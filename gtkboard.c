@@ -50,6 +50,7 @@
 #define POINT_CUBE 31
 #define POINT_RIGHT 32
 #define POINT_LEFT 33
+#define POINT_RESIGN 34
 
 #define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
 			  same point is considered a real drag rather than a
@@ -231,11 +232,28 @@ static void cube_position( BoardData *bd, int *px, int *py, int *porient ) {
     }
 }
 
+static void resign_position( BoardData *bd, int *px, int *py, int *porient ) {
+
+  if( bd->resigned ) {
+    if ( px ) *px = 50 + 30 * bd->resigned / abs ( bd->resigned );
+    if ( py ) *py = 32;
+    if( porient ) *porient = - bd->resigned / abs ( bd->resigned );
+  }
+  else {
+    /* no resignation */
+    if( px ) *px = -32768;
+    if( py ) *py = -32768;
+    if( porient ) *porient = -1;
+  }
+
+}
+
 static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
 			int cx, int cy ) {
     
     int anBoard[ 2 ][ 25 ], anOff[ 2 ], anDice[ 2 ], anDicePosition[ 2 ][ 2 ],
 	anCubePosition[ 2 ], nOrient;
+    int anResignPosition[ 2 ], fResign, nResignOrientation;
 
     read_board( bd, anBoard );
     if( bd->colour != bd->turn )
@@ -251,10 +269,14 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
     anDicePosition[ 1 ][ 0 ] = bd->x_dice[ 1 ];
     anDicePosition[ 1 ][ 1 ] = bd->y_dice[ 1 ];
     cube_position( bd, anCubePosition, anCubePosition + 1, &nOrient );
+    resign_position( bd, anResignPosition, anResignPosition + 1, 
+                     &nResignOrientation );
     CalculateArea( &rdAppearance, puch, cx * 3, &bd->ri, anBoard, anOff,
 		   anDice, anDicePosition, bd->colour == bd->turn,
 		   anCubePosition, LogCube( bd->cube ) + ( bd->doubled != 0 ),
-		   nOrient, x, y, cx, cy );
+		   nOrient, 
+                   anResignPosition, abs(bd->resigned), nResignOrientation,
+                   x, y, cx, cy );
 }
 
 static gboolean board_expose( GtkWidget *drawing_area, GdkEventExpose *event,
@@ -376,6 +398,17 @@ static void board_invalidate_cube( BoardData *bd ) {
 			   8 * rdAppearance.nSize, 8 * rdAppearance.nSize, bd );
 }
 
+static void board_invalidate_resign( BoardData *bd ) {
+
+    int x, y, orient;
+    
+    resign_position( bd, &x, &y, &orient );
+    
+    board_invalidate_rect( bd->drawing_area, x * rdAppearance.nSize,
+			   y * rdAppearance.nSize,
+			   8 * rdAppearance.nSize, 8 * rdAppearance.nSize, bd );
+}
+
 static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 
     int i, x, y, cx, cy, xCube, yCube;
@@ -390,6 +423,10 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
     cube_position( bd, &xCube, &yCube, NULL );
     if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
 	return POINT_CUBE;
+
+    resign_position( bd, &xCube, &yCube, NULL );
+    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+	return POINT_RESIGN;
     
     /* jsc: support for faster rolling of dice by clicking board
       *
@@ -760,6 +797,10 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
     if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
 	return POINT_CUBE;
     
+    resign_position( bd, &xCube, &yCube, NULL );
+    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+	return POINT_RESIGN;
+    
     /* Could not find an overlapping point */
     return -1;
 }
@@ -1098,6 +1139,17 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    
 	    return TRUE;
 	}
+
+        if( bd->drag_point == POINT_RESIGN ) {
+          /* clicked on resignation symbol */
+          bd->drag_point = -1;
+          if ( bd->resigned && 
+               ! gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+            UserCommand ( "accept" );
+
+          return TRUE;
+
+        }
 
 	if( bd->drag_point == POINT_DICE ) {
 	    /* Clicked on dice; end move. */
@@ -1486,13 +1538,16 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     return TRUE;
 }
 
-static gint board_set( Board *board, const gchar *board_text ) {
+static gint board_set( Board *board, const gchar *board_text,
+                       const gint resigned ) {
 
     BoardData *bd = board->board_data;
     gchar *dest, buf[ 32 ];
     gint i, *pn, **ppn;
     gint old_board[ 28 ];
     int old_cube, old_doubled, old_crawford, old_xCube, old_yCube, editing;
+    int old_resigned;
+    int old_xResign, old_yResign;
     GtkAdjustment *padj0, *padj1;
     
 #if __GNUC__
@@ -1591,8 +1646,12 @@ static gint board_set( Board *board, const gchar *board_text ) {
     old_cube = bd->cube;
     old_doubled = bd->doubled;
     old_crawford = bd->crawford_game;
-    
+    old_resigned = bd->resigned;
+
     cube_position( bd, &old_xCube, &old_yCube, NULL );
+
+    resign_position( bd, &old_xResign, &old_yResign, NULL );
+    bd->resigned = resigned;
     
     for( i = 21, ppn = game_settings; i--; ) {
 	if( *board_text++ != ':' )
@@ -1762,9 +1821,11 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	}
     }
 
-    if( bd->doubled != old_doubled || bd->cube != old_cube ||
+    if( bd->doubled != old_doubled || 
+        bd->cube != old_cube ||
 	bd->cube_owner != bd->opponent_can_double - bd->can_double ||
-	fCubeUse != bd->cube_use || bd->crawford_game != old_crawford ) {
+	fCubeUse != bd->cube_use || 
+        bd->crawford_game != old_crawford ) {
 	int xCube, yCube;
 
 	bd->cube_owner = bd->opponent_can_double - bd->can_double;
@@ -1780,6 +1841,26 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	board_invalidate_rect( bd->drawing_area, xCube * rdAppearance.nSize,
 			       yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
 			       8 * rdAppearance.nSize, bd );
+    }
+
+    if ( bd->resigned != old_resigned ) {
+	int xResign, yResign;
+
+	/* erase old resign */
+	board_invalidate_rect( bd->drawing_area, 
+                               old_xResign * rdAppearance.nSize,
+			       old_yResign * rdAppearance.nSize, 
+                               8 * rdAppearance.nSize,
+			       8 * rdAppearance.nSize, bd );
+	
+	resign_position( bd, &xResign, &yResign, NULL );
+	/* draw new resign */
+	board_invalidate_rect( bd->drawing_area, 
+                               xResign * rdAppearance.nSize,
+			       yResign * rdAppearance.nSize, 
+                               8 * rdAppearance.nSize,
+			       8 * rdAppearance.nSize, bd );
+
     }
 
     if( fClockwise != rdAppearance.fClockwise ) {
@@ -1800,6 +1881,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
     /* FIXME only redraw dice/cube if changed */
     board_invalidate_dice( bd );
     board_invalidate_cube( bd );
+    board_invalidate_resign ( bd );
 
     return 0;
 }
@@ -2121,8 +2203,8 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     FIBSBoard( board_str, points, roll, name, opp_name, match, score,
 	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
 	       ms.fTurn, ms.fCrawford);
-    
-    board_set( board, board_str );
+
+    board_set( board, board_str, -pbd->turn * ms.fResigned );
     
     /* FIXME update names, score, match length */
     if( rdAppearance.nSize <= 0 )
@@ -3136,7 +3218,7 @@ static void board_init( Board *board ) {
 
     board_set( board, "board:::1:0:0:"
               "0:-2:0:0:0:0:5:0:3:0:0:0:-5:5:0:0:0:-3:0:-5:0:0:0:0:2:0:"
-              "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0" );
+              "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0", 0 );
     
     gtk_widget_show_all( GTK_WIDGET( board ) );
 	

@@ -1,3 +1,7 @@
+Wed Jan 29 20:02:10 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c, render.c: Show pseudo-cube on resignations.
+
 Wed Jan 29 17:10:27 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* boards.xml: add Ian Shaw's new Iberian design :-)

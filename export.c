@@ -410,6 +410,9 @@ GenerateImage ( renderimages *pri, renderdata *prd,
   int anDicePosition[ 2 ][ 2 ];
   int nOrient;
   int doubled, color;
+  /* FIXME: resignations */
+  int anResignPosition[ 2 ];
+  int fResign = 0, nResignOrientation;
 
   if ( ! fMove )
     SwapSides ( anBoard );
@@ -474,6 +477,7 @@ GenerateImage ( renderimages *pri, renderdata *prd,
                   color, anCubePosition, 
                   LogCube( nCube ) + ( doubled != 0 ),
                   nOrient,
+                  anResignPosition, fResign, nResignOrientation,
                   0, 0, 108 * nSize, 72 * nSize );
 
   /* crop */

@@ -165,6 +165,8 @@ static void Preview( renderdata *prd ) {
     int anDice[ 2 ] = { 4, 3 };
     int anDicePosition[ 2 ][ 2 ] = { { 70, 30 }, { 80, 32 } };
     int anCubePosition[ 2 ] = { 50, 32 };
+    int anResignPosition[ 2 ] = { -32768, -32768 };
+    int fResign = 0, nResignOrientation = 0;
 
     if( !fUpdate )
 	return;
@@ -183,8 +185,9 @@ static void Preview( renderdata *prd ) {
     anBoard[ 0 ][ 23 ] = anBoard[ 1 ][ 23 ] = 2;
     
     CalculateArea( &rd, auch, 108 * 3 * 3, &ri, anBoard, NULL, anDice,
-		   anDicePosition, 1, anCubePosition, 0, 0, 0, 0, 108 * 3,
-		   72 * 3 );
+		   anDicePosition, 1, anCubePosition, 0, 0, 
+                   anResignPosition, fResign, nResignOrientation,
+                   0, 0, 108 * 3, 72 * 3 );
     FreeImages( &ri );
   
     gc = gdk_gc_new( ppm );

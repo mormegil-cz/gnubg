@@ -24,6 +24,7 @@
 #endif
 
 #include <assert.h>
+#include <string.h>
 #if HAVE_FREETYPE
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -1172,6 +1173,7 @@ static void RenderBasicGlyph( unsigned char *puch, int nStride,
 #undef PUT
 }
 
+
 static void RenderBasicNumber( unsigned char *puch, int nStride,
 			       int nSize, unsigned n, int xOff, int yOff,
 			       unsigned char r, unsigned char g, unsigned
@@ -1258,6 +1260,8 @@ static void RenderNumber( unsigned char *puch, int nStride, FT_Glyph *aftg,
 	RenderGlyph( puch, nStride, aftg[ n % 10 ], xOff, yOff, r, g, b );
     }
 }
+
+
 #endif
 
 static void RenderBasicLabels( renderdata *prd, unsigned char *puch,
@@ -1632,16 +1636,19 @@ extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
 #endif
 }
 
-extern void RenderCube( renderdata *prd, unsigned char *puch, int nStride ) {
+static void
+RenderBasicCube ( const float arLight[ 3 ], const int nSize, 
+                  const double arColour[ 4 ], unsigned char *puch,
+                  int nStride ) {
 
     int ix, iy, in, fx, fy, i;
     float x, y, x_loop, y_loop, diffuse, specular, cos_theta,
 	x_norm, y_norm, z_norm;
 
-    nStride -= 8 * prd->nSize * 4;
+    nStride -= 8 * nSize * 4;
     
-    for( iy = 0, y_loop = -1.0; iy < 8 * prd->nSize; iy++ ) {
-	for( ix = 0, x_loop = -1.0; ix < 8 * prd->nSize; ix++ ) {
+    for( iy = 0, y_loop = -1.0; iy < 8 * nSize; iy++ ) {
+	for( ix = 0, x_loop = -1.0; ix < 8 * nSize; ix++ ) {
 	    in = 0;
 	    diffuse = specular = 0.0;
 	    fy = 0;
@@ -1654,8 +1661,8 @@ extern void RenderCube( renderdata *prd, unsigned char *puch, int nStride ) {
 			fabs( y ) < 7.0 / 8.0 ) {
 			/* flat surface */
 			in++;
-			diffuse += prd->arLight[ 2 ] * 0.8 + 0.2;
-			specular += pow( prd->arLight[ 2 ], 10 ) * 0.4;
+			diffuse += arLight[ 2 ] * 0.8 + 0.2;
+			specular += pow( arLight[ 2 ], 10 ) * 0.4;
 		    } else {
 			if( fabs( x ) < 7.0 / 8.0 ) {
 			    /* top/bottom edge */
@@ -1679,32 +1686,51 @@ extern void RenderCube( renderdata *prd, unsigned char *puch, int nStride ) {
 			
 			in++;
 			diffuse += 0.2;
-			if( ( cos_theta = prd->arLight[ 0 ] * x_norm +
-			      prd->arLight[ 1 ] * y_norm +
-			      prd->arLight[ 2 ] * z_norm ) > 0.0 ) {
+			if( ( cos_theta = arLight[ 0 ] * x_norm +
+			      arLight[ 1 ] * y_norm +
+			      arLight[ 2 ] * z_norm ) > 0.0 ) {
 			    diffuse += cos_theta * 0.8;
 			    cos_theta = 2 * z_norm * cos_theta -
-				prd->arLight[ 2 ];
+				arLight[ 2 ];
 			    specular += pow( cos_theta, 10 ) * 0.4;
 			}
 		    }
 		missed:		    
-		    x += 1.0 / ( 8 * prd->nSize );
+		    x += 1.0 / ( 8 * nSize );
 		} while( !fx++ );
-		y += 1.0 / ( 8 * prd->nSize );
+		y += 1.0 / ( 8 * nSize );
 	    } while( !fy++ );
 
 	    for( i = 0; i < 3; i++ )
-		*puch++ = clamp( ( diffuse * prd->arCubeColour[ i ] +
+		*puch++ = clamp( ( diffuse * arColour[ i ] +
 				   specular ) * 64.0 );
 
 	    *puch++ = 255 * ( 4 - in ) / 4; /* alpha channel */
 
-	    x_loop += 2.0 / ( 8 * prd->nSize );
+	    x_loop += 2.0 / ( 8 * nSize );
 	}
-	y_loop += 2.0 / ( 8 * prd->nSize );
+	y_loop += 2.0 / ( 8 * nSize );
 	puch += nStride;
     }
+}
+
+
+
+extern void
+RenderResign( renderdata *prd, unsigned char *puch, int nStride ) {
+
+  const double arColour[ 4 ] = { 1.0, 1.0, 1.0, 0.0 }; /* white */
+
+  RenderBasicCube( prd->arLight, prd->nSize, arColour,
+                   puch, nStride );
+
+}
+
+extern void RenderCube( renderdata *prd, unsigned char *puch, int nStride ) {
+
+  RenderBasicCube( prd->arLight, prd->nSize, prd->arCubeColour,
+                   puch, nStride );
+
 }
 
 extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
@@ -1778,6 +1804,64 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 	}
 #endif
 }
+
+
+extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
+			     int nStride, unsigned char *puchCube,
+			     int nStrideCube ) {
+    int i;
+
+#if HAVE_FREETYPE
+    FT_Face ftf;
+    FT_Glyph aftg[ 10 ], aftgSmall[ 10 ];
+    int fFreetype = FALSE;
+    
+    if( !FT_New_Memory_Face( ftl, auchLuxiRB, cbLuxiRB, 0, &ftf ) &&
+	!FT_Set_Pixel_Sizes( ftf, 0, 5 * prd->nSize ) ) {
+	fFreetype = TRUE;
+	
+	for( i = 0; i < 10; i++ ) {
+	    FT_Load_Char( ftf, '0' + i, FT_LOAD_RENDER );
+	    FT_Get_Glyph( ftf->glyph, aftg + i );
+	}
+	
+	FT_Set_Pixel_Sizes( ftf, 0, 21 * prd->nSize / 8 );
+	
+	for( i = 0; i < 10; i++ ) {
+	    FT_Load_Char( ftf, '0' + i, FT_LOAD_RENDER );
+	    FT_Get_Glyph( ftf->glyph, aftgSmall + i );
+	}
+	
+	FT_Done_Face( ftf );
+    }
+#endif
+    
+    for( i = 0; i < 3; i++ ) {
+	AlphaBlend( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
+		    prd->nSize * nStrideCube, nStrideCube, 6 * prd->nSize,
+		    6 * prd->nSize );
+
+#if HAVE_FREETYPE
+	if( fFreetype )
+            RenderNumber( puch, nStride, aftg, i + 1,
+                          3 * prd->nSize,
+			  78 * prd->nSize / 16, 0, 0, 0x80 );
+	else
+#endif
+            RenderBasicNumber( puch, nStride, 4 * prd->nSize, 
+                               i + 1, 
+                               3 * prd->nSize, 5 * prd->nSize, 0, 0, 0x80 );
+	
+	puch += 6 * prd->nSize * nStride;
+    }
+    
+#if HAVE_FREETYPE
+    if( fFreetype )
+	for( i = 0; i < 10; i++ ) 
+	    FT_Done_Glyph( aftg[ i ] );
+#endif
+}
+
 
 extern void RenderDice( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride ) {
@@ -2040,6 +2124,8 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			   int anDicePosition[ 2 ][ 2 ],
 			   int fDiceColour, int anCubePosition[ 2 ],
 			   int nLogCube, int nCubeOrientation,
+                           int anResignPosition[ 2 ],
+                           int fResign, int nResignOrientation,
 			   int x, int y, int cx, int cy ) {
     
     int i, xPoint, yPoint, cxPoint, cyPoint, n;
@@ -2178,6 +2264,33 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			    prd->nSize * 6, prd->nSize * 6,
 			    nCubeOrientation + 1 );
     }
+
+    /* draw resignation */
+
+    if( fResign && intersects( x, y, cx, cy,
+                               anResignPosition[ 0 ] * prd->nSize, 
+                               anResignPosition[ 1 ] * prd->nSize,
+                               8 * prd->nSize, 8 * prd->nSize ) ) {
+
+	AlphaBlendClip( puch, nStride,
+			anResignPosition[ 0 ] * prd->nSize - x,
+			anResignPosition[ 1 ] * prd->nSize - y,
+			cx, cy, puch, nStride,
+			anResignPosition[ 0 ] * prd->nSize - x,
+			anResignPosition[ 1 ] * prd->nSize - y,
+			pri->achResign, prd->nSize * 8 * 4,
+			0, 0, prd->nSize * 8, prd->nSize * 8 );
+
+	CopyAreaRotateClip( puch, nStride,
+			    ( anResignPosition[ 0 ] + 1 ) * prd->nSize - x,
+			    ( anResignPosition[ 1 ] + 1 ) * prd->nSize - y,
+			    cx, cy, pri->achResignFaces, prd->nSize * 6 * 3,
+			    0, prd->nSize * 6 * ( fResign - 1 ),
+			    prd->nSize * 6, prd->nSize * 6,
+			    nResignOrientation + 1 );
+    }
+
+
 }
 
 extern void RenderImages( renderdata *prd, renderimages *pri ) {
@@ -2198,6 +2311,8 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
 				  sizeof (unsigned short) );
     pri->asRefract[ 1 ] = malloc( nSize * nSize * 6 * 6 *
 				  sizeof (unsigned short) );
+    pri->achResign = malloc ( nSize * nSize * 8 * 8 * 4 );
+    pri->achResignFaces = malloc ( nSize * nSize * 6 * 6 * 3 * 3 );
     
     RenderBoard( prd, pri->ach, 108 * nSize * 3 );
     RenderChequers( prd, pri->achChequer[ 0 ], pri->achChequer[ 1 ],
@@ -2206,6 +2321,10 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     RenderCube( prd, pri->achCube, nSize * 8 * 4 );
     RenderCubeFaces( prd, pri->achCubeFaces, nSize * 6 * 3, pri->achCube,
 		     nSize * 8 * 4 );
+    RenderResign( prd, pri->achResign, nSize * 8 * 4 );
+    RenderResignFaces( prd, pri->achResignFaces, nSize * 6 * 3, pri->achResign,
+                     nSize * 8 * 4 );
+
     RenderDice( prd, pri->achDice[ 0 ], pri->achDice[ 1 ], nSize * 7 * 4 );
     RenderPips( prd, pri->achPip[ 0 ], pri->achPip[ 1 ], nSize * 3 );
 }
@@ -2224,6 +2343,8 @@ extern void FreeImages( renderimages *pri ) {
     free( pri->achCubeFaces );
     free( pri->asRefract[ 0 ] );
     free( pri->asRefract[ 1 ] );
+    free( pri->achResign );
+    free( pri->achResignFaces );
 }
 
 extern void RenderInitialise( void ) {

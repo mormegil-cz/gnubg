@@ -83,6 +83,7 @@ typedef struct _BoardData {
 	cube_use, dice_roll[ 2 ]; /* roll showing on the off-board dice */
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
     gint qedit_point; /* used to remember last point in quick edit mode */
+    gint resigned;
     move *all_moves, *valid_move;
     movelist move_list;
 
