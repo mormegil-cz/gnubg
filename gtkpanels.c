@@ -22,6 +22,7 @@
 */
 
 #include "config.h"
+#define GTK_ENABLE_BROKEN /* for GtkText */
 #include "backgammon.h"
 #include "gtkboard.h"
 #include <i18n.h>
