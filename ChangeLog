@@ -1,3 +1,8 @@
+Wed Aug 13 18:08:35 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in: add some magic for board3d and gtk1.2. Also add
+	a "--without-board3d" option as suggested by Jim.
+
 Wed Aug 13 15:26:57 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
 	
 	* gtktheory.c - don't call gettext on null strings.

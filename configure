@@ -882,6 +882,7 @@ Optional Packages:
                           Prefix where FreeType is installed (optional)
   --with-ft-exec-prefix=PREFIX
                           Exec prefix where FreeType is installed (optional)
+  --with-board3d         compile with 3D boards
   --with-sound            use sounds with GNU Backgammon
   --with-esd-prefix=PFX   Prefix where ESD is installed (optional)
   --with-esd-exec-prefix=PFX Exec prefix where ESD is installed (optional)
@@ -10914,8 +10915,20 @@ fi
 
 
 
-if test "$no_gtk" != "yes"; then
-    no_gtkglext=""
+
+# Check whether --with-board3d or --without-board3d was given.
+if test "${with_board3d+set}" = set; then
+  withval="$with_board3d"
+
+fi;
+
+no_board3d="yes"
+
+if test "with_board3d" = "yes"; then
+   if test "$no_gtk" != "yes"; then
+
+      if test "$no_gtk2" != "yes"; then
+                   no_gtkglext=""
   GTKGLEXT_CFLAGS=""
   GTKGLEXT_LIBS=""
 
@@ -11222,26 +11235,92 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 
   rm -f conf.gtkgltest
 
-   if test "$no_gtkglext" != "yes"; then
+         no_gtkgl=$no_gtkglext
+      else
+                  echo "$as_me:$LINENO: checking for gtk_gl_area_new in -lgtkglarea" >&5
+echo $ECHO_N "checking for gtk_gl_area_new in -lgtkglarea... $ECHO_C" >&6
+if test "${ac_cv_lib_gtkglarea_gtk_gl_area_new+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgtkglarea  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char gtk_gl_area_new ();
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+gtk_gl_area_new ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_gtkglarea_gtk_gl_area_new=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_lib_gtkglarea_gtk_gl_area_new=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_gtkglarea_gtk_gl_area_new" >&5
+echo "${ECHO_T}$ac_cv_lib_gtkglarea_gtk_gl_area_new" >&6
+if test $ac_cv_lib_gtkglarea_gtk_gl_area_new = yes; then
+  no_gtkgl="no"
+fi
+
+      fi
+
+      if test "$no_gtkgl" != "yes"; then
+         no_board3d="no"
 
 cat >>confdefs.h <<\_ACEOF
 #define USE_BOARD3D 1
 _ACEOF
 
-            if test "$have_freetype" = "yes"; then
+                  if test "$have_freetype" = "yes"; then
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_FTGL 1
 _ACEOF
 
-         FTGL_LIBS="-lftgl"
+            FTGL_LIBS="-lftgl"
 
+         fi
       fi
    fi
 fi
 
 
-if test "$no_gtkglext" != "yes"; then
+
+if test "$no_board3d" = "no"; then
   USE_BOARD3D_TRUE=
   USE_BOARD3D_FALSE='#'
 else
@@ -15025,17 +15104,7 @@ fi
 
 
 
-os=`config.guess | sed 's/.*-//'`
-if test "$os" = "mingw32"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define WIN32 1
-_ACEOF
-
-fi
-
 ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile"
-
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure

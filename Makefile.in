@@ -158,14 +158,12 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-@USE_EXT_TRUE@EXT_DIR = ext
-@USE_EXT_FALSE@EXT_DIR = 
 pkgpyexecdir = @pkgpyexecdir@
 pkgpythondir = @pkgpythondir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
-@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4 xpm sounds
-@USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4 xpm sounds
+@USE_EXT_TRUE@EXT_DIR = ext
+@USE_EXT_FALSE@EXT_DIR = 
 
 localedir = $(datadir)/locale
 
@@ -202,10 +200,11 @@ ACLOCAL_AMFLAGS = -I m4
 @USE_BOARD3D_FALSE@BOARD3D_LIBS = 
 @USE_BOARD3D_TRUE@BOARD3D_INCS = @GTKGLEXT_CFLAGS@
 @USE_BOARD3D_FALSE@BOARD3D_INCS = 
-@USE_PYTHON_TRUE@PYTHON_SOURCES = gnubgmodule.c gnubgmodule.h
-@USE_PYTHON_FALSE@PYTHON_SOURCES = 
 
 SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) $(EXT_DIR)
+
+@USE_PYTHON_TRUE@PYTHON_SOURCES = gnubgmodule.c gnubgmodule.h
+@USE_PYTHON_FALSE@PYTHON_SOURCES = 
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
@@ -228,7 +227,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	boardpos.c boardpos.h progress.c progress.h format.c format.h \
 	$(LIBGEN_SOURCES)
 
-COMMON_DEPS = @LIBOBJS@ lib/libevent.a 
+COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff makehyper
 
@@ -263,7 +262,8 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 @USE_EXT_TRUE@@USE_GTK_FALSE@	$(COMMON_LIBS) $(SOUND_LIBS) @THREAD_LIBS@
 
 @USE_GTK_TRUE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
-@USE_GTK_TRUE@	@LIBART_LIBS@ @THREAD_LIBS@ $(BOARD3D_LIBS)
+@USE_GTK_TRUE@        @LIBART_LIBS@ $(BOARD3D_LIBS) @THREAD_LIBS@
+
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
@@ -475,7 +475,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	py-compile strdup.c
-DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds board3d
+DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d ext
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
 
 all: config.h
@@ -497,7 +497,7 @@ $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 $(srcdir)/configure:  $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/audiofile.m4 m4/esd.m4 m4/freetype2.m4 m4/gettext.m4 m4/gtk-2.0.m4 m4/gtk.m4 m4/iconv.m4 m4/intdiv0.m4 m4/inttypes-pri.m4 m4/inttypes.m4 m4/inttypes_h.m4 m4/libart.m4 m4/nls.m4 m4/po.m4 m4/python.m4 m4/stdint_h.m4 m4/uintmax_t.m4 m4/ulonglong.m4
+$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/audiofile.m4 m4/esd.m4 m4/freetype2.m4 m4/gettext.m4 m4/gtk-2.0.m4 m4/gtk.m4 m4/gtkglext-1.0.m4 m4/iconv.m4 m4/intdiv0.m4 m4/inttypes-pri.m4 m4/inttypes.m4 m4/inttypes_h.m4 m4/libart.m4 m4/nls.m4 m4/po.m4 m4/python.m4 m4/stdint_h.m4 m4/uintmax_t.m4 m4/ulonglong.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1

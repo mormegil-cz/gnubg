@@ -409,22 +409,38 @@ AM_CONDITIONAL(USE_FREETYPE, test "$have_freetype" = "yes")
 dnl ---------------------------------------
 dnl Look for libraries needed for 3D boards
 
-if test "$no_gtk" != "yes"; then
-   AM_PATH_GTKGLEXT_1_0(,AC_DEFINE(HAVE_GTKGLEXT,1,
-                                   [Define if you have GtkGLExt]))
-   if test "$no_gtkglext" != "yes"; then
-      dnl check for GtkGLExt
-      AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards])
-      dnl check for FTGL (dependent on freetype)
-      if test "$have_freetype" = "yes"; then
-         dnl fixme: write a test...
-         AC_DEFINE(HAVE_FTGL,1,[Define if you have the FTGL library])
-         FTGL_LIBS="-lftgl"
-	 AC_SUBST(FTGL_LIBS)
+AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards])
+
+no_board3d="yes"
+
+if test "with_board3d" = "yes"; then
+   if test "$no_gtk" != "yes"; then
+
+      if test "$no_gtk2" != "yes"; then
+         dnl Gtk GL libraries for GTK+ 2.x: GtkGlExt
+         AM_PATH_GTKGLEXT_1_0(,AC_DEFINE(HAVE_GTKGLEXT,1,
+                                         [Define if you have GtkGLExt]))
+         no_gtkgl=$no_gtkglext
+      else
+         dnl Gtk GL libraries for GTK+ 1.x: GtkGlArea
+         AC_CHECK_LIB(gtkglarea, gtk_gl_area_new, no_gtkgl="no" )
+      fi
+
+      if test "$no_gtkgl" != "yes"; then
+         no_board3d="no"
+         AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards])
+         dnl check for FTGL (dependent on freetype)
+         if test "$have_freetype" = "yes"; then
+            dnl fixme: write a test...
+            AC_DEFINE(HAVE_FTGL,1,[Define if you have the FTGL library])
+            FTGL_LIBS="-lftgl"
+            AC_SUBST(FTGL_LIBS)
+         fi
       fi
    fi
 fi
-AM_CONDITIONAL(USE_BOARD3D,test "$no_gtkglext" != "yes")
+
+AM_CONDITIONAL(USE_BOARD3D,test "$no_board3d" = "no")
 
 dnl ---------------------------------------
 dnl Sounds
