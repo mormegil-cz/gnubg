@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tr\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-07-10 23:57+0900\n"
+"POT-Creation-Date: 2004-07-16 16:37+0200\n"
 "PO-Revision-Date: 2003-10-23 16:51+0200\n"
 "Last-Translator: Akif Dinc <akif@webjump.de>\n"
 "Language-Team: Türkce <LL@li.org>\n"
@@ -64,7 +64,7 @@ msgstr "Git yat"
 msgid "Better luck next time"
 msgstr "Þansýn yaðver gitmedi"
 
-#: analysis.c:62 gtkgame.c:10208 gtkoptions.c:611
+#: analysis.c:62 gtkgame.c:10209 gtkoptions.c:611
 msgid "None"
 msgstr "Hiçbiri"
 
@@ -104,7 +104,7 @@ msgstr ""
 msgid "Analysing match; move:"
 msgstr "Oyun analizi yapýlýyor; adým"
 
-#: analysis.c:1609 gnubg.c:9193 html.c:2912 html.c:3211
+#: analysis.c:1609 gnubg.c:9193 html.c:2914 html.c:3213
 msgid "Player"
 msgstr "Oyuncu"
 
@@ -112,19 +112,19 @@ msgstr "Oyuncu"
 msgid "Chequerplay statistics"
 msgstr "Checker-Oyuncunun istatistiði"
 
-#: analysis.c:1639 html.c:2945
+#: analysis.c:1639 html.c:2947
 msgid "Luck statistics"
 msgstr "Þans istatistiði"
 
-#: analysis.c:1663 html.c:2968 progress.c:260
+#: analysis.c:1663 html.c:2970 progress.c:260
 msgid "Cube statistics"
 msgstr "Vido istatistiði"
 
-#: analysis.c:1687 html.c:2991
+#: analysis.c:1687 html.c:2993
 msgid "Overall statistics"
 msgstr "Genel istatistikler"
 
-#: analysis.c:1724 gtkgame.c:8625
+#: analysis.c:1724 gtkgame.c:8626
 msgid "Statistics for all games"
 msgstr "Tüm oyunlarýn istatistiði"
 
@@ -133,11 +133,11 @@ msgid "Statistics for current game"
 msgstr "Oynan oyunun istatistiði"
 
 #: analysis.c:1774 export.c:323 export.c:473 export.c:548 gnubg.c:5238
-#: gnubg.c:5278 html.c:3505 html.c:3700 html.c:3843 html.c:3879 latex.c:540
+#: gnubg.c:5278 html.c:3507 html.c:3702 html.c:3845 html.c:3881 latex.c:540
 #: play.c:2071 play.c:2401 play.c:2532 play.c:2896 play.c:2975 play.c:3433
 #: play.c:3678 play.c:3718 play.c:3836 play.c:4146 postscript.c:1300
 #: postscript.c:1422 sgf.c:2319 sgf.c:2356 sgf.c:2401 show.c:964 show.c:1185
-#: show.c:1479 show.c:2109 show.c:2133 text.c:928 text.c:1024
+#: show.c:1479 show.c:2109 show.c:2133 text.c:930 text.c:1026
 msgid "No game in progress (type `new game' to start one)."
 msgstr "Oyun oynanmýyor ( `new game' komutu ile baþlat )."
 
@@ -153,8 +153,8 @@ msgstr "Pardon, adým analiz edilemiyor"
 msgid "Cannot clear analysis on this move"
 msgstr "Bu adýmýn analizi silinemiyor"
 
-#: bearoff.c:83 gtkexport.c:722 gtkgame.c:2710 gtkgame.c:5623 gtkgame.c:7466
-#: gtkgame.c:8124
+#: bearoff.c:83 gtkexport.c:722 gtkgame.c:2711 gtkgame.c:5624 gtkgame.c:7467
+#: gtkgame.c:8125
 msgid "GNU Backgammon"
 msgstr "GNU Backgammon"
 
@@ -298,10 +298,10 @@ msgstr "Hamleler\tOyuncu\tRakip\tOyuncu\tRakip\n"
 #: bearoff.c:1163 bearoff.c:1188 bearoff.c:1203 format.c:926 formatgs.c:214
 #: formatgs.c:322 formatgs.c:375 formatgs.c:390 formatgs.c:444 formatgs.c:459
 #: formatgs.c:499 formatgs.c:525 formatgs.c:540 formatgs.c:555 gtkboard.c:615
-#: gtkboard.c:616 gtkgame.c:470 gtkgame.c:474 gtkgame.c:9308 gtkgame.c:9314
-#: gtkgame.c:9320 gtkgame.c:9326 gtkgame.c:9332 gtkgame.c:9338 gtkgame.c:9344
-#: gtkgame.c:9350 gtkgame.c:9356 gtkgame.c:9371 gtkgame.c:9377 gtkgame.c:9383
-#: gtkrace.c:497 html.c:2177 html.c:3146 postscript.c:900 postscript.c:921
+#: gtkboard.c:616 gtkgame.c:471 gtkgame.c:475 gtkgame.c:9309 gtkgame.c:9315
+#: gtkgame.c:9321 gtkgame.c:9327 gtkgame.c:9333 gtkgame.c:9339 gtkgame.c:9345
+#: gtkgame.c:9351 gtkgame.c:9357 gtkgame.c:9372 gtkgame.c:9378 gtkgame.c:9384
+#: gtkrace.c:497 html.c:2179 html.c:3148 postscript.c:900 postscript.c:921
 #: postscript.c:925 postscript.c:929 postscript.c:933 postscript.c:937
 #: progress.c:854 progress.c:860 progress.c:874
 #, c-format
@@ -769,7 +769,7 @@ msgid "Neural net evaluation"
 msgstr ""
 
 #: eval.c:321 eval.c:5228 format.c:934 gtkchequer.c:582 gtkcube.c:888
-#: gtkrace.c:592 html.c:2185
+#: gtkrace.c:592 html.c:2187
 msgid "Rollout"
 msgstr ""
 
@@ -957,16 +957,16 @@ msgstr "L(g)"
 msgid "L(bg)"
 msgstr "L(bg)"
 
-#: eval.c:3976 gtkchequer.c:88 gtkrolls.c:227 html.c:2526 show.c:2360
+#: eval.c:3976 gtkchequer.c:88 gtkrolls.c:227 html.c:2528 show.c:2360
 msgid "Equity"
 msgstr ""
 
 #: eval.c:3976 gnubg.c:3683 gtkchequer.c:86 gtkchequer.c:584 gtkcube.c:151
-#: gtkcube.c:165 gtkcube.c:453 gtkcube.c:467 gtkcube.c:890 html.c:2526
+#: gtkcube.c:165 gtkcube.c:453 gtkcube.c:467 gtkcube.c:890 html.c:2528
 msgid "MWC"
 msgstr "MWC"
 
-#: eval.c:3976 eval.c:5224 gtkgame.c:6620 html.c:347 progress.c:756 show.c:121
+#: eval.c:3976 eval.c:5224 gtkgame.c:6621 html.c:347 progress.c:756 show.c:121
 msgid "Cubeful"
 msgstr ""
 
@@ -1003,11 +1003,11 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
-#: eval.c:4150 format.c:908 gtkcube.c:413 html.c:1991
+#: eval.c:4150 format.c:908 gtkcube.c:413 html.c:1993
 msgid "Double, take"
 msgstr "Vido, al"
 
-#: eval.c:4152 format.c:909 gtkcube.c:414 html.c:1992
+#: eval.c:4152 format.c:909 gtkcube.c:414 html.c:1994
 msgid "Double, pass"
 msgstr "Vido, pes"
 
@@ -1105,55 +1105,55 @@ msgstr ""
 msgid "You must specify a file to export to (see `help export position pos')."
 msgstr ""
 
-#: external.c:132
+#: external.c:131
 #, fuzzy, c-format
 msgid ""
 "Windows socket error (%s):\n"
 "%s"
 msgstr "Windows socketleri"
 
-#: external.c:268
+#: external.c:267
 msgid "External connection closed."
 msgstr ""
 
-#: external.c:274
+#: external.c:273
 msgid "reading from external connection"
 msgstr ""
 
-#: external.c:334
+#: external.c:333
 msgid "writing to external connection"
 msgstr ""
 
-#: external.c:391 external.c:455
+#: external.c:390 external.c:454
 msgid "Warning: badly formed board from external controller."
 msgstr ""
 
-#: external.c:577
+#: external.c:576
 msgid ""
 "This installation of GNU Backgammon was compiled without\n"
 "socket support, and does not implement external controllers."
 msgstr ""
 
-#: external.c:591
+#: external.c:590
 msgid ""
 "You must specify the name of the socket to the external\n"
 "controller -- try `help external'."
 msgstr ""
 
-#: external.c:613
+#: external.c:612
 msgid "listen"
 msgstr ""
 
-#: external.c:618
+#: external.c:617
 #, c-format
 msgid "Waiting for a connection from %s...\n"
 msgstr ""
 
-#: external.c:636
+#: external.c:635
 msgid "accept"
 msgstr "kabul"
 
-#: external.c:647
+#: external.c:646
 #, c-format
 msgid "Accepted connection from %s.\n"
 msgstr ""
@@ -1267,33 +1267,33 @@ msgstr ""
 msgid "Different evaluations after %d plies:\n"
 msgstr ""
 
-#: format.c:794 html.c:2041
+#: format.c:794 html.c:2043
 msgid "Alert: missed double"
 msgstr ""
 
-#: format.c:817 html.c:2066
+#: format.c:817 html.c:2068
 msgid "Alert: wrong take"
 msgstr ""
 
-#: format.c:837 html.c:2088
+#: format.c:837 html.c:2090
 msgid "Alert: wrong pass"
 msgstr ""
 
-#: format.c:861 html.c:2114
+#: format.c:861 html.c:2116
 msgid "Alert: wrong double"
 msgstr ""
 
-#: format.c:878 html.c:2134
+#: format.c:878 html.c:2136
 #, c-format
 msgid "Alert: double decision marked %s"
 msgstr ""
 
-#: format.c:884 html.c:2142
+#: format.c:884 html.c:2144
 #, c-format
 msgid "Alert: take decision marked %s"
 msgstr ""
 
-#: format.c:907 gtkcube.c:412 gtkrace.c:246 html.c:1990
+#: format.c:907 gtkcube.c:412 gtkrace.c:246 html.c:1992
 msgid "No double"
 msgstr ""
 
@@ -1303,20 +1303,20 @@ msgid ""
 "Cube analysis\n"
 msgstr ""
 
-#: format.c:930 gtkmovefilter.c:384 gtkmovefilter.c:394 html.c:2181
+#: format.c:930 gtkmovefilter.c:384 gtkmovefilter.c:394 html.c:2183
 #, c-format
 msgid "%d-ply"
 msgstr "%d-ply"
 
-#: format.c:941 html.c:2197
+#: format.c:941 html.c:2199
 msgid "cubeless equity"
 msgstr ""
 
-#: format.c:941 html.c:2197
+#: format.c:941 html.c:2199
 msgid "cubeless MWC"
 msgstr ""
 
-#: format.c:943 html.c:2201
+#: format.c:943 html.c:2203
 msgid "Money"
 msgstr "Para"
 
@@ -1329,7 +1329,7 @@ msgstr ""
 msgid "Cubeful equities:\n"
 msgstr ""
 
-#: format.c:997 html.c:2273
+#: format.c:997 html.c:2275
 msgid "Proper cube action:"
 msgstr ""
 
@@ -3139,7 +3139,7 @@ msgstr "Bilgisayar oyunu kazanýyor"
 msgid "Bot wins match"
 msgstr "Bilgisayar maçý kazanýyor"
 
-#: gnubg.c:1623 gtkgame.c:1853 gtkgamelist.c:439 latex.c:494 postscript.c:1189
+#: gnubg.c:1623 gtkgame.c:1854 gtkgamelist.c:439 latex.c:494 postscript.c:1189
 #: sound.c:100
 msgid "Drop"
 msgstr "Red edildi"
@@ -3161,7 +3161,7 @@ msgid "Human wins match"
 msgstr "Ýnsan maçý kazandý"
 
 #: gnubg.c:1633 gtkchequer.c:585 gtkchequer.c:838 gtkchequer.c:847
-#: gtkrolls.c:226 html.c:2521 sound.c:102
+#: gtkrolls.c:226 html.c:2523 sound.c:102
 msgid "Move"
 msgstr "Hamle"
 
@@ -3169,7 +3169,7 @@ msgstr "Hamle"
 msgid "Redouble"
 msgstr ""
 
-#: gnubg.c:1637 gtkgame.c:1895 gtkgame.c:9850 gtktoolbar.c:502 sound.c:104
+#: gnubg.c:1637 gtkgame.c:1896 gtkgame.c:9851 gtktoolbar.c:502 sound.c:104
 msgid "Resign"
 msgstr "Pes"
 
@@ -3181,7 +3181,7 @@ msgstr "Atýþ"
 msgid "Starting of GNU Backgammon"
 msgstr "GNU Backgammon baþlatýlýyor"
 
-#: gnubg.c:1643 gtkcube.c:120 gtkcube.c:341 gtkgame.c:1852 gtkgamelist.c:433
+#: gnubg.c:1643 gtkcube.c:120 gtkcube.c:341 gtkgame.c:1853 gtkgamelist.c:433
 #: latex.c:484 postscript.c:1169 sound.c:106
 msgid "Take"
 msgstr "Al"
@@ -4149,11 +4149,11 @@ msgstr[1] ""
 msgid "%-30.30s %s\n"
 msgstr ""
 
-#: gnubg.c:3049 gtkgame.c:1353
+#: gnubg.c:3049 gtkgame.c:1354
 msgid "Equity before time penalty:"
 msgstr ""
 
-#: gnubg.c:3054 gtkgame.c:1361
+#: gnubg.c:3054 gtkgame.c:1362
 msgid "Equity after time penalty:"
 msgstr ""
 
@@ -4161,8 +4161,8 @@ msgstr ""
 msgid "Lose from penalty:"
 msgstr ""
 
-#: gnubg.c:3114 gnubg.c:3276 gnubg.c:5085 gtkgame.c:1533 gtkgame.c:1681
-#: gtkgamelist.c:450 text.c:96 text.c:491
+#: gnubg.c:3114 gnubg.c:3276 gnubg.c:5085 gtkgame.c:1534 gtkgame.c:1682
+#: gtkgamelist.c:450 text.c:96 text.c:493
 #, c-format
 msgid "Rolled %d%d"
 msgstr "Atýlan %d%d"
@@ -4254,7 +4254,7 @@ msgstr ""
 "\n"
 "Kullanýþ: %s"
 
-#: gnubg.c:3635 gtkgame.c:3537
+#: gnubg.c:3635 gtkgame.c:3538
 msgid "<subcommand>\n"
 msgstr ""
 
@@ -4340,7 +4340,7 @@ msgstr ""
 "Doðru pes kararý         : %s\n"
 "\n"
 
-#: gnubg.c:3984 gnubg.c:3999 gtkgame.c:1911 gtktoolbar.c:484
+#: gnubg.c:3984 gnubg.c:3999 gtkgame.c:1912 gtktoolbar.c:484
 msgid "Accept"
 msgstr "Kabul"
 
@@ -4998,7 +4998,7 @@ msgstr "..."
 msgid "Show"
 msgstr "Göster"
 
-#: gtkchequer.c:587 gtkcube.c:891 gtkcube.c:999 gtkcube.c:1000 gtkgame.c:7012
+#: gtkchequer.c:587 gtkcube.c:891 gtkcube.c:999 gtkcube.c:1000 gtkgame.c:7013
 msgid "Copy"
 msgstr "Kopya"
 
@@ -5063,7 +5063,7 @@ msgstr "W g"
 msgid "W bg"
 msgstr "W bg"
 
-#: gtkchequer.c:833 gtkcube.c:67 gtkgame.c:10225 html.c:341
+#: gtkchequer.c:833 gtkcube.c:67 gtkgame.c:10226 html.c:341
 msgid "Lose"
 msgstr ""
 
@@ -5119,7 +5119,7 @@ msgstr ""
 msgid "Cubeless rollout equity: %s"
 msgstr ""
 
-#: gtkcube.c:223 gtkcube.c:512 html.c:2230
+#: gtkcube.c:223 gtkcube.c:512 html.c:2232
 msgid "Cubeful equities:"
 msgstr ""
 
@@ -5155,7 +5155,7 @@ msgstr ""
 msgid "Annotations"
 msgstr "Ek Açýklamalar"
 
-#: gtkexport.c:46 gtkgame.c:5872
+#: gtkexport.c:46 gtkgame.c:5873
 msgid "Analysis"
 msgstr "Analiz"
 
@@ -5167,7 +5167,7 @@ msgstr "Ýstatistikler"
 msgid "Legend"
 msgstr ""
 
-#: gtkexport.c:49 html.c:3136 postscript.c:891
+#: gtkexport.c:49 html.c:3138 postscript.c:891
 msgid "Match Information"
 msgstr "Maç Bilgileri"
 
@@ -5228,8 +5228,8 @@ msgstr "GNU Backgammon - dýþa aktarma ayarlarý"
 msgid "Include"
 msgstr "Ýçermek"
 
-#: gtkexport.c:518 gtkexport.c:533 gtkgame.c:2881 gtkprefs.c:2906
-#: gtkprefs.c:2923
+#: gtkexport.c:518 gtkexport.c:533 gtkgame.c:2882 gtkprefs.c:2909
+#: gtkprefs.c:2926
 msgid "Board"
 msgstr "Masa"
 
@@ -5319,1424 +5319,1424 @@ msgstr "PNG resimlerin boyutu:"
 msgid "Size of Html images:"
 msgstr "PNG resimlerin boyutu:"
 
-#: gtkgame.c:146
+#: gtkgame.c:147
 msgid "Press escape to exit full screen mode"
 msgstr "Tüm ekran kipinden çýkmak için escape tuþuna bas"
 
-#: gtkgame.c:147
+#: gtkgame.c:148
 msgid ""
 "This option will speed up the 3d drawing, but may not work correctly on all "
 "machines"
 msgstr ""
 
-#: gtkgame.c:148
+#: gtkgame.c:149
 msgid ""
 "Drawing shadows is only supported on the latest graphics cards\n"
 "Disable this option if performance is poor"
 msgstr ""
 
-#: gtkgame.c:150
+#: gtkgame.c:151
 msgid "No hardware accelerated graphics card found, performance may be slow"
 msgstr ""
 
-#: gtkgame.c:772
+#: gtkgame.c:773
 msgid "GNU Backgammon - Dice"
 msgstr "GNU Backgammon . Zar"
 
-#: gtkgame.c:820
+#: gtkgame.c:821
 msgid "GNU Backgammon - Cube"
 msgstr ""
 
-#: gtkgame.c:996
+#: gtkgame.c:997
 #, fuzzy
 msgid "Messages - GNU Backgammon"
 msgstr "GNU Backgammon'u (Tavla) bitir"
 
-#: gtkgame.c:1044
+#: gtkgame.c:1045
 #, fuzzy
 msgid "Annotation - GNU Backgammon"
 msgstr "GNU Backgammon baþlatýlýyor"
 
-#: gtkgame.c:1119
+#: gtkgame.c:1120
 #, fuzzy
 msgid "Game record - GNU Backgammon"
 msgstr "GNU Backgammon'u (Tavla) bitir"
 
-#: gtkgame.c:1139 gtkgame.c:8715
+#: gtkgame.c:1140 gtkgame.c:8716
 msgid "Move back to the previous game"
 msgstr "Bir önceki oyuna geç"
 
-#: gtkgame.c:1144
+#: gtkgame.c:1145
 msgid "Move back to the previous roll"
 msgstr "Bir önceki hamleye geç"
 
-#: gtkgame.c:1149
+#: gtkgame.c:1150
 msgid "Move ahead to the next roll"
 msgstr "Bir ilerideki hamleye geç"
 
-#: gtkgame.c:1154 gtkgame.c:8719
+#: gtkgame.c:1155 gtkgame.c:8720
 msgid "Move ahead to the next game"
 msgstr "Bir ilerideki oyuna geç"
 
-#: gtkgame.c:1160
+#: gtkgame.c:1161
 msgid "Move back to the previous marked decision"
 msgstr "Bir geride iþaretlenmiþ karara git"
 
-#: gtkgame.c:1166
+#: gtkgame.c:1167
 msgid "Move ahead to the next marked decision"
 msgstr "Bir önde iþaretlenmiþ karara git"
 
-#: gtkgame.c:1170
+#: gtkgame.c:1171
 msgid "(no game)"
 msgstr "(oyun yok)"
 
-#: gtkgame.c:1337
+#: gtkgame.c:1338
 #, c-format
 msgid "Time penalty: %s loses %d point"
 msgid_plural "Time penalty: %s loses %d points"
 msgstr[0] ""
 msgstr[1] ""
 
-#: gtkgame.c:1369
+#: gtkgame.c:1370
 msgid "Loss from penalty:"
 msgstr ""
 
-#: gtkgame.c:1435
+#: gtkgame.c:1436
 msgid "Equity before resignation: "
 msgstr ""
 
-#: gtkgame.c:1443
+#: gtkgame.c:1444
 msgid "Equity after resignation: "
 msgstr ""
 
-#: gtkgame.c:1451
+#: gtkgame.c:1452
 msgid "Difference: "
 msgstr "Fark: "
 
-#: gtkgame.c:1651 gtkgame.c:1660
+#: gtkgame.c:1652 gtkgame.c:1661
 msgid "Didn't double"
 msgstr "Vido yapýlmadý"
 
-#: gtkgame.c:1724 gtkgame.c:1725 gtkgame.c:1730 gtkgame.c:1731
+#: gtkgame.c:1725 gtkgame.c:1726 gtkgame.c:1731 gtkgame.c:1732
 msgid "Moved "
 msgstr "Oynandý "
 
-#: gtkgame.c:1777 gtkgame.c:5526 gtkgame.c:5628 gtkgame.c:5879 gtkgame.c:5976
-#: gtkgame.c:6294 gtkgame.c:8938 gtkoptions.c:460
+#: gtkgame.c:1778 gtkgame.c:5527 gtkgame.c:5629 gtkgame.c:5880 gtkgame.c:5977
+#: gtkgame.c:6295 gtkgame.c:8939 gtkoptions.c:460
 msgid "Chequer play"
 msgstr "Checker oyunu"
 
-#: gtkgame.c:1781 html.c:2160
+#: gtkgame.c:1782 html.c:2162
 msgid "Cube decision"
 msgstr ""
 
-#: gtkgame.c:1836 gtkgame.c:1873
+#: gtkgame.c:1837 gtkgame.c:1874
 msgid "GNU Backgammon cannot analyse neither beavers nor raccoons yet"
 msgstr ""
 
-#: gtkgame.c:1946
+#: gtkgame.c:1947
 msgid "No analysis available."
 msgstr "Analiz yok"
 
-#: gtkgame.c:2004 gtkgame.c:8751
+#: gtkgame.c:2005 gtkgame.c:8752
 #, c-format
 msgid "Game %d: %s %d, %s %d"
 msgstr "Oyun %d: %s %d, %s %d"
 
-#: gtkgame.c:2309
+#: gtkgame.c:2310
 msgid "Commentary"
 msgstr ""
 
-#: gtkgame.c:2313
+#: gtkgame.c:2314
 msgid "Messages"
 msgstr ""
 
-#: gtkgame.c:2329
+#: gtkgame.c:2330
 msgid "/_File"
 msgstr "/_Dosya"
 
-#: gtkgame.c:2330
+#: gtkgame.c:2331
 msgid "/_File/_New"
 msgstr "/_Dosya/_Yeni"
 
-#: gtkgame.c:2332
+#: gtkgame.c:2333
 msgid "/_File/_New/_Game"
 msgstr "/_Dosya/_Yeni/_Oyun"
 
-#: gtkgame.c:2333
+#: gtkgame.c:2334
 msgid "/_File/_New/_Match..."
 msgstr "/_Dosya/_Yeni/_Maç..."
 
-#: gtkgame.c:2334
+#: gtkgame.c:2335
 msgid "/_File/_New/_Session"
 msgstr "/_Dosya/_Yeni/_Oturum"
 
-#: gtkgame.c:2335
+#: gtkgame.c:2336
 msgid "/_File/_New/_Weights..."
 msgstr "/_Dosya/_Yeni/_Weights..."
 
-#: gtkgame.c:2337
+#: gtkgame.c:2338
 msgid "/_File/_Open"
 msgstr "/_Dosya/_Aç"
 
-#: gtkgame.c:2338
+#: gtkgame.c:2339
 msgid "/_File/_Open/_Commands..."
 msgstr "/_Dosya/_Aç/_Komutlar..."
 
-#: gtkgame.c:2339
+#: gtkgame.c:2340
 msgid "/_File/_Open/_Game..."
 msgstr "/_Dosya/_Aç/_Oyun..."
 
-#: gtkgame.c:2340
+#: gtkgame.c:2341
 msgid "/_File/_Open/_Match or session..."
 msgstr "/_Dosya/_Aç/_Maç veya oturum..."
 
-#: gtkgame.c:2342
+#: gtkgame.c:2343
 msgid "/_File/_Open/_Position..."
 msgstr "/_Dosya/_Aç/_Pozisyon..."
 
-#: gtkgame.c:2343
+#: gtkgame.c:2344
 msgid "/_File/_Save"
 msgstr "/_Dosya/_Kayýt et"
 
-#: gtkgame.c:2344
+#: gtkgame.c:2345
 msgid "/_File/_Save/_Game..."
 msgstr "/_Dosya/_Kayýt et/_Oyun..."
 
-#: gtkgame.c:2345
+#: gtkgame.c:2346
 msgid "/_File/_Save/_Match or session..."
 msgstr "/_Dosya/_Kayýt et/_Maç veya oturum..."
 
-#: gtkgame.c:2347
+#: gtkgame.c:2348
 msgid "/_File/_Save/_Position..."
 msgstr "/_Dosya/_Kayýt et/_Pozisyon"
 
-#: gtkgame.c:2348
+#: gtkgame.c:2349
 msgid "/_File/_Save/_Weights..."
 msgstr "/_Dosya/_Kayýt et/_Weights..."
 
-#: gtkgame.c:2349 gtkgame.c:2414
+#: gtkgame.c:2350 gtkgame.c:2415
 msgid "/_File/-"
 msgstr "/_Dosya/-"
 
-#: gtkgame.c:2350
+#: gtkgame.c:2351
 msgid "/_File/_Import"
 msgstr "/_File/_Ýçeri aktar"
 
-#: gtkgame.c:2351
+#: gtkgame.c:2352
 msgid "/_File/_Import/BKG session..."
 msgstr "/_Dosya/_Ýçeri aktar/BKG oturumu..."
 
-#: gtkgame.c:2352
+#: gtkgame.c:2353
 msgid "/_File/_Import/._mat match..."
 msgstr "/_Dosya/_Ýçeri aktar/._mat maç..."
 
-#: gtkgame.c:2353
+#: gtkgame.c:2354
 msgid "/_File/_Import/._pos position..."
 msgstr "/_Dosya/_Ýçeri aktar/._pos posizyon..."
 
-#: gtkgame.c:2354
+#: gtkgame.c:2355
 msgid "/_File/_Import/FIBS _oldmoves..."
 msgstr "/_Dosya/_Ýçeri aktar/FIBS _oldmoves..."
 
-#: gtkgame.c:2356
+#: gtkgame.c:2357
 msgid "/_File/_Import/._GamesGrid .sgg match..."
 msgstr "/_Dosya/_Ýçeri aktar/._GamesGrid .sgg maç..."
 
-#: gtkgame.c:2358
+#: gtkgame.c:2359
 msgid "/_File/_Import/._TrueMoneyGames .tmg match..."
 msgstr "/_Dosya/_Ýçeri aktar/._TrueMoneyGames .tmg maç..."
 
-#: gtkgame.c:2360
+#: gtkgame.c:2361
 msgid "/_File/_Import/._Snowie standard text format..."
 msgstr "/_Dosya/_Ýçeri aktar/._Snowie satnadart text format..."
 
-#: gtkgame.c:2362
+#: gtkgame.c:2363
 msgid "/_File/_Import/._Snowie .txt position file..."
 msgstr "/_Dosya/_Ýçeri aktar/._Snowie .txt pozisyon dosyasý..."
 
-#: gtkgame.c:2364
+#: gtkgame.c:2365
 msgid "/_File/_Export"
 msgstr "/_Dosya/_Dýþa aktar"
 
-#: gtkgame.c:2365
+#: gtkgame.c:2366
 msgid "/_File/_Export/_Game"
 msgstr "/_Dosya/_Dýþa aktar/_Oyun"
 
-#: gtkgame.c:2366
+#: gtkgame.c:2367
 msgid "/_File/_Export/_Game/.gam..."
 msgstr "/_Dosya/_Dýþa aktar/_Oyun/.gam..."
 
-#: gtkgame.c:2367
+#: gtkgame.c:2368
 msgid "/_File/_Export/_Game/HTML..."
 msgstr "/_Dosya/_Dýþa aktar/_Oyun/HTML..."
 
-#: gtkgame.c:2368
+#: gtkgame.c:2369
 msgid "/_File/_Export/_Game/LaTeX..."
 msgstr "/_Dosya/_Dýþa aktar/_Oyun/LaTeX..."
 
-#: gtkgame.c:2369
+#: gtkgame.c:2370
 msgid "/_File/_Export/_Game/PDF..."
 msgstr "/_Dosya/_Dýþa aktar/_Oyun/PDF..."
 
-#: gtkgame.c:2370
+#: gtkgame.c:2371
 msgid "/_File/_Export/_Game/PostScript..."
 msgstr "/_Dosya/_Dýþa aktar/_Oyun/PostScript..."
 
-#: gtkgame.c:2372
+#: gtkgame.c:2373
 msgid "/_File/_Export/_Game/Text..."
 msgstr "/_Dosya/_Dýþa aktar/_Oyun/Text..."
 
-#: gtkgame.c:2374
+#: gtkgame.c:2375
 msgid "/_File/_Export/_Match"
 msgstr "/_Dosya/_Dýþa aktar/_Maç"
 
-#: gtkgame.c:2375
+#: gtkgame.c:2376
 msgid "/_File/_Export/_Match/HTML..."
 msgstr "/_Dosya/_Dýþa aktar//_Maç/HTML..."
 
-#: gtkgame.c:2377
+#: gtkgame.c:2378
 msgid "/_File/_Export/_Match/LaTeX..."
 msgstr "/_Dosya/_Dýþa aktar/_Maç/LaTeX..."
 
-#: gtkgame.c:2379
+#: gtkgame.c:2380
 msgid "/_File/_Export/_Match/.mat..."
 msgstr "/_Dosya/_Dýþa aktar/_Maç/.mat..."
 
-#: gtkgame.c:2380
+#: gtkgame.c:2381
 msgid "/_File/_Export/_Match/PDF..."
 msgstr "/_Dosya/_Dýþa aktar/_Maç/PDF..."
 
-#: gtkgame.c:2381
+#: gtkgame.c:2382
 msgid "/_File/_Export/_Match/PostScript..."
 msgstr "/_Dosya/_Dýþa aktar/_Maç/PostScript..."
 
-#: gtkgame.c:2383
+#: gtkgame.c:2384
 msgid "/_File/_Export/_Match/Text..."
 msgstr "/_Dosya/_Dýþa aktar/_Maç/Text..."
 
-#: gtkgame.c:2385
+#: gtkgame.c:2386
 msgid "/_File/_Export/_Position"
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon"
 
-#: gtkgame.c:2386
+#: gtkgame.c:2387
 msgid "/_File/_Export/_Position/HTML..."
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon/HTML..."
 
-#: gtkgame.c:2388
+#: gtkgame.c:2389
 msgid "/_File/_Export/_Position/GammOnLine (HTML)..."
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon/GammOnLine (HTML)..."
 
-#: gtkgame.c:2390
+#: gtkgame.c:2391
 msgid "/_File/_Export/_Position/Encapsulated PostScript..."
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon/Encapsulated PostScript..."
 
-#: gtkgame.c:2392
+#: gtkgame.c:2393
 msgid "/_File/_Export/_Position/PNG..."
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon/PNG..."
 
-#: gtkgame.c:2394
+#: gtkgame.c:2395
 msgid "/_File/_Export/_Position/.pos..."
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon/.pos..."
 
-#: gtkgame.c:2396
+#: gtkgame.c:2397
 msgid "/_File/_Export/_Position/Snowie .txt..."
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon/Snowie .txt..."
 
-#: gtkgame.c:2399
+#: gtkgame.c:2400
 msgid "/_File/_Export/_Position/Text..."
 msgstr "/_Dosya/_Dýþa aktar/_Pozisyon/Text..."
 
-#: gtkgame.c:2401
+#: gtkgame.c:2402
 msgid "/_File/_Export/_Session"
 msgstr "/_Dosya/_Dýþa aktar/_Session"
 
-#: gtkgame.c:2402
+#: gtkgame.c:2403
 msgid "/_File/_Export/_Session/HTML..."
 msgstr "/_Dosya/_Dýþa aktar/_Oturum/HTML..."
 
-#: gtkgame.c:2404
+#: gtkgame.c:2405
 msgid "/_File/_Export/_Session/LaTeX..."
 msgstr "/_Dosya/_Dýþa aktar/_Oturum/LaTeX..."
 
-#: gtkgame.c:2406
+#: gtkgame.c:2407
 msgid "/_File/_Export/_Session/PDF..."
 msgstr "/_Dosya/_Dýþa aktar/_Oturum/PDF..."
 
-#: gtkgame.c:2408
+#: gtkgame.c:2409
 msgid "/_File/_Export/_Session/PostScript..."
 msgstr "/_Dosya/_Dýþa aktar/_Oturum/PostScript..."
 
-#: gtkgame.c:2410
+#: gtkgame.c:2411
 msgid "/_File/_Export/_Session/Text..."
 msgstr "/_Dosya/_Dýþa aktar/_Oturum/Text..."
 
-#: gtkgame.c:2412
+#: gtkgame.c:2413
 msgid "/_File/_Export/_HTML Images..."
 msgstr "/_Dosya/_Dýþa aktar/_Oturum/_HTML Resimleri..."
 
-#: gtkgame.c:2415
+#: gtkgame.c:2416
 msgid "/_File/_Quit"
 msgstr "/_Dosya/_Bitir"
 
-#: gtkgame.c:2416
+#: gtkgame.c:2417
 msgid "/_Edit"
 msgstr "/_Düzenle"
 
-#: gtkgame.c:2417
+#: gtkgame.c:2418
 msgid "/_Edit/_Undo"
 msgstr "/_Düzenle/_Geri al"
 
-#: gtkgame.c:2418 gtkgame.c:2426
+#: gtkgame.c:2419 gtkgame.c:2427
 msgid "/_Edit/-"
 msgstr "/_Düzenle/-"
 
-#: gtkgame.c:2419
+#: gtkgame.c:2420
 msgid "/_Edit/_Copy"
 msgstr "/_Düzenle/_Kopya"
 
-#: gtkgame.c:2420
+#: gtkgame.c:2421
 msgid "/_Edit/Copy as"
 msgstr "/_Düzenle/Baþka biçimle kopya"
 
-#: gtkgame.c:2421
+#: gtkgame.c:2422
 msgid "/_Edit/Copy as/Position as ASCII"
 msgstr "/_Düzenle/Baþka biçimle kopya/ASCII olarak pozisyonlar"
 
-#: gtkgame.c:2423
+#: gtkgame.c:2424
 msgid "/_Edit/Copy as/GammOnLine (HTML)"
 msgstr "/_Düzenle/Baþka biçimle kopya/GammOnLine (HTML)"
 
-#: gtkgame.c:2425
+#: gtkgame.c:2426
 msgid "/_Edit/_Paste"
 msgstr "/_Düzenle/_Yapýþtýr"
 
-#: gtkgame.c:2427
+#: gtkgame.c:2428
 msgid "/_Edit/_Enter command..."
 msgstr "/_Düzenle/_Komut yaz..."
 
-#: gtkgame.c:2428
+#: gtkgame.c:2429
 msgid "/_Game"
 msgstr "/_Oyun"
 
-#: gtkgame.c:2429
+#: gtkgame.c:2430
 msgid "/_Game/_Roll"
 msgstr "/_Oyun/_At"
 
-#: gtkgame.c:2430
+#: gtkgame.c:2431
 msgid "/_Game/_Finish move"
 msgstr "/_Oyun/_Hamleyi bitir"
 
-#: gtkgame.c:2431 gtkgame.c:2436 gtkgame.c:2447 gtkgame.c:2449 gtkgame.c:2451
-#: gtkgame.c:2459
+#: gtkgame.c:2432 gtkgame.c:2437 gtkgame.c:2448 gtkgame.c:2450 gtkgame.c:2452
+#: gtkgame.c:2460
 msgid "/_Game/-"
 msgstr "/_Oyun/-"
 
-#: gtkgame.c:2432
+#: gtkgame.c:2433
 msgid "/_Game/_Double"
 msgstr "/_Oyun/_Vido"
 
-#: gtkgame.c:2433
+#: gtkgame.c:2434
 msgid "/_Game/_Take"
 msgstr "/_Oyun/_Al"
 
-#: gtkgame.c:2434
+#: gtkgame.c:2435
 msgid "/_Game/Dro_p"
 msgstr "/_Oyun/_Ýptal"
 
-#: gtkgame.c:2435
+#: gtkgame.c:2436
 msgid "/_Game/R_edouble"
 msgstr ""
 
-#: gtkgame.c:2437
+#: gtkgame.c:2438
 msgid "/_Game/Re_sign"
 msgstr "/_Oyun/_Pes"
 
-#: gtkgame.c:2439
+#: gtkgame.c:2440
 msgid "/_Game/Re_sign/_Normal"
 msgstr "/_Oyun/_Pes/_Normal"
 
-#: gtkgame.c:2440
+#: gtkgame.c:2441
 msgid "/_Game/Re_sign/_Gammon"
 msgstr "/_Oyun/_Pes/_Oyun"
 
-#: gtkgame.c:2441
+#: gtkgame.c:2442
 msgid "/_Game/Re_sign/_Backgammon"
 msgstr "/_Oyun/_Pes/_Mars"
 
-#: gtkgame.c:2444
+#: gtkgame.c:2445
 msgid "/_Game/_Agree to resignation"
 msgstr "/_Oyun/_Pesi onayla"
 
-#: gtkgame.c:2445
+#: gtkgame.c:2446
 msgid "/_Game/De_cline resignation"
 msgstr "/_Oyun/_Pesi red et"
 
-#: gtkgame.c:2448
+#: gtkgame.c:2449
 msgid "/_Game/Play computer turn"
 msgstr "/_Oyun/_Bilgisayarýn hamlesini oyna"
 
-#: gtkgame.c:2450
+#: gtkgame.c:2451
 msgid "/_Game/Swap players"
 msgstr "/_Oyun/Oyuncularýn yerlerini deðiþ"
 
-#: gtkgame.c:2452
+#: gtkgame.c:2453
 msgid "/_Game/Set cube..."
 msgstr ""
 
-#: gtkgame.c:2453
+#: gtkgame.c:2454
 msgid "/_Game/Set _dice..."
 msgstr "/_Oyun/_Zarlarý belirle"
 
-#: gtkgame.c:2454
+#: gtkgame.c:2455
 msgid "/_Game/Set _turn"
 msgstr "/_Oyun/_Oyuncu sýrasýný belirle"
 
-#: gtkgame.c:2455
+#: gtkgame.c:2456
 msgid "/_Game/Set turn/0"
 msgstr "/_Oyun/_Oyuncu sýrasýný belirle/0"
 
-#: gtkgame.c:2457
+#: gtkgame.c:2458
 msgid "/_Game/Set turn/1"
 msgstr "/_Oyun/_Oyuncu sýrasýný belirle/1"
 
-#: gtkgame.c:2460
+#: gtkgame.c:2461
 msgid "/_Game/Match information..."
 msgstr "/_Oyun/Maç bilgileri..."
 
-#: gtkgame.c:2461
+#: gtkgame.c:2462
 msgid "/_Navigate"
 msgstr "/_Dolaþ"
 
-#: gtkgame.c:2462
+#: gtkgame.c:2463
 msgid "/_Navigate/Previous rol_l"
 msgstr "/_Dolaþ/Ö_nceki atýþ"
 
-#: gtkgame.c:2464
+#: gtkgame.c:2465
 msgid "/_Navigate/Next _roll"
 msgstr "/_Dolaþ/S_onraki atýþ"
 
-#: gtkgame.c:2466 gtkgame.c:2471 gtkgame.c:2476 gtkgame.c:2481
+#: gtkgame.c:2467 gtkgame.c:2472 gtkgame.c:2477 gtkgame.c:2482
 msgid "/_Navigate/-"
 msgstr "/_Dolaþ/-"
 
-#: gtkgame.c:2467
+#: gtkgame.c:2468
 msgid "/_Navigate/_Previous move"
 msgstr "/_Dolaþ/_Önceki adým"
 
-#: gtkgame.c:2469
+#: gtkgame.c:2470
 msgid "/_Navigate/Next _move"
 msgstr "/_Dolaþ/_Sonraki adým"
 
-#: gtkgame.c:2472
+#: gtkgame.c:2473
 msgid "/_Navigate/Previous chequer _play"
 msgstr ""
 
-#: gtkgame.c:2474
+#: gtkgame.c:2475
 msgid "/_Navigate/Next _chequer play"
 msgstr "/_Dolaþ/So_nraki checker oyunu"
 
-#: gtkgame.c:2477
+#: gtkgame.c:2478
 msgid "/_Navigate/Previous marke_d move"
 msgstr "/_Dolaþ/Ön_ceki iþaretli oyun"
 
-#: gtkgame.c:2479
+#: gtkgame.c:2480
 msgid "/_Navigate/Next mar_ked move"
 msgstr "/_Dolaþ/Sonr_aki iþaretli oyun"
 
-#: gtkgame.c:2482
+#: gtkgame.c:2483
 msgid "/_Navigate/Pre_vious game"
 msgstr "/_Dolaþ/Önce_ki oyun"
 
-#: gtkgame.c:2484
+#: gtkgame.c:2485
 msgid "/_Navigate/Next _game"
 msgstr "/_Dolaþ/Sonrak_i oyun"
 
-#: gtkgame.c:2486
+#: gtkgame.c:2487
 msgid "/_Analyse"
 msgstr "/_Analiz"
 
-#: gtkgame.c:2487
+#: gtkgame.c:2488
 msgid "/_Analyse/_Evaluate"
 msgstr "/_Analiz/_Evaluasyon"
 
-#: gtkgame.c:2488
+#: gtkgame.c:2489
 msgid "/_Analyse/_Hint"
 msgstr "/_Analiz/_Ýpucu"
 
-#: gtkgame.c:2489
+#: gtkgame.c:2490
 msgid "/_Analyse/_Rollout"
 msgstr ""
 
-#: gtkgame.c:2490
+#: gtkgame.c:2491
 msgid "/_Analyse/Rollout _cube decision"
 msgstr ""
 
-#: gtkgame.c:2492 gtkgame.c:2510 gtkgame.c:2517 gtkgame.c:2527 gtkgame.c:2534
-#: gtkgame.c:2551 gtkgame.c:2556 gtkgame.c:2563
+#: gtkgame.c:2493 gtkgame.c:2511 gtkgame.c:2518 gtkgame.c:2528 gtkgame.c:2535
+#: gtkgame.c:2552 gtkgame.c:2557 gtkgame.c:2564
 msgid "/_Analyse/-"
 msgstr "/_Analiz/-"
 
-#: gtkgame.c:2493
+#: gtkgame.c:2494
 msgid "/_Analyse/Analyse move"
 msgstr "/_Analiz/Adýmýn analizi"
 
-#: gtkgame.c:2495
+#: gtkgame.c:2496
 msgid "/_Analyse/Analyse game"
 msgstr "/_Analiz/Oyunun analizi"
 
-#: gtkgame.c:2497
+#: gtkgame.c:2498
 msgid "/_Analyse/Analyse match"
 msgstr "/_Analiz/Maçýn analizi"
 
-#: gtkgame.c:2499
+#: gtkgame.c:2500
 msgid "/_Analyse/Analyse session"
 msgstr "/_Analiz/Oturumun analizi"
 
-#: gtkgame.c:2501
+#: gtkgame.c:2502
 msgid "/_Analyse/Clear analysis"
 msgstr "/_Analiz/Analizi sil"
 
-#: gtkgame.c:2502
+#: gtkgame.c:2503
 msgid "/_Analyse/Clear analysis/Move"
 msgstr "/_Analiz/Analizi sil/Adým"
 
-#: gtkgame.c:2504
+#: gtkgame.c:2505
 msgid "/_Analyse/Clear analysis/_Game"
 msgstr "/_Analiz/Analizi sil/_Oyun"
 
-#: gtkgame.c:2506
+#: gtkgame.c:2507
 msgid "/_Analyse/Clear analysis/_Match"
 msgstr "/_Analiz/Analizi sil/_Maç"
 
-#: gtkgame.c:2508
+#: gtkgame.c:2509
 msgid "/_Analyse/Clear analysis/_Session"
 msgstr "/_Analiz/Analizi sil/_Oturum"
 
-#: gtkgame.c:2511
+#: gtkgame.c:2512
 msgid "/_Analyse/Game statistics"
 msgstr "/_Analiz/Oyun istatistiði"
 
-#: gtkgame.c:2513
+#: gtkgame.c:2514
 msgid "/_Analyse/Match statistics"
 msgstr "/_Analiz/Maç istatistiði"
 
-#: gtkgame.c:2515
+#: gtkgame.c:2516
 msgid "/_Analyse/Session statistics"
 msgstr "/_Analiz/Oturum istatistiði"
 
-#: gtkgame.c:2518
+#: gtkgame.c:2519
 msgid "/_Analyse/Player records"
 msgstr "/_Analiz/Oyuncu kayýtlarý"
 
-#: gtkgame.c:2520
+#: gtkgame.c:2521
 msgid "/_Analyse/Add to player records"
 msgstr "/_Analiz/Oyuncu kayýtlarýna ekle"
 
-#: gtkgame.c:2521
+#: gtkgame.c:2522
 msgid "/_Analyse/Add to player records/Game statistics"
 msgstr "/_Analiz/Oyuncu kayýtlarýna ekle/Oyun istatistikler"
 
-#: gtkgame.c:2523
+#: gtkgame.c:2524
 msgid "/_Analyse/Add to player records/Match statistics"
 msgstr "/_Analiz/Oyuncu kayýtlarýna ekle/Maç istatistikler"
 
-#: gtkgame.c:2525
+#: gtkgame.c:2526
 msgid "/_Analyse/Add to player records/Session statistics"
 msgstr "/_Analiz/Oyuncu kayýtlarýna ekle/Oturum istatistikler"
 
-#: gtkgame.c:2528
+#: gtkgame.c:2529
 #, fuzzy
 msgid "/_Analyse/Relational database/Add match or session..."
 msgstr "/_Dosya/_Aç/_Maç veya oturum..."
 
-#: gtkgame.c:2530
+#: gtkgame.c:2531
 #, fuzzy
 msgid "/_Analyse/Relational database/Test..."
 msgstr "/_Analiz/Bearoff veritabaný"
 
-#: gtkgame.c:2532
+#: gtkgame.c:2533
 #, fuzzy
 msgid "/_Analyse/Relational database/Help..."
 msgstr "/_Analiz/Bearoff veritabaný"
 
-#: gtkgame.c:2535
+#: gtkgame.c:2536
 msgid "/_Analyse/_Pip count"
 msgstr "/_Analiz/_Pip saymasý"
 
-#: gtkgame.c:2536
+#: gtkgame.c:2537
 msgid "/_Analyse/_Kleinman count"
 msgstr "/_Analiz/_Kleinman saymasý"
 
-#: gtkgame.c:2538
+#: gtkgame.c:2539
 msgid "/_Analyse/_Thorp count"
 msgstr "/_Analiz/_Thorp saymasý"
 
-#: gtkgame.c:2539
+#: gtkgame.c:2540
 msgid "/_Analyse/One chequer race"
 msgstr "/_Analiz/Tek checker yarýþý"
 
-#: gtkgame.c:2541
+#: gtkgame.c:2542
 msgid "/_Analyse/One sided rollout"
 msgstr ""
 
-#: gtkgame.c:2544
+#: gtkgame.c:2545
 msgid "/_Analyse/Distribution of rolls"
 msgstr ""
 
-#: gtkgame.c:2547
+#: gtkgame.c:2548
 msgid "/_Analyse/Temperature Map"
 msgstr "/_Analiz/Temperature Map"
 
-#: gtkgame.c:2549
+#: gtkgame.c:2550
 msgid "/_Analyse/Temperature Map (cube decision)"
 msgstr "/_Analiz/Temperature Map (cube decision)"
 
-#: gtkgame.c:2552
+#: gtkgame.c:2553
 msgid "/_Analyse/Bearoff Databases"
 msgstr "/_Analiz/Bearoff veritabaný"
 
-#: gtkgame.c:2554
+#: gtkgame.c:2555
 #, fuzzy
 msgid "/_Analyse/Effective Pip Count"
 msgstr "/_Analiz/_Pip saymasý"
 
-#: gtkgame.c:2557
+#: gtkgame.c:2558
 msgid "/_Analyse/_Gammon values"
 msgstr "/_Analiz/_Gammon deðerleri"
 
-#: gtkgame.c:2559
+#: gtkgame.c:2560
 msgid "/_Analyse/_Market window"
 msgstr "/_Analiz/_Ýþaretli pencereler"
 
-#: gtkgame.c:2561
+#: gtkgame.c:2562
 msgid "/_Analyse/M_atch equity table"
 msgstr ""
 
-#: gtkgame.c:2564
+#: gtkgame.c:2565
 msgid "/_Analyse/Evaluation engine"
 msgstr ""
 
-#: gtkgame.c:2566
+#: gtkgame.c:2567
 msgid "/_Analyse/Evaluation speed"
 msgstr ""
 
-#: gtkgame.c:2569
+#: gtkgame.c:2570
 msgid "/_Train"
 msgstr "/_Antranman"
 
-#: gtkgame.c:2570
+#: gtkgame.c:2571
 msgid "/_Train/D_ump database"
 msgstr "/_Antranman/Veritabanýný b_oþalt"
 
-#: gtkgame.c:2572
+#: gtkgame.c:2573
 msgid "/_Train/_Generate database"
 msgstr "/_Antranman/Veritabaný o_luþtur"
 
-#: gtkgame.c:2574
+#: gtkgame.c:2575
 msgid "/_Train/_Rollout database"
 msgstr "/_Antranman/_Atýþ veritabaný"
 
-#: gtkgame.c:2576
+#: gtkgame.c:2577
 msgid "/_Train/_Import database..."
 msgstr "/_Antranman/Veritabaný i_çeri aktar..."
 
-#: gtkgame.c:2577
+#: gtkgame.c:2578
 msgid "/_Train/_Export database..."
 msgstr "/_Antranman/_Veritabaný d_ýþarý aktar..."
 
-#: gtkgame.c:2578
+#: gtkgame.c:2579
 msgid "/_Train/-"
 msgstr "/_Antranman/-"
 
-#: gtkgame.c:2579
+#: gtkgame.c:2580
 msgid "/_Train/Train from _database"
 msgstr "/_Antranman/Veritabanýndan atranman y_ap"
 
-#: gtkgame.c:2581
+#: gtkgame.c:2582
 msgid "/_Train/Train with _TD(0)"
 msgstr "/_Antranman/_TD(0) ile antranman"
 
-#: gtkgame.c:2583
+#: gtkgame.c:2584
 msgid "/_Settings"
 msgstr "_Ayarlar"
 
-#: gtkgame.c:2584
+#: gtkgame.c:2585
 msgid "/_Settings/Analysis..."
 msgstr "_Ayarlar/Analiz..."
 
-#: gtkgame.c:2585
+#: gtkgame.c:2586
 msgid "/_Settings/Appearance..."
 msgstr "_Ayarlar/Görünüþ..."
 
-#: gtkgame.c:2587
+#: gtkgame.c:2588
 msgid "/_Settings/_Evaluation..."
 msgstr "_Ayarlar/_Evaluation..."
 
-#: gtkgame.c:2588
+#: gtkgame.c:2589
 msgid "/_Settings/E_xport..."
 msgstr "_Ayarlar/Dýþa _aktar..."
 
-#: gtkgame.c:2590
+#: gtkgame.c:2591
 msgid "/_Settings/_Players..."
 msgstr "_Ayarlar/_Oyuncular..."
 
-#: gtkgame.c:2591
+#: gtkgame.c:2592
 msgid "/_Settings/_Rollouts..."
 msgstr "_Ayarlar/_Hamleler..."
 
-#: gtkgame.c:2593
+#: gtkgame.c:2594
 msgid "/_Settings/_Time Control"
 msgstr "_Ayarlar/_Zaman denetimi"
 
-#: gtkgame.c:2594
+#: gtkgame.c:2595
 msgid "/_Settings/Time Control/_Define..."
 msgstr "_Ayarlar/Zaman denetimi/_Define..."
 
-#: gtkgame.c:2595
+#: gtkgame.c:2596
 msgid "/_Settings/Time Control/-"
 msgstr "_Ayarlar/Zaman denetimi"
 
-#: gtkgame.c:2596
+#: gtkgame.c:2597
 msgid "/_Settings/Time Control/Off"
 msgstr "_Ayarlar/Zaman denetimi/Off"
 
-#: gtkgame.c:2598 gtkgame.c:2601
+#: gtkgame.c:2599 gtkgame.c:2602
 msgid "/_Settings/-"
 msgstr "_Ayarlar/-"
 
-#: gtkgame.c:2599
+#: gtkgame.c:2600
 msgid "/_Settings/Options..."
 msgstr "_Ayarlar/Seçenekler..."
 
-#: gtkgame.c:2600
+#: gtkgame.c:2601
 msgid "/_Settings/Paths..."
 msgstr "_Ayarlar/Yol..."
 
-#: gtkgame.c:2602
+#: gtkgame.c:2603
 msgid "/_Settings/Save settings"
 msgstr "_Ayarlar/Ayarlarý kayýt et"
 
-#: gtkgame.c:2604
+#: gtkgame.c:2605
 msgid "/_Windows"
 msgstr "/_Pencereler"
 
-#: gtkgame.c:2605
+#: gtkgame.c:2606
 msgid "/_Windows/_Game record"
 msgstr "/_Pencereler/_Oyunu kayýt et"
 
-#: gtkgame.c:2607
+#: gtkgame.c:2608
 #, fuzzy
 msgid "/_Windows/_Analysis"
 msgstr "/_Pencereler/_Ek açýklamalar"
 
-#: gtkgame.c:2609
+#: gtkgame.c:2610
 #, fuzzy
 msgid "/_Windows/_Commentary"
 msgstr "/_Pencereler/_Mesaj"
 
-#: gtkgame.c:2611
+#: gtkgame.c:2612
 msgid "/_Windows/_Message"
 msgstr "/_Pencereler/_Mesaj"
 
-#: gtkgame.c:2613 gtkgame.c:2617 gtkgame.c:2626
+#: gtkgame.c:2614 gtkgame.c:2618 gtkgame.c:2627
 msgid "/_Windows/-"
 msgstr "/_Pencereler/-"
 
-#: gtkgame.c:2614
+#: gtkgame.c:2615
 #, fuzzy
 msgid "/_Windows/_Dock panels"
 msgstr "/_Pencereler/Tüm panolarý göster"
 
-#: gtkgame.c:2615
+#: gtkgame.c:2616
 #, fuzzy
 msgid "/_Windows/Restore panels"
 msgstr "/_Pencereler/Tüm panolarý göster"
 
-#: gtkgame.c:2616
+#: gtkgame.c:2617
 #, fuzzy
 msgid "/_Windows/Hide panels"
 msgstr "/_Pencereler/Tüm panolarý sakla"
 
-#: gtkgame.c:2618
+#: gtkgame.c:2619
 #, fuzzy
 msgid "/_Windows/_Toolbar"
 msgstr "/_Pencereler/Gu_ile"
 
-#: gtkgame.c:2619
+#: gtkgame.c:2620
 #, fuzzy
 msgid "/_Windows/_Toolbar/Text only"
 msgstr "/_Pencereler/_Ek açýklamalar"
 
-#: gtkgame.c:2621
+#: gtkgame.c:2622
 #, fuzzy
 msgid "/_Windows/_Toolbar/Icons only"
 msgstr "/_Pencereler/_Ek açýklamalar"
 
-#: gtkgame.c:2623
+#: gtkgame.c:2624
 #, fuzzy
 msgid "/_Windows/_Toolbar/Both"
 msgstr "/_Pencereler/_Ek açýklamalar"
 
-#: gtkgame.c:2625
+#: gtkgame.c:2626
 msgid "/_Windows/Full screen"
 msgstr "/_Pencereler/Tüm ekran"
 
-#: gtkgame.c:2627
+#: gtkgame.c:2628
 msgid "/_Windows/Gu_ile"
 msgstr "/_Pencereler/Gu_ile"
 
-#: gtkgame.c:2628
+#: gtkgame.c:2629
 msgid "/_Windows/_Python shell (IDLE)..."
 msgstr "/_Pencereler/_Python shell (IDLE)..."
 
-#: gtkgame.c:2630
+#: gtkgame.c:2631
 msgid "/_Help"
 msgstr "/_Yardým"
 
-#: gtkgame.c:2631
+#: gtkgame.c:2632
 msgid "/_Help/_Commands"
 msgstr "/_Yardým/_Komutlar"
 
-#: gtkgame.c:2632
+#: gtkgame.c:2633
 msgid "/_Help/gnubg _Manual"
 msgstr "/_Yardým/gnubg _Manual"
 
-#: gtkgame.c:2634
+#: gtkgame.c:2635
 msgid "/_Help/gnubg M_anual (web)"
 msgstr "/_Yardým/gnubg M_anual (web)"
 
-#: gtkgame.c:2636
+#: gtkgame.c:2637
 msgid "/_Help/_Frequently Asked Questions"
 msgstr "/_Yardým/_Sýk sorulan sorular"
 
-#: gtkgame.c:2637
+#: gtkgame.c:2638
 msgid "/_Help/Co_pying gnubg"
 msgstr "/_Yardým/gnubg'i k_opyalamak"
 
-#: gtkgame.c:2638
+#: gtkgame.c:2639
 msgid "/_Help/gnubg _Warranty"
 msgstr "/_Yardým/gnubg _Garanti"
 
-#: gtkgame.c:2640 gtkgame.c:2642
+#: gtkgame.c:2641 gtkgame.c:2643
 msgid "/_Help/-"
 msgstr "/_Yardým/-"
 
-#: gtkgame.c:2641
+#: gtkgame.c:2642
 msgid "/_Help/_Report bug"
 msgstr "/_Yardým/_Bug bildir"
 
-#: gtkgame.c:2643
+#: gtkgame.c:2644
 msgid "/_Help/_About gnubg"
 msgstr "/_Yardým/gnubg Üz_eri"
 
-#: gtkgame.c:2789
+#: gtkgame.c:2790
 #, fuzzy
 msgid "Hide panels"
 msgstr "/_Pencereler/Tüm panolarý sakla"
 
-#: gtkgame.c:2801
+#: gtkgame.c:2802
 #, fuzzy
 msgid "Restore panels"
 msgstr "/_Pencereler/Tüm panolarý göster"
 
-#: gtkgame.c:2881
+#: gtkgame.c:2882
 msgid "Rendering"
 msgstr "Icra"
 
-#: gtkgame.c:2974 gtkgame.c:3022 gtkgame.c:7480 board3d/gtkcolour3d.c:429
+#: gtkgame.c:2975 gtkgame.c:3023 gtkgame.c:7481 board3d/gtkcolour3d.c:429
 msgid "OK"
 msgstr "Tamam"
 
-#: gtkgame.c:3023 gtkgame.c:9866 board3d/gtkcolour3d.c:431
+#: gtkgame.c:3024 gtkgame.c:9867 board3d/gtkcolour3d.c:431
 msgid "Cancel"
 msgstr "Ýptal"
 
-#: gtkgame.c:3120
+#: gtkgame.c:3121
 msgid "GNU Backgammon - Message"
 msgstr "GNU Backgammon - Mesaj"
 
-#: gtkgame.c:3121
+#: gtkgame.c:3122
 msgid "GNU Backgammon - Question"
 msgstr "GNU Backgammon - Soru"
 
-#: gtkgame.c:3122 gtkgame.c:3123 gtkgame.c:10033
+#: gtkgame.c:3123 gtkgame.c:3124 gtkgame.c:10034
 msgid "GNU Backgammon - Warning"
 msgstr "GNU Backgammon - Ýkaz"
 
-#: gtkgame.c:3124
+#: gtkgame.c:3125
 msgid "GNU Backgammon - Error"
 msgstr "GNU Backgammon - Hata"
 
-#: gtkgame.c:3232
+#: gtkgame.c:3233
 msgid "Play Anyway"
 msgstr "Buna raðmen oyna"
 
-#: gtkgame.c:3233
+#: gtkgame.c:3234
 msgid "Rethink"
 msgstr "Birdaha düþün"
 
-#: gtkgame.c:3234
+#: gtkgame.c:3235
 msgid "End Tutor Mode"
 msgstr "Tutor modunu sonlandýr"
 
-#: gtkgame.c:3235 gtktoolbar.c:520
+#: gtkgame.c:3236 gtktoolbar.c:520
 msgid "Hint"
 msgstr "Ýpucu"
 
-#: gtkgame.c:3281
+#: gtkgame.c:3282
 msgid "GNU Backgammon - Tutor"
 msgstr "GNU Backgammon - Tutor"
 
-#: gtkgame.c:3499
+#: gtkgame.c:3500
 #, c-format
 msgid "Unknown keyword: %s\n"
 msgstr "Tanýnmayan kelime %s\n"
 
-#: gtkgame.c:3510
+#: gtkgame.c:3511
 msgid "Available commands:\n"
 msgstr "Kullanýlabilen komutlar:\n"
 
-#: gtkgame.c:3539
+#: gtkgame.c:3540
 msgid "Available subcommands:\n"
 msgstr ""
 
-#: gtkgame.c:3736
+#: gtkgame.c:3737
 msgid "Show Help"
 msgstr "Yardým göster"
 
-#: gtkgame.c:3812
+#: gtkgame.c:3813
 msgid "GNU Backgammon - Enter command"
 msgstr "GNU Backgammon - Komut yaz"
 
-#: gtkgame.c:3919
+#: gtkgame.c:3920
 msgid "Shortcut buttons"
 msgstr "Kestirme tuþlarý"
 
-#: gtkgame.c:3927
+#: gtkgame.c:3928
 #, fuzzy
 msgid "Start a new money game session"
 msgstr "Yeni bir oyun, maç veya oturum baþlat"
 
-#: gtkgame.c:3948
+#: gtkgame.c:3949
 #, c-format
 msgid "Start a new %d point match"
 msgstr ""
 
-#: gtkgame.c:3962 gtkgame.c:4392 gtkgame.c:4428 gtkoptions.c:253
+#: gtkgame.c:3963 gtkgame.c:4393 gtkgame.c:4429 gtkoptions.c:253
 msgid "Game"
 msgstr "Oyun"
 
-#: gtkgame.c:3965 gtkgame.c:4391 gtkgame.c:4427 gtkoptions.c:778
+#: gtkgame.c:3966 gtkgame.c:4392 gtkgame.c:4428 gtkoptions.c:778
 msgid "Match"
 msgstr "Maç"
 
-#: gtkgame.c:3968
+#: gtkgame.c:3969
 msgid "Money game session"
 msgstr "Moneygame oturumu"
 
-#: gtkgame.c:3971 gtkgame.c:4393 gtkgame.c:4429
+#: gtkgame.c:3972 gtkgame.c:4394 gtkgame.c:4430
 msgid "Position"
 msgstr "Pozisyon"
 
-#: gtkgame.c:3979
+#: gtkgame.c:3980
 msgid "Match length:"
 msgstr "Maç uzunluðu:"
 
-#: gtkgame.c:3996
+#: gtkgame.c:3997
 msgid "Player settings"
 msgstr "Oyuncu ayarlarý"
 
-#: gtkgame.c:4003
+#: gtkgame.c:4004
 msgid "Current player settings"
 msgstr "Mevcut oyuncu ayarlarý kullan"
 
-#: gtkgame.c:4013 gtkgame.c:4025
+#: gtkgame.c:4014 gtkgame.c:4026
 msgid "vs."
 msgstr "karþý"
 
-#: gtkgame.c:4032
+#: gtkgame.c:4033
 msgid "GNU Backgammon vs. Human"
 msgstr "GNU Backgammon insana karþý"
 
-#: gtkgame.c:4033
+#: gtkgame.c:4034
 msgid "Human vs. Human"
 msgstr "Ýnsan, insana karþý"
 
-#: gtkgame.c:4039
+#: gtkgame.c:4040
 msgid "Modify player settings..."
 msgstr "Oyuncu ayarlarýný deðiþtir..."
 
-#: gtkgame.c:4051 gtkoptions.c:1027
+#: gtkgame.c:4052 gtkoptions.c:1027
 msgid "Manual dice"
 msgstr "Kendi zarlarýný kullan"
 
-#: gtkgame.c:4052 gtkoptions.c:444
+#: gtkgame.c:4053 gtkoptions.c:444
 msgid "Tutor mode"
 msgstr "Eðitici kip"
 
-#: gtkgame.c:4108
+#: gtkgame.c:4109
 msgid "GNU Backgammon - New"
 msgstr "GNU Backgammon - Yeni"
 
-#: gtkgame.c:4132
+#: gtkgame.c:4133
 msgid "GNU Backgammon - New Weights"
 msgstr ""
 
-#: gtkgame.c:4133
+#: gtkgame.c:4134
 msgid "Number of hidden nodes:"
 msgstr ""
 
-#: gtkgame.c:4350
+#: gtkgame.c:4351
 msgid "Set Default _Path"
 msgstr ""
 
-#: gtkgame.c:4352
+#: gtkgame.c:4353
 msgid "Set Default Path"
 msgstr ""
 
-#: gtkgame.c:4372
+#: gtkgame.c:4373
 msgid "Export settings..."
 msgstr ""
 
-#: gtkgame.c:4388 gtkgame.c:4424
+#: gtkgame.c:4389 gtkgame.c:4425
 msgid "Save match, game or position"
 msgstr "Maç, oyun veya pozisyon kayýt et"
 
-#: gtkgame.c:4389 gtkgame.c:4425
+#: gtkgame.c:4390 gtkgame.c:4426
 msgid "Save session, game or position"
 msgstr "Oturum, oyun veya pozisyon kayýt et"
 
-#: gtkgame.c:4391 gtkgame.c:4427
+#: gtkgame.c:4392 gtkgame.c:4428
 msgid "Session"
 msgstr "Oturum"
 
-#: gtkgame.c:4410 gtkpath.c:136
+#: gtkgame.c:4411 gtkpath.c:136
 msgid "HTML"
 msgstr "HTML"
 
-#: gtkgame.c:4411
+#: gtkgame.c:4412
 msgid "GammOnLine (HTML)"
 msgstr "GammOnLine (HTML)"
 
-#: gtkgame.c:4411
+#: gtkgame.c:4412
 msgid ".pos"
 msgstr ".pos"
 
-#: gtkgame.c:4412
+#: gtkgame.c:4413
 msgid ".mat"
 msgstr ".mat"
 
-#: gtkgame.c:4412
+#: gtkgame.c:4413
 msgid ".gam"
 msgstr ".gam"
 
-#: gtkgame.c:4413 gtkpath.c:138
+#: gtkgame.c:4414 gtkpath.c:138
 msgid "LaTeX"
 msgstr "LaTeX"
 
-#: gtkgame.c:4413 gtkpath.c:144
+#: gtkgame.c:4414 gtkpath.c:144
 msgid "PDF"
 msgstr "PDF"
 
-#: gtkgame.c:4414 gtkpath.c:150
+#: gtkgame.c:4415 gtkpath.c:150
 msgid "PostScript"
 msgstr "PostScript"
 
-#: gtkgame.c:4415 gtkpath.c:132
+#: gtkgame.c:4416 gtkpath.c:132
 msgid "Encapsulated PostScript"
 msgstr "Encapsulated PostScript"
 
-#: gtkgame.c:4416 gtkpath.c:146
+#: gtkgame.c:4417 gtkpath.c:146
 msgid "PNG"
 msgstr "PNG"
 
-#: gtkgame.c:4417 gtkpath.c:156
+#: gtkgame.c:4418 gtkpath.c:156
 msgid "Text"
 msgstr "Text"
 
-#: gtkgame.c:4418
+#: gtkgame.c:4419
 msgid "Equity evolution"
 msgstr ""
 
-#: gtkgame.c:4419 gtkgame.c:4495
+#: gtkgame.c:4420 gtkgame.c:4496
 msgid "Snowie .txt position file"
 msgstr "Snowie .txt pozisyon dosyasý"
 
-#: gtkgame.c:4451
+#: gtkgame.c:4452
 msgid "Export to format: "
 msgstr "Export biçimi:"
 
-#: gtkgame.c:4473
+#: gtkgame.c:4474
 msgid "Get default filename"
 msgstr ""
 
-#: gtkgame.c:4490
+#: gtkgame.c:4491
 msgid "BKG session"
 msgstr "BKG oturumu"
 
-#: gtkgame.c:4491
+#: gtkgame.c:4492
 msgid ".mat match"
 msgstr ".mat maç"
 
-#: gtkgame.c:4491
+#: gtkgame.c:4492
 msgid ".pos position"
 msgstr ".pos pozisyon"
 
-#: gtkgame.c:4492 gtkpath.c:142
+#: gtkgame.c:4493 gtkpath.c:142
 msgid "FIBS oldmoves"
 msgstr "FIBS oldmoves"
 
-#: gtkgame.c:4492
+#: gtkgame.c:4493
 msgid "GamesGrid .sgg"
 msgstr "GamesGrid .sgg"
 
-#: gtkgame.c:4493
+#: gtkgame.c:4494
 msgid "TrueMoneyGames .tmg match"
 msgstr "TrueMoneyGames .tmg match"
 
-#: gtkgame.c:4494
+#: gtkgame.c:4495
 msgid "Snowie standard text format"
 msgstr "Snowie standart text biçimi"
 
-#: gtkgame.c:4500
+#: gtkgame.c:4501
 msgid "Import from format: "
 msgstr "Biçiminden import et:"
 
-#: gtkgame.c:4516
+#: gtkgame.c:4517
 msgid "Go to default path"
 msgstr ""
 
-#: gtkgame.c:4574
+#: gtkgame.c:4575
 msgid "Open commands"
 msgstr "Aç komutlarý"
 
-#: gtkgame.c:4592
+#: gtkgame.c:4593
 msgid "Set match equity table"
 msgstr ""
 
-#: gtkgame.c:4608
+#: gtkgame.c:4609
 msgid "Open game"
 msgstr "Oyun Aç"
 
-#: gtkgame.c:4617
+#: gtkgame.c:4618
 msgid "Open match or session"
 msgstr "Maç veya oturum aç"
 
-#: gtkgame.c:4626
+#: gtkgame.c:4627
 msgid "Open position"
 msgstr "Pozisyono aç"
 
-#: gtkgame.c:4635
+#: gtkgame.c:4636
 msgid "Import BKG session"
 msgstr ""
 
-#: gtkgame.c:4644
+#: gtkgame.c:4645
 msgid "Import .mat match"
 msgstr ".mat maç import et"
 
-#: gtkgame.c:4653
+#: gtkgame.c:4654
 msgid "Import .pos position"
 msgstr ".po pozisyon import et"
 
-#: gtkgame.c:4662
+#: gtkgame.c:4663
 msgid "Import FIBS oldmoves"
 msgstr ""
 
-#: gtkgame.c:4671
+#: gtkgame.c:4672
 msgid "Import .sgg match"
 msgstr ".sgg maç import et"
 
-#: gtkgame.c:4680
+#: gtkgame.c:4681
 msgid "Import .tmg match"
 msgstr ".tmg maç import et"
 
-#: gtkgame.c:4689
+#: gtkgame.c:4690
 msgid "Import Snowie .txt position"
 msgstr "Snowie .txt pozisyon import et"
 
-#: gtkgame.c:4699
+#: gtkgame.c:4700
 msgid "Save game"
 msgstr "Oyun kayýt et"
 
-#: gtkgame.c:4708
+#: gtkgame.c:4709
 msgid "Save match or session"
 msgstr "Maç veya oturum kayýt et"
 
-#: gtkgame.c:4717
+#: gtkgame.c:4718
 msgid "Save position"
 msgstr "Pozisyon kayýt et"
 
-#: gtkgame.c:4726
+#: gtkgame.c:4727
 msgid "Save weights"
 msgstr ""
 
-#: gtkgame.c:4735
+#: gtkgame.c:4736
 msgid "Export .gam game"
 msgstr ".gam oyunu export et"
 
-#: gtkgame.c:4744
+#: gtkgame.c:4745
 msgid "Export HTML game"
 msgstr "HTML oyun export et"
 
-#: gtkgame.c:4753
+#: gtkgame.c:4754
 msgid "Export LaTeX game"
 msgstr "LaTeX oyun export et"
 
-#: gtkgame.c:4762
+#: gtkgame.c:4763
 msgid "Export PDF game"
 msgstr "PDF oyunu export et"
 
-#: gtkgame.c:4771
+#: gtkgame.c:4772
 msgid "Export PostScript game"
 msgstr "PostScript oyunu export et"
 
-#: gtkgame.c:4782
+#: gtkgame.c:4783
 msgid "Export text game"
 msgstr "Text oyunu export et"
 
-#: gtkgame.c:4790
+#: gtkgame.c:4791
 msgid "Export LaTeX match"
 msgstr "LaTeX maç export et"
 
-#: gtkgame.c:4799
+#: gtkgame.c:4800
 msgid "Export HTML match"
 msgstr "HTML maç export et"
 
-#: gtkgame.c:4808
+#: gtkgame.c:4809
 msgid "Export .mat match"
 msgstr ".mat maç export et"
 
-#: gtkgame.c:4817
+#: gtkgame.c:4818
 msgid "Export PDF match"
 msgstr "PDF maç export et"
 
-#: gtkgame.c:4826
+#: gtkgame.c:4827
 msgid "Export PostScript match"
 msgstr "PostScript maç export et"
 
-#: gtkgame.c:4836
+#: gtkgame.c:4837
 msgid "Export text match"
 msgstr "Text maç export et"
 
-#: gtkgame.c:4845
+#: gtkgame.c:4846
 msgid "Export EPS position"
 msgstr "EPS pozisyon export et"
 
-#: gtkgame.c:4854
+#: gtkgame.c:4855
 msgid "Export HTML position"
 msgstr "HTML pozisyon export et"
 
-#: gtkgame.c:4863
+#: gtkgame.c:4864
 msgid "Export position to GammOnLine (HTML)"
 msgstr ""
 
-#: gtkgame.c:4878
+#: gtkgame.c:4879
 msgid "Export .pos position"
 msgstr ""
 
-#: gtkgame.c:4887
+#: gtkgame.c:4888
 msgid "Export PNG position"
 msgstr ""
 
-#: gtkgame.c:4896
+#: gtkgame.c:4897
 msgid "Export text position"
 msgstr ""
 
-#: gtkgame.c:4905
+#: gtkgame.c:4906
 msgid "Export Snowie .txt position"
 msgstr ""
 
-#: gtkgame.c:4915
+#: gtkgame.c:4916
 msgid "Export LaTeX session"
 msgstr ""
 
-#: gtkgame.c:4925
+#: gtkgame.c:4926
 msgid "Export PDF session"
 msgstr ""
 
-#: gtkgame.c:4934
+#: gtkgame.c:4935
 msgid "Export HTML session"
 msgstr ""
 
-#: gtkgame.c:4943
+#: gtkgame.c:4944
 msgid "Export PostScript session"
 msgstr ""
 
-#: gtkgame.c:4953
+#: gtkgame.c:4954
 msgid "Export text session"
 msgstr ""
 
-#: gtkgame.c:4962
+#: gtkgame.c:4963
 msgid "Export HTML images"
 msgstr ""
 
-#: gtkgame.c:4972
+#: gtkgame.c:4973
 msgid "Export database"
 msgstr ""
 
-#: gtkgame.c:4981
+#: gtkgame.c:4982
 msgid "Import database"
 msgstr ""
 
-#: gtkgame.c:5137
+#: gtkgame.c:5138
 msgid "No reduction"
-msgstr ""
-
-#: gtkgame.c:5139
-#, c-format
-msgid "50%% speed"
 msgstr ""
 
 #: gtkgame.c:5140
 #, c-format
-msgid "33%% speed"
+msgid "50%% speed"
 msgstr ""
 
 #: gtkgame.c:5141
 #, c-format
+msgid "33%% speed"
+msgstr ""
+
+#: gtkgame.c:5142
+#, c-format
 msgid "25%% speed"
 msgstr ""
 
-#: gtkgame.c:5163
+#: gtkgame.c:5164
 msgid "Predefined settings"
 msgstr ""
 
-#: gtkgame.c:5173
+#: gtkgame.c:5174
 msgid "Select a predefined setting:"
 msgstr "Bir ön tanýmlanmýþ ayar seç"
 
-#: gtkgame.c:5176
+#: gtkgame.c:5177
 msgid ""
 "Select a predefined setting, ranging from beginner's play to the grandmaster "
 "setting that will test your patience"
 msgstr ""
 "Sabrýný deneyen acemi ile grandmaster arasýnda ön tanýmlanmýþ bir ayar seç."
 
-#: gtkgame.c:5191 gtkmovefilter.c:359 gtkmovefilter.c:564 gtkprefs.c:236
+#: gtkgame.c:5192 gtkmovefilter.c:359 gtkmovefilter.c:564 gtkprefs.c:236
 msgid "user defined"
 msgstr "kullanýcýnýn tanýmlaýðý"
 
-#: gtkgame.c:5216
+#: gtkgame.c:5217
 msgid "User defined settings"
 msgstr "Kullanýcýnýn tanýmlaýðý ayarlar"
 
-#: gtkgame.c:5229
+#: gtkgame.c:5230
 msgid ""
 "Specify how many rolls GNU Backgammon should lookahead. Each ply costs "
 "approximately a factor of 21 in computational time. Also note that 2-ply is "
 "equivalent to Snowie's 3-ply setting."
 msgstr ""
 
-#: gtkgame.c:5235
+#: gtkgame.c:5236
 msgid "Lookahead"
 msgstr "Önbakýþ"
 
-#: gtkgame.c:5244
+#: gtkgame.c:5245
 msgid "Plies:"
 msgstr "Plies:"
 
-#: gtkgame.c:5258
+#: gtkgame.c:5259
 #, no-c-format
 msgid ""
 "Instead of averaging over all 21 possible dice rolls it is possible to "
@@ -6745,26 +6745,26 @@ msgid ""
 "search without reduction."
 msgstr ""
 
-#: gtkgame.c:5265
+#: gtkgame.c:5266
 msgid "Reduced evaluations"
 msgstr ""
 
-#: gtkgame.c:5305 set.c:115
+#: gtkgame.c:5306 set.c:115
 msgid "Cubeful evaluations"
 msgstr ""
 
-#: gtkgame.c:5310
+#: gtkgame.c:5311
 msgid "Cubeful chequer evaluation"
 msgstr ""
 
-#: gtkgame.c:5317
+#: gtkgame.c:5318
 msgid ""
 "Instruct GNU Backgammon to use cubeful evaluations, i.e., include the value "
 "of cube ownership in the evaluations. It is recommended to enable this "
 "option."
 msgstr ""
 
-#: gtkgame.c:5324
+#: gtkgame.c:5325
 msgid ""
 "GNU Backgammon will always perform cubeful evaluations for cube decisions. "
 "Disabling this option will make GNU Backgammon use cubeless evaluations in "
@@ -6772,7 +6772,7 @@ msgid ""
 "this option"
 msgstr ""
 
-#: gtkgame.c:5337
+#: gtkgame.c:5338
 msgid ""
 "You can use this option to introduce noise or errors in the evaluations. "
 "This is useful for introducing levels below 0-ply. The lower rated bots (e."
@@ -6781,19 +6781,19 @@ msgid ""
 "same position, or it can be random"
 msgstr ""
 
-#: gtkgame.c:5346
+#: gtkgame.c:5347
 msgid "Noise"
 msgstr "Gürültü"
 
-#: gtkgame.c:5358
+#: gtkgame.c:5359
 msgid "Noise:"
 msgstr "Gürültü:"
 
-#: gtkgame.c:5364
+#: gtkgame.c:5365
 msgid "Deterministic noise"
 msgstr "Belirleyiçi gürültü"
 
-#: gtkgame.c:5388
+#: gtkgame.c:5389
 msgid ""
 "GNU Backgammon will evaluate all moves at 0-ply. The move filter controls "
 "how many moves to be evaluted at higher plies. A \"smaller\" filter will be "
@@ -6801,318 +6801,318 @@ msgid ""
 "up their own filters by clicking on the [Modify] button"
 msgstr ""
 
-#: gtkgame.c:5530 gtkgame.c:5639 gtkgame.c:5882 gtkgame.c:5985 gtkgame.c:6306
-#: gtkgame.c:8941
+#: gtkgame.c:5531 gtkgame.c:5640 gtkgame.c:5883 gtkgame.c:5986 gtkgame.c:6307
+#: gtkgame.c:8942
 msgid "Cube decisions"
 msgstr ""
 
-#: gtkgame.c:5536
+#: gtkgame.c:5537
 msgid "GNU Backgammon - Evaluation settings"
 msgstr ""
 
-#: gtkgame.c:5609 gtkgame.c:9254
+#: gtkgame.c:5610 gtkgame.c:9255
 msgid "Name:"
 msgstr "Ýsim:"
 
-#: gtkgame.c:5617
+#: gtkgame.c:5618
 msgid "Human"
 msgstr "Ýnsan"
 
-#: gtkgame.c:5658
+#: gtkgame.c:5659
 msgid "Pubeval"
 msgstr ""
 
-#: gtkgame.c:5664
+#: gtkgame.c:5665
 msgid "External"
 msgstr ""
 
-#: gtkgame.c:5670
+#: gtkgame.c:5671
 msgid "Socket:"
 msgstr ""
 
-#: gtkgame.c:5729
+#: gtkgame.c:5730
 msgid "GNU Backgammon - Players"
 msgstr "GNU Backgammon - Oyuncular"
 
-#: gtkgame.c:5737
+#: gtkgame.c:5738
 msgid "Player 0"
 msgstr "Oyuncu 0"
 
-#: gtkgame.c:5740
+#: gtkgame.c:5741
 msgid "Player 1"
 msgstr "Oyuncu 1"
 
-#: gtkgame.c:5853
+#: gtkgame.c:5854
 msgid "Very good:"
 msgstr "Çok güzel:"
 
-#: gtkgame.c:5853
+#: gtkgame.c:5854
 msgid "Good:"
 msgstr "Ýyi:"
 
-#: gtkgame.c:5854
+#: gtkgame.c:5855
 msgid "Doubtful:"
 msgstr "Þüpheli:"
 
-#: gtkgame.c:5854
+#: gtkgame.c:5855
 msgid "Bad:"
 msgstr "Kötü:"
 
-#: gtkgame.c:5854
+#: gtkgame.c:5855
 msgid "Very bad:"
 msgstr "Çok kötü:"
 
-#: gtkgame.c:5855
+#: gtkgame.c:5856
 msgid "Very lucky:"
 msgstr "Çok þanslý:"
 
-#: gtkgame.c:5855
+#: gtkgame.c:5856
 msgid "Lucky:"
 msgstr "Þanslý:"
 
-#: gtkgame.c:5856
+#: gtkgame.c:5857
 msgid "Unlucky:"
 msgstr "Þanssýz:"
 
-#: gtkgame.c:5856
+#: gtkgame.c:5857
 msgid "Very unlucky:"
 msgstr "Çok þanssýz:"
 
-#: gtkgame.c:5885 gtkgame.c:8944 gtkgame.c:9234
+#: gtkgame.c:5886 gtkgame.c:8945 gtkgame.c:9235
 msgid "Luck"
 msgstr "Þans"
 
-#: gtkgame.c:5890
+#: gtkgame.c:5891
 #, c-format
 msgid "Analyse player %s"
 msgstr "Oyuncu %s analiz ediliyor"
 
-#: gtkgame.c:5908
+#: gtkgame.c:5909
 msgid "Move limit:"
 msgstr "Ýlerleme sýnýrý:"
 
-#: gtkgame.c:5918
+#: gtkgame.c:5919
 msgid "Skill thresholds"
 msgstr "Bilgi eþiði"
 
-#: gtkgame.c:5947
+#: gtkgame.c:5948
 msgid "Luck thresholds"
 msgstr "Þans eþiði"
 
-#: gtkgame.c:6115
+#: gtkgame.c:6116
 msgid "GNU Backgammon - Analysis Settings"
 msgstr "GNU Backgammon - Analiz ayarlarý"
 
-#: gtkgame.c:6443
+#: gtkgame.c:6444
 msgid "First Play Both"
 msgstr ""
 
-#: gtkgame.c:6443 gtkgame.c:6760
+#: gtkgame.c:6444 gtkgame.c:6761
 msgid "First Play (0) "
 msgstr ""
 
-#: gtkgame.c:6447
+#: gtkgame.c:6448
 msgid "Later Play Both"
 msgstr ""
 
-#: gtkgame.c:6447 gtkgame.c:6768
+#: gtkgame.c:6448 gtkgame.c:6769
 msgid "Later Play (0) "
 msgstr ""
 
-#: gtkgame.c:6468 gtkrace.c:545
+#: gtkgame.c:6469 gtkrace.c:545
 msgid "Trials:"
 msgstr ""
 
-#: gtkgame.c:6472
+#: gtkgame.c:6473
 msgid "Truncation"
 msgstr ""
 
-#: gtkgame.c:6480
+#: gtkgame.c:6481
 msgid "Truncate Rollouts"
 msgstr ""
 
-#: gtkgame.c:6490
+#: gtkgame.c:6491
 msgid "Truncate at ply:"
 msgstr ""
 
-#: gtkgame.c:6498
+#: gtkgame.c:6499
 msgid "Evaluation for later plies"
 msgstr ""
 
-#: gtkgame.c:6506
+#: gtkgame.c:6507
 msgid "Enable separate evaluations "
 msgstr ""
 
-#: gtkgame.c:6517
+#: gtkgame.c:6518
 msgid "Change eval after ply:"
 msgstr ""
 
-#: gtkgame.c:6524
+#: gtkgame.c:6525
 msgid "Stop when result is accurate"
 msgstr ""
 
-#: gtkgame.c:6533
+#: gtkgame.c:6534
 msgid "Stop when STDs are small enough "
 msgstr ""
 
-#: gtkgame.c:6549 gtkgame.c:6599
+#: gtkgame.c:6550 gtkgame.c:6600
 msgid "Minimum Trials:"
 msgstr ""
 
-#: gtkgame.c:6561
+#: gtkgame.c:6562
 msgid "Ratio |Standard Deviation/Value|:"
 msgstr ""
 
-#: gtkgame.c:6571
+#: gtkgame.c:6572
 msgid "Stop Rollouts of multiple moves based on j.s.d."
 msgstr ""
 
-#: gtkgame.c:6583
+#: gtkgame.c:6584
 msgid "Stop rollout when one move appears to be best "
 msgstr ""
 
-#: gtkgame.c:6588
+#: gtkgame.c:6589
 msgid "Stop rollout of move when best move j.s.d. appears better "
 msgstr ""
 
-#: gtkgame.c:6610
+#: gtkgame.c:6611
 msgid "No of j.s.d.s from best move"
 msgstr ""
 
-#: gtkgame.c:6628
+#: gtkgame.c:6629
 msgid "Bearoff Truncation"
 msgstr ""
 
-#: gtkgame.c:6635
+#: gtkgame.c:6636
 msgid "Truncate cubeless (and cubeful money) at exact bearoff database"
 msgstr ""
 
-#: gtkgame.c:6642
+#: gtkgame.c:6643
 msgid "Truncate cubeless at one-sided bearoff database"
 msgstr ""
 
-#: gtkgame.c:6650
+#: gtkgame.c:6651
 msgid "Variance reduction"
 msgstr ""
 
-#: gtkgame.c:6656
+#: gtkgame.c:6657
 msgid "Use quasi-random dice"
 msgstr ""
 
-#: gtkgame.c:6662
+#: gtkgame.c:6663
 msgid "Rollout as initial position"
 msgstr ""
 
-#: gtkgame.c:6670
+#: gtkgame.c:6671
 msgid "Seed:"
 msgstr ""
 
-#: gtkgame.c:6677
+#: gtkgame.c:6678
 msgid "Cube decisions use same settings as Chequer play"
 msgstr ""
 
-#: gtkgame.c:6685
+#: gtkgame.c:6686
 msgid "Use same settings for both players"
 msgstr ""
 
-#: gtkgame.c:6693
+#: gtkgame.c:6694
 msgid "Use player0 setting for truncation point"
 msgstr ""
 
-#: gtkgame.c:6746
+#: gtkgame.c:6747
 msgid "GNU Backgammon - Rollouts"
 msgstr ""
 
-#: gtkgame.c:6756
+#: gtkgame.c:6757
 msgid "General Settings"
 msgstr "Genel ayarlar"
 
-#: gtkgame.c:6764
+#: gtkgame.c:6765
 msgid "First Play (1) "
 msgstr ""
 
-#: gtkgame.c:6772
+#: gtkgame.c:6773
 msgid "Later Play (1) "
 msgstr ""
 
-#: gtkgame.c:6776
+#: gtkgame.c:6777
 msgid "Truncation Pt."
 msgstr ""
 
-#: gtkgame.c:7007
+#: gtkgame.c:7008
 msgid "GNU Backgammon - Evaluation"
 msgstr ""
 
-#: gtkgame.c:7085 gtkgame.c:7126 gtkgame.c:7219
+#: gtkgame.c:7086 gtkgame.c:7127 gtkgame.c:7220
 msgid "GNU Backgammon - Hint"
 msgstr "GNU Backgammon - Ýpucu"
 
-#: gtkgame.c:7135
+#: gtkgame.c:7136
 msgid "MWC before resignation"
 msgstr "Pesden önce MWC"
 
-#: gtkgame.c:7135
+#: gtkgame.c:7136
 msgid "Equity before resignation"
 msgstr ""
 
-#: gtkgame.c:7152
+#: gtkgame.c:7153
 msgid "MWC after resignation"
 msgstr "Pesden sonra MWC"
 
-#: gtkgame.c:7152
+#: gtkgame.c:7153
 msgid "Equity after resignation"
 msgstr ""
 
-#: gtkgame.c:7168
+#: gtkgame.c:7169
 msgid "You should accept the resignation!"
 msgstr "Pes ediliþi kabul et!"
 
-#: gtkgame.c:7170
+#: gtkgame.c:7171
 msgid "You should reject the resignation!"
 msgstr ""
 
-#: gtkgame.c:7326 show.c:976
+#: gtkgame.c:7327 show.c:976
 #, c-format
 msgid "Score Sheet - "
 msgstr ""
 
-#: gtkgame.c:7329 show.c:979
+#: gtkgame.c:7330 show.c:979
 #, fuzzy, c-format
 msgid "Match to %d point"
 msgid_plural "Match to %d points"
 msgstr[0] " (%d puanlýk maç%s).\n"
 
-#: gtkgame.c:7334 show.c:983
+#: gtkgame.c:7335 show.c:983
 #, fuzzy
 msgid "Money Session"
 msgstr "Moneygame oturumu"
 
-#: gtkgame.c:7455
+#: gtkgame.c:7456
 msgid "About GNU Backgammon"
 msgstr ""
 
-#: gtkgame.c:7498
+#: gtkgame.c:7499
 msgid "Credits"
 msgstr ""
 
-#: gtkgame.c:7504
+#: gtkgame.c:7505
 msgid "Build Info"
 msgstr ""
 
-#: gtkgame.c:7510
+#: gtkgame.c:7511
 msgid "Copying conditions"
 msgstr ""
 
-#: gtkgame.c:7516 show.c:1085
+#: gtkgame.c:7517 show.c:1085
 msgid "Warranty"
 msgstr ""
 
-#: gtkgame.c:7570
+#: gtkgame.c:7571
 #, fuzzy
 msgid "GNU Backgammon - Build Info"
 msgstr "GNU Backgammon - Ýpucu"
 
-#: gtkgame.c:7602
+#: gtkgame.c:7603
 msgid ""
 "GNU Backgammon is free software, covered by the GNU General Public License "
 "version 2, and you are welcome to change it and/or distribute copies of it "
@@ -7120,16 +7120,16 @@ msgid ""
 "Backgammon."
 msgstr ""
 
-#: gtkgame.c:7669
+#: gtkgame.c:7670
 #, fuzzy
 msgid "GNU Backgammon - Credits"
 msgstr "GNU Backgammon - Ýpucu"
 
-#: gtkgame.c:7715
+#: gtkgame.c:7716
 msgid "Special thanks"
 msgstr ""
 
-#: gtkgame.c:7772
+#: gtkgame.c:7773
 msgid ""
 "The online manual is not available with this installation of GNU "
 "Backgammon.  You can view the manual on the WWW at:\n"
@@ -7137,7 +7137,7 @@ msgid ""
 "    http://www.gnubg.org/win32/gnubg/gnubg.html"
 msgstr ""
 
-#: gtkgame.c:7784
+#: gtkgame.c:7785
 msgid ""
 "The Frequently Asked Questions are not available with this installation of "
 "GNU Backgammon.  You can view them on the WWW at:\n"
@@ -7145,15 +7145,15 @@ msgid ""
 "    http://www.gnubg.org/docs/faq/"
 msgstr ""
 
-#: gtkgame.c:7797
+#: gtkgame.c:7798
 msgid "GNU Backgammon - Manual"
 msgstr ""
 
-#: gtkgame.c:7911
+#: gtkgame.c:7912
 msgid "GNU Backgammon - Frequently Asked Questions"
 msgstr ""
 
-#: gtkgame.c:7974
+#: gtkgame.c:7975
 #, c-format
 msgid ""
 "%s- %s\n"
@@ -7164,316 +7164,316 @@ msgstr ""
 "\n"
 "Kullanýþ: %s%s\n"
 
-#: gtkgame.c:8012
+#: gtkgame.c:8013
 msgid "GNU Backgammon - Help"
 msgstr ""
 
-#: gtkgame.c:8142
+#: gtkgame.c:8143
 #, c-format
 msgid "Generating bearoff database (%p%%)"
 msgstr ""
 
-#: gtkgame.c:8462
+#: gtkgame.c:8463
 msgid "Chequer Play Statistics:"
 msgstr "Checker oyun istatistiði:"
 
-#: gtkgame.c:8463
+#: gtkgame.c:8464
 msgid "Cube Statistics:"
 msgstr ""
 
-#: gtkgame.c:8464
+#: gtkgame.c:8465
 msgid "Luck Statistics:"
 msgstr ""
 
-#: gtkgame.c:8465
+#: gtkgame.c:8466
 msgid "Overall Statistics:"
 msgstr ""
 
-#: gtkgame.c:8630
+#: gtkgame.c:8631
 msgid "Statistics for game "
 msgstr ""
 
-#: gtkgame.c:8707
+#: gtkgame.c:8708
 msgid "Show all games"
 msgstr ""
 
-#: gtkgame.c:8711
+#: gtkgame.c:8712
 msgid "Move to first game"
 msgstr ""
 
-#: gtkgame.c:8723
+#: gtkgame.c:8724
 msgid "Move ahead to last game"
 msgstr ""
 
-#: gtkgame.c:8731
+#: gtkgame.c:8732
 #, c-format
 msgid "All games: %s %d, %s %d"
 msgstr ""
 
-#: gtkgame.c:8734
+#: gtkgame.c:8735
 #, c-format
 msgid "All games: %s, %s"
 msgstr ""
 
-#: gtkgame.c:8935 gtkgame.c:9232
+#: gtkgame.c:8936 gtkgame.c:9233
 msgid "Overall"
 msgstr ""
 
-#: gtkgame.c:8975
+#: gtkgame.c:8976
 msgid "Graph"
 msgstr ""
 
-#: gtkgame.c:8976
+#: gtkgame.c:8977
 msgid ""
 "This graph shows the total error rates per game for each player. The games "
 "are along the bottom and the error rates up the side. Chequer error in "
 "green, cube error in blue."
 msgstr ""
 
-#: gtkgame.c:8981
+#: gtkgame.c:8982
 msgid "Split statistics into panels"
 msgstr ""
 
-#: gtkgame.c:9204
+#: gtkgame.c:9205
 msgid "GNU Backgammon - Player records"
 msgstr ""
 
-#: gtkgame.c:9224
+#: gtkgame.c:9225
 msgid "Name"
 msgstr ""
 
-#: gtkgame.c:9227
+#: gtkgame.c:9228
 msgid "Chequer"
 msgstr "Checker"
 
-#: gtkgame.c:9229 gtkoptions.c:352 gtkprefs.c:2914 gtkprefs.c:2931
+#: gtkgame.c:9230 gtkoptions.c:352 gtkprefs.c:2917 gtkprefs.c:2934
 #: gtktheory.c:780 progress.c:161 progress.c:250
 msgid "Cube"
 msgstr ""
 
-#: gtkgame.c:9236
+#: gtkgame.c:9237
 msgid "Games"
 msgstr ""
 
-#: gtkgame.c:9257
+#: gtkgame.c:9258
 msgid "Games:"
 msgstr ""
 
-#: gtkgame.c:9260
+#: gtkgame.c:9261
 msgid "Chequer:"
 msgstr "Checker:"
 
-#: gtkgame.c:9263
+#: gtkgame.c:9264
 msgid "Cube:"
 msgstr ""
 
-#: gtkgame.c:9266
+#: gtkgame.c:9267
 msgid "Overall:"
 msgstr ""
 
-#: gtkgame.c:9269
+#: gtkgame.c:9270
 msgid "Luck:"
 msgstr ""
 
-#: gtkgame.c:9272
+#: gtkgame.c:9273
 msgid "20"
 msgstr ""
 
-#: gtkgame.c:9275
+#: gtkgame.c:9276
 msgid "100"
 msgstr ""
 
-#: gtkgame.c:9278
+#: gtkgame.c:9279
 msgid "500"
 msgstr ""
 
-#: gtkgame.c:9281 progress.c:215 progress.c:305
+#: gtkgame.c:9282 progress.c:215 progress.c:305
 #, c-format
 msgid "Total"
 msgstr ""
 
-#: gtkgame.c:9290
+#: gtkgame.c:9291
 msgid "Erase"
 msgstr ""
 
-#: gtkgame.c:9295
+#: gtkgame.c:9296
 msgid "Erase All"
 msgstr ""
 
-#: gtkgame.c:9415 record.c:533 record.c:574
+#: gtkgame.c:9416 record.c:533 record.c:574
 msgid "No player records found."
 msgstr ""
 
-#: gtkgame.c:9469
+#: gtkgame.c:9470
 msgid "GNU Backgammon - Match information"
 msgstr ""
 
-#: gtkgame.c:9488 gtkgame.c:9491
+#: gtkgame.c:9489 gtkgame.c:9492
 #, c-format
 msgid "%s's rating:"
 msgstr ""
 
-#: gtkgame.c:9494
+#: gtkgame.c:9495
 msgid "Date:"
 msgstr ""
 
-#: gtkgame.c:9495
+#: gtkgame.c:9496
 msgid "Event:"
 msgstr ""
 
-#: gtkgame.c:9496
+#: gtkgame.c:9497
 msgid "Round:"
 msgstr ""
 
-#: gtkgame.c:9497
+#: gtkgame.c:9498
 msgid "Place:"
 msgstr ""
 
-#: gtkgame.c:9498
+#: gtkgame.c:9499
 msgid "Annotator:"
 msgstr ""
 
-#: gtkgame.c:9501
+#: gtkgame.c:9502
 msgid "Comments:"
 msgstr ""
 
-#: gtkgame.c:9648
+#: gtkgame.c:9649
 msgid "GNU Backgammon - Speed estimate"
 msgstr ""
 
-#: gtkgame.c:9658
+#: gtkgame.c:9659
 msgid "Speed recorded:"
 msgstr ""
 
-#: gtkgame.c:9671 gtkgame.c:9718
+#: gtkgame.c:9672 gtkgame.c:9719
 msgid "static evaluations/second"
 msgstr ""
 
-#: gtkgame.c:9675
+#: gtkgame.c:9676
 msgid "Calibrate"
 msgstr ""
 
-#: gtkgame.c:9708
+#: gtkgame.c:9709
 msgid "GNU Backgammon - Calibration"
 msgstr ""
 
-#: gtkgame.c:9714
+#: gtkgame.c:9715
 msgid "Calibrating:"
 msgstr ""
 
-#: gtkgame.c:9716
+#: gtkgame.c:9717
 msgid "       (n/a)       "
 msgstr ""
 
-#: gtkgame.c:9772
+#: gtkgame.c:9773
 msgid "Change Disk"
 msgstr ""
 
-#: gtkgame.c:9839
+#: gtkgame.c:9840
 msgid "Resign normal"
 msgstr "Normal pes et"
 
-#: gtkgame.c:9840
+#: gtkgame.c:9841
 msgid "Resign gammon"
 msgstr "Bir oyun pes et"
 
-#: gtkgame.c:9841
+#: gtkgame.c:9842
 msgid "Resign backgammon"
 msgstr "Pes et"
 
-#: gtkgame.c:10042
+#: gtkgame.c:10043
 msgid "Don't show this again"
 msgstr "Bir daha gösterme bunu"
 
-#: gtkgame.c:10043
+#: gtkgame.c:10044
 msgid "If set, this message won't appear again"
 msgstr ""
 
-#: gtkgame.c:10160 gtkgame.c:10168 gtkgame.c:10177
+#: gtkgame.c:10161 gtkgame.c:10169 gtkgame.c:10178
 msgid "/Settings/Time Control/"
 msgstr "/Ayarlar/Zaman denetimi/"
 
-#: gtkgame.c:10195
+#: gtkgame.c:10196
 msgid "Not implemented - work in progress"
 msgstr "Henüz gerçekleþtirilmemiþtir - çalýþýlmakta"
 
-#: gtkgame.c:10202
+#: gtkgame.c:10203
 msgid "Time control name (tcname):"
 msgstr "Zaman denetimi ismi (tcname):"
 
-#: gtkgame.c:10209
+#: gtkgame.c:10210
 msgid "Plain"
 msgstr "Basit"
 
-#: gtkgame.c:10210
+#: gtkgame.c:10211
 msgid "Bronstein"
 msgstr ""
 
-#: gtkgame.c:10211
+#: gtkgame.c:10212
 msgid "Fischer"
 msgstr "Fischer"
 
-#: gtkgame.c:10212
+#: gtkgame.c:10213
 msgid "Hourglass"
 msgstr "Kum saati"
 
-#: gtkgame.c:10220
+#: gtkgame.c:10221
 msgid "Time control type (tctype):"
 msgstr "Zaman denetleme tipi (tctype):"
 
-#: gtkgame.c:10226
+#: gtkgame.c:10227
 msgid "1 point"
 msgstr "1 puan"
 
-#: gtkgame.c:10227
+#: gtkgame.c:10228
 msgid "2 points"
 msgstr "2 puan"
 
-#: gtkgame.c:10228
+#: gtkgame.c:10229
 msgid "3 points"
 msgstr "3 puan"
 
-#: gtkgame.c:10229
+#: gtkgame.c:10230
 msgid "4 points"
 msgstr "4 puan"
 
-#: gtkgame.c:10230
+#: gtkgame.c:10231
 msgid "5 points"
 msgstr "5 puan"
 
-#: gtkgame.c:10238
+#: gtkgame.c:10239
 msgid "Penalty type (tctype):"
 msgstr "Penaltý tipi (tctype):"
 
-#: gtkgame.c:10244 gtkgame.c:10251
+#: gtkgame.c:10245 gtkgame.c:10252
 msgid "Time to add (tctime):"
 msgstr ""
 
-#: gtkgame.c:10258
+#: gtkgame.c:10259
 msgid "Time to add / point (tcpoint):"
 msgstr ""
 
-#: gtkgame.c:10265
+#: gtkgame.c:10266
 msgid "Time to add / move (tcmove):"
 msgstr ""
 
-#: gtkgame.c:10272
+#: gtkgame.c:10273
 msgid "Scale old time by (tcmult):"
 msgstr ""
 
-#: gtkgame.c:10279
+#: gtkgame.c:10280
 msgid "Next time control (tcnext):"
 msgstr ""
 
-#: gtkgame.c:10286
+#: gtkgame.c:10287
 msgid "Opponent's next time control (tcnext):"
 msgstr ""
 
-#: gtkgame.c:10303
+#: gtkgame.c:10304
 msgid "GNU Backgammon - Define Time Control"
 msgstr ""
 
-#: gtkgamelist.c:245 html.c:2515
+#: gtkgamelist.c:245 html.c:2517
 msgid "#"
 msgstr "#"
 
@@ -8621,7 +8621,7 @@ msgstr "Þu an: "
 msgid "Set as default"
 msgstr ""
 
-#: gtkprefs.c:205 gtkprefs.c:3010
+#: gtkprefs.c:205 gtkprefs.c:3013
 msgid "GNU Backgammon - Appearance"
 msgstr "GNU Backgammon - Görünüþ"
 
@@ -8803,7 +8803,7 @@ msgstr "Checker bicim:"
 msgid "Flat"
 msgstr "Düz"
 
-#: gtkprefs.c:727 html.c:3164
+#: gtkprefs.c:727 html.c:3166
 msgid "Round"
 msgstr "Round"
 
@@ -9205,89 +9205,91 @@ msgstr ""
 
 #: gtkprefs.c:2487
 #, c-format
-msgid "%d designs added.\n"
-msgstr ""
+msgid "%d design added.\n"
+msgid_plural "%d designs added.\n"
+msgstr[0] ""
+msgstr[1] ""
 
-#: gtkprefs.c:2501
+#: gtkprefs.c:2504
 #, c-format
 msgid "Permently remove design %s?"
 msgstr "%s biçimi daima silinsin mi?"
 
-#: gtkprefs.c:2522
+#: gtkprefs.c:2525
 #, fuzzy, c-format
 msgid "Permanently overwrite 3d settings for design %s?"
 msgstr "%s biçimi daima silinsin mi?"
 
-#: gtkprefs.c:2524
+#: gtkprefs.c:2527
 #, fuzzy, c-format
 msgid "Permanently overwrite 2d settings for design %s?"
 msgstr "%s biçimi daima silinsin mi?"
 
-#: gtkprefs.c:2526
+#: gtkprefs.c:2529
 #, fuzzy, c-format
 msgid "Permanently overwrite settings for design %s?"
 msgstr "%s biçimi daima silinsin mi?"
 
-#: gtkprefs.c:2598
+#: gtkprefs.c:2601
 msgid "Select new design and lose current changes?"
 msgstr ""
 
-#: gtkprefs.c:2664
+#: gtkprefs.c:2667
 msgid "Add current design"
 msgstr "Mevcut biçimi ekle"
 
-#: gtkprefs.c:2672
+#: gtkprefs.c:2675
 msgid "Remove design"
 msgstr "Biçimi sil"
 
-#: gtkprefs.c:2682
+#: gtkprefs.c:2685
 #, fuzzy
 msgid "Update design"
 msgstr "Biçimi sil"
 
-#: gtkprefs.c:2695
+#: gtkprefs.c:2698
 #, fuzzy
 msgid "Export design"
 msgstr "Dýþa aktar"
 
-#: gtkprefs.c:2703
+#: gtkprefs.c:2706
 #, fuzzy
 msgid "Import design"
 msgstr "Biçimi sil"
 
-#: gtkprefs.c:2884
+#: gtkprefs.c:2887
 msgid "Lighting"
 msgstr "Iþýk"
 
-#: gtkprefs.c:2897
+#: gtkprefs.c:2900
 msgid "Designs"
 msgstr "Biçimler"
 
-#: gtkprefs.c:2905
+#: gtkprefs.c:2908
 msgid "Chequers"
 msgstr "Checkerler"
 
-#: gtkprefs.c:2908 gtkprefs.c:2925
+#: gtkprefs.c:2911 gtkprefs.c:2928
 msgid "Border"
 msgstr "Çerceve"
 
-#: gtkprefs.c:2911 gtkprefs.c:2927
+#: gtkprefs.c:2914 gtkprefs.c:2930
 msgid "Dice (0)"
 msgstr "Zar (0)"
 
-#: gtkprefs.c:2913 gtkprefs.c:2929
+#: gtkprefs.c:2916 gtkprefs.c:2932
 msgid "Dice (1)"
 msgstr "Zar (1)"
 
-#: gtkprefs.c:2920
+#: gtkprefs.c:2923
 msgid "Chequers (0)"
 msgstr "Checkerler (0)"
 
-#: gtkprefs.c:2922
+#: gtkprefs.c:2925
 msgid "Chequers (1)"
 msgstr "Checkerler (1)"
 
-#: gtkprefs.c:3037
+#: gtkprefs.c:3040
 msgid "General"
 msgstr "Genel"
 
@@ -9802,256 +9804,257 @@ msgid "Move number %d:"
 msgstr ""
 
 #: html.c:1687
-#, c-format
-msgid " %s resigns %d points"
-msgstr ""
+#, fuzzy, c-format
+msgid " %s resigns %d point"
+msgid_plural " %s resigns %d points"
+msgstr[0] "%s %s ve %d puan kazanýyor.\n"
 
-#: html.c:1697
+#: html.c:1699
 #, c-format
 msgid " %s to play %d%d"
 msgstr ""
 
-#: html.c:1707
+#: html.c:1709
 #, c-format
 msgid " %s doubles to %d"
 msgstr ""
 
-#: html.c:1717
+#: html.c:1719
 #, c-format
 msgid " %s on roll, cube decision?"
 msgstr ""
 
-#: html.c:1751 html.c:3779 show.c:899 text.c:230
+#: html.c:1753 html.c:3781 show.c:899 text.c:230
 #, fuzzy, c-format
 msgid "The score (after %d game) is: %s %d, %s %d"
 msgid_plural "The score (after %d games) is: %s %d, %s %d"
 msgstr[0] "%d oyun sonra puan sayýsý: %s %d, %s %d"
 
-#: html.c:1760 html.c:3788 text.c:239
+#: html.c:1762 html.c:3790
 #, fuzzy, c-format
 msgid " (match to %d point%s)"
 msgid_plural " (match to %d points%s)"
 msgstr[0] " (%d puanlýk maç%s).\n"
 
-#: html.c:1765 html.c:3793 show.c:911 text.c:243
+#: html.c:1767 html.c:3795 show.c:911 text.c:243
 msgid ", Crawford game"
 msgstr ", Crawford oyunu"
 
-#: html.c:1766 html.c:3794 show.c:912 text.c:244
+#: html.c:1768 html.c:3796 show.c:912 text.c:245
 msgid ", post-Crawford play"
 msgstr ""
 
-#: html.c:1783
+#: html.c:1785
 msgid "match play"
 msgstr ""
 
-#: html.c:1783
+#: html.c:1785
 msgid "money game"
 msgstr ""
 
-#: html.c:1786
+#: html.c:1788
 #, c-format
 msgid "%s (analysed by GNU Backgammon %s)"
 msgstr ""
 
-#: html.c:1807
+#: html.c:1809
 #, c-format
 msgid "Game number %d"
 msgstr ""
 
-#: html.c:1887
+#: html.c:1889
 #, c-format
 msgid ""
 "Output generated %s by <a href=\"http://www.gnu.org/software/gnubg/\">GNU "
 "Backgammon %s</a>"
 msgstr ""
 
-#: html.c:1895
+#: html.c:1897
 #, c-format
 msgid "(HTML Export version %d.%d)"
 msgstr "(HTML dýþa aktar sürüm %d.%d)"
 
-#: html.c:1913
+#: html.c:1915
 msgid "Valid XHTML 1.0!"
 msgstr "Valid XHTML 1.0!"
 
-#: html.c:1914
+#: html.c:1916
 msgid "Valid CSS!"
 msgstr "Valid CSS!"
 
-#: html.c:1951
+#: html.c:1953
 #, c-format
 msgid ""
 "<!-- Output generated %s by GNU Backgammon %s (http://www.gnu.org/software/"
 "gnubg/) "
 msgstr ""
 
-#: html.c:1958
+#: html.c:1960
 #, c-format
 msgid "(HTML Export version %d.%d) -->"
 msgstr "(HTML dýþa aktar sürüm %d.%d) -->"
 
-#: html.c:2291
+#: html.c:2293
 msgid "Rollout details"
 msgstr ""
 
-#: html.c:2471 text.c:456
+#: html.c:2473 text.c:458
 #, c-format
 msgid "Alert: %s move"
 msgstr "Dikkat: %s hamle"
 
-#: html.c:2494 text.c:477
+#: html.c:2496 text.c:479
 #, c-format
 msgid "Alert: %s roll!"
 msgstr ""
 
-#: html.c:2518
+#: html.c:2520
 msgid "Ply"
 msgstr ""
 
-#: html.c:2762 text.c:530
+#: html.c:2764 text.c:532
 msgid "Cannot move"
 msgstr ""
 
-#: html.c:2811
+#: html.c:2813
 #, c-format
 msgid "%s%s moves %s"
 msgstr ""
 
-#: html.c:2816
+#: html.c:2818
 #, c-format
 msgid "%s%s cannot move"
 msgstr "%s%s hamle yapamýyor"
 
-#: html.c:2850 text.c:596
+#: html.c:2852 text.c:598
 msgid "accepts"
 msgstr ""
 
-#: html.c:2850 text.c:596
+#: html.c:2852 text.c:598
 msgid "rejects"
 msgstr ""
 
-#: html.c:2891
+#: html.c:2893
 #, c-format
 msgid "Game statistics for game %d"
 msgstr ""
 
-#: html.c:2899
+#: html.c:2901
 msgid "Match statistics"
 msgstr ""
 
-#: html.c:2903
+#: html.c:2905
 msgid "Session statistics"
 msgstr ""
 
-#: html.c:2922
+#: html.c:2924
 msgid "Checker play statistics"
 msgstr ""
 
-#: html.c:3063
+#: html.c:3065
 msgid "Annotation"
 msgstr ""
 
-#: html.c:3144
+#: html.c:3146
 #, c-format
 msgid "%s's rating"
 msgstr ""
 
-#: html.c:3157 postscript.c:911 text.c:712
+#: html.c:3159 postscript.c:911 text.c:714
 msgid "%B %d, %Y"
 msgstr ""
 
-#: html.c:3158
+#: html.c:3160
 msgid "Date"
 msgstr ""
 
-#: html.c:3163
+#: html.c:3165
 msgid "Event"
 msgstr ""
 
-#: html.c:3165 relational.c:292
+#: html.c:3167 relational.c:292
 msgid "Place"
 msgstr ""
 
-#: html.c:3166
+#: html.c:3168
 msgid "Annotator"
 msgstr ""
 
-#: html.c:3167
+#: html.c:3169
 msgid "Comment"
 msgstr ""
 
-#: html.c:3204
+#: html.c:3206
 msgid "Recorded player statistics"
 msgstr ""
 
-#: html.c:3215
+#: html.c:3217
 msgid "Chequer (Long-term error rate)"
 msgstr "Checker (Uzun vadeli hata raytingi)"
 
-#: html.c:3220
+#: html.c:3222
 msgid "Cube (Long-term error rate)"
 msgstr ""
 
-#: html.c:3225
+#: html.c:3227
 msgid "Chequer (Short-term error rate)"
 msgstr "Checker (Kýsa vadeli hata raytingi)"
 
-#: html.c:3230
+#: html.c:3232
 msgid "Cube (Short-term error rate)"
 msgstr ""
 
-#: html.c:3235
+#: html.c:3237
 msgid "Chequer (total)"
 msgstr "Checker (tümü)"
 
-#: html.c:3240
+#: html.c:3242
 msgid "Cube (total)"
 msgstr ""
 
-#: html.c:3245
+#: html.c:3247
 msgid "Luck (total)"
 msgstr ""
 
-#: html.c:3250
+#: html.c:3252
 msgid "Games (total)"
 msgstr ""
 
-#: html.c:3374
+#: html.c:3376
 #, c-format
 msgid "<p %s>%s wins %d point</p>\n"
 msgid_plural "<p %s>%s wins %d points</p>\n"
 msgstr[0] ""
 
-#: html.c:3481
+#: html.c:3483
 #, c-format
 msgid "gnubg.css is not written since it already exist in \"%s\"\n"
 msgstr ""
 
-#: html.c:3510
+#: html.c:3512
 #, fuzzy
 msgid "You must specify a file to export to (see `help export game html')."
 msgstr ""
 "Okunulmasý istediðin bir dosya göstermelisin (bak: `help load commands')."
 
-#: html.c:3607
+#: html.c:3609
 msgid "You must specify a file to export to (see `help export match html')."
 msgstr ""
 
-#: html.c:3705 html.c:3848
+#: html.c:3707 html.c:3850
 msgid "You must specify a file to export to (see `help export position html')."
 msgstr ""
 
-#: htmlimages.c:666
+#: htmlimages.c:670
 #, c-format
 msgid "You must specify a file to export to (see `%s')\n"
 msgstr ""
 
-#: htmlimages.c:777
+#: htmlimages.c:781
 msgid "Generating image:"
 msgstr ""
 
-#: htmlimages.c:788
+#: htmlimages.c:792
 msgid ""
 "This installation of GNU Backgammon was compiled without\n"
 "support for writing HTML images."
@@ -11181,7 +11184,7 @@ msgstr ""
 msgid "All player records erased."
 msgstr ""
 
-#: record.c:550 text.c:765
+#: record.c:550 text.c:767
 msgid ""
 "                                Short-term  Long-term   Total        Total\n"
 "                                error rate  error rate  error rate   luck\n"
@@ -13959,22 +13962,22 @@ msgstr ""
 msgid ", %04d-%02d-%02d\n"
 msgstr ""
 
-#: show.c:793 text.c:721
+#: show.c:793 text.c:723
 #, c-format
 msgid "Event: %s\n"
 msgstr ""
 
-#: show.c:796 text.c:725
+#: show.c:796 text.c:727
 #, c-format
 msgid "Round: %s\n"
 msgstr ""
 
-#: show.c:799 text.c:729
+#: show.c:799 text.c:731
 #, c-format
 msgid "Place: %s\n"
 msgstr ""
 
-#: show.c:802 text.c:733
+#: show.c:802 text.c:735
 #, c-format
 msgid "Annotator: %s\n"
 msgstr ""
@@ -14780,110 +14783,111 @@ msgid ""
 "\n"
 msgstr ""
 
-#: text.c:240
+#: text.c:238
 #, fuzzy, c-format
-msgid " (match to %d points%s)"
-msgstr " (%d puanlýk maç%s).\n"
+msgid " (match to %d point)"
+msgid_plural " (match to %d points)"
+msgstr[0] " (%d puanlýk maç%s).\n"
 
-#: text.c:274
+#: text.c:276
 #, c-format
 msgid "Output generated %sby GNU Backgammon %s "
 msgstr ""
 
-#: text.c:279
+#: text.c:281
 #, c-format
 msgid ""
 "(Text Export version %d.%d)\n"
 "\n"
 msgstr ""
 
-#: text.c:566
+#: text.c:568
 #, c-format
 msgid "* %s moves %s"
 msgstr "* %s %s oynuyor"
 
-#: text.c:571
+#: text.c:573
 #, c-format
 msgid "* %s cannot move"
 msgstr "* %s hamle yapamýyor"
 
-#: text.c:617
+#: text.c:619
 #, c-format
 msgid ""
 "Game statistics for game %d\n"
 "\n"
 msgstr ""
 
-#: text.c:622
+#: text.c:624
 #, c-format
 msgid ""
 "Match statistics\n"
 "\n"
 msgstr ""
 
-#: text.c:624
+#: text.c:626
 #, c-format
 msgid ""
 "Session statistics\n"
 "\n"
 msgstr ""
 
-#: text.c:678
+#: text.c:680
 msgid "Annotation:\n"
 msgstr ""
 
-#: text.c:694
+#: text.c:696
 msgid ""
 "Match Information:\n"
 "\n"
 msgstr ""
 
-#: text.c:700
+#: text.c:702
 #, c-format
 msgid "%s's rating: %s\n"
 msgstr ""
 
-#: text.c:713
+#: text.c:715
 #, c-format
 msgid "Date: %s\n"
 msgstr ""
 
-#: text.c:736
+#: text.c:738
 #, c-format
 msgid "Comments: %s\n"
 msgstr ""
 
-#: text.c:763
+#: text.c:765
 msgid ""
 "Statistics from player records:\n"
 "\n"
 msgstr ""
 
-#: text.c:896
+#: text.c:898
 #, c-format
 msgid ""
 "%s wins %d points\n"
 "\n"
 msgstr ""
 
-#: text.c:901
+#: text.c:903
 #, c-format
 msgid ""
 "%s wins %d point\n"
 "\n"
 msgstr ""
 
-#: text.c:933
+#: text.c:935
 #, fuzzy
 msgid "You must specify a file to export to (see `help export game text')."
 msgstr ""
 "Okunulmasý istediðin bir dosya göstermelisin (bak: `help load commands')."
 
-#: text.c:970
+#: text.c:972
 msgid "You must specify a file to export to (see `help export match text')."
 msgstr ""
 
-#: text.c:1029
+#: text.c:1031
 msgid "You must specify a file to export to (see `help export position text')."
 msgstr ""
 
@@ -15019,6 +15023,10 @@ msgstr "3boyut renk secimleri"
 #: board3d/inc3d.h:70
 msgid "No texture"
 msgstr ""
+
+#, fuzzy
+#~ msgid " (match to %d points%s)"
+#~ msgstr " (%d puanlýk maç%s).\n"
 
 #~ msgid "%s wins a %s and %d points.\n"
 #~ msgstr "%s %s ve %d puan kazanýyor.\n"
