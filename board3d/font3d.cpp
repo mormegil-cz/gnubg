@@ -111,7 +111,7 @@ private:
 extern "C" void BuildFont(BoardData* bd)
 {
 	bd->numberFont = new font(24, FONT_SIZE, auchLuxiSR, cbLuxiSR);
-	bd->cubeFont = new font(48, CUBE_FONT_SIZE, auchLuxiRB, cbLuxiRB);
+	bd->cubeFont = new font(44, CUBE_FONT_SIZE, auchLuxiRB, cbLuxiRB);
 }
 
 extern "C" void KillFont(BoardData* bd)

@@ -1,3 +1,7 @@
+Tue June 1 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c: Smaller doubling cube and flag shadow fix
+
 Mon May 24 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* drawboard3d.c, misc3d.c: Improve dice dot drawing

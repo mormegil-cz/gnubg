@@ -1002,24 +1002,24 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 {	/* Draw a box with normals and optional textures */
 	float repX, repY;
 	float normX, normY, normZ;
+	float w2 = w / 2.0f, h2 = h / 2.0f, d2 = d / 2.0f;
 
 	glPushMatrix();
-
-	glTranslatef(x + w / 2, y + h / 2, z + d / 2);
-
-	glScalef(w / 2.0f, h / 2.0f, d / 2.0f);
+	glTranslatef(x + w2, y + h2, z + d2);
+	glScalef(w2, h2, d2);
 
 	/* Scale normals */
-	normX = (w / 2);
-	normY = (h / 2);
-	normZ = (d / 2);
+	normX = w2;
+	normY = h2;
+	normZ = d2;
+
+	glBegin(GL_QUADS);
 
 	if (texture)
 	{
 		repX = (w * TEXTURE_SCALE) / texture->width;
 		repY = (h * TEXTURE_SCALE) / texture->height;
 	 
-	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, normZ);
 		if (type & BOX_SPLITTOP)
@@ -1084,11 +1084,9 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 			glTexCoord2f(repX, repY); glVertex3f(-1, 1, 1);
 			glTexCoord2f(0, repY); glVertex3f(-1, 1, -1);
 		}
-	glEnd();
 	}
 	else
 	{	/* no texture co-ords */
-	glBegin(GL_QUADS);
 		/* Front Face */
 		glNormal3f(0, 0, normZ);
 		if (type & BOX_SPLITTOP)
@@ -1154,8 +1152,8 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 			glVertex3f(-1, 1, 1);
 			glVertex3f(-1, 1, -1);
 		}
-	glEnd();
 	}
+	glEnd();
 	glPopMatrix();
 }
 
