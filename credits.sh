@@ -29,6 +29,7 @@ Corrin Lakeland
 Tim Laursen
 Kevin Maguire
 Dave Neary
+Thomas Patrick
 Zvezdan Petkovic
 Petri Pitkänen
 Sam Pottle
