@@ -168,7 +168,7 @@ typedef struct _redevaldata {
 
 extern int 
 EvalInitialise( char *szWeights, char *szWeightsBinary,
-                char *szDatabase, char *szDir );
+                char *szDatabase, char *szDir, int fProgress );
 
 extern int 
 EvalSave( char *szWeights );

@@ -510,7 +510,7 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
     }
 }
 
-static unsigned char *HeuristicDatabase( void ) {
+static unsigned char *HeuristicDatabase( int fProgress ) {
 
     unsigned char *p = malloc( 54264 * 32 * 2 );
     int i;
@@ -524,7 +524,7 @@ static unsigned char *HeuristicDatabase( void ) {
 
     for( i = 1; i < 54264; i++ ) {
 	GenerateBearoff( p, i );
-	if( !( i % 1000 ) ) {
+	if( fProgress && !( i % 1000 ) ) {
 	    /* FIXME this progress indicator is not very good for GTK
 	       (especially if fTTY is FALSE)... what else could be done? */
 	    putchar( "\\|/-"[ ( i / 1000 ) % 4 ] );
@@ -537,7 +537,7 @@ static unsigned char *HeuristicDatabase( void ) {
 }
 
 extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
-			   char *szDatabase, char *szDir ) {
+			   char *szDatabase, char *szDir, int fProgress ) {
     FILE *pfWeights;
     int h, fReadWeights = FALSE;
     char szFileVersion[ 16 ];
@@ -582,7 +582,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	if( pBearoff1 )
 	    pBearoff2 = pBearoff1 + 54264 * 32 * 2;
 	else {
-	    pBearoff1 = HeuristicDatabase();
+	    pBearoff1 = HeuristicDatabase( fProgress );
 	    pBearoff2 = NULL;
 	}
     }
@@ -3815,8 +3815,6 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
       for( i = 0; i < ml.cMaxMoves * 2; i++ )
 	  anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
   
-  PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
-
   return 0;
 }
 
@@ -4690,9 +4688,7 @@ extern float
 Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   if ( pci->fCubeOwner == -1 ) {
-
     return Cl2CfMatchCentered ( arOutput, pci );
-
   } 
   else if ( pci->fCubeOwner == pci->fMove ) {
 
