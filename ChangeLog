@@ -1,3 +1,7 @@
+Tue Jul 15 17:07:45 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gnubgmodule.c gnubgmodule.h: if-guard python extensions
+
 Tue Jul 15 00:11:02 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* rollout.c (GeneralCubeDecisionR): fix bug leading to wrong

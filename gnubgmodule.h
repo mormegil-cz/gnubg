@@ -22,6 +22,8 @@
 #ifndef _PYTHONMODULE_H_
 #define _PYTHONMODULE_H_
 
+#if USE_PYTHON
+
 #include <Python.h>
 extern PyMethodDef gnubgMethods[];
 
@@ -30,6 +32,8 @@ PythonInitialise( const char *arg0, const char *szDir );
 
 extern void
 PythonShutdown();
+
+#endif /* USE_PYTHON */
 
 #endif /* _PYTHONMODULE_H_ */
 

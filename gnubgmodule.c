@@ -1,4 +1,3 @@
-
 /*
  * gnubgmodule.c
  *
@@ -20,11 +19,14 @@
  * $Id$
  */
 
+#if USE_PYTHON
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include <Python.h>
+
 #include <signal.h>
 #include <assert.h>
 #include <string.h>
@@ -910,3 +912,5 @@ PythonShutdown( void ) {
   Py_Finalize();
 
 }
+
+#endif /* USE_PYTHON */
