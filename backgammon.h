@@ -577,6 +577,9 @@ extern char* GetLuckAnalysis( matchstate* pms, float rLuck );
 extern moverecord *
 getCurrentMoveRecord ( int* pfHistory );
 
+extern int
+getFinalScore( int* anScore );
+
 extern void
 UpdateStoredMoves ( const movelist* pml, const matchstate* pms );
 

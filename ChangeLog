@@ -1,3 +1,10 @@
+Fri Sep 05 22:57:49 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* backgammon.h, play.c (getFinalScore): new function
+	* gtkgame.c (AddNavigation): give final score or none for overall stats
+	(reported by Martin Janke)
+	* gtkgame.c (GTKDumpStatcontext): #ifdef unused variable
+
 Fri Sep  5 22:46:12 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* matchequity.c (InitMatchEquity):  extend the post Crawford match
