@@ -1,3 +1,11 @@
+Wed May 21 20:35:56 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ParseSnowieTxt): strsep is not ANSI. Use new
+	NextTokenGeneral.	
+
+	* gnubg.c (NextTokenGeneral): new almost, but not quite general
+	tokeniser.
+
 Mon May 19 22:20:43 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (FindnSaveBestMoves): bugfix: missing update of nMaxPly.

@@ -2633,7 +2633,7 @@ ParseSnowieTxt( char *sz,
 
   c = 0;
   i = 0;
-  pc = strsep( &sz, ";" );
+  pc = NextTokenGeneral( &sz, ";" );
   while ( pc ) {
 
     switch( c ) {
@@ -2714,9 +2714,8 @@ ParseSnowieTxt( char *sz,
       break;
     }
 
-    pc = 
-    pc = strsep( &sz, ";" );
-
+    pc = NextTokenGeneral( &sz, ";" );
+  
     ++c;
     if ( c == 40 )
       break;

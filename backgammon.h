@@ -365,6 +365,7 @@ extern int GetInputYN( char *szPrompt );
 extern void HandleCommand( char *sz, command *ac );
 extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
 extern char *NextToken( char **ppch );
+extern char *NextTokenGeneral( char **ppch, const char *szTokens );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );

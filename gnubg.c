@@ -1811,7 +1811,9 @@ int HighlightIntensity = 0;
 
 char *szHomeDirectory, *szDataDirectory, *szTerminalCharset;
 
-extern char *NextToken( char **ppch ) {
+extern char *
+NextTokenGeneral( char **ppch, const char *szTokens ) {
+
 
     char *pch, *pchSave, chQuote = 0;
     int fEnd = FALSE;
@@ -1835,20 +1837,19 @@ extern char *NextToken( char **ppch ) {
 	return NULL;
 
     while( !fEnd ) {
+
+      if ( **ppch && strchr( szTokens, **ppch ) ) {
+        /* this character ends token */
+        if( !chQuote ) {
+          fEnd = TRUE;
+          (*ppch)++; /* step over token */
+        }
+        else
+          *pchSave++ = **ppch;
+        break;
+      }
+      else {
 	switch( **ppch ) {
-	case ' ':
-	case '\t':
-	case '\n':
-	case '\r':
-	case '\v':
-	case '\f':
-	    /* whitespace -- ends token if not quoted */
-	    if( !chQuote )
-		fEnd = TRUE;
-	    else
-		*pchSave++ = **ppch;
-	    break;
-	    
 	case '\'':
 	case '"':
 	    /* quote mark */
@@ -1899,12 +1900,14 @@ extern char *NextToken( char **ppch ) {
 	    *pchSave++ = **ppch;
 	}
 
-	if( !fEnd )
-	    ( *ppch )++;
+      }
+
+      if( !fEnd )
+        ( *ppch )++;
     }
 
     while( isspace( **ppch ) )
-	( *ppch )++;
+      ( *ppch )++;
 
     *pchSave = 0;
 
@@ -1913,6 +1916,13 @@ extern char *NextToken( char **ppch ) {
     assert( pch <= pchEnd );
     
     return pch;
+
+}
+
+extern char *NextToken( char **ppch ) {
+
+  return NextTokenGeneral( ppch, " \t\n\r\v\f" ); 
+
 }
 
 static int CountTokens( char *pch ) {
