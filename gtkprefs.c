@@ -3419,7 +3419,7 @@ ParseBoardDesigns ( const char *szFile, const int fDeletable ) {
     return NULL;
 
   pxpc = xmlCreateFileParserCtxt ( pch );
-  g_free ( pch );
+  free ( pch );
   if ( ! pxpc )
     return NULL;
 
