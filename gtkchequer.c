@@ -224,11 +224,12 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 #endif
 
     GTKRolloutRow ( 0 );
-    ProgressStartValue( _("Rolling out positions"), 0 );
+
+    if ( fAction )
+      HandleXAction();
 
     if ( ScoreMoveRollout ( ppm, ppci, c ) < 0 ) {
       GTKRolloutDone ();
-      ProgressEnd ();
       return;
     }
     
@@ -255,7 +256,6 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 
   UpdateMoveList ( phd );
 
-  ProgressEnd ();
 }
 
 

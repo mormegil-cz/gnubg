@@ -1,3 +1,7 @@
+Sun Jul 13 19:17:27 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (MoveListRollout): call HandleXAction.
+
 Sun Jul 13 12:06:05 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (CommandRollout): fix some non-ANSI decls.
