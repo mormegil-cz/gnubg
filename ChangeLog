@@ -1,3 +1,8 @@
+Sun Aug 11 18:22:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c: put all notebook pages into a non-expanding
+	GtkHBox.
+
 Sun Aug 11 17:56:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* acconfig.h: removed (stuff moved to configure.in)
