@@ -278,12 +278,11 @@ cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
 char *aszEvalType[] = 
    { "No evaluation", "Neural net evaluation", "Rollout" };
 
-static evalcontext ecBasic = { 0, 0, 0, 0, FALSE, 0.0, TRUE };
+static evalcontext ecBasic = { 0, FALSE, 0, 0, TRUE, 0.0, 0.0 };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
     int nEvalContext;
-    positionclass pc;
     float ar[ NUM_OUTPUTS ];
 } evalcache;
 
@@ -394,16 +393,15 @@ static void ComputeTable( void )
 static int EvalCacheCompare( evalcache *p0, evalcache *p1 ) {
 
     return !EqualKeys( p0->auchKey, p1->auchKey ) ||
-	p0->nEvalContext != p1->nEvalContext ||
-	p0->pc != p1->pc;
+	p0->nEvalContext != p1->nEvalContext;
 }
 
 static long EvalCacheHash( evalcache *pec ) {
 
-    long l = 0;
+    long l;
     int i;
     
-    l = ( pec->nEvalContext << 9 ) ^ ( pec->pc << 4 );
+    l = pec->nEvalContext;
 
     for( i = 0; i < 10; i++ )
 	l = ( ( l << 8 ) % 8388593 ) ^ pec->auchKey[ i ];
@@ -2583,47 +2581,58 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   return 0;
 }
 
+static int LogCube( int n ) {
+
+    int i;
+
+    for( i = 0; ; i++ )
+	if( n <= ( 1 << i ) )
+	    return i;
+}
 
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
                        cubeinfo *pci, evalcontext *pecx, int nPlies,
                        positionclass pc ) {
+    evalcache ec, *pec;
+    long l;
+    
+    if( pecx->rNoise != 0.0f && !pecx->fDeterministic )
+	/* non-deterministic noisy evaluations; cannot cache */
+	return EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies,
+				     pc );
+    
+    PositionKey( anBoard, ec.auchKey );
 
-  evalcache ec, *pec;
-  long l;
-	
-  PositionKey( anBoard, ec.auchKey );
-  ec.nEvalContext = nPlies ^ ( pecx->nSearchCandidates << 2 ) ^
-    ( ( (int) ( pecx->rSearchTolerance * 100 ) ) << 6 ) ^
-    ( pecx->nReduced << 12 ) ^
-    ( ( (int) ( pecx->rNoise * 1000 ) ) << 15 );
-  ec.pc = pc;
+    /* Record the signature of important evaluation settings.  Some members
+       of evalcontext (e.g. nSearchCandidates) only affect FindBestMove and
+       not EvaluatePositionFull; they do not need to be recorded. */
+    ec.nEvalContext = pecx->nReduced | ( nPlies << 2 ) |
+	( pecx->fCubeful << 5 ) | ( ( (int) ( pecx->rNoise * 1000 ) ) << 6 );
 
-  if ( ! ( pci->nMatchTo && nPlies ) && ( pecx->fDeterministic ||
-					  pecx->rNoise == 0.0f ) ) {
-
-    /* only cache 0-ply evals for match play */
-    /* FIXME: cache 0+ ply evals for match play */
-
+    /* In match play, the score and cube value and position are important. */
+    if( pci->nMatchTo )
+	ec.nEvalContext ^=
+	    ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 16 ) ^
+	    ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 20 ) ^
+	    ( LogCube( pci->nCube ) << 24 ) ^
+	    ( ( pci->fCubeOwner < 0 ? 2 :
+		pci->fCubeOwner == pci->fMove ) << 28 ) ^
+	    ( pci->fCrawford << 30 );
+    
     l = EvalCacheHash( &ec );
     
     if( ( pec = CacheLookup( &cEval, l, &ec ) ) ) {
-      memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
-
-      return 0;
+	memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
+	
+	return 0;
     }
-  }
     
-  if( EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies, pc ) )
-    return -1;
-
-  memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
-
-  if ( ! ( pci->nMatchTo && nPlies ) && ( pecx->fDeterministic ||
-					  pecx->rNoise == 0.0f ) )
+    if( EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies, pc ) )
+	return -1;
+    
+    memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
     return CacheAdd( &cEval, l, &ec, sizeof ec );
-  else
-    return 0;
 }
 
 
