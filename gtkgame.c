@@ -350,55 +350,16 @@ static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
 #endif
 static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw );
-static void EnterCommand( gpointer *p, guint n, GtkWidget *pw );
-static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw );
-static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw );
-static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw );
-static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw );
-static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw );
-static void ExportGameText( gpointer *p, guint n, GtkWidget *pw );
 static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw );
-static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw );
-static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw );
-static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw );
-static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw );
-static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw );
-static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionPNG( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionText( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionSnowieTxt( gpointer *p, guint n, GtkWidget *pw );
-static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw );
-static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw );
-static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw );
-static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
-static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw );
-static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw );
 static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw );
+static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw );
 static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw );
-static void ImportBKG( gpointer *p, guint n, GtkWidget *pw );
-static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
-static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
-static void ImportPos( gpointer *p, guint n, GtkWidget *pw );
-static void ImportSGG( gpointer *p, guint n, GtkWidget *pw );
-static void ImportTMG( gpointer *p, guint n, GtkWidget *pw );
-static void ImportSnowieTxt( gpointer *p, guint n, GtkWidget *pw );
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
-static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
-static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
-static void LoadPosition( gpointer *p, guint n, GtkWidget *pw );
-static void NewDialog( gpointer *p, guint n, GtkWidget *pw );
-#if 0
-static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
-static void NewWeights( gpointer *p, guint n, GtkWidget *pw );
-#endif
-static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
-static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
-static void SavePosition( gpointer *p, guint n, GtkWidget *pw );
-static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
+static void NewClicked( gpointer *p, guint n, GtkWidget *pw );
+static void OpenClicked( gpointer *p, guint n, GtkWidget *pw );
+static void SaveClicked( gpointer *p, guint n, GtkWidget *pw );
+static void ImportClicked( gpointer *p, guint n, GtkWidget *pw );
+static void ExportClicked( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
@@ -1205,14 +1166,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 				4 );
 #endif
 
-#if 0
-	    gtk_box_pack_start( GTK_BOX( pwBox ),
-				RollAnalysis( pmr->anDice[ 0 ],
-					      pmr->anDice[ 1 ],
-					      pmr->rLuck, pmr->lt ),
-				FALSE, FALSE, 4 );
-#endif
-
 	    ms.fMove = ms.fTurn = pmr->fPlayer;
 
             /* 
@@ -1223,16 +1176,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 
             GetMatchStateCubeInfo ( &ci, &ms );
             if ( GetDPEq ( NULL, NULL, &ci ) ) {
-#if 0
-              gtk_box_pack_start ( GTK_BOX ( pwBox ),
-                                   gtk_label_new ( _("Didn't double") ),
-                                   FALSE, FALSE, 4 );
-              gtk_box_pack_start ( GTK_BOX ( pwBox ),
-                                   SkillMenu ( pmr->stCube, "cube" ),
-                                   FALSE, FALSE, 4 );
-
-#endif
-
               gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
                                    gtk_label_new ( _("Didn't double") ),
                                    0, 1, 0, 1 );
@@ -1294,16 +1237,6 @@ extern void SetAnnotation( moverecord *pmr ) {
 	}
 
             /* chequer play skill */
-#if 0
-	    gtk_box_pack_end( GTK_BOX( pwBox ), 
-                              SkillMenu( pmr->n.stMove, "move" ),
-			      FALSE, FALSE, 4 );
-	    strcpy( sz, _("Moved ") );
-	    FormatMove( sz + strlen(_("Moved ")), ms.anBoard, pmr->n.anMove );
-	    gtk_box_pack_end( GTK_BOX( pwBox ),
-			      gtk_label_new( sz ), FALSE, FALSE, 0 );
-
-#endif
 	    strcpy( sz, _("Moved ") );
 	    FormatMove( sz + strlen(_("Moved ")), ms.anBoard, pmr->n.anMove );
 
@@ -1939,123 +1872,135 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     static GtkItemFactoryEntry aife[] = {
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_New"), "<control>N", NewDialog, 0, NULL },
-#if 0
-	{ N_("/_File/_New/_Game"), "<control>N", Command, CMD_NEW_GAME, NULL },
-	{ N_("/_File/_New/_Match..."), NULL, NewMatch, 0, NULL },
-	{ N_("/_File/_New/_Session"), NULL, Command, CMD_NEW_SESSION, NULL },
-	{ N_("/_File/_New/_Weights..."), NULL, NewWeights, 0, NULL },
+	{ N_("/_File/_New..."), "<control>N", NewClicked, 0,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_NEW
+#else
+		NULL
 #endif
-	{ N_("/_File/_Open"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Open/_Commands..."), NULL, LoadCommands, 0, NULL },
-	{ N_("/_File/_Open/_Game..."), NULL, LoadGame, 0, NULL },
-	{ N_("/_File/_Open/_Match or session..."), "<control>O", 
-          LoadMatch, 0, NULL },
-	{ N_("/_File/_Open/_Position..."), NULL, LoadPosition, 0, NULL },
-	{ N_("/_File/_Save"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Save/_Game..."), NULL, SaveGame, 0, NULL },
-	{ N_("/_File/_Save/_Match or session..."), "<control>S", 
-          SaveMatch, 0, NULL },
-	{ N_("/_File/_Save/_Position..."), NULL, SavePosition, 0, NULL },
-	{ N_("/_File/_Save/_Weights..."), NULL, SaveWeights, 0, NULL },
-	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },	
-	{ N_("/_File/_Import"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Import/BKG session..."), NULL, ImportBKG, 0, NULL },
-	{ N_("/_File/_Import/._mat match..."), NULL, ImportMat, 0, NULL },
-	{ N_("/_File/_Import/._pos position..."), NULL, ImportPos, 0, NULL },
-	{ N_("/_File/_Import/FIBS _oldmoves..."), 
-          NULL, ImportOldmoves, 0, NULL },
-	{ N_("/_File/_Import/._GamesGrid .sgg match..."), 
-          NULL, ImportSGG, 0, NULL },
-	{ N_("/_File/_Import/._TrueMoneyGames .tmg match..."), 
-          NULL, ImportTMG, 0, NULL },
-	{ N_("/_File/_Import/._Snowie standard text format..."), 
-          NULL, ImportMat, 0, NULL },
-	{ N_("/_File/_Import/._Snowie .txt position file..."), 
-          NULL, ImportSnowieTxt, 0, NULL },
-	{ N_("/_File/_Export"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Export/_Game"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Export/_Game/.gam..."), NULL, ExportGameGam, 0, NULL },
-	{ N_("/_File/_Export/_Game/HTML..."), NULL, ExportGameHtml, 0, NULL },
-	{ N_("/_File/_Export/_Game/LaTeX..."), NULL, ExportGameLaTeX, 0, NULL },
-	{ N_("/_File/_Export/_Game/PDF..."), NULL, ExportGamePDF, 0, NULL },
-	{ N_("/_File/_Export/_Game/PostScript..."), 
-          NULL, ExportGamePostScript, 0, NULL },
-	{ N_("/_File/_Export/_Game/Text..."), 
-          NULL, ExportGameText, 0, NULL },
-	{ N_("/_File/_Export/_Match"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Export/_Match/HTML..."), 
-          NULL, ExportMatchHtml, 0, NULL },
-	{ N_("/_File/_Export/_Match/LaTeX..."), 
-          NULL, ExportMatchLaTeX, 0, NULL },
-	{ N_("/_File/_Export/_Match/.mat..."), NULL, ExportMatchMat, 0, NULL },
-	{ N_("/_File/_Export/_Match/PDF..."), NULL, ExportMatchPDF, 0, NULL },
-	{ N_("/_File/_Export/_Match/PostScript..."), 
-          NULL, ExportMatchPostScript, 0, NULL },
-	{ N_("/_File/_Export/_Match/Text..."), 
-          NULL, ExportMatchText, 0, NULL },
-	{ N_("/_File/_Export/_Position"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Export/_Position/HTML..."), NULL,
-	  ExportPositionHtml, 0, NULL },
-	{ N_("/_File/_Export/_Position/GammOnLine (HTML)..."), NULL,
-	  ExportPositionGammOnLine, 0, NULL },
-	{ N_("/_File/_Export/_Position/Encapsulated PostScript..."), NULL,
-	  ExportPositionEPS, 0, NULL },
-	{ N_("/_File/_Export/_Position/PNG..."), NULL, ExportPositionPNG, 0,
-	  NULL },
-	{ N_("/_File/_Export/_Position/.pos..."), NULL, ExportPositionPos, 0,
-	  NULL },
-	{ N_("/_File/_Export/_Position/Snowie .txt..."), NULL, 
-          ExportPositionSnowieTxt, 0,
-	  NULL },
-	{ N_("/_File/_Export/_Position/Text..."), NULL, ExportPositionText, 0,
-	  NULL },
-	{ N_("/_File/_Export/_Session"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_File/_Export/_Session/HTML..."), NULL, ExportSessionHtml, 0,
-	  NULL },
-	{ N_("/_File/_Export/_Session/LaTeX..."), NULL, ExportSessionLaTeX, 0,
-	  NULL },
-	{ N_("/_File/_Export/_Session/PDF..."), 
-          NULL, ExportSessionPDF, 0, NULL },
-	{ N_("/_File/_Export/_Session/PostScript..."), NULL,
-	  ExportSessionPostScript, 0, NULL },
-	{ N_("/_File/_Export/_Session/Text..."), NULL,
-	  ExportSessionText, 0, NULL },
-	{ N_("/_File/_Export/_HTML Images..."), NULL, ExportHTMLImages, 0,
+	},
+	{ N_("/_File/_Open..."), "<control>O", OpenClicked, 0, 
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_OPEN
+#else
+		NULL
+#endif
+	},
+	{ N_("/_File/Open _Commands..."), NULL, LoadCommands, 0, NULL },
+	{ N_("/_File/_Save..."), "<control>S", SaveClicked, 0, 
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_SAVE
+#else
+		NULL
+#endif
+	},
+	{ N_("/_File/_Import..."), NULL, ImportClicked, 0, NULL },
+	{ N_("/_File/_Export..."), NULL, ExportClicked, 0, NULL },
+	{ N_("/_File/Generate _HTML Images..."), NULL, ExportHTMLImages, 0,
 	  NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT, NULL },
+	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_QUIT
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Edit/_Undo"), "<control>Z", Undo, 0, NULL },
+	{ N_("/_Edit/_Undo"), "<control>Z", Undo, 0, 
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_UNDO
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Edit/_Copy"), "<control>C", Command, CMD_XCOPY, NULL },
+	{ N_("/_Edit/_Copy"), "<control>C", Command, CMD_XCOPY,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_COPY
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Edit/Copy as/Position as ASCII"), NULL,
 	  CommandCopy, 0, NULL },
 	{ N_("/_Edit/Copy as/GammOnLine (HTML)"), NULL,
 	  CopyAsGOL, 0, NULL },
-	{ N_("/_Edit/_Paste"), "<control>V", NULL, 0, NULL },
-	{ N_("/_Edit/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Edit/_Enter command..."), NULL, EnterCommand, 0, NULL },
+	{ N_("/_Edit/_Paste"), "<control>V", NULL, 0,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_PASTE
+#else
+		NULL
+#endif
+	},
+	{ N_("/_View"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_View/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
+	  "<CheckItem>" },
+	{ N_("/_View/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
+	  "<CheckItem>" },
+	{ N_("/_View/_Commentary"), NULL, TogglePanel, TOGGLE_COMMENTARY,
+	  "<CheckItem>" },
+	{ N_("/_View/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
+	  "<CheckItem>" },
+	{ N_("/_View/_Theory"), NULL, TogglePanel, TOGGLE_THEORY,
+	  "<CheckItem>" },
+	{ N_("/_View/_Command"), NULL, TogglePanel, TOGGLE_COMMAND,
+	  "<CheckItem>" },
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_View/_Dock panels"), NULL, ToggleDockPanels, 0, "<CheckItem>" },
+	{ N_("/_View/Restore panels"), NULL, ShowAllPanels, 0, NULL },
+	{ N_("/_View/Hide panels"), NULL, HideAllPanels, 0, NULL },
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_View/_Toolbar"), NULL, NULL, 0, "<Branch>"},
+	{ N_("/_View/_Toolbar/Text only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_TEXT,
+	  "<RadioItem>" },
+	{ N_("/_View/_Toolbar/Icons only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_ICONS,
+	  "/View/Toolbar/Text only" },
+	{ N_("/_View/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
+	  "/View/Toolbar/Text only" },
+	{ N_("/_View/Full screen"), NULL, FullScreenMode, 0, NULL },
+	{ N_("/_View/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_View/Gu_ile"), NULL, NULL, 0, NULL },
+	{ N_("/_View/_Python shell (IDLE)..."), 
+          NULL, PythonShell, 0, NULL },
 	{ N_("/_Game"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Game/_Roll"), "<control>R", Command, CMD_ROLL, NULL },
 	{ N_("/_Game/_Finish move"), "<control>F", FinishMove, 0, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/_Double"), "<control>D", Command, CMD_DOUBLE, NULL },
-	{ N_("/_Game/_Take"), "<control>T", Command, CMD_TAKE, NULL },
-	{ N_("/_Game/Dro_p"), "<control>P", Command, CMD_DROP, NULL },
-	{ N_("/_Game/R_edouble"), NULL, Command, CMD_REDOUBLE, NULL },
+	{ N_("/_Game/_Take"), "<control>T", Command, CMD_TAKE,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_APPLY
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Game/Dro_p"), "<control>P", Command, CMD_DROP,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_CANCEL
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Game/B_eaver"), NULL, Command, CMD_REDOUBLE, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/Re_sign"), NULL, GTKResign, 0, NULL },
-#if 0
-	{ N_("/_Game/Re_sign/_Normal"), NULL, Command, CMD_RESIGN_N, NULL },
-	{ N_("/_Game/Re_sign/_Gammon"), NULL, Command, CMD_RESIGN_G, NULL },
-	{ N_("/_Game/Re_sign/_Backgammon"), 
-          NULL, Command, CMD_RESIGN_B, NULL },
+        { N_("/_Game/_Agree to resignation"), NULL, Command, CMD_AGREE,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_APPLY
+#else
+		NULL
 #endif
-        { N_("/_Game/_Agree to resignation"), NULL, Command, CMD_AGREE, NULL },
+	},
 	{ N_("/_Game/De_cline resignation"), 
-          NULL, Command, CMD_DECLINE, NULL },
+          NULL, Command, CMD_DECLINE,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_CANCEL
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/Play computer turn"), NULL, Command, CMD_PLAY, NULL },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
@@ -2070,34 +2015,64 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "/Game/Set turn/0" },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/Match information..."), NULL, GTKMatchInfo, 0, NULL },
-	{ N_("/_Navigate"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Navigate/Previous rol_l"), "Page_Up", 
-          Command, CMD_PREV_ROLL, NULL },
-	{ N_("/_Navigate/Next _roll"), "Page_Down",
-	  Command, CMD_NEXT_ROLL, NULL },
-	{ N_("/_Navigate/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Navigate/_Previous move"), "<shift>Page_Up", 
+	{ N_("/_Go"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Go/Previous rol_l"), "Page_Up", 
+          Command, CMD_PREV_ROLL,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GO_BACK
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Go/Next _roll"), "Page_Down",
+	  Command, CMD_NEXT_ROLL, 
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GO_FORWARD
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/_Previous move"), "<shift>Page_Up", 
           Command, CMD_PREV, NULL },
-	{ N_("/_Navigate/Next _move"), "<shift>Page_Down", 
+	{ N_("/_Go/Next _move"), "<shift>Page_Down", 
           Command, CMD_NEXT, NULL },
-	{ N_("/_Navigate/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Navigate/Previous chequer _play"), "<alt>Page_Up",
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Previous chequer _play"), "<alt>Page_Up",
 	  Command, CMD_PREV_ROLLED, NULL },
-	{ N_("/_Navigate/Next _chequer play"), "<alt>Page_Down",
+	{ N_("/_Go/Next _chequer play"), "<alt>Page_Down",
 	  Command, CMD_NEXT_ROLLED, NULL },
-	{ N_("/_Navigate/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Navigate/Previous marke_d move"), "<control><shift>Page_Up", 
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Previous marke_d move"), "<control><shift>Page_Up", 
           Command, CMD_PREV_MARKED, NULL },
-	{ N_("/_Navigate/Next mar_ked move"), "<control><shift>Page_Down", 
+	{ N_("/_Go/Next mar_ked move"), "<control><shift>Page_Down", 
           Command, CMD_NEXT_MARKED, NULL },
-	{ N_("/_Navigate/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Navigate/Pre_vious game"), "<control>Page_Up", 
-          Command, CMD_PREV_GAME, NULL },
-	{ N_("/_Navigate/Next _game"), "<control>Page_Down",
-	  Command, CMD_NEXT_GAME, NULL },
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
+          Command, CMD_PREV_GAME,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GOTO_FIRST
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Go/Next _game"), "<control>Page_Down",
+	  Command, CMD_NEXT_GAME,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GOTO_LAST
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL },
-	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT, NULL },
+	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_DIALOG_INFO
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Analyse/_Rollout"), NULL, Command, CMD_ROLLOUT, NULL },
 	{ N_("/_Analyse/Rollout _cube decision"), 
           NULL, Command, CMD_ROLLOUT_CUBE, NULL },
@@ -2112,13 +2087,37 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL, Command, CMD_ANALYSE_SESSION, NULL },
         { N_("/_Analyse/Clear analysis"), NULL, NULL, 0, "<Branch>" },
         { N_("/_Analyse/Clear analysis/Move"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_MOVE, NULL },
+          NULL, Command, CMD_ANALYSE_CLEAR_MOVE, 
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_CLEAR
+#else
+		NULL
+#endif
+	},
         { N_("/_Analyse/Clear analysis/_Game"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_GAME, NULL },
+          NULL, Command, CMD_ANALYSE_CLEAR_GAME,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_CLEAR
+#else
+		NULL
+#endif
+	},
         { N_("/_Analyse/Clear analysis/_Match"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_MATCH, NULL },
+          NULL, Command, CMD_ANALYSE_CLEAR_MATCH,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_CLEAR
+#else
+		NULL
+#endif
+	},
         { N_("/_Analyse/Clear analysis/_Session"), 
-          NULL, Command, CMD_ANALYSE_CLEAR_SESSION, NULL },
+          NULL, Command, CMD_ANALYSE_CLEAR_SESSION,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_CLEAR
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/Game statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_GAME, NULL },
@@ -2131,14 +2130,38 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_RECORD_SHOW, NULL },
 	{ N_("/_Analyse/Add to player records"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Analyse/Add to player records/Game statistics"), NULL, Command,
-	  CMD_RECORD_ADD_GAME, NULL },
+	  CMD_RECORD_ADD_GAME,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_ADD
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Analyse/Add to player records/Match statistics"), NULL,
-	  Command, CMD_RECORD_ADD_MATCH, NULL },
+	  Command, CMD_RECORD_ADD_MATCH,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_ADD
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
-	  Command, CMD_RECORD_ADD_SESSION, NULL },
+	  Command, CMD_RECORD_ADD_SESSION,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_ADD
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
         { N_("/_Analyse/Relational database/Add match or session"), NULL,
-          GtkRelationalAddMatch, 0, NULL },
+          GtkRelationalAddMatch, 0,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_ADD
+#else
+		NULL
+#endif
+	},
         { N_("/_Analyse/Relational database/Show Records"), NULL,
           GtkShowRelational, 0, NULL },
         { N_("/_Analyse/Relational database/Manage Environments"), NULL,
@@ -2146,7 +2169,13 @@ extern int InitGTK( int *argc, char ***argv ) {
         { N_("/_Analyse/Relational database/Test"), NULL,
           Command, CMD_RELATIONAL_TEST, NULL },
         { N_("/_Analyse/Relational database/Help"), NULL,
-          Command, CMD_RELATIONAL_HELP, NULL },
+          Command, CMD_RELATIONAL_HELP,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_HELP
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
@@ -2217,38 +2246,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL },
-	{ N_("/_Windows"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Windows/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
-	  "<CheckItem>" },
-	{ N_("/_Windows/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
-	  "<CheckItem>" },
-	{ N_("/_Windows/_Commentary"), NULL, TogglePanel, TOGGLE_COMMENTARY,
-	  "<CheckItem>" },
-	{ N_("/_Windows/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
-	  "<CheckItem>" },
-	{ N_("/_Windows/_Theory"), NULL, TogglePanel, TOGGLE_THEORY,
-	  "<CheckItem>" },
-	{ N_("/_Windows/_Command"), NULL, TogglePanel, TOGGLE_COMMAND,
-	  "<CheckItem>" },
-	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Windows/_Dock panels"), NULL, ToggleDockPanels, 0, "<CheckItem>" },
-	{ N_("/_Windows/Restore panels"), NULL, ShowAllPanels, 0, NULL },
-	{ N_("/_Windows/Hide panels"), NULL, HideAllPanels, 0, NULL },
-	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Windows/_Toolbar"), NULL, NULL, 0, "<Branch>"},
-	{ N_("/_Windows/_Toolbar/Text only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_TEXT,
-	  "<RadioItem>" },
-	{ N_("/_Windows/_Toolbar/Icons only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_ICONS,
-	  "/Windows/Toolbar/Text only" },
-	{ N_("/_Windows/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
-	  "/Windows/Toolbar/Text only" },
-	{ N_("/_Windows/Full screen"), NULL, FullScreenMode, 0, NULL },
-	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Windows/Gu_ile"), NULL, NULL, 0, NULL },
-	{ N_("/_Windows/_Python shell (IDLE)..."), 
-          NULL, PythonShell, 0, NULL },
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
+	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_HELP
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Help/gnubg _Manual"), NULL, Command, 
           CMD_SHOW_MANUAL_GUI, NULL },
 	{ N_("/_Help/gnubg M_anual (web)"), NULL, Command, 
@@ -2260,8 +2265,15 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Help/_Report bug"), NULL, ReportBug, 0, NULL },
 	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION, NULL }
+	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_ABOUT
+#else
+		NULL
+#endif
+	}
     };
+    int i;
 #if __GNUC__
     char sz[ strlen( szHomeDirectory ) + 15 ];
 #elif HAVE_ALLOCA
@@ -2370,10 +2382,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 #endif
 
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/Windows/Guile" ), FALSE );
+	pif, "/View/Guile" ), FALSE );
 
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/Windows/Python shell (IDLE)..." ), 
+	pif, "/View/Python shell (IDLE)..." ), 
 #if USE_PYTHON 
                               TRUE
 #else
@@ -2548,9 +2560,9 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	if (!ArePanelsDocked())
 	{
 		gtk_widget_hide(hpaned);
-		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Commentary"));
-		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Hide panels"));
-		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Restore panels"));
+		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Commentary"));
+		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Hide panels"));
+		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/View/Restore panels"));
 	}
 	else if (ArePanelsShowing())
 		gtk_widget_hide(pwGameBox);
@@ -3076,52 +3088,6 @@ extern void GTKOutputNew( void ) {
     while( !fFinishedPopping );
 }
 
-#if 0
-static void NumberOK( GtkWidget *pw, int *pf ) {
-
-    *pf = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( pwEntry ) );
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
-extern int 
-GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
-               int nMin, int nMax, int nInc ) {
-
-    int n = INT_MIN;
-    GtkObject *pa = gtk_adjustment_new( nDefault, nMin, nMax, nInc, nInc,
-					0 );
-    GtkWidget *pwDialog = GTKCreateDialog( szTitle, DT_QUESTION,
-					GTK_SIGNAL_FUNC( NumberOK ), &n ),
-	*pwPrompt = gtk_label_new( szPrompt );
-
-    pwEntry = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), nInc, 0 );
-    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwEntry ), TRUE );
-
-    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwPrompt );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwEntry );
-
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    gtk_signal_connect_after( GTK_OBJECT( pwEntry ), "activate",
-			GTK_SIGNAL_FUNC( NumberOK ), &n );
-    
-    gtk_widget_grab_focus( pwEntry );
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    return n;
-}
-#endif
-
 /* Show dynamic help as command entered */
 
 extern command *FindHelpCommand( command *pcBase, char *sz,
@@ -3380,121 +3346,6 @@ extern gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, struct C
 		return FALSE;
 }	
 
-static void ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
-
-	GtkWidget *pwVbox, *pwHbox, *pwShowHelp;
-	GtkWidget *pwDialog, *pwPrompt;
-
-	cedDialog.cmdString = NULL;
-
-	pwDialog = GTKCreateDialog( szTitle, DT_QUESTION,
-					GTK_SIGNAL_FUNC( CommandOK ), &cedDialog ),
-	pwPrompt = gtk_label_new( szPrompt );
-
-	cedDialog.cmdEntryCombo = gtk_combo_new();
-	gtk_combo_set_value_in_list(GTK_COMBO(cedDialog.cmdEntryCombo), FALSE, TRUE);
-	gtk_widget_set_usize(cedDialog.cmdEntryCombo, 200, -1);
-
-	gtk_combo_disable_activate(GTK_COMBO(cedDialog.cmdEntryCombo));
-	cedDialog.pwEntry = GTK_COMBO(cedDialog.cmdEntryCombo)->entry;
-
-	PopulateCommandHistory(&cedDialog);
-
-	gtk_entry_set_text(GTK_ENTRY(cedDialog.pwEntry), szDefault );
-	gtk_signal_connect(GTK_OBJECT(cedDialog.pwEntry), "changed", GTK_SIGNAL_FUNC(CommandTextChange), &cedDialog);
-	gtk_signal_connect(GTK_OBJECT(cedDialog.pwEntry), "key-press-event", GTK_SIGNAL_FUNC(CommandKeyPress), &cedDialog);
-	gtk_signal_connect(GTK_OBJECT(cedDialog.pwEntry), "activate", GTK_SIGNAL_FUNC(CommandOK), &cedDialog);
-
-	pwVbox = gtk_vbox_new(FALSE, 0);
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-				pwVbox );
-	pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHbox, FALSE, FALSE, 0);
-
-	gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwPrompt, FALSE, FALSE, 0);
-	gtk_box_pack_start( GTK_BOX( pwHbox ), cedDialog.cmdEntryCombo, FALSE, FALSE, 0);
-
-	pwHbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHbox, FALSE, FALSE, 0);
-	pwShowHelp = gtk_toggle_button_new_with_label( _("Show Help") );
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwShowHelp), cedDialog.showHelp);
-	gtk_signal_connect(GTK_OBJECT(pwShowHelp), "toggled", GTK_SIGNAL_FUNC(ShowHelpToggled), &cedDialog);
-	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwShowHelp, FALSE, TRUE, 0);
-	gtk_signal_connect(GTK_OBJECT(pwShowHelp), "focus-in-event", GTK_SIGNAL_FUNC(CommandFocusIn), &cedDialog);
-
-	pwHelpbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHelpbox, TRUE, TRUE, 0);
-
-	cedDialog.pwHelpText = NULL;
-	if (cedDialog.showHelp)
-		CreateHelpText(&cedDialog);
-
-	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
-	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-
-	gtk_widget_grab_focus(cedDialog.pwEntry);
-	gtk_widget_show_all(pwDialog);
-
-	GTKDisallowStdin();
-	gtk_main();
-	GTKAllowStdin();
-}
-#if 0
-
-static void RealOK( GtkWidget *pw, float *pr ) {
-
-    *pr = gtk_spin_button_get_value_as_float( GTK_SPIN_BUTTON( pwEntry ) );
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
-
-static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
-			double rMin, double rMax, double rInc ) {
-
-    float r = ERR_VAL;
-    GtkObject *pa = gtk_adjustment_new( rDefault, rMin, rMax, rInc, rInc,
-					0 );
-    GtkWidget *pwDialog = GTKCreateDialog( szTitle, DT_QUESTION,
-					GTK_SIGNAL_FUNC( RealOK ), &r ),
-	*pwPrompt = gtk_label_new( szPrompt );
-
-    pwEntry = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), rInc, 2 );
-    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwEntry ), TRUE );
-
-    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwPrompt );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwEntry );
-
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    gtk_signal_connect_after( GTK_OBJECT( pwEntry ), "activate",
-			GTK_SIGNAL_FUNC( RealOK ), &r );
-    
-    gtk_widget_grab_focus( pwEntry );
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-    return r;
-}
-#endif
-static void EnterCommand( gpointer *p, guint n, GtkWidget *pw ) {
-
-	ReadCommand( _("GNU Backgammon - Enter command"), FormatPrompt(),
-			    "" );
-}
-
 typedef struct _newwidget {
   GtkWidget *pwG, *pwM, *pwS, *pwP, *pwCPS, *pwGNUvsHuman,
       *pwHumanHuman, *pwManualDice, *pwTutorMode;
@@ -3578,10 +3429,6 @@ static GtkWidget *NewWidget( newwidget *pnw){
   GtkWidget *pwSpin, *pwButtons, *pwFrame, *pwVbox2; 
 #include "xpm/stock_new_all.xpm"
 #include "xpm/stock_new_money.xpm"
-#if 0
-#include "xpm/computer.xpm"
-#include "xpm/human2.xpm"
-#endif
   pwVbox = gtk_vbox_new(FALSE, 0);
 #if USE_GTK2
   pwToolbar = gtk_toolbar_new ();
@@ -3679,39 +3526,11 @@ static GtkWidget *NewWidget( newwidget *pnw){
 
   pnw->pwCPS = gtk_radio_button_new_with_label( NULL, _("Current player settings"));
   gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwCPS, FALSE, FALSE, 0);
-#if 0
-  pnw->pwGNUvsHuman = gtk_radio_button_new_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS));
-  pnw->pwHumanHuman = gtk_radio_button_new_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS));
   
-  pwHbox2 = gtk_hbox_new(FALSE, 0);
-  gtk_container_add(GTK_CONTAINER(pwHbox2),
-      image_from_xpm_d(computer_xpm, pnw->pwCPS));
-  gtk_container_add(GTK_CONTAINER(pwHbox2),
-      gtk_label_new(_("vs.")));
-  gtk_container_add(GTK_CONTAINER(pwHbox2),
-      image_from_xpm_d(human2_xpm, pnw->pwCPS));
-
-  gtk_container_add(GTK_CONTAINER(pnw->pwGNUvsHuman), pwHbox2);
-  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwGNUvsHuman, FALSE, FALSE, 0);
-  
-  pwHbox2 = gtk_hbox_new(FALSE, 0);
-  
-  gtk_container_add(GTK_CONTAINER(pwHbox2),
-      image_from_xpm_d(human2_xpm, pnw->pwCPS));
-  gtk_container_add(GTK_CONTAINER(pwHbox2),
-      gtk_label_new(_("vs.")));
-  gtk_container_add(GTK_CONTAINER(pwHbox2),
-      image_from_xpm_d(human2_xpm, pnw->pwCPS));
-  
-  gtk_container_add(GTK_CONTAINER(pnw->pwHumanHuman), pwHbox2);
-  gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwHumanHuman, FALSE, FALSE, 0);
-#else
   pnw->pwGNUvsHuman = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS), _("GNU Backgammon vs. Human"));
   pnw->pwHumanHuman = gtk_radio_button_new_with_label_from_widget( GTK_RADIO_BUTTON(pnw->pwCPS), _("Human vs. Human"));
   gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwGNUvsHuman, FALSE, FALSE, 0);
   gtk_box_pack_start(GTK_BOX(pwVbox2), pnw->pwHumanHuman, FALSE, FALSE, 0);
-  
-#endif
   
   pwButtons = gtk_button_new_with_label(_("Modify player settings..."));
   gtk_container_set_border_width(GTK_CONTAINER(pwButtons), 10);
@@ -3773,8 +3592,81 @@ static void NewSet( newwidget *pnw) {
 
 }
 
-static void NewDialog( gpointer *p, guint n, GtkWidget *pw ) {
+static void NewClicked( gpointer *p, guint n, GtkWidget *pw ) {
   GTKNew();
+}
+
+static void OpenClicked( gpointer *p, guint n, GtkWidget *pw ) {
+  GTKOpen();
+}
+
+static void SaveClicked( gpointer *p, guint n, GtkWidget *pw ) {
+  GTKSave();
+}
+
+static void ImportClicked( gpointer *p, guint n, GtkWidget *pw ) {
+  GTKImport();
+}
+
+static void ExportClicked( gpointer *p, guint n, GtkWidget *pw ) {
+  GTKExport();
+}
+
+extern void 
+GTKOpen( void ) {
+
+  char *sz = getDefaultPath ( PATH_SGF );
+
+  GTKFileCommand(_("Open match, session, game or position"), 
+		   sz, "load match", "sgf", FDT_NONE_OPEN, PATH_SGF);
+  if ( sz ) 
+    free ( sz );
+}
+
+extern void 
+GTKSave( void ) {
+
+  char *sz = getDefaultFileName ( PATH_SGF );
+  GTKFileCommand(_("Save match, session, game or position"), 
+		   sz, "save", "sgf", FDT_SAVE, PATH_SGF);
+  if ( sz ) 
+    free ( sz );
+}
+
+extern void 
+GTKImport( void ) {
+
+	/* Order of import types in menu */
+	int impTypes[] = {PATH_BKG, PATH_MAT, PATH_POS, PATH_OLDMOVES, PATH_SGG,
+		PATH_TMG, PATH_MAT, PATH_SNOWIE_TXT};
+	char* sz = NULL;
+
+	if (lastImportType != -1)
+		sz = getDefaultPath(impTypes[lastImportType]);
+
+	GTKFileCommand(_("Import match, session, game or position"), 
+		   sz, "import", "N", FDT_IMPORT, impTypes[lastImportType]);
+
+	if (sz)
+		free(sz);
+}
+
+extern void 
+GTKExport( void ) {
+
+	/* Order of export types in menu */
+	int expTypes[] = {PATH_HTML, PATH_GAM, PATH_POS, PATH_MAT, PATH_GAM, 
+		PATH_LATEX, PATH_PDF, PATH_POSTSCRIPT, PATH_EPS, -1, PATH_TEXT, -1, PATH_SNOWIE_TXT};
+	char* sz = NULL;
+
+	if (lastExportType != -1 && expTypes[lastExportType] != -1)
+		sz = getDefaultPath(expTypes[lastExportType]);
+
+	GTKFileCommand(_("Export match, session, game or position"), 
+		   sz, "export", "N", FDT_EXPORT_FULL, expTypes[lastExportType]);
+
+	if (sz)
+		free(sz);
 }
 
 extern void GTKNew( void ){
@@ -3801,22 +3693,6 @@ extern void GTKNew( void ){
   GTKAllowStdin();
 
 }
-
-
-#if 0
-static void NewWeights( gpointer *p, guint n, GtkWidget *pw ) {
-
-    int nSize = GTKReadNumber( _("GNU Backgammon - New Weights"),
-                               _("Number of hidden nodes:"), 128, 1, 1024, 1 );
-    
-    if( nSize > 0 ) {
-	char sz[ 32 ];
-
-	sprintf( sz, "new weights %d", nSize );
-	UserCommand( sz );
-    }
-}
-#endif
 
 typedef struct _filethings {
 	GtkWidget *pwom;
@@ -4293,357 +4169,9 @@ extern void SetMET( GtkWidget *pw, gpointer p ) {
 	free( pchMet );
 }
 
-static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_SGF );
-  GTKFileCommand( _("Open game"), sz, "load game", "sgf", FDT_NONE_OPEN, PATH_SGF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_SGF );
-  GTKFileCommand( _("Open match or session"), sz, "load match", "sgf", FDT_NONE_OPEN, PATH_SGF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void LoadPosition( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_SGF );
-  GTKFileCommand( _("Open position"), sz, "load position", "sgf", FDT_NONE_OPEN, PATH_SGF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ImportBKG( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_BKG );
-  GTKFileCommand( _("Import BKG session"), sz, "import bkg", "bkg", FDT_NONE_OPEN, PATH_BKG );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ImportMat( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_MAT );
-  GTKFileCommand( _("Import .mat match"), sz, "import mat", "mat", FDT_NONE_OPEN, PATH_MAT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ImportPos( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_POS );
-  GTKFileCommand( _("Import .pos position"), sz, "import pos", "pos", FDT_NONE_OPEN, PATH_POS );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_OLDMOVES );
-  GTKFileCommand( _("Import FIBS oldmoves"), sz, "import oldmoves", "oldmoves", FDT_NONE_OPEN, PATH_OLDMOVES );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ImportSGG( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_SGG );
-  GTKFileCommand( _("Import .sgg match"), sz, "import sgg", "sgg", FDT_NONE_OPEN, PATH_SGG );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ImportTMG( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_TMG );
-  GTKFileCommand( _("Import .tmg match"), sz, "import tmg", "tmg", FDT_NONE_OPEN, PATH_TMG );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ImportSnowieTxt( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultPath ( PATH_SNOWIE_TXT ); 
-  GTKFileCommand( _("Import Snowie .txt position"), sz, "import snowietxt", 
-               "snowietxt", FDT_NONE_OPEN, PATH_SNOWIE_TXT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_SGF );
-  GTKFileCommand( _("Save game"), sz, "save game", "sgf", FDT_NONE_SAVE, PATH_SGF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_SGF );
-  GTKFileCommand( _("Save match or session"), sz, "save match", "sgf", FDT_NONE_SAVE, PATH_SGF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void SavePosition( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_SGF );
-  GTKFileCommand( _("Save position"), sz, "save position", "sgf", FDT_NONE_SAVE, PATH_SGF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void SaveWeights( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = strdup ( PKGDATADIR "/gnubg.weights" );
-  GTKFileCommand( _("Save weights"), sz, "save weights", NULL, FDT_NONE_SAVE, PATH_NULL );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_GAM );
-  GTKFileCommand( _("Export .gam game"), sz, "export game gam", "gam", FDT_EXPORT, PATH_GAM );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_HTML );
-  GTKFileCommand( _("Export HTML game"), sz, "export game html", "html", FDT_EXPORT, PATH_HTML );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_LATEX );
-  GTKFileCommand( _("Export LaTeX game"), sz, "export game latex", "latex", FDT_EXPORT, PATH_LATEX );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_PDF );
-  GTKFileCommand( _("Export PDF game"), sz, "export game pdf", "pdf", FDT_EXPORT, PATH_PDF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
-  GTKFileCommand( _("Export PostScript game"), sz, "export game postscript",
-	       "postscript", FDT_EXPORT, PATH_POSTSCRIPT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void
-ExportGameText( gpointer *p, guint n, GtkWidget *pw )
-{
-  char *sz = getDefaultFileName ( PATH_TEXT );
-  GTKFileCommand( _("Export text game"), sz, "export game text", "text", FDT_EXPORT, PATH_TEXT );
-  if ( sz ) 
-    free ( sz );
-}
-
-static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_LATEX );
-  GTKFileCommand( _("Export LaTeX match"), sz, "export match latex", "latex", FDT_EXPORT, PATH_LATEX );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_HTML );
-  GTKFileCommand( _("Export HTML match"), sz, "export match html", "html", FDT_EXPORT, PATH_HTML );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_MAT );
-  GTKFileCommand( _("Export .mat match"), sz, "export match mat", "mat", FDT_NONE_SAVE, PATH_MAT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_PDF );
-  GTKFileCommand( _("Export PDF match"), sz, "export match pdf", "pdf", FDT_EXPORT, PATH_PDF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
-  GTKFileCommand( _("Export PostScript match"), sz, "export match postscript",
-	       "postscript", FDT_EXPORT, PATH_POSTSCRIPT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_TEXT );
-  GTKFileCommand( _("Export text match"), sz, "export match text", "text", FDT_EXPORT, PATH_TEXT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_EPS );
-  GTKFileCommand( _("Export EPS position"), sz, "export position eps", "eps", FDT_NONE_SAVE, PATH_EPS );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_HTML );
-  GTKFileCommand( _("Export HTML position"), sz, "export position html", "html", FDT_EXPORT, PATH_HTML );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_HTML );
-  GTKFileCommand( _("Export position to GammOnLine (HTML)"), 
-               sz, "export position gammonline", "html", FDT_NONE_SAVE, PATH_HTML );
-  if ( sz ) 
-    free ( sz );
-}
-
 static void CopyAsGOL( gpointer *p, guint n, GtkWidget *pw ) {
 
   UserCommand("export position gol2clipboard");
-
-}
-
-static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_POS );
-  GTKFileCommand( _("Export .pos position"), sz, "export position pos", "pos", FDT_NONE_SAVE, PATH_POS );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportPositionPNG( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_PNG );
-  GTKFileCommand( _("Export PNG position"), sz, "export position png", "png", FDT_EXPORT, PATH_PNG );
-  if ( sz ) 
-     free ( sz );
-
-}
-
-static void ExportPositionText( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_TEXT );
-  GTKFileCommand( _("Export text position"), sz, "export position text", "text", FDT_EXPORT, PATH_TEXT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportPositionSnowieTxt( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_SNOWIE_TXT );
-  GTKFileCommand( _("Export Snowie .txt position"), sz, 
-               "export position snowietxt", "snowietxt", FDT_EXPORT, PATH_SNOWIE_TXT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_LATEX );
-  GTKFileCommand( _("Export LaTeX session"), sz, "export session latex",
-	       "latex", FDT_EXPORT, PATH_LATEX );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_PDF );
-  GTKFileCommand( _("Export PDF session"), sz, "export session pdf", "pdf", FDT_EXPORT, PATH_PDF );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_HTML );
-  GTKFileCommand( _("Export HTML session"), sz, "export session html", "html", FDT_EXPORT, PATH_HTML );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
-  GTKFileCommand( _("Export PostScript session"), sz,
-               "export session postscript", "postscript", FDT_EXPORT, PATH_POSTSCRIPT );
-  if ( sz ) 
-    free ( sz );
-
-}
-
-static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw ) {
-
-  char *sz = getDefaultFileName ( PATH_TEXT );
-  GTKFileCommand( _("Export text session"), sz, "export session text", "text", FDT_EXPORT, PATH_TEXT );
-  if ( sz ) 
-    free ( sz );
 
 }
 
@@ -8010,14 +7538,12 @@ extern void GTKSet( void *p ) {
 	board_set_playing( BOARD( pwBoard ), ms.gs == GAME_PLAYING );
         ToolbarSetPlaying( pwToolbar, ms.gs == GAME_PLAYING );
 
-	enable_sub_menu( gtk_item_factory_get_widget( pif, "/File/Save" ),
-			 plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget( pif,
+				"/File/Save..." ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget( pif,
+	                        "/File/Export..." ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	    pif, "/File/Save/Weights..." ), TRUE );
-	enable_sub_menu( gtk_item_factory_get_widget( pif, "/File/Export" ),
-			 plGame != NULL );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-				      pif, "/File/Export/HTML Images..." ),
+				      pif, "/File/Generate HTML Images..." ),
 				  TRUE );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),

@@ -1,3 +1,13 @@
+Sat Mar  05  23:50:45 2005 Oystein Johansen <oystein@gnubg.org>
+
+	This is the first commit in a large GUI cleanup I intend to do.
+
+	Cleanup in the menu system. Simplify all the 'File' menues. Rearrange
+	accoring to Human Interface Guidlines 2.0 (HIG 2.0). Add some stock
+	icons to some of the menu items. Please comment on the stock items.
+
+	* gtkgame.[ch], gtkpanels.c, gtktoolbar.c: Menu cleanup.
+	
 Fri Feb  25  11:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtk(some).c : Make event boxes transparent (By Ingo Macherius)

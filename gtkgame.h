@@ -188,8 +188,12 @@ GtkTutor ( char *sz );
 
 extern void
 GTKCopy ( void );
-extern void
-GTKNew ( void );
+
+extern void GTKNew ( void );
+extern void GTKOpen ( void );
+extern void GTKSave ( void );
+extern void GTKImport ( void );
+extern void GTKExport ( void );
 
 extern void
 RefreshGeometries ( void );

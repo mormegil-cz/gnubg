@@ -195,63 +195,6 @@ ToolbarStop( GtkWidget *pw, gpointer unused ) {
 #endif
 }
 
-static void 
-OpenClicked( GtkWidget *pw, gpointer unused ) {
-
-  char *sz = getDefaultPath ( PATH_SGF );
-
-  GTKFileCommand(_("Open match, session, game or position"), 
-		   sz, "load match", "sgf", FDT_NONE_OPEN, PATH_SGF);
-  if ( sz ) 
-    free ( sz );
-}
-
-static void 
-SaveClicked( GtkWidget *pw, gpointer unused ) {
-
-  char *sz = getDefaultFileName ( PATH_SGF );
-  GTKFileCommand(_("Save match, session, game or position"), 
-		   sz, "save", "sgf", FDT_SAVE, PATH_SGF);
-  if ( sz ) 
-    free ( sz );
-}
-
-static void 
-ImportClicked( GtkWidget *pw, gpointer unused ) {
-
-	/* Order of import types in menu */
-	int impTypes[] = {PATH_BKG, PATH_MAT, PATH_POS, PATH_OLDMOVES, PATH_SGG,
-		PATH_TMG, PATH_MAT, PATH_SNOWIE_TXT};
-	char* sz = NULL;
-
-	if (lastImportType != -1)
-		sz = getDefaultPath(impTypes[lastImportType]);
-
-	GTKFileCommand(_("Import match, session, game or position"), 
-		   sz, "import", "N", FDT_IMPORT, impTypes[lastImportType]);
-
-	if (sz)
-		free(sz);
-}
-
-static void 
-ExportClicked( GtkWidget *pw, gpointer unused ) {
-
-	/* Order of export types in menu */
-	int expTypes[] = {PATH_HTML, PATH_GAM, PATH_POS, PATH_MAT, PATH_GAM, 
-		PATH_LATEX, PATH_PDF, PATH_POSTSCRIPT, PATH_EPS, -1, PATH_TEXT, -1, PATH_SNOWIE_TXT};
-	char* sz = NULL;
-
-	if (lastExportType != -1 && expTypes[lastExportType] != -1)
-		sz = getDefaultPath(expTypes[lastExportType]);
-
-	GTKFileCommand(_("Export match, session, game or position"), 
-		   sz, "export", "N", FDT_EXPORT_FULL, expTypes[lastExportType]);
-
-	if (sz)
-		free(sz);
-}
-
 
 extern GtkWidget *
 ToolbarGetStopParent ( GtkWidget *pwToolbar ) {
@@ -420,7 +363,7 @@ ToolbarNew ( void ) {
                               _("Open game, match, session or position"),
                                NULL,
 			       image_from_xpm_d ( stock_open_xpm, pwToolbar),
-                               GTK_SIGNAL_FUNC( OpenClicked ), NULL );
+                               GTK_SIGNAL_FUNC( GTKOpen ), NULL );
 
     /* Import button */
   gtk_toolbar_append_item ( GTK_TOOLBAR ( pwToolbar ),
@@ -428,7 +371,7 @@ ToolbarNew ( void ) {
                                _("Import game, match or position"), 
                                NULL,
 			       image_from_xpm_d ( stock_import_xpm, pwToolbar),
-                               GTK_SIGNAL_FUNC( ImportClicked ), NULL );
+                               GTK_SIGNAL_FUNC( GTKImport ), NULL );
 
 #define TB_BUTTON_ADD(pointer,icon,label,cb,arg,tooltip,tooltip2) \
   pointer = gtk_button_new(); \
@@ -461,14 +404,14 @@ ToolbarNew ( void ) {
 		  GTK_RELIEF_NONE);
   
   /* Save button */
-  TB_BUTTON_ADD(ptw->pwSave, stock_save_xpm, _("Save"), SaveClicked,
+  TB_BUTTON_ADD(ptw->pwSave, stock_save_xpm, _("Save"), GTKSave,
 		  NULL, 
                   _("Save match, session, game or position"), 
 		  NULL) ;
   
   /* Export button */
 
-  TB_BUTTON_ADD(ptw->pwExport, stock_export_xpm, _("Export"), ExportClicked,
+  TB_BUTTON_ADD(ptw->pwExport, stock_export_xpm, _("Export"), GTKExport,
 		  NULL, 
                           _("Export to another format"), 
                                NULL);
