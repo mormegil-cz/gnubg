@@ -592,7 +592,7 @@ class relational:
          played = int(row)
       stats.append(("Games played", played))
 
-      row = self.__runqueryvalue("SELECT * FROM match WHERE (nick_id0 = %d and result = 1)" \
+      row = self.__runqueryvalue("SELECT COUNT(*) FROM match WHERE (nick_id0 = %d and result = 1)" \
         " OR (nick_id1 = %d and result = -1)" % (nick_id, nick_id));
       if row == None:
          wins = 0
