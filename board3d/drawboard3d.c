@@ -1605,7 +1605,7 @@ void InsideFillet(float x, float y, float z, float w, float h, float radius, int
 	/* Bottom */
 	DrawTop(x + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH, w, EDGE_DEPTH - BOARD_FILLET)
 	/* Right */
-	DrawLeft(x + w + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH, h, EDGE_DEPTH - BOARD_FILLET);
+	DrawLeft(x + w + BOARD_FILLET, y + BOARD_FILLET, BASE_DEPTH + LIFT_OFF, h, EDGE_DEPTH - BOARD_FILLET);
 
 	if (tuv)
 	{
