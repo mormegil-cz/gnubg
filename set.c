@@ -48,7 +48,7 @@
 #include <string.h>
 
 #else /* #ifndef WIN32 */
-#include <winsock.h>
+#include <winsock2.h>
 #endif /* #ifndef WIN32 */
 
 #if HAVE_UNISTD_H

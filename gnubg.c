@@ -111,7 +111,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 
 #ifdef WIN32
 #ifdef HAVE_SOCKETS
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 #endif /* WIN32 */
 

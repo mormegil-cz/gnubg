@@ -66,7 +66,7 @@
 #endif /* #if HAVE_SYS_SOCKET_H */
 
 #else /* #ifndef WIN32 */
-#include <winsock.h>
+#include <winsock2.h>
 
 #define EWOULDBLOCK             WSAEWOULDBLOCK
 #define EINPROGRESS             WSAEINPROGRESS

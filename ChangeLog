@@ -1,3 +1,7 @@
+Fri Mar 19 00:26:45 2004 Oystein Johansen  <oystein@gnubg.org>
+
+        * external.c (and other files): changes to use winsock2.h
+
 Thu Mar 18 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Panel bug fixed (removed warning)
