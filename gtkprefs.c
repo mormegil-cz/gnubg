@@ -178,7 +178,7 @@ free_board_design ( gpointer data, gpointer user_data ) {
   g_free ( pbde->szAuthor );
   g_free ( pbde->szBoardDesign );
 
-  g_free ( data );
+  free ( data );
 
 }
 

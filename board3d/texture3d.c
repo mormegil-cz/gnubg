@@ -2,7 +2,7 @@
 * texture3d.c
 * by Jon Kinsey, 2003
 *
-* Function to load DIB texture file
+* Functions to load texture files
 *
 *
 * This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,8 @@
 *
 * $Id$
 */
+
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>

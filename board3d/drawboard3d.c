@@ -3476,6 +3476,8 @@ void preDraw3d(BoardData* bd)
 		gluQuadricTexture(bd->qobj, GL_FALSE);
 	}
 
+	if (bd->boardPoints)
+		freeEigthPoints(bd->boardPoints, bd->curveAccuracy);
 	calculateEigthPoints(&bd->boardPoints, BOARD_FILLET, bd->curveAccuracy);
 
 	preDrawPiece(bd, transparentPieces);
