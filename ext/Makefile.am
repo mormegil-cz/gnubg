@@ -3,8 +3,8 @@
 ## a standalone library, it would be better for them to be installed.
 ##
 
-INCLUDES = -I$(srcdir)/../lib
-LIBS = -L../lib -levent
+INCLUDES = -I$(top_srcdir)/lib
+LIBS = -L$(top_Ssrcdir)/lib -levent
 
 noinst_LIBRARIES = libext.a
 libext_a_SOURCES = ext.c extwin.c tick.xbm
