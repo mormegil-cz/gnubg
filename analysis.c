@@ -64,6 +64,8 @@ const char *aszLuckRating[] = {
 static const float arThrsRating [ RAT_SUPERNATURAL + 1 ] = {
   1e38, 0.060, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 };
 
+evalcontext ecLuck = { 0, TRUE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
+
 extern ratingtype
 GetRating ( const float rError ) {
 
@@ -80,7 +82,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
             const cubeinfo *pci, const evalcontext *pec ) {
 
   int anBoardTemp[ 2 ][ 25 ], i, j;
-  float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
+  float aar[ 6 ][ 6 ], ar[ NUM_ROLLOUT_OUTPUTS ], rMean = 0.0f;
   cubeinfo ciOpp;
   
   /* first with player pci->fMove on roll */
@@ -100,11 +102,15 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
       SwapSides( anBoardTemp );
       
-      /* FIXME should we use EvaluatePositionCubeful here? */
-      if( EvaluatePosition( anBoardTemp, ar, &ciOpp, (evalcontext *) pec ) )
+      if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+                                (evalcontext *) pec ) < 0 )
         return ERR_VAL;
-      
-      aar[ i ][ j ] = - Utility ( ar, &ciOpp );
+
+      if ( pec->fCubeful )
+        aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+      else
+        aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
+
       rMean += aar[ i ][ j ];
 
     }
@@ -123,12 +129,15 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
       SwapSides( anBoardTemp );
       
-      /* FIXME should we use EvaluatePositionCubeful here? */
-      if( EvaluatePosition( anBoardTemp, ar, 
-                            (cubeinfo *) pci, (evalcontext *) pec ) )
+      if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+                                (evalcontext *) pec ) < 0 )
         return ERR_VAL;
-      
-      aar[ i ][ j ] = Utility ( ar, &ciOpp );
+
+      if ( pec->fCubeful )
+        aar[ i ][ j ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
+      else
+        aar[ i ][ j ] = ar[ OUTPUT_EQUITY ];
+
       rMean += aar[ i ][ j ];
 
     }
@@ -160,11 +169,15 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
       SwapSides( anBoardTemp );
       
-      /* FIXME should we use EvaluatePositionCubeful here? */
-      if( EvaluatePosition( anBoardTemp, ar, &ciOpp, (evalcontext *) pec ) )
+      if ( GeneralEvaluationE ( ar, anBoardTemp, &ciOpp, 
+                                (evalcontext *) pec ) < 0 )
         return ERR_VAL;
-      
-      aar[ i ][ j ] = -Utility ( ar, &ciOpp );
+
+      if ( pec->fCubeful )
+        aar[ i ][ j ] = - ar[ OUTPUT_CUBEFUL_EQUITY ];
+      else
+        aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
+
       rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][j ] * 2.0f;
 
     }
@@ -175,8 +188,6 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
 
 static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 			   cubeinfo *pci, int fFirstMove ) {
-
-  evalcontext ecLuck = { 0, TRUE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
 
   if( n0-- < n1-- )
     swap( &n0, &n1 );

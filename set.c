@@ -67,6 +67,15 @@
 
 static int iPlayerSet, iPlayerLateSet;
 
+static evalcontext *pecSet;
+static char *szSet, *szSetCommand;
+static rolloutcontext *prcSet;
+
+static evalsetup *pesSet;
+
+static rng *rngSet;
+
+
 static char szEQUITY[] = N_ ("<equity>"),
     szFILENAME[] = N_ ("<filename>"),
     szNAME[] = N_ ("<name>"),
@@ -287,6 +296,18 @@ extern void CommandSetAnalysisLuck( char *sz ) {
 		   _("Dice rolls will not be analysed.") ) >= 0 )
 	UpdateSetting( &fAnalyseDice );
 }
+
+extern void
+CommandSetAnalysisLuckAnalysis ( char *sz ) {
+
+
+    szSet = _("luck analysis");
+    szSetCommand = "set analysis luckanalysis";
+    pecSet = &ecLuck;
+    HandleCommand( sz, acSetEvaluation );
+
+}
+
 
 extern void CommandSetAnalysisMoves( char *sz ) {
 
@@ -571,7 +592,7 @@ extern void CommandSetAppearance( char *sz ) {
 	BoardPreferencesStart( pwBoard );
 	    
 	while( ParseKeyValue( &sz, apch ) )
-	    BoardPreferencesParam( bd, apch[ 0 ], apch[ 1 ] );
+          BoardPreferencesParam( bd, apch[ 0 ], apch[ 1 ] );
 
 	BoardPreferencesDone( pwBoard );	    
     } else
@@ -803,14 +824,6 @@ extern void CommandSetDisplay( char *sz ) {
     SetToggle( "display", &fDisplay, sz, _("Will display boards for computer "
 	       "moves."), _("Will not display boards for computer moves.") );
 }
-
-static evalcontext *pecSet;
-static char *szSet, *szSetCommand;
-static rolloutcontext *prcSet;
-
-static evalsetup *pesSet;
-
-static rng *rngSet;
 
 extern void CommandSetEvalCandidates( char *sz ) {
 

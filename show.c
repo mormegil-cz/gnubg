@@ -387,11 +387,12 @@ extern void CommandShowAnalysis( char *sz ) {
                "Analysis will be performed with the "
              "following evaluation parameters:") );
   outputl( _("    Chequer play:") );
-    ShowEvalSetup ( &esAnalysisChequer );
-    outputl( _("    Cube decisions:") );
-    ShowEvalSetup ( &esAnalysisCube );
+  ShowEvalSetup ( &esAnalysisChequer );
+  outputl( _("    Cube decisions:") );
+  ShowEvalSetup ( &esAnalysisCube );
 
-    
+  outputl( _("    Luck analysis:") );
+  ShowEvaluation ( &ecLuck );
 
 }
 

@@ -1,3 +1,16 @@
+Fri Dec  6 21:10:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New commands for specifying the evalcontext for luck
+	analysis. (suggested by Oliver Riordan)
+
+	* gnubg.c: new commands "set analysis luckanalysis ..."
+	* gnubg.c (CommandSaveSettings): save luck evalcontext.
+	* set.c (CommandSetAnalysisLuckAnalysis): new function.
+	* show.c (CommandShowAnalysis): output luck evalcontext.
+	* analysis.c (LuckAnalysis): use new luck evalcontext.
+	* analysis.c (LuckNormal, LuckFirst): use general evaluator.
+
+
 Fri Dec  6 18:58:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c (UseDesign): apply chequer shape as well.
