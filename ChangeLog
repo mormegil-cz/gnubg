@@ -1,3 +1,7 @@
+Sat Sep 14 12:17:35 2002  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (real_main): Make `-q' option take precedence over RC file.
+
 Sat Sep 14 11:10:15 2002  Gary Wong  <gtw@gnu.org>
 
 	* sound.c (play_audio_file): Cache used sound files.
