@@ -1,3 +1,8 @@
+Thu Apr 19 15:43:01 2001  Gary Wong  <gtw@research.att.com>
+
+	* sgf.c (WriteStatContext): New function.
+	(WriteTakeAnalysis): Removed.
+
 Wed Apr 18 13:59:06 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (Skill): Return SKILL_DOUBTFUL, if appropriate.

@@ -257,6 +257,10 @@ static void RestoreRootNode( list *pl ) {
 		    pmgi->nAutoDoubles = i;
 		    break;
 		}
+	} else if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'S' ) {
+	    /* GS - Game statistics */
+
+	    /* FIXME */
 	}
 
     AddMoveRecord( pmgi );
@@ -829,22 +833,6 @@ static void WriteDoubleAnalysis( FILE *pf, evaltype et, float ar[],
     }
 }
 
-static void WriteTakeAnalysis( FILE *pf, evaltype et, float r,
-			       evalsetup *pes ) {
-    switch( et ) {
-    case EVAL_EVAL:
-	fprintf( pf, "TA[E %.4f %d%s]", r, pes->ec.nPlies,
-		 pes->ec.fCubeful ? "C" : "" );
-	break;
-
-    case EVAL_ROLLOUT:
-	/* FIXME */
-
-    default:
-	assert( FALSE );
-    }    
-}
-
 static void WriteMove( FILE *pf, int fPlayer, int anMove[] ) {
 
     int i;
@@ -962,6 +950,76 @@ static void WriteSkill( FILE *pf, skilltype st ) {
     }
 }
 
+static void WriteStatContext( FILE *pf, statcontext *psc ) {
+
+    lucktype lt;
+    skilltype st;
+    
+    fputs( "GS", pf );
+    
+    /* FIXME if( moves analysed ) */
+    fprintf( pf, "[M:%d %d %d %d ", psc->anUnforcedMoves[ 0 ],
+	     psc->anUnforcedMoves[ 1 ], psc->anTotalMoves[ 0 ],
+	     psc->anTotalMoves[ 1 ] );
+    for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ )
+	fprintf( pf, "%d %d ", psc->anMoves[ 0 ][ st ],
+		 psc->anMoves[ 1 ][ st ] );
+    fprintf( pf, "%.6f %.6f %.6f %.6f]", psc->arErrorCheckerplay[ 0 ][ 0 ],
+	     psc->arErrorCheckerplay[ 0 ][ 1 ],
+	     psc->arErrorCheckerplay[ 1 ][ 0 ],
+	     psc->arErrorCheckerplay[ 1 ][ 1 ] );
+
+    /* FIXME if( cube analysed ) */
+    fprintf( pf, "[C:%d %d %d %d %d %d %d %d ", psc->anTotalCube[ 0 ],
+	     psc->anTotalCube[ 1 ], psc->anDouble[ 0 ], psc->anDouble[ 1 ],
+	     psc->anTake[ 0 ], psc->anTake[ 1 ], psc->anPass[ 0 ],
+	     psc->anPass[ 1 ] );
+    fprintf( pf, "%d %d %d %d %d %d %d %d %d %d %d %d ",
+	     psc->anCubeMissedDoubleDP[ 0 ], psc->anCubeMissedDoubleDP[ 1 ],
+	     psc->anCubeMissedDoubleTG[ 0 ], psc->anCubeMissedDoubleTG[ 1 ],
+	     psc->anCubeWrongDoubleDP[ 0 ], psc->anCubeWrongDoubleDP[ 1 ],
+	     psc->anCubeWrongDoubleTG[ 0 ], psc->anCubeWrongDoubleTG[ 1 ],
+	     psc->anCubeWrongTake[ 0 ], psc->anCubeWrongTake[ 1 ],
+	     psc->anCubeWrongPass[ 0 ], psc->anCubeWrongPass[ 1 ] );
+    fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
+	     "%.6f ",
+	     psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+	     psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
+	     psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+	     psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
+	     psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+	     psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
+	     psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+	     psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
+	     psc->arErrorWrongTake[ 0 ][ 0 ],
+	     psc->arErrorWrongTake[ 0 ][ 1 ],
+	     psc->arErrorWrongPass[ 0 ][ 0 ],
+	     psc->arErrorWrongPass[ 0 ][ 1 ] );
+    fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
+	     "%.6f]",
+	     psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+	     psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
+	     psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+	     psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
+	     psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+	     psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
+	     psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+	     psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
+	     psc->arErrorWrongTake[ 1 ][ 0 ],
+	     psc->arErrorWrongTake[ 1 ][ 1 ],
+	     psc->arErrorWrongPass[ 1 ][ 0 ],
+	     psc->arErrorWrongPass[ 1 ][ 1 ] );
+
+    /* FIXME if( luck analysed ) */
+    fputs( "[D:", pf );
+    for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ )
+	fprintf( pf, "%d %d ", psc->anLuck[ 0 ][ lt ],
+		 psc->anLuck[ 1 ][ lt ] );
+    fprintf( pf, "%.6f %.6f %.6f %.6f]", psc->arLuck[ 0 ][ 0 ],
+	     psc->arLuck[ 0 ][ 1 ], psc->arLuck[ 1 ][ 0 ],
+	     psc->arLuck[ 1 ][ 1 ] );
+}
+
 static void SaveGame( FILE *pf, list *plGame ) {
 
     list *pl;
@@ -1001,6 +1059,9 @@ static void SaveGame( FILE *pf, list *plGame ) {
     if( pmr->g.fWinner >= 0 )
 	fprintf( pf, "RE[%c+%d%s]", pmr->g.fWinner ? 'B' : 'W',
 		 pmr->g.nPoints, pmr->g.fResigned ? "R" : "" );
+
+    if( pmr->g.sc.fComputed )
+	WriteStatContext( pf, &pmr->g.sc );
 
     for( pl = pl->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
