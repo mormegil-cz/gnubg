@@ -229,6 +229,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord;
 extern int fAutoAnalysis;
+extern int fInvertMET;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
@@ -439,7 +440,6 @@ extern void CommandAccept( char * ),
     CommandExternal( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
-    CommandInvertMatchEquityTable( char * ),
     CommandImportJF( char * ),
     CommandImportMat( char * ),
     CommandImportOldmoves( char * ),
@@ -551,6 +551,7 @@ extern void CommandAccept( char * ),
     CommandSetExportCubeDisplayClose ( char * ),
     CommandSetExportParametersEvaluation ( char * ),
     CommandSetExportParametersRollout ( char * ),
+    CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
     CommandSetMatchID ( char * ),
     CommandSetMET( char * ),
