@@ -232,8 +232,11 @@ extern int CacheResize( cache *pc, int cNew ) {
 
 extern int CacheStats( cache *pc, int *pcLookup, int *pcHit ) {
 
-    *pcLookup = pc->cLookup;
-    *pcHit = pc->cHit;
+    if( pcLookup )
+	*pcLookup = pc->cLookup;
+
+    if( pcHit )
+	*pcHit = pc->cHit;
 
     return 0;
 }
