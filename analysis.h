@@ -82,4 +82,7 @@ extern ratingtype GetRating ( const float rError );
 extern void IniStatcontext ( statcontext *psc );
 extern void AddStatcontext ( statcontext *pscA, statcontext *pscB );
 
+extern void
+DumpStatcontext ( char *szOutput, statcontext *psc, char * sz );
+
 #endif

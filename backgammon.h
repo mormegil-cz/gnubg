@@ -333,6 +333,10 @@ extern void HandleInput( char *sz );
 extern int fReadline;
 #endif
 
+#ifdef WIN32
+extern void WinCopy( char *szOut );
+#endif
+
 extern int iProgressMax, iProgressValue;
 extern char *pcProgress;
 

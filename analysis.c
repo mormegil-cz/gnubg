@@ -673,12 +673,12 @@ IniStatcontext ( statcontext *psc ) {
 
 }
 
-static void
-DumpStatcontext ( statcontext *psc, char * sz ) {
+extern void
+DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 
   int i;
   ratingtype rt[ 2 ];
-
+  char szTemp[1024];
 #if 0
 
   /* dump the contents of statcontext to stdin,
@@ -740,11 +740,12 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
   /* FIXME: calculate ratings (ET, World class, etc.) */
   /* FIXME: use output*() functions, not printf */
   
-  printf ( "Player\t\t\t\t%-15s\t\t%-15s\n\n",
+  sprintf ( szTemp, "Player\t\t\t\t%-15s\t\t%-15s\n\n",
            ap[ 0 ].szName, ap [ 1 ].szName );
-  
+  strcpy ( szOutput, szTemp);
+ 
   if( psc->fMoves ) {
-      printf( "Checkerplay statistics:\n\n"
+      sprintf( szTemp, "Checkerplay statistics:\n\n"
 	      "Total moves:\t\t\t%3d\t\t\t%3d\n"
 	      "Unforced moves:\t\t\t%3d\t\t\t%3d\n\n"
 	      "Moves marked very good\t\t%3d\t\t\t%3d\n"
@@ -770,9 +771,10 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 	      psc->anMoves[ 1 ][ SKILL_BAD ],
 	      psc->anMoves[ 0 ][ SKILL_VERYBAD ],
 	      psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
+      strcat ( szOutput, szTemp);
 
-      if ( ms.nMatchTo )
-	  printf ("Error rate (total)\t\t"
+      if ( ms.nMatchTo ){
+	  sprintf ( szTemp,"Error rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Error rate (pr. move)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
@@ -788,8 +790,9 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 		  psc->anUnforcedMoves[ 1 ],
 		  psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
 		  psc->anUnforcedMoves[ 1 ] );
-      else
-	  printf ("Error rate (total)\t\t"
+          strcat ( szOutput, szTemp);
+      } else {
+	  sprintf ( szTemp,"Error rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Error rate (pr. move)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
@@ -805,17 +808,20 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 		  psc->anUnforcedMoves[ 1 ],
 		  psc->arErrorCheckerplay[ 1 ][ 1 ] /
 		  psc->anUnforcedMoves[ 1 ] );
+          strcat ( szOutput, szTemp);
+      }
 
       for ( i = 0 ; i < 2; i++ )
 	  rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
 				psc->anUnforcedMoves[ i ] );
       
-      printf ( "Checker play rating:\t\t%-15s\t\t%-15s\n\n",
+      sprintf ( szTemp, "Checker play rating:\t\t%-15s\t\t%-15s\n\n",
 	       aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+      strcat ( szOutput, szTemp);
   }
 
   if( psc->fDice ) {
-      printf ( "Rolls marked very lucky\t\t%3d\t\t\t%3d\n"
+      sprintf ( szTemp, "Rolls marked very lucky\t\t%3d\t\t\t%3d\n"
 	       "Rolls marked lucky\t\t%3d\t\t\t%3d\n"
 	       "Rolls unmarked\t\t\t%3d\t\t\t%3d\n"
 	       "Rolls marked unlucky\t\t%3d\t\t\t%3d\n"
@@ -830,9 +836,10 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 	       psc->anLuck[ 1 ][ LUCK_BAD ],
 	       psc->anLuck[ 0 ][ LUCK_VERYBAD ],
 	       psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
-      
-      if ( ms.nMatchTo )
-	  printf ("Luck rate (total)\t\t"
+      strcat ( szOutput, szTemp);
+       
+      if ( ms.nMatchTo ){
+	  sprintf ( szTemp,"Luck rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Luck rate (pr. move)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
@@ -848,8 +855,9 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 		  psc->anTotalMoves[ 1 ],
 		  psc->arLuck[ 1 ][ 1 ] * 100.0f /
 		  psc->anTotalMoves[ 1 ] );
-      else
-	  printf ("Luck rate (total)\t\t"
+          strcat ( szOutput, szTemp);
+      } else {
+	  sprintf ( szTemp,"Luck rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Luck rate (pr. move)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
@@ -865,12 +873,15 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 		  psc->anTotalMoves[ 1 ],
 		  psc->arLuck[ 1 ][ 1 ] /
 		  psc->anTotalMoves[ 1 ] );
+          strcat ( szOutput, szTemp);
+      }
   }
 
   if( psc->fCube ) {
-      printf ( "\nCube decisions statistics:\n\n" );
+      sprintf ( szTemp, "\nCube decisions statistics:\n\n" );
+      strcat ( szOutput, szTemp);
 
-      printf ( "Total cube decisions\t\t%3d\t\t\t%3d\n"
+      sprintf ( szTemp, "Total cube decisions\t\t%3d\t\t\t%3d\n"
 	       "Doubles\t\t\t\t%3d\t\t\t%3d\n"
 	       "Takes\t\t\t\t%3d\t\t\t%3d\n"
 	       "Pass\t\t\t\t%3d\t\t\t%3d\n\n",
@@ -882,9 +893,10 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 	       psc->anTake[ 1 ],
 	       psc->anPass[ 0 ], 
 	       psc->anPass[ 1 ] );
+      strcat ( szOutput, szTemp);
       
-      if ( ms.nMatchTo )
-	  printf ("Missed doubles around DP\t"
+      if ( ms.nMatchTo ){
+	  sprintf ( szTemp,"Missed doubles around DP\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Missed doubles around TG\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
@@ -932,8 +944,9 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 		  psc->anCubeWrongPass[ 1 ],
 		  psc->arErrorWrongPass[ 1 ][ 0 ],
 		  psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
-      else
-	  printf ("Missed doubles around DP\t"
+          strcat ( szOutput, szTemp);
+      } else {
+	  sprintf ( szTemp,"Missed doubles around DP\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Missed doubles around TG\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
@@ -981,7 +994,8 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 		  psc->anCubeWrongPass[ 1 ],
 		  psc->arErrorWrongPass[ 1 ][ 0 ],
 		  psc->arErrorWrongPass[ 1 ][ 1 ] );
-      
+          strcat ( szOutput, szTemp);
+      }
       for ( i = 0 ; i < 2; i++ )
 	  rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
 				  + psc->arErrorMissedDoubleTG[ i ][ 0 ]
@@ -991,8 +1005,9 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 				  + psc->arErrorWrongPass[ i ][ 0 ] ) /
 				psc->anTotalCube[ i ] );
       
-      printf ( "\nCube decision rating:\t\t%-15s\t%-15s\n\n",
+      sprintf ( szTemp, "\nCube decision rating:\t\t%-15s\t\t%-15s\n\n",
 	       aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+      strcat ( szOutput, szTemp);
   }
 
   if( psc->fMoves && psc->fCube ) {
@@ -1007,14 +1022,17 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
 				( psc->anTotalCube[ i ] +
 				  psc->anUnforcedMoves[ i ] ) );
       
-      printf ( "Overall rating:\t\t\t%-15s\t\t%-15s\n\n",
+      sprintf ( szTemp, "Overall rating:\t\t\t%-15s\t\t%-15s\n\n",
 	       aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+      strcat ( szOutput, szTemp);
   }
 }
 
 
 extern void
 CommandShowStatisticsMatch ( char *sz ) {
+
+    char szOutput[4096];
 
 #if USE_GTK
     if ( fX ) {
@@ -1023,7 +1041,8 @@ CommandShowStatisticsMatch ( char *sz ) {
     }
 #endif
 
-    DumpStatcontext ( &scMatch, "Statistics for all games");
+    DumpStatcontext ( szOutput, &scMatch, "Statistics for all games");
+    outputl(szOutput);
 }
 
 
@@ -1039,6 +1058,7 @@ extern void
 CommandShowStatisticsGame ( char *sz ) {
 
     movegameinfo *pmgi;
+    char szOutput[4096];
     
     if( !plGame ) {
 	outputl( "No game is being played." );
@@ -1056,5 +1076,6 @@ CommandShowStatisticsGame ( char *sz ) {
     }
 #endif
 
-    DumpStatcontext ( &pmgi->sc, "Statistics for current game");
+    DumpStatcontext ( szOutput, &pmgi->sc, "Statistics for current game");
+    outputl( szOutput );
 }

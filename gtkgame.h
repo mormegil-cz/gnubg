@@ -87,7 +87,9 @@ extern void GTKUpdateAnnotations( void );
 extern void GTKShowMatchEquityTable( int n );
 extern int GTKGetManualDice( int an[ 2 ] );
 extern void GTKShowVersion( void );
-
+#ifdef WIN32
+extern void GTKWinCopy( GtkWidget *widget, gpointer data);
+#endif
 extern int fTTY;
 
 #endif

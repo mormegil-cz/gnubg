@@ -3520,6 +3520,10 @@ extern void GTKEval( char *szOutput ) {
 					FALSE, NULL, NULL ),
 	*pwText = gtk_text_new( NULL, NULL );
     GdkFont *pf;
+#if WIN32
+    GtkWidget *pwButtons,
+        *pwCopy = gtk_button_new_with_label( "Copy" );
+#endif
 
 #if WIN32
     /* Windows fonts come out smaller than you ask for, for some reason... */
@@ -3528,6 +3532,14 @@ extern void GTKEval( char *szOutput ) {
 #else
     pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
 			"*-*-*-m-*-iso8859-1" );
+#endif
+
+#if WIN32
+    /* FIXME There should be some way to extract the text on Unix as well */
+    pwButtons = DialogArea( pwDialog, DA_BUTTONS );
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
+    gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
+			GTK_SIGNAL_FUNC( GTKWinCopy ), (gpointer) szOutput );
 #endif
     
     gtk_text_set_editable( GTK_TEXT( pwText ), FALSE );
@@ -3542,7 +3554,7 @@ extern void GTKEval( char *szOutput ) {
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
+ 
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
@@ -3551,6 +3563,12 @@ extern void GTKEval( char *szOutput ) {
 
     gdk_font_unref( pf );
 }
+
+#if WIN32
+extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
+   WinCopy( (char *) data);
+}
+#endif
 
 static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
 
@@ -4295,6 +4313,20 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
   int i;
   char sz[ 32 ];
   ratingtype rt[ 2 ];
+#if WIN32
+  char szOutput[4096];
+    GtkWidget *pwButtons,
+        *pwCopy = gtk_button_new_with_label( "Copy" );
+#endif
+
+#if WIN32
+    /* FIXME There should be some way to extract the text on Unix as well */
+    pwButtons = DialogArea( pwDialog, DA_BUTTONS );
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
+    DumpStatcontext( szOutput, psc, szTitle);
+    gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
+			GTK_SIGNAL_FUNC( GTKWinCopy ), (gpointer) szOutput );
+#endif
 
   for( i = 0; i < 3; i++ ) {
       gtk_clist_set_column_auto_resize( GTK_CLIST( pwStats ), i, TRUE );

@@ -2586,6 +2586,9 @@ extern void CommandImportSGG( char *sz ) {
 extern void CommandCopy( char *sz ) {
   char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   char szOut[ 2048 ];
+
+  /* FIXME - Rewrite for new WinCopy command */
+
 #ifdef WIN32
   DrawBoard( szOut, ms.anBoard, 1, aps );
   strcat(szOut, "\n");
@@ -2611,6 +2614,29 @@ extern void CommandCopy( char *sz ) {
   puts( DrawBoard( szOut, ms.anBoard, 1, aps ) );
 #endif
 }
+
+#ifdef WIN32
+extern void WinCopy( char *szOut ){
+
+  if(OpenClipboard(0)) {
+
+    HGLOBAL clipbuffer;
+    char * buf;
+
+    EmptyClipboard();
+    clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(szOut)+1 );
+    buf = (char*)GlobalLock(clipbuffer);
+    strcpy(buf, szOut);
+    GlobalUnlock(clipbuffer);
+    SetClipboardData(CF_TEXT, clipbuffer);
+    CloseClipboard();
+
+    } else {
+
+    outputl( "Can't open clipboard" ); 
+  }
+}
+#endif
 
 static void LoadRCFiles( void ) {
 
