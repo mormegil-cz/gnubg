@@ -2035,8 +2035,16 @@ enum {
     0: save base
     1: from base
  */
-DECLARE_THREADSTATICGLOBAL (int, nContext[3], ({-1, -1, -1}));
-
+#if PROCESSING_UNITS
+DECLARE_THREADSTATICGLOBAL (int, nContext[3], {});
+#else
+/* we can't use DECLARE_THREADSTATICGLOBAL here:
+   we can't use commas inside the initialiser {-1,-1,-1} because they're
+   recongised as macro arg separtors; and bracing them: ({-1,-1,-1})
+   would generate: static int nContext[3]=({-1,-1,-1}) which 
+   generates a compiler error */
+static int nContext[3] = {-1, -1, -1};
+#endif
 
 static inline NNEvalType
 NNevalAction(positionclass p)

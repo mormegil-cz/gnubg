@@ -1379,36 +1379,6 @@ GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
 
 
-extern int
-UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
-
-  int old_points[ 28 ];
-  int i, j;
-  int an[ 28 ];
-  int rc;
-
-  memcpy( old_points, bd->points, sizeof old_points );
-
-  write_board ( bd, anBoard );
-
-  for ( i = 0, j = 0; i < 28; ++i )
-    if ( old_points[ i ] != bd->points[ i ] )
-      an[ j++ ] = i;
-
-  if ( ( rc = update_move ( bd ) ) )
-    /* illegal move */
-    memcpy( bd->points, old_points, sizeof old_points );
-
-  /* redraw points */
-
-  for ( i = 0; i < j; ++i )
-    board_invalidate_point( bd, an[ i ] );
-
-  return rc;
-
-}
-
-
 
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
@@ -1600,12 +1570,35 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
             /* we've found a move: update board  */
 
-            if ( UpdateMove( bd, anBoard ) ) {
-              /* should not happen as ForcedMove and GreadyBearoff
-                 always return legal moves */
-              assert ( FALSE );
-            }
+            int old_points[ 28 ];
+            int i, j;
+            int an[ 28 ];
 
+	    memcpy( old_points, bd->points, sizeof old_points );
+
+            write_board ( bd, anBoard );
+
+            for ( i = 0, j = 0; i < 28; ++i )
+              if ( old_points[ i ] != bd->points[ i ] )
+                an[ j++ ] = i;
+
+            if ( !update_move ( bd ) ) {
+
+              /* redraw points */
+
+              for ( i = 0; i < j; ++i )
+                board_invalidate_point( bd, an[ i ] );
+
+            }
+            else {
+
+              /* whoops: this should not happen as ForcedMove and GreadyBearoff
+                 only returns legal moves */
+
+              assert ( FALSE );
+
+            }
+            
           }
 
           return TRUE;
@@ -2314,11 +2307,16 @@ static gint board_blink_timeout( gpointer p ) {
     BoardData *pbd = board->board_data;
     int src, dest, src_cheq = 0, dest_cheq = 0, colour;
     static int blink_move, blink_count;
+    
+    /* board_blink_timeout is called by GDK (not GTK+) and
+        thus must be thread-safe */
+    gdk_threads_enter ();
 
     if( blink_move >= 8 || animate_move_list[ blink_move ] < 0 ||
 	fInterrupt ) {
 	blink_move = 0;
 	animation_finished = TRUE;
+        gdk_threads_leave ();
 	return FALSE;
     }
 
@@ -2361,6 +2359,8 @@ static gint board_blink_timeout( gpointer p ) {
     gdk_window_process_updates( pbd->drawing_area->window, FALSE );
 #endif
 
+    gdk_threads_leave ();
+
     return TRUE;
 }
 
@@ -2371,6 +2371,9 @@ static gint board_slide_timeout( gpointer p ) {
     int src, dest, colour;
     static int slide_move, slide_phase, x, y, x_mid, x_dest, y_dest, y_lift;
     
+    /* board_slide_timeout is called by GDK (not GTK+) and
+        thus must be thread-safe */
+    gdk_threads_enter ();
     if( fInterrupt && pbd->drag_point >= 0 ) {
 	board_end_drag( pbd->drawing_area, pbd );
 	pbd->drag_point = -1;
@@ -2380,6 +2383,7 @@ static gint board_slide_timeout( gpointer p ) {
 	fInterrupt ) {
 	slide_move = slide_phase = 0;
 	animation_finished = TRUE;
+        gdk_threads_leave ();
 	return FALSE;
     }
     
@@ -2481,7 +2485,8 @@ static gint board_slide_timeout( gpointer p ) {
 	    
 	    playSound( SOUND_CHEQUER );
 
-	    return TRUE;
+	    gdk_threads_leave ();
+            return TRUE;
 	}
 	break;
 	
@@ -2492,6 +2497,7 @@ static gint board_slide_timeout( gpointer p ) {
     board_drag( pbd->drawing_area, pbd, x * rdAppearance.nSize,
 		y * rdAppearance.nSize );
     
+    gdk_threads_leave ();
     return TRUE;
 }
 

@@ -21,8 +21,6 @@
 
 #include "config.h"
 
-#define PROCESSING_UNITS 1
-
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif

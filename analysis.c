@@ -528,7 +528,7 @@ updateStatcontext ( statcontext *psc,
 
 
 extern int
-AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
+AnalyzeMove1 ( moverecord *pmr, matchstate *pms, statcontext *psc,
               evalsetup *pesChequer, evalsetup *pesCube,
               movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] ) {
@@ -883,15 +883,73 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	break;
     }
   
+  return 0;
+}
+
+
+extern int
+AnalyzeMoveList ( int cMoves, moverecord *pmr, 
+              matchstate *pms, list *plGame, statcontext *psc,
+              evalsetup *pesChequer, evalsetup *pesCube,
+              movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
+	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] ) {
+
+    int nMove;
+    
+    for (nMove = 0; nMove < cMoves; nMove ++) {
+        if (AnalyzeMove1 (&pmr[nMove], pms, psc, pesChequer, pesCube, aamf,
+                fUpdateStatistics, afAnalysePlayers) < 0) {
+            return -1;
+        }
+    
+        ApplyMoveRecord( pms, plGame, pmr );
+    
+        if ( fUpdateStatistics ) {
+            psc->fMoves = fAnalyseMove;
+            psc->fCube = fAnalyseCube;
+            psc->fDice = fAnalyseDice;
+        }
+        
+    }
+    
+    return 0;
+}
+
+extern int
+AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
+              evalsetup *pesChequer, evalsetup *pesCube,
+              movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
+	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] ) {
+
+    if (AnalyzeMove1 (pmr, pms, psc, pesChequer, pesCube, aamf,
+                fUpdateStatistics, afAnalysePlayers) < 0) {
+        return -1;
+    }
+              
     ApplyMoveRecord( pms, plGame, pmr );
-  
+
     if ( fUpdateStatistics ) {
-      psc->fMoves = fAnalyseMove;
-      psc->fCube = fAnalyseCube;
-      psc->fDice = fAnalyseDice;
+        psc->fMoves = fAnalyseMove;
+        psc->fCube = fAnalyseCube;
+        psc->fDice = fAnalyseDice;
     }
   
     return 0;
+}
+
+
+static int
+CreateTask_AnalyseMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
+              evalsetup *pesChequer, evalsetup *pesCube,
+              movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
+	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] ) {
+
+    int	nMoves = 0;
+
+              
+    ApplyMoveRecord( pms, plGame, pmr );
+
+    return nMoves;
 }
 
 
@@ -904,6 +962,70 @@ AnalyzeGame ( list *plGame ) {
     matchstate msAnalyse;
 
     assert( pmgi->mt == MOVE_GAMEINFO );
+    
+#if PROCESSING_UNITS && 0
+
+    TaskEngine_Init ();
+
+    IniStatcontext( &pmgi->sc );
+
+    ProgressValueAdd( 1 );
+    
+    pl = plGame->plNext;
+    
+    /* parse the whole match, posting tasks to compute (1 task = 1 move
+        analysis [1]), until all moves have been posted and all results have
+        been computed.
+       Note [1]: sequences of moves like DOUBLE, [BEAVER, ...] DROP|TAKE
+        will be packed into a single task -- see AnalyseMove1() for details
+    */
+    while ((pl != plGame || cPendingResults > 0) && !fInterrupt) {
+    
+        pu_task *pt;
+        
+        while (pl != plGame && !TaskEngine_Full ()) {
+            /* create new tasks with the moves to analyse */
+            int n;
+            pmr = pl->p;
+    
+            n = CreateTask_AnalyseMove ( pmr, &msAnalyse, plGame, &pmgi->sc, 
+                            &esAnalysisChequer,
+                            &esAnalysisCube, aamfAnalysis, TRUE, 
+                            afAnalysePlayers );
+            if (n < 0) {
+                fInterrupt = TRUE;
+                break;
+            }
+            
+            cPendingResults ++;
+            ProgressValueAdd( n );
+            
+            while (n -- > 0) 
+                pl = pl->plNext;
+        }
+        
+        while ((pt = TaskEngine_GetCompletedTask ()) && !fInterrupt) {
+            /* retrieve and integrate all results from completed tasks */
+            
+            Analyse_IntegrateResults (&pt->taskdata.eval);
+            
+            FreeTask (pt);
+            cPendingResults --;
+        }
+
+            
+    } /* while ((pl != plGame || cPendingResults > 0) && !fInterrupt) */
+
+    TaskEngine_Shutdown ();
+
+    if (fInterrupt) {
+        IniStatcontext( &pmgi->sc );
+        /* FIXME: dealloc remaining tasks */
+        
+        return -1;
+    }
+    
+#else
     
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
@@ -919,6 +1041,8 @@ AnalyzeGame ( list *plGame ) {
  	    return -1;
 	}
     }
+    
+#endif
     
     return 0;
 }

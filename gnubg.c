@@ -754,6 +754,7 @@ command cER = {
     { "weights", CommandNewWeights, N_("Create new (random) neural net "
       "weights"), szOPTSIZE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+#if PROCESSING_UNITS
 }, acProcunitsAdd[] = {
     { "local", CommandProcunitsAddLocal, N_("Add n local processing unit(s)"), 
       szOPTN, NULL },
@@ -776,6 +777,7 @@ command cER = {
     { "stop", CommandProcunitsStop, N_("Stop/disconnect a processing unit"), 
       szPROCUNITID, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+#endif
 }, acRecordAdd[] = {
     { "game", CommandRecordAddGame,
       N_("Log the game statistics to the player records"), NULL, NULL },
@@ -990,6 +992,7 @@ command cER = {
       N_("Show winning chances as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
+#if PROCESSING_UNITS
 }, acSetProcunitsRemote[] = {
     { "mode", CommandSetProcunitsRemoteMode,
         N_("Set host in master or slave remote mode"), szSLAVEMASTER, &cSlaveMaster },
@@ -1006,6 +1009,7 @@ command cER = {
     { "remote", NULL, 
         N_("Set remote processing units parameters"), NULL, acSetProcunitsRemote },
     { NULL, NULL, NULL, NULL, NULL }
+#endif
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, N_("Use the ANSI C rand() (usually linear "
       "congruential) generator"), szOPTSEED, NULL },
@@ -1555,7 +1559,9 @@ command cER = {
     { "postcrawford", CommandSetPostCrawford, 
       N_("Set whether this is a post-Crawford game"), szONOFF, &cOnOff },
     { "priority", NULL, N_("Set the priority of gnubg"), NULL, acSetPriority },
+#if PROCESSING_UNITS
     { "pu", NULL, N_("Set processing units parameteres"), NULL, acSetProcunits },
+#endif
     { "prompt", CommandSetPrompt, N_("Customise the prompt gnubg prints when "
       "ready for commands"), szPROMPT, NULL },
     { "record", CommandSetRecord, N_("Set whether all games in a session are "
@@ -1588,6 +1594,7 @@ command cER = {
     { "session", CommandShowStatisticsSession, 
       N_("Compute statistics for every game in the session"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+#if PROCESSING_UNITS
 }, acShowProcunitsRemote[] = {
     { "mask", CommandShowProcunitsRemoteMask, 
       N_("Show remote processing IP address mask"), NULL, NULL },
@@ -1602,6 +1609,7 @@ command cER = {
     { "remote", NULL, 
       N_("Show information about remote processing"), NULL, acShowProcunitsRemote },
     { NULL, NULL, NULL, NULL, NULL }
+#endif
 }, acShow[] = {
     { "analysis", CommandShowAnalysis, N_("Show parameters used for analysing "
       "moves"), NULL, NULL },
@@ -1682,8 +1690,10 @@ command cER = {
     { "player", CommandShowPlayer, N_("View per-player options"), NULL, NULL },
     { "postcrawford", CommandShowCrawford, 
       N_("See if this is post-Crawford play"), NULL, NULL },
+#if PROCESSING_UNITS
     { "pu", NULL, N_("Show processing units info "
         "and parameters"), NULL, acShowProcunits },
+#endif
     { "prompt", CommandShowPrompt, N_("Show the prompt that will be printed "
       "when ready for commands"), NULL, NULL },
     { "record", CommandRecordShow, N_("View the player records"), szOPTNAME,
@@ -2618,6 +2628,8 @@ static guint nUpdate;
 
 static gint UpdateBoard( gpointer p ) {
 
+    gdk_threads_enter ();
+    
     /* we've waited long enough -- force this update */
     nLastRequest = LastKnownRequestProcessed( GDK_DISPLAY() );
     
@@ -2625,6 +2637,7 @@ static gint UpdateBoard( gpointer p ) {
 
     nUpdate = 0;
 
+    gdk_threads_leave ();
     return FALSE; /* remove idle handler */
 }
 #endif
@@ -5666,7 +5679,8 @@ extern gint NextTurnNotify( gpointer p )
 extern int NextTurnNotify( event *pev, void *p )
 #endif
 {
-
+    gdk_threads_enter ();
+    
     NextTurn( TRUE );
 
     ResetInterrupt();
@@ -5689,6 +5703,7 @@ extern int NextTurnNotify( event *pev, void *p )
 	fNeedPrompt = FALSE;
     }
     
+    gdk_threads_leave ();
     return FALSE; /* remove idle handler, if GTK */
 }
 #endif
@@ -6547,6 +6562,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 
 #if PROCESSING_UNITS
+    #if USE_GTK
+        g_thread_init (NULL);
+    #endif
     InitThreadGlobalStorage ();
     CreateThreadGlobalStorage ();
     InitProcessingUnits ();

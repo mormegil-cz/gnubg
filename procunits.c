@@ -1,6 +1,28 @@
+/*
+ * procunits.c
+ *
+ * by Olivier Baur <olivier.baur@noos.fr>, 2003
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#if PROCESSING_UNITS
 
 #include <stdlib.h>
 #include <pthread.h>
@@ -15,6 +37,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <netdb.h>
 #endif
 
 #if TIME_WITH_SYS_TIME
@@ -34,6 +57,10 @@
 
 #include <signal.h>
 #include <stddef.h>
+
+#if USE_GTK
+#include "gtkgame.h"
+#endif
 
 #include "backgammon.h"
 #include "procunits.h"
@@ -55,6 +82,8 @@
     units communication (used for "quick" messages only, not for 
     polling rollout results!) */
 #define RPU_TIMEOUT 5
+
+#define DEFAULT_JOBSIZE (100 * 1024)
 
 
 static int 		gfProcessingUnitsInitialised = FALSE;
@@ -97,6 +126,11 @@ pthread_mutex_t		mutexTaskListAccess;
 
 /* this mutex for debugging purposes only */
 pthread_mutex_t		mutexCPUAccess;
+
+
+DECLARE_THREADSTATICGLOBAL (char *, gpPackedData, NULL);
+DECLARE_THREADSTATICGLOBAL (int, gPackedDataPos, 0);
+DECLARE_THREADSTATICGLOBAL (int, gPackedDataSize, 0);
 
 
 /* prototypes of threaded rollout functions */
@@ -220,7 +254,8 @@ extern void InitProcessingUnits (void)
        N should be set to the number of processors available on the host */
 
     for (i = 0; i < nProcs ; i++) {
-        CreateProcessingUnit (pu_type_local, pu_stat_ready, pu_task_info|pu_task_rollout, 1);
+        CreateProcessingUnit (pu_type_local, pu_stat_ready, 
+                        pu_task_info|pu_task_rollout|pu_task_analysis, 1);
     }
     
     /* create remote processing units: according to the information returned
@@ -288,6 +323,7 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
 
         ClearStats (&ppu->rolloutStats);
         ClearStats (&ppu->evalStats);
+        ClearStats (&ppu->analysisStats);
 
         pthread_mutex_init (&ppu->mutexStatusChanged, NULL);
         pthread_cond_init (&ppu->condStatusChanged, NULL);
@@ -299,15 +335,16 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
 
 /* Create and START a remote processing unit */
 
-static procunit * CreateRemoteProcessingUnit (struct in_addr *inAddress, int fWait)
+static procunit * CreateRemoteProcessingUnit (char *szAddress, int fWait)
 {
 
-    procunit 	*ppu = CreateProcessingUnit (pu_type_remote, 
-                            pu_stat_busy, pu_task_info|pu_task_rollout, 0);
-        /* create rpu in busy state so it can't be used for now (connecting) */
+    procunit 	*ppu = CreateProcessingUnit (pu_type_remote, pu_stat_busy, pu_task_none, 0);
+        /* create rpu in busy state so it can't be used for now (connecting);
+            the task mask and queue size will be set during handshake with remote half of rpu */
     
     if (ppu != NULL) {
-        ppu->info.remote.inAddress = *inAddress;
+        bzero ((char *) &ppu->info.remote.inAddress, sizeof (ppu->info.remote.inAddress));
+        strncpy (ppu->info.remote.hostName, szAddress, MAX_HOSTNAME);
         ppu->info.remote.fTasksAvailable = FALSE;
         pthread_mutex_init (&ppu->info.remote.mutexTasksAvailable, NULL);
         pthread_cond_init (&ppu->info.remote.condTasksAvailable, NULL);
@@ -350,10 +387,13 @@ static void PrintProcessingUnitInfo (procunit *ppu)
     /* make up "tasks" string */
     if (ppu->taskMask & pu_task_rollout) strcat (asTasks, "rollout ");
     if (ppu->taskMask & pu_task_eval) strcat (asTasks, "eval ");
+    if (ppu->taskMask & pu_task_analysis) strcat (asTasks, "analysis ");
     if (asTasks[0] == 0) strcat (asTasks, "none");
     /* make remote procunit address string */
     if (ppu->type == pu_type_remote) {
-        sprintf (asAddress, "%s", inet_ntoa (ppu->info.remote.inAddress));
+        sprintf (asAddress, "%s:%d (%s)", inet_ntoa (ppu->info.remote.inAddress.sin_addr),
+                                    ppu->info.remote.inAddress.sin_port,
+                                    ppu->info.remote.hostName);
     }
     outputf ("  %2i  %-6s  %-10s %5d  %-20s  %-20s\n" ,
                 ppu->procunit_id, 
@@ -482,7 +522,9 @@ static int StartProcessingUnit (procunit *ppu, int fWait)
                     return 0;
             }
             else
-                StartRemoteProcessingUnit (ppu);
+                return StartRemoteProcessingUnit (ppu);
+            break;
+                
         default:
           assert ( FALSE );
           break;
@@ -1202,6 +1244,7 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
             while (!gResultsAvailable && !fInterrupt) 
                 WaitForCondition (&condResultsAvailable, &mutexResultsAvailable, 
                                     NULL, NULL);
+                if (fAction) fnAction ();
         }
         gResultsAvailable = FALSE;
         pthread_mutex_unlock (&mutexResultsAvailable);
@@ -1210,6 +1253,28 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
     
     return NULL;
 }
+
+
+
+
+
+/* use (UN)PACKJOB to (un)pack a scalar, eg. char, int, float, etc. */
+#define PACKJOB(x) 			n += RPU_PackJob ((char *) &(x), 1, FALSE,sizeof(x))
+#define UNPACKJOB(x) 			n += RPU_UnpackJob ((char *) &(x), FALSE, sizeof (x), FALSE)
+
+/* use (UN)PACKJOBN to (un)pack an array of scalars, eg. int foo[4] */
+#define PACKJOBN(x,N) 			n += RPU_PackJob ((char *) (x), N, TRUE, sizeof(*x))
+#define UNPACKJOBN(x) 			n += RPU_UnpackJob ((char *) &(x), TRUE, sizeof (*x), FALSE)
+
+/* use (UN)PACKJOBN to (un)pack an alloced array of scalars, 
+    eg. int *foo = malloc (4 * sizeof (int)) */
+#define PACKJOBPTR(x,N,t) 		n += RPU_PackJob ((char *) (x), N, TRUE, sizeof(t))
+#define UNPACKJOBPTR(x,t) 		n += RPU_UnpackJob ((char *) &(x), TRUE, sizeof(t), TRUE)
+
+/* use (UN)PACKJOBSTRUCTPTR to (un)pack an alloced array of structs, 
+    eg. cubeinfo *foo = malloc (4 * sizeof (cubeinfo)) */
+#define PACKJOBSTRUCTPTR(x,N,t) 	n += RPU_PackJobStruct_##t ((x), N)
+#define UNPACKJOBSTRUCTPTR(x,t) 	n += RPU_UnpackJobStruct_##t (&(x))
 
 
 static void RPU_DumpData (unsigned char *data, int len)
@@ -1230,105 +1295,169 @@ static void RPU_DumpData (unsigned char *data, int len)
 
 
 
-static int RPU_PackJob (char **job, int *jobSize, int *p, void *data, int size)
+static int RPU_PackWrite (char *data, int size)
 {
-    if (RPU_DEBUG_PACK) 
-        fprintf (stderr, "  > RPU_PackJob(): size=%d bytes at p=+%d\n", size, *p);
-        
-    while ((*p) + size > *jobSize) {
-      char *newJob;
+    char *p = THREADGLOBAL(gpPackedData);
+    p += THREADGLOBAL(gPackedDataPos);
+    
+    #if __BIG_ENDIAN__
+        memcpy (p, data, size);
+    #else
+        int i;
+        for (i = size - 1; i >= 0; i --) 
+            *(p ++) = data[i];
+    #endif
+    
+    THREADGLOBAL(gPackedDataPos) += size;
+
+    return size;
+}
+
+static int RPU_PackJob (char *data, int cItems, int fSeveral, int itemSize)
+{
+    int n = 0;
+    int neededSize = cItems * itemSize + (fSeveral ? sizeof (int) : 0);
+    
+    if (RPU_DEBUG_PACK > 1) {
+        fprintf (stderr, "  > RPU_PackJob(): %d item(s) of size %d bytes, "
+                        "total size=%d bytes at p=+%d\n", cItems, itemSize, 
+                        neededSize, THREADGLOBAL(gPackedDataPos));
+        RPU_DumpData (data, cItems * itemSize);
+    }
+    
+    /* resize gPackedData if necessary */
+    while (THREADGLOBAL(gPackedDataPos) + neededSize > THREADGLOBAL(gPackedDataSize)) {
+      char *pNewPackedData;
         if (RPU_DEBUG_PACK) fprintf (stderr, "[Resizing Job]");
         /* no more room, let's double the size of the job */
-        *jobSize *= 2;
-        newJob = realloc (*job, *jobSize);
-        if (newJob == NULL) {
+        THREADGLOBAL(gPackedDataSize) *= 2;
+        pNewPackedData = realloc (THREADGLOBAL(gpPackedData), THREADGLOBAL(gPackedDataSize));
+        if (pNewPackedData == NULL) {
             /* realloc won't work: let's do it the long way */
-            newJob = malloc (*jobSize);
-            assert (newJob != NULL);
-            memcpy (newJob, *job, *jobSize / 2);
-            free (*job);
-            *job = newJob;
+            pNewPackedData = malloc (THREADGLOBAL(gPackedDataSize));
+            assert (pNewPackedData != NULL);
+            memcpy (pNewPackedData, THREADGLOBAL(gpPackedData), THREADGLOBAL(gPackedDataSize) / 2);
+            free (THREADGLOBAL(gpPackedData));
+            THREADGLOBAL(gpPackedData) = pNewPackedData;
         }
     }
     
-    memcpy ((*job) + *p, data, size);
-    (*p) += size;
-    
-    if (RPU_DEBUG_PACK > 1) RPU_DumpData (data, size);
-    return size;  
-}
-
-static int RPU_PackJobPtr (char **job, int *jobSize, int *p, char *data, int size, int q)
-{
-    int n = 0;
-    int totalSize = sizeof (q) + q * size;
-    
-    if (RPU_DEBUG_PACK) 
-        fprintf (stderr, "  > RPU_PackJobPtr(): size=%d bytes at p=+%d\n", 
-                        totalSize, *p);
-    n += RPU_PackJob (job, jobSize, p, &totalSize, sizeof (totalSize));
-    n += RPU_PackJob (job, jobSize, p, data, q * size);
+    if (fSeveral)
+        n += RPU_PackWrite ((char *) &cItems, sizeof (int));
+        
+    while (cItems > 0) {
+        n += RPU_PackWrite (data, itemSize);
+        data += itemSize;
+        cItems --;
+    }
     
     return n;
 }
 
-#define PACKJOB(x) len += RPU_PackJob ((char **) &pjt, &jobSize, &p, \
-                                    (char *) &(x), sizeof (x)); 
-#define PACKJOBPTR(x,q,t) len += RPU_PackJobPtr ((char **) &pjt, &jobSize, &p, \
-                                    (char *) (x), sizeof (t), (q))
-#define DEFAULT_JOBSIZE (100 * 1024)
+static int RPU_PackJobStruct_cubeinfo (cubeinfo *pci, int cItems)
+{
+    int n = 0;
+    
+    PACKJOB (cItems);
+    
+    while (cItems > 0) {
+        PACKJOB (pci->nCube);
+        PACKJOB (pci->fCubeOwner);
+        PACKJOB (pci->fMove);
+        PACKJOB (pci->nMatchTo);
+        PACKJOBN (pci->anScore, 2);
+        PACKJOB (pci->fCrawford);
+        PACKJOB (pci->fJacoby);
+        PACKJOB (pci->fBeavers);
+        PACKJOBN (pci->arGammonPrice, 4);
+        PACKJOB (pci->bgv);
+        cItems --;
+    }
+
+    return n;
+}
+
+
+static int RPU_PackJobStruct_rolloutstat (rolloutstat *prs, int cItems)
+{
+    int n = 0;
+    
+    PACKJOB (cItems);
+    
+    while (cItems > 0) {
+        PACKJOBN (prs->acWin, STAT_MAXCUBE);
+        PACKJOBN (prs->acWinGammon, STAT_MAXCUBE);
+        PACKJOBN (prs->acWinBackgammon, STAT_MAXCUBE);
+        PACKJOBN (prs->acDoubleDrop, STAT_MAXCUBE);
+        PACKJOBN (prs->acDoubleTake, STAT_MAXCUBE);
+        PACKJOB (prs->nOpponentHit);
+        PACKJOB (prs->rOpponentHitMove);
+        PACKJOB (prs->nBearoffMoves);
+        PACKJOB (prs->nBearoffPipsLost);
+        PACKJOB (prs->nOpponentClosedOut);
+        PACKJOB (prs->rOpponentClosedOutMove);
+        cItems --;
+    }
+
+    return n;
+}
+
 
 static rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
-{
-    int 		len = sizeof (rpu_jobtask);
-    int			jobSize = DEFAULT_JOBSIZE;
-    rpu_jobtask		*pjt;
-    int			p;	/* offset from beginning of pjt */
+{    
+    int n = 0;
     
-    pu_task_rollout_data	*prd;
-    pu_task_rollout_bearoff_data *psb;
-    pu_task_rollout_basiccubeful_data *psc;
+    THREADGLOBAL(gPackedDataSize) = DEFAULT_JOBSIZE;
+    THREADGLOBAL(gpPackedData) = malloc (THREADGLOBAL(gPackedDataSize));
+    assert (THREADGLOBAL(gpPackedData) != NULL);
     
-    pjt = malloc (jobSize);
-    assert (pjt != NULL);
-
-    pjt->type = pt->type;
+    ((rpu_jobtask *) THREADGLOBAL(gpPackedData))->type = pt->type;
     if (pt->task_id.src_taskId == 0)
         pt->task_id.src_taskId = pt->task_id.taskId;
-    p = offsetof (rpu_jobtask, data);	    
+        
+    THREADGLOBAL(gPackedDataPos) = offsetof (rpu_jobtask, data);	    
     
     switch (pt->type) {
     
-        case pu_task_rollout:
-            prd = &pt->taskdata.rollout;
-            PACKJOB (pt->task_id.src_taskId);
-            PACKJOB (prd->type);
-            switch (prd->type) {
-                case pu_task_rollout_bearoff:
-                    psb = &prd->specificdata.bearoff;
-                    PACKJOBPTR (prd->aanBoardEval, 2 * 25, int);
-                    PACKJOBPTR (prd->aar, NUM_ROLLOUT_OUTPUTS, float);
-                    PACKJOB(psb->nTruncate);
-                    PACKJOB(psb->nTrials);
-                    PACKJOB(psb->bgv);
-                    break;
-                case pu_task_rollout_basiccubeful:
-                    psc = &prd->specificdata.basiccubeful;
-                    PACKJOBPTR (prd->aanBoardEval, 2 * 25 * psc->cci, int);
-                    PACKJOBPTR (prd->aar, NUM_ROLLOUT_OUTPUTS * psc->cci, float);
-                    PACKJOBPTR(psc->aci, psc->cci, cubeinfo);
-                    PACKJOBPTR(psc->afCubeDecTop, psc->cci, int);
-                    PACKJOB(psc->cci);
-                    PACKJOBPTR(psc->aaarStatistics, 2 * psc->cci, rolloutstat);
-                    break;
-            }
-            PACKJOB(prd->rc);
-            PACKJOB(prd->seed);
-            PACKJOB(prd->iTurn);
-            PACKJOB(prd->iGame);
+        case pu_task_rollout: 
+            {
+                pu_task_rollout_data *prd = &pt->taskdata.rollout;
+                PACKJOB (pt->task_id.src_taskId);
+                PACKJOB (prd->type);
+                switch (prd->type) {
+                    case pu_task_rollout_bearoff:
+                        {
+                            pu_task_rollout_bearoff_data *psb = &prd->specificdata.bearoff;
+                            PACKJOBPTR (prd->aanBoardEval, 2 * 25, int);
+                            PACKJOBPTR (prd->aar, NUM_ROLLOUT_OUTPUTS, float);
+                            PACKJOB (psb->nTruncate);
+                            PACKJOB (psb->nTrials);
+                            PACKJOB (psb->bgv);
+                        }
+                        break;
+                    case pu_task_rollout_basiccubeful:
+                        {
+                            pu_task_rollout_basiccubeful_data *psc = &prd->specificdata.basiccubeful;
+                            PACKJOB (psc->cci);
+                            PACKJOBPTR (prd->aanBoardEval, 2 * 25 * psc->cci, int);
+                            PACKJOBPTR (prd->aar, NUM_ROLLOUT_OUTPUTS * psc->cci, float);
+                            PACKJOBSTRUCTPTR (psc->aci, psc->cci, cubeinfo);
+                            PACKJOBPTR (psc->afCubeDecTop, psc->cci, int);
+                            PACKJOBSTRUCTPTR (psc->aaarStatistics, 2 * psc->cci, rolloutstat);
+                        }
+                        break;
+                }
+                PACKJOB (prd->rc);
+                PACKJOB (prd->seed);
+                PACKJOB (prd->iTurn);
+                PACKJOB (prd->iGame);
+            }    
             break;
             
         case pu_task_eval:
+            break;
+
+        case pu_task_analysis:
             break;
 
        default:
@@ -1337,10 +1466,11 @@ static rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
     
     }
 
-    pjt->len = len;
-    if (RPU_DEBUG_PACK) fprintf (stderr, "[JobTask packed, %d bytes]\n", len);
+    ((rpu_jobtask *) THREADGLOBAL(gpPackedData))->len = THREADGLOBAL(gPackedDataPos);
+    if (RPU_DEBUG_PACK) fprintf (stderr, "[JobTask packed, %d bytes]\n", THREADGLOBAL(gPackedDataPos));
+    if (RPU_DEBUG_PACK) RPU_DumpData (THREADGLOBAL(gpPackedData), THREADGLOBAL(gPackedDataPos));
     
-    return pjt;
+    return (rpu_jobtask *) THREADGLOBAL(gpPackedData);
 }
 
 
@@ -1363,7 +1493,7 @@ static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
         apJobTasks[i] = RPU_PackTaskToJobTask (apTasks[i]);
         assert (apJobTasks[i] != NULL);
         if (RPU_DEBUG_PACK) fprintf (stderr, "[Job #%d packed to jobtask, %d bytes]\n", 
-                                                i, apJobTasks[i]->len);
+                                                i+1, apJobTasks[i]->len);
         if (RPU_DEBUG_PACK > 1) RPU_DumpData ( (char *) apJobTasks[i], 
                                                apJobTasks[i]->len);
         totalJobTasksSize += apJobTasks[i]->len;
@@ -1384,8 +1514,8 @@ static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
             for (i = 0; i < cTasks; i ++) {
                 memcpy (p, apJobTasks[i], apJobTasks[i]->len);
                 if (RPU_DEBUG_PACK) fprintf (stderr, "[Jobtask #%d moved to job, %d bytes]\n", 
-                                                        i, apJobTasks[i]->len);
-                if (RPU_DEBUG_PACK > 1) RPU_DumpData ( (char *) p, apJobTasks[i]->len);
+                                                        i+1, apJobTasks[i]->len);
+                if (RPU_DEBUG_PACK) RPU_DumpData ( (char *) p, apJobTasks[i]->len);
                 p += apJobTasks[i]->len;
                 free ((char *) apJobTasks[i]);
             }
@@ -1400,69 +1530,200 @@ static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
     return pJob;
 }
 
-#define UNPACKJOB(x) \
-        if (RPU_DEBUG > 1) { \
-            fprintf (stderr, "  > UNPACKJOB(): size=%d bytes at p=+%d\n", \
-                sizeof (x), (int) p - (int) pjt); \
-            RPU_DumpData (p, sizeof (x)); } \
-        x = *((typeof (x) *) p); p += sizeof (x); 
 
-#define UNPACKJOBPTR(x) \
-        len = (*((int *) p)) - sizeof(int); \
-        if (RPU_DEBUG_PACK > 1) { \
-            fprintf (stderr, "  > UNPACKJOBPTR(): size=%d+4 bytes at p=+%d\n", \
-                len, (int) p - (int) pjt); \
-            RPU_DumpData (p + sizeof (int), len); } \
-        p += sizeof (int); \
-        x = malloc (len); memcpy (x, p, len); p += len; 
+
+static int RPU_PackRead (char *dst, int size)
+{
+    #if __BIG_ENDIAN__
+        memcpy (dst, THREADGLOBAL(gpPackedData) + THREADGLOBAL(gPackedDataPos), size);
+        if (RPU_DEBUG_PACK > 1) {
+            fprintf (stderr, ">> 0x%x + %d ", THREADGLOBAL(gpPackedData), THREADGLOBAL(gPackedDataPos));
+            RPU_DumpData (THREADGLOBAL(gpPackedData) + THREADGLOBAL(gPackedDataPos), size);
+            RPU_DumpData (dst, size);
+        }
+        THREADGLOBAL(gPackedDataPos) += size;
+    #else
+        int i;
+        for (i = size - 1; i >= 0; i --) 
+            dst[i] = THREADGLOBAL(gPackedData)[THREADGLOBAL(gPackedDataPos) ++];
+    #endif
+
+    return size;
+}
+
+
+int RPU_UnpackJob (char *dst, int fSeveralItems, int itemSize, int fMalloc)
+{
+    int 	n = 0;
+    int 	cItems = 1;
+    
+    
+    if (fSeveralItems) {
+        n += RPU_PackRead ((char *) &cItems, sizeof (cItems));
+    }
+    
+    if (RPU_DEBUG_PACK) {
+        char *p = THREADGLOBAL(gpPackedData) ;
+        p += THREADGLOBAL(gPackedDataPos);
+        p -= fSeveralItems ? sizeof (int) : 0;
+        fprintf (stderr, "Unpacking job at 0x%x/0x%x, %d item(s) of size = %d bytes %s\n",
+                       THREADGLOBAL(gpPackedData), p, cItems, itemSize, fMalloc ? "w/malloc" : "");
+        RPU_DumpData (p, cItems * itemSize + (fSeveralItems ? sizeof (int) : 0) );
+    }
+
+    if (fMalloc) {
+        /* if fMalloc is set, we dont read data to dst, but rather to
+            a newly alloced ptr, whose address we store in *dst */
+        char *p = malloc (cItems * itemSize);
+        assert (p != NULL);
+        *((char **) dst) = p;
+        dst = p;
+    }
+
+    /* read all data to dst */
+    while (cItems > 0) {
+        n += RPU_PackRead (dst, itemSize);
+        dst += itemSize;
+        cItems --;
+    }
+    
+    return n;
+}
+
+
+static int RPU_UnpackJobStruct_cubeinfo (cubeinfo **ppci)
+{
+    int 	n = 0;
+    int 	cItems;
+    cubeinfo	*pci;
+    
+    UNPACKJOB (cItems);
+    
+    if (RPU_DEBUG_PACK) 
+        fprintf (stderr, "Unpacking job {cubeinfo}, %d item(s) of size = %d bytes\n",
+                        cItems, sizeof (cubeinfo));
+
+    pci = malloc (cItems * sizeof (cubeinfo));
+    assert (pci != NULL);
+    
+    *ppci = pci;
+    
+    while (cItems > 0) {
+        UNPACKJOB (pci->nCube);
+        UNPACKJOB (pci->fCubeOwner);
+        UNPACKJOB (pci->fMove);
+        UNPACKJOB (pci->nMatchTo);
+        UNPACKJOBN (pci->anScore);
+        UNPACKJOB (pci->fCrawford);
+        UNPACKJOB (pci->fJacoby);
+        UNPACKJOB (pci->fBeavers);
+        UNPACKJOBN (pci->arGammonPrice);
+        UNPACKJOB (pci->bgv);
+        cItems --;
+    }
+
+    return n;
+}
+
+
+
+static int RPU_UnpackJobStruct_rolloutstat (rolloutstat **pprs)
+{
+    int 	n = 0;
+    int 	cItems;
+    rolloutstat	*prs;
+    
+    UNPACKJOB (cItems);
+    
+    if (RPU_DEBUG_PACK) 
+        fprintf (stderr, "Unpacking job {rolloutstat}, %d item(s) of size = %d bytes\n",
+                        cItems, sizeof (rolloutstat));
+
+    prs = malloc (cItems * sizeof (rolloutstat));
+    assert (prs != NULL);
+    
+    *pprs = prs;
+    
+    while (cItems > 0) {
+        UNPACKJOBN (prs->acWin);
+        UNPACKJOBN (prs->acWinGammon);
+        UNPACKJOBN (prs->acWinBackgammon);
+        UNPACKJOBN (prs->acDoubleDrop);
+        UNPACKJOBN (prs->acDoubleTake);
+        UNPACKJOB (prs->nOpponentHit);
+        UNPACKJOB (prs->rOpponentHitMove);
+        UNPACKJOB (prs->nBearoffMoves);
+        UNPACKJOB (prs->nBearoffPipsLost);
+        UNPACKJOB (prs->nOpponentClosedOut);
+        UNPACKJOB (prs->rOpponentClosedOutMove);
+        cItems --;
+    }
+
+    return n;
+}
+
+
+
+
 
 static pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
 {
     pu_task	*pt;
-    char	*p = (char *) &pjt->data;
-    int		len;
+    int		n = 0;
     
-    pu_task_rollout_data		*prd;
-    pu_task_rollout_bearoff_data 	*psb;
-    pu_task_rollout_basiccubeful_data 	*psc;
     
     if (RPU_DEBUG) fprintf (stderr, "RPU_UnpackJobToTask...\n");
+    if (RPU_DEBUG_PACK) RPU_DumpData ((char *) pjt, pjt->len);
     
     pt = CreateTask (pjt->type, fDetached);
     assert (pt != NULL);
+    
+    THREADGLOBAL(gpPackedData) = (char *) &pjt->data;
+    THREADGLOBAL(gPackedDataPos) = 0;
     
     if (pt != NULL) {
             
         switch (pjt->type) {
         
             case pu_task_rollout:
-                prd = &pt->taskdata.rollout;
-                UNPACKJOB (pt->task_id.src_taskId);
-                UNPACKJOB (prd->type);
-                UNPACKJOBPTR (prd->aanBoardEval);
-                UNPACKJOBPTR (prd->aar);
-                switch (prd->type) {
-                    case pu_task_rollout_bearoff:
-                        psb = &prd->specificdata.bearoff;
-                        UNPACKJOB(psb->nTruncate);
-                        UNPACKJOB(psb->nTrials);
-                        UNPACKJOB(psb->bgv);
-                        break;
-                    case pu_task_rollout_basiccubeful:
-                        psc = &prd->specificdata.basiccubeful;
-                        UNPACKJOBPTR(psc->aci);
-                        UNPACKJOBPTR(psc->afCubeDecTop);
-                        UNPACKJOB(psc->cci);
-                        UNPACKJOBPTR(psc->aaarStatistics);
-                        break;
+                {
+                    pu_task_rollout_data *prd = &pt->taskdata.rollout;
+                    UNPACKJOB (pt->task_id.src_taskId);
+                    UNPACKJOB (prd->type);
+                    switch (prd->type) {
+                        case pu_task_rollout_bearoff:
+                            {
+                                pu_task_rollout_bearoff_data *psb = &prd->specificdata.bearoff;
+                                UNPACKJOBPTR (prd->aanBoardEval, int);
+                                UNPACKJOBPTR (prd->aar, float);
+                                UNPACKJOB (psb->nTruncate);
+                                UNPACKJOB (psb->nTrials);
+                                UNPACKJOB (psb->bgv);
+                            }
+                            break;
+                        case pu_task_rollout_basiccubeful:
+                            {
+                                pu_task_rollout_basiccubeful_data *psc = &prd->specificdata.basiccubeful;
+                                UNPACKJOB (psc->cci);
+                                UNPACKJOBPTR (prd->aanBoardEval, int);
+                                UNPACKJOBPTR (prd->aar, float);
+                                UNPACKJOBSTRUCTPTR (psc->aci, cubeinfo);
+                                UNPACKJOBPTR (psc->afCubeDecTop, int);
+                                UNPACKJOBSTRUCTPTR (psc->aaarStatistics, rolloutstat);
+                            }
+                            break;
+                    }
+                    UNPACKJOB(prd->rc);
+                    UNPACKJOB(prd->seed);
+                    UNPACKJOB(prd->iTurn);
+                    UNPACKJOB(prd->iGame);
                 }
-                UNPACKJOB(prd->rc);
-                UNPACKJOB(prd->seed);
-                UNPACKJOB(prd->iTurn);
-                UNPACKJOB(prd->iGame);
                 break;
                 
             case pu_task_eval:
+                break;
+                
+            case pu_task_analysis:
                 break;
                 
             default:
@@ -1668,6 +1929,51 @@ static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_i
     }
     if ((localAddr.sin_addr.s_addr & gRPU_IPMask) == (remoteAddr.sin_addr.s_addr & gRPU_IPMask)) 
         return 1;
+    
+    return 0;
+}
+
+
+static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz)
+{
+    char 		*szPort;
+    struct hostent 	*phe;
+    
+    bzero ((char *) inAddress, sizeof (struct sockaddr_in));
+    inAddress->sin_family = AF_INET;
+    
+    /* scan for port, eg 192.168.0.1:1234 or host.gnu.org:1234 */
+    szPort = strchr (sz, ':');
+    if (szPort != NULL) {
+        /* port is specified */
+        int	port;
+        if (sscanf (szPort + 1, "%d", &port) != 1
+        ||  port < 1 || port > 65335) {
+            fprintf (stderr, "*** Invalid TCP port (%d).\n", port);
+            return -1;
+        }
+        inAddress->sin_port = htons (port);
+        *szPort = 0x00;
+    }
+    else {
+        /* use default port */
+        inAddress->sin_port = htons (gRPU_TCPPort);
+    }
+    
+    /* read the non-port part of the address */
+    /* try the number version, eg 192.168.0.1 */
+    if (inet_aton (sz, &inAddress->sin_addr) != 0) return 0;
+    
+    /* didn't work, it must be a host name, eg myhost.gnu.org */
+    phe = gethostbyname (sz);
+    if (phe == NULL) {
+        fprintf (stderr, "*** Unknown host (%s).\n", sz);
+        if (szPort != NULL) *szPort = ':';
+        return -1;
+    }
+    else inAddress->sin_addr = *(struct in_addr *) phe->h_addr;
+
+    if (szPort != NULL) *szPort = ':';
     
     return 0;
 }
@@ -2275,17 +2581,25 @@ static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
 
 extern void * Thread_RemoteProcessingUnit (void *data)
 {
-    int 	rpuSocket;
-    procunit	*ppu = (procunit *) data;
-    int		err = 0;
+    int 		rpuSocket;
+    procunit		*ppu = (procunit *) data;
+    int			err = 0;
+    
+    CreateThreadGlobalStorage ();
     
     if (RPU_DEBUG) fprintf (stderr, "# (0x%x) RPU Local Half started.\n", (int) pthread_self ());
+    
+    if (RPU_ReadInternetAddress (&ppu->info.remote.inAddress, ppu->info.remote.hostName) < 0) {
+        fprintf (stderr, "# (0x%x) RPU Could not resolve address \"%s\".\n", 
+                    (int) pthread_self (), ppu->info.remote.hostName);
+        ppu->info.remote.fStop = TRUE;
+    }
     
     while (!ppu->info.remote.fStop) {
     
         ppu->status = pu_stat_connecting;
         ppu->maxTasks = 0;
-        
+                
         /* create socket */
         rpuSocket = socket (AF_INET, SOCK_STREAM, 0);
         if (rpuSocket == -1) {
@@ -2296,13 +2610,7 @@ extern void * Thread_RemoteProcessingUnit (void *data)
         }
         else {
             /* connect to remote host */
-            struct sockaddr_in remoteAddress;
-            bzero((char *) &remoteAddress, sizeof (struct sockaddr_in));
-            remoteAddress.sin_family= AF_INET;
-            remoteAddress.sin_addr.s_addr = ppu->info.remote.inAddress.s_addr;
-            remoteAddress.sin_port = htons(gRPU_TCPPort);
-    
-            if (connect (rpuSocket, (const struct sockaddr *) &remoteAddress, sizeof(remoteAddress)) < 0) {
+            if (connect (rpuSocket, (const struct sockaddr *) &ppu->info.remote.inAddress, 					sizeof(ppu->info.remote.inAddress)) < 0) {
                 fprintf (stderr, "# (0x%x) RPU could not connect socket (err=%d).\n", 
                     (int) pthread_self (), errno);
                 perror ("connect");
@@ -2346,8 +2654,11 @@ extern void * Thread_RemoteProcessingUnit (void *data)
                                 int i;
                                 RPU_PrintInfo (pinfo);
                                 ppu->maxTasks = 0;
-                                for (i = 0; i < pinfo->cProcunits; i ++)
+                                ppu->taskMask = pu_task_none;
+                                for (i = 0; i < pinfo->cProcunits; i ++) {
                                     ppu->maxTasks += pinfo->procunitInfo[i].maxTasks;
+                                    ppu->taskMask |= pinfo->procunitInfo[i].taskMask;
+                                }
                             }
                             free ((char *) msg);
                         }
@@ -2510,7 +2821,8 @@ extern void CommandProcunitsAddLocal( char *sz )
     }
 
     while (n > 0) {
-        procunit *ppu = CreateProcessingUnit (pu_type_local, pu_stat_ready, pu_task_info|pu_task_rollout, 1);
+        procunit *ppu = CreateProcessingUnit (pu_type_local, pu_stat_ready, 
+                            pu_task_info|pu_task_rollout|pu_task_analysis, 1);
         if (ppu == NULL) {
             outputf ("Could not add local processing unit.\n");
             break;
@@ -2525,28 +2837,20 @@ extern void CommandProcunitsAddLocal( char *sz )
 
 extern void CommandProcunitsAddRemote( char *sz ) 
 {    
-    struct in_addr	inAddress;
-
     if (sz == NULL) {
         outputf ( "Remote processing unit address not specified.\n");
         return;
     }
     
-    if (inet_aton (sz, &inAddress) == 0) {
-        outputf ( "Remote processing unit address invalid.\n");
-    }
+    procunit *ppu = CreateRemoteProcessingUnit (sz, TRUE);
+    if (ppu == NULL)
+        outputf ("Remote processing unit could not be created.\n");
     else {
-        procunit *ppu = CreateRemoteProcessingUnit (&inAddress, TRUE);
-        if (ppu == NULL)
-            outputf ("Remote processing unit could not be created.\n");
-        else {
-            outputf ("Remote processing unit id=%d created.\n", ppu->procunit_id);
-            if (ppu->status == pu_stat_deactivated)
-                outputf ("*** Warning: Remote processing unit id=%d could "
-                        "not be started.\n", ppu->procunit_id);
-        }
+        outputf ("Remote processing unit id=%d created.\n", ppu->procunit_id);
+        if (ppu->status == pu_stat_deactivated)
+            outputf ("*** Warning: Remote processing unit id=%d could "
+                    "not be started.\n", ppu->procunit_id);
     }
-    
 }
 
 
@@ -2690,3 +2994,4 @@ extern void CommandSetProcunitsRemoteQueue ( char *sz )
         ppu->maxTasks = queueSize;
 }
 
+#endif

@@ -57,6 +57,7 @@
 #if PROCESSING_UNITS
 #include "procunits.h"
 #endif
+#include "threadglobals.h"
 
 static void
 initRolloutstat ( rolloutstat *prs );
@@ -242,7 +243,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     for( i = 0; i < NUM_OUTPUTS; i++ )
 	    arOutput[ i ] += arMean[ i ] - arMin[ i ];
 
-    if( fAction )
+    if( fAction && !PROCESSING_UNITS)
 	fnAction();
     
     if( fInterrupt )
@@ -709,7 +710,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         }
 
-        if( fAction )
+        if( fAction && !PROCESSING_UNITS)
           fnAction();
     
         if( fInterrupt )
@@ -965,8 +966,8 @@ void * Threaded_BearoffRollout (void *data)
     pu_task_rollout_data 		*prd = (pu_task_rollout_data *) &pt->taskdata.rollout;
     pu_task_rollout_bearoff_data 	*psd = (pu_task_rollout_bearoff_data *) &prd->specificdata.bearoff;
     
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
-                           (int ) pthread_self ());
+    /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
+                           (int ) pthread_self ());*/
     
     CreateThreadGlobalStorage ();
     
@@ -980,8 +981,8 @@ void * Threaded_BearoffRollout (void *data)
                            psd->nTruncate, prd->iTurn, prd->iGame, 
                            psd->nTrials, psd->bgv);
     
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
-                           (int) pthread_self ());
+    /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
+                           (int) pthread_self ());*/
     
     pthread_mutex_lock (&mutexTaskListAccess);
     MarkTaskDone (pt, NULL);
@@ -1006,8 +1007,8 @@ void * Threaded_BasicCubefulRollout (void *data)
     pu_task_rollout_data 		*prd = (pu_task_rollout_data *) &pt->taskdata.rollout;
     pu_task_rollout_basiccubeful_data 	*psd = (pu_task_rollout_basiccubeful_data *) &prd->specificdata.basiccubeful;
     
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
-                           (int) pthread_self ());
+    /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
+                           (int) pthread_self ());*/
 
     CreateThreadGlobalStorage ();
 
@@ -1030,8 +1031,8 @@ void * Threaded_BasicCubefulRollout (void *data)
             prd->seed);
     }
 
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
-                           (int) pthread_self ());
+    /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
+                           (int) pthread_self ());*/
 
     pthread_mutex_lock (&mutexTaskListAccess);
     MarkTaskDone (pt, NULL);
@@ -1067,10 +1068,9 @@ void Rollout_IntegrateResults (int anBoardOrig[ 2 ][ 25 ],
       for ( ici = 0; ici < cci ; ici++ ) {
         if( fInvert ) InvertEvaluationR( aar[ ici ], &aci[ ici ] );
 
-       if (PU_DEBUG)  outputf ("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)\n", "",
-                    aar[ici][0], aar[ici][1], aar[ici][2], aar[ici][3], aar[ici][4], aar[ici][5]);
+       /*if (PU_DEBUG)  outputf ("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)\n", "",
+                    aar[ici][0], aar[ici][1], aar[ici][2], aar[ici][3], aar[ici][4], aar[ici][5]);*/
                     
-       //assert ( aar[ici][0] < .99f );
         
         for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
 	  float rMuNew, rDelta;
@@ -1140,7 +1140,7 @@ void Rollout_ShowProgress (int fShowProgress, char asz[][ 40 ], int i, int cGame
 			   aarMu[ 0 ][ 5 ], aarSigma[ 0 ][ 5 ], i + 1 );
 		  fflush( stdout );
                   
-                  if (PU_DEBUG) fprintf (stderr, "\n");
+                  /*if (PU_DEBUG) fprintf (stderr, "\n");*/
 	      }
       }
 }
@@ -1155,6 +1155,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 cubeinfo aci[], 
                 int afCubeDecTop[], int cci, int fInvert ) {
 #if VECTOR
+  VECTOR_FLOATARRAY2(aar,cci,NUM_ROLLOUT_OUTPUTS);
   VECTOR_FLOATARRAY2(aarMu,cci,NUM_ROLLOUT_OUTPUTS);
   VECTOR_FLOATARRAY2(aarSigma,cci,NUM_ROLLOUT_OUTPUTS);
   VECTOR_FLOATARRAY2(aarResult,cci,NUM_ROLLOUT_OUTPUTS);
@@ -1163,6 +1164,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #if __GNUC__
   int aanBoardEval[ cci ][ 2 ][ 25 ];
   #if !VECTOR
+  float aar[ cci ][ NUM_ROLLOUT_OUTPUTS ];
   float aarMu[ cci ][ NUM_ROLLOUT_OUTPUTS ];
   float aarSigma[ cci ][ NUM_ROLLOUT_OUTPUTS ];
   double aarResult[ cci ][ NUM_ROLLOUT_OUTPUTS ];
@@ -1172,6 +1174,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #elif HAVE_ALLOCA
   int ( *aanBoardEval )[ 2 ][ 25 ] = alloca( cci * 50 * sizeof int );
   #if !VECTOR
+  float ( *aar )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
+						  sizeof float );
   float ( *aarMu )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
 						    sizeof float );
   float ( *aarSigma )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci *
@@ -1187,6 +1191,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #else
   int aanBoardEval[ MAX_ROLLOUT_CUBEINFO ][ 2 ][ 25 ];
   #if !VECTOR
+  float aar[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   float aarMu[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   float aarSigma[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   double aarResult[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];

@@ -9,8 +9,6 @@
 
 #include <stdlib.h>
 
-#define PROCESSING_UNITS 1
-
 #if PROCESSING_UNITS
 #include <pthread.h>
 #endif

@@ -610,7 +610,7 @@ extern void HandleXAction( void ) {
     /* Process incoming X events.  It's important to handle all of them,
        because we won't get another SIGIO for events that are buffered
        but not processed. */
-    while( gtk_events_pending() )
+    while( gtk_events_pending() ) 
 	gtk_main_iteration();
 
     ResumeInput( &m );
@@ -2710,7 +2710,13 @@ extern void RunGTK( GtkWidget *pwSplash ) {
        has special settings, e.g., clockwise or nackgammon */
     ShowBoard();
 
+    #if PROCESSING_UNITS
+    gdk_threads_enter ();
+    #endif
     gtk_main();
+    #if PROCESSING_UNITS
+    gdk_threads_leave ();
+    #endif
 }
 
 static void DestroyList( gpointer p ) {
@@ -6685,7 +6691,7 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
     
     gtk_progress_configure( GTK_PROGRESS( pwRolloutProgress ),
 			    iGame + 1, 0, cGames );
-#if 0
+#if 1
     GTKDisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();

@@ -1,3 +1,23 @@
+/*
+ * procunits.h
+ *
+ * by Olivier Baur <olivier.baur@noos.fr>, 2003
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
 #ifndef _PROCUNITS_H_
 #define _PROCUNITS_H_ 1
 
@@ -28,10 +48,10 @@ typedef struct {
 } pu_task_rollout_bearoff_data;
 
 typedef struct {
+    int			cci;
     cubeinfo		*aci;
     int			*afCubeDecTop;
-    int			cci;
-    rolloutstat		**aaarStatistics;
+    rolloutstat		*aaarStatistics;
 } pu_task_rollout_basiccubeful_data;
 
 typedef struct {
@@ -56,12 +76,18 @@ typedef struct {
 } pu_task_eval_data;
 
 typedef struct {
+    
+    
+} pu_task_analysis_data;
+
+typedef struct {
     int		masterId;			/* id of master host */
     int		taskId;				/* unique id assigned by master host */
     int		src_taskId;			/* id used on remote master hoster */
 } pu_task_id;
 
-typedef enum { pu_task_none = 0, pu_task_info = 1, pu_task_rollout = 2, pu_task_eval = 4 } 
+typedef enum { pu_task_none = 0, pu_task_info = 1, pu_task_rollout = 2, 
+                pu_task_eval = 4, pu_task_analysis = 8 } 
 pu_task_type; /* use powers of 2 so types can be ORed in a mask */
 
 typedef enum { pu_task_todo = 1, pu_task_inprogress, pu_task_done } 
@@ -77,6 +103,7 @@ typedef struct {
     union _taskdata {
         pu_task_rollout_data	rollout;
         pu_task_eval_data	eval;
+        pu_task_analysis_data	analysis;
     } taskdata;
 } pu_task;
 
@@ -97,6 +124,7 @@ typedef struct {
     pthread_t	thread;
 } pu_info_local;
 
+#define MAX_HOSTNAME 256
 typedef struct {
     pthread_t		thread;
     int			fInterrupt;		/* interrupt all rpu processing */
@@ -104,7 +132,8 @@ typedef struct {
     int			fTasksAvailable;	/* set if task(s) have been assigned to rpu */
     pthread_mutex_t 	mutexTasksAvailable;
     pthread_cond_t	condTasksAvailable;
-    struct in_addr	inAddress;
+    struct sockaddr_in	inAddress;
+    char		hostName[MAX_HOSTNAME];
 } pu_info_remote;
 
 typedef union {
@@ -134,6 +163,7 @@ typedef struct _procunit {
     /* processing unit stats */
     pu_stats		rolloutStats;
     pu_stats		evalStats;
+    pu_stats		analysisStats;
 
     pthread_mutex_t 	mutexStatusChanged;
     pthread_cond_t	condStatusChanged;
@@ -148,7 +178,7 @@ typedef struct _procunit {
 
 typedef struct {
     int		len;		/* len of whole structure */
-    pu_task_type type;		/* rollout or eval */
+    pu_task_type type;		/* rollout, eval or analysis */
     char	data[0];
 } rpu_jobtask;
 
