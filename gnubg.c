@@ -5867,6 +5867,10 @@ extern void output( const char *sz ) {
 #endif
     pch = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
     fputs( pch, stdout );
+
+    if( !isatty( STDOUT_FILENO ) ) 
+       fflush( stdout );
+
     free( pch );
 }
 
@@ -6004,9 +6008,6 @@ extern void outputx( void ) {
     if( cOutputDisabled || cOutputPostponed )
 	return;
 
-    if( fTTY )
-       fflush( stdout );
-    
 #if USE_GTK
     if( fX )
 	GTKOutputX();
