@@ -660,9 +660,9 @@ GTKShowTheory ( const int fActivePage ) {
   int *pi;
 
   static char *aszTitles[] = {
-    "",
+    NULL,
     N_("Dead cube"),
-    "" /* N_("Live cube") */,
+    NULL /* N_("Live cube") */,
     N_("Fully live")
   };
   gchar *asz[ 4 ];
@@ -946,7 +946,7 @@ GTKShowTheory ( const int fActivePage ) {
                              gtk_label_new ( _("Market window") ) );
 
   for ( i = 0; i < 4; ++i )
-    asz[ i ] = gettext( aszTitles[ i ] );
+    asz[ i ] = aszTitles[ i ] ? gettext( aszTitles[ i ] ) : "";
 
   for ( i = 0; i < 2; ++i ) {
 
