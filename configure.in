@@ -74,8 +74,8 @@ if test "$with_gdbm" != "no"; then
   fi
 fi
 AC_CHECK_LIB(dl, dlopen)
-AC_CHECK_LIB(gmp, mpz_init)
-AC_CHECK_LIB(gmp, __gmpz_init)
+AC_CHECK_LIB(gmp, mpz_import)
+AC_CHECK_LIB(gmp, __gmpz_import)
 
 dnl Checks for header files.
 AC_HEADER_STDC
