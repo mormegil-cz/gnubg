@@ -1,5 +1,9 @@
 Mon Mar  6 10:27:44 2000  Gary Wong  <gary@cs.arizona.edu>
 
+	* configure.in: Use $datadir (not $pkgdatadir) to find installation
+	path.  $pkgdatadir is an automake invention; configure doesn't know
+	about it.
+
 	* eval.c (TrainPosition): Calculate alpha based on the correct net.
 	* database.c (CommandDatabaseDump): Fix spelling mistake.
 

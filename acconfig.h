@@ -6,10 +6,13 @@
  * $Id$
  */
 
+/* Installation directory (used to determine PKGDATADIR below). */
+#undef DATADIR
+
 @BOTTOM@
 
 /* The directory where the weights and databases will be stored. */
-#undef PKGDATADIR
+#define PKGDATADIR DATADIR "/" PACKAGE
 
 #ifndef FALSE
 #define FALSE 0

@@ -21,6 +21,9 @@
 /* Define if the X Window System is missing or not being used.  */
 #undef X_DISPLAY_MISSING
 
+/* Installation directory (used to determine PKGDATADIR below). */
+#undef DATADIR
+
 /* Define if you have the alloca function.  */
 #undef HAVE_ALLOCA
 
@@ -110,7 +113,7 @@
 
 
 /* The directory where the weights and databases will be stored. */
-#undef PKGDATADIR
+#define PKGDATADIR DATADIR "/" PACKAGE
 
 #ifndef FALSE
 #define FALSE 0

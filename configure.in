@@ -72,7 +72,7 @@ AC_PATH_XTRA
 AM_CONDITIONAL(NOX, test "$no_x" = "yes" )
 
 dnl Record installation paths.
-AC_DEFINE_DIR(PKGDATADIR, pkgdatadir)
+AC_DEFINE_DIR(DATADIR, datadir)
 
 if test "$no_x" != "yes"; then
   conf_ext=ext

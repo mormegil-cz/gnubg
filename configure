@@ -788,7 +788,7 @@ then
   . ./config.options
 fi
 
-for ac_prog in gawk mawk nawk awk
+for ac_prog in mawk gawk nawk awk
 do
 # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -3124,10 +3124,10 @@ fi
 	ac_expanded=`(
 	    test "x$prefix" = xNONE && prefix="$ac_default_prefix"
 	    test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
-	    eval echo \""$pkgdatadir"\"
+	    eval echo \""$datadir"\"
         )`
 	cat >> confdefs.h <<EOF
-#define PKGDATADIR "$ac_expanded"
+#define DATADIR "$ac_expanded"
 EOF
 
 
