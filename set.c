@@ -2498,9 +2498,6 @@ SetExportHTMLCSS ( const htmlexportcss hecss ) {
   if ( exsExport.hecss == hecss )
     return;
 
-  if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL )
-    CommandNotImplemented ( NULL );
-
   exsExport.hecss = hecss;
 
   outputf ( _("CSS stylesheet for HTML export: %s\n"),
