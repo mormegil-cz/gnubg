@@ -71,10 +71,6 @@ typedef enum _playertype {
 typedef struct _player {
     char szName[ 32 ];
     playertype pt;
-<<<<<<< backgammon.h
-=======
-    evaltype etChequer, etCube; /* PLAYER_GNU */
->>>>>>> 1.85
     evalsetup esChequer, esCube; /* PLAYER_GNU */
     int h; /* PLAYER_EXTERNAL */
 } player;
