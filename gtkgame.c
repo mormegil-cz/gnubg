@@ -5924,7 +5924,7 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
 
           if ( ! ms.nMatchTo ) 
             /* money game */
-            sprintf( sz, "%+6.3f", aarSigma[ j ][ i ] );
+            sprintf( sz, "%+7.4f", aarSigma[ j ][ i ] );
           else if ( fOutputMWC )
             /* match play (mwc) */
             sprintf( sz, "%7.3f%%", 100.0f * aarSigma[ j ][ i ] );
