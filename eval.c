@@ -55,10 +55,11 @@ extern float pubeval( int race, int pos[] );
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
 
-/* Race and contact inputs */
+/* Race and contact inputs -- commented in more detail in
+   CalculateHalfInputs(). */
 enum { I_OFF1 = 100, I_OFF2, I_OFF3, HALF_RACE_INPUTS };
 
-/* Contact inputs -- see Berliner for most of these */
+/* Contact inputs -- see CalculateHalfInputs() again. */
 enum { I_BREAK_CONTACT = HALF_RACE_INPUTS, I_BACK_CHEQUER, I_BACK_ANCHOR,
        I_FORWARD_ANCHOR, I_PIPLOSS, I_P1, I_P2, I_BACKESCAPES, I_ACONTAIN,
        I_ACONTAIN2, I_CONTAIN, I_CONTAIN2, I_BUILDERS, I_SLOTTED,
@@ -443,6 +444,9 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     for( n = 15, i = 0; i < 25; i++ )
 	n -= anBoard[ i ];
 
+    /* Decode the men off into 3 integers, in the hope of capturing more
+       nonlinear information from the number of men off than a single input
+       could. */
     if( n > 10 ) {
 	afInput[ I_OFF1 ] = 1.0;
 	afInput[ I_OFF2 ] = 1.0;
@@ -471,7 +475,9 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     if( !n )
 	/* No contact */
 	return 1;
-    
+
+    /* n will equal 152 in the starting position; normalise n to keep the
+       input in the range 0.0 to 1.0 (approximately). */
     afInput[ I_BREAK_CONTACT ] = n / 152.0;
 
     /* Back chequer */
@@ -697,20 +703,26 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 
     afInput[ I_PIPLOSS ] = n / ( 12.0 * 36.0 );
 
+    /* Number of rolls that hit at least one chequer. */
     for( n = 0, i = 0; i < 21; i++ )
 	if( aRoll[ i ].nChequers )
 	    n += aaRoll[ i ][ 3 ] > 0 ? 1 : 2;
 
     afInput[ I_P1 ] = n / 36.0;
-    
+
+    /* Number of rolls that hit at least two chequers. */
     for( n = 0, i = 0; i < 21; i++ )
 	if( aRoll[ i ].nChequers > 1 )
 	    n += aaRoll[ i ][ 3 ] > 0 ? 1 : 2;
 
     afInput[ I_P2 ] = n / 36.0;
 
+    /* Number of rolls that can be played by the opponent's back man. */
     afInput[ I_BACKESCAPES ] = Escapes( anBoard, 23 - nOppBack ) / 36.0;
 
+    /* Blockade strength -- find the point between the opponent's back
+       chequer and our 9 point from which the least rolls can be played,
+       and define the strength based on that number of rolls. */
     for( n = 36, i = 15; i < 24 - nOppBack; i++ )
 	if( ( j = Escapes( anBoard, i ) ) < n )
 	    n = j;
@@ -718,13 +730,17 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
     afInput[ I_ACONTAIN ] = ( 36 - n ) / 36.0;
     afInput[ I_ACONTAIN2 ] = afInput[ I_ACONTAIN ] * afInput[ I_ACONTAIN ];
 
+    /* Potential blockade strength -- find the point from our 9 point down
+       from which the opponent could play the least number of rolls. */
     for( n = 36, i = 15; i < 24; i++ )
 	if( ( j = Escapes( anBoard, i ) ) < n )
 	    n = j;
 
     afInput[ I_CONTAIN ] = ( 36 - n ) / 36.0;
     afInput[ I_CONTAIN2 ] = afInput[ I_CONTAIN ] * afInput[ I_CONTAIN ];
-    
+
+    /* The number of builders we have aimed at the point we most want to
+       make. */
     for( n = 0, i = 0; i < 6; i++ )
 	if( anBoard[ j = anPoint[ i ] ] < 2 && anBoardOpp[ 23 - j ] < 2 ) {
 	    /* we want to make point j */
@@ -738,15 +754,19 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 
     afInput[ I_BUILDERS ] = n / 6.0;
 
+    /* Whether the point we want to make is slotted. */
     afInput[ I_SLOTTED ] = ( i < 6 && anBoard[ j ] == 1 ) ?
 	( 6 - i ) / 6.0 : 0.0;
-    
+
+    /* Overall measure of how many different ways we have of moving. */
     for( n = 0, i = 6; i < 25; i++ )
 	if( anBoard[ i ] )
 	    n += ( i - 5 ) * anBoard[ i ] * Escapes( anBoardOpp, i );
 
     afInput[ I_MOBILITY ] = n / 3600.00;
 
+    /* 2nd moment of inertia -- presented by Berliner as a measure of how
+       "stranded" the rear chequers are. */
     for( n = 0, i = 0; i < 25; i++ )
 	if( anBoard[ i ] )
 	    n += i * anBoard[ i ];
