@@ -406,6 +406,8 @@ extern void ShowBoard( void );
 extern void SetMatchID ( const char *szMatchID );
 extern char*
 FormatCubePosition ( char *sz, cubeinfo *pci );
+extern void
+FormatCubePositions( const cubeinfo *pci, char asz[ 2 ][ 40 ] );
 extern char *FormatPrompt( void );
 extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			     int i, int fRankKnown,

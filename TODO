@@ -331,8 +331,6 @@ functions:
   be easy to move back to correct mistakes.
 ** Think about adding features which attempt to predict the time and
   standard error of rollouts in advance (see Chuck's work). (gary)
-** Allow the caller of the Rollout* functions to specify a callback function
-  (to replace the current hard-coded GTKRollout()/output* calls).
 ** Investigate more sophisticated training techniques, e.g. real
   simulated annealing (see the GNU Scientific Library, at
   <http://sources.redhat.com/gsl/>).

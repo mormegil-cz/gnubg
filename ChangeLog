@@ -1,3 +1,18 @@
+Wed Jul 16 12:21:20 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Change rollouts routines to accept a progress callback instead
+	of currently hardcoded GTK+ calls.
+
+	* rollout.c (GeneralEvaluation, GneralEvaluationR,
+	GeneralCubeDecision, GeneralCubeDecisionR): change prototype to
+	include progress callback.
+	* rollout.c (RolloutGeneral): replaced hardcoded calls with
+	calls to passed progress callback.
+	* progress.c: new file with default progress initialisers and 
+	callbacks.
+	* gnubg.c (CommandRollout): bring up hint dialog after
+	"rollout =cube" and "rollout =1 =2 =3". 
+
 Tue Jul 15 19:52:54 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* set.c: sockets: added includes for Windows

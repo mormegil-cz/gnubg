@@ -802,6 +802,7 @@ extern int ComputerTurn( void ) {
       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
       rolloutstat aarsStatistics[ 2 ][ 2 ];
       cubedecision cd;
+      void *p;
 
       /* Consider cube action */
 
@@ -841,10 +842,9 @@ extern int ComputerTurn( void ) {
 
       /* Evaluate cube decision */
       ProgressStart( _("Considering cube action...") );
-      if ( GeneralCubeDecision ( _("Computer player"),
-                                 aarOutput, aarStdDev, aarsStatistics,
-                                 ms.anBoard,
-                                 &ci, &ap [ ms.fTurn ].esCube) < 0 ) {
+      if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
+                                 ms.anBoard, &ci, &ap [ ms.fTurn ].esCube,
+                                 NULL, NULL ) < 0 ) {
 	  ProgressEnd();
 	  return -1;
       }
@@ -1050,10 +1050,9 @@ extern int ComputerTurn( void ) {
 
           /* Consider cube action */
 	  ProgressStart( _("Considering cube action...") );
-          if ( GeneralCubeDecision ( _("Computer player"),
-                                     aarOutput, aarStdDev, aarsStatistics,
-                                     ms.anBoard,
-                                     &ci, &ap [ ms.fTurn ].esCube) < 0 ) {
+          if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics,
+                                     ms.anBoard, &ci, &ap [ ms.fTurn ].esCube,
+                                     NULL, NULL ) < 0 ) {
 	      ProgressEnd();
 	      return -1;
 	  }
