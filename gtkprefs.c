@@ -210,8 +210,9 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 			    GTK_RADIO_BUTTON( pwWood ), "Painted" ),
 			FALSE, FALSE, 0 );
 
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->wood ? pwWood :
-						     pwWoodF ), TRUE );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->wood != WOOD_PAINT ?
+						     pwWood : pwWoodF ),
+				  TRUE );
     
     for( i = 0; i < 3; i++ )
 	ar[ i ] = bd->aanBoardColour[ 1 ][ i ] / 255.0;
