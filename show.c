@@ -44,6 +44,7 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtktheory.h"
+#include "gtkexport.h"
 #elif USE_EXT
 #include "xgame.h"
 #endif
@@ -1237,9 +1238,9 @@ CommandShowExport ( char *sz ) {
 
   int i;
 
-#if USE_GTK && 0
+#if USE_GTK 
   if( fX ) {
-    GTKExportSettings(); 
+    GTKShowExport( &exsExport ); 
     return;
   }
 #endif
@@ -1265,16 +1266,22 @@ CommandShowExport ( char *sz ) {
     outputf ( "- board\r\t\t\t\t: on every %d move\n", 
               exsExport.fDisplayBoard );
 
-  if ( exsExport.fSide < 0 )
+  if ( exsExport.fSide == 3 )
     outputl ( "- players\r\t\t\t\t: both" );
   else
     outputf ( "- player\r\t\t\t\t: %s\n", 
-              ap[ exsExport.fSide ].szName );
+              ap[ exsExport.fSide - 1 ].szName );
 
   outputl ( "\nOutput moves:\n" );
 
   outputf ( "- show at most\r\t\t\t\t: %d moves\n", 
             exsExport.nMoves );
+  outputf ( "- show detailed probabilities\r\t\t\t\t: %s\n", 
+            exsExport.fMovesDetailProb ? "yes" : "no" );
+  outputf ( "- show evaluation parameters\r\t\t\t\t: %s\n", 
+            exsExport.afMovesParameters[ 0 ] ? "yes" : "no" );
+  outputf ( "- show rollout parameters\r\t\t\t\t: %s\n", 
+            exsExport.afMovesParameters[ 1 ] ? "yes" : "no" );
 
   for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
     if ( i == SKILL_NONE ) 
@@ -1287,6 +1294,13 @@ CommandShowExport ( char *sz ) {
   }
 
   outputl ( "\nOutput cube decisions:\n" );
+
+  outputf ( "- show detailed probabilities\r\t\t\t\t: %s\n", 
+            exsExport.fCubeDetailProb ? "yes" : "no" );
+  outputf ( "- show evaluation parameters\r\t\t\t\t: %s\n", 
+            exsExport.afCubeParameters[ 0 ] ? "yes" : "no" );
+  outputf ( "- show rollout parameters\r\t\t\t\t: %s\n", 
+            exsExport.afCubeParameters[ 1 ] ? "yes" : "no" );
 
   for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
     if ( i == SKILL_NONE )
@@ -1304,6 +1318,14 @@ CommandShowExport ( char *sz ) {
             exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? "yes" : "no" );
   outputf ( "- close cube decisions\r\t\t\t\t: %s\n",
             exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
+
+  outputl ( "\nHTML options:\n" );
+
+  outputf ( "- URL to pictures used in export\n"
+            "\t%s\n",
+            exsExport.szHTMLPictureURL ? exsExport.szHTMLPictureURL :
+            "not defined" );
+
 
   outputl ( "\n" );
 
