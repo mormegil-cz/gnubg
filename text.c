@@ -176,7 +176,7 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
   if ( szIndent && *szIndent )
     strcat ( sz, szIndent );
 
-  if ( prc->nTruncate )
+  if ( prc->nTruncate && prc->fDoTruncate)
     sprintf ( pc = strchr ( sz, 0 ),
               prc->fCubeful ?
               _("Truncated cubeful rollout (depth %d)") :
