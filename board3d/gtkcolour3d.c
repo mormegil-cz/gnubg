@@ -54,21 +54,28 @@ extern void RenderPreview(Material* pMat, unsigned char* buf);
 extern int LoadTexture(Texture* texture, const char* Filename);
 extern BoardData bd3d;
 
+int previewLightLevels[3];
+
+void SetPreviewLightLevel(int levels[3])
+{
+	memcpy(previewLightLevels, levels, sizeof(int[3]));
+}
+
 void SetupLight()
 {
 	float al[4], dl[4], sl[4];
 	float lp[4] = {PREVIEW_WIDTH / 2, PREVIEW_HEIGHT / 2, 50, 1};
 	glLightfv(GL_LIGHT0, GL_POSITION, lp);
 
-	al[0] = al[1] = al[2] = 50 / 100.0f;
+	al[0] = al[1] = al[2] = previewLightLevels[0] / 100.0f;
 	al[3] = 1;
 	glLightfv(GL_LIGHT0, GL_AMBIENT, al);
 
-	dl[0] = dl[1] = dl[2] = 70 / 100.0f;
+	dl[0] = dl[1] = dl[2] = previewLightLevels[1] / 100.0f;
 	dl[3] = 1;
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
 
-	sl[0] = sl[1] = sl[2] = 100 / 100.0f;
+	sl[0] = sl[1] = sl[2] = previewLightLevels[2] / 100.0f;
 	sl[3] = 1;
 	glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
 }
@@ -188,7 +195,6 @@ void SetupColourPreview()
 	glOrtho(0, STRIP_WIDTH, 0, STRIP_HEIGHT, -STRIP_HEIGHT, 0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	SetupLight();
 }
 
 #if HAVE_GTKGLEXT
@@ -221,6 +227,7 @@ void RenderPreview(Material* pMat, unsigned char* buf)
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return;
 
+	SetupLight();
 	Draw(pMat);
 
 	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buf);
@@ -251,6 +258,7 @@ void RenderPreview(Material* pMat, unsigned char* buf)
 		return;
 
 	SetupColourPreview();
+	SetupLight();
 
 	Draw(pMat);
 

@@ -38,7 +38,7 @@
 GdkGLConfig *glconfig;
 #endif
 
-int checkAccelerated = 0;
+static int checkAccelerated = 1;
 void DoAcceleratedCheck(GtkWidget* board);
 
 guint idleId = 0;
@@ -89,7 +89,7 @@ void setIdleFunc(BoardData* bd, idleFunc* pFun)
 
 void Draw(BoardData* bd)
 {	/* Render board - need multiple passes for shadows */
-	if (rdAppearance.showShadows)
+	if (bd->showShadows)
 		shadowDisplay(drawBoard, bd);
 	else
 		drawBoard(bd);
@@ -154,7 +154,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
 		height = widget->allocation.height;
 	}
 	glViewport(0, 0, width, height);
-	SetupViewingVolume3d(bd);
+	SetupViewingVolume3d(bd, &rdAppearance);
 
 #if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
@@ -176,10 +176,12 @@ void realize(GtkWidget *widget, BoardData* bd)
     if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
 		return;
 #endif
+
 	InitGL(bd);
 	testSet3dSetting(bd, &rdAppearance);
+	SetupViewingVolume3d(bd, &rdAppearance);
 	GetTextures(bd);
-preDraw3d(bd);
+	preDraw3d(bd);
 
 #if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
@@ -302,13 +304,6 @@ int InitGTK3d(int *argc, char ***argv)
 	return 0;
 }
 
-void CheckAccelerated(GtkWidget* board)
-{
-	checkAccelerated = 1;
-	if (GTK_WIDGET_REALIZED(board))
-		DoAcceleratedCheck(board);
-}
-
 #ifdef WIN32
 
 #ifndef PFD_GENERIC_ACCELERATED
@@ -414,12 +409,11 @@ GdkGLContext *glPixmapContext = NULL;
 
 unsigned char testbuf[ 108 * 3 * 72 * 3 * 3 ];
 
-void SetupPreview(BoardData* bd)
+void SetupPreview(BoardData* bd, renderdata* prd)
 {
-	glViewport(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
-	SetupViewingVolume3d(bd);
-	InitGL(bd);
+	ClearTextures(bd, TRUE);
 	GetTextures(bd);
+	SetupViewingVolume3d(bd, prd);
 	preDraw3d(bd);
 }
 
@@ -450,14 +444,15 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return 0;
 
-	SetupPreview(bd);
+	glViewport(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+	InitGL(bd);
 
 	gdk_gl_drawable_gl_end (gldrawable);
 
 	return glpixmap;
 }
 
-void RenderBoard3d(BoardData* bd, void *glpixmap, unsigned char* buf)
+void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf)
 {
 	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE((GdkGLPixmap *)glpixmap);
@@ -465,9 +460,7 @@ void RenderBoard3d(BoardData* bd, void *glpixmap, unsigned char* buf)
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return;
 
-ClearTextures(bd, TRUE);
-GetTextures(bd);
-preDraw3d(bd);
+	SetupPreview(bd, prd);
 
 	Draw(bd);
 
@@ -508,7 +501,7 @@ void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm)
 	return ppm;
 }
 
-void RenderBoard3d(BoardData* bd, void *ppm, unsigned char* buf)
+void RenderBoard3d(BoardData* bd, renderdata* prd, void *ppm, unsigned char* buf)
 {
 	GdkGLPixmap *glpixmap;
 
@@ -518,8 +511,10 @@ void RenderBoard3d(BoardData* bd, void *ppm, unsigned char* buf)
 	if (!gdk_gl_pixmap_make_current(glpixmap, glPixmapContext))
 		return;
 
-ClearTextures(bd, TRUE);
-	SetupPreview(bd);
+	glViewport(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
+	InitGL(bd);
+
+	SetupPreview(bd, prd);
 
 	Draw(bd);
 

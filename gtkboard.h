@@ -187,6 +187,7 @@ typedef struct _BoardData {
     gint forced, crawford_game; /* unused, Crawford game flag */
     gint redoubles; /* number of instant redoubles allowed */
 	int DragTargetHelp;	/* Currently showing draw targets? */
+	int iTargetHelpPoints[4];	/* Drag target position */
 
 #if USE_BOARD3D
 /* extra members for 3d board */
@@ -217,10 +218,16 @@ typedef struct _BoardData {
 
 	int moving;	/* Is a piece moving (animating) */
 	Path piecePath;	/* Animation path for moving pieces */
-	float rotateMovingPiece;
+	float rotateMovingPiece;	/* Piece going home? */
 	int shakingDice;	/* Are dice being animated */
 	Path dicePaths[2];	/* Dice shaking paths */
 	int showHinges;	/* Hinges visibile? */
+	int showMoveIndicator;	/* Show move indicator? */
+	int showShadows;	/* Show shadows */
+	int shadowDarkness;	/* How dark are shadows */
+	int boardAngle;	/* Angle board is tilted at */
+	int testSkewFactor;	/* Debug FOV adjustment */
+	int curveAccuracy;	/* Round curve approximation accuracy */
 
 	float movingPos[3];
 	float dragPos[3];
@@ -230,7 +237,6 @@ typedef struct _BoardData {
 
 	float flagWaved;	/* How much has flag waved */
 
-	int iTargetHelpPoints[4];	/* Drag target position */
 	void *numberFont, *cubeFont;	/* FTGL fonts */
 	int preview;	/* Showing a preview? */
 
@@ -271,9 +277,10 @@ extern void board_free_pixmaps( BoardData *bd );
 #if USE_BOARD3D
 /* Functions for 3d board */
 extern int InitGTK3d(int *argc, char ***argv);
-extern void SetupViewingVolume3d(BoardData *bd);
+extern void SetupViewingVolume3d(BoardData *bd, renderdata* prd);
 extern void DisplayCorrectBoardType();
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
+extern void SetupLight3d(BoardData *bd, renderdata* prd);
 
 extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
 extern void RollDice3d(BoardData *bd);
@@ -286,7 +293,7 @@ extern void CloseBoard3d(BoardData* bd);
 extern int BoardPoint3d(BoardData *bd, int x, int y, int point);
 extern int MouseMove3d(BoardData *bd, int x, int y);
 extern void ReadBoard3d(BoardData* bd, GtkWidget *widget, unsigned char* buf);
-extern void RenderBoard3d(BoardData* bd, void *glpixmap, unsigned char* buf);
+extern void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf);
 extern void Tidy3dObjects(BoardData* bd, int glValid);
 extern int TestPerformance3d(BoardData* bd);
 extern void testSet3dSetting(BoardData* bd, const renderdata *prd);
@@ -302,7 +309,6 @@ extern void updateDiceOccPos(BoardData *bd);
 extern void updatePieceOccPos(BoardData* bd);
 extern void updateHingeOccPos(BoardData* bd);
 extern void updateFlagOccPos(BoardData* bd);
-extern void CheckAccelerated(GtkWidget* board);
 #endif
 
 extern int animate_player, *animate_move_list, animation_finished;

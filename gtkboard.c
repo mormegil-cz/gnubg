@@ -2310,7 +2310,7 @@ static gint board_set( Board *board, const gchar *board_text,
 
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
-		SetupViewingVolume3d(bd);	/* Cube may be out of top of screen */
+		SetupViewingVolume3d(bd, &rdAppearance);	/* Cube may be out of top of screen */
 	else
 #endif
 	{
@@ -4091,26 +4091,25 @@ extern GtkWidget *board_dice_widget( Board *board ) {
 
 void InitBoardData()
 {	/* Initialize some BoardData settings on new game start */
-	BoardData* bd = BOARD(pwBoard)->board_data;
-
 	/* Only needed for 3d board */
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_2D)
+	if (rdAppearance.fDisplayType == DT_3D)
+	{
+		BoardData* bd = BOARD(pwBoard)->board_data;
+		/* Move cube back to center */
+		bd->cube = 0;
+		bd->cube_owner = 0;
+		bd->doubled = 0;
+
+		bd->resigned = 0;
+
+		/* Set dice so 3d roll happens */
+		bd->diceShown = DICE_NOT_SHOWN;
+		bd->diceRoll[0] = bd->diceRoll[1] = -1;
+
+		updateOccPos(bd);
+		updateFlagOccPos(bd);
+		SetupViewingVolume3d(bd, &rdAppearance);
+	}
 #endif
-		return;
-
-	/* Move cube back to center */
-	bd->cube = 0;
-	bd->cube_owner = 0;
-	bd->doubled = 0;
-
-	bd->resigned = 0;
-
-	/* Set dice so 3d roll happens */
-	bd->diceShown = DICE_NOT_SHOWN;
-	bd->diceRoll[0] = bd->diceRoll[1] = -1;
-
-	updateOccPos(bd);
-	updateFlagOccPos(bd);
-	SetupViewingVolume3d(bd);
 }

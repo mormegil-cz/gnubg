@@ -71,7 +71,6 @@ typedef struct _diceTest
 void InitBoard3d(BoardData *bd);
 void InitBoardPreview(BoardData *bd);
 void InitGL(BoardData *bd);
-void SetupLight3d(BoardData *bd);
 
 /* Drawing functions */
 void drawBoard(BoardData* bd);

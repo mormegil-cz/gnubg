@@ -600,6 +600,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 
 }
 
+#if USE_BOARD3D
+
 char *WriteMaterial(Material* pMat)
 {
 #define NUM_MATS 20
@@ -626,6 +628,8 @@ char *WriteMaterial(Material* pMat)
 	}
 	return buf[cur];
 }
+
+#endif
 
 extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 

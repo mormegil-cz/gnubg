@@ -67,7 +67,7 @@ void CheckNormal()
 	glEnd();
 }
 
-void SetupLight3d(BoardData * bd)
+void SetupLight3d(BoardData *bd, renderdata* prd)
 {
 	/* Ugly - store shadow light position here... 
 		This is because this position needs to be adjusted (below) */
@@ -77,8 +77,8 @@ void SetupLight3d(BoardData * bd)
 	/* Shadow light position */
 	bd->shadow_light_position = &lp;
 
-	copyPoint(lp, rdAppearance.lightPos);
-	lp[3] = (float)(rdAppearance.lightType == LT_POSITIONAL);
+	copyPoint(lp, prd->lightPos);
+	lp[3] = (float)(prd->lightType == LT_POSITIONAL);
 
 	/* If directioinal vector is from origin */
 	if (lp[3] == 0)
@@ -88,15 +88,15 @@ void SetupLight3d(BoardData * bd)
 	}
 	glLightfv(GL_LIGHT0, GL_POSITION, lp);
 
-	al[0] = al[1] = al[2] = rdAppearance.lightLevels[0] / 100.0f;
+	al[0] = al[1] = al[2] = prd->lightLevels[0] / 100.0f;
 	al[3] = 1;
 	glLightfv(GL_LIGHT0, GL_AMBIENT, al);
 
-	dl[0] = dl[1] = dl[2] = rdAppearance.lightLevels[1] / 100.0f;
+	dl[0] = dl[1] = dl[2] = prd->lightLevels[1] / 100.0f;
 	dl[3] = 1;
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
 
-	sl[0] = sl[1] = sl[2] = rdAppearance.lightLevels[2] / 100.0f;
+	sl[0] = sl[1] = sl[2] = prd->lightLevels[2] / 100.0f;
 	sl[3] = 1;
 	glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
 }
@@ -338,6 +338,91 @@ int LoadTexture(Texture* texture, const char* filename)
 
 	free(bits);	/* Release loaded image */
 	return 1;
+}
+
+void GetTexture(BoardData* bd, Material* pMat)
+{
+	if (pMat->textureInfo)
+	{
+		char buf[100];
+		strcpy(buf, TEXTURE_PATH);
+		strcat(buf, pMat->textureInfo->file);
+		SetTexture(bd, pMat, buf);
+	}
+	else
+		pMat->pTexture = 0;
+}
+
+void GetTextures(BoardData* bd)
+{
+	GetTexture(bd, &bd->chequerMat[0]);
+	GetTexture(bd, &bd->chequerMat[1]);
+	GetTexture(bd, &bd->baseMat);
+	GetTexture(bd, &bd->pointMat[0]);
+	GetTexture(bd, &bd->pointMat[1]);
+	GetTexture(bd, &bd->boxMat);
+	GetTexture(bd, &bd->hingeMat);
+	GetTexture(bd, &bd->backGroundMat);
+}
+
+void testSet3dSetting(BoardData* bd, const renderdata *prd)
+{
+	bd->pieceType = prd->pieceType;
+	bd->showHinges = prd->fHinges;
+	bd->showMoveIndicator = prd->showMoveIndicator;
+	bd->showShadows = prd->showShadows;
+	bd->shadowDarkness = prd->shadowDarkness;
+	bd->curveAccuracy = prd->curveAccuracy;
+	bd->testSkewFactor = prd->testSkewFactor;
+	bd->boardAngle = prd->boardAngle;
+
+	memcpy(bd->chequerMat, prd->rdChequerMat, sizeof(Material[2]));
+
+	memcpy(&bd->diceMat[0], prd->afDieColour[0] ? &prd->rdChequerMat[0] : &prd->rdDiceMat[0], sizeof(Material));
+	memcpy(&bd->diceMat[1], prd->afDieColour[1] ? &prd->rdChequerMat[1] : &prd->rdDiceMat[1], sizeof(Material));
+	bd->diceMat[0].textureInfo = bd->diceMat[1].textureInfo = 0;
+
+	memcpy(bd->diceDotMat, prd->rdDiceDotMat, sizeof(Material[2]));
+
+	memcpy(&bd->cubeMat, &prd->rdCubeMat, sizeof(Material));
+	memcpy(&bd->cubeNumberMat, &prd->rdCubeNumberMat, sizeof(Material));
+
+	memcpy(&bd->baseMat, &prd->rdBaseMat, sizeof(Material));
+	memcpy(bd->pointMat, prd->rdPointMat, sizeof(Material[2]));
+
+	memcpy(&bd->boxMat, &prd->rdBoxMat, sizeof(Material));
+	memcpy(&bd->hingeMat, &prd->rdHingeMat, sizeof(Material));
+	memcpy(&bd->pointNumberMat, &prd->rdPointNumberMat, sizeof(Material));
+	memcpy(&bd->backGroundMat, &prd->rdBackGroundMat, sizeof(Material));
+}
+
+void CopySettings3d(BoardData* from, BoardData* to)
+{
+	memcpy(to->chequerMat, from->chequerMat, sizeof(Material[2]));
+
+	memcpy(to->diceMat, from->diceMat, sizeof(Material[2]));
+	memcpy(to->diceDotMat, from->diceDotMat, sizeof(Material[2]));
+
+	memcpy(&to->cubeMat, &from->cubeMat, sizeof(Material));
+	memcpy(&to->cubeNumberMat, &from->cubeNumberMat, sizeof(Material));
+
+	memcpy(&to->baseMat, &from->baseMat, sizeof(Material));
+	memcpy(&to->pointMat[0], &from->pointMat[0], sizeof(Material));
+	memcpy(&to->pointMat[1], &from->pointMat[1], sizeof(Material));
+
+	memcpy(&to->boxMat, &from->boxMat, sizeof(Material));
+	memcpy(&to->hingeMat, &from->hingeMat, sizeof(Material));
+	memcpy(&to->pointNumberMat, &from->pointNumberMat, sizeof(Material));
+	memcpy(&to->backGroundMat, &from->backGroundMat, sizeof(Material));
+
+	to->pieceType = from->pieceType;
+	to->showHinges = from->showHinges;
+	to->showMoveIndicator = from->showMoveIndicator;
+	to->showShadows = from->showShadows;
+	to->shadowDarkness = from->shadowDarkness;
+	to->curveAccuracy = from->curveAccuracy;
+	to->testSkewFactor = from->testSkewFactor;
+	to->boardAngle = from->boardAngle;
 }
 
 /* Return v position, d distance along path segment */
@@ -1136,14 +1221,13 @@ void CloseBoard3d(BoardData* bd)
 	bd->resigned = 0;
 	fClockwise = 0;
 
-	rdAppearance.showShadows = 0;
-	rdAppearance.showMoveIndicator = 0;
+	bd->showShadows = 0;
+	bd->showMoveIndicator = 0;
 	rdAppearance.fLabels = 0;
 	bd->diceShown = DICE_NOT_SHOWN;
 	bd->State = BOARD_CLOSING;
 
 	/* Random logo */
-	SetupSimpleMat(&bd->logoMat, bd->boxMat.ambientColour[0] + 1 / 2.0f, bd->boxMat.ambientColour[1] + 1 / 2.0f, bd->boxMat.ambientColour[2] + 1 / 2.0f);
 	if (rand() % 2)
 		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp");
 	else
@@ -1170,7 +1254,7 @@ int MouseMove3d(BoardData *bd, int x, int y)
 		return 0;
 }
 
-void SetupViewingVolume3d(BoardData *bd)
+void SetupViewingVolume3d(BoardData *bd, renderdata* prd)
 {
 	GLint viewport[4];
 	glGetIntegerv (GL_VIEWPORT, viewport);
@@ -1179,7 +1263,7 @@ void SetupViewingVolume3d(BoardData *bd)
 	glLoadIdentity();
 	SetupPerspVolume(bd, viewport);
 
-	SetupLight3d(bd);
+	SetupLight3d(bd, prd);
 	calculateBackgroundSize(bd, viewport);
 }
 
@@ -1312,6 +1396,7 @@ void InitBoard3d(BoardData *bd)
 	setDicePos(bd);
 
 	SetupSimpleMat(&bd->gap, 0, 0, 0);
+	SetupSimpleMat(&bd->logoMat, 1, 1, 1);
 	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
 	SetupMat(&bd->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 0);
 

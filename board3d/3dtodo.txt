@@ -1,57 +1,37 @@
 
+* Settings not getting applied correctly on startup (gtk 2)
+
 Todo
 ====
 
-Display settings
-----------------
-
-* Get all options working...
-	* Move non-skin settings to (new 3d) display option page
-		+ Only enable when 3d board showing (try disabling page)
-		* Make sure options change correctly!
-		* Add tooltips for new options
-			+ show point labels
-	* Update lighting on changes to light paramaters (in preview)
-		* Use lighting levels in appearance settings (for colour preveiw - rather than constants)
-
-+ Remove testgtkboard.c file from lib build (and cvs)
-
-Bugs
-====
-
-* Add design - doesn't work...
-
-In current version
-------------------
-
-* Click on home to move 2 chequers off board when player 0 (human)
-	- causes crash or assertion failure
-	? Problem in UpdateMove() ?
-
-* Show a colour selection box in appearances
-	- strange gtk (General delete case) error on settings exit
-
-* Gtk 1, change colour of 2d design element but cancel colour dialog
-	- change not removed until next screen update/change
-
-Other things
-============
-
-+ Flag waving (change setting when displayed...)
-
-* Remove rdAppearance from notebook pages - pass in correct ones
-	+ So settings saved (not overwritten) when switching 3d<->2d?
+_( before strings?
 
 Add check for unaccellerated graphics under linux
 	+ use glX functions - isDirect()?
 	- test
 
-----------------------------------------------------------
++ Flag waving (change setting when displayed...)
 
-Add a few preset light positions
-	i.e. left of board, top of board, right of board, centre of board.
++ Remove testgtkboard.c file from lib build (and cvs)
+
+* export position png - and any other place that uses rendered board
+
+Bugs
+====
+
+* Sound not always played on exit (2d/no hinges?)
+
+In current version
+------------------
+* Click on home to move 2 chequers off board when player 0 (human)
+	- causes crash or assertion failure
+	? Problem in UpdateMove() ?
+	* May be fixed - try with latest code
+
+Other things
+============
+
 On close, remap background to a better shape?
-export position png - and any other place that uses rendered board
 Show/hide 2d arrow with option
 
 ----------------------------------------------------------
@@ -61,9 +41,3 @@ FTGL uses C++
 Remove any warnings
 Check builds and runs without BOARD3D defined (check settings ok too)
 Check Gtk1 + 2 ok
-
-Skin help
-=========
-<colour/lighting help>
-(Look at materials.h for sample colour settings)
-<texture help>

@@ -7451,7 +7451,7 @@ extern void GTKSet( void *p ) {
 #if USE_BOARD3D
 		/* If in 3d mode may need to update sizes */
 		if (rdAppearance.fDisplayType == DT_3D)
-			SetupViewingVolume3d(bd);
+			SetupViewingVolume3d(bd, &rdAppearance);
 		else
 #endif
 		{
@@ -8799,6 +8799,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     pow->pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwLabels ), rdAppearance.fLabels );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwLabels, FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pow->pwLabels, "Show or hide point numbers", NULL );
 
     pow->pwDragTargetHelp = gtk_check_button_new_with_label(
 	_("Show target help when dragging a chequer") );
