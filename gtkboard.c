@@ -3602,7 +3602,7 @@ DrawDie( GdkDrawable *pd,
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
                              BoardData *bd ) {
 
-	if (bd->rd->nSize <= 0 || event->count || bd->diceShown == DICE_NOT_SHOWN)
+	if (bd->rd->nSize <= 0 || bd->diceShown == DICE_NOT_SHOWN)
 		return TRUE;
 
     DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip,
@@ -4091,41 +4091,47 @@ extern GtkType board_get_type( void ) {
     return board_type;
 }
 
+unsigned char *TTachCube, *TTachCubeFaces, *TTachDice[2], *TTachPip[2];
+
+static int GetSetSize()
+{
+	return gdk_screen_width() / 170;
+}
+
 static gboolean cube_widget_expose( GtkWidget *cube, GdkEventExpose *event,
 				    BoardData *bd ) {
 
     int n, nValue;
     unsigned char *puch;
+    int setSize = GetSetSize();
+    int cubeStride = setSize * CUBE_WIDTH * 4;
+    int cubeFaceStride = setSize * CUBE_LABEL_WIDTH * 3;
     
-    if( event->count )
-	return TRUE;
-
     n = (int) gtk_object_get_user_data( GTK_OBJECT( cube ) );
     if( ( nValue = n % 13 - 1 ) == -1 )
 	nValue = 5; /* use 64 cube for 1 */
     
-    puch = g_alloca( CUBE_LABEL_WIDTH * bd->rd->nSize *
-		     CUBE_LABEL_HEIGHT * bd->rd->nSize * 3 );
-    CopyAreaRotateClip( puch, CUBE_LABEL_WIDTH * bd->rd->nSize * 3, 0, 0,
-			CUBE_LABEL_WIDTH * bd->rd->nSize,
-			CUBE_LABEL_HEIGHT * bd->rd->nSize,
-			bd->ri.achCubeFaces,
-			CUBE_LABEL_WIDTH * bd->rd->nSize * 3,
-			0, CUBE_LABEL_HEIGHT * bd->rd->nSize * nValue,
-			CUBE_LABEL_WIDTH * bd->rd->nSize,
-			CUBE_LABEL_HEIGHT * bd->rd->nSize,
+    puch = g_alloca( cubeFaceStride * CUBE_LABEL_HEIGHT * setSize );
+
+    CopyAreaRotateClip( puch, cubeFaceStride, 0, 0,
+			CUBE_LABEL_WIDTH * setSize,
+			CUBE_LABEL_HEIGHT * setSize,
+			TTachCubeFaces,
+			cubeFaceStride,
+			0, CUBE_LABEL_HEIGHT * setSize * nValue,
+			CUBE_LABEL_WIDTH * setSize,
+			CUBE_LABEL_HEIGHT * setSize,
 			2 - n / 13 );
-    
     DrawAlphaImage( cube->window, 0, 0,
-		    bd->ri.achCube, CUBE_WIDTH * bd->rd->nSize * 4,
-		    CUBE_WIDTH * bd->rd->nSize,
-		    CUBE_HEIGHT * bd->rd->nSize );
+		    TTachCube, cubeStride,
+		    CUBE_WIDTH * setSize,
+		    CUBE_HEIGHT * setSize );
     gdk_draw_rgb_image( cube->window, bd->gc_copy,
-			bd->rd->nSize, bd->rd->nSize,
-			CUBE_LABEL_WIDTH * bd->rd->nSize,
-			CUBE_LABEL_HEIGHT * bd->rd->nSize,
+			setSize, setSize,
+			CUBE_LABEL_WIDTH * setSize,
+			CUBE_LABEL_HEIGHT * setSize,
 			GDK_RGB_DITHER_MAX,
-			puch, CUBE_LABEL_WIDTH * bd->rd->nSize * 3 );
+			puch, cubeFaceStride );
 
     return TRUE;
 }
@@ -4150,51 +4156,78 @@ static gboolean cube_widget_press( GtkWidget *cube, GdkEvent *event,
     return TRUE;
 }
 
-extern GtkWidget *board_cube_widget( Board *board ) {
-
-    GtkWidget *pw = gtk_table_new( 3, 13, TRUE ), *pwCube;
-    BoardData *bd = board->board_data;    
-    int x, y;
-
-    for( y = 0; y < 3; y++ )
-	for( x = 0; x < 13; x++ ) {
-	    pwCube = gtk_drawing_area_new();
-	    gtk_object_set_user_data( GTK_OBJECT( pwCube ),
-				      (gpointer) ( y * 13 + x ) );
-	    gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
-				   CUBE_WIDTH * bd->rd->nSize,
-				   CUBE_HEIGHT * bd->rd->nSize );
-	    gtk_widget_add_events( pwCube, GDK_EXPOSURE_MASK |
-				   GDK_BUTTON_PRESS_MASK |
-				   GDK_STRUCTURE_MASK );
-	    gtk_signal_connect( GTK_OBJECT( pwCube ), "expose_event",
-				GTK_SIGNAL_FUNC( cube_widget_expose ), bd );
-	    gtk_signal_connect( GTK_OBJECT( pwCube ), "button_press_event",
-				GTK_SIGNAL_FUNC( cube_widget_press ), bd );
-	    gtk_table_attach_defaults( GTK_TABLE( pw ), pwCube,
-				       x, x + 1, y, y + 1 );
-        }
-
-    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * bd->rd->nSize );
-    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * bd->rd->nSize );
-    gtk_container_set_border_width( GTK_CONTAINER( pw ), bd->rd->nSize );
-    
-    return pw;	    
+extern void DestroySetCube(GtkObject *po, GtkWidget *pw)
+{
+	free(TTachCubeFaces);
+	free(TTachCube);
+	gtk_widget_destroy(pw);
 }
+
+extern GtkWidget *board_cube_widget( Board *board )
+{
+	GtkWidget *pw = gtk_table_new( 3, 13, TRUE ), *pwCube;
+	BoardData *bd = board->board_data;    
+	int x, y;
+	int setSize = GetSetSize();
+
+	int cubeStride = setSize * CUBE_WIDTH * 4;
+	int cubeFaceStride = setSize * CUBE_LABEL_WIDTH * 3;
+	renderdata rd;
+	CopyAppearance(&rd);
+	rd.nSize = setSize;
+#if USE_BOARD3D
+	if (bd->rd->fDisplayType == DT_3D)
+	{
+		for (x = 0; x < 4; x++)
+			rd.arCubeColour[x] = bd->rd->CubeMat.ambientColour[x];
+	}
+#endif
+	TTachCube = malloc(cubeStride * setSize * CUBE_HEIGHT);
+	TTachCubeFaces = malloc(cubeFaceStride * setSize * CUBE_LABEL_HEIGHT * 12);
+
+	RenderCube(&rd, TTachCube, cubeStride);
+	RenderCubeFaces(&rd, TTachCubeFaces, cubeFaceStride, TTachCube, cubeStride);
+
+	for( y = 0; y <= 2; y++ )
+	{
+		for( x = 0; x <= 12; x++ )
+		{
+			pwCube = gtk_drawing_area_new();
+			gtk_object_set_user_data( GTK_OBJECT( pwCube ),
+							(gpointer) ( y * 13 + x ) );
+			gtk_drawing_area_size( GTK_DRAWING_AREA( pwCube ),
+						CUBE_WIDTH * setSize,
+						CUBE_HEIGHT * setSize );
+			gtk_widget_add_events( pwCube, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
+			gtk_signal_connect( GTK_OBJECT( pwCube ), "expose_event",
+					GTK_SIGNAL_FUNC( cube_widget_expose ), bd );
+			gtk_signal_connect( GTK_OBJECT( pwCube ), "button_press_event",
+					GTK_SIGNAL_FUNC( cube_widget_press ), bd );
+			gtk_table_attach_defaults( GTK_TABLE( pw ), pwCube,
+							x, x + 1, y, y + 1 );
+		}
+	}
+
+	gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * setSize );
+	gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * setSize );
+	gtk_container_set_border_width( GTK_CONTAINER( pw ), setSize );
+    
+	return pw;	    
+}
+
 
 static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
 				    BoardData *bd ) {
 
+    int setSize = GetSetSize();
+
     int n = (int) gtk_object_get_user_data( GTK_OBJECT( dice ) );
 
-    if( event->count )
-	return TRUE;
-    
-    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, bd->rd->nSize, bd->gc_copy,
+    DrawDie( dice->window, TTachDice, TTachPip, setSize, bd->gc_copy,
              0, 0, bd->turn > 0, n % 6 + 1 );
-    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, bd->rd->nSize, bd->gc_copy,
-             DIE_WIDTH * bd->rd->nSize, 0, bd->turn > 0, n / 6 + 1 );
-    
+    DrawDie( dice->window, TTachDice, TTachPip, setSize, bd->gc_copy,
+             DIE_WIDTH * setSize, 0, bd->turn > 0, n / 6 + 1 );
+
     return TRUE;
 }
 
@@ -4213,36 +4246,77 @@ static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event,
     return TRUE;
 }
 
-extern GtkWidget *board_dice_widget( Board *board ) {
+extern void DestroySetDice(GtkObject *po, GtkWidget *pw)
+{
+	free(TTachDice[0]);
+	free(TTachDice[1]);
+	free(TTachPip[0]);
+	free(TTachPip[1]);
+	gtk_widget_destroy(pw);
+}
 
-    GtkWidget *pw = gtk_table_new( 6, 6, TRUE ), *pwDice;
-    BoardData *bd = board->board_data;    
-    int x, y;
+extern GtkWidget *board_dice_widget( Board *board )
+{
+	GtkWidget *pw = gtk_table_new( 6, 6, TRUE ), *pwDice;
+	BoardData *bd = board->board_data;    
+	int x, y;
+	int setSize = GetSetSize();
 
-    for( y = 0; y < 6; y++ )
-	for( x = 0; x < 6; x++ ) {
-	    pwDice = gtk_drawing_area_new();
-	    gtk_object_set_user_data( GTK_OBJECT( pwDice ),
-				      (gpointer) ( y * 6 + x ) );
-	    gtk_drawing_area_size( GTK_DRAWING_AREA( pwDice ),
-				   2 * DIE_WIDTH * bd->rd->nSize,
-				   DIE_HEIGHT * bd->rd->nSize );
-	    gtk_widget_add_events( pwDice, GDK_EXPOSURE_MASK |
-				   GDK_BUTTON_PRESS_MASK |
-				   GDK_STRUCTURE_MASK );
-	    gtk_signal_connect( GTK_OBJECT( pwDice ), "expose_event",
-				GTK_SIGNAL_FUNC( dice_widget_expose ), bd );
-	    gtk_signal_connect( GTK_OBJECT( pwDice ), "button_press_event",
-				GTK_SIGNAL_FUNC( dice_widget_press ), bd );
-	    gtk_table_attach_defaults( GTK_TABLE( pw ), pwDice,
-				       x, x + 1, y, y + 1 );
-        }
+	int diceStride = setSize * DIE_WIDTH * 4;
+	int pipStride = setSize * 3;
+	renderdata rd;
+	CopyAppearance(&rd);
+	rd.nSize = setSize;
+#if USE_BOARD3D
+	if (bd->rd->fDisplayType == DT_3D)
+	{
+		int i, j;
+		for (j = 0; j < 4; j++)
+		{
+			for (i = 0; i < 2; i++)
+			{
+				rd.aarColour[i][j] = bd->rd->ChequerMat[i].ambientColour[j];
+				rd.aarDiceColour[i][j] = bd->rd->DiceMat[i].ambientColour[j];
+				rd.aarDiceDotColour[i][j] = bd->rd->DiceDotMat[i].ambientColour[j];
+			}
+		}
+	}
+#endif
+	TTachDice[ 0 ] = malloc(diceStride * setSize * DIE_HEIGHT);
+	TTachDice[ 1 ] = malloc(diceStride * setSize * DIE_HEIGHT);
+	TTachPip[ 0 ] = malloc(pipStride * setSize);
+	TTachPip[ 1 ] = malloc(pipStride * setSize);
 
-    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * bd->rd->nSize );
-    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * bd->rd->nSize );
-    gtk_container_set_border_width( GTK_CONTAINER( pw ), bd->rd->nSize );
-    
-    return pw;	    
+	RenderDice( &rd, TTachDice[ 0 ], TTachDice[ 1 ], diceStride );
+	RenderPips( &rd, TTachPip[ 0 ], TTachPip[ 1 ], pipStride );
+
+	for( y = 0; y < 6; y++ )
+	{
+		for( x = 0; x < 6; x++ )
+		{
+			pwDice = gtk_drawing_area_new();
+			gtk_object_set_user_data( GTK_OBJECT( pwDice ),
+							(gpointer) ( y * 6 + x ) );
+			gtk_drawing_area_size( GTK_DRAWING_AREA( pwDice ),
+						2 * DIE_WIDTH * setSize,
+						DIE_HEIGHT * setSize );
+			gtk_widget_add_events( pwDice, GDK_EXPOSURE_MASK |
+						GDK_BUTTON_PRESS_MASK |
+						GDK_STRUCTURE_MASK );
+			gtk_signal_connect( GTK_OBJECT( pwDice ), "expose_event",
+					GTK_SIGNAL_FUNC( dice_widget_expose ), bd );
+			gtk_signal_connect( GTK_OBJECT( pwDice ), "button_press_event",
+					GTK_SIGNAL_FUNC( dice_widget_press ), bd );
+			gtk_table_attach_defaults( GTK_TABLE( pw ), pwDice,
+							x, x + 1, y, y + 1 );
+		}
+	}
+
+	gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * setSize );
+	gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * setSize );
+	gtk_container_set_border_width( GTK_CONTAINER( pw ), setSize );
+
+	return pw;	    
 }
 
 #if USE_BOARD3D

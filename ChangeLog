@@ -1,3 +1,11 @@
+Fri Apr 30 18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkboard.c: Change dice and cube selection dialogs to fixed size
+	* gtkboard.c board3d/graph.c: Remove event->count optimization as now done in gtk
+	* i18n.c: Warn if too many PopLocale() calls attempted
+	* gtkprefs.c, html.c: No libart build fixes
+	* gtkprefs.c: Small bug in colours when switching from 3d to 2d
+
 Thu Apr 29 20:44:24 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* bearoff.c (GetDistCompressed): fix sanity check for huge 

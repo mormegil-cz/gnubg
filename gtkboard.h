@@ -67,7 +67,9 @@ typedef struct _BoardClass {
 extern GtkType board_get_type( void );    
 extern GtkWidget *board_new(renderdata* prd);
 extern GtkWidget *board_cube_widget( Board *board );
+extern void DestroySetCube(GtkObject *po, GtkWidget *pw);
 extern GtkWidget *board_dice_widget( Board *board );
+extern void DestroySetDice(GtkObject *po, GtkWidget *pw);
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1,

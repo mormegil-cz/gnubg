@@ -768,15 +768,10 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
     }
 }
 
-static void DestroySetDice( GtkObject *po, GtkWidget *pw ) {
-
-    gtk_widget_destroy( pw );
-}
-
 extern int GTKGetManualDice( int an[ 2 ] ) {
 
     GtkWidget *pwDialog = GTKCreateDialog( _("GNU Backgammon - Dice"),
-					DT_QUESTION, NULL, NULL ),
+					DT_INFO, NULL, NULL ),
 	*pwDice = board_dice_widget( BOARD( pwBoard ) );
 
     an[ 0 ] = 0;
@@ -824,7 +819,7 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
 	return;
 	
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Cube"),
-			     DT_QUESTION, NULL, NULL );
+			     DT_INFO, NULL, NULL );
     pwCube = board_cube_widget( BOARD( pwBoard ) );
 
     an[ 0 ] = -1;
@@ -839,7 +834,7 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwCube ), "destroy",
-			GTK_SIGNAL_FUNC( DestroySetDice ), pwDialog );
+			GTK_SIGNAL_FUNC( DestroySetCube ), pwDialog );
     
     gtk_widget_show_all( pwDialog );
 
