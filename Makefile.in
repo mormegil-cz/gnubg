@@ -201,7 +201,7 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
-makebearoff1_SOURCES = makebearoff1.c 
+makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
 makebearoff1_LDADD = 
 makebearoff1_DEPENDENCIES = 
 
@@ -268,7 +268,8 @@ am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	bearoff.$(OBJEXT)
 makebearoff_OBJECTS = $(am_makebearoff_OBJECTS)
 makebearoff_LDFLAGS =
-am_makebearoff1_OBJECTS = makebearoff1.$(OBJEXT)
+am_makebearoff1_OBJECTS = makebearoff1.$(OBJEXT) getopt.$(OBJEXT) \
+	getopt1.$(OBJEXT)
 makebearoff1_OBJECTS = $(am_makebearoff1_OBJECTS)
 makebearoff1_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT)
@@ -978,7 +979,7 @@ gnubg.weights:
 @CROSS_COMPILING_FALSE@bearoff-database: makebearoff
 @CROSS_COMPILING_FALSE@	@echo ' ** NOTE: you can generate huge one sided and two sided'
 @CROSS_COMPILING_FALSE@	@echo ' ** bearoff databases for usage with gnubg'
-@CROSS_COMPILING_FALSE@	£echo ' ** See README for more details'
+@CROSS_COMPILING_FALSE@	@echo ' ** See README for more details'
 @CROSS_COMPILING_FALSE@	./makebearoff -t 6x6 > $(srcdir)/gnubg_ts0.bd; $(MAKE) gnubg.bd
 
 .PHONY: bearoff-database
