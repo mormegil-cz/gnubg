@@ -690,15 +690,16 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
     N_("Lose (g)"), 
     N_("Lose (bg)"),
     N_("Cubeless"), 
-    N_("Cubeful")
-  }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-  char *aszTemp[ 8 ];
+    N_("Cubeful"),
+	N_("Rank/J.S.D.")
+  }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+  char *aszTemp[ 9 ];
   int i;
   GtkWidget *pwVbox;
   GtkWidget *pwButtons;
   rolloutprogress *prp = 
     (rolloutprogress *) g_malloc( sizeof ( rolloutprogress ) );
-  
+  int nColumns = sizeof (aszTitle) / sizeof (aszTitle[0]);
   *pp = prp;
   prp->prs = (rolloutstat *) aars;
     
@@ -739,10 +740,10 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
 
   pwVbox = gtk_vbox_new( FALSE, 4 );
 	
-  for ( i = 0; i < 8; i++ )
+  for ( i = 0; i < nColumns; i++ )
     aszTemp[ i ] = aszTitle[ i ] ? gettext ( aszTitle[ i ] ) : "";
 
-  prp->pwRolloutResult = gtk_clist_new_with_titles( 8, aszTemp );
+  prp->pwRolloutResult = gtk_clist_new_with_titles( nColumns, aszTemp );
   gtk_clist_column_titles_passive( GTK_CLIST( prp->pwRolloutResult ) );
     
   prp->pwRolloutProgress = gtk_progress_bar_new();
@@ -752,7 +753,7 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
   gtk_box_pack_start( GTK_BOX( pwVbox ), prp->pwRolloutProgress, FALSE, FALSE,
                       0 );
     
-  for( i = 0; i < 8; i++ ) {
+  for( i = 0; i < nColumns; i++ ) {
     gtk_clist_set_column_auto_resize( GTK_CLIST( prp->pwRolloutResult ), i,
                                       TRUE );
     gtk_clist_set_column_justification( GTK_CLIST( prp->pwRolloutResult ), i,
@@ -801,6 +802,10 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                     const cubeinfo aci[],
                     const int iGame,
                     const int iAlternative,
+					const int nRank,	
+					const float rJsd,
+					const int fStopped,
+					const int fShowRanks,
                     rolloutprogress *prp ) {
 
     char sz[ 32 ];
@@ -845,6 +850,18 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     }
 
+    if (fShowRanks && iGame > 1) {
+	  sprintf (sz, "%d %s", nRank, fStopped ? "S" : "R");
+	  gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ),
+						  iAlternative * 2, i + 1, sz);
+	  sprintf( sz,  "%5.3f", rJsd);
+	  gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ),
+						  iAlternative * 2 + 1, i + 1, sz);
+	} else {
+	  gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ),
+						  iAlternative * 2, i + 1, "n/a");
+	}
+	  
     gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ),
                             iGame + 1, 0, prc->nTrials );
 #if 0
@@ -955,6 +972,10 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                  const cubeinfo aci[],
                  const int iGame,
                  const int iAlternative,
+				 const int nRank,
+				 const float rJsd,
+				 const int fStopped,
+				 const int fShowRanks,
                  void *pUserData ) {
 
   if ( ! fShowProgress )
@@ -963,7 +984,7 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 #if USE_GTK
   if ( fX ) {
     GTKRolloutProgress( aarOutput, aarStdDev, prc, aci, iGame, iAlternative, 
-                        pUserData );
+                        nRank, rJsd, fStopped, fShowRanks, pUserData );
     return;
   }
 #endif /* USE_GTK */

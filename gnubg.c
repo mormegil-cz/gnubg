@@ -324,7 +324,12 @@ rolloutcontext rcRollout =
   0,  /* seed */
   FALSE,  /* no stop on STD */
   144,    /* minimum games  */
-  0.1	  /* stop when std's are under 10% of value */
+  0.1,	  /* stop when std's are under 10% of value */
+  FALSE,  /* no stop on JSD */
+  FALSE,  /* no move stop on JSD */
+  144,    /* minimum games  */
+  1.96,   /* stop when best has j.s.d. for 95% confidence */
+
 };
 
 /* parameters for `eval' and `hint' */
@@ -480,7 +485,8 @@ static char szDICE[] = N_("<die> <die>"),
     szMATCHID[] = N_("<matchid>"),
     szURL[] = N_("<URL>"),
     szMAXERR[] = N_("<fraction>"),
-    szMINGAMES[] = N_("<minimum games to rollout>");
+    szMINGAMES[] = N_("<minimum games to rollout>"),
+    szJSDS[] = N_("<joint standard deviations>");
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
     NULL, NULL, NULL, NULL, &cER
@@ -1032,9 +1038,6 @@ command cER = {
       N_("Record the round of the match within the event"), szOPTVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
-    { "digits", CommandSetOutputDigits,
-      N_("Control how many digits to be shown for probabilities "
-         "and percentages"), szVALUE, NULL },
     { "matchpc", CommandSetOutputMatchPC,
       N_("Show match equities as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
@@ -1045,6 +1048,9 @@ command cER = {
     { "winpc", CommandSetOutputWinPC,
       N_("Show winning chances as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
+	{ "digits", CommandSetOutputDigits,
+	  N_("Set number of digits after the decimal point in outputs"),
+	  szVALUE, NULL},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, N_("Use the ANSI C rand() (usually linear "
@@ -1093,6 +1099,20 @@ command cER = {
       N_("Stop when all ratios |std/value| are less than this "),
       szMAXERR, NULL},
     { NULL, NULL, NULL, NULL, NULL }
+},acSetRolloutJsd[] = {
+  { "limit", CommandSetRolloutJsdLimit, 
+    N_("Stop when equities differ by this many j.s.d.s"),
+    szJSDS, NULL},
+  { "minimumgames", CommandSetRolloutJsdMinGames,
+      N_("Always rollout at least this many games"),
+      szMINGAMES, NULL},
+  { "move", CommandSetRolloutJsdMoveEnable,
+    N_("Stop rollout of move when J.S.D. is large enough"),
+    szONOFF, &cOnOff },
+  { "stop", CommandSetRolloutJsdEnable,
+    N_("Stop entire rollout when J.S.D.s are large enough"),
+    szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutPlayer[] = {
     { "chequerplay", CommandSetRolloutPlayerChequerplay, 
       N_("Specify parameters "
@@ -1149,6 +1169,9 @@ command cER = {
       "rollout is cubeful or cubeless"), szONOFF, &cOnOff },
     { "initial", CommandSetRolloutInitial, 
       N_("Roll out as the initial position of a game"), szONOFF, &cOnOff },
+    { "jsd", CommandSetRolloutJsd, 
+      N_("Stop truncations based on j.s.d. of equities"),
+      NULL, acSetRolloutJsd},
     {"later", CommandSetRolloutLate,
      N_("Control evaluation parameters for later plies of rollout"),
      NULL, acSetRolloutLate },
@@ -3884,11 +3907,9 @@ CommandRollout( char *sz ) {
 #if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
     char ( *asz )[ 40 ];
-    rolloutstat ( *aars)[2];
 #else
     int aan[ 10 ][ 2 ][ 25 ];
     char asz[ 10 ][ 40 ];
-    rolloutstat aars[ 10 ][2];
 #endif
 
   if( !( c = CountTokens( sz ) ) ) {
@@ -3953,7 +3974,6 @@ CommandRollout( char *sz ) {
 #if HAVE_ALLOCA
     aan = alloca( 50 * c * sizeof( int ) );
     asz = alloca( 40 * c );
-    aars = alloca( 2 * c * sizeof ( rolloutstat ) );
 
 #else
     if( c > 10 )
@@ -3962,18 +3982,18 @@ CommandRollout( char *sz ) {
     
     for( i = 0; i < c; i++ ) {
       if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
-	return;
+		return;
       else if( n ) {
-	if( ms.fMove )
-	  SwapSides( aan[ i ] );
+		if( ms.fMove )
+		  SwapSides( aan[ i ] );
 	    
-	fOpponent = TRUE;
+		fOpponent = TRUE;
       }
 
       if( !sz ) {
-	/* that was the last parameter */
-	c = i + 1;
-	break;
+		/* that was the last parameter */
+		c = i + 1;
+		break;
       }
     }
 
@@ -4003,7 +4023,6 @@ CommandRollout( char *sz ) {
       int         (** apBoard)[2][25];
       float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
       float       (** apStdDev)[ NUM_ROLLOUT_OUTPUTS ];
-      rolloutstat (** apStatistics)[2];
       evalsetup   (** apes);
       cubeinfo    (** apci);
       int         (** apCubeDecTop);
@@ -4012,7 +4031,6 @@ CommandRollout( char *sz ) {
       apBoard = alloca (c * sizeof (int *));
       apOutput = alloca (c * sizeof (float *));
       apStdDev = alloca (c * sizeof (float *));
-      apStatistics = alloca (2 * c * sizeof (rolloutstat *));
       apes = alloca (c * sizeof (evalsetup *));
       apci = alloca (c * sizeof (cubeinfo *));
       apCubeDecTop = alloca (c * sizeof (int *));
@@ -4022,7 +4040,6 @@ CommandRollout( char *sz ) {
       int         (*apBoard[10])[2][25];
       float       (*apOutput[10])[2][25];
       float       (*apStdDev[10])[2][25];
-      rolloutstat (*apStatistics[10])[2];
       evalsetup   (*apes[10]);
       cubeinfo    (*apci[10]);
       int         (*apCubeDecTop[10]);
@@ -4046,18 +4063,15 @@ CommandRollout( char *sz ) {
 	  apes[ i ] = &NoEs;
 	  memcpy (&NoEs.rc, &rcRollout, sizeof (rolloutcontext));
 	}
-	apStatistics[ i ] = &aars[i];
 	apci[ i ] = &ci;
 	apCubeDecTop[ i ] = &false;
       }
 
-      RolloutProgressStart( &ci, c, aars, &rcRollout, asz, &p );
-
       if( ( cGames = 
 	    RolloutGeneral( apBoard, apOutput, apStdDev,
-			    apStatistics, apes, apci,
-			    apCubeDecTop, c, fOpponent, 
-                            RolloutProgress, p )) <= 0 ) {
+			    NULL, apes, apci,
+			    apCubeDecTop, c, fOpponent, FALSE,
+                           RolloutProgress, p )) <= 0 ) {
         RolloutProgressEnd( &p );
 	return;
       }
@@ -4871,7 +4885,11 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s truncate-equal-player0 %s\n"
             "%s limit enable %s\n"
             "%s limit minimumgames %d\n"
-            "%s limit maxerror %05.4f\n",
+            "%s limit maxerror %05.4f\n"
+	    "%s jsd stop %s\n"
+            "%s jsd move %s\n"
+            "%s jsd minimumgames %d\n"
+            "%s jsd limit %05.4f\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
@@ -4888,7 +4906,11 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, fTruncEqualPlayer0 ? "on" : "off",
 	    sz, prc->fStopOnSTD ? "on" : "off",
 	    sz, prc->nMinimumGames,
-	    sz, prc->rStdLimit
+	    sz, prc->rStdLimit,
+            sz, prc->fStopOnJsd ? "on" : "off",
+            sz, prc->fStopMoveOnJsd ? "on" : "off",
+            sz, prc->nMinimumJsdGames,
+            sz, prc->rJsdLimit
             );
   
   SaveRNGSettings ( pf, sz, prc->rngRollout );

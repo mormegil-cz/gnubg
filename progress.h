@@ -37,6 +37,10 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                  const cubeinfo aci[],
                  const int iGame,
                  const int iAlternative,
+				 const int nRank,
+				 const float rJsd,
+				 const int fStopped,
+				 const int fShowRanks,
                  void *pUserData );
 
 extern void

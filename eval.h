@@ -134,11 +134,21 @@ typedef struct _rolloutcontext {
   unsigned int fStopOnSTD;    /* stop when std's are small enough */
   unsigned int nMinimumGames; /* but always do at least this many */
   double       rStdLimit;     /* stop when abs( value / std ) < this */
+  unsigned int fStopMoveOnJsd;    /* stop multi-line rollout when jsd is small enough */
+  unsigned int fStopOnJsd;
+  unsigned int nMinimumJsdGames;
+  double       rJsdLimit;
   int nGamesDone;
   int nSkip;
-  int fNoMore;
 } rolloutcontext;
 
+
+typedef struct {
+  float  rEquity;
+  float  rJSD;
+  int    nOrder;
+  int	 nRank;
+} jsdinfo;
 
 typedef enum _evaltype {
   EVAL_NONE, EVAL_EVAL, EVAL_ROLLOUT

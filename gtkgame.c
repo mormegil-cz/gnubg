@@ -4975,10 +4975,15 @@ typedef struct _rolloutpagegeneral {
   int *pfOK;
   GtkWidget *pwCubeful, *pwVarRedn, *pwInitial, *pwRotate, *pwDoLate;
   GtkWidget *pwDoTrunc, *pwCubeEqualChequer, *pwPlayersAreSame;
-  GtkWidget *pwTruncEqualPlayer0, *pwDoSTDStop;
+  GtkWidget *pwTruncEqualPlayer0;
   GtkWidget *pwTruncBearoff2, *pwTruncBearoffOS, *pwTruncBearoffOpts;
-  GtkWidget *pwAdjLatePlies, *pwAdjTruncPlies, *pwAdjMinGames, *pwAdjMaxError;
-  GtkAdjustment *padjTrials, *padjTruncPlies, *padjLatePlies, *padjSeed, *padjMinGames, *padjMaxError;
+  GtkWidget *pwAdjLatePlies, *pwAdjTruncPlies, *pwAdjMinGames;
+  GtkWidget *pwDoSTDStop, *pwAdjMaxError;
+  GtkWidget *pwJsdDoStop, *pwJsdDoMoveStop;
+  GtkWidget *pwJsdMinGames, *pwJsdAdjMinGames, *pwJsdAdjLimit;
+  GtkAdjustment *padjTrials, *padjTruncPlies, *padjLatePlies;
+  GtkAdjustment *padjSeed, *padjMinGames, *padjMaxError;
+  GtkAdjustment *padjJsdMinGames, *padjJsdLimit;
   GtkWidget *arpwGeneral;
   GtkWidget *pwMinGames, *pwMaxError;
 } rolloutpagegeneral;
@@ -5055,6 +5060,11 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
                                             prw->prwGeneral->pwDoSTDStop));
   prw->rcRollout.nMinimumGames = (unsigned int) gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prw->prwGeneral->pwMinGames));
   prw->rcRollout.rStdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwMaxError));
+
+  prw->rcRollout.fStopOnJsd = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(prw->prwGeneral->pwJsdDoStop));
+  prw->rcRollout.fStopMoveOnJsd = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(prw->prwGeneral->pwJsdDoMoveStop));
+  prw->rcRollout.nMinimumJsdGames = (unsigned int) gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdMinGames));
+  prw->rcRollout.rJsdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwJsdAdjLimit));
 
   /* get all the evaluations out of the widgets */
   for (i = 0; i < 4; ++i) {
@@ -5178,6 +5188,18 @@ static void STDStopToggled( GtkWidget *pw, rolloutwidget *prw) {
                             do_std_stop);
   gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjMaxError),
                             do_std_stop);
+}
+
+static void JsdStopToggled( GtkWidget *pw, rolloutwidget *prw) {
+
+  int do_jsd_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwJsdDoStop ) );
+  int do_jsd_move_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwJsdDoMoveStop) );
+  int enable = do_jsd_stop | do_jsd_move_stop;
+  
+
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjMinGames), enable);
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjLimit), enable);
+
 }
 
 static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw) {
@@ -5331,10 +5353,10 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   prpw->pwAdjMinGames = pwHBox = gtk_hbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
-                     gtk_label_new( _("Minimum Games:" ) ) );
+                     gtk_label_new( _("Minimum Trials:" ) ) );
 
   prpw->padjMinGames = GTK_ADJUSTMENT( gtk_adjustment_new( 
-                                       prw->rcRollout.nMinimumGames, 1, 1296 * 1296, 36, 26, 0 ) );
+                                       prw->rcRollout.nMinimumGames, 1, 1296 * 1296, 36, 36, 0 ) );
 
   prpw->pwMinGames = gtk_spin_button_new(prpw->padjMinGames, 1, 0 ) ;
 
@@ -5351,6 +5373,46 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   prpw->pwMaxError = gtk_spin_button_new(prpw->padjMaxError, .0001, 4 );
 
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwMaxError);
+
+  pwFrame = gtk_frame_new ( _("Stop Rollouts of multiple moves based on j.s.d.") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
+
+  pw = gtk_vbox_new( FALSE, 8 );
+  gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
+   
+  prpw->pwJsdDoStop = gtk_check_button_new_with_label (_( "Stop rollout when one move appears to be best " ) );
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwJsdDoStop );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoStop ), prw->rcRollout.fStopOnJsd);
+  gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwJsdDoStop ), "toggled", GTK_SIGNAL_FUNC (JsdStopToggled), prw);
+
+  prpw->pwJsdDoMoveStop = gtk_check_button_new_with_label (_( "Stop rollout of move when best move j.s.d. appears better " ) );
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwJsdDoMoveStop );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoMoveStop ), prw->rcRollout.fStopMoveOnJsd);
+  gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwJsdDoMoveStop ), "toggled", GTK_SIGNAL_FUNC (JsdStopToggled), prw);
+
+  prpw->pwJsdAdjMinGames = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_label_new( _("Minimum Trials:" ) ) );
+
+  prpw->padjJsdMinGames = GTK_ADJUSTMENT( gtk_adjustment_new( prw->rcRollout.nMinimumJsdGames, 1, 1296 * 1296, 36, 36, 0 ) );
+
+  prpw->pwJsdMinGames = gtk_spin_button_new(prpw->padjJsdMinGames, 1, 0 ) ;
+
+  gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwJsdMinGames);
+
+  prpw->pwJsdAdjLimit = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+                   gtk_label_new( _("No of j.s.d.s from best move" ) ) );
+
+  prpw->padjJsdLimit = GTK_ADJUSTMENT( gtk_adjustment_new( 
+                       prw->rcRollout.rJsdLimit, 0, 1, .0001, .0001, 0.001 ) );
+
+  prpw->pwJsdAdjLimit = gtk_spin_button_new(prpw->padjJsdLimit, .0001, 4 );
+
+  gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwJsdAdjLimit);
+
 
   pwFrame = gtk_frame_new ( _("Truncation") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
@@ -5547,6 +5609,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
   /* cheap and nasty way to get things set correctly */
   LateEvalToggled (NULL, &rw);
   STDStopToggled (NULL, &rw);
+  JsdStopToggled (NULL, &rw);
   TruncEnableToggled (NULL, &rw);
   CubeEqCheqToggled (NULL, &rw);
   PlayersSameToggled (NULL, &rw);
@@ -5557,21 +5620,24 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
   GTKAllowStdin();
 
   if( fOK ) {
+    int fCubeful;
     outputpostpone();
 
-    if( rw.rcRollout.fCubeful != rcRollout.fCubeful ) {
+    if((fCubeful = rw.rcRollout.fCubeful) != rcRollout.fCubeful ) {
       sprintf( sz, "set rollout cubeful %s",
-               rw.rcRollout.fCubeful ? "on" : "off" );
+              fCubeful ? "on" : "off" );
       UserCommand( sz );
 
-	  if (!rw.rcRollout.fCubeful) {
 		for (i = 0; i < 2; ++i) {
-		  /* turn off cubeful chequer for rollouts if cubeful is
-			 off on the main page */
-		  rw.rcRollout.aecChequer[i].fCubeful = 0;
-		  rw.rcRollout.aecChequerLate[i].fCubeful = 0;
+		  /* replicate main page cubeful on/of in all evals */
+		  rw.rcRollout.aecChequer[i].fCubeful = fCubeful;
+		  rw.rcRollout.aecChequerLate[i].fCubeful = fCubeful;
+		  rw.rcRollout.aecCube[i].fCubeful = fCubeful;
+		  rw.rcRollout.aecCubeLate[i].fCubeful = fCubeful;
 		}
-	  }
+		rw.rcRollout.aecCubeTrunc.fCubeful = 
+		  rw.rcRollout.aecChequerTrunc.fCubeful = fCubeful;
+	
     }
 
     for (i = 0; i < 2; ++i) {
@@ -5688,6 +5754,29 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
       lisprintf( sz, "set rollout limit maxerr %5.4f", rw.rcRollout.rStdLimit );
       UserCommand( sz );
     }
+
+    /* ======================= */
+
+    if( rw.rcRollout.fStopOnJsd != rcRollout.fStopOnJsd ) {
+      sprintf( sz, "set rollout jsd stop %s", rw.rcRollout.fStopOnJsd ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fStopMoveOnJsd != rcRollout.fStopMoveOnJsd ) {
+      sprintf( sz, "set rollout jsd move %s", rw.rcRollout.fStopMoveOnJsd ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.nMinimumJsdGames != rcRollout.nMinimumJsdGames ) {
+      sprintf( sz, "set rollout jsd minimumgames %d", rw.rcRollout.nMinimumJsdGames );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.rJsdLimit != rcRollout.rJsdLimit ) {
+      lisprintf( sz, "set rollout jsd limit %5.4f", rw.rcRollout.rJsdLimit );
+      UserCommand( sz );
+    }
+
 
     if( rw.rcRollout.nLate != rcRollout.nLate ) {
       sprintf( sz, "set rollout late plies %d", rw.rcRollout.nLate );

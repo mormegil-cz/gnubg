@@ -1,3 +1,10 @@
+Fri Jul 18 13:49:30 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
+
+	* backgammon.h eval.h gnubg.c rollout.c rollout.h progress.c
+	  progress.h set.c gtkgame.c gtkgame.h 
+	  Fixes to rollout extension, allow rollout stop on JSD of moves
+	  fix 'set output digits' command
+	
 Fri Jul 18 10:12:40 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* text.c (OutputMWC): strip some '+' signs from output of

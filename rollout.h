@@ -68,17 +68,21 @@ typedef void
                         const cubeinfo aci[],
                         const int iGame,
                         const int iAlternative,
+						const int nRank,
+						const float rJsd,
+						const int fStopped,
+						const int fShowRanks,
                         void *pUserData );
 
 extern int
 RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], 
                 float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
                 float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
-                rolloutstat (* apStatistics[])[2],
+                rolloutstat apStatistics[][2],
                 evalsetup (* apes[]),
                 cubeinfo (* apci[]), 
                 int (* apCubeDecTop[]), int alternatives, 
-		int fInvert,
+		int fInvert, int fCubeRollout,
                 rolloutprogressfunc *pfRolloutProgress,
                 void *pUserData );
 
