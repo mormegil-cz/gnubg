@@ -138,7 +138,7 @@ UpdateMoveList ( const hintdata *phd ) {
     if (!psHighlight)
     {	/* Get highlight style first time in */
       GtkStyle *psMoves = gtk_widget_get_style( pwMoves );
-      GetStyleFromRCFile(&psHighlight, "move", psMoves);
+      GetStyleFromRCFile(&psHighlight, "move-done", psMoves);
     }
     for ( i = 0; i < pml->cMoves; i++ )
       gtk_clist_set_row_style( GTK_CLIST( pwMoves ), i, i == *piHighlight ?

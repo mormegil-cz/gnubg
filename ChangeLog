@@ -1,5 +1,10 @@
 Wed Jun 16 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
+	* gtkchequer.c, gtkboard.c, gnubg.gtkrc: separate styles for current
+	move and done move in move list
+
+Wed Jun 16 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
 	* gtkchequer.c: use move style for hint window, also removed highlight
 	code from several files
 
