@@ -1969,6 +1969,65 @@ extern void CommandDecline( char *sz ) {
     TurnDone();
 }
 
+static skilltype GoodDouble (int fisRedouble) {
+
+    float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    cubeinfo ci;
+	cubedecision cd;
+    float rDeltaEquity;
+	int      fAnalyseCubeSave = fAnalyseCube;
+
+	/* reasons that doubling is not an issue */
+    if( (ms.gs != GAME_PLAYING) || 
+		ms.anDice[ 0 ]         || 
+		(ms.fDoubled && !fisRedouble) || 
+		(!ms.fDoubled && fisRedouble) ||
+		ms.fResigned ||
+		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
+
+      return (SKILL_NONE);
+    }
+
+	GetMatchStateCubeInfo( &ci, &ms );
+
+	fAnalyseCube = TRUE;
+	if( !GetDPEq ( NULL, NULL, &ci ) ) {
+	  fAnalyseCube = fAnalyseCubeSave;
+	  return (SKILL_NONE);
+	}
+
+	/* Give hint on cube action */
+
+	ProgressStart( _("Considering cube action...") );
+	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+								&esEvalCube.ec ) < 0 ) {
+	  ProgressEnd();
+	  fAnalyseCube = fAnalyseCubeSave;
+	  return (SKILL_NONE);;
+	}
+	ProgressEnd();
+	    
+	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
+
+	switch ( cd ) {
+	case NODOUBLE_TAKE:
+	case NODOUBLE_BEAVER:
+	case TOOGOOD_TAKE:
+	case TOOGOOD_PASS:
+	case NO_REDOUBLE_TAKE:
+	case NO_REDOUBLE_BEAVER:
+	case TOOGOODRE_TAKE:
+
+	  rDeltaEquity = arDouble [OUTPUT_TAKE] - arDouble [OUTPUT_NODOUBLE];
+	  break;
+  
+	default:
+	  return (SKILL_NONE);
+	}
+
+	return Skill (rDeltaEquity);
+}
+
 extern void CommandDouble( char *sz ) {
 
     moverecord *pmr;
@@ -2032,6 +2091,9 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
     
+  if ( fTutor && !GiveAdvice( GoodDouble( FALSE ) ))
+	  return;
+
     if( fDisplay )
 	outputf( _("%s doubles.\n"), ap[ ms.fTurn ].szName );
 
@@ -2942,6 +3004,9 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
     
+	if ( fTutor && !GiveAdvice( GoodDouble( TRUE ) ))
+	  return;
+
     if( fDisplay )
 	outputf( _("%s accepts and immediately redoubles to %d.\n"),
 		ap[ ms.fTurn ].szName, ms.nCube << 2 );

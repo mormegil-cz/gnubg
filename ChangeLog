@@ -1,3 +1,7 @@
+Sun Jul 28 23:06:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c: bug fix. Tutor mode "missing" for doubles.
+
 Sun Jul 28 16:16:13 2002  Øystein Johansen  <oeysteij@online.no>
 
         * gtkgame.c (GTKShowMatchEquityTable): Make *Invert' button a toggle
