@@ -349,7 +349,29 @@ extern void ClearMoveRecord( void ) {
     ListCreate( plGame );
 }
 
-#if USE_GUI && HAVE_SELECT
+#if USE_GTK
+static guint nTimeout, fDelaying;
+
+static gint DelayTimeout( gpointer p ) {
+
+    if( fDelaying )
+	gtk_main_quit();
+
+    nTimeout = 0;
+    
+    return FALSE;
+}
+
+static void ResetDelayTimer( void ) {
+
+    if( fX && nDelay && fDisplay ) {
+	if( nTimeout )
+	    gtk_timeout_remove( nTimeout );
+
+	nTimeout = gtk_timeout_add( nDelay, DelayTimeout, NULL );
+    }
+}
+#elif USE_EXT && HAVE_SELECT
 static struct timeval tvLast;
 
 static void ResetDelayTimer( void ) {
@@ -423,7 +445,6 @@ static void NewGame( void ) {
       outputnew();
       outputf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
                ap[ 1 ].szName, anDice[ 1 ] );
-      outputx();
     }
 
     if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
@@ -436,6 +457,8 @@ static void NewGame( void ) {
 	goto reroll;
     }
 
+    outputx();
+    
     AddGame( pmr );
     
     pmr = malloc( sizeof( pmr->sd ) );
@@ -445,6 +468,7 @@ static void NewGame( void ) {
     pmr->sd.fPlayer = anDice[ 1 ] > anDice[ 0 ];
     AddMoveRecord( pmr );
     UpdateSetting( &fTurn );
+    UpdateSetting( &gs );
     
 #if USE_GUI
     if( fX && fDisplay )
@@ -808,7 +832,7 @@ static int TryBearoff( void ) {
 extern void NextTurn( void ) {
 
     int n;
-#if USE_GUI && HAVE_SELECT
+#if USE_EXT && HAVE_SELECT
     struct timeval tv;
     fd_set fds;
 #endif
@@ -826,8 +850,15 @@ extern void NextTurn( void ) {
     } else
 #endif
 	fNextTurn = FALSE;
-    
-#if USE_GUI && HAVE_SELECT
+
+#if USE_GTK
+    if( fX && nDelay && fDisplay && nTimeout ) {
+	fDelaying = TRUE;
+	GTKDelay();
+	fDelaying = FALSE;
+	ResetDelayTimer();
+    }    
+#elif USE_EXT && HAVE_SELECT
     if( fX && nDelay && fDisplay ) {
 	if( tvLast.tv_sec ) {
 	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
@@ -850,7 +881,6 @@ extern void NextTurn( void ) {
 #ifdef ConnectionNumber /* FIXME use configure for this */
 		FD_ZERO( &fds );
 		FD_SET( ConnectionNumber( DISPLAY ), &fds );
-		/* GTK-FIXME: use timeout */
 		if( select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL,
 			    NULL, &tv ) > 0 ) {
 		    HandleXAction();
@@ -867,6 +897,11 @@ extern void NextTurn( void ) {
 	ResetDelayTimer();
     }
 #endif
+
+    UpdateSetting( &nCube );
+    UpdateSetting( &fCubeOwner );
+    UpdateSetting( &fTurn );
+    UpdateSetting( &gs );
     
     if( ( n = GameStatus( anBoard ) ) ||
 	( gs == GAME_DROP && ( ( n = 1 ) ) ) ||
@@ -1113,6 +1148,14 @@ extern void CommandDouble( char *sz ) {
     
     if( fDisplay )
 	outputf( "%s doubles.\n", ap[ fTurn ].szName );
+
+#if USE_GTK
+    /* There's no point delaying here. */
+    if( nTimeout ) {
+	gtk_timeout_remove( nTimeout );
+	nTimeout = 0;
+    }
+#endif
     
     pmr = malloc( sizeof( pmr->d ) );
     pmr->d.mt = MOVE_DOUBLE;
@@ -1401,6 +1444,7 @@ extern void CommandNewMatch( char *sz ) {
     UpdateSetting( &nMatchTo );
     UpdateSetting( &fTurn );
     UpdateSetting( &fCrawford );
+    UpdateSetting( &gs );
     
     outputf( "A new %d point match has been started.\n", n );
 
@@ -1435,6 +1479,7 @@ extern void CommandNewSession( char *sz ) {
     UpdateSetting( &nMatchTo );
     UpdateSetting( &fTurn );
     UpdateSetting( &fCrawford );
+    UpdateSetting( &gs );
     
     outputl( "A new session has been started." );
     
@@ -1452,7 +1497,8 @@ static void UpdateGame( void ) {
     UpdateSetting( &nCube );
     UpdateSetting( &fCubeOwner );
     UpdateSetting( &fTurn );
-
+    UpdateSetting( &gs );
+    
     ShowBoard();
 }
 

@@ -1,3 +1,27 @@
+Mon Mar 19 10:48:53 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.gtkrc: New file.
+
+	* dice.c: Use /dev/urandom rather than /dev/random.
+
+	* eval.c (PathOpen): Add a flags parameter, so that callers can ask
+	for binary mode on non-POSIX systems.  All callers changed.
+
+	* gnubg.c (CommandSaveSettings): Save more settings.
+
+	* guile.c (classify_position): New function.
+	* gnubg.scm (pip-count): New function.
+
+	* gtkboard.c (board_label_chequers): New function.
+
+	* gtkboard.c (board_draw_labels): New function.
+
+	* gtkgame.c (EnterCommand, SaveWeights, SetRollouts, GTKDelay): New 
+	functions.
+	
+	* set.c (CommandSetRolloutSeed): New function.
+	* rollout.c (Rollout): Use specified seed.
+	
 Fri Mar 16 10:18:26 2001  Gary Wong  <gtw@research.att.com>
 
 	* set.c (CommandSetTrainingThreshold): New function.

@@ -102,17 +102,12 @@ duplication of effort and to make sure our changes merge easily.
   Currently missing:
 *** set beavers
 *** set * evaluation reduced
-*** set output *
-*** set rollout *
 ** Add a prompt and entry field to allow commands to be entered (replacing
   stdin).
 ** Allow the user to decide whether short messages appear in dialogs
   instead of the status bar, or whether all messages are appended to a
   message window.
-** Disable the reset/edit buttons in the board window when no game is in
-  progress.  (Disable appropriate menu items, too.)  Disable the "stop"
-  button when nothing is happening.
-** Add optional point number labels on the board.
+** Disable the "stop" button when nothing is happening.
 ** Have a progress bar along with some text in the main window, which
    indicates progress for the current possibly time-consuming operation.
    E.g. when the user clicks 'hint' the progress text will show
@@ -136,8 +131,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Make usage() show the GDK and GTK options, if appropriate.
 ** Make load/save and prev game/next game freeze and thaw the game list;
   load match shouldn't update the score between games, either. (gary)
-** When the user is moving, show _complete_ moves differently from
-  incomplete ones.
 ** Animate the chequers when the computer moves.
 ** Show a preview of the chequers in the appearances dialog.
 ** Allow the border colour to be changed, and honour the user's lighting
@@ -146,16 +139,24 @@ duplication of effort and to make sure our changes merge easily.
   game_set_old_dice()).
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?
+** Spin buttons with large values (e.g. the RNG seed settings) behave
+  strangely.  This is GTK+'s fault (adjustments store their values as
+  floats, which have less precision than ints).
+** Don't show a cube in the board window in the Crawford game, or if cube
+  use is disabled.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
   to recurse through help for subcommands.
-*** Make the match equity table dialog prettier (make the row/column headings
-  bold, and don't scroll them), and allow selection of data in it.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
 *** Matija Kejzar suggests making the hint dialog non-modal.
+
+** MS Windows:
+*** The stop button has no effect.  One approach would be to define a
+  polling macro which sets fAction if gtk_events_pending() is true, and call
+  this macro before testing fAction.
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution
@@ -167,7 +168,8 @@ duplication of effort and to make sure our changes merge easily.
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
 ** When using mmap()ed bearoff databases, add a signal handler for
-  SIGBUS/SIGSEGV to trap I/O errors.
+  SIGBUS/SIGSEGV to trap I/O errors.  Unfortunately, the semantics of
+  errors on mmap()ed regions are the most unportable that can be imagined...
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages.
 ** The GTK code uses ConnectionNumber() at various places to detect X
@@ -179,7 +181,6 @@ duplication of effort and to make sure our changes merge easily.
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
   see what the REPL in guile-gtk does.
-** "set eval cubeful" gives a poor error message.
 ** Cosmetic bug when using the rollout button in the hint window (the
   commands echoed to stdout and the prompts are in the wrong order).
 ** Changing a player's name doesn't affect the names in the drop-down
@@ -224,7 +225,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Extend ParsePosition to cope with other formats, e.g. FIBS
   "boardstyle 3" and/or a human friendly position description,
   like "set board (0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0)".
-** Do more in CommandSaveSettings.
 ** Handle SGF setup properties when loading games.
 ** Handle SGF variations.
 ** Make the external player handle cube and resignation decisions, and allow
