@@ -7076,7 +7076,7 @@ ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
 static char *
 getInstallDir( void ) {
 
-  char *pc;
+  char *pc = NULL;
   char buf[_MAX_PATH];
   DWORD buflen = _MAX_PATH;
   HKEY key;
@@ -7087,8 +7087,6 @@ getInstallDir( void ) {
                           (LPBYTE)buf, &buflen);
     if (res == ERROR_SUCCESS) 
       pc = strdup( buf );
-    else
-      pc = NULL;
 
     RegCloseKey(key);
     
