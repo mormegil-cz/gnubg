@@ -48,6 +48,7 @@
 #if USE_GTK
 #include "gtkboard.h"
 #include "gtkgame.h"
+#include "gtkpath.h"
 #include "gtktheory.h"
 #include "gtkrace.h"
 #include "gtkexport.h"

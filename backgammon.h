@@ -1029,6 +1029,11 @@ extern char *
 basename ( const char *filename );
 #endif
 
+#ifndef HAVE_DIRNAME
+extern char *
+dirname ( const char *filename );
+#endif
+
 #if USE_GTK
 #  if GTK_CHECK_VERSION(1,3,0) || defined (WIN32)
 #    define GNUBG_CHARSET "UTF-8"

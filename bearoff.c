@@ -28,6 +28,9 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
+
+#include <glib/gutils.h>
+
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -41,7 +44,6 @@
 #if HAVE_LIBGEN_H
 #include <libgen.h>
 #endif
-
 
 #include "positionid.h"
 #include "eval.h"
@@ -820,9 +822,13 @@ ReadSconyers15x15( bearoffcontext *pbc,
           
             if( pbc->szDir )
               free( pbc->szDir );
-          
+
+#if ! defined(HAVE_DIRNAME) && ! defined(HAVE_LIBGEN_H)
+            pbc->szDir = (char *) g_path_get_dirname( (const gchar *) pch );
+#else
             pbc->szDir = dirname( pch );
-          
+#endif
+
             free( pch );
             free( pch2 );
 

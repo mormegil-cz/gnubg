@@ -80,6 +80,8 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <iconv.h>
 #endif
 
+#include <glib/gutils.h>
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -7724,13 +7726,16 @@ basename (const char *filename)
 extern char *
 dirname( const char *filename ) {
 
-   int implement_me = 0;
-   assert ( implement_me );
+#if __GLIBC__
+    return (char *) g_path_get_dirname( (const gchar *) filename );
+#else
+    int implement_me = 0;
+    assert ( implement_me );
+#endif /* #if __GLIBC__ */
 
 }
 
 #endif /* ! HAVE_DIRNAME */
-
 
 extern char *
 Convert ( const char *sz, 
