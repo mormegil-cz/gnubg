@@ -83,7 +83,8 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES)
-gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @LIBART_LIBS@
+gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
+	@LIBART_LIBS@ @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
 if USE_EXT
@@ -92,14 +93,14 @@ INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES)
 gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-	$(COMMON_LIBS) $(SOUND_LIBS)
+	$(COMMON_LIBS) $(SOUND_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 else
 ## --- Plain
 INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
 gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
 	$(FONT_SOURCES)  $(PYTHON_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
+gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @THREAD_LIBS@
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif

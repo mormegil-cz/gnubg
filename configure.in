@@ -401,6 +401,8 @@ if test "$USE_NLS" = "yes"; then
 fi
 
 
+dnl pull in thread stuff
+AC_SUBST(THREAD_LIBS)
 
 dnl check for TRUE/FALSE
 AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))

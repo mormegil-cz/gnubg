@@ -96,7 +96,7 @@ AC_DEFUN(AM_GTK2,[
   AC_SUBST(GTK_LIBS)
 ])
 
-dnl @snyopsis AC_PROG_CC_IEEE
+dnl @synopsis AC_PROG_CC_IEEE
 dnl
 dnl Determine if the C compiler requires the -ieee flag.
 dnl
