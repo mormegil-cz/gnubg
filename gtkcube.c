@@ -700,9 +700,9 @@ CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
 
 #ifdef WIN32
 
-  char *pc;
+  char *pc =  GetContext ( pchd );
 
-  if ( pc = GetContext ( pchd ) )
+  if ( pc )
     WinCopy ( pc );
 
 #else /* WIN32 */
