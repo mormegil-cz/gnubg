@@ -40,6 +40,8 @@
 #include "i18n.h"
 #include "matchequity.h"
 
+#define MAXPLY 4
+
 typedef struct _theorywidget {
 
   cubeinfo ci;
@@ -89,6 +91,12 @@ typedef struct _theorywidget {
 
   /* dead double, live cash, and dead too good points; for graph drawing */
   float aar[ 2 ][ 3 ];
+
+
+  /* radio buttons for plies */
+
+  GtkWidget *apwPly[ MAXPLY ];
+
 } theorywidget;
 
 
@@ -140,6 +148,9 @@ ResetTheory ( GtkWidget *pw, theorywidget *ptw ) {
 
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( ptw->pwBeavers ),
                                  ptw->ci.fBeavers );
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( ptw->apwPly[ ec.nPlies ] ),
+                                TRUE );
 
 
   for ( i = 0; i < 2; i++ ) {
@@ -225,6 +236,8 @@ TheoryGetValues ( theorywidget *ptw, cubeinfo *pci,
   }
 
 }
+
+
 
 
 
@@ -519,6 +532,44 @@ static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
 		       ax[ 2 ], 13, x + cx - ax[ 2 ], cy - 2 );
 }
 
+
+static void
+PlyClicked( GtkWidget *pw, theorywidget *ptw ) {
+
+  int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+  cubeinfo ci;
+  float aarRates[ 2 ][ 2 ];
+  evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
+  float arOutput[ NUM_OUTPUTS ];
+  int i, j;
+
+  if ( !f )
+    return;
+
+  GetMatchStateCubeInfo ( &ci, &ms );
+  TheoryGetValues( ptw, &ci, aarRates );
+  
+  ec.nPlies = *pi;
+  ProgressStart( _("Evaluating gammon percentages" ) );
+  if ( getCurrentGammonRates ( aarRates, arOutput, ms.anBoard, 
+                               &ci, &ec ) < 0 ) {
+    ProgressEnd();
+    fInterrupt = FALSE;
+    return;
+  }
+  ProgressEnd();
+
+  for ( i = 0; i < 2; ++i )
+    for ( j = 0; j < 2; ++j )
+      gtk_adjustment_set_value ( GTK_ADJUSTMENT ( ptw->aapwRates[ i ][ j ] ),
+                                 aarRates[ i ][ j ] * 100.0f );
+
+  TheoryUpdated( NULL, ptw );
+
+}
+
+
 /*
  * Display widget with misc. theory:
  * - market windows
@@ -545,6 +596,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   int i, j, k;
   char sz[ 256 ];
+  int *pi;
 
   theorywidget *ptw;
 
@@ -724,8 +776,12 @@ GTKShowTheory ( const int fActivePage ) {
   pwFrame = gtk_frame_new ( _("Gammon and backgammon percentages") );
   gtk_box_pack_start( GTK_BOX( pwVBox ), pwFrame, FALSE, FALSE, 0 );
 
+  pwx = gtk_vbox_new( FALSE, 0 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwx );
+
+
   pwTable = gtk_table_new ( 3, 3, TRUE );
-  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
+  gtk_box_pack_start( GTK_BOX( pwx ), pwTable, FALSE, FALSE, 4 );
 
   for ( i = 0; i < 2; i++ ) {
 
@@ -771,7 +827,35 @@ GTKShowTheory ( const int fActivePage ) {
     }
 
   }
+
+  /* radio buttons with plies */
+
+  pwz = gtk_hbox_new( FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pwx ), pwz, FALSE, FALSE, 4 );
+
+  for ( i = 0; i < MAXPLY; ++i ) {
+    
+    gchar *sz = g_strdup_printf( _("%d ply"), i );
+    if ( !i )
+      ptw->apwPly[ i ] = gtk_radio_button_new_with_label( NULL, sz );
+    else
+      ptw->apwPly[ i ] =
+        gtk_radio_button_new_with_label_from_widget( 
+                   GTK_RADIO_BUTTON ( ptw->apwPly[ 0 ] ), sz );
+    g_free( sz );
   
+    pi = (int *) g_malloc( sizeof ( int ) );
+    *pi = i;
+    
+    gtk_object_set_data_full( GTK_OBJECT( ptw->apwPly[ i ] ),
+                              "user_data", pi, g_free );
+
+    gtk_box_pack_start( GTK_BOX( pwz ), ptw->apwPly[ i ], FALSE, FALSE, 4 );
+
+    gtk_signal_connect( GTK_OBJECT( ptw->apwPly[ i ] ), "toggled", 
+                        GTK_SIGNAL_FUNC( PlyClicked ), ptw );
+
+  }
 
   /* add notebook pages */
 

@@ -1,3 +1,11 @@
+Sat May 31 18:54:34 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Add ply-buttons to theory widget
+	(suggested by Albert Silver)
+
+	* gtktheory.c (PlyClicked): new routine.
+	* gtktheory.c (GTKShowTheory): add radio buttons for plies.	
+
 Fri May 30 21:27:04 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktempmap.c (GTKShowTempMap): make dialog non-modal.
