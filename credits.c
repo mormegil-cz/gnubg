@@ -48,6 +48,7 @@ char *aszCredits[] = {
     "Tim Laursen",
     "Eli Liang",
     "Kevin Maguire",
+    "Massimiliano Maini",
     "William Maslen",
     "Thomas Meyer",
     "Achim Mueller",

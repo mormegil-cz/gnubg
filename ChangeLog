@@ -1,3 +1,9 @@
+Mon Aug 25 22:12:56 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktheory.c (TheoryUpdated): enlarge font used for
+	market window.
+	(reported by Massimiliano Maini)
+
 Tue Aug 26 07:16:35 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* gtkgame.c (SkillMenu): ignore skill "good" in gtk game.

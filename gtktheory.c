@@ -453,10 +453,10 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
 #if WIN32
   /* Windows fonts come out smaller than you ask for, for some reason... */
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
                       "*-*-*-m-*-iso8859-1" );
 #else
-  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-10-"
+  pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
                       "*-*-*-m-*-iso8859-1" );
 #endif
 
