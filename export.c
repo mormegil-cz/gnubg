@@ -28,15 +28,33 @@
 #include <assert.h>
 #include <stdarg.h>
 
+#if HAVE_LIBPNG
+#include <png.h>
+#endif
+
+#if USE_GTK
+#define GTK_ENABLE_BROKEN /* for GtkText */
+#include <gtk/gtk.h>
+#endif /* USE_GTK */
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"
 #include "export.h"
 #include "eval.h"
 #include "positionid.h"
+#include "render.h"
 #include "matchid.h"
-
 #include "i18n.h"
+
+#if USE_GTK
+#include "gtkboard.h"
+#include "gtkgame.h"
+#endif 
+
+/* size of html images in steps of 108x72 */
+
+int nPNGSize = 2;
 
 
 static void
@@ -307,3 +325,233 @@ CommandExportMatchEquityEvolution ( char *sz ) {
 
 }
 
+#if HAVE_LIBPNG && USE_GTK
+
+
+static int
+WritePNG ( const char *sz, unsigned char *puch, 
+           const int nSizeX, const int nSizeY ) {
+
+  FILE *pf;
+  png_structp ppng;
+  png_infop pinfo;
+  png_colorp pcolor;
+  png_text atext[ 3 ];
+  int i;
+
+  if ( ! ( pf = fopen ( sz, "wb" ) ) )
+    return;
+
+  if ( ! ( ppng = png_create_write_struct ( PNG_LIBPNG_VER_STRING,
+                                            NULL, NULL, NULL ) ) ) {
+    fclose ( pf );
+    return 1;
+
+  }
+
+  if ( ! ( pinfo = png_create_info_struct ( ppng ) ) ) {
+    fclose ( pf );
+    png_destroy_write_struct ( &ppng, NULL );
+    return -1;
+  }
+
+  if ( setjmp ( png_jmpbuf ( ppng ) ) ) {
+    printf ( "error writeing file\n" );
+    fclose ( pf );
+    png_destroy_write_struct ( &ppng, &pinfo );
+    return -1;
+  }
+
+  png_init_io(ppng, pf );
+
+  png_set_IHDR ( ppng, pinfo, nSizeX, nSizeY, 8, PNG_COLOR_TYPE_RGB,
+                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, 
+                 PNG_FILTER_TYPE_BASE );
+
+  /* text */
+
+  atext[ 0 ].key = "Title";
+  atext[ 0 ].text = "Backgammon board";
+  atext[ 0 ].compression = PNG_TEXT_COMPRESSION_NONE;
+  
+  atext[ 1 ].key = "author";
+  atext[ 1 ].text = "GNU Backgammon" VERSION;
+  atext[ 1 ].compression = PNG_TEXT_COMPRESSION_NONE;
+  
+#ifdef PNG_iTXt_SUPPORTED
+   text_ptr[0].lang = NULL;
+   text_ptr[1].lang = NULL;
+#endif
+   png_set_text( ppng, pinfo, atext, 2 );
+  
+    png_write_info( ppng, pinfo );
+
+ {
+   png_bytep aprow[ nSizeY ];
+   for ( i = 0; i < nSizeY; ++i )
+     aprow[ i ] = puch + nSizeX * 3 * i;
+
+   png_write_image ( ppng, aprow );
+
+ }
+
+ png_write_end( ppng, pinfo );
+
+ png_destroy_write_struct(&ppng, &pinfo );
+
+   fclose ( pf );
+
+   return 0;
+
+}
+
+
+
+
+static int
+GenerateImage ( renderimages *pri, renderdata *prd,
+                int anBoard[ 2 ][ 25 ],
+                const char *szName,
+                const int nSize, const int nSizeX, const int nSizeY,
+                const int nOffsetX, const int nOffsetY,
+                const int fMove, const int fTurn, const int fCube,
+                const int anDice[ 2 ], const int nCube, const int fDoubled ) {
+
+  unsigned char *puch;
+  int anCubePosition[ 2 ];
+  int anDicePosition[ 2 ][ 2 ];
+  int nOrient;
+  int doubled, color;
+
+  if ( ! fMove )
+    SwapSides ( anBoard );
+
+  /* allocate memory for board */
+
+  if ( ! ( puch = (unsigned char *) malloc ( 108 * 72 * 
+                                             nSize * nSize * 3 ) ) ) {
+    outputerr ( "malloc" );
+    return -1;
+  }
+
+  /* calculate cube position */
+
+  if ( fDoubled )
+    doubled = fTurn ? -1 : 1;
+  else
+    doubled = 0;
+
+  if ( fCube ) {
+    anCubePosition[ 0 ] = 50 - 24 * doubled;
+    anCubePosition[ 1 ] = 32;
+    nOrient = doubled;
+  }
+  else {
+    nOrient = -1;
+    anCubePosition[ 0 ] = anCubePosition[ 1 ] = -0x8000;
+  }
+
+  /* calculate dice position */
+
+  /* FIXME */
+
+  if ( anDice[ 0 ] ) {
+    anDicePosition[ 0 ][ 0 ] = 22 + fMove * 48;
+    anDicePosition[ 0 ][ 1 ] = 32;
+    anDicePosition[ 1 ][ 0 ] = 32 + fMove * 48;
+    anDicePosition[ 1 ][ 1 ] = 32;
+  }
+  else {
+    anDicePosition[ 0 ][ 0 ] = -1;
+    anDicePosition[ 0 ][ 1 ] = -1;
+    anDicePosition[ 1 ][ 0 ] = -1;
+    anDicePosition[ 1 ][ 1 ] = -1;
+  }
+
+  /* render board */
+
+  color = fMove;
+
+  CalculateArea ( prd, puch, 108 * nSize * 3, pri, anBoard, NULL,
+                  (int *) anDice, anDicePosition, 
+                  color, anCubePosition, 
+                  LogCube( nCube ) + ( doubled != 0 ),
+                  nOrient,
+                  0, 0, 108 * nSize, 72 * nSize );
+
+  /* crop */
+
+  if ( nSizeX < 108 || nSizeY < 72 ) {
+    int i, j, k;
+
+    j = 0;
+    k = nOffsetY * nSize * 108 + nOffsetX;
+    for ( i = 0; i < nSizeY * nSize; ++i ) {
+      /* loop over each row */
+      memmove ( puch + j, puch + k, nSizeX * nSize * 3 );
+
+      j += nSizeX * nSize * 3;
+      k += 108 * nSize;
+      
+    }
+
+  }
+
+  /* write png */
+
+  WritePNG ( szName, puch, nSizeX * nSize, nSizeY * nSize );
+  
+
+}
+
+
+
+extern void
+CommandExportPositionPNG ( char *sz ) {
+
+  renderimages ri;
+  renderdata rd;
+  BoardData *bd;
+
+  sz = NextToken( &sz );
+
+  if ( ! fX ) {
+    outputl( _("You must be running the GUI to export positions to PNG.") );
+    return;
+  }
+
+  if( ms.gs == GAME_NONE ) {
+    outputl( _("No game in progress (type `new game' to start one).") );
+    return;
+    }
+    
+  if( !sz || !*sz ) {
+    outputl( _("You must specify a file to export to (see `help export "
+               "position png').") );
+    return;
+  }
+
+  if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+    return;
+
+  /* generate PNG image */
+  
+  bd = BOARD ( pwBoard )->board_data;
+
+  memcpy ( &rd, &bd->rd, sizeof ( renderdata ) );
+  rd.nSize = nPNGSize;
+
+  RenderImages ( &rd, &ri );
+
+  GenerateImage ( &ri, &rd, ms.anBoard, sz, 
+                  nPNGSize, 108, 72, 0, 0, 
+                  ms.fMove, ms.fTurn, fCubeUse, ms.anDice, ms.nCube,
+                  ms.fDoubled );
+
+  FreeImages ( &ri );
+
+
+}
+
+
+#endif /* HAVE_LIBPNG && USE_GTK */

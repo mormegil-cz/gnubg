@@ -80,6 +80,7 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(gmp, mpz_import)
 AC_CHECK_LIB(gmp, __gmpz_import)
 
+
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
@@ -319,6 +320,15 @@ fi
 
 AC_SUBST(NAS_LIBS)
 AC_SUBST(NAS_CFLAGS)
+
+dnl test for libpng
+
+AC_CHECK_LIB(png,png_create_info_struct)
+if test "$ac_cv_lib_png_png_create_info_struct" == yes; then
+   PNG_LIBS='-lpng -lz'
+fi
+
+AC_SUBST(PNG_LIBS)
 
 dnl Record installation paths.
 AC_DEFINE_DIR(_DATADIR, datadir)

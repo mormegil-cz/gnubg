@@ -54,6 +54,7 @@
 #endif
 #include "matchequity.h"
 #include "positionid.h"
+#include "export.h"
 #include "drawboard.h"
 
 #include "i18n.h"
@@ -3690,4 +3691,20 @@ CommandSetCheat ( char *sz ) {
 
 
 
+extern void
+CommandSetPNGSize ( char *sz ) {
 
+    int n;
+    
+    if( ( n = ParseNumber( &sz ) ) < 1 || n > 20 ) {
+	outputl( _("You must specify a size between 1 and 20.") );
+	return;
+    }
+
+    nPNGSize = n;
+
+    outputf ( "Size of generated PNG images are %dx%d pixels\n",
+              n * 108, n * 72 );
+
+
+}

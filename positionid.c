@@ -240,7 +240,7 @@ Base64( const char ch ) {
     return 63;
 }
 
-extern int PositionFromID( int anBoard[ 2 ][ 25 ], char *pchEnc ) {
+extern int PositionFromID( int anBoard[ 2 ][ 25 ], const char *pchEnc ) {
 
   unsigned char auchKey[ 10 ], ach[ 15 ], *pch = ach, *puch = auchKey;
   int i;
