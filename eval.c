@@ -781,11 +781,14 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	if( nnRace.cInput != NUM_RACE_INPUTS ||
 	    nnRace.cOutput != NUM_OUTPUTS )
 	    NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
-			     NUM_OUTPUTS );	
-    } else
-	CreateWeights( nSize );    
-    
-    return 0;
+			     NUM_OUTPUTS );
+
+	return 0;
+    } else {
+	CreateWeights( nSize );
+
+	return 1;
+    }
 }
 
 extern int EvalSave( char *szWeights ) {

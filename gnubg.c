@@ -331,7 +331,7 @@ command acAnalyse[] = {
       "format", szFILENAME, NULL },
     { "latex", CommandExportGameLaTeX, "Records a log of the game in LaTeX "
       "format", szFILENAME, NULL },
-    { "pdf", CommandExportGamePDF, "Records a log of the game in the"
+    { "pdf", CommandExportGamePDF, "Records a log of the game in the "
       "Portable Document Format", szFILENAME, NULL },
     { "postscript", CommandExportGamePostScript, "Records a log of the game "
       "in PostScript format", szFILENAME, NULL },
@@ -357,6 +357,8 @@ command acAnalyse[] = {
 }, acExportSession[] = {
     { "latex", CommandExportMatchLaTeX, "Records a log of the session in "
       "LaTeX format", szFILENAME, NULL },
+    { "pdf", CommandExportMatchPDF, "Records a log of the session in the "
+      "Portable Document Format", szFILENAME, NULL },
     { "postscript", CommandExportMatchPostScript, "Records a log of the "
       "session in PostScript format", szFILENAME, NULL },
     { "ps", CommandExportMatchPostScript, NULL, szFILENAME, NULL },
@@ -377,6 +379,8 @@ command acAnalyse[] = {
     { "database", CommandDatabaseImport, "Merge positions into the database",
       szFILENAME, NULL },
     { "mat", CommandImportMat, "Import a Jellyfish match", szFILENAME, NULL },
+    { "oldmoves", CommandImportOldmoves, "Import a FIBS oldmoves file",
+      szFILENAME, NULL },
     { "pos", CommandImportJF, "Import a Jellyfish position file", szFILENAME,
       NULL },
     { NULL, NULL, NULL, NULL, NULL }
@@ -2536,6 +2540,11 @@ extern void CommandImportMat( char *sz ) {
 #endif
 }
 
+extern void CommandImportOldmoves( char *sz ) {
+
+    CommandNotImplemented( sz ); /* FIXME */
+}
+
 extern void CommandCopy( char *sz ) {
   char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL};
   char szOut[ 2048 ];
@@ -2599,6 +2608,11 @@ static void LoadRCFiles( void ) {
 extern void CommandExportGameGam( char *sz ) {
     
     FILE *pf;
+
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export"
@@ -2626,6 +2640,11 @@ extern void CommandExportMatchMat( char *sz ) {
     list *pl;
 
     /* FIXME what should be done if nMatchTo == 0? */
+    
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export "
@@ -3787,7 +3806,7 @@ static void version( void ) {
 static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchDataDir = NULL;
-    static int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE;
+    int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
 	{ "no-bearoff", no_argument, NULL, 'b' },
@@ -3949,11 +3968,21 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     InitMatchEquity ( metCurrent );
     
-    if( EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
-			nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir,
-			nNewWeights, fShowProgress ) )
+    if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
+			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
+			      fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir,
+			      nNewWeights, fShowProgress ) ) < 0 )
 	exit( EXIT_FAILURE );
+    else if( n > 0 && !nNewWeights ) {
+	outputl( "WARNING: No neural net weights were found.  GNU Backgammon "
+		 "will create an\n"
+		 "initial random network, but this will be unsuitable for "
+		 "use until training\n"
+		 "is complete.  Please consult the manual for information "
+		 "about training, or\n"
+		 "directions for obtaining a pre-trained network." );
+	outputx();
+    }
 
 #if USE_GUILE
     GuileInitialise( pchDataDir );
