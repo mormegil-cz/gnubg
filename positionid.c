@@ -208,7 +208,11 @@ PositionFromKey(int anBoard[2][25], const unsigned char* pauch)
     
     for(k = 0; k < 8; ++k) {
       if( (cur & 0x1) ) {
-	++anBoard[i][j];
+        if (i >= 2 || j >= 25)
+        {	/* Error, so return - will probably show error message */
+          return;
+        }
+        ++anBoard[i][j];
       } else {
 	if( ++j == 25 ) {
 	  ++i;
