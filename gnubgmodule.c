@@ -2320,7 +2320,7 @@ PythonInitialise( const char *szDir ) {
 
   char *pch;
 	static char workingDir[BIG_PATH];
-    _getcwd(workingDir, _MAX_PATH);
+    getcwd(workingDir, PATH_MAX);
 
 #if WIN32
 {	/* Setup python to look in the pythonlib directory if present */

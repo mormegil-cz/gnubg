@@ -1,4 +1,12 @@
-Sun Jan  2 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sun Jan  2 13:44:55 2005 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubgmodule.h - reinclude config.h to set HAVE_FSTAT (gcc
+	  doesn't like trying to redfine it and config.h is not
+	  idempotent)
+	* gnubgmodule.c - replace _getcwd with getcwd, _MAX_PATH with 
+	  PATH_MAX, which should be available in all C implementations
+
+Sun Jan  2 11:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubgmodule.c: Look for local python installation (windows)
 

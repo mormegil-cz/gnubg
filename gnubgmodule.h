@@ -33,7 +33,7 @@
 #undef HAVE_FSTAT
 #include <Python.h>
 #undef HAVE_FSTAT
-#define HAVE_FSTAT _HAVE_FSTAT
+#include "config.h"
 
 extern void
 PythonInitialise( const char *szDir );
