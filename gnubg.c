@@ -26,6 +26,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif

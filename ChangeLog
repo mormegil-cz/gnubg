@@ -1,3 +1,8 @@
+Thu Jan 27 17:34:45 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c [HAVE_SYS_FILE_H]: #include <sys/file.h> if present, to
+	get FASYNC (required on Solaris).
+
 Wed Jan 19 09:59:02 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (HandleIO): Handle X events asynchronously.  Many other
