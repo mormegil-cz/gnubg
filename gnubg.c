@@ -2947,7 +2947,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	    fprintf( pf, "set player %d gnubg\n", i );
 	    sprintf( szTemp, "set player %d chequerplay", i );
 	    SaveEvalSetupSettings( pf, szTemp, &ap[ i ].esChequer );
-	    sprintf( szTemp, "set player %d cubedecisions", i );
+	    sprintf( szTemp, "set player %d cubedecision", i );
 	    SaveEvalSetupSettings( pf, szTemp, &ap[ i ].esCube );
 	    break;
 	    

@@ -1776,7 +1776,7 @@ CommandSetEvalCubedecision ( char *sz ) {
   pesSet = &esEvalCube;
 
   szSet = "`eval' and `hint' cube decisions";
-  szSetCommand = "evaluation cubedecisions ";
+  szSetCommand = "evaluation cubedecision ";
 
   HandleCommand( sz, acSetEvalParam );
 
