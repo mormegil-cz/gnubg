@@ -56,7 +56,7 @@ gboolean idle(BoardData* bd)
 }
 
 void StopIdle3d(BoardData* bd)
-{	/* NB. Animation could have been interruptted */
+{	/* Animation has finished (or could have been interruptted) */
 	if (bd->shakingDice)
 	{
 		bd->shakingDice = 0;

@@ -2475,6 +2475,7 @@ static gint board_set( Board *board, const gchar *board_text,
 		if (redrawNeeded)
 		{
 			board_invalidate_dice( bd );
+			board_invalidate_labels( bd );
 			board_invalidate_cube( bd );
 			board_invalidate_resign( bd );
 			board_invalidate_arrow( bd );
