@@ -1,3 +1,8 @@
+Thu Jul 17 14:46:45 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (UpdateMoveList): use Output* functions instead of
+	hardcoded logic.
+
 Thu Jul 17 12:29:20 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Some changes to the match statistics:

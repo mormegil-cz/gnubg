@@ -44,6 +44,7 @@
 #include "i18n.h"
 #include "gtktempmap.h"
 #include "progress.h"
+#include "export.h"
 
 
 
@@ -80,13 +81,11 @@ UpdateMoveList ( const hintdata *phd ) {
     
   GetMatchStateCubeInfo( &ci, &ms );
     
-  if( fOutputMWC && ms.nMatchTo ) {
+  rBest = pml->amMoves[ 0 ].rScore;
+  if( fOutputMWC && ms.nMatchTo ) 
     gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("MWC") );
-    rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
-  } else {
+  else
     gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("Equity") );
-    rBest = pml->amMoves[ 0 ].rScore;
-  }
     
   for( i = 0; i < pml->cMoves; i++ ) {
     float *ar = pml->amMoves[ i ].arEvalMove;
@@ -105,37 +104,24 @@ UpdateMoveList ( const hintdata *phd ) {
     FormatEval( sz, &pml->amMoves[ i ].esMove );
     gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
 
-    for( j = 0; j < 5; j++ ) {
-      if( fOutputWinPC )
-        sprintf( sz, "%5.1f%%", ar[ aanColumns[ j ][ 1 ] ] * 100.0f );
-      else
-        sprintf( sz, "%5.3f", ar[ aanColumns[ j ][ 1 ] ] );
-	    
+    /* gwc */
+
+    for( j = 0; j < 5; j++ ) 
       gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
-                          sz );
-    }
+                          OutputPercent( ar[ aanColumns[ j ][ 1 ] ] ) );
 
-    if( fOutputWinPC )
-      sprintf( sz, "%5.1f%%", ( 1.0f - ar[ OUTPUT_WIN ] ) * 100.0f );
-    else
-      sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
-	    
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, 
+                        OutputPercent( 1.0f - ar[ OUTPUT_WIN ] ) );
 
-    if( fOutputMWC && ms.nMatchTo )
-      sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
-                                               &ci ) );
-    else
-      sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore );
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
+    /* cubeless equity */
+
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, 
+                        OutputEquity( pml->amMoves[ i ].rScore, &ci, TRUE ) );
 
     if( i ) {
-      if( fOutputMWC && ms.nMatchTo )
-        sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
-                 * 100.0f - rBest );
-      else
-        sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore - rBest );
-      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
+      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, 
+                          OutputEquityDiff( pml->amMoves[ i ].rScore, 
+                                            rBest, &ci ) );
     }
 	
     gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
