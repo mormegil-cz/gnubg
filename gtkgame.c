@@ -9953,6 +9953,13 @@ extern void GtkShowQuery(RowSet* pRow)
     gtk_main();
     GTKAllowStdin();
 }
+#else
+static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
+{
+}
+static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
+{
+}
 #endif
 
 #if USE_TIMECONTROL
