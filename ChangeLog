@@ -1,3 +1,9 @@
+Fri Oct  3 19:08:51 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktheory.c (TheoryUpdated): argh, it should be
+	bg <= 1.0-g.
+	(reported by Massimiliano Maini)
+
 Thu Oct  2 20:48:23 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* formatgs.c (errorRateMP): remove extra digit in 
