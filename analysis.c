@@ -303,6 +303,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
       case MOVE_SETCUBEVAL:
       case MOVE_SETCUBEPOS:
 	  /* FIXME apply these records */
+	  ;
       }
 
       if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) i++;

@@ -223,6 +223,7 @@ static char *aszCommands[ NUM_CMDS ] = {
 
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
+static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
 static void NewMatch( gpointer *p, guint n, GtkWidget *pw );

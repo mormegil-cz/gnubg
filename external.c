@@ -166,6 +166,7 @@ extern void CommandExternal( char *sz ) {
     if( listen( h, 1 ) < 0 ) {
 	perror( "listen" );
 	close( h );
+	unlink( sz );
 	return;
     }
 
@@ -176,6 +177,7 @@ extern void CommandExternal( char *sz ) {
 
 	    if( fInterrupt ) {
 		close( h );
+		unlink( sz );
 		return;
 	    }
 	    
@@ -184,6 +186,7 @@ extern void CommandExternal( char *sz ) {
 	
 	perror( "accept" );
 	close( h );
+	unlink( sz );
 	return;
     }
 

@@ -1,4 +1,6 @@
-Wed Mar 14 17:12:22 2001  Gary Wong  <gtw@research.att.com>
+Wed Mar 14 17:33:25 2001  Gary Wong  <gtw@research.att.com>
+
+	* external.c (CommandExternal): Make sure we unlink() the socket.
 
 	* gtkgame.c (LoadCommands): New function.
 
@@ -79,6 +81,10 @@ Thu Mar  8 10:30:15 2001  Gary Wong  <gtw@research.att.com>
 	
 	* acinclude.m4: Check for Guile 1.4 or newer (Zvezdan Petkovic reports
 	gnubg won't link with 1.3.)
+
+Wed Mar  7 17:46:24 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.6: Added man page contributed by Corrin Lakeland.
 
 Tue Mar  6 11:37:32 2001  Gary Wong  <gtw@research.att.com>
 

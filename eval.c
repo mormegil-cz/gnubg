@@ -1069,7 +1069,8 @@ CalculateHalfInputs( int anBoard[ 25 ],
 	    /* enter this shot as available */
 	      
 	    aHit[ aanCombination[ j - 24 + i ][ n ] ] |= 1 << j;
-	    cannot_hit:
+	  cannot_hit:
+	    ;
 	  }
 
   for( i = 0; i < 21; i++ )
@@ -2031,7 +2032,7 @@ enum {
   OG_POSSIBLE = 0x4,
   
   /* backgammon possible by side not on roll */
-  OBG_POSSIBLE = 0x8,
+  OBG_POSSIBLE = 0x8
 };
 
 static void

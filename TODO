@@ -147,6 +147,8 @@ duplication of effort and to make sure our changes merge easily.
   angle when rendering the border.
 ** Make "next" and "previous" change the off-board dice (see
   game_set_old_dice()).
+** Use a file selection widget for the socket in the player dialog, and
+  look into using a GtkSheet (from GtkExtra) for the match equity table.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able

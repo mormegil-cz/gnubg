@@ -402,10 +402,10 @@ extern void CommandDatabaseTrain( char *sz ) {
 	    dValue = gdbm_fetch( pdb, dKey );
 	    
 	    pev = (dbevaluation *) dValue.dptr;
-	    
+
 	    if( pev->c >= 36 /* FIXME */ ) {
-		if( !( ++c % 100 ) && fShowProgress ) {
-		    outputf( "%6d\r", c );
+		if( !( ++c % 1000 ) && fShowProgress ) {
+		    outputf( "%8d\r", c );
 		    fflush( stdout );
 		}
 		

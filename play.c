@@ -741,6 +741,7 @@ static int ComputerTurn( void ) {
       
   case PLAYER_HUMAN:
       /* fall through */
+      ;
   }
   
   assert( FALSE );
