@@ -1927,7 +1927,6 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   if ( pes->et == EVAL_ROLLOUT && exsExport.fCubeDetailProb ) {
 
     char asz[ 2 ][ 1024 ];
-    char sz[ 1024 ];
     cubeinfo aci[ 2 ];
 
     for ( i = 0; i < 2; i++ ) {

@@ -749,7 +749,6 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   float r;
 
   int fActual, fClose, fMissed;
-  int fDisplay;
   int fAnno = FALSE;
 
   float arDouble[ 4 ];
