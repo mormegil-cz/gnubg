@@ -2817,7 +2817,7 @@ static void DumpGameList(char *szOut, list *plGame) {
 	    sprintf( sz, "%d%d%-2s: %s", 
                      pmr->sd.anDice[ 0 ],
                      pmr->sd.anDice[ 1 ],
-                     aszLuckTypeAbbr[ pmr->n.lt ],
+                     aszLuckTypeAbbr[ pmr->sd.lt ],
                      _("Rolled") );
 	    break;
 	case MOVE_SETBOARD:
@@ -2850,6 +2850,9 @@ static void DumpGameList(char *szOut, list *plGame) {
 
 	i++;
     }
+
+    printf( "\n" );
+
 }
 
 extern void CommandListGame( char *sz ) {
