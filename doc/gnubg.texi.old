@@ -1,0 +1,1921 @@
+\input texinfo
+@setfilename gnubg.info
+@settitle GNU Backgammon
+@include version.texi
+
+@set month-year April, 2001
+
+@syncodeindex vr cp
+
+@macro gnubg
+@t{gnubg}
+@end macro
+
+@dircategory Games
+@direntry
+* gnubg: (gnubg).               GNU Backgammon.
+@end direntry
+
+@ifinfo
+This file documents GNU Backgammon, a program for playing and analysing
+backgammon games and matches.
+
+Copyright @copyright{} 1999, 2000, 2001 Gary Wong.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1; with
+no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled "GNU Free
+Documentation License".
+@end ifinfo
+
+@titlepage
+@sp 10
+@title GNU Backgammon
+@subtitle version @value{VERSION}
+@subtitle @value{month-year}
+@author Gary Wong
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1999, 2000, 2001 Gary Wong.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1; with
+no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
+copy of the license is included in the section entitled "GNU Free
+Documentation License".
+@end titlepage
+
+@ifnottex
+@node Top
+@top GNU Backgammon
+
+This manual describes how to use GNU Backgammon to play and analyse
+backgammon games and matches.  It corresponds to version @value{VERSION}
+(updated in @value{month-year}).
+
+@menu
+* Introduction::                   What GNU Backgammon does.
+* How to Play Backgammon::         The rules of the game.
+* Sample Game::                    An example of how to play against gnubg.
+* Invocation::                     Starting and leaving gnubg.
+* Basic Commands::                 Fundamental operations in gnubg.
+* Playing::                        gnubg's game playing features.
+* GTK::                            gnubg's optional graphical interface.
+* Analysis::                       Using gnubg to evaluate positions.
+* Databases::                      Storing information about positions.
+* Training::                       Modifying gnubg's neural nets.
+* Guile::                          Extending GNU Backgammon with Guile.
+* Frequently Asked Questions::     Brief answers to things you might ask.
+* GNU Free Documentation License:: Your rights regarding this manual.
+* Appendices::                     Technical stuff
+* Command Index::                  A summary of all the gnubg commands.
+* Concept Index::                  Index of concepts described in this manual.
+@end menu
+
+@end ifnottex
+
+@node Introduction
+@chapter Introduction
+@cindex introduction
+
+GNU Backgammon (@gnubg{}) plays and analyses backgammon games and matches. 
+
+It is currently a work-in-progress.  So far it is able to play
+individual games and tournament matches, evaluate and roll out
+positions, tune its own evaluation functions using either
+@uref{http://www.research.ibm.com/massdist/tdl.html,,TD} or supervised
+training, maintain databases of positions for training and other
+purposes, and more.
+
+It is driven by a command-line interface, and displays an ASCII
+rendition of a board on text-only terminals, but also allows the user to
+play games and manipulate positions with a GTK+
+@uref{http://www.gnu.org/software/gnubg/board.png,,board window} where
+available.  It is extensible on platforms which support
+@uref{http://www.gnu.org/software/guile/guile.html,,Guile}.
+
+It currently plays at about the level of a championship flight
+tournament player (depending on its parameters and its luck in recent
+games, it rates from around 1900 to 2000 on
+@cindex FIBS
+@uref{http://www.fibs.com/,,FIBS}, the First Internet Backgammon Server
+--- at its strongest, it ranks in the top 5 of over 6000 rated players
+there) and is gradually improving; it should be somewhat stronger than
+this when released.  Since almost all of the CPU time required during
+supervised training is spent performing rollouts, and rollouts can
+easily be performed in parallel, it is hoped that users will be able to
+pool rollout results and collectively train it to a level stronger than
+any individual could obtain.
+
+If you can tolerate the rough edges, periodic pre-releases of the source
+will be made on @uref{ftp://alpha.gnu.org/gnu/gnubg/,the alpha.gnu.org
+FTP server}.
+
+Anonymous CVS access to the very latest code is available: if you have a
+CVS client, set @env{CVSROOT} to
+@code{:pserver:anoncvs@@subversions.gnu.org:/cvs} and check out module
+@file{gnubg}.  If not, daily snapshots of the CVS repository are made
+available by @uref{ftp://alpha.gnu.org/gnu/gnubg/snapshots/,FTP}, or you
+can browse the repository through the
+@uref{http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/,WWW gateway}.  Do
+not expect this code to be stable; it will generally include both more
+features and more bugs than the main pre-release version.
+
+You can also compete against recent versions of @gnubg{} on FIBS; it
+plays there under the names @samp{gnu}, @samp{mgnutest}, @samp{mpgnu}
+and @samp{gnu_one_ply}.
+
+@node How to Play Backgammon
+@chapter How to Play Backgammon
+@cindex backgammon
+
+The rules presented in this chapter were written by Tom Keith for the
+@uref{http://www.bkgm.com/,Backgammon Galore web site}, and are included
+here with his permission.
+
+@menu
+* Rules of Backgammon::         How to play the board game.
+* Match Play::                  Special rules used in tournament matches.
+@end menu
+
+@node Rules of Backgammon
+@section Rules of Backgammon
+@cindex backgammon rules
+@subsection Setup
+@cindex board setup
+
+Backgammon is a game for two players, played on a board consisting of 
+twenty-four narrow triangles called @cindex points
+@dfn{points}. 
+The triangles alternate in color and are grouped into four quadrants of 
+six triangles each. 
+The quadrants are referred to as a player's
+@cindex home board
+@dfn{home board} and
+@cindex outer board
+@dfn{outer board}, and the opponent's home board and outer board. 
+The home and outer boards are separated from each other by a ridge down 
+the center of the board called the
+@cindex bar
+@dfn{bar}. 
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig1} @tab @strong{Figure 1.}  A board with the checkers
+in their initial position.
+
+An alternate arrangement is the reverse of the one shown here, with the
+home board on the left and the outer board on the right.
+@end multitable
+@end ifnottex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig1}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 1.}  A board with the checkers in their initial position.\par
+
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+An alternate arrangement is the reverse of the one shown here, with the
+home board on the left and the outer board on the right.\par\vskip 2 cm}}
+@end tex
+
+The points are numbered for either player starting in that player's home 
+board. 
+The outermost point is the twenty-four point, which is also the opponent's 
+one point.  
+Each player has fifteen checkers of his own color. 
+The initial arrangement of checkers is: 
+two on each player's twenty-four point, five on each player's thirteen point, 
+three on each player's eight point, and five on each player's six point.
+
+@cindex doubling cube
+Both players have their own pair of dice and a dice cup used for shaking.  
+A @dfn{doubling cube}, with the numerals 2, 4, 8, 16, 32, and 64 on its 
+faces, is used to keep track of the current stake of the game.
+
+@subsection Object of the Game
+@cindex object of the game
+
+The object of the game is for a player to move all of his checkers into 
+his own home board and then bear them off. 
+The first player to bear off all of his checkers wins the game.
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig2} @tab @strong{Figure 2.}  Direction of movement of
+White's checkers.  Red's checkers move in the opposite direction.
+@end multitable
+@end ifnottex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig2}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 2.}  Direction of movement of White's checkers.  Red's
+checkers move in the opposite direction.\par\vskip 2 cm}}
+@end tex
+
+@subsection Movement of the Checkers
+@cindex moving chequers, rules
+
+To start the game, each player throws a single die.  
+This determines both the player to go first and the numbers to be played. 
+If equal numbers come up, then both players roll again until they roll 
+different numbers.  
+The player throwing the higher number now moves his checkers according to 
+the numbers showing on both dice.  
+After the first roll, the players throw two dice and alternate turns.
+
+@cindex pips
+The roll of the dice indicates how many points, or @dfn{pips}, 
+the player is to move his checkers.  
+The checkers are always moved forward, to a lower-numbered point.
+The following rules apply:
+
+@enumerate
+@item
+@cindex open point
+A checker may be moved only to an @dfn{open point}, one that is not 
+occupied by two or more opposing checkers.
+
+@item
+The numbers on the two dice constitute separate moves. 
+For example, if a player rolls 5 and 3, he may move one checker five 
+spaces to an open point and another checker three spaces to an open 
+point, or he may move the one checker a total of eight spaces to an 
+open point, but only if the intermediate point (either three or five 
+spaces from the starting point) is also open.
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig3} @tab @strong{Figure 3.}  Two ways that White can
+play a roll of 53.
+@end multitable
+@end ifnottex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig3}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 3.}  Two ways that White can
+play a roll of 53.\par\vskip 2 cm}}
+@end tex
+
+@item
+A player who rolls doubles plays the numbers shown on the dice twice.  
+A roll of 6 and 6 means that the player has four sixes to use, and he 
+may move any combination of checkers he feels appropriate to complete 
+this requirement.
+
+@item
+A player must use both numbers of a roll if this is legally possible 
+(or all four numbers of a double). 
+When only one number can be played, the player must play that number. 
+Or if either number can be played but not both, the player must play 
+the larger one. 
+When neither number can be used, the player loses his turn. 
+In the case of doubles, when all four numbers cannot be played, the 
+player must play as many numbers as he can.
+@end enumerate
+
+@subsection Hitting and Entering
+@cindex hitting
+@cindex entering
+
+A point occupied by a single checker of either color is called a
+@cindex blot
+@dfn{blot}.  If an opposing checker lands on a blot, the blot is @dfn{hit}
+and placed on the bar.
+
+Any time a player has one or more checkers on the bar, his first obligation 
+is to
+@cindex enter
+@dfn{enter} those checker(s) into the opposing home board. 
+A checker is entered by moving it to an open point corresponding to one of 
+the numbers on the rolled dice.
+
+For example, if a player rolls 4 and 6, he may enter a checker 
+onto either the opponent's four point or six point, so long as the 
+prospective point is not occupied by two or more of the opponent's checkers. 
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig4} @tab @strong{Figure 4.}  If White rolls 64 with a
+checker on the bar, he must enter the checker onto Red's four point 
+since Red's six point is not open.
+@end multitable
+@end ifnottex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig4}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 4.}  If White rolls 64 with a
+checker on the bar, he must enter the checker onto Red's four point 
+since Red's six point is not open.\par\vskip 2 cm}}
+@end tex
+
+If neither of the points is open, the player loses his turn.  
+If a player is able to enter some but not all of his checkers, he must enter 
+as many as he can and then forfeit the remainder of his turn.
+
+After the last of a player's checkers has been entered, any unused numbers 
+on the dice must be played, by moving either the checker that was entered 
+or a different checker.
+
+@subsection Bearing Off
+@cindex bearing off
+
+Once a player has moved all of his fifteen checkers into his home board, 
+he may commence @dfn{bearing off}. 
+A player bears off a checker by rolling a number that corresponds to the 
+point on which the checker resides, and then removing that checker from 
+the board. 
+Thus, rolling a 6 permits the player to remove a checker from the six point.
+
+If there is no checker on the point indicated by the roll, the player 
+must make a legal move using a checker on a higher-numbered point. 
+If there are no checkers on higher-numbered points, the player is 
+permitted (and required) to remove a checker from the highest point on 
+which one of his checkers resides. 
+A player is under no obligation to bear off if he can make an otherwise 
+legal move.
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig5} @tab @strong{Figure 5.}  White rolls 64 and bears
+off two checkers.
+@end multitable
+@end ifnottex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig5}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 5.}  White rolls 64 and bears off two checkers.\par\vskip 2 cm}}
+@end tex
+
+A player must have all of his active checkers in his home board in order 
+to bear off. 
+If a checker is hit during the bear-off process, the player must bring 
+that checker back to his home board before continuing to bear off. 
+The first player to bear off all fifteen checkers wins the game.
+
+@subsection Doubling
+@cindex doubling, rules
+
+Backgammon is played for an agreed stake per point. 
+Each game starts at one point. 
+During the course of the game, a player who feels he has a sufficient 
+advantage may propose doubling the stakes. 
+He may do this only at the start of his own turn and before he has rolled 
+the dice.
+
+A player who is offered a double may @dfn{refuse}, in which case he 
+concedes the game and pays one point. 
+Otherwise, he must @dfn{accept} the double and play on for the new higher 
+stakes.  
+A player who accepts a double becomes the
+@cindex cube owner
+@dfn{owner of the cube} and only he may make the next double.  
+
+Subsequent doubles in the same game are called @dfn{redoubles}. 
+If a player refuses a redouble, he must pay the number of points that were 
+at stake prior to the redouble.  
+Otherwise, he becomes the new owner of the cube and the game continues
+at twice the previous stakes.  
+There is no limit to the number of redoubles in a game.
+
+@subsection Gammons and Backgammons
+@cindex gammons
+@cindex backgammons
+
+At the end of the game, if the losing player has borne off at least one 
+checker, he loses only the value showing on the doubling cube (one point, 
+if there have been no doubles).  
+However, if the loser has @emph{not} borne off any of his checkers, 
+he is @dfn{gammoned} and loses @emph{twice} the value of the doubling cube.  
+Or, worse, if the loser has not borne off any of his checkers and still has 
+a checker on the bar or in the winner's home board, he is @dfn{backgammoned}
+and loses @emph{three times} the value of the doubling cube.
+
+@subsection Optional Rules
+@cindex optional rules
+@cindex rules, optional
+
+The following optional rules are in widespread use.  
+
+@table @dfn
+@item Automatic doubles
+@cindex automatic doubles
+@cindex doubles, automatic
+If identical numbers are thrown on the first roll, the stakes are doubled.
+The doubling cube is turned to 2 and remains in the middle. 
+Players usually agree to limit the number of automatic doubles to one per game.
+
+@item Beavers
+@cindex beavers
+When a player is doubled, he may immediately redouble (beaver) while 
+retaining possession of the cube.  
+The original doubler has the option of accepting or refusing as with a
+normal double.
+
+@item The Jacoby Rule
+@cindex Jacoby rule
+Gammons and backgammons count only as a single game if neither player has
+offered a double during the course of the game.
+This rule speeds up play by eliminating situations where a player avoids 
+doubling so he can play on for a gammon.
+@end table
+
+@subsection Irregularities
+@cindex irregularities
+
+@enumerate
+@item
+The dice must be rolled together and land flat on the surface of the 
+right-hand section of the board. 
+The player must reroll both dice if a die lands outside the right-hand 
+board, or lands on a checker, or does not land flat.
+
+@item
+A turn is completed when the player picks up his dice. 
+If the play is incomplete or otherwise illegal, the opponent has the option 
+of accepting the play as made or of requiring the player to make a legal play. 
+A play is deemed to have been accepted as made when the opponent rolls his 
+dice or offers a double to start his own turn.
+
+@item
+If a player rolls before his opponent has completed his turn by picking up 
+the dice, the player's roll is voided. 
+This rule is generally waived any time a play is forced or when there is no 
+further contact between the opposing forces.
+@end enumerate
+
+@node Match Play
+@section Rules for Match Play
+@cindex match rules
+
+When backgammon tournaments are held to determine an overall winner, 
+the usual style of competition is @dfn{match play}. 
+Competitors are paired off, and each pair plays a series of games to decide 
+which player progresses to the next round of the tournament.  
+This series of games is called a @dfn{match}.
+
+Matches are played to a specified number of points. 
+The first player to accumulate the required points wins the match. 
+Points are awarded in the usual manner: 
+one for a single game, two for a gammon, and three for a backgammon. 
+The doubling cube is used, so the winner receives the value of the game 
+multiplied by the final value of the doubling cube.
+
+Matches are normally played using the
+@cindex Crawford rule
+@dfn{Crawford rule}. 
+The Crawford rule states that if one player reaches a score one point short 
+of the match, neither player may offer a double in the immediately following 
+game. 
+This one game without doubling is called the Crawford game. 
+Once the Crawford game has been played, if the match has not yet been decided, the doubling 
+cube is active again.
+
+@html
+<center><table width=406 border=0 cellspacing=0 cellpadding=1>
+<tr><td colspan=2><font face="Arial,Helvetica"><b>Match to 5</b></font></td>    <td align=center><font size=2 face="Arial,Helvetica"><b>&nbsp;White&nbsp;</b></font></td>       <td align=center><font size=2 face="Arial,Helvetica"><b>&nbsp;Black&nbsp;</b></font></td><tr>
+<tr><td colspan=6><img src="bar.png" border=0 width=402 height=3></td></tr>
+<tr><td><b>Game 1:&nbsp;&nbsp;</b></td><td>White wins 2 points&nbsp;&nbsp;</td> <td align=center>2</td>         <td align=center>0</td> <td rowspan=3 valign=center><img src="rbrace3.png" width=9 height=52></td><td rowspan=3 valign=center><font size=2 face="Arial,Helvetica">&nbsp;Doubling Allowed</font></td></tr>
+<tr><td><b>Game 2:</b></td><td>Black wins 1 point</td>  <td align=center>2</td>         <td align=center>1</td></tr>
+<tr><td><b>Game 3:</b></td><td>White wins 2 points</td><td align=center>4</td>          <td align=center>1</td></tr>
+<tr bgcolor=FFCC99><td><b>Game 4:</b></td><td>Black wins 1 point</td>   <td align=center>4</td>         <td align=center>2</td>         <td>&nbsp;</td><td><font size=2 face="Arial,Helvetica">&nbsp;Crawford Game</font></td></tr>
+<tr><td><b>Game 5:</b></td><td>Black wins 2 points</td><td align=center>4</td>          <td align=center>4</td>         <td rowspan=2 valign=center><img src="rbrace2.png" width=9 height=34></td><td rowspan=2 valign=center><font size=2 face="Arial,Helvetica">&nbsp;Doubling Allowed</font></td></tr>
+<tr><td><b>Game 6:</b></td><td>White wins 2 points</td><td align=center>6</td>          <td align=center>4</td></tr>
+<tr><td colspan=6><img src="bar.png" border=0 width=402 height=3></td></tr>
+</table></center>
+@end html
+@tex
+\medskip
+\moveright 5 mm \vbox{
+\settabs \+ \hskip 6 cm & \hskip 2 cm & \hskip 2 cm & \cr
+\+ \bf Match to 5 & \bf \hfil White \hfil & \bf \hfil Black \hfil & \cr
+\smallskip
+\hrule width 14 cm
+\smallskip
+\hbox{\vbox{%
+\+ {\bf Game 1:}\quad White wins 2 points & \hfil 2 \hfil & \hfil 0 \hfil & \cr
+\+ {\bf Game 2:}\quad Black wins 1 point & \hfil 2 \hfil & \hfil 1 \hfil & \cr
+\+ {\bf Game 3:}\quad White wins 2 points & \hfil 4 \hfil & \hfil 1 \hfil & \cr
+}\vbox{%
+\vfil
+\hbox{$\Biggr\}$Doubling Allowed}
+\vfil}
+}
+\+ {\bf Game 4:}\quad Black wins 1 point & \hfil 4 \hfil & \hfil 2 \hfil & \quad Crawford Game \cr
+\hbox{\vbox{%
+\+ {\bf Game 5:}\quad Black wins 2 points & \hfil 4 \hfil & \hfil 4 \hfil & \cr
+\+ {\bf Game 6:}\quad White wins 2 points & \hfil 6 \hfil & \hfil 4 \hfil & \cr
+}\vbox{%
+\vfil
+\hbox{$\biggr\}$Doubling Allowed}
+\vfil}
+}}
+@end tex
+@ifinfo
+@example
+Match to 5                    White  Black
+--------------------------------------------------------------
+Game 1:  White wins 2 points    2      0  \
+Game 2:  Black wins 1 point     2      1   @} Doubling Allowed
+Game 3:  White wins 2 points    4      1  /
+Game 4:  Black wins 1 point     4      2     Crawford Game
+Game 5:  Black wins 2 points    4      4  \
+Game 6:  White wins 2 points    6      4  /  Doubling Allowed
+@end example
+@end ifinfo
+@quotation
+In this example, White and Black are playing a 5-point match.
+After three games White has 4 points, which is just one point 
+short of what he needs.  
+That triggers the Crawford rule which says there can be no 
+doubling in next game, Game 4.
+@end quotation
+
+There is no bonus for winning more than the required number of points
+in match play.
+The sole goal is to win the match, and the size of the victory doesn't matter.
+
+Automatic doubles, beavers, and the Jacoby rule are not used in match play. 
+
+@node Sample Game
+@chapter Sample Game
+@cindex sample game
+
+Although GNU Backgammon has many commands and options, only a few of them
+are used during routine play.  This chapter demonstrates some of those
+most commonly used.
+
+If your @gnubg{} installation is complete, you should be able to start it
+and see output similar to the following:
+
+@example
+GNU Backgammon 0.02  Copyright 1999, 2000, 2001 Gary Wong.
+GNU Backgammon is free software, covered by the GNU General Public
+License, and you are welcome to change it and/or distribute copies
+of it under certain conditions.  Type "show copying" to see the
+conditions.
+There is absolutely no warranty for GNU Backgammon.  Type "show
+warranty" for details.
+(No game) 
+@end example
+
+When you start a game, @gnubg{} will (by default) show which player's move it
+is; it is displaying @samp{(No game)} at the moment to indicate that it
+isn't anybody's turn.
+
+GNU Backgammon uses a pseudo-random number generator to produce dice
+rolls.  It will normally initialise the state of the generator to
+some value based on the current time (and perhaps other system information,
+depending what features are available on your platform).  But for purposes
+of this example, it will be better to start the generator from a known
+state, so that the rolls it generates will be repeatable.  Enter the
+following command to change the generator state (``seed''):
+
+@example
+(No game) set seed 15
+Seed set to 15.
+(No game)   
+@end example
+
+The default settings allow you to play X (the black pieces, if you have
+a graphical board window) and the computer will play O (red).  It will
+play with no lookahead by default; it is very fast at choosing moves
+in this mode (instantaneous, on most hardware) though it does not play
+at its full strength.  Let's start a game.
+
+@example
+(No game) new game
+gnubg rolls 1, user rolls 3.
+@group
+ GNU Backgammon  Position ID: 4HPwATDgc/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    |   | O              X |     
+ | X           O    |   | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   | X                |    
+ | O                |   | X                |     
+ | O           X    |   | X                |     
+ | O           X    |   | X              O |     
+ | O           X    |   | X              O |     Rolled 13
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+@end group
+
+(user) 
+@end example
+
+This is the output you will see if a graphical board is unavailable or
+disabled; if your environment supports a graphical board, you will see a
+better representation of a backgammon board than this.  Exactly the
+same information is available, either way.
+
+You have just won the opening roll (you have a 3, and @gnubg{} has a 1) --- the
+dice roll is in the bottom right hand corner for the TTY board, or shown
+as graphical dice on the right hand side of the board window.  The
+position ID (the @samp{4HPwATDgc/ABMA} in this example) is an encoded
+representation of the current position.  It comes in useful when using
+some of @gnubg{}'s advanced commands, but you can safely ignore it for now.
+Notice that the prompt has changed to @samp{(user)}, to indicate that it
+is your turn; on systems where a login name is available, @gnubg{} will
+use that instead.
+
+If you are familiar with backgammon, you will know that the best play
+for this roll is to make your 5 point.  The command to do that is:
+
+@example
+(user) 8 5 6 5
+@end example
+
+@noindent
+in the terminal window (i.e.@: move one chequer from your 8 point to
+your 5 point, and move another from your 6 to your 5 point); or by
+dragging each chequer to the destination point in the board window.
+Click mouse button 1 on the dice to indicate you have finished your move
+(just as you would pick up your dice to end your move if you were
+playing on a real board).
+
+Once you have done that, @gnubg{} will take its turn, rolling 63 and playing
+24/15.  It is now your move again:
+
+@example
+@group
+ GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    |   | O              X |     
+ | X           O    |   | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   | X                |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     O     X    |   | X  X           O |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+@end group
+
+(user) 
+@end example
+
+Since it is no longer the opening roll, you have the option of doubling
+before rolling your dice.  To roll without doubling, just enter the
+command @kbd{roll} (or @kbd{r} for short):
+
+@example
+(gnubg) roll
+@group
+ GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    |   | O              X |     
+ | X           O    |   | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   | X                |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     O     X    |   | X  X           O |     Rolled 35
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+@end group
+
+(user)
+@end example
+
+@noindent
+(You can also roll by clicking the dice just underneath the board
+window.)
+
+Let's play this roll by hitting twice: 13/10*, 6/1*.  You can enter this
+move with @kbd{13 10 6 1} --- note that you don't need to specify anything
+special to hit; @gnubg{} will automatically move blots that are hit to the
+bar.  You can also make this move by dragging chequers in the board window,
+of course.
+
+@example
+(user) 13 10 6 1
+@group
+ GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    | O | O              X |     
+ | X           O    | O | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ |                  |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   |                  |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     X     X    |   | X  X           X |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+@end group
+
+(user) 
+@end example
+
+GNU Backgammon has rolled 65 and been unable to move.  Let's take another
+roll:
+
+@example
+(user) roll
+@group
+ GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    | O | O              X |     
+ | X           O    | O | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ |                  |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   |                  |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     X     X    |   | X  X           X |     Rolled 25
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+@end group
+
+(user)
+@end example
+
+Play this roll as @kbd{13 11 6 1}.  @gnubg{} will now roll 16 --- and still
+can't move!
+
+@example
+@group
+ GNU Backgammon  Position ID: 4HPwAWDDZsoBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
+ | X           O    | O | O              X |     
+ | X           O    | O | O              X |     
+ | X           O    |   | O                |     
+ |                  |   | O                |     
+ |                  |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   |                  |     
+ | O                |   |                  |     
+ | O           X    |   | X  X           X |     
+ | O  X  X     X    |   | X  X           X |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
+@end group
+
+(user) 
+@end example
+
+Our position is now strong.  Let's try doubling --- this can be done by
+entering the command @kbd{double} at the prompt, or by clicking the
+doubling cube in the board window.  When you are doubled, you should use
+the command @kbd{take} or @kbd{drop} to accept or refuse the cube.  GNU
+Backgammon will drop this double:
+
+@example
+(user) double
+gnubg refuses the cube and gives up 1 point.
+user wins a single game and 1 points.
+The score (after 1 game) is: gnubg 0, user 1 (money session,
+without Jacoby rule).
+@end example
+
+That concludes the example game.  You have seen most of the commands
+normally used while playing; others you will need include @kbd{bar}
+when re-entering a hit chequer (e.g.@: @kbd{bar 20 24 20}) and
+@kbd{off} to remove a chequer from the board when bearing off
+(e.g.@: @kbd{6 off 5 off}).
+
+Type @kbd{help} from within @gnubg{} for a summary of all commands, or
+browse the rest of this manual to learn more.  Have fun playing
+GNU Backgammon!
+
+@ignore
+We need to think of logical sections that each command belongs to so
+that appropriate commands are documented together.  We can easily make
+a table or summary later to group commands by name; for the rest of
+the manual it is better to group them by purpose.
+
+accept                  playing		/ the game, cube
+agree                   playing         / the game
+analysis                analysis
+beaver                  playing         / cube
+database dump           databases
+database export		databases
+database generate       databases
+database import         databases
+database rollout        databases
+database train          databases
+decline                 playing		/ the game
+double                  playing         / cube
+drop                    playing         / cube
+eval                    analysis
+exit                    invocation
+export database         databases
+export game
+export match
+export pos
+external		playing		/ computer player
+help                    basic
+hint                    playing		/ the game
+list game
+list match
+list session
+load commands
+load game               playing         / recording
+load match              playing         / recording
+load weights            training
+move                    playing		/ the game
+new game                playing
+new match               playing         / matches and sessions
+new session             playing         / matches and sessions
+new weights		training
+next
+pass			playing
+play                    playing         / computer player
+previous
+quit                    invocation
+redouble                playing         / cube
+reject                  playing
+resign                  playing
+roll                    playing         / dice
+rollout                 analysis
+save game               playing         / recording
+save match              playing         / recording
+save settings
+save weights            training
+set auto bearoff        playing		/ the game
+set auto crawford       playing         / matches and sessions
+set auto doubles        playing         / matches and sessions
+set auto game           playing         / matches and sessions
+set auto move           playing		/ the game
+set auto roll           playing         / dice
+set beavers
+set board               playing		/ the game
+set cache               analysis
+set colours		gtk
+set confirm
+set crawford            playing         / matches and sessions
+set cube centre         playing         / cube
+set cube owner          playing         / cube
+set cube use            playing         / cube
+set cube value          playing         / cube
+set delay		gtk
+set dice                playing         / dice
+set display             playing		/ the game
+set evaluation *        analysis
+set jacoby              playing         / matches and sessions
+set matchequitytable *
+set nackgammon
+set output matchpc
+set output mwc
+set output winpc
+set player eval *       playing		/ computer player
+set player external	playing		/ computer player
+set player gnubg        playing         / computer player
+set player human        playing         
+set player name         playing         
+set player pubeval      playing         / computer player
+set postcrawford        playing         / matches and sessions
+set prompt
+set rng ansi            playing         / dice
+set rng bsd             playing         / dice
+set rng isaac           playing         / dice
+set rng manual          playing         / dice
+set rng md5		playing         / dice
+set rng mersenne        playing         / dice
+set rng user            playing         / dice
+set rollout *           analysis
+set score               playing         / matches and sessions
+set seed                playing         / dice
+set turn                playing
+show automatic
+show beavers
+show board              playing
+show cache              analysis
+show commands
+show confirm            playing?
+show copying            basic
+show crawford           playing         / matches and sessions
+show cube
+show delay		gtk
+show dice
+show display
+show evaluation
+show gammonprice	analysis
+show jacoby             playing         / matches and sessions
+show kleinman
+show marketwindow	analysis
+show matchequitytable	analysis
+show nackgammon
+show output
+show pipcount           playing
+show player             playing
+show postcrawford       playing         / matches and sessions
+show prompt
+show rng                playing         / dice
+show rollout
+show score              playing         / matches and sessions
+show seed		playing		/ dice
+show thorp
+show turn               playing
+show warranty           basic
+take                    playing         / cube
+train database          training
+train td                training
+! (shell)
+: (Guile)
+@end ignore
+
+@node Invocation
+@chapter Starting and Leaving @gnubg
+
+This chapter describes how to run @gnubg{}, and how to end it when you
+are finished.
+
+@menu
+* Invoking gnubg::              How to start gnubg.
+* Leaving gnubg::               How to end gnubg.
+* Shell Commands::              How to issue shell commands from within gnubg.
+@end menu
+
+@node Invoking gnubg
+@section Invoking @gnubg
+@cindex invoking @t{gnubg}
+@cindex starting @t{gnubg}
+@cindex running @t{gnubg}
+@cindex command line options
+
+Start GNU Backgammon by running the program @kbd{gnubg}.  Once started, it
+will process commands from the terminal.
+
+You can also instruct @gnubg{} to read an existing game or match from a
+file, to play or analyse.  To read from @var{filename}, specify
+@kbd{gnubg @var{filename}}.
+
+@gnubg{} will give you a short summary of how to invoke it if given the
+option @option{--help} (@option{-h} for short), and report its version
+with @option{--version} (@option{-v}).
+
+GNU Backgammon will normally use a graphical board window if a window
+system is available.  To prevent this behaviour and use standard
+terminal output instead, you can specify the @option{--tty} option (which
+can be abbreviated to @option{-t}).
+
+By default, @gnubg{} will attempt to load pre-trained neural net
+weights; if you have no weights or wish to train a net from scratch,
+you can supply the @option{--no-weights} (@option{-n}) option, and
+new weights will be randomly generated.
+
+FIXME the previous command is out of date; --no-weights is now --new-weights.
+
+FIXME document --no-bearoff, --no-rc, --datadir and
+--window-system-only options.
+
+@node Leaving gnubg
+@section Leaving @gnubg
+@cindex leaving @t{gnubg}
+@cindex exiting @t{gnubg}
+@cindex quitting @t{gnubg}
+
+@table @code
+@kindex exit
+@kindex quit
+@item exit
+@itemx quit
+To exit @gnubg{}, use the @kbd{exit} or @kbd{quit} commands (they are
+synonymous).  If you are currently playing a game, the match in progress
+will be lost, so @gnubg{} will ask you if you are sure you want to exit
+in this case.
+@end table
+
+@gnubg{} will also exit upon end-of-file; you can therefore exit by typing
+an end-of-file character (usually @kbd{C-d}, i.e.@: hold the @key{CTRL}
+key and press D).
+
+@cindex interrupting @t{gnubg}
+@cindex cancelling commands
+If you send an interrupt sequence (often by pressing @kbd{C-c}), the
+current @gnubg{} command (if any) will be terminated.  This can be useful
+if you do not want to wait for a slow command to complete.
+
+@node Shell Commands
+@section Shell Commands
+@cindex shell commands
+@cindex escapes, shell
+
+You can execute shell commands from @gnubg{} without leaving or suspending it.
+
+@table @code
+@kindex !
+@item ![@var{command}]
+Invoke a subshell to execute @var{command}.  If you do not give a
+command, a shell will be invoked (the shell is specified by the environment
+variable @env{SHELL} if it is set, or defaults to @file{/bin/sh} if not).
+@end table
+
+@node Basic Commands
+@chapter Basic Commands
+@cindex basic commands
+@cindex commands, basic
+
+There are a few simple commands you can use within GNU Backgammon to
+display information you might need to know:
+
+@table @code
+@kindex help
+@kindex ?
+@item help [@var{command}]
+@itemx ? [@var{command}]
+Describe the commands that @gnubg{} understands.  @code{help} by itself
+lists the main commands with a one-line description of each; when
+@var{command} is specified, that command is explained in more detail,
+and if it has any subcommands then they are listed in brief.
+
+@code{?} is a synonym for @code{help}.
+@kindex show copying
+@kindex show warranty
+@item show copying
+@itemx show warranty
+These commands are used to show the conditions GNU Backgammon is
+distributed under (the GNU General Public License).  Essentially, there
+is no warranty for @gnubg{}, and everybody is free to use, inspect,
+copy, modify and distribute it.  You are permitted to do just about
+anything with @gnubg{}, except deny these freedoms to others.  For a
+precise description of your rights and obligations, please use the
+@code{show copying} and @code{show warranty} commands, or see the file
+@file{COPYING} in the @gnubg{} distribution (the contents are identical).
+@end table
+
+@node Playing
+@chapter Playing Backgammon with @gnubg
+@cindex playing commands
+@cindex commands, playing
+
+This chapter introduces several more commands used while playing games
+and matches in @gnubg{}.
+
+@menu
+* The Game::                    Commands used during the game.
+* Dice::                        Controlling dice rolls.
+* Computer Player::             Having gnubg make moves.
+* Matches and Sessions::        Playing series of games.
+* Cube::                        Using the doubling cube.
+* Recording::                   Saving games and matches.
+@end menu
+
+@node The Game
+@section Commands Used During the Game
+@cindex game commands
+
+@table @code
+@kindex new game
+@item new game
+This command is used to start a game within a match or session.  (Note
+that all games are played within matches or sessions; see
+@ref{Matches and Sessions}.  To play a single game, use either a
+1 point match or a session lasting for one game, depending whether
+you want gammons and the doubling cube to be active.)  @code{new game}
+will set up the board in the starting position, and roll one die for
+each player for the opening move.
+
+If you are in the middle of a game, @code{new game} will ask you if
+you want to abort the game in progress.  If you do, a new game will
+replace the current one (i.e.@: the partially completed game will have
+no effect on the score).  If you want the current game to be scored
+for either player, you should use the @code{resign} command instead.
+@kindex move
+@item move @var{from} @var{to} @dots{}
+@itemx move =@var{number}
+@itemx @var{from} @var{to} @dots{}
+@itemx =@var{number}
+
+The @code{move} command allows you to make chequer plays when it is your
+turn.  In its normal form, you should specify pairs of point numbers
+indicating the points you want to move a chequer from and to.  Specify
+one pair for each chequer you want to move.  (For instance, on an
+opening roll of 31, you might use @code{move 8 5 6 5} to move two
+chequers --- one from your 8 point to your 5 point, and the other from
+your 6 point to your 5 point.)  For several example moves, see
+@ref{Sample Game}.
+
+You should use the words @code{bar} and @code{off} when moving a chequer
+from the bar or bearing it off the board, e.g.@: @code{move bar 20} or
+@code{move 3 off}.  These words can be abbreviated to @code{b} and
+@code{o} respectively.
+
+If there is only one legal move you can make, then the command @code{move}
+by itself will make it for you without requiring you to specify it in full.
+Similarly, if there is no play available at all, then @code{move} will
+end your turn without moving.
+
+As long as you specify at least one pair of points, then the word
+@code{move} is optional --- the command @code{bar 20 24 20} means exactly
+the same thing as @code{move bar 20 24 20}, for instance.
+
+FIXME document `=n' notation.
+
+If you are using a window system, you can also move chequers using the
+board window.  One way to do this is to use any mouse button to drag a
+chequer (that is, press the button when the pointer is over the chequer
+you wish to move; move the pointer to the point you wish to play it to,
+and then release the button).
+
+An alternative is to click a mouse button on the chequer; button 1 will
+move it by the number of pips showing on the left die, and any other
+button will move it according to the right die.  If you don't like the
+order the dice are displayed in, pressing either button 2 or 3 on the
+dice will swap their positions.
+
+Whichever method you use to move the chequers, once you have made a legal
+move you can end your turn by clicking mouse button 1 on the dice.
+
+FIXME reference set auto move and set auto bearoff.
+@kindex resign
+@kindex agree
+@kindex accept
+@kindex decline
+@kindex reject
+@item resign [@var{type}]
+@itemx agree
+@itemx accept
+@itemx decline
+@itemx reject
+The @code{resign} command is used to give up a game without playing it to
+completion.  It is often useful during endgame play when the game reaches
+a position where it is impossible for one player to win.  If you do not
+specify a value @var{type}, then the player whose turn it is offers to
+give up one game (at the current cube value) to the opponent; you can
+also specify @code{1}, @code{2} or @code{3} to resign a single, double
+or triple game.  Specifying @code{normal}, @code{gammon} or
+@code{backgammon} is also legal, and is identical to expressing the
+number of points as a digit.  @code{single} is yet another synonym for
+one game.
+
+The opponent may accept the resignation with either the @code{agree} or
+@code{accept} commands, but is not obliged to.  To ignore the
+resignation and continue play normally, use either the @code{decline} or
+@code{reject} commands.  (@code{accept} and @code{reject} are also legal
+commands in response to a double; @pxref{Cube}.)
+@kindex set board
+@item set board @var{id}|=@var{number}
+If you wish to directly set the chequers to a different position, you
+can use the @code{set board} command.  You need to know the
+@dfn{position ID} of the chequer arrangement you want; position IDs
+are always displayed when the board is shown.  (If you are playing
+on a text terminal, the position ID is in the upper right hand corner
+of the board diagram; when using the board window, the ID is shown
+below the board on the right hand side.)  For instance, to set the
+chequers to the starting position, use the command
+@code{set board 4HPwATDgc/ABMA}.
+
+FIXME reference =n notation and describe the GTK edit mode
+
+@kindex set matchid
+@item set matchid @var{id}
+The @code{set matchid} commands is a convienient way of settings the
+match length, match score, cube owner and value, player on roll
+etc. etc. For example, @code{set matchid QYk5ASAAIAAA} will start a new
+9 point match where the score is set to 2-4, player 0 owns a 2-cube, and
+player 1 has rolled 6-3 (@pxref{Detailed description of the match ID}
+for a detailed description).
+
+The match ID is shown on the board, both in text mode and
+graphical mode.
+
+
+@kindex show board
+@item show board [@var{id}|=@var{number}]
+The @code{show board} command is used to display a particular position ---
+normally the board of the current game, but it is also possible to view
+unrelated layouts.  When specified without the optional @var{id} parameter,
+the current position is displayed.  (When using a text terminal, this
+is useful if subsequent output has caused the board diagram to scroll
+off the screen.  In the board window, the command can be used to undo
+erroneous chequer plays by resetting the window to the position at the
+start of the turn.)
+
+When a position ID @var{id} is given, the chequers are arranged into
+the position specified and that board is displayed.  Note that this
+command affects the display only; the current game is unchanged.  Use
+the @code{show board} command with no parameter if you want to see
+the current game again.
+@kindex hint
+@item hint
+At any time during the game when the dice have been rolled, you can
+use the @code{hint} command to see the moves @gnubg{} recommends.
+The output is of the following form:
+
+@example
+@group
+Win    W(g)   W(bg)  L(g)   L(bg)  Equity       Move
+0.542  0.142  0.008  0.113  0.008  (+0.114)     6/5 8/5 
+0.505  0.120  0.008  0.122  0.007  (+0.009)     24/23 23/20 
+0.498  0.126  0.008  0.123  0.007  (+0.000)     24/23 13/10 
+0.499  0.113  0.008  0.121  0.007  (-0.011)     24/23 24/21 
+0.486  0.125  0.008  0.120  0.009  (-0.024)     13/10 10/9 
+0.481  0.116  0.008  0.129  0.008  (-0.051)     6/5 24/21 
+0.472  0.122  0.008  0.129  0.009  (-0.064)     6/5 13/10 
+@end group
+@end example
+
+The moves are listed in descending order of preference, so in this case,
+@gnubg{} recommends the move @samp{6/5 8/5}.  The first five columns are
+its estimates of the probability of the player on roll winning
+(@samp{Win}), winning a gammon (@samp{W(g)}), winning a backgammon
+(@samp{W(bg)}), losing a gammon (@samp{L(g)}), and losing a backgammon
+(@samp{L(bg)}) if the game is played to completion without use of the
+doubling cube, after the candidate move in that row is
+made@footnote{Note that the probability of winning includes the
+probability of winning a gammon or backgammon, and likewise the gammon
+probabilities include the backgammon probabilities.}.  The sixth column,
+@samp{Equity}, is the estimated cubeless equity following the move ---
+this is the expected number of points per game won by the player on
+roll.
+
+FIXME describe =n notation.
+
+@gnubg{} will `look ahead' a certain number of moves when evaluating
+the probabilities, according to the search depth set by the
+@code{set plies} command (@pxref{Analysis}).
+@kindex show pipcount
+@item show pipcount [@var{id}|=@var{number}]
+Use @code{show pipcount} to automatically count the number of `pips'
+each player needs to bear off.  Depending on the position, the output
+will look something like:
+
+@example
+The pip counts are: X 103, O 112.
+@end example
+@kindex set player human
+@kindex set player name
+@kindex show player
+@itemx show player
+@item set player @var{name} human
+@itemx set player @var{old-name} name @var{new-name}
+Both players have a certain amount of configuration information; use the
+command @code{show player} to summarise these settings.  By default,
+@gnubg{} will play for player 0, whose name is initially @samp{gnubg}.
+Player 1 defaults to a human (i.e.@: @gnubg{} will prompt the user
+for a move when it is player 1's turn) whose name is the user's login
+name, on systems where this information is available; on single-user
+systems, the default name @samp{user} applies.
+
+Either player can be set to a human with the command @code{set player
+@var{name} human}, where @var{name} is either the number of the player
+(0 or 1) or that player's name (initially @samp{gnubg} and @samp{user}
+or the user's login name).  You can also specify @code{both} which will
+set both players simultaneously.  There are also options for computer
+players (@pxref{Computer Player}).
+
+You can change the names of the players with the
+@code{set player @var{old-name} name @var{new-name}} command.  Again,
+either the player numbers or names are valid for the @var{old-name}
+parameter.  Names may not contain whitespace characters, and may not
+be longer than 31 characters.  The names @samp{0}, @samp{1} and
+@samp{both} are not permitted, to avoid ambiguities, and the players
+may not both share the same name.  Names are not case sensitive.
+@kindex set turn
+@kindex show turn
+@item set turn @var{player}
+@itemx show turn
+The command @code{set turn @var{player}} (where @var{player} can be the
+player's name or number, as above) is used to control which player is on
+roll.  It will cancel the current dice roll and cube action (if any),
+and set the named player on roll.
+@kindex set automatic bearoff
+@kindex set automatic move
+@item set automatic bearoff
+@itemx set automatic move
+FIXME
+@kindex set display
+@item set display @var{value}
+By default, @gnubg{} will update the display before and after every move,
+whether made by a human or automatically.  (When using the graphical board,
+the board window is redrawn to the current position; when using the ASCII
+board, a new diagram is displayed on the terminal.)  Information about
+cube actions and resignations offered will also appear as appropriate.
+
+The command @code{set display off} will suppress this output, which can
+speed up the display and reduce clutter (this might be useful when completing
+a game where both sides are played by the computer, for instance).
+@code{set display on} will restore the default behaviour.  The standard
+toggle synonyms may be substituted for @code{on} and @code{off}.
+
+The board will always be updated when it is a human player's turn to move,
+regardless of the @code{display} setting.
+@end table
+
+@node Dice
+@section Controlling Dice Rolls
+@cindex dice
+@cindex rolls, dice
+
+@table @code
+@kindex roll
+@item roll
+This is the basic command used to roll the dice before each turn.  It will
+use the current random number generator to produce a dice roll, and then
+allow the player to move (if there is at least one legal play for the
+dice rolled).  By rolling the dice, the player gives up any opportunity
+to double this turn.
+@kindex set automatic roll
+@itemx set automatic roll @var{value}
+When the cube is not being used, or is owned by the opponent, or at
+certain scores in a match, it is either illegal or pointless for a
+player to double.  Under these circumstances, the player might as well
+roll the dice immediately --- the @code{set automatic roll} command
+instructs @gnubg{} to go ahead and roll the dice without waiting for the
+player to issue @code{roll}, whenever no doubling decision is necessary.
+The standard toggle commands may be used to turn this option on and off.
+@kindex set dice
+@itemx set dice @var{pips} @var{pips}
+To set the dice to a particular roll (whether they have already been rolled
+or not), use the @code{set dice} command.  The player can then play a move
+according to the dice specified.  Like the @code{roll} command, this will
+also forego any opportunity to double; to disregard a dice roll and
+allow the player to roll again (or double, if permitted), use @code{set
+turn @var{player}}.
+@kindex set rng
+@kindex show rng
+@item set rng @var{generator} [@var{seed}]
+@itemx show rng
+@gnubg{} allows a variety of methods for generating dice rolls, including
+several built-in pseudo-random number generators and a facility for external
+libraries to be used.  It is also possible to enter a roll manually whenever
+required.
+
+The @code{set rng} command is used to select which generator will be used.
+The @var{generator} parameter must be one of the following:
+@table @code
+@item ansi
+The ANSI C standard @code{rand()} random number generator.  The
+behaviour of this generator will depend on the C library linked with
+@gnubg{}, but is typically a linear congruential pseudo-random number
+generator.  Such generators have fairly weak distribution properties,
+but are generally adequate for producing backgammon dice.  However, the
+ANSI generator is not recommended for performing rollouts, because any
+small biases in the dice could accumulate over hundreds or thousands of
+trials and distort the results.  Using a better generator would be
+safer for rollouts.
+@item bsd
+The 4.3BSD @code{random()} non-linear additive feedback random number
+generator.  This is a good quality generator, but is not available on
+all systems.  @gnubg{} will report an error if you attempt to use this
+generator if the C library used in your installation does not include
+the BSD @code{random} code.
+@item isaac
+Bob Jenkins' ISAAC random number generator.  This is believed to be a
+high quality generator.
+@item manual
+By setting the generator to @code{manual}, @gnubg{} will not generate
+the dice itself; rather, it will prompt for a roll to be entered whenever
+one is required.
+@item md5
+MD5 is a public domain message digest algorithm invented by Ron
+Rivest and documented in RFC 1321.  @gnubg{} can use MD5 as a procedure
+for generating dice rolls --- this generator has the property that
+the seed increments by one each roll, and so the sequence generated
+by seed @samp{n+1} will be identical to that generated by seed @samp{n},
+with the first roll omitted.  The command @code{show seed} is available
+when using the @var{md5} generator, for obtaining the current seed value.
+@item mersenne
+Choosing this option will enable the Mersenne Twister generator designed
+by Matsumoto and Nishimura.  This should be an excellent pseudo-random
+number generator.
+@item user
+Use the @code{user} generator to dynamically load a user library which
+will be used to produce the dice rolls.  See the file @file{userrng.c}
+in the @gnubg{} distribution for an example user generator, and instructions
+on how to write your own.
+@end table
+FIXME explain optional seed parameter
+@kindex set seed
+@item set seed @var{seed}
+You can change the random number generator seed at any time with the
+@code{set seed} command.  FIXME
+@kindex show seed
+@item show seed
+FIXME
+@end table
+
+@node Computer Player
+@section Having @gnubg{} Make Moves
+@cindex computer player
+@cindex @t{gnubg}, making moves
+
+@table @code
+@kindex set player gnubg
+@item set player @var{name} gnubg
+This command will instruct @gnubg{} to choose moves (and make cube decisions)
+for the specified player, using its evaluation engine.
+@kindex set player pubeval
+@item set player @var{name} pubeval
+An alternative computer player can be chosen by setting a player to
+@code{pubeval}.  This will cause moves for that player to be made by
+Gerry Tesauro's benchmark player.  @code{pubeval} is much weaker than
+@gnubg{}'s own evaluator, but provides a constant level of play which
+is useful for measuring different players against.
+
+@code{pubeval} is not capable of making cube or resignation decisions
+based on the position.  It will never accept resignations at less than
+triple (backgammon) stakes, and will take all cubes.  It nevers offers
+resignations or doubles of its own.
+@kindex set player external
+@item set player @var{name} external
+FIXME
+@kindex set player evaluation
+@item set player @var{name} evaluation
+FIXME
+@kindex play
+@item play
+FIXME
+@kindex external
+@item external
+FIXME
+@end table
+
+@node Matches and Sessions
+@section Matches and Sessions
+@cindex matches
+@cindex sessions
+
+This section describes how to use GNU Backgammon to play series of
+games, whether those games are part of a match (as in tournament
+backgammon) or a session of independent games (conventionally
+called ``money'' play, regardless of whether any payment is involved).
+
+@table @code
+@kindex new match
+@kindex new session
+@kindex set automatic game
+@kindex set crawford
+@kindex set postcrawford
+@kindex set automatic crawford
+@kindex set jacoby
+@kindex set automatic doubles
+@kindex set score
+@kindex show crawford
+@kindex show postcrawford
+@kindex show jacoby
+@kindex show score
+@item new match @var{length}
+@itemx new session
+@itemx set automatic game
+@itemx set crawford
+@itemx set postcrawford
+@itemx set automatic crawford
+@itemx set jacoby
+@itemx set automatic doubles @var{limit}
+@itemx set score @var{points} @var{points}
+@itemx show crawford
+@itemx show postcrawford
+@itemx show jacoby
+@itemx show score
+FIXME
+@end table
+
+@node Cube
+@section The Doubling Cube
+@cindex cube, doubling
+@cindex doubling, commands
+
+@table @code
+@kindex double
+@kindex redouble
+@kindex beaver
+@kindex take
+@kindex accept
+@kindex drop
+@kindex pass
+@kindex reject
+@kindex set cube centre
+@kindex set cube owner
+@kindex set cube use
+@kindex set cube value
+@item double
+@itemx redouble
+@itemx beaver
+@itemx take
+@itemx accept
+@itemx drop
+@itemx pass
+@itemx reject
+@itemx set cube centre
+@itemx set cube owner @var{player}
+@itemx set cube use
+@itemx set cube value @var{points}
+FIXME
+@end table
+
+@node Recording
+@section Saving Games and Matches
+@cindex recording matches
+@cindex saving matches
+@cindex matches, saving
+@cindex games, saving
+
+@table @code
+@kindex save game
+@kindex save match
+@kindex load game
+@kindex load match
+@item save game @var{file}
+@itemx save match @var{file}
+@itemx load game @var{file}
+@itemx load match @var{file}
+FIXME
+@end table
+
+@node GTK
+@chapter The Graphical Interface to @gnubg{}
+@cindex graphical interface
+@cindex GTK+
+
+@table @code
+@kindex set colours
+@kindex set delay
+@kindex show delay
+@item set colours
+@itemx set delay
+@itemx show delay
+FIXME
+@end table
+
+@node Analysis
+@chapter Using @gnubg{} to Analyse Positions
+@cindex analysis of positions
+@cindex position analysis
+
+@table @code
+@kindex eval
+@kindex rollout
+@kindex set evaluation
+@kindex set rollout
+@kindex set cache
+@kindex show cache
+@kindex show gammonprice
+@kindex show marketwindow
+@kindex show matchequitytable
+@kindex analysis
+@item eval [@var{id}|=@var{number}]
+@itemx rollout [@var{id}|=@var{number} @dots{}]
+@itemx set evaluation
+@itemx set rollout
+@itemx set cache @var{size}
+@itemx show cache
+@itemx show gammonprice
+@itemx show marketwindow
+@itemx show matchequitytable
+@itemx analysis
+FIXME
+@end table
+
+@node Databases
+@chapter Position Databases
+@cindex databases
+@cindex position databases
+
+@table @code
+@kindex database dump
+@kindex database export
+@kindex export database
+@kindex database generate
+@kindex database import
+@kindex import database
+@kindex database rollout
+@kindex database train
+@item database dump
+@itemx database export
+@itemx export database
+@itemx database generate
+@itemx database import
+@itemx import database
+@itemx database rollout
+FIXME
+@item database train
+@itemx train database
+FIXME pointer only
+@end table
+
+@node Training
+@chapter Modifying @gnubg{}'s Neural Nets
+@cindex training
+@cindex neural nets, training
+
+@table @code
+@kindex new weights
+@kindex save weights
+@kindex load weights
+@kindex database train
+@kindex train database
+@kindex train td
+@item new weights
+@item save weights @var{file}
+@itemx load weights @var{file}
+@itemx database train
+@itemx train database
+@itemx train td
+FIXME
+@end table
+
+@image{annealing}
+
+@node Guile
+@chapter Extending @gnubg{}
+@cindex extending @t{gnubg}
+@cindex Guile
+@cindex Scheme
+
+@table @code
+@kindex :
+@item :
+FIXME
+@end table
+
+@include faq.texi
+
+@c This is the old FAQ chapter:
+@ignore
+@node Frequently Asked Questions
+@chapter Frequently Asked Questions
+@cindex frequently asked questions
+@cindex FAQ
+
+@menu
+* Where can I get GNU Backgammon?::  
+* How do I play a game?::       
+* gnubg.bd errors::             
+* gnubg.weights errors::        
+* Black and white board window::  
+@end menu
+
+@node Where can I get GNU Backgammon?
+@section Where can I get GNU Backgammon?
+@cindex obtaining @t{gnubg}
+
+Pre-release snapshots of GNU Backgammon are periodically made available
+for FTP at @uref{ftp://alpha.gnu.org/gnu/gnubg/}.
+
+If you want to experiment with the very latest code, the development
+sources are kept in a CVS repository at
+@uref{http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/}; see the @gnubg{}
+web page at @uref{http://www.gnu.org/software/gnubg/gnubg.html} for
+instructions on checking out sources from the repository.  Daily snapshots of
+the main branch of the repository are automatically placed in the
+@file{snapshots} directory of the FTP area above, if you wish to retrieve
+this experimental code via FTP.
+
+@node How do I play a game?
+@section How do I play a game?
+@cindex playing a game
+@cindex moving chequers, commands
+
+Once you are running @gnubg{}, enter @kbd{new game} at the
+@samp{(gnubg)} prompt to start a game against the computer opponent.
+You should now see a board (if a window system is available, @gnubg{}
+will use a graphical board window; otherwise, it will display an ASCII
+board on your terminal).  If @gnubg{} won the opening roll, it will have
+moved; you can now type @kbd{roll} (or click on the dice below the board
+window) to roll the dice yourself.  In either case, it will now be your
+move; you should enter the moves for each chequer as pairs of numbers.
+For instance, if you have rolled 3 and 1, you could type @kbd{8 5 6 5}
+to move one chequer from the 8 point to the 5 point and another from the
+6 point to the 5 point.  Use @kbd{bar} to move from the bar, and
+@kbd{off} to bear off.  If you are using the board window, you can also
+drag chequers around the board.  Click on the dice when you have
+finished.
+
+@node gnubg.bd errors
+@section I only see @samp{gnubg.bd: No such file or directory}.  What's wrong?
+@vindex gnubg.bd
+@cindex errors starting @t{gnubg}
+
+The file @file{gnubg.bd} is the bearoff database that @gnubg{} uses to
+evaluate endgame positions.  @gnubg{} will look for it first in the current
+directory and then in the installed directory (@file{/usr/local/share/gnubg/}
+by default).
+
+The @gnubg{} distribution is set up to create @file{gnubg.bd} by itself
+during compilation, but it can be a slow process (taking half an hour
+or more, depending on the speed of your computer).  If you would rather
+not wait to generate the database yourself, you can obtain a copy
+via FTP from @uref{ftp://alpha.gnu.org/gnu/gnubg/gnubg.bd.gz}.
+
+FIXME this is out of date; gnubg can cope without gnubg.bd if it has to.
+
+@node gnubg.weights errors
+@section Now I get @samp{gnubg.weights: No such file or directory}.  What's that?
+@vindex gnubg.weights
+@cindex errors starting @t{gnubg}
+
+The file @file{gnubg.weights} contains the trained neural net weights
+for most of @gnubg{}'s position evaluators.  Like @file{gnubg.bd}, it should
+be kept in either the current directory or the installed directory.
+
+A binary variant of the weights file named @file{gnubg.wd} can also be
+used (this version can be loaded more quickly, but is not portable
+between different computer architectures).  It will automatically be
+built during the compilation process, and used in preference to
+@file{gnubg.weights} if found.
+
+You should be able to obtain a copy of the weights from wherever you
+found the @gnubg{} distribution.  If you wish to start @gnubg{} without
+any weights (and train your own), you can use the @option{--no-weights}
+option (see @pxref{Invoking gnubg}).
+
+@node Black and white board window
+@section The board window is shown in black and white and looks awful!  What's wrong?
+
+If you see this problem, your X server is probably using a
+@dfn{PseudoColor} visual, and is dynamically allocating colours
+to clients from a limited colourmap.  On these types of displays, 
+@gnubg{} tries to be a well-behaved client by using colours from the
+default standard colourmap.  This will allow it to share colours
+with other clients that use the same scheme, which will help them
+all to use as many colours as possible without exhausting the
+colourmap.
+
+Unfortunately, not all X clients use standard colourmaps.  If other
+clients have been run before @gnubg{} and allocated most of the colours,
+then there may not be enough left for @gnubg{} to allocate a standard
+colourmap.  If this happens, it will just take what it can get (which
+in the worst case might be black and white only).  You can try to
+avoid this problem by running @gnubg{} before other colour-hungry clients,
+or by using the @file{xstdcmap} utility to install the default
+standard colourmap early in your session while colours are still
+available.  Depending on your hardware, you may be able to configure
+your display to allow more colours, or use a @dfn{DirectColor} or
+@dfn{TrueColor} visual which should resolve the problem.
+
+Of course, if your X server can only display black and white (not even
+shades of grey), then there's not much you can do!
+
+@node Are the dice fair?
+
+@end ignore
+
+@include fdl.texi
+
+@node Appendices
+@chapter Appendices
+@cindex appendix
+
+@menu
+* Detailed description of the position ID::
+* Detailed description of the match ID::
+@end menu
+
+@node Detailed description of the position ID
+@section Detailed description of the position ID
+@cindex position ID
+
+[insert the contents of
+http://www.cs.arizona.edu/~gary/backgammon/positionid.html here]
+
+@node Detailed description of the match ID
+@section Detailed description of the match ID
+@cindex match ID
+
+@subsection Introduction
+
+This section describes how the match ID is calculated. The match ID  can
+be used for easy exchange of positions for @gnubg{} users in
+conjuction with the position ID. The match key is a 9 byte
+representation of the match score, match length, value of cube, owner of
+cube, Crawford game flag, player on roll, player to make a decision,
+doubled flag, resigned flag, and the dice rolled. The match ID is the 12
+character Base64 encoding of the match key.
+
+@subsection Match key
+
+The match key is a bit string of length 66:
+
+@enumerate
+@item
+Bit 1-4 contains the 2-logarithm of the cube value. For example, a
+8-cube is encoded as 0011 binary (or 3), since 2 to the power of 3 is
+8. The maximum value of the cube in with this encoding is 2 to the power
+of 15, i.e., a 32768-cube.
+
+@item
+Bit 5-6 contains the cube owner. 00 if player 0 owns the cube, 01 if
+player 1 owns the cube, or 11 for a centered cube.
+
+@item
+Bit 7 is the player on roll or the player who did roll (0 and 1 for
+player 0 and 1, respectively).  
+
+@item
+Bit 8 is the Crawford flag: 1 if this game is the Crawford game, 0
+otherwise.
+
+@item
+Bit 9-11 is the game state: 000 for no game started, 001 for playing a game,
+010 if the game is over, 011 if the game was resigned, or 100 if the
+game was ended by dropping a cube.
+
+@item
+Bit 12 indicates whose turn it is. For example, suppose player 0 is on
+roll then bit 7 above will be 0. Player 0 now decides to double, this
+will make bit 12 equal to 1, since it is now player 1's turn to decide
+whether she takes or passes the cube.
+
+@item
+Bit 13 indicates whether an doubled is being offered. 0 if no double is
+being offered and 1 if a double is being offered.
+
+@item
+Bit 14-15 indicates whether an resignation was offered. 00 for no
+resignation, 01 for resign of a sigle game, 10 for resign of a gammon,
+or 11 for resign of a backgammon. The player offering the resignation is
+the inverse of bit 12, e.g., if player 0 resigns a gammon then bit 12
+will be 1 (as it is now player 1 now has to decide whether to accept or
+reject the resignation) and bit 13-14 will be 10 for resign of a gammon.
+
+@item
+Bit 16-18 and bit 19-21 is the first and second die, respectively. 0 if
+the dice has not yet be rolled, otherwise the binary encoding of the
+dice, e.g., if 5-2 was rolled bit 16-21 will be 101-010.
+
+@item
+Bit 22 to 36 is the match length. The maximum value for the match length
+is 32767. A matchscore of zero indicates that the game is a money game.
+
+@item
+Bit 37-51 and bit 52-66 is the score for player 0 and player 1
+respectively. The maximum value of the match score is 32767.
+
+@end enumerate
+
+For example, assume the score is 2-4 in a 9 point match with player 0
+holding a 2-cube, and player 1 has just rolled 52. The match key for
+this will be (note that the bit order is reversed below for readability)
+
+1000 00 1 0  100 1 0 00 101 010 100100000000000 010000000000000 001000000000000            
+
+
+In little endian the bytes looks like:
+
+01000001 10001001 00101010 00000001 00100000 00000000 00100000 00000000 00
+
+0x41     0x89     0x2A     0x01     0x20     0x00     0x20     0x00     0x00
+
+@subsection Match ID
+
+Analogous to the position ID from the previous section the match ID
+format is simply the Base64 encoding of the key. 
+
+To continue the example above, the 9 8-bit bytes are grouped into 12
+6-bits groups:
+
+
+010000 011000 100100 101010 000000 010010 000000 000000 001000 000000
+000000 000000
+
+In Base64 encoding, the groups are represented as:
+
+Q Y k q A U A A I A A A
+
+So, the match id is simply:
+
+QYkqAUAAIAAA
+
+@node Command Index
+@unnumbered Command Index
+@printindex ky
+
+@node Concept Index
+@unnumbered Index
+@printindex cp
+
+@contents
+@bye
