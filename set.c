@@ -78,6 +78,10 @@
 
 #include "sound.h"
 
+#if USE_TIMECONTROL
+#include "timecontrol.h"
+#endif
+
 static int iPlayerSet, iPlayerLateSet;
 
 static evalcontext *pecSet;

@@ -92,6 +92,7 @@ extern int UpdateClockNotify(void *p)
  * @param open settings file
  */
 
+extern void SetDefaultTC ();
 extern void SaveTimeControlSettings( FILE *pf );
 extern void CommandShowTCTutorial ();
 

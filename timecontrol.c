@@ -171,10 +171,11 @@ static timecontrol *findOrDeleteTimeControl( char *sz, int del )
 
     if (del)
     {
+    tcnode *next;
 #if USE_GTK
 	GTKRemoveTimeControl((*ppRefNode)->ptc->szName);
 #endif
-    tcnode *next=(*ppRefNode)->next;
+    next=(*ppRefNode)->next;
     free((*ppRefNode)->ptc->szName);
     free((*ppRefNode)->ptc->szNext);
     free((*ppRefNode)->ptc->szNextB);
@@ -213,10 +214,11 @@ static void setNameModified( )
 static void nameTimeControl( char *sz )
 {
     tcnode *pNode;
+	timecontrol *ptc;
 
     if (!sz || !*sz) return;
 
-    timecontrol *ptc = findTimeControl( sz );
+    ptc = findTimeControl( sz );
     if (!ptc || strcmp(ptc->szName, sz))
     {
 	ptc = calloc(sizeof(timecontrol), 1);

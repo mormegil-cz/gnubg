@@ -757,7 +757,7 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
 	
 #if USE_TIMECONTROL
     case CMD_SET_TC:
-	sprintf( sz, "%s %s", aszCommands[ iCommand ], p);
+	sprintf( sz, "%s %s", aszCommands[ iCommand ], (char*)p);
 	UserCommand( sz );
 	break;
 #endif
@@ -9596,10 +9596,9 @@ typedef struct _definetcwidget {
 
 static GtkWidget *DefineTCWidget( definetcwidget *pdtcw) 
 {
-  int i, j = 1 ;
-  GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwEntry;
-  GtkWidget *pwSpin, *pwFrame, *pwVbox2; 
-  GtkWidget *pwMenu, *pwOptionMenu;
+  GtkWidget *pwVbox, *pwHbox, *pwLabel;
+  GtkWidget *pwFrame, *pwVbox2; 
+  GtkWidget *pwMenu;
 
   pwVbox = gtk_vbox_new(FALSE, 0);
   gtk_container_add( GTK_CONTAINER ( pwVbox ),
