@@ -50,20 +50,21 @@ static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, 
 int fDisplayPanels = TRUE;
 int fDockPanels = TRUE;
 
-extern void ShowAnalysis();
-extern void DeleteAnalysis();
-extern void ShowAnnotation();
-extern void DeleteAnnotation();
-extern void ShowGameWindow();
-extern void DeleteGame();
-extern void ShowMessage();
-extern void DeleteMessage();
-extern void ShowTheoryWindow();
-extern void DeleteTheoryWindow();
-extern void ShowCommandWindow();
-extern void DeleteCommandWindow();
+/* Callbacks return TRUE as delete_event needs to be stopped */
+extern gboolean ShowAnalysis();
+extern gboolean DeleteAnalysis();
+extern gboolean ShowAnnotation();
+extern gboolean DeleteAnnotation();
+extern gboolean ShowGameWindow();
+extern gboolean DeleteGame();
+extern gboolean ShowMessage();
+extern gboolean DeleteMessage();
+extern gboolean ShowTheoryWindow();
+extern gboolean DeleteTheoryWindow();
+extern gboolean ShowCommandWindow();
+extern gboolean DeleteCommandWindow();
 
-typedef void (*panelFun)();
+typedef gboolean (*panelFun)();
 
 typedef struct _windowobject {
 	char* winName;
@@ -166,7 +167,7 @@ windowobject woPanel[NUM_WINDOWS] =
 
 #if USE_GTK
 
-extern void ShowPanel(gnubgwindow window)
+extern gboolean ShowPanel(gnubgwindow window)
 {
 	setWindowGeometry(window);
 	if (!woPanel[window].docked && woPanel[window].pwWin->window)
@@ -176,16 +177,19 @@ extern void ShowPanel(gnubgwindow window)
 	/* Avoid showing before main window */
 	if (GTK_WIDGET_REALIZED(pwMain))
 		gtk_widget_show_all(woPanel[window].pwWin);
+
+	return TRUE;
 }
 
-extern void ShowGameWindow( void )
+extern gboolean ShowGameWindow( void )
 {
 	ShowPanel(WINDOW_GAME);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Game record")), TRUE);
+	return TRUE;
 }
 
-extern void ShowAnnotation( void )
+extern gboolean ShowAnnotation( void )
 {
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Commentary")), TRUE);
@@ -194,34 +198,39 @@ extern void ShowAnnotation( void )
 	/* Avoid showing before main window */
 	if( GTK_WIDGET_REALIZED( pwMain ) )
 		gtk_widget_show_all( woPanel[WINDOW_ANNOTATION].pwWin );
+	return TRUE;
 }
 
-extern void ShowMessage( void )
+extern gboolean ShowMessage( void )
 {
 	ShowPanel(WINDOW_MESSAGE);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Message")), TRUE);
+	return TRUE;
 }
 
-extern void ShowAnalysis( void )
+extern gboolean ShowAnalysis( void )
 {
 	ShowPanel(WINDOW_ANALYSIS);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 		"/Windows/Analysis")), TRUE);
+	return TRUE;
 }
 
-extern void ShowTheoryWindow( void )
+extern gboolean ShowTheoryWindow( void )
 {
 	ShowPanel(WINDOW_THEORY);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Theory")), TRUE);
+	return TRUE;
 }
 
-extern void ShowCommandWindow( void )
+extern gboolean ShowCommandWindow( void )
 {
 	ShowPanel(WINDOW_COMMAND);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Command")), TRUE);
+	return TRUE;
 }
 
 static void CreateMessageWindow( void )
@@ -615,46 +624,52 @@ static void CreatePanels()
    gtk_box_pack_start(GTK_BOX(pwPanelVbox), woPanel[WINDOW_THEORY].pwWin, FALSE, FALSE, 0 );
 }
 
-extern void DeleteMessage ( void )
+extern gboolean DeleteMessage ( void )
 {
 	HidePanel(WINDOW_MESSAGE);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Message")), FALSE);
+	return TRUE;
 }
 
-extern void DeleteAnalysis( void )
+extern gboolean DeleteAnalysis( void )
 {
 	HidePanel(WINDOW_ANALYSIS);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Analysis")), FALSE);
+	return TRUE;
 }
 
-extern void DeleteAnnotation( void )
+extern gboolean DeleteAnnotation( void )
 {
 	HidePanel(WINDOW_ANNOTATION);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Commentary")), FALSE);
+	return TRUE;
 }
 
-extern void DeleteGame( void )
+extern gboolean DeleteGame( void )
 {
 	HidePanel(WINDOW_GAME);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Game record")), FALSE);
+	return TRUE;
 }
 
-extern void DeleteTheoryWindow ( void )
+extern gboolean DeleteTheoryWindow ( void )
 {
 	HidePanel(WINDOW_THEORY);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Theory")), FALSE);
+	return TRUE;
 }
 
-extern void DeleteCommandWindow ( void )
+extern gboolean DeleteCommandWindow ( void )
 {
 	HidePanel(WINDOW_COMMAND);
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Command")), FALSE);
+	return TRUE;
 }
 
 static void GetGeometryString(char* buf, windowobject* pwo)
