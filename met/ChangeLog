@@ -1,3 +1,7 @@
+Tue Mar 26 18:06:09 2002  Øystein Johansen <oeysteij@online.no>
+
+        * ortega.xml: set encoding to iso-8859-1
+
 Sun Mar 24 18:36:09 2002  Øystein Johansen <oeysteij@online.no>
 
         * ortega.xml: New file.
