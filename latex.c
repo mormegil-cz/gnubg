@@ -525,7 +525,7 @@ extern void CommandExportGameLaTeX( char *sz ) {
       return;
 
     if( !sz || !*sz ) {
-	outputl( _("You must specify a file to export to (see `help export"
+	outputl( _("You must specify a file to export to (see `help export "
 		 "game latex').") );
 	return;
     }
