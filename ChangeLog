@@ -1,3 +1,9 @@
+Thu Oct  2 20:48:23 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* formatgs.c (errorRateMP): remove extra digit in 
+	error rates.
+	(suggested by olivier croisille)
+
 Thu Oct  2 20:21:21 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ImportSGGGame): ensure that resignations are in the

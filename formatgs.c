@@ -72,8 +72,6 @@ errorRateMP( const float rn, const float ru, const matchstate *pms ) {
 
   int n = fOutputDigits - ( log10( rErrorRateFactor ) - 0.5 );
 
-  printf( "%f\n", rn );
-  
   if ( n < 0 )
     n = 0;
 
@@ -81,16 +79,16 @@ errorRateMP( const float rn, const float ru, const matchstate *pms ) {
 
     if ( pms->nMatchTo ) 
       return g_strdup_printf( "%+*.*f (%+7.3f%%)",
-                              n + 5, n + 1, 
+                              n + 5, n, 
                               rErrorRateFactor * rn, ru * 100.0f );
     else
       return g_strdup_printf( "%+*.*f (%+7.3f)",
-                              n + 5, n + 1, 
+                              n + 5, n, 
                               rErrorRateFactor * rn, ru );
 
   }
   else
-    return g_strdup_printf( "%+*.*f", n + 5, n + 1, rErrorRateFactor * rn );
+    return g_strdup_printf( "%+*.*f", n + 5, n, rErrorRateFactor * rn );
 
 }
 
