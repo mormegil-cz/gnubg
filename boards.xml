@@ -1100,4 +1100,57 @@
 
    </board-design>
 
+   <board-design>
+
+      <about>
+	 <title>Curtis cool</title>
+         <author>Ian Curtis</author>
+      </about>
+
+      <design>
+         board=#54566A;0.20
+         border=#7F5213
+         wood=walnut
+         hinges=n
+         light=150;50
+         shape=0.5
+         chequers0=#29235E;1.00;1.40;0.30;31.90
+         chequers1=#CEC46D;1.00;1.40;0.30;31.90
+         dice0=#29235E;0.30;31.90;y
+         dice1=#EDE657;0.30;87.10;n
+         dot0=#FFFFFF
+         dot1=#1B1B1B
+         cube=#C3BCBA
+         points0=#57A0D2;0.20
+         points1=#F9F08B;0.20
+         hinges3d=n
+         piecetype=0
+         piecetexturetype=1
+         roundededges=y
+         bgintrays=y
+         roundedpoints=n
+         lighttype=d
+         lightposx=-0.700000 lightposy=3.500000 lightposz=4.300000
+         lightambient=50 lightdiffuse=70 lightspecular=100
+         chequers3d0=#1D2070;#386262;#827E85;81;100
+         chequers3d1=#F1F55D;#EFED74;#9E9E9E;100;100
+         dice3d0=#1D2070;#386262;#827E85;81;100;y
+         dice3d1=#F1F55D;#EFED74;#9E9E9E;100;100;y
+         dot3d0=#FFFFFF;#FFFFFF;#FFFFFF;100;100
+         dot3d1=#000000;#000000;#0B0B0B;100;100
+         cube3d=#FFFFFF;#D6D6D6;#B5B5B5;98;0
+         cubetext3d=#6B52AA;#382C71;#000000;100;100
+         base3d=#4F5260;#696487;#686868;95;0;suede.png
+         points3d0=#C8C886;#EBEAB5;#838383;100;100;suede.png
+         points3d1=#77C3CC;#9BD5DC;#717171;100;100;suede.png
+         border3d=#E9AE66;#B39D69;#606060;102;100;maple.png
+         hinge3d=#CC975B;#DAB056;#FFEFC6;100;0
+         numbers3d=#070707;#030303;#E5E5E5;100;100
+         background3d=#E06A35;#AA5344;#515151;100;0;Grass01.png
+
+   </design>
+
+   </board-design>
+
+
 </board-designs>

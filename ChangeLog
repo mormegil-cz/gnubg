@@ -1,4 +1,8 @@
 Wed Oct 27 01:20:45 2004   Oystein Johansen <oystein@gnubg.org>
+	
+	* boards.xml: Add design by Ian Curtis.
+	
+Wed Oct 27 01:20:45 2004   Oystein Johansen <oystein@gnubg.org>
 
 	* gtktheory.c gtktempmap.c: Two files I missed in the last commit.
 
