@@ -82,6 +82,23 @@ Board1ToPy( int anBoard [ 25 ] ) {
 
 
 static int
+PyToDice( PyObject* p, int anDice[ 2 ] )
+{
+  if( PySequence_Check(p) && PySequence_Size(p) == 2 ) {
+    int j;
+
+    for ( j = 0; j < 2; ++j ) {
+      PyObject* pi = PySequence_Fast_GET_ITEM(p, j);
+    
+      anDice[ j ] = (int) PyInt_AsLong( pi );
+    }
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
 PyToBoard1( PyObject* p, int anBoard[ 25 ] )
 {
   if( PySequence_Check(p) && PySequence_Size(p) == 25 ) {
@@ -511,6 +528,104 @@ PythonEvaluate( PyObject* self IGNORE, PyObject *args ) {
   }
 }
 
+static PyObject *
+PythonEvaluateCubeful( PyObject* self IGNORE, PyObject *args ) {
+
+  PyObject *pyBoard = NULL;
+  PyObject *pyCubeInfo = NULL;
+  PyObject *pyEvalContext = NULL;
+
+  int anBoard[ 2 ][ 25 ];
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], arCube[ NUM_CUBEFUL_OUTPUTS ];
+  cubeinfo ci;
+  evalcontext ec = { 0, 0, 0, 1, 0.0f };
+
+  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  if ( ! PyArg_ParseTuple( args, "|OOO", 
+                           &pyBoard, &pyCubeInfo, &pyEvalContext ) )
+    return NULL;
+
+  if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
+    return NULL;
+
+  if ( pyCubeInfo && PyToCubeInfo( pyCubeInfo, &ci ) )
+    return NULL;
+
+  if ( pyEvalContext && PyToEvalContext( pyEvalContext, &ec ) )
+    return NULL;
+
+  if ( GeneralCubeDecisionE ( aarOutput, anBoard, &ci, &ec, 0 ) < 0 ){
+    PyErr_SetString( PyExc_StandardError, 
+                     _("interupted/errno in GeneralCubeDecisionE") );
+    return NULL;
+  }
+
+  FindCubeDecision ( arCube, GCCCONSTAHACK aarOutput, &ci );
+
+  {
+    PyObject* p = PyTuple_New( NUM_CUBEFUL_OUTPUTS );
+    int k;
+    for(k = 0; k < NUM_CUBEFUL_OUTPUTS; ++k) {
+      PyTuple_SET_ITEM(p, k, PyFloat_FromDouble(arCube[k]));
+    }
+    return p;
+  }
+}
+
+static PyObject *
+PythonFindBestMove( PyObject* self IGNORE, PyObject *args ) {
+
+  PyObject *pyDice = NULL;
+  PyObject *pyBoard = NULL;
+  PyObject *pyCubeInfo = NULL;
+  PyObject *pyEvalContext = NULL;
+
+  int anBoard[ 2 ][ 25 ];
+  int anDice[ 2 ];
+  int anMove[ 8 ];
+  cubeinfo ci;
+  evalcontext ec = { 0, 0, 0, 1, 0.0f };
+
+  memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  memcpy( anDice, ms.anDice, sizeof anDice );
+  GetMatchStateCubeInfo( &ci, &ms );
+  if ( ! PyArg_ParseTuple( args, "|OOO(ii)", 
+                           &pyBoard, &pyCubeInfo, &pyEvalContext, &pyDice ) )
+    return NULL;
+
+  if ( pyDice && !PyToDice( pyBoard, anDice ) )
+    return NULL;
+
+  if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
+    return NULL;
+
+  if ( pyCubeInfo && PyToCubeInfo( pyCubeInfo, &ci ) )
+    return NULL;
+
+  if ( pyEvalContext && PyToEvalContext( pyEvalContext, &ec ) )
+    return NULL;
+
+  /* 
+   * FIXME: The function will use the eval movefilter. The function
+   * should take a movefilter as an argument.
+   */
+  
+  if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
+                        anBoard, &ci, &ec, aamfEval ) < 0 )
+        return NULL;
+  {
+    PyObject* p = PyTuple_New( 8 );
+    int k;
+    for(k = 0; k < 8; ++k) {
+      PyTuple_SET_ITEM(p, k, Py_BuildValue( "i", anMove[k]+1));
+    }
+    return p;
+  }
+
+}
 
 static PyObject *
 METRow( float ar[ MAXSCORE ], const int n ) {
@@ -830,7 +945,7 @@ PythonPositionBearoff( PyObject* self IGNORE, PyObject *args )
   int nPoints = 6;
   int anBoard[ 25 ];
 
-  memcpy( anBoard, 0, sizeof anBoard );
+  memcpy( anBoard, ms.anBoard, sizeof anBoard );
 
   if ( ! PyArg_ParseTuple( args, "|Oii:positionbearoff", 
                            &pyBoard, &nPoints, &nChequers ) )
@@ -2115,12 +2230,16 @@ PyMethodDef gnubgMethods[] = {
     "Get the current board" },
   { "command", PythonCommand, METH_VARARGS,
     "Execute a command" },
+  { "cfevaluate", PythonEvaluateCubeful, METH_VARARGS,
+    "Cubeful evaluation" },
   { "evaluate", PythonEvaluate, METH_VARARGS,
     "Cubeless evaluation" },
   { "evalcontext", PythonEvalContext, METH_VARARGS,
     "make a evalcontext" },
   { "eq2mwc", PythonEq2mwc, METH_VARARGS,
     "convert equity to MWC" },
+  { "findbestmove", PythonFindBestMove, METH_VARARGS,
+    "Find the best move" },
   { "mwc2eq", PythonMwc2eq, METH_VARARGS,
     "convert MWC to equity" },
   { "matchchecksum", PythonMatchChecksum, METH_VARARGS,
