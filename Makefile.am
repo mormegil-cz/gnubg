@@ -1,8 +1,8 @@
 ## $Id$
 if USE_EXT
-SUBDIRS = intl lib doc ext met po m4 xpm sounds
+EXT_DIR=ext
 else
-SUBDIRS = intl lib doc met po m4 xpm sounds
+EXT_DIR=
 endif
 
 localedir = $(datadir)/locale
@@ -39,9 +39,24 @@ else
 BR1DATA =
 endif
 
+if USE_BOARD3D
+BOARD3D_DIR=board3d
+BOARD3D_DEPS=board3d/libboard3d.a
+BOARD3D_LIBS=-L$(srcdir)/board3d -lboard3d @GTKGLEXT_LIBS@ @FTGL_LIBS@
+BOARD3D_INCS=@GTKGLEXT_CFLAGS@
+else
+BOARD3D_DIR=
+BOARD3D_DEPS=
+BOARD3D_LIBS=
+BOARD3D_INCS=
+endif
+
+
+SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) $(EXT_DIR)
+
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@
+              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ 
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@ \
               @FT2_LIBS@ @GTKEXTRA_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
@@ -55,13 +70,14 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h boardpos.c boardpos.h
-COMMON_DEPS = @LIBOBJS@ lib/libevent.a
+COMMON_DEPS = @LIBOBJS@ lib/libevent.a 
 
 bin_PROGRAMS = gnubg makebearoff makehyper
 
 if USE_GTK
 ## --- GTK
-INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@
+INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
+           $(BOARD3D_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
@@ -72,8 +88,9 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
         openurl.c openurl.h gtktempmap.c gtktempmap.h \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
-gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) @LIBART_LIBS@
-gnubg_DEPENDENCIES = $(COMMON_DEPS)
+gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS) \
+        @LIBART_LIBS@ $(BOARD3D_LIBS)
+gnubg_DEPENDENCIES = $(COMMON_DEPS) $(BOARD3D_DEPS)
 else
 if USE_EXT
 ## --- EXT

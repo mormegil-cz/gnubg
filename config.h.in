@@ -80,6 +80,9 @@
 /* Define to 1 if you have the `fstat' function. */
 #undef HAVE_FSTAT
 
+/* Define if you have the FTGL library */
+#undef HAVE_FTGL
+
 /* Define if your GDBM library gdbm_errno works correctly. */
 #undef HAVE_GDBM_ERRNO
 
@@ -127,6 +130,9 @@
 
 /* Define to 1 if you have the <gmp.h> header file. */
 #undef HAVE_GMP_H
+
+/* Define if you have GtkGLExt */
+#undef HAVE_GTKGLEXT
 
 /* Define to 1 if you have the `gtk_option_menu_get_history' function. */
 #undef HAVE_GTK_OPTION_MENU_GET_HISTORY
@@ -417,6 +423,9 @@
 
 /* Define TRUE */
 #undef TRUE
+
+/* Define if you want to use the 3d boards */
+#undef USE_BOARD3D
 
 /* Define if you have a bearoff database to link to GNU Backgammon */
 #undef USE_BUILTIN_BEAROFF
