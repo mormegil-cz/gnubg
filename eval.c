@@ -1814,21 +1814,17 @@ EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] ) {
 
   int anBoardNew0[ 2 ][ 25 ], anBoardNew1[ 2 ][ 25 ];
   int anMove[ 8 ];
-  int i;
-  int nSaveCube;
+  int nFactor0, nFactor1;
   int nDice0, nDice1, nDice2, nDice3;
-  int nMarketLoosers, nDoubledOut;
+  int nMarketLoosers = 0, nDoubledOut = 0;
+  int nOldCube;
 
   int fOldCubeOwner;
 
   float rDropPoint, rEqDouble, rEqNoDouble;
-  float rDoubleLate, rDoubleEarly;
   float rMyDropPoint, rMyDropPointRecube;
   float arOutput[ NUM_OUTPUTS ];
-  float rEq, rFactor, rEqD, rEqND, rEqCubeless;
-
-  char auch[ 10 ];
-    char szMove[100];
+  float rEq;
 
   /* Get drop point */
 
@@ -1884,19 +1880,22 @@ EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] ) {
    *
    */
 
-  rEqNoDouble = 0.0;
-  rEqDouble = 0.0;
+  /*
+   * /------------------------------\
+   * | Assume that we don't double. |
+   * \------------------------------/
+   */
 
-  nMarketLoosers = nDoubledOut = 0;
+  rEqNoDouble = 0.0;
 
   for ( nDice0 = 1; nDice0 <= 6; nDice0++ ) {
     for ( nDice1 = 1; nDice1 <= nDice0; nDice1++ ) {
 
-      /*
-	printf ("dice0,dice1 = %1i %1i\n",nDice0,nDice1);
-      */
+      memcpy( anBoardNew0 , anBoard, sizeof ( anBoardNew0 ) );
 
-      memcpy( anBoardNew0, anBoard, sizeof ( anBoardNew0 ) );
+      /* 
+       * Find my best move.
+       */
 
       FindBestMove ( 0, anMove, nDice0, nDice1, anBoardNew0 );
 
@@ -1912,83 +1911,65 @@ EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] ) {
       if ( ClassifyPosition ( anBoardNew0 ) == CLASS_OVER ) {
 
 	/*
-	 * Yahoo, I won the game!
-	 * Add equity for winning game
+	 * Yahoo, I win the game!
+	 * Add equity for winning game.
 	 */
 
 	if ( nDice0 == nDice1 ) {
-	  rEqDouble += 72.0 * rEq;
 	  rEqNoDouble += 36.0 * rEq;
 	  nMarketLoosers += 36;
 	}
 	else {
-	  rEqDouble += 144.0 * rEq;
 	  rEqNoDouble += 72.0 * rEq;
 	  nMarketLoosers += 72;
 	}
 
-	/* next die */
-	continue;
+	continue; /* next roll */
 
       }
 
-      if ( rEq < rMyDropPoint ) {
+      if ( ( rEq < rMyDropPoint ) && ( fCubeOwner < 0 ) ) {
 
 	/* 
-	 * If opponent can double me out subtract an
-	 * equity of -1.
+	 * If the cube is centered and my equity is 
+	 * less than my drop point the opponent can 
+	 * double me out when it is his turn.
 	 */
 
-    	if ( nDice0 == nDice1 ) {
-    	  rEqDouble -= 72.0;
+    	if ( nDice0 == nDice1 )
     	  rEqNoDouble -= 36.0;
-	  nDoubledOut += 36;
-    	}
-    	else {
-    	  rEqDouble -= 144.0;
+    	else
     	  rEqNoDouble -= 72.0;
-	  nDoubledOut += 72;
-    	}
+	
+    	continue; /* next roll */
 
-    	continue; /* next die */ 
+      } 
 
-          } 
+      /* PAIAQKMBAAAAAA */
 
-          /* otherwise continue with opponents roll */
+
+      nFactor0 = ( nDice0 == nDice1 ) ? 1 : 2;
+
+      /* now continue with opponents roll */
 
       for ( nDice2 = 1; nDice2 <= 6; nDice2++ ) { 
     	for ( nDice3 = 1; nDice3 <= nDice2; nDice3++ ) { 
-	    
-    	  memcpy( anBoardNew1, anBoardNew0, sizeof ( anBoardNew1 ) );
-	  
-	  FindBestMove ( 0,
-			 anMove, nDice2, nDice3, anBoardNew1 );
-	  
-	  rFactor = ( ( nDice0 == nDice1 ) ? 1.0 : 2.0 ) *
-	            ( ( nDice2 == nDice3 ) ? 1.0 : 2.0 );
 
+	  nFactor1 = nFactor0 * ( ( nDice2 == nDice3 ) ? 1 : 2 ); 
+
+	  memcpy( anBoardNew1, anBoardNew0, sizeof ( anBoardNew1 ) ); 
+	  
+	  FindBestMove ( 0, anMove, nDice2, nDice3, anBoardNew1 );
+	  
 	  SwapSides ( anBoardNew1 );
 
 	  EvaluatePosition( anBoardNew1, arOutput, 
 			    (nPlies > 1) ? nPlies-2 : 0 );
 	  
-	  rEqND = Utility( arOutput );
-	  
-	  /* remember gammon price is changed after doubling */
-
-	  /* FIXME: don't recalculate gammon price every turn */
-
-	  fOldCubeOwner = fCubeOwner;
-	  SetCube ( nCube << 1, !fMove );
-	  rEqD = Utility( arOutput );
-	  SetCube ( nCube >> 1, fOldCubeOwner );
-	  
-	  /*
-	   * Assume I don't double.
-	   * Add equity + equity for holding cube
-	   */
+	  rEq = Utility( arOutput );
 	  
 	  if ( fCubeOwner == -1 ) {
+
 	    /* 
 	     * Centered cube
 	     * - if this is a market looser I can turn the 
@@ -1996,18 +1977,18 @@ EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] ) {
 	     * - if below my own drop point the value of owning
 	     *   the cube is 0
 	     * - else we interpolate 0.5 * rEq
-	     * FIXME: 0.25 is for money game only...
-	     * FIMXE: this needs some further explanation...
 	     */
-	      
-	    if ( rEqND >= rDropPoint ) {
-	      rEqNoDouble += rFactor * 1.0;
-	      nMarketLoosers += rFactor;
-	    }
-	    else if ( rEqND < rMyDropPoint )
-	      rEqNoDouble += rFactor * rEqND;
+	    
+	    if ( rEq > 1.0 )
+	      rEqDouble += nFactor1 * rEq;
+	    else if ( rEq >= rDropPoint ) {
+	      rEqNoDouble += nFactor1;
+	      nMarketLoosers += nFactor1;
+	      }
+	    else if ( rEq < rMyDropPoint )
+	      rEqNoDouble += nFactor1 * rEq;
 	    else
-	      rEqNoDouble += rFactor * ( rEqND + 0.5 * rEqND );
+	      rEqNoDouble += nFactor1 * ( rEq + 0.5 * rEq );
 	    
 	  } 
 	  else if ( fCubeOwner == fMove ) {
@@ -2017,47 +1998,172 @@ EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] ) {
 	     * - if this is a market looser I can turn the 
 	     *   cube and claim 1 point
 	     * - else the value of the cube is 0.25 * rEq + 0.25
-	     * FIXME: 0.25 is for money game only...
 	     */
 	    
-	    if ( rEqND >= rDropPoint ) {
-	      rEqNoDouble += rFactor * 1.0;
-	      nMarketLoosers += rFactor;
+	    if ( rEq >= rDropPoint ) {
+	      rEqNoDouble += nFactor1;
+	      nMarketLoosers += nFactor1;
 	    }
 	    else
-	      rEqNoDouble += rFactor * ( rEqND + 0.25 * rEqND + 0.25 );
-	    
+	      rEqNoDouble += nFactor1 * ( rEq + 0.25 * rEq + 0.25 );
+	      
 	  }
 	  else {
-	    printf("aarggh...shouldn't be here...\n");
-	    exit(-1);
+	    assert ( FALSE );
 	  }
-
-	  /* 
-	   * Bugger, see what happens if I turn the damn cube...
-	   * Subtract the value of your opponent now
-	   * holding the cube
-	   */
-
-	  if ( rEqD < rMyDropPointRecube )
-	    rEqDouble -= rFactor * 2;
-	  else 
-	    rEqDouble += rFactor * ( 2.0 * rEqD - ( 0.5 * ( -rEqD ) +
-						    0.5  ) );
-
-	  /*
-	  printf("%1i %1i %+6.3f  %+6.3f  %+6.3f\n",
-		 nDice2,nDice3,rEqD,rEqNoDouble,rEqDouble);
-	  */
 
 	} /* nDice3 */
       } /* nDice2 */
     } /* nDice1 */
   } /* nDice0 */
 
+
+  /*
+   * /---------------------------\
+   * | Assume that we do double. |
+   * \---------------------------/
+   */
+
+  rEqDouble = 0.0;
+
+  /* turn cube, recalc gammon price */
+
+  fOldCubeOwner = fCubeOwner;
+  nOldCube = nCube;
+  SetCube ( nCube << 1, fMove ? 0 : 1 );
+
+  for ( nDice0 = 1; nDice0 <= 6; nDice0++ ) {
+    for ( nDice1 = 1; nDice1 <= nDice0; nDice1++ ) {
+
+      memcpy( anBoardNew0 , anBoard, sizeof ( anBoardNew0 ) );
+
+      /* 
+       * Find my best move.
+       */
+
+      /* 
+       * fixme: check if opponent has automatic redouble
+       */
+
+      FindBestMove ( 0, anMove, nDice0, nDice1, anBoardNew0 );
+
+      SwapSides ( anBoardNew0 );
+
+      EvaluatePosition ( anBoardNew0, arOutput, 
+			 (nPlies > 0) ? nPlies-1 : 0 );
+
+      InvertEvaluation ( arOutput );
+
+      rEq = Utility ( arOutput );
+
+      if ( ClassifyPosition ( anBoardNew0 ) == CLASS_OVER ) {
+
+	/*
+	 * Yahoo, I win the game!
+	 * Add equity for winning game.
+	 * (36 rolls times cube value of 2)
+	 */
+
+	if ( nDice0 == nDice1 )
+	  rEqDouble += 72.0 * rEq;
+	else
+	  rEqDouble += 144.0 * rEq;
+
+	continue; /* next roll */
+
+      }
+
+      /*
+       * FIXME: for match play:
+       * check if opponents has automatic redouble,
+       * and if we might have to pass it.
+       */
+
+
+      if ( rEq < rMyDropPointRecube ) {
+
+	/* 
+	 * Opponent now owns cube and might use it
+	 * against me.
+	 */
+
+    	if ( nDice0 == nDice1 ) {
+    	  rEqDouble -= 72.0;
+	  nDoubledOut += 36;
+    	}
+    	else {
+    	  rEqDouble -= 144.0;
+	  nDoubledOut += 72;
+    	}
+	
+    	continue; /* next roll */
+
+      } 
+
+      nFactor0 = ( nDice0 == nDice1 ) ? 1 : 2;
+
+      /* now continue with opponents roll */
+
+      for ( nDice2 = 1; nDice2 <= 6; nDice2++ ) { 
+    	for ( nDice3 = 1; nDice3 <= nDice2; nDice3++ ) { 
+
+	  nFactor1 = nFactor0 * ( ( nDice2 == nDice3 ) ? 1 : 2 ); 
+
+	  memcpy( anBoardNew1, anBoardNew0, sizeof ( anBoardNew1 ) ); 
+	  
+	  FindBestMove ( 0, anMove, nDice2, nDice3, anBoardNew1 );
+	  
+	  SwapSides ( anBoardNew1 );
+
+	  EvaluatePosition( anBoardNew1, arOutput, 
+			    (nPlies > 1) ? nPlies-2 : 0 );
+	  
+	  rEq = Utility( arOutput );
+	  
+	  if ( fCubeOwner == fMove ) {
+
+	    /* 
+	     * I own the cube again. This means that the 
+	     * opponent had a automatic redouble, ie.
+	     * the cube is dead and worthless to me.
+	     */
+
+	    assert ( FALSE );
+	    rEqDouble += nFactor1 * rEq;
+	    
+	  } 
+	  else {
+
+	    /* 
+	     * Opponent owns cube.
+	     * - If my equity is less that my drop point
+	     *   on a recube the opponent will double me out.
+	     * - Otherwise add equity for opponent holding
+	     *   cube.
+	     */
+
+	    if ( rEq < rMyDropPointRecube )
+	      rEqDouble -= nFactor1 * 2;
+	    else 
+	      rEqDouble += nFactor1 * ( 2.0 * rEq - ( 0.5 * ( -rEq ) +
+						      0.5  ) );
+	      
+	  }
+
+	} /* nDice3 */
+      } /* nDice2 */
+    } /* nDice1 */
+  } /* nDice0 */
+
+  SetCube ( nOldCube, fOldCubeOwner );
+
+  /* transfer result */
+
   arDouble[ 0 ] = rEqNoDouble / 1296.0;
   arDouble[ 1 ] = rEqDouble / 1296.0;
   arDouble[ 2 ] = nMarketLoosers;
   arDouble[ 3 ] = nDoubledOut;
+
+  return 0;
 
 }
