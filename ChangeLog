@@ -1,3 +1,9 @@
+Sat Apr 12 14:40:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (MoveListShowToggled): allow only one move to be
+	selected with the Show button is active
+	(suggested by Ian Shaw)
+
 Sat Apr 12 14:21:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseMatMove): handle illegal moves in .mat files

@@ -304,6 +304,20 @@ MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
 
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
   int c = CheckHintButtons ( phd );
+  GtkWidget *pwMoves = phd->pwMoves;
+
+
+  /* allow only one move to be selected when "Show" is active */
+
+  if ( f )
+    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
+				  GTK_SELECTION_SINGLE );
+  else
+    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
+				  GTK_SELECTION_MULTIPLE );
+
+
+  c = CheckHintButtons( phd );
 
   if ( f && c == 1 )
     ShowMove ( phd, TRUE );
