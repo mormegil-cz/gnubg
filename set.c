@@ -459,11 +459,21 @@ extern void CommandSetAppearance( char *sz ) {
 		 "interface." );
 }
 
-extern void CommandSetConfirm( char *sz ) {
+extern void CommandSetConfirmNew( char *sz ) {
     
-    SetToggle( "confirm", &fConfirm, sz, "Will ask for confirmation before "
+    SetToggle( "confirm new", &fConfirm, sz, 
+               "Will ask for confirmation before "
 	       "aborting games in progress.", "Will not ask for confirmation "
 	       "before aborting games in progress." );
+}
+
+extern void CommandSetConfirmSave( char *sz ) {
+    
+    SetToggle( "confirm save", &fConfirmSave, sz, 
+               "Will ask for confirmation before "
+	       "overwriting existing files.", 
+               "Will not ask for confirmation "
+	       "overwriting existing files." );
 }
 
 extern void CommandSetCubeCentre( char *sz ) {

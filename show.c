@@ -365,6 +365,14 @@ extern void CommandShowConfirm( char *sz ) {
     else
 	outputl( "GNU Backgammon will not ask for confirmation "
 	       "before aborting games in progress." );
+
+    if( fConfirmSave )
+	outputl( "GNU Backgammon will ask for confirmation before "
+	       "overwriting existing files." );
+    else
+	outputl( "GNU Backgammon will not ask for confirmation "
+	       "overwriting existing files." );
+
 }
 
 extern void CommandShowCopying( char *sz ) {

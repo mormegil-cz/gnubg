@@ -1,3 +1,23 @@
+Sun May 12 12:46:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Ask for confirmation before overwriting existing files.
+
+	* gtkgame.c: update GUI with new confirm commands.
+	* gnubg.c: new commands "set confirm new on|off" (identical to old "set confirm on|off")
+	and "set confirm save on|off".
+	* gnubg.c (confirmOverwrite): new function: ask for confirmation if file exists.
+	* set.c (CommandSetConfirmNew, CommandSetConfirmSave): new commands.
+	* show.c (CommandShowConfirm): outout new confirm setting.
+
+	* gnubg.c (CommandSaveWeights, CommandExportGameGam, CommandExportMatchGam): 
+	call confirmOverwrite.
+	* sgf.c (CommandSaveMatch, CommandSaveGame): call confirmOverwrite.
+	* html.c (CommandExportPositionHtml, CommandExportGameHtml, CommandExportMatchHtml):
+	call confirmOverwrite.
+	* latex.c (CommandExportGameLaTeX, CommandExportMatchLaTeX): call confirmOverwrite.
+	* postscript.c (ExportGameGeneral, ExportMatchGeneral, CommandExportPositionEPS):
+	call confirmOverwrite.
+
 Sun May 12 12:13:02 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* matchequity.c (getGammonPrice): hopefully the asserts shouldn't
