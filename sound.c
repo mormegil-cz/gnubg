@@ -92,6 +92,8 @@
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
+#if USE_SOUND
+
 #define MAX_SOUND_LENGTH 1048576
 
 char *aszSoundDesc[ NUM_SOUNDS ] = {
@@ -1299,3 +1301,4 @@ extern void SoundWait( void ) {
 	return;
     }
 }
+#endif

@@ -79,7 +79,7 @@ static char *Concatenate( list *pl ) {
     
     return sz;
 }
- 
+
 %}
 
 /* There are 2 shift/reduce conflicts caused by ambiguities at which level
@@ -171,7 +171,7 @@ extern list *SGFParse( FILE *pf ) {
     
     sgfin = pf;
     plCollection = NULL;
-    
+
     sgfparse();
 
     return plCollection;

@@ -113,7 +113,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "external.h"
 
 #ifdef WIN32
-#ifdef HAVE_SOCKETS
+#if HAVE_SOCKETS
 #include <winsock2.h>
 #endif
 #endif /* WIN32 */
@@ -4277,7 +4277,7 @@ Shutdown( void ) {
   PythonShutdown();
 #endif
 
-#ifdef HAVE_SOCKETS
+#if HAVE_SOCKETS
 #ifdef WIN32
   WSACleanup();
 #endif
@@ -4318,7 +4318,7 @@ extern void PromptForExit( void ) {
 		StopIdle3d(bd);
 	}
 #endif
-#ifdef HAVE_SOCKETS
+#if HAVE_SOCKETS
 	/* Close any open connections */
 	if( ap[0].pt == PLAYER_EXTERNAL )
 		closesocket( ap[0].h );
@@ -7974,7 +7974,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
                                   (void *) ChangeDisk );
 
 #ifdef WIN32
-#ifdef HAVE_SOCKETS
+#if HAVE_SOCKETS
 
 #if USE_GTK
     PushSplash ( pwSplash, 

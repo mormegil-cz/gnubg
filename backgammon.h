@@ -188,7 +188,7 @@ typedef enum _movetype {
     MOVE_TIME
 } movetype;
 
-#ifdef USE_TIMECONTROL
+#if USE_TIMECONTROL
 
 #include <time.h>
 #if HAVE_SYS_TIME_H

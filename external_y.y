@@ -56,9 +56,6 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 %token ON
 %token OFF
 
-%name-prefix="ext"
-%defines
-
 %%
 
 the_command    : /* empty */  

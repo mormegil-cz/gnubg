@@ -123,9 +123,9 @@ static void Disconnect(PyObject *r)
 
 extern int RelationalMatchExists()
 {
+  int ret = -1;
 #if USE_PYTHON
   PyObject *v, *r;
-  int ret;
 
   if (!(r = Connect()))
 	  return -1;
@@ -154,11 +154,10 @@ extern int RelationalMatchExists()
 
   Disconnect(r);
 
-  return ret;
-
 #else /* USE_PYTHON */
   outputl( _("This build was not compiled with support for Python.\n") );
 #endif /* !USE_PYTHON */
+  return ret;
 }
 
 extern void
