@@ -455,10 +455,26 @@ char *yytext;
 #line 2 "external_l.l"
 
 /*
- * command_l.l -- lexer for the command
+ * external_l.l -- lexer for external interface
  *
-* [insert GPL here]
+ * by Jørn Thyssen <jth@gnubg.org>, 2003.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
  */
+
 #include <string.h>
 
 #include "external_y.h"
@@ -466,7 +482,7 @@ char *yytext;
 int prc_lineno = 1;
 void escapes(const char *cp, char *tp);
 
-#line 470 "external_l.c"
+#line 486 "external_l.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -617,10 +633,10 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 21 "external_l.l"
+#line 37 "external_l.l"
 
 
-#line 624 "external_l.c"
+#line 640 "external_l.c"
 
 	if ( yy_init )
 		{
@@ -705,7 +721,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 23 "external_l.l"
+#line 39 "external_l.l"
 {
 			char buf[100];
 
@@ -718,7 +734,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 32 "external_l.l"
+#line 48 "external_l.l"
 {
 			char buf[100];
 
@@ -731,67 +747,67 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 43 "external_l.l"
+#line 59 "external_l.l"
 { return EVALUATION; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 44 "external_l.l"
+#line 60 "external_l.l"
 { return FIBSBOARD; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 45 "external_l.l"
+#line 61 "external_l.l"
 { return CUBEFUL; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 46 "external_l.l"
+#line 62 "external_l.l"
 { return CUBELESS; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 47 "external_l.l"
+#line 63 "external_l.l"
 { return CUBE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 48 "external_l.l"
+#line 64 "external_l.l"
 { return PLIES; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 49 "external_l.l"
+#line 65 "external_l.l"
 { return NOISE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 50 "external_l.l"
+#line 66 "external_l.l"
 { return REDUCED; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 51 "external_l.l"
+#line 67 "external_l.l"
 { return ON; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 52 "external_l.l"
+#line 68 "external_l.l"
 { return ON; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 53 "external_l.l"
+#line 69 "external_l.l"
 { return OFF; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 54 "external_l.l"
+#line 70 "external_l.l"
 { return OFF; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 56 "external_l.l"
+#line 72 "external_l.l"
 { 
 			char buf[100];
 
@@ -802,17 +818,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 65 "external_l.l"
+#line 81 "external_l.l"
 { prc_lineno++;	}   /* newline is ignored */
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 67 "external_l.l"
+#line 83 "external_l.l"
 { extlval.number = atoi(exttext); return NUMBER; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 69 "external_l.l"
+#line 85 "external_l.l"
 {
 			char buf[100];
 
@@ -823,15 +839,15 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 77 "external_l.l"
+#line 93 "external_l.l"
 ;	/* whitespace */
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 79 "external_l.l"
+#line 95 "external_l.l"
 ECHO;
 	YY_BREAK
-#line 835 "external_l.c"
+#line 851 "external_l.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1713,7 +1729,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 79 "external_l.l"
+#line 95 "external_l.l"
 
 
 void escapes(const char *cp, char *tp)

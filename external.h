@@ -64,8 +64,8 @@ extern int ExternalWrite( int h, char *pch, int cch );
 
 /* Parser functions */
 
-extern void ( *ExtErrorHandler )( char *szMessage, char *szNear, 
-                                  int fParseError );
+extern void ( *ExtErrorHandler )( const char *szMessage, const char *szNear, 
+                                  const int fParseError );
 
 #endif /* #if HAVE_SOCKETS */
 

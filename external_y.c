@@ -26,10 +26,26 @@
 
 #line 1 "external_y.y"
 
-  /*
-   * command_y.y -- command parser for gnubg server
-   *
-   */
+/*
+ * external_y.y -- command parser for external interface
+ *
+ * by Jørn Thyssen <jth@gnubg.org>, 2003.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -45,11 +61,11 @@ extcmd ec;
 
 static void reset_command();
 
-void ( *ExtErrorHandler )( char *, char *, int ) = NULL;
+void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 
 
   
-#line 26 "external_y.y"
+#line 42 "external_y.y"
 #ifndef YYSTYPE
 typedef union {
   int number;
@@ -126,9 +142,9 @@ static const short yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined. */
 static const short yyrline[] =
 {
-       0,    43,    44,    47,    48,    51,    56,    63,    69,    70,
-      73,    74,    75,    78,    79,    82,    83,    86,    87,    90,
-      91,    94,    97,    98,   101
+       0,    59,    60,    63,    64,    67,    72,    79,    85,    86,
+      89,    90,    91,    94,    95,    98,    99,   102,   103,   106,
+     107,   110,   113,   114,   117
 };
 #endif
 
@@ -917,13 +933,13 @@ yyreduce:
   switch (yyn) {
 
 case 5:
-#line 51 "external_y.y"
+#line 67 "external_y.y"
 {
   reset_command();
 }
     break;
 case 6:
-#line 56 "external_y.y"
+#line 72 "external_y.y"
 { 
   ec.ct = COMMAND_FIBSBOARD;
   g_free( ec.szFIBSBoard );
@@ -931,42 +947,42 @@ case 6:
 }
     break;
 case 7:
-#line 63 "external_y.y"
+#line 79 "external_y.y"
 { 
   g_free( ec.szFIBSBoard );
   ec.szFIBSBoard = g_strdup( yyvsp[0].sval );
 }
     break;
 case 8:
-#line 69 "external_y.y"
+#line 85 "external_y.y"
 { ec.nPlies = yyvsp[0].number; }
     break;
 case 10:
-#line 73 "external_y.y"
+#line 89 "external_y.y"
 { ec.fCubeful = TRUE; }
     break;
 case 11:
-#line 74 "external_y.y"
+#line 90 "external_y.y"
 { ec.fCubeful = FALSE; }
     break;
 case 13:
-#line 78 "external_y.y"
+#line 94 "external_y.y"
 { ec.fCubeful = TRUE; }
     break;
 case 15:
-#line 82 "external_y.y"
+#line 98 "external_y.y"
 { ec.fCubeful = FALSE; }
     break;
 case 17:
-#line 86 "external_y.y"
+#line 102 "external_y.y"
 { ec.rNoise = yyvsp[0].number; }
     break;
 case 19:
-#line 90 "external_y.y"
+#line 106 "external_y.y"
 { ec.nReduced = yyvsp[0].number; }
     break;
 case 24:
-#line 101 "external_y.y"
+#line 117 "external_y.y"
 { 
   ec.ct = COMMAND_EVALUATION;
 }
@@ -1204,7 +1220,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 106 "external_y.y"
+#line 122 "external_y.y"
 
 
 /* lexer interface */
@@ -1218,7 +1234,7 @@ exterror( const char *s ) {
   if ( ExtErrorHandler )
     ExtErrorHandler( s, exttext && exttext[ 0 ] ? exttext : "<EOT>", 1);
   else
-    fprintf( "Error: %s at %s\n", 
+    fprintf( stderr, "Error: %s at %s\n", 
              s, exttext && exttext[ 0 ] ? exttext : "<EOT>" );
 }
 

@@ -1,8 +1,24 @@
 %{
-  /*
-   * command_y.y -- command parser for gnubg server
-   *
-   */
+/*
+ * external_y.y -- command parser for external interface
+ *
+ * by Jørn Thyssen <jth@gnubg.org>, 2003.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ */
 
 #if HAVE_CONFIG_H
 #include "config.h"
@@ -18,7 +34,7 @@ extcmd ec;
 
 static void reset_command();
 
-void ( *ExtErrorHandler )( char *, char *, int ) = NULL;
+void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 
 
   %}
@@ -116,7 +132,7 @@ exterror( const char *s ) {
   if ( ExtErrorHandler )
     ExtErrorHandler( s, exttext && exttext[ 0 ] ? exttext : "<EOT>", 1);
   else
-    fprintf( "Error: %s at %s\n", 
+    fprintf( stderr, "Error: %s at %s\n", 
              s, exttext && exttext[ 0 ] ? exttext : "<EOT>" );
 }
 

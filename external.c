@@ -333,7 +333,8 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 
 
 static void
-ErrorHandler( char *szMessage, char *szNear, int fParseError ) {
+ErrorHandler( const char *szMessage, const char *szNear, 
+              const int fParseError ) {
 
   fError = TRUE;
 
