@@ -2596,6 +2596,18 @@ CommandRollout( char *sz ) {
 	} else
 	    c = 1; /* current position */
     }
+    else if ( rcRollout.fInitial ) {
+
+      if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) )
+        outputl ( "You cannot do a cube decision rollout for the initial"
+                  " position.\n"
+                  "Please 'set rollout initial off'." );
+      else
+        outputl ( "You cannot rollout moves as initial position.\n"
+                  "Please 'set rollout initial off'." );
+      
+      return;
+    }
 
     /* check for `rollout =cube' */    
     if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) ) {
@@ -2607,7 +2619,7 @@ CommandRollout( char *sz ) {
 	  outputl( "No game in progress." );
 	  return;
       }
-      
+
       GetMatchStateCubeInfo( &ci, &ms );
 
       GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
