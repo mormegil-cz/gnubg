@@ -1,3 +1,10 @@
+Wed Jul 17 01:10:56 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (BasicCubefulRollout): scale cubeful 
+	equities for money game cube rollouts.
+	* gtkgame.c (GTKRolloutUpdate): don't scale
+	cubeful equities for money game cube rollouts.
+
 Tue Jul 16 13:36:33 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c (board_init): Put the "stop" button in its own container,
