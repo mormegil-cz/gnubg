@@ -3747,20 +3747,20 @@ extern void CommandSaveSettings( char *szParam ) {
 
     for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
       if ( i == SKILL_NONE ) 
-        fprintf ( pf, "set export move unmarked %s\n", 
+        fprintf ( pf, "set export moves display unmarked %s\n", 
                   exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
       else
-        fprintf ( pf, "set export move %s %s\n", 
+        fprintf ( pf, "set export moves display %s %s\n", 
                   aszSkillTypeCommand[ i ], 
                   exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
     }
 
     for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
       if ( i == SKILL_NONE )
-        fprintf ( pf, "set export cube unmarked %s\n", 
+        fprintf ( pf, "set export cube display unmarked %s\n", 
                   exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
       else
-        fprintf ( pf, "set export cube %s %s\n", 
+        fprintf ( pf, "set export cube display %s %s\n", 
                   aszSkillTypeCommand[ i ], 
                   exsExport.afCubeDisplay[ i ] ? "yes" : "no" );
     }
