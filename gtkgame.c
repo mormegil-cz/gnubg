@@ -272,8 +272,10 @@ static char *aszCommands[ NUM_CMDS ] = {
     "xcopy"
 };
 
+#if ENABLE_TRAIN_MENU
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
+#endif
 static void EnterCommand( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw );
@@ -3761,6 +3763,8 @@ static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw ) {
 	free ( sz );
 }
 
+#if ENABLE_TRAIN_MENU
+
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = strdup ( PKGDATADIR "/gnubg.gdbm" );
@@ -3778,6 +3782,8 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
     free ( sz );
 
 }
+
+#endif /* ENABLE_TRAIN_MENU */
 
 typedef struct _evalwidget {
     evalcontext *pec;

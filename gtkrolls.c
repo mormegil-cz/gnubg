@@ -217,7 +217,6 @@ RollsTree ( const int n, evalcontext *pec, matchstate *pms ) {
 
   GtkTreeModel *pm;
   GtkWidget *ptv;
-  GtkTreeViewColumn *ptvc;
   int i;
   GtkCellRenderer *renderer;
   static char *aszColumn[] = {
@@ -285,8 +284,6 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   GtkWidget *pwDialog = CreateDialog( _("Distribution of rolls"),
                                       DT_INFO, NULL, NULL );
   GtkWidget *pw, *vbox, *hbox;
-  GtkAdjustment *padj;
-  GtkTreeModel *ptm;
 
   rollswidget *prw = g_malloc ( sizeof ( rollswidget ) );
 

@@ -70,6 +70,7 @@
 #include "isaac.h"
 #include "i18n.h"
 #include "external.h"
+#include "path.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -483,6 +484,9 @@ extern void InitRNGSeed( int n, const rng rngx ) {
 	/* no-op */
       break;
 
+    default:
+      break;
+
     }
 }
 
@@ -529,6 +533,10 @@ static void InitRNGSeedMP( mpz_t n, rng rng ) {
     case RNG_FILE:
 	/* no-op */
 	break;
+        
+    default:
+      break;
+
     }
 }
     
@@ -817,6 +825,9 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
 
       break;
 
+    default:
+      break;
+
     }
 
     return -1;
@@ -940,7 +951,7 @@ static int
 ReadDiceFile( void ) {
 
   unsigned char uch;
-  ssize_t n;
+  int n;
 
   while ( 1 ) {
   

@@ -4450,6 +4450,8 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
     case RNG_FILE:
         fprintf( pf, "%s rng file %s\n", sz, szDiceFilename );
 	break;
+    default:
+	break;
     }
 
 }
