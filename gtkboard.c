@@ -2107,26 +2107,31 @@ static void
 score_changed( GtkAdjustment *adj, BoardData *bd ) {
 
   gchar buf[ 32 ];
+  int nMatchLen = GTK_SPIN_BUTTON( bd->match )->adjustment->value;
 
-  bd->ascore0->upper = bd->ascore1->upper = 
-    bd->match_to ? bd->match_to : 65535;
+  if ((bd->match_to != nMatchLen) && (adj == bd->amatch)) {
+    /* reset limits for scores if match length is changed */
+    bd->ascore0->upper = bd->ascore1->upper =
+      (gfloat) (nMatchLen == 0) ? 65535 : nMatchLen;
+  }
+    
   gtk_adjustment_changed( bd->ascore0 );
   gtk_adjustment_changed( bd->ascore1 );
 	
-  if ( bd->match_to ) {
+  if ( nMatchLen ) {
 
-    if ( bd->score_opponent >= bd->match_to )
+    if ( bd->score_opponent >= nMatchLen )
       sprintf( buf, "%d (won match)", bd->score_opponent );
     else
       sprintf( buf, "%d (%d-away)", bd->score_opponent,
-               bd->match_to - bd->score_opponent );
+               nMatchLen - bd->score_opponent );
     gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
 
-    if ( bd->score >= bd->match_to )
+    if ( bd->score >= nMatchLen )
       sprintf( buf, "%d (won match)", bd->score );
     else
       sprintf( buf, "%d (%d-away)", bd->score,
-               bd->match_to - bd->score );
+               nMatchLen - bd->score );
     gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
 
   }
@@ -3235,6 +3240,11 @@ void board_edit( BoardData *bd ) {
             for ( i = 0; i < 2; ++i )
               if ( anScoreNew[ i ] > nMatchToNew )
                 anScoreNew[ i ] = 0;
+	  if ((bd->diceRoll[0] < 0) || (bd->diceRoll[1] < 0) ||
+	      (bd->diceRoll[0] > 6) || (bd->diceRoll[1] > 6)) {
+	    bd->diceRoll[0] = bd->diceRoll[1] = 0;
+	  }
+
           sz = g_strdup_printf( "set matchid %s", 
                                 MatchID(bd->diceRoll,
                                          ms.fTurn,

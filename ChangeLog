@@ -1,3 +1,10 @@
+Wed Oct 1 2003 16:37:22 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkboard.c - when changing the match length, update the limits
+	  on the score spinner. Also ensure the dice are valid or not 
+	  rolled. You can now increase the match length and then change a
+	  score to be greater than the old match length.	
+
 Tue Oct 1 9:38:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Fixed 2d board chequer shape setting.
