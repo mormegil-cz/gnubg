@@ -1,3 +1,9 @@
+Thu Feb  5 19:06:31 CET 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* progress.c (formatDelta): fix small bug leading to
+	gnubg thining that there is 60 hours/day.
+	(reported by Michael Depreli)
+
 Wed Feb 4 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* import.c (and minor changes in others) : Limit size of player
