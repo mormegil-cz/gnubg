@@ -2951,7 +2951,7 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
     GtkWidget *pwDialog, *pwEval;
     int fOK;
     
-    memcpy( &ec, &ecEval, sizeof ec );
+    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
 
     pwEval = EvalWidget( &ec, &fOK );
     
@@ -2974,7 +2974,7 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
     GTKAllowStdin();
 
     if( fOK )
-	SetEvalCommands( "set evaluation", &ec, &ecEval );
+	SetEvalCommands( "set evaluation", &ec, &esEvalChequer.ec );
 }
 
 typedef struct _playerswidget {
@@ -3027,7 +3027,7 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 			   "GNU Backgammon" ) );
 
     gtk_container_add( GTK_CONTAINER( pwPage ), ppw->apwEval[ i ] =
-		       EvalWidget( &ppw->ap[ i ].ec, NULL ) );
+		       EvalWidget( &ppw->ap[ i ].esChequer.ec, NULL ) );
     gtk_widget_set_sensitive( ppw->apwEval[ i ],
 			      ap[ i ].pt == PLAYER_GNU );
     
@@ -3151,7 +3151,7 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 		}
 		
 		sprintf( sz, "set player %d evaluation", i );
-		SetEvalCommands( sz, &apTemp[ i ].ec, &ap[ i ].ec );
+		SetEvalCommands( sz, &apTemp[ i ].ec, &ap[ i ].esChequer.ec );
 		break;
 		
 	    case PLAYER_PUBEVAL:
