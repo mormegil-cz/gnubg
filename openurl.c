@@ -53,12 +53,18 @@ OpenURL( const char *szURL ) {
 
   /* FIXME: implement other browsers */
 
+#ifdef __APPLE__
+#define BROWSERCOMMAND "open %s"
+#else
+#define BROWSERCOMMAND "mozilla \"%s\""
+#endif
+
 #if GTK_CHECK_VERSION(1,3,10)
 
   gchar *pchCommand;
   GError *error = NULL;
 
-  pchCommand = g_strdup_printf( "mozilla \"%s\"", szURL );
+  pchCommand = g_strdup_printf( BROWSERCOMMAND, szURL );
 
   if ( ! g_spawn_command_line_async( pchCommand, &error ) ) {
     outputerrf( _("Error launching browser: %s\n"), error->message );
@@ -71,7 +77,7 @@ OpenURL( const char *szURL ) {
 
    
   gchar *pchCommand;
-  pchCommand = g_strdup_printf( "mozilla \"%s\"", szURL );
+  pchCommand = g_strdup_printf( BROWSERCOMMAND, szURL );
 
   if ( system( pchCommand ) < 0 ) 
      outputerr( _("Error launching browser\n") );
