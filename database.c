@@ -419,7 +419,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	if( rThreshold ) {
 	    float ar[ NUM_OUTPUTS ], r0, r1;
 	    static evalcontext ec0 = { 0, FALSE, 0, 0, TRUE, 0.16, 0.0 },
-		ec1 = { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 };
+		ec1 = { 8, FALSE, 1, 0, TRUE, 0.16, 0.0 };
 		
 	    if( EvaluatePosition( anBoardGenerate, ar, &ciCubeless, &ec0 )
 		< 0 )

@@ -1,3 +1,9 @@
+Tue Nov 27 18:02:15 2001  Gary Wong  <gtw@research.att.com>
+
+	* database.c (CommandDatabaseGenerate): Fix wrong evalcontext
+	settings -- ec1 erroneously used 0-ply evaluation (reported by
+	Craig Campbell).
+
 Mon Nov 12 18:25:25 2001  Øystein Johansen <oeysteij@online.no>
 
         * gnubg.c (CommandSaveSettings): Avoid crash when saving settings
