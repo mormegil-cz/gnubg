@@ -1662,7 +1662,8 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 		else if (bd->drag_point == POINT_RIGHT && bd->turn != 1)
 			UserCommand( "set turn 1" );
 
-		bd->drag_point = -1;
+		/* Avoid dragging after selection causing pieces to appear */
+		bd->drag_point = -2;
 		GTKSetDice( NULL, 0, NULL );
 		return TRUE;
 	}
