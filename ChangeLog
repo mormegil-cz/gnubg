@@ -1,6 +1,12 @@
+Mon Sep 08 20:18:46 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* formatgs.c (formatGS): report cube errors as negative values
+	(reported by Scott Steiner)
+
 Mon Sep 08 18:45:56 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	classify cube decisions into 3 categories: around DP, CP and TG
+	(suggested by Jørn)
 
 	* analysis.c: rename getMarketWindowDividersMWC to
 	getMarketWindowDividersEq

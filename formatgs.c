@@ -271,8 +271,8 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
         for ( j = 0; j < 2; ++j ) 
           aasz[ j + 1 ] = cubeEntry( ai2[ i ][ j ],
-                                     af2[ j ][ i ][ 0 ],
-                                     af2[ j ][ i ][ 1 ],
+                                     -af2[ j ][ i ][ 0 ],
+                                     -af2[ j ][ i ][ 1 ],
                                      pms );
 
         list = g_list_append( list, aasz );
