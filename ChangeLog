@@ -1,3 +1,7 @@
+Sat Nov 30 21:15:31 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* configure.in: change check for gnuplot and png*.
+
 Sat Nov 30 17:13:18 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtktexi.c: declare xsaxScan static to avoid polution of namespace.

@@ -36,9 +36,9 @@ AC_PROG_RANLIB
 AC_CHECK_PROG(BISON, bison, bison, true)
 AC_CHECK_PROG(CSOUND, csound, csound, true)
 AC_CHECK_PROG(FLEX, flex, flex, true)
-AC_CHECK_PROG(GNUPLOT, gnuplot, gnuplot)
-AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm)
-AC_CHECK_PROG(PNMTOPS, pnmtops, pnmtops)
+AC_CHECK_PROG(GNUPLOT, gnuplot, gnuplot, $MISSING gnuplot)
+AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm, $MISSING pngtopnm )
+AC_CHECK_PROG(PNMTOPS, pnmtops, pnmtops, $MISSING pnmtops )
 AC_CHECK_PROG(SRCONV, srconv, srconv, true)
 AC_CHECK_PROG(TR, tr, tr)
 

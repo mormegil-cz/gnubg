@@ -3009,6 +3009,7 @@ do
 done
 done
 
+  test -z "$ac_cv_prog_GNUPLOT" && ac_cv_prog_GNUPLOT="$MISSING gnuplot"
 fi
 fi
 GNUPLOT=$ac_cv_prog_GNUPLOT
@@ -3044,6 +3045,7 @@ do
 done
 done
 
+  test -z "$ac_cv_prog_PNGTOPNM" && ac_cv_prog_PNGTOPNM="$MISSING pngtopnm "
 fi
 fi
 PNGTOPNM=$ac_cv_prog_PNGTOPNM
@@ -3079,6 +3081,7 @@ do
 done
 done
 
+  test -z "$ac_cv_prog_PNMTOPS" && ac_cv_prog_PNMTOPS="$MISSING pnmtops "
 fi
 fi
 PNMTOPS=$ac_cv_prog_PNMTOPS
