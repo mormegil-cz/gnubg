@@ -33,6 +33,7 @@
 #include "relational.h"
 #include "backgammon.h"
 #include "positionid.h"
+#include "rollout.h"
 
 #if USE_PYTHON
 
