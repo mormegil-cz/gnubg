@@ -1,3 +1,23 @@
+Thu Feb  7 23:00:28 2002 Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* export.h: fix typo.
+
+	* html.c (printImage): add new parameter for alt attribute.
+	Change all callers. 
+
+	* html.c (printHTMLBoard): Controlling the alt attribute makes
+	output readable in lynx browser -- thanks to Stein Kulseth.
+
+	* html.c (HTMLPrintCubeAnalysis, HTMLPrintMoveAnalysis):
+	new routines: print analysis. The former is not implemented yet,
+	whereas the latter is.
+
+	* html.c (HTMLDumpStatcontext): new routine. Write statistics.
+
+	* html.c (ExportGameHTML): new routine: export game in html.
+
+	* html.c (CommandExportPosHTML): remove some debugging output.
+
 Thu Feb  7 14:24:26 2002  Gary Wong  <gtw@research.att.com>
 
 	* play.c (ComputerTurn): Fix error checking bug after dropped cubes,
