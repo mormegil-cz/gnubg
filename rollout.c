@@ -34,6 +34,9 @@
 #include <string.h>
 #include <assert.h>
 #include <time.h>
+#if PROCESSING_UNITS
+#include <signal.h>
+#endif
 
 #include "backgammon.h"
 #include "dice.h"

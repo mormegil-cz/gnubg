@@ -1,3 +1,8 @@
+Mon Jun  9 19:21:12 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* procunits.c: various small fixes.
+	* rollout.c: include "signal.h"
+
 Wed Jun  4 20:18:36 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* configure.in, Makefile.am: autoconf magic for gthread.

@@ -216,7 +216,7 @@ static int GetProcessorCount (void)
         /* try _NPROCESSORS_ONLN from sysconf */
 
         if ( ( i = sysconf( _SC_NPROCESSORS_ONLN ) ) > 0 )
-          i = cProcessors;
+          cProcessors = i;
 
         /* other ideas? */
 
@@ -1351,9 +1351,11 @@ static int RPU_PackWrite (char *data, int size)
     #if __BIG_ENDIAN__
         memcpy (p, data, size);
     #else
+    {
         int i;
         for (i = size - 1; i >= 0; i --) 
             *(p ++) = data[i];
+    }
     #endif
     
     THREADGLOBAL(gPackedDataPos) += size;
@@ -1593,7 +1595,7 @@ static int RPU_PackRead (char *dst, int size)
     #else
         int i;
         for (i = size - 1; i >= 0; i --) 
-            dst[i] = THREADGLOBAL(gPackedData)[THREADGLOBAL(gPackedDataPos) ++];
+            dst[i] = THREADGLOBAL(gpPackedData)[THREADGLOBAL(gPackedDataPos) ++];
     #endif
 
     return size;
@@ -1984,11 +1986,12 @@ static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_i
 
 static int RPU_CheckClose (int s)
 {
-    rpu_message msg;;
+    rpu_message msg;
+    int n;
     
     if (RPU_DEBUG_NOTIF) fprintf (stderr, "[checking close]");
     
-    int n = recv (s, &msg, sizeof (msg), MSG_PEEK);
+    n = recv (s, &msg, sizeof (msg), MSG_PEEK);
     
     if (n > 0 && msg.type == mmClose) {
         if (RPU_DEBUG_NOTIF) fprintf (stderr, ">>> Connection closed by slave.\n");
@@ -3161,12 +3164,13 @@ extern void CommandProcunitsAddLocal( char *sz )
 
 extern void CommandProcunitsAddRemote( char *sz ) 
 {    
+    procunit *ppu;
     if (sz == NULL) {
         outputf ( "Remote processing unit address not specified.\n");
         return;
     }
     
-    procunit *ppu = CreateRemoteProcessingUnit (sz, TRUE);
+    ppu = CreateRemoteProcessingUnit (sz, TRUE);
     if (ppu == NULL)
         outputf ("Remote processing unit could not be created.\n");
     else {
