@@ -1078,15 +1078,15 @@ static void DeleteMessage ( void ) {
 #endif
 }
 
-#if !USE_OLD_LAYOUT
 static void DeleteAnalysis( void ) {
 
   fAnalysis = FALSE;
+#if !USE_OLD_LAYOUT
   gtk_widget_hide ( pwAnalysis->parent );
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Analysis")), FALSE);
-}
 #endif
+}
 
 static GtkWidget *CreateMessageWindow( void ) {
 
@@ -1363,14 +1363,14 @@ static void ShowMessage( void ) {
 #endif
 }
 
-#if !USE_OLD_LAYOUT
 static void ShowAnalysis( void ) {
     fAnalysis = TRUE;
+#if !USE_OLD_LAYOUT
     gtk_widget_show_all( pwAnalysis->parent );
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Analysis")), TRUE);
-}
 #endif
+}
 
 static int AddMoveRecordRow( void ) {
 
