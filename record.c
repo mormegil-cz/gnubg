@@ -220,6 +220,15 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
     
     sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
 
+#ifdef WIN32
+    /* experiment */
+    if ( unlink ( sz ) ) {
+      outputerr ( sz );
+      free ( pchOut );
+      return -1;
+    }
+#endif
+
     if( rename( pchOut, sz ) ) {
 	outputerr( sz );
 	free( pchOut );

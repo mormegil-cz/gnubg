@@ -1,3 +1,9 @@
+Mon Sep 30 22:20:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* record.c (RecordWrite): unlink file before renaming.
+	Hopefully this should fix or shed more light on the problem
+	reported by Albert Silver and Ned Cross.
+
 Thu Sep 26 09:29:27 2002  Gary Wong  <gtw@gnu.org>
 
 	* html.c (printHTMLBoardBBS): Reverse point colours for bottom
