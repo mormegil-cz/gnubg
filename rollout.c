@@ -953,19 +953,19 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                           0, i, prc->nTrials );
         else
 	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aciLocal, afCubeDecTop, cci, prc,
+                               0, i, aci, afCubeDecTop, cci, prc,
                                aarsStatistics );
         break;
       case BASIC:
 	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aciLocal, afCubeDecTop, cci, prc,
+                               0, i, aci, afCubeDecTop, cci, prc,
                                aarsStatistics );
 	  break;
       case VARREDN:
 
         if ( ! prc->fCubeful )
 	  VarRednRollout( *aanBoardEval, *aar, prc->nTruncate,
-                          0, i, cGames, &aciLocal[ 0 ],
+                          0, i, cGames, &aci[ 0 ],
                           &prc->aecChequer[ 0 ] );
         else
         /* FIXME: write me
@@ -980,18 +980,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
       
       for ( ici = 0; ici < cci ; ici++ ) {
 
-        if( fInvert ) {
-
-	  InvertEvaluation( aar[ ici ] );
-          if ( aciLocal[ ici ].nMatchTo )
-            aar[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
-              1.0 - aar [ ici ][ OUTPUT_CUBEFUL_EQUITY ];
-          else
-            aar[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
-
-        }
-
         aar[ ici ][ OUTPUT_EQUITY ] = Utility ( aar[ ici ], &aci [ ici ]);
+
+
+        if( fInvert ) InvertEvaluationR( aar[ ici ], &aci[ ici ] );
+
       
         for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
 	  float rMuNew, rDelta;
@@ -1025,7 +1018,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #if USE_GTK
 	if( fX ) 
 	      GTKRolloutUpdate( aarMu, aarSigma, i, cGames,
-                                prc->fCubeful, cci, aci );
+                                prc->fCubeful, cci, aciLocal );
 	  else
 #endif
 	      {

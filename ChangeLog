@@ -1,3 +1,11 @@
+Fri Jan 25 20:21:51 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (GeneralRollout): yet another bugfix... this time
+  	rollouts should finally be working :-)
+
+	* gnubg.c (CommandRollout): remove inversion of matchscore. 
+	Why was this done in the first place anyway?
+
 Thu Jan 24 21:06:07 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (RolloutGeneral): calculate cubeles equity with aci instead
