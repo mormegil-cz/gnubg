@@ -400,7 +400,9 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
 
     CopyAppearance(&rd);
     rd.nSize = ptmw->nSizeDie = nSizeDie;
-
+#if USE_BOARD3D
+    Copy3dDiceColour(&rd);
+#endif
     
     for (  i = 0; i < 2; ++i ) {
       g_free( ptmw->achDice[ i ] );

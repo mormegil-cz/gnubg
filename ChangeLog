@@ -1,3 +1,8 @@
+Thu May  6 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtktempmap.c, gtkboard.c: Show correct dice colour in temperture
+	map when in 3d
+
 Mon May  3 15:20:43 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* osr.c, dice.c: add mti as parameter to init_genrand.

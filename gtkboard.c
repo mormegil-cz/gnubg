@@ -4255,6 +4255,25 @@ extern void DestroySetDice(GtkObject *po, GtkWidget *pw)
 	gtk_widget_destroy(pw);
 }
 
+#if USE_BOARD3D
+extern void Copy3dDiceColour(renderdata* prd)
+{
+	if (prd->fDisplayType == DT_3D)
+	{
+		int i, j;
+		for (j = 0; j < 4; j++)
+		{
+			for (i = 0; i < 2; i++)
+			{
+				prd->aarColour[i][j] = prd->ChequerMat[i].ambientColour[j];
+				prd->aarDiceColour[i][j] = prd->DiceMat[i].ambientColour[j];
+				prd->aarDiceDotColour[i][j] = prd->DiceDotMat[i].ambientColour[j];
+			}
+		}
+	}
+}
+#endif
+
 extern GtkWidget *board_dice_widget( Board *board )
 {
 	GtkWidget *pw = gtk_table_new( 6, 6, TRUE ), *pwDice;
@@ -4268,19 +4287,7 @@ extern GtkWidget *board_dice_widget( Board *board )
 	CopyAppearance(&rd);
 	rd.nSize = setSize;
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D)
-	{
-		int i, j;
-		for (j = 0; j < 4; j++)
-		{
-			for (i = 0; i < 2; i++)
-			{
-				rd.aarColour[i][j] = bd->rd->ChequerMat[i].ambientColour[j];
-				rd.aarDiceColour[i][j] = bd->rd->DiceMat[i].ambientColour[j];
-				rd.aarDiceDotColour[i][j] = bd->rd->DiceDotMat[i].ambientColour[j];
-			}
-		}
-	}
+	Copy3dDiceColour(&rd);
 #endif
 	TTachDice[ 0 ] = malloc(diceStride * setSize * DIE_HEIGHT);
 	TTachDice[ 1 ] = malloc(diceStride * setSize * DIE_HEIGHT);
