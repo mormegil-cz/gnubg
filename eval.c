@@ -6087,7 +6087,7 @@ EvaluatePositionCubeful2( int anBoard[ 2 ][ 25 ],
     alloca( cci * NUM_ROLLOUT_OUTPUTS * sizeof float );
   cubeinfo ( *aciOpp ) = alloca ( cci * sizeof cubeinfo );
 #else
-  float aar[ 10 ][ NUM_ROLLOUTS_OUTPUTS ];
+  float aar[ 10 ][ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo aciOpp[ 10 ];
 #endif
 
