@@ -311,10 +311,10 @@ player ap[ 2 ] = {
 
 windowgeometry awg[ NUM_WINDOWS ] =
   { 
-    { 0, 0, -1, -1 },  /* main */
-    { 250, 200, -1, -1 },    /* game list */
-    { 0, 400, -1, -1 },      /* annotation */
-    { 0, 0, -1, -1 }         /* hint */
+    { 0, 0, 20, 20 },  /* main */
+    { 250, 200, 20, 20 },    /* game list */
+    { 0, 400, 20, 20 },      /* annotation */
+    { 0, 0, 20, 20 }         /* hint */
   };
 
 

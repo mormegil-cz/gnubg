@@ -1,3 +1,8 @@
+Mon Aug 12 14:13:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c: change default location for windows to (20,20), 
+	otherwise the window decorations are hidden.
+
 Mon Aug 12 13:54:44 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (StatcontextGetSelection): add newline.
