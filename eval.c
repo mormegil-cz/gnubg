@@ -2967,7 +2967,7 @@ Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
 
 
 extern float 
-mwc2eq ( float rMwc, cubeinfo *pci ) {
+mwc2eq ( const float rMwc, const cubeinfo *pci ) {
 
   /* mwc if I win/lose */
 
@@ -3006,7 +3006,7 @@ mwc2eq ( float rMwc, cubeinfo *pci ) {
 }
 
 extern float 
-eq2mwc ( float rEq, cubeinfo *pci ) {
+eq2mwc ( const float rEq, const cubeinfo *pci ) {
 
   /* mwc if I win/lose */
 

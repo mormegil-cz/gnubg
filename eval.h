@@ -332,10 +332,10 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 		  int fOutputMWC, int fOutputInvert );
 
 extern float
-mwc2eq ( float rMwc, cubeinfo *ci );
+mwc2eq ( const float rMwc, const cubeinfo *ci );
 
 extern float
-eq2mwc ( float rEq, cubeinfo *ci );
+eq2mwc ( const float rEq, const cubeinfo *ci );
  
 extern float
 se_mwc2eq ( const float rMwc, const cubeinfo *ci );
