@@ -1,3 +1,8 @@
+Sun Apr 13 09:51:12 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c: add and rephrase some menu entries in order to
+	avoid confusion between snowie .txt and snowie standard text.
+
 Sun Apr 13 12:41:40 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* eval.c (ScoreMoves): Restore incremental eval of NN by keeping a

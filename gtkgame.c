@@ -2239,7 +2239,9 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL, ImportSGG, 0, NULL },
 	{ N_("/_File/_Import/._TrueMoneyGames .tmg match..."), 
           NULL, ImportTMG, 0, NULL },
-	{ N_("/_File/_Import/._Snowie .txt file..."), 
+	{ N_("/_File/_Import/._Snowie standard text format..."), 
+          NULL, ImportMat, 0, NULL },
+	{ N_("/_File/_Import/._Snowie .txt position file..."), 
           NULL, ImportSnowieTxt, 0, NULL },
 	{ N_("/_File/_Export"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Game"), NULL, NULL, 0, "<Branch>" },
@@ -3511,7 +3513,7 @@ static void ImportTMG( gpointer *p, guint n, GtkWidget *pw ) {
 static void ImportSnowieTxt( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SNOWIE_TXT ); 
-  FileCommand( _("Import Snowie .txt"), sz, "import snowietxt", 
+  FileCommand( _("Import Snowie .txt position"), sz, "import snowietxt", 
                "snowietxt", 0 );
   if ( sz ) 
     free ( sz );
