@@ -655,12 +655,12 @@ for this roll is to make your 5 point.  The command to do that is:
 @end example
 
 @noindent
-in the terminal window (i.e.@: move one chequer from your 8 point to your 5
-point, and move another from your 6 to your 5 point); or by dragging
-each chequer to the destination point with mouse button 1 in the board
-window.  Click mouse button 1 on the dice to indicate you have finished
-your move (just as you would pick up your dice to end your move if you
-were playing on a real board).
+in the terminal window (i.e.@: move one chequer from your 8 point to
+your 5 point, and move another from your 6 to your 5 point); or by
+dragging each chequer to the destination point in the board window.
+Click mouse button 1 on the dice to indicate you have finished your move
+(just as you would pick up your dice to end your move if you were
+playing on a real board).
 
 Once you have done that, @gnubg{} will take its turn, rolling 63 and playing
 24/15.  It is now your move again:
@@ -1142,17 +1142,17 @@ the same thing as @code{move bar 20 24 20}, for instance.
 
 FIXME document `=n' notation.
 
-If you are using a window system, you can also move chequers using
-the board window.  One way to do this is to use mouse button 1 to drag
-a chequer (that is, press the button when the pointer is over the
-chequer you wish to move; move the pointer to the point you wish to
-play it to, and then release the button).
+If you are using a window system, you can also move chequers using the
+board window.  One way to do this is to use any mouse button to drag a
+chequer (that is, press the button when the pointer is over the chequer
+you wish to move; move the pointer to the point you wish to play it to,
+and then release the button).
 
-An alternative is to click buttons 2 or 3 on the chequer; button 2 will
-move it by the number of pips showing on the left die, and button 3 will
-move it according to the right die.  If you don't like the order the
-dice are displayed in, pressing either button 2 or 3 on the dice will
-swap their positions.
+An alternative is to click a mouse button on the chequer; button 1 will
+move it by the number of pips showing on the left die, and any other
+button will move it according to the right die.  If you don't like the
+order the dice are displayed in, pressing either button 2 or 3 on the
+dice will swap their positions.
 
 Whichever method you use to move the chequers, once you have made a legal
 move you can end your turn by clicking mouse button 1 on the dice.
@@ -1691,9 +1691,9 @@ move; you should enter the moves for each chequer as pairs of numbers.
 For instance, if you have rolled 3 and 1, you could type @kbd{8 5 6 5}
 to move one chequer from the 8 point to the 5 point and another from the
 6 point to the 5 point.  Use @kbd{bar} to move from the bar, and
-@kbd{off} to bear off.  If you are using the board window, you can
-also drag chequers around the board with mouse button 1.  Click on the
-dice when you have finished.
+@kbd{off} to bear off.  If you are using the board window, you can also
+drag chequers around the board.  Click on the dice when you have
+finished.
 
 @node gnubg.bd errors
 @section I only see @samp{gnubg.bd: No such file or directory}.  What's wrong?

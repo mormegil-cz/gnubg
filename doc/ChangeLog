@@ -1,3 +1,7 @@
+Wed Sep 19 11:19:56 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.texi: Adjust documentation to suit updated mouse handling.
+
 Mon Mar 12 11:09:45 2001  Gary Wong  <gtw@research.att.com>
 
 	* annealing.gp: New file.
