@@ -426,6 +426,8 @@ command acAnalyse[] = {
 }, acSetAnalysisThreshold[] = {
     { "bad", CommandSetAnalysisThresholdBad, "Specify the equity loss for a "
       "bad move", szVALUE, NULL },
+    { "doubtful", CommandSetAnalysisThresholdDoubtful, 
+      "Specify the equity loss for a doubtful move", szVALUE, NULL },
     { "good", CommandSetAnalysisThresholdGood, "Specify the equity gain for a "
       "good move", szVALUE, NULL },
     { "lucky", CommandSetAnalysisThresholdLucky, "Specify the equity gain for "

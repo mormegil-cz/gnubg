@@ -230,6 +230,10 @@ static void SetSkillThreshold( char *szCommand, skilltype lt, char *sz ) {
     outputf( "`%s' threshold set to %.3f.\n", szCommand, r );
 }
 
+extern void CommandSetAnalysisThresholdDoubtful( char *sz ) {
+
+    SetSkillThreshold( "bad", SKILL_BAD, sz );
+}
 extern void CommandSetAnalysisThresholdBad( char *sz ) {
 
     SetSkillThreshold( "bad", SKILL_BAD, sz );

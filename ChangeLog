@@ -1,4 +1,12 @@
-Sat Oct 27 22:52:07 CEST 2001
+Sun Oct 28 11:20:29 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	All entries below relates to the fact that is was not possible to set/show
+	the threshold for "doubtful" moves/cube actions.
+
+	* set.c (CommandSetAnalysisThresholdDoubtful): new function. 
+	* show.c (CommandShowAnalysis): show threshold for doubtful moves.
+
+Sat Oct 27 22:52:07 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (ComputerTurn): bug fix for gnubg's reply to beavers. Reported by
 	John Chuang.
