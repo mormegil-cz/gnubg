@@ -3606,7 +3606,7 @@ void RestrictiveDrawMoveIndicator(BoardData* bd)
 
 void RestrictiveDrawBoardNumbers(BoardData* bd)
 {
-#define NUMBER_WIDTH (TOTAL_WIDTH - (2 * TRAY_WIDTH) + ARROW_SIZE)
+#define NUMBER_WIDTH (TOTAL_WIDTH - (2 * TRAY_WIDTH))
 	float pos[3] = {TRAY_WIDTH + (NUMBER_WIDTH / 2.0f), TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT / 2.0f), BASE_DEPTH + EDGE_DEPTH};
 	float textHeight = getFontHeight(bd);
 

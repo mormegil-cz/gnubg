@@ -2568,7 +2568,7 @@ static gint board_set( Board *board, const gchar *board_text,
 		{
 			if (rdAppearance.fDynamicLabels)
 				RestrictiveDrawBoardNumbers(bd);
-			else if (bd->showMoveIndicator)
+			if (bd->showMoveIndicator)
 				RestrictiveDrawMoveIndicator(bd);
 		}
 #endif

@@ -1106,6 +1106,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 		ShowFlag3d(bd);
 		if (bd->diceShown == DICE_ON_BOARD)
 			setDicePos(bd);	/* Make sure dice appear ok */
+		RestrictiveRedraw();
 	}
 	else
 	{
