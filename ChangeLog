@@ -1,3 +1,26 @@
+Sat Jun 15 19:09:12 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Export in text format.
+
+	* gnubg.c: new commands "export {game,match,position} text".
+	* gnubg.c (GetLuckAnalysis): static -> extern.
+	* gnubg.c: new command "set path text".
+	* set.c (CommandSetPathText): new function.
+	* show.c (CommandShowPath): show text path.
+	* text.c: new file. Export in text format.
+	* html.c (getGameNumber, getMoveNumber, HTMLFilename): static ->
+	extern. 
+	* html.c, analysis.c (getLuckRating): move from html.c to analysis.c
+	* analysis.c (DumpStatcontext): show luck rating.
+	* gtkgame.c (ExportGameText, ExportMatchText, ExportPositionText,
+	ExportSessionText): new functions.
+	* gtkgame.c (GTKShowPath): show text path.
+	* gnubg.c (getDefaultPath): bugfix. Don't add trailing slash if
+	already present.
+	* text.c (CommandExport{Game,Match,Position}Text): call
+	setDefaultFileName. 
+	* text.c (CommandExportPositionText): check that plLastMove is valid.
+
 Sat Jun 15 11:53:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* drawboard.c (FIBSBoard): unmarked string that does not need 
