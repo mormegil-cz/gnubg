@@ -2087,3 +2087,19 @@ CommandShowCheat( char *sz ) {
   PrintCheatRoll( 1, afCheatRoll[ 1 ] );
 
 }
+
+
+extern void
+CommandShowCubeEfficiency( char *sz ) {
+
+
+  outputf( _("Parameters for cube evaluations:\n"
+             "Cube efficiency for crashed positions           : %7.4f\n"
+             "Cube efficiency for context positions           : %7.4f\n"
+             "Cube efficiency for one sided bearoff positions : %7.4f\n"
+             "Cube efficiency for race: x = pips * %.5f + %.5f\n"
+             "(min value %.4f, max value %.4f)\n"),
+           rCrashedX, rContactX, rOSCubeX,
+           rRaceFactorX, rRaceCoefficientX, rRaceMin, rRaceMax );
+
+}

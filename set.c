@@ -4241,3 +4241,83 @@ CommandSetGotoFirstGame( char *sz ) {
              _("Goto last game when loading matches or sessions.") );
 
 }
+
+
+static void
+SetEfficiency( const char *szText, char *sz, float *prX ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r >= 0.0f && r <= 1.0f ) {
+    *prX = r;
+    outputf( "%s: %7.5f\n", szText, *prX );
+  }
+  else
+    outputl( _("Cube efficiency must be between 0 and 1") );
+
+}
+
+extern void
+CommandSetCubeEfficiencyOS( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency for one sided bearoff positions"), 
+                 sz, &rOSCubeX );
+
+}
+
+extern void
+CommandSetCubeEfficiencyCrashed( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency for crashed positions"), sz, &rCrashedX );
+
+}
+
+extern void
+CommandSetCubeEfficiencyContact( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency for contact positions"), sz, &rContactX );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceFactor( char *sz ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r >= 0 ) {
+    rRaceFactorX = r;
+    outputf( _("Cube efficiency race factor set to %7.5f\n"), rRaceFactorX );
+  }
+  else
+    outputl( _("Cube efficiency race factor must be larger than 0.") );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceMax( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency race max"), sz, &rRaceMax );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceMin( char *sz ) {
+
+  SetEfficiency( _("Cube efficiency race min"), sz, &rRaceMin );
+
+}
+
+extern void
+CommandSetCubeEfficiencyRaceCoefficient( char *sz ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r >= 0 ) {
+    rRaceCoefficientX = r;
+    outputf( _("Cube efficiency race coefficienct set to %7.5f\n"), 
+             rRaceCoefficientX );
+  }
+  else
+    outputl( _("Cube efficiency race coefficient must be larger than 0.") );
+
+}
