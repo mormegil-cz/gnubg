@@ -1,3 +1,7 @@
+Tue Mar 27 14:31:17 2001  Gary Wong  <gtw@research.att.com>
+
+	* external.c (CommandExternal): Fix bugs handling anBoard.
+
 Mon Mar 26 10:31:04 2001  Gary Wong  <gtw@research.att.com>
 
 	* set.c (CommandSetAnnotation): New function.

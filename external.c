@@ -138,8 +138,9 @@ extern void CommandExternal( char *sz ) {
     struct sockaddr_un saun;
     char szCommand[ 256 ], szResponse[ 32 ];
     char szName[ 32 ], szOpp[ 32 ];
-    int anBoard[ 2 ][ 25 ], nMatchTo, anScore[ 2 ], anDice[ 2 ],
-	nCube, fCubeOwner, fDoubled, fTurn, fCrawford, anMove[ 8 ];
+    int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
+	anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
+	anMove[ 8 ];
     cubeinfo ci;
     
     if( !sz || !*sz ) {
@@ -201,18 +202,18 @@ extern void CommandExternal( char *sz ) {
 	    outputl( "Warning: badly formed board from external controller." );
 	else {
 	    /* FIXME check if this is a double/take/resign decision */
-	    
-	    if( !fTurn )
-		SwapSides( anBoard );
+	    /* FIXME could SwapSides( anBoard ) be necessary? */
 	    
 	    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
 			  fCrawford, fJacoby, fBeavers );
+
+	    memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
 	    
 	    if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
 			      anBoard, &ci, &ecEval ) < 0 )
 		break;
 
-	    FormatMove( szResponse, anBoard, anMove );
+	    FormatMove( szResponse, anBoardOrig, anMove );
 	    strcat( szResponse, "\n" );
 	    
 	    if( ExternalWrite( hPeer, szResponse, strlen( szResponse ) ) )
