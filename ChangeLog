@@ -1,3 +1,15 @@
+Mon Feb 11 20:05:46 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	This check-in moves the update of statcontext into
+	a subroutine. This is to allow the implementation of
+	routines that update the statcontext of a game/match/session
+	without redoing the analysis.
+
+	* analysis.c (updateStatcontext): new function. Update
+	statcontext for given move.
+
+	* analysis.c (AnalyseMove): use updateStatcontext.
+
 Fri Feb  8 17:25:31 2002  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (ClassifyPosition): Reintroduce code which coped if
