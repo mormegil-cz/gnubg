@@ -1,3 +1,10 @@
+Tue Mar 3  15:28:15 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c - fix EvalWidget to display the actual reduction
+	  values. Someone needs to have a second look at the whole
+	  approach of the menus with one item skipped, this is a hack
+	  on not the nicest of code
+
 Mon Mar  3 20:14:05 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Rename fNackgammon into a enum bgvariation
