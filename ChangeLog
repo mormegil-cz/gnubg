@@ -1,3 +1,9 @@
+Wed Mar 21 10:20:08 2001  Gary Wong  <gtw@research.att.com>
+
+	* credits.sh, credits.sh: New files.
+	* show.c (CommandShowEngine, CommandShowVersion): New functions.
+	* gtkgame.c (GTKShowVersion): New function.
+
 Tue Mar 20 10:15:02 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (GTKDelay): Fix stupid bug in yesterday's delay code.

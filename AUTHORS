@@ -1,5 +1,3 @@
-$Id$
-
                          GNU Backgammon was written by:
 
   Joseph Heled         Øystein Johansen         Jørn Thyssen         Gary Wong
@@ -8,37 +6,23 @@ $Id$
 
          Contributors (of bug reports, comments, and patches) include:
 
-                                 Eric Augustine
-                                  Steve Baedke
-                                 Bill Davidson
-                                  Eric Groleau
-                                 Jeff Haferman
-                                  Alain Henry
-                                 Jens Hoefkens
-                                Corrin Lakeland
-                                 Kevin Maguire
-                                David Montgomery
-                                   Dave Neary
-                                Zvezdan Petkovic
-                                 Petri Pitkänen
-                                   Sam Pottle
-                                  Jared Riley
-                                 Frank Worrell
+    Eric Augustine          Jens Hoefkens           Petri Pitkänen
+    Steve Baedke            Corrin Lakeland         Sam Pottle
+    Bill Davidson           Kevin Maguire           Jared Riley
+    Eric Groleau            David Montgomery        Frank Worrell
+    Jeff Haferman           Dave Neary
+    Alain Henry             Zvezdan Petkovic
 
 
   Credit is also due to those who have published information about backgammon
    playing programs (references will appear here later).  GNU Backgammon has
                               borrowed ideas from:
 
-                                 Hans Berliner
-                                  Chuck Bower
-                                 Rick Janowski
-                                David Montgomery
-                                 Brian Sheppard
-                                 Gerry Tesauro
-                                  Michael Zehr
+    Hans Berliner           David Montgomery        Michael Zehr
+    Chuck Bower             Brian Sheppard
+    Rick Janowski           Gerry Tesauro
 
-                                        
+       
     The manual for GNU Backgammon includes a chapter describing the rules of
       backgammon, written by Tom Keith for his Backgammon Galore web site
                              <http://www.bkgm.com/>.

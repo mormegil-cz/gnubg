@@ -159,6 +159,8 @@ extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
                 char *szDatabase, char *szDir, int nSize, int fProgress );
 
+extern void EvalStatus( char *szOutput );
+
 extern int EvalNewWeights( int nSize );
 
 extern int 

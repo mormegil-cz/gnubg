@@ -88,6 +88,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc );
 
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
+typedef void ( *classstatusfunc )( char *szOutput );
 typedef int ( *cfunc )( const void *, const void * );
 
 /* Race inputs */
@@ -254,6 +255,7 @@ static int anEscapes1[ 0x1000 ];
 
 static neuralnet nnContact, nnBPG, nnRace;
 static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
+static int fBearoffHeuristic;
 static cache cEval;
 static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
@@ -621,11 +623,13 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    close( h );
 	}
 
-	if( pBearoff1 )
+	if( pBearoff1 ) {
 	    pBearoff2 = pBearoff1 + 54264 * 32 * 2;
-	else {
+	    fBearoffHeuristic = FALSE;
+	} else {
 	    pBearoff1 = HeuristicDatabase( fProgress );
 	    pBearoff2 = NULL;
+	    fBearoffHeuristic = TRUE;
 	}
     }
 
@@ -3664,6 +3668,56 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   return 0;
 }
 
+static void StatusBearoff2( char *sz ) {
+
+    if( !pBearoff2 )
+	return;
+
+    strcpy( sz, " * 2-sided bearoff database evaluator:\n"
+	    "   - up to 6 chequers (924 positions) per player.\n\n" );
+}
+
+static void StatusBearoff1( char *sz ) {
+
+    if( !pBearoff1 )
+	return;
+
+    sprintf( sz, " * 1-sided %sbearoff database evaluator:\n"
+	     "   - up to 6 points (54264 positions) per player.\n\n",
+	     fBearoffHeuristic ? "heuristic " : "" );
+}
+
+static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz ) {
+
+    sprintf( sz, " * %s neural network evaluator:\n"
+	     "   - %d inputs, %d hidden units, trained on %d positions.\n\n",
+	     szTitle, pnn->cInput, pnn->cHidden, pnn->nTrained );
+}
+
+static void StatusRace( char *sz ) {
+
+    StatusNeuralNet( &nnRace, "Race", sz );
+}
+
+static void StatusContact( char *sz ) {
+
+    StatusNeuralNet( &nnContact, "Contact", sz );
+}
+
+static classstatusfunc acsf[ N_CLASSES ] = {
+  NULL, StatusBearoff2, StatusBearoff1, StatusRace, StatusContact, NULL
+};
+
+extern void EvalStatus( char *szOutput ) {
+
+    int i;
+
+    *szOutput = 0;
+    
+    for( i = N_CLASSES - 1; i >= 0; i-- )
+	if( acsf[ i ] )
+	    acsf[ i ]( strchr( szOutput, 0 ) );
+}
 
 extern int 
 GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,

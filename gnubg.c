@@ -396,6 +396,8 @@ command acDatabase[] = {
       NULL },
     { "display", CommandShowDisplay, "Show whether the board will be updated "
       "on the computer's turn", NULL, NULL },
+    { "engine", CommandShowEngine, "Display the status of the evaluation "
+      "engine", NULL, NULL },
     { "evaluation", CommandShowEvaluation, "Display evaluation settings "
       "and statistics", NULL, NULL },
     { "gammonprice", CommandShowGammonPrice, "Show gammon price",
@@ -431,6 +433,8 @@ command acDatabase[] = {
     { "training", CommandShowTraining, "Display the training parameters",
       NULL, NULL },
     { "turn", CommandShowTurn, "Show which player is on roll", NULL, NULL },
+    { "version", CommandShowVersion, "Describe this version of GNU Backgammon",
+      NULL, NULL },
     { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
       "not have", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
@@ -505,6 +509,23 @@ command acDatabase[] = {
 }, cTop = { NULL, NULL, NULL, NULL, acTop };
 
 static char szCommandSeparators[] = " \t\n\r\v\f";
+
+char *aszVersion[] = {
+    "GNU Backgammon " VERSION,
+#if USE_GUILE
+    "Guile supported.",
+#endif
+#if HAVE_LIBGDBM
+    "Position databases supported.",
+#endif
+#if USE_GUI
+    "Window system supported.",
+#endif
+#if HAVE_SOCKETS
+    "External players supported.",
+#endif
+    NULL
+};
 
 extern char *NextToken( char **ppch ) {
 
@@ -2964,20 +2985,11 @@ static void usage( char *argv0 ) {
 }
 
 static void version( void ) {
-    
-    puts( "GNU Backgammon " VERSION );
-#if USE_GUILE
-    puts( "Guile supported." );
-#endif
-#if HAVE_LIBGDBM
-    puts( "Position databases supported." );
-#endif
-#if USE_GUI
-    puts( "Window system supported." );
-#endif
-#if HAVE_SOCKETS
-    puts( "External players supported." );
-#endif
+
+    char **ppch = aszVersion;
+
+    while( *ppch )
+	puts( *ppch++ );
 }
 
 static void real_main( void *closure, int argc, char *argv[] ) {

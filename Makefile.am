@@ -11,7 +11,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
-        guile.h import.c import.h external.c external.h
+        guile.h import.c import.h external.c external.h credits.c
 COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -61,13 +61,16 @@ distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
-	gnubg.gtkrc
+	gnubg.gtkrc credits.sh
 
 sgfp.h sgfp.c: sgf.y
 	$(BISON) -o $@ -p sgf -d $<
 
 sgfl.c: sgf.l
 	$(FLEX) -o$@ -Psgf $<
+
+credits.c AUTHORS: credits.sh
+	cd $(srcdir) && $(SHELL) ./credits.sh
 
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $< > $@

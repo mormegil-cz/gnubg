@@ -128,12 +128,14 @@ typedef enum _gnubgcommand {
     CMD_SET_TURN_0,
     CMD_SET_TURN_1,
     CMD_SHOW_COPYING,
+    CMD_SHOW_ENGINE,
     CMD_SHOW_GAMMONPRICE,
     CMD_SHOW_MARKETWINDOW,
     CMD_SHOW_MATCHEQUITYTABLE,
     CMD_SHOW_KLEINMAN,
     CMD_SHOW_PIPCOUNT,
     CMD_SHOW_THORP,
+    CMD_SHOW_VERSION,
     CMD_SHOW_WARRANTY,
     CMD_TAKE,
     CMD_TRAIN_DATABASE,
@@ -228,12 +230,14 @@ static char *aszCommands[ NUM_CMDS ] = {
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
     "show copying",
+    "show engine",
     "show gammonprice",
     "show marketwindow",
     "show matchequitytable",
     "show kleinman",
     "show pipcount",
     "show thorp",
+    "show version",
     "show warranty",
     "take",
     "train database",
@@ -1074,6 +1078,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
 	{ "/_Analyse/M_atch equity table", NULL, Command,
 	  CMD_SHOW_MATCHEQUITYTABLE, NULL },
+	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Analyse/Evaluation engine", NULL, Command,
+	  CMD_SHOW_ENGINE, NULL },
 	{ "/_Train", NULL, NULL, 0, "<Branch>" },
 	{ "/_Train/D_ump database", NULL, Command, CMD_DATABASE_DUMP, NULL },
 	{ "/_Train/_Generate database", NULL, Command, CMD_DATABASE_GENERATE,
@@ -1167,7 +1174,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Help/gnubg _Warranty", NULL, Command, CMD_SHOW_WARRANTY,
 	  NULL },
 	{ "/_Help/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Help/_About gnubg", NULL, NULL, 0, NULL }
+	{ "/_Help/_About gnubg", NULL, Command, CMD_SHOW_VERSION, NULL }
     };
     char sz[ PATH_MAX ], *pch = getenv( "HOME" );
 
@@ -1224,9 +1231,6 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	pif, "/Windows/Guile" ), FALSE );
 
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/Help/About gnubg" ), FALSE );
-    
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
     pwGrab = ( (BoardData *) BOARD( pwBoard )->board_data )->stop;
     
@@ -1299,12 +1303,24 @@ extern void RunGTK( void ) {
     gtk_main();
 }
 
+static void DestroyList( gpointer p ) {
+
+    *( (void **) p ) = NULL;
+}
+
 extern void ShowList( char *psz[], char *szTitle ) {
 
-    GtkWidget *pwDialog = gtk_dialog_new(), *pwList = gtk_list_new(),
+    static GtkWidget *pwDialog;
+    GtkWidget *pwList = gtk_list_new(),
 	*pwScroll = gtk_scrolled_window_new( NULL, NULL ),
 	*pwOK = gtk_button_new_with_label( "OK" );
 
+    if( pwDialog )
+	gtk_widget_destroy( pwDialog );
+
+    pwDialog = gtk_dialog_new();
+    gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyList, &pwDialog );
+    
     while( *psz )
 	gtk_container_add( GTK_CONTAINER( pwList ),
 			   gtk_list_item_new_with_label( *psz++ ) );
@@ -2961,6 +2977,140 @@ extern void GTKShowMatchEquityTable( int n ) {
     GTKAllowStdin();
 }
 
+#if WIN32
+static char *ToUTF8( unsigned char *sz ) {
+
+    static unsigned char szOut[ 128 ], *pch;
+
+    for( pch = szOut; *sz; sz++ )
+	if( *sz < 0x80 )
+	    *pch++ = *sz;
+	else {
+	    *pch++ = 0xC0 | ( *sz >> 6 );
+	    *pch++ = 0x80 | ( *sz & 0x3F );
+	}
+
+    *pch = 0;
+
+    return szOut;
+}
+#define TRANS(x) ToUTF8(x)
+#else
+#define TRANS(x) (x)
+#endif
+
+static void DestroyAbout( gpointer p ) {
+
+    *( (void **) p ) = NULL;
+}
+
+extern void GTKShowVersion( void ) {
+
+    static GtkWidget *pwDialog;
+    GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 ),
+	*pwHBox = gtk_hbox_new( FALSE, 8 ),
+	*pwPrompt = gtk_label_new( "GNU Backgammon" ),
+	*pwList = gtk_list_new(),
+	*pwScrolled = gtk_scrolled_window_new( NULL, NULL ),
+	*pwButton;
+    GtkRcStyle *ps = gtk_rc_style_new();
+    int i;
+    static char *aszAuthors[] = { "Joseph Heled", "Øystein Johansen",
+				  "Jørn Thyssen", "Gary Wong" };
+    extern char *aszCredits[];
+
+    if( pwDialog )
+	gtk_widget_destroy( pwDialog );
+    
+    pwDialog = CreateDialog( "About GNU Backgammon", FALSE,
+			     NULL, NULL );
+    gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyAbout, &pwDialog );
+
+    gtk_container_set_border_width( GTK_CONTAINER( pwBox ), 4 );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwBox );
+
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt, FALSE, FALSE, 0 );
+    ps->font_name = g_strdup( "-*-times-medium-r-normal-*-64-*-*-*-p-*-"
+			      "iso8859-1" );
+    gtk_widget_modify_style( pwPrompt, ps );
+    gtk_rc_style_unref( ps );
+    
+    gtk_box_pack_start( GTK_BOX( pwBox ),
+			gtk_label_new( "version " VERSION ), FALSE, FALSE, 0 );
+
+    ps = gtk_rc_style_new();
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
+			gtk_label_new( "Copyright 1999, 2000, 2001 "
+				       "Gary Wong" ), FALSE, FALSE, 4 );
+    ps->font_name = g_strdup( "-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-"
+			      "iso8859-1" );
+    gtk_widget_modify_style( pwPrompt, ps );
+
+    for( i = 1; aszVersion[ i ]; i++ ) {
+	gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
+			    gtk_label_new( aszVersion[ i ] ),
+			    FALSE, FALSE, 0 );
+	gtk_widget_modify_style( pwPrompt, ps );
+    }
+    
+    gtk_box_pack_start( GTK_BOX( pwBox ),
+			gtk_label_new( "GNU Backgammon was written by:" ),
+			FALSE, FALSE, 8 );
+    
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwHBox, FALSE, FALSE, 0 );
+
+    for( i = 0; i < 4; i++ )
+	gtk_container_add( GTK_CONTAINER( pwHBox ),
+			   gtk_label_new( TRANS( aszAuthors[ i ] ) ) );
+    
+    gtk_box_pack_start( GTK_BOX( pwBox ),
+			gtk_label_new( "With special thanks to:" ),
+			FALSE, FALSE, 8 );
+
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwHBox = gtk_hbox_new( FALSE, 0 ),
+			TRUE, TRUE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( pwHBox ), pwScrolled, TRUE, FALSE, 0 );
+    gtk_widget_set_usize( pwScrolled, 200, 100 );
+    gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScrolled ),
+					   pwList );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
+				    GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
+    
+    for( i = 0; aszCredits[ i ]; i++ ) {
+	gtk_container_add( GTK_CONTAINER( pwList ),
+			   gtk_list_item_new_with_label(
+			       TRANS( aszCredits[ i ] ) ) );
+    }
+
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt = gtk_label_new(
+	"GNU Backgammon is free software, covered by the GNU General Public "
+	"License version 2, and you are welcome to change it and/or "
+	"distribute copies of it under certain conditions.  There is "
+	"absolutely no warranty for GNU Backgammon." ), FALSE, FALSE, 4 );
+    gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
+    gtk_widget_modify_style( pwPrompt, ps );
+    gtk_rc_style_unref( ps );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
+		       pwButton = gtk_button_new_with_label(
+			   "Copying conditions" ) );
+    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+			GTK_SIGNAL_FUNC( CommandShowCopying ), NULL );
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
+		       pwButton = gtk_button_new_with_label(
+			   "Warranty" ) );
+    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+			GTK_SIGNAL_FUNC( CommandShowWarranty ), NULL );
+    
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+
+    gtk_widget_show_all( pwDialog );
+}
+
 static void UpdateToggle( gnubgcommand cmd, int *pf ) {
 
     GtkWidget *pw = gtk_item_factory_get_widget_by_action( pif, cmd );
@@ -3088,6 +3238,8 @@ extern void GTKSet( void *p ) {
 			 gs == GAME_PLAYING );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_SHOW_ENGINE ), TRUE );
 	
 	fAutoCommand = FALSE;
     } else if( p == &fCrawford )
