@@ -1,7 +1,7 @@
 /*
  * gnubg.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998-1999.
+ * by Gary Wong <gary@cs.arizona.edu>, 1998, 1999, 2000.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -113,204 +113,238 @@ player ap[ 2 ] = {
     { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, TRUE } }
 };
 
-static command acDatabase[] = {
+/* Usage strings */
+static char szDICE[] = "<die> <die>",
+    szFILENAME[] = "<filename>",
+    szLENGTH[] = "<length>",
+    szLIMIT[] = "<limit>",
+    szMILLISECONDS[] = "<milliseconds>",
+    szMOVE[] = "<from> <to> ...",
+    szONOFF[] = "on|off",
+    szOPTCOMMAND[] = "[command]",
+    szOPTPOSITION[] = "[position]",
+    szOPTSEED[] = "[seed]",
+    szPLAYER[] = "<player>",
+    szPLIES[] = "<plies>",
+    szPOSITION[] = "<position>",
+    szPROMPT[] = "<prompt>",
+    szSCORE[] = "<score>",
+    szSEED[] = "<seed>",
+    szSIZE[] = "<size>",
+    szTRIALS[] = "<trials>",
+    szVALUE[] = "<value>";
+
+command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
-      NULL },
+      NULL, NULL },
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
-      "self-play", NULL },
+      "self-play", NULL, NULL },
     { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
-      "for future training", NULL },
+      "for future training", NULL, NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "
-      "positions", NULL },
-    { NULL, NULL, NULL, NULL }
+      "positions", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acNew[] = {
     { "game", CommandNewGame, "Start a new game within the current match or "
-      "session", NULL },
+      "session", NULL, NULL },
     { "match", CommandNewMatch, "Play a new match to some number of points",
+      szLENGTH, NULL },
+    { "session", CommandNewSession, "Start a new (money) session", NULL,
       NULL },
-    { "session", CommandNewSession, "Start a new (money) session", NULL },
-    { NULL, NULL, NULL, NULL }
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSave[] = {
     { "game", CommandSaveGame, "Record a log of the game so far to a "
-      "file", NULL },
+      "file", szFILENAME, NULL },
     { "match", CommandSaveMatch, "Record a log of the match so far to a file",
-      NULL },
+      szFILENAME, NULL },
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
-      NULL },
-    { NULL, NULL, NULL, NULL }
+      szFILENAME, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
-      "chequers as possible", NULL },
+      "chequers as possible", szONOFF, NULL },
     { "crawford", CommandSetAutoCrawford, "Enable the Crawford game "
-      "based on match score", NULL },
+      "based on match score", szONOFF, NULL },
     { "doubles", CommandSetAutoDoubles, "Control automatic doubles "
-      "during (money) session play", NULL },
+      "during (money) session play", szLIMIT, NULL },
     { "game", CommandSetAutoGame, "Select whether to start new games "
-      "after wins", NULL },
+      "after wins", szONOFF, NULL },
     { "move", CommandSetAutoMove, "Select whether forced moves will be "
-      "made automatically", NULL },
+      "made automatically", szONOFF, NULL },
     { "roll", CommandSetAutoRoll, "Control whether dice will be rolled "
-      "automatically", NULL },
-    { NULL, NULL, NULL, NULL }
+      "automatically", szONOFF, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetCube[] = {
     { "center", CommandSetCubeCentre, "The U.S.A. spelling of `centre'",
-      NULL },
+      NULL, NULL },
     { "centre", CommandSetCubeCentre, "Allow both players access to the "
-      "cube", NULL },
+      "cube", NULL, NULL },
     { "owner", CommandSetCubeOwner, "Allow only one player to double",
+      szPLAYER, NULL },
+    { "use", CommandSetCubeUse, "Control use of the doubling cube", szONOFF,
       NULL },
-    { "use", CommandSetCubeUse, "Enable use of the doubling cube", NULL },
-    { "value", CommandSetCubeValue, "Fix what the cube has been set to",
-      NULL },
+    { "value", CommandSetCubeValue, "Fix what the cube stake has been set to",
+      szVALUE, NULL },
     { NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
-      "congruential) generator", NULL },
+      "congruential) generator", szOPTSEED, NULL },
     { "bsd", CommandSetRNGBsd, "Use the BSD random() non-linear additive "
-      "feedback generator", NULL },
-    { "isaac", CommandSetRNGIsaac, "Use the I.S.A.A.C. generator", NULL },
-    { "manual", CommandSetRNGManual, "Enter all dice rolls manually", NULL },
-    { "mersenne", CommandSetRNGMersenne, "Use the Mersenne Twister generator",
+      "feedback generator", szOPTSEED, NULL },
+    { "isaac", CommandSetRNGIsaac, "Use the I.S.A.A.C. generator", szOPTSEED,
       NULL },
-    { "user", CommandSetRNGUser, "Specify an external generator", NULL },
-    { NULL, NULL, NULL, NULL }
+    { "manual", CommandSetRNGManual, "Enter all dice rolls manually", NULL,
+      NULL },
+    { "mersenne", CommandSetRNGMersenne, "Use the Mersenne Twister generator",
+      szOPTSEED, NULL },
+    { "user", CommandSetRNGUser, "Specify an external generator", szOPTSEED,
+      NULL,},
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetRollout[] = {
     { "evaluation", CommandSetRolloutEvaluation, "Specify parameters "
-      "for evaluation during rollouts", NULL },
+      "for evaluation during rollouts", NULL, acSetEvaluation },
     { "seed", CommandNotImplemented, "Specify the base pseudo-random seed "
-      "to use for rollouts", NULL },
+      "to use for rollouts", szSEED, NULL },
     { "trials", CommandSetRolloutTrials, "Control how many rollouts to "
-      "perform", NULL },
+      "perform", szTRIALS, NULL },
     { "truncation", CommandSetRolloutTruncation, "End rollouts at a "
-      "particular depth", NULL },
+      "particular depth", szPLIES, NULL },
     { "varredn", CommandSetRolloutVarRedn, "Use lookahead during rollouts "
-      "to reduce variance", NULL },
+      "to reduce variance", szONOFF, NULL },
     /* FIXME add commands for cubeful rollouts, cube variance reduction,
        quasi-random dice, settlements... */
-    { NULL, NULL, NULL, NULL }
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSet[] = {
     { "automatic", NULL, "Perform certain functions without user input",
-      acSetAutomatic },
+      NULL, acSetAutomatic },
     { "board", CommandSetBoard, "Set up the board in a particular "
-      "position", NULL },
-    { "cache", CommandSetCache, "Set the size of the evaluation cache", NULL },
+      "position", szPOSITION, NULL },
+    { "cache", CommandSetCache, "Set the size of the evaluation cache",
+      szSIZE, NULL },
     { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
-      "a game in progress", NULL },
+      "a game in progress", szONOFF, NULL },
     { "crawford", CommandSetCrawford, 
-      "Set whether this is the Crawford game", NULL },
-    { "cube", NULL, "Set the cube owner and/or value", acSetCube },
+      "Set whether this is the Crawford game", szONOFF, NULL },
+    { "cube", NULL, "Set the cube owner and/or value", NULL, acSetCube },
     { "delay", CommandSetDelay, "Limit the speed at which moves are made",
-      NULL },
+      szMILLISECONDS, NULL },
     { "dice", CommandSetDice, "Select the roll for the current move",
-      NULL },
+      szDICE, NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
-      "the computer's turn", NULL },
+      "the computer's turn", szONOFF, NULL },
     { "evaluation", CommandSetEvaluation, "Control position evaluation "
-      "parameters", NULL },
-    { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in"
-      "money game", NULL },
-    { "nackgammon", CommandSetNackgammon, "Set the starting position", NULL },
+      "parameters", NULL, acSetEvaluation },
+    { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
+      "money games", szONOFF, NULL },
+    { "nackgammon", CommandSetNackgammon, "Set the starting position",
+      szONOFF, NULL },
     { "player", CommandSetPlayer, "Change options for one or both "
-      "players", NULL },
+      "players", szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
-      "Set whether this is post-Crawford games", NULL },
+      "Set whether this is a post-Crawford game", szONOFF, NULL },
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
-      "ready for commands", NULL },
-    { "rng", NULL, "Select the random number generator algorithm", acSetRNG },
-    { "rollout", NULL, "Control rollout parameters", acSetRollout },
+      "ready for commands", szPROMPT, NULL },
+    { "rng", NULL, "Select the random number generator algorithm", NULL,
+      acSetRNG },
+    { "rollout", NULL, "Control rollout parameters", NULL, acSetRollout },
     { "score", CommandSetScore, "Set the match or session score ",
-      NULL },
-    { "seed", CommandSetSeed, "Set the dice generator seed", NULL },
-    { "turn", CommandSetTurn, "Set which player is on roll", NULL },
-    { NULL, NULL, NULL, NULL }
+      szSCORE, NULL },
+    { "seed", CommandSetSeed, "Set the dice generator seed", szSEED, NULL },
+    { "turn", CommandSetTurn, "Set which player is on roll", szPLAYER, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acShow[] = {
     { "automatic", CommandShowAutomatic, "List which functions will be "
-      "performed without user input", NULL },
-    { "board", CommandShowBoard, "Redisplay the board position", NULL },
+      "performed without user input", NULL, NULL },
+    { "board", CommandShowBoard, "Redisplay the board position", szOPTPOSITION,
+      NULL },
     { "cache", CommandShowCache, "Display statistics on the evaluation "
-      "cache", NULL },
+      "cache", NULL, NULL },
     { "confirm", CommandShowConfirm, "Show whether confirmation is required "
-      "before aborting a game in progress", NULL },
+      "before aborting a game in progress", NULL, NULL },
     { "copying", CommandShowCopying, "Conditions for redistributing copies "
-      "of GNU Backgammon", NULL },
+      "of GNU Backgammon", NULL, NULL },
     { "crawford", CommandShowCrawford, 
-      "See if this is the Crawford game", NULL },
+      "See if this is the Crawford game", NULL, NULL },
     { "cube", CommandShowCube, "Display the current cube value and owner",
-      NULL },
+      NULL, NULL },
     { "delay", CommandShowDelay, "See what the current delay setting is", 
-              NULL },
-    { "dice", CommandShowDice, "See what the current dice roll is", NULL },
-    { "display", CommandShowDisplay, "Show whether the board will be updated "
-      "on the computer's turn", NULL },
-    { "evaluation", CommandShowEvaluation, "Display evaluation settings "
-      "and statistics", NULL },
-    { "jacoby", CommandShowJacoby, 
-      "See if the Jacoby rule is used in money sessions", NULL },
-    { "kleinman", CommandShowKleinman, "Calculate Kleinman count at "
-      "current position", NULL },
-    { "nackgammon", CommandShowNackgammon, "Display which starting position "
-      "will be used", NULL },
-    { "pipcount", CommandShowPipCount, "Count the number of pips each player "
-      "must move to bear off", NULL },
-    { "player", CommandShowPlayer, "View per-player options", NULL },
-    { "postcrawford", CommandShowCrawford, 
-      "See if this is post-Crawford play", NULL },
-    { "prompt", CommandShowPrompt, "Show the prompt that will be printed "
-      "when ready for commands", NULL },
-    { "rng", CommandShowRNG, "Display which random number generator "
-      "is being used", NULL },
-    { "rollout", CommandShowRollout, "Display the evaluation settings used "
-      "during rollouts", NULL },
-    { "score", CommandShowScore, "View the match or session score ",
+      NULL, NULL },
+    { "dice", CommandShowDice, "See what the current dice roll is", NULL,
       NULL },
-    { "thorp", CommandShowThorp, "Calculate Thorp Count at current"
-      " position", NULL },
-    { "turn", CommandShowTurn, "Show which player is on roll", NULL },
+    { "display", CommandShowDisplay, "Show whether the board will be updated "
+      "on the computer's turn", NULL, NULL },
+    { "evaluation", CommandShowEvaluation, "Display evaluation settings "
+      "and statistics", NULL, acSetEvaluation },
+    { "jacoby", CommandShowJacoby, 
+      "See if the Jacoby rule is used in money sessions", NULL, NULL },
+    { "kleinman", CommandShowKleinman, "Calculate Kleinman count for "
+      "position", szOPTPOSITION, NULL },
+    { "nackgammon", CommandShowNackgammon, "Display which starting position "
+      "will be used", NULL, NULL },
+    { "pipcount", CommandShowPipCount, "Count the number of pips each player "
+      "must move to bear off", szOPTPOSITION, NULL },
+    { "player", CommandShowPlayer, "View per-player options", NULL, NULL },
+    { "postcrawford", CommandShowCrawford, 
+      "See if this is post-Crawford play", NULL, NULL },
+    { "prompt", CommandShowPrompt, "Show the prompt that will be printed "
+      "when ready for commands", NULL, NULL },
+    { "rng", CommandShowRNG, "Display which random number generator "
+      "is being used", NULL, NULL },
+    { "rollout", CommandShowRollout, "Display the evaluation settings used "
+      "during rollouts", NULL, NULL },
+    { "score", CommandShowScore, "View the match or session score ",
+      NULL, NULL },
+    { "thorp", CommandShowThorp, "Calculate Thorp Count for "
+      "position", szOPTPOSITION, NULL },
+    { "turn", CommandShowTurn, "Show which player is on roll", NULL, NULL },
     { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
-      "not have", NULL },
-    { NULL, NULL, NULL, NULL }    
+      "not have", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }    
 }, acTrain[] = {
     { "database", CommandDatabaseTrain, "Train the network from a database of "
-      "positions", NULL },
+      "positions", NULL, NULL },
     { "td", CommandTrainTD, "Train the network by TD(0) zero-knowledge "
-      "self-play", NULL },
-    { NULL, NULL, NULL, NULL }
+      "self-play", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acTop[] = {
     { "accept", CommandAccept, "Accept a cube or resignation",
+      NULL, NULL },
+    { "agree", CommandAgree, "Agree to a resignation", NULL, NULL },
+    { "beaver", CommandRedouble, "Synonym for `redouble'", NULL, NULL },
+    { "database", NULL, "Manipulate a database of positions", NULL,
+      acDatabase },
+    { "decline", CommandDecline, "Decline a resignation", NULL, NULL },
+    { "double", CommandDouble, "Offer a double", NULL, NULL },
+    { "drop", CommandDrop, "Decline an offered double", NULL, NULL },
+    { "eval", CommandEval, "Display evaluation of a position", szOPTPOSITION,
       NULL },
-    { "agree", CommandAgree, "Agree to a resignation", NULL },
-    { "beaver", CommandRedouble, "Synonym for `redouble'", NULL },
-    { "database", NULL, "Manipulate a database of positions", acDatabase },
-    { "decline", CommandDecline, "Decline a resignation", NULL },
-    { "double", CommandDouble, "Offer a double", NULL },
-    { "drop", CommandDrop, "Decline an offered double", NULL },
-    { "eval", CommandEval, "Display evaluation of a position", NULL },
-    { "exit", CommandQuit, "Leave GNU Backgammon", NULL },
-    { "help", CommandHelp, "Describe commands", NULL },
+    { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
+    { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { "hint", CommandHint, "Show the best evaluations of legal "
-      "moves", NULL },
-    { "load", CommandNotImplemented, "Read data from a file", NULL },
-    { "move", CommandMove, "Make a backgammon move", NULL },
-    { "new", NULL, "Start a new game", acNew },
-    { "play", CommandPlay, "Force the computer to move", NULL },
-    { "quit", CommandQuit, "Leave GNU Backgammon", NULL },
-    { "r", CommandRoll, NULL, NULL },
+      "moves", NULL, NULL },
+    { "load", CommandNotImplemented, "Read data from a file", NULL, NULL },
+    { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
+    { "new", NULL, "Start a new game, match or session", NULL, acNew },
+    { "play", CommandPlay, "Force the computer to move", NULL, NULL },
+    { "quit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
+    { "r", CommandRoll, NULL, NULL, NULL },
     { "redouble", CommandRedouble, "Accept the cube one level higher "
-      "than it was offered", NULL },
-    { "reject", CommandReject, "Reject a cube or resignation", NULL },
-    { "resign", CommandResign, "Offer to end the current game", NULL },
-    { "roll", CommandRoll, "Roll the dice", NULL },
-    { "rollout", CommandRollout, "Have gnubg perform rollouts of a position",
+      "than it was offered", NULL, NULL },
+    { "reject", CommandReject, "Reject a cube or resignation", NULL, NULL },
+    { "resign", CommandResign, "Offer to end the current game", szVALUE,
       NULL },
-    { "save", NULL, "Write data to a file", acSave },
-    { "set", NULL, "Modify program parameters", acSet },
-    { "show", NULL, "View program parameters", acShow },
-    { "take", CommandTake, "Agree to an offered double", NULL },
-    { "train", NULL, "Update gnubg's weights from "
-      "training data", acTrain },
-    { "?", CommandHelp, "Describe commands", NULL },
-    { NULL, NULL, NULL, NULL }
-};
+    { "roll", CommandRoll, "Roll the dice", NULL, NULL },
+    { "rollout", CommandRollout, "Have gnubg perform rollouts of a position",
+      szOPTPOSITION, NULL },
+    { "save", NULL, "Write data to a file", NULL, acSave },
+    { "set", NULL, "Modify program parameters", NULL, acSet },
+    { "show", NULL, "View program parameters", NULL, acShow },
+    { "take", CommandTake, "Agree to an offered double", NULL, NULL },
+    { "train", NULL, "Update gnubg's weights from training data", NULL,
+      acTrain },
+    { "?", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, cTop = { NULL, NULL, NULL, NULL, acTop };
 
 static char szCommandSeparators[] = " \t\n\r\v\f";
 
@@ -439,32 +473,32 @@ static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
     int i = 0, c;
 
     do {
-	while( i < ich && isspace( sz[ i ] ) )
-	    i++;
+        while( i < ich && isspace( sz[ i ] ) )
+            i++;
 
-	if( i == ich )
-	    /* no command */
-	    return pc;
+        if( i == ich )
+            /* no command */
+            return pc;
 
-	c = strcspn( sz + i, szCommandSeparators );
+        c = strcspn( sz + i, szCommandSeparators );
 
-	if( i + c >= ich && !fDeep )
-	    /* incomplete command */
-	    return pc;
+        if( i + c >= ich && !fDeep )
+            /* incomplete command */
+            return pc;
 
-	while( pc && pc->sz ) {
-	    if( !strncasecmp( sz + i, pc->sz, c ) ) {
-		pc = pc->pc;
+        while( pc && pc->sz ) {
+            if( !strncasecmp( sz + i, pc->sz, c ) ) {
+                pc = pc->pc;
 
-		if( i + c >= ich )
-		    return pc;
-		
-		i += c;
-		break;
-	    }
+                if( i + c >= ich )
+                    return pc;
+                
+                i += c;
+                break;
+            }
 
-	    pc++;
-	}
+            pc++;
+        }
     } while( pc && pc->sz );
 
     return NULL;
@@ -880,26 +914,77 @@ extern void CommandEval( char *sz ) {
 	puts( szOutput );
 }
 
-extern void CommandHelp( char *sz ) {
+static command *FindHelpCommand( command *pcBase, char *sz,
+				 char *pchCommand, char *pchUsage ) {
 
     command *pc;
     char *pch;
-
-    /* FIXME show help for each command (not just those with subcommands) */
+    int cch;
     
-    for( pch = sz + strlen( sz ) - 1; pch >= sz && isspace( *pch ); pch-- )
-	*pch = 0;
+    if( !( pch = NextToken( &sz ) ) )
+	return pcBase;
 
-    if( !( pc = FindContext( acTop, sz, pch - sz + 1, TRUE ) ) ) {
+    cch = strlen( pch );
+
+    for( pc = pcBase->pc; pc && pc->sz; pc++ )
+	if( !strncasecmp( pch, pc->sz, cch ) )
+	    break;
+
+    if( !pc || !pc->sz )
+	return NULL;
+
+    pch = pc->sz;
+    while( *pch )
+	*pchCommand++ = *pchUsage++ = *pch++;
+    *pchCommand++ = ' '; *pchCommand = 0;
+    *pchUsage++ = ' '; *pchUsage = 0;
+
+    if( pc->szUsage ) {
+	pch = pc->szUsage;
+	while( *pch )
+	    *pchUsage++ = *pch++;
+	*pchUsage++ = ' '; *pchUsage = 0;	
+    }
+    
+    if( pc->pc )
+	/* subcommand */
+	return FindHelpCommand( pc, sz, pchCommand, pchUsage );
+    else
+	/* terminal command */
+	return pc;
+}
+
+extern void CommandHelp( char *sz ) {
+
+    command *pc;
+    char szCommand[ 128 ], szUsage[ 128 ];
+    
+    if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {
 	printf( "No help available for topic `%s' -- try `help' for a list of "
 		"topics.\n", sz );
 
 	return;
     }
-    
-    for( ; pc->sz; pc++ )
-	if( pc->szHelp )
-	    printf( "%-15s\t%s\n", pc->sz, pc->szHelp );
+
+    if( pc->szHelp ) {
+	printf( "%s- %s\n\nUsage: %s", szCommand, pc->szHelp,
+		szUsage );
+
+	if( pc->pc )
+	    puts( "<subcommand>\n" );
+	else
+	    putchar( '\n' );
+    }
+
+    if( pc->pc ) {
+	puts( pc == &cTop ? "Available commands:" : "Available subcommands:" );
+
+	pc = pc->pc;
+	
+	for( ; pc->sz; pc++ )
+	    if( pc->szHelp )
+		printf( "%-15s\t%s\n", pc->sz, pc->szHelp );
+    }
 }
 
 extern void CommandHint( char *sz ) {

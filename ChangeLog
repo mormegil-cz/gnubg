@@ -1,3 +1,12 @@
+Mon Jul 10 09:40:11 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c: Expanded "help" command.
+
+	* set.c (CommandSetDice): Allow dice to be entered without
+	space in between.
+	
+	* play.c (ComputerTurn): Don't add move to game if interrupted.
+
 Wed Jul  5 12:55:35 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (CommandShowGame): More work on saving.

@@ -21,7 +21,7 @@ duplication of effort and to make sure our changes merge easily.
   in the CVS repository for work on this.
 
 * Command interface:
-** Add more completions to help and readline.
+** Add more completions to readline.
 ** Allow timeouts for "train" (and others?).
 ** Add interactive rollouts.
 ** Load, save and analyse games and matches.
@@ -33,7 +33,6 @@ duplication of effort and to make sure our changes merge easily.
   words and pauses before scrolling (as in gdb).
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
   multiple moves (e.g. "8/7(2) 6/5(2)").
-** Finish "help" -- add detailed help for each command.
 ** Add undo, reroll, and viewing next/prev moves in game/match.  (Reroll
   is not really necessary, since "set turn <player>" will let them roll
   again.)
@@ -83,6 +82,8 @@ duplication of effort and to make sure our changes merge easily.
 ** If the exposed area in BoardRedraw() intersects a point but not the
   dice, the point will be redrawn -- but sometimes that will overwrite
   the dice, which then need updating.
+** The erroneous commands "set player both" and "set player both evaluation"
+  give poor error messages; "help r" doesn't do anything.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -105,3 +106,5 @@ duplication of effort and to make sure our changes merge easily.
 ** Add option to flip the board.
 ** Find someone who lives near London and wants to enter gnubg in the
   MSO Olympiad in August: <http://www.msoworld.com/Olympiad/computer.html>.
+** Move the built-in RNGs into lib/; they can then be used instead of
+  rand_r for better quality random numbers and improved portability.
