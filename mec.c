@@ -181,7 +181,7 @@ mec_pc( const float rGammonRate,
         const float rWinRate,
         float arMetPC[ MAXSCORE ] ) {
 
-  int i, j;
+  int i;
 
    /* match length */
 

@@ -3101,7 +3101,7 @@ HTMLPrintMI( FILE *pf, const char *szTitle, const char *sz ) {
            "<td style=\"padding-right: 2em\">%s</td><td>", szTitle );
 
   ppch = g_strsplit( sz, "\n", -1 );
-  for ( i = 0; pchToken = ppch[ i ]; ++i ) {
+  for ( i = 0; (pchToken = ppch[ i ]) ; ++i ) {
     if ( i )
       fputs( "<br />\n", pf );
     fputs( pchToken, pf );

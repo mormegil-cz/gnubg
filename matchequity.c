@@ -1088,7 +1088,6 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
     float rWR = 0.5;
     list *pl;
     parameter *pp;
-    int i;
 
     /* obtain parameters */
 

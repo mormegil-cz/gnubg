@@ -27,6 +27,7 @@
 #endif
 
 #include "relational.h"
+#include "backgammon.h"
 
 
 extern void
