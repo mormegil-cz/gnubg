@@ -170,6 +170,8 @@ GUILE_LDFLAGS="-lguilegtk-1.2 $GUILE_LDFLAGS"
   AC_SUBST(GUILEDATA)
 fi
 
+AC_CHECK_LIB(xml2,xmlParseFile)
+
 AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
 
 dnl Record installation paths.

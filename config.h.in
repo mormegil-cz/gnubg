@@ -160,6 +160,9 @@
 /* Define if you have the <pwd.h> header file.  */
 #undef HAVE_PWD_H
 
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
+
 /* Define if you have the <stropts.h> header file.  */
 #undef HAVE_STROPTS_H
 
@@ -204,6 +207,9 @@
 
 /* Define if you have the readline library (-lreadline).  */
 #undef HAVE_LIBREADLINE
+
+/* Define if you have the xml2 library (-lxml2).  */
+#undef HAVE_LIBXML2
 
 /* Name of package */
 #undef PACKAGE
