@@ -4985,8 +4985,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
             outputl( _("Sorry, this build does not support the -tty option"));
 #else
 	    fX = FALSE;
-	    break;
 #endif
+	    break;
 	case 'h': /* help */
             usage( argv[ 0 ] );
 	    exit( EXIT_SUCCESS );
