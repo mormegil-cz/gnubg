@@ -2232,6 +2232,9 @@ void RemoveTexture(Material* pMat)
 void ClearTextures(BoardData* bd)
 {
 	int i;
+	if (!bd->numTextures)
+		return;
+
 	MakeCurrent3d(bd->drawing_area3d);
 
 	for (i = 0; i < bd->numTextures; i++)
