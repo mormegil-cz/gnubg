@@ -3392,10 +3392,9 @@ DrawDie( GdkDrawable *pd,
     for( iy = 0; iy < 3; iy++ )
 	for( ix = 0; ix < 3; ix++ )
 	    if( afPip[ iy * 3 + ix ] )
-		gdk_draw_rgb_image( pd, gc, x + s + 2 * s * ix,
-				    y + s + 2 * s * iy, s, s,
-				    GDK_RGB_DITHER_MAX,
-				    achPip[ fColour ], s * 3 );
+	        gdk_draw_rgb_image (pd, gc,  s * 1.5 + x + 1.5 * s * ix,
+			    s * 1.5 + y + 1.5 * s * iy, s, s,
+			    GDK_RGB_DITHER_MAX, achPip[fColour], s * 3);
 }
 
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,

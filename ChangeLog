@@ -1,3 +1,9 @@
+Fri Jan  2 19:23:09 2004  Oystein Johansen <oystein@gnubg.org>
+
+        * render.c (RenderDice): Redesign the dice in the 2D board.
+	* gtkboard.c (DrawDie): Redesign the dice in the dice selection
+	dialog.
+
 Fri Jan  2 12:14:52 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Use one chequer racing formulae from Zadeh & Kobliska, Management

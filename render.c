@@ -2120,6 +2120,7 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
 #endif
 }
 
+#define circ(x,y) ssqrt( (x*x) + (y*y) )
 
 extern void RenderDice( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride ) {
@@ -2155,8 +2156,7 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 		fx = 0;
 		x = x_loop;
 		do {
-		    if( fabs( x ) < 6.0 / 7.0 &&
-			fabs( y ) < 6.0 / 7.0 ) {
+		    if( circ( x,y ) < 1.0  ) {
 			/* flat surface */
 			in++;
 			diffuse += prd->arLight[ 2 ] * 0.8 + 0.2;
@@ -2167,25 +2167,11 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 					   arDiceExponent[ 1 ] ) *
 			    arDiceCoefficient[ 1 ];
 		    } else {
-			if( fabs( x ) < 6.0 / 7.0 ) {
-			    /* top/bottom edge */
-			    x_norm = 0.0;
-			    y_norm = -7.0 * y - ( y > 0.0 ? -6.0 : 6.0 );
-			    z_norm = ssqrt( 1.0 - y_norm * y_norm );
-			} else if( fabs( y ) < 6.0 / 7.0 ) {
-			    /* left/right edge */
-			    x_norm = 7.0 * x + ( x > 0.0 ? -6.0 : 6.0 );
-			    y_norm = 0.0;
-			    z_norm = ssqrt( 1.0 - x_norm * x_norm );
-			} else {
-			    /* corner */
-			    x_norm = 7.0 * x + ( x > 0.0 ? -6.0 : 6.0 );
-			    y_norm = -7.0 * y - ( y > 0.0 ? -6.0 : 6.0 );
-			    if( ( z_norm = 1 - x_norm * x_norm -
-				  y_norm * y_norm ) < 0.0 )
-				goto missed;
-			    z_norm = sqrt( z_norm );
-			}
+			/* corner */
+			x_norm = 0.707 * x; // - ( x > 0.0 ? 1.0 : 1.0); 
+			y_norm = -0.707 * y; // - ( y > 0.0 ? 1.0 : 1.0 );
+			z_norm = 1 - x_norm * x_norm - y_norm * y_norm; 
+			z_norm = ssqrt( z_norm );
 			
 			in++;
 			diffuse += 0.2;
@@ -2204,7 +2190,6 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 			    }
 			}
 		    }
-		missed:		    
 		    x += 1.0 / ( DIE_WIDTH * prd->nSize );
 		} while( !fx++ );
 		y += 1.0 / ( DIE_HEIGHT * prd->nSize );
@@ -2726,9 +2711,9 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 		for( ix = 0; ix < 3; ix++ )
 		    if( afPip[ iy * 3 + ix ] )
 			CopyAreaClip( puch, nStride,
-				      ( anDicePosition[ i ][ 0 ] + 1 + 2 * ix )
+				      ( anDicePosition[ i ][ 0 ] + 1.5 + 1.5 * ix )
 				      * prd->nSize - x,
-				      ( anDicePosition[ i ][ 1 ] + 1 + 2 * iy )
+				      ( anDicePosition[ i ][ 1 ] + 1.5 + 1.5 * iy )
 				      * prd->nSize - y,
 				      cx, cy, pri->achPip[ fDiceColour ],
 				      prd->nSize * 3, 0, 0,
