@@ -714,7 +714,11 @@ WriteInt16 (FILE * pf, int n)
 extern void
 CommandExportPositionJF (char *sz)
 {
-
+  /* I think this function works now correctly. If there is some
+   * inconsistencies between import pos and export pos, it's probably a
+   * bug in the import code. --Oystein
+   */
+	
   FILE *fp;
   int i, anBoardJF[26];
   unsigned char c;
@@ -747,8 +751,6 @@ CommandExportPositionJF (char *sz)
       return;
     }
 
-
-
   WriteInt16 (fp, 126);       /* Always write in JellyFish 3.0 format */
   WriteInt16 (fp, 0);         /* Never save with Caution */
   WriteInt16 (fp, 0);         /* This is unused */
@@ -759,7 +761,7 @@ CommandExportPositionJF (char *sz)
 
   WriteInt16 (fp, ms.nCube);
   WriteInt16 (fp, ms.fCubeOwner + 1);
-
+	     
   if ((ms.gs == GAME_OVER) || (ms.gs == GAME_NONE))
     {
       WriteInt16 (fp, 0);
@@ -809,7 +811,6 @@ CommandExportPositionJF (char *sz)
   for (i = 0; i < c; i++)
     fwrite (&ap[1].szName[i], 1, 1, fp);
 
-
   WriteInt16 (fp, 0);         /* FIXME Check gnubg setting */
   /* TRUE if lower die is to be drawn to the left  */
 
@@ -833,9 +834,10 @@ CommandExportPositionJF (char *sz)
    * possible to save just the current board twice as done below. */
 
   memcpy( anBoard, ms.anBoard, 2 * 25 * sizeof ( int ) );
-  if ( ms.fMove )
+  
+  if ( !ms.fMove )
     SwapSides( anBoard );
-
+  
   /* Player 0 on bar */
   WriteInt16 (fp, -anBoard[0][24] + 20);
   WriteInt16 (fp, -anBoard[0][24] + 20);

@@ -1,3 +1,9 @@
+Mon Apr 14 16:31:12 2003  Oystein Johansen  <oystein@gnubg.org>
+
+        * export.c (CommandExportPositionJF): Based on tests by Michael
+	Depreli, I now think I have done the last change to the JellyFish
+	position export code. Thanks for the testing, Michael.
+	
 Sun Apr 13 09:51:12 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c: add and rephrase some menu entries in order to
