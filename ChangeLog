@@ -1,3 +1,7 @@
+Sat Jul 27 13:34:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c: clean up struct gnubgcommand and aszCommands.
+
 Sat Jul 27 12:47:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Added the www.random.org-RNG to gnubg.
