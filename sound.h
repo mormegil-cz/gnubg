@@ -32,6 +32,7 @@ typedef enum _gnubgsound {
   SOUND_AGREE,
   SOUND_DOUBLE,
   SOUND_DROP,
+  SOUND_CHEQUER,
   SOUND_MOVE,
   SOUND_REDOUBLE,
   SOUND_RESIGN,
@@ -73,6 +74,7 @@ extern int fSound;
 
 extern void
 playSound ( const gnubgsound gs );
+extern void SoundFlushCache( const gnubgsound gs );
 extern void SoundWait( void );
 
 #ifdef SIGIO

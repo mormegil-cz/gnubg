@@ -2877,6 +2877,8 @@ CommandSetSoundSystemWindows ( char *sz ) {
 static void
 SetSound ( const gnubgsound gs, const char *szFilename ) {
 
+  SoundFlushCache( gs );
+    
   if ( ! szFilename || ! *szFilename ) {
 
     strcpy ( aszSound[ gs ], "" );
@@ -2891,7 +2893,6 @@ SetSound ( const gnubgsound gs, const char *szFilename ) {
     outputf ( _("Sound for: %s: %s\n"), 
               gettext ( aszSoundDesc[ gs ] ),
               aszSound[ gs ] );
-
   }
 
 }

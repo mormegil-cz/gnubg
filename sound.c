@@ -20,6 +20,7 @@
  * File modified by Joern Thyssen <jthyssen@dk.ibm.com> for use with
  * GNU Backgammon.
  *
+ * $Id$
  */
 
 #ifdef HAVE_CONFIG_H
@@ -50,6 +51,7 @@
 
 #ifdef HAVE_ARTSC
 #include <artsc.h>
+#include <glib.h>
 #endif
 
 #ifdef HAVE_NAS
@@ -60,8 +62,6 @@
 #include "windows.h" /* for PlaySound */
 #endif
 
-/* #include "glib.h"  - is this really necessary? */
-
 #include "backgammon.h"
 #include "eval.h"
 #include "i18n.h"
@@ -71,12 +71,15 @@
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
+#define MAX_SOUND_LENGTH 1048576
+
 char *aszSoundDesc[ NUM_SOUNDS ] = {
   N_("Starting GNU Backgammon"),
   N_("Exiting GNU Backgammon"),
   N_("Agree"),
   N_("Doubling"),
   N_("Drop"),
+  N_("Chequer movement"),
   N_("Move"),
   N_("Redouble"),
   N_("Resign"),
@@ -96,6 +99,7 @@ char *aszSoundCommand[ NUM_SOUNDS ] = {
   "agree",
   "double",
   "drop",
+  "chequer",
   "move",
   "redouble",
   "resign",
@@ -117,6 +121,7 @@ char aszSound[ NUM_SOUNDS ][ 80 ] = {
   "sounds/drop.wav",
   "sounds/double.wav",
   "sounds/drop.wav",
+  "sounds/chequer.wav",
   "sounds/move.wav",
   "sounds/double.wav",
   "sounds/resign.wav",
@@ -168,6 +173,14 @@ char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ] = {
   "windows" 
 };
 
+typedef struct _soundcache {
+    unsigned char *pch; /* the audio data; NULL if unavailable */
+    int nSampleRate, nChannels, nBitDepth, fBigEndian, cb;
+    int fSigned; /* 0 = unsigned, 1 = signed, -1 = mu-law */
+} soundcache;
+
+static soundcache asc[ NUM_SOUNDS ];
+
 #ifdef SIGIO
 
 static int hSound = -1; /* file descriptor of dsp/audio device */
@@ -201,9 +214,6 @@ extern RETSIGTYPE SoundSIGIO( int idSignal ) {
 	    close( hSound );
 	    hSound = -1;
 #endif
-	    /* We would like to free( pSound ) here, but it's not safe to
-	       call free() from a signal handler, so we leave that job to
-	       somebody else. */
 	} else
 	    pSoundCurrent += cch;
     }
@@ -260,16 +270,14 @@ static int check_dev(char *dev) {
 
 }
 
-static void MonoToStereo( int nBitDepth, int fSigned, unsigned char **pbuf,
-			  int *pcb ) {
+static void MonoToStereo( soundcache *psc ) {
 
-    unsigned char *bufNew = malloc( *pcb << 1 );
-    unsigned char *pDest = bufNew, *pSrc = *pbuf;
+    unsigned char *bufNew = malloc( psc->cb << 1 );
+    unsigned char *pDest = bufNew, *pSrc = psc->pch;
     int i;
-
-    nBitDepth /= 8;
+    int nBitDepth = psc->nBitDepth / 8;
     
-    for( i = 0; i < *pcb / nBitDepth; i++ ) {
+    for( i = 0; i < psc->cb / nBitDepth; i++ ) {
 	memcpy( pDest, pSrc, nBitDepth );
 	pDest += nBitDepth;
 	memcpy( pDest, pSrc, nBitDepth );
@@ -277,20 +285,19 @@ static void MonoToStereo( int nBitDepth, int fSigned, unsigned char **pbuf,
 	pSrc += nBitDepth;
     }
     
-    free( *pbuf );
-    *pbuf = bufNew;
-    *pcb <<= 1;
+    free( psc->pch );
+    psc->pch = bufNew;
+    psc->cb <<= 1;
+    psc->nChannels = 2;
 }
 
-static void StereoToMono( int nBitDepth, int fSigned, unsigned char **pbuf,
-			  int *pcb ) {
+static void StereoToMono( soundcache *psc ) {
 
-    unsigned char *pDest = *pbuf, *pSrc = *pbuf;
+    unsigned char *pDest = psc->pch, *pSrc = psc->pch;
     int i;
-
-    nBitDepth /= 8;
+    int nBitDepth = psc->nBitDepth / 8;
     
-    for( i = 0; i < *pcb / nBitDepth; i++ ) {
+    for( i = 0; i < psc->cb / nBitDepth; i++ ) {
 	/* FIXME this code merely keeps the left channel and discards the
 	   right... it would be better to mix them, but then we have to
 	   worry about endianness and signedness -- yuck. */
@@ -299,16 +306,17 @@ static void StereoToMono( int nBitDepth, int fSigned, unsigned char **pbuf,
 	pSrc += nBitDepth << 1;
     }
     
-    *pbuf = realloc( *pbuf, *pcb >>= 1 );
+    psc->pch = realloc( psc->pch, psc->cb >>= 1 );
+    psc->nChannels = 2;
 }
 
-static void play_audio_file(const char *file, const char *device) {
+static void play_audio_file(soundcache *psc, const char *file,
+			    const char *device) {
 
     /* here we can assume that we can write to /dev/audio */
     unsigned char *buf, tmp[ 256 ];
     struct stat info;
-    int fd, n, cb, nSampleRate, nChannels, nBitDepth, fBigEndian;
-    int fSigned; /* 0 = unsigned, 1 = signed, -1 = mu-law */
+    int fd, n;
     int fMonoToStereo = FALSE, fStereoToMono = FALSE;
     
 #ifdef SIGIO
@@ -319,199 +327,200 @@ static void play_audio_file(const char *file, const char *device) {
     sigaddset( &ss, SIGALRM );
     sigprocmask( SIG_BLOCK, &ss, &ssOld );
   
-    if( pSound ) {
-	free( pSound );
-	pSound = NULL;
-	cbSound = 0;
-	if( hSound >= 0 ) {
+    if( hSound >= 0 ) {
 #ifdef SNDCTL_DSP_RESET
-	    ioctl( hSound, SNDCTL_DSP_RESET, 0 );
+	ioctl( hSound, SNDCTL_DSP_RESET, 0 );
 #endif
-	    close( hSound );
-	    hSound = -1;
-	}
+	close( hSound );
+	hSound = -1;
     }
 
     sigprocmask( SIG_SETMASK, &ssOld, NULL );
 #endif
-  
-    if( ( fd = open(file, O_RDONLY) ) < 0 )
-	return;
 
-    fstat( fd, &info );
+    if( !psc->pch ) {
+	/* cache miss */
+	if( ( fd = open(file, O_RDONLY) ) < 0 )
+	    return;
 
-    if( read( fd, tmp, 4 ) < 4 ) {
-	close( fd );
-	return;
-    }
-
-    if( !memcmp( tmp, ".snd", 4 ) ) {
-	/* .au format */
-	unsigned long nOffset;
-
-	if( read( fd, tmp + 4, 20 ) < 20 ) {
+	fstat( fd, &info );
+	
+	if( read( fd, tmp, 4 ) < 4 ) {
 	    close( fd );
 	    return;
 	}
 	
-	nOffset = ( tmp[ 4 ] << 24 ) | ( tmp[ 5 ] << 16 ) | ( tmp[ 6 ] << 8 ) |
-	    tmp[ 7 ];
-	nSampleRate = ( tmp[ 16 ] << 24 ) | ( tmp[ 17 ] << 16 ) |
-	    ( tmp[ 18 ] << 8 ) | tmp[ 19 ];
-	nChannels = tmp[ 23 ];
-	fBigEndian = TRUE;
-	switch( tmp[ 15 ] ) {
-	case 1:
-	    /* 8 bit mu-law */
-	    nBitDepth = 8;
-	    fSigned = -1;
-	    break;
+	if( !memcmp( tmp, ".snd", 4 ) ) {
+	    /* .au format */
+	    unsigned long nOffset;
 	    
-	case 2:
-	    /* 8 bit linear */
-	    nBitDepth = 8;
-	    fSigned = 1;
-	    break;
+	    if( read( fd, tmp + 4, 20 ) < 20 ) {
+		close( fd );
+		return;
+	    }
 	    
-	case 3:
-	    /* 16 bit linear */
-	    nBitDepth = 16;
-	    fSigned = 1;
-	    break;
+	    nOffset = ( tmp[ 4 ] << 24 ) | ( tmp[ 5 ] << 16 ) |
+		( tmp[ 6 ] << 8 ) | tmp[ 7 ];
+	    psc->nSampleRate = ( tmp[ 16 ] << 24 ) | ( tmp[ 17 ] << 16 ) |
+		( tmp[ 18 ] << 8 ) | tmp[ 19 ];
+	    psc->nChannels = tmp[ 23 ];
+	    psc->fBigEndian = TRUE;
+	    switch( tmp[ 15 ] ) {
+	    case 1:
+		/* 8 bit mu-law */
+		psc->nBitDepth = 8;
+		psc->fSigned = -1;
+		break;
+		
+	    case 2:
+		/* 8 bit linear */
+		psc->nBitDepth = 8;
+		psc->fSigned = 1;
+		break;
+		
+	    case 3:
+		/* 16 bit linear */
+		psc->nBitDepth = 16;
+		psc->fSigned = 1;
+		break;
+		
+	    case 4:
+		/* 24 bit linear */
+		psc->nBitDepth = 24;
+		psc->fSigned = 1;
+		break;
+		
+	    case 5:
+		/* 32 bit linear */
+		psc->nBitDepth = 32;
+		psc->fSigned = 1;
+		break;
+		
+	    default:
+		/* unknown encoding */
+		close( fd );
+		return;
+	    }
 	    
-	case 4:
-	    /* 24 bit linear */
-	    nBitDepth = 24;
-	    fSigned = 1;
-	    break;
-	    
-	case 5:
-	    /* 32 bit linear */
-	    nBitDepth = 32;
-	    fSigned = 1;
-	    break;
-	    
-	default:
-	    /* unknown encoding */
-	    close( fd );
-	    return;
-	}
+	    if( nOffset != 24 )
+		lseek( fd, nOffset, SEEK_SET );
 
-	if( nOffset != 24 )
-	    lseek( fd, nOffset, SEEK_SET );
-
-	buf = malloc( cb = info.st_size - nOffset );
-	if( ( cb = read( fd, buf, cb ) ) < 0 ) {
-	    free( buf );
-	    close( fd );
-	    return;
-	}
-    } else if( !memcmp( tmp, "RIFF", 4 ) ) {
-	long nLength;
-	
-	/* .wav format */
-	if( read( fd, tmp, 8 ) < 8 ) {
-	    close( fd );
-	    return;
-	}
-
-	if( memcmp( tmp + 4, "WAVE", 4 ) ) {
-	    /* it wasn't in .wav format after all -- whoops */
-	    close( fd );
-	    return;
-	}
-
-	while( 1 ) {
+	    if( ( psc->cb = info.st_size - nOffset ) > MAX_SOUND_LENGTH )
+		psc->cb = MAX_SOUND_LENGTH;
+	    buf = malloc( psc->cb );
+	    if( ( psc->cb = read( fd, buf, psc->cb ) ) < 0 ) {
+		free( buf );
+		close( fd );
+		return;
+	    }
+	} else if( !memcmp( tmp, "RIFF", 4 ) ) {
+	    long nLength;
+	    
+	    /* .wav format */
 	    if( read( fd, tmp, 8 ) < 8 ) {
 		close( fd );
 		return;
 	    }
-
-	    if( ( nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
-		  ( tmp[ 5 ] << 8 ) | tmp[ 4 ] ) < 0 ) {
+	    
+	    if( memcmp( tmp + 4, "WAVE", 4 ) ) {
+		/* it wasn't in .wav format after all -- whoops */
+		close( fd );
+		return;
+	    }
+	    
+	    while( 1 ) {
+		if( read( fd, tmp, 8 ) < 8 ) {
+		    close( fd );
+		    return;
+		}
+		
+		if( ( nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+		      ( tmp[ 5 ] << 8 ) | tmp[ 4 ] ) < 0 ) {
+		    close( fd );
+		    return;
+		}
+		
+		if( !memcmp( tmp, "fmt ", 4 ) )
+		    break;
+		
+		lseek( fd, nLength, SEEK_CUR );
+	    }
+	    
+	    if( read( fd, tmp, 16 ) < 16 ) {
 		close( fd );
 		return;
 	    }
 
-	    if( !memcmp( tmp, "fmt ", 4 ) )
-		break;
-
-	    lseek( fd, nLength, SEEK_CUR );
-	}
-
-	if( read( fd, tmp, 16 ) < 16 ) {
-	    close( fd );
-	    return;
-	}
-
-	if( tmp[ 0 ] != 1 ) {
-	    /* unknown encoding */
-	    close( fd );
-	    return;
-	}
-	
-	nSampleRate = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
-	    ( tmp[ 5 ] << 8 ) | tmp[ 4 ];
-	nChannels = tmp[ 2 ];
-	nBitDepth = tmp[ 14 ];
-	fSigned = nBitDepth > 8;
-	fBigEndian = FALSE;
-	
-	lseek( fd, nLength - 16, SEEK_CUR );
-	
-	while( 1 ) {
-	    if( read( fd, tmp, 8 ) < 8 ) {
+	    if( tmp[ 0 ] != 1 ) {
+		/* unknown encoding */
 		close( fd );
 		return;
 	    }
-
-	    if( ( nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
-		  ( tmp[ 5 ] << 8 ) | tmp[ 4 ] ) < 0 ) {
+	    
+	    psc->nSampleRate = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+		( tmp[ 5 ] << 8 ) | tmp[ 4 ];
+	    psc->nChannels = tmp[ 2 ];
+	    psc->nBitDepth = tmp[ 14 ];
+	    psc->fSigned = psc->nBitDepth > 8;
+	    psc->fBigEndian = FALSE;
+	    
+	    lseek( fd, nLength - 16, SEEK_CUR );
+	    
+	    while( 1 ) {
+		if( read( fd, tmp, 8 ) < 8 ) {
+		    close( fd );
+		    return;
+		}
+		
+		if( ( nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+		      ( tmp[ 5 ] << 8 ) | tmp[ 4 ] ) < 0 ) {
+		    close( fd );
+		    return;
+		}
+		
+		if( !memcmp( tmp, "data", 4 ) )
+		    break;
+		
+		lseek( fd, nLength, SEEK_CUR );
+	    }
+	    
+	    if( nLength > MAX_SOUND_LENGTH )
+		nLength = MAX_SOUND_LENGTH;
+	    buf = malloc( psc->cb = nLength );
+	    if( ( psc->cb = read( fd, buf, psc->cb ) ) < 0 ) {
+		free( buf );
 		close( fd );
 		return;
 	    }
-
-	    if( !memcmp( tmp, "data", 4 ) )
-		break;
-
-	    lseek( fd, nLength, SEEK_CUR );
-	}
-	
-	buf = malloc( cb = nLength );
-	cb = nLength;
-	if( ( cb = read( fd, buf, cb ) ) < 0 ) {
-	    free( buf );
+	} else {
+	    /* unknown format -- ignore */
 	    close( fd );
 	    return;
 	}
-    } else {
-	/* unknown format -- ignore */
-	close( fd );
-	return;
+
+	psc->pch = buf;
     }
     
-    if( ( fd = open(device, O_WRONLY | O_NDELAY) ) < 0 ) {
-	free(buf);
+    if( ( fd = open(device, O_WRONLY | O_NDELAY) ) < 0 )
 	return;
-    }
 
 #if defined( SNDCTL_DSP_SETFMT )
     {
 	int n, nDesired;
 	
-	if( fSigned < 0 )
+	if( psc->fSigned < 0 )
 	    n = AFMT_MU_LAW;
-	else if( fSigned ) {
-	    if( nBitDepth == 8 )
+	else if( psc->fSigned ) {
+	    if( psc->nBitDepth == 8 )
 		n = AFMT_S8;
-	    else if( fBigEndian )
+	    else if( psc->fBigEndian )
 		n = AFMT_S16_BE;
 	    else
 		n = AFMT_S16_LE;
 	} else {
-	    if( nBitDepth == 8 )
+	    if( psc->nBitDepth == 8 )
 		n = AFMT_U8;
-	    else if( fBigEndian )
+	    else if( psc->fBigEndian )
 		n = AFMT_U16_BE;
 	    else
 		n = AFMT_U16_LE;
@@ -519,11 +528,12 @@ static void play_audio_file(const char *file, const char *device) {
 
 	ioctl( fd, SNDCTL_DSP_SETFMT, &n );
 	/* FIXME check for re-encoding */
-	nDesired = nChannels;
-	ioctl( fd, SNDCTL_DSP_CHANNELS, &nChannels );
-	fMonoToStereo = nChannels == 2 && nDesired == 1;
-	fStereoToMono = nChannels == 1 && nDesired == 2;
-	ioctl( fd, SNDCTL_DSP_SPEED, &nSampleRate );
+	nDesired = psc->nChannels;
+	ioctl( fd, SNDCTL_DSP_CHANNELS, &nDesired );
+	fMonoToStereo = psc->nChannels == 1 && nDesired == 2;
+	fStereoToMono = psc->nChannels == 2 && nDesired == 1;
+	nDesired = psc->nSampleRate;
+	ioctl( fd, SNDCTL_DSP_SPEED, &nDesired );
 	/* FIXME check for resampling */
     }
 #elif defined( AUDIO_SETINFO )
@@ -531,10 +541,10 @@ static void play_audio_file(const char *file, const char *device) {
 	struct audio_info_t ait;
 
 	AUDIO_INITINFO( &ait );
-	ait.play.sample_rate = nSampleRate;
-	ait.play.channels = nChannels;
-	ait.play.precision = nBitDepth;
-	ait.play.encoding = fSigned < 0 ? AUDIO_ENCODING_ULAW :
+	ait.play.sample_rate = psc->nSampleRate;
+	ait.play.channels = psc->nChannels;
+	ait.play.precision = psc->nBitDepth;
+	ait.play.encoding = psc->fSigned < 0 ? AUDIO_ENCODING_ULAW :
 	    AUDIO_ENCODING_LINEAR;
 	ioctl( fd, AUDIO_SETINFO, &ait );
 	/* FIXME check for re-encoding or resampling */
@@ -542,10 +552,10 @@ static void play_audio_file(const char *file, const char *device) {
 #endif
 
     if( fMonoToStereo )
-	MonoToStereo( nBitDepth, fSigned, &buf, &cb );
+	MonoToStereo( psc );
     
     if( fStereoToMono )
-	StereoToMono( nBitDepth, fSigned, &buf, &cb );
+	StereoToMono( psc );
 
 #ifdef SIGIO
     sigemptyset( &ss );
@@ -553,8 +563,8 @@ static void play_audio_file(const char *file, const char *device) {
     sigaddset( &ss, SIGALRM );
     sigprocmask( SIG_BLOCK, &ss, &ssOld );
     
-    pSound = pSoundCurrent = buf;
-    cbSound = cb;
+    pSound = pSoundCurrent = psc->pch;
+    cbSound = psc->cb;
     hSound = fd;
     
 #if O_ASYNC
@@ -593,8 +603,7 @@ static void play_audio_file(const char *file, const char *device) {
     
     sigprocmask( SIG_SETMASK, &ssOld, NULL );
 #else
-    write(fd, buf, cb);
-    free(buf);
+    write(fd, psc->pch, psc->cb);
     close(fd);
 #endif
 }
@@ -799,7 +808,7 @@ static int play_nas_file(char *file)
 #endif /* HAVE_NAS */
 
 static void 
-play_file_child(const char *filename) {
+play_file_child(soundcache *psc, const char *filename) {
 
     switch ( ssSoundSystem ) {
 
@@ -865,7 +874,7 @@ play_file_child(const char *filename) {
     {
 	char *pch;
 	if( ( pch = can_play_audio() ) ) {
-	    play_audio_file(filename, pch);
+	    play_audio_file(psc,filename, pch);
 #ifndef SIGIO
 	    _exit(0);
 #endif
@@ -894,7 +903,7 @@ play_file_child(const char *filename) {
 }
 
 static void 
-play_file(const char *filename) {
+play_file(soundcache *psc, const char *filename) {
 
 #ifndef WIN32
 
@@ -903,7 +912,7 @@ play_file(const char *filename) {
 #ifdef SIGIO
   if( ssSoundSystem == SOUND_SYSTEM_NORMAL) {
       /* we can play directly without forking */
-      play_file_child( filename );
+      play_file_child( psc, filename );
       return;
   }
 #endif
@@ -926,7 +935,7 @@ play_file(const char *filename) {
 
 #endif
 
-    play_file_child( filename );
+    play_file_child( psc, filename );
     
 #ifndef WIN32
 
@@ -956,10 +965,23 @@ playSound ( const gnubgsound gs ) {
 	return;
 
     szFile = PathSearch( aszSound[ gs ], szDataDirectory );
-    play_file( szFile );
+    play_file( asc + gs, szFile );
     free( szFile );
 }
 
+extern void SoundFlushCache( const gnubgsound gs ) {
+
+#ifdef SIGIO
+    if( ssSoundSystem == SOUND_SYSTEM_NORMAL )
+	/* the sound might be in use at the moment */
+	SoundWait();
+#endif
+    
+    if( asc[ gs ].pch ) {
+	free( asc[ gs ].pch );
+	asc[ gs ].pch = NULL;
+    }
+}
 
 extern void SoundWait( void ) {
 
