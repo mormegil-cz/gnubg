@@ -839,6 +839,7 @@ extern void *InitRNG( int *pnSeed, int *pfInitFrom,
 #if HAVE_LIBGMP
     /* BBS */
     rngctx->fZInit = FALSE;
+    mpz_init( rngctx->nz );
 #endif /* HAVE_LIBGMP */
 
     /* common */
