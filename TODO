@@ -247,6 +247,10 @@ functions:
   anything wrong with the code -- perhaps it is a GTK+ bug?  (That list
   widget is obselete, so presumably the problem will go away when we move
   to GTK+ 2.0.)
+** it's not possible to drag the opponents chequers back if the player
+  regret the hit; e.g., play one chequer to but the opponent on the bar. 
+  After this it's neither possible to drag the opponent's chequer back
+  nor to drag your own chequer back.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
