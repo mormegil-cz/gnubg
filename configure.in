@@ -194,4 +194,11 @@ AM_CONDITIONAL(XML_MANUAL, test "$no_libxml2" != "yes" -a "$gtk2" = "yes")
 dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)
 
-AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile)
+dnl Set of available languages
+ALL_LINGUAS=""
+
+dnl internationalization macros
+AM_GNU_GETTEXT
+
+AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile
+          intl/Makefile po/Makefile.in po/Makefile)

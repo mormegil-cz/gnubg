@@ -1,11 +1,14 @@
 if USE_EXT
-SUBDIRS = lib doc ext met
+SUBDIRS = intl lib doc ext met po
 else
-SUBDIRS = lib doc met
+SUBDIRS = intl lib doc met po
 endif
 
-COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @LIBXML2_LIBS@
+localedir = $(datadir)/locale
+
+COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
+              -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\"
+COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
@@ -67,7 +70,8 @@ distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
-	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h
+	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
+	ABOUT-NLS
 
 sgfp.h sgfp.c: sgf.y
 	$(BISON) -o $@ -p sgf -d $(srcdir)/sgf.y

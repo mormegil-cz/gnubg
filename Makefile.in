@@ -57,10 +57,20 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = @host@
 AWK = @AWK@
 BISON = @BISON@
+BUILD_INCLUDED_LIBINTL = @BUILD_INCLUDED_LIBINTL@
+CATALOGS = @CATALOGS@
+CATOBJEXT = @CATOBJEXT@
 CC = @CC@
+DATADIRNAME = @DATADIRNAME@
 FLEX = @FLEX@
+GENCAT = @GENCAT@
+GLIBC21 = @GLIBC21@
+GMOFILES = @GMOFILES@
+GMSGFMT = @GMSGFMT@
 GNUPLOT = @GNUPLOT@
 GTKDATA = @GTKDATA@
 GTK_CFLAGS = @GTK_CFLAGS@
@@ -70,20 +80,36 @@ GUILEDATA = @GUILEDATA@
 GUILE_CFLAGS = @GUILE_CFLAGS@
 GUILE_CONFIG = @GUILE_CONFIG@
 GUILE_LIBS = @GUILE_LIBS@
+INSTOBJEXT = @INSTOBJEXT@
+INTLBISON = @INTLBISON@
+INTLLIBS = @INTLLIBS@
+INTLOBJS = @INTLOBJS@
+INTL_LIBTOOL_SUFFIX_PREFIX = @INTL_LIBTOOL_SUFFIX_PREFIX@
+LIBICONV = @LIBICONV@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
+MKINSTALLDIRS = @MKINSTALLDIRS@
+MSGFMT = @MSGFMT@
 PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
 PNGTOPNM = @PNGTOPNM@
 PNMTOPS = @PNMTOPS@
+POFILES = @POFILES@
+POSUB = @POSUB@
 RANLIB = @RANLIB@
 TR = @TR@
+USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
+USE_NLS = @USE_NLS@
 VERSION = @VERSION@
-@USE_EXT_TRUE@SUBDIRS = @USE_EXT_TRUE@lib doc ext met html-images
-@USE_EXT_FALSE@SUBDIRS = @USE_EXT_FALSE@lib doc met html-images
+@USE_EXT_TRUE@SUBDIRS = @USE_EXT_TRUE@intl lib doc ext met po
+@USE_EXT_FALSE@SUBDIRS = @USE_EXT_FALSE@intl lib doc met po
 
-COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @LIBXML2_LIBS@
+localedir = $(datadir)/locale
+
+COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
+              -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\"
+
+COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
@@ -135,7 +161,8 @@ erftest_SOURCES = erftest.c
 TESTS = gnubgtest erftest
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
-	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h
+	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
+	ABOUT-NLS
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -195,17 +222,17 @@ MANS = $(man_MANS)
 NROFF = nroff
 DATA =  $(pkgdata_DATA)
 
-DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
-Makefile.am Makefile.in NEWS TODO acconfig.h acinclude.m4 aclocal.m4 \
-config.h.in configure configure.in erf.c install-sh missing \
-mkinstalldirs strdup.c
+DIST_COMMON =  README ./stamp-h.in ABOUT-NLS AUTHORS COPYING ChangeLog \
+INSTALL Makefile.am Makefile.in NEWS TODO acconfig.h acinclude.m4 \
+aclocal.m4 config.guess config.h.in config.sub configure configure.in \
+erf.c install-sh missing mkinstalldirs strdup.c
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DIST_SUBDIRS =  lib doc ext met html-images lib doc met html-images
+DIST_SUBDIRS =  intl lib doc ext met po intl lib doc met po
 DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/credits.P \
 .deps/database.P .deps/dice.P .deps/drawboard.P .deps/erf.P \
 .deps/erftest.P .deps/eval.P .deps/external.P .deps/gdkgetrgb.P \
@@ -502,7 +529,7 @@ distcheck: dist
 	dc_install_base=`cd $(distdir)/=inst && pwd`; \
 	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook; \
 	cd $(distdir)/=build \
-	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
+	  && ../configure --with-included-gettext --srcdir=.. --prefix=$$dc_install_base \
 	  && $(MAKE) $(AM_MAKEFLAGS) \
 	  && $(MAKE) $(AM_MAKEFLAGS) dvi \
 	  && $(MAKE) $(AM_MAKEFLAGS) check \
