@@ -4627,3 +4627,23 @@ extern void CommandSetDisplayPanels( char *sz ) {
 #endif
     
 }
+
+
+extern void
+CommandSetOutputErrorRateFactor( char *sz ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r < 0 ) {
+    outputl( _("Please provide a positive number\n" ) );
+    return;
+  }
+
+  rErrorRateFactor = r;
+
+  outputf( _("The factor used for multiplying error rates is: %.1f\n"),
+           rErrorRateFactor );
+
+
+
+}

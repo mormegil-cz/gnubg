@@ -24,9 +24,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <glib.h>
+#include <math.h>
 
 #include "backgammon.h"
 #include "formatgs.h"
+#include "format.h"
 #include "analysis.h"
 
 #include "i18n.h"
@@ -68,18 +70,27 @@ errorRate( const float rn, const float ru, const matchstate *pms ) {
 static char *
 errorRateMP( const float rn, const float ru, const matchstate *pms ) {
 
-  if ( rn != 0.0f ) {
+  int n = fOutputDigits - ( log10( rErrorRateFactor ) - 0.5 );
+
+  printf( "%f\n", rn );
+  
+  if ( n < 0 )
+    n = 0;
+
+  if ( rn != 0.0f && ru != 0.0f ) {
 
     if ( pms->nMatchTo ) 
-      return g_strdup_printf( "%+6.2f (%+7.3f%%)",
-                              1000.0f * rn, ru * 100.0f );
+      return g_strdup_printf( "%+*.*f (%+7.3f%%)",
+                              n + 5, n + 1, 
+                              rErrorRateFactor * rn, ru * 100.0f );
     else
-      return g_strdup_printf( "%+6.2f (%+7.3f)",
-                              1000.0f * rn, ru );
+      return g_strdup_printf( "%+*.*f (%+7.3f)",
+                              n + 5, n + 1, 
+                              rErrorRateFactor * rn, ru );
 
   }
   else
-    return g_strdup_printf( "%+6.3f", 0.0f );
+    return g_strdup_printf( "%+*.*f", n + 5, n + 1, rErrorRateFactor * rn );
 
 }
 
@@ -434,9 +445,9 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
       for ( i = 0; i < 2; ++i )
         if ( ( n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
-          aasz[ i + 1 ] = g_strdup_printf( "%+6.2f",
-                                           -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n  *
-                                           1000.0f );
+          aasz[ i + 1 ] = 
+            errorRateMP( -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n,
+                         0.0f, pms );
         else
           aasz[ i + 1 ] = g_strdup( _("n/a") );
 

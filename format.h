@@ -23,6 +23,7 @@
 #define _FORMAT_H_
 
 extern int fOutputDigits, fOutputMWC, fOutputWinPC, fOutputMatchPC;
+extern float rErrorRateFactor;
 
 /* misc. output routines used by text and HTML export */
 

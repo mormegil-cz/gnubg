@@ -1,3 +1,10 @@
+Sat Sep 20 22:07:59 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* formatgs.c (errorrateMP): allow control of number of digits in 
+	error rate and allow control over factor used (default is 1000).
+	* gnubg.c: new command "set output errorratefactor ...".
+	* set.c (CommandSetOutputErrorRateFactor): new function.
+
 Fri Sep 19 20:23:46 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
 
 	* boarddim.h - reverse cube locations, gtkgame.c - micro-typo

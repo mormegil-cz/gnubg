@@ -1085,9 +1085,11 @@ command cER = {
     { "winpc", CommandSetOutputWinPC,
       N_("Show winning chances as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
-	{ "digits", CommandSetOutputDigits,
-	  N_("Set number of digits after the decimal point in outputs"),
-	  szVALUE, NULL},
+    { "digits", CommandSetOutputDigits,
+      N_("Set number of digits after the decimal point in outputs"),
+      szVALUE, NULL},
+    { "errorratefactor", CommandSetOutputErrorRateFactor,
+      N_("The factor used for multiplying error rates"), szVALUE, NULL},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, N_("Use the ANSI C rand() (usually linear "
@@ -5428,12 +5430,14 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set output mwc %s\n"
 	     "set output rawboard %s\n"
 	     "set output winpc %s\n"
-             "set output digits %d\n",
+             "set output digits %d\n"
+             "set output errorratefactor %f\n",
 	     fOutputMatchPC ? "on" : "off",
 	     fOutputMWC ? "on" : "off",
 	     fOutputRawboard ? "on" : "off",
 	     fOutputWinPC ? "on" : "off",
-             fOutputDigits );
+             fOutputDigits,
+             rErrorRateFactor );
     
     for( i = 0; i < 2; i++ ) {
 	fprintf( pf, "set player %d name %s\n", i, ap[ i ].szName );
