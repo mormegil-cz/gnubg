@@ -1347,7 +1347,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
     pch = strcpy( malloc( strlen( sz ) + 1 ), sz );
     
     if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
-	outputerr( pch );
+	SockErr( pch );
 	free( pch );
 	return;
     }
@@ -1367,7 +1367,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
 	    continue;
 	}
 	
-	outputerr( pch );
+	SockErr( pch );
 	closesocket( h );
 	free( psa );
 	free( pch );
@@ -2466,7 +2466,7 @@ extern void CommandSetScore( char *sz ) {
     if( ms.gs < GAME_OVER && plGame && 
         ( pmr = (moverecord *) plGame->plNext->p ) &&
         ( pmgi = &pmr->g ) ) {
-	assert( pmr == MOVE_GAMEINFO );
+	assert( pmr->mt == MOVE_GAMEINFO );
 	pmgi->anScore[ 0 ] = ms.anScore[ 0 ];
 	pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
 	pmgi->fCrawfordGame = ms.fCrawford;

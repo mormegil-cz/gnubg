@@ -133,9 +133,6 @@ void OutputWin32SocketError(const char* action)
 	outputerrf(_("Windows socket error (%s):\n%s"), action, (LPCTSTR)lpMsgBuf);
 	LocalFree(lpMsgBuf);
 }
-#define SockErr OutputWin32SocketError
-#else
-#define SockErr outputerr
 #endif
 
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
@@ -621,6 +618,8 @@ extern void CommandExternal( char *sz ) {
 	ExternalUnbind( sz );
 	return;
       }
+      outputf( _("Waiting for a connection from %s...\n"), sz);
+
       // Must set length when using windows
       saLen = sizeof(struct sockaddr);
       while( ( hPeer = accept( h, (struct sockaddr*)&saRemote, &saLen ) ) < 0 ) {
