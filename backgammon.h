@@ -288,6 +288,7 @@ extern int CompareNames( char *sz0, char *sz1 );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
+extern void SetMatchID ( char *szMatchID );
 extern char*
 FormatCubePosition ( char *sz, cubeinfo *pci );
 extern char *FormatPrompt( void );
@@ -500,6 +501,7 @@ extern void CommandAccept( char * ),
     CommandSetEvalCubedecision ( char * ),
     CommandSetEgyptian( char * ),
     CommandSetJacoby( char * ),
+    CommandSetMatchID ( char * ),
     CommandSetMET( char * ),
     CommandSetJacoby( char * ),
     CommandSetNackgammon( char * ),

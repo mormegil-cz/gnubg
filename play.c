@@ -2858,3 +2858,137 @@ extern void CommandTake( char *sz ) {
     
     TurnDone();
 }
+
+extern void
+SetMatchID ( char *szMatchID ) {
+
+  int anScore[ 2 ], anDice[ 2 ];
+  int nMatchTo, fCubeOwner, fMove, fCrawford, nCube;
+
+  char szID[ 15 ];
+
+  moverecord *pmr;
+
+
+  if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( fInterrupt )
+      return;
+	    
+    if( !GetInputYN( "Are you sure you want to setup a new match id, "
+			 "and discard the game in progress? " ) )
+      return;
+  }
+    
+
+  if ( ms.gs == GAME_PLAYING )
+    strcpy ( szID, PositionID ( ms.anBoard ) );
+  else
+    strcpy ( szID, "" );
+
+  if ( MatchFromID ( &nCube, &fCubeOwner, &fMove,
+                     &nMatchTo, anScore, &fCrawford, 
+                     anDice, szMatchID ) < 0 ) {
+
+    outputf( "Illegal match ID '%'\n", szMatchID );
+    outputx();
+    return;
+
+  }
+
+  printf ( "%d %d %d %d %d %d %d %d %d\n",
+           nCube, fCubeOwner, fMove, nMatchTo, anScore[ 0 ], anScore[ 1 ],
+           fCrawford, anDice[ 0 ], anDice[ 1 ] );
+
+  /* start new match or session */
+
+  FreeMatch();
+
+  ms.cGames = 0;
+  ms.nMatchTo = nMatchTo;
+  ms.anScore[ 0 ] = anScore[ 0 ];
+  ms.anScore[ 1 ] = anScore[ 1 ];
+  ms.fCrawford = fCrawford;
+  ms.fPostCrawford = ! fCrawford && 
+    ( ( anScore[ 0 ] == nMatchTo - 1 ) || 
+      ( anScore[ 1] == nMatchTo - 1 ) );
+  
+  /* start new game */
+    
+  PopGame ( plGame, TRUE );
+
+  InitBoard ( ms.anBoard );
+
+  ClearMoveRecord();
+
+  ListInsert( &lMatch, plGame );
+
+  pmr = malloc( sizeof( movegameinfo ) );
+  pmr->g.mt = MOVE_GAMEINFO;
+  pmr->g.sz = NULL;
+  pmr->g.i = ms.cGames;
+  pmr->g.nMatch = ms.nMatchTo;
+  pmr->g.anScore[ 0 ] = ms.anScore[ 0 ];
+  pmr->g.anScore[ 1 ] = ms.anScore[ 1 ];
+  pmr->g.fCrawford = fAutoCrawford && ms.nMatchTo > 1;
+  pmr->g.fCrawfordGame = ms.fCrawford;
+  pmr->g.fJacoby = fJacoby && !ms.nMatchTo;
+  pmr->g.fWinner = -1;
+  pmr->g.nPoints = 0;
+  pmr->g.fResigned = FALSE;
+  pmr->g.nAutoDoubles = 0;
+  IniStatcontext( &pmr->g.sc );
+  AddMoveRecord( pmr );
+
+  ms.gs = GAME_PLAYING;
+  ms.fMove = fMove;
+  ms.fTurn = fMove;
+  
+  UpdateSetting( &ms.gs );
+  UpdateSetting( &ms.nCube );
+  UpdateSetting( &ms.fCubeOwner );
+  UpdateSetting( &ms.fTurn );
+  UpdateSetting( &ms.fCrawford );
+
+  /* Set dice */
+
+  if ( anDice[ 0 ] ) {
+
+    char sz[ 10 ];
+  
+    sprintf ( sz, "%d %d", anDice[ 0 ], anDice[ 1 ] );
+    CommandSetDice ( sz );
+
+  }
+
+  /* set cube */
+
+  if ( fCubeOwner != -1 ) {
+
+    movesetcubepos *pmscp;
+
+    pmscp = malloc( sizeof( *pmscp ) );
+    pmscp->mt = MOVE_SETCUBEPOS;
+    pmscp->sz = NULL;
+    pmscp->fCubeOwner = fCubeOwner;
+    
+    AddMoveRecord( pmscp );
+
+  }
+    
+  if ( nCube != 1 ) {
+
+    char sz[ 10 ];
+
+    sprintf ( sz, "%d", nCube );
+
+    CommandSetCubeValue ( sz );
+
+  }
+
+  /* set board to old value */
+
+  if ( strlen ( szID ) )
+    CommandSetBoard ( szID );
+
+
+}
