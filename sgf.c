@@ -429,11 +429,14 @@ static void RestoreDoubleAnalysis( property *pp,
 }
 
 static void RestoreMoveAnalysis( property *pp, int fPlayer,
-				 movelist *pml, int *piMove, evalsetup *pesChequer ) {
+				 movelist *pml, int *piMove, 
+                                 evalsetup *pesChequer,
+                                 const matchstate *pms ) {
     list *pl = pp->pl->plNext;
     char *pch, ch;
     move *pm;
     int i, nPlies, fDeterministic, nReduced, nSearchCandidates;
+    int anBoardMove[ 2 ][ 25 ];
     
     *piMove = atoi( pl->p );
 
@@ -463,6 +466,12 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	
 	if( i < 4 )
 	    pm->anMove[ i << 1 ] = -1;
+
+        /* restore auch */
+
+        memcpy ( anBoardMove, pms->anBoard, sizeof ( anBoardMove ) );
+        ApplyMove ( anBoardMove, pm->anMove, FALSE );
+        PositionKey ( anBoardMove, pm->auch );
 
 	sscanf( pch, " %c", &ch );
 	
@@ -500,7 +509,7 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 
 	/* save "largest" evalsetup */
 
-    if ( cmp_evalsetup ( pesChequer, &pm->esMove ) > 0 )
+    if ( cmp_evalsetup ( pesChequer, &pm->esMove ) < 0 )
 	   memcpy ( pesChequer, &pm->esMove, sizeof ( evalsetup ) );
 
 
@@ -747,7 +756,8 @@ static void RestoreNode( list *pl ) {
                                        &pmr->n.esDouble );
 	    if( ppA )
 		RestoreMoveAnalysis( ppA, pmr->n.fPlayer, &pmr->n.ml,
-				     &pmr->n.iMove, &pmr->n.esChequer );
+				     &pmr->n.iMove, &pmr->n.esChequer,
+                                     &ms );
             /* FIXME: separate st's */
 	    pmr->n.stMove = st;
 	    pmr->n.stCube = st;

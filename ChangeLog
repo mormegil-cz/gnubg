@@ -1,3 +1,9 @@
+Sun May  5 14:25:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* sgf.c (RestoreMoveAnalysis): restore auch (otherwise updateStatcontext will 
+	fail to calculate chequer play errors). Also, fix typo in calculation of 
+	maximum evalsetup.
+
 Sat May  4 13:34:46 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* eval.c (NNevalAction): Complete small neural net speedup via an ugly
