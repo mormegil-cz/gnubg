@@ -878,11 +878,6 @@ static int NewGame( void ) {
 	free( plGame );
 	ListDelete( lMatch.plPrev );
 
-        for ( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext )
-          plGame = pl->p;
-
-        plLastMove = plGame->plPrev;
-
 	return -1;
     }
     

@@ -1,3 +1,10 @@
+Mon Dec 29 23:58:34 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* play.c (NewGame): remove some old code that led
+	to gnubg deleting the current game. I wonder why
+	I originally inserted that code???
+	(bug #7008 reported by Rod Roark)
+
 Mon Dec 29 23:17:20 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* progress.c: move cpp directive.
