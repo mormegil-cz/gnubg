@@ -1,3 +1,8 @@
+Tue Mar 23 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* boards.xml, textures.txt: Added settings for final few 3d designs,
+		tidied up design a bit too.
+
 Mon Mar 22 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Make sure messages shown when docked panels are

@@ -43,11 +43,12 @@
          points0=#FF5F5F;0.20
          points1=#BFBFBF;0.20
 		piecetype=0
+		piecetexturetype=1
 		roundededges=y
 		bgintray=n
 		lighttype=p
-		lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-		lightambient=50 lightdiffuse=70 lightspecular=100
+		lightposx=0.200000 lightposy=1.900000 lightposz=3.300000
+		lightambient=45 lightdiffuse=75 lightspecular=95
 		chequers3d0=#D83F3F;#CC3333;#FF0000;60;80
 		chequers3d1=#333333;#4C4C4C;#3F3F3F;70;80
 		dice3d0=#F22626;#CC3333;#FF0000;100;100;n
@@ -56,13 +57,13 @@
 		dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
 		cube3d=#B2B2BF;#A5A5B2;#CBCCCB;80;0
 		cubetext3d=#000066;#00007F;#00008C;98;100
-		base3d=#007F00;#007200;#000000;128;0;base.bmp
-		points3d0=#FF3233;#DB4C5A;#49181D;128;100;base.bmp
-		points3d1=#F3FBFB;#FDEDF9;#47514A;128;100;base.bmp
-		border3d=#D87226;#D85630;#37465C;128;100;board.bmp
-		hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.bmp
+		base3d=#007F00;#007200;#000000;128;0;felt.png
+		points3d0=#FF3233;#DB4C5A;#49181D;128;100;felt.png
+		points3d1=#F3FBFB;#FDEDF9;#47514A;128;100;felt.png
+		border3d=#D87226;#D85630;#37465C;128;100;alder.png
+		hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
 		numbers3d=#AB78CC;#E7E675;#010101;116;100
-		background3d=#D45588;#933E98;#CA41C7;116;0;base.bmp
+		background3d=#D45588;#933E98;#CA41C7;116;0;felt.png
 	</design>
    </board-design>
 
@@ -91,11 +92,12 @@
          points0=#4CA57F;0.09 
          points1=#4C4C4C;0.20
          piecetype=0
+         piecetexturetype=1
          roundededges=y
 		 bgintray=y
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=0.400000 lightposy=1.600000 lightposz=3.400000
+         lightambient=60 lightdiffuse=60 lightspecular=90
          chequers3d0=#F2F2F2;#E5E4E5;#7F7F7F;90;100
          chequers3d1=#191919;#323232;#7F7F7F;90;100
          dice3d0=#F2F2F2;#E5E4E5;#7F7F7F;90;100;y
@@ -104,13 +106,13 @@
          dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
          cube3d=#D6D6C6;#B5AFA0;#97B787;59;0
          cubetext3d=#000082;#23266B;#4A3166;128;100
-         base3d=#F2E5D8;#EABA5B;#302030;128;0;base3.png
-         points3d0=#4CA57F;#59B28C;#0A0C1C;128;100;base3.png
-         points3d1=#4C4C4C;#595959;#602026;128;100;base3.png
-         border3d=#5A4821;#604F25;#495D79;128;100;board3.bmp
-         hinge3d=#CC915A;#BF7F63;#DAA260;122;0;hinge.bmp
+         base3d=#F2E5D8;#EABA5B;#302030;128;0;stain.png
+         points3d0=#4CA57F;#59B28C;#0A0C1C;128;100;stain.png
+         points3d1=#4C4C4C;#595959;#602026;128;100;stain.png
+         border3d=#5A4821;#604F25;#495D79;128;100;berch.png
+         hinge3d=#CC915A;#BF7F63;#DAA260;122;0;hinge.png
          numbers3d=#E3E3E3;#D0CBCE;#010101;128;100
-         background3d=#C62149;#993559;#1A4312;128;0;board.bmp
+         background3d=#C62149;#993559;#1A4312;128;0;alder.png
       </design>
 
    </board-design>
@@ -139,11 +141,12 @@
          points0=#FF5F5F;0.20
          points1=#BFBFBF;0.20
          piecetype=0
+         piecetexturetype=1
          roundededges=y
 		 bgintray=n
          lighttype=d
-         lightposx=3.000000 lightposy=0.000000 lightposz=3.600000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=3.000000 lightposy=0.000000 lightposz=3.500000
+         lightambient=40 lightdiffuse=75 lightspecular=80
          chequers3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100
          chequers3d1=#0C0C0C;#262626;#E5E5E5;100;100
          dice3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100;y
@@ -152,13 +155,13 @@
          dot3d1=#FFFFFF;#E5E5E5;#E5E5E5;100;100
          cube3d=#FFFFFF;#E0E0E0;#E5E5E5;81;0
          cubetext3d=#000000;#000000;#000000;100;100
-         base3d=#FFD872;#F9C46C;#FFDB5E;61;0;aboard2.bmp
-         points3d0=#BF7200;#B26600;#995E3F;100;100;aboard.bmp
-         points3d1=#753B00;#7D4400;#9E510C;100;100;aboard.bmp
-         border3d=#3F2400;#4C2603;#703D26;71;100;aboard2.bmp
-         hinge3d=#895B49;#7D613D;#EACE8E;100;0;hinge.bmp
+         base3d=#FFD872;#F9C46C;#FFDB5E;61;0;pine2.png
+         points3d0=#BF7200;#B26600;#995E3F;100;100;pine.png
+         points3d1=#753B00;#7D4400;#9E510C;100;100;pine.png
+         border3d=#3F2400;#4C2603;#703D26;71;100;pine2.png
+         hinge3d=#895B49;#7D613D;#EACE8E;100;0;hinge.png
          numbers3d=#FFFFFF;#FFFFFF;#E5E5E5;100;100
-         background3d=#FBFFB5;#FEFFAA;#FEFF7E;100;0;aboard.bmp
+         background3d=#FBFFB5;#FEFFAA;#FEFF7E;100;0;pine.png
        </design>
 
    </board-design>
@@ -187,6 +190,7 @@
          points0=#980000;0.09 
          points1=#000072;0.20      
          piecetype=0
+         piecetexturetype=1
          roundededges=n
 		 bgintray=y
          lighttype=p
@@ -203,10 +207,10 @@
          base3d=#BFBFBF;#969696;#505050;100;0
          points3d0=#D02A30;#BB3437;#F1A6AD;100;100
          points3d1=#3A38B9;#6363C8;#3B3F98;100;100
-         border3d=#85581D;#734C16;#3F3113;100;100;base.bmp
-         hinge3d=#DBDC46;#FFFA44;#DADC9F;100;0;hinge.bmp
+         border3d=#85581D;#734C16;#3F3113;100;100;felt.png
+         hinge3d=#DBDC46;#FFFA44;#DADC9F;100;0;hinge.png
          numbers3d=#FFFFFF;#FFFFFF;#FFFFFF;100;100
-         background3d=#DD47FF;#A83097;#EDEDED;100;0;board.bmp
+         background3d=#DD47FF;#A83097;#EDEDED;100;0;alder.png
       </design>
 
    </board-design>
@@ -236,11 +240,12 @@
          points0=#007F00;0.09
          points1=#FFFFFF;0.09
          piecetype=1
+         piecetexturetype=1
          roundededges=y
 		 bgintray=n
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=0.500000 lightposy=2.100000 lightposz=2.500000
+         lightambient=55 lightdiffuse=65 lightspecular=100
          chequers3d0=#005300;#005600;#3FB651;100;95
          chequers3d1=#B2B2A3;#A5A2A4;#7F7F7F;100;100
          dice3d0=#005300;#005600;#3FB651;100;95;y
@@ -249,13 +254,13 @@
          dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
          cube3d=#E3E5DA;#E4E9C9;#97B787;93;0
          cubetext3d=#000093;#3A4589;#4A3166;128;100
-         base3d=#AD7521;#B7661B;#000000;128;0;base2.bmp
-         points3d0=#005E00;#007200;#004900;128;100;base2.bmp
-         points3d1=#FFFFFF;#CECECE;#7F7F7F;118;100;base2.bmp
-         border3d=#005E00;#003F00;#002D00;128;100;board2.bmp
-         hinge3d=#CC915A;#BF7F63;#DAA260;122;100;hinge.bmp
+         base3d=#AD7521;#B7661B;#000000;128;0;suede.png
+         points3d0=#005E00;#007200;#004900;128;100;suede.png
+         points3d1=#FFFFFF;#CECECE;#7F7F7F;118;100;suede.png
+         border3d=#005E00;#003F00;#002D00;128;100;marble.png
+         hinge3d=#CC915A;#BF7F63;#DAA260;122;100;hinge.png
          numbers3d=#9E9E9E;#939092;#010101;128;100
-         background3d=#5B993F;#4B7748;#1A4312;128;0;base2.bmp
+         background3d=#5B993F;#4B7748;#1A4312;128;0;suede.png
       </design>
 
    </board-design>
@@ -285,11 +290,12 @@
          points0=#D7DFDF;0.00
          points1=#878E8F;0.00
          piecetype=0
+         piecetexturetype=1
          roundededges=y
 		 bgintray=y
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=0.100000 lightposy=1.500000 lightposz=3.000000
+         lightambient=50 lightdiffuse=65 lightspecular=90
          chequers3d0=#FFFFFF;#CCCCCC;#CCCCCC;60;50
          chequers3d1=#000000;#4C4C4C;#3F3F3F;70;50
          dice3d0=#005E00;#001C00;#007200;100;80;n
@@ -298,14 +304,13 @@
          dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
          cube3d=#CCCCDB;#A5A5B2;#CBCCCB;80;0
          cubetext3d=#000066;#00007F;#00008C;98;100
-         base3d=#8EAFB7;#A0C6CE;#8AD6AB;128;0;base.bmp
+         base3d=#8EAFB7;#A0C6CE;#8AD6AB;128;0;felt.png
          points3d0=#D6DDDD;#DBE5E5;#49181D;128;100
          points3d1=#878E8E;#96A8A8;#47514A;128;100
-         border3d=#FC7226;#ED5630;#37465C;128;100;board.bmp
-         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.bmp
+         border3d=#FC7226;#ED5630;#37465C;128;100;alder.png
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
          numbers3d=#AB78CC;#E7E675;#010101;116;100
          background3d=#A2B2D4;#609895;#68ACCA;116;0
-
    </design>
 
    </board-design>
@@ -339,21 +344,21 @@
          roundededges=y
 		 bgintray=n
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
-         chequers3d0=#383AAD;#495ECC;#CCCCCC;60;100;checker.bmp
-         chequers3d1=#D1BF23;#B4B94E;#BDBDBD;70;100;checker.bmp
+         lightposx=1.000000 lightposy=1.000000 lightposz=1.500000
+         lightambient=60 lightdiffuse=50 lightspecular=100
+         chequers3d0=#383AAD;#495ECC;#CCCCCC;60;100;swirl.png
+         chequers3d1=#D1BF23;#B4B94E;#BDBDBD;70;100;swirl.png
          dice3d0=#383AAD;#28288D;#4B48DE;100;100;n
          dice3d1=#D1BF23;#C19E44;#494949;70;100;n
          dot3d0=#DEDEDE;#BFBFBF;#4C4F4C;128;100
          dot3d1=#282828;#40422E;#3F3F3F;128;100
          cube3d=#AFE5A8;#A7D671;#CBCCCB;80;0
          cubetext3d=#66204F;#69297F;#00008C;98;100
-         base3d=#FFFCC3;#C7CE4F;#000000;128;0;base2.bmp
+         base3d=#FFFCC3;#C7CE4F;#000000;128;0;suede.png
          points3d0=#49D33F;#43A02B;#345A0F;128;100
          points3d1=#0A680F;#1B5C1E;#47514A;128;100
          border3d=#308466;#37A274;#42794E;110;100
-         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.bmp
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
          numbers3d=#CCB76A;#C2E72E;#010101;116;100
          background3d=#C8D022;#CAD02C;#385D6E;116;0
       </design> 
@@ -384,11 +389,12 @@
          points0=#9A6750;0.09
          points1=#5F7287;0.09 
          piecetype=0
+         piecetexturetype=1
          roundededges=y
 		 bgintray=y
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=0.500000 lightposy=1.400000 lightposz=1.500000
+         lightambient=30 lightdiffuse=80 lightspecular=80
          chequers3d0=#932119;#963F34;#CCCCCC;100;100
          chequers3d1=#E8EDEF;#E8E8E8;#3F3F3F;100;100
          dice3d0=#D13FBA;#762F8D;#943EBB;100;100;n
@@ -396,14 +402,14 @@
          dot3d0=#C6C6C6;#BFBFBF;#4C4F4C;128;100
          dot3d1=#EFEFEF;#A4ABA1;#1B1B1B;128;100
          cube3d=#F7C60A;#AA802D;#CBCCCB;80;0
-         cubetext3d=#475E6C;#446281;#00008C;98;100
-         base3d=#EFB53A;#BF9241;#203020;128;0;board.bmp
-         points3d0=#99664F;#966C37;#49181D;128;100;aboard.bmp
-         points3d1=#5E7287;#6C7979;#47514A;128;100;aboard.bmp
-         border3d=#895436;#734334;#37465C;128;100;board3.bmp
-         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.bmp
-         numbers3d=#AB78CC;#E7E675;#010101;116;100
-         background3d=#9A3F2B;#715A16;#68ACCA;116;0;base.bmp
+         cubetext3d=#2B196C;#403681;#00008C;98;100
+         base3d=#EFB53A;#BF9241;#203020;128;0;alder.png
+         points3d0=#99664F;#966C37;#49181D;128;100;pine.png
+         points3d1=#5E7287;#6C7979;#47514A;128;100;pine.png
+         border3d=#895436;#734334;#37465C;128;100;berch.png
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
+         numbers3d=#CCAD91;#E7E675;#010101;116;100
+         background3d=#9A3F2B;#715A16;#68ACCA;116;0;felt.png
       </design> 
 
    </board-design>
@@ -436,21 +442,21 @@
          roundededges=y
 		 bgintray=n
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
-         chequers3d0=#EFF7FF;#E5E5E5;#CCCCCC;100;100;checker2.bmp
-         chequers3d1=#3F4FAF;#556CDE;#3F3F3F;100;100;checker2.bmp
+         lightposx=1.100000 lightposy=2.200000 lightposz=3.300000
+         lightambient=55 lightdiffuse=60 lightspecular=70
+         chequers3d0=#EFF7FF;#E5E5E5;#CCCCCC;100;100;wood.png
+         chequers3d1=#3F4FAF;#556CDE;#3F3F3F;100;100;wood.png
          dice3d0=#FFFFFF;#BABABA;#B4B8BB;100;100;n
          dice3d1=#6363E5;#330BB1;#3F3F3F;70;100;n
          dot3d0=#000000;#282828;#4C4F4C;128;100
          dot3d1=#EFEFEF;#D1DACD;#1B1B1B;128;100
          cube3d=#F9F7FF;#AAA5AA;#CBCCCB;80;0
          cubetext3d=#475E6C;#446281;#00008C;98;100
-         base3d=#F4F4FF;#F3FCFF;#000000;128;0;base.bmp
-         points3d0=#8C8C8E;#96938E;#000000;128;100;base.bmp
-         points3d1=#B5B5B5;#9BADAD;#000000;128;100;base.bmp
+         base3d=#F4F4FF;#F3FCFF;#000000;128;0;felt.png
+         points3d0=#8C8C8E;#96938E;#000000;128;100;felt.png
+         points3d1=#B5B5B5;#9BADAD;#000000;128;100;felt.png
          border3d=#CED1FF;#DBD6FF;#37465C;128;100
-         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.bmp
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
          numbers3d=#894C32;#8D4023;#010101;116;100
          background3d=#C5C8AB;#9DAD9C;#68ACCA;116;0
       </design> 
@@ -482,11 +488,12 @@
          points0=#FFFEFE;0.00 
          points1=#010101;0.09
          piecetype=1
+         piecetexturetype=1
          roundededges=n
 		 bgintray=y
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=1.600000 lightposy=1.600000 lightposz=3.400000
+         lightambient=45 lightdiffuse=70 lightspecular=100
          chequers3d0=#F93232;#BB5343;#010101;128;100
          chequers3d1=#7AE0E2;#8FBADB;#010101;128;100
          dice3d0=#FF3838;#E0201A;#7B1913;100;100;n
@@ -534,8 +541,8 @@
          roundededges=y
 		 bgintray=n
          lighttype=p
-         lightposx=3.000000 lightposy=1.500000 lightposz=4.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=2.900000 lightposy=1.400000 lightposz=4.500000
+         lightambient=60 lightdiffuse=60 lightspecular=75
          chequers3d0=#B5B5C9;#B5918C;#858084;81;100
          chequers3d1=#DBA52B;#ADAD0F;#A0A0A0;100;100
          dice3d0=#B5B5C9;#B5918C;#858084;81;100;y
@@ -544,11 +551,11 @@
          dot3d1=#FFFFFF;#E5E5E5;#E5E5E5;100;100
          cube3d=#E5E5E5;#C1C1C1;#E5E5E5;81;0
          cubetext3d=#000000;#000000;#000000;100;100
-         base3d=#020533;#514F6D;#5B5B5B;61;0;base.bmp
-         points3d0=#FF6060;#EA7267;#C5C5C5;100;100;base.bmp
-         points3d1=#7CA8C9;#4FA0DD;#C5C5C5;100;100;base.bmp
-         border3d=#BF4E35;#BF694A;#8B6234;100;100;aboard.bmp
-         hinge3d=#DEDD5D;#E3CC8A;#C6B985;100;0;hinge.bmp
+         base3d=#020533;#514F6D;#5B5B5B;61;0;felt.png
+         points3d0=#FF6060;#EA7267;#C5C5C5;100;100;felt.png
+         points3d1=#7CA8C9;#4FA0DD;#C5C5C5;100;100;felt.png
+         border3d=#BF4E35;#BF694A;#8B6234;100;100;pine.png
+         hinge3d=#DEDD5D;#E3CC8A;#C6B985;100;0;hinge.png
          numbers3d=#FFFFFF;#FFFFFF;#E5E5E5;100;100
          background3d=#9BB149;#8D4B7D;#6E6E6E;100;0;Water01.png
    </design>
@@ -584,7 +591,7 @@
 		 bgintray=y
          lighttype=d
          lightposx=-0.700000 lightposy=3.500000 lightposz=4.300000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightambient=45 lightdiffuse=60 lightspecular=100
          chequers3d0=#98BFA5;#B5C69E;#43A268;81;100
          chequers3d1=#992632;#A2423B;#AA412A;100;100
          dice3d0=#98BFA5;#B5C69E;#43A268;81;100;y
@@ -592,12 +599,12 @@
          dot3d0=#005600;#005B00;#000000;100;100
          dot3d1=#F4ED07;#E5DC23;#BDBDBD;100;100
          cube3d=#CEA507;#E0BF00;#E5E5E5;98;0
-         cubetext3d=#6B52AA;#382C71;#000000;100;100
+         cubetext3d=#8328AA;#2F1645;#000000;100;100
          base3d=#6B9956;#3A873C;#686868;95;0
-         points3d0=#C9FCDB;#86EBBD;#838383;100;100;aboard2.bmp
-         points3d1=#B52D3D;#9E3533;#717171;100;100;aboard2.bmp
-         border3d=#AA814C;#756645;#606060;102;100;base3.bmp
-         hinge3d=#CC975B;#DAB056;#FFE09A;100;0;hinge2.bmp
+         points3d0=#C9FCDB;#86EBBD;#838383;100;100;pine2.png
+         points3d1=#B52D3D;#9E3533;#717171;100;100;pine2.png
+         border3d=#AA814C;#756645;#606060;102;100;stain.png
+         hinge3d=#CC975B;#DAB056;#FFE09A;100;0;hinge2.png
          numbers3d=#D2D2D2;#D2D2D2;#E5E5E5;100;100
          background3d=#E06A35;#AA5344;#515151;100;0;Grass01.png
       </design> 
@@ -634,21 +641,21 @@
 		 bgintray=n
          lighttype=p
          lightposx=1.000000 lightposy=1.700000 lightposz=5.000000
-         lightambient=50 lightdiffuse=70 lightspecular=100
-         chequers3d0=#FFFFFF;#FFFFFF;#E5E2E2;81;100;checker2.bmp
-         chequers3d1=#F71919;#FF210F;#AA412A;100;100;checker2.bmp
+         lightambient=55 lightdiffuse=55 lightspecular=80
+         chequers3d0=#FFFFFF;#FFFFFF;#E5E2E2;81;100;wood.png
+         chequers3d1=#F71919;#FF210F;#AA412A;100;100;wood.png
          dice3d0=#FFFFFF;#FFFFFF;#E5E2E2;81;100;y
          dice3d1=#F71919;#FF210F;#AA412A;100;100;y
          dot3d0=#000A00;#111111;#000000;100;100
          dot3d1=#E8F4D6;#FFF4FF;#BDBDBD;100;100
          cube3d=#E0FCE2;#E0BFDB;#E5E5E5;98;0
          cubetext3d=#6B52AA;#382C71;#000000;100;100
-         base3d=#74B172;#49AA4B;#000000;120;0;base2.bmp
-         points3d0=#DD5151;#DD5B56;#000000;100;100;base2.bmp
-         points3d1=#4C4C4C;#494C49;#000000;100;100;base2.bmp
-         border3d=#735733;#62553A;#606060;102;100;board3.bmp
-         hinge3d=#E3E042;#D4AB53;#FFE09A;100;0;hinge2.bmp
-         numbers3d=#D2D2D2;#D2D2D2;#E5E5E5;100;100
+         base3d=#74B172;#49AA4B;#000000;120;0;suede.png
+         points3d0=#DD5151;#DD5B56;#000000;100;100;suede.png
+         points3d1=#4C4C4C;#494C49;#000000;100;100;suede.png
+         border3d=#735733;#62553A;#606060;102;100;berch.png
+         hinge3d=#E3E042;#D4AB53;#FFE09A;100;0;hinge2.png
+         numbers3d=#C8D294;#B3E3E7;#553D43;128;100
          background3d=#6A2AAF;#40487B;#515151;100;0;wavesand01.png
       </design> 
   
@@ -683,8 +690,8 @@
          roundededges=y
 		 bgintray=y
          lighttype=p
-         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=1.600000 lightposy=1.200000 lightposz=1.500000
+         lightambient=30 lightdiffuse=80 lightspecular=100
          chequers3d0=#F2F2F2;#EAEAEA;#FFFFFF;100;100
          chequers3d1=#478E49;#4C7C3F;#3F3F3F;98;100
          dice3d0=#F2F2F2;#EAEAEA;#FFFFFF;100;100;y
@@ -693,14 +700,13 @@
          dot3d1=#E8F4EA;#D1D8CE;#1B1B1B;128;100
          cube3d=#D1D6C9;#384058;#CBCCCB;80;0
          cubetext3d=#7D2A68;#926E58;#00008C;98;100
-         base3d=#D0B15D;#D4B935;#334F3F;128;0;base2.bmp
+         base3d=#D0B15D;#D4B935;#334F3F;128;0;suede.png
          points3d0=#CC7F00;#C18408;#49181D;128;100;wavesand01.png
          points3d1=#823A00;#963F00;#47514A;128;100;wavesand01.png
-         border3d=#161616;#1C1C1C;#37465C;128;100;board2.bmp
-         hinge3d=#772534;#81342B;#E9C944;115;0;hinge.bmp
+         border3d=#161616;#1C1C1C;#37465C;128;100;marble.png
+         hinge3d=#772534;#81342B;#E9C944;115;0;hinge.png
          numbers3d=#A6A847;#E7DCAE;#010101;116;100
-         background3d=#82AD61;#62776E;#CA6A6D;116;0;board.bmp
-
+         background3d=#82AD61;#62776E;#CA6A6D;116;0;alder.png
       </design>
 
    </board-design>
@@ -735,7 +741,7 @@
          bgintrays=y
          lighttype=p
          lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightambient=50 lightdiffuse=65 lightspecular=80
          chequers3d0=#E0E0E0;#E8E8E8;#5E0000;75;100
          chequers3d1=#2816BF;#201A4C;#3F3F3F;70;100
          dice3d0=#E0E0E0;#E8E8E8;#5E0000;75;100;y
@@ -744,14 +750,13 @@
          dot3d1=#E8E8E8;#E5EDE5;#1B1B1B;128;100
          cube3d=#611FBF;#1B92B2;#CBCCCB;80;0
          cubetext3d=#C1D03F;#E3B866;#00008C;98;100
-         base3d=#FFFFFF;#FFFFFF;#263B2F;128;0;aboard.bmp
-         points3d0=#000000;#333232;#49181D;128;100;aboard.bmp
-         points3d1=#F30A0A;#9E3426;#47514A;128;100;aboard.bmp
+         base3d=#FFFFFF;#FFFFFF;#263B2F;128;0;pine.png
+         points3d0=#000000;#333232;#49181D;128;100;pine.png
+         points3d1=#F30A0A;#9E3426;#47514A;128;100;pine.png
          border3d=#191919;#333332;#37465C;128;100
-         hinge3d=#F2D05B;#BF9664;#E9C944;63;0;hinge.bmp
+         hinge3d=#F2D05B;#BF9664;#E9C944;63;0;hinge.png
          numbers3d=#C4CCBC;#E7E0D5;#010101;116;100
-         background3d=#30D427;#51D2BA;#CA41C7;116;0;base.bmp
-
+         background3d=#30D427;#51D2BA;#CA41C7;116;0;felt.png
    </design>
 
    </board-design>
@@ -781,7 +786,28 @@
         cube=#E5C997
         points0=#AD2323;0.20 
         points1=#D4A527;0.09
-
+         piecetype=0
+         piecetexturetype=0
+         roundededges=n
+         bgintrays=n
+         lighttype=p
+         lightposx=0.600000 lightposy=0.600000 lightposz=3.600000
+         lightambient=35 lightdiffuse=80 lightspecular=90
+         chequers3d0=#EAD666;#CCC693;#42424C;91;100;wood.png
+         chequers3d1=#912621;#911E16;#3F3F3F;70;100;wood.png
+         dice3d0=#EAD666;#CCC693;#42424C;91;100;y
+         dice3d1=#912621;#911E16;#3F3F3F;70;100;y
+         dot3d0=#7C0C14;#75070A;#4C4F4C;128;100
+         dot3d1=#E5CEA8;#EDD6A5;#1B1B1B;128;100
+         cube3d=#E2BA91;#D8BA93;#CBCCCB;80;0
+         cubetext3d=#2F4C81;#0000A2;#00008C;98;100
+         base3d=#FFFFFF;#FFFFFF;#000000;128;0;ash.png
+         points3d0=#FFA5A0;#DB4C5A;#49181D;128;100;maple.png
+         points3d1=#FFE8A0;#FFD893;#47514A;128;100;maple.png
+         border3d=#FFFFFF;#FFFFFF;#37465C;128;100;oak.png
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
+         numbers3d=#7A7889;#E7E675;#010101;116;100
+         background3d=#D45588;#933E98;#CA41C7;116;0;redwood.png
      </design>
 
   </board-design>
@@ -809,7 +835,28 @@
          cube=#F3F12E
          points0=#309829;0.09
          points1=#FFFFFF;0.20
-
+         piecetype=0
+         piecetexturetype=0
+         roundededges=y
+         bgintrays=y
+         lighttype=p
+         lightposx=0.700000 lightposy=0.700000 lightposz=3.800000
+         lightambient=50 lightdiffuse=70 lightspecular=100
+         chequers3d0=#EADB70;#CCC693;#42424C;91;100
+         chequers3d1=#164919;#639245;#3F3F3F;70;100
+         dice3d0=#EADB70;#CCC693;#42424C;91;100;y
+         dice3d1=#164919;#639245;#3F3F3F;70;100;y
+         dot3d0=#010000;#260203;#4C4F4C;128;100
+         dot3d1=#E5E8F2;#EDF7FF;#1B1B1B;128;100
+         cube3d=#C9E2A4;#D4D8BF;#CBCCCB;80;0
+         cubetext3d=#1C2D4D;#8C3BA2;#00008C;98;100
+         base3d=#FDDD77;#F5C17D;#000000;128;0;felt.png
+         points3d0=#72FF72;#72FF5A;#49181D;128;100;felt.png
+         points3d1=#FFFFFF;#FFFFFF;#47514A;128;100;felt.png
+         border3d=#B5EDA8;#A8E5B2;#37465C;128;100;Grass01.png
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
+         numbers3d=#8CA46F;#A0B586;#010101;116;100
+         background3d=#8C6ED4;#682C6C;#CA41C7;116;0;maple.png
    </design>
 
    </board-design>
@@ -837,6 +884,28 @@
          cube=#B1C5CE
          points0=#E9CED1;0.00 
          points1=#A0ADD6;0.00 
+         piecetype=0
+         piecetexturetype=0
+         roundededges=y
+         bgintrays=n
+         lighttype=p
+         lightposx=3.100000 lightposy=1.500000 lightposz=4.500000
+         lightambient=50 lightdiffuse=75 lightspecular=70
+         chequers3d0=#FFE5E5;#FFDDDD;#858084;81;100
+         chequers3d1=#910000;#A0000F;#A0A0A0;100;100
+         dice3d0=#FFE5E5;#FFDDDD;#858084;81;100;y
+         dice3d1=#910000;#A0000F;#A0A0A0;100;100;y
+         dot3d0=#000000;#000000;#000000;100;100
+         dot3d1=#FFFFFF;#E5E5E5;#E5E5E5;100;100
+         cube3d=#B0B5A1;#BBB599;#E5E5E5;81;0
+         cubetext3d=#372F55;#312343;#000000;100;100
+         base3d=#FFE5BC;#FFDBC9;#010101;128;0;suede.png
+         points3d0=#DBB2C4;#EAA8B2;#010101;128;100;suede.png
+         points3d1=#A0AABC;#96BAC6;#010101;128;100;suede.png
+         border3d=#872561;#8B5160;#8B6234;100;100;oak.png
+         hinge3d=#DED761;#E3CC8A;#C6B985;100;0;hinge.png
+         numbers3d=#7CA697;#6A9467;#010101;100;100
+         background3d=#9BB149;#8D4B7D;#6E6E6E;100;0;ash.png
       </design>
 
    </board-design>
@@ -844,17 +913,33 @@
    <board-design>
 
       <about>
-         <title>Nature (3d)</title>
+         <title>Nature</title>
          <author>Albert Silver</author>
       </about>
 
       <design>
+         board=#77B3C5;0.09
+         border=#003F00
+         wood=ebony
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#FFDDBC;1.00;1.00;0.20;3.00
+         chequers1=#C4590A;1.00;1.50;1.00;30.00
+         dice0=#F12525;0.20;3.00;y
+         dice1=#00000B;1.00;30.00;y
+         dot0=#010101
+         dot1=#EDEDED
+         cube=#F7F7F7
+         points0=#58BB58;0.20
+         points1=#265126;0.20
          piecetype=0
+         piecetexturetype=1
          roundededges=y
 		 bgintray=y
          lighttype=d
-         lightposx=3.000000 lightposy=0.000000 lightposz=3.600000
-         lightambient=50 lightdiffuse=70 lightspecular=100
+         lightposx=3.000000 lightposy=0.200000 lightposz=2.600000
+         lightambient=55 lightdiffuse=70 lightspecular=70
          chequers3d0=#FFDFBC;#FBD8B6;#FFFFFF;81;100
          chequers3d1=#C55909;#AD4D0F;#E0E0E0;100;100
          dice3d0=#FFDFBC;#FBD8B6;#FFFFFF;81;100;y
@@ -867,7 +952,7 @@
          points3d0=#7DDC7D;#59D267;#C5C5C5;100;100;Grass01.png
          points3d1=#1E661E;#106A13;#C5C5C5;100;100;Grass01.png
          border3d=#FFFFFF;#FFFFFF;#FFFFFF;71;100;EarthSand01.png
-         hinge3d=#CC975B;#DAB056;#FFE09A;100;0;Hinge2.bmp
+         hinge3d=#CC975B;#DAB056;#FFE09A;100;0;Hinge2.png
          numbers3d=#FFFFFF;#FFFFFF;#E5E5E5;100;100
          background3d=#FFFFFF;#FFFFFF;#FFFFFF;100;0;wavesand01.png
       </design>

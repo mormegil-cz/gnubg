@@ -1,55 +1,67 @@
 2
-base.bmp
-bmp
-Test base 1
-General
-base2.bmp
-bmp
-Test base 2
-General
-base3.bmp
-bmp
-Test base 3
-General
-base3.png
+oak.png
 png
-Test base 3 png
+Oak wood
 General
-board.bmp
-bmp
-Test board 1
+ash.png
+png
+Ash wood
 General
-board2.bmp
-bmp
-Test board 2
+redwood.png
+png
+Red wood
 General
-board3.bmp
-bmp
-Test board 3
+maple.png
+png
+Maple wood
 General
-checker.bmp
-bmp
-Test chequer 1
+felt.png
+png
+Felt
+General
+suede.png
+png
+Suede
+General
+stain.png
+png
+Wood stain
+General
+alder.png
+png
+Alder wood
+General
+marble.png
+png
+Marble
+General
+berch.png
+png
+Berch
+General
+swirl.png
+png
+Swirl
 Piece
-checker2.bmp
-bmp
-Test chequer 2
+wood.png
+png
+Wood
 Piece
-hinge.bmp
-bmp
-Test hinge
+hinge.png
+png
+Hinge 1
 Hinge
-hinge2.bmp
-bmp
-Test hinge 2
+hinge2.png
+png
+Hinge 2
 Hinge
-aboard.bmp
-bmp
-alb b1
+pine.png
+png
+Pine wood
 general
-aboard2.bmp
-bmp
-alb b2
+pine2.png
+png
+Pine wood 2
 general
 EarthSand01.png
 png

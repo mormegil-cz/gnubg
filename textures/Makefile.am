@@ -1,6 +1,6 @@
-texturefiles = base2.bmp base3.bmp base3.png base.bmp board2.bmp \
-               board3.bmp board.bmp checker2.bmp checker.bmp hinge.bmp \
-               logo2.bmp logo.bmp aboard.bmp aboard2.bmp total.bmp hinge2.bmp \
+texturefiles = logo2.bmp logo.bmp total.bmp alder.png ash.png berch.png \
+				felt.png hinge.png hinge2.png maple.png marble.png oak.png \
+				pine.png pine2.png redwood.png stain.png suede.png swirl.png \
                Grass01.png wavesand01.png Water01.png EarthSand01.png
 texturesdir = $(pkgdatadir)/textures
 textures_DATA = $(texturefiles)
