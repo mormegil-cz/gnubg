@@ -642,6 +642,9 @@ command cER = {
 #endif /* HAVE_LIBPNG */
     { "pos", CommandNotImplemented, N_("Save the current position in .pos "
       "format"), szFILENAME, &cFilename },
+    { "snowietxt", CommandExportPositionSnowieTxt,
+      N_("Save the current position in Snowie .txt format"), 
+      szFILENAME, &cFilename },
     { "text", CommandExportPositionText,
       N_("Save the current position in text format"), 
       szFILENAME, &cFilename },

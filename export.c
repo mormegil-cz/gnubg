@@ -551,3 +551,135 @@ CommandExportPositionPNG ( char *sz ) {
 
 
 #endif /* HAVE_LIBPNG */
+
+
+/*
+ * For documentation of format, see ImportSnowieTxt in import.c
+ */
+
+static void
+ExportSnowieTxt( FILE *pf, const matchstate *pms ) {
+
+  int i, j;
+
+  /* length of match */
+
+  fprintf( pf, "%d;", pms->nMatchTo );
+
+  /* Jacoby rule */
+
+  fprintf( pf, "%d;", ( ! pms->nMatchTo && fJacoby ) ? 1 : 0 );
+
+  /* unknown field (perhaps variant */
+
+  fputs( "0;", pf );
+
+  /* unknown field */
+
+  fprintf( pf, "%d;", pms->nMatchTo ? 0 : 1 );
+
+  /* player on roll (0 = 1st player) */
+
+  fprintf( pf, "%d;", pms->fMove );
+
+  /* player names */
+  
+  fprintf( pf, "%s;%s;", ap[ pms->fMove ].szName, ap[ ! pms->fMove ].szName );
+
+  /* crawford game */
+
+  i = pms->nMatchTo &&
+    ( ( pms->anScore[ 0 ] == ( pms->nMatchTo - 1 ) ) ||
+      ( pms->anScore[ 1 ] == ( pms->nMatchTo - 1 ) ) ) && 
+    pms->fCrawford && ! pms->fPostCrawford;
+
+  fprintf( pf, "%d;", i );
+
+  /* scores */
+
+  fprintf( pf, "%d;%d;", 
+           pms->anScore[ pms->fMove ], pms->anScore[ ! pms->fMove ] );
+
+  /* cube value */
+
+  fprintf( pf, "%d;", pms->nCube );
+
+  /* cube owner */
+
+  if ( pms->fCubeOwner == -1 )
+    i = 0;
+  else if ( pms->fCubeOwner == pms->fMove )
+    i = 1;
+  else
+    i = -1;
+
+  fprintf( pf, "%d;", i );
+
+  /* chequers on the bar for player on roll */
+
+  fprintf( pf, "%d;", - pms->anBoard[ 0 ][ 24 ] );
+
+  /* chequers on the board */
+
+  for ( i = 0; i < 24; ++i ) {
+    if ( pms->anBoard[ 1 ][ i ] )
+      j = pms->anBoard[ 1 ][ i ];
+    else
+      j = - pms->anBoard[ 0 ][ 23 - i ];
+
+    fprintf( pf, "%d;", j );
+
+  }
+
+  /* chequers on the bar for opponent */
+
+  fprintf( pf, "%d;", pms->anBoard[ 1 ][ 24 ] );
+
+  /* dice */
+
+  fprintf( pf, "%d;%d;", 
+           ( pms->anDice[ 0 ] > 0 ) ? pms->anDice[ 0 ] : 0,
+           ( pms->anDice[ 1 ] > 0 ) ? pms->anDice[ 1 ] : 0 );
+
+  fputs( "\n", pf );
+
+
+}
+
+
+extern void
+CommandExportPositionSnowieTxt( char *sz ) {
+
+    FILE *pf;
+	
+    sz = NextToken( &sz );
+    
+    if( ms.gs == GAME_NONE ) {
+	outputl( _("No game in progress (type `new game' to start one).") );
+	return;
+    }
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a file to export to (see `help export "
+		 "position snowietxt').") );
+	return;
+    }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	outputerr( sz );
+	return;
+    }
+
+    ExportSnowieTxt( pf, &ms );
+
+    if( pf != stdout )
+	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_SNOWIE_TXT );
+
+}
