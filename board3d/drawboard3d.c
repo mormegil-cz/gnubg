@@ -1004,10 +1004,11 @@ void drawSpecialPieces(BoardData* bd)
 
 	if (blend)
 	{	/* Draw back of piece separately */
-		glEnable(GL_BLEND);
 		glCullFace(GL_FRONT);
+		glEnable(GL_BLEND);
 		renderSpecialPieces(bd);
 		glCullFace(GL_BACK);
+		glEnable(GL_BLEND);
 	}
 	renderSpecialPieces(bd);
 
@@ -1042,7 +1043,6 @@ void drawPieces(BoardData* bd)
 
 	if (blend)
 	{	/* Draw back of piece separately */
-		glEnable(GL_BLEND);
 		glCullFace(GL_FRONT);
 
 		setMaterial(&bd->chequerMat[0]);
@@ -1050,6 +1050,7 @@ void drawPieces(BoardData* bd)
 		{
 			for (j = 1; j <= -bd->points[i]; j++)
 			{
+				glEnable(GL_BLEND);
 				drawPiece(bd, i, j);
 			}
 		}
@@ -1058,6 +1059,7 @@ void drawPieces(BoardData* bd)
 		{
 			for (j = 1; j <= bd->points[i]; j++)
 			{
+				glEnable(GL_BLEND);
 				drawPiece(bd, i, j);
 			}
 		}
@@ -1069,6 +1071,8 @@ void drawPieces(BoardData* bd)
 	{
 		for (j = 1; j <= -bd->points[i]; j++)
 		{
+			if (blend)
+				glEnable(GL_BLEND);
 			drawPiece(bd, i, j);
 		}
 	}
@@ -1077,10 +1081,11 @@ void drawPieces(BoardData* bd)
 	{
 		for (j = 1; j <= bd->points[i]; j++)
 		{
+			if (blend)
+				glEnable(GL_BLEND);
 			drawPiece(bd, i, j);
 		}
 	}
-
 	if (blend)
 		glDisable(GL_BLEND);
 

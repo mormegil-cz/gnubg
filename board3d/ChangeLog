@@ -1,3 +1,7 @@
+Tue Nov 18 12:38:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c: Fixed chequer transparancy problem
+
 Mon Oct 20 10:38:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* drawboard3d.c, misc3d.c: Make chequers look smoother
