@@ -27,6 +27,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "backgammon.h"
 #include "dice.h"
