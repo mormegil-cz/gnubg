@@ -47,7 +47,9 @@ typedef struct _rollswidget {
 
   GtkWidget *psw;   /* the scrolled window */
   GtkWidget *ptv;   /* the tree widget */
+  GtkWidget *pDialog, *pCancel, *pScale;
     
+  int closing;
   evalcontext *pec;
   matchstate *pms;
   int nDepth; /* current depth */
@@ -95,6 +97,8 @@ add_level ( GtkTreeStore *model, GtkTreeIter *iter,
       if ( n ) {
 
         add_level ( model, &child_iter, n - 1, an, pec, &ci, ! fInvert, ar );
+		if (fInterrupt)
+			return;
 
       }
       else {
@@ -205,12 +209,16 @@ create_model ( const int n, evalcontext *pec, matchstate *pms ) {
 
   ProgressEnd ();
 
-  gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE ( model ),
-                                     2, sort_func, NULL, NULL );
-  gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (model), 
-                                        2, GTK_SORT_DESCENDING);
-  return GTK_TREE_MODEL ( model );
-
+  if (!fInterrupt)
+  {
+	gtk_tree_sortable_set_sort_func ( GTK_TREE_SORTABLE ( model ),
+										2, sort_func, NULL, NULL );
+	gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (model), 
+											2, GTK_SORT_DESCENDING);
+	return GTK_TREE_MODEL ( model );
+  }
+  else
+	  return NULL;
 }
 
 
@@ -228,6 +236,9 @@ RollsTree ( const int n, evalcontext *pec, matchstate *pms ) {
   };
 
   pm = create_model( n, pec, pms );
+  if( fInterrupt ) {
+	  return NULL;
+  }
   ptv = gtk_tree_view_new_with_model ( pm );
   g_object_unref ( G_OBJECT ( pm ) ); 
 
@@ -247,48 +258,101 @@ RollsTree ( const int n, evalcontext *pec, matchstate *pms ) {
 
   if( fInterrupt ) {
       gtk_widget_destroy( ptv );
-      ptv = NULL;
-      fInterrupt = FALSE;
+      return NULL;
   }
   
   return ptv;
-
 }
 
+static void DepthChanged ( GtkRange *pr, rollswidget *prw )
+{
+	GtkWidget *pNewRolls;
 
-static void
-DepthChanged ( GtkRange *pr, rollswidget *prw ) {
+	if (fInterrupt)
+	{	/* Stop recursion on cancel */
+		fInterrupt = FALSE;
+		return;
+	}
 
-  int n = gtk_range_get_value( pr );
+	int n = gtk_range_get_value(pr);
+	if (n == prw->nDepth)
+		return;
 
-  if( n == prw->nDepth )
-      return;
-  
-  if ( prw->ptv )
-    gtk_widget_destroy ( GTK_WIDGET ( prw->ptv ) );
-  if( ( prw->ptv = RollsTree ( n, prw->pec, prw->pms ) ) ) {
-      gtk_container_add ( GTK_CONTAINER ( prw->psw ), prw->ptv );
-      prw->nDepth = n;
-  } else
-      prw->nDepth = -1;
-  
-  gtk_widget_show_all ( GTK_WIDGET ( prw->psw ) );
+	pwOldGrab = pwGrab;
+	pwGrab = prw->pDialog;
 
+	gtk_widget_set_sensitive(DialogArea(prw->pDialog, DA_BUTTONS), FALSE);
+	gtk_widget_set_sensitive(prw->pScale, FALSE);
+	gtk_widget_set_sensitive(prw->pCancel, TRUE);
+
+	pNewRolls = RollsTree ( n, prw->pec, prw->pms );
+
+	if (pNewRolls)
+	{
+		if ( prw->ptv )
+		{
+			gtk_widget_destroy ( GTK_WIDGET ( prw->ptv ) );
+			prw->ptv = NULL;
+		}
+		prw->ptv = pNewRolls;
+
+		gtk_container_add ( GTK_CONTAINER ( prw->psw ), prw->ptv );
+		prw->nDepth = n;
+	}
+	else
+	{
+		if (!prw->closing)
+			gtk_range_set_value(GTK_RANGE(prw->pScale), prw->nDepth);
+	}
+
+	pwGrab = pwOldGrab;
+	if (!prw->closing)
+	{
+		gtk_widget_set_sensitive(DialogArea(prw->pDialog, DA_BUTTONS), TRUE);
+		gtk_widget_set_sensitive(prw->pScale, TRUE);
+		gtk_widget_set_sensitive(prw->pCancel, FALSE);
+
+		gtk_widget_show_all ( GTK_WIDGET ( prw->psw ) );
+	}
+	else
+	{	/* dialog is waiting to close */
+		gtk_widget_destroy(prw->pDialog);
+	}
 }
 
 #endif /* USE_GTK2 */
+
+void CancelRolls(GtkWidget* pButton)
+{
+	fInterrupt = TRUE;
+	gtk_widget_set_sensitive(pButton, FALSE);
+}
+
+static gint RollsClose(GtkWidget *widget, GdkEvent *event, rollswidget *prw)
+{
+	if (pwOldGrab != pwGrab)
+	{	/* Mid-depth change - wait for it to cancel */
+		gtk_widget_set_sensitive(prw->pCancel, FALSE);
+		prw->closing = TRUE;
+	    fInterrupt = TRUE;
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
 
 extern void
 GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
 #if USE_GTK2
 
-  GtkWidget *pwDialog = GTKCreateDialog( _("Distribution of rolls"),
-                                      DT_INFO, NULL, NULL );
-  GtkWidget *pw, *vbox, *hbox;
+  GtkWidget *vbox, *hbox;
   GtkAdjustment *padj;
 
   rollswidget *prw = g_malloc ( sizeof ( rollswidget ) );
+
+  prw->closing = FALSE;
+  prw->pDialog = GTKCreateDialog( _("Distribution of rolls"), DT_INFO, NULL, NULL );
 
   int n = ( nDepth < 1 ) ? 1 : nDepth;
 
@@ -300,8 +364,7 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
   vbox = gtk_vbox_new ( FALSE, 8 );
   gtk_container_set_border_width ( GTK_CONTAINER ( vbox ), 8);
-  gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), vbox );
-
+  gtk_container_add ( GTK_CONTAINER (DialogArea( prw->pDialog, DA_MAIN ) ), vbox );
   gtk_object_set_data_full ( GTK_OBJECT ( vbox ), "user_data",
                              prw, g_free );
 
@@ -328,14 +391,19 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
   /* Set page size to 1 */
   padj = GTK_ADJUSTMENT(gtk_adjustment_new(1, 1, 5, 1, 1, 0));
-  pw = gtk_hscale_new( padj );
-  gtk_widget_set_size_request( pw, 100, -1 );
-  gtk_box_pack_start ( GTK_BOX ( hbox ), pw, FALSE, FALSE, 4 );
-  gtk_scale_set_digits( GTK_SCALE( pw ), 0 );
-  gtk_scale_set_draw_value( GTK_SCALE( pw ), TRUE );
-  gtk_range_set_update_policy( GTK_RANGE( pw ), GTK_UPDATE_DISCONTINUOUS );
-      
-  gtk_signal_connect ( GTK_OBJECT ( pw ), "value-changed",
+  prw->pScale = gtk_hscale_new( padj );
+  gtk_widget_set_size_request( prw->pScale, 100, -1 );
+  gtk_box_pack_start ( GTK_BOX ( hbox ), prw->pScale, FALSE, FALSE, 4 );
+  gtk_scale_set_digits( GTK_SCALE( prw->pScale ), 0 );
+  gtk_scale_set_draw_value( GTK_SCALE( prw->pScale ), TRUE );
+  gtk_range_set_update_policy( GTK_RANGE( prw->pScale ), GTK_UPDATE_DISCONTINUOUS );
+
+  prw->pCancel = gtk_button_new_with_label( _("Cancel") );
+  gtk_signal_connect( GTK_OBJECT( prw->pCancel ), "clicked", 
+			GTK_SIGNAL_FUNC( CancelRolls ), NULL );
+  gtk_box_pack_start ( GTK_BOX ( hbox ), prw->pCancel, FALSE, FALSE, 4 );
+
+  gtk_signal_connect ( GTK_OBJECT ( prw->pScale ), "value-changed",
                        GTK_SIGNAL_FUNC ( DepthChanged ), prw );
 
   /* tree  */
@@ -347,21 +415,22 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   
   /* modality */
 
-  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 ); 
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+  gtk_window_set_default_size( GTK_WINDOW( prw->pDialog ), 560, 400 ); 
+  gtk_window_set_modal( GTK_WINDOW( prw->pDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( prw->pDialog ),
                                 GTK_WINDOW( pwMain ) );
 
-  gtk_widget_show_all( pwDialog );
+  gtk_widget_show_all( prw->pDialog );
 
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+  gtk_signal_connect( GTK_OBJECT( prw->pDialog ), "delete_event",
+                      GTK_SIGNAL_FUNC(RollsClose), prw );
+  gtk_signal_connect( GTK_OBJECT( prw->pDialog ), "destroy",
+                      GTK_SIGNAL_FUNC(gtk_main_quit), NULL );
 
   GTKDisallowStdin();
   gtk_main();
   GTKAllowStdin();
   
-
 #endif
 
 }
