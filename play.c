@@ -797,6 +797,9 @@ void DiceRolled()
 		ShowBoard();
 	}
 #endif
+        if ( ! fX )
+          ShowBoard();
+
 }
 
 static int NewGame( void ) {
