@@ -73,6 +73,9 @@ CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 DATADIRNAME = @DATADIRNAME@
 DEPDIR = @DEPDIR@
+ESD_CFLAGS = @ESD_CFLAGS@
+ESD_CONFIG = @ESD_CONFIG@
+ESD_LIBS = @ESD_LIBS@
 FLEX = @FLEX@
 GENCAT = @GENCAT@
 GLIBC21 = @GLIBC21@
@@ -124,6 +127,13 @@ install_sh = @install_sh@
 
 localedir = $(datadir)/locale
 
+@USE_SOUND_TRUE@SOUND_INCS = @ESD_CFLAGS@
+@USE_SOUND_FALSE@SOUND_INCS = 
+@USE_SOUND_TRUE@SOUND_SOURCES = sound.c
+@USE_SOUND_FALSE@SOUND_SOURCES = 
+@USE_SOUND_TRUE@SOUND_LIBS = @ESD_LIBS@
+@USE_SOUND_FALSE@SOUND_LIBS = 
+
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\"
 
@@ -135,28 +145,31 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
-	export.c sound.c sound.h
+	export.c sound.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
 
-@USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS)
-@USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
-@USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
-@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES)
-@USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
+@USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
+@USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
+@USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS)
+@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(SOUND_SOURCES)
+@USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(SOUND_SOURCES)
+
 @USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 @USE_GTK_TRUE@	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
 @USE_GTK_TRUE@	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 @USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
-@USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h
+@USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
+@USE_GTK_TRUE@	$(SOUND_SOURCES)
 
-@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS)
+@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(COMMON_LIBS)
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(COMMON_LIBS) $(SOUND_LIBS)
 
-@USE_GTK_TRUE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
+@USE_GTK_TRUE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS)
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 @USE_GTK_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
@@ -211,16 +224,20 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	sgfp.$(OBJEXT) sgfl.$(OBJEXT) guile.$(OBJEXT) import.$(OBJEXT) \
 	external.$(OBJEXT) credits.$(OBJEXT) latex.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
-	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) sound.$(OBJEXT)
-@USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1)
+	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT)
+@USE_SOUND_TRUE@am__objects_2 = sound.$(OBJEXT)
+@USE_SOUND_FALSE@am__objects_2 =
+@USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
+@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_2)
 @USE_EXT_TRUE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	xboard.$(OBJEXT) xgame.$(OBJEXT)
+@USE_EXT_TRUE@@USE_GTK_FALSE@	xboard.$(OBJEXT) xgame.$(OBJEXT) \
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_2)
 @USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_1) gtkboard.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkgame.$(OBJEXT) gdkgetrgb.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkprefs.$(OBJEXT) gtk-multiview.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktheory.$(OBJEXT) gtktexi.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkexport.$(OBJEXT) gtkcube.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkchequer.$(OBJEXT)
+@USE_GTK_TRUE@	gtkchequer.$(OBJEXT) $(am__objects_2)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \

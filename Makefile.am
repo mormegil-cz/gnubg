@@ -6,6 +6,18 @@ endif
 
 localedir = $(datadir)/locale
 
+## sounds
+
+if USE_SOUND
+SOUND_INCS = @ESD_CFLAGS@
+SOUND_SOURCES = sound.c
+SOUND_LIBS = @ESD_LIBS@
+else
+SOUND_INCS = 
+SOUND_SOURCES =
+SOUND_LIBS = 
+endif
+
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\"
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@
@@ -16,37 +28,40 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
-	export.c sound.c sound.h
+	export.c sound.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
 
 if USE_GTK
 ## --- GTK
-INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
+INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
-	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h
-gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
+	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
+	$(SOUND_SOURCES)
+gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
 if USE_EXT
 ## --- EXT
-INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
-gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
+INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
+gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
+	$(SOUND_SOURCES)
 gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-	$(COMMON_LIBS)
+	$(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 else
 ## --- Plain
-INCLUDES = $(COMMON_INCS)
-gnubg_SOURCES = $(COMMON_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS)
+INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
+gnubg_SOURCES = $(COMMON_SOURCES) $(SOUND_SOURCES)
+gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif
+
 
 pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 

@@ -252,6 +252,22 @@ PKG_CHECK_MODULES(LIBXML2, libxml-2.0, AC_DEFINE(HAVE_LIBXML2,1,Define if you wa
 AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
 AM_CONDITIONAL(XML_MANUAL, test "$no_libxml2" != "yes" -a "$gtk2" = "yes")
 
+dnl Sounds
+
+AC_ARG_WITH(sound,[  --with-sound            use sounds with GNU Backgammon])
+
+AM_CONDITIONAL(USE_SOUND, test "$with_sound" != "no" )
+if test "$with_sound" != "no"; then
+
+  AC_DEFINE(USE_SOUND,1,Define if you want to use sounds with GNU Backgammon)
+
+  AM_PATH_ESD(,AC_DEFINE(HAVE_ESD,1,[Define if you have the ESD sound system]))
+
+  dnl AC_ARG_ENABLE(nas,     [  --enable-nas            Enable NAS (Network Audio System) support],,enable_nas=no)
+  dnl AC_ARG_ENABLE(artsc,   [  --disable-artsc         Turn off ArtsC (default=auto)],,enable_artsc=yes)
+
+fi
+
 dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)
 AC_DEFINE([DATADIR], datadir,

@@ -53,6 +53,9 @@
 /* Define to 1 if you have the `erf' function. */
 #undef HAVE_ERF
 
+/* Define if you have the ESD sound system */
+#undef HAVE_ESD
+
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
@@ -391,6 +394,9 @@
 
 /* Define if you want to use the Guile extensibility language. */
 #undef USE_GUILE
+
+/* Define if you want to use sounds with GNU Backgammon */
+#undef USE_SOUND
 
 /* Version number of package */
 #undef VERSION

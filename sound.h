@@ -22,6 +22,7 @@
 #ifndef _SOUND_H_
 #define _SOUND_H_
 
+#ifdef USE_SOUND
 
 typedef enum _gnubgsound {
   /* start & exit of gnubg */
@@ -66,6 +67,12 @@ extern int fSound;
 
 extern void
 playSound ( const gnubgsound gs );
+
+#else /* USE_SOUND */
+
+#define playSound(a) 
+
+#endif
 
 
 #endif /* _SOUND_H_ */

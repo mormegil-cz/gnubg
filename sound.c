@@ -37,7 +37,7 @@
 #include <sys/stat.h>
 #include <assert.h>
 
-#ifdef ESD_SOUND
+#ifdef HAVE_ESD
 #include <esd.h>
 #endif
 
@@ -77,9 +77,19 @@ char aszSound[ NUM_SOUNDS ][ 80 ] = {
 
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";
 
+#  if defined (HAVE_ESD)
+soundoption soSoundOption = SOUND_OPTION_ESD;
+#  elif defined (HAVE_ARTSC)
+soundoption soSoundOption = SOUND_OPTION_ARTSC;
+#  elif defined (HAVE_NAS)
+soundoption soSoundOption = SOUND_OPTION_NAS;
+#  elif 
 soundoption soSoundOption = SOUND_OPTION_NORMAL;
+#  endif
 
 int fSound = TRUE;
+
+
 
 static int check_dev(char *dev) {
 
@@ -379,7 +389,7 @@ play_file(const char *filename) {
 
     case SOUND_OPTION_ESD:
 
-#ifdef ESD_SOUND
+#ifdef HAVE_ESD
 
       if (esd_play_file(NULL, filename, 1) )
         _exit(0);
@@ -434,7 +444,6 @@ play_file(const char *filename) {
 }
 
 
-
 extern void
 playSound ( const gnubgsound gs ) {
 
@@ -449,3 +458,5 @@ playSound ( const gnubgsound gs ) {
   play_file ( aszSound[ gs ] );
 
 }
+
+
