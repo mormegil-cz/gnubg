@@ -882,14 +882,15 @@ that position.
 */
 
 extern int
-RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], char asz[][ 40 ],
+RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], 
                 float (* apOutput[])[ NUM_ROLLOUT_OUTPUTS ],
                 float (* apStdDev[])[ NUM_ROLLOUT_OUTPUTS ],
                 rolloutstat (* apStatistics[])[2],
                 evalsetup (* apes[]),
                 cubeinfo (* apci[]), 
                 int (* apCubeDecTop[]), int alternatives, 
-		int fInvert) {
+		int fInvert,
+                rolloutprogressfunc *pfProgress, void *pUserData ) {
   
 #if HAVE_ALLOCA
   int (* aanBoardEval )[ 2 ][ 25 ] = 
@@ -1074,26 +1075,13 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], char asz[][ 40 ],
       if ( ! isHyperGammon( apci[ alt ]->bgv ) )
 	SanityCheck( anBoardOrig, aarMu[ alt ] );
 
-    }
 
-    if( fInterrupt )
+      if( fInterrupt )
 	break;
       
-    if( fShowProgress ) {
-#if USE_GTK
-      if( fX ) 
-	GTKRolloutUpdate( aarMu, aarSigma, i, cGames,
-			  prc->fCubeful, alternatives, aciLocal );
-      else
-#endif
-	{
-	  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-		   "%5d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
-		   aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
-		   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ],
-		   aarMu[ 0 ][ 5 ], aarSigma[ 0 ][ 5 ], i + 1 );
-	  fflush( stdout );
-	}
+      if( fShowProgress && pfProgress ) 
+        (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
+                       i, alt, pUserData );
 
     }
 
@@ -1185,12 +1173,12 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], char asz[][ 40 ],
  */
 
 extern int
-GeneralEvaluation ( char *sz, 
-                    float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
+GeneralEvaluation ( float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
                     float arStdDev[ NUM_ROLLOUT_OUTPUTS ], 
                     rolloutstat arsStatistics[ 2 ],
                     int anBoard[ 2 ][ 25 ],
-                    cubeinfo *pci, evalsetup *pes ) {
+                    cubeinfo *pci, evalsetup *pes,
+                    rolloutprogressfunc *pf, void *p ) {
 
   int i;
 
@@ -1205,8 +1193,8 @@ GeneralEvaluation ( char *sz,
 
   case EVAL_ROLLOUT:
 
-    return GeneralEvaluationR ( sz, arOutput, arStdDev, arsStatistics,
-                                anBoard, pci, &pes->rc );
+    return GeneralEvaluationR ( arOutput, arStdDev, arsStatistics,
+                                anBoard, pci, &pes->rc, pf, p );
     break;
 
   case EVAL_NONE:
@@ -1221,12 +1209,12 @@ GeneralEvaluation ( char *sz,
 }
 
 extern int
-GeneralEvaluationR ( char *sz,
-                     float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+GeneralEvaluationR ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev [ NUM_ROLLOUT_OUTPUTS ],
                      rolloutstat arsStatistics[ 2 ],
                      int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, rolloutcontext *prc ) {
+                     cubeinfo *pci, rolloutcontext *prc,
+                     rolloutprogressfunc *pf, void *p ) {
 
   int (* apBoard[1])[2][25];
   float (*apOutput[1])[NUM_ROLLOUT_OUTPUTS];
@@ -1249,21 +1237,21 @@ GeneralEvaluationR ( char *sz,
   es.et = EVAL_NONE;
   memcpy (&es.rc, prc, sizeof (rolloutcontext));
   
-  if ( RolloutGeneral ( apBoard, ( char (*)[ 40 ] ) sz,
+  if ( RolloutGeneral ( apBoard, 
 			apOutput, apStdDev, apStatistics, apes, apci,
-			apCubeDecTop, 1, FALSE) < 0 )
+			apCubeDecTop, 1, FALSE, pf, p ) < 0 )
     return -1;
   
   return 0;
 }
 
 extern int
-GeneralCubeDecision ( char *sz, 
-                      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+GeneralCubeDecision ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       rolloutstat aarsStatistics[ 2 ][ 2 ],
                       int anBoard[ 2 ][ 25 ],
-                      cubeinfo *pci, evalsetup *pes ) {
+                      cubeinfo *pci, evalsetup *pes, 
+                      rolloutprogressfunc *pf, void *p ) {
 
   int i, j;
 
@@ -1279,8 +1267,8 @@ GeneralCubeDecision ( char *sz,
 
   case EVAL_ROLLOUT:
 
-    return GeneralCubeDecisionR ( sz, aarOutput, aarStdDev, aarsStatistics, 
-                                  anBoard, pci, &pes->rc, pes );
+    return GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics, 
+                                  anBoard, pci, &pes->rc, pes, pf, p );
     break;
 
   case EVAL_NONE:
@@ -1297,12 +1285,13 @@ GeneralCubeDecision ( char *sz,
 
 
 extern int
-GeneralCubeDecisionR ( char *sz, 
-                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        rolloutstat aarsStatistics[ 2 ][ 2 ],
                        int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, rolloutcontext *prc, evalsetup *pes ) {
+                       cubeinfo *pci, rolloutcontext *prc, evalsetup *pes,
+                       rolloutprogressfunc *pf, void *p ) {
+  
 
   evalsetup esLocal;
   int (* apBoard[2])[2][25] = { (int (*)[2][25]) anBoard, 
@@ -1320,8 +1309,6 @@ GeneralCubeDecisionR ( char *sz,
   cubeinfo aci[ 2 ];
   cubeinfo (* apci[2]) = { &aci[ 0 ], &aci[ 1 ] };
 
-
-  char aach[ 2 ][ 40 ];
 
   int i, cGames;
   int afCubeDecTop[] = { FALSE, FALSE }; /* no cube decision in 
@@ -1342,13 +1329,9 @@ GeneralCubeDecisionR ( char *sz,
                 pci->nMatchTo, pci->anScore, pci->fCrawford, 
                 pci->fJacoby, pci->fBeavers, pci->bgv );
 
-  FormatCubePosition ( aach[ 0 ], &aci[ 0 ] );
-
   SetCubeInfo ( &aci[ 1 ], 2 * pci->nCube, ! pci->fMove, pci->fMove,
                 pci->nMatchTo, pci->anScore, pci->fCrawford, 
                 pci->fJacoby, pci->fBeavers, pci->bgv );
-
-  FormatCubePosition ( aach[ 1 ], &aci[ 1 ] );
 
   if ( ! GetDPEq ( NULL, NULL, &aci[ 0 ] ) ) {
     outputl ( _("Cube not available!") );
@@ -1361,53 +1344,18 @@ GeneralCubeDecisionR ( char *sz,
   }
 
 
-#if USE_GTK
-  if( fX )
-    GTKRollout( 2, aach, prc->nTrials, aarsStatistics );
-  else
-#endif
-    outputl( _("                               Win  W(g) W(bg)  L(g) L(bg) "
-             "Equity                    Trials") );
-	
-#if USE_GTK
-  if( fX )
-    GTKRolloutRow( 0 );
-#endif
-
-  if( ( cGames = RolloutGeneral( apBoard, aach, apOutput, apStdDev, 
+  if( ( cGames = RolloutGeneral( apBoard, apOutput, apStdDev, 
                                  apStatistics, apes, apci,
-                                 apCubeDecTop, 2, FALSE)) <= 0 )
+                                 apCubeDecTop, 2, FALSE, pf, p )) <= 0 )
     return -1;
 
   pes->rc.nGamesDone = cGames;
   pes->rc.nSkip = nSkip;
 
-#if USE_GTK
-	if( !fX )
-#endif
-          for ( i = 0; i < 2; i++ )
-	    outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
-                     "Cubeful: %6.3f %12d\n"
-		     "              Standard error %5.3f %5.3f %5.3f %5.3f"
-		     " %5.3f (%6.3f)         %6.3f\n\n"),
-		     aach[ i ],
-                     aarOutput[ i ][ 0 ], aarOutput[ i ][ 1 ],
-                     aarOutput[ i ][ 2 ], aarOutput[ i ][ 3 ],
-                     aarOutput[ i ][ 4 ], aarOutput[ i ][ 5 ],
-                     aarOutput[ i ][ 6 ],
-                     cGames,
-                     aarStdDev[ i ][ 0 ], aarStdDev[ i ][ 1 ],
-                     aarStdDev[ i ][ 2 ], aarStdDev[ i ][ 3 ],
-                     aarStdDev[ i ][ 4 ], aarStdDev[ i ][ 5 ],
-                     aarStdDev[ i ][ 6 ] ); 
-    
-#if USE_GTK
-    if( fX )
-      GTKRolloutDone();
-#endif	
-  
-    return 0;
+  return 0;
+
 }
+
 
 
 /*
@@ -1685,11 +1633,10 @@ getResignation ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
   /* Evaluate current position */
 
-  if ( GeneralEvaluation ( NULL,
-                           arResign, arStdDev,
+  if ( GeneralEvaluation ( arResign, arStdDev,
                            arsStatistics,
                            anBoard,
-                           pci, pesResign ) < 0 )
+                           pci, pesResign, NULL, NULL ) < 0 )
     return -1;
 
   /* check if we want to resign */
@@ -1746,7 +1693,8 @@ getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
 
 extern int
-ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves ) {
+ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves,
+                   rolloutprogressfunc *pf, void *p ) {
 
   cubeinfo *pci;
   int fCubeDecTop = TRUE;
@@ -1802,9 +1750,10 @@ ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves ) {
   
   }
 
-  nGamesDone = RolloutGeneral ( apBoard, NULL, 
+  nGamesDone = RolloutGeneral ( apBoard, 
 				apOutput, apStdDev, apStatistics,
-				apes, apci, apCubeDecTop, cMoves, TRUE);
+				apes, apci, apCubeDecTop, cMoves, TRUE, 
+                                pf, p );
   /* put fMove back again */
   for ( i = 0; i < cMoves; ++i) {
     aci[ i ].fMove = ! aci[ i ].fMove;
@@ -1840,14 +1789,15 @@ ScoreMoveRollout ( move **ppm, cubeinfo **ppci, int cMoves ) {
 
 
 extern int
-ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes ) {
+ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes,
+                   rolloutprogressfunc *pf, void *p ) {
 
   switch ( pes->et ) {
   case EVAL_EVAL:
     return ScoreMove ( pm, pci, &pes->ec, pes->ec.nPlies );
     break;
   case EVAL_ROLLOUT:
-    return ScoreMoveRollout ( &pm, &pci, 1);
+    return ScoreMoveRollout ( &pm, &pci, 1, pf, p );
     break;
   default:
     return -1;

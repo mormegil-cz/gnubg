@@ -619,10 +619,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
           
           if ( cmp_evalsetup ( pesCube, &pmr->n.esDouble ) > 0 ) {
             
-	    if ( GeneralCubeDecision ( "",
-				       aarOutput, aarStdDev, aarsStatistics, 
+	    if ( GeneralCubeDecision ( aarOutput, aarStdDev, aarsStatistics, 
 				       pms->anBoard, &ci,
-				       pesCube ) < 0 )
+				       pesCube, NULL, NULL  ) < 0 )
               return -1;
             
             
@@ -743,10 +742,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	      
               if ( cmp_evalsetup ( pesCube, &pmr->d.esDouble ) > 0 ) {
 
-		if ( GeneralCubeDecision ( "",
-					   aarOutput, aarStdDev, aarsStatistics, 
-					   pms->anBoard, &ci,
-					   pesCube ) < 0 )
+		if ( GeneralCubeDecision ( aarOutput, aarStdDev, 
+                                           aarsStatistics, pms->anBoard, &ci,
+					   pesCube, NULL, NULL ) < 0 )
 		    return -1;
 
               }

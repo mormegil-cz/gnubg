@@ -43,6 +43,7 @@
 #include "gtkchequer.h"
 #include "i18n.h"
 #include "gtktempmap.h"
+#include "progress.h"
 
 
 
@@ -186,6 +187,7 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
   int i;
   move *m;
   int *ai;
+  void *p;
 
   if ( !  GTK_CLIST( pwMoves )->selection )
     return;
@@ -218,30 +220,24 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 
   }
 
-#if USE_GTK
-  if( fX )
-    GTKRollout( c, asz, rcRollout.nTrials, NULL ); 
-#endif
+  RolloutProgressStart( &ci, c, NULL, &rcRollout, asz, &p );
 
-    GTKRolloutRow ( 0 );
+  if ( fAction )
+    HandleXAction();
 
-    if ( fAction )
-      HandleXAction();
-
-    if ( ScoreMoveRollout ( ppm, ppci, c ) < 0 ) {
-      GTKRolloutDone ();
-      return;
-    }
+  if ( ScoreMoveRollout ( ppm, ppci, c, RolloutProgress, p ) < 0 ) {
+    RolloutProgressEnd( &p );
+    return;
+  }
     
+  RolloutProgressEnd( &p );
 
-    /* Calling RefreshMoveList here requires some extra work, as
-       it may reorder moves */
-
-    UpdateMoveList ( phd );
+  /* Calling RefreshMoveList here requires some extra work, as
+     it may reorder moves */
+  
+  UpdateMoveList ( phd );
 
   }
-
-  GTKRolloutDone ();
 
   gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
 

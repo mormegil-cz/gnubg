@@ -105,6 +105,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "rollout.h"
 #include "sound.h"
 #include "record.h"
+#include "progress.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -3863,6 +3864,8 @@ CommandRollout( char *sz ) {
     float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     rolloutstat aarsStatistics[ 2 ][ 2 ];
+    void *p;
+    char aszCube[ 2 ][ 40 ];
 
     evalsetup es;
 
@@ -3875,11 +3878,20 @@ CommandRollout( char *sz ) {
     memcpy (&es.rc, &rcRollout, sizeof (rcRollout));
 
     GetMatchStateCubeInfo( &ci, &ms );
+
+    FormatCubePositions( &ci, aszCube );
+
+    RolloutProgressStart( &ci, 2, aarsStatistics, &es.rc, aszCube, &p );
     
-    GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
-			   ms.anBoard, &ci, &es.rc, &es );
+    GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
+			   ms.anBoard, &ci, &es.rc, &es, RolloutProgress, p );
 
     UpdateStoredCube ( aarOutput, aarStdDev, &es, &ms );
+
+    RolloutProgressEnd( &p );
+
+    /* bring up Hint-dialog with cube rollout */
+    CommandHint( NULL );
 
     return;
 
@@ -3927,14 +3939,6 @@ CommandRollout( char *sz ) {
 		  ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
                   nBeavers, ms.bgv );
 
-#if USE_GTK
-    if( fX )
-	GTKRollout( c, asz, rcRollout.nTrials, aars );
-    else
-#endif
-      outputl( _("                               Win  W(g) W(bg)  L(g) L(bg) "
-		 "Equity   Cube E    n" ) );
-	
     {
       /* create all the explicit pointer arrays for RolloutGeneral */
       /* cdecl is your friend */
@@ -3942,6 +3946,7 @@ CommandRollout( char *sz ) {
       float aarNoStdDev[ NUM_ROLLOUT_OUTPUTS ];
       evalsetup NoEs;
       int false = FALSE;
+      void *p;
 #if HAVE_ALLOCA
       int         (** apBoard)[2][25];
       float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
@@ -3978,11 +3983,6 @@ CommandRollout( char *sz ) {
 	if ( fOpponent ) 
 	  apMoves[ i ] = pm = GetMove ( aan[ i ] );
     
-#if USE_GTK
-	if( fX )
-	  GTKRolloutRow( 0 );
-#endif
-
 	apBoard[ i ] = aan + i;
 	if (pm) {
 	  apOutput[ i ] = &pm->arEvalMove;
@@ -3998,14 +3998,20 @@ CommandRollout( char *sz ) {
 	apci[ i ] = &ci;
 	apCubeDecTop[ i ] = &false;
       }
-	
-      if( ( cGames = 
-	    RolloutGeneral( apBoard, &asz[ i ], apOutput, apStdDev,
-			    apStatistics, apes, apci,
-			    apCubeDecTop, c, fOpponent)) <= 0 ) {
 
+      
+      RolloutProgressStart( &ci, c, aars, &rcRollout, asz, &p );
+
+      if( ( cGames = 
+	    RolloutGeneral( apBoard, apOutput, apStdDev,
+			    apStatistics, apes, apci,
+			    apCubeDecTop, c, fOpponent, 
+                            RolloutProgress, p )) <= 0 ) {
+        RolloutProgressEnd( &p );
 	return;
       }
+      
+      RolloutProgressEnd( &p );
 
       /* save in current movelist */
 
@@ -4035,38 +4041,13 @@ CommandRollout( char *sz ) {
             
 	pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
 
-#if USE_GTK
-	if( !fX )
-#endif
-	  {
-	    if( pm->esMove.rc.fCubeful )
-	      outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
-			 "%6.3f %4d\n"
-			 "              Standard error %5.3f %5.3f %5.3f "
-			 "%5.3f %5.3f (%6.3f) %6.3f\n\n"),
-		       asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
-		       ar[ 4 ], ar[ 5 ],ar[ 6 ], cGames, arStdDev[ 0 ],
-		       arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-		       arStdDev[ 4 ], arStdDev[ 5 ], arStdDev[ 6 ] );
-	    else
-	      outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    "
-			 "n/a %4d\n"
-			 "              Standard error %5.3f %5.3f %5.3f "
-			 "%5.3f %5.3f (%6.3f)    n/a\n\n" ),
-		       asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
-		       ar[ 4 ], ar[ 5 ], cGames, arStdDev[ 0 ],
-		       arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-		       arStdDev[ 4 ], arStdDev[ 5 ] );
-
-	  }
       }
     
-#if USE_GTK
-      if( fX )
-	GTKRolloutDone();
-#endif	
-
     }
+
+    /* bring up Hint-dialog with chequerplay rollout */
+    CommandHint( NULL );
+
 }
 
 static void ExportGameJF( FILE *pf, list *plGame, int iGame,
@@ -8026,3 +8007,24 @@ TextToClipboard( const char *sz ) {
 #endif
 
 }
+
+
+extern void
+FormatCubePositions( const cubeinfo *pci, char asz[ 2 ][ 40 ] ) {
+
+  cubeinfo aci[ 2 ];
+
+  SetCubeInfo ( &aci[ 0 ], pci->nCube, pci->fCubeOwner, pci->fMove,
+                pci->nMatchTo, pci->anScore, pci->fCrawford, 
+                pci->fJacoby, pci->fBeavers, pci->bgv );
+
+  FormatCubePosition ( asz[ 0 ], &aci[ 0 ] );
+
+  SetCubeInfo ( &aci[ 1 ], 2 * pci->nCube, ! pci->fMove, pci->fMove,
+                pci->nMatchTo, pci->anScore, pci->fCrawford, 
+                pci->fJacoby, pci->fBeavers, pci->bgv );
+
+  FormatCubePosition ( asz[ 1 ], &aci[ 1 ] );
+
+}
+

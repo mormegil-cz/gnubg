@@ -40,6 +40,7 @@
 #include "gtkgame.h"
 #include "gtkcube.h"
 #include "i18n.h"
+#include "progress.h"
 
 
 
@@ -652,6 +653,8 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   rolloutstat aarsStatistics[ 2 ][ 2 ];
   evalsetup *pes = pchd->pes;
+  char asz[ 2 ][ 40 ];
+  void *p;
 
   if (pes->et != EVAL_ROLLOUT) {
     pes->rc = rcRollout;
@@ -666,11 +669,18 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
 
   GetMatchStateCubeInfo( &ci, &pchd->ms );
 
-  if ( GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
+  FormatCubePositions( &ci, asz );
+  RolloutProgressStart( &ci, 2, aarsStatistics, &pes->rc, asz, &p );
+
+  if ( GeneralCubeDecisionR ( aarOutput, aarStdDev, aarsStatistics,
                               pchd->ms.anBoard, &ci, 
-			      &pes->rc, pes ) < 0 ) {
+			      &pes->rc, pes,
+                              RolloutProgress, p ) < 0 ) {
+    RolloutProgressEnd( &p );
     return;
   }
+
+  RolloutProgressEnd( &p );
   
   memcpy ( pchd->aarOutput, aarOutput, 
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );

@@ -12,6 +12,9 @@ Wed Jul 16 12:21:20 2003  Joern Thyssen  <jth@gnubg.org>
 	callbacks.
 	* gnubg.c (CommandRollout): bring up hint dialog after
 	"rollout =cube" and "rollout =1 =2 =3". 
+	* gnubg.c, gtkchequer.c, gtkcube.c, database.c, analysis.c, external.c: 
+	change calls to rollout functions.
+	* gtkgame.c: move GTK rollout progress stuff to new file progress.c
 
 Tue Jul 15 19:52:54 2003  Holger Bochnig <hbgg@gmx.net>
 

@@ -802,7 +802,6 @@ extern int ComputerTurn( void ) {
       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
       rolloutstat aarsStatistics[ 2 ][ 2 ];
       cubedecision cd;
-      void *p;
 
       /* Consider cube action */
 

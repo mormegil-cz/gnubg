@@ -388,9 +388,9 @@ extern void CommandExternal( char *sz ) {
 	    if ( fDoubled > 0 ) {
 
 		/* take decision */
-		if( GeneralCubeDecision( "", aarOutput, aarStdDev,
+		if( GeneralCubeDecision( aarOutput, aarStdDev,
 					 aarsStatistics, anBoard, &ci,
-					 &esEvalCube ) < 0 )
+					 &esEvalCube, NULL, NULL ) < 0 )
 		    break;
 	  
 		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {
@@ -461,9 +461,9 @@ extern void CommandExternal( char *sz ) {
 		FormatMovePlain( szResponse, anBoardOrig, anMove );
 	    } else {
 		/* double decision */
-		if( GeneralCubeDecision( "", aarOutput, aarStdDev,
+		if( GeneralCubeDecision( aarOutput, aarStdDev,
 					 aarsStatistics, anBoard, &ci,
-					 &esEvalCube ) < 0 )
+					 &esEvalCube, NULL, NULL ) < 0 )
 		    break;
 		
 		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {

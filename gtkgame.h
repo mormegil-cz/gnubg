@@ -50,6 +50,10 @@ typedef enum _dialogtype {
 extern GtkWidget *pwMain, *pwMenuBar;
 extern GtkTooltips *ptt;
 
+extern GtkWidget *pwGrab;
+extern GtkWidget *pwOldGrab;
+
+
 extern int fEndDelay;
 
 extern void ShowGameWindow( void );
@@ -103,19 +107,6 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
 			 const evalsetup *pes );
 
-extern void
-GTKRollout( int c, char asz[][ 40 ], int cGames,
-	    rolloutstat ars[][ 2 ] );
-
-extern void GTKRolloutRow( int i );
-
-extern int
-GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
-                  float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
-                  int iGame, int cGames, int fCubeful, int cRows,
-                  cubeinfo aci[] );
-
-extern void GTKRolloutDone( void );
 extern void GTKSet( void *p );
 extern void GTKUpdateAnnotations( void );
 extern int GTKGetManualDice( int an[ 2 ] );
@@ -125,7 +116,6 @@ extern void *GTKCalibrationStart( void ),
     GTKCalibrationUpdate( void *context, float rEvalsPerSec ),
     GTKCalibrationEnd( void *context );
 extern void GTKDumpRolloutResults(GtkWidget *widget, gpointer data);
-extern void GTKViewRolloutStatistics(GtkWidget *widget, gpointer data);
 extern void GTKWinCopy( GtkWidget *widget, gpointer data);
 extern void
 GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
