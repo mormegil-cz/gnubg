@@ -1,7 +1,7 @@
 /*
  * eval.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998-2000.
+ * by Gary Wong <gary@cs.arizona.edu>, 1998-2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -2989,75 +2989,77 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 
 static int CompareMoves( const move *pm0, const move *pm1 ) {
 
-    return pm1->rScore > pm0->rScore ? 1 : -1;
+    return ( pm1->rScore > pm0->rScore ||
+	     ( pm1->rScore == pm0->rScore && pm1->rScore2 > pm0->rScore2 ) ) ?
+	1 : -1;
+}
+
+static int ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
+
+    int anBoardTemp[ 2 ][ 25 ];
+    float arEval[ NUM_OUTPUTS ];
+    float arEvalCf[ 4 ];
+    cubeinfo ci;
+    
+    PositionFromKey( anBoardTemp, pm->auch );
+      
+    SwapSides( anBoardTemp );
+
+    /* swap fMove in cubeinfo */
+    memcpy ( &ci, pci, sizeof (ci) );
+    ci.fMove = ! ci.fMove;
+    
+    if ( pec->fCubeful ) {
+        if ( EvaluatePositionCubeful ( anBoardTemp, arEvalCf, arEval, &ci,
+                                       pec, nPlies ) ) 
+	    return -1;
+	
+        InvertEvaluation ( arEval );
+        InvertEvaluationCf ( arEvalCf );
+    } else {
+        if( EvaluatePositionCache( anBoardTemp, arEval, &ci, pec, nPlies,
+                                   ClassifyPosition( anBoardTemp ) ) )
+	    return -1;
+	
+        InvertEvaluation( arEval );
+        arEvalCf[ 0 ] = 0.0;
+    }
+
+    /* Save evaluations */  
+    memcpy( pm->arEvalMove, arEval, sizeof( arEval ) );
+    
+    /* Save evaluation setup */
+    pm->etMove = EVAL_EVAL;
+    pm->esMove.ec = *pec;
+    pm->esMove.ec.nPlies = nPlies;
+    
+    /* Score for move:
+       rScore is the primary score (cubeful/cubeless)
+       rScore2 is the secondary score (cubeless) */
+    pm->rScore =  (pec->fCubeful) ? arEvalCf[ 0 ] : Utility ( arEval, pci );
+    pm->rScore2 = Utility ( arEval, pci );
+
+    return 0;
 }
 
 static int
 ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies ) {
 
-    int i, anBoardTemp[ 2 ][ 25 ];
-    float arEval[ NUM_OUTPUTS ];
-    float arEvalCf[ 4 ];
-    cubeinfo ci;
+    int i;
     
     pml->rBestScore = -99999.9;
 
     for( i = 0; i < pml->cMoves; i++ ) {
-      PositionFromKey( anBoardTemp, pml->amMoves[ i ].auch );
-      
-      SwapSides( anBoardTemp );
+	if( ScoreMove( pml->amMoves + i, pci, pec, nPlies ) < 0 )
+	    return -1;
 
-      /* swap fMove in cubeinfo */
-
-      memcpy ( &ci, pci, sizeof (ci) );
-      ci.fMove = ! ci.fMove;
-
-      if ( pec->fCubeful ) {
-
-        if ( EvaluatePositionCubeful ( anBoardTemp, arEvalCf, arEval, &ci,
-                                       pec, nPlies ) ) 
-          return -1;
-
-        InvertEvaluation ( arEval );
-        InvertEvaluationCf ( arEvalCf );
-
-      } else {
-
-        if( EvaluatePositionCache( anBoardTemp, arEval, &ci, pec, nPlies,
-                                   ClassifyPosition( anBoardTemp ) ) )
-          return -1;
-
-        InvertEvaluation( arEval );
-        arEvalCf[ 0 ] = 0.0;
-
-      }
-
-      /* Save evaluations */
-      
-      memcpy( pml->amMoves[ i ].arEvalMove, arEval,
-              sizeof( arEval ) );
-
-      /* Save evaluation setup */
-
-      pml->amMoves[ i ].etMove = EVAL_EVAL;
-      pml->amMoves[ i ].esMove.ec = *pec;
-      pml->amMoves[ i ].esMove.ec.nPlies = nPlies;
-
-      /* Score for move:
-         rScore is the primary score (cubeful/cubeless)
-         rScore2 is the secondary score (cubeless) */
-      
-      pml->amMoves[ i ].rScore = 
-        (pec->fCubeful) ? arEvalCf[ 0 ] : Utility ( arEval, pci );
-      pml->amMoves[ i ].rScore2 = Utility ( arEval, pci );
-
-      if( ( pml->amMoves[ i ].rScore > pml->rBestScore ) || 
-          ( ( pml->amMoves[ i ].rScore == pml->rBestScore ) 
-            && ( pml->amMoves[ i ].rScore2 > 
-                 pml->amMoves[ pml->iMoveBest ].rScore2 ) ) ) {
-        pml->iMoveBest = i;
-        pml->rBestScore = pml->amMoves[ i ].rScore;
-      };
+	if( ( pml->amMoves[ i ].rScore > pml->rBestScore ) || 
+	    ( ( pml->amMoves[ i ].rScore == pml->rBestScore ) 
+	      && ( pml->amMoves[ i ].rScore2 > 
+		   pml->amMoves[ pml->iMoveBest ].rScore2 ) ) ) {
+	    pml->iMoveBest = i;
+	    pml->rBestScore = pml->amMoves[ i ].rScore;
+	};
     }
     
     return 0;
@@ -3198,67 +3200,6 @@ int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
                             &ecBasic, pec ? pec->nPlies : 0 );
 }
 
-
-extern int 
-FindBestMoves( movelist *pml,
-               int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-               int c, float d, cubeinfo *pci, evalcontext *pec ) {
-
-    int i, j;
-    static move amCandidates[ 32 ];
-    positionclass pc;
-    
-    /* amCandidates is only 32 elements long, so we silently truncate any
-       request for more moves to 32 */
-    if( c > 32 )
-	c = 32;
-
-    /* Find all moves -- note that pml contains internal pointers to static
-       data, so we can't call GenerateMoves again (or anything that calls
-       it, such as ScoreMoves at more than 0 plies) until we have saved
-       the moves we want to keep in amCandidates. */
-    GenerateMoves( pml, anBoard, nDice0, nDice1, FALSE );
-
-    if( ( pc = ScoreMoves( pml, pci, pec, 0 ) ) < 0 )
-	return -1;
-
-    /* Eliminate moves whose scores are below the threshold from the best */
-    for( i = 0, j = 0; i < pml->cMoves; i++ )
-	if( pml->amMoves[ i ].rScore >= pml->rBestScore - d ) {
-	    if( i != j )
-		pml->amMoves[ j ] = pml->amMoves[ i ];
-
-	    j++;
-	}
-
-    /* Sort the others in descending order */
-    qsort( pml->amMoves, j, sizeof( move ), (cfunc) CompareMoves );
-
-    pml->iMoveBest = 0;
-
-    /* Consider only those better than the threshold or as many as were
-       requested, whichever is less */
-    pml->cMoves = ( j < c ) ? j : c;
-
-    /* Copy the moves under consideration into our private array, so we
-       can safely call ScoreMoves without them being clobbered */
-    memcpy( amCandidates, pml->amMoves, pml->cMoves * sizeof( move ) );    
-    pml->amMoves = amCandidates;
-
-    /* Calculate the full evaluations at the search depth requested */
-    if( ScoreMoves( pml, pci, pec, pec->nPlies ) < 0 )
-	return -1;
-
-    /* Using a deeper search might change the order of the evaluations;
-       reorder them according to the latest evaluation */
-    if( pec->nPlies )
-	qsort( pml->amMoves, pml->cMoves, sizeof( move ),
-	       (cfunc) CompareMoves );
-
-    return 0;
-}
-
-
 extern int 
 FindnSaveBestMoves( movelist *pml,
                   int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
@@ -3266,17 +3207,15 @@ FindnSaveBestMoves( movelist *pml,
                   cubeinfo *pci, evalcontext *pec ) {
 
   /* Find best moves. 
-     Ensure that auchMove is present in the list. */
+     Ensure that auchMove is evaluated at the deepest ply. */
 
   int i, j, nMoves, iPly;
-  positionclass pc;
   move *pm;
     
   /* Find all moves -- note that pml contains internal pointers to static
      data, so we can't call GenerateMoves again (or anything that calls
      it, such as ScoreMoves at more than 0 plies) until we have saved
      the moves we want to keep in amCandidates. */
-  
   GenerateMoves( pml, anBoard, nDice0, nDice1, FALSE );
 
   if ( pml->cMoves == 0 ) {
@@ -3286,7 +3225,6 @@ FindnSaveBestMoves( movelist *pml,
   }
   
   /* Save moves */
-
   pm = (move *) malloc ( pml->cMoves * sizeof ( move ) );
   memcpy( pm, pml->amMoves, pml->cMoves * sizeof( move ) );    
   pml->amMoves = pm;
@@ -3294,52 +3232,40 @@ FindnSaveBestMoves( movelist *pml,
   nMoves = pml->cMoves;
 
   /* Evaluate all moves at 0-ply */
-
-  if( ( pc = ScoreMoves( pml, pci, pec, 0 ) ) < 0 ) {
+  if( ScoreMoves( pml, pci, pec, 0 ) < 0 ) {
       free( pm );
       return -1;
   }
   
+  /* Sort moves in descending order */
+  qsort( pml->amMoves, nMoves, sizeof( move ), (cfunc) CompareMoves );
+  
   for ( iPly = 0; iPly < pec->nPlies; iPly++ ) {
 
     /* search tolerance at iPly */
-
     float rTol = pec->rSearchTolerance / ( 1 << iPly );
 
     /* larger threshold for 0-ply evaluations */
-
     if ( pec->nPlies == 0 && rTol < 0.25 )
       rTol = 0.25;
 
-    /* Eliminate moves whose scores are below the threshold from the
-       best except for auchMove */
-
+    /* Eliminate moves whose scores are below the threshold. */
     for( i = 0, j = 0; i < pml->cMoves; i++ ) {
-
-      int fMustHave = 
-        ( auchMove && EqualKeys ( auchMove, pml->amMoves[ i ].auch ) );
-      
-      if( fMustHave ||
-          pml->amMoves[ i ].rScore >= pml->rBestScore - rTol ) {
-
-        if( i != j ) {
-          move m = pml->amMoves[ j ];
-          pml->amMoves[ j ] = pml->amMoves[ i ];
-          pml->amMoves[ i ] = m;
-        }
-        
-        j++;
-      }
+	if( pml->amMoves[ i ].rScore >= pml->rBestScore - rTol ) {
+	    if( i != j ) {
+		move m = pml->amMoves[ j ];
+		pml->amMoves[ j ] = pml->amMoves[ i ];
+		pml->amMoves[ i ] = m;
+	    }
+	    
+	    j++;
+	}
     }
-
-    /* Sort moves in descending order */
-    qsort( pml->amMoves, j, sizeof( move ), (cfunc) CompareMoves );
 
     pml->iMoveBest = 0;
 
     /* Consider only those better than the threshold or as many as were
        requested, whichever is less */
-
     pml->cMoves = ( j < ( pec->nSearchCandidates >> iPly ) ? j :
                     ( pec->nSearchCandidates >> iPly ) );
 
@@ -3349,17 +3275,38 @@ FindnSaveBestMoves( movelist *pml,
 	return -1;
     }
 
+    /* Resort the moves, in case the new evaluation reordered them. */
+    qsort( pml->amMoves, pml->cMoves, sizeof( move ), (cfunc) CompareMoves );
   }
 
-  /* Using a deeper search might change the order of the evaluations;
-     reorder them according to the latest evaluation */
-
   pml->cMoves = nMoves;
-
-  qsort( pml->amMoves, pml->cMoves, sizeof( move ),
-         (cfunc) CompareMoves );
-
-    return 0;
+  
+  /* Make sure that auchMove was evaluated at the deepest ply. */
+  if( auchMove )
+      for( i = 0; i < pml->cMoves; i++ )
+	  if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
+	      if( pml->amMoves[ i ].esMove.ec.nPlies < pec->nPlies ) {
+		  ScoreMove( pml->amMoves + i, pci, pec, pec->nPlies );
+		  
+		  for( j = 0; j < i; j++ )
+		      if( CompareMoves( pml->amMoves + i,
+					pml->amMoves + j ) < 0 ) {
+			  /* On closer inspection, the selected move ranks
+			     higher; reorder the relevant part of the list. */
+			  move m;
+			  
+			  memcpy( &m, pml->amMoves + i, sizeof m );
+			  memmove( pml->amMoves + j + 1, pml->amMoves + j,
+				   ( i - j ) * sizeof m );
+			  memcpy( pml->amMoves + j, &m, sizeof m );
+			  
+			  break;
+		      }
+	      }
+	      break;
+	  }
+  
+  return 0;
 }
 
 
