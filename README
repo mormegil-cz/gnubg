@@ -1,4 +1,4 @@
-GNU Backgammon 0.10
+GNU Backgammon 0.11
 ===================
 
 This is a pre-release version of GNU Backgammon (gnubg), a backgammon
@@ -37,6 +37,8 @@ Current features:
    Smart Game Format)
  - Exporting games and matches to .mat format
  - Scripting ability (if GNU Guile is available)
+ - Automatic and manual annotation (analysis and commentary) of games and
+   matches
 
 The file `gnubg.bd':
 --------------------

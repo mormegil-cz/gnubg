@@ -289,6 +289,8 @@ duplication of effort and to make sure our changes merge easily.
   a seed.
 ** If a MOVE_NORMAL is marked bad, it's not clear whether that means a
   bad move, or a costly missed double.
+** Consider some kind of interface for recording live matches as quickly
+  as possible.
 
 Local Variables:
 mode: outline

@@ -3,7 +3,7 @@ dnl To rebuild the `configure' script from this, execute the command
 dnl     autoconf
 dnl in the directory containing this script.
 dnl
-dnl by Gary Wong <gtw@gnu.org>, 1999, 2000.
+dnl by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
 dnl
 dnl This program is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 AC_INIT(gnubg.c)
-AM_INIT_AUTOMAKE(gnubg,0.10)
+AM_INIT_AUTOMAKE(gnubg,0.11)
 AM_CONFIG_HEADER(config.h)
 
 if test -f config.options
