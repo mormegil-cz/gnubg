@@ -1,3 +1,12 @@
+Sun Jul 27 11:11:33 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Avoid coredump when importing invalid SGG (and others) with
+	"set gotofirstgame on"
+	(reported by Joseph)
+
+	* import.c: let import routines return -1 indicating errors.
+	* gnubg.c: handle returned value from import routines.
+
 Sun Jul 27 01:46:23 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (CommandExportHTMLImages): render board label pictures

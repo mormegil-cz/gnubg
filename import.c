@@ -270,7 +270,7 @@ ParseJF( FILE *fp,
 
 }
 
-extern void
+extern int
 ImportJF( FILE * fp, char *szFileName) {
 
   moverecord *pmr;
@@ -283,11 +283,11 @@ ImportJF( FILE * fp, char *szFileName) {
   
   if( ms.gs == GAME_PLAYING && fConfirm ) {
     if( fInterrupt )
-      return;
+      return -1;
     
     if( !GetInputYN( _("Are you sure you want to import a saved match, "
                        "and discard the game in progress? ") ) )
-      return;
+      return -1;
   }
   
 #if USE_GTK
@@ -299,7 +299,7 @@ ImportJF( FILE * fp, char *szFileName) {
                 &fCrawfordGame, &fPostCrawford, anScore, &nCube, &fCubeOwner, 
                 anBoard, anDice, &fCubeUse, &fBeavers ) < 0 ) {
     outputl( _("This file is not a valid Jellyfish .pos file!\n") );
-    return;
+    return -1;
   }
 
   FreeMatch();
@@ -389,6 +389,8 @@ ImportJF( FILE * fp, char *szFileName) {
     GTKSet(ap);
   }
 #endif
+
+  return 0;
 
 }  
 
@@ -824,7 +826,7 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
 
 }
 
-extern void ImportMat( FILE *pf, char *szFilename ) {
+extern int ImportMat( FILE *pf, char *szFilename ) {
 
     int n, nLength, i;
     char ch;
@@ -835,7 +837,7 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
 	if( ( n = fscanf( pf, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
 			  &ch ) ) == EOF ) {
 	    outputerrf( _("%s: not a valid .mat file"), szFilename );
-	    return;
+	    return -1;
 	} else if( n > 1 )
 	    break;
 
@@ -846,11 +848,11 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
     
     if( ms.gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
-	    return;
+	    return -1;
 	    
 	if( !GetInputYN( _("Are you sure you want to import a saved match, "
 			 "and discard the game in progress? ") ) )
-	    return;
+	    return -1;
     }
 
 #if USE_GTK
@@ -883,6 +885,9 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
 	GTKSet(ap);
     }
 #endif
+
+    return 0;
+
 }
 
 static void ParseOldmove( char *sz, int fInvert ) {
@@ -1226,7 +1231,7 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
 }
 
 
-extern void ImportOldmoves( FILE *pf, char *szFilename ) {
+extern int ImportOldmoves( FILE *pf, char *szFilename ) {
 
     int n, n0, n1, nLength, i;
 
@@ -1236,7 +1241,7 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 	if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,
 			  &nLength ) ) == EOF ) {
 	    outputerrf( _("%s: not a valid oldmoves file"), szFilename );
-	    return;
+	    return -1;
 	} else if( n == 2 ) {
 	    /* assume a money game */
 	    nLength = 0;
@@ -1251,11 +1256,11 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
     
     if( ms.gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
-	    return;
+	    return -1;
 	
 	if( !GetInputYN( _("Are you sure you want to import a saved match, "
 			 "and discard the game in progress? ") ) )
-	    return;
+	    return -1;
     }
 
 #if USE_GTK
@@ -1299,6 +1304,9 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 	GTKSet(ap);
     }
 #endif
+
+    return 0;
+
 }
 
 static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
@@ -1308,7 +1316,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 
     char sz[ 1024 ];
-    char *pch;
+    char *pch = NULL;
     int c, fPlayer = 0, anRoll[ 2 ];
     moverecord *pmgi, *pmr;
     char *szComment = NULL;
@@ -1993,7 +2001,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 }
 
 
-extern void ImportSGG( FILE *pf, char *szFilename ) {
+extern int ImportSGG( FILE *pf, char *szFilename ) {
 
     char sz[ 80 ], sz0[ 32 ], sz1[ 32 ];
     int n, n0, n1, nLength, i, fCrawford;
@@ -2008,7 +2016,7 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     while( 1 ) {
 	if( ( n = fscanf( pf, "%32s vs. %32s\n", sz0, sz1 ) ) == EOF ) {
 	    outputerrf( _("%s: not a valid SGG file"), szFilename );
-	    return;
+	    return -1;
 	} else if( n == 2 )
 	    break;
 	
@@ -2019,11 +2027,11 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     
     if( ms.gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
-	    return;
+	    return -1;
 	
 	if( !GetInputYN( _("Are you sure you want to import a saved match, "
 			 "and discard the game in progress? ") ) )
-	    return;
+	    return -1;
     }
 
 #if USE_GTK
@@ -2068,6 +2076,9 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
 	GTKSet(ap);
     }
 #endif
+
+    return 0;
+
 }
 
 
@@ -2496,7 +2507,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 }
 
-extern void
+extern int
 ImportTMG ( FILE *pf, const char *szFilename ) {
 
   int fCrawfordRule = TRUE;
@@ -2566,6 +2577,9 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
     GTKSet(ap);
   }
 #endif
+
+  return 0;
+
 }
 
 static void ImportBKGGame( FILE *pf, int *pi ) {
@@ -2704,17 +2718,17 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
     }
 }
 
-extern void ImportBKG( FILE *pf, const char *szFilename ) {
+extern int ImportBKG( FILE *pf, const char *szFilename ) {
 
     int i;
 
     if( ms.gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
-	    return;
+	    return -1;
 	    
 	if( !GetInputYN( _("Are you sure you want to import a saved match, "
 			 "and discard the game in progress? ") ) )
-	    return;
+	    return -1;
     }
 
 #if USE_GTK
@@ -2748,6 +2762,9 @@ extern void ImportBKG( FILE *pf, const char *szFilename ) {
 	GTKSet(ap);
     }
 #endif
+
+    return 0;
+
 }
 
 
@@ -2892,7 +2909,7 @@ ParseSnowieTxt( char *sz,
  *
  */
 
-extern void
+extern int
 ImportSnowieTxt( FILE *pf ) {
 
   char sz[ 2048 ];
@@ -2908,11 +2925,11 @@ ImportSnowieTxt( FILE *pf ) {
 
   if( ms.gs == GAME_PLAYING && fConfirm ) {
     if( fInterrupt )
-      return;
+      return -1;
     
     if( !GetInputYN( _("Are you sure you want to import a saved match, "
                        "and discard the game in progress? ") ) )
-      return;
+      return -1;
   }
   
 #if USE_GTK
@@ -2942,7 +2959,7 @@ ImportSnowieTxt( FILE *pf ) {
                        &fTurn, aszPlayer, &fCrawfordGame, anScore,
                        &nCube, &fCubeOwner, anBoard, anDice ) < 0 ) {
     outputl( "This file is not a valid Snowie .txt file!" );
-    return;
+    return -1;
   }
 
   FreeMatch();
@@ -3032,6 +3049,8 @@ ImportSnowieTxt( FILE *pf ) {
     GTKSet(ap);
   }
 #endif
+
+  return 0;
 
 }
 

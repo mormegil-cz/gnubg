@@ -4390,6 +4390,7 @@ extern void CommandLoadCommands( char *sz ) {
 extern void CommandImportBKG( char *sz ) {
     
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4400,8 +4401,11 @@ extern void CommandImportBKG( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportBKG( pf, sz );
+        rc = ImportBKG( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_BKG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4412,6 +4416,7 @@ extern void CommandImportBKG( char *sz ) {
 extern void CommandImportJF( char *sz ) {
 
     FILE *pf;
+    int rc;
 
     sz = NextToken( &sz );
     
@@ -4422,7 +4427,10 @@ extern void CommandImportJF( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "rb" ) ) ) {
-	ImportJF( pf, sz );
+        rc = ImportJF( pf, sz );
+        if ( rc )
+          /* no file imported */
+          return;
 	fclose( pf );
         setDefaultFileName ( sz, PATH_POS );
     } else
@@ -4434,6 +4442,7 @@ extern void CommandImportJF( char *sz ) {
 extern void CommandImportMat( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4444,8 +4453,11 @@ extern void CommandImportMat( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportMat( pf, sz );
+        rc = ImportMat( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_MAT );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4456,6 +4468,7 @@ extern void CommandImportMat( char *sz ) {
 extern void CommandImportOldmoves( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4466,8 +4479,11 @@ extern void CommandImportOldmoves( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportOldmoves( pf, sz );
+	rc = ImportOldmoves( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_OLDMOVES );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4479,6 +4495,7 @@ extern void CommandImportOldmoves( char *sz ) {
 extern void CommandImportSGG( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4489,8 +4506,11 @@ extern void CommandImportSGG( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportSGG( pf, sz );
+	rc = ImportSGG( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_SGG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4501,6 +4521,7 @@ extern void CommandImportSGG( char *sz ) {
 extern void CommandImportTMG( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4511,8 +4532,11 @@ extern void CommandImportTMG( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportTMG( pf, sz );
+	rc = ImportTMG( pf, sz );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_TMG );
         if ( fGotoFirstGame )
           CommandFirstGame( NULL );
@@ -4523,6 +4547,7 @@ extern void CommandImportTMG( char *sz ) {
 extern void CommandImportSnowieTxt( char *sz ) {
 
     FILE *pf;
+    int rc;
     
     sz = NextToken( &sz );
     
@@ -4533,8 +4558,11 @@ extern void CommandImportSnowieTxt( char *sz ) {
     }
 
     if( ( pf = fopen( sz, "r" ) ) ) {
-	ImportSnowieTxt( pf );
+	rc = ImportSnowieTxt( pf );
 	fclose( pf );
+        if ( rc )
+          /* no file imported */
+          return;
         setDefaultFileName ( sz, PATH_SNOWIE_TXT );
     } else
 	outputerr( sz );
