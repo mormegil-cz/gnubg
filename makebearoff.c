@@ -889,7 +889,7 @@ static void BearOff2( int nUs, int nThem,
     if ( fCubeful ) {
 
       for ( k = 1; k < 4; ++k )
-        arEquity[ k ] /= 36.0f;
+        arEquity[ k ] = arTotal[ k ] / 36.0f;
 
     }
 
