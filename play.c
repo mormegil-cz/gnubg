@@ -500,6 +500,10 @@ CalculateBoard( void )
 
         
   } while( pl != plLastMove );
+
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
 }
 
 static void FreeMoveRecord( moverecord *pmr ) {
@@ -806,7 +810,6 @@ static int NewGame( void ) {
 
     moverecord *pmr;
     int fError;
-    list *pl;
     
     if( !fRecord && !ms.nMatchTo && lMatch.plNext->p ) {
 	/* only recording the active game of a session; discard any others */
@@ -821,7 +824,11 @@ static int NewGame( void ) {
 
 	PopGame( lMatch.plNext->p, TRUE );
     }
-    
+
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
+
     InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();

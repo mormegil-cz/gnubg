@@ -529,6 +529,7 @@ void Set3dSettings(BoardData* bd, const renderdata *prd)
 	bd->showHinges = prd->fHinges;
 	bd->showMoveIndicator = prd->showMoveIndicator;
 	bd->showShadows = prd->showShadows;
+	bd->quickDraw = prd->quickDraw;
 	bd->roundedEdges = prd->roundedEdges;
 	bd->bgInTrays = prd->bgInTrays;
 	bd->shadowDarkness = prd->shadowDarkness;
@@ -1479,6 +1480,240 @@ void PlaceMovingPieceRotation(BoardData* bd, int dest, int src)
 	bd->pieceRotation[dest][abs(bd->points[dest]) - 1] = bd->movingPieceRotation;
 }
 
+void getProjectedCoord(float pos[3], float* x, float* y)
+{	/* Work out where point (x, y, z) is on the screen */
+	GLint viewport[4];
+	GLdouble mvmatrix[16], projmatrix[16], xd, yd, zd;
+
+	glGetIntegerv (GL_VIEWPORT, viewport);
+	glGetDoublev (GL_MODELVIEW_MATRIX, mvmatrix);
+	glGetDoublev (GL_PROJECTION_MATRIX, projmatrix);
+
+	gluProject ((GLdouble)pos[0], (GLdouble)pos[1], (GLdouble)pos[2], mvmatrix, projmatrix, viewport, &xd, &yd, &zd);
+	*x = (float)xd;
+	*y = (float)yd;
+}
+
+int freezeRestrict = 0;
+ClipBox cb[MAX_FRAMES], eraseCb, lastCb;
+int numRestrictFrames = 0;
+
+float BoxWidth(ClipBox* pCb)
+{
+	return pCb->xx - pCb->x;
+}
+
+float BoxHeight(ClipBox* pCb)
+{
+	return pCb->yy - pCb->y;
+}
+
+float BoxMidWidth(ClipBox* pCb)
+{
+	return pCb->x + BoxWidth(pCb) / 2;
+}
+
+float BoxMidHeight(ClipBox* pCb)
+{
+	return pCb->y + BoxHeight(pCb) / 2;
+}
+
+void CopyBox(ClipBox* pTo, ClipBox* pFrom)
+{
+	*pTo = *pFrom;
+}
+
+void EnlargeTo(ClipBox* pCb, float x, float y)
+{
+	if (x < pCb->x)
+		pCb->x = x;
+	if (y < pCb->y)
+		pCb->y = y;
+	if (x > pCb->xx)
+		pCb->xx = x;
+	if (y > pCb->yy)
+		pCb->yy = y;
+}
+
+void EnlargeCurrentToBox(ClipBox* pOtherCb)
+{
+	EnlargeTo(&cb[numRestrictFrames], pOtherCb->x, pOtherCb->y);
+	EnlargeTo(&cb[numRestrictFrames], pOtherCb->xx, pOtherCb->yy);
+}
+
+void InitBox(ClipBox* pCb, float x, float y)
+{
+	pCb->x = pCb->xx = x;
+	pCb->y = pCb->yy = y;
+}
+
+void RationalizeBox(ClipBox* pCb)
+{
+	int midX, midY, maxXoff, maxYoff;
+	pCb->xx += .25f;
+	midX = (int)BoxMidWidth(pCb);
+	midY = (int)BoxMidHeight(pCb);
+	maxXoff = (int)max(midX - pCb->x, pCb->xx - midX) + 1;
+	maxYoff = (int)max(midY - pCb->y, pCb->yy - midY) + 1;
+	pCb->x = midX - maxXoff;
+	pCb->xx = midX + maxXoff;
+	pCb->y = midY - maxYoff;
+	pCb->yy = midY + maxYoff;
+}
+
+void RestrictiveRedraw()
+{
+	numRestrictFrames = -1;
+}
+
+void RestrictiveDraw(ClipBox* pCb, float pos[3], float width, float height, float depth)
+{
+	float tpos[3];
+	float x, y;
+
+	copyPoint(tpos, pos);
+	tpos[0] -= width / 2.0f;
+	tpos[1] -= height / 2.0f;
+
+	getProjectedCoord(tpos, &x, &y);
+	InitBox(pCb, x, y);
+
+	tpos[0] += width;
+	getProjectedCoord(tpos, &x, &y);
+	EnlargeTo(pCb, x, y);
+
+	tpos[1] += height;
+	getProjectedCoord(tpos, &x, &y);
+	EnlargeTo(pCb, x, y);
+
+	tpos[0] -= width;
+	getProjectedCoord(tpos, &x, &y);
+	EnlargeTo(pCb, x, y);
+
+	tpos[1] -= height;
+	tpos[2] += depth;
+	getProjectedCoord(tpos, &x, &y);
+	EnlargeTo(pCb, x, y);
+
+	tpos[0] += width;
+	getProjectedCoord(tpos, &x, &y);
+	EnlargeTo(pCb, x, y);
+
+	tpos[1] += height;
+	getProjectedCoord(tpos, &x, &y);
+	EnlargeTo(pCb, x, y);
+
+	tpos[0] -= width;
+	getProjectedCoord(tpos, &x, &y);
+	EnlargeTo(pCb, x, y);
+}
+
+void RestrictiveDrawFrame(float pos[3], float width, float height, float depth)
+{
+	if (numRestrictFrames != -1)
+	{
+		numRestrictFrames++;
+		if (numRestrictFrames == MAX_FRAMES)
+		{	/* Too many drawing requests - just redraw whole screen */
+			numRestrictFrames = -1;
+			return;
+		}
+		RestrictiveDraw(&cb[numRestrictFrames], pos, width, height, depth);
+	}
+}
+
+void RestrictiveRender(BoardData *bd)
+{
+	GLint viewport[4];
+
+	glGetIntegerv (GL_VIEWPORT, viewport);
+
+	while (numRestrictFrames > 0)
+	{
+		RationalizeBox(&cb[numRestrictFrames]);
+
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluPickMatrix(BoxMidWidth(&cb[numRestrictFrames]), BoxMidHeight(&cb[numRestrictFrames]),
+			BoxWidth(&cb[numRestrictFrames]), BoxHeight(&cb[numRestrictFrames]), viewport);
+
+		/* Setup projection matrix - using saved values */
+		if (bd->planView)
+			glOrtho(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, 0, 5);
+		else
+			glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
+
+		glMatrixMode(GL_MODELVIEW);
+
+		glViewport((int)(cb[numRestrictFrames].x), (int)(cb[numRestrictFrames].y),
+				   (int)BoxWidth(&cb[numRestrictFrames]), (int)BoxHeight(&cb[numRestrictFrames]));
+
+		drawBoard(bd);
+
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix() ;
+		glMatrixMode(GL_MODELVIEW);
+
+		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+		if (!freezeRestrict)
+			numRestrictFrames--;
+		else
+		{
+			freezeRestrict = 0;
+			break;
+		}
+	}
+}
+
+int MouseMove3d(BoardData *bd, int x, int y)
+{
+	if (bd->drag_point >= 0)
+	{
+		getProjectedPieceDragPos(x, y, bd->dragPos);
+		updateMovingPieceOccPos(bd);
+
+		if(bd->quickDraw)
+		{
+			if (!freezeRestrict)
+				CopyBox(&eraseCb, &lastCb);
+
+			RestrictiveDraw(&cb[numRestrictFrames], bd->dragPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+			freezeRestrict++;
+
+			CopyBox(&lastCb, &cb[numRestrictFrames]);
+			EnlargeCurrentToBox(&eraseCb);
+		}
+		return 1;
+	}
+	else
+		return 0;
+}
+
+void RestrictiveStartMouseMove(BoardData *bd, int pos, int depth)
+{
+	float erasePos[3];
+	getPiecePos(pos, depth, fClockwise, erasePos);
+	RestrictiveDrawFrame(erasePos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+	CopyBox(&eraseCb, &cb[numRestrictFrames]);
+	freezeRestrict = 1;
+}
+
+void RestrictiveEndMouseMove(BoardData *bd, int pos, int depth)
+{
+	float newPos[3];
+	getPiecePos(pos, depth, fClockwise, newPos);
+
+	RestrictiveDraw(&cb[numRestrictFrames], newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+	if (freezeRestrict)
+		EnlargeCurrentToBox(&eraseCb);
+	else
+		EnlargeCurrentToBox(&lastCb);
+
+	freezeRestrict = 0;
+}
+
 void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])
 {
 	if (movePath(path, dist, 0, pos))
@@ -1531,9 +1766,12 @@ int idleAnimate(BoardData* bd)
 
 	if (bd->moving)
 	{
+		float old_pos[3], new_pos[3];
 		float *pRotate = 0;
 		if (bd->rotateMovingPiece != -1 && bd->piecePath.state == 2)
 			pRotate = &bd->rotateMovingPiece;
+
+		copyPoint(old_pos, bd->movingPos);
 
 		if (!movePath(&bd->piecePath, animateDistance, pRotate, bd->movingPos))
 		{
@@ -1543,11 +1781,16 @@ int idleAnimate(BoardData* bd)
 
 			if ((abs(bd->points[moveDest]) == 1) && (bd->turn != SGN(bd->points[moveDest])))
 			{	/* huff */
+				int bar;
 				if (bd->turn == 1)
-					bd->points[0]--;
+					bar = 0;
 				else
-					bd->points[25]++;
+					bar = 25;
+				bd->points[bar] -= bd->turn;
 				bd->points[moveDest] = 0;
+
+				if (bd->quickDraw)
+					RestrictiveDrawPiece(bd, bar, abs(bd->points[bar]));
 			}
 
 			bd->points[moveDest] += bd->turn;
@@ -1557,6 +1800,9 @@ int idleAnimate(BoardData* bd)
 			update_pipcount(bd, points);
 
 			PlaceMovingPieceRotation(bd, moveDest, moveStart);
+
+			if (bd->quickDraw)
+				getPiecePos(moveDest, abs(bd->points[moveDest]), fClockwise, new_pos);
 
 			/* Next piece */
 			slide_move += 2;
@@ -1574,7 +1820,17 @@ int idleAnimate(BoardData* bd)
 			playSound( SOUND_CHEQUER );
 		}
 		else
+		{
 			updateMovingPieceOccPos(bd);
+			copyPoint(new_pos, bd->movingPos);
+		}
+		if (bd->quickDraw)
+		{
+			ClipBox temp;
+			RestrictiveDrawFrame(old_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+			RestrictiveDraw(&temp, new_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+			EnlargeCurrentToBox(&temp);
+		}
 	}
 
 	if (bd->shakingDice)
@@ -1656,6 +1912,8 @@ void ShowFlag3d(BoardData *bd)
 
 	waveFlag(bd, 0);
 	updateFlagOccPos(bd);
+
+	RestrictiveRedraw();
 }
 
 int idleCloseBoard(BoardData* bd)
@@ -1756,22 +2014,13 @@ void CloseBoard3d(BoardData* bd)
 	gtk_main();
 }
 
-int MouseMove3d(BoardData *bd, int x, int y)
-{
-	if (bd->drag_point >= 0)
-	{
-		getProjectedPieceDragPos(x, y, bd->dragPos);
-		updateMovingPieceOccPos(bd);
-		return 1;
-	}
-	else
-		return 0;
-}
-
 void SetupViewingVolume3d(BoardData *bd, renderdata* prd)
 {
 	GLint viewport[4];
+float tempMatrix[16];
 	glGetIntegerv (GL_VIEWPORT, viewport);
+
+memcpy(tempMatrix, bd->modelMatrix, sizeof(float[16]));
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -1779,6 +2028,8 @@ void SetupViewingVolume3d(BoardData *bd, renderdata* prd)
 
 	SetupLight3d(bd, prd);
 	calculateBackgroundSize(bd, viewport);
+if (memcmp(tempMatrix, bd->modelMatrix, sizeof(float[16])))
+	numRestrictFrames = -1;
 }
 
 void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a)

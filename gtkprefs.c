@@ -79,7 +79,7 @@ static GList *plBoardDesigns;
 #endif
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
-	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource,
+	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource, *pwQuickDraw,
 	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *textureTypeCombo, *frame3dOptions,
 	*pwPlanView, *pwBoardAngle, *pwSkewFactor, *skewLab, *anglelab, *pwBgTrays,
 	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame, *pwRoundedEdges;
@@ -1092,6 +1092,11 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	redrawChange = FALSE;
 	if (rdAppearance.fDisplayType == DT_3D)
 	{	/* Make sure main drawing area's context is current */
+		if (rdAppearance.quickDraw)
+		{	/* Disable drag help and dice below board too */
+			fGUIDragTargetHelp = 0;
+			fGUIDiceArea = 0;
+		}
 		MakeCurrent3d(bd->drawing_area3d);
 		/* Delete old objects */
 		ClearTextures(bd, TRUE);
@@ -1126,12 +1131,14 @@ LabelsToggled( GtkWidget *pwLabels, GtkWidget *pwDynamicLabels ) {
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
 
 #if USE_BOARD3D
-	if (previewType == DT_3D)
-		f = 0;	/* Disable for 3d board */
+	if (previewType == DT_3D &&
+		pwQuickDraw && gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwQuickDraw)))
+		f = 0;	/* Disable for quick drawing */
 #endif
 
 	gtk_widget_set_sensitive( GTK_WIDGET( pwDynamicLabels ), f );
 
+	redrawChange = TRUE;
 }
 
 #if USE_BOARD3D
@@ -1159,7 +1166,10 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	previewType = state ? DT_3D : DT_2D;
 
 	if (previewType == DT_3D)
-		DoAcceleratedCheck(bd->drawing_area3d);
+	{
+		if (!DoAcceleratedCheck(bd->drawing_area3d))
+			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwQuickDraw), 1);
+	}			
 
 	AddPages(bd, pwNotebook);
 
@@ -1177,12 +1187,38 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 #endif
 }
 
-void toggle_show_shadows(GtkWidget *widget, GtkWidget *pw)
+void toggle_quick_draw(GtkWidget *widget, int init)
+{
+	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	gtk_widget_set_sensitive(pwShowShadows, !set);
+	gtk_widget_set_sensitive(pwAnimateRoll, !set);
+	gtk_widget_set_sensitive(pwCloseBoard, !set);
+	gtk_widget_set_sensitive(pwAnimateFlag, !set);
+	gtk_widget_set_sensitive(pwDynamicLabels, !set);
+
+	if (set)
+	{
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), 0);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateRoll), 0);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), 0);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateFlag), 0);
+		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDynamicLabels), 0);
+		if (init != -1)
+			GTKShowWarning(WARN_QUICKDRAW_MODE);
+	}
+	LabelsToggled( pwLabels, pwDynamicLabels );
+
+	redrawChange = TRUE;
+}
+
+void toggle_show_shadows(GtkWidget *widget, int init)
 {
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(lightLab, set);
 	gtk_widget_set_sensitive(pwDarkness, set);
 	gtk_widget_set_sensitive(darkLab, set);
+	if (set && init != -1)
+		GTKShowWarning(WARN_SET_SHADOWS);
 	redrawChange = TRUE;
 }
 
@@ -1230,6 +1266,16 @@ void DoTestPerformance(GtkWidget *pw, BoardData* bd)
 	sprintf(str, "%s\n(%d frames per second)\n", msg, fps);
 
 	outputl(str);
+
+	if (fps <= 5)
+	{	/* Give some advice, hopefully to speed things up */
+		if (rdAppearance.showShadows)
+			outputl("Disable shadows to improve performance");
+		else if (!rdAppearance.quickDraw)
+			outputl("Try the quick draw option to improve performance");
+		else
+			outputl("The quick draw option will not change the result of this performance test");
+	}
 	outputx();
 }
 
@@ -1437,6 +1483,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 #if USE_BOARD3D
 	GtkWidget *dtBox, *button, *dtFrame, *hBox, *lab, *pwev, *pwhbox,
 			*pwAccuracy, *pwDiceSize;
+	pwQuickDraw = 0;
 #endif
 
     pwx = gtk_hbox_new ( FALSE, 0 );
@@ -1471,8 +1518,8 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwDynamicLabels ), 
                                   rdAppearance.fDynamicLabels );
     gtk_box_pack_start( GTK_BOX( pw ), pwDynamicLabels, FALSE, FALSE, 0 );
-    gtk_signal_connect_object( GTK_OBJECT( pwDynamicLabels ), "toggled",
-			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwDynamicLabels ), "toggled",
+					GTK_SIGNAL_FUNC( LabelsToggled ), pwDynamicLabels );
 
     gtk_signal_connect( GTK_OBJECT( pwLabels ), "toggled",
                         GTK_SIGNAL_FUNC( LabelsToggled ), 
@@ -1522,7 +1569,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 	darkLab = gtk_label_new(_("dark"));
 	gtk_box_pack_start(GTK_BOX(hBox), darkLab, FALSE, FALSE, 0);
 
-	toggle_show_shadows(pwShowShadows, 0);
+	toggle_show_shadows(pwShowShadows, -1);
 
 	pwAnimateRoll = gtk_check_button_new_with_label (_("Animate dice rolls"));
 	gtk_tooltips_set_tip(ptt, pwAnimateRoll, _("Dice rolls will shake across board"), 0);
@@ -1642,6 +1689,14 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 	gtk_box_pack_start(GTK_BOX(pw), pwTestPerformance, FALSE, FALSE, 4);
 	gtk_signal_connect(GTK_OBJECT(pwTestPerformance), "clicked",
 				   GTK_SIGNAL_FUNC(DoTestPerformance), bd);
+
+	pwQuickDraw = gtk_check_button_new_with_label (_("Quick drawing"));
+	gtk_tooltips_set_tip(ptt, pwQuickDraw, _("Cut down drawing to improve performance"), 0);
+	gtk_box_pack_start (GTK_BOX (pw), pwQuickDraw, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwQuickDraw), rdAppearance.quickDraw);
+	gtk_signal_connect(GTK_OBJECT(pwQuickDraw), "toggled", GTK_SIGNAL_FUNC(toggle_quick_draw), NULL);
+	toggle_quick_draw(pwQuickDraw, -1);
+
 #else
 	Add2dLightOptions(pw);
 #endif
@@ -1676,7 +1731,8 @@ UseDesign ( void ) {
   GetPrefs( &rd );
 
 #if USE_BOARD3D
-	ClearTextures(&bd3d, FALSE);
+	if (rd.fDisplayType == DT_3D)
+		ClearTextures(&bd3d, FALSE);
 #endif
 
   pch = sz = g_strdup ( pbdeSelected->szBoardDesign );
@@ -2470,6 +2526,7 @@ static void GetPrefs ( renderdata *prd ) {
 		prd->animateRoll = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateRoll));
 		prd->animateFlag = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateFlag));
 		prd->closeBoardOnExit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwCloseBoard));
+		prd->quickDraw = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwQuickDraw));
 
 		prd->curveAccuracy = padjAccuracy->value;
 		prd->curveAccuracy -= (prd->curveAccuracy % 4);
@@ -2880,6 +2937,7 @@ void Default3dSettings()
 				rdAppearance.boardAngle = rdNew.boardAngle;
 				rdAppearance.diceSize = rdNew.diceSize;
 				rdAppearance.planView = rdNew.planView;
+				rdAppearance.quickDraw = rdNew.quickDraw;
 
 				memcpy(rdAppearance.rdChequerMat, rdNew.rdChequerMat, sizeof(Material[2]));
 				memcpy(rdAppearance.rdDiceMat, rdNew.rdDiceMat, sizeof(Material[2]));

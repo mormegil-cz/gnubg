@@ -702,6 +702,8 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd,
 	{
 		SetMovingPieceRotation(bd, bd->drag_point);
 		updatePieceOccPos(bd);
+		if (bd->quickDraw)
+			RestrictiveStartMouseMove(bd, drag_point, abs(bd->points[drag_point] + bd->drag_colour));
 	}
 	else
 #endif
@@ -1134,6 +1136,7 @@ static void board_end_drag( GtkWidget *widget, BoardData *bd ) {
  * button_release_event().  Mainly, it assumes that a checker
  * has been picked up.  If the move fails, that pickup will be reverted.
  */
+
 gboolean place_chequer_or_revert(BoardData *bd, 
 					 int dest )
 {
@@ -1214,6 +1217,16 @@ gboolean place_chequer_or_revert(BoardData *bd,
     }
 
 #if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D && rdAppearance.quickDraw)
+	{
+		if (placed)
+			RestrictiveEndMouseMove(bd, dest, abs(bd->points[dest]));
+		else
+			RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+
+		if (hit)
+			RestrictiveDrawPiece(bd, bar, abs(bd->points[bar]));
+	}
 	if (placed && rdAppearance.fDisplayType == DT_3D)
 		PlaceMovingPieceRotation(bd, dest, bd->drag_point);
 #endif
@@ -1936,7 +1949,7 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
-	{	/* Reverse screen y coords for openGL */
+	{	/* Reverse screen y coords for OpenGL */
 		y = board->allocation.height - y;
 	}
 #endif
@@ -2461,6 +2474,10 @@ static gint board_set( Board *board, const gchar *board_text,
 			}
 			bd->diceShown = DICE_ON_BOARD;
 		}
+#if USE_BOARD3D
+		if (rdAppearance.fDisplayType == DT_3D && rdAppearance.quickDraw)
+			RestrictiveDrawDice(bd);
+#endif
 	}
 
     if (bd->diceShown == DICE_ON_BOARD )
@@ -2487,6 +2504,9 @@ static gint board_set( Board *board, const gchar *board_text,
 		/* Make sure flag shadow is correct if players are swapped when resigned */
 		if (bd->resigned)
 			updateFlagOccPos(bd);
+
+		if (bd->quickDraw && bd->showMoveIndicator)
+			RestrictiveDrawMoveIndicator(bd);
 #endif
 	  redrawNeeded = 1;
 	}
@@ -2497,6 +2517,9 @@ static gint board_set( Board *board, const gchar *board_text,
 	cube_use != bd->cube_use || 
         bd->crawford_game != old_crawford ) {
 	int xCube, yCube;
+#if USE_BOARD3D
+	int old_cube_owner = bd->cube_owner;
+#endif
 	redrawNeeded = 1;
 
 	bd->cube_owner = bd->opponent_can_double - bd->can_double;
@@ -2504,7 +2527,11 @@ static gint board_set( Board *board, const gchar *board_text,
 
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
+	{
 		SetupViewingVolume3d(bd, &rdAppearance);	/* Cube may be out of top of screen */
+		if (bd->quickDraw)
+			RestrictiveDrawCube(bd, old_doubled, old_cube_owner);
+	}
 	else
 #endif
 	{
@@ -2790,8 +2817,14 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
     int n;
     monitor m;
 	
-    if (animGUI == ANIMATE_NONE || ms.fResigned)
-	return;
+	if (animGUI == ANIMATE_NONE || ms.fResigned)
+	{
+#if USE_BOARD3D
+		if (animGUI == ANIMATE_NONE)
+			RestrictiveRedraw();
+#endif
+		return;
+	}
 
     animate_move_list = move;
     animate_player = player;

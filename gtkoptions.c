@@ -1458,6 +1458,18 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	    g_free( sz );
 	}
     }
+
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+	{
+		if (rdAppearance.quickDraw)
+		{	/* Target help and dice below board disabled in quick draw mode */
+			gtk_widget_set_sensitive(pow->pwUseDiceIcon, 0);
+			gtk_widget_set_sensitive(pow->pwDragTargetHelp, 0);
+		}
+	}
+#endif
+		
     gtk_widget_show_all( pwm );
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pow->pwLangMenu ), pwm );
 

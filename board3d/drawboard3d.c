@@ -75,18 +75,12 @@ void initPath(Path* p, float start[3]);
 void addPathSegment(Path* p, PathType type, float point[3]);
 void initDT(diceTest* dt, int x, int y, int z);
 
-/* Clipping planes */
-#define zNear .1f
-#define zFar 70
-
 /* All the board element sizes - based on base_unit size */
 
 /* Widths */
 
 /* Side edge width of bearoff trays */
 #define EDGE_WIDTH base_unit
-/* Piece/point size */
-#define PIECE_HOLE (base_unit * 3.0f)
 
 #define TRAY_WIDTH (EDGE_WIDTH * 2.0f + PIECE_HOLE)
 #define BOARD_WIDTH (PIECE_HOLE * 6.0f)
@@ -112,7 +106,6 @@ void initDT(diceTest* dt, int x, int y, int z);
 /* Depths */
 
 #define EDGE_DEPTH (base_unit * 1.95f)
-#define PIECE_DEPTH base_unit
 #define BASE_DEPTH base_unit
 
 /* Other objects */
@@ -1135,7 +1128,7 @@ void DrawNumbers(BoardData* bd, int sides, int mode)
 			else
 				n = i + 1;
 
-			if (bd->turn == -1)
+			if (bd->turn == -1 && rdAppearance.fDynamicLabels)
 				n = 25 - n;
 
 			sprintf(num, "%d", n);
@@ -1163,7 +1156,7 @@ void DrawNumbers(BoardData* bd, int sides, int mode)
 			else
 				n = 24 - i;
 
-			if (bd->turn == -1)
+			if (bd->turn == -1 && rdAppearance.fDynamicLabels)
 				n = 25 - n;
 
 			sprintf(num, "%d", n);
@@ -1450,40 +1443,49 @@ void tidyEdges(BoardData* bd)
 	glDisable(GL_LINE_SMOOTH);
 }
 
+void getMoveIndicatorPos(BoardData* bd, float pos[3])
+{
+	if (!fClockwise)
+		pos[0] = TOTAL_WIDTH - TRAY_WIDTH + ARROW_SIZE / 2.0f;
+	else
+		pos[0] = TRAY_WIDTH - ARROW_SIZE / 2.0f;
+
+	if (bd->turn == 1)
+		pos[1] = EDGE_HEIGHT / 2.0f;
+	else
+		pos[1] = TOTAL_HEIGHT - EDGE_HEIGHT / 2.0f;
+
+	pos[2] = BASE_DEPTH + EDGE_DEPTH;
+}
+
 void showMoveIndicator(BoardData* bd)
 {
+	float pos[3];
 /* ARROW_UNIT used to draw sub-bits of arrow */
 #define ARROW_UNIT (ARROW_SIZE / 4.0f)
+
 	setMaterial(&bd->chequerMat[(bd->turn == 1)]);
+
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_TEXTURE_2D);
 	glNormal3f(0, 0, 1);
+
 	glPushMatrix();
-	if (!fClockwise)
-	{
-		if (bd->turn == 1)
-			glTranslatef(TOTAL_WIDTH - TRAY_WIDTH, (EDGE_HEIGHT - ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		else
-			glTranslatef(TOTAL_WIDTH - TRAY_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT - ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-	}
-	else
-	{
-		if (bd->turn == 1)
-			glTranslatef(TRAY_WIDTH, (EDGE_HEIGHT + ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
-		else
-			glTranslatef(TRAY_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT + ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+	getMoveIndicatorPos(bd, pos);
+	glTranslatef(pos[0], pos[1], pos[2]);
+	if (fClockwise)
 		glRotatef(180, 0, 0, 1);
-	}
+
 	glBegin(GL_QUADS);
+		glVertex2f(-ARROW_UNIT * 2, -ARROW_UNIT);
+		glVertex2f(0, -ARROW_UNIT);
 		glVertex2f(0, ARROW_UNIT);
-		glVertex2f(ARROW_UNIT * 2, ARROW_UNIT);
-		glVertex2f(ARROW_UNIT * 2, ARROW_UNIT * 3);
-		glVertex2f(0, ARROW_UNIT * 3);
+		glVertex2f(-ARROW_UNIT * 2, ARROW_UNIT);
 	glEnd();
 	glBegin(GL_TRIANGLES);
-		glVertex2f(ARROW_UNIT * 2, ARROW_UNIT * 4);
+		glVertex2f(0, ARROW_UNIT * 2);
+		glVertex2f(0, -ARROW_UNIT * 2);
 		glVertex2f(ARROW_UNIT * 2, 0);
-		glVertex2f(ARROW_UNIT * 4, ARROW_UNIT * 2);
 	glEnd();
 
 	/* Outline arrow */
@@ -1494,13 +1496,13 @@ void showMoveIndicator(BoardData* bd)
 	glEnable(GL_LINE_SMOOTH);
 
 	glBegin(GL_LINE_LOOP);
+		glVertex2f(-ARROW_UNIT * 2, -ARROW_UNIT);
+		glVertex2f(-ARROW_UNIT * 2, ARROW_UNIT);
 		glVertex2f(0, ARROW_UNIT);
-		glVertex2f(0, ARROW_UNIT * 3);
-		glVertex2f(ARROW_UNIT * 2, ARROW_UNIT * 3);
-		glVertex2f(ARROW_UNIT * 2, ARROW_UNIT * 4);
-		glVertex2f(ARROW_UNIT * 4, ARROW_UNIT * 2);
+		glVertex2f(0, ARROW_UNIT * 2);
 		glVertex2f(ARROW_UNIT * 2, 0);
-		glVertex2f(ARROW_UNIT * 2, ARROW_UNIT);
+		glVertex2f(0, -ARROW_UNIT * 2);
+		glVertex2f(0, -ARROW_UNIT);
 	glEnd();
 
 	glDisable(GL_BLEND);
@@ -3522,6 +3524,74 @@ void preDraw3d(BoardData* bd)
 void SetShadowDimness3d(BoardData* bd)
 {	/* Darnkess as percentage of ambient light */
 	bd->dim = ((rdAppearance.lightLevels[1] / 100.0f) * (100 - bd->shadowDarkness)) / 100;
+}
+
+void RestrictiveDrawPiece(BoardData* bd, int pos, int depth)
+{
+	float newPos[3];
+	getPiecePos(pos, depth, fClockwise, newPos);
+
+	RestrictiveDrawFrame(newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+}
+
+void RestrictiveDrawDice(BoardData* bd)
+{
+	float pos[3];
+	float overSize;
+	ClipBox temp;
+	int tempTurn = 0;
+	DiceShown tempDiceShown;
+
+	if (bd->diceShown != DICE_ON_BOARD)
+	{
+		tempDiceShown = bd->diceShown;
+		bd->diceShown = DICE_ON_BOARD;
+		tempTurn = bd->turn;
+		bd->turn *= -1;
+	}
+	overSize = bd->diceSize * 1.5f;
+	getDicePos(bd, 0, pos);
+	pos[2] -= bd->diceSize / 2.0f;
+	RestrictiveDrawFrame(pos, overSize, overSize, overSize);
+
+	getDicePos(bd, 1, pos);
+	pos[2] -= bd->diceSize / 2.0f;
+	RestrictiveDraw(&temp, pos, overSize, overSize, overSize);
+	EnlargeCurrentToBox(&temp);
+	if (tempTurn)
+	{
+		bd->diceShown = tempDiceShown;
+		bd->turn = tempTurn;
+	}
+}
+
+void RestrictiveDrawCube(BoardData* bd, int old_doubled, int old_cube_owner)
+{
+	float pos[3];
+	int temp_dob = bd->doubled, temp_cow = bd->cube_owner;
+	bd->doubled = old_doubled;
+	bd->cube_owner = old_cube_owner;
+	getDoubleCubePos(bd, pos);
+	pos[2] -= DOUBLECUBE_SIZE / 2.0f;
+	RestrictiveDrawFrame(pos, DOUBLECUBE_SIZE, DOUBLECUBE_SIZE, DOUBLECUBE_SIZE);
+	bd->doubled = temp_dob;
+	bd->cube_owner = temp_cow;
+	getDoubleCubePos(bd, pos);
+	pos[2] -= DOUBLECUBE_SIZE / 2.0f;
+	RestrictiveDrawFrame(pos, DOUBLECUBE_SIZE, DOUBLECUBE_SIZE, DOUBLECUBE_SIZE);
+}
+
+void RestrictiveDrawMoveIndicator(BoardData* bd)
+{	/* Need to redraw both indicators */
+	float pos[3];
+
+	bd->turn *= -1;
+	getMoveIndicatorPos(bd, pos);
+	RestrictiveDrawFrame(pos, ARROW_SIZE, ARROW_SIZE, LIFT_OFF);
+
+	bd->turn *= -1;
+	getMoveIndicatorPos(bd, pos);
+	RestrictiveDrawFrame(pos, ARROW_SIZE, ARROW_SIZE, LIFT_OFF);
 }
 
 void drawBoard(BoardData* bd)

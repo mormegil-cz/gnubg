@@ -163,6 +163,7 @@ renderdata rdDefault = {
 	0,	/* Animate roll */
 	0,	/* Animate flag */
 	0,	/* Close board on exit */
+	0,	/* Quick draw */
 	36,	/* Curve accuracy */
 	LT_POSITIONAL, /* light source type */
 	{0, 2, 3.5f},	/* x,y,z pos of light source */

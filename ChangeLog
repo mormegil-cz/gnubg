@@ -1,3 +1,12 @@
+Fri Jan 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* set.c, render.c, play.c, renderprefs.c, gtkprefs.c, gtkoptions.c,
+	gtkgame.c, gtkboard.c: 3d quick draw option
+
+Fri Jan 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* bearoff.c, show.c, progress.c: Removed some build warnings
+
 Sun Jan  4 13:35:16 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkchequer.c (CreateMoveList): remove the old layout version as

@@ -228,6 +228,7 @@ typedef struct _BoardData {
 	int showHinges;	/* Hinges visibile? */
 	int showMoveIndicator;	/* Show move indicator? */
 	int showShadows;	/* Show shadows */
+	int quickDraw;	/* Cut down 3d drawing to improve performance */
 	int shadowDarkness;	/* How dark are shadows */
 	int boardAngle;	/* Angle board is tilted at */
 	int testSkewFactor;	/* Debug FOV adjustment */
@@ -291,7 +292,7 @@ extern void SetupViewingVolume3d(BoardData *bd, renderdata* prd);
 extern void DisplayCorrectBoardType();
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
 extern void SetupLight3d(BoardData *bd, renderdata* prd);
-extern void DoAcceleratedCheck(GtkWidget* board);
+extern int DoAcceleratedCheck(GtkWidget* board);
 
 extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
 extern void RollDice3d(BoardData *bd);
@@ -319,6 +320,15 @@ extern void updateDiceOccPos(BoardData *bd);
 extern void updatePieceOccPos(BoardData* bd);
 extern void updateHingeOccPos(BoardData* bd);
 extern void updateFlagOccPos(BoardData* bd);
+
+extern void RestrictiveRedraw();
+extern void RestrictiveDrawPiece(BoardData* bd, int pos, int depth);
+extern void RestrictiveStartMouseMove(BoardData *bd, int pos, int depth);
+extern void RestrictiveEndMouseMove(BoardData *bd, int pos, int depth);
+extern void RestrictiveDrawDice(BoardData* bd);
+extern void RestrictiveDrawCube(BoardData* bd, int old_doubled, int old_cube_owner);
+extern void RestrictiveDrawMoveIndicator(BoardData* bd);
+
 #endif
 
 extern int animate_player, *animate_move_list, animation_finished;

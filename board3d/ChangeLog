@@ -1,3 +1,7 @@
+Fri Jan 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	drawboard3d.c, inc3d.h, misc3d.c, widget3d.c: 3d quick draw option
+
 Fri Nov 21 11:38:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* drawboard3d.c: Fixed small bug

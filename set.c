@@ -705,6 +705,9 @@ extern void CommandSetClockwise( char *sz ) {
                _("Player 1 moves anticlockwise (and "
                  "player 0 moves clockwise).") );
     
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
 #if USE_GUI
     if( fX )
 	ShowBoard();
@@ -945,6 +948,9 @@ extern void CommandSetDice( char *sz ) {
 
     outputf( _("The dice have been set to %d and %d.\n"), n0, n1 );
 
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
 #if USE_GUI
     if( fX )
 	ShowBoard();
@@ -2684,7 +2690,7 @@ extern void CommandSetWarning( char *sz )
 
 static void PrintWarning(int warning)
 {
-	char buf[100];
+	char buf[1024];
 	sprintf(buf, _("Warning %s (%s) is %s"), warningNames[warning], warningStrings[warning],
 		warningEnabled[warning] ? "on" : "off");
 	outputl(buf);
