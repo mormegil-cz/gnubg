@@ -1979,10 +1979,10 @@ int idleAnimate(BoardData* bd)
 void RollDice3d(BoardData *bd)
 {	/* animate the dice roll if not below board */
 	setDicePos(bd);
+	SuspendInput();
 
 	if (bd->rd->animateRoll)
 	{
-		SuspendInput();
 		animStartTime = get_time();
 
 		bd->shakingDice = 1;
@@ -2000,7 +2000,6 @@ void RollDice3d(BoardData *bd)
 				firstFrame = 1;
 		}
 		gtk_main();
-		ResumeInput();
 	}
 	else
 	{
@@ -2009,6 +2008,7 @@ void RollDice3d(BoardData *bd)
 		while(gtk_events_pending())
 			gtk_main_iteration();	
 	}
+	ResumeInput();
 }
 
 void AnimateMove3d(BoardData *bd)
