@@ -1,3 +1,8 @@
+Thu Oct 19 16:37:17 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* eval.c (Cl2CfMoney): bugfix - too good to double with
+        centered cube did not work.
+
 Wed Oct 18 11:43:00 2000  Gary Wong  <gary@research.att.com>
 
 	* gnubg.c (ShowBoard): Don't display GTK board if !fGTKOutput

@@ -4219,10 +4219,22 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     /* Centered cube.  */
 
-    if ( arOutput[0 ] > rOppTG && arOutput[ 0 ] < rOppCP ) {
-      /* Opp cashes. Don't award him full bonus, as I might
-	 have a joker-roll. */
-      rEq = -0.9999;
+    if ( arOutput[ 0 ] <= rOppTG ) {
+
+      /* Opponent is too good to double.
+         Linear interpolation between: 
+         p=OppTG, E = -1
+         p=0, E = -L
+      */
+
+      if ( fJacoby )
+        rEq = -1.0; /* gammons don't count: rL = 1 */
+      else
+        rEq = -rL + ( rL - 1.0 ) * arOutput[ 0 ] / rOppTG;
+
+    } else if ( arOutput[0 ] > rOppTG && arOutput[ 0 ] < rOppCP ) {
+      /* Opp cashes.  */
+      rEq = -1.0;
     } else if ( arOutput[ 0 ] > rOppCP && arOutput[ 0 ] < rCP ) {
       /* In market window.
 	 We do linear interpolation, but the initial double points
@@ -4340,6 +4352,15 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
     } else if ( arOutput[ 0 ] > rCP && arOutput[ 0 ] < rTG ) {
       /* We cash one point */
       rEq = 1.0;
+    } else {
+
+      /* we are too good to double */
+
+      if ( fJacoby )
+        rEq = 1.0; /* gammons don't count: rW = 1 */
+      else
+        rEq = rW + 
+          ( rW - 1.0 ) * ( arOutput[ 0 ] - 1.0 ) / ( rTG - 1.0 ) ;
     }
 
   }
