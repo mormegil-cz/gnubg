@@ -3514,7 +3514,11 @@ extern void *Thread_NotificationSender (void *data);
 static void Slave (void)
 {
     int			done = FALSE;
+#ifdef WIN32
+    SOCKET		listenSocket;
+#else
     int			listenSocket;
+#endif /* WIN32 */
     pthread_t		notifier;
     
     if (RPU_DEBUG) outputerrf ("RPU Local Half started.\n");
@@ -3547,7 +3551,7 @@ static void Slave (void)
 #endif /* WIN32 */
         outputerrf ("*** RPU could not create slave socket (err=%d).\n", 
 #ifdef WIN32
-            GetLastError() );
+            WSAGetLastError() );
 #else
             errno);
 #endif /* WIN32 */
@@ -3568,7 +3572,7 @@ static void Slave (void)
         else {
 #ifdef WIN32
             u_long arg = TRUE;
-            if ( ioctlsocket( (SOCKET) listenSocket, FIONBIO, &arg ) < 0 ) {
+            if ( ioctlsocket( listenSocket, FIONBIO, &arg ) < 0 ) {
                 outputerr ("set socket to non-blocking");
 #else
             if ( fcntl (listenSocket, F_SETFL, O_NONBLOCK) < 0 ) {
@@ -3585,10 +3589,16 @@ static void Slave (void)
                 /* listen for incoming connect from master */
                 gSlaveStatus = rpu_stat_waiting;
                 Slave_UpdateStatus ();
-                
-                if (listen (listenSocket, 8) < 0) {
-                    outputerrf ("*** RPU could not listen to master socket (err=%d).\n", errno);
-                    outputerr ("listen");
+
+                if ( listen( listenSocket, 8 ) < 0 ) {
+#ifdef WIN32
+                    outputerrf( "*** RPU could not listen to master socket "
+				"(err=%d).\n", WSAGetLastError() );
+#else
+                    outputerrf( "*** RPU could not listen to master socket "
+				"(err=%d).\n", errno);
+#endif /* WIN32 */
+                    outputerr("listen");
                 }
                 else {
                     /* incoming connection: accept it */
@@ -3596,13 +3606,28 @@ static void Slave (void)
                     struct sockaddr_in slaveAddress;
                     int masterAddressLen = sizeof (masterAddress);
                     int slaveAddressLen = sizeof (slaveAddress);
+#ifdef WIN32
+                    SOCKET rpuSocket;
+#else
                     int rpuSocket;
+#endif /* WIN32 */
                     
-                    do { 
+                    do {
+#ifdef WIN32
+                    	int nWSAError;
+#endif /* WIN32 */
+
                         GTK_YIELDTIME;
-                        rpuSocket = accept (listenSocket, (struct sockaddr *) &masterAddress, 
-                                                &masterAddressLen);
+			rpuSocket = accept( listenSocket,
+					    (struct sockaddr *) &masterAddress,
+					    &masterAddressLen );
+#ifdef WIN32
+			nWSAError = WSAGetLastError();
+                        if ( (rpuSocket == INVALID_SOCKET) && (errno != EAGAIN)
+                             && (nWSAError != WSAEWOULDBLOCK) )
+#else
                         if (rpuSocket == -1 && errno != EAGAIN && errno != EWOULDBLOCK) 
+#endif /* WIN32 */
                                 fInterrupt = TRUE;
                     } while (rpuSocket < 0 && !fInterrupt);
                     
@@ -3610,15 +3635,20 @@ static void Slave (void)
                     
                     if (rpuSocket < 0) {
                         if (!fInterrupt) {
-                            outputerrf ("*** RPU could not accept connection from master (err=%d).\n", errno);
-                            outputerr ("accept");
+                            outputerrf( "*** RPU could not accept connection "
+#ifdef WIN32
+					"from master (err=%d).\n", WSAGetLastError() );
+#else
+					"from master (err=%d).\n", errno );
+#endif /* WIN32 */
+                            outputerr( "accept" );
                         }
                     }
                     else if (!RPU_AcceptConnection (slaveAddress, masterAddress)) {
-                        outputerrf ("*** RPU refused connection on local IP address "
-                                            "%s from remote IP address %s.\n", 
-                                            inet_ntoa(slaveAddress.sin_addr), 
-                                            inet_ntoa(masterAddress.sin_addr));
+			outputerrf( "*** RPU refused connection on local IP address "
+				    "%s from remote IP address %s.\n",
+				    inet_ntoa(slaveAddress.sin_addr),
+				    inet_ntoa(masterAddress.sin_addr) );
                     }
                     else {
                         /* RPU: local half connected with remote host */
@@ -4026,7 +4056,11 @@ static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
 
 extern void * Thread_RemoteProcessingUnit (void *data)
 {
+#ifdef WIN32
+    SOCKET 		rpuSocket;
+#else
     int 		rpuSocket;
+#endif /* WIN32 */
     procunit		*ppu = (procunit *) data;
     int			err = 0;
     
@@ -4047,15 +4081,15 @@ extern void * Thread_RemoteProcessingUnit (void *data)
         ppu->maxTasks = 0;
                 
         /* create socket */
-        rpuSocket = socket (AF_INET, SOCK_STREAM, 0);
+        rpuSocket = socket( AF_INET, SOCK_STREAM, 0 );
 #ifdef WIN32
-    if (rpuSocket == INVALID_SOCKET) {
+	if (rpuSocket == INVALID_SOCKET) {
 #else
-        if (rpuSocket == -1) {
+	if (rpuSocket == -1) {
 #endif /* WIN32 */
             outputerrf ("# (0x%x) RPU could not create socket (err=%d).\n", 
 #ifdef WIN32
-		(int) pthread_self (), GetLastError() );
+		(int) pthread_self (), WSAGetLastError() );
 #else
 		(int) pthread_self (), errno);
 #endif /* WIN32 */
@@ -4064,15 +4098,26 @@ extern void * Thread_RemoteProcessingUnit (void *data)
         }
         else {
             /* connect to remote host */
-            if (connect (rpuSocket, (const struct sockaddr *) &ppu->info.remote.inAddress, 
-                            sizeof(ppu->info.remote.inAddress)) < 0) {
+	    if ( connect( rpuSocket,
+			  (const struct sockaddr *) &ppu->info.remote.inAddress,
+			  sizeof(ppu->info.remote.inAddress)
+#ifdef WIN32
+			) == SOCKET_ERROR ) {
+#else
+			) < 0 ) {
+#endif /* WIN32 */
+
 #if USE_GTK
 #if PROCESSING_UNITS
                 gdk_threads_enter();
 #endif /* PROCESSING_UNITS */
 #endif /* USE_GTK */
-                outputerrf ("# (0x%x) RPU could not connect socket (err=%d).\n", 
-                    (int) pthread_self (), errno);
+                outputerrf( "# (0x%x) RPU could not connect socket (err=%d).\n", 
+#ifdef WIN32
+                    (int) pthread_self (), WSAGetLastError() );
+#else
+                    (int) pthread_self (), errno );
+#endif /* WIN32 */
                 outputerr ("connect");
 #if USE_GTK
 #if PROCESSING_UNITS
