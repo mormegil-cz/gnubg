@@ -1101,7 +1101,7 @@ extern int ComputerTurn( void ) {
       if ( fX ) {
 	  
 	  outputnew ();
-	  ShowAutoMove( anBoardMove, pmn->anMove );
+	  ShowAutoMove( ms.anBoard, pmn->anMove );
 	  outputx ();
       }
 #endif
