@@ -224,16 +224,13 @@ extern void
 GTKShowExport ( exportsetup *pexs ) {
 
   GtkWidget *pwDialog;
-  GtkWidget *pwNotebook;
 
   GtkWidget *pwVBox;
-  GtkWidget *pwHBox;
   GtkWidget *pwFrame;
   GtkWidget *pwTable;
   GtkWidget *pwTableX;
-  GtkWidget *pwAlign;
   
-  GtkWidget *pw, *pwx;
+  GtkWidget *pw;
 
   char *aszInclude[] = {
     N_("Annotations"), 
@@ -262,8 +259,7 @@ GTKShowExport ( exportsetup *pexs ) {
     N_("Show missed doubles"),
     N_("Show close cube decisions") };
 
-  int i, j, k;
-  char sz[ 256 ];
+  int i;
 
   exportwidget *pew;
 
