@@ -25,61 +25,71 @@
 
 #include <libguile.h>
 
+#include "backgammon.h"
 #include "eval.h"
 #include "positionid.h"
 
-static long idBoardSmob;
+static SCM BoardToSCM( int anBoard[ 2 ][ 25 ] ) {
 
-typedef struct _boardsmob {
-    int anBoard[ 2 ][ 25 ];
-} boardsmob;
-
-static int BoardSmobPrint( SCM b, SCM port, scm_print_state *psps ) {
-
-    boardsmob *pbs = (boardsmob *) SCM_CDR( b );
-    
-    scm_puts( "#<board ", port );
-    scm_puts( PositionID( pbs->anBoard ), port );
-    scm_puts( ">", port );
-    
-    return 1;
-}
-
-static SCM BoardSmobEqualP( SCM b0, SCM b1 ) {
-
-    boardsmob *pbs0 = (boardsmob *) SCM_CDR( b0 ),
-	*pbs1 = (boardsmob *) SCM_CDR( b1 );
-
-    return EqualBoards( pbs0->anBoard, pbs1->anBoard ) ? SCM_BOOL_T :
-	SCM_BOOL_F;
-}
-
-static SCM board( SCM s ) {
-
-    boardsmob *pb;
+    SCM b0, b1;
     int i;
     
-    pb = scm_must_malloc( sizeof( *pb ), "board" );
+    b0 = scm_make_vector( SCM_MAKINUM( 25 ), SCM_UNSPECIFIED );
+    b1 = scm_make_vector( SCM_MAKINUM( 25 ), SCM_UNSPECIFIED );
 
-    /* FIXME initialise based on position ID, if specified */
+    for( i = 0; i < 25; i++ ) {
+	scm_vector_set_x( b0, SCM_MAKINUM( i ),
+			  SCM_MAKINUM( anBoard[ 0 ][ i ] ) );
+	scm_vector_set_x( b1, SCM_MAKINUM( i ),
+			  SCM_MAKINUM( anBoard[ 1 ][ i ] ) );
+    }
+    
+    return scm_cons( b0, b1 );
+}
+
+static void SCMToBoard( SCM s, int anBoard[ 2 ][ 25 ] ) {
+
+    int i;
+    SCM n;
+
+    SCM_ASSERT( SCM_NIMP( s ) && SCM_CONSP( s ), s, SCM_ARGn, NULL );
     
     for( i = 0; i < 25; i++ ) {
-	pb->anBoard[ 0 ][ i ] = 0;
-	pb->anBoard[ 1 ][ i ] = 0;
+	n = scm_vector_ref( SCM_CAR( s ), SCM_MAKINUM( i ) );
+	SCM_ASSERT( SCM_INUMP( n ), n, SCM_ARGn, NULL );
+	anBoard[ 0 ][ i ] = SCM_INUM( n );
+	n = scm_vector_ref( SCM_CDR( s ), SCM_MAKINUM( i ) );
+	SCM_ASSERT( SCM_INUMP( n ), n, SCM_ARGn, NULL );
+	anBoard[ 1 ][ i ] = SCM_INUM( n );
     }
+}
 
-    SCM_RETURN_NEWSMOB( idBoardSmob, pb );
+static SCM current_board( void ) {
+
+    return fTurn == -1 ? SCM_BOOL_F : BoardToSCM( anBoard );
+}
+
+static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
+
+    int i, anBoard[ 2 ][ 25 ];
+    float ar[ NUM_OUTPUTS ];
+    SCM s;
+    
+    SCMToBoard( sBoard, anBoard );
+    EvaluatePosition( anBoard, ar, NULL, NULL ); /* FIXME use all params */
+    
+    s = scm_make_vector( SCM_MAKINUM( NUM_OUTPUTS ), SCM_UNSPECIFIED );
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+	scm_vector_set_x( s, SCM_MAKINUM( i ), scm_make_real( ar[ i ] ) );
+
+    return s;
 }
 
 extern int GuileInitialise( void ) {
 
-    idBoardSmob = scm_make_smob_type( "board", sizeof( boardsmob ) );
-
-    scm_set_smob_print( idBoardSmob, BoardSmobPrint );
-    scm_set_smob_equalp( idBoardSmob, BoardSmobEqualP );
-
-    scm_make_gsubr( "board", 0, 1, 0, board );
-
+    scm_make_gsubr( "current-board", 0, 0, 0, current_board );
+    scm_make_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
+    
     return 0;
 }
 
