@@ -130,7 +130,7 @@ am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
 info_TEXINFOS = gnubg.texi
-gnubg_TEXINFOS = fdl.texi faq.texi
+gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi
 @XML_MANUAL_TRUE@pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
 @XML_MANUAL_TRUE@	rulfig4.png rulfig5.png annealing.png
 

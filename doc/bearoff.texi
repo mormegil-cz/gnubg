@@ -333,7 +333,6 @@ piped into makebearoff1 that generates the C code for the
 database. The resulting @file{br1.c} is more than 8MB, so it's not
 distributed with the source for @gnubg{}. 
 
-
 @subsection Download
 
 Currently, the only database available for download is the 6 chequers
@@ -342,4 +341,66 @@ on 6 points two sided database which can be downloaded from
 
 Later, other databases may be available for download or it may be
 possible to purchase these on CDROM or DVD for a nomial fee. 
+
+@subsection Verification of databases
+
+To verify that your generated or downloaded bearoff database is
+correct, the table below lists the MD5 checksums for a number of
+possible databases.
+
+@subsubsection One-sided bearoff databases (compressed)
+
+The table below contains the MD5 checksums for the compressed one
+sided bearoff databases, i.e., databases generated with default options.
+
+@multitable @columnfractions 0.25 0.25 0.25
+@item @strong{Chequers}  
+@tab @strong{Points}   
+@tab @strong{MD5 checksum}
+@item 15        @tab 1        @tab c789f049ec98ce4e307b471257999f39
+@item 15        @tab 2        @tab b6e61c1625ae4b3b164e93ab064192b9
+@item 15        @tab 3        @tab 346dae6139ccb4b227c534373e5c52e4
+@item 15        @tab 4        @tab 653255f5f9f22fd50277f7ff25b2a343
+@item 15        @tab 5        @tab 2064f9a56b23117d053a573c96a92fa2
+@item 15        @tab 6        @tab 3dc7b833c4670849cee00479a9e21b49
+@item 15        @tab 7        @tab 67235c8e0ee152df5daf36cbeae5b3c2
+@item 15        @tab 8        @tab a4acbb5c7e9e1f08e561afe0af934e5c
+@item 15        @tab 9        @tab 9c4ddab4e51c3e668c9c97b8f8768dbc
+@item 15        @tab 10       @tab not available
+@item 15        @tab 11       @tab not available
+@item 15        @tab 12       @tab not available
+@item 15        @tab 13       @tab not available
+@item 15        @tab 14       @tab not available
+@item 15        @tab 15       @tab not available
+@item 15        @tab 16       @tab not available
+@item 15        @tab 17       @tab not available
+@item 15        @tab 18       @tab not available
+@end multitable
+
+
+@subsection Two-sided bearoff databases (with cubeless and cubeful equities)
+
+The table below contains the MD5 checksums for the default two
+sided bearoff databases.
+
+@multitable @columnfractions 0.25 0.25 0.25
+@item @strong{Chequers}  
+@tab @strong{Points}   
+@tab @strong{MD5 checksum}
+@item 1         @tab 6        @tab not available
+@item 2         @tab 6        @tab not available
+@item 3         @tab 6        @tab not available
+@item 4         @tab 6        @tab not available
+@item 5         @tab 6        @tab not available
+@item 6         @tab 6        @tab not available
+@item 7         @tab 6        @tab not available
+@item 8         @tab 6        @tab not available
+@item 9         @tab 6        @tab not available
+@item 10        @tab 6        @tab not available
+@item 11        @tab 6        @tab not available
+@item 12        @tab 6        @tab not available
+@item 13        @tab 6        @tab not available
+@item 14        @tab 6        @tab not available
+@item 15        @tab 6        @tab not available
+@end multitable
 

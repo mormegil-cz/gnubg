@@ -1,5 +1,5 @@
 info_TEXINFOS = gnubg.texi
-gnubg_TEXINFOS = fdl.texi faq.texi
+gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi
 if XML_MANUAL
 pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
 	rulfig4.png rulfig5.png annealing.png
