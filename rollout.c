@@ -870,7 +870,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   
   int i, j, ici;
   int anBoardOrig[ 2 ][ 25 ];
-  int stopped_early = 0;
   int		ii, jj;
   int     err_too_big;
   double	v, s;
@@ -1081,13 +1080,14 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	} /* for (ii = 0; ii < NUM_ROLLOUT_OUTPUTS; ii++) */
       } /* for (jj = 0; jj < cci; jj++) */
       if (!err_too_big) {
-	stopped_early = 1;
 	break;
       }
     } /* if (prc->fStopOnSTD && (i >= prc->nMinimumGames)) */
   }
 
-  if( ( cGames != i ) && !stopped_early )
+  cGames = i;
+  /* return -1 if no games rolled out */
+  if( ! cGames)
     return -1;
 
   if( aarOutput )
