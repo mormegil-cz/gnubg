@@ -204,7 +204,7 @@ else
   AC_CHECK_FUNCS(gtk_option_menu_get_history)
   if test "$with_gtkextra" != "no"; then
     if test "$no_gtk2" != "yes"; then
-      PKG_CHECK_MODULES(GTKEXTRA, gtkextra-2.0, AC_DEFINE(USE_GTKEXTRA,2,[Define to 1 or 2 if you have the gtkextra-1 or -2 library, as appropriate.]))
+      PKG_CHECK_MODULES(GTKEXTRA, gtkextra-2.0, AC_DEFINE(USE_GTKEXTRA,2,[Define to 1 or 2 if you have the gtkextra-1 or -2 library, as appropriate.]),nada=)
     else
       AC_CHECK_LIB(gtkextra,gtk_sheet_new,gtkextra_1=yes)
       if test "$gtkextra_1" = "yes"; then
