@@ -1,3 +1,12 @@
+Sat Jan 12 17:37:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* matchequity.c (InitMatchEquity): initialise new structure
+	with information about match equity table.
+
+	* show.c (CommandShowMatchEquityTable): use information from miCurrent.
+	* gtkgame.c (GTKShowMatchEquityTable): use information from miCurrent.
+
+
 Sat Jan 12 17:00:47 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* matchequity.c (ExtendMET, initPostCrawfordMET, initMETZadeh):

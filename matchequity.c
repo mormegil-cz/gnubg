@@ -41,13 +41,6 @@ extern double erf( double x );
 
 #include "matchequity.h"
 
-char *szMET[ MET_JACOBS + 1 ] = {
-    "N. Zadeh, Management Science 23, 986 (1977)", /* MET_ZADEH */
-    "Snowie 2.1, Oasya (1999)", /* MET_SNOWIE */
-    "K. Woolsey, How to Play Tournament Backgammon (1993)", /* MET_WOOLSEY */
-    "J. Jacobs & W. Trice, Can a Fish Taste Twice as Good (1996)"
-        /* MET_JACOBS */
-};
 
 /*
  * A1 (A2) is the match equity of player 1 (2)
@@ -55,25 +48,11 @@ char *szMET[ MET_JACOBS + 1 ] = {
  */
 
 float aafMET [ MAXSCORE ][ MAXSCORE ];
-
 float afMETPostCrawford [ MAXSCORE ];
 
 met metCurrent = MET_ZADEH;
+metinfo miCurrent;
 
-#ifdef UNDEF
-int 
-GetCubePrimeValue ( int i, int j, int nCubeValue );
-
-void
-InitPostCrawfordMET ();
-
-void
-ExtendMET ( int nMaxScore );
-
-extern float
-NormalDistArea ( float rMin, float rMax, float rMu, float rSigma );
-
-#endif
 
 /*
  * Match equity table from Kit Woolsey: "How to Play Tournament
@@ -1026,6 +1005,12 @@ InitMatchEquity ( met metInit ) {
 
     initMETZadeh ( aafMET, afMETPostCrawford,
                    G1, G2, DELTA, DELTABAR, GAMMONRATE );
+
+    strcpy ( miCurrent.szName, "N. Zadeh, Management Science 23, 986 (1977)" );
+    strcpy ( miCurrent.szFileName, "zadeh.xml" );
+    strcpy ( miCurrent.szDescription,
+             "Match equity table based on N. Zadeh's formulae." );
+    miCurrent.nLength = MAXSCORE;
     
     break;
 
@@ -1037,6 +1022,12 @@ InitMatchEquity ( met metInit ) {
 
     initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
   
+    strcpy ( miCurrent.szName,
+             "K. Woolsey, How to Play Tournament Backgammon (1993)" );
+    strcpy ( miCurrent.szFileName, "woolsey.xml" );
+    strcpy ( miCurrent.szDescription, "" );
+    miCurrent.nLength = 15;
+
     break;
 
   case MET_JACOBS:
@@ -1047,6 +1038,12 @@ InitMatchEquity ( met metInit ) {
 
     initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
 
+    strcpy ( miCurrent.szName,
+             "J. Jacobs & W. Trice, Can a Fish Taste Twice as Good (1996)" );
+    strcpy ( miCurrent.szFileName, "jacobs.xml" );
+    strcpy ( miCurrent.szDescription, "" );
+    miCurrent.nLength = 25;
+
     break;
 
   case MET_SNOWIE:
@@ -1056,6 +1053,12 @@ InitMatchEquity ( met metInit ) {
         aafMET[ i ][ j ] = aafMETSnowie[ i ][ j ];
 
     initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
+
+    strcpy ( miCurrent.szName,
+             "Snowie 2.1, Oasya (1999)" );
+    strcpy ( miCurrent.szFileName, "snowie2.1.xml" );
+    strcpy ( miCurrent.szDescription, "" );
+    miCurrent.nLength = 25;
 
     break;
 
