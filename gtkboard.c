@@ -923,11 +923,11 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       bd->y_drag - 3 * bd->board_size,
 			       6 * bd->board_size, 6 * bd->board_size,
 			       bd->rgb_saved, 6 * bd->board_size * 3 );
-	else
-	    gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
-			     bd->x_drag - 3 * bd->board_size,
-			     bd->y_drag - 3 * bd->board_size,
-			     0, 0, 6 * bd->board_size, 6 * bd->board_size );
+
+	gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
+			 bd->x_drag - 3 * bd->board_size,
+			 bd->y_drag - 3 * bd->board_size,
+			 0, 0, 6 * bd->board_size, 6 * bd->board_size );
 	
 	/* fall through */
 	
@@ -971,13 +971,15 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		psrc += 4;
 	    }
 	    		
-	    gdk_draw_rgb_image( board->window, bd->gc_copy,
-				bd->x_drag - 3 * bd->board_size,
-				bd->y_drag - 3 * bd->board_size,
-				6 * bd->board_size, 6 * bd->board_size,
-				GDK_RGB_DITHER_MAX, bd->rgb_saved,
-				6 * bd->board_size * 3 );
-	    
+	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
+			     0, 0, bd->x_drag - 3 * bd->board_size,
+			     bd->y_drag - 3 * bd->board_size,
+			     6 * bd->board_size, 6 * bd->board_size );
+
+	    gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
+			     x - 3 * bd->board_size, y - 3 * bd->board_size,
+			     0, 0, 6 * bd->board_size, 6 * bd->board_size );
+	
 	    gdk_draw_rgb_image( board->window, bd->gc_copy,
 				x - 3 * bd->board_size,
 				y - 3 * bd->board_size,
@@ -1034,18 +1036,10 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( bd->drag_point < 0 )
 	    break;
 
-	if( bd->translucent )
-	    gdk_draw_rgb_image( board->window, bd->gc_copy,
-				bd->x_drag - 3 * bd->board_size,
-				bd->y_drag - 3 * bd->board_size,
-				6 * bd->board_size, 6 * bd->board_size,
-				GDK_RGB_DITHER_MAX, bd->rgb_saved,
-				6 * bd->board_size * 3 );
-	else
-	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
-			     0, 0, bd->x_drag - 3 * bd->board_size,
-			     bd->y_drag - 3 * bd->board_size,
-			     6 * bd->board_size, 6 * bd->board_size );
+	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
+			 0, 0, bd->x_drag - 3 * bd->board_size,
+			 bd->y_drag - 3 * bd->board_size,
+			 6 * bd->board_size, 6 * bd->board_size );
 
 	dest = board_point( board, bd, x, y );
     place_chequer:
@@ -1504,11 +1498,11 @@ extern void board_free_pixmaps( BoardData *bd ) {
 	gdk_pixmap_unref( bd->pm_o );
 	gdk_bitmap_unref( bd->bm_mask );
 	gdk_pixmap_unref( bd->pm_point );
-	gdk_pixmap_unref( bd->pm_saved );
 	gdk_pixmap_unref( bd->pm_temp );
 	gdk_pixmap_unref( bd->pm_temp_saved );
     }
     
+    gdk_pixmap_unref( bd->pm_saved );
     gdk_pixmap_unref( bd->pm_board );
     gdk_pixmap_unref( bd->pm_x_dice );
     gdk_pixmap_unref( bd->pm_o_dice );
@@ -2280,7 +2274,13 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
     board_draw_cube( board, bd );
     board_set_cube_font( board, bd );
 
+    bd->pm_saved = gdk_pixmap_new( board->window,
+				   6 * bd->board_size,
+				   6 * bd->board_size, -1 );
     if( bd->translucent ) {
+	bd->pm_saved = gdk_pixmap_new( board->window,
+				       6 * bd->board_size,
+				       6 * bd->board_size, -1 );
 	bd->rgb_saved = malloc( 6 * bd->board_size * 6 * bd->board_size * 3 );
 	bd->rgb_temp = malloc( 6 * bd->board_size * 6 * bd->board_size * 3 );
 	bd->rgb_temp_saved = malloc( 6 * bd->board_size * 6 * bd->board_size *
@@ -2288,9 +2288,6 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 	gtk_object_set_user_data( GTK_OBJECT( bd->key0 ), &bd->rgba_x_key );
 	gtk_object_set_user_data( GTK_OBJECT( bd->key1 ), &bd->rgba_o_key );
     } else {
-	bd->pm_saved = gdk_pixmap_new( board->window,
-				       6 * bd->board_size,
-				       6 * bd->board_size, -1 );
 	bd->pm_temp = gdk_pixmap_new( board->window,
 				      6 * bd->board_size,
 				      6 * bd->board_size, -1 );
@@ -2570,7 +2567,7 @@ static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
 static gboolean key_press( GtkWidget *pw, GdkEvent *event,
 			   BoardData *bd ) {
 
-    UserCommand( "set colours" );
+    BoardPreferences( bd->widget );
     
     return TRUE;
 }
@@ -2812,4 +2809,61 @@ extern GtkType board_get_type( void ) {
     }
     
     return board_type;
+}
+
+static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
+				    BoardData *bd ) {
+
+    int n = (int) gtk_object_get_user_data( GTK_OBJECT( dice ) );
+    
+    board_redraw_die( dice, bd, 0, 0, bd->turn, n % 6 + 1 );
+    board_redraw_die( dice, bd, 7 * bd->board_size, 0, bd->turn, n / 6 + 1 );
+    
+    return TRUE;
+}
+
+static gboolean dice_widget_press( GtkWidget *dice, GdkEvent *event,
+			    BoardData *bd ) {
+
+    GtkWidget *pwTable = dice->parent;
+    int n = (int) gtk_object_get_user_data( GTK_OBJECT( dice ) );
+    int *an = gtk_object_get_user_data( GTK_OBJECT( pwTable ) );
+
+    an[ 0 ] = n % 6 + 1;
+    an[ 1 ] = n / 6 + 1;
+
+    gtk_widget_destroy( pwTable );
+    
+    return TRUE;
+}
+
+extern GtkWidget *board_dice_widget( Board *board ) {
+
+    GtkWidget *pw = gtk_table_new( 6, 6, TRUE ), *pwDice;
+    BoardData *bd = board->board_data;    
+    int x, y;
+
+    for( y = 0; y < 6; y++ )
+	for( x = 0; x < 6; x++ ) {
+	    pwDice = gtk_drawing_area_new();
+	    gtk_object_set_user_data( GTK_OBJECT( pwDice ),
+				      (gpointer) ( y * 6 + x ) );
+	    gtk_drawing_area_size( GTK_DRAWING_AREA( pwDice ),
+				   14 * bd->board_size, 7 * bd->board_size );
+	    gtk_widget_set_events( pwDice, GDK_EXPOSURE_MASK |
+				   GDK_BUTTON_PRESS_MASK |
+				   GDK_STRUCTURE_MASK );
+	    gtk_signal_connect( GTK_OBJECT( pwDice ), "expose_event",
+				GTK_SIGNAL_FUNC( dice_widget_expose ), bd );
+	    gtk_signal_connect( GTK_OBJECT( pwDice ), "button_press_event",
+				GTK_SIGNAL_FUNC( dice_widget_press ), bd );
+	    gtk_table_attach_defaults( GTK_TABLE( pw ), pwDice,
+				       x, x + 1, y, y + 1 );
+        }
+
+    gtk_table_set_row_spacings( GTK_TABLE( pw ), 4 * bd->board_size );
+    gtk_table_set_col_spacings( GTK_TABLE( pw ), 2 * bd->board_size );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), bd->board_size );
+    
+    return pw;	    
 }

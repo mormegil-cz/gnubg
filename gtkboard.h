@@ -25,7 +25,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
+    
 #define TYPE_BOARD ( board_get_type() )
 #define BOARD( obj ) ( GTK_CHECK_CAST( (obj), TYPE_BOARD, Board ) )
 #define BOARD_CLASS( c ) ( GTK_CHECK_CLASS_CAST( (c), TYPE_BOARD, \
@@ -37,13 +37,14 @@ typedef struct _Board {
     GtkVBox vbox;
     gpointer board_data;
 } Board;
-
+    
 typedef struct _BoardClass {
     GtkVBoxClass parent_class;
 } BoardClass;
 
 extern GtkType board_get_type( void );    
 extern GtkWidget *board_new( void );
+extern GtkWidget *board_dice_widget( Board *board );
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 );

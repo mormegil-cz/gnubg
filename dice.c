@@ -55,6 +55,10 @@
 #include "mt19937int.h"
 #include "isaac.h"
 
+#if USE_GTK
+#include "gtkgame.h"
+#endif
+
 rng rngCurrent = RNG_MERSENNE;
 
 static randctx rc;
@@ -77,6 +81,16 @@ static int GetManualDice( int anDice[ 2 ] ) {
   char *sz, *pz;
   int i;
 
+#if USE_GTK
+  if( fX ) {
+      if( GTKGetManualDice( anDice ) ) {
+	  fInterrupt = 1;
+	  return -1;
+      } else
+	  return 0;
+  }
+#endif
+  
   for (;;) {
   TryAgain:
       if( fInterrupt ) {

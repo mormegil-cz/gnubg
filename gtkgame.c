@@ -49,6 +49,7 @@
 #include "drawboard.h"
 #include "gtkboard.h"
 #include "gtkgame.h"
+#include "gtkprefs.h"
 #include "positionid.h"
 
 /* Enumeration to be used as index to the table of command strings below
@@ -170,7 +171,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set automatic game",
     "set automatic move",
     "set automatic roll",
-    "set colours",
+    NULL, /* set colours */
     "set confirm",
     "set cube centre",
     NULL, /* set cube owner 0 */
@@ -216,6 +217,7 @@ static GtkWidget *pwGrab;
 
 GtkWidget *pwBoard, *pwMain;
 static GtkWidget *pwStatus, *pwGame, *pwGameList, *pom;
+static GtkAccelGroup *pagMain;
 static GtkStyle *psGameList, *psCurrent;
 static int yCurrent, xCurrent; /* highlighted row/col in game record */
 static GtkItemFactory *pif;
@@ -335,6 +337,10 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
     }
 
     switch( iCommand ) {
+    case CMD_SET_COLOURS:
+	BoardPreferences( pwBoard );
+	return;
+	
     case CMD_SET_CUBE_OWNER_0:
     case CMD_SET_CUBE_OWNER_1:
 	sprintf( sz, "set cube owner %s",
@@ -351,6 +357,51 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
 	
     default:
 	UserCommand( aszCommands[ iCommand ] );
+    }
+}
+
+static void DestroySetDice( GtkObject *po, GtkWidget *pw ) {
+
+    gtk_widget_destroy( pw );
+}
+
+extern int GTKGetManualDice( int an[ 2 ] ) {
+
+    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Dice", TRUE,
+					NULL, NULL ),
+	*pwDice = board_dice_widget( BOARD( pwBoard ) );
+
+    an[ 0 ] = 0;
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwDice );
+    gtk_object_set_user_data( GTK_OBJECT( pwDice ), an );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    gtk_signal_connect( GTK_OBJECT( pwDice ), "destroy",
+			GTK_SIGNAL_FUNC( DestroySetDice ), pwDialog );
+    
+    gtk_widget_show_all( pwDialog );
+
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
+
+    return an[ 0 ] ? 0 : -1;
+}
+
+static void SetDice( gpointer *p, guint n, GtkWidget *pw ) {
+
+    int an[ 2 ];
+    char sz[ 13 ]; /* "set dice x y" */
+
+    if( !GTKGetManualDice( an ) ) {
+	sprintf( sz, "set dice %d %d", an[ 0 ], an[ 1 ] );
+	UserCommand( sz );
     }
 }
 
@@ -430,18 +481,19 @@ static void ButtonCommand( GtkWidget *pw, char *szCommand ) {
     UserCommand( szCommand );
 }
 
-static GtkWidget *PixmapButton( GdkWindow *pwin, char **xpm,
+static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
 				char *szCommand ) {
     
     GdkPixmap *ppm;
     GdkBitmap *pbm;
     GtkWidget *pw, *pwButton;
 
-    ppm = gdk_pixmap_create_from_xpm_d( pwin, &pbm, NULL, xpm );
+    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL, pcmap, &pbm, NULL,
+						 xpm );
     pw = gtk_pixmap_new( ppm, pbm );
     pwButton = gtk_button_new();
     gtk_container_add( GTK_CONTAINER( pwButton ), pw );
-
+    
     gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonCommand ), szCommand );
     
@@ -456,38 +508,38 @@ static void CreateGameWindow( void ) {
 	*phbox = gtk_hbox_new( FALSE, 0 ),
 	*pm = gtk_menu_new();
     GtkStyle *ps;
-
+    GdkColormap *pcmap;
+    
 #include "prevgame.xpm"
 #include "prevmove.xpm"
 #include "nextmove.xpm"
 #include "nextgame.xpm"
     
     pwGame = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    pcmap = gtk_widget_get_colormap( pwGame );
+    
     gtk_window_set_title( GTK_WINDOW( pwGame ), "GNU Backgammon - "
 			  "Game record" );
     gtk_window_set_wmclass( GTK_WINDOW( pwGame ), "gamerecord",
 			    "GameRecord" );
     gtk_window_set_default_size( GTK_WINDOW( pwGame ), 0, 400 );
-    /* realise the window immediately, so the colourmap is available for the
-       pixmap */
-    gtk_widget_realize( pwGame );
     
     gtk_container_add( GTK_CONTAINER( pwGame ), pvbox );
 
     gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pwGame->window, prevgame_xpm,
-				      "previous game" ), FALSE, FALSE, 4 );
+			PixmapButton( pcmap, prevgame_xpm, "previous game" ),
+			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pwGame->window, prevmove_xpm,
-				      "previous" ), FALSE, FALSE, 0 );
+			PixmapButton( pcmap, prevmove_xpm, "previous" ),
+			FALSE, FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pwGame->window, nextmove_xpm,
-				      "next" ), FALSE, FALSE, 4 );
+			PixmapButton( pcmap, nextmove_xpm, "next" ),
+			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pwGame->window, nextgame_xpm,
-				      "next game" ), FALSE, FALSE, 0 );
+			PixmapButton( pcmap, nextgame_xpm, "next game" ),
+			FALSE, FALSE, 0 );
         
     gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(
 	"(no game)" ) );
@@ -734,7 +786,9 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
     }
 
     gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psCurrent );
-    gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.5, 0.5 );
+
+    if( gtk_clist_row_is_visible( pcl, yCurrent ) == GTK_VISIBILITY_NONE )
+	gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.5, 0.5 );
 }
 
 extern void GTKClearMoveRecord( void ) {
@@ -827,7 +881,6 @@ static void TextPopped( GtkWidget *pw, guint id, gchar *text, void *p ) {
 extern int InitGTK( int *argc, char ***argv ) {
     
     GtkWidget *pwVbox;
-    GtkAccelGroup *pag;
     static GtkItemFactoryEntry aife[] = {
 	{ "/_File", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_New", NULL, NULL, 0, "<Branch>" },
@@ -892,7 +945,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "/Game/Cube/Value/1" },
 	{ "/_Game/_Cube/_Value/64", NULL, Command, CMD_SET_CUBE_VALUE_64,
 	  "/Game/Cube/Value/1" },
-	{ "/_Game/_Dice...", NULL, NULL, 0, NULL },
+	{ "/_Game/_Dice...", NULL, SetDice, 0, NULL },
 	{ "/_Game/_Score...", NULL, NULL, 0, NULL },
 	{ "/_Game/_Seed...", NULL, NULL, 0, NULL },
 	{ "/_Game/_Turn", NULL, NULL, 0, "<Branch>" },
@@ -962,9 +1015,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Settings/Save settings", NULL, Command, CMD_SAVE_SETTINGS, NULL },
 	{ "/_Help", NULL, NULL, 0, "<Branch>" },
-	{ "/_Help/_Commands", NULL, Command, CMD_HELP, NULL },
-	{ "/_Help/Co_pying gnubg", NULL, Command, CMD_SHOW_COPYING, NULL },
-	{ "/_Help/gnubg _Warranty", NULL, Command, CMD_SHOW_WARRANTY, NULL },
+	{ "/_Help/_Commands...", NULL, Command, CMD_HELP, NULL },
+	{ "/_Help/Co_pying gnubg...", NULL, Command, CMD_SHOW_COPYING, NULL },
+	{ "/_Help/gnubg _Warranty...", NULL, Command, CMD_SHOW_WARRANTY,
+	  NULL },
 	{ "/_Help/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Help/_About...", NULL, NULL, 0, NULL }
     };
@@ -987,11 +1041,11 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_container_add( GTK_CONTAINER( pwMain ),
 		       pwVbox = gtk_vbox_new( FALSE, 0 ) );
 
-    pag = gtk_accel_group_new();
-    pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pag );
+    pagMain = gtk_accel_group_new();
+    pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pagMain );
     gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ),
 				   aife, NULL );
-    gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pag );
+    gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
     gtk_box_pack_start( GTK_BOX( pwVbox ),
 			gtk_item_factory_get_widget( pif, "<main>" ),
 			FALSE, FALSE, 0 );
@@ -1015,6 +1069,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
     CreateGameWindow();
+    gtk_window_add_accel_group( GTK_WINDOW( pwGame ), pagMain );
     
     ListCreate( &lOutput );
 
@@ -1122,12 +1177,9 @@ extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 	*pwPixmap;
     GtkAccelGroup *pag = gtk_accel_group_new();
 
-    /* realise the dialog immediately, so the colourmap is available for the
-       pixmap */
-    gtk_widget_realize( pwDialog );
-    
-    ppm = gdk_pixmap_create_from_xpm_d( pwDialog->window, NULL, NULL,
-					fQuestion ? question_xpm : gnu_xpm );
+    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
+	 gtk_widget_get_colormap( pwDialog ), NULL, NULL,
+	 fQuestion ? question_xpm : gnu_xpm );
     pwPixmap = gtk_pixmap_new( ppm, NULL );
     gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
 
@@ -1500,47 +1552,87 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 extern void GTKHint( movelist *pml ) {
 
     static char *aszTitle[] = {
-	"Win", "Win (g)", "Win (bg)", "Lose (g)", "Lose (bg)", "Equity",
-	"Move"
-    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+	"Rank", "Type", "Win", "W g", "W bg", "Lose", "L g", "L bg",
+	"Equity", "Diff.", "Move"
+    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+		       NULL, NULL };
+    static int aanColumns[][ 2 ] = {
+	{ 2, OUTPUT_WIN },
+	{ 3, OUTPUT_WINGAMMON },
+	{ 4, OUTPUT_WINBACKGAMMON },
+	{ 6, OUTPUT_LOSEGAMMON },
+	{ 7, OUTPUT_LOSEBACKGAMMON }
+    };
     GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL,
 					NULL ),
 	*psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pwButtons = DialogArea( pwDialog, DA_BUTTONS ),
 	*pwMove = gtk_button_new_with_label( "Move" ),
 	*pwRollout = gtk_button_new_with_label( "Rollout" ),
-	*pwMoves = gtk_clist_new_with_titles( 7, aszTitle );
+	*pwMoves = gtk_clist_new_with_titles( 11, aszTitle );
     int i, j;
     char sz[ 32 ];
     hintdata hd = { pwMove, pwRollout };
+    float rBest;
     
-    for( i = 0; i < 7; i++ ) {
+    for( i = 0; i < 11; i++ ) {
 	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
 	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
-					    i == 6 ? GTK_JUSTIFY_LEFT :
+					    i == 1 || i == 10 ?
+					    GTK_JUSTIFY_LEFT :
 					    GTK_JUSTIFY_RIGHT );
     }
     gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
     gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
 				  GTK_SELECTION_MULTIPLE );
-    
+
+    rBest = pml->amMoves[ 0 ].arEvalMove[ OUTPUT_WIN ] * 2.0f +
+	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_WINGAMMON ] +
+	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_WINBACKGAMMON ] -
+	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_LOSEGAMMON ] -
+	pml->amMoves[ 0 ].arEvalMove[ OUTPUT_LOSEBACKGAMMON ] - 1.0f;
+	
     for( i = 0; i < pml->cMoves; i++ ) {
 	float *ar = pml->amMoves[ i ].arEvalMove;
 
 	gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
 
 	gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
-	
+
+	sprintf( sz, "%d", i + 1 );
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 0, sz );
+
+	FormatEval( sz, pml->amMoves[ i ].etMove, pml->amMoves[ i ].esMove );
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
+
 	for( j = 0; j < 5; j++ ) {
-	    sprintf( sz, "%5.3f", ar[ j ] );
-	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, j, sz );
+	    if( fOutputWinPC )
+		sprintf( sz, "%5.1f%%", ar[ aanColumns[ j ][ 1 ] ] * 100.0f );
+	    else
+		sprintf( sz, "%5.3f", ar[ aanColumns[ j ][ 1 ] ] );
+	    
+	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
+				sz );
 	}
 
-	sprintf( sz, "%6.3f", ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] -
-		 ar[ 4 ] - 1.0 );
+	if( fOutputWinPC )
+	    sprintf( sz, "%5.1f%%", ( 1.0f - ar[ OUTPUT_WIN ] ) * 100.0f );
+	else
+	    sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
+	    
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
 	
-	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 6,
+	sprintf( sz, "%6.3f", ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] -
+		 ar[ 4 ] - 1.0 );
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
+
+	if( i ) {
+	    sprintf( sz, "%6.3f", ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] -
+		     ar[ 4 ] - 1.0 - rBest );
+	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
+	}
+	
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
 			    FormatMove( sz, anBoard,
 					pml->amMoves[ i ].anMove ) );
     }
