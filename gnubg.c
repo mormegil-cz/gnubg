@@ -140,10 +140,6 @@ event evNextTurn;
 #include "timecontrol.h"
 #endif
 
-#ifdef WIN32
-#include<windows.h>
-#endif
-
 #if HAVE_ALLOCA
 #ifndef alloca
 #define alloca __builtin_alloca
@@ -5034,6 +5030,10 @@ CommandXCopy ( char *sz ) {
 }
 
 #ifdef WIN32
+
+#if !USE_GTK
+#include <windows.h>
+#endif
 
 int CountLines(const char* buf)
 {

@@ -21,7 +21,7 @@
 * $Id$
 */
 
-#if USE_MSDEV_TEST_HARNESS
+#if _MSC_VER
 #include <gl/gl.h>
 #endif
 

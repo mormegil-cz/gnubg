@@ -38,11 +38,13 @@
 #include <gtk/gtk.h>
 #endif
 
+#ifdef _MSC_VER
+	#define AlphaBlend ab
+#endif
 #ifdef USE_MSDEV_TEST_HARNESS
 	#define USE_GLUT
 	#define USE_GLUT_FONT
 
-	#define AlphaBlend ab
 	#define gtk_main_quit() 0
 	#define gtk_main() 0
 	#define g_print(a) 0
