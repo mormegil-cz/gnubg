@@ -1,3 +1,17 @@
+Wed Jul 31 16:32:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+        * gtkexport.c (ExportOK): Fix bug from yesterday.
+        * gtkexport.c (GTKShowExport): Add label to HTML board type menu.
+
+        * gtkgame.c: Remove HintCopy()
+        * gtkgame.c (GtkTutor): Call ShowBoard after clicking 'Rethink' 
+          button. Suggested by Nardy Pillards.
+
+        * gtkgame.c (FileCommand): Incrase buffer (thanks Jim!)
+        * gtkgame.c (OptionsOK): Small unimportant fixes.
+
+        * gnubg.c (SaveRolloutSettings): remove call to SaveRNGSettings  
+
 Tue Jul 30 18:56:13 2002  Øystein Johansen  <oeysteij@online.no>
 
         * gtkgame.c: Add sensitivity to Tutor options

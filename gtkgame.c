@@ -2426,6 +2426,14 @@ TutorHint ( GtkWidget *pw, void *unused ) {
 
 }
 
+static void
+TutorRethink ( GtkWidget *pw, void *unused ) {
+
+  gtk_widget_destroy ( gtk_widget_get_toplevel( pw ) );
+  ShowBoard ();
+
+}
+
 extern int GtkTutor ( char *sz ) {
 
     int f = FALSE, fRestoreNextTurn;
@@ -2466,9 +2474,9 @@ extern int GtkTutor ( char *sz ) {
     gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", 
 			GTK_SIGNAL_FUNC( OK ), (void *) &f );
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
-	gtk_signal_connect_object( GTK_OBJECT( pwCancel ), "clicked",
-				   GTK_SIGNAL_FUNC( gtk_widget_destroy ),
-				   GTK_OBJECT( pwTutorDialog ) );
+	gtk_signal_connect( GTK_OBJECT( pwCancel ), "clicked",
+				   GTK_SIGNAL_FUNC( TutorRethink ),
+				   (void *) &f );
 
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwEndTutor );
 	gtk_signal_connect( GTK_OBJECT( pwEndTutor ), "clicked",
@@ -2822,9 +2830,9 @@ static void FileCommand( char *szPrompt, char *szDefault, char *szCommand ) {
     
     if( ( pch = SelectFile( szPrompt, szDefault ) ) ) {
 #if __GNUC__
-	char sz[ strlen( pch ) + strlen( szCommand ) + 2 ];
+	char sz[ strlen( pch ) + strlen( szCommand ) + 4 ];
 #elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + strlen( szCommand ) + 2 );
+	char *sz = alloca( strlen( pch ) + strlen( szCommand ) + 4 );
 #else
 	char sz[ 1024 ];
 #endif
@@ -4541,41 +4549,6 @@ extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
    WinCopy( (char *) data);
 }
 #endif
-
-static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
-
-   char szBuf[4096], szTemp[4096];
-   int n, i;
- 
-   movelist *pml;
-    
-   pml = malloc( sizeof( *pml ) );
-   memcpy( pml, pmlOrig, sizeof( *pml ) );
-    
-   pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
-   memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
-
-   n = pml->cMoves;
-
-   if (n > 12) n = 12;  /* FIXME There should be some kind of way to
-                         * control how many moves you want to copy */
-#ifdef WIN32
-   strcpy(szBuf, "");
-#else
-   strcpy(szBuf, "\n");
-#endif
-
-   for( i = 0; i < n; i++ )
-      strcat( szBuf, FormatMoveHint( szTemp, &ms, pml, i, TRUE, TRUE, TRUE ) );
-
-#ifdef WIN32   
-   WinCopy( szBuf ); 
-#else
-   printf("%s", szBuf); 
-#endif
-   
-}
-
 
 static void DestroyHint( gpointer p ) {
 
@@ -7059,7 +7032,7 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwSkill_menu), glade_menuitem);
   gtk_option_menu_set_menu (GTK_OPTION_MENU (pow->pwTutorSkill), pwSkill_menu);
-  gtk_option_menu_set_history (GTK_OPTION_MENU (pow->pwTutorSkill), 4);
+  gtk_option_menu_set_history (GTK_OPTION_MENU (pow->pwTutorSkill), 0);
 
   gtk_widget_set_sensitive (pow->pwTutorSkill, fTutor);
   gtk_widget_set_sensitive( pow->pwTutorCube, fTutor );
@@ -7203,7 +7176,6 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwPRNG_menu), glade_menuitem);
   gtk_option_menu_set_menu (GTK_OPTION_MENU (pow->pwPRNGMenu), pwPRNG_menu);
-  gtk_option_menu_set_history (GTK_OPTION_MENU (pow->pwPRNGMenu), 4);
 
   pow->pwSeed = gtk_button_new_with_label (_("Seed..."));
   gtk_box_pack_start (GTK_BOX (pwHBox), pow->pwSeed, FALSE, FALSE, 0);
