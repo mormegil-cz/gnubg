@@ -525,9 +525,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	if( fAnalyseCube ) {
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
-	    if ( GetDPEq ( NULL, NULL, &ci ) ) {
+	    if ( GetDPEq ( NULL, NULL, &ci ) ||
+                 ci.fCubeOwner < 0 || ci.fCubeOwner == ci.fMove ) {
 	      
-              if ( cmp_evalsetup ( &esAnalysisCube, &pmr->n.esDouble ) > 0 ) {
+              if ( cmp_evalsetup ( &esAnalysisCube, &pmr->d.esDouble ) > 0 ) {
 
 		if ( GeneralCubeDecision ( "",
 					   aarOutput, aarStdDev, aarsStatistics, 
