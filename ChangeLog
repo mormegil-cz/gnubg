@@ -1,3 +1,8 @@
+Sat Nov 30 12:31:12 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* makebearoff1.c (PrintCode, PrintPre): do md5 checksum
+	of the built-in database to avoid potential problems.
+
 Fri Nov 29 23:55:00 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Rudimentary support for board designs.
