@@ -76,7 +76,7 @@ VERSION = @VERSION@
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@
 COMMON_LIBS = -Llib -levent @GUILE_LDFLAGS@
-COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c
+COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c guile.h
 
 COMMON_DEPS = lib/libevent.a
 
@@ -134,20 +134,20 @@ X_PRE_LIBS = @X_PRE_LIBS@
 @USE_GTK_FALSE@@USE_EXT_TRUE@pub_eval.o set.o show.o database.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@mt19937int.o dice.o rollout.o isaac.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@copying.o kleinman.o md5.o matchequity.o \
-@USE_GTK_FALSE@@USE_EXT_TRUE@analysis.o sgf.o sgfp.o sgfl.o xboard.o \
-@USE_GTK_FALSE@@USE_EXT_TRUE@xgame.o
+@USE_GTK_FALSE@@USE_EXT_TRUE@analysis.o sgf.o sgfp.o sgfl.o guile.o \
+@USE_GTK_FALSE@@USE_EXT_TRUE@xboard.o xgame.o
 @USE_GTK_TRUE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @USE_GTK_TRUE@positionid.o drawboard.o pub_eval.o set.o show.o \
 @USE_GTK_TRUE@database.o mt19937int.o dice.o rollout.o isaac.o \
 @USE_GTK_TRUE@copying.o kleinman.o md5.o matchequity.o analysis.o sgf.o \
-@USE_GTK_TRUE@sgfp.o sgfl.o gtkboard.o gtkgame.o
+@USE_GTK_TRUE@sgfp.o sgfl.o guile.o gtkboard.o gtkgame.o
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@getopt1.o eval.o play.o positionid.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@drawboard.o pub_eval.o set.o show.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@database.o mt19937int.o dice.o rollout.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@isaac.o copying.o kleinman.o md5.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@matchequity.o analysis.o sgf.o sgfp.o \
-@USE_GTK_FALSE@@USE_EXT_FALSE@sgfl.o
+@USE_GTK_FALSE@@USE_EXT_FALSE@sgfl.o guile.o
 gnubg_LDFLAGS = 
 md5test_OBJECTS =  md5test.o md5.o
 md5test_LDADD = $(LDADD)
@@ -178,11 +178,11 @@ DIST_SUBDIRS =  lib doc ext lib doc
 DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/database.P \
 .deps/dice.P .deps/drawboard.P .deps/eval.P .deps/getopt.P \
 .deps/getopt1.P .deps/gnubg.P .deps/gtkboard.P .deps/gtkgame.P \
-.deps/isaac.P .deps/kleinman.P .deps/makebearoff.P .deps/makeweights.P \
-.deps/matchequity.P .deps/md5.P .deps/md5test.P .deps/mt19937int.P \
-.deps/play.P .deps/positionid.P .deps/pub_eval.P .deps/rollout.P \
-.deps/set.P .deps/sgf.P .deps/sgfl.P .deps/sgfp.P .deps/show.P \
-.deps/xboard.P .deps/xgame.P
+.deps/guile.P .deps/isaac.P .deps/kleinman.P .deps/makebearoff.P \
+.deps/makeweights.P .deps/matchequity.P .deps/md5.P .deps/md5test.P \
+.deps/mt19937int.P .deps/play.P .deps/positionid.P .deps/pub_eval.P \
+.deps/rollout.P .deps/set.P .deps/sgf.P .deps/sgfl.P .deps/sgfp.P \
+.deps/show.P .deps/xboard.P .deps/xgame.P
 SOURCES = $(gnubg_SOURCES) $(md5test_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 OBJECTS = $(gnubg_OBJECTS) $(md5test_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 
