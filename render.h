@@ -134,6 +134,7 @@ typedef struct _renderdata {
 	int planView;	/* Ortho view? */
 	float diceSize;	/* How big are the dice */
 	int roundedEdges;	/* Rounded board edges? */
+	int bgInTrays;	/* Rounded board edges? */
 	PieceType pieceType;	/* Different piece models */
 	PieceTextureType pieceTextureType;	/* Different piece texture types */
 

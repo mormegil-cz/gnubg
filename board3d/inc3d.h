@@ -23,8 +23,6 @@
 #ifndef _INC3D_H_
 #define _INC3D_H_
 
-#include <gtk/gtk.h>
-
 #ifdef TRUE
 #undef TRUE
 #endif
@@ -36,13 +34,13 @@
 #include <stdio.h>
 #include "i18n.h"
 
-/*#define USE_MSDEV_TEST_HARNESS*/
+#if USE_GTK
+#include <gtk/gtk.h>
+#endif
+
 #ifdef USE_MSDEV_TEST_HARNESS
-	#undef USE_GTK
 	#define USE_GLUT
 	#define USE_GLUT_FONT
-	/* Comment out next line to switch test harness off */
-	#define TEST
 
 	#define AlphaBlend ab
 	#define gtk_main_quit() 0

@@ -61,6 +61,7 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 void drawCube(float size);
 void drawRect(float x, float y, float z, float w, float h, Texture* texture);
 void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture);
+void drawQuarterRect(float x, float y, float z, float w, float h, Texture* texture);
 void QuarterCylinder(float radius, float len, int accuracy, Texture* texture);
 void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* texture);
 void QuarterCylinderSplayedRev(float radius, float len, int accuracy, Texture* texture);
@@ -1142,42 +1143,7 @@ void drawNumbers(BoardData* bd, int sides)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void outlinePoint(float tuv, int i, int p)
-{	/* Draw outline of point with correct texture co-ords */
-	float w = PIECE_HOLE;
-	float h = POINT_HEIGHT;
-	float x, y;
-
-	if (p)
-	{
-		x = TRAY_WIDTH - EDGE_WIDTH + PIECE_HOLE * i;
-		y = -LIFT_OFF;
-	}
-	else
-	{
-		x = TRAY_WIDTH - EDGE_WIDTH + BOARD_WIDTH - (PIECE_HOLE * i);
-		y = TOTAL_HEIGHT - EDGE_HEIGHT * 2 + LIFT_OFF;
-		w = -w;
-		h = -h;
-	}
-
-	glPushMatrix();
-	glTranslatef(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH);
-
-	glBegin(GL_LINE_STRIP);
-		glNormal3f(0, 0, 1);
-		glTexCoord2f(x * tuv, y * tuv);
-		glVertex3f(x, y, 0);
-		glTexCoord2f((x + w / 2) * tuv, (y + h) * tuv); 
-		glVertex3f(x + w / 2, y + h, 0);
-		glTexCoord2f((x + w) * tuv, y * tuv); 
-		glVertex3f(x + w, y, 0);
-	glEnd();
-
-	glPopMatrix();
-}
-
-void drawPoint(float tuv, int i, int p)
+void drawPoint(BoardData* bd, float tuv, int i, int p, GLenum mode)
 {	/* Draw point with correct texture co-ords */
 	float w = PIECE_HOLE;
 	float h = POINT_HEIGHT;
@@ -1197,16 +1163,22 @@ void drawPoint(float tuv, int i, int p)
 	}
 
 	glPushMatrix();
-	glTranslatef(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH);
+	if (bd->bgInTrays)
+		glTranslatef(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH);
+	else
+	{
+		x -= TRAY_WIDTH - EDGE_WIDTH;
+		glTranslatef(TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH);
+	}
 
-	glBegin(GL_TRIANGLES);
+	glBegin(mode);
 		glNormal3f(0, 0, 1);
-		glTexCoord2f(x * tuv, y * tuv);
-		glVertex3f(x, y, 0);
 		glTexCoord2f((x + w) * tuv, y * tuv); 
 		glVertex3f(x + w, y, 0);
 		glTexCoord2f((x + w / 2) * tuv, (y + h) * tuv); 
 		glVertex3f(x + w / 2, y + h, 0);
+		glTexCoord2f(x * tuv, y * tuv);
+		glVertex3f(x, y, 0);
 	glEnd();
 
 	glPopMatrix();
@@ -1221,30 +1193,33 @@ void drawPoints(BoardData* bd)
 	glDepthFunc(GL_ALWAYS);
 
 	setMaterial(&bd->baseMat);
-	drawSplitRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH + TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->baseMat.pTexture);
+	if (bd->bgInTrays)
+		drawQuarterRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH + TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->baseMat.pTexture);
+	else
+		drawQuarterRect(TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->baseMat.pTexture);
 
 	if (bd->pointMat[0].pTexture)
 		tuv = (TEXTURE_SCALE) / bd->pointMat[0].pTexture->width;
 	else
 		tuv = 0;
 	setMaterial(&bd->pointMat[0]);
-	drawPoint(tuv, 0, 0);
-	drawPoint(tuv, 0, 1);
-	drawPoint(tuv, 2, 0);
-	drawPoint(tuv, 2, 1);
-	drawPoint(tuv, 4, 0);
-	drawPoint(tuv, 4, 1);
+	drawPoint(bd, tuv, 0, 0, GL_TRIANGLES);
+	drawPoint(bd, tuv, 0, 1, GL_TRIANGLES);
+	drawPoint(bd, tuv, 2, 0, GL_TRIANGLES);
+	drawPoint(bd, tuv, 2, 1, GL_TRIANGLES);
+	drawPoint(bd, tuv, 4, 0, GL_TRIANGLES);
+	drawPoint(bd, tuv, 4, 1, GL_TRIANGLES);
 
 	glLineWidth(1);
  	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
-	outlinePoint(tuv, 0, 0);
-	outlinePoint(tuv, 0, 1);
-	outlinePoint(tuv, 2, 0);
-	outlinePoint(tuv, 2, 1);
-	outlinePoint(tuv, 4, 0);
-	outlinePoint(tuv, 4, 1);
+	drawPoint(bd, tuv, 0, 0, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 0, 1, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 2, 0, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 2, 1, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 4, 0, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 4, 1, GL_LINE_STRIP);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
@@ -1254,22 +1229,22 @@ void drawPoints(BoardData* bd)
 	else
 		tuv = 0;
 	setMaterial(&bd->pointMat[1]);
-	drawPoint(tuv, 1, 0);
-	drawPoint(tuv, 1, 1);
-	drawPoint(tuv, 3, 0);
-	drawPoint(tuv, 3, 1);
-	drawPoint(tuv, 5, 0);
-	drawPoint(tuv, 5, 1);
+	drawPoint(bd, tuv, 1, 0, GL_TRIANGLES);
+	drawPoint(bd, tuv, 1, 1, GL_TRIANGLES);
+	drawPoint(bd, tuv, 3, 0, GL_TRIANGLES);
+	drawPoint(bd, tuv, 3, 1, GL_TRIANGLES);
+	drawPoint(bd, tuv, 5, 0, GL_TRIANGLES);
+	drawPoint(bd, tuv, 5, 1, GL_TRIANGLES);
 
  	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
-	outlinePoint(tuv, 1, 0);
-	outlinePoint(tuv, 1, 1);
-	outlinePoint(tuv, 3, 0);
-	outlinePoint(tuv, 3, 1);
-	outlinePoint(tuv, 5, 0);
-	outlinePoint(tuv, 5, 1);
+	drawPoint(bd, tuv, 1, 0, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 1, 1, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 3, 0, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 3, 1, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 5, 0, GL_LINE_STRIP);
+	drawPoint(bd, tuv, 5, 1, GL_LINE_STRIP);
 
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
@@ -1664,6 +1639,9 @@ void drawTable(BoardData* bd)
 		drawBase(bd, 2);
 	setMaterial(&bd->boxMat);
 
+	if (!bd->bgInTrays)
+		drawSplitRect(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, PIECE_HOLE + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->boxMat.pTexture);
+
 if (bd->roundedEdges)
 {
 	if (bd->boxMat.pTexture)
@@ -1968,6 +1946,9 @@ else
 		drawBase(bd, 1);
 
 	setMaterial(&bd->boxMat);
+
+	if (!bd->bgInTrays)
+		drawSplitRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, PIECE_HOLE, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->boxMat.pTexture);
 
 	if (bd->State != BOARD_OPEN)
 	{	/* Back of board */

@@ -1,3 +1,11 @@
+Tue Oct 14 10:58:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c, misc3d.c, gtkprefs.c, renderpref.c: Added
+	option to draw background in bear off trays (3d board).
+	* graph.c: Tidied number sizes in axis.
+	* boards.xml: Added more (rough) 3d designs.
+	* gtkboard.c: Don't allow chequer input if computers turn.
+
 Mon Oct 13 18:12:37 2003  Joern Thyssen  <jth@gnubg.org>
 
 	gnubg.c (real_main): attempt to read install directory

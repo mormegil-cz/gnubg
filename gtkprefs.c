@@ -79,7 +79,7 @@ static GList *plBoardDesigns;
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
 	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource,
 	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *textureTypeCombo, *frame3dOptions,
-	*pwPlanView, *pwBoardAngle, *pwSkewFactor, *skewLab, *anglelab,
+	*pwPlanView, *pwBoardAngle, *pwSkewFactor, *skewLab, *anglelab, *pwBgTrays,
 	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame, *pwRoundedEdges;
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
 	*padjLightLevelAmbient, *padjLightLevelDiffuse, *padjLightLevelSpecular,
@@ -516,6 +516,19 @@ static GtkWidget *CubePrefs3d( BoardData *bd )
   return pwx;
 }
 
+void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
+{
+	renderdata rd;
+	GetPrefs(&rd);
+	SetupLight3d(&bd3d, &rd);
+	SetPreviewLightLevel(rd.lightLevels);
+	setDicePos(&bd3d);
+	Preview(&rd);
+	UpdateColPreviews();
+	if (ppw)
+		gtk_widget_queue_draw(*ppw);
+}
+
 static GtkWidget *BoardPage3d( BoardData *bd )
 {
     GtkWidget *pw, *pwhbox;
@@ -534,6 +547,12 @@ static GtkWidget *BoardPage3d( BoardData *bd )
     gtk_box_pack_start( GTK_BOX( pwhbox ),
 		gtk_colour_picker_new3d(pwPreview + PI_BOARD, bd->drawing_area3d->window, 
 				&bd3d.baseMat, DF_NO_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+	pwBgTrays = gtk_check_button_new_with_label ("Show background in bear-off trays");
+	gtk_tooltips_set_tip(ptt, pwBgTrays, ("If unset the bear-off trays will be drawn with the board colour"), 0);
+	gtk_box_pack_start (GTK_BOX (pw), pwBgTrays, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwBgTrays), rdAppearance.bgInTrays);
+	gtk_signal_connect(GTK_OBJECT(pwBgTrays), "toggled", GTK_SIGNAL_FUNC(redraw_changed), (GtkObject*) ( pwPreview + PI_BOARD ));
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -556,19 +575,6 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 	return pwx;
 }
 
-void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
-{
-	renderdata rd;
-	GetPrefs(&rd);
-	SetupLight3d(&bd3d, &rd);
-	SetPreviewLightLevel(rd.lightLevels);
-	setDicePos(&bd3d);
-	Preview(&rd);
-	UpdateColPreviews();
-	if (ppw)
-		gtk_widget_queue_draw(*ppw);
-}
-
 static GtkWidget *BorderPage3d( BoardData *bd )
 {
     GtkWidget *pw, *pwhbox;
@@ -588,8 +594,8 @@ static GtkWidget *BorderPage3d( BoardData *bd )
 		gtk_colour_picker_new3d(pwPreview + PI_BORDER, bd->drawing_area3d->window, 
 				&bd3d.boxMat, DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
 
-	pwRoundedEdges = gtk_check_button_new_with_label ("Rounded board edges");
-	gtk_tooltips_set_tip(ptt, pwRoundedEdges, "Toggle rounded or square edges to the board", 0);
+	pwRoundedEdges = gtk_check_button_new_with_label (_("Rounded board edges"));
+	gtk_tooltips_set_tip(ptt, pwRoundedEdges, _("Toggle rounded or square edges to the board"), 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwRoundedEdges, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwRoundedEdges), rdAppearance.roundedEdges);
 	gtk_signal_connect(GTK_OBJECT(pwRoundedEdges), "toggled", GTK_SIGNAL_FUNC(redraw_changed), (GtkObject*) ( pwPreview + PI_BORDER ));
@@ -1288,12 +1294,12 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_container_add (GTK_CONTAINER (dtLightSourceFrame), vbox);
 	
 	pwLightSource = gtk_radio_button_new_with_label (NULL, "Positional");
-	gtk_tooltips_set_tip(ptt, pwLightSource, "This is a fixed light source, like a lamp", 0);
+	gtk_tooltips_set_tip(ptt, pwLightSource, _("This is a fixed light source, like a lamp"), 0);
 	gtk_box_pack_start (GTK_BOX (vbox), pwLightSource, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (rdAppearance.lightType == LT_POSITIONAL));
 	
 	pwDirectionalSource = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), "Directional");
-	gtk_tooltips_set_tip(ptt, pwDirectionalSource, "This is a light direction, like the sun", 0);
+	gtk_tooltips_set_tip(ptt, pwDirectionalSource, _("This is a light direction, like the sun"), 0);
 	gtk_box_pack_start (GTK_BOX (vbox), pwDirectionalSource, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (rdAppearance.lightType == LT_DIRECTIONAL));
 	gtk_signal_connect(GTK_OBJECT(pwDirectionalSource), "toggled", GTK_SIGNAL_FUNC(option_changed), bd);
@@ -1381,7 +1387,7 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjLightLevelAmbient ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwLightLevelAmbient = gtk_hscale_new(padjLightLevelAmbient);
-	gtk_tooltips_set_tip(ptt, pwLightLevelAmbient, "Ambient light specifies the general light level", 0);
+	gtk_tooltips_set_tip(ptt, pwLightLevelAmbient, _("Ambient light specifies the general light level"), 0);
 	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelAmbient, TRUE, TRUE, 0);
 
 	hBox = gtk_hbox_new (FALSE, 0);
@@ -1395,7 +1401,7 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjLightLevelDiffuse ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwLightLevelDiffuse = gtk_hscale_new(padjLightLevelDiffuse);
-	gtk_tooltips_set_tip(ptt, pwLightLevelDiffuse, "Diffuse light specifies light from the light source", 0);
+	gtk_tooltips_set_tip(ptt, pwLightLevelDiffuse, _("Diffuse light specifies light from the light source"), 0);
 	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelDiffuse, TRUE, TRUE, 0);
 
 	hBox = gtk_hbox_new (FALSE, 0);
@@ -1409,7 +1415,7 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjLightLevelSpecular ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwLightLevelSpecular = gtk_hscale_new(padjLightLevelSpecular);
-	gtk_tooltips_set_tip(ptt, pwLightLevelSpecular, "Specular light is reflected light off shiny surfaces", 0);
+	gtk_tooltips_set_tip(ptt, pwLightLevelSpecular, _("Specular light is reflected light off shiny surfaces"), 0);
 	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelSpecular, TRUE, TRUE, 0);
 #endif
     
@@ -1698,6 +1704,8 @@ if (rd.fDisplayType == DT_3D)
 
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwRoundedEdges ),
                                 rd.roundedEdges );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwBgTrays ),
+                                rd.bgInTrays );
 
 	UpdateColPreviews();
 	redrawChange = FALSE;
@@ -2078,6 +2086,7 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
             "         piecetype=%d\n"
             "         piecetexturetype=%d\n"
 			"         roundededges=%c\n"
+			"         bgintrays=%c\n"
             "         lighttype=%c\n"
             "         lightposx=%f lightposy=%f lightposz=%f\n"
             "         lightambient=%d lightdiffuse=%d lightspecular=%d\n"
@@ -2155,6 +2164,7 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
 			rd.pieceType,
 			rd.pieceTextureType,
 			rd.roundedEdges ? 'y' : 'n',
+			rd.bgInTrays ? 'y' : 'n',
 			rd.lightType == LT_POSITIONAL ? 'p' : 'd',
 			rd.lightPos[0], rd.lightPos[1], rd.lightPos[2],
 			rd.lightLevels[0], rd.lightLevels[1], rd.lightLevels[2],
@@ -2474,6 +2484,7 @@ static void GetPrefs ( renderdata *prd ) {
 		prd->pieceTextureType = getPieceTextureType(lastTextureStr);
 		prd->diceSize = padjDiceSize->value;
 		prd->roundedEdges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedEdges));
+		prd->bgInTrays = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwBgTrays));
 		prd->planView = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwPlanView));
 
 		/* Both chequers have the same texture */
@@ -2839,6 +2850,7 @@ void Default3dSettings()
 				rdAppearance.showMoveIndicator = rdNew.showMoveIndicator;
 				rdAppearance.showShadows = rdNew.showShadows;
 				rdAppearance.roundedEdges = rdNew.roundedEdges;
+				rdAppearance.bgInTrays = rdNew.bgInTrays;
 				rdAppearance.shadowDarkness = rdNew.shadowDarkness;
 				rdAppearance.curveAccuracy = rdNew.curveAccuracy;
 				rdAppearance.testSkewFactor = rdNew.testSkewFactor;

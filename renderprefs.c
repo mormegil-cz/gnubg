@@ -528,6 +528,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 		prd->diceSize = atof(szValue);
     else if( !strncasecmp( szParam, "roundededges", c ) )
 		prd->roundedEdges = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "bgintrays", c ) )
+		prd->bgInTrays = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "piecetype", c ) )
 		prd->pieceType = (PieceType)atoi(szValue);
     else if( !strncasecmp( szParam, "piecetexturetype", c ) )
@@ -681,6 +683,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		"planview=%c "
 		"dicesize=%f "
 		"roundededges=%c "
+		"bgintrays=%c "
 		"piecetype=%d "
 		"piecetexturetype=%d "
 		"chequers3d0=%s "
@@ -733,6 +736,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->planView ? 'y' : 'n',
 		prd->diceSize,
 		prd->roundedEdges ? 'y' : 'n',
+		prd->bgInTrays ? 'y' : 'n',
 		prd->pieceType,
 		prd->pieceTextureType,
 		WriteMaterial(&prd->rdChequerMat[0]),

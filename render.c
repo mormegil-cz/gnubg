@@ -172,6 +172,7 @@ renderdata rdDefault = {
 	0,	/* Plan view */
 	3,	/* Dice size */
 	0,	/* Rounded edges */
+	1,	/* Background in trays */
 	PT_ROUNDED,	/* Piece type */
 	PTT_ALL,	/* Piece texture type */
 	/* Default 3d colours - black+white, should never be used -

@@ -235,6 +235,7 @@ typedef struct _BoardData {
 	int curveAccuracy;	/* Round curve approximation accuracy */
 	float diceSize;
 	int roundedEdges;	/* Rounded board edges? */
+	int bgInTrays;	/* Show background in trays? */
 
 	float movingPos[3];
 	float dragPos[3];

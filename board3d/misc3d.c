@@ -31,7 +31,6 @@
 #include "shadow.h"
 #include "renderprefs.h"
 #include "sound.h"
-#include "event.h"
 #include "backgammon.h"
 #include "path.h"
 
@@ -455,7 +454,7 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 		bits = LoadDIBTexture(fp, &texture->width, &texture->height);
 		break;
 	case TF_PNG:
-#ifdef HAVE_LIBPNG
+#if HAVE_LIBPNG
 		bits = LoadPNGTexture(fp, &texture->width, &texture->height);
 #endif
 		break;
@@ -531,6 +530,7 @@ void Set3dSettings(BoardData* bd, const renderdata *prd)
 	bd->showMoveIndicator = prd->showMoveIndicator;
 	bd->showShadows = prd->showShadows;
 	bd->roundedEdges = prd->roundedEdges;
+	bd->bgInTrays = prd->bgInTrays;
 	bd->shadowDarkness = prd->shadowDarkness;
 	SetShadowDimness3d(bd);
 	bd->curveAccuracy = prd->curveAccuracy;
@@ -1168,6 +1168,71 @@ void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture
 			glVertex3f(1, 0, 0);
 			glVertex3f(1, 1, 0);
 			glVertex3f(-1, 1, 0);
+		glEnd();
+	}
+
+	glPopMatrix();
+}
+
+void drawQuarterRect(float x, float y, float z, float w, float h, Texture* texture)
+{	/* Draw a rectangle in 4 quarters */
+	float repX, repY, tuv;
+
+	glPushMatrix();
+	glTranslatef(x + w / 2, y + h / 2, z);
+	glScalef(w / 2.0f, h / 2.0f, 1);
+	glNormal3f(0, 0, 1);
+	
+	if (texture)
+	{
+		tuv = TEXTURE_SCALE / texture->width;
+		repX = w * tuv;
+		repY = h * tuv;
+
+		glBegin(GL_QUADS);
+			glTexCoord2f(0, 0); glVertex3f(-1, -1, 0);
+			glTexCoord2f(repX / 2.0f, 0); glVertex3f(0, -1, 0);
+			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
+			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 0);
+
+			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 0);
+			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
+			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0, 1, 0);
+			glTexCoord2f(0, repY); glVertex3f(-1, 1, 0);
+
+			glTexCoord2f(repX / 2.0f, 0); glVertex3f(0, -1, 0);
+			glTexCoord2f(repX, 0); glVertex3f(1, -1, 0);
+			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 0);
+			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
+
+			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
+			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 0);
+			glTexCoord2f(repX, repY); glVertex3f(1, 1, 0);
+			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0, 1, 0);
+		glEnd();
+	}
+	else
+	{
+		glBegin(GL_QUADS);
+			glVertex3f(-1, -1, 0);
+			glVertex3f(0, -1, 0);
+			glVertex3f(0, 0, 0);
+			glVertex3f(-1, 0, 0);
+
+			glVertex3f(-1, 0, 0);
+			glVertex3f(0, 0, 0);
+			glVertex3f(0, 1, 0);
+			glVertex3f(-1, 1, 0);
+
+			glVertex3f(0, -1, 0);
+			glVertex3f(1, -1, 0);
+			glVertex3f(1, 0, 0);
+			glVertex3f(0, 0, 0);
+
+			glVertex3f(0, 0, 0);
+			glVertex3f(1, 0, 0);
+			glVertex3f(1, 1, 0);
+			glVertex3f(0, 1, 0);
 		glEnd();
 	}
 

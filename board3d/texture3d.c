@@ -189,9 +189,7 @@ unsigned char *LoadDIBTexture(FILE *fp, int *width, int *height)
 	return bits;
 }
 
-#include "config.h"
-
-#ifdef HAVE_LIBPNG
+#if HAVE_LIBPNG
 
 #include <png.h>
 
