@@ -3104,7 +3104,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 	continue;
       }
 
-      if( ScoreMoves( &ml, pci, pec, 0 ) < 0 ) {
+      if( ScoreMoves( &ml, pci, pec, iPly ) < 0 ) {
 	return -1;
       }
 
