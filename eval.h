@@ -99,7 +99,8 @@ typedef struct _rolloutcontext {
 
   unsigned int fCubeful : 1; /* Cubeful rollout */
   unsigned int fVarRedn : 1; /* variance reduction */
-  unsigned int fInitial: 1; /* roll out as opening position */
+  unsigned int fInitial: 1;  /* roll out as opening position */
+  unsigned int fRotate : 1;  /* rotate dice of first two rolls */
     
   unsigned short nTruncate; /* truncation */
   unsigned short nTrials; /* number of rollouts */
