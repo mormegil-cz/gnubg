@@ -2563,6 +2563,8 @@ static int
 ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
 	    int nPlies );
 
+#if !defined(REDUCTION_CODE)
+
 #define nPruneMoves 10
 static int cubefullPrune = 1;
 
@@ -2737,7 +2739,7 @@ FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
   
   PositionFromKey(anBoard, ml.amMoves[ml.iMoveBest].auch);
 }
-
+#endif
 
 static int 
 EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
