@@ -23,6 +23,7 @@ Eric Groleau
 Jeff Haferman
 Alain Henry
 Jens Hoefkens
+Matija Kejzar
 Corrin Lakeland
 Kevin Maguire
 David Montgomery

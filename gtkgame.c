@@ -90,6 +90,7 @@ typedef enum _gnubgcommand {
     CMD_ROLL,
     CMD_ROLLOUT,
     CMD_SAVE_SETTINGS,
+    CMD_SET_ANNOTATION_ON,
     CMD_SET_AUTO_BEAROFF,
     CMD_SET_AUTO_CRAWFORD,
     CMD_SET_AUTO_GAME,
@@ -192,6 +193,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "roll",
     "rollout",
     "save settings",
+    "set annotation on",
     "set automatic bearoff",
     "set automatic crawford",
     "set automatic game",
@@ -270,7 +272,8 @@ static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 static GtkWidget *pwGrab;
 
 GtkWidget *pwBoard, *pwMain;
-static GtkWidget *pwStatus, *pwGame, *pwGameList, *pom;
+static GtkWidget *pwStatus, *pwGame, *pwGameList, *pom, *pwAnnotation,
+    *pwAnalysis, *pwCommentary, *pwHint;
 static GtkAccelGroup *pagMain;
 static GtkStyle *psGameList, *psCurrent;
 static int yCurrent, xCurrent; /* highlighted row/col in game record */
@@ -511,7 +514,7 @@ typedef struct _gamelistrow {
 } gamelistrow;
 
 /* Find a moverecord, given an index into the game (0 = player 0's first
-   move, 1 = player 1's first move, 2 = player 0's first move, etc.).
+   move, 1 = player 1's first move, 2 = player 0's second move, etc.).
    This function maps based on what's in the list window, so "combined"
    rows (e.g. "set board") will occupy TWO entries in the sequence space. */
 static moverecord *GameListLookupMove( int i ) {
@@ -565,14 +568,14 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     
     plLastMove = pl;
     
-    SetMoveRecord( pmr );
-    
     CalculateBoard();
 
     UpdateSetting( &nCube );
     UpdateSetting( &fCubeOwner );
     UpdateSetting( &fTurn );
     UpdateSetting( &gs );
+    
+    SetMoveRecord( pmr );
     
     ShowBoard();
 }
@@ -599,6 +602,185 @@ static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
 			GTK_SIGNAL_FUNC( ButtonCommand ), szCommand );
     
     return pwButton;
+}
+
+static void DeleteAnnotation( void ) {
+
+    fAnnotation = FALSE;
+    UpdateSetting( &fAnnotation );
+}
+
+typedef struct _hintdata {
+    GtkWidget *pwMove, *pwRollout, *pw;
+    movelist *pml;
+    int fButtonsValid;
+} hintdata;
+
+static int CheckHintButtons( void ) {
+
+    int c;
+    GList *pl;
+    hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
+    GtkWidget *pw = phd->pw;
+
+    for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
+	c++;
+
+    gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
+
+    return c;
+}
+
+static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
+
+    static int aanColumns[][ 2 ] = {
+	{ 2, OUTPUT_WIN },
+	{ 3, OUTPUT_WINGAMMON },
+	{ 4, OUTPUT_WINBACKGAMMON },
+	{ 6, OUTPUT_LOSEGAMMON },
+	{ 7, OUTPUT_LOSEBACKGAMMON }
+    };
+    static char *aszTitle[] = {
+	"Rank", "Type", "Win", "W g", "W bg", "Lose", "L g", "L bg",
+	"", "Diff.", "Move"
+    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+		       NULL, NULL };
+    GtkWidget *pwMoves = gtk_clist_new_with_titles( 11, aszTitle );
+    int i, j;
+    char sz[ 32 ];
+    float rBest;
+    cubeinfo ci;
+    movelist *pml = phd->pml;
+
+    /* This function should only be called when the game state matches
+       the move list. */
+    assert( fMove == 0 || fMove == 1 );
+    
+    for( i = 0; i < 11; i++ ) {
+	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
+	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
+					    i == 1 || i == 10 ?
+					    GTK_JUSTIFY_LEFT :
+					    GTK_JUSTIFY_RIGHT );
+    }
+    gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
+    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
+				  GTK_SELECTION_MULTIPLE );
+
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		  fCrawford, fJacoby, fBeavers );
+    
+    if( fOutputMWC && nMatchTo ) {
+	gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, "MWC" );
+	rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
+    } else {
+	gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, "Equity" );
+	rBest = pml->amMoves[ 0 ].rScore;
+    }
+    
+    for( i = 0; i < pml->cMoves; i++ ) {
+	float *ar = pml->amMoves[ i ].arEvalMove;
+
+	gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
+
+	gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
+
+	sprintf( sz, "%d", i + 1 );
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 0, sz );
+
+	FormatEval( sz, pml->amMoves[ i ].etMove, pml->amMoves[ i ].esMove );
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
+
+	for( j = 0; j < 5; j++ ) {
+	    if( fOutputWinPC )
+		sprintf( sz, "%5.1f%%", ar[ aanColumns[ j ][ 1 ] ] * 100.0f );
+	    else
+		sprintf( sz, "%5.3f", ar[ aanColumns[ j ][ 1 ] ] );
+	    
+	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
+				sz );
+	}
+
+	if( fOutputWinPC )
+	    sprintf( sz, "%5.1f%%", ( 1.0f - ar[ OUTPUT_WIN ] ) * 100.0f );
+	else
+	    sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
+	    
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
+
+	if( fOutputMWC && nMatchTo )
+	    sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
+						     &ci ) );
+	else
+	    sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore );
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
+
+	if( i ) {
+	    if( fOutputMWC && nMatchTo )
+		sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
+			 * 100.0f - rBest );
+	    else
+		sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore - rBest );
+	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
+	}
+	
+	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
+			    FormatMove( sz, anBoard,
+					pml->amMoves[ i ].anMove ) );
+    }
+
+    if( iHighlight >= 0 ) {
+	GtkStyle *ps;
+
+	gtk_widget_ensure_style( pwMoves );
+	ps = gtk_style_copy( pwMoves->style );
+
+	ps->fg[ GTK_STATE_NORMAL ].red = ps->fg[ GTK_STATE_ACTIVE ].red =
+	    ps->fg[ GTK_STATE_SELECTED ].red = 0xFFFF;
+	ps->fg[ GTK_STATE_NORMAL ].green = ps->fg[ GTK_STATE_ACTIVE ].green =
+	    ps->fg[ GTK_STATE_SELECTED ].green = 0;
+	ps->fg[ GTK_STATE_NORMAL ].blue = ps->fg[ GTK_STATE_ACTIVE ].blue =
+	    ps->fg[ GTK_STATE_SELECTED ].blue = 0;
+
+	gtk_clist_set_row_style( GTK_CLIST( pwMoves ), iHighlight, ps );
+
+	gtk_style_unref( ps );
+    }
+    
+    return pwMoves;
+}
+
+static void CreateAnnotationWindow( void ) {
+
+    GtkWidget *pwPaned;
+    
+    pwAnnotation = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+
+    gtk_window_set_title( GTK_WINDOW( pwAnnotation ),
+			  "GNU Backgammon - Annotation" );
+    gtk_window_set_wmclass( GTK_WINDOW( pwAnnotation ), "annotation",
+			    "Annotation" );
+    gtk_window_set_default_size( GTK_WINDOW( pwAnnotation ), 250, 200 );
+
+    gtk_container_add( GTK_CONTAINER( pwAnnotation ),
+		       pwPaned = gtk_vpaned_new() );
+    
+    gtk_paned_add1( GTK_PANED( pwPaned ),
+		    pwAnalysis = gtk_label_new( "Analysis goes here" ) );
+    
+    gtk_paned_add2( GTK_PANED( pwPaned ),
+		    pwCommentary = gtk_text_new( NULL, NULL ) );
+
+    gtk_text_insert( GTK_TEXT( pwCommentary ), NULL, NULL, NULL,
+		     "Once commentary is implemented, you will be able to "
+		     "make notes about moves here.", -1 );
+
+    gtk_text_set_word_wrap( GTK_TEXT( pwCommentary ), TRUE );
+    gtk_text_set_editable( GTK_TEXT( pwCommentary ), FALSE );
+
+    gtk_signal_connect( GTK_OBJECT( pwAnnotation ), "delete_event",
+			GTK_SIGNAL_FUNC( DeleteAnnotation ), NULL );
 }
 
 static void CreateGameWindow( void ) {
@@ -728,6 +910,9 @@ static int AddMoveRecordRow( void ) {
     return i;
 }
 
+/* Add a moverecord to the game list window.  NOTE: This function must be
+   called _before_ applying the moverecord, so it can be displayed
+   correctly. */
 extern void GTKAddMoveRecord( moverecord *pmr ) {
 
     gamelistrow *pglr;
@@ -847,11 +1032,109 @@ extern void GTKPopMoveRecord( moverecord *pmr ) {
     gtk_clist_thaw( pcl );
 }
 
+static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
+				evalsetup *pes ) {
+    cubeinfo ci;
+    char sz[ 1024 ];
+
+    if( et == EVAL_NONE )
+	return NULL;
+    
+    SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		 fCrawford, fJacoby, fBeavers );
+    
+    if( !GetDPEq( NULL, NULL, &ci ) )
+	/* No cube action possible */
+	return NULL;
+    
+    GetCubeActionSz( arDouble, sz, &ci, fOutputMWC, FALSE );
+
+    return gtk_label_new( sz );
+}
+
+static void SetAnalysis( moverecord *pmr ) {
+
+    GtkWidget *pwParent = pwAnalysis->parent, *pwCube, *pwList;
+    static hintdata hd = { NULL, NULL, NULL, NULL, FALSE };
+    list *pl;
+    
+    /* Select the moverecord _after_ pmr.  FIXME this is very ugly! */
+    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext )
+	if( pl->p == pmr ) {
+	    pmr = pl->plNext->p;
+	    break;
+	}
+
+    if( pl == plGame )
+	pmr = NULL;
+    
+    /* FIXME optimise by ignoring set if pmr is unchanged */
+    
+    if( pwAnalysis ) {
+	gtk_widget_destroy( pwAnalysis );
+	pwAnalysis = NULL;
+    }
+
+    if( pmr ) {
+	if( pmr->mt == MOVE_NORMAL ) {
+	    int fMoveOld = fMove, fTurnOld = fTurn;
+
+	    fMove = fTurn = pmr->n.fPlayer;
+	    
+	    pwCube = CubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
+				   &pmr->n.esDouble );
+	    if( pmr->n.ml.cMoves ) {
+		hd.pml = &pmr->n.ml;
+		hd.pw = pwList = gtk_scrolled_window_new( NULL, NULL );
+		gtk_scrolled_window_set_policy(
+		    GTK_SCROLLED_WINDOW( pwList ),
+		    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
+		gtk_container_add( GTK_CONTAINER( pwList ),
+				   CreateMoveList( &hd, pmr->n.iMove ) );
+	    } else
+		pwList = NULL;
+	    
+	    if( pwCube && pwList ) {
+		pwAnalysis = gtk_vbox_new( FALSE, 0 );
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwCube,
+				    FALSE, FALSE, 0 );
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwList,
+				    TRUE, TRUE, 0 );
+	    } else if( pwCube )
+		pwAnalysis = pwCube;
+	    else if( pwList )
+		pwAnalysis = pwList;
+
+	    fMove = fMoveOld;
+	    fTurn = fTurnOld;
+	} else if( pmr->mt == MOVE_DOUBLE )
+	    pwAnalysis = CubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
+				       &pmr->n.esDouble );
+    }
+	
+    if( !pwAnalysis )
+	pwAnalysis = gtk_label_new( "No analysis available." );
+    
+    gtk_paned_add1( GTK_PANED( pwParent ), pwAnalysis );
+    gtk_widget_show_all( pwAnalysis );
+}
+
+/* Select a moverecord as the "current" one.  NOTE: This function must be
+   called _after_ applying the moverecord. */
 extern void GTKSetMoveRecord( moverecord *pmr ) {
 
     GtkCList *pcl = GTK_CLIST( pwGameList );
     gamelistrow *pglr;
     int i;
+
+    SetAnalysis( pmr );
+
+    if( pwHint ) {
+	hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
+
+	phd->fButtonsValid = FALSE;
+	CheckHintButtons();
+    }
     
     gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psGameList );
 
@@ -861,8 +1144,18 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	return;
     
     if( pmr == plGame->plNext->p ) {
+	assert( pmr->mt == MOVE_GAMEINFO );
 	yCurrent = 0;
-	xCurrent = 1;
+	
+	if( plGame->plNext->plNext->p ) {
+	    moverecord *pmrNext = plGame->plNext->plNext->p;
+
+	    if( pmrNext->mt == MOVE_NORMAL && pmrNext->n.fPlayer == 1 )
+		xCurrent = 2;
+	    else
+		xCurrent = 1;
+	} else
+	    xCurrent = 1;
     } else {
 	for( i = pcl->rows - 1; i >= 0; i-- ) {
 	    pglr = gtk_clist_get_row_data( pcl, i );
@@ -1166,7 +1459,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/Save settings", NULL, Command, CMD_SAVE_SETTINGS, NULL },
 	{ "/_Windows", NULL, NULL, 0, "<Branch>" },
 	{ "/_Windows/_Game record", NULL, Command, CMD_LIST_GAME, NULL },
-	{ "/_Windows/_Annotation", NULL, NULL, 0, NULL },
+	{ "/_Windows/_Annotation", NULL, Command, CMD_SET_ANNOTATION_ON,
+	  NULL },
 	{ "/_Windows/Gu_ile", NULL, NULL, 0, NULL },
 	{ "/_Help", NULL, NULL, 0, "<Branch>" },
 	{ "/_Help/_Commands", NULL, Command, CMD_HELP, NULL },
@@ -1227,8 +1521,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 #endif
 
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	pif, "/Windows/Annotation" ), FALSE );
-    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	pif, "/Windows/Guile" ), FALSE );
 
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
@@ -1252,6 +1544,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     CreateGameWindow();
     gtk_window_add_accel_group( GTK_WINDOW( pwGame ), pagMain );
+
+    CreateAnnotationWindow();
+    gtk_window_add_accel_group( GTK_WINDOW( pwAnnotation ), pagMain );
     
     ListCreate( &lOutput );
 
@@ -1346,8 +1641,6 @@ extern void ShowList( char *psz[], char *szTitle ) {
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
     gtk_window_set_title( GTK_WINDOW( pwDialog ), szTitle );
 
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
     gtk_widget_show_all( pwDialog );
 }
 
@@ -2556,28 +2849,16 @@ static void HintRollout( GtkWidget *pw, GtkWidget *pwMoves ) {
 #endif        
 }
 
-typedef struct _hintdata {
-    GtkWidget *pwMove, *pwRollout;
-    movelist *pml;
-} hintdata;
-
 static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 			hintdata *phd ) {
-
-    int c;
-    GList *pl;
     
-    for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
-	c++;
-
+    int c = CheckHintButtons();
+    
     if( c && peb )
 	gtk_selection_owner_set( pw, GDK_SELECTION_PRIMARY, peb->time );
 
-    gtk_widget_set_sensitive( phd->pwMove, c == 1 );
-    gtk_widget_set_sensitive( phd->pwRollout, c );
-
     /* Double clicking a row makes that move. */
-    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS )
+    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && phd->fButtonsValid )
 	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
 }
 
@@ -2634,111 +2915,56 @@ static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
 #endif        
 }
 
-extern void GTKHint( movelist *pml ) {
+static void DestroyHint( gpointer p ) {
 
-    static char *aszTitle[] = {
-	"Rank", "Type", "Win", "W g", "W bg", "Lose", "L g", "L bg",
-	"", "Diff.", "Move"
-    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		       NULL, NULL };
-    static int aanColumns[][ 2 ] = {
-	{ 2, OUTPUT_WIN },
-	{ 3, OUTPUT_WINGAMMON },
-	{ 4, OUTPUT_WINBACKGAMMON },
-	{ 6, OUTPUT_LOSEGAMMON },
-	{ 7, OUTPUT_LOSEBACKGAMMON }
-    };
-    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL,
-					NULL ),
-	*psw = gtk_scrolled_window_new( NULL, NULL ),
-	*pwButtons = DialogArea( pwDialog, DA_BUTTONS ),
+    hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
+
+    free( phd->pml->amMoves );
+    free( phd->pml );
+    
+    pwHint = NULL;
+}
+
+static void SetHint( void ) {
+
+    /* FIXME enable/disable move/rollout buttons */
+}
+
+extern void GTKHint( movelist *pmlOrig ) {
+
+    GtkWidget  *psw = gtk_scrolled_window_new( NULL, NULL ),
+	*pwButtons,
 	*pwMove = gtk_button_new_with_label( "Move" ),
 	*pwRollout = gtk_button_new_with_label( "Rollout" ),
-	*pwMoves = gtk_clist_new_with_titles( 11, aszTitle );
-    int i, j;
-    char sz[ 32 ];
-    hintdata hd = { pwMove, pwRollout, pml };
-    float rBest;
-    cubeinfo ci;
+	*pwMoves;
+    static hintdata hd;
+    movelist *pml;
     
-    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
-		  fCrawford, fJacoby, fBeavers );
+    if( pwHint )
+	gtk_widget_destroy( pwHint );
+
+    pml = malloc( sizeof( *pml ) );
+    memcpy( pml, pmlOrig, sizeof( *pml ) );
     
-    for( i = 0; i < 11; i++ ) {
-	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
-	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
-					    i == 1 || i == 10 ?
-					    GTK_JUSTIFY_LEFT :
-					    GTK_JUSTIFY_RIGHT );
-    }
-    gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
-    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
-				  GTK_SELECTION_MULTIPLE );
+    pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
+    memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
 
-    if( fOutputMWC && nMatchTo ) {
-	gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, "MWC" );
-	rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
-    } else {
-	gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, "Equity" );
-	rBest = pml->amMoves[ 0 ].rScore;
-    }
+    hd.pwMove = pwMove;
+    hd.pwRollout = pwRollout;
+    hd.pml = pml;
+    hd.fButtonsValid = TRUE;
+    hd.pw = pwMoves = CreateMoveList( &hd, -1 /* FIXME change if they've
+						 already moved */ );
     
-    for( i = 0; i < pml->cMoves; i++ ) {
-	float *ar = pml->amMoves[ i ].arEvalMove;
-
-	gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
-
-	gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
-
-	sprintf( sz, "%d", i + 1 );
-	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 0, sz );
-
-	FormatEval( sz, pml->amMoves[ i ].etMove, pml->amMoves[ i ].esMove );
-	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
-
-	for( j = 0; j < 5; j++ ) {
-	    if( fOutputWinPC )
-		sprintf( sz, "%5.1f%%", ar[ aanColumns[ j ][ 1 ] ] * 100.0f );
-	    else
-		sprintf( sz, "%5.3f", ar[ aanColumns[ j ][ 1 ] ] );
-	    
-	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
-				sz );
-	}
-
-	if( fOutputWinPC )
-	    sprintf( sz, "%5.1f%%", ( 1.0f - ar[ OUTPUT_WIN ] ) * 100.0f );
-	else
-	    sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
-	    
-	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
-
-	if( fOutputMWC && nMatchTo )
-	    sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
-						     &ci ) );
-	else
-	    sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore );
-	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
-
-	if( i ) {
-	    if( fOutputMWC && nMatchTo )
-		sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
-			 * 100.0f - rBest );
-	    else
-		sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore - rBest );
-	    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
-	}
-	
-	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
-			    FormatMove( sz, anBoard,
-					pml->amMoves[ i ].anMove ) );
-    }
-
+    pwHint = CreateDialog( "GNU Backgammon - Hint", FALSE, NULL, NULL );
+    gtk_object_set_user_data( GTK_OBJECT( pwHint ), &hd );
+    pwButtons = DialogArea( pwHint, DA_BUTTONS );
+    
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
 				    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
     gtk_container_add( GTK_CONTAINER( psw ), pwMoves );
     
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), psw );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), psw );
 
     gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
 			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
@@ -2761,19 +2987,11 @@ extern void GTKHint( movelist *pml ) {
     gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_get",
 			GTK_SIGNAL_FUNC( HintGetSelection ), &hd );
     
-    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
+    gtk_window_set_default_size( GTK_WINDOW( pwHint ), 0, 300 );
     
-    gtk_widget_show_all( pwDialog );
+    gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, &pwHint );
     
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+    gtk_widget_show_all( pwHint );
 }
 
 static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwProgress;
@@ -3105,9 +3323,6 @@ extern void GTKShowVersion( void ) {
     gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
 			GTK_SIGNAL_FUNC( CommandShowWarranty ), NULL );
     
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-
     gtk_widget_show_all( pwDialog );
 }
 
@@ -3244,4 +3459,14 @@ extern void GTKSet( void *p ) {
 	fAutoCommand = FALSE;
     } else if( p == &fCrawford )
 	ShowBoard(); /* this is overkill, but it works */
+    else if( p == &fAnnotation ) {
+	if( fAnnotation ) {
+	    gtk_widget_show_all( pwAnnotation );
+	    if( pwAnnotation->window )
+		gdk_window_raise( pwAnnotation->window );
+	} else
+	    /* FIXME actually we should unmap the window, and send a synthetic
+	       UnmapNotify event to the window manager -- see the ICCCM */
+	    gtk_widget_hide( pwAnnotation );
+    }
 }
