@@ -4258,7 +4258,7 @@ extern void PromptForExit( void ) {
     }
 
 #if USE_BOARD3D
-    if ((bd->rd->fDisplayType == DT_3D) && fX)
+    if (fX && (bd->rd->fDisplayType == DT_3D))
 	{	/* Stop any 3d animations */
 		StopIdle3d(bd);
 	}
@@ -4267,8 +4267,8 @@ extern void PromptForExit( void ) {
     playSound ( SOUND_EXIT );
 
 #if USE_BOARD3D
-	if (bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit
-		&& bd->rd->fHinges3d && fX)
+	if (fX && bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit
+		&& bd->rd->fHinges3d)
 		CloseBoard3d(bd);
 #endif
 #if USE_GTK
@@ -7707,7 +7707,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( fX )
 #if USE_GTK
 	fX = InitGTK( &argc, &argv );
-#else
+
         if( !getenv( "DISPLAY" ) )
 	    fX = FALSE;
 #endif /* ! USE_GTK */
@@ -8078,12 +8078,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 #if USE_BOARD3D
 {
+    if (fX) {
 	BoardData* bd = BOARD(pwBoard)->board_data;
 	/* If using 3d board initilize 3d widget */
 	if (bd->rd->fDisplayType == DT_3D)
 		Init3d();
 	/* If no 3d settings loaded, set appearance to first design */
 	Default3dSettings(bd);
+    }
 }
 #endif
 
