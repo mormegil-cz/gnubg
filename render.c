@@ -1150,7 +1150,7 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
     /* Bar */
     for( y = 0; y < s * BOARD_HEIGHT; y++ )
 	for( x = 0; x < s * BAR_WIDTH / 2; x++ ) {
-	    if( y < s && y < x && y < s * (BAR_WIDTH + 2) - x - 1 ) {
+	    if( y < s && y < x && y < s * (BAR_WIDTH / 2) - x - 1 ) {
 		rDiffuse = arDiffuse[ 3 ][ y ];
 		nSpecular = anSpecular[ 3 ][ y ];
 		rHeight = arHeight[ y ];

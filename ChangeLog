@@ -1,3 +1,7 @@
+Sat Apr 17 23:43:07 2004  Oystein Johansen  <oystein@gnubg.org>
+
+        * render.c (RenderFrameWood): Fix typo.
+
 Sat Apr 17 20:01:07 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* set.c (CommandSetMet): call "clear hint".
