@@ -154,6 +154,22 @@ typedef enum _cubedecision {
   OPTIONAL_REDOUBLE_PASS
 } cubedecision;
 
+typedef enum _doubletype {
+  DT_NORMAL,
+  DT_BEAVER,
+  DT_RACCOON,
+  NUM_DOUBLE_TYPES
+} doubletype;
+
+typedef enum _taketype {
+  TT_NA,
+  TT_NORMAL,
+  TT_BEAVER
+} taketype;
+
+extern char *aszDoubleTypes[ NUM_DOUBLE_TYPES ];
+
+
 /*
  * prefined settings
  *
@@ -510,6 +526,7 @@ equal_movefilters ( movefilter aamf1[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
                     movefilter aamf2[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 
-
+extern doubletype
+DoubleType ( const int fDoubled, const int fMove, const int fTurn );
 
 #endif

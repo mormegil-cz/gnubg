@@ -414,6 +414,7 @@ updateStatcontext ( statcontext *psc,
     break;
 
   case MOVE_DOUBLE:
+ 
 
     if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
 
@@ -539,6 +540,8 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     static evalsetup esDouble; /* shared between the
 				  double and subsequent take/drop */
     static float arDouble[ NUM_CUBEFUL_OUTPUTS ]; /* likewise */
+    doubletype dt;
+    taketype tt;
 
     /* analyze this move */
 
@@ -675,6 +678,11 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       
     case MOVE_DOUBLE:
 
+        dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+
+        if ( dt != DT_NORMAL )
+          break;
+
 	/* cube action */	    
 	if( fAnalyseCube ) {
 	    GetMatchStateCubeInfo( &ci, pms );
@@ -721,6 +729,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	break;
       
     case MOVE_TAKE:
+
+        tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+        if ( tt != TT_NORMAL )
+          break;
       
 	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
 
@@ -745,6 +757,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	break;
       
     case MOVE_DROP:
+      
+        tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+        if ( tt != TT_NORMAL )
+          break;
       
 	if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
 	    GetMatchStateCubeInfo( &ci, pms );

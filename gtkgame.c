@@ -1139,7 +1139,8 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
     gamelistrow *pglr;
     int i, fPlayer = 0;
     char *pch = 0;
-	char sz[ 40 ];
+    char sz[ 40 ];
+    doubletype dt;
     
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
@@ -1161,12 +1162,22 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
     case MOVE_DOUBLE:
 	fPlayer = pmr->d.fPlayer;
 	pch = sz;
-	
-	if( ms.fDoubled )
-	    sprintf( sz, _("Redouble to %d"), ms.nCube << 2 );
-	else
-	    sprintf( sz, _("Double to %d"), ms.nCube << 1 );
-	    
+
+        switch ( ( dt = DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn ) ) ) {
+        case DT_NORMAL:
+          sprintf( sz, ( ms.fCubeOwner == -1 )? 
+                   _("Double to %d") : _("Redouble to %d"), 
+                   ms.nCube << 1 );
+          break;
+        case DT_BEAVER:
+        case DT_RACCOON:
+          sprintf( sz, ( dt == DT_BEAVER ) ? 
+                   _("Beaver to %d") : _("Raccoon to %d"), ms.nCube << 2 );
+          break;
+        default:
+          assert ( FALSE );
+          break;
+        }
 	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
 	break;
 	
@@ -1511,6 +1522,8 @@ static void SetAnnotation( moverecord *pmr ) {
     list *pl;
     char sz[ 64 ];
     GtkWidget *pwMoveAnalysis = NULL, *pwCubeAnalysis = NULL;
+    doubletype dt;
+    taketype tt;
     
     /* Select the moverecord _after_ pmr.  FIXME this is very ugly! */
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext )
@@ -1636,20 +1649,36 @@ static void SetAnnotation( moverecord *pmr ) {
 	    break;
 
 	case MOVE_DOUBLE:
+
+            dt = DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn );
+
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
+
+            if ( dt == DT_NORMAL ) {
 	    
-            fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
+              fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
             
-            if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
-                                             pmr->d.aarStdDev,
-                                             pmr->d.arDouble,
-                                             &pmr->d.esDouble,
-                                             MOVE_DOUBLE ) ) )
+              if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
+                                               pmr->d.aarStdDev,
+                                               pmr->d.arDouble,
+                                               &pmr->d.esDouble,
+                                               MOVE_DOUBLE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
+            }
+            else 
+              gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
+                                   gtk_label_new ( _("GNU Backgammon cannot "
+                                                     "analyse neither beavers "
+                                                     "nor raccoons yet") ),
+                                   FALSE, FALSE, 0 );
+
 	    pwBox = gtk_hbox_new( FALSE, 0 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( _("Double") ),
+
+	    gtk_box_pack_start( GTK_BOX( pwBox ), 
+                                gtk_label_new( 
+                                   gettext ( aszDoubleTypes[ dt ] ) ),
 				FALSE, FALSE, 2 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), 
                                 SkillMenu( pmr->d.st, "double" ),
@@ -1665,17 +1694,30 @@ static void SetAnnotation( moverecord *pmr ) {
 
 	case MOVE_TAKE:
 	case MOVE_DROP:
+
+            tt = (taketype) DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn );
+
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 
-            fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
+            if ( tt == TT_NORMAL ) {
 
-            if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
-                                             pmr->d.aarStdDev,
-                                             pmr->d.arDouble,
-                                             &pmr->d.esDouble,
-                                             pmr->mt ) ) )
+              fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
+              
+              if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
+                                               pmr->d.aarStdDev,
+                                               pmr->d.arDouble,
+                                               &pmr->d.esDouble,
+                                               pmr->mt ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
+
+            }
+            else
+              gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
+                                   gtk_label_new ( _("GNU Backgammon cannot "
+                                                     "analyse neither beavers "
+                                                     "nor raccoons yet") ),
+                                   FALSE, FALSE, 0 );
 
 	    pwBox = gtk_hbox_new( FALSE, 0 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ),

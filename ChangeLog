@@ -1,3 +1,14 @@
+Wed Dec 25 16:46:19 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	Avoid wrong analysis of beavers and raccoons
+	(gnubg will still give wrong analysis of the take decision after
+	a raccoon, but otherwise it'll say "Cannot analyse...")
+
+	* eval.c (DoubleType): new functions.
+	* analyse.c (AnalyseMove): skip analysis of beavers & raccoons
+	* gtkgame.c (SetAnnotation, GTKAddMoveRecord): handle beavers
+	and raccoons.
+
 Tue Dec 24 17:23:03 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	* postscript.c (PostScriptPrologue): define more fonts.
