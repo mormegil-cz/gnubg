@@ -86,9 +86,12 @@ static void NewGame( void ) {
 	return;
     }
     
-    if( fDisplay )
-	outputf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
-		ap[ 1 ].szName, anDice[ 1 ] );
+    if( fDisplay ) {
+      outputnew();
+      outputf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
+               ap[ 1 ].szName, anDice[ 1 ] );
+      outputx();
+    }
 
     if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
 	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse ) {
@@ -114,7 +117,8 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
     char sz[ 40 ];
 
-    outputf( "Moving %s\n", FormatMove( sz, anBoard, anMove ) );
+    outputf( "%s moves %s\n",
+             ap [ fTurn ].szName, FormatMove( sz, anBoard, anMove ) );
 }
 
 static int ComputerTurn( void ) {
@@ -122,9 +126,10 @@ static int ComputerTurn( void ) {
   movenormal *pmn;
   cubeinfo ci;
   float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
+  char sz [ 1024 ];
     
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
-    
+
   switch( ap[ fTurn ].pt ) {
   case PLAYER_GNU:
     if( fResigned ) {
@@ -204,8 +209,24 @@ static int ComputerTurn( void ) {
 
       /* Roll dice and move */
 
-      if ( ! anDice[ 0 ] )
+      if ( ! anDice[ 0 ] ) {
+
         RollDice ( anDice );
+
+        /* write line to status bar if using GTK */
+
+#ifdef USE_GTK        
+        if ( fX ) {
+
+          outputnew ();
+          outputf ( "%s rolls %1i and %1i\n",
+                    ap [ fTurn ].szName, anDice[ 0 ], anDice[ 1 ] );
+          outputx ();
+
+        }
+#endif
+      }
+
 
       if ( fDisplay )
         ShowBoard();
@@ -224,6 +245,20 @@ static int ComputerTurn( void ) {
 	    }
 	    
 	    memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
+
+      /* write move to status bar if using GTK */
+
+#ifdef USE_GTK        
+      if ( fX ) {
+
+        outputnew ();
+        outputf ( "%s moves %s\n",
+                  ap [ fTurn ].szName,
+                  FormatMove( sz, anBoardMove, pmn->anMove ) );
+        outputx ();
+        
+      }
+#endif
 	    
 	    return 0;
     }
@@ -608,56 +643,59 @@ extern void CommandDrop( char *sz ) {
     TurnDone();
 }
 
-extern void CommandMove( char *sz ) {
 
-    int c, i, j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ],
-	an[ 8 ];
-    movelist ml;
-    movenormal *pmn;
+extern void 
+CommandMove( char *sz ) {
+
+  int c, i, j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ],
+    an[ 8 ];
+  movelist ml;
+  movenormal *pmn;
+  char szTemp[ 1024 ];
     
-    if( fTurn < 0 ) {
-	outputl( "No game in progress (type `new' to start one)." );
+  if( fTurn < 0 ) {
+    outputl( "No game in progress (type `new' to start one)." );
 
-	return;
-    }
+    return;
+  }
 
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-	      "move immediately." );
-	return;
-    }
+  if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+    outputl( "It is the computer's turn -- type `play' to force it to "
+             "move immediately." );
+    return;
+  }
 
-    if( !anDice[ 0 ] ) {
-	outputl( "You must roll the dice before you can move." );
+  if( !anDice[ 0 ] ) {
+    outputl( "You must roll the dice before you can move." );
 
-	return;
-    }
+    return;
+  }
 
-    if( fResigned ) {
-	outputf( "Please wait for %s to consider the resignation before "
-		"moving.\n", ap[ fTurn ].szName );
+  if( fResigned ) {
+    outputf( "Please wait for %s to consider the resignation before "
+             "moving.\n", ap[ fTurn ].szName );
 
-	return;
-    }
+    return;
+  }
 
-    if( fDoubled ) {
-	outputf( "Please wait for %s to consider the cube before "
-		"moving.\n", ap[ fTurn ].szName );
+  if( fDoubled ) {
+    outputf( "Please wait for %s to consider the cube before "
+             "moving.\n", ap[ fTurn ].szName );
 
-	return;
-    }
+    return;
+  }
     
-    if( !*sz ) {
-	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+  if( !*sz ) {
+    GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
-	if( ml.cMoves == 1 ) {
+    if( ml.cMoves == 1 ) {
 	    pmn = malloc( sizeof( *pmn ) );
 	    pmn->mt = MOVE_NORMAL;
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
 	    memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
-		    sizeof( pmn->anMove ) );
+              sizeof( pmn->anMove ) );
 	    ListInsert( plGame, pmn );
 
 	    ShowAutoMove( anBoard, pmn->anMove );
@@ -667,70 +705,83 @@ extern void CommandMove( char *sz ) {
 	    TurnDone();
 
 	    return;
-	}
+    }
 
-	if( fAutoBearoff && !TryBearoff() ) {
+    if( fAutoBearoff && !TryBearoff() ) {
 	    TurnDone();
 
 	    return;
-	}
-	
-	outputl( "You must specify a move (type `help move' for "
-		 "instructions)." );
-
-	return;
     }
+	
+    outputl( "You must specify a move (type `help move' for "
+             "instructions)." );
+
+    return;
+  }
     
-    if( ( c = ParseMove( sz, an ) ) > 0 ) {
-	for( i = 0; i < 25; i++ ) {
+  if( ( c = ParseMove( sz, an ) ) > 0 ) {
+    for( i = 0; i < 25; i++ ) {
 	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
 	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-	}
+    }
 	
-	for( i = 0; i < c; i++ ) {
+    for( i = 0; i < c; i++ ) {
 	    anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
 	    if( an[ ( i << 1 ) | 1 ] > 0 ) {
-		anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
+        anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
 		
-		anBoardNew[ 0 ][ 24 ] +=
-		    anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
+        anBoardNew[ 0 ][ 24 ] +=
+          anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
 		
-		anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
+        anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
 	    }
-	}
+    }
 	
-	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+    GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 	
-	for( i = 0; i < ml.cMoves; i++ ) {
+    for( i = 0; i < ml.cMoves; i++ ) {
 	    PositionFromKey( anBoardTest, ml.amMoves[ i ].auch );
 	    
 	    for( j = 0; j < 25; j++ )
-		if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
-		    anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
-		    break;
+        if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
+            anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
+          break;
 	    
 	    if( j == 25 ) {
-		/* we have a legal move! */
-		pmn = malloc( sizeof( *pmn ) );
-		pmn->mt = MOVE_NORMAL;
-		pmn->anRoll[ 0 ] = anDice[ 0 ];
-		pmn->anRoll[ 1 ] = anDice[ 1 ];
-		pmn->fPlayer = fTurn;
-		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
-			sizeof( pmn->anMove ) );
-		ListInsert( plGame, pmn );
+        /* we have a legal move! */
+        pmn = malloc( sizeof( *pmn ) );
+        pmn->mt = MOVE_NORMAL;
+        pmn->anRoll[ 0 ] = anDice[ 0 ];
+        pmn->anRoll[ 1 ] = anDice[ 1 ];
+        pmn->fPlayer = fTurn;
+        memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
+                sizeof( pmn->anMove ) );
+        ListInsert( plGame, pmn );
 		
-		memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
+        memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
 		
-		TurnDone();
-		
-		return;
-	    }
-	}
-    }
+#ifdef USE_GTK        
+        if ( fX ) {
 
-    outputl( "Illegal move." );
+          outputnew ();
+          outputf ( "%s moves %s\n",
+                    ap [ fTurn ].szName,
+                    FormatMove( szTemp, anBoard, pmn->anMove ) );
+          outputx ();
+        
+      }
+#endif
+
+        TurnDone();
+		
+        return;
+	    }
+    }
+  }
+
+  outputl( "Illegal move." );
 }
+
 
 static void FreeGame( list *pl ) {
 
@@ -971,82 +1022,96 @@ extern void CommandResign( char *sz ) {
     TurnDone();
 }
 
-extern void CommandRoll( char *sz ) {
 
-    movelist ml;
-    movenormal *pmn;
+extern void 
+CommandRoll( char *sz ) {
+
+  movelist ml;
+  movenormal *pmn;
     
-    if( fTurn < 0 ) {
-	outputl( "No game in progress (type `new' to start one)." );
+  if( fTurn < 0 ) {
+    outputl( "No game in progress (type `new' to start one)." );
 
-	return;
-    }
+    return;
+  }
     
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-	      "move immediately." );
-	return;
-    }
+  if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+    outputl( "It is the computer's turn -- type `play' to force it to "
+             "move immediately." );
+    return;
+  }
 
-    if( fDoubled ) {
-	outputf( "Please wait for %s to consider the cube before "
-		"moving.\n", ap[ fTurn ].szName );
+  if( fDoubled ) {
+    outputf( "Please wait for %s to consider the cube before "
+             "moving.\n", ap[ fTurn ].szName );
 
-	return;
-    }    
+    return;
+  }    
 
-    if( fResigned ) {
-	outputl( "Please resolve the resignation first." );
+  if( fResigned ) {
+    outputl( "Please resolve the resignation first." );
 
-	return;
-    }
+    return;
+  }
 
-    if( anDice[ 0 ] ) {
-	outputl( "You already did roll the dice." );
+  if( anDice[ 0 ] ) {
+    outputl( "You already did roll the dice." );
 
-	return;
-    }
+    return;
+  }
     
-    if( RollDice( anDice ) < 0 )
-	return;
+  if( RollDice( anDice ) < 0 )
+    return;
 
-    ShowBoard();
+  ShowBoard();
 
-    ResetDelayTimer();
+#ifdef USE_GTK        
+  if ( fX ) {
+
+    outputnew ();
+    outputf ( "%s rolls %1i and %1i\n",
+              ap [ fTurn ].szName, anDice[ 0 ], anDice[ 1 ] );
+    outputx ();
+
+  }
+#endif
+
+  ResetDelayTimer();
     
-    if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE ) ) {
-	pmn = malloc( sizeof( *pmn ) );
-	pmn->mt = MOVE_NORMAL;
-	pmn->anRoll[ 0 ] = anDice[ 0 ];
-	pmn->anRoll[ 1 ] = anDice[ 1 ];
-	pmn->fPlayer = fTurn;
-	pmn->anMove[ 0 ] = -1;
-	ListInsert( plGame, pmn );
+  if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE ) ) {
+    pmn = malloc( sizeof( *pmn ) );
+    pmn->mt = MOVE_NORMAL;
+    pmn->anRoll[ 0 ] = anDice[ 0 ];
+    pmn->anRoll[ 1 ] = anDice[ 1 ];
+    pmn->fPlayer = fTurn;
+    pmn->anMove[ 0 ] = -1;
+    ListInsert( plGame, pmn );
 	
-	outputl( "No legal moves." );
+    outputl( "No legal moves." );
 
-	TurnDone();
-    } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
-						  <= CLASS_BEAROFF1 &&
-						  fAutoBearoff ) ) ) {
-	pmn = malloc( sizeof( *pmn ) );
-	pmn->mt = MOVE_NORMAL;
-	pmn->anRoll[ 0 ] = anDice[ 0 ];
-	pmn->anRoll[ 1 ] = anDice[ 1 ];
-	pmn->fPlayer = fTurn;
-	memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
+    TurnDone();
+  } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
+                                                <= CLASS_BEAROFF1 &&
+                                                fAutoBearoff ) ) ) {
+    pmn = malloc( sizeof( *pmn ) );
+    pmn->mt = MOVE_NORMAL;
+    pmn->anRoll[ 0 ] = anDice[ 0 ];
+    pmn->anRoll[ 1 ] = anDice[ 1 ];
+    pmn->fPlayer = fTurn;
+    memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
 
-	ShowAutoMove( anBoard, pmn->anMove );
+    ShowAutoMove( anBoard, pmn->anMove );
 	
-	ListInsert( plGame, pmn );
+    ListInsert( plGame, pmn );
 	
-	PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
+    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 	
-	TurnDone();
-    } else
-	if( fAutoBearoff && !TryBearoff() )
+    TurnDone();
+  } else
+    if( fAutoBearoff && !TryBearoff() )
 	    TurnDone();
 }
+
 
 extern void CommandTake( char *sz ) {
 
