@@ -31,5 +31,17 @@ extern char *FormatMove( char *pch, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
 extern char *FormatMovePlain( char *pch, int anBoard[ 2 ][ 25 ],
                               int anMove[ 8 ] );
 extern int ParseMove( char *pch, int an[ 8 ] );
+/* Fill the buffer pch with a FIBS "boardstyle 3" description of the game. */
+extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
+			char *szPlayer, char *szOpp, int nMatchTo,
+			int nScore, int nOpponent, int nDice0, int nDice1,
+			int nCube, int fCubeOwner, int fDoubled, int fTurn,
+			int fCrawford );
+/* Read a FIBS "boardstyle 3" description from pch. */
+extern int ParseFIBSBoard( char *pch, int anBoard[ 2 ][ 25 ],
+			   char *szPlayer, char *szOpp, int *pnMatchTo,
+			   int *pnScore, int *pnScoreOpponent,
+			   int anDice[ 2 ], int *pnCube, int *pfCubeOwner,
+			   int *pfDoubled, int *pfTurn, int *pfCrawford );
 
 #endif

@@ -1,7 +1,7 @@
 /*
  * set.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1999-2000.
+ * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -21,10 +21,18 @@
 
 #include "config.h"
 
+#include <errno.h>
 #include <math.h>
+#if HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#include <sys/un.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "backgammon.h"
 #include "dice.h"
@@ -55,6 +63,8 @@ command acSetEvaluation[] = {
 }, acSetPlayer[] = {
     { "evaluation", CommandSetPlayerEvaluation, "Control evaluation "
       "parameters when gnubg plays", NULL, acSetEvaluation },
+    { "external", CommandSetPlayerExternal, "Have another process make all "
+      "moves for a player", NULL, NULL },
     { "gnubg", CommandSetPlayerGNU, "Have gnubg make all moves for a player",
       NULL, NULL },
     { "human", CommandSetPlayerHuman, "Have a human make all moves for a "
@@ -603,7 +613,7 @@ extern void CommandSetPlayerEvaluation( char *sz ) {
 
     szSet = ap[ iPlayerSet ].szName;
     szSetCommand = "player ";
-    pecSet = &ap[ iPlayerSet ].ec;
+    pecSet = &ap[ iPlayerSet ].pd.ec;
 
     HandleCommand( sz, acSetEvaluation );
 
@@ -612,8 +622,61 @@ extern void CommandSetPlayerEvaluation( char *sz ) {
 		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
 }
 
+extern void CommandSetPlayerExternal( char *sz ) {
+
+#if !HAVE_SOCKETS
+    outputl( "This installation of GNU Backgammon was compiled without\n"
+	     "socket support, and does not implement external players." );
+#else
+    int h;
+    struct sockaddr_un sun;
+       
+    if( !sz || !*sz ) {
+	outputl( "You must specify the name of the socket to the external\n"
+		 "player -- try `help set player external'." );
+	return;
+    }
+
+    if( ( h = socket( PF_LOCAL, SOCK_STREAM, 0 ) ) < 0 ) {
+	perror( "socket" );
+	return;
+    }
+
+    /* FIXME allow some syntax for TCP connections instead of AF_LOCAL */
+    
+    sun.sun_family = AF_LOCAL;
+    strcpy( sun.sun_path, sz ); /* yuck!  opportunities for buffer overflow
+				    here... but we didn't write the broken
+				    interface */
+    
+    while( connect( h, (struct sockaddr *) &sun, SUN_LEN( &sun ) ) < 0 ) {
+	if( errno == EINTR ) {
+	    if( fAction )
+		fnAction();
+
+	    if( fInterrupt ) {
+		close( h );
+		return;
+	    }
+	    
+	    continue;
+	}
+	
+	perror( sz );
+	close( h );
+	return;
+    }
+    
+    ap[ iPlayerSet ].pt = PLAYER_EXTERNAL;
+    ap[ iPlayerSet ].pd.h = h;
+#endif
+}
+
 extern void CommandSetPlayerGNU( char *sz ) {
 
+    if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
+	close( ap[ iPlayerSet ].pd.h );
+    
     ap[ iPlayerSet ].pt = PLAYER_GNU;
 
     outputf( "Moves for %s will now be played by GNU Backgammon.\n",
@@ -622,6 +685,9 @@ extern void CommandSetPlayerGNU( char *sz ) {
 
 extern void CommandSetPlayerHuman( char *sz ) {
 
+    if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
+	close( ap[ iPlayerSet ].pd.h );
+    
     ap[ iPlayerSet ].pt = PLAYER_HUMAN;
 
     outputf( "Moves for %s must now be entered manually.\n",
@@ -682,7 +748,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
 	return;
     }
 
-    ap[ iPlayerSet ].ec.nPlies = n;
+    ap[ iPlayerSet ].pd.ec.nPlies = n;
     
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	outputf( "Moves for %s will be played with %d ply lookahead (note that "
@@ -695,6 +761,9 @@ extern void CommandSetPlayerPlies( char *sz ) {
 
 extern void CommandSetPlayerPubeval( char *sz ) {
 
+    if( ap[ iPlayerSet ].pt == PLAYER_EXTERNAL )
+	close( ap[ iPlayerSet ].pd.h );
+    
     ap[ iPlayerSet ].pt = PLAYER_PUBEVAL;
 
     outputf( "Moves for %s will now be played by pubeval.\n",
@@ -854,20 +923,20 @@ extern void CommandSetScore( char *sz ) {
 
     int n0, n1;
 
-    /* FIXME allow setting the score in `n-away' notation, e.g.
-     "set score -3 -4".  Also allow specifying Crawford here, e.g.
-    "set score crawford -3" or "set score 4C 3". */
-    
-    if( ( n0 = ParseNumber( &sz ) ) < 0 ||
-	( n1 = ParseNumber( &sz ) ) < 0 ) {
-	outputl( "You must specify the score for both players -- try `help "
-		 "set score'." );
-	return;
-    }
+    /* FIXME Allow specifying Crawford here, e.g. "set score crawford -3" or
+       "set score 4C 3". */
 
-    if( nMatchTo && ( n0 >= nMatchTo || n1 >= nMatchTo ) ) {
-	outputf( "Each player's score must be below %d point%s.\n", nMatchTo,
-		nMatchTo == 1 ? "" : "s" );
+    n0 = ParseNumber( &sz );
+    n1 = ParseNumber( &sz );
+
+    if( n0 < 0 ) /* -n means n-away */
+	n0 += nMatchTo;
+
+    if( n1 < 0 )
+	n1 += nMatchTo;
+    
+    if( n0 < 0 || n1 < 0 ) {
+	outputf( "You must specify two scores between 0 and %d.\n", nMatchTo );
 	return;
     }
 

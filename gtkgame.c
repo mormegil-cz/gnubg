@@ -230,15 +230,20 @@ static guint nStdin, nDisabledCount = 1;
 
 void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     
-#if HAVE_LIBREADLINE
-    /* Handle "next turn" processing before more input (otherwise we might
-       not even have a readline handler installed!) */
-    while( nNextTurn )
-	NextTurnNotify( NULL );
-    
-    rl_callback_read_char();
-#else
     char sz[ 2048 ], *pch;
+    
+#if HAVE_LIBREADLINE
+    if( fReadline ) {
+	/* Handle "next turn" processing before more input (otherwise we might
+	   not even have a readline handler installed!) */
+	while( nNextTurn )
+	    NextTurnNotify( NULL );
+	
+	rl_callback_read_char();
+
+	return;
+    }
+#endif
 
     while( nNextTurn )
 	NextTurnNotify( NULL );
@@ -252,8 +257,11 @@ void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     
 	
     if( feof( stdin ) ) {
+	if( !isatty( STDIN_FILENO ) )
+	    exit( EXIT_SUCCESS );
+	
 	PromptForExit();
-	return 0;
+	return;
     }	
 
     fInterrupt = FALSE;
@@ -266,7 +274,6 @@ void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
 	fNeedPrompt = TRUE;
     else
 	Prompt();
-#endif
 }
 
 void AllowStdin( void ) {
@@ -1112,12 +1119,13 @@ extern void RunGTK( void ) {
 #endif
     
 #if HAVE_LIBREADLINE
-	fReadingCommand = TRUE;
-	rl_callback_handler_install( FormatPrompt(), HandleInput );
-	atexit( rl_callback_handler_remove );
-#else
-	Prompt();
+	if( fReadline ) {
+	    fReadingCommand = TRUE;
+	    rl_callback_handler_install( FormatPrompt(), HandleInput );
+	    atexit( rl_callback_handler_remove );
+	} else
 #endif
+	    Prompt();
     }
     
     gtk_widget_show_all( pwMain );

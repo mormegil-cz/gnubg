@@ -1431,41 +1431,16 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 ) {
     gchar board_str[ 256 ];
-    int i, off[ 2 ], old_dice;
+    int old_dice;
     BoardData *pbd = board->board_data;
 
     memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
     old_dice = pbd->dice[ 0 ];
+
+    FIBSBoard( board_str, points, roll, name, opp_name, match, score,
+	       opp_score, die0, die1, nCube, fCubeOwner, fDoubled, fTurn,
+	       fCrawford );
     
-    /* Names and match length/score */
-    sprintf( board_str, "board:%s:%s:%d:%d:%d:", name, opp_name, match, score,
-	     opp_score );
-
-    /* Opponent on bar */
-    sprintf( strchr( board_str, 0 ), "%d:", -points[ 0 ][ 24 ] );
-
-    /* Board */
-    for( i = 0; i < 24; i++ )
-	sprintf( strchr( board_str, 0 ), "%d:", points[ 0 ][ 23 - i ] ?
-		 -points[ 0 ][ 23 - i ] : points[ 1 ][ i ] );
-
-    /* Player on bar */
-    sprintf( strchr( board_str, 0 ), "%d:", points[ 1 ][ 24 ] );
-
-    /* Whose turn */
-    strcat( strchr( board_str, 0 ), roll ? "1:" : "-1:" );
-
-    off[ 0 ] = off[ 1 ] = 15;
-    for( i = 0; i < 25; i++ ) {
-	off[ 0 ] -= points[ 0 ][ i ];
-	off[ 1 ] -= points[ 1 ][ i ];
-    }
-
-    sprintf( strchr( board_str, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:"
-	     "%d:0:0:0:0:%d:0", die0, die1, die0, die1, fTurn < 0 ? 1 : nCube,
-	     fTurn < 0 || fCubeOwner != 0, fTurn < 0 || fCubeOwner != 1,
-	     fDoubled ? ( fTurn ? -1 : 1 ) : 0, off[ 1 ], off[ 0 ],
-	     fCrawford );    
     board_set( board, board_str );
     
     /* FIXME update names, score, match length */

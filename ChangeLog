@@ -1,3 +1,33 @@
+Tue Feb 13 12:55:52 2001  Gary Wong  <gtw@research.att.com>
+
+	* external.c: New file (to support external players).
+	* drawboard.c (FIBSBoard, ParseFIBSBoard): New functions.
+	* play.c (ComputerTurn): Handle external players.
+	* set.c (CommandSetPlayerExternal): New function.
+
+	* gnubg.c (CommandNewWeights): New function.
+	(real_main): Change `--no-weights' to `--new-weights', and allow the
+	net size to be specified.
+	* eval.c (EvalNewWeights): New function.
+
+	* guile.c: Handle signals when in Guile and gnubg callbacks.
+	(GuileStartIntHandler, GuileEndIntHandler): New functions.
+	* gnubg.c (HandleCommand): Install a SIGINT handler when handling
+	Guile escapes.
+	* gnubg.c (PortableSignal): Don't restart system calls on SIGIOs.
+
+	* gnubg.c: Don't use readline if stdin is not a TTY.
+	(Prompt): Don't issue a prompt if stdin is not a TTY.
+
+	* set.c (CommandSetScore): Allow "n-away" notation.
+	
+	* eval.c (DumpPosition): Display evaluations in either percentages
+	or probabilities.
+
+	* positionid.c (CheckPosition): Bug fix checking for closed boards.
+
+	* rollout.c (Rollout): Don't get upset if GTKRolloutUpdate fails.
+	
 Mon Feb 12 14:27:41 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (real_main): Implement the `-w' option again (it was

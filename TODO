@@ -54,8 +54,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
-** Make sure input behaves correctly when stdin is not a TTY (the only
-  problems seem to be cosmetic; junk is echoed to stdout). (gary)
 ** Make output*() functions wrap words, and pause before scrolling (as in
   gdb).  Make sure output to stderr is available when using GTK -- perror
   calls will have to be replaced, for instance.
@@ -80,16 +78,16 @@ duplication of effort and to make sure our changes merge easily.
   be a "Rollout" button in the hint window for cube decisions, and something
   under the Analyse menu).
 ** Make "show marketwindow" say something for money games.
+** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
 ** Define Scheme "port"s for the gnubg output() functions.
-** Defer and allow Guile interrupts at appropriate places in guile.c.
-  (For instance, evaluating "(define (x) (x)) (x)" in Guile can be
-  interrupted.  But "(rollout-position (current-board))" cannot.) (gary)
 ** Use Guile keywords in cube-info.  Add a similar function for eval
   contexts.
 ** Add Guile functions to access the current game state.
+** Don't change the SIGINT handler if it's SIG_DFL (i.e. we never installed
+  a handler because stdin is not a TTY).
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
@@ -167,8 +165,7 @@ duplication of effort and to make sure our changes merge easily.
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
 ** The erroneous commands "set player both" and "set player both evaluation"
-  give poor error messages; "set score -1 -1" gives a bad message too (it
-  should be redefined to set 1-away, 1-away).
+  give poor error messages.
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
 ** "set player <tab>" gives incorrect completions.
@@ -185,9 +182,9 @@ duplication of effort and to make sure our changes merge easily.
   commands echoed to stdout and the prompts are in the wrong order).
 ** Changing a player's name doesn't affect the names in the drop-down
   menu in the game window.
-** The SGF loading (saving?) routines don't abort on interrupt.
-  "load commands /dev/zero" aborts on a TTY interrupt, but not the
-  GTK `stop' button.
+** The SGF loading (saving?) routines and CommandLoadCommands use
+  stdio, which restarts system calls on signals.  This means TTY interrupts
+  and the GTK `stop' button don't work. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -218,17 +215,15 @@ duplication of effort and to make sure our changes merge easily.
   progress") checks so that they _do_ ask when the game is over but the
   match is still in progress, and they _don't_ ask if a game has not been
   modified since it was last loaded/saved.
-** Change the `no-weights' option to `new-weights', and allow specification
-  of the net size (e.g. "gnubg -new-weights=128").  Add an equivalent
-  command "new weights".
 ** Extend ParsePosition to cope with other formats, e.g. FIBS
   "boardstyle 3" and/or a human friendly position description,
-  like "set board 0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0".
+  like "set board (0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0)".
 ** Do more in CommandSaveSettings.
 ** Handle SGF setup properties when loading games.
-** Make "eval" pay attention to the percentage/probability settings. (gary)
-** Add an "external" player (writes boards/reads moves to/from a Unix
-  domain socket).
+** Handle SGF variations.
+** Make the external player handle cube and resignation decisions, and allow
+  connection via TCP/IP.
+** Allow an option for illegal moves to be entered.
 
 
 Local Variables:

@@ -1,7 +1,7 @@
 /*
  * backgammon.h
  *
- * by Gary Wong, 1999, 2000.
+ * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -45,6 +45,14 @@ extern event evNextTurn;
 #define DISPLAY ewnd.pdsp
 #endif
 
+#if HAVE_SIGACTION
+typedef struct sigaction psighandler;
+#elif HAVE_SIGVEC
+typedef struct sigvec psighandler;
+#else
+typedef RETSIGTYPE (*psighandler)( int );
+#endif
+
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_CUBE_STR "4096"
 
@@ -57,13 +65,16 @@ typedef struct _command {
 } command;
 
 typedef enum _playertype {
-    PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL
+    PLAYER_EXTERNAL, PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL
 } playertype;
 
 typedef struct _player {
     char szName[ 32 ];
     playertype pt;
-    evalcontext ec;
+    union _playerdata {
+	evalcontext ec; /* PLAYER_GNU */
+	int h; /* PLAYER_EXTERNAL */
+    } pd;
 } player;
 
 typedef enum _movetype {
@@ -238,6 +249,11 @@ extern void ResetInterrupt( void );
 extern void PromptForExit( void );
 extern void Prompt( void );
 
+extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
+			     psighandler *pOld );
+extern void PortableSignalRestore( int nSignal, psighandler *p );
+extern RETSIGTYPE HandleInterrupt( int idSignal );
+
 /* Write a string to stdout/status bar/popup window */
 extern void output( char *sz );
 /* Write a string to stdout/status bar/popup window, and append \n */
@@ -272,6 +288,10 @@ extern void HandleInput( char *sz );
 #endif
 #endif
 
+#if HAVE_LIBREADLINE
+extern int fReadline;
+#endif
+
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[];
@@ -289,6 +309,7 @@ extern void CommandAccept( char * ),
     CommandEval( char * ),
     CommandExportGame( char * ),
     CommandExportMatch( char * ),
+    CommandExternal( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
     CommandImportJF( char * ),
@@ -301,6 +322,7 @@ extern void CommandAccept( char * ),
     CommandNewGame( char * ),
     CommandNewMatch( char * ),
     CommandNewSession( char * ),
+    CommandNewWeights( char * ),
     CommandNext( char * ),
     CommandNotImplemented( char * ),
     CommandPlay( char * ),
@@ -351,6 +373,7 @@ extern void CommandAccept( char * ),
     CommandSetOutputMWC ( char * ),
     CommandSetOutputWinPC( char * ),
     CommandSetPlayerEvaluation( char * ),
+    CommandSetPlayerExternal( char * ),
     CommandSetPlayerGNU( char * ),
     CommandSetPlayerHuman( char * ),
     CommandSetPlayerName( char * ),

@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -542,6 +543,120 @@ extern int ParseMove( char *pch, int an[ 8 ] ) {
         errno = EINVAL;
         return -1;
     }
-    
+
+    if( i < 8 )
+	an[ i ] = 0;
+
     return i >> 1;
+}
+
+extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
+			char *szPlayer, char *szOpp, int nMatchTo,
+			int nScore, int nOpponent, int nDice0, int nDice1,
+			int nCube, int fCubeOwner, int fDoubled, int fTurn,
+			int fCrawford ) {
+    char *sz = pch;
+    int i, anOff[ 2 ];
+    
+    /* Names and match length/score */
+    sprintf( sz, "board:%s:%s:%d:%d:%d:", szPlayer, szOpp, nMatchTo, nScore,
+	     nOpponent );
+
+    /* Opponent on bar */
+    sprintf( strchr( sz, 0 ), "%d:", -anBoard[ 0 ][ 24 ] );
+
+    /* Board */
+    for( i = 0; i < 24; i++ )
+	sprintf( strchr( sz, 0 ), "%d:", anBoard[ 0 ][ 23 - i ] ?
+		 -anBoard[ 0 ][ 23 - i ] : anBoard[ 1 ][ i ] );
+
+    /* Player on bar */
+    sprintf( strchr( sz, 0 ), "%d:", anBoard[ 1 ][ 24 ] );
+
+    /* Whose turn */
+    strcat( strchr( sz, 0 ), fRoll ? "1:" : "-1:" );
+
+    anOff[ 0 ] = anOff[ 1 ] = 15;
+    for( i = 0; i < 25; i++ ) {
+	anOff[ 0 ] -= anBoard[ 0 ][ i ];
+	anOff[ 1 ] -= anBoard[ 1 ][ i ];
+    }
+    
+    sprintf( strchr( sz, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:%d:0:0:0:"
+	     "0:%d:0", nDice0, nDice1, nDice0, nDice1, fTurn < 0 ? 1 : nCube,
+	     fTurn < 0 || fCubeOwner != 0, fTurn < 0 || fCubeOwner != 1,
+	     fDoubled ? ( fTurn ? -1 : 1 ) : 0, anOff[ 1 ], anOff[ 0 ],
+	     fCrawford );
+
+    return pch;
+}
+
+extern int ParseFIBSBoard( char *pch, int anBoard[ 2 ][ 25 ],
+			   char *szPlayer, char *szOpp, int *pnMatchTo,
+			   int *pnScore, int *pnScoreOpponent,
+			   int anDice[ 2 ], int *pnCube, int *pfCubeOwner,
+			   int *pfDoubled, int *pfTurn, int *pfCrawford ) {
+    
+    int i, c, n, fCanDouble, fOppCanDouble, anOppDice[ 2 ];
+
+    for( i = 0; i < 25; i++ )
+	anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
+    
+    /* Names and match length/score */
+    c = -1;
+    sscanf( pch, "board:%31[^:]:%31[^:]:%d:%d:%d:%n", szPlayer, szOpp,
+	    pnMatchTo, pnScore, pnScoreOpponent, &c );
+    if( c < 0 )
+	return -1;
+    pch += c;
+
+    /* Opponent on bar */
+    c = -1;
+    sscanf( pch, "%d:%n", &n, &c );
+    if( c < 0 )
+	return -1;
+    pch += c;
+    anBoard[ 0 ][ 24 ] = -n;
+
+    /* Board */
+    for( i = 0; i < 24; i++ ) {
+	c = -1;
+	sscanf( pch, "%d:%n", &n, &c );
+	if( c < 0 )
+	    return -1;
+	pch += c;
+	if( n < 0 )
+	    anBoard[ 0 ][ 23 - i ] = -n;
+	else
+	    anBoard[ 1 ][ i ] = n;
+    }
+
+    /* Player on bar */
+    c = -1;
+    sscanf( pch, "%d:%n", &n, &c );
+    if( c < 0 )
+	return -1;
+    pch += c;
+    anBoard[ 1 ][ 24 ] = n;
+
+    c = -1;
+    sscanf( pch, "%d:%d:%d:%d:%d:%d:%d:%d:%d:%*d:%*d:%*d:%*d:%*d:%*d:%*d:%*d:"
+	    "%*d:%*d:%d:%n", pfTurn, anDice, anDice + 1, anOppDice,
+	    anOppDice + 1, pnCube, &fCanDouble, &fOppCanDouble,
+	    pfDoubled, pfCrawford, &c );
+    if( c < 0 )
+	return -1;
+
+    *pfTurn = *pfTurn > 0;
+
+    if( !anDice[ 0 ] ) {
+	anDice[ 0 ] = anOppDice[ 0 ];
+	anDice[ 1 ] = anOppDice[ 1 ];
+    }
+
+    *pfCubeOwner = fCanDouble != fOppCanDouble ? fCanDouble : -1;
+
+    *pfDoubled = *pfDoubled != 0;
+
+    return 0;
 }

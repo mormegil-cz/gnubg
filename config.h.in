@@ -115,6 +115,9 @@
 /* Define if you have the <sys/mman.h> header file.  */
 #undef HAVE_SYS_MMAN_H
 
+/* Define if you have the <sys/socket.h> header file.  */
+#undef HAVE_SYS_SOCKET_H
+
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
 
@@ -153,6 +156,9 @@
 
 /* Define if you have a signbit() macro faster than a compare to 0.0. */
 #undef HAVE_SIGNBIT
+
+/* Define if the system supports AC_LOCAL sockets. */
+#undef HAVE_SOCKETS
 
 /* Define if you want to use the ext toolkit and widgets. */
 #undef USE_EXT

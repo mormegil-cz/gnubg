@@ -1,7 +1,7 @@
 /*
  * play.c
  *
- * by Gary Wong, 1999-2000
+ * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -30,10 +30,14 @@
 #if HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "backgammon.h"
 #include "dice.h"
 #include "drawboard.h"
+#include "external.h"
 #include "eval.h"
 #include "positionid.h"
 #include "matchequity.h"
@@ -465,7 +469,9 @@ static int ComputerTurn( void ) {
   movenormal *pmn;
   cubeinfo ci;
   float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
-    
+  char szBoard[ 256 ], szResponse[ 256 ];
+  int i, c;
+  
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
 		fCrawford, fJacoby, fBeavers );
 
@@ -475,7 +481,7 @@ static int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
 
-      if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].ec ) )
+      if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].pd.ec ) )
         return -1;
 
       rEqBefore = -Utility ( arOutput, &ci );
@@ -518,8 +524,8 @@ static int ComputerTurn( void ) {
       /* Consider cube action */
 
       if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
-                                     &ap [ fTurn ].ec,
-                                     ap [ fTurn ].ec.nPlies ) < 0 )
+                                     &ap [ fTurn ].pd.ec,
+                                     ap [ fTurn ].pd.ec.nPlies ) < 0 )
         return -1;
 
       fComputerDecision = TRUE;
@@ -567,8 +573,8 @@ static int ComputerTurn( void ) {
           /* We're in market window */
 
           if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
-                                         &ap [ fTurn ].ec,
-                                         ap [ fTurn ].ec.nPlies ) < 0 )
+                                         &ap [ fTurn ].pd.ec,
+                                         ap [ fTurn ].pd.ec.nPlies ) < 0 )
             return -1;
 
           if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) &&
@@ -613,7 +619,7 @@ static int ComputerTurn( void ) {
       pmn->fPlayer = fTurn;
       
       if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-                        anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 ) {
+                        anBoardMove, &ci, &ap[ fTurn ].pd.ec ) < 0 ) {
         free( pmn );
         return -1;
       }
@@ -664,11 +670,79 @@ static int ComputerTurn( void ) {
     
     AddMoveRecord( pmn );
     return 0;
-    
-  default:
-    assert( FALSE );
-    return -1;
+
+  case PLAYER_EXTERNAL:
+#if HAVE_SOCKETS
+      if( fResigned == 3 ) {
+	  /* FIXME get resignation decision */
+	  fComputerDecision = TRUE;
+	  CommandAgree( NULL );
+	  return 0;
+      } else if( fResigned ) {
+	  /* FIXME get resignation decision */
+	  fComputerDecision = TRUE;
+	  CommandDecline( NULL );
+	  return 0;
+      } else if( fDoubled ) {
+	  /* FIXME get take decision */
+	  fComputerDecision = TRUE;
+	  CommandTake( NULL );
+	  return 0;
+      } else if( !anDice[ 0 ] ) {
+	  /* FIXME get double decision (check cube use on, cube access, and
+	     Crawford) */
+	  if( RollDice( anDice ) < 0 )
+	      return -1;
+	  
+	  if( fDisplay )
+	      ShowBoard();
+      }
+
+      FIBSBoard( szBoard, anBoard, fMove, ap[ 1 ].szName,
+		 ap[ 0 ].szName, nMatchTo, anScore[ 1 ],
+		 anScore[ 0 ], anDice[ 0 ], anDice[ 1 ], nCube,
+		 fCubeOwner, fDoubled, fTurn, fCrawford );
+      strcat( szBoard, "\n" );
+      
+      if( ExternalWrite( ap[ fTurn ].pd.h, szBoard,
+			 strlen( szBoard ) + 1 ) < 0 )
+	  return -1;
+
+      if( ExternalRead( ap[ fTurn ].pd.h, szResponse,
+			sizeof( szResponse ) ) < 0 )
+	  return -1;
+      
+      pmn = malloc( sizeof( *pmn ) );
+      pmn->mt = MOVE_NORMAL;
+      pmn->anRoll[ 0 ] = anDice[ 0 ];
+      pmn->anRoll[ 1 ] = anDice[ 1 ];
+      pmn->fPlayer = fTurn;
+
+      if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
+	  pmn->anMove[ 0 ] = 0;
+	  outputl( "Warning: badly formed move from external player" );
+      } else
+	  for( i = 0; i < 4; i++ )
+	      if( i < c ) {
+		  pmn->anMove[ i << 1 ]--;
+		  pmn->anMove[ ( i << 1 ) + 1 ]--;
+	      } else {
+		  pmn->anMove[ i << 1 ] = -1;
+		  pmn->anMove[ ( i << 1 ) + 1 ] = -1;
+	      }
+      
+      AddMoveRecord( pmn );
+      return 0;
+#else
+      /* fall through */
+#endif
+      
+  case PLAYER_HUMAN:
+      /* fall through */
   }
+  
+  assert( FALSE );
+  return -1;
 }
 
 extern void CancelCubeAction( void ) {
