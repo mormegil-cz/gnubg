@@ -1,3 +1,8 @@
+Sat May 31 19:54:53 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* procunits.c (GetProcessorCount): get number of processors
+	for windows systems.
+
 Sat May 31 19:48:18 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* procunits.c (GetProcessorCount): experimental code for 

@@ -28,6 +28,10 @@
 #endif
 #endif
 
+#if WIN32
+#include <windows.h>
+#endif
+
 #include <signal.h>
 #include <stddef.h>
 
@@ -145,8 +149,10 @@ static int GetProcessorCount (void)
             cProcessors = MPProcessors ();
             
     #elif WIN32
-        /* add here Win32 specific code */
-        
+
+        SYSTEM_INFO siSysInfo;
+        GetSystemInfo( &siSysInfo );
+        cProcessors = siSysInfo.dwNumberOfProcessors;
         
         ;
 
