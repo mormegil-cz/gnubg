@@ -35,5 +35,6 @@ AC_PROG_RANLIB
 dnl Checks for header files.
 AC_PATH_XTRA
 AC_HEADER_STDC
+AC_CHECK_HEADERS(sys/time.h)
 
 AC_OUTPUT(Makefile)

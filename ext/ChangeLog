@@ -1,1 +1,4 @@
-None, yet.
+Wed Dec 15 15:19:42 NZDT 1999  Joern Thyssen  <joern@thyssen.nu>
+
+        * configure.in, config.h.in: Add AC_CHECK_HEADERS(sys/time.h)
+
