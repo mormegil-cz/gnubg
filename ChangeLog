@@ -1,3 +1,7 @@
+Wed Jan 29 16:47:14 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in: some magic for wintendo systems.
+
 Tue Jan 28 11:04:16 2003  Gary Wong  <gtw@gnu.org>
 
 	* gtkrolls.c (GTKShowRolls): Change the spin button to a GTKHScale,
