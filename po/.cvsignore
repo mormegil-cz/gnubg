@@ -4,3 +4,4 @@ Makefile.in
 POTFILES
 remove-potcdate.sed
 stamp-po
+en@quot.insert-header
