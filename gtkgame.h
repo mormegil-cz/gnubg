@@ -81,8 +81,8 @@ extern void GTKDisallowStdin( void );
 extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle );
 
-extern GtkWidget *GTKCreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
-				void *p );
+extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt, 
+                                   GtkSignalFunc pf, void *p );
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
     
 extern int GTKGetInputYN( char *szPrompt );
@@ -99,8 +99,8 @@ extern void
 GTKProgressValue ( int fValue );
 extern void GTKBearoffProgress( int i );
 
-extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
-				char *szTitle );
+extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
+				const char *szTitle, const int fIsMatch );
 extern void GTKEval( char *szOutput );
 extern void 
 GTKHint( movelist *pmlOrig, const int iMove );

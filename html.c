@@ -2950,6 +2950,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
   };
 
   int fCalc;
+  const int fIsMatch = iGame < 0;
 
   getMWCFromError ( psc, aaaar );
 
@@ -3379,17 +3380,21 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                                    psc->arLuck[ 1 ][ 1 ] + 
                                    psc->arLuck[ 0 ][ 1 ] ) );
 
-      if ( r > 0.0f && r < 1.0f ) {
-        float rRating = relativeFibsRating( r, pms->nMatchTo );
-        printStatTableRow( pf,
-                           _("Relative FIBS rating"),
-                           "%.2f",
-                           rRating / 2.0f, -rRating / 2.0f );
+      if ( fIsMatch ) {
+
+        if ( r > 0.0f && r < 1.0f ) {
+          float rRating = relativeFibsRating( r, pms->nMatchTo );
+          char sz[ 10 ];
+          sprintf( sz, "%.2f", rRating );
+          printStatTableRow( pf,
+                             _("FIBS rating difference"),
+                             "%s", sz, "" );
+        }
+        else
+          printStatTableRow( pf,
+                             _("FIBS rating difference"),
+                             "%s", _("n/a"), _("n/a") );
       }
-      else
-        printStatTableRow( pf,
-                           _("Relative FIBS rating"),
-                           "%s", _("n/a"), _("n/a") );
 
     }
     else {
@@ -3407,7 +3412,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                          psc->arActualResult[ 1 ] - 
                          psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
 
-      if ( psc->nGames > 1 ) {
+      if ( fIsMatch && psc->nGames > 1 ) {
         printStatTableRow( pf,
                            _("Advantage (actual) in ppg"),
                            "%+.3f",

@@ -2851,8 +2851,8 @@ static void OK( GtkWidget *pw, int *pf ) {
 }
 
 
-extern GtkWidget *GTKCreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
-				void *p ) {
+extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt, 
+                                   GtkSignalFunc pf, void *p ) {
     GtkWidget *pwDialog = gtk_dialog_new(),
 	*pwOK = gtk_button_new_with_label( _("OK") ),
 	*pwCancel = gtk_button_new_with_label( _("Cancel") ),
@@ -6883,8 +6883,8 @@ extern void GTKSet( void *p ) {
 }
 
 static void
-FormatStatEquity(char* sz, float ar[2], int nDenominator,
-		 int nMatchTo, float rMult )
+FormatStatEquity(char* sz, const float ar[2], const int nDenominator,
+		 const int nMatchTo, const float rMult )
 {
   if( !nDenominator ) {
     strcpy( sz, "n/a" );
@@ -6908,7 +6908,8 @@ FormatStatEquity(char* sz, float ar[2], int nDenominator,
 }
 
 static void
-FormatStatCubeError(char* sz, int n, float ar[2], int nMatchTo)
+FormatStatCubeError( char* sz, const int n, const float ar[2], 
+                     const int nMatchTo)
 {
   if( n == 0 ) {
     {                                 assert( ar[0] == 0.0 && ar[1] == 0.0 ); }
@@ -7025,8 +7026,8 @@ StatcontextCopy ( GtkWidget *pw, void *unused ) {
 }
 
 
-extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
-				char *szTitle ) {
+extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
+				const char *szTitle, const int fIsMatch ) {
     
   static char *aszEmpty[] = { NULL, NULL, NULL };
   static char *aszLabels[] = { 
@@ -7085,7 +7086,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   };
 
   static char *aszLabelsMatch[] = {
-    N_("Relative FIBS rating")
+    N_("FIBS rating difference")
   };
 
   GtkWidget *pwDialog = GTKCreateDialog( szTitle,
@@ -7125,21 +7126,23 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
     gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, gettext ( aszLabels[i] ) );
   }
-  if ( pms->nMatchTo ) 
-    for (i = 0; i < ( sizeof( aszLabelsMatch ) / sizeof( *aszLabelsMatch ) ); 
-         ++i, ++j ) {
-      gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
-      gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
-                          gettext ( aszLabelsMatch[i] ) );
-    }
-  else
-    for (i = 0; i < ( sizeof( aszLabelsMoney ) / sizeof( *aszLabelsMoney ) );
-         ++i, ++j ) {
-      gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
-      gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
-                          gettext ( aszLabelsMoney[i] ) );
-    }
 
+  if ( fIsMatch ) {
+    if ( pms->nMatchTo ) 
+      for (i = 0; i < ( sizeof( aszLabelsMatch ) / sizeof( *aszLabelsMatch ) ); 
+           ++i, ++j ) {
+        gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
+        gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
+                            gettext ( aszLabelsMatch[i] ) );
+      }
+    else
+      for (i = 0; i < ( sizeof( aszLabelsMoney ) / sizeof( *aszLabelsMoney ) );
+           ++i, ++j ) {
+        gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
+        gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
+                            gettext ( aszLabelsMoney[i] ) );
+      }
+  }
 
         
   sprintf(sz,"%d", psc->anTotalMoves[ 0 ]);
@@ -7518,14 +7521,15 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
       }
 
-      for ( i = 0; i < 2; ++i ) {
+      if ( fIsMatch ) {
         if ( r > 0.0f && r < 1.0f )
-          sprintf( sz, "%.2f", ( 1 - 2 * i ) * 
-                   relativeFibsRating( r, pms->nMatchTo ) / 2.0f );
+          sprintf( sz, "%.2f", 
+                   relativeFibsRating( r, pms->nMatchTo ) );
         else
           strcpy( sz, _("n/a") );
 
-        gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, i + 1, sz);
+        gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, 1, sz);
+
       }
 
     }
@@ -7536,7 +7540,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
                  psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
         
-        if( psc->nGames > 1 ) {
+        if( fIsMatch && psc->nGames > 1 ) {
 
           sprintf( sz, "%+.3f",
                    psc->arActualResult[ i ] / psc->nGames );
@@ -7588,7 +7592,8 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_signal_connect( GTK_OBJECT( pwStats ), "selection_clear_event",
                       GTK_SIGNAL_FUNC( StatcontextClearSelection ), pwCopy );
   gtk_signal_connect( GTK_OBJECT( pwStats ), "selection_get",
-                      GTK_SIGNAL_FUNC( StatcontextGetSelection ), psc );
+                      GTK_SIGNAL_FUNC( StatcontextGetSelection ), 
+                      ( gpointer) psc );
 
   /* modality */
 

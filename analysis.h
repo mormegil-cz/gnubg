@@ -112,7 +112,8 @@ extern void IniStatcontext ( statcontext* psc );
 extern void AddStatcontext ( statcontext* pscA, statcontext* pscB );
 
 extern void
-DumpStatcontext ( char* szOutput, const statcontext* psc, const char* sz );
+DumpStatcontext ( char* szOutput, const statcontext* psc, const char* sz,
+                  const int fIsMatch );
 
 extern void
 updateStatisticsGame ( const list* plGame );

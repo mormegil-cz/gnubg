@@ -1390,7 +1390,8 @@ calcFibsRating( const float rMWC, const int nMatchTo ) {
 
 
 extern void
-DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
+DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
+                  const int fIsMatch ) {
 
   int i;
   ratingtype rt[ 2 ];
@@ -1788,7 +1789,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                 psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
                 psc->arActualResult[ 1 ] - 
                 psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
-      if ( psc->nGames > 1 ) {
+      if ( fIsMatch && psc->nGames > 1 ) {
         sprintf( strchr( szOutput, 0 ),
                  "\n"
                  "%-31.31s %7.3f                 %7.3f\n"
@@ -1823,24 +1824,29 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
   
   /* calculate total error */
 
-  if ( ms.nMatchTo ) {
+  if ( fIsMatch ) {
 
-    float r = 0.5f + psc->arActualResult[ 0 ] - 
-      psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-
-    if ( r > 0.0f && r < 1.0f ) {
-      float rRating = relativeFibsRating( r, ms.nMatchTo );
-
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %7.2f                 %7.2f\n",
-                _("Relative FIBS rating"), rRating / 2.0f , -rRating / 2.0f );
-
+    if ( ms.nMatchTo ) {
+      
+      float r = 0.5f + psc->arActualResult[ 0 ] - 
+        psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+      
+      if ( r > 0.0f && r < 1.0f ) {
+        float rRating = relativeFibsRating( r, ms.nMatchTo );
+        
+        sprintf ( strchr ( szOutput, 0 ),
+                  "%-31s %7.2f\n",
+                  _("FIBS rating difference"), rRating );
+        
+      }
+      else
+        sprintf ( strchr ( szOutput, 0 ),
+                  "%-31s %-7s\n",
+                  _("FIBS rating difference") );
     }
-    else
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %-7s                 %-7s\n",
-                _("Relative FIBS rating"), _("n/a"), _("n/a") );
+
   }
+
 }
 
 
@@ -1853,12 +1859,14 @@ CommandShowStatisticsMatch ( char *sz ) {
 
 #if USE_GTK
     if ( fX ) {
-	GTKDumpStatcontext ( &scMatch, &ms, _("Statistics for all games") );
+	GTKDumpStatcontext ( &scMatch, &ms, 
+                             _("Statistics for all games"), TRUE );
 	return;
     }
 #endif
 
-    DumpStatcontext ( szOutput, &scMatch, _("Statistics for all games"));
+    DumpStatcontext ( szOutput, &scMatch, 
+                      _("Statistics for all games"), TRUE );
     outputl(szOutput);
 }
 
@@ -1891,12 +1899,14 @@ CommandShowStatisticsGame ( char *sz )
     
 #if USE_GTK
   if ( fX ) {
-    GTKDumpStatcontext ( &pmgi->sc, &ms, _("Statistics for current game") );
+    GTKDumpStatcontext ( &pmgi->sc, &ms, 
+                         _("Statistics for current game"), FALSE );
     return;
   }
 #endif
 
-  DumpStatcontext ( szOutput, &pmgi->sc, _("Statistics for current game"));
+  DumpStatcontext ( szOutput, &pmgi->sc, 
+                    _("Statistics for current game"), FALSE );
   outputl( szOutput );
 }
 

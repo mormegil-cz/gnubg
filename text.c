@@ -599,7 +599,7 @@ static void TextDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   }
 
-  DumpStatcontext ( sz, psc, NULL );
+  DumpStatcontext ( sz, psc, NULL, iGame < 0 );
 
   fputs ( sz, pf );
 
