@@ -21,6 +21,9 @@
 
 #include "config.h"
 
+#define PROCESSING_UNITS 1
+#define SERIALIZE 0
+
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
@@ -51,9 +54,6 @@
 #include "lib/vector_ve.h"
 #endif
 #endif
-
-#define PROCESSING_UNITS 1
-#define SERIALIZE 0
 
 #if PROCESSING_UNITS
 #include "procunits.h"
@@ -966,7 +966,8 @@ void * Threaded_BearoffRollout (void *data)
     pu_task_rollout_data 		*prd = (pu_task_rollout_data *) &pt->taskdata.rollout;
     pu_task_rollout_bearoff_data 	*psd = (pu_task_rollout_bearoff_data *) &prd->specificdata.bearoff;
     
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", pthread_self ());
+    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
+                           (int ) pthread_self ());
     
     CreateThreadGlobalStorage ();
     
@@ -975,11 +976,13 @@ void * Threaded_BearoffRollout (void *data)
 
     InitRNGSeed (prd->seed, prd->rc.rngRollout);
     
-    err = BearoffRollout ((int **) prd->aanBoardEval, (float *) prd->aar,
-                    psd->nTruncate, prd->iTurn, prd->iGame, psd->nTrials,
-                    psd->bgv);
+    err = BearoffRollout ( ( int(*)[ 25 ] ) prd->aanBoardEval, 
+                           (float *) prd->aar,
+                           psd->nTruncate, prd->iTurn, prd->iGame, 
+                           psd->nTrials, psd->bgv);
     
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", pthread_self ());
+    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
+                           (int) pthread_self ());
     
     pthread_mutex_lock (&mutexTaskListAccess);
     MarkTaskDone (pt, NULL);
@@ -992,6 +995,8 @@ void * Threaded_BearoffRollout (void *data)
     }
 
     FreeThreadSavedBases ();
+
+    return NULL;
 }
 
 void * Threaded_BasicCubefulRollout (void *data)
@@ -1002,7 +1007,8 @@ void * Threaded_BasicCubefulRollout (void *data)
     pu_task_rollout_data 		*prd = (pu_task_rollout_data *) &pt->taskdata.rollout;
     pu_task_rollout_basiccubeful_data 	*psd = (pu_task_rollout_basiccubeful_data *) &prd->specificdata.basiccubeful;
     
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", pthread_self ());
+    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
+                           (int) pthread_self ());
 
     CreateThreadGlobalStorage ();
 
@@ -1011,11 +1017,12 @@ void * Threaded_BasicCubefulRollout (void *data)
 
     InitRNGSeed (prd->seed, prd->rc.rngRollout);
     
-    err = BasicCubefulRollout (prd->aanBoardEval, prd->aar, 
-                        prd->iTurn, prd->iGame,
-                        psd->aci, psd->afCubeDecTop, psd->cci,
-                        &prd->rc,
-                        psd->aaarStatistics);
+    err = BasicCubefulRollout ( ( int(*)[ 2 ][ 25 ] ) prd->aanBoardEval, 
+                                ( float(*)[ NUM_ROLLOUT_OUTPUTS ] ) prd->aar, 
+                                prd->iTurn, prd->iGame,
+                                psd->aci, psd->afCubeDecTop, psd->cci,
+                                &prd->rc,
+                                ( rolloutstat (*)[ 2 ] ) psd->aaarStatistics);
     
     if (0) {
         float *pf = (float *) prd->aar;
@@ -1024,7 +1031,8 @@ void * Threaded_BasicCubefulRollout (void *data)
             prd->seed);
     }
 
-    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", pthread_self ());
+    if (PU_DEBUG) fprintf (stderr, "# (0x%x) Rollout done...\n", 
+                           (int) pthread_self ());
 
     pthread_mutex_lock (&mutexTaskListAccess);
     MarkTaskDone (pt, NULL);
@@ -1037,19 +1045,22 @@ void * Threaded_BasicCubefulRollout (void *data)
     }
                     
     FreeThreadSavedBases ();
+
+    return NULL;
 }
+
 
 #endif
 
 
 void Rollout_IntegrateResults (int anBoardOrig[ 2 ][ 25 ],
-                            float aar[][ NUM_ROLLOUT_OUTPUTS ],
-                            float aarResult[][ NUM_ROLLOUT_OUTPUTS ],
-                            float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
-                            float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
-                            float aarVariance[][ NUM_ROLLOUT_OUTPUTS ],
-                            cubeinfo aci[], int cci,
-                            int fInvert, int i) 
+                               float aar[][ NUM_ROLLOUT_OUTPUTS ],
+                               double aarResult[][ NUM_ROLLOUT_OUTPUTS ],
+                               float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
+                               float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
+                               double aarVariance[][ NUM_ROLLOUT_OUTPUTS ],
+                               cubeinfo aci[], int cci,
+                               int fInvert, int i) 
 {
     int ici, j;
     
@@ -1145,7 +1156,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 cubeinfo aci[], 
                 int afCubeDecTop[], int cci, int fInvert ) {
 #if VECTOR
-  VECTOR_FLOATARRAY2(aar,cci,NUM_ROLLOUT_OUTPUTS);
   VECTOR_FLOATARRAY2(aarMu,cci,NUM_ROLLOUT_OUTPUTS);
   VECTOR_FLOATARRAY2(aarSigma,cci,NUM_ROLLOUT_OUTPUTS);
   VECTOR_FLOATARRAY2(aarResult,cci,NUM_ROLLOUT_OUTPUTS);
@@ -1154,7 +1164,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #if __GNUC__
   int aanBoardEval[ cci ][ 2 ][ 25 ];
   #if !VECTOR
-  float aar[ cci ][ NUM_ROLLOUT_OUTPUTS ];
   float aarMu[ cci ][ NUM_ROLLOUT_OUTPUTS ];
   float aarSigma[ cci ][ NUM_ROLLOUT_OUTPUTS ];
   double aarResult[ cci ][ NUM_ROLLOUT_OUTPUTS ];
@@ -1164,8 +1173,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #elif HAVE_ALLOCA
   int ( *aanBoardEval )[ 2 ][ 25 ] = alloca( cci * 50 * sizeof int );
   #if !VECTOR
-  float ( *aar )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
-						  sizeof float );
   float ( *aarMu )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci * NUM_ROLLOUT_OUTPUTS *
 						    sizeof float );
   float ( *aarSigma )[ NUM_ROLLOUT_OUTPUTS ] = alloca( cci *
@@ -1181,12 +1188,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 #else
   int aanBoardEval[ MAX_ROLLOUT_CUBEINFO ][ 2 ][ 25 ];
   #if !VECTOR
-  float aar[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   float aarMu[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   float aarSigma[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   double aarResult[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
   double aarVariance[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
-  #endif
+#endif
   cubeinfo aciLocal[ MAX_ROLLOUT_CUBEINFO ];
 #endif
   
@@ -1276,14 +1282,14 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                                 0, i, prc->nTrials, aci[ 0 ].bgv, prc,
                                 gameSeed );
                 else
-                pt = CreateTask_BasicCubefulRollout( anBoard,  
+                  pt = CreateTask_BasicCubefulRollout( ( int(*)[ 2 ][ 25 ] ) anBoard,  
                                     0, i, aci, afCubeDecTop, cci, prc, 
                                     aarsStatistics,
                                     gameSeed );
                 break;
             case BASIC:
             case VARREDN:
-                pt = CreateTask_BasicCubefulRollout( anBoard,  
+                pt = CreateTask_BasicCubefulRollout( ( int(*)[ 2 ][ 25 ] ) anBoard,  
                                     0, i, aci, afCubeDecTop, cci, prc, 
                                     aarsStatistics,
                                     gameSeed );
@@ -1296,8 +1302,10 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
         /* retrieve and integrate all results from completed tasks */
         pu_task_rollout_data *prd = &pt->taskdata.rollout;
         
-        Rollout_IntegrateResults (anBoardOrig, prd->aar, aarResult, aarMu, 
-                                    aarSigma, aarVariance, aci, cci, fInvert, j);
+        Rollout_IntegrateResults (anBoardOrig, 
+                                  ( float(*) [ NUM_ROLLOUT_OUTPUTS ] ) prd->aar, 
+                                  aarResult,
+                                  aarMu, aarSigma, aarVariance, aci, cci, fInvert, j);
                                     
         Rollout_ShowProgress (fShowProgress, asz, j, cGames, prc,
                                 aarMu, aarSigma, cci, aciLocal);
