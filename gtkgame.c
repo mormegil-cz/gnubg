@@ -71,6 +71,8 @@ static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
 }
 #endif
 
+
+
 /* Enumeration to be used as index to the table of command strings below
    (since GTK will only let us put integers into a GtkItemFactoryEntry,
    and that might not be big enough to hold a pointer).  Must be kept in
@@ -3997,7 +3999,8 @@ static void RolloutCancel( GtkObject *po, gpointer p ) {
     fInterrupt = TRUE;
 }
 
-extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
+extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
+			rolloutstat ars[][ 2 ] ) {
     
     static char *aszTitle[] = {
 	"", "Win", "Win (g)", "Win (bg)", "Lose (g)", "Lose (bg)",
@@ -4011,6 +4014,8 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
 #else
         *pwCopy = gtk_button_new_with_label( "Dump rollout results" );
 #endif    
+    GtkWidget *pwViewStat = gtk_button_new_with_label ( "View statistics" );
+
     pwRolloutDialog = CreateDialog( "GNU Backgammon - Rollout", FALSE, NULL,
 				    NULL );
 
@@ -4019,10 +4024,20 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
 					 GTK_SIGNAL_FUNC( RolloutCancel ),
 					 NULL );
 
+    /* Buttons */
+
     pwButtons = DialogArea( pwRolloutDialog, DA_BUTTONS );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwViewStat );
+
+    /* Setup signals */
+
     gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
 			GTK_SIGNAL_FUNC( GTKDumpRolloutResults ), NULL );
+
+    gtk_signal_connect( GTK_OBJECT( pwViewStat ), "clicked",
+			GTK_SIGNAL_FUNC( GTKViewRolloutStatistics ),
+			(gpointer) ars );
 
     pwVbox = gtk_vbox_new( FALSE, 4 );
 	
@@ -4102,6 +4117,527 @@ extern void GTKDumpRolloutResults(GtkWidget *widget, gpointer data) {
     printf("%s", sz);
 #endif
 }
+
+
+/*
+ * Make pages with statistics.
+ */
+
+static GtkWidget *
+GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
+
+  GtkWidget *pw;
+  GtkWidget *pwLabel;
+  GtkWidget *pwStat;
+
+  static char *aszColumnTitle[] = {
+    "Cube", "Win Single", "Win gammon", "Win BG",
+    "Lose Single", "Lose Gammon", "Lose BG" };
+
+  static char *aszRow[ 7 ];
+  int i;
+  char sz[ 100 ];
+  int anTotal[ 6 ];
+
+  pw = gtk_vbox_new ( FALSE, 0 );
+
+  pwLabel = gtk_label_new ( "Win statistics" );
+
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+
+  /* table with results */
+
+  pwStat = gtk_clist_new_with_titles( 7, aszColumnTitle );
+  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+    
+  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
+    
+  for( i = 0; i < 7; i++ ) {
+    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
+				      TRUE );
+    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
+					GTK_JUSTIFY_RIGHT );
+
+    aszRow[ i ] = malloc ( 100 );
+  }
+
+  memset ( anTotal, 0, sizeof ( anTotal ) );
+  
+  for ( i = 0; i < STAT_MAXCUBE; i++ ) {
+
+    sprintf ( aszRow[ 0 ], ( i < STAT_MAXCUBE - 1 ) ?
+	      "%d-cube" : ">= %d-cube", 1 << i);
+    sprintf ( aszRow[ 1 ], "%d", prs->acWin[ i ] );
+    sprintf ( aszRow[ 2 ], "%d", prs->acWinGammon[ i ] );
+    sprintf ( aszRow[ 3 ], "%d", prs->acWinBackgammon[ i ] );
+
+    sprintf ( aszRow[ 4 ], "%d", (prs+1)->acWin[ i ] );
+    sprintf ( aszRow[ 5 ], "%d", (prs+1)->acWinGammon[ i ] );
+    sprintf ( aszRow[ 6 ], "%d", (prs+1)->acWinBackgammon[ i ] );
+
+    anTotal[ 0 ] += prs->acWin[ i ];
+    anTotal[ 1 ] += prs->acWinGammon[ i ];
+    anTotal[ 2 ] += prs->acWinBackgammon[ i ];
+    anTotal[ 3 ] += (prs+1)->acWin[ i ];
+    anTotal[ 4 ] += (prs+1)->acWinGammon[ i ];
+    anTotal[ 5 ] += (prs+1)->acWinBackgammon[ i ];
+
+    gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  }
+
+
+  sprintf ( aszRow[ 0 ], "Total" );
+  for ( i = 0; i < 6; i++ )
+    sprintf ( aszRow[ i + 1 ], "%d", anTotal[ i ] );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+
+  sprintf ( aszRow[ 0 ], "%%" );
+  for ( i = 0; i < 6; i++ )
+    sprintf ( aszRow[ i + 1 ], "%6.2f%%",
+	      100.0 * (float) anTotal[ i ] / (float) cGames );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+
+  for ( i = 0; i < 7; i++ ) free ( aszRow[ i ] );
+
+
+  return pw;
+
+}
+
+static GtkWidget *
+GTKStatPageHit ( const rolloutstat *prs, const int cGames ) {
+
+  GtkWidget *pw;
+  GtkWidget *pwLabel;
+  GtkWidget *pwStat;
+
+  static char *aszColumnTitle[] = {
+    "Move", "#Hits", "#Hits" };
+
+  static char *aszRow[ 3 ];
+  int i;
+  char sz[ 100 ];
+  int anTotal[ 2 ];
+
+  pw = gtk_vbox_new ( FALSE, 0 );
+
+  pwLabel = gtk_label_new ( "Hit statistics" );
+
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+
+  /* table with results */
+
+  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
+  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+    
+  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
+    
+  for( i = 0; i < 3; i++ ) {
+    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
+				      TRUE );
+    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
+					GTK_JUSTIFY_RIGHT );
+
+    aszRow[ i ] = malloc ( 100 );
+  }
+
+  memset ( anTotal, 0, sizeof ( anTotal ) );
+  
+  for ( i = 0; i < MAXHIT; i++ ) {
+
+    sprintf ( aszRow[ 0 ], ( i < MAXHIT - 1 ) ?
+	      "%d" : ">= %d", i + 1 );
+    sprintf ( aszRow[ 1 ], "%d", prs->acHit[ i ] );
+
+    sprintf ( aszRow[ 2 ], "%d", (prs+1)->acHit[ i ] );
+
+    anTotal[ 0 ] += prs->acHit[ i ];
+    anTotal[ 1 ] += (prs+1)->acHit[ i ];
+
+    gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  }
+
+
+  sprintf ( aszRow[ 0 ], "Total" );
+  for ( i = 0; i < 2; i++ )
+    sprintf ( aszRow[ i + 1 ], "%d", anTotal[ i ] );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+
+  sprintf ( aszRow[ 0 ], "%%" );
+  for ( i = 0; i < 2; i++ )
+    sprintf ( aszRow[ i + 1 ], "%6.2f%%",
+	      100.0 * (float) anTotal[ i ] / (float) cGames );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+
+  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
+
+
+  return pw;
+
+}
+
+static GtkWidget *
+GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
+
+  GtkWidget *pw;
+  GtkWidget *pwLabel;
+  GtkWidget *pwStat;
+
+  static char *aszColumnTitle[] = {
+    "Cube",
+    "#Double, take", "#Double, pass", 
+    "#Double, take", "#Double, pass", 
+  };
+
+  static char *aszRow[ 5 ];
+  int i;
+  char sz[ 100 ];
+  int anTotal[ 4 ];
+
+  pw = gtk_vbox_new ( FALSE, 0 );
+
+  pwLabel = gtk_label_new ( "Cube statistics" );
+
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+
+  /* table with results */
+
+  pwStat = gtk_clist_new_with_titles( 5, aszColumnTitle );
+  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+    
+  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
+    
+  for( i = 0; i < 5; i++ ) {
+    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
+				      TRUE );
+    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
+					GTK_JUSTIFY_RIGHT );
+
+    aszRow[ i ] = malloc ( 100 );
+  }
+
+  memset ( anTotal, 0, sizeof ( anTotal ) );
+  
+  for ( i = 0; i < STAT_MAXCUBE; i++ ) {
+
+    sprintf ( aszRow[ 0 ], ( i < STAT_MAXCUBE - 1 ) ?
+	      "%d-cube" : ">= %d-cube", 2 << i );
+    sprintf ( aszRow[ 1 ], "%d", prs->acDoubleTake[ i ] );
+    sprintf ( aszRow[ 2 ], "%d", prs->acDoubleDrop[ i ] );
+
+    sprintf ( aszRow[ 3 ], "%d", (prs+1)->acDoubleTake[ i ] );
+    sprintf ( aszRow[ 4 ], "%d", (prs+1)->acDoubleDrop[ i ] );
+
+    anTotal[ 0 ] += prs->acDoubleTake[ i ];
+    anTotal[ 1 ] += prs->acDoubleDrop[ i ];
+    anTotal[ 2 ] += (prs+1)->acDoubleTake[ i ];
+    anTotal[ 3 ] += (prs+1)->acDoubleDrop[ i ];
+
+    gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  }
+
+
+  sprintf ( aszRow[ 0 ], "Total" );
+  for ( i = 0; i < 4; i++ )
+    sprintf ( aszRow[ i + 1 ], "%d", anTotal[ i ] );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+
+  sprintf ( aszRow[ 0 ], "%%" );
+  for ( i = 0; i < 4; i++ )
+    sprintf ( aszRow[ i + 1 ], "%6.2f%%",
+	      100.0 * (float) anTotal[ i ] / (float) cGames );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+
+  for ( i = 0; i < 5; i++ ) free ( aszRow[ i ] );
+
+  if ( anTotal[ 1 ] + anTotal[ 0 ] ) {
+    sprintf ( sz, "Cube efficiency for player 0: %7.4f",
+	      (float) anTotal[ 0 ] / ( anTotal[ 1 ] + anTotal[ 0 ] ) );
+    pwLabel = gtk_label_new ( sz );
+    gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+  }
+
+  if ( anTotal[ 2 ] + anTotal[ 3 ] ) {
+    sprintf ( sz, "Cube efficiency for player 1: %7.4f",
+	      (float) anTotal[ 2 ] / ( anTotal[ 3 ] + anTotal[ 2 ] ) );
+    pwLabel = gtk_label_new ( sz );
+    gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+  }
+
+  return pw;
+
+}
+
+static GtkWidget *
+GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
+
+  GtkWidget *pw;
+  GtkWidget *pwLabel;
+  GtkWidget *pwStat;
+
+  static char *aszColumnTitle[] = {
+    "", "Player 0", "Player 1" };
+
+  static char *aszRow[ 3 ];
+  int i;
+  char sz[ 100 ];
+  int anTotal[ 2 ];
+
+  pw = gtk_vbox_new ( FALSE, 0 );
+
+  pwLabel = gtk_label_new ( "Bearoff statistics" );
+
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+
+  /* table with results */
+
+  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
+  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+    
+  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
+    
+  for( i = 0; i < 3; i++ ) {
+    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
+				      TRUE );
+    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
+					GTK_JUSTIFY_RIGHT );
+
+    aszRow[ i ] = malloc ( 100 );
+  }
+
+  
+  sprintf ( aszRow[ 0 ], "Moves with bearoff" );
+  sprintf ( aszRow[ 1 ], "%d", prs->nBearoffMoves );
+  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nBearoffMoves );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  sprintf ( aszRow[ 0 ], "Pips lost" );
+  sprintf ( aszRow[ 1 ], "%d", prs->nBearoffPipsLost );
+  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nBearoffPipsLost );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  sprintf ( aszRow[ 0 ], "Average Pips lost" );
+
+  if ( prs->nBearoffMoves )
+    sprintf ( aszRow[ 1 ], "%7.2f",
+  	    (float) prs->nBearoffPipsLost / prs->nBearoffMoves );
+  else
+    sprintf ( aszRow[ 1 ], "n/a" );
+
+  if ( (prs+1)->nBearoffMoves )
+    sprintf ( aszRow[ 2 ], "%7.2f",
+	      (float) (prs+1)->nBearoffPipsLost / (prs+1)->nBearoffMoves );
+  else
+    sprintf ( aszRow[ 2 ], "n/a" );
+
+
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
+
+  return pw;
+
+}
+
+
+static GtkWidget *
+GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {
+
+  GtkWidget *pw;
+  GtkWidget *pwLabel;
+  GtkWidget *pwStat;
+
+  static char *aszColumnTitle[] = {
+    "", "Player 0", "Player 1" };
+
+  static char *aszRow[ 3 ];
+  int i;
+  char sz[ 100 ];
+  int anTotal[ 2 ];
+
+  pw = gtk_vbox_new ( FALSE, 0 );
+
+  pwLabel = gtk_label_new ( "Closed out statistics" );
+
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+
+  /* table with results */
+
+  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
+  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+    
+  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
+    
+  for( i = 0; i < 3; i++ ) {
+    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
+				      TRUE );
+    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
+					GTK_JUSTIFY_RIGHT );
+
+    aszRow[ i ] = malloc ( 100 );
+  }
+
+  sprintf ( aszRow[ 0 ], "Number of close-outs" );
+  sprintf ( aszRow[ 1 ], "%d", prs->nOpponentClosedOut );
+  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nOpponentClosedOut );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  sprintf ( aszRow[ 0 ], "Average move number for close out" );
+  if ( prs->nOpponentClosedOut )
+    sprintf ( aszRow[ 1 ], "%7.2f",
+	      1.0f + (float) prs->nOpponentClosedOutMove / prs->nOpponentClosedOut );
+  else
+    sprintf ( aszRow[ 1 ], "n/a" );
+
+
+  if ( (prs+1)->nOpponentClosedOut )
+    sprintf ( aszRow[ 2 ], "%7.2f",
+	      1.0f + (float) (prs+1)->nOpponentClosedOutMove /
+	      (prs+1)->nOpponentClosedOut );
+  else
+    sprintf ( aszRow[ 2 ], "n/a" );
+
+
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
+
+  return pw;
+
+}
+
+
+
+
+/*
+ * 
+ */
+
+static GtkWidget *
+GTKRolloutStatPage ( const rolloutstat *prs,
+		     const int cGames ) {
+
+
+  /* GTK Widgets */
+
+  GtkWidget *pwNotebook;
+  GtkWidget *pw;
+  GtkWidget *pwWin, *pwCube, *pwHit, *pwBearoff, *pwClosedOut;
+
+  /* Create notebook pages */
+
+  pw = gtk_vbox_new ( FALSE, 0 );
+
+  pwWin = GTKStatPageWin ( prs, cGames );
+  pwCube = GTKStatPageCube ( prs, cGames );
+  pwBearoff = GTKStatPageBearoff ( prs, cGames );
+  pwHit =  GTKStatPageHit ( prs, cGames );
+  pwClosedOut =  GTKStatPageClosedOut ( prs, cGames );
+
+  /*
+  pwNotebook = gtk_notebook_new ();
+
+  gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
+    
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+			     pwWin,
+			     gtk_label_new ( "Win" ) );
+
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+			     pwCube,
+			     gtk_label_new ( "Cube" ) );
+
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+			     pwBearoff,
+			     gtk_label_new ( "Bearoff" ) );
+  
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+			     pwHit,
+			     gtk_label_new ( "Hit" ) );
+
+  gtk_box_pack_start( GTK_BOX( pw ), pwNotebook, FALSE, FALSE, 0 );
+  */
+
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwWin, FALSE, FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwCube, FALSE, FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwBearoff, FALSE, FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwClosedOut, FALSE, FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwHit, FALSE, FALSE, 0 );
+
+
+  return pw;
+  
+}
+
+
+extern void
+GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){ 
+
+  /* Rollout statistics information */
+
+  rolloutstat *prs = data;
+  int cGames = gtk_progress_get_value ( GTK_PROGRESS( pwProgress ) );
+  int nRollouts = GTK_CLIST( pwRolloutResult )->rows / 2;
+  int i;
+
+  /* GTK Widgets */
+
+  GtkWidget *pwDialog;
+  GtkWidget *pwNotebook;
+
+  /* Temporary variables */
+
+  char *sz;
+
+  /* Create dialog */
+
+  pwDialog = CreateDialog ( "Rollout statistics", FALSE,
+			    NULL, NULL );
+
+  /* Create notebook pages */
+
+  pwNotebook = gtk_notebook_new ();
+
+  gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
+    
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		     pwNotebook );
+
+  for ( i = 0; i < nRollouts; i++ ) {
+
+    gtk_clist_get_text ( GTK_CLIST ( pwRolloutResult ),
+			      i * 2, 0, &sz );
+
+    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+			       GTKRolloutStatPage ( &prs[ i * 2 ], 
+						    cGames ), 
+			       gtk_label_new ( sz ) );
+
+  }
+
+
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+		      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+  
+  gtk_widget_show_all( pwDialog );
+
+  gtk_main();
+
+
+}
+
 
 extern void GTKRolloutRow( int i ) {
 

@@ -23,6 +23,7 @@
 #define _GTKGAME_H_
 
 #include "backgammon.h"
+#include "rollout.h"
 
 typedef enum _dialogarea {
     DA_MAIN,
@@ -76,7 +77,11 @@ extern void GTKHint( movelist *pml );
 extern void GTKDoubleHint( char *sz );
 extern void GTKTakeHint( float arDouble[], int fMWC, int fBeaver,
 			 cubeinfo *pci );
-extern void GTKRollout( int c, char asz[][ 40 ], int cGames );
+
+extern void
+GTKRollout( int c, char asz[][ 40 ], int cGames,
+	    rolloutstat ars[][ 2 ] );
+
 extern void GTKRolloutRow( int i );
 
 extern int
@@ -92,6 +97,7 @@ extern void GTKShowMatchEquityTable( int n );
 extern int GTKGetManualDice( int an[ 2 ] );
 extern void GTKShowVersion( void );
 extern void GTKDumpRolloutResults(GtkWidget *widget, gpointer data);
+extern void GTKViewRolloutStatistics(GtkWidget *widget, gpointer data);
 #ifdef WIN32
 extern void GTKWinCopy( GtkWidget *widget, gpointer data);
 #endif
