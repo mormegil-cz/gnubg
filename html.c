@@ -1066,9 +1066,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* equities */
 
-  ai[ 0 ] = 1;
-  ai[ 1 ] = 2;
-  ai[ 2 ] = 3;
+  getCubeDecisionOrdering ( ai, arDouble, pci );
 
   for ( i = 0; i < 3; i++ ) {
 

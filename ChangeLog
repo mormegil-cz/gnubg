@@ -1,3 +1,22 @@
+Sun Mar 31 22:36:29 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	Easter commit no. 9:
+	- save all members of evalcontext in SGF format
+	- add arOutput for double decisions to move{normal,double}
+	- improve cube analysis widget
+
+	* eval.c (getCubeDecisionOrdering): new function.
+	* analysis.c (AnalyzeMove): save new fields of move{normal,double}
+
+	* gtkgame.c (CubeAnalysis, TakeAnalysis): improve widgets.
+
+	* sgf.c (WriteDoubleAnalysis, RestoreDoubleAnalysis, 
+ 	WriteMoveAnalysis, RestoreMoveAnalysis): save/restore all members
+	of evalcontext, and save/restore the new fields.
+
+	* html.c (HTMLPrintCubeAnalysisTable): use getCubeDecisionOrdering.
+
+
 Sun Mar 31 14:36:09 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	Finish implemention of rollout of initial position.
