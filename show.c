@@ -196,8 +196,6 @@ static void ShowPaged( char **ppch ) {
 
 extern void CommandShowAnalysis( char *sz ) {
 
-    int i;
-
     outputl( fAnalyseCube ? _("Cube action will be analysed.") :
 	     _("Cube action will not be analysed.") );
 
@@ -438,7 +436,7 @@ extern void CommandShowCube( char *sz ) {
 	outputf( _("The cube is at %d, and is centred."), ms.nCube );
     else
 	outputf( _("The cube is at %d, and is owned by %s."), 
-                 ap[ ms.fCubeOwner ].szName, ms.nCube );
+                 ms.nCube, ap[ ms.fCubeOwner ].szName );
 }
 
 extern void CommandShowDice( char *sz ) {
