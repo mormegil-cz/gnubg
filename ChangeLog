@@ -1,3 +1,7 @@
+Mon Apr 22 10:53:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c, backgammon.h: insert some missing #if USE_GTK
+
 Sun Apr 21 21:55:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New command "swap players".
