@@ -1,3 +1,8 @@
+Wed Sep 11 22:42:04 2002  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (real_main): Add option `--quiet' (-q).
+	* gnubgtest: Use `-q' option in tests.
+
 Wed Sep 11 22:25:20 2002  Gary Wong  <gtw@research.att.com>
 
 	* sound.c, Makefile.am, configure.in: Add synthesised sound effects.

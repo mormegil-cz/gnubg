@@ -5359,6 +5359,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	{ "no-bearoff", no_argument, NULL, 'b' },
 	{ "no-rc", no_argument, NULL, 'r' },
 	{ "new-weights", optional_argument, NULL, 'n' },
+	{ "quiet", no_argument, NULL, 'q' },
 	{ "window-system-only", no_argument, NULL, 'w' },
 	/* these options must come last -- see below. */
 	{ "commands", required_argument, NULL, 'c' },
@@ -5474,7 +5475,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #endif
 		
-    while( ( ch = getopt_long( argc, argv, "bc:d:hn::rs:tvw", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:tvw", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -5497,6 +5498,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    if( nNewWeights < 1 )
 		nNewWeights = DEFAULT_NET_SIZE;
 
+	    break;
+	case 'q': /* quiet */
+	    fSound = FALSE;
 	    break;
 	case 'r': /* no-rc */
 	    fNoRC = TRUE;

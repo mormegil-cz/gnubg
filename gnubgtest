@@ -22,7 +22,7 @@ rm -f $TEMP
 echo '--- Feature test succeeds.'
 
 # Make sure an opening 31 is played correctly.
-./gnubg $dirparam -t -r << "EOF" | grep sGfwATDgc/ABMA > /dev/null || die \
+./gnubg $dirparam -t -q -r << "EOF" | grep sGfwATDgc/ABMA > /dev/null || die \
     '--- Opening move test fails.'
 set player both human
 new game
@@ -34,7 +34,7 @@ EOF
 echo '--- Opening move test succeeds.'
 
 # Play a game with pubeval.
-./gnubg $dirparam -t -r << "EOF" > /dev/null || die '--- Pubeval test fails.'
+./gnubg $dirparam -t -q -r << "EOF" > /dev/null || die '--- Pubeval test fails.'
 set automatic game no
 set cube use no
 set player both pubeval
@@ -43,7 +43,7 @@ EOF
 echo '--- Pubeval test succeeds.'
 
 # Play a cubeless game.
-./gnubg $dirparam -t -r << "EOF" > /dev/null || die '--- Self-play test fails.'
+./gnubg $dirparam -t -q -r << "EOF" > /dev/null || die '--- Self-play test fails.'
 set automatic game no
 set cube use no
 set player both gnubg
@@ -54,7 +54,7 @@ EOF
 echo '--- Self-play test succeeds.'
 
 # Play a cubeful game.
-./gnubg $dirparam -t -r << "EOF" > /dev/null || die \
+./gnubg $dirparam -t -q -r << "EOF" > /dev/null || die \
     '--- Cubeful self-play test fails.'
 set automatic game no
 set player both gnubg
@@ -67,7 +67,7 @@ EOF
 echo '--- Cubeful self-play test succeeds.'
 
 # Test game navigation (and save game for later load test).
-./gnubg $dirparam -t -r << EOF | grep '167.*163' > /dev/null || die \
+./gnubg $dirparam -t -q -r << EOF | grep '167.*163' > /dev/null || die \
     '--- Game navigation fails.'
 set rng manual
 set player both human
@@ -88,7 +88,7 @@ EOF
 echo '--- Game navigation succeeds.'
 
 # Test resignation.
-./gnubg $dirparam -t -r << "EOF" | grep 'a 0, b 4' > /dev/null || die \
+./gnubg $dirparam -t -q -r << "EOF" | grep 'a 0, b 4' > /dev/null || die \
     '--- Resignation test fails.'
 set rng manual
 set player both human
@@ -109,7 +109,7 @@ EOF
 echo '--- Resignation test succeeds.'
 
 # Test beavers.
-./gnubg $dirparam -t -r << "EOF" | grep 'a 0, b 4' > /dev/null || die \
+./gnubg $dirparam -t -q -r << "EOF" | grep 'a 0, b 4' > /dev/null || die \
     '--- Beaver test fails.'
 set rng manual
 set player 0 human
@@ -133,7 +133,7 @@ EOF
 echo '--- Beaver test succeeds.'
 
 # Test saving.
-./gnubg $dirparam -t -r << EOF | grep '163.*161' > /dev/null || die \
+./gnubg $dirparam -t -q -r << EOF | grep '163.*161' > /dev/null || die \
     '--- Load test fails.'
 set player both human
 load game $TEMP
@@ -143,7 +143,7 @@ rm -f $TEMP
 echo '--- Load test succeeds.'
 
 # Test miscellaneous commands.
-./gnubg $dirparam -t -r << EOF > /dev/null || die \
+./gnubg $dirparam -t -q -r << EOF > /dev/null || die \
     '--- Miscellaneous test fails.'
 set evaluation chequerplay eval plies 1
 set evaluation cubedecision eval plies 1
@@ -220,7 +220,7 @@ rm -f $TEMP
 echo '--- Miscellaneous test succeeds.'
 
 # Make sure the example game in the manual works.
-./gnubg $dirparam -t -r << "EOF" | grep \
+./gnubg $dirparam -t -q -r << "EOF" | grep \
    'refuses the cube and gives up 1 point.' > /dev/null || die \
    '--- Manual example test fails.'
 set seed 15
@@ -250,7 +250,7 @@ if [ "$GUILE" = "yes" ]; then
        (lambda (tag . args)
 	 (primitive-exit 1)))
 EOF
-    ./gnubg $dirparam -t -r << EOF | grep successful > /dev/null || \
+    ./gnubg $dirparam -t -q -r << EOF | grep successful > /dev/null || \
     die '--- Guile test fails.'
 set rng manual
 set player both human
