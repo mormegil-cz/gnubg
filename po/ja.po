@@ -7954,7 +7954,7 @@ msgstr "1ポイントの色:"
 
 #: gtkprefs.c:864
 msgid "Second point colour:"
-msgstr "2ポイントの色:
+msgstr "2ポイントの色:"
 
 #: gtkprefs.c:900
 msgid "Smooth"
