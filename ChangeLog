@@ -1,3 +1,9 @@
+Fri Sep 19 20:59:43 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (getPercent): fix bugs for "strange" match play
+	scenarios (see 2-ply and 3-ply eval on cAmgACAAGAAA/4HPkAUgzW8EBMA)
+	(reported by Ege Lundgren)	
+
 Fri Sep 19 09:34:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Add tab-completion to the command dialog
