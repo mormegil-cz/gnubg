@@ -48,7 +48,6 @@ duplication of effort and to make sure our changes merge easily.
 
 * Commands:
 ** Add more completions to readline (player names, filenames for load/save).
-** Allow timeouts for "train" (and others?).
 ** Add interactive rollouts.
 ** Analyse games and matches.
 ** Finish saving positions and evaluations to databases.
@@ -99,8 +98,13 @@ duplication of effort and to make sure our changes merge easily.
 
 * GTK interface:
 ** Allow copy/paste and drag & drop of the board ID in the board window.
-** Finish menus (settings, in particular).  Make sure there is a GUI
-  equivalent for every command.
+** Finish menus.  Make sure there is a GUI equivalent for every command.
+  Currently missing:
+*** set beavers
+*** set * evaluation reduced
+*** set output *
+*** set rollout *
+*** set training *
 ** Add a prompt and entry field to allow commands to be entered (replacing
   stdin).
 ** Allow the user to decide whether short messages appear in dialogs
@@ -110,7 +114,6 @@ duplication of effort and to make sure our changes merge easily.
   progress.  (Disable appropriate menu items, too.)  Disable the "stop"
   button when nothing is happening.
 ** Add optional point number labels on the board.
-** Add "beavers" in the Set menu.
 ** Have a progress bar along with some text in the main window, which
    indicates progress for the current possibly time-consuming operation.
    E.g. when the user clicks 'hint' the progress text will show
@@ -148,7 +151,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
   to recurse through help for subcommands.
-*** Make "show matchequitytable" show output in a table.
+*** Make the match equity table dialog prettier (make the row/column headings
+  bold, and don't scroll them), and allow selection of data in it.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)

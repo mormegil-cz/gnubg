@@ -930,6 +930,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_New/_Session", NULL, Command, CMD_NEW_SESSION, NULL },
 	{ "/_File/_New/_Weights...", NULL, NewWeights, 0, NULL },
 	{ "/_File/_Open", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Open/_Commands...", NULL, LoadCommands, 0, NULL },
 	{ "/_File/_Open/_Game...", NULL, LoadGame, 0, NULL },
 	{ "/_File/_Open/_Match...", NULL, LoadMatch, 0, NULL },
 	{ "/_File/_Open/_Session...", NULL, NULL, 0, NULL },
@@ -1060,7 +1061,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/Di_splay", NULL, Command, CMD_SET_DISPLAY,
 	  "<CheckItem>" },
 	{ "/_Settings/_Evaluation...", NULL, SetEval, 0, NULL },
-	{ "/_Settings/_Jacoby", NULL, Command, CMD_SET_JACOBY, "<CheckItem>" },
+	{ "/_Settings/_Jacoby rule", NULL, Command, CMD_SET_JACOBY,
+	  "<CheckItem>" },
 	{ "/_Settings/_Match equity table", NULL, NULL, 0, "<Branch>" },
 	{ "/_Settings/_Match equity table/_Jacobs", NULL, Command,
 	  CMD_SET_MET_JACOBS, "<RadioItem>" },
@@ -1567,6 +1569,17 @@ static char *SelectFile( char *szTitle ) {
     return pch;
 }
 
+static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( ( pch = SelectFile( "Open commands" ) ) ) {
+	/* FIXME use UserCommand, so it's entered in the history */
+	CommandLoadCommands( pch );
+	g_free( pch );
+    }
+}
+
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
 
     char *pch;
@@ -2017,7 +2030,9 @@ extern void GTKEval( char *szOutput ) {
 
     DisallowStdin();
     gtk_main();
-    AllowStdin();    
+    AllowStdin();
+
+    gdk_font_unref( pf );
 }
 
 static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
@@ -2414,6 +2429,62 @@ extern void GTKRolloutDone( void ) {
     gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
+}
+
+extern void GTKShowMatchEquityTable( int n ) {
+
+    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Match equity table",
+					FALSE, NULL, NULL ),
+	*pwBox = gtk_vbox_new( FALSE, 0 ),
+	*pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL ),
+	*pwTable = gtk_table_new( n + 2, n + 2, TRUE );
+    int i, j;
+    char sz[ 16 ];
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwBox );
+    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( szMET[ metCurrent ] ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwScrolledWindow, TRUE, TRUE, 0 );
+    
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
+				    GTK_POLICY_AUTOMATIC,
+				    GTK_POLICY_AUTOMATIC );
+    gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(
+	pwScrolledWindow ), pwTable );
+
+    for( i = 0; i <= n; i++ ) {
+	sprintf( sz, "%d-away", i );
+	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
+				   gtk_label_new( sz ),
+				   0, 1, i + 1, i + 2 );
+	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
+				   gtk_label_new( sz ),
+				   i + 1, i + 2, 0, 1 );
+    }
+    
+    for( i = 0; i <= n; i++ )
+	for( j = 0; j <= n; j++ ) {
+	    sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
+	    gtk_table_attach_defaults( GTK_TABLE( pwTable ),
+				       gtk_label_new( sz ),
+				       j + 1, j + 2, i + 1, i + 2 );
+	}
+    
+    gtk_table_set_col_spacings( GTK_TABLE( pwTable ), 4 );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 300 );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
     DisallowStdin();
     gtk_main();
     AllowStdin();

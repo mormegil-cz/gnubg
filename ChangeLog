@@ -1,3 +1,15 @@
+Wed Mar 14 17:12:22 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (LoadCommands): New function.
+
+	* gtkgame.c (GTKShowMatchEquityTable): New function.
+	* matchequity.c: Keep the match equity table titles in an array.
+	* show.c (CommandShowMatchEquityTable): Read the table title from
+	that array.
+
+	* gtkboard.c (board_set): Add extra redraws to workaround cosmetic
+	problems when running under Wine.
+
 Tue Mar 13 12:20:31 2001  Gary Wong  <gtw@research.att.com>
 
 	* acinclude.m4 (AM_GUILE): Allow a `--with-guile-prefix=' parameter.

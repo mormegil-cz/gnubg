@@ -25,6 +25,14 @@
 #include <stdio.h>
 #include "matchequity.h"
 
+char *szMET[ MET_JACOBS + 1 ] = {
+    "N. Zadeh, Management Science 23, 986 (1977)", /* MET_ZADEH */
+    "Snowie 2.1, Oasya (1999)", /* MET_SNOWIE */
+    "K. Woolsey, How to Play Tournament Backgammon (1993)", /* MET_WOOLSEY */
+    "J. Jacobs & W. Trice, Can a Fish Taste Twice as Good (1996)"
+        /* MET_JACOBS */
+};
+
 /*
  * A1 (A2) is the match equity of player 1 (2)
  * Btilde is the post-crawford match equities.

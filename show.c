@@ -607,29 +607,17 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
       n = nMaxScore;
   }
 
-  /* FIXME: for GTK write out to table */
+#if USE_GTK
+  if( fX ) {
+      GTKShowMatchEquityTable( n );
+      return;
+  }
+#endif
 
   output ( "Match equity table: " );
-
-  switch ( metCurrent ) {
-  case MET_ZADEH:
-    output ( "N. Zadeh, Management Science 23, 986 (1977)\n\n" );
-    break;
-  case MET_SNOWIE:
-    output ( "Snowie 2.1, Oasya, 1999\n\n" );
-    break;
-  case MET_WOOLSEY:
-    output ( "K. Woolsey, How to Play Tournament Backgammon "
-             "(1993)\n\n" );
-    break;
-  case MET_JACOBS:
-    output ( "J. Jacobs & W. Trice, Can a Fish Taste Twice as Good. "
-             "(1996)\n\n" );
-    break;
-  default:
-    assert ( FALSE );
-  }
-
+  outputl( szMET[ metCurrent ] );
+  outputl( "" );
+  
   /* Write column headers */
 
   output ( "          " );

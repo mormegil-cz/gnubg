@@ -61,6 +61,7 @@ extern void GTKRolloutRow( int i );
 extern int GTKRolloutUpdate( float arMu[], float arSigma[], int i, int c );
 extern void GTKRolloutDone( void );
 extern void GTKSet( void *p );
+extern void GTKShowMatchEquityTable( int n );
 extern int GTKGetManualDice( int an[ 2 ] );
 
 extern int fTTY;

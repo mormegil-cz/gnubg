@@ -27,6 +27,7 @@ typedef enum _met {
   MET_ZADEH, MET_SNOWIE, MET_WOOLSEY, MET_JACOBS
 } met;
 
+extern char *szMET[ MET_JACOBS + 1 ];
 
 extern float aafMET [ MAXSCORE ][ MAXSCORE ];
 
