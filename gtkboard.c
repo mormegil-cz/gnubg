@@ -434,15 +434,17 @@ static void cube_position( BoardData *bd, int *px, int *py, int *porient ) {
 }
 
 static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
-    int x, y, two_chars, lbearing[ 2 ], width[ 2 ], ascent[ 2 ], descent[ 2 ],
+    
+    int x, y, orient;
+#if !USE_GTK2
+    int two_chars, lbearing[ 2 ], width[ 2 ], ascent[ 2 ], descent[ 2 ],
 	orient, n;
     char cube_text[ 3 ];
+#endif
     
     if( bd->board_size <= 0 || bd->crawford_game || !bd->cube_use )
 	return;
 
-    n = bd->doubled ? bd->cube << 1 : bd->cube;
-    
     cube_position( bd, &x, &y, &orient );
     x *= bd->board_size;
     y *= bd->board_size;
@@ -454,7 +456,9 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
 		     8 * bd->board_size, 8 * bd->board_size );
 
     gdk_gc_set_clip_mask( bd->gc_copy, NULL );
-    
+
+#if !USE_GTK2
+    n = bd->doubled ? bd->cube << 1 : bd->cube;    
     sprintf( cube_text, "%d", n > 1 && n < 65 ? n : 64 );
 
     two_chars = n == 1 || n > 10;
@@ -510,6 +514,7 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
 		       y + 4 * bd->board_size + ascent[ 0 ] / 2 - descent[ 0 ],
 		       cube_text, two_chars + 1 );
     }
+#endif
 }
 
 static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
@@ -1691,7 +1696,92 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 }
 
 static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
+#if USE_GTK2
+    PangoFontDescription *pfd;
+    PangoLayout *pl;
+    char sz[ 64 ];
+    int cx, cy, n, orient;
+    static void board_draw_cube( GtkWidget *widget, BoardData *bd );
+    
+    pl = gtk_widget_create_pango_layout( widget, "" );
+    pfd = pango_font_description_new();
+    pango_font_description_set_family_static( pfd, "utopia,serif" );
+    pango_font_description_set_weight( pfd, PANGO_WEIGHT_BOLD );
+    pango_font_description_set_size( pfd, bd->board_size * 5 * PANGO_SCALE );
+    pango_layout_set_font_description( pl, pfd );
+    
+    n = bd->doubled ? bd->cube << 1 : bd->cube;    
+    sprintf( sz, "%d", n > 1 && n < 65 ? n : 64 );
 
+    pango_layout_set_text( pl, sz, -1 );
+
+    pango_layout_get_pixel_size( pl, &cx, &cy );
+
+    /* this is a bit grotty, but we need to erase the old cube digits */
+    gdk_pixmap_unref( bd->pm_cube );
+    board_draw_cube( widget, bd );
+    
+    gdk_draw_layout( bd->pm_cube, bd->gc_cube, ( bd->board_size * 8 - cx ) / 2,
+		     ( bd->board_size * 8 - cy ) / 2, pl );
+    
+    cube_position( bd, NULL, NULL, &orient );
+    if( orient != -1 ) {
+	/* rotate the cube */
+	GdkPixbuf *ppb;
+	guchar *puch0, *puch1, *puch;
+	int x, y, cx;
+	
+	if( ( ppb = gdk_pixbuf_get_from_drawable( NULL, bd->pm_cube, NULL,
+						  bd->board_size,
+						  bd->board_size, 0, 0,
+						  6 * bd->board_size,
+						  6 * bd->board_size ) ) ) {
+	    cx = gdk_pixbuf_get_rowstride( ppb );
+	    puch0 = gdk_pixbuf_get_pixels( ppb );
+	    puch = puch1 = g_alloca( 6 * 6 * bd->board_size *
+				     bd->board_size * 3 );
+
+	    if( orient )
+		/* upside down; start from bottom right */
+		puch0 += ( 6 * bd->board_size - 1 ) * cx +
+		    ( 6 * bd->board_size - 1 ) * 3;
+	    else
+		/* sideways; start from bottom left */
+		puch0 += ( 6 * bd->board_size - 1 ) * cx;
+	    
+	    for( y = 0; y < 6 * bd->board_size; y++ ) {
+		for( x = 0; x < 6 * bd->board_size; x++ ) {
+		    *puch++ = puch0[ 0 ];
+		    *puch++ = puch0[ 1 ];
+		    *puch++ = puch0[ 2 ];
+
+		    if( orient )
+			/* upside down; move left */
+			puch0 -= 3;
+		    else
+			/* sideways; move up */
+			puch0 -= cx;
+		}
+		if( orient )
+		    /* upside down; move right and up */
+		    puch0 += 6 * bd->board_size * 3 - cx;
+		else
+		    /* sideways; move down and right */
+		    puch0 += 6 * bd->board_size * cx + 3;
+	    }
+		    
+	    g_object_unref( ppb );
+
+	    gdk_draw_rgb_image( bd->pm_cube, bd->gc_cube, bd->board_size,
+				bd->board_size, 6 * bd->board_size,
+				6 * bd->board_size, GDK_RGB_DITHER_NONE,
+				puch1, 6 * bd->board_size * 3 );
+	}
+    }
+
+    pango_font_description_free( pfd );
+    g_object_unref( pl );
+#else
     char font_name[ 256 ];
     int i, orient, sizes[ 20 ] = { 34, 33, 26, 25, 24, 20, 19, 18, 17, 16, 15,
 				   14, 13, 12, 11, 10, 9, 8, 7, 6 };
@@ -1745,7 +1835,8 @@ static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
     gdk_font_ref( bd->cube_font = gtk_style_get_font( widget->style ) );
 
  done:
-    gdk_gc_set_font( bd->gc_cube, bd->cube_font );    
+    gdk_gc_set_font( bd->gc_cube, bd->cube_font );
+#endif
 }
 
 static gint board_set( Board *board, const gchar *board_text ) {
@@ -2030,7 +2121,9 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	event.area.x = xCube * bd->board_size;
 	event.area.y = yCube * bd->board_size;
 
+#if !USE_GTK2
 	gdk_font_unref( bd->cube_font );
+#endif
 	board_set_cube_font( GTK_WIDGET( board ), bd );
 
 	board_expose( bd->drawing_area, &event, bd );
@@ -2447,9 +2540,49 @@ extern void board_free_pixmaps( BoardData *bd ) {
     gdk_bitmap_unref( bd->bm_dice_mask );
     gdk_bitmap_unref( bd->bm_cube_mask );
 
+#if !USE_GTK2
     gdk_font_unref( bd->cube_font );
+#endif
 }
 
+#if USE_GTK2
+static void board_draw_labels( GtkWidget *pw, BoardData *bd ) {
+
+    PangoFontDescription *pfd;
+    PangoLayout *pl;
+    GdkGC *gc;
+    GdkGCValues gcv;
+    int i, cx, cy;
+    char sz[ 64 ];
+    
+    pl = gtk_widget_create_pango_layout( pw, "" );
+    pfd = pango_font_description_new();
+    pango_font_description_set_size( pfd, bd->board_size * 2 * PANGO_SCALE );
+    pango_layout_set_font_description( pl, pfd );
+    
+    gcv.foreground.pixel = gdk_rgb_xpixel_from_rgb( 0xFFFFFF );
+    gc = gtk_gc_get( pw->style->depth, pw->style->colormap, &gcv,
+		     GDK_GC_FOREGROUND );
+
+    for( i = 1; i <= 24; i++ ) {
+        sprintf( sz, "%d", i );
+
+	pango_layout_set_text( pl, sz, -1 );
+
+	pango_layout_get_pixel_size( pl, &cx, &cy );
+	
+	gdk_draw_layout( bd->pm_board, gc,
+			 ( positions[ fClockwise ][ i ][ 0 ] + 3 ) *
+			 bd->board_size - cx / 2,
+			 ( ( i > 12 ? 3 : 141 ) * bd->board_size - cy ) / 2,
+			 pl );
+    }
+
+    gtk_gc_release( gc );
+    pango_font_description_free( pfd );
+    g_object_unref( pl );
+}
+#else
 static void board_draw_labels( BoardData *bd ) {
 
     int i;
@@ -2496,6 +2629,7 @@ static void board_draw_labels( BoardData *bd ) {
     gdk_gc_unref( gc );
     gdk_font_unref( gcv.font );
 }
+#endif
 
 static guchar board_pixel( BoardData *bd, int i, int antialias, int j ) {
 
@@ -3346,7 +3480,11 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
         board_draw_hinges( bd, gc );
     
     if( bd->labels )
+#if USE_GTK2
+	board_draw_labels( widget, bd );
+#else
 	board_draw_labels( bd );
+#endif
     
     if( bd->translucent ) {
 	bd->rgb_bar0 = malloc( 6 * bd->board_size * 20 * bd->board_size * 3 );
@@ -4715,7 +4853,7 @@ static void board_init( Board *board ) {
     bd->gc_copy = gtk_gc_get( vis->depth, cmap, &gcval, 0 );
 
     gcval.foreground.pixel = gdk_rgb_xpixel_from_rgb( 0x000080 );
-    // ^^^ use gdk_get_color  and gdk_gc_set_foreground....
+    /* ^^^ use gdk_get_color  and gdk_gc_set_foreground.... */
     bd->gc_cube = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND );
 
     bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;    
