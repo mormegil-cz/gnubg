@@ -57,6 +57,6 @@ extern int
 MatchFromKey ( int *pnCube, int *pfCubeOwner, int *pfMove,
                int *pnMatchTo, int anScore[ 2 ], 
                int *pfCrawford, int anDice[ 2 ],
-               unsigned char *auchKey;
+               unsigned char *auchKey );
 
 #endif
