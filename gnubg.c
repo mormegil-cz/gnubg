@@ -6113,6 +6113,7 @@ extern void CommandSwapPlayers ( char *sz ) {
 
 #if USE_GTK
   if ( fX ) {
+    GTKSet ( ap );
     GTKRegenerateGames();
     GTKUpdateAnnotations();
   }
