@@ -65,7 +65,7 @@ animation animGUI = ANIMATE_SLIDE;
 int nGUIAnimSpeed = 4, fGUIBeep = TRUE, fGUIDiceArea = FALSE,
     fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE, fGUIShowIDs = TRUE,
     fGUIShowGameInfo = TRUE,
-    fGUIShowPips = TRUE, fGUIDragTargetHelp = TRUE;
+    fGUIShowPips = TRUE, fGUIDragTargetHelp = TRUE, crawford_id = 0;
 
 #if !GTK_CHECK_VERSION(1,3,0)
 #define g_alloca alloca
@@ -2289,6 +2289,14 @@ void RollDice2d(BoardData* bd)
 	}
 }
 
+static void SetCrawfordToggle(BoardData* bd)
+{
+	gtk_signal_handler_block(GTK_OBJECT(bd->crawford), crawford_id);
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
+				      bd->crawford_game );
+	gtk_signal_handler_unblock(GTK_OBJECT(bd->crawford), crawford_id);
+}
+
 static gint board_set( Board *board, const gchar *board_text,
                        const gint resigned, const gint cube_use ) {
 
@@ -2451,11 +2459,8 @@ static gint board_set( Board *board, const gchar *board_text,
 
         score_changed( NULL, bd );
 
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
-				      bd->crawford_game );
-	gtk_widget_set_sensitive( bd->crawford, bd->match_to > 1 &&
-				  ( ( bd->score == bd->match_to - 1 ) ^
-				    ( bd->score_opponent == bd->match_to - 1 ) ));
+	SetCrawfordToggle(bd);
+	gtk_widget_set_sensitive( bd->crawford, bd->crawford_game);
 
 	read_board( bd, bd->old_board );
 	update_position_id( bd, bd->old_board );
@@ -3290,19 +3295,15 @@ static void board_show_all( GtkWidget *pw ) {
     gtk_widget_show( pw );
 }
 
-static void board_set_crawford( GtkWidget *pw, BoardData *bd ) {
-
-    char sz[ 17 ]; /* "set crawford off" */
-    int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->crawford ) );
-
-    if( f != bd->crawford_game ) {
-	sprintf( sz, "set crawford %s", f ? "on" : "off" );
-
-	UserCommand( sz );
-
-	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
-				      bd->crawford_game );
-    }
+static void board_set_crawford( GtkWidget *pw, BoardData *bd )
+{
+	/* Don't allow changes unless editing */
+	if (!ToolbarIsEditing( pwToolbar ))
+	{
+		SetCrawfordToggle(bd);
+		outputl(_("You can only change whether this is the Crawford game when editing"));
+		outputx();
+	}
 }
 
 void board_edit( BoardData *bd ) {
@@ -3311,6 +3312,9 @@ void board_edit( BoardData *bd ) {
 									
     update_move( bd );
     update_buttons( bd );
+
+    if (!bd->crawford_game)
+	gtk_widget_set_sensitive(bd->crawford, f);
     
     if( f ) {
 	/* Entering edit mode: enable entry fields for names and scores */
@@ -3321,13 +3325,14 @@ void board_edit( BoardData *bd ) {
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mmatch ), bd->match );
     } else {
 	/* Editing complete; set board. */
-        int points[ 2 ][ 25 ], anScoreNew[ 2 ], nMatchToNew;
+        int points[ 2 ][ 25 ], anScoreNew[ 2 ], nMatchToNew, crawford;
 	const char *pch0, *pch1;
 	char sz[ 64 ]; /* "set board XXXXXXXXXXXXXX" */
 
 	/* We need to query all the widgets before issuing any commands,
 	   since those commands have side effects which disturb other
 	   widgets. */
+	crawford = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->crawford ) );
 	pch0 = gtk_entry_get_text( GTK_ENTRY( bd->name0 ) );
 	pch1 = gtk_entry_get_text( GTK_ENTRY( bd->name1 ) );
 	anScoreNew[ 0 ] = GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
@@ -3336,6 +3341,13 @@ void board_edit( BoardData *bd ) {
 	read_board( bd, points );
 
 	outputpostpone();
+
+	if (crawford != bd->crawford_game)
+	{
+		sprintf( sz, "set crawford %s", crawford ? "on" : "off" );
+		UserCommand( sz );
+		SetCrawfordToggle(bd);
+	}
 
 	/* NB: these comparisons are case-sensitive, and do not use
 	   CompareNames(), so that the user can modify the case of names. */
@@ -3870,7 +3882,7 @@ static void board_init( Board *board ) {
                         bd->crawford =
                         gtk_check_button_new_with_label( _("Crawford game") ),
                         FALSE, FALSE, 0 );
-    gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
+    crawford_id = gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
 			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
 
 
