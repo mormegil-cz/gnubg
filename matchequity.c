@@ -211,6 +211,7 @@ initPostCrawfordMET ( float afMETPostCrawford[ MAXSCORE ],
     assert( afMETPostCrawford[ i ] >= 0.0f &&
             afMETPostCrawford[ i ] <= 1.0f && 
             "insane post crawford equity(2)" );
+
   }
 
 
@@ -264,9 +265,9 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
   for ( i = 0; i < MAXSCORE; i++ ) {
 
     aafMET[ i ][ 0 ] = 
-      rG2 * 0.5 *
+      rG1 * 0.5 *
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 )
-      + (1.0 - rG2) * 0.5 * 
+      + (1.0 - rG1) * 0.5 * 
       ( (i-1 >=0) ? afMETPostCrawford[ i-1 ] : 1.0 );
     aafMET[ 0 ][ i ] = 1.0 - aafMET[ i ][ 0 ];
 
