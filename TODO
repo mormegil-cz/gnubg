@@ -23,7 +23,9 @@ duplication of effort and to make sure our changes merge easily.
   should pass, both moves have cubeful equity -1. But the opponent
   might not double, in which case it had been best to choose the
   move with highest cubeless equity. (thyssen)
-  
+** Add another "eval"-like command that show the distribution of
+  equities n rolls ahead.  SW does bar graphs of this stuff; Cam Trenor
+  suggests alternative output.
 ** Improve quasi-random dice generation for rollouts. (gary)
 ** Create multiple threads to parallelise rollouts (and evaluations?) on
   multiprocessors.  Perhaps start remote processes?
@@ -146,6 +148,10 @@ duplication of effort and to make sure our changes merge easily.
   to the other, that the dice in the board window change colour.
 ** Beavers (redoubles) doesn't work properly. The player who beavers
   get to roll instead of the player who originally doubled.
+** When using GTK, some output is lost for (e.g.) "set player both human".
+  It should show in a dialog, not in the status bar.
+** In the Crawford game, "hint" still tries to recommend a doubling action.
+  Also, "eval" gives different MWC for cubeless and cubeful -- why?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -180,3 +186,8 @@ duplication of effort and to make sure our changes merge easily.
   be better to move everything into the top level configure.in.  This makes
   having standalone lib (event) and ext packages more difficult, but that
   probably isn't critical any more.
+
+
+Local Variables:
+mode: outline
+End:
