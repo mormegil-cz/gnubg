@@ -480,8 +480,9 @@ will generate a checkpoint file (in the example above:
 needed by using the @command{-r} option. You can also change the
 default convergence threshold of 0.00001 if you're happy with less
 accurate equities. To generate the 3 chequer database you need
-approximately 400 MB of free memory. The calculation takes more than 4
-days on the authors 1 GHz Intel PIII machine which has 384 MB of memory.
+approximately 400 MB of free memory. On a 2.4 GHz box with 512 MB of
+RAM the calculation ran for 58 iterations of 3000 seconds each, i.e., a
+total of 48 hours!
 
 See @command{makehyper --help} for the complete set of available
 options. 
