@@ -47,6 +47,7 @@ gtkexport.c
 gtkexport.h
 gtkgame.c
 gtkgame.h
+gtkgamelist.c
 gtkmet.c
 gtkmet.h
 gtkmovefilter.c
@@ -109,6 +110,8 @@ progress.h
 pub_eval.c
 record.c
 record.h
+relational.c
+relational.h
 render.c
 render.h
 renderprefs.c

@@ -1,6 +1,6 @@
 Èeština pro GNUBG
 *****************
-Verze: 22.4.2004 (gnubg 0.14.2-dev 1.1568)
+Verze: 13.6.2004 (gnubg 0.14.2-dev 1.1604)
 
 
 Jak nainstalovat?
@@ -97,6 +97,6 @@ tzn. podle GNU licence, což znamená, že ho smíte volnì kopírovat.
 
 Autor
 -----
-Autor pøekladu, Petr Kadlec, je k zastižení na e-mailové adrese mormegil@centrum.cz,
-na které oèekává i vaše pøipomínky a informace o chybách v pøekladu.
-Obèas ho mùžete zastihnout i na ICQ (#68196926).
+Autor pøekladu, Petr Kadlec, je k zastižení na e-mailové adrese
+mormegil@centrum.cz, na které oèekává i vaše pøipomínky a informace
+o chybách v pøekladu. Obèas ho mùžete zastihnout i na ICQ (#68196926).
