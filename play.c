@@ -3956,6 +3956,11 @@ SetMatchID ( const char *szMatchID ) {
 
   }
 
+  /* set board to old value */
+
+  if ( strlen ( szID ) )
+    CommandSetBoard ( szID );
+
   /* the following is needed to get resignations correct */
 
   ms.gs = gs;
@@ -3970,11 +3975,9 @@ SetMatchID ( const char *szMatchID ) {
   UpdateSetting( &ms.fTurn );
   UpdateSetting( &ms.fCrawford );
 
-  /* set board to old value */
+  /* show board */
 
-  if ( strlen ( szID ) )
-    CommandSetBoard ( szID );
-
+  ShowBoard();
 
 }
 
