@@ -1,3 +1,13 @@
+Wed Nov 15 13:00:36 2000  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (DumpPosition, GetCubeActionSz): Add fOutputInvert
+	parameter, for reporting result from opponent's perspective.
+	All callers changed.
+	* gnubg.c (CommandEval): Report evaluations specified with
+	=n notation from player's perspective.
+
+	* gnubgtest: Add Guile test.
+
 Tue Nov 14 10:25:54 2000  Gary Wong  <gtw@research.att.com>
 
 	* eval.c: Global game state (e.g. nCube, fCubeOwner, anScore)

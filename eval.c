@@ -3487,7 +3487,8 @@ static classdumpfunc acdf[ N_CLASSES ] = {
 };
 
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
-                         evalcontext *pec, cubeinfo *pci, int fOutputMWC ) {
+                         evalcontext *pec, cubeinfo *pci, int fOutputMWC,
+			 int fOutputInvert ) {
 
   float arOutput[ NUM_OUTPUTS ], arCfOutput[ 4 ];
   float arClOutput[ NUM_OUTPUTS ];
@@ -3553,7 +3554,13 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	    sprintf( szOutput, "%2d ply", i );
 
     szOutput = strchr( szOutput, 0 );
-	
+
+    if( fOutputInvert ) {
+      InvertEvaluation( arOutput );
+      InvertEvaluationCf( arCfOutput );
+      pci->fMove = !pci->fMove;
+    }
+    
     if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
       sprintf( szOutput,
 	       ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
@@ -3572,15 +3579,21 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	       100.0 * eq2mwc ( Utility ( arOutput, pci ), pci ), 
 	       100.0 * eq2mwc ( arCfOutput[ 0], pci ) ); 
     }
+    
+    if( fOutputInvert ) {
+      pci->fMove = !pci->fMove;
+    }
   }
 
   /* if cube is available, output cube action */
   if ( GetDPEq ( NULL, NULL, pci ) ) {
+    if( fOutputInvert )
+      InvertEvaluationCf( arCfOutput );
 
     szOutput = strchr( szOutput, 0 );    
     sprintf( szOutput, "\n\n" );
     szOutput = strchr( szOutput, 0 );    
-    GetCubeActionSz ( arCfOutput, szOutput, pci, fOutputMWC );
+    GetCubeActionSz ( arCfOutput, szOutput, pci, fOutputMWC, fOutputInvert );
 
   }
   
@@ -3590,11 +3603,12 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
 extern int 
 GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
-		  int fOutputMWC ) {
+		  int fOutputMWC, int fOutputInvert ) {
 
   /* write string with cube action */
 
-  /* FIXME: write equity and mwc for match play */
+  if( fOutputInvert )
+    pci->fMove = !pci->fMove;
 
   if ( arDouble[ 2 ] >= arDouble[ 1 ] && arDouble[ 3 ] >= arDouble[ 1 ] ) {
 
@@ -3606,6 +3620,12 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
          Best for me : Double, pass
          Worst for me: No Double */
 
+      if( fOutputInvert ) {
+	arDouble[ 1 ] = -arDouble[ 1 ];
+	arDouble[ 2 ] = -arDouble[ 2 ];
+	arDouble[ 3 ] = -arDouble[ 3 ];
+      }
+	
       if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
 	sprintf ( szOutput,
 		  "Double, take  : %+6.3f\n"
@@ -3636,6 +3656,12 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
          BEst for me : Double, take
          Worst for me: no double */
 
+      if( fOutputInvert ) {
+	arDouble[ 1 ] = -arDouble[ 1 ];
+	arDouble[ 2 ] = -arDouble[ 2 ];
+	arDouble[ 3 ] = -arDouble[ 3 ];
+      }
+	
       if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
 	sprintf ( szOutput,
 		  "Double, pass  : %+6.3f\n"
@@ -3673,6 +3699,12 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
            Best for me : Double, take
            Worst for me: Double, pass */
 
+        if( fOutputInvert ) {
+	  arDouble[ 1 ] = -arDouble[ 1 ];
+	  arDouble[ 2 ] = -arDouble[ 2 ];
+	  arDouble[ 3 ] = -arDouble[ 3 ];
+        }
+	
 	if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
 	  sprintf ( szOutput,
 		    "No double     : %+6.3f\n"
@@ -3705,6 +3737,12 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
         /* This situation may arise in match play. */
 
+        if( fOutputInvert ) {
+	  arDouble[ 1 ] = -arDouble[ 1 ];
+	  arDouble[ 2 ] = -arDouble[ 2 ];
+	  arDouble[ 3 ] = -arDouble[ 3 ];
+        }
+	
 	if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
 	  sprintf ( szOutput,
 		    "No double     : %+6.3f\n"
@@ -3737,6 +3775,12 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
          Best for me : Double, pass
          Worst for me: Double, take */
 
+      if( fOutputInvert ) {
+	arDouble[ 1 ] = -arDouble[ 1 ];
+	arDouble[ 2 ] = -arDouble[ 2 ];
+	arDouble[ 3 ] = -arDouble[ 3 ];
+      }
+	
       if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
         sprintf ( szOutput,
                   "No double     : %+6.3f\n"
@@ -3763,6 +3807,14 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
   }
 
+  if( fOutputInvert ) {
+    arDouble[ 1 ] = -arDouble[ 1 ];
+    arDouble[ 2 ] = -arDouble[ 2 ];
+    arDouble[ 3 ] = -arDouble[ 3 ];
+      
+    pci->fMove = !pci->fMove;
+  }
+  
   return 0;
 }
 

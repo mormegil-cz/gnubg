@@ -84,6 +84,10 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more data types and Scheme bindings for useful functions.
 ** Define Scheme "port"s for the gnubg output() functions.
 ** Defer and allow Guile interrupts at appropriate places in guile.c.
+** Use Guile keywords in cube-info.  Add a similar function for eval
+  contexts.
+** Allow Guile code to execute gnubg commands (except ":" and "!" escapes).
+** Add Guile functions to access the current game state.
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
@@ -178,8 +182,8 @@ duplication of effort and to make sure our changes merge easily.
   commands echoed to stdout and the prompts are in the wrong order).
 ** When selecting a cell in the game record window with the mouse, the
   window shouldn't scroll to centre the current record.
-** "eval" and "rollout" give equities from the opponent's point of view
-  when using =n notation. (gary)
+** "rollout" gives equities from the opponent's point of view when using =n
+  notation. (gary)
 ** "rollout" needs to show the move or board position in the output. (gary)
 
 * Documentation:
@@ -207,6 +211,8 @@ duplication of effort and to make sure our changes merge easily.
   progress") checks so that they _do_ ask when the game is over but the
   match is still in progress, and they _don't_ ask if a game has not been
   modified since it was last loaded/saved.
+** Add a command line option to bypass rc files, and supply this option
+  in gnubgtest so the tests aren't confused by user options.
 
 
 Local Variables:

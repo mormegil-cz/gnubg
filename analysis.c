@@ -159,7 +159,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
             for ( j = 0; j < 4; j++ ) 
               pmr->n.arDouble[ j ] = arDouble[ j ];
 
-            GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC );
+            GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC, FALSE );
 
             puts ( sz );
 
@@ -238,7 +238,7 @@ AnalyzeGame ( list *plGame, int iGame ) {
           for ( j = 0; j < 4; j++ ) 
             pmr->d.arDouble[ j ] = arDouble[ j ];
 
-          GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC );
+          GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC, FALSE );
 
           puts ( sz );
 

@@ -201,7 +201,8 @@ PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
 
 extern int 
 DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
-              evalcontext *pec, cubeinfo *pci, int fOutputMWC );
+              evalcontext *pec, cubeinfo *pci, int fOutputMWC,
+	      int fOutputInvert );
 
 extern void 
 SwapSides( int anBoard[ 2 ][ 25 ] );
@@ -269,7 +270,7 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci );
 
 extern int 
 GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
-		  int fOutputMWC );
+		  int fOutputMWC, int fOutputInvert );
 
 extern float
 mwc2eq ( float rMwc, cubeinfo *ci );
