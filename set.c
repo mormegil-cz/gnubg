@@ -2313,6 +2313,7 @@ CommandSetExportHTMLPictureURL ( char *sz ) {
   if ( exsExport.szHTMLPictureURL )
     free ( exsExport.szHTMLPictureURL );
 
+  sz = NextToken ( &sz );
   exsExport.szHTMLPictureURL = strdup ( sz );
 
   outputf ( _("URL for picture in HTML export is now: \n"
