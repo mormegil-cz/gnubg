@@ -273,13 +273,14 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	pmr->n.rLuck = -HUGE_VALF;
 	pmr->n.st = SKILL_NONE;
 	
-	c = ParseMove( sz + 3, pmr->n.anMove );
-	for( i = 0; i < ( c << 1 ); i++ )
-	    pmr->n.anMove[ i ]--;
-	if( c < 4 )
-	    pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
-		
-	AddMoveRecord( pmr );
+	if( ( c = ParseMove( sz + 3, pmr->n.anMove ) ) >= 0 ) {
+	    for( i = 0; i < ( c << 1 ); i++ )
+		pmr->n.anMove[ i ]--;
+	    if( c < 4 )
+		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+	    
+	    AddMoveRecord( pmr );
+	}
     } else if( !strncasecmp( sz, "double", 6 ) ) {
 	pmr = malloc( sizeof( pmr->d ) );
 	pmr->d.mt = MOVE_DOUBLE;
@@ -371,9 +372,13 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
 	if( ( pch = strpbrk( sz, "\n\r" ) ) )
 	    *pch = 0;
 
-	if( strlen( sz ) > 15 && ( pchRight = strstr( sz + 15, "  " ) ) )
+	if( ( pchLeft = strchr( sz, ':' ) ) &&
+		 ( pchRight = strchr( pchLeft + 1, ':' ) ) &&
+		 pchRight > sz + 3 )
+	    *( ( pchRight -= 2 ) - 1 ) = 0;
+	else if( strlen( sz ) > 15 && ( pchRight = strstr( sz + 15, "  " ) ) )
 	    *pchRight++ = 0;
-
+	
 	if( ( pchLeft = strchr( sz, ')' ) ) )
 	    pchLeft++;
 	else
