@@ -1,5 +1,11 @@
 info_TEXINFOS = gnubg.texi
-gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi movefilters.texi cubeful.texi scripting.texi absrating.texi
+gnubg_TEXINFOS = \
+absrating.texi additional.texi analyse.texi bearoff.texi cubeful.texi \
+export.texi faq.texi fdl.texi id.texi impatient.texi \
+import.texi install.texi intro.texi movefilters.texi opening.texi \
+playing.texi rules.texi saving.texi scripting.texi settings.texi \
+starting.texi training.texi version.texi
+
 if XML_MANUAL
 pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
 	rulfig4.png rulfig5.png annealing.png
@@ -10,7 +16,7 @@ EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd \
 	annealing.png annealing.eps \
 	mgtp.gp mgtp.png mgtp.eps mgtp.txt \
-	mgtp.gp mgtp.png mgtp.eps mptp.txt
+	mgcd.gp mgcd.png mgcd.eps mgcd.txt \
 	d11.png d23.png d3.png d5.png d7.png fita2.png \
 	fitb.png lsqcoeff.png r11.png r1.png r23.png r3.png r5.png \
 	r7.png rallfitted.png rall.png

@@ -1,3 +1,8 @@
+Mon May 10 22:39:53 CEST 2004  JOern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am: add missing files to Makefile.am 
+	(reported by Adrian Bunk)
+
 Fri Apr 30 19:10:03 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* bearoff.texi: add MD5 checksum for 13pt one-sided database
