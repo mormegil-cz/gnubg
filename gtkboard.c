@@ -949,7 +949,8 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	bd->drag_colour = bd->points[ bd->drag_point ] < 0 ? -1 : 1;
 
-	if( bd->drag_point > 0 && bd->drag_point < 25 &&
+	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    bd->drag_point > 0 && bd->drag_point < 25 &&
 	    bd->drag_colour != bd->turn ) {
 	    /* trying to move opponent's chequer (except off the bar, which
 	       is OK) */

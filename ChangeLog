@@ -1,3 +1,8 @@
+Fri Oct 12 10:37:52 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_pointer): Could not move opponent's chequers
+	with button 1 in edit mode (reported by Johnny Kirk).
+
 Thu Oct 11 23:30:40 2001  Øystein Johansen <oeysteij@online.no>
 
         * gnubg.c (ExportGameJF): Some improvements for resigned games

@@ -28,6 +28,7 @@ Jeff Haferman
 Alain Henry
 Jens Hoefkens
 Matija Kejzar
+Johnny Kirk
 Corrin Lakeland
 Tim Laursen
 Kevin Maguire

@@ -16,6 +16,7 @@ char *aszCredits[] = {
     "Rick Janowski",
     "Tom Keith",
     "Matija Kejzar",
+    "Johnny Kirk",
     "Corrin Lakeland",
     "Tim Laursen",
     "Kevin Maguire",
