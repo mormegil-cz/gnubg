@@ -221,6 +221,13 @@ extern void CommandSetCache( char *sz ) {
 		n == 1 ? "y" : "ies" );
 }
 
+extern void CommandSetConfirm( char *sz ) {
+    
+    SetToggle( "confirm", &fConfirm, sz, "Will ask for confirmation before "
+	       "aborting games in progress.", "Will not ask for confirmation "
+	       "before aborting games in progress." );
+}
+
 extern void CommandSetCubeCentre( char *sz ) {
 
     if( CheckCubeAllowed() )

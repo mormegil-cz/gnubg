@@ -50,11 +50,10 @@ duplication of effort and to make sure our changes merge easily.
   the board window would be better.)
 ** Show rollout results while in progress, and allow resuming interrupted
   rollouts.
-** When a game is in progress and EOF is read from the terminal, ask if
-  they're sure they want to exit.
+** When a game is in progress, EOF is read from the terminal, and fConfirm
+  is set, ask if they're sure they want to exit.
 ** Save partial input when reading something below the top level, or when
   TTY input is overwritten by an X command.
-** Add "set confirm".
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)

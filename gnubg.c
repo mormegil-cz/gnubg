@@ -190,6 +190,8 @@ static command acDatabase[] = {
     { "board", CommandSetBoard, "Set up the board in a particular "
       "position", NULL },
     { "cache", CommandSetCache, "Set the size of the evaluation cache", NULL },
+    { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
+      "a game in progress", NULL },
     { "crawford", CommandSetCrawford, 
       "Set whether this is the Crawford game", NULL },
     { "cube", NULL, "Set the cube owner and/or value", acSetCube },
