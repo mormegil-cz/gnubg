@@ -1747,7 +1747,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
 	     "beep=%c highdie=%c wood=%s hinges=%c "
              "show_ids=%c show_pips=%c "
-	     "animate=%s speed=%d light=%0.0f;%0.0f shape=%0.1f" 
+	     "animate=%s speed=%d light=%0.0f;%0.0f shape=%0.1f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "dice0=#%02X%02X%02X;%0.2f;%0.2f;%c "

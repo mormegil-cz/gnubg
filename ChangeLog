@@ -1,3 +1,8 @@
+Mon Sep 16 11:18:11 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkprefs.c (BoardPreferencesCommand): Correct typo (reported by
+	Øystein).
+
 Sun Sep 15 15:51:47 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c (board_draw_chequers): Render chequers with a flat top.
