@@ -250,7 +250,7 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
       /* ignore */
       break;
     }
-    outputf("%*s%-*s (%s) %d: ", 2*level,"",
+    outputf("%*s%-*s (%s): ", 2*level,"",
 		30-strlen(szTCPENALTY),
 		"Penalty points",
 		szTCPENALTY);
