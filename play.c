@@ -746,7 +746,7 @@ extern void CommandRoll( char *sz ) {
 
 	NextTurn();
     } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
-						  <= CLASS_RACE &&
+						  <= CLASS_BEAROFF1 &&
 						  fAutoBearoff ) ) ) {
 	pmn = malloc( sizeof( *pmn ) );
 	pmn->mt = MOVE_NORMAL;
