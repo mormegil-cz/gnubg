@@ -671,10 +671,17 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     doubletype dt;
     taketype tt;
     const movegameinfo *pmgi = (movegameinfo *) plGame->plNext->p;
+    int    is_initial_position = 1;
 
     /* analyze this move */
 
     FixMatchState ( pms, pmr );
+
+    if ((pms->anBoard[0][5]  != 5) || (pms->anBoard[1][5]  != 5) ||
+	(pms->anBoard[0][12] != 5) || (pms->anBoard[1][12] != 5) ||
+	(pms->anBoard[0][8]  != 3) || (pms->anBoard[1][8]  != 3) ||
+	(pms->anBoard[0][23] != 2) || (pms->anBoard[1][23] != 2))
+      is_initial_position = 1;
 
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
@@ -704,8 +711,8 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       
 	/* cube action? */
       
-	if ( fAnalyseCube && pmgi->fCubeUse && !fFirstMove &&
-	     GetDPEq ( NULL, NULL, &ci ) ) {
+	if ( ! is_initial_position && fAnalyseCube && 
+	     pmgi->fCubeUse && !fFirstMove && GetDPEq ( NULL, NULL, &ci ) ) {
           
           if ( cmp_evalsetup ( pesCube, &pmr->n.esDouble ) > 0 ) {
             

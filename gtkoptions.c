@@ -1780,8 +1780,9 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   /* language preference */
 
   n = gtk_option_menu_get_history( GTK_OPTION_MENU( pow->pwLangMenu ) );
-  if ( n >= 0 && ( n < sizeof( aaszLang ) / sizeof( aaszLang[0] ) ) ) {
-    if ( strcmp( szLang, aaszLang[ n ][ 1 ] ) ) {
+  if ( n >= 0 && ( n < sizeof( aaszLang ) / sizeof( aaszLang[0] ) ) &&
+       aaszLang[1]) {
+    if (aaszLang[ n ][ 1 ] &&  strcmp( szLang, aaszLang[ n ][ 1 ] ) ) {
       sprintf( sz, "set lang %s", aaszLang[ n ][ 1 ] );
       UserCommand( sz );
     }

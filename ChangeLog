@@ -1,3 +1,9 @@
+Wed Nov  5 00:31:27 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
+
+	* analysis.c - don't analyse cube if board is in initial position
+	  (spurious annotations for not doubling when tutor mode was enabled)
+	* gtkoptions.c - fix bug which crashed with invalid language option
+
 Mon Nov 3 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Changes to the panel view
