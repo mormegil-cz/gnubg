@@ -524,8 +524,6 @@ InitEvalContext ( evalcontext *pec ) {
   pec->nReduced = 0;
   pec->fDeterministic = FALSE;
   pec->rNoise = 0.0;
-  pec->nSearchCandidates = 0;
-  pec->rSearchTolerance = 0;
 
 }
 
@@ -533,20 +531,18 @@ InitEvalContext ( evalcontext *pec ) {
 static void
 RestoreEvalContext ( evalcontext *pec, const char *sz ) {
 
-  int nPlies, nReduced, fDeterministic, nSearchCandidates;
+  int nPlies, nReduced, fDeterministic;
   char ch;
 
   InitEvalContext ( pec );
 
   sscanf ( sz, "%d%c %d %d %f %d %f",
-           &nPlies, &ch, &nReduced, &fDeterministic, &pec->rNoise,
-           &nSearchCandidates, &pec->rSearchTolerance );
+           &nPlies, &ch, &nReduced, &fDeterministic, &pec->rNoise );
 
   pec->nPlies = nPlies;
   pec->fCubeful = ch == 'C';
   pec->nReduced = nReduced;
   pec->fDeterministic = fDeterministic;
-  pec->nSearchCandidates = nSearchCandidates;
 
 }
 
@@ -707,8 +703,6 @@ static void RestoreDoubleAnalysis( property *pp,
     case 'E':
 	/* EVAL_EVAL */
 	pes->et = EVAL_EVAL;
-	pes->ec.nSearchCandidates = 0;
-	pes->ec.rSearchTolerance = 0;
 	nReduced = 0;
         pes->ec.rNoise = 0.0f;
         fDeterministic = TRUE;
@@ -761,7 +755,7 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
     list *pl = pp->pl->plNext;
     char *pch, ch;
     move *pm;
-    int i, nPlies, fDeterministic, nReduced, nSearchCandidates;
+    int i, nPlies, fDeterministic, nReduced;
     int anBoardMove[ 2 ][ 25 ];
     
     *piMove = atoi( pl->p );
@@ -807,7 +801,6 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	    pm->esMove.et = EVAL_EVAL;
 	    nReduced = 0;
             fDeterministic = 0;
-            nSearchCandidates = 0;
 
 	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f %d %f",
 		    &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
@@ -817,15 +810,13 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
                     &ch, 
                     &nReduced, 
                     &fDeterministic, 
-                    &pm->esMove.ec.rNoise, 
-                    &nSearchCandidates,
-                    &pm->esMove.ec.rSearchTolerance);
+                    &pm->esMove.ec.rNoise );
+
 
 	    pm->esMove.ec.fCubeful = ch == 'C';
 	    pm->esMove.ec.nPlies = nPlies;
 	    pm->esMove.ec.nReduced = nReduced;
 	    pm->esMove.ec.fDeterministic = fDeterministic;
-            pm->esMove.ec.nSearchCandidates = nSearchCandidates;
 	    break;
 
         case 'R':
@@ -1337,14 +1328,12 @@ static void WriteEscapedString( FILE *pf, char *pch, int fEscapeColons ) {
 static void
 WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
 
-  fprintf( pf, "%d%s %d %d %.4f %d %.4f",
+  fprintf( pf, "%d%s %d %d %.4f",
            pec->nPlies,
            pec->fCubeful ? "C" : "",
            pec->nReduced, 
            pec->fDeterministic, 
-           pec->rNoise, 
-           pec->nSearchCandidates,
-           pec->rSearchTolerance );
+           pec->rNoise );
 
 }
 
@@ -1504,7 +1493,7 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    
 	case EVAL_EVAL:
 	    fprintf( pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s "
-                     "%d %d %.4f %d %.4f",
+                     "%d %d %.4f",
 		     pml->amMoves[ i ].arEvalMove[ 0 ],
 		     pml->amMoves[ i ].arEvalMove[ 1 ],
 		     pml->amMoves[ i ].arEvalMove[ 2 ],
@@ -1515,9 +1504,7 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 		     pml->amMoves[ i ].esMove.ec.fCubeful ? "C" : "",
                      pml->amMoves[ i ].esMove.ec.nReduced, 
                      pml->amMoves[ i ].esMove.ec.fDeterministic, 
-                     pml->amMoves[ i ].esMove.ec.rNoise, 
-                     pml->amMoves[ i ].esMove.ec.nSearchCandidates,
-                     pml->amMoves[ i ].esMove.ec.rSearchTolerance );
+                     pml->amMoves[ i ].esMove.ec.rNoise );
 	    break;
 	    
 	case EVAL_ROLLOUT:

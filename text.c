@@ -129,11 +129,9 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
               " %d%% speed",
               (pec->nReduced) ? 100 / pec->nReduced : 100 );
 
-  if ( fChequer && pec->nPlies ) 
-    sprintf ( pc = strchr ( sz, 0 ),
-              ", %d cand., %0.3g tol.",
-              pec->nSearchCandidates,
-              pec->rSearchTolerance );
+  if ( fChequer && pec->nPlies ) {
+    /* FIXME: movefilters!!! */
+  }
 
   if ( pec->rNoise > 0.0f )
     sprintf ( pc = strchr ( sz, 0 ),

@@ -85,8 +85,6 @@ static char szEQUITY[] = N_ ("<equity>"),
     szSTDDEV[] = N_ ("<std dev>");
     
 command acSetEvaluation[] = {
-    { "candidates", CommandSetEvalCandidates, N_("Limit the number of moves "
-      "for deep evaluation"), szNUMBER, NULL },
     { "cubeful", CommandSetEvalCubeful, N_("Cubeful evaluations"), szONOFF,
       &cOnOff },
     { "deterministic", CommandSetEvalDeterministic, N_("Specify whether added "
@@ -95,13 +93,8 @@ command acSetEvaluation[] = {
       szSTDDEV, NULL },
     { "plies", CommandSetEvalPlies, N_("Choose how many plies to look ahead"),
       szPLIES, NULL },
-    { "nooneplyprune", CommandSetEvalNoOnePlyPrune,
-      N_("Control pruning of candidates at deep plied searches"),
-      szONOFF, &cOnOff },
     { "reduced", CommandSetEvalReduced,
       N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
-    { "tolerance", CommandSetEvalTolerance, N_("Control the equity range "
-      "of moves for deep evaluation"), szEQUITY, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
     { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
@@ -825,24 +818,6 @@ extern void CommandSetDisplay( char *sz ) {
 	       "moves."), _("Will not display boards for computer moves.") );
 }
 
-extern void CommandSetEvalCandidates( char *sz ) {
-
-    int n = ParseNumber( &sz );
-
-    if( n < 2 || n > MAX_SEARCH_CANDIDATES ) {
-	outputf( _("You must specify a valid number of moves to consider -- try "
-	      "`help set %s candidates'.\n"), szSetCommand );
-
-	return;
-    }
-
-    pecSet->nSearchCandidates = n;
-
-    outputf( _("%s will consider up to %d moves for evaluation at deeper "
-	     "plies.\n"), szSet, pecSet->nSearchCandidates );
-}
-
-
 extern void 
 CommandSetEvalCubeful( char *sz ) {
 
@@ -870,18 +845,6 @@ extern void CommandSetEvalDeterministic( char *sz ) {
     if( !pecSet->rNoise )
 	outputl( _("(Note that this setting will have no effect unless you "
 		 "set noise to some non-zero value.)") );
-}
-
-extern void CommandSetEvalNoOnePlyPrune( char *sz ) {
-
-    char asz[ 2 ][ 128 ], szCommand[ 64 ];
-    int f = pecSet->fNoOnePlyPrune;
-    
-    sprintf( asz[ 0 ], _("%s will not prune candidates at 1-ply.\n"), szSet );
-    sprintf( asz[ 1 ], _("%s will prune candidates at 1-ply.\n"), szSet );
-    sprintf( szCommand, "%s nooneplyprune", szSetCommand );
-    SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
-    pecSet->fNoOnePlyPrune = f;
 }
 
 extern void CommandSetEvalNoise( char *sz ) {
@@ -944,24 +907,6 @@ extern void CommandSetEvalReduced( char *sz ) {
 	outputl( _("(Note that this setting will have no effect until you "
 		 "choose 2 ply evaluation.)") );
 }
-
-extern void CommandSetEvalTolerance( char *sz ) {
-
-    double r = ParseReal( &sz );
-
-    if( r < 0.0 ) {
-	outputf( _("You must specify a valid cubeless equity tolerance to use -- "
-		"try `help set\n%s tolerance'.\n"), szSetCommand );
-
-	return;
-    }
-
-    pecSet->rSearchTolerance = r;
-
-    outputf( _("%s will select moves within %0.3g cubeless equity for\n"
-	    "evaluation at deeper plies.\n"), szSet, pecSet->rSearchTolerance );
-}
-
 
 extern void CommandSetEvaluation( char *sz ) {
 

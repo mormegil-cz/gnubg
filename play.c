@@ -973,7 +973,7 @@ extern int ComputerTurn( void ) {
 
       if( ClassifyPosition( ms.anBoard ) <= CLASS_RACE ) {
 
-          evalcontext ecResign = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0};
+          evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
           evalsetup esResign;
 
           esResign.et = EVAL_EVAL;
@@ -4007,7 +4007,7 @@ getCurrentMoveRecord ( int *pfHistory ) {
 static int
 CheatDice ( int anDice[ 2 ], matchstate *pms ) {
 
-  static evalcontext ec0ply = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
+  static evalcontext ec0ply = { FALSE, 0, 0, TRUE, 0.0 };
   static cubeinfo ci;
     
   GetMatchStateCubeInfo( &ci, pms );

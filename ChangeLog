@@ -1,3 +1,19 @@
+Wed Dec 11 19:37:01 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Convert code in FindnSaveBestMoves to use movefilters.
+	(and remove all references to nSearchCandiates, rSearchTolerance,
+	and fNoOnePlyPrune).
+
+	* eval.c (FindnSaveBestMoves): use new movefilters.
+	* eval.h, set.c, gtktheory.c, gtkcube.c, gtkchequer.c, analysis.c, 
+	database.c, rollout.c, gtkgame.c, backgammon.h, gnubg.c, guile.c,
+	sgf.c, text.c:
+	remove nSearchCandidates, rSearchTolerance, fNoOnePlyPrune.
+	(remove all references everywhere)	
+	* show.c (ShowEvaluation): only print movefilter if chequer play.
+
+	* gnubg.c (CreateGnubgDirectory): new function.
+
 Wed Dec 11 11:57:42 2002  Gary Wong  <gtw@gnu.org>
 
 	* luxi.c: New file.  Contains glyphs of digits from the Luxi fonts.

@@ -905,7 +905,7 @@ extern int GiveAdvice ( skilltype Skill );
 extern skilltype TutorSkill;
 extern int fTutorAnalysis;
 
-extern int EvalCmp (evalcontext *, evalcontext *, int);
+extern int EvalCmp ( const evalcontext *, const evalcontext *, const int);
 
 #ifndef HAVE_BASENAME
 extern char *

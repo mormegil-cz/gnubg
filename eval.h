@@ -95,14 +95,11 @@ extern movefilter defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
 typedef struct _evalcontext {
     /* FIXME expand this... e.g. different settings for different position
        classes */
-    unsigned int nSearchCandidates : 7;
     unsigned int fCubeful : 1; /* cubeful evaluation */
     unsigned int nPlies : 3;
     unsigned int nReduced : 2; /* this will need to be expanded if we add
 				  support for nReduced != 3 */
     unsigned int fDeterministic : 1;
-    unsigned int fNoOnePlyPrune : 1;
-    float        rSearchTolerance;
     float        rNoise; /* standard deviation */
 } evalcontext;
 
@@ -160,8 +157,7 @@ typedef enum _cubedecision {
  *
  */
 
-#define NUM_SETTINGS            7
-#define SETTINGS_WORLDCLASSPP   6
+#define NUM_SETTINGS            6
 #define SETTINGS_WORLDCLASS     5
 #define SETTINGS_ADVANCED       4
 #define SETTINGS_EXPERT         3
@@ -171,13 +167,6 @@ typedef enum _cubedecision {
 
 extern evalcontext aecSettings[ NUM_SETTINGS  ];
 extern const char *aszSettings[ NUM_SETTINGS ];
-
-#define NUM_SEARCHSPACES        8
-
-extern const char *aszSearchSpaces[ NUM_SEARCHSPACES ];
-extern const int anSearchCandidates[ NUM_SEARCHSPACES ];
-extern const float arSearchTolerances[ NUM_SEARCHSPACES ];
-
 
 typedef struct _move {
   int anMove[ 8 ];

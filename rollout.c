@@ -335,7 +335,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   int aaanBoard[ 6 ][ 6 ][ 2 ][ 25 ];
   float aaar[ 6 ][ 6 ][ NUM_ROLLOUT_OUTPUTS ];
 
-  evalcontext ecCubeless0ply = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0f, 0.0f};
+  evalcontext ecCubeless0ply = { FALSE, 0, 0, TRUE, 0.0 };
 
   /* local pointers to the eval contexts to use */
   evalcontext *pecCube[2], *pecChequer[2];
@@ -361,8 +361,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
       if ( aecVarRedn[ i ].nPlies ) {
         aecVarRedn[ i ].nPlies--;
-        ec.nSearchCandidates >>= 1;
-        ec.rSearchTolerance /= 2.0;
       }
 
     }

@@ -267,12 +267,6 @@ static int anEscapes1[ 0x1000 ];
 
 static neuralnet nnContact, nnRace, nnCrashed;
 
-#if 0
-static int fBearoffOS = -1;
-static int nBearoffOSPoints = -1;
-static int fBearoffOSND = FALSE;
-#endif
-
 bearoffcontext *pbcOS = NULL;
 bearoffcontext *pbcTS = NULL;
 bearoffcontext *pbc1 = NULL;
@@ -296,7 +290,7 @@ char *aszEvalType[] =
      N_ ("Rollout")
    };
 
-static evalcontext ecBasic = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
+static evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
 
 /* defaults for the filters  - 0 ply uses no filters */
 movefilter
@@ -356,39 +350,16 @@ const char *aszSettings[ NUM_SETTINGS ] = {
   N_ ("intermediate"), 
   N_ ("advanced"), 
   N_ ("expert"), 
-  N_ ("world class"),
-  N_ ("world class++") };
+  N_ ("world class") };
 
 evalcontext aecSettings[ NUM_SETTINGS ] = {
-  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.060 }, /* casual play */
-  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.050 }, /* beginner */
-  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.040 }, /* intermediate */
-  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.015 }, /* advanced */
-  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.0 },   /* expert */
-  { 8, TRUE, 2, 0, TRUE, FALSE, 0.16, 0.0 },   /* world class */
-  {16, TRUE, 2, 0, TRUE, FALSE, 1.00, 0.0 }    /* world class++ */
+  { TRUE, 0, 0, TRUE, 0.060 }, /* casual play */
+  { TRUE, 0, 0, TRUE, 0.050 }, /* beginner */
+  { TRUE, 0, 0, TRUE, 0.040 }, /* intermediate */
+  { TRUE, 0, 0, TRUE, 0.015 }, /* advanced */
+  { TRUE, 0, 0, TRUE, 0.0 }, /* expert */
+  { TRUE, 2, 0, TRUE, 0.0 }, /* world class */
 };
-
-
-const char *aszSearchSpaces[ NUM_SEARCHSPACES ] = {
-  N_ ("super tiny"), 
-  N_ ("tiny"), 
-  N_ ("small"), 
-  N_ ("medium"), 
-  N_ ("large"), 
-  N_ ("huge"), 
-  N_ ("enormous"), 
-  N_ ("gigantic")
-};
-
-const int anSearchCandidates[ NUM_SEARCHSPACES ] = {
-  2, 3, 4, 6, 7, 8, 16, 127
-};
-
-const float arSearchTolerances[ NUM_SEARCHSPACES ] = {
-  0.050, 0.070, 0.090, 0.110, 0.130, 0.160, 1.00, 5.00
-};
-
 
 
 static void ComputeTable0( void )
@@ -1937,7 +1908,7 @@ raceBGprob(int anBoard[2][25], int side)
   }
 }  
 
-static void
+extern void
 EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
 {
   float arInput[ NUM_INPUTS ];
@@ -2383,9 +2354,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     
     PositionKey( anBoard, ec.auchKey );
 
-    /* Record the signature of important evaluation settings.  Some members
-       of evalcontext (e.g. nSearchCandidates) only affect FindBestMove and
-       not EvaluatePositionFull; they do not need to be recorded. */
+    /* Record the signature of important evaluation settings. */
     ec.nEvalContext = pecx->nReduced | ( nPlies << 2 ) |
 	( pecx->fCubeful << 5 ) | ( ( (int) ( pecx->rNoise * 1000 ) ) << 6 );
 
@@ -3093,13 +3062,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      evalcontext *pec, int nPlies ) {
   int i, iPly;
   movelist ml;
-#if __GNUC__
-  move amCandidates[ pec->nSearchCandidates ];
-#elif HAVE_ALLOCA
-  move* amCandidates = alloca( pec->nSearchCandidates * sizeof( move ) );
-#else
   move amCandidates[ MAX_SEARCH_CANDIDATES ];
-#endif
 
   if( fAction )
       fnAction();
@@ -3208,6 +3171,7 @@ FindnSaveBestMoves( movelist *pml,
 
   int i, j = 0, nMoves, iPly;
   move *pm;
+  movefilter* mFilters;
     
   /* Find all moves -- note that pml contains internal pointers to static
      data, so we can't call GenerateMoves again (or anything that calls
@@ -3225,65 +3189,61 @@ FindnSaveBestMoves( movelist *pml,
   pm = (move *) malloc ( pml->cMoves * sizeof ( move ) );
   memcpy( pm, pml->amMoves, pml->cMoves * sizeof( move ) );    
   pml->amMoves = pm;
-
   nMoves = pml->cMoves;
 
-  /* Evaluate all moves at 0-ply */
-  if( ScoreMoves( pml, pci, pec, 0 ) < 0 ) {
-      free( pm );
-      pml->cMoves = 0;
-      pml->amMoves = NULL;
-      return -1;
-  }
-  
-  /* Sort moves in descending order */
-  qsort( pml->amMoves, nMoves, sizeof( move ), (cfunc) CompareMoves );
-  
+  mFilters = ( pec->nPlies > 0 && pec->nPlies <= MAX_FILTER_PLIES) ?
+      defaultFilters[ pec->nPlies-1] : defaultFilters[MAX_FILTER_PLIES-1];
+
   for ( iPly = 0; iPly < pec->nPlies; iPly++ ) {
 
-    /* search tolerance at iPly */
-    float rTol = pec->rSearchTolerance / ( 1 << iPly );
+      movefilter* mFilter =
+	(iPly < MAX_FILTER_PLIES) ? &mFilters[iPly] : &NullFilter;
+	 
+      unsigned int k;
 
-    /* larger threshold for 0-ply evaluations */
-    if ( pec->nPlies == 0 && rTol < 0.25 )
-      rTol = 0.25;
-    
-    if ( ! ( pec->fNoOnePlyPrune && ( iPly == 1 ) ) ) {
-        /* Eliminate moves whose scores are below the threshold. */
-        for( i = 0, j = 0; i < pml->cMoves; i++ ) {
-	    if( pml->amMoves[ i ].rScore >= pml->rBestScore - rTol ) {
-	        if( i != j ) {
-		    move m = pml->amMoves[ j ];
-		    pml->amMoves[ j ] = pml->amMoves[ i ];
-		    pml->amMoves[ i ] = m;
-	        }
-	        j++;
-	    }
-        }
-    }       /* if ( ! (pec->fNoOnePlyPrune && ( iPly != 1 ) ) ) */
-    
-    pml->iMoveBest = 0;
+      if( mFilter->Accept == 0 ) {
+	continue;
+      }
 
-    /* Consider only those better than the threshold or as many as were
-       requested, whichever is less */
-    if ( ! (pec->fNoOnePlyPrune && ( iPly == 1 ) ) ) 
-        pml->cMoves = ( j < ( pec->nSearchCandidates >> iPly ) ? j :
-                        ( pec->nSearchCandidates >> iPly ) );
-
-    /* Calculate the full evaluations at the search depth requested */
-    if( ScoreMoves( pml, pci, pec, iPly + 1 ) < 0 ) {
-	free( pm );
-	pml->cMoves = 0;
-	pml->amMoves = NULL;
+      if( ScoreMoves( pml, pci, pec, iPly ) < 0 ) {
 	return -1;
-    }
+      }
 
-    /* Resort the moves, in case the new evaluation reordered them. */
-    qsort( pml->amMoves, pml->cMoves, sizeof( move ), (cfunc) CompareMoves );
+      qsort( pml->amMoves, pml->cMoves, sizeof(move), (cfunc)CompareMoves);
+      pml->iMoveBest = 0;
+      
+      k = pml->cMoves;
+      pml->cMoves = min(mFilter->Accept, pml->cMoves );
+
+      {
+	unsigned int limit = min(k, pml->cMoves + mFilter->Extra);
+      
+	for( /**/ ; pml->cMoves < limit; ++pml->cMoves ) {
+	  if( pml->amMoves[ pml->cMoves ].rScore <
+	      pml->amMoves[0].rScore - mFilter->Threshold ) {
+	    break;
+	  }
+	}
+      }
+	
   }
 
-  pml->cMoves = nMoves;
+  /* evaluate moves on top ply */
+
+  if( ScoreMoves( pml, pci, pec, pec->nPlies ) < 0 ) {
+    free( pm );
+    pml->cMoves = 0;
+    pml->amMoves = NULL;
+    return -1;
+  }
   
+  /* Resort the moves, in case the new evaluation reordered them. */
+  qsort( pml->amMoves, pml->cMoves, sizeof( move ), (cfunc) CompareMoves );
+  
+  /* set the proper size of the movelist */
+  
+  pml->cMoves = nMoves;
+
   /* Make sure that auchMove was evaluated at the deepest ply. */
   if( auchMove )
       for( i = 0; i < pml->cMoves; i++ )
@@ -3310,6 +3270,7 @@ FindnSaveBestMoves( movelist *pml,
 	  }
   
   return 0;
+
 }
 
 extern int
@@ -5997,24 +5958,6 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
     return -1;
   else if ( pec1->fCubeful > pec2->fCubeful )
     return +1;
-
-  /* Search candidates */
-
-  if ( pec1->nPlies ) {
-
-    if ( pec1->nSearchCandidates < pec2->nSearchCandidates )
-      return -1;
-    else if ( pec1->nSearchCandidates > pec2->nSearchCandidates )
-      return +1;
-    
-    /* Search tolerance */
-    
-    if ( pec1->rSearchTolerance < pec2->rSearchTolerance )
-      return -1;
-    else if ( pec1->rSearchTolerance > pec2->rSearchTolerance )
-      return +1;
-
-  }
 
   /* Noise  */
 

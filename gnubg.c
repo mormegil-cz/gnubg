@@ -221,34 +221,34 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
 	0.04f /* SKILL_VERYGOOD	*/
     };
 
-evalcontext ecTD = { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0};
+evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
 
 rolloutcontext rcRollout =
 { 
   {
 	/* player 0/1 cube decision */
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, 
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }
+        { FALSE, 0, 0, TRUE, 0.0 },
+	{ FALSE, 0, 0, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 chequerplay */
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }
+	{ FALSE, 0, 0, TRUE, 0.0 },
+	{ FALSE, 0, 0, TRUE, 0.0 }
   }, 
 
   {
 	/* player 0/1 late cube decision */
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }
+	{ FALSE, 0, 0, TRUE, 0.0 },
+	{ FALSE, 0, 0, TRUE, 0.0 }
   }, 
   {
 	/* player 0/1 late chequerplay */
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
-	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } 
+	{ FALSE, 0, 0, TRUE, 0.0 },
+	{ FALSE, 0, 0, TRUE, 0.0 } 
   }, 
   /* truncation point cube and chequerplay */
-  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
-  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
+  { FALSE, 0, 0, TRUE, 0.0 },
+  { FALSE, 0, 0, TRUE, 0.0 },
 
   FALSE, /* cubeful */
   TRUE, /* variance reduction */
@@ -271,27 +271,27 @@ rolloutcontext rcRollout =
   /* evaltype */ \
   EVAL_EVAL, \
   /* evalcontext */ \
-  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, \
+  { FALSE, 0, 0, TRUE, 0.0 }, \
   /* rolloutcontext */ \
   { \
     { \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 cube decision */ \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 cube decision */ \
+      { FALSE, 0, 0, TRUE, 0.0 }, /* player 0 cube decision */ \
+      { FALSE, 0, 0, TRUE, 0.0 } /* player 1 cube decision */ \
     }, \
     { \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 chequerplay */ \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 chequerplay */ \
+      { FALSE, 0, 0, TRUE, 0.0 }, /* player 0 chequerplay */ \
+      { FALSE, 0, 0, TRUE, 0.0 } /* player 1 chequerplay */ \
     }, \
     { \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late cube decision */ \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late cube decision */ \
+      { FALSE, 0, 0, TRUE, 0.0 }, /* p 0 late cube decision */ \
+      { FALSE, 0, 0, TRUE, 0.0 } /* p 1 late cube decision */ \
     }, \
     { \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late chequerplay */ \
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late chequerplay */ \
+      { FALSE, 0, 0, TRUE, 0.0 }, /* p 0 late chequerplay */ \
+      { FALSE, 0, 0, TRUE, 0.0 } /* p 1 late chequerplay */ \
     }, \
-    { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncate cube decision */ \
-    { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncate chequerplay */ \
+    { FALSE, 0, 0, TRUE, 0.0 }, /* truncate cube decision */ \
+    { FALSE, 0, 0, TRUE, 0.0 }, /* truncate chequerplay */ \
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \
     FALSE, /* initial position */ \
@@ -4137,18 +4137,15 @@ static void
 SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
     fprintf( pf, "%s plies %d\n"
-	     "%s candidates %d\n"
-	     "%s tolerance %.3f\n"
 	     "%s reduced %d\n"
-	     "%s nooneplyprune %s\n"
 	     "%s cubeful %s\n"
 	     "%s noise %.3f\n"
 	     "%s deterministic %s\n",
-	     sz, pec->nPlies, sz, pec->nSearchCandidates,
-	     sz, pec->rSearchTolerance, sz, pec->nReduced,
-             sz, pec->fNoOnePlyPrune ? "on" : "off",
+	     sz, pec->nPlies, 
+	     sz, pec->nReduced,
 	     sz, pec->fCubeful ? "on" : "off",
-	     sz, pec->rNoise, sz, pec->fDeterministic ? "on" : "off" );
+	     sz, pec->rNoise, 
+             sz, pec->fDeterministic ? "on" : "off" );
 }
 
 
@@ -5757,6 +5754,44 @@ extern void ProgressEnd( void ) {
 
 }
 
+/*
+ * Create $HOME/.gnubg if not existing
+ *
+ */
+
+static int
+CreateGnubgDirectory ( void ) {
+
+  char *sz;
+
+  if ( ! ( sz = (char *) malloc ( strlen ( szHomeDirectory ) + 8 ) ) ) {
+    outputerr ( "CreateGnubgDirectory" );
+    return -1;
+  }
+
+  sprintf ( sz, "%s/.gnubg", szHomeDirectory );
+
+  if ( access ( sz, F_OK ) ) {
+
+    /* create the directory */
+
+    if ( mkdir ( sz, S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH ) < 0 ) {
+      outputerr ( sz );
+      free ( sz );
+      return -1;
+    }
+    
+  }
+
+  free ( sz );
+
+  return 0;
+
+
+}
+
+
+
 extern RETSIGTYPE HandleInterrupt( int idSignal ) {
 
     /* NB: It is safe to write to fInterrupt even if it cannot be read
@@ -6188,6 +6223,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     fnTick = CallbackProgress;
     
+    /* create gnubg directory if non-existing */
+
+    if ( CreateGnubgDirectory () )
+      exit ( EXIT_FAILURE );
+    
+    /* load rc files */
+
     if( !fNoRC )
 	LoadRCFiles();
 

@@ -77,40 +77,37 @@ static void ShowMoveFilter (movefilter *pmf, int ply) {
 			pmf->Extra, pmf->Threshold);
 }	  
 	  
-static void ShowEvaluation( evalcontext *pec ) {
+static void ShowEvaluation( const evalcontext *pec, const int fChequer ) {
     
   int  i;
 
-    outputf( _("        %d-ply evaluation.\n"
-             "        %d move search candidate%s.\n"
-             "        %0.3g cubeless search tolerance.\n"
+  outputf( _("        %d-ply evaluation.\n"
              "        %d%% speed.\n"
-             "        %s pruning at 1-ply for moves.\n"
              "        %s evaluations.\n"),
-             pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
-             "" : "s", pec->rSearchTolerance,
-             (pec->nReduced) ? 100 / pec->nReduced : 100,
-             pec->fNoOnePlyPrune ? _("No") : _("Normal"),
-             pec->fCubeful ? _("Cubeful") : _("Cubeless") );
+           pec->nPlies, 
+           (pec->nReduced) ? 100 / pec->nReduced : 100,
+           pec->fCubeful ? _("Cubeful") : _("Cubeless") );
 
-	if (pec->nPlies > 0) {
-	  for (i = 0; i < pec->nPlies; ++i) {
-		outputf ( "        " );
-		ShowMoveFilter ( &defaultFilters[pec->nPlies-1][ i ], i );
-	  }
-	}
+  if (pec->nPlies > 0 && fChequer ) {
+    for (i = 0; i < pec->nPlies; ++i) {
+      outputf ( "        " );
+      ShowMoveFilter ( &defaultFilters[pec->nPlies-1][ i ], i );
+    }
+  }
 		
-    if( pec->rNoise )
-	outputf( _("    Noise standard deviation %5.3f"), pec->rNoise );
-    else
-	output( _("    Noiseless evaluations") );
+  if( pec->rNoise )
+    outputf( _("    Noise standard deviation %5.3f"), pec->rNoise );
+  else
+    output( _("    Noiseless evaluations") );
+  
+  outputl( pec->fDeterministic ? _(" (deterministic noise).\n") :
+           _(" (pseudo-random noise).\n") );
 
-    outputl( pec->fDeterministic ? _(" (deterministic noise).\n") :
-	     _(" (pseudo-random noise).\n") );
 }
 
 extern int
-EvalCmp (evalcontext *E1, evalcontext *E2, int nElements) {
+EvalCmp ( const evalcontext *E1, const evalcontext *E2, 
+          const int nElements) {
 
   int  i, cmp = 0;
  
@@ -130,8 +127,11 @@ EvalCmp (evalcontext *E1, evalcontext *E2, int nElements) {
    player settings, displays late evaluations where needed */
 
 static void 
-show_evals (char *text, evalcontext *early, evalcontext *late,
-              int fPlayersAreSame, int fLateEvals, int nLate) {
+show_evals ( const char *text, 
+             const evalcontext *early, const evalcontext *late,
+             const int fPlayersAreSame, const int fLateEvals, 
+             const int nLate, 
+             const int fChequer ) {
 
   int  i;
 
@@ -141,11 +141,11 @@ show_evals (char *text, evalcontext *early, evalcontext *late,
     outputf ("%s\n", text);
 
   if (fPlayersAreSame)
-    ShowEvaluation (early);
+    ShowEvaluation (early, fChequer );
   else {
     for (i = 0; i < 2; i++ ) {
       outputf (_("Player %d:\n"), i);
-      ShowEvaluation (early + i);
+      ShowEvaluation (early + i, fChequer );
     }
   }
 
@@ -154,23 +154,22 @@ show_evals (char *text, evalcontext *early, evalcontext *late,
 
   outputf (_("%s after %d plies:\n"), text, nLate);
   if (fPlayersAreSame)
-    ShowEvaluation (late);
+    ShowEvaluation (late, fChequer );
   else {
     for (i = 0; i < 2; i++ ) {
       outputf (_("Player %d:\n"), i);
-      ShowEvaluation (late + i);
+      ShowEvaluation (late + i, fChequer );
     }
   }
 }
 
 extern void
-ShowRollout ( rolloutcontext *prc ) {
+ShowRollout ( const rolloutcontext *prc ) {
 
   int fDoTruncate = 0;
   int fLateEvals = 0;
   int nTruncate = prc->nTruncate;
   int nLate = prc->nLate;
-  int fCubeEqualChequer = 1;
   int fPlayersAreSame = 1;
 
   if (prc->fDoTruncate && (nTruncate > 0))
@@ -235,41 +234,22 @@ ShowRollout ( rolloutcontext *prc ) {
          EvalCmp (prc->aecCubeLate, prc->aecCubeLate + 1, 1))))
      fPlayersAreSame = 0;
     
-  /* see if the cube and chequer evals are the same */
-  if (EvalCmp (prc->aecChequer, prc->aecCube, 2) ||
-     (fLateEvals &&
-        (EvalCmp (prc->aecChequerLate, prc->aecCubeLate, 2))))
-    fCubeEqualChequer = 0;
-
-  if (fCubeEqualChequer) {
-    /* simple summary - show_evals will deal with player differences */
-    show_evals (_("Evaluation parameters:"), prc->aecChequer,
-                  prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate);
-  } else {
-    /* Cube different from Chequer */
-    show_evals ( _( "Chequer play parameters:"), prc->aecChequer,
-                   prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate);
-    show_evals ( _( "Cube decision parameters:"), prc->aecCube,
-                   prc->aecCubeLate, fPlayersAreSame, fLateEvals, nLate);
-  }
-
+  show_evals ( _( "Chequer play parameters:"), prc->aecChequer,
+               prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate, TRUE );
+  show_evals ( _( "Cube decision parameters:"), prc->aecCube,
+               prc->aecCubeLate, fPlayersAreSame, fLateEvals, nLate, FALSE );
 
   if (fDoTruncate) {
-    if (EvalCmp (&prc->aecCubeTrunc, &prc->aecChequerTrunc, 1)) {
-      show_evals (_("Truncation point Chequer play evaluation:"), 
-                  &prc->aecChequerTrunc, 0, 1, 0, 0);
-      show_evals (_("Truncation point Cube evaluation:"), 
-                  &prc->aecCubeTrunc, 0, 1, 0, 0);
-    }
-    else {
-      show_evals (_("Truncation point evaluation:"),
-                  &prc->aecChequerTrunc, 0, 1, 0, 0);
-    } 
+    show_evals (_("Truncation point Chequer play evaluation:"), 
+                &prc->aecChequerTrunc, 0, 1, 0, 0, TRUE );
+    show_evals (_("Truncation point Cube evaluation:"), 
+                &prc->aecCubeTrunc, 0, 1, 0, 0, FALSE );
   }
+
 }
 
 extern void
-ShowEvalSetup ( evalsetup *pes ) {
+ShowEvalSetup ( const evalsetup *pes, const int fChequer ) {
 
   switch ( pes->et ) {
 
@@ -278,7 +258,7 @@ ShowEvalSetup ( evalsetup *pes ) {
     break;
   case EVAL_EVAL:
     outputl ( _("      Neural net evaluation:") );
-    ShowEvaluation ( &pes->ec );
+    ShowEvaluation ( &pes->ec, fChequer );
     break;
   case EVAL_ROLLOUT:
     outputl ( _("      Rollout:") );
@@ -387,12 +367,12 @@ extern void CommandShowAnalysis( char *sz ) {
                "Analysis will be performed with the "
              "following evaluation parameters:") );
   outputl( _("    Chequer play:") );
-  ShowEvalSetup ( &esAnalysisChequer );
+  ShowEvalSetup ( &esAnalysisChequer, TRUE );
   outputl( _("    Cube decisions:") );
-  ShowEvalSetup ( &esAnalysisCube );
+  ShowEvalSetup ( &esAnalysisCube, FALSE );
 
   outputl( _("    Luck analysis:") );
-  ShowEvaluation ( &ecLuck );
+  ShowEvaluation ( &ecLuck, FALSE );
 
 }
 
@@ -616,9 +596,9 @@ extern void CommandShowEvaluation( char *sz ) {
 
     outputl( _("`eval' and `hint' will use:") );
     outputl( _("    Chequer play:") );
-    ShowEvalSetup ( &esEvalChequer );
+    ShowEvalSetup ( &esEvalChequer, TRUE );
     outputl( _("    Cube decisions:") );
-    ShowEvalSetup ( &esEvalCube );
+    ShowEvalSetup ( &esEvalCube, FALSE );
 
 }
 
@@ -718,9 +698,9 @@ extern void CommandShowPlayer( char *sz ) {
 	case PLAYER_GNU:
 	    outputf( _("gnubg:\n") );
             outputl( _("    Checker play:") );
-            ShowEvalSetup ( &ap[ i ].esChequer );
+            ShowEvalSetup ( &ap[ i ].esChequer, TRUE );
             outputl( _("    Cube decisions:") );
-            ShowEvalSetup ( &ap[ i ].esCube );
+            ShowEvalSetup ( &ap[ i ].esCube, FALSE );
 	    break;
 	case PLAYER_PUBEVAL:
 	    outputl( _("pubeval\n") );

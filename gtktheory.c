@@ -96,7 +96,7 @@ static void
 ResetTheory ( GtkWidget *pw, theorywidget *ptw ) {
 
   float aarRates[ 2 ][ 2 ];
-  evalcontext ec = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
+  evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
   float arOutput[ NUM_OUTPUTS ];
 
   int i,j;
