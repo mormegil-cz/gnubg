@@ -100,56 +100,65 @@ static int RolloutGame( int anBoard[ 2 ][ 25 ], float arOutput[],
 	if( anDice[ 0 ]-- < anDice[ 1 ]-- )
 	    swap( anDice, anDice + 1 );
 
-	if( pc == CLASS_BEAROFF1 ) {
-	    EvaluatePosition( anBoardEval, arMean, 0 );
-	    if( iTurn & 1 )
-		InvertEvaluation( arMean );
+	if( nPlies ) {
+	    /* Lookahead evaluation; apply variance reduction. */
+	    if( pc == CLASS_BEAROFF1 ) {
+		EvaluatePosition( anBoardEval, arMean, 0 );
+		if( iTurn & 1 )
+		    InvertEvaluation( arMean );
 	    
-	    FindBestBearoff( anBoardEval, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-		aaar[ anDice[ 0 ] ][ anDice[ 1 ] ] );
+		FindBestBearoff( anBoardEval, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
+				 aaar[ anDice[ 0 ] ][ anDice[ 1 ] ] );
 
-	    if( !( iTurn & 1 ) )
-		InvertEvaluation( aaar[ anDice[ 0 ] ][ anDice[ 1 ] ] );
-	} else {
-	    for( n = 0; n < NUM_OUTPUTS; n++ )
-		arMean[ n ] = 0.0;
-    
-	    for( i = 0; i < 6; i++ )
-		for( j = 0; j <= i; j++ ) {
-		    memcpy( aaanBoard[ i ][ j ], anBoardEval,
-			    sizeof( anBoardEval ) );
+		if( !( iTurn & 1 ) )
+		    InvertEvaluation( aaar[ anDice[ 0 ] ][ anDice[ 1 ] ] );
+	    } else {
+		for( n = 0; n < NUM_OUTPUTS; n++ )
+		    arMean[ n ] = 0.0;
 		
-		    if( FindBestMove( nPlies - 1, NULL, i + 1, j + 1,
-				      aaanBoard[ i ][ j ] ) < 0 )
-			return -1;
-
-		    SwapSides( aaanBoard[ i ][ j ] );
+		for( i = 0; i < 6; i++ )
+		    for( j = 0; j <= i; j++ ) {
+			memcpy( aaanBoard[ i ][ j ], anBoardEval,
+				sizeof( anBoardEval ) );
+			
+			if( FindBestMove( nPlies - 1, NULL, i + 1, j + 1,
+					  aaanBoard[ i ][ j ] ) < 0 )
+			    return -1;
+			
+			SwapSides( aaanBoard[ i ][ j ] );
+			
+			EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
+					  nPlies - 1 ); /* probably cached */
+			/* FIXME probably _NOT_ cached!  add param to FBM */
+			
+			if( !( iTurn & 1 ) )
+			    InvertEvaluation( aaar[ i ][ j ] );
+			
+			for( n = 0; n < NUM_OUTPUTS; n++ )
+			    arMean[ n ] += ( ( i == j ) ? aaar[ i ][ j ][ n ] :
+					     ( aaar[ i ][ j ][ n ] * 2.0 ) );
+		    }
 		
-		    EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
-				      nPlies - 1 ); /* probably cached */
-		    /* FIXME probably _NOT_ cached!  add param to FBM */
-		    
-		    if( !( iTurn & 1 ) )
-			InvertEvaluation( aaar[ i ][ j ] );
-
-		    for( n = 0; n < NUM_OUTPUTS; n++ )
-			arMean[ n ] += ( ( i == j ) ? aaar[ i ][ j ][ n ] :
-					 ( aaar[ i ][ j ][ n ] * 2.0 ) );
-		}
-
-	    for( n = 0; n < NUM_OUTPUTS; n++ )
-		arMean[ n ] /= 36.0;
-
-	    if( FindBestMove( nPlies, NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-			      anBoardEval ) < 0 )
+		for( n = 0; n < NUM_OUTPUTS; n++ )
+		    arMean[ n ] /= 36.0;
+		
+		if( FindBestMove( nPlies, NULL, anDice[ 0 ] + 1,
+				  anDice[ 1 ] + 1, anBoardEval ) < 0 )
+		    return -1;
+	    }
+	} else
+	    /* 0 plies; cannot perform variance reduction. */
+	    if( FindBestMove( nPlies, NULL, anDice[ 0 ] + 1,
+			      anDice[ 1 ] + 1, anBoardEval ) < 0 )
 		return -1;
-	}
-
+	
 	SwapSides( anBoardEval );
-	    
-	for( i = 0; i < NUM_OUTPUTS; i++ )
-	    arOutput[ i ] += arMean[ i ] -
-		aaar[ anDice[ 0 ] ][ anDice[ 1 ] ][ i ];
+
+	if( nPlies )
+	    /* Add variance reduction term. */
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+		arOutput[ i ] += arMean[ i ] -
+		    aaar[ anDice[ 0 ] ][ anDice[ 1 ] ][ i ];
 
 	if( fInterrupt )
 	    return -1;

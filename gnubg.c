@@ -713,7 +713,7 @@ extern void CommandRollout( char *sz ) {
 	return;
     }
 
-    if( ( c = Rollout( an, ar, arStdDev, 1, 500, 1296 ) ) < 0 )
+    if( ( c = Rollout( an, ar, arStdDev, 0, 7, 1296 ) ) < 0 )
 	return;
 
     printf( "Result (after %d trials):\n\n"

@@ -9,6 +9,8 @@ duplication of effort and to make sure our changes merge easily.
   positions, prime-vs-prime...
 *** Consider meta-pi scheme for using output from multiple nets.
 ** Add partial searching.
+** Let the user control SEARCH_CANDIDATES and SEARCH_TOLERANCE in
+  FindBestMove().
 ** See http://www.oasya.com/CubefulAdvantages.html for example of
   cubeful evaluation.
 
@@ -20,7 +22,8 @@ duplication of effort and to make sure our changes merge easily.
 * Command interface:
 ** Check "show" exists for every "set"!
 ** Add more completions to help and readline.
-** Allow user to vary parameters for rollouts.
+** Allow user to vary parameters for rollouts (trials, truncation,
+  duplicate dice, quasi-random dice, variance reduction, plies...).
 ** Allow timeouts for "train" (and others?).
 ** Load, save and analyse games and matches.  Also load matches given
   as command line parameters.
@@ -96,8 +99,6 @@ duplication of effort and to make sure our changes merge easily.
    (or even raccoon).
    However, the program treats the beaver as an ordinary redouble and
    I don't keep the cube.
-** RolloutGame() looks as if it will attempt nonsensical variance
-  reduction when nPlies is 0 -- check it.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
