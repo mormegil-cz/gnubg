@@ -63,6 +63,7 @@ typedef struct _rolloutstat {
 } rolloutstat;
 
 
+
 extern int 
 Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[], float arStdDev[],
          int nTruncate, int cGames, int fVarRedn, cubeinfo *pci,
@@ -113,5 +114,21 @@ GeneralCubeDecisionR ( char *sz,
 extern char *
 printRolloutstat ( char *sz, const rolloutstat *prs,
                    const int cGames );
+
+/* Resignations */
+
+extern int
+getResignation ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
+                 int anBoard[ 2 ][ 25 ],
+                 cubeinfo *pci, 
+                 evalsetup *pesResign );
+
+extern void
+getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
+                    cubeinfo *pci, 
+                    int nResigned,
+                    float *prBefore, float *prAfter );
+
+
 
 #endif
