@@ -26,6 +26,10 @@
 #include <assert.h>
 #include <math.h>
 
+#if !HAVE_ERF
+extern double erf( double x );
+#endif
+
 #include "matchequity.h"
 
 char *szMET[ MET_JACOBS + 1 ] = {

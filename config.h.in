@@ -76,6 +76,9 @@
 /* Define if you have the cosf function.  */
 #undef HAVE_COSF
 
+/* Define if you have the erf function.  */
+#undef HAVE_ERF
+
 /* Define if you have the fork function.  */
 #undef HAVE_FORK
 
