@@ -1,3 +1,9 @@
+Sun Oct 12 10:43:18 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (swapGame): swap player for MOVE_TIME.
+	* import.c (ImportTMGGame): handle timeouts in TMG files
+	correctly when USE_TIMECONTROL is defined.
+
 Sat Oct 11 23:22:37 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* play.c (NextTurn): protect call to gtk_timeout_remove.

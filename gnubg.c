@@ -7973,9 +7973,10 @@ swapGame ( list *plGame ) {
       /* no-op */
       break;
 
-	case MOVE_TIME:
-
-      /* no-op */
+    case MOVE_TIME:
+#if USE_TIMECONTROL
+      pmr->t.fPlayer = ! pmr->t.fPlayer;
+#endif
       break;
 
     case MOVE_SETCUBEPOS:
