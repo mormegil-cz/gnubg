@@ -592,7 +592,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
 	    pmr->d.esDouble = esDouble;
+
 	    memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
+            memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
+            memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
 	  
             pmr->d.st = Skill( rSkill = -arDouble[ OUTPUT_DROP ] -
                                -arDouble[ OUTPUT_TAKE ] );
