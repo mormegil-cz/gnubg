@@ -3695,11 +3695,11 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			in++;
 			diffuse += bd->arLight[ 2 ] * 0.8 + 0.2;
 			specular_x += pow( bd->arLight[ 2 ],
-					   bd->arExponent[ 0 ] ) *
-			    bd->arCoefficient[ 0 ];
+					   bd->arDiceExponent[ 0 ] ) *
+			    bd->arDiceCoefficient[ 0 ];
 			specular_o += pow( bd->arLight[ 2 ],
-					   bd->arExponent[ 1 ] ) *
-			    bd->arCoefficient[ 1 ];
+					   bd->arDiceExponent[ 1 ] ) *
+			    bd->arDiceCoefficient[ 1 ];
 		    } else {
 			if( fabs( x ) < 6.0 / 7.0 ) {
 			    /* top/bottom edge */
@@ -3730,11 +3730,11 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			    cos_theta = 2 * z_norm * cos_theta -
 				bd->arLight[ 2 ];
 			    specular_x += pow( cos_theta,
-					       bd->arExponent[ 0 ] ) *
-				bd->arCoefficient[ 0 ];
+					       bd->arDiceExponent[ 0 ] ) *
+				bd->arDiceCoefficient[ 0 ];
 			    specular_o += pow( cos_theta,
-					       bd->arExponent[ 1 ] ) *
-				bd->arCoefficient[ 1 ];
+					       bd->arDiceExponent[ 1 ] ) *
+				bd->arDiceCoefficient[ 1 ];
 			}
 		    }
 		missed:		    
@@ -3744,35 +3744,37 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 	    } while( !fy++ );
 	    
 	    if( in < 2 ) {
+
 		for( i = 0; i < 3; i++ )
 		    buf_x[ iy ][ ix ][ i ] = buf_o[ iy ][ ix ][ i ] = 0;
-		gdk_image_put_pixel( img, ix, iy, MASK_INVISIBLE );
+              gdk_image_put_pixel( img, ix, iy, MASK_INVISIBLE );
+
 	    } else {
 		gdk_image_put_pixel( img, ix, iy, MASK_VISIBLE );
 
 		buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse *
-						  bd->aarColour[ 0 ][ 0 ] +
+						  bd->aarDiceColour[ 0 ][ 0 ] +
 						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_x[ iy ][ ix ][ 1 ] = clamp( ( diffuse *
-						  bd->aarColour[ 0 ][ 1 ] +
+						  bd->aarDiceColour[ 0 ][ 1 ] +
 						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_x[ iy ][ ix ][ 2 ] = clamp( ( diffuse *
-						  bd->aarColour[ 0 ][ 2 ] +
+						  bd->aarDiceColour[ 0 ][ 2 ] +
 						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
 
 		buf_o[ iy ][ ix ][ 0 ] = clamp( ( diffuse *
-						  bd->aarColour[ 1 ][ 0 ] +
+						  bd->aarDiceColour[ 1 ][ 0 ] +
 						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_o[ iy ][ ix ][ 1 ] = clamp( ( diffuse *
-						  bd->aarColour[ 1 ][ 1 ] +
+						  bd->aarDiceColour[ 1 ][ 1 ] +
 						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse *
-						  bd->aarColour[ 1 ][ 2 ] +
+						  bd->aarDiceColour[ 1 ][ 2 ] +
 						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 	    }
@@ -3810,23 +3812,23 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
 				   bd->board_size, -1 );
 
     diffuse = bd->arLight[ 2 ] * 0.8 + 0.2;
-    specular_x = pow( bd->arLight[ 2 ], bd->arExponent[ 0 ] ) *
-	bd->arCoefficient[ 0 ];
-    specular_o = pow( bd->arLight[ 2 ], bd->arExponent[ 1 ] ) *
-	bd->arCoefficient[ 1 ];
-    dice_top[ 0 ][ 0 ] = ( diffuse * bd->aarColour[ 0 ][ 0 ] + specular_x ) *
-	64.0;
-    dice_top[ 0 ][ 1 ] = ( diffuse * bd->aarColour[ 0 ][ 1 ] + specular_x ) *
-	64.0;
-    dice_top[ 0 ][ 2 ] = ( diffuse * bd->aarColour[ 0 ][ 2 ] + specular_x ) *
-	64.0;
-    dice_top[ 1 ][ 0 ] = ( diffuse * bd->aarColour[ 1 ][ 0 ] + specular_o ) *
-	64.0;
-    dice_top[ 1 ][ 1 ] = ( diffuse * bd->aarColour[ 1 ][ 1 ] + specular_o ) *
-	64.0;
-    dice_top[ 1 ][ 2 ] = ( diffuse * bd->aarColour[ 1 ][ 2 ] + specular_o ) *
-	64.0;
-    
+    specular_x = pow( bd->arLight[ 2 ], bd->arDiceExponent[ 0 ] ) *
+	bd->arDiceCoefficient[ 0 ];
+    specular_o = pow( bd->arLight[ 2 ], bd->arDiceExponent[ 1 ] ) *
+	bd->arDiceCoefficient[ 1 ];
+    dice_top[ 0 ][ 0 ] = 
+      ( diffuse * bd->aarDiceColour[ 0 ][ 0 ] + specular_x ) * 64.0;
+    dice_top[ 0 ][ 1 ] = 
+      ( diffuse * bd->aarDiceColour[ 0 ][ 1 ] + specular_x ) * 64.0;
+    dice_top[ 0 ][ 2 ] = 
+      ( diffuse * bd->aarDiceColour[ 0 ][ 2 ] + specular_x ) * 64.0;
+    dice_top[ 1 ][ 0 ] = 
+      ( diffuse * bd->aarDiceColour[ 1 ][ 0 ] + specular_o ) * 64.0;
+    dice_top[ 1 ][ 1 ] = 
+      ( diffuse * bd->aarDiceColour[ 1 ][ 1 ] + specular_o ) * 64.0;
+    dice_top[ 1 ][ 2 ] = 
+      ( diffuse * bd->aarDiceColour[ 1 ][ 2 ] + specular_o ) * 64.0;
+
     for( iy = 0, y_loop = -1.0; iy < bd->board_size; iy++ ) {
 	for( ix = 0, x_loop = -1.0; ix < bd->board_size; ix++ ) {
 	    in = 0;
@@ -3849,11 +3851,11 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
 			    cos_theta = 2 * z / 5 * cos_theta -
 				bd->arLight[ 2 ];
 			    specular_x += pow( cos_theta,
-					       bd->arExponent[ 0 ] ) *
-				bd->arCoefficient[ 0 ];
+					       bd->arDiceExponent[ 0 ] ) *
+				bd->arDiceCoefficient[ 0 ];
 			    specular_o += pow( cos_theta,
-					       bd->arExponent[ 1 ] ) *
-				bd->arCoefficient[ 1 ];
+					       bd->arDiceExponent[ 1 ] ) *
+				bd->arDiceCoefficient[ 1 ];
 			}
 		    }
 		    x += 1.0 / ( bd->board_size );
@@ -3861,25 +3863,27 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
 		y += 1.0 / ( bd->board_size );
 	    } while( !fy++ );
 
-	    buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.7 + specular_x ) *
-					    64.0 + ( 4 - in ) *
-					    dice_top[ 0 ][ 0 ] );
-	    buf_x[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.7 + specular_x ) *
-					    64.0 + ( 4 - in ) *
-					    dice_top[ 0 ][ 1 ] );
-	    buf_x[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.7 + specular_x ) *
-					    64.0 + ( 4 - in ) *
-					    dice_top[ 0 ][ 2 ] );
+
+	    buf_x[ iy ][ ix ][ 0 ] = 
+              clamp( ( diffuse * bd->aarDiceDotColour[ 0 ][ 0 ] + specular_x ) 
+                     * 64.0 + ( 4 - in ) * dice_top[ 0 ][ 0 ] );
+	    buf_x[ iy ][ ix ][ 1 ] = 
+              clamp( ( diffuse * bd->aarDiceDotColour[ 0 ][ 1 ] + specular_x ) 
+                       * 64.0 + ( 4 - in ) * dice_top[ 0 ][ 1 ] );
+	    buf_x[ iy ][ ix ][ 2 ] = 
+              clamp( ( diffuse * bd->aarDiceDotColour[ 0 ][ 2 ] + specular_x ) 
+                     * 64.0 + ( 4 - in ) * dice_top[ 0 ][ 2 ] );
 	    
-	    buf_o[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.7 + specular_o ) *
-					    64.0 + ( 4 - in ) *
-					    dice_top[ 1 ][ 0 ] );
-	    buf_o[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.7 + specular_o ) *
-					    64.0 + ( 4 - in ) *
-					    dice_top[ 1 ][ 1 ] );
-	    buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.7 + specular_o ) *
-					    64.0 + ( 4 - in ) *
-					    dice_top[ 1 ][ 2 ] );
+	    buf_o[ iy ][ ix ][ 0 ] = 
+              clamp( ( diffuse * bd->aarDiceDotColour[ 1 ][ 0 ] + specular_o ) 
+                     * 64.0 + ( 4 - in ) * dice_top[ 1 ][ 0 ] );
+	    buf_o[ iy ][ ix ][ 1 ] = 
+              clamp( ( diffuse * bd->aarDiceDotColour[ 1 ][ 1 ] + specular_o ) 
+                     * 64.0 + ( 4 - in ) * dice_top[ 1 ][ 1 ] );
+	    buf_o[ iy ][ ix ][ 2 ] = 
+              clamp( ( diffuse * bd->aarDiceDotColour[ 1 ][ 2 ] + specular_o ) 
+                     * 64.0 + ( 4 - in ) * dice_top[ 1 ][ 2 ] );
+
 	    x_loop += 2.0 / ( bd->board_size );
 	}
 	y_loop += 2.0 / ( bd->board_size );
@@ -4503,6 +4507,27 @@ static void board_init( Board *board ) {
     bd->aarColour[ 1 ][ 1 ] = 0.05;
     bd->aarColour[ 1 ][ 2 ] = 0.10;
     bd->aarColour[ 1 ][ 3 ] = 0.5;
+    bd->arRefraction[ 0 ] = bd->arRefraction[ 1 ] = 1.5; /* unused! */
+    bd->arDiceCoefficient[ 0 ] = 0.2;
+    bd->arDiceExponent[ 0 ] = 3.0;
+    bd->arDiceCoefficient[ 1 ] = 1.0;
+    bd->arDiceExponent[ 1 ] = 30.0;
+    bd->aarDiceColour[ 0 ][ 0 ] = 1.0;
+    bd->aarDiceColour[ 0 ][ 1 ] = 0.40;
+    bd->aarDiceColour[ 0 ][ 2 ] = 0.00;
+    bd->aarDiceColour[ 0 ][ 3 ] = 0.9;
+    bd->aarDiceColour[ 1 ][ 0 ] = 0.15;
+    bd->aarDiceColour[ 1 ][ 1 ] = 0.45;
+    bd->aarDiceColour[ 1 ][ 2 ] = 0.00;
+    bd->aarDiceColour[ 1 ][ 3 ] = 0.5;
+    bd->aarDiceDotColour[ 0 ][ 0 ] = 1.0;
+    bd->aarDiceDotColour[ 0 ][ 1 ] = 0.00;
+    bd->aarDiceDotColour[ 0 ][ 2 ] = 0.00;
+    bd->aarDiceDotColour[ 0 ][ 3 ] = 0.0; /* unused */
+    bd->aarDiceDotColour[ 1 ][ 0 ] = 0.00;
+    bd->aarDiceDotColour[ 1 ][ 1 ] = 1.00;
+    bd->aarDiceDotColour[ 1 ][ 2 ] = 0.00;
+    bd->aarDiceDotColour[ 1 ][ 3 ] = 0.0; /*unused */
     bd->aanBoardColour[ 0 ][ 0 ] = 0x30;
     bd->aanBoardColour[ 0 ][ 1 ] = 0x60;
     bd->aanBoardColour[ 0 ][ 2 ] = 0x30;

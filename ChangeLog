@@ -1,3 +1,25 @@
+Fri Aug  2 20:19:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Independent adjustment of dice and dice dot colors.
+
+	* gtkboard.c (board_draw_dice): use dice colors instead of
+	chequer color.
+	* gtkboard.c (board_draw_pip): use dice dot colors instead of
+	grey.
+	* gtkboard.c (board_init): initialise dice colors and dice dot
+	colors to some ugly colors.
+
+	* gtkprefs.c (DicePrefs): new function. Show notebook page
+	with dice preferences.
+	* gtkprefs.c (BoardPrefsDo): apply dice color and dice dot
+	colors.
+	* gtkprefs.c (BoardPreferences): add new notebook pages.
+	* gtkprefs.c (SetColourSS, SetColourX): new functions.
+	* gtkprefs.c (BoardPreferencesParam): parse dice and dice dot
+	colors.
+	* gtkprefs.c (BoardPreferencesCommand): write dice and dice
+	dot colors.
+
 Fri Aug  2 18:06:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Make tutor mode save cube decisions in game list.

@@ -86,10 +86,13 @@ typedef struct _BoardData {
     animation animate_computer_moves;
     int animate_speed;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
+    gdouble aarDiceColour[ 2 ][ 4 ]; /* color of dice for each player */
+    gdouble aarDiceDotColour[ 2 ][ 4 ]; /* color of dice dot for each player */
     guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
     int aSpeckle[ 4 ]; /* speckle for background, border, pts */
-    gfloat arRefraction[ 2 ], arCoefficient[ 2 ], arExponent[ 2 ],
-	arLight[ 3 ];
+    gfloat arRefraction[ 2 ], arCoefficient[ 2 ], arExponent[ 2 ];
+    gfloat arDiceCoefficient[ 2 ], arDiceExponent[ 2 ];
+    gfloat arLight[ 3 ];
     gint board_size; /* basic unit of board size, in pixels -- a chequer's
 			diameter is 6 of these units (and is 2 units thick) */
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
