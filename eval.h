@@ -171,7 +171,7 @@ extern evalcontext aecSettings[ NUM_SETTINGS  ];
 extern const char *aszSettings[ NUM_SETTINGS ];
 
 
-#define NUM_MOVEFILTER_SETTINGS 3
+#define NUM_MOVEFILTER_SETTINGS 5
 
 extern const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ];
 extern movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
