@@ -1,3 +1,9 @@
+Thu Jul 25 19:47:44 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Memory dealloc bug. Patch contributed by Jim Segrave.
+
+	* gtkgame.c (DestroyHint): only free non-NULL pointers.
+
 Thu Jul 25 19:07:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Remove auto analysis, which has been replaced by tutor mode.

@@ -4595,8 +4595,13 @@ static void DestroyHint( gpointer p ) {
 
     hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
 
-    free( phd->pml->amMoves );
-    free( phd->pml );
+    if ( phd->pml ) {
+      if ( phd->pml->amMoves )
+        free ( phd->pml->amMoves );
+
+      free( phd->pml );
+
+    }
     
     pwHint = NULL;
 }
