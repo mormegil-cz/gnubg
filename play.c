@@ -918,6 +918,9 @@ extern void NextTurn( void ) {
 
     /* We have reached a safe point to check for interrupts.  Until now,
        the board could have been in an inconsistent state. */
+    if( fAction )
+	fnAction();
+	
     if( fInterrupt )
 	return;
     

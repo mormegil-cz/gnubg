@@ -24,6 +24,7 @@
 #if HAVE_LIBGDBM
 #include <gdbm.h>
 #endif
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -39,58 +40,61 @@ static char *szDatabase = "gnubg.gdbm";
 
 extern void CommandDatabaseDump( char *sz ) {
     
-  GDBM_FILE pdb;
-  datum dKey, dValue;
-  dbevaluation *pev;
-  int c = 0;
-  void *p;
+    GDBM_FILE pdb;
+    datum dKey, dValue;
+    dbevaluation *pev;
+    int c = 0;
+    void *p;
     
-  if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-    fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
+	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
-    return;
-  }
-
-  dKey = gdbm_firstkey( pdb );
-
-  while( dKey.dptr ) {
-    dValue = gdbm_fetch( pdb, dKey );
-
-    pev = (dbevaluation *) dValue.dptr;
-
-    if( !c )
-	    outputl( "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
-               "Date" );
-
-    outputf( "%14s %5.3f %5.3f %5.3f %5.3f %5.3f %6d %s",
-             PositionIDFromKey( (unsigned char *) dKey.dptr ),
-             (float) pev->asEq[ OUTPUT_WIN ] / 0xFFFF,
-             (float) pev->asEq[ OUTPUT_WINGAMMON ] / 0xFFFF,
-             (float) pev->asEq[ OUTPUT_WINBACKGAMMON ] / 0xFFFF,
-             (float) pev->asEq[ OUTPUT_LOSEGAMMON ] / 0xFFFF,
-             (float) pev->asEq[ OUTPUT_LOSEBACKGAMMON ] / 0xFFFF,
-             pev->c, pev->t ? ctime( &pev->t ) : " (no rollout data)\n" );
-	
-    c++;
-    
-    free( pev );
-
-    p = dKey.dptr;
-	
-    if( fInterrupt ) {
-	    free( p );
-	    break;
+	return;
     }
     
-    dKey = gdbm_nextkey( pdb, dKey );
+    dKey = gdbm_firstkey( pdb );
+    
+    while( dKey.dptr ) {
+	dValue = gdbm_fetch( pdb, dKey );
+
+	pev = (dbevaluation *) dValue.dptr;
 	
-    free( p );
-  }
+	if( !c )
+	    outputl( "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
+		     "Date" );
+	
+	outputf( "%14s %5.3f %5.3f %5.3f %5.3f %5.3f %6d %s",
+		 PositionIDFromKey( (unsigned char *) dKey.dptr ),
+		 (float) pev->asEq[ OUTPUT_WIN ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_WINGAMMON ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_WINBACKGAMMON ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_LOSEGAMMON ] / 0xFFFF,
+		 (float) pev->asEq[ OUTPUT_LOSEBACKGAMMON ] / 0xFFFF,
+		 pev->c, pev->t ? ctime( &pev->t ) : " (no rollout data)\n" );
+	
+	c++;
+	
+	free( pev );
+	
+	p = dKey.dptr;
 
-  if( !c )
-    outputl( "The database is empty." );
-
-  gdbm_close( pdb );
+	if( fAction )
+	    fnAction();
+	
+	if( fInterrupt ) {
+	    free( p );
+	    break;
+	}
+	
+	dKey = gdbm_nextkey( pdb, dKey );
+	
+	free( p );
+    }
+    
+    if( !c )
+	outputl( "The database is empty." );
+    
+    gdbm_close( pdb );
 }
 
 extern void CommandDatabaseExport( char *sz ) {
@@ -141,6 +145,9 @@ extern void CommandDatabaseExport( char *sz ) {
 	free( pev );
 
 	p = dKey.dptr;
+	
+	if( fAction )
+	    fnAction();
 	
 	if( fInterrupt ) {
 	    free( p );
@@ -289,6 +296,9 @@ extern void CommandDatabaseRollout( char *sz ) {
 	
 	p = dKey.dptr;
 	
+	if( fAction )
+	    fnAction();
+	
 	if( fInterrupt ) {
 	    free( p );
 	    break;
@@ -346,10 +356,33 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
 		      anBoardGenerate, &ciCubeless, NULL );
 
+	if( fAction )
+	    fnAction();
+	
 	if( fInterrupt )
 	    break;
 	    
 	SwapSides( anBoardGenerate );
+
+	if( rThreshold ) {
+	    float ar[ NUM_OUTPUTS ], r0, r1;
+	    static evalcontext ec0 = { 0, 0, 0, 0, FALSE },
+		ec1 = { 1, 8, 0.16, 0, FALSE };
+		
+	    if( EvaluatePosition( anBoardGenerate, ar, &ciCubeless, &ec0 )
+		< 0 )
+		break;
+	    r0 = Utility( ar, &ciCubeless );
+	    
+	    if( EvaluatePosition( anBoardGenerate, ar, &ciCubeless, &ec1 )
+		< 0 )
+		break;
+	    r1 = Utility( ar, &ciCubeless );
+	    
+	    if( fabs( r0 - r1 ) < rThreshold )
+		/* error too small; keep looking */
+		continue;
+	}
 	
 	PositionKey( anBoardGenerate, auchKey );
 	
@@ -421,6 +454,9 @@ extern void CommandDatabaseTrain( char *sz ) {
 	    
 	    p = dKey.dptr;
 	    
+	    if( fAction )
+		fnAction();
+	
 	    if( ( n && c > n ) || fInterrupt ) {
 		free( p );
 		break;

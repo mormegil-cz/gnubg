@@ -104,7 +104,6 @@ duplication of effort and to make sure our changes merge easily.
 *** set * evaluation reduced
 *** set output *
 *** set rollout *
-*** set training *
 ** Add a prompt and entry field to allow commands to be entered (replacing
   stdin).
 ** Allow the user to decide whether short messages appear in dialogs
@@ -193,8 +192,6 @@ duplication of effort and to make sure our changes merge easily.
   #define AF_LOCAL AF_UNIX (same with PF_).
 ** The fread() calls in import.c need to be byte-swapped on big-endian
   machines.
-** Not everything that checks fInterrupt checks fAction first (e.g.
-  CommandDatabaseTrain).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

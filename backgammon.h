@@ -188,7 +188,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
     fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC,
     fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard;
-extern float rAlpha, rAnneal;
+extern float rAlpha, rAnneal, rThreshold;
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
@@ -406,6 +406,7 @@ extern void CommandAccept( char * ),
     CommandSetSeed( char * ),
     CommandSetTrainingAlpha( char * ),
     CommandSetTrainingAnneal( char * ),
+    CommandSetTrainingThreshold( char * ),
     CommandSetTurn( char * ),
     CommandShowAutomatic( char * ),
     CommandShowBoard( char * ),
@@ -434,6 +435,7 @@ extern void CommandAccept( char * ),
     CommandShowRollout( char * ),
     CommandShowScore( char * ),
     CommandShowSeed( char * ),
+    CommandShowTraining( char * ),
     CommandShowTurn( char * ),
     CommandShowWarranty( char * ),
     CommandShowKleinman( char * ),
