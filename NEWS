@@ -1,5 +1,23 @@
 GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 
+* Changes in GNU Backgammon 0.14
+
+** general
+ - improved support for Jacoby rule and variants (Nackgammon, Hypergammon, 
+   and cubeless)
+
+** New dice generator:
+ - read dice from file (similar to Jellyfish)
+
+** Import
+ - import files in Snowie .txt format
+
+** Export
+ - export in Snowie .txt format
+ - export in TMG format
+ - export in SGG format
+
+
 * Changes in GNU Backgammon 0.13
 
 ** swap players
