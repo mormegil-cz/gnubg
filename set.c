@@ -3189,56 +3189,78 @@ CommandSetGeometryPosY ( char *sz ) {
 
 }
 
-int nSetHighlightColour = 12;
+int *Highlightrgb = HighlightColourTable[13].rgbs[0];
 
 extern void
 CommandSetHighlightColour ( char *sz ) {
+
     char *pch = NextToken( &sz ), *pchCopy;
-    int i;
-	szSetCommand = "highlightcolour";
+    int i, j, n;
 
     if( !pch ) {
 	outputf( _("You must specify a colour "
-			   "-- try `help set highlightcolour'.\n"), szSetCommand );
+			   "-- try `help set %s'.\n"), szSetCommand );
 	
 	return;
     }
 
   if( (i = ParseHighlightColour( pch )) < 0 ) {
-    outputf (_("Unknown colour '%s' -- try `help set highlight colour'.\n"), 
-			 sz);
+    outputf (_("Unknown colour '%s' -- try `help set %s colour'.\n"), 
+			 sz, szSetCommand );
 	return;
   }
 
-  nSetHighlightColour = i;
   HighlightColour = &HighlightColourTable[i];
-  HandleCommand( sz, acSetHighlightIntensity );
+  Highlightrgb = &HighlightColourTable[i].rgbs[HighlightIntensity][0];
+  if (i == 0) {
+	/* custom rgb */
+	for (j = 0; j < 3; ++j) {
+	  if (( n = ParseNumber( &sz ) ) == INT_MIN )
+		return;
+
+	  Highlightrgb[j] = n;
+	}
+  }
 }
 
 extern void
-CommandSetHighlightIntensity ( char *sz ) {
+CommandSetHighlight ( char *sz ) {
 
-  char *pch = NextToken( &sz );
-
-  if ((pch == 0) || (strncasecmp (pch, "normal", strlen (pch)) == 0)) {
-	HighlightIntensity = 0;
-	return;
-  }
-
-  if (strncasecmp (pch, "medium", strlen (pch)) == 0) {
-	HighlightIntensity = 1;
-	return;
-  }
-
-  if (strncasecmp (pch, "dark", strlen (pch)) == 0) {
-	HighlightIntensity = 2;
-	return;
-  }
-
-  outputf (_("Unknown intensity '%s' -- try `help set %s'.\n"), pch, szSetCommand);
-  return;
+  HandleCommand ( sz, acSetHighlightIntensity );
 
 }
+
+
+extern void
+CommandSetHighlightLight ( char *sz ) {
+
+    char *szCommand = _("highlightcolour light");
+
+	HighlightIntensity = 0;
+	CommandSetHighlightColour ( sz );
+
+}
+
+extern void
+CommandSetHighlightMedium ( char *sz ) {
+
+    char *szCommand = _("highlightcolour medium");
+	HighlightIntensity = 1;
+	CommandSetHighlightColour ( sz );
+
+
+}
+
+extern void
+CommandSetHighlightDark ( char *sz ) {
+
+    char *szCommand = _("highlightcolour dark");
+	HighlightIntensity = 2;
+	CommandSetHighlightColour ( sz );
+
+
+}
+
 
 /*
  * Sounds

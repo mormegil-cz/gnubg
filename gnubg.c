@@ -1201,10 +1201,20 @@ command cER = {
   { "skill", NULL, N_("Set level for tutor warnings"), 
     NULL, acSetTutorSkill },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetHighlightColour[] = {
+  { NULL, CommandSetHighlightColour,
+   N_("Set colour for highlighted moves"), szCOLOUR, NULL},
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetHighlightIntensity[] = {
-  {"intensity", CommandSetHighlightIntensity, 
-   N_("choose normal/medium/dark  colours"), 
-   NULL, NULL },
+  {"dark", CommandSetHighlightDark,
+   N_("choose dark highlight colour"), 
+   szCOLOUR, acSetHighlightColour},
+  {"light", CommandSetHighlightLight,
+   N_("choose light highlight colour"), 
+   szCOLOUR, acSetHighlightColour},
+  {"medium", CommandSetHighlightMedium,
+   N_("choose medium highlight colour"), 
+   szCOLOUR, acSetHighlightColour},
   { NULL, NULL, NULL, NULL, NULL }      
 }, acSet[] = {
     { "analysis", NULL, N_("Control parameters used when analysing moves"),
@@ -1243,9 +1253,9 @@ command cER = {
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
-    { "highlightcolour", CommandSetHighlightColour, 
-      N_("Set colour for highlighting lines"),
-	  szCOLOUR, acSetHighlightIntensity},
+    { "highlightcolour", CommandSetHighlight, 
+      N_("Set brightness and colour for highlighting lines"),
+	  NULL, acSetHighlightIntensity},
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1533,22 +1543,23 @@ char *aszVersion[] = {
 };
 
 highlightcolour HighlightColourTable[] = {
-  {{ 0, 0, 0}, { 0, 0, 0}, { 0, 0, 0}, "black" },
-  {{ 0, 0, 65280}, { 0, 0, 52480}, { 0, 0, 32768}, "blue" },
-  {{ 34560, 52736, 64000}, { 0, 48896, 65280}, { 0, 26624, 35584}, "skyblue" },
-  {{ 32512, 65280, 0}, { 26112, 52480, 0}, { 17664, 35584, 0}, "chartreuse" },
-  {{ 0, 65280, 65280}, { 0, 52480, 52480}, { 0, 35584, 35584}, "cyan" },
-  {{ 65280, 55040, 0}, { 52480, 44288, 0}, { 35584, 29952, 0}, "gold" },
-  {{ 0, 65280, 0}, { 0, 52480, 0}, { 0, 25600, 0}, "green" },
-  {{ 0, 65280, 32512}, { 0, 52480, 26112}, { 0, 35584, 17664}, "springgreen" },
-  {{ 65280, 42240, 0}, { 60928, 30208, 0}, { 35584, 17664, 0}, "orange" },
-  {{ 65280, 17664, 0}, { 52480, 14080, 0}, { 35584, 9472, 0}, "orangered" },
-  {{ 65280, 0, 65280}, { 52480, 0, 52480}, { 35584, 0, 35584}, "magenta" },
-  {{ 40960, 8192, 61440}, { 32000, 9728, 52480}, { 23808, 18176, 35584}, "purple" },
-  {{ 65280, 0, 0}, { 52480, 0, 0}, { 35584, 0, 0}, "red" },
-  {{ 0, 62720, 65280}, { 0, 50432, 52480}, { 0, 52736, 53504}, "turquoise" },
-  {{ 60928, 33280, 60928}, { 36864, 16640, 59904}, { 37888, 0, 54016}, "violet" },
-  {{ 65280, 65280, 0}, { 52480, 52480, 0}, { 35584, 35584, 0}, "yellow" },
+  {{ 0,         0,     0,         0,     0,     0,     0,     0,     0}, "custom" },
+  {{ 0,         0,     0,         0,     0,     0,     0,     0,     0}, "black" },
+  {{ 0,         0, 65280,         0,     0, 52480,     0,     0, 32768}, "blue" },
+  {{ 34560, 52736, 64000,         0, 48896, 65280,     0, 26624, 35584}, "skyblue" },
+  {{ 32512, 65280,     0,     26112, 52480,     0, 17664, 35584,     0}, "chartreuse" },
+  {{     0, 65280, 65280,         0, 52480, 52480,     0, 35584, 35584}, "cyan" },
+  {{ 65280, 55040,     0,     52480, 44288,     0, 35584, 29952,     0}, "gold" },
+  {{     0, 65280,     0,         0, 52480,     0,     0, 25600,     0}, "green" },
+  {{     0, 65280, 32512,         0, 52480, 26112,     0, 35584, 17664}, "springgreen" },
+  {{ 65280, 42240,     0,     60928, 30208,     0, 35584, 17664,     0}, "orange" },
+  {{ 65280, 17664,     0,     52480, 14080,     0, 35584,  9472,     0}, "orangered" },
+  {{ 65280,     0, 65280,     52480,     0, 52480, 35584,     0, 35584}, "magenta" },
+  {{ 40960, 8192,  61440,     32000,  9728, 52480, 23808, 18176, 35584}, "purple" },
+  {{ 65280,     0,     0,     52480,     0,     0, 35584,     0,     0}, "red" },
+  {{     0, 62720, 65280,         0, 50432, 52480,     0, 52736, 53504}, "turquoise" },
+  {{ 60928, 33280, 60928,     36864, 16640, 59904, 37888,     0, 54016}, "violet" },
+  {{ 65280, 65280,     0,     52480, 52480,     0, 35584, 35584,     0}, "yellow" },
 };
 
 
@@ -1745,6 +1756,9 @@ extern int ParseHighlightColour( char *sz ) {
   return -1;
 
 }
+
+
+
 /* Convert a string to a board array.  Currently allows the string to
    be a position ID, "=n" notation, or empty (in which case the current
    board is used).
@@ -4563,11 +4577,19 @@ extern void CommandSaveSettings( char *szParam ) {
   
 #endif /* WIN32 */
 
-
-	fprintf ( pf, "set highlightcolour %s intensity %s\n",
-			  HighlightColour->colourname,
-			  HighlightIntensity == 2 ? "dark" :
-              HighlightIntensity == 1 ? "medium" : "normal");
+	for (i = 0; i < 3; ++i) {
+	  fprintf ( pf, "set highlightcolour %s custom %d %d %d\n",
+				( HighlightIntensity == 2 ? "dark" :
+				  HighlightIntensity == 1 ? "medium" : "normal" ),
+				HighlightColourTable[0].rgbs[i][0], 
+				HighlightColourTable[0].rgbs[i][1], 
+				HighlightColourTable[0].rgbs[i][2]);				
+	}
+	 
+	fprintf ( pf, "set highlightcolour %s %s\n",
+			  ( HighlightIntensity == 2 ? "dark" :
+              HighlightIntensity == 1 ? "medium" : "normal" ),
+			  HighlightColour->colourname);
 
     /* the end */
 
@@ -4867,7 +4889,7 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
             if( !strncasecmp( pchCurrent, pc->sz, strlen( pchCurrent ) ) ) {
 		pc = pc->pc;
 		
-		if ( pc == acSetHighlightIntensity ) {
+		if ( pc == acSetHighlightColour ) {
 		  pcResume = pc;
 		  pc = &cHighlightColour;
 		  break;
