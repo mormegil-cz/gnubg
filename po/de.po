@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
 "POT-Creation-Date: 2003-08-01 16:38+0200\n"
-"PO-Revision-Date: 2003-08-02 12:05+0200\n"
+"PO-Revision-Date: 2003-08-03 18:47+0200\n"
 "Last-Translator: Achim Mueller <ace@gnubg.org>\n"
 "Language-Team: Deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -65,7 +65,7 @@ msgstr "Mehr Glück das nächste Mal"
 
 #: analysis.c:60 gtkoptions.c:589 html.c:2941
 msgid "None"
-msgstr "Neutral"
+msgstr "Nichts"
 
 #: analysis.c:61 html.c:2942
 msgid "Good dice, man!"
@@ -301,7 +301,7 @@ msgstr "95%% Konfidenz-Intervall (ppg)"
 
 #: analysis.c:1809
 msgid "Advantage (luck adj.) in ppg"
-msgstr "Vorteil (bereinigt um Glück) in ppg"
+msgstr "Vorteil (bereinigt um Glück) in Punkten pro Spiel"
 
 #: analysis.c:1837 gtkgame.c:7056 html.c:3374
 msgid "Relative FIBS rating"
@@ -6217,7 +6217,7 @@ msgstr "Verkürze Rollouts"
 
 #: gtkgame.c:5392
 msgid "Truncate at ply:"
-msgstr "Verkürze bei \"ply\":"
+msgstr "Verkürze bei \"Ply\":"
 
 #: gtkgame.c:5400
 msgid "Evaluation for later plies"
@@ -6270,9 +6270,8 @@ msgstr "Bearoff-Verkürzung"
 #: gtkgame.c:5537
 msgid "Truncate cubeless (and cubeful money) at exact bearoff database"
 msgstr ""
-"Verkürze Rollouts ohne Doppler (und mit Doppler im Spiele um Geld), wenn "
-"die\n"
-"\"exact bearoff\" Datenbank erreicht ist."
+"Verkürze Rollouts ohne Doppler (und mit Doppler im Spiele um Geld), \n"
+" wenn die \"exact bearoff\" Datenbank erreicht ist."
 
 #: gtkgame.c:5544
 msgid "Truncate cubeless at one-sided bearoff database"
@@ -6482,7 +6481,7 @@ msgstr "Vollständige Fehler-Rate (total):"
 
 #: gtkgame.c:7041
 msgid "Overall error rate (per decision)"
-msgstr "Vollständige Fehler-Rate (pro Entscheidung)"
+msgstr "VollständigeFehler-Rate (pro Entscheidung)"
 
 #: gtkgame.c:7042 html.c:3313
 msgid "Equivalent Snowie error rate"
@@ -6490,7 +6489,7 @@ msgstr "Gleichwertige Snowie Fehlerrate"
 
 #: gtkgame.c:7051 html.c:3407
 msgid "Advantage (luck adjusted) in ppg"
-msgstr "Vorteil (bereinigt um den Glücksfaktor) in ppg"
+msgstr "Vorteil (bereinigt um den Glücksfaktor) in Punkten pro Spiel"
 
 #: gtkgame.c:7730
 msgid "GNU Backgammon - Player records"
@@ -8711,11 +8710,11 @@ msgstr "Dies ist keine gültige Jellyfish '.pos'-Datei!\n"
 #: import.c:1397 import.c:1477 import.c:1538 import.c:1634 import.c:1652
 #: import.c:2416 import.c:2434 import.c:2667
 msgid "Take record found but doesn't follow a double"
-msgstr "Anahme des Dopplers gefunden, aber nicht nach einem Doppel"
+msgstr "Annahme des Dopplers gefunden, aber nicht gefolgt von einem Doppel"
 
 #: import.c:524
 msgid "No '(' following text 'Illegal play'"
-msgstr "Nr. '( folgender Text 'Illegaler Zug'"
+msgstr "Nr. '( folgender Text 'Illegaler Zug')"
 
 #: import.c:534
 msgid "Illegal Snowie position format for illegal play."
@@ -9011,7 +9010,7 @@ msgstr "met DTD nicht gefunden\n"
 
 #: matchequity.c:1333
 msgid "XML does not validate!\n"
-msgstr "XML ist nicht valide!\n"
+msgstr "XML ist nicht gültig!\n"
 
 #: matchequity.c:1378
 #, c-format
@@ -10266,7 +10265,7 @@ msgstr ""
 
 #: set.c:880
 msgid "You must specify a legal move delay (see `help set delay')."
-msgstr "Du mußt eine valide Zug-Verzögerung bestimmen (siehe auch `help set delay')."
+msgstr "Du mußt eine gültige Zug-Verzögerung bestimmen (siehe auch `help set delay')."
 
 #: set.c:887
 #, c-format
@@ -10615,7 +10614,7 @@ msgstr ""
 #: set.c:1601
 msgid "No evaluations changes will be made during rollouts."
 msgstr ""
-"Es werden keine Veränderungen an der Beurteulungstiefe während der Rollouts "
+"Es werden keine Veränderungen an der Beurteilungstiefe während der Rollouts "
 "vorgenommen."
 
 #: set.c:1603
@@ -10641,7 +10640,7 @@ msgstr ""
 #, c-format
 msgid "After %d games, rollouts will stop if the STDs are small enough.\n"
 msgstr ""
-"Nach %d Partien werden die Rollouts gestoppt, wenn die Standardabweichnungen "
+"Nach %d Partien werden die Rollouts gestoppt, wenn die Standardabweichungen "
 "klein genug sind.\n"
 
 #: set.c:1647
@@ -11042,7 +11041,7 @@ msgstr "Diese Partie ist die Crawford-Partie (doppeln ist nicht erlaubt)."
 
 #: set.c:2514
 msgid "This game is not the Crawford game."
-msgstr "Diese Partie is nicht die Crawford-Partie."
+msgstr "Diese Partie ist nicht die Crawford-Partie."
 
 #: set.c:2528
 msgid ""
