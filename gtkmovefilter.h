@@ -24,7 +24,8 @@
 
 extern GtkWidget *
 MoveFilterWidget ( movefilter *pmf, 
-                   int *pfOK );
+                   int *pfOK,
+                   GtkSignalFunc pfChanged, gpointer userdata );
 
 extern void
 SetMovefilterCommands ( const char *sz,
@@ -33,5 +34,9 @@ SetMovefilterCommands ( const char *sz,
 
 extern void
 MoveFilterOK ( GtkWidget *pw, GtkWidget *pwMoveFilter );
+
+extern void
+MoveFilterSetPredefined ( GtkWidget *pwMoveFilter, 
+                          const int i );
 
 #endif /* _GTKMOVEFILTER_H_ */

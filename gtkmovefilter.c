@@ -49,6 +49,11 @@ typedef struct _movefilterwidget {
   
   GtkWidget *pwOptionMenu;
 
+  /* callback for the parent */
+
+  GtkSignalFunc pfChanged;
+  gpointer userdata;
+
 } movefilterwidget;
 
 
@@ -60,8 +65,10 @@ typedef struct _movefiltersetupwidget {
   GtkAdjustment *aapadjAccept[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   GtkAdjustment *aapadjExtra[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   GtkAdjustment *aapadjThreshold[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  GtkWidget *aapwA[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   GtkWidget *aapwET[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   GtkWidget *aapwT[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  GtkWidget *aapwEnable[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   GtkWidget *pwOptionMenu;
 
 } movefiltersetupwidget;
@@ -72,18 +79,30 @@ MoveFilterSetupSetValues ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES
                            movefiltersetupwidget *pmfsw ) {
 
   int i, j;
+  int f;
 
   for ( i = 0; i < MAX_FILTER_PLIES; ++i ) 
     for ( j = 0; j <=i; ++j ) {
 
       gtk_adjustment_set_value ( pmfsw->aapadjAccept[ i ][ j ], 
-                                 aamf[ i ][ j ].Accept );
+                                 aamf[ i ][ j ].Accept >= 0 ? 
+                                 aamf[ i ][ j ].Accept : 0);
       gtk_adjustment_set_value ( pmfsw->aapadjExtra[ i ][ j ], 
-                                 aamf[ i ][ j ].Accept ?
+                                 aamf[ i ][ j ].Accept >= 0 ?
                                  aamf[ i ][ j ].Extra : 0 );
       gtk_adjustment_set_value ( pmfsw->aapadjThreshold[ i ][ j ], 
-                                 aamf[ i ][ j ].Extra ?
+                                 ( aamf[ i ][ j ].Accept >= 0 && 
+                                   aamf[ i ][ j ].Extra ) ?
                                  aamf[ i ][ j ].Threshold : 0 );
+
+      f = aamf[ i ][ j ].Accept >= 0;
+      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwA[ i ][ j ] ), f );
+      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwET[ i ][ j ] ), f );
+      gtk_toggle_button_set_active ( 
+                    GTK_TOGGLE_BUTTON ( pmfsw->aapwEnable[ i ][ j ] ), f );
+      f = f && aamf[ i ][ j ].Extra;
+      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwT[ i ][ j ] ), f );
+
 
     }
 
@@ -96,18 +115,28 @@ MoveFilterSetupGetValues ( movefilter *pmf, movefiltersetupwidget *pmfsw ) {
 
   int i, j;
   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  int f;
 
   memset ( aamf, 0, sizeof ( aamf ) );
 
   for ( i = 0; i < MAX_FILTER_PLIES; ++i ) 
-    for ( j = 0; j <=i; ++j ) 
-      if ( ( aamf[ i ][ j ].Accept = pmfsw->aapadjAccept[ i ][ j ]->value ) )
-        if ( ( aamf[ i ][ j ].Extra = pmfsw->aapadjExtra[ i ][ j ]->value ) )
-          aamf[ i ][ j ].Threshold = pmfsw->aapadjThreshold[ i ][ j ]->value;
+    for ( j = 0; j <=i; ++j ) {
+
+      f = gtk_toggle_button_get_active ( 
+             GTK_TOGGLE_BUTTON ( pmfsw->aapwEnable[ i ][ j ] ) );
+
+      aamf[ i ][ j ].Accept = f ? pmfsw->aapadjAccept[ i ][ j ]->value : -1;
+      aamf[ i ][ j ].Extra = ( aamf[ i ][ j ].Accept >= 0 ) ? 
+        pmfsw->aapadjExtra[ i ][ j ]->value : 0;
+      aamf[ i ][ j ].Threshold = ( aamf[ i ][ j ].Extra ) ? 
+      pmfsw->aapadjThreshold[ i ][ j ]->value : 0;
+
+    }
 
   memcpy ( pmf, aamf, sizeof ( aamf ) );
 
 }
+
 
 static void
 AcceptChanged ( GtkWidget *pw, movefiltersetupwidget *pmfsw ) {
@@ -115,14 +144,6 @@ AcceptChanged ( GtkWidget *pw, movefiltersetupwidget *pmfsw ) {
   int fFound;
   int i, j;
   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
-
-  for ( i = 0; i < MAX_FILTER_PLIES; ++i ) 
-    for ( j = 0; j <= i; ++j ) {
-      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwET[ i ][ j ] ),
-                                 pmfsw->aapadjAccept[ i ][ j ]->value );
-      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwT[ i ][ j ] ),
-                                 pmfsw->aapadjExtra[ i ][ j ]->value );
-  }
 
   /* see if current settings match a predefined one */
 
@@ -145,6 +166,30 @@ AcceptChanged ( GtkWidget *pw, movefiltersetupwidget *pmfsw ) {
                                     NUM_MOVEFILTER_SETTINGS );
 
 }
+
+
+static void
+EnableToggled ( GtkWidget *pw, movefiltersetupwidget *pmfsw ) {
+
+  int f;
+  int i, j;
+
+  for ( i = 0; i < MAX_FILTER_PLIES; ++i ) 
+    for ( j = 0; j <= i; ++j ) {
+
+      f = gtk_toggle_button_get_active ( 
+             GTK_TOGGLE_BUTTON ( pmfsw->aapwEnable[ i ][ j ] ) );
+
+      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwA[ i ][ j ] ), f );
+      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwET[ i ][ j ] ), f );
+      gtk_widget_set_sensitive ( GTK_WIDGET ( pmfsw->aapwT[ i ][ j ] ), f );
+  }
+
+  AcceptChanged ( pw, pmfsw );
+
+}
+
+
 
 
 static void
@@ -177,9 +222,21 @@ MoveFilterPage ( const int i, const int j,
 
   pwPage = gtk_vbox_new ( FALSE, 0 );
 
+  /* enable */
+
+  pmfsw->aapwEnable[ i ][ j ] = 
+    gtk_check_button_new_with_label ( _("Enable this level" ) );
+  gtk_box_pack_start ( GTK_BOX ( pwPage ), pmfsw->aapwEnable[ i ][ j ], 
+                       FALSE, FALSE, 0 );
+
+  gtk_signal_connect ( GTK_OBJECT ( pmfsw->aapwEnable[ i ][ j ] ),
+                       "toggled", 
+                       GTK_SIGNAL_FUNC ( EnableToggled ), pmfsw );
+
   /* accept */
 
   pwhbox = gtk_hbox_new ( FALSE, 0 );
+  pmfsw->aapwA[ i ][ j ] = pwhbox;
   gtk_box_pack_start ( GTK_BOX ( pwPage ), pwhbox, FALSE, FALSE, 0 );
 
   gtk_box_pack_start ( GTK_BOX ( pwhbox ),
@@ -377,6 +434,9 @@ MoveFilterSetupOK ( GtkWidget *pw, GtkWidget *pwMoveFilterSetup ) {
 
 }
 
+
+typedef void (*changed) ( GtkWidget *pw, gpointer p );
+
 static void
 MoveFilterChanged ( movefilterwidget *pmfw ) {
 
@@ -400,8 +460,11 @@ MoveFilterChanged ( movefilterwidget *pmfw ) {
       gtk_option_menu_set_history ( GTK_OPTION_MENU ( pmfw->pwOptionMenu ),
                                     NUM_MOVEFILTER_SETTINGS );
 
+  /* callback for parent */
 
-
+  if ( pmfw->pfChanged )
+    ((changed) (*pmfw->pfChanged)) ( NULL, pmfw->userdata );
+  
 }
 
 
@@ -464,7 +527,8 @@ ClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
 
 
 extern GtkWidget *
-MoveFilterWidget ( movefilter *pmf, int *pfOK ) {
+MoveFilterWidget ( movefilter *pmf, int *pfOK,
+                   GtkSignalFunc pfChanged, gpointer userdata ) {
 
   GtkWidget *pwFrame;
   movefilterwidget *pmfw;
@@ -478,6 +542,8 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK ) {
   pwFrame = gtk_frame_new ( _("Move filter") );
   pmfw = (movefilterwidget *) g_malloc ( sizeof ( movefilterwidget ) );
   pmfw->pmf = pmf;
+  pmfw->userdata = userdata;
+  pmfw->pfChanged = NULL; /* UGLY; see comment later */
 
   /* output widget (with "User defined", or "Large" etc */
 
@@ -528,6 +594,10 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK ) {
 
   MoveFilterChanged ( pmfw );
 
+  /* don't set pfChanged until here, as we don't want to call EvalChanged
+     just yet. This is a big ugly... */
+  pmfw->pfChanged = pfChanged;
+
   return pwFrame;
 
 
@@ -568,3 +638,24 @@ MoveFilterOK ( GtkWidget *pw, GtkWidget *pwMoveFilter ) {
 
 }
 
+
+extern void
+MoveFilterSetPredefined ( GtkWidget *pwMoveFilter,
+                          const int i ) {
+
+
+  movefilterwidget *pmfw = 
+    gtk_object_get_user_data ( GTK_OBJECT ( pwMoveFilter ) );
+
+  if ( i < 0 )
+    return;
+
+  memcpy ( pmfw->pmf, aaamfMoveFilterSettings[ i ],
+           MAX_FILTER_PLIES * MAX_FILTER_PLIES * sizeof ( movefilter ) );
+
+  gtk_option_menu_set_history ( GTK_OPTION_MENU ( pmfw->pwOptionMenu ),
+                                i );
+
+  MoveFilterChanged ( pmfw );
+
+}
