@@ -44,4 +44,7 @@ extern int NeuralNetLoadBinary( neuralnet *pnn, FILE *pf );
 extern int NeuralNetSave( neuralnet *pnn, FILE *pf );
 extern int NeuralNetSaveBinary( neuralnet *pnn, FILE *pf );
 
+extern void 
+ComputeSigTable (void);
+
 #endif

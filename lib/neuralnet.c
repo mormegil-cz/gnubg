@@ -32,6 +32,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
+
+#define SIGMOID_BAUR 0
+#define SIGMOID_JTH 0
+
+#if HAVE_LIBATLAS
+#warning "LIBATLAS processing..."
+#include <cblas.h>
+#endif /* HAVE_LIBATLAS */
+
+#if SIGMOID_BAUR
+#define sigmoid sigmoid_baur
+#elif SIGMOID_JTH
+#define sigmoid sigmoid_jth
+#else
+#define sigmoid sigmoid_original
+#endif
+
 
 /* e[k] = exp(k/10) / 10 */
 static float e[100] = {
@@ -148,7 +166,8 @@ static float e[100] = {
    The Intel x87's `f2xm1' instruction makes calculating accurate
    exponentials comparatively fast, but still about 30% slower than
    the lookup table used here. */
-static inline float sigmoid(float const xin) {
+//static inline float sigmoid(float const xin) {
+static float sigmoid_original(float const xin) {
     
     if( !signbit( xin ) ) { /* signbit() can be faster than a compare to 0.0 */
 	/* xin is almost always positive; we place this branch of the `if'
@@ -172,6 +191,119 @@ static inline float sigmoid(float const xin) {
 	    return 19930.370438230298f / 19931.370438230298f;	
     }
 }
+
+#if SIGMOID_BAUR
+
+#define SIG_Q 10.0f     /* reciprocal of precision step */                      
+#define SIG_MAX 100     /* half number of entries in lookup table */
+/* note: the lookup table covers the interval [ -SIG_MAX/SIG_Q  to
++SIG_MAX/SIG_Q ] */
+static float Sig[2*SIG_MAX+1];
+
+#endif /* SIGMOID_BAUR */
+
+#if SIGMOID_JTH
+
+#define SIG_Q 10.0f
+#define SIG_MAX 100  /* half number of entries */
+
+static float SigD0[ 2 * SIG_MAX + 1 ]; /* sigmoid(x0) */
+static float SigD1[ 2 * SIG_MAX + 1 ]; /* sigmoid'(x0) */
+
+#endif /* SIGMOID_JTH */
+
+extern void 
+ComputeSigTable (void) {
+
+#if SIGMOID_BAUR
+
+  int i;
+
+  for (i = -SIG_MAX; i < SIG_MAX+1; i++) {
+    float x = (float) i / SIG_Q;
+    /* Sig[SIG_MAX+i] = 1.0f / (1.0f + exp (x));  more accurate, 
+                                                  but fails gnubgtest */
+    /* use the current sigmoid function instead :-)  */
+    Sig[SIG_MAX+i] = sigmoid_original(x);  
+  }
+
+  printf( "Table with %d elements initialised\n", 2 * SIG_MAX + 1 );
+
+#endif /* SIGMOID_BAUR */
+
+#if SIGMOID_JTH
+
+  int i;
+  for ( i = -SIG_MAX; i < SIG_MAX + 1; ++i ) {
+    float x = (float) i / SIG_Q;
+    SigD0[ SIG_MAX + i ] = sigmoid_original(x);
+    SigD1[ SIG_MAX + i ] = 
+      - exp(x) * SigD0[ SIG_MAX + i ] * SigD0[ SIG_MAX + i ] / SIG_Q;
+  }
+
+  printf( "SIGMOID_JTH: table with %d elements initialised.\n", 
+          2 * SIG_MAX + 1 );
+
+#endif /* SIGMOID_JTH */
+
+}
+
+#if SIGMOID_BAUR
+
+static float 
+sigmoid_baur (float const x) {
+
+  float x2 = x * SIG_Q;
+  int i = x2;
+
+  if (i > - SIG_MAX) {
+    if (i < SIG_MAX) {
+      float a = Sig[i+SIG_MAX];
+      float b = Sig[i+SIG_MAX+1];
+      return a + (b - a) * (x2 - i);
+    }
+    else
+      /* warning: this is 1.0f/(1.0f+exp(9.9f)) */
+      return 1.0f / 19931.370438230298f;  
+  }
+  else
+    /* warning: this is 1.0f/(1.0f+exp(-9.9f)) */
+    return 19930.370438230298f / 19931.370438230298f;  
+}
+
+#endif /* SIGMOID_BAUR */
+
+#if SIGMOID_JTH
+
+static float
+sigmoid_jth( const float x ) {
+
+  float x2 = x * SIG_Q;
+  int i = x2;
+
+  if (i > - SIG_MAX) {
+    if (i < SIG_MAX) {
+      float fx0   = SigD0[i+SIG_MAX];
+      float dfx0 = SigD1[i+SIG_MAX];
+      float s = fx0 + dfx0 * ( x2 - i );
+      /*
+      float d = sigmoid_original(x);
+      if ( fabs(s-d) > 2.0e-3 ) {
+        printf( "%f %f %f %f %f %f %f \n", x, x2, x0, fx0, dfx0, s, d );
+        assert(0);
+        }*/
+      return s;
+    }
+    else
+      /* warning: this is 1.0f/(1.0f+exp(9.9f)) */
+      return 1.0f / 19931.370438230298f;  
+  }
+  else
+    /* warning: this is 1.0f/(1.0f+exp(-9.9f)) */
+    return 19930.370438230298f / 19931.370438230298f;  
+}
+
+#endif /* SIGMOID_JTH */
 
 
 /*  #define sigmoid( x ) ( (x) > 0.0f ? \ */
@@ -301,8 +433,9 @@ NeuralNetDestroy( neuralnet *pnn )
   return 0;
 }
 
-static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
-		     float arOutput[], float *saveAr ) {
+static int EvaluateOld( neuralnet *pnn, float arInput[], float ar[],
+                        float arOutput[], float *saveAr ) {
+
     int i, j;
     float *prWeight;
 
@@ -331,6 +464,7 @@ static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
     if( saveAr)
       memcpy( saveAr, ar, pnn->cHidden * sizeof( *saveAr));
 
+
     for( i = 0; i < pnn->cHidden; i++ )
 	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
 
@@ -347,10 +481,65 @@ static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
     }
 
     return 0;
+
 }
 
-static int EvaluateFromBase( neuralnet *pnn, float arInputDif[], float ar[],
+static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
+		     float arOutput[], float *saveAr ) {
+  int i;
+
+#if !HAVE_LIBATLAS
+  return EvaluateOld( pnn, arInput, ar, arOutput, saveAr );
+#else /* HAVE_LIBATLAS */
+
+    /* BLAS implementation */
+
+    /* ar = t(hidden) */
+    memcpy( ar, pnn->arHiddenThreshold, 
+            pnn->cHidden * sizeof ( float ) );
+
+    /* activity at hidden nodes: ar = W(hidden) * i + t(hidden) */
+
+    cblas_sgemv( CblasColMajor, CblasNoTrans,
+                 pnn->cHidden, pnn->cInput, 1.0f,
+                 pnn->arHiddenWeight, pnn->cHidden,
+                 arInput, 1,
+                 1.0f, ar, 1 );
+
+    /* save result for later use */
+    
+    if( saveAr)
+      memcpy( saveAr, ar, pnn->cHidden * sizeof( *saveAr));
+
+    /* apply sigmoid */
+
+    for( i = 0; i < pnn->cHidden; i++ )
+	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+
+    /* calculate output: arOutput = W(output) * ar + t(output) */
+
+    memcpy( arOutput, pnn->arOutputThreshold, 
+            pnn->cOutput * sizeof ( float ) );
+
+    cblas_sgemv( CblasRowMajor, CblasNoTrans,
+                 pnn->cOutput, pnn->cHidden, 1.0f,
+                 pnn->arOutputWeight, pnn->cHidden,
+                 ar, 1,
+                 1.0f, arOutput, 1 );
+
+    /* apply sigmoid */
+
+    for( i = 0; i < pnn->cOutput; i++ )
+	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * arOutput[ i ] );
+
+#endif /* HAVE_LIBATLAS */
+
+    return 0;
+}
+
+static int EvaluateFromBaseOld( neuralnet *pnn, float arInputDif[], float ar[],
 		     float arOutput[] ) {
+
     int i, j;
     float *prWeight;
 
@@ -394,6 +583,52 @@ static int EvaluateFromBase( neuralnet *pnn, float arInputDif[], float ar[],
 
 	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * r );
     }
+
+    return 0;
+
+}
+
+
+static int EvaluateFromBase( neuralnet *pnn, float arInputDif[], float ar[],
+		     float arOutput[] ) {
+    int i;
+
+#if !HAVE_LIBATLAS
+    return EvaluateFromBaseOld( pnn, arInputDif, ar, arOutput );
+#else /* HAVE_LIBATLAS */
+
+    /* BLAS implementation */
+
+    /* activity at hidden nodes: ar = W(hidden) * i + t(hidden) */
+
+    cblas_sgemv( CblasColMajor, CblasNoTrans,
+                 pnn->cHidden, pnn->cInput, 1.0f,
+                 pnn->arHiddenWeight, pnn->cHidden,
+                 arInputDif, 1,
+                 1.0f, ar, 1 );
+    
+    /* apply sigmoid */
+
+    for( i = 0; i < pnn->cHidden; i++ )
+	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
+
+    /* calculate output: arOutput = W(output) * ar + t(output) */
+
+    memcpy( arOutput, pnn->arOutputThreshold, 
+            pnn->cOutput * sizeof ( float ) );
+
+    cblas_sgemv( CblasRowMajor, CblasNoTrans,
+                 pnn->cOutput, pnn->cHidden, 1.0f,
+                 pnn->arOutputWeight, pnn->cHidden,
+                 ar, 1,
+                 1.0f, arOutput, 1 );
+
+    /* apply sigmoid */
+
+    for( i = 0; i < pnn->cOutput; i++ )
+	arOutput[ i ] = sigmoid( -pnn->rBetaOutput * arOutput[ i ] );
+    
+#endif /* HAVE_LIBATLAS */
 
     return 0;
 }
