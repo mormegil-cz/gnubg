@@ -983,8 +983,9 @@ extern void CommandSetSeed( char *sz ) {
 	InitRNGSeed( n );
 	outputf( "Seed set to %d.\n", n );
     } else
-	outputl( InitRNG() ? "Seed initialised from system random data." :
-	      "Seed initialised by system clock." );
+	outputl( InitRNG( NULL, TRUE ) ?
+		 "Seed initialised from system random data." :
+		 "Seed initialised by system clock." );
 }
 
 extern void CommandSetTurn( char *sz ) {
@@ -1156,8 +1157,7 @@ static void SetMET( met metNew ) {
 
         InitMatchEquity ( metNew );
 
-        /* FIXME: add match equity table to GTK menu 
-           UpdateSetting( &metCurrent ); */
+	UpdateSetting( &metCurrent );
     }
 }
 

@@ -203,7 +203,7 @@ extern void InitRNGSeed( int n ) {
 
 /* Returns TRUE if /dev/random was available, or FALSE if system clock was
    used. */
-extern int InitRNG( void ) {
+extern int InitRNG( int *pnSeed, int fSet ) {
 
     int n, h, f = FALSE;
 
@@ -223,8 +223,12 @@ extern int InitRNG( void ) {
 #endif
 	    n = time( NULL );
     }
-    
-    InitRNGSeed( n );
+
+    if( pnSeed )
+	*pnSeed = n;
+
+    if( fSet )
+	InitRNGSeed( n );
 
     return f;
 }
