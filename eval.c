@@ -4201,8 +4201,17 @@ extern cubedecision
 FindCubeDecision ( float arDouble[],
                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                    cubeinfo *pci ) {
- 
-  GetDPEq ( NULL, &arDouble[ OUTPUT_DROP ], pci );
+
+  if ( pci->nMatchTo ) {
+
+    float r;
+  
+    GetDPEq ( NULL, &r, pci );
+    arDouble[ OUTPUT_DROP ] = mwc2eq ( r, pci );
+  }
+  else
+    GetDPEq ( NULL, &arDouble[ OUTPUT_DROP ], pci );
+
   arDouble[ OUTPUT_NODOUBLE ] = aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ];
   arDouble[ OUTPUT_TAKE ] = aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ];
 
