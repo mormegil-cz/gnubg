@@ -286,7 +286,8 @@ static char szDICE[] = "<die> <die>",
     szSCORE[] = "<score>",
     szSIZE[] = "<size>",
     szTRIALS[] = "<trials>",
-    szVALUE[] = "<value>";
+    szVALUE[] = "<value>",
+    szMATCHID[] = "<matchid>";
 
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
@@ -647,6 +648,7 @@ command cER = {
       "money games", szONOFF, &cOnOff },
     { "matchequitytable", CommandSetMET,
       "Read match equity table from XML file", szFILENAME, &cFilename },
+    { "matchid", CommandSetMatchID, "set Match ID", szMATCHID, NULL },
     { "met", CommandSetMET,
       "Synonym for `set matchequitytable'", szFILENAME, &cFilename },
     { "nackgammon", CommandSetNackgammon, "Set the starting position",
@@ -1820,6 +1822,18 @@ extern void ShowBoard( void ) {
 #endif
     }    
 #endif    
+
+#ifdef UNDEF
+    {
+      char *pc;
+
+      printf ( "MatchID: %s\n", pc = MatchIDFromMatchState ( &ms ) );
+
+      MatchStateFromID ( &ms, pc );
+
+    }
+#endif
+
 }
 
 extern char *FormatPrompt( void ) {
