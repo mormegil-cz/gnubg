@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <glib.h>
 
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -931,7 +932,7 @@ TextRolloutProgressStart( const cubeinfo *pci, const int n,
 
   *pp = prp;
 
-  prp->ppch = g_malloc( n * sizeof (char *) );
+  prp->ppch = (char **) g_malloc( n * sizeof (char *) );
   for ( i = 0; i < n; ++i )
     prp->ppch[ i ] = (char *) asz[ i ];
   prp->n = n;

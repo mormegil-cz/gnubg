@@ -23,15 +23,29 @@
 #include <config.h>
 #endif
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+
+#if HAVE_ALLOCA
+#ifndef alloca
+#define alloca __builtin_alloca
+#endif
+#endif
+
 #include <errno.h>
+
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+
 #include <stdio.h>
 #include <string.h>
+
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

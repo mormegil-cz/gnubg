@@ -19,11 +19,20 @@
  * $Id$
  */
 
-#include "config.h"
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
+
+#if HAVE_ALLOCA
+#ifndef alloca
+#define alloca __builtin_alloca
+#endif
+#endif
+
 #include <errno.h>
 #include <isaac.h>
 #include <math.h>

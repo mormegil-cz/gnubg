@@ -796,8 +796,8 @@ void DiceRolled()
 		bd->diceShown = DICE_ROLLING;
 		ShowBoard();
 	}
-#endif
         if ( ! fX )
+#endif
           ShowBoard();
 
 }
