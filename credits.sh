@@ -42,6 +42,7 @@ Ric Gerace
 Michel Grimminck
 Eric Groleau
 Jeff Haferman
+Morten Juul Henriksen
 Alain Henry
 Jens Hoefkens
 Martin Janke
@@ -56,6 +57,7 @@ Corrin Lakeland
 Tim Laursen
 Eli Liang
 Kevin Maguire
+William Maslen
 Thomas Meyer
 Achim Mueller
 Magnar Naustdalslid
