@@ -131,10 +131,11 @@ duplication of effort and to make sure our changes merge easily.
   angle when rendering the border.  Allow the dice pips colour to be
   changed.
 ** Use a file selection widget for the socket in the player dialog.
-** Would ShowList() look better if it used a text widget?
+** Would ShowList() look better if it used a text widget?  (Wait for
+  GTK+ 2.0.)
 ** Spin buttons with large values (e.g. the RNG seed settings) behave
   strangely.  This is GTK+'s fault (adjustments store their values as
-  floats, which have less precision than ints).
+  floats, which have less precision than ints).  (Fixed in GTK+ 2.0.)
 ** During a rollout, the OK button should be the grab widget.  Can we
   fix that by temporarily modifying pwGrab?  (Or maybe we should allow
   the entire the whole rollout dialog to be active, for copy/paste.)
@@ -162,7 +163,7 @@ duplication of effort and to make sure our changes merge easily.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
-  to recurse through help for subcommands.
+  to recurse through help for subcommands.  (Wait for GTK+ 2.0.)
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
@@ -267,6 +268,8 @@ functions:
 *** ASCII.
 *** LaTeX.
 ** Improve the LaTeX, PS and PDF output:
+*** Add commands to change paper size, board magnification, and number of
+  move candidates listed in analysis. (gary)
 *** Add names and scores before each game.
 *** Show game and match statistics (if available) at end of game/match.
 *** Allow some option for selecting which boards to print (see the

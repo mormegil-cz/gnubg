@@ -1,3 +1,17 @@
+Tue Nov  6 10:48:56 2001  Gary Wong  <gtw@research.att.com>
+
+	* latex.c, postscript.c (ExportGameLaTeX, ExportGamePostScript): Set
+	fTurn and fMove in the matchstate (fixes a bug reported by John 
+	Chuang).
+	* gnubg.c (FormatMoveHint): Add a matchstate parameter.  All callers
+	changed.
+
+	* gnubg.c (CommandSaveSettings): Save analysis thresholds (reported
+	by Olivier Croisille).
+	* set.c (CommandSetAnalysisThresholdInteresting): New function.
+	
+	* postscript.c (CommandExportPositionEPS): New function.
+
 Mon Nov  5 12:57:19 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (MainSize): Compute the default window size dynamically,

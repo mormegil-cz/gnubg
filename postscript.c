@@ -30,6 +30,7 @@
 
 #include "backgammon.h"
 #include "drawboard.h"
+#include "positionid.h"
 
 typedef enum _font { FONT_NONE, FONT_RM, FONT_SF, FONT_TT } font;
 static char *aszFont[ FONT_TT + 1 ] = { NULL, "rm", "sf", "tt" };
@@ -203,7 +204,7 @@ static void Skip( FILE *pf, int cy ) {
 	Consume( pf, cy );
 }
 
-static void PostScriptPrologue( FILE *pf ) {
+static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
 
     /* FIXME change the font-setting procedures to use ISO 8859-1
        encoding */
@@ -373,9 +374,16 @@ static void PostScriptPrologue( FILE *pf ) {
     } else {
 	fputs( "%!PS-Adobe-3.0\n", pf );
 
-	fprintf( pf, "%%%%BoundingBox: %d %d %d %d\n",
-		 ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2,
-		 ( cxPage + 451 ) / 2, ( cyPage + 648 ) / 2 );
+	if( fEPS )
+	    fprintf( pf, "%%%%BoundingBox: %d %d %d %d\n",
+		     ( cxPage - 451 ) / 2 + 225 - 200 * nMag / 100,
+		     ( cyPage + 648 ) / 2 - 260 * nMag / 100,
+		     ( cxPage - 451 ) / 2 + 225 + 200 * nMag / 100,
+		     ( cyPage + 648 ) / 2 );
+	else
+	    fprintf( pf, "%%%%BoundingBox: %d %d %d %d\n",
+		     ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2,
+		     ( cxPage + 451 ) / 2, ( cyPage + 648 ) / 2 );
 	
 	time( &t );
 	sz = ctime( &t );
@@ -384,9 +392,7 @@ static void PostScriptPrologue( FILE *pf ) {
 	fprintf( pf, "%%%%CreationDate: (%s)\n", sz );
 	
 	fputs( "%%Title: (", pf );
-	PostScriptEscape( pf, ap[ 0 ].szName );
-	fputs( " vs. ", pf );
-	PostScriptEscape( pf, ap[ 1 ].szName );
+	PostScriptEscape( pf, szTitle );
 	fputs( ")\n", pf );
 	
 	fprintf( pf, szPrologue, fClockwise ? -20 : 20,
@@ -728,6 +734,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_NORMAL:
+	    msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
 	    if( fTook )
 		/* no need to print board following a double/take */
 		fTook = FALSE;
@@ -767,7 +774,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 		    fprintf( pf, fPDF ? "1 0 0 1 46 %d Tm (" :
 			     "46 %d moveto (", y );
 		    putc( i == pmr->n.iMove ? '*' : ' ', pf );
-		    FormatMoveHint( sz, msExport.anBoard, &pmr->n.ml, i,
+		    FormatMoveHint( sz, &msExport, &pmr->n.ml, i,
 				    i != pmr->n.iMove ||
 				    i != pmr->n.ml.cMoves - 1 );
 		    pch = strchr( sz, '\n' );
@@ -936,6 +943,7 @@ static void PostScriptEpilogue( FILE *pf ) {
 static void ExportGameGeneral( int f, char *sz ) {
 
     FILE *pf;
+    char szTitle[ 128 ];
 
     sz = NextToken( &sz );
     
@@ -945,8 +953,8 @@ static void ExportGameGeneral( int f, char *sz ) {
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export"
-		 "game postscript')." ); /* FIXME not necessarily PS */
+	outputf( "You must specify a file to export to (see `help export "
+		 "game %s').\n", f ? "pdf" : "postscript" );
 	return;
     }
 
@@ -964,7 +972,8 @@ static void ExportGameGeneral( int f, char *sz ) {
     }
 
     fPDF = f;
-    PostScriptPrologue( pf );
+    sprintf( szTitle, "%s vs. %s", ap[ 0 ].szName, ap[ 1 ].szName );
+    PostScriptPrologue( pf, FALSE, szTitle );
     
     ExportGamePostScript( pf, plGame );
 
@@ -988,7 +997,8 @@ static void ExportMatchGeneral( int f, char *sz ) {
     
     FILE *pf;
     list *pl;
-
+    char szTitle[ 128 ];
+    
     sz = NextToken( &sz );
     
     if( !plGame ) {
@@ -998,7 +1008,7 @@ static void ExportMatchGeneral( int f, char *sz ) {
     
     if( !sz || !*sz ) {
 	outputf( "You must specify a file to export to (see `help export "
-		 "match %s\n').", f ? "pdf" : "postscript" );
+		 "match %s').\n", f ? "pdf" : "postscript" );
 	return;
     }
 
@@ -1016,7 +1026,8 @@ static void ExportMatchGeneral( int f, char *sz ) {
     }
 
     fPDF = f;
-    PostScriptPrologue( pf );
+    sprintf( szTitle, "%s vs. %s", ap[ 0 ].szName, ap[ 1 ].szName );
+    PostScriptPrologue( pf, FALSE, szTitle );
 
     /* FIXME write match introduction? */
     
@@ -1037,4 +1048,41 @@ extern void CommandExportMatchPDF( char *sz ) {
 extern void CommandExportMatchPostScript( char *sz ) {
 
     ExportMatchGeneral( FALSE, sz );
+}
+
+extern void CommandExportPositionEPS( char *sz ) {
+
+    FILE *pf;
+    char szTitle[ 32 ];
+	
+    sz = NextToken( &sz );
+    
+    if( ms.gs == GAME_NONE ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
+    
+    if( !sz || !*sz ) {
+	outputl( "You must specify a file to export to (see `help export "
+		 "position eps')." );
+	return;
+    }
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	perror( sz );
+	return;
+    }
+
+    fPDF = FALSE;
+    sprintf( szTitle, "Position %s", PositionID( ms.anBoard ) );
+    PostScriptPrologue( pf, TRUE, szTitle );
+
+    PrintPostScriptBoard( pf, &ms, ms.fTurn );
+    
+    PostScriptEpilogue( pf );
+
+    if( pf != stdout )
+	fclose( pf );
 }
