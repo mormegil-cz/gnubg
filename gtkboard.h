@@ -212,19 +212,20 @@ extern void board_free_pixmaps( BoardData *bd );
 #if USE_BOARD3D
 /* Functions for 3d board */
 extern int InitGTK3d(int *argc, char ***argv);
-extern void SetupViewingVolume3d();
+extern void SetupViewingVolume3d(BoardData *bd);
 extern void DisplayCorrectBoardType();
-extern void ShowBoard3d(BoardData *bd);
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
 extern void RollDice3d(BoardData *bd);
 extern void AnimateMove3d(BoardData *bd);
 extern void ShowFlag3d(BoardData *bd);
-extern void StopIdle3d();
+extern void StopIdle3d(BoardData* bd);
 extern void SetShadowDimness3d();
 extern void preDraw3d();
 extern void CloseBoard3d(BoardData* bd);
 extern void SetSkin(BoardData *bd, int num);
-void SetupLight3d(BoardData *bd);
+extern void SetupLight3d(BoardData *bd);
+extern int BoardPoint3d(BoardData *bd, int x, int y, int point);
+extern int MouseMove3d(BoardData *bd, int x, int y);
 
 extern void PlaceMovingPieceRotation(BoardData* bd, int dest, int src);
 extern void SetMovingPieceRotation(BoardData* bd, int pt);
@@ -234,6 +235,8 @@ extern void updateHingeOccPos(BoardData* bd);
 extern void updateFlagOccPos(BoardData* bd);
 extern void CheckAccelerated();
 #endif
+
+extern int animate_player, *animate_move_list, animation_finished;
 
 extern void read_board( BoardData *bd, gint points[ 2 ][ 25 ] );
 extern void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] );
@@ -247,6 +250,9 @@ extern int update_move(BoardData *bd);
 extern gboolean place_chequer_or_revert(BoardData *bd, int dest);
 extern gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] );
 extern void InitBoardData();
+extern gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* bd);
+extern gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, BoardData* bd);
+extern gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData* bd);
 
 extern void
 DrawDie( GdkDrawable *pd, 

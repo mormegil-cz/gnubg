@@ -103,7 +103,7 @@ void draw_shadow_volume_to_stencil()
 	glEnable(GL_LIGHTING);
 }
 
-void shadowDisplay(void (*drawScene)())
+void shadowDisplay(void (*drawScene)(void*), void* arg)
 {
 	/* Pass 1: Draw model, ambient light only (some diffuse to vary shadow darkness) */
 	float zero[4] = {0,0,0,0};
@@ -116,7 +116,7 @@ void shadowDisplay(void (*drawScene)())
 	glGetLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, zero);
 
-	drawScene();
+	drawScene(arg);
 
 	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
@@ -129,7 +129,7 @@ void shadowDisplay(void (*drawScene)())
 	glStencilFunc(GL_EQUAL, midStencilVal, ~0);
 	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-	drawScene();
+	drawScene(arg);
 
 	glDisable(GL_STENCIL_TEST);
 }

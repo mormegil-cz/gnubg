@@ -3591,7 +3591,7 @@ extern void PromptForExit( void ) {
 
 #if USE_BOARD3D
 	/* Stop any 3d animations */
-	StopIdle3d();
+	StopIdle3d(BOARD(pwBoard)->board_data);
 #endif
 
     playSound ( SOUND_EXIT );

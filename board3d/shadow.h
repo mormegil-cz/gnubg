@@ -34,7 +34,7 @@ extern void copyOccluder(Occluder* fromOcc, Occluder* toOcc);
 void moveToOcc(Occluder* pOcc);
 
 void shadowInit();
-void shadowDisplay(void (*drawScene)());
+void shadowDisplay(void (*drawScene)(void*), void* arg);
 void draw_shadow_volume_extruded_edges(Occluder* Occluder, int prim);
 void draw_shadow_volume_edges(Occluder* Occluder);
 

@@ -101,10 +101,7 @@ void InitGL();
 
 /* Drawing functions */
 void drawBoard(BoardData* bd);
-int board_point(BoardData *bd, int x, int y, int point);
-void SetupViewingVolume();
 void SetupPerspVolume(BoardData* bd, int viewport[4]);
-void preDrawThings(BoardData* bd);
 float getBoardWidth();
 float getBoardHeight();
 void calculateBackgroundSize(BoardData *bd, int viewport[4]);
@@ -129,5 +126,4 @@ void setDicePos(BoardData* bd);
 
 typedef int idleFunc(BoardData* bd);
 
-void stopIdleFunc();
-void setIdleFunc(idleFunc* pFun);
+void setIdleFunc(BoardData* bd, idleFunc* pFun);

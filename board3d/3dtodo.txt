@@ -4,58 +4,52 @@ Todo
 
 Display settings
 ----------------
-	* Change display settings options to allow 3d skin settings
-		Merge in with existing 2d settings?
-		(Look at materials.h for sample colour settings)
-
-	? Merge options/display and appearance/general+3d together?
-		Some of the options/display seem out of place
-		animation speed/type + dice below board
-
-	Setting appearance/general messy
-		Change bottom bits to 2d settings / or add a light setting tab?
-
-	* Change skin options to be similiar to windows selection?
-		i.e. two pages, one to select the skin and the other to vary settings
-		select items from drop down - or click on the screen
-
-	Add apply button to appearance dialog?
+* Add 3d preview window
+	+ Make sure switching from 2d/3d option works ok
+	+ Look at theWidget variable - problems/remove?
 
 Bugs
 ====
 
 * Play 2 moves each, go back to your last move in game record window, then resign the game
  -> strange piece movement before resignation.
-	+ Doesn't work in 2d either
+	+ Doesn't work in 2d or 3d view
+	
+* 2d view: resign game, new game starts and resignation cube still visible.
+	+ Now switch to 3d view and sometimes hangs... or "no dice?" message
+
++Both go wrong with BOARD3D not defined
 
 Other things
 ============
 
 Tidy files
-	Merge button press code together
-		Split up big function at same time
-		Use separate messages too
 	Put animation effects in misc3d.c to a new file/check through files
 		+ Add stuff in widget.c too (or put animation stuff here)
 	Remove test files from lib build (testgtkboard.c)
 		+ Remove initialization code (not needed from lib) - when in settings
 	Sort out dice_roll/dice/dice_opponent rubbish
+		+ No dice showing/dice below board or on either side
 
-Add check for unaccellerated graphics under linux
-	+ build/use very simple example to test
+Accelerated check
+	Add proper accelerated check under windows
+	Add check for unaccellerated graphics under linux
+		+ build/use very simple example to test
+
+Add tooltips for new options
+
+----------------------------------------------------------
 
 Add a few preset light positions
 	i.e. left of board, top of board, right of board, centre of board.
 
-Add tooltips for new options
-
-Move textures from data directory to boards or boards/3d or boards/textures
+Move texture location from data directory to boards or boards/3d or boards/textures
 	Add them to cvs (as binary files)
-
-Add proper accelerated check
 
 ----------------------------------------------------------
 
+export position png - render 3d board to file?
+Separate dice animation speed setting?
 Add gtk 1.3 option (via other gtk widget)
 	+ Test ok
 Blink move animatation - useful?
@@ -65,5 +59,11 @@ Fails to load (run) on my windows 98 box - freetype problem?
 
 Remove any build warnings
 Remove any g_prints/debug code
-remove pCurBoard as much as poss
 Check gnubg builds and runs without BOARD3D defined
+
+
+Skin help
+=========
+<colour/lighting help>
+(Look at materials.h for sample colour settings)
+<texture help>

@@ -431,6 +431,6 @@ void SetSkin(BoardData *bd, int num)
 	if (num == 6)
 		SetSkin6(bd);
 
-	preDrawThings(bd);
+	preDraw3d(bd);
 	updateHingeOccPos(bd);
 }

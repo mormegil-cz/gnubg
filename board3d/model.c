@@ -494,39 +494,34 @@ void addHalfTube(Occluder* pOcc, float r, float h, int numSteps)
 	free(yPts);
 }
 
-int converted[8][3][3] = {
-	{{1, 2, 3}, {3, 1, 2}, {2, 3, 1}},
-	{{-2, 1, 3}, {-1, 3, 2}, {-3, 2, 1}},
-	{{-1, -2, 3}, {-3, -1, 2}, {-2, -3, 1}},
-	{{2, -1, 3}, {1, -3, 2}, {3, -2, 1}},
-	{{2, 1, -3}, {1, 3, -2}, {3, 2, -1}},
-	{{-1, 2, -3}, {-3, 1, -2}, {-2, 3, -1}},
-	{{-2, -1, -3}, {-1, -3, -2}, {-3, -2, -1}},
-	{{1, -2, -3}, {3, -1, -2}, {2, -3, -1}}};
+float GetValue(float x, float y, float d, int c, int a, int b)
+{	/* Map (x, y, d) to corner c, face a return b co-ord */
+	int i = c / 4, j = (c / 2) % 2, k = c % 2;
+	int minus, val;
+	if ((i + j + k) % 2)
+		val = ((7 - (b + a)) % 3) + 1;
+	else
+		val = ((b + 3 - a) % 3) + 1;
 
-float GetValue(float x, float y, float d, int val)
-{
-	int s = SGN(val);
-	switch (abs(val))
+	minus = ((k && b == 0) || (j && b == 1) || (i && b == 2));
+
+	switch (val)
 	{
 	case 1:
-		return x * s;
-		break;
+		return minus ? -x : x;
 	case 2:
-		return y * s;
-		break;
+		return minus ? -y : y;
 	case 3:
-		return d * s;
-		break;
+		return minus ? -d : d;
 	}
 	return 0;
 }
 
 void GetCoords(float x, float y, float d, int c, int f, float v[3])
-{
-	v[0] = GetValue(x, y, d, converted[c][f][0]);
-	v[1] = GetValue(x, y, d, converted[c][f][1]);
-	v[2] = GetValue(x, y, d, converted[c][f][2]);
+{	/* Map (x, y, d) to corner c, face f put result in v */
+	v[0] = GetValue(x, y, d, c, f, 0);
+	v[1] = GetValue(x, y, d, c, f, 1);
+	v[2] = GetValue(x, y, d, c, f, 2);
 }
 
 void addDice(Occluder* pOcc, float size)

@@ -7456,7 +7456,7 @@ extern void GTKSet( void *p ) {
 #if USE_BOARD3D
 	/* If in 3d mode may need to update sizes */
     if (rdAppearance.fDisplayType == DT_3D)
-		SetupViewingVolume3d();
+		SetupViewingVolume3d(bd);
 #endif
 	}
     } else if( p == &fGUIShowIDs ) {

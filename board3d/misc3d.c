@@ -777,7 +777,6 @@ void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])
 #include "../sound.h"
 
 double animStartTime = 0;
-extern int animate_player, *animate_move_list, animation_finished;
 int stopNextTime;
 int slide_move;
 extern int convert_point( int i, int player );
@@ -813,7 +812,7 @@ int idleAnimate(BoardData* bd)
 
 	if (stopNextTime)
 	{	/* Stop now - last animation frame has been drawn */
-		stopIdleFunc();
+		StopIdle3d(bd);
 		gtk_main_quit();
 		return 1;
 	}
@@ -896,7 +895,7 @@ void RollDice3d(BoardData *bd)
 
 		bd->shakingDice = 1;
 		stopNextTime = 0;
-		setIdleFunc(idleAnimate);
+		setIdleFunc(bd, idleAnimate);
 
 		setupDicePaths(bd, dicePaths);
 		/* Make sure shadows are in correct place */
@@ -917,7 +916,7 @@ void AnimateMove3d(BoardData *bd)
 	SetupMove(bd);
 
 	stopNextTime = 0;
-	setIdleFunc(idleAnimate);
+	setIdleFunc(bd, idleAnimate);
 	gtk_main();
 	ResumeInput( &m );
 }
@@ -936,10 +935,10 @@ void ShowFlag3d(BoardData *bd)
 	if (rdAppearance.animateFlag && bd->resigned)
 	{
 		animStartTime = get_time();
-		setIdleFunc(idleWaveFlag);
+		setIdleFunc(bd, idleWaveFlag);
 	}
 	else
-		stopIdleFunc();
+		StopIdle3d(bd);
 
 	waveFlag(0);
 	updateFlagOccPos(bd);
@@ -962,7 +961,7 @@ int idleCloseBoard(BoardData* bd)
 	float elapsedTime = (float)(get_time() - animStartTime);
 	if (bd->State == BOARD_CLOSED)
 	{	/* finished */
-		stopIdleFunc();
+		StopIdle3d(bd);
 		gtk_main_quit();
 
 		return 1;
@@ -1006,14 +1005,14 @@ void CloseBoard3d(BoardData* bd)
 	}
 	animStartTime = get_time();
 	bd->perOpen = 0;
-	setIdleFunc(idleCloseBoard);
+	setIdleFunc(bd, idleCloseBoard);
 	/* As idleCloseBoard assumes last matrix is on stack */
 	glPushMatrix();
 	
 	gtk_main();
 }
 
-int MouseMove(BoardData *bd, int x, int y)
+int MouseMove3d(BoardData *bd, int x, int y)
 {
 	if (bd->drag_point >= 0)
 	{
@@ -1025,9 +1024,43 @@ int MouseMove(BoardData *bd, int x, int y)
 		return 0;
 }
 
-void Reshape(int w, int h)
+#ifdef WIN32
+
+void CheckAccelerated()
 {
-	glViewport(0, 0, w, h);
-	SetupViewingVolume();
+	const char* vendor = glGetString(GL_VENDOR);
+	const char* renderer = glGetString(GL_RENDERER);
+//	const char* version = glGetString(GL_VERSION);
+
+	if (strstr(vendor, "Microsoft") && strstr(renderer, "Generic"))
+	{
+#if HAVE_GTKGLEXT
+		GtkWidget *dialog = gtk_message_dialog_new (0, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+				GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, 
+				"No hardware accelerated graphics card found - performance may be slow.\n");
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+#endif
+	}
 }
 
+#else
+
+void CheckAccelerated()
+{
+}
+
+#endif
+
+void SetupViewingVolume3d(BoardData *bd)
+{
+	GLint viewport[4];
+	glGetIntegerv (GL_VIEWPORT, viewport);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	SetupPerspVolume(bd, viewport);
+
+	SetupLight3d(bd);
+	calculateBackgroundSize(bd, viewport);
+}
