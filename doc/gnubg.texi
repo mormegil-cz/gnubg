@@ -3,7 +3,7 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year August, 2002
+@set month-year August, 2003
 
 @syncodeindex vr cp
 
