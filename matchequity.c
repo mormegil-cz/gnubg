@@ -72,6 +72,17 @@ CalcMatchEq () {
       + (1.0 - GAMMONRATE) * 0.5 * 
       ( (i-2 >=0) ? afBtilde[ i-2 ] : 1.0 );
 
+    /*
+     * add 1.5% at 1-away, 2-away for the free drop
+     * add 0.4% at 1-away, 4-away for the free drop
+     */
+
+    if ( i == 1 )
+      afBtilde[ i ] -= 0.015;
+
+    if ( i == 3 )
+      afBtilde[ i ] -= 0.004;
+
   }
 
   /*
