@@ -33,7 +33,6 @@
 #endif
 
 #if USE_GTK
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 #endif /* USE_GTK */
 
@@ -322,27 +321,26 @@ CommandExportMatchEquityEvolution ( char *sz ) {
 
 }
 
-#if HAVE_LIBPNG && USE_GTK
+#if HAVE_LIBPNG
 
 
-static int
-WritePNG ( const char *sz, unsigned char *puch, 
+extern int
+WritePNG ( const char *sz, unsigned char *puch, int nStride,
            const int nSizeX, const int nSizeY ) {
 
   FILE *pf;
   png_structp ppng;
   png_infop pinfo;
-  png_colorp pcolor;
   png_text atext[ 3 ];
   int i;
 
   if ( ! ( pf = fopen ( sz, "wb" ) ) )
-    return;
+    return -1;
 
   if ( ! ( ppng = png_create_write_struct ( PNG_LIBPNG_VER_STRING,
                                             NULL, NULL, NULL ) ) ) {
     fclose ( pf );
-    return 1;
+    return -1;
 
   }
 
@@ -353,7 +351,7 @@ WritePNG ( const char *sz, unsigned char *puch,
   }
 
   if ( setjmp ( png_jmpbuf ( ppng ) ) ) {
-    printf ( "error writeing file\n" );
+    outputerr( sz );
     fclose ( pf );
     png_destroy_write_struct ( &ppng, &pinfo );
     return -1;
@@ -386,7 +384,7 @@ WritePNG ( const char *sz, unsigned char *puch,
  {
    png_bytep aprow[ nSizeY ];
    for ( i = 0; i < nSizeY; ++i )
-     aprow[ i ] = puch + nSizeX * 3 * i;
+     aprow[ i ] = puch + nStride * i;
 
    png_write_image ( ppng, aprow );
 
@@ -496,7 +494,7 @@ GenerateImage ( renderimages *pri, renderdata *prd,
 
   /* write png */
 
-  WritePNG ( szName, puch, nSizeX * nSize, nSizeY * nSize );
+  WritePNG( szName, puch, nSizeX * nSize * 3, nSizeX * nSize, nSizeY * nSize );
   
 
 }
@@ -508,14 +506,11 @@ CommandExportPositionPNG ( char *sz ) {
 
   renderimages ri;
   renderdata rd;
+#if USE_GTK
   BoardData *bd;
-
+#endif
+  
   sz = NextToken( &sz );
-
-  if ( ! fX ) {
-    outputl( _("You must be running the GUI to export positions to PNG.") );
-    return;
-  }
 
   if( ms.gs == GAME_NONE ) {
     outputl( _("No game in progress (type `new game' to start one).") );
@@ -532,12 +527,20 @@ CommandExportPositionPNG ( char *sz ) {
     return;
 
   /* generate PNG image */
-  
-  bd = BOARD ( pwBoard )->board_data;
 
-  memcpy ( &rd, &bd->rd, sizeof ( renderdata ) );
+#if USE_GTK
+  if ( fX ) {
+      bd = BOARD ( pwBoard )->board_data;
+
+      memcpy ( &rd, &bd->rd, sizeof ( renderdata ) );
+  } else
+#endif
+      memcpy( &rd, &rdDefault, sizeof rd );
+  
   rd.nSize = exsExport.nPNGSize;
 
+  assert( rd.nSize >= 1 );
+  
   RenderImages ( &rd, &ri );
 
   GenerateImage ( &ri, &rd, ms.anBoard, sz, 
@@ -551,4 +554,4 @@ CommandExportPositionPNG ( char *sz ) {
 }
 
 
-#endif /* HAVE_LIBPNG && USE_GTK */
+#endif /* HAVE_LIBPNG */

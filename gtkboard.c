@@ -2001,7 +2001,7 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 	auchChequers[ 2 ][ 6 * 3 * 6 * 3 * 4 ];
     unsigned short asRefract[ 2 ][ 6 * 3 * 6 * 3 ];
     int i, nSizeReal;
-    
+
     RenderImages( &bd->rd, &bd->ri );
     nSizeReal = bd->rd.nSize;
     bd->rd.nSize = 3;
@@ -2513,69 +2513,7 @@ static void board_init( Board *board ) {
     bd->show_ids = TRUE;
     bd->show_pips = TRUE;
 
-    bd->rd.fClockwise = fClockwise;
-    bd->rd.wt = WOOD_ALDER;
-    bd->rd.fHinges = TRUE;
-    bd->rd.fLabels = TRUE;
-    bd->rd.rRound = 0.5;
-    bd->rd.arLight[ 0 ] = -0.55667;
-    bd->rd.arLight[ 1 ] = 0.32139;
-    bd->rd.arLight[ 2 ] = 0.76604;
-    bd->rd.arRefraction[ 0 ] = bd->rd.arRefraction[ 1 ] = 1.5;
-    bd->rd.arCoefficient[ 0 ] = 0.2;
-    bd->rd.arExponent[ 0 ] = 3.0;
-    bd->rd.arCoefficient[ 1 ] = 1.0;
-    bd->rd.arExponent[ 1 ] = 30.0;
-    bd->rd.aarColour[ 0 ][ 0 ] = 1.0;
-    bd->rd.aarColour[ 0 ][ 1 ] = 0.20;
-    bd->rd.aarColour[ 0 ][ 2 ] = 0.20;
-    bd->rd.aarColour[ 0 ][ 3 ] = 0.9;
-    bd->rd.aarColour[ 1 ][ 0 ] = 0.05;
-    bd->rd.aarColour[ 1 ][ 1 ] = 0.05;
-    bd->rd.aarColour[ 1 ][ 2 ] = 0.10;
-    bd->rd.aarColour[ 1 ][ 3 ] = 0.5;
-    bd->rd.arDiceCoefficient[ 0 ] = 0.2;
-    bd->rd.arDiceExponent[ 0 ] = 3.0;
-    bd->rd.arDiceCoefficient[ 1 ] = 1.0;
-    bd->rd.arDiceExponent[ 1 ] = 30.0;
-    bd->rd.aarDiceColour[ 0 ][ 0 ] = 1.0;
-    bd->rd.aarDiceColour[ 0 ][ 1 ] = 0.2;
-    bd->rd.aarDiceColour[ 0 ][ 2 ] = 0.2;
-    bd->rd.aarDiceColour[ 0 ][ 3 ] = 0.9;
-    bd->rd.aarDiceColour[ 1 ][ 0 ] = 0.05;
-    bd->rd.aarDiceColour[ 1 ][ 1 ] = 0.05;
-    bd->rd.aarDiceColour[ 1 ][ 2 ] = 0.1;
-    bd->rd.aarDiceColour[ 1 ][ 3 ] = 0.5;
-    bd->rd.afDieColour[ 0 ] = TRUE;
-    bd->rd.afDieColour[ 1 ] = TRUE;
-    bd->rd.aarDiceDotColour[ 0 ][ 0 ] = 0.7;
-    bd->rd.aarDiceDotColour[ 0 ][ 1 ] = 0.7;
-    bd->rd.aarDiceDotColour[ 0 ][ 2 ] = 0.7;
-    bd->rd.aarDiceDotColour[ 0 ][ 3 ] = 0.0; /* unused */
-    bd->rd.aarDiceDotColour[ 1 ][ 0 ] = 0.7;
-    bd->rd.aarDiceDotColour[ 1 ][ 1 ] = 0.7;
-    bd->rd.aarDiceDotColour[ 1 ][ 2 ] = 0.7;
-    bd->rd.aarDiceDotColour[ 1 ][ 3 ] = 0.0; /*unused */
-    bd->rd.arCubeColour[ 0 ] = 0.90;
-    bd->rd.arCubeColour[ 1 ] = 0.90;
-    bd->rd.arCubeColour[ 2 ] = 0.90;
-    bd->rd.arCubeColour[ 3 ] = 0.0; /*unused */
-    bd->rd.aanBoardColour[ 0 ][ 0 ] = 0x30;
-    bd->rd.aanBoardColour[ 0 ][ 1 ] = 0x60;
-    bd->rd.aanBoardColour[ 0 ][ 2 ] = 0x30;
-    bd->rd.aanBoardColour[ 1 ][ 0 ] = 0x00;
-    bd->rd.aanBoardColour[ 1 ][ 1 ] = 0x40;
-    bd->rd.aanBoardColour[ 1 ][ 2 ] = 0x00;
-    bd->rd.aanBoardColour[ 2 ][ 0 ] = 0xFF;
-    bd->rd.aanBoardColour[ 2 ][ 1 ] = 0x60;
-    bd->rd.aanBoardColour[ 2 ][ 2 ] = 0x60;
-    bd->rd.aanBoardColour[ 3 ][ 0 ] = 0xC0;
-    bd->rd.aanBoardColour[ 3 ][ 1 ] = 0xC0;
-    bd->rd.aanBoardColour[ 3 ][ 2 ] = 0xC0;
-    bd->rd.aSpeckle[ 0 ] = 25;
-    bd->rd.aSpeckle[ 1 ] = 25;
-    bd->rd.aSpeckle[ 2 ] = 25;
-    bd->rd.aSpeckle[ 3 ] = 25;
+    memcpy( &bd->rd, &rdDefault, sizeof bd->rd );
     
     gcval.function = GDK_AND;
     gcval.foreground.pixel = ~0L; /* AllPlanes */

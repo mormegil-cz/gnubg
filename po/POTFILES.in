@@ -50,6 +50,7 @@ gtktheory.h
 guile.c
 guile.h
 html.c
+htmlimages.c
 i18n.c
 i18n.h
 import.c

@@ -356,8 +356,9 @@ exportsetup exsExport = {
   NULL, /* HTML url to pictures */
   HTML_EXPORT_TYPE_GNU,
   NULL,  /* HTML extension */
-  HTML_EXPORT_CSS_HEAD /* write CSS stylesheet in <head> */
+  HTML_EXPORT_CSS_HEAD, /* write CSS stylesheet in <head> */
 
+  4 /* PNG size */
 };
 
   
@@ -626,6 +627,8 @@ command cER = {
       "to a portable format"), szFILENAME, &cFilename },
     { "game", NULL, N_("Record a log of the game so far to a file"), NULL,
       acExportGame },
+    { "htmlimages", CommandExportHTMLImages, N_("Generate images to be used "
+      "by the HTML export commands"), szFILENAME, &cFilename },
     { "match", NULL, N_("Record a log of the match so far to a file"), NULL,
       acExportMatch },
     { "position", NULL, N_("Write the current position to a file"), NULL,
@@ -5522,7 +5525,7 @@ extern char *strcpyn( char *szDest, const char *szSrc, int cch ) {
 }
 
 /* Write a string to stdout/status bar/popup window */
-extern void output( char *sz ) {
+extern void output( const char *sz ) {
 
     char *pch;
     
@@ -5541,7 +5544,7 @@ extern void output( char *sz ) {
 }
 
 /* Write a string to stdout/status bar/popup window, and append \n */
-extern void outputl( char *sz ) {
+extern void outputl( const char *sz ) {
 
     char *pch;
     
@@ -5576,7 +5579,7 @@ extern void outputc( char ch ) {
 }
     
 /* Write a string to stdout/status bar/popup window, printf style */
-extern void outputf( char *sz, ... ) {
+extern void outputf( const char *sz, ... ) {
 
     va_list val;
 
@@ -5586,7 +5589,7 @@ extern void outputf( char *sz, ... ) {
 }
 
 /* Write a string to stdout/status bar/popup window, vprintf style */
-extern void outputv( char *sz, va_list val ) {
+extern void outputv( const char *sz, va_list val ) {
 
 #if USE_GTK || __GLIBC__
     char *szFormatted;
@@ -5615,7 +5618,7 @@ extern void outputv( char *sz, va_list val ) {
 }
 
 /* Write an error message, perror() style */
-extern void outputerr( char *sz ) {
+extern void outputerr( const char *sz ) {
 
     /* FIXME we probably shouldn't convert the charset of strerror() - yuck! */
     
@@ -5623,7 +5626,7 @@ extern void outputerr( char *sz ) {
 }
 
 /* Write an error message, fprintf() style */
-extern void outputerrf( char *sz, ... ) {
+extern void outputerrf( const char *sz, ... ) {
 
     va_list val;
 
@@ -5633,7 +5636,7 @@ extern void outputerrf( char *sz, ... ) {
 }
 
 /* Write an error message, vfprintf() style */
-extern void outputerrv( char *sz, va_list val ) {
+extern void outputerrv( const char *sz, va_list val ) {
 
     char *pch;
 #if USE_GTK || __GLIBC__
@@ -6293,8 +6296,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GUILE
     GuileInitialise( szDataDirectory );
 #endif
-    RenderInitialise();
 
+    RenderInitialise();
+    
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );
     else if( ( pch = getenv( "USER" ) ) )

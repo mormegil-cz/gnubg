@@ -391,22 +391,23 @@ extern RETSIGTYPE HandleInterrupt( int idSignal );
 extern char *strcpyn( char *szDest, const char *szSrc, int cch );
 
 /* Write a string to stdout/status bar/popup window */
-extern void output( char *sz );
+extern void output( const char *sz );
 /* Write a string to stdout/status bar/popup window, and append \n */
-extern void outputl( char *sz );
+extern void outputl( const char *sz );
 /* Write a character to stdout/status bar/popup window */
-extern void outputc( char ch );
+extern void outputc( const char ch );
 /* Write a string to stdout/status bar/popup window, printf style */
-extern void outputf( char *sz, ... ) __attribute__((format(printf,1,2)));
+extern void outputf( const char *sz, ... ) __attribute__((format(printf,1,2)));
 /* Write a string to stdout/status bar/popup window, vprintf style */
-extern void outputv( char *sz, va_list val )
+extern void outputv( const char *sz, va_list val )
     __attribute__((format(printf,1,0)));
 /* Write an error message, perror() style */
-extern void outputerr( char *sz );
+extern void outputerr( const char *sz );
 /* Write an error message, fprintf() style */
-extern void outputerrf( char *sz, ... ) __attribute__((format(printf,1,2)));
+extern void outputerrf( const char *sz, ... )
+    __attribute__((format(printf,1,2)));
 /* Write an error message, vfprintf() style */
-extern void outputerrv( char *sz, va_list val )
+extern void outputerrv( const char *sz, va_list val )
     __attribute__((format(printf,1,0)));
 /* Signifies that all output for the current command is complete */
 extern void outputx( void );

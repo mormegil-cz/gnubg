@@ -71,6 +71,29 @@ extern unsigned int cbLuxiRB, cbLuxiSB, cbLuxiSR;
 
 #endif
 
+renderdata rdDefault = {
+    WOOD_ALDER, /* wt */
+    { { 1.0, 0.2, 0.2, 0.9 }, { 0.05, 0.05, 0.1, 0.5 } }, /* aarColour */
+    { { 1.0, 0.2, 0.2, 0.9 }, { 0.05, 0.05, 0.1, 0.5 } }, /* aarDiceColour */
+    { TRUE, TRUE }, /* afDieColour */
+    { { 0.7, 0.7, 0.7, 1.0 }, { 0.7, 0.7, 0.7, 1.0 } }, /* aarDiceDotColour */
+    { 0.9, 0.9, 0.9, 1.0 }, /* arCubeColour */
+    { { 0x30, 0x60, 0x30, 0xFF }, { 0x00, 0x40, 0x00, 0xFF },
+      { 0xFF, 0x60, 0x60, 0xFF }, { 0xC0, 0xC0, 0xC0, 0xFF } }, /* aanBoardC */
+    { 25, 25, 25, 25 }, /* aSpeckle */
+    { 1.5, 1.5 }, /* arRefraction */
+    { 0.2, 1.0 }, /* arCoefficient */
+    { 3.0, 30.0 }, /* arExponent */
+    { 0.2, 1.0 }, /* arDiceCoefficient */
+    { 3.0, 30.0 }, /* arDiceExponent */
+    { -0.55667, 0.32139, 0.76604 }, /* arLight */
+    0.5, /* rRound */
+    -1, /* nSize */
+    TRUE, /* fHinges */
+    TRUE, /* fLabels */
+    FALSE /* fClockwise */
+};
+
 static inline unsigned char clamp( int n ) {
 
     if( n < 0 )
@@ -154,7 +177,7 @@ static void CopyAreaClip( unsigned char *puchDest, int nDestStride,
 		     cx, cy );
 }
 
-static void CopyAreaRotateClip( unsigned char *puchDest, int nDestStride,
+extern void CopyAreaRotateClip( unsigned char *puchDest, int nDestStride,
 				int xDest, int yDest, int cxDest, int cyDest,
 				unsigned char *puchSrc, int nSrcStride,
 				int xSrc, int ySrc, int cx, int cy,

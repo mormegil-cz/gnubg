@@ -59,12 +59,19 @@ typedef struct _renderimages {
 	*achPip[ 2 ], *achCube, *achCubeFaces;
     unsigned short *asRefract[ 2 ];
 } renderimages;
+
+extern renderdata rdDefault;
     
 extern void RenderInitialise( void );
     
 extern void CopyArea( unsigned char *puchDest, int nDestStride,
 		      unsigned char *puchSrc, int nSrcStride,
 		      int cx, int cy );
+extern void CopyAreaRotateClip( unsigned char *puchDest, int nDestStride,
+				int xDest, int yDest, int cxDest, int cyDest,
+				unsigned char *puchSrc, int nSrcStride,
+				int xSrc, int ySrc, int cx, int cy,
+				int nTheta );
 extern void AlphaBlend( unsigned char *puchDest, int nDestStride,
 			unsigned char *puchBack, int nBackStride,
 			unsigned char *puchFore, int nForeStride,

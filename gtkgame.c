@@ -262,6 +262,7 @@ static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameText( gpointer *p, guint n, GtkWidget *pw );
+static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw );
@@ -2120,6 +2121,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  ExportSessionPostScript, 0, NULL },
 	{ N_("/_File/_Export/_Session/Text..."), NULL,
 	  ExportSessionText, 0, NULL },
+	{ N_("/_File/_Export/_HTML Images..."), NULL, ExportHTMLImages, 0,
+	  NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT, NULL },
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
@@ -3500,6 +3503,14 @@ static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw ) {
   if ( sz ) 
     free ( sz );
 
+}
+
+static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *sz = strdup( PKGDATADIR "/html-images" );
+    FileCommand( _("Export HTML images"), sz, "export htmlimages", NULL );
+    if ( sz ) 
+	free ( sz );
 }
 
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
@@ -6905,6 +6916,9 @@ extern void GTKSet( void *p ) {
 				  ms.gs == GAME_PLAYING );
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/File/Export" ),
 			 plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+				      pif, "/File/Export/HTML Images..." ),
+				  TRUE );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
 			 ms.gs == GAME_PLAYING );

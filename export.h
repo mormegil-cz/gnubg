@@ -98,6 +98,9 @@ getMoveNumber ( const list *plGame, const void *p );
 extern char *
 HTMLFilename ( const char *szBase, const int iGame );
 
+extern int WritePNG( const char *sz, unsigned char *puch, int nStride,
+		     const int nSizeX, const int nSizeY );
+
 /* misc. output routines used by text and HTML export */
 
 extern char *

@@ -69,6 +69,8 @@ duplication of effort and to make sure our changes merge easily.
 *** save evaluation into pmr for doubles
 ** Make the command functions return an int, instead of void; that way
   commands which use other commands can provide sensible error handling. (gary)
+** Kit Woolsey suggests adding an option for truncated rollouts: when
+  truncating at n plies, take the mean of the (n-1) and n ply results.
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -163,7 +165,10 @@ duplication of effort and to make sure our changes merge easily.
   seed (e.g. BBS modulus, user .so file) in the GUI.
 ** Clean up the board rendering code, so we can: (gary)
 *** Show a preview of the chequers in the appearances dialog.
-*** Consider somehow rendering html-images directly.
+*** Perhaps even provide a Mozilla plug-in so that boards in generated HTML
+  can be displayed efficiently.
+*** Use a single renderdata struct which is controlled by the
+  "set appearance" command, even when GTK+ isn't there.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -236,6 +241,10 @@ functions:
   Montgomery's suggestion of allowing negative error thresholds.)
 ** ShowBoard always shows "resigns" message as the player on roll, but it
   might have been the opponent.
+** There is an extra column in the GTK+ player record list.  I can't see
+  anything wrong with the code -- perhaps it is a GTK+ bug?  (That list
+  widget is obselete, so presumably the problem will go away when we move
+  to GTK+ 2.0.)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
