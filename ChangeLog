@@ -1,3 +1,7 @@
+Wed Oct  9 21:40:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (SetAnnotation): show analysis in a notebook.
+
 Wed Oct  9 20:58:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandSwapPlayers): update /Game/Turn/ menu after

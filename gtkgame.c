@@ -1439,6 +1439,7 @@ static void SetAnnotation( moverecord *pmr ) {
     int fMoveOld, fTurnOld;
     list *pl;
     char sz[ 64 ];
+    GtkWidget *pwMoveAnalysis = NULL, *pwCubeAnalysis = NULL;
     
     /* Select the moverecord _after_ pmr.  FIXME this is very ugly! */
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext )
@@ -1484,16 +1485,6 @@ static void SetAnnotation( moverecord *pmr ) {
 
             fixOutput ( pmr->n.arDouble, pmr->n.aarOutput );
 
-	    if( ( pw = CreateCubeAnalysis( pmr->n.aarOutput, 
-                                           pmr->n.aarStdDev,
-                                           pmr->n.arDouble,
-                                           &pmr->n.esDouble, 
-                                           MOVE_NORMAL ) ) ) {
-		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
-				    4 );
-                /* FIXME: add cube skill */
-            }
-
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
 	    
@@ -1524,16 +1515,45 @@ static void SetAnnotation( moverecord *pmr ) {
             gtk_box_pack_start ( GTK_BOX ( pwBox ),
                                  SkillMenu ( pmr->n.stCube, "cube" ),
                                  FALSE, FALSE, 4 );
+            /* cube */
+
+            pwCubeAnalysis = CreateCubeAnalysis( pmr->n.aarOutput, 
+                                                 pmr->n.aarStdDev,
+                                                 pmr->n.arDouble,
+                                                 &pmr->n.esDouble, 
+                                                 MOVE_NORMAL );
+
 
             /* move */
 			      
-	    if( pmr->n.ml.cMoves ) {
+	    if( pmr->n.ml.cMoves ) 
+              pwMoveAnalysis = CreateMoveList( &pmr->n.ml, &pmr->n.iMove,
+                                               TRUE, FALSE );
 
-              gtk_box_pack_start( GTK_BOX( pwAnalysis ), 
-                                  CreateMoveList( &pmr->n.ml, &pmr->n.iMove,
-                                                  TRUE, FALSE ),
-                                  TRUE, TRUE, 0 );
-	    }
+
+            if ( pwMoveAnalysis && pwCubeAnalysis ) {
+              /* notebook with analysis */
+              pw = gtk_notebook_new ();
+
+              gtk_box_pack_start ( GTK_BOX ( pwAnalysis ), pw, TRUE, TRUE, 0 );
+
+              gtk_notebook_append_page ( GTK_NOTEBOOK ( pw ),
+                                         pwMoveAnalysis,
+                                         gtk_label_new ( _("Chequer play") ) );
+
+              gtk_notebook_append_page ( GTK_NOTEBOOK ( pw ),
+                                         pwCubeAnalysis,
+                                         gtk_label_new ( _("Cube decision") ) );
+
+
+            }
+            else if ( pwMoveAnalysis )
+              gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
+                                   pwMoveAnalysis, TRUE, TRUE, 0 );
+            else if ( pwCubeAnalysis )
+              gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
+                                   pwCubeAnalysis, TRUE, TRUE, 0 );
+
 
 	    if( !g_list_first( GTK_BOX( pwAnalysis )->children ) ) {
 		gtk_widget_destroy( pwAnalysis );
@@ -1666,6 +1686,16 @@ static void SetAnnotation( moverecord *pmr ) {
     
     gtk_paned_pack1( GTK_PANED( pwParent ), pwAnalysis, TRUE, FALSE );
     gtk_widget_show_all( pwAnalysis );
+
+
+    if ( pmr && pmr->mt == MOVE_NORMAL && pwMoveAnalysis && pwCubeAnalysis ) {
+
+      if ( pmr->n.stCube != SKILL_NONE )
+        gtk_notebook_set_page ( GTK_NOTEBOOK ( pw ), 1 );
+
+
+    }
+
 }
 
 
