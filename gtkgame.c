@@ -279,6 +279,22 @@ static char *aszCommands[ NUM_CMDS ] = {
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
 static void EnterCommand( gpointer *p, guint n, GtkWidget *pw );
+static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw );
+static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw );
+static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw );
+static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw );
+static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw );
+static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw );
+static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw );
+static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw );
+static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw );
+static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw );
+static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw );
+static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw );
+static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
+static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
+static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
+static void ImportPos( gpointer *p, guint n, GtkWidget *pw );
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
@@ -1686,6 +1702,32 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_Save/_Match...", NULL, SaveMatch, 0, NULL },
 	{ "/_File/_Save/_Session...", NULL, NULL, 0, NULL },
 	{ "/_File/_Save/_Weights...", NULL, SaveWeights, 0, NULL },
+	{ "/_File/-", NULL, NULL, 0, "<Separator>" },	
+	{ "/_File/_Import", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Import/._mat match...", NULL, ImportMat, 0, NULL },
+	{ "/_File/_Import/._pos position...", NULL, ImportPos, 0, NULL },
+	{ "/_File/_Import/FIBS _oldmoves...", NULL, ImportOldmoves, 0, NULL },
+	{ "/_File/_Export", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Game", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Game/.gam", NULL, ExportGameGam, 0, NULL },
+	{ "/_File/_Export/_Game/LaTeX", NULL, ExportGameLaTeX, 0, NULL },
+	{ "/_File/_Export/_Game/PDF", NULL, ExportGamePDF, 0, NULL },
+	{ "/_File/_Export/_Game/PostScript", NULL, ExportGamePostScript, 0,
+	  NULL },
+	{ "/_File/_Export/_Match", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Match/LaTeX", NULL, ExportMatchLaTeX, 0, NULL },
+	{ "/_File/_Export/_Match/.mat", NULL, ExportMatchMat, 0, NULL },
+	{ "/_File/_Export/_Match/PDF", NULL, ExportMatchPDF, 0, NULL },
+	{ "/_File/_Export/_Match/PostScript", NULL, ExportMatchPostScript, 0,
+	  NULL },
+	{ "/_File/_Export/_Position", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Position/Encapsulated PostScript", NULL,
+	  ExportPositionEPS, 0, NULL },
+	{ "/_File/_Export/_Position/.pos", NULL, ExportPositionPos, 0, NULL },
+	{ "/_File/_Export/_Session", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Session/PDF", NULL, ExportSessionPDF, 0, NULL },
+	{ "/_File/_Export/_Session/PostScript", NULL, ExportSessionPostScript,
+	  0, NULL },
 	{ "/_File/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_File/_Quit", "<control>Q", Command, CMD_QUIT, NULL },
 	{ "/_Edit", NULL, NULL, 0, "<Branch>" },
@@ -2642,172 +2684,143 @@ static char *SelectFile( char *szTitle ) {
     return pch;
 }
 
-static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
+static void FileCommand( char *szPrompt, char *szCommand ) {
 
     char *pch;
     
-    if( ( pch = SelectFile( "Open commands" ) ) ) {
+    if( ( pch = SelectFile( szPrompt ) ) ) {
 #if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
+	char sz[ strlen( pch ) + strlen( szCommand ) + 2 ];
 #elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
+	char *sz = alloca( strlen( pch ) + strlen( szCommand ) + 2 );
 #else
 	char sz[ 1024 ];
 #endif
-	sprintf( sz, "load commands %s", pch );
+	sprintf( sz, "%s %s", szCommand, pch );
 	UserCommand( sz );
 
 	g_free( pch );
     }
+}
+
+static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Open commands", "load commands" );
 }
 
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch;
-    
-    if( ( pch = SelectFile( "Open game" ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
-#else
-	char sz[ 1024 ];
-#endif
-	sprintf( sz, "load game %s", pch );
-	UserCommand( sz );
-
-	g_free( pch );
-    }
+    FileCommand( "Open game", "load game" );
 }
 
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch;
-    
-    if( ( pch = SelectFile( "Open match" ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
-#else
-	char sz[ 1024 ];
-#endif
-	sprintf( sz, "load match %s", pch );
-	UserCommand( sz );
+    FileCommand( "Open match", "load match" );
+}
 
-	g_free( pch );
-    }
+static void ImportMat( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Import .mat match", "import mat" );
+}
+
+static void ImportPos( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Import .pos position", "import pos" );
+}
+
+static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Import FIBS oldmoves", "import oldmoves" );
 }
 
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch;
-    
-    if( ms.gs == GAME_NONE ) {
-	outputl( "No game in progress (type `new game' to start one)." );
-	outputx();
-	
-	return;
-    }
-    
-    if( ( pch = SelectFile( "Save game" ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
-#else
-	char sz[ 1024 ];
-#endif
-	sprintf( sz, "save game %s", pch );
-	UserCommand( sz );
-
-	g_free( pch );
-    }
+    FileCommand( "Save game", "save game" );
 }
 
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch;
-    
-    if( ms.gs == GAME_NONE ) {
-	outputl( "No game in progress (type `new game' to start one)." );
-	outputx();
-	
-	return;
-    }
-
-    /* FIXME what if nMatch == 0? */
-    
-    if( ( pch = SelectFile( "Save match" ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
-#else
-	char sz[ 1024 ];
-#endif
-	sprintf( sz, "save match %s", pch );
-	UserCommand( sz );
-
-	g_free( pch );
-    }
+    FileCommand( "Save match", "save match" );
 }
 
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch;
-    
-    if( ( pch = SelectFile( "Save weights" ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
-#else
-	char sz[ 1024 ];
-#endif
-	sprintf( sz, "save weights %s", pch );
-	UserCommand( sz );
+    FileCommand( "Save weights", "save weights" );
+}
 
-	g_free( pch );
-    }
+static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export .gam game", "export game gam" );
+}
+
+static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export LaTeX game", "export game latex" );
+}
+
+static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export PDF game", "export game pdf" );
+}
+
+static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export PostScript game", "export game postscript" );
+}
+
+static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export LaTeX match", "export match latex" );
+}
+
+static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export .mat match", "export match mat" );
+}
+
+static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export PDF match", "export match pdf" );
+}
+
+static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export PostScript match", "export match postscript" );
+}
+
+static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export EPS position", "export position eps" );
+}
+
+static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export .pos position", "export position pos" );
+}
+
+static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export LaTeX session", "export session latex" );
+}
+
+static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export PDF session", "export session pdf" );
+}
+
+static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export PostScript session", "export session postscript" );
 }
 
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch;
-    
-    if( ( pch = SelectFile( "Export database" ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
-#else
-	char sz[ 1024 ];
-#endif
-	sprintf( sz, "database export %s", pch );
-	UserCommand( sz );
-
-	g_free( pch );
-    }
+    FileCommand( "Export database", "database export" );
 }
 
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch;
-    
-    if( ( pch = SelectFile( "Import database" ) ) ) {
-#if __GNUC__
-	char sz[ strlen( pch ) + 32 ];
-#elif HAVE_ALLOCA
-	char *sz = alloca( strlen( pch ) + 32 );
-#else
-	char sz[ 1024 ];
-#endif
-	sprintf( sz, "database export %s", pch );
-	UserCommand( sz );
-
-	g_free( pch );
-    }
+    FileCommand( "Import database", "database import" );
 }
 
 typedef struct _evalwidget {
@@ -4040,6 +4053,16 @@ extern void GTKSet( void *p ) {
 
 	board_set_playing( BOARD( pwBoard ), ms.gs == GAME_PLAYING );
 
+	enable_sub_menu( gtk_item_factory_get_widget( pif, "/File/Save" ),
+			 plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	    pif, "/File/Save/Weights..." ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	    pif, "/File/Import/.pos position..." ),
+				  ms.gs == GAME_PLAYING );
+	enable_sub_menu( gtk_item_factory_get_widget( pif, "/File/Export" ),
+			 plGame != NULL );
+	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
 			 ms.gs == GAME_PLAYING );
 	
@@ -4048,9 +4071,9 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_ANALYSE_GAME ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_ANALYSE_MATCH ), TRUE );
+	    pif, CMD_ANALYSE_MATCH ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_ANALYSE_SESSION ), TRUE );
+	    pif, CMD_ANALYSE_SESSION ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_STATISTICS_GAME ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(

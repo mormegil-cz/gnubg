@@ -254,6 +254,12 @@ duplication of effort and to make sure our changes merge easily.
 ** Importing a position should add MOVE_SETBOARD (etc.) records. (gary)
 ** If "set turn" has been used during a game (so a player has two
   consecutive moves), then export to .mat format saves it incorrectly.
+** "set score" does not update the score in the GTK game window option menu.
+  Also, setting the score when browsing an existing game soon reverts to
+  the old score.
+** LuckAnalysis() in analysis.c assumes the equity before the first
+  move was 0, which is not true when the two players have different
+  gammon prices.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

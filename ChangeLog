@@ -1,3 +1,20 @@
+Fri Aug 24 11:23:40 2001  Gary Wong  <gtw@research.att.com>
+
+	* import.c (ParseMatMove): Ignore moves with syntax errors, and
+	use more robust parsing to determine where the right hand move starts.
+
+	* gtkgame.c (InitGTK): Add Import and Export menus.
+	(FileCommand): New function.
+
+	* postscript.c (ExportGameGeneral, ExportMatchGeneral): Complain
+	if no game is in progress.
+	* gnubg.c (CommandExportGameGam, CommandExportMatchMat): Complain
+	if no game is in progress.
+	
+	* eval.c (EvalInitialise): Return 1 if random weights were created.
+	* gnubg.c (real_main): Complain loudly if no weights were loaded
+	and -n not specified.
+
 Thu Aug 23 10:50:19 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (AddStatcontext): Update the destination fMoves, fDice
