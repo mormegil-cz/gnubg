@@ -68,6 +68,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Guile::                          Extending GNU Backgammon with Guile.
 * Frequently Asked Questions::     Brief answers to things you might ask.
 * GNU Free Documentation License:: Your rights regarding this manual.
+* Appendices::                     Technical stuff
 * Command Index::                  A summary of all the gnubg commands.
 * Concept Index::                  Index of concepts described in this manual.
 @end menu
@@ -1197,6 +1198,20 @@ chequers to the starting position, use the command
 @code{set board 4HPwATDgc/ABMA}.
 
 FIXME reference =n notation and describe the GTK edit mode
+
+@kindex set matchid
+@item set matchid @var{id}
+The @code{set matchid} commands is a convienient way of settings the
+match length, match score, cube owner and value, player on roll
+etc. etc. For example, @code{set matchid QYk5ASAAIAAA} will start a new
+9 point match where the score is set to 2-4, player 0 owns a 2-cube, and
+player 1 has rolled 6-3 (@pxref{Detailed description of the match ID}
+for a detailed description).
+
+The match ID is shown on the board, both in text mode and
+graphical mode.
+
+
 @kindex show board
 @item show board [@var{id}|=@var{number}]
 The @code{show board} command is used to display a particular position ---
@@ -1767,6 +1782,130 @@ Hopefully nobody will ask this question, but I suppose it will happen...
 @end ignore
 
 @include fdl.texi
+
+@node Appendices
+@chapter Appendices
+@cindex appendix
+
+@menu
+* Detailed description of the position ID::
+* Detailed description of the match ID::
+@end menu
+
+@node Detailed description of the position ID
+@section Detailed description of the position ID
+@cindex position ID
+
+[insert the contents of
+http://www.cs.arizona.edu/~gary/backgammon/positionid.html here]
+
+@node Detailed description of the match ID
+@section Detailed description of the match ID
+@cindex match ID
+
+@subsection Introduction
+
+This section describes how the match ID is calculated. The match ID  can
+be used for easy exchange of positions for @gnubg{} users in
+conjuction with the position ID. The match key is a 9 byte
+representation of the match score, match length, value of cube, owner of
+cube, Crawford game flag, player on roll, player to make a decision,
+doubled flag, resigned flag, and the dice rolled. The match ID is the 12
+character Base64 encoding of the match key.
+
+@subsection Match key
+
+The match key is a bit string of length 66:
+
+@enumerate
+@item
+Bit 1-4 contains the 2-logarithm of the cube value. For example, a
+8-cube is encoded as 0011 binary (or 3), since 2 to the power of 3 is
+8. The maximum value of the cube in with this encoding is 2 to the power
+of 15, i.e., a 32768-cube.
+
+@item
+Bit 5-6 contains the cube owner. 00 if player 0 owns the cube, 01 if
+player 1 owns the cube, or 11 for a centered cube.
+
+@item
+Bit 7 is the player on roll or the player who did roll (0 and 1 for
+player 0 and 1, respectively).  
+
+@item
+Bit 8 is the Crawford flag: 1 if this game is the Crawford game, 0
+otherwise.
+
+@item
+Bit 9-11 is the game state: 000 for no game started, 001 for playing a game,
+010 if the game is over, 011 if the game was resigned, or 100 if the
+game was ended by dropping a cube.
+
+@item
+Bit 12 indicates whose turn it is. For example, suppose player 0 is on
+roll then bit 7 above will be 0. Player 0 now decides to double, this
+will make bit 12 equal to 1, since it is now player 1's turn to decide
+whether she takes or passes the cube.
+
+@item
+Bit 13 indicates whether an doubled is being offered. 0 if no double is
+being offered and 1 if a double is being offered.
+
+@item
+Bit 14-15 indicates whether an resignation was offered. 00 for no
+resignation, 01 for resign of a sigle game, 10 for resign of a gammon,
+or 11 for resign of a backgammon. The player offering the resignation is
+the inverse of bit 12, e.g., if player 0 resigns a gammon then bit 12
+will be 1 (as it is now player 1 now has to decide whether to accept or
+reject the resignation) and bit 13-14 will be 10 for resign of a gammon.
+
+@item
+Bit 16-18 and bit 19-21 is the first and second die, respectively. 0 if
+the dice has not yet be rolled, otherwise the binary encoding of the
+dice, e.g., if 5-2 was rolled bit 16-21 will be 101-010.
+
+@item
+Bit 22 to 36 is the match length. The maximum value for the match length
+is 32767. A matchscore of zero indicates that the game is a money game.
+
+@item
+Bit 37-51 and bit 52-66 is the score for player 0 and player 1
+respectively. The maximum value of the match score is 32767.
+
+@end enumerate
+
+For example, assume the score is 2-4 in a 9 point match with player 0
+holding a 2-cube, and player 1 has just rolled 52. The match key for
+this will be (note that the bit order is reversed below for readability)
+
+1000 00 1 0  100 1 0 00 101 010 100100000000000 010000000000000 001000000000000            
+
+
+In little endian the bytes looks like:
+
+01000001 10001001 00101010 00000001 00100000 00000000 00100000 00000000 00
+
+0x41     0x89     0x2A     0x01     0x20     0x00     0x20     0x00     0x00
+
+@subsection Match ID
+
+Analogous to the position ID from the previous section the match ID
+format is simply the Base64 encoding of the key. 
+
+To continue the example above, the 9 8-bit bytes are grouped into 12
+6-bits groups:
+
+
+010000 011000 100100 101010 000000 010010 000000 000000 001000 000000
+000000 000000
+
+In Base64 encoding, the groups are represented as:
+
+Q Y k q A U A A I A A A
+
+So, the match id is simply:
+
+QYkqAUAAIAAA
 
 @node Command Index
 @unnumbered Command Index

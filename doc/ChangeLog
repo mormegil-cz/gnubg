@@ -1,3 +1,7 @@
+Thu Mar 28 20:10:09 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.texi: add section on position and match ID.
+
 Wed Mar 13 11:17:11 2002  Gary Wong  <gtw@research.att.com>
 
 	* Makefile.am: Add rules to generate gnubg.xml.
