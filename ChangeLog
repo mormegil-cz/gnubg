@@ -1,3 +1,8 @@
+Mon Jul 21 21:17:30 2003  Joern Thyssen  <jth@gnubg.org>
+
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): fix normalisation bug.
+
 Mon 20 Jul 17:04:44 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
 
 	* gtkgame.c - more re-arrangement of aspect ratio

@@ -7411,7 +7411,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
       }
 
       for ( i = 0; i < 2; ++i ) {
-        sprintf( sz, "%.2f", ( 1 - 2 * i ) * rRating );
+        sprintf( sz, "%.2f", ( 1 - 2 * i ) * rRating / 2.0f );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, i + 1, sz);
       }
 

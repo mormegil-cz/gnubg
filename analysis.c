@@ -1831,7 +1831,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 
     sprintf ( strchr ( szOutput, 0 ),
               "%-31s %7.2f                 %7.2f\n",
-              _("Relative FIBS rating"), rRating, -rRating );
+              _("Relative FIBS rating"), rRating / 2.0f , -rRating / 2.0f );
 
   }
 

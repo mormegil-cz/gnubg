@@ -3380,7 +3380,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow( pf,
                          _("Relative FIBS rating"),
                          "%.2f",
-                         rRating, -rRating );
+                         rRating / 2.0f, -rRating / 2.0f );
     }
     else {
 
