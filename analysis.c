@@ -374,7 +374,7 @@ extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
               int fUpdateStatistics ) {
 
-    static int i, anBoardMove[ 2 ][ 25 ];
+    static int anBoardMove[ 2 ][ 25 ];
     static int fFirstMove;
     static unsigned char auch[ 10 ];
     static cubeinfo ci;
@@ -422,8 +422,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	    FindCubeDecision ( arDouble, aarOutput, &ci );
             
 	    pmr->n.esDouble = esAnalysisCube;
-	    for ( i = 0; i < 4; i++ ) 
-              pmr->n.arDouble[ i ] = arDouble[ i ];
+
+            memcpy ( pmr->n.arDouble, arDouble, sizeof ( arDouble ) );
+            memcpy ( pmr->n.aarOutput, aarOutput, sizeof ( aarOutput ) );
+            memcpy ( pmr->n.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
             
           }
           
@@ -535,12 +537,13 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 
               }
 	      
-		FindCubeDecision ( arDouble, aarOutput, &ci );
+                FindCubeDecision ( arDouble, aarOutput, &ci );
 	      
 		esDouble = pmr->d.esDouble = esAnalysisCube;
 	      
-		for ( i = 0; i < 4; i++ ) 
-		    pmr->d.arDouble[ i ] = arDouble[ i ];
+                memcpy ( pmr->d.arDouble, arDouble, sizeof ( arDouble ) );
+                memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
+                memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
 	      
 		rSkill = arDouble[ OUTPUT_TAKE ] <
 		    arDouble[ OUTPUT_DROP ] ?
@@ -565,7 +568,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	    GetMatchStateCubeInfo( &ci, pms );
 	  
 	    pmr->d.esDouble = esDouble;
-	    memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
+
+            memcpy ( pmr->d.arDouble, arDouble, sizeof ( arDouble ) );
+            memcpy ( pmr->d.aarOutput, aarOutput, sizeof ( aarOutput ) );
+            memcpy ( pmr->d.aarStdDev, aarStdDev, sizeof ( aarStdDev ) );
 	  
             pmr->d.st = Skill ( -arDouble[ OUTPUT_TAKE ] - 
                                 -arDouble[ OUTPUT_DROP ] );
