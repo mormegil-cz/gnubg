@@ -884,6 +884,8 @@ extern int ComputerTurn( void ) {
         case REDOUBLE_TAKE:
         case NO_REDOUBLE_TAKE:
         case TOOGOODRE_TAKE:
+        case NODOUBLE_DEADCUBE:
+        case NO_REDOUBLE_DEADCUBE:
 
           CommandTake ( NULL );
           break;
