@@ -4846,39 +4846,39 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   sprintf(sz, "set analysis limit %.0f", paw->padjMoves->value );
   UserCommand(sz); 
   
-  sprintf(sz, "set analysis threshold verygood %.3f",
+  lisprintf(sz, "set analysis threshold verygood %.3f",
 		  paw->apadjSkill[0]->value );
   UserCommand(sz); 
     
-  sprintf(sz, "set analysis threshold good %.3f",
+  lisprintf(sz, "set analysis threshold good %.3f",
 		  paw->apadjSkill[1]->value );
   UserCommand(sz); 
     
-  sprintf(sz, "set analysis threshold doubtful %.3f",
+  lisprintf(sz, "set analysis threshold doubtful %.3f",
 		  paw->apadjSkill[2]->value );
   UserCommand(sz); 
     
-  sprintf(sz, "set analysis threshold bad %.3f",
+  lisprintf(sz, "set analysis threshold bad %.3f",
 		  paw->apadjSkill[3]->value );
   UserCommand(sz); 
     
-  sprintf(sz, "set analysis threshold verybad %.3f",
+  lisprintf(sz, "set analysis threshold verybad %.3f",
 		  paw->apadjSkill[4]->value );
   UserCommand(sz); 
 
-  sprintf(sz, "set analysis threshold verylucky %.3f",
+  lisprintf(sz, "set analysis threshold verylucky %.3f",
 		  paw->apadjLuck[0]->value );
   UserCommand(sz); 
     
-  sprintf(sz, "set analysis threshold lucky %.3f",
+  lisprintf(sz, "set analysis threshold lucky %.3f",
 		  paw->apadjLuck[1]->value );
   UserCommand(sz); 
     
-  sprintf(sz, "set analysis threshold unlucky %.3f",
+  lisprintf(sz, "set analysis threshold unlucky %.3f",
 		  paw->apadjLuck[2]->value );
   UserCommand(sz); 
     
-  sprintf(sz, "set analysis threshold veryunlucky %.3f",
+  lisprintf(sz, "set analysis threshold veryunlucky %.3f",
 		  paw->apadjLuck[3]->value );
   UserCommand(sz); 
     

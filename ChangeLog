@@ -1,3 +1,8 @@
+Mon Jul  8 09:53:00 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (AnalysisOK): write some command locale independent.
+	* play.c (CommandNewMatch, CommandNewSession): initialise plLastMove.
+
 Fri Jul  5 17:48:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gnubg.c (real_main): Fix mistake from yesterday.
