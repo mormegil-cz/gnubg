@@ -1,3 +1,8 @@
+Wed Feb 16 14:48:16 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (GenerateKeywords) [HAVE_LIBREADLINE, X_DISPLAY_MISSING]: Set
+ 	fReadingOther correctly when using readline but not X.
+
 Wed Feb 16 10:28:51 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* eval.c (FindBestMovePlied): Set a minimum tolerance for ply 0.
