@@ -1,3 +1,12 @@
+Fri Mar  9 11:01:09 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (TrainPosition): Added alpha and anneal parameters.  All
+	callers changed.
+	* set.c (CommandSetTrainingAlpha, CommandSetTrainingAnneal): New
+	functions.
+	
+	* guile.c (current_score, play_game): New functions.
+
 Thu Mar  8 10:30:15 2001  Gary Wong  <gtw@research.att.com>
 
 	* database.c (CommandDatabaseTrain): Allow a timeout parameter.

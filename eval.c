@@ -2611,33 +2611,38 @@ extern int GameStatus( int anBoard[ 2 ][ 25 ] ) {
 	return 1;
 }
 
-extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] ) {
+extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[],
+			  float rAlpha, int fAnneal ) {
 
-  float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
+    float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
 
-  int pc = ClassifyPosition( anBoard );
+    int pc = ClassifyPosition( anBoard );
   
-  neuralnet* nn;
+    neuralnet* nn;
   
-  switch( pc ) {
-	case CLASS_CONTACT: nn = &nnContact; break;
-	case CLASS_RACE:    nn = &nnRace; break;
-	case CLASS_BPG:     nn = &nnBPG; break;
-	default:
-    {
-      errno = EDOM;
-      return -1;
+    switch( pc ) {
+    case CLASS_CONTACT:
+	nn = &nnContact;
+	break;
+    case CLASS_RACE:
+	nn = &nnRace;
+	break;
+    case CLASS_BPG:
+	nn = &nnBPG;
+	break;
+    default:
+	errno = EDOM;
+	return -1;
     }
-  }
 
-  SanityCheck( anBoard, arDesired );
+    SanityCheck( anBoard, arDesired );
     
-  CalculateInputs( anBoard, arInput );
+    CalculateInputs( anBoard, arInput );
 
-  NeuralNetTrain( nn, arInput, arOutput, arDesired,
-									2.0 / pow( 100.0 + nn->nTrained, 0.25 ) );
-
-  return 0;
+    NeuralNetTrain( nn, arInput, arOutput, arDesired, fAnneal ? 20.0f *
+		    rAlpha / pow( 100.0 + nn->nTrained, 0.25 ) : rAlpha );
+    
+    return 0;
 }
 
 extern float

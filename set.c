@@ -988,6 +988,27 @@ extern void CommandSetSeed( char *sz ) {
 		 "Seed initialised by system clock." );
 }
 
+extern void CommandSetTrainingAlpha( char *sz ) {
+
+    float r = ParseReal( &sz );
+
+    if( r <= 0.0f || r > 1.0f ) {
+	outputl( "You must specify a value for alpha which is greater than\n"
+		 "zero, and no more than one." );
+	return;
+    }
+
+    rAlpha = r;
+    outputf( "Alpha set to %f.\n", r );
+}
+
+extern void CommandSetTrainingAnneal( char *sz ) {
+
+    SetToggle( "training anneal", &fAnneal, sz,
+	       "Will reduce alpha as training progresses.",
+	       "Will not reduce alpha as training progresses." );
+}
+
 extern void CommandSetTurn( char *sz ) {
 
     char *pch = NextToken( &sz );

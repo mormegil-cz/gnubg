@@ -134,7 +134,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fConfirm = TRUE, fShowProgress, fMove, fCubeOwner, fJacoby = TRUE,
     fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
     fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
-    fOutputMatchPC = TRUE, fOutputRawboard = FALSE;
+    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, fAnneal = TRUE;
+float rAlpha = 0.1;
 
 gamestate gs = GAME_NONE;
 
@@ -313,6 +314,12 @@ command acDatabase[] = {
     /* FIXME add commands for cubeful rollouts, cube variance reduction,
        quasi-random dice, settlements... */
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetTraining[] = {
+    { "alpha", CommandSetTrainingAlpha, "Control magnitude of backpropagation "
+      "of errors", szVALUE, NULL },
+    { "anneal", CommandSetTrainingAnneal, "Decrease alpha as training "
+      "progresses", szONOFF, NULL },
+    { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
     { "automatic", NULL, "Perform certain functions without user input",
       NULL, acSetAutomatic },
@@ -358,6 +365,7 @@ command acDatabase[] = {
     { "score", CommandSetScore, "Set the match or session score ",
       szSCORE, NULL },
     { "seed", CommandSetSeed, "Set the dice generator seed", szSEED, NULL },
+    { "training", NULL, "Control training parameters", NULL, acSetTraining },
     { "turn", CommandSetTurn, "Set which player is on roll", szPLAYER, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShow[] = {
@@ -2187,7 +2195,7 @@ extern void CommandTrainTD( char *sz ) {
 	    EvaluatePosition( anBoardTrain, ar, &ciCubeless, &ecTD );
 	    
 	    InvertEvaluation( ar );
-	    if( TrainPosition( anBoardOld, ar ) )
+	    if( TrainPosition( anBoardOld, ar, rAlpha, fAnneal ) )
 		break;
 	    
 	    /* FIXME can stop as soon as perfect */
@@ -2902,12 +2910,18 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	   for other processes issuing gnubg commands via IPC. */
 	struct stat st;
 	
-	if( !fstat( STDOUT_FILENO, &st ) && ( S_ISFIFO( st.st_mode ) ||
-					      S_ISSOCK( st.st_mode ) ) )
+	if( !fstat( STDOUT_FILENO, &st ) && ( S_ISFIFO( st.st_mode )
+#ifdef S_ISSOCK
+					      || S_ISSOCK( st.st_mode )
+#endif
+	    ) )
 	    setvbuf( stdout, NULL, _IOLBF, 0 );
 	
-	if( !fstat( STDERR_FILENO, &st ) && ( S_ISFIFO( st.st_mode ) ||
-					      S_ISSOCK( st.st_mode ) ) )
+	if( !fstat( STDERR_FILENO, &st ) && ( S_ISFIFO( st.st_mode )
+#ifdef S_ISSOCK
+					      || S_ISSOCK( st.st_mode )
+#endif
+	    ) )
 	    setvbuf( stderr, NULL, _IOLBF, 0 );
     }
 #endif

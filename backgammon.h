@@ -154,7 +154,7 @@ typedef union _moverecord {
     movetype mt;
     movegameinfo g;
     movedouble d;
-    movebasic t; /* double, take, drop */
+    movebasic t; /* take or drop */
     movenormal n;
     moveresign r;
     movesetboard sb;
@@ -189,7 +189,8 @@ extern gamestate gs;
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
     fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC,
-    fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard;
+    fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard, fAnneal;
+extern float rAlpha;
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
@@ -398,6 +399,8 @@ extern void CommandAccept( char * ),
     CommandSetRolloutVarRedn( char * ),
     CommandSetScore( char * ),
     CommandSetSeed( char * ),
+    CommandSetTrainingAlpha( char * ),
+    CommandSetTrainingAnneal( char * ),
     CommandSetTurn( char * ),
     CommandShowAutomatic( char * ),
     CommandShowBoard( char * ),
