@@ -1109,10 +1109,10 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
                             + psc->arErrorWrongDoubleDP[ i ][ 0 ]
                             + psc->arErrorWrongDoubleTG[ i ][ 0 ]
                             + psc->arErrorWrongTake[ i ][ 0 ]
-                            + psc->arErrorWrongPass[ i ][ 0 ] ) /
-                          psc->anTotalCube[ i ] +
-                          psc->arErrorCheckerplay[ i ][ 0 ] /
-                          psc->anUnforcedMoves[ i ] );
+                            + psc->arErrorWrongPass[ i ][ 0 ]
+                            + psc->arErrorCheckerplay[ i ][ 0 ]  ) /
+                         ( psc->anTotalCube[ i ] +
+                          psc->anUnforcedMoves[ i ] ) );
 
   printf ( "Overall rating:\t\t\t%-15s\t\t%-15s\n\n",
            aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );

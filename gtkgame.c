@@ -912,12 +912,17 @@ static void CreateGameWindow( void ) {
     gtk_container_add( GTK_CONTAINER( pvbox ), psw );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
 				    GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
-    
+
     gtk_container_add( GTK_CONTAINER( psw ),
 		       pwGameList = gtk_clist_new_with_titles( 3, asz ) );
+
     gtk_clist_set_selection_mode( GTK_CLIST( pwGameList ),
 				  GTK_SELECTION_BROWSE );
     gtk_clist_column_titles_passive( GTK_CLIST( pwGameList ) );
+
+    gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 1, ap[0].szName);
+    gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 2, ap[1].szName);
+
     gtk_clist_set_column_justification( GTK_CLIST( pwGameList ), 0,
 					GTK_JUSTIFY_RIGHT );
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 0, 40 );
@@ -4132,10 +4137,10 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
                             + psc->arErrorWrongDoubleDP[ i ][ 0 ]
                             + psc->arErrorWrongDoubleTG[ i ][ 0 ]
                             + psc->arErrorWrongTake[ i ][ 0 ]
-                            + psc->arErrorWrongPass[ i ][ 0 ] ) /
-                          psc->anTotalCube[ i ] +
-                          psc->arErrorCheckerplay[ i ][ 0 ] /
-                          psc->anUnforcedMoves[ i ] );
+                            + psc->arErrorWrongPass[ i ][ 0 ] 
+                            + psc->arErrorCheckerplay[ i ][ 0 ] ) /
+                          ( psc->anTotalCube[ i ] +
+                            psc->anUnforcedMoves[ i ] ) );
 
   sprintf ( sz, "%-15s", aszRating[ rt [ 0 ] ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 1, sz);
