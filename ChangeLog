@@ -1,3 +1,11 @@
+Mon Aug  5 20:15:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Correct problems with loading RNG settings.
+
+	* gnubg.c: call CommandSetRNG for "set rng".
+	* set.c (SetRNG): new parameter. Change all callers.
+	
+
 Mon Aug  5 19:59:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Save and load geometries even though USE_GTK = 0.

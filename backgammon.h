@@ -66,7 +66,6 @@ typedef RETSIGTYPE (*psighandler)( int );
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_CUBE_STR "4096"
 
-#if USE_GTK
 
 /* position of windows: main window, game list, and annotation */
 
@@ -85,7 +84,6 @@ typedef struct _windowgeometry {
 
 extern windowgeometry awg[ NUM_WINDOWS ];
 
-#endif
 
 typedef struct _monitor {
 #if USE_GTK
@@ -693,6 +691,7 @@ extern void CommandAccept( char * ),
     CommandSetPostCrawford( char * ),
     CommandSetPrompt( char * ),
     CommandSetRecord( char * ),
+    CommandSetRNG( char * ),
     CommandSetRNGAnsi( char * ),
     CommandSetRNGBsd( char * ),
     CommandSetRNGIsaac( char * ),

@@ -103,22 +103,23 @@ command acSetEvaluation[] = {
     { NULL, NULL, NULL, NULL, NULL }
 };
 
-static void SetRNG( rng rngNew, char *szSeed ) {
+static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 
     /* FIXME: read name of file with user RNG */
 
-    if( rngCurrent == rngNew ) {
+    if( *prng == rngNew ) {
 	outputf( _("You are already using the %s generator.\n"),
 		gettext ( aszRNG[ rngNew ] ) );
-	if( szSeed )
+	if( szSeed ) {
 	    CommandSetSeed( szSeed );
+        }
     } else {
 	outputf( _("GNU Backgammon will now use the %s generator.\n"),
                  gettext ( aszRNG[ rngNew ] ) );
 
         /* Dispose dynamically linked user module if necesary */
 
-        if ( rngCurrent == RNG_USER )
+        if ( *prng == RNG_USER )
 #if HAVE_LIBDL
 	  UserRNGClose();
 #else
@@ -132,7 +133,7 @@ static void SetRNG( rng rngNew, char *szSeed ) {
 	  if ( !UserRNGOpen() ) {
 	      outputl( _("Error loading shared library.") );
 	      outputf( _("You are still using the %s generator.\n"),
-		     gettext ( aszRNG[ rngCurrent ] ) );
+		     gettext ( aszRNG[ *prng ] ) );
             return;
 	  }
 #else
@@ -140,10 +141,9 @@ static void SetRNG( rng rngNew, char *szSeed ) {
 #endif
 	}
 	    
-	if( ( rngCurrent = rngNew ) != RNG_MANUAL )
+	if( ( *prng = rngNew ) != RNG_MANUAL )
 	    CommandSetSeed( szSeed );
 	
-	UpdateSetting( &rngCurrent );
     }
 }
 
@@ -1118,14 +1118,21 @@ extern void CommandSetRecord( char *sz ) {
 	       _("Only the active game in a session will be recorded.") );
 }
 
+extern void CommandSetRNG ( char *sz ) {
+
+  rngSet = &rngCurrent;
+  HandleCommand ( sz, acSetRNG );
+
+}
+
 extern void CommandSetRNGAnsi( char *sz ) {
 
-    SetRNG( RNG_ANSI, sz );
+    SetRNG( rngSet, RNG_ANSI, sz );
 }
 
 extern void CommandSetRNGBsd( char *sz ) {
 #if HAVE_RANDOM
-    SetRNG( RNG_BSD, sz );
+    SetRNG( rngSet, RNG_BSD, sz );
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "BSD generator.") );
@@ -1134,28 +1141,28 @@ extern void CommandSetRNGBsd( char *sz ) {
 
 extern void CommandSetRNGIsaac( char *sz ) {
 
-    SetRNG( RNG_ISAAC, sz );
+    SetRNG( rngSet, RNG_ISAAC, sz );
 }
 
 extern void CommandSetRNGManual( char *sz ) {
 
-    SetRNG ( RNG_MANUAL, sz );
+    SetRNG ( rngSet, RNG_MANUAL, sz );
 }
 
 extern void CommandSetRNGMD5( char *sz ) {
 
-    SetRNG ( RNG_MD5, sz );
+    SetRNG ( rngSet, RNG_MD5, sz );
 }
 
 extern void CommandSetRNGMersenne( char *sz ) {
 
-    SetRNG( RNG_MERSENNE, sz );
+    SetRNG( rngSet, RNG_MERSENNE, sz );
 }
 
 extern void CommandSetRNGRandomDotOrg( char *sz ) {
 
 #if HAVE_SOCKETS
-    SetRNG( RNG_RANDOM_DOT_ORG, sz );
+    SetRNG( rngSet, RNG_RANDOM_DOT_ORG, sz );
 #else
     outputl( _("This installation of GNU Backgammon was compiled without "
                "support for sockets needed for fetching\n"
@@ -1168,7 +1175,7 @@ extern void CommandSetRNGRandomDotOrg( char *sz ) {
 extern void CommandSetRNGUser( char *sz ) {
 
 #if HAVE_LIBDL
-    SetRNG( RNG_USER, sz );
+    SetRNG( rngSet, RNG_USER, sz );
 #else
     outputl( _("This installation of GNU Backgammon was compiled without the"
                "dynamic linking library needed for user RNG's.") );
@@ -1191,8 +1198,6 @@ CommandSetRolloutRNG ( char *sz ) {
   rngSet = &prcSet->rngRollout;
 
   HandleCommand ( sz, acSetRNG );
-
-  CommandNotImplemented ( sz );
 
 }
   
@@ -1571,7 +1576,7 @@ extern void CommandSetSeed( char *sz ) {
 
     int n;
     
-    if( rngCurrent == RNG_MANUAL || rngCurrent == RNG_RANDOM_DOT_ORG ) {
+    if( *rngSet == RNG_MANUAL || *rngSet == RNG_RANDOM_DOT_ORG ) {
 	outputl( _("You can't set a seed "
                    "if you're using manual dice generation or random.org") );
 	return;
@@ -1586,10 +1591,10 @@ extern void CommandSetSeed( char *sz ) {
 	    return;
 	}
 
-	InitRNGSeed( n, rngCurrent );
+	InitRNGSeed( n, *rngSet );
 	outputf( _("Seed set to %d.\n"), n );
     } else
-	outputl( InitRNG( NULL, TRUE, rngCurrent ) ?
+	outputl( InitRNG( NULL, TRUE, *rngSet ) ?
 		 _("Seed initialised from system random data.") :
 		 _("Seed initialised by system clock.") );
 }

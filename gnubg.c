@@ -1013,7 +1013,7 @@ command cER = {
       "ready for commands"), szPROMPT, NULL },
     { "record", CommandSetRecord, N_("Set whether all games in a session are "
       "recorded"), szONOFF, &cOnOff },
-    { "rng", NULL, N_("Select the random number generator algorithm"), NULL,
+    { "rng", CommandSetRNG, N_("Select the random number generator algorithm"), NULL,
       acSetRNG },
     { "rollout", CommandSetRollout, N_("Control rollout parameters"),
       NULL, acSetRollout }, 
