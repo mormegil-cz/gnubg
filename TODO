@@ -176,6 +176,7 @@ duplication of effort and to make sure our changes merge easily.
 *** right-blick bearoff tray for bearing off 4 men
     Also, if "allow dragging to illegal points" is disabled right clicking
     on the bearoff tray will hit the chequer in the home board.
+** add sounds (look at sound.c from GAIM for inspiration)
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
