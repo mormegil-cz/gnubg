@@ -348,6 +348,7 @@ CalcMatchEq () {
   
 }
 
+
 int 
 GetCubePrimeValue ( int i, int j, int nCubeValue ) {
 
@@ -362,7 +363,117 @@ GetCubePrimeValue ( int i, int j, int nCubeValue ) {
 }
 
 
+int
+GetTakePoint ( float arOutput [ 5 ],
+	       int   nScore[ 2 ], int nMatchTo,
+	       int   nCube,
+	       float arTakePoint[ 2 ] ) {
+
+  /*
+   * Input:
+   * - arOutput: we need the gammon ratios (and in a more refined model
+   *   we could include the backgammon ratios. We assume that arOutput
+   *   is evaluated for player 0.
+   * - nScore: the current score.
+   * - nCubeValue: the current cube.
+   *
+   * Output:
+   * - return the take point's for both players assuming 
+   *   semi-efficient cubes. The value of DELTA and DELTABAR
+   *   gives you the efficiency of the cube.
+   * 
+   * This is actually just a recalculation of D1 from the
+   * code above, using the current gammon rations.
+   *
+   */
+
+  /* normalize score */
+
+  int i = nMatchTo - nScore[ 0 ] - 1;
+  int j = nMatchTo - nScore[ 1 ] - 1;
+  int nDead, n, nMax, nCubeValue, nCubePrimeValue;
+
+  float arD1bar[ MAXCUBELEVEL ], arD2bar[ MAXCUBELEVEL ];
+  float arD1[ MAXCUBELEVEL ], arD2[ MAXCUBELEVEL ];
+  float rG1 = arOutput[ 1 ];
+  float rG2 = arOutput[ 3 ];
+
+  /* Find out what value the cube has when you or your
+     opponent give a dead cube. */
+
+  nDead = nCube;
+  nMax = 0;
+
+
+  while ( ( i >= 2 * nDead ) && ( j >= 2 * nDead ) ) {
+    nMax ++;
+    nDead *= 2;
+  }
+
+
+  for ( nCubeValue = nDead, n = nMax; 
+	nCubeValue >= nCube; 
+	nCubeValue >>= 1, n-- ) {
+
+    
+    /* Calculate D1bar */
+	
+    nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
+
+    /* D1bar is winning chance a my opponents take point assuming 
+       a dead cube. */
+
+    arD1bar[ n ] = 
+      ( GET_A1 ( i - nCubeValue, j, aafA1 )
+	- rG2 * GET_A1 ( i, j - 4 * nCubePrimeValue, aafA1 )
+	- (1.0-rG2) * GET_A1 ( i, j - 2 * nCubePrimeValue, aafA1 ) )
+      /
+      ( rG1 * GET_A1( i - 4 * nCubePrimeValue, j, aafA1 )
+	+ (1.0-rG1) * GET_A1 ( i - 2 * nCubePrimeValue, j, aafA1 )
+	- rG2 * GET_A1 ( i, j - 4 * nCubePrimeValue, aafA1 )
+	- (1.0-rG2) * GET_A1 ( i, j - 2 * nCubePrimeValue, aafA1 ) );
+
+
+    /* Calculate D2bar */
+
+    nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
+  
+    arD2bar[ n ] =
+      ( GET_A2 ( i, j - nCubeValue, aafA2 )
+	- G2 * GET_A2 ( i - 4 * nCubePrimeValue, j, aafA2 )
+	- (1.0-G2) * GET_A2 ( i - 2 * nCubePrimeValue, j, aafA2 ) )
+      /
+      ( G1 * GET_A2( i, j - 4 * nCubePrimeValue, aafA2 )
+	+ (1.0-G1) * GET_A2 ( i, j - 2 * nCubePrimeValue, aafA2 )
+	- G2 * GET_A2 ( i - 4 * nCubePrimeValue, j, aafA2 )
+	- (1.0-G2) * GET_A2 ( i - 2 * nCubePrimeValue, j, aafA2 ) );
+  
+    /* Calculate D1 */
+
+    if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) )
+      arD1[ n ] = arD1bar[n];
+    else
+      arD1[ n ] = 
+	1.0 + ( arD2[ n + 1 ] + DELTA ) * ( arD1bar[ n ] - 1.0 );
+
+    /* Calculate D2 */
+
+    if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) )
+      arD2[ n ] = arD2bar[ n ];
+    else
+      arD2[ n ] =
+	1.0 + ( arD1[ n + 1 ] + DELTA ) * ( arD2bar[ n ] - 1.0 );
+
+  }
+
+  arTakePoint[ 0 ] = arD1[ 0 ];
+  arTakePoint[ 1 ] = arD2[ 0 ];
+
+}
+
+
 #ifdef UNDEF
+
 int main ()
 
 {
@@ -371,21 +482,28 @@ int main ()
 
   CalcMatchEq ();
 
-  puts ( "      " );
-  for ( j = 0; j < MAXSCORE; j++ )
-    printf ( "%9d", j );
-  printf ( "\n" );
+  for ( i = 0; i < MAXSCORE; i ++ ) {
 
-  for ( i = 0; i < MAXSCORE; i++ ) {
+     for ( j = 0; j <= i; j++ ) {
 
-    printf ( "%6d", i );
+        printf ( "%02d-away, %02d-away: %9.6f - %9.6f "
+                 "(%9.6f %9.6f - %9.6f %9.6f)\n",
+                 i + 1, j + 1, aafA1[ i ][ j ], aafA2[ i ][ j ],
+                 aaafD1[ i ][ j ][ 0 ], aaafD1bar[ i ][ j ][ 0 ],
+                 aaafD2[ i ][ j ][ 0 ], aaafD2bar[ i ][ j ][ 0 ]);
 
-    for ( j = 0; j < MAXSCORE; j++ )
-      printf ( "%9.6f", aafA1[ i ][ j ] );
+     }
 
-    printf ( "\n" );
   }
+  {
+    float arOutput[ 5 ] = {0.0, 0.25, 0.0, 0.15, 0.0};
+    float arTP[ 2 ];
+    int   nScore[ 2 ] = {0,1};
 
+    GetTakePoint ( arOutput, nScore, 8, 1, arTP );
 
+    printf ( "%9.6f %9.6f\n", arTP[ 0 ], arTP[ 1 ] );
+  }
 }
+
 #endif
