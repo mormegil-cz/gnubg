@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <assert.h>
 
 #if TIME_WITH_SYS_TIME
 #include <sys/time.h>
@@ -534,7 +535,3 @@ extern void UserRNGClose() {
 }
 
 #endif /* HAVE_LIBDL */
-
-
-
-
