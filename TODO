@@ -160,6 +160,8 @@ duplication of effort and to make sure our changes merge easily.
   and only output the relevant statistics.
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
   the new evalsetups. (gary)
+** Make sure copy/paste works correctly everywhere.  See
+  <http://www.freedesktop.org/standards/clipboards.txt>. (gary)
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -192,7 +194,6 @@ functions:
   give poor error messages.  Bad "set rollout" commands (e.g.
   "set rollout chequerplay plies") also give bad errors.
 ** "help load sfdkljsdlf" gives a poor error message.
-** "set player <tab>" gives incorrect completions.
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
@@ -239,6 +240,9 @@ functions:
 ** When a match is over, the prev game/prev move menu items are disabled.
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
+** "set player both gnu" should display the "Play" button, if it's
+  now the computer's turn. (gary)
+** Problems importing .sgg files (see Peter Sochovsky's bug report).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -314,6 +318,10 @@ functions:
 ** Allow the caller of the Rollout* functions to specify a callback function
   (to replace the current hard-coded GTKRollout()/output* calls).
 ** CommandSetRolloutRNG() in set.c needs to be finished. (gary)
+** Add an option to swap the players or flip the board vertically
+  (suggested by Peter Sochovsky).
+** Consider making a move selection in the annotation window update the
+  chequers to show that move (suggested by Peter Sochovsky).
 
 * Obselete or problematic ideas (probably better not to implement these):
 ** Save partial input when TTY input is overwritten by an X command.
