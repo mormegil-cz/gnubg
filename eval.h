@@ -32,8 +32,8 @@
 #define TRUE 1
 #endif
 
-#define WEIGHTS_VERSION "0.11"
-#define WEIGHTS_VERSION_BINARY 0.11f
+#define WEIGHTS_VERSION "0.12"
+#define WEIGHTS_VERSION_BINARY 0.12f
 #define WEIGHTS_MAGIC_BINARY 472.3782f
 
 #define NUM_OUTPUTS 5
@@ -176,8 +176,9 @@ typedef enum _positionclass {
     CLASS_OVER = 0, /* Game already finished */
     CLASS_BEAROFF2, /* Two-sided bearoff database */
     CLASS_BEAROFF1, /* One-sided bearoff database */
-    CLASS_RACE, /* Race neural network */
-    CLASS_CONTACT /* Contact neural network */
+    CLASS_RACE,     /* Race neural network */
+    CLASS_CRASHED,  /* Contact, one side has less than 7 active checkers */
+    CLASS_CONTACT   /* Contact neural network */
 } positionclass;
 
 #define N_CLASSES (CLASS_CONTACT + 1)

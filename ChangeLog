@@ -1,3 +1,11 @@
+Fri Jan 18 01:35:00 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c: Added new crashed net.
+
+Fri Jan 18 01:04:56 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c: Remove the dead-end BGP net code.
+
 Wed Jan 17 17:55:58 2002  Øystein Johansen <oeysteij@online.no>
 
         * drawboard.c (DrawBoardCls): Fix Position ID bug

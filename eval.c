@@ -264,7 +264,7 @@ enum {
 static int anEscapes[ 0x1000 ];
 static int anEscapes1[ 0x1000 ];
 
-static neuralnet nnContact, nnBPG, nnRace;
+static neuralnet nnContact, nnRace, nnCrashed;
 static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
 static int fBearoffHeuristic;
 static cache cEval;
@@ -595,36 +595,41 @@ static unsigned char *HeuristicDatabase( int fProgress ) {
     return p;
 }
 
-static void CreateWeights( int nSize ) {
-
-    NeuralNetCreate( &nnContact, NUM_INPUTS, nSize,
-		     NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
+static void
+CreateWeights(int nSize)
+{
+  NeuralNetCreate( &nnContact, NUM_INPUTS, nSize,
+		   NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
 	
-    NeuralNetCreate( &nnBPG, NUM_INPUTS, nSize,
-		     NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
-	
-    NeuralNetCreate( &nnRace, NUM_RACE_INPUTS, nSize,
-		     NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
+  NeuralNetCreate( &nnCrashed, NUM_INPUTS, nSize,
+		   NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
+  
+  NeuralNetCreate( &nnRace, NUM_RACE_INPUTS, nSize,
+		   NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
 }
 
-static void DestroyWeights( void ) {
-
-    NeuralNetDestroy( &nnContact );
-    NeuralNetDestroy( &nnBPG );
-    NeuralNetDestroy( &nnRace );
+static void
+DestroyWeights( void )
+{
+  NeuralNetDestroy( &nnContact );
+  NeuralNetDestroy( &nnCrashed );
+  NeuralNetDestroy( &nnRace );
 }
 
-extern int EvalNewWeights( int nSize ) {
-
-    DestroyWeights();
-    CreateWeights( nSize );
+extern int
+EvalNewWeights(int nSize)
+{
+  DestroyWeights();
+  CreateWeights( nSize );
     
-    return 0;
+  return 0;
 }
 
-extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
-			   char *szDatabase, char *szDir, int nSize,
-			   int fProgress ) {
+extern int
+EvalInitialise( char *szWeights, char *szWeightsBinary,
+		char *szDatabase, char *szDir, int nSize,
+		int fProgress )
+{
     FILE *pfWeights;
     int h, fReadWeights = FALSE, fMalloc = FALSE;
     char szFileVersion[ 16 ];
@@ -730,15 +735,9 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	else {
 	    if( !( fReadWeights =
 		   !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
-		   !NeuralNetLoadBinary(&nnRace, pfWeights ) ) ) {
+		   !NeuralNetLoadBinary(&nnRace, pfWeights ) &&
+		   !NeuralNetLoadBinary(&nnCrashed, pfWeights ) ) ) {
 		perror( szWeightsBinary );
-	    }
-	    
-	    if( fReadWeights ) {
-		if( NeuralNetLoadBinary( &nnBPG, pfWeights ) == -1 ) {
-		    /* HACK */
-		    nnBPG.cInput = 0;
-		}
 	    }
 	    
 	    fclose( pfWeights );
@@ -758,18 +757,12 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 			 WEIGHTS_VERSION " is required,\nbut these weights "
 			 "are %s)\n", szWeights, szFileVersion );
 	    else {
-		if( !( fReadWeights = !NeuralNetLoad( &nnContact,
-						      pfWeights ) &&
-		       !NeuralNetLoad( &nnRace, pfWeights ) ) )
+		if( !( fReadWeights =
+		       !NeuralNetLoad( &nnContact, pfWeights ) &&
+		       !NeuralNetLoad( &nnRace, pfWeights ) &&
+		       !NeuralNetLoad( &nnCrashed, pfWeights ) ) )
 		    perror( szWeights );
 
-		if( fReadWeights ) {
-		  if( NeuralNetLoad( &nnBPG, pfWeights ) == -1 ) {
-		    /* HACK */
-		    nnBPG.cInput = 0;
-		  }
-		}
-		
 		fclose( pfWeights );
 	    }
 	}
@@ -779,6 +772,11 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	if( nnContact.cInput != NUM_INPUTS ||
 	    nnContact.cOutput != NUM_OUTPUTS )
 	    NeuralNetResize( &nnContact, NUM_INPUTS, nnContact.cHidden,
+			     NUM_OUTPUTS );
+	
+	if( nnCrashed.cInput != NUM_INPUTS ||
+	    nnCrashed.cOutput != NUM_OUTPUTS )
+	    NeuralNetResize( &nnCrashed, NUM_INPUTS, nnCrashed.cHidden,
 			     NUM_OUTPUTS );
 	
 	if( nnRace.cInput != NUM_RACE_INPUTS ||
@@ -805,10 +803,7 @@ extern int EvalSave( char *szWeights ) {
 
   NeuralNetSave( &nnContact, pfWeights );
   NeuralNetSave( &nnRace, pfWeights );
-    
-  if( nnBPG.cInput != 0 ) { /* HACK */
-    NeuralNetSave( &nnBPG, pfWeights );
-  }
+  NeuralNetSave( &nnCrashed, pfWeights );
     
   fclose( pfWeights );
 
@@ -1831,38 +1826,69 @@ barPrimeBackGame(int anBoard[ 2 ][ 25 ])
 }
 #endif
 
-extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
+extern positionclass
+ClassifyPosition( int anBoard[ 2 ][ 25 ] )
+{
+  int nOppBack = -1, nBack = -1;
 
-    int i, nOppBack = -1, nBack = -1;
-
-    for( i = 0; i < 25; i++ ) {
-	if( anBoard[ 0 ][ i ] )
-	    nOppBack = i;
-	if( anBoard[ 1 ][ i ] )
-	    nBack = i;
+  for(nOppBack = 24; nOppBack >= 0; --nOppBack) {
+    if( anBoard[0][nOppBack] ) {
+      break;
     }
+  }
 
-    if( nBack < 0 || nOppBack < 0 )
-	return CLASS_OVER;
+  for(nBack = 24; nBack >= 0; --nBack) {
+    if( anBoard[1][nBack] ) {
+      break;
+    }
+  }
 
-    if( nBack + nOppBack > 22 ) {
-      /* Disable BPG */
+  if( nBack < 0 || nOppBack < 0 )
+    return CLASS_OVER;
+
+  if( nBack + nOppBack > 22 ) {
+    unsigned int const N = 6;
+    unsigned int i;
+    unsigned int side;
+    
+    for(side = 0; side < 2; ++side) {
+      unsigned int tot = 0;
       
-/*        if( barPrimeBackGame(anBoard) ) { */
-/*  	return CLASS_BPG; */
-/*        } */
+      const int* board = anBoard[side];
+      
+      for(i = 0;  i < 25; ++i) {
+	tot += board[i];
+      }
 
-      return CLASS_CONTACT;
+      if( tot <= N ) {
+	return CLASS_CRASHED;
+      } else {
+	if( board[0] > 1 ) {
+	  if( (tot - board[0]) <= N ) {
+	    return CLASS_CRASHED;
+	  } else {
+	    if( board[1] > 1 && (1 + tot - (board[0] + board[1])) <= N ) {
+	      return CLASS_CRASHED;
+	    }
+	  }
+	} else {
+	  if( ((int)tot - (1 + board[1])) <= (int)N ) {
+	    return CLASS_CRASHED;
+	  }
+	}
+      }
     }
-    else if( nBack > 5 || nOppBack > 5 || !pBearoff1 )
-	return CLASS_RACE;
 
-    if( PositionBearoff( anBoard[ 0 ] ) > 923 ||
-	PositionBearoff( anBoard[ 1 ] ) > 923 ||
-	!pBearoff2 )
-	return CLASS_BEAROFF1;
+    return CLASS_CONTACT;
+  }
+  else if( nBack > 5 || nOppBack > 5 )
+    return CLASS_RACE;
 
-    return CLASS_BEAROFF2;
+  if( PositionBearoff( anBoard[ 0 ] ) > 923 ||
+      PositionBearoff( anBoard[ 1 ] ) > 923 )
+    return CLASS_BEAROFF1;
+
+  return CLASS_BEAROFF2;
 }
 
 static void
@@ -1870,7 +1896,7 @@ EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] )
 {
   int n, nOpp;
 
-  assert( pBearoff2 );
+  {                                                      assert( pBearoff2 ); }
   
   nOpp = PositionBearoff( anBoard[ 0 ] );
   n = PositionBearoff( anBoard[ 1 ] );
@@ -2325,19 +2351,6 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
   /* sanity check will take care of rest */
 }
 
-#if 0
-static void EvalBPG( int anBoard[ 2 ][ 25 ], float arOutput[] )
-{
-  float arInput[ NUM_INPUTS ];
-
-  CalculateInputs(anBoard, arInput);
-
-  /* HACK - if not loaded, use contact */
-  
-  NeuralNetEvaluate(nnBPG.cInput != 0 ? &nnBPG : &nnContact,
-		    arInput, arOutput);
-}
-#endif
 
 static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     
@@ -2346,6 +2359,15 @@ static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     CalculateInputs( anBoard, arInput );
     
     NeuralNetEvaluate( &nnContact, arInput, arOutput );
+}
+
+static void EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+    
+    float arInput[ NUM_INPUTS ];
+
+    CalculateInputs( anBoard, arInput );
+    
+    NeuralNetEvaluate( &nnCrashed, arInput, arOutput );
 }
 
 static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
@@ -2425,7 +2447,7 @@ static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 }
 
 static classevalfunc acef[ N_CLASSES ] = {
-    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalContact
+    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalCrashed, EvalContact
 };
 
 static float Noise( evalcontext *pec, int anBoard[ 2 ][ 25 ], int iOutput ) {
@@ -2800,6 +2822,9 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[],
 	break;
     case CLASS_RACE:
 	nn = &nnRace;
+	break;
+    case CLASS_CRASHED:
+	nn = &nnCrashed;
 	break;
     default:
 	errno = EDOM;
@@ -3633,7 +3658,7 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 }
 
 static classdumpfunc acdf[ N_CLASSES ] = {
-  DumpOver, DumpBearoff2, DumpBearoff1, DumpRace, DumpContact
+  DumpOver, DumpBearoff2, DumpBearoff1, DumpRace, DumpContact, DumpContact
 };
 
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
@@ -3839,7 +3864,8 @@ static void StatusContact( char *sz ) {
 }
 
 static classstatusfunc acsf[ N_CLASSES ] = {
-  NULL, StatusBearoff2, StatusBearoff1, StatusRace, StatusContact,
+  NULL, StatusBearoff2, StatusBearoff1, StatusRace,
+  StatusContact, StatusContact
 };
 
 extern void EvalStatus( char *szOutput ) {
