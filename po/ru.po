@@ -2516,7 +2516,7 @@ msgstr ""
 
 #: gnubg.c:1147
 msgid "Show statistics in a panel"
-msgstr "Показать статистику в отделной панели"
+msgstr "Показать статистику в отдельной панели"
 
 #: gnubg.c:1150
 msgid "Show the higher die on the left"
@@ -6090,7 +6090,7 @@ msgstr ""
 
 #: gtkgame.c:2619
 msgid "/_Windows/_Toolbar"
-msgstr "/_Окна/_Панель интсрументов"
+msgstr "/_Окна/_Панель инструментов"
 
 #: gtkgame.c:2620
 msgid "/_Windows/_Toolbar/Text only"
