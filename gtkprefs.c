@@ -1138,7 +1138,7 @@ void DoTestPerformance(GtkWidget *pw, BoardData* bd)
 	int fps;
 	monitor m;
 
-	if (!GetInputYN("Save settings and test 3d performance for 3 seconds?"))
+	if (!GetInputYN(_("Save settings and test 3d performance for 3 seconds?")))
 		return;
 
 	BoardPrefsOK(pw, bd);
@@ -2104,8 +2104,8 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
 			rd.lightLevels[0], rd.lightLevels[1], rd.lightLevels[2],
 			WriteMaterial(&rd.rdChequerMat[0]),
 			WriteMaterial(&rd.rdChequerMat[1]),
-			WriteMaterial(&rd.rdDiceMat[0]),
-			WriteMaterial(&rd.rdDiceMat[1]),
+			WriteMaterialDice(&rd, 0),
+			WriteMaterialDice(&rd, 1),
 			WriteMaterial(&rd.rdDiceDotMat[0]),
 			WriteMaterial(&rd.rdDiceDotMat[1]),
 			WriteMaterial(&rd.rdCubeMat),
@@ -2130,7 +2130,7 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
 
   AddDesignRow ( pbde, pwDesignList );
 
-
+  DesignSave(pw, data);
 }
 
 
@@ -2140,11 +2140,16 @@ RemoveDesign ( GtkWidget *pw, gpointer data ) {
   GList **pplBoardDesigns = (GList **) data;
   int i = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ),
                                          pbdeSelected );
+  char prompt[200];
+  sprintf(prompt, _("Permently remove design %s?"), pbdeSelected->szTitle);
+  if (!GetInputYN(prompt))
+		return;
 
   *pplBoardDesigns = g_list_remove ( *pplBoardDesigns, pbdeSelected );
 
   gtk_clist_remove ( GTK_CLIST ( pwDesignList ), i );
 
+  DesignSave(pw, data);
 }
 
 static void
@@ -2302,14 +2307,6 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
    * buttons 
    */
 
-  /* remove design */
-
-  pwDesignRemove = gtk_button_new_with_label ( _("Remove design") );
-  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignRemove, FALSE, FALSE, 4 );
-
-  gtk_signal_connect ( GTK_OBJECT ( pwDesignRemove ), "clicked",
-                       GTK_SIGNAL_FUNC ( RemoveDesign ), pplBoardDesigns );
-
   /* add current design */
 
   pw = gtk_button_new_with_label ( _("Add current design") );
@@ -2318,13 +2315,13 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
   gtk_signal_connect ( GTK_OBJECT ( pw ), "clicked",
                        GTK_SIGNAL_FUNC ( DesignAdd ), pplBoardDesigns );
 
-  /* save designs */
+  /* remove design */
 
-  pw = gtk_button_new_with_label ( _("Save designs") );
-  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pw, FALSE, FALSE, 4 );
+  pwDesignRemove = gtk_button_new_with_label ( _("Remove design") );
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignRemove, FALSE, FALSE, 4 );
 
-  gtk_signal_connect ( GTK_OBJECT ( pw ), "clicked",
-                       GTK_SIGNAL_FUNC ( DesignSave ), pplBoardDesigns );
+  gtk_signal_connect ( GTK_OBJECT ( pwDesignRemove ), "clicked",
+                       GTK_SIGNAL_FUNC ( RemoveDesign ), pplBoardDesigns );
 
 
   gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
