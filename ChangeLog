@@ -1,3 +1,9 @@
+Mon Oct 29 11:07:28 2001  Gary Wong  <gtw@research.att.com>
+
+	* play.c (NextTurn): Return without scheduling another NextTurn if
+	NewGame fails, e.g. when using manual dice and the user cancels the
+	opening roll (reported by Jacques Thiriat).
+
 Mon Oct 29 09:52:41 2001  Gary Wong  <gtw@research.att.com>
 
 	* backgammon.h: ERR_VAL definition added, to replace HUGE_VALF.

@@ -319,6 +319,11 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow very large (128 bit+) seeds. (gary)
 ** Allow the caller of the Rollout* functions to specify a callback function
   (to replace the current hard-coded GTKRollout()/output* calls).
+** The size of evalsetup means that movenormal structs are now very big.
+  Changing some members of evalcontext to bit fields, and perhaps making
+  some members of evalsetup a union might help. (gary)
+** Make sure there is some way to find the weights version in use. (gary)
+
 
 Local Variables:
 mode: outline

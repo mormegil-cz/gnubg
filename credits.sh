@@ -43,6 +43,7 @@ Sam Pottle
 Jared Riley
 Oliver Riordan
 Ian Shaw
+Jacques Thiriat
 JP White
 Kit Woolsey
 Frank Worrell

@@ -33,6 +33,7 @@ char *aszCredits[] = {
     "Ian Shaw",
     "Brian Sheppard",
     "Gerry Tesauro",
+    "Jacques Thiriat",
     "JP White",
     "Kit Woolsey",
     "Frank Worrell",

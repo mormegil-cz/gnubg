@@ -512,7 +512,7 @@ extern void AddGame( moverecord *pmr ) {
     ms.cGames++;
 }
 
-static void NewGame( void ) {
+static int NewGame( void ) {
 
     moverecord *pmr;
     
@@ -552,7 +552,7 @@ static void NewGame( void ) {
 	free( plGame );
 	ListDelete( lMatch.plPrev );
 
-	return;
+	return -1;
     }
     
     if( fDisplay ) {
@@ -594,6 +594,8 @@ static void NewGame( void ) {
 
     ResetDelayTimer();
 #endif
+
+    return 0;
 }
 
 static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
@@ -1354,7 +1356,8 @@ extern int NextTurn( int fPlayNext ) {
 	outputx();
 	
 	if( fAutoGame ) {
-	    NewGame();
+	    if( NewGame() < 0 )
+		return -1;
 	    
 	    if( ap[ ms.fTurn ].pt == PLAYER_HUMAN )
 		ShowBoard();
