@@ -873,10 +873,14 @@ extern char *
 basename ( const char *filename );
 #endif
 
-#if GTK_CHECK_VERSION(1,3,0)
-#define GNUBG_CHARSET "UTF-8"
+#if USE_GTK
+#  if GTK_CHECK_VERSION(1,3,0) || defined (WIN32)
+#    define GNUBG_CHARSET "UTF-8"
+#  else
+#    define GNUBG_CHARSET "ISO-8859-1"
+#  endif
 #else
-#define GNUBG_CHARSET "ISO-8859-1"
+#  define GNUBG_CHARSET "ISO-8859-1"
 #endif
 
 extern char *
