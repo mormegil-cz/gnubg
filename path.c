@@ -171,7 +171,7 @@ BackupFile ( const char *sz ) {
   /* windows can not rename to an existing file */
   if ( unlink ( szNew ) && errno != ENOENT ) {
     /* do not complain if file is not found */
-    outputerr ( szNew );
+    perror ( szNew );
     free ( szNew );
     return -1;
   }
