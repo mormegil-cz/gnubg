@@ -407,8 +407,8 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
     PlaceChequer:
 	nBar = pgd->fDragColour == pgd->fColour ? 25 - pgd->nBar : pgd->nBar;
 	    
-	if( nDest == -1 || ( pgd->fDragColour > 0 ? pgd->anBoard[ nDest ] < -1 :
-			     pgd->anBoard[ nDest ] > 1 ) || nDest == nBar ||
+	if( nDest == -1 || ( pgd->fDragColour > 0 ? pgd->anBoard[ nDest ] < -1
+			     : pgd->anBoard[ nDest ] > 1 ) || nDest == nBar ||
 	    nDest > 27 ) {
 	    /* FIXME check with owner that move is legal */
 	    XBell( pewnd->pdsp, 100 );

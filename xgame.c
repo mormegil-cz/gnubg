@@ -17,12 +17,13 @@
 #include "xboard.h"
 #include "xgame.h"
 #include "backgammon.h"
+#include "positionid.h"
 
 typedef enum _statsid {
     STATS_LNAME, STATS_XNAME, STATS_ONAME,
     STATS_LSCORE, STATS_XSCORE, STATS_OSCORE,
     STATS_LMATCH, STATS_MATCH,
-    STATS_MOVE
+    STATS_MOVE, STATS_BOARD
 } statsid;
 
 typedef struct _statsmove {
@@ -78,6 +79,14 @@ static extdefault aedStatsTextC[] = {
     { NULL, NULL }
 };
 
+static extdefault aedStatsTextPlainC[] = {
+    { &eq_font, "-Misc-Fixed-Medium-R-Normal--12-*-*-*-*-*-iso8859-1" },
+    { &eq_background, "#000" },
+    { &eq_foreground, "#FFF" },
+    { &eq_justification, "c" },
+    { NULL, NULL }
+};
+
 extwindowspec aewsStats[] = {
     { "lname", &ewcText, aedStatsTitleL, "Name", STATS_LNAME },
     { "xname", &ewcText, aedStatsTextL, NULL, STATS_XNAME },
@@ -87,7 +96,8 @@ extwindowspec aewsStats[] = {
     { "oscore", &ewcText, aedStatsTextR, NULL, STATS_OSCORE },
     { "lmatch", &ewcText, aedStatsTitleR, "Match", STATS_LMATCH },
     { "match", &ewcText, aedStatsTextL, NULL, STATS_MATCH },
-    { "move", &ewcText, aedStatsTextC, NULL, STATS_MOVE }
+    { "move", &ewcText, aedStatsTextC, NULL, STATS_MOVE },
+    { "board", &ewcText, aedStatsTextPlainC, NULL, STATS_BOARD }
 };
 
 static int StatsRedraw( extwindow *pewnd, statsdata *psd, int fClear ) {
@@ -132,7 +142,10 @@ static int StatsConfigure( extwindow *pewnd, statsdata *psd,
 		       76, cxyChequer * 2 + 24, 100, 12 );
 
     XMoveResizeWindow( pewnd->pdsp, psd->paewnd[ STATS_MOVE ].wnd,
-		       0, cxyChequer * 2 + 42, pewnd->cx, 12 );
+		       0, cxyChequer * 2 + 42, pewnd->cx >> 1, 12 );
+    XMoveResizeWindow( pewnd->pdsp, psd->paewnd[ STATS_BOARD ].wnd,
+		       pewnd->cx >> 1, cxyChequer * 2 + 42,
+		       pewnd->cx >> 1, 12 );
     
     StatsRedraw( pewnd, pewnd->pv, True );
     
@@ -226,6 +239,25 @@ extern int StatsConfirm( extwindow *pewnd ) {
     return 0;
 }
 
+static void StatsUpdateBoardID( extwindow *pewnd, statsdata *psd ) {
+
+    gamedata *pgd = psd->pgd;
+    int i, anBoard[ 2 ][ 25 ];
+
+    for( i = 0; i < 24; i++ ) {
+	anBoard[ pgd->fTurn <= 0 ][ i ] = pgd->anBoard[ 24 - i ] < 0 ?
+	    abs( pgd->anBoard[ 24 - i ] ) : 0;
+	anBoard[ pgd->fTurn > 0 ][ i ] = pgd->anBoard[ i + 1 ] > 0 ?
+	    abs( pgd->anBoard[ i + 1 ] ) : 0;
+    }
+
+    anBoard[ pgd->fTurn <= 0 ][ 24 ] = abs( pgd->anBoard[ 0 ] );
+    anBoard[ pgd->fTurn > 0 ][ 24 ] = abs( pgd->anBoard[ 25 ] );
+
+    ExtChangePropertyHandler( psd->paewnd + STATS_BOARD, TP_TEXT, 8,
+			      PositionID( anBoard ), 15 );
+}
+
 extern int StatsMove( extwindow *pewnd, int nSource, int nDest, int fHit ) {
 
     char sz[ 40 ], *pch;
@@ -283,6 +315,8 @@ extern int StatsMove( extwindow *pewnd, int nSource, int nDest, int fHit ) {
     
     ExtChangePropertyHandler( psd->paewnd + STATS_MOVE, TP_TEXT, 8, sz,
 			      strlen( sz ) + 1 );    
+
+    StatsUpdateBoardID( pewnd, psd );
     
     return 0;
 }
@@ -327,6 +361,8 @@ extern int StatsSet( extwindow *pewnd, char *sz ) {
 	psd->csmv = 0;
 	ExtChangePropertyHandler( psd->paewnd + STATS_MOVE, TP_TEXT, 8, "",
 				  0 );
+	
+	StatsUpdateBoardID( pewnd, psd );
     }
     
     return 0;
