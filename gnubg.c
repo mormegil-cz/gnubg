@@ -184,17 +184,17 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
 	0.04f /* SKILL_VERYGOOD	*/
     };
 
-evalcontext ecTD = { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 };
+evalcontext ecTD = { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 };
 
 rolloutcontext rcRollout =
 { 
   {
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 cube decision */
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 cube decision */
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 cube decision */
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 cube decision */
   }, 
   {
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 chequerplay */
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 chequerplay */
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 chequerplay */
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 chequerplay */
   }, 
   FALSE, /* cubeful */
   FALSE, /* variance reduction */
@@ -211,16 +211,16 @@ rolloutcontext rcRollout =
   /* evaltype */ \
   EVAL_EVAL, \
   /* evalcontext */ \
-  { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, \
+  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, \
   /* rolloutcontext */ \
   { \
     { \
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 cube decision */ \
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 cube decision */ \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 cube decision */ \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 cube decision */ \
     }, \
     { \
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 chequerplay */ \
-      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 chequerplay */ \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 chequerplay */ \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 chequerplay */ \
     }, \
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \

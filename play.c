@@ -941,7 +941,7 @@ extern int ComputerTurn( void ) {
 
       if( ClassifyPosition( ms.anBoard ) <= CLASS_RACE ) {
 
-          evalcontext ecResign = { 0, FALSE, 0, 0, TRUE, 0.0, 0.0 };
+          evalcontext ecResign = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
           evalsetup esResign;
 
           esResign.et = EVAL_EVAL;

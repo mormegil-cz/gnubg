@@ -281,7 +281,7 @@ cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
 char *aszEvalType[] = 
    { "No evaluation", "Neural net evaluation", "Rollout" };
 
-static evalcontext ecBasic = { 0, FALSE, 0, 0, TRUE, 0.0, 0.0 };
+static evalcontext ecBasic = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -327,12 +327,12 @@ const char *aszSettings[ NUM_SETTINGS ] = {
   "beginner", "novice", "intermediate", "advanced", "expert", "world class" };
 
 evalcontext aecSettings[ NUM_SETTINGS ] = {
-  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.060 }, /* beginner */
-  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.050 }, /* novice */
-  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.040 }, /* intermediate */
-  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.015 }, /* advanced */
-  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.0 },   /* expert */
-  { 8, TRUE, 2, 0, TRUE, 0.16, 0.0 }    /* world class */
+  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.060 }, /* beginner */
+  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.050 }, /* novice */
+  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.040 }, /* intermediate */
+  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.015 }, /* advanced */
+  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.0 },   /* expert */
+  { 8, TRUE, 2, 0, TRUE, FALSE, 0.16, 0.0 }    /* world class */
 };
 
 
@@ -3468,7 +3468,7 @@ FindnSaveBestMoves( movelist *pml,
   /* Find best moves. 
      Ensure that auchMove is evaluated at the deepest ply. */
 
-  int i, j, nMoves, iPly;
+  int i, j = 0, nMoves, iPly;
   move *pm;
     
   /* Find all moves -- note that pml contains internal pointers to static

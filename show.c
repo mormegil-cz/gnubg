@@ -56,10 +56,12 @@ static void ShowEvaluation( evalcontext *pec ) {
              "        %d move search candidate%s.\n"
              "        %0.3g cubeless search tolerance.\n"
              "        %d%% speed.\n"
+             "        %s pruning at 1-ply for moves.\n"
              "        %s evaluations.\n",
              pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
              "" : "s", pec->rSearchTolerance,
              (pec->nReduced) ? 100 / pec->nReduced : 100,
+             pec->fNoOnePlyPrune ? "No" : "Normal",
              pec->fCubeful ? "Cubeful" : "Cubeless" );
 
     if( pec->rNoise )

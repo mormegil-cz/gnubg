@@ -1,3 +1,12 @@
+Sat Apr 13 15:41:49 2002  Øystein Johansen <oeysteij@online.no>
+
+        * play.c, gtktheory.c, gnubg.c eval.c, database.c: Initialise
+        used evalcontext to contain fNoOnePlyPrune member.
+
+        * show.c (ShowEvaluation): Show setting of 1-ply pruning option.   
+
+        * eval.c (FindnSaveBestMoves): Initialise j counter.
+
 Fri Apr 12 21:01:49 2002  Øystein Johansen <oeysteij@online.no>
 
         * eval.c (FindnSaveBestMove): Skip 1-ply pruning of candidates
