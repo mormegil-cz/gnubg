@@ -536,7 +536,7 @@ RestoreEvalContext ( evalcontext *pec, const char *sz ) {
 
   InitEvalContext ( pec );
 
-  sscanf ( sz, "%d%c %d %d %f %d %f",
+  sscanf ( sz, "%d%c %d %d %f",
            &nPlies, &ch, &nReduced, &fDeterministic, &pec->rNoise );
 
   pec->nPlies = nPlies;
@@ -802,7 +802,7 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	    nReduced = 0;
             fDeterministic = 0;
 
-	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f %d %f",
+	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f",
 		    &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
 		    &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
 		    &pm->arEvalMove[ 4 ], &pm->rScore,
