@@ -3690,6 +3690,10 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     strcat( szOutput, "RACE" );
     break;
 
+  case CLASS_CRASHED: /* Crashed neural network */
+    strcat( szOutput, "CRASHED" );
+    break;
+    
   case CLASS_CONTACT: /* Contact neural network */
     strcat( szOutput, "CONTACT" );
     break;
@@ -5720,9 +5724,10 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
           return rEff;
        }
      }
-  if (pc == CLASS_CONTACT)
+  if (pc == CLASS_CONTACT || pc == CLASS_CRASHED)
     {
-      
+      /* FIXME: should CLASS_CRASHED be handled differently? */
+	
       /* FIXME: use Øystein's values published in rec.games.backgammon,
          or work some other semiempirical values */
 

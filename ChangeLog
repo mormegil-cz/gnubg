@@ -1,3 +1,10 @@
+Fri Jan 18 10:43:53 2002  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (DumpPosition): Add entry for CLASS_CRASHED.
+	(EvalEfficiency): Handle CLASS_CRASHED like CLASS_CONTACT.
+
+	* guile.c (GuileInitialise): Add symbol CLASS_CRASHED.
+	
 Fri Jan 18 01:35:00 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* eval.c: Added new crashed net.
