@@ -213,13 +213,16 @@ static int SetMaterialCommon(Material* pMat, char *sz)
 
 static int SetMaterial(Material* pMat, char *sz)
 {
-	sz = (char*)SetMaterialCommon(pMat, sz);
-	pMat->textureInfo = 0;
-	pMat->pTexture = 0;
-	if (sz > 0)
+	if (fX)
 	{
-		FindTexture(&pMat->textureInfo, sz);
-		sz = 0;
+		sz = (char*)SetMaterialCommon(pMat, sz);
+		pMat->textureInfo = 0;
+		pMat->pTexture = 0;
+		if (sz > 0)
+		{
+			FindTexture(&pMat->textureInfo, sz);
+			sz = 0;
+		}
 	}
 	return (int)sz;
 }
