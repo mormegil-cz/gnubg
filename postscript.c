@@ -34,9 +34,50 @@
 #include "drawboard.h"
 #include "positionid.h"
 #include "i18n.h"
+#include "export.h"
 
-typedef enum _font { FONT_NONE, FONT_RM, FONT_SF, FONT_TT } font;
-static char *aszFont[ FONT_TT + 1 ] = { NULL, "rm", "sf", "tt" };
+typedef enum _font { 
+  FONT_NONE, 
+  /* Times-Roman */
+  FONT_RM,               
+  FONT_RM_BOLD,          
+  FONT_RM_ITALIC,       
+  FONT_RM_BOLD_ITALIC,  
+  /* Helvetica (Sans serif) */
+  FONT_SF,  
+  FONT_SF_BOLD,  
+  FONT_SF_OBLIQUE,  
+  FONT_SF_BOLD_OBLIQUE,  
+  /* Courier (type writer) */
+  FONT_TT,  
+  FONT_TT_BOLD,
+  FONT_TT_OBLIQUE,
+  FONT_TT_BOLD_OBLIQUE,
+  NUM_FONTS,
+} font;
+static char *aszFont[ NUM_FONTS ] = { 
+  NULL, 
+  "rm", "rmb", "rmi", "rmbi",
+  "sf", "sfb", "sfo", "sfbo",
+  "tt", "ttb", "tto", "ttbo",
+};
+
+static char *aszFontName[ NUM_FONTS ] = {
+  NULL,
+  "Times-Roman",
+  "Times-Bold",
+  "Times-Italic",
+  "Times-BoldItalic",
+  "Helvetica",
+  "Helvetica-Bold",
+  "Helvetica-Oblique",
+  "Helvetica-Bold-Oblique",
+  "Courier",
+  "Courier-Bold",
+  "Courier-Oblique",
+  "Courier-Bold-Oblique" 
+};
+  
 
 /* Output settings.  FIXME there should be commands to modify these! */
 static int cxPage = 595, cyPage = 842; /* A4 -- min (451,648) */
@@ -44,7 +85,7 @@ static int nMag = 100; /* Board scale (percentage) -- min 1, max 127 */
 
 /* Current document state. */
 static int iPage, y, nFont, fPDF, idPages, idResources, idLength,
-    aidFont[ FONT_TT + 1 ];
+    aidFont[ NUM_FONTS ];
 static long lStreamStart;
 static font fn;
 static dynarray daXRef, daPages;
@@ -211,8 +252,10 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
 
     /* FIXME change the font-setting procedures to use ISO 8859-1
        encoding */
+   
+    int i;
     
-    static char szPrologue[] =
+    static char *aszPrologue[] = {
 	"%%%%Creator: (GNU Backgammon " VERSION ")\n"
 	"%%%%DocumentData: Clean7Bit\n"
 	"%%%%DocumentNeededResources: font Courier Helvetica Times-Roman\n"
@@ -223,14 +266,11 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
 	"%%%%PageOrder: Ascend\n"
 	"%%%%EndComments\n"
 	"%%%%BeginDefaults\n"
-	"%%%%PageResources: font Courier Helvetica Times-Roman\n"
+        "%%%%PageResources: font Courier Helvetica Times-Roman\n"
 	"%%%%EndDefaults\n"
 	"%%%%BeginProlog\n"
 	"%%%%BeginResource: procset GNU-Backgammon-Prolog 1.0 0\n"
-	"\n"
-	"/rm { /Times-Roman findfont exch scalefont setfont } bind def\n"
-	"/sf { /Helvetica findfont exch scalefont setfont } bind def\n"
-	"/tt { /Courier findfont exch scalefont setfont } bind def\n"
+	"\n",
 	"\n"
 	"/cshow { dup stringwidth pop 2 div neg 0 rmoveto show } bind def\n"
 	"\n"
@@ -313,7 +353,7 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
 	"%%%%IncludeResource: font Courier\n"
 	"%%%%IncludeResource: font Helvetica\n"
 	"%%%%IncludeResource: font Times-Roman\n"
-	"%%%%EndSetup\n";
+	"%%%%EndSetup\n" };
     time_t t;
     char *sz, *pch;
 
@@ -336,42 +376,34 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
 		 idPages = AllocateObject() );
 	EndObject( pf );
 
-	StartObject( pf, aidFont[ FONT_RM ] = AllocateObject() );
-	fputs( "<<\n"
-	       "/Type /Font\n"
-	       "/Subtype /Type1\n"
-	       "/Name /rm\n"
-	       "/BaseFont /Times-Roman\n"
-	       "/Encoding /WinAnsiEncoding\n"
-	       ">>\n", pf );
-	EndObject( pf );
-	
-	StartObject( pf, aidFont[ FONT_SF ] = AllocateObject() );
-	fputs( "<<\n"
-	       "/Type /Font\n"
-	       "/Subtype /Type1\n"
-	       "/Name /sf\n"
-	       "/BaseFont /Helvetica\n"
-	       "/Encoding /WinAnsiEncoding\n"
-	       ">>\n", pf );
-	EndObject( pf );
-	
-	StartObject( pf, aidFont[ FONT_TT ] = AllocateObject() );
-	fputs( "<<\n"
-	       "/Type /Font\n"
-	       "/Subtype /Type1\n"
-	       "/Name /tt\n"
-	       "/BaseFont /Courier\n"
-	       "/Encoding /WinAnsiEncoding\n"
-	       ">>\n", pf );
-	EndObject( pf );
+        /* fonts */
+
+        for ( i = 1; i < NUM_FONTS; ++i ) {
+
+          StartObject ( pf, aidFont[ i ] = AllocateObject() );
+
+          fprintf ( pf,
+                    "<<\n"
+                    "/Type /Font\n"
+                    "/Subtype /Type1\n"
+                    "/Name /%s\n"
+                    "/BaseFont /%s\n"
+                    "/Encoding /WinAnsiEncoding\n"
+                    ">>\n", aszFont[ i ], aszFontName[ i ] );
+          EndObject( pf );
+
+        }
 	
 	StartObject( pf, idResources = AllocateObject() );
 	fprintf( pf, "<<\n"
 		 "/ProcSet [/PDF /Text]\n"
-		 "/Font << /rm %d 0 R /sf %d 0 R /tt %d 0 R >>\n"
-		 ">>\n", aidFont[ FONT_RM ], aidFont[ FONT_SF ],
-		 aidFont[ FONT_TT ] );
+		 "/Font << " );
+
+        for ( i = 1; i < NUM_FONTS; ++i ) 
+          fprintf ( pf, "/%s %d 0 R ", aszFont[ i ], aidFont[ i ] );
+
+        fprintf ( pf, ">>\n" ">>\n" );
+
 	/* FIXME list xobject resources */
 	EndObject( pf );
     } else {
@@ -397,8 +429,18 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
 	fputs( "%%Title: (", pf );
 	PostScriptEscape( pf, szTitle );
 	fputs( ")\n", pf );
+
+        /* Prologue */
+
+        fputs ( aszPrologue[ 0 ], pf );
+
+        /* fonts */
+
+        for ( i = 1; i < NUM_FONTS; ++i ) 
+          fprintf ( pf, "/%s { /%s findfont exch scalefont setfont } "
+                    "bind def\n", aszFont[ i ], aszFontName[ i ] );
 	
-	fprintf( pf, szPrologue, fClockwise ? -20 : 20,
+	fprintf( pf, aszPrologue[ 1 ], fClockwise ? -20 : 20,
 		 fClockwise ? 320 : 80, fClockwise ? 365 : 35 );
     }
     
@@ -613,7 +655,10 @@ static int StringWidth( unsigned char *sz ) {
 
 /* Typeset a line of text.  We're not TeX, so we don't do any kerning,
    hyphenation or justification.  Word wrapping will have to do. */
-static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
+
+static void PrintPostScriptLineWithSkip( FILE *pf, unsigned char *pch, 
+                                         const int nSkip,
+                                         font fn, int nSize ) {
 
     int x;
     unsigned char *pchStart, *pchBreak;
@@ -621,7 +666,8 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
     if( !pch || !*pch )
 	return;
 
-    Skip( pf, 6 );
+    if ( nSkip )
+      Skip( pf, nSkip );
 
     while( *pch ) {
 	Advance( pf, 10 );
@@ -629,7 +675,7 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
 	pchBreak = NULL;
 	pchStart = pch;
 	
-	for( x = 0; x < 451 * 1000 / 10; x += acxTimesRoman[ *pch++ ] )
+	for( x = 0; x < 451 * 1000 / nSize; x += acxTimesRoman[ *pch++ ] )
 	    if( !*pch ) {
 		/* finished; break here */
 		pchBreak = pch;
@@ -645,7 +691,7 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
 	if( !pchBreak )
 	    pchBreak = ( pch == pchStart ) ? pch : pch - 1;
 
-	RequestFont( pf, FONT_RM, 10 );
+	RequestFont( pf, fn, nSize );
 
 	fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (" : "0 %d moveto (", y );
 	
@@ -670,6 +716,32 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
 	pch = pchBreak + 1;
     }
 }
+
+static void
+PrintPostScriptLine ( FILE *pf, unsigned char *pch ) {
+
+  PrintPostScriptLineWithSkip ( pf, pch, 0, FONT_RM, 10 );
+
+}
+
+static void
+PrintPostScriptLineFont ( FILE *pf, unsigned char *pch, 
+                          font fn, int nSize ) {
+
+  PrintPostScriptLineWithSkip ( pf, pch, 0, fn, nSize );
+
+}
+
+
+
+static void
+PrintPostScriptComment ( FILE *pf, unsigned char *pch ) {
+
+  PrintPostScriptLineWithSkip ( pf, pch, 6, FONT_RM, 10 );
+
+}
+
+
 
 static void 
 PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
@@ -723,6 +795,69 @@ static void PlayerSymbol( FILE *pf, int x, int fPlayer ) {
 		 fPlayer ? "fill" : "stroke" );
 }
 
+
+static void
+PostScriptMatchInfo ( FILE *pf, matchinfo *pmi ) {
+
+  char sz[ 1000 ];
+  char szx[ 1000 ];
+  int i;
+  struct tm tmx;
+
+  Consume ( pf, 14 );
+  PrintPostScriptLineFont ( pf, _("Match Information" ), FONT_RM_BOLD, 14 );
+  Consume ( pf, 6 );
+
+  /* ratings */
+
+  RequestFont ( pf, FONT_RM, 10 );
+  for ( i = 0; i < 2; ++i ) {
+    sprintf ( sz, _("%s's rating: %s"),
+              ap[ i ].szName,
+              pmi->pchRating[ i ] ? pmi->pchRating[ i ] : _("n/a") );
+    PrintPostScriptLine ( pf, sz );
+  }
+
+  /* date */
+
+  if ( pmi->nYear ) {
+
+    tmx.tm_year = pmi->nYear - 1900;
+    tmx.tm_mon = pmi->nMonth - 1;
+    tmx.tm_mday = pmi->nDay;
+    strftime ( szx, sizeof ( szx ), _("%B %d, %Y"), &tmx );
+    sprintf ( sz, _("Date: %s"), szx ); 
+    PrintPostScriptLine ( pf, sz );
+  }
+  else 
+    PrintPostScriptLine ( pf, _("Date: n/a") );
+
+  /* event, round, place and annotator */
+
+  sprintf( sz, _("Event: %s"),
+           pmi->pchEvent ? pmi->pchEvent : _("n/a") );
+  PrintPostScriptLine ( pf, sz );
+
+  sprintf( sz, _("Round: %s"),
+           pmi->pchRound ? pmi->pchRound : _("n/a") );
+  PrintPostScriptLine ( pf, sz );
+
+  sprintf( sz, _("Place: %s"),
+           pmi->pchPlace ? pmi->pchPlace : _("n/a") );
+  PrintPostScriptLine ( pf, sz );
+
+  sprintf( sz, _("Annotator: %s"),
+           pmi->pchAnnotator ? pmi->pchAnnotator : _("n/a") );
+  PrintPostScriptLine ( pf, sz );
+
+  sprintf( sz, _("Comments: %s"),
+           pmi->pchComment ? pmi->pchComment : _("n/a") );
+  PrintPostScriptLine ( pf, sz );
+    
+  ReleaseFont ( pf );
+
+}
+
 static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
     list *pl;
@@ -738,6 +873,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
         FixMatchState ( &msExport, pmr );
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
+
+            ApplyMoveRecord ( &msExport, plGame, pmr );
+          
 	    Ensure( pf, 26 );
 	    Consume( pf, 14 );
 	    RequestFont( pf, FONT_RM, 14 );
@@ -766,6 +904,11 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PostScriptEscape( pf, ap[ 1 ].szName );
 	    fprintf( pf, _(" (%d points)"), pmr->g.anScore[ 1 ] );
 	    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+
+            /* match information */
+
+            if ( exsExport.fIncludeMatchInfo )
+              PostScriptMatchInfo ( pf, &mi );
 	    
 	    break;
 	    

@@ -1,3 +1,9 @@
+Tue Dec 24 17:23:03 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	* postscript.c (PostScriptPrologue): define more fonts.
+	* postscript.c (PostScriptMatchInfo): new function.
+	* postscript.c (ExportGamePostScript): add match info to output.
+
 Tue Dec 24 11:15:31 2002  Gary Wong  <gtw@gnu.org>
 
 	* configure.in: Detect gtkextra-2.0.
