@@ -5,6 +5,7 @@ This section describes what kind of bearoff databases you can use with
 * Introduction to bearoff databases::
 * Bearoff databases with GNU Backgammon::
 * Obtaining bearoff databases::
+* Technical notes::
 @end menu
 
 @node Introduction to bearoff databases
@@ -606,3 +607,40 @@ Double, take        : -0.710   (-0.491)
 Correct cube action: No double, beaver
 
 @end example
+
+
+@node Technical notes
+@section Technical notes
+
+@subsection Enumeration of one-sided bearoff positions
+                                                                                
+Assume you have C chequers and P points. The total number of one-sided 
+positions is binom(C+P,P). The positions are now enumerated as follows:
+                                                                                
+@multitable @columnfractions 0.5 0.5
+@item 000...0000 @tab : 0
+@item 100...0000 @tab : 1
+@item 010...0000 @tab : 2
+@item 001 ..0000 @tab : 2
+@item 000...0001 @tab : P
+@item @tab
+@item 200...0000 @tab : P+1
+@item 110...0000 @tab : P+2
+@item 101...0000 @tab : P+3
+@item ... @tab
+@item 020...0000 @tab : P+P
+@item ... @tab
+@end multitable
+                                                                                
+That is, we start enumerating all positions with 0 chequers, then all
+positions with 1 chequer, and then all positions with 2 chequers etc.
+
+@subsection Enumeration of two-sided bearoff positions
+                                                                                
+two sided enum =
+   (one sided enum for player on roll) * binom(C+P,P)
+   + (one sided enum for opponent)
+
+This is the same enumeration used by Hugh Sconyers to index his
+databases, except that he doesn't include position #0.
+
