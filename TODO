@@ -103,3 +103,4 @@ duplication of effort and to make sure our changes merge easily.
   The SGF format (Smart Game Format -- see <http://www.red-bean.com/sgf/>)
   can probably be extended to backgammon, instead.
 ** Export matches (and analysis) to ASCII, HTML, PostScript, etc.
+** Import and export position databases to a portable format.
