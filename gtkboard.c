@@ -43,7 +43,7 @@ static unsigned int nSeed = 1; /* for rand_r */
 
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_move, *table, *hbox_match,
-	*move, *position_id;
+	*move, *position_id, *set, *edit;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point;
@@ -406,14 +406,14 @@ static void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
 static void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
-    gtk_label_set_text( GTK_LABEL( bd->position_id ), PositionID( points ) );
+    gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
 }
 
 /* A chequer has been moved or the board has been updated -- update the
    move and position ID labels. */
 static void update_move( BoardData *bd ) {
     
-    char move[ 40 ] = "Illegal move";
+    char *move = "Illegal move", move_buf[ 40 ];
     gint i, points[ 2 ][ 25 ];
     guchar key[ 10 ];
 
@@ -422,9 +422,11 @@ static void update_move( BoardData *bd ) {
 
     bd->valid_move = NULL;
     
-    if( EqualBoards( points, bd->old_board ) )
+    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+	move = "(Editing)";
+    else if( EqualBoards( points, bd->old_board ) )
         /* no move has been made */
-	move[ 0 ] = 0;
+	move = NULL;
     else {
         PositionKey( points, key );
 
@@ -432,7 +434,8 @@ static void update_move( BoardData *bd ) {
             if( EqualKeys( bd->move_list.amMoves[ i ].auch, key ) ) {
                 /* FIXME do something different if the move is complete */
                 bd->valid_move = bd->move_list.amMoves + i;
-                FormatMove( move, bd->old_board, bd->valid_move->anMove );
+                FormatMove( move = move_buf, bd->old_board,
+			    bd->valid_move->anMove );
                 break;
             }
     }
@@ -1781,6 +1784,23 @@ static void board_realize( GtkWidget *board ) {
     board_create_pixmaps( board, bd );
 }
 
+static void board_set_position( GtkWidget *pw, BoardData *bd ) {
+
+    char sz[ 25 ]; /* "set board XXXXXXXXXXXXXX" */
+
+    sprintf( sz, "set board %s", gtk_entry_get_text( GTK_ENTRY(
+	bd->position_id ) ) );
+    
+    UserCommand( sz );
+}
+
+static void board_edit( GtkWidget *pw, BoardData *bd ) {
+
+    update_move( bd );
+    
+    /* FIXME */
+}
+
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
 			     BoardData *bd ) {
     
@@ -1861,8 +1881,19 @@ static void board_init( Board *board ) {
     /* FIXME */ {
 	gtk_box_pack_start( GTK_BOX( bd->hbox_move ), bd->move =
 			    gtk_label_new( NULL ), TRUE, FALSE, 0 );
-	gtk_box_pack_start( GTK_BOX( bd->hbox_move ), bd->position_id =
-			    gtk_label_new( NULL ), TRUE, FALSE, 0 );
+
+	gtk_box_pack_end( GTK_BOX( bd->hbox_move ), bd->edit =
+			    gtk_toggle_button_new_with_label( "Edit" ),
+			    FALSE, FALSE, 8 );
+	gtk_box_pack_end( GTK_BOX( bd->hbox_move ), bd->set =
+			    gtk_button_new_with_label( "Set" ),
+			    FALSE, FALSE, 0 );
+	gtk_box_pack_end( GTK_BOX( bd->hbox_move ), bd->position_id =
+			    gtk_entry_new(), FALSE, FALSE, 8 );
+	gtk_entry_set_max_length( GTK_ENTRY( bd->position_id ), 14 );
+	gtk_box_pack_end( GTK_BOX( bd->hbox_move ),
+			  gtk_label_new( "Position:" ), FALSE, FALSE, 0 );
+	    
 	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Name" ),
 			  1, 2, 0, 1, 0, 0, 4, 0 );
 	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Score" ),
@@ -1889,6 +1920,14 @@ static void board_init( Board *board ) {
               "1:3:1:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:2:0:0:3" );
     
     gtk_widget_show_all( GTK_WIDGET( board ) );
+
+    gtk_signal_connect( GTK_OBJECT( bd->position_id ), "activate",
+			GTK_SIGNAL_FUNC( board_set_position ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->set ), "clicked",
+			GTK_SIGNAL_FUNC( board_set_position ), bd );
+
+    gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
+			GTK_SIGNAL_FUNC( board_edit ), bd );
     
     gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "expose_event",
 			GTK_SIGNAL_FUNC( board_expose ), bd );    

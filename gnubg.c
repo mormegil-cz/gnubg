@@ -437,6 +437,10 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
 	return 0;
     }
 
+    /* FIXME be more strict than this -- fail if both players are on the
+       bar against closed boards, or if either player has no chequers
+       remaining. */
+    
     return PositionFromID( an, sz );
 }
 

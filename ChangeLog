@@ -1,3 +1,8 @@
+Thu Jul 27 10:03:33 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkboard.c (board_init): Change position ID to an entry field,
+	add "set" and "edit" buttons.
+
 Tue Jul 25 10:33:54 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (output, outputl, outputc, outputf, outputv, outputx): New

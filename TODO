@@ -62,7 +62,7 @@ duplication of effort and to make sure our changes merge easily.
 
 * GTK interface:
 ** Add a board edit mode (button 1 drags chequers, button 2 adds
-  player 0/removes player 1, button 3 adds player 1/removes player 0).
+  player 0/removes player 1, button 3 adds player 1/removes player 0). (gary)
 ** Add a game window, which lists the moves made in the game so far and
   allows moving back and forth.
 ** Make sure the board window behaves properly with ICCCM things.
@@ -74,10 +74,14 @@ duplication of effort and to make sure our changes merge easily.
   stdin).
 ** Allow the user to decide whether short messages appear in dialogs
   instead of the status bar.
+** Disable the set/edit buttons in the board window when no game is in
+  progress.
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
   changes in eval.c to give the information in a useful form; probably
   a "DumpPositionRaw".
+*** Make "rollout" (and other slow commands which currently use carriage
+  returns to update their status) use a progress bar in a dialog. (gary)
 *** Make "help" show its output in a CList.  There must be a button in
   the dialog to allow the user to recurse through help for subcommands.
 
@@ -124,3 +128,4 @@ duplication of effort and to make sure our changes merge easily.
   both players have up to 11 chequers in the home board onto a CD-ROM).
 ** Move the built-in RNGs into lib/; they can then be used instead of
   rand_r for better quality random numbers and improved portability.
+** Make sure the POSIX-isms in libevent are not used if unavailable. (gary)
