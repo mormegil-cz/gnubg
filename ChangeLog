@@ -1,3 +1,9 @@
+Sat Apr 12 14:21:31 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ParseMatMove): handle illegal moves in .mat files
+	produced by Snowie.
+	(reported by Ian Shaw)
+
 Sat Apr 12 10:55:38 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (place_chequer_or_revert): allow pick'n'pass moves

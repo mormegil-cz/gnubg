@@ -38,6 +38,14 @@
 #include "i18n.h"
 
 static int
+ParseSnowieTxt( char *sz,  
+                int *pnMatchTo, int *pfJacoby, int *pfUnused1, int *pfUnused2,
+                int *pfTurn, char aszPlayer[ 2 ][ 32 ], int *pfCrawfordGame,
+                int anScore[ 2 ], int *pnCube, int *pfCubeOwner,
+                int anBoard[ 2 ][ 25 ], int anDice[ 2 ] );
+
+
+static int
 IsValidMove ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ] ) {
 
   int anBoardTemp[ 2 ][ 25 ];
@@ -483,7 +491,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
     for( pch = strchr( sz, 0 ) - 1;
 	 pch >= sz && ( *pch == ' ' || *pch == '\t' ); pch-- )
 	*pch = 0;
-    
+
     if( sz[ 0 ] >= '1' && sz[ 0 ] <= '6' && sz[ 1 ] >= '1' && sz[ 1 ] <= '6' &&
 	sz[ 2 ] == ':' ) {
 
@@ -498,6 +506,44 @@ static void ParseMatMove( char *sz, int iPlayer ) {
           AddMoveRecord( pmr );
         }
         fBeaver = FALSE;
+
+        if ( ! strncasecmp( sz + 4, "illegal play", 12 ) ) {
+          /* Snowie type illegal play */
+
+          int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
+          int anScore[ 2 ], nCube, fCubeOwner, anBoard[ 2 ][ 25 ], anDice[ 2 ];
+          char aszPlayer[ 2 ][ 32 ];
+
+          if ( ! ( pch = strchr( sz + 4, '(' ) ) ) {
+            outputl( _("No '(' following text 'Illegal play'") );
+            return;
+          }
+
+          /* step over '(' */
+          ++pch; 
+
+          if ( ParseSnowieTxt( pch, &nMatchTo, &fJacoby, &fUnused1, &fUnused2,
+                               &fTurn, aszPlayer, &fCrawfordGame, anScore,
+                               &nCube, &fCubeOwner, anBoard, anDice ) ) {
+            outputl( _("Illegal Snowie position format for illegal play.") );
+            return;
+          }
+
+          /* FIXME: we only handle illegal moves; not illegal cubes,
+             changes to the match score etc. */
+
+          pmr = (moverecord *) malloc( sizeof( moverecord ) );
+          pmr->sb.mt = MOVE_SETBOARD;
+          pmr->sb.sz = NULL;
+          if( fTurn )
+            SwapSides( anBoard );
+          PositionKey( anBoard, pmr->sb.auchKey );
+          AddMoveRecord( pmr );
+
+          return;
+
+
+        }
 
         pmr = malloc( sizeof( pmr->n ) );
         pmr->n.mt = MOVE_NORMAL;
@@ -515,6 +561,8 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	pmr->n.stCube = SKILL_NONE;
 	
         c = ParseMove( sz + 3, pmr->n.anMove );
+
+        FixMatchState( &ms, pmr );
 
 	if( c > 0 ) {
 
@@ -632,7 +680,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 static int 
 ImportGame( FILE *pf, int iGame, int nLength ) {
 
-    char sz[ 128 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight = NULL;
+    char sz[ 256 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight = NULL;
     int n0, n1;
     moverecord *pmr;
     
@@ -689,7 +737,7 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
     AddMoveRecord( pmr );
     
     do
-	if( !fgets( sz, 128, pf ) ) {
+	if( !fgets( sz, sizeof( sz ), pf ) ) {
 	    sz[ 0 ] = 0;
 	    break;
 	}
@@ -702,10 +750,10 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
 	if( ( pch = strpbrk( sz, "\n\r" ) ) )
 	    *pch = 0;
 
-	if( ( pchLeft = strchr( sz, ':' ) ) &&
-		 ( pchRight = strchr( pchLeft + 1, ':' ) ) &&
-		 pchRight > sz + 3 )
-	    *( ( pchRight -= 2 ) - 1 ) = 0;
+        if( ( pchLeft = strchr( sz, ':' ) ) &&
+            ( pchRight = strchr( pchLeft + 1, ':' ) ) &&
+            pchRight > sz + 3 )
+          *( ( pchRight -= 2 ) - 1 ) = 0;
 	else if( strlen( sz ) > 15 && ( pchRight = strstr( sz + 15, "  " ) ) )
 	    *pchRight++ = 0;
 	
@@ -719,7 +767,7 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
 	if( pchRight )
 	    ParseMatMove( pchRight, 1 );
 	
-	if( !fgets( sz, 128, pf ) )
+	if( !fgets( sz, sizeof( sz ), pf ) )
 	    break;
     } while( strspn( sz, " \n\r\t" ) != strlen( sz ) );
 
