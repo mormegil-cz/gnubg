@@ -374,9 +374,6 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ], const int fMove ) {
 
   memcpy( an, anBoard, 2 * 25 *sizeof ( int ) );
 
-  if ( fMove )
-    SwapSides( an );
-
   PipCount ( an, anPips );
 
   for ( i = 0; i < 2; ++i )
