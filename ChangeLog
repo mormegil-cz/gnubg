@@ -1,3 +1,13 @@
+Thu May 23 23:17:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New commands "next rolled" and "prev rolled" which will
+	take you to the next and previous moverecord which the
+	dice rolled if possible.
+
+	* gnubg.c: next commands "next rolled" and "prev rolled".
+	* play.c (CommandNextRolled, CommandPreviousRolled): new functions.
+	* play.c (CommandNext, CommandPrevious): call new functions.
+
 Wed May 22 21:12:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (GTKRollout): fix bug where "4 / 324 (4%)" was not
