@@ -186,7 +186,8 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     pnn->rBetaHidden = rBetaHidden;
     pnn->rBetaOutput = rBetaOutput;
     pnn->nTrained = 0;
-
+    pnn->fDirect = FALSE;
+    
     if( !( pnn->arHiddenWeight = malloc( cHidden * cInput *
 					 sizeof( float ) ) ) )
 	return -1;
@@ -227,13 +228,45 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     return 0;
 }
 
+extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
+    
+    pnn->cInput = *( ( (int *) p )++ );
+    pnn->cHidden = *( ( (int *) p )++ );
+    pnn->cOutput = *( ( (int *) p )++ );
+    pnn->nTrained = *( ( (int *) p )++ );
+    pnn->fDirect = TRUE;
+    pnn->rBetaHidden = *( ( (float *) p )++ );
+    pnn->rBetaOutput = *( ( (float *) p )++ );
+    
+    if( pnn->cInput < 1 || pnn->cHidden < 1 || pnn->cOutput < 1 ||
+	pnn->nTrained < 0 || pnn->rBetaHidden <= 0.0 ||
+	pnn->rBetaOutput <= 0.0 ) {
+	errno = EINVAL;
+
+	return NULL;
+    }
+
+    pnn->arHiddenWeight = p;
+    ( (float *) p ) += pnn->cInput * pnn->cHidden;
+    pnn->arOutputWeight = p;
+    ( (float *) p ) += pnn->cHidden * pnn->cOutput;
+    pnn->arHiddenThreshold = p;
+    ( (float *) p ) += pnn->cHidden;
+    pnn->arOutputThreshold = p;
+    ( (float *) p ) += pnn->cOutput;
+    
+    return p;
+}
+
 extern int NeuralNetDestroy( neuralnet *pnn ) {
 
-    free( pnn->arHiddenWeight );
-    free( pnn->arOutputWeight );
-    free( pnn->arHiddenThreshold );
-    free( pnn->arOutputThreshold );
-
+    if( !pnn->fDirect ) {
+	free( pnn->arHiddenWeight );
+	free( pnn->arOutputWeight );
+	free( pnn->arHiddenThreshold );
+	free( pnn->arOutputThreshold );
+    }
+    
     return 0;
 }
 

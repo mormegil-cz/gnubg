@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 typedef struct _neuralnet {
-    int cInput, cHidden, cOutput, nTrained;
+    int cInput, cHidden, cOutput, nTrained, fDirect;
     float rBetaHidden, rBetaOutput, *arHiddenWeight, *arOutputWeight,
 	*arHiddenThreshold, *arOutputThreshold;
 } neuralnet;
@@ -18,6 +18,7 @@ typedef struct _neuralnet {
 extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 			    int cOutput, float rBetaHidden,
 			    float rBetaOutput );
+extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p );
 extern int NeuralNetDestroy( neuralnet *pnn );
 
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],

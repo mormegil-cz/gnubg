@@ -1,3 +1,7 @@
+Fri Feb  1 10:49:00 2002  Gary Wong  <gtw@research.att.com>
+
+	* neuralnet.c (NeuralNetCreateDirect): New function.
+
 Thu Aug 23 10:57:16 2001  Gary Wong  <gtw@research.att.com>
 
 	* dynarray.c, hash.c, heap.c, list.c: #include <stddef.h>, to get
