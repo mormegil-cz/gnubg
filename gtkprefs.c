@@ -1287,10 +1287,12 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_container_add (GTK_CONTAINER (dtLightSourceFrame), vbox);
 	
 	pwLightSource = gtk_radio_button_new_with_label (NULL, "Positional");
+	gtk_tooltips_set_tip(ptt, pwLightSource, "This is a fixed light source, like a lamp", 0);
 	gtk_box_pack_start (GTK_BOX (vbox), pwLightSource, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (rdAppearance.lightType == LT_POSITIONAL));
 	
 	pwDirectionalSource = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), "Directional");
+	gtk_tooltips_set_tip(ptt, pwDirectionalSource, "This is a light direction, like the sun", 0);
 	gtk_box_pack_start (GTK_BOX (vbox), pwDirectionalSource, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (rdAppearance.lightType == LT_DIRECTIONAL));
 	gtk_signal_connect(GTK_OBJECT(pwDirectionalSource), "toggled", GTK_SIGNAL_FUNC(option_changed), bd);
@@ -1378,6 +1380,7 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjLightLevelAmbient ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwLightLevelAmbient = gtk_hscale_new(padjLightLevelAmbient);
+	gtk_tooltips_set_tip(ptt, pwLightLevelAmbient, "Ambient light specifies the general light level", 0);
 	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelAmbient, TRUE, TRUE, 0);
 
 	hBox = gtk_hbox_new (FALSE, 0);
@@ -1391,6 +1394,7 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjLightLevelDiffuse ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwLightLevelDiffuse = gtk_hscale_new(padjLightLevelDiffuse);
+	gtk_tooltips_set_tip(ptt, pwLightLevelDiffuse, "Diffuse light specifies light from the light source", 0);
 	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelDiffuse, TRUE, TRUE, 0);
 
 	hBox = gtk_hbox_new (FALSE, 0);
@@ -1404,6 +1408,7 @@ GtkWidget *LightingPage(BoardData *bd)
 	gtk_signal_connect_object( GTK_OBJECT( padjLightLevelSpecular ), "value-changed",
 			       GTK_SIGNAL_FUNC( option_changed ), NULL );
 	pwLightLevelSpecular = gtk_hscale_new(padjLightLevelSpecular);
+	gtk_tooltips_set_tip(ptt, pwLightLevelSpecular, "Specular light is reflected light off shiny surfaces", 0);
 	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelSpecular, TRUE, TRUE, 0);
 #endif
     
