@@ -1,3 +1,8 @@
+Wed Sep 25 17:39:10 2002  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (getDefaultPath): When the match date is known, use that
+	date in the default filename.
+
 Wed Sep 25 17:21:31 2002  Gary Wong  <gtw@gnu.org>
 
 	* set.c (CommandSetMatchInfoAnnotator, CommandSetMatchInfoComment,

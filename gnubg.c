@@ -6247,7 +6247,7 @@ getDefaultFileName ( const pathformat f ) {
 
     /* "timestamp"-"name for player 0"-"name for player 1"-"length".ext */
 
-    l = 10 + 1 + strlen ( ap[ 0 ].szName ) + 1 +
+    l = 15 + 1 + strlen ( ap[ 0 ].szName ) + 1 +
       strlen ( ap[ 1 ].szName ) + 1 + 5 + 1 + 
       strlen ( szExt ) + ( szPath ? ( 1 + strlen ( szPath ) ) : 0 );
 
@@ -6261,9 +6261,14 @@ getDefaultFileName ( const pathformat f ) {
       strcpy ( sz, "" );
 
     pc = strchr ( sz, 0 );
-    time ( &t );
-    strftime ( pc, l, _("%Y-%m-%d-%H%M"), localtime ( &t ) );
-  
+    
+    if( mi.nYear )
+	sprintf( pc, "%04d-%02d-%02d", mi.nYear, mi.nMonth, mi.nDay );
+    else {
+	time ( &t );
+	strftime ( pc, l, _("%Y-%m-%d-%H%M"), localtime ( &t ) );
+    }
+    
     pc = strchr ( pc, 0 );
     strcat ( pc, "-" );
 
