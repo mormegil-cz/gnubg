@@ -1,3 +1,8 @@
+Mon Oct  7 20:59:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (absoluteFibsRating): slight modification of
+	interpolation formulae used for error rates above 0.03.
+
 Sat Oct  5 02:30:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Gammon percentages working with huge OS database.

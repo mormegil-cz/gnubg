@@ -1030,7 +1030,7 @@ absoluteFibsRating ( const float r, const int n ) {
   /* error rate above 0.030 */
   /* use exponential interpolation */
 
-  return 500.0f + 1000.0f * exp ( 0.030f - r );
+  return 500.0f + 1000.0f * exp ( 0.030f - 10.0 * r );
 
 }
 
