@@ -92,6 +92,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "i18n.h"
 #include "sound.h"
 #include "path.h"
+#include "render.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -6419,9 +6420,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Board Images"), 500 );
 #endif    
-#if USE_GUI
+
     RenderInitialise();
-#endif 
+
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );
     else if( ( pch = getenv( "USER" ) ) )
