@@ -40,14 +40,17 @@ duplication of effort and to make sure our changes merge easily.
   use the old ugly format for JF compatibility (25 not bar, 0 not off,
   and check whether * for hits is OK).
 ** Finish "help" -- add detailed help for each command.
-** Add undo, reroll, and viewing next/prev moves in game/match.
+** Add undo, reroll, and viewing next/prev moves in game/match.  (Reroll
+  is not really necessary, since "set turn <player>" will let them roll
+  again.)
 ** Allow reading commands from scripts.  A .gnubgrc file would contain
   startup commands.  This needs some thought to make sure it works well
   with Guile scripts.
 ** Add "!" as a shell escape.
 ** Add ":" as a Guile escape, once it's here.
 ** When "set board" is given with no parameters under X, set it to the
-  current position displayed in the board window.
+  current position displayed in the board window.  (Perhaps a button in
+  the board window would be better.)
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -96,6 +99,8 @@ duplication of effort and to make sure our changes merge easily.
   and probably needs better event handling everywhere.
 ** When the interrupt key is pressed during processing in response to
   a board window event, "(Interrupted)" is not shown.
+** Make sure that ComputerMove() updating anBoard and the call to
+  NextTurn() are atomic, even if a SIGINT occurs.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -110,3 +115,8 @@ duplication of effort and to make sure our changes merge easily.
   an online evaluator like Monte Carlo, maybe even an entire game like
   Motif.
 ** Allow loading and saving weights to specify binary or ASCII format.
+** Allow annotating moves in matches.  It would be nice to be compatible
+  with other formats (Snowie?  CBG?) but these are probably undocumented.
+  The SGF format (Smart Game Format -- see <http://www.red-bean.com/sgf/>)
+  can probably be extended to backgammon, instead.
+** Export matches (and analysis) to ASCII, HTML, PostScript, etc.
