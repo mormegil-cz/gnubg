@@ -1321,37 +1321,30 @@ void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int draggin
        clicking on a narrow border */
     n = board_point_with_border( board, bd, x, y );
 
-    if (!dragging)
+    if (!dragging && (n == POINT_UNUSED0 || n == POINT_UNUSED1 || n == 26 || n == 27))
 	{
 		if (n == 26 || n == 27)
 		{	/* click on bearoff tray in edit mode -- bear off all chequers */
-			for( i = 0; i < 28; i++ )
+			for( i = 0; i < 26; i++ )
 			{
 				bd->points[i] = 0;
-#if USE_BOARD3D
-				if (rdAppearance.fDisplayType == DT_2D)
-#endif
-				    board_invalidate_point(bd, i);
 			}
 			bd->points[26] = bd->nchequers;
 			bd->points[27] = -bd->nchequers;
-
-			updateBoard(board, bd);
 		}
-		else if (n == POINT_UNUSED0 || n == POINT_UNUSED1)
+		else /* if (n == POINT_UNUSED0 || n == POINT_UNUSED1) */
 		{	/* click on unused bearoff tray in edit mode -- reset to starting position */
 			int anBoard[ 2 ][ 25 ];
 			InitBoard( anBoard, ms.bgv );
 			write_board( bd, anBoard );
-
-#if USE_BOARD3D
-			if (rdAppearance.fDisplayType == DT_2D)
-#endif
-				for( i = 0; i < 28; i++ )
-					board_invalidate_point( bd, i );
-			
-			updateBoard(board, bd);
 		}
+#if USE_BOARD3D
+		if (rdAppearance.fDisplayType == DT_2D)
+#endif
+			for( i = 0; i < 28; i++ )
+				board_invalidate_point( bd, i );
+
+		updateBoard(board, bd);
     }
 
     /* Only points or bar allowed */
@@ -2887,7 +2880,7 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
     }
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
-	{	/* Restore 2d chequer colour */
+	{	/* Restore 2d colours */
 		memcpy(rdAppearance.aarColour, aarColourTemp, sizeof(rdAppearance.aarColour));
 		memcpy(rdAppearance.aanBoardColour[0], aanBoardColourTemp, sizeof(double[4]));
 		memcpy(rdAppearance.arCubeColour, arCubeColourTemp, sizeof(rdAppearance.arCubeColour));
@@ -2976,9 +2969,9 @@ static void board_size_allocate( GtkWidget *board,
       new_size = MIN( allocation->width / 108,
                       ( allocation->height - 2 ) / 82 );
     }
-    
-    /* FIXME what should we do if new_size < 1?  If the window manager
-       honours our minimum size this won't happen, but... */
+    /* If the window manager honours our minimum size this won't happen, but... */
+	if (new_size < 1)
+		new_size = 1;
     
     if( ( rdAppearance.nSize = new_size ) != old_size &&
 	GTK_WIDGET_REALIZED( board ) ) {
