@@ -1805,7 +1805,7 @@ extern void GTKAddGame( moverecord *pmr ) {
 	*pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
     GList *pl;
     int c;
-    char sz[ 32 ];
+    char sz[ 128 ];
     
     if( !fGameMenuUsed ) {
 	/* Delete the "(no game)" item. */
