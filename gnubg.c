@@ -703,6 +703,9 @@ command cER = {
     { "mersenne", CommandSetRNGMersenne, 
       N_("Use the Mersenne Twister generator"),
       szOPTSEED, NULL },
+    { "random.org", CommandSetRNGRandomDotOrg, 
+      N_("Use random numbers fetched fromk <www.random.org>"),
+      NULL, NULL },
     { "user", CommandSetRNGUser, 
       N_("Specify an external generator"), szOPTSEED, NULL,},
     { NULL, NULL, NULL, NULL, NULL }
@@ -3425,6 +3428,7 @@ extern void CommandCopy (char *sz)
   puts (DrawBoard (szOut, ms.anBoard, ms.fMove, aps,
 			  MatchIDFromMatchState (&ms)));
 #endif
+
 }
 
 #ifdef WIN32
@@ -3601,6 +3605,9 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
 	break;
     case RNG_MERSENNE:
 	fprintf( pf, "%s rng mersenne\n", sz );
+	break;
+    case RNG_RANDOM_DOT_ORG:
+        fprintf( pf, "%s rng random.org\n", sz );
 	break;
     case RNG_USER:
 	/* don't save user RNGs */

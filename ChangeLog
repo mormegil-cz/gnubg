@@ -1,3 +1,14 @@
+Sat Jul 27 12:47:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Added the www.random.org-RNG to gnubg.
+
+	* gnubg.c: new command "set rng random.org"
+	* gnubg.c (SaveRNGSettings): save new rng.
+	* set.c (CommandSetRNGRandomDotOrg): new function.
+	* gtkgame.c (OptionsPage, OptionsOK): add new rng.
+	* dice.c (getDiceRandomDotOrg): new function.
+	* dice.c (RollDice, InitRNGSeed): add new rng.
+
 Sat Jul 27 12:17:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Add hint to tutor mode dialog.

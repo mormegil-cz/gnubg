@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #if TIME_WITH_SYS_TIME
 #include <sys/time.h>
@@ -49,12 +50,22 @@
 #include <unistd.h>
 #endif
 
+#if HAVE_SYS_SOCKET_H
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <sys/un.h>
+#endif
+
 #include "backgammon.h"
 #include "dice.h"
 #include "md5.h"
 #include "mt19937int.h"
 #include "isaac.h"
 #include "i18n.h"
+#include "external.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -68,6 +79,7 @@ char *aszRNG[] = {
    N_ ("manual"),
    N_ ("MD5"),
    N_ ("Mersenne Twister"),
+   N_ ("www.random.org"),
    N_ ("user supplied")
 };
 
@@ -207,6 +219,7 @@ extern void InitRNGSeed( int n ) {
 #endif
 
     case RNG_MANUAL:
+    case RNG_RANDOM_DOT_ORG:
 	/* no-op */
       break;
 
@@ -244,6 +257,113 @@ extern int InitRNG( int *pnSeed, int fSet ) {
 
     return f;
 }
+
+
+/* 
+ * Fetch random numbers from www.random.org
+ *
+ */
+
+#ifdef HAVE_SOCKETS
+
+static int
+getDiceRandomDotOrg ( void ) {
+
+#define BUFLENGTH 500
+
+  static int nCurrent = -1;
+  static int anBuf [ BUFLENGTH ]; 
+  static int nRead;
+ 
+
+  int h;
+  int cb;
+
+  int nBytesRead, i;
+  struct sockaddr *psa;
+  char szHostname[ 80 ];
+  char szHTTP[] = 
+    "GET http://www.random.org/cgi-bin/randnum?num=500&min=0&max=5&col=1\n";
+  char acBuf [ 2048 ];
+
+  /* 
+   * Suggestions for improvements:
+   * - use proxy
+   */
+
+  /*
+   * Return random number
+   */
+
+  if ( ( nCurrent >= 0) && ( nCurrent < nRead ) )
+     return anBuf [ nCurrent++ ];
+  else {
+
+    outputf ( _("Fetching %d random numbers from <www.random.org>\n"), BUFLENGTH );
+    outputx ();
+
+    /* fetch new numbers */
+
+    /* open socket */
+
+    strcpy ( szHostname, "www.random.org:80" );
+
+    if ( ( h = ExternalSocket ( &psa, &cb, szHostname ) ) < 0 ) {
+      perror ( szHostname );
+      return -1;
+    }
+
+    /* connect */
+
+    if ( ( connect ( h, psa, cb ) ) < 0 ) {
+      perror ( szHostname );
+      return -1;
+    }
+
+    /* read next set of numbers */
+
+    if ( ExternalWrite ( h, szHTTP, strlen ( szHTTP ) + 1 ) < 0 ) {
+      perror ( szHTTP );
+      close ( h );
+      return -1;
+    }
+
+    /* read data from web-server */
+
+    if ( ! ( nBytesRead = read ( h, acBuf, sizeof ( acBuf ) ) ) ) {
+      perror ( "reading data" );
+      close ( h );
+      return -1;
+    }
+
+    /* close socket */
+
+    close ( h );
+
+    /* parse string */
+
+    outputl ( _("Done." ) );
+    outputx ();
+
+    i = 0; nRead = 0;
+    for ( i = 0; i < nBytesRead ; i++ ) {
+
+      if ( ( acBuf[ i ] >= '0' ) && ( acBuf[ i ] <= '5' ) ) {
+         anBuf[ nRead ] = 1 + (int) (acBuf[ i ] - '0');
+         nRead++;
+      }
+
+    }
+
+
+    nCurrent = 1;
+    return anBuf[ 0 ];
+  }
+
+}
+
+#endif /* HAVE_SOCKETS */
+
 
 extern int RollDice( int anDice[ 2 ] ) {
 
@@ -302,6 +422,24 @@ extern int RollDice( int anDice[ 2 ] ) {
 #else
 	abort();
 #endif
+
+    case RNG_RANDOM_DOT_ORG:
+#if HAVE_SOCKETS
+
+      anDice[ 0 ] = getDiceRandomDotOrg();
+      anDice[ 1 ] = getDiceRandomDotOrg();
+
+      if ( anDice[ 0 ] <= 0 || anDice[ 1 ] <= 0 )
+        return -1;
+      else
+        return 0;
+
+#else /* HAVE_SOCKETS */
+
+      assert ( FALSE );
+
+#endif /* !HAVE_SOCKETS */
+
     }
 
     return -1;

@@ -172,11 +172,12 @@ typedef enum _gnubgcommand {
     CMD_SET_RNG_ISAAC,
     CMD_SET_RNG_MANUAL,
     CMD_SET_RNG_MD5,
+    CMD_SET_RNG_RANDOM_DOT_ORG,
     CMD_SET_RNG_MERSENNE,
     CMD_SET_RNG_USER,
     CMD_SET_TURN_0,
     CMD_SET_TURN_1,
-	CMD_SET_TUTOR,
+    CMD_SET_TUTOR,
     CMD_SHOW_COPYING,
     CMD_SHOW_ENGINE,
     CMD_SHOW_EXPORT,
@@ -264,6 +265,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set rng manual",
     "set rng md5",
     "set rng mersenne",
+    "set rng random.org",
     "set rng user",
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
@@ -7152,6 +7154,9 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   glade_menuitem = gtk_menu_item_new_with_label (_("Mersenne Twister"));
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwPRNG_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("<www.random.org>"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwPRNG_menu), glade_menuitem);
   glade_menuitem = gtk_menu_item_new_with_label (_("User"));
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwPRNG_menu), glade_menuitem);
@@ -7284,6 +7289,10 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
         UserCommand("set rng mersenne");
       break;
     case 5:
+      if (rngCurrent != RNG_RANDOM_DOT_ORG)
+        UserCommand("set rng random.org");
+      break;
+    case 6:
       if (rngCurrent != RNG_USER)
         UserCommand("set rng user");
       break;

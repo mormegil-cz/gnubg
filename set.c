@@ -1152,6 +1152,19 @@ extern void CommandSetRNGMersenne( char *sz ) {
     SetRNG( RNG_MERSENNE, sz );
 }
 
+extern void CommandSetRNGRandomDotOrg( char *sz ) {
+
+#if HAVE_SOCKETS
+    SetRNG( RNG_RANDOM_DOT_ORG, sz );
+#else
+    outputl( _("This installation of GNU Backgammon was compiled without "
+               "support for sockets needed for fetching\n"
+               "random numbers from <www.random.org>") );
+#endif
+
+}
+
+
 extern void CommandSetRNGUser( char *sz ) {
 
 #if HAVE_LIBDL
@@ -1558,8 +1571,9 @@ extern void CommandSetSeed( char *sz ) {
 
     int n;
     
-    if( rngCurrent == RNG_MANUAL ) {
-	outputl( _("You can't set a seed if you're using manual dice generation.") );
+    if( rngCurrent == RNG_MANUAL || rngCurrent == RNG_RANDOM_DOT_ORG ) {
+	outputl( _("You can't set a seed "
+                   "if you're using manual dice generation or random.org") );
 	return;
     }
 
