@@ -1,3 +1,7 @@
+Wed Oct  8 02:42:26 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gnubg.pot, *.po: merge & update.
+
 Sat Sep 19 21:10:29 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* POTFILES.in: Move timer.c to toplevel.
@@ -92,7 +96,7 @@ Sun Aug  4 21:31:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 Fri Jul 25 15:06:57 2002  Øystein Johansen  <oeysteij@online.no>
 
-        * de.po: Update file from Achim
+	* de.po: Update file from Achim
 
 Wed Jul 17 13:46:57 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
