@@ -384,7 +384,7 @@ BearoffEvalOneSided ( bearoffcontext *pbc,
       r = 0;
       for( i = 0; i < 32; i++ )
         for( j = i + 1; j < 32; j++ )
-          r += aarProb[ 1 ][ i ] * aarGammonProb[ 0 ][ j ];
+          r += aarProb[ 0 ][ i ] * aarGammonProb[ 1 ][ j ];
       
       arOutput[ OUTPUT_LOSEGAMMON ] = r;
       
@@ -434,6 +434,13 @@ BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     break;
 
   }
+
+  printf ( "%f %f %f %f %f\n", 
+           arOutput[ 0 ],
+           arOutput[ 1 ],
+           arOutput[ 2 ],
+           arOutput[ 3 ],
+           arOutput[ 4 ] );
 
   return 0;
 }

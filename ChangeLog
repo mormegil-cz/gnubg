@@ -1,3 +1,7 @@
+Sun Nov 24 11:59:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* bearoff.c (BearoffEvalOneSided): fix typo.
+
 Sun Nov 24 11:16:54 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Enhanced support for bearoff databases.
