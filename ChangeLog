@@ -1,3 +1,8 @@
+Wed Aug 27 18:19:44 2003 Oystein Johansen <oystein@gnubg.org>
+
+	* gtkgame.c (NewWidget): Fix bug that the shortcut buttons react on
+	the player settings.
+
 Wed Aug 27 14:04:44 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubg.c - make szLang writeable, ensure LANG env setting

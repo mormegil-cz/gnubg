@@ -3549,11 +3549,6 @@ typedef struct _newwidget {
   GtkAdjustment *padjML;
 } newwidget;
 
-typedef struct _cb_struct {
-	newwidget *pnw;
-	int n;
-} cb_struct;
-
 static GtkWidget *
 button_from_image ( GtkWidget *pwImage ) {
 
@@ -3608,15 +3603,18 @@ static void SettingsPressed( GtkWidget *pw, gpointer data ) {
 }
 
 static void ToolButtonPressedMS( GtkWidget *pw, newwidget *pnw ) {
-  UpdatePlayerSettings( pnw ); /* FIXME */
+  UpdatePlayerSettings( pnw ); 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   UserCommand("new session");
 }
 
-static void ToolButtonPressed( GtkWidget *pw, gpointer i ) {
+static void ToolButtonPressed( GtkWidget *pw, newwidget *pnw ) {
   char sz[40];
-  sprintf(sz, "new match %d", (int) i);
-//  UpdatePlayerSettings( pcbs->pnw ); /* FIXME */
+  int *pi;
+
+  pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pw ) );
+  sprintf(sz, "new match %d", *pi);
+  UpdatePlayerSettings( pnw );
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   UserCommand(sz);
 }
@@ -3625,16 +3623,13 @@ static GtkWidget *NewWidget( newwidget *pnw){
   int i, j = 1 ;
   char **apXPM[10];
   GtkWidget *pwVbox, *pwHbox, *pwLabel, *pwToolbar;
-  GtkWidget *pwSpin, *pwButtons, *pwFrame, *pwVbox2; /*, *pwHbox2; */
-  cb_struct cbs;
+  GtkWidget *pwSpin, *pwButtons, *pwFrame, *pwVbox2; 
 #include "xpm/stock_new_all.xpm"
 #include "xpm/stock_new_money.xpm"
 #if 0
 #include "xpm/computer.xpm"
 #include "xpm/human2.xpm"
 #endif
-  cbs.pnw = pnw;
-  cbs.n = -1;
   pwVbox = gtk_vbox_new(FALSE, 0);
 #if USE_GTK2
   pwToolbar = gtk_toolbar_new ();
@@ -3673,13 +3668,21 @@ static GtkWidget *NewWidget( newwidget *pnw){
   
   for(i = 1; i < 19; i=i+2, j++ ){			     
      char sz[40];
+     int *pi;
+
      sprintf(sz, _("Start a new %d point match"), i);
      pwButtons = button_from_image( image_from_xpm_d ( apXPM[j],
                                                       pwToolbar ) );
      gtk_toolbar_append_widget( GTK_TOOLBAR( pwToolbar ),
                              pwButtons, sz, NULL );
+     
+      pi = malloc ( sizeof ( int ) );
+      *pi = i;
+     gtk_object_set_data_full( GTK_OBJECT( pwButtons ), "user_data",
+                                  pi, free );
+
      gtk_signal_connect( GTK_OBJECT( pwButtons ), "clicked",
-		    GTK_SIGNAL_FUNC( ToolButtonPressed ), (gpointer) i );
+		    GTK_SIGNAL_FUNC( ToolButtonPressed ), pnw );
   }
   pnw->pwG = gtk_radio_button_new_with_label(NULL, _("Game"));
   pnw->pwM =
