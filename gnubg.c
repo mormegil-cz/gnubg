@@ -367,7 +367,7 @@ rolloutcontext rcRollout =
   /* evaltype */ \
   EVAL_EVAL, \
   /* evalcontext */ \
-  { FALSE, 0, 0, TRUE, 0.0 }, \
+  { TRUE, 0, 0, TRUE, 0.0 }, \
   /* rolloutcontext */ \
   { \
     { \
@@ -4889,7 +4889,7 @@ CommandLoadPython( char * sz ) {
   pch = PathSearch( sz, NULL );
   pf = fopen( pch, "r" );
   if (!pf)
-  {	/* Couldn't find file, have a look in the scripts dir */
+  {  /* Couldn't find file, have a look in the scripts dir */
     char scriptDir[BIG_PATH];
     strcpy(scriptDir, (szDataDirectory && *szDataDirectory) ? szDataDirectory: ".");
     strcat(scriptDir, "/scripts");
