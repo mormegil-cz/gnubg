@@ -3736,16 +3736,20 @@ static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput,
   /* no-op -- nothing much we can say, really (pip count?) */
 }
 
-static void DumpContact( int anBoard[ 2 ][ 25 ], char* szOutput,
-                         const bgvariation bgv ) {
-
+static void
+DumpAnyContact(int anBoard[ 2 ][ 25 ], char* szOutput,
+	       const bgvariation bgv, int isCrashed )
+{
   float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ],
     arDerivative[ NUM_INPUTS * NUM_OUTPUTS ],
     ardEdI[ NUM_INPUTS ], *p;
   int i, j;
 
-  /* (FIXME) crashed?? */
-  CalculateContactInputs( anBoard, arInput );
+  if( isCrashed ) {
+    CalculateCrashedInputs( anBoard, arInput );
+  } else {
+    CalculateContactInputs( anBoard, arInput );
+  }
     
   NeuralNetDifferentiate( &nnContact, arInput, arOutput, arDerivative );
 
@@ -3815,6 +3819,18 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char* szOutput,
 }
 
 static void
+DumpContact( int anBoard[ 2 ][ 25 ], char* szOutput, const bgvariation bgv )
+{
+  DumpAnyContact(anBoard, szOutput, bgv, 0);
+}
+
+static void
+DumpCrashed( int anBoard[ 2 ][ 25 ], char* szOutput, const bgvariation bgv )
+{
+  DumpAnyContact(anBoard, szOutput, bgv, 1);
+}
+
+static void
 DumpHypergammon1 ( int anBoard[ 2 ][ 25 ], char *szOutput,
                    const bgvariation bgv ) {
 
@@ -3845,7 +3861,7 @@ static classdumpfunc acdf[ N_CLASSES ] = {
   DumpOver, 
   DumpHypergammon1, DumpHypergammon2, DumpHypergammon3,
   DumpBearoff2, DumpBearoffTS, DumpBearoff1, DumpBearoffOS,
-  DumpRace, DumpContact, DumpContact
+  DumpRace, DumpCrashed, DumpContact
 };
 
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
