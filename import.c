@@ -600,9 +600,11 @@ static void ParseMatMove( char *sz, int iPlayer ) {
             
             /* check if move is valid */
             
-            if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) )
+            if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) ) {
               outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"),
                         sz + 3 );
+              return;
+            }
             
             AddMoveRecord( pmr );
             
