@@ -56,7 +56,10 @@ extern void CommandCalibrate( char *sz ) {
 	}
     }
 
-    irandinit( &rc, FALSE );
+    rc.randrsl[ 0 ] = time( NULL );
+    for( i = 0; i < RANDSIZ; i++ )
+        rc.randrsl[ i ] = rc.randrsl[ 0 ];
+    irandinit( &rc, TRUE);
 
 #if USE_GTK
     if( fX )
