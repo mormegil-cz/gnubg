@@ -40,7 +40,8 @@ int DynArrayAdd( dynarray *pda, void *p ) {
 	if( !pda->ap[ i ] )
 	    break;
 
-    if( ( i >= pda->cp ) && !( pda->ap = realloc( pda->ap, pda->cp <<= 1 ) ) )
+    if( ( i >= pda->cp ) && !( pda->ap = realloc(
+	pda->ap, ( pda->cp <<= 1 ) * sizeof( void * ) ) ) )
 	return -1;
 
     pda->c++;
