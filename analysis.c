@@ -594,6 +594,10 @@ AnalyzeGame ( list *plGame ) {
 	i++;
     }
 
+    psc->fMoves = fAnalyseMove;
+    psc->fCube = fAnalyseCube;
+    psc->fDice = fAnalyseDice;
+    
     if ( fWinner != -1 )
 	anScore[ fWinner ] += nPoints;
 
@@ -603,7 +607,7 @@ AnalyzeGame ( list *plGame ) {
 #endif
 }
 
-static void
+extern void
 AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
 
   /* pscB = pscB + pscA */
@@ -741,7 +745,7 @@ IniStatcontext ( statcontext *psc ) {
 
   int i, j;
 
-  psc->fComputed = FALSE;
+  psc->fMoves = psc->fCube = psc->fDice = FALSE;
   
   for ( i = 0; i < 2; i++ ) {
 

@@ -32,7 +32,7 @@ typedef enum _skilltype {
 } skilltype;
 
 typedef struct _statcontext {
-  int fComputed;
+  int fMoves, fCube, fDice; /* which statistics have been computed? */
     
   int anUnforcedMoves[ 2 ];
   int anTotalMoves[ 2 ];
@@ -80,5 +80,6 @@ const char *aszRating [ RAT_EXTRA_TERRESTRIAL + 1 ];
 
 extern ratingtype GetRating ( const float rError );
 extern void IniStatcontext ( statcontext *psc );
+extern void AddStatcontext ( statcontext *pscA, statcontext *pscB );
 
 #endif

@@ -185,6 +185,110 @@ static void RestoreMI( list *pl, movegameinfo *pmgi ) {
 	    SetScore( pmgi, *pch == 'b', atoi( pch + 3 ) );
 }
 
+static void RestoreGS( list *pl, statcontext *psc ) {
+
+    char *pch;
+    lucktype lt;
+    skilltype st;
+    
+    for( pl = pl->plNext; ( pch = pl->p ); pl = pl->plNext )
+	switch( *pch ) {
+	case 'M': /* moves */
+	    psc->fMoves = TRUE;
+	    
+	    psc->anUnforcedMoves[ 0 ] = strtol( pch + 2, &pch, 10 );
+	    psc->anUnforcedMoves[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anTotalMoves[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anTotalMoves[ 1 ] = strtol( pch, &pch, 10 );
+
+	    for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ ) {
+		psc->anMoves[ 0 ][ st ] = strtol( pch, &pch, 10 );
+		psc->anMoves[ 1 ][ st ] = strtol( pch, &pch, 10 );
+	    }
+
+	    psc->arErrorCheckerplay[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorCheckerplay[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorCheckerplay[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorCheckerplay[ 1 ][ 1 ] = strtod( pch, &pch );
+	    
+	    break;
+	    
+	case 'C': /* cube */
+	    psc->fCube = TRUE;
+	    
+	    psc->anTotalCube[ 0 ] = strtol( pch + 2, &pch, 10 );
+	    psc->anTotalCube[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anDouble[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anDouble[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anTake[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anTake[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anPass[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anPass[ 1 ] = strtol( pch, &pch, 10 );
+
+	    psc->anCubeMissedDoubleDP[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeMissedDoubleDP[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeMissedDoubleTG[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeMissedDoubleTG[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongDoubleDP[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongDoubleDP[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongDoubleTG[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongDoubleTG[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongTake[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongTake[ 1 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongPass[ 0 ] = strtol( pch, &pch, 10 );
+	    psc->anCubeWrongPass[ 1 ] = strtol( pch, &pch, 10 );
+	    
+	    psc->arErrorMissedDoubleDP[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorMissedDoubleDP[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorMissedDoubleTG[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorMissedDoubleTG[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleDP[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleDP[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleTG[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleTG[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongTake[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongTake[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongPass[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongPass[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorMissedDoubleDP[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorMissedDoubleDP[ 1 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorMissedDoubleTG[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorMissedDoubleTG[ 1 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleDP[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleDP[ 1 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleTG[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongDoubleTG[ 1 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongTake[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongTake[ 1 ][ 1 ] = strtod( pch, &pch );
+	    psc->arErrorWrongPass[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arErrorWrongPass[ 1 ][ 1 ] = strtod( pch, &pch );
+	    
+	    break;
+	    
+	case 'D': /* dice */
+	    psc->fDice = TRUE;
+	    
+	    pch += 2;
+	    
+	    for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
+		psc->anLuck[ 0 ][ lt ] = strtol( pch, &pch, 10 );
+		psc->anLuck[ 1 ][ lt ] = strtol( pch, &pch, 10 );
+	    }
+
+	    psc->arLuck[ 0 ][ 0 ] = strtod( pch, &pch );
+	    psc->arLuck[ 0 ][ 1 ] = strtod( pch, &pch );
+	    psc->arLuck[ 1 ][ 0 ] = strtod( pch, &pch );
+	    psc->arLuck[ 1 ][ 1 ] = strtod( pch, &pch );
+	    
+	    break;
+	    
+	default:
+	    /* ignore */
+	}
+
+    AddStatcontext( psc, &scMatch );
+}
+
 static void RestoreRootNode( list *pl ) {
 
     property *pp;
@@ -257,11 +361,9 @@ static void RestoreRootNode( list *pl ) {
 		    pmgi->nAutoDoubles = i;
 		    break;
 		}
-	} else if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'S' ) {
+	} else if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'S' )
 	    /* GS - Game statistics */
-
-	    /* FIXME */
-	}
+	    RestoreGS( pp->pl, &pmgi->sc );
 
     AddMoveRecord( pmgi );
 }
@@ -694,6 +796,7 @@ static void ClearMatch( void ) {
     fCrawford = FALSE;
     fPostCrawford = FALSE;
     gs = GAME_NONE;
+    IniStatcontext( &scMatch );
 }
 
 static void UpdateSettings( void ) {
@@ -957,67 +1060,72 @@ static void WriteStatContext( FILE *pf, statcontext *psc ) {
     
     fputs( "GS", pf );
     
-    /* FIXME if( moves analysed ) */
-    fprintf( pf, "[M:%d %d %d %d ", psc->anUnforcedMoves[ 0 ],
-	     psc->anUnforcedMoves[ 1 ], psc->anTotalMoves[ 0 ],
-	     psc->anTotalMoves[ 1 ] );
-    for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ )
-	fprintf( pf, "%d %d ", psc->anMoves[ 0 ][ st ],
-		 psc->anMoves[ 1 ][ st ] );
-    fprintf( pf, "%.6f %.6f %.6f %.6f]", psc->arErrorCheckerplay[ 0 ][ 0 ],
-	     psc->arErrorCheckerplay[ 0 ][ 1 ],
-	     psc->arErrorCheckerplay[ 1 ][ 0 ],
-	     psc->arErrorCheckerplay[ 1 ][ 1 ] );
+    if( psc->fMoves ) {
+	fprintf( pf, "[M:%d %d %d %d ", psc->anUnforcedMoves[ 0 ],
+		 psc->anUnforcedMoves[ 1 ], psc->anTotalMoves[ 0 ],
+		 psc->anTotalMoves[ 1 ] );
+	for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ )
+	    fprintf( pf, "%d %d ", psc->anMoves[ 0 ][ st ],
+		     psc->anMoves[ 1 ][ st ] );
+	fprintf( pf, "%.6f %.6f %.6f %.6f]", psc->arErrorCheckerplay[ 0 ][ 0 ],
+		 psc->arErrorCheckerplay[ 0 ][ 1 ],
+		 psc->arErrorCheckerplay[ 1 ][ 0 ],
+		 psc->arErrorCheckerplay[ 1 ][ 1 ] );
+    }
 
-    /* FIXME if( cube analysed ) */
-    fprintf( pf, "[C:%d %d %d %d %d %d %d %d ", psc->anTotalCube[ 0 ],
-	     psc->anTotalCube[ 1 ], psc->anDouble[ 0 ], psc->anDouble[ 1 ],
-	     psc->anTake[ 0 ], psc->anTake[ 1 ], psc->anPass[ 0 ],
-	     psc->anPass[ 1 ] );
-    fprintf( pf, "%d %d %d %d %d %d %d %d %d %d %d %d ",
-	     psc->anCubeMissedDoubleDP[ 0 ], psc->anCubeMissedDoubleDP[ 1 ],
-	     psc->anCubeMissedDoubleTG[ 0 ], psc->anCubeMissedDoubleTG[ 1 ],
-	     psc->anCubeWrongDoubleDP[ 0 ], psc->anCubeWrongDoubleDP[ 1 ],
-	     psc->anCubeWrongDoubleTG[ 0 ], psc->anCubeWrongDoubleTG[ 1 ],
-	     psc->anCubeWrongTake[ 0 ], psc->anCubeWrongTake[ 1 ],
-	     psc->anCubeWrongPass[ 0 ], psc->anCubeWrongPass[ 1 ] );
-    fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
-	     "%.6f ",
-	     psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-	     psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
-	     psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-	     psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
-	     psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-	     psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
-	     psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-	     psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
-	     psc->arErrorWrongTake[ 0 ][ 0 ],
-	     psc->arErrorWrongTake[ 0 ][ 1 ],
-	     psc->arErrorWrongPass[ 0 ][ 0 ],
-	     psc->arErrorWrongPass[ 0 ][ 1 ] );
-    fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
-	     "%.6f]",
-	     psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-	     psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
-	     psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-	     psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
-	     psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-	     psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
-	     psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-	     psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
-	     psc->arErrorWrongTake[ 1 ][ 0 ],
-	     psc->arErrorWrongTake[ 1 ][ 1 ],
-	     psc->arErrorWrongPass[ 1 ][ 0 ],
-	     psc->arErrorWrongPass[ 1 ][ 1 ] );
-
-    /* FIXME if( luck analysed ) */
-    fputs( "[D:", pf );
-    for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ )
-	fprintf( pf, "%d %d ", psc->anLuck[ 0 ][ lt ],
-		 psc->anLuck[ 1 ][ lt ] );
-    fprintf( pf, "%.6f %.6f %.6f %.6f]", psc->arLuck[ 0 ][ 0 ],
-	     psc->arLuck[ 0 ][ 1 ], psc->arLuck[ 1 ][ 0 ],
-	     psc->arLuck[ 1 ][ 1 ] );
+    if( psc->fCube ) {
+	fprintf( pf, "[C:%d %d %d %d %d %d %d %d ", psc->anTotalCube[ 0 ],
+		 psc->anTotalCube[ 1 ], psc->anDouble[ 0 ], psc->anDouble[ 1 ],
+		 psc->anTake[ 0 ], psc->anTake[ 1 ], psc->anPass[ 0 ],
+		 psc->anPass[ 1 ] );
+	fprintf( pf, "%d %d %d %d %d %d %d %d %d %d %d %d ",
+		 psc->anCubeMissedDoubleDP[ 0 ],
+		 psc->anCubeMissedDoubleDP[ 1 ],
+		 psc->anCubeMissedDoubleTG[ 0 ],
+		 psc->anCubeMissedDoubleTG[ 1 ],
+		 psc->anCubeWrongDoubleDP[ 0 ], psc->anCubeWrongDoubleDP[ 1 ],
+		 psc->anCubeWrongDoubleTG[ 0 ], psc->anCubeWrongDoubleTG[ 1 ],
+		 psc->anCubeWrongTake[ 0 ], psc->anCubeWrongTake[ 1 ],
+		 psc->anCubeWrongPass[ 0 ], psc->anCubeWrongPass[ 1 ] );
+	fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
+		 "%.6f ",
+		 psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+		 psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
+		 psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+		 psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
+		 psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+		 psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
+		 psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+		 psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
+		 psc->arErrorWrongTake[ 0 ][ 0 ],
+		 psc->arErrorWrongTake[ 0 ][ 1 ],
+		 psc->arErrorWrongPass[ 0 ][ 0 ],
+		 psc->arErrorWrongPass[ 0 ][ 1 ] );
+	fprintf( pf, "%.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f %.6f "
+		 "%.6f]",
+		 psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+		 psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
+		 psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+		 psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
+		 psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+		 psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
+		 psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+		 psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
+		 psc->arErrorWrongTake[ 1 ][ 0 ],
+		 psc->arErrorWrongTake[ 1 ][ 1 ],
+		 psc->arErrorWrongPass[ 1 ][ 0 ],
+		 psc->arErrorWrongPass[ 1 ][ 1 ] );
+    }
+    
+    if( psc->fDice ) {
+	fputs( "[D:", pf );
+	for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ )
+	    fprintf( pf, "%d %d ", psc->anLuck[ 0 ][ lt ],
+		     psc->anLuck[ 1 ][ lt ] );
+	fprintf( pf, "%.6f %.6f %.6f %.6f]", psc->arLuck[ 0 ][ 0 ],
+		 psc->arLuck[ 0 ][ 1 ], psc->arLuck[ 1 ][ 0 ],
+		 psc->arLuck[ 1 ][ 1 ] );
+    }
 }
 
 static void SaveGame( FILE *pf, list *plGame ) {
@@ -1060,7 +1168,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	fprintf( pf, "RE[%c+%d%s]", pmr->g.fWinner ? 'B' : 'W',
 		 pmr->g.nPoints, pmr->g.fResigned ? "R" : "" );
 
-    if( pmr->g.sc.fComputed )
+    if( pmr->g.sc.fMoves || pmr->g.sc.fCube || pmr->g.sc.fDice )
 	WriteStatContext( pf, &pmr->g.sc );
 
     for( pl = pl->plNext; pl != plGame; pl = pl->plNext ) {
