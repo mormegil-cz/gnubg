@@ -45,10 +45,6 @@
 #include "matchequity.h"
 #include "rollout.h"
 
-#ifndef HUGE_VALF
-#define HUGE_VALF 1e38
-#endif
-
 char *aszGameResult[] = { "single game", "gammon", "backgammon" },
     *aszSkillType[] = { "very bad", "bad", "doubtful", NULL,
 			"interesting", "good", "very good" },
@@ -73,6 +69,7 @@ static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
 
 #if USE_GTK
     memcpy( anLastMove, anMove, sizeof anLastMove );
+    CanonicalMoveOrder( anLastMove );
     fLastPlayer = fPlayer;
     fLastMove = anMove[ 0 ] >= 0;
 #endif
@@ -125,7 +122,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 
     assert( pmr->mt == MOVE_GAMEINFO || pmgi->mt == MOVE_GAMEINFO );
     
-    pms->fResigned = FALSE;
+    pms->fResigned = pms->fResignationDeclined = 0;
     pms->gs = GAME_PLAYING;
     
     switch( pmr->mt ) {
@@ -138,8 +135,8 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 	
 	pms->gs = GAME_NONE;
 	pms->fMove = pms->fTurn = pms->fCubeOwner = -1;
-	pms->anDice[ 0 ] = pms->anDice[ 1 ] = 0;
-	pms->fResigned = pms->fDoubled = FALSE;
+	pms->anDice[ 0 ] = pms->anDice[ 1 ] = pms->cBeavers = 0;
+	pms->fDoubled = FALSE;
 	pms->nCube = 1 << pmr->g.nAutoDoubles;
 	pms->fCrawford = pmr->g.fCrawfordGame;
 	pms->fPostCrawford = !pms->fCrawford &&
@@ -155,6 +152,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 	    break;
 	
 	if( pms->fDoubled ) {
+	    pms->cBeavers++;
 	    pms->nCube <<= 1;
 	    pms->fCubeOwner = !pms->fMove;
 	} else
@@ -168,6 +166,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 	    break;
 	
 	pms->nCube <<= 1;
+	pms->cBeavers = 0;
 	pms->fDoubled = FALSE;
 	pms->fCubeOwner = !pms->fMove;
 	pms->fTurn = pms->fMove;
@@ -178,6 +177,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 	    break;
 	
 	pms->fDoubled = FALSE;
+	pms->cBeavers = 0;
 	pms->gs = GAME_DROP;
 	pmgi->nPoints = pms->nCube;
 	pmgi->fWinner = !pmr->d.fPlayer;
@@ -583,7 +583,7 @@ static void NewGame( void ) {
     pmr->sd.anDice[ 1 ] = ms.anDice[ 1 ];
     pmr->sd.fPlayer = ms.anDice[ 1 ] > ms.anDice[ 0 ];
     pmr->sd.lt = LUCK_NONE;
-    pmr->sd.rLuck = -HUGE_VALF;
+    pmr->sd.rLuck = ERR_VAL;
     AddMoveRecord( pmr );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
@@ -738,7 +738,8 @@ extern int ComputerTurn( void ) {
 
           /* Opponent out of his right mind: Raccoon if possible */
 
-          if ( fBeavers && ! ms.nMatchTo && ms.nCube < ( MAX_CUBE >> 1 ) ) 
+          if ( ms.cBeavers < nBeavers && ! ms.nMatchTo &&
+	       ms.nCube < ( MAX_CUBE >> 1 ) ) 
             /* he he: raccoon */
             CommandRedouble ( NULL );
           else
@@ -813,7 +814,8 @@ extern int ComputerTurn( void ) {
         case REDOUBLE_BEAVER:
         case NO_REDOUBLE_BEAVER:
 
-          if ( fBeavers && ! ms.nMatchTo && ms.nCube < ( MAX_CUBE >> 1 ) ) 
+          if ( ms.cBeavers < nBeavers && ! ms.nMatchTo &&
+	       ms.nCube < ( MAX_CUBE >> 1 ) ) 
             /* Beaver all night! */
             CommandRedouble ( NULL );
           else
@@ -836,13 +838,49 @@ extern int ComputerTurn( void ) {
 
     } else {
       int anBoardMove[ 2 ][ 25 ];
-	    
-
+      float rPlay, arResign[ NUM_OUTPUTS ];
+      int nResign;
+      static char *achResign[ 3 ] = { "n", "g", "b" };
+      
       /* Don't use the global board for this call, to avoid
 	 race conditions with updating the board and aborting the
 	 move with an interrupt. */
       memcpy( anBoardMove, ms.anBoard, sizeof( anBoardMove ) );
 
+      /* Consider resigning -- no point wasting time over the decision,
+	 so only evaluate at 0 plies. */
+      if( EvaluatePosition( anBoardMove, arOutput, &ci, NULL ) )
+	  return -1;
+
+      rPlay = Utility( arOutput, &ci );
+
+      arResign[ OUTPUT_WIN ] = arResign[ OUTPUT_WINGAMMON ] =
+	  arResign[ OUTPUT_WINBACKGAMMON ] = 0.0f;
+      arResign[ OUTPUT_LOSEGAMMON ] = arResign[ OUTPUT_LOSEBACKGAMMON ] = 1.0f;
+      if( arOutput[ OUTPUT_LOSEBACKGAMMON ] > 0.0f &&
+	  Utility( arResign, &ci ) == rPlay )
+	  nResign = 3;
+      else {
+	  /* worth trying to escape the backgammon */
+	  arResign[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
+	  if( arOutput[ OUTPUT_LOSEGAMMON ] > 0.0f &&
+	      Utility( arResign, &ci ) == rPlay )
+	      nResign = 2;
+	  else {
+	      /* worth trying to escape the gammon */
+	      arResign[ OUTPUT_LOSEGAMMON ] = 0.0f;
+	      nResign = Utility( arResign, &ci ) == rPlay;
+	  }
+      }      
+
+      if( nResign > ms.fResignationDeclined ) {
+	  fComputerDecision = TRUE;
+	  CommandResign( achResign[ nResign - 1 ] );
+	  fComputerDecision = FALSE;
+	  
+	  return 0;
+      }
+      
       /* Consider doubling */
 
       if ( fCubeUse && !ms.anDice[ 0 ] && ms.nCube < MAX_CUBE &&
@@ -959,7 +997,7 @@ extern int ComputerTurn( void ) {
       pmn->esDouble.et = EVAL_NONE;
       pmn->esChequer.et = EVAL_NONE;
       pmn->lt = LUCK_NONE;
-      pmn->rLuck = -HUGE_VALF;
+      pmn->rLuck = ERR_VAL;
       pmn->st = SKILL_NONE;
       
       if( FindBestMove( pmn->anMove, ms.anDice[ 0 ], ms.anDice[ 1 ],
@@ -1019,7 +1057,7 @@ extern int ComputerTurn( void ) {
     pmn->esDouble.et = EVAL_NONE;
     pmn->esChequer.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
-    pmn->rLuck = -HUGE_VALF;
+    pmn->rLuck = ERR_VAL;
     pmn->st = SKILL_NONE;
     
     FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, pmn->anMove );
@@ -1082,7 +1120,7 @@ extern int ComputerTurn( void ) {
       pmn->esDouble.et = EVAL_NONE;
       pmn->esChequer.et = EVAL_NONE;
       pmn->lt = LUCK_NONE;
-      pmn->rLuck = -HUGE_VALF;
+      pmn->rLuck = ERR_VAL;
       pmn->st = SKILL_NONE;
       
       if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
@@ -1164,7 +1202,7 @@ static int TryBearoff( void ) {
                 pmn->esDouble.et = EVAL_NONE;
                 pmn->esChequer.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
-		pmn->rLuck = -HUGE_VALF;
+		pmn->rLuck = ERR_VAL;
 		pmn->st = SKILL_NONE;
 		
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
@@ -1461,7 +1499,10 @@ static void AnnotateMove( skilltype st ) {
 	return;
     }
 
-    outputf( "Move marked as %s.\n", aszSkillType[ st ] );
+    if( st == SKILL_NONE )
+	outputl( "Skill annotation cleared." );
+    else
+	outputf( "Move marked as %s.\n", aszSkillType[ st ] );
 }
 
 static void AnnotateRoll( lucktype lt ) {
@@ -1487,7 +1528,10 @@ static void AnnotateRoll( lucktype lt ) {
 	return;
     }
 
-    outputf( "Roll marked as %s.\n", aszLuckType[ lt ] );
+    if( lt == LUCK_NONE )
+	outputl( "Luck annotation cleared." );
+    else
+	outputf( "Roll marked as %s.\n", aszLuckType[ lt ] );
 }
 
 extern void CommandAnnotateBad( char *sz ) {
@@ -1495,9 +1539,31 @@ extern void CommandAnnotateBad( char *sz ) {
     AnnotateMove( SKILL_BAD );
 }
 
-extern void CommandAnnotateClear( char *sz ) {
+extern void CommandAnnotateClearComment( char *sz ) {
 
-    CommandNotImplemented( NULL ); /* FIXME */
+    moverecord *pmr;
+
+    if( !( pmr = plLastMove->plNext->p ) ) {
+	outputl( "You must select a move to clear the comment from." );
+	return;
+    }
+
+    if( pmr->a.sz )
+	free( pmr->a.sz );
+
+    pmr->a.sz = NULL;
+    
+    outputl( "Commentary for this move cleared." );
+}
+
+extern void CommandAnnotateClearLuck( char *sz ) {
+
+    AnnotateRoll( LUCK_NONE );
+}
+
+extern void CommandAnnotateClearSkill( char *sz ) {
+
+    AnnotateMove( SKILL_NONE );
 }
 
 extern void CommandAnnotateDoubtful( char *sz ) {
@@ -1569,6 +1635,7 @@ extern void CommandDecline( char *sz ) {
 	outputf( "%s declines the %s.\n", ap[ ms.fTurn ].szName,
 		aszGameResult[ ms.fResigned - 1 ] );
 
+    ms.fResignationDeclined = ms.fResigned;
     ms.fResigned = FALSE;
     ms.fTurn = !ms.fTurn;
     
@@ -1697,7 +1764,7 @@ static void DumpGameList(char *szOut, list *plGame) {
     list *pl;
     moverecord *pmr;
     char sz[ 128 ];
-    int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
+    int i = 0, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
 
     InitBoard( anBoard );
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
@@ -1855,7 +1922,7 @@ CommandMove( char *sz ) {
 	    pmn->esDouble.et = EVAL_NONE;
 	    pmn->esChequer.et = EVAL_NONE;
 	    pmn->lt = LUCK_NONE;
-	    pmn->rLuck = -HUGE_VALF;
+	    pmn->rLuck = ERR_VAL;
 	    pmn->st = SKILL_NONE;
 	    
 	    if( ml.cMoves )
@@ -1927,7 +1994,7 @@ CommandMove( char *sz ) {
 		pmn->esDouble.et = EVAL_NONE;
 		pmn->esChequer.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
-		pmn->rLuck = -HUGE_VALF;
+		pmn->rLuck = ERR_VAL;
 		pmn->st = SKILL_NONE;
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
@@ -2314,6 +2381,23 @@ extern void CommandRedouble( char *sz ) {
 
 	return;
     }
+
+    if( !nBeavers ) {
+	outputl( "Beavers are disabled (see `help set beavers')." );
+
+	return;
+    }
+
+    if( ms.cBeavers >= nBeavers ) {
+	if( nBeavers == 1 )
+	    outputl( "Only one beaver is permitted (see `help set "
+		     "beavers')." );
+	else
+	    outputf( "Only %d beavers are permitted (see `help set "
+		     "beavers').\n", nBeavers );
+
+	return;
+    }
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( "The cube must have been offered before you can redouble "
@@ -2405,6 +2489,16 @@ extern void CommandResign( char *sz ) {
 	
 	return;
     }
+
+    if( ms.fResigned <= ms.fResignationDeclined ) {
+	ms.fResigned = 0;
+	
+	outputf( "%s has already declined your offer of a %s.\n",
+		 ap[ !ms.fTurn ].szName,
+		 aszGameResult[ ms.fResignationDeclined - 1 ] );
+
+	return;
+    }
     
     if( fDisplay )
 	outputf( "%s offers to resign a %s.\n", ap[ ms.fTurn ].szName,
@@ -2464,7 +2558,7 @@ CommandRoll( char *sz ) {
   pmr->sd.anDice[ 1 ] = ms.anDice[ 1 ];
   pmr->sd.fPlayer = ms.fTurn;
   pmr->sd.lt = LUCK_NONE;
-  pmr->sd.rLuck = -HUGE_VALF;
+  pmr->sd.rLuck = ERR_VAL;
   AddMoveRecord( pmr );
   
   ShowBoard();
@@ -2496,7 +2590,7 @@ CommandRoll( char *sz ) {
     pmn->esDouble.et = EVAL_NONE;
     pmn->esChequer.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
-    pmn->rLuck = -HUGE_VALF;
+    pmn->rLuck = ERR_VAL;
     pmn->st = SKILL_NONE;
     
     ShowAutoMove( ms.anBoard, pmn->anMove );
@@ -2517,7 +2611,7 @@ CommandRoll( char *sz ) {
     pmn->esDouble.et = EVAL_NONE;
     pmn->esChequer.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
-    pmn->rLuck = -HUGE_VALF;
+    pmn->rLuck = ERR_VAL;
     pmn->st = SKILL_NONE;
     memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
 
