@@ -1,3 +1,8 @@
+Thu Apr 1 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkchequer.c: Reset interupt flag on analysis start
+	* sound.c: Add some error handiling to windows sound
+
 Wed Mar 31 20:58:49 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: add BR1_SOURCES to makebearoff and makehyper.
