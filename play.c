@@ -41,6 +41,18 @@ char *aszGameResult[] = { "single game", "gammon", "backgammon" };
 enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
 list lMatch, *plGame;
 
+#if !X_DISPLAY_MISSING
+static struct timeval tvLast;
+
+void ResetDelayTimer( void ) {
+    
+    if( fX && nDelay && fDisplay )
+	gettimeofday( &tvLast, NULL );
+}
+#else
+#define ResetDelayTimer()
+#endif
+
 static void NewGame( void ) {
 
     InitBoard( anBoard );
@@ -75,13 +87,15 @@ static void NewGame( void ) {
 
 	goto reroll;
     }
-
-#if !X_DISPLAY_MISSING
-	if( fX && fDisplay )
-	    ShowBoard();
-#endif
 	
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
+    
+#if !X_DISPLAY_MISSING
+    if( fX && fDisplay )
+	ShowBoard();
+
+    ResetDelayTimer();
+#endif
 }
 
 static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
@@ -233,7 +247,7 @@ extern void NextTurn( void ) {
 
     int n, fWinner;
 #if !X_DISPLAY_MISSING
-    static struct timeval tvLast, tv;
+    struct timeval tv;
     fd_set fds;
 #endif
     
@@ -254,7 +268,7 @@ extern void NextTurn( void ) {
     }
 
 #if !X_DISPLAY_MISSING
-    if( fX && nDelay ) {
+    if( fX && nDelay && fDisplay ) {
 	if( tvLast.tv_sec ) {
 	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
 		tvLast.tv_sec += tvLast.tv_usec / 1000000;
@@ -284,7 +298,7 @@ extern void NextTurn( void ) {
 		}
 	    }
 	}
-	gettimeofday( &tvLast, NULL );
+	ResetDelayTimer();
     }
 #endif
     
@@ -893,6 +907,8 @@ extern void CommandRoll( char *sz ) {
 
     ShowBoard();
 
+    ResetDelayTimer();
+    
     if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE ) ) {
 	pmn = malloc( sizeof( *pmn ) );
 	pmn->mt = MOVE_NORMAL;
