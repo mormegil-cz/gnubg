@@ -24,6 +24,10 @@ getopt.h
 gnubg.c
 gtkboard.c
 gtkboard.h
+gtkchequer.c
+gtkchequer.h
+gtkcube.c
+gtkcube.h
 gtkexport.c
 gtkexport.h
 gtkgame.c

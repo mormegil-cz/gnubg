@@ -1,0 +1,590 @@
+/*
+ * gtkchequer.c
+ *
+ * by Joern Thyssen <jthyssen@dk.ibm.com>, 2002
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ */
+
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
+#define GTK_ENABLE_BROKEN /* for GtkText */
+#include <gtk/gtk.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+#include "backgammon.h"
+#include "drawboard.h"
+#include "eval.h"
+#include "rollout.h"
+#include "gtkgame.h"
+#include "gtkchequer.h"
+#include "i18n.h"
+
+
+
+
+/*
+ * Call UpdateMostList to update the movelist in the GTK hint window.
+ * For example, after new evaluations, rollouts or toggle of MWC/Equity.
+ *
+ */
+
+static void
+UpdateMoveList ( const hintdata *phd ) {
+
+  static int aanColumns[][ 2 ] = {
+    { 2, OUTPUT_WIN },
+    { 3, OUTPUT_WINGAMMON },
+    { 4, OUTPUT_WINBACKGAMMON },
+    { 6, OUTPUT_LOSEGAMMON },
+    { 7, OUTPUT_LOSEBACKGAMMON }
+  };
+
+  GtkWidget *pwMoves = phd->pw;
+  int i, j;
+  char sz[ 32 ];
+  float rBest;
+  cubeinfo ci;
+  movelist *pml = phd->pml;
+  int *piHighlight = phd->piHighlight;
+
+  /* This function should only be called when the game state matches
+     the move list. */
+
+  assert( ms.fMove == 0 || ms.fMove == 1 );
+    
+  GetMatchStateCubeInfo( &ci, &ms );
+    
+  if( fOutputMWC && ms.nMatchTo ) {
+    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("MWC") );
+    rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
+  } else {
+    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("Equity") );
+    rBest = pml->amMoves[ 0 ].rScore;
+  }
+    
+  for( i = 0; i < pml->cMoves; i++ ) {
+    float *ar = pml->amMoves[ i ].arEvalMove;
+
+    gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
+
+    if( i && i == pml->cMoves - 1 && piHighlight && i == *piHighlight )
+      /* The move made is the last on the list.  Some moves might
+         have been deleted to fit this one in, so its rank isn't
+         known. */
+      strcpy( sz, "??" );
+    else
+      sprintf( sz, "%d", i + 1 );
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 0, sz );
+
+    FormatEval( sz, &pml->amMoves[ i ].esMove );
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
+
+    for( j = 0; j < 5; j++ ) {
+      if( fOutputWinPC )
+        sprintf( sz, "%5.1f%%", ar[ aanColumns[ j ][ 1 ] ] * 100.0f );
+      else
+        sprintf( sz, "%5.3f", ar[ aanColumns[ j ][ 1 ] ] );
+	    
+      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
+                          sz );
+    }
+
+    if( fOutputWinPC )
+      sprintf( sz, "%5.1f%%", ( 1.0f - ar[ OUTPUT_WIN ] ) * 100.0f );
+    else
+      sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
+	    
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
+
+    if( fOutputMWC && ms.nMatchTo )
+      sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
+                                               &ci ) );
+    else
+      sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore );
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
+
+    if( i ) {
+      if( fOutputMWC && ms.nMatchTo )
+        sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
+                 * 100.0f - rBest );
+      else
+        sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore - rBest );
+      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
+    }
+	
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
+                        FormatMove( sz, ms.anBoard,
+                                    pml->amMoves[ i ].anMove ) );
+  }
+
+  /* highlight row */
+
+  if( piHighlight && *piHighlight >= 0 ) {
+    GtkStyle *psblack, *ps;
+    
+    gtk_widget_ensure_style( pwMoves );
+    psblack = gtk_style_copy( pwMoves->style );
+    ps = gtk_style_copy( pwMoves->style );
+
+    /* 
+     * reset style 
+     * Necesary if we have reordered the list due to rollouts or evaluations
+     * and the highlighted move is shiftet 
+     */
+    
+    for ( i = 0; i < pml->cMoves; i++ )
+      gtk_clist_set_row_style( GTK_CLIST( pwMoves ), i, psblack );
+    
+    ps->fg[ GTK_STATE_NORMAL ].red = ps->fg[ GTK_STATE_ACTIVE ].red =
+      ps->fg[ GTK_STATE_SELECTED ].red = 0xFFFF;
+    ps->fg[ GTK_STATE_NORMAL ].green = ps->fg[ GTK_STATE_ACTIVE ].green =
+      ps->fg[ GTK_STATE_SELECTED ].green = 0;
+    ps->fg[ GTK_STATE_NORMAL ].blue = ps->fg[ GTK_STATE_ACTIVE ].blue =
+      ps->fg[ GTK_STATE_SELECTED ].blue = 0;
+    
+    gtk_clist_set_row_style( GTK_CLIST( pwMoves ), *piHighlight, ps );
+    
+    gtk_style_unref( ps );
+  }
+    
+  /* update storedmoves global struct */
+
+  UpdateStoredMoves ( pml, &ms );
+
+}
+
+
+static void 
+MoveListRollout( GtkWidget *pw, hintdata *phd ) {
+
+
+  GList *pl;
+  GtkWidget *pwMoves = phd->pw;
+  cubeinfo ci;
+#if HAVE_ALLOCA
+  char ( *asz )[ 40 ];
+#else
+  char asz[ 10 ][ 40 ];
+#endif
+  int c;
+  int i;
+
+  int *ai;
+
+  if ( !  GTK_CLIST( pwMoves )->selection )
+    return;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+  
+  for(  c = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
+    c++;
+
+  /* setup rollout dialog */
+
+#if HAVE_ALLOCA
+    asz = alloca( 40 * c );
+#else
+    if( c > 10 )
+	c = 10;
+#endif
+
+
+  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
+       pl = pl->next, i++ ) {
+
+    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
+
+    FormatMove ( asz[ i ], ms.anBoard, m->anMove );
+
+  }
+
+#if USE_GTK
+  if( fX )
+    GTKRollout( c, asz, rcRollout.nTrials, NULL ); 
+#endif
+
+  ProgressStartValue( _("Rolling out positions; position:"), c );
+
+  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
+       pl = pl->next, i++ ) {
+
+    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
+
+    GTKRolloutRow ( i );
+
+    if ( ScoreMoveRollout ( m, &ci, &rcRollout ) < 0 ) {
+      GTKRolloutDone ();
+      ProgressEnd ();
+      return;
+    }
+    
+    ProgressValueAdd ( 1 );
+
+    /* Calling RefreshMoveList here requires some extra work, as
+       it may reorder moves */
+
+    UpdateMoveList ( phd );
+
+  }
+
+  GTKRolloutDone ();
+
+  gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
+
+  ai = (int *) malloc ( phd->pml->cMoves * sizeof ( int ) );
+  RefreshMoveList ( phd->pml, ai );
+
+  if ( phd->piHighlight && phd->pml->cMoves ) 
+    *phd->piHighlight = ai [ *phd->piHighlight ];
+
+  free ( ai );
+
+
+  UpdateMoveList ( phd );
+
+  ProgressEnd ();
+
+}
+
+
+static void
+MoveListMWC ( GtkWidget *pw, hintdata *phd ) {
+
+  char sz[ 80 ];
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+
+  if ( f != fOutputMWC ) {
+    sprintf ( sz, "set output mwc %s", fOutputMWC ? "off" : "on" );
+    
+    UserCommand ( sz );
+  }
+
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pw ), fOutputMWC );
+
+  UpdateMoveList ( phd );
+
+}
+
+static void
+MoveListEval ( GtkWidget *pw, hintdata *phd ) {
+
+  GList *pl;
+  GtkWidget *pwMoves = phd->pw;
+  cubeinfo ci;
+  int *ai;
+
+  if ( !  GTK_CLIST( pwMoves )->selection )
+    return;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+  
+  ProgressStart( _("Evaluating positions...") );
+
+  for(  pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
+
+    if ( ScoreMove ( &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ],
+                     &ci, &esEvalChequer.ec, esEvalChequer.ec.nPlies ) < 0 ) {
+      ProgressEnd ();
+      return;
+    }
+
+    /* Calling RefreshMoveList here requires some extra work, as
+       it may reorder moves */
+
+    UpdateMoveList ( phd );
+
+  }
+
+  gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
+
+  ai = (int *) malloc ( phd->pml->cMoves * sizeof ( int ) );
+  RefreshMoveList ( phd->pml, ai );
+
+  if ( phd->piHighlight && phd->pml->cMoves ) 
+    *phd->piHighlight = ai [ *phd->piHighlight ];
+
+  free ( ai );
+
+  UpdateMoveList ( phd );
+
+  ProgressEnd ();
+
+}
+
+static void
+MoveListEvalSettings ( GtkWidget *pw, void *unused ) {
+
+  SetEvalChequer ( NULL, 0, NULL );
+
+}
+
+static void
+MoveListRolloutSettings ( GtkWidget *pw, void *unused ) {
+
+  SetRollouts ( NULL, 0, NULL );
+
+}
+
+
+
+static GtkWidget *
+CreateMoveListTools ( hintdata *phd ) {
+
+  GtkWidget *pwTools;
+  GtkWidget *pwEval = gtk_button_new_with_label ( _("Eval") );
+  GtkWidget *pwEvalSettings = gtk_button_new_with_label ( _("...") );
+  GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
+  GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
+  GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
+
+  phd->pwRollout = pwRollout;
+  phd->pwRolloutSettings = pwRolloutSettings;
+  phd->pwEval = pwEval;
+  phd->pwEvalSettings = pwEvalSettings;
+
+  /* toolbox on the left with buttons for eval, rollout and more */
+  
+  pwTools = gtk_table_new (3, 2, FALSE);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwEvalSettings, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 2, 3,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
+  
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
+                                 fOutputMWC );
+
+  /* signals */
+
+  gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListRollout ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwEval ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListEval ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwEvalSettings ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListEvalSettings ), NULL );
+  gtk_signal_connect( GTK_OBJECT( pwRolloutSettings ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListRolloutSettings ), NULL );
+  gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
+                      GTK_SIGNAL_FUNC( MoveListMWC ), phd );
+
+
+  return pwTools;
+  
+}
+
+
+static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
+			hintdata *phd ) {
+    
+    int c = CheckHintButtons( phd );
+    
+    if( c && peb )
+	gtk_selection_owner_set( pw, GDK_SELECTION_PRIMARY, peb->time );
+
+    /* Double clicking a row makes that move. */
+    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && phd->fButtonsValid )
+	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
+}
+
+static gint HintClearSelection( GtkWidget *pw, GdkEventSelection *pes,
+				hintdata *phd ) {
+    
+    gtk_clist_unselect_all( GTK_CLIST( pw ) );
+
+    return TRUE;
+}
+
+typedef int ( *cfunc )( const void *, const void * );
+
+static int CompareInts( int *p0, int *p1 ) {
+
+    return *p0 - *p1;
+}
+
+static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
+			      guint n, guint t, hintdata *phd ) {
+    int c, i;
+    GList *pl;
+    char *sz, *pch;
+    int *an;
+    
+    for( c = 0, pl = GTK_CLIST( pw )->selection; pl; pl = pl->next )
+	c++;
+
+#if HAVE_ALLOCA
+    an = alloca( c * sizeof( an[ 0 ] ) );
+    sz = alloca( c * 160 );
+#else
+    an = malloc( c * sizeof( an[ 0 ] ) );
+    sz = malloc( c * 160 );
+#endif
+
+    *sz = 0;
+    
+    for( i = 0, pl = GTK_CLIST( pw )->selection; pl;
+	 pl = pl->next, i++ )
+	an[ i ] = GPOINTER_TO_INT( pl->data );
+
+    qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
+
+    for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
+	FormatMoveHint( pch, &ms, phd->pml, an[ i ], TRUE );
+        
+    gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
+			    sz, strlen( sz ) );
+    
+#if !HAVE_ALLOCA
+    free( an );
+    free( sz );
+#endif        
+}
+
+extern int 
+CheckHintButtons( hintdata *phd ) {
+
+    int c;
+    GList *pl;
+    GtkWidget *pw = phd->pw;
+
+    for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
+	c++;
+
+    //gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
+
+    return c;
+}
+
+
+
+extern GtkWidget *
+CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid ) {
+
+    static char *aszTitle[] = {
+	N_("Rank"), 
+        N_("Type"), 
+        N_("Win"), 
+        N_("W g"), 
+        N_("W bg"), 
+        N_("Lose"), 
+        N_("L g"), 
+        N_("L bg"),
+	"", 
+        N_("Diff."), 
+        N_("Move")
+    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+		       NULL, NULL };
+    char *aszTemp[ 11 ];
+    GtkWidget *pwMoves;
+    GtkWidget *pw;
+    GtkWidget *pwHBox;
+    int i;
+
+    hintdata *phd = (hintdata *) malloc ( sizeof ( hintdata ) );
+
+    /* set titles */
+
+    phd->piHighlight = piHighlight;
+    phd->pml = pml;
+
+    for ( i = 0; i < 11; i++ )
+     aszTemp[ i ] = gettext ( aszTitle[ i ] );
+
+    pwMoves = gtk_clist_new_with_titles( 11, aszTemp );
+
+    /* This function should only be called when the game state matches
+       the move list. */
+    assert( ms.fMove == 0 || ms.fMove == 1 );
+    
+    for( i = 0; i < 11; i++ ) {
+	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
+	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
+					    i == 1 || i == 10 ?
+					    GTK_JUSTIFY_LEFT :
+					    GTK_JUSTIFY_RIGHT );
+    }
+    gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
+    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
+				  GTK_SELECTION_MULTIPLE );
+
+    for( i = 0; i < pml->cMoves; i++ )
+      gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
+
+
+    phd->pw = pwMoves;
+    UpdateMoveList ( phd );
+
+    pw = gtk_scrolled_window_new( NULL, NULL );
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pw ),
+                                    GTK_POLICY_NEVER, 
+                                    GTK_POLICY_AUTOMATIC );
+    gtk_container_add( GTK_CONTAINER( pw ),
+                       pwMoves );
+
+    pwHBox = gtk_hbox_new ( FALSE, 0 );
+
+    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
+    gtk_box_pack_end ( GTK_BOX ( pwHBox ),
+                       CreateMoveListTools( phd ),
+                       FALSE, FALSE, 0 );
+    
+    gtk_object_set_data_full( GTK_OBJECT( pwHBox ), "user_data",
+                              phd, free );
+
+    gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
+			      GDK_SELECTION_TYPE_STRING, 0 );
+    
+    HintSelect( pwMoves, 0, 0, NULL, phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
+			GTK_SIGNAL_FUNC( HintSelect ), phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "unselect-row",
+			GTK_SIGNAL_FUNC( HintSelect ), phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_clear_event",
+			GTK_SIGNAL_FUNC( HintClearSelection ), phd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_get",
+			GTK_SIGNAL_FUNC( HintGetSelection ), phd );
+    
+    return pwHBox;
+}
+
