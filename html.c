@@ -2395,24 +2395,24 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     break;
 
-  case MOVE_DOUBLE:
-
-    /* no-op: we assume the following move is MOVE_TAKE or MOVE_DROP */
-
-    break;
-
   case MOVE_TAKE:
   case MOVE_DROP:
+  case MOVE_DOUBLE:
 
     fprintf ( pf, "<p>" );
 
     if ( het == HTML_EXPORT_TYPE_FIBS2HTML )
       printImage ( pf, szImageDir, "b-indent", szExtension, "" );
 
-    fprintf ( pf,
-              "*%s %s</p>\n",
-              ap[ pmr->d.fPlayer ].szName,
-              ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
+    if ( pmr->mt == MOVE_DOUBLE )
+      fprintf ( pf,
+                "*%s doubles</p>\n",
+                ap[ pmr->d.fPlayer ].szName );
+    else
+      fprintf ( pf,
+                "*%s %s</p>\n",
+                ap[ pmr->d.fPlayer ].szName,
+                ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
 
     HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, het );
 

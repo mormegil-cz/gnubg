@@ -1224,19 +1224,19 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     break;
 
   case MOVE_DOUBLE:
-
-    /* no-op: we assume the following move is MOVE_TAKE or MOVE_DROP */
-
-    break;
-
   case MOVE_TAKE:
   case MOVE_DROP:
 
-    fprintf ( pf,
-              "* %s %s\n\n",
-              ap[ pmr->d.fPlayer ].szName,
-              ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
-
+    if ( pmr->mt == MOVE_DOUBLE ) 
+      fprintf ( pf,
+                "* %s doubles\n\n",
+                ap[ pmr->d.fPlayer ].szName );
+    else
+      fprintf ( pf,
+                "* %s %s\n\n",
+                ap[ pmr->d.fPlayer ].szName,
+                ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
+    
     TextPrintCubeAnalysis ( pf, pms, pmr );
 
     break;
