@@ -137,7 +137,7 @@ extern void CommandShowBoard( char *sz ) {
     }
 
     /* FIXME handle =n notation */
-    if( ParsePosition( an, &sz ) < 0 )
+    if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
 #if USE_GUI
@@ -295,7 +295,7 @@ extern void CommandShowPipCount( char *sz ) {
 	return;
     }
     
-    if( ParsePosition( an, &sz ) < 0 )
+    if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
     
     PipCount( an, anPips );
@@ -437,7 +437,7 @@ extern void CommandShowKleinman( char *sz ) {
         return;
     }
  
-    if( ParsePosition( an, &sz ) < 0 )
+    if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
      
     PipCount( an, anPips );
@@ -460,7 +460,7 @@ extern void CommandShowThorp( char *sz ) {
         return;
     }
 
-    if( ParsePosition( an, &sz ) < 0 )
+    if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
     PipCount( an, anPips );

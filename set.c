@@ -198,7 +198,7 @@ extern void CommandSetBoard( char *sz ) {
     }
 
     /* FIXME how should =n notation be handled? */
-    if( ParsePosition( an, &sz ) < 0 )
+    if( ParsePosition( an, &sz, NULL ) < 0 )
 	return;
 
     pmsb = malloc( sizeof( *pmsb ) );
