@@ -1227,7 +1227,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
           int anBoard[ 2 ][ 25 ];
           
-          read_board ( bd, anBoard );
+          memcpy ( anBoard, ms.anBoard, sizeof anBoard );
 
           bd->drag_colour = bd->turn;
           bd->drag_point = -1;

@@ -1,3 +1,9 @@
+Thu Jan 30 17:19:11 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (board_pointer): use board from current matchstate
+	instead of current board show for click-bearoff-tray-to-bearoff.
+	(reported by Holger Bochnig)
+
 Thu Jan 30 17:13:30 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (board_set): make sure dice positions are calculated
