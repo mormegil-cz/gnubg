@@ -54,16 +54,8 @@
 #define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
 			  same point is considered a real drag rather than a
 			  click */
-
-#if WIN32
-/* The Win32 port of GDK wants clip masks to be inverted, for some reason... */
-#define MASK_INVISIBLE 0
-#define MASK_VISIBLE 1
-#else
 #define MASK_INVISIBLE 1
 #define MASK_VISIBLE 0
-#endif
-
 
 static int positions[ 2 ][ 30 ][ 3 ] = { {
     { 51, 25, 7 },
