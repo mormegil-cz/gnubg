@@ -5339,7 +5339,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   prpw->pwAdjMaxError = pwHBox = gtk_hbox_new( FALSE, 0 );
   gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
-                   gtk_label_new( _("Ratio |Value/Standard Deviation|:" ) ) );
+                   gtk_label_new( _("Ratio |Standard Deviation/Value|:" ) ) );
 
   prpw->padjMaxError = GTK_ADJUSTMENT( gtk_adjustment_new( 
                        prw->rcRollout.rStdLimit, 0, 1, .0001, .0001, 0.001 ) );
