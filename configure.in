@@ -363,7 +363,7 @@ AC_CHECK_DECL(TRUE,,AC_DEFINE(TRUE,1,[Define TRUE]))
 
 dnl define WIN32 for wintendo systems
 
-os=`config.guess | sed 's/^\(.*\)-\([^-]*-[^-]*\)$/\2/'`
+os=`config.guess | sed 's/.*-//'`
 if test "$os" = "mingw32"; then
   AC_DEFINE(WIN32,1,[Define if you use wintendo])
 fi

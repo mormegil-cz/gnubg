@@ -12759,7 +12759,7 @@ fi
 
 
 
-os=`config.guess | sed 's/^\(.*\)-\(^-*-^-*\)$/\2/'`
+os=`config.guess | sed 's/.*-//'`
 if test "$os" = "mingw32"; then
 
 cat >>confdefs.h <<\_ACEOF
