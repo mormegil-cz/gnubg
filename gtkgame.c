@@ -205,6 +205,7 @@ static togglecommand atc[] = {
     { &fAutoGame, CMD_SET_AUTO_GAME },
     { &fAutoMove, CMD_SET_AUTO_MOVE },
     { &fAutoRoll, CMD_SET_AUTO_ROLL },
+    { &fClockwise, CMD_SET_CLOCKWISE },
     { &fConfirm, CMD_SET_CONFIRM },
     { &fCubeUse, CMD_SET_CUBE_USE },
     { &fDisplay, CMD_SET_DISPLAY },
