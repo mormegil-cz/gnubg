@@ -7976,7 +7976,8 @@ typedef struct _optionswidget {
             *pwTutorEvalHint, *pwTutorEvalAnalysis;
   GtkAdjustment *padjCubeBeaver, *padjCubeAutomatic, *padjLength;
   GtkWidget *pwCubeUsecube, *pwCubeJacoby, *pwCubeInvert;
-  GtkWidget *pwGameClockwise, *pwGameNackgammon, *pwGameEgyptian;
+  GtkWidget *pwGameClockwise, *pwGameEgyptian;
+  GtkWidget *apwVariations[ NUM_VARIATIONS ];
   GtkWidget *pwOutputMWC, *pwOutputGWC, *pwOutputMWCpst;
   GtkWidget *pwConfStart, *pwConfOverwrite;
   GtkWidget *pwDiceManual, *pwDicePRNG, *pwPRNGMenu;
@@ -8067,10 +8068,22 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     }, *aszTutor[] = {
 	N_("Doubtful"), N_("Bad"), N_("Very bad")
     };
+
+    static char *aszVariationsTooltips[ NUM_VARIATIONS ] = {
+      N_("Use standard backgammon starting position"),
+      N_("Use Nick \"Nack\" Ballard's Nackgammon starting position "
+         "with standard rules."),
+      N_("Play 1-chequer hypergammon (i.e., gammon and backgammons possible)"),
+      N_("Play 2-chequer hypergammon (i.e., gammon and backgammons possible)"),
+      N_("Play 3-chequer hypergammon (i.e., gammon and backgammons possible)")
+    };
+
+
     char **ppch, **ppchTip;
     GtkWidget *pw, *pwn, *pwp, *pwvbox, *pwhbox, *pwev, *pwm, *pwf, *pwb,
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale;
     int cCache;
+    int i;
     
     pwn = gtk_notebook_new();
     gtk_container_set_border_width( GTK_CONTAINER( pwn ), 8 );
@@ -8129,14 +8142,41 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "legal points.  Either way, the resulting move "
 			    "must be legal when you pick up the dice, or it "
 			    "will not be accepted."), NULL );
+
+    pwf = gtk_frame_new( _("Variations") );
+    gtk_box_pack_start( GTK_BOX ( pwvbox ), pwf, FALSE, FALSE, 0 );
+    gtk_container_set_border_width (GTK_CONTAINER (pwf), 4);
+    pwb = gtk_vbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (pwf), pwb);
+
+    for ( i = 0; i < NUM_VARIATIONS; ++i ) {
     
-    pow->pwGameNackgammon = gtk_check_button_new_with_label(
-	_("Use Nackgammon starting position"));
-    gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwGameNackgammon,
-			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwGameNackgammon,
-			  _("Use Nick \"Nack\" Ballard's Nackgammon "
-			    "starting position."), NULL );
+      pow->apwVariations[ i ] = 
+        i ? gtk_radio_button_new_with_label_from_widget ( 
+               GTK_RADIO_BUTTON( pow->apwVariations[ 0 ] ), 
+               gettext ( aszVariations[ i ] ) ) :
+        gtk_radio_button_new_with_label ( NULL, 
+                                          gettext ( aszVariations[ i ] ) );
+
+      gtk_box_pack_start( GTK_BOX( pwb ), pow->apwVariations[ i ], 
+                          FALSE, FALSE, 0 );
+
+      gtk_toggle_button_set_active ( 
+               GTK_TOGGLE_BUTTON ( pow->apwVariations[ i ] ), bgv == i );
+
+      gtk_tooltips_set_tip( ptt, pow->apwVariations[ i ],
+                            gettext ( aszVariationsTooltips[ i ] ), NULL );
+
+    }
+
+    /* disable entries if hypergammon databases are not available */
+
+    for ( i = 0; i < 3; ++i )
+      gtk_widget_set_sensitive ( 
+            GTK_WIDGET ( pow->apwVariations[ i + VARIATION_HYPERGAMMON_1 ] ),
+            apbcHyper[ i ] != NULL );
+
+                                                                
 
     pow->pwGameEgyptian = gtk_check_button_new_with_label(
 	_("Forbid more than five chequers on a point"));
@@ -8949,6 +8989,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   char sz[128];
   int n, cCache;
+  int i;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
 
@@ -8996,7 +9037,14 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   CHECKUPDATE(pow->pwGameClockwise,fClockwise, "set clockwise %s")
   CHECKUPDATE(pow->pwGameEgyptian,fEgyptian, "set egyptian %s")
-  CHECKUPDATE(pow->pwGameNackgammon,fNackgammon, "set nackgammon %s")
+
+  for ( i = 0; i < NUM_VARIATIONS; ++i ) 
+    if( gtk_toggle_button_get_active( 
+              GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ) ) && bgv != i ) {
+      sprintf( sz, "set variation %s", aszVariationCommands[ i ] );
+      UserCommand( sz );
+      break;
+    }
   
   CHECKUPDATE(pow->pwOutputMWC,fOutputMWC, "set output mwc %s")
   CHECKUPDATE(pow->pwOutputGWC,fOutputWinPC, "set output winpc %s")
@@ -9169,6 +9217,8 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 static void 
 OptionsSet( optionswidget *pow) {
 
+  int i;
+
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAutoBearoff ),
                                 fAutoBearoff );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAutoCrawford ),
@@ -9208,8 +9258,11 @@ OptionsSet( optionswidget *pow) {
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGameClockwise ),
                                 fClockwise );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGameNackgammon ),
-                                fNackgammon );
+
+  for ( i = 0; i < NUM_VARIATIONS; ++i )
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ),
+                                   bgv == i );
+
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGameEgyptian ),
                                 fEgyptian );
 
