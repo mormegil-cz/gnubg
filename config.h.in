@@ -40,6 +40,9 @@
 /* Define to 1 if you have the `atanf' function. */
 #undef HAVE_ATANF
 
+/* Define if you have the audiofile library */
+#undef HAVE_AUDIOFILE
+
 /* Define to 1 if you have the `basename' function. */
 #undef HAVE_BASENAME
 
