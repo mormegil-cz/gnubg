@@ -4475,22 +4475,19 @@ static void board_realize( GtkWidget *board ) {
 
 static void board_set_position( GtkWidget *pw, BoardData *bd ) {
 
-    char sz[ 25 ]; /* "set board XXXXXXXXXXXXXX" */
+  char *sz = g_strdup_printf ( "set board %s",
+                  gtk_entry_get_text( GTK_ENTRY( bd->position_id ) ) );
+  UserCommand( sz );
+  g_free ( sz );
 
-    sprintf( sz, "set board %s", gtk_entry_get_text( GTK_ENTRY(
-	bd->position_id ) ) );
-    
-    UserCommand( sz );
 }
 
 static void board_set_matchid( GtkWidget *pw, BoardData *bd ) {
 
-  char sz[ 25 ]; /* "set board XXXXXXXXXXXXXX" */
-
-  sprintf ( sz, "set matchid %s", 
+  char *sz = g_strdup_printf ( "set matchid %s",
             gtk_entry_get_text ( GTK_ENTRY ( bd->match_id ) ) );
-
   UserCommand ( sz );
+  g_free ( sz );
 
 }
 

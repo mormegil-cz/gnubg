@@ -1,3 +1,11 @@
+Thu Oct 10 22:35:41 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Small unimportant fixes.
+
+	* positionid.c (PositionFromID): initialise ach.
+	* gtkboard.c (board_set_matchid, board_set_matchid): avoid possible
+	buffer overflow.
+
 Thu Oct 10 22:14:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Another attempt to solve the problem with missing moves
