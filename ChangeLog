@@ -1,3 +1,7 @@
+Tue Nov 19 10:53:27 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c (raceBGprob): fix a bug in race bg code.
+
 Mon Nov 18 22:50:51 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkgame.c - fix handling of setting of plies for late evals

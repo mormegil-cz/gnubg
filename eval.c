@@ -2550,7 +2550,10 @@ NNEvalType NNevalAction(void)
   return NNEVAL_FROMBASE;
 }
 
-static float
+/* side - side that potentially can win a backgammon */
+/* Return - Probablity that side will win a backgammon */
+
+float
 raceBGprob(int anBoard[2][25], int side)
 {
   int totMenHome = 0;
@@ -2570,7 +2573,6 @@ raceBGprob(int anBoard[2][25], int side)
     return 0.0;
   }
 
-	
   for(i = 0; i < 25; ++i) {
     dummy[side][i] = anBoard[side][i];
   }
@@ -2591,14 +2593,15 @@ raceBGprob(int anBoard[2][25], int side)
 
       float p = 0.0;
       unsigned int j;
-      unsigned long scale = 1;
+
+      unsigned long scale = (side == 0) ? 36 : 1;
 
       getBearoffProbs(k, aProb);
 
-      for(j = 0; j < RBG_NPROBS; j++) {
+      for(j = 1-side; j < RBG_NPROBS; j++) {
 	unsigned long sum = 0;
 	scale *= 36;
-	for(i = j+1+side; i < 32; ++i) {
+	for(i = 1; i <= j + side; ++i) {
 	  sum += aProb[i];
 	}
 	p += ((float)bgp[j])/scale * sum;
@@ -2606,7 +2609,7 @@ raceBGprob(int anBoard[2][25], int side)
 
       p /= 65535.0;
 	
-      return side == 0 ? p : 1.0 - p;
+      return p;
 	  
     } else {
       float p[5];
@@ -2618,7 +2621,7 @@ raceBGprob(int anBoard[2][25], int side)
 	EvalBearoff2(dummy, p);
       }
 
-      return p[0];
+      return side == 1 ? p[0] : 1 - p[0];
     }
   }
 }  
@@ -2699,7 +2702,7 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
 	    arOutput[OUTPUT_WINGAMMON] = arOutput[OUTPUT_WINBACKGAMMON];
 	  }
 	} else {
-	  arOutput[OUTPUT_LOSEBACKGAMMON] = 1 - pr;
+	  arOutput[OUTPUT_LOSEBACKGAMMON] = pr;
 
 	  if(arOutput[OUTPUT_LOSEGAMMON] < arOutput[OUTPUT_LOSEBACKGAMMON]) {
 	    arOutput[OUTPUT_LOSEGAMMON] = arOutput[OUTPUT_LOSEBACKGAMMON];
