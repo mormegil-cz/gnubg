@@ -1,3 +1,8 @@
+Thu Oct 25 17:56:43 2001  Gary Wong  <gtw@research.att.com>
+
+	* database.c: Use (*_imp__gdbm_errno) on systems where it is
+	necessary.
+
 Thu Oct 25 22:05:23 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* gnubg.c (CommandEq2MWC, CommandMWC2Eq): new commands.

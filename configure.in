@@ -52,6 +52,20 @@ fi
 AC_ARG_WITH(gdbm,[  --with-gdbm             use GNU dbm for position databases])
 if test "$with_gdbm" != "no"; then
   AC_CHECK_LIB(gdbm, gdbm_open)
+  AC_CACHE_CHECK(for gdbm_errno, ac_cv_var_gdbm_errno,
+[AC_TRY_LINK([#include <gdbm.h>], [return gdbm_errno;],
+  eval "ac_cv_var_gdbm_errno=yes",
+  eval "ac_cv_var_gdbm_errno=no")])
+  if test "$ac_cv_var_gdbm_errno" = "yes"; then
+    AC_DEFINE(HAVE_GDBM_ERRNO,1,Define if your GDBM library gdbm_errno works correctly.)
+  fi
+  AC_CACHE_CHECK(for _imp__gdbm_errno, ac_cv_var_imp_gdbm_errno,
+[AC_TRY_LINK([#include <gdbm.h>], [extern gdbm_error *_imp__gdbm_errno; return (*_imp__gdbm_errno);],
+  eval "ac_cv_var_imp_gdbm_errno=yes",
+  eval "ac_cv_var_imp_gdbm_errno=no")])
+  if test "$ac_cv_var_imp_gdbm_errno" = "yes"; then
+    AC_DEFINE(HAVE_IMP_GDBM_ERRNO,1,Define if you can use _imp__gdbm_errno as a workaround.)
+  fi
 fi
 AC_CHECK_LIB(dl, dlopen)
 
@@ -76,7 +90,7 @@ AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpwuid gettimeofday isatty me
 AC_CHECK_FUNCS(acosf asinf atanf cosf lrint sinf tanf)
 AC_CACHE_CHECK(for signbit macro, ac_cv_func_signbit,
 [AC_TRY_LINK([#define _GNU_SOURCE 1
-#include <math.h>], [if(signbit(1.0f));],
+#include <math.h>], [return signbit(1.0f);],
   eval "ac_cv_func_signbit=yes",
   eval "ac_cv_func_signbit=no")])
 if test "$ac_cv_func_signbit" = "yes"; then

@@ -211,6 +211,12 @@
 /* Version number of package */
 #undef VERSION
 
+/* Define if your GDBM library gdbm_errno works correctly. */
+#undef HAVE_GDBM_ERRNO
+
+/* Define if you can use _imp__gdbm_errno as a workaround. */
+#undef HAVE_IMP_GDBM_ERRNO
+
 /* Define if you have a signbit() macro faster than a compare to 0.0. */
 #undef HAVE_SIGNBIT
 

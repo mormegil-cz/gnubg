@@ -36,6 +36,14 @@
 #include "rollout.h"
 
 #if HAVE_LIBGDBM
+
+#if !HAVE_GDBM_ERRNO && HAVE_IMP_GDBM_ERRNO
+/* Kludge to access gdbm_errno in Windows DLLs that won't let us use
+   gdbm_errno directly. */
+extern gdbm_error *_imp__gdbm_errno;
+#define gdbm_errno (*_imp__gdbm_errno)
+#endif
+
 static char *szDatabase = "gnubg.gdbm";
 
 extern void CommandDatabaseDump( char *sz ) {
