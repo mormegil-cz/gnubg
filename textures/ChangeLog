@@ -1,0 +1,3 @@
+Fri Aug 22 22:31:09 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am: add missing variables needed for install target.

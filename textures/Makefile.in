@@ -166,12 +166,16 @@ texturefiles = base2.bmp base3.bmp base3.png base.bmp board2.bmp \
                board3.bmp board.bmp checker2.bmp checker.bmp hinge.bmp \
                logo2.bmp logo.bmp
 
+texturesdir = $(pkgdatadir)/textures
+textures_DATA = $(texturefiles)
 EXTRA_DIST = $(texturefiles)
 subdir = textures
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 DIST_SOURCES =
+DATA = $(textures_DATA)
+
 DIST_COMMON = Makefile.am Makefile.in
 all: all-am
 
@@ -182,6 +186,24 @@ $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 uninstall-info-am:
+texturesDATA_INSTALL = $(INSTALL_DATA)
+install-texturesDATA: $(textures_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(texturesdir)
+	@list='$(textures_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " $(texturesDATA_INSTALL) $$d$$p $(DESTDIR)$(texturesdir)/$$f"; \
+	  $(texturesDATA_INSTALL) $$d$$p $(DESTDIR)$(texturesdir)/$$f; \
+	done
+
+uninstall-texturesDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(textures_DATA)'; for p in $$list; do \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(texturesdir)/$$f"; \
+	  rm -f $(DESTDIR)$(texturesdir)/$$f; \
+	done
 tags: TAGS
 TAGS:
 
@@ -213,9 +235,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(DATA)
 
 installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(texturesdir)
 
 install: install-am
 install-exec: install-exec-am
@@ -257,7 +280,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-texturesDATA
 
 install-exec-am:
 
@@ -275,15 +298,16 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-generic
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-info-am uninstall-texturesDATA
 
 .PHONY: all all-am check check-am clean clean-generic distclean \
 	distclean-generic distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic uninstall uninstall-am uninstall-info-am
+	install-strip install-texturesDATA installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic uninstall uninstall-am \
+	uninstall-info-am uninstall-texturesDATA
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
