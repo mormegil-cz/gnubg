@@ -2373,3 +2373,7 @@ extern void CommandShowTCTutorial( char *sz ) {
 #endif
 
 
+extern void CommandShowDisplayPanels( char *sz ) {
+  outputf( _("Game list, Annotation and Message panels/windows "
+             "will%s be displayed."), fDisplayPanels ? "": " not");
+}

@@ -357,8 +357,6 @@ static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
 static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
-static void HideAllPanels ( gpointer *p, guint n, GtkWidget *pw );
-static void ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw );
 static void TogglePanel ( gpointer *p, guint n, GtkWidget *pw );
 static void FullScreenMode( gpointer *p, guint n, GtkWidget *pw );
 
@@ -386,6 +384,8 @@ static guint idOutput, idProgress;
 static list lOutput;
 int fTTY = TRUE;
 int fGUISetWindowPos = TRUE;
+
+int fDisplayPanels = TRUE;
 
 static guint nStdin, nDisabledCount = 1;
 
@@ -2947,6 +2947,10 @@ extern int InitGTK( int *argc, char ***argv ) {
     pwMessage = CreateMessageWindow();
     gtk_window_add_accel_group( GTK_WINDOW( pwMessage ), pagMain );
 #endif
+
+    if (!fDisplayPanels)
+      HideAllPanels (0, 0, 0);
+
     ListCreate( &lOutput );
     return TRUE;
 }
@@ -3005,6 +3009,11 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 
     /* force update of board; needed to display board correctly if user
        has special settings, e.g., clockwise or nackgammon */
+
+#if !USE_OLD_LAYOUT
+    if (!fDisplayPanels)
+      HideAllPanels (0, 0, 0);
+#endif
     ShowBoard();
 
     gtk_main();
@@ -9185,15 +9194,17 @@ PythonShell( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
-static void
+extern void
 ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw ) {
+  fDisplayPanels = 1;
   ShowAnnotation();
   ShowMessage();
   ShowGameWindow();
 }
 
-static void
+extern void
 HideAllPanels ( gpointer *p, guint n, GtkWidget *pw ) {
+  fDisplayPanels = 0;
   DeleteAnnotation();
   DeleteMessage();
   DeleteGame();

@@ -1669,6 +1669,9 @@ command cER = {
       N_("Synonym for `set matchequitytable'"), szFILENAME, &cFilename },
     { "output", NULL, N_("Modify options for formatting results"), NULL,
       acSetOutput },
+    { "panels", CommandSetDisplayPanels, 
+      N_("Display game list, annotation and message panels/windows"), 
+	 szONOFF, &cOnOff }, 
     { "path", NULL, N_("Set default path when saving, loading, importing, "
       "and exporting files."), NULL, acSetPath },
     { "player", CommandSetPlayer, N_("Change options for one or both "
@@ -5552,6 +5555,7 @@ extern void CommandSaveSettings( char *szParam ) {
        RefreshGeometries ();
 #endif
 
+    fprintf( pf, "set panels %s\n", fDisplayPanels ? "yes" : "no");
     for ( i = 0; i < NUM_WINDOWS; ++i )
         fprintf ( pf, 
                   "set geometry %s width %d\n"

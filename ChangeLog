@@ -1,9 +1,15 @@
+Fri 12 Sep 19:00:57 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubg.c show.c set.c backgammon.h gtkgame.c - add panels on/off
+	  setting
+
+
 Fri Sep 12 17:56:18 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.c (TextToClipboard): Chanage Japanese locale detection
 	logic.
 
-Fri 13 Sep 17:07"54 GMT Jim Segrave <jes@jes-2.demon.nl>
+Fri 12 Sep 1707:54 GMT Jim Segrave <jes@jes-2.demon.nl>
 	
         * timecontrol.c play.c backgammon.h needed Unix include files, 
 	  missing return values, suppress compiler warnings

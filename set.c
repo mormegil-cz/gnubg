@@ -4608,3 +4608,21 @@ extern void CommandSetLang( char *sz ) {
 		"of gnubg." ), sz );
 
 }
+
+extern void CommandSetDisplayPanels( char *sz ) {
+
+  SetToggle ("panels", &fDisplayPanels, sz, 
+  _("Game list, Annotation and Message panels/windows will be displayed."),
+  _("Game list, Annotation and Message panels/windows will not be displayed.")
+	     );
+
+#if USE_GUI && USE_GTK
+  if (fX) {
+    if (fDisplayPanels) 
+      ShowAllPanels (0, 0, 0);
+    else
+      HideAllPanels (0, 0, 0);
+  }
+#endif
+    
+}
