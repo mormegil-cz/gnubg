@@ -683,6 +683,7 @@ writeme
 * Rollout of cube decisions::
 * Analysing a saved game or match or session::
 * Output of an analysis::
+* Equities::
 @end menu
 
 @node Evaluating a position
@@ -989,6 +990,105 @@ Threshold for ratings:
 @item 0.026 - 0.035   @tab Beginner
 @item > 0.035         @tab Awful!
 @end multitable
+
+
+
+@node Equities
+@section Equities
+
+@subsection Introduction
+
+@gnubg{} works with many different kinds of equities. The equity is
+defined as the expected value of the position. However, this value can
+be expressed in several different metrics and may be calculated with
+or without taking the effect of the cube into consideration. In the
+following section we will describe the equities used and calculated by
+@gnubg{}.
+
+@subsection Money equity
+
+This is the value of the position in money game, e.g., if you equity
+is +0.4 an you are playing money game with a $1 stake, you will win
+$0.40 on average. The money equity can be calculated with or without
+taking the effect of the doubling cube into consideration, or
+@emph{cubeful} or @emph{cubeless}. The cubeless equity can be
+calculated from the basic formulae:
+2*p(w)-1+2(p(wg)-p(lg))+3(p(wbg)-p(lbg)). Evaluating the cubeful equity
+is much more difficult; it can either be estimated from the cubeless
+equitity by using transformations as outlined by Rick Janowski or by
+constructing a neural net that 
+directly outputs cubeful equities. @gnubg{} uses the former approach
+(see chapter @ref{Cubeful equities}).
+
+@subsection Match Winning Chance
+
+In match play we're generally not particular interested in the outcome
+of the individual games as much as the outcome of the entire match, so
+the interesting quantity for match play is @emph{match winning chance}
+(MWC). As for the money equity the MWC can be calculated with and
+without the effect of the doubling cube. The MWCs are generally
+calculated with the use of a match equity table, which contains the
+chance of winning the match @emph{before} a game starts, e.g., if the
+score is 0-0 in a 1pt match each player has 50% chance of winning the
+match before the game starts assuming they're of equal skill. 
+
+The cubeless MWC is calculated as: MWC(cubeless) = p(w) * MWC(w) +
+p(l) * MWC(l) + p(wg) * MWC(wg) + p(lg) * MWC(lg) + p(wbg) * MWC(wbg)
+* p(lbg) * MWC(lbg). 
+
+For example, if the w/g/bg distribution is 0 30 60 - 40 10 0 and the
+match score is 1-3 to 5 with the cube on 2 the cubeless MWC is:
+
+MWC(cubeless)= 30% * 50% + 30% * 0% + 30% * 100% + 10% * 0% + 0% *
+100% + 0% * 0% = 45%,
+
+so the cubeless MWC is 45%. 
+
+Evaluating the cubeful MWC is more difficult, and as for the cubeful
+money equity it's possible to estimate cubeful MWCs from
+transformation on the w/g/bg distribution or directly calculate it
+from neural nets. @gnubg{} uses the former approach, but the formulae
+are currently not published.
+
+@subsection Normalised equity
+
+It's generally very difficult to compare MWCs. For example, it's
+hardly worth mentioning a 0.5% MWC error at DMP where as it's a huge
+error at 0-0 to 7. It is therefore of interesting to normalise the
+MWCs to some common scale. The most often used normalisation is
+Normalised Money Game Equity (NEMG) where the MWC for any game is
+transformed into the same interval as money game, i.e., -3 to +3 (due
+to anomalies at certain match scores the NEMG can go below -3 and
+above +3). The transformation is linear: 
+
+NEMG = 2 * (MWC-MWC(l))/(MWC(w)-MWC(l)) - 1 
+
+In other words, extrapolation with the following two extrapolation
+points: (MWC(w),+1) and (MWC(l),-1).
+
+For example, suppose the score is 3-1 to 5 with the cube on 2:
+MWC(l)=0% and MWC(w)=50%:
+
+@multitable @columnfractions 0.33 0.33
+@item @strong{MWC} @tab @strong{NEMG}
+@item 0% @tab -1
+@item 25% @tab 0
+@item 50% @tab +1
+@item 75% @tab +2
+@item 100% @tab +3
+@end multitable 
+
+Note that a w/g/bg distribution of 0 100 100 - 0 0 0 gives a NEMG of
++3 whereas the corresponding money equity is only +2. This is because
+the gammon price is high for that particular score. When both players
+are far from winning the match, e.g., 0-0 to 17 or 1-0 to 17, NEMG is
+very close to the ususal money equity.
+
+NEMG can be calculated from both cubeless and cubeful MWCs. 
+
+A word of caution: A cubeless NEMG calculated from a cubeless MWC
+could be named ``cubeless equity'', but in most backgammon litterature
+this term seems to be reserved for the cubeless money equity. 
 
 
 
