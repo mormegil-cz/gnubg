@@ -841,8 +841,10 @@ extern void CommandShowRollout( char *sz ) {
 
 extern void CommandShowScore( char *sz ) {
 
-    outputf( _("The score (after %d game%s) is: %s %d, %s %d"),
-	    ms.cGames, ms.cGames == 1 ? "" : "s",
+    outputf((ms.cGames == 1
+	     ? _("The score (after %d game) is: %s %d, %s %d")
+	     : _("The score (after %d games) is: %s %d, %s %d")),
+	    ms.cGames,
 	    ap[ 0 ].szName, ms.anScore[ 0 ],
 	    ap[ 1 ].szName, ms.anScore[ 1 ] );
 

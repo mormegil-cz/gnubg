@@ -3710,25 +3710,30 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	    strcpy( sz, " Takes" ); /* FIXME beavers? */
 	    break;
 	case MOVE_DROP:
-            sprintf( sz, " Drops%sWins %d point%s",
-                   (i & 1) ? "\n      " : "                       ",
-                   nFileCube / 2, (nFileCube == 2) ? "" :"s" );
+	    sprintf( sz, ( nFileCube == 2
+			   ? " Drops%sWins %d point"
+			   : " Drops%sWins %d points"),
+		     (i & 1) ? "\n      " : "                       ",
+		     nFileCube / 2 );
 	    if( anScore )
 		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
-        case MOVE_RESIGN:
-            if (pmr->r.fPlayer)
-              sprintf( sz, "%s      Wins %d point%s\n", (i & 1) ? "\n" : "",
-                       pmr->r.nResigned * nFileCube,
-                       ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
-            else
-              sprintf( sz, "%sWins %d point%s\n", (i & 1) ? " " :
-                        "                                  ",
-                        pmr->r.nResigned * nFileCube,
-                        ((pmr->r.nResigned * nFileCube ) > 1) ? "s" : "");
-            if( anScore )
-                anScore[ !pmr->r.fPlayer ] += pmr->r.nResigned * nFileCube;
-            break;
+	case MOVE_RESIGN:
+	    if (pmr->r.fPlayer)
+	      sprintf( sz, ((pmr->r.nResigned * nFileCube ) == 1
+			    ? "%s      Wins %d point\n"
+			    : "%s      Wins %d points\n"),
+		       (i & 1) ? "\n" : "",
+		       pmr->r.nResigned * nFileCube );
+	    else
+	      sprintf( sz, ((pmr->r.nResigned * nFileCube ) == 1
+			    ? "%sWins %d point\n"
+			    : "%sWins %d points\n"),
+		       (i & 1) ? " " : "                                  ",
+			pmr->r.nResigned * nFileCube );
+	    if( anScore )
+		anScore[ !pmr->r.fPlayer ] += pmr->r.nResigned * nFileCube;
+	    break;
 	case MOVE_SETDICE:
 	    /* ignore */
 	    break;
@@ -3761,9 +3766,11 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
         }
 
 	if( ( n = GameStatus( anBoard ) ) ) {
-	    fprintf( pf, "%sWins %d point%s%s\n\n",
+	    fprintf( pf, ( n * nFileCube == 1
+			   ? "%sWins %d point%s\n\n"
+			   : "%sWins %d points%s\n\n"),
 		   i & 1 ? "                                  " : "\n      ",
-		   n * nFileCube, n * nFileCube > 1 ? "s" : "",
+		   n * nFileCube,
 		   "" /* FIXME " and the match" if appropriate */ );
 
 	    if( anScore )

@@ -817,8 +817,10 @@ extern void CommandSetDelay( char *sz ) {
 	}
 
 	if( n ) {
-	    outputf( _("All moves will be shown for at least %d millisecond%s.\n"),
-		    n, n > 1 ? "s" : "" );
+	    outputf(( n == 1
+		      ? _("All moves will be shown for at least %d millisecond.\n")
+		      : _("All moves will be shown for at least %d milliseconds.\n")),
+		    n );
 	    if( !fDisplay )
 		outputl( _("(You will also need to use `set display' to turn "
 		      "board updates on -- see `help set display'.)") );

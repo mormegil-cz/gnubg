@@ -1,3 +1,7 @@
+Wed Jan 15 14:44:05 2003  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c, set.c, show.c: I18N plural patches from TAKAHASHI Kaoru.
+
 Wed Jan 15 10:40:22 2003  Gary Wong  <gtw@gnu.org>
 
 	* NEWS, README: Updated in preparation for a 0.13 pre-release.
