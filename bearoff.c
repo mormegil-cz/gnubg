@@ -615,7 +615,7 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
                     "   - up to %d chequers on %d points (%d positions)"
                     " per player\n"
                     "   - %s\n"
-                    "   - number of reads: %lld\n"),
+                    "   - number of reads: %lu\n"),
               pbc->fInMemory ?
               _("In memory 2-sided bearoff database evaluator") :
               _("On disk 2-sided bearoff database evaluator"),
@@ -637,7 +637,7 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
                     "%s"
                     "%s"
                     "   - %s\n"
-                    "   - number of reads: %lld\n"),
+                    "   - number of reads: %lu\n"),
               pbc->fInMemory ?
               _("In memory 1-sided bearoff database evaluator") :
               _("On disk 1-sided bearoff database evaluator"),
