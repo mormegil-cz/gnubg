@@ -312,6 +312,44 @@ printStatTableRow3 ( FILE *pf, const char *format1, const char *format2,
 }
 
 
+static void
+printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
+                     const char *format3, 
+                     const int f0, const float r00, const float r01,
+                     const int f1, const float r10, const float r11 ) {
+                     
+  fprintf ( pf, 
+            "<tr>\n"
+            "<td>%s</td>\n",
+            format1 );
+
+  fputs ( "<td>", pf );
+
+  if ( f0 ) {
+    fprintf ( pf, format2, r00 );
+    fputs ( " (", pf );
+    fprintf ( pf, format3, r01 );
+    fputs ( " )", pf );
+  }
+  else
+    fputs ( _("n/a"), pf );
+
+  fputs ( "</td>\n<td>", pf );
+
+  if ( f1 ) {
+    fprintf ( pf, format2, r10 );
+    fputs ( " (", pf );
+    fprintf ( pf, format3, r11 );
+    fputs ( " )", pf );
+  }
+  else
+    fputs ( _("n/a"), pf );
+
+  fputs ( "</td>\n</tr>\n", pf );
+
+}
+
+
 /*
  * Print img tag.
  *
@@ -2561,12 +2599,14 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
 
-      printStatTableRow2 ( pf,
+      printStatTableRow4 ( pf,
                            _("Error rate (pr. move)"), 
                            "%+6.3f", "%+7.3f%",
+                           psc->anUnforcedMoves[ 0 ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
                            * 100.0f,
+                           psc->anUnforcedMoves[ 1 ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
@@ -2582,11 +2622,13 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
-      printStatTableRow2 ( pf,
+      printStatTableRow4 ( pf,
                            _("Error rate (pr. move)"), 
                            "%+6.3f", "%+7.3f%",
+                           psc->anUnforcedMoves[ 0 ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
+                           psc->anUnforcedMoves[ 1 ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
 
@@ -2597,8 +2639,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     
     printStatTableRow ( pf, 
                         _( "Chequer play rating"), "%s",
-                        gettext ( aszRating[ rt[ 0 ] ] ), 
-                        gettext ( aszRating[ rt[ 1 ] ] ) );
+                        psc->anUnforcedMoves[ 0 ] ? 
+                        gettext ( aszRating[ rt[ 0 ] ] ) : _("n/a"), 
+                        psc->anUnforcedMoves[ 1 ] ? 
+                        gettext ( aszRating[ rt[ 1 ] ] ) : _("n/a" ) );
 
   }
 
@@ -2638,10 +2682,12 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow2 ( pf, 
                            _( "Luck rate (pr. move)"), 
                            "%+6.3f", "%+7.3f%%",
+                           psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 0 ][ 0 ] /
                            psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 0 ][ 1 ] * 100.0f /
                            psc->anTotalMoves[ 0 ],
+                           psc->anTotalMoves[ 1 ],
                            psc->arLuck[ 1 ][ 0 ] /
                            psc->anTotalMoves[ 1 ],
                            psc->arLuck[ 1 ][ 1 ] * 100.0f /
@@ -2655,13 +2701,15 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            psc->arLuck[ 0 ][ 1 ],
                            psc->arLuck[ 1 ][ 0 ],
                            psc->arLuck[ 1 ][ 1 ] );
-      printStatTableRow2 ( pf, 
+      printStatTableRow4 ( pf, 
                            _( "Luck rate (pr. move)"), 
                            "%+6.3f", "%+7.3f",
+                           psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 0 ][ 0 ] /
                            psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 0 ][ 1 ] /
                            psc->anTotalMoves[ 0 ],
+                           psc->anTotalMoves[ 1 ],
                            psc->arLuck[ 1 ][ 0 ] /
                            psc->anTotalMoves[ 1 ],
                            psc->arLuck[ 1 ][ 1 ] /
@@ -2674,8 +2722,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     printStatTableRow ( pf, 
                         _( "Luck rating"), "%s",
-                        gettext ( aszLuckRating[ ai[ 0 ] ] ), 
-                        gettext ( aszLuckRating[ ai[ 1 ] ] ) );
+                        psc->anTotalMoves[ 0 ] ?
+                        gettext ( aszLuckRating[ ai[ 0 ] ] ) : _("n/a"), 
+                        psc->anTotalMoves[ 1 ] ?
+                        gettext ( aszLuckRating[ ai[ 1 ] ] ) : _("n/a") );
 
   }
 
@@ -2813,12 +2863,14 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
 
-      printStatTableRow2 ( pf,
+      printStatTableRow4 ( pf,
                            _("Error rate (per cube decision)"), 
                            "%+6.3f", "%+7.3f%",
+                           psc->anTotalCube[ 0 ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
                            * 100.0f,
+                           psc->anTotalCube[ 1 ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
@@ -2834,11 +2886,13 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
-      printStatTableRow2 ( pf,
+      printStatTableRow4 ( pf,
                            _("Error rate (per cube decision)"), 
                            "%+6.3f", "%+7.3f%",
+                           psc->anTotalCube[ 0 ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
+                           psc->anTotalCube[ 1 ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
 
@@ -2849,8 +2903,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     printStatTableRow ( pf, 
                         _( "Cube decision rating"), "%s",
-                        gettext ( aszRating[ rt [ 0 ] ] ), 
-                        gettext ( aszRating[ rt [ 1 ] ] ) );
+                        psc->anTotalCube[ 0 ] ? 
+                        gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
+                        psc->anTotalCube[ 1 ] ? 
+                        gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
   }
     
   /* overall rating */
@@ -2875,12 +2931,14 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
 
-      printStatTableRow2 ( pf,
+      printStatTableRow4 ( pf,
                            _("Error rate (per decision)"), 
                            "%+6.3f", "%+7.3f%",
+                           psc->anUnforcedMoves[ 0 ] + psc->anTotalCube[ 0 ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
                            * 100.0f,
+                           psc->anUnforcedMoves[ 1 ] + psc->anTotalCube[ 1 ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
@@ -2896,11 +2954,13 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
-      printStatTableRow2 ( pf,
+      printStatTableRow4 ( pf,
                            _("Error rate (per decision)"), 
                            "%+6.3f", "%+7.3f%",
+                           psc->anUnforcedMoves[ 0 ] + psc->anTotalCube[ 0 ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
+                           psc->anUnforcedMoves[ 1 ] + psc->anTotalCube[ 1 ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
 
@@ -2911,8 +2971,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       
     printStatTableRow ( pf, 
                         _("Overall rating"), "%s",
-                        gettext ( aszRating[ rt [ 0 ] ] ), 
-                        gettext ( aszRating[ rt [ 1 ] ] ) );
+                        ( psc->anTotalCube[ 0 ] + psc->anUnforcedMoves[ 0 ] )? 
+                        gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
+                        ( psc->anTotalCube[ 1 ] + psc->anUnforcedMoves[ 1 ] )? 
+                        gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a" ) );
 
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, 0,
                  pms->nMatchTo, pms->anScore, pms->fCrawford,

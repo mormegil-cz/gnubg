@@ -1169,8 +1169,10 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
       
       sprintf ( szTemp, _("Checker play rating:\t\t%-20s\t%-20s\n\n"),
-                gettext ( aszRating[ rt [ 0 ] ] ), 
-                gettext ( aszRating[ rt [ 1 ] ] ) );
+                psc->anUnforcedMoves[ 0 ] ? 
+                gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
+                psc->anUnforcedMoves[ 1 ] ? 
+                gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
       strcat ( szOutput, szTemp);
   }
 
@@ -1193,41 +1195,81 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       strcat ( szOutput, szTemp);
        
       if ( ms.nMatchTo ){
+
 	  sprintf ( szTemp,_("Luck rate (total)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-		  "Luck rate (pr. move)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
-		  psc->arLuck[ 0 ][ 0 ],
-		  psc->arLuck[ 0 ][ 1 ] * 100.0f,
-		  psc->arLuck[ 1 ][ 0 ],
-		  psc->arLuck[ 1 ][ 1 ] * 100.0f,
-		  psc->arLuck[ 0 ][ 0 ] /
-		  psc->anTotalMoves[ 0 ],
-		  psc->arLuck[ 0 ][ 1 ] * 100.0f /
-		  psc->anTotalMoves[ 0 ],
-		  psc->arLuck[ 1 ][ 0 ] /
-		  psc->anTotalMoves[ 1 ],
-		  psc->arLuck[ 1 ][ 1 ] * 100.0f /
-		  psc->anTotalMoves[ 1 ] );
-          strcat ( szOutput, szTemp);
+                             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
+                    psc->arLuck[ 0 ][ 0 ],
+                    psc->arLuck[ 0 ][ 1 ] * 100.0f,
+                    psc->arLuck[ 1 ][ 0 ],
+                    psc->arLuck[ 1 ][ 1 ] * 100.0f );
+          strcat ( szOutput, szTemp );
+
+          strcat ( szOutput, _("Luck rate (pr. move)\t\t") );
+
+          if ( psc->anTotalMoves[ 0 ] ) {
+            sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
+                      psc->arLuck[ 0 ][ 0 ] /
+                      psc->anTotalMoves[ 0 ],
+                      psc->arLuck[ 0 ][ 1 ] * 100.0f /
+                      psc->anTotalMoves[ 0 ] );
+            strcat ( szOutput, szTemp );
+          }
+          else {
+            strcat ( szOutput, _("n/a") );
+            strcat ( szOutput, "\t\t\t" );
+          }
+
+          if ( psc->anTotalMoves[ 1 ] ) {
+            sprintf ( szTemp, _("%+6.3f (%+7.3f%%)\n\n"),
+                      psc->arLuck[ 1 ][ 0 ] /
+                      psc->anTotalMoves[ 1 ],
+                      psc->arLuck[ 1 ][ 1 ] * 100.0f /
+                      psc->anTotalMoves[ 1 ] );
+            strcat ( szOutput, szTemp);
+          }
+          else {
+            strcat ( szOutput, _("n/a" ) );
+            strcat ( szOutput, "\n" );
+          }
+
+
       } else {
+
 	  sprintf ( szTemp,_("Luck rate (total)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-		  "Luck rate (pr. move)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
-		  psc->arLuck[ 0 ][ 0 ],
-		  psc->arLuck[ 0 ][ 1 ],
-		  psc->arLuck[ 1 ][ 0 ],
-		  psc->arLuck[ 1 ][ 1 ],
-		  psc->arLuck[ 0 ][ 0 ] /
-		  psc->anTotalMoves[ 0 ],
-		  psc->arLuck[ 0 ][ 1 ] /
-		  psc->anTotalMoves[ 0 ],
-		  psc->arLuck[ 1 ][ 0 ] /
-		  psc->anTotalMoves[ 1 ],
-		  psc->arLuck[ 1 ][ 1 ] /
-		  psc->anTotalMoves[ 1 ] );
-          strcat ( szOutput, szTemp);
+                             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
+                    psc->arLuck[ 0 ][ 0 ],
+                    psc->arLuck[ 0 ][ 1 ],
+                    psc->arLuck[ 1 ][ 0 ],
+                    psc->arLuck[ 1 ][ 1 ] );
+
+          strcat ( szOutput, _("Luck rate (pr. move)\t\t") );
+
+          if ( psc->anTotalMoves[ 0 ] ) {
+            sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
+                      psc->arLuck[ 0 ][ 0 ] /
+                      psc->anTotalMoves[ 0 ],
+                      psc->arLuck[ 0 ][ 1 ] /
+                      psc->anTotalMoves[ 0 ] );
+            strcat ( szOutput, szTemp );
+          }
+          else {
+            strcat ( szOutput, _("n/a") );
+            strcat ( szOutput, "\t\t\t" );
+          }
+
+          if ( psc->anTotalMoves[ 1 ] ) {
+            sprintf ( szTemp, _("%+6.3f (%+7.3f%%)\n\n"),
+                      psc->arLuck[ 1 ][ 0 ] /
+                      psc->anTotalMoves[ 1 ],
+                      psc->arLuck[ 1 ][ 1 ] /
+                      psc->anTotalMoves[ 1 ] );
+            strcat ( szOutput, szTemp);
+          }
+          else {
+            strcat ( szOutput, _("n/a" ) );
+            strcat ( szOutput, "\n" );
+          }
+          
       }
 
       /* luck rating */
@@ -1238,8 +1280,10 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                                   psc->anTotalMoves[ i ] );
 
       sprintf ( szTemp, _("Luck rating:\t\t\t%-15s\t\t%-15s\n\n"),
-                gettext ( aszLuckRating[ rt [ 0 ] ] ), 
-                gettext ( aszLuckRating[ rt [ 1 ] ] ) );
+                psc->anTotalMoves[ 0 ] ?
+                gettext ( aszLuckRating[ rt [ 0 ] ] ) : _("n/a"),
+                psc->anTotalMoves[ 1 ] ?
+                gettext ( aszLuckRating[ rt [ 1 ] ] ) : _("n/a") );
       strcat ( szOutput, szTemp);
       
 
@@ -1365,42 +1409,81 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
           strcat ( szOutput, szTemp);
       }
 
-      if ( ms.nMatchTo ){
+      if ( ms.nMatchTo ) {
+
 	  sprintf ( szTemp,_("Error rate (total)\t\t"
-                             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                             "Error rate (per cube decision)\t"
                              "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f,
                     
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f,
-                    
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f,
-                    
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f
-                    );
-          strcat ( szOutput, szTemp);
+                    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f );
+
+          strcat ( szOutput, szTemp );
+          
+          strcat ( szOutput, _("Error rate (per cube decision)\t") );
+
+          if ( psc->anTotalCube[ 0 ] ) {
+
+            sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f );
+            strcat ( szOutput, szTemp );
+          }
+          else {
+            strcat ( szOutput, _("n/a") );
+            strcat ( szOutput, "\t\t\t" );
+          }
+
+          if ( psc->anTotalCube[ 1 ] ) {
+
+            sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f );
+            strcat ( szOutput, szTemp);
+          }
+          else {
+            strcat ( szOutput, _("n/a") );
+            strcat ( szOutput, "\n" );
+          }
+
       } else {
+
 	  sprintf ( szTemp,_("Error rate (total)\t\t"
-                             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                             "Error rate (per cube decision)\t"
-                             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
+                             "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n" ),
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
                     
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ],
-                    
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
-                    
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                    -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
-                    );
-          strcat ( szOutput, szTemp);
+                    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
+          strcat ( szOutput, szTemp );
+
+          strcat ( szOutput, _("Error rate (per cube decision)\t") );
+
+          if ( psc->anTotalCube[ 0 ] ) {
+
+            sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] );
+            strcat ( szOutput, szTemp );
+          }
+          else {
+            strcat ( szOutput, _("n/a") );
+            strcat ( szOutput, "\t\t\t" );
+          }
+
+          if ( psc->anTotalCube[ 1 ] ) {
+
+            sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                      -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
+            strcat ( szOutput, szTemp);
+          }
+          else {
+            strcat ( szOutput, _("n/a") );
+            strcat ( szOutput, "\n" );
+          }
+
       }
 
 
@@ -1408,69 +1491,115 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
       
       sprintf ( szTemp, _("\nCube decision rating:\t\t%-20s\t%-20s\n\n"),
-                gettext ( aszRating[ rt [ 0 ] ] ), 
-                gettext ( aszRating[ rt [ 1 ] ] ) );
+                psc->anTotalCube[ 0 ] ?
+                gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
+                psc->anTotalCube[ 1 ] ?
+                gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
       strcat ( szOutput, szTemp);
 
   }
-
+  
 
   /* overall rating */
-
+  
   if( psc->fMoves && psc->fCube ) {
-
+    
     sprintf ( szTemp, _("\nOverall statistics:\n\n") );
     strcat ( szOutput, szTemp);
 
-    if ( ms.nMatchTo ){
+    if ( ms.nMatchTo ) {
+      
       sprintf ( szTemp,_("Error rate (total)\t\t"
-                         "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                         "Error rate (per decision)\t"
                          "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f,
                     
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f,
-                    
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f,
-                    
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f
-                );
-      strcat ( szOutput, szTemp);
+                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f );
+
+      strcat ( szOutput, szTemp );
+          
+      strcat ( szOutput, _("Error rate (per decision)\t") );
+
+      if ( psc->anTotalCube[ 0 ] ) {
+
+        sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f );
+        strcat ( szOutput, szTemp );
+      }
+      else {
+        strcat ( szOutput, _("n/a") );
+        strcat ( szOutput, "\t\t\t" );
+      }
+
+      if ( psc->anTotalCube[ 1 ] ) {
+
+        sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f );
+        strcat ( szOutput, szTemp);
+      }
+      else {
+        strcat ( szOutput, _("n/a") );
+        strcat ( szOutput, "\n" );
+      }
+
     } else {
+
       sprintf ( szTemp,_("Error rate (total)\t\t"
-                         "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                         "Error rate (per decision)\t"
-                         "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
+                         "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n" ),
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
                     
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ],
-                    
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
-                    
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
-                );
-      strcat ( szOutput, szTemp);
+                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
+      strcat ( szOutput, szTemp );
+
+      strcat ( szOutput, _("Error rate (per decision)\t") );
+
+      if ( psc->anTotalCube[ 0 ] ) {
+
+        sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] );
+        strcat ( szOutput, szTemp );
+      }
+      else {
+        strcat ( szOutput, _("n/a") );
+        strcat ( szOutput, "\t\t\t" );
+      }
+
+      if ( psc->anTotalCube[ 1 ] ) {
+
+        sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                  -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
+        strcat ( szOutput, szTemp);
+      }
+      else {
+        strcat ( szOutput, _("n/a") );
+        strcat ( szOutput, "\n" );
+      }
+
     }
 
-    for ( i = 0 ; i < 2; i++ )
-      rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
-      
-    sprintf ( szTemp, _("Overall rating:\t\t\t%-20s\t%-20s\n\n"),
-              gettext ( aszRating[ rt [ 0 ] ] ), 
-              gettext ( aszRating[ rt [ 1 ] ] ) );
-    strcat ( szOutput, szTemp);
+
   }
 
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
+      
+  sprintf ( szTemp, _("Overall rating:\t\t\t%-20s\t%-20s\n\n"),
+            ( psc->anUnforcedMoves[ 0 ] + psc->anTotalCube[ 0 ] ) ?
+            gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
+            ( psc->anUnforcedMoves[ 1 ] + psc->anTotalCube[ 1 ] ) ?
+            gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
+  strcat ( szOutput, szTemp);
+  
+  
   /* calculate total error */
-
+  
   if ( ms.nMatchTo ) {
 
     sprintf ( szTemp, 
@@ -1485,11 +1614,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
               absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ], 
                                    ms.nMatchTo ) );
     strcat ( szOutput, szTemp);
-
-
+    
 
   }
-  
 
 }
 

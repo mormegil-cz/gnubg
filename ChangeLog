@@ -1,3 +1,10 @@
+Thu Aug  1 19:54:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (DumpStatContext, GTKDumpStatContext,
+	HTMLDumpStatContext): 
+	Write "n/a" instead of 0 in match statistics if there
+	was no moves, no unforced moves etc.
+
 Thu Aug  1 19:29:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (SuspendInput, ResumeInput): only call 
