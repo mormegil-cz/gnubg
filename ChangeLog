@@ -1,3 +1,9 @@
+Wed Aug 13 21:32:37 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* play.c (CommandNext): fix bug in "next marked" command.
+	(reported by Klaus Rindholt)
+	* play.c (ShowMark): protect GTK+ code.
+
 Wed Aug 13 19:44:10 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktheory.c (GTKShowTheory): fix i18n problem.
