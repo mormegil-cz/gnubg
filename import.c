@@ -801,6 +801,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     char *pch;
     int c, fPlayer = 0, anRoll[ 2 ];
     moverecord *pmgi, *pmr;
+    char *szComment = NULL;
     
     InitBoard( ms.anBoard );
 
@@ -844,7 +845,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 		if( anRoll[ 0 ] ) {
 		    pmr = malloc( sizeof( pmr->n ) );
 		    pmr->n.mt = MOVE_NORMAL;
-		    pmr->n.sz = NULL;
+		    pmr->n.sz = szComment;
 		    pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
 		    pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
 		    pmr->n.fPlayer = fPlayer;
@@ -869,6 +870,8 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			free( pmr );
 		    
 		    anRoll[ 0 ] = 0;
+                    szComment = NULL;
+
 		} else {
 		    if( ( fPlayer = *pch == '\t' ) )
 			pch++;
@@ -882,7 +885,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			if( strstr( pch, "O-O" ) ) {
 			    pmr = malloc( sizeof( pmr->n ) );
 			    pmr->n.mt = MOVE_NORMAL;
-			    pmr->n.sz = NULL;
+			    pmr->n.sz = szComment;
 			    pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
 			    pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
 			    pmr->n.fPlayer = fPlayer;
@@ -896,7 +899,10 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->n.stMove = SKILL_NONE;
 			    pmr->n.stCube = SKILL_NONE;
 			    AddMoveRecord( pmr );
+
 			    anRoll[ 0 ] = 0;
+                            szComment = NULL;
+
 			} else {
 			    for( pch += 3; *pch; pch++ )
 				if( !isspace( *pch ) )
@@ -912,13 +918,16 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			
 			    pmr = malloc( sizeof( pmr->sd ) );
 			    pmr->sd.mt = MOVE_SETDICE;
-			    pmr->sd.sz = NULL;
+			    pmr->sd.sz = szComment;
 			    pmr->sd.fPlayer = fPlayer;
 			    pmr->sd.anDice[ 0 ] = anRoll[ 0 ];
 			    pmr->sd.anDice[ 1 ] = anRoll[ 1 ];
 			    pmr->sd.lt = LUCK_NONE;
 			    pmr->sd.rLuck = ERR_VAL;
+
 			    AddMoveRecord( pmr );
+                            szComment = NULL;
+
 			}
 		    } else {
 			if( !strncasecmp( pch, "double", 6 ) ) {
@@ -929,39 +938,70 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_DOUBLE;
-			    pmr->d.sz = NULL;
+			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
 			    pmr->d.esDouble.et = EVAL_NONE;
 			    pmr->d.st = SKILL_NONE;
+
 			    AddMoveRecord( pmr );
+                            szComment = NULL;
 			} else if( !strncasecmp( pch, "accept", 6 ) ) {
 			    if( !ms.fDoubled )
 				continue;
 			    
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_TAKE;
-			    pmr->d.sz = NULL;
+			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
 			    pmr->d.esDouble.et = EVAL_NONE;
 			    pmr->d.st = SKILL_NONE;
+
 			    AddMoveRecord( pmr );
+                            szComment = NULL;
 			} else if( !strncasecmp( pch, "pass", 4 ) ) {
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_DROP;
-			    pmr->d.sz = NULL;
+			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
 			    pmr->d.esDouble.et = EVAL_NONE;
 			    pmr->d.st = SKILL_NONE;
+
 			    AddMoveRecord( pmr );
+                            szComment = NULL;
 			}
 		    }
 		}
 	    }
-	}
+	} /* isdigit */
+        else {
+
+          /* the text is most likely a comment */
+
+          if ( *sz != '\n' ) {
+            /* non-empty line */
+            if ( ! szComment )
+              szComment = strdup ( sz );
+            else {
+              szComment = 
+                (char *) realloc ( szComment,
+                                   strlen ( sz ) + strlen ( szComment ) + 1 );
+              strcat ( szComment, sz );
+            }
+
+          }
+
+        }
+          
     }
 
  finished:
     AddGame( pmgi );
+
+    /* garbage collect */
+
+    if ( szComment )
+      free ( szComment );
+
 }
 
 static int ParseSGGGame( char *pch, int *pi, int *pn0, int *pn1,
