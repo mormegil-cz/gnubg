@@ -73,7 +73,7 @@ AC_CHECK_LIB(dl, dlopen)
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
-AC_CHECK_HEADERS(fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h stropts.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h)
+AC_CHECK_HEADERS(fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h stropts.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h libgen.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

@@ -2012,7 +2012,7 @@ EOF
 
 fi
 
-for ac_hdr in fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h stropts.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h
+for ac_hdr in fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h stropts.h sys/socket.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h libgen.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6

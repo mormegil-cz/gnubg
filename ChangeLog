@@ -1,3 +1,8 @@
+Sat Aug 10 13:38:20 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c, html.c, config.h.in, configure.in: more
+	config-magic regarding "basename".
+
 Sat Aug 10 13:29:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (ComputerTurn): make gnubg double on optional

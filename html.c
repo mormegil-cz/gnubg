@@ -36,6 +36,10 @@
 #include "positionid.h"
 #include "matchid.h"
 
+#if ! defined (HAVE_BASENAME) && defined (HAVE_LIBGEN_H)
+#include "libgen.h"
+#endif
+
 #include "i18n.h"
 
 #define STYLESHEET \

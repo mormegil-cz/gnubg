@@ -6104,7 +6104,7 @@ extern int GiveAdvice( skilltype Skill ) {
 	return GetAdviceAnswer( sz );
 }
 
-#ifndef HAVE_BASENAME
+#if ! defined(HAVE_BASENAME) && ! defined (HAVE_LIBGEN_H)
 
 /*
  * Basename copied from glibc-2.2. for users without glibc.
