@@ -1,3 +1,8 @@
+Mon Nov  5 12:57:19 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (MainSize): Compute the default window size dynamically,
+	so that board_size=4 is used if possible (reported by John Chuang).
+
 Wed Oct 31 19:46:31 CET 2001
 
 	* eval.c (FindBestCubeDecision): only beaver if equity > -2, otherwise "you
