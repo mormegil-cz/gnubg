@@ -65,6 +65,7 @@
 #else
 #include <glib.h>
 #endif
+#include "openurl.h"
 
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
@@ -2419,3 +2420,25 @@ CommandShowEPC( char *sz ) {
     }
 
 }
+
+
+extern void
+CommandShowManualWeb( char *sz ) {
+
+  OpenURL( "http://www.gnubg.org/win32/gnubg/gnubg.html" );
+
+}
+
+#if USE_GTK
+extern void
+CommandShowManualGUI( char *sz ) {
+
+  if ( fX ) {
+    GTKShowManual();
+  }
+  else
+    outputl( _("`show manual gui' does not work in command line mode.\n"
+               "Please use `show manual web' instead.") );
+
+}
+#endif /* USE_GTK */

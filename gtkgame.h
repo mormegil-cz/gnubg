@@ -202,4 +202,7 @@ extern void GTKCheckTimeControl( char *szName) ;
 
 extern void SetToolbarStyle(int value);
 
+extern void
+GTKShowManual( void );
+
 #endif

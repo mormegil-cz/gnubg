@@ -1816,6 +1816,13 @@ command cER = {
     { "session", CommandShowStatisticsSession, 
       N_("Compute statistics for every game in the session"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acShowManual[] = {
+#if USE_GTK
+    { "gui", CommandShowManualGUI, N_("Show manual in GUI"), NULL, NULL },
+#endif /* USE_GTK */
+    { "web", CommandShowManualWeb, N_("Show manual in web browser"), 
+      NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acShow[] = {
     { "analysis", CommandShowAnalysis, N_("Show parameters used for analysing "
       "moves"), NULL, NULL },
@@ -1884,6 +1891,7 @@ command cER = {
       "position"), szOPTPOSITION, NULL },
     { "lang", CommandShowLang, N_("Display your language preference"),
       NULL, NULL },
+    { "manual", NULL, N_("Show manual"), NULL, acShowManual },
     { "marketwindow", CommandShowMarketWindow, 
       N_("show market window for doubles"), NULL, NULL },
     { "matchequitytable", CommandShowMatchEquityTable, 

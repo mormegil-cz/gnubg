@@ -226,6 +226,8 @@ typedef enum _gnubgcommand {
     CMD_SHOW_MARKETWINDOW,
     CMD_SHOW_MATCHEQUITYTABLE,
     CMD_SHOW_KLEINMAN,
+    CMD_SHOW_MANUAL_GUI,
+    CMD_SHOW_MANUAL_WEB,
     CMD_SHOW_ONECHEQUER,
     CMD_SHOW_ONESIDEDROLLOUT,
     CMD_SHOW_PATH,
@@ -313,6 +315,8 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show marketwindow",
     "show matchequitytable",
     "show kleinman",
+    "show manual gui",
+    "show manual web",
     "show onechequer",
     "show onesidedrollout",
     "show path",
@@ -393,7 +397,6 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
-static void ShowManualWeb( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
@@ -3025,8 +3028,10 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL, PythonShell, 0, NULL },
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
-	{ N_("/_Help/gnubg _Manual"), NULL, ShowManual, 0, NULL },
-	{ N_("/_Help/gnubg M_anual (web)"), NULL, ShowManualWeb, 0, NULL },
+	{ N_("/_Help/gnubg _Manual"), NULL, Command, 
+          CMD_SHOW_MANUAL_GUI, NULL },
+	{ N_("/_Help/gnubg M_anual (web)"), NULL, Command, 
+          CMD_SHOW_MANUAL_WEB, NULL },
 	{ N_("/_Help/_Frequently Asked Questions"), NULL, ShowFAQ, 0, NULL },
 	{ N_("/_Help/Co_pying gnubg"), NULL, Command, CMD_SHOW_COPYING, NULL },
 	{ N_("/_Help/gnubg _Warranty"), NULL, Command, CMD_SHOW_WARRANTY,
@@ -8038,7 +8043,9 @@ static void NoFAQ( void ) {
     outputx();
 }
 
-static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
+extern void
+GTKShowManual( void ) {
+
 #if HAVE_GTKTEXI
     if( !ShowManualSection( _("GNU Backgammon - Manual"), "Top" ) )
 	return;
@@ -8047,13 +8054,6 @@ static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
     NoManual();
 }
 
-
-static void
-ShowManualWeb( gpointer *p, guint n, GtkWidget *pwEvent ) {
-
-  OpenURL( "http://www.gnubg.org/win32/gnubg/gnubg.html" );
-
-}
 
 static void
 ReportBug( gpointer *p, guint n, GtkWidget *pwEvent ) {
@@ -10556,3 +10556,4 @@ static void DefineTimeControl( gpointer *p, guint n, GtkWidget *pw ) {
 
 
 #endif
+
