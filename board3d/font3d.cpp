@@ -21,10 +21,6 @@
 * $Id$
 */
 
-#if _MSC_VER
-#include <gl/gl.h>
-#endif
-
 #include "config.h"
 #include "backgammon.h"
 #include "inc3d.h"

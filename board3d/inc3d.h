@@ -30,7 +30,6 @@
 #undef FALSE
 #endif
 
-#include "config.h"
 #include <stdio.h>
 #include "i18n.h"
 
@@ -38,9 +37,6 @@
 #include <gtk/gtk.h>
 #endif
 
-#ifdef _MSC_VER
-	#define AlphaBlend ab
-#endif
 #ifdef USE_MSDEV_TEST_HARNESS
 	#define USE_GLUT
 	#define USE_GLUT_FONT

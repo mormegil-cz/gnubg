@@ -21,10 +21,10 @@
 * $Id$
 */
 
+#include "config.h"
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <string.h>
-
 #include "inc3d.h"
 #include <gdk/gdkkeysyms.h>
 

@@ -21,6 +21,7 @@
 * $Id$
 */
 
+#include "config.h"
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -1998,7 +1999,7 @@ else
 	setMaterial(&bd->boxMat);
 
 	if (!bd->bgInTrays)
-		drawSplitRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, PIECE_HOLE, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->boxMat.pTexture);
+		drawSplitRect(EDGE_WIDTH - LIFT_OFF, EDGE_HEIGHT, BASE_DEPTH, PIECE_HOLE, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->boxMat.pTexture);
 
 	if (bd->State != BOARD_OPEN)
 	{	/* Back of board */
