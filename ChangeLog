@@ -1,3 +1,12 @@
+Sat Mar 29 16:23:37 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Try to stop the never-ending discussion regarding cubeless
+	equities for Jacoby rule and money games with centered cubes.
+
+	* eval.c (UtilityME): new function to return money equity as
+	opposed to cubeless equity.
+	(changed a few callers in eval.c and database.c)
+
 Sat Mar 29 16:02:44 2003  Joern Thyssen  <jth@gnubg.org>
 
         Enhance dice manipulation :-)

@@ -422,12 +422,12 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	    if( EvaluatePosition( anBoardGenerate, ar, &ciCubeless, &ec0 )
 		< 0 )
 		break;
-	    r0 = Utility( ar, &ciCubeless );
+	    r0 = UtilityME( ar, &ciCubeless );
 	    
 	    if( EvaluatePosition( anBoardGenerate, ar, &ciCubeless, &ec1 )
 		< 0 )
 		break;
-	    r1 = Utility( ar, &ciCubeless );
+	    r1 = UtilityME( ar, &ciCubeless );
 	    
 	    if( fabs( r0 - r1 ) < rThreshold )
 		/* error too small; keep looking */
@@ -587,12 +587,12 @@ extern void CommandDatabaseVerify( char *sz ) {
 	    for( i = 0; i < NUM_OUTPUTS; i++ )
 		arDesired[ i ] = (float) pev->asEq[ i ] / 0xFFFF;
 
-	    arDesired[ OUTPUT_EQUITY ] = Utility( arDesired, &ciCubeless );
+	    arDesired[ OUTPUT_EQUITY ] = UtilityME( arDesired, &ciCubeless );
 	    
 	    PositionFromKey( anBoardEval, (unsigned char *) dKey.dptr );
 	    EvaluatePosition( anBoardEval, arOutput, &ciCubeless, NULL );
 
-	    arOutput[ OUTPUT_EQUITY ] = Utility( arOutput, &ciCubeless );
+	    arOutput[ OUTPUT_EQUITY ] = UtilityME( arOutput, &ciCubeless );
 	    
 	    for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
 		arError[ i ] += ( arDesired[ i ] - arOutput[ i ] ) *

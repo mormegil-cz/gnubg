@@ -2643,6 +2643,13 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[],
     return 0;
 }
 
+/*
+ * Utility returns the "correct" cubeless equity based on the current
+ * gammon values.
+ *
+ * Use UtilityME to get the "true" money equity.
+ */
+
 extern float
 Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
 
@@ -2680,6 +2687,29 @@ Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
 		
 }
 
+/*
+ * UtilityME is identical to Utility for match play.
+ * For money play it returns the money equity instead of the 
+ * correct cubeless equity.
+ */
+
+extern float
+UtilityME( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
+
+  if ( ! pci->nMatchTo )
+
+    /* calculate money equity */
+
+    return 
+      ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
+      ( ar[ OUTPUT_WINGAMMON ] - ar[ OUTPUT_LOSEGAMMON ] ) +
+      ( ar[ OUTPUT_WINBACKGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON ] );
+
+  else 
+
+    return Utility( ar, pci );
+
+}
 
 
 extern float 
@@ -3733,7 +3763,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 		     100.0f * aarOutput[ 0 ][ 2 ],
                      100.0f * aarOutput[ 0 ][ 3 ],
 		     100.0f * aarOutput[ 0 ][ 4 ],
-                     Utility ( aarOutput[ 0 ], pci ), 
+                     UtilityME ( aarOutput[ 0 ], pci ), 
 		     arDouble[ 0 ] ); 
 	else
 	    sprintf( szOutput,
@@ -3741,7 +3771,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 		     "(%+6.3f  (%+6.3f))\n",
 		     aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ],
 		     aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ],
-		     aarOutput[ 0 ][ 4 ], Utility ( aarOutput[ 0 ], pci ), 
+		     aarOutput[ 0 ][ 4 ], UtilityME ( aarOutput[ 0 ], pci ), 
 		     arDouble[ 0 ] ); 
     }
     
@@ -5448,7 +5478,7 @@ CalcCubefulEquity ( positionclass pc,
     rDT = 0.0;
   }
 
-  arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
+  arOutput[ OUTPUT_EQUITY ] = UtilityME ( arOutput, pci );
   arOutput[ OUTPUT_CUBEFUL_EQUITY ] = r;
 
 }
@@ -5493,7 +5523,7 @@ GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     /* equity */
 
     aarOutput[ i ][ OUTPUT_EQUITY ] =
-      Utility ( arOutput, &aciCubePos[ i ] );
+      UtilityME ( arOutput, &aciCubePos[ i ] );
 
     aarOutput[ i ][ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ i ];
 
@@ -5529,7 +5559,7 @@ GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                   pci, pec, nPlies, FALSE ) )
     return -1;
 
-  arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
+  arOutput[ OUTPUT_EQUITY ] = UtilityME ( arOutput, pci );
   arOutput[ OUTPUT_CUBEFUL_EQUITY ] = rCubeful;
 
   return 0;
@@ -5555,7 +5585,7 @@ GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                  nPlies, ClassifyPosition ( anBoard ) ) )
       return -1;
 
-    arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
+    arOutput[ OUTPUT_EQUITY ] = UtilityME ( arOutput, pci );
     arOutput[ OUTPUT_CUBEFUL_EQUITY ] = 0.0f;
 
   }
