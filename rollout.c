@@ -400,7 +400,7 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
       if( fShowProgress ) {
 #if USE_GTK
 	  if( fX )
-	      GTKRolloutUpdate( arMu, arSigma, i, cGames );
+	      GTKRolloutUpdate( &arMu, &arSigma, i, cGames, FALSE, 1 );
 	  else
 #endif
 	      {
@@ -444,13 +444,16 @@ static int
 BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], 
                       int iTurn, int iGame,
-                      cubeinfo aci[], int cci, rolloutcontext *prc ) {
+                      cubeinfo aci[], int afCubeDecTop[], int cci,
+                      rolloutcontext *prc ) {
+
   int anDice [ 2 ];
   cubeinfo *pci;
   cubedecision cd;
-  int *pf, ici;
+  int *pf, ici, i;
 
   float arCf[ NUM_CUBEFUL_OUTPUTS ];
+  float aar[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
   int nTruncate = prc->nTruncate;
   int cGames = prc->nTrials;
@@ -482,21 +485,22 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
       if ( *pf ) {
 
-        if ( prc->fCubeful && GetDPEq ( NULL, NULL, pci ) ) {
+        if ( prc->fCubeful && GetDPEq ( NULL, NULL, pci ) &&
+             ( iTurn > 0 || afCubeDecTop[ ici ] ) ) {
 
-          if ( FindCubeDecision ( &cd, arCf,
-                                  aarOutput[ ici ],
-                                  aanBoard[ ici ],
-                                  pci, &prc->aecCube[ pci->fMove ] ) )
+          if ( GeneralCubeDecisionE ( aar, aanBoard[ ici ],
+                                      pci,
+                                      &prc->aecCube[ pci->fMove ] ) < 0 ) 
             return -1;
 
+          cd = FindCubeDecision ( arCf, aar, pci );
 
           switch ( cd ) {
 
           case DOUBLE_TAKE:
-	      /* FIXME this shouldn't be using the global ms.fMove, should
-		 it? */
-            SetCubeInfo ( pci, 2 * pci->nCube, !ms.fMove, ms.fMove, pci->nMatchTo,
+
+            SetCubeInfo ( pci, 2 * pci->nCube, ! pci.fMove, pci.fMove,
+			  pci->nMatchTo,
                           pci->anScore, pci->fCrawford, pci->fJacoby,
                           pci->fBeavers);
             break;
@@ -508,7 +512,10 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
             *pf = FALSE;
 
-            /* assign cubeful output */
+            /* assign outputs */
+
+            for ( i = 0; i < OUTPUT_LOSEBACKGAMMON; i++ )
+              aarOutput[ ici ][ i ] = aar[ 0 ][ i ];
 
             aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
               arCf[ OUTPUT_OPTIMAL ];
@@ -518,7 +525,11 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
             if ( iTurn & 1 ) {
 
               InvertEvaluation ( aarOutput[ ici ] );
-              aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
+              if ( pci->nMatchTo )
+                aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 
+                  1.0 - aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ];
+              else
+                aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
 
             }
 
@@ -582,11 +593,13 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       if ( *pf ) {
         
         if ( prc->fCubeful ) {
-          if ( EvaluatePositionCubeful ( aanBoard[ ici ], arCf,
-                                         aarOutput[ ici ],
-                                         pci,
-                                         &prc->aecCube[ pci->fMove ], 
-                                         prc->aecCube[ pci->fMove ].nPlies ) )
+          if ( EvaluatePositionCubeful2 ( aanBoard[ ici ], 
+                                          aarOutput[ ici ], arCf, 
+                                          pci,
+                                          &prc->aecCube[ pci->fMove ], 
+                                          prc->aecCube[ pci->fMove ].nPlies,
+                                          prc->aecCube[ pci->fMove ].nPlies,
+                                          TRUE, pci ) )
             return -1;
 
           aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
@@ -607,14 +620,26 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         if ( iTurn & 1 ) {
           
           InvertEvaluation ( aarOutput[ ici ] );
-          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
+          if ( pci->nMatchTo )
+            aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 
+              1.0 - aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ];
+          else
+            aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
           
         }
       }
 
-      if ( pci->nMatchTo )
-        aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
-          eq2mwc ( aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ], pci );
+      /* convert to MWC or normalize against old cube value. */
+
+/*        if ( pci->nMatchTo ) */
+/*          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = */
+/*            eq2mwc ( aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ], pci ); */
+/*        else */
+/*          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= */
+/*            pci->nCube / aci [ ici ].nCube; */
+      if ( ! pci->nMatchTo ) 
+        aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *=
+          pci->nCube / aci [ ici ].nCube;
       
     }
 
@@ -623,11 +648,11 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 
 extern int
-RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
-                   float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                   float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                   rolloutcontext *prc,
-                   cubeinfo aci[], int cci, int fInvert ) {
+RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
+                float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                rolloutcontext *prc,
+                cubeinfo aci[], int afCubeDecTop[], int cci, int fInvert ) {
 
 #if __GNUC__
   int aanBoardEval[ cci ][ 2 ][ 25 ];
@@ -659,6 +684,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
   double aarVariance[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
 #endif
   
+>>>>>>> 1.32
   int i, j, ici;
   int anBoardOrig[ 2 ][ 25 ];
 
@@ -705,8 +731,10 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
 	  InitRNGSeed( nRolloutSeed + ( i << 8 ) );
       
       for ( ici = 0; ici < cci; ici++ )
-        memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoardOrig[ 0 ][ 0 ],
+        memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
                  sizeof ( anBoardOrig ) );
+      /*  memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoardOrig[ 0 ][ 0 ],
+          sizeof ( anBoardOrig ) ); */
 
       /* FIXME: old code was:
          
@@ -722,11 +750,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
                           0, i, prc->nTrials );
         else
 	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aci, cci, prc );
+                               0, i, aci, afCubeDecTop, cci, prc );
         break;
       case BASIC:
 	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aci, cci, prc );
+                               0, i, aci, afCubeDecTop, cci, prc );
 	  break;
       case VARREDN:
 
@@ -791,12 +819,13 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
       if( fShowProgress ) {
 #if USE_GTK
 	  if( fX )
-	      GTKRolloutUpdate( *aarMu, *aarSigma, i, cGames );
+	      GTKRolloutUpdate( aarMu, aarSigma, i, cGames,
+                                prc->fCubeful, cci );
 	  else
 #endif
 	      {
 		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-			   "Cubeful: %6.3f %5.3f %5d\r", sz,
+			   "Cubeful: %6.3f %5.3f %5d\r", asz[ 0 ],
                            aarMu[ 0 ][ 0 ], aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
 			   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ], aarMu[ 0 ][ 5 ],
                            aarSigma[ 0 ][ 5 ],

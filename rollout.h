@@ -34,10 +34,10 @@ Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[], float arStdDev[],
 	 evalcontext *pec, int fInvert );
 
 extern int
-RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
+RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                 rolloutcontext *prc,
-                cubeinfo aci[], int cci, int fInvert );
+                cubeinfo aci[], int afCubeDecTop[], int cci, int fInvert );
 
 #endif
