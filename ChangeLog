@@ -1,3 +1,11 @@
+Thu Apr 22 21:09:01 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Introduce RNG context for storage of RNG-specific private data.
+
+	* dice.c (many functions): add rngctx to a number of functions
+	(change all callers)
+	* show.c (CommandShowSeed): show RNG counter as well.
+
 Wed Apr 21 22:53:44 CEST 2004  Petr Kadlec  <mormegil@centrum.cz>
 
 	Corrected some i18n-related problems + typos.

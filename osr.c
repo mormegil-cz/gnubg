@@ -31,12 +31,15 @@
 #include "eval.h"
 #include "positionid.h"
 #include "osr.h"
-#include "mt19937int.h"
+#include "mt19937ar.h"
 #include "bearoff.h"
 
 #define MAX_PROBS        32
 #define MAX_GAMMON_PROBS 15
 #define min(x,y)   (((x) > (y)) ? (y) : (x))
+
+static unsigned long mt[ N ];
+static int mti = N + 1;
 
 static int 
 OSRQuasiRandomDice( const int iTurn, const int iGame, const int cGames,
@@ -51,8 +54,8 @@ OSRQuasiRandomDice( const int iTurn, const int iGame, const int cGames,
     anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
     return 0;
   } else {
-    anDice[ 0 ] = ( genrand() % 6 ) + 1;
-    anDice[ 1 ] = ( genrand() % 6 ) + 1;
+    anDice[ 0 ] = ( genrand_int32(&mti,mt) % 6 ) + 1;
+    anDice[ 1 ] = ( genrand_int32(&mti,mt) % 6 ) + 1;
     return ( anDice[ 0 ] > 0 && anDice[ 1 ] > 0 );
   }
 }
@@ -855,7 +858,9 @@ raceProbs ( int anBoard[ 2 ][ 25 ], const int nGames,
 
   float w, s;
 
-  sgenrand ( 0 );
+  /* Seed set to ensure that OSR are reproducable */
+
+  init_genrand ( 0, mt );
 
   for ( i = 0; i < 5; ++i )
     arOutput[ i ] = 0.0f;

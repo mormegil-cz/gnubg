@@ -240,7 +240,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     BoardData *bd = BOARD( pwBoard )->board_data;
 
-    InitRNG( &nRandom, FALSE, rngCurrent );
+    InitRNG( &nRandom, NULL, FALSE, rngCurrent );
     
     pwn = gtk_notebook_new();
     gtk_container_set_border_width( GTK_CONTAINER( pwn ), 8 );

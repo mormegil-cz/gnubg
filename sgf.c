@@ -1667,6 +1667,8 @@ WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
   
   int i;
 
+  printf( "rng %d\n", prc->rngRollout );
+
   fprintf ( pf, "RC %d %d %d %d %d %d %d %d %d %d \"%s\" %d ",
             prc->fCubeful,
             prc->fVarRedn,
