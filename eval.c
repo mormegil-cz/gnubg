@@ -2131,7 +2131,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
       int an[ 3 ];
       int i;
-      char *aszDoubleStr[ 3 ] = 
+      char *aszDoubleStr[ 4 ] = 
 			{ "No double, take", "Double, take   ", 
 				"Double, pass   ", "Too good, pass " };
       
