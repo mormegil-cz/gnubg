@@ -1156,6 +1156,13 @@ extern void CommandRollout( char *sz ) {
 		       fVarRedn, &ecRollout ) ) < 0 )
 	return;
 
+#if USE_GTK
+    if( fX ) {
+	GTKRolloutDone();
+	return;
+    }
+#endif
+    
     outputf( "Result (after %d trials):\n\n"
 	    "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
 	    "Equity\n"

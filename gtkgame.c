@@ -213,30 +213,7 @@ static int cchOutput;
 static guint idOutput;
 static list lOutput;
 int fGTKOutput = FALSE;
-
-extern void HandleXAction( void ) {
-    /* It is safe to execute this function with SIGIO unblocked, because
-       if a SIGIO occurs before fAction is reset, then the I/O it alerts
-       us to will be processed anyway.  If one occurs after fAction is reset,
-       that will cause this function to be executed again, so we will
-       still process its I/O. */
-    fAction = FALSE;
-
-    /* Grab events so that the board window knows this is a re-entrant
-       call, and won't allow commands like roll, move or double. */
-    if( !gtk_grab_get_current() )
-	gtk_grab_add( pwGrab );
-
-    /* Process incoming X events.  It's important to handle all of them,
-       because we won't get another SIGIO for events that are buffered
-       but not processed. */
-    while( gtk_events_pending() )
-	gtk_main_iteration();
-
-    /* GTK-FIXME do we need to flush X output here? */
-
-    gtk_grab_remove( pwGrab );
-}
+static guint nStdin, nDisabledCount = 1;
 
 void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
 #if HAVE_LIBREADLINE
@@ -268,6 +245,53 @@ void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     else
 	Prompt();
 #endif
+}
+
+void AllowStdin( void ) {
+
+    if( !nDisabledCount )
+	return;
+    
+    if( !--nDisabledCount )
+	nStdin = gtk_input_add_full( STDIN_FILENO, GDK_INPUT_READ,
+				     StdinReadNotify, NULL, NULL, NULL );
+}
+
+void DisallowStdin( void ) {
+
+    nDisabledCount++;
+    
+    if( nStdin ) {
+	gtk_input_remove( nStdin );
+	nStdin = 0;
+    }
+}
+
+extern void HandleXAction( void ) {
+    /* It is safe to execute this function with SIGIO unblocked, because
+       if a SIGIO occurs before fAction is reset, then the I/O it alerts
+       us to will be processed anyway.  If one occurs after fAction is reset,
+       that will cause this function to be executed again, so we will
+       still process its I/O. */
+    fAction = FALSE;
+
+    /* Grab events so that the board window knows this is a re-entrant
+       call, and won't allow commands like roll, move or double. */
+    if( !gtk_grab_get_current() )
+	gtk_grab_add( pwGrab );
+
+    /* Don't check stdin here; readline isn't ready yet. */
+    DisallowStdin();
+    
+    /* Process incoming X events.  It's important to handle all of them,
+       because we won't get another SIGIO for events that are buffered
+       but not processed. */
+    while( gtk_events_pending() )
+	gtk_main_iteration();
+
+    AllowStdin();
+
+    gtk_grab_remove( pwGrab );
 }
 
 /* TRUE if gnubg is automatically setting the state of a menu item. */
@@ -321,28 +345,6 @@ static gboolean main_delete( GtkWidget *dice, GdkEvent *event,
     UserCommand( "quit" );
     
     return TRUE;
-}
-
-static guint nStdin, nDisabledCount = 1;
-
-void AllowStdin( void ) {
-
-    if( !nDisabledCount )
-	return;
-    
-    if( !--nDisabledCount )
-	nStdin = gtk_input_add_full( STDIN_FILENO, GDK_INPUT_READ,
-				     StdinReadNotify, NULL, NULL, NULL );
-}
-
-void DisallowStdin( void ) {
-
-    nDisabledCount++;
-    
-    if( nStdin ) {
-	gtk_input_remove( nStdin );
-	nStdin = 0;
-    }
 }
 
 /* The brain-damaged gtk_statusbar_pop interface doesn't return a value,
@@ -879,10 +881,12 @@ extern void GTKHint( movelist *pml ) {
 }
 
 static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwProgress;
+static guint nRolloutSignal;
 
 static void RolloutCancel( GtkObject *po, gpointer p ) {
 
     pwRolloutDialog = pwRolloutResult = pwProgress = NULL;
+    fInterrupt = TRUE;
 }
 
 extern void GTKRollout( int c ) {
@@ -896,8 +900,10 @@ extern void GTKRollout( int c ) {
     pwRolloutDialog = CreateDialog( "GNU Backgammon - Rollout", FALSE, NULL,
 				    NULL );
 
-    gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ), "destroy",
-			GTK_SIGNAL_FUNC( RolloutCancel ), NULL );
+    nRolloutSignal = gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ),
+					 "destroy",
+					 GTK_SIGNAL_FUNC( RolloutCancel ),
+					 NULL );
 
     pwVbox = gtk_vbox_new( FALSE, 4 );
 	
@@ -934,8 +940,10 @@ extern void GTKRollout( int c ) {
     
     gtk_widget_show_all( pwRolloutDialog );
 
+    DisallowStdin();
     while( gtk_events_pending() )
-        gtk_main_iteration();    
+        gtk_main_iteration();
+    AllowStdin();
 }
 
 extern int GTKRolloutUpdate( float arMu[], float arSigma[], int iGame,
@@ -956,10 +964,26 @@ extern int GTKRolloutUpdate( float arMu[], float arSigma[], int iGame,
     
     gtk_progress_configure( GTK_PROGRESS( pwProgress ), iGame + 1, 0, cGames );
     
+    DisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();
+    AllowStdin();
 
     return 0;
+}
+
+extern void GTKRolloutDone( void ) {
+
+    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
+				    "Finished (%v trials)" );
+    
+    gtk_signal_disconnect( GTK_OBJECT( pwRolloutDialog ), nRolloutSignal );
+    gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
 }
 
 static void UpdateToggle( gnubgcommand cmd, int *pf ) {

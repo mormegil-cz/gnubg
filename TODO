@@ -110,6 +110,7 @@ duplication of effort and to make sure our changes merge easily.
   should be redefined to set 1-away, 1-away); "help r" doesn't do anything.
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
+** "set player <tab>" gives incorrect completions.
 ** Make sure when one player is on roll and "set turn" is used to change
   to the other, that the dice in the board window change colour.
 

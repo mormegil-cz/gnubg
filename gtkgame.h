@@ -33,6 +33,7 @@ extern void GTKOutputNew( void );
 extern void GTKHint( movelist *pml );
 extern void GTKRollout( int c );
 extern int GTKRolloutUpdate( float arMu[], float arSigma[], int i, int c );
+extern void GTKRolloutDone( void );
 extern void GTKSet( void *p );
 
 extern int fGTKOutput;
