@@ -1,3 +1,7 @@
+Mon May 27 21:32:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c (CommandPreviousMove): forgot call to CommandPreviousRolled.
+
 Mon May 27 20:51:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Updates to rollout statistics.

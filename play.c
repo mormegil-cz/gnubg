@@ -2806,6 +2806,9 @@ extern void CommandPrevious( char *sz ) {
 	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
 	    CommandPreviousGame( sz );
 	    return;
+	} else if( !strncasecmp( pch, "rolled", strlen( pch ) ) ) {
+	    CommandPreviousRolled( sz );
+	    return;
 	} else if( !strncasecmp( pch, "roll", strlen( pch ) ) ) {
 	    CommandPreviousRoll( sz );
 	    return;
