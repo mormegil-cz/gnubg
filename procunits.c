@@ -21,25 +21,25 @@
 
 #if HAVE_CONFIG_H
 #include "config.h"
-#endif
+#endif /* #if HAVE_CONFIG_H */
 
 #if PROCESSING_UNITS
-
 #include <stdlib.h>
 #include <pthread.h>
 #include <assert.h>
 #include <string.h>
 #include <errno.h>
+
 #if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
+#endif /* #if HAVE_UNISTD_H */
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#endif
+#endif /* #if HAVE_SYS_SOCKET_H */
 
 #if TIME_WITH_SYS_TIME
 #include <sys/time.h>
@@ -49,24 +49,69 @@
 #include <sys/time.h>
 #else
 #include <time.h>
-#endif
-#endif
+#endif /* #if HAVE_SYS_TIME_H */
+#endif /* #if TIME_WITH_SYS_TIME */
 
 #if WIN32
 #include <windows.h>
-#endif
+/* copied the following from <libxml2/win32config.h> */
+#define EWOULDBLOCK             WSAEWOULDBLOCK
+#define EINPROGRESS             WSAEINPROGRESS
+#define EALREADY                WSAEALREADY
+#define ENOTSOCK                WSAENOTSOCK
+#define EDESTADDRREQ            WSAEDESTADDRREQ
+#define EMSGSIZE                WSAEMSGSIZE
+#define EPROTOTYPE              WSAEPROTOTYPE
+#define ENOPROTOOPT             WSAENOPROTOOPT
+#define EPROTONOSUPPORT         WSAEPROTONOSUPPORT
+#define ESOCKTNOSUPPORT         WSAESOCKTNOSUPPORT
+#define EOPNOTSUPP              WSAEOPNOTSUPP
+#define EPFNOSUPPORT            WSAEPFNOSUPPORT
+#define EAFNOSUPPORT            WSAEAFNOSUPPORT
+#define EADDRINUSE              WSAEADDRINUSE
+#define EADDRNOTAVAIL           WSAEADDRNOTAVAIL
+#define ENETDOWN                WSAENETDOWN
+#define ENETUNREACH             WSAENETUNREACH
+#define ENETRESET               WSAENETRESET
+#define ECONNABORTED            WSAECONNABORTED
+#define ECONNRESET              WSAECONNRESET
+#define ENOBUFS                 WSAENOBUFS
+#define EISCONN                 WSAEISCONN
+#define ENOTCONN                WSAENOTCONN
+#define ESHUTDOWN               WSAESHUTDOWN
+#define ETOOMANYREFS            WSAETOOMANYREFS
+/* defines commented out conflict with defines in errno.h
+   and winsock.h */
+/* #define ETIMEDOUT               WSAETIMEDOUT */
+#define ECONNREFUSED            WSAECONNREFUSED
+#define ELOOP                   WSAELOOP
+/* #define ENAMETOOLONG            WSAENAMETOOLONG */
+#define EHOSTDOWN               WSAEHOSTDOWN
+#define EHOSTUNREACH            WSAEHOSTUNREACH
+/* #define ENOTEMPTY               WSAENOTEMPTY */
+#define EPROCLIM                WSAEPROCLIM
+#define EUSERS                  WSAEUSERS
+#define EDQUOT                  WSAEDQUOT
+#define ESTALE                  WSAESTALE
+#define EREMOTE                 WSAEREMOTE 
+#endif /* #if WIN32 */
 
 #include <signal.h>
 #include <stddef.h>
 #include <fcntl.h>
+#include <glib.h>
 
 #if USE_GTK
-#include "gtkgame.h"
-#endif
+#include <gtk/gtk.h>
+#endif /* #if USE_GTK */
 
 #include "backgammon.h"
 #include "procunits.h"
 #include "threadglobals.h"
+
+#if USE_GTK
+#include "gtkgame.h"
+#endif /* #if USE_GTK */
 
 /* set to activate debugging */
 #define RPU_DEBUG 0
@@ -87,7 +132,6 @@
 #define RPU_TIMEOUT 5
 
 #define DEFAULT_JOBSIZE (100 * 1024)
-
 
 static int 		gfProcessingUnitsInitialised = FALSE;
 static pthread_t	gMainThread;
@@ -136,18 +180,15 @@ pthread_mutex_t		mutexProcunitAccess;
 /* this mutex for debugging purposes only */
 pthread_mutex_t		mutexCPUAccess;
 
-
 DECLARE_THREADSTATICGLOBAL (char *, gpPackedData, NULL);
 DECLARE_THREADSTATICGLOBAL (int, gPackedDataPos, 0);
 DECLARE_THREADSTATICGLOBAL (int, gPackedDataSize, 0);
-
 
 /* prototypes of threaded rollout functions */
 extern void *Threaded_BearoffRollout (void *data);
 extern void *Threaded_BasicCubefulRollout (void *data);
 
 void * Thread_RemoteProcessingUnit (void *data);
-
 
 static int StartProcessingUnit (procunit *ppu, int fWait);
 static int StopProcessingUnit (procunit *ppu);
@@ -202,11 +243,12 @@ typedef struct {
     char		hostName[MAX_HOSTNAME];
 } rpuNotificationMsg;
 
-
 #if USE_GTK
 static GtkWidget	*gpwSlaveWindow;
 static GtkWidget	*gpwLabel_Status;
+#if USE_GTK2
 static GtkTextBuffer 	*gptbSlaveText;
+#endif /* #if USE_GTK2 */
 static GtkWidget	*gpwSlave_Button_Stop;
 static GtkWidget	*gpwSlave_Button_Start;
 static GtkWidget	*gpwSlave_Button_Options;
@@ -228,8 +270,9 @@ static GtkWidget    	*gpwMaster_Button_Options;
 
 static GtkWidget	*gpwOptionsWindow;
 
+#if USE_GTK2
 static GtkListStore 	*gplsProcunits = NULL;
-
+#endif /* #if USE_GTK2 */
 
 #define GTK_YIELDTIME 	{if (IsMainThread () && fX) while (gtk_events_pending ()) gtk_main_iteration ();}
 
@@ -241,20 +284,19 @@ static void		*gpwSlaveWindow = NULL;	/* for testing whether there's a slave wind
 #endif
 
 
-
 static int GetProcessorCount (void)
 {
     int cProcessors = 1;
     int i;
     
-    #if __APPLE__
+#if __APPLE__
         #include <CoreServices/CoreServices.h>
         if (!MPLibraryIsLoaded ())
             outputerrf ("*** Could not load Mac OS X Multiprocessing Library.\n");
         else
             cProcessors = MPProcessors ();
             
-    #elif WIN32
+#elif WIN32
 
         SYSTEM_INFO siSysInfo;
         GetSystemInfo( &siSysInfo );
@@ -262,7 +304,7 @@ static int GetProcessorCount (void)
         
         ;
 
-    #else
+#else
 
         /* try _NPROCESSORS_ONLN from sysconf */
 
@@ -271,16 +313,12 @@ static int GetProcessorCount (void)
 
         /* other ideas? */
 
-
-
-    #endif
-
+#endif /* #if __APPLE__ */
     
     if (PU_DEBUG) outputerrf ("%d processor(s) found.\n", cProcessors);
     
     return cProcessors;
 }
-
 
 static void ClearStats (pu_stats *s)
 {
@@ -289,7 +327,6 @@ static void ClearStats (pu_stats *s)
     s->totalDone = 0;
     s->totalFailed = 0;
 }
-
 
 /* Creates all processing units available on the host.
 */
@@ -337,7 +374,7 @@ extern void InitProcessingUnits (void)
             holds pointers to the installed procunits */
         gplsProcunits = gtk_list_store_new (1, G_TYPE_POINTER);                                                    
     }
-#endif
+#endif /* #if USE_GTK */
 
     /* create local processing unit: each will execute one rollout thread;
        N should be set to the number of processors available on the host */
@@ -353,7 +390,6 @@ extern void InitProcessingUnits (void)
     
 }
 
-
 extern int IsMainThread (void)
 {
     return (gMainThread == pthread_self ());
@@ -365,7 +401,6 @@ extern pu_mode GetProcessingUnitsMode (void)
     return gProcunitsMode;
 }
 
-
 static void SetProcessingUnitsMode (pu_mode mode)
 {
     if (gProcunitsMode == mode) return;
@@ -376,17 +411,15 @@ static void SetProcessingUnitsMode (pu_mode mode)
 
     gProcunitsMode = mode;
 
-    #if USE_GTK
+#if USE_GTK
         if (gpwSlaveWindow != NULL) {
             gtk_widget_set_sensitive (gpwSlave_Button_Stop, gProcunitsMode == pu_mode_slave);
             gtk_widget_set_sensitive (gpwSlave_Button_Start, gProcunitsMode == pu_mode_master);
             gtk_widget_set_sensitive (gpwSlave_Button_Options, gProcunitsMode == pu_mode_master);
             gtk_label_set_text (GTK_LABEL(gpwLabel_Status), "Status : n/a");    
         }
-    #endif
-
+#endif /* #if USE_GTK */
 }
-
 
 static int GetProcessingUnitsCount (void)
 {
@@ -423,7 +456,6 @@ static void GetProcessingUnitAddresssString (procunit *ppu, char *sz)
     else
         strcpy (sz, "n/a");
 }
-
 
 /* Creates and adds a new processing unit in the processing units list.
    Fills it in with passed arguments and default parameters.
@@ -469,7 +501,7 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
         ClearStats (&ppu->evalStats);
         ClearStats (&ppu->analysisStats);
         
-        #if USE_GTK
+#if USE_GTK
         if (fX) {
             GtkTreeIter iter;
             if (!IsMainThread ()) gdk_threads_enter ();
@@ -477,7 +509,7 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
             gtk_list_store_set (gplsProcunits, &iter, 0, ppu, -1);
             if (!IsMainThread ()) gdk_threads_leave ();
         }
-        #endif
+#endif /* #if USE_GTK */
 
         pthread_mutex_init (&ppu->mutexStatusChanged, NULL);
         pthread_cond_init (&ppu->condStatusChanged, NULL);
@@ -488,9 +520,7 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
     return *pppu;
 }
 
-
 /* Create and START a remote processing unit */
-
 static procunit * CreateRemoteProcessingUnit (char *szAddress, int fWait)
 {
 
@@ -515,7 +545,6 @@ static procunit * CreateRemoteProcessingUnit (char *szAddress, int fWait)
     return ppu;
 }
 
-
 static void DestroyProcessingUnit (int procunit_id)
 {
     procunit **plpu;
@@ -534,7 +563,7 @@ static void DestroyProcessingUnit (int procunit_id)
         while (*plpu != NULL) {
             /*PrintProcessingUnitInfo (*plpu);*/
             if (*plpu == ppu) {
-                #if USE_GTK
+#if USE_GTK
                 if (fX) {
                     GtkTreeIter iter;      
                     if (!IsMainThread ()) gdk_threads_enter ();
@@ -549,7 +578,7 @@ static void DestroyProcessingUnit (int procunit_id)
                         } while (gtk_tree_model_iter_next (GTK_TREE_MODEL(gplsProcunits), &iter));
                     if (!IsMainThread ()) gdk_threads_leave ();
                 }
-                #endif
+#endif /* #if USE_GTK */
                 procunit *next = ppu->next;
                 free ((char *) ppu);
                 *plpu = next;
@@ -562,8 +591,6 @@ static void DestroyProcessingUnit (int procunit_id)
     
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
-
-
 
 static void PrintProcessingUnitInfo (procunit *ppu)
 {
@@ -586,7 +613,6 @@ static void PrintProcessingUnitInfo (procunit *ppu)
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
 
-
 extern void PrintProcessingUnitList (void)
 {
     procunit *ppu;
@@ -604,7 +630,6 @@ extern void PrintProcessingUnitList (void)
     
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
-
 
 static void PrintProcessingUnitStats (int procunit_id)
 {
@@ -654,10 +679,8 @@ static void PrintProcessingUnitStats (int procunit_id)
             ppu = ppu->next;
         }
     }
-
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
-
 
 /* Finds a processing unit in the available processing units list;
    search can be started from an arbitrary processing unit ppu in the list;
@@ -686,7 +709,6 @@ static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status stat
     return ppu;
 }
 
-
 /* ChangeProcessingUnitStatus ()
     Using this function instead of changing the ppu->status field
     will allow threads waiting for ppu->condStatusChanged to be
@@ -703,12 +725,10 @@ static void ChangeProcessingUnitStatus (procunit *ppu, pu_status status)
     pthread_cond_broadcast (&ppu->condStatusChanged);
     pthread_mutex_unlock (&ppu->mutexStatusChanged);
     
-    #if USE_GTK
+#if USE_GTK
     if (fX) GTK_TouchProcunit (ppu);
-    #endif
-
+#endif /* #if USE_GTK */
 }
-
 
 /* start a processing unit.
     - local procunit: merely set it to ready state; a thread will
@@ -731,20 +751,20 @@ static int StartProcessingUnit (procunit *ppu, int fWait)
         case pu_type_remote:
             if (fWait) {
                 StartRemoteProcessingUnit (ppu);
-                #if USE_GTK
+#if USE_GTK
                 /* when running GTK, we get here called by gtk_main(), so
                     the GDK lock is already acquired and we must release it
                     to let the new thread update its state in the master window */
                 gdk_threads_leave ();
-                #endif
+#endif /* #if USE_GTK */
                 pthread_mutex_lock (&ppu->mutexStatusChanged);
                 if (ppu->status == pu_stat_connecting)
                     pthread_cond_wait (&ppu->condStatusChanged, 
                                         &ppu->mutexStatusChanged);
                 pthread_mutex_unlock (&ppu->mutexStatusChanged);
-                #if USE_GTK
+#if USE_GTK
                 gdk_threads_enter ();
-                #endif
+#endif /* #if USE_GTK */
                 if (ppu->status != pu_stat_deactivated) 
                     return 0;
             }
@@ -759,7 +779,6 @@ static int StartProcessingUnit (procunit *ppu, int fWait)
     
     return -1;
 }
-
 
 static int StartRemoteProcessingUnit (procunit *ppu)
 {
@@ -781,7 +800,6 @@ static int StartRemoteProcessingUnit (procunit *ppu)
     
     return err;
 }
-
 
 static int StopProcessingUnit (procunit *ppu)
 {
@@ -817,16 +835,15 @@ static int StopProcessingUnit (procunit *ppu)
 
 }
 
-
 static int WaitForAllProcessingUnits (void)
 {
     procunit *ppu = gpulist;
     
     if (RPU_DEBUG) PrintProcessingUnitList ();
     
-    #if USE_GTK
+#if USE_GTK
     if (IsMainThread ()) gdk_threads_leave ();
-    #endif
+#endif /* #if USE_GTK */
     while (ppu != NULL) {
         pthread_mutex_lock (&ppu->mutexStatusChanged);
         if (ppu->status != pu_stat_ready && ppu->status != pu_stat_deactivated) {
@@ -845,9 +862,9 @@ static int WaitForAllProcessingUnits (void)
         pthread_mutex_unlock (&ppu->mutexStatusChanged);
         ppu = ppu->next;
     } 
-    #if USE_GTK
+#if USE_GTK
     if (IsMainThread ()) gdk_threads_enter ();
-    #endif
+#endif /* #if USE_GTK */
     
 
     if (RPU_DEBUG) outputerrf ("### All procunits ready or deactivated.\n");
@@ -855,8 +872,6 @@ static int WaitForAllProcessingUnits (void)
     
     return 0;
 }
-
-
 
 static void CancelProcessingUnitTasks (procunit *ppu)
 {
@@ -887,7 +902,6 @@ static void CancelProcessingUnitTasks (procunit *ppu)
     pthread_mutex_unlock (&mutexTaskListAccess);
     if (IsMainThread ()) gdk_threads_enter ();
 }
-
 
 static int InterruptAllProcessingUnits ()
 {
@@ -921,8 +935,6 @@ static int InterruptAllProcessingUnits ()
 
     return 0;
 }
-
-
 
 /* Returns TRUE if successfully started */
 static int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
@@ -976,7 +988,6 @@ static int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
     return ( err == 0 );
 }
 
-
 /* RunTaskOnRemoteProcessingUnit ()
     
     Returns TRUE if successfully started
@@ -1007,7 +1018,6 @@ static int RunTaskOnRemoteProcessingUnit (pu_task *pt, procunit *ppu)
     return ( err == 0 );
 }
 
-
 static void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
 {
     int started = 0;
@@ -1023,7 +1033,6 @@ static void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
         default:
             assert( FALSE );
             break;
-
     }
 
     if (started) {
@@ -1042,7 +1051,6 @@ static void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
     }
 }
 
-
 extern void InitTasks (void)
 {
     int i;
@@ -1055,7 +1063,6 @@ extern void InitTasks (void)
     for (i = 0; i < taskListMax; i ++)
         taskList[i] = NULL;
 }
-
 
 static void ReleaseTasks (void)
 {
@@ -1072,8 +1079,6 @@ static void ReleaseTasks (void)
     free ((char *) taskList);
     taskList = NULL;
 }
-
-
 
 extern pu_task *CreateTask (pu_task_type type, int fDetached)
 {
@@ -1115,7 +1120,6 @@ extern pu_task *CreateTask (pu_task_type type, int fDetached)
     return pt;
 }
 
-
 static pu_task *FindTask (pu_task_status status, pu_task_type taskMask, int taskId, int procunit_id)
 {
     int i;
@@ -1133,7 +1137,6 @@ static pu_task *FindTask (pu_task_status status, pu_task_type taskMask, int task
     return NULL;
 }
 
-
 static int GetTaskCount (pu_task_status status, pu_task_type taskMask)
 {
     int i, n = 0;
@@ -1148,7 +1151,6 @@ static int GetTaskCount (pu_task_status status, pu_task_type taskMask)
             
     return n;
 }
-
 
 static pu_task *AttachTask (pu_task *pt)
 {
@@ -1168,7 +1170,6 @@ static pu_task *AttachTask (pu_task *pt)
     return NULL;
 }
 
-
 extern void PrintTaskList (void)
 {
     int i;
@@ -1181,7 +1182,6 @@ extern void PrintTaskList (void)
                         taskList[i]->task_id.taskId, asTaskStatus[taskList[i]->status], taskList[i]->procunit_id);
         }
 }
-
 
 void FreeTask (pu_task *pt)
 {
@@ -1234,7 +1234,6 @@ void FreeTask (pu_task *pt)
     
     free ((char *) pt);
 }
-
 
 static int AssignTasksToProcessingUnits (void)
 {
@@ -1291,11 +1290,9 @@ static int AssignTasksToProcessingUnits (void)
     return cPickedUpTasks;
 }
 
-
 /* creates an array of todo tasks (*papt) assigned to ppu;
     returns the number of tasks put in *papt (caller must
     free *papt after use), or 0 if none (*papt set to NULL) */
-    
 static int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task ***papt, int maxTasks)
 {
     int 	i, cTasks = 0;
@@ -1322,7 +1319,6 @@ static int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task 
     
     return cTasks;
 }
-
 
 extern void MarkTaskDone (pu_task *pt, procunit *ppu)
 {
@@ -1375,14 +1371,12 @@ extern void MarkTaskDone (pu_task *pt, procunit *ppu)
     pthread_mutex_unlock (&mutexResultsAvailable);
 }
 
-
 extern void TaskEngine_Init (void)
 {
     if (PU_DEBUG) outputerrf ("Starting Task Engine...\n");
     InitTasks ();
     gResultsAvailable = FALSE;
 }
-
 
 extern void TaskEngine_Shutdown (void)
 {
@@ -1391,7 +1385,6 @@ extern void TaskEngine_Shutdown (void)
     WaitForAllProcessingUnits ();
     ReleaseTasks ();
 }
-
 
 extern int TaskEngine_Full (void)
 {
@@ -1403,7 +1396,6 @@ extern int TaskEngine_Full (void)
     return TRUE;
 }
 
-
 extern int TaskEngine_Empty (void)
 {
     int i;
@@ -1413,7 +1405,6 @@ extern int TaskEngine_Empty (void)
         
     return TRUE;
 }
-
 
 extern pu_task * TaskEngine_GetCompletedTask (void)
 {
@@ -1425,7 +1416,7 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
     
     if (TaskEngine_Empty ()) return NULL;
     
-    #if USE_GTK
+#if USE_GTK
         /* when we get here in the main thread, we are performing
         an analysis/rollout/eval triggered from a menu/button,
         and thus we are called from gtk_main() in RunGTK(), which
@@ -1433,30 +1424,30 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
         now that we are idle and waiting, to give other threads a
         chance to use GTK */
         if (IsMainThread ()) gdk_threads_leave ();
-    #endif
+#endif /* #if USE_GTK */
 
     while (!done) {
         
-        #if PROCESSING_UNITS
+#if PROCESSING_UNITS
         gdk_threads_enter ();
-        #endif
+#endif /* #if PROCESSING_UNITS */
         GTK_YIELDTIME;
-        #if PROCESSING_UNITS
+#if PROCESSING_UNITS
         gdk_threads_leave ();
-        #endif
+#endif /* #if PROCESSING_UNITS */
 
         pthread_mutex_lock (&mutexTaskListAccess);
         
         /* sanity check */
         
         /* assign procunits to todo tasks */
-        #if PROCESSING_UNITS
+#if PROCESSING_UNITS
         gdk_threads_enter ();
-        #endif
+#endif /* #if PROCESSING_UNITS */
         AssignTasksToProcessingUnits ();
-        #if PROCESSING_UNITS
+#if PROCESSING_UNITS
         gdk_threads_leave ();
-        #endif
+#endif /* #if PROCESSING_UNITS */
         
         /* look for available results */
         pt = FindTask (pu_task_done, 0, 0, 0);
@@ -1504,16 +1495,12 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
 
     }
     
-    #if USE_GTK
+#if USE_GTK
         if (IsMainThread ()) gdk_threads_enter ();
-    #endif
+#endif /* #if USE_GTK */
 
     return pt;
 }
-
-
-
-
 
 /* use (UN)PACKJOB to (un)pack a scalar, eg. char, int, float, etc. */
 #define PACKJOB(x) 			n += RPU_PackJob ((char *) &(x), 1, FALSE,sizeof(x))
@@ -1533,7 +1520,6 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
 #define PACKJOBSTRUCTPTR(x,N,t) 	n += RPU_PackJobStruct_##t ((x), N)
 #define UNPACKJOBSTRUCTPTR(x,t) 	n += RPU_UnpackJobStruct_##t (&(x))
 
-
 static void RPU_DumpData (unsigned char *data, int len)
 {
     int i;
@@ -1550,22 +1536,20 @@ static void RPU_DumpData (unsigned char *data, int len)
     outputerrf ("]\n");
 }
 
-
-
 static int RPU_PackWrite (char *data, int size)
 {
     char *p = THREADGLOBAL(gpPackedData);
     p += THREADGLOBAL(gPackedDataPos);
     
-    #if __BIG_ENDIAN__
+#if __BIG_ENDIAN__
         memcpy (p, data, size);
-    #else
+#else
     {
         int i;
         for (i = size - 1; i >= 0; i --) 
             *(p ++) = data[i];
     }
-    #endif
+#endif /* #if __BIG_ENDIAN__ */
     
     THREADGLOBAL(gPackedDataPos) += size;
 
@@ -1636,7 +1620,6 @@ static int RPU_PackJobStruct_cubeinfo (cubeinfo *pci, int cItems)
     return n;
 }
 
-
 static int RPU_PackJobStruct_rolloutstat (rolloutstat *prs, int cItems)
 {
     int n = 0;
@@ -1660,7 +1643,6 @@ static int RPU_PackJobStruct_rolloutstat (rolloutstat *prs, int cItems)
 
     return n;
 }
-
 
 static rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
 {    
@@ -1732,7 +1714,6 @@ static rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
     return (rpu_jobtask *) THREADGLOBAL(gpPackedData);
 }
 
-
 static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
 {
     rpu_job	*pJob = NULL;
@@ -1789,11 +1770,9 @@ static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
     return pJob;
 }
 
-
-
 static int RPU_PackRead (char *dst, int size)
 {
-    #if __BIG_ENDIAN__
+#if __BIG_ENDIAN__
         memcpy (dst, THREADGLOBAL(gpPackedData) + THREADGLOBAL(gPackedDataPos), size);
         if (RPU_DEBUG_PACK > 1) {
             outputerrf (">> 0x%x + %d ", THREADGLOBAL(gpPackedData), THREADGLOBAL(gPackedDataPos));
@@ -1801,15 +1780,14 @@ static int RPU_PackRead (char *dst, int size)
             RPU_DumpData (dst, size);
         }
         THREADGLOBAL(gPackedDataPos) += size;
-    #else
+#else
         int i;
         for (i = size - 1; i >= 0; i --) 
             dst[i] = THREADGLOBAL(gpPackedData)[THREADGLOBAL(gPackedDataPos) ++];
-    #endif
+#endif /* #if __BIG_ENDIAN__ */
 
     return size;
 }
-
 
 int RPU_UnpackJob (char *dst, int fSeveralItems, int itemSize, int fMalloc)
 {
@@ -1849,7 +1827,6 @@ int RPU_UnpackJob (char *dst, int fSeveralItems, int itemSize, int fMalloc)
     return n;
 }
 
-
 static int RPU_UnpackJobStruct_cubeinfo (cubeinfo **ppci)
 {
     int 	n = 0;
@@ -1883,8 +1860,6 @@ static int RPU_UnpackJobStruct_cubeinfo (cubeinfo **ppci)
 
     return n;
 }
-
-
 
 static int RPU_UnpackJobStruct_rolloutstat (rolloutstat **pprs)
 {
@@ -1920,10 +1895,6 @@ static int RPU_UnpackJobStruct_rolloutstat (rolloutstat **pprs)
 
     return n;
 }
-
-
-
-
 
 static pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
 {
@@ -1995,7 +1966,6 @@ static pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
     return pt;
 }
 
-
 static int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInterrupt)
 {
     int 	n;
@@ -2028,7 +1998,6 @@ static int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInte
     
     return 0;
 }
-
 
 /* timeout in seconds; timeout == 0 for no timeout */
 static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterrupt, int timeout)
@@ -2091,7 +2060,6 @@ static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterru
     return msg;
 }
 
-
 static rpu_message * RPU_MakeMessage (pu_message_type type, void *data, int datalen)
 {
     int		msglen = offsetof (rpu_message, data) + datalen;
@@ -2106,7 +2074,6 @@ static rpu_message * RPU_MakeMessage (pu_message_type type, void *data, int data
     
     return msg;
 }
-
 
 static void * RPU_GetMessageData (rpu_message *msg, pu_message_type msgType)
 {
@@ -2172,12 +2139,10 @@ static int RPU_SetSocketOptions (int s)
     return err;
 }
 
-
 static int RPU_CheckHostList (void)
 {
     return 0;
 }
-
 
 static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_in remoteAddr)
 {
@@ -2199,7 +2164,6 @@ static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_i
     return 0;
 }
 
-
 static int RPU_CheckClose (int s)
 {
     rpu_message msg;
@@ -2216,8 +2180,6 @@ static int RPU_CheckClose (int s)
         
     return 0;
 }
-
-
 
 static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
                                     int defaultTCPPort)
@@ -2264,7 +2226,6 @@ static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
     return 0;
 }
 
-
 static void RPU_PrintInfo (rpu_info *info)
 {
     int i;
@@ -2272,7 +2233,6 @@ static void RPU_PrintInfo (rpu_info *info)
     for (i = 0; i < info->cProcunits; i ++)
         PrintProcessingUnitInfo (&info->procunitInfo[i]);
 }
-
 
 static int Slave_DoJob (int toSocket, rpu_job *job)
 {
@@ -2386,7 +2346,6 @@ static int Slave_DoJob (int toSocket, rpu_job *job)
     return err;
 }
 
-
 static int Slave_GetInfo (int toSocket)
 {
     int 	i, err;
@@ -2487,7 +2446,7 @@ extern void Slave_UpdateStatus (void)
         }
     }
     else {
-#endif
+#endif /* #if USE_GTK */
         outputf ("%4d (%4d/%4d/%4d)  "
                 "%4d (%4d/%4d/%4d)  "
                 "%4d (%4d/%4d/%4d)  "
@@ -2515,23 +2474,22 @@ extern void Slave_UpdateStatus (void)
         fflush( stdout );
 #if USE_GTK
     }
-#endif
+#endif /* #if USE_GTK */
 }
-
 
 static void Slave_PrintStatus (void)
 {
-    #if USE_GTK
+#if USE_GTK
     if (!fX) {
-    #endif
+#endif /* #if USE_GTK */
         outputf ("Tasks (todo/prog/done)  "
                 "Rollouts (rcvd/sent/fail)  "
                 "Evals (rcvd/sent/fail)  "
                 "Status  "
                 "\n");
-    #if USE_GTK
+#if USE_GTK
     }
-    #endif
+#endif /* #if USE_GTK */
 
     Slave_UpdateStatus ();
 }
@@ -2759,7 +2717,6 @@ static void Slave (void)
     SetProcessingUnitsMode (pu_mode_master);   
 }
 
-
 static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char *s, int *step)
 {
     int			err;
@@ -2786,8 +2743,6 @@ static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char 
     
     return 0;
 }
-
-
 
 static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
 {
@@ -2986,7 +2941,6 @@ static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
     } /* while (err == 0 && !ppu->info.remote.fStop) */
 }
 
-
 /*  Thread_RemoteProcessingUnit ()
 
     this function is called at master remote procunit (rpu) creation
@@ -2999,7 +2953,6 @@ static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
                             hosts and sends messages)
     remote hosts = SLAVES, act as servers
 */
-
 extern void * Thread_RemoteProcessingUnit (void *data)
 {
     int 		rpuSocket;
@@ -3076,9 +3029,9 @@ extern void * Thread_RemoteProcessingUnit (void *data)
                                 /* retrieve interesting data; calculate whole local RPU queue
                                     size according to available procunits queues on slave */
                                 int i;
-                                #if 0
+#if 0
                                 RPU_PrintInfo (pinfo);
-                                #endif
+#endif
                                 ppu->maxTasks = 0;
                                 ppu->taskMask = pu_task_none;
                                 for (i = 0; i < pinfo->cProcunits; i ++) {
@@ -3130,7 +3083,6 @@ extern void * Thread_RemoteProcessingUnit (void *data)
     
     return 0;
 }
-
 
 extern void *Thread_NotificationSender (void *data)
 {
@@ -3211,7 +3163,6 @@ extern void *Thread_NotificationSender (void *data)
     close (notifySocket);
 }
 
-
 extern void *Thread_NotificationListener (void *data)
 {
     int		notifySocket;
@@ -3287,7 +3238,6 @@ extern void *Thread_NotificationListener (void *data)
     
 }
 
-
 int StartNotificationListener (void)
 {
     int err;
@@ -3301,7 +3251,6 @@ int StartNotificationListener (void)
     return err;
 }
 
-
 extern void CommandProcunitsMaster ( char *sz ) 
 {
     SetProcessingUnitsMode (pu_mode_master);
@@ -3310,7 +3259,6 @@ extern void CommandProcunitsMaster ( char *sz )
     
     StartNotificationListener ();
 }
-
 
 extern void CommandProcunitsSlave ( char *sz ) 
 {
@@ -3375,9 +3323,9 @@ extern void CommandProcunitsSlave ( char *sz )
     } /* if (sz != NULL) */
     
     outputf ( "Host set to SLAVE mode.\n");
-    #if USE_GTK
+#if USE_GTK
     if (!fX) {
-    #endif
+#endif /* #if USE_GTK */
         if (gfRPU_Notification) {
             if (gfRPU_NotificationBroadcast)
                 outputf ("  Will broadcast availability to listening masters "
@@ -3393,23 +3341,22 @@ extern void CommandProcunitsSlave ( char *sz )
         outputf ("Available processing units:\n");
         PrintProcessingUnitList ();
         outputf ("\n");
-    #if USE_GTK
+#if USE_GTK
     }
-    #endif
+#endif /* #if USE_GTK */
     outputx ();
     
     Slave ();
     
-    #if USE_GTK
+#if USE_GTK
     if (!fX) {
-    #endif
+#endif /* #if USE_GTK */
         outputf ("\n\nHost set back to MASTER mode.\n\n");
         outputx ();
-    #if USE_GTK
+#if USE_GTK
     }
-    #endif
+#endif /* #if USE_GTK */
 }
-
 
 extern void CommandProcunitsStart ( char *sz ) 
 {
@@ -3440,7 +3387,6 @@ extern void CommandProcunitsStart ( char *sz )
     outputx ();
 }
 
-
 extern void CommandProcunitsStop ( char *sz ) 
 {
     int procunit_id = -1;
@@ -3470,7 +3416,6 @@ extern void CommandProcunitsStop ( char *sz )
     outputx ();
 }
 
-
 extern void CommandProcunitsRemove ( char *sz ) 
 {
     int procunit_id = -1;
@@ -3499,7 +3444,6 @@ extern void CommandProcunitsRemove ( char *sz )
     outputx ();
 }
 
-
 extern void CommandProcunitsAddLocal( char *sz ) 
 {
     int n = 1;
@@ -3524,7 +3468,6 @@ extern void CommandProcunitsAddLocal( char *sz )
     outputx ();
 }
 
-
 extern void CommandProcunitsAddRemote( char *sz ) 
 {    
     procunit *ppu;
@@ -3545,8 +3488,6 @@ extern void CommandProcunitsAddRemote( char *sz )
 
     outputx ();
 }
-
-
 
 extern void CommandShowProcunitsInfo ( char *sz ) 
 {
@@ -3582,8 +3523,6 @@ extern void CommandShowProcunitsInfo ( char *sz )
     PrintProcessingUnitList ();
 }
 
-
-
 extern void CommandShowProcunitsStats ( char *sz ) 
 {
     int procunit_id = 0;
@@ -3603,7 +3542,6 @@ extern void CommandShowProcunitsStats ( char *sz )
     PrintProcessingUnitStats (procunit_id);
 }
 
-
 extern void CommandShowProcunitsRemoteMask ( char *sz ) 
 {
     struct in_addr inMask;
@@ -3612,12 +3550,10 @@ extern void CommandShowProcunitsRemoteMask ( char *sz )
     outputf ("Processing units remote IP mask: %s\n", inet_ntoa (inMask));
 }
 
-
 extern void CommandShowProcunitsRemotePort ( char *sz ) 
 {
     outputf ("Processing units remote TCP port: %d\n", gRPU_TCPPort);
 }
-
 
 extern void CommandShowProcunitsRemoteNotifListenEnabled (char *sz)
 {
@@ -3625,12 +3561,10 @@ extern void CommandShowProcunitsRemoteNotifListenEnabled (char *sz)
                 gRPU_MasterNotifListen ? "on" : "off");
 }
 
-
 extern void CommandShowProcunitsRemoteNotifListenPort (char *sz)
 {
     outputf ("Slave availability notifications listened to on TCP port: %d\n", gRPU_MasterTCPPort);
 }
-
 
 extern void CommandShowProcunitsRemoteNotifSendMethod (char *sz)
 {
@@ -3638,29 +3572,24 @@ extern void CommandShowProcunitsRemoteNotifSendMethod (char *sz)
                 gRPU_SlaveNotifMethod == rpu_method_host ? gRPU_SlaveNotifSpecificHost : "");
 }
 
-
 extern void CommandShowProcunitsRemoteNotifSendDelay (char *sz)
 {
     outputf ("Slave availability notifications send delay: %d\n", gRPU_SlaveNotifDelay);
 }
-
 
 extern void CommandShowProcunitsRemoteNotifSendPort (char *sz)
 {
     outputf ("Slave availability notifications sent on TCP port: %d\n", gRPU_SlaveTCPPort);
 }
 
-
 extern void CommandSetProcunitsEnabled ( char *sz ) 
 {
 }
-
 
 extern void CommandSetProcunitsRemoteMode ( char *sz ) 
 {
     outputf ( "Remote processing units not implemented yet.\n");
 }
-
 
 extern void CommandSetProcunitsRemoteMask ( char *sz ) 
 {
@@ -3691,7 +3620,6 @@ extern void CommandSetProcunitsRemotePort ( char *sz )
         gRPU_TCPPort = port;
 }
 
-
 extern void CommandSetProcunitsRemoteQueue ( char *sz ) 
 {
     int		procunit_id = 0;
@@ -3719,7 +3647,6 @@ extern void CommandSetProcunitsRemoteQueue ( char *sz )
         ppu->maxTasks = queueSize;
 }
 
-
 extern void CommandSetProcunitsRemoteNotifListenEnabled ( char *sz ) 
 {
     SetToggle( "procunit remote notification listen enable", &gRPU_MasterNotifListen, sz,
@@ -3728,7 +3655,6 @@ extern void CommandSetProcunitsRemoteNotifListenEnabled ( char *sz )
                  
     if (gRPU_MasterNotifListen) StartNotificationListener ();
 }
-
 
 extern void CommandSetProcunitsRemoteNotifListenPort ( char *sz ) 
 {
@@ -3742,25 +3668,21 @@ extern void CommandSetProcunitsRemoteNotifListenPort ( char *sz )
         gRPU_MasterTCPPort = port;
 }
 
-
 extern void CommandSetProcunitsRemoteNotifSendMethodNone ( char *sz ) 
 {
     gRPU_SlaveNotifMethod = rpu_method_none;
 }
-
 
 extern void CommandSetProcunitsRemoteNotifSendMethodBroadcast ( char *sz ) 
 {
     gRPU_SlaveNotifMethod = rpu_method_broadcast;
 }
 
-
 extern void CommandSetProcunitsRemoteNotifSendMethodHost ( char *sz ) 
 {
     strncpy (gRPU_SlaveNotifSpecificHost, sz, MAX_HOSTNAME);
     gRPU_SlaveNotifMethod = rpu_method_host;
 }
-
 
 extern void CommandSetProcunitsRemoteNotifSendPort ( char *sz ) 
 {
@@ -3774,7 +3696,6 @@ extern void CommandSetProcunitsRemoteNotifSendPort ( char *sz )
         gRPU_SlaveTCPPort = port;
 }
 
-
 extern void CommandSetProcunitsRemoteNotifSendDelay ( char *sz ) 
 {
     int	delay = 0;
@@ -3786,8 +3707,6 @@ extern void CommandSetProcunitsRemoteNotifSendDelay ( char *sz )
     else
         gRPU_SlaveNotifDelay = delay;
 }
-
-
 
 #if USE_GTK
 
@@ -3819,7 +3738,6 @@ typedef struct {
     int		iSlaveTCPPort;
 } _puOptions;
 
-
 static void GetOptions (_puOptions *po)
 {
     /* master */
@@ -3832,7 +3750,6 @@ static void GetOptions (_puOptions *po)
     po->iSlaveTCPPort = gRPU_SlaveTCPPort;
 }
 
-
 static void GTK_SetOptions (_optionsWidgets *pw, _puOptions *po)
 {
     /* master */
@@ -3844,7 +3761,6 @@ static void GTK_SetOptions (_optionsWidgets *pw, _puOptions *po)
     gtk_entry_set_text (GTK_ENTRY(pw->pwOptions_Entry_NotifSpecific), po->szNotifSpecific);
     gtk_spin_button_set_value (GTK_SPIN_BUTTON(pw->pwOptions_Spin_SlaveTCPPort), po->iSlaveTCPPort);
 }
-
 
 #define CHECK_UPDATE(button,flag,string) \
    n = gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON((button))); \
@@ -3888,14 +3804,12 @@ static void GTK_Options_OK (GtkWidget *widget, gpointer data)
                     "set pu remote notification send port %d");
 }
 
-
 static void GTK_Options_ListenNotifs (GtkWidget *widget, gpointer data)
 {
     _puOptions *po = (_puOptions *) data;
     gtk_widget_set_sensitive (GTK_WIDGET(po->w.pwOptions_HBox_MasterTCPPort), 
                                 gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON(widget)));
 }
-
 
 static void GTK_Options_RadioNotif (GtkWidget *widget, gpointer data)
 {
@@ -3906,7 +3820,6 @@ static void GTK_Options_RadioNotif (GtkWidget *widget, gpointer data)
     gtk_widget_set_sensitive (GTK_WIDGET(po->w.pwOptions_HBox_SlaveTCPPort), 
                             widget != po->w.pwOptions_Radio_Notif[rpu_method_none]);
 }
-
 
 GtkWidget *GTK_Options_Page (_puOptions *po)
 {
@@ -4027,7 +3940,6 @@ GtkWidget *GTK_Options_Page (_puOptions *po)
     return pwVBox;
 }
 
-
 static void GTK_Options (GtkWidget *widget, gpointer data)
 {
     GtkWidget 	*pwDialog;
@@ -4066,30 +3978,25 @@ static void GTK_Options (GtkWidget *widget, gpointer data)
     GTK_YIELDTIME;
 }
 
-
 void GTK_Procunit_Options (gpointer *p, guint n, GtkWidget *pw)
 {
     GTK_Options (pw, NULL);
 }
-
 
 static void GTK_Slave_Start (GtkWidget *widget, gpointer data)
 {
     CommandProcunitsSlave ("");
 }
 
-
 static void GTK_Slave_Stop (GtkWidget *widget, gpointer data)
 {
     CommandProcunitsMaster ("");
 }
 
-
 static void GTK_Slave_Destroy (GtkWidget *widget, gpointer data)
 {
     gpwSlaveWindow = NULL;
 }
-
 
 void GTK_Procunit_Slave (gpointer *p, guint n, GtkWidget *pw)
 {
@@ -4161,7 +4068,6 @@ void GTK_Procunit_Slave (gpointer *p, guint n, GtkWidget *pw)
     gtk_widget_show_all (gpwSlaveWindow);
 }
 
-
 enum {
     col_Id,
     col_Type,
@@ -4171,7 +4077,6 @@ enum {
     col_Address,
     COLCOUNT
 };
-
 
 /* *ppPath must be gtk_tree_path_free'd by caller */
 static int Tree_Find_Procunit (int procunit_id, GtkTreePath **ppPath, GtkTreeIter *pIter)
@@ -4197,7 +4102,6 @@ static int Tree_Find_Procunit (int procunit_id, GtkTreePath **ppPath, GtkTreeIte
     
     return fFound;
 }
-
 
 static void Tree_CellDataFunc_Procunit (GtkTreeViewColumn *tree_column,
                                     GtkCellRenderer *cell,
@@ -4239,12 +4143,10 @@ static void Tree_CellDataFunc_Procunit (GtkTreeViewColumn *tree_column,
     }
 }
 
-
 static void GTK_Master_AddLocal (GtkWidget *widget, gpointer data)
 {
     CommandProcunitsAddLocal ("");    
 }
-                                    
 
 static void GTK_Master_AddRemote (GtkWidget *widget, gpointer data)
 {
@@ -4294,7 +4196,6 @@ static void GTK_Master_Command_ForEach (GtkTreeModel *model, GtkTreePath *path, 
     sprintf (sz, "%d", ppu->procunit_id);
     ((Command_Func) data) (sz);
 }
-                                        
 
 static void GTK_Master_Remove (GtkWidget *widget, gpointer data)
 {
@@ -4327,21 +4228,18 @@ static void GTK_Master_Remove (GtkWidget *widget, gpointer data)
     }
     
 }
-                                    
 
 static void GTK_Master_Start (GtkWidget *widget, gpointer data)
 {
     gtk_tree_selection_selected_foreach ((GtkTreeSelection *) data, GTK_Master_Command_ForEach, 
                                             (gpointer) CommandProcunitsStart);    
 }
-                                    
 
 static void GTK_Master_Stop (GtkWidget *widget, gpointer data)
 {
     gtk_tree_selection_selected_foreach ((GtkTreeSelection *) data, GTK_Master_Command_ForEach, 
                                             (gpointer) CommandProcunitsStop);    
 }
-                                    
 
 static void GTK_Master_SelectionChanged (GtkTreeSelection *selection, gpointer data)
 {
@@ -4379,7 +4277,6 @@ static void GTK_Master_SelectionChanged (GtkTreeSelection *selection, gpointer d
     gtk_widget_set_sensitive (gpwMaster_Button_Stats, iSelected > 0);
 }
 
-
 static void GTK_TouchProcunit (procunit *ppu)
 {
     GtkTreeIter 	iter;
@@ -4400,7 +4297,6 @@ static void GTK_TouchProcunit (procunit *ppu)
     
 }
 
-
 static void GTK_Master_Queue_ForEach_Preflight (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                                         gpointer data)	/* data contains ptr to max queue size */
 {
@@ -4412,7 +4308,6 @@ static void GTK_Master_Queue_ForEach_Preflight (GtkTreeModel *model, GtkTreePath
     if (ppu->maxTasks > *((int *) data))
         *((int *) data) = ppu->maxTasks;
 }
-
 
 static void GTK_Master_Queue_ForEach (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                                         gpointer data)	/* data contains ptr to queue size */
@@ -4426,7 +4321,6 @@ static void GTK_Master_Queue_ForEach (GtkTreeModel *model, GtkTreePath *path, Gt
     CommandSetProcunitsRemoteQueue (sz);
     GTK_TouchProcunit (ppu);
 }
-
 
 static void GTK_Master_Queue (GtkWidget *widget, gpointer data)
 {
@@ -4471,12 +4365,10 @@ static void GTK_Master_Queue (GtkWidget *widget, gpointer data)
     gtk_widget_destroy (pwDialog);
 }
 
-
 static void GTK_Master_Destroy (GtkWidget *widget, gpointer data)
 {
     gpwMasterWindow = NULL;
 }
-
 
 void GTK_Procunit_Master (gpointer *p, guint n, GtkWidget *pw)
 {
@@ -4593,13 +4485,10 @@ void GTK_Procunit_Master (gpointer *p, guint n, GtkWidget *pw)
 			GTK_SIGNAL_FUNC(GTK_Master_Queue), (gpointer) selection);
     gtk_signal_connect (GTK_OBJECT(gpwMaster_Button_Options), "clicked",
 			GTK_SIGNAL_FUNC(GTK_Options), (gpointer) NULL);
-    
-                  
+
     gtk_widget_show_all (gpwMasterWindow);
 }
 
+#endif /* #if USE_GTK */
 
-#endif
-
-
-#endif
+#endif /* #if PROCESSING_UNITS */
