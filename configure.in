@@ -84,10 +84,9 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
 AC_CHECK_FUNCS(getdtablesize getlogin getpwuid gettimeofday isatty random readv select)
-AC_CACHE_CHECK(for signbit, ac_cv_func_signbit,
-[AC_EGREP_CPP(signbit,
-[#define _GNU_SOURCE 1
-#include <math.h>],
+AC_CACHE_CHECK(for signbit macro, ac_cv_func_signbit,
+[AC_TRY_LINK([#define _GNU_SOURCE 1
+#include <math.h>], [if(signbit(1.0f));],
   eval "ac_cv_func_signbit=yes",
   eval "ac_cv_func_signbit=no")])
 if test "$ac_cv_func_signbit" = "yes"; then
