@@ -94,6 +94,8 @@ duplication of effort and to make sure our changes merge easily.
   computation (the process is too busy doing other things and never
   notices the key press in the event queue).  This is tricky to fix
   and probably needs better event handling everywhere.
+** When CommandSetTurn calls ShowBoard, the dice shown in the board
+   window can be the wrong colour.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

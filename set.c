@@ -801,6 +801,11 @@ extern void CommandSetTurn( char *sz ) {
 
     anDice[ 0 ] = anDice[ 1 ] = 0;
 
+#if !X_DISPLAY_MISSING
+    if( fX )
+	ShowBoard();
+#endif
+    
     printf( "`%s' is now on roll.\n", ap[ i ].szName );
 }
 
