@@ -897,7 +897,7 @@ OutputCubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
               _("Money"), 
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
   else
-    sprintf ( strchr ( sz, 0 ), " cubeless equity %s\n",
+    sprintf ( strchr ( sz, 0 ), _(" cubeless equity %s\n"),
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
 

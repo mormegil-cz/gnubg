@@ -471,7 +471,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
   if ( ci.nMatchTo ) {
 
-    pch = g_strdup_printf( ("Gammon values at %d-away, %d-away (%d cube)\n\n"),
+    pch = g_strdup_printf( _("Gammon values at %d-away, %d-away (%d cube)\n\n"),
                            ci.nMatchTo - ci.anScore[ 0 ],
                            ci.nMatchTo - ci.anScore[ 1 ],
                            ci.nCube );
@@ -482,7 +482,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
     g_free( pch );
 
     gtk_text_insert( GTK_TEXT( ptw->pwGammonPrice ), pf, NULL, NULL,
-                     "Player                          Gammon   BG\n", -1 );
+                     _("Player                          Gammon   BG\n"), -1 );
     
 
     for ( j = 0; j < 2; ++j ) {
