@@ -4182,6 +4182,8 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 	
   char sz[128]; 
 
+  gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
+  
   sprintf(sz, "set analysis moves %s",
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwMoves ) ) ?
        "on" : "off" );

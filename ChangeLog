@@ -3,6 +3,9 @@ Wed Jul 17 13:21:16 2002  Gary Wong  <gtw@gnu.org>
 	* play.c (autoAnalyseMove): Show progress bar during automatic
 	analysis.
 
+	* gtkgame.c (AnalysisOK): Hide the analysis settings dialog while
+	processing the changes.
+	
 Wed Jul 17 17:27:03 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Stabilising the previous commits...
