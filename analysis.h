@@ -24,10 +24,6 @@
 
 #include "backgammon.h"
 
-extern void
-CommandShowStatistics ( char *sz );
-
-
 typedef struct _statcontext {
 
   int anUnforcedMoves[ 2 ];
@@ -65,9 +61,24 @@ typedef struct _statcontext {
   float arErrorWrongPass [ 2 ][ 2 ];
   float arLuck[ 2 ][ 2 ];
   
-  
-
 } statcontext;
 
+typedef enum _ratingtype {
+  RAT_BEGINNER, RAT_NOVICE, RAT_INTERMEDIATE, RAT_ADVANCED,
+  RAT_EXPERT, RAT_WORLD_CLASS, RAT_EXTRA_TERRESTRIAL 
+} ratingtype;
+
+extern const char *aszRating [ RAT_EXTRA_TERRESTRIAL + 1 ];
+
+extern const float arThrsRating [ RAT_EXTRA_TERRESTRIAL + 1 ];
+
+extern int
+StatGame ( statcontext *pscStatGame, int *pfCompleteAnalysis );
+
+extern int
+StatMatch ( statcontext *pscStatMatch, int *pfCompleteAnalysis );
+
+extern ratingtype
+GetRating ( const float rError );
 
 #endif

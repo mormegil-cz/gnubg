@@ -1,3 +1,20 @@
+Sat Apr 14 13:28:06 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	* analysis.c (CommandShowStatisticsGame,
+	CommandShowStatisticsMatch, CommandShowStatisticsSession): new
+	functions. 
+	* analysis.c (StatMatch, StatGame): calculate statistics for 
+	match/session or game.
+	* analysis.c (GetRating): return a rating a la Snowie (Beginner,
+	novice, etc.).
+	* analysis.c (DumpStatcontext): updated: shorter output. 
+
+	* gnubg.c, gtkgame.c: New commands `show statistics
+	{game,session,match}'
+
+	* sgf.c, play.c, gtkgame.c: bugfix: MOVE_{DROP,TAKE} is now stored
+	in movedouble struct.
+
 Fri Apr 13 22:15:56 2001  Jørn Thyssen  <joern@thyssen.nu>
 
 	* analysis.c (CommandShowStatistic, IniStatcontext,

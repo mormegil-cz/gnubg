@@ -38,10 +38,10 @@
 #endif
 
 extern int
-StatGame ( list *plGame, statcontext *pscGame );
+ComputeStatGame ( list *plGame, statcontext *pscGame );
 
 extern void
-DumpStatcontext ( statcontext *psc );
+DumpStatcontext ( statcontext *psc, int fCompleteAnalysis, char * sz );
 
 extern void
 IniStatcontext ( statcontext *psc );
@@ -49,6 +49,12 @@ IniStatcontext ( statcontext *psc );
 extern void
 AddStatcontext ( statcontext *pscA, statcontext *pscB );
 
+const char *aszRating [ RAT_EXTRA_TERRESTRIAL + 1 ] = {
+  "Beginner", "Novice", "Intermediate", "Advanced", "Expert",
+  "World class", "Extra-terrestrial" };
+
+const float arThrsRating [ RAT_EXTRA_TERRESTRIAL + 1 ] = {
+  0.005, 0.010, 0.015, 0.020, 0.025, 0.030, 1e38 };
 
 static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 			   cubeinfo *pci, int fFirstMove ) {
@@ -488,65 +494,6 @@ extern void CommandAnalyseSession( char *sz ) {
 }
 
 
-extern void
-CommandShowStatistics ( char *sz ) {
-
-  /* 
-   * FIXME: change to `show statistics game' 
-   *        and       `show statistics match' 
-   */
-     
-
-  list *pl;
-  int nGames, fCompleteAnalysis, i;
-  statcontext *pscStatGames, *pscStatTotal, *psc;
-
-  ProgressStart( "Collecting statistics..." );
-
-  /* find number of games */
-
-  for ( nGames = 1, pl = lMatch.plNext; pl != &lMatch; nGames++ )
-     pl = pl->plNext;
-
-  printf ("nGames = %i\n", nGames );
-
-
-  psc = pscStatGames =
-    (statcontext *) malloc ( nGames * sizeof (statcontext) );
-  pscStatTotal =
-    (statcontext *) malloc ( sizeof (statcontext) );
-
-  fCompleteAnalysis = TRUE;
-
-  IniStatcontext ( pscStatTotal );
-  
-  for ( i = 0, pl = lMatch.plNext; pl != &lMatch;
-        i++, pl = pl->plNext, psc++ ) {   
-
-    IniStatcontext ( psc );
-
-    fCompleteAnalysis =
-      fCompleteAnalysis && StatGame( pl->p, psc );
-
-    AddStatcontext ( psc, pscStatTotal );
-
-    printf ( "Statistics for game no. %d\n\n", i );
-    DumpStatcontext ( psc );
-
-  }
-
-  /* FIXME: write warning for ! fCompleteAnalysis */
-
-  printf ( "Statistics for all games\n\n" );
-  DumpStatcontext ( pscStatTotal );
-
-  ProgressEnd();
-
-  free ( pscStatGames );
-  free ( pscStatTotal );
-
-}
-
 
 extern void
 IniStatcontext ( statcontext *psc ) {
@@ -653,7 +600,7 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
 
 
 extern int
-StatGame ( list *plGame, statcontext *pscGame ) {
+ComputeStatGame ( list *plGame, statcontext *pscGame ) {
 
   /* Gather statistics about this game */
 
@@ -696,8 +643,6 @@ StatGame ( list *plGame, statcontext *pscGame ) {
   
   for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
     pmr = pl->p;
-
-    Progress();
 
     switch( pmr->mt ) {
     case MOVE_NORMAL:
@@ -1093,9 +1038,11 @@ StatGame ( list *plGame, statcontext *pscGame ) {
 }
 
 extern void
-DumpStatcontext ( statcontext *psc ) {
+DumpStatcontext ( statcontext *psc, int fCompleteAnalysis,
+                  char * sz ) {
 
   int i;
+  ratingtype rt[ 2 ];
 
 #if 0
 
@@ -1158,87 +1105,374 @@ DumpStatcontext ( statcontext *psc ) {
   /* FIXME: honour fOutputMWC etc. */
   /* FIXME: calculate ratings (ET, World class, etc.) */
 
-  for ( i = 0; i < 2; i++ ) {
+  printf ( "Player\t\t\t\t%-15s\t\t%-15s\n\n"
+           "Checkerplay statistics:\n\n"
+           "Total moves:\t\t\t%3d\t\t\t%3d\n"
+           "Unforced moves:\t\t\t%3d\t\t\t%3d\n\n"
+           "Moves rated perfect\t\t%3d\t\t\t%3d\n"
+           "Moves rated very good\t\t%3d\t\t\t%3d\n"
+           "Moves rated good\t\t%3d\t\t\t%3d\n"
+           "Moves rated small error\t\t%3d\t\t\t%3d\n"
+           "Moves rated error\t\t%3d\t\t\t%3d\n"
+           "Moves rated blunder\t\t%3d\t\t\t%3d\n"
+           "Moves rated Zzz Zzz\t\t%3d\t\t\t%3d\n\n",
+           ap[ 0 ].szName, ap [ 1 ].szName,
+           psc->anTotalMoves[ 0 ], psc->anTotalMoves[ 1 ],
+           psc->anUnforcedMoves[ 0 ], psc->anUnforcedMoves[ 1 ],
+           psc->anMoves[ 0 ][ SKILL_VERYGOOD ],
+           psc->anMoves[ 1 ][ SKILL_VERYGOOD ],
+           psc->anMoves[ 0 ][ SKILL_GOOD ],
+           psc->anMoves[ 1 ][ SKILL_GOOD ],
+           psc->anMoves[ 0 ][ SKILL_INTERESTING ],
+           psc->anMoves[ 1 ][ SKILL_INTERESTING ],
+           psc->anMoves[ 0 ][ SKILL_NONE ],
+           psc->anMoves[ 1 ][ SKILL_NONE ],
+           psc->anMoves[ 0 ][ SKILL_DOUBTFUL ],
+           psc->anMoves[ 1 ][ SKILL_DOUBTFUL ],
+           psc->anMoves[ 0 ][ SKILL_BAD ],
+           psc->anMoves[ 1 ][ SKILL_BAD ],
+           psc->anMoves[ 0 ][ SKILL_VERYBAD ],
+           psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
+
+  if ( nMatchTo )
+    printf ("Error rate (total)\t\t"
+            "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
+            "Error rate (pr. move)\t\t"
+            "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
+            psc->arErrorCheckerplay[ 0 ][ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 0 ],
+            psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f,
+            psc->arErrorCheckerplay[ 0 ][ 0 ] /
+            psc->anUnforcedMoves[ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 0 ] /
+            psc->anUnforcedMoves[ 1 ],
+            psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
+            psc->anUnforcedMoves[ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
+            psc->anUnforcedMoves[ 1 ] );
+  else
+    printf ("Error rate (total)\t\t"
+            "%+6.3f (%+7.3f%)\t%+6.3f (%+7.3f%)\n"
+            "Error rate (pr. move)\t\t"
+            "%+6.3f (%+7.3f%)\t%+6.3f (%+7.3f%)\n\n",
+            psc->arErrorCheckerplay[ 0 ][ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 0 ],
+            psc->arErrorCheckerplay[ 0 ][ 1 ],
+            psc->arErrorCheckerplay[ 1 ][ 1 ],
+            psc->arErrorCheckerplay[ 0 ][ 0 ] /
+            psc->anUnforcedMoves[ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 0 ] /
+            psc->anUnforcedMoves[ 1 ],
+            psc->arErrorCheckerplay[ 0 ][ 1 ] /
+            psc->anUnforcedMoves[ 0 ],
+            psc->arErrorCheckerplay[ 1 ][ 1 ] /
+            psc->anUnforcedMoves[ 1 ] );
+
+  printf ( "Super-jokers\t\t\t%3d\t\t\t%3d\n"
+           "Jokers\t\t\t\t%3d\t\t\t%3d\n"
+           "Average\t\t\t\t%3d\t\t\t%3d\n"
+           "Anti-jokers\t\t\t%3d\t\t\t%3d\n"
+           "Super anti-jokers\t\t%3d\t\t\t%3d\n",
+           psc->anLuck[ 0 ][ LUCK_VERYGOOD ],
+           psc->anLuck[ 1 ][ LUCK_VERYGOOD ],
+           psc->anLuck[ 0 ][ LUCK_GOOD ],
+           psc->anLuck[ 1 ][ LUCK_GOOD ],
+           psc->anLuck[ 0 ][ LUCK_NONE ],
+           psc->anLuck[ 1 ][ LUCK_NONE ],
+           psc->anLuck[ 0 ][ LUCK_BAD ],
+           psc->anLuck[ 1 ][ LUCK_BAD ],
+           psc->anLuck[ 0 ][ LUCK_VERYBAD ],
+           psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
+           
+
+  if ( nMatchTo )
+    printf ("Luck rate (total)\t\t"
+            "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
+            "Luck rate (pr. move)\t\t"
+            "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
+            psc->arLuck[ 0 ][ 0 ],
+            psc->arLuck[ 1 ][ 0 ],
+            psc->arLuck[ 0 ][ 1 ] * 100.0f,
+            psc->arLuck[ 1 ][ 1 ] * 100.0f,
+            psc->arLuck[ 0 ][ 0 ] /
+            psc->anTotalMoves[ 0 ],
+            psc->arLuck[ 1 ][ 0 ] /
+            psc->anTotalMoves[ 1 ],
+            psc->arLuck[ 0 ][ 1 ] * 100.0f /
+            psc->anTotalMoves[ 0 ],
+            psc->arLuck[ 1 ][ 1 ] * 100.0f /
+            psc->anTotalMoves[ 1 ] );
+  else
+    printf ("Luck rate (total)\t\t"
+            "%+6.3f (%+7.3f%)\t%+6.3f (%+7.3f%)\n"
+            "Luck rate (pr. move)\t\t"
+            "%+6.3f (%+7.3f%)\t%+6.3f (%+7.3f%)\n\n",
+            psc->arLuck[ 0 ][ 0 ],
+            psc->arLuck[ 1 ][ 0 ],
+            psc->arLuck[ 0 ][ 1 ],
+            psc->arLuck[ 1 ][ 1 ],
+            psc->arLuck[ 0 ][ 0 ] /
+            psc->anTotalMoves[ 0 ],
+            psc->arLuck[ 1 ][ 0 ] /
+            psc->anTotalMoves[ 1 ],
+            psc->arLuck[ 0 ][ 1 ] /
+            psc->anTotalMoves[ 0 ],
+            psc->arLuck[ 1 ][ 1 ] /
+            psc->anTotalMoves[ 1 ] );
+
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
+                          psc->anUnforcedMoves[ i ] );
+
+  printf ( "Checker play rating:\t\t%-15s\t%-15s\n\n",
+           aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+
+  printf ( "\nCube decisions statistics:\n\n" );
+
+  printf ( 
+           "Total cube decisions\t\t%3d\t\t\t%3d\n"
+           "Doubles\t\t\t\t%3d\t\t\t%3d\n"
+           "Takes\t\t\t\t%3d\t\t\t%3d\n"
+           "Pass\t\t\t\t%3d\t\t\t%3d\n\n",
+           psc->anTotalCube[ 0 ],
+           psc->anTotalCube[ 1 ],
+           psc->anDouble[ 0 ], 
+           psc->anDouble[ 1 ], 
+           psc->anTake[ 0 ],
+           psc->anTake[ 1 ],
+           psc->anPass[ 0 ], 
+           psc->anPass[ 1 ] );
+
+  if ( nMatchTo )
+    printf ("Missed doubles around DP\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Missed doubles around TG\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong doubles around DP\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong doubles around TG\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong takes\t\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong passes\t\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n",
+            psc->anCubeMissedDoubleDP[ 0 ],
+            psc->anCubeMissedDoubleDP[ 1 ],
+            psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+            psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f,
+            psc->anCubeMissedDoubleTG[ 0 ],
+            psc->anCubeMissedDoubleTG[ 1 ],
+            psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+            psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f,
+            psc->anCubeWrongDoubleDP[ 0 ],
+            psc->anCubeWrongDoubleDP[ 1 ],
+            psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+            psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f,
+            psc->anCubeWrongDoubleTG[ 0 ],
+            psc->anCubeWrongDoubleTG[ 1 ],
+            psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+            psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f,
+            psc->anCubeWrongTake[ 0 ],
+            psc->anCubeWrongTake[ 1 ],
+            psc->arErrorWrongTake[ 0 ][ 0 ],
+            psc->arErrorWrongTake[ 1 ][ 0 ],
+            psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f,
+            psc->anCubeWrongPass[ 0 ],
+            psc->anCubeWrongPass[ 1 ],
+            psc->arErrorWrongPass[ 0 ][ 0 ],
+            psc->arErrorWrongPass[ 1 ][ 0 ],
+            psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
+            psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
+  else
+    printf ("Missed doubles around DP\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Missed doubles around TG\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong doubles around DP\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong doubles around TG\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong takes\t\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
+            "Wrong passes\t\t\t"
+            "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n",
+            psc->anCubeMissedDoubleDP[ 0 ],
+            psc->anCubeMissedDoubleDP[ 1 ],
+            psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+            psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+            psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
+            psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
+            psc->anCubeMissedDoubleTG[ 0 ],
+            psc->anCubeMissedDoubleTG[ 1 ],
+            psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+            psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+            psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
+            psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
+            psc->anCubeWrongDoubleDP[ 0 ],
+            psc->anCubeWrongDoubleDP[ 1 ],
+            psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+            psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+            psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
+            psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
+            psc->anCubeWrongDoubleTG[ 0 ],
+            psc->anCubeWrongDoubleTG[ 1 ],
+            psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+            psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
+            psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
+            psc->anCubeWrongTake[ 0 ],
+            psc->anCubeWrongTake[ 1 ],
+            psc->arErrorWrongTake[ 0 ][ 0 ],
+            psc->arErrorWrongTake[ 1 ][ 0 ],
+            psc->arErrorWrongTake[ 0 ][ 1 ],
+            psc->arErrorWrongTake[ 1 ][ 1 ],
+            psc->anCubeWrongPass[ 0 ],
+            psc->anCubeWrongPass[ 1 ],
+            psc->arErrorWrongPass[ 0 ][ 0 ],
+            psc->arErrorWrongPass[ 1 ][ 0 ],
+            psc->arErrorWrongPass[ 0 ][ 1 ],
+            psc->arErrorWrongPass[ 1 ][ 1 ] );
+
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
+                            + psc->arErrorMissedDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleDP[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongTake[ i ][ 0 ]
+                            + psc->arErrorWrongPass[ i ][ 0 ] ) /
+                          psc->anTotalCube[ i ] );
+
+  printf ( "\nCube decision rating:\t\t%-15s\t%-15s\n\n",
+           aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
+                            + psc->arErrorMissedDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleDP[ i ][ 0 ]
+                            + psc->arErrorWrongDoubleTG[ i ][ 0 ]
+                            + psc->arErrorWrongTake[ i ][ 0 ]
+                            + psc->arErrorWrongPass[ i ][ 0 ] ) /
+                          psc->anTotalCube[ i ] +
+                          psc->arErrorCheckerplay[ i ][ 0 ] /
+                          psc->anUnforcedMoves[ i ] );
+
+  printf ( "Overall rating:\t\t\t%-15s\t%-15s\n\n",
+           aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+
+  if ( ! fCompleteAnalysis )
+    printf ( "\nWarning: due to incomplete analysis"
+             " the results may be incomplete!\n\n" );
+
+}
+
+
+extern void
+CommandShowStatisticsMatch ( char *sz ) {
+
+  statcontext scStatMatch;
+  int fCompleteAnalysis;
+
+  StatMatch ( &scStatMatch, &fCompleteAnalysis );
+
+#if USE_GTK && 0
+  if ( fX ) {
+    GTKDumpStatcontext ( &scStatMatch, fCompleteAnalysis,
+                         "Statistics for all games" );
+    return;
+  }
+#endif
+
+  DumpStatcontext ( &scStatMatch, fCompleteAnalysis,
+                    "Statistics for all games");
+
+}
+
+
+extern void
+CommandShowStatisticsSession ( char *sz ) {
+
+  CommandShowStatisticsMatch ( sz );
+
+}
+
+
+extern void
+CommandShowStatisticsGame ( char *sz ) {
+
+  statcontext scStatGame;
+  int fCompleteAnalysis;
+
+  if( !plGame ) {
+    outputl( "No game is being played." );
+    return;
+  }
+    
+  StatGame ( &scStatGame, &fCompleteAnalysis );
+
+#if USE_GTK && 0
+  if ( fX ) {
+    GTKDumpStatcontext ( &scStatGame, fCompleteAnalysis,
+                         "Statistics for current game" );
+    return;
+  }
+#endif
+
+  DumpStatcontext ( &scStatGame, fCompleteAnalysis,
+                    "Statistics for current game");
+
+}
   
-    printf ( "Player %s\n\n"
-             "Checkerplay statistics:\n\n"
-             "Total moves:               %3d\n"
-             "Unforced moves:            %3d\n\n"
-             "Moves rated perfect        %3d\n"
-             "Moves rated very good      %3d\n"
-             "Moves rated good           %3d\n"
-             "Moves rated small error    %3d\n"
-             "Moves rated error          %3d\n"
-             "Moves rated blunder        %3d\n"
-             "Moves rated Zzz Zzz        %3d\n\n"
-             "Error rate (total)         %+6.3f (%+7.3f%%)\n"
-             "Error rate (pr. move)      %+6.3f (%+7.3f%%)\n\n"
-             "Super-jokers               %3d\n"
-             "Jokers                     %3d\n"
-             "Average                    %3d\n"
-             "Anti-jokers                %3d\n"
-             "Super anti-jokers          %3d\n\n"
-             "Luck rate (total)          %+6.3f (%+7.3f%%)\n"
-             "Luck rate (pr. move)       %+6.3f (%+7.3f%%)\n\n"
-             "Cube decision statistics:\n\n"
-             "Total cube decisions       %3d\n"
-             "Doubles                    %3d\n"
-             "Takes                      %3d\n"
-             "Pass                       %3d\n\n"
-             "Missed doubles around DP   %3d (%+6.3f (%+7.3f%%)\n"
-             "Missed doubles around TG   %3d (%+6.3f (%+7.3f%%)\n"
-             "Wrong doubles around DP    %3d (%+6.3f (%+7.3f%%)\n"
-             "Wrong doubles around TG    %3d (%+6.3f (%+7.3f%%)\n"
-             "Wrong takes                %3d (%+6.3f (%+7.3f%%)\n"
-             "Wrong passes               %3d (%+6.3f (%+7.3f%%)\n\n"
-             "%s played %s!\n\n",
-             ap[ i ].szName,
-             psc->anTotalMoves[ i ], psc->anUnforcedMoves[ i ],
-             psc->anMoves[ i ][ SKILL_VERYGOOD ],
-             psc->anMoves[ i ][ SKILL_GOOD ],
-             psc->anMoves[ i ][ SKILL_INTERESTING ],
-             psc->anMoves[ i ][ SKILL_NONE ],
-             psc->anMoves[ i ][ SKILL_DOUBTFUL ],
-             psc->anMoves[ i ][ SKILL_BAD ],
-             psc->anMoves[ i ][ SKILL_VERYBAD ],
-             psc->arErrorCheckerplay[ i ][ 0 ],
-             psc->arErrorCheckerplay[ i ][ 1 ] * 100.0f,
-             psc->arErrorCheckerplay[ i ][ 0 ] /
-                psc->anUnforcedMoves[ i ],
-             psc->arErrorCheckerplay[ i ][ 1 ] * 100.0f /
-                psc->anUnforcedMoves[ i ],
-             psc->anLuck[ i ][ LUCK_VERYGOOD ],
-             psc->anLuck[ i ][ LUCK_GOOD ],
-             psc->anLuck[ i ][ LUCK_NONE ],
-             psc->anLuck[ i ][ LUCK_BAD ],
-             psc->anLuck[ i ][ LUCK_VERYBAD ],
-             psc->arLuck[ i ][ 0 ], psc->arLuck[ i ][ 1 ] * 100.0f,
-             psc->arLuck[ i ][ 0 ] / psc->anTotalMoves[ i ],
-             psc->arLuck[ i ][ 1 ] * 100.0f / psc->anTotalMoves[ i ],
-             psc->anTotalCube[ i ], psc->anDouble[ i ], 
-             psc->anTake[ i ], psc->anPass[ i ], 
-             psc->anCubeMissedDoubleDP[ i ],
-             psc->arErrorMissedDoubleDP[ i ][ 0 ],
-             psc->arErrorMissedDoubleDP[ i ][ 1 ] * 100.0f,
-             psc->anCubeMissedDoubleTG[ i ],
-             psc->arErrorMissedDoubleTG[ i ][ 0 ],
-             psc->arErrorMissedDoubleTG[ i ][ 1 ] * 100.0f,
-             psc->anCubeWrongDoubleDP[ i ],
-             psc->arErrorWrongDoubleDP[ i ][ 0 ],
-             psc->arErrorWrongDoubleDP[ i ][ 1 ] * 100.0f,
-             psc->anCubeWrongDoubleTG[ i ],
-             psc->arErrorWrongDoubleTG[ i ][ 0 ],
-             psc->arErrorWrongDoubleTG[ i ][ 1 ] * 100.0f,
-             psc->anCubeWrongTake[ i ],
-             psc->arErrorWrongTake[ i ][ 0 ],
-             psc->arErrorWrongTake[ i ][ 1 ] * 100.0f,
-             psc->anCubeWrongPass[ i ],
-             psc->arErrorWrongPass[ i ][ 0 ],
-             psc->arErrorWrongPass[ i ][ 1 ] * 100.0f,
-             ap[ i ].szName,
-             ( ap[ i ].pt == PLAYER_GNU ) ?
-             "Extraterrestrial" : "as a rhino" );
+
+extern int
+StatMatch ( statcontext *pscStatMatch, int *pfCompleteAnalysis ) {
+
+
+  list *pl;
+  int i;
+  statcontext sc;
+
+  *pfCompleteAnalysis = TRUE;
+
+  IniStatcontext ( pscStatMatch );
+  
+  for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext ) {   
+
+    *pfCompleteAnalysis =
+      ComputeStatGame( pl->p, &sc ) && *pfCompleteAnalysis;
+
+    AddStatcontext ( &sc, pscStatMatch );
+
   }
 
 }
 
+
+extern int
+StatGame ( statcontext *pscStatGame, int *pfCompleteAnalysis ) {
+
+  *pfCompleteAnalysis = ComputeStatGame ( plGame, pscStatGame );
+
+}
+
+
+extern ratingtype
+GetRating ( const float rError ) {
+
+  int i;
+
+  for ( i = RAT_EXTRA_TERRESTRIAL; i >= 0; i-- )
+    if ( rError <= arThrsRating[ i ] ) return i;
+
+  return RAT_BEGINNER;
+
+}
