@@ -3,7 +3,10 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 * Changes in GNU Backgammon 0.14.3
 
 ** fix "bug" in Zadeh match equity table
+
 ** Add built-in support for mec 
+
+** Russian translation started
 
 ** Interface to relational databases using Python
 

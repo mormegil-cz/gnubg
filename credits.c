@@ -44,6 +44,7 @@ credEntry ceTranslations[] = {
   {"Renzo Campagna", N_("Italian") },
   {"Kaoru Takahashi", N_("Japanese") },
   {"Akif Dinc", N_("Turkish") },
+  {"Dmitri I GOULIAEV", N_("Russian") },
   {0, 0}
 };
 
@@ -65,13 +66,13 @@ credEntry ceCredits[] = {
   {"Tristan Colgate", 0},
   {"Olivier Croisille", 0},
   {"Ned Cross", 0},
-  {"Christopher D. Yep", 0},
   {"Bill Davidson", 0},
   {"Giulio De Marco", 0},
   {"Michael Depreli", 0},
   {"Alberta di Silvio", 0},
   {"Ian Dunstan", 0},
   {"Max Durbano", 0},
+  {"Christopher D. Yep", 0},
   {"Peter Eberhard", 0},
   {"Robert Eberlein", 0},
   {"James F. Kibler", 0},
@@ -193,6 +194,7 @@ char aszAUTHORS[] =
 "     Renzo Campagna (Italian)\n"
 "     Kaoru Takahashi (Japanese)\n"
 "     Akif Dinc (Turkish)\n"
+"     Dmitri I GOULIAEV (Russian)\n"
 "\n"
 "             Contributors (of bug reports and suggestions) include:\n"
 "\n"

@@ -66,6 +66,7 @@ Hlynur Sigurgislason,Icelandic
 Renzo Campagna,Italian
 Kaoru Takahashi,Japanese
 Akif Dinc,Turkish
+Dmitri I GOULIAEV,Russian
 EOF
 
 cat > $credit <<EOF
