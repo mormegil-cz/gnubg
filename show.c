@@ -663,6 +663,12 @@ extern void CommandShowOutput( char *sz ) {
 
     printf( "Winning chances will be shown as %s.\n", fOutputWinPC ?
 	    "percentages" : "probabilities" );
+
+#if USE_GUI
+    if( !fX )
+#endif
+	printf( "Boards will be shown in %s.\n", fOutputRawboard ?
+		"raw format" : "ASCII" );
 }
 
 extern void CommandShowMarketWindow ( char * sz ) {

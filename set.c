@@ -1135,6 +1135,13 @@ extern void CommandSetOutputMWC( char *sz ) {
 
 }
 
+extern void CommandSetOutputRawboard( char *sz ) {
+
+    SetToggle( "output rawboard", &fOutputRawboard, sz,
+	       "TTY boards will be given in raw format.",
+	       "TTY boards will be given in ASCII." );
+}
+
 extern void CommandSetOutputWinPC( char *sz ) {
 
     SetToggle( "output winpc", &fOutputWinPC, sz,

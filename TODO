@@ -79,6 +79,7 @@ duplication of effort and to make sure our changes merge easily.
   under the Analyse menu).
 ** Make "show marketwindow" say something for money games.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
+** Make "set auto roll" roll when holding a dead cube.
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -183,6 +184,9 @@ duplication of effort and to make sure our changes merge easily.
 ** The SGF loading (saving?) routines and CommandLoadCommands use
   stdio, which restarts system calls on signals.  This means TTY interrupts
   and the GTK `stop' button don't work. (gary)
+** Make sure the socket changes for external players work on Solaris.  Things
+  to check: #include <sys/types.h>; don't use the identifier "sun";
+  #define AF_LOCAL AF_UNIX (same with PF_).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

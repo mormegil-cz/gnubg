@@ -1,3 +1,9 @@
+Mon Feb 26 18:56:14 2001  Gary Wong  <gtw@research.att.com>
+
+	* set.c (CommandSetOutputRawboard): New function.
+	* gnubg.c (ShowBoard): Show a FIBS "boardstyle 3" board if
+	fOutputRawboard is set.
+
 Fri Feb 23 13:09:48 2001  Gary Wong  <gtw@research.att.com>
 
 	* Makefile.am: Don't run makebearoff or makeweights if cross-compiling.
