@@ -763,7 +763,7 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
      */
     
     if( fscanf( pf, " %31s is X - %31s is O\n", sz0, sz1 ) < 2 )
-	return;
+	return 0;
 
     /* consistency checks */
 
