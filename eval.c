@@ -7015,7 +7015,7 @@ CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
 extern int
 isCloseCubedecision ( const float arDouble[] ) {
   
-  const float rThr = 0.10;
+  const float rThr = 0.25;
 
   /* too good positions */
 

@@ -1,3 +1,8 @@
+Thu Aug  8 21:39:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (isCloseCubedecision): adjust threshold for when
+	a cube decision is considered close.
+
 Thu Aug  8 21:09:05 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (board_init): turn on board numbering as 
