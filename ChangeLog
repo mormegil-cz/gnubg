@@ -1,3 +1,7 @@
+Fri Sep 19 09:34:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Add tab-completion to the command dialog
+
 Thu Sep 19 22:06:27 2003 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* first cut at paramaterising board. It now appears to be possible
