@@ -783,14 +783,14 @@ CubeAnalysisEvalPly ( GtkWidget *pw, cubehintdata *pchd ) {
 
   char *szPly = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
   //evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
-  evalcontext ec = {  esAnalysisCube.ec.fCubeful,
-		      0, TRUE, 0.0, 
+  evalcontext ec = {  esAnalysisCube.ec.fCubeful, 0,
 #if defined( REDUCTION_CODE )
-  esAnalysisCube.ec.nReduced
+                      esAnalysisCube.ec.nReduced,
 #else
-  esAnalysisCube.ec.fUsePrune
+                      esAnalysisCube.ec.fUsePrune,
 #endif
-   };
+                      TRUE, 0.0};
+
   ec.nPlies = atoi ( szPly );
 
   EvalCube ( pchd, &ec );

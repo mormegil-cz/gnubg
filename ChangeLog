@@ -1,3 +1,7 @@
+Tue Feb  22  19:26:45 2005 Oystein Johansen <oystein@gnubg.org>
+
+        * gtkcube.c (CubeAnalysisEvalPly): Get the evalcontext right!
+
 Tue Feb  22  19:06:45 2005 Oystein Johansen <oystein@gnubg.org>
 
 	* gtkgame.c (GTKFileCommand): Apply a fix from Ingo
