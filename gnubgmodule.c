@@ -886,6 +886,8 @@ PythonInitialise( const char *argv0, const char *szDir ) {
   Py_SetProgramName( (char *) argv0 );
   Py_Initialize();
 
+  PySys_SetArgv( 1, (char **) &argv0 );
+
   /* ensure that python know about our gnubg module */
   Py_InitModule( "gnubg", gnubgMethods );
   PyRun_SimpleString( "import gnubg\n" );

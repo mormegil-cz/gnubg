@@ -338,6 +338,7 @@ static void ShowManualWeb( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
+static void PythonShell( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 GtkWidget *pwGrab;
@@ -2521,6 +2522,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Windows/_Message"), NULL, Command, CMD_SET_MESSAGE_ON,
 	  NULL },
 	{ N_("/_Windows/Gu_ile"), NULL, NULL, 0, NULL },
+	{ N_("/_Windows/_Python shell (IDLE)..."), 
+          NULL, PythonShell, 0, NULL },
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
 	{ N_("/_Help/gnubg _Manual"), NULL, ShowManual, 0, NULL },
@@ -2637,6 +2640,15 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	pif, "/Windows/Guile" ), FALSE );
+
+    gtk_widget_set_sensitive( gtk_item_factory_get_widget(
+	pif, "/Windows/Python shell (IDLE)..." ), 
+#if USE_PYTHON 
+                              TRUE
+#else
+                              FALSE
+#endif
+                              );
 
     gtk_box_pack_start( GTK_BOX( pwVbox ),
                         pwToolbar = ToolbarNew(), FALSE, FALSE, 0 );
@@ -8317,5 +8329,17 @@ FinishMove( gpointer *p, guint n, GtkWidget *pw ) {
     return;
 
   UserCommand( FormatMove( sz, ms.anBoard, anMove ) );
+
+}
+
+
+static void 
+PythonShell( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *pch = g_strdup( ">import idle.PyShell; idle.PyShell.main()\n" );
+
+  UserCommand( pch );
+
+  g_free( pch );
 
 }

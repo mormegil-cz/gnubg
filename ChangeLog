@@ -1,3 +1,9 @@
+Mon Jul 28 21:31:19 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (InitGTK): new menu entry for IDLE (Python).
+	* gnubg.c (HandleCommand): strip leading space of python commands.
+	* gnubgmodule.c (PythonInitialise): set argv.
+
 Mon Jul 28 14:31:43 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* play.c - missed initialising CubeDecPtr on beavers

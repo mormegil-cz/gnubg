@@ -2613,6 +2613,11 @@ extern void HandleCommand( char *sz, command *ac ) {
           while ( *sz == '>' )
             ++sz;
 
+          /* leading white space confuses Python :-) */
+
+          while ( isspace( *sz ) )
+            ++sz;
+
 #if USE_PYTHON
 #if USE_GTK
 	    if( fX )
