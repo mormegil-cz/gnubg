@@ -1,3 +1,8 @@
+Sat Jul  3 15:24:40 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* font3d.cpp: add "FTGL/" to #include's in order to match the
+	path returned by pkg-config --cflags ftgl.
+
 Tue June 1 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* drawboard3d.c: Smaller doubling cube and flag shadow fix
