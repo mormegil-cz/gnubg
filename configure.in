@@ -508,6 +508,10 @@ if test "$with_board3d" != "no"; then
       PKG_CHECK_MODULES(FTGL, ftgl,
                         AC_DEFINE(HAVE_LIBFTGL,1,[Define if you have libftgl]),
                         no_ftgl="yes")
+      dnl automake can't pick up these, since the PKG_CHECK_MODULES macro
+      dnl has $1_LIBS.
+      AC_SUBST(FTGL_LIBS)
+      AC_SUBST(FTGL_CFLAGS)
 
       if test "$no_gtkgl" != "yes" -a "$no_ftgl" != "yes"; then
          no_board3d=
