@@ -52,17 +52,17 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
 
     /* rollout of initial position: no doubles allowed */
 
-    if( !iTurn && !( cGames % 60 ) ) {
-      anDice[ 1 ] = ( ( iGame / 10 ) % 6 ) + 1;
-      anDice[ 0 ] = ( ( iGame / 2 ) % 5 ) + 1;
+    if( !iTurn && !( cGames % 30 ) ) {
+      anDice[ 1 ] = ( ( iGame / 5 ) % 6 ) + 1;
+      anDice[ 0 ] = ( iGame % 5 ) + 1;
       if ( anDice[ 0 ] >= anDice[ 1 ] ) 
         anDice[ 0 ]++;
       
       return 0;
     } 
-    else if( iTurn == 1 && !( cGames % 2160 ) ) {
-      anDice[ 0 ] = ( ( iGame / 60 ) % 6 ) + 1;
-      anDice[ 1 ] = ( ( iGame / 360 ) % 6 ) + 1;
+    else if( iTurn == 1 && !( cGames % 1080 ) ) {
+      anDice[ 0 ] = ( ( iGame / 30 ) % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 180 ) % 6 ) + 1;
 
       return 0;
     } 
@@ -409,7 +409,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           ici < cci; ici++, pci++, pf++ ) {
 
       if ( *pf ) {
- 
+
         /* Save number of chequers on bar */
 
         for ( i = 0; i < 2; i++ )
@@ -722,7 +722,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   
   int i, j, ici;
   int anBoardOrig[ 2 ][ 25 ];
-  int fInvertOnEntry = fInvert;
 
   enum _rollouttype { BEAROFF, BASIC, VARREDN } rt;
 
@@ -784,21 +783,6 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   for( i = 0; i < cGames; i++ ) {
       if( rngCurrent != RNG_MANUAL )
 	  InitRNGSeed( rcRollout.nSeed + ( i << 8 ) );
-
-
-      /* rollout as initial position */
-
-      if ( prc->fInitial ) {
-
-        if ( i % 2 )
-          /* player on roll */
-          fInvert = fInvertOnEntry;
-        else
-          /* opponent on roll */
-          fInvert = ! fInvertOnEntry;
-
-      }
-          
       
       for ( ici = 0; ici < cci; ici++ )
         memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],

@@ -1,3 +1,7 @@
+Sun Apr 21 18:26:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c: roll back changes from "Sat Apr 20 15:56:26 2002".
+
 Sat Apr 20 19:37:12 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Save geometry of windows.
