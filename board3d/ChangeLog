@@ -1,3 +1,7 @@
+Fri Mar 19 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c: Avoid readjusting board when cube changes
+
 Mon Mar 8 7:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkcolour3d.c: Remove gtk warning message

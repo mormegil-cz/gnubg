@@ -3006,22 +3006,55 @@ float GetFOVAngle(BoardData* bd)
 	return (47 - 2.3f * temp * temp) / skewFactor;
 }
 
+void WorkOutViewArea(BoardData* bd, viewArea *pva, float *pHalfRadianFOV, float aspectRatio, int AssumeCubeAtTop)
+{
+	float p[3];
+	float boardRadAngle;
+	initViewArea(pva);
+
+	boardRadAngle = (bd->boardAngle * PI) / 180.0f;
+	*pHalfRadianFOV = ((GetFOVAngle(bd) * PI) / 180.0f) / 2.0f;
+
+	/* Sort out viewing area */
+	addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, -getBoardHeight() / 2, 0);
+	addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, -getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
+
+	if (fGUIDiceArea)
+	{
+		addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, 0);
+		addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, BASE_DEPTH + bd->diceSize);
+	}
+	else
+	{	/* Bottom edge is defined by board */
+		addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, getBoardHeight() / 2, 0);
+		addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
+	}
+
+	if (AssumeCubeAtTop)
+		addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
+
+	if (!bd->doubled)
+	{
+		if (bd->cube_owner == 1)
+			addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
+		if (bd->cube_owner == -1)
+			addViewAreaHeightPoint(pva, *pHalfRadianFOV, boardRadAngle, getBoardHeight() / 2 - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
+	}
+	p[0] = getBoardWidth() / 2;
+	p[1] = getBoardHeight() / 2;
+	p[2] = BASE_DEPTH + EDGE_DEPTH;
+	workOutWidth(pva, *pHalfRadianFOV, boardRadAngle, aspectRatio, p);
+}
+
 void SetupPerspVolume(BoardData* bd, int viewport[4])
 {
 	float aspectRatio = (float)viewport[2]/(float)(viewport[3]);
 	if (!bd->planView)
 	{
+		viewArea va;
+		float halfRadianFOV;
 		float fovScale;
 		float zoom;
-
-		float halfRadianFOV;
-		float p[3];
-		float boardRadAngle;
-		viewArea va;
-		initViewArea(&va);
-
-		boardRadAngle = (bd->boardAngle * PI) / 180.0f;
-		halfRadianFOV = ((GetFOVAngle(bd) * PI) / 180.0f) / 2.0f;
 
 		if (aspectRatio < .5f)
 		{
@@ -3032,33 +3065,19 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 			aspectRatio = .5f;
 		}
 
-		/* Sort out viewing area */
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, 0);
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
+		/* Workout how big the board is (in 3d space) */
+		WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio, FALSE);
 
-		if (fGUIDiceArea)
+		/* If the cube not at top of board and some spare vertical space,
+			see if adding cube at top would fit without changing the board size */
+		if ((bd->cube_owner != 1) && (aspectRatio <= getAreaRatio(&va)))
 		{
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, 0);
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, BASE_DEPTH + bd->diceSize);
+			WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio, TRUE);
+			if (aspectRatio > getAreaRatio(&va))
+			{	/* Didn't fit - go back to original values */
+				WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio, FALSE);
+			}
 		}
-		else
-		{	/* Bottom edge is defined by board */
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, 0);
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
-		}
-
-		if (!bd->doubled)
-		{
-			if (bd->cube_owner == 1)
-				addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
-			if (bd->cube_owner == -1)
-				addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
-		}
-
-		p[0] = getBoardWidth() / 2;
-		p[1] = getBoardHeight() / 2;
-		p[2] = BASE_DEPTH + EDGE_DEPTH;
-		workOutWidth(&va, halfRadianFOV, boardRadAngle, aspectRatio, p);
 
 		fovScale = zNear * (float)tan(halfRadianFOV);
 
