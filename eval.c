@@ -1730,7 +1730,6 @@ extern int GameStatus( int anBoard[ 2 ][ 25 ] ) {
 extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] ) {
 
   float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
-  int fRace;
 
   int pc = ClassifyPosition( anBoard );
   
@@ -1749,11 +1748,10 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] ) {
 
   SanityCheck( anBoard, arDesired );
     
-  fRace = CalculateInputs( anBoard, arInput );
+  CalculateInputs( anBoard, arInput );
 
   NeuralNetTrain( nn, arInput, arOutput, arDesired,
-		  2.0 / pow( 100.0 + ( fRace ? nnRace : nnContact ).nTrained,
-			     0.25 ) );
+		  2.0 / pow( 100.0 + nn.nTrained, 0.25 ) );
 
   return 0;
 }

@@ -1,3 +1,8 @@
+Mon Mar  6 10:27:44 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* eval.c (TrainPosition): Calculate alpha based on the correct net.
+	* database.c (CommandDatabaseDump): Fix spelling mistake.
+
 Sun Mar  5 14:56:42 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* eval.c: Disable BPG net until I figure if there is a way to get rid
