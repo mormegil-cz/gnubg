@@ -83,6 +83,9 @@ typedef struct _optionswidget {
   GtkWidget *pwPathSconyers15x15DVDModify;
   GtkWidget *pwPathSconyers15x15DiskModify;
 
+  GtkAdjustment *padjDigits;
+  GtkWidget *pwDigits;
+
 } optionswidget;   
 
 
@@ -708,6 +711,42 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "71.2%).  Otherwise, match winning chances will "
 			    "be shown as probabilities (e.g. 0.712)."),
 			  NULL );
+
+    /* number of digits in output */
+
+    pwev = gtk_event_box_new();
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
+    pwhbox = gtk_hbox_new( FALSE, 4 );
+    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
+
+    pw = gtk_label_new( _("Number of digits in output:") );
+    gtk_box_pack_start (GTK_BOX (pwhbox), pw, FALSE, FALSE, 0);
+
+    pow->padjDigits = GTK_ADJUSTMENT( gtk_adjustment_new (1, 0, 6, 
+							      1, 1, 1 ) );
+    pow->pwDigits = gtk_spin_button_new (GTK_ADJUSTMENT (pow->padjDigits),
+					  1, 0);
+    gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwDigits, TRUE, TRUE, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pow->pwDigits), TRUE);
+    gtk_tooltips_set_tip (ptt, pwev,
+			  _("Control the number of digits to be shown after "
+                            "the decimal point in "
+                            "probabilities and equities. "
+                            "This value is used throughout GNU Backgammon, "
+                            "i.e., in exported files, hints, analysis etc."
+                            "The default value of 3 results "
+                            "in equities output as +0.123. "
+                            "The equities and probabilities are internally "
+                            "stored with 7-8 digits, so it's possible to "
+                            "change the value "
+                            "after an analysis if you want more digits "
+                            "shown in the output. The output of match "
+                            "winning chances are derived from this value "
+                            "to produce numbers with approximately the same "
+                            "number of digits. The default value of 3 results "
+                            "in MWCs being output as 50.33%."),
+                          NULL );
+
 
     /* Match options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
@@ -1437,6 +1476,12 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwOutputGWC,fOutputWinPC, "set output winpc %s")
   CHECKUPDATE(pow->pwOutputMWCpst,fOutputMatchPC, "set output matchpc %s")
 
+  if(( n = pow->padjDigits->value ) != fOutputDigits ){
+    sprintf(sz, "set output digits %d", fOutputDigits );
+    UserCommand(sz); 
+  }
+  
+
   /* bearoff options */
 
   CHECKUPDATE( pow->pwSconyers15x15DVD, fSconyers15x15DVD,
@@ -1735,6 +1780,9 @@ OptionsSet( optionswidget *pow) {
                                 fOutputWinPC );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwOutputMWCpst ),
                                 fOutputMatchPC );
+
+  gtk_adjustment_set_value ( pow->padjDigits, fOutputDigits );
+
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwConfStart ),
                                 fConfirm );
