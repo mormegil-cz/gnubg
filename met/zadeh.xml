@@ -1,0 +1,57 @@
+<?xml version = "1.0"?>
+<!DOCTYPE met SYSTEM "met.dtd">
+
+<!--
+
+     zadeh.xml
+
+     by Joern Thyssen <jthyssen@dk.ibm.com>, 2002
+
+     This program is free software; you can redistribute it and/or modify
+     it under the terms of version 2 of the GNU General Public License as
+     published by the Free Software Foundation.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program; if not, write to the Free Software
+      Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+     $Id$
+
+ -->
+
+
+<met>
+   <info>
+      <name>N. Zadeh</name>
+      <description>N. Zadeh, Management Science 23, 986 (1977)</description>
+      <length>-1</length>
+   </info>
+
+   <pre-crawford-table type="zadeh">
+
+      <parameters>
+         <parameter name="gammon-rate-leader">0.25</parameter>
+         <parameter name="gammon-rate-trailer">0.15</parameter>
+         <parameter name="delta">0.08</parameter>
+         <parameter name="delta-bar">0.06</parameter>
+      </parameters>
+
+   </pre-crawford-table>      
+ 
+
+   <post-crawford-table type="zadeh">
+
+      <parameters>
+         <parameter name="gammon-rate-trailer">0.25</parameter>
+         <parameter name="free-drop-2-away">0.015</parameter>
+         <parameter name="free-drop-4-away">0.004</parameter>
+      </parameters>
+
+   </post-crawford-table>   
+
+</met>
