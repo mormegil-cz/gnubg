@@ -1,3 +1,9 @@
+Thu Nov 14 19:54:20 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (printHTMLBoardGNU, printNumbers): implement 
+	clockwise movement.
+	(suggested by Scott Steiner)
+
 Thu Nov 14 18:11:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c: fix typos in CSS.

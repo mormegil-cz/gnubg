@@ -1169,30 +1169,66 @@ printNumbers ( FILE *pf, const int fTop, const htmlexportcss hecss ) {
 
   int i;
 
-  if ( fTop ) {
+  printf ( "clock %d\n", fClockwise );
 
-    fputs ( "<tr><td>&nbsp;</td>", pf );
-    for ( i = 13; i <= 18; i++ )
-      fprintf ( pf, "<td %s>%d</td>", 
-                GetStyle ( CLASS_NUMBER, hecss ), i );
-    fputs ( "<td>&nbsp;</td>", pf );
-    for ( i = 19; i <= 24; i++ )
-      fprintf ( pf, "<td %s>%d</td>", 
-                GetStyle ( CLASS_NUMBER, hecss ), i );
-    fputs ( "</tr>\n", pf );
+  if ( fClockwise ) {
+
+    if ( fTop ) {
+      
+      fputs ( "<tr><td>&nbsp;</td>", pf );
+      for ( i = 24; i >= 19; i-- )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "<td>&nbsp;</td>", pf );
+      for ( i = 18; i >= 13; i-- )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "</tr>\n", pf );
+      
+    }
+    else {
+      
+      fputs ( "<tr><td>&nbsp;</td>", pf );
+      for ( i = 1; i <= 6; ++i )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "<td>&nbsp;</td>", pf );
+      for ( i = 7; i <= 12; ++i )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "</tr>\n", pf );
+      
+    }
 
   }
   else {
 
-    fputs ( "<tr><td>&nbsp;</td>", pf );
-    for ( i = 12; i >= 7; i-- )
-      fprintf ( pf, "<td %s>%d</td>", 
-                GetStyle ( CLASS_NUMBER, hecss ), i );
-    fputs ( "<td>&nbsp;</td>", pf );
-    for ( i = 6; i >= 1; i-- )
-      fprintf ( pf, "<td %s>%d</td>", 
-                GetStyle ( CLASS_NUMBER, hecss ), i );
-    fputs ( "</tr>\n", pf );
+    if ( fTop ) {
+      
+      fputs ( "<tr><td>&nbsp;</td>", pf );
+      for ( i = 13; i <= 18; i++ )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "<td>&nbsp;</td>", pf );
+      for ( i = 19; i <= 24; i++ )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "</tr>\n", pf );
+      
+    }
+    else {
+      
+      fputs ( "<tr><td>&nbsp;</td>", pf );
+      for ( i = 12; i >= 7; i-- )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "<td>&nbsp;</td>", pf );
+      for ( i = 6; i >= 1; i-- )
+        fprintf ( pf, "<td %s>%d</td>", 
+                  GetStyle ( CLASS_NUMBER, hecss ), i );
+      fputs ( "</tr>\n", pf );
+      
+    }
 
   }
 
@@ -1231,18 +1267,25 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
+
   printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
                fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+",
                hecss, HTML_EXPORT_TYPE_GNU );
+
   fputs ( "</td></tr>\n", pf );
 
   /* display left bearoff tray */
 
   fputs ( "<tr>", pf );
 
+
   fputs ( "<td rowspan=\"2\">", pf );
-  printImage ( pf, szImageDir, "b-roff", szExtension, "|", 
+  if ( fClockwise && acOff[ 1 ] )
+    sprintf ( sz, "b-roff-x%d", acOff[ 1 ] );
+  else
+    strcpy ( sz, "b-roff" );
+  printImage ( pf, szImageDir, sz, szExtension, "|", 
                hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
@@ -1250,10 +1293,16 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   for ( i = 0; i < 6; i++ ) {
     fputs ( "<td rowspan=\"2\">", pf );
-    printPointGNU ( pf, szImageDir, szExtension, 
-                    anBoard[ 1 ][ 11 - i ],
-                    anBoard[ 0 ][ 12 + i],
-                    ! (i % 2), TRUE, hecss );
+    if ( fClockwise )
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ i ],
+                      anBoard[ 0 ][ 23 - i ],
+                      ! (i % 2), TRUE, hecss );
+    else
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ 11 - i ],
+                      anBoard[ 0 ][ 12 + i],
+                      ! (i % 2), TRUE, hecss );
     fputs ( "</td>", pf );
   }
 
@@ -1276,10 +1325,16 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   for ( i = 0; i < 6; i++ ) {
     fputs ( "<td rowspan=\"2\">", pf );
-    printPointGNU ( pf, szImageDir, szExtension, 
-                    anBoard[ 1 ][ 5 - i ],
-                    anBoard[ 0 ][ 18 + i],
-                    ! ( i % 2 ), TRUE, hecss );
+    if ( fClockwise ) 
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ i + 6 ],
+                      anBoard[ 0 ][ 17 - i ],
+                      ! ( i % 2 ), TRUE, hecss );
+    else
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ 5 - i ],
+                      anBoard[ 0 ][ 18 + i],
+                      ! ( i % 2 ), TRUE, hecss );
     fputs ( "</td>", pf );
   }
 
@@ -1287,7 +1342,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* right bearoff tray */
 
   fputs ( "<td rowspan=\"2\">", pf );
-  if ( acOff[ 1 ] ) 
+  if ( ! fClockwise && acOff[ 1 ] )
     sprintf ( sz, "b-roff-x%d", acOff[ 1 ] );
   else
     strcpy ( sz, "b-roff" );
@@ -1330,11 +1385,14 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<td colspan=\"6\">", pf );
 
-  if ( ! pms->fMove && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
+  if ( pms->fMove == fClockwise && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
 
-    /* player 0 has rolled the dice */
+    /* player has rolled the dice */
     
-    sprintf ( sz, "b-midl-x%d%d", pms->anDice[ 0 ], pms->anDice[ 1 ] );
+    sprintf ( sz, "b-mid%c-%c%d%d", 
+              pms->fMove ? 'r' : 'l',
+              pms->fMove ? 'o' : 'x',
+              pms->anDice[ 0 ], pms->anDice[ 1 ] );
     sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
     
@@ -1342,11 +1400,13 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                  hecss, HTML_EXPORT_TYPE_GNU );
     
   }
-  else if ( ! pms->fMove && pms->fDoubled ) {
+  else if ( pms->fMove == fClockwise && pms->fDoubled ) {
     
     /* player 0 has doubled */
     
-    sprintf ( sz, "b-midl-c%d", 2 * pms->nCube );
+    sprintf ( sz, "b-mid%c-c%d", 
+              pms->fMove ? 'r' : 'l',
+              2 * pms->nCube );
     sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
     
     printImage ( pf, szImageDir, sz, szExtension, szAlt, 
@@ -1381,11 +1441,14 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<td colspan=\"6\">", pf );
 
-  if ( pms->fMove == 1 && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
+  if ( pms->fMove == ! fClockwise && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
 
     /* player 1 has rolled the dice */
-    
-    sprintf ( sz, "b-midr-o%d%d", pms->anDice[ 0 ], pms->anDice[ 1 ] );
+
+    sprintf ( sz, "b-mid%c-%c%d%d", 
+              pms->fMove ? 'r' : 'l',
+              pms->fMove ? 'o' : 'x',
+              pms->anDice[ 0 ], pms->anDice[ 1 ] );
     sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
     
@@ -1393,11 +1456,13 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                  hecss, HTML_EXPORT_TYPE_GNU );
     
   }
-  else if ( pms->fMove == 1 && pms->fDoubled ) {
+  else if ( pms->fMove == ! fClockwise && pms->fDoubled ) {
     
     /* player 1 has doubled */
     
-    sprintf ( sz, "b-midr-c%d", 2 * pms->nCube );
+    sprintf ( sz, "b-mid%c-c%d", 
+              pms->fMove ? 'r' : 'l',
+              2 * pms->nCube );
     sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
     
     printImage ( pf, szImageDir, sz, szExtension, szAlt, 
@@ -1431,19 +1496,28 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "<tr>", pf );
 
   fputs ( "<td rowspan=\"2\">", pf );
-  printImage ( pf, szImageDir, "b-roff", szExtension, "|", 
+  if ( fClockwise && acOff[ 0 ] ) 
+    sprintf ( sz, "b-roff-o%d", acOff[ 0 ] );
+  else
+    strcpy ( sz, "b-roff" );
+  printImage ( pf, szImageDir, sz, szExtension, "|", 
                hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
-
 
   /* display player 1's outer quadrant */
 
   for ( i = 0; i < 6; i++ ) {
     fputs ( "<td rowspan=\"2\">", pf );
-    printPointGNU ( pf, szImageDir, szExtension, 
-                    anBoard[ 1 ][ 12 + i ],
-                    anBoard[ 0 ][ 11 - i],
-                    i % 2, FALSE, hecss );
+    if ( fClockwise )
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ 23 - i ],
+                      anBoard[ 0 ][ i ],
+                      i % 2, FALSE, hecss );
+    else
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ 12 + i ],
+                      anBoard[ 0 ][ 11 - i],
+                      i % 2, FALSE, hecss );
     fputs ( "</td>", pf );
   }
 
@@ -1467,10 +1541,16 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   for ( i = 0; i < 6; i++ ) {
     fputs ( "<td rowspan=\"2\">", pf );
-    printPointGNU ( pf, szImageDir, szExtension, 
-                    anBoard[ 1 ][ 18 + i ],
-                    anBoard[ 0 ][ 5 - i],
-                    i % 2, FALSE, hecss );
+    if ( fClockwise )
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ 17 - i ],
+                      anBoard[ 0 ][ i + 6 ],
+                      i % 2, FALSE, hecss );
+    else
+      printPointGNU ( pf, szImageDir, szExtension, 
+                      anBoard[ 1 ][ 18 + i ],
+                      anBoard[ 0 ][ 5 - i],
+                      i % 2, FALSE, hecss );
     fputs ( "</td>", pf );
   }
 
@@ -1478,7 +1558,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* right bearoff tray */
 
   fputs ( "<td rowspan=\"2\">", pf );
-  if ( acOff[ 0 ] ) 
+  if ( ! fClockwise && acOff[ 0 ] ) 
     sprintf ( sz, "b-roff-o%d", acOff[ 0 ] );
   else
     strcpy ( sz, "b-roff" );
