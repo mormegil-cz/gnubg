@@ -4699,6 +4699,10 @@ typedef struct _evalwidget {
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 
+#if defined( REDUCTION_CODE )
+  GtkWidget *pwMenu, *pwItem;
+  int *pi;
+#endif
   pec->nPlies = pew->padjPlies->value;
   pec->fCubeful =
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
@@ -4841,6 +4845,8 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     GtkWidget *pwev;
 #if defined( REDUCTION_CODE )
+	GtkWidget *pw4;
+	char *pch;
     const char *aszReduced[] = {
       N_("No reduction"),
       NULL,
