@@ -626,6 +626,33 @@ rolls is obviously not uniform any longer in this case, but it will
 still provide some reduction of the luck, i.e., no 37 trial rollout
 will have 3 games with a initial 66. 
 
+Before the first game of a rollout, @gnubg{} creates a psuedo random
+array which it will use for all the games in the rollout. In effect it
+has already decided the roll sequence it will use for up to 128 rolls
+in every game of the rollout. In other words, for a normal rollout
+where games don't go over 64 moves, every single game of every
+possible rollout length has already had its dice sequence
+determined. During the rollout of game n, sequence n will be used, for
+game n+1 sequence n+1, etc. If it's a @emph{rollout as initial
+position}, then whenever the current sequence starts with a double,
+the sequence is skipped and the dice routine moves on to the next
+sequence. Say an @emph{rollout as initial position} is about to start
+using sequence 275, but that sequence begins with a double. The dice
+routine moves to sequence 276. On the following game, it will use
+sequence 277 (it remembers how many it has already skipped). 
+
+So, if you select @emph{rollout as initial position} and 36 games,
+then you will get a prefect set of rolls for games 1..30 and the first
+6 rolls of the next perfect set (the same rolls you would have gotton
+for games 31..36 if you'd asked for 1080 games or 10800 games or 92
+games or whatever. 
+
+The dice sequence doesn't know how man trials it will be asked for, it
+simply generates sequences such that for a normal rollout
+(@emph{rollout as initial position}) every 36 (30) games you get all
+possible 1st rolls, every 1296 (1080) games get every possible first 2
+rolls, every 46656 (38880) games you get full sets of 3 rolls, etc.
+
 
 
 
