@@ -1941,6 +1941,39 @@ static GtkWidget *RollAnalysis( int n0, int n1, float rLuck,
     return pw;
 }
 
+
+/*
+ * temporary hack for files sgf files 
+ */
+
+static void
+fixOutput ( float arDouble[], float aarOutput[][ NUM_ROLLOUT_OUTPUTS ] ) {
+  
+  cubeinfo ci;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+
+  if ( aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] < -10000.0 ) {
+    if ( ci.nMatchTo )
+      aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = 
+        eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], &ci );
+    else
+      aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = arDouble[ OUTPUT_NODOUBLE ];
+  }
+
+
+  if ( aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] < -10000.0 ) {
+    if ( ci.nMatchTo )
+      aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = 
+        eq2mwc ( arDouble[ OUTPUT_TAKE ], &ci );
+    else
+      aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = arDouble[ OUTPUT_TAKE ];
+  }
+
+}
+
+
+
 static void SetAnnotation( moverecord *pmr ) {
 
     GtkWidget *pwParent = pwAnalysis->parent, *pw, *pwBox, *pwAlign;
@@ -1990,6 +2023,8 @@ static void SetAnnotation( moverecord *pmr ) {
 	    pwBox = gtk_hbox_new( FALSE, 0 );
 	    
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
+
+            fixOutput ( pmr->n.arDouble, pmr->n.aarOutput );
 	    
 	    if( ( pw = CubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
 				     &pmr->n.esDouble, FALSE ) ) ) {
@@ -2055,6 +2090,8 @@ static void SetAnnotation( moverecord *pmr ) {
 	case MOVE_DOUBLE:
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 	    
+            fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
+
 	    if( ( pw = CubeAnalysis( pmr->d.aarOutput, pmr->d.aarStdDev,
 				     &pmr->d.esDouble, TRUE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
@@ -2078,6 +2115,8 @@ static void SetAnnotation( moverecord *pmr ) {
 	case MOVE_TAKE:
 	case MOVE_DROP:
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
+
+            fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
 
 	    if( ( pw = TakeAnalysis( pmr->mt, pmr->d.aarOutput,
                                      pmr->d.aarStdDev,

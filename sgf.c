@@ -393,8 +393,13 @@ static void RestoreDoubleAnalysis( property *pp,
 	nReduced = 0;
         pes->ec.rNoise = 0.0f;
         fDeterministic = TRUE;
+        memset ( aarOutput[ 0 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        memset ( aarOutput[ 1 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
+        aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
 	
 	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f"
+                "%f %f %f %f %f %f %f" 
                 "%f %f %f %f %f %f %f", 
                 &ar[ 0 ], &ar[ 1 ], &ar[ 2 ], &ar[ 3 ], 
                 &nPlies, &ch,
@@ -404,17 +409,17 @@ static void RestoreDoubleAnalysis( property *pp,
                 &aarOutput[ 0 ][ 0 ], &aarOutput[ 0 ][ 1 ], 
                 &aarOutput[ 0 ][ 2 ], &aarOutput[ 0 ][ 3 ], 
                 &aarOutput[ 0 ][ 4 ], &aarOutput[ 0 ][ 5 ], 
-                &aarOutput[ 0 ][ 6 ] );
+                &aarOutput[ 0 ][ 6 ],
+                &aarOutput[ 1 ][ 0 ], &aarOutput[ 1 ][ 1 ], 
+                &aarOutput[ 1 ][ 2 ], &aarOutput[ 1 ][ 3 ], 
+                &aarOutput[ 1 ][ 4 ], &aarOutput[ 1 ][ 5 ], 
+                &aarOutput[ 1 ][ 6 ] );
 
 	pes->ec.nPlies = nPlies;
         pes->ec.nReduced = nReduced;
         pes->ec.fDeterministic = fDeterministic;
 	pes->ec.fCubeful = ch == 'C';
 
-        memset ( aarOutput[ 1 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-
-        aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = ar[ OUTPUT_TAKE ];
-        
 	break;
 
     default:
@@ -968,6 +973,7 @@ static void WriteDoubleAnalysis( FILE *pf, float ar[],
     switch( pes->et ) {
     case EVAL_EVAL:
 	fprintf( pf, "DA[E %.4f %.4f %.4f %.4f %d%s %d %d %.4f "
+                 "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
                  "%.4f %.4f %.4f %.4f %.4f %.4f %.4f]", 
                  ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], 
                  pes->ec.nPlies,
@@ -978,7 +984,11 @@ static void WriteDoubleAnalysis( FILE *pf, float ar[],
                  aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
                  aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
                  aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
-                 aarOutput[ 0 ][ 6 ] );
+                 aarOutput[ 0 ][ 6 ],
+                 aarOutput[ 1 ][ 0 ], aarOutput[ 1 ][ 1 ], 
+                 aarOutput[ 1 ][ 2 ], aarOutput[ 1 ][ 3 ], 
+                 aarOutput[ 1 ][ 4 ], aarOutput[ 1 ][ 5 ], 
+                 aarOutput[ 1 ][ 6 ] );
 	break;
 
     case EVAL_ROLLOUT:

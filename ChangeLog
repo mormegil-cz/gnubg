@@ -1,3 +1,15 @@
+Mon Apr 22 19:04:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix problem with cube analysis not being restored.
+
+	* sgf.c (WriteDoubleAnalysis, RestoreDoubleAnalysis): read/write
+	both aarOutput[ 0 ] and aarOutput[ 1 ].
+
+	The ugly fix for backwardscompability:
+
+	* gtkgame.c (fixOutput): fix aarOutput if SGF file is written pre-today.
+	* gtkgame.c (SetAnnotation): call fixOutput.
+
 Mon Apr 22 11:18:42 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (SetMatchID): return if empty match id.
