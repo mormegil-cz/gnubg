@@ -124,6 +124,7 @@ void calculateBackgroundSize(BoardData *bd, int viewport[4]);
 
 // Misc functions
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
+void SetupSimpleMat(Material* pMat, float r, float g, float b);
 void setMaterial(Material* pMat);
 void SetColour(float r, float g, float b, float a);
 unsigned char *LoadDIBitmap(const char *filename, int *width, int *height);

@@ -3,9 +3,9 @@
 
 typedef struct _OccModel
 {
-	list planes;
-	list edges;
-	list points;
+	myList planes;
+	myList edges;
+	myList points;
 } OccModel;
 
 typedef struct Occluder_T

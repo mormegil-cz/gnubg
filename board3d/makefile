@@ -18,7 +18,7 @@ INCLUDE= \
 	-I$(BASEDIR)/include/gtkglext-1.0 \
 	-I$(BASEDIR)/lib/gtkglext-1.0/include \
 	-I$(BASEDIR)/include/freetype2 \
-	-I$(BASEDIR)/FTGL/src \
+	-Ic:/ftp/FTGL/include \
 	-I$(GNUDIR) \
 	-I$(GNUDIR)/lib
 

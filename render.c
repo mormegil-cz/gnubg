@@ -112,7 +112,8 @@ renderdata rdDefault = {
 	FALSE,	/* Show shadows */
 	1,	/* Test skin */
 	0,	/* Animate roll */
-	0	/* Animate flag */
+	0,	/* Animate flag */
+	0	/* Close board on exit */
 #endif
 };
 

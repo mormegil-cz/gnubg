@@ -107,8 +107,24 @@ void StopIdle3d()
 	stopIdleFunc();
 }
 
+extern int animation_finished;
+
 void stopIdleFunc()
 {
+	if (pCurBoard->shakingDice)
+	{
+		pCurBoard->shakingDice = 0;
+		updateDiceOccPos(pCurBoard);
+		gtk_main_quit();
+	}
+	if (pCurBoard->moving)
+	{
+		pCurBoard->moving = 0;
+		updatePieceOccPos(pCurBoard);
+		animation_finished = TRUE;
+		gtk_main_quit();
+	}
+
 	if (id)
 	{
 		g_idle_remove_by_data(widget);
@@ -118,7 +134,12 @@ void stopIdleFunc()
 
 void setIdleFunc(idleFunc* pFun)
 {
-	stopIdleFunc();
+	if (id)
+	{
+		g_idle_remove_by_data(widget);
+		id = 0;
+	}
+
 	pIdleFun = pFun;
 	id = g_idle_add((GtkFunction)idle, widget);
 }
@@ -310,7 +331,7 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 	gint y = screenHeight - (int)event->y;	/* Reverse screen y coords */
 	int editing = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pCurBoard->edit));
 
-	if (pCurBoard->drag_point >= 0 || pCurBoard->shakingDice || pCurBoard->moving)
+	if (event->type != GDK_BUTTON_PRESS || pCurBoard->drag_point >= 0 || pCurBoard->shakingDice || pCurBoard->moving)
 		return TRUE;
 
 	pCurBoard->click_time = gdk_event_get_time( (GdkEvent*)event );
@@ -352,12 +373,13 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 	    return TRUE;
 
 	case POINT_RESIGN:
+		stopIdleFunc();
 		/* clicked on resignation symbol */
 		updateFlagOccPos(pCurBoard);
 
 		pCurBoard->drag_point = -1;
 		if (pCurBoard->resigned && !editing)
-			UserCommand ( "accept" );
+			UserCommand("accept");
 
 		return TRUE;
 
@@ -452,9 +474,6 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
                  always return legal moves */
               assert(FALSE);
             }
-			/* Show move */
-			updatePieceOccPos(pCurBoard);
-			gtk_widget_queue_draw(widget);
           }
 
           return TRUE;
@@ -572,8 +591,7 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 		/* Start Dragging piece */
 		MouseMove(x, y);
 
-		/* Make sure piece is rotated correctly while dragging */
-		pCurBoard->movingPieceRotation = pCurBoard->pieceRotation[pCurBoard->drag_point][abs(pCurBoard->points[pCurBoard->drag_point])];
+		SetMovingPieceRotation(pCurBoard->drag_point);
 
 		/* Show hovering piece */
 		updatePieceOccPos(pCurBoard);
@@ -593,6 +611,8 @@ gboolean button_release_event(GtkWidget *widget, GdkEventButton *event, gpointer
 	if (pCurBoard->drag_point >= 0)
 	{
 		int dest = board_point(pCurBoard, x, y, -1);
+		pCurBoard->DragTargetHelp = 0;
+
 		if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pCurBoard->edit ) ) &&
 			dest == pCurBoard->drag_point && gdk_event_get_time( (GdkEvent*)event ) -
 			pCurBoard->click_time < CLICK_TIME ) 
@@ -675,15 +695,28 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer 
 {
 	gint x = (int)event->x;
 	gint y = screenHeight - (int)event->y;	/* Reverse screen y coords */
+	int editing = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pCurBoard->edit));
 
 	/* In quick editing mode, dragging across points */
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pCurBoard->edit))
-		 && !(event->state & GDK_CONTROL_MASK))
+	if (editing && !(event->state & GDK_CONTROL_MASK))
 	{
 		pCurBoard->drag_point = board_point(pCurBoard, x, y, -1);
 		board_quick_edit3d(pCurBoard, x, y, 1);
 	    pCurBoard->drag_point = -1;
 	    return TRUE;
+	}
+
+	if (fGUIDragTargetHelp && !editing)
+	{
+		gint iDestPoints[4];
+		gint i, ptx, pty, ptcx, ptcy;
+		GdkColor *TargetHelpColor;
+		
+		if ((ap[ pCurBoard->drag_colour == -1 ? 0 : 1 ].pt == PLAYER_HUMAN)		/* not for computer turn */
+			&& (pCurBoard->drag_point != board_point(pCurBoard, x, y, -1)))	/* dragged to different ponit */
+		{
+			pCurBoard->DragTargetHelp = LegalDestPoints(pCurBoard, pCurBoard->iTargetHelpPoints);
+		}
 	}
 
 	if (MouseMove(x, y))
@@ -701,7 +734,7 @@ void CreateGLWidget(GtkWidget **drawing_area)
 	gtk_widget_set_gl_capability(*drawing_area, glconfig, NULL, TRUE, GDK_GL_RGBA_TYPE);
 
 	gtk_widget_set_events(*drawing_area, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
-				GDK_BUTTON_RELEASE_MASK | GDK_BUTTON1_MOTION_MASK);
+				GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK);
 
 	g_signal_connect(G_OBJECT(*drawing_area), "realize", G_CALLBACK(realize), NULL);
 	g_signal_connect(G_OBJECT(*drawing_area), "configure_event", G_CALLBACK(configure_event), NULL);

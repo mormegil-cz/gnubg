@@ -209,6 +209,10 @@ typedef struct _BoardData {
 	/* Angle of board display */
 	float fovAngle;	/* y-field of view angle 0-90 */
 	float boardAngle;	/* angle board is rotated at 0-90 */
+
+	int iTargetHelpPoints[4];	/* Drag target position */
+	int DragTargetHelp;
+
 #endif
 } BoardData;
 
@@ -227,6 +231,8 @@ extern void AnimateMove3d();
 extern void ShowFlag3d();
 extern void StopIdle3d();
 
+extern void PlaceMovingPieceRotation(int dest, int src);
+extern void SetMovingPieceRotation(int pt);
 extern void updateOccPos(BoardData* bd);
 extern void updateHingeOccPos(BoardData* bd);
 extern void updateFlagOccPos(BoardData* bd);

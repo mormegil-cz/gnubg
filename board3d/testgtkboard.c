@@ -217,6 +217,8 @@ setDicePos(bd);
 	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
 
 	SetShadowDimness(bd, 50);
+
+	bd->DragTargetHelp = 0;
 }
 
 void TidyBoard(BoardData *bd)
@@ -228,28 +230,6 @@ void TidyBoard(BoardData *bd)
 		free(bd->textureNames[i]);
 	}
 	bd->numTextures = 0;
-}
-
-void CloseBoard(BoardData* bd)
-{
-	EmptyPos(bd);
-	bd->State = BOARD_CLOSED;
-	/* Turn off most things so they don't interfere when board closed/opening */
-	bd->cube_use = 0;
-	bd->colour = 0;
-	bd->direction = 1;
-	fClockwise = 0;
-	/* Sort out logo */
-	SetupSimpleMat(&bd->logoMat, bd->boxMat.ambientColour[0], bd->boxMat.ambientColour[1], bd->boxMat.ambientColour[2]);
-	if (bd->boxMat.pTexture)
-	{
-		static int test = 0;
-		if (test)
-			SetTexture(bd, &bd->logoMat, PATH"logo.bmp");
-		else
-			SetTexture(bd, &bd->logoMat, PATH"logo2.bmp");
-		test = !test;
-	}
 }
 
 void SetSkin1(BoardData *bd)
@@ -311,6 +291,9 @@ void SetSkin2(BoardData *bd)
 	SetupSimpleMatAlpha(&bd->pointNumberMat, .5f, .5f, .5f, 1);
 	SetupSimpleMat(&bd->backGroundMat, .4f, .6f, .2f);
 	SetTexture(bd, &bd->backGroundMat, PATH"base2.bmp");
+
+	SetupSimpleMat(&bd->hingeMat, .75f, .85f, .1f);
+	SetTexture(bd, &bd->hingeMat, PATH"hinge.bmp");
 
 	bd->pieceType = 1;
 }

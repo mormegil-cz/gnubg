@@ -1065,6 +1065,10 @@ gboolean place_chequer_or_revert(BoardData *bd,
 	}
     }
 
+#if USE_BOARD3D
+	if (placed && rdAppearance.fDisplayType == DT_3D)
+		PlaceMovingPieceRotation(dest, bd->drag_point);
+#endif
     return placed;
 }
 
@@ -1389,10 +1393,19 @@ UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
     /* illegal move */
     memcpy( bd->points, old_points, sizeof old_points );
 
-  /* redraw points */
-
-  for ( i = 0; i < j; ++i )
-    board_invalidate_point( bd, an[ i ] );
+	/* Show move */
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+	{
+		updatePieceOccPos(bd);
+		ShowBoard3d(bd);
+	}
+	else
+#endif
+	{
+		for ( i = 0; i < j; ++i )
+			board_invalidate_point( bd, an[ i ] );
+	}
 
   return rc;
 
@@ -1784,7 +1797,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( bd->drag_point < 0 )
 	    break;
 
-	if ( fGUIDragTargetHelp ) {
+	if ( fGUIDragTargetHelp && !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) )) {
 		gint iDestPoints[4];
 		gint i, ptx, pty, ptcx, ptcy;
 		GdkColor *TargetHelpColor;
@@ -2956,6 +2969,10 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd ) {
 static void board_stop( GtkWidget *pw, BoardData *bd ) {
 
     fInterrupt = TRUE;
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+		StopIdle3d();
+#endif
 }
 
 static void board_edit( GtkWidget *pw, BoardData *bd ) {
@@ -4038,6 +4055,7 @@ InitBoardData()
 	BoardData* bd = BOARD(pwBoard)->board_data;
 
 	bd->doubled = 0;
+	bd->cube = 0;
 	bd->cube_owner = 0;
 	bd->resigned = 0;
 	/* Set dice so roll works */
@@ -4047,7 +4065,7 @@ InitBoardData()
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
 	{
-		updateDiceOccPos(bd);
+		updateOccPos(bd);
 		updateFlagOccPos(bd);
 		SetupViewingVolume3d();
 	}

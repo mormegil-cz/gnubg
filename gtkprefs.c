@@ -68,7 +68,7 @@ static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwLabels, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ];
 #if USE_BOARD3D
-GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwSpin;
+GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard, *pwSpin;
 #endif
 
 #if HAVE_LIBXML2
@@ -644,15 +644,61 @@ void toggle_display_type(GtkWidget *widget, gpointer data)
 }
 #endif
 
+#if USE_BOARD3D
+GtkWidget *Board3dPage(BoardData *bd)
+{
+    GtkWidget *pw, *pwx;
+	GtkWidget *dtBox, *pwev, *pwhbox, *lab;
+	GtkAdjustment *adj;
+
+    pwx = gtk_hbox_new ( FALSE, 0 );
+    pw = gtk_vbox_new( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
+	
+	dtBox = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pw), dtBox, FALSE, FALSE, 0);
+	
+	pwShowShadows = gtk_check_button_new_with_label ("Show shadows");
+	gtk_box_pack_start (GTK_BOX (dtBox), pwShowShadows, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), rdAppearance.showShadows);
+	
+	pwAnimateRoll = gtk_check_button_new_with_label ("Animate dice rolls");
+	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateRoll, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateRoll), rdAppearance.animateRoll);
+	
+	pwAnimateFlag = gtk_check_button_new_with_label ("Animate resignation flag");
+	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateFlag, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateFlag), rdAppearance.animateFlag);
+
+	pwCloseBoard = gtk_check_button_new_with_label ("Close board on exit");
+	gtk_box_pack_start (GTK_BOX (dtBox), pwCloseBoard, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), rdAppearance.closeBoardOnExit );
+	
+	pwev = gtk_event_box_new();
+	gtk_box_pack_start(GTK_BOX(dtBox), pwev, FALSE, FALSE, 0);
+	pwhbox = gtk_hbox_new(FALSE, 4);
+	gtk_container_add(GTK_CONTAINER(pwev), pwhbox);
+	
+	lab = gtk_label_new("3d test skin:");
+	gtk_box_pack_start(GTK_BOX(pwhbox), lab, FALSE, FALSE, 0);
+	
+	adj = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.skin3d, 1, 4, 1, 1, 1));
+	pwSpin = gtk_spin_button_new(adj, 1, 0);
+	gtk_box_pack_start(GTK_BOX(pwhbox), pwSpin, FALSE, FALSE, 0);
+	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(pwSpin), TRUE);
+
+    return pwx;
+}
+#endif
+
 static GtkWidget *GeneralPage( BoardData *bd ) {
 
     GtkWidget *pw, *pwTable, *pwBox, *pwScale;
     float rAzimuth, rElevation;
     GtkWidget *pwx;
 #if USE_BOARD3D
-	GtkWidget *dtBox, *button, *dtFrame, *pwev, *pwhbox, *lab;
+	GtkWidget *dtBox, *button, *dtFrame;
 	GSList* group;
-	GtkAdjustment *adj;
 #endif
 
     pwx = gtk_hbox_new ( FALSE, 0 );
@@ -677,39 +723,6 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 	gtk_box_pack_start (GTK_BOX (dtBox), button, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.fDisplayType == DT_3D));
 	g_signal_connect(G_OBJECT(button), "toggled", G_CALLBACK(toggle_display_type), NULL);
-	
-	
-	dtFrame = gtk_frame_new("3d Options");
-	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
-	gtk_box_pack_start(GTK_BOX( pw ), dtFrame, FALSE, FALSE, 0);
-	
-	dtBox = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (dtFrame), dtBox);
-	
-	pwShowShadows = gtk_check_button_new_with_label ("Show shadows");
-	gtk_box_pack_start (GTK_BOX (dtBox), pwShowShadows, FALSE, FALSE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), rdAppearance.showShadows);
-	
-	pwAnimateRoll = gtk_check_button_new_with_label ("Animate dice rolls");
-	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateRoll, FALSE, FALSE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateRoll), rdAppearance.animateRoll);
-	
-	pwAnimateFlag = gtk_check_button_new_with_label ("Animate resignation flag");
-	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateFlag, FALSE, FALSE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateFlag), rdAppearance.animateFlag);
-	
-	pwev = gtk_event_box_new();
-	gtk_box_pack_start(GTK_BOX(dtBox), pwev, FALSE, FALSE, 0);
-	pwhbox = gtk_hbox_new(FALSE, 4);
-	gtk_container_add(GTK_CONTAINER(pwev), pwhbox);
-	
-	lab = gtk_label_new("3d test skin:");
-	gtk_box_pack_start(GTK_BOX(pwhbox), lab, FALSE, FALSE, 0);
-	
-	adj = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.skin3d, 1, 4, 1, 1, 1));
-	pwSpin = gtk_spin_button_new(adj, 1, 0);
-	gtk_box_pack_start(GTK_BOX(pwhbox), pwSpin, FALSE, FALSE, 0);
-	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(pwSpin), TRUE);
 #endif
 
     pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
@@ -1468,6 +1481,7 @@ static void GetPrefs ( renderdata *prd ) {
 	SetSkin(bd, rdAppearance.skin3d);
 	rdAppearance.animateRoll = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateRoll));
 	rdAppearance.animateFlag = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateFlag));
+	rdAppearance.closeBoardOnExit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwCloseBoard));
 	if (rdAppearance.fDisplayType == DT_3D && bd->resigned)
 		ShowFlag3d();	/* Showing now - update */
 #endif
@@ -1623,6 +1637,13 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      GeneralPage( bd ),
 			      gtk_label_new( _("General") ) );
+
+#if USE_BOARD3D
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      Board3dPage( bd ),
+			      gtk_label_new( _("3d Options") ) );
+#endif
+
 #if HAVE_LIBXML2
     plBoardDesigns = read_board_designs ();
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),

@@ -1,50 +1,39 @@
 
-GTK problems
-============
-
-* Right mouse button dragging not working
-- hence can't move piece using right click or edit positions...
-	No events from gtk - don't know why
-
-* Double click when editing - 3 extra pieces appear
-	Ignore double click
-
-* Interupt animations - sort out what happens here
-	+ Testing: try slow animation speed
-	Swapping 2d<->3d, showing dialog box etc.
-
-Bugs
-----
-
-* Occasionaly hangs on user click, when dice should roll:
-	I'm proabably confusing the idle processing - how should this be done properly?
-	cpu 100% - stuck in a loop somewhere
-
-* gnubg moving, open appearance dialog (mid animation), change skin number (pause a bit), click ok -> crash
-	Stop animation when interupted - fixes this problem?
-	Similiarly: flag still waves if settings shown when resigning - ok?
-
-* Fails to load (run) on my windows 98 box
-
 Todo
 ====
 
-* Add animation effects
-	Blink moves?
-
-Display setting
----------------
+Display settings
+----------------
 
 	* Change display settings options to allow 3d skin settings
 		Merge in with existing 2d settings?
-	* Add other 3d settings too (new page)
+	* Add other 3d settings too
+		Add tooltips
 
 	Design/think about this bit.
+
+Bugs
+====
+
+Fails to load (run) on my windows 98 box
 
 Other things
 ============
 
+Put animation effects in misc3d.c to a new file
+	+ Add stuff in widget.c too (or put animation stuff here)
+
+Add a g_print with fps/render time displayed
+	+ Add an option to show this
+	+ Display roll/move fps and every 10 displays average draw time
+
 1st skin - red pieces look a bit strange (transparancy)
+	+ Draw inside and outside of piece separately
+
+Add specular highlights to skins
+	+ Piece, dice + cube
+
+Blink move animatation - useful?
 
 Merge button press code together
 	Split up big function at same time
@@ -57,8 +46,9 @@ Change win32 messagebox's to gtk messagebox's
 
 FTGL uses C++
 
-Check performance
-	2d + unaccelerated
+Flag still waves if settings shown when resigning...
+
+Check unaccelerated performance
 
 Remove g_prints/debug code
 
@@ -71,3 +61,8 @@ remove build warnings
 remove pCurBoard and use bd passed in throughout (or as much as poss)?
 
 Check display calls - minimium number
+
+Look at base_unit usage
+	Vary board sizes + check things are ok
+
+Check gnubg builds and runs without BOARD3D defined

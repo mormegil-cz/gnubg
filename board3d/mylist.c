@@ -5,7 +5,7 @@
 
 #define ALLOC_STEP 50
 
-void ListInit(list* l, int eleSize)
+void ListInit(myList* l, int eleSize)
 {
 	l->eleSize = eleSize;
 	l->numElements = 0;
@@ -13,7 +13,7 @@ void ListInit(list* l, int eleSize)
 	l->data = 0;
 }
 
-void ListClear(list* l)
+void ListClear(myList* l)
 {
 	free(l->data);
 	l->eleSize = 0;
@@ -22,7 +22,7 @@ void ListClear(list* l)
 	l->data = 0;
 }
 
-void ListAdd(list* l, void* ele)
+void ListAdd(myList* l, void* ele)
 {
 	if (l->numElements == l->curAllocated)
 	{
@@ -33,17 +33,17 @@ void ListAdd(list* l, void* ele)
 	l->numElements++;
 }
 
-int ListSize(list* l)
+int ListSize(myList* l)
 {
 	return l->numElements;
 }
 
-void* ListGet(list* l, int pos)
+void* ListGet(myList* l, int pos)
 {
 	return &((char*)l->data)[pos * l->eleSize];
 }
 
-int ListFind(list* l, void* ele)
+int ListFind(myList* l, void* ele)
 {
 	int i;
 	for (i = 0; i < ListSize(l); i++)

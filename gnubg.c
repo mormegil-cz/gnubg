@@ -3594,6 +3594,14 @@ extern void PromptForExit( void ) {
 	StopIdle3d();
 #endif
 
+    playSound ( SOUND_EXIT );
+
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D && rdAppearance.closeBoardOnExit
+		&& rdAppearance.fHinges)
+		CloseBoard3d(BOARD(pwBoard)->board_data);
+	else
+#endif
 #if USE_GTK
     if( fX ) {
 #if USE_GTK2
@@ -3609,7 +3617,6 @@ extern void PromptForExit( void ) {
     if( fInteractive )
 	PortableSignalRestore( SIGINT, &shInterruptOld );
     
-    playSound ( SOUND_EXIT );
     SoundWait();
 
     EvalShutdown ();

@@ -64,6 +64,7 @@ typedef struct _renderdata {
 	int skin3d;	/* Test skin number */
 	int animateRoll;	/* Animate dice rolls */
 	int animateFlag;	/* Animate resignation flag */
+	int closeBoardOnExit;	/* Animate board close on quit */
 #endif
 } renderdata;
 

@@ -717,14 +717,14 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 			dot = 8 - c;
 
 		/* Make sure top dot looks nice */
-		nd = !bd->shakingDice && (dot == dt->top);
-		if (nd)
-			glDisable(GL_DEPTH_TEST);
+		nd = !bd->shakingDice && (dot == dt->top || dot == dt->side[2]);
 
-		if (bd->shakingDice || 
-			(showFront && dot != dt->bottom && dot != dt->side[0])
-			|| (!showFront && dot != dt->top))
+		if (bd->shakingDice
+			|| (showFront && dot != dt->bottom && dot != dt->side[0])
+			|| (!showFront && dot != dt->top && dot != dt->side[2]))
 		{
+			if (nd)
+				glDisable(GL_DEPTH_TEST);
 			glPushMatrix();
 			glTranslatef(0, 0, hds + radius);
 
@@ -750,9 +750,9 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 			} while (*dp);
 
 			glPopMatrix();
+			if (nd)
+				glEnable(GL_DEPTH_TEST);
 		}
-		if (nd)
-			glEnable(GL_DEPTH_TEST);
 
 		if (c % 2 == 0)
 			glRotatef(-90, 0, 1, 0);
@@ -834,16 +834,17 @@ void drawDice2(BoardData* bd, int num)
 	else
 	{
 		value = bd->dice[num];
-		z = ((int)bd->dicePos[num][2]) / 90;
+		z = ((int)bd->dicePos[num][2] + 45) / 90;
 		if (bd->direction == 1)
 			z++;
 	}
 
-	glRotatef(90.0f * rotDice[value - 1][0], 1, 0, 0);
-	glRotatef(90.0f * rotDice[value - 1][1], 0, 1, 0);
+	value--;	/* Zero based for array access */
+	glRotatef(90.0f * rotDice[value][0], 1, 0, 0);
+	glRotatef(90.0f * rotDice[value][1], 0, 1, 0);
 
-	if (value)
-		initDT(&dt, rotDice[value - 1][0], rotDice[value - 1][1], z);
+	if (value >= 0)
+		initDT(&dt, rotDice[value][0], rotDice[value][1], z);
 	else
 		g_print("no value on dice?\n");
 
@@ -998,6 +999,26 @@ void drawPiece(BoardData* bd, int point, int pos)
 	glPopMatrix();
 }
 
+void drawGreenPiece(BoardData* bd, int point, int pos)
+{
+	float v[3];
+	getPiecePos(point, pos, fClockwise, v);
+
+	glPushMatrix();
+	glTranslatef(v[0], v[1], v[2]);
+
+	/* Home pieces are sideways */
+	if (point == 26)
+		glRotatef(-90, 1, 0, 0);
+	if (point == 27)
+		glRotatef(90, 1, 0, 0);
+
+	glRotatef((float)bd->pieceRotation[point][pos - 1], 0, 0, 1);
+	glCallList(pieceList);
+
+	glPopMatrix();
+}
+
 void drawDraggedPiece(BoardData* bd)
 {
 	if (bd->drag_point >= 0)
@@ -1005,7 +1026,7 @@ void drawDraggedPiece(BoardData* bd)
 		glPushMatrix();
 		glTranslated(bd->dragPos[0], bd->dragPos[1], bd->dragPos[2]);
 
-		renderPiece(bd, bd->movingPieceRotation, (pCurBoard->drag_colour == 1));
+		renderPiece(bd, bd->movingPieceRotation, (bd->drag_colour == 1));
 
 		glPopMatrix();
 	}
@@ -1056,7 +1077,23 @@ void drawPieces(BoardData* bd)
 	}
 
 	if (blend)
-	glDisable(GL_BLEND);
+		glDisable(GL_BLEND);
+
+	if (bd->DragTargetHelp)
+	{	/* highlight target points */
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		SetColour(0, 1, 0, 0);
+
+		for (i = 0; i <= 3; i++)
+		{
+			int target = bd->iTargetHelpPoints[i];
+			if (target != -1)
+			{
+				drawGreenPiece(bd, target, abs(bd->points[target]) + 1);
+			}
+		}
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
 }
 
 void drawSpecialPieces(BoardData* bd)
@@ -2160,6 +2197,7 @@ void updateDiceOccPos(BoardData *bd);
 
 void setDicePos(BoardData* bd)
 {
+	int iter = 0;
 	float dist;
 	float orgX[2];
 	float firstX = (DICE_STEP_SIZE0 * 3 + DICE_SIZE / 2.0f);
@@ -2176,6 +2214,12 @@ void setDicePos(BoardData* bd)
 		orgX[1] = bd->dicePos[1][0] - DICE_STEP_SIZE1 * 5;
 		dist = (float)sqrt((orgX[1] - orgX[0]) * (orgX[1] - orgX[0])
 				+ (bd->dicePos[1][1] - bd->dicePos[0][1]) * (bd->dicePos[1][1] - bd->dicePos[0][1]));
+
+		if (++iter > 20)
+		{	/* Trouble placing 2nd dice - replace 1st dice */
+			setDicePos(bd);
+			return;;
+		}
 	}
 	while (dist < DICE_SIZE * 1.1f);
 
@@ -2190,7 +2234,7 @@ void setDicePos(BoardData* bd)
 		copyPoint(bd->dicePos[1], temp);
 	}
 
-updateDiceOccPos(bd);
+	updateDiceOccPos(bd);
 }
 
 void drawMovingDice(BoardData* bd, int num)
@@ -2645,10 +2689,14 @@ void updateFlagOccPos(BoardData* bd)
 		ctlpoints[1][0][2] *= .7f;
 
 		for (s = 0; s < S_NUMPOINTS - 1; s++)
-		{
-			addWonkyCube(&Occluders[OCC_FLAG], ctlpoints[s][0][0], ctlpoints[s][0][1], ctlpoints[s][0][2],
-				ctlpoints[s + 1][0][0] - ctlpoints[s][0][0], ctlpoints[s][1][1] - ctlpoints[s][0][1], 
-				base_unit / 10.0f,
+		{	/* Reduce shadow size a bit to remove artifacts */
+			float h = (ctlpoints[s][1][1] - ctlpoints[s][0][1]) * .92f - (FLAG_HEIGHT * .05f);
+			float y = ctlpoints[s][0][1] + FLAG_HEIGHT * .05f;
+			float w = ctlpoints[s + 1][0][0] - ctlpoints[s][0][0];
+			if (s == 2)
+				w *= .95f;
+			addWonkyCube(&Occluders[OCC_FLAG], ctlpoints[s][0][0], y, ctlpoints[s][0][2],
+				w, h, base_unit / 10.0f,
 				ctlpoints[s + 1][0][2] - ctlpoints[s][0][2], s);
 		}
 		ctlpoints[1][0][2] = p1x;
@@ -2777,8 +2825,35 @@ void SetShadowDimness(BoardData* bd, int percent)
 	dim = (bd->LightDiffuse * (100 - percent)) / 100;
 }
 
+void RotateClosingBoard(BoardData* bd)
+{
+	float rotAngle = 90;
+	float trans = getBoardHeight() * .4f;
+	float zoom = .2f;
+
+	glPopMatrix();
+
+	glClearColor(bd->backGroundMat.ambientColour[0], pCurBoard->backGroundMat.ambientColour[1], pCurBoard->backGroundMat.ambientColour[2], 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if ((pCurBoard->State == BOARD_OPENING) || (pCurBoard->State == BOARD_CLOSING))
+	{
+		rotAngle *= pCurBoard->perOpen;
+		trans *= pCurBoard->perOpen;
+		zoom *= pCurBoard->perOpen;
+	}
+	glPushMatrix();
+	glTranslatef(0, -trans, zoom);
+	glTranslatef(getBoardWidth() / 2.0f, getBoardHeight() / 2.0f, 0);
+	glRotatef(rotAngle, 0, 0, 1);
+	glTranslatef(-getBoardWidth() / 2.0f, -getBoardHeight() / 2.0f, 0);
+}
+
 void drawBoard(BoardData* bd)
 {
+	if (bd->State != BOARD_OPEN)
+		RotateClosingBoard(bd);
+
 	drawTable(bd);
 
 	if (bd->cube_use && !bd->crawford_game)
