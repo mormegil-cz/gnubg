@@ -1,6 +1,11 @@
+Sun Feb 23 15:58:11 2003  Oystein Johansen <oystein@gnubg.org>
+
+	* html.c (CommandExportPositionGammOnLine): Copy the file
+	directly to the windows clipboard.
+	
 Mon Feb 17 18:54:11 2003  Jim Segrave <jes@jes-2.demon.nl>
 
-	* play.c - fix so next marked finds errors on last play of game
+	* play.c: - fix so next marked finds errors on last play of game
 	
 Mon Feb  3 12:11:36 2003  Gary Wong  <gtw@gnu.org>
 

@@ -4018,8 +4018,9 @@ CommandExportPositionGammOnLine ( char *sz ) {
     FILE *pf;
     int fHistory;
     moverecord *pmr = getCurrentMoveRecord ( &fHistory );
-    int iMove;
-	
+    int iMove, i = 0;
+    char szClipboard[8192]; 
+    
     sz = NextToken( &sz );
     
     if( ms.gs == GAME_NONE ) {
@@ -4097,9 +4098,21 @@ CommandExportPositionGammOnLine ( char *sz ) {
     }
 
     HTMLEpilogueComment ( pf );
-
+    
     if( pf != stdout )
 	fclose( pf );
+    
+#ifdef WIN32
+    /* rewind(pf); */
+    
+    pf = fopen( sz, "r");  /* why doesn't rewind(pf) work? */
+    
+    while ( (szClipboard[i] = fgetc(pf)) != EOF )
+	    i++;
+    szClipboard[i]= '\0';
+    WinCopy( szClipboard );
+    fclose( pf );
+#endif
 
 }
 
