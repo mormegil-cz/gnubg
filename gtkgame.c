@@ -3138,17 +3138,36 @@ GTKMessage( char *sz, dialogtype dt ) {
 	N_("GNU Backgammon - Warning"),
 	N_("GNU Backgammon - Error"),
     };
-    GtkWidget *pwDialog = GTKCreateDialog( gettext( aszTitle[ dt ] ), dt, NULL,
-					&f ),
-	*pwPrompt = gtk_label_new( sz );
+    GtkWidget *pwDialog = GTKCreateDialog( gettext( aszTitle[ dt ] ),
+					   dt, NULL, &f );
+    GtkWidget *psw;
+    GtkWidget *pwPrompt = gtk_label_new( sz );
+    GtkRequisition req;
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_label_set_justify( GTK_LABEL( pwPrompt ), GTK_JUSTIFY_LEFT );
     gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
+
+    gtk_widget_size_request( GTK_WIDGET( pwPrompt ), &req );
+
+    if ( req.height > 500 ) {
+	psw = gtk_scrolled_window_new( NULL, NULL );
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+			   psw );
+	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( psw ),
+					       pwPrompt );
+	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+					GTK_POLICY_NEVER, GTK_POLICY_ALWAYS );
+	gtk_window_set_default_size( GTK_WINDOW( pwDialog ),
+				     req.width, req.height );
+	gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, TRUE, TRUE );
+    }
+    else {
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwPrompt );
-
     gtk_window_set_policy( GTK_WINDOW( pwDialog ), FALSE, FALSE, FALSE );
+    }
+
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
