@@ -129,5 +129,8 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      skilltype stTake,
                      const int fPrintAlerts );
 
+extern char *
+OutputMoneyEquity ( const float ar[], const int f );
+
 
 #endif

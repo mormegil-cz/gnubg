@@ -289,6 +289,21 @@ OutputEquity ( const float r, const cubeinfo *pci, const int f ) {
 }
 
 
+extern char *
+OutputMoneyEquity ( const float ar[], const int f ) {
+
+  static char sz[ 9 ];
+
+  sprintf ( sz, f ? "%+7.3f" : "%7.3f", 
+            2.0 * ar[ OUTPUT_WIN ] - 1.0
+            + ar[ OUTPUT_WINGAMMON ] + ar[ OUTPUT_WINBACKGAMMON] 
+            - ar[ OUTPUT_LOSEGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON] );
+
+  return sz;
+
+}
+
+
 
 /*
  * Return formatted string with equity or MWC.
@@ -838,10 +853,20 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     break;
   }
 
-  sprintf ( pc = strchr ( sz, 0 ), " %s %s\n",
-            ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
-            _("cubeless equity") : _("cubeless MWC"),
-            OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ) );
+  if ( pci->nMatchTo ) 
+    sprintf ( pc = strchr ( sz, 0 ), " %s %s (%s: %s)\n",
+              ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
+              _("cubeless equity") : _("cubeless MWC"),
+              OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ),
+              _("Money"), 
+              OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+  else
+    sprintf ( pc = strchr ( sz, 0 ), " %s %s\n",
+              ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
+              _("cubeless equity") : _("cubeless MWC"),
+              OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+
+
 
 
   /* Output percentags for evaluations */

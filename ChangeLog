@@ -1,3 +1,12 @@
+Mon Oct 21 19:19:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Output cubeless equities independent of Jacoby rule:
+	Part I: output in cube analysis (text/html/gtk)
+	
+	* text.c (OutputMoneyEquity): output money equity
+	* text.c (OutputCubeAnalysis), html.c (HTMLPrintCubeAnalysisTable),
+	gtkcube.c (CubeAnalysis, TakeAnalysis): fix cubeless output.
+
 Mon Oct 21 18:31:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Make OSR code compile.

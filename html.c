@@ -1833,11 +1833,19 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   }
 
   /* cubeless equity */
-  
-  fprintf ( pf, " %s</td><td>%s</td><td>&nbsp;</td>\n",
-            ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
-            _("cubeless equity") : _("cubeless MWC"),
-            OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ) );
+
+  if ( pci->nMatchTo ) 
+    fprintf ( pf, " %s</td><td>%s</td><td>(%s: %s)</td>\n",
+              ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
+              _("cubeless equity") : _("cubeless MWC"),
+              OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ),
+              _("Money"), 
+              OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+  else
+    fprintf ( pf, " %s</td><td>%s</td><td>&nbsp;</td>\n",
+              ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
+              _("cubeless equity") : _("cubeless MWC"),
+              OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
 
   fprintf ( pf, "</tr>\n" );

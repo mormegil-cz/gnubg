@@ -103,18 +103,43 @@ static GtkWidget *TakeAnalysis( const movetype mt,
 
     iRow = 0;
 
-    if ( pes->et == EVAL_EVAL ) 
-      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
-                             _("Cubeless %d-ply equity: %s") :
-                             _("Cubeless %d-ply MWC: %s"), 
-                             pes->ec.nPlies,
-                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
-    else 
-      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
-                             _("Cubeless rollout equity: %s") :
-                             _("Cubeless rollout MWC: %s"), 
-                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
+    switch ( pes->et ) {
+    case EVAL_EVAL:
+      if ( ci.nMatchTo )
+        sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s (Money: %s)"),
+                               pes->ec.nPlies,
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                                              &ci, TRUE ),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+      else
+        sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s"),
+                               pes->ec.nPlies,
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
+      break;
+
+    case EVAL_ROLLOUT:
+      if ( ci.nMatchTo )
+        sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                                              &ci, TRUE ),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+      else
+        sz = g_strdup_printf ( _("Cubeless rollout %s: %s"),
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+
+      break;
+
+    default:
+
+      sz = g_strdup_printf ( "" );
+
+    }
+                               
     pw = gtk_label_new ( sz );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
@@ -371,18 +396,43 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     /* cubeless equity */
 
-    if ( pes->et == EVAL_EVAL ) 
-      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
-                             _("Cubeless %d-ply equity: %s") :
-                             _("Cubeless %d-ply MWC: %s"), 
-                             pes->ec.nPlies,
-                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
-    else 
-      sz = g_strdup_printf ( ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) ) ?
-                             _("Cubeless rollout equity: %s") :
-                             _("Cubeless rollout MWC: %s"), 
-                             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], &ci, TRUE ) );
-    
+    switch ( pes->et ) {
+    case EVAL_EVAL:
+      if ( ci.nMatchTo )
+        sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s (Money: %s)"),
+                               pes->ec.nPlies,
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                                              &ci, TRUE ),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+      else
+        sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s"),
+                               pes->ec.nPlies,
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+
+      break;
+
+    case EVAL_ROLLOUT:
+      if ( ci.nMatchTo )
+        sz = g_strdup_printf ( _("Cubeless rollout %s: %s (Money: %s)"),
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ],
+                                              &ci, TRUE ),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+      else
+        sz = g_strdup_printf ( _("Cubeless rollout %s: %s"),
+                               fOutputMWC ? _("MWC") : _("equity"),
+                               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
+
+      break;
+
+    default:
+
+      sz = g_strdup_printf ( "" );
+
+    }
+                               
     pw = gtk_label_new ( sz );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
