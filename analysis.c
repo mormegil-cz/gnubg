@@ -37,9 +37,17 @@
 #include "rollout.h"
 #include "analysis.h"
 
+#include "i18n.h"
+
 const char *aszRating [ RAT_UNDEFINED + 1 ] = {
-  "Beginner", "Novice", "Intermediate", "Advanced", "Expert",
-  "World class", "Extra-terrestrial", "N/A" };
+  N_("Beginner"), 
+  N_("Novice"), 
+  N_("Intermediate"), 
+  N_("Advanced"), 
+  N_("Expert"),
+  N_("World class"), 
+  N_("Extra-terrestrial"), 
+  N_("N/A") };
 
 static const float arThrsRating [ RAT_EXTRA_TERRESTRIAL + 1 ] = {
   1e38, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 };
@@ -785,8 +793,8 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
 static int CheckSettings( void ) {
 
     if( !fAnalyseCube && !fAnalyseDice && !fAnalyseMove ) {
-	outputl( "You must specify at least one type of analysis to perform "
-		 "(see `help set\nanalysis')." );
+	outputl( _("You must specify at least one type of analysis to perform "
+		 "(see `help set\nanalysis').") );
 	return -1;
     }
 
@@ -826,7 +834,7 @@ extern void CommandAnalyseGame( char *sz ) {
   int nMoves;
   
   if( !plGame ) {
-    outputl( "No game is being played." );
+    outputl( _("No game is being played.") );
     return;
   }
     
@@ -835,7 +843,7 @@ extern void CommandAnalyseGame( char *sz ) {
   
   nMoves = NumberMovesGame ( plGame );
 
-  ProgressStartValue( "Analysing game; move:", nMoves );
+  ProgressStartValue( _("Analysing game; move:"), nMoves );
     
   AnalyzeGame( plGame );
   
@@ -855,7 +863,7 @@ extern void CommandAnalyseMatch( char *sz ) {
   int nMoves;
   
   if( ListEmpty( &lMatch ) ) {
-      outputl( "No match is being played." );
+      outputl( _("No match is being played.") );
       return;
   }
 
@@ -864,7 +872,7 @@ extern void CommandAnalyseMatch( char *sz ) {
 
   nMoves = NumberMovesMatch ( &lMatch );
 
-  ProgressStartValue( "Analysing match; move:", nMoves );
+  ProgressStartValue( _("Analysing match; move:"), nMoves );
 
   IniStatcontext( &scMatch );
   
@@ -958,12 +966,12 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
   /* FIXME: calculate ratings (ET, World class, etc.) */
   /* FIXME: use output*() functions, not printf */
   
-  sprintf ( szTemp, "Player\t\t\t\t%-15s\t\t%-15s\n\n",
+  sprintf ( szTemp, _("Player\t\t\t\t%-15s\t\t%-15s\n\n"),
            ap[ 0 ].szName, ap [ 1 ].szName );
   strcpy ( szOutput, szTemp);
  
   if( psc->fMoves ) {
-      sprintf( szTemp, "Checkerplay statistics:\n\n"
+      sprintf( szTemp, _("Checkerplay statistics:\n\n"
 	      "Total moves:\t\t\t%3d\t\t\t%3d\n"
 	      "Unforced moves:\t\t\t%3d\t\t\t%3d\n\n"
 	      "Moves marked very good\t\t%3d\t\t\t%3d\n"
@@ -972,7 +980,7 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 	      "Moves unmarked\t\t\t%3d\t\t\t%3d\n"
 	      "Moves marked doubtful\t\t%3d\t\t\t%3d\n"
 	      "Moves marked bad\t\t%3d\t\t\t%3d\n"
-	      "Moves marked very bad\t\t%3d\t\t\t%3d\n\n",
+	      "Moves marked very bad\t\t%3d\t\t\t%3d\n\n"),
 	      psc->anTotalMoves[ 0 ], psc->anTotalMoves[ 1 ],
 	      psc->anUnforcedMoves[ 0 ], psc->anUnforcedMoves[ 1 ],
 	      psc->anMoves[ 0 ][ SKILL_VERYGOOD ],
@@ -992,10 +1000,10 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
       strcat ( szOutput, szTemp);
 
       if ( ms.nMatchTo ){
-	  sprintf ( szTemp,"Error rate (total)\t\t"
+	  sprintf ( szTemp,_("Error rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Error rate (pr. move)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
+		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
 		  psc->arErrorCheckerplay[ 0 ][ 0 ],
 		  psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
 		  psc->arErrorCheckerplay[ 1 ][ 0 ],
@@ -1010,10 +1018,10 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 		  psc->anUnforcedMoves[ 1 ] );
           strcat ( szOutput, szTemp);
       } else {
-	  sprintf ( szTemp,"Error rate (total)\t\t"
+	  sprintf ( szTemp,_("Error rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Error rate (pr. move)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
+		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
 		  psc->arErrorCheckerplay[ 0 ][ 0 ],
 		  psc->arErrorCheckerplay[ 0 ][ 1 ],
 		  psc->arErrorCheckerplay[ 1 ][ 0 ],
@@ -1033,17 +1041,18 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 	  rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
 				psc->anUnforcedMoves[ i ] );
       
-      sprintf ( szTemp, "Checker play rating:\t\t%-15s\t\t%-15s\n\n",
-	       aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+      sprintf ( szTemp, _("Checker play rating:\t\t%-15s\t\t%-15s\n\n"),
+                gettext ( aszRating[ rt [ 0 ] ] ), 
+                gettext ( aszRating[ rt [ 1 ] ] ) );
       strcat ( szOutput, szTemp);
   }
 
   if( psc->fDice ) {
-      sprintf ( szTemp, "Rolls marked very lucky\t\t%3d\t\t\t%3d\n"
+      sprintf ( szTemp, _("Rolls marked very lucky\t\t%3d\t\t\t%3d\n"
 	       "Rolls marked lucky\t\t%3d\t\t\t%3d\n"
 	       "Rolls unmarked\t\t\t%3d\t\t\t%3d\n"
 	       "Rolls marked unlucky\t\t%3d\t\t\t%3d\n"
-	       "Rolls marked very unlucky\t%3d\t\t\t%3d\n",
+	       "Rolls marked very unlucky\t%3d\t\t\t%3d\n"),
 	       psc->anLuck[ 0 ][ LUCK_VERYGOOD ],
 	       psc->anLuck[ 1 ][ LUCK_VERYGOOD ],
 	       psc->anLuck[ 0 ][ LUCK_GOOD ],
@@ -1057,10 +1066,10 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
       strcat ( szOutput, szTemp);
        
       if ( ms.nMatchTo ){
-	  sprintf ( szTemp,"Luck rate (total)\t\t"
+	  sprintf ( szTemp,_("Luck rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Luck rate (pr. move)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
+		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
 		  psc->arLuck[ 0 ][ 0 ],
 		  psc->arLuck[ 0 ][ 1 ] * 100.0f,
 		  psc->arLuck[ 1 ][ 0 ],
@@ -1075,10 +1084,10 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 		  psc->anTotalMoves[ 1 ] );
           strcat ( szOutput, szTemp);
       } else {
-	  sprintf ( szTemp,"Luck rate (total)\t\t"
+	  sprintf ( szTemp,_("Luck rate (total)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Luck rate (pr. move)\t\t"
-		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n",
+		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
 		  psc->arLuck[ 0 ][ 0 ],
 		  psc->arLuck[ 0 ][ 1 ],
 		  psc->arLuck[ 1 ][ 0 ],
@@ -1096,13 +1105,13 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
   }
 
   if( psc->fCube ) {
-      sprintf ( szTemp, "\nCube decisions statistics:\n\n" );
+      sprintf ( szTemp, _("\nCube decisions statistics:\n\n") );
       strcat ( szOutput, szTemp);
 
-      sprintf ( szTemp, "Total cube decisions\t\t%3d\t\t\t%3d\n"
+      sprintf ( szTemp, _("Total cube decisions\t\t%3d\t\t\t%3d\n"
 	       "Doubles\t\t\t\t%3d\t\t\t%3d\n"
 	       "Takes\t\t\t\t%3d\t\t\t%3d\n"
-	       "Pass\t\t\t\t%3d\t\t\t%3d\n\n",
+	       "Pass\t\t\t\t%3d\t\t\t%3d\n\n"),
 	       psc->anTotalCube[ 0 ],
 	       psc->anTotalCube[ 1 ],
 	       psc->anDouble[ 0 ], 
@@ -1114,7 +1123,7 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
       strcat ( szOutput, szTemp);
       
       if ( ms.nMatchTo ){
-	  sprintf ( szTemp,"Missed doubles around DP\t"
+	  sprintf ( szTemp,_("Missed doubles around DP\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Missed doubles around TG\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
@@ -1125,7 +1134,7 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 		  "Wrong takes\t\t\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Wrong passes\t\t\t"
-		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n",
+		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"),
 		  psc->anCubeMissedDoubleDP[ 0 ],
 		  psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
 		  psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
@@ -1164,7 +1173,7 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 		  psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
           strcat ( szOutput, szTemp);
       } else {
-	  sprintf ( szTemp,"Missed doubles around DP\t"
+	  sprintf ( szTemp,_("Missed doubles around DP\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Missed doubles around TG\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
@@ -1175,7 +1184,7 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 		  "Wrong takes\t\t\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Wrong passes\t\t\t"
-		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n",
+		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"),
 		  psc->anCubeMissedDoubleDP[ 0 ],
 		  psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
 		  psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
@@ -1223,8 +1232,9 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 				  + psc->arErrorWrongPass[ i ][ 0 ] ) /
 				psc->anTotalCube[ i ] );
       
-      sprintf ( szTemp, "\nCube decision rating:\t\t%-15s\t\t%-15s\n\n",
-	       aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+      sprintf ( szTemp, _("\nCube decision rating:\t\t%-15s\t\t%-15s\n\n"),
+                gettext ( aszRating[ rt [ 0 ] ] ), 
+                gettext ( aszRating[ rt [ 1 ] ] ) );
       strcat ( szOutput, szTemp);
   }
 
@@ -1240,8 +1250,9 @@ DumpStatcontext ( char *szOutput, statcontext *psc, char * sz ) {
 				( psc->anTotalCube[ i ] +
 				  psc->anUnforcedMoves[ i ] ) );
       
-      sprintf ( szTemp, "Overall rating:\t\t\t%-15s\t\t%-15s\n\n",
-	       aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+      sprintf ( szTemp, _("Overall rating:\t\t\t%-15s\t\t%-15s\n\n"),
+                gettext ( aszRating[ rt [ 0 ] ] ), 
+                gettext ( aszRating[ rt [ 1 ] ] ) );
       strcat ( szOutput, szTemp);
   }
 }
@@ -1256,12 +1267,12 @@ CommandShowStatisticsMatch ( char *sz ) {
 
 #if USE_GTK
     if ( fX ) {
-	GTKDumpStatcontext ( &scMatch, &ms, "Statistics for all games" );
+	GTKDumpStatcontext ( &scMatch, &ms, _("Statistics for all games") );
 	return;
     }
 #endif
 
-    DumpStatcontext ( szOutput, &scMatch, "Statistics for all games");
+    DumpStatcontext ( szOutput, &scMatch, _("Statistics for all games"));
     outputl(szOutput);
 }
 
@@ -1281,7 +1292,7 @@ CommandShowStatisticsGame ( char *sz ) {
     char szOutput[4096];
     
     if( !plGame ) {
-	outputl( "No game is being played." );
+	outputl( _("No game is being played.") );
 	return;
     }
 
@@ -1293,12 +1304,12 @@ CommandShowStatisticsGame ( char *sz ) {
     
 #if USE_GTK
     if ( fX ) {
-	GTKDumpStatcontext ( &pmgi->sc, &ms, "Statistics for current game" );
+	GTKDumpStatcontext ( &pmgi->sc, &ms, _("Statistics for current game") );
 	return;
     }
 #endif
 
-    DumpStatcontext ( szOutput, &pmgi->sc, "Statistics for current game");
+    DumpStatcontext ( szOutput, &pmgi->sc, _("Statistics for current game"));
     outputl( szOutput );
 }
 
@@ -1308,7 +1319,7 @@ extern void CommandAnalyseMove ( char *sz ) {
   matchstate msx;
 
   if( ms.gs == GAME_NONE ) {
-    outputl( "No game in progress (type `new game' to start one)." );
+    outputl( _("No game in progress (type `new game' to start one).") );
     return;
   }
     
@@ -1326,7 +1337,7 @@ extern void CommandAnalyseMove ( char *sz ) {
 #endif
   }
   else
-    outputl ( "Sorry, cannot analyse move!" );
+    outputl ( _("Sorry, cannot analyse move!") );
 
 }
 
