@@ -487,7 +487,7 @@
          points3d0=#FFE2E2;#A3B7C9;#010000;128;100
          points3d1=#151A1E;#373D3D;#010101;128;100
          border3d=#2D3030;#42261D;#37465C;128;100
-         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.bmp
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;
          numbers3d=#AB78CC;#E7E675;#010101;116;100
          background3d=#999A94;#707165;#2C3B6C;116;0
       </design> 
