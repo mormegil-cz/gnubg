@@ -177,7 +177,8 @@ static int ComputerTurn( void ) {
 	  /* consider doubling */
 	  
 	  if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
-	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) ) {
+	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) 
+	       && ( nMatchTo - anScore [ fTurn ] > nCube ) ) {
 
 	    gettimeofday ( &tv0, NULL );
 
