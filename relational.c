@@ -131,7 +131,7 @@ extern int RelationalMatchExists()
 	  return -1;
 
   /* Check if match is in database */
-  if (!(v = PyObject_CallMethod(r, "is_existing", "O", PythonMatchChecksum(0, 0))))
+  if (!(v = PyObject_CallMethod(r, "is_existing_match", "O", PythonMatchChecksum(0, 0))))
   {
     PyErr_Print();
     Py_DECREF(r);
@@ -139,16 +139,11 @@ extern int RelationalMatchExists()
   }
   else
   {
-    if (PyInt_Check(v))
-	{
-      if (PyInt_AsLong(v) == -1)
-		  return 0;
-	  else
-		  return 1;
-    }
-    else {
-      ret = -1;
-    }
+    if (v == Py_None)
+		ret = 0;
+	else if (PyInt_Check(v))
+		ret = 1;
+
     Py_DECREF( v );
   }
 
@@ -165,14 +160,13 @@ CommandRelationalAddMatch( char *sz ) {
 
 #if USE_PYTHON
   PyObject *v, *r;
-  int env_id = 0;
+  char* env;
   int force = FALSE;
   char *pch;
 
-  if (sz && *sz)
-    env_id = ParseNumber( &sz );
-  if ( env_id < 0 )
-    env_id = 0;
+  env = NextToken( &sz );
+  if (!env)
+	  env = "";
 
   pch = NextToken( &sz );
   force = pch && *pch && 
@@ -183,7 +177,7 @@ CommandRelationalAddMatch( char *sz ) {
 	  return;
 
   /* add match to database */
-  if ( ! ( v = PyObject_CallMethod( r, "addmatch", "ii", env_id, force)) ) {
+  if ( ! ( v = PyObject_CallMethod( r, "addmatch", "si", env, force)) ) {
     PyErr_Print();
     Py_DECREF( r );
     return;
@@ -204,6 +198,9 @@ CommandRelationalAddMatch( char *sz ) {
       case -3:
         outputl( _("Match is already in database") );
         break;
+      case -4:
+        outputl( _("Unknown environment") );
+        break;
       default:
         outputf( _("Unknown return code %d from addmatch"), l );
         break;
@@ -221,6 +218,59 @@ CommandRelationalAddMatch( char *sz ) {
   outputl( _("This build was not compiled with support for Python.\n") );
 #endif /* !USE_PYTHON */
 
+}
+
+int env_added;	/* Horrid flag to see if next function worked... */
+
+extern void CommandRelationalAddEnvironment(char *sz)
+{
+#if USE_PYTHON
+	PyObject *v, *r;
+
+	env_added = FALSE;
+
+	if (!sz || !*sz)
+	{
+		outputl( _("You must specify an environment name to add "
+		"(see `help relational add environment').") );
+		return;
+	}
+
+	if (!(r = Connect()))
+		return;
+
+	/* add environment to database */
+	if (!(v = PyObject_CallMethod(r, "addenv", "s", sz)))
+	{
+		PyErr_Print();
+		Py_DECREF(r);
+		return;
+	}
+	if (PyInt_Check(v))
+	{
+		int l = PyInt_AsLong( v );
+		if (l == -1)
+			outputl( _("Error adding environment to database") );
+		else if (l == 1)
+		{
+			outputl( _("Environment succesfully added to database") );
+			env_added = TRUE;
+		}
+		else if (l == -2)
+			outputl( _("That environment already exists") );
+		else
+			outputl( _("unknown return value") );
+	}
+	else
+		outputl( _("invalid return (non-integer)") );
+
+	Py_DECREF(v);
+
+	Disconnect(r);
+
+#else /* USE_PYTHON */
+	outputl( _("This build was not compiled with support for Python.\n") );
+#endif /* !USE_PYTHON */
 }
 
 extern void
@@ -282,7 +332,7 @@ CommandRelationalShowEnvironments( char *sz )
 {
 #if USE_PYTHON
 	/* Use the Select command */
-	CommandRelationalSelect("env_id, place FROM env "
+	CommandRelationalSelect("place FROM env "
                          "ORDER BY env_id");
 
 #else /* USE_PYTHON */
@@ -296,17 +346,22 @@ CommandRelationalShowDetails( char *sz )
 #if USE_PYTHON
 	PyObject *v, *r;
 
-	if (!sz || !*sz)
+	char *player_name, *env;
+
+	if (!sz || !*sz || !(player_name = NextToken(&sz)))
 	{
 		outputl( _("You must specify a player name to list the details for "
 		"(see `help relational show details').") );
 		return;
 	}
+	env = NextToken(&sz);
+	if (!env)
+		env = "";
 
 	r = Connect();
 
 	/* list env */
-	if (!(v = PyObject_CallMethod(r, "list_details", "s", sz)))
+	if (!(v = PyObject_CallMethod(r, "list_details", "ss", player_name, env)))
 	{
 		PyErr_Print();
 		return;
@@ -361,6 +416,8 @@ CommandRelationalShowDetails( char *sz )
 			int l = PyInt_AsLong(v);
 			if (l == -1)
 				outputl( _("Player not in database") );
+			else if (l == -4)
+				outputl( _("Unknown environment") );
 			else
 				outputl( _("unknown return value") );
 		}
@@ -396,18 +453,22 @@ extern void CommandRelationalErase(char *sz)
 {
 #if USE_PYTHON
 	PyObject *v, *r;
+	char *player_name, *env;
 
-	if (!sz || !*sz)
+	if (!sz || !*sz || !(player_name = NextToken(&sz)))
 	{
-		outputl( _("You must specify a player name to list the details for "
-		"(see `help relational erase').") );
+		outputl( _("You must specify a player name to remove "
+		"(see `help relational erase player').") );
 		return;
 	}
+	env = NextToken(&sz);
+	if (!env)
+		env = "";
 
 	r = Connect();
 
 	/* remove player */
-	if (!(v = PyObject_CallMethod(r, "erase_player", "s", sz)))
+	if (!(v = PyObject_CallMethod(r, "erase_player", "ss", player_name, env)))
 	{
 		PyErr_Print();
 		return;
@@ -420,6 +481,143 @@ extern void CommandRelationalErase(char *sz)
 			outputl( _("Player not in database") );
 		else if (l == 1)
 			outputl( _("player removed from database") );
+		else if (l == -4)
+			outputl( _("Unknown environment") );
+		else
+			outputl( _("unknown return value") );
+	}
+	else
+		outputl( _("invalid return (non-integer)") );
+
+	Py_DECREF(v);
+
+	Disconnect(r);
+
+#else /* USE_PYTHON */
+	outputl( _("This build was not compiled with support for Python.\n") );
+#endif /* !USE_PYTHON */
+}
+
+extern void RelationalLinkNick(char* nick, char* env, char* player)
+{	/* Link nick on env to player */
+#if USE_PYTHON
+	PyObject *v, *r;
+
+	r = Connect();
+
+	if (!(v = PyObject_CallMethod(r, "link_players", "sss", nick, env, player)))
+	{
+		PyErr_Print();
+		return;
+	}
+
+	if (PyInt_Check(v))
+	{
+		int l = PyInt_AsLong( v );
+		if (l == -1)
+			outputl( _("Failed to link players") );
+		else if (l == 1)
+			outputl( _("Players linked successfully") );
+		else
+			outputl( _("unknown return value") );
+	}
+	else
+		outputl( _("invalid return (non-integer)") );
+
+	Py_DECREF(v);
+
+	Disconnect(r);
+
+#else /* USE_PYTHON */
+	outputl( _("This build was not compiled with support for Python.\n") );
+#endif /* !USE_PYTHON */
+}
+
+extern void CommandRelationalRenameEnv(char *sz)
+{
+#if USE_PYTHON
+	PyObject *v, *r;
+	char *env_name, *new_name;
+
+	if (!sz || !*sz || !(env_name = NextToken(&sz))
+		|| !(new_name = NextToken(&sz)))
+	{
+		outputl( _("You must specify an environment to rename and "
+			"a new name (see `help relational rename environment').") );
+		return;
+	}
+
+	r = Connect();
+
+	/* rename env */
+	if (!(v = PyObject_CallMethod(r, "rename_env", "ss", env_name, new_name)))
+	{
+		PyErr_Print();
+		return;
+	}
+
+	if (PyInt_Check(v))
+	{
+		int l = PyInt_AsLong( v );
+		if (l == -1)
+			outputl( _("Environment not in database") );
+		else if (l == 1)
+			outputl( _("Environment renamed") );
+		else
+			outputl( _("unknown return value") );
+	}
+	else
+		outputl( _("invalid return (non-integer)") );
+
+	Py_DECREF(v);
+
+	Disconnect(r);
+
+#else /* USE_PYTHON */
+	outputl( _("This build was not compiled with support for Python.\n") );
+#endif /* !USE_PYTHON */
+}
+
+int env_deleted;	/* Horrid flag to see if next function worked... */
+
+extern void CommandRelationalEraseEnv(char *sz)
+{
+#if USE_PYTHON
+	PyObject *v, *r;
+
+	env_deleted = FALSE;
+	if (!sz || !*sz)
+	{
+		outputl( _("You must specify an environment to remove "
+		"(see `help relational erase environment').") );
+		return;
+	}
+
+	if (fConfirmSave && !GetInputYN( _("Are you sure you want to erase the "
+		"environment and all related data?") ))
+		return;
+
+	r = Connect();
+
+	/* erase env */
+	if (!(v = PyObject_CallMethod(r, "erase_env", "s", sz)))
+	{
+		PyErr_Print();
+		return;
+	}
+
+	if (PyInt_Check(v))
+	{
+		int l = PyInt_AsLong( v );
+		if (l == -1)
+			outputl( _("Environment not in database") );
+		else if (l == -2)
+			outputl( _("You must keep at least one environment in the database") );
+		else if (l == 1)
+		{
+			outputl( _("Environment removed from database") );
+			env_deleted = TRUE;
+		}
 		else
 			outputl( _("unknown return value") );
 	}
@@ -439,6 +637,10 @@ extern void CommandRelationalEraseAll(char *sz)
 {
 #if USE_PYTHON
 	PyObject *v, *r;
+
+	if( fConfirmSave && !GetInputYN( _("Are you sure you want to erase all "
+				       "player records?") ) )
+		return;
 
 	r = Connect();
 
@@ -554,20 +756,18 @@ extern int RunQuery(RowSet* pRow, char *sz)
 		
 	i = PySequence_Size(v);
 	j = 0;
-	if (PySequence_Size(v) > 0)
+	if (i > 0)
 	{
 		PyObject *cols = PySequence_GetItem(v, 0);
 		if (!PySequence_Check(cols))
-			j = 0;
+		{
+			outputl( _("invalid return (non-tuple)") );
+			Py_DECREF(v);
+			Disconnect(r);
+			return FALSE;
+		}
 		else
 			j = PySequence_Size(cols);
-	}
-	if (i <= 1 || j == 0)
-	{
-		pRow->rows = pRow->cols = 0;
-		Py_DECREF(v);
-		Disconnect(r);
-		return FALSE;
 	}
 
 	MallocRowset(pRow, i, j);
@@ -721,8 +921,25 @@ extern void RelationalUpdatePlayerDetails(int player_id, const char* newName,
 										  const char* newNotes)
 {
 	char query[1024];
-	sprintf(query, "person SET name = \"%s\", notes = \"%s\" WHERE person_id = %d",
-		newName, newNotes, player_id);
-	UpdateQuery(query);
+	RowSet r;
+
+	/* Can't change the name to an existing one */
+	sprintf(query, "person_id FROM person WHERE name = '%s'", newName);
+	if (!RunQuery(&r, query))
+	{
+		outputerrf( _("Error running database command") );
+		return;
+	}
+	if (r.rows > 1)
+		outputerrf( _("Player name already exists.  Use the link button to combine different"
+			" nicknames for the same player") );
+	else
+	{
+		sprintf(query, "person SET name = \"%s\", notes = \"%s\" WHERE person_id = %d",
+			newName, newNotes, player_id);
+		if (!UpdateQuery(query))
+			outputerrf( _("Error running database command") );
+	}
+	FreeRowset(&r);
 }
 #endif

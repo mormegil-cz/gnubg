@@ -34,5 +34,6 @@ extern void RelationalUpdatePlayerDetails(int player_id, const char* newName,
 										  const char* newNotes);
 extern int RunQuery(RowSet* pRow, char *sz);
 extern void FreeRowset(RowSet* pRow);
+extern void RelationalLinkNick(char* nick, char* env, char* player);
 
 #endif /* _RELATIONAL_H_ */

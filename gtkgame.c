@@ -377,6 +377,7 @@ static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw );
 static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw );
+static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw );
 static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw );
 static void ImportBKG( gpointer *p, guint n, GtkWidget *pw );
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
@@ -2193,12 +2194,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
         { N_("/_Analyse/Relational database/Add match or session..."), NULL,
           GtkRelationalAddMatch, 0, NULL },
+        { N_("/_Analyse/Relational database/Show Records..."), NULL,
+          GtkShowRelational, 0, NULL },
+        { N_("/_Analyse/Relational database/Manage Environments..."), NULL,
+          GtkManageRelationalEnvs, 0, NULL },
         { N_("/_Analyse/Relational database/Test..."), NULL,
           Command, CMD_RELATIONAL_TEST, NULL },
         { N_("/_Analyse/Relational database/Help..."), NULL,
           Command, CMD_RELATIONAL_HELP, NULL },
-        { N_("/_Analyse/Relational database/Show Records..."), NULL,
-          GtkShowRelational, 0, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
@@ -2843,6 +2846,41 @@ GTKMessage( char *sz, dialogtype dt ) {
 extern int GTKGetInputYN( char *szPrompt ) {
 
     return GTKMessage( szPrompt, DT_AREYOUSURE );
+}
+
+char* inputString;
+static void GetInputOk( GtkWidget *pw, GtkWidget *pwEntry )
+{
+	inputString = strdup(gtk_entry_get_text(GTK_ENTRY(pwEntry)));
+    gtk_widget_destroy(gtk_widget_get_toplevel(pw));
+}
+
+extern char* GTKGetInput(char* title, char* prompt)
+{
+	GtkWidget *pwDialog, *pwHbox, *pwEntry;
+	pwEntry = gtk_entry_new();
+	inputString = NULL;
+	pwDialog = GTKCreateDialog(title, DT_QUESTION, GetInputOk, pwEntry );
+
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
+		pwHbox = gtk_hbox_new(FALSE, 0));
+
+	gtk_box_pack_start(GTK_BOX(pwHbox), gtk_label_new(prompt), FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwEntry, FALSE, FALSE, 0);
+	gtk_widget_grab_focus(pwEntry);
+
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+	gtk_widget_show_all( pwDialog );
+
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
+	return inputString;
 }
 
 /*
@@ -8059,6 +8097,11 @@ extern void GTKSet( void *p ) {
                                        "/Analyse/"
                                        "Relational database/Show Records..." ), 
           TRUE );
+    gtk_widget_set_sensitive( 
+          gtk_item_factory_get_widget( pif,
+                                       "/Analyse/"
+                                       "Relational database/Manage Environments..." ), 
+          TRUE );
 #endif /* USE_PYTHON */
 
 	fAutoCommand = FALSE;
@@ -9755,25 +9798,34 @@ static GtkWidget* GetRelList(RowSet* pRow)
 }
 
 int curPlayerId, curRow;
-GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult;
+GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult, *aliases, *pwAliasList;
+
+static void ClearText(GtkWidget* pwText)
+{
+	gtk_text_set_point(GTK_TEXT(pwText), 0);
+	gtk_text_freeze(GTK_TEXT(pwText));
+	gtk_text_forward_delete(GTK_TEXT(pwText), gtk_text_get_length(GTK_TEXT(pwText)));
+	gtk_text_thaw(GTK_TEXT(pwText));
+}
 
 static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
 {
-	char* pName;
-	RowSet r;
+	char *pName, *pEnv;
+	RowSet r, r2;
 	char query[256];
+	int i;
 
 	gtk_clist_get_text(GTK_CLIST(pw), y, 0, &pName);
+	gtk_clist_get_text(GTK_CLIST(pw), y, 1, &pEnv);
 
-	sprintf(query, "person.person_id, person.name, person.notes FROM nick INNER JOIN person"
-		" ON nick.person_id = person.person_id"
-		" WHERE nick.name = \"%s\" AND nick.env_id = %d",
-		pName, 0);
+	sprintf(query, "person.person_id, person.name, person.notes"
+		" FROM nick INNER JOIN env INNER JOIN person"
+		" ON nick.env_id = env.env_id AND nick.person_id = person.person_id"
+		" WHERE nick.name = '%s' AND env.place = '%s'",
+		pName, pEnv);
 
-	gtk_text_set_point(GTK_TEXT(pwPlayerNotes), 0);
-	gtk_text_freeze(GTK_TEXT(pwPlayerNotes));
-	gtk_text_forward_delete(GTK_TEXT(pwPlayerNotes), gtk_text_get_length(GTK_TEXT(pwPlayerNotes)));
-	gtk_text_thaw(GTK_TEXT(pwPlayerNotes));
+	ClearText(pwPlayerNotes);
+	ClearText(pwAliasList);
 
 	if (!RunQuery(&r, query))
 	{
@@ -9788,7 +9840,26 @@ static void ShowRelationalSelect(GtkWidget *pw, int y, int x, GdkEventButton *pe
 	gtk_entry_set_text(GTK_ENTRY(pwPlayerName), r.data[1][1]);
 	gtk_text_insert(GTK_TEXT(pwPlayerNotes), NULL, NULL, NULL, r.data[1][2], -1);
 
+	sprintf(query, _("%s is:"), r.data[1][1]);
+	gtk_label_set_text(GTK_LABEL(aliases), query);
+
+	sprintf(query, "nick.name, env.place"
+		" FROM nick INNER JOIN env INNER JOIN person"
+		" ON nick.env_id = env.env_id AND nick.person_id = person.person_id"
+		" WHERE person.person_id = %d", curPlayerId);
+
+	if (!RunQuery(&r2, query))
+		return;
+
+	for (i = 1; i < r2.rows; i++)
+	{
+		char line[100];
+		sprintf(line, _("%s on %s\n"), r2.data[i][0], r2.data[i][1]);
+		gtk_text_insert(GTK_TEXT(pwAliasList), NULL, NULL, NULL, line, -1);
+	}
+
 	FreeRowset(&r);
+	FreeRowset(&r2);
 }
 
 static void RelationalQuery(GtkWidget *pw, GtkWidget *pwVbox)
@@ -9823,32 +9894,334 @@ static void UpdatePlayerDetails(GtkWidget *pw, int *dummy)
 	g_free(pch);
 }
 
+char envString[100], curEnvString[100], linkPlayer[100];
+int currentLinkRow;
+
+static void LinkPlayerSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, void* null)
+{
+	currentLinkRow = y;
+}
+
+static void SelectLinkOK(GtkWidget *pw, GtkWidget *pwList)
+{
+	char* current;
+	if (currentLinkRow != -1)
+	{
+		gtk_clist_get_text(GTK_CLIST(pwList), currentLinkRow, 0, &current);
+		strcpy(linkPlayer, current);
+		gtk_widget_destroy(gtk_widget_get_toplevel(pw));
+	}
+}
+
+static void RelationalLinkPlayers(GtkWidget *pw, GtkWidget *pwRelList)
+{
+	char query[1024];
+	RowSet r;
+	GtkWidget *pwDialog, *pwList;
+	char *linkNick, *linkEnv;
+	if (curPlayerId == -1)
+		return;
+
+	gtk_clist_get_text(GTK_CLIST(pwRelList), curRow, 0, &linkNick);
+	gtk_clist_get_text(GTK_CLIST(pwRelList), curRow, 1, &linkEnv);
+
+	/* Pick suitable linking players with this query... */
+	sprintf(query, "person.name AS Player FROM person WHERE person_id NOT IN"
+		" (SELECT person.person_id FROM nick INNER JOIN env INNER JOIN person"
+		" ON nick.env_id = env.env_id AND nick.person_id = person.person_id"
+		" WHERE env.env_id IN"
+		" (SELECT env_id FROM nick INNER JOIN person"
+		" ON nick.person_id = person.person_id"
+		" WHERE person.name = '%s'))",
+		gtk_entry_get_text(GTK_ENTRY(pwPlayerName)));
+	if (!RunQuery(&r, query))
+		return;
+
+	if (r.rows < 2)
+	{
+		GTKMessage("No players to link to", DT_ERROR);
+		FreeRowset(&r);
+		return;
+	}
+
+	pwList = GetRelList(&r);
+	FreeRowset(&r);
+
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Linked Player"),
+						   DT_QUESTION, GTK_SIGNAL_FUNC(SelectLinkOK), pwList);
+
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), pwList);
+	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
+							GTK_SIGNAL_FUNC( LinkPlayerSelect ), pwList );
+
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+	gtk_widget_show_all( pwDialog );
+
+	*linkPlayer = '\0';
+	currentLinkRow = -1;
+
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
+
+	if (*linkPlayer)
+	{
+		RelationalLinkNick(linkNick, linkEnv, linkPlayer);
+ShowRelationalSelect(pwRelList, curRow, 0, 0, 0);
+//update new details list...
+//>> change query so person not picked if nick in selected env!
+	}
+}
+
 static void RelationalErase(GtkWidget *pw, GtkWidget* pwList)
 {
-    char *pch;
-    char sz[100];
+    char *player, *env;
+	char args[200];
 
 	if (curPlayerId == -1)
 		return;
 
-	/* Get player name from id */
-	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &pch);
+	/* Get player name and env from list */
+	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &player);
+	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 1, &env);
 
-    sprintf(sz, "relational erase %s", pch);
-    UserCommand(sz);
+	sprintf(args, "\"%s\" \"%s\"", player, env);
+	CommandRelationalErase(args);
 
 	gtk_clist_remove(GTK_CLIST(pwList), curRow);
 }
 
+char envString[100], curEnvString[100];
+GtkWidget *envP1, *envP2;
+RowSet *pNick1Envs, *pNick2Envs, *pEnvRows;
+
+static void SelectEnvOK(GtkWidget *pw, GtkWidget *pwCombo)
+{
+	char* current = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(pwCombo)->entry));
+	strcpy(envString, current);
+	gtk_widget_destroy(gtk_widget_get_toplevel(pw));
+}
+
+void SelEnvChange(GtkList *list, GtkWidget* pwCombo)
+{
+	char* current = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(pwCombo)->entry));
+	if (current && *current && (!*curEnvString || strcmp(current, curEnvString)))
+	{
+		int i, id;
+		strcpy(curEnvString, current);
+
+		/* Get id from selected string */
+		i = 1;
+		while (strcmp(pEnvRows->data[i][1], curEnvString))
+			i++;
+		id = atoi(pEnvRows->data[i][0]);
+
+		/* Set player names for env (if available) */
+		for (i = 1; i < pNick1Envs->rows; i++)
+		{
+			if (atoi(pNick1Envs->data[i][0]) == id)
+				break;
+		}
+		if (i < pNick1Envs->rows)
+			gtk_label_set_text(GTK_LABEL(envP1), pNick1Envs->data[i][1]);
+		else
+			gtk_label_set_text(GTK_LABEL(envP1), "[new to env]");
+
+		for (i = 1; i < pNick2Envs->rows; i++)
+		{
+			if (atoi(pNick2Envs->data[i][0]) == id)
+				break;
+		}
+		if (i < pNick2Envs->rows)
+			gtk_label_set_text(GTK_LABEL(envP2), pNick2Envs->data[i][1]);
+		else
+			gtk_label_set_text(GTK_LABEL(envP2), "[new to env]");
+	}
+}
+
+static int GtkGetEnv(char* env)
+{	/* Get an environment for the match to be added */
+	int envID;
+	/* See if more than one env (if not no choice) */
+	RowSet envRows;
+	char *query = "env_id, place FROM env ORDER BY env_id";
+
+	if (!RunQuery(&envRows, query))
+	{
+		GTKMessage(_("Database error getting environment"), DT_ERROR);
+		return -1;
+	}
+
+	if (envRows.rows == 2)
+	{	/* Just one env */
+		strcpy(env, envRows.data[1][1]);
+	}
+	else
+	{
+		/* find out what envs players nicks are in */
+		int found, cur1, cur2, i, NextEnv;
+		RowSet nick1, nick2;
+		char query[256];
+		char *queryText = "env_id, person.name"
+				" FROM nick INNER JOIN person"
+				" ON nick.person_id = person.person_id"
+				" WHERE nick.name = '%s' ORDER BY env_id";
+		
+		pNick1Envs = &nick1;
+		pNick2Envs = &nick2;
+		pEnvRows = &envRows;
+
+		sprintf(query, queryText, ap[0].szName);
+		if (!RunQuery(&nick1, query))
+		{
+			GTKMessage(_("Database error getting environment"), DT_ERROR);
+			return -1;
+		}
+
+		sprintf(query, queryText, ap[1].szName);
+		if (!RunQuery(&nick2, query))
+		{
+			GTKMessage(_("Database error getting environment"), DT_ERROR);
+			return -1;
+		}
+
+		/* pick best (first with both players or first with either player) */
+		found = 0;
+		cur1 = cur2 = 1;
+		envID = atoi(envRows.data[1][0]);
+
+		for (i = 1; i < envRows.rows; i++)
+		{
+			int oneFound = FALSE;
+			int curID = atoi(envRows.data[i][0]);
+			if (nick1.rows > cur1)
+			{
+				NextEnv = atoi(nick1.data[cur1][0]);
+				if (NextEnv == curID)
+				{
+					if (found == 0)
+					{	/* Found at least one */
+						found = 1;
+						envID = curID;
+					}
+					oneFound = TRUE;
+					cur1++;
+				}
+			}
+			if (nick2.rows > cur2)
+			{
+				NextEnv = atoi(nick2.data[cur2][0]);
+				if (NextEnv == curID)
+				{
+					if (found == 0)
+					{	/* Found at least one */
+						found = 1;
+						envID = curID;
+					}
+					if (oneFound == 1)
+					{	/* Found env with both nicks */
+						envID = curID;
+						break;
+					}
+				}
+			}
+		}
+		/* show dialog to select env */
+		{
+			GList *glist;
+			GtkWidget *pwEnvCombo, *pwDialog, *pwHbox, *pwVbox;
+			pwEnvCombo = gtk_combo_new();
+
+			pwDialog = GTKCreateDialog( _("GNU Backgammon - Select Environment"),
+							DT_QUESTION, GTK_SIGNAL_FUNC(SelectEnvOK), pwEnvCombo);
+
+			gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
+				pwHbox = gtk_hbox_new(FALSE, 0));
+
+			gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+			gtk_box_pack_start(GTK_BOX(pwVbox), gtk_label_new(_("Environment")), FALSE, FALSE, 0);
+
+			gtk_combo_set_value_in_list(GTK_COMBO(pwEnvCombo), TRUE, FALSE);
+			glist = NULL;
+			for (i = 1; i < envRows.rows; i++)
+				glist = g_list_append(glist, envRows.data[i][1]);
+			gtk_combo_set_popdown_strings(GTK_COMBO(pwEnvCombo), glist);
+			g_list_free(glist);
+			gtk_box_pack_start(GTK_BOX(pwVbox), pwEnvCombo, FALSE, FALSE, 0);
+
+			/* Select best env */
+			i = 1;
+			while (atoi(envRows.data[i][0]) != envID)
+				i++;
+
+			*curEnvString = '\0';
+			gtk_widget_set_sensitive(GTK_WIDGET(GTK_COMBO(pwEnvCombo)->entry), FALSE);
+			gtk_signal_connect(GTK_OBJECT(GTK_COMBO(pwEnvCombo)->list), "selection-changed",
+							GTK_SIGNAL_FUNC(SelEnvChange), pwEnvCombo);
+
+			gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 10);
+			gtk_box_pack_start(GTK_BOX(pwVbox), gtk_label_new(ap[0].szName), FALSE, FALSE, 0);
+			envP1 = gtk_label_new(NULL);
+			gtk_box_pack_start(GTK_BOX(pwVbox), envP1, FALSE, FALSE, 0);
+
+			gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 10);
+			gtk_box_pack_start(GTK_BOX(pwVbox), gtk_label_new(ap[1].szName), FALSE, FALSE, 0);
+			envP2 = gtk_label_new(NULL);
+			gtk_box_pack_start(GTK_BOX(pwVbox), envP2, FALSE, FALSE, 0);
+
+			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pwEnvCombo)->entry), envRows.data[i][1]);
+
+			gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+			gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+							GTK_WINDOW( pwMain ) );
+			gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+					GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+			gtk_widget_show_all( pwDialog );
+
+			*envString = '\0';
+
+			GTKDisallowStdin();
+			gtk_main();
+			GTKAllowStdin();
+
+			if (*envString)
+			{
+				strcpy(env, envString);
+			}
+			else
+				*envString = '\0';
+		}
+
+		FreeRowset(&nick1);
+		FreeRowset(&nick2);
+	}
+
+	FreeRowset(&envRows);
+	return 0;
+}
+
 static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
 {
-	char buf[20] = {"0 Yes"};
+	char env[100];
+	char buf[20];
 	int exists = RelationalMatchExists();
 	if (exists == -1 ||
 		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
 		return;
 
+	if (GtkGetEnv(env) == -1)
+		return;
+
+	/* Pass in env id and force addition */
+	sprintf(buf, "\"%s\" Yes", env);
 	CommandRelationalAddMatch(buf);
+
 	outputx();
 }
 
@@ -9857,7 +10230,7 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	RowSet r;
 	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
 		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwn,
-		*pwLabel;
+		*pwLabel, *pwLink;
 
 	curPlayerId = -1;
 
@@ -9878,6 +10251,11 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 		" ON nick.env_id = env.env_id"))
 		return;
 
+	if (r.rows < 2)
+	{
+		GTKMessage(_("No data in database"), DT_ERROR);
+		return;
+	}
 	pwList = GetRelList(&r);
 	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
 							GTK_SIGNAL_FUNC( ShowRelationalSelect ), pwList );
@@ -9920,6 +10298,29 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	gtk_box_pack_start(GTK_BOX(pwVbox2), pwUpdate, FALSE, FALSE, 0);
 	gtk_signal_connect_object(GTK_OBJECT(pwUpdate), "clicked",
 					GTK_SIGNAL_FUNC(UpdatePlayerDetails), NULL);
+
+	/* If more than one environment, show linked nicknames */
+	if (!RunQuery(&r, "env_id FROM env"))
+	{
+		GTKMessage(_("Database error"), DT_ERROR);
+		return;
+	}
+	if (r.rows > 2)
+	{	/* Multiple environments */
+		gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+		aliases = gtk_label_new(NULL);
+		gtk_box_pack_start(GTK_BOX(pwVbox), aliases, FALSE, FALSE, 0);
+
+		pwAliasList = gtk_text_new(NULL, NULL);
+		gtk_text_set_editable(GTK_TEXT(pwAliasList), FALSE);
+		gtk_box_pack_start(GTK_BOX(pwVbox), pwAliasList, TRUE, TRUE, 0);
+
+		pwLink = gtk_button_new_with_label(_("Link players"));
+		gtk_signal_connect(GTK_OBJECT(pwLink), "clicked",
+			GTK_SIGNAL_FUNC(RelationalLinkPlayers), pwList);
+		gtk_box_pack_start(GTK_BOX(pwVbox), pwLink, FALSE, TRUE, 0);
+	}
+	FreeRowset(&r);
 
 	/* Query sheet */
 	gtk_notebook_append_page(GTK_NOTEBOOK(pwn), pwVbox = gtk_vbox_new(FALSE, 0),
@@ -9985,11 +10386,148 @@ extern void GtkShowQuery(RowSet* pRow)
     gtk_main();
     GTKAllowStdin();
 }
+
+int curEnvRow, numEnvRows;
+GtkWidget *pwRemoveEnv, *pwRenameEnv;
+
+static void ManageEnvSelect(GtkWidget *pw, int y, int x, GdkEventButton *peb, GtkWidget *pwCopy)
+{
+	gtk_widget_set_sensitive(pwRemoveEnv, TRUE);
+	gtk_widget_set_sensitive(pwRenameEnv, TRUE);
+
+	curEnvRow = y;
+}
+
+extern int env_added;
+
+static void RelationalNewEnv(GtkWidget *pw, GtkWidget* pwList)
+{
+    char *newName;
+
+	if ((newName = GTKGetInput(_("New Environment"), _("Enter name"))))
+	{
+		char *aszRow[1];
+		CommandRelationalAddEnvironment(newName);
+
+		if (env_added)
+		{
+			aszRow[0] = newName;
+			gtk_clist_append(GTK_CLIST(pwList), aszRow);
+			free(newName);
+
+			gtk_widget_set_sensitive(pwRemoveEnv, FALSE);
+			gtk_widget_set_sensitive(pwRenameEnv, FALSE);
+
+			numEnvRows++;
+		}
+	}
+}
+
+extern int env_deleted;
+
+static void RelationalRemoveEnv(GtkWidget *pw, GtkWidget* pwList)
+{
+    char *pch;
+
+	if (numEnvRows == 1)
+	{
+		GTKMessage(_("You must have at least one environment"), DT_WARNING);
+		return;
+	}
+
+	gtk_clist_get_text(GTK_CLIST(pwList), curEnvRow, 0, &pch);
+
+	CommandRelationalEraseEnv(pch);
+
+	if (env_deleted)
+	{
+		gtk_clist_remove(GTK_CLIST(pwList), curEnvRow);
+		gtk_widget_set_sensitive(pwRemoveEnv, FALSE);
+		gtk_widget_set_sensitive(pwRenameEnv, FALSE);
+
+		numEnvRows--;
+	}
+}
+
+static void RelationalRenameEnv(GtkWidget *pw, GtkWidget* pwList)
+{
+    char *pch, *newName;
+	gtk_clist_get_text(GTK_CLIST(pwList), curEnvRow, 0, &pch);
+
+	if ((newName = GTKGetInput(_("Rename Environment"), _("Enter new name"))))
+	{
+		char str[1024];
+		sprintf(str, "\"%s\" \"%s\"", pch, newName);
+		CommandRelationalRenameEnv(str);
+		gtk_clist_set_text(GTK_CLIST(pwList), curEnvRow, 0, newName);
+		free(newName);
+	}
+}
+
+static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw )
+{
+	RowSet r;
+	GtkWidget *pwList, *pwDialog, *pwHbox, *pwVbox, *pwBut;
+
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Manage Environments"),
+					DT_INFO, NULL, NULL );
+
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 
+		pwHbox = gtk_hbox_new(FALSE, 0));
+
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+
+	if (!RunQuery(&r, "place as environment FROM env"))
+		return;
+
+	numEnvRows = r.rows - 1; /* -1 as header row counted */
+
+	pwList = GetRelList(&r);
+	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
+							GTK_SIGNAL_FUNC( ManageEnvSelect ), pwList );
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwList, TRUE, TRUE, 0);
+	FreeRowset(&r);
+
+	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
+
+	pwBut = gtk_button_new_with_label( _("New Env" ) );
+	gtk_signal_connect(GTK_OBJECT(pwBut), "clicked",
+				GTK_SIGNAL_FUNC(RelationalNewEnv), pwList);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwBut, FALSE, FALSE, 4);
+
+	pwRemoveEnv = gtk_button_new_with_label( _("Remove Env" ) );
+	gtk_signal_connect(GTK_OBJECT(pwRemoveEnv), "clicked",
+				GTK_SIGNAL_FUNC(RelationalRemoveEnv), pwList);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwRemoveEnv, FALSE, FALSE, 4);
+
+	pwRenameEnv = gtk_button_new_with_label( _("Rename Env" ) );
+	gtk_signal_connect(GTK_OBJECT(pwRenameEnv), "clicked",
+				GTK_SIGNAL_FUNC(RelationalRenameEnv), pwList);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwRenameEnv, FALSE, FALSE, 4);
+
+	gtk_widget_set_sensitive(pwRemoveEnv, FALSE);
+	gtk_widget_set_sensitive(pwRenameEnv, FALSE);
+
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+	gtk_widget_show_all( pwDialog );
+
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
+}
 #else
 static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 {
 }
 static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
+{
+}
+static void GtkManageRelationalEnvs( gpointer *p, guint n, GtkWidget *pw )
 {
 }
 #endif

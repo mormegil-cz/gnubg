@@ -704,6 +704,8 @@ static char szDICE[] = N_("<die> <die>"),
     szFILTER[] = N_ ( "<ply> <num.xjoin to accept (0 = skip)> "
                       "[<num. of extra moves to accept> <tolerance>]"),
     szNAME[] = N_("<name>"),
+    szNAMEOPTENV[] = N_("<name> [env]"),
+    szRENAME[] = N_("<name> <newname>"),
     szLANG[] = N_("system|<language code>"),
     szONOFF[] = N_("on|off"),
     szOPTCOMMAND[] = N_("[command]"),
@@ -1070,31 +1072,46 @@ command cER = {
       &cRecordName },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acRelationalAdd[] = {
-    { "match", CommandRelationalAddMatch, 
+    { "match", CommandRelationalAddMatch,
       N_("Log the match to the external relational database"), 
       szOPTENVFORCE, NULL },
+    { "env", CommandRelationalAddEnvironment,
+      N_("Add a new environment to the external relational database"), 
+      szNAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
+}, acRelationalErase[] = {
+    { "environment", CommandRelationalEraseEnv, N_("Remove an environment and all related "
+		"statistics from the relational database"), szNAME, NULL },
+    { "player", CommandRelationalErase, N_("Remove all statistics from one player "
+			"in the relational database"), szNAMEOPTENV, NULL },
+    { "allplayers", CommandRelationalEraseAll,
+      N_("Remove all player statistics in the relational database"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acRelationalRename[] = {
+    { "environment", CommandRelationalRenameEnv, N_("Rename an environment "
+		"in the relational database"), szRENAME, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acRelationalShow[] = {
     { "environments", CommandRelationalShowEnvironments, 
       N_("Show the environments where the match can be logged"), 
       NULL, NULL },
     { "details", CommandRelationalShowDetails, 
       N_("Show details of the matches for a given player in the database"), 
-      szNAME, NULL },
+      szNAMEOPTENV, NULL },
     { "players", CommandRelationalShowPlayers, 
       N_("Show a list of all the players in the database"), 
       NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acRelational[] = {
-    { "add", NULL, N_("Log to the external relational database"), NULL,
+    { "add", NULL, N_("Add to the external relational database"), NULL,
       acRelationalAdd },
-    { "erase", CommandRelationalErase, N_("Remove all statistics from one player "
-			"in the relational database"), szNAME, NULL },
-    { "eraseall", CommandRelationalEraseAll,
-      N_("Remove all player statistics in the relational database"), NULL, NULL },
+    { "erase", NULL, N_("Remove from the external relational database"), NULL,
+      acRelationalErase },
     { "help", CommandRelationalHelp, 
       N_("Help and instructions for using and setting up "
          "the external relational database"), NULL, NULL },
+    { "rename", NULL, N_("Rename items in the external relational database"), NULL,
+      acRelationalRename },
     { "select", CommandRelationalSelect, N_("Query the relational database"),
       szCOMMAND, NULL },
     { "show", NULL, N_("Show information from the relational database"),

@@ -68,11 +68,12 @@ CREATE UNIQUE INDEX iperson ON person (
 -- Nicknames, combining a player and an env
 
 CREATE TABLE nick (
-   env_id        INTEGER NOT NULL
-   ,person_id     INTEGER NOT NULL
+   nick_id INTEGER NOT NULL
+   ,env_id INTEGER NOT NULL
+   ,person_id INTEGER NOT NULL
    -- Nickname of player
    ,name          CHAR(80) NOT NULL
-   ,PRIMARY KEY (env_id, person_id)
+   ,PRIMARY KEY (nick_id)
    ,FOREIGN KEY (env_id) REFERENCES env (env_id)
       ON DELETE RESTRICT
    ,FOREIGN KEY (person_id) REFERENCES person (person_id)
@@ -80,7 +81,7 @@ CREATE TABLE nick (
 );
 
 CREATE UNIQUE INDEX inick ON nick (
-    env_id, person_id
+    nick_id
 );
 
 -- Table: match
@@ -88,12 +89,10 @@ CREATE UNIQUE INDEX inick ON nick (
 CREATE TABLE match (
     match_id        INTEGER NOT NULL
    ,checksum        CHAR(33) NOT NULL
-   -- location of match
-   ,env_id        INTEGER NOT NULL
    -- Player 0
-   ,person_id0      INTEGER NOT NULL 
+   ,nick_id0      INTEGER NOT NULL 
    -- Player 1
-   ,person_id1      INTEGER NOT NULL 
+   ,nick_id1      INTEGER NOT NULL 
    -- The result of the match/session:
    -- - the total number of points won or lost
    -- - +1/0/-1 for player 0 won the match, match not complete, and
@@ -114,11 +113,9 @@ CREATE TABLE match (
    ,comment         CHAR(80) NOT NULL
    ,date            DATE 
    ,PRIMARY KEY (match_id)
-   ,FOREIGN KEY (env_id) REFERENCES env (env_id)
+   ,FOREIGN KEY (nick_id0) REFERENCES nick (nick_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (person_id0) REFERENCES person (person_id)
-      ON DELETE RESTRICT
-   ,FOREIGN KEY (person_id1) REFERENCES person (person_id)
+   ,FOREIGN KEY (nick_id1) REFERENCES nick (nick_id)
       ON DELETE RESTRICT
 );
 
@@ -137,7 +134,7 @@ CREATE TABLE matchstat (
    -- match identification
    ,match_id                          INTEGER NOT NULL
    -- player identification
-   ,person_id                         INTEGER NOT NULL
+   ,nick_id                         INTEGER NOT NULL
    -- chequerplay statistics
    ,total_moves                       INTEGER NOT NULL 
    ,unforced_moves                    INTEGER NOT NULL
@@ -216,7 +213,7 @@ CREATE TABLE matchstat (
    ,time_penalty_loss                 FLOAT   NOT NULL
    -- 
    ,PRIMARY KEY (matchstat_id)
-   ,FOREIGN KEY (person_id) REFERENCES person (person_id)
+   ,FOREIGN KEY (nick_id) REFERENCES nick (nick_id)
       ON DELETE RESTRICT
    ,FOREIGN KEY (match_id) REFERENCES match (match_id)
       ON DELETE CASCADE
@@ -227,3 +224,4 @@ CREATE UNIQUE INDEX ismatchstat ON matchstat (
 );
 
 INSERT INTO env VALUES( 0, 'Default env.');
+INSERT INTO control VALUES('env', 1);
