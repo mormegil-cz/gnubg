@@ -46,10 +46,6 @@ typedef enum _DiceShown {
 	DICE_NOT_SHOWN = 0, DICE_BELOW_BOARD, DICE_ON_BOARD
 } DiceShown;
 
-/* minimum time in milliseconds before a drag to the
-	same point is considered a real drag rather than a click */
-#define CLICK_TIME 200
-
 typedef enum _animation {
     ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
 } animation;
@@ -208,6 +204,7 @@ typedef struct _BoardData {
     gint to_move; /* 0 to 4 -- number of pieces to move */
     gint forced, crawford_game; /* unused, Crawford game flag */
     gint redoubles; /* number of instant redoubles allowed */
+	int DragTargetHelp;	/* Currently showing draw targets? */
 
 #if USE_BOARD3D
 /* extra members for 3d board */
@@ -252,8 +249,6 @@ typedef struct _BoardData {
 	float flagWaved;	/* How much has flag waved */
 
 	int iTargetHelpPoints[4];	/* Drag target position */
-	int DragTargetHelp;	/* Currently showing draw targets? */
-
 	void *numberFont, *cubeFont;	/* FTGL fonts */
 	int preview;	/* Showing a preview? */
 
@@ -297,7 +292,12 @@ extern int InitGTK3d(int *argc, char ***argv);
 extern void SetupViewingVolume3d(BoardData *bd);
 extern void DisplayCorrectBoardType();
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
+
+#if FAST_3D_PREVIEW
 extern void CreatePreviewBoard3d(BoardData* bd, GtkWidget** drawing_area);
+#else
+extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
+#endif
 extern void RollDice3d(BoardData *bd);
 extern void AnimateMove3d(BoardData *bd);
 extern void ShowFlag3d(BoardData *bd);
@@ -308,6 +308,7 @@ extern void CloseBoard3d(BoardData* bd);
 extern int BoardPoint3d(BoardData *bd, int x, int y, int point);
 extern int MouseMove3d(BoardData *bd, int x, int y);
 extern void ReadBoard3d(BoardData* bd, GtkWidget *widget, unsigned char* buf);
+extern void RenderBoard3d(BoardData* bd, void *glpixmap, unsigned char* buf);
 extern void Tidy3dObjects(BoardData* bd);
 extern int TestPerformance3d(BoardData* bd);
 extern void testSet3dSetting(BoardData* bd, renderdata *prd, int testRow);

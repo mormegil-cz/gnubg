@@ -134,10 +134,13 @@ void InitGL(BoardData *bd)
 	/* Generate normal co-ords for nurbs */
 	glEnable(GL_AUTO_NORMAL);
 
-	/* Setup some 3d things */
-	BuildFont(bd);
-	setupFlag(bd);
-	shadowInit(bd);
+	if (bd)
+	{
+		/* Setup some 3d things */
+		BuildFont(bd);
+		setupFlag(bd);
+		shadowInit(bd);
+	}
 }
 
 void setMaterial(Material* pMat)

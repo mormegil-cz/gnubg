@@ -19,23 +19,38 @@ Display settings
 * Only enable 2d/3d skin options when selected
 * Move non-skin settings to new display option page
 
+* Update lighting on changes to light paramaters (in preview)
+	* Use lighting levels in appearance settings (for colour preveiw - rather than constants)
+
 Bugs
 ====
 
-* Gtk 1, change colour of design element but cancel colour dialog - change not removed until next screen update
-	+ Doesn't work in 2d or 3d - have I broken this?
-* Show a colour selection box in appearances, strange gtk (General delete case) error on settings exit
+* Sliders not getting set (2nd time) in 3d colour setting
 
-* Switch from 2d->3d, shadows on pages except design look wrong (stencil buffer/widget/gtk problem)
-	- ok when design page shown...
+In current version
+------------------
+
+* Click on home to move 2 chequers off board when player 0 (human)
+	- causes crash or assertion failure
+	? Problem in UpdateMove() ?
+
+* Show a colour selection box in appearances
+	- strange gtk (General delete case) error on settings exit
+
+* Gtk 1, change colour of design element but cancel colour dialog
+	- change not removed until next screen update
 
 Other things
 ============
+
+Make logo brighter (on close board)
 
 Add tooltips for new options
 
 Add check for unaccellerated graphics under linux
 	+ use glX functions - isDirect()?
+
+Show/hide 2d arrow with option
 
 ----------------------------------------------------------
 

@@ -1520,7 +1520,7 @@ void drawTable(BoardData* bd)
 
 	/* Bear-off edge */
 	drawBox(BOX_NOENDS | BOX_SPLITTOP, TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, bd->boxMat.pTexture);
-	drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->boxMat.pTexture);
 
 	if (rdAppearance.fLabels)
 		drawNumbers(bd, 2);
@@ -1577,7 +1577,7 @@ void drawTable(BoardData* bd)
 
 	/* Bear-off edge */
 	drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, bd->boxMat.pTexture);
-	drawBox(BOX_NOSIDES, EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_NOSIDES, EDGE_WIDTH - LIFT_OFF, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2 + LIFT_OFF * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->boxMat.pTexture);
 
 	if (bd->showHinges)
 	{
@@ -1844,7 +1844,7 @@ void drawPointPick(BoardData* bd, int point)
 */	}
 }
 
-/* 20 allows for 5 hit records (more than enougth) */
+/* 20 allows for 5 hit records (more than enough) */
 #define BUFSIZE 20
 
 int BoardPoint3d(BoardData *bd, int x, int y, int point)

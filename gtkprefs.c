@@ -77,8 +77,11 @@ GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwClose
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
 	*padjLightLevelAmbient, *padjLightLevelDiffuse, *padjLightLevelSpecular,
 	*padjLightPosY, *padjLightPosZ;
-BoardData bd3d;
-displaytype previewType;
+
+	BoardData bd3d;
+	displaytype previewType;
+
+	void *glpixPreview;
 #endif
 
 #if HAVE_LIBXML2
@@ -105,6 +108,10 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook);
 
 static void
 AddDesignRow ( gpointer data, gpointer user_data );
+
+void UpdatePreviewBar(GdkPixmap *pixmap);
+		GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind, Material* pMat);
+		GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent);
 
 
 #if HAVE_LIBXML2
@@ -208,7 +215,6 @@ Preview2D( const renderdata *prd ) {
 int testRow;
 
 #if USE_BOARD3D
-
 static void Preview3D(const renderdata *prd)
 {
 	unsigned char auch[ 108 * 3 * 72 * 3 * 3 ];
@@ -216,7 +222,11 @@ static void Preview3D(const renderdata *prd)
 
 	testSet3dSetting(&bd3d, prd, testRow);
 
+#if FAST_3D_PREVIEW
 	ReadBoard3d(&bd3d, pwPreview[PI_DESIGN], auch);
+#else
+	RenderBoard3d(&bd3d, glpixPreview, auch);
+#endif
 
 	gc = gdk_gc_new( ppm );
 	gdk_draw_rgb_image( ppm, gc, 0, 0, 108 * 3, 72 * 3, GDK_RGB_DITHER_MAX,
@@ -252,10 +262,10 @@ static void Preview( const renderdata *prd )
 #endif
 }
 
-static void UpdatePreview(GtkWidget **ppw)
+void UpdatePreview(GtkWidget **ppw)
 {
 	renderdata rd;
-	GetPrefs(&rd);
+ 	GetPrefs(&rd);
 	Preview(&rd);
 
 	if (ppw)
@@ -265,9 +275,45 @@ static void UpdatePreview(GtkWidget **ppw)
 void ShowPreview(GtkWidget *widget, void *arg)
 {	/* Update preview when dialog shown */
 	fUpdate = TRUE;
-
 	Preview(&rdAppearance);
 }
+
+#if USE_BOARD3D
+
+static GtkWidget *ChequerPrefs3d( BoardData *bd)
+{
+    GtkWidget *pw, *pwhbox;
+    GtkWidget *pwx;
+
+    pwx = gtk_hbox_new ( FALSE, 0 );
+
+    pw = gtk_vbox_new( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, TRUE, TRUE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Chequer 0:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+//			apwColour[ 0 ] = 
+gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window, 
+				&bd3d.checkerMat[0]), TRUE, TRUE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Chequer 1:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+//			apwColour[ 1 ] = 
+gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window, 
+				&bd3d.checkerMat[1]), TRUE, TRUE, 4 );
+
+  return pwx;
+}
+
+#endif
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 
@@ -291,7 +337,8 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 			FALSE, FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Colour:") ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ),
+
+   gtk_box_pack_start( GTK_BOX( pwhbox ),
 			apwColour[ f ] = gtk_colour_picker_new(), TRUE,
 			TRUE, 4 );
     
@@ -724,26 +771,30 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 {
 	int i;
 	int state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
-
+	int numPages = 
+#ifdef USE_GTK2
+		gtk_notebook_get_n_pages(GTK_NOTEBOOK(pwNotebook));
+#else
+		g_list_length(GTK_NOTEBOOK(pwNotebook)->children);
+#endif
 	/* Show pages with correct 2d/3d settings */
-	for (i = NUM_PIXMAPS + NUM_NONPREVIEW_PAGES - 1; i >= NUM_NONPREVIEW_PAGES; i--)
+	for (i = numPages - 1; i >= NUM_NONPREVIEW_PAGES; i--)
 		gtk_notebook_remove_page(GTK_NOTEBOOK(pwNotebook), i);
 
 	previewType = state ? DT_3D : DT_2D;
 	AddPages(bd, pwNotebook);
 
-// Add others here...
+// Add others here...?
 	gtk_widget_set_sensitive(pwTestPerformance, state);
 
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
 
+#if FAST_3D_PREVIEW
 #if !GTK2
 	gtk_widget_realize(pwPreview[PI_DESIGN]);
 #endif
-
-// Put back when settings set correctly...
-//	UpdatePreview(&pwPreview[PI_DESIGN]);
+#endif
 
 	if (state)
 		CheckAccelerated(pwPreview[PI_DESIGN]);
@@ -778,11 +829,11 @@ void DoTestPerformance(GtkWidget *pw, BoardData* bd)
 
 	if (fps >= 30)
 		msg = "3d Performance is very fast.\n";
-	else if (fps > 15)
+	else if (fps >= 15)
 		msg = "3d Performance is good.\n";
-	else if (fps > 10)
+	else if (fps >= 10)
 		msg = "3d Performance is ok.\n";
-	else if (fps > 5)
+	else if (fps >= 5)
 		msg = "3d Performance is poor.\n";
 	else
 		msg = "3d Performance is very poor.\n";
@@ -872,6 +923,7 @@ GtkWidget *Board3dPage(BoardData *bd)
 	padjBoardAngle = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.boardAngle,
 										0, 60, 1, 10, 0));
 	pwBoardAngle = gtk_hscale_new(padjBoardAngle);
+	gtk_scale_set_digits( GTK_SCALE( pwBoardAngle ), 0 );
 	gtk_box_pack_start(GTK_BOX(dtBox), pwBoardAngle, FALSE, FALSE, 0);
 
 	lab = gtk_label_new("test FOV skew factor");
@@ -880,6 +932,7 @@ GtkWidget *Board3dPage(BoardData *bd)
 	padjSkewFactor = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.testSkewFactor,
 										0, 100, 1, 10, 0));
 	pwSkewFactor = gtk_hscale_new(padjSkewFactor);
+	gtk_scale_set_digits( GTK_SCALE( pwSkewFactor ), 0 );
 	gtk_box_pack_start(GTK_BOX(dtBox), pwSkewFactor, FALSE, FALSE, 0);
 
 	pwTestPerformance = gtk_button_new_with_label("Test performance");
@@ -1185,8 +1238,9 @@ UseDesign ( void ) {
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(padjSkewFactor), rd.testSkewFactor);
 
+	if (previewType == DT_2D)
 #endif
-
+{
   /* chequers */
 
   for ( i = 0; i < 2; ++i ) {
@@ -1201,9 +1255,9 @@ UseDesign ( void ) {
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjExponent[ i ] ),
                                rd.arExponent[ i ] );
-
-
   }
+}
+
 
   /* board, border, and points */
 
@@ -1307,9 +1361,8 @@ static void
 DesignActivate ( boarddesign *pbde ) {
 
   gchar *sz;
-  
-  fUpdate = FALSE;
 
+  fUpdate = FALSE;
   /* set title */
   gtk_label_set_text ( GTK_LABEL ( pwDesignTitle ),
                        pbde->szTitle );
@@ -1799,7 +1852,12 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
 #if USE_BOARD3D
 	if (previewType == DT_3D)
 	{
+#if FAST_3D_PREVIEW
 		CreatePreviewBoard3d(&bd3d, &pwPreview[PI_DESIGN]);
+#else
+		glpixPreview = CreatePreviewBoard3d(&bd3d, ppm);
+		pwPreview[PI_DESIGN] = gtk_pixmap_new(ppm, NULL),
+#endif
 
 		/* design preview */
 		gtk_box_pack_start (GTK_BOX(pwvbox), pwPreview[PI_DESIGN],
@@ -1905,7 +1963,6 @@ static void GetPrefs ( renderdata *prd ) {
 
 #if USE_BOARD3D
 	BoardData *bd = BOARD( pwBoard )->board_data;
-
 	prd->fDisplayType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwBoardType ) ) ? DT_2D : DT_3D;
 	prd->showShadows = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwShowShadows));
 	prd->animateRoll = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateRoll));
@@ -1936,13 +1993,10 @@ static void GetPrefs ( renderdata *prd ) {
 // Best place for these?
 //preDraw3d(bd);
 //SetupViewingVolume3d(bd);
+
+	if (previewType == DT_2D)
 #endif
-    prd->fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
-    prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
-    fWood = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwWood ) );
-    prd->rRound = 1.0 - padjRound->value;
-    
+{
     for( i = 0; i < 2; i++ ) {
 	prd->arRefraction[ i ] = apadj[ i ]->value;
 	prd->arCoefficient[ i ] = apadjCoefficient[ i ]->value;
@@ -1959,7 +2013,13 @@ static void GetPrefs ( renderdata *prd ) {
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwColour[ 1 ] ), ar );
     for( i = 0; i < 4; i++ )
 	prd->aarColour[ 1 ][ i ] = ar[ i ];
-
+}
+    prd->fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+    prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
+    fWood = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwWood ) );
+    prd->rRound = 1.0 - padjRound->value;
+    
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwDiceColour[ 0 ] ), 
                                    ar );
     for( i = 0; i < 3; i++ )
@@ -2049,10 +2109,20 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 			      gtk_label_new(_("Designs") ) );
 }
 #endif /* HAVE_LIBXML2 */
+#if USE_BOARD3D
+	if (previewType == DT_3D)
+	{
+		append_preview_page( pwNotebook, ChequerPrefs3d( bd ),
+			 _("Chequers"), PI_CHEQUERS0 );
+	}
+	else
+#endif
+{
     append_preview_page( pwNotebook, ChequerPrefs( bd, 0 ),
 			 _("Chequers (0)"), PI_CHEQUERS0 );
     append_preview_page( pwNotebook, ChequerPrefs( bd, 1 ),
 			 _("Chequers (1)"), PI_CHEQUERS1 );
+}
     append_preview_page( pwNotebook, BoardPage( bd ), _("Board"),
 			 PI_BOARD );
     append_preview_page( pwNotebook, BorderPage( bd ), _("Border"),
@@ -2064,18 +2134,6 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
     append_preview_page( pwNotebook, CubePrefs( bd ), _("Cube"), PI_CUBE );
 }
 
-void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page, 
-				guint page_num, gpointer user_data)
-{
-#if USE_BOARD3D
-	if (previewType == DT_3D)
-	{
-		if (page_num > NUM_NONPREVIEW_PAGES)
-			UpdatePreview(pwPreview + page_num - NUM_NONPREVIEW_PAGES);
-	}
-#endif
-}
-
 extern void BoardPreferences( GtkWidget *pwBoard ) {
 
     int i;
@@ -2083,6 +2141,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     BoardData *bd = BOARD( pwBoard )->board_data;
 
 #if USE_BOARD3D
+	GtkWidget* colourDialog3d;
 	/* Set bd3d to current board settings */
 	CopySettings3d(bd, &bd3d);
 #endif
@@ -2091,6 +2150,10 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     
     pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
+
+#if USE_BOARD3D
+	colourDialog3d = Create3dColourDialog(bd->drawing_area3d->window, pwDialog);
+#endif
 
     pwNotebook = gtk_notebook_new();
 
@@ -2124,9 +2187,6 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
 
-    gtk_signal_connect( GTK_OBJECT( pwNotebook ), "switch-page",
-			GTK_SIGNAL_FUNC( ChangePage ), 0);
-
     gtk_widget_show_all( pwDialog );
 
 	gtk_notebook_set_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
@@ -2152,6 +2212,10 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fUpdate = TRUE;
 
     gtk_main();
+
+#if USE_BOARD3D
+	gtk_widget_destroy(colourDialog3d);
+#endif
 }
 
 #if HAVE_LIBXML2

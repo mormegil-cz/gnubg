@@ -52,6 +52,10 @@
 #define gtk_image_new_from_pixmap gtk_pixmap_new
 #endif
 
+/* minimum time in milliseconds before a drag to the
+	same point is considered a real drag rather than a click */
+#define CLICK_TIME 250
+
 animation animGUI = ANIMATE_SLIDE;
 int nGUIAnimSpeed = 4, fGUIBeep = TRUE, fGUIDiceArea = FALSE,
     fGUIHighDieFirst = TRUE, fGUIIllegal = FALSE, fGUIShowIDs = TRUE,
@@ -1470,6 +1474,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 
 	bd->click_time = gdk_event_get_time((GdkEvent*)event);
 	bd->drag_button = event->button;
+	bd->DragTargetHelp = 0;
 
 	/* Set dice in editing mode */
     if (editing && (bd->drag_point == POINT_DICE ||
@@ -1765,7 +1770,6 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
 	{
-		bd->DragTargetHelp = 0;
 		dest = BoardPoint3d(bd, x, y, -1);
 	}
 	else
@@ -1774,19 +1778,19 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 		board_end_drag( board, bd );
 
 		/* undo drag target help */
-		if ( fGUIDragTargetHelp ) {
+		if (fGUIDragTargetHelp && bd->DragTargetHelp)
+		{
 			int i;
-			gint iDestPoints[4];
-			
-			if ( LegalDestPoints( bd, iDestPoints ) )
-				for ( i = 0; i <= 3; ++i ) {
-					if ( iDestPoints[i] != -1 )
-						board_invalidate_point( bd, iDestPoints[i] );
-				}
+			for ( i = 0; i <= 3; ++i )
+			{
+				if (bd->iTargetHelpPoints[i] != -1)
+					board_invalidate_point(bd, bd->iTargetHelpPoints[i]);
+			}
 		}
 
 		dest = board_point(board, bd, x, y);
 	}
+	bd->DragTargetHelp = 0;
 
 	if (!editing && dest == bd->drag_point &&
 		gdk_event_get_time( (GdkEvent*)event ) - bd->click_time < CLICK_TIME)
@@ -1796,7 +1800,7 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 			/* can't move the opponent's chequers */
 			board_beep(bd);
 			dest = bd->drag_point;
-    		place_chequer_or_revert(bd, dest);
+			place_chequer_or_revert(bd, dest);
 		}
 		else
 		{
@@ -1893,52 +1897,46 @@ gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData*
 	if (bd->drag_point < 0)
 		return TRUE;
 
-	if (fGUIDragTargetHelp && !editing)
-	{
-#if USE_BOARD3D
-		if (rdAppearance.fDisplayType == DT_3D)
+	if (fGUIDragTargetHelp && !bd->DragTargetHelp && !editing)
+	{	/* Decide if drag targets should be shown (shown after small pause) */
+		if ((ap[bd->drag_colour == -1 ? 0 : 1].pt == PLAYER_HUMAN)		/* not for computer turn */
+			&& gdk_event_get_time((GdkEvent*)event) - bd->click_time > CLICK_TIME)
 		{
-			if ((ap[bd->drag_colour == -1 ? 0 : 1].pt == PLAYER_HUMAN)		/* not for computer turn */
-				&& (bd->drag_point != BoardPoint3d(bd, x, y, -1)))	/* dragged to different ponit */
-			{
-				bd->DragTargetHelp = LegalDestPoints(bd, bd->iTargetHelpPoints);
-			}
+			bd->DragTargetHelp = LegalDestPoints(bd, bd->iTargetHelpPoints);
 		}
-		else
+	}
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_2D)
 #endif
-		{
-			gint iDestPoints[4];
+	{
+		if (bd->DragTargetHelp)
+		{	/* Display 2d drag target help */
 			gint i, ptx, pty, ptcx, ptcy;
 			GdkColor *TargetHelpColor;
 			
-			if ( ( ap[ bd->drag_colour == -1 ? 0 : 1 ].pt == PLAYER_HUMAN )		/* not for computer turn */
-				&& ( bd->drag_point != board_point( board, bd, x, y ) )		/* dragged some distance */
-				&& LegalDestPoints( bd, iDestPoints ) )				/* can move */
-			{
-				TargetHelpColor = (GdkColor *) malloc( sizeof(GdkColor) );
-				/* values of RGB components within GdkColor are
-				* taken from 0 to 65535, not 0 to 255. */
-				TargetHelpColor->red   =    0 * ( 65535 / 255 );
-				TargetHelpColor->green =  255 * ( 65535 / 255 );
-				TargetHelpColor->blue  =    0 * ( 65535 / 255 );
-				TargetHelpColor->pixel = (gulong)( TargetHelpColor->red * 65536 +
-								   TargetHelpColor->green * 256 +
-								   TargetHelpColor->blue );
-				/* get the closest color available in the colormap if no 24-bit*/
-				gdk_color_alloc(gtk_widget_get_colormap( board ), TargetHelpColor);
-				gdk_gc_set_foreground(bd->gc_copy, TargetHelpColor);
-		
-				/* draw help rectangles around target points */
-				for ( i = 0; i <= 3; ++i ) {
-					if ( iDestPoints[i] != -1 ) {
-						/* calculate region coordinates for point */
-						point_area( bd, iDestPoints[i], &ptx, &pty, &ptcx, &ptcy );
-						gdk_draw_rectangle( board->window, bd->gc_copy, FALSE, ptx + 1, pty + 1, ptcx - 2, ptcy - 2 );
-					}
+			TargetHelpColor = (GdkColor *) malloc( sizeof(GdkColor) );
+			/* values of RGB components within GdkColor are
+			* taken from 0 to 65535, not 0 to 255. */
+			TargetHelpColor->red   =    0 * ( 65535 / 255 );
+			TargetHelpColor->green =  255 * ( 65535 / 255 );
+			TargetHelpColor->blue  =    0 * ( 65535 / 255 );
+			TargetHelpColor->pixel = (gulong)( TargetHelpColor->red * 65536 +
+							   TargetHelpColor->green * 256 +
+							   TargetHelpColor->blue );
+			/* get the closest color available in the colormap if no 24-bit*/
+			gdk_color_alloc(gtk_widget_get_colormap( board ), TargetHelpColor);
+			gdk_gc_set_foreground(bd->gc_copy, TargetHelpColor);
+
+			/* draw help rectangles around target points */
+			for ( i = 0; i <= 3; ++i ) {
+				if ( bd->iTargetHelpPoints[i] != -1 ) {
+					/* calculate region coordinates for point */
+					point_area( bd, bd->iTargetHelpPoints[i], &ptx, &pty, &ptcx, &ptcy );
+					gdk_draw_rectangle( board->window, bd->gc_copy, FALSE, ptx + 1, pty + 1, ptcx - 2, ptcy - 2 );
 				}
- 		
-				free( TargetHelpColor );
 			}
+		
+			free( TargetHelpColor );
 		}
 	}
 
@@ -4095,31 +4093,24 @@ void InitBoardData()
 {	/* Initialize some BoardData settings on new game start */
 	BoardData* bd = BOARD(pwBoard)->board_data;
 
-	bd->doubled = 0;
+	/* Only needed for 3d board */
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_2D)
+#endif
+		return;
 
 	/* Move cube back to center */
-	board_invalidate_cube(bd);
 	bd->cube = 0;
 	bd->cube_owner = 0;
+	bd->doubled = 0;
 
-	if (bd->resigned)
-	{
-#if USE_BOARD3D
-		if (rdAppearance.fDisplayType == DT_2D)
-#endif
-			board_invalidate_resign(bd);
-		bd->resigned = 0;
-	}
+	bd->resigned = 0;
+
 	/* Set dice so 3d roll happens */
 	bd->diceShown = DICE_NOT_SHOWN;
 	bd->diceRoll[0] = bd->diceRoll[1] = -1;
 
-#if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
-	{
-		updateOccPos(bd);
-		updateFlagOccPos(bd);
-		SetupViewingVolume3d(bd);
-	}
-#endif
+	updateOccPos(bd);
+	updateFlagOccPos(bd);
+	SetupViewingVolume3d(bd);
 }

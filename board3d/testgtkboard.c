@@ -207,8 +207,10 @@ void testSet3dSetting(BoardData* bd, renderdata *prd, int testRow)
 
 //	updateHingeOccPos(bd);
 
-	setA(&bd->checkerMat[0], prd->aarColour[0]);
-	setA(&bd->checkerMat[1], prd->aarColour[1]);
+//	setA(&bd->checkerMat[0], prd->aarColour[0]);
+//	setA(&bd->checkerMat[1], prd->aarColour[1]);
+bd->checkerMat[0].pTexture = 0;
+bd->checkerMat[1].pTexture = 0;
 
 	set(&bd->diceMat[0], prd->afDieColour[0] ? prd->aarColour[0] : prd->aarDiceColour[0], 0);
 	set(&bd->diceMat[1], prd->afDieColour[1] ? prd->aarColour[1] : prd->aarDiceColour[1], 0);
@@ -235,9 +237,10 @@ void testSet3dSetting(BoardData* bd, renderdata *prd, int testRow)
 
 	bd->showHinges = prd->fHinges;
 
-	SetTestTextures(bd, testRow);
 
-	preDraw3d(bd);
+//	SetTestTextures(bd, testRow);
+
+//	preDraw3d(bd);
 }
 
 void CopyTexture(BoardData* from, BoardData* to, Material* fromMat, Material* toMat)
@@ -246,7 +249,10 @@ void CopyTexture(BoardData* from, BoardData* to, Material* fromMat, Material* to
 	int i;
 
 	if (!fromMat->pTexture || !fromMat->pTexture->texID)
+	{
+		toMat->pTexture = 0;
 		return;
+	}
 
 	i = 0;
 	while (&from->textureList[i] != fromMat->pTexture)
@@ -289,5 +295,5 @@ void CopySettings3d(BoardData* from, BoardData* to)
 	to->pieceType = from->pieceType;
 	to->showHinges = from->showHinges;
 
-	preDraw3d(to);
+//	preDraw3d(to);
 }
