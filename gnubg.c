@@ -1091,12 +1091,19 @@ command cER = {
     acSetExportParameters },
   { "display", NULL, N_("when to show moves"), NULL, acSetExportCubeDisplay },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportPNG[] = {
+    { "size", CommandSetExportPNGSize, 
+      N_("Set size of board for PNG export and HTML image export"), 
+      szVALUE, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExport[] = {
   { "html", NULL,
     N_("Set options for HTML export"), NULL, acSetExportHTML },
   { "include", NULL,
     N_("Control which blocks to include in exports"), 
     NULL, acSetExportInclude },
+  { "png", NULL,
+    N_("Set options for PNG export"), NULL, acSetExportPNG },
   { "show", NULL,
     N_("Control display of boards/players in exports"), NULL, acSetExportShow },
   { "moves", NULL,
@@ -1302,9 +1309,6 @@ command cER = {
     { "highlightcolour", CommandSetHighlight, 
       N_("Set brightness and colour for highlighting lines"),
 	  NULL, acSetHighlightIntensity},
-    { "pngsize", CommandSetPNGSize, 
-      N_("Set size of board for PNG export and HTML image export"), 
-      szVALUE, NULL },
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -4483,8 +4487,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set delay %d\n"
 #endif
 	     "set display %s\n"
-	     "set egyptian %s\n"
-             "set pngsize %d\n",
+	     "set egyptian %s\n",
 	     fClockwise ? "on" : "off", 
 			 fTutor ? "on" : "off",
 			 fTutorCube ? "on" : "off",
@@ -4498,8 +4501,7 @@ extern void CommandSaveSettings( char *szParam ) {
 #if USE_GUI
 	     nDelay,
 #endif
-	     fDisplay ? "on" : "off", fEgyptian ? "on" : "off",
-             nPNGSize );
+	     fDisplay ? "on" : "off", fEgyptian ? "on" : "off" );
 
     SaveEvalSetupSettings ( pf, "set evaluation chequerplay", &esEvalChequer );
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );
@@ -4639,6 +4641,8 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf ( pf, "set export html css %s\n",
               aszHTMLExportCSSCommand[ exsExport.hecss ] );
+
+    fprintf ( pf, "set export png size %d\n", exsExport.nPNGSize );
 
     /* invert settings */
 

@@ -74,6 +74,11 @@ typedef struct _exportwidget {
   GtkWidget *pwHTMLType;
   GtkWidget *pwHTMLCSS;
 
+  /* png */
+
+  GtkWidget *pwPNGSize;
+  GtkAdjustment *adjPNGSize;
+
 } exportwidget;
 
 static void
@@ -151,6 +156,10 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
 
   pexs->hecss = 
     gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLCSS));
+
+  /* png */
+
+  pexs->nPNGSize = pew->adjPNGSize->value;
 
 }
 
@@ -281,6 +290,13 @@ SetExportCommands ( const exportsetup *pexsOrig,
     g_free ( sz );
   }
 
+  /* png */
+
+  if ( pexsOrig->nPNGSize != pexsNew->nPNGSize ) {
+    char *sz = g_strdup_printf ( "set export png size %d", pexsNew->nPNGSize );
+    UserCommand ( sz );
+    g_free ( sz );
+  }
 
 }
 
@@ -373,7 +389,29 @@ ExportSet ( exportwidget *pew ) {
   gtk_option_menu_set_history ( GTK_OPTION_MENU (pew->pwHTMLCSS), 
                                 pexs->hecss );
 
+  /* png */
+
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT ( pew->adjPNGSize ),
+                             pexs->nPNGSize );
+
 }
+
+
+static void
+PNGSizeChanged ( GtkAdjustment *adj, exportwidget *pew ) {
+
+  int n = (int) adj->value;
+
+  char *sz = g_strdup_printf ( _("%dx%d pixels"), 
+                                n * 108, n * 72 );
+
+  gtk_label_set_text ( GTK_LABEL ( pew->pwPNGSize ),
+                       sz );
+
+  g_free ( sz );
+
+}
+
 
 extern void
 GTKShowExport ( exportsetup *pexs ) {
@@ -704,6 +742,42 @@ GTKShowExport ( exportsetup *pexs ) {
   gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);
   gtk_box_pack_start (GTK_BOX (pwVBox), pwHBox, FALSE, FALSE, 0);
   
+  /* Png */
+
+  pwFrame = gtk_frame_new ( _("PNG export options") );
+
+  gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,
+                     1, 2, 2, 3,
+                     GTK_FILL, 
+                     GTK_FILL, 
+                     2, 2 );
+
+  pwVBox = gtk_vbox_new ( FALSE, 0 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwVBox );
+  gtk_container_set_border_width ( GTK_CONTAINER ( pwVBox ), 4 );
+  
+  pwHBox = gtk_hbox_new ( FALSE, 0 );
+  gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwHBox, FALSE, FALSE, 0);
+  
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ),
+                       gtk_label_new ( _("Size of PNG images:") ),
+                       TRUE, TRUE, 0 );
+  
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ),
+                       pew->pwPNGSize = gtk_label_new ( "108x72 pixels" ),
+                       TRUE, TRUE, 0 );
+
+  pew->adjPNGSize = GTK_ADJUSTMENT ( gtk_adjustment_new ( 1,
+                                                          1, 20, 1, 5, 0 ) );
+  
+  gtk_box_pack_start (GTK_BOX (pwVBox), 
+                      gtk_hscale_new ( pew->adjPNGSize ), FALSE, FALSE, 0);
+
+  gtk_signal_connect ( GTK_OBJECT ( pew->adjPNGSize ), "value-changed",
+                       GTK_SIGNAL_FUNC ( PNGSizeChanged ), pew );
+
   /* show dialog */
 
   gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );

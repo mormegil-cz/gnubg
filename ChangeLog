@@ -1,3 +1,23 @@
+Tue Dec 17 00:09:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	GUI support for setting PNG size
+	(also, PNG size moved in exportsetup)
+
+	* export.c, export.h: PNG size moved in exportsetup
+	* gnubg.c: new command "set export png size ..."
+	* gnubg.c (CommandSaveSettings): save png size.
+	* gtkexport.c (ExportSet, ExportGetValues, SetExportCOmmands):
+	GUI support for setting PNG size
+	* set.c (CommandSetExportPNGSize): new function.
+
+Mon Dec 16 23:45:03 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Make sure that "rollout =1 =2" stores results into storedmoves
+	and make sure that storedmoves are stored in movenormal records.
+
+	* gnubg.c (CommandRollout): store results into storedmoves.
+	* play.c: store storedmoves into movenormal records.
+
 Mon Dec 16 23:37:56 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Output player records in html and text export.

@@ -3692,7 +3692,7 @@ CommandSetCheat ( char *sz ) {
 
 
 extern void
-CommandSetPNGSize ( char *sz ) {
+CommandSetExportPNGSize ( char *sz ) {
 
     int n;
     
@@ -3701,7 +3701,7 @@ CommandSetPNGSize ( char *sz ) {
 	return;
     }
 
-    nPNGSize = n;
+    exsExport.nPNGSize = n;
 
     outputf ( "Size of generated PNG images are %dx%d pixels\n",
               n * 108, n * 72 );
