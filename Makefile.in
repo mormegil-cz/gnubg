@@ -201,6 +201,8 @@ ACLOCAL_AMFLAGS = -I m4
 @EXTERNAL_BR1_TRUE@BR1DATA = gnubg_os0.bd
 @EXTERNAL_BR1_FALSE@BR1DATA = 
 
+BOARD3D_TEXTURE_FILES = textures.txt
+
 @USE_BOARD3D_TRUE@BOARD3D_DIR = board3d textures
 @USE_BOARD3D_FALSE@BOARD3D_DIR = 
 @USE_BOARD3D_TRUE@BOARD3D_DEPS = board3d/libboard3d.a
@@ -209,10 +211,10 @@ ACLOCAL_AMFLAGS = -I m4
 @USE_BOARD3D_FALSE@BOARD3D_LIBS = 
 @USE_BOARD3D_TRUE@BOARD3D_INCS = @GTKGLEXT_CFLAGS@
 @USE_BOARD3D_FALSE@BOARD3D_INCS = 
-@USE_BOARD3D_TRUE@BOARD3DDATA = textures.txt 
+@USE_BOARD3D_TRUE@BOARD3DDATA = $(BOARD3D_TEXTURE_FILES)
 @USE_BOARD3D_FALSE@BOARD3DDATA = 
 
-SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) 
+SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts
 
 @USE_PYTHON_TRUE@PYTHON_SOURCES = gnubgmodule.c gnubgmodule.h
 @USE_PYTHON_FALSE@PYTHON_SOURCES = 
@@ -318,7 +320,8 @@ TESTS = gnubgtest erftest
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS boards.xml external_l.l external_y.y
+	ABOUT-NLS boards.xml external_l.l external_y.y \
+	$(BOARD3D_TEXTURE_FILES)
 
 
 DISTCLEANFILES = gnubg.wd
@@ -485,7 +488,8 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c external_l.c external_y.c install-sh \
 	missing mkinstalldirs py-compile strdup.c ylwrap
-DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d textures
+DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d textures \
+	scripts
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
 
 all: config.h

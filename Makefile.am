@@ -51,12 +51,14 @@ else
 BR1DATA =
 endif
 
+BOARD3D_TEXTURE_FILES = textures.txt
+
 if USE_BOARD3D
 BOARD3D_DIR=board3d textures
 BOARD3D_DEPS=board3d/libboard3d.a
 BOARD3D_LIBS=-L$(srcdir)/board3d -lboard3d @GTKGLEXT_LIBS@ @FTGL_LIBS@
 BOARD3D_INCS=@GTKGLEXT_CFLAGS@
-BOARD3DDATA=textures.txt 
+BOARD3DDATA=$(BOARD3D_TEXTURE_FILES)
 else
 BOARD3D_DIR=
 BOARD3D_DEPS=
@@ -66,7 +68,7 @@ BOARD3DDATA=
 endif
 
 
-SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) 
+SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) scripts
 
 if USE_PYTHON
 PYTHON_SOURCES=gnubgmodule.c gnubgmodule.h
@@ -176,7 +178,8 @@ distcheck-hook:
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS boards.xml external_l.l external_y.y
+	ABOUT-NLS boards.xml external_l.l external_y.y \
+	$(BOARD3D_TEXTURE_FILES)
 
 DISTCLEANFILES=gnubg.wd
 
