@@ -191,10 +191,8 @@ static int SetMaterial(Material* pMat, char *sz)
 	if (pch)
 	{
 		sz += strlen(sz) + 1;
-		if (sz)
-		{
+		if (sz && *sz)
 			FindTexture(&pMat->textureInfo, sz);
-		}
 	}
 
 	return 0;

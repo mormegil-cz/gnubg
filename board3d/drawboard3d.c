@@ -697,7 +697,6 @@ void DrawDCNumbers(BoardData* bd)
 	drawDCNumbers(bd, 0, &dt);
 
 	glLineWidth(.5f);
-
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
@@ -1207,7 +1206,6 @@ void drawNumbers(BoardData* bd, int sides)
 	DrawNumbers(bd, sides, 0);
 
 	glLineWidth(1);
-
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 
@@ -1216,6 +1214,41 @@ void drawNumbers(BoardData* bd, int sides)
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
 	glEnable(GL_DEPTH_TEST);
+}
+
+void outlinePoint(float tuv, int i, int p)
+{	/* Draw outline of point with correct texture co-ords */
+	float w = PIECE_HOLE;
+	float h = POINT_HEIGHT;
+	float x, y;
+
+	if (p)
+	{
+		x = TRAY_WIDTH - EDGE_WIDTH + PIECE_HOLE * i;
+		y = -LIFT_OFF;
+	}
+	else
+	{
+		x = TRAY_WIDTH - EDGE_WIDTH + BOARD_WIDTH - (PIECE_HOLE * i);
+		y = TOTAL_HEIGHT - EDGE_HEIGHT * 2 + LIFT_OFF;
+		w = -w;
+		h = -h;
+	}
+
+	glPushMatrix();
+	glTranslatef(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH);
+
+	glBegin(GL_LINE_STRIP);
+		glNormal3f(0, 0, 1);
+		glTexCoord2f(x * tuv, y * tuv);
+		glVertex3f(x, y, 0);
+		glTexCoord2f((x + w / 2) * tuv, (y + h) * tuv); 
+		glVertex3f(x + w / 2, y + h, 0);
+		glTexCoord2f((x + w) * tuv, y * tuv); 
+		glVertex3f(x + w, y, 0);
+	glEnd();
+
+	glPopMatrix();
 }
 
 void drawPoint(float tuv, int i, int p)
@@ -1264,9 +1297,6 @@ void drawPoints(BoardData* bd)
 	setMaterial(&bd->baseMat);
 	drawSplitRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH + TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->baseMat.pTexture);
 
- 	glEnable(GL_POLYGON_SMOOTH);
-	glEnable(GL_BLEND);
-
 	if (bd->pointMat[0].pTexture)
 		tuv = (TEXTURE_SCALE) / bd->pointMat[0].pTexture->width;
 	else
@@ -1278,6 +1308,20 @@ void drawPoints(BoardData* bd)
 	drawPoint(tuv, 2, 1);
 	drawPoint(tuv, 4, 0);
 	drawPoint(tuv, 4, 1);
+
+	glLineWidth(1);
+ 	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+
+	outlinePoint(tuv, 0, 0);
+	outlinePoint(tuv, 0, 1);
+	outlinePoint(tuv, 2, 0);
+	outlinePoint(tuv, 2, 1);
+	outlinePoint(tuv, 4, 0);
+	outlinePoint(tuv, 4, 1);
+
+	glDisable(GL_BLEND);
+	glDisable(GL_LINE_SMOOTH);
 
 	if (bd->pointMat[1].pTexture)
 		tuv = (TEXTURE_SCALE) / bd->pointMat[1].pTexture->width;
@@ -1291,8 +1335,19 @@ void drawPoints(BoardData* bd)
 	drawPoint(tuv, 5, 0);
 	drawPoint(tuv, 5, 1);
 
+ 	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+
+	outlinePoint(tuv, 1, 0);
+	outlinePoint(tuv, 1, 1);
+	outlinePoint(tuv, 3, 0);
+	outlinePoint(tuv, 3, 1);
+	outlinePoint(tuv, 5, 0);
+	outlinePoint(tuv, 5, 1);
+
 	glDisable(GL_BLEND);
-	glDisable(GL_POLYGON_SMOOTH);
+	glDisable(GL_LINE_SMOOTH);
+
 	glDepthFunc(GL_LEQUAL);
 }
 

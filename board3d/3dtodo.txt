@@ -2,13 +2,20 @@
 Todo
 ====
 
-_( before strings?
+_( before strings
+-----------------
+	It's internationalisation (i18n), so you can translate gnubg to your
+	preferred language.
+	The macro _(...) marks the string for translation, so you should only do it for strings that need it
+	commands should not be marked.
+	You need to #include "i18n.h" to use _(...).
+	Static arrays of strings need special care:
+		static char *asz[] = { N_("blah", N_("blah blah") };
+	and then
+	    printf( _("Blah blah: %s\n"), gettext( asz[ i ] );
 
 Bugs
 ====
-
-Show messages - shake garbled
-	+ Goes wrong when comp against comp playing
 
 In current version
 ------------------

@@ -1016,12 +1016,16 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	int i;
 	int state = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	int numPages = 
-		g_list_length(GTK_NOTEBOOK(pwNotebook)->children);
+	g_list_length(GTK_NOTEBOOK(pwNotebook)->children);
 	/* Show pages with correct 2d/3d settings */
 	for (i = numPages - 1; i >= NUM_NONPREVIEW_PAGES; i--)
 		gtk_notebook_remove_page(GTK_NOTEBOOK(pwNotebook), i);
 
 	previewType = state ? DT_3D : DT_2D;
+
+	if (previewType == DT_3D)
+		DoAcceleratedCheck(bd->drawing_area3d);
+
 	AddPages(bd, pwNotebook);
 
 	ShowLightWidgets(state);

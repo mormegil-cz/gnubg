@@ -41,7 +41,7 @@
 GdkGLConfig *glconfig;
 #endif
 
-static int checkAccelerated = 1;
+int checkAccelerated = 0;
 void DoAcceleratedCheck(GtkWidget* board);
 
 guint idleId = 0;
@@ -149,8 +149,6 @@ void realize(GtkWidget *widget, BoardData* bd)
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
 #endif
-	if (checkAccelerated)
-		DoAcceleratedCheck(widget);
 }
 
 void CheckOpenglError()
@@ -321,7 +319,6 @@ int CheckAccelerated(GtkWidget* board)
 	g_print("Renderer: %s\n", renderer);
 	g_print("Version: %s\n", version);
 */
-	checkAccelerated = 0;
 
 	if (!dc)
 		g_print("No DC found.\n");
@@ -360,11 +357,15 @@ int CheckAccelerated(GtkWidget* board)
 
 void DoAcceleratedCheck(GtkWidget* board)
 {
-	if (!CheckAccelerated(board))
-	{	/* Display warning message as performance will be bad */
-		outputl("No hardware accelerated graphics card found, ");
-		outputl("performance may be slow.\n");
-		outputx();
+	if (checkAccelerated == 0)
+	{
+		if (!CheckAccelerated(board))
+		{	/* Display warning message as performance will be bad */
+			outputl("No hardware accelerated graphics card found, ");
+			outputl("performance may be slow.\n");
+			outputx();
+		}
+		checkAccelerated = 1;
 	}
 }
 

@@ -125,7 +125,6 @@ void InitGL(BoardData *bd)
 
 	/* Nice hints */
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 
 	/* Default blend function for alpha-blending */
