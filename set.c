@@ -4346,7 +4346,9 @@ static void SetPriority( int n ) {
 	nThreadPriority = n;
     }
 #elif WIN32
-    int tp;
+    /* tp - thread priority, pp - process priority */
+    int tp = THREAD_PRIORITY_NORMAL;
+    int pp = NORMAL_PRIORITY_CLASS;
     char *pch;
        
     if( n < -19 ) {
@@ -4359,17 +4361,17 @@ static void SetPriority( int n ) {
 	tp = THREAD_PRIORITY_ABOVE_NORMAL;
 	pch = N_("above normal");
     } else if( !n ) {
-	tp = THREAD_PRIORITY_NORMAL;
 	pch = N_("normal");
     } else if( n < 19 ) {
 	tp = THREAD_PRIORITY_BELOW_NORMAL;
 	pch = N_("below normal");
     } else {
-	tp = THREAD_PRIORITY_IDLE;
+	pp = IDLE_PRIORITY_CLASS;
 	pch = N_("idle");
     }
 
-    if ( SetThreadPriority(GetCurrentThread(), tp ) ) {
+    if ( SetThreadPriority(GetCurrentThread(), tp ) 
+		&& SetPriorityClass(GetCurrentProcess(), pp) ) {
 	outputf ( _("Priority of program set to: %s\n"), pch );
 	nThreadPriority = n;
     } else

@@ -1,6 +1,11 @@
+Wed Apr 28 16:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* set.c: Change "set priority idle" to set the process priority to
+	idle (for windows).
+
 Mon Apr 26 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
-	* gnubg.c, credits.* : Moved copyright string to credits.sh
+	* gnubg.c, credits.*: Moved copyright string to credits.sh
 
 Sun Apr 25 08:46:27 CEST 2004  Dmitri I GOULIAEV  <dmitri.gouliaev@telkel.net>
 
