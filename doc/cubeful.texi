@@ -1,0 +1,172 @@
+@node Cubeful equities
+@chapter Cubeful equities
+
+This chapter is a brief description of how @gnubg{} calculates cubeful
+equities. The formulae build directly on the work by Rick Janowski 
+@uref{http://www.msoworld.com/mindzine/news/classic/bg/cubeformulae.html,Take-Points
+in Money Games} from 1993.
+
+@section Basic formulae for cubeful equities
+
+The basic formulae for cubeful equities as derived by Janowski is
+
+@tex
+$$ E(cubeful) = E(dead) \cdot (1-x) + E(live) \cdot x.
+@end tex
+@ifnottex
+@quotation
+E(cubeful) = E(dead) * (1-x) + E(live) * x,
+@end quotation
+@end ifnottex
+
+where E(dead) is the dead cube equity (cubeless equiti) calculated
+from the standard formulae. E(live) is the cubeful equity assuming a
+fully live cube. We'll return to that in the next section. x is the cube
+efficiency. x=0 gives E(cubeful)=E(dead) as one extreme and x=1 gives
+E(cubeful)=E(live) as the other extreme. In reality x is somewhere
+inbetween, which typical values around 0.6 - 0.8. 
+
+Janowski's article doesn't mention cubeful equities, so we use the
+straightforward generalisation
+
+@tex
+$$ MWC(cubeful) = MWC(dead) \cdot (1-x) + MWC(live) \cdot x.
+@end tex
+@ifnottex
+@quotation
+MWC(cubeful) = MWC(dead) * (1-x) + MWC(live) * x.
+@end quotation
+@end ifnottex
+
+as MWC is the entity that is used for match play evaluations. 
+
+
+@section Live cube equities
+
+The live cube equity is the equity assuming that the equity changes
+continously, so that doubles and takes occurs exactly at the double
+point and take point. For gammonless play this is the well-known take
+point of 20%. Janowski derives the more general formula
+
+@tex
+$$ TP = \frac{L-0.5}{W+L+0.5}
+@end tex
+@ifnottex
+@quotation
+TP = (L-0.5)/(W+L+0.5)
+@end quotation
+@end ifnottex
+
+where W is the average cubeless value of games ultimately won, and L
+is the average cubeless value of games ultimately lost. For example,
+for the following position
+
+@example
+ GNU Backgammon  Position ID: 4HPMwQCMz+AIIQ
+                 Match ID   : cAkAAAAAAAAA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg
+ | X  O     X  O    |   | O  X           X |     0 points
+ | X  O        O    |   | O                |
+ | X           O    |   | O                |
+ |                  |   | O                |
+ |                  |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ |                  |   | X                |
+ |                  |   | X                |
+ | O                |   | X                |
+ | O           X  O |   | X        X       |     On roll
+ | O           X  O |   | X        X       |     0 points
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: jth
+@end example
+
+@gnubg{} evaluates
+
+@example
+        Win     W(g)    W(bg)   L(g)    L(bg)   
+static: 0.454   0.103   0.001   0.106   0.003   
+@end example
+
+and hence W=(0.454 + 0.103 + 0.001)/0.454=1.229 and
+L=(0.556+0.106+0.003)/0.556) = 1.196. For gammonless positions, e.g.,
+a race, W=1 and L=1.
+
+The live cube equity is now based on piecewise linear interpolation
+between the points (0%,-L%), (TP,-1), (CP,+1), and (100%,+W): if my
+winning chance is 0 I lose L points, at my take point I lose 1 point,
+at my cash point I cash 1 point, and when I have a certain win I win W
+points:
+
+@multitable @columnfractions 0.67 0.33
+@item @image{mgtp}
+@tab @strong{Figure X} Fully live cubeful equity
+@end multitable
+
+
+For match play there is no simple formula, since redoubles can only
+occur a limited number of times. 
+
+The live cube take point is generally calculated as
+
+TP(live, n Cube)=TP(dead, n cube) * (1 - TP(live, 2n cube)
+
+So to calculate the live cube take points for a 1-cube at 3-0 to 7 we
+need the live cube take points for the 4-cube and the 2-cube. For the
+position above and using
+Woolsey's match equity table the live cube take point are:
+
+@multitable @columnfractions 0.3 0.3 0.3
+@item @strong{Cube value}
+@tab @strong{TP for X}
+@tab @strong{TP for O}
+@item 4  @tab   0%   @tab 41%
+@item 2  @tab  15%   @tab 38.5%
+@item 1  @tab  24.5% @tab 27.3%
+@end multitable
+
+The calculation of these are left as an exercise to the reader.
+
+Ignoring backgammons, the gammon rates for O and X are 0.106/54.6=19%
+and 0.103/0.454=22%, respectively. If O wins the game his MWC will be
+
+81% * MWC(-3,-7) + 19% * MWC(-2,-7) = 78%
+
+and if X wins his MWC will be
+
+78% * MWC(-4,-6) + 22% * MWC(-4,-5) = 41%.
+
+If O cashes 1 point he has MWC(-3,-7)=76% and if X cashes he has
+MWC(-4,-6)=36%. Analogous to money game the live cube MWC is
+calculated as piecewise linear interpolation between (0%,22%),
+(24.5%,24%), (72.7%,36%), and (100%,41%) (from X's point of view):
+
+@multitable @columnfractions 0.67 0.33
+@item @image{mptp}
+@tab @strong{Figure X} Fully live cubeful MWC
+@end multitable
+
+
+@section 0-ply Cubeful equities
+
+Having established the live cube equities and MWCs we're now in
+position to calculate the 0-ply cubeful equities. 
+
+Let's start with money game: the cubeless equity is -0.097 and the
+live cube equity can be determined from Figure X as -0.157. Thus, the
+cubeful equity is -0.138.
+
+
+For the match play example at the score 3-0 the cubeless MWC is 29.1%
+and from Figure X using wins=45.4% we can determine the live cube MWC
+to be 29.2%. Using a value of x=0.68 we arrive at a cubeful MWC of 29.17%.
+
+
+@section n-ply Cubeful equities
+
+@section The cube efficiency
+
+@section Cube decisions
+
+
+
+
+

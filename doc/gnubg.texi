@@ -67,6 +67,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Settings::				Changing settings in GNU Backgammon.
 * Analysis and rollouts::		How to analyse positions, games, matches or sessions.
 * Position and match IDs::		A brief technical explanation.
+* Cubeful equities::                    How do @gnubg{} calculate cubeful equities.
 * Training::				How to store databases and train the neural nets.
 * Bearoff databases::                   How to generate bearoff databases for use with GNU Backgammon
 * Frequently Asked Questions::		A bunch of questions and answers (mostly taken from r.g.b.).
@@ -1098,6 +1099,8 @@ If someone post a match ID you can set up the position in @gnubg{} by
 writing or pasting it into the Match ID text input field on the main
 window, or by executing the command @code{set matchid QYkqASAAIAAA}.
 
+
+@include cubeful.texi
 
 
 @node Training
