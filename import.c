@@ -999,6 +999,9 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     moverecord *pmgi, *pmr;
     char *szComment = NULL;
     int fBeaver = FALSE;
+
+    int fPlayerOld, nMoveOld; 
+    int nMove = -1;
     
     InitBoard( ms.anBoard );
 
@@ -1019,13 +1022,17 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     pmgi->g.fWinner = -1;
     pmgi->g.nPoints = 0;
     pmgi->g.fResigned = FALSE;
-    pmgi->g.nAutoDoubles = 0; /* FIXME */
+    pmgi->g.nAutoDoubles = 0; /* we check for automatic doubles later */
     IniStatcontext( &pmgi->g.sc );
     AddMoveRecord( pmgi );
 
     anRoll[ 0 ] = 0;
     
     while( fgets( sz, 1024, pf ) ) {
+
+        nMoveOld = nMove;
+        fPlayerOld = fPlayer;
+
 	/* check for game over */
 	for( pch = sz; *pch; pch++ )
 	    if( !strncmp( pch, "  wins ", 7 ) )
@@ -1034,6 +1041,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 		break;
 
 	if( isdigit( *sz ) ) {
+            nMove = atoi ( sz );
 	    for( pch = sz; isdigit( *pch ); pch++ )
 		;
 
@@ -1050,7 +1058,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                     if ( *(pch+4) == '\n' || !*(pch+4) )
                        continue;
 
-                    /* when beavered there is not explicit "take" */
+                    /* when beavered there is no explicit "take" */
                     if ( fBeaver ) {
                       pmr = malloc( sizeof( pmr->d ) );
                       pmr->d.mt = MOVE_TAKE;
@@ -1105,7 +1113,18 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 			if( strstr( pch, "O-O" ) ) {
 
-                            /* when beavered there is not explicit "take" */
+                            if ( nMove == nMoveOld && fPlayerOld == fPlayer ) {
+                              /* handle duplicate dances:
+                                 24	62: O-O
+                                 24	62: O-O
+                              */
+                              anRoll[ 0 ] = 0;
+                              continue;
+                            }
+
+
+
+                            /* when beavered there is no explicit "take" */
                             if ( fBeaver ) {
                               pmr = malloc( sizeof( pmr->d ) );
                               pmr->d.mt = MOVE_TAKE;
@@ -1159,7 +1178,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 				continue;
 			    }
 
-                            /* when beavered there is not explicit "take" */
+                            /* when beavered there is no explicit "take" */
                             if ( fBeaver ) {
                               pmr = malloc( sizeof( pmr->d ) );
                               pmr->d.mt = MOVE_TAKE;

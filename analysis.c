@@ -674,11 +674,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	break;
       
     case MOVE_DOUBLE:
-	if( pmr->d.fPlayer != pms->fMove ) {
-	    SwapSides( pms->anBoard );
-	    pms->fMove = pmr->d.fPlayer;
-	}
-      
+
 	/* cube action */	    
 	if( fAnalyseCube ) {
 	    GetMatchStateCubeInfo( &ci, pms );
