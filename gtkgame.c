@@ -71,6 +71,7 @@
 #include "gtktexi.h"
 #include "i18n.h"
 #include "matchequity.h"
+#include "openurl.h"
 #include "path.h"
 #include "positionid.h"
 #include "record.h"

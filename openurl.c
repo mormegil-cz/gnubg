@@ -1,6 +1,5 @@
-
 /*
- * osr.c
+ * openurl.c
  *
  * by Jørn Thyssen <jthyssen@dk.ibm.com>, 2002.
  * (after inspiration from osr.cc from fibs2html <fibs2html.sourceforge.net>
@@ -31,22 +30,21 @@
 
 #include "openurl.h"
 #include "i18n.h"
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN 1
+#include "windows.h"
+#include "shellapi.h"
+#endif /* WIN32 */
 
+
+extern void
+OpenURL( const char *szURL ) {
 
 #ifdef WIN32
 
-extern void
-OpenURL( const char *szURL ) {
+  ShellExecute( NULL, TEXT("open"), szURL, NULL, ".\\", SW_SHOWMAXIMIZED );
 
-  ShellExecute(NULL, NULL, szURL, NULL, ".\\", 0);
-
-}
-
-#else /* WIN32 */
-
-
-extern void
-OpenURL( const char *szURL ) {
+#else /* ! WIN32 */
 
   /* FIXME: implement other browsers */
 
@@ -62,8 +60,6 @@ OpenURL( const char *szURL ) {
 
   g_free( pchCommand );
 
-}
-
-
-
 #endif /* ! WIN32 */
+
+}
