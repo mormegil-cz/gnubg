@@ -4665,7 +4665,7 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 
 static GtkWidget *RolloutPage( rolloutpagewidget *prpw) {
 
-  GtkWidget *pwPage, *pw;
+  GtkWidget *pwPage;
   GtkWidget *pwHBox;
   GtkWidget *pwFrame;
 
@@ -4772,7 +4772,6 @@ CubefulToggled ( GtkWidget *pw, rolloutwidget *prw ) {
 
 static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw) {
 
-  int   i;
   int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                                      prw->prwGeneral->pwPlayersAreSame ) );
   int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
@@ -4950,7 +4949,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
 
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
-  GtkWidget *pwDialog, *pwNotebook, *pw;
+  GtkWidget *pwDialog;
   int fOK = FALSE;
   rolloutwidget rw;
   rolloutpagegeneral RPGeneral;
@@ -9004,4 +9003,3 @@ extern void GTKMatchInfo( void ) {
 	outputresume();
     }
 }
-
