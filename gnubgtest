@@ -57,6 +57,8 @@ echo '--- Pubeval test succeeds.'
 set automatic game no
 set cube use no
 set player both gnubg
+set player both chequerplay type eval
+set player both chequerplay eval plies 0
 new game
 EOF
 echo '--- Self-play test succeeds.'
@@ -66,6 +68,10 @@ echo '--- Self-play test succeeds.'
     '--- Cubeful self-play test fails.'
 set automatic game no
 set player both gnubg
+set player both chequerplay type eval
+set player both chequerplay eval plies 0
+set player both cubedecision type eval
+set player both cubedecision eval plies 0
 new game
 EOF
 echo '--- Cubeful self-play test succeeds.'
@@ -120,6 +126,10 @@ set player 0 human
 set player 0 name a
 set player 1 gnu
 set player 1 name b
+set player 1 chequerplay type eval
+set player 1 chequerplay eval plies 0
+set player 1 cubedecision type eval
+set player 1 cubedecision eval plies 0
 set automatic game no
 new game
 21
@@ -148,11 +158,14 @@ echo '--- Load test succeeds.'
 help
 show player
 new game
-set evaluation plies 1
+set evaluation chequerplay eval plies 1
+set evaluation cubedecision eval plies 1
 eval
 set rollout trials 8
 set rollout truncation 8
-set rollout evaluation plies 0
+set rollout cubeful no
+set rollout player both chequerplay plies 0
+set rollout player both cubedecision plies 0
 set rollout varredn no
 rollout
 EOF
