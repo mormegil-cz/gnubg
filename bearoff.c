@@ -290,6 +290,8 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
 
   return 0;
 
+  ++pbc->nReads;
+
 }
 
 
@@ -1342,6 +1344,8 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
     }
       
   }
+
+  ++pbc->nReads;
 
 }
 
