@@ -169,16 +169,16 @@ static void gtk_colour_picker_init( GtkColourPicker *pcp ) {
     pcp->pwDraw = gtk_drawing_area_new();
     gtk_drawing_area_size( GTK_DRAWING_AREA( pcp->pwDraw ), 32, 16 );
 
-    g_signal_connect( pcp->pwDraw, "realize", GTK_SIGNAL_FUNC( realize ),
-		      pcp );    
-    g_signal_connect( COLOUR_SEL( pcp ), "color-changed",
-		      GTK_SIGNAL_FUNC( colour_changed ), pcp );    
-    g_signal_connect( COLOUR_SEL_DIA( pcp ), "delete-event",
-		      GTK_SIGNAL_FUNC( delete_event ), pcp );
-    g_signal_connect( COLOUR_SEL_DIA( pcp )->ok_button, "clicked",
-		      GTK_SIGNAL_FUNC( ok ), pcp );
-    g_signal_connect( COLOUR_SEL_DIA( pcp )->cancel_button, "clicked",
-		      GTK_SIGNAL_FUNC( cancel ), pcp );
+    gtk_signal_connect( pcp->pwDraw, "realize", GTK_SIGNAL_FUNC( realize ),
+			pcp );    
+    gtk_signal_connect( COLOUR_SEL( pcp ), "color-changed",
+			GTK_SIGNAL_FUNC( colour_changed ), pcp );    
+    gtk_signal_connect( COLOUR_SEL_DIA( pcp ), "delete-event",
+			GTK_SIGNAL_FUNC( delete_event ), pcp );
+    gtk_signal_connect( COLOUR_SEL_DIA( pcp )->ok_button, "clicked",
+			GTK_SIGNAL_FUNC( ok ), pcp );
+    gtk_signal_connect( COLOUR_SEL_DIA( pcp )->cancel_button, "clicked",
+			GTK_SIGNAL_FUNC( cancel ), pcp );
 		      
     gtk_container_add( GTK_CONTAINER( pcp ), pcp->pwDraw );
     gtk_widget_show( pcp->pwDraw );

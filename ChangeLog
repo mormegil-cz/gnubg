@@ -1,3 +1,7 @@
+Tue Dec 24 09:04:57 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkcolour.c: Minor changes for GTK+ 1.2.x compatibility.
+
 Tue Dec 24 12:25:42 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	* eval.c (EvaluatePositionCubeful3, EvaluatePositionFull): Fix small
