@@ -2216,6 +2216,21 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* equities */
 
+  fprintf( pf, 
+           "<tr><td colspan=\"4\">%s</td></tr>\n",
+           _("Cubeful equities:") );
+
+  /* evaluate parameters */
+
+  if ( pes->et == EVAL_EVAL && exsExport.afCubeParameters[ 0 ] ) {
+
+    fputs ( "<tr><td>&nbsp;</td>"
+            "<td colspan=\"3\">", pf );
+    fputs ( OutputEvalContext( &pes->ec, FALSE ), pf );
+    fputs ( "</td></tr>\n", pf );
+
+  }
+
   getCubeDecisionOrdering ( ai, arDouble, aarOutput, pci );
 
   for ( i = 0; i < 3; i++ ) {

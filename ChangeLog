@@ -1,3 +1,11 @@
+Sat Mar  8 13:38:44 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* text.c (OutputCubeAnalysis), gtkcube.c (CubeAnalysis), 
+	html.c (HTMLPrintMoveAnalysis): clarify output.
+	* text.c (OutputEvalContext): write "cubeful" for cube decisions.
+
+	* gtkcube.c: use new function TextToClipboard.
+
 Sat Mar  8 11:03:05 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseMatMove): fix .mat import to handle

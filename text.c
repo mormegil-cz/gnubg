@@ -123,7 +123,7 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
   
   sprintf ( sz, _("%d-ply %s"), 
             pec->nPlies, 
-            pec->fCubeful ? _("cubeful") : _("cubeless") );
+            ( ! fChequer || pec->fCubeful ) ? _("cubeful") : _("cubeless") );
 
   if ( pec->nPlies == 2 ) 
     sprintf ( pc = strchr ( sz, 0 ),
@@ -891,6 +891,13 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   strcat( sz, "\n" );
 
   /* equities */
+
+  strcat( sz, _("Cubeful equities:\n") );
+  if ( pes->et == EVAL_EVAL && exsExport.afCubeParameters[ 0 ] ) {
+    strcat( sz, "  " );
+    strcat( sz, OutputEvalContext( &pes->ec, FALSE ) );
+    strcat( sz, "\n" );
+  }
 
   getCubeDecisionOrdering ( ai, arDouble, aarOutput, pci );
 
