@@ -2826,6 +2826,8 @@ CommandRollout( char *sz ) {
       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
       rolloutstat aarsStatistics[ 2 ][ 2 ];
 
+      evalsetup es;
+
       if( ms.gs != GAME_PLAYING ) {
 	  outputl( _("No game in progress.") );
 	  return;
@@ -2835,6 +2837,11 @@ CommandRollout( char *sz ) {
 
       GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
                              ms.anBoard, &ci, &rcRollout );
+
+      es.et = EVAL_ROLLOUT;
+      es.rc = rcRollout;
+      UpdateStoredCube ( aarOutput, aarStdDev, &es, &ms );
+
       return;
 
     }

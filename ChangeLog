@@ -1,3 +1,17 @@
+Wed Jul 17 11:24:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (CommandRollout): call UpdateStoredCube for 
+	"rollout =cube".
+
+Wed Jul 17 11:19:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Cache cube hint (similar to the storedmoves struct for
+	chequerplay hint).
+
+	* gnubg.c (CommandHint): update storedcube if cube analysis
+	is not already calculated.
+	* gnubg.c (UpdateStoredCube): new function.
+
 Wed Jul 17 01:10:56 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (BasicCubefulRollout): scale cubeful 

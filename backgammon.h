@@ -295,6 +295,20 @@ typedef struct _storedmoves {
 } storedmoves;
 extern storedmoves sm;
 
+/*
+ * Store cube analysis
+ *
+ */
+
+typedef struct _storedcube {
+  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  evalsetup es;
+  matchstate ms;
+} storedcube;
+extern storedcube sc;
+
+
 extern player ap[ 2 ];
 
 extern char *GetInput( char *szPrompt );
@@ -426,6 +440,12 @@ getCurrentMoveRecord ( void );
 
 extern void
 UpdateStoredMoves ( const movelist *pml, const matchstate *pms );
+
+extern void
+UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                   const evalsetup *pes,
+                   const matchstate *pms );
 
 #ifdef WIN32
 extern void WinCopy( char *szOut );
