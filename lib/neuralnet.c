@@ -87,21 +87,29 @@ extern int NeuralNetDestroy( neuralnet *pnn ) {
 static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
 		     float arOutput[] ) {
     int i, j;
-    float r, *pr, *prWeight;
+    float *prWeight;
 
     /* Calculate activity at hidden nodes */
     for( i = 0; i < pnn->cHidden; i++ )
 	ar[ i ] = pnn->arHiddenThreshold[ i ];
 
-    for( i = 0; i < pnn->cInput; i++ )
-	if( arInput[ i ] == 1.0f )
-	    for( prWeight = pnn->arHiddenWeight + i * pnn->cHidden,
-		     j = pnn->cHidden, pr = ar; j; j-- )
-		*pr++ += *prWeight++;
-	else if( arInput[ i ] )
-	    for( prWeight = pnn->arHiddenWeight + i * pnn->cHidden,
-		     j = pnn->cHidden, pr = ar; j; j-- )
-		*pr++ += *prWeight++ * arInput[ i ];
+    prWeight = pnn->arHiddenWeight;
+    
+    for( i = 0; i < pnn->cInput; i++ ) {
+	float const ari = arInput[ i ];
+
+	if( ari ) {
+	    float *pr = ar;
+
+	    if( ari == 1.0f )
+		for( j = pnn->cHidden; j; j-- )
+		    *pr++ += *prWeight++;
+	    else
+		for( j = pnn->cHidden; j; j-- )
+		    *pr++ += *prWeight++ * ari;
+	} else
+	    prWeight += pnn->cHidden;
+    }
     
     for( i = 0; i < pnn->cHidden; i++ )
 	ar[ i ] = sigmoid( -pnn->rBetaHidden * ar[ i ] );
@@ -110,7 +118,8 @@ static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
     prWeight = pnn->arOutputWeight;
 
     for( i = 0; i < pnn->cOutput; i++ ) {
-	r = pnn->arOutputThreshold[ i ];
+	float r = pnn->arOutputThreshold[ i ];
+	
 	for( j = 0; j < pnn->cHidden; j++ )
 	    r += ar[ j ] * *prWeight++;
 

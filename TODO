@@ -9,7 +9,6 @@ duplication of effort and to make sure our changes merge easily.
   positions, prime-vs-prime...
 *** Consider meta-pi scheme for using output from multiple nets.
 ** Add partial searching.
-** Merge Joseph Heled's faster evaluation code.
 
 * Game play:
 ** Add cube handling for computer player.
