@@ -68,10 +68,12 @@ static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
     int i, nSrc, nDest;
 
 #if USE_GTK
-    memcpy( anLastMove, anMove, sizeof anLastMove );
-    CanonicalMoveOrder( anLastMove );
-    fLastPlayer = fPlayer;
-    fLastMove = anMove[ 0 ] >= 0;
+    if( pms == &ms ) {
+	memcpy( anLastMove, anMove, sizeof anLastMove );
+	CanonicalMoveOrder( anLastMove );
+	fLastPlayer = fPlayer;
+	fLastMove = anMove[ 0 ] >= 0;
+    }
 #endif
     
     if( pms->fMove != -1 && fPlayer != pms->fMove )
@@ -124,6 +126,10 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
     
     pms->fResigned = pms->fResignationDeclined = 0;
     pms->gs = GAME_PLAYING;
+#if USE_GTK
+    if( pms == &ms )
+	fLastMove = FALSE;
+#endif
     
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
