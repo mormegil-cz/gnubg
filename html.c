@@ -141,6 +141,9 @@ static char *aszLinkText[] = {
   N_ ("[Next Game]"), 
   N_ ("[Last Game]") };
 
+static const char*
+bullet = "&bull; ";
+
 static void
 WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
 
@@ -398,32 +401,38 @@ printStatTableRow ( FILE *pf, const char *format1, const char *format2,
 
 }
 
-
 static void
-printStatTableRow2 ( FILE *pf, const char *format1, const char *format2,
-                     const char *format3, ... ) {
-
-  va_list val;
-  char *sz;
-  int l = 100 + strlen ( format1 ) 
-    + 2 * strlen ( format2 ) + 2 * strlen ( format3 );
-
-  va_start( val, format3 );
-
-  sprintf ( sz = (char *) malloc ( l ),
-             "<tr>\n" 
-             "<td>%s</td>\n" 
-             "<td>%s (%s) </td>\n" 
-             "<td>%s (%s) </td>\n" 
-             "</tr>\n",
-             format1, format2, format3, format2, format3 );
+printStatTableRow2( FILE *pf, const char *format1, int match,
+		    float v01, float v02, float v11, float v12 )
+{
+  if( match ) {
+    v02 *= 100;
+    v12 *= 100;
+  }
   
-  vfprintf ( pf, sz, val );
+  fprintf (pf,
+	   "<tr>\n" 
+	   "<td>%s</td>\n"
+	   "<td>",
+	   format1) ;
 
-  free ( sz );
+  if( v01 != 0.0 ) {
+    fprintf (pf, "%+6.3f (%+7.3f%s)\n",
+	     v01, v02, match ? "%" : "");
+  } else {
+    fprintf(pf, "0");
+  }
+  
+  fprintf(pf, " </td>\n<td>");
 
-  va_end( val );
-
+  if( v11 != 0.0 ) {
+    fprintf (pf, "%+6.3f (%+7.3f%s)",
+	     v11, v12, match ? "%" : "" );
+  } else {
+    fprintf (pf, "0");
+  }
+  
+  fprintf (pf, " </td>\n</tr>\n");
 }
 
 
@@ -485,7 +494,7 @@ printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
       fprintf ( pf, format2, r10 );
       fputs ( " (", pf );
       fprintf ( pf, format3, r11 );
-      fputs ( " )", pf );
+      fputs ( ")", pf );
     }
   }
   else
@@ -2831,12 +2840,12 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     if ( pmr->n.anMove[ 0 ] >= 0 )
       fprintf ( pf,
-                _("*%s moves %s"),
+                _("%s%s moves %s"), bullet,
                 ap[ pmr->n.fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
     else if ( ! pmr->n.ml.cMoves )
       fprintf ( pf,
-                _("*%s cannot move"),
+                _("%s%s cannot move"), bullet,
                 ap[ pmr->n.fPlayer ].szName );
 
     fputs ( "</p>\n", pf );
@@ -2862,11 +2871,11 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     if ( pmr->mt == MOVE_DOUBLE )
       fprintf ( pf,
-                "*%s doubles</p>\n",
+                "%s%s doubles</p>\n", bullet,
                 ap[ pmr->d.fPlayer ].szName );
     else
       fprintf ( pf,
-                "*%s %s</p>\n",
+                "%s%s %s</p>\n", bullet,
                 ap[ pmr->d.fPlayer ].szName,
                 ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
 
@@ -2992,17 +3001,15 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                         psc->anMoves[ 0 ][ SKILL_VERYBAD ],
                         psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
 
+    printStatTableRow2 ( pf,
+			  _("Error rate (total)"), pms->nMatchTo,
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
+    
     if ( pms->nMatchTo ) {
 
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
 
       printStatTableRow4 ( pf,
                            _("Error rate (pr. move)"), 
@@ -3018,14 +3025,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     }
     else {
-
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f",
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow4 ( pf,
                            _("Error rate (pr. move)"), 
@@ -3075,35 +3074,27 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                         psc->anLuck[ 0 ][ LUCK_VERYBAD ],
                         psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
        
+    printStatTableRow2 ( pf, 
+			  _( "Luck rate (total)"), pms->nMatchTo,
+			  psc->arLuck[ 0 ][ 0 ],
+			  psc->arLuck[ 0 ][ 1 ],
+			  psc->arLuck[ 1 ][ 0 ],
+			  psc->arLuck[ 1 ][ 1 ] );
+    
     if ( pms->nMatchTo ) {
 
       printStatTableRow2 ( pf, 
-                           _( "Luck rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           psc->arLuck[ 0 ][ 0 ],
-                           psc->arLuck[ 0 ][ 1 ] * 100.0f,
-                           psc->arLuck[ 1 ][ 0 ],
-                           psc->arLuck[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow2 ( pf, 
-                           _( "Luck rate (pr. move)"), 
-                           "%+6.3f", "%+7.3f%%",
+			    _( "Luck rate (pr. move)"),  1,
                            psc->arLuck[ 0 ][ 0 ] /
                            psc->anTotalMoves[ 0 ],
-                           psc->arLuck[ 0 ][ 1 ] * 100.0f /
+                           psc->arLuck[ 0 ][ 1 ] /
                            psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 1 ][ 0 ] /
                            psc->anTotalMoves[ 1 ],
-                           psc->arLuck[ 1 ][ 1 ] * 100.0f /
+                           psc->arLuck[ 1 ][ 1 ] /
                            psc->anTotalMoves[ 1 ] );
     }
     else {
-      printStatTableRow2 ( pf, 
-                           _( "Luck rate (total)"), 
-                           "%+6.3f", "%+7.3f",
-                           psc->arLuck[ 0 ][ 0 ],
-                           psc->arLuck[ 0 ][ 1 ],
-                           psc->arLuck[ 1 ][ 0 ],
-                           psc->arLuck[ 1 ][ 1 ] );
       printStatTableRow4 ( pf, 
                            _( "Luck rate (pr. move)"), 
                            "%+6.3f", "%+7.3f",
@@ -3204,17 +3195,15 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -psc->arErrorWrongPass[ 1 ][ 1 ] );
 
 
+      printStatTableRow2 ( pf,
+			    _("Error rate (total)"), pms->nMatchTo,
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] ,
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ]  );
+      
     if ( pms->nMatchTo ) {
 
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
 
       printStatTableRow4 ( pf,
                            _("Error rate (per cube decision)"), 
@@ -3230,14 +3219,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     }
     else {
-
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f",
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow4 ( pf,
                            _("Error rate (per cube decision)"), 
@@ -3272,17 +3253,15 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     printStatTableHeader ( pf, hecss, 
                            _("Overall rating" ) );
                             
+    printStatTableRow2( pf,
+			 _("Error rate (total)"), pms->nMatchTo,
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_0][NORMALISED],
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_0][UNNORMALISED],
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_1][NORMALISED],
+			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_1][UNNORMALISED]);
+    
     if ( pms->nMatchTo ) {
 
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
 
       printStatTableRow4 ( pf,
                            _("Error rate (per decision)"), 
@@ -3315,14 +3294,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     }
     else {
-
-      printStatTableRow2 ( pf,
-                           _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%",
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow4 ( pf,
                            _("Error rate (per decision)"), 
