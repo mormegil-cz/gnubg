@@ -30,29 +30,35 @@
 #include "dice.h"
 #include "eval.h"
 
-static command acSetEvaluation[] = {
+static char szEQUITY[] = "<equity>",
+    szNAME[] = "<name>",
+    szNUMBER[] = "<number>",
+    szONOFF[] = "on|off",
+    szPLIES[] = "<plies>";
+    
+command acSetEvaluation[] = {
     { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
-      "for deep evaluation", NULL },
+      "for deep evaluation", szNUMBER, NULL },
     { "consistency", CommandSetEvalConsistency, "Use the same evaluator for "
-      "all moves", NULL },
+      "all moves", szONOFF, NULL },
     { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
-      "`hint' commands look ahead", NULL },
+      "`hint' commands look ahead", szPLIES, NULL },
     { "reduced", CommandSetEvalReduced,
-      "...Find a suitable text here...", NULL },
+      "Control how thoroughly deep plies are searched", szNUMBER, NULL },
     { "tolerance", CommandSetEvalTolerance, "Control the equity range "
-      "of moves for deep evaluation", NULL },
-    { NULL, NULL, NULL, NULL }
+      "of moves for deep evaluation", szEQUITY, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
     { "evaluation", CommandSetPlayerEvaluation, "Control evaluation "
-      "parameters when gnubg plays", NULL },
+      "parameters when gnubg plays", NULL, acSetEvaluation },
     { "gnubg", CommandSetPlayerGNU, "Have gnubg make all moves for a player",
-      NULL },
+      NULL, NULL },
     { "human", CommandSetPlayerHuman, "Have a human make all moves for a "
-      "player", NULL },
-    { "name", CommandSetPlayerName, "Change a player's name", NULL },
+      "player", NULL, NULL },
+    { "name", CommandSetPlayerName, "Change a player's name", szNAME, NULL },
     { "pubeval", CommandSetPlayerPubeval, "Have pubeval make all moves for a "
-      "player", NULL },
-    { NULL, NULL, NULL, NULL }
+      "player", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 };
 
 static void SetRNG( rng rngNew, char *szSeed ) {
@@ -395,8 +401,16 @@ extern void CommandSetDice( char *sz ) {
 	return;
     }
 
-    if( ( n0 = ParseNumber( &sz ) ) < 1 || n0 > 6 ||
-	( n1 = ParseNumber( &sz ) ) < 1 || n1 > 6 ) {
+    n0 = ParseNumber( &sz );
+
+    if( n0 > 10 ) {
+	/* assume a 2-digit number; n0 first digit, n1 second */
+	n1 = n0 % 10;
+	n0 /= 10;
+    } else
+	n1 = ParseNumber( &sz );
+    
+    if( n0  < 1 || n0 > 6 || n1 < 1 || n1 > 6 ) {
 	puts( "You must specify two numbers from 1 to 6 for the dice." );
 
 	return;
@@ -504,7 +518,7 @@ extern void CommandSetEvalTolerance( char *sz ) {
 
     if( r < 0.0 ) {
 	printf( "You must specify a valid cubeless equity tolerance to use -- "
-		"try `help set\n%sevaluation tolerance'.", szSetCommand );
+		"try `help set\n%sevaluation tolerance'.\n", szSetCommand );
 
 	return;
     }
