@@ -29,6 +29,7 @@
 #include <string.h>
 
 #include "backgammon.h"
+#include "dice.h"
 #if USE_GTK
 #include "gtkgame.h"
 #endif
@@ -1059,6 +1060,50 @@ static void WriteMove( FILE *pf, int fPlayer, int anMove[] ) {
 	}
 }
 
+
+static void
+WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
+
+  fprintf( pf, "%d%s %d %d %.4f %d %.4f",
+           pec->nPlies,
+           pec->fCubeful ? "C" : "",
+           pec->nReduced, 
+           pec->fDeterministic, 
+           pec->rNoise, 
+           pec->nSearchCandidates,
+           pec->rSearchTolerance );
+
+}
+
+
+static void
+WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
+
+  int i;
+
+  fprintf ( pf, "%d %d %d %d %d \"%s\" %d ",
+            prc->fCubeful,
+            prc->fVarRedn,
+            prc->fInitial,
+            prc->nTruncate,
+            prc->nTrials,
+            aszRNG[ prc->rngRollout ],
+            prc->nSeed );
+
+  for ( i = 0; i < 2; i++ ) {
+
+    fprintf ( pf, "cube%d ", i );
+    WriteEvalContext ( pf, &prc->aecCube[ i ] );
+    fputc ( ' ', pf );
+
+    fprintf ( pf, "cheq%d ", i );
+    WriteEvalContext ( pf, &prc->aecChequer[ i ] );
+    fputc ( ' ', pf );
+
+  }
+
+}
+
 static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 			       int iMove ) {
 
@@ -1094,7 +1139,33 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    break;
 	    
 	case EVAL_ROLLOUT:
-	    /* FIXME */
+          
+          fprintf ( pf, 
+                    "R "
+                    "Score %.4f %.4f "
+                    "Output %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+                    "StdDev %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+                    "RC ",
+                    pml->amMoves[ i ].rScore,
+                    pml->amMoves[ i ].rScore2,
+                    pml->amMoves[ i ].arEvalMove[ 0 ],
+                    pml->amMoves[ i ].arEvalMove[ 1 ],
+                    pml->amMoves[ i ].arEvalMove[ 2 ],
+                    pml->amMoves[ i ].arEvalMove[ 3 ],
+                    pml->amMoves[ i ].arEvalMove[ 4 ],
+                    pml->amMoves[ i ].arEvalMove[ 5 ],
+                    pml->amMoves[ i ].arEvalMove[ 6 ],
+                    pml->amMoves[ i ].arEvalStdDev[ 0 ],
+                    pml->amMoves[ i ].arEvalStdDev[ 1 ],
+                    pml->amMoves[ i ].arEvalStdDev[ 2 ],
+                    pml->amMoves[ i ].arEvalStdDev[ 3 ],
+                    pml->amMoves[ i ].arEvalStdDev[ 4 ],
+                    pml->amMoves[ i ].arEvalStdDev[ 5 ],
+                    pml->amMoves[ i ].arEvalStdDev[ 6 ] );
+          
+          WriteRolloutContext ( pf, &pml->amMoves[ i ].esMove.rc );
+
+          break;
 
 	default:
 	    assert( FALSE );

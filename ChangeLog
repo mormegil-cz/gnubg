@@ -1,3 +1,10 @@
+Mon Jul 15 00:51:06 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Iteration 1: saving rollouts in SGF
+
+	* sgf.c (WriteMoveAnalysis): write rollout.
+	* sgf.c (WriteRolloutContext, WriteEvalContext): new functions.
+
 Mon Jul 15 00:44:16 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (UpdateStoredMoves): new function. Updates the global
