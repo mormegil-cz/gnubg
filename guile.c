@@ -374,17 +374,21 @@ static SCM sInterrupt;
 
 extern int GuileStartIntHandler( void ) {
 
-    scm_sigaction( SCM_MAKINUM( SIGINT ), sInterrupt, SCM_MAKINUM( 0 ) );
-    scm_unmask_signals();
+    if( isatty( STDIN_FILENO ) ) {
+	scm_sigaction( SCM_MAKINUM( SIGINT ), sInterrupt, SCM_MAKINUM( 0 ) );
+	scm_unmask_signals();
+    }
     
     return 0;
 }
 
 extern int GuileEndIntHandler( void ) {
 
-    scm_mask_signals();
-    scm_sigaction( SCM_MAKINUM( SIGINT ), SCM_BOOL_F, SCM_MAKINUM( 0 ) );
-
+    if( isatty( STDIN_FILENO ) ) {
+	scm_mask_signals();
+	scm_sigaction( SCM_MAKINUM( SIGINT ), SCM_BOOL_F, SCM_MAKINUM( 0 ) );
+    }
+    
     return 0;
 }
 
