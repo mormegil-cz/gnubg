@@ -1,3 +1,9 @@
+Fri Jul 11 12:39:38 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* play.c (CommandRoll): fix grammer (bug #4273)
+	* gtkoptions.c (OptionsPages): fix some typos and disable
+	15x15 on disk (it's not implemented yet)
+
 Thu Jul 10 21:56:41 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* bearoff.c, gnubg.c: use g_path_get_dirname

@@ -3682,7 +3682,7 @@ CommandRoll( char *sz ) {
   }
 
   if( ms.anDice[ 0 ] ) {
-    outputl( _("You already did roll the dice.") );
+    outputl( _("You have already rolled the dice.") );
 
     return;
   }
