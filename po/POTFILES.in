@@ -129,6 +129,8 @@ sound.h
 speed.c
 strdup.c
 text.c
+timecontrol.c
+timecontrol.h
 userrng.c
 xboard.c
 xboard.h

@@ -1,3 +1,8 @@
+Sat Sep 13 03:20:09 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* POTFILES.in: Add timecontrol.c, timecontrol.h.
+	* gnubg.pot, *.po: merge & update.
+
 Tue Sep  9 04:40:09 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.pot, *.po: merge & update.
