@@ -233,15 +233,17 @@ TextPrologue ( FILE *pf, const matchstate *pms, const int iGame ) {
            ap[ 0 ].szName, pms->anScore[ 0 ],
            ap[ 1 ].szName, pms->anScore[ 1 ] );
 
-  if ( pms->nMatchTo > 0 ) 
+  if ( pms->nMatchTo > 0 ) {
     fprintf( pf,
              ngettext( " (match to %d point)", 
                        " (match to %d points)",
                        pms->nMatchTo ),
-             pms->nMatchTo,
-             pms->fCrawford ? 
-             _(", Crawford game") : ( pms->fPostCrawford ?
-					 _(", post-Crawford play") : ""));
+             pms->nMatchTo );
+    if ( pms->fCrawford )
+       fputs( _(", Crawford game"), pf );
+    if ( pms->fPostCrawford )
+       fputs( _(", post-Crawford play"), pf );
+  }
 
   fputs( "\n", pf );
 
