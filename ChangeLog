@@ -1,3 +1,12 @@
+Tue Jul 16 13:46:34 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c, eval.c (CopyMoveList): move to eval.c
+
+	* eval.c (RefreshMoveList): return new ordering.
+	* gtkgame.c: update highlighted row in move list
+
+	* sgf.c (RestoreMoveAnalysis): restore rollouts
+
 Mon Jul 15 21:47:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* import.c (ImportGame, ImportMat): read only first match

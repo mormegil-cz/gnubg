@@ -435,6 +435,169 @@ static void RestoreDoubleAnalysis( property *pp,
     }
 }
 
+
+static void
+RestoreRolloutScore ( move *pm, const char *sz ) {
+
+  char *pc = strstr ( sz, "Score" );
+
+  pm->rScore = -99999;
+  pm->rScore2 = -99999;
+
+  if ( ! pc )
+    return;
+
+  sscanf ( pc, "Score %f %f",
+           &pm->rScore, &pm->rScore2 );
+
+}
+
+static void
+RestoreRolloutTrials ( move *pm, const char *sz ) {
+
+  char *pc = strstr ( sz, "Trials" );
+
+  /* pm->nTrials = 0; */
+
+  if ( ! pc )
+    return;
+
+  sscanf ( pc, "Trials %*d" );
+
+  /* printf ( "ntrials %d\n", pm->nTrials ); */
+
+}
+
+static void
+RestoreRolloutOutput ( float ar[ NUM_ROLLOUT_OUTPUTS ], 
+                       const char *sz, const char *szKeyword ) {
+
+  char *pc = strstr ( sz, szKeyword );
+  int i;
+  
+  for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+    ar[ i ] = 0.0;
+
+  if ( ! pc )
+    return;
+
+  sscanf ( pc, "%*s %f %f %f %f %f %f %f",
+           &ar[ 0 ], &ar[ 1 ], &ar[ 2 ], &ar[ 3 ], &ar[ 4 ],
+           &ar[ 5 ], &ar[ 6 ] );
+
+}
+
+static void
+InitEvalContext ( evalcontext *pec ) {
+
+  pec->nPlies = 0;
+  pec->fCubeful = FALSE;
+  pec->nReduced = 0;
+  pec->fDeterministic = FALSE;
+  pec->rNoise = 0.0;
+  pec->nSearchCandidates = 0;
+  pec->rSearchTolerance = 0;
+
+}
+
+
+static void
+RestoreEvalContext ( evalcontext *pec, const char *sz ) {
+
+  int nPlies, nReduced, fDeterministic, nSearchCandidates;
+  char ch;
+
+  InitEvalContext ( pec );
+
+  sscanf ( sz, "%d%c %d %d %f %d %f",
+           &nPlies, &ch, &nReduced, &fDeterministic, &pec->rNoise,
+           &nSearchCandidates, &pec->rSearchTolerance );
+
+  pec->nPlies = nPlies;
+  pec->fCubeful = ch == 'C';
+  pec->nReduced = nReduced;
+  pec->fDeterministic = fDeterministic;
+  pec->nSearchCandidates = nSearchCandidates;
+
+}
+
+static void
+RestoreRolloutContextEvalContext ( evalcontext *pec, const char *sz,
+                                   const char *szKeyword ) {
+
+  char *pc = strstr ( sz, szKeyword );
+
+  InitEvalContext ( pec );
+
+  if ( ! pc )
+    return;
+
+  pc = strchr ( pc, ' ' );
+
+  if ( ! pc )
+    return;
+
+  RestoreEvalContext ( pec, pc );
+
+}
+
+
+static void
+RestoreRolloutRolloutContext ( move *pm, const char *sz ) {
+
+  char *pc = strstr ( sz, "RC" );
+  char szTemp[ 1024 ];
+  int fCubeful, fVarRedn, fInitial;
+
+  pm->esMove.rc.fCubeful = FALSE;
+  pm->esMove.rc.fVarRedn = FALSE;
+  pm->esMove.rc.fInitial = FALSE;
+  pm->esMove.rc.nTruncate = 0;
+  pm->esMove.rc.nTrials = 0;
+  pm->esMove.rc.rngRollout = RNG_MERSENNE;
+  pm->esMove.rc.nSeed = 0;
+
+  if ( ! pc )
+    return;
+
+  sscanf ( pc, "RC %d %d %d %d %d \"%s\" %d",
+           &fCubeful,
+           &fVarRedn,
+           &fInitial,
+           &pm->esMove.rc.nTruncate,
+           &pm->esMove.rc.nTrials,
+           &szTemp,
+           &pm->esMove.rc.nSeed );
+
+  pm->esMove.rc.fCubeful = fCubeful;
+  pm->esMove.rc.fVarRedn = fVarRedn;
+  pm->esMove.rc.fInitial = fInitial;
+
+  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecCube[ 0 ],
+                                     sz, "cube0" );
+  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecCube[ 1 ],
+                                     sz, "cube1" );
+  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecChequer[ 0 ],
+                                     sz, "cheq0" );
+  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecChequer[ 1 ],
+                                     sz, "cheq1" );
+
+}
+
+
+static void
+RestoreRollout ( move *pm, const char *sz ) {
+
+  pm->esMove.et = EVAL_ROLLOUT;
+  RestoreRolloutScore ( pm, sz );
+  RestoreRolloutTrials ( pm, sz ); 
+  RestoreRolloutOutput ( pm->arEvalMove, sz, "Output" ); 
+  RestoreRolloutOutput ( pm->arEvalStdDev, sz, "StdDev" ); 
+  RestoreRolloutRolloutContext ( pm, sz ); 
+
+}
+
+
 static void RestoreMoveAnalysis( property *pp, int fPlayer,
 				 movelist *pml, int *piMove, 
                                  evalsetup *pesChequer,
@@ -508,6 +671,11 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	    pm->esMove.ec.fDeterministic = fDeterministic;
             pm->esMove.ec.nSearchCandidates = nSearchCandidates;
 	    break;
+
+        case 'R':
+
+          RestoreRollout ( pm, pch );
+          break;
 	    
 	default:
 	    /* FIXME */
@@ -1143,11 +1311,13 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
           fprintf ( pf, 
                     "R "
                     "Score %.4f %.4f "
+                    "Trials %d "
                     "Output %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
                     "StdDev %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
                     "RC ",
                     pml->amMoves[ i ].rScore,
                     pml->amMoves[ i ].rScore2,
+                    0, /* FIXME */
                     pml->amMoves[ i ].arEvalMove[ 0 ],
                     pml->amMoves[ i ].arEvalMove[ 1 ],
                     pml->amMoves[ i ].arEvalMove[ 2 ],
