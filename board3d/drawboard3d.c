@@ -2557,10 +2557,10 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 	/* Only rotate piece going home */
 	*pRotate = -1;
 
-	/* Swap board if displaying other way around */
+	/* Swap boards if displaying other way around */
 	if (fClockwise)
 	{
-		int swap[] = {0, 2, 1, 4, 3};
+		int swap[] = {0, 2, 1, 4, 3, 5};
 		fromBoard = swap[fromBoard];
 		toBoard = swap[toBoard];
 	}
