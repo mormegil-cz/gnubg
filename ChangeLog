@@ -1,3 +1,4 @@
+Thu Jul 10 21:56:41 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* bearoff.c, gnubg.c: use g_path_get_dirname
 	  if dirname not available
