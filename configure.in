@@ -413,7 +413,11 @@ AC_ARG_WITH(board3d,[  --with-board3d         compile with 3D boards])
 
 no_board3d="yes"
 
-if test "with_board3d" = "yes"; then
+# if test "with_board3d" = "yes"; then
+# echo "debug with_board3d: $with_board3d"
+
+if test "with_board3d" != "no"; then
+
    if test "$no_gtk" != "yes"; then
 
       if test "$no_gtk2" != "yes"; then
