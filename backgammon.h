@@ -443,6 +443,15 @@ extern void HandleInput( char *sz );
 #endif
 #endif
 
+#ifdef WIN32
+#define DIR_SEPARATOR  '\\'
+#define DIR_SEPARATOR_S  "\\"
+#else
+#define DIR_SEPARATOR  '/'
+#define DIR_SEPARATOR_S  "/"
+#endif
+
+
 #if HAVE_LIBREADLINE
 extern int fReadline;
 #endif

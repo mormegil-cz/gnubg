@@ -1,3 +1,8 @@
+Mon Oct  7 22:08:14 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (SetDefaultPath): execute "set path xxx <path>"
+	with <path> instead of filename.
+
 Mon Oct  7 21:26:08 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Update the tooltips on Hint dialog.

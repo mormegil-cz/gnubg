@@ -3024,13 +3024,19 @@ static void FileOK( GtkWidget *pw, char **ppch ) {
 static void SetDefaultPath( GtkWidget *pw, char *sz ) {
 
     char *pch;
-
-    pch = g_strdup_printf( "set path %s \"%s\"", sz,
-			   gtk_file_selection_get_filename(
+    char *pc;
+    char *szFile = g_strdup ( gtk_file_selection_get_filename(
 			       GTK_FILE_SELECTION( gtk_widget_get_ancestor(
-			       pw, GTK_TYPE_FILE_SELECTION ) ) ) );
+                               pw, GTK_TYPE_FILE_SELECTION ) ) ) );
+
+    if ( ( pc = strrchr ( szFile, DIR_SEPARATOR ) ) )
+      *pc = 0;
+
+    pch = g_strdup_printf( "set path %s \"%s\"", sz, szFile );
+    g_free ( szFile );
+
     UserCommand( pch );
-    free( pch );
+    g_free( pch );
 }
 
 static char *SelectFile( char *szTitle, char *szDefault, char *szPath ) {
