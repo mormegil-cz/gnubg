@@ -314,7 +314,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     , "set tc"
 #endif
 };
-enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTRY, TOGGLE_MESSAGE };
+enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTARY, TOGGLE_MESSAGE };
 
 #if ENABLE_TRAIN_MENU
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
@@ -1007,7 +1007,7 @@ static void DeleteAnnotation( void ) {
   gtk_widget_hide ( pwAnnotation );
 #if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/Windows/Commentry")), FALSE);
+			  "/Windows/Commentary")), FALSE);
 #endif
 }
 
@@ -1350,7 +1350,7 @@ static void ShowAnnotation( void ) {
     gtk_widget_show_all( pwAnnotation );
 #if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/Windows/Commentry")), TRUE);
+			  "/Windows/Commentary")), TRUE);
 #endif
 }
 
@@ -2799,7 +2799,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "<CheckItem>" },
 	{ N_("/_Windows/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
 	  "<CheckItem>" },
-	{ N_("/_Windows/_Commentry"), NULL, TogglePanel, TOGGLE_COMMENTRY,
+	{ N_("/_Windows/_Commentary"), NULL, TogglePanel, TOGGLE_COMMENTARY,
 	  "<CheckItem>" },
 	{ N_("/_Windows/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
 	  "<CheckItem>" },
@@ -2961,7 +2961,7 @@ extern int InitGTK( int *argc, char ***argv ) {
    pwGame = CreateGameWindow();
    gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwGame, TRUE, TRUE, 0 );
 
-   pwAnnotation = CreateHeadWindow(_("Commentry"), CreateAnnotationWindow(), DeleteAnnotation);
+   pwAnnotation = CreateHeadWindow(_("Commentary"), CreateAnnotationWindow(), DeleteAnnotation);
    gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwAnalysis->parent, FALSE, FALSE, 0 );
    gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwAnnotation, FALSE, FALSE, 0 );
 
@@ -2973,7 +2973,7 @@ extern int InitGTK( int *argc, char ***argv ) {
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 	   gtk_item_factory_get_widget( pif, "/Windows/Analysis")), TRUE);
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
-	   gtk_item_factory_get_widget( pif, "/Windows/Commentry")), TRUE);
+	   gtk_item_factory_get_widget( pif, "/Windows/Commentary")), TRUE);
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 	   gtk_item_factory_get_widget( pif, "/Windows/Game record")), TRUE);
 #endif
@@ -9593,7 +9593,7 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
 		else
 		        DeleteAnalysis();
                 break;
-	  case TOGGLE_COMMENTRY:
+	  case TOGGLE_COMMENTARY:
 		if (f)
 			ShowAnnotation();
 		else

@@ -118,7 +118,7 @@ extern void CommandExportHTMLImages( char *sz ) {
     unsigned char auchLo[ BOARD_WIDTH * 4 * BORDER_HEIGHT * 4 * 4 ];
     unsigned char auchHi[ BOARD_WIDTH * 4 * BORDER_HEIGHT * 4 * 4 ];
     unsigned char auchLabel[ BOARD_WIDTH * 4 * BORDER_HEIGHT * 4 * 3 ];
-#if 1
+#if 0
     int xx = 0;
 #endif
 	
