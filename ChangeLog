@@ -1,3 +1,7 @@
+Tue Feb  5 14:47:05 2002  Gary Wong  <gtw@research.att.com>
+
+	* configure.in: Link with -lnsl if necessary.
+
 Tue Feb  5 10:10:08 2002  Gary Wong  <gtw@research.att.com>
 
 	* guile.c: [HAVE_SCM_SELECT_MODULE && !HAVE_SCM_SET_CURRENT_MODULE]

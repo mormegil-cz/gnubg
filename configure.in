@@ -98,6 +98,7 @@ if test "$ac_cv_func_signbit" = "yes"; then
   AC_DEFINE(HAVE_SIGNBIT,1,Define if you have a signbit() macro faster than a compare to 0.0.)
 fi
 AC_SEARCH_LIBS(connect,socket,AC_DEFINE(HAVE_SOCKETS,1,Define if the system supports AC_LOCAL sockets.))
+AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_REPLACE_FUNCS(erf)
 
 dnl Check for GTK
@@ -114,7 +115,7 @@ fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 if test "$no_gtk" = "yes"; then
   AC_PATH_XTRA
-  AM_CONDITIONAL(USE_EXT, test "$no_x" != "yes" )
+  AM_CONDITIONAL(USE_EXT, test "$use_ext" = "yes" )
   if test "$no_x" != "yes"; then
     AC_DEFINE(USE_EXT,1,Define if you want to use the ext toolkit and widgets.)
   fi
