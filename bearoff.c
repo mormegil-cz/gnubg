@@ -924,6 +924,9 @@ BearoffEvalSconyers( bearoffcontext *pbc,
 extern int
 BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
+  if (!pbc)
+    return 0;
+
   switch ( pbc->bc ) {
   case BEAROFF_GNUBG:
 

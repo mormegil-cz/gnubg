@@ -6279,12 +6279,16 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
          pc == CLASS_HYPERGAMMON3 ) {
 
       bearoffcontext *pbc = apbcHyper[ pc - CLASS_HYPERGAMMON1 ];
-      unsigned short int nUs =
-        PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
-      unsigned short int nThem =
-        PositionBearoff ( anBoard[ 0 ],  pbc->nPoints, pbc->nChequers );
-      int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-      unsigned int iPos = nUs * n + nThem;
+      unsigned short int nUs, nThem, iPos;
+      int n;
+
+      if (!pbc)
+        return -1;
+
+      nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+      nThem = PositionBearoff ( anBoard[ 0 ],  pbc->nPoints, pbc->nChequers );
+      n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+      iPos = nUs * n + nThem;
       
       if ( BearoffHyper ( apbcHyper[ pc - CLASS_HYPERGAMMON1 ], iPos,
                           arOutput, arEquity ) )

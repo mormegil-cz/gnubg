@@ -644,6 +644,23 @@ extern void CommandSetAutoRoll( char *sz ) {
                _("Will not automatically roll the dice.") );
 }
 
+int CorrectNumberOfChequers(int anBoard[2][25], int numCheq)
+{    /* Check players don't have too many chequers (esp. for hypergammon) */
+	int ac[2], i;
+	ac[0] = ac[1] = 0;
+	for (i = 0; i < 25; i++)
+	{
+		ac[0] += anBoard[0][i];
+		ac[1] += anBoard[1][i];
+	}
+	/* Nb. representation doesn't specify how many chequers
+	may be off the board - so has to be <= not == */
+	if (ac[0] <= numCheq && ac[1] <= numCheq)
+		return 1;
+	else
+		return 0;
+}
+
 extern void CommandSetBoard( char *sz ) {
 
     int an[ 2 ][ 25 ];
@@ -662,7 +679,8 @@ extern void CommandSetBoard( char *sz ) {
     }
 
     /* FIXME how should =n notation be handled? */
-    if( ParsePosition( an, &sz, NULL ) < 0 )
+    if (ParsePosition( an, &sz, NULL ) < 0 ||
+		!CorrectNumberOfChequers(an, anChequers[ms.bgv]))
 	return;
 
     pmr = NewMoveRecord();
