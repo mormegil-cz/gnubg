@@ -1,3 +1,13 @@
+Fri Oct  4 19:37:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix bugs in Export settings widget.  (reported by Ian Shaw)
+
+	* gtkexport.c (SetExportCommands, ExportGetValues): new functions.
+	* gtkexport.c (ExportOK): use new functions.
+	* gtkexport.c (GTKShowExport): fix typo.	
+
+	* set.c (CommandSetExportShowPlayer): fix typo.
+
 Fri Oct  4 18:46:42 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (SetDefaultPath): add double qoutes around filename.

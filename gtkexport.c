@@ -76,9 +76,8 @@ typedef struct _exportwidget {
 } exportwidget;
 
 static void
-ExportOK ( GtkWidget *pw, exportwidget *pew ) {
+ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
 
-  exportsetup *pexs = pew->pexs;
   int i;
 
   /* include */
@@ -141,16 +140,150 @@ ExportOK ( GtkWidget *pw, exportwidget *pew ) {
 
   /* html */
 
-  if ( pexs->szHTMLPictureURL )
-    free ( pexs->szHTMLPictureURL );
-
   pexs->szHTMLPictureURL = 
     strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
 
-  if ( pexs->szHTMLExtension )
-    free ( pexs->szHTMLExtension );
-
   pexs->het = gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
+
+}
+
+#define CHECKVALUE(orig,new,flag,text,format) \
+{ \
+   if ( orig->flag != new->flag ) { \
+      char *sz = g_strdup_printf ( "set export " text " " format, \
+                                   new->flag ); \
+      UserCommand ( sz ); \
+      g_free ( sz ); \
+   } \
+} 
+
+#define CHECKFLAG(orig,new,flag,text) \
+{ \
+   if ( orig->flag != new->flag ) { \
+      char *sz = g_strdup_printf ( "set export " text " %s", \
+                                   new->flag ? "on" : "off" ); \
+      UserCommand ( sz ); \
+      g_free ( sz ); \
+   } \
+} 
+
+#define CHECKFLAG2(orig,new,flag,text,text2) \
+{ \
+   if ( orig->flag != new->flag ) { \
+      char *sz = g_strdup_printf ( "set export " text " %s %s", \
+                                   text2, new->flag ? "on" : "off" ); \
+      UserCommand ( sz ); \
+      g_free ( sz ); \
+   } \
+} 
+
+static void
+SetExportCommands ( const exportsetup *pexsOrig,
+                    const exportsetup *pexsNew ) {
+
+  int i;
+
+  /* display */
+
+  CHECKFLAG ( pexsOrig, pexsNew, fIncludeAnnotation, "include annotation" );
+  CHECKFLAG ( pexsOrig, pexsNew, fIncludeAnalysis, "include analysis" );
+  CHECKFLAG ( pexsOrig, pexsNew, fIncludeStatistics, "include statistics" );
+  CHECKFLAG ( pexsOrig, pexsNew, fIncludeLegend, "include legend" );
+
+  /* board */
+
+  CHECKVALUE ( pexsOrig, pexsNew, fDisplayBoard, "show board", "%d" );
+
+  if ( pexsOrig->fSide != pexsNew->fSide ) {
+    if ( pexsNew->fSide == 3 )
+      UserCommand ( "set export show player both" );
+    else {
+      CHECKVALUE ( pexsOrig, pexsNew, fSide - 1, "show player", "%d" );
+    }
+  }
+
+  /* moves */
+
+  CHECKVALUE ( pexsOrig, pexsNew, nMoves, "moves number", "%d" );
+  CHECKFLAG ( pexsOrig, pexsNew, fMovesDetailProb, 
+              "moves probabilities" );
+  CHECKFLAG ( pexsOrig, pexsNew, afMovesParameters[ 0 ], 
+              "moves parameters evaluation" );
+  CHECKFLAG ( pexsOrig, pexsNew, afMovesParameters[ 1 ], 
+              "moves parameters rollout" );
+
+  for ( i = 0; i <= SKILL_VERYGOOD; ++i ) {
+    if ( i == SKILL_NONE ) {
+      CHECKFLAG ( pexsOrig, pexsNew, afMovesDisplay[ i ], 
+                  "moves display unmarked" );
+    }
+    else {
+      CHECKFLAG2 ( pexsOrig, pexsNew, afMovesDisplay[ i ], 
+                  "moves display", aszSkillTypeCommand[ i ] );
+    }
+  }
+
+  /* cube */
+
+  CHECKFLAG ( pexsOrig, pexsNew, fCubeDetailProb, 
+              "cube probabilities" );
+  CHECKFLAG ( pexsOrig, pexsNew, afCubeParameters[ 0 ], 
+              "cube parameters evaluation" );
+  CHECKFLAG ( pexsOrig, pexsNew, afCubeParameters[ 1 ], 
+              "cube parameters rollout" );
+
+  for ( i = 0; i <= SKILL_VERYGOOD; ++i ) {
+    if ( i == SKILL_NONE ) {
+      CHECKFLAG ( pexsOrig, pexsNew, afCubeDisplay[ i ], 
+                  "cube display unmarked" );
+    }
+    else {
+      CHECKFLAG2 ( pexsOrig, pexsNew, afCubeDisplay[ i ], 
+                  "cube display", aszSkillTypeCommand[ i ] );
+    }
+  }
+
+  CHECKFLAG ( pexsOrig, pexsNew, afCubeDisplay[ EXPORT_CUBE_ACTUAL ], 
+              "cube display actual" );
+  CHECKFLAG ( pexsOrig, pexsNew, afCubeDisplay[ EXPORT_CUBE_MISSED ], 
+              "cube display missed" );
+  CHECKFLAG ( pexsOrig, pexsNew, afCubeDisplay[ EXPORT_CUBE_CLOSE ], 
+              "cube display close" );
+
+  /* HTML */
+
+  if ( strcmp ( pexsOrig->szHTMLPictureURL, pexsNew->szHTMLPictureURL ) ) {
+    char *sz = g_strdup_printf ( "set export html pictureurl \"%s\"",
+                                 pexsNew->szHTMLPictureURL );
+    UserCommand ( sz );
+    g_free ( sz );
+  }
+
+  if (  pexsOrig->het != pexsNew->het ) {
+    char *sz = g_strdup_printf ( "set export html type \"%s\"",
+                                 aszHTMLExportType[ pexsNew->het ] );
+    UserCommand ( sz );
+    g_free ( sz );
+  }
+
+
+}
+
+
+static void
+ExportOK ( GtkWidget *pw, exportwidget *pew ) {
+
+  exportsetup *pexs = pew->pexs;
+  exportsetup exsNew;
+
+  /* get new settings */
+
+  ExportGetValues ( pew, &exsNew );
+
+  /* set new values */
+
+  SetExportCommands ( pexs, &exsNew );
+  g_free ( exsNew.szHTMLPictureURL ),
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
@@ -513,10 +646,10 @@ GTKShowExport ( exportsetup *pexs ) {
   glade_menuitem = gtk_menu_item_new_with_label (_("GNU Backgammon"));
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  glade_menuitem = gtk_menu_item_new_with_label (_("fibs2html"));
+  glade_menuitem = gtk_menu_item_new_with_label (_("BBS"));
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
-  glade_menuitem = gtk_menu_item_new_with_label (_("BBS"));
+  glade_menuitem = gtk_menu_item_new_with_label (_("fibs2html"));
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
   gtk_option_menu_set_menu (GTK_OPTION_MENU (pew->pwHTMLType), pwType_menu);

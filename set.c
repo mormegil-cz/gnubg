@@ -2182,12 +2182,12 @@ CommandSetExportShowPlayer ( char *sz ) {
 
   exsExport.fSide = i + 1;
 
-  if ( i == 3 )
+  if ( i == 2 )
     outputl ( _("Analysis, boards etc will be "
               "shown for both players in exports.") );
   else
     outputf ( _("Analysis, boards etc will only be shown for "
-              "player %s in exports.\n"), ap[ i - 1 ].szName );
+              "player %s in exports.\n"), ap[ i ].szName );
 
 }
 
