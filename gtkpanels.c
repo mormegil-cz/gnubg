@@ -22,12 +22,18 @@
 */
 
 #include "config.h"
+
 #include <stdlib.h>
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <ctype.h>
 #define GTK_ENABLE_BROKEN /* for GtkText */
 #include "backgammon.h"
-#include "gtkboard.h"
 #include <i18n.h>
+
+#if USE_GTK
+#include "gtkboard.h"
 #include "gtkgame.h"
 #include "positionid.h"
 
@@ -38,6 +44,8 @@ extern GtkWidget* GL_Create();
 extern GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm, void *fn);
 
 static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, char* windowRole);
+
+#endif
 
 int fDisplayPanels = TRUE;
 int fDockPanels = TRUE;
@@ -155,6 +163,8 @@ windowobject woPanel[NUM_WINDOWS] =
 		{ 0, 0, 20, 20 }
 	}
 };
+
+#if USE_GTK
 
 extern void ShowPanel(gnubgwindow window)
 {
@@ -750,11 +760,6 @@ static void CreatePanel(gnubgwindow window, GtkWidget* pWidget, char* winTitle, 
 		woPanel[window].pwWin = pWidget;
 }
 
-int PanelShowing(gnubgwindow window)
-{
-	return woPanel[window].showing && (fDisplayPanels || !woPanel[window].docked);
-}
-
 void DockPanels()
 {
 	int i;
@@ -909,6 +914,118 @@ extern void ToggleDockPanels( gpointer *p, guint n, GtkWidget *pw )
 		DockPanels();
 	}
 }
+
+void DisplayWindows()
+{
+	int i;
+	/* Display any other windows now */
+	for (i = 0; i < NUM_WINDOWS; i++)
+	{
+		if (woPanel[i].pwWin && woPanel[i].dockable)
+		{
+			if (woPanel[i].showing)
+				gtk_widget_show_all(woPanel[i].pwWin);
+			else
+				gtk_widget_hide(woPanel[i].pwWin);
+		}
+	}
+	if (!fDisplayPanels)
+		HideAllPanels (0, 0, 0);
+}
+
+void DestroyPanel(gnubgwindow window)
+{
+	if (woPanel[window].pwWin)
+	{
+		gtk_widget_destroy(woPanel[window].pwWin);
+		woPanel[window].pwWin = NULL;
+		woPanel[window].showing = FALSE;
+	}
+}
+
+GtkWidget* GetPanelWidget(gnubgwindow window)
+{
+    return woPanel[window].pwWin;
+}
+
+void SetPanelWidget(gnubgwindow window, GtkWidget* pWin)
+{
+	woPanel[window].pwWin = pWin;
+	woPanel[WINDOW_HINT].showing = pWin ? TRUE : FALSE;
+}
+
+extern void
+setWindowGeometry(gnubgwindow window)
+{
+	windowobject* pwo = &woPanel[window];
+
+	if (pwo->docked || !pwo->pwWin || !fGUISetWindowPos)
+		return;
+
+#if GTK_CHECK_VERSION(2,0,0)
+
+  gtk_window_set_default_size ( GTK_WINDOW ( pwo->pwWin ),
+                      ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
+                      ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
+
+  gtk_window_move ( GTK_WINDOW ( pwo->pwWin ),
+                    ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
+                    ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
+
+#else
+
+  gtk_window_set_default_size( GTK_WINDOW( pwo->pwWin ), 
+                               ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
+                               ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
+  
+  gtk_widget_set_uposition ( pwo->pwWin, 
+                             ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
+                             ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
+
+#endif /* ! GTK 2.0 */
+
+}
+
+void ShowHidePanel(gnubgwindow panel)
+{
+	if (woPanel[panel].showing)
+		woPanel[panel].showFun();
+	else
+		woPanel[panel].hideFun();
+}
+
+int SetMainWindowSize()
+{
+	if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
+	{
+		gtk_window_set_default_size(GTK_WINDOW(pwMain),
+                                     woPanel[WINDOW_MAIN].wg.nWidth,
+                                     woPanel[WINDOW_MAIN].wg.nHeight);
+		return 1;
+	}
+	else
+		return 0;
+}
+
+void PanelShow(gnubgwindow panel)
+{
+	woPanel[panel].showFun();
+}
+
+void PanelHide(gnubgwindow panel)
+{
+	woPanel[panel].hideFun();
+}
+
+extern void
+RefreshGeometries ( void )
+{
+	int i;
+	for (i = 0; i < NUM_WINDOWS; i++)
+		getWindowGeometry(i);
+}
+
+#endif
 
 extern void CommandSetAnnotation( char *sz ) {
 
@@ -1122,7 +1239,9 @@ extern void CommandSetDockPanels( char *sz ) {
 
     SetToggle( "dockdisplay", &fDockPanels, sz, _("Windows will be docked."),
 		_("Windows will be detached.") );
+#if USE_GTK
 	DockPanels();
+#endif
 }
 
 static void GetGeometryDisplayString(char* buf, windowobject* pwo)
@@ -1148,48 +1267,9 @@ CommandShowGeometry ( char *sz )
 	}
 }
 
-void DisplayWindows()
-{
-	int i;
-	/* Display any other windows now */
-	for (i = 0; i < NUM_WINDOWS; i++)
-	{
-		if (woPanel[i].pwWin && woPanel[i].dockable)
-		{
-			if (woPanel[i].showing)
-				gtk_widget_show_all(woPanel[i].pwWin);
-			else
-				gtk_widget_hide(woPanel[i].pwWin);
-		}
-	}
-	if (!fDisplayPanels)
-		HideAllPanels (0, 0, 0);
-}
-
 int DockedPanelsShowing()
 {
 	return fDockPanels && fDisplayPanels;
-}
-
-void DestroyPanel(gnubgwindow window)
-{
-	if (woPanel[window].pwWin)
-	{
-		gtk_widget_destroy(woPanel[window].pwWin);
-		woPanel[window].pwWin = NULL;
-		woPanel[window].showing = FALSE;
-	}
-}
-
-GtkWidget* GetPanelWidget(gnubgwindow window)
-{
-    return woPanel[window].pwWin;
-}
-
-void SetPanelWidget(gnubgwindow window, GtkWidget* pWin)
-{
-	woPanel[window].pwWin = pWin;
-	woPanel[WINDOW_HINT].showing = pWin ? TRUE : FALSE;
 }
 
 int ArePanelsShowing()
@@ -1207,83 +1287,17 @@ int IsPanelDocked(gnubgwindow window)
 	return woPanel[window].docked;
 }
 
-extern void
-setWindowGeometry(gnubgwindow window)
-{
-	windowobject* pwo = &woPanel[window];
-
-	if (pwo->docked || !pwo->pwWin || !fGUISetWindowPos)
-		return;
-
-#if GTK_CHECK_VERSION(2,0,0)
-
-  gtk_window_set_default_size ( GTK_WINDOW ( pwo->pwWin ),
-                      ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
-                      ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
-
-  gtk_window_move ( GTK_WINDOW ( pwo->pwWin ),
-                    ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
-                    ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
-
-#else
-
-  gtk_window_set_default_size( GTK_WINDOW( pwo->pwWin ), 
-                               ( pwo->wg.nWidth > 0 ) ? pwo->wg.nWidth : -1,
-                               ( pwo->wg.nHeight > 0 ) ? pwo->wg.nHeight : -1 );
-  
-  gtk_widget_set_uposition ( pwo->pwWin, 
-                             ( pwo->wg.nPosX >= 0 ) ? pwo->wg.nPosX : 0, 
-                             ( pwo->wg.nPosY >= 0 ) ? pwo->wg.nPosY : 0 );
-
-#endif /* ! GTK 2.0 */
-
-}
-
-extern void
-RefreshGeometries ( void )
-{
-	int i;
-	for (i = 0; i < NUM_WINDOWS; i++)
-		getWindowGeometry(i);
-}
-
-void ShowHidePanel(gnubgwindow panel)
-{
-	if (woPanel[panel].showing)
-		woPanel[panel].showFun();
-	else
-		woPanel[panel].hideFun();
-}
-
-int SetMainWindowSize()
-{
-	if (woPanel[WINDOW_MAIN].wg.nWidth && woPanel[WINDOW_MAIN].wg.nHeight)
-	{
-		gtk_window_set_default_size(GTK_WINDOW(pwMain),
-                                     woPanel[WINDOW_MAIN].wg.nWidth,
-                                     woPanel[WINDOW_MAIN].wg.nHeight);
-		return 1;
-	}
-	else
-		return 0;
-}
-
 int GetPanelWidth(gnubgwindow panel)
 {
 	return woPanel[panel].wg.nWidth;
 }
 
-void PanelShow(gnubgwindow panel)
-{
-	woPanel[panel].showFun();
-}
-
-void PanelHide(gnubgwindow panel)
-{
-	woPanel[panel].hideFun();
-}
-
 int IsPanelShowVar(gnubgwindow panel, void *p)
 {
 	return (p == &woPanel[panel].showing);
+}
+
+int PanelShowing(gnubgwindow window)
+{
+	return woPanel[window].showing && (fDisplayPanels || !woPanel[window].docked);
 }
