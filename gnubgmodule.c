@@ -36,6 +36,7 @@
 #include <signal.h>
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #if HAVE_LIBREADLINE
 #include <readline/history.h>
@@ -49,6 +50,7 @@
 #include "matchequity.h"
 #include "path.h"
 #include "positionid.h"
+#include "analysis.h"
 
 #define IGNORE __attribute__ ((unused))
 
@@ -436,6 +438,27 @@ PythonBoard( PyObject* self IGNORE, PyObject *args ) {
   return BoardToPy( ms.anBoard );
 }
 
+static PyObject *
+PythonLuckRating( PyObject* self IGNORE, PyObject *args ) {
+
+  float r;
+  if ( ! PyArg_ParseTuple( args, "f", &r ) )
+    return NULL;
+
+  return PyInt_FromLong( GetRating( r ) );
+
+}
+
+static PyObject *
+PythonErrorRating( PyObject* self IGNORE, PyObject *args ) {
+
+  float r;
+  if ( ! PyArg_ParseTuple( args, "f", &r ) )
+    return NULL;
+
+  return PyInt_FromLong( getLuckRating( r ) );
+
+}
 
 static PyObject *
 PythonEvaluate( PyObject* self IGNORE, PyObject *args ) {
@@ -1209,12 +1232,16 @@ PyDoubleAnalysis(const evalsetup* pes,
 }
 
 static PyObject*
-PyGameStats(const statcontext* sc)
+PyGameStats(const statcontext* sc, const int nMatchTo, const int fIsMatch )
 {
   PyObject* p[2];
+  float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
+
   if( ! (sc->fMoves || sc->fCube || sc->fDice) ) {
     return 0;
   }
+
+  getMWCFromError( sc, aaaar );
 
   p[0] = PyDict_New();
   p[1] = PyDict_New();
@@ -1248,40 +1275,46 @@ PyGameStats(const statcontext* sc)
   if( sc->fCube ) {
     int side;
     for(side = 0; side < 2; ++side) {
+      float errorskill = 
+         aaaar[ CUBEDECISION ][ PERMOVE ][ side ][ NORMALISED ];
+      float errorcost = 
+         aaaar[ CUBEDECISION ][ PERMOVE ][ side ][ UNNORMALISED ];
+
       PyObject* d =
 	Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i"
-		      "s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f}",
+		      "s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,"
+                      "s:f,s:f}",
 		      "total-cube",sc->anTotalCube[side],
                       "close-cube", sc->anCloseCube[side],
 		      "n-doubles",sc->anDouble[side],
 		      "n-takes", sc->anTake[side],
 		      "n-drops", sc->anPass[side],
 
-		      "missed-double-dp",sc->anCubeMissedDoubleDP[side],
-		      "missed-double-tg", sc->anCubeMissedDoubleTG[side],
-		      "wrong-double-dp", sc->anCubeWrongDoubleDP[side],
-		      "wrong-double-tg",sc->anCubeWrongDoubleTG[side],
+		      "missed-double-below-cp",sc->anCubeMissedDoubleDP[side],
+		      "missed-double-above-cp", sc->anCubeMissedDoubleTG[side],
+		      "wrong-double-below-dp", sc->anCubeWrongDoubleDP[side],
+		      "wrong-double-above-tg",sc->anCubeWrongDoubleTG[side],
 		      "wrong-take", sc->anCubeWrongTake[side],
 		      "wrong-drop", sc->anCubeWrongPass[side],
 
-		      "err-missed-double-dp-skill",
+		      "err-missed-double-below-cp-skill",
 		      sc->arErrorMissedDoubleDP[side][0],
-		      "err-missed-double-dp-cost",
+		      "err-missed-double-below-cp-cost",
 		      sc->arErrorMissedDoubleDP[side][1],
 
-		      "err-missed-double-tg-skill",
+		      "err-missed-double-above-cp-skill",
 		      sc->arErrorMissedDoubleTG[side][ 0 ],
-		      "err-missed-double-tg-cost",
+		      "err-missed-double-above-cp-cost",
 		      sc->arErrorMissedDoubleTG[side][ 1 ],
 
-		      "err-wrong-double-dp-skill",
+		      "err-wrong-double-below-dp-skill",
 		      sc->arErrorWrongDoubleDP[side][ 0 ],
-		      "err-wrong-double-dp-cost",
+		      "err-wrong-double-below-dp-cost",
 		      sc->arErrorWrongDoubleDP[side][ 1 ],
 
-		      "err-wrong-double-tg-skill",
+		      "err-wrong-double-above-tg-skill",
 		      sc->arErrorWrongDoubleTG[side][ 0 ],
-		      "err-wrong-double-tg-cost",
+		      "err-wrong-double-above-tg-cost",
 		      sc->arErrorWrongDoubleTG[side][ 1 ],
 
 		      "err-wrong-take-skill",
@@ -1292,7 +1325,12 @@ PyGameStats(const statcontext* sc)
 		      "err-wrong-drop-skill",
 		      sc->arErrorWrongPass[side][ 0 ],
 		      "err-wrong-drop-cost",
-		      sc->arErrorWrongPass[side][ 1 ] );
+		      sc->arErrorWrongPass[side][ 1 ],
+
+                      "error-skill",
+                      errorskill,
+                      "error-cost",
+                      errorcost );
 
       DictSetItemSteal(p[side], "cube", d);
     }
@@ -1302,14 +1340,14 @@ PyGameStats(const statcontext* sc)
     int side;
     for(side = 0; side < 2; ++side) {
       PyObject* d =
-	Py_BuildValue("{s:f,s:f,s:f,s:f}",
+	Py_BuildValue("{s:f,s:f,s:f,s:f,s:f}",
 		      "luck", sc->arLuck[side][0],
 		      "luck-cost", sc->arLuck[side][1], 
                       "actual-result", sc->arActualResult[side],
                       "luck-adjusted-result", sc->arLuckAdj[side]);
     
       PyObject* m = PyDict_New();
-
+  
       {
 	lucktype lt;
 	for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
@@ -1317,12 +1355,95 @@ PyGameStats(const statcontext* sc)
 			   PyInt_FromLong(sc->anLuck[0][lt]));
 	}
       }
+
+      /* luck based fibs rating difference */
+  
+      if ( nMatchTo && fIsMatch ) {
+         float r = 0.5f + sc->arActualResult[ side ] -
+              sc->arLuck[ side ][ 1 ] + sc->arLuck[ !side ][ 1 ];
+         if ( r > 0.0f && r < 1.0f )
+            DictSetItemSteal( d, "fibs-rating-difference",
+                              PyFloat_FromDouble( relativeFibsRating( r,
+                                                  nMatchTo ) ) );
+      }
       
       DictSetItemSteal(d, "marked-rolls", m);
 
       DictSetItemSteal(p[side], "dice", d);
     }
   }
+
+#if USE_TIMECONTROL
+  {
+     int side;
+     for ( side = 0; side < 2; ++side ) {
+        PyObject *d =
+            Py_BuildValue( "{s:i,s:f,s:f}",
+                           "time-penalty", sc->anTimePenalties[ side ],
+                           "time-penalty-skill", sc->aarTimeLoss[ side ][ 0 ],
+                           "time-penalty-cost", sc->aarTimeLoss[ side ][ 1 ] );
+
+         DictSetItemSteal( p[ side ], "time", d );
+      }
+  }
+#endif /* USE_TIMECONTROL */
+
+  /* advantage */
+
+  if ( sc->fDice && fIsMatch && !nMatchTo && sc->nGames > 1 ) {
+
+     int side;
+     for ( side = 0; side < 2; ++side ) {
+        PyObject *d =
+            Py_BuildValue( "{s:f,s:f,s:f,s:f}",
+                           "actual", sc->arActualResult[ side ] / sc->nGames,
+                           "actual-ci", 1.95996f * 
+                           sqrt( sc->arVarianceActual[ side ] / sc->nGames ),
+                           "luck-adjusted", 
+                           sc->arLuckAdj[ side ] / sc->nGames,
+                           "luck-adjusted-ci", 1.95996f * 
+                           sqrt( sc->arVarianceLuckAdj[ side ] / sc->nGames ) );
+
+         DictSetItemSteal( p[ side ], "ppg-advantage", d );
+      }
+
+  }
+
+  /* error based fibs ratings */
+
+  if ( ( sc->fCube || sc->fMoves ) && fIsMatch && nMatchTo ) {
+
+     int side;
+     for ( side = 0; side < 2; ++side ) {
+
+        PyObject* d = PyDict_New();
+
+        DictSetItemSteal( d, "total", 
+                          PyFloat_FromDouble( absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ side ][ NORMALISED ],
+                                                                  aaaar[ CUBEDECISION ][ PERMOVE ][ side ][ NORMALISED ],
+                                                                  nMatchTo, rRatingOffset ) ) );
+ 
+        if ( sc->anUnforcedMoves[ side ] ) {
+           DictSetItemSteal( d, "chequer", 
+                             PyFloat_FromDouble( absoluteFibsRatingChequer( aaaar[ CHEQUERPLAY ][ PERMOVE ][ side ][ NORMALISED ],
+                             nMatchTo ) ) );
+ 
+        }
+
+        if ( sc->anCloseCube[ side ] ) {
+           DictSetItemSteal( d, "cube", 
+                             PyFloat_FromDouble( absoluteFibsRatingCube( aaaar[ CUBEDECISION ][ PERMOVE ][ side ][ NORMALISED ],
+                             nMatchTo ) ) );
+ 
+        }
+
+        DictSetItemSteal( p[ side ], "error-based-fibs-rating", d );
+
+     }
+
+  }
+  
+  /* */
 
   {
     PyObject* d = PyDict_New();
@@ -1400,7 +1521,7 @@ PythonGame(const list*    plGame,
     AddStatcontext(&g->sc, scMatch);
     
     {
-      PyObject* s = PyGameStats(&g->sc);
+      PyObject* s = PyGameStats(&g->sc,FALSE,g->nMatch);
 
       if( s ) {
 	DictSetItemSteal(gameDict, "stats", s);
@@ -1446,6 +1567,7 @@ PythonGame(const list*    plGame,
 
 	  {
 	    PyObject* dice = Py_BuildValue("(ii)", n->anRoll[0], n->anRoll[1]);
+
 	    
 	    DictSetItemSteal(recordDict, "dice", dice);
 	  }
@@ -1785,7 +1907,7 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
     DictSetItemSteal(matchDict, "games", matchTuple);
 
     if( statistics ) {
-      PyObject* s = PyGameStats(&scMatch);
+      PyObject* s = PyGameStats(&scMatch,TRUE,g->nMatch);
 
       if( s ) {
 	DictSetItemSteal(matchDict, "stats", s);
@@ -1941,6 +2063,8 @@ PyMethodDef gnubgMethods[] = {
   { "navigate", (PyCFunction)PythonNavigate, METH_VARARGS|METH_KEYWORDS,
     "" },
   { "nextturn", (PyCFunction) PythonNextTurn, METH_VARARGS, "" },
+  { "luckrating", (PyCFunction) PythonLuckRating, METH_VARARGS, "" },
+  { "errorrating", (PyCFunction) PythonErrorRating, METH_VARARGS, "" },
   { NULL, NULL, 0, NULL }
 
 };

@@ -1,3 +1,9 @@
+Sun Apr  4 15:11:10 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubgmodule.c (PyGameStats): add missing statistics.
+	* gnubgmodule.c: new functions "gnubg.luckrating" and
+	"gnubg.errorrating".
+
 Sun Apr  4 10:35:13 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Respect $BROWSER
