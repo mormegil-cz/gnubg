@@ -79,8 +79,8 @@ PNMTOPS = @PNMTOPS@
 RANLIB = @RANLIB@
 TR = @TR@
 VERSION = @VERSION@
-@USE_EXT_TRUE@SUBDIRS = @USE_EXT_TRUE@lib doc ext met
-@USE_EXT_FALSE@SUBDIRS = @USE_EXT_FALSE@lib doc met
+@USE_EXT_TRUE@SUBDIRS = @USE_EXT_TRUE@lib doc ext met html-images
+@USE_EXT_FALSE@SUBDIRS = @USE_EXT_FALSE@lib doc met html-images
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @LIBXML2_LIBS@
@@ -101,7 +101,8 @@ bin_PROGRAMS = gnubg
 @USE_GTK_TRUE@gnubg_SOURCES = @USE_GTK_TRUE@$(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 @USE_GTK_TRUE@	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
 @USE_GTK_TRUE@	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
-@USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h
+@USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
+@USE_GTK_TRUE@	gtkexport.c gtkexport.h
 @USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_SOURCES = @USE_GTK_FALSE@@USE_EXT_TRUE@$(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_SOURCES = @USE_GTK_FALSE@@USE_EXT_FALSE@$(COMMON_SOURCES)
 @USE_GTK_TRUE@gnubg_LDADD = @USE_GTK_TRUE@@GTK_LIBS@ $(COMMON_LIBS)
@@ -173,7 +174,7 @@ X_PRE_LIBS = @X_PRE_LIBS@
 @USE_GTK_TRUE@matchequity.o analysis.o sgf.o sgfp.o sgfl.o guile.o \
 @USE_GTK_TRUE@import.o external.o credits.o latex.o postscript.o html.o \
 @USE_GTK_TRUE@matchid.o gtkboard.o gtkgame.o gdkgetrgb.o gtkprefs.o \
-@USE_GTK_TRUE@gtk-multiview.o gtktheory.o gtktexi.o
+@USE_GTK_TRUE@gtk-multiview.o gtktheory.o gtktexi.o gtkexport.o
 gnubg_LDFLAGS = 
 erftest_OBJECTS =  erftest.o
 erftest_LDADD = $(LDADD)
@@ -204,18 +205,18 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DIST_SUBDIRS =  lib doc ext met lib doc met
+DIST_SUBDIRS =  lib doc ext met html-images lib doc met html-images
 DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/credits.P \
 .deps/database.P .deps/dice.P .deps/drawboard.P .deps/erf.P \
 .deps/erftest.P .deps/eval.P .deps/external.P .deps/gdkgetrgb.P \
 .deps/getopt.P .deps/getopt1.P .deps/gnubg.P .deps/gtk-multiview.P \
-.deps/gtkboard.P .deps/gtkgame.P .deps/gtkprefs.P .deps/gtktexi.P \
-.deps/gtktheory.P .deps/guile.P .deps/html.P .deps/import.P \
-.deps/kleinman.P .deps/latex.P .deps/makebearoff.P .deps/makeweights.P \
-.deps/matchequity.P .deps/matchid.P .deps/play.P .deps/positionid.P \
-.deps/postscript.P .deps/pub_eval.P .deps/rollout.P .deps/set.P \
-.deps/sgf.P .deps/sgfl.P .deps/sgfp.P .deps/show.P .deps/strdup.P \
-.deps/xboard.P .deps/xgame.P
+.deps/gtkboard.P .deps/gtkexport.P .deps/gtkgame.P .deps/gtkprefs.P \
+.deps/gtktexi.P .deps/gtktheory.P .deps/guile.P .deps/html.P \
+.deps/import.P .deps/kleinman.P .deps/latex.P .deps/makebearoff.P \
+.deps/makeweights.P .deps/matchequity.P .deps/matchid.P .deps/play.P \
+.deps/positionid.P .deps/postscript.P .deps/pub_eval.P .deps/rollout.P \
+.deps/set.P .deps/sgf.P .deps/sgfl.P .deps/sgfp.P .deps/show.P \
+.deps/strdup.P .deps/xboard.P .deps/xgame.P
 SOURCES = $(gnubg_SOURCES) $(erftest_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 OBJECTS = $(gnubg_OBJECTS) $(erftest_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 

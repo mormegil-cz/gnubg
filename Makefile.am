@@ -1,7 +1,7 @@
 if USE_EXT
-SUBDIRS = lib doc ext met
+SUBDIRS = lib doc ext met html-images
 else
-SUBDIRS = lib doc met
+SUBDIRS = lib doc met html-images
 endif
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
@@ -23,7 +23,8 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
-	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h
+	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
+	gtkexport.c gtkexport.h
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
