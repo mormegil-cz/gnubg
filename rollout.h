@@ -125,6 +125,10 @@ getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
                     int nResigned,
                     float *prBefore, float *prAfter );
 
+extern int
+ScoreMoveRollout ( move *pm, cubeinfo *pci, rolloutcontext *prc );
 
+extern int
+ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes );
 
 #endif

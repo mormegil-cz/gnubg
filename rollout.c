@@ -1113,7 +1113,7 @@ GeneralCubeDecisionR ( char *sz,
     
 #if USE_GTK
     if( fX )
-	GTKRolloutDone();
+      GTKRolloutDone();
 #endif	
   
     return 0;
@@ -1452,3 +1452,79 @@ getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
   *prAfter = Utility ( ar, pci );
 
 }
+
+
+extern int
+ScoreMoveRollout ( move *pm, cubeinfo *pci, rolloutcontext *prc ) {
+
+  int anBoardTemp[ 2 ][ 25 ];
+  cubeinfo ci;
+  rolloutstat arsStatistics[ 2 ];
+  int fCubeDecTop = TRUE;
+  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+  float arStdDev[ NUM_ROLLOUT_OUTPUTS ];
+    
+  PositionFromKey( anBoardTemp, pm->auch );
+      
+  SwapSides( anBoardTemp );
+
+  /* swap fMove in cubeinfo */
+  memcpy ( &ci, pci, sizeof (ci) );
+  ci.fMove = ! ci.fMove;
+
+  if ( RolloutGeneral ( anBoardTemp, NULL,
+			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arOutput,
+			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arStdDev,
+                        ( rolloutstat (*)[ 2 ]) arsStatistics,
+                        prc, pci, &fCubeDecTop, 1, TRUE ) < 0 )
+    return -1;
+
+  /* copy results */
+
+  memcpy ( pm->arEvalMove, arOutput, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+  memcpy ( pm->arEvalStdDev, arStdDev, 
+           NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+
+  /* Save evaluation setup */
+  pm->esMove.et = EVAL_ROLLOUT;
+  pm->esMove.rc = *prc;
+    
+  /* Score for move:
+     rScore is the primary score (cubeful/cubeless)
+     rScore2 is the secondary score (cubeless) */
+
+  if ( prc->fCubeful ) {
+    if ( pci->nMatchTo )
+      pm->rScore = mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], pci );
+    else
+      pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
+  }
+  else
+    pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
+
+  pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
+
+  return 0;
+
+
+}
+
+
+
+extern int
+ScoreMoveGeneral ( move *pm, cubeinfo *pci, evalsetup *pes ) {
+
+  switch ( pes->et ) {
+  case EVAL_EVAL:
+    return ScoreMove ( pm, pci, &pes->ec, pes->ec.nPlies );
+    break;
+  case EVAL_ROLLOUT:
+    return ScoreMoveRollout ( pm, pci, &pes->rc );
+    break;
+  default:
+    return -1;
+    break;
+  }
+
+}
+
