@@ -4840,11 +4840,11 @@ typedef struct _rolloutwidget {
   int  fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;
   int *pfOK;
 } rolloutwidget;
-
+/*
 int fCubeEqualChequer = 1;
 int fPlayersAreSame = 1;
 int fTruncEqualPlayer0 = 1;
-
+*/ 
 static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
   int   p0, p1, i;
   int fCubeEqChequer, fPlayersAreSame, nTruncPlies;
