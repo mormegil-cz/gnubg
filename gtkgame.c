@@ -7697,6 +7697,138 @@ extern void GTKProgressEnd( void ) {
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
 }
 
+int colWidth;
+
+void MoveListIntoView(GtkWidget *pwList, int row)
+{
+  if (gtk_clist_row_is_visible(GTK_CLIST(pwList), row) != GTK_VISIBILITY_FULL)
+  {
+    gtk_clist_moveto(GTK_CLIST(pwList), row, 0, 0, 0);
+    gtk_widget_set_usize(GTK_WIDGET(pwList), colWidth * 2 + 50, -1);
+  }
+}
+
+extern void GTKShowScoreSheet( void )
+{
+	GtkWidget *pwDialog, *pwBox;
+	GtkWidget *hbox;
+	GtkWidget *pwList;
+	GtkWidget* pwScrolled;
+	int width1, width2;
+	int i;
+	int numRows = 0;
+	char title[100];
+	char *titles[2];
+	char *data[2];
+	list *pl;
+
+	sprintf(title, _("Score Sheet - "));
+	if ( ms.nMatchTo > 0 )
+		sprintf(title + strlen(title), ms.nMatchTo == 1 ? 
+	         _("Match to %d point") :
+	         _("Match to %d points"),
+                 ms.nMatchTo);
+	else
+		strcat(title, _("Money Session"));
+
+	pwDialog = GTKCreateDialog(title, DT_INFO, NULL, NULL );
+	pwBox = gtk_vbox_new( FALSE, 0);
+	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
+
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
+
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+
+	gtk_widget_set_usize(GTK_WIDGET (pwDialog), -1, 200);
+	gtk_container_set_border_width(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), 4);
+
+	hbox = gtk_hbox_new (FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(DialogArea(pwDialog, DA_MAIN)), hbox);
+
+	titles[0] = ap[0].szName;
+	titles[1] = ap[1].szName;
+
+	pwList = gtk_clist_new_with_titles( 2, titles );
+	GTK_WIDGET_UNSET_FLAGS(pwList, GTK_CAN_FOCUS);
+	gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
+	width1 = gdk_string_width( gtk_style_get_font( pwList->style ), titles[0] );
+	width2 = gdk_string_width( gtk_style_get_font( pwList->style ), titles[1] );
+	colWidth = MAX(width1, width2);
+
+	data[0] = malloc(10);
+	data[1] = malloc(10);
+
+	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
+	{
+		int score[2];
+		list *plGame = pl->plNext->p;
+
+		if (plGame)
+		{
+			moverecord *pmr = plGame->plNext->p;
+			score[0] = pmr->g.anScore[0];
+			score[1] = pmr->g.anScore[1];
+		}
+		else
+		{
+			moverecord *pmr;
+			list *plGame = pl->p;
+			if (!plGame)
+				continue;
+			pmr = plGame->plNext->p;
+			score[0] = pmr->g.anScore[0];
+			score[1] = pmr->g.anScore[1];
+			if (pmr->g.fWinner == -1)
+			{
+				if (pl == lMatch.plNext)
+				{	/* First game */
+					score[0] = score[1] = 0;
+				}
+				else
+					continue;
+			}
+			else
+				score[pmr->g.fWinner] += pmr->g.nPoints;
+		}
+		sprintf(data[0], "%d", score[0]);
+		sprintf(data[1], "%d", score[1]);
+		gtk_clist_append(GTK_CLIST(pwList), data);
+		numRows++;
+	}
+
+	free(data[0]);
+	free(data[1]);
+
+	for( i = 0; i < 2; i++ )
+	{
+	gtk_clist_set_column_justification(GTK_CLIST(pwList), i, GTK_JUSTIFY_CENTER);
+	gtk_clist_set_column_width( GTK_CLIST( pwList ), i, colWidth);
+	gtk_clist_set_column_resizeable(GTK_CLIST(pwList), i, FALSE);
+	}
+
+	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
+				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_container_add(GTK_CONTAINER(pwScrolled), pwList);
+
+	gtk_widget_set_usize(GTK_WIDGET(pwList), colWidth * 2 + 20, -1);
+
+	gtk_box_pack_start(GTK_BOX(hbox), pwScrolled, TRUE, FALSE, 0);
+
+	gtk_clist_select_row(GTK_CLIST(pwList), numRows - 1, 1);
+
+	gtk_signal_connect(GTK_OBJECT(pwList), "realize",
+			GTK_SIGNAL_FUNC(MoveListIntoView), (gpointer *)(numRows - 1) );
+
+	gtk_widget_show_all( pwDialog );
+	gtk_main();
+}
+
 static void DestroyAbout( gpointer p ) {
 
     *( (void **) p ) = NULL;

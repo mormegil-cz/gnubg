@@ -954,6 +954,96 @@ extern void CommandShowBuildInfo( char *sz )
 #endif
 }
 
+extern void CommandShowScoreSheet( char *sz )
+{
+	int i, width1, width2;
+	char *data[2];
+	list *pl;
+
+	if( ms.gs == GAME_NONE ) {
+		outputl( _("No game in progress (type `new game' to start one).") );
+		return;
+	}
+
+#if USE_GTK
+	if( fX )
+	{
+		GTKShowScoreSheet();
+		return;
+	}
+#endif
+
+	output(_("Score Sheet - "));
+	if ( ms.nMatchTo > 0 )
+		outputf(ms.nMatchTo == 1 ? 
+	         _("Match to %d point") :
+	         _("Match to %d points"),
+                 ms.nMatchTo);
+	else
+		output(_("Money Session"));
+
+	output("\n\n");
+
+	width1 = strlen(ap[0].szName);
+	width2 = strlen(ap[1].szName);
+
+	outputf("%s | %s\n", ap[0].szName, ap[1].szName);
+	for (i = 0; i < width1 + width2 + 3; i++)
+		outputc('-');
+	output("\n");
+
+	data[0] = malloc(50);
+	data[1] = malloc(50);
+
+	for (pl = lMatch.plNext; pl->p; pl = pl->plNext )
+	{
+		int score[2];
+		list *plGame = pl->plNext->p;
+
+		if (plGame)
+		{
+			moverecord *pmr = plGame->plNext->p;
+			score[0] = pmr->g.anScore[0];
+			score[1] = pmr->g.anScore[1];
+		}
+		else
+		{
+			moverecord *pmr;
+			list *plGame = pl->p;
+			if (!plGame)
+			{
+				continue;
+			}
+			else
+			{
+				pmr = plGame->plNext->p;
+				score[0] = pmr->g.anScore[0];
+				score[1] = pmr->g.anScore[1];
+				if (pmr->g.fWinner == -1)
+				{
+					if (pl == lMatch.plNext)
+					{	/* First game */
+						score[0] = score[1] = 0;
+					}
+					else
+						continue;
+				}
+				else
+					score[pmr->g.fWinner] += pmr->g.nPoints;
+			}
+		}
+		sprintf(data[0], "%d", score[0]);
+		sprintf(data[1], "%d", score[1]);
+		outputf("%*s | %s\n", width1, data[0], data[1]);
+	}
+
+	free(data[0]);
+	free(data[1]);
+
+	output("\n");
+	outputx();
+}
+
 static void
 ShowAuthors( const credEntry ace[], const char *title ) {
 

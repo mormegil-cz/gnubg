@@ -1973,6 +1973,8 @@ command cER = {
       szOPTDEPTH, NULL },
     { "score", CommandShowScore, N_("View the match or session score "),
       NULL, NULL },
+    { "scoresheet", CommandShowScoreSheet,
+      N_("View the score sheet for the match or session"), NULL, NULL },
     { "seed", CommandShowSeed, N_("Show the dice generator seed"), 
       NULL, NULL },
 #if USE_SOUND

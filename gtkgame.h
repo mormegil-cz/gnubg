@@ -147,6 +147,7 @@ extern void GTKHelp( char *sz );
 extern void GTKMatchInfo( void );
 extern void GTKShowBuildInfo(void);
 extern void GTKCommandShowCredits(void);
+extern void GTKShowScoreSheet(void);
 
 extern void SetEvaluation( gpointer *p, guint n, GtkWidget *pw );
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
