@@ -328,7 +328,7 @@ static randctx rc;
 
 const char *aszSettings[ NUM_SETTINGS ] = {
   N_ ("beginner"), 
-  N_ ("novice"), 
+  N_ ("casual play"), 
   N_ ("intermediate"), 
   N_ ("advanced"), 
   N_ ("expert"), 
@@ -336,8 +336,8 @@ const char *aszSettings[ NUM_SETTINGS ] = {
   N_ ("world class++") };
 
 evalcontext aecSettings[ NUM_SETTINGS ] = {
-  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.060 }, /* beginner */
-  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.050 }, /* novice */
+  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.060 }, /* casual play */
+  { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.050 }, /* beginner */
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.040 }, /* intermediate */
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.015 }, /* advanced */
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.0 },   /* expert */

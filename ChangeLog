@@ -1,3 +1,12 @@
+Sat Sep 14 19:20:41 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Rename some of the ratings:
+	Novice -> Beginner, Novice -> Casual Player and introduce
+	new rating "Awful!" :-)
+
+	* analysis.c: rename some of the ratings.
+	* eval.c: rename some of the predefined evalcontexts.
+
 Sat Sep 14 19:10:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (PromptForExit): no gtk_window_list_toplevels() in GTK1.2
