@@ -2479,7 +2479,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       if ( fCube ) 
 	prOutput[ 3 ] = prOutput[ 0 ];
       else 
-	prOutput[ 0 ] = 0.0;
+	prOutput[ 3 ] = 0.0;
 
     } 
     else {
