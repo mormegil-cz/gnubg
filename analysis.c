@@ -1157,7 +1157,9 @@ IniStatcontext ( statcontext *psc ) {
 extern float
 relativeFibsRating ( const float r, const int n ) {
 
-  return - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
+  float x = - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
+
+  return ( x < -2100 ) ? -2100 : x;
 
 } 
 
@@ -1270,6 +1272,19 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
     return 1.0f;
   else
     return r;
+
+}
+
+extern float
+calcFibsRating( const float rMWC, const int nMatchTo ) {
+
+  float r;
+
+  r = 0.50f - rMWC;
+  if ( r < 0.0f )
+    r = 0.0f;
+
+  return 2100 + relativeFibsRating( r, nMatchTo );
 
 }
 
@@ -1673,6 +1688,13 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
             absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ], 
                                  ms.nMatchTo ) );
 
+  sprintf( strchr( szOutput, 0 ),
+           "%-31s %7.2f                  %7.2f\n",
+           _("Estimated FIBS rating"),
+           calcFibsRating( aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ], ms.nMatchTo  ),
+           calcFibsRating( aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ], ms.nMatchTo ) );
+
+
   }
 
 }
@@ -1746,12 +1768,15 @@ extern void CommandAnalyseMove ( char *sz ) {
 
   if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
 
+    ProgressStart( _("Analysing move...") );
+
     /* analyse move */
 
     memcpy ( &msx, &ms, sizeof ( matchstate ) );
     AnalyzeMove ( plLastMove->plNext->p, &msx, plGame, NULL, 
                   &esAnalysisChequer, &esAnalysisCube, aamfAnalysis, 
                   FALSE, NULL );
+    ProgressEnd();
 
 #if USE_GTK
   if( fX )
