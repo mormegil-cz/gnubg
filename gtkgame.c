@@ -3306,8 +3306,15 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 
 	/* Display any other windows now */
 	for (i = 0; i < NUM_WINDOWS; i++)
-		UpdateSetting(&woPanel[i].showing);
-
+	{
+		if (woPanel[i].pwWin && woPanel[i].dockable)
+		{
+			if (woPanel[i].showing)
+				gtk_widget_show_all(woPanel[i].pwWin);
+			else
+				gtk_widget_hide(woPanel[i].pwWin);
+		}
+	}
 	if (!fDisplayPanels)
 		HideAllPanels (0, 0, 0);
 
