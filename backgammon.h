@@ -276,7 +276,7 @@ extern void PromptForExit( void );
 extern void Prompt( void );
 
 extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
-			     psighandler *pOld );
+			    psighandler *pOld, int fRestart );
 extern void PortableSignalRestore( int nSignal, psighandler *p );
 extern RETSIGTYPE HandleInterrupt( int idSignal );
 
@@ -350,6 +350,7 @@ extern void CommandAccept( char * ),
     CommandDatabaseRollout( char * ),
     CommandDatabaseGenerate( char * ),
     CommandDatabaseTrain( char * ),
+    CommandDatabaseVerify( char * ),
     CommandDecline( char * ),
     CommandDouble( char * ),
     CommandDrop( char * ),

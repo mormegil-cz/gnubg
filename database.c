@@ -476,6 +476,84 @@ extern void CommandDatabaseTrain( char *sz ) {
     
     gdbm_close( pdb );
 }
+
+extern void CommandDatabaseVerify( char *sz ) {
+    
+    GDBM_FILE pdb;
+    datum dKey, dValue;
+    dbevaluation *pev;
+    int i, c = 0, anBoardEval[ 2 ][ 25 ];
+    float arDesired[ NUM_ROLLOUT_OUTPUTS ], arOutput[ NUM_ROLLOUT_OUTPUTS ];
+    double arError[ NUM_ROLLOUT_OUTPUTS ];
+    void *p;
+    
+    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
+	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+        
+	return;
+    }
+
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+	arError[ i ] = 0.0;
+    
+    dKey = gdbm_firstkey( pdb );
+    
+    while( dKey.dptr ) {
+	dValue = gdbm_fetch( pdb, dKey );
+	
+	pev = (dbevaluation *) dValue.dptr;
+	
+	if( pev->c >= 36 ) {
+	    c++;
+	    
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+		arDesired[ i ] = (float) pev->asEq[ i ] / 0xFFFF;
+
+	    arDesired[ OUTPUT_EQUITY ] = Utility( arDesired, &ciCubeless );
+	    
+	    PositionFromKey( anBoardEval, (unsigned char *) dKey.dptr );
+	    EvaluatePosition( anBoardEval, arOutput, &ciCubeless, NULL );
+
+	    arOutput[ OUTPUT_EQUITY ] = Utility( arOutput, &ciCubeless );
+	    
+	    for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+		arError[ i ] += ( arDesired[ i ] - arOutput[ i ] ) *
+		    ( arDesired[ i ] - arOutput[ i ] );
+	}
+		
+	free( pev );
+	
+	p = dKey.dptr;
+	
+	if( fAction )
+	    fnAction();
+	
+	if( fInterrupt ) {
+	    free( p );
+	    break;
+	}
+	
+	dKey = gdbm_nextkey( pdb, dKey );
+	
+	free( p );
+    }
+    
+    if( c ) {
+	for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+	    arError[ i ] = sqrt( arError[ i ] / c );
+
+	outputf( "Error in: p(W) %5.3f p(WG) %5.3f p(WBG) %5.3f "
+		 "p(LG) %5.3f p(LBG) %5.3f\n", arError[ OUTPUT_WIN ],
+		 arError[ OUTPUT_WINGAMMON ], arError[ OUTPUT_WINBACKGAMMON ],
+		 arError[ OUTPUT_LOSEGAMMON ],
+		 arError[ OUTPUT_LOSEBACKGAMMON ] );
+	outputf( "Equity error %5.3f\n", arError[ OUTPUT_EQUITY ] );
+    } else
+	outputl( "There are no target evaluations in the database to "
+		 "verify against." );
+    
+    gdbm_close( pdb );
+}
 #else
 static void NoGDBM( void ) {
 
@@ -504,6 +582,10 @@ extern void CommandDatabaseRollout( char *sz ) {
 }
 
 extern void CommandDatabaseTrain( char *sz ) {
+  NoGDBM();
+}
+
+extern void CommandDatabaseVerify( char *sz ) {
   NoGDBM();
 }
 #endif
