@@ -112,6 +112,8 @@ typedef struct _movenormal {
     int fPlayer;
     int anRoll[ 2 ];
     int anMove[ 8 ];
+    /* evaluation setup for move analysis */
+    evalsetup esChequer;
     /* evaluation of cube action before this move */
     float arDouble[ 4 ];
     evalsetup esDouble;

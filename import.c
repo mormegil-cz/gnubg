@@ -306,6 +306,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	pmr->n.ml.cMoves = 0;
 	pmr->n.ml.amMoves = NULL;
         pmr->n.esDouble.et = EVAL_NONE;
+        pmr->n.esChequer.et = EVAL_NONE;
 	pmr->n.lt = LUCK_NONE;
 	pmr->n.rLuck = -HUGE_VALF;
 	pmr->n.st = SKILL_NONE;
@@ -535,6 +536,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	pmr->n.ml.cMoves = 0;
 	pmr->n.ml.amMoves = NULL;
         pmr->n.esDouble.et = EVAL_NONE;
+        pmr->n.esChequer.et = EVAL_NONE;
 	pmr->n.lt = LUCK_NONE;
 	pmr->n.rLuck = -HUGE_VALF;
 	pmr->n.st = SKILL_NONE;
@@ -809,6 +811,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 		    pmr->n.ml.cMoves = 0;
 		    pmr->n.ml.amMoves = NULL;
 		    pmr->n.esDouble.et = EVAL_NONE;
+		    pmr->n.esChequer.et = EVAL_NONE;
 		    pmr->n.lt = LUCK_NONE;
 		    pmr->n.rLuck = -HUGE_VALF;
 		    pmr->n.st = SKILL_NONE;
@@ -846,6 +849,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 			    pmr->n.ml.amMoves = NULL;
 			    pmr->n.anMove[ 0 ] = -1;
 			    pmr->n.esDouble.et = EVAL_NONE;
+			    pmr->n.esChequer.et = EVAL_NONE;
 			    pmr->n.lt = LUCK_NONE;
 			    pmr->n.rLuck = -HUGE_VALF;
 			    pmr->n.st = SKILL_NONE;
