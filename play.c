@@ -155,27 +155,6 @@ static int ComputerTurn( void ) {
 			      anBoardMove, &ap[ fTurn ].ec ) < 0 )
 		return -1;
 
-	    /* The move has been determined without an interrupt.  It's
-	       too late to go back now; go ahead and update the board, and
-	       block SIGINTs, to make sure that the rest of the move
-	       processing proceeds atomically.  On POSIX systems, use
-	       sigprocmask() to do it; on older BSD systems, sigblock()
-	       will have to do.  If their system is broken and doesn't
-	       have either of these, we can't do anything to avoid the
-	       race condition. */
-#if HAVE_SIGPROCMASK
-	    {
-		sigset_t ss;
-
-		sigemptyset( &ss );
-		sigaddset( &ss, SIGINT );
-		sigprocmask( SIG_BLOCK, &ss, NULL );
-	    }
-#elif HAVE_SIGBLOCK
-	    sigblock( sigmask( SIGINT ) );
-#endif
-	    fInterrupt = FALSE;
-
 	    memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
 	    
 	    return 0;
@@ -357,7 +336,9 @@ extern void NextTurn( void ) {
     
     if( fTurn == fMove )
 	fResigned = 0;
-    
+
+    /* We have reached a safe point to check for interrupts.  Until now,
+       the board could have been in an inconsistent state. */
     if( fInterrupt )
 	return;
     

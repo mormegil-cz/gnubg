@@ -519,18 +519,6 @@ static void ResetInterrupt( void ) {
 	EventPending( &evNextTurn, FALSE );
 #endif
     }
-    
-#if HAVE_SIGPROCMASK
-    {
-	sigset_t ss;
-
-	sigemptyset( &ss );
-	sigaddset( &ss, SIGINT );
-	sigprocmask( SIG_UNBLOCK, &ss, NULL );
-    }
-#elif HAVE_SIGBLOCK
-    sigsetmask( 0 );
-#endif
 }
 
 #if !X_DISPLAY_MISSING
@@ -950,18 +938,19 @@ static void PromptForExit( void ) {
     while( !fExiting && fInteractive && fConfirm && fTurn != -1 ) {
 	fExiting = TRUE;
 
+	fInterrupt = FALSE;
+	
 	sz = GetInput( "Are you sure you want to exit and abort the game in "
 		       "progress? " );
 
+	fInterrupt = FALSE;
 	fExiting = FALSE;
 	
 	if( sz ) {
 	    if( *sz == 'y' || *sz == 'Y' )
 		break;
-	    else if( *sz == 'n' || *sz == 'N' ) {
-		fInterrupt = FALSE;
+	    else if( *sz == 'n' || *sz == 'N' )
 		return;
-	    }
 	}
 
 	puts( "Please answer `y' or `n'." );
@@ -1344,18 +1333,7 @@ int StdinReadNotify( event *pev, void *p ) {
 
 int NextTurnNotify( event *pev, void *p ) {
 
-    EventPending( pev, FALSE );
-
-    /* FIXME should we really abort now?  If we've gotten this far, it might
-       be too late... */
-#if 1
-    if( fInterrupt ) {
-	puts( "(Interrupted)" );
-
-	fInterrupt = FALSE;
-    } else
-#endif
-	NextTurn();
+    NextTurn();
 
     ResetInterrupt();
     
@@ -1797,6 +1775,9 @@ extern int main( int argc, char *argv[] ) {
 	CommandLoad( argv[ optind ] );
     
 #if !X_DISPLAY_MISSING
+    if( !getenv( "DISPLAY" ) )
+	fX = FALSE;
+    
     if( fX ) {
 	RunX();
 
@@ -1807,9 +1788,9 @@ extern int main( int argc, char *argv[] ) {
     
     for(;;) {
 #if HAVE_LIBREADLINE
-	if( !( sz = readline( FormatPrompt() ) ) ) {
+	while( !( sz = readline( FormatPrompt() ) ) ) {
 	    putchar( '\n' );
-	    return EXIT_SUCCESS;
+	    PromptForExit();
 	}
 	
 	fInterrupt = FALSE;
@@ -1830,11 +1811,11 @@ extern int main( int argc, char *argv[] ) {
 	/* FIXME shouldn't restart sys calls on signals during this fgets */
 	fgets( sz, sizeof( sz ), stdin );
 	
-	if( feof( stdin ) ) {
+	while( feof( stdin ) ) {
 	    putchar( '\n' );
 	    
 	    if( !sz[ 0 ] )
-		return EXIT_SUCCESS;
+		PromptForExit();
 
 	    continue;
 	}	
@@ -1844,7 +1825,7 @@ extern int main( int argc, char *argv[] ) {
 	HandleCommand( sz, acTop );
 #endif
 
-	while( !fInterrupt && fNextTurn )
+	while( fNextTurn )
 	    NextTurn();
 
 	ResetInterrupt();
