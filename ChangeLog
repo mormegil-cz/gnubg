@@ -1,3 +1,7 @@
+Thu Sep  4 18:36:21 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* html.c (WriteStyleSheet): Don't gettextize CVS ID marker string.
+
 Thu Sep 04 16:34:03 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.c: resize stats window if no-panels selected,

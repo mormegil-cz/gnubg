@@ -169,10 +169,12 @@ WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
   else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
     /* write come comments in the file */
 
-    fputs( _("\n" 
-             "/* CSS Stylesheet for GNU Backgammon " VERSION " */\n"
-             "/* $Id$ */\n"
-             "/* This file is distributed as a part of the "
+    fputs( "\n"
+           "/* CSS Stylesheet for GNU Backgammon " VERSION " */\n"
+           "/* $Id$ */\n",
+           pf );
+
+    fputs( _("/* This file is distributed as a part of the "
              "GNU Backgammon program. */\n"
              "/* Copying and distribution of verbatim and modified "
              "versions of this file */\n"
@@ -182,8 +184,8 @@ WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
            pf );
 
   for ( i = 0; i < NUM_CLASSES; ++i )
-    fprintf ( pf, 
-              ".%s { %s }\n", 
+    fprintf ( pf,
+              ".%s { %s }\n",
               aaszStyleSheetClasses[ i ][ 0 ],
               aaszStyleSheetClasses[ i ][ 1 ] );
 
@@ -2575,7 +2577,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         float *ar = pmr->n.ml.amMoves[ i ].arEvalMove;
 
-        /* percentages */
+        /*,A (Bpercentages */
 
         if ( i == pmr->n.iMove )
           fprintf ( pf, "<tr %s>\n", 
