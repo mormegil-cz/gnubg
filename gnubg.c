@@ -531,7 +531,7 @@ static char szDICE[] = N_("<die> <die>"),
     szLANG[] = N_("system|<language code>"),
     szONOFF[] = N_("on|off"),
     szOPTCOMMAND[] = N_("[command]"),
-    szOPTENV[] = N_("[env]"),
+    szOPTENVFORCE[] = N_("[env [force]]"),
     szOPTDEPTH[] = N_("[depth]"),
     szOPTFILENAME[] = N_("[filename]"),
     szOPTGENERATOROPTSEED[] = N_("[generator] [seed]"),
@@ -897,7 +897,7 @@ command cER = {
 }, acRelationalAdd[] = {
     { "match", CommandRelationalAddMatch, 
       N_("Log the match to the external relational database"), 
-      szOPTENV, NULL },
+      szOPTENVFORCE, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acRelationalShow[] = {
     { "environments", CommandRelationalShowEnvironments, 
@@ -911,7 +911,7 @@ command cER = {
       N_("Help and instructions for using and setting up "
          "the external relational database"), NULL, NULL },
     { "show", NULL, N_("Show information from the relational database"),
-      NULL, NULL },
+      NULL, acRelationalShow },
     { "test", CommandRelationalTest, 
       N_("Test the external relational database"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    

@@ -1,3 +1,13 @@
+Fri Apr 23 22:12:51 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c: according to FSF we must give individual years
+	rather than an interval.
+	* gtkboard.c (update_pipcount): show epc in lowercase.
+	
+	* gnubg.c: fix a typo in the definition for "relational" command.
+	* relational.c: add code for most functions.
+	* scripts/database.py: adapt code to relational.c
+
 Mon Apr 23 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c: Change year to 2004 for command line build
