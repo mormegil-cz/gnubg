@@ -36,6 +36,7 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtkgame.h"
+#include "i18n.h"
 
 typedef struct _theorywidget {
 
@@ -239,19 +240,19 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   int afDead[ 2 ];
 
   const char *aszMoneyPointLabel[] = {
-    "Take Point (TP)",
-    "Beaver Point (BP)",
-    "Raccoon Point (RP)",
-    "Initial Double Point (IDP)",
-    "Redouble Point (RDP)",
-    "Cash Point (CP)",
-    "Too good Point (TP)" };
+    N_ ("Take Point (TP)"),
+    N_ ("Beaver Point (BP)"),
+    N_ ("Raccoon Point (RP)"),
+    N_ ("Initial Double Point (IDP)"),
+    N_ ("Redouble Point (RDP)"),
+    N_ ("Cash Point (CP)"),
+    N_ ("Too good Point (TP)") };
 
   const char *aszMatchPlayLabel[] = {
-    "Take Point (TP)",
-    "Double point (DP)",
-    "Cash Point (CP)",
-    "Too good Point (TP)" };
+    N_ ("Take Point (TP)"),
+    N_ ("Double point (DP)"),
+    N_ ("Cash Point (CP)"),
+    N_ ("Too good Point (TP)") };
 
   /* get values */
 
@@ -268,7 +269,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   gtk_widget_show ( ptw->apwGammonPrice[ ! ci.nMatchTo ] );
   gtk_widget_hide ( ptw->apwGammonPrice[ ci.nMatchTo != 0 ] );
 
-  sprintf ( sz, "Gammon values at %d-away, %d-away (%d cube)",
+  sprintf ( sz, _("Gammon values at %d-away, %d-away (%d cube)"),
             ci.nMatchTo - ci.anScore[ 0 ],
             ci.nMatchTo - ci.anScore[ 1 ],
             ci.nCube );
@@ -317,14 +318,14 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
       /* column headers */
 
       gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 1 ] ),
-                           "Dead cube" );
+                           _("Dead cube") );
 
       if ( afAutoRedouble[ i ] )
         gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             "Opp. redoubles" );
+                             _("Opp. redoubles") );
       else if ( ! afDead[ i ] )
         gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             "Live cube" );
+                             _("Live cube") );
       else
         gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
                              "" );
@@ -335,7 +336,7 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
         /* row header */
 
         gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ 0 ] ),
-                             aszMatchPlayLabel[ j ] );
+                             gettext ( aszMatchPlayLabel[ j ] ) );
 
         for ( k = 0; k < 2; k++ ) {
           
@@ -379,16 +380,16 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
       /* column headers */
 
       gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 1 ] ),
-                           "Dead cube" );
+                           _("Dead cube") );
       gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                           "Live cube" );
+                           _("Live cube") );
 
       for ( j = 0; j < 7; j++ ) {
 
         /* row header */
 
         gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ 0 ] ),
-                             aszMoneyPointLabel[ j ] );
+                             gettext ( aszMoneyPointLabel[ j ] ) );
 
         for ( k = 0; k < 2; k++ ) {
 
@@ -540,7 +541,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( "GNU Backgammon - Theory", FALSE, 
+  pwDialog = CreateDialog ( _("GNU Backgammon - Theory"), FALSE, 
                             NULL, NULL );
 
   pwVBox = gtk_vbox_new ( FALSE, 8 );
@@ -557,12 +558,12 @@ GTKShowTheory ( const int fActivePage ) {
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ), 
                       ptw->apwRadio[ 0 ] = 
-                      gtk_radio_button_new_with_label ( NULL, "Match play" ) );
+                      gtk_radio_button_new_with_label ( NULL, _("Match play") ) );
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
                       ptw->apwRadio[ 1 ] = 
                       gtk_radio_button_new_with_label_from_widget (
                       GTK_RADIO_BUTTON ( ptw->apwRadio[ 0 ] ), 
-                      "Money game" ) );
+                      _("Money game") ) );
 
   gtk_signal_connect( GTK_OBJECT( ptw->apwRadio[ 0 ] ), "toggled",
                       GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
@@ -571,13 +572,13 @@ GTKShowTheory ( const int fActivePage ) {
 
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
-                      ptw->pwReset = gtk_button_new_with_label ( "Reset" ) );
+                      ptw->pwReset = gtk_button_new_with_label ( _("Reset") ) );
   gtk_signal_connect( GTK_OBJECT( ptw->pwReset ), "clicked",
                       GTK_SIGNAL_FUNC( ResetTheory ), ptw );
 
   /* match score widget */
 
-  ptw->apwFrame[ 0 ] = gtk_frame_new ( "Match score" );
+  ptw->apwFrame[ 0 ] = gtk_frame_new ( _("Match score") );
   gtk_box_pack_start( GTK_BOX( pwVBox ), ptw->apwFrame[ 0 ], FALSE, FALSE, 0 );
 
   pw = gtk_vbox_new ( 0, FALSE );
@@ -612,7 +613,7 @@ GTKShowTheory ( const int fActivePage ) {
                        4, 0 );
 
     gtk_table_attach ( GTK_TABLE ( pwTable ),
-                       pwx = gtk_label_new ( "-away" ),
+                       pwx = gtk_label_new ( _("-away") ),
                        2, 3, 0 + i, 1 + i, 
                        GTK_EXPAND | GTK_FILL,
                        GTK_EXPAND | GTK_FILL,
@@ -629,12 +630,12 @@ GTKShowTheory ( const int fActivePage ) {
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
                       ptw->pwCrawford = gtk_check_button_new_with_label (
-                          "Crawford game" ) );
+                          _("Crawford game") ) );
 
   gtk_signal_connect( GTK_OBJECT( ptw->pwCrawford ), "toggled",
                       GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
 
-  ptw->pwCubeFrame = gtk_frame_new ( "Cube" );
+  ptw->pwCubeFrame = gtk_frame_new ( _("Cube") );
   gtk_container_add ( GTK_CONTAINER ( pw ), ptw->pwCubeFrame );
 
   pwHBox = gtk_hbox_new ( 0, FALSE );
@@ -664,7 +665,7 @@ GTKShowTheory ( const int fActivePage ) {
   }
   
 
-  ptw->apwFrame[ 1 ] = gtk_frame_new ( "Money play" );
+  ptw->apwFrame[ 1 ] = gtk_frame_new ( _("Money play") );
   gtk_box_pack_start( GTK_BOX( pwVBox ), ptw->apwFrame[ 1 ], FALSE, FALSE, 0 );
 
   pwHBox = gtk_hbox_new ( 0, FALSE );
@@ -672,7 +673,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
                       ptw->pwJacoby = gtk_check_button_new_with_label (
-                          "Jacoby rule" ) );
+                          _("Jacoby rule") ) );
 
   gtk_signal_connect( GTK_OBJECT( ptw->pwJacoby ), "toggled",
                       GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
@@ -680,14 +681,14 @@ GTKShowTheory ( const int fActivePage ) {
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
                       ptw->pwBeavers = gtk_check_button_new_with_label (
-                          "Beavers allowed" ) );
+                          _("Beavers allowed") ) );
 
   gtk_signal_connect( GTK_OBJECT( ptw->pwBeavers ), "toggled",
                       GTK_SIGNAL_FUNC( TheoryUpdated ), ptw );
 
   /* gammon and backgammon percentages */
 
-  pwFrame = gtk_frame_new ( "Gammon and backgammon percentages" );
+  pwFrame = gtk_frame_new ( _("Gammon and backgammon percentages") );
   gtk_box_pack_start( GTK_BOX( pwVBox ), pwFrame, FALSE, FALSE, 0 );
 
   pwTable = gtk_table_new ( 3, 3, TRUE );
@@ -708,8 +709,8 @@ GTKShowTheory ( const int fActivePage ) {
     /* column title */
 
     gtk_table_attach ( GTK_TABLE ( pwTable ),
-                       pw = gtk_label_new ( i ? "bg rate(%)" : 
-                                            "gammon rate(%)" ),
+                       pw = gtk_label_new ( i ? _("bg rate(%)") : 
+                                            _("gammon rate(%)") ),
                        1 + i, 2 + i, 0, 1, 
                        GTK_EXPAND | GTK_FILL,
                        GTK_EXPAND | GTK_FILL,
@@ -751,11 +752,11 @@ GTKShowTheory ( const int fActivePage ) {
   pwVBox = gtk_vbox_new ( 0, FALSE );
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              pwVBox,
-                             gtk_label_new ( "Market window" ) );
+                             gtk_label_new ( _("Market window") ) );
 
   for ( i = 0; i < 2; i++ ) {
 
-    sprintf ( sz, "Market window for player %s", ap[ i ].szName );
+    sprintf ( sz, _("Market window for player %s"), ap[ i ].szName );
     pwFrame = gtk_frame_new ( sz );
     gtk_container_add ( GTK_CONTAINER ( pwVBox ), pwFrame );
 
@@ -789,10 +790,10 @@ GTKShowTheory ( const int fActivePage ) {
   pwVBox = gtk_vbox_new ( 0, FALSE );
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              pwVBox,
-                             gtk_label_new ( "Window graph" ) );
+                             gtk_label_new ( _("Window graph") ) );
 
   for ( i = 0; i < 2; i++ ) {
-      sprintf( sz, "Window graph for player %s", ap[ i ].szName );
+      sprintf( sz, _("Window graph for player %s"), ap[ i ].szName );
       pwFrame = gtk_frame_new( sz );
       gtk_box_pack_start( GTK_BOX ( pwVBox ), pwFrame, FALSE, FALSE, 4 );
 
@@ -812,7 +813,7 @@ GTKShowTheory ( const int fActivePage ) {
   pwVBox = gtk_vbox_new ( 0, FALSE );
 
   ptw->apwGammonPrice[ 0 ] = 
-    gtk_frame_new ( "Gammon values at 0-away, 0-away for 0-cube" );
+    gtk_frame_new ( _("Gammon values at 0-away, 0-away for 0-cube") );
   gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwGammonPrice[ 0 ] );
 
   pwTable = gtk_table_new ( 3, 3, TRUE );
@@ -829,8 +830,8 @@ GTKShowTheory ( const int fActivePage ) {
     gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
 
     gtk_table_attach ( GTK_TABLE ( pwTable ),
-                       pwx = gtk_label_new ( i ? "backgammon value" : 
-                                             "gammon value" ), 
+                       pwx = gtk_label_new ( i ? _("backgammon value") : 
+                                             _("gammon value") ), 
                        1+ i, 2 + i, 0, 1, 
                        GTK_EXPAND | GTK_FILL,
                        GTK_EXPAND | GTK_FILL,
@@ -853,7 +854,7 @@ GTKShowTheory ( const int fActivePage ) {
   }
 
   ptw->apwGammonPrice[ 1 ] = 
-    gtk_frame_new ( "Gammon values for money game" );
+    gtk_frame_new ( _("Gammon values for money game") );
   gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwGammonPrice[ 1 ] );
 
   pw = gtk_vbox_new ( 0, FALSE );
@@ -863,8 +864,8 @@ GTKShowTheory ( const int fActivePage ) {
 
     gtk_container_add ( GTK_CONTAINER ( pw ), 
                         gtk_label_new ( k ?
-                                        "Doubled cube" :
-                                        "Centered cube" ) );
+                                        _("Doubled cube") :
+                                        _("Centered cube") ) );
     
     pwTable = gtk_table_new ( 3, 3, TRUE );
     gtk_container_add ( GTK_CONTAINER ( pw ), pwTable );
@@ -880,8 +881,8 @@ GTKShowTheory ( const int fActivePage ) {
       gtk_misc_set_alignment( GTK_MISC( pwx ), 0, 0.5 );
 
       gtk_table_attach ( GTK_TABLE ( pwTable ),
-                         pwx = gtk_label_new ( i ? "backgammon value" : 
-                                               "gammon value" ), 
+                         pwx = gtk_label_new ( i ? _("backgammon value") : 
+                                               _("gammon value") ), 
                          1+ i, 2 + i, 0, 1, 
                          GTK_EXPAND | GTK_FILL,
                          GTK_EXPAND | GTK_FILL,
@@ -908,7 +909,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              pwVBox,
-                             gtk_label_new ( "Gammon values" ) );
+                             gtk_label_new ( _("Gammon values") ) );
 
   /* show dialog */
 

@@ -78,27 +78,27 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-			gtk_label_new( "Refractive Index:" ), FALSE, FALSE,
+			gtk_label_new( _("Refractive Index:") ), FALSE, FALSE,
 			4 );
     gtk_box_pack_end( GTK_BOX( pwhbox ), gtk_hscale_new( apadj[ f ] ), TRUE,
 		      TRUE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Dull" ), FALSE,
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Dull") ), FALSE,
 			FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
 	apadjCoefficient[ f ] ), TRUE, TRUE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Shiny" ), FALSE,
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Shiny") ), FALSE,
 			FALSE, 4 );
     
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Diffuse" ), FALSE,
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Diffuse") ), FALSE,
 			FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
 	apadjExponent[ f ] ), TRUE, TRUE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Specular" ), FALSE,
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Specular") ), FALSE,
 			FALSE, 4 );
     
     return pw;
@@ -125,11 +125,11 @@ static GtkWidget *PointPrefs( BoardData *bd, int f ) {
     
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Smooth" ),
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Smooth") ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
 	apadjPoint[ f ] ), TRUE, TRUE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Speckled" ),
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Speckled") ),
 			FALSE, FALSE, 4 );
 
     return pw;
@@ -156,11 +156,11 @@ static GtkWidget *BoardPage( BoardData *bd ) {
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Smooth" ),
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Smooth") ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
 	apadjBoard[ 0 ] ), TRUE, TRUE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Speckled" ),
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Speckled") ),
 			FALSE, FALSE, 4 );
     
     return pw;
@@ -182,8 +182,19 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     gdouble ar[ 4 ];
     int i;
     static char *aszWood[] = {
-	"Alder", "Ash", "Basswood", "Beech", "Cedar", "Ebony", "Fir", "Maple",
-	"Oak", "Pine", "Redwood", "Walnut", "Willow"
+	N_ ("Alder"), 
+        N_ ("Ash"), 
+        N_ ("Basswood"), 
+        N_ ("Beech"), 
+        N_ ("Cedar"), 
+        N_ ("Ebony"), 
+        N_ ("Fir"), 
+        N_ ("Maple"),
+	N_ ("Oak"), 
+        N_ ("Pine"), 
+        N_ ("Redwood"), 
+        N_ ("Walnut"), 
+        N_ ("Willow")
     };
     BoardWood bw;
     
@@ -191,7 +202,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 
     gtk_box_pack_start( GTK_BOX( pw ),
 			pwWood = gtk_radio_button_new_with_label( NULL,
-								  "Wooden" ),
+								  _("Wooden") ),
 			FALSE, FALSE, 0 );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwWoodType = gtk_option_menu_new(),
@@ -200,7 +211,8 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     pwWoodMenu = gtk_menu_new();
     for( bw = 0; bw < WOOD_PAINT; bw++ )
 	gtk_menu_shell_append( GTK_MENU_SHELL( pwWoodMenu ),
-			       gtk_menu_item_new_with_label( aszWood[ bw ] ) );
+			       gtk_menu_item_new_with_label( 
+                                  gettext ( aszWood[ bw ] ) ) );
 	
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pwWoodType ), pwWoodMenu );
     if( bd->wood != WOOD_PAINT )
@@ -208,7 +220,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     
     gtk_box_pack_start( GTK_BOX( pw ),
 			pwWoodF = gtk_radio_button_new_with_label_from_widget(
-			    GTK_RADIO_BUTTON( pwWood ), "Painted" ),
+			    GTK_RADIO_BUTTON( pwWood ), _("Painted") ),
 			FALSE, FALSE, 0 );
 
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->wood != WOOD_PAINT ?
@@ -223,7 +235,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ 1 ] ),
 				   ar );
 
-    pwHinges = gtk_check_button_new_with_label( "Show hinges" );
+    pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), fHinges );
     gtk_box_pack_start( GTK_BOX( pw ), pwHinges, FALSE, FALSE, 0 );
 
@@ -270,37 +282,37 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     
     pw = gtk_vbox_new( FALSE, 0 );
     
-    pwTranslucent = gtk_check_button_new_with_label( "Translucent chequers" );
+    pwTranslucent = gtk_check_button_new_with_label( _("Translucent chequers") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwTranslucent ),
 				  fTranslucent );
     gtk_signal_connect( GTK_OBJECT( pwTranslucent ), "toggled",
 			GTK_SIGNAL_FUNC( ToggleTranslucent ), bd );
     gtk_box_pack_start( GTK_BOX( pw ), pwTranslucent, FALSE, FALSE, 4 );
 
-    pwLabels = gtk_check_button_new_with_label( "Numbered point labels" );
+    pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), fLabels );
     gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
     
-    pwUseDiceIcon = gtk_check_button_new_with_label( "Click dice icon to "
-						     "roll" );
+    pwUseDiceIcon = gtk_check_button_new_with_label( _("Click dice icon to "
+						     "roll") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwUseDiceIcon ),
 				  fUseDiceIcon );
     gtk_box_pack_start( GTK_BOX( pw ), pwUseDiceIcon, FALSE, FALSE, 4 );
     
     pwPermitIllegal = gtk_check_button_new_with_label(
-	"Allow dragging to illegal points" );
+	_("Allow dragging to illegal points") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwPermitIllegal ),
 				  fPermitIllegal );
     gtk_box_pack_start( GTK_BOX( pw ), pwPermitIllegal, FALSE, FALSE, 0 );
 
     pwBeepIllegal = gtk_check_button_new_with_label(
-	"Beep on illegal input" );
+	_("Beep on illegal input") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwBeepIllegal ),
 				  fBeepIllegal );
     gtk_box_pack_start( GTK_BOX( pw ), pwBeepIllegal, FALSE, FALSE, 0 );
 
     pwHigherDieFirst = gtk_check_button_new_with_label(
-	"Show higher die on left" );
+	_("Show higher die on left") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHigherDieFirst ),
 				  fHigherDieFirst );
     gtk_box_pack_start( GTK_BOX( pw ), pwHigherDieFirst, FALSE, FALSE, 0 );
@@ -308,25 +320,25 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     pwAnimBox = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pw ), pwAnimBox, FALSE, FALSE, 0 );
     
-    pwFrame = gtk_frame_new( "Animation" );
+    pwFrame = gtk_frame_new( _("Animation") );
     gtk_box_pack_start( GTK_BOX( pwAnimBox ), pwFrame, FALSE, FALSE, 4 );
 
     pwBox = gtk_vbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwFrame ), pwBox );
 
-    pwAnimateNone = gtk_radio_button_new_with_label( NULL, "None" );
+    pwAnimateNone = gtk_radio_button_new_with_label( NULL, _("None") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateNone ),
 				  anim == ANIMATE_NONE );
     gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateNone, FALSE, FALSE, 0 );
     
     pwAnimateBlink = gtk_radio_button_new_with_label_from_widget(
-	GTK_RADIO_BUTTON( pwAnimateNone ), "Blink moving chequers" );
+	GTK_RADIO_BUTTON( pwAnimateNone ), _("Blink moving chequers") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ),
 				  anim == ANIMATE_BLINK );
     gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateBlink, FALSE, FALSE, 0 );
     
     pwAnimateSlide = gtk_radio_button_new_with_label_from_widget(
-	GTK_RADIO_BUTTON( pwAnimateNone ), "Slide moving chequers" );
+	GTK_RADIO_BUTTON( pwAnimateNone ), _("Slide moving chequers") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateSlide ),
 				  anim == ANIMATE_SLIDE );
     gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateSlide, FALSE, FALSE, 0 );
@@ -339,12 +351,12 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
     gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
 
-    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( "Speed:" ),
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Speed:") ),
 			FALSE, FALSE, 8 );
-    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( "Slow" ),
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Slow") ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwSpeed ), pwScale, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( "Fast" ),
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( _("Fast") ),
 			FALSE, FALSE, 4 );
     
     gtk_signal_connect( GTK_OBJECT( pwAnimateNone ), "toggled",
@@ -356,9 +368,9 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     pwTable = gtk_table_new( 2, 2, FALSE );
     gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
     
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( "Light azimuth" ),
+    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( _("Light azimuth") ),
 		      0, 1, 0, 1, 0, 0, 4, 2 );
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( "Light elevation" ),
+    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( _("Light elevation") ),
 		      0, 1, 1, 2, 0, 0, 4, 2 );
 
     rElevation = asinf( bd->arLight[ 2 ] ) * 180 / M_PI;
@@ -530,7 +542,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 extern void BoardPreferences( GtkWidget *pwBoard ) {
 
     GtkWidget *pwDialog, *pwNotebook,
-        *pwApply = gtk_button_new_with_label( "Apply" );
+        *pwApply = gtk_button_new_with_label( _("Apply") );
     BoardData *bd = BOARD( pwBoard )->board_data;
     
     fTranslucent = bd->translucent;
@@ -543,7 +555,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fHinges = bd->hinges;
     anim = bd->animate_computer_moves;
     
-    pwDialog = CreateDialog( "GNU Backgammon - Appearance", TRUE,
+    pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), TRUE,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
@@ -561,23 +573,23 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      ChequerPrefs( bd, 0 ),
-			      gtk_label_new( "Chequers (0)" ) );
+			      gtk_label_new( _("Chequers (0)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      ChequerPrefs( bd, 1 ),
-			      gtk_label_new( "Chequers (1)" ) );
+			      gtk_label_new( _("Chequers (1)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      BoardPage( bd ), gtk_label_new( "Board" ) );
+			      BoardPage( bd ), gtk_label_new( _("Board") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), BorderPage( bd ),
-			      gtk_label_new( "Border" ) );
+			      gtk_label_new( _("Border") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      PointPrefs( bd, 0 ),
-			      gtk_label_new( "Points (0)" ) );
+			      gtk_label_new( _("Points (0)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      PointPrefs( bd, 1 ),
-			      gtk_label_new( "Points (1)" ) );
+			      gtk_label_new( _("Points (1)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      GeneralPage( bd ),
-			      gtk_label_new( "General" ) );
+			      gtk_label_new( _("General") ) );
 
     /* FIXME add settings for ambient light, and dice pip and cube colours */
     
@@ -807,10 +819,10 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 					&bd->aSpeckle[
 					    szParam[ c - 1 ] - '0' + 2 ] );
     else
-	outputf( "Unknown setting `%s'.\n", szParam );
+	outputf( _("Unknown setting `%s'.\n"), szParam );
 
     if( fValueError )
-	outputf( "`%s' is not a legal value for parameter `%s'.\n", szValue,
+	outputf( _("`%s' is not a legal value for parameter `%s'.\n"), szValue,
 		 szParam );
 }
 
