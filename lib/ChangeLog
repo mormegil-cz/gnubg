@@ -1,3 +1,7 @@
+Fri Jan 14 09:34:52 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* fifo.c: replaced bcopy with memcpy.
+
 Sat Jan  8 17:57:54 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* event.c: removed syslog code (unportable and unnecessary).
