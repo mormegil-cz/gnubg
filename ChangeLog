@@ -1,3 +1,8 @@
+Thu May 15 19:12:45 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* matchid.c (MatchID): fix typo
+	(reported by Henrik Ravn)
+
 Mon May 12 21:51:42 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis.c (CommandAnalyseMove): show progress.

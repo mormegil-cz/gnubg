@@ -52,6 +52,7 @@ char *aszCredits[] = {
     "Nardy Pillards",
     "Petri Pitkänen",
     "Sam Pottle",
+    "Henrik Ravn",
     "James Rech",
     "Jared Riley",
     "Oliver Riordan",

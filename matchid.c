@@ -167,9 +167,9 @@ MatchID ( const int anDice[ 2 ],
   SetBits ( auchKey, 13, 2, fResigned );
   SetBits ( auchKey, 15, 3, anDice[ 0 ] & 0x7 );
   SetBits ( auchKey, 18, 3, anDice[ 1 ] & 0x7 );
-  SetBits ( auchKey, 21, 15, nMatchTo & 0x8FFF );
-  SetBits ( auchKey, 36, 15, anScore[ 0 ] & 0x8FFF );
-  SetBits ( auchKey, 51, 15, anScore[ 1 ] & 0x8FFF );
+  SetBits ( auchKey, 21, 15, nMatchTo & 0x7FFF );
+  SetBits ( auchKey, 36, 15, anScore[ 0 ] & 0x7FFF );
+  SetBits ( auchKey, 51, 15, anScore[ 1 ] & 0x7FFF );
 
   return MatchIDFromKey ( auchKey );
 
