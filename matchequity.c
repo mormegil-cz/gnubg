@@ -1575,10 +1575,20 @@ getGammonPrice ( float arGammonPrice[ 4 ],
       
   if ( fabs ( rWin - rCenter ) > epsilon ) {
 
+    /* this expression can be reduced to: 
+       2 * ( rWinGammon - rWin ) / ( rWin - rLose )
+       which is twice the "usual" gammon value */
+
     arGammonPrice[ 0 ] = 
       ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+
+    /* this expression can be reduced to:
+       2 * ( rLose - rLoseGammon ) / ( rWin - rLose )
+       which is twice the "usual" gammon value */
+
     arGammonPrice[ 1 ] = 
       ( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
+
     arGammonPrice[ 2 ] = 
       ( rWinBG - rCenter ) / ( rWin - rCenter ) - 
       ( arGammonPrice[ 0 ] + 1.0 );

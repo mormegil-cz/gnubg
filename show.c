@@ -780,7 +780,8 @@ extern void CommandShowGammonValues ( char *sz ) {
 
     outputf ("%-12s     %7.5f         %7.5f\n",
 	     ap[ i ].szName,
-	     ci.arGammonPrice[ i ], ci.arGammonPrice[ 2 + i ] );
+	     0.5f * ci.arGammonPrice[ i ], 
+             0.5f * ( ci.arGammonPrice[ 2 + i ] + ci.arGammonPrice[ i ] ) );
   }
 
 }

@@ -1,3 +1,11 @@
+Tue Aug 13 22:54:15 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Output gammon values in "usual" metric.
+
+	* gtktheory.c (TheoryUpdated): output gammon values in "usual" metric.
+	* show.c (CommandShowGammonValues): output gammon values in "usual"
+	metric.
+
 Tue Aug 13 22:20:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (CommandExportMatchHtml): fix some memory allocation
