@@ -256,13 +256,13 @@ static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 
 static lucktype Luck( float r ) {
 
-    if( r >= arLuckLevel[ LUCK_VERYGOOD ] )
+    if( r > arLuckLevel[ LUCK_VERYGOOD ] )
 	return LUCK_VERYGOOD;
-    else if( r >= arLuckLevel[ LUCK_GOOD ] )
+    else if( r > arLuckLevel[ LUCK_GOOD ] )
 	return LUCK_GOOD;
-    else if( r <= -arLuckLevel[ LUCK_VERYBAD ] )
+    else if( r < -arLuckLevel[ LUCK_VERYBAD ] )
 	return LUCK_VERYBAD;
-    else if( r <= -arLuckLevel[ LUCK_BAD ] )
+    else if( r < -arLuckLevel[ LUCK_BAD ] )
 	return LUCK_BAD;
     else
 	return LUCK_NONE;
@@ -271,11 +271,11 @@ static lucktype Luck( float r ) {
 extern skilltype
 Skill( float const r )
 {
-  if( r <= -arSkillLevel[ SKILL_VERYBAD ] )
+  if( r < -arSkillLevel[ SKILL_VERYBAD ] )
     return SKILL_VERYBAD;
-  else if( r <= -arSkillLevel[ SKILL_BAD ] )
+  else if( r < -arSkillLevel[ SKILL_BAD ] )
     return SKILL_BAD;
-  else if( r <= -arSkillLevel[ SKILL_DOUBTFUL ] )
+  else if( r < -arSkillLevel[ SKILL_DOUBTFUL ] )
     return SKILL_DOUBTFUL;
   else
     return SKILL_GOOD;
