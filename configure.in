@@ -238,7 +238,6 @@ AC_SEARCH_LIBS(inet_aton,resolv)
 AC_REPLACE_FUNCS(erf strdup)
 
 dnl Check for GTK
-AM_PATH_GLIB_2_0(2.0.0)
 AC_ARG_WITH(gtk,[  --with-gtk              use GTK+ library and widgets])
 AC_ARG_WITH(gtk2,[  --with-gtk2             use GTK+ 2.0])
 AC_ARG_WITH(gtkextra,[  --with-gtkextra         use GtkExtra widgets])
@@ -256,6 +255,30 @@ else
   fi
 fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
+
+
+if test "$no_gtk" != "no"; then
+   dnl Look for Glib 1.x
+   AM_PATH_GLIB(1.2.0)
+elif test "$no_gtk2" != "no"; then
+   dnl look for Glib 2.x
+   AM_PATH_GLIB_2_0(2.0.0)
+else
+   dnl look for glib 2.x
+   AM_PATH_GLIB_2_0(2.0.0)
+   if test "$no_glib" != "no"; then
+      dnl no glib2, loom for glib 1
+      AM_PATH_GLIB(1.2.0)
+   fi   
+fi
+
+if test x"$no_glib" != "x"; then
+   echo "*** You must have installed Glib1 or Glib2 in order to "
+   echo "    compile GNU Backgammon"
+   exit 1
+fi
+
+
 if test "$no_gtk" = "yes"; then
   AC_PATH_XTRA
   AM_CONDITIONAL(USE_EXT, test "$no_x" != "yes" )
