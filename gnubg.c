@@ -109,9 +109,11 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "format.h"
 #include "onechequer.h"
 
+#ifdef WIN32
 #ifdef HAVE_SOCKETS
 #include <winsock.h>
 #endif
+#endif /* WIN32 */
 
 #if USE_PYTHON
 #include <gnubgmodule.h>
