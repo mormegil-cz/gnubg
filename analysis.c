@@ -663,11 +663,7 @@ updateStatcontext(statcontext*       psc,
       else
         r = pms->nCube * d;
 
-      printf( "%f %f\n", r, d );
-
       psc->anTimePenalties[ pmr->t.fPlayer ]++;
-
-      printf( "update %d\n", psc->anTimePenalties[ pmr->t.fPlayer ] );
 
       psc->aarTimeLoss[ pmr->t.fPlayer ][ 0 ] += r;
       psc->aarTimeLoss[ pmr->t.fPlayer ][ 1 ] += d;
@@ -1199,7 +1195,6 @@ AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
 
 #if USE_TIMECONTROL
     pscB->anTimePenalties[ i ] += pscA->anTimePenalties[ i ];
-    printf( "add %d %d\n", i, pscB->anTimePenalties[ i ] );
 #endif /* USE_TIMECONTROL */
 
     pscB->anUnforcedMoves[ i ] += pscA->anUnforcedMoves[ i ];

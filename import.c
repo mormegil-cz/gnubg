@@ -2531,8 +2531,6 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 #if USE_TIMECONTROL
           pmr = malloc( sizeof *pmr );
 
-          printf( "out of time: %d\n", fPlayer );
-
           pmr->mt = MOVE_TIME;
           pmr->t.sz = NULL;
           pmr->t.fPlayer = fPlayer;
