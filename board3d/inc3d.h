@@ -21,12 +21,12 @@
 * $Id$
 */
 
-/* Comment next lines to use glut, gtkglarea or gtkglext */
-#define USE_GTK 1
-#if USE_GTK
-	#define USE_GTKGLEXT 1
-	#include "../config.h"
+#include "config.h"
 
+/* Comment out next line to remove glut library (needed for debug font) */
+#define USE_GLUT_FONT 1
+
+#if USE_GTK
 	#define BUILDING_LIB 1
 
 	#include <gtk/gtk.h>
@@ -34,8 +34,6 @@
 
 #else
 	#define USE_GLUT
-//	#define g_print printf
-	#define USE_BOARD3D 1
 
 //#define _RENDER_H_
 #define AlphaBlend ab
@@ -54,7 +52,7 @@ typedef struct _bearoffcontext { int a;
 #define g_print(a)     ((void)0)
 #endif
 
-#include "../gtkboard.h"
+#include "gtkboard.h"
 
 #define SGN(x) (x / abs(x))
 
@@ -92,7 +90,7 @@ typedef struct _diceTest
 /* Scale textures by this amount */
 #define TEXTURE_SCALE (10.0f / base_unit)
 
-#include "..\boardpos.h"
+#include "boardpos.h"
 
 #define PI 3.14159265358979323846f
 
