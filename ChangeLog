@@ -183,6 +183,10 @@ Thu Dec 12 18:11:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* path.c (BackupFile): can't use outputerr here, since 
 	makebearoff won't link. As a temporarily fix use perror.
 
+Thu Dec 12 10:01:34 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c: Fix ply number when doing the filters.
+
 Wed Dec 11 17:45:44 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am, luxi.c: Don't bother compiling luxi.c if not using
