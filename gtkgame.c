@@ -1390,6 +1390,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     int iRow;
     int i;
     cubedecision cd;
+    float r;
 
     int ai[ 3 ];
     const char *aszCube[] = {
@@ -1570,10 +1571,26 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
         
     gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                       2, 4, iRow, iRow + 1, 
+                       2, 3, iRow, iRow + 1, 
                        GTK_EXPAND | GTK_FILL, 
                        GTK_EXPAND | GTK_FILL, 
                        8, 8 );
+
+    /* percent */
+
+    if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 ) {
+
+      sz = g_strdup_printf ( "(%.1f%%)", 100.0 * r );
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         3, 4, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 8 );
+
+    }
 
     return pwFrame;
 }

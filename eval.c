@@ -7387,3 +7387,53 @@ getCubeDecisionOrdering ( int aiOrder[ 3 ],
 
 }
 
+
+
+extern float
+getPercent ( const cubedecision cd,
+             const float arDouble[] ) {
+
+  switch ( cd ) {
+
+  case DOUBLE_TAKE:
+  case DOUBLE_BEAVER:
+  case DOUBLE_PASS:
+  case REDOUBLE_TAKE:
+  case REDOUBLE_PASS:
+  case NODOUBLE_DEADCUBE:
+  case NO_REDOUBLE_DEADCUBE:
+    /* correct cube action */
+    return -1.0;
+    break;
+
+  case NODOUBLE_TAKE:
+  case NODOUBLE_BEAVER:
+  case NO_REDOUBLE_TAKE:
+  case NO_REDOUBLE_BEAVER:
+  case TOOGOODRE_TAKE:
+  case TOOGOOD_TAKE:
+
+    /* how many doubles should be dropped before it is correct to double */
+
+    return 
+      ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ] ) /
+      (arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ] );
+    break;
+
+  case TOOGOOD_PASS:
+  case TOOGOODRE_PASS:
+
+    /* how many doubles should be taken before it is correct to double */
+    return 
+      ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ] ) /
+      (arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ] );
+    break;
+
+  default:
+
+    assert ( FALSE );
+
+  }
+
+}
+

@@ -415,4 +415,8 @@ extern void
 getCubeDecisionOrdering ( int aiOrder[ 3 ], 
                           float arDouble[ 4 ], cubeinfo *pci );
 
+extern float
+getPercent ( const cubedecision cd,
+             const float arDouble[] );
+
 #endif
