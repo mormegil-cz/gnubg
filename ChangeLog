@@ -1,3 +1,8 @@
+Sat Jan 18 16:18:39 2003  Gary Wong  <gtw@gnu.org>
+
+	* render.c (RenderDice, RenderPips): Don't calculate specular
+	component when cos_theta < 0.
+
 Sat Jan 18 11:24:00 2003  Gary Wong  <gtw@gnu.org>
 
 	* render.c (DrawChequers): Fix cosmetic bug with more than 3 chequers
