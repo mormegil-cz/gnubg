@@ -1,3 +1,7 @@
+Thu Jul 18 22:15:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c: New options dialog to clean up in the Settings menu
+
 Wed Jul 17 14:40:59 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (GTKCubeHint): New function (combining the previously
