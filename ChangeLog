@@ -1,3 +1,7 @@
+Sun Jul  6 18:01:08 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* openurl.c (OpenURL): commit old fix.
+
 Sun Jul 6 15:02 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
 	* rolloutc it helps to call fabs() when dealing with floats.

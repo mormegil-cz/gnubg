@@ -27,6 +27,9 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdkprivate.h>
+#if !GTK_CHECK_VERSION(1,3,10)
+#include <stdlib.h>
+#endif
 
 #include "openurl.h"
 #include "i18n.h"
@@ -37,6 +40,7 @@
 #endif /* WIN32 */
 
 #include "backgammon.h"
+
 
 extern void
 OpenURL( const char *szURL ) {
@@ -49,6 +53,8 @@ OpenURL( const char *szURL ) {
 
   /* FIXME: implement other browsers */
 
+#if GTK_CHECK_VERSION(1,3,10)
+
   gchar *pchCommand;
   GError *error = NULL;
 
@@ -60,6 +66,19 @@ OpenURL( const char *szURL ) {
   }
 
   g_free( pchCommand );
+
+#else /* GTK 1.3 */
+
+   
+  gchar *pchCommand;
+  pchCommand = g_strdup_printf( "mozilla \"%s\"", szURL );
+
+  if ( system( pchCommand ) < 0 ) 
+     outputerr( _("Error launching browser\n") );
+
+  g_free( pchCommand );
+
+#endif /* ! GTK 1.3 */
 
 #endif /* ! WIN32 */
 
