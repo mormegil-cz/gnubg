@@ -1,3 +1,8 @@
+Sun Apr 28 22:35:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (AnalyzeMove): bugfix. Cube analysis was lost when 
+	re-analysing match on same or lower settings.
+
 Sun Apr 28 21:56:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c: numerous cosmetic improvements. Compile-time support

@@ -537,6 +537,10 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 		    return -1;
 
               }
+              else {
+                memcpy ( aarOutput, pmr->d.aarOutput, sizeof ( aarOutput ) );
+                memcpy ( aarStdDev, pmr->d.aarStdDev, sizeof ( aarStdDev ) );
+              }
 	      
                 FindCubeDecision ( arDouble, aarOutput, &ci );
 	      
