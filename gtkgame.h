@@ -192,6 +192,9 @@ GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
 
 extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
                             char *szPath, filedialogtype fdt );
+extern char 
+*SelectFile( char *szTitle, char *szDefault, char *szPath, 
+             filedialogtype fdt );
 
 extern void Undo();
 

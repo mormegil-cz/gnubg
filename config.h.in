@@ -180,7 +180,7 @@
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
-/* Define if you have the FTGL library */
+/* Define if you have libftgl */
 #undef HAVE_LIBFTGL
 
 /* Define to 1 if you have the `gdbm' library (-lgdbm). */

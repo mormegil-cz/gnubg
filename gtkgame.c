@@ -4333,7 +4333,7 @@ static void SetDefaultPath( GtkWidget *pw, char *sz ) {
     g_free( pch );
 }
 
-static char *SelectFile( char *szTitle, char *szDefault, char *szPath,
+extern char *SelectFile( char *szTitle, char *szDefault, char *szPath,
 		filedialogtype fdt ) {
 
     GtkWidget *pw = gtk_file_selection_new( szTitle ),
