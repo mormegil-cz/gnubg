@@ -161,6 +161,7 @@ duplication of effort and to make sure our changes merge easily.
   annotation.
 ** Add the players' names in the drop-down menu in the game window.  (They
   used to be there, but weren't updated if the names were changed.)
+** Write GTKDumpStatcontext (show statistics).
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
