@@ -1,3 +1,8 @@
+Mon Dec 16 18:36:08 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* text.c (OutputRolloutContext): show RNG for quasi-random dice
+	as well.
+
 Mon Dec 16 17:20:44 2002  Oystein Johansen  <oeysteij@online.no>
 
         * gtkboard.c (board_expose): Change g_alloca() with malloc()

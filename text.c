@@ -206,11 +206,17 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
   if ( prc->fInitial )
     strcat ( sz, ", rollout as initial position" );
 
-  sprintf ( pc = strchr ( sz, 0 ),
-            ", seed %d using %s\n",
-            prc->nSeed,
-	    prc->fRotate ? _("quasi-random dice") :
-            gettext ( aszRNG[ prc->rngRollout ] ) );
+  if ( prc->fRotate ) 
+    sprintf ( pc = strchr ( sz, 0 ),
+              ", seed %d using %s and %s\n",
+              prc->nSeed,
+              _("quasi-random dice"),
+              gettext ( aszRNG[ prc->rngRollout ] ) );
+  else
+    sprintf ( pc = strchr ( sz, 0 ),
+              ", seed %d using %s\n",
+              prc->nSeed,
+              gettext ( aszRNG[ prc->rngRollout ] ) );
 
   for ( i = 0; i < 1 + ! fIdentical; i++ ) {
 
