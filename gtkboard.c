@@ -159,28 +159,34 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
 
   gint i;
   gint anOff[ 2 ];
+  int an[ 2 ][ 25 ];
+
+  memcpy( an, anBoard, sizeof an );
+
+  if ( turn < 0 )
+    SwapSides( an );
 
   for ( i = 0; i < 28; ++i )
     points[ i ] = 0;
 
   /* Opponent on bar */
-  points[ 0 ] = -anBoard[ 0 ][ 24 ];
+  points[ 0 ] = -an[ 0 ][ 24 ];
 
   /* Board */
   for( i = 0; i < 24; i++ ) {
-    if ( anBoard[ 1 ][ i ] )
-      points[ i + 1 ] = anBoard[ 1 ][ i ];
-    if ( anBoard[ 0 ][ i ] )
-      points[ 24 - i ] = -anBoard[ 0 ][ i ];
+    if ( an[ 1 ][ i ] )
+      points[ i + 1 ] = an[ 1 ][ i ];
+    if ( an[ 0 ][ i ] )
+      points[ 24 - i ] = -an[ 0 ][ i ];
   }
 
   /* Player on bar */
-  points[ 25 ] = anBoard[ 1 ][ 24 ];
+  points[ 25 ] = an[ 1 ][ 24 ];
 
   anOff[ 0 ] = anOff[ 1 ] = nchequers;
   for( i = 0; i < 25; i++ ) {
-    anOff[ 0 ] -= anBoard[ 0 ][ i ];
-    anOff[ 1 ] -= anBoard[ 1 ][ i ];
+    anOff[ 0 ] -= an[ 0 ][ i ];
+    anOff[ 1 ] -= an[ 1 ][ i ];
   }
     
   points[ 26 ] = anOff[ 1 ];
@@ -190,14 +196,7 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
 
 void write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 
-  int an[ 2 ][ 25 ];
-
-  memcpy( an, anBoard, sizeof an );
-
-  if ( bd->turn < 0 )
-    SwapSides( an );
-
-  write_points( bd->points, bd->turn, bd->nchequers, an );
+  write_points( bd->points, bd->turn,  bd->nchequers, anBoard );
 
 }
 
@@ -1222,29 +1221,94 @@ static void board_end_drag( GtkWidget *widget, BoardData *bd ) {
 gboolean place_chequer_or_revert(BoardData *bd, 
 					 int dest )
 {
-    int bar, hit;
-    gboolean placed = TRUE;
-    int unhit;
-    int oldpoints[ 28 ];
+    /* This procedure has grown more complicated than I like
+     * We might want to discard most of it and use a calculated 
+     * list of valid destination points (since we have the code for that available 
+     * 
+     * Known problems:
+     
+     * Not tested for "allow dragging to illegal points". Unlikely to work, might crash 
+     * It is not possible to drag checkers from the bearoff tray. This must be corrected in 
+     * the pick-up code - this proc should be ready for it.
+     *
+     * Nis Jorgensen, 2004-06-17
+     */
 
+    int hitCheckers [ 4 ] = {0, 0, 0, 0};
+    int unhitCheckers [ 4 ] = {0, 0, 0, 0};
+    int bar, hit = 0;
+    gboolean placed = TRUE;
+    int unhit = 0;
+    int oldpoints[ 28 ];
+    int passpoint;
+    int source, dest2, i;
+
+    /* dest2 is the destination point used  for numerical calculations */
+    dest2 = dest;
+
+    source = bd->drag_point;
+
+
+    /* This is the opponents bar point */
     bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
     
+
     if( dest == -1 || ( bd->drag_colour > 0 ? bd->points[ dest ] < -1
 			: bd->points[ dest ] > 1 ) || dest == bar ||
 	dest > 27 ) {
-	/* FIXME check move is legal */
 	placed = FALSE;
-	dest = bd->drag_point;
-    } else if( dest >= 26 )
+	dest = dest2 = source;
+    } else if( dest >= 26 ) {
 	/* bearing off */
 	dest = bd->drag_colour > 0 ? 26 : 27;
-		
-    if( ( hit = bd->points[ dest ] == -bd->drag_colour ) ) {
-	bd->points[ dest ] = 0;
-	bd->points[ bar ] -= bd->drag_colour;
-	
-	board_invalidate_point( bd, bar );
+        dest2 = bd->drag_colour > 0 ? 0 : 25;
     }
+		
+
+    /* Check for hits, undoing hits, including pick-and pass */
+
+
+    if ( (source - dest2) * bd->drag_colour > 0 ) { /*We are moving forward */ 
+        if( bd->points[ dest ] == -bd->drag_colour ) {
+             /* outputf ("Hitting on %d \n", dest); */
+             hit++;
+             hitCheckers[ 0 ] = dest;
+             bd->points[ dest ] = 0;
+             bd->points[ bar ] -= bd->drag_colour;
+             board_invalidate_point( bd, bar );
+        }
+        if ( bd->diceRoll[0] == bd->diceRoll[1] ) {
+            for (i = 1; i <= 3; i++) {
+                    passpoint = source - i * bd->diceRoll[0] * bd->drag_colour;
+                    if ((dest2 - passpoint) * bd->drag_colour > 0 ) break;
+                    if (bd->points[ passpoint ] == - bd->drag_colour) {
+                        hit++;
+                        hitCheckers[ i ] = passpoint;
+                        bd->points[ passpoint ] = 0;
+                        bd->points[ bar ] -= bd->drag_colour;
+                        board_invalidate_point( bd, bar );
+                        board_invalidate_point( bd, passpoint );
+                    }
+            }
+        } else {
+          if (ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] 
+              || dest > 25 ) 
+            for (i = 0; i < 2; i++) {
+                    passpoint = source - bd->diceRoll[ i ] * bd->drag_colour;
+                    if ((dest2 - passpoint) * bd->drag_colour > 0 ) continue;
+                    if (bd->points[ passpoint ] == - bd->drag_colour) {
+                        hit++;
+                        hitCheckers[ i + 1 ] = passpoint;
+                        bd->points[ passpoint ] = 0;
+                        bd->points[ bar ] -= bd->drag_colour;
+                        board_invalidate_point( bd, bar );
+                        board_invalidate_point( bd, passpoint );
+
+                        break;         
+                    }
+                }
+        } 
+    } else {
 
     /* 
      * Check for taking chequer off point where we hit 
@@ -1253,44 +1317,92 @@ gboolean place_chequer_or_revert(BoardData *bd,
     /* check if the opponent had a chequer on the drag point (source),
        and that it's not pick'n'pass */
 
-    /* FIXME: this does not detect undoing pick'n'pass */
-    
-    write_points( oldpoints, bd->turn, bd->nchequers, bd->old_board );
+        write_points(oldpoints,  bd->turn, bd->nchequers, bd->old_board );
 
-    if ( ( unhit = ( ( oldpoints[ bd->drag_point ] == -bd->drag_colour ) && 
-                     ( dest < 26 ) &&
-                     ( ( bd->drag_point - dest ) * bd->drag_colour < 0 ) ) ) ) {
-      bd->points[ bar ] += bd->drag_colour;
-      bd->points[ bd->drag_point ] -= bd->drag_colour;
-      board_invalidate_point( bd, bar );
-      board_invalidate_point( bd, bd->drag_point );
-
-    }
-
-    bd->points[ dest ] += bd->drag_colour;
-    
-    if( bd->drag_point != dest ) {
-	if( update_move( bd ) && !fGUIIllegal ) {
-	    /* the move was illegal; undo it */
-	    bd->points[ dest ] -= bd->drag_colour;
-	    bd->points[ bd->drag_point ] += bd->drag_colour;
-	    if( hit ) {
-		bd->points[ bar ] += bd->drag_colour;
-		bd->points[ dest ] = -bd->drag_colour;
-		board_invalidate_point( bd, bar );
-	    }
-
-            if ( unhit ) {
-              bd->points[ bar ] -= bd->drag_colour;
-              bd->points[ bd->drag_point ] += bd->drag_colour;
-              board_invalidate_point( bd, bar );
+        if ( oldpoints[ source ] == -bd->drag_colour ) { 
+            unhit++;
+            unhitCheckers[0] = source; 
+            bd->points[ bar ] += bd->drag_colour;
+            board_invalidate_point( bd, bar );
+            bd->points[ source ] -= bd->drag_colour;
+            board_invalidate_point( bd, source );
+        }
+ 
+        if ( bd->diceRoll[0] == bd->diceRoll[1]) {
+            /* Doubles are tricky - we can have pick-and-passed with 2 chequers */
+            for (i = 1; i <= 3; i++) {
+                passpoint = source +  i * bd->diceRoll[ 0 ] * bd->drag_colour;
+                if ((dest2 - passpoint) * bd->drag_colour <= 0) break;
+                if ( ( oldpoints[ passpoint ] ==  -bd->drag_colour ) && /*there was a blot */
+                         ( bd->points[ passpoint ] == 0 ) && /* We actually did p&p */
+                           bd->points[ source ] == oldpoints [ source ] ) { /* We didn't p&p with a second checker */
+                        unhit++;
+                        unhitCheckers [ i ] = passpoint;
+                        bd->points[ bar ] += bd->drag_colour;
+                        bd->points[ passpoint ] -= bd->drag_colour;
+                        board_invalidate_point( bd, bar );
+                        board_invalidate_point( bd, passpoint );
+                }
+            }
+        } else {
+            for ( i = 0; i < 2; i++) {
+                passpoint = source + bd->diceRoll[ i ] * bd->drag_colour;
+                if ((dest2 - passpoint) * bd->drag_colour <= 0) continue;
+                if ( ( oldpoints[ passpoint ] ==  -bd->drag_colour ) &&
+                     ( bd->points[ passpoint ] == 0 ) ) {
+                    unhit++;
+                    unhitCheckers [ i + 1 ] = passpoint;
+                    bd->points[ bar ] += bd->drag_colour;
+                    board_invalidate_point( bd, bar );
+                    bd->points[ passpoint ] -= bd->drag_colour;
+                    board_invalidate_point( bd, passpoint );
+                }
             }
 
-	    board_invalidate_point( bd, bd->drag_point );
+        }
+
+    }
+    
+    bd->points[ dest ] += bd->drag_colour;
+    board_invalidate_point( bd, dest );
+
+/* Not sure why this was made conditional on dest != source
+ * I encountered at least one case where it was needed anyway (when we tried 
+ * to unhit on that point so commenting out */ 
+
+/*    if( source != dest ) { */
+      if( update_move( bd ) && !fGUIIllegal ) {
+	    /* the move was illegal; undo it */
+	    bd->points[ source ] += bd->drag_colour;
+	    board_invalidate_point( bd, source );
+            bd->points[ dest ] -= bd->drag_colour;
+            board_invalidate_point( bd, dest );
+	    if( hit > 0 ) {
+		bd->points[ bar ] += hit * bd->drag_colour;
+ 		board_invalidate_point( bd, bar );
+                for (i = 0; i < 4; i++) 
+                    if (hitCheckers[ i ] > 0) {
+		        bd->points[ hitCheckers[ i ] ] = -bd->drag_colour;
+ 		        board_invalidate_point( bd, hitCheckers[ i ] );
+                    }
+	    }
+
+          if ( unhit > 0 ) {
+              bd->points[ bar ] -= unhit * bd->drag_colour;
+              board_invalidate_point( bd, bar );
+              for (i = 0; i < 4; i++) 
+                    if (unhitCheckers[ i ] > 0) {
+		        bd->points[ unhitCheckers[ i ] ] += bd->drag_colour;
+ 		        board_invalidate_point( bd, unhitCheckers[ i ] );
+                    }
+            }
+
 	    update_move( bd );
 	    placed = FALSE;
-    	}
-    }
+	}
+/*    } */
+
+
     if (placed)
 	board_invalidate_point( bd, dest );
 
@@ -1303,7 +1415,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
 			RestrictiveDrawPiece(bar, abs(bd->points[bar]));
 	}
 	if (placed && bd->rd->fDisplayType == DT_3D)
-		PlaceMovingPieceRotation(bd, dest, bd->drag_point);
+		PlaceMovingPieceRotation(bd, dest, source);
 #endif
     return placed;
 }
