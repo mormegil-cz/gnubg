@@ -11,6 +11,7 @@ char *aszCredits[] = {
     "John Chuang",
     "Tristan Colgate",
     "Olivier Croisille",
+    "Ned Cross",
     "Bill Davidson",
     "Eric Groleau",
     "Jeff Haferman",

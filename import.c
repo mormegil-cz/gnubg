@@ -813,9 +813,9 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     pmgi->g.nMatch = nLength;
     pmgi->g.anScore[ 0 ] = n0;
     pmgi->g.anScore[ 1 ] = n1;
-    pmgi->g.fCrawford = TRUE; /* FIXME */
+    pmgi->g.fCrawford = nLength != 0; /* FIXME */
     pmgi->g.fCrawfordGame = fCrawford;
-    pmgi->g.fJacoby = FALSE; /* FIXME */
+    pmgi->g.fJacoby = !nLength; /* FIXME */
     pmgi->g.fWinner = -1;
     pmgi->g.nPoints = 0;
     pmgi->g.fResigned = FALSE;
@@ -996,9 +996,12 @@ static int ParseSGGGame( char *pch, int *pi, int *pn0, int *pn1,
 	*pfCrawford = TRUE;
     }
 
-    if( *pch != '/' )
-	return -1;
-
+    if( *pch != '/' ) {
+	/* assume money session */
+	*pnLength = 0;
+	return 0;
+    }
+    
     pch++;
     
     *pnLength = strtol( pch, &pch, 10 );

@@ -1,3 +1,11 @@
+Wed Mar 13 20:33:59 2002  Gary Wong  <gtw@research.att.com>
+
+	* import.c (ParseSGGGame): Handle money sessions in SGG files
+	(reported by Ned Cross).
+
+	* gtkgame.c (GTKAddGame): Increase size of sz[], to avoid buffer
+	overflow if the players have long names.
+
 Wed Mar 13 11:13:16 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (ShowManual): New function.
