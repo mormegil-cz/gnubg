@@ -69,7 +69,9 @@ static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
     ps->font = pf;
     gdk_font_ref( pf );
 }
+#endif
 
+#if !HAVE_GTK_OPTION_MENU_GET_HISTORY
 static gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
     
     GtkWidget *active_widget;
@@ -88,8 +90,6 @@ static gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
 	return -1;
 }
 #endif
-
-
 
 /* Enumeration to be used as index to the table of command strings below
    (since GTK will only let us put integers into a GtkItemFactoryEntry,
@@ -4082,9 +4082,9 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
     gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
 
     if ( -rEqAfter >= -rEqBefore )
-	pch = "Your should accept the resignation!";
+	pch = "You should accept the resignation!";
     else
-	pch = "Your should reject the resignation!";
+	pch = "You should reject the resignation!";
     
     gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new( pch ),
 		      0, 2, 2, 3, GTK_EXPAND | GTK_FILL,
