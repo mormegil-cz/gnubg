@@ -1,6 +1,18 @@
 GNU Backgammon NEWS -- history of user-visible changes.  9 Dec 1999
 
+** Optional automatic bearoffs in non-contact positions ("set autobearoff").
+
+** Match and session play has been added, along with support for the
+Crawford and Jacoby rules, and automatic doubles.
+
+** The position ID is now displayed in board window.
+
+** Allow alternate style of moving chequers in board window with mouse
+buttons 2 and 3.
+
 ** Added support for other dice generators ("set rng").
+
+** More bug fixes.
 
 * Changes in GNU Backgammon 0.02
 
