@@ -5323,9 +5323,7 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
   GtkWidget *pwLabel;
   GtkWidget *pwStat;
 
-  static char *aszColumnTitle[] = {
-    "Cube", "Win Single", "Win gammon", "Win BG",
-    "Lose Single", "Lose Gammon", "Lose BG" };
+  static char *aszColumnTitle[ 7 ];
 
   static char *aszRow[ 7 ];
   int i;
@@ -5339,7 +5337,21 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 
   /* table with results */
 
+  aszColumnTitle[ 0 ] = strdup ( "Cube" );
+  for ( i = 0; i < 2; i++ ) {
+    aszColumnTitle[ 3 * i + 1 ] = 
+      g_strdup_printf ( "Win Single\n%s", ap[ i ].szName );
+    aszColumnTitle[ 3 * i + 2 ] = 
+      g_strdup_printf ( "Win Gammon\n%s", ap[ i ].szName );
+    aszColumnTitle[ 3 * i + 3 ] = 
+      g_strdup_printf ( "Win BG\n%s", ap[ i ].szName );
+  }
+
   pwStat = gtk_clist_new_with_titles( 7, aszColumnTitle );
+
+  for ( i = 0; i < 7; i++ )
+    g_free ( aszColumnTitle[ i ] );
+
   gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
     
   gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
@@ -5399,79 +5411,6 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 
 }
 
-static GtkWidget *
-GTKStatPageHit ( const rolloutstat *prs, const int cGames ) {
-
-  GtkWidget *pw;
-  GtkWidget *pwLabel;
-  GtkWidget *pwStat;
-
-  static char *aszColumnTitle[] = {
-    "Move", "#Hits", "#Hits" };
-
-  static char *aszRow[ 3 ];
-  int i;
-  int anTotal[ 2 ];
-
-  pw = gtk_vbox_new ( FALSE, 0 );
-
-  pwLabel = gtk_label_new ( "Hit statistics" );
-
-  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
-
-  /* table with results */
-
-  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
-  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
-    
-  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
-    
-  for( i = 0; i < 3; i++ ) {
-    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
-				      TRUE );
-    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
-					GTK_JUSTIFY_RIGHT );
-
-    aszRow[ i ] = malloc ( 100 );
-  }
-
-  memset ( anTotal, 0, sizeof ( anTotal ) );
-  
-  for ( i = 0; i < MAXHIT; i++ ) {
-
-    sprintf ( aszRow[ 0 ], ( i < MAXHIT - 1 ) ?
-	      "%d" : ">= %d", i + 1 );
-    sprintf ( aszRow[ 1 ], "%d", prs->acHit[ i ] );
-
-    sprintf ( aszRow[ 2 ], "%d", (prs+1)->acHit[ i ] );
-
-    anTotal[ 0 ] += prs->acHit[ i ];
-    anTotal[ 1 ] += (prs+1)->acHit[ i ];
-
-    gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-  }
-
-
-  sprintf ( aszRow[ 0 ], "Total" );
-  for ( i = 0; i < 2; i++ )
-    sprintf ( aszRow[ i + 1 ], "%d", anTotal[ i ] );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-
-  sprintf ( aszRow[ 0 ], "%%" );
-  for ( i = 0; i < 2; i++ )
-    sprintf ( aszRow[ i + 1 ], "%6.2f%%",
-	      100.0 * (float) anTotal[ i ] / (float) cGames );
-  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
-
-
-  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
-
-
-  return pw;
-
-}
 
 static GtkWidget *
 GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
@@ -5480,16 +5419,20 @@ GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
   GtkWidget *pwLabel;
   GtkWidget *pwStat;
 
-  static char *aszColumnTitle[] = {
-    "Cube",
-    "#Double, take", "#Double, pass", 
-    "#Double, take", "#Double, pass", 
-  };
+  static char *aszColumnTitle[ 5 ];
 
   static char *aszRow[ 5 ];
   int i;
   char sz[ 100 ];
   int anTotal[ 4 ];
+
+  aszColumnTitle[ 0 ] = strdup ( "Cube" );
+  for ( i = 0; i < 2; i++ ) {
+    aszColumnTitle[ 2 * i + 1 ] = 
+      g_strdup_printf ( "#Double, take\n%s", ap[ i ].szName );
+    aszColumnTitle[ 2 * i + 2 ] = 
+      g_strdup_printf ( "#Double, pass\n%s", ap[ i ].szName );
+  }
 
   pw = gtk_vbox_new ( FALSE, 0 );
 
@@ -5501,6 +5444,9 @@ GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
 
   pwStat = gtk_clist_new_with_titles( 5, aszColumnTitle );
   gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+
+  for ( i = 0; i < 5; i++ )
+    g_free ( aszColumnTitle[ i ] );
     
   gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
     
@@ -5551,14 +5497,16 @@ GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
   for ( i = 0; i < 5; i++ ) free ( aszRow[ i ] );
 
   if ( anTotal[ 1 ] + anTotal[ 0 ] ) {
-    sprintf ( sz, "Cube efficiency for player 0: %7.4f",
+    sprintf ( sz, "Cube efficiency for %s: %7.4f",
+              ap[ 0 ].szName,
 	      (float) anTotal[ 0 ] / ( anTotal[ 1 ] + anTotal[ 0 ] ) );
     pwLabel = gtk_label_new ( sz );
     gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
   }
 
   if ( anTotal[ 2 ] + anTotal[ 3 ] ) {
-    sprintf ( sz, "Cube efficiency for player 1: %7.4f",
+    sprintf ( sz, "Cube efficiency for p%s: %7.4f",
+              ap[ 0 ].szName,
 	      (float) anTotal[ 2 ] / ( anTotal[ 3 ] + anTotal[ 2 ] ) );
     pwLabel = gtk_label_new ( sz );
     gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
@@ -5575,8 +5523,7 @@ GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
   GtkWidget *pwLabel;
   GtkWidget *pwStat;
 
-  static char *aszColumnTitle[] = {
-    "", "Player 0", "Player 1" };
+  static char *aszColumnTitle[ 3 ];
 
   static char *aszRow[ 3 ];
   int i;
@@ -5587,10 +5534,24 @@ GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
 
   gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
 
+  /* column titles */
+
+  aszColumnTitle[ 0 ] = strdup ( "" );
+  for ( i = 0; i < 2; i++ )
+    aszColumnTitle[ i + 1 ] = strdup ( ap[ i ].szName );
+
   /* table with results */
 
   pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
   gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+    
+
+  /* garbage collect */
+
+  for ( i = 0; i < 3; i++ )
+    free ( aszColumnTitle[ i ] );
+
+  /* content */
     
   gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
     
@@ -5645,8 +5606,7 @@ GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {
   GtkWidget *pwLabel;
   GtkWidget *pwStat;
 
-  static char *aszColumnTitle[] = {
-    "", "Player 0", "Player 1" };
+  static char *aszColumnTitle[ 3 ];
 
   static char *aszRow[ 3 ];
   int i;
@@ -5657,10 +5617,23 @@ GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {
 
   gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
 
+  /* column titles */
+
+  aszColumnTitle[ 0 ] = strdup ( "" );
+  for ( i = 0; i < 2; i++ )
+    aszColumnTitle[ i + 1 ] = strdup ( ap[ i ].szName );
+
   /* table with results */
 
   pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
   gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+
+  /* garbage collect */
+
+  for ( i = 0; i < 3; i++ )
+    free ( aszColumnTitle[ i ] );
+
+  /* content */
     
   gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
     
@@ -5681,15 +5654,106 @@ GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {
   sprintf ( aszRow[ 0 ], "Average move number for close out" );
   if ( prs->nOpponentClosedOut )
     sprintf ( aszRow[ 1 ], "%7.2f",
-	      1.0f + (float) prs->nOpponentClosedOutMove / prs->nOpponentClosedOut );
+	      1.0f + prs->rOpponentClosedOutMove / prs->nOpponentClosedOut );
   else
     sprintf ( aszRow[ 1 ], "n/a" );
 
 
   if ( (prs+1)->nOpponentClosedOut )
     sprintf ( aszRow[ 2 ], "%7.2f",
-	      1.0f + (float) (prs+1)->nOpponentClosedOutMove /
+	      1.0f + (prs+1)->rOpponentClosedOutMove /
 	      (prs+1)->nOpponentClosedOut );
+  else
+    sprintf ( aszRow[ 2 ], "n/a" );
+
+
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  for ( i = 0; i < 2; i++ ) free ( aszRow[ i ] );
+
+  return pw;
+
+}
+
+
+static GtkWidget *
+GTKStatPageHit ( const rolloutstat *prs, const int cGames ) {
+
+  GtkWidget *pw;
+  GtkWidget *pwLabel;
+  GtkWidget *pwStat;
+
+  static char *aszColumnTitle[ 3 ];
+
+  static char *aszRow[ 3 ];
+  int i;
+
+  pw = gtk_vbox_new ( FALSE, 0 );
+
+  pwLabel = gtk_label_new ( "Hit statistics" );
+
+  gtk_box_pack_start ( GTK_BOX ( pw ), pwLabel, FALSE, FALSE, 4 );
+
+  /* column titles */
+
+  aszColumnTitle[ 0 ] = strdup ( "" );
+  for ( i = 0; i < 2; i++ )
+    aszColumnTitle[ i + 1 ] = strdup ( ap[ i ].szName );
+
+  /* table with results */
+
+  pwStat = gtk_clist_new_with_titles( 3, aszColumnTitle );
+  gtk_clist_column_titles_passive( GTK_CLIST( pwStat ) );
+
+  /* garbage collect */
+
+  for ( i = 0; i < 3; i++ )
+    free ( aszColumnTitle[ i ] );
+
+  /* content */
+    
+  gtk_box_pack_start( GTK_BOX( pw ), pwStat, TRUE, TRUE, 0 );
+    
+  for( i = 0; i < 3; i++ ) {
+    gtk_clist_set_column_auto_resize( GTK_CLIST( pwStat ), i,
+				      TRUE );
+    gtk_clist_set_column_justification( GTK_CLIST( pwStat ), i,
+					GTK_JUSTIFY_RIGHT );
+
+    aszRow[ i ] = malloc ( 100 );
+  }
+
+  sprintf ( aszRow[ 0 ], "Number of games with hit(s)" );
+  sprintf ( aszRow[ 1 ], "%d", prs->nOpponentHit );
+  sprintf ( aszRow[ 2 ], "%d", (prs+1)->nOpponentHit );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  sprintf ( aszRow[ 0 ], "Percent games with hits" );
+  sprintf ( aszRow[ 1 ], "%7.2f%%", 
+            100.0 * (prs)->nOpponentHit / ( 1.0 * cGames ) );
+  sprintf ( aszRow[ 2 ], "%7.2f%%", 
+            100.0 * (prs+1)->nOpponentHit / (1.0 * cGames ) );
+  gtk_clist_append ( GTK_CLIST ( pwStat ), aszRow );
+
+  sprintf ( aszRow[ 0 ], "Average move number for first hit" );
+  if ( prs->nOpponentHit )
+    sprintf ( aszRow[ 1 ], "%7.2f",
+	      1.0f + prs->rOpponentHitMove / prs->nOpponentHit );
+  else
+    sprintf ( aszRow[ 1 ], "n/a" );
+
+
+  sprintf ( aszRow[ 0 ], "Average move number for first hit" );
+  if ( prs->nOpponentHit )
+    sprintf ( aszRow[ 1 ], "%7.2f",
+	      1.0f + prs->rOpponentHitMove / (1.0 * prs->nOpponentHit ) );
+  else
+    sprintf ( aszRow[ 1 ], "n/a" );
+
+  if ( (prs+1)->nOpponentHit )
+    sprintf ( aszRow[ 2 ], "%7.2f",
+	      1.0f + (prs+1)->rOpponentHitMove /
+	      ( 1.0 * (prs+1)->nOpponentHit ) );
   else
     sprintf ( aszRow[ 2 ], "n/a" );
 

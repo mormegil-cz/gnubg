@@ -46,7 +46,10 @@ typedef struct _rolloutstat {
 
   /* Chequer hit statistics (dimension is move number) */
   
-  int acHit[ MAXHIT ]; /* number of hits */
+  /* Opponent closed out */
+
+  int nOpponentHit;
+  int rOpponentHitMove;
 
   /* Average loss of pips in bear-off */
 
@@ -56,7 +59,7 @@ typedef struct _rolloutstat {
   /* Opponent closed out */
 
   int nOpponentClosedOut;
-  int nOpponentClosedOutMove;
+  int rOpponentClosedOutMove;
 
   /* FIXME: add more stuff */
 

@@ -248,6 +248,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   int aiBar[ 2 ];
 
   int afClosedOut[ 2 ] = { FALSE, FALSE };
+  int afHit[ 2 ] = { FALSE, FALSE };
 
   float rDP;
 
@@ -512,12 +513,14 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         /* FIXME: record double hit, triple hits etc. ? */
 
-	if( aarsStatistics )
-	    for ( i = 0; i < 2; i++ )
-		aarsStatistics[ ici ][ i ].
-		  acHit[ (iTurn < MAXHIT ) ? iTurn : MAXHIT ] +=
-		  aiBar[ ! i ] != aanBoard[ ici][ ! i ][ 24 ];  
-          
+	if( aarsStatistics && ! afHit [ pci->fMove ] && 
+            ( aiBar[ 0 ] < aanBoard[ ici ][ 0 ][ 24 ]  ) ) {
+
+          aarsStatistics[ ici ][ pci->fMove ].nOpponentHit++;
+          aarsStatistics[ ici ][ pci->fMove ].rOpponentHitMove += iTurn;
+          afHit[ pci->fMove ] = TRUE;
+
+        }
 
         if( fAction )
           fnAction();
@@ -555,7 +558,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 	  if ( afClosedBoard[ pci->fMove ] ) {
 	    aarsStatistics[ ici ][ pci->fMove ].nOpponentClosedOut++;
 	    aarsStatistics[ ici ]
-	      [ pci->fMove ].nOpponentClosedOutMove += iTurn;
+	      [ pci->fMove ].rOpponentClosedOutMove += iTurn;
 	    afClosedOut[ pci->fMove ] = TRUE;
 	  }
 
@@ -1151,6 +1154,8 @@ initRolloutstat ( rolloutstat *prs ) {
  * Returns:
  *    sz
  *
+ *
+ * FIXME: hopeless outdated!
  */
 
 extern char *
@@ -1322,6 +1327,9 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
   sprintf ( pc, "\n\n" );
   pc = strchr ( pc, 0 );
 
+#if 0
+
+ FIXME: rewrite
 
   /* hitting statistics */
 
@@ -1342,6 +1350,8 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
   sprintf ( pc, "Total number of hits              %8d   %7.3f%%\n\n",
             nSum, 100.0f * nSum / cGames  );
   pc = strchr ( pc, 0 );
+
+#endif
 
 
   outputl ( szTemp );

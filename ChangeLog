@@ -1,3 +1,17 @@
+Mon May 27 20:51:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Updates to rollout statistics.
+
+	* rollout.c (BasicCubefulRollout): simplify hit statistics.
+	* gtkgame.c (GTKStatPageHit): simplify hit statistics.
+
+	* rollout.c (BasicCubefulRollout): change nOpponentClosedOutMove to
+	float to avoid overflows.
+
+	* gtkgame.c (GTKStatPageWin, GTKStatPageCube, GTKStatPageBearoff,
+	GTKStatPageClosedOut, GTKStatPageHit): improve column titles.
+	
+
 Sun May 26 12:47:27 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (ExportGameHTML): fix bugs in HTML export reported by 
