@@ -2692,9 +2692,9 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 				guint page_num, gpointer user_data)
 {
 #if USE_BOARD3D
-	/* Make sure correct dice preview visible */
 	if (previewType == DT_3D)
 	{
+		/* Make sure correct dice preview visible */
 		if (page_num == NUM_NONPREVIEW_PAGES + PI_DICE0 - 1)
 		{
 			if (bd3d.turn == 1)
