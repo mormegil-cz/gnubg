@@ -2309,6 +2309,48 @@ CommandSetExportCubeDisplayMissed ( char *sz ) {
 }
 
 extern void 
+CommandSetExportHTMLType ( char *sz ) {
+
+  if ( ! sz || ! *sz ) {
+    outputl ( _("You must specify a HTML type. "
+              "See 'help set export html type'.") );
+    return;
+  }
+
+  if ( exsExport.szHTMLType )       /* FIXME Should not free intil we know  */
+    free ( exsExport.szHTMLType );  /* it's a valid string */ 
+
+  sz = NextToken ( &sz );
+
+  if ( ! strcmp ( sz, "fibs2html" ) )
+    {
+     exsExport.szHTMLType = strdup ( sz );
+     exsExport.szHTMLExtension = "gif";
+    } 
+  else if ( ! strcmp ( sz, "bbs" ) )
+    {
+     exsExport.szHTMLType = strdup ( sz );
+     exsExport.szHTMLExtension = "gif";
+    } 
+  else if ( ! strcmp ( sz, "gnu" ) )
+    {
+     exsExport.szHTMLType = strdup ( sz );
+     exsExport.szHTMLExtension = "png";
+    } 
+  else
+    {
+     outputf ( _("unknown board type\n") );
+     return;
+    }
+
+  outputf ( _("HTML export type is now: \n"
+            "%s\n"), 
+            exsExport.szHTMLType );
+
+}
+
+
+extern void 
 CommandSetExportHTMLPictureURL ( char *sz ) {
 
   if ( ! sz || ! *sz ) {

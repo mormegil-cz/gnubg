@@ -1371,11 +1371,15 @@ CommandShowExport ( char *sz ) {
 
   outputl ( _("\nHTML options:\n") );
 
+  outputf ( _("- HTML export type used in export\n"
+            "\t%s\n"),
+            exsExport.szHTMLType ? exsExport.szHTMLType :
+            _("not defined") );
+
   outputf ( _("- URL to pictures used in export\n"
             "\t%s\n"),
             exsExport.szHTMLPictureURL ? exsExport.szHTMLPictureURL :
             _("not defined") );
-
 
   outputl ( "\n" );
 

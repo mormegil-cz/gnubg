@@ -3233,8 +3233,8 @@ extern void CommandExportGameHtml( char *sz ) {
     }
 
     ExportGameHTML( pf, plGame,
-                     exsExport.szHTMLPictureURL, "png", 
-                    "gnu", 
+                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension, 
+                    exsExport.szHTMLType, 
                     aszColorNameGNU,
                     getGameNumber ( plGame ), FALSE, 
                     NULL );
@@ -3346,8 +3346,8 @@ extern void CommandExportMatchHtml( char *sz ) {
       }
 
       ExportGameHTML ( pf, pl->p, 
-                       exsExport.szHTMLPictureURL, "png",
-                       "gnu", 
+                       exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
+                       exsExport.szHTMLType, 
                        aszColorNameGNU,
                        i, i == nGames - 1,
                        aszLinks );
@@ -3400,13 +3400,13 @@ extern void CommandExportPositionHtml( char *sz ) {
                       getMoveNumber ( plGame, pmr ) - 1 );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
-                    exsExport.szHTMLPictureURL, "png",
-                    "gnu" );
+                    exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
+                    exsExport.szHTMLType );
 
     if( pmr )
       HTMLAnalysis ( pf, &ms, pmr,
-                     exsExport.szHTMLPictureURL, "png",
-                     "gnu" );
+                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
+                     exsExport.szHTMLType );
     
     HTMLEpilogue ( pf, &ms, NULL );
 
