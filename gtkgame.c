@@ -5050,8 +5050,8 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 
   prw->rcRollout.fStopOnSTD = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
                                             prw->prwGeneral->pwDoSTDStop));
-  prw->rcRollout.nMinimumGames = (unsigned int) gtk_spin_button_get_value (GTK_SPIN_BUTTON (prw->prwGeneral->pwMinGames));
-  prw->rcRollout.rStdLimit = gtk_spin_button_get_value (GTK_SPIN_BUTTON (prw->prwGeneral->pwMaxError));
+  prw->rcRollout.nMinimumGames = (unsigned int) gtk_spin_button_get_value_as_int (GTK_SPIN_BUTTON (prw->prwGeneral->pwMinGames));
+  prw->rcRollout.rStdLimit = gtk_spin_button_get_value_as_float (GTK_SPIN_BUTTON (prw->prwGeneral->pwMaxError));
 
   /* get all the evaluations out of the widgets */
   for (i = 0; i < 4; ++i) {

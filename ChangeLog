@@ -1,3 +1,8 @@
+Mon Jun 24 00:03 GMT 2003 Jim Segrave jes@jes-2.demon.nl
+
+	* Use deprecated gtk_spin_button_get_value_as_float, for gtk1.2
+	  compatibility
+
 Mon Jun 23 21:31 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
 	* allow terminating rollouts early if all the standard errors are
