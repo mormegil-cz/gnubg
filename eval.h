@@ -210,4 +210,8 @@ eq2mwc ( float rEq, cubeinfo *ci );
 extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner, 
 			 int fMove );
 
+extern float eq2ceq ( float rEq, 
+		      float rTakePoint0, float rTakePoint1,
+		      int fCenteredCube);
+
 #endif
