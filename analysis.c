@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -35,6 +36,19 @@
 #ifndef HUGE_VALF
 #define HUGE_VALF (-1e38)
 #endif
+
+extern int
+StatGame ( list *plGame, statcontext *pscGame );
+
+extern void
+DumpStatcontext ( statcontext *psc );
+
+extern void
+IniStatcontext ( statcontext *psc );
+
+extern void
+AddStatcontext ( statcontext *pscA, statcontext *pscB );
+
 
 static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 			   cubeinfo *pci, int fFirstMove ) {
@@ -73,7 +87,7 @@ static void
 AnalyzeGame ( list *plGame ) {
 
     list *pl;
-    moverecord *pmr;
+    moverecord *pmr, *pmrPrev;
     int i = 0, nCube = 1, anBoard[ 2 ][ 25 ];
     int fCrawfordLocal = fCrawford, fPostCrawfordLocal = fPostCrawford,
 	fJacobyLocal = fJacoby, fBeaversLocal = fBeavers,
@@ -162,7 +176,7 @@ AnalyzeGame ( list *plGame ) {
           float arDouble[ 4 ];
 
           if ( GetDPEq ( NULL, NULL, &ci ) ) {
-
+            
             if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
                                            &ecEval, ecEval.nPlies ) < 0 ) 
               return;
@@ -286,22 +300,60 @@ AnalyzeGame ( list *plGame ) {
 #if DEBUG_ANALYSIS
 	sprintf( sz, " Doubles => %d", nCube <<= 1 );
 #endif
-	fCubeOwner = ! fPlayer;
-	
+        
+        nCube <<= 1;
+        fCubeOwner = ! fPlayer;
+
         break;
       case MOVE_TAKE:
-        /* Don't store evaluation since it's stored in the 
-           previous move, which we hope is a MOVE_DOUBLE */
-#if DEBUG_ANALYSIS
-        strcpy( sz, " Takes" ); /* FIXME beavers? */
-#endif
+
+        /* Check if the previous move was a MOVE_DOUBLE */
+
+        pmrPrev = pl->plPrev->p;
+
+        if ( pmrPrev->mt == MOVE_DOUBLE ) {
+
+          /* copy evaluation from the previous MOVE_DOUBLE */
+
+          pmr->d.etDouble = pmrPrev->d.etDouble;
+          pmr->d.esDouble.ec = pmrPrev->d.esDouble.ec;
+          for ( j = 0; j < 4; j++ ) 
+            pmr->d.arDouble[ j ] = - pmrPrev->d.arDouble[ j ];
+
+        } 
+        else {
+
+          /* we have to perform the evaluation */
+
+          assert ( FALSE ); /* FIXME: could this ever happen??? */
+
+        }
+
         break;
       case MOVE_DROP:
-	  /* Don't store evaluation since it's stored in the 
-           previous move, which we hope is a MOVE_DOUBLE */
-#if DEBUG_ANALYSIS
-        strcpy( sz, " Drops\n" );
-#endif
+
+        /* Check if the previous move was a MOVE_DOUBLE */
+
+        pmrPrev = pl->plPrev->p;
+
+        if ( pmrPrev->mt == MOVE_DOUBLE ) {
+
+          /* copy evaluation from the previous MOVE_DOUBLE */
+
+          pmr->d.etDouble = pmrPrev->d.etDouble;
+          pmr->d.esDouble.ec = pmrPrev->d.esDouble.ec;
+          for ( j = 0; j < 4; j++ ) 
+            pmr->d.arDouble[ j ] = - pmrPrev->d.arDouble[ j ];
+
+        } 
+        else {
+
+          /* we have to perform the evaluation */
+
+          assert ( FALSE ); /* FIXME: could this ever happen??? */
+
+        }
+
         anScore[ ( i + 1 ) & 1 ] += nCube / 2;
         break;
       case MOVE_RESIGN:
@@ -434,3 +486,759 @@ extern void CommandAnalyseSession( char *sz ) {
 
     CommandAnalyseMatch( sz );
 }
+
+
+extern void
+CommandShowStatistics ( char *sz ) {
+
+  /* 
+   * FIXME: change to `show statistics game' 
+   *        and       `show statistics match' 
+   */
+     
+
+  list *pl;
+  int nGames, fCompleteAnalysis, i;
+  statcontext *pscStatGames, *pscStatTotal, *psc;
+
+  ProgressStart( "Collecting statistics..." );
+
+  /* find number of games */
+
+  for ( nGames = 1, pl = lMatch.plNext; pl != &lMatch; nGames++ )
+     pl = pl->plNext;
+
+  printf ("nGames = %i\n", nGames );
+
+
+  psc = pscStatGames =
+    (statcontext *) malloc ( nGames * sizeof (statcontext) );
+  pscStatTotal =
+    (statcontext *) malloc ( sizeof (statcontext) );
+
+  fCompleteAnalysis = TRUE;
+
+  IniStatcontext ( pscStatTotal );
+  
+  for ( i = 0, pl = lMatch.plNext; pl != &lMatch;
+        i++, pl = pl->plNext, psc++ ) {   
+
+    IniStatcontext ( psc );
+
+    fCompleteAnalysis =
+      fCompleteAnalysis && StatGame( pl->p, psc );
+
+    AddStatcontext ( psc, pscStatTotal );
+
+    printf ( "Statistics for game no. %d\n\n", i );
+    DumpStatcontext ( psc );
+
+  }
+
+  /* FIXME: write warning for ! fCompleteAnalysis */
+
+  printf ( "Statistics for all games\n\n" );
+  DumpStatcontext ( pscStatTotal );
+
+  ProgressEnd();
+
+  free ( pscStatGames );
+  free ( pscStatTotal );
+
+}
+
+
+extern void
+IniStatcontext ( statcontext *psc ) {
+
+  /* Initialize statcontext with all zeroes */
+
+  int i, j;
+
+  for ( i = 0; i < 2; i++ ) {
+
+    psc->anUnforcedMoves[ i ] = 0;
+    psc->anTotalMoves[ i ] = 0;
+    
+    psc->anTotalCube[ i ] = 0;
+    psc->anDouble[ i ] = 0;
+    psc->anTake[ i ] = 0;
+    psc->anPass[ i ] = 0;
+
+    for ( j = 0; j <= SKILL_VERYGOOD; j++ )
+      psc->anMoves[ i ][ j ] = 0;
+
+    for ( j = 0; j <= LUCK_VERYGOOD; j++ )
+      psc->anLuck[ i ][ j ] = 0;
+
+    psc->anCubeMissedDoubleDP [ i ] = 0;
+    psc->anCubeMissedDoubleTG [ i ] = 0;
+    psc->anCubeWrongDoubleDP [ i ] = 0;
+    psc->anCubeWrongDoubleTG [ i ] = 0;
+    psc->anCubeWrongTake [ i ] = 0;
+    psc->anCubeWrongPass [ i ] = 0;
+
+    for ( j = 0; j < 2; j++ ) {
+
+      psc->arErrorCheckerplay [ i ][ j ] = 0.0;
+      psc->arErrorMissedDoubleDP [ i ][ j ] = 0.0;
+      psc->arErrorMissedDoubleTG [ i ][ j ] = 0.0;
+      psc->arErrorWrongDoubleDP [ i ][ j ] = 0.0;
+      psc->arErrorWrongDoubleTG [ i ][ j ] = 0.0;
+      psc->arErrorWrongTake[ i ][ j ] = 0.0;
+      psc->arErrorWrongPass[ i ][ j ] = 0.0;
+      psc->arLuck[ i ][ j ] = 0.0;
+
+    }
+
+  }
+
+}
+
+
+extern void
+AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
+
+  /* pscB = pscB + pscA */
+
+  int i, j;
+
+  for ( i = 0; i < 2; i++ ) {
+
+    pscB->anUnforcedMoves[ i ] += pscA->anUnforcedMoves[ i ];
+    pscB->anTotalMoves[ i ] += pscA->anTotalMoves[ i ];
+    
+    pscB->anTotalCube[ i ] += pscA->anTotalCube[ i ];
+    pscB->anDouble[ i ] += pscA->anDouble[ i ];
+    pscB->anTake[ i ] += pscA->anTake[ i ];
+    pscB->anPass[ i ] += pscA->anPass[ i ];
+
+    for ( j = 0; j <= SKILL_VERYGOOD; j++ )
+      pscB->anMoves[ i ][ j ] += pscA->anMoves[ i ][ j ];
+
+    for ( j = 0; j <= LUCK_VERYGOOD; j++ )
+      pscB->anLuck[ i ][ j ] += pscA->anLuck[ i ][ j ];
+
+    pscB->anCubeMissedDoubleDP [ i ] += pscA->anCubeMissedDoubleDP [ i ];
+    pscB->anCubeMissedDoubleTG [ i ] += pscA->anCubeMissedDoubleTG [ i ];
+    pscB->anCubeWrongDoubleDP [ i ] += pscA->anCubeWrongDoubleDP [ i ];
+    pscB->anCubeWrongDoubleTG [ i ] += pscA->anCubeWrongDoubleTG [ i ];
+    pscB->anCubeWrongTake [ i ] += pscA->anCubeWrongTake [ i ];
+    pscB->anCubeWrongPass [ i ] += pscA->anCubeWrongPass [ i ];
+
+    for ( j = 0; j < 2; j++ ) {
+
+      pscB->arErrorCheckerplay [ i ][ j ] +=
+        pscA->arErrorCheckerplay[ i ][ j ];
+      pscB->arErrorMissedDoubleDP [ i ][ j ] +=
+        pscA->arErrorMissedDoubleDP[ i ][ j ];
+      pscB->arErrorMissedDoubleTG [ i ][ j ] +=
+        pscA->arErrorMissedDoubleTG[ i ][ j ];
+      pscB->arErrorWrongDoubleDP [ i ][ j ] +=
+        pscA->arErrorWrongDoubleDP[ i ][ j ];
+      pscB->arErrorWrongDoubleTG [ i ][ j ] +=
+        pscA->arErrorWrongDoubleTG[ i ][ j ];
+      pscB->arErrorWrongTake [ i ][ j ] +=
+        pscA->arErrorWrongTake[ i ][ j ];
+      pscB->arErrorWrongPass [ i ][ j ] +=
+        pscA->arErrorWrongPass [ i ][ j ];
+      pscB->arLuck [ i ][ j ] +=
+        pscA->arLuck [ i ][ j ];
+
+    }
+
+  }
+
+}
+
+
+extern int
+StatGame ( list *plGame, statcontext *pscGame ) {
+
+  /* Gather statistics about this game */
+
+  /* FIXME: move threshold to struct */
+
+#define THRS_LUCK_VERYGOOD 0.5
+#define THRS_LUCK_GOOD     0.25
+#define THRS_LUCK_BAD     -0.25
+#define THRS_LUCK_VERYBAD -0.50
+
+#define THRS_SKILL_VERYGOOD    0.005
+#define THRS_SKILL_GOOD        0.010
+#define THRS_SKILL_INTERESTING 0.020
+#define THRS_SKILL_NONE        0.030
+#define THRS_SKILL_DOUBTFUL    0.040
+#define THRS_SKILL_BAD         0.080
+
+
+  list *pl;
+  moverecord *pmr;
+
+  float rLuck, rND, rDT, rDP, rError, rErrorMWC;
+
+  int i = 0, nCube = 1, anBoard[ 2 ][ 25 ];
+  int fCrawfordLocal = fCrawford, fPostCrawfordLocal = fPostCrawford,
+    fJacobyLocal = fJacoby, fBeaversLocal = fBeavers,
+    nMatchToLocal = nMatchTo;
+  int anScore[ 2 ];
+  int fCubeOwner = -1, fPlayer = -1;
+  int anDice[ 2 ], j;
+  cubeinfo ci;
+  int fWinner, nPoints;
+
+  lucktype lt;
+  skilltype st;
+
+  int fComplete = 1;
+
+  IniStatcontext ( pscGame );
+  
+  for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
+    pmr = pl->p;
+
+    Progress();
+
+    switch( pmr->mt ) {
+    case MOVE_NORMAL:
+
+      fPlayer = pmr->n.fPlayer;
+
+      /*
+       * cube action statistics 
+       */
+
+
+      if ( pmr->n.etDouble != EVAL_NONE ) {
+
+        rND = pmr->n.arDouble[ 1 ];
+        rDT = pmr->n.arDouble[ 2 ];
+        rDP = pmr->n.arDouble[ 3 ];
+
+        pscGame->anTotalCube[ fPlayer ]++;
+
+        if ( rDP >= rND && rDT >= rND ) {
+
+          /* it was a double */
+
+          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+			anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
+          /* error for not doubling */
+
+          if ( rDT >= rDP )
+            rError = rDP - rND; /* pass */
+          else
+            rError = rDT - rND; /* take */
+
+          rErrorMWC = 
+            ( nMatchToLocal ) ?
+            eq2mwc ( rError, &ci ) - eq2mwc ( 0.0f, &ci ) :
+            nCube * rError;
+
+          if ( rND >= 0.950 ) {
+
+            /* around too good point */
+
+            pscGame->anCubeMissedDoubleTG[ fPlayer ]++;
+            pscGame->arErrorMissedDoubleTG[ fPlayer ][ 0 ] += rError;
+            pscGame->arErrorMissedDoubleTG[ fPlayer ][ 1 ] +=
+              rErrorMWC;
+
+          }
+          else {
+
+            /* around double point */
+
+            pscGame->anCubeMissedDoubleDP[ fPlayer ]++;
+            pscGame->arErrorMissedDoubleDP[ fPlayer ][ 0 ] += rError;
+            pscGame->arErrorMissedDoubleDP[ fPlayer ][ 1 ] +=
+              rErrorMWC;
+
+          }
+
+        } /* it was a double */
+
+      } /* cube action stat */
+
+
+      /* 
+       * checkerplay statistics 
+       */
+
+
+      pscGame->anTotalMoves[ fPlayer ]++;
+
+      if ( pmr->n.ml.amMoves ) {
+
+        if ( pmr->n.ml.cMoves > 1 ) {
+
+          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+                        anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
+          pscGame->anUnforcedMoves[ fPlayer ]++;
+
+          rError =
+            pmr->n.ml.amMoves[ 0 ].rScore - 
+            pmr->n.ml.amMoves[ pmr->n.iMove ].rScore;
+
+          rErrorMWC =
+            ( nMatchToLocal ) ?
+            eq2mwc ( pmr->n.ml.amMoves[ 0 ].rScore, &ci ) - 
+            eq2mwc ( pmr->n.ml.amMoves[ pmr->n.iMove ].rScore, &ci ) :
+            nCube * rError;
+
+          if ( rError < THRS_SKILL_VERYGOOD )
+            st = SKILL_VERYGOOD;
+          else if ( rError < THRS_SKILL_GOOD )
+            st = SKILL_GOOD;
+          else if ( rError < THRS_SKILL_INTERESTING )
+            st = SKILL_INTERESTING;
+          else if ( rError < THRS_SKILL_NONE )
+            st = SKILL_NONE;
+          else if ( rError < THRS_SKILL_DOUBTFUL )
+            st = SKILL_DOUBTFUL;
+          else if ( rError < THRS_SKILL_BAD )
+            st = SKILL_BAD;
+          else
+            st = SKILL_VERYBAD;
+
+          pscGame->anMoves[ fPlayer ][ st ]++;
+
+          pscGame->arErrorCheckerplay[ fPlayer ][ 0 ] += rError;
+          pscGame->arErrorCheckerplay[ fPlayer ][ 1 ] += rErrorMWC;
+
+        }
+
+      } 
+      else {
+
+        fComplete = 0;
+
+      } /* checkerplay stat */
+
+
+      /* Luck statistics */
+
+      rLuck = pmr->n.rLuck;
+
+      if ( rLuck != -HUGE_VALF ) {
+
+        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+		      anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
+        pscGame->arLuck[ fPlayer ][ 0 ] += rLuck;
+        pscGame->arLuck[ fPlayer ][ 1 ] +=
+          ( nMatchToLocal ) ?
+          eq2mwc ( rLuck, &ci ) - eq2mwc ( 0.0f, &ci ) :
+          nCube * rLuck;
+
+
+        if ( rLuck >= THRS_LUCK_VERYGOOD )
+          lt = LUCK_VERYGOOD;
+        else if ( rLuck >= THRS_LUCK_GOOD )
+          lt = LUCK_GOOD;
+        else if ( rLuck >= THRS_LUCK_BAD )
+          lt = LUCK_NONE;
+        else if ( rLuck >= THRS_LUCK_VERYBAD )
+          lt = LUCK_BAD;
+        else
+          lt = LUCK_VERYBAD;
+
+        pscGame->anLuck[ fPlayer ][ lt ]++;
+
+      } /* luck stat */
+
+      break; /* MOVE_NORMAL */
+
+    case MOVE_DOUBLE:
+
+      fPlayer = pmr->d.fPlayer;
+
+      /*
+       * cube action statistics 
+       */
+
+      if ( pmr->d.etDouble != EVAL_NONE ) {
+
+        rND = pmr->d.arDouble[ 1 ];
+        rDT = pmr->d.arDouble[ 2 ];
+        rDP = pmr->d.arDouble[ 3 ];
+
+        pscGame->anTotalCube[ fPlayer ]++;
+        pscGame->anDouble[ fPlayer ]++;
+
+        if ( rDP < rND && rDT < rND ) {
+
+          /* it was not a double */
+
+          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+			anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
+          /* error for doubling */
+
+          if ( rND >= rDP )
+            rError = rND - rDP; /* pass */
+          else
+            rError = rND - rDT; /* take */
+
+          rErrorMWC = 
+            ( nMatchToLocal ) ?
+            eq2mwc ( rError, &ci ) - eq2mwc ( 0.0f, &ci ) :
+            nCube * rError;
+
+
+          if ( rND >= 0.950 ) {
+
+            /* around too good point */
+
+            pscGame->anCubeWrongDoubleTG[ fPlayer ]++;
+            pscGame->arErrorWrongDoubleTG[ fPlayer ][ 0 ] += rError;
+            pscGame->arErrorWrongDoubleTG[ fPlayer ][ 1 ] +=
+              rErrorMWC;
+
+          }
+          else {
+
+            /* around double point */
+
+            pscGame->anCubeWrongDoubleDP[ fPlayer ]++;
+            pscGame->arErrorWrongDoubleDP[ fPlayer ][ 0 ] += rError;
+            pscGame->arErrorWrongDoubleDP[ fPlayer ][ 1 ] +=
+              rErrorMWC;
+
+          }
+
+        } /* it was not a double */
+
+      } 
+      else 
+        fComplete = 0;
+
+      fCubeOwner = ! fPlayer;
+
+      break; /* MOVE_DOUBLE */
+
+    case MOVE_TAKE:
+
+      fPlayer = pmr->d.fPlayer;
+
+      /*
+       * cube action statistics 
+       */
+
+      if ( pmr->d.etDouble != EVAL_NONE ) {
+
+        rND = pmr->d.arDouble[ 1 ];
+        rDT = pmr->d.arDouble[ 2 ];
+        rDP = pmr->d.arDouble[ 3 ];
+
+        pscGame->anTotalCube[ fPlayer ]++;
+        pscGame->anTake[ fPlayer ]++;
+
+        if ( rDP > rDT ) {
+
+          /* it was not a take */
+
+          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+			anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
+          /* error for doubling */
+
+          rError = rDP - rDT; /* pass */
+
+          rErrorMWC = 
+            ( nMatchToLocal ) ?
+            eq2mwc ( rError, &ci ) - eq2mwc ( 0.0f, &ci ) :
+            nCube * rError;
+
+          pscGame->anCubeWrongTake[ fPlayer ]++;
+          pscGame->arErrorWrongTake[ fPlayer ][ 0 ] += rError;
+          pscGame->arErrorWrongTake[ fPlayer ][ 1 ] += rErrorMWC;
+
+        } /* it was not a take */
+
+      }
+      else
+        fComplete = 0;
+
+      break; /* MOVE_TAKE */
+
+
+    case MOVE_DROP:
+
+      fPlayer = pmr->d.fPlayer;
+
+      /*
+       * cube action statistics 
+       */
+
+      if ( pmr->d.etDouble != EVAL_NONE ) {
+
+        rND = pmr->d.arDouble[ 1 ];
+        rDT = pmr->d.arDouble[ 2 ];
+        rDP = pmr->d.arDouble[ 3 ];
+
+        pscGame->anTotalCube[ fPlayer ]++;
+        pscGame->anTake[ fPlayer ]++;
+
+        if ( rDP < rDT ) {
+
+          /* it was a take */
+
+          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+			anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
+          /* error for dropping */
+
+          rError = rDT - rDP;
+
+          rErrorMWC = 
+            ( nMatchToLocal ) ?
+            eq2mwc ( rError, &ci ) - eq2mwc ( 0.0f, &ci ) :
+            nCube * rError;
+
+          pscGame->anCubeWrongPass[ fPlayer ]++;
+          pscGame->arErrorWrongPass[ fPlayer ][ 0 ] += rError;
+          pscGame->arErrorWrongPass[ fPlayer ][ 1 ] += rErrorMWC;
+
+        } /* it was a take */
+
+      }
+      else
+        fComplete = 0;
+
+      anScore[ ( i + 1 ) & 1 ] += nCube / 2;
+
+      break; /* MOVE_DROP */
+
+    case MOVE_RESIGN:
+
+      /* fixme */
+
+      break;
+
+    case MOVE_GAMEINFO:
+
+        fWinner = pmr->g.fWinner;
+        nPoints = pmr->g.nPoints;
+
+        anScore[ 0 ] = pmr->g.anScore[ 0 ];
+        anScore[ 1 ] = pmr->g.anScore[ 1 ];
+        fCrawfordLocal = pmr->g.fCrawfordGame;
+        nMatchToLocal = pmr->g.nMatch;
+
+        if ( ! fCrawfordLocal &&
+             ( nMatchToLocal - anScore[ 0 ] == 1 ||
+               nMatchToLocal - anScore[ 1 ] == 1 ) )
+          fPostCrawfordLocal = 1;
+
+        break;
+
+    case MOVE_SETBOARD:
+
+      if( fMove < 0 )
+        fTurn = fMove = 0;
+
+      break;
+
+      /* FIXME: perhaps save luck stats??? */
+
+    case MOVE_SETDICE:
+
+      anDice[ 0 ] = pmr->sd.anDice[ 0 ];
+      anDice[ 1 ] = pmr->sd.anDice[ 1 ];
+      fPlayer = pmr->sd.fPlayer;
+      fDoubled = FALSE;
+
+      /* FIXME: perhaps save luck stats??? */
+
+      break;
+      
+    case MOVE_SETCUBEVAL:
+      if( fPlayer < 0 )
+        fPlayer = 0;
+	  
+      nCube = pmr->scv.nCube;
+      fDoubled = FALSE;
+
+      /* FIXME: perhaps save luck stats??? */
+
+      break;
+	  
+    case MOVE_SETCUBEPOS:
+      if( fPlayer < 0 )
+        fPlayer = 0;
+	  
+      fCubeOwner = pmr->scp.fCubeOwner;
+      fDoubled = FALSE;
+
+      /* FIXME: perhaps save luck stats??? */
+
+      break;
+    
+    } /* switch */
+      
+    if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) i++;
+
+    i++;
+  } /* move */
+
+  if ( fWinner != -1 )
+    anScore[ fWinner ] += nPoints;
+
+
+  return fComplete;
+
+}
+
+extern void
+DumpStatcontext ( statcontext *psc ) {
+
+  int i;
+
+#if 0
+
+  /* dump the contents of statcontext to stdin,
+     mainly for debugging */
+
+#define PAN( a, b )   printf ( "%s[%1i] = %i\n", # a, b, a [ b ] )
+#define PAR( a, b )   printf ( "%s[%1i] = %f\n", # a, b, a [ b ] )
+#define PAAN( a, b, c )   printf ( "%s[%1i,%1i] = %i\n", # a, b, c, a [ b ][ c ] )
+#define PAAR( a, b, c )   printf ( "%s[%1i,%1i] = %f\n", # a, b, c, a [ b ][ c ] )
+  
+  int j;
+
+  for ( i = 0; i < 2; i++ ) {
+
+    
+    PAN ( psc->anUnforcedMoves, i );
+    PAN ( psc->anTotalMoves, i );
+    
+    PAN ( psc->anTotalCube, i );
+    PAN ( psc->anDouble, i );
+    PAN ( psc->anTake, i );
+    PAN ( psc->anPass, i );
+
+    for ( j = 0; j <= SKILL_VERYGOOD; j++ )
+      PAAN ( psc->anMoves, i, j );
+
+    for ( j = 0; j <= LUCK_VERYGOOD; j++ )
+      PAAN ( psc->anLuck, i, j );
+
+    PAN ( psc->anCubeMissedDoubleDP, i );
+    PAN ( psc->anCubeMissedDoubleTG, i );
+    PAN ( psc->anCubeWrongDoubleDP, i );
+    PAN ( psc->anCubeWrongDoubleTG, i );
+    PAN ( psc->anCubeWrongTake, i );
+    PAN ( psc->anCubeWrongPass, i );
+
+    for ( j = 0; j < 2; j++ ) {
+
+      PAAR ( psc->arErrorCheckerplay, i, j );
+      PAAR ( psc->arErrorMissedDoubleDP, i, j );
+      PAAR ( psc->arErrorMissedDoubleTG, i, j );
+      PAAR ( psc->arErrorWrongDoubleDP, i, j );
+      PAAR ( psc->arErrorWrongDoubleTG, i, j );
+      PAAR ( psc->arErrorWrongTake, i, j );
+      PAAR ( psc->arErrorWrongPass, i, j );
+      PAAR ( psc->arLuck, i, j );
+
+    }
+
+  }
+
+#endif
+
+  /* nice human readable dump */
+
+  /* FIXME: make GTK+ version */
+  /* FIXME: make tty output shorter */
+  /* FIXME: the code below is only for match play */
+  /* FIXME: honour fOutputMWC etc. */
+  /* FIXME: calculate ratings (ET, World class, etc.) */
+
+  for ( i = 0; i < 2; i++ ) {
+  
+    printf ( "Player %s\n\n"
+             "Checkerplay statistics:\n\n"
+             "Total moves:               %3d\n"
+             "Unforced moves:            %3d\n\n"
+             "Moves rated perfect        %3d\n"
+             "Moves rated very good      %3d\n"
+             "Moves rated good           %3d\n"
+             "Moves rated small error    %3d\n"
+             "Moves rated error          %3d\n"
+             "Moves rated blunder        %3d\n"
+             "Moves rated Zzz Zzz        %3d\n\n"
+             "Error rate (total)         %+6.3f (%+7.3f%%)\n"
+             "Error rate (pr. move)      %+6.3f (%+7.3f%%)\n\n"
+             "Super-jokers               %3d\n"
+             "Jokers                     %3d\n"
+             "Average                    %3d\n"
+             "Anti-jokers                %3d\n"
+             "Super anti-jokers          %3d\n\n"
+             "Luck rate (total)          %+6.3f (%+7.3f%%)\n"
+             "Luck rate (pr. move)       %+6.3f (%+7.3f%%)\n\n"
+             "Cube decision statistics:\n\n"
+             "Total cube decisions       %3d\n"
+             "Doubles                    %3d\n"
+             "Takes                      %3d\n"
+             "Pass                       %3d\n\n"
+             "Missed doubles around DP   %3d (%+6.3f (%+7.3f%%)\n"
+             "Missed doubles around TG   %3d (%+6.3f (%+7.3f%%)\n"
+             "Wrong doubles around DP    %3d (%+6.3f (%+7.3f%%)\n"
+             "Wrong doubles around TG    %3d (%+6.3f (%+7.3f%%)\n"
+             "Wrong takes                %3d (%+6.3f (%+7.3f%%)\n"
+             "Wrong passes               %3d (%+6.3f (%+7.3f%%)\n\n"
+             "%s played %s!\n\n",
+             ap[ i ].szName,
+             psc->anTotalMoves[ i ], psc->anUnforcedMoves[ i ],
+             psc->anMoves[ i ][ SKILL_VERYGOOD ],
+             psc->anMoves[ i ][ SKILL_GOOD ],
+             psc->anMoves[ i ][ SKILL_INTERESTING ],
+             psc->anMoves[ i ][ SKILL_NONE ],
+             psc->anMoves[ i ][ SKILL_DOUBTFUL ],
+             psc->anMoves[ i ][ SKILL_BAD ],
+             psc->anMoves[ i ][ SKILL_VERYBAD ],
+             psc->arErrorCheckerplay[ i ][ 0 ],
+             psc->arErrorCheckerplay[ i ][ 1 ] * 100.0f,
+             psc->arErrorCheckerplay[ i ][ 0 ] /
+                psc->anUnforcedMoves[ i ],
+             psc->arErrorCheckerplay[ i ][ 1 ] * 100.0f /
+                psc->anUnforcedMoves[ i ],
+             psc->anLuck[ i ][ LUCK_VERYGOOD ],
+             psc->anLuck[ i ][ LUCK_GOOD ],
+             psc->anLuck[ i ][ LUCK_NONE ],
+             psc->anLuck[ i ][ LUCK_BAD ],
+             psc->anLuck[ i ][ LUCK_VERYBAD ],
+             psc->arLuck[ i ][ 0 ], psc->arLuck[ i ][ 1 ] * 100.0f,
+             psc->arLuck[ i ][ 0 ] / psc->anTotalMoves[ i ],
+             psc->arLuck[ i ][ 1 ] * 100.0f / psc->anTotalMoves[ i ],
+             psc->anTotalCube[ i ], psc->anDouble[ i ], 
+             psc->anTake[ i ], psc->anPass[ i ], 
+             psc->anCubeMissedDoubleDP[ i ],
+             psc->arErrorMissedDoubleDP[ i ][ 0 ],
+             psc->arErrorMissedDoubleDP[ i ][ 1 ] * 100.0f,
+             psc->anCubeMissedDoubleTG[ i ],
+             psc->arErrorMissedDoubleTG[ i ][ 0 ],
+             psc->arErrorMissedDoubleTG[ i ][ 1 ] * 100.0f,
+             psc->anCubeWrongDoubleDP[ i ],
+             psc->arErrorWrongDoubleDP[ i ][ 0 ],
+             psc->arErrorWrongDoubleDP[ i ][ 1 ] * 100.0f,
+             psc->anCubeWrongDoubleTG[ i ],
+             psc->arErrorWrongDoubleTG[ i ][ 0 ],
+             psc->arErrorWrongDoubleTG[ i ][ 1 ] * 100.0f,
+             psc->anCubeWrongTake[ i ],
+             psc->arErrorWrongTake[ i ][ 0 ],
+             psc->arErrorWrongTake[ i ][ 1 ] * 100.0f,
+             psc->anCubeWrongPass[ i ],
+             psc->arErrorWrongPass[ i ][ 0 ],
+             psc->arErrorWrongPass[ i ][ 1 ] * 100.0f,
+             ap[ i ].szName,
+             ( ap[ i ].pt == PLAYER_GNU ) ?
+             "Extraterrestrial" : "as a rhino" );
+  }
+
+}
+

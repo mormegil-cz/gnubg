@@ -1,3 +1,18 @@
+Fri Apr 13 22:15:56 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	* analysis.c (CommandShowStatistic, IniStatcontext,
+	AddStatcontext, DumpStatContext): New
+	functions. CommandShowStatistics calculate and show statistics
+	about checker play, cube decisions, and luck.  
+	* gnubg.c: New command `show statistics'.
+
+	* analysis.c (AnalyzeGame): bugfix: "Cube <<= 1" was commented out.
+	
+	* gnubg.c (real_main): pacify fussy compilers.
+	
+	* analysis.c (AnalyzeGame), play.c (CommandDrop, CommandTake):
+	store MOVE_{DROP,TAKE} evals in movedouble struct.
+
 Fri Apr 13 12:22:17 2001  Gary Wong  <gtw@research.att.com>
 
 	* sgf.c (WriteLuck, RestoreNode): Load and save luck analysis.
