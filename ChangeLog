@@ -1,3 +1,7 @@
+Tue Jun 15 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgamelist.c, gnubg.gtkrc: Fix font styles for gtk2 and style order
+
 Tue Jun 15 05:58:34 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* credits.sh, credits.c, AUTHORS: Fix Japanese translations

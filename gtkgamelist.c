@@ -39,16 +39,35 @@ static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
     ps->font = pf;
     gdk_font_ref( pf );
 }
+
+static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
+{
+	return gdk_font_equal(gtk_style_get_font(psOne), gtk_style_get_font(psTwo));
+}
+
+static void gtk_set_font(GtkStyle* psStyle, GtkStyle* psValue)
+{
+	gtk_style_set_font(psStyle, gtk_style_get_font(psValue));
+}
+
+#else
+
+static int gtk_compare_fonts(GtkStyle* psOne, GtkStyle* psTwo)
+{
+	return pango_font_description_equal(psOne->font_desc, psTwo->font_desc);
+}
+
+static void gtk_set_font(GtkStyle* psStyle, GtkStyle* psValue)
+{
+	psStyle->font_desc = pango_font_description_copy(psValue->font_desc);
+}
+
 #endif
 
 GtkWidget *pwGameList;
-GtkStyle *psGameList, *psCurrent, *psCubeErrors[3], *psChequerErrors[3], 
-  *psLucky[LUCK_VERYGOOD + 1], *psAnyErrors[3];
+GtkStyle *psGameList, *psCurrent, *psCubeErrors[3], *psChequerErrors[3], *psLucky[LUCK_VERYGOOD + 1];
 
 extern void SetAnnotation( moverecord *pmr );
-
-/* if we want to highlight both cube and chequer errors the same */
-int	mark_any_errors[3];
 
 typedef struct _gamelistrow {
     moverecord *apmr[ 2 ]; /* moverecord entries for each column */
@@ -176,11 +195,11 @@ void UpdateStyle(GtkStyle *psStyle, GtkStyle *psNew, GtkStyle *psDefault)
 	SetColourIfDifferent(psStyle->bg, psNew->bg, psDefault->bg);
 	SetColourIfDifferent(psStyle->base, psNew->base, psDefault->base);
 
-	if (!gdk_font_equal(gtk_style_get_font(psNew), gtk_style_get_font(psDefault)))
-		gtk_style_set_font(psStyle, gtk_style_get_font(psNew));
+	if (!gtk_compare_fonts(psNew, psDefault))
+		gtk_set_font(psStyle, psNew);
 }
 
-void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, int which)
+void GetStyleFromRCFile(GtkStyle** ppStyle, char* name)
 {	/* Note gtk 1.3 doesn't seem to have a nice way to do this... */
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	GtkStyle *psDefault, *psNew;
@@ -204,29 +223,16 @@ void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, int which)
 	/* Base new style on default for game list */
 	*ppStyle = gtk_style_copy(psGameList);
 	/* Make changes to fg+bg and copy to selected states */
-	if (memcmp(&psNew->fg[GTK_STATE_NORMAL], 
-		   &psDefault->fg[GTK_STATE_NORMAL], sizeof(GdkColor))) {
-	  if (which >= 0)
-	    mark_any_errors[which] = 1;
-
-	  memcpy(&(*ppStyle)->fg[GTK_STATE_NORMAL],  &psNew->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
-	}
-
+	if (memcmp(&psNew->fg[GTK_STATE_NORMAL], &psDefault->fg[GTK_STATE_NORMAL], sizeof(GdkColor)))
+		memcpy(&(*ppStyle)->fg[GTK_STATE_NORMAL], &psNew->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
 	memcpy(&(*ppStyle)->fg[GTK_STATE_SELECTED], &(*ppStyle)->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
 
-	if (memcmp(&psNew->base[GTK_STATE_NORMAL], &psDefault->base[GTK_STATE_NORMAL], sizeof(GdkColor))) {
-	  if (which >= 0)
-            mark_any_errors[which] = 1;
-	}
+	if (memcmp(&psNew->base[GTK_STATE_NORMAL], &psDefault->base[GTK_STATE_NORMAL], sizeof(GdkColor)))
 		memcpy(&(*ppStyle)->base[GTK_STATE_NORMAL], &psNew->base[GTK_STATE_NORMAL], sizeof(GdkColor));
 	memcpy(&(*ppStyle)->bg[GTK_STATE_SELECTED], &(*ppStyle)->base[GTK_STATE_NORMAL], sizeof(GdkColor));
 	/* Update the font if different */
-	if (!gdk_font_equal(gtk_style_get_font(psNew), gtk_style_get_font(psDefault))) {
-	  if (which >= 0)
-            mark_any_errors[which] = 1;
-
-		gtk_style_set_font(*ppStyle, gtk_style_get_font(psNew));
-	}
+	if (!gtk_compare_fonts(psNew, psDefault))
+		gtk_set_font(*ppStyle, psNew);
 
 	/* Remove useless widgets */
 	gtk_widget_destroy(dummy);
@@ -278,20 +284,16 @@ GtkWidget* GL_Create()
     psCurrent->fg[ GTK_STATE_SELECTED ] = psCurrent->fg[ GTK_STATE_NORMAL ] =
 	psGameList->bg[ GTK_STATE_NORMAL ];
 
-    GetStyleFromRCFile(&psCubeErrors[SKILL_VERYBAD], "cube-blunder", -1);
-    GetStyleFromRCFile(&psCubeErrors[SKILL_BAD], "cube-error", -1);
-    GetStyleFromRCFile(&psCubeErrors[SKILL_DOUBTFUL], "cube-doubtful", -1);
+    GetStyleFromRCFile(&psCubeErrors[SKILL_VERYBAD], "cube-blunder");
+    GetStyleFromRCFile(&psCubeErrors[SKILL_BAD], "cube-error");
+    GetStyleFromRCFile(&psCubeErrors[SKILL_DOUBTFUL], "cube-doubtful");
 
-    GetStyleFromRCFile(&psChequerErrors[SKILL_VERYBAD], "chequer-blunder", -1);
-    GetStyleFromRCFile(&psChequerErrors[SKILL_BAD], "chequer-error", -1);
-    GetStyleFromRCFile(&psChequerErrors[SKILL_DOUBTFUL], "chequer-doubtful", -1);
+    GetStyleFromRCFile(&psChequerErrors[SKILL_VERYBAD], "chequer-blunder");
+    GetStyleFromRCFile(&psChequerErrors[SKILL_BAD], "chequer-error");
+    GetStyleFromRCFile(&psChequerErrors[SKILL_DOUBTFUL], "chequer-doubtful");
 
-    GetStyleFromRCFile(&psLucky[LUCK_VERYBAD], "luck-bad", -1);
-    GetStyleFromRCFile(&psLucky[LUCK_VERYGOOD], "luck-good", -1);
-
-    GetStyleFromRCFile(&psAnyErrors[SKILL_VERYBAD], "any-blunder", SKILL_VERYBAD);
-    GetStyleFromRCFile(&psAnyErrors[SKILL_BAD], "any-error", SKILL_BAD);
-    GetStyleFromRCFile(&psAnyErrors[SKILL_DOUBTFUL], "any-doubtful", SKILL_DOUBTFUL);
+    GetStyleFromRCFile(&psLucky[LUCK_VERYBAD], "luck-bad");
+    GetStyleFromRCFile(&psLucky[LUCK_VERYGOOD], "luck-good");
 
     nMaxWidth = gdk_string_width( gtk_style_get_font( psCurrent ), _("99") );
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 0, nMaxWidth );
@@ -348,29 +350,20 @@ void SetCellColour(int row, int col, moverecord *pmr)
 		if (pmr->lt == LUCK_VERYBAD)
 			pStyle = psLucky[LUCK_VERYBAD];
 
-		if (pmr->n.stMove == SKILL_VERYBAD)
-			AddStyle(&pStyle, psChequerErrors[SKILL_VERYBAD]);
-		else if (pmr->n.stMove == SKILL_BAD)
-			AddStyle(&pStyle, psChequerErrors[SKILL_BAD]);
-		else if (pmr->n.stMove == SKILL_DOUBTFUL)
+		if (pmr->n.stMove == SKILL_DOUBTFUL)
 			AddStyle(&pStyle, psChequerErrors[SKILL_DOUBTFUL]);
-
-		if (pmr->stCube == SKILL_VERYBAD)
-			AddStyle(&pStyle, psCubeErrors[SKILL_VERYBAD]);
-		else if (pmr->stCube == SKILL_BAD)
-			AddStyle(&pStyle, psCubeErrors[SKILL_BAD]);
-		else if (pmr->stCube == SKILL_DOUBTFUL)
+		if (pmr->stCube == SKILL_DOUBTFUL)
 			AddStyle(&pStyle, psCubeErrors[SKILL_DOUBTFUL]);
 
-		if ((pmr->stCube == SKILL_VERYBAD) || 
-		    (pmr->n.stMove == SKILL_VERYBAD))
-			AddStyle(&pStyle, psAnyErrors[SKILL_VERYBAD]);
-		else if ((pmr->stCube == SKILL_BAD) ||
-			 (pmr->n.stMove == SKILL_BAD))
-			AddStyle(&pStyle, psAnyErrors[SKILL_BAD]);
-		else if ((pmr->stCube == SKILL_DOUBTFUL) || 
-			 (pmr->n.stMove == SKILL_DOUBTFUL)) 
-			AddStyle(&pStyle, psAnyErrors[SKILL_DOUBTFUL]);
+		if (pmr->n.stMove == SKILL_BAD)
+			AddStyle(&pStyle, psChequerErrors[SKILL_BAD]);
+		if (pmr->stCube == SKILL_BAD)
+			AddStyle(&pStyle, psCubeErrors[SKILL_BAD]);
+
+		if (pmr->n.stMove == SKILL_VERYBAD)
+			AddStyle(&pStyle, psChequerErrors[SKILL_VERYBAD]);
+		if (pmr->stCube == SKILL_VERYBAD)
+			AddStyle(&pStyle, psCubeErrors[SKILL_VERYBAD]);
 	}
 
 	if (!pStyle)

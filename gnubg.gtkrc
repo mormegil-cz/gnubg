@@ -89,7 +89,7 @@ widget_class "*" style "default"
 # Styles for moves in game list
 #
 # Each gamelist style can have a foreground (fg[NORMAL]),
-# background (base[NORMAL]) and font specified.
+# background (base[NORMAL]) and font (font_name for gtk 2) specified.
 # Note that multiple styles will be applied (E.g. if a move is
 # lucky and an error), if more than one style specifies the same
 # attribute then they will be shown in this order cube, chequer and luck
@@ -113,12 +113,10 @@ widget_class "*" style "default"
 #	{
 #	}
 #
-# if you simply want all blunders/errors/doubtful moves and cube
-# decisions marked, use the gamelist-any-blunder etc. Then if either
-# the cube or the chequer player is a blunder, the
-# gamelist-any-blunder settings will be used, otherwise if either is
-# an error, the error setting is used, etc. So you get the worst of
-# either type of mistake as the choice of settings
+#
+# If you want chequer and cube errors to appear the same just
+# set the styles to the same values (i.e. set the cube and chequer
+# styles the same for each of the 3 levels of error)
 
 style "gamelist-chequer-blunder" = "default"
 {
@@ -148,11 +146,17 @@ style "gamelist-cube-doubtful" = "default"
 
 style "gamelist-luck-bad" = "default"
 {
+# gtk 1
   font = "-*-tahoma-normal-i-normal-*-*-100-*-*-*-*-*-*"
+# gtk 2
+#  font_name = "Italic"
 }
 style "gamelist-luck-good" = "default"
 {
+# gtk 1
   font = "-*-tahoma-bold-r-normal-*-*-100-*-*-*-*-*-*"
+# gtk 2
+#  font_name = "Bold"
 }
 
 widget "*.gnubg-gamelist-chequer-blunder" style "gamelist-chequer-blunder"
@@ -165,12 +169,6 @@ widget "*.gnubg-gamelist-cube-doubtful" style "gamelist-cube-doubtful"
 
 widget "*.gnubg-gamelist-luck-good" style "gamelist-luck-good"
 widget "*.gnubg-gamelist-luck-bad" style "gamelist-luck-bad"
-
-# uncomment these to use the cube indications for all errors
-
-# widget "*.gnubg-gamelist-any-blunder" style "gamelist-cube-blunder"
-# widget "*.gnubg-gamelist-any-error" style "gamelist-cube-error"
-# widget "*.gnubg-gamelist-any-doubtful" style "gamelist-cube-doubtful"
 
 #
 # Styles for match equity table
