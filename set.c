@@ -1,3 +1,24 @@
+/*
+ * set.c
+ *
+ * by Gary Wong <gary@cs.arizona.edu>, 1999-2000.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ */
+
 #include "config.h"
 
 #include <stdio.h>
@@ -109,6 +130,23 @@ extern void CommandSetBoard( char *sz ) {
     /* FIXME check errors */
 
     ShowBoard();
+}
+
+extern void CommandSetCache( char *sz ) {
+
+    int n;
+
+    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+	puts( "You must specify the number of cache entries to use." );
+
+	return;
+    }
+
+    if( EvalCacheResize( n ) )
+	perror( "EvalCacheResize" );
+    else
+	printf( "The position cache has been sized to %d entr%s.\n", n,
+		n == 1 ? "y" : "ies" );
 }
 
 extern void CommandSetDice( char *sz ) {
@@ -332,6 +370,36 @@ extern void CommandSetRNGUser( char *sz ) {
     puts( "dynamic linking library needed for user RNG's." );
 #endif
 
+}
+
+extern void CommandSetScore( char *sz ) {
+
+    int n0, n1;
+
+    /* FIXME allow setting the score in `n-away' notation, e.g.
+     "set score -3 -4".  Also allow specifying Crawford here, e.g.
+    "set score crawford -3". */
+    
+    if( ( n0 = ParseNumber( &sz ) ) < 0 ||
+	( n1 = ParseNumber( &sz ) ) < 0 ) {
+	puts( "You must specify the score for both players -- try `help set "
+	      "score'." );
+	return;
+    }
+
+    if( nMatchTo && ( n0 >= nMatchTo || n1 >= nMatchTo ) ) {
+	printf( "Each player's score must be below %d point%s.\n", nMatchTo,
+		nMatchTo == 1 ? "" : "s" );
+	return;
+    }
+
+    anScore[ 0 ] = n0;
+    anScore[ 1 ] = n1;
+
+    fCrawford = ( n0 == nMatchTo - 1 ) || ( n1 == nMatchTo - 1 );
+    fPostCrawford = FALSE;
+    
+    CommandShowScore( NULL );
 }
 
 extern void CommandSetSeed( char *sz ) {

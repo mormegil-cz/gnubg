@@ -534,14 +534,12 @@ extern void CommandNewGame( char *sz ) {
 	   command to let the user be paranoid about shooting themselves in
 	   the foot. */
 
-	FreeGame( plGame );
-
 	/* The last game of the match should always be the current one. */
-	assert( lMatch.plPrev == plGame );
+	assert( lMatch.plPrev->p == plGame );
 
 	ListDelete( lMatch.plPrev );
 	
-	free( plGame );
+	FreeGame( plGame );
     }
     
     NewGame();
@@ -558,7 +556,7 @@ extern void CommandNewGame( char *sz ) {
 
 static void FreeMatch( void ) {
 
-    list *plMatch, *plGame;
+    list *plMatch;
 
     while( ( plMatch = lMatch.plNext ) != &lMatch ) {
 	FreeGame( plMatch->p );

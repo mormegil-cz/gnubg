@@ -31,6 +31,9 @@ static int aanPosition[ 28 ][ 3 ] = {
     { 51, 41, -7 }, { 99, 63, 6 }, { 99, 3, -6 }
 };
 
+static unsigned int nSeed = 1; /* for rand_r */
+#define RAND ( ( (unsigned int) rand_r( &nSeed ) ) & RAND_MAX )
+
 static int Intersects( int x0, int y0, int cx0, int cy0,
 		       int x1, int y1, int cx1, int cy1 ) {
 
@@ -620,8 +623,8 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
 	else {
 	    /* FIXME different dice for first turn */
 	    /* FIXME avoid cocked dice if possible */
-	    pgd->xDice[ 0 ] = random() % 21 + 13;
-	    pgd->xDice[ 1 ] = random() % ( 34 - pgd->xDice[ 0 ] ) +
+	    pgd->xDice[ 0 ] = RAND % 21 + 13;
+	    pgd->xDice[ 1 ] = RAND % ( 34 - pgd->xDice[ 0 ] ) +
 		pgd->xDice[ 0 ] + 8;
 	    
 	    if( pgd->fColour == pgd->fTurn ) {
@@ -629,8 +632,8 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
 		pgd->xDice[ 1 ] += 48;
 	    }
 	    
-	    pgd->yDice[ 0 ] = random() % 10 + 28;
-	    pgd->yDice[ 1 ] = random() % 10 + 28;
+	    pgd->yDice[ 0 ] = RAND % 10 + 28;
+	    pgd->yDice[ 1 ] = RAND % 10 + 28;
 	    pgd->fDiceColour[ 0 ] = pgd->fDiceColour[ 1 ] = pgd->fTurn;
 	}
     }
@@ -831,40 +834,40 @@ static void BoardDraw( extwindow *pewnd, gamedata *pgd ) {
 	    else if( nAntialias > 20 )
 		nAntialias = 20;
 	    
-	    anCurrent[ 0 ] = ( ( ( random() & 0x1F ) + ( random() & 0x1F ) ) *
-		( 20 - nAntialias ) +
-		( 0x80 + ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		nAntialias ) / 20;
+	    anCurrent[ 0 ] = ( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) *
+			       ( 20 - nAntialias ) +
+			       ( 0x80 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       nAntialias ) / 20;
 		      
-	    anCurrent[ 1 ] = ( ( ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		( 20 - nAntialias ) +
-		( ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		nAntialias ) / 20;
+	    anCurrent[ 1 ] = ( ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       ( 20 - nAntialias ) +
+			       ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       nAntialias ) / 20;
 		      
-	    anCurrent[ 2 ] = ( ( ( random() & 0x1F ) + ( random() & 0x1F ) ) *
-		( 20 - nAntialias ) +
-		( ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		nAntialias ) / 20;
+	    anCurrent[ 2 ] = ( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) *
+			       ( 20 - nAntialias ) +
+			       ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       nAntialias ) / 20;
 
 	    pix = MatchColour( pgd->pxscm, anCurrent );
 
 	    XPutPixel( pxim, ix + 6 * pgd->nBoardSize, iy, pix );
 	    XPutPixel( pxim, ix, 66 * pgd->nBoardSize - iy - 1, pix );
 
-	    anCurrent[ 0 ] = ( ( ( random() & 0x1F ) + ( random() & 0x1F ) ) *
-		( 20 - nAntialias ) +
-		( 0x40 + ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		nAntialias ) / 20;
+	    anCurrent[ 0 ] = ( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) *
+			       ( 20 - nAntialias ) +
+			       ( 0x40 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       nAntialias ) / 20;
 		      
-	    anCurrent[ 1 ] = ( ( ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		( 20 - nAntialias ) +
-		( 0x40 + ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		nAntialias ) / 20;
+	    anCurrent[ 1 ] = ( ( ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       ( 20 - nAntialias ) +
+			       ( 0x40 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       nAntialias ) / 20;
 		      
-	    anCurrent[ 2 ] = ( ( ( random() & 0x1F ) + ( random() & 0x1F ) ) *
-		( 20 - nAntialias ) +
-		( 0x40 + ( random() & 0x3F ) + ( random() & 0x3F ) ) *
-		nAntialias ) / 20;
+	    anCurrent[ 2 ] = ( ( ( RAND & 0x1F ) + ( RAND & 0x1F ) ) *
+			       ( 20 - nAntialias ) +
+			       ( 0x40 + ( RAND & 0x3F ) + ( RAND & 0x3F ) ) *
+			       nAntialias ) / 20;
 
 	    pix = MatchColour( pgd->pxscm, anCurrent );
 	    
@@ -875,9 +878,9 @@ static void BoardDraw( extwindow *pewnd, gamedata *pgd ) {
 
     for( iy = 0; iy < 6 * pgd->nBoardSize; iy++ )
 	for( ix = 0; ix < 12 * pgd->nBoardSize; ix++ ) {
-	    anCurrent[ 0 ] = ( random() & 0x1F ) + ( random() & 0x1F );
-	    anCurrent[ 1 ] = ( random() & 0x3F ) + ( random() & 0x3F );
-	    anCurrent[ 2 ] = ( random() & 0x1F ) + ( random() & 0x1F );
+	    anCurrent[ 0 ] = ( RAND & 0x1F ) + ( RAND & 0x1F );
+	    anCurrent[ 1 ] = ( RAND & 0x3F ) + ( RAND & 0x3F );
+	    anCurrent[ 2 ] = ( RAND & 0x1F ) + ( RAND & 0x1F );
 
 	    pix = MatchColour( pgd->pxscm, anCurrent );
 	    
@@ -903,9 +906,9 @@ static void BoardDraw( extwindow *pewnd, gamedata *pgd ) {
 
     for( iy = 0; iy < 30 * pgd->nBoardSize; iy++ )
 	for( ix = 0; ix < 6 * pgd->nBoardSize; ix++ ) {
-	    anCurrent[ 0 ] = ( random() & 0x1F ) + ( random() & 0x1F );
-	    anCurrent[ 1 ] = ( random() & 0x3F ) + ( random() & 0x3F );
-	    anCurrent[ 2 ] = ( random() & 0x1F ) + ( random() & 0x1F );
+	    anCurrent[ 0 ] = ( RAND & 0x1F ) + ( RAND & 0x1F );
+	    anCurrent[ 1 ] = ( RAND & 0x3F ) + ( RAND & 0x3F );
+	    anCurrent[ 2 ] = ( RAND & 0x1F ) + ( RAND & 0x1F );
 
 	    pix = MatchColour( pgd->pxscm, anCurrent );
 

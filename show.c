@@ -83,7 +83,7 @@ extern void CommandShowDice( char *sz ) {
 
 extern void CommandShowPipCount( char *sz ) {
 
-    int an[ 2 ], i;
+    int an[ 2 ];
 
     /* FIXME take a board argument */
     

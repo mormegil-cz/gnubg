@@ -264,6 +264,8 @@ extern int StatsMove( extwindow *pewnd, int nSource, int nDest, int fHit ) {
     statsdata *psd = pewnd->pv;
     int i;
 
+    StatsUpdateBoardID( pewnd, psd );
+    
     if( psd->pgd->fTurn < 0 ) {
 	nSource = 25 - nSource;
 	if( nDest < 25 )
@@ -316,8 +318,6 @@ extern int StatsMove( extwindow *pewnd, int nSource, int nDest, int fHit ) {
     ExtChangePropertyHandler( psd->paewnd + STATS_MOVE, TP_TEXT, 8, sz,
 			      strlen( sz ) + 1 );    
 
-    StatsUpdateBoardID( pewnd, psd );
-    
     return 0;
 }
 

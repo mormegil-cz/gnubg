@@ -1,3 +1,27 @@
+Mon Jan  3 03:13:02 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* xgame.c (StatsMove): call StatsUpdateBoardID earlier, so that the
+	position ID will still be updated even if more than 4 moves are
+	made.  (This is only temporary -- a better move routine should
+	be written anyway.)
+
+Sun Jan  2 11:35:41 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* eval.c (EvalCacheResize): New function.
+
+Fri Dec 24 01:12:54 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (CommandRollout): use Rollout()'s equity standard
+	deviation, rather than (incorrectly) trying to calculate it.
+	* rollout.c (Rollout): calculate equity standard deviation.
+	Also fix bug which would sometimes return NaN standard deviation.
+
+Thu Dec 23 18:45:31 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (CommandNewGame): fix bug in assert() -- the game is at
+	lMatch.plPrev->p, not lMatch.plPrev.  Also, do not free plGame
+	after calling FreeGame(); FreeGame() already does it.
+
 Mon Dec 20 17:33:06 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* play.c (TryBearoff): New function.

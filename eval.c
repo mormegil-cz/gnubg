@@ -1,7 +1,7 @@
 /*
  * eval.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998-1999.
+ * by Gary Wong <gary@cs.arizona.edu>, 1998-2000.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -1626,6 +1626,11 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     }
 
     return 0;
+}
+
+extern int EvalCacheResize( int cNew ) {
+
+    return CacheResize( &cEval, cNew );
 }
 
 extern int EvalCacheStats( int *pc, int *pcLookup, int *pcHit ) {

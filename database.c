@@ -99,7 +99,7 @@ extern void CommandDatabaseEvaluate( char *sz ) {
     datum dKey, dValue;
     dbevaluation *pev;
     int i, c = 0, anBoardEval[ 2 ][ 25 ];
-    float arOutput[ NUM_OUTPUTS ];
+    float arOutput[ NUM_ROLLOUT_OUTPUTS ];
     void *p;
     
     if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRITER, 0, NULL ) ) ) {

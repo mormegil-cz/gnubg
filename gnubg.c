@@ -131,7 +131,7 @@ static command acDatabase[] = {
       "automatically", NULL },
     { "board", CommandSetBoard, "Set up the board in a particular "
       "position", NULL },
-    { "cache", CommandNotImplemented, "Set the size of the evaluation "
+    { "cache", CommandSetCache, "Set the size of the evaluation "
       "cache", NULL },
     { "crawford", CommandSetCrawford, 
       "Set whether this is the Crawford game", NULL },
@@ -151,7 +151,7 @@ static command acDatabase[] = {
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
       "ready for commands", NULL },
     { "rng", NULL, "Select the random number generator algorithm", acSetRNG },
-    { "score", CommandNotImplemented, "Set the match or session score ",
+    { "score", CommandSetScore, "Set the match or session score ",
       NULL },
     { "seed", CommandSetSeed, "Set the dice generator seed", NULL },
     { "turn", CommandSetTurn, "Set which player is on roll", NULL },
@@ -378,6 +378,19 @@ extern void HandleCommand( char *sz, command *ac ) {
     char *pch;
     int cch;
 
+    if( ac == acTop ) {
+	if( *sz == '!' ) {
+	    /* Shell escape */
+	    /* FIXME */
+	    return;
+	} else if( *sz == ':' ) {
+	    /* Guile escape */
+	    puts( "This installation of GNU Backgammon was compiled without "
+		  "Guile support." );
+	    return;
+	}
+    }
+    
     if( !( pch = NextToken( &sz ) ) ) {
 	if( ac != acTop )
 	    puts( "Incomplete command -- try `help'." );
@@ -386,7 +399,7 @@ extern void HandleCommand( char *sz, command *ac ) {
     }
 
     cch = strlen( pch );
-    
+
     if( ac == acTop && ( isdigit( *pch ) || !strncasecmp( pch, "bar",
 							  cch ) ) ) {
 	if( pch + cch < sz )
@@ -658,7 +671,7 @@ extern void CommandQuit( char *sz ) {
 
 extern void CommandRollout( char *sz ) {
     
-    float ar[ NUM_OUTPUTS ], arStdDev[ NUM_OUTPUTS ], r, rStdDev;
+    float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
     int c, an[ 2 ][ 25 ];
     
     if( !*sz && fTurn == -1 ) {
@@ -675,17 +688,6 @@ extern void CommandRollout( char *sz ) {
     if( ( c = Rollout( an, ar, arStdDev, 1, 500, 1296 ) ) < 0 )
 	return;
 
-    r = ar[ OUTPUT_WIN ] * 2.0 - 1.0 + ar[ OUTPUT_WINGAMMON ] +
-	ar[ OUTPUT_WINBACKGAMMON ] - ar[ OUTPUT_LOSEGAMMON ] -
-	ar[ OUTPUT_LOSEBACKGAMMON ];
-
-    rStdDev = sqrt( 4.0 * arStdDev[ OUTPUT_WIN ] * arStdDev[ OUTPUT_WIN ] +
-	arStdDev[ OUTPUT_WINGAMMON ] * arStdDev[ OUTPUT_WINGAMMON ] +
-	arStdDev[ OUTPUT_WINBACKGAMMON ] * arStdDev[ OUTPUT_WINBACKGAMMON ] +
-	arStdDev[ OUTPUT_LOSEGAMMON ] * arStdDev[ OUTPUT_LOSEGAMMON ] +
-	arStdDev[ OUTPUT_LOSEBACKGAMMON ] *
-		    arStdDev[ OUTPUT_LOSEBACKGAMMON ] );
-    
     printf( "Result (after %d trials):\n\n"
 	    "                   \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
 	    "Equity\n"
@@ -693,9 +695,9 @@ extern void CommandRollout( char *sz ) {
 	    "(%+6.3f)\n"
 	    "Standard deviation:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
 	    "(%+6.3f)\n\n",
-	    c, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], r,
+	    c, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
 	    arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
-	    arStdDev[ 4 ], rStdDev );
+	    arStdDev[ 4 ], arStdDev[ 5 ] );
 }
 
 static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
@@ -1095,6 +1097,7 @@ extern int main( int argc, char *argv[] ) {
 	    break;
 	case 'v': /* version */
 	    puts( "GNU Backgammon " VERSION );
+	    /* FIXME show optional features installed (Guile, X, etc.) */
 	    return EXIT_SUCCESS;
 	default:
 	    usage( argv[ 0 ] );
