@@ -1,6 +1,10 @@
+Thu Mar 18 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Change window order and titles (Ned's suggestion)
+
 Fri Mar 19 00:26:45 2004 Oystein Johansen  <oystein@gnubg.org>
 
-        * external.c (and other files): changes to use winsock2.h
+	* external.c (and other files): changes to use winsock2.h
 
 Thu Mar 18 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 

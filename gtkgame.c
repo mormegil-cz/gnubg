@@ -1076,7 +1076,7 @@ static GtkWidget *CreateMessageWindow( void ) {
 	{
 		woPanel[WINDOW_MESSAGE].pwWin = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 		gtk_window_set_title( GTK_WINDOW( woPanel[WINDOW_MESSAGE].pwWin ),
-			  _("GNU Backgammon - Messages") );
+			  _("Messages - GNU Backgammon") );
 #if GTK_CHECK_VERSION(2,0,0)
 		gtk_window_set_role( GTK_WINDOW( woPanel[WINDOW_MESSAGE].pwWin ), "messages" );
 #if GTK_CHECK_VERSION(2,2,0)
@@ -1123,7 +1123,7 @@ static GtkWidget *CreateAnalysisWindow( void ) {
 		woPanel[WINDOW_ANALYSIS].pwWin = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
 		gtk_window_set_title( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ),
-				  _("GNU Backgammon - Annotation") );
+				  _("Annotation - GNU Backgammon") );
 #if GTK_CHECK_VERSION(2,0,0)
 	    gtk_window_set_role( GTK_WINDOW( woPanel[WINDOW_ANALYSIS].pwWin ), "annotation" );
 #if GTK_CHECK_VERSION(2,2,0)
@@ -1199,8 +1199,8 @@ static void CreateGameWindow( void ) {
 	{
 		woPanel[WINDOW_GAME].pwWin = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
-		gtk_window_set_title( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ), _("GNU Backgammon - "
-			  "Game record") );
+		gtk_window_set_title( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ),
+			_("Game record - GNU Backgammon") );
 #if GTK_CHECK_VERSION(2,0,0)
 		gtk_window_set_role( GTK_WINDOW( woPanel[WINDOW_GAME].pwWin ), "game record" );
 #if GTK_CHECK_VERSION(2,2,0)
@@ -1333,7 +1333,9 @@ extern void ShowGameWindow( void )
 			  "/Windows/Game record")), TRUE);
 
 	woPanel[WINDOW_GAME].showing = TRUE;
-	gtk_widget_show_all(woPanel[WINDOW_GAME].pwWin);
+	/* Avoid showing before main window */
+	if( GTK_WIDGET_REALIZED( pwMain ) )
+		gtk_widget_show_all(woPanel[WINDOW_GAME].pwWin);
 }
 
 static void ShowAnnotation( void )
@@ -1341,7 +1343,9 @@ static void ShowAnnotation( void )
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Commentary")), TRUE);
 	woPanel[WINDOW_ANNOTATION].showing = TRUE;
-	gtk_widget_show_all( woPanel[WINDOW_ANNOTATION].pwWin );
+	/* Avoid showing before main window */
+	if( GTK_WIDGET_REALIZED( pwMain ) )
+		gtk_widget_show_all( woPanel[WINDOW_ANNOTATION].pwWin );
 }
 
 static void ShowMessage( void )
@@ -1354,21 +1358,25 @@ static void ShowMessage( void )
 			  "/Windows/Message")), TRUE);
 
 	woPanel[WINDOW_MESSAGE].showing = TRUE;
-	gtk_widget_show_all(woPanel[WINDOW_MESSAGE].pwWin);
+	/* Avoid showing before main window */
+	if( GTK_WIDGET_REALIZED( pwMain ) )
+		gtk_widget_show_all(woPanel[WINDOW_MESSAGE].pwWin);
 }
 
 static void ShowAnalysis( void )
 {
-    setWindowGeometry(&woPanel[WINDOW_ANALYSIS]);
-    if (!woPanel[WINDOW_ANALYSIS].docked && woPanel[WINDOW_ANALYSIS].pwWin->window)
-    	gdk_window_raise(woPanel[WINDOW_ANALYSIS].pwWin->window);
+	setWindowGeometry(&woPanel[WINDOW_ANALYSIS]);
+	if (!woPanel[WINDOW_ANALYSIS].docked && woPanel[WINDOW_ANALYSIS].pwWin->window)
+		gdk_window_raise(woPanel[WINDOW_ANALYSIS].pwWin->window);
 
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/Windows/Analysis")), TRUE);
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
+		"/Windows/Analysis")), TRUE);
 
-    woPanel[WINDOW_ANALYSIS].showing = TRUE;
+	woPanel[WINDOW_ANALYSIS].showing = TRUE;
 
-    gtk_widget_show_all(woPanel[WINDOW_ANALYSIS].pwWin);
+	/* Avoid showing before main window */
+	if( GTK_WIDGET_REALIZED( pwMain ) )
+		gtk_widget_show_all(woPanel[WINDOW_ANALYSIS].pwWin);
 }
 
 static int AddMoveRecordRow( void ) {
@@ -3238,6 +3246,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 
 extern void RunGTK( GtkWidget *pwSplash ) {
 
+    int i;
     GTKSet( &ms.fCubeOwner );
     GTKSet( &ms.nCube );
     GTKSet( ap );
@@ -3279,8 +3288,9 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 #endif
 	    Prompt();
     }
-    
-    gtk_widget_show_all( pwMain );
+
+	/* Show everything */
+	gtk_widget_show_all( pwMain );
 
 	/* Make sure toolbar looks correct */
 	SetToolbarStyle(nToolbarStyle);
@@ -3289,18 +3299,15 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	DisplayCorrectBoardType();
 #endif
 
-    DestroySplash ( pwSplash );
+	DestroySplash ( pwSplash );
 
-    if (!woPanel[WINDOW_ANNOTATION].showing)
-      DeleteAnnotation();
-    if (!woPanel[WINDOW_MESSAGE].showing)
-      DeleteMessage();
-    if (!woPanel[WINDOW_GAME].showing)
-      DeleteGame();
-    if (!woPanel[WINDOW_ANALYSIS].showing)
-      DeleteAnalysis();
-    if (!fDisplayPanels)
-      HideAllPanels (0, 0, 0);
+	/* Display any other windows now */
+	for (i = 0; i < NUM_WINDOWS; i++)
+		UpdateSetting(&woPanel[i].showing);
+
+	if (!fDisplayPanels)
+		HideAllPanels (0, 0, 0);
+
 	if (!fDockPanels)
 	{	/* Make sure some things stay hidden */
 		gtk_widget_hide(pwArrowVBox);
@@ -3308,12 +3315,14 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Hide panels"));
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Restore panels"));
 	}
+	/* Make sure main window is on top */
+	gdk_window_raise(pwMain->window);
 
-    /* force update of board; needed to display board correctly if user
-       has special settings, e.g., clockwise or nackgammon */
-    ShowBoard();
+	/* force update of board; needed to display board correctly if user
+		has special settings, e.g., clockwise or nackgammon */
+	ShowBoard();
 
-    gtk_main();
+	gtk_main();
 }
 
 static void DestroyList( gpointer p ) {
@@ -10172,26 +10181,26 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
 		if (f)
 			ShowAnalysis();
 		else
-		        DeleteAnalysis();
-                break;
+			DeleteAnalysis();
+		break;
 	  case TOGGLE_COMMENTARY:
 		if (f)
 			ShowAnnotation();
 		else
-		        DeleteAnnotation();
-                break;
+			DeleteAnnotation();
+		break;
 	  case TOGGLE_GAMELIST:
 		if(f)
 			ShowGameWindow();
 		else
 			DeleteGame();
-                break;
+		break;
 	  case TOGGLE_MESSAGE:
 		if(f)
 			ShowMessage();
 		else
-	                DeleteMessage();
-                break;
+			DeleteMessage();
+		break;
   }
   gtk_window_set_default_size(GTK_WINDOW(pwMain), woPanel[WINDOW_MAIN].wg.nWidth, woPanel[WINDOW_MAIN].wg.nHeight);
 }
