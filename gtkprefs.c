@@ -233,7 +233,7 @@ static void Preview3D(renderdata *prd)
 	unsigned char auch[ 108 * 3 * 82 * 3 * 3 ];
 	GdkGC *gc;
 
-	testSet3dSetting(&bd3d, prd);
+	Set3dSettings(&bd3d, prd);
 
 	RenderBoard3d(&bd3d, prd, glpixPreview, auch);
 
@@ -1034,7 +1034,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	{	/* Make sure main drawing area's context is current */
 		MakeCurrent3d(bd->drawing_area3d);
 		/* Setup values */
-		testSet3dSetting(bd, &rdAppearance);
+		Set3dSettings(bd, &rdAppearance);
 		ClearTextures(bd, TRUE);
 		GetTextures(bd);
 		preDraw3d(bd);
@@ -1619,7 +1619,7 @@ UseDesign ( void ) {
   /* 3D options */
 if (rd.fDisplayType == DT_3D)
 {
-	testSet3dSetting(&bd3d, &rd);
+	Set3dSettings(&bd3d, &rd);
 
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (rd.lightType == LT_POSITIONAL));
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDirectionalSource), (rd.lightType == LT_DIRECTIONAL));
@@ -2026,8 +2026,8 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
             "         hinges=%c\n"
             "         light=%0.0f;%0.0f\n"
             "         shape=%0.1f\n"
-            "         chequers0=#%02X%02X%02X;#%0.2f;%0.2f;#%0.2f;%0.2f\n"
-            "         chequers1=#%02X%02X%02X;#%0.2f;%0.2f;#%0.2f;%0.2f\n"
+            "         chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f\n"
+            "         chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f\n"
             "         dice0=#%02X%02X%02X;%0.2f;%0.2f;%c\n"
             "         dice1=#%02X%02X%02X;%0.2f;%0.2f;%c\n"
             "         dot0=#%02X%02X%02X\n"
@@ -2731,6 +2731,57 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 	gtk_widget_destroy(colourDialog3d);
 #endif
 }
+
+#if USE_BOARD3D
+
+int IsWhiteColour3d(Material* pMat)
+{
+	return (pMat->ambientColour[0] == 1) && (pMat->ambientColour[1] == 1) && (pMat->ambientColour[2] == 1) &&
+		(pMat->diffuseColour[0] == 1) && (pMat->diffuseColour[1] == 1) && (pMat->diffuseColour[2] == 1) &&
+		(pMat->specularColour[0] == 1) && (pMat->specularColour[1] == 1) && (pMat->specularColour[2] == 1);
+}
+
+int IsBlackColour3d(Material* pMat)
+{
+	return (pMat->ambientColour[0] == 0) && (pMat->ambientColour[1] == 0) && (pMat->ambientColour[2] == 0) &&
+		(pMat->diffuseColour[0] == 0) && (pMat->diffuseColour[1] == 0) && (pMat->diffuseColour[2] == 0) &&
+		(pMat->specularColour[0] == 0) && (pMat->specularColour[1] == 0) && (pMat->specularColour[2] == 0);
+}
+
+void Default3dSettings()
+{	/* If no 3d settings loaded, set appearance to first design */
+#if HAVE_LIBXML2
+	/* Check if colours are set to default values */
+	if (IsWhiteColour3d(&rdAppearance.rdChequerMat[0]) && IsBlackColour3d(&rdAppearance.rdChequerMat[1]) &&
+		IsWhiteColour3d(&rdAppearance.rdDiceMat[0]) && IsBlackColour3d(&rdAppearance.rdDiceMat[1]) &&
+		IsBlackColour3d(&rdAppearance.rdDiceDotMat[0]) && IsWhiteColour3d(&rdAppearance.rdDiceDotMat[1]) &&
+		IsWhiteColour3d(&rdAppearance.rdCubeMat) && IsBlackColour3d(&rdAppearance.rdCubeNumberMat) &&
+		IsWhiteColour3d(&rdAppearance.rdPointMat[0]) && IsBlackColour3d(&rdAppearance.rdPointMat[1]) &&
+		IsBlackColour3d(&rdAppearance.rdBoxMat) &&
+		IsWhiteColour3d(&rdAppearance.rdPointNumberMat) &&
+		IsWhiteColour3d(&rdAppearance.rdBackGroundMat))
+	{
+		plBoardDesigns = read_board_designs ();
+		if (plBoardDesigns && g_list_length(plBoardDesigns) > 0)
+		{
+			boarddesign *pbde = g_list_nth_data(plBoardDesigns, 1);
+			if (pbde->szBoardDesign)
+			{
+				char *apch[ 2 ];
+				gchar *sz, *pch;
+
+				pch = sz = g_strdup ( pbde->szBoardDesign );
+				while( ParseKeyValue( &sz, apch ) ) 
+					RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
+
+				g_free ( pch );
+			}
+		}
+		free_board_designs ( plBoardDesigns );
+	}
+#endif /* HAVE_LIBXML2 */
+}
+#endif
 
 #if HAVE_LIBXML2
 

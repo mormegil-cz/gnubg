@@ -140,7 +140,7 @@ void realize(GtkWidget *widget, BoardData* bd)
 #endif
 
 	InitGL(bd);
-	testSet3dSetting(bd, &rdAppearance);
+	Set3dSettings(bd, &rdAppearance);
 	SetupViewingVolume3d(bd, &rdAppearance);
 	GetTextures(bd);
 	preDraw3d(bd);

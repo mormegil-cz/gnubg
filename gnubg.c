@@ -7348,6 +7348,11 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( !fNoRC )
 	LoadRCFiles();
 
+#if USE_BOARD3D
+	if (fX)
+		Default3dSettings();
+#endif
+
 #if USE_GTK
       PushSplash ( pwSplash, 
                    _("Doing"), _("nothing in particular"), 0 );

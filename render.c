@@ -111,7 +111,7 @@ renderdata rdDefault = {
     TRUE,  /* dynamic labels */
 	1	/* Show move indicator */
 #if USE_BOARD3D
-	, DT_3D,	/* Display type */
+	, DT_2D,	/* Display type */
 	FALSE,	/* Show shadows */
 	50,	/* Shadow darkness */
 	0,	/* Animate roll */
@@ -127,7 +127,8 @@ renderdata rdDefault = {
 	3,	/* Dice size */
 	0,	/* Rounded edges */
 	PT_ROUNDED,	/* Piece type */
-	/* Default 3d colours - black+white, should never be used */
+	/* Default 3d colours - black+white, should never be used -
+		if no 3d settings the first design will be used */
     {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
 	 {{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0}},
     {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},

@@ -296,7 +296,7 @@ extern int MouseMove3d(BoardData *bd, int x, int y);
 extern void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf);
 extern void Tidy3dObjects(BoardData* bd, int glValid);
 extern int TestPerformance3d(BoardData* bd);
-extern void testSet3dSetting(BoardData* bd, const renderdata *prd);
+extern void Set3dSettings(BoardData* bd, const renderdata *prd);
 extern void CopySettings3d(BoardData* from, BoardData* to);
 extern void MakeCurrent3d(GtkWidget *widget);
 extern void GetTextures(BoardData* bd);

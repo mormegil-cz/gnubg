@@ -234,10 +234,9 @@ void preDrawPiece0(BoardData* bd)
 	for (j = 0; j <= bd->curveAccuracy / 4; j++)
 	{
 		latitude = (float)sin(angle2) * lip;
-		angle = 0;
-
 		new_radius = Dist2d(lip, latitude);
 
+		angle = 0;
 		for (i = 0; i < bd->curveAccuracy; i++)
 		{
 			n[i][j][0] = (float)sin(angle) * new_radius;

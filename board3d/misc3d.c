@@ -207,12 +207,12 @@ void setMaterial(Material* pMat)
 }
 
 float Dist2d(float a, float b)
-{
+{	/* Find 3rd side size */
 	float sqdD = a * a - b * b;
-	if (sqdD == 0)
-		return 0;
+	if (sqdD > 0)
+		return (float)sqrt(sqdD);
 	else
-		return (float)sqrt(fabs(sqdD));
+		return 0;
 }
 
 int IsSet(int flags, int bit)
@@ -285,10 +285,10 @@ void LoadTextureInfo()
 
 	ListInit(&textures, sizeof(TextureInfo));
 
-        if ( ! ( szFile = PathSearch( TEXTURE_FILE, szDataDirectory ) ) ) {
-          g_print( "PathSearch failed!\n" );
-          return;
-        }
+	if ( ! ( szFile = PathSearch( TEXTURE_FILE, szDataDirectory ) ) ) {
+		g_print( "PathSearch failed!\n" );
+		return;
+	}
 
 	fp = fopen(szFile, "r");
 	free(szFile);
@@ -427,19 +427,19 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 {
 	unsigned char* bits = 0;
 	int n;
-        char *szFile = PathSearch( filename, szDataDirectory );
-        FILE *fp;
+	char *szFile = PathSearch( filename, szDataDirectory );
+	FILE *fp;
 
-        if ( ! szFile )
-          return 0;
+	if ( ! szFile )
+		return 0;
 
 	if ( ! ( fp = fopen( szFile, "rb") ) ) {
 		g_print("Failed to open texture: %s\n", szFile );
-                free( szFile );
+		free( szFile );
 		return 0;	/* failed to load file */
 	}
 
-        free( szFile );
+	free( szFile );
 
 	switch(format)
 	{
@@ -483,9 +483,10 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 	glBindTexture(GL_TEXTURE_2D, texture->texID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	/* Read bits */
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, texture->width, texture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
-
 	free(bits);	/* Release loaded image data */
+
 	return 1;
 }
 
@@ -514,7 +515,7 @@ void GetTextures(BoardData* bd)
 	GetTexture(bd, &bd->backGroundMat);
 }
 
-void testSet3dSetting(BoardData* bd, const renderdata *prd)
+void Set3dSettings(BoardData* bd, const renderdata *prd)
 {
 	bd->pieceType = prd->pieceType;
 	bd->showHinges = prd->fHinges;
@@ -530,7 +531,6 @@ void testSet3dSetting(BoardData* bd, const renderdata *prd)
 	bd->planView = prd->planView;
 
 	memcpy(bd->chequerMat, prd->rdChequerMat, sizeof(Material[2]));
-
 	memcpy(&bd->diceMat[0], prd->afDieColour[0] ? &prd->rdChequerMat[0] : &prd->rdDiceMat[0], sizeof(Material));
 	memcpy(&bd->diceMat[1], prd->afDieColour[1] ? &prd->rdChequerMat[1] : &prd->rdDiceMat[1], sizeof(Material));
 	bd->diceMat[0].textureInfo = bd->diceMat[1].textureInfo = 0;
@@ -1263,9 +1263,9 @@ void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
 	for (i = 0; i < (accuracy / 4) + 1; i++)
 	{
 		latitude = (float)sin(lat_angle) * radius;
-		angle = 0;
 		new_radius = Dist2d(radius, latitude);
 
+		angle = 0;
 		ns = (accuracy / 4) - i;
 		step = (2 * PI) / (ns * 4);
 
