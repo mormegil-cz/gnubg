@@ -155,7 +155,7 @@ static inline guchar clamp( gint n ) {
 	return n;
 }
 
-static void Beep( BoardData *bd ) {
+static void board_beep( BoardData *bd ) {
 
     if( bd->beep_illegal )
 	gdk_beep();
@@ -642,7 +642,8 @@ static int update_move( BoardData *bd ) {
 
     bd->valid_move = NULL;
     
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
+    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	bd->playing ) {
 	move = "(Editing)";
 	fIncomplete = fIllegal = FALSE;
     } else if( EqualBoards( points, bd->old_board ) ) {
@@ -688,7 +689,7 @@ static void Confirm( BoardData *bd ) {
         UserCommand( move );
     } else
         /* Illegal move */
-	Beep( bd );
+	board_beep( bd );
 }
 
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
@@ -734,7 +735,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
 	    /* Click on illegal area. */
-	    Beep( bd );
+	    board_beep( bd );
 	    bd->drag_point = -1;
 	    
 	    return TRUE;
@@ -745,7 +746,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
-		Beep( bd );
+		board_beep( bd );
 	    else
 		UserCommand( "double" );
 	    
@@ -757,7 +758,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
-		Beep( bd );
+		board_beep( bd );
 	    else if( event->button.button == 1 )
 		Confirm( bd );
 	    else {
@@ -777,11 +778,11 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
-	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
-	    bd->dice[ 0 ] <= 0 ) {
+	if( !bd->playing || ( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+	    bd->edit ) ) && bd->dice[ 0 ] <= 0 ) ) {
 	    /* Don't let them move chequers unless the dice have been
 	       rolled, or they're editing the board. */
-	    Beep( bd );
+	    board_beep( bd );
 	    bd->drag_point = -1;
 	    
 	    return TRUE;
@@ -864,7 +865,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		memcpy( bd->points, old_points, sizeof bd->points );
 	    }
 	    
-	    Beep( bd );
+	    board_beep( bd );
 	    
 	finished:
 	    bd->drag_point = -1;
@@ -908,7 +909,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 					     dest == 25 ||
 					     bd->drag_point == 26 ||
 					     dest == 26 ) ) )
-		Beep( bd );
+		board_beep( bd );
 	    else {
 		int points[ 2 ][ 25 ];
 		
@@ -928,7 +929,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	if( !bd->points[ bd->drag_point ] ) {
 	    /* click on empty bearoff tray */
-	    Beep( bd );
+	    board_beep( bd );
 	    
 	    bd->drag_point = -1;
 	    return TRUE;
@@ -938,7 +939,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
 	if( event->button.button != 1 && bd->drag_colour != bd->turn ) {
 	    /* trying to move opponent's chequer */
-	    Beep( bd );
+	    board_beep( bd );
 	    
 	    bd->drag_point = -1;
 	    return TRUE;
@@ -1100,7 +1101,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			     : bd->points[ dest ] > 1 ) || dest == bar ||
 	    dest > 27 ) {
 	    /* FIXME check move is legal */
-	    Beep( bd );
+	    board_beep( bd );
 	    
 	    dest = bd->drag_point;
 	}
@@ -1130,7 +1131,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		board_expose_point( board, bd, bd->drag_point );
 		board_expose_point( board, bd, dest );
 		update_move( bd );
-		Beep( bd );
+		board_beep( bd );
 	    }
 	
 	bd->drag_point = -1;
@@ -1506,7 +1507,6 @@ extern void board_set_playing( Board *board, gboolean f ) {
     pbd->playing = f;
     gtk_widget_set_sensitive( pbd->position_id, f );
     gtk_widget_set_sensitive( pbd->reset, f );
-    gtk_widget_set_sensitive( pbd->edit, f );
 }
 
 static void update_buttons( BoardData *pbd ) {
@@ -2748,14 +2748,15 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
 	    sprintf( sz, "set player 1 name %s", pch1 );
 	    UserCommand( sz );
 	}
-	
+
 	if( anScoreNew[ 0 ] != ms.anScore[ 0 ] ||
 	    anScoreNew[ 1 ] != ms.anScore[ 1 ] ) {
-	    sprintf( sz, "set score %d %d", anScoreNew[ 0 ], anScoreNew[ 1 ] );
+	    sprintf( sz, "set score %d %d", anScoreNew[ 0 ],
+		     anScoreNew[ 1 ] );
 	    UserCommand( sz );
 	}
-	
-	if( !EqualBoards( ms.anBoard, points ) ) {
+
+	if( bd->playing && !EqualBoards( ms.anBoard, points ) ) {
 	    sprintf( sz, "set board %s", PositionID( points ) );
 	    UserCommand( sz );
 	}
