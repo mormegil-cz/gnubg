@@ -4883,13 +4883,20 @@ GTKHint( movelist *pmlOrig, const int iMove ) {
     gtk_widget_show_all( pwHint );
 }
 
-static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwRolloutProgress;
+static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwRolloutProgress,
+    *pwOldGrab, *pwRolloutOK, *pwRolloutStop, *pwRolloutViewStat;
 static int iRolloutRow;
 static guint nRolloutSignal;
 
 static void RolloutCancel( GtkObject *po, gpointer p ) {
 
+    pwGrab = pwOldGrab;
     pwRolloutDialog = pwRolloutResult = pwRolloutProgress = NULL;
+    fInterrupt = TRUE;
+}
+
+static void RolloutStop( GtkObject *po, gpointer p ) {
+
     fInterrupt = TRUE;
 }
 
@@ -4909,12 +4916,16 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     char *aszTemp[ 8 ];
     int i;
     GtkWidget *pwVbox;
-    GtkWidget *pwButtons,
-          *pwViewStat = gtk_button_new_with_label ( _("View statistics") );
-
+    GtkWidget *pwButtons;
+    
     pwRolloutDialog = CreateDialog( _("GNU Backgammon - Rollout"), DT_INFO,
 				    NULL, NULL );
-
+    pwRolloutViewStat = gtk_button_new_with_label ( _("View statistics") );
+    pwRolloutStop = gtk_button_new_with_label( _("Stop") );
+    
+    pwOldGrab = pwGrab;
+    pwGrab = pwRolloutDialog;
+    
     nRolloutSignal = gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ),
 					 "destroy",
 					 GTK_SIGNAL_FUNC( RolloutCancel ),
@@ -4923,19 +4934,27 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     /* Buttons */
 
     pwButtons = DialogArea( pwRolloutDialog, DA_BUTTONS );
+    pwRolloutOK = DialogArea( pwRolloutDialog, DA_OK );
 
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwRolloutStop );
+    
     if ( ars )
-      gtk_container_add( GTK_CONTAINER( pwButtons ), pwViewStat );
+      gtk_container_add( GTK_CONTAINER( pwButtons ), pwRolloutViewStat );
 
+    gtk_widget_set_sensitive( pwRolloutOK, FALSE );
+    gtk_widget_set_sensitive( pwRolloutViewStat, FALSE );
+    
     /* Setup signal */
 
-    gtk_signal_connect( GTK_OBJECT( pwViewStat ), "clicked",
+    gtk_signal_connect( GTK_OBJECT( pwRolloutStop ), "clicked",
+			GTK_SIGNAL_FUNC( RolloutStop ), NULL );
+    
+    gtk_signal_connect( GTK_OBJECT( pwRolloutViewStat ), "clicked",
 			GTK_SIGNAL_FUNC( GTKViewRolloutStatistics ),
 			(gpointer) ars );
 
     pwVbox = gtk_vbox_new( FALSE, 4 );
 	
-
     for ( i = 0; i < 8; i++ )
       aszTemp[ i ] = gettext ( aszTitle[ i ] );
 
@@ -4978,11 +4997,12 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
 				  GTK_WINDOW( pwMain ) );
     
     gtk_widget_show_all( pwRolloutDialog );
-
+#if 0
     GTKDisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();
     GTKAllowStdin();
+#endif
 }
 
 /*
@@ -5682,23 +5702,29 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
     
     gtk_progress_configure( GTK_PROGRESS( pwRolloutProgress ),
 			    iGame + 1, 0, cGames );
-    
+#if 0
     GTKDisallowStdin();
     while( gtk_events_pending() )
         gtk_main_iteration();
     GTKAllowStdin();
-
+#endif
     return 0;
 }
 
 extern void GTKRolloutDone( void ) {
 
     fInterrupt = FALSE;
+
+    pwGrab = pwOldGrab;
     
     /* if they cancelled the rollout early, pwRolloutDialog has already been
        destroyed */
     if( !pwRolloutDialog )
 	return;
+    
+    gtk_widget_set_sensitive( pwRolloutOK, TRUE );
+    gtk_widget_set_sensitive( pwRolloutStop, FALSE );
+    gtk_widget_set_sensitive( pwRolloutViewStat, TRUE );
     
     gtk_progress_set_format_string( GTK_PROGRESS( pwRolloutProgress ),
 				    _("Finished (%v trials)") );

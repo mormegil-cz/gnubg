@@ -1,3 +1,8 @@
+Tue Sep 24 23:03:05 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (GTKRollout): Add a "stop" button to the rollout
+	dialog, which is the grab widget while a rollout is in progress.
+
 Tue Sep 24 17:32:44 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c (board_draw): Move set of bd->clockwise to board_draw,
