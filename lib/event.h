@@ -1,19 +1,18 @@
 /*
  * event.h
  *
- * by Gary Wong, 1996
+ * by Gary Wong, 1996-2000
  *
+ * $Id$
  */
 
 #ifndef _EVENT_H_
 #define _EVENT_H_
 
 #include <list.h>
+#if defined HAVE_SYS_TIME_H || !defined HAVE_CONFIG_H
 #include <sys/time.h>
-
-/* FIXME the sys/time.h include should be protected with an if HAVE_,
-   but this is a user header file and we can't rely on the user having
-   included our config.h... yuck! */
+#endif
 
 typedef struct _event event;
 typedef struct _eventhandler eventhandler;

@@ -34,10 +34,11 @@ AC_PROG_RANLIB
 
 dnl Checks for header files.
 AC_HEADER_STDC
+AC_HEADER_TIME
 AC_CHECK_HEADERS(limits.h syslog.h sys/time.h sys/types.h sys/uio.h unistd.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
-AC_HEADER_TIME
+AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
 AC_FUNC_VPRINTF

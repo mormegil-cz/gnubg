@@ -1,7 +1,9 @@
 /*
  * buffer.c
  *
- * by Gary Wong, 1996
+ * by Gary Wong, 1996-2000
+ *
+ * $Id$
  */
 
 #include "config.h"
@@ -13,7 +15,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 int BufferReadNotify( event *pev, buffer *pb ) {
 

@@ -1,3 +1,7 @@
+Sat Jan  8 17:57:54 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* event.c: removed syslog code (unportable and unnecessary).
+
 Thu Jan  6 22:24:39 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* neuralnet.c (NeuralNetLoadBinary, NeuralNetLoadBinary): New

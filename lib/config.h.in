@@ -11,6 +11,9 @@
 /* Define if you have the vprintf function.  */
 #undef HAVE_VPRINTF
 
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
