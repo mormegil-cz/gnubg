@@ -751,6 +751,55 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	return 0;
     }
 
+    if ( ! strcmp ( pch, "simple" ) ) {
+   
+       /* board given as 26 integers.
+        * integer 1   : # of my chequers on the bar
+        * integer 2-25: number of chequers on point 1-24
+        *               positive ints: my chequers 
+        *               negative ints: opp chequers 
+        * integer 26  : # of opp chequers on the bar
+        */
+ 
+       int n;
+
+       for ( i = 0; i < 26; i++ ) {
+
+          if ( ( n = ParseNumber ( ppch ) ) == INT_MIN ) {
+             outputf ("`simple' must be followed by 26 integers; "
+                      "found only %d\n", i );
+             return -1;
+          }
+
+          if ( i == 0 ) {
+             /* my chequers on the bar */
+             an[ fMove ][ 24 ] = abs(n);
+          }
+          else if ( i == 25 ) {
+             /* opp chequers on the bar */
+             an[ ! fMove ][ 24 ] = abs(n);
+          } else {
+
+             an[ fMove ][ i - 1 ] = 0;
+             an[ ! fMove ][ 24 - i ] = 0;
+
+             if ( n < 0 )
+                an[ ! fMove ][ 24 - i ] = -n;
+             else if ( n > 0 )
+                an[ fMove ][ i - 1 ] = n;
+             
+          }
+      
+       }
+
+       if( pchDesc )
+          strcpy( pchDesc, *ppch );
+	
+
+       return CheckPosition ( an );
+
+    }
+
     if( *pch == '=' ) {
 	if( !( i = atoi( pch + 1 ) ) ) {
 	    outputl( "You must specify the number of the move to apply." );
