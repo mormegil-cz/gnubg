@@ -252,6 +252,10 @@ enum {
 #define NUM_INPUTS ((25 * MINPPERPOINT + MORE_INPUTS) * 2)
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
 
+#define DATABASE1_SIZE ( 54264 * 32 * 2 )
+#define DATABASE2_SIZE ( 924 * 924 * 2 )
+#define DATABASE_SIZE ( DATABASE1_SIZE + DATABASE2_SIZE )
+
 static int anEscapes[ 0x1000 ];
 static int anEscapes1[ 0x1000 ];
 
@@ -551,7 +555,7 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
 
 static unsigned char *HeuristicDatabase( int fProgress ) {
 
-    unsigned char *p = malloc( 54264 * 32 * 2 );
+    unsigned char *p = malloc( DATABASE1_SIZE );
     int i;
     
     if( !p )
@@ -606,7 +610,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 			   char *szDatabase, char *szDir, int nSize,
 			   int fProgress ) {
     FILE *pfWeights;
-    int h, fReadWeights = FALSE;
+    int h, fReadWeights = FALSE, fMalloc = FALSE;
     char szFileVersion[ 16 ];
     float r;
     static int fInitialised = FALSE;
@@ -631,19 +635,17 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    struct stat st;
 	    
 	    if( fstat( h, &st ) ||
-		st.st_size != 54264 * 32 * 2 + 924 * 924 * 2 ||
-		!( pBearoff1 = mmap( NULL, 54264 * 32 * 2 + 924 * 924 * 2,
+		st.st_size != DATABASE_SIZE ||
+		!( pBearoff1 = mmap( NULL, DATABASE_SIZE,
 				     PROT_READ, MAP_SHARED, h, 0 ) ) ) {
 #endif
-		if( !( pBearoff1 = malloc( 54264 * 32 * 2 +
-					   924 * 924 * 2 ) ) ) {
+		if( !( pBearoff1 = malloc( DATABASE_SIZE ) ) ) {
 		    perror( "malloc" );
 		    return -1;
 		}
 
 		errno = 0;
-		if( read( h, pBearoff1, 54264 * 32 * 2 +
-			  924 * 924 * 2 ) < 54264 * 32 * 2 + 924 * 924 * 2 ) {
+		if( read( h, pBearoff1, DATABASE_SIZE ) < DATABASE_SIZE ) {
 		    if( errno )
 			perror( szDatabase );
 		    else
@@ -652,7 +654,8 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 		    
 		    free( pBearoff1 );
 		    pBearoff1 = NULL;
-		}
+		} else
+		    fMalloc = TRUE;
 #if HAVE_MMAP
 	    }
 #endif
@@ -660,7 +663,33 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	}
 
 	if( pBearoff1 ) {
-	    pBearoff2 = pBearoff1 + 54264 * 32 * 2;
+	    static unsigned char achCorrect[ 16 ] = {
+		0xFF, 0xBB, 0x21, 0x08, 0xAB, 0xE1, 0xFD, 0x1A,
+		0x79, 0xC6, 0xD9, 0xD3, 0xEA, 0xDF, 0x56, 0xCF
+	    };
+	    unsigned char ach[ 16 ];
+	    
+	    /* Successfully read the file -- now compute its
+	       checksum, to make sure the contents were correct. */
+	    md5_buffer( pBearoff1, DATABASE_SIZE, ach );
+	    if( memcmp( ach, achCorrect, 16 ) ) {
+		fprintf( stderr, "%s: not a valid bearoff database\n",
+			 szDatabase );
+		
+		if( fMalloc )
+		    free( pBearoff1 );
+		else
+#if HAVE_MMAP
+		    munmap( pBearoff1, DATABASE_SIZE );
+#else
+		    assert( FALSE );
+#endif
+		pBearoff1 = NULL;
+	    }
+	}
+	
+	if( pBearoff1 ) {
+	    pBearoff2 = pBearoff1 + DATABASE1_SIZE;
 	    fBearoffHeuristic = FALSE;
 	} else {
 	    pBearoff1 = HeuristicDatabase( fProgress );
