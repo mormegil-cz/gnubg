@@ -28,6 +28,28 @@
 #define MAX_ROLLOUT_CUBEINFO 16
 #endif
 
+#define MAXHIT 50 /* for statistics */
+
+typedef struct _rolloutstat {
+
+  /* Regular win statistics (dimension is cube turns) */
+
+  int acWin[ 10 ], acWinGammon[ 10 ], acWinBackgammon[ 10 ]; 
+
+  /* Cube statistics (dimension is cube turns) */
+
+  int acDoubleDrop[ 10 ]; /* # of Double, drop */
+  int acDoubleTake[ 10 ]; /* # of Double, takes */
+
+  /* Chequer hit statistics (dimension is move number) */
+  
+  int acHit[ MAXHIT ]; /* number of hits */
+
+  /* FIXME: add more stuff */
+
+} rolloutstat;
+
+
 extern int 
 Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[], float arStdDev[],
          int nTruncate, int cGames, int fVarRedn, cubeinfo *pci,
@@ -37,6 +59,7 @@ extern int
 RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                rolloutstat aarsStatistics[][ 2 ],
                 rolloutcontext *prc,
                 cubeinfo aci[], int afCubeDecTop[], int cci, int fInvert );
 
@@ -44,6 +67,7 @@ extern int
 GeneralEvaluation ( char *sz,
                     float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
                     float arStdDev[ NUM_ROLLOUT_OUTPUTS ], 
+                    rolloutstat arsStatistics[ 2 ],
                     int anBoard[ 2 ][ 25 ],
                     cubeinfo *pci, evalsetup *pes );
 
@@ -51,6 +75,7 @@ extern int
 GeneralEvaluationR ( char *sz,
                      float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev[ NUM_ROLLOUT_OUTPUTS ],
+                     rolloutstat arsStatistics[ 2 ],
                      int anBoard[ 2 ][ 25 ],
                      cubeinfo *pci, rolloutcontext *prc );
 
@@ -58,6 +83,7 @@ extern int
 GeneralCubeDecision ( char *sz, 
                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                      rolloutstat aarsStatistics[ 2 ][ 2 ],
                       int anBoard[ 2 ][ 25 ],
                       cubeinfo *pci, evalsetup *pes );
 
@@ -65,7 +91,14 @@ extern int
 GeneralCubeDecisionR ( char *sz, 
                        float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                       rolloutstat aarsStatistics[ 2 ][ 2 ],
                        int anBoard[ 2 ][ 25 ],
                        cubeinfo *pci, rolloutcontext *prc );
+
+/* operations on rolloutstat */
+
+extern char *
+printRolloutstat ( char *sz, const rolloutstat *prs,
+                   const int cGames );
 
 #endif
