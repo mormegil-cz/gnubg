@@ -78,7 +78,7 @@ typedef struct _theorywidget {
 
   /* market window */
 
-  GtkWidget *aaapwMW[ 2 ][ 8 ][ 3 ];
+  GtkWidget *apwMW[ 2 ];
 
   /* window graphs */
   GtkWidget *apwGraph[ 2 ];
@@ -98,6 +98,15 @@ typedef struct _theorywidget {
 } theorywidget;
 
 
+
+static void
+MWGetSelection( GtkWidget *pw, GtkSelectionData *psd,
+                guint n, guint t, theorywidget *ptw ) {
+
+
+  printf( "sorry not implemented\n" );
+
+}
 
 static void
 ResetTheory ( GtkWidget *pw, theorywidget *ptw ) {
@@ -314,30 +323,31 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
   if( ci.nMatchTo ) {
 
+    gchar *asz[ 4 ];
+
     /* match play */
 
     getMatchPoints ( aaarPointsMatch, afAutoRedouble, afDead, &ci, aarRates );
 
-    for ( i = 0; i < 2; i++ ) {
+    for ( i = 0; i < 2; ++i ) {
+    
+      gtk_clist_freeze( GTK_CLIST( ptw->apwMW[ i ] ) );
 
-      /* column headers */
+      gtk_clist_clear( GTK_CLIST( ptw->apwMW[ i ] ) );
 
-      gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 1 ] ),
-                           _("Dead cube") );
-
+      gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 1, 
+                                  _("Dead cube") );
       if ( afAutoRedouble[ i ] )
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             _("Opp. redoubles") );
+        gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 3, 
+                                    _("Opp. redoubles") );
       else
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                             _("Live cube") );
+        gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 3, 
+                                    _("Fully live") );
 
       for ( j = 0; j < 4; j++ ) {
 
-        /* row header */
+        asz[ 0 ] = g_strdup( gettext( aszMatchPlayLabel[ j ] ) );
 
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ 0 ] ),
-                             gettext ( aszMatchPlayLabel[ j ] ) );
 
         for ( k = 0; k < 2; k++ ) {
           
@@ -350,62 +360,85 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
           f = f && 
             ( ! ci.nMatchTo || ( ci.anScore[ i ] + ci.nCube < ci.nMatchTo ) );
 
-          if ( f ) {
-            sprintf ( sz, "%7.3f%%", 100.0f * aaarPointsMatch[ i ][ j ][ k ] );
-            gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ k + 1 ] ), 
-                                 sz );
-          }
+          if ( f ) 
+            asz[ 1 + 2 * k ] = 
+              g_strdup_printf( "%7.3f%%", 
+                               100.0f * aaarPointsMatch[ i ][ j ][ k ] );
           else
-            gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ k + 1 ] ), 
-                                 "" );
+            asz[ 1 + 2 * k ] = g_strdup( "" );
 
         }
+
+        asz[ 2 ] = g_strdup( "" );
+
+        gtk_clist_append( GTK_CLIST( ptw->apwMW[ i ] ), asz );
+
+        for ( k = 0; k < 4; ++k )
+          g_free( asz[ k ] );
+
       }
 
-      for ( j = 5; j < 8; j++ ) 
-        for ( k = 0; k < 3; k++ )
-          gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j ][ k ] ), 
-                               "" );
+      gtk_clist_thaw( GTK_CLIST( ptw->apwMW[ i ] ) );
+
+      for ( j = 0; j < 4; ++j )
+        gtk_clist_set_column_width( GTK_CLIST( ptw->apwMW[ i ] ),
+                                    j,
+                                    gtk_clist_optimal_column_width( GTK_CLIST( ptw->apwMW[ i ] ), j  ) );
 
       ptw->aar[ i ][ 0 ] = aaarPointsMatch[ i ][ 1 ][ 0 ];
       ptw->aar[ i ][ 1 ] = aaarPointsMatch[ i ][ 2 ][ 1 ];
       ptw->aar[ i ][ 2 ] = aaarPointsMatch[ i ][ 3 ][ 0 ];
       
       gtk_widget_queue_draw( ptw->apwGraph[ i ] );
+
     }
 
   }
   else {
 
+    gchar *asz[ 4 ];
+
     /* money play */
 
     getMoneyPoints ( aaarPoints, ci.fJacoby, ci.fBeavers, aarRates );
 
-    for ( i = 0; i < 2; i++ ) {
+    for ( i = 0; i < 2; ++i ) {
 
-      /* column headers */
-
-      gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 1 ] ),
-                           _("Dead cube") );
-      gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ 0 ][ 2 ] ),
-                           _("Live cube") );
+      gtk_clist_freeze( GTK_CLIST( ptw->apwMW[ i ] ) );
+      
+      gtk_clist_clear( GTK_CLIST( ptw->apwMW[ i ] ) );
+    
+      gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 1, 
+                                _("Dead cube") );
+      gtk_clist_set_column_title( GTK_CLIST( ptw->apwMW[ i ] ), 3, 
+                                  _("Fully live") );
 
       for ( j = 0; j < 7; j++ ) {
 
-        /* row header */
+        asz[ 0 ] = g_strdup( gettext( aszMoneyPointLabel[ j ] ) );
 
-        gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ 0 ] ),
-                             gettext ( aszMoneyPointLabel[ j ] ) );
 
-        for ( k = 0; k < 2; k++ ) {
+        for ( k = 0; k < 2; k++ )
+          asz[ 2 * k + 1 ] = 
+            g_strdup_printf( "%7.3f%%", 
+                             100.0f * aaarPoints[ i ][ j ][ k ] );
 
-          sprintf ( sz, "%7.3f%%", 100.0f * aaarPoints[ i ][ j ][ k ] );
-          gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j + 1 ][ k + 1 ] ), 
-                               sz );
+        asz[ 2 ] = g_strdup( "" );
 
-        }
+        gtk_clist_append( GTK_CLIST( ptw->apwMW[ i ] ), asz );
+
+        for ( k = 0; k < 4; ++k )
+          g_free( asz[ k ] );
+
       }
-      
+
+      gtk_clist_thaw( GTK_CLIST( ptw->apwMW[ i ] ) );
+
+      for ( j = 0; j < 4; ++j )
+        gtk_clist_set_column_width( GTK_CLIST( ptw->apwMW[ i ] ),
+                                    j,
+                                    gtk_clist_optimal_column_width( GTK_CLIST( ptw->apwMW[ i ] ), j ) );
+
       ptw->aar[ i ][ 0 ] = aaarPoints[ i ][ 3 ][ 0 ];
       ptw->aar[ i ][ 1 ] = aaarPoints[ i ][ 5 ][ 1 ];
       ptw->aar[ i ][ 2 ] = aaarPoints[ i ][ 6 ][ 0 ];
@@ -630,6 +663,15 @@ GTKShowTheory ( const int fActivePage ) {
   int i, j, k;
   char sz[ 256 ];
   int *pi;
+
+  static char *aszTitles[] = {
+    N_(""),
+    N_("Dead cube"),
+    N_("") /* N_("Live cube") */,
+    N_("Fully live")
+  };
+  gchar *asz[ 4 ];
+    
 
   theorywidget *ptw;
 
@@ -906,35 +948,34 @@ GTKShowTheory ( const int fActivePage ) {
                              pwVBox,
                              gtk_label_new ( _("Market window") ) );
 
-  for ( i = 0; i < 2; i++ ) {
+  for ( i = 0; i < 4; ++i )
+    asz[ i ] = gettext( aszTitles[ i ] );
+
+  for ( i = 0; i < 2; ++i ) {
 
     sprintf ( sz, _("Market window for player %s"), ap[ i ].szName );
     pwFrame = gtk_frame_new ( sz );
     gtk_container_add ( GTK_CONTAINER ( pwVBox ), pwFrame );
 
-    pwTable = gtk_table_new ( 8, 3, FALSE );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
+    ptw->apwMW[ i ] = gtk_clist_new_with_titles( 4, asz );
 
-    for ( j = 0; j < 3; j++ ) 
-      for ( k = 0; k < 8; k++ )
+    gtk_clist_set_selection_mode( GTK_CLIST( ptw->apwMW[ i ] ),
+                              GTK_SELECTION_MULTIPLE );
 
-        if ( j || k ) {
+    gtk_clist_column_titles_passive ( GTK_CLIST( ptw->apwMW[ i ] ) );
 
-          gtk_table_attach ( GTK_TABLE ( pwTable ),
-                             ptw->aaapwMW[ i ][ k ][ j ] = 
-                             gtk_label_new ( "dummy" ),
-                             j, j + 1, k, k + 1,
-                             GTK_EXPAND | GTK_FILL,
-                             GTK_EXPAND | GTK_FILL,
-                             4, 0 );
-          gtk_misc_set_alignment( GTK_MISC( ptw->aaapwMW[ i ][ k ][ j ] ), 
-                                  0, 0.5 );
+    /*
+    for ( j = 0; j < 4; ++j )
+      gtk_clist_set_column_auto_resize ( GTK_CLIST( ptw->apwMW[ i ] ),
+      j, TRUE );*/
 
-        }
-        else 
-          ptw->aaapwMW[ i ][ j ][ k ] = NULL;
+    gtk_selection_add_target( ptw->apwMW[ i ], GDK_SELECTION_PRIMARY,
+                              GDK_SELECTION_TYPE_STRING, 0 );
 
+    gtk_signal_connect( GTK_OBJECT( ptw->apwMW[ i ] ), "selection_get",
+                        GTK_SIGNAL_FUNC( MWGetSelection ), ptw );
 
+    gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwMW[ i ] );
 
   }
 
@@ -966,6 +1007,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   ptw->pwGammonPrice = gtk_text_new( NULL, NULL );
   gtk_text_set_line_wrap ( GTK_TEXT( ptw->pwGammonPrice ), FALSE );
+
   gtk_container_add ( GTK_CONTAINER( pwVBox ), ptw->pwGammonPrice );
 
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
