@@ -1442,7 +1442,7 @@ generate_ts ( const int nTSP, const int nTSC,
 
 static void
 usage ( char *arg0 ) {
-
+#ifndef WIN32
   printf ( "Usage: %s [options] -f filename\n"
            "Options:\n"
            "  -f, --outfile filename\n"
@@ -1469,14 +1469,42 @@ usage ( char *arg0 ) {
            "%s -o 6 -f gnubg_os0.bd\n"
            "\n",
            arg0, arg0 );
-
+#else
+    MessageBox (NULL, 
+           "Usage: makebearoff [options] -f filename\n\n"
+           "Options:\n"
+           "  -f, --outfile filename\tOutput to file\n"
+           "  -t, --two-sided PxC   \tNumber of points and number of chequers"
+           " for two-sided database\n"
+           "  -o, --one-sided P     \tNumber of points for one-sided database\n"
+           "  -s, --xhash-size N    \tUse cache of size N bytes\n"
+           "  -O, --old-bearoff filename\tReuse already generated bearoff database\n"
+           "  -H, --no-header       \tDo not write header\n"
+           "  -C, --no-cubeful      \tDo not calculate cubeful equities for"
+           " two-sided databases\n"
+           "  -c, --no-compress     \tDo not use compression scheme "
+                                  "for one-sided databases\n"
+           "  -g, --no-gammons      \tInclude gammon distribution for one-sided"
+                                  " databases\n"
+           "  -n, --normal-dist     \tApproximate one-sided bearoff database"
+           " with normal distributions\n"
+           "  -v, --version         \t\tShow version information and exit\n"
+           "  -h, --help            \t\tDisplay usage and exit\n"
+           "\n"
+           "To generate gnubg_os0.bd:\n"
+           "makebearoff -o 6 -f gnubg_os0.bd\n"
+           "\n",
+		     "Makebearoff", MB_OK);
+#endif
 }
 
 static void
 version ( void ) {
-
+#ifndef WIN32
   printf ( "makebearoff $Revision$\n" );
-
+#else
+  MessageBox( NULL, "makebearoff $Revision$\n" );
+#endif
 }
 
 

@@ -1,3 +1,7 @@
+Wed Sep 29 15:10:45 2004  Oystein Johansen <oystein@gnubg.org>
+
+	* makebearoff.c: Display 'usage' on Windows.
+
 Sun Sep 19 14:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Fix gtk2 panel bug
