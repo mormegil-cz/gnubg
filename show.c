@@ -197,6 +197,7 @@ extern void CommandShowAnalysis( char *sz ) {
     outputf( "\nAnalysis thresholds:\n"
 	     "  +%.3f very good\n"
 	     "  +%.3f good\n"
+	     "  -%.3f doubtful\n"
 	     "  -%.3f bad\n"
 	     "  -%.3f very bad\n"
 	     "\n"
@@ -205,6 +206,7 @@ extern void CommandShowAnalysis( char *sz ) {
 	     "  -%.3f unlucky\n"
 	     "  -%.3f very unlucky\n",
 	     arSkillLevel[ SKILL_VERYGOOD ], arSkillLevel[ SKILL_GOOD ],
+	     arSkillLevel[ SKILL_DOUBTFUL ], 
 	     arSkillLevel[ SKILL_BAD ], arSkillLevel[ SKILL_VERYBAD ],
 	     arLuckLevel[ LUCK_VERYGOOD ], arLuckLevel[ LUCK_GOOD ],
 	     arLuckLevel[ LUCK_BAD ], arLuckLevel[ LUCK_VERYBAD ] );
