@@ -689,6 +689,7 @@ command cER = {
       N_("Fix what the cube stake has been set to"),
       szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+#ifdef USE_GTK
 }, acSetGeometryValues[] = {
     { "width", CommandSetGeometryWidth, N_("set width of window"), 
       szVALUE, NULL },
@@ -709,6 +710,7 @@ command cER = {
     { "main", CommandSetGeometryMain,
       N_("set geometry of main window"), NULL, acSetGeometryValues },
     { NULL, NULL, NULL, NULL, NULL }
+#endif
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
       N_("Show match equities as percentages (on) or probabilities (off)"),
@@ -992,7 +994,9 @@ command cER = {
     { "egyptian", CommandSetEgyptian, 
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
+#ifdef USE_GTK
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
+#endif
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1079,8 +1083,10 @@ command cER = {
       N_("See if the Egyptian rule is used in sessions"), NULL, NULL },
     { "export", CommandShowExport, N_("Show current export settings"), 
       NULL, NULL },
+#ifdef USE_GTK
     { "geometry", CommandShowGeometry, N_("Show geometry settings"), 
       NULL, NULL },
+#endif
     { "jacoby", CommandShowJacoby, 
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
     { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
@@ -4062,7 +4068,7 @@ extern void CommandSaveSettings( char *szParam ) {
                   acSetPath[ i ].sz, aaszPaths[ i ][ 0 ] );
 
     /* geometries */
-
+#ifdef USE_GTK
     RefreshGeometries ();
 
     for ( i = 0; i < NUM_WINDOWS; ++i )
@@ -4075,7 +4081,7 @@ extern void CommandSaveSettings( char *szParam ) {
                   aszWindow[ i ], awg[ i ].nHeight,
                   aszWindow[ i ], awg[ i ].nPosX,
                   aszWindow[ i ], awg[ i ].nPosY );
-
+#endif
     /* the end */
 
     

@@ -2612,12 +2612,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow2 ( pf, 
                            _( "Luck rate (pr. move)"), 
                            "%+6.3f", "%+7.3f%%",
-                           psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 0 ][ 0 ] /
                            psc->anTotalMoves[ 0 ],
                            psc->arLuck[ 0 ][ 1 ] * 100.0f /
                            psc->anTotalMoves[ 0 ],
-                           psc->anTotalMoves[ 1 ],
                            psc->arLuck[ 1 ][ 0 ] /
                            psc->anTotalMoves[ 1 ],
                            psc->arLuck[ 1 ][ 1 ] * 100.0f /

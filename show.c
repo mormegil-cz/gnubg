@@ -1492,7 +1492,7 @@ outputl(_("Tutor mode evaluates moves using the same settings as Analysis.") );
 
 }
 
-
+#ifdef USE_GTK
 extern void
 CommandShowGeometry ( char *sz ) {
 
@@ -1519,3 +1519,4 @@ CommandShowGeometry ( char *sz ) {
             awg[ WINDOW_HINT ].nPosY );
 
 }
+#endif

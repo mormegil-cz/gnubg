@@ -771,20 +771,14 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 		       pwNotebook );
 
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      GeneralPage( bd ),
+			      gtk_label_new( _("General") ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      ChequerPrefs( bd, 0 ),
 			      gtk_label_new( _("Chequers (0)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      ChequerPrefs( bd, 1 ),
 			      gtk_label_new( _("Chequers (1)") ) );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      CubePrefs( bd ),
-			      gtk_label_new( _("Cube") ) );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      DicePrefs( bd, 0 ),
-			      gtk_label_new( _("Dice (0)") ) );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      DicePrefs( bd, 1 ),
-			      gtk_label_new( _("Dice (1)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      BoardPage( bd ), gtk_label_new( _("Board") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), BorderPage( bd ),
@@ -796,8 +790,14 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 			      PointPrefs( bd, 1 ),
 			      gtk_label_new( _("Points (1)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      GeneralPage( bd ),
-			      gtk_label_new( _("General") ) );
+			      DicePrefs( bd, 0 ),
+			      gtk_label_new( _("Dice (0)") ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      DicePrefs( bd, 1 ),
+			      gtk_label_new( _("Dice (1)") ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      CubePrefs( bd ),
+			      gtk_label_new( _("Cube") ) );
 
     /* FIXME add settings for ambient light, and dice pip and cube colours */
     

@@ -1,3 +1,12 @@
+Mon Aug  5 17:35:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+        gnubg.c, show.c, set.c: #ifdef USE_GTK code conserning 
+        saving geometries. Consider this as a temporary solution.
+
+        gtkprefs.c: Change order of pages.
+
+        html.c: fix typo
+          
 Sun Aug  4 19:11:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Implement "unforced cube decisions" -- should give more
