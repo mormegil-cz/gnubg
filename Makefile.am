@@ -81,9 +81,10 @@ endif
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @PYTHON_CFLAGS@ 
+              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @PYTHON_CFLAGS@ \
+              @GLIB_CFLAGS@
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@ \
-              @FT2_LIBS@ @GTKEXTRA_LIBS@ @PYTHON_LIBS@ 
+              @FT2_LIBS@ @GTKEXTRA_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
@@ -109,8 +110,7 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
            $(BOARD3D_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtkprefs.c gtkprefs.h gtk-multiview.c \
-	gtk-multiview.h \
-	gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
+	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
 	gtkrace.c gtkrace.h \
 	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
