@@ -1,3 +1,7 @@
+Mon Nov  8 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c : Fixed bug with credits
+
 Fri Nov  5 14:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.sql, gtkgame.c, realational.c, database.py :

@@ -7488,7 +7488,9 @@ extern void GTKCommandShowCredits(void)
 			gtk_list_item_new_with_label(TRANS(ceCredits[ i ].Name)) );
 	}
 
-	ListDeleteAll(&names);
+	while(names.plNext->p)
+		ListDelete(names.plNext );
+
 	gtk_widget_show_all( pwDialog );
 	gtk_main();
 }
