@@ -19,20 +19,16 @@
 -- $Id$
 --
 
-DROP SCHEMA gnubg CASCADE;
-
-CREATE SCHEMA gnubg;
-
 -- Table: control
 -- Holds the most current value of xxx_id for every table.
 
-CREATE TABLE gnubg.control (
+CREATE TABLE control (
     tablename     CHAR(80) NOT NULL
    ,next_id       INTEGER NOT NULL
    ,PRIMARY KEY (tablename)
 );
 
-CREATE UNIQUE INDEX icontrol ON gnubg.control (
+CREATE UNIQUE INDEX icontrol ON control (
     tablename
 );
 
@@ -41,20 +37,20 @@ CREATE UNIQUE INDEX icontrol ON gnubg.control (
 -- where nicks might be found. This allows different players having
 -- identical nicks on different servers.
 
-CREATE TABLE gnubg.env (
+CREATE TABLE env (
     env_id       INTEGER NOT NULL
    -- Textual description of the environment, e.g., "FIBS"
    ,place        CHAR(80) NOT NULL 
    ,PRIMARY KEY (env_id)
 );
 
-CREATE UNIQUE INDEX ienv ON gnubg.env(
+CREATE UNIQUE INDEX ienv ON env(
     env_id 
 );
 
 -- Table: person
 
-CREATE TABLE gnubg.person (
+CREATE TABLE person (
     person_id     INTEGER NOT NULL
    -- Name of person (if known)
    ,name          CHAR(80) NOT NULL
@@ -63,31 +59,31 @@ CREATE TABLE gnubg.person (
    ,PRIMARY KEY (person_id)
 );
 
-CREATE UNIQUE INDEX iperson ON gnubg.person (
+CREATE UNIQUE INDEX iperson ON person (
     person_id
 );
 
 -- Table: player
 -- The combination of an environment and a person
 
-CREATE TABLE gnubg.player (
+CREATE TABLE player (
     env_id         INTEGER NOT NULL
    ,person_id      INTEGER NOT NULL
    ,PRIMARY KEY (env_id,person_id)
-   ,FOREIGN KEY (env_id) REFERENCES gnubg.env (env_id)
+   ,FOREIGN KEY (env_id) REFERENCES env (env_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (person_id) REFERENCES gnubg.person (person_id)
+   ,FOREIGN KEY (person_id) REFERENCES person (person_id)
       ON DELETE RESTRICT
 );
 
-CREATE UNIQUE INDEX iplayer ON gnubg.player (
+CREATE UNIQUE INDEX iplayer ON player (
     env_id
    ,person_id
 );
 
 -- Table: match
 
-CREATE TABLE gnubg.match (
+CREATE TABLE match (
     match_id        INTEGER NOT NULL
    -- Player 0
    ,env_id0         INTEGER NOT NULL
@@ -115,13 +111,13 @@ CREATE TABLE gnubg.match (
    ,comment         CHAR(80) NOT NULL
    ,date            DATE 
    ,PRIMARY KEY (match_id)
-   ,FOREIGN KEY (env_id0,person_id0) REFERENCES gnubg.player (env_id,person_id)
+   ,FOREIGN KEY (env_id0,person_id0) REFERENCES player (env_id,person_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (env_id1,person_id1) REFERENCES gnubg.player (env_id,person_id)
+   ,FOREIGN KEY (env_id1,person_id1) REFERENCES player (env_id,person_id)
       ON DELETE RESTRICT
 );
 
-CREATE UNIQUE INDEX imatch ON gnubg.match (
+CREATE UNIQUE INDEX imatch ON match (
     match_id
 );
 
@@ -130,7 +126,7 @@ CREATE UNIQUE INDEX imatch ON gnubg.match (
 -- Used from match and game tables to store match and game statistics,
 -- respectively.
 
-CREATE TABLE gnubg.matchstat (
+CREATE TABLE matchstat (
    -- match identification
     match_id                          INTEGER NOT NULL
    -- player identification
@@ -213,15 +209,15 @@ CREATE TABLE gnubg.matchstat (
    ,time_penalty_loss                 FLOAT   NOT NULL
    -- 
    ,PRIMARY KEY (match_id,person_id)
-   ,FOREIGN KEY (person_id) REFERENCES gnubg.person (person_id)
+   ,FOREIGN KEY (person_id) REFERENCES person (person_id)
       ON DELETE RESTRICT
-   ,FOREIGN KEY (match_id) REFERENCES gnubg.match (match_id)
+   ,FOREIGN KEY (match_id) REFERENCES match (match_id)
       ON DELETE CASCADE
 );
 
-CREATE UNIQUE INDEX ismatchstat ON gnubg.matchstat (
+CREATE UNIQUE INDEX ismatchstat ON matchstat (
     match_id
    ,person_id
 );
 
-INSERT INTO gnubg.env VALUES( 0, 'Default env.');
+INSERT INTO env VALUES( 0, 'Default env.');

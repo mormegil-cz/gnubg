@@ -45,7 +45,7 @@ class relational:
 
       # fetch next_id from control table
 
-      q = "SELECT next_id FROM gnubg.control WHERE tablename = '%s'" % (tablename)
+      q = "SELECT next_id FROM control WHERE tablename = '%s'" % (tablename)
 
       c = self.conn.cursor()
       c.execute(q)
@@ -60,7 +60,7 @@ class relational:
 
          # update control data with new next id
          
-         q = "UPDATE gnubg.control SET next_id = %d WHERE tablename = '%s'" \
+         q = "UPDATE control SET next_id = %d WHERE tablename = '%s'" \
              % (next_id+1, tablename)
          
          c = self.conn.cursor()
@@ -72,7 +72,7 @@ class relational:
 
          # insert next id
 
-         q = "INSERT INTO gnubg.control (tablename,next_id) VALUES ('%s',%d)" \
+         q = "INSERT INTO control (tablename,next_id) VALUES ('%s',%d)" \
              % (tablename,next_id+1)
          
          c = self.conn.cursor()
@@ -95,7 +95,7 @@ class relational:
       
       # check if player exists
       
-      query = "SELECT per.person_id FROM gnubg.player pla INNER JOIN gnubg.person per ON pla.person_id = per.person_id  WHERE per.name = '%s'" % ( name )
+      query = "SELECT per.person_id FROM player pla INNER JOIN person per ON pla.person_id = per.person_id  WHERE per.name = '%s'" % ( name )
       
       cursor = self.conn.cursor()
       cursor.execute(query)
@@ -113,14 +113,14 @@ class relational:
          
          person_id = self.__next_id("person")
          
-         query = "INSERT INTO gnubg.person (person_id,name,notes) VALUES (%d,'%s','')" % ( person_id, name )
+         query = "INSERT INTO person (person_id,name,notes) VALUES (%d,'%s','')" % ( person_id, name )
          cursor = self.conn.cursor()
          cursor.execute(query)
          cursor.close()
          
          # Insert player
          
-         query = "INSERT INTO gnubg.player (person_id,env_id) VALUES (%d,%d)" % (person_id, env_id)
+         query = "INSERT INTO player (person_id,env_id) VALUES (%d,%d)" % (person_id, env_id)
          cursor = self.conn.cursor()
          cursor.execute(query)
          cursor.close()
@@ -292,7 +292,7 @@ class relational:
              gs[ 'time' ][ 'time-penalty-skill' ], \
              gs[ 'time' ][ 'time-penalty-cost' ] )
       
-      query = "INSERT INTO gnubg.matchstat VALUES (" + \
+      query = "INSERT INTO matchstat VALUES (" + \
               s1 + s2 + s3 + s4 + s5 + s6 + s7 + s8 + ");"
       cursor = self.conn.cursor()
       cursor.execute(query)
@@ -323,7 +323,7 @@ class relational:
       else:
          date = "NULL"
          
-      query = "INSERT INTO gnubg.match (match_id,env_id0,person_id0,env_id1,person_id1,result,length,added,rating0,rating1,event,round,place,annotator,comment,date) VALUES (%d,%d,%d,%d,%d,%d,%d,CURRENT_TIMESTAMP,'%s','%s','%s','%s','%s','%s','%s',%s) " % \
+      query = "INSERT INTO match (match_id,env_id0,person_id0,env_id1,person_id1,result,length,added,rating0,rating1,event,round,place,annotator,comment,date) VALUES (%d,%d,%d,%d,%d,%d,%d,CURRENT_TIMESTAMP,'%s','%s','%s','%s','%s','%s','%s',%s) " % \
               (match_id,env_id,person_id0,env_id,person_id1, \
                -1,mi[ 'match-length' ],
                self.__getKey( mi[ 'X' ], 'rating' )[0:80],
@@ -455,7 +455,7 @@ class relational:
 
       cursor = self.conn.cursor()
       try:
-         cursor.execute("SELECT COUNT(*) from gnubg.match;")
+         cursor.execute("SELECT COUNT(*) from match;")
       except:
          rc = -2
 
@@ -475,7 +475,7 @@ class relational:
       cursor = self.conn.cursor()
       try:
          cursor.execute( "SELECT env_id, place "
-                         "FROM gnubg.env "
+                         "FROM env "
                          "ORDER BY env_id" );
       except:
          cursor.close()
