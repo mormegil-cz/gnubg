@@ -840,7 +840,7 @@ static void board_drag( GtkWidget *board, BoardData *bd, int x, int y ) {
     
     GdkPixmap *pm_swap;
     guchar *rgb_swap;
-    
+
     if( bd->translucent ) {
 	int c, j;
 	guchar *psrc, *pdest;
@@ -1389,12 +1389,16 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    ( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) 
 	    && bd->dice[ 0 ] <= 0 ) {
 	    if( ( bd->drag_point == POINT_RIGHT && bd->turn == 1 ) ||
-		( bd->drag_point == POINT_LEFT  && bd->turn == -1 ) )
+		( bd->drag_point == POINT_LEFT  && bd->turn == -1 ) ) {
+		/* NB: the UserCommand() call may cause reentrancies,
+		   so it is vital to reset bd->drag_point first! */
+		bd->drag_point = -1;
 		UserCommand( "roll" );
-	    else
+	    } else {
+		bd->drag_point = -1;
 		board_beep( bd );
+	    }
 	    
-	    bd->drag_point = -1;
 	    return TRUE;
 	}
 	
@@ -2267,7 +2271,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
     else /* ANIMATE_SLIDE */
 	n = gtk_timeout_add( 0x100 >> pbd->animate_speed, board_slide_timeout,
 			     board );
-    
+
     while( !animation_finished ) {
 	SuspendInput( &m );
 	gtk_main_iteration();
@@ -4585,8 +4589,8 @@ static void board_init( Board *board ) {
     GtkWidget *pwFrame;
     GtkWidget *pwvbox;
 
-#ifndef USE_GTK2
 #include "xpm/tb_edit.xpm"
+#ifndef USE_GTK2
 #include "xpm/tb_no.xpm"
 #include "xpm/tb_yes.xpm"
 #include "xpm/tb_stop.xpm"
@@ -4847,15 +4851,9 @@ static void board_init( Board *board ) {
 
     gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
 
-#if USE_GTK2
-    bd->edit =
-      toggle_button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_EDIT, 
-                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
     bd->edit =
       toggle_button_from_image ( image_from_xpm_d ( tb_edit_xpm,
                                              bd->toolbar ) );
-#endif
     gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
 			GTK_SIGNAL_FUNC( board_edit ), bd );
     

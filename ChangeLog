@@ -1,3 +1,18 @@
+Sun Sep 15 10:26:56 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_pointer): Reset bd->drag_point earlier when
+	clicking the "roll dice" area on the board.  Hopefully this should
+	fix the "disappearing chequers" problem.
+
+Sun Sep 15 09:16:27 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_init): GTK_STOCK_EDIT is not a standard
+	GTK stock icon in GTK+ 2.0; use xpm/tb_edit.xpm.
+
+Sun Sep 15 09:15:38 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (GTKCubeHint, GTKHint): Pacify fussy compiler.
+
 Sun Sep 15 13:46:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Predefined board designs (first iteration)
