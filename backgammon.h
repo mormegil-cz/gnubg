@@ -67,6 +67,7 @@ typedef RETSIGTYPE (*psighandler)( int );
 #define MAX_CUBE_STR "4096"
 
 #ifdef WIN32
+#include <wininet.h>
 #define BIG_PATH _MAX_PATH
 #else
 #define BIG_PATH PATH_MAX

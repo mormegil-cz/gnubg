@@ -7716,6 +7716,18 @@ basename (const char *filename)
 
 #endif /* ! HAVE_BASENAME */
 
+#if ! defined(HAVE_DIRNAME) && ! defined(HAVE_LIBGEN_H)
+
+extern char *
+dirname( const char *filename ) {
+
+   int implement_me = 0;
+   assert ( implement_me );
+
+}
+
+#endif /* ! HAVE_DIRNAME */
+
 
 extern char *
 Convert ( const char *sz, 
