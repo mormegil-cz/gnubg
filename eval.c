@@ -66,6 +66,11 @@
 #define BINARY 0
 #endif
 
+
+#define CFMONEY(arEquity,pci) \
+   ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
+   ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 1 ] : arEquity[ 3 ] ) )
+
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
 
@@ -2503,6 +2508,46 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 }
 
 
+static void
+PerfectCubeful ( bearoffcontext *pbc, 
+                 int anBoard[ 2 ][ 25 ], float arEquity[] ) {
+
+  unsigned short int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+  unsigned short int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  unsigned int iPos = nUs * n + nThem;
+
+  BearoffCubeful ( pbc, iPos, arEquity );
+
+}
+
+
+extern int
+EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[] ) {
+
+  positionclass pc = ClassifyPosition ( anBoard );
+ 
+  assert ( pc <= CLASS_PERFECT );
+
+  switch ( pc ) {
+  case CLASS_BEAROFF2:
+    PerfectCubeful ( pbc2, anBoard, arEquity );
+    return 0;
+    break;
+  case CLASS_BEAROFF_TS:
+    PerfectCubeful ( pbcTS, anBoard, arEquity );
+    return 0;
+    break;
+  default:
+    break;
+  }
+
+  return -1;
+
+}
+
+
+
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
 		  cubeinfo *pci, evalcontext *pec ) {
@@ -4507,6 +4552,7 @@ GetDPEq ( int *pfCube, float *prDPEq, const cubeinfo *pci ) {
 }
 
 
+
 static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
@@ -5658,6 +5704,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   positionclass pc;
   float r;
   float ar[ NUM_OUTPUTS ];
+  float arEquity[ 4 ];
 
   cubeinfo ciMoveOpp;
 
@@ -5679,7 +5726,8 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 
   pc = ClassifyPosition ( anBoard );
   
-  if( pc > CLASS_OVER && nPlies > 0 ) {
+  if( pc > CLASS_OVER && nPlies > 0 && 
+      ! ( pc <= CLASS_PERFECT && !pciMove->nMatchTo ) ) {
     /* internal node; recurse */
 
     int anBoardNew[ 2 ][ 25 ];
@@ -5895,42 +5943,55 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   } else {
     /* at leaf node; use static evaluation */
 
-    /* Add cube positions to list */
+    if ( pc <= CLASS_PERFECT && ! pciMove->nMatchTo ) {
 
-    EvaluatePosition ( anBoard, arOutput, pciMove, 0 );
+      EvaluatePerfectCubeful ( anBoard, arEquity );
 
-    if( pec->rNoise )
-	for( i = 0; i < NUM_OUTPUTS; i++ )
-	    arOutput[ i ] += Noise( pec, anBoard, i );
+      arOutput[ 0 ] = ( arEquity[ 0 ] + 1.0 ) / 2.0;
+      arOutput[ 1 ] = arOutput[ 2 ] = arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
+
+    }
+    else {
+
+      /* Add cube positions to list */
+      
+      EvaluatePosition ( anBoard, arOutput, pciMove, 0 );
+      
+      if( pec->rNoise )
+        for( i = 0; i < NUM_OUTPUTS; i++ )
+          arOutput[ i ] += Noise( pec, anBoard, i );
+      
+      SanityCheck( anBoard, arOutput );
+      
+      /* Calculate cube efficiency */
+      
+      rCubeX = EvalEfficiency ( anBoard, pc );
+
+    }
     
-    SanityCheck( anBoard, arOutput );
-
-    /* Calculate cube efficiency */
-
-    rCubeX = EvalEfficiency ( anBoard, pc );
-
     /* Build all possible cube positions */
-
+    
     MakeCubePos ( aciCubePos, cci, fTop, aci, FALSE );
-
+    
     /* Calculate cubeful equity for each possible cube position */
-
+    
     for ( ici = 0; ici < 2 * cci; ici++ ) 
       if ( aci[ ici ].nCube > 0 ) {
         /* cube available */
         if ( pciMove->nMatchTo )
           arCf[ ici ] = Cl2CfMatch ( arOutput, &aci[ ici ] );
-        else 
+        else if ( pc <= CLASS_PERFECT )
+          arCf[ ici ] = CFMONEY ( arEquity, &aci[ ici ] );
+        else
           arCf[ ici ] = Cl2CfMoney ( arOutput, &aci[ ici ] );
       }
-
+    
     /* find optimal of "no double" and "double" */
-        
+    
     GetECF3 ( arCubeful, cci, arCf, aci );
-
-
+    
   }
-
+  
   return 0;
 
 }

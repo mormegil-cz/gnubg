@@ -441,7 +441,7 @@ generate_os ( const int nOS, const int fHeader,
   int n;
   unsigned short int aus[ 64 ];
   hash h;
-  FILE *fTmp;
+  FILE *fTmp = NULL;
   time_t t;
   unsigned int npos;
   char szTmp[ 11 ];
@@ -757,6 +757,7 @@ static void BearOff2( int nUs, int nThem,
     int k;
     float *prj;
     float arj[ 4 ];
+    float r;
 
     if ( ! nUs ) {
 
@@ -779,6 +780,31 @@ static void BearOff2( int nUs, int nThem,
 
     for( i = nTSP; i < 25; i++ )
 	anBoard[ 1 ][ i ] = anBoard[ 0 ][ i ] = 0;
+
+    /* look for position in bearoff file */
+
+#if 0
+    WRITE ME
+    if ( pbc ) {
+      assert ( FALSE );
+      for ( i = 24; i >= 0 && ! anBoard[ 1 ][ i ]; --i )
+        ;
+      if ( i < pbc->nPoints && k <= pbc->nChequers ) {
+        unsigned short int nUsL = 
+          PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+        unsigned short int nThemL = 
+          PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+        int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+        unsigned int iPos = nUsL * nL + nThemL;
+          
+        BearoffCubeful ( pbc, iPos, arEquity );
+          
+        return;
+      }
+      
+    }
+#endif
+
 
     arTotal[ 0 ] = arTotal[ 1 ] = arTotal[ 2 ] = arTotal[ 3 ] = 0.0f;
     
@@ -824,17 +850,19 @@ static void BearOff2( int nUs, int nThem,
 
                   /* Centered cube (so centered for opponent too) */
 
-                  if ( -prj[ 2 ] > arBest[ 2 ] ) {
+                  r = CubeEquity ( prj[ 2 ], 2.0 * prj[ 3 ], 1.0 ); 
+                  if ( -r > arBest[ 2 ] ) {
                     aiBest [ 2 ] = j;
-                    arBest [ 2 ] = -prj[ 2 ];
+                    arBest [ 2 ] = -r;
                   }
 
                   /* Opponent owns cube:
                      from opponent's view he owns cube */
 
-                  if ( -prj[ 1 ] > arBest[ 3 ] ) {
+                  r = CubeEquity ( prj[ 1 ], 2.0 * prj[ 3 ], 1.0 ); 
+                  if ( -r > arBest[ 3 ] ) {
                     aiBest [ 3 ] = j;
-                    arBest [ 3 ] = -prj[ 1 ];
+                    arBest [ 3 ] = -r;
                   }
 
                 }
@@ -861,21 +889,7 @@ static void BearOff2( int nUs, int nThem,
     if ( fCubeful ) {
 
       for ( k = 1; k < 4; ++k )
-        arTotal[ k ] /= 36.0f;
-
-      /* I own cube */
-
-      arEquity[ 1 ] = 
-        CubeEquity ( arTotal[ 1 ], 2.0 * arTotal[ 3 ], 1.0 );
-
-      /* Centered cube */
-
-      arEquity[ 2 ] = 
-        CubeEquity ( arTotal[ 2 ], 2.0 * arTotal[ 3 ], 1.0 );
-
-      /* Opp own cube */
-
-      arEquity[ 3 ] = arTotal[ 3 ];
+        arEquity[ k ] /= 36.0f;
 
     }
 
@@ -1101,8 +1115,6 @@ extern int main( int argc, char **argv ) {
   int fND = FALSE;
   bearoffcontext *pbc = NULL;
   FILE *output = stdout;
-  char *outfile;
-
 
   static struct option ao[] = {
     { "two-sided", required_argument, NULL, 't' },
