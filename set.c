@@ -1091,6 +1091,16 @@ extern void CommandSetGUIShowIDs( char *sz ) {
 	UpdateSetting( &fGUIShowIDs );
 }
 
+extern void CommandSetGUIDragTargetHelp( char *sz ) {
+
+    if( SetToggle( "gui dragtargethelp", &fGUIDragTargetHelp, sz,
+		   _("The target help while dragging a chequer will "
+		     "be shown."),
+		   _("The target help while dragging a chequer will "
+		     "not be shown.") ) )
+	UpdateSetting( &fGUIDragTargetHelp );
+}
+
 extern void CommandSetGUIShowPips( char *sz ) {
 
     if( SetToggle( "gui showpips", &fGUIShowPips, sz,
