@@ -3500,7 +3500,7 @@ static void Slave (void)
     int			done = FALSE;
     SOCKET		listenSocket;
     pthread_t		notifier;
-    
+
     if (RPU_DEBUG) outputerrf ("RPU Local Half started.\n");
 
     memset( &gSlaveStats, 0, sizeof( gSlaveStats ));
@@ -3521,7 +3521,7 @@ static void Slave (void)
             gfRPU_Notification = FALSE;
         }
     }
-    
+
     /* create socket */
     listenSocket = socket (AF_INET, SOCK_STREAM, 0);
 #ifdef WIN32
@@ -3547,15 +3547,23 @@ static void Slave (void)
         listenAddress.sin_addr.s_addr 	= htonl(INADDR_ANY);
         listenAddress.sin_port 		= htons(gRPU_SlaveTCPPort);
         RPU_SetSocketOptions (listenSocket);
+#ifdef WIN32
+	if ( bind( listenSocket, (const struct sockaddr *) &listenAddress,
+		   sizeof( listenAddress ) ) == SOCKET_ERROR ) {
+            outputerrf( "*** RPU could not bind slave socket address(err=%d).\n",
+			WSAGetLastError() );
+#else
 	if (bind (listenSocket,  (struct sockaddr *) &listenAddress, sizeof(listenAddress)) < 0) {
             outputerrf ("*** RPU could not bind slave socket address(err=%d).\n", errno);
+#endif /* WIN32 */
             outputerr("socket_bind");
         }
         else {
 #ifdef WIN32
             u_long arg = TRUE;
-            if ( ioctlsocket( listenSocket, FIONBIO, &arg ) < 0 ) {
-                outputerr ("set socket to non-blocking");
+            if ( ioctlsocket( listenSocket, FIONBIO, &arg ) == SOCKET_ERROR ) {
+                outputerrf( "set socket to non-blocking (error %d)",
+			    WSAGetLastError() );
 #else
             if ( fcntl (listenSocket, F_SETFL, O_NONBLOCK) < 0 ) {
                 outputerr ("fcntl F_SETFL, O_NONBLOCK");
@@ -3572,11 +3580,12 @@ static void Slave (void)
                 gSlaveStatus = rpu_stat_waiting;
                 Slave_UpdateStatus ();
 
-                if ( listen( listenSocket, 8 ) < 0 ) {
 #ifdef WIN32
+                if ( listen( listenSocket, 8 ) == SOCKET_ERROR ) {
                     outputerrf( "*** RPU could not listen to master socket "
 				"(err=%d).\n", WSAGetLastError() );
 #else
+                if ( listen( listenSocket, 8 ) < 0 ) {
                     outputerrf( "*** RPU could not listen to master socket "
 				"(err=%d).\n", errno);
 #endif /* WIN32 */
@@ -3589,37 +3598,57 @@ static void Slave (void)
                     int masterAddressLen = sizeof (masterAddress);
                     int slaveAddressLen = sizeof (slaveAddress);
                     SOCKET rpuSocket;
-                    
-                    do {
 #ifdef WIN32
-                    	int nWSAError;
+                    int nWSAError = 0;
 #endif /* WIN32 */
 
+                    do {
                         GTK_YIELDTIME;
 			rpuSocket = accept( listenSocket,
 					    (struct sockaddr *) &masterAddress,
 					    &masterAddressLen );
 #ifdef WIN32
 			nWSAError = WSAGetLastError();
-                        if ( (rpuSocket == INVALID_SOCKET) && (nWSAError != EAGAIN)
+                        if ( (rpuSocket == INVALID_SOCKET) && (errno != EAGAIN)
                              && (nWSAError != WSAEWOULDBLOCK) )
 #else
                         if (rpuSocket == -1 && errno != EAGAIN && errno != EWOULDBLOCK) 
 #endif /* WIN32 */
+
                                 break;
-                    } while (rpuSocket < 0 && !fInterrupt);
+
+                    }
+#ifdef WIN32
+                    while ( (rpuSocket != INVALID_SOCKET) &&
+			    (!fInterrupt) );
+#else
+                    while (rpuSocket < 0 && !fInterrupt);
+#endif /* WIN32 */
+
+#ifdef WIN32
+                    if ( getsockname( rpuSocket,
+				      (struct sockaddr *) &slaveAddress,
+				      &slaveAddressLen ) == SOCKET_ERROR )
+			outputerrf( "getsockname err=%d", WSAGetLastError() );
+#else
+                    getsockname( rpuSocket, (struct sockaddr *) &slaveAddress,
+				 &slaveAddressLen );
+#endif /* WIN32 */
                     
-                    getsockname (rpuSocket, (struct sockaddr *) &slaveAddress, &slaveAddressLen);
-                    
-                    if (rpuSocket < 0) {
+#ifdef WIN32
+                    if ( rpuSocket == INVALID_SOCKET ) {
+#else
+                    if ( rpuSocket < 0 ) {
+#endif /* WIN32 */
                         if (!fInterrupt) {
                             outputerrf( "*** RPU could not accept connection "
 #ifdef WIN32
-					"from master (err=%d).\n", WSAGetLastError()
+					"from master (err=%d).\n",
+					nWSAError
 #else
 					"from master (err=%d).\n", errno 
 #endif /* WIN32 */
-                                        );
+                                      );
                             outputerr( "accept" );
                         }
                     }
