@@ -1267,11 +1267,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
 
     }
 
-          
-    
     bd->points[ dest ] += bd->drag_colour;
-    
-    board_invalidate_point( bd, dest );
     
     if( bd->drag_point != dest ) {
 	if( update_move( bd ) && !fGUIIllegal ) {
@@ -1289,14 +1285,14 @@ gboolean place_chequer_or_revert(BoardData *bd,
               bd->points[ bd->drag_point ] += bd->drag_colour;
               board_invalidate_point( bd, bar );
             }
-              
-		    
+
 	    board_invalidate_point( bd, bd->drag_point );
-	    board_invalidate_point( bd, dest );
 	    update_move( bd );
 	    placed = FALSE;
-	}
+    	}
     }
+    if (placed)
+	board_invalidate_point( bd, dest );
 
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D && bd->rd->quickDraw)

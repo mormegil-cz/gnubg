@@ -1,3 +1,7 @@
+Fri Jun 11 18:56:45 GMT 2004  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkboard.c: Fix minor chequer display bug
+
 Fri Jun 11 19:00:05 CEST 2004  Jim Segrave  <jes@jes-2.demon.nl>
 
 	* gtkgamelist.c gnubg.gtkrc
@@ -7,25 +11,25 @@ Thu Jun 10 17:41:40 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: add gtkgamelist.c
 
-Thu Jun  10  14:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Jun  10  14:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgamelist.c, gnubg.gtkrc: Multiple styles and new defaults for game list
 
-Wed Jun  9  14:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Jun  9  14:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkgamelist.c, gnubg.gtkrc: Get game list colours from gtkrc file
 
-Tue Jun  8  8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue Jun  8  8:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkgamelist.c: Colour mistakes in game list
 
-Mon Jun  7  8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Jun  7  8:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Remove keyboard focus from game window, fix minor bug
 	with new right click menu.
 	* gnubg.c: Empty board on startup (try #2)
 
-Sun Jun  6 18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Sun Jun  6 18:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c: Empty board on startup
 	* gtkboard.c: Close hint window when editing
@@ -37,11 +41,11 @@ Fri Jun  4 22:58:22 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	hash key.
 	(fixes bug #9211 reported by Casey Hopkins)
 
-Fri Jun  4 18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Jun  4 18:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gnubg.c: Add show scoresheet command (to right click menu)
 
-Wed Jun  2 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Jun  2 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkboard.c: Add undo right click menu
 
@@ -51,19 +55,19 @@ Thu May 27 19:05:49 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	resignations.
 	(reported by Joachim Matussek)
 
-Tur May 20 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tur May 20 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* external.*: Remove memory leaks
 
-Tue May 18 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue May 18 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* external.*: Minor changes to parser
 
-Tue May 18 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue May 18 8:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c, render.c: Several small fixes to board appearance options
 
-Wed May 12 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed May 12 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* boards.xml, gtkprefs.c, render.c+.h, renderprefs.c:
 	Add Taki-style rounded points
@@ -80,7 +84,7 @@ Fri May  7 21:13:26 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* external_l.l: fix buffer overflow.
 
-Fri May  8 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri May  8 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* external.c, dice.c, set.c: Fix socket code for windows
 
@@ -93,7 +97,7 @@ Fri May  7 16:17:09 CEST 2004  Joern Thyssen  <jth@gnubg.org>
  	* backgammon.h: Change union moverecord into struct moverecord
 	(change a gazillion subroutines)
 
-Fri May  8 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri May  8 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkgame.c, gtkpath.c, set.c: Added png to set path command
 
@@ -110,7 +114,7 @@ Fri May  7 07:27:18 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	equities being different for -1,-3C rollouts reported by
 	Robert Eberlein.
 
-Thu May  6 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu May  6 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtktempmap.c, gtkboard.c: Show correct dice colour in temperture
 	map when in 3d
@@ -119,7 +123,7 @@ Mon May  3 15:20:43 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* osr.c, dice.c: add mti as parameter to init_genrand.
 
-Fri Apr 30 18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Apr 30 18:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkboard.c: Change dice and cube selection dialogs to fixed size
 	* gtkboard.c board3d/graph.c: Remove event->count optimization as now done in gtk
@@ -140,12 +144,12 @@ Wed Apr 28 20:28:22 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	* bearoffdump.c: new file.	
 	* Makefile.am: add bearoffdump as installable file.
 
-Wed Apr 28 16:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Apr 28 16:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* set.c: Change "set priority idle" to set the process priority to
 	idle (for windows).
 
-Mon Apr 26 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Apr 26 13:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, credits.*: Moved copyright string to credits.sh
 
@@ -164,7 +168,7 @@ Fri Apr 23 22:12:51 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	* relational.c: add code for most functions.
 	* scripts/database.py: adapt code to relational.c
 
-Fri Apr 23 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Apr 23 13:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c: Change year to 2004 for command line build
 
@@ -199,7 +203,7 @@ Mon Apr 19 22:52:41 CEST 2004  Joern Thyssen  <jth@gnubg.org>
        	to avoid calling the OSR code, that resets the seed.
 	We really need to introduce several RNG contexts...
 
-Mon Apr 19 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Apr 19 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Small 3d bug fix
 
@@ -241,7 +245,7 @@ Fri Apr 16 22:02:23 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	* matchequity.c (initMetFromParameters, 
 	initPostCrawfordMETFromParameters): support for mec.
 
-Fri Apr 16 16:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Apr 16 16:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* sound.c: Fix bug if no sound card on windows
 
@@ -331,7 +335,7 @@ Sun Apr  4 09:43:17 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* sound.c: include <libaudiofile.h>
 
-Thu Apr 1 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Apr 1 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkchequer.c: Reset interupt flag on analysis start
 	* sound.c: Add some error handiling to windows sound
@@ -342,11 +346,11 @@ Wed Mar 31 20:58:49 2004  Joern Thyssen  <jth@gnubg.org>
 	* configure.in: whoops, remove "dynamic"..
 	* sound.c: include <stropts.h> [SIGIO]
 
-Wed Mar 31 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Mar 31 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c and other files: Moved preview in preferences
 
-Mon Mar 29 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 29 17:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Fixed small bug to allow both names to be swapped
 
@@ -383,21 +387,21 @@ Thu Mar 25 21:04:54 CET 2004  Joern Thyssen  <jth@gnubg.org>
 	Move generation of cred entries into credits.sh for easy
 	reuse in the text version of CommandShowCredits.
 
-Wed Mar 24 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Mar 24 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: More credits and version info now copyable.
 
-Tue Mar 23 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue Mar 23 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* boards.xml, textures.txt: Added settings for final few 3d designs,
 		tidied up design a bit too.
 
-Mon Mar 22 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 22 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Make sure messages shown when docked panels are
 	hidden, also don't show a message when setting cube (bug 3973)
 
-Fri Mar 19 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Mar 19 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Change window order and titles, and put back
 		accelerators from windows (Ned's suggestions)
@@ -406,19 +410,19 @@ Fri Mar 19 00:26:45 2004 Oystein Johansen  <oystein@gnubg.org>
 
 	* external.c (and other files): changes to use winsock2.h
 
-Thu Mar 18 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Mar 18 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Panel bug fixed (removed warning)
 
-Mon Mar 16 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 16 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Panel bug fixed (crash at startup)
 
-Mon Mar 15 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 15 17:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* sound.c: Wait when multiple sounds attempted to be played (windows)
 
-Mon Mar 15 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 15 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c gtkgame.c: Reorganized about box
 
@@ -432,16 +436,16 @@ Sun Mar 14 08:55:39 2004  Joseph Heled  <pepster@users.sourceforge.net>
 	* gtkcolour.h: Change broken type for GtkColourPicker::func and
 	prototype.
 
-Fri Mar 12 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Mar 12 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkprefs.c, gtkgame.c: Removed texture load errors when in 2d mode
 
-Mon Mar 8 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Mar 8 8:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkcolor.c, gtkprefs.c: Remove "property delete" gtk warning message
 		when changin colours
 
-Thu Mar 4 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Mar 4 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gnubg.c: Replace USE_OLD_LAYOUT compile flag with menu option
 	* gtkboard.c: Crawford flag only changeable when editing
@@ -450,11 +454,11 @@ Sun Feb 29 18:17:14 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.c: #include <winsock.h> only if WIN32 defined.
 
-Wed Feb 25 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Feb 25 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkgame.c: Add option so toolbar can show text, icon or both
 
-Wed Feb 25 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Feb 25 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkgame.c, set.c: Save shown panels
 	* gnubg.c : Fixed small show epc bug
@@ -464,15 +468,15 @@ Fri Feb 20 15:10:39 CET 2004  Joern Thyssen  <jth@gnubg.org>
 	* Makefile.am, configure.in: move gnubg.py to scripts.
 	* gnubgmodule.c: _MAX_PATH only defined onwintendo.
 
-Thu Feb 19 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Feb 19 13:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* import.c: Fixed import jellyfish pos problem (bug 6086)
 
-Thu Feb 19 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Feb 19 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* scripts: Added new directory to cvs for python scripts
 
-Wed Feb 18 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Feb 18 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Remove maximum column size of text copied to
 		clipboard from statistics view (Bug 4161).
@@ -483,7 +487,7 @@ Mon Feb 16 21:57:18 CET 2004   Joern Thyssen  <jth@gnubg.org>
 	with GetBearoffDistUncompressed (a.k.a. the 40 byte offset).
 	(reported by Daniel Murhpy)
 
-Mon Feb 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Feb 16 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* html.c: Tidy text version of html export
 
@@ -503,7 +507,7 @@ Thu Feb  5 19:06:31 CET 2004  Joern Thyssen  <jth@gnubg.org>
 	gnubg thining that there is 60 hours/day.
 	(reported by Michael Depreli)
 
-Wed Feb 4 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Feb 4 17:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* import.c (and minor changes in others) : Limit size of player
 	names in import files, bug #7526
@@ -512,19 +516,19 @@ Mon Feb 02 2004 18:42:05 GMT
 	
 	* timer.c - wrong #if around include
 
-Fri Jan 30 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Jan 30 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* several files: Small changes for msdev compiler
 
-Thu Jan 29 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Thu Jan 29 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c, gtkprefs.c: 3d quick draw-last options added
 
-Wed Jan 28 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Jan 28 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c: 3d quick draw-chequer target help added
 
-Tue Jan 27 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Tue Jan 27 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c, gtkprefs.c: Some more 3d quick draw code
 
@@ -559,21 +563,21 @@ Tue Jan 20 00:02:30 CET 2004  Joern Thyssen  <jth@gnubg.org>
 	corrupted bearoff files.
 	(inspired by bug #7296 by Rod Roark)
 
-Mon Jan 19 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Jan 19 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* timer.c timecontrol.c: Small timing changes
 
-Mon Jan 19 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Jan 19 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkboard.c, gtkchequer.c, gtkgame.c, gtkgame.h,
 	gtkprefs.c, gtktoolbar.c: More 3d quick draw option stuff
 
-Fri Jan 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Jan 16 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* set.c, render.c, play.c, renderprefs.c, gtkprefs.c, gtkoptions.c,
 	gtkgame.c, gtkboard.c: 3d quick draw option
 
-Fri Jan 16 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Jan 16 9:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* bearoff.c, show.c, progress.c: Removed some build warnings
 
