@@ -78,8 +78,13 @@ typedef enum _gnubgwindow {
 } gnubgwindow;
 
 typedef struct _windowgeometry {
+#if USE_GTK
   gint nWidth, nHeight;
   gint nPosX, nPosY;
+#else
+  int nWidth, nHeight;
+  int nPosX, nPosY;
+#endif
 } windowgeometry;
 
 extern windowgeometry awg[ NUM_WINDOWS ];
