@@ -165,6 +165,24 @@ AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_SEARCH_LIBS(inet_aton,resolv)
 AC_REPLACE_FUNCS(erf strdup)
 
+dnl pthreads
+dnl (the multi-processor code uses pthreads)
+
+no_pu="yes"
+AC_ARG_WITH(pu,[  --with-pu              Activate multi-processor code])
+if test "$with_pu" != "no"; then
+  AC_CHECK_LIB(pthread,pthread_create)
+  AM_CONDITIONAL(PROCESSING_UNITS, test "$have_pthread" != "no" )
+  if test "$have_pthread" != "no"; then
+    AC_DEFINE(PROCESSING_UNITS,1,
+              [Define if you want to use the multi-processor code])
+    no_pu="no"  
+  fi
+  gtk_modules="gthread"
+fi
+
+
+
 dnl Check for GTK
 AC_ARG_WITH(gtk,[  --with-gtk              use GTK+ library and widgets])
 AC_ARG_WITH(gtk2,[  --with-gtk2             use GTK+ 2.0])
@@ -179,7 +197,7 @@ else
   fi
   if test "$no_gtk" = "yes"; then
     no_gtk2=yes
-    AM_PATH_GTK(1.2.0)
+    AM_PATH_GTK(1.2.0,,,gtk_modules)
   fi
 fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
@@ -222,6 +240,14 @@ else
   GTKDATA=gnubg.gtkrc
   AC_SUBST(GTKDATA)
   AM_PATH_LIBART(,AC_DEFINE(HAVE_LIBART,1,[Define if you have the art library]))
+
+  dnl look for gthread for GTK+ 2.0
+
+  if test "$no_gtk2" != "yes"; then
+     if test "$no_pu" = "no"; then
+        PKG_CHECK_MODULES(GTHREAD,gthread-2.0)  
+     fi
+  fi
 fi
 
 AH_VERBATIM([USE_GUI],
@@ -329,16 +355,6 @@ fi
 
 AC_SUBST(NAS_LIBS)
 AC_SUBST(NAS_CFLAGS)
-
-dnl pthreads
-dnl (the multi-processor code uses pthreads)
-
-AC_CHECK_LIB(pthread, pthread_create)
-AM_CONDITIONAL(PROCESSING_UNITS, test "$have_pthread" != "no" )
-if test "$have_pthread" != "no"; then
-  AC_DEFINE(PROCESSING_UNITS,1,
-            [Define if you want to use the multi-processor code])
-fi
 
 dnl test for libpng
 

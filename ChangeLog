@@ -1,3 +1,7 @@
+Wed Jun  4 20:18:36 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in, Makefile.am: autoconf magic for gthread.
+
 Sat May 31 19:54:53 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* procunits.c (GetProcessorCount): get number of processors

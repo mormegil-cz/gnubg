@@ -858,6 +858,7 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-readline         support fancy command line editing
   --with-gdbm             use GNU dbm for position databases
+  --with-pu              Activate multi-processor code
   --with-gtk              use GTK+ library and widgets
   --with-gtk2             use GTK+ 2.0
   --with-gtkextra         use GtkExtra widgets
@@ -6946,6 +6947,103 @@ done
 
 
 
+no_pu="yes"
+
+# Check whether --with-pu or --without-pu was given.
+if test "${with_pu+set}" = set; then
+  withval="$with_pu"
+
+fi;
+if test "$with_pu" != "no"; then
+
+echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
+echo $ECHO_N "checking for pthread_create in -lpthread... $ECHO_C" >&6
+if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpthread  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char pthread_create ();
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
+int
+main ()
+{
+pthread_create ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_pthread_pthread_create=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+ac_cv_lib_pthread_pthread_create=no
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_pthread_pthread_create" >&5
+echo "${ECHO_T}$ac_cv_lib_pthread_pthread_create" >&6
+if test $ac_cv_lib_pthread_pthread_create = yes; then
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPTHREAD 1
+_ACEOF
+
+  LIBS="-lpthread $LIBS"
+
+fi
+
+
+
+if test "$have_pthread" != "no" ; then
+  PROCESSING_UNITS_TRUE=
+  PROCESSING_UNITS_FALSE='#'
+else
+  PROCESSING_UNITS_TRUE='#'
+  PROCESSING_UNITS_FALSE=
+fi
+
+  if test "$have_pthread" != "no"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define PROCESSING_UNITS 1
+_ACEOF
+
+    no_pu="no"
+  fi
+  gtk_modules="gthread"
+fi
+
+
+
+
 # Check whether --with-gtk or --without-gtk was given.
 if test "${with_gtk+set}" = set; then
   withval="$with_gtk"
@@ -7061,7 +7159,7 @@ else
   enable_gtktest=yes
 fi;
 
-  for module in .
+  for module in . gtk_modules
   do
       case "$module" in
          gthread)
@@ -9216,6 +9314,110 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 
   rm -f conf.libarttest
 
+
+
+  if test "$no_gtk2" != "yes"; then
+     if test "$no_pu" = "no"; then
+
+  succeeded=no
+
+  if test -z "$PKG_CONFIG"; then
+    # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_PKG_CONFIG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $PKG_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKG_CONFIG="$PKG_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_PKG_CONFIG="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_path_PKG_CONFIG" && ac_cv_path_PKG_CONFIG="no"
+  ;;
+esac
+fi
+PKG_CONFIG=$ac_cv_path_PKG_CONFIG
+
+if test -n "$PKG_CONFIG"; then
+  echo "$as_me:$LINENO: result: $PKG_CONFIG" >&5
+echo "${ECHO_T}$PKG_CONFIG" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+  fi
+
+  if test "$PKG_CONFIG" = "no" ; then
+     echo "*** The pkg-config script could not be found. Make sure it is"
+     echo "*** in your path, or set the PKG_CONFIG environment variable"
+     echo "*** to the full path to pkg-config."
+     echo "*** Or see http://www.freedesktop.org/software/pkgconfig to get pkg-config."
+  else
+     PKG_CONFIG_MIN_VERSION=0.9.0
+     if $PKG_CONFIG --atleast-pkgconfig-version $PKG_CONFIG_MIN_VERSION; then
+        echo "$as_me:$LINENO: checking for gthread-2.0" >&5
+echo $ECHO_N "checking for gthread-2.0... $ECHO_C" >&6
+
+        if $PKG_CONFIG --exists "gthread-2.0" ; then
+            echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+            succeeded=yes
+
+            echo "$as_me:$LINENO: checking GTHREAD_CFLAGS" >&5
+echo $ECHO_N "checking GTHREAD_CFLAGS... $ECHO_C" >&6
+            GTHREAD_CFLAGS=`$PKG_CONFIG --cflags "gthread-2.0"`
+            echo "$as_me:$LINENO: result: $GTHREAD_CFLAGS" >&5
+echo "${ECHO_T}$GTHREAD_CFLAGS" >&6
+
+            echo "$as_me:$LINENO: checking GTHREAD_LIBS" >&5
+echo $ECHO_N "checking GTHREAD_LIBS... $ECHO_C" >&6
+            GTHREAD_LIBS=`$PKG_CONFIG --libs "gthread-2.0"`
+            echo "$as_me:$LINENO: result: $GTHREAD_LIBS" >&5
+echo "${ECHO_T}$GTHREAD_LIBS" >&6
+        else
+            GTHREAD_CFLAGS=""
+            GTHREAD_LIBS=""
+            ## If we have a custom action on failure, don't print errors, but
+            ## do set a variable so people can do so.
+            GTHREAD_PKG_ERRORS=`$PKG_CONFIG --errors-to-stdout --print-errors "gthread-2.0"`
+            echo $GTHREAD_PKG_ERRORS
+        fi
+
+
+
+     else
+        echo "*** Your version of pkg-config is too old. You need version $PKG_CONFIG_MIN_VERSION or newer."
+        echo "*** See http://www.freedesktop.org/software/pkgconfig"
+     fi
+  fi
+
+  if test $succeeded = yes; then
+     :
+  else
+     { { echo "$as_me:$LINENO: error: Library requirements (gthread-2.0) not met; consider adjusting the PKG_CONFIG_PATH environment variable if your libraries are in a nonstandard prefix so pkg-config can find them." >&5
+echo "$as_me: error: Library requirements (gthread-2.0) not met; consider adjusting the PKG_CONFIG_PATH environment variable if your libraries are in a nonstandard prefix so pkg-config can find them." >&2;}
+   { (exit 1); exit 1; }; }
+  fi
+
+     fi
+  fi
 fi
 
 
@@ -10877,90 +11079,6 @@ fi
 
 
 
-
-
-
-echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
-echo $ECHO_N "checking for pthread_create in -lpthread... $ECHO_C" >&6
-if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpthread  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char pthread_create ();
-#ifdef F77_DUMMY_MAIN
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int F77_DUMMY_MAIN() { return 1; }
-#endif
-int
-main ()
-{
-pthread_create ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_pthread_pthread_create=yes
-else
-  echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-ac_cv_lib_pthread_pthread_create=no
-fi
-rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_pthread_pthread_create" >&5
-echo "${ECHO_T}$ac_cv_lib_pthread_pthread_create" >&6
-if test $ac_cv_lib_pthread_pthread_create = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBPTHREAD 1
-_ACEOF
-
-  LIBS="-lpthread $LIBS"
-
-fi
-
-
-
-if test "$have_pthread" != "no" ; then
-  PROCESSING_UNITS_TRUE=
-  PROCESSING_UNITS_FALSE='#'
-else
-  PROCESSING_UNITS_TRUE='#'
-  PROCESSING_UNITS_FALSE=
-fi
-
-if test "$have_pthread" != "no"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define PROCESSING_UNITS 1
-_ACEOF
-
-fi
 
 
 
@@ -13532,6 +13650,13 @@ echo "$as_me: error: conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${PROCESSING_UNITS_TRUE}" && test -z "${PROCESSING_UNITS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"PROCESSING_UNITS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"PROCESSING_UNITS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${USE_GTK_TRUE}" && test -z "${USE_GTK_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"USE_GTK\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -13592,13 +13717,6 @@ if test -z "${USE_SOUND_TRUE}" && test -z "${USE_SOUND_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"USE_SOUND\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"USE_SOUND\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test -z "${PROCESSING_UNITS_TRUE}" && test -z "${PROCESSING_UNITS_FALSE}"; then
-  { { echo "$as_me:$LINENO: error: conditional \"PROCESSING_UNITS\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-echo "$as_me: error: conditional \"PROCESSING_UNITS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -14158,6 +14276,8 @@ s,@SRCONV@,$SRCONV,;t t
 s,@TR@,$TR,;t t
 s,@ALLOCA@,$ALLOCA,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
+s,@PROCESSING_UNITS_TRUE@,$PROCESSING_UNITS_TRUE,;t t
+s,@PROCESSING_UNITS_FALSE@,$PROCESSING_UNITS_FALSE,;t t
 s,@PKG_CONFIG@,$PKG_CONFIG,;t t
 s,@GTK_CFLAGS@,$GTK_CFLAGS,;t t
 s,@GTK_LIBS@,$GTK_LIBS,;t t
@@ -14176,6 +14296,8 @@ s,@GTKDATA@,$GTKDATA,;t t
 s,@LIBART_CONFIG@,$LIBART_CONFIG,;t t
 s,@LIBART_CFLAGS@,$LIBART_CFLAGS,;t t
 s,@LIBART_LIBS@,$LIBART_LIBS,;t t
+s,@GTHREAD_CFLAGS@,$GTHREAD_CFLAGS,;t t
+s,@GTHREAD_LIBS@,$GTHREAD_LIBS,;t t
 s,@GUILE_CONFIG@,$GUILE_CONFIG,;t t
 s,@GUILE_CFLAGS@,$GUILE_CFLAGS,;t t
 s,@GUILE_LIBS@,$GUILE_LIBS,;t t
@@ -14208,8 +14330,6 @@ s,@AUDIOFILE_CFLAGS@,$AUDIOFILE_CFLAGS,;t t
 s,@AUDIOFILE_LIBS@,$AUDIOFILE_LIBS,;t t
 s,@NAS_LIBS@,$NAS_LIBS,;t t
 s,@NAS_CFLAGS@,$NAS_CFLAGS,;t t
-s,@PROCESSING_UNITS_TRUE@,$PROCESSING_UNITS_TRUE,;t t
-s,@PROCESSING_UNITS_FALSE@,$PROCESSING_UNITS_FALSE,;t t
 s,@PNG_LIBS@,$PNG_LIBS,;t t
 s,@MKINSTALLDIRS@,$MKINSTALLDIRS,;t t
 s,@MSGFMT@,$MSGFMT,;t t
