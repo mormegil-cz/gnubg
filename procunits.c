@@ -126,7 +126,7 @@
 /* set to activate debugging -- warning: avoid using GTK at the same
    time because some alert windows that pop-up from secondary threads
    and lock-up GTK */
-#define RPU_DEBUG 0
+#define RPU_DEBUG 1
 #define RPU_DEBUG_PACK 0
 #define RPU_DEBUG_NOTIF 0
 #define PU_DEBUG_FREE 0
@@ -387,7 +387,7 @@ static void ClearStats (pu_stats *s)
 
 extern void InitProcessingUnits (void)
 {
-    int 		i;
+    int 		i, rv = 0;
     int 		nProcs = GetProcessorCount ();
 #if HAVE_SIGACTION
     struct sigaction 	act;
@@ -416,18 +416,27 @@ extern void InitProcessingUnits (void)
     /* create inter-thread mutexes and conditions neeeded for
         multithreaded operation */
         
-    pthread_mutexattr_init (&mutexAttrRecursive);
-    pthread_mutexattr_settype (&mutexAttrRecursive, PTHREAD_MUTEX_RECURSIVE);
-    
-    pthread_mutex_init (&mutexTaskListAccess, NULL);
-    pthread_mutex_init (&mutexResultsAvailable, NULL);
-    pthread_cond_init (&condResultsAvailable, NULL);
-    pthread_mutex_init (&mutexRPU_Notification, NULL);
-    pthread_cond_init (&condRPU_Notification, NULL);
-    pthread_mutex_init (&mutexProcunitAccess, &mutexAttrRecursive);
-    pthread_mutex_init (&mutexCPUAccess, NULL);
+    rv = pthread_mutexattr_init (&mutexAttrRecursive);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+    rv = pthread_mutexattr_settype (&mutexAttrRecursive, PTHREAD_MUTEX_RECURSIVE);
 
-    pthread_mutexattr_destroy (&mutexAttrRecursive);
+    rv = pthread_mutex_init (&mutexTaskListAccess, NULL);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+    rv = pthread_mutex_init (&mutexResultsAvailable, NULL);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+    rv = pthread_cond_init (&condResultsAvailable, NULL);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+    rv = pthread_mutex_init (&mutexRPU_Notification, NULL);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+    rv = pthread_cond_init (&condRPU_Notification, NULL);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+    rv = pthread_mutex_init (&mutexProcunitAccess, &mutexAttrRecursive);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+    rv = pthread_mutex_init (&mutexCPUAccess, NULL);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
+
+    rv = pthread_mutexattr_destroy (&mutexAttrRecursive);
+    if (rv!=0) fprintf (stderr, "mutex err %d", rv);
 
 #if USE_GTK2
     if (fX && gplsProcunits == NULL) {
@@ -1849,7 +1858,7 @@ extern void MarkTaskDone (pu_task *pt, procunit *ppu)
         assigned to this procunit (it may have been removed or reassigned 
         to another procunit) !!! */
 
-    /*outputerrf ("# Task done.\n");*/
+    if (PU_DEBUG) outputerrf ("# Task done.\n");
     
     if (ppu == NULL)
         ppu = FindProcessingUnit (NULL, pu_type_none, pu_stat_none, pu_task_none, pt->procunit_id);
@@ -3632,7 +3641,7 @@ static void Slave (void)
 					    &masterAddressLen );
 #ifdef WIN32
 			nWSAError = WSAGetLastError();
-                        if ( (rpuSocket == INVALID_SOCKET) && (nWSAError != WSAEAGAIN)
+                        if ( (rpuSocket == INVALID_SOCKET)
                              && (nWSAError != WSAEWOULDBLOCK) )
 #else
                         if (rpuSocket == -1 && errno != EAGAIN && errno != EWOULDBLOCK) 
@@ -3642,7 +3651,7 @@ static void Slave (void)
 
                     }
 #ifdef WIN32
-                    while ( (rpuSocket != INVALID_SOCKET) &&
+                    while ( (rpuSocket == INVALID_SOCKET) &&
 			    (!fInterrupt) );
 #else
                     while (rpuSocket < 0 && !fInterrupt);
