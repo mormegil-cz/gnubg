@@ -30,11 +30,18 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef HAVE_LIBXML2
+#include <libxml/parser.h>
+#include <libxml/parserInternals.h>
+#endif
+
 #include "backgammon.h"
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
 #include "i18n.h"
+
+
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -54,11 +61,13 @@ static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
     *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges;
 
-#if HAVE_LIBXML2 && 0
-static GtkWidget *pwDesignMenu;
+#if HAVE_LIBXML2
 static GtkWidget *pwDesignTitle;
 static GtkWidget *pwDesignAuthor;
 static GtkWidget *pwDesignPixmap;
+static GtkWidget *pwDesignList;
+static GtkWidget *pwDesignUse;
+static GtkWidget *pwDesignRemove;
 #endif /* HAVE_LIBXML2 */
 
 static GtkWidget *pwShowIDs;
@@ -74,107 +83,26 @@ static int fShowIDs;
 static int fShowPips;
 static animation anim;
 
+static GList *
+ParseBoardDesigns ( const char *szFile );
+
 
 typedef struct _boarddesign {
 
   gchar *szTitle;        /* Title of board design */
   gchar *szAuthor;       /* Name of author */
   gchar *szFilePreview;  /* preview picture */
-
-  /* chequers */
-
-  gdouble aarColour[ 2 ][ 4 ];
-  gfloat arRefraction[ 2 ];
-  gfloat arCoefficient[ 2 ];
-  gfloat arExponent[ 2 ];
-  gboolean translucent;
-
-  /* board, border, and points */
-
-  guchar aanBoardColour[ 4 ][ 4 ];
-  int aSpeckle[ 4 ];
-  gboolean hinges;
-  BoardWood wood;
-
-  /* die */
-
-  int afDieColor[ 2 ];
-  gdouble aarDiceColour[ 2 ][ 4 ];
-  gfloat arDiceCoefficient[ 2 ];
-  gfloat arDiceExponent[ 2 ];
-
-  /* die dot */
-
-  gdouble aarDiceDotColour[ 2 ][ 4 ];
-  
-  /* cube */
-
-  gdouble arCubeColour[ 4 ]; 
-
-  /* light */
-
-  gfloat rAzimuth;
-  gfloat rElevation;
+  gchar *szBoardDesign;  /* Command for setting board */
 
 } boarddesign;
 
 
+static boarddesign *pbdeSelected = NULL;
+
 extern GList *
 read_board_designs ( void ) {
 
-  GList *pl;
-  boarddesign *pbde;
-  int i;
-
-  boarddesign bde = {
-    NULL, NULL, NULL,
-    /* chequers */
-    { { 1.0, 1.0, 1.0, 1.0 }, { 0.05, 0.05, 0.05, 1.0 } },
-    { 3.0, 3.0 }, 
-    { 0.9, 0.9 },
-    { 20.0, 15.1 },
-    FALSE,
-    /* board + points */
-    { { 243, 230, 218, 0 },
-      {   0,   0,   0, 0 },
-      {   0, 166, 128, 0 },
-      {  77,  77,  77, 0 } },
-    { 13, 0, 13, 13 },
-    TRUE, WOOD_EBONY, 
-    /* dice */
-    { TRUE, TRUE },
-    { { 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0 } },
-    { 0.0, 0.0 },
-    { 0.0, 0.0 },
-    /*  dice dot */
-    { { 0.93, 0.94, 0.95, 0.0 }, { 0.93, 0.94, 0.95, 0.0 } },
-    /* cube color */
-    { 0.84, 0.84, 0.78, 0.0 },
-    /* light */
-    150.0, 50.0
-  };
-    
-
-  if ( ! ( pl = g_list_alloc () ) )
-    return NULL;
-
-  /* read board designs from file */
-
-  for ( i = 0; i < 10; ++i ) {
-
-    pbde = (boarddesign *) malloc ( sizeof ( boarddesign ) );
-    
-    memcpy ( pbde, &bde, sizeof ( boarddesign ) );
-    pbde->szTitle = g_strdup ( "test board" );
-    pbde->szAuthor = g_strdup ( "Jørn Thyssen" );
-    pbde->szFilePreview = g_strdup ( "xpm/bla.xpm" );
-
-    g_list_append ( pl, (gpointer) pbde );
-
-  }
-
-  return pl;
-
+  return ParseBoardDesigns ( "boards/boards.xml" );
 }
 
 static void
@@ -188,6 +116,7 @@ free_board_design ( gpointer data, gpointer user_data ) {
   g_free ( pbde->szTitle );
   g_free ( pbde->szAuthor );
   g_free ( pbde->szFilePreview );
+  g_free ( pbde->szBoardDesign );
 
   g_free ( data );
 
@@ -768,12 +697,12 @@ extern void BoardPreferencesStart( GtkWidget *pwBoard ) {
 	board_free_pixmaps( bd );
 }
 
-#if HAVE_LIBXML2 && 0
+#if HAVE_LIBXML2
 
 /* functions for board design */
 
 static void
-DesignMenuActivate ( GtkWidget *pw, boarddesign *pbde ) {
+DesignActivate ( GtkWidget *pw, boarddesign *pbde ) {
 
   gchar *sz;
   GdkPixmap *ppm;
@@ -837,60 +766,76 @@ DesignMenuActivate ( GtkWidget *pw, boarddesign *pbde ) {
 }
 
 
+
 static void
-AddDesignMenuItem ( gpointer data, gpointer user_data ) {
+SaveDesigns ( GtkWidget *pw, gpointer unused ) {
 
-  GtkWidget *pwMenu = user_data;
-  boarddesign *pbde = data;
-  GtkWidget *pw;
+  /* IMPLEMENT ME */
+  
+}
 
-  if ( ! pbde )
-    return;
 
-  if ( pbde->szTitle && *pbde->szTitle )
-    pw = gtk_menu_item_new_with_label ( pbde->szTitle );
-  else
-    pw = gtk_menu_item_new_with_label ( _("No title") );
+static void
+AddDesign ( GtkWidget *pw, gpointer unused ) {
 
-  gtk_menu_append ( GTK_MENU ( pwMenu ), pw );
-
-  gtk_signal_connect ( GTK_OBJECT ( pw ), "activate",
-                       GTK_SIGNAL_FUNC ( DesignMenuActivate ),
-                       pbde );
-
+  /* IMPLEMENT ME */
 
 }
 
-static void
-UseDesign ( GtkWidget *pw, GtkWidget *pwOptionMenu ) {
 
-  int n = gtk_option_menu_get_history ( GTK_OPTION_MENU ( pwOptionMenu ) );
-  GList *pl = g_list_nth ( plBoardDesigns, n + 1 );
-  boarddesign *pbde = pl->data;
+
+static void
+RemoveDesign ( GtkWidget *pw, gpointer data ) {
+
+  GList *plBoardDesigns = data;
+  int i = gtk_clist_find_row_from_data ( GTK_CLIST ( pwDesignList ),
+                                         pbdeSelected );
+  gtk_clist_remove ( GTK_CLIST ( pwDesignList ), i );
+
+  plBoardDesigns = g_list_remove ( plBoardDesigns, pbdeSelected );
+
+}
+
+
+static void
+UseDesign ( GtkWidget *pw, gpointer unused ) {
+
+  BoardData bd;
   int i, j;
   gdouble ar[ 4 ];
+  gfloat rAzimuth, rElevation;
+  char *apch[ 2 ];
+  gchar *sz, *pch;
+
+  memset ( &bd, 0, sizeof ( BoardData ) );
+
+  pch = sz = g_strdup ( pbdeSelected->szBoardDesign );
+  while( ParseKeyValue( &sz, apch ) ) 
+    BoardPreferencesParam( &bd, apch[ 0 ], apch[ 1 ] );
+  g_free ( pch );
+  
 
   /* chequers */
 
-  fTranslucent = pbde->translucent;
+  fTranslucent = bd.translucent;
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwTranslucent ), 
                                 fTranslucent );
 
   for ( i = 0; i < 2; ++i ) {
     gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwColour[ i ] ),
-                                    pbde->aarColour[ i ] );
+                                    bd.aarColour[ i ] );
 
     gtk_color_selection_set_has_opacity_control(
 	GTK_COLOR_SELECTION( apwColour[ i ] ), fTranslucent );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadj[ i ] ),
-                               pbde->arRefraction[ i ] );
+                               bd.arRefraction[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjCoefficient[ i ] ),
-                               pbde->arCoefficient[ i ] );
+                               bd.arCoefficient[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjExponent[ i ] ),
-                               pbde->arExponent[ i ] );
+                               bd.arExponent[ i ] );
 
 
   }
@@ -898,11 +843,11 @@ UseDesign ( GtkWidget *pw, GtkWidget *pwOptionMenu ) {
   /* board, border, and points */
 
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwHinges ), 
-                                 pbde->hinges );
-  gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), pbde->wood );
+                                 bd.hinges );
+  gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), bd.wood );
 
-  gtk_widget_set_sensitive( pwWoodType, pbde->wood != WOOD_PAINT );
-  gtk_widget_set_sensitive( apwBoard[ 1 ], pbde->wood == WOOD_PAINT);
+  gtk_widget_set_sensitive( pwWoodType, bd.wood != WOOD_PAINT );
+  gtk_widget_set_sensitive( apwBoard[ 1 ], bd.wood == WOOD_PAINT);
 
   /* board + border */
     
@@ -910,10 +855,10 @@ UseDesign ( GtkWidget *pw, GtkWidget *pwOptionMenu ) {
 
     if ( !i ) 
       gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjBoard[ i ] ),
-                                 pbde->aSpeckle[ i ] / 128.0 );
+                                 bd.aSpeckle[ i ] / 128.0 );
 
     for ( j = 0; j < 3; j++ )
-      ar[ j ] = pbde->aanBoardColour[ i ][ j ] / 255.0;
+      ar[ j ] = bd.aanBoardColour[ i ][ j ] / 255.0;
 
     gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwBoard[ i ]),
                                     ar );
@@ -925,10 +870,10 @@ UseDesign ( GtkWidget *pw, GtkWidget *pwOptionMenu ) {
   for ( i = 0; i < 2; ++i ) {
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjPoint[ i ] ),
-                               pbde->aSpeckle[ i + 2 ] / 128.0 );
+                               bd.aSpeckle[ i + 2 ] / 128.0 );
 
     for ( j = 0; j < 3; j++ )
-      ar[ j ] = pbde->aanBoardColour[ i + 2 ][ j ] / 255.0;
+      ar[ j ] = bd.aanBoardColour[ i + 2 ][ j ] / 255.0;
 
     gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwPoint[ i ]),
                                     ar );
@@ -940,81 +885,139 @@ UseDesign ( GtkWidget *pw, GtkWidget *pwOptionMenu ) {
   for ( i = 0; i < 2; ++i ) {
 
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColor[ i ] ),
-                                   pbde->afDieColor[ i ] );
+                                   bd.afDieColor[ i ] );
     gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColorBox[ i ] ),
-                               ! pbde->afDieColor[ i ] );
+                               ! bd.afDieColor[ i ] );
 
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwDiceColour[ i ] ),
-                                   pbde->afDieColor[ i ] ? 
-                                   pbde->aarColour[ i ] :
-                                   pbde->aarDiceColour[ i ] );
+                                   bd.afDieColor[ i ] ? 
+                                   bd.aarColour[ i ] :
+                                   bd.aarDiceColour[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjDiceExponent[ i ] ),
-                               pbde->afDieColor[ i ] ? 
-                               pbde->arExponent[ i ] :
-                               pbde->arDiceExponent[ i ] );
+                               bd.afDieColor[ i ] ? 
+                               bd.arExponent[ i ] :
+                               bd.arDiceExponent[ i ] );
 
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjDiceCoefficient[ i ] ),
-                               pbde->afDieColor[ i ] ?
-                               pbde->arCoefficient[ i ] :
-                               pbde->arDiceCoefficient[ i ] );
+                               bd.afDieColor[ i ] ?
+                               bd.arCoefficient[ i ] :
+                               bd.arDiceCoefficient[ i ] );
 
 
     /* die dot */
 
     gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwDiceDotColour[ i ] ), 
-                                    pbde->aarDiceDotColour[ i ] );
+                                    bd.aarDiceDotColour[ i ] );
 
   }
 
   /* cube color */
   
   gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( pwCubeColour ), 
-                                  pbde->arCubeColour );
+                                  bd.arCubeColour );
 
   /* light */
 
+  rElevation = asinf( bd.arLight[ 2 ] ) * 180 / M_PI;
+  rAzimuth = acosf( bd.arLight[ 0 ] / sqrt( 1.0 - bd.arLight[ 2 ] *
+                                             bd.arLight[ 2 ] ) ) * 180 / M_PI;
+  if( bd.arLight[ 1 ] < 0 )
+    rAzimuth = 360 - rAzimuth;
+    
   gtk_adjustment_set_value ( GTK_ADJUSTMENT ( paAzimuth ),
-                             pbde->rAzimuth );
+                             rAzimuth );
   gtk_adjustment_set_value ( GTK_ADJUSTMENT ( paElevation ),
-                             pbde->rElevation );
+                             rElevation );
 
 
 }
 
-static GtkWidget *
-DesignPage ( void ) {
 
+static void
+AddDesignRow ( gpointer data, gpointer user_data ) {
+
+  GtkWidget *pwList = user_data;
+  boarddesign *pbde = data;
+  GtkWidget *pw;
+  char *asz[ 1 ];
+  gint i;
+
+  if ( ! pbde )
+    return;
+
+  asz[ 0 ] = pbde->szTitle;
+
+  i = gtk_clist_append ( GTK_CLIST ( pwList ), asz );
+  gtk_clist_set_row_data ( GTK_CLIST ( pwList ), i, pbde );
+
+}
+
+static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
+			  GdkEventButton *pev, gpointer unused ) {
+
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignUse ), TRUE );
+#if 0
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), TRUE );
+#endif
+
+  pbdeSelected = gtk_clist_get_row_data ( GTK_CLIST ( pwDesignList ),
+                                          nRow );
+
+  DesignActivate ( pwDesignUse, pbdeSelected );
+
+}
+
+static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
+			  GdkEventButton *pev, gpointer unused ) {
+
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignUse ), FALSE );
+#if 0
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
+#endif
+
+  pbdeSelected = NULL;
+
+}
+
+
+static GtkWidget *
+DesignPage ( GList *plBoardDesigns ) {
 
   GtkWidget *pwvbox;
   GtkWidget *pwhbox;
   GtkWidget *pw;
   GtkWidget *pwFrame;
   GtkWidget *pwv;
+  GtkWidget *pwScrolled;
+  GtkWidget *pwPage;
+  char *asz[ 1 ];
 
 #include "xpm/no_picture.xpm"
 
-  pwvbox = gtk_vbox_new ( FALSE, 0 );
+  pwPage = gtk_hbox_new ( FALSE, 4 );
 
-  /* menu with board designs */
+  /* CList with board designs */
 
-  pwhbox = gtk_hbox_new ( FALSE, 0 );
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwhbox, FALSE, FALSE, 4 );
+  pwScrolled = gtk_scrolled_window_new( NULL, NULL );
+  gtk_container_add ( GTK_CONTAINER ( pwPage ), pwScrolled );
 
-  gtk_box_pack_start ( GTK_BOX ( pwhbox ), 
-                       gtk_label_new ( _("Select board design:") ), 
-                       FALSE, FALSE, 4 );
+  pwDesignList = gtk_clist_new( 1 );
+  gtk_clist_set_column_auto_resize( GTK_CLIST( pwDesignList ), 0, TRUE );
+  
+  g_list_foreach ( plBoardDesigns, AddDesignRow, pwDesignList );
+  gtk_container_add ( GTK_CONTAINER ( pwScrolled ), pwDesignList );
 
-  pw = gtk_menu_new ();
-  g_list_foreach ( plBoardDesigns, AddDesignMenuItem, pw );
+  gtk_signal_connect( GTK_OBJECT( pwDesignList ), "select-row",
+                      GTK_SIGNAL_FUNC( DesignSelect ), NULL );
+  gtk_signal_connect( GTK_OBJECT( pwDesignList ), "unselect-row",
+                      GTK_SIGNAL_FUNC( DesignUnselect ), NULL );
 
-  pwDesignMenu = gtk_option_menu_new ();
-  gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pwDesignMenu ),
-                             pw );
 
-  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignMenu, TRUE, TRUE, 4 );
+  /* preview page */
 
-  /* preview board design */
+  pwvbox = gtk_vbox_new ( FALSE, 4 );
+  gtk_container_add ( GTK_CONTAINER ( pwPage ), pwvbox );
 
   pwFrame = gtk_frame_new ( _("Selected board design" ) );
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
@@ -1058,25 +1061,45 @@ DesignPage ( void ) {
 
   /* button: use design */
 
-  pwhbox = gtk_alignment_new ( 0.5, 0.5, 0.0, 0.0 );
+  pwhbox = gtk_hbox_new ( FALSE, 0 );
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwhbox, FALSE, FALSE, 4 );
 
+  /* buttons */
 
-  pw = gtk_button_new_with_label ( _("Use design") );
-  gtk_container_add ( GTK_CONTAINER ( pwhbox ), pw );
+  pwDesignUse = gtk_button_new_with_label ( _("Use design") );
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignUse, FALSE, FALSE, 4 );
+
+  gtk_signal_connect ( GTK_OBJECT ( pwDesignUse ), "clicked",
+                       GTK_SIGNAL_FUNC ( UseDesign ), NULL );
+
+#if 0
+
+  pwDesignRemove = gtk_button_new_with_label ( _("Remove design") );
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignRemove, FALSE, FALSE, 4 );
+
+  gtk_signal_connect ( GTK_OBJECT ( pwDesignRemove ), "clicked",
+                       GTK_SIGNAL_FUNC ( RemoveDesign ), plBoardDesigns );
+
+  pw = gtk_button_new_with_label ( _("Add current design") );
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pw, FALSE, FALSE, 4 );
 
   gtk_signal_connect ( GTK_OBJECT ( pw ), "clicked",
-                       GTK_SIGNAL_FUNC ( UseDesign ), pwDesignMenu );
+                       GTK_SIGNAL_FUNC ( AddDesign ), NULL );
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pw ), FALSE );
 
-  if ( g_list_length ( plBoardDesigns ) > 1 ) {
-    GList *pl = g_list_nth ( plBoardDesigns, 1 );
+  pw = gtk_button_new_with_label ( _("Save designs") );
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pw, FALSE, FALSE, 4 );
 
-    gtk_option_menu_set_history ( GTK_OPTION_MENU ( pwDesignMenu ), 0 );
+  gtk_signal_connect ( GTK_OBJECT ( pw ), "clicked",
+                       GTK_SIGNAL_FUNC ( SaveDesigns ), NULL );
 
-    DesignMenuActivate ( pwvbox, pl->data );
-  }
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
 
-  return pwvbox;
+#endif
+
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignUse ), FALSE );
+
+  return pwPage;
 
 }
 
@@ -1285,12 +1308,21 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     BoardPrefsDo( pw, bd, TRUE );
 }
 
+static void
+BoardPrefsDestroy ( GtkWidget *pw, GList *plBoardDesigns ) {
+
+  free_board_designs ( plBoardDesigns );
+
+}
+
+
 extern void BoardPreferences( GtkWidget *pwBoard ) {
 
     int i;
     GtkWidget *pwDialog, *pwNotebook,
         *pwApply = gtk_button_new_with_label( _("Apply") );
     BoardData *bd = BOARD( pwBoard )->board_data;
+    GList *plBoardDesigns;
     
     fTranslucent = bd->translucent;
     fLabels = bd->labels;
@@ -1324,11 +1356,12 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      GeneralPage( bd ),
 			      gtk_label_new( _("General") ) );
-#if HAVE_LIBXML2 && 0 
+#if HAVE_LIBXML2
+    plBoardDesigns = read_board_designs ();
     gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                               DesignPage (),
+                               DesignPage ( plBoardDesigns ),
                                gtk_label_new ( "Designs" ) );
-#endif
+#endif /* HAVE_LIBXML2 */
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      ChequerPrefs( bd, 0 ),
 			      gtk_label_new( _("Chequers (0)") ) );
@@ -1360,6 +1393,10 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
+#if HAVE_LIBXML2
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( BoardPrefsDestroy ), plBoardDesigns );
+#endif /* HAVE_LIBXML2 */
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
@@ -1588,11 +1625,10 @@ static int SetWood( char *sz, BoardWood *pbw ) {
     return -1;
 }
 
-extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
+extern void BoardPreferencesParam( BoardData *bd, char *szParam,
 				   char *szValue ) {
 
     int c, fValueError = FALSE;
-    BoardData *bd = BOARD( pwBoard )->board_data;
     
     if( !szParam || !*szParam )
 	return;
@@ -1823,3 +1859,243 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 
     return sz;
 }
+
+#if HAVE_LIBXML2
+
+typedef enum _parsestate {
+  STATE_NONE,
+  STATE_BOARD_DESIGNS,
+  STATE_BOARD_DESIGN,
+  STATE_ABOUT,
+  STATE_TITLE, STATE_AUTHOR, STATE_PREVIEW_FILE,
+  STATE_DESIGN, 
+} parsestate;
+
+typedef struct _parsecontext {
+
+  GList *pl;  /* list of board designs */
+
+  parsestate aps[ 10 ];      /* the current tag */
+  int ips;                   /* depth of stack */
+
+  boarddesign *pbde;
+  int i, j;      /* counters */
+  int err;     /* return code */
+
+} parsecontext;
+
+
+static void
+PushState ( parsecontext *ppc, const parsestate ps ) {
+
+  if ( ppc->ips > 9 ) {
+    ppc->err = TRUE;
+    return;
+  }
+
+  ++(ppc->ips);
+  ppc->aps[ ppc->ips ] = ps;
+
+}
+
+static void
+PopState ( parsecontext *ppc ) {
+
+ (ppc->ips)--;
+
+}
+
+
+static void Err( void *pv, const char *msg, ... ) {
+
+  parsecontext *ppc = pv;
+  va_list args;
+  
+  ppc->err = TRUE;
+  
+  va_start(args, msg);
+  vprintf(msg, args);
+  va_end(args);
+  
+}
+
+static void ScanEndElement( void *pv, const xmlChar *pchName ) {
+  
+  parsecontext *ppc = pv;
+
+  /* pop element */
+
+  PopState ( ppc );
+
+}
+
+
+
+static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
+
+  parsecontext *ppc = pv;
+  char *sz = g_strndup ( pchIn, cch );
+
+  switch ( ppc->aps[ ppc->ips ] ) {
+  case STATE_BOARD_DESIGNS:
+  case STATE_BOARD_DESIGN:
+    /* no chars in these elements */
+    break;
+
+  case STATE_TITLE:
+
+    ppc->pbde->szTitle = strdup ( sz );
+    break;
+
+  case STATE_AUTHOR:
+
+    ppc->pbde->szAuthor = strdup ( sz );
+    break;
+
+  case STATE_PREVIEW_FILE:
+
+    ppc->pbde->szFilePreview = strdup ( sz );
+    break;
+
+  case STATE_DESIGN:
+    ppc->pbde->szBoardDesign = strdup ( sz );
+    break;
+
+  default:
+    break;
+  }
+
+  g_free ( sz );
+
+}
+
+static void ScanStartElement( void *pv, const xmlChar *pchName,
+                              const xmlChar **ppchAttrs ) {
+
+  const xmlChar **psz;
+  parsecontext *ppc = pv;
+  int f;
+
+
+  if ( ! strcmp ( pchName, "board-designs" ) && ppc->ips == -1 ) {
+
+    PushState ( ppc, STATE_BOARD_DESIGNS );
+
+  }
+  else if ( ! strcmp ( pchName, "board-design" ) &&
+            ppc->aps[ ppc->ips ] == STATE_BOARD_DESIGNS ) {
+
+    /* allocate list if empty */
+    if ( ! ppc->pl )
+      ppc->pl = g_list_alloc ();
+
+    ppc->pbde = (boarddesign *) malloc ( sizeof ( boarddesign ) );
+    memset ( ppc->pbde, 0, sizeof ( boarddesign ) );
+    g_list_append ( ppc->pl, (gpointer) ppc->pbde );
+
+    PushState ( ppc, STATE_BOARD_DESIGN );
+
+  }
+  else if ( ! strcmp ( pchName, "about" ) &&
+            ppc->aps[ ppc->ips ] == STATE_BOARD_DESIGN ) {
+
+    PushState ( ppc, STATE_ABOUT );
+
+  }
+  else if ( ! strcmp ( pchName, "title" ) &&
+            ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
+
+    PushState ( ppc, STATE_TITLE );
+
+  }
+  else if ( ! strcmp ( pchName, "author" ) &&
+            ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
+
+    PushState ( ppc, STATE_AUTHOR );
+
+  }
+  else if ( ! strcmp ( pchName, "preview-file" ) &&
+            ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
+
+    PushState ( ppc, STATE_PREVIEW_FILE );
+
+  }
+  else if ( ! strcmp ( pchName, "design" ) &&
+            ppc->aps[ ppc->ips ] == STATE_BOARD_DESIGN ) {
+
+    PushState ( ppc, STATE_DESIGN );
+
+  }
+  else
+    printf ( "ignoring start tag \"%s\"\n", pchName );
+
+
+}
+
+
+xmlSAXHandler xsaxScan = {
+    NULL, /* internalSubset */
+    NULL, /* isStandalone */
+    NULL, /* hasInternalSubset */
+    NULL, /* hasExternalSubset */
+    NULL, /* resolveEntity */
+    NULL, /* getEntity */
+    NULL, /* entityDecl */
+    NULL, /* notationDecl */
+    NULL, /* attributeDecl */
+    NULL, /* elementDecl */
+    NULL, /* unparsedEntityDecl */
+    NULL, /* setDocumentLocator */
+    NULL, /* startDocument */
+    NULL, /* endDocument */
+    ScanStartElement, /* startElement */
+    ScanEndElement, /* endElement */
+    NULL, /* reference */
+    ScanCharacters, /* characters */
+    NULL, /* ignorableWhitespace */
+    NULL, /* processingInstruction */
+    NULL, /* comment */
+    Err, /* xmlParserWarning */
+    Err, /* xmlParserError */
+    Err, /* fatal error */
+    NULL, /* getParameterEntity */
+    NULL, /* cdataBlock; */
+    NULL,  /* externalSubset; */
+    TRUE
+};
+
+static GList *
+ParseBoardDesigns ( const char *szFile ) {
+
+  xmlParserCtxt *pxpc;
+  parsecontext pc;
+  char *pch;
+
+  pc.ips = -1;
+  pc.pl = NULL;
+  pc.err = FALSE;
+
+  /* create parser context */
+
+  if ( ! ( pch = PathSearch ( szFile, szDataDirectory ) ) )
+    return NULL;
+  pxpc = xmlCreateFileParserCtxt ( pch );
+  free ( pch );
+  if ( ! pxpc )
+    return NULL;
+
+  pxpc->sax = &xsaxScan;
+  pxpc->userData = &pc;
+
+  /* parse document */
+
+  xmlParseDocument ( pxpc );
+
+  if ( pc.err )
+    free_board_designs ( pc.pl );
+
+  return pc.err ? NULL : pc.pl;
+
+}
+
+#endif /* HAVE_LIBXML2 */

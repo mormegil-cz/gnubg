@@ -1,6 +1,6 @@
 ## $Id$
 if USE_EXT
-SUBDIRS = intl lib doc ext met po m4 xpm sounds
+SUBDIRS = intl lib doc ext met po m4 xpm sounds boards
 else
 SUBDIRS = intl lib doc met po m4 xpm sounds
 endif

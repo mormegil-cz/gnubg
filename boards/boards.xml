@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!--
+
+     boards.xml
+
+     by Joern Thyssen <jthyssen@dk.ibm.com>, 2002
+
+     This file is distributed as a part of the GNU Backgammon program.
+
+     Copying and distribution of verbatim and modified versions of this file
+     is permitted in any medium provided the copyright notice and this
+     permission notice are preserved.
+
+     $Id$
+
+ -->
+
+
+<board-designs>
+
+   <board-design>
+
+      <about>
+         <title>Default setting</title>
+         <author>The GNU Backgammon Team</author>
+         <preview-file>boards/default.xpm</preview-file>
+      </about>
+ 
+      <design>
+         board=#2F5F2F;0.20 
+         border=#003F00 
+         translucent=y 
+         wood=alder 
+         hinges=y 
+         light=150;50 
+         shape=0.5 
+         chequers0=#F12525;0.90;1.50;0.20;3.00 
+         chequers1=#00000B;0.50;1.50;1.00;30.00 
+         dice0=#F12525;0.20;3.00;y 
+         dice1=#00000B;1.00;30.00;y 
+         dot0=#A4A4A4 
+         dot1=#A4A4A4
+         cube=#D7D7D7
+         points0=#FF5F5F;0.20
+         points1=#BFBFBF;0.20
+      </design>
+
+   </board-design>
+
+
+   <board-design>
+
+      <about>
+         <title>Albert Silver 1</title>
+         <author>Albert Silver</author>
+         <preview-file>boards/silver1.xpm</preview-file>
+      </about>
+ 
+      <design>
+         board=#F2E5D8;0.09 
+         border=#003F00 
+         translucent=y
+         wood=ebony 
+         hinges=y
+         light=150;50 
+         shape=0.5
+         chequers0=#FDFDFD;1.00;3.00;0.90;20.00
+         chequers1=#0B0B0B;1.00;3.00;0.90;15.00 
+         dice0=#EE2222;0.20;3.00;y
+         dice1=#000008;1.00;30.00;y 
+         dot0=#EDEFF2 
+         dot1=#EDEFF2 
+         cube=#D6D6C6
+         points0=#4CA57F;0.09 
+         points1=#4C4C4C;0.20
+      </design>
+
+   </board-design>
+
+   <board-design>
+
+      <about>
+         <title>Albert Silver 2</title>
+         <author>Albert Silver</author>
+         <preview-file>boards/silver2.xpm</preview-file>
+      </about>
+ 
+      <design>
+         board=#FFD872;0.09 
+         border=#003F00 
+         translucent=y 
+         wood=walnut 
+         hinges=y 
+         light=150;50 
+         shape=0.5 
+         chequers0=#FFFFFF;1.00;3.00;0.90;19.90 
+         chequers1=#000000;1.00;3.00;0.90;14.80 
+         dice0=#FBFBFB;0.90;19.90;y 
+         dice1=#090909;0.90;14.80;y 
+         dot0=#EBEDF0 
+         dot1=#EBEDF0 
+         cube=#D4D4C4 
+         points0=#CC7F00;0.09 
+         points1=#7F3F00;0.20
+      </design>
+
+   </board-design>
+
+   <board-design>
+
+      <about>
+         <title>Albert Silver 3</title>
+         <author>Albert Silver</author>
+         <preview-file>boards/silver3.xpm</preview-file>
+      </about>
+ 
+      <design>
+         board=#BFBFBF;0.09 
+         border=#003F00 
+         translucent=y 
+         wood=walnut 
+         hinges=y 
+         light=150;50 
+         shape=0.5 
+         chequers0=#FEFEFE;1.00;3.00;0.90;19.90 
+         chequers1=#000000;1.00;3.00;0.90;14.80 
+         dice0=#FEFEFE;0.90;19.90;y 
+         dice1=#000000;0.90;14.80;y 
+         dot0=#EAECEF 
+         dot1=#EAECEF 
+         cube=#D3D3C3 
+         points0=#980000;0.09 
+         points1=#000072;0.20      
+      </design>
+
+   </board-design>
+
+</board-designs>
+
+

@@ -25,16 +25,10 @@
 #include "gtkboard.h"
 
 extern void BoardPreferences( GtkWidget *pwBoard );
-extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
+extern void BoardPreferencesParam( BoardData *bd, char *szParam,
 				   char *szValue );
 extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz );
 extern void BoardPreferencesStart( GtkWidget *pwBoard );
 extern void BoardPreferencesDone( GtkWidget *pwBoard );
-
-extern GList *
-read_board_designs ( void );
-
-extern void
-free_board_designs ( GList *pl );
 
 #endif

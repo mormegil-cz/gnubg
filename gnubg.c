@@ -3339,11 +3339,6 @@ extern void PromptForExit( void ) {
     playSound ( SOUND_EXIT );
     SoundWait();
 
-#if USE_GTK
-    if ( fX )
-      free_board_designs ( plBoardDesigns );
-#endif
-
     EvalShutdown ();
     
     exit( EXIT_SUCCESS );
@@ -6141,13 +6136,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     ListCreate( &lMatch );
     IniStatcontext( &scMatch );
     
-    /* read board designs */
-
-#if USE_GTK
-    if ( fX )
-      plBoardDesigns = read_board_designs ();
-#endif
-
     /* setup readline */
     
 #if USE_GTK

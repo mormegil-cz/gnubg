@@ -129,7 +129,7 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4 xpm sounds
+@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4 xpm sounds boards
 @USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4 xpm sounds
 
 localedir = $(datadir)/locale
@@ -336,7 +336,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	strdup.c
-DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds
+DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds boards
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makeweights_SOURCES)
 
 all: config.h
