@@ -168,51 +168,60 @@ extern void CommandDatabaseGenerate( char *sz ) {
   GDBM_FILE pdb;
   datum dKey, dValue;
   dbevaluation ev;
-  int i, c = 0, anBoardGenerate[ 2 ][ 25 ], anDiceGenerate[ 2 ];
+  int i, c = 0, n, anBoardGenerate[ 2 ][ 25 ], anDiceGenerate[ 2 ];
   unsigned char auchKey[ 10 ];
-    
+
+  if( sz && *sz ) {
+      if( ( n = ParseNumber( &sz ) ) < 1 ) {
+	  outputl( "If you specify a parameter to `database generate', it\n"
+		   "must be a number of positions to create." );
+	  return;
+      }
+  } else
+      n = INT_MAX;
+      
   if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRCREAT, 0666, NULL ) ) ) {
     fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
     return;
   }
 
-  while( !fInterrupt ) {
+  while( c <= n && !fInterrupt ) {
     InitBoard( anBoardGenerate );
 	
     do {    
-	    if( !( ++c % 100 ) && fShowProgress ) {
-        outputf( "%6d\r", c );
-        fflush( stdout );
-	    }
+	if( !( ++c % 100 ) && fShowProgress ) {
+	    outputf( "%6d\r", c );
+	    fflush( stdout );
+	}
 	    
-	    RollDice( anDiceGenerate );
+	RollDice( anDiceGenerate );
 
-	    if( fInterrupt )
-        break;
+	if( fInterrupt )
+	    break;
 	    
-	    FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
-                    anBoardGenerate, &ciCubeless, NULL );
+	FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
+		      anBoardGenerate, &ciCubeless, NULL );
 
-	    if( fInterrupt )
-        break;
+	if( fInterrupt )
+	    break;
 	    
-	    SwapSides( anBoardGenerate );
-
-	    PositionKey( anBoardGenerate, auchKey );
-
-	    dKey.dptr = auchKey;
-	    dKey.dsize = 10;
-
-	    ev.t = ev.c = 0;
-	    for( i = 0; i < NUM_OUTPUTS; i++ )
-        ev.asEq[ i ] = 0;
-
-	    dValue.dptr = (char *) &ev;
-	    dValue.dsize = sizeof ev;
-
-	    gdbm_store( pdb, dKey, dValue, GDBM_INSERT );
-    } while( !fInterrupt && ClassifyPosition( anBoardGenerate ) >
+	SwapSides( anBoardGenerate );
+	
+	PositionKey( anBoardGenerate, auchKey );
+	
+	dKey.dptr = auchKey;
+	dKey.dsize = 10;
+	
+	ev.t = ev.c = 0;
+	for( i = 0; i < NUM_OUTPUTS; i++ )
+	    ev.asEq[ i ] = 0;
+	
+	dValue.dptr = (char *) &ev;
+	dValue.dsize = sizeof ev;
+	
+	gdbm_store( pdb, dKey, dValue, GDBM_INSERT );
+    } while( c <= n && !fInterrupt && ClassifyPosition( anBoardGenerate ) >
              CLASS_PERFECT );
   }
 
