@@ -5,8 +5,8 @@
  *               ie the maximum level the cube goes to.
  */
 
-#define MAXSCORE      8
-#define MAXCUBELEVEL  4
+#define MAXSCORE      64
+#define MAXCUBELEVEL  7
 #define DELTA         0.08
 #define DELTABAR      0.06
 #define G1            0.25

@@ -1370,8 +1370,8 @@ extern float UtilityMwc( float ar[ NUM_OUTPUTS ], cubeinfo *ci ) {
 
   if ( fCrawford || fPostCrawford ) {
 
-    printf ("UMWC Craw: n0 n1 %2i %2i\n", nScore0, nScore1 );
-    printf ("     Cube: %1i\n", nCube );
+    //printf ("UMWC Craw: n0 n1 %2i %2i\n", nScore0, nScore1 );
+    // printf ("     Cube: %1i\n", nCube );
 
     if ( nScore0 == 0 )
       return
@@ -2343,7 +2343,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       
     }
 
-    printf ("Cubeful: use cube? %1i\n", fCube );
+    //printf ("Cubeful: use cube? %1i\n", fCube );
 
     if ( fCube ) {
 
@@ -2410,9 +2410,9 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
     else
       prOutput[ 0 ] = prOutput[ 1 ];
 
-    printf ( "%1i-ply: %+6.3f %+6.3f %+6.3f %+6.3f\n",
-	     nPlies, prOutput[ 0 ], prOutput[ 1 ], prOutput[ 2 ],
-	     prOutput[ 3 ] );
+    //    printf ( "%1i-ply: %+6.3f %+6.3f %+6.3f %+6.3f\n",
+    //   nPlies, prOutput[ 0 ], prOutput[ 1 ], prOutput[ 2 ],
+    //   prOutput[ 3 ] );
 
   } else {
 
@@ -2425,6 +2425,14 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
     int nCube = ci->nCube;
     int fCubeOwner = ci->fCubeOwner;
     int fMove = ci->fMove;
+
+    /* 
+     * rTakePoint0: my equity at my take point,
+     * rTakePoint1: my equity at opp take point.
+     */
+
+    float rTakePoint0 = - ci->arTakePoint[ fMove ];
+    float rTakePoint1 = ci->arTakePoint[ ! fMove ];
     
     EvaluatePosition ( anBoard, arOutput, ci, 0 );
     
@@ -2463,10 +2471,11 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
        *
        * (1) rEq > 1.0: too good to double
        *     My ownership: nil
-       * (2) 0.5 < rEq <= 1.0: no double
+       * (2) opp take point < rEq <= 1.0: double, pass
        *     My ownership  : 1 - rEq;
        * (3) rEq > -1: 
-       *     My ownership  : 0.25 * rEq + 0.25
+       *     My ownership  : 
+       *     (1-opp take point)/(1+opp take point) * ( 1 + rEq )
        * (4) rEq <= -1:
        *     My ownership  : 0
        */
@@ -2489,37 +2498,48 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
        * - or as a special case: if the score is 2-away, 2-away.
        */
 
-      fNoCube = ( anScore[ 0 ] + nCube >= nMatchTo );
-      fNoCube = fNoCube || ( anScore[ 1 ] + nCube >= nMatchTo );
+      fNoCube = ( anScore[ fMove ] + nCube >= nMatchTo );
+      fNoCube = fNoCube || ( anScore[ ! fMove ] + nCube >= nMatchTo );
       fNoCube = fNoCube ||  
-	( ( anScore[ 0 ] == nMatchTo - 2 ) &&
-	  ( anScore[ 1 ] == nMatchTo - 2 ) );
+	( ( anScore[ fMove ] == nMatchTo - 2 ) &&
+	  ( anScore[ ! fMove ] == nMatchTo - 2 ) );
       fNoCube = fNoCube || fCrawford;
 
-      printf ( "no-cube? %1i\n", fNoCube );
-    
       if ( ! ( nMatchTo && fNoCube ) ) {
+
+	//	printf ("equity before cubeful %6.3f  %+1i\n", rEq, fCubeOwner );
+	//	printf ("takepoint 0 %6.3f\n", rTakePoint0 );
+	//	printf ("takepoint 1 %6.3f\n", rTakePoint1 );
+	//		printf ("gammon price %6.3f %6.3f %6.3f %6.3f\n",
+	//ci->arGammonPrice[ 0 ], ci->arGammonPrice[ 1 ],
+	//ci->arGammonPrice[ 0 ], ci->arGammonPrice[ 1 ]);
 
 	if ( ( fCubeOwner == -1 ) || ( fCubeOwner == fMove ) ) {
 
-	  if ( rEq > 0.5 ) {
+	  if ( rEq > rTakePoint1 ) {
 	    if ( rEq < 1.0 )
 	      rEq = 1.0; /* I double, opponent pass */
 	  }
 	  else {
 	    if ( rEq > -1.0 )
-	      rEq += 0.25 * rEq + 0.25;
+	      rEq += 
+		( 1.0 - rTakePoint1 ) / ( 1.0 + rTakePoint1 ) * 
+		( 1.0 +	rEq );
 	  }
 	  
 	}
-
+	
+	//printf ("equity between %6.3f\n", rEq );
+	
 	if ( ( fCubeOwner == -1 ) || ( fCubeOwner != fMove ) ) {
 
 	  /* Use rEqbck since rEq might have been changed above */
 	  
-	  if ( rEqbck > -0.5 ) {
+	  if ( rEqbck > rTakePoint0 ) {
 	    if ( rEqbck < 1.0 )
-	      rEq += 0.25 * rEqbck - 0.25;
+	      rEq += 
+		( 1.0 + rTakePoint0 ) / ( 1.0 - rTakePoint0 ) *
+		( rEqbck - 1.0 );
 	  }
 	  else {
 	    if ( rEqbck > -1.0 )
@@ -2527,6 +2547,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	  }
 	  
 	}
+	//printf ("equity after cubeful %6.3f\n", rEq );
 
       }
 
@@ -2548,10 +2569,10 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
 	  SetCubeInfo ( &cix, nCube * 2, 0, fMove );
 
-	  printf ("automatic double...\n");
-	  printf ("ci->nCube: %1i\n", cix.nCube );
-	  printf ("ci->fCubeOwner: %1i\n", cix.fCubeOwner );
-	  printf ("ci->fMove: %1i\n", cix.fMove );
+	  //printf ("automatic double...\n");
+	  //printf ("ci->nCube: %1i\n", cix.nCube );
+	  //printf ("ci->fCubeOwner: %1i\n", cix.fCubeOwner );
+	  //printf ("ci->fMove: %1i\n", cix.fMove );
 	  
 	  rEq = UtilityMwc ( arOutput, &cix );
 
@@ -2562,7 +2583,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
       }
 
-      printf ( "0-ply %6.3f (Cube = %1i)\n", rEq, nCube );
+      //      printf ( "0-ply %6.3f (Cube = %1i)\n", rEq, nCube );
 
       prOutput[ 0 ] = rEq;
 
@@ -2601,6 +2622,18 @@ extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
       ci->arGammonPrice[ 2 ] = 1.0;
       ci->arGammonPrice[ 3 ] = 1.0;
     }
+
+    /*
+     * Take points.
+     * If centered cube, take points is 25%, else 20%.
+     * 20% assumes are perfectly live cube, these values
+     * can probably be slightly modified to account for
+     * not-perfect cubes (see articles by Rick Janowski).
+     */
+
+    ci->arTakePoint[ 0 ] = 0.5;
+    ci->arTakePoint[ 1 ] = 0.6;
+    
   }
   else {
 
@@ -2613,7 +2646,100 @@ extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
     int nScore0 = NORM_SCORE ( anScore[ 0 ] );
     int nScore1 = NORM_SCORE ( anScore[ 1 ] );
 
+    /*
+     * Take points in match play.
+     *
+     * Crawford game:
+     * - no doubling allowed (take point "undefined").
+     * Post-Crawford games:
+     * - optional/automatic redoubles
+     *   (no value of owning cube, thus we don't need to
+     *    know the take point)
+     *   However, the take-points are defined:
+     *   1-away, n-away (n even): 
+     *   - player 0: 50%,
+     *   - player 1: doesn't double.
+     *   1-away, n-away (n odd):
+     *   - player 0: ~1% (1% being the value of the free drop),
+     *   - player 1: doesn't double.
+     * Other scores:
+     * - player 0:
+     *   - risk = mwc(double, pass) - mwc(double, take, loose)
+     *   - gain = mwc(double, take, win) - mwc(double, pass)
+     *   - take-point = risk/(risk+gain)
+     *     (again modify with Rick Janowski formula)
+     *   Transform mwc to equity on current cube(?).
+     * Analogous for player 1.
+     * If player 1 has an automatic/optional redouble after this
+     * double, we assume he has the chance to turn the cube, ie.
+     * that the cube is not dead, ie. a last roll situation.
+     * This should only give problems when evaluating cubeful
+     * on 0-ply. 1-ply should be OK. 
+     *
+     */
+
+    if ( fCrawford || fPostCrawford )
+      ci->arTakePoint[ 0 ] = ci->arTakePoint[ 1 ] = 0;
+    else {
+
+      float rDoublePass0, rDoublePass1, rDoubleTakeWin;
+      float rDoubleTakeLose;
+
+      /* take point for player 1 */
+
+      rDoublePass0 = 
+	GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+
+      if ( ( ( nScore1 - 2 * nCube ) <= 0 ) && 
+	   ( ( nScore0 - 2 * nCube ) > 0 ) ) 
+	rDoubleTakeWin =
+	  GET_A1 ( nScore0 - 4 * nCube - 1, nScore1 - 1, aafA1 );
+
+      else
+	rDoubleTakeWin =
+	  GET_A1 ( nScore0 - 2 * nCube - 1, nScore1 - 1, aafA1 );
+
+      rDoubleTakeLose = 
+	GET_A1 ( nScore0 - 1, nScore1 - 2 * nCube - 1, aafA1 );
+
+      /* take point in equity */
+      
+      ci->arTakePoint[ 0 ] =
+	-2.0 * ( rDoublePass0 - rDoubleTakeLose ) /
+	( rDoubleTakeWin - rDoubleTakeLose) + 1.0;
+
+      /* take point for player 1 */
+
+      rDoublePass1 = 
+	GET_A1 ( nScore1 - 1, nScore0 - nCube - 1, aafA1 );
+
+      if ( ( ( nScore0 - 2 * nCube ) <= 0 ) && 
+	   ( ( nScore1 - 2 * nCube ) > 0 ) ) 
+	rDoubleTakeWin =
+	  GET_A1 ( nScore1 - 4 * nCube - 1, nScore0 - 1, aafA1 );
+      else
+	rDoubleTakeWin =
+	  GET_A1 ( nScore1 - 2 * nCube - 1, nScore0 - 1, aafA1 );
+
+      rDoubleTakeLose = 
+	GET_A1 ( nScore1 - 1, nScore0 - 2 * nCube - 1, aafA1 );
+
+      /* take point in equity */
+      
+      ci->arTakePoint[ 1 ] = 
+	-2.0 * ( rDoublePass1 - rDoubleTakeLose ) /
+	( rDoubleTakeWin - rDoubleTakeLose) + 1.0;
+
+    }
+
+    //printf ( "fCrawford = %1i\n", fCrawford );
+    //printf ( "fPostCrawford = %1i\n", fPostCrawford );
+    //printf ( "nScore0 = %2i\n", nScore0 );
+    //printf ( "nScore1 = %2i\n", nScore1 );
+
     if ( fCrawford || fPostCrawford ) {
+
+      //printf ( "in crawford code...\n" );
 
       if ( nScore0 == 1 ) {
 
@@ -2669,6 +2795,16 @@ extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 	GET_A1 ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafA1 );
 
       float rCenter = ( rWin + rLose ) / 2.0;
+
+      /*
+      printf ( "in non-crawford code...\n" );
+      printf ("rWin    = %10.7f\n", rWin );
+      printf ("rWinG   = %10.7f\n", rWinGammon );
+      printf ("rWinBG  = %10.7f\n", rWinBG );
+      printf ("rLose   = %10.7f\n", rLose );
+      printf ("rLoseG  = %10.7f\n", rLoseGammon );
+      printf ("rLoseBG = %10.7f\n", rLoseBG );
+      */
 
       ci->arGammonPrice[ 0 ] = ( nScore0 == 1 ) ? 
 	0.0 : ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
