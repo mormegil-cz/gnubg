@@ -71,7 +71,6 @@ typedef struct _rolloutprogress {
 } rolloutprogress;
 
 
-#if USE_GTK
 
 
 
@@ -132,6 +131,7 @@ estimatedSE( const float rSE, const int iGame, const int nTrials ) {
 
 }
 
+#if USE_GTK
 
 /*
  * Make pages with statistics.
