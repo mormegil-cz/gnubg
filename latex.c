@@ -181,7 +181,7 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     
     fprintf( pf, "\\bigskip\\pagebreak[1]\\begin{center}\\begin{picture}"
 	     "(356,240)(22,10)\n"
-	     "\\%sboard\n", fPlayer ? _("black") : _("white") );
+	     "\\%sboard\n", fPlayer ? "black" : "white" );
 
     for( i = 0; i < 25; i++ ) {
 	anOff[ 0 ] -= pms->anBoard[ 0 ][ i ];
