@@ -6131,8 +6131,23 @@ extern void outputv( const char *sz, va_list val ) {
 extern void outputerr( const char *sz ) {
 
     /* FIXME we probably shouldn't convert the charset of strerror() - yuck! */
-    
-    outputerrf( "%s: %s", sz, strerror( errno ) );
+#ifdef WIN32
+    LPVOID lpMsgBuf;
+    if ( ! errno ) {
+	FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+		       FORMAT_MESSAGE_IGNORE_INSERTS, NULL, GetLastError(),
+		       MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPTSTR) &lpMsgBuf,
+		       0, NULL );
+	outputerrf( "%s: %s", sz, lpMsgBuf );
+    }
+    else
+#endif /* WIN32 */
+
+	outputerrf( "%s: %s", sz, strerror( errno ) );
+
+#ifdef WIN32
+    LocalFree( lpMsgBuf );
+#endif /* WIN32 */
 }
 
 /* Write an error message, fprintf() style */
