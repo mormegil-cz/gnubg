@@ -21,7 +21,6 @@ duplication of effort and to make sure our changes merge easily.
   in the CVS repository for work on this.
 
 * Command interface:
-** Check "show" exists for every "set"!
 ** Add more completions to help and readline.
 ** Allow timeouts for "train" (and others?).
 ** Add interactive rollouts.
@@ -33,9 +32,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Write fancy output routines (to replace printf, puts, etc.) that wraps
   words and pauses before scrolling (as in gdb).
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
-  multiple moves (e.g. "8/7(2) 6/5(2)").  Make FormatMovePlain()
-  use the old ugly format for JF compatibility (25 not bar, 0 not off.
-  * for hits is OK).
+  multiple moves (e.g. "8/7(2) 6/5(2)").
 ** Finish "help" -- add detailed help for each command.
 ** Add undo, reroll, and viewing next/prev moves in game/match.  (Reroll
   is not really necessary, since "set turn <player>" will let them roll
@@ -54,8 +51,8 @@ duplication of effort and to make sure our changes merge easily.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
-** Add a board edit mode.  What would be the best semantics for the
-  interface?
+** Add a board edit mode (button 1 drags chequers, button 2 adds
+  player 0/removes player 1, button 3 adds player 1/removes player 0).
 ** Add a game window, which lists the moves made in the game so far and
   allows moving back and forth.
 ** Don't flood the server with requests (which can happen if gnubg is
@@ -75,9 +72,6 @@ duplication of effort and to make sure our changes merge easily.
   terminal window at all.
 
 * Bugs:
-** EvaluatePositionCache should store more information in the evalcache
-  struct, to make sure that cache entries for the same position with
-  different cube values or evaluation parameters don't collide.
 ** Nothing handles running out of memory gracefully.  A solution
   could be to write a malloc() wrapper that (if malloc fails) first
   tries to free memory (e.g. flush the eval cache); if malloc still
@@ -93,7 +87,6 @@ duplication of effort and to make sure our changes merge easily.
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
   unlikely to change should be documented.
-** Describe the ASCII vs. binary weights behaviour.
 
 * Miscellaneous:
 ** Add internationalisation (gettext).

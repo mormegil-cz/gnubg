@@ -1,5 +1,11 @@
 #!/bin/sh -e
 
+if [ -n "$srcdir" ]; then
+  dirparam="--datadir $srcdir"
+else
+  dirparam=""
+fi
+
 die () {
   echo "$1"
   exit 1
@@ -7,15 +13,15 @@ die () {
 
 # Basic test -- could fail if it can't find the bearoff database, or there
 # are problems with the binary.
-./gnubg --d $srcdir -t -n <> /dev/null || die '--- Basic gnubg test fails.'
+./gnubg $dirparam -t -n <> /dev/null || die '--- Basic gnubg test fails.'
 echo '--- Basic gnubg test succeeds.'
 
 # Test without -n; now requires weights files.
-./gnubg --d $srcdir -t <> /dev/null || die '--- Neural net weights test fails.'
+./gnubg $dirparam -t <> /dev/null || die '--- Neural net weights test fails.'
 echo '--- Neural net weights test succeeds.'
 
 # Make sure an opening 31 is played correctly.
-./gnubg --d $srcdir -t << "EOF" | grep -q sGfwATDgc/ABMA || die \
+./gnubg $dirparam -t << "EOF" | grep -q sGfwATDgc/ABMA || die \
     '--- Opening move test fails.'
 set player both human
 new game
@@ -27,7 +33,7 @@ EOF
 echo '--- Opening move test succeeds.'
 
 # Play a game.
-./gnubg --d $srcdir -t << "EOF" > /dev/null || die '--- Self-play test fails.'
+./gnubg $dirparam -t << "EOF" > /dev/null || die '--- Self-play test fails.'
 set automatic game no
 set player both gnubg
 new game
@@ -35,7 +41,7 @@ EOF
 echo '--- Self-play test succeeds.'
 
 # Test miscellaneous commands.
-./gnubg --d $srcdir -t << "EOF" > /dev/null || die \
+./gnubg $dirparam -t << "EOF" > /dev/null || die \
     '--- Miscellaneous test fails.'
 help
 set player both human

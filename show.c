@@ -170,6 +170,16 @@ extern void CommandShowCache( char *sz ) {
     putchar( '\n' );
 }
 
+extern void CommandShowConfirm( char *sz ) {
+
+    if( fConfirm )
+	puts( "GNU Backgammon will ask for confirmation before "
+	       "aborting games in progress." );
+    else
+	puts( "GNU Backgammon will not ask for confirmation "
+	       "before aborting games in progress." );
+}
+
 extern void CommandShowCopying( char *sz ) {
 
     ShowPaged( aszCopying );
@@ -188,6 +198,31 @@ extern void CommandShowCrawford( char *sz ) {
 
 }
 
+extern void CommandShowCube( char *sz ) {
+
+    if( fTurn < 0 ) {
+	puts( "There is no game in progress." );
+	return;
+    }
+
+    if( fCrawford ) {
+	puts( "The cube is disabled during the Crawford game." );
+	return;
+    }
+    
+    if( !fCubeUse ) {
+	puts( "The doubling cube is disabled." );
+	return;
+    }
+	
+    printf( "The cube is at %d, ", nCube );
+
+    if( fCubeOwner == -1 )
+	puts( "and is centred." );
+    else
+	printf( "and is owned by %s.", ap[ fCubeOwner ].szName );
+}
+
 extern void CommandShowDice( char *sz ) {
 
     if( fTurn < 0 ) {
@@ -203,6 +238,14 @@ extern void CommandShowDice( char *sz ) {
 		anDice[ 1 ] );
 }
 
+extern void CommandShowDisplay( char *sz ) {
+
+    if( fDisplay )
+	puts( "GNU Backgammon will display boards for computer moves." );
+    else
+	puts( "GNU Backgammon will not display boards for computer moves." );
+}
+
 extern void CommandShowEvaluation( char *sz ) {
 
     puts( "`eval' and `hint' will use:" );
@@ -216,6 +259,15 @@ extern void CommandShowJacoby( char *sz ) {
     else
       puts( "Money sessions is played without the Jacoby rule." );
 
+}
+
+extern void CommandShowNackgammon( char *sz ) {
+
+    if( fNackgammon )
+	puts( "New games will use the Nackgammon starting position." );
+    else
+	puts( "New games will use the standard backgammon starting "
+	      "position." );
 }
 
 extern void CommandShowPipCount( char *sz ) {
@@ -274,6 +326,11 @@ extern void CommandShowPostCrawford( char *sz ) {
   else
     puts( "No match is being played." );
 
+}
+
+extern void CommandShowPrompt( char *sz ) {
+
+    printf( "The prompt is set to `%s'.\n", szPrompt );
 }
 
 extern void CommandShowRNG( char *sz ) {
