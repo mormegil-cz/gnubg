@@ -1,6 +1,12 @@
+Mon Aug 14 14:39:08 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* set.c (CommandSetEvalReduced): Corrected faulty logic, where 
+	"set eval reduced 0" or "set eval reduced 21" would give 
+	nReduced = 7.
+
 Mon Aug 14 00:22:48 2000  Joern Thyssen  <joern@thyssen.nu>
 
-  * eval.c (GetDoublePointDeadCube): Corrected bugfix for double
+  * eval.c (GetDoublePointDeadCube): Corrected bug in double
 	point for Jacoby and Beavers.
 
 Sun Aug 13 23:14:23 2000  Joern Thyssen  <joern@thyssen.nu>

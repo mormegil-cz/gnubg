@@ -504,12 +504,9 @@ extern void CommandSetEvalReduced( char *sz ) {
 
     }
 
-    if ( n == 21 ) 
+    if ( n == 0 || n == 21 )
       pecSet->nReduced = 0;
-    else
-      pecSet->nReduced = n;
-
-    if ( n <= 7 )
+    else if ( n <= 7 )
       pecSet->nReduced = 7;
     else if ( n <= 11 )
       pecSet->nReduced = 11;
