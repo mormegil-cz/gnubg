@@ -25,6 +25,8 @@ duplication of effort and to make sure our changes merge easily.
   used for the internal evaluations of deep searches for a significant
   speed increase.  See FindBestMoveInEval() in eval.c from fibs2html.
 ** Consider making EvalEfficiency() more sophisticated.
+** Save rollouts and evaluations in moverecords, e.g., a cubeless rollout 
+  for a position.
 
 * Commands:
 ** Add interactive rollouts.
@@ -169,6 +171,8 @@ details.
 *** right-blick bearoff tray for bearing off 4 men
     Also, if "allow dragging to illegal points" is disabled right clicking
     on the bearoff tray will hit the chequer in the home board.
+*** Problems with movement with dice 63, 42, or 21. 
+   See <URL:http://mail.gnu.org/archive/html/bug-gnubg/2003-05/msg00055.html>
 ** Annotations: it's not possible to write to the annotation window while playing
 ** Redesign some of the GUI. See mails from Albert Silver and others.
 ** The "take" hint-widget is not used. Either use it, or alter the current
