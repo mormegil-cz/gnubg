@@ -246,4 +246,7 @@ GetDoublePointDeadCube ( float arOutput [ 5 ],
 extern int
 GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci );
 
+extern int 
+GetCubeActionSz ( float arDouble[ 4 ], char *szOutput );
+
 #endif

@@ -1069,8 +1069,8 @@ extern void CommandHint( char *sz ) {
 
     movelist ml;
     int i;
-    char szMove[ 32 ];
-    float aar[ 32 ][ NUM_OUTPUTS ];
+    char szMove[ 32 ], szTemp[ 1024 ];
+    float aar[ 32 ][ NUM_OUTPUTS ], arDouble[ 4 ];
     cubeinfo ci;
     
     if( fTurn < 0 ) {
@@ -1079,36 +1079,112 @@ extern void CommandHint( char *sz ) {
       return;
     }
 
-    if( !anDice[ 0 ] ) {
-      outputl( "You must roll (or set) the dice first." );
+    if( !anDice[ 0 ] && !fDoubled ) {
+
+      /* Give hint on cube action */
+
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
+      if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci, &ecEval,
+                                     ecEval.nPlies ) < 0 )
+        return;
+
+      GetCubeActionSz ( arDouble, szTemp );
+
+#if USE_GTK
+      /*
+      if ( fX ) {
+
+         GTKHint( cube action );
+
+         return;
+
+      }
+      */
+#endif
+      outputl ( szTemp );
 
       return;
     }
 
-    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+    if ( fDoubled ) {
 
-    FindBestMoves( &ml, aar, anDice[ 0 ], anDice[ 1 ], anBoard,
-                   ecEval.nSearchCandidates, ecEval.rSearchTolerance,
-                   &ci, &ecEval );
-    
-    if( fInterrupt )
+      /* Give hint on take decision */
+
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
+      if ( EvaluatePositionCubeful ( anBoard, arDouble, &ci, &ecEval,
+                                     ecEval.nPlies ) < 0 )
+        return;
+
+#if USE_GTK
+      /*
+      if ( fX ) {
+
+        GTKHint( take decision );
+
+        return;
+
+      }
+      */
+#endif
+
+      outputl ( "Take decision:\n" );
+
+      if ( ! nMatchTo ) {
+
+        outputf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
+        outputf ( "Equity for pass: %+6.3f\n\n", -arDouble[ 3 ] );
+
+      }
+      else {
+
+        /* FIXME */
+
+      }
+
+      if ( arDouble[ 2 ] < 0 && ! nMatchTo && fBeavers )
+        outputl ( "Your proper cube action: Beaver!\n" );
+      else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
+        outputl ( "Your proper cube action: Take.\n" );
+      else
+        outputl ( "Your proper cube action: Pass.\n" );
+
       return;
+
+    }
+
+    if ( anDice[ 0 ] ) {
+
+      /* Give hints on move */
+
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
+      FindBestMoves( &ml, aar, anDice[ 0 ], anDice[ 1 ], anBoard,
+                     ecEval.nSearchCandidates, ecEval.rSearchTolerance,
+                     &ci, &ecEval );
+    
+      if( fInterrupt )
+        return;
     
 #if USE_GTK
-    if( fX ) {
-      GTKHint( &ml );
-      return;
-    }
+      if( fX ) {
+        GTKHint( &ml );
+        return;
+      }
 #endif
     
-    outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
+      outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
     
-    for( i = 0; i < ml.cMoves; i++ ) {
-	float *ar = ml.amMoves[ i ].pEval;
-	outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
-		ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
-		ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] - ar[ 4 ] - 1.0 );
-	outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove ) );
+      for( i = 0; i < ml.cMoves; i++ ) {
+        float *ar = ml.amMoves[ i ].pEval;
+        outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
+                 ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
+                 ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] - ar[ 4 ] - 1.0 );
+        outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove ) );
+
+      }
+
     }
 }
 

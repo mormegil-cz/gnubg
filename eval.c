@@ -2685,18 +2685,129 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
              arOutput[ 4 ], Utility ( arOutput, &ci ), arCfOutput[ 0 ] );
   }
 
-  /* debug */
-  
-  for ( i = 0; i < 4; i++ ) {
+  /* if cube is available, output cube action */
+
+  if ( GetDPEq ( NULL, NULL, &ci ) ) {
+
     szOutput = strchr( szOutput, 0 );    
-    sprintf ( szOutput, "arCfOutput[%1i] = %+6.3f\n",
-              i, arCfOutput[i]);
+    sprintf( szOutput, "\n\n" );
+    szOutput = strchr( szOutput, 0 );    
+    GetCubeActionSz ( arCfOutput, szOutput );
+
   }
   
-  /* end debug */
-
   return 0;
 }
+
+
+extern int 
+GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
+
+  /* write string with cube action */
+
+  /* FIXME: write equity and mwc for match play */
+
+  if ( arDouble[ 2 ] >= arDouble[ 1 ] && arDouble[ 3 ] >= arDouble[ 1 ] ) {
+
+    /* it's correct to double */
+
+    if ( arDouble[ 2 ] < arDouble[ 3 ] ) {
+
+      /* Optimal     : Double, take
+         Best for me : Double, pass
+         Worst for me: No Double */
+
+      sprintf ( szOutput,
+                "Double, take  : %+6.3f\n"
+                "Double, pass  : %+6.3f   (%+6.3f)\n"
+                "No double     : %+6.3f   (%+6.3f)\n\n"
+                "Correct cube action: Double, take",
+                arDouble[ 2 ],
+                arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 2 ],
+                arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 2 ] );
+
+    }
+    else {
+
+      /* Optimal     : Double, pass
+         BEst for me : Double, take
+         Worst for me: no double */
+
+      sprintf ( szOutput,
+                "Double, pass  : %+6.3f\n"
+                "Double, take  : %+6.3f   (%+6.3f)\n"
+                "No double     : %+6.3f   (%+6.3f)\n\n"
+                "Correct cube action: Double, pass",
+                arDouble[ 3 ],
+                arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 3 ],
+                arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 3 ] );
+
+    }
+
+  } 
+  else {
+
+    /* it's correct not to double */
+
+    if ( arDouble[ 1 ] > arDouble[ 3 ] ) {
+
+      if ( arDouble[ 2 ] > arDouble[ 3 ] ) {
+
+        /* Optimal     : no double
+           Best for me : Double, take
+           Worst for me: Double, pass */
+
+        sprintf ( szOutput,
+                  "No double     : %+6.3f\n"
+                  "Double, take  : %+6.3f   (%+6.3f)\n"
+                  "Double, pass  : %+6.3f   (%+6.3f)\n\n"
+                  "Correct cube action: too good to double, pass",
+                  arDouble[ 1 ],
+                  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ],
+                  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ] );
+
+      }
+      else {
+        
+        /* Optimal     : no double
+           Best for me : Double, pass
+           Worst for me: Double, take */
+
+        /* This situation may arise in match play. */
+
+        sprintf ( szOutput,
+                  "No double     : %+6.3f\n"
+                  "Double, pass  : %+6.3f   (%+6.3f)\n"
+                  "Double, take  : %+6.3f   (%+6.3f)\n\n"
+                  "Correct cube action: too good to double, take(!)",
+                  arDouble[ 1 ],
+                  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ],
+                  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ] );
+
+      }
+
+    }
+    else { /* arDouble[ 2 ] < arDouble[ 1 ] */
+    
+      /* Optimal     : no double
+         Best for me : Double, pass
+         Worst for me: Double, take */
+
+        sprintf ( szOutput,
+                  "No double     : %+6.3f\n"
+                  "Double, pass  : %+6.3f   (%+6.3f)\n"
+                  "Double, take  : %+6.3f   (%+6.3f)\n\n"
+                  "Correct cube action: No double, take",
+                  arDouble[ 1 ],
+                  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ],
+                  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ] );
+
+    }
+
+  }
+
+}
+
 
 extern int EvalCacheResize( int cNew ) {
 
