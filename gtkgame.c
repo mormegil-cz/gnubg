@@ -78,7 +78,6 @@
 #include "record.h"
 #include "sound.h"
 #include "gtkoptions.h"
-#include "gtkbatch.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -2306,8 +2305,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  ExportSessionText, 0, NULL },
 	{ N_("/_File/_Export/_HTML Images..."), NULL, ExportHTMLImages, 0,
 	  NULL },
-	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_File/_Batch..."), NULL, GTKBatch, 0, NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_File/_Quit"), "<control>Q", Command, CMD_QUIT, NULL },
 	{ N_("/_Edit"), NULL, NULL, 0, "<Branch>" },
