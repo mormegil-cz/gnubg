@@ -160,8 +160,8 @@ static void DrawPips(unsigned char *auchDest, int nStride,
 		for (ix = 0; ix < 3; ix++)
 		{
 			if (afPip[iy * 3 + ix])
-				CopyArea(auchDest + (1 + 2 * ix) * ss * 3 +
-					(1 + 2 * iy) * ss * nStride, nStride,
+				CopyArea(auchDest + (int)((1.5 * (ix + 1)) * ss * 3) +
+					(int)((1.5 * (iy + 1)) * ss * nStride), nStride,
 					auchPip, ss * 3, ss, ss);
 		}
 	}
