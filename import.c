@@ -2032,11 +2032,11 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     if ( ! GetValue( sz, szTemp ) )
       break;
 
-    if ( ! strcmp( szTemp, "HyperGammon" ) )
+    if ( ! strcasecmp( szTemp, "HyperGammon" ) )
       *pbgv = VARIATION_HYPERGAMMON_3;
-    else if ( ! strcmp( szTemp, "Nackgammon" ) )
+    else if ( ! strcasecmp( szTemp, "Nackgammon" ) )
       *pbgv = VARIATION_NACKGAMMON;
-    else if ( ! strcmp( szTemp, "Backgammon" ) )
+    else if ( ! strcasecmp( szTemp, "Backgammon" ) )
       *pbgv = VARIATION_STANDARD;
     else {
       outputf ( "Unknown variant in SGG file\n"

@@ -1,3 +1,9 @@
+Sat Jun 12 12:25:54 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ParseSGGOptions): use strcasecmp for deciding which
+	variant of backgammon is used.
+	(reported by Hugh Sconyers)
+
 Fri Jun 11 18:56:45 GMT 2004  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c: Fix minor chequer display bug
