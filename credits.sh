@@ -23,6 +23,7 @@ Eric Augustine
 Erik Barfoed
 Ron Barry
 Steve Baedke
+Olivier Baur
 Holger Bochnig
 Chuck Bower
 Nick Bratby
@@ -96,7 +97,7 @@ Mark Spencer
 Scott Steiner
 Maik Stiebler
 W. Stroop (Rob)
-Kaoru TAKAHASHI
+Kaoru Takahashi
 Yoshito Takeuchi
 Jacques Thiriat
 Malene Thyssen
