@@ -21,6 +21,9 @@
 /* Define if the X Window System is missing or not being used.  */
 #undef X_DISPLAY_MISSING
 
+/* Define if you have the alloca function.  */
+#undef HAVE_ALLOCA
+
 /* Define if you have the getlogin function.  */
 #undef HAVE_GETLOGIN
 
@@ -47,6 +50,9 @@
 
 /* Define if you have the sigvec function.  */
 #undef HAVE_SIGVEC
+
+/* Define if you have the <alloca.h> header file.  */
+#undef HAVE_ALLOCA_H
 
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H

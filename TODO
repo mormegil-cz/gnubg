@@ -9,21 +9,15 @@ duplication of effort and to make sure our changes merge easily.
   positions, prime-vs-prime...
 *** Consider meta-pi scheme for using output from multiple nets.
 ** Add partial searching.
-** Let the user control SEARCH_CANDIDATES and SEARCH_TOLERANCE in
-  FindBestMove().
 ** See http://www.oasya.com/CubefulAdvantages.html for example of
   cubeful evaluation.
 
 * Game play:
-** Add an option for Nackgammon.
 ** Add cube handling for computer player.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
   progress.  To do it properly requires improved input routines.
 
 * Command interface:
-** Put all the "set auto*" options under a new "set automatice" subcommand,
-  and "set plies", "set cache" under a new "set evaluation" one.  ("set
-  evaluation candidates" and "set evaluation tolerance" go in there, too.)
 ** Check "show" exists for every "set"!
 ** Add more completions to help and readline.
 ** Allow user to vary parameters for rollouts (trials, truncation,
@@ -56,8 +50,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow copy/paste and drag & drop of the board ID in the board window. (gary)
 ** Make sure the board window behaves properly with ICCCM things.  Maybe
   some of this should wait for Gnome.
-** Add an option to slow down display if moves happen too quickly (e.g.
-  computer move, unable to move, auto bearoff, etc.)
 ** Add a board edit mode.  What would be the best semantics for the
   interface?
 ** Try to use some optimisation like XCheckIfEvent() to ignore all but
@@ -90,7 +82,9 @@ duplication of effort and to make sure our changes merge easily.
   very difficult for routines like GetManualDice which want to block
   until input is ready).  Also, what happens when the user types half
   a command and then moves with the mouse which causes the manual dice
-  prompt?  All this mess can probably wait for Gnome. (gary)
+  prompt?  "set delay" is related to this; other things should happen
+  while waiting for the delay.  All this mess can probably wait for
+  Gnome. (gary)
 ** The interrupt key doesn't work from the board window during a long
   computation (the process is too busy doing other things and never
   notices the key press in the event queue).  This is tricky to fix
@@ -103,7 +97,6 @@ duplication of effort and to make sure our changes merge easily.
 
 * Miscellaneous:
 ** Add internationalisation (gettext).
-** Use Guile if available.
 ** Add a self-test to the distribution.
 ** Add more to http://www.gnu.org/software/gnubg/... -- definitely the
   HTML formatted manual, and perhaps pages to submit training data,

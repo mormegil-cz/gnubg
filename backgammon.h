@@ -3,6 +3,19 @@
  *
  * by Gary Wong, 1999
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * $Id$
  */
 
@@ -62,7 +75,7 @@ extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
 extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
     fAutoGame, fAutoMove, fResigned, fMove, fDoubled, nPliesEval, anScore[ 2 ],
     cGames, nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
-    fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse;
+    fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse, fNackgammon;
 #if !X_DISPLAY_MISSING
 extern int nDelay;
 #endif
@@ -78,6 +91,7 @@ extern void NextTurn( void );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char *sz );
+extern double ParseReal( char **ppch );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
@@ -118,7 +132,6 @@ extern void CommandAccept( char * ),
     CommandSetCrawford( char * ),
     CommandSetPostCrawford( char * ),
     CommandSetBoard( char * ),
-    CommandSetCache( char * ),
     CommandSetCubeCentre( char * ),
     CommandSetCubeOwner( char * ),
     CommandSetCubeUse( char * ),
@@ -126,13 +139,17 @@ extern void CommandAccept( char * ),
     CommandSetDelay( char * ),
     CommandSetDice( char * ),
     CommandSetDisplay( char * ),
+    CommandSetEvalCache( char * ),
+    CommandSetEvalCandidates( char * ),
+    CommandSetEvalPlies( char * ),
+    CommandSetEvalTolerance( char * ),
+    CommandSetNackgammon( char * ),
     CommandSetPlayerGNU( char * ),
     CommandSetPlayerHuman( char * ),
     CommandSetPlayerName( char * ),
     CommandSetPlayerPlies( char * ),
     CommandSetPlayerPubeval( char * ),
     CommandSetPlayer( char * ),
-    CommandSetPlies( char * ),
     CommandSetPrompt( char * ),
     CommandSetRNGAnsi( char * ),
     CommandSetRNGBsd( char * ),
@@ -144,10 +161,10 @@ extern void CommandAccept( char * ),
     CommandSetSeed( char * ),
     CommandSetTurn( char * ),
     CommandShowBoard( char * ),
-    CommandShowCache( char * ),
     CommandShowCopying( char * ),
     CommandShowCrawford( char * ),
     CommandShowDice( char * ),
+    CommandShowEvaluation( char * ),
     CommandShowJacoby( char * ),
     CommandShowPipCount( char * ),
     CommandShowPostCrawford( char * ),

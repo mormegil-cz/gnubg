@@ -118,23 +118,6 @@ extern void CommandShowBoard( char *sz ) {
 	puts( DrawBoard( szOut, an, TRUE, ap ) );
 }
 
-extern void CommandShowCache( char *sz ) {
-
-    int c, cLookup, cHit;
-    
-    EvalCacheStats( &c, &cLookup, &cHit );
-
-    printf( "%d cache entries have been used.  %d lookups, %d hits",
-	    c, cLookup, cHit );
-
-    if( cLookup )
-	printf( " (%d%%).", ( cHit * 100 + cLookup / 2 ) / cLookup );
-    else
-	putchar( '.' );
-
-    putchar( '\n' );
-}
-
 extern void CommandShowCopying( char *sz ) {
 
     ShowPaged( aszCopying );
@@ -166,6 +149,25 @@ extern void CommandShowDice( char *sz ) {
     else
 	printf( "%s has rolled %d and %d.\n", ap[ fMove ].szName, anDice[ 0 ],
 		anDice[ 1 ] );
+}
+
+extern void CommandShowEvaluation( char *sz ) {
+
+    int c, cLookup, cHit;
+    
+    EvalCacheStats( &c, &cLookup, &cHit );
+
+    printf( "%d cache entries have been used.  %d lookups, %d hits",
+	    c, cLookup, cHit );
+
+    if( cLookup )
+	printf( " (%d%%).", ( cHit * 100 + cLookup / 2 ) / cLookup );
+    else
+	putchar( '.' );
+
+    putchar( '\n' );
+
+    /* FIXME show other things besides cache */
 }
 
 extern void CommandShowJacoby( char *sz ) {

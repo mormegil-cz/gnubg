@@ -53,6 +53,24 @@
 #define GNUBG_WEIGHTS_BINARY "gnubg.wd"
 #define GNUBG_BEAROFF "gnubg.bd"
 
+/* A trivial upper bound on the number of (complete or incomplete)
+ * legal moves of a single roll: if all 15 chequers are spread out,
+ * then there are 18 C 4 + 17 C 3 + 16 C 2 + 15 C 1 = 3875
+ * combinations in which a roll of 11 could be played (up to 4 choices from
+ * 15 chequers, and a chequer may be chosen more than once).  The true
+ * bound will be lower than this (because there are only 26 points,
+ * some plays of 15 chequers must "overlap" and map to the same
+ * resulting position), but that would be more difficult to
+ * compute. */
+#define MAX_INCOMPLETE_MOVES 3875
+#define MAX_MOVES 3060
+
+#if __GNUC__ || HAVE_ALLOCA
+#define MAX_SEARCH_CANDIDATES MAX_MOVES
+#else
+#define MAX_SEARCH_CANDIDATES 64
+#endif
+
 typedef struct _move {
     int anMove[ 8 ];
     unsigned char auch[ 10 ];
@@ -61,6 +79,8 @@ typedef struct _move {
 } move;
 
 extern volatile int fInterrupt;
+extern int nSearchCandidates;
+extern float rSearchTolerance;
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */

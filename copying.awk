@@ -9,19 +9,19 @@ BEGIN {
 }
 
 /^[ \t]*END OF TERMS AND CONDITIONS[ \t]*$/ {
-  print "    0\n};";
+  print "  0\n};";
   exit;
 }
 
 /^[ \t]*NO WARRANTY[ \t]*$/ {
-  print "    0\n}, *aszWarranty[] = {";
+  print "  0\n}, *aszWarranty[] = {";
 }
 
 {
   if ($0 ~ /\f/) {
-    print "    \"\",";
+    print "  \"\",";
   } else {
-    printf "    \"";
+    printf "  \"";
     for (i = 1; i < NF; i++)
       printf "%s\\\"", $i;
     printf "%s\",\n", $NF;

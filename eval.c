@@ -65,26 +65,14 @@ enum { I_BREAK_CONTACT = HALF_RACE_INPUTS, I_BACK_CHEQUER, I_BACK_ANCHOR,
 #define NUM_INPUTS ( HALF_INPUTS * 2 )
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
 
-#define SEARCH_CANDIDATES 8
-#define SEARCH_TOLERANCE 0.16
-
-/* A trivial upper bound on the number of (complete or incomplete)
- * legal moves of a single roll: if all 15 chequers are spread out,
- * then there are 18 C 4 + 17 C 3 + 16 C 2 + 15 C 1 = 3875
- * combinations in which a roll of 11 could be played (up to 4 choices from
- * 15 chequers, and a chequer may be chosen more than once).  The true
- * bound will be lower than this (because there are only 26 points,
- * some plays of 15 chequers must "overlap" and map to the same
- * resulting position), but that would be more difficult to
- * compute. */
-#define MAX_MOVES 3875
-
 static int anEscapes[ 0x1000 ];
 static neuralnet nnContact, nnRace;
 static unsigned char *pBearoff1 = NULL, *pBearoff2;
 static cache cEval;
 volatile int fInterrupt = FALSE;
 static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
+int nSearchCandidates = 8;
+float rSearchTolerance = 0.16;
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -517,6 +505,7 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 			/* enter this shot as available */
 			aHit[ aanCombination[ j - 24 + i ][ n ] ] |= 1 << j;
 		    cannot_hit:
+			;
 		    }
 
     for( i = 0; i < 21; i++ )
@@ -1283,7 +1272,7 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     
     pml->cMoves++;
 
-    assert( pml->cMoves < MAX_MOVES );
+    assert( pml->cMoves < MAX_INCOMPLETE_MOVES );
 }
 
 static int LegalMove( int anBoard[ 2 ][ 25 ], int iSrc, int nPips ) {
@@ -1402,7 +1391,7 @@ static int ScoreMoves( movelist *pml, int nPlies ) {
 extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 			  int n0, int n1, int fPartial ) {
     int anRoll[ 4 ], anMoves[ 8 ];
-    static move amMoves[ MAX_MOVES ];
+    static move amMoves[ MAX_INCOMPLETE_MOVES ];
 
     anRoll[ 0 ] = n0;
     anRoll[ 1 ] = n1;
@@ -1426,10 +1415,15 @@ extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 
 extern int FindBestMove( int nPlies, int anMove[ 8 ], int nDice0, int nDice1,
 			 int anBoard[ 2 ][ 25 ] ) {
-
     int i, j, iPly;
     movelist ml;
-    move amCandidates[ SEARCH_CANDIDATES ];
+#if __GNUC__
+    move amCandidates[ nSearchCandidates ];
+#elif HAVE_ALLOCA
+    move *amCandidates = alloca( nSearchCandidates * sizeof( move ) );
+#else
+    move amCandidates[ MAX_SEARCH_CANDIDATES ];
+#endif
 
     if( anMove )
 	for( i = 0; i < 8; i++ )
@@ -1451,7 +1445,7 @@ extern int FindBestMove( int nPlies, int anMove[ 8 ], int nDice0, int nDice1,
 	for( iPly = 0; iPly < nPlies; iPly++ ) {
 	    for( i = 0, j = 0; i < ml.cMoves; i++ )
 		if( ml.amMoves[ i ].rScore >= ml.rBestScore -
-		    ( SEARCH_TOLERANCE / ( 1 << iPly ) ) ) {
+		    ( rSearchTolerance / ( 1 << iPly ) ) ) {
 		    if( i != j )
 			ml.amMoves[ j ] = ml.amMoves[ i ];
 		    
@@ -1465,8 +1459,8 @@ extern int FindBestMove( int nPlies, int anMove[ 8 ], int nDice0, int nDice1,
 
 	    ml.iMoveBest = 0;
 	    
-	    ml.cMoves = ( j < ( SEARCH_CANDIDATES >> iPly ) ? j :
-			  ( SEARCH_CANDIDATES >> iPly ) );
+	    ml.cMoves = ( j < ( nSearchCandidates >> iPly ) ? j :
+			  ( nSearchCandidates >> iPly ) );
 
 	    if( ml.amMoves != amCandidates ) {
 		memcpy( amCandidates, ml.amMoves, ml.cMoves * sizeof( move ) );

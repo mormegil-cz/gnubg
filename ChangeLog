@@ -1,3 +1,12 @@
+Wed Jan 12 21:08:03 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c (CommandSetEvalCandidates, CommandSetEvalTolerance,
+	CommandSetNackgammon): New functions.
+	* gnubg.c (ParseReal): New function.
+	(InitBoard): Use the Nackgammon starting position if requested.
+	* eval.c (FindBestMove): Use variables nSearchCandidates and
+	rSearchTolerance.
+
 Wed Jan 12 14:51:37 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* show.c (CommandShowCopying, CommandShowWarranty, ShowPaged): New

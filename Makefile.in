@@ -142,7 +142,7 @@ mkinstalldirs stamp-vti texinfo.tex version.texi
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 DIST_SUBDIRS =  lib lib ext
 DEP_FILES =  .deps/copying.P .deps/database.P .deps/dice.P \

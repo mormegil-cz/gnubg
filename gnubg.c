@@ -73,7 +73,7 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
     fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
     fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 0,
-    fCubeUse = TRUE;
+    fCubeUse = TRUE, fNackgammon = FALSE;
 
 #if !X_DISPLAY_MISSING
 int nDelay = 0;
@@ -90,7 +90,7 @@ static command acDatabase[] = {
     { "evaluate", CommandDatabaseEvaluate, "Evaluate positions in database "
       "for future training", NULL },
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
-      "self-play)", NULL },
+      "self-play", NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL },
     { NULL, NULL, NULL, NULL }
@@ -109,6 +109,20 @@ static command acDatabase[] = {
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
       NULL },
     { NULL, NULL, NULL, NULL }
+}, acSetAutomatic[] = {
+    { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
+      "chequers as possible", NULL },
+    { "crawford", CommandSetAutoCrawford, "Enable the Crawford game "
+      "based on match score", NULL },
+    { "doubles", CommandSetAutoDoubles, "Control automatic doubles "
+      "during (money) session play", NULL },
+    { "game", CommandSetAutoGame, "Select whether to start new games "
+      "after wins", NULL },
+    { "move", CommandSetAutoMove, "Select whether forced moves will be "
+      "made automatically", NULL },
+    { "roll", CommandSetAutoRoll, "Control whether dice will be rolled "
+      "automatically", NULL },
+    { NULL, NULL, NULL, NULL }
 }, acSetCube[] = {
     { "center", CommandSetCubeCentre, "The U.S.A. spelling of `centre'",
       NULL },
@@ -119,6 +133,16 @@ static command acDatabase[] = {
     { "use", CommandSetCubeUse, "Enable use of the doubling cube", NULL },
     { "value", CommandSetCubeValue, "Fix what the cube has been set to",
       NULL },
+    { NULL, NULL, NULL, NULL }
+}, acSetEvaluation[] = {
+    { "cache", CommandSetEvalCache, "Set the size of the evaluation "
+      "cache", NULL },
+    { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
+      "for deep evaluation", NULL },
+    { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
+      "`hint' commands look ahead", NULL },
+    { "tolerance", CommandSetEvalTolerance, "Control the equity range "
+      "of moves for deep evaluation", NULL },
     { NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
@@ -132,22 +156,10 @@ static command acDatabase[] = {
     { "user", CommandSetRNGUser, "Specify an external generator", NULL },
     { NULL, NULL, NULL, NULL }
 }, acSet[] = {
-    { "autobearoff", CommandSetAutoBearoff, "Automatically bear off as many "
-      "chequers as possible", NULL },
-    { "autocrawford", CommandSetAutoCrawford, "Enable the Crawford game "
-      "based on match score", NULL },
-    { "autodoubles", CommandSetAutoDoubles, "Control automatic doubles "
-      "during (money) session play", NULL },
-    { "autogame", CommandSetAutoGame, "Select whether to start new games "
-      "after wins", NULL },
-    { "automove", CommandSetAutoMove, "Select whether forced moves will be "
-      "made automatically", NULL },
-    { "autoroll", CommandSetAutoRoll, "Control whether dice will be rolled "
-      "automatically", NULL },
+    { "automatic", NULL, "Perform certain functions without user input",
+      acSetAutomatic },
     { "board", CommandSetBoard, "Set up the board in a particular "
       "position", NULL },
-    { "cache", CommandSetCache, "Set the size of the evaluation "
-      "cache", NULL },
     { "crawford", CommandSetCrawford, 
       "Set whether this is the Crawford game", NULL },
     { "cube", NULL, "Set the cube owner and/or value", acSetCube },
@@ -157,12 +169,13 @@ static command acDatabase[] = {
       NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
       "the computer's turn", NULL },
+    { "evaluation", NULL, "Control position evaluation parameters",
+      acSetEvaluation },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in"
       "money game", NULL },
+    { "nackgammon", CommandSetNackgammon, "Set the starting position", NULL },
     { "player", CommandSetPlayer, "Change options for one or both "
       "players", NULL },
-    { "plies", CommandSetPlies, "Choose how many plies the `eval' and `hint' "
-      "commands look ahead", NULL },
     { "postcrawford", CommandSetPostCrawford, 
       "Set whether this is post-Crawford games", NULL },
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
@@ -174,11 +187,8 @@ static command acDatabase[] = {
     { "turn", CommandSetTurn, "Set which player is on roll", NULL },
     { NULL, NULL, NULL, NULL }
 }, acShow[] = {
-    /* FIXME show autobearoff, autocrawford, autodoubles, autogame, automove,
-       autoroll */
+    { "automatic", CommandNotImplemented, "FIXME", NULL },
     { "board", CommandShowBoard, "Redisplay the board position", NULL },
-    { "cache", CommandShowCache, "See statistics on the performance of "
-      "the evaluation cache", NULL },
     { "copying", CommandShowCopying, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
     /* FIXME show cube */
@@ -187,6 +197,8 @@ static command acDatabase[] = {
     /* FIXME show delay */
     { "dice", CommandShowDice, "See what the current dice roll is", NULL },
     /* FIXME show display */
+    { "evaluation", CommandShowEvaluation, "Display evaluation settings "
+      "and statistics", NULL },
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
@@ -270,6 +282,19 @@ extern char *NextToken( char **ppch ) {
 	( *ppch )++;
 
     return pch;
+}
+
+extern double ParseReal( char **ppch ) {
+
+    char *pch, *pchOrig;
+    double r;
+    
+    if( !ppch || !( pchOrig = NextToken( ppch ) ) )
+	return -HUGE_VAL;
+
+    r = strtod( pchOrig, &pch );
+
+    return *pch ? -HUGE_VAL : r;
 }
 
 extern int ParseNumber( char **ppch ) {
@@ -451,10 +476,13 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
     for( i = 0; i < 25; i++ )
 	anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
 
-    anBoard[ 0 ][ 5 ] = anBoard[ 1 ][ 5 ] = 5;
+    anBoard[ 0 ][ 5 ] = anBoard[ 1 ][ 5 ] =
+	anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = fNackgammon ? 4 : 5;
     anBoard[ 0 ][ 7 ] = anBoard[ 1 ][ 7 ] = 3;
-    anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = 5;
     anBoard[ 0 ][ 23 ] = anBoard[ 1 ][ 23 ] = 2;
+
+    if( fNackgammon )
+	anBoard[ 0 ][ 22 ] = anBoard[ 1 ][ 22 ] = 2;
 }
 
 extern void ShowBoard( void ) {
@@ -1137,10 +1165,10 @@ extern int main( int argc, char *argv[] ) {
 
     puts( "GNU Backgammon " VERSION "  Copyright 1999 Gary Wong.\n"
 	  "GNU Backgammon is free software, covered by the GNU "
-	  "General Public License,\n"
-	  "and you are welcome to change it and/or distribute "
-	  "copies of it under certain\n"
-	  "conditions.  Type \"show copying\" to see "
+	  "General Public License\n"
+	  "version 2, and you are welcome to change it and/or distribute "
+	  "copies of it\n"
+	  "under certain conditions.  Type \"show copying\" to see "
 	  "the conditions.\n"
 	  "There is absolutely no warranty for GNU Backgammon.  "
 	  "Type \"show warranty\" for\n"

@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -86,14 +87,14 @@ static void SetRNG( rng rngNew, char *szSeed ) {
 
 extern void CommandSetAutoBearoff( char *sz ) {
 
-    SetToggle( "autobearoff", &fAutoBearoff, sz, "Will automatically bear "
-	       "off as many chequers as possible.", "Will not automatically "
-	       "bear off chequers." );
+    SetToggle( "automatic bearoff", &fAutoBearoff, sz, "Will automatically "
+	       "bear off as many chequers as possible.", "Will not "
+	       "automatically bear off chequers." );
 }
 
 extern void CommandSetAutoCrawford( char *sz ) {
 
-    SetToggle( "autocrawford", &fAutoCrawford, sz, "Will enable the "
+    SetToggle( "automatic crawford", &fAutoCrawford, sz, "Will enable the "
 	       "Crawford game according to match score.", "Will not "
 	       "enable the Crawford game according to match score." );
 }
@@ -104,7 +105,7 @@ extern void CommandSetAutoDoubles( char *sz ) {
     
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
 	puts( "You must specify how many automatic doubles to use "
-	      "(try `help set autodouble')." );
+	      "(try `help set automatic double')." );
 	return;
     }
 
@@ -131,20 +132,20 @@ extern void CommandSetAutoDoubles( char *sz ) {
 
 extern void CommandSetAutoGame( char *sz ) {
 
-    SetToggle( "autogame", &fAutoGame, sz, "Will automatically start games "
-	       "after wins.", "Will not automatically start games." );
+    SetToggle( "automatic game", &fAutoGame, sz, "Will automatically start "
+	       "games after wins.", "Will not automatically start games." );
 }
 
 extern void CommandSetAutoMove( char *sz ) {
 
-    SetToggle( "automove", &fAutoMove, sz, "Forced moves will be made "
+    SetToggle( "automatic move", &fAutoMove, sz, "Forced moves will be made "
 	       "automatically.", "Forced moves will not be made "
 	       "automatically." );
 }
 
 extern void CommandSetAutoRoll( char *sz ) {
 
-    SetToggle( "autoroll", &fAutoRoll, sz, "Will automatically roll the "
+    SetToggle( "automatic roll", &fAutoRoll, sz, "Will automatically roll the "
 	       "dice when no cube action is possible.", "Will not "
 	       "automatically roll the dice." );
 }
@@ -173,23 +174,6 @@ extern void CommandSetBoard( char *sz ) {
     memcpy( anBoard, an, sizeof( an ) );
 
     ShowBoard();
-}
-
-extern void CommandSetCache( char *sz ) {
-
-    int n;
-
-    if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	puts( "You must specify the number of cache entries to use." );
-
-	return;
-    }
-
-    if( EvalCacheResize( n ) )
-	perror( "EvalCacheResize" );
-    else
-	printf( "The position cache has been sized to %d entr%s.\n", n,
-		n == 1 ? "y" : "ies" );
 }
 
 static int CheckCubeAllowed( void ) {
@@ -387,6 +371,85 @@ extern void CommandSetDisplay( char *sz ) {
 	       "moves.", "Will not display boards for computer moves." );
 }
 
+extern void CommandSetEvalCache( char *sz ) {
+
+    int n;
+
+    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+	puts( "You must specify the number of cache entries to use." );
+
+	return;
+    }
+
+    if( EvalCacheResize( n ) )
+	perror( "EvalCacheResize" );
+    else
+	printf( "The position cache has been sized to %d entr%s.\n", n,
+		n == 1 ? "y" : "ies" );
+}
+
+extern void CommandSetEvalCandidates( char *sz ) {
+
+    int n = ParseNumber( &sz );
+
+    if( n < 0 || n > MAX_SEARCH_CANDIDATES ) {
+	puts( "You must specify a valid number of moves to consider -- try "
+	      "`help set evaluation candidates'." );
+
+	return;
+    }
+
+    nSearchCandidates = n;
+
+    printf( "gnubg will consider up to %d move%s for evaluation at deeper "
+	    "plies.\n", nSearchCandidates, nSearchCandidates == 1 ? "" : "s" );
+}
+
+extern void CommandSetEvalPlies( char *sz ) {
+
+    int n = ParseNumber( &sz );
+
+    if( n < 0 ) {
+	puts( "You must specify a valid number of plies to look ahead -- try "
+	      "`help set evaluation plies'." );
+
+	return;
+    }
+
+    nPliesEval = n;
+
+    printf( "`eval' and `hint' will use %d ply evaluation.\n", nPliesEval );
+}
+
+extern void CommandSetEvalTolerance( char *sz ) {
+
+    double r = ParseReal( &sz );
+
+    if( r < 0.0 ) {
+	puts( "You must specify a valid cubeless equity tolerance to use -- "
+	      "try `help set\nevaluation tolerance'." );
+
+	return;
+    }
+
+    rSearchTolerance = r;
+
+    printf( "gnubg will select moves within %0.3g cubeless equity for\n"
+	    "evaluation at deeper plies.\n", rSearchTolerance );
+}
+
+extern void CommandSetNackgammon( char *sz ) {
+    
+    SetToggle( "nackgammon", &fNackgammon, sz, "New games will use the "
+	       "Nackgammon starting position.", "New games will use the "
+	       "standards backgammon starting position." );
+
+#if !X_DISPLAY_MISSING
+    if( fX && fTurn == -1 )
+	ShowBoard();
+#endif
+}
+
 static int iPlayerSet;
 
 extern void CommandSetPlayerGNU( char *sz ) {
@@ -512,22 +575,6 @@ extern void CommandSetPlayer( char *sz ) {
     }
     
     printf( "Unknown player `%s' -- try `help set player'.\n", pch );
-}
-
-extern void CommandSetPlies( char *sz ) {
-
-    int n = ParseNumber( &sz );
-
-    if( n < 0 ) {
-	puts( "You must specify a valid number of plies to look ahead -- try "
-	      "`help set plies'." );
-
-	return;
-    }
-
-    nPliesEval = n;
-
-    printf( "`eval' and `hint' will use %d ply evaluation.\n", nPliesEval );
 }
 
 extern void CommandSetPrompt( char *szParam ) {
