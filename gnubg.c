@@ -456,7 +456,19 @@ command cER = {
 }, cHighlightColour = {
     /* dummy command used for highlight colour names */
     NULL, NULL, NULL, NULL, &cHighlightColour
+}, acAnalyseClear[] = {
+    { "game", CommandAnalyseClearGame, 
+      N_("Clear analysis for this game"), NULL, NULL },
+    { "match", CommandAnalyseClearMatch, 
+      N_("Clear analysis for entire match"), NULL, NULL },
+    { "session", CommandAnalyseClearMatch, 
+      N_("Clear analysis for entire session"), NULL, NULL },
+    { "move", CommandAnalyseClearMove, 
+      N_("Clear analysis for this move"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acAnalyse[] = {
+    { "clear", NULL, 
+      N_("Clear previous analysis"), NULL, acAnalyseClear },
     { "game", CommandAnalyseGame, 
       N_("Compute analysis and annotate current game"),
       NULL, NULL },

@@ -731,7 +731,6 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_TAKE:
 
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
-        printf ( "move_Take: %d\n", tt );
         if ( tt != TT_NORMAL )
           break;
       
@@ -760,7 +759,6 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_DROP:
       
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
-        printf ( "move_drop: %d\n", tt );
         if ( tt != TT_NORMAL )
           break;
       
@@ -1821,3 +1819,123 @@ extern int getLuckRating ( const float rLuck ) {
     return 5;
 
 }
+
+
+static void
+AnalyseClearMove ( moverecord *pmr ) {
+
+  if ( ! pmr )
+    return;
+
+  switch ( pmr->mt ) {
+  case MOVE_GAMEINFO:
+    IniStatcontext ( &pmr->g.sc );
+    break;
+
+  case MOVE_NORMAL:
+
+    pmr->n.esDouble.et = pmr->n.esChequer.et = EVAL_NONE;
+    pmr->n.stMove = pmr->n.stCube = SKILL_NONE;
+    pmr->n.rLuck = ERR_VAL;
+    pmr->n.lt = LUCK_NONE;
+    if ( pmr->n.ml.amMoves ) {
+      free ( pmr->n.ml.amMoves );
+      pmr->n.ml.amMoves = NULL;
+    }
+    pmr->n.ml.cMoves = 0;
+    break;
+
+  case MOVE_DOUBLE:
+  case MOVE_TAKE:
+  case MOVE_DROP:
+
+    pmr->d.esDouble.et = EVAL_NONE;
+    pmr->d.st = SKILL_NONE;
+    break;
+      
+  case MOVE_RESIGN:
+
+    pmr->r.esResign.et = EVAL_NONE;
+    pmr->r.stResign = pmr->r.stAccept = SKILL_NONE;
+    break;
+
+  case MOVE_SETDICE:
+
+    pmr->sd.lt = LUCK_NONE;
+    pmr->sd.rLuck = ERR_VAL;
+    break;
+
+  default:
+    /* no-op */
+    break;
+
+  }
+
+}
+
+static void
+AnalyseClearGame ( list *plGame ) {
+
+  list *pl;
+
+  if ( ! plGame || ListEmpty ( plGame ) )
+    return;
+
+  for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) 
+    AnalyseClearMove ( pl->p );
+
+}
+
+
+extern void
+CommandAnalyseClearMove ( char *sz ) {
+
+  if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
+    AnalyseClearMove ( plLastMove->plNext->p );
+#if USE_GTK
+    if( fX )
+      GTKUpdateAnnotations();
+#endif
+  }
+  else
+    outputl ( _("Cannot clear analysis on this move" ) );
+
+}
+
+extern void
+CommandAnalyseClearGame ( char *sz ) {
+
+  if( !plGame ) {
+    outputl( _("No game is being played.") );
+    return;
+  }
+
+  AnalyseClearGame ( plGame );
+
+#if USE_GTK
+  if( fX )
+    GTKUpdateAnnotations();
+#endif
+
+}
+
+extern void
+CommandAnalyseClearMatch ( char *sz ) {
+
+  list *pl;
+
+  if( ListEmpty( &lMatch ) ) {
+    outputl( _("No match is being played.") );
+    return;
+  }
+
+  for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) 
+    AnalyseClearGame ( pl->p );
+
+#if USE_GTK
+  if( fX )
+    GTKUpdateAnnotations();
+#endif
+
+}
+

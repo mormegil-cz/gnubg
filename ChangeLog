@@ -1,3 +1,14 @@
+Wed Dec 25 17:29:22 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	Commands for clearing analysis
+	(suggested by Albert Silver)
+
+	* gnubg.c: new commands "analyse clear [move,game,match,session].
+	* analysis.c (AnalyseClearMove, AnalyseClearGame,
+	CommandAnalyseClearMove, CommandAnalyseClearGame, 
+	CommandAnalyseClearMatch, CommandAnalyseClearSession): new functions.
+	* gtkgame.c: add new commands to analysis menu.
+
 Wed Dec 25 16:52:47 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	* postscript.c (ExportGamePostScript): output header before each move

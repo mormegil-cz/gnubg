@@ -117,6 +117,10 @@ extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
    sync with the string array! */
 typedef enum _gnubgcommand {
     CMD_AGREE,
+    CMD_ANALYSE_CLEAR_MOVE,
+    CMD_ANALYSE_CLEAR_GAME,
+    CMD_ANALYSE_CLEAR_MATCH,
+    CMD_ANALYSE_CLEAR_SESSION,
     CMD_ANALYSE_MOVE,
     CMD_ANALYSE_GAME,
     CMD_ANALYSE_MATCH,
@@ -184,6 +188,10 @@ typedef enum _gnubgcommand {
    
 static char *aszCommands[ NUM_CMDS ] = {
     "agree",
+    "analyse clear move",
+    "analyse clear game",
+    "analyse clear match",
+    "analyse clear session",
     "analyse move",
     "analyse game",
     "analyse match",
@@ -2277,6 +2285,15 @@ extern int InitGTK( int *argc, char ***argv ) {
           NULL, Command, CMD_ANALYSE_MATCH, NULL },
 	{ N_("/_Analyse/Analyse session"), 
           NULL, Command, CMD_ANALYSE_SESSION, NULL },
+        { N_("/_Analyse/Clear analysis"), NULL, NULL, 0, "<Branch>" },
+        { N_("/_Analyse/Clear analysis/Move"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_MOVE, NULL },
+        { N_("/_Analyse/Clear analysis/_Game"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_GAME, NULL },
+        { N_("/_Analyse/Clear analysis/_Match"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_MATCH, NULL },
+        { N_("/_Analyse/Clear analysis/_Session"), 
+          NULL, Command, CMD_ANALYSE_CLEAR_SESSION, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/Game statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_GAME, NULL },
@@ -6944,6 +6961,7 @@ extern void GTKSet( void *p ) {
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
 			 ms.gs == GAME_PLAYING );
+
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
             pif, CMD_ANALYSE_MOVE ), 
             plLastMove && plLastMove->plNext && plLastMove->plNext->p );
@@ -6953,12 +6971,22 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_ANALYSE_MATCH ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_ANALYSE_SESSION ), !ListEmpty( &lMatch ) );
+
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+            pif, CMD_ANALYSE_CLEAR_MOVE ), 
+            plLastMove && plLastMove->plNext && plLastMove->plNext->p );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_ANALYSE_CLEAR_GAME ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_ANALYSE_CLEAR_MATCH ), !ListEmpty( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_ANALYSE_CLEAR_SESSION ), !ListEmpty( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_STATISTICS_GAME ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_SHOW_STATISTICS_MATCH ), TRUE );
+	    pif, CMD_SHOW_STATISTICS_MATCH ), !ListEmpty ( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
-	    pif, CMD_SHOW_STATISTICS_SESSION ), TRUE );
+	    pif, CMD_SHOW_STATISTICS_SESSION ), !ListEmpty ( &lMatch ) );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_RECORD_SHOW ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(

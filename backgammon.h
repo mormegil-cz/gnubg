@@ -523,6 +523,9 @@ extern command acSetHighlightIntensity[];
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
+    CommandAnalyseClearGame( char * ),
+    CommandAnalyseClearMatch( char * ),
+    CommandAnalyseClearMove( char * ),
     CommandAnalyseGame( char * ),
     CommandAnalyseMatch( char * ),
     CommandAnalyseMove( char * ),
