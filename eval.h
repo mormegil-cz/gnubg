@@ -194,6 +194,9 @@ extern int
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
                   cubeinfo *pci, evalcontext *pec );
 
+extern void
+InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS] );
+
 extern void 
 InvertEvaluation( float ar[ NUM_OUTPUTS ] );
 
@@ -300,13 +303,19 @@ extern char
 *FormatEval ( char *sz, evalsetup *pes );
 
 extern int 
-EvaluatePositionCubeful2( int anBoard[ 2 ][ 25 ], float arOutput[],
-                          float arCF[ 4 ],
-                          cubeinfo *pci, evalcontext *pec, int nPlies,
-                          int nPliesTop, int fDTTop, cubeinfo *pciTop );
+EvaluatePositionCubeful2( int anBoard[ 2 ][ 25 ],
+                          float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                          cubeinfo aci[], int cci,
+                          evalcontext *pec, int nPlies,
+                          int nPliesTop, int fDTTop, cubeinfo aciTop[] );
 
 extern cubedecision
 FindCubeDecision ( float arDouble[],
                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], cubeinfo *pci );
+
+extern int
+GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                       int anBoard[ 2 ][ 25 ],
+                       cubeinfo *pci, evalcontext *pec );
 
 #endif
