@@ -10,7 +10,7 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
 
 noinst_LIBRARIES = libboard3d.a
 libboard3d_a_SOURCES = drawboard3d.c matrix.h mylist.c \
-	timer.c misc3d.c  widget3d.c gtkcolour3d.c \
+	misc3d.c  widget3d.c gtkcolour3d.c \
         matrix.c model.c shadow.c texture3d.c  font3d.cpp graph.c
 
 
