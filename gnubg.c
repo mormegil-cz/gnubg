@@ -2102,6 +2102,7 @@ extern void CommandHint( char *sz ) {
 			                            &esEvalCube.ec ) < 0 )
 		return;
 
+        FindCubeDecision ( arDouble, aarOutput, &ci );  
 #if USE_GTK
 	/*
 	  if ( fX ) {
