@@ -1732,7 +1732,9 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 	       "set gui dragtargethelp %s" )
 
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_2D)
+	if (rdAppearance.fDisplayType == DT_3D)
+		updateDiceOccPos(BOARD( pwBoard )->board_data);
+	else
 #endif
 	if( GTK_WIDGET_REALIZED( pwBoard ) )
 	{
