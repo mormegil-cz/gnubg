@@ -1,3 +1,14 @@
+Thu Jul 10 14:56:04 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c: new command "show matchresult" to show
+	actual and luck adjusted results for a money game.
+	(needed to answer post in rec.games.backgammon)
+	* show.c (CommandShowMatchResult): new function.
+
+Thu Jul 10 13:55:07 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (dirname): win32 doesn't have dirname.
+
 Thu Jul 10 13:10:29 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Improve output of settings for rollout 

@@ -2264,3 +2264,69 @@ ShowBearoff( char *sz, matchstate *pms, bearoffcontext *pbc ) {
   }
 
 }
+
+
+extern void
+CommandShowMatchResult( char *sz ) {
+
+  float arSum[ 2 ] = { 0.0f, 0.0f };
+  float arSumSquared[ 2 ] = { 0.0f, 0.0f };
+  int n = 0;
+  movegameinfo *pmgi;
+  statcontext *psc;
+  list *pl;
+  float r;
+
+  if ( ms.nMatchTo ) {
+    outputl( _("This command has not been implemented for match play!") );
+    return;
+  }
+
+  updateStatisticsMatch ( &lMatch );
+
+  outputf( _("Actual and luck adjusted results for %s\n\n"),
+           ap[ 0 ].szName );
+  outputl( _("Game   Actual     Luck adj.\n") );
+
+  for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext, ++n ) {
+  
+      pmgi = ( (list *) pl->p )->plNext->p;
+      assert( pmgi->mt == MOVE_GAMEINFO );
+      
+      psc = &pmgi->sc;
+      
+      if ( psc->fDice ) 
+        outputf( "%4d   %+9.3f   %+9.3f\n",
+                 n, 
+                 psc->arActualResult[ 0 ],
+                 psc->arActualResult[ 0 ] - 
+                 psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] );
+      else
+        outputf( _("%d   no info avaiable\n"), n );
+      
+      r = psc->arActualResult[ 0 ];
+      arSum[ 0 ] += r;
+      arSumSquared[ 0 ] += r * r;
+
+      r = psc->arActualResult[ 0 ] - 
+        psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+      arSum[ 1 ] += r;
+      arSumSquared[ 1 ] += r * r;
+  
+      
+  }
+
+  outputf( _("Sum    %+9.3f   %+9.3f\n"),
+           arSum[ 0 ], arSum[ 1 ] );
+
+  if ( n ) {
+    outputf( _("Ave.   %+9.3f   %+9.3f\n"),
+             arSum[ 0 ] / n , arSum[ 1 ] / n );
+    outputf( _("95%%CI  %9.3f   %9.3f\n" ),
+             sqrt ( arSumSquared[ 0 ] / n - 
+                    arSum[ 0 ] * arSum[ 0 ] / ( n * n ) ) / sqrt( n ),
+             sqrt ( arSumSquared[ 1 ] / n - 
+                    arSum[ 1 ] * arSum[ 1 ] / ( n * n ) ) / sqrt( n ) );
+  }
+            
+}

@@ -1703,6 +1703,9 @@ command cER = {
       N_("Display auxiliary match information"), NULL, NULL },
     { "matchlength", CommandShowMatchLength,
       N_("Show default match length"), NULL, NULL },
+    { "matchresult", CommandShowMatchResult,
+      N_("Show the actual and luck adjusted result for each game "
+         "and the entire match"), NULL, NULL },
     { "met", CommandShowMatchEquityTable, 
       N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
     { "onechequer", CommandShowOneChequer, 
