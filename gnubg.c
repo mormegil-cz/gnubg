@@ -330,6 +330,8 @@ command acDatabase[] = {
 }, acSet[] = {
     { "annotation", CommandSetAnnotation, "Select whether move analysis and "
       "commentary are shown", szONOFF, NULL },
+    { "appearance", CommandSetColours, "Modify the look and feel of the "
+      "graphical interface", szKEYVALUE, NULL },
     { "automatic", NULL, "Perform certain functions without user input",
       NULL, acSetAutomatic },
     { "beavers", CommandSetBeavers, 
@@ -339,8 +341,8 @@ command acDatabase[] = {
       "position", szPOSITION, NULL },
     { "cache", CommandSetCache, "Set the size of the evaluation cache",
       szSIZE, NULL },
-    { "colours", CommandSetColours, "Modify the appearance of the board",
-      szKEYVALUE, NULL },
+    { "colours", CommandSetColours, "Synonym for `set appearance'", NULL,
+      NULL },
     { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
       "a game in progress", szONOFF, NULL },
     { "crawford", CommandSetCrawford, 

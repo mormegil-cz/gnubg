@@ -610,12 +610,12 @@ static void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
 /* A chequer has been moved or the board has been updated -- update the
    move and position ID labels. */
-static void update_move( BoardData *bd ) {
+static int update_move( BoardData *bd ) {
     
     char *move = "Illegal move", move_buf[ 40 ];
     gint i, points[ 2 ][ 25 ];
     guchar key[ 10 ];
-    int fIncomplete = TRUE;
+    int fIncomplete = TRUE, fIllegal = TRUE;
     
     read_board( bd, points );
     update_position_id( bd, points );
@@ -624,11 +624,11 @@ static void update_move( BoardData *bd ) {
     
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
 	move = "(Editing)";
-	fIncomplete = FALSE;
+	fIncomplete = fIllegal = FALSE;
     } else if( EqualBoards( points, bd->old_board ) ) {
         /* no move has been made */
 	move = NULL;
-	fIncomplete = FALSE;
+	fIncomplete = fIllegal = FALSE;
     } else {
         PositionKey( points, key );
 
@@ -637,6 +637,7 @@ static void update_move( BoardData *bd ) {
                 bd->valid_move = bd->move_list.amMoves + i;
 		fIncomplete = bd->valid_move->cMoves < bd->move_list.cMaxMoves
 		    || bd->valid_move->cPips < bd->move_list.cMaxPips;
+		fIllegal = FALSE;
                 FormatMove( move = move_buf, bd->old_board,
 			    bd->valid_move->anMove );
                 break;
@@ -646,6 +647,8 @@ static void update_move( BoardData *bd ) {
     gtk_widget_set_state( bd->move, fIncomplete ? GTK_STATE_ACTIVE :
 			  GTK_STATE_NORMAL );
     gtk_label_set_text( GTK_LABEL( bd->move ), move );
+
+    return fIllegal ? -1 : 0;
 }
 
 static void Confirm( BoardData *bd ) {
@@ -672,7 +675,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
     GdkPixmap *pm_swap;
     guchar *rgb_swap;
-    int i, n, dest, x, y, bar;
+    int i, n, dest, x, y, bar, hit;
 
     switch( event->type ) {
     case GDK_BUTTON_PRESS:
@@ -828,17 +831,14 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		read_board( bd, points );
 		PositionKey( points, key );
 
-		for( i = 0; i < bd->move_list.cMoves; i++ )
-		    if( EqualKeys( bd->move_list.amMoves[ i ].auch, key ) ) {
-			update_move( bd );
-
-			board_expose_point( board, bd, n[ 0 ] );
-			board_expose_point( board, bd, n[ 1 ] );
-			board_expose_point( board, bd, bd->drag_point );
-			board_expose_point( board, bd, bar );
-
-			goto finished;
-		    }
+		if( !update_move( bd ) ) {
+		    board_expose_point( board, bd, n[ 0 ] );
+		    board_expose_point( board, bd, n[ 1 ] );
+		    board_expose_point( board, bd, bd->drag_point );
+		    board_expose_point( board, bd, bar );
+			
+		    goto finished;
+		}
 
 		/* the move to make the point wasn't legal; undo it. */
 		memcpy( bd->points, old_points, sizeof bd->points );
@@ -1085,7 +1085,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    dest = bd->drag_point;
 	}
 
-	if( bd->points[ dest ] == -bd->drag_colour ) {
+	if( ( hit = bd->points[ dest ] == -bd->drag_colour ) ) {
 	    bd->points[ dest ] = 0;
 	    bd->points[ bar ] -= bd->drag_colour;
 
@@ -1097,7 +1097,21 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	board_expose_point( board, bd, dest );
 
 	if( bd->drag_point != dest )
-	    update_move( bd );
+	    if( update_move( bd ) && !bd->permit_illegal ) {
+		/* the move was illegal; undo it */
+		bd->points[ dest ] -= bd->drag_colour;
+		bd->points[ bd->drag_point ] += bd->drag_colour;
+		if( hit ) {
+		    bd->points[ bar ] += bd->drag_colour;
+		    bd->points[ dest ] = -bd->drag_colour;
+		    board_expose_point( board, bd, bar );
+		}
+		    
+		board_expose_point( board, bd, bd->drag_point );
+		board_expose_point( board, bd, dest );
+		update_move( bd );
+		gdk_beep();
+	    }
 	
 	bd->drag_point = -1;
 
@@ -1488,7 +1502,8 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     gchar board_str[ 256 ];
     int old_dice;
     BoardData *pbd = board->board_data;
-
+    enum _control { C_NONE, C_ROLLDOUBLE, C_TAKEDROP, C_AGREEDECLINE } c;
+    
     memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
     old_dice = pbd->dice[ 0 ];
 
@@ -1502,16 +1517,36 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     if( pbd->board_size <= 0 )
 	return 0;
 
+    c = C_NONE;
+    
     if( die0 ) {
-	/* dice have been rolled; hide off-board dice */
 	pbd->dice_roll[ 0 ] = die0;
 	pbd->dice_roll[ 1 ] = die1;
-	gtk_widget_hide( pbd->dice_area );
-    } else if( old_dice )
-	/* dice have been removed from board; show dice ready to roll */
-	gtk_widget_show( pbd->dice_area );
+    } else
+	c = C_ROLLDOUBLE;
+
+    if( fDoubled )
+	c = C_TAKEDROP;
+
+    if( fResigned )
+	c = C_AGREEDECLINE;
+
+    if( c == C_ROLLDOUBLE && old_dice )
+	gtk_widget_show_all( pbd->usedicearea ? pbd->dice_area :
+			     pbd->rolldouble );
     else
-	;
+	gtk_widget_hide( pbd->usedicearea ? pbd->dice_area :
+			     pbd->rolldouble );
+
+    if( c == C_TAKEDROP )
+	gtk_widget_show_all( pbd->takedrop );
+    else
+	gtk_widget_hide( pbd->takedrop );
+
+    if( c == C_AGREEDECLINE )
+	gtk_widget_show_all( pbd->agreedecline );
+    else
+	gtk_widget_hide( pbd->agreedecline );
 
     /* FIXME it's overkill to do this every time, but if we don't do it,
        then "set turn <player>" won't redraw the dice in the other colour. */
@@ -2432,7 +2467,8 @@ static void board_size_allocate( GtkWidget *board,
     gint old_size = bd->board_size, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
-
+    int cy;
+    
     memcpy( &board->allocation, allocation, sizeof( GtkAllocation ) );
     
     gtk_widget_get_child_requisition( bd->hbox_match, &requisition );
@@ -2458,21 +2494,38 @@ static void board_size_allocate( GtkWidget *board,
     child_allocation.width = allocation->width;
     child_allocation.height = requisition.height;
     gtk_widget_size_allocate( bd->hbox_pos, &child_allocation );
-    
+
+    /* find the tallest out of the move widget and the button boxes */
     gtk_widget_get_child_requisition( bd->move, &requisition );
+    cy = requisition.height;
+    gtk_widget_get_child_requisition( bd->rolldouble, &requisition );
+    if( requisition.height > cy )
+	cy = requisition.height;
+    gtk_widget_get_child_requisition( bd->takedrop, &requisition );
+    if( requisition.height > cy )
+	cy = requisition.height;
+    gtk_widget_get_child_requisition( bd->agreedecline, &requisition );
+    if( requisition.height > cy )
+	cy = requisition.height;
+    
     /* ensure there is room for the dice area or the move, whichever is
        bigger */
     new_size = MIN( allocation->width / 108,
-		    MIN( ( allocation->height - requisition.height - 2 ) / 72,
+		    MIN( ( allocation->height - cy - 2 ) / 72,
 			 ( allocation->height - 2 ) / 79 ) );
+
+    if( new_size * 7 > cy )
+	cy = new_size * 7;
+    
+    gtk_widget_get_child_requisition( bd->move, &requisition );
     child_allocation.x = allocation->x;
-    child_allocation.y = allocation->y + allocation->height -
-	requisition.height + 1;
+    child_allocation.y = allocation->y + allocation->height - cy + 1;
     child_allocation.width = allocation->width;
     child_allocation.height = requisition.height;
-    allocation->height -= MAX( requisition.height, new_size * 7 ) + 2;
     gtk_widget_size_allocate( bd->move, &child_allocation );
 
+    allocation->height -= cy + 2;
+    
     /* FIXME what should we do if new_size < 1?  If the window manager
        honours our minimum size this won't happen, but... */
     
@@ -2495,6 +2548,27 @@ static void board_size_allocate( GtkWidget *board,
     child_allocation.height = 7 * bd->board_size;
     child_allocation.y += 72 * bd->board_size + 1;
     gtk_widget_size_allocate( bd->dice_area, &child_allocation );
+
+    gtk_widget_get_child_requisition( bd->rolldouble, &requisition );
+    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
+	54 * bd->board_size - requisition.width );
+    child_allocation.width = requisition.width;
+    child_allocation.height = requisition.height;
+    gtk_widget_size_allocate( bd->rolldouble, &child_allocation );
+
+    gtk_widget_get_child_requisition( bd->takedrop, &requisition );
+    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
+	54 * bd->board_size - requisition.width );
+    child_allocation.width = requisition.width;
+    child_allocation.height = requisition.height;
+    gtk_widget_size_allocate( bd->takedrop, &child_allocation );
+
+    gtk_widget_get_child_requisition( bd->agreedecline, &requisition );
+    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
+	54 * bd->board_size - requisition.width );
+    child_allocation.width = requisition.width;
+    child_allocation.height = requisition.height;
+    gtk_widget_size_allocate( bd->agreedecline, &child_allocation );
 }
 
 static void AddChild( GtkWidget *pw, GtkRequisition *pr ) {
@@ -2513,7 +2587,8 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
 
     BoardData *bd;
     GtkRequisition r;
-
+    int cy;
+    
     if( !pw || !pr )
 	return;
 
@@ -2524,10 +2599,23 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
     AddChild( bd->hbox_pos, pr );
     AddChild( bd->table, pr );
     AddChild( bd->hbox_match, pr );
-    
+
     gtk_widget_size_request( bd->move, &r );
-    pr->height += MAX( r.height, 7 ); /* move or dice_area, whichever is
-					 taller */
+    cy = MAX( r.height, 7 ); /* move or dice_area, whichever is taller */
+
+    gtk_widget_size_request( bd->rolldouble, &r );
+    if( r.height > cy )
+	cy = r.height;
+
+    gtk_widget_size_request( bd->takedrop, &r );
+    if( r.height > cy )
+	cy = r.height;
+
+    gtk_widget_size_request( bd->agreedecline, &r );
+    if( r.height > cy )
+	cy = r.height;
+
+    pr->height += cy;
 
     if( pr->width < 108 )
 	pr->width = 108;
@@ -2557,7 +2645,7 @@ static void board_set_position( GtkWidget *pw, BoardData *bd ) {
 
 static void board_show_child( GtkWidget *pwChild, BoardData *pbd ) {
 
-    if( pwChild != pbd->dice_area )
+    if( pwChild != pbd->dice_area && !GTK_IS_HBUTTON_BOX( pwChild ) )
 	gtk_widget_show_all( pwChild );
 }
 
@@ -2733,12 +2821,18 @@ static GtkWidget *chequer_key_new( int iPlayer, BoardData *bd ) {
     return pw;
 }
 
+static void ButtonClicked( GtkWidget *pw, char *sz ) {
+
+    UserCommand( sz );
+}
+
 static void board_init( Board *board ) {
 
     BoardData *bd = g_malloc( sizeof( *bd ) );
     GdkColormap *cmap = gtk_widget_get_colormap( GTK_WIDGET( board ) );
     GdkVisual *vis = gtk_widget_get_visual( GTK_WIDGET( board ) );
     GdkGCValues gcval;
+    GtkWidget *pw;
     
     board->board_data = bd;
     bd->widget = GTK_WIDGET( board );
@@ -2751,6 +2845,8 @@ static void board_init( Board *board ) {
 
     bd->translucent = TRUE;
     bd->labels = FALSE;
+    bd->usedicearea = TRUE;
+    bd->permit_illegal = TRUE;
     bd->arLight[ 0 ] = -0.5;
     bd->arLight[ 1 ] = 0.5;
     bd->arLight[ 2 ] = 0.707;
@@ -2809,6 +2905,43 @@ static void board_init( Board *board ) {
     gtk_container_add( GTK_CONTAINER( board ),
 		       bd->move = gtk_label_new( NULL ) );
     gtk_widget_set_name( bd->move, "move" );
+
+    bd->takedrop = gtk_hbutton_box_new();
+    pw = gtk_button_new_with_label( "Take" );
+    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "take" );
+    gtk_container_add( GTK_CONTAINER( bd->takedrop ), pw );
+    pw = gtk_button_new_with_label( "Drop" );
+    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "drop" );
+    gtk_container_add( GTK_CONTAINER( bd->takedrop ), pw );
+    bd->redouble = gtk_button_new_with_label( "Redouble" );
+    gtk_signal_connect( GTK_OBJECT( bd->redouble ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "redouble" );
+    gtk_container_add( GTK_CONTAINER( bd->takedrop ), bd->redouble );
+    gtk_container_add( GTK_CONTAINER( board ), bd->takedrop );
+    
+    bd->rolldouble = gtk_hbutton_box_new();
+    pw = gtk_button_new_with_label( "Roll" );
+    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "roll" );
+    gtk_container_add( GTK_CONTAINER( bd->rolldouble ), pw );
+    bd->doub = gtk_button_new_with_label( "Double" );
+    gtk_signal_connect( GTK_OBJECT( bd->doub ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "double" );
+    gtk_container_add( GTK_CONTAINER( bd->rolldouble ), bd->doub );
+    gtk_container_add( GTK_CONTAINER( board ), bd->rolldouble );
+
+    bd->agreedecline = gtk_hbutton_box_new();
+    pw = gtk_button_new_with_label( "Agree" );
+    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "agree" );
+    gtk_container_add( GTK_CONTAINER( bd->agreedecline ), pw );
+    pw = gtk_button_new_with_label( "Decline" );
+    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "decline" );
+    gtk_container_add( GTK_CONTAINER( bd->agreedecline ), pw );
+    gtk_container_add( GTK_CONTAINER( board ), bd->agreedecline );
     
     bd->dice_area = gtk_drawing_area_new();
     gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );

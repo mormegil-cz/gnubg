@@ -91,12 +91,12 @@ typedef enum _gnubgcommand {
     CMD_ROLLOUT,
     CMD_SAVE_SETTINGS,
     CMD_SET_ANNOTATION_ON,
+    CMD_SET_APPEARANCE,
     CMD_SET_AUTO_BEAROFF,
     CMD_SET_AUTO_CRAWFORD,
     CMD_SET_AUTO_GAME,
     CMD_SET_AUTO_MOVE,
     CMD_SET_AUTO_ROLL,
-    CMD_SET_COLOURS,
     CMD_SET_CONFIRM,
     CMD_SET_CUBE_CENTRE,
     CMD_SET_CUBE_OWNER_0,
@@ -194,12 +194,12 @@ static char *aszCommands[ NUM_CMDS ] = {
     "rollout",
     "save settings",
     "set annotation on",
+    NULL, /* set appearance */
     "set automatic bearoff",
     "set automatic crawford",
     "set automatic game",
     "set automatic move",
     "set automatic roll",
-    NULL, /* set colours */
     "set confirm",
     "set cube centre",
     NULL, /* set cube owner 0 */
@@ -440,7 +440,7 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
     }
 
     switch( iCommand ) {
-    case CMD_SET_COLOURS:
+    case CMD_SET_APPEARANCE:
 	BoardPreferences( pwBoard );
 	return;
 	
@@ -1387,6 +1387,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
 	{ "/_Train/Train with _TD(0)", NULL, Command, CMD_TRAIN_TD, NULL },
 	{ "/_Settings", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/Appearance...", NULL, Command, CMD_SET_APPEARANCE,
+	  NULL },
 	{ "/_Settings/_Automatic", NULL, NULL, 0, "<Branch>" },
 	{ "/_Settings/_Automatic/_Bearoff", NULL, Command,
 	  CMD_SET_AUTO_BEAROFF, "<CheckItem>" },
@@ -1401,7 +1403,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "<CheckItem>" },
 	{ "/_Settings/_Beavers...", NULL, NULL, 0, NULL },
 	{ "/_Settings/Cache...", NULL, SetCache, 0, NULL },
-	{ "/_Settings/Colours...", NULL, Command, CMD_SET_COLOURS, NULL },
 	{ "/_Settings/_Confirmation", NULL, Command, CMD_SET_CONFIRM,
 	  "<CheckItem>" },
 	{ "/_Settings/De_lay...", NULL, SetDelay, 0, NULL },

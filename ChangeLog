@@ -1,3 +1,20 @@
+Thu Mar 29 11:21:04 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (update_move): Notify caller of illegal moves.
+	(board_pointer): Optionally reject illegal chequer movement.
+
+	* gtkboard.c (board_init): Add buttons for take, drop, double, roll,
+	etc.
+
+	* gtkprefs.c (GeneralPage): Add options for permitting illegal
+	movement, and clicking the dice icon to roll.
+
+	* play.c (NextTurn): Don't automatically roll if a resignation
+	has been offered.
+	
+	* gdkgetrgb.c (gdk_get_rgb_image): Fix stupid memory leak of image
+	(reported by Tim Laursen).
+
 Tue Mar 27 14:31:17 2001  Gary Wong  <gtw@research.att.com>
 
 	* external.c (CommandExternal): Fix bugs handling anBoard.

@@ -41,8 +41,8 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ], *apadjPoint[ 2 ],
     *padjBoard;
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *pwBoard, *pwTranslucent,
-    *pwLabels;
-static int fTranslucent, fLabels;
+    *pwLabels, *pwUseDiceIcon, *pwPermitIllegal;
+static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal;
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 
@@ -183,6 +183,18 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), fLabels );
     gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
     
+    pwUseDiceIcon = gtk_check_button_new_with_label( "Click dice icon to "
+						     "roll" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwUseDiceIcon ),
+				  fUseDiceIcon );
+    gtk_box_pack_start( GTK_BOX( pw ), pwUseDiceIcon, FALSE, FALSE, 4 );
+    
+    pwPermitIllegal = gtk_check_button_new_with_label(
+	"Allow dragging to illegal points" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwPermitIllegal ),
+				  fPermitIllegal );
+    gtk_box_pack_start( GTK_BOX( pw ), pwPermitIllegal, FALSE, FALSE, 0 );
+    
     pwTable = gtk_table_new( 2, 2, FALSE );
     gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
     
@@ -223,7 +235,17 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
     
     if( GTK_WIDGET_REALIZED( pwBoard ) ) {
 	board_create_pixmaps( pwBoard, bd );
-    
+
+	if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !bd->usedicearea ) {
+	    gtk_widget_hide( bd->dice_area );
+	    gtk_widget_show_all( bd->rolldouble );
+	}
+
+	if( GTK_WIDGET_VISIBLE( bd->rolldouble ) && bd->usedicearea ) {
+	    gtk_widget_show_all( bd->dice_area );
+	    gtk_widget_hide( bd->rolldouble );
+	}
+	
 	gtk_widget_queue_draw( bd->drawing_area );
 	gtk_widget_queue_draw( bd->dice_area );
 	gtk_widget_queue_draw( bd->table );
@@ -237,6 +259,10 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     char sz[ 256 ];
     
     fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
+    fUseDiceIcon = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwUseDiceIcon ) );
+    fPermitIllegal = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwPermitIllegal ) );
     
     for( i = 0; i < 2; i++ ) {
 	bd->arRefraction[ i ] = apadj[ i ]->value;
@@ -275,6 +301,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
 
     bd->labels = fLabels;
+    bd->usedicearea = fUseDiceIcon;
+    bd->permit_illegal = fPermitIllegal;
     
     /* This is a horrible hack, but we need translucency set to the new
        value to call BoardPreferencesCommand(), so we get the correct
@@ -300,8 +328,10 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     
     fTranslucent = bd->translucent;
     fLabels = bd->labels;
+    fUseDiceIcon = bd->usedicearea;
+    fPermitIllegal = bd->permit_illegal;
     
-    pwDialog = CreateDialog( "GNU Backgammon - Colours", TRUE,
+    pwDialog = CreateDialog( "GNU Backgammon - Appearance", TRUE,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
     pwNotebook = gtk_notebook_new();
@@ -470,7 +500,11 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	bd->translucent = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "labels", c ) )
 	/* labels=bool */
-	bd->labels = toupper( *szValue ) == 'Y';    
+	bd->labels = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "diceicon", c ) )
+	bd->usedicearea = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "illegal", c ) )
+	bd->permit_illegal = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "light", c ) ) {
 	/* light=azimuth;elevation */
 	float rAzimuth, rElevation;
@@ -523,8 +557,9 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     if( bd->arLight[ 1 ] < 0 )
 	rAzimuth = 360 - rAzimuth;
     
-    sprintf( sz, "set colours board=rgb:%02X/%02X/%02X;%0.2f translucent=%c "
-	     "labels=%c light=%0.0f;%0.0f "
+    sprintf( sz, "set appearance board=rgb:%02X/%02X/%02X;%0.2f "
+	     "translucent=%c labels=%c diceicon=%c illegal=%c "
+	     "light=%0.0f;%0.0f "
 	     "chequers0=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "points0=rgb:%02X/%02X/%02X;%0.2f "
@@ -532,6 +567,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->aanBoardColour[ 0 ][ 0 ], bd->aanBoardColour[ 0 ][ 1 ], 
 	     bd->aanBoardColour[ 0 ][ 2 ], bd->aSpeckle[ 0 ] / 128.0f,
 	     bd->translucent ? 'y' : 'n', bd->labels ? 'y' : 'n',
+	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
 	     rAzimuth, rElevation,
 	     (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 

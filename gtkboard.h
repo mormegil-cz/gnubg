@@ -55,7 +55,8 @@ extern void board_set_playing( Board *board, gboolean f );
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
 	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
-	*crawford, *widget, *key0, *key1, *stop;
+	*crawford, *widget, *key0, *key1, *stop, *takedrop, *rolldouble,
+	*agreedecline, *redouble, *doub;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
@@ -65,7 +66,7 @@ typedef struct _BoardData {
 	*rgb_saved, *rgb_temp, *rgb_temp_saved, *rgb_bar;
     short *ai_refract[ 2 ];
     GdkFont *cube_font;
-    gboolean translucent, labels;
+    gboolean translucent, labels, usedicearea, permit_illegal;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
     guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
     int aSpeckle[ 4 ]; /* speckle for background, border, pts */
