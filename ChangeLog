@@ -1,3 +1,8 @@
+Wed Apr  4 11:54:00 2001  Joern Thyssen  <joern@thyssen.nu>
+
+        * matchequity.c (InitMatchEquity): Fix stupid bug :a number of
+        misplaced `break;'s (reported by David Montgomery).
+
 Mon Apr  2 15:17:25 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (CompareMoves): Include rScore2 in the comparision (for

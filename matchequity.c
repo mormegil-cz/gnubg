@@ -275,9 +275,10 @@ InitMatchEquity ( met metInit ) {
     for ( i = 0; i < 15; i++ ) 
       for ( j = 0; j < 15; j++ ) 
         aafMET[ i ][ j ] = aafMETWoolsey[ i ][ j ];
-    break;
 
     InitPostCrawfordMET ();
+
+    break;
 
   case MET_JACOBS:
 
@@ -286,9 +287,10 @@ InitMatchEquity ( met metInit ) {
     for ( i = 0; i < 25; i++ ) 
       for ( j = 0; j < 25; j++ ) 
         aafMET[ i ][ j ] = aafMETJacobs[ i ][ j ];
-    break;
 
     InitPostCrawfordMET ();
+
+    break;
 
   case MET_SNOWIE:
 
@@ -297,9 +299,11 @@ InitMatchEquity ( met metInit ) {
     for ( i = 0; i < 15; i++ ) 
       for ( j = 0; j < 15; j++ ) 
         aafMET[ i ][ j ] = aafMETSnowie[ i ][ j ];
-    break;
 
     InitPostCrawfordMET ();
+
+    break;
+
 
   default:
     break;
