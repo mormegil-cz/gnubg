@@ -3814,7 +3814,9 @@ Shutdown( void ) {
 extern void PromptForExit( void ) {
 
     static int fExiting;
+#if USE_BOARD3D
 	BoardData* bd = BOARD(pwBoard)->board_data;
+#endif
 
     if( !fExiting && fInteractive && fConfirm && ms.gs == GAME_PLAYING ) {
 	fExiting = TRUE;

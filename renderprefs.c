@@ -485,6 +485,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 	    prd->rRound = 1.0 - rRound;
         PopLocale ();
     }
+    else if( !strncasecmp( szParam, "moveindicator", c ) )
+		prd->showMoveIndicator = toupper(*szValue) == 'Y';
 #if USE_BOARD3D
     else if( !strncasecmp( szParam, "boardshadows", c ) )
 		prd->showShadows = toupper( *szValue ) == 'Y';
@@ -514,8 +516,6 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 		prd->lightLevels[1] = atoi(szValue);
     else if( !strncasecmp( szParam, "lightspecular", c ) )
 		prd->lightLevels[2] = atoi(szValue);
-    else if( !strncasecmp( szParam, "moveindicator", c ) )
-		prd->showMoveIndicator = toupper(*szValue) == 'Y';
     else if( !strncasecmp( szParam, "boardangle", c ) )
 		prd->boardAngle = atoi(szValue);
     else if( !strncasecmp( szParam, "skewfactor", c ) )
@@ -651,6 +651,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
     sprintf( sz, 
              "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
+		"moveindicator=%c "
 #if USE_BOARD3D
 		"boardtype=%c "
 		"boardshadows=%c "
@@ -662,7 +663,6 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		"lighttype=%c "
 		"lightposx=%f lightposy=%f lightposz=%f "
 		"lightambient=%d lightdiffuse=%d lightspecular=%d "
-		"moveindicator=%c "
 		"boardangle=%d "
 		"skewfactor=%d "
 		"planview=%c "
@@ -702,6 +702,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
              /* border */
 	     prd->aanBoardColour[ 1 ][ 0 ], prd->aanBoardColour[ 1 ][ 1 ], 
 	     prd->aanBoardColour[ 1 ][ 2 ],
+		prd->showMoveIndicator ? 'y' : 'n',
 #if USE_BOARD3D
 		prd->fDisplayType == DT_2D ? '2' : '3',
 		prd->showShadows ? 'y' : 'n',
@@ -713,7 +714,6 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->lightType == LT_POSITIONAL ? 'p' : 'd',
 		prd->lightPos[0], prd->lightPos[1], prd->lightPos[2],
 		prd->lightLevels[0], prd->lightLevels[1], prd->lightLevels[2],
-		prd->showMoveIndicator ? 'y' : 'n',
 		prd->boardAngle,
 		prd->testSkewFactor,
 		prd->planView ? 'y' : 'n',
