@@ -1,3 +1,13 @@
+Fri Apr 12 21:01:49 2002  Øystein Johansen <oeysteij@online.no>
+
+        * eval.c (FindnSaveBestMove): Skip 1-ply pruning of candidates
+
+        * eval.h: Added fNoOnePlyPrune to evalcontext structure.
+
+        * set.c: (CommandSetEvalNoOnePlyPrune): New function.
+
+        * gtkgame.c: Added checkbox for 'No 1-ply pruning'
+
 Mon Apr  8 18:10:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandSaveSettings): fix typo.

@@ -87,6 +87,7 @@ typedef struct _evalcontext {
     unsigned int nReduced : 2; /* this will need to be expanded if we add
 				  support for nReduced != 3 */
     unsigned int fDeterministic : 1;
+    unsigned int fNoOnePlyPrune : 1;
     float rSearchTolerance;
     float rNoise; /* standard deviation */
 } evalcontext;

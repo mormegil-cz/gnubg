@@ -3546,7 +3546,7 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 typedef struct _evalwidget {
     evalcontext *pec;
     GtkWidget *pwCubeful, *pwReduced, *pwSearchCandidates, *pwSearchTolerance,
-	*pwDeterministic;
+	*pwDeterministic, *pwNoOnePlyPrune;
     GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
 	*padjNoise;
     int *pfOK;
@@ -3563,6 +3563,8 @@ static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 	GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
     pec->nReduced = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwReduced ) ) ? 7 : 0;
+    pec->fNoOnePlyPrune = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pew->pwNoOnePlyPrune ) ) ? TRUE : FALSE;
     pec->rNoise = pew->padjNoise->value;
     pec->fDeterministic = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
@@ -3641,6 +3643,7 @@ static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
     gtk_widget_set_sensitive( pew->pwSearchTolerance, padj->value > 0 );
     gtk_widget_set_sensitive( pew->pwSearchSpaceMenu, padj->value > 0 );
     gtk_widget_set_sensitive( pew->pwReduced, padj->value == 2 );
+    gtk_widget_set_sensitive( pew->pwNoOnePlyPrune, padj->value > 1 );
 
     EvalChanged ( NULL, pew );
 
@@ -3690,6 +3693,8 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwReduced ),
                                 pec->nReduced );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwNoOnePlyPrune ),
+                                pec->fNoOnePlyPrune );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
                                 pec->fCubeful );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
@@ -3709,7 +3714,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     GtkWidget *pwEval, *pw;
 
     GtkWidget *pwFrame, *pwFrame2;
-    GtkWidget *pw2, *pw3;
+    GtkWidget *pw2, *pw3, *pw4;
 
     GtkWidget *pwMenu;
     GtkWidget *pwItem;
@@ -3877,12 +3882,19 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 
     pwFrame2 = gtk_frame_new ( "Reduced evaluations" );
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwFrame2 );
+    pw4 = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame2 ), pw4 );
 
-    gtk_container_add( GTK_CONTAINER( pwFrame2 ),
+    gtk_container_add( GTK_CONTAINER( pw4 ),
 		       pew->pwReduced = gtk_check_button_new_with_label(
 			   "Reduced 2 ply evaluation" ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwReduced ),
 				  pec->nReduced );
+    gtk_container_add( GTK_CONTAINER( pw4 ),
+		       pew->pwNoOnePlyPrune = gtk_check_button_new_with_label(
+			   "No 1-ply pruning" ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwNoOnePlyPrune ),
+				  pec->fNoOnePlyPrune );
 
     /* cubeful */
     
@@ -3949,6 +3961,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
+    gtk_signal_connect ( GTK_OBJECT( pew->pwNoOnePlyPrune ), "toggled",
+                         GTK_SIGNAL_FUNC( EvalChanged ), pew );
+
     
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
 
@@ -3993,6 +4008,12 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     
     if( pec->nReduced != pecOrig->nReduced ) {
 	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
+	UserCommand( sz );
+    }
+
+    if( pec->fNoOnePlyPrune != pecOrig->fNoOnePlyPrune ) {
+	sprintf( sz, "%s nooneplyprune %s", szPrefix,
+			pec->fNoOnePlyPrune ? "on" : "off" );
 	UserCommand( sz );
     }
 
