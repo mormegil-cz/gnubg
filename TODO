@@ -251,6 +251,8 @@ functions:
   two rollouts (one with player 0 on roll, and another with player 1 on roll)
   and average the two results. Instead gnubg should automagically perform both 
   rollouts and do the averaging.
+** When 'Allow dragging to illegal input' is selected, Two consecutive Button 1
+click will both use the 'first' dice.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
