@@ -367,6 +367,7 @@ windowgeometry awg[ NUM_WINDOWS ] =
 /* Usage strings */
 static char szDICE[] = N_("<die> <die>"),
     szCOMMAND[] = N_("<command>"),
+    szCOLOUR[] = N_("<colour>"),
     szER[] = N_("evaluation|rollout"), 
     szFILENAME[] = N_("<filename>"),
     szKEYVALUE[] = N_("[<key>=<value> ...]"),
@@ -426,6 +427,9 @@ command cER = {
 }, cRecordName = {
     /* dummy command used for player record names */
     NULL, NULL, NULL, NULL, &cRecordName
+}, cHighlightColour = {
+    /* dummy command used for highlight colour names */
+    NULL, NULL, NULL, NULL, &cHighlightColour
 }, acAnalyse[] = {
     { "game", CommandAnalyseGame, 
       N_("Compute analysis and annotate current game"),
@@ -1197,6 +1201,11 @@ command cER = {
   { "skill", NULL, N_("Set level for tutor warnings"), 
     NULL, acSetTutorSkill },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetHighlightIntensity[] = {
+  {"intensity", CommandSetHighlightIntensity, 
+   N_("choose normal/medium/dark  colours"), 
+   NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }      
 }, acSet[] = {
     { "analysis", NULL, N_("Control parameters used when analysing moves"),
       NULL, acSetAnalysis },
@@ -1234,6 +1243,9 @@ command cER = {
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
+    { "highlightcolour", CommandSetHighlightColour, 
+      N_("Set colour for highlighting lines"),
+	  szCOLOUR, acSetHighlightIntensity},
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1338,6 +1350,8 @@ command cER = {
       NULL, NULL },
     { "geometry", CommandShowGeometry, N_("Show geometry settings"), 
       NULL, NULL },
+	{ "highlight colour", CommandShowHighlightColour, 
+	  N_("Show colour for highlighting moves"), NULL, NULL },
     { "jacoby", CommandShowJacoby, 
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
     { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
@@ -1518,6 +1532,29 @@ char *aszVersion[] = {
     NULL,
 };
 
+highlightcolour HighlightColourTable[] = {
+  {{ 0, 0, 0}, { 0, 0, 0}, { 0, 0, 0}, "black" },
+  {{ 0, 0, 65280}, { 0, 0, 52480}, { 0, 0, 32768}, "blue" },
+  {{ 34560, 52736, 64000}, { 0, 48896, 65280}, { 0, 26624, 35584}, "skyblue" },
+  {{ 32512, 65280, 0}, { 26112, 52480, 0}, { 17664, 35584, 0}, "chartreuse" },
+  {{ 0, 65280, 65280}, { 0, 52480, 52480}, { 0, 35584, 35584}, "cyan" },
+  {{ 65280, 55040, 0}, { 52480, 44288, 0}, { 35584, 29952, 0}, "gold" },
+  {{ 0, 65280, 0}, { 0, 52480, 0}, { 0, 25600, 0}, "green" },
+  {{ 0, 65280, 32512}, { 0, 52480, 26112}, { 0, 35584, 17664}, "springgreen" },
+  {{ 65280, 42240, 0}, { 60928, 30208, 0}, { 35584, 17664, 0}, "orange" },
+  {{ 65280, 17664, 0}, { 52480, 14080, 0}, { 35584, 9472, 0}, "orangered" },
+  {{ 65280, 0, 65280}, { 52480, 0, 52480}, { 35584, 0, 35584}, "magenta" },
+  {{ 40960, 8192, 61440}, { 32000, 9728, 52480}, { 23808, 18176, 35584}, "purple" },
+  {{ 65280, 0, 0}, { 52480, 0, 0}, { 35584, 0, 0}, "red" },
+  {{ 0, 62720, 65280}, { 0, 50432, 52480}, { 0, 52736, 53504}, "turquoise" },
+  {{ 60928, 33280, 60928}, { 36864, 16640, 59904}, { 37888, 0, 54016}, "violet" },
+  {{ 65280, 65280, 0}, { 52480, 52480, 0}, { 35584, 35584, 0}, "yellow" },
+};
+
+
+highlightcolour *HighlightColour = &HighlightColourTable[12]; /* default red */
+int HighlightIntensity = 0;
+
 char *szHomeDirectory, *szDataDirectory;
 
 extern char *NextToken( char **ppch ) {
@@ -1692,6 +1729,22 @@ extern int ParsePlayer( char *sz ) {
     return -1;
 }
 
+extern int ParseHighlightColour( char *sz ) {
+
+  int	i;
+  highlightcolour *hp;
+
+  for (i = 0, hp = HighlightColourTable; 
+	   i < (sizeof (HighlightColourTable) / sizeof (HighlightColourTable[0]));
+	   ++i) {
+	if ( !strncasecmp( sz, HighlightColourTable[i].colourname, strlen (sz) ) )
+	  return i;
+
+  }
+
+  return -1;
+
+}
 /* Convert a string to a board array.  Currently allows the string to
    be a position ID, "=n" notation, or empty (in which case the current
    board is used).
@@ -4510,6 +4563,12 @@ extern void CommandSaveSettings( char *szParam ) {
   
 #endif /* WIN32 */
 
+
+	fprintf ( pf, "set highlightcolour %s intensity %s\n",
+			  HighlightColour->colourname,
+			  HighlightIntensity == 2 ? "dark" :
+              HighlightIntensity == 1 ? "medium" : "normal");
+
     /* the end */
 
     
@@ -4643,6 +4702,32 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     return NULL;
 }
 
+static char *HighlightCompletion (const char *sz, int nState ) {
+
+    static int i, cch;
+    char *pch, *szDup;
+
+    if( !nState ) {
+	cch = strlen( sz );
+	i = 0;
+    }
+
+	while (i < 
+		   (sizeof (HighlightColourTable) / 
+			sizeof (HighlightColourTable[0]))) {
+	  pch = HighlightColourTable[i].colourname;
+	  ++i;
+	  if( !strncasecmp( sz, pch, cch ) ) {
+	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
+		  return NULL;
+	    
+	    return strcpy( szDup, pch );
+	  }
+    }
+
+    return NULL;
+}
+
 static char *ERCompletion( const char *sz, int nState ) {
 
     static int i, cch;
@@ -4662,6 +4747,7 @@ static char *ERCompletion( const char *sz, int nState ) {
 	    
 	    return strcpy( szDup, pch );
 	}
+	++i;
     }
 
     return NULL;
@@ -4781,11 +4867,17 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
             if( !strncasecmp( pchCurrent, pc->sz, strlen( pchCurrent ) ) ) {
 		pc = pc->pc;
 		
+		if ( pc == acSetHighlightIntensity ) {
+		  pcResume = pc;
+		  pc = &cHighlightColour;
+		  break;
+		}
 		if( pc == acSetPlayer || pc == acSetRolloutPlayer || 
 			pc == acSetRolloutLatePlayer) {
 		    pcResume = pc;
 		    pc = &cPlayerBoth;
 		}
+		
                 break;
             }
 
@@ -4832,6 +4924,8 @@ static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 	return rl_completion_matches( szText, PlayerCompletion );
     else if( pcCompleteContext == &cPlayerBoth )
 	return rl_completion_matches( szText, PlayerCompletionBoth );
+	else if ( pcCompleteContext == &cHighlightColour )
+	  return rl_completion_matches( szText, HighlightCompletion );
     else
 	return rl_completion_matches( szText, GenerateKeywords );
 }

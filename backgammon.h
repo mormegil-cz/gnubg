@@ -358,6 +358,7 @@ extern void ClearMatch( void );
 extern void FreeMatch( void );
 extern void SetMatchDate( matchinfo *pmi );
 extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms );
+extern int ParseHighlightColour( char *sz );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc );
@@ -513,6 +514,7 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
 extern command acAnnotateMove[];
 extern command acSetExportParameters[];
 extern command acSetGeometryValues[];
+extern command acSetHighlightIntensity[];
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
@@ -708,6 +710,8 @@ extern void CommandAccept( char * ),
     CommandSetGeometryHeight ( char * ),
     CommandSetGeometryPosX ( char * ),
     CommandSetGeometryPosY ( char * ),
+    CommandSetHighlightColour ( char * ),
+    CommandSetHighlightIntensity ( char * ),
     CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
     CommandSetMatchAnnotator( char * ),
@@ -850,6 +854,7 @@ extern void CommandAccept( char * ),
     CommandShowExport ( char * ),
     CommandShowGammonValues( char * ),
     CommandShowGeometry ( char * ),
+    CommandShowHighlightColour ( char * ),
     CommandShowEgyptian( char * ),
     CommandShowJacoby( char * ),
     CommandShowKleinman( char * ),
@@ -909,5 +914,14 @@ basename ( const char *filename );
 extern char *
 Convert ( const char *sz, 
           const char *szSourceCharset, const char *szDestCharset );
+
+
+typedef struct _highlightcolour {
+  int  normal[3], medium[3], dark[3];
+  char *colourname;
+} highlightcolour;
+
+extern highlightcolour *HighlightColour, HighlightColourTable[];
+extern int HighlightIntensity;
 
 #endif

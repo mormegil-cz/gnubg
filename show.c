@@ -1698,6 +1698,16 @@ CommandShowGeometry ( char *sz ) {
 }
 
 
+extern void CommandShowHighlightColour ( char *sz ) {
+
+  outputf ( _("Moves will be highlighted in %s %s.\n"),
+              HighlightIntensity == 2 ? "dark" :
+              HighlightIntensity == 1 ? "medium" : "",
+			  HighlightColour->colourname);
+}
+
+
+
 #ifdef USE_SOUND
 
 extern void

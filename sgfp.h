@@ -9,6 +9,7 @@ typedef union {
     list *pl; /* nodes, sequences, gametrees */
 } yystype;
 # define YYSTYPE yystype
+# define YYSTYPE_IS_TRIVIAL 1
 #endif
 # define	PROPERTY	257
 # define	VALUETEXT	258

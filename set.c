@@ -3189,6 +3189,56 @@ CommandSetGeometryPosY ( char *sz ) {
 
 }
 
+int nSetHighlightColour = 12;
+
+extern void
+CommandSetHighlightColour ( char *sz ) {
+    char *pch = NextToken( &sz ), *pchCopy;
+    int i;
+	szSetCommand = "highlightcolour";
+
+    if( !pch ) {
+	outputf( _("You must specify a colour "
+			   "-- try `help set highlightcolour'.\n"), szSetCommand );
+	
+	return;
+    }
+
+  if( (i = ParseHighlightColour( pch )) < 0 ) {
+    outputf (_("Unknown colour '%s' -- try `help set highlight colour'.\n"), 
+			 sz);
+	return;
+  }
+
+  nSetHighlightColour = i;
+  HighlightColour = &HighlightColourTable[i];
+  HandleCommand( sz, acSetHighlightIntensity );
+}
+
+extern void
+CommandSetHighlightIntensity ( char *sz ) {
+
+  char *pch = NextToken( &sz );
+
+  if ((pch == 0) || (strncasecmp (pch, "normal", strlen (pch)) == 0)) {
+	HighlightIntensity = 0;
+	return;
+  }
+
+  if (strncasecmp (pch, "medium", strlen (pch)) == 0) {
+	HighlightIntensity = 1;
+	return;
+  }
+
+  if (strncasecmp (pch, "dark", strlen (pch)) == 0) {
+	HighlightIntensity = 2;
+	return;
+  }
+
+  outputf (_("Unknown intensity '%s' -- try `help set %s'.\n"), pch, szSetCommand);
+  return;
+
+}
 
 /*
  * Sounds
