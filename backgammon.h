@@ -724,6 +724,8 @@ getCurrentMoveRecord ( int* pfHistory );
 extern int
 getFinalScore( int* anScore );
 
+extern char* GetMoveString(moverecord *pmr, int* pPlayer);
+
 extern void
 UpdateStoredMoves ( const movelist* pml, const matchstate* pms );
 
@@ -880,7 +882,6 @@ extern void CommandAccept( char * ),
     CommandRelationalShowEnvironments( char * ),
     CommandRelationalShowPlayers( char * ),
     CommandRelationalShowDetails( char * ),
-    CommandRelationalShowRecords( char * ),
     CommandRelationalTest( char * ),
     CommandRelationalHelp( char * ),
     CommandResign( char * ),

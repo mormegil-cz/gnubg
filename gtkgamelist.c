@@ -367,104 +367,10 @@ void SetCellColour(int row, int col, moverecord *pmr)
 extern void GTKAddMoveRecord( moverecord *pmr )
 {
     gamelistrow *pglr;
-    int i, numRows, fPlayer = 0;
-    char *pch = 0;
-    char sz[ 40 ];
-    doubletype dt;
-    
-    switch( pmr->mt ) {
-    case MOVE_GAMEINFO:
-	/* no need to list this */
-	return;
-
-#if USE_TIMECONTROL
-    case MOVE_TIME:
-	sprintf(pch = sz, _("(%s out of time [%d])"),
-		     ap[ ms.fTurn ].szName , pmr->t.nPoints);
-	fPlayer = -1;
-	break;
-#endif
-
-    case MOVE_NORMAL:
-	fPlayer = pmr->fPlayer;
-	pch = sz;
-	sz[ 0 ] = pmr->anDice[ 0 ] + '0';
-	sz[ 1 ] = pmr->anDice[ 1 ] + '0';
-	sz[ 2 ] = ':';
-	sz[ 3 ] = ' ';
-	FormatMove( sz + 4, ms.anBoard, pmr->n.anMove );
-	strcat( sz, aszSkillTypeAbbr[ pmr->n.stMove ] );
-	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
-	break;
-
-    case MOVE_DOUBLE:
-	fPlayer = pmr->fPlayer;
-	pch = sz;
-
-        switch ( ( dt = DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn ) ) ) {
-        case DT_NORMAL:
-          sprintf( sz, ( ms.fCubeOwner == -1 )? 
-                   _("Double to %d") : _("Redouble to %d"), 
-                   ms.nCube << 1 );
-          break;
-        case DT_BEAVER:
-        case DT_RACCOON:
-          sprintf( sz, ( dt == DT_BEAVER ) ? 
-                   _("Beaver to %d") : _("Raccoon to %d"), ms.nCube << 2 );
-          break;
-        default:
-          assert ( FALSE );
-          break;
-        }
-	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
-	break;
-	
-    case MOVE_TAKE:
-	fPlayer = pmr->fPlayer;
-	strcpy( pch = sz, _("Take") );
-	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
-	break;
-	
-    case MOVE_DROP:
-	fPlayer = pmr->fPlayer;
-	strcpy( pch = sz, _("Drop") );
-	strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
-	break;
-	
-    case MOVE_RESIGN:
-	fPlayer = pmr->fPlayer;
-	pch = _(" Resigns"); /* FIXME show value */
-	break;
-
-    case MOVE_SETDICE:
-	fPlayer = pmr->fPlayer;
-	sprintf( pch = sz, _("Rolled %d%d"), pmr->anDice[ 0 ],
-		 pmr->anDice[ 1 ] );
-	break;
-
-    case MOVE_SETBOARD:
-	fPlayer = -1;
-	sprintf( pch = sz, " (set board %s)",
-		 PositionIDFromKey( pmr->sb.auchKey ) );
-	break;
-
-    case MOVE_SETCUBEPOS:
-	fPlayer = -1;
-	if( pmr->scp.fCubeOwner < 0 )
-	    pch = " (set cube centre)";
-	else
-	    sprintf( pch = sz, " (set cube owner %s)",
-		     ap[ pmr->scp.fCubeOwner ].szName );
-	break;
-
-    case MOVE_SETCUBEVAL:
-	fPlayer = -1;
-	sprintf( pch = sz, " (set cube value %d)", pmr->scv.nCube );
-	break;
-	
-    default:
-	assert( FALSE );
-    }
+    int i, numRows, fPlayer;
+    char *pch = GetMoveString(pmr, &fPlayer);
+    if (!pch)
+		return;
 
 	i = -1;
 	numRows = GTK_CLIST( pwGameList )->rows;

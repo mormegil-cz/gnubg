@@ -22,7 +22,6 @@
 #ifndef _MATCHID_H_
 #define _MATCHID_H_
 
-#include "config.h"
 #include "backgammon.h"
 
 extern int

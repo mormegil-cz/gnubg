@@ -324,7 +324,7 @@ class relational:
    #             person_id1 (person_id of player 1)
    #             m (the gnubg match)             
    
-   def __addMatch(self,env_id,person_id0,person_id1,m):
+   def __addMatch(self,env_id,person_id0,person_id1,m,key):
 
       # add match
 
@@ -345,10 +345,10 @@ class relational:
       elif DB_TYPE == DB_POSTGRESQL:
          CURRENT_TIME = CURRENT_TIMESTAMP
 
-      query = ("INSERT INTO match(match_id, env_id, person_id0, person_id1, " \
+      query = ("INSERT INTO match(match_id, checksum, env_id, person_id0, person_id1, " \
               "result, length, added, rating0, rating1, event, round, place, annotator, comment, date) " \
-              "VALUES (%d, %d, %d, %d, %d, %d, " + CURRENT_TIME + ", '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s) ") % \
-              (match_id, env_id, person_id0, person_id1, \
+              "VALUES (%d, '%s', %d, %d, %d, %d, %d, " + CURRENT_TIME + ", '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s) ") % \
+              (match_id, key, env_id, person_id0, person_id1, \
                -1, mi[ 'match-length' ],
                self.__getKey( mi[ 'X' ], 'rating' )[0:80],
                self.__getKey( mi[ 'O' ], 'rating' )[0:80],
@@ -384,7 +384,7 @@ class relational:
    # Returns: n/a
    #
    
-   def __add_match(self,m,env_id):
+   def __add_match(self,m,env_id,key):
 
       # add players
 
@@ -400,14 +400,14 @@ class relational:
       
       # add match
 
-      match_id = self.__addMatch( env_id, player_id0, player_id1, m)
+      match_id = self.__addMatch( env_id, player_id0, player_id1, m, key)
       if match_id == None:
          return None
 
       return match_id
 
    # Simply function to run a query
-   def __runquery(self,q):
+   def __runquery(self, q):
    
       cursor = self.conn.cursor()
       cursor.execute(q);
@@ -418,9 +418,19 @@ class relational:
    #
    #
 
-   def is_existing(self,m,env_id):
+   def is_existing(self, key):
+   
+      q = "SELECT match_id FROM match WHERE checksum = '%s'" % (key)
 
-      return 0
+      c = self.conn.cursor()
+      c.execute(q)
+      row = c.fetchone()
+      c.close()
+
+      if row:
+         return row[0]
+
+      return -1
 
    #
    # Main logic
@@ -461,7 +471,6 @@ class relational:
 
       try:
          if DB_TYPE == DB_SQLITE:
-
             dbfile = os.access(DBFILE, os.F_OK)
             self.conn = sqlite.connect(DBFILE)
             if (dbfile == 0):
@@ -494,18 +503,25 @@ class relational:
 
       m = gnubg.match(0,0,1,0)
       if m:
-         if force or self.is_existing(m,env_id) == 0:
-            match_id = self.__add_match(m,env_id)
-            if match_id <> None:
-               self.conn.commit()
-               # Match successfully added to database
-               return 0
+         key = gnubg.matchchecksum()
+         existing_id = self.is_existing(key)
+         if existing_id != -1:
+            if (force):
+               # Replace match in database - so first delete existing match
+               self.__runquery("DELETE FROM matchstat WHERE match_id = %d" % existing_id);
+               self.__runquery("DELETE FROM match WHERE match_id = %d" % existing_id);
             else:
-               # Error add match to database
-               return -1
+               # Match is already in the database
+               return -3
+               
+         match_id = self.__add_match(m,env_id,key)
+         if match_id <> None:
+            self.conn.commit()
+            # Match successfully added to database
+            return 0
          else:
-            # Match is already in the database
-            return -3
+            # Error add match to database
+            return -1
       else:
          # No match
          return -2

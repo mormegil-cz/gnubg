@@ -24,8 +24,6 @@
 
 #include <stdio.h>
 
-#include "config.h"
-
 #if HAVE_LOCALE_H
 #include <locale.h>
 #endif

@@ -52,8 +52,8 @@ CREATE UNIQUE INDEX ienv ON env(
 -- One person, which can have one or more nicknames
 
 CREATE TABLE person (
-    person_id     INTEGER NOT NULL
-   -- Name of person (if known)
+    person_id      INTEGER NOT NULL
+   -- Name of person
    ,name          CHAR(80) NOT NULL
    -- Misc notes about this person
    ,notes         VARCHAR(1000) NOT NULL
@@ -87,6 +87,7 @@ CREATE UNIQUE INDEX inick ON nick (
 
 CREATE TABLE match (
     match_id        INTEGER NOT NULL
+   ,checksum        CHAR(33) NOT NULL
    -- location of match
    ,env_id        INTEGER NOT NULL
    -- Player 0
@@ -124,6 +125,7 @@ CREATE TABLE match (
 CREATE UNIQUE INDEX imatch ON match (
     match_id
 );
+
 
 
 -- Table: statistics

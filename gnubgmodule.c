@@ -23,8 +23,7 @@
 #include "config.h"
 #endif
 #if USE_PYTHON
-#undef HAVE_FSTAT
-#include <Python.h>
+#include "gnubgmodule.h"
 
 #include <signal.h>
 #include <assert.h>
@@ -45,6 +44,7 @@
 #include "path.h"
 #include "positionid.h"
 #include "analysis.h"
+#include "md5.h"
 
 #undef IGNORE	// Ignore msdev define
 #define IGNORE __attribute__ ((unused))
@@ -608,6 +608,83 @@ PythonEq2mwc( PyObject* self IGNORE, PyObject *args ) {
 
   return PyFloat_FromDouble( eq2mwc( r, &ci ) );
 
+}
+
+#define STRBUF_SIZE 1024
+
+void AddString(list* buffers, char* str)
+{
+	list* pCurrent = buffers->plPrev;
+	if (!pCurrent->p || strlen(str) + strlen(pCurrent->p) > STRBUF_SIZE)
+	{
+		char* newBuf = malloc(STRBUF_SIZE + 1);
+		*newBuf = '\0';
+		pCurrent = ListInsert(buffers, newBuf);
+	}
+	strcat(pCurrent->p, str);
+}
+
+extern char* GameAsString()
+{
+	char *ret;
+	int size;
+	char buf[1024];
+	list *pList, *plGame, *plMove;
+	list buffers;
+	ListCreate(&buffers);
+
+	sprintf(buf, "%s vs %s (%d)", ap[0].szName, ap[1].szName, ms.nMatchTo);
+	AddString(&buffers, buf);
+
+	for (plGame = lMatch.plNext; plGame->p; plGame = plGame->plNext)
+	{
+		list* plStart = plGame->p;
+		int move = 1;
+		for (plMove = plStart->plNext; plMove->p; plMove = plMove->plNext)
+		{
+			char playerStr[3] = ".AB";
+			int player;
+			moverecord* pmr = plMove->p;
+			char* moveString = GetMoveString(pmr, &player);
+			if (moveString)
+			{
+				sprintf(buf, " %d%c %s", move, playerStr[player + 1], moveString);
+				AddString(&buffers, buf);
+				if (player == 1)
+					move++;
+			}
+		}
+	}
+
+	/* Create single string from buffers */
+	size = 0;
+	for (pList = buffers.plNext; pList->p; pList = pList->plNext)
+		size += strlen(pList->p);
+
+	ret = malloc(size + 1);
+	*ret = '\0';
+	for (pList = buffers.plNext; pList->p; pList = pList->plNext)
+		strcat(ret, pList->p);
+
+	ListDeleteAll(&buffers);
+
+	return ret;
+}
+
+extern PyObject *
+PythonMatchChecksum( PyObject* self IGNORE, PyObject *args )
+{
+	unsigned char auch[16], auchHex[33];
+	int i;
+	// Work out md5 checksum
+	char* gameStr = GameAsString();
+	md5_buffer(gameStr, strlen(gameStr), auch);
+	free(gameStr);
+	/* Convert to hex so stores easily in database - is there a better way? */
+	for (i = 0; i < 16; i++)
+		sprintf(auchHex + (i * 2), "%02x", auch[i]);
+
+	return PyString_FromString(auchHex);
 }
 
 static PyObject *
@@ -2032,6 +2109,8 @@ PyMethodDef gnubgMethods[] = {
     "convert equity to MWC" },
   { "mwc2eq", PythonMwc2eq, METH_VARARGS,
     "convert MWC to equity" },
+  { "matchchecksum", PythonMatchChecksum, METH_VARARGS,
+    "Calculate checksum for current match" },
   { "cubeinfo", PythonCubeInfo, METH_VARARGS,
     "Make a cubeinfo" },
   { "met", PythonMET, METH_VARARGS,

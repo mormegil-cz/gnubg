@@ -4753,3 +4753,108 @@ getFinalScore( int* anScore )
   
   return FALSE;
 }
+
+extern char* GetMoveString(moverecord *pmr, int* pPlayer)
+{
+    doubletype dt;
+    static char sz[40];
+	char* pch = NULL;
+	*pPlayer = 0;
+
+	switch( pmr->mt )
+	{
+	case MOVE_GAMEINFO:
+		/* no need to list this */
+		break;
+
+#if USE_TIMECONTROL
+	case MOVE_TIME:
+		sprintf(pch = sz, _("(%s out of time [%d])"),
+				ap[ ms.fTurn ].szName , pmr->t.nPoints);
+		*pPlayer = -1;
+		break;
+#endif
+
+	case MOVE_NORMAL:
+	*pPlayer = pmr->fPlayer;
+		pch = sz;
+		sz[ 0 ] = pmr->anDice[ 0 ] + '0';
+		sz[ 1 ] = pmr->anDice[ 1 ] + '0';
+		sz[ 2 ] = ':';
+		sz[ 3 ] = ' ';
+		FormatMove( sz + 4, ms.anBoard, pmr->n.anMove );
+		strcat( sz, aszSkillTypeAbbr[ pmr->n.stMove ] );
+		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+	break;
+
+	case MOVE_DOUBLE:
+	*pPlayer = pmr->fPlayer;
+		pch = sz;
+
+		switch ( ( dt = DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn ) ) )
+		{
+		case DT_NORMAL:
+			sprintf( sz, ( ms.fCubeOwner == -1 )? 
+					_("Double to %d") : _("Redouble to %d"), 
+					ms.nCube << 1 );
+			break;
+		case DT_BEAVER:
+		case DT_RACCOON:
+			sprintf( sz, ( dt == DT_BEAVER ) ? 
+					_("Beaver to %d") : _("Raccoon to %d"), ms.nCube << 2 );
+			break;
+		default:
+			assert ( FALSE );
+			break;
+		}
+		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+	break;
+
+	case MOVE_TAKE:
+		*pPlayer = pmr->fPlayer;
+		strcpy( pch = sz, _("Take") );
+		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+	break;
+
+	case MOVE_DROP:
+		*pPlayer = pmr->fPlayer;
+		strcpy( pch = sz, _("Drop") );
+		strcat( sz, aszSkillTypeAbbr[ pmr->stCube ] );
+	break;
+
+	case MOVE_RESIGN:
+		*pPlayer = pmr->fPlayer;
+		pch = _(" Resigns"); /* FIXME show value */
+	break;
+
+	case MOVE_SETDICE:
+		*pPlayer = pmr->fPlayer;
+		sprintf( pch = sz, _("Rolled %d%d"), pmr->anDice[ 0 ],
+			pmr->anDice[ 1 ] );
+	break;
+
+	case MOVE_SETBOARD:
+		*pPlayer = -1;
+		sprintf( pch = sz, " (set board %s)",
+			PositionIDFromKey( pmr->sb.auchKey ) );
+	break;
+
+	case MOVE_SETCUBEPOS:
+		*pPlayer = -1;
+		if( pmr->scp.fCubeOwner < 0 )
+			pch = " (set cube centre)";
+		else
+			sprintf( pch = sz, " (set cube owner %s)",
+				ap[ pmr->scp.fCubeOwner ].szName );
+	break;
+
+	case MOVE_SETCUBEVAL:
+		*pPlayer = -1;
+		sprintf( pch = sz, " (set cube value %d)", pmr->scv.nCube );
+	break;
+
+	default:
+		assert( FALSE );
+	}
+	return pch;
+}

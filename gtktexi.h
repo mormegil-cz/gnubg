@@ -22,9 +22,7 @@
 #ifndef _GTKTEXI_H_
 #define _GTKTEXI_H_
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#else
+#if !HAVE_CONFIG_H
 /* Compiling standalone; assume all dependencies are satisfied. */
 #define HAVE_LIBXML2 1
 #define USE_GTK2 1

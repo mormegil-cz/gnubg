@@ -203,7 +203,6 @@ typedef enum _gnubgcommand {
     CMD_RELATIONAL_ADD_MATCH,
     CMD_RELATIONAL_TEST,
     CMD_RELATIONAL_HELP,
-    CMD_RELATIONAL_SHOW_RECORDS,
     CMD_REDOUBLE,
     CMD_RESIGN_N,
     CMD_RESIGN_G,
@@ -296,7 +295,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "relational add match",
     "relational test",
     "relational help",
-    "relational show records",
     "redouble",
     "resign normal",
     "resign gammon",
@@ -378,6 +376,8 @@ static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw );
+static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw );
+static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw );
 static void ImportBKG( gpointer *p, guint n, GtkWidget *pw );
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
@@ -2194,13 +2194,13 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  Command, CMD_RECORD_ADD_SESSION, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
         { N_("/_Analyse/Relational database/Add match or session..."), NULL,
-          Command, CMD_RELATIONAL_ADD_MATCH, NULL },
+          GtkRelationalAddMatch, 0, NULL },
         { N_("/_Analyse/Relational database/Test..."), NULL,
           Command, CMD_RELATIONAL_TEST, NULL },
         { N_("/_Analyse/Relational database/Help..."), NULL,
           Command, CMD_RELATIONAL_HELP, NULL },
         { N_("/_Analyse/Relational database/Show Records..."), NULL,
-          Command, CMD_RELATIONAL_SHOW_RECORDS, NULL },
+          GtkShowRelational, 0, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
@@ -9795,7 +9795,19 @@ static void RelationalErase(GtkWidget *pw, GtkWidget* pwList)
 	gtk_clist_remove(GTK_CLIST(pwList), curRow);
 }
 
-extern void GtkShowRelational()
+static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
+{
+	char buf[20] = {"0 Yes"};
+	int exists = RelationalMatchExists();
+	if (exists == -1 ||
+		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
+		return;
+
+	CommandRelationalAddMatch(buf);
+	outputx();
+}
+
+static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 {
 	RowSet r;
 	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,

@@ -23,9 +23,6 @@
 #define _BOARDDIM_H_
 
 
-#include "config.h"
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

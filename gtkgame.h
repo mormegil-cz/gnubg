@@ -235,7 +235,6 @@ extern void
 GTKShowManual( void );
 
 extern void GtkShowQuery(RowSet* pRow);
-extern void GtkShowRelational();
 
 #endif
 

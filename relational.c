@@ -34,8 +34,7 @@
 
 #if USE_PYTHON
 
-#undef HAVE_FSTAT
-#include <Python.h>
+#include "gnubgmodule.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -121,6 +120,46 @@ static void Disconnect(PyObject *r)
 	Py_DECREF(r);
 }
 #endif /* USE_PYTHON */
+
+extern int RelationalMatchExists()
+{
+#if USE_PYTHON
+  PyObject *v, *r;
+  int ret;
+
+  if (!(r = Connect()))
+	  return -1;
+
+  /* Check if match is in database */
+  if (!(v = PyObject_CallMethod(r, "is_existing", "O", PythonMatchChecksum(0, 0))))
+  {
+    PyErr_Print();
+    Py_DECREF(r);
+    return -1;
+  }
+  else
+  {
+    if (PyInt_Check(v))
+	{
+      if (PyInt_AsLong(v) == -1)
+		  return 0;
+	  else
+		  return 1;
+    }
+    else {
+      ret = -1;
+    }
+    Py_DECREF( v );
+  }
+
+  Disconnect(r);
+
+  return ret;
+
+#else /* USE_PYTHON */
+  outputl( _("This build was not compiled with support for Python.\n") );
+#endif /* !USE_PYTHON */
+}
 
 extern void
 CommandRelationalAddMatch( char *sz ) {
@@ -608,19 +647,6 @@ extern int RunQuery(RowSet* pRow, char *sz)
 }
 #endif
 #endif
-
-extern void CommandRelationalShowRecords(char *sz)
-{
-#if USE_PYTHON
-#if USE_GTK
-	GtkShowRelational();
-#else
-	CommandNotImplemented( sz );
-#endif
-#else /* USE_PYTHON */
-	outputl( _("This build was not compiled with support for Python.\n") );
-#endif /* !USE_PYTHON */
-}
 
 extern void CommandRelationalSelect(char *sz)
 {

@@ -959,9 +959,6 @@ command cER = {
     { "players", CommandRelationalShowPlayers, 
       N_("Show a list of all the players in the database"), 
       NULL, NULL },
-    { "records", CommandRelationalShowRecords, 
-      N_("Show details of the database"), 
-      NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acRelational[] = {
     { "add", NULL, N_("Log to the external relational database"), NULL,

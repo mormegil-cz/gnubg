@@ -1,3 +1,8 @@
+Tue Oct 5 16:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* database.py, relational.c, gtkgame.c (and others) : Added
+	check for match in database
+
 Wed Sep 29 21:29:45 2004 Oystein Johansen <oystein@gnubg.org>
 	
 	* relational.c: make it compile without gtk

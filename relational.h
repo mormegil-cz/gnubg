@@ -29,6 +29,7 @@ typedef struct _RowSet
 	int *widths;
 } RowSet;
 
+extern int RelationalMatchExists();
 extern void RelationalUpdatePlayerDetails(int player_id, const char* newName,
 										  const char* newNotes);
 extern int RunQuery(RowSet* pRow, char *sz);
