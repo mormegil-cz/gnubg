@@ -21,6 +21,9 @@
 * $Id$
 */
 
+#ifndef _SHADOW_H_
+#define _SHADOW_H_
+
 extern void initOccluder(Occluder* Occ);
 extern void freeOccluder(Occluder* Occ);
 extern void copyOccluder(Occluder* fromOcc, Occluder* toOcc);
@@ -41,3 +44,5 @@ extern void addWonkyCube(Occluder* pOcc, float x, float y, float z, float w, flo
 extern void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, int a);
 extern void addHalfTube(Occluder* pOcc, float r, float h, int a);
 extern void addDice(Occluder* pOcc, float size);
+
+#endif

@@ -40,6 +40,7 @@
 #if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #endif
+#include <gtk/gtktext.h>
 
 #if HAVE_STROPTS_H
 #include <stropts.h>  /* I_SETSIG, S_RDNORM under solaris */
@@ -8623,7 +8624,7 @@ extern void GTKDumpStatcontext( int game )
 	GtkWidget *pw;
 	list *pl;
 	int i;
-#endif;
+#endif
 	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, NULL );
 
 	pwNotebook = gtk_notebook_new();

@@ -21,6 +21,7 @@
 * $Id$
 */
 
+#include <config.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #if !WIN32

@@ -20,6 +20,8 @@
 *
 * $Id$
 */
+#ifndef _INC3D_H_
+#define _INC3D_H_
 
 #include <gtk/gtk.h>
 #include "config.h"
@@ -136,3 +138,10 @@ void CheckOpenglError();
 
 typedef int idleFunc(BoardData* bd);
 void setIdleFunc(BoardData* bd, idleFunc* pFun);
+
+#if HAVE_GTKGLEXT
+#include <gdk/gdkgltypes.h>
+GdkGLConfig *glconfig;
+#endif
+
+#endif

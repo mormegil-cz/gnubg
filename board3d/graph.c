@@ -1,4 +1,9 @@
+/* graph.c
+ * $Header$
+ * $Id$
+ */
 
+#include <config.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #if !WIN32
@@ -6,12 +11,12 @@
 #endif
 #if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
+#include <gtk/gtkglwidget.h>
 #else
 #include <gtkgl/gtkglarea.h>
 #endif
 #include <gtk/gtk.h>
 #include <stdlib.h>
-#include "config.h"
 #include "inc3d.h"
 #include "renderprefs.h"
 
