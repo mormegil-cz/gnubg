@@ -1,3 +1,8 @@
+Tue Sep 23 17:47:55 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
+
+	* sgfp.c sgfl.c - regenerated for users who don't have working
+	  flex/bison
+	
 Mon Sep 22 22:35:43 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
 
 	* sgf.y - Concatenate() didn't deal with empty ValueString's
