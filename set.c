@@ -152,12 +152,6 @@ SetSeed ( const rng rngx, char *sz ) {
 
 static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 
-#if HAVE_LIBGMP
-
-    char *sz, *sz1;
-    int fInit;
-#endif
-    
     if( *prng == rngNew && !*szSeed ) {
 	outputf( _("You are already using the %s generator.\n"),
 		gettext ( aszRNG[ rngNew ] ) );
@@ -176,39 +170,44 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
     switch( rngNew ) {
     case RNG_BBS:
 #if HAVE_LIBGMP
-	fInit = FALSE;
+	  {
+		char *sz, *sz1;
+		int fInit;
+
+		fInit = FALSE;
 	
-	if( *szSeed ) {
-	    if( !strncasecmp( szSeed, "modulus", strcspn( szSeed,
-							  " \t\n\r\v\f" ) ) ) {
-		NextToken( &szSeed ); /* skip "modulus" keyword */
-		if( InitRNGBBSModulus( NextToken( &szSeed ) ) ) {
-		    outputf( _("You must specify a valid modulus (see `help "
-			       "set rng bbs').") );
-		    return;
-		}
-		fInit = TRUE;
-	    } else if( !strncasecmp( szSeed, "factors",
+		if( *szSeed ) {
+		  if( !strncasecmp( szSeed, "modulus", strcspn( szSeed,
+												" \t\n\r\v\f" ) ) ) {
+			NextToken( &szSeed ); /* skip "modulus" keyword */
+			if( InitRNGBBSModulus( NextToken( &szSeed ) ) ) {
+			  outputf( _("You must specify a valid modulus (see `help "
+						 "set rng bbs').") );
+			  return;
+			}
+			fInit = TRUE;
+		  } else if( !strncasecmp( szSeed, "factors",
 				     strcspn( szSeed, " \t\n\r\v\f" ) ) ) {
-		NextToken( &szSeed ); /* skip "modulus" keyword */
-		sz = NextToken( &szSeed );
-		sz1 = NextToken( &szSeed );
-		if( InitRNGBBSFactors( sz, sz1 ) ) {
-		    outputf( _("You must specify two valid factors (see `help "
-			       "set rng bbs').") );
-		    return;
+			NextToken( &szSeed ); /* skip "modulus" keyword */
+			sz = NextToken( &szSeed );
+			sz1 = NextToken( &szSeed );
+			if( InitRNGBBSFactors( sz, sz1 ) ) {
+			  outputf( _("You must specify two valid factors (see `help "
+						 "set rng bbs').") );
+			  return;
+			}
+			fInit = TRUE;
+		  }
 		}
-		fInit = TRUE;
-	    }
-	}
 	
-	if( !fInit )
-	    /* use default modulus, with factors
-	       148028650191182616877187862194899201391 and
-	       315270837425234199477225845240496832591. */
-	    InitRNGBBSModulus( "46669116508701198206463178178218347698370"
-			       "262771368237383789001446050921334081" );
-	break;
+		if( !fInit )
+		  /* use default modulus, with factors
+			 148028650191182616877187862194899201391 and
+			 315270837425234199477225845240496832591. */
+		  InitRNGBBSModulus( "46669116508701198206463178178218347698370"
+							 "262771368237383789001446050921334081" );
+		break;
+	  }
 #else
 	abort();
 #endif
@@ -216,24 +215,26 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
     case RNG_USER:
 	/* Load dynamic library with user RNG */
 #if HAVE_LIBDL
-	sz = NULL;
+	  {
+		char *sz = NULL;
 	
-	if( *szSeed ) {
-	    char *pch;
+		if( *szSeed ) {
+		  char *pch;
 	    
-	    for( pch = szSeed; isdigit( *pch ); pch++ )
-		;
+		  for( pch = szSeed; isdigit( *pch ); pch++ )
+			;
 	    
-	    if( *pch && !isspace( *pch ) )
-		/* non-numeric char found; assume it's the user RNG file */
-		sz = NextToken( &szSeed );
-	}
+		  if( *pch && !isspace( *pch ) )
+			/* non-numeric char found; assume it's the user RNG file */
+			sz = NextToken( &szSeed );
+		}
 	
-	if ( !UserRNGOpen( sz ? sz : "userrng.so" ) ) {
-	    outputf( _("You are still using the %s generator.\n"),
-		     gettext ( aszRNG[ *prng ] ) );
-	    return;
-	}
+		if ( !UserRNGOpen( sz ? sz : "userrng.so" ) ) {
+		  outputf( _("You are still using the %s generator.\n"),
+				   gettext ( aszRNG[ *prng ] ) );
+		  return;
+		}
+	  }
 #else
 	abort();
 #endif
