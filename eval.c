@@ -4946,7 +4946,8 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
     return Utility ( arOutput, pci );
   }
 
-  rEqDead = arOutput[ 0 ] *  ( rW + rL ) - rL;
+  
+  rEqDead = Utility( arOutput, pci );
   rEqLive = MoneyLive( rW, rL, arOutput[ 0 ], pci );
 
   return rEqDead * ( 1.0 - rCubeX ) + rEqLive * rCubeX;
