@@ -194,6 +194,12 @@ static void NextTurn( void ) {
 		    aszGameResult[ n - 1 ], n * nCube,
 		    n * nCube > 1 ? "s" : "" );
 	    
+	    if( nMatchTo && fAutoCrawford ) {
+		fCrawford = anScore[ fWinner ] == nMatchTo - 1 &&
+		    anScore[ !fWinner ] < nMatchTo - 1;
+		fPostCrawford = anScore[ !fWinner ] == nMatchTo - 1;
+	    }
+
 	    CommandShowScore( NULL );
 
 	    if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
@@ -426,10 +432,12 @@ extern void CommandMove( char *sz ) {
 	return;
     }
     
+    /* FIXME allow abbreviating multiple moves (e.g. "8/7(2) 6/5(2)") */
+	
     for( i = 0; *sz && i < 8; i++ ) {
 	pch = sz;
 
-	while( *sz && !isspace( *sz ) )
+	while( *sz && !isspace( *sz ) && *sz != '/' && *sz != '*' )
 	    sz++;
 
 	if( !*sz )
@@ -452,8 +460,8 @@ extern void CommandMove( char *sz ) {
 	    i++;
 	    break;
 	}
-	
-	while( *sz && isspace( *sz ) )
+
+	while( *sz && ( isspace( *sz ) || *sz == '/' || *sz == '*' ) )
 	    sz++;
     }
 

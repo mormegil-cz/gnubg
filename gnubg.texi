@@ -392,6 +392,7 @@ save game               playing         / recording
 save match              playing         / recording
 save weights            training
 set autobearoff         playing
+set autocrawford        playing         / matches and sessions
 set autogame            playing         / matches and sessions
 set automove            playing
 set autoroll            playing         / dice
@@ -817,6 +818,7 @@ called ``money'' play, regardless of whether any money is involved).
 @kindex set autogame
 @kindex set crawford
 @kindex set postcrawford
+@kindex set autocrawford
 @kindex set jacoby
 @kindex set score
 @kindex show crawford
