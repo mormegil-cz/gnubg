@@ -20,6 +20,7 @@ char *aszCredits[] = {
     "Michael Depreli",
     "Max Durbano",
     "Christopher D. Yep",
+    "Robert Eberlein",
     "James F. Kibler",
     "Ric Gerace",
     "Michel Grimminck",
