@@ -105,7 +105,7 @@ ExportOK ( GtkWidget *pw, exportwidget *pew ) {
   pexs->fSide = 0;
   for ( i = 0; i < 2; i++ ) 
     pexs->fSide = pexs->fSide |
-      ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwSide[ i ] ) )  >> i );
+      ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pew->apwSide[ i ] ) )  << i );
 
   /* moves */
 
