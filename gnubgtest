@@ -21,16 +21,6 @@ grep Window $TEMP > /dev/null && WINDOW=yes || WINDOW=""
 rm -f $TEMP
 echo '--- Feature test succeeds.'
 
-# Test without -b; now requires bearoff database.
-./gnubg $dirparam -t -r -n < /dev/null > /dev/null || die \
-    '--- Bearoff database test fails.'
-echo '--- Bearoff database test succeeds.'
-
-# Test without -n; now requires weights files.
-./gnubg $dirparam -t -r < /dev/null > /dev/null || die \
-    '--- Neural net weights test fails.'
-echo '--- Neural net weights test succeeds.'
-
 # Make sure an opening 31 is played correctly.
 ./gnubg $dirparam -t -r << "EOF" | grep sGfwATDgc/ABMA > /dev/null || die \
     '--- Opening move test fails.'
@@ -155,11 +145,14 @@ echo '--- Load test succeeds.'
 # Test miscellaneous commands.
 ./gnubg $dirparam -t -r << "EOF" > /dev/null || die \
     '--- Miscellaneous test fails.'
-help
-show player
-new game
 set evaluation chequerplay eval plies 1
 set evaluation cubedecision eval plies 1
+eval
+eval 4HPwATDgc/ABMA
+rollout
+rollout =cube
+help
+new match 1
 eval
 set rollout trials 8
 set rollout truncation 8
@@ -168,6 +161,50 @@ set rollout player both chequerplay plies 0
 set rollout player both cubedecision plies 0
 set rollout varredn no
 rollout
+rollout =cube
+show analysis
+show automatic
+show beavers
+show board
+show cache
+show clockwise
+show commands
+show confirm
+show copying
+show crawford
+show cube
+show delay
+show dice
+show display
+show egyptian
+show engine
+show evaluation
+show gammonprice
+show jacoby
+show kleinman
+show marketwindow
+show matchequitytable
+show nackgammon
+show output
+show pipcount
+show player
+show postcrawford
+show prompt
+show rng
+show rollout
+show score
+show seed
+show statistics game
+show thorp
+show training
+show turn
+show version
+show warranty
+eq2mwc
+mwc2eq
+list game
+list match
+list session
 EOF
 echo '--- Miscellaneous test succeeds.'
 
@@ -188,15 +225,7 @@ echo '--- Manual example test succeeds.'
 
 # Test Guile.
 if [ "$GUILE" = "yes" ]; then
-    ./gnubg $dirparam -t -r << "EOF" > /dev/null || die '--- Guile test fails.'
-set rng manual
-set player both human
-set automatic game no
-new game
-31
-8/5 6/5
-:(define foo 123)
-:
+    cat << 'EOF' > $TEMP
 (catch #t (lambda ()
 	    (or (= foo 123)
 		(throw #t))
@@ -204,10 +233,24 @@ new game
 		(throw #t))
 	    (or (< (vector-ref (evaluate-position (current-board)) 0) 0.5)
 		(throw #t))
+	    (display "successful")
+	    (newline)
 	    (primitive-exit 0))
        (lambda (tag . args)
 	 (primitive-exit 1)))
 EOF
+    ./gnubg $dirparam -t -r << EOF | grep successful > /dev/null || \
+    die '--- Guile test fails.'
+set rng manual
+set player both human
+set automatic game no
+new game
+31
+8/5 6/5
+:(define foo 123)
+:(load "$TEMP")
+EOF
+    rm -f $TEMP
     echo '--- Guile test succeeds.'
 else
     echo '--- Guile test not available.'
