@@ -24,6 +24,7 @@
 #include "config.h"
 #include <gtk/gtk.h>
 #include <assert.h>
+#include <stdlib.h>
 #include "i18n.h"
 #include "backgammon.h"
 #include "gtkboard.h"
