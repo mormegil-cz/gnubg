@@ -1409,7 +1409,10 @@ extern int ComputerTurn( void ) {
 #endif
       AddMoveRecord( pmn );      
 #if USE_TIMECONTROL
-    if (!fLastMove) HitGameClock ( &ms ); 
+#if USE_GTK
+    if (!fLastMove)
+#endif
+      HitGameClock ( &ms ); 
 #endif 
       
       return 0;
@@ -1471,7 +1474,10 @@ extern int ComputerTurn( void ) {
 #endif
     AddMoveRecord( pmn );
 #if USE_TIMECONTROL
-    if (!fLastMove) HitGameClock ( &ms ); 
+#if USE_GTK
+    if (!fLastMove)
+#endif
+      HitGameClock ( &ms ); 
 #endif 
     return 0;
 
@@ -1641,7 +1647,10 @@ extern int ComputerTurn( void ) {
 #endif
 	  AddMoveRecord( pmn );
 #if USE_TIMECONTROL
-    if (!fLastMove) HitGameClock ( &ms ); 
+#if USE_GTK
+    if (!fLastMove)
+#endif
+      HitGameClock ( &ms ); 
 #endif 
 	  return 0;
       }
