@@ -2604,6 +2604,99 @@ extern void CommandSetPostCrawford( char *sz ) {
 
 }
 
+#if USE_GTK
+warnings ParseWarning(char* str)
+{
+	int i;
+
+	while(*str == ' ')
+		str++;
+
+	for (i = 0; i < WARN_NUM_WARNINGS; i++)
+	{
+		if (!strcasecmp(str, warningNames[i]))
+			return i;
+	}
+
+	return -1;
+}
+
+extern void CommandSetWarning( char *sz )
+{
+	char buf[100];
+	warnings warning;
+	char* pValue = strchr(sz, ' ');
+
+	if (!pValue)
+	{
+		outputl( _("Incorrect syntax for set warning command.") );
+		return;
+	}
+	*pValue++ = '\0';
+
+	warning = ParseWarning(sz);
+	if ((int)warning < 0)
+	{
+		sprintf(buf, _("Unknown warning %s."), sz);
+		outputl(buf);
+		return;
+	}
+
+	while(*pValue == ' ')
+		pValue++;
+
+	if (!strcasecmp(pValue, "on"))
+	{
+		warningEnabled[warning] = TRUE;
+	}
+	else if (!strcasecmp(pValue, "off"))
+	{
+		warningEnabled[warning] = FALSE;
+	}
+	else
+	{
+		sprintf(buf, _("Unknown value %s."), pValue);
+		outputl(buf);
+		return;
+	}
+	sprintf(buf, _("Warning %s set %s."), sz, pValue);
+	outputl(buf);
+}
+
+static void PrintWarning(int warning)
+{
+	char buf[100];
+	sprintf(buf, _("Warning %s (%s) is %s"), warningNames[warning], warningStrings[warning],
+		warningEnabled[warning] ? "on" : "off");
+	outputl(buf);
+}
+
+extern void CommandShowWarning( char *sz )
+{
+	warnings warning;
+
+	while(*sz == ' ')
+		sz++;
+
+	if (!*sz)
+	{	/* Show all warnings */
+		for (warning = 0; warning < WARN_NUM_WARNINGS; warning++)
+			PrintWarning(warning);
+	}
+	else
+	{	/* Show specific warning */
+		warning = ParseWarning(sz);
+		if ((int)warning < 0)
+		{
+			char buf[100];
+			sprintf(buf, _("Unknown warning %s."), sz);
+			outputl(buf);
+			return;
+		}
+		PrintWarning(warning);
+	}
+}
+#endif
 
 extern void CommandSetBeavers( char *sz ) {
 
