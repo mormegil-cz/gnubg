@@ -113,11 +113,14 @@ ShowMoveFilters ( const movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] 
 static void 
 ShowEvaluation( const evalcontext *pec ) {
   
-  outputf( _("        %d-ply evaluation.\n"
 #if defined( REDUCTION_CODE )
+  outputf( _("        %d-ply evaluation.\n"
              "        %d%% speed.\n"
-#endif
              "        %s evaluations.\n"),
+#else
+  outputf( _("        %d-ply evaluation.\n"
+             "        %s evaluations.\n"),
+#endif
            pec->nPlies, 
 #if defined( REDUCTION_CODE )
            (pec->nReduced) ? 100 / pec->nReduced : 100,
