@@ -8269,6 +8269,8 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 	outputl( _("No player records found.") );
 
     if( f ) {
+	gtk_clist_sort( GTK_CLIST( pwList ) );
+	
 	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
 	gtk_window_set_modal( GTK_WINDOW( pw ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pw ), GTK_WINDOW( pwMain ) );

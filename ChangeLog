@@ -1,3 +1,7 @@
+Thu Sep 19 21:46:10 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (GTKRecordShow): Sort the player record list.
+
 Thu Sep 19 13:47:26 2002  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (outputerrf): New function, replacing fprintf( stderr, ... ).
