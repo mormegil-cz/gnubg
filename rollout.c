@@ -1174,7 +1174,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
       if (log_rollouts && log_name) {
 	sprintf (log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
 	log_game_start (log_name, apci[ alt ], prc->fCubeful, 
-			aanBoardEval + alt);
+			(int (*)[25]) (aanBoardEval + alt));
 	if ( !log_rollouts) {
 	  /* open failed */
 	  log_rollouts = 0;

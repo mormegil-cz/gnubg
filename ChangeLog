@@ -1,3 +1,7 @@
+Fri Oct 25 10:10:07 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* rollout.c - cast to keep compiler happy
+	
 Thu Oct 24 22:52:23 2003 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* set.c backgammon.h rollout.c gnubg.c - added text mode commands
