@@ -1,3 +1,8 @@
+Tue Sep  2 23:56:28 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* show.c (CommandShowVersion): Deal with gettext.
+	* progress.c (TextRolloutProgress): Ditto.
+
 Tue Sep 02 21:48:18 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* analysis.c (getMarketWindowDividerMWC, updateStatcontext):

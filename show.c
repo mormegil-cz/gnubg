@@ -1327,9 +1327,12 @@ extern void CommandShowVersion( char *sz ) {
 
     outputc( '\n' );
 
-    outputl( _("GNU Backgammon was written by Joseph Heled, Øystein Johansen, "
-	     "David Montgomery,\nJim Segrave, Jørn Thyssen and Gary Wong.\n\n"
-	     "Special thanks to:") );
+    /* To avoid gnubg.pot include non US-ASCII char. */
+    outputf( _("GNU Backgammon was written by %s, %s, %s\n%s, %s and %s.\n\n"),
+	       "Joseph Heled", "Øystein Johansen", "David Montgomery",
+	       "Jim Segrave", "Jørn Thyssen", "Gary Wong");
+
+    outputl( _("Special thanks to:") );
 
     cCol = 80;
 
