@@ -654,7 +654,7 @@ extern void CommandHint( char *sz ) {
     int i;
     char szMove[ 32 ];
     float aar[ 32 ][ NUM_OUTPUTS ];
-    float arDouble[ 4 ];
+    float arDouble[ 3 ];
     
     if( fTurn < 0 ) {
 	puts( "You must set up a board first." );
@@ -672,18 +672,20 @@ extern void CommandHint( char *sz ) {
 
       /* give hints on cube action */
 
-      EvaluateDouble ( nPliesEval, anBoard, arDouble );
+      if( EvaluatePositionCubeful( anBoard, nCube, fCubeOwner,
+				     fMove, arDouble, nPliesEval ) )
+	  return -1;
 
       if ( fInterrupt )
 	return;
       
       puts ( "Take decision:\n" );
-      printf ( "Equity for take: %+6.3f\n", -arDouble[ 1 ] );
+      printf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
       printf ( "Equity for pass: %+6.3f\n\n", -1.0 );
 
-      if ( ( arDouble[ 1 ] < 0 ) && ( ! nMatchTo ) )
+      if ( ( arDouble[ 2 ] < 0 ) && ( ! nMatchTo ) )
 	puts ( "Proper cube action: Beaver\n" );
-      else if ( arDouble[ 1 ] <= 1.0 )
+      else if ( arDouble[ 2 ] <= 1.0 )
 	puts ( "Proper cube action: Take\n" );
       else
 	puts ( "Proper cube action: Pass\n" );
