@@ -1,7 +1,7 @@
 /*
  * gtkboard.c
  *
- * by Gary Wong <gtw@gnu.org>, 1997-2000.
+ * by Gary Wong <gtw@gnu.org>, 1997-2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -44,6 +44,8 @@
 
 #define POINT_DICE 28
 #define POINT_CUBE 29
+#define POINT_RIGHT 30
+#define POINT_LEFT 31
 
 #define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
 			  same point is considered a real drag rather than a
@@ -183,6 +185,20 @@ static void board_label_chequers( GtkWidget *board, BoardData *bd,
     gtk_draw_string( board->style, board->window, GTK_STATE_NORMAL,
 		     x + 3 * bd->board_size - cx / 2,
 		     y + 3 * bd->board_size + cy0 / 2 - cy1, sz );
+}
+
+static void chequer_position( int point, int chequer, int *px, int *py ) {
+
+    int c_chequer;
+
+    c_chequer = ( !point || point == 25 ) ? 3 : 5;
+
+    if( chequer > c_chequer )
+	chequer = c_chequer;
+    
+    *px = positions[ fClockwise ][ point ][ 0 ];
+    *py = positions[ fClockwise ][ point ][ 1 ] - ( chequer - 1 ) *
+	positions[ fClockwise ][ point ][ 2 ];
 }
 
 static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
@@ -595,6 +611,16 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
     if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], 7, 7 ) ||
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
 	return POINT_DICE;
+    
+    /* jsc: support for faster rolling of dice by clicking board
+      *
+      * These arguments should be dynamically calculated instead 
+      * of hardcoded, but it's too painful right now.
+      */
+    if( intersects( x0, y0, 0, 0, 60, 33, 36, 6 ) )
+	return POINT_RIGHT;
+    else if( intersects( x0, y0, 0, 0, 12, 33, 36, 6 ) )
+	return POINT_LEFT;
 
     cube_position( bd, &xCube, &yCube, NULL );
     
@@ -701,11 +727,208 @@ static void Confirm( BoardData *bd ) {
 	board_beep( bd );
 }
 
-static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
-			       BoardData *bd ) {
+static void board_start_drag( GtkWidget *board, BoardData *bd,
+			      int drag_point, int x, int y ) {
+
+    bd->drag_point = drag_point;
+    bd->drag_colour = bd->points[ drag_point ] < 0 ? -1 : 1;
+
+    bd->points[ drag_point ] -= bd->drag_colour;
+    
+    board_expose_point( board, bd, drag_point );
+
+    bd->x_drag = x;
+    bd->y_drag = y;
+
+    if( bd->translucent )
+	gdk_get_rgb_image( board->window,
+			   gdk_window_get_colormap( board->window ),
+			   bd->x_drag - 3 * bd->board_size,
+			   bd->y_drag - 3 * bd->board_size,
+			   6 * bd->board_size, 6 * bd->board_size,
+			   bd->rgb_saved, 6 * bd->board_size * 3 );
+    
+    gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
+		     bd->x_drag - 3 * bd->board_size,
+		     bd->y_drag - 3 * bd->board_size,
+		     0, 0, 6 * bd->board_size, 6 * bd->board_size );
+}
+
+static void board_drag( GtkWidget *board, BoardData *bd, int x, int y ) {
+    
     GdkPixmap *pm_swap;
     guchar *rgb_swap;
-    int i, n, dest, x, y, bar, hit;
+    
+    if( bd->translucent ) {
+	int c, j;
+	guchar *psrc, *pdest;
+	short *refract = bd->drag_colour > 0 ? bd->ai_refract[ 1 ] :
+	    bd->ai_refract[ 0 ];
+	
+	gdk_get_rgb_image( board->window,
+			   gdk_window_get_colormap( board->window ),
+			   x - 3 * bd->board_size, y - 3 * bd->board_size,
+			   6 * bd->board_size, 6 * bd->board_size,
+			   bd->rgb_temp_saved, 6 * bd->board_size * 3 );
+	
+	copy_rgb( bd->rgb_saved, bd->rgb_temp_saved, 0, 0,
+		  bd->x_drag - x, bd->y_drag - y,
+		  6 * bd->board_size, 6 * bd->board_size,
+		  6 * bd->board_size, 6 * bd->board_size,
+		  6 * bd->board_size * 3, 6 * bd->board_size * 3 );
+	
+	memcpy( bd->rgb_temp, bd->rgb_temp_saved, 6 * bd->board_size *
+		6 * bd->board_size * 3 );
+	
+	c = 6 * bd->board_size * 6 * bd->board_size;
+	for( j = 0, psrc = bd->drag_colour > 0 ? bd->rgba_o : bd->rgba_x,
+		 pdest = bd->rgb_temp; j < c; j++ ) {
+	    int r = refract[ j ] * 3;
+	    
+	    pdest[ 0 ] = clamp( ( ( bd->rgb_temp_saved[ r + 0 ] *
+				    psrc[ 3 ] ) >> 8 ) + psrc[ 0 ] );
+	    pdest[ 1 ] = clamp( ( ( bd->rgb_temp_saved[ r + 1 ] *
+				    psrc[ 3 ] ) >> 8 ) + psrc[ 1 ] );
+	    pdest[ 2 ] = clamp( ( ( bd->rgb_temp_saved[ r + 2 ] *
+				    psrc[ 3 ] ) >> 8 ) + psrc[ 2 ] );
+	    pdest += 3;
+	    psrc += 4;
+	}
+	
+	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
+			 0, 0, bd->x_drag - 3 * bd->board_size,
+			 bd->y_drag - 3 * bd->board_size,
+			 6 * bd->board_size, 6 * bd->board_size );
+	
+	gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
+			 x - 3 * bd->board_size, y - 3 * bd->board_size,
+			 0, 0, 6 * bd->board_size, 6 * bd->board_size );
+	
+	gdk_draw_rgb_image( board->window, bd->gc_copy,
+			    x - 3 * bd->board_size,
+			    y - 3 * bd->board_size,
+			    6 * bd->board_size, 6 * bd->board_size,
+			    GDK_RGB_DITHER_MAX, bd->rgb_temp,
+			    6 * bd->board_size * 3 );
+	
+	rgb_swap = bd->rgb_saved;
+	bd->rgb_saved = bd->rgb_temp_saved;
+	bd->rgb_temp_saved = rgb_swap;
+    } else {
+	gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, board->window,
+			 x - 3 * bd->board_size, y - 3 * bd->board_size,
+			 0, 0, 6 * bd->board_size, 6 * bd->board_size );
+	
+	gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, bd->pm_saved,
+			 0, 0, bd->x_drag - x, bd->y_drag - y,
+			 6 * bd->board_size, 6 * bd->board_size );
+	
+	gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->pm_temp_saved,
+			 0, 0, 0, 0, 6 * bd->board_size,
+			 6 * bd->board_size );
+	
+	gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_mask );
+	gdk_gc_set_clip_origin( bd->gc_copy, 0, 0 );
+	
+	gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->drag_colour > 0 ?
+			 bd->pm_o : bd->pm_x,
+			 0, 0, 0, 0, 6 * bd->board_size,
+			 6 * bd->board_size );
+	
+	gdk_gc_set_clip_mask( bd->gc_copy, NULL );
+	
+	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
+			 0, 0, bd->x_drag - 3 * bd->board_size,
+			 bd->y_drag - 3 * bd->board_size,
+			 6 * bd->board_size, 6 * bd->board_size );
+	
+	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_temp,
+			 0, 0, x - 3 * bd->board_size,
+			 y - 3 * bd->board_size,
+			 6 * bd->board_size, 6 * bd->board_size );
+	
+	pm_swap = bd->pm_saved;
+	bd->pm_saved = bd->pm_temp_saved;
+	bd->pm_temp_saved = pm_swap;
+    }
+    
+    bd->x_drag = x;
+    bd->y_drag = y;
+}
+
+static void board_end_drag( GtkWidget *board, BoardData *bd ) {
+    
+    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
+		     0, 0, bd->x_drag - 3 * bd->board_size,
+		     bd->y_drag - 3 * bd->board_size,
+		     6 * bd->board_size, 6 * bd->board_size );
+}
+
+/* jsc: This is the code that was at the end of case
+ * GDK_BUTTON_RELEASE: in board_pointer(), but was moved to this
+ * procedure so that it could be called twice for trying high die
+ * first then low die.  If illegal move, it no longer beeps, but
+ * instead returns FALSE.
+ *
+ * Since this has side-effects, it should only be called from
+ * GDK_BUTTON_RELEASE in board_pointer().  Mainly, it assumes
+ * that a previous call to board_pointer() set up bd->drag_colour,
+ * bd->drag_point, and also picked up a checker:
+ *     bd->points[ bd->drag_point ] -= bd->drag_colour;
+ *
+ * If the move fails, that pickup will be reverted.
+ */
+static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd, 
+					 int dest ) {
+    int bar, hit;
+    gboolean placed = TRUE;
+
+    bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
+    
+    if( dest == -1 || ( bd->drag_colour > 0 ? bd->points[ dest ] < -1
+			: bd->points[ dest ] > 1 ) || dest == bar ||
+	dest > 27 ) {
+	/* FIXME check move is legal */
+	placed = FALSE;
+	dest = bd->drag_point;
+    } else if( dest >= 26 )
+	/* bearing off */
+	dest = bd->drag_colour > 0 ? 26 : 27;
+		
+    if( ( hit = bd->points[ dest ] == -bd->drag_colour ) ) {
+	bd->points[ dest ] = 0;
+	bd->points[ bar ] -= bd->drag_colour;
+	
+	board_expose_point( board, bd, bar );
+    }
+    
+    bd->points[ dest ] += bd->drag_colour;
+    
+    board_expose_point( board, bd, dest );
+    
+    if( bd->drag_point != dest )
+	if( update_move( bd ) && !bd->permit_illegal ) {
+	    /* the move was illegal; undo it */
+	    bd->points[ dest ] -= bd->drag_colour;
+	    bd->points[ bd->drag_point ] += bd->drag_colour;
+	    if( hit ) {
+		bd->points[ bar ] += bd->drag_colour;
+		bd->points[ dest ] = -bd->drag_colour;
+		board_expose_point( board, bd, bar );
+	    }
+		    
+	    board_expose_point( board, bd, bd->drag_point );
+	    board_expose_point( board, bd, dest );
+	    update_move( bd );
+	    placed = FALSE;
+	}
+
+    return placed;
+}
+
+static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
+			       BoardData *bd ) {
+    int i, n, dest, x, y, bar;
 
     switch( event->type ) {
     case GDK_BUTTON_PRESS:
@@ -786,6 +1009,32 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		board_redraw_dice( board, bd, 1 );
 	    }
 	    
+	    return TRUE;
+	}
+
+	/* jsc: If playing, but not editing, and dice not rolled yet,
+	   this code handles rolling the dice if bottom player clicks
+	   the right side of the board, or the top player clicks the
+	   left side of the board (his/her right side).  */
+	if( bd->playing && 
+	    ( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) 
+	    && bd->dice[ 0 ] <= 0 ) {
+	    if( ( bd->drag_point == POINT_RIGHT && bd->turn == 1 ) ||
+		( bd->drag_point == POINT_LEFT  && bd->turn == -1 ) )
+		UserCommand( "roll" );
+	    else
+		board_beep( bd );
+	    
+	    bd->drag_point = -1;
+	    return TRUE;
+	}
+	
+	/* jsc: since we added new POINT_RIGHT and POINT_LEFT, we want
+	   to make sure no ghost checkers can be dragged out of this *
+	   region!  */
+	if( ( bd->drag_point == POINT_RIGHT || 
+	      bd->drag_point == POINT_LEFT ) ) {
+	    bd->drag_point = -1;
 	    return TRUE;
 	}
 
@@ -950,7 +1199,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	bd->drag_colour = bd->points[ bd->drag_point ] < 0 ? -1 : 1;
 
 	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
-	    bd->drag_point > 0 && bd->drag_point < 25 &&
+	    bd->drag_point && bd->drag_point != 25 &&
 	    bd->drag_colour != bd->turn ) {
 	    /* trying to move opponent's chequer (except off the bar, which
 	       is OK) */
@@ -959,26 +1208,8 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    return TRUE;
 	}
-	
-	bd->points[ bd->drag_point ] -= bd->drag_colour;
 
-	board_expose_point( board, bd, bd->drag_point );
-
-	bd->x_drag = x;
-	bd->y_drag = y;
-
-	if( bd->translucent )
-	    gdk_get_rgb_image( board->window,
-			       gdk_window_get_colormap( board->window ),
-			       bd->x_drag - 3 * bd->board_size,
-			       bd->y_drag - 3 * bd->board_size,
-			       6 * bd->board_size, 6 * bd->board_size,
-			       bd->rgb_saved, 6 * bd->board_size * 3 );
-
-	gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
-			 bd->x_drag - 3 * bd->board_size,
-			 bd->y_drag - 3 * bd->board_size,
-			 0, 0, 6 * bd->board_size, 6 * bd->board_size );
+	board_start_drag( board, bd, bd->drag_point, x, y );
 	
 	/* fall through */
 	
@@ -986,113 +1217,16 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( bd->drag_point < 0 )
 	    break;
 
-	if( bd->translucent ) {
-	    int c, j;
-	    guchar *psrc, *pdest;
-	    short *refract = bd->drag_colour > 0 ? bd->ai_refract[ 1 ] :
-		bd->ai_refract[ 0 ];
-	    
-	    gdk_get_rgb_image( board->window,
-			       gdk_window_get_colormap( board->window ),
-			       x - 3 * bd->board_size, y - 3 * bd->board_size,
-			       6 * bd->board_size, 6 * bd->board_size,
-			       bd->rgb_temp_saved, 6 * bd->board_size * 3 );
-
-	    copy_rgb( bd->rgb_saved, bd->rgb_temp_saved, 0, 0,
-		      bd->x_drag - x, bd->y_drag - y,
-		      6 * bd->board_size, 6 * bd->board_size,
-		      6 * bd->board_size, 6 * bd->board_size,
-		      6 * bd->board_size * 3, 6 * bd->board_size * 3 );
-
-	    memcpy( bd->rgb_temp, bd->rgb_temp_saved, 6 * bd->board_size *
-		    6 * bd->board_size * 3 );
-
-	    c = 6 * bd->board_size * 6 * bd->board_size;
-	    for( j = 0, psrc = bd->drag_colour > 0 ? bd->rgba_o : bd->rgba_x,
-		     pdest = bd->rgb_temp; j < c; j++ ) {
-		int r = refract[ j ] * 3;
-		
-		pdest[ 0 ] = clamp( ( ( bd->rgb_temp_saved[ r + 0 ] *
-					psrc[ 3 ] ) >> 8 ) + psrc[ 0 ] );
-		pdest[ 1 ] = clamp( ( ( bd->rgb_temp_saved[ r + 1 ] *
-					psrc[ 3 ] ) >> 8 ) + psrc[ 1 ] );
-		pdest[ 2 ] = clamp( ( ( bd->rgb_temp_saved[ r + 2 ] *
-					psrc[ 3 ] ) >> 8 ) + psrc[ 2 ] );
-		pdest += 3;
-		psrc += 4;
-	    }
-	    		
-	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
-			     0, 0, bd->x_drag - 3 * bd->board_size,
-			     bd->y_drag - 3 * bd->board_size,
-			     6 * bd->board_size, 6 * bd->board_size );
-
-	    gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
-			     x - 3 * bd->board_size, y - 3 * bd->board_size,
-			     0, 0, 6 * bd->board_size, 6 * bd->board_size );
+	board_drag( board, bd, x, y );
 	
-	    gdk_draw_rgb_image( board->window, bd->gc_copy,
-				x - 3 * bd->board_size,
-				y - 3 * bd->board_size,
-				6 * bd->board_size, 6 * bd->board_size,
-				GDK_RGB_DITHER_MAX, bd->rgb_temp,
-				6 * bd->board_size * 3 );
-	    
-	    rgb_swap = bd->rgb_saved;
-	    bd->rgb_saved = bd->rgb_temp_saved;
-	    bd->rgb_temp_saved = rgb_swap;
-	} else {
-	    gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, board->window,
-			     x - 3 * bd->board_size, y - 3 * bd->board_size,
-			     0, 0, 6 * bd->board_size, 6 * bd->board_size );
-	
-	    gdk_draw_pixmap( bd->pm_temp_saved, bd->gc_copy, bd->pm_saved,
-			     0, 0, bd->x_drag - x, bd->y_drag - y,
-			     6 * bd->board_size, 6 * bd->board_size );
-		   
-	    gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->pm_temp_saved,
-			     0, 0, 0, 0, 6 * bd->board_size,
-			     6 * bd->board_size );
-
-	    gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_mask );
-	    gdk_gc_set_clip_origin( bd->gc_copy, 0, 0 );
-	    
-	    gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->drag_colour > 0 ?
-			     bd->pm_o : bd->pm_x,
-			     0, 0, 0, 0, 6 * bd->board_size,
-			     6 * bd->board_size );
-	
-	    gdk_gc_set_clip_mask( bd->gc_copy, NULL );
-	    
-	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
-			     0, 0, bd->x_drag - 3 * bd->board_size,
-			     bd->y_drag - 3 * bd->board_size,
-			     6 * bd->board_size, 6 * bd->board_size );
-		
-	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_temp,
-			     0, 0, x - 3 * bd->board_size,
-			     y - 3 * bd->board_size,
-			     6 * bd->board_size, 6 * bd->board_size );
-
-	    pm_swap = bd->pm_saved;
-	    bd->pm_saved = bd->pm_temp_saved;
-	    bd->pm_temp_saved = pm_swap;
-	}
-	
-	bd->x_drag = x;
-	bd->y_drag = y;
-
 	break;
 	
     case GDK_BUTTON_RELEASE:
 	if( bd->drag_point < 0 )
 	    break;
-
-	gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
-			 0, 0, bd->x_drag - 3 * bd->board_size,
-			 bd->y_drag - 3 * bd->board_size,
-			 6 * bd->board_size, 6 * bd->board_size );
-
+	
+	board_end_drag( board, bd );
+	
 	dest = board_point( board, bd, x, y );
 
 	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
@@ -1101,69 +1235,59 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    /* Automatically place chequer on destination point
 	       (as opposed to a full drag). */
 
-	    /* FIXME we should check to see if the chequer can move the
-	       die corresponding to the clicked button; if not, then use
-	       the other button instead.  There could also be an option
-	       to automatically swap the dice after making the move. */
-
 	    if( bd->drag_colour != bd->turn ) {
 		/* can't move the opponent's chequers */
 		board_beep( bd );
 
 		dest = bd->drag_point;
+
+    		place_chequer_or_revert( board, bd, dest );		
 	    } else {
-		dest = bd->drag_point - ( bd->drag_button == 1 ?
-					  bd->dice[ 0 ] :
-					  bd->dice[ 1 ] ) * bd->drag_colour;
-		
+		gint left = bd->dice[0];
+		gint right = bd->dice[1];
+
+		/* Button 1 tries the left roll first.
+		   other buttons try the right dice roll first */
+		dest = bd->drag_point - ( bd->drag_button == 1 ? 
+					  left :
+					  right ) * bd->drag_colour;
+
 		if( ( dest <= 0 ) || ( dest >= 25 ) )
 		    /* bearing off */
 		    dest = bd->drag_colour > 0 ? 26 : 27;
-	    }
-	}
-	
-	bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
-	    
-	if( dest == -1 || ( bd->drag_colour > 0 ? bd->points[ dest ] < -1
-			     : bd->points[ dest ] > 1 ) || dest == bar ||
-	    dest > 27 ) {
-	    /* FIXME check move is legal */
-	    board_beep( bd );
-	    
-	    dest = bd->drag_point;
-	}
-
-	if( ( hit = bd->points[ dest ] == -bd->drag_colour ) ) {
-	    bd->points[ dest ] = 0;
-	    bd->points[ bar ] -= bd->drag_colour;
-
-	    board_expose_point( board, bd, bar );
-	}
-	
-	bd->points[ dest ] += bd->drag_colour;
-
-	board_expose_point( board, bd, dest );
-
-	if( bd->drag_point != dest )
-	    if( update_move( bd ) && !bd->permit_illegal ) {
-		/* the move was illegal; undo it */
-		bd->points[ dest ] -= bd->drag_colour;
-		bd->points[ bd->drag_point ] += bd->drag_colour;
-		if( hit ) {
-		    bd->points[ bar ] += bd->drag_colour;
-		    bd->points[ dest ] = -bd->drag_colour;
-		    board_expose_point( board, bd, bar );
-		}
+		
+		if( !place_chequer_or_revert( board, bd, dest ) ) {
+		    /* First roll was illegal.  We are going to 
+		       try the second roll next. First, we have 
+		       to redo the pickup since we got reverted. */
+		    bd->points[ bd->drag_point ] -= bd->drag_colour;
+		    board_expose_point( board, bd, bd->drag_point );
 		    
-		board_expose_point( board, bd, bd->drag_point );
-		board_expose_point( board, bd, dest );
-		update_move( bd );
-		board_beep( bd );
+		    /* Now we try the other die roll. */
+		    dest = bd->drag_point - ( bd->drag_button == 1 ?
+					      right :
+					      left ) * bd->drag_colour;
+		    
+		    if( ( dest <= 0 ) || ( dest >= 25 ) )
+			/* bearing off */
+			dest = bd->drag_colour > 0 ? 26 : 27;
+		    
+		    if( !place_chequer_or_revert( board, bd, dest ) ) {
+			board_expose_point( board, bd, bd->drag_point );
+			board_beep( bd );
+		    }
+		}
 	    }
+	} else {
+	    /* This is from a normal drag release */
+	    if( !place_chequer_or_revert( board, bd, dest ) )
+		board_beep( bd );
+	}
 	
 	bd->drag_point = -1;
 
 	break;
+	
     default:
 	g_assert_not_reached();
     }
@@ -1409,6 +1533,14 @@ static gint board_set( Board *board, const gchar *board_text ) {
     if( bd->board_size <= 0 )
 	return 0;
 
+    if( bd->higher_die_first ) {
+	if( bd->dice[ 0 ] < bd->dice[ 1 ] )
+	    swap( bd->dice, bd->dice + 1 );
+	
+	if( bd->dice_opponent[ 0 ] < bd->dice_opponent[ 1 ] )
+	    swap( bd->dice_opponent, bd->dice_opponent + 1 );
+    }
+    
     if( bd->dice[ 0 ] != old_dice[ 0 ] ||
 	bd->dice[ 1 ] != old_dice[ 1 ] ||
 	bd->dice_opponent[ 0 ] != old_dice[ 2 ] ||
@@ -1514,40 +1646,43 @@ static gint board_set( Board *board, const gchar *board_text ) {
     return 0;
 }
 
-static int animate_move, animate_count, animate_player, *animate_move_list;
-
 static int convert_point( int i, int player ) {
 
     if( player )
-	return ( i < 0 ) ? 26 : i + 1; /* FIXME check 26 and 27 are right */
+	return ( i < 0 ) ? 26 : i + 1;
     else
 	return ( i < 0 ) ? 27 : 24 - i;
 }
 
-static gint board_animate_timeout( gpointer p ) {
+static int animate_player, *animate_move_list, animation_finished;
+
+static gint board_blink_timeout( gpointer p ) {
 
     Board *board = p;
     BoardData *pbd = board->board_data;
     int src, dest, src_cheq, dest_cheq, colour;
+    static int blink_move, blink_count;
 
-    if( animate_move >= 8 || animate_move_list[ animate_move ] < 0 ) {
-	gtk_main_quit();
+    if( blink_move >= 8 || animate_move_list[ blink_move ] < 0 ||
+	fInterrupt ) {
+	blink_move = 0;
+	animation_finished = TRUE;
 	return FALSE;
     }
 
-    src = convert_point( animate_move_list[ animate_move ], animate_player );
-    dest = convert_point( animate_move_list[ animate_move + 1 ],
+    src = convert_point( animate_move_list[ blink_move ], animate_player );
+    dest = convert_point( animate_move_list[ blink_move + 1 ],
 			  animate_player );
     colour = animate_player ? 1 : -1;
 
-    if( !( animate_count & 1 ) ) {
+    if( !( blink_count & 1 ) ) {
 	src_cheq = pbd->points[ src ];
 	dest_cheq = pbd->points[ dest ];
 
 	if( pbd->points[ dest ] == -colour ) {
 	    pbd->points[ dest ] = 0;
 	    
-	    if( animate_count == 4 ) {
+	    if( blink_count == 4 ) {
 		pbd->points[ animate_player ? 0 : 25 ] -= colour;
 		board_expose_point( pbd->drawing_area, pbd,
 				    animate_player ? 0 : 25 );
@@ -1561,34 +1696,174 @@ static gint board_animate_timeout( gpointer p ) {
     board_expose_point( pbd->drawing_area, pbd, src );
     board_expose_point( pbd->drawing_area, pbd, dest );
 
-    if( !( animate_count & 1 ) && animate_count < 4 ) {
+    if( !( blink_count & 1 ) && blink_count < 4 ) {
 	pbd->points[ src ] = src_cheq;
 	pbd->points[ dest ] = dest_cheq;
     }
     
-    if( animate_count++ >= 4 ) {
-	animate_count = 0;	
-	animate_move += 2;	
+    if( blink_count++ >= 4 ) {
+	blink_count = 0;	
+	blink_move += 2;	
     }
 
+    return TRUE;
+}
+
+static gint board_slide_timeout( gpointer p ) {
+
+    Board *board = p;
+    BoardData *pbd = board->board_data;
+    int src, dest, colour;
+    static int slide_move, slide_phase, x, y, x_mid, x_dest, y_dest, y_lift;
+    
+    if( fInterrupt && pbd->drag_point >= 0 ) {
+	board_end_drag( pbd->drawing_area, pbd );
+	pbd->drag_point = -1;
+    }
+
+    if( slide_move >= 8 || animate_move_list[ slide_move ] < 0 ||
+	fInterrupt ) {
+	slide_move = slide_phase = 0;
+	animation_finished = TRUE;
+	return FALSE;
+    }
+    
+    src = convert_point( animate_move_list[ slide_move ], animate_player );
+    dest = convert_point( animate_move_list[ slide_move + 1 ],
+			  animate_player );
+    colour = animate_player ? 1 : -1;
+
+    switch( slide_phase ) {
+    case 0:
+	/* start slide */
+	chequer_position( src, abs( pbd->points[ src ] ), &x, &y );
+	x += 3;
+	y += 3;
+	if( y < 18 )
+	    y_lift = 18;
+	else if( y < 36 )
+	    y_lift = y + 3;
+	else if( y > 54 )
+	    y_lift = 54;
+	else
+	    y_lift = y - 3;
+	chequer_position( dest, abs( pbd->points[ dest ] ) + 1, &x_dest,
+			  &y_dest );
+	x_dest += 3;
+	y_dest += 3;
+	x_mid = ( x + x_dest ) >> 1;
+	board_start_drag( pbd->drawing_area, pbd, src, x * pbd->board_size,
+			  y * pbd->board_size );
+	slide_phase++;
+	/* fall through */
+    case 1:
+	/* lift */
+	if( y < 36 && y < y_lift ) {
+	    y += 2;
+	    break;
+	} else if( y > 36 && y > y_lift ) {
+	    y -= 2;
+	    break;
+	} else
+	    slide_phase++;
+	/* fall through */
+    case 2:
+	/* to mid point */
+	if( y > 36 )
+	    y--;
+	else if( y < 36 )
+	    y++;
+	
+	if( x > x_mid + 2 ) {
+	    x -= 3;
+	    break;
+	} else if( x < x_mid - 2 ) {
+	    x += 3;
+	    break;
+	} else
+	    slide_phase++;
+	/* fall through */
+    case 3:
+	/* from mid point */
+	if( y > y_dest + 1 )
+	    y -= 2;
+	else if( y < y_dest - 1 )
+	    y += 2;
+	
+	if( x < x_dest - 2 ) {
+	    x += 3;
+	    break;
+	} else if( x > x_dest + 2 ) {
+	    x -= 3;
+	    break;
+	} else
+	    slide_phase++;
+	/* fall through */
+    case 4:
+	/* drop */
+	if( y > y_dest + 2 )
+	    y -= 3;
+	else if( y < y_dest - 2 )
+	    y += 3;
+	else {
+	    board_end_drag( pbd->drawing_area, pbd );
+	    
+	    if( pbd->points[ dest ] == -colour ) {
+		pbd->points[ dest ] = 0;
+		pbd->points[ animate_player ? 0 : 25 ] -= colour;
+		board_expose_point( pbd->drawing_area, pbd,
+				    animate_player ? 0 : 25 );
+	    }
+	    
+	    pbd->points[ dest ] += colour;
+	    board_expose_point( pbd->drawing_area, pbd, dest );
+	    pbd->drag_point = -1;
+	    slide_phase = 0;
+	    slide_move += 2;
+
+	    return TRUE;
+	}
+	break;
+	
+    default:
+	g_assert_not_reached();
+    }
+
+    board_drag( pbd->drawing_area, pbd, x * pbd->board_size,
+		y * pbd->board_size );
+    
     return TRUE;
 }
 
 extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
     BoardData *pbd = board->board_data;
-    int n;
-    
-    if( !pbd->animate_computer_moves )
+    int n, f;
+	
+    if( pbd->animate_computer_moves == ANIMATE_NONE )
 	return;
 
-    animate_move = animate_count = 0;
     animate_move_list = move;
     animate_player = player;
-    
-    n = gtk_timeout_add( 75, board_animate_timeout, board );
 
-    gtk_main();
+    animation_finished = FALSE;
+    
+    if( pbd->animate_computer_moves == ANIMATE_BLINK )
+	n = gtk_timeout_add( 0x300 >> pbd->animate_speed, board_blink_timeout,
+			     board );
+    else /* ANIMATE_SLIDE */
+	n = gtk_timeout_add( 0x100 >> pbd->animate_speed, board_slide_timeout,
+			     board );
+    
+    while( !animation_finished ) {
+	if( ( f = !GTK_WIDGET_HAS_GRAB( pbd->stop ) ) )
+	    gtk_grab_add( pbd->stop );
+	
+	gtk_main_iteration();
+
+	if( f )
+	    gtk_grab_remove( pbd->stop );
+    }
 }
 
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
@@ -1613,6 +1888,9 @@ extern gint game_set_old_dice( Board *board, gint die0, gint die1 ) {
     pbd->dice_roll[ 0 ] = die0;
     pbd->dice_roll[ 1 ] = die1;
 
+    if( pbd->higher_die_first && pbd->dice_roll[ 0 ] < pbd->dice_roll[ 1 ] )
+	swap( pbd->dice_roll, pbd->dice_roll + 1 );
+    
     return 0;
 }
 
@@ -1666,11 +1944,9 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 ) {
     gchar board_str[ 256 ];
-    int old_dice;
     BoardData *pbd = board->board_data;
     
     memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
-    old_dice = pbd->dice[ 0 ];
 
     FIBSBoard( board_str, points, roll, name, opp_name, match, score,
 	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
@@ -1683,6 +1959,9 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	return 0;
 
     if( die0 ) {
+	if( pbd->higher_die_first && die0 < die1 )
+	    swap( &die0, &die1 );
+	
 	pbd->dice_roll[ 0 ] = die0;
 	pbd->dice_roll[ 1 ] = die1;
     }
@@ -3015,8 +3294,11 @@ static void board_init( Board *board ) {
     bd->translucent = TRUE;
     bd->labels = FALSE;
     bd->usedicearea = TRUE;
-    bd->permit_illegal = TRUE;
+    bd->permit_illegal = FALSE;
     bd->beep_illegal = TRUE;
+    bd->higher_die_first = FALSE;
+    bd->animate_computer_moves = ANIMATE_SLIDE;
+    bd->animate_speed = 4;
     bd->arLight[ 0 ] = -0.5;
     bd->arLight[ 1 ] = 0.5;
     bd->arLight[ 2 ] = 0.707;
@@ -3045,7 +3327,6 @@ static void board_init( Board *board ) {
     bd->aSpeckle[ 0 ] = 25;
     bd->aSpeckle[ 2 ] = 25;
     bd->aSpeckle[ 3 ] = 25;
-    bd->animate_computer_moves = TRUE;
     
     gcval.function = GDK_AND;
     gcval.foreground.pixel = ~0L; /* AllPlanes */

@@ -1,7 +1,7 @@
 /*
  * gtkboard.h
  *
- * by Gary Wong <gtw@gnu.org>, 1997-2000.
+ * by Gary Wong <gtw@gnu.org>, 1997-2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -51,6 +51,10 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 extern gint game_set_old_dice( Board *board, gint die0, gint die1 );
 extern void board_set_playing( Board *board, gboolean f );
 extern void board_animate( Board *board, int move[ 8 ], int player );
+
+typedef enum _animation {
+    ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
+} animation;
     
 /* private data */
 typedef struct _BoardData {
@@ -68,8 +72,10 @@ typedef struct _BoardData {
 	*rgb_saved, *rgb_temp, *rgb_temp_saved, *rgb_bar;
     short *ai_refract[ 2 ];
     GdkFont *cube_font;
-    gboolean translucent, labels, classical, usedicearea, permit_illegal,
-        beep_illegal, playing, animate_computer_moves;
+    gboolean translucent, labels, usedicearea, permit_illegal, beep_illegal,
+	higher_die_first, playing;
+    animation animate_computer_moves;
+    int animate_speed;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
     guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
     int aSpeckle[ 4 ]; /* speckle for background, border, pts */

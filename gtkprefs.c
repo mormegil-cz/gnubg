@@ -1,7 +1,7 @@
 /*
  * gtkprefs.c
  *
- * by Gary Wong <gtw@gnu.org>, 2000.
+ * by Gary Wong <gtw@gnu.org>, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -39,10 +39,14 @@
 
 static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ], *apadjPoint[ 2 ],
-    *padjBoard;
+    *padjBoard, *padjSpeed;
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *pwBoard, *pwTranslucent,
-    *pwLabels, *pwUseDiceIcon, *pwPermitIllegal, *pwBeepIllegal, *pwAnimateComputerMoves;
-static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal, fAnimateComputerMoves;
+    *pwLabels, *pwUseDiceIcon, *pwPermitIllegal, *pwBeepIllegal,
+    *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide,
+    *pwSpeed;
+static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
+    fHigherDieFirst;
+static animation anim;
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 
@@ -58,8 +62,9 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     apadjExponent[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new(
 	bd->arExponent[ f ], 1.0, 100.0, 1.0, 10.0, 0.0 ) );
     
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       apwColour[ f ] = gtk_color_selection_new() );
+    gtk_box_pack_start( GTK_BOX( pw ),
+			apwColour[ f ] = gtk_color_selection_new(),
+			FALSE, FALSE, 0 );
     gtk_color_selection_set_opacity( GTK_COLOR_SELECTION( apwColour[ f ] ),
 				     fTranslucent );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwColour[ f ] ),
@@ -175,9 +180,16 @@ static void ToggleTranslucent( GtkWidget *pw, BoardData *bd ) {
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwColour[ 1 ] ), ar );
 }
 
+static void ToggleAnimation( GtkWidget *pw, void *p ) {
+
+    gtk_widget_set_sensitive( pwSpeed,
+			      !gtk_toggle_button_get_active(
+				  GTK_TOGGLE_BUTTON( pw ) ) );
+}
+
 static GtkWidget *GeneralPage( BoardData *bd ) {
 
-    GtkWidget *pw, *pwTable;
+    GtkWidget *pw, *pwTable, *pwBox, *pwAnimBox, *pwFrame, *pwScale;
     float rAzimuth, rElevation;
     
     pw = gtk_vbox_new( FALSE, 0 );
@@ -210,13 +222,61 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwBeepIllegal ),
 				  fBeepIllegal );
     gtk_box_pack_start( GTK_BOX( pw ), pwBeepIllegal, FALSE, FALSE, 0 );
-    
-    pwAnimateComputerMoves = gtk_check_button_new_with_label(
-	"Animate computer moves" );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateComputerMoves),
-				  fAnimateComputerMoves);
-    gtk_box_pack_start( GTK_BOX( pw ), pwAnimateComputerMoves, FALSE, FALSE, 0 );
 
+    pwHigherDieFirst = gtk_check_button_new_with_label(
+	"Show higher die on left" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHigherDieFirst ),
+				  fHigherDieFirst );
+    gtk_box_pack_start( GTK_BOX( pw ), pwHigherDieFirst, FALSE, FALSE, 0 );
+
+    pwAnimBox = gtk_hbox_new( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pw ), pwAnimBox, FALSE, FALSE, 0 );
+    
+    pwFrame = gtk_frame_new( "Animation" );
+    gtk_box_pack_start( GTK_BOX( pwAnimBox ), pwFrame, FALSE, FALSE, 4 );
+
+    pwBox = gtk_vbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwFrame ), pwBox );
+
+    pwAnimateNone = gtk_radio_button_new_with_label( NULL, "None" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateNone ),
+				  anim == ANIMATE_NONE );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateNone, FALSE, FALSE, 0 );
+    
+    pwAnimateBlink = gtk_radio_button_new_with_label_from_widget(
+	GTK_RADIO_BUTTON( pwAnimateNone ), "Blink moving chequers" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ),
+				  anim == ANIMATE_BLINK );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateBlink, FALSE, FALSE, 0 );
+    
+    pwAnimateSlide = gtk_radio_button_new_with_label_from_widget(
+	GTK_RADIO_BUTTON( pwAnimateNone ), "Slide moving chequers" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateSlide ),
+				  anim == ANIMATE_SLIDE );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwAnimateSlide, FALSE, FALSE, 0 );
+
+    pwSpeed = gtk_hbox_new( FALSE, 0 );
+    
+    padjSpeed = GTK_ADJUSTMENT( gtk_adjustment_new( bd->animate_speed, 0, 7,
+						    1, 1, 0 ) );
+    pwScale = gtk_hscale_new( padjSpeed );
+    gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
+    gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
+
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( "Speed:" ),
+			FALSE, FALSE, 8 );
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( "Slow" ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), pwScale, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwSpeed ), gtk_label_new( "Fast" ),
+			FALSE, FALSE, 4 );
+    
+    gtk_signal_connect( GTK_OBJECT( pwAnimateNone ), "toggled",
+			GTK_SIGNAL_FUNC( ToggleAnimation ), bd );
+    ToggleAnimation( pwAnimateNone, NULL );
+
+    gtk_container_add( GTK_CONTAINER( pwAnimBox ), pwSpeed );
+    
     pwTable = gtk_table_new( 2, 2, FALSE );
     gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
     
@@ -287,8 +347,17 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	GTK_TOGGLE_BUTTON( pwPermitIllegal ) );
     fBeepIllegal = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwBeepIllegal ) );
-    fAnimateComputerMoves = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwAnimateComputerMoves) );
+    fHigherDieFirst = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwHigherDieFirst ) );
+    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ) ) )
+	anim = ANIMATE_BLINK;
+    else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+	pwAnimateSlide ) ) )
+	anim = ANIMATE_SLIDE;
+    else
+	anim = ANIMATE_NONE;
+
+    bd->animate_speed = (int) ( padjSpeed->value + 0.5 );
     
     for( i = 0; i < 2; i++ ) {
 	bd->arRefraction[ i ] = apadj[ i ]->value;
@@ -337,7 +406,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     bd->usedicearea = fUseDiceIcon;
     bd->permit_illegal = fPermitIllegal;
     bd->beep_illegal = fBeepIllegal;
-    bd->animate_computer_moves = fAnimateComputerMoves; 
+    bd->higher_die_first = fHigherDieFirst;
+    bd->animate_computer_moves = anim;
     
     /* This is a horrible hack, but we need translucency set to the new
        value to call BoardPreferencesCommand(), so we get the correct
@@ -366,7 +436,8 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fUseDiceIcon = bd->usedicearea;
     fPermitIllegal = bd->permit_illegal;
     fBeepIllegal = bd->beep_illegal;
-    fAnimateComputerMoves = bd->animate_computer_moves;
+    fHigherDieFirst = bd->higher_die_first;
+    anim = bd->animate_computer_moves;
     
     pwDialog = CreateDialog( "GNU Backgammon - Appearance", TRUE,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
@@ -544,9 +615,28 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	bd->permit_illegal = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "beep", c ) )
 	bd->beep_illegal = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "animate", c ) )
-	bd->animate_computer_moves = toupper( *szValue ) == 'Y';
-    else if( !g_strncasecmp( szParam, "light", c ) ) {
+    else if( !g_strncasecmp( szParam, "highdie", c ) )
+	bd->higher_die_first = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "animate", c ) ) {
+	switch( toupper( *szValue ) ) {
+	case 'B':
+	    bd->animate_computer_moves = ANIMATE_BLINK;
+	    break;
+	case 'S':
+	    bd->animate_computer_moves = ANIMATE_SLIDE;
+	    break;
+	default:
+	    bd->animate_computer_moves = ANIMATE_NONE;
+	    break;
+	}
+    } else if( !g_strncasecmp( szParam, "speed", c ) ) {
+	int n= atoi( szValue );
+
+	if( n < 0 || n > 7 )
+	    fValueError = TRUE;
+	else
+	    bd->animate_speed = n;
+    } else if( !g_strncasecmp( szParam, "light", c ) ) {
 	/* light=azimuth;elevation */
 	float rAzimuth, rElevation;
 
@@ -590,7 +680,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 
     BoardData *bd = BOARD( pwBoard )->board_data;
     float rAzimuth, rElevation;
-    
+    static char *aszAnim[ ANIMATE_SLIDE + 1 ] = { "none", "blink", "slide" };
     rElevation = asinf( bd->arLight[ 2 ] ) * 180 / M_PI;
     rAzimuth = acosf( bd->arLight[ 0 ] / sqrt( 1.0 - bd->arLight[ 2 ] *
 					       bd->arLight[ 2 ] ) ) *
@@ -600,7 +690,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     
     sprintf( sz, "set appearance board=rgb:%02X/%02X/%02X;%0.2f "
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
-	     "beep=%c animate=%c light=%0.0f;%0.0f " 
+	     "beep=%c highdie=%c animate=%s speed=%d light=%0.0f;%0.0f " 
 	     "chequers0=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "points0=rgb:%02X/%02X/%02X;%0.2f "
@@ -609,8 +699,9 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->aanBoardColour[ 0 ][ 2 ], bd->aSpeckle[ 0 ] / 128.0f,
 	     bd->translucent ? 'y' : 'n', bd->labels ? 'y' : 'n',
 	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
-	     bd->beep_illegal ? 'y' : 'n', bd->animate_computer_moves ? 'y' : 'n', rAzimuth, rElevation,
-	     (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
+	     bd->beep_illegal ? 'y' : 'n', bd->higher_die_first ? 'y' : 'n',
+	     aszAnim[ bd->animate_computer_moves ], bd->animate_speed,
+	     rAzimuth, rElevation, (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 
 	     (int) ( bd->aarColour[ 0 ][ 2 ] * 0xFF ), bd->aarColour[ 0 ][ 3 ],
 	     bd->arRefraction[ 0 ], bd->arCoefficient[ 0 ],
