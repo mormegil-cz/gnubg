@@ -1572,8 +1572,6 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        GTK_EXPAND | GTK_FILL, 
                        8, 8 );
 
-    gtk_widget_pop_style ();
-      
     return pwFrame;
 }
 
@@ -1839,8 +1837,6 @@ static GtkWidget *TakeAnalysis( movetype mt,
                        GTK_EXPAND | GTK_FILL, 
                        8, 8 );
 
-    gtk_widget_pop_style ();
-      
     return pwFrame;
 
 #if 0
