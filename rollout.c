@@ -420,12 +420,16 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
     for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
 	    arStdDev[ i ] = arSigma[ i ];	
 
-  if( fShowProgress ) {
-    for( i = 0; i < 72; i++ )
-	    outputc( ' ' );
+  if( fShowProgress
+#if USE_GTK
+      && !fX
+#endif
+      ) {
+      for( i = 0; i < 72; i++ )
+	  outputc( ' ' );
 
-    outputc( '\r' );
-    fflush( stdout );
+      outputc( '\r' );
+      fflush( stdout );
   }
     
   return cGames;
