@@ -219,7 +219,7 @@ windowobject woPanel[NUM_WINDOWS] =
 	/* game list */
 	{
 		"game",
-		TRUE, TRUE, TRUE, TRUE,
+		FALSE, TRUE, TRUE, TRUE,
 #if USE_GTK
 		ShowGameWindow, DeleteGame,
 		0,
