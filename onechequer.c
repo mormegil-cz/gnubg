@@ -136,6 +136,33 @@ DistFromPipCount( const int nPips, float arDist[ 32 ], float *table ) {
 
 }
 
+
+/*
+ * The usual formulae for calculating gwc:
+ *
+ * x_A = pip count for player on roll (anPips[1])
+ * x_B = pip count for opponent (anPips[0])
+ *
+ * p = \sum_{i=1}^{i=\infty} 
+ *          \left( P(x_A,i) \cdot \sum_{j=i}^{j=\infty} P(x_B,j) \right)
+ *
+ */
+
+extern float
+GWCFromDist( const float arDist0[], const float arDist1[], const int n ) {
+
+  int i, j;
+  float r = 0.0f;
+
+  for ( i = 0; i < n; ++i )
+    for ( j = i; j < n; ++j )
+      r += arDist0[ i ] * arDist1[ j ];
+
+  return r;
+
+}
+
+
 /*
  * Calculate the cubeless GWC based on pip counts
  *
@@ -175,22 +202,8 @@ GWCFromPipCount( const int anPips[ 2 ], float *arMu, float *arSigma ) {
     DistFromPipCount( anPips[ i ], aarDist[ i ], table );
   }
 
-  /*
-   * The usual formulae for calculating gwc:
-   *
-   * x_A = pip count for player on roll (anPips[1])
-   * x_B = pip count for opponent (anPips[0])
-   *
-   * p = \sum_{i=1}^{i=\infty} 
-   *          \left( P(x_A,i) \cdot \sum_{j=i}^{j=\infty} P(x_B,j) \right)
-   *
-   */
+  r = GWCFromDist( aarDist[ 1 ], aarDist[ 0 ], 32 );
   
-  r = 0.0f;
-  for ( i = 0; i < 32; ++i )
-    for ( j = i; j < 32; ++j )
-      r += aarDist[ 1 ][ i ] * aarDist[ 0 ][ j ];
-
   /* garbage collect */
 
   free( table );
@@ -206,5 +219,22 @@ GWCFromPipCount( const int anPips[ 2 ], float *arMu, float *arSigma ) {
   }
 
   return r;
+
+}
+
+
+extern float
+GWCFromMuSigma( const float arMu[ 2 ], const float arSigma[ 2 ] ) {
+
+  float aarDist[ 2 ][ 32 ];
+  int i, j;
+
+  /* calculate distribution */
+
+  for ( i = 0; i < 2; ++i ) 
+    for ( j = 0; j < 32; ++j )
+      aarDist[ i ][ j ] = fnd ( 1.0f * j, arMu[ i ], arSigma[ i ] );
+  
+  return GWCFromDist( aarDist[ 1 ], aarDist[ 0 ], 32 );
 
 }

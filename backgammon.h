@@ -1349,7 +1349,8 @@ extern void
 ShowBearoff( char* sz, matchstate* pms, bearoffcontext* pbc );
 
 extern int
-EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource );
+EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma, 
+     int *pfSource );
 
 extern char *
 ShowEPC( int anBoard[ 2 ][ 25 ] );

@@ -8905,7 +8905,8 @@ CommandClearHint( char *sz ) {
  */
 
 extern int
-EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource ) {
+EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma, 
+     int *pfSource ) {
 
   const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
                     5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
@@ -8923,7 +8924,12 @@ EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource ) {
       if ( BearoffDist( pbc1, n, NULL, NULL, ar, NULL, NULL ) )
         return -1;
 
-      arEPC[ i ] = x * ar[ 0 ];
+      if ( arEPC )
+        arEPC[ i ] = x * ar[ 0 ];
+      if ( arMu )
+        arMu[ i ] = ar[ 0 ];
+      if ( arSigma )
+        arSigma[ i ] = ar[ 1 ];
 
     }
 
@@ -8945,7 +8951,12 @@ EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource ) {
       if ( BearoffDist( pbcOS, n, NULL, NULL, ar, NULL, NULL ) )
         return -1;
 
-      arEPC[ i ] = x * ar[ 0 ];
+      if ( arEPC )
+        arEPC[ i ] = x * ar[ 0 ];
+      if ( arMu )
+        arMu[ i ] = ar[ 0 ];
+      if ( arSigma )
+        arSigma[ i ] = ar[ 1 ];
 
     }
 
@@ -8961,14 +8972,20 @@ EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource ) {
 
     int anBoard[ 2 ][ 25 ];
     int nTrials = 576;
-    float arMu[ 2 ];
+    float arMux[ 2 ];
     float ar[ 5 ];
     int i;
 
-    raceProbs ( anBoard, nTrials, ar, arMu );
+    raceProbs ( anBoard, nTrials, ar, arMux );
 
-    for ( i = 0; i < 2; ++i )
-      arEPC[ i ] = arMu[ i ] * x;
+    for ( i = 0; i < 2; ++i ) {
+      if ( arEPC )
+        arEPC[ i ] = x * arMux[ i ];
+      if ( arMu )
+        arMu[ i ] = arMux[ i ];
+      if ( arSigma )
+        arSigma[ i ] = -1.0f; /* raceProbs cannot calculate sigma! */
+    }
 
     if ( pfSource )
       *pfSource = 1;
@@ -9012,8 +9029,10 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
   float aar[ 2 ][ 2 ];
   float ar[ 2 ];
   int an[ 2 ];
+  float arMu[ 2 ];
+  float arSigma[ 2 ];
 
-  if ( EPC( anBoard, arEPC, &f ) ) {
+  if ( EPC( anBoard, arEPC, arMu, arSigma, &f ) ) {
     sz = g_strdup( _("Sorry, EPCs cannot be calculated for this position") );
     return sz;
   }
@@ -9063,14 +9082,30 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
   r = LinearInterpolation( an[ 0 ], ar[ 0 ], an[ 1 ], ar[ 1 ], arEPC[ 1 ] );
 
-  szz = g_strdup_printf( _("Estimated gwc: %8.4f (WARNING: this is work in progress)\n\n"), r );
+  szz = g_strdup_printf( _("Estimated gwc: %8.4f (one chequer approximation)\n"), r );
 
+  sz = g_strconcat( szx, szy, szz, NULL );
 
-  sz = g_strconcat( szx, szy, szz, _("EPC = 8.167 * Average rolls\n"
-                                     "Wastage = EPC - pips\n\n" ), NULL );
   g_free( szx );
   g_free( szy );
   g_free( szz );
+
+  /* GWC from mu and sigma */
+
+  if ( arSigma[ 0 ] >= 0.0f ) {
+
+    szx = sz;
+    szy = g_strdup_printf( _("Estimated gwc: %8.4f (from mean and std.dev)\n"),
+                           GWCFromMuSigma( arMu, arSigma ) );
+    sz = g_strconcat( szx, szy, NULL );
+    g_free( szx );
+
+  }
+  
+  szx = sz;
+  sz = g_strconcat( sz, _("\nEPC = 8.167 * Average rolls\n"
+                          "Wastage = EPC - pips\n\n" ), NULL );
+  g_free( szx );
 
   return sz;
 

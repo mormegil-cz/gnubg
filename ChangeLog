@@ -1,3 +1,16 @@
+Sat Jan  3 14:32:46 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Some updates to EPCs:
+
+	* gnubg.c (EPC): return mu and sigma if requested.
+	* gnubg.c (ShowEPC): calculate GWC from mu and sigma.
+	* onechequer.c (GWCFromMuSigma, GWCFromDist): new funtions.
+	
+
+Sat Jan  3 01:02:49 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in: look for socklen_t.
+
 Fri Jan  2 19:23:09 2004  Oystein Johansen <oystein@gnubg.org>
 
         * render.c (RenderDice): Redesign the dice in the 2D board.
