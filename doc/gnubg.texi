@@ -3,7 +3,7 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year December, 1999
+@set month-year February, 2000
 
 @syncodeindex vr cp
 
@@ -15,7 +15,7 @@
 This file documents GNU Backgammon, a program for playing and analysing
 backgammon games and matches.
 
-Copyright @copyright{} 1999 Gary Wong.
+Copyright @copyright{} 1999, 2000 Gary Wong.
 @end ifinfo
 
 @titlepage
@@ -57,23 +57,28 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 
 GNU Backgammon (@gnubg{}) plays and analyses backgammon games and matches. 
 
-It is currently a work-in-progress.  When it is finished, it will be able
-to play and analyse cubeless and cubeful games and tournament matches,
-evaluate and roll out positions, tune its own evaluation functions using
-either TD or supervised training, maintain databases of positions for
-training and other purposes, and more.
+It is currently a work-in-progress.  So far it is able to play cubeless
+games and tournament matches, evaluate and roll out positions, tune its
+own evaluation functions using either TD or supervised training,
+maintain databases of positions for training and other purposes, and
+more.
 
-It will be extensible on platforms where Guile is available, so that the
-user can program it to answer sophisticated questions like ``How many
-chequers must Black have borne off in positions like this one to be able
-to accept a double?'' and automate complicated rollout tasks.  It will be
-driven by a command-line interface, and will display an ASCII rendition
-of a board on text-only terminals, but will also allow the user to play
-games and manipulate positions with an X11 board window where available.
+It is driven by a command-line interface, and displays an ASCII
+rendition of a board on text-only terminals, but also allows the user to
+play games and manipulate positions with an X11 board window where
+available.
+
+Plans for the future include completing its ability to play and analyse
+cubeful games and matches, and making it extensible on platforms where
+Guile is available, so that the user can program it to answer
+sophisticated questions like ``How many chequers must Black have borne
+off in positions like this one to be able to accept a double?''@: and
+automate complicated rollout tasks.
 
 It currently plays at about the level of a strong intermediate flight
-tournament player (rated in the mid 1700s on @dfn{FIBS},
+tournament player (rated in the mid 1700s on
 @cindex FIBS
+@uref{http://www.fibs.com/,,FIBS},
 the First Internet Backgammon Server --- around the 90th percentile) and
 is gradually improving; it should be somewhat stronger than this when
 released.  Since almost all of the CPU time required during supervised
@@ -84,10 +89,8 @@ individual could obtain.
 
 If you can tolerate the rough edges, periodic snapshots of @gnubg{} and
 anonymous CVS access to the pre-release source are being made available.
-You can also compete against a recent version of @gnubg{} on FIBS; it
-plays there under the name @samp{gnu}.
-
-FIXME update this section.
+You can also compete against recent versions of @gnubg{} on FIBS; it
+plays there under the names @samp{gnu} and @samp{mgnutest}.
 
 @node How to Play Backgammon
 @chapter How to Play Backgammon
@@ -132,16 +135,22 @@ An alternate arrangement is the reverse of the one shown here, with the
 home board on the left and the outer board on the right.
 @end multitable
 @end ifnottex
-@iftex
-@image{rulfig1}
-@quotation
-@strong{Figure 1.}  A board with the checkers
-in their initial position.
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig1}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 1.}  A board with the checkers in their initial position.\par
 
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
 An alternate arrangement is the reverse of the one shown here, with the
-home board on the left and the outer board on the right.
-@end quotation
-@end iftex
+home board on the left and the outer board on the right.\par\vskip 2 cm}}
+@end tex
 
 The points are numbered for either player starting in that player's home 
 board. 
@@ -170,15 +179,20 @@ The first player to bear off all of his checkers wins the game.
 White's checkers.  Red's checkers move in the opposite direction.
 @end multitable
 @end ifnottex
-@iftex
-@image{rulfig2}
-@quotation
-@strong{Figure 2.}  Direction of movement of White's checkers.  Red's
-checkers move in the opposite direction.@end quotation
-@end iftex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig2}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 2.}  Direction of movement of White's checkers.  Red's
+checkers move in the opposite direction.\par\vskip 2 cm}}
+@end tex
 
 @subsection Movement of the Checkers
-@cindex moving chequers
+@cindex moving chequers, rules
 
 To start the game, each player throws a single die.  
 This determines both the player to go first and the numbers to be played. 
@@ -214,13 +228,17 @@ spaces from the starting point) is also open.
 play a roll of 53.
 @end multitable
 @end ifnottex
-@iftex
-@image{rulfig3}
-@quotation
-@strong{Figure 3.}  Two ways that White can
-play a roll of 53.
-@end quotation
-@end iftex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig3}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 3.}  Two ways that White can
+play a roll of 53.\par\vskip 2 cm}}
+@end tex
 
 @item
 A player who rolls doubles plays the numbers shown on the dice twice.  
@@ -266,14 +284,18 @@ checker on the bar, he must enter the checker onto Red's four point
 since Red's six point is not open.
 @end multitable
 @end ifnottex
-@iftex
-@image{rulfig4}
-@quotation
-@strong{Figure 4.}  If White rolls 64 with a
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig4}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 4.}  If White rolls 64 with a
 checker on the bar, he must enter the checker onto Red's four point 
-since Red's six point is not open.
-@end quotation
-@end iftex
+since Red's six point is not open.\par\vskip 2 cm}}
+@end tex
 
 If neither of the points is open, the player loses his turn.  
 If a player is able to enter some but not all of his checkers, he must enter 
@@ -307,12 +329,16 @@ legal move.
 off two checkers.
 @end multitable
 @end ifnottex
-@iftex
-@image{rulfig5}
-@quotation
-@strong{Figure 5.}  White rolls 64 and bears off two checkers.
-@end quotation
-@end iftex
+@tex
+\medskip
+\hbox{
+\hbox{@image{rulfig5}}
+\vbox{
+\hsize=5 cm
+\raggedright
+\parindent=0 pt
+{\bf Figure 5.}  White rolls 64 and bears off two checkers.\par\vskip 2 cm}}
+@end tex
 
 A player must have all of his active checkers in his home board in order 
 to bear off. 
@@ -321,7 +347,7 @@ that checker back to his home board before continuing to bear off.
 The first player to bear off all fifteen checkers wins the game.
 
 @subsection Doubling
-@cindex doubling
+@cindex doubling, rules
 
 Backgammon is played for an agreed stake per point. 
 Each game starts at one point. 
@@ -408,8 +434,97 @@ further contact between the opposing forces.
 @end enumerate
 
 @node Match Play
-@section Match Play
+@section Rules for Match Play
 @cindex match rules
+
+When backgammon tournaments are held to determine an overall winner, 
+the usual style of competition is @dfn{match play}. 
+Competitors are paired off, and each pair plays a series of games to decide 
+which player progresses to the next round of the tournament.  
+This series of games is called a @dfn{match}.
+
+Matches are played to a specified number of points. 
+The first player to accumulate the required points wins the match. 
+Points are awarded in the usual manner: 
+one for a single game, two for a gammon, and three for a backgammon. 
+The doubling cube is used, so the winner receives the value of the game 
+multiplied by the final value of the doubling cube.
+
+Matches are normally played using the
+@cindex Crawford rule
+@dfn{Crawford rule}. 
+The Crawford rule states that if one player reaches a score one point short 
+of the match, neither player may offer a double in the immediately following 
+game. 
+This one game without doubling is called the Crawford game. 
+Once the Crawford game has been played, if the match has not yet been decided, the doubling 
+cube is active again.
+
+@html
+<center><table width=406 border=0 cellspacing=0 cellpadding=1>
+<tr><td colspan=2><font face="Arial,Helvetica"><b>Match to 5</b></font></td>    <td align=center><font size=2 face="Arial,Helvetica"><b>&nbsp;White&nbsp;</b></font></td>       <td align=center><font size=2 face="Arial,Helvetica"><b>&nbsp;Black&nbsp;</b></font></td><tr>
+<tr><td colspan=6><img src="bar.png" border=0 width=402 height=3></td></tr>
+<tr><td><b>Game 1:&nbsp;&nbsp;</b></td><td>White wins 2 points&nbsp;&nbsp;</td> <td align=center>2</td>         <td align=center>0</td> <td rowspan=3 valign=center><img src="rbrace3.png" width=9 height=52></td><td rowspan=3 valign=center><font size=2 face="Arial,Helvetica">&nbsp;Doubling Allowed</font></td></tr>
+<tr><td><b>Game 2:</b></td><td>Black wins 1 point</td>  <td align=center>2</td>         <td align=center>1</td></tr>
+<tr><td><b>Game 3:</b></td><td>White wins 2 points</td><td align=center>4</td>          <td align=center>1</td></tr>
+<tr bgcolor=FFCC99><td><b>Game 4:</b></td><td>Black wins 1 point</td>   <td align=center>4</td>         <td align=center>2</td>         <td>&nbsp;</td><td><font size=2 face="Arial,Helvetica">&nbsp;Crawford Game</font></td></tr>
+<tr><td><b>Game 5:</b></td><td>Black wins 2 points</td><td align=center>4</td>          <td align=center>4</td>         <td rowspan=2 valign=center><img src="rbrace2.png" width=9 height=34></td><td rowspan=2 valign=center><font size=2 face="Arial,Helvetica">&nbsp;Doubling Allowed</font></td></tr>
+<tr><td><b>Game 6:</b></td><td>White wins 2 points</td><td align=center>6</td>          <td align=center>4</td></tr>
+<tr><td colspan=6><img src="bar.png" border=0 width=402 height=3></td></tr>
+</table></center>
+@end html
+@tex
+\medskip
+\moveright 5 mm \vbox{
+\settabs \+ \hskip 6 cm & \hskip 2 cm & \hskip 2 cm & \cr
+\+ \bf Match to 5 & \bf \hfil White \hfil & \bf \hfil Black \hfil & \cr
+\smallskip
+\hrule width 14 cm
+\smallskip
+\hbox{\vbox{%
+\+ {\bf Game 1:}\quad White wins 2 points & \hfil 2 \hfil & \hfil 0 \hfil & \cr
+\+ {\bf Game 2:}\quad Black wins 1 point & \hfil 2 \hfil & \hfil 1 \hfil & \cr
+\+ {\bf Game 3:}\quad White wins 2 points & \hfil 4 \hfil & \hfil 1 \hfil & \cr
+}\vbox{%
+\vfil
+\hbox{$\Biggr\}$Doubling Allowed}
+\vfil}
+}
+\+ {\bf Game 4:}\quad Black wins 1 point & \hfil 4 \hfil & \hfil 2 \hfil & \quad Crawford Game \cr
+\hbox{\vbox{%
+\+ {\bf Game 5:}\quad Black wins 2 points & \hfil 4 \hfil & \hfil 4 \hfil & \cr
+\+ {\bf Game 6:}\quad White wins 2 points & \hfil 6 \hfil & \hfil 4 \hfil & \cr
+}\vbox{%
+\vfil
+\hbox{$\biggr\}$Doubling Allowed}
+\vfil}
+}}
+@end tex
+@ifinfo
+@example
+Match to 5                    White  Black
+--------------------------------------------------------------
+Game 1:  White wins 2 points    2      0  \
+Game 2:  Black wins 1 point     2      1   @} Doubling Allowed
+Game 3:  White wins 2 points    4      1  /
+Game 4:  Black wins 1 point     4      2     Crawford Game
+Game 5:  Black wins 2 points    4      4  \
+Game 6:  White wins 2 points    6      4  /  Doubling Allowed
+@end example
+@end ifinfo
+@quotation
+In this example, White and Black are playing a 5-point match.
+After three games White has 4 points, which is just one point 
+short of what he needs.  
+That triggers the Crawford rule which says there can be no 
+doubling in next game, Game 4.
+@end quotation
+
+There is no bonus for winning more than the required number of points
+in match play.
+The sole goal is to win the match, and the size of the victory doesn't matter.
+
+Automatic doubles, beavers, and the Jacoby rule are not used in match play. 
 
 @node Sample Game
 @chapter Sample Game
@@ -1156,7 +1271,7 @@ FIXME
 @node Cube
 @section The Doubling Cube
 @cindex cube, doubling
-@cindex doubling
+@cindex doubling, commands
 
 @table @code
 @kindex double
@@ -1284,7 +1399,7 @@ instructions on checking out sources from the repository.
 @node How do I play a game?
 @section How do I play a game?
 @cindex playing a game
-@cindex moving chequers
+@cindex moving chequers, commands
 
 Once you are running @gnubg{}, enter @kbd{new game} at the @samp{(gnubg)}
 prompt to start a game against the computer opponent.  You should now
