@@ -24,9 +24,13 @@
 #include <assert.h>
 #include <errno.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 #include <sys/un.h>
 #endif
 #include <stdio.h>
@@ -43,9 +47,79 @@
 #define AF_LOCAL AF_UNIX
 #define PF_LOCAL PF_UNIX
 #endif
-#ifndef SUN_LEN
-#define SUN_LEN(x) (sizeof *(x))
+
+extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
+
+#if HAVE_SOCKETS
+    int h, f;
+    struct sockaddr_un *psun;
+    struct sockaddr_in *psin;
+    struct hostent *phe;
+    char *pch;
+    
+    if( ( pch = strchr( sz, ':' ) ) && !strchr( sz, '/' ) ) {
+	/* Internet domain socket. */
+	if( ( h = socket( PF_INET, SOCK_STREAM, 0 ) ) < 0 )
+	    return -1;
+
+	f = TRUE;
+	if( setsockopt( h, SOL_SOCKET, SO_REUSEADDR, &f, sizeof f ) )
+	    return -1;
+	
+	psin = malloc( *pcb = sizeof (struct sockaddr_in) );
+	
+	psin->sin_family = AF_INET;
+
+	*pch = 0;
+	
+	if( !*sz )
+	    /* no host specified */
+	    psin->sin_addr.s_addr = htonl( INADDR_ANY );
+	else if( !inet_aton( sz, &psin->sin_addr ) ) {
+	    if( !( phe = gethostbyname( sz ) ) ) {
+		*pch = ':';
+		errno = EINVAL;
+		free( psin );
+		return -1;
+	    }
+
+	    psin->sin_addr = *(struct in_addr *) phe->h_addr;
+	}
+
+	*pch++ = ':';
+	
+	psin->sin_port = htons( atoi( pch ) );
+	
+	*ppsa = (struct sockaddr *) psin;
+    } else {
+	/* Local domain socket. */
+	if( ( h = socket( PF_LOCAL, SOCK_STREAM, 0 ) ) < 0 )
+	    return -1;
+
+	/* yuck... there's no portable way to obtain the necessary
+	   sockaddr_un size, but this is a conservative estimate */
+	psun = malloc( *pcb = 16 + strlen( sz ) );
+	
+	psun->sun_family = AF_LOCAL;
+	strcpy( psun->sun_path, sz );
+
+	*ppsa = (struct sockaddr *) psun;
+    }
+    
+    return h;
+#else
+    assert( FALSE );
 #endif
+}
+
+static void ExternalUnbind( char *sz ) {
+
+    if( strchr( sz, ':' ) && !strchr( sz, '/' ) )
+	/* it was a TCP socket; no cleanup necessary */
+	return;
+
+    unlink( sz );
+}
 
 extern int ExternalRead( int h, char *pch, int cch ) {
 #if HAVE_SOCKETS
@@ -135,8 +209,8 @@ extern void CommandExternal( char *sz ) {
     outputl( "This installation of GNU Backgammon was compiled without\n"
 	     "socket support, and does not implement external controllers." );
 #else
-    int h, hPeer;
-    struct sockaddr_un saun;
+    int h, hPeer, cb;
+    struct sockaddr *psa;
     char szCommand[ 256 ], szResponse[ 32 ];
     char szName[ 32 ], szOpp[ 32 ];
     int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
@@ -156,26 +230,24 @@ extern void CommandExternal( char *sz ) {
 	return;
     }
 
-    if( ( h = socket( PF_LOCAL, SOCK_STREAM, 0 ) ) < 0 ) {
-	perror( "socket" );
+    if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
+	perror( sz );
 	return;
     }
 
-    saun.sun_family = AF_LOCAL;
-    strcpy( saun.sun_path, sz ); /* yuck!  opportunities for buffer overflow
-				    here... but we didn't write the broken
-				    interface */
-
-    if( bind( h, (struct sockaddr *) &saun, SUN_LEN( &saun ) ) < 0 ) {
+    if( bind( h, psa, cb ) < 0 ) {
 	perror( sz );
 	close( h );
+	free( psa );
 	return;
     }
+
+    free( psa );
     
     if( listen( h, 1 ) < 0 ) {
 	perror( "listen" );
 	close( h );
-	unlink( sz );
+	ExternalUnbind( sz );
 	return;
     }
 
@@ -186,7 +258,7 @@ extern void CommandExternal( char *sz ) {
 
 	    if( fInterrupt ) {
 		close( h );
-		unlink( sz );
+		ExternalUnbind( sz );
 		return;
 	    }
 	    
@@ -195,12 +267,12 @@ extern void CommandExternal( char *sz ) {
 	
 	perror( "accept" );
 	close( h );
-	unlink( sz );
+	ExternalUnbind( sz );
 	return;
     }
 
     close( h );
-    unlink( sz );
+    ExternalUnbind( sz );
 
     while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) )
 	if( ParseFIBSBoard( szCommand, anBoard, szName, szOpp, &nMatchTo,
@@ -230,8 +302,13 @@ extern void CommandExternal( char *sz ) {
 		    strcpy( szResponse, "drop" );
 		    break;
 
+		case NODOUBLE_BEAVER:
+		case DOUBLE_BEAVER:
+		case NO_REDOUBLE_BEAVER:
+		    strcpy( szResponse, "beaver" );
+		    break;
+		    
 		default:
-		    /* we don't consider beavers */
 		    strcpy( szResponse, "take" );
 		}
 	    } else if( anDice[ 0 ] ) {

@@ -247,7 +247,6 @@ functions:
   point is allowing input, when it shouldn't be (input should be
   grabbed -- see HandleXAction and board_animate).
 ** Make sure that GTKSet() allows analysis after a move is imported. (gary)
-** Illegal input from an external player can lead to an infinite loop.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -276,8 +275,7 @@ functions:
   like "set board (0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0)".
 ** Handle SGF variations.
 ** Allow loading/saving of compressed games/matches with zlib.
-** Make the external player handle resignation decisions, and allow connection
-  via TCP/IP.
+** Make the external player handle resignation decisions.
 ** Allow an option for illegal moves to be entered.
 ** Allow ~ and $ escapes in filenames (use wordexp()).
 ** Allow printing positions/games/matches/etc.  (More or less the same

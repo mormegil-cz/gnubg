@@ -1,3 +1,18 @@
+Tue Feb  5 10:10:08 2002  Gary Wong  <gtw@research.att.com>
+
+	* guile.c: [HAVE_SCM_SELECT_MODULE && !HAVE_SCM_SET_CURRENT_MODULE]
+	Use scm_select_module instead of scm_set_current_module (the old name
+	from Guile 1.4).
+	* configure.in: Check for scm_set_current_module, scm_select_module
+	and gtk_option_menu_get_history.
+	
+	* play.c (ComputerTurn): Detect errors from external player.
+
+	* external.c (ExternalSocket, ExternalUnbind): New functions.  Support
+	TCP as well as local domain sockets.
+
+	* gtkgame.c (GTKResignHint): Fix typo.
+
 Mon Feb  4 21:01:30 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c: fix typo.

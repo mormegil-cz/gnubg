@@ -631,7 +631,7 @@ extern int ComputerTurn( void ) {
   cubeinfo ci;
   float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
   char szBoard[ 256 ], szResponse[ 256 ];
-  int i, c;
+  int i, c, fTurnOrig;
 
   if( fAction )
       fnAction();
@@ -1079,6 +1079,8 @@ extern int ComputerTurn( void ) {
 
   case PLAYER_EXTERNAL:
 #if HAVE_SOCKETS
+      fTurnOrig = ms.fTurn;
+      
 #if 1
       /* FIXME handle resignations -- there must be some way of indicating
 	 that a resignation has been offered to the external player. */
@@ -1095,13 +1097,6 @@ extern int ComputerTurn( void ) {
       }
 #endif
 
-	if( fAutoRoll && !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
-	    ( !fCubeUse || ms.fCrawford ||
-	      ( ms.fCubeOwner >= 0 && ms.fCubeOwner != ms.fTurn ) ||
-	      ( ms.nMatchTo > 0 && ms.anScore[ ms.fTurn ] +
-		ms.nCube >= ms.nMatchTo ) ) )
-
-	    
       if( !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
 	  ( !fCubeUse || ms.nCube >= MAX_CUBE ||
 	    !GetDPEq( NULL, NULL, &ci ) ) ) {
@@ -1136,13 +1131,16 @@ extern int ComputerTurn( void ) {
 	  else if( tolower( *szResponse ) == 'd' ||
 		   tolower( *szResponse ) == 'r' ) /* decline or reject */
 	      CommandDecline( NULL );
-	  else
+	  else {
 	      outputl( "Warning: badly formed resignation response from "
 		       "external player" );
-	  
+	      fComputerDecision = FALSE;
+	      return -1;
+	  }
+
 	  fComputerDecision = FALSE;
 	  
-	  return 0;
+	  return ms.fTurn == fTurnOrig ? -1 : 0;
       }
 #endif
       
@@ -1159,13 +1157,16 @@ extern int ComputerTurn( void ) {
 	  else if( tolower( *szResponse ) == 'b' || /* beaver */
 		   !strncasecmp( szResponse, "red", 3 ) ) /* redouble */
 	      CommandRedouble( NULL );
-	  else
+	  else {
 	      outputl( "Warning: badly formed cube response from "
 		       "external player" );
+	      fComputerDecision = FALSE;
+	      return -1;
+	  }	      
 	  
 	  fComputerDecision = FALSE;
 	  
-	  return 0;
+	  return ms.fTurn == fTurnOrig ? -1 : 0;
       } else if( !ms.anDice[ 0 ] ) {
 	  if( tolower( *szResponse ) == 'r' ) { /* roll */
 	      if( RollDice( ms.anDice ) < 0 )
@@ -1173,13 +1174,16 @@ extern int ComputerTurn( void ) {
 	      
 	      if( fDisplay )
 		  ShowBoard();
+
+	      return 0; /* we'll end up back here to play the roll, but
+			   that's OK */
 	  } else if( tolower( *szResponse ) == 'd' ) { /* double */
 	      fComputerDecision = TRUE;
 	      CommandDouble( NULL );
 	      fComputerDecision = FALSE;
 	  }
 
-	  return 0;
+	  return ms.fTurn == fTurnOrig ? -1 : 0;
       } else {
 	  pmn = malloc( sizeof( *pmn ) );
 	  pmn->mt = MOVE_NORMAL;
@@ -1198,6 +1202,7 @@ extern int ComputerTurn( void ) {
 	  if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
 	      pmn->anMove[ 0 ] = 0;
 	      outputl( "Warning: badly formed move from external player" );
+	      return -1;
 	  } else
 	      for( i = 0; i < 4; i++ )
 		  if( i < c ) {

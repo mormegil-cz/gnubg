@@ -22,7 +22,17 @@
 #ifndef _EXTERNAL_H_
 #define _EXTERNAL_H_
 
+#if HAVE_SOCKETS
+
+#if HAVE_SYS_SOCKET_H
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif
+
+extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz );
 extern int ExternalRead( int h, char *pch, int cch );
 extern int ExternalWrite( int h, char *pch, int cch );
+
+#endif
 
 #endif
