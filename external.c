@@ -339,6 +339,7 @@ extern void CommandExternal( char *sz ) {
 	aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     rolloutstat aarsStatistics[ 2 ][ 2 ];
     cubeinfo ci;
+    int nScore, nScoreOpponent;
     
     sz = NextToken( &sz );
     
@@ -394,17 +395,38 @@ extern void CommandExternal( char *sz ) {
 
     while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) )
       if( ParseFIBSBoard( szCommand, anBoard, szName, szOpp, &nMatchTo,
-			  anScore, anScore + 1, anDice, &nCube,
+			  &nScore, &nScoreOpponent, anDice, &nCube,
 			  &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) )
 	outputl( _("Warning: badly formed board from external controller.") );
       else {
 
+        anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
+        anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
+
 	SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
 		      fCrawford, fJacoby, nBeavers, bgvDefault ); 
 
+        if ( !fTurn )
+          SwapSides( anBoard );
+
+#if 0
+ {
+   char *asz[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+        char szBoard[ 10000 ];
+	outputl( DrawBoard( szBoard, anBoard, fTurn, asz,
+                            "no matchid", 15 ) );
+
+        printf( "score %d-%d to %d ", anScore[ 0 ], anScore[ 1 ],
+                nMatchTo );
+        printf( "dice %d %d ", anDice[ 0 ], anDice[ 1 ] );
+        printf( "cubeowner %d cube %d turn %d crawford %d doubled %d\n",
+                fCubeOwner, nCube, fTurn, fCrawford, fDoubled );
+ }
+#endif
+
 	memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
 
-	if ( fDoubled > 0 ) {
+	if ( fDoubled  ) {
 
 	  /* take decision */
 	  if( GeneralCubeDecision( aarOutput, aarStdDev,
@@ -430,6 +452,9 @@ extern void CommandExternal( char *sz ) {
 	    strcpy( szResponse, "take" );
 	  }
 
+#if 0
+          /* this code is broken as the sign of fDoubled 
+             indicates who doubled */
 	} else if ( fDoubled < 0 ) {
               
 	  /* if opp wants to resign (extension to FIBS board) */
@@ -449,6 +474,7 @@ extern void CommandExternal( char *sz ) {
 	  else
 	    strcpy( szResponse, "reject" );
 
+#endif /* broken */
 	} else if( anDice[ 0 ] ) {
 	  /* move */
 	  if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],

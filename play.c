@@ -756,6 +756,7 @@ extern int ComputerTurn( void ) {
 #if HAVE_SOCKETS
   char szBoard[ 256 ], szResponse[ 256 ];
   int i, c, fTurnOrig;
+  int anBoardTemp[ 2 ][ 25 ];
 #endif
 
   if( fAction )
@@ -1251,10 +1252,16 @@ extern int ComputerTurn( void ) {
 	      
 	  DiceRolled();      
 	 }
-      FIBSBoard( szBoard, ms.anBoard, ms.fMove, ap[ 1 ].szName,
-		 ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
-		 ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ], ms.nCube,
-		 ms.fCubeOwner, ms.fDoubled, ms.fTurn, ms.fCrawford,
+
+      memcpy( anBoardTemp, ms.anBoard, sizeof anBoardTemp );
+      if ( !ms.fMove )
+        SwapSides( anBoardTemp );
+
+      FIBSBoard( szBoard, anBoardTemp, ms.fMove, 
+                 ap[ ms.fMove ].szName, ap[ ! ms.fMove ].szName, 
+                 ms.nMatchTo, ms.anScore[ ms.fMove ], ms.anScore[ ! ms.fMove ],
+                 ms.anDice[ 0 ], ms.anDice[ 1 ], ms.nCube,
+		 ms.fCubeOwner, ms.fDoubled, 0 /* turn */, ms.fCrawford,
                  anChequers [ ms.bgv ] );
       strcat( szBoard, "\n" );
       

@@ -1,3 +1,8 @@
+Sun Sep  7 15:11:08 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* external.c (CommandExternal), play.c (ComputerTurn): yet another
+	attempt to fix external play.
+
 Sun Sep  7 10:35:46 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Revert "Sat Sep  6 11:35:32 2003".
