@@ -20,6 +20,7 @@ char *aszCredits[] = {
     "Alain Henry",
     "Jens Hoefkens",
     "Rick Janowski",
+    "Nis Jorgensen",
     "Tom Keith",
     "Matija Kejzar",
     "Johnny Kirk",

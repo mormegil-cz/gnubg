@@ -1,3 +1,8 @@
+Tue Aug 20 14:15:04 2002  Gary Wong  <gtw@gnu.org>
+
+	* rollout.c (RolloutGeneral): Correct variance computation
+	(reported by Nis Jorgensen).
+
 Sun Aug 18 16:22:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c: set fMessage = FALSE as default.

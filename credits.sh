@@ -33,6 +33,7 @@ Eric Groleau
 Jeff Haferman
 Alain Henry
 Jens Hoefkens
+Nis Jorgensen
 Matija Kejzar
 Johnny Kirk
 Robert Konigsberg
