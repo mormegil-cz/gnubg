@@ -217,10 +217,13 @@ MatchFromKey ( int anDice[ 2 ],
      return -1;
   if ( *pnMatchTo < 0 || *pnMatchTo > MAXSCORE )
      return -1;
-  if ( anScore[ 0 ] < 0 || anScore[ 0 ] > *pnMatchTo )
-     return -1;
-  if ( anScore[ 1 ] < 0 || anScore[ 1 ] > *pnMatchTo )
-     return -1;
+
+  if ( *pnMatchTo ) {
+    if ( anScore[ 0 ] < 0 || anScore[ 0 ] > *pnMatchTo )
+      return -1;
+    if ( anScore[ 1 ] < 0 || anScore[ 1 ] > *pnMatchTo )
+      return -1;
+  }
 
   return 0;
 

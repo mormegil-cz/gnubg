@@ -1,3 +1,8 @@
+Mon Aug  5 18:37:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* matchid.c (MatchFromID): don't do consistency check on
+	match score if it's money game.
+
 Mon Aug  5 17:35:13 2002  Øystein Johansen  <oeysteij@online.no>
 
         gnubg.c, show.c, set.c: #ifdef USE_GTK code conserning 
