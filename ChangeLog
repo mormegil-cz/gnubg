@@ -1,3 +1,14 @@
+Thu Oct 24 22:52:23 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* set.c backgammon.h rollout.c gnubg.c - added text mode commands
+	  set rollout log on/off, set rollout logfile <template name>
+	  When rollout log is set to on and rollout logfile has a valid
+	  path and template, then each rollout will generate a .sgf file
+	  of the game. The .sgf file name will use the template, followed
+	  by '-'nnnnn'-'x.sgf  where nnnnn is the trial number (starts at
+	  0) and x is a etter a-z to indicate which option is being done -
+	  the top line in the rollout window is 'a', next 'b', etc/
+	
 Sat Oct 18 13:46:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.h, play.c, sgf.c: Tidy 3d dice shake code

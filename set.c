@@ -1589,6 +1589,25 @@ extern void CommandSetRolloutLate ( char *sz ) {
 
 }
 
+extern void CommandSetRolloutLogEnable (char *sz) {
+  int f = log_rollouts;
+
+  SetToggle ( "rollout .sgf files", &f, sz, 
+	      _("Create an .sgf file for each game rolled out"),
+	      _("Do not create an .sgf file for each game rolled out") );
+
+  log_rollouts = f;
+}
+
+extern void CommandSetRolloutLogFile (char *sz) {
+   
+  if (log_file_name) {
+    free (log_file_name);
+  }
+   
+  log_file_name = strdup (sz);
+}
+
 extern void
 CommandSetRolloutLateEnable ( char *sz )
 {

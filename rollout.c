@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #include "backgammon.h"
 #include "dice.h"
@@ -44,6 +45,123 @@
 #include "i18n.h"
 #include "format.h"
 
+int log_rollouts = 0;
+static FILE *logfp;
+char *log_file_name = 0;
+
+/* make sgf files of rollouts if log_rollouts is true and we have a file 
+ * name template to work with
+ */
+
+void 
+log_cube (char *action, int player) {
+  fprintf (logfp, ";%s[%s]\n", player ? "B" : "W", action);
+}
+
+
+void
+log_move (int *anMove, int player, int die0, int die1) {
+  int i;
+
+  fprintf (logfp, ";%s[%d%d", player ? "B" : "W", die0, die1);
+
+  for (i = 0; i < 8; i += 2) {
+    if (anMove[i] < 0) 
+      break;
+
+    if (anMove[i] > 23) 
+      fprintf (logfp, "y");
+    else if (!player)
+      fprintf (logfp, "%c", 'a' + anMove[i]  );
+    else
+      fprintf (logfp, "%c", 'x' - anMove[i] );
+
+    if (anMove[i + 1] < 0)
+      fprintf (logfp, "z");
+    else if (!player)
+      fprintf (logfp, "%c", 'a' + anMove[i + 1]  );
+    else
+      fprintf (logfp, "%c", 'x' - anMove[i + 1] );
+
+  }
+
+  fprintf (logfp, "%s", "]\n");
+     
+}
+
+static void board_to_sgf (int anBoard[25], int direction) {
+  int	i, j;
+  int   c = direction > 0 ? 'a' : 'x';
+
+  for (i = 0; i < 24; ++i) {
+    for (j = 0; j < anBoard[i]; ++j)
+      fprintf (logfp, "[%c]", c);
+    
+    c += direction;
+  }
+
+  for (j = 0; j < anBoard[24]; ++j) 
+    fprintf (logfp, "[y]");
+}
+
+    
+
+void log_game_start (char *name, const cubeinfo *pci, int fCubeful,
+		     int anBoard[2][25]) {
+  time_t     t = time (0);
+  struct tm  *now = localtime (&t);
+  char       *rule;
+
+  if (pci->nMatchTo == 0) {
+    if (!fCubeful)
+      rule = "RU[NoCube:Jacoby]";
+    else if (!pci -> fJacoby) {
+      rule = "";
+    }
+    else {
+      rule = "RU[Jacoby]";
+    }
+  } else {
+    if (!fCubeful) {
+      rule = "RU[NoCube:Crawford]";
+    } else if (fAutoCrawford) {
+      rule = (ms.fCrawford) ? "RU[Crawford:CrawfordGame]" : "RU[Crawford]";
+    } else {
+      rule = "";
+    }
+  }
+
+  if ((logfp = fopen (name, "w")) == 0) {
+    log_rollouts = 0;
+    return;
+  }
+
+  fprintf (logfp, "(;FF[4]GM[6]CA[UTF-8]AP[GNU Backgammon:0.14-devel]MI"
+	   "[length:%d][game:0][ws:%d][bs:%d][wtime:0][btime:0]"
+	   "[wtimeouts:0][btimeouts:0]PW[White]PB[Black]DT[%d-%02d-%02d]"
+	   "%s\n", pci->nMatchTo, pci->anScore[0], pci->anScore[1], 
+	   1900 + now->tm_year, 1 + now->tm_mon, now->tm_mday, rule);
+
+  /* set the rest of the things up */
+  fprintf (logfp, ";PL[%s]\n", pci->fMove ? "B" : "W" );
+  fprintf (logfp, ";CP[%s]\n", pci->fCubeOwner == 0 ? "w" :
+	   pci->fCubeOwner == 1 ? "b" : "c");
+  fprintf (logfp, ";CV[%d]\n", pci->nCube);
+  fprintf (logfp, ";AE[a:y]AW");
+  board_to_sgf (anBoard[0], 1);
+  fprintf (logfp, "AB");
+  board_to_sgf (anBoard[1], -1);
+  fprintf (logfp, "\n");
+}
+
+void log_game_over (void) {
+  if (logfp) {
+    fprintf (logfp, ")" );
+    fclose (logfp);
+  }
+
+  logfp = 0;
+}
 
 static void
 initRolloutstat ( rolloutstat *prs );
@@ -239,6 +357,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   evalcontext aecVarRedn[ 2 ];
   float arMean[ NUM_ROLLOUT_OUTPUTS ];
   int aaanBoard[ 6 ][ 6 ][ 2 ][ 25 ];
+  int aanMoves[ 6 ][ 6 ][ 8 ];
   float aaar[ 6 ][ 6 ][ NUM_ROLLOUT_OUTPUTS ];
 
   evalcontext ecCubeless0ply = { FALSE, 0, 0, TRUE, 0.0 };
@@ -353,6 +472,10 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           case DOUBLE_TAKE:
           case DOUBLE_BEAVER:
           case REDOUBLE_TAKE:
+	    if (log_rollouts) {
+	      log_cube ("double",  pci->fMove);
+	      log_cube ("take",   !pci->fMove);
+	    }
 
             /* update statistics */
 	    if( aarsStatistics )
@@ -368,6 +491,11 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         
           case DOUBLE_PASS:
           case REDOUBLE_PASS:
+	    if (log_rollouts) {
+	      log_cube ("double", pci->fMove);
+	      log_cube ("drop",  !pci->fMove);
+	    }
+
             *pf = FALSE;
 	    cUnfinished--;
 	    
@@ -470,8 +598,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
               /* Find the best move for each roll on ply 0 only */
 
-              if ( FindBestMove ( NULL, i + 1, j + 1, aaanBoard[ i ][ j ],
-                                  pci, NULL, defaultFilters ) < 0 )
+	      if (FindBestMove ( aanMoves[ i ][ j ], i + 1, j + 1, 
+				 aaanBoard[ i ][ j ],
+				 pci, NULL, defaultFilters ) < 0 )
                 return -1;
 
               SwapSides ( aaanBoard[ i ][ j ] );
@@ -510,7 +639,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
             /* the user requested n-ply (n>0). Another call to
                FindBestMove is required */
 
-            FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
+	    FindBestMove( aanMoves[ anDice[ 0 ] - 1][ anDice[ 1 ] - 1], 
+			  anDice[ 0 ], anDice[ 1 ],
                           aanBoard[ ici ], pci,
                           pecChequer [ pci->fMove ],
                           ( iTurn < nLateEvals ) ? 
@@ -553,7 +683,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           /* no variance reduction */
               
-          FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
+	  FindBestMove( aanMoves[ anDice[ 0 ] - 1][ anDice[ 1 ] - 1],
+			anDice[ 0 ], anDice[ 1 ],
                         aanBoard[ ici ], pci,
                         pecChequer [ pci->fMove ],
                         ( iTurn < nLateEvals ) ? 
@@ -561,6 +692,11 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                         prc->aaamfLate[ pci->fMove ] );
 
         }
+
+	if (log_rollouts) {
+	  log_move (aanMoves[ anDice[ 0 ] - 1][ anDice[ 1 ] - 1], 
+		    pci->fMove, anDice[0], anDice[1]);
+	}
 
         /* Save hit statistics */
 
@@ -860,6 +996,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   int fOutputMWCSave = fOutputMWC;
   int active_alternatives;
   int show_jsds = 1;
+  char *log_name = 0;
 
 #if !(__GNUC__ || HAVE_ALLOCA)
   if (alternatives > MAX_ROLLOUT_CUBEINFO) {
@@ -894,6 +1031,10 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 
   /* initialise internal variables and figure out what the first 
      trial will be */
+
+  if (log_rollouts && log_file_name) {
+    log_name = malloc (strlen (log_file_name) + 6 + 2 + 4 + 1);
+  }
 
   cGames = rcRollout.nTrials;
   nFirstTrial = ~0 ;
@@ -1029,10 +1170,28 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 #if 0
       printf ("rollout game %d alt %d\n", i, alt);
 #endif
+
+      if (log_rollouts && log_name) {
+	sprintf (log_name, "%s-%5.5d-%c.sgf", log_file_name, i, alt + 'a');
+	log_game_start (log_name, apci[ alt ], prc->fCubeful, 
+			aanBoardEval + alt);
+	if ( !log_rollouts) {
+	  /* open failed */
+	  log_rollouts = 0;
+	  free (log_name);
+	  log_name = 0;
+	} 
+      }
+
       BasicCubefulRollout( aanBoardEval + alt, aar + alt, 0, i, apci[ alt ], 
                            apCubeDecTop[ alt ], 1, prc, 
 			   aarsStatistics ? aarsStatistics + alt : NULL,
 			   aciLocal[ fCubeRollout ? 0 : alt ].nCube);
+
+      if (log_rollouts) {
+	log_game_over ();
+      }
+
       if( fInterrupt )
         break;
 
@@ -1277,6 +1436,11 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
     if (((active_alternatives < 2) && rcRollout.fStopOnJsd) || !err_too_big)
       break;
   } /* for( i = nFirstTrial; i < cGames; i++ ) */
+
+  if (log_rollouts && log_name) {
+    free (log_name);
+    log_name = 0;
+  }
 
   cGames = i;
 

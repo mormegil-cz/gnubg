@@ -520,6 +520,8 @@ extern rolloutcontext rcRollout;
 
 extern int fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;
 
+extern int log_rollouts;
+extern char *log_file_name;
 
 /* The current match.
   A list of games. Each game is a list of moverecords.
@@ -1092,6 +1094,8 @@ extern void CommandAccept( char * ),
     CommandSetRolloutBearoffTruncationOS ( char * ),
     CommandSetRolloutCubedecision ( char * ),
     CommandSetRolloutLateCubedecision ( char * ),
+    CommandSetRolloutLogEnable ( char * ),
+    CommandSetRolloutLogFile ( char * ),
     CommandSetRolloutCubeful ( char * ),
     CommandSetRolloutChequerplay ( char * ),
     CommandSetRolloutCubeEqualChequer ( char * ),
