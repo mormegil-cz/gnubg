@@ -7636,7 +7636,7 @@ Convert ( const char *sz,
 #if WIN32
     rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
 #else
-    rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
+    rc = iconv ( id, (ICONV_CONST char **) &pchIn, &lIn, &pchOut, &l );
 #endif
 
     if ( rc == -1 ) 
