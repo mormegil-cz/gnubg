@@ -81,6 +81,8 @@ details.
 ** Add a "go to start of match" command. (gary)
 ** Use a single renderdata struct which is controlled by the
   "set appearance" command, even when GTK+ isn't there. (gary)
+** The "play" command is broken in "load command" scripts.  Add subcommands
+  like "play game", "play match" for finer control. (gary)
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -173,6 +175,7 @@ details.
   seed (e.g. BBS modulus, user .so file) in the GUI.
 ** Make sure all the buttons in the game record window are also available
   as main menu commands.
+** The sound setting options page isn't complete yet.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -314,6 +317,8 @@ One could then look through a game and mark all positions of interest, set
 the rollouts off and come back later.
 ** Consider a Mozilla plug-in so that boards in generated HTML
   can be displayed efficiently. (gary)
+** We provide access to non-deterministic dice from random.org.  Add
+  completely deterministic dice from noentropy.net as well.
 
 * Bugs believed fixed:
 ** Save the results of rollouts/evaluations performed with hint during playing
