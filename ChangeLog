@@ -1,3 +1,8 @@
+Mon Sep 23 21:39:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* import.c: roll-back previous check-in, and add a call
+	to CommandSwapPlayers instead.
+
 Sun Sep 22 22:47:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* import.c (ImportSGG, ImportSGGGame): swap players
