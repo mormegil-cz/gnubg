@@ -280,7 +280,7 @@ extern int fCheat;
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
   PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
-  PATH_MET, PATH_TMG,
+  PATH_MET, PATH_TMG, PATH_BKG,
   NUM_PATHS } 
 pathformat;
 
@@ -587,6 +587,7 @@ extern void CommandAccept( char * ),
     CommandExternal( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
+    CommandImportBKG( char * ),
     CommandImportJF( char * ),
     CommandImportMat( char * ),
     CommandImportOldmoves( char * ),

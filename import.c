@@ -2067,3 +2067,174 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
 #endif
 }
 
+static void ImportBKGGame( FILE *pf, int *pi ) {
+
+    char sz[ 80 ], *pch;
+    moverecord *pmr, *pmrGame;
+    int i, fPlayer;
+    
+    /* skip to first game */
+    do {
+	fgets( sz, 80, pf );
+	if( feof( pf ) )
+	    return;
+    } while( strncmp( sz, "Black", 5 ) && strncmp( sz, "White", 5 ) );
+
+    InitBoard( ms.anBoard );
+
+    ClearMoveRecord();
+
+    ListInsert( &lMatch, plGame );
+
+    pmrGame = pmr = malloc( sizeof( movegameinfo ) );
+    pmr->g.mt = MOVE_GAMEINFO;
+    pmr->g.sz = NULL;
+    pmr->g.i = ( *pi )++;
+    pmr->g.nMatch = 0; /* not stored in BKG files -- assume money sessions */
+    pmr->g.anScore[ 0 ] = ms.anScore[ 0 ];
+    pmr->g.anScore[ 1 ] = ms.anScore[ 1 ];
+    pmr->g.fCrawford = FALSE;
+    pmr->g.fCrawfordGame = FALSE;
+    pmr->g.fJacoby = fJacoby;
+    pmr->g.fWinner = -1;
+    pmr->g.nPoints = 0;
+    pmr->g.fResigned = FALSE;
+    pmr->g.nAutoDoubles = 0;
+    IniStatcontext( &pmr->g.sc );
+    AddMoveRecord( pmr );
+    
+    while( 1 ) {
+	if( !strncmp( sz, "Black", 5 ) || !strncmp( sz, "White", 5 ) ) {
+	    fPlayer = !strncmp( sz, "White", 5 );
+	    
+	    if( strlen( sz ) > 6 && !strncmp( sz + 6, "wins", 4 ) ) {
+		if( ms.gs == GAME_PLAYING ) {
+		    /* Neither a drop nor a bearoff to win, so we
+		       presume the loser resigned. */
+		    pmr = malloc( sizeof( pmr->r ) );
+		    pmr->r.mt = MOVE_RESIGN;
+		    pmr->r.sz = NULL;
+		    pmr->r.esResign.et = EVAL_NONE;
+		    pmr->r.fPlayer = !fPlayer;
+		    if( strlen( sz ) > 14 && !strncmp( sz + 14, "gammon", 6 ) )
+			pmr->r.nResigned = 2;
+		    else if( strlen( sz ) > 14 &&
+			     !strncmp( sz + 14, "backgammon", 10 ) )
+			pmr->r.nResigned = 3;
+		    else
+			pmr->r.nResigned = 1;
+		    AddMoveRecord( pmr );
+		}
+
+		AddGame( pmrGame );
+		
+		return;
+	    } else if( strlen( sz ) > 6 && !strncmp( sz + 6, "Doubles", 7 ) ) {
+		pmr = malloc( sizeof( pmr->d ) );
+		pmr->d.mt = MOVE_DOUBLE;
+		pmr->d.sz = NULL;
+		pmr->d.fPlayer = fPlayer;
+		pmr->d.esDouble.et = EVAL_NONE;
+		pmr->d.st = SKILL_NONE;
+		AddMoveRecord( pmr );
+
+		pmr = malloc( sizeof( pmr->d ) );
+		pmr->d.mt = strlen( sz ) > 22 &&
+		    !strncmp( sz + 22, "Accepted", 8 ) ? MOVE_TAKE : MOVE_DROP;
+		pmr->d.sz = NULL;
+		pmr->d.fPlayer = !fPlayer;
+		pmr->d.esDouble.et = EVAL_NONE;
+		pmr->d.st = SKILL_NONE;
+		AddMoveRecord( pmr );
+	    } else if( strlen( sz ) > 9 && isdigit( sz[ 7 ] ) &&
+		       isdigit( sz[ 9 ] ) ) {
+		pmr = malloc( sizeof( pmr->n ) );
+		pmr->n.mt = MOVE_NORMAL;
+		pmr->n.sz = NULL;
+		pmr->n.anRoll[ 0 ] = sz[ 7 ] - '0';
+		pmr->n.anRoll[ 1 ] = sz[ 9 ] - '0';
+		pmr->n.fPlayer = fPlayer;
+		pmr->n.ml.cMoves = 0;
+		pmr->n.ml.amMoves = NULL;
+		pmr->n.esDouble.et = EVAL_NONE;
+		pmr->n.esChequer.et = EVAL_NONE;
+		pmr->n.lt = LUCK_NONE;
+		pmr->n.rLuck = ERR_VAL;
+		pmr->n.stMove = SKILL_NONE;
+		pmr->n.stCube = SKILL_NONE;
+
+		if( strlen( sz ) > 13 ) {
+		    for( i = 0, pch = sz + 13; i < 8 && *pch; i++ ) {
+			while( *pch && !isdigit( *pch ) )
+			    pch++;
+
+			if( !*pch )
+			    break;
+
+			pmr->n.anMove[ i ] = fPlayer ? 24 - atoi( pch ) :
+			    atoi( pch ) - 1;
+
+			while( isdigit( *pch ) )
+			    pch++;
+		    }
+
+		    if( i < 8 )
+			pmr->n.anMove[ i ] = -1;
+		} else
+		    pmr->n.anMove[ 0 ] = -1;
+
+		AddMoveRecord( pmr );
+	    }
+	}
+
+	fgets( sz, 80, pf );
+	if( feof( pf ) )
+	    return;
+    }
+}
+
+extern void ImportBKG( FILE *pf, const char *szFilename ) {
+
+    int i;
+
+    if( ms.gs == GAME_PLAYING && fConfirm ) {
+	if( fInterrupt )
+	    return;
+	    
+	if( !GetInputYN( _("Are you sure you want to import a saved match, "
+			 "and discard the game in progress? ") ) )
+	    return;
+    }
+
+#if USE_GTK
+    if( fX )
+	GTKFreeze();
+#endif
+    
+    FreeMatch();
+    ClearMatch();
+
+    /* clear matchinfo */
+    SetMatchInfo( &mi.pchRating[ 0 ], NULL, NULL );
+    SetMatchInfo( &mi.pchRating[ 1 ], NULL, NULL );
+    SetMatchInfo( &mi.pchPlace, NULL, NULL );
+    SetMatchInfo( &mi.pchEvent, NULL, NULL );
+    SetMatchInfo( &mi.pchRound, NULL, NULL );
+    SetMatchInfo( &mi.pchAnnotator, NULL, NULL );
+    SetMatchInfo( &mi.pchComment, NULL, NULL );
+    mi.nYear = mi.nMonth = mi.nDay = 0;
+
+    i = 0;
+    
+    while( !feof( pf ) )
+	ImportBKGGame( pf, &i );
+    
+    UpdateSettings();
+  
+#if USE_GTK
+    if( fX ){
+	GTKThaw();
+	GTKSet(ap);
+    }
+#endif
+}

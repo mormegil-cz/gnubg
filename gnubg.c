@@ -1,7 +1,7 @@
 /*
  * gnubg.c
  *
- * by Gary Wong <gtw@gnu.org>, 1998, 1999, 2000, 2001, 2002.
+ * by Gary Wong <gtw@gnu.org>, 1998, 1999, 2000, 2001, 2002, 2003.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -202,7 +202,8 @@ char *aszExtensions [ NUM_PATHS ] = {
   "sgg",
   "txt",
   "xml",
-  "tmg"
+  "tmg",
+  "bkg"
 };
 
 int fNextTurn = FALSE, fComputing = FALSE;
@@ -652,6 +653,8 @@ command cER = {
       NULL, acExportSession },
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
+    { "bkg", CommandImportBKG, N_("Import from Hans Berliner's BKG format"),
+      szFILENAME, &cFilename },
     { "database", CommandDatabaseImport, 
       N_("Merge positions into the database"),
       szFILENAME, &cFilename },
@@ -3888,6 +3891,26 @@ extern void CommandLoadCommands( char *sz ) {
 	outputerr( sz );
 }
 
+extern void CommandImportBKG( char *sz ) {
+    
+    FILE *pf;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a BKG session file to import (see `help "
+		 "import bkg').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	ImportBKG( pf, sz );
+	fclose( pf );
+        setDefaultFileName ( sz, PATH_BKG );
+    } else
+	outputerr( sz );
+}
+
 extern void CommandImportJF( char *sz ) {
 
     FILE *pf;
@@ -6334,7 +6357,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
     if( fTTY )
 #endif
-      printf( _("GNU Backgammon %s  Copyright 1999, 2000, 2001, 2002 "
+      printf( _("GNU Backgammon %s  Copyright 1999, 2000, 2001, 2002, 2003 "
                 "Gary Wong.\n"
                 "GNU Backgammon is free software, covered by the GNU "
                 "General Public License\n"

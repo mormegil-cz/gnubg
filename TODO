@@ -50,6 +50,9 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish supervised training, and allow people to submit training data via
   web.
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
+*** Allow saving rollouts -- see Jim Segrave's message at
+<http://mail.gnu.org/archive/html/bug-gnubg/2003-01/msg00244.html> for
+details.
 ** Extend ParsePosition() to handle some sort of syntax like
   [8/5 6/5] (meaning the position after that move).  FIBS boardstyle 3 output
   might be nice, too.
@@ -309,7 +312,7 @@ functions:
 ** It would be nice if you could mark positions and moves for "Rollout later".
 One could then look through a game and mark all positions of interest, set
 the rollouts off and come back later.
-*** Consider a Mozilla plug-in so that boards in generated HTML
+** Consider a Mozilla plug-in so that boards in generated HTML
   can be displayed efficiently. (gary)
 
 * Bugs believed fixed:

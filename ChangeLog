@@ -1,3 +1,10 @@
+Fri Jan 10 10:34:18 2003  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (CommandImportBKG): New function.  Import sessions saved
+	by Hans Berliner's BKG.
+	* gtkgame.c (ImportBKG): New function.
+	* import.c (ImportBKGGame): New function.
+
 Fri Jan 10 15:10:20 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* rollout.c: Fix incorrect accumulating of rollout results for

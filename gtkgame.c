@@ -284,6 +284,7 @@ static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw );
+static void ImportBKG( gpointer *p, guint n, GtkWidget *pw );
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
 static void ImportPos( gpointer *p, guint n, GtkWidget *pw );
@@ -2179,6 +2180,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Save/_Weights..."), NULL, SaveWeights, 0, NULL },
 	{ N_("/_File/-"), NULL, NULL, 0, "<Separator>" },	
 	{ N_("/_File/_Import"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_File/_Import/BKG session..."), NULL, ImportBKG, 0, NULL },
 	{ N_("/_File/_Import/._mat match..."), NULL, ImportMat, 0, NULL },
 	{ N_("/_File/_Import/._pos position..."), NULL, ImportPos, 0, NULL },
 	{ N_("/_File/_Import/FIBS _oldmoves..."), 
@@ -3353,6 +3355,15 @@ static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SGF );
   FileCommand( _("Open match or session"), sz, "load match", "sgf", 0 );
+  if ( sz ) 
+    free ( sz );
+
+}
+
+static void ImportBKG( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultPath ( PATH_BKG );
+  FileCommand( _("Import BKG session"), sz, "import bkg", "bkg", 0 );
   if ( sz ) 
     free ( sz );
 
