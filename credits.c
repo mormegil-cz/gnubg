@@ -60,6 +60,7 @@ char *aszCredits[] = {
     "Kevin Maguire",
     "Massimiliano Maini",
     "Alix Martin",
+    "John Marttila",
     "William Maslen",
     "Thomas Meyer",
     "Achim Mueller",

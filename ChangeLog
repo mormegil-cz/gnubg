@@ -1,3 +1,9 @@
+Mon Feb  9 22:56:17 CET 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ImportTMG): don't call SwapPlayers unless
+	a game is in progress.
+	(reported by John Marttila)
+
 Thu Feb  5 19:06:31 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* progress.c (formatDelta): fix small bug leading to

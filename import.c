@@ -2715,12 +2715,13 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
         break;
 
   }
-  
+
   UpdateSettings();
   
   /* swap players */
   
-  CommandSwapPlayers ( NULL );
+  if ( ms.gs != GAME_NONE )
+    CommandSwapPlayers ( NULL );
   
 #if USE_GTK
   if( fX ){
