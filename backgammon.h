@@ -281,6 +281,7 @@ extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ], rEvalsPerSec;
 extern int nThreadPriority;
 extern int fCheat;
+extern int afCheatRoll[ 2 ];
 
 /* GUI settings. */
 #if USE_GTK
@@ -531,6 +532,7 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
     acSetRolloutPlayer[], acSetRolloutLatePlayer[], cOnOff, cFilename,
     cHighlightColour;
+extern command acSetCheatPlayer[];
 
 extern command acAnnotateMove[];
 extern command acSetExportParameters[];
@@ -673,7 +675,9 @@ extern void CommandAccept( char * ),
     CommandSetBeavers( char * ),
     CommandSetCache( char * ),
     CommandSetCalibration( char * ),
-    CommandSetCheat ( char * ),
+    CommandSetCheatEnable ( char * ),
+    CommandSetCheatPlayer ( char * ),
+    CommandSetCheatPlayerRoll ( char * ),
     CommandSetClockwise( char * ),
     CommandSetConfirmNew( char * ),
     CommandSetConfirmSave( char * ),
@@ -911,6 +915,7 @@ extern void CommandAccept( char * ),
     CommandShowBeavers( char * ),
     CommandShowCache( char * ),
     CommandShowCalibration( char * ),
+    CommandShowCheat( char * ),
     CommandShowClockwise( char * ),
     CommandShowCommands( char * ),
     CommandShowConfirm( char * ),
@@ -994,9 +999,7 @@ Convert ( const char *sz,
 extern void
 OptimumRoll ( int anBoard[ 2 ][ 25 ], 
               const cubeinfo *pci, const evalcontext *pec,
-              const int fBest, int *pnDice0, int *pnDice1 );
-
-
+              const int fBest, int anDice[ 2 ] );
 
 typedef struct _highlightcolour {
   int   rgbs[3][3];
@@ -1012,6 +1015,9 @@ SetMatchInfo( char **ppch, char *sz, char *szMessage );
 
 extern void
 TextToClipboard ( const char * sz );
+
+extern void
+PrintCheatRoll( const int fPlayer, const int n );
 
 #ifdef WIN32
 #define BIG_PATH _MAX_PATH
