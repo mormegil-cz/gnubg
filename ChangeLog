@@ -1,3 +1,17 @@
+Sat Feb 19 14:27:28 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* Makefile.am: Added TESTS, for "make check" (and "make distcheck").
+	* gnubgtest: New file, for self-test.
+
+	* eval.c (EvalInitialise): Add parameter `szDir' to specify
+	additional directory to search for weight/bearoff databases.
+	All callers changed.
+	* gnubg.c (main): Add option `--datadir' (-d).
+
+Fri Feb 18 19:49:35 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* xgame.c (StatsMove): Remove superfluous parameters.  Caller changed.
+
 Thu Feb 17 20:10:10 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* xboard.c (BoardPointer): Fix test of pgd->fDragColour when using

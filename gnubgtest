@@ -1,0 +1,52 @@
+#!/bin/sh -e
+
+die () {
+  echo "$1"
+  exit 1
+}
+
+# Basic test -- could fail if it can't find the bearoff database, or there
+# are problems with the binary.
+./gnubg --d $srcdir -t -n <> /dev/null || die '--- Basic gnubg test fails.'
+echo '--- Basic gnubg test succeeds.'
+
+# Test without -n; now requires weights files.
+./gnubg --d $srcdir -t <> /dev/null || die '--- Neural net weights test fails.'
+echo '--- Neural net weights test succeeds.'
+
+# Make sure an opening 31 is played correctly.
+./gnubg --d $srcdir -t << "EOF" | grep -q sGfwATDgc/ABMA || die \
+    '--- Opening move test fails.'
+set player both human
+new game
+set turn 0
+set dice 3 1
+set player 0 gnubg
+play
+EOF
+echo '--- Opening move test succeeds.'
+
+# Play a game.
+./gnubg --d $srcdir -t << "EOF" > /dev/null || die '--- Self-play test fails.'
+set automatic game no
+set player both gnubg
+new game
+EOF
+echo '--- Self-play test succeeds.'
+
+# Test miscellaneous commands.
+./gnubg --d $srcdir -t << "EOF" > /dev/null || die \
+    '--- Miscellaneous test fails.'
+help
+set player both human
+show player
+new game
+set evaluation plies 1
+eval
+set rollout trials 8
+set rollout truncation 8
+set rollout evaluation plies 0
+set rollout varredn no
+rollout
+EOF
+echo '--- Miscellaneous test succeeds.'

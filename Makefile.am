@@ -41,15 +41,20 @@ makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
 
-EXTRA_DIST = userrng.c copying.awk
+TESTS = gnubgtest
+distcheck-hook:
+	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
+
+EXTRA_DIST = userrng.c copying.awk gnubgtest
 
 copying.c: COPYING copying.awk
-	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
+	$(AWK) -f $(srcdir)/copying.awk < $< > $@
 
 gnubg.bd: makebearoff
-	[ -s $@ ] || ./makebearoff > $@
+	[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
+	$(LN_S) $(srcdir)/gnubg.bd $@; else ./makebearoff > $@; fi
 
-gnubg.weights:
+weights.message:
 	@echo ' ** NOTE: For proper operation, GNU Backgammon requires'
 	@echo ' ** a "gnubg.weights" file containing neural net'
 	@echo ' ** parameters.  This file is not included in the'
@@ -57,8 +62,12 @@ gnubg.weights:
 	@echo ' ** Backgammon home page <http://www.gnu.org/software/gnubg/>'
 	@echo ' ** or generate one by training a neural net yourself.'
 
-gnubg.wd: gnubg.weights
-	if [ -s $(srcdir)/gnubg.weights ]; \
-	then ./makeweights < $(srcdir)/gnubg.weights > $@; fi
+.PHONY: weights.message
+
+gnubg.weights:
+	[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
+
+gnubg.wd: gnubg.weights makeweights
+	[ -s $@ ] || ./makeweights < $< > $@
 
 .DELETE_ON_ERROR:

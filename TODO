@@ -55,9 +55,6 @@ duplication of effort and to make sure our changes merge easily.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
-** Allow copy/paste and drag & drop of the board ID in the board window. (gary)
-** Make sure the board window behaves properly with ICCCM things.  Maybe
-  some of this should wait for Gnome.
 ** Add a board edit mode.  What would be the best semantics for the
   interface?
 ** Add a game window, which lists the moves made in the game so far and
@@ -68,6 +65,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
 ** Add Gnome support.  Better to wait until Gnome is rock solid, I think.
+*** Make sure the board window behaves properly with ICCCM things.
+*** Allow copy/paste and drag & drop of the board ID in the board window.
 *** Add silly bells and whistles.  Things like colour selector for chequer
   colours, angle of light, surface of pieces, transparent background, etc.
 *** Add menus and dialogs so that games can be played without the
@@ -85,6 +84,10 @@ duplication of effort and to make sure our changes merge easily.
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
 ** Sam Pottle points out errors in the standard error calculation. (gary)
+** C-c doesn't seem to interrupt like it should when not using X
+  (set player both gnubg; new game; C-c -- nothing happens). (gary)
+** C-d doesn't ask if you're sure when not using X. (gary)
+** When fInterrupt is true and using X, C-d goes into an infinite loop. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -106,3 +109,4 @@ duplication of effort and to make sure our changes merge easily.
   can probably be extended to backgammon, instead.
 ** Export matches (and analysis) to ASCII, HTML, PostScript, etc.
 ** Import and export position databases to a portable format.
+** Add option to flip the board.

@@ -18,5 +18,3 @@ hashtest_SOURCES = hashtest.c
 hashtest_LDADD = -L. -levent
 
 TESTS = hashtest
-
-test: check
