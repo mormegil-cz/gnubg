@@ -38,6 +38,9 @@
 #if HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
+#if HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
 
 
 #include "positionid.h"
@@ -78,8 +81,15 @@ static int anCacheSize[] = { 100000, 10000, 5000 };
 char *aszBearoffGenerator[ NUM_BEAROFFS ] = {
   N_("GNU Backgammon"),
   N_("ExactBearoff"),
+  N_("Hugh Sconyers"),
   N_("Unknown program")
 };
+
+
+static int 
+ReadSconyers15x15( bearoffcontext *pbc,
+                   const unsigned int iPos,
+                   float arOutput[], float arEquity[] );
 
 
 static void
@@ -562,6 +572,21 @@ BearoffCubeful ( bearoffcontext *pbc,
     return ReadExactBearoff ( pbc, iPos, ar, aus );
     break;
 
+  case BEAROFF_SCONYERS:
+
+    assert( aus == NULL );
+
+    switch( pbc->hsdb ) {
+    case HS_15x15_ON_DISK:
+    case HS_15x15_ON_DVDS:
+      return ReadSconyers15x15( pbc, iPos, NULL, ar );
+      break;
+    default:
+      assert( FALSE );
+      break;
+    }
+    break;
+
   default:
 
     assert ( FALSE );
@@ -569,6 +594,7 @@ BearoffCubeful ( bearoffcontext *pbc,
 
   }
 
+  /* code not reachable */
   return 0;
 
 }
@@ -584,17 +610,18 @@ BearoffEvalTwoSided ( bearoffcontext *pbc,
   int iPos = nUs * n + nThem;
   float ar[ 4 ];
   
-  ReadTwoSidedBearoff ( pbc, iPos, ar, NULL );
+  if ( ReadTwoSidedBearoff ( pbc, iPos, ar, NULL ) )
+    return -1;
 
   memset ( arOutput, 0, 5 * sizeof ( float ) );
   arOutput[ OUTPUT_WIN ] = ar[ 0 ] / 2.0f + 0.5;
   
-  return ar [ 0 ] * 65535.0;
+  return 0;
 
 }
 
 
-static void
+static int
 ReadHypergammon( bearoffcontext *pbc,
                  const unsigned int iPos,
                  float arOutput[ NUM_OUTPUTS ],
@@ -630,6 +657,8 @@ ReadHypergammon( bearoffcontext *pbc,
 
   ++pbc->nReads;
 
+  return 0;
+
 }
 
 
@@ -650,8 +679,9 @@ BearoffEvalOneSided ( bearoffcontext *pbc,
   for ( i = 0; i < 2; ++i ) {
 
     an[ i ] = PositionBearoff ( anBoard[ i ], pbc->nPoints, pbc->nChequers );
-    BearoffDist ( pbc, an[ i ], aarProb[ i ], aarGammonProb[ i ], ar [ i ],
-                  NULL, NULL );
+    if ( BearoffDist ( pbc, an[ i ], aarProb[ i ], 
+                       aarGammonProb[ i ], ar [ i ], NULL, NULL ) )
+      return -1;
 
   }
 
@@ -714,7 +744,7 @@ BearoffEvalOneSided ( bearoffcontext *pbc,
   arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
   arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0f;
 
-  return ar [ 0 ][ 0 ] * 65535.0;
+  return 0;
 
 }
 
@@ -724,11 +754,7 @@ BearoffHyper( bearoffcontext *pbc,
               const unsigned int iPos,
               float arOutput[], float arEquity[] ) {
 
-  /* debug */
-
-  ReadHypergammon( pbc, iPos, arOutput, arEquity );
-
-  return 0;
+  return ReadHypergammon( pbc, iPos, arOutput, arEquity );
 
 }
 
@@ -742,13 +768,206 @@ BearoffEvalHypergammon ( bearoffcontext *pbc,
   int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
   int iPos = nUs * n + nThem;
 
-  ReadHypergammon ( pbc, iPos, arOutput, NULL );
+  return ReadHypergammon ( pbc, iPos, arOutput, NULL );
+
+}
+
+
+static int 
+ReadSconyers15x15( bearoffcontext *pbc,
+                   const unsigned int iPos,
+                   float arOutput[], float arEquity[] ) {
+
+  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  int nFile = ( iPos / n ) / 1250;
+  char sz[ 15 ];
+  char *pch, *pch2;
+  long lPos;
+  unsigned char ac[ 16 ];
+  float ar[ 4 ];
+  float *pr;
+  long l;
+  int i;
+  int h = -1;
+
+  switch( pbc->hsdb ) {
+  case HS_15x15_ON_DVDS:
+
+    if ( pbc->nCurrentFile != nFile ) {
+
+      if ( pbc->nCurrentFile != -1 ) 
+        close( pbc->h );
+      
+      sprintf( sz, "bg15_%d.dat", nFile + 1 );
+      if ( ( pbc->h = PathOpen( sz, pbc->szDir, BINARY ) ) < 0 ) {
+        /* could not open file... */
+        do {
+          
+          pch = (*pbc->pfDJ)( _("Please insert disk with file %s"), 
+                              TRUE, sz );
+
+          if ( fInterrupt ) {
+            pbc->nCurrentFile = -1;
+            return -1;
+          }
+
+          if ( pch ) {
+            /* new path */
+          
+            /* FIXME: redo this... */
+          
+            pch2 = strdup( pch );
+          
+            if( pbc->szDir )
+              free( pbc->szDir );
+          
+            pbc->szDir = dirname( pch );
+          
+            free( pch );
+            free( pch2 );
+
+          }
+          
+          printf( "attempt to open '%s' '%s'\n",
+                  sz, pbc->szDir );
+          if ( ( pbc->h = PathOpen( sz, pbc->szDir, BINARY ) ) >= 0 )
+            break;
+          
+        } while( 1 );
+
+      }
+      
+    }
+
+    pbc->nCurrentFile = nFile;
+    h = pbc->h;
+
+    break;
+
+  case HS_15x15_ON_DISK:
+
+    if ( ( h = pbc->ah[ nFile ] ) < 0 ) {
+
+      /* file not open: open it */
+      
+      sprintf( sz, "bg15_%d.dat", nFile + 1 );
+      if ( ( h = pbc->ah[ nFile ] = PathOpen( sz, pbc->szDir, 
+                                              BINARY ) ) < 0 ) {
+        perror( sz );
+      return -1;
+      }
+
+    }
+
+    break;
+
+
+  default:
+
+    assert( FALSE );
+
+  }
+
+  /* Position number */
+
+  lPos = iPos;
+
+  /* printf( "lPos %ld, disk no. %d\n", lPos, nFile ); */
+
+  /* 
+   * Hugh does not score positions will all chequers off:
+   * gnubg calculate position# as 54264 * nUs + nThem.
+   * Hugh uses                    54263 * ( nUs -1 ) + ( nThem - 1 )
+   * The difference is:           nUs + 54263 + 1
+   */
+
+  lPos -= ( ( iPos / 54264 ) + ( n - 1 ) + 1 );
+
+  /*
+   * Each disk contains 1250 * 54263 positions.
+   * Subtract disk number minus 1 times the number of positions per disk.
+   */
+
+  lPos -= nFile * 1250 * ( n - 1 );
+
+  /* Each position uses 16 bytes (4 floats of 4 bytes each) */
+
+  printf( "modified lPos %ld\n", lPos ); 
+
+  lPos *= 16L;
+
+  /* Seek to calculated offset */
+
+  if ( ( l = lseek( h, lPos, SEEK_SET ) ) < 0 ) {
+    perror( "lseek (15x15)" );
+    return -1;
+  }
+
+  /* printf( "new offset %ld\n", l );  */
+
+  /* Read the 16 bytes for this position */
+
+  if ( ( l = read( h, ac, 16 ) ) < 16 ) {
+    printf( "bytes read: %ld, expected %d\n", l, 16 );
+    if ( errno )
+      perror( "read (15x15)" );
+    return -1;
+  }
+
+
+  for ( i = 0; i < 4; ++i ) {
+    /* FIXME: handle little endian/big endian */
+    l = ac[ 4 * i + 0 ] | 
+      ( ac[ 4 * i + 1 ] << 8 ) |
+      ( ac[ 4 * i + 2 ] << 16 ) |
+      ( ac[ 4 * i + 3 ] << 24 );
+    pr = (float *) &l;
+    ar[ i ] = *pr;
+  }
+
+  /* Save equities */
+
+  if ( arEquity )
+    memcpy( arEquity, ar, 4 * sizeof ( float ) );
+
+  if ( arOutput ) {
+    memset( arOutput, 0, 5 * sizeof ( float ) );
+    arOutput[ 0 ] = ar[ 0 ] / 2.0f + 0.5f;
+    /* FIXME: what do we do when gammons are possible??? */
+  }
+
+  ++pbc->nReads;
 
   return 0;
 
 }
 
 
+static int
+BearoffEvalSconyers( bearoffcontext *pbc, 
+                     int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+
+  unsigned int nUs = 
+    PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+  unsigned int nThem = 
+    PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
+  unsigned int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  int iPos = nUs * n + nThem;
+
+  switch( pbc->hsdb ) {
+  case HS_15x15_ON_DISK:
+  case HS_15x15_ON_DVDS:
+    return ReadSconyers15x15( pbc, iPos, arOutput, NULL );
+    break;
+  default:
+    assert( FALSE );
+    break;
+  }
+
+  /* code not reachable */
+  return 0;
+
+}
 
 
 extern int
@@ -759,23 +978,27 @@ BearoffEval ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
     switch ( pbc->bt ) {
     case BEAROFF_TWOSIDED:
-      BearoffEvalTwoSided ( pbc, anBoard, arOutput );
+      return BearoffEvalTwoSided ( pbc, anBoard, arOutput );
       break;
     case BEAROFF_ONESIDED:
-      BearoffEvalOneSided ( pbc, anBoard, arOutput );
+      return BearoffEvalOneSided ( pbc, anBoard, arOutput );
       break;
     case BEAROFF_HYPERGAMMON:
-      BearoffEvalHypergammon ( pbc, anBoard, arOutput );
+      return BearoffEvalHypergammon ( pbc, anBoard, arOutput );
       break;
     }
 
     break;
 
+  case BEAROFF_SCONYERS:
+
+    return BearoffEvalSconyers( pbc, anBoard, arOutput );
+    break;
 
   case BEAROFF_EXACT_BEAROFF:
 
     assert ( pbc->bt == BEAROFF_TWOSIDED );
-    BearoffEvalTwoSided ( pbc, anBoard, arOutput );
+    return BearoffEvalTwoSided ( pbc, anBoard, arOutput );
     break;
 
   default:
@@ -872,11 +1095,11 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
                 "(%lu hits, and %lu misses)\n"),
               pbc->ph->cSize, pbc->ph->cLookups, 
               pbc->ph->cHits, pbc->ph->cMisses );
-  
+
 }
 
 
-static void
+static int
 BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
@@ -897,7 +1120,8 @@ BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
             "Position %12d  %12d\n\n", 
             nUs, nThem );
 
-  ReadTwoSidedBearoff ( pbc, iPos, ar, NULL );
+  if( ReadTwoSidedBearoff ( pbc, iPos, ar, NULL ) )
+    return -1;
 
   if ( pbc->fCubeful )
     for ( i = 0; i < 4 ; ++i )
@@ -911,10 +1135,12 @@ BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
   strcat ( sz, "\n" );
 
+  return 0;
+
 }
 
 
-static void
+static int
 BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
@@ -929,10 +1155,12 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
               1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
 
 
-  BearoffDist ( pbc, nUs, aarProb[ 0 ], aarGammonProb[ 0 ], ar[ 0 ], 
-                NULL, NULL );
-  BearoffDist ( pbc, nThem, aarProb[ 1 ], aarGammonProb[ 1 ], ar[ 1 ],
-                NULL, NULL );
+  if ( BearoffDist ( pbc, nUs, aarProb[ 0 ], aarGammonProb[ 0 ], ar[ 0 ], 
+                     NULL, NULL ) )
+    return -1;
+  if ( BearoffDist ( pbc, nThem, aarProb[ 1 ], aarGammonProb[ 1 ], ar[ 1 ],
+                     NULL, NULL ) )
+    return -1;
 
   sprintf ( strchr ( sz, 0 ),
             "             Player       Opponent\n"
@@ -1040,10 +1268,12 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
           _("EPC = %5.3f * Average rolls\n"
             "Wastage = EPC - pips\n\n" ), x );
 
+  return 0;
+
 }
 
 
-static void
+static int
 BearoffDumpHyper( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
   int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
@@ -1059,7 +1289,8 @@ BearoffDumpHyper( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
     N_("Opponent owns cube")
   };
 
-  BearoffHyper ( pbc, iPos, NULL, ar );
+  if ( BearoffHyper ( pbc, iPos, NULL, ar ) )
+    return -1;
 
   sprintf ( strchr ( sz, 0 ),
             "             Player       Opponent\n"
@@ -1071,11 +1302,48 @@ BearoffDumpHyper( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
               "%-30.30s: %+7.4f\n", 
               gettext ( aszEquity[ i ] ), ar[ i ] );
 
+  return 0;
 
 }
 
 
-extern void
+extern int
+BearoffDumpSconyers15x15( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ],
+                          char *sz ) {
+
+  int nUs = PositionBearoff ( anBoard[ 1 ], pbc->nPoints, pbc->nChequers );
+  int nThem = PositionBearoff ( anBoard[ 0 ], pbc->nPoints, pbc->nChequers );
+  int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  int iPos = nUs * n + nThem;
+  float ar[ 4 ];
+  int i;
+  static char *aszEquity[] = {
+    N_("Cubeless"),
+    N_("Owned cube"),
+    N_("Centered cube"),
+    N_("Opponent owns cube")
+  };
+
+
+  if ( ReadSconyers15x15( pbc, iPos, NULL, ar ) )
+    return -1;
+
+  sprintf ( strchr ( sz, 0 ),
+            "             Player       Opponent\n"
+            "Position %12d  %12d\n\n", 
+            nUs, nThem );
+
+  for ( i = 0; i < 4 ; ++i )
+    sprintf ( strchr ( sz, 0 ),
+              "%-30.30s: %+7.4f\n", 
+              gettext ( aszEquity[ i ] ), ar[ i ] );
+
+  return 0;
+
+}
+
+
+extern int
 BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
   switch ( pbc->bc ) {
@@ -1083,13 +1351,13 @@ BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
     switch ( pbc->bt ) {
     case BEAROFF_TWOSIDED:
-      BearoffDumpTwoSided ( pbc, anBoard, sz );
+      return BearoffDumpTwoSided ( pbc, anBoard, sz );
       break;
     case BEAROFF_ONESIDED:
-      BearoffDumpOneSided ( pbc, anBoard, sz );
+      return BearoffDumpOneSided ( pbc, anBoard, sz );
       break;
     case BEAROFF_HYPERGAMMON:
-      BearoffDumpHyper ( pbc, anBoard, sz );
+      return BearoffDumpHyper ( pbc, anBoard, sz );
       break;
     }
 
@@ -1097,7 +1365,19 @@ BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
   case BEAROFF_EXACT_BEAROFF:
 
-    BearoffDumpTwoSided ( pbc, anBoard, sz );
+    return BearoffDumpTwoSided ( pbc, anBoard, sz );
+    break;
+
+  case BEAROFF_SCONYERS:
+
+    switch( pbc->hsdb ) {
+    case HS_15x15_ON_DISK:
+    case HS_15x15_ON_DVDS:
+      return BearoffDumpSconyers15x15( pbc, anBoard, sz );
+      break;
+    default:
+      assert( FALSE );
+    }
     break;
 
   default:
@@ -1107,18 +1387,36 @@ BearoffDump ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
 
   }
 
+  /* code not reachable */
+  return 0;
+
 }
 
 extern void
-BearoffClose ( bearoffcontext *pbc ) {
+BearoffClose ( bearoffcontext **ppbc ) {
 
-  if ( ! pbc )
+  if ( ! ppbc || ! *ppbc )
     return;
 
-  if ( ! pbc->fInMemory )
-    close ( pbc->h );
-  else if ( pbc->p && pbc->fMalloc )
-    free ( pbc->p );
+  if ( ! ((*ppbc))->fInMemory )
+    close ( (*ppbc)->h );
+  else if ( (*ppbc)->p && (*ppbc)->fMalloc )
+    free ( (*ppbc)->p );
+
+  if ( (*ppbc)->szDir )
+    free( (*ppbc)->szDir );
+
+  if ( (*ppbc)->szFilename )
+    free( (*ppbc)->szFilename );
+
+  if ( (*ppbc)->ah ) {
+    int i;
+    for ( i = 0; i < (*ppbc)->nFiles; ++i )
+      close( (*ppbc)->ah[ i ] );
+    free( (*ppbc)->ah );
+  }
+
+  free( (*ppbc) );
   
 }
 
@@ -1188,6 +1486,126 @@ isExactBearoff ( const char ac[ 8 ] ) {
 }
 
 
+bearoffcontext *
+BearoffAlloc( void ) {
+
+  bearoffcontext *pbc;
+
+  if( ! ( pbc = ( bearoffcontext *) malloc( sizeof ( bearoffcontext ) ) ) )
+    return NULL;
+  
+  pbc->h = -1;
+  pbc->ah = NULL;
+  pbc->nFiles = 0;
+  pbc->bt = -1;
+  pbc->bc = -1;
+  pbc->nPoints = -1;
+  pbc->nChequers = -1;
+  pbc->fInMemory = FALSE;
+  pbc->fMalloc = FALSE;
+  pbc->szDir = NULL;
+  pbc->szFilename = NULL;
+  pbc->fCompressed = TRUE;
+  pbc->fGammon = TRUE;
+  pbc->fND = FALSE;
+  pbc->fHeuristic = FALSE;
+  pbc->nOffsetBuffer = -1;
+  pbc->puchBuffer = NULL;
+  pbc->nOffsetA = -1;
+  pbc->puchA = NULL;
+  pbc->fCubeful = TRUE;
+  pbc->hsdb = -1;
+  pbc->pfDJ = NULL;
+  pbc->nCurrentFile = -1;
+  pbc->p = NULL;
+  pbc->ph = NULL;
+
+  return pbc;
+
+}
+
+
+
+/*
+ * Setup a bearoff context for Hugh Sconyers bearoff databases.
+ * So far only the huuuuge 15x15 database is supported.
+ * The pointer p is a function to be called when a new disk should
+ * be inserted.
+ *
+ */
+
+static bearoffcontext *
+BearoffInitSconyers( const char *szFilename, const char *szDir,
+                     const int bo, void *p ) {
+
+  bearoffcontext *pbc;
+  int i;
+  char  sz[ 15 ];
+
+  if ( ! ( pbc = BearoffAlloc() ) )
+    return NULL;
+
+  if ( ( bo & BO_SCONYERS_15x15 ) && ( bo & BO_ON_DISK ) ) {
+
+    pbc->bt = BEAROFF_TWOSIDED;
+    pbc->bc = BEAROFF_SCONYERS;
+    pbc->nPoints = 6;
+    pbc->nChequers = 15;
+    pbc->fInMemory = FALSE; /* are you nuts? 47 Gigs :-) */
+    pbc->fCubeful = TRUE; /* yup, it has cubeful equities as well */
+    pbc->hsdb = HS_15x15_ON_DISK;
+    pbc->nCurrentFile = -1;
+    pbc->pfDJ = NULL;
+    pbc->szDir = szDir ? strdup( szDir ) : NULL;
+    pbc->szFilename = NULL;
+    pbc->ph = NULL;
+    pbc->ah = (int *) malloc( 44 * sizeof( int ) );
+    /* open all 44 files... */
+    /* FIXME: considering just checking that all files are there */
+    for ( i = 0; i < 44; ++i ) {
+      sprintf( sz, "bg15_%d.dat", i + 1 );
+      if ( ( pbc->ah[ i ] = PathOpen( sz, pbc->szDir, BINARY ) ) < 0 ) {
+        /* could not open file */
+        perror( sz );
+        BearoffClose( &pbc );
+        return NULL;
+      }
+    }
+
+
+    return pbc;
+
+  }
+  else if ( ( bo & BO_SCONYERS_15x15 ) && ( bo & BO_ON_DVDS ) ) {
+
+    pbc->bt = BEAROFF_TWOSIDED;
+    pbc->bc = BEAROFF_SCONYERS;
+    pbc->nPoints = 6;
+    pbc->nChequers = 15;
+    pbc->fInMemory = FALSE; /* are you nuts? 47 Gigs :-) */
+    pbc->fCubeful = TRUE; /* yup, it has cubeful equities as well */
+    pbc->hsdb = HS_15x15_ON_DVDS;
+    pbc->nCurrentFile = -1;
+    pbc->pfDJ = p; /* pointer to the disk jockey function */
+    pbc->szDir = szDir ? strdup( szDir ) : NULL;
+    pbc->szFilename = NULL;
+    pbc->ph = NULL;
+    pbc->ah = NULL;
+
+    return pbc;
+
+  }
+  else {
+
+    assert ( FALSE );
+
+  }
+
+  return NULL;
+
+}
+
+
 /*
  * Initialise bearoff database
  *
@@ -1205,16 +1623,19 @@ isExactBearoff ( const char ac[ 8 ] ) {
 
 extern bearoffcontext *
 BearoffInit ( const char *szFilename, const char *szDir,
-              const int bo, void (*pfProgress) ( int ) ) {
+              const int bo, void *p ) {
 
   bearoffcontext *pbc;
   char sz[ 41 ];
   int nSize = -1;
   int iOffset = 0;
 
+  if ( bo & BO_SCONYERS_15x15 ) 
+    return BearoffInitSconyers( szFilename, szDir, bo, p );
+
   if ( bo & BO_HEURISTIC ) {
     
-    if ( ! ( pbc = (bearoffcontext *) malloc ( sizeof ( bearoffcontext ) ) ) ) {
+    if ( ! ( pbc = BearoffAlloc() ) ) {
       /* malloc failed */
       perror ( "bearoffcontext" );
       return NULL;
@@ -1233,8 +1654,10 @@ BearoffInit ( const char *szFilename, const char *szDir,
     pbc->nReads = 0;
     pbc->fHeuristic = TRUE;
     pbc->fMalloc = TRUE;
-    pbc->p = HeuristicDatabase ( pfProgress );
+    pbc->p = HeuristicDatabase ( p );
     pbc->ph = NULL;
+    pbc->szDir = szDir ? strdup( szDir ) : NULL;
+    pbc->szFilename = szFilename ? strdup( szFilename ) : NULL;
 
     return pbc;
     
@@ -1249,7 +1672,7 @@ BearoffInit ( const char *szFilename, const char *szDir,
    * Allocate memory for bearoff context
    */
 
-  if ( ! ( pbc = (bearoffcontext *) malloc ( sizeof ( bearoffcontext ) ) ) ) {
+  if ( ! ( pbc = BearoffAlloc() ) ) {
     /* malloc failed */
     perror ( "bearoffcontext" );
     return NULL;
@@ -1293,6 +1716,9 @@ BearoffInit ( const char *szFilename, const char *szDir,
     pbc->bc = BEAROFF_EXACT_BEAROFF;
   else
     pbc->bc = BEAROFF_UNKNOWN;
+
+  pbc->szDir = szDir ? strdup( szDir ) : NULL;
+  pbc->szFilename = szFilename ? strdup( szFilename ) : NULL;
 
   switch ( pbc->bc ) {
 
@@ -1415,7 +1841,7 @@ BearoffInit ( const char *szFilename, const char *szDir,
                   l, m );
       }
 
-      if ( ! ( pbc = (bearoffcontext *) malloc ( sizeof ( bearoffcontext ) ) ) ) {
+      if ( ! ( pbc = BearoffAlloc() ) ) {
         /* malloc failed */
         perror ( "bearoffcontext" );
         return NULL;
@@ -1434,6 +1860,8 @@ BearoffInit ( const char *szFilename, const char *szDir,
       pbc->fHeuristic = FALSE;
       pbc->fMalloc = FALSE;
       pbc->p = NULL;
+      pbc->szDir = szDir ? strdup( szDir ) : NULL;
+      pbc->szFilename = szFilename ? strdup( szFilename ) : NULL;
 
       iOffset = 0;
       nSize = -1;
@@ -1521,7 +1949,7 @@ fnd ( const float x, const float mu, const float sigma  ) {
 
 
 
-static void
+static int
 ReadBearoffOneSidedND ( bearoffcontext *pbc, 
                         const unsigned int nPosID,
                         float arProb[ 32 ], float arGammonProb[ 32 ],
@@ -1536,7 +1964,7 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
 
   if ( lseek ( pbc->h, 40 + nPosID * 16, SEEK_SET ) < 0 ) {
     perror ( "OS bearoff database" );
-    return;
+    return -1;
   }
 
   if ( read ( pbc->h, ac, 16 ) < 16 ) {
@@ -1544,7 +1972,7 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
       perror ( "OS bearoff database" );
     else
       fprintf ( stderr, "error reading OS bearoff database" );
-    return;
+    return -1; 
   }
 
   memcpy ( arx, ac, 16 );
@@ -1573,6 +2001,8 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
     memcpy ( ar, arx, 16 );
 
   ++pbc->nReads;
+
+  return 0;
 
 }
 
@@ -1665,7 +2095,7 @@ GetDistCompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
       perror ( "OS bearoff database" );
       return NULL;
     }
-    
+
     if ( read ( pbc->h, ac, 8 ) < 8 ) {
       if ( errno )
         perror ( "OS bearoff database" );
@@ -1762,7 +2192,7 @@ GetDistUncompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
 }
 
 
-static void
+static int
 ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
                            float arProb[ 32 ], float arGammonProb[ 32 ],
                            float ar[ 4 ],
@@ -1793,7 +2223,7 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
 
     if ( ! pus ) {
       printf ( "argh!\n" );
-      return;
+      return -1;
     }
 
     if ( ! pbc->fInMemory ) {
@@ -1815,9 +2245,12 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
 
   ++pbc->nReads;
 
+
+  return 0;
+
 }
 
-extern void
+extern int
 BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
               float arProb[ 32 ], float arGammonProb[ 32 ],
               float ar[ 4 ],
@@ -1830,17 +2263,20 @@ BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
     assert ( pbc->bt == BEAROFF_ONESIDED );
 
     if ( pbc->fND ) 
-      ReadBearoffOneSidedND ( pbc, nPosID, arProb, arGammonProb, ar,
-                              ausProb, ausGammonProb );
+      return ReadBearoffOneSidedND ( pbc, nPosID, arProb, arGammonProb, ar,
+                                     ausProb, ausGammonProb );
     else
-      ReadBearoffOneSidedExact ( pbc, nPosID, arProb, arGammonProb, ar,
-                                 ausProb, ausGammonProb );
+      return ReadBearoffOneSidedExact ( pbc, nPosID, arProb, arGammonProb, ar,
+                                        ausProb, ausGammonProb );
     break;
 
   default:
     assert ( FALSE );
     break;
   }
+
+  /* code not reachable */
+  return 0;
 
 }
 
@@ -1884,3 +2320,6 @@ isBearoff ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ] ) {
     return FALSE;
 
 }
+
+
+
