@@ -1,3 +1,7 @@
+Sun Jul  4 01:41:35 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* font3d.cpp: revert last patch.
+
 Sat Jul  3 15:24:40 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* font3d.cpp: add "FTGL/" to #include's in order to match the

@@ -4,9 +4,9 @@
 ##
 
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
-           -I$(srcdir)/../lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
-              -I$(srcdir)/../intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @GTKGLEXT_CFLAGS@
+	-I$(top_srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
+	-I$(top_srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
+	@FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @GTKGLEXT_CFLAGS@ @FTGL_CFLAGS@
 
 noinst_LIBRARIES = libboard3d.a
 libboard3d_a_SOURCES = drawboard3d.c matrix.h mylist.c \

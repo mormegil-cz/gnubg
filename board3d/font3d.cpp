@@ -29,9 +29,9 @@
 /* Using ftgl in a static libaray */
 #define FTGL_LIBRARY_STATIC
 
-#include "FTGL/FTGLPolygonFont.h"
-#include "FTGL/FTGLOutlineFont.h"
-#include "FTGL/FTFont.h"
+#include "FTGLPolygonFont.h"
+#include "FTGLOutlineFont.h"
+#include "FTFont.h"
 
 /* Avoid FTGLOutlineFont::Render() as expensive to call repeatedly */
 class MyOutlineFont : public FTGLOutlineFont
