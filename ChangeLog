@@ -1,3 +1,7 @@
+Sun Jul 27 14:39:51 2003  Oystein Johansen  <oystein@gnubg.org>
+
+	* gnubg.c, html.c, bearoff.c: improve 'dirname' where it's not present.
+
 Sun Jul 27 13:59:51 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* text.c: move all Output* functions to new file format.c	

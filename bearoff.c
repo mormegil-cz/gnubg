@@ -29,8 +29,6 @@
 #include <errno.h>
 #include <math.h>
 
-#include <glib/gutils.h>
-
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -58,6 +56,10 @@
 #define BINARY 0
 #endif
 
+#ifndef HAVE_DIRNAME
+extern char *
+dirname ( const char *filename );
+#endif
 
 typedef struct _hashentryonesided {
   unsigned int nPosID;
@@ -774,7 +776,6 @@ BearoffEvalHypergammon ( bearoffcontext *pbc,
 
 }
 
-
 static int 
 ReadSconyers15x15( bearoffcontext *pbc,
                    const unsigned int iPos,
@@ -823,11 +824,7 @@ ReadSconyers15x15( bearoffcontext *pbc,
             if( pbc->szDir )
               free( pbc->szDir );
 
-#if ! defined(HAVE_DIRNAME) && ! defined(HAVE_LIBGEN_H)
-            pbc->szDir = (char *) g_path_get_dirname( (const gchar *) pch );
-#else
             pbc->szDir = dirname( pch );
-#endif
 
             free( pch );
             free( pch2 );
