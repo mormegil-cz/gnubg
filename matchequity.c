@@ -997,6 +997,8 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
      * Use Zadeh's formulae 
      */
 
+    PushLocale ( "C" );
+
     /* obtain parameters */
 
     for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
@@ -1014,6 +1016,8 @@ initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
         rDeltaBar = atof ( pp->szValue );
 
     }
+
+    PopLocale ();
     
 
     /* calculate table */
@@ -1052,6 +1056,8 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
      * Use Zadeh's formulae 
      */
 
+    PushLocale ( "C" );
+
     /* obtain parameters */
 
     for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
@@ -1067,6 +1073,8 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
         rFD4 = atof ( pp->szValue );
 
     }
+
+    PopLocale ();
 
     /* calculate table */
 
