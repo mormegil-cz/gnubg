@@ -1831,6 +1831,8 @@ command cER = {
     { "database", NULL, N_("Manipulate a database of positions"), NULL,
       acDatabase },
     { "decline", CommandDecline, N_("Decline a resignation"), NULL, NULL },
+    { "dicerolls", CommandDiceRolls, N_("Generate a list of rolls"), 
+      NULL, NULL },
     { "double", CommandDouble, N_("Offer a double"), NULL, NULL },
     { "drop", CommandDrop, N_("Decline an offered double"), NULL, NULL },
     { "eq2mwc", CommandEq2MWC,
@@ -8243,3 +8245,21 @@ TextToClipboard( const char *sz ) {
 }
 
 
+void 
+CommandDiceRolls (char *sz) {
+  int    n;
+  char	*pch;
+  int	 anDice[2];
+
+  if ( (pch = NextToken( &sz ) ) ) {
+    n = ParseNumber( &pch );
+
+    while (n-- > 0) {
+      RollDice( anDice, rngCurrent );
+
+      printf( "%d %d\n", anDice[ 0 ], anDice[ 1 ] );
+
+    }
+
+  }
+}
