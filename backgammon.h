@@ -136,7 +136,8 @@ typedef struct _movenormal {
     int iMove; /* index into the movelist of the move that was made */
     lucktype lt;
     float rLuck; /* ERR_VAL means unknown */
-    skilltype st;
+    skilltype stMove;
+    skilltype stCube;
 } movenormal;
 
 typedef struct _moveresign {
@@ -377,20 +378,28 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
     acSetRolloutPlayer[], cOnOff, cFilename;
+extern command acAnnotateMove[];
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
     CommandAnalyseGame( char * ),
     CommandAnalyseMatch( char * ),
     CommandAnalyseSession( char * ),
+    CommandAnnotateAccept ( char * ),
     CommandAnnotateBad( char * ),
     CommandAnnotateClearComment( char * ),
     CommandAnnotateClearLuck( char * ),
     CommandAnnotateClearSkill( char * ),
+    CommandAnnotateCube ( char * ),
+    CommandAnnotateDouble ( char * ),
     CommandAnnotateDoubtful( char * ),
+    CommandAnnotateDrop ( char * ),
     CommandAnnotateGood( char * ),
     CommandAnnotateInteresting( char * ),
     CommandAnnotateLucky( char * ),
+    CommandAnnotateMove ( char * ),
+    CommandAnnotateReject ( char * ),
+    CommandAnnotateResign ( char * ),
     CommandAnnotateUnlucky( char * ),
     CommandAnnotateVeryBad( char * ),
     CommandAnnotateVeryGood( char * ),

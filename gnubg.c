@@ -323,24 +323,45 @@ command cER = {
     { "skill", CommandAnnotateClearSkill, "Erase skill annotations for a move",
       NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
-}, acAnnotate[] = {
-    { "bad", CommandAnnotateBad, "Mark a bad move", NULL, NULL },
-    { "clear", NULL, "Remove annotations from a move", NULL, acAnnotateClear },
-    { "doubtful", CommandAnnotateDoubtful, "Mark a doubtful move", NULL,
-      NULL },
-    { "good", CommandAnnotateGood, "Mark a good move", NULL, NULL },
-    { "interesting", CommandAnnotateInteresting, "Mark an interesting move",
+}, acAnnotateMove[] = {
+    { "bad", CommandAnnotateBad, "Mark as bad", NULL, NULL },
+    { "clear", CommandAnnotateClearSkill, "Remove annotations", NULL, NULL },
+    { "doubtful", CommandAnnotateDoubtful, "Mark as doubtful", NULL, NULL },
+    { "good", CommandAnnotateGood, "Mark as good", NULL, NULL },
+    { "interesting", CommandAnnotateInteresting, "Mark as interesting",
       NULL, NULL },
+    { "verybad", CommandAnnotateVeryBad, "Mark as very bad", NULL, NULL },
+    { "verygood", CommandAnnotateVeryGood, "Mark as very good", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acAnnotateRoll[] = {
+    { "clear", CommandAnnotateClearLuck, "Remove annotations", NULL, NULL },
     { "lucky", CommandAnnotateLucky, "Mark a lucky dice roll", NULL, NULL },
     { "unlucky", CommandAnnotateUnlucky, "Mark an unlucky dice roll",
       NULL, NULL },
-    { "verybad", CommandAnnotateVeryBad, "Mark a very bad move", NULL, NULL },
-    { "verygood", CommandAnnotateVeryGood, "Mark a very good move", NULL,
-      NULL },
     { "verylucky", CommandAnnotateVeryLucky, "Mark a very lucky dice roll",
       NULL, NULL },
     { "veryunlucky", CommandAnnotateVeryUnlucky, "Mark an very unlucky dice "
       "roll", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acAnnotate[] = {
+    { "clear", NULL, "Clear annotation", NULL, acAnnotateClear },
+    { "move", CommandAnnotateMove, "Mark a move", NULL, acAnnotateMove },
+    { "roll", NULL, "Mark a roll", NULL, acAnnotateRoll },
+    { "cube", CommandAnnotateCube, "Mark a cube decision", 
+      NULL, acAnnotateMove },
+    { "double", CommandAnnotateDouble, "Mark a double", NULL, acAnnotateMove },
+    { "accept", CommandAnnotateAccept, "Mark an accept decision", 
+      NULL, acAnnotateMove },
+    { "drop", CommandAnnotateDrop, "Mark a drop decision", 
+      NULL, acAnnotateMove },
+    { "pass", CommandAnnotateDrop, "Mark a pass decision", 
+      NULL, acAnnotateMove },
+    { "reject", CommandAnnotateReject, "Mark a reject decision", 
+      NULL, acAnnotateMove },
+    { "resign", CommandAnnotateResign, "Mark a resign decision", 
+      NULL, acAnnotateMove },
+    { "take", CommandAnnotateAccept, "Mark a take decision", 
+      NULL, acAnnotateMove },
     { NULL, NULL, NULL, NULL, NULL }
 }, acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
