@@ -4,6 +4,9 @@ Thu Mar 14 18:41:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * rollout.[ch]: Deleted unused code
 
+        * gtkgame.c, gtkgame.h: static function SetCube renamed to GTKSetCube
+        and made extern.
+
 Thu Mar 14 10:30:04 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (GTKHelp): New function.
