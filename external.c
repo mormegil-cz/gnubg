@@ -44,6 +44,7 @@
 #include "drawboard.h"
 #include "external.h"
 #include "rollout.h"
+#include "i18n.h"
 
 #if defined(AF_UNIX) && !defined(AF_LOCAL)
 #define AF_LOCAL AF_UNIX
@@ -145,13 +146,13 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	PortableSignalRestore( SIGPIPE, &sh );
 	
 	if( !n ) {
-	    outputl( "External connection closed." );
+	    outputl( _("External connection closed.") );
 	    return -1;
 	} else if( n < 0 ) {
 	    if( errno == EINTR )
 		continue;
 
-	    perror( "external connection" );
+	    perror( _("external connection") );
 	    return -1;
 	}
 	
@@ -197,7 +198,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	    if( errno == EINTR )
 		continue;
 
-	    perror( "external connection" );
+	    perror( _("external connection") );
 	    return -1;
 	}
 	
@@ -215,8 +216,8 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 extern void CommandExternal( char *sz ) {
 
 #if !HAVE_SOCKETS
-    outputl( "This installation of GNU Backgammon was compiled without\n"
-	     "socket support, and does not implement external controllers." );
+    outputl( _("This installation of GNU Backgammon was compiled without\n"
+	     "socket support, and does not implement external controllers.") );
 #else
     int h, hPeer, cb;
     struct sockaddr *psa;
@@ -234,8 +235,8 @@ extern void CommandExternal( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify the name of the socket to the external\n"
-		 "controller -- try `help external'." );
+	outputl( _("You must specify the name of the socket to the external\n"
+		 "controller -- try `help external'.") );
 	return;
     }
 
@@ -254,7 +255,7 @@ extern void CommandExternal( char *sz ) {
     free( psa );
     
     if( listen( h, 1 ) < 0 ) {
-	perror( "listen" );
+	perror( _("listen") );
 	close( h );
 	ExternalUnbind( sz );
 	return;
@@ -274,7 +275,7 @@ extern void CommandExternal( char *sz ) {
 	    continue;
 	}
 	
-	perror( "accept" );
+	perror( _("accept") );
 	close( h );
 	ExternalUnbind( sz );
 	return;
@@ -287,7 +288,7 @@ extern void CommandExternal( char *sz ) {
 	if( ParseFIBSBoard( szCommand, anBoard, szName, szOpp, &nMatchTo,
 			     anScore + 1, anScore, anDice, &nCube,
 			    &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) )
-	    outputl( "Warning: badly formed board from external controller." );
+	    outputl( _("Warning: badly formed board from external controller.") );
 	else {
 	    /* FIXME could SwapSides( anBoard ) be necessary? */
 	    
