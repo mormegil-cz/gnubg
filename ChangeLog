@@ -1,7 +1,8 @@
-Fri Dec 13 14:35:41 2002  Gary Wong  <gtw@gnu.org>
+Fri Dec 13 16:07:18 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c, gtkprefs.c: Major changes to use the render.c board
 	drawing code instead of the old gtkboard.c equivalents.
+	* Makefile.am (gnubg_SOURCES): Remove gdkgetrgb.c.
 
 	* gtkprefs.c (DesignPage): Default to a preview of the current board.
 	* gtkprefs.c (Preview): New function.

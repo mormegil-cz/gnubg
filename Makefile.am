@@ -62,7 +62,7 @@ if USE_GTK
 ## --- GTK
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
-	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
+	gtkprefs.c gtkprefs.h gtk-multiview.c \
 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
@@ -120,12 +120,12 @@ erftest_SOURCES = erftest.c
 
 TESTS = gnubgtest erftest
 distcheck-hook:
-	-cp $(srcdir)/gnubg_os0.bd $(srcdir)/gnubg_ts0.bd \
-	$(srcdir)/gnubg.weights $(distdir)/
+	chmod -R a+w $(distdir)
+	-cp $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS
+	ABOUT-NLS boards.xml
 
 br1.c:	makebearoff makebearoff1
 	if [ ! -f br1.c ]; then \
