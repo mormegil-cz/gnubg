@@ -1,7 +1,7 @@
 # English translations for GNU Backgammon package.
-# Copyright (C) 2003 Free Software Foundation, Inc.
+# Copyright (C) 2004 Free Software Foundation, Inc.
 # This file is distributed under the same license as the GNU Backgammon package.
-# Automatically generated, 2003.
+# Automatically generated, 2004.
 #
 # All this catalog "translates" are quotation characters.
 # The msgids must be ASCII and therefore cannot contain real quotation
@@ -27,15 +27,15 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU Backgammon 0.14-devel\n"
-"Report-Msgid-Bugs-To: \n"
+"Project-Id-Version: GNU Backgammon 0.14.1\n"
 "POT-Creation-Date: 2004-01-02 19:48+0900\n"
-"PO-Revision-Date: 2003-11-20 16:42+0900\n"
+"PO-Revision-Date: 2004-01-02 19:48+0900\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: analysis.c:48
@@ -317,6 +317,9 @@ msgid ""
 "Position %12d  %12d\n"
 "\n"
 msgstr ""
+"             Player       Opponent\n"
+"Position %12d  %12d\n"
+"\n"
 
 #: bearoff.c:1170
 msgid "Bearing off\t\t\t\tBearing at least one chequer off\n"
@@ -357,12 +360,12 @@ msgstr "\tPlayer\tOpponent\tPlayer\tOpponent\n"
 #: bearoff.c:1227
 #, c-format
 msgid "Mean\t%7.3f\t%7.3f\t\t"
-msgstr ""
+msgstr "Mean\t%7.3f\t%7.3f\t\t"
 
 #: bearoff.c:1242
 #, c-format
 msgid "Std dev\t%7.3f\t%7.3f\t\t"
-msgstr ""
+msgstr "Std dev\t%7.3f\t%7.3f\t\t"
 
 #: bearoff.c:1259
 msgid ""
@@ -1102,9 +1105,9 @@ msgid "accept"
 msgstr "accept"
 
 #: external.c:632
-#, fuzzy, c-format
+#, c-format
 msgid "Accepted connection from %s.\n"
-msgstr "External connection closed."
+msgstr "Accepted connection from %s.\n"
 
 #: format.c:120
 #, c-format
@@ -1267,9 +1270,9 @@ msgid "Money"
 msgstr "Money"
 
 #: format.c:946
-#, fuzzy, c-format
+#, c-format
 msgid " cubeless equity %s\n"
-msgstr "cubeless equity"
+msgstr " cubeless equity %s\n"
 
 #: format.c:965
 msgid "Cubeful equities:\n"
@@ -1467,13 +1470,12 @@ msgid "Advantage (luck adjusted) in ppg"
 msgstr "Advantage (luck adjusted) in ppg"
 
 #: formatgs.c:624
-#, fuzzy
 msgid "Number of time penalties"
-msgstr "Number of hidden nodes:"
+msgstr "Number of time penalties"
 
 #: formatgs.c:636
 msgid "Loss from time pen. (total)"
-msgstr ""
+msgstr "Loss from time pen. (total)"
 
 #: getopt.c:673
 #, c-format
@@ -1891,9 +1893,8 @@ msgid "Mark a take decision"
 msgstr "Mark a take decision"
 
 #: gnubg.c:649
-#, fuzzy
 msgid "Clear analysis used for `hint'"
-msgstr "Clear analysis for this game"
+msgstr "Clear analysis used for ‘hint’"
 
 #: gnubg.c:652
 msgid "List the positions in the database"
@@ -2778,9 +2779,8 @@ msgid "set type of HTML boards used in HTML export"
 msgstr "set type of HTML boards used in HTML export"
 
 #: gnubg.c:1333
-#, fuzzy
 msgid "Set size of board for Html image export"
-msgstr "Set size of board for PNG export and HTML image export"
+msgstr "Set size of board for Html image export"
 
 #: gnubg.c:1338
 msgid "show very bad moves"
@@ -2875,9 +2875,8 @@ msgid "when to show moves"
 msgstr "when to show moves"
 
 #: gnubg.c:1415
-#, fuzzy
 msgid "Set size of board for PNG export"
-msgstr "Set size of board for PNG export and HTML image export"
+msgstr "Set size of board for PNG export"
 
 #: gnubg.c:1420
 msgid "Set options for HTML export"
@@ -3551,9 +3550,8 @@ msgid "See if the Egyptian rule is used in sessions"
 msgstr "See if the Egyptian rule is used in sessions"
 
 #: gnubg.c:1813
-#, fuzzy
 msgid "Show Effective Pip Count for position"
-msgstr "Calculate Thorp Count for position"
+msgstr "Show Effective Pip Count for position"
 
 #: gnubg.c:1814
 msgid "Show current export settings"
@@ -3746,9 +3744,8 @@ msgid "Measure evaluation speed, for later time estimates"
 msgstr "Measure evaluation speed, for later time estimates"
 
 #: gnubg.c:1928
-#, fuzzy
 msgid "Clear information"
-msgstr "Clear annotation"
+msgstr "Clear information"
 
 #: gnubg.c:1929
 msgid "Copy current position to clipboard"
@@ -3808,7 +3805,7 @@ msgstr "Give hints on cube action or best legal moves"
 
 #: gnubg.c:1955
 msgid "Display current history"
-msgstr ""
+msgstr "Display current history"
 
 #: gnubg.c:1957
 msgid "invert match equity tables, etc."
@@ -4025,26 +4022,24 @@ msgstr "Unknown keyword ‘%s’ -- try ‘help’.\n"
 #: gnubg.c:2985
 #, c-format
 msgid "Time penalty: %s loses %d points\n"
-msgstr ""
+msgstr "Time penalty: %s loses %d points\n"
 
 #: gnubg.c:2988 gnubg.c:2993 gnubg.c:2998
-#, fuzzy, c-format
+#, c-format
 msgid "%-30.30s %s\n"
-msgstr "   %-30.30s : “%s”\n"
+msgstr "%-30.30s %s\n"
 
 #: gnubg.c:2989 gtkgame.c:1661
-#, fuzzy
 msgid "Equity before time penalty:"
-msgstr "Equity before resignation: "
+msgstr "Equity before time penalty:"
 
 #: gnubg.c:2994 gtkgame.c:1669
-#, fuzzy
 msgid "Equity after time penalty:"
-msgstr "Equity after resignation: "
+msgstr "Equity after time penalty:"
 
 #: gnubg.c:2999
 msgid "Lose from penalty:"
-msgstr ""
+msgstr "Lose from penalty:"
 
 #: gnubg.c:3054 gnubg.c:3220 gnubg.c:4978 gtkgame.c:1480 gtkgame.c:1841
 #: gtkgame.c:1989 text.c:94 text.c:489
@@ -4686,68 +4681,62 @@ msgid "You may be about to make a doubtful play. Are you sure? "
 msgstr "You may be about to make a doubtful play. Are you sure? "
 
 #: gnubg.c:8889
-#, fuzzy
 msgid "Analysis used for `hint' has been cleared"
-msgstr "The evaluation speed has been cleared."
+msgstr "Analysis used for ‘hint’ has been cleared"
 
 #: gnubg.c:9006
 msgid "Sorry, EPCs cannot be calculated for this position"
-msgstr ""
+msgstr "Sorry, EPCs cannot be calculated for this position"
 
 #: gnubg.c:9012
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Effective pip count from %s:\n"
 "\n"
 msgstr ""
+"Effective pip count from %s:\n"
 "\n"
-"Effective pip count:\n"
 
 #: gnubg.c:9013
-#, fuzzy
 msgid "one-sided bearoff database"
-msgstr "Unknown bearoff database\n"
+msgstr "one-sided bearoff database"
 
 #: gnubg.c:9014
-#, fuzzy
 msgid "one-sided rollout"
-msgstr "One sided rollout"
+msgstr "one-sided rollout"
 
 #: gnubg.c:9021
-#, fuzzy
 msgid "Opponent"
-msgstr "Open"
+msgstr "Opponent"
 
 #: gnubg.c:9022 gtkrace.c:295
 msgid "EPC"
 msgstr "EPC"
 
 #: gnubg.c:9023
-#, fuzzy
 msgid "Pip count"
-msgstr "Pip colour:"
+msgstr "Pip count"
 
 #: gnubg.c:9024 gtkrace.c:299
 msgid "Wastage"
 msgstr "Wastage"
 
 #: gnubg.c:9037
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Estimated gwc: %8.4f\n"
 "\n"
 msgstr ""
-"Estimated cubeless gwc (%s on roll): %8.4f%%\n"
+"Estimated gwc: %8.4f\n"
 "\n"
 
 #: gnubg.c:9040
-#, fuzzy
 msgid ""
 "EPC = 8.167 * Average rolls\n"
 "Wastage = EPC - pips\n"
 "\n"
 msgstr ""
-"EPC = %5.3f * Average rolls\n"
+"EPC = 8.167 * Average rolls\n"
 "Wastage = EPC - pips\n"
 "\n"
 
@@ -4819,9 +4808,8 @@ msgid "Two-sided (memory)"
 msgstr "Two-sided (memory)"
 
 #: gtkbearoff.c:343
-#, fuzzy
 msgid "Effective Pip Count"
-msgstr "Effective pip count"
+msgstr "Effective Pip Count"
 
 #: gtkboard.c:533
 #, c-format
@@ -5219,18 +5207,16 @@ msgid "External file"
 msgstr "External file"
 
 #: gtkexport.c:764
-#, fuzzy
 msgid "Export sizes"
-msgstr "Export"
+msgstr "Export sizes"
 
 #: gtkexport.c:783
 msgid "Size of PNG images:"
 msgstr "Size of PNG images:"
 
 #: gtkexport.c:805
-#, fuzzy
 msgid "Size of Html images:"
-msgstr "Size of PNG images:"
+msgstr "Size of Html images:"
 
 #: gtkgame.c:145
 msgid "Press escape to exit full screen mode"
@@ -5326,13 +5312,13 @@ msgid " Resigns"
 msgstr " Resigns"
 
 #: gtkgame.c:1647
-#, fuzzy, c-format
+#, c-format
 msgid "Time penalty: %s loses %d points"
-msgstr " %s resigns %d points"
+msgstr "Time penalty: %s loses %d points"
 
 #: gtkgame.c:1677
 msgid "Loss from penalty:"
-msgstr ""
+msgstr "Loss from penalty:"
 
 #: gtkgame.c:1743
 msgid "Equity before resignation: "
@@ -5907,9 +5893,8 @@ msgid "/_Analyse/Bearoff Databases"
 msgstr "/_Analyse/Bearoff Databases"
 
 #: gtkgame.c:2864
-#, fuzzy
 msgid "/_Analyse/Effective Pip Count"
-msgstr "/_Analyse/_Pip count"
+msgstr "/_Analyse/Effective Pip Count"
 
 #: gtkgame.c:2867
 msgid "/_Analyse/_Gammon values"
@@ -7002,7 +6987,6 @@ msgid "Warranty"
 msgstr "Warranty"
 
 #: gtkgame.c:7731
-#, fuzzy
 msgid ""
 "The online manual is not available with this installation of GNU "
 "Backgammon.  You can view the manual on the WWW at:\n"
@@ -7012,10 +6996,9 @@ msgstr ""
 "The online manual is not available with this installation of GNU "
 "Backgammon.  You can view the manual on the WWW at:\n"
 "\n"
-"    http://www.gnu.org/manual/gnubg/"
+"    http://www.gnubg.org/win32/gnubg/gnubg.html"
 
 #: gtkgame.c:7743
-#, fuzzy
 msgid ""
 "The Frequently Asked Questions are not available with this installation of "
 "GNU Backgammon.  You can view them on the WWW at:\n"
@@ -7025,7 +7008,7 @@ msgstr ""
 "The Frequently Asked Questions are not available with this installation of "
 "GNU Backgammon.  You can view them on the WWW at:\n"
 "\n"
-"    http://mole.dnsalias.org/~acepoint/GnuBG/gnubg-faq/"
+"    http://www.gnubg.org/docs/faq/"
 
 #: gtkgame.c:7754
 msgid "GNU Backgammon - Manual"
@@ -9293,14 +9276,12 @@ msgid ""
 "Gammon values at %d-away, %d-away (%d cube)\n"
 "\n"
 msgstr ""
+"Gammon values at %d-away, %d-away (%d cube)\n"
+"\n"
 
 #: gtktheory.c:485
-#, fuzzy
 msgid "Player                          Gammon   BG\n"
-msgstr ""
-"%s:\n"
-"\n"
-"Player                          Gammon   BG\n"
+msgstr "Player                          Gammon   BG\n"
 
 #: gtktheory.c:507
 msgid ""
@@ -10972,21 +10953,21 @@ msgstr "View statistics"
 
 #: progress.c:850
 msgid "Time elapsed"
-msgstr ""
+msgstr "Time elapsed"
 
 #: progress.c:856
 msgid "Estimated time left"
-msgstr ""
+msgstr "Estimated time left"
 
 #: progress.c:862
 #, c-format
 msgid "Estimated SE for \"%s\" after %d trials "
-msgstr ""
+msgstr "Estimated SE for “%s” after %d trials "
 
 #: progress.c:865
 #, c-format
 msgid "Estimated SE after %d trials "
-msgstr ""
+msgstr "Estimated SE after %d trials "
 
 #: progress.c:1043
 msgid "Finished (%v trials)"
@@ -10995,22 +10976,22 @@ msgstr "Finished (%v trials)"
 #: progress.c:1157
 #, c-format
 msgid "Time elapsed %s"
-msgstr ""
+msgstr "Time elapsed %s"
 
 #: progress.c:1159
 #, c-format
 msgid " Estimated time left %s\n"
-msgstr ""
+msgstr " Estimated time left %s\n"
 
 #: progress.c:1178
 #, c-format
 msgid "Estimated SE for \"%s\" after %d trials %s\n"
-msgstr ""
+msgstr "Estimated SE for “%s” after %d trials %s\n"
 
 #: progress.c:1181
 #, c-format
 msgid "Estimated SE after %d trials %s\n"
-msgstr ""
+msgstr "Estimated SE after %d trials %s\n"
 
 #: progress.c:1192
 #, c-format
@@ -13245,9 +13226,9 @@ msgid "You must specify a size between 1 and 20."
 msgstr "You must specify a size between 1 and 20."
 
 #: set.c:4474
-#, fuzzy, c-format
+#, c-format
 msgid "Size of generated Html images are %dx%d pixels\n"
-msgstr "Size of generated PNG images are %dx%d pixels\n"
+msgstr "Size of generated Html images are %dx%d pixels\n"
 
 #: set.c:4492
 #, c-format
@@ -13255,14 +13236,14 @@ msgid "Size of generated PNG images are %dx%d pixels\n"
 msgstr "Size of generated PNG images are %dx%d pixels\n"
 
 #: set.c:4505
-#, fuzzy, c-format
+#, c-format
 msgid "The current match or session is being played as `%s'.\n"
-msgstr "No session is being played."
+msgstr "The current match or session is being played as ‘%s’.\n"
 
 #: set.c:4508
-#, fuzzy, c-format
+#, c-format
 msgid "Please start a new match or session to play `%s'\n"
-msgstr "Start a new game, match or session"
+msgstr "Please start a new match or session to play ‘%s’\n"
 
 #: set.c:4558
 msgid "Goto first game when loading matches or sessions."
@@ -14401,9 +14382,9 @@ msgid "not defined"
 msgstr "not defined"
 
 #: show.c:1811
-#, fuzzy, c-format
+#, c-format
 msgid "- size of exported Html pictures: %dx%d\n"
-msgstr "- size of exported PNG pictures: %dx%d\n"
+msgstr "- size of exported Html pictures: %dx%d\n"
 
 #: show.c:1816
 msgid "PNG options:\n"
@@ -14566,7 +14547,7 @@ msgid "disabled"
 msgstr "disabled"
 
 #: show.c:2124
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Parameters for cube evaluations:\n"
 "Cube efficiency for crashed positions           : %7.4f\n"
@@ -14577,7 +14558,7 @@ msgid ""
 msgstr ""
 "Parameters for cube evaluations:\n"
 "Cube efficiency for crashed positions           : %7.4f\n"
-"Cube efficiency for context positions           : %7.4f\n"
+"Cube efficiency for contact positions           : %7.4f\n"
 "Cube efficiency for one sided bearoff positions : %7.4f\n"
 "Cube efficiency for race: x = pips * %.5f + %.5f\n"
 "(min value %.4f, max value %.4f)\n"
@@ -14663,14 +14644,12 @@ msgid "Time Control Tutorial"
 msgstr "Time Control Tutorial"
 
 #: show.c:2397
-#, fuzzy
 msgid "There must be a game in progress to set show effective pip count."
-msgstr "There must be a game in progress to set the dice."
+msgstr "There must be a game in progress to set show effective pip count."
 
 #: show.c:2403
-#, fuzzy
 msgid "Illegal board"
-msgstr "Illegal move"
+msgstr "Illegal board"
 
 #: sound.c:80
 msgid "Starting GNU Backgammon"
@@ -15008,12 +14987,3 @@ msgstr "3d Colour selection"
 #: board3d/inc3d.h:68
 msgid "No texture"
 msgstr "No texture"
-
-#~ msgid "PNG export options"
-#~ msgstr "PNG export options"
-
-#~ msgid "black"
-#~ msgstr "black"
-
-#~ msgid "white"
-#~ msgstr "white"

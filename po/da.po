@@ -24,7 +24,6 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gnubg 0.12\n"
-"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2004-01-02 19:48+0900\n"
 "PO-Revision-Date: 2003-07-27 19:39+0200\n"
 "Last-Translator: Jørn Thyssen <jthyssen@dk.ibm.com>\n"
@@ -32,6 +31,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
 
 #: analysis.c:48
 msgid "Awful!"

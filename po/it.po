@@ -7,7 +7,6 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gnubg 0.14\n"
-"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2004-01-02 19:48+0900\n"
 "PO-Revision-Date: 2003-08-11 14:24+0200\n"
 "Last-Translator: Renzo Campagna <renzo.camp@tin.it>, Giulio De Marco "
@@ -16,6 +15,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-15\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
 
 #: analysis.c:48
 msgid "Awful!"
