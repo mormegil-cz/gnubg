@@ -7341,7 +7341,10 @@ char* getenvvalue(char* str)
 	static char ret[1024];
 	*ret = '\0';
 	explode(str, ret);
-	return ret;
+	if (*ret)
+		return ret;
+	else
+		return NULL;
 }
 
 #endif /* WIN32 */
@@ -7392,7 +7395,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if !WIN32
 	szHomeDirectory = getenv( "HOME" );
 #else
-	szHomeDirectory = getenvvalue( "HOME" );
+	szHomeDirectory = getenvvalue( "%HOME%" );
 #endif
 	if (!szHomeDirectory)
 		szHomeDirectory = ".";
