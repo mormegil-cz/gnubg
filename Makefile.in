@@ -1082,7 +1082,7 @@ gnubg.weights:
 @CROSS_COMPILING_FALSE@	@echo ' ** NOTE: you can generate huge one sided and two sided'
 @CROSS_COMPILING_FALSE@	@echo ' ** bearoff databases for usage with gnubg'
 @CROSS_COMPILING_FALSE@	@echo ' ** See README for more details'
-@CROSS_COMPILING_FALSE@	./makebearoff -t 6x6 -f $(srcdir)/gnubg_ts0.bd
+@CROSS_COMPILING_FALSE@	./makebearoff -t 6x6 -f  $(srcdir)/gnubg_ts0.bd
 
 .PHONY: bearoff-database
 

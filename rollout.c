@@ -1084,6 +1084,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
       }
     } /* if (prc->fStopOnSTD && (i >= prc->nMinimumGames)) */
   }
+  
+  /* re-init the RNG so dice rolled in games played after this rollout won't
+     be dependent on the rollout RNG seed and on the number of rollouts just
+     performed */
+  InitRNG( NULL, TRUE, rngCurrent );
 
   cGames = i;
   /* return -1 if no games rolled out */
