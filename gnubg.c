@@ -3804,7 +3804,9 @@ Shutdown( void ) {
 #endif
 
 #ifdef WIN32
+#ifdef HAVE_SOCKETS
     WSACleanup();
+#endif
 #endif
 
 }
@@ -7135,6 +7137,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
                                   (void *) ChangeDisk );
 
 #ifdef WIN32
+#ifdef HAVE_SOCKETS
 
 #if USE_GTK
     PushSplash ( pwSplash, 
@@ -7150,6 +7153,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    outputerr( "Windows sockets initialisation" );
 	}
     }
+
+#endif /* HAVE_SOCKETS */
 #endif /* WIN32 */
 
 #if USE_GUILE
