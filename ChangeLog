@@ -1,3 +1,8 @@
+Wed May 29 21:23:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c: include "support of XML match equity files" in
+	"about gnubg" and "gnubg -v".
+
 Mon May 27 23:22:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix bug reported by Ian Shaw:

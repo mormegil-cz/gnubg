@@ -1067,6 +1067,9 @@ char *aszVersion[] = {
 #if HAVE_SOCKETS
     "External players supported.",
 #endif
+#if HAVE_LIBXML2
+    "XML match equity files supported.",
+#endif
     NULL
 };
 
