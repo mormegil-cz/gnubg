@@ -1,3 +1,11 @@
+Thu Mar 28 15:09:24 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+	
+	* eval.c (SanityCheck): fix bug. SanityCheck would report
+	"impossible to avoid backgammon" for some positions where
+	it was impossible to win backgammon, e.g., 221DAgAAAAAAAA.
+	This was the bug that led to too high backgammon percentages
+	in rollouts.
+
 Thu Mar 28 13:14:27 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (getGameNumber, getMoveNumber): new functions.

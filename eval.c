@@ -1776,11 +1776,14 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     fContact = anBack[ 0 ] + anBack[ 1 ] >= 24;
 
     if( !fContact ) {
-	for( i = 0; i < 2; i++ )
-	    if( anBack[ i ] < 6 && pBearoff1 )
+        for( i = 0; i < 2; i++ ) 
+            if( anBack[ i ] < 6 && pBearoff1 )
 		anMaxTurns[ i ] = MaxTurns( PositionBearoff( anBoard[ i ] ) );
 	    else
 		anMaxTurns[ i ] = anCross[ i ] * 2;
+      
+        if ( ! anMaxTurns[ 1 ] ) anMaxTurns[ 1 ] = 1;
+
     }
     
     if( !fContact && anCross[ 0 ] > 4 * ( anMaxTurns[ 1 ] - 1 ) )
