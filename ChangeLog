@@ -1,3 +1,16 @@
+Sun Mar  3 10:56:47 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (cmp_evalcontext): a few bugfixes.
+
+	* eval.c: define predefined settings for evalcontexts.
+
+	* gtkgame.c (EvalWidget): resign widget, and introduce predefined
+	settings.
+	* gtkgame.c (EvalChanged): called when values in EvalWidget changes.
+	* gtkgame.c (EvalGetValues): fetch values from EvalWidget.
+	* gtkgame.c (SettingsMenuActivate, SearchSpaceMenuActivate):
+	called when option menu is changed.
+
 Thu Feb 28 22:38:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c: Started a 'Set cube...' dialog box
