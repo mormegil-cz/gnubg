@@ -177,7 +177,6 @@ duplication of effort and to make sure our changes merge easily.
    "next move for player 0 marked doubtful".
 ** Problem with auto-analysis
    (X events must be disabled whilst analysing)
-** Change analysis submenu to a widget.
 
 
 ** Dialogs:
@@ -298,8 +297,6 @@ click will both use the 'first' dice.
 ** Allow the caller of the Rollout* functions to specify a callback function
   (to replace the current hard-coded GTKRollout()/output* calls).
 ** CommandSetRolloutRNG() in set.c needs to be finished. (gary)
-** Add an option to swap the players or flip the board vertically
-  (suggested by Peter Sochovsky).
 ** Consider making a move selection in the annotation window update the
   chequers to show that move (suggested by Peter Sochovsky).
 ** Investigate more sophisticated training techniques, e.g. real
