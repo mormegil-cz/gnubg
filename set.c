@@ -166,7 +166,7 @@ SetSeed ( const rng rngx, void *rngctx, char *sz ) {
 	    return;
 	}
 
-	InitRNGSeed( n, rngx );
+	InitRNGSeed( n, rngx, rngctx );
 	outputf( _("Seed set to %d.\n"), n );
 #endif /* HAVE_LIBGMP */
     } else 
