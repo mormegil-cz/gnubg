@@ -3288,6 +3288,7 @@ extern void CommandExportMatchHtml( char *sz ) {
 extern void CommandExportPositionHtml( char *sz ) {
 
     FILE *pf;
+    moverecord *pmr = getCurrentMoveRecord ();
 	
     sz = NextToken( &sz );
     
@@ -3316,16 +3317,16 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     HTMLBoardHeader ( pf, &ms, aszColorNameGNU,
                       getGameNumber ( plGame ),
-                      getMoveNumber ( plGame, plLastMove->plNext->p ) - 1 );
+                      getMoveNumber ( plGame, pmr ) - 1 );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
-                     exsExport.szHTMLPictureURL, "png",
+                    exsExport.szHTMLPictureURL, "png",
                     "gnu" );
 
-    if( plLastMove->plNext->p != NULL)
-        HTMLAnalysis ( pf, &ms, plLastMove->plNext->p,
-                       exsExport.szHTMLPictureURL, "png",
-                       "gnu" );
+    if( pmr )
+      HTMLAnalysis ( pf, &ms, pmr,
+                     exsExport.szHTMLPictureURL, "png",
+                     "gnu" );
     
     HTMLEpilogue ( pf, &ms, NULL );
 

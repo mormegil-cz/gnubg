@@ -1261,6 +1261,7 @@ extern void CommandExportMatchText( char *sz ) {
 extern void CommandExportPositionText( char *sz ) {
 
     FILE *pf;
+    moverecord *pmr = getCurrentMoveRecord ();
 	
     sz = NextToken( &sz );
     
@@ -1273,14 +1274,6 @@ extern void CommandExportPositionText( char *sz ) {
 	outputl( _("You must specify a file to export to (see `help export "
 		 "position text').") );
 	return;
-    }
-
-
-    if ( ! plLastMove || ! plLastMove->plNext || ! plLastMove->plNext->p ) {
-
-      outputl ( "Sorry, cannot export move!" );
-      return;
-
     }
 
 
@@ -1298,12 +1291,12 @@ extern void CommandExportPositionText( char *sz ) {
 
     TextBoardHeader ( pf, &ms, 
                       getGameNumber ( plGame ),
-                      getMoveNumber ( plGame, plLastMove->plNext->p ) - 1 );
+                      getMoveNumber ( plGame, pmr ) - 1 );
 
     printTextBoard( pf, &ms );
 
-    if( plLastMove->plNext->p != NULL)
-      TextAnalysis ( pf, &ms, plLastMove->plNext->p );
+    if( pmr )
+      TextAnalysis ( pf, &ms, pmr );
     
     TextEpilogue ( pf, &ms );
 
