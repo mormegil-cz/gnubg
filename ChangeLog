@@ -1,3 +1,8 @@
+Thu Sep  5 22:18:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* text.c (OutputCubeAnalysis): new parameter fOutputAlerts.
+	Change all callers.
+
 Thu Sep  5 19:33:42 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Play sounds under Windows.

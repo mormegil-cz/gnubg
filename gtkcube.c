@@ -696,7 +696,8 @@ GetContent ( cubehintdata *pchd ) {
                             pchd->pes,
                             &ci,
                             FALSE, FALSE,
-                            SKILL_NONE, SKILL_NONE );
+                            SKILL_NONE, SKILL_NONE,
+                            FALSE );
 
   return pc;
 
