@@ -539,6 +539,7 @@ extern void GTKSuspendInput()
 		grabIdSignal = gtk_signal_connect_after(GTK_OBJECT(pwGrab),
 				"key-press-event", GTK_SIGNAL_FUNC(gtk_true), NULL);
 	}
+
 	/* Don't check stdin here; readline isn't ready yet. */
 	GTKDisallowStdin();
 	suspendCount++;
@@ -550,10 +551,11 @@ extern void GTKResumeInput()
 	suspendCount--;
 	if (suspendCount == 0)
 	{
-		gtk_signal_disconnect(GTK_OBJECT(pwGrab), grabIdSignal);
-		gtk_grab_remove(grabbedWidget);
-		if (pwGrab != grabbedWidget)
-			g_print("** Problem in widget grabbing! **\n");
+		if (GTK_IS_WIDGET(grabbedWidget) && GTK_WIDGET_HAS_GRAB(grabbedWidget))
+		{
+			gtk_signal_disconnect(GTK_OBJECT(grabbedWidget), grabIdSignal);
+			gtk_grab_remove(grabbedWidget);
+		}
 	}
 
 	GTKAllowStdin();
