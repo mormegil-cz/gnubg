@@ -1776,6 +1776,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
                  always return legal moves */
               assert(FALSE);
             }
+            playSound( SOUND_CHEQUER );
           }
 
           return TRUE;
