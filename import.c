@@ -338,9 +338,34 @@ static void ParseMatMove( char *sz, int iPlayer ) {
                         sz + 3 );
 	    
 	    AddMoveRecord( pmr );
-	} else
+
+	    return;
+	} else {
+	    /* roll but no move found; check for a resignation */
+	    int anDice[ 2 ] = { pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] };
+	    
 	    free( pmr );
-    } else if( !strncasecmp( sz, "double", 6 ) ) {
+	    sz += 3;
+	    sz += strspn( sz, " \t" );
+	    
+	    if( !strncasecmp( sz, "win", 3 ) ) {
+		/* the player not on roll resigned -- record the roll */
+		pmr = malloc( sizeof( pmr->sd ) );
+		pmr->sd.mt = MOVE_SETDICE;
+		pmr->sd.sz = NULL;
+		pmr->sd.fPlayer = iPlayer;
+		pmr->sd.anDice[ 0 ] = anDice[ 0 ];
+		pmr->sd.anDice[ 1 ] = anDice[ 1 ];
+		pmr->sd.lt = LUCK_NONE;
+		pmr->sd.rLuck = ERR_VAL;
+		AddMoveRecord( pmr );
+		/* and now fall through and handle the resignation below */
+	    } else
+		return;
+	}
+    }
+	
+    if( !strncasecmp( sz, "double", 6 ) ) {
 	pmr = malloc( sizeof( pmr->d ) );
 	pmr->d.mt = MOVE_DOUBLE;
 	pmr->d.sz = NULL;

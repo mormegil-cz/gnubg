@@ -1,3 +1,11 @@
+Wed Nov 27 21:40:42 2002  Gary Wong  <gtw@gnu.org>
+
+	* import.c (ParseMatMove): Handle resignations from the player not
+	on roll (reported by hbgg@gmx.net).
+	
+	* analysis.c (AnalyzeMove): Add plGame parameter.  All callers changed.
+	* play.c (ApplyMoveRecord): Add plGame parameter.  All callers changed.
+
 Wed Nov 27 17:28:26 2002  Gary Wong  <gtw@gnu.org>
 
 	* dice.c (BBSCheckInitialSeed): If the first seed fails, try a few

@@ -209,7 +209,7 @@ functions:
   resigning when using the TTY interface.  We also need to calculate how
   many points a resignation was for.  See Little_Sister match
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
-  of both problems.
+  of both problems.  (This should be fixed for .mat format, but not FIBS.)
 ** "help next" (and "next <tab>") are incomplete.
 ** GtkTexi should try to load images from the same directory as the XML file.
 ** "save settings" when using the TTY interface will delete GTK settings
@@ -235,6 +235,8 @@ functions:
   commands which are derived directly from the analysis, which would give
   the behaviour the user seems to want, and allow us to implement David
   Montgomery's suggestion of allowing negative error thresholds.)
+** ShowBoard always shows "resigns" message as the player on roll, but it
+  might have been the opponent.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
