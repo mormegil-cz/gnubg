@@ -151,6 +151,8 @@ extern void CommandSetAutoRoll( char *sz ) {
 
 extern void CommandSetBoard( char *sz ) {
 
+    int an[ 2 ][ 25 ];
+    
     if( fTurn < 0 ) {
 	puts( "There must be a game in progress to set the board." );
 
@@ -163,9 +165,12 @@ extern void CommandSetBoard( char *sz ) {
 	return;
     }
 
-    ParsePosition( anBoard, sz );
+    if( ParsePosition( an, sz ) ) {
+	puts( "Illegal position." );
+	return;
+    }
 
-    /* FIXME check errors */
+    memcpy( anBoard, an, sizeof( an ) );
 
     ShowBoard();
 }
@@ -273,6 +278,11 @@ extern void CommandSetCubeUse( char *sz ) {
 		   "Use of the doubling cube is disabled." ) < 0 )
 	return;
 
+    if( !nMatchTo && fJacoby && !fCubeUse )
+	puts( "(Note that you'll have to disable the Jacoby rule if you want "
+	      "gammons and\nbackgammons to be scored -- see `help set "
+	      "jacoby')." );
+    
     if( fCrawford && fCubeUse )
 	puts( "(But the Crawford rule is in effect, so you won't be able to "
 	      "use it during\nthis game.)" );
@@ -317,6 +327,32 @@ extern void CommandSetCubeValue( char *sz ) {
 	}
 
     puts( "You must specify a legal cube value (see `help set cube value')." );
+}
+
+extern void CommandSetDelay( char *sz ) {
+#if !X_DISPLAY_MISSING
+    int n;
+
+    if( fX ) {
+	if( *sz && !strncasecmp( sz, "none", strlen( sz ) ) )
+	    n = 0;
+	else if( ( n = ParseNumber( &sz ) ) < 0 || n > 10000 ) {
+	    puts( "You must specify a legal move delay (see `help set "
+		  "delay')." );
+	    return;
+	}
+
+	if( n )
+	    printf( "All moves will be shown for at least %d millisecond%s.\n",
+		    n, n > 1 ? "s" : "" );
+	else
+	    puts( "Moves will not be delayed." );
+	
+	nDelay = n;
+    } else
+#endif
+	puts( "The `set delay' command applies only when using the X Window "
+	      "System." );
 }
 
 extern void CommandSetDice( char *sz ) {
@@ -576,7 +612,6 @@ extern void CommandSetScore( char *sz ) {
 
 extern void CommandSetSeed( char *sz ) {
 
-    /* FIXME allow setting very long seeds */
     int n;
     
     if( rngCurrent == RNG_MANUAL ) {
@@ -643,9 +678,14 @@ extern void CommandSetTurn( char *sz ) {
 
 extern void CommandSetJacoby( char *sz ) {
 
-  SetToggle( "jacoby", &fJacoby, sz, 
-	     "Will use the Jacoby rule for money sessions.",
-	     "Will not use the Jacoby rule for money sessions." );
+    if( SetToggle( "jacoby", &fJacoby, sz, 
+		   "Will use the Jacoby rule for money sessions.",
+		   "Will not use the Jacoby rule for money sessions." ) )
+	return;
+
+    if( fJacoby && !fCubeUse )
+	puts( "(Note that you'll have to enable the cube if you want gammons "
+	      "and backgammons\nto be scored -- see `help set cube use'.)" );
 }
 
 

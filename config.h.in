@@ -9,6 +9,9 @@
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
@@ -44,6 +47,9 @@
 
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H
+
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
 
 /* Define if you have the <pwd.h> header file.  */
 #undef HAVE_PWD_H

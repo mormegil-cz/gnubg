@@ -27,7 +27,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <math.h>
 #if HAVE_SYS_MMAN_H
 #include <sys/mman.h>
@@ -129,7 +131,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 			   char *szDatabase ) {
 
     FILE *pfWeights;
-    int h, fReadWeights = FALSE;
+    int h, fReadWeights = FALSE, idFirstError;
     char szFileVersion[ 16 ];
     char szPath[ PATH_MAX ];
     float r;
@@ -200,12 +202,15 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 
     if( !fReadWeights && szWeights ) {
 	if( !( pfWeights = fopen( szWeights, "r" ) ) ) {
+	    idFirstError = errno;
 	    sprintf( szPath, PKGDATADIR "/%s", szWeights );
-	    if( !( pfWeights = fopen( szPath, "r" ) ) )
-		/* FIXME both fopen()s have failed; report the error of the
-		   `more serious' (e.g. if one is an EPERM and the other
-		   a ENOENT, then report EPERM) */
+	    if( !( pfWeights = fopen( szPath, "r" ) ) ) {
+		/* try to report the more serious error (ENOENT is less
+		   important than, say, EPERM) */
+		if( errno == ENOENT && idFirstError != ENOENT )
+		    errno = idFirstError;
 		perror( szWeights );
+	    }
 	}
 
 	if( pfWeights ) {
@@ -817,6 +822,13 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 	arOutput[ OUTPUT_LOSEGAMMON ] = lose;
       }
     }
+
+    /* Backgammons cannot exceed gammons */
+    if( arOutput[ OUTPUT_WINBACKGAMMON ] > arOutput[ OUTPUT_WINGAMMON ] )
+	arOutput[ OUTPUT_WINBACKGAMMON ] = arOutput[ OUTPUT_WINGAMMON ];
+    
+    if( arOutput[ OUTPUT_LOSEBACKGAMMON ] > arOutput[ OUTPUT_LOSEGAMMON ] )
+	arOutput[ OUTPUT_LOSEBACKGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
 }
 
 extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
@@ -1419,8 +1431,6 @@ extern int FindBestMove( int nPlies, int anMove[ 8 ], int nDice0, int nDice1,
     movelist ml;
     move amCandidates[ SEARCH_CANDIDATES ];
 
-    /* FIXME return -1 and do not change anBoard on interrupt */
-    
     if( anMove )
 	for( i = 0; i < 8; i++ )
 	    anMove[ i ] = -1;
@@ -1576,12 +1586,38 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 
 static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
-    /* FIXME */
+    /* no-op -- nothing much we can say */
 }
 
 static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
-    /* FIXME */
+    int i, n, nOpp, an[ 2 ], f = FALSE;
+    
+    nOpp = PositionBearoff( anBoard[ 0 ] );
+    n = PositionBearoff( anBoard[ 1 ] );
+
+    strcpy( szOutput, "Rolls\tPlayer\tOpponent\n" );
+    
+    for( i = 0; i < 32; i++ ) {
+	an[ 0 ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
+	    ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
+
+	an[ 1 ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
+	    ( pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) | 1 ] << 8 );
+
+	if( an[ 0 ] || an[ 1 ] )
+	    f = TRUE;
+
+	if( f ) {
+	    if( !an[ 0 ] && !an[ 1 ] )
+		break;
+
+	    szOutput = strchr( szOutput, 0 );
+	
+	    sprintf( szOutput, "%5d\t%6.3f\t%8.3f\n", i, an[ 0 ] / 655.35,
+		     an[ 1 ] / 655.35 );
+	}
+    }
 }
 
 static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput ) {

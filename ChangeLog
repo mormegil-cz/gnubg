@@ -1,3 +1,33 @@
+Sat Jan  8 23:33:18 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* show.c (CommandShowPipCount): Take an optional position ID parameter.
+
+	* gnubg.c (main): Make --version list optional features supported.
+	Use XResourceManagerString instead of requesting property manually.
+
+	* positionid.c (CheckPosition): New function.
+	(PositionFromKey, PositionFromID): Fail if the position specified
+	is illegal.
+
+	* eval.c (DumpBearoff1): Wrote function.
+
+	* eval.c (SanityCheck): Don't evaluate more backgammons than gammons.
+
+	* gnubg.c: Jacoby rule defaults to off (until we have proper cube
+	evaluations).
+
+	* play.c (NextTurn): Partially implemented delay (some problems
+	remaining).
+	* set.c (CommandSetDelay): New function.
+
+	* set.c (CommandSetCubeUse, CommandSetJacoby): Print warnings if
+	the user tries to enable the Jacoby rule and disable cube use.
+	
+	* gnubg.c (main): add rl_callback_handler_remove to the atexit list.
+	
+	* xboard.c (BoardPoint, BoardPointer): Allow clicking on the cube to
+	double.
+
 2000-01-09  Joern Thyssen  <jth@localhost.localdomain>
 
 	* play.c (ComputerTurn): Call Utility for calculation of equity
@@ -18,10 +48,13 @@ Sat Jan  8 14:16:08 2000  Gary Wong  <gary@cs.arizona.edu>
 	parameter fPartial, and include incomplete moves in the list
 	if set.
 	* positionid.c, positionid.h (EqualBoards): New function.
+	
 	* set.c (CommandSetCubeCentre, CommandSetCubeOwner,
 	CommandSetCubeValue): New functions.
+	
 	* set.c (CommandSetCubeUse): If the cube had been offered and
 	cube use is being disabled, go back to the player on roll.
+	
 	* gnubg.c (main): Initialise the players' names to "gnubg" and
 	the user's login name.
 	* gnubg.c (ShowBoard): Label the players' names with X or O in the
@@ -45,22 +78,23 @@ Wed Jan  5 22:20:09 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* play.c (NextTurn): ignore gammons when appropriate under the
 	Jacoby rule.
+	
 	* gnubg.c (ShowBoard): when no game is in progress under X, display
 	an empty board window.
+	
 	* set.c (CommandSetCubeUse): New function.
 	* gnubg.c (SetToggle): Add "enabled" and "disabled" (along with
 	yes/no, on/off, true/false).
+	
 	* play.c (NextTurn): Don't autoroll if the opponent has just
 	doubled.
+	
 	* set.c (CommandSetAutoDoubles): New function.
 	* play.c (NewGame): Apply automatic doubles when appropriate.
 
 Mon Jan  3 21:13:22 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* dice.c (InitRNG): Use /dev/random for initial seed if possible.
-
-Mon Jan  3 20:15:46 2000  Gary Wong  <gary@cs.arizona.edu>
-
 	* set.c (SetRNG): Don't call CommandSetSeed() when changing
 	to manual dice.
 
@@ -108,6 +142,7 @@ Sun Dec 19 22:57:49 1999  Gary Wong  <gary@cs.arizona.edu>
 	* gnubg.c (SaveGame, CommandSaveMatch): finished saving.
 	* eval.c (SaveMoves): store all bearoff moves as destination
 	point 0 (previous patch to do this was incomplete).
+	
 	* play.c (FreeGame): New function.
 	* play.c (FreeMatch): New function.
 
@@ -186,7 +221,6 @@ Fri Dec 10 18:19:16 1999  Gary Wong  <gary@cs.arizona.edu>
 Thu Dec  9 17:24:14 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* isaac.c: New file.  Added support for ISAAC dice generator.
-	
 	* dice.c: Added support for ISAAC.
 
 Fri Dec  3 17:07:35 1999  Gary Wong  <gary@cs.arizona.edu>

@@ -14,8 +14,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Add cube handling for computer player.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
   progress.  To do it properly requires improved input routines.
-** Print sensible warnings if the user tries to enable the Jacoby rule
-  and cubeless play at the same time.
 
 * Command interface:
 ** Check "show" exists for every "set"!
@@ -51,7 +49,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow copy/paste and drag & drop of the board ID in the board window. (gary)
 ** Make sure the board window behaves properly with ICCCM things.  Maybe
   some of this should wait for Gnome.
-** Allow doubling by clicking the cube in the board window. (gary)
 ** Add an option to slow down display if moves happen too quickly (e.g.
   computer move, unable to move, auto bearoff, etc.)
 ** Add a board edit mode.  What would be the best semantics for the
@@ -75,17 +72,22 @@ duplication of effort and to make sure our changes merge easily.
   Joseph Heled has improved performance here.
 ** Think about what should happen with variance reduction in Rollout()
   and RolloutGame() when a probability turns out <0 or >1.
-** When X and readline are enabled, using the board window to play while
-  the rng is set to manual really confuses the terminal (readline has
-  left the TTY in a silly state while GetManualDice() is trying to
-  read).  To fix this properly will take far cleverer input handling
-  (we want to be responsive to X events and stdin, which more or less
-  means that while waiting for any kind of input we must be in
-  the top level HandleEvents(); this makes it very difficult for routines
-  like GetManualDice which want to block until input is ready).  Also,
-  what happens when the user types half a command and then moves with
-  the mouse which causes the manual dice prompt?  All this mess can
-  probably wait for Gnome. (gary)
+** When X and readline are enabled, using the board window to play
+  while the rng is set to manual really confuses the terminal
+  (readline has left the TTY in a silly state while GetManualDice() is
+  trying to read).  It also means that the interrupt key won't work on
+  commands initiated from the mouse.  To fix this properly will take
+  far cleverer input handling (we want to be responsive to X events
+  and stdin, which more or less means that while waiting for any kind
+  of input we must be in the top level HandleEvents(); this makes it
+  very difficult for routines like GetManualDice which want to block
+  until input is ready).  Also, what happens when the user types half
+  a command and then moves with the mouse which causes the manual dice
+  prompt?  All this mess can probably wait for Gnome. (gary)
+** The interrupt key doesn't work from the board window during a long
+  computation (the process is too busy doing other things and never
+  notices the key press in the event queue).  This is tricky to fix
+  and probably needs better event handling everywhere.
 ** CommandRedouble does not work according to international backgammon
    rules. See <URI:"http://www.bkgm.com/rules.html"> (search for Beaver).
    If I beaver, I keep the cube and my opponent may drop the beaver 
