@@ -2373,7 +2373,7 @@ extern void CommandSetEvalMoveFilter( char *sz ) {
 
 extern void CommandSetAnalysisMoveFilter( char *sz ) {
 
-  SetMoveFilter ( sz, aamfEval );
+  SetMoveFilter ( sz, aamfAnalysis );
 
 }
 
