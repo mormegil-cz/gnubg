@@ -1,3 +1,7 @@
+Mon Jul 02 09:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* play.c: Fixed 3d quick draw bug
+
 Sun Aug 01 00:40:47 UTC  2004   Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubgmodule.c - calls to PythonGame had arguments in different

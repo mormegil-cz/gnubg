@@ -948,10 +948,6 @@ static int NewGame( void ) {
 
     outputx();
 
-#if USE_BOARD3D
-	RestrictiveRedraw();
-#endif
-    
     AddGame( pmr );
     
     pmr = NewMoveRecord();
@@ -968,6 +964,10 @@ static int NewGame( void ) {
 #endif
   
     AddMoveRecord( pmr );
+
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
 
 #if USE_TIMECONTROL
     HitGameClock ( &ms );
