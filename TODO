@@ -9,6 +9,8 @@ duplication of effort and to make sure our changes merge easily.
   positions, prime-vs-prime...
 *** Consider meta-pi scheme for using output from multiple nets.
 ** Add partial searching.
+** See http://www.oasya.com/CubefulAdvantages.html for example of
+  cubeful evaluation.
 
 * Game play:
 ** Add cube handling for computer player.
@@ -94,6 +96,8 @@ duplication of effort and to make sure our changes merge easily.
    (or even raccoon).
    However, the program treats the beaver as an ordinary redouble and
    I don't keep the cube.
+** RolloutGame() looks as if it will attempt nonsensical variance
+  reduction when nPlies is 0 -- check it.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
