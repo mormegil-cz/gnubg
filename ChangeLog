@@ -1,3 +1,8 @@
+Sat Aug 30 20:20:39 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* formatgs.c (errorRateMP): report errors rate per decision
+	in millipoints.
+
 Sat Aug 30 20:06:47 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Unify handling of match and game statistics for html export,

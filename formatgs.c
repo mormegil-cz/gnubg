@@ -66,6 +66,24 @@ errorRate( const float rn, const float ru, const matchstate *pms ) {
 }
 
 static char *
+errorRateMP( const float rn, const float ru, const matchstate *pms ) {
+
+  if ( rn != 0.0f ) {
+
+    if ( pms->nMatchTo ) 
+      return g_strdup_printf( "%+6.2f (%+7.3f%%)",
+                              1000.0f * rn, ru * 100.0f );
+    else
+      return g_strdup_printf( "%+6.2f (%+7.3f)",
+                              1000.0f * rn, ru );
+
+  }
+  else
+    return g_strdup_printf( "%+6.3f", 0.0f );
+
+}
+
+static char *
 cubeEntry( const int n, const float rn, const float ru, 
            const matchstate *pms ) {
 
@@ -166,7 +184,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
       aasz[ 0 ] = g_strdup( _("Error rate (per move)") );
 
       for ( i = 0; i < 2; ++i )
-        aasz[ i + 1 ] = errorRate( 
+        aasz[ i + 1 ] = errorRateMP( 
               -aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ],
               -aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ UNNORMALISED ],
               pms );
@@ -274,7 +292,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
       aasz[ 0 ] = g_strdup( _("Error rate (per cube decision)") );
 
       for ( i = 0; i < 2; ++i )
-        aasz[ i + 1 ] = errorRate( 
+        aasz[ i + 1 ] = errorRateMP( 
               -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ],
               -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ UNNORMALISED ],
               pms );
@@ -339,7 +357,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
       for ( i = 0; i < 2; ++i )
         if ( psc->anTotalMoves[ i ] ) 
-          aasz[ i + 1 ] = errorRate( psc->arLuck[ i ][ 0 ] / 
+          aasz[ i + 1 ] = errorRateMP( psc->arLuck[ i ][ 0 ] / 
                                      psc->anTotalMoves[ i ], 
                                      psc->arLuck[ i ][ 1 ] / 
                                      psc->anTotalMoves[ i ], 
@@ -393,7 +411,7 @@ formatGS( const statcontext *psc, const matchstate *pms,
       aasz[ 0 ] = g_strdup( _("Error rate (per decision)") );
 
       for ( i = 0; i < 2; ++i )
-        aasz[ i + 1 ] = errorRate( 
+        aasz[ i + 1 ] = errorRateMP( 
               -aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ],
               -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ],
               pms );
