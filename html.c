@@ -3090,11 +3090,27 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr,
 static void
 HTMLPrintMI( FILE *pf, const char *szTitle, const char *sz ) {
 
+  gchar **ppch;
+  gchar *pchToken;
+  int i;
+
   if ( ! sz || ! *sz )
     return;
 
-  fprintf( pf, "%s: %s<br />\n", szTitle, sz );
+  fprintf( pf, "<tr valign=\"top\">"
+           "<td style=\"padding-right: 2em\">%s</td><td>", szTitle );
 
+  ppch = g_strsplit( sz, "\n", -1 );
+  for ( i = 0; pchToken = ppch[ i ]; ++i ) {
+    if ( i )
+      fputs( "<br />\n", pf );
+    fputs( pchToken, pf );
+  }
+
+  g_strfreev( ppch );
+
+  fputs( "</td></tr>\n", pf );
+  
 }
 
 static void
@@ -3118,15 +3134,17 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
 
   fprintf ( pf, "<h2>%s</h2>\n", _("Match Information") );
 
-  fputs ( "<p>\n", pf );
+  fputs ( "<table border=\"0\">\n", pf );
 
   /* ratings */
 
   for ( i = 0; i < 2; ++i )
-    if ( pmi->pchRating[ i ] )
-      fprintf ( pf, _("%s's rating: %s<br />\n"), 
-                ap[ i ].szName, 
-                pmi->pchRating[ i ] ? pmi->pchRating[ i ] : _("n/a") );
+    if ( pmi->pchRating[ i ] ) {
+      gchar *pch = g_strdup_printf( _("%s's rating"), ap[ i ].szName );
+      HTMLPrintMI( pf, pch, 
+                   pmi->pchRating[ i ] ? pmi->pchRating[ i ] : _("n/a") );
+      g_free( pch );
+    }
 
   /* date */
 
@@ -3136,8 +3154,7 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
     tmx.tm_mon = pmi->nMonth - 1;
     tmx.tm_mday = pmi->nDay;
     strftime ( sz, sizeof ( sz ), _("%B %d, %Y"), &tmx );
-    fprintf ( pf, _("Date: %s<br />\n"), sz ); 
-
+    HTMLPrintMI( pf, _("Date"), sz );
   }
 
   /* event, round, place and annotator */
@@ -3148,7 +3165,7 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
   HTMLPrintMI( pf, _("Annotator"), pmi->pchAnnotator );
   HTMLPrintMI( pf, _("Comment"), pmi->pchComment );
 
-  fputs ( "</p>\n", pf );
+  fputs ( "</table>\n", pf );
 
   fputs ( "\n<!-- End Match Information -->\n\n", pf );
 

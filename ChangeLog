@@ -1,3 +1,12 @@
+Sat Apr 17 10:58:18 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Save leading comment lines in the match information when 
+	reading Jellyfish .mat files
+	(e.g., the information Dueller adds to .mat files)
+
+	* import.c (ImportMat): same comments.
+	* html.c (HTMLMatchInfo): rearrange match info into a <table>
+
 Fri Apr 16 22:02:23 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Add built-in support for mec

@@ -490,7 +490,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
     moverecord *pmr;
     int i, c;
     static int fBeaver = FALSE;
-    
+
     sz += strspn( sz, " \t" );
 
     if( !*sz )
@@ -873,29 +873,52 @@ extern int ImportMat( FILE *pf, char *szFilename ) {
 
     int n, nLength, i;
     char ch;
+    gchar *pchComment = NULL;
+    char szLine[ 1024 ];
 
     fWarned = fPostCrawford = FALSE;
     
     while( 1 ) {
-	if( ( n = fscanf( pf, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
-			  &ch ) ) == EOF ) {
-	    outputerrf( _("%s: not a valid .mat file"), szFilename );
-	    return -1;
-	} else if( n > 1 )
-	    break;
 
-	/* discard line */
-	while( ( n = getc( pf ) ) != '\n' && n != EOF )
-	    ;
+      if ( feof( pf ) || ! fgets( szLine, sizeof ( szLine ), pf ) ) {
+        outputerrf( _("%s: not a valid .mat file"), szFilename );
+        g_free( pchComment );
+        return -1;
+      }
+
+      if ( *szLine == '#' || *szLine == ';' ) {
+        /* comment */
+        char *pchOld = pchComment;
+        char *pch;
+	if( ( pch = strpbrk( szLine, "\n\r" ) ) )
+          *pch = 0;
+        pch = szLine + 1;
+        while ( isspace( *pch ) )
+          ++pch;
+        if ( *pch ) {
+          pchComment = g_strconcat( pchComment ? pchComment : "", 
+                                    pch, "\n", NULL );
+          g_free( pchOld );
+        }
+      }
+      else if ( ( n = sscanf( szLine, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
+                              &ch ) ) > 1 )
+        /* this appears to be a valid JF mat file */
+        break;
+
     }
     
     if( ms.gs == GAME_PLAYING && fConfirm ) {
-	if( fInterrupt )
-	    return -1;
+      if( fInterrupt ) {
+        g_free( pchComment );
+        return -1;
+      }
 	    
-	if( !GetInputYN( _("Are you sure you want to import a saved match, "
-			 "and discard the game in progress? ") ) )
-	    return -1;
+      if( !GetInputYN( _("Are you sure you want to import a saved match, "
+                         "and discard the game in progress? ") ) ) {
+        g_free( pchComment );
+        return -1;
+      }
     }
 
 #if USE_GTK
@@ -905,6 +928,12 @@ extern int ImportMat( FILE *pf, char *szFilename ) {
     
     FreeMatch();
     ClearMatch();
+
+    if ( pchComment ) 
+      mi.pchComment = strdup( pchComment ); /* no need to free mi.pchComment 
+                                               as it's already done in 
+                                               ClearMatch */
+    g_free( pchComment );
 
     while( 1 ) {
         if( ( n = fscanf( pf, " Game %d\n", &i ) ) == 1 ) {
