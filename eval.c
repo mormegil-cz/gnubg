@@ -2026,7 +2026,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ] )
   }
 
 
-  if ( ( nBack < 5 && nOppBack < 5 ) || ( fBearoffOS < 0 ) ) {
+  if ( ( nBack < 6 && nOppBack < 6 ) || ( fBearoffOS < 0 ) ) {
     /* small bear off database */
 
     if( PositionBearoff( anBoard[ 0 ], 6 ) > 923 ||
