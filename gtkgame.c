@@ -3514,17 +3514,53 @@ GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
     return n;
 }
 #endif
-static void StringOK( GtkWidget *pw, char **ppch ) {
-
-    *ppch = gtk_editable_get_chars( GTK_EDITABLE( pwEntry ), 0, -1 );
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-}
 
 /* Show dynamic help as command entered */
 extern void ShowHelp(GtkWidget *pwText, char* pStr);
 GtkWidget *pwHelpText, *vscrollbar, *pwHelpbox;
 int showHelp = 0;
+#define NUM_CMD_HISTORY 10
+char* cmdHistory[NUM_CMD_HISTORY];
+int numHistory = 0;
+
+static void CommandOK( GtkWidget *pw, char **ppch ) {
+
+	int i, found = -1;
+    *ppch = gtk_editable_get_chars( GTK_EDITABLE( pwEntry ), 0, -1 );
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+	/* Update command history */
+
+	/* See if already in history */
+	for (i = 0; i < numHistory; i++)
+	{
+		if (!strcasecmp(*ppch, cmdHistory[i]))
+		{
+			found = i;
+			break;
+		}
+	}
+	if (found != -1)
+	{	/* Remove old entry */
+		free(cmdHistory[found]);
+		numHistory--;
+		for (i = found; i < numHistory; i++)
+			cmdHistory[i] = cmdHistory[i + 1];
+	}
+
+	if (numHistory == NUM_CMD_HISTORY)
+	{
+		free(cmdHistory[NUM_CMD_HISTORY - 1]);
+		numHistory--;
+	}
+	for (i = numHistory; i > 0; i--)
+		cmdHistory[i] = cmdHistory[i - 1];
+
+	cmdHistory[0] = malloc(strlen(*ppch) + 1);
+	strcpy(cmdHistory[0], *ppch);
+	numHistory++;
+}
 
 static void CommandTextChange(GtkEntry *entry, gpointer user_data)
 {
@@ -3567,14 +3603,31 @@ static void ShowHelpToggled(GtkWidget *widget, gpointer data)
 static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 
     char *sz = NULL;
-	GtkWidget *pwVbox, *pwHbox, *pwShowHelp;
+	GList *glist;
+	int i;
+	GtkWidget *pwVbox, *pwHbox, *pwShowHelp, *cmdEntryCombo;
     GtkWidget *pwDialog = GTKCreateDialog( szTitle, DT_QUESTION,
-					GTK_SIGNAL_FUNC( StringOK ), &sz ),
+					GTK_SIGNAL_FUNC( CommandOK ), &sz ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
-    pwEntry = gtk_entry_new();
+	cmdEntryCombo = gtk_combo_new();
+	gtk_combo_set_value_in_list(GTK_COMBO(cmdEntryCombo), FALSE, TRUE);
+
+	gtk_combo_disable_activate(GTK_COMBO(cmdEntryCombo));
+	pwEntry = GTK_COMBO(cmdEntryCombo)->entry;
+
+	glist = NULL;
+	for (i = 0; i < numHistory; i++)
+		glist = g_list_append(glist, cmdHistory[i]);
+	if (glist)
+	{
+		gtk_combo_set_popdown_strings(GTK_COMBO(cmdEntryCombo), glist);
+		g_list_free(glist);
+	}
+
     gtk_entry_set_text( GTK_ENTRY( pwEntry ), szDefault );
 	gtk_signal_connect(GTK_OBJECT(pwEntry), "changed", GTK_SIGNAL_FUNC(CommandTextChange), 0);
+	gtk_signal_connect(GTK_OBJECT(pwEntry), "activate", CommandOK, &sz);
 
 	pwVbox = gtk_vbox_new(FALSE, 0);
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -3584,7 +3637,7 @@ static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
 	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwPrompt, FALSE, FALSE, 0);
-	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwEntry, TRUE, TRUE, 0);
+	gtk_box_pack_start( GTK_BOX( pwHbox ), cmdEntryCombo, FALSE, FALSE, 0);
 
 	pwHbox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHbox, FALSE, FALSE, 0);
@@ -3605,8 +3658,6 @@ static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    gtk_signal_connect_after( GTK_OBJECT( pwEntry ), "activate",
-			GTK_SIGNAL_FUNC( StringOK ), &sz );
 
     gtk_widget_grab_focus( pwEntry );
     gtk_widget_show_all( pwDialog );

@@ -3334,6 +3334,7 @@ static command *FindHelpCommand( command *pcBase, char *sz,
 	return pc;
 }
 
+#if USE_GUI
 static char* CheckCommand(char *sz, command *ac)
 {
 	command *pc;
@@ -3434,6 +3435,7 @@ extern void ShowHelp(GtkWidget *pwText, char* pStr)
 	free(pTemp);
 	gtk_text_thaw(GTK_TEXT( pwText ));
 }
+#endif
 
 extern void CommandHelp( char *sz ) {
 

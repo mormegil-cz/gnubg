@@ -1949,9 +1949,6 @@ DesignAddTitle ( boarddesign *pbde ) {
 
   gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-/*
-  gtk_signal_connect_after( GTK_OBJECT( pwEntry ), "activate",
-  GTK_SIGNAL_FUNC( StringOK ), &sz );*/
   
   gtk_widget_grab_focus( pwDesignAddTitle );
   gtk_widget_show_all( pwDialog );
