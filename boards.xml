@@ -131,57 +131,87 @@
 
    <board-design>
 
-     <about> 
-         <title>Red Green</title>  
-         <author>Nardy Pillards</author>
+      <about>
+         <title>Crisloid</title>
+         <author>Gary Wong</author>
       </about>
-  
+
       <design>
-         board=#6C9856;0.0
-         border=#004000
-         wood=walnut
+         board=#AE7621;0.09
+         border=#005F00
+         wood=paint
          hinges=n
-         light=51;60
+         light=150;50
          shape=0.2
-         chequers0=#98BFA5;1.00;3.10;1.00;51.00
-         chequers1=#982533;1.00;3.00;1.00;41.00
-         dice0=#B4E2B4;1.00;3.00;y 
-         dice1=#5A2D31;1.00;30.00;y
-         dot0=#005600 
-         dot1=#FAF208
-         cube=#D6BA00
-         points0=#CAFDDB;0.00
-         points1=#B52D3C;0.00   
-      </design> 
+         chequers0=#005F00;1.00;1.50;1.00;100.00
+         chequers1=#BFBFAF;1.00;1.50;1.00;100.00
+         dice0=#005F00;1.00;100.00;y
+         dice1=#DFDFCF;1.00;100.00;n
+         dot0=#FFFFFF
+         dot1=#007F00
+         cube=#E5E5E5
+         points0=#007F00;0.09
+         points1=#FFFFFF;0.09
+
+      </design>
 
    </board-design>
 
 
    <board-design>
 
+      <about>
+         <title>Crystal</title>
+         <author>Gary Wong</author>
+      </about>
+
+      <design>
+         board=#8FAFB7;0.00
+         border=#005F00
+         wood=redwood
+         hinges=y
+         light=150;50
+         shape=1.0
+         chequers0=#FFFFFF;0.51;1.50;1.00;100.00
+         chequers1=#000000;0.44;1.50;1.00;100.00
+         dice0=#005F00;1.00;100.00;y
+         dice1=#7C7C7C;1.00;100.00;n
+         dot0=#4E4E4E
+         dot1=#DDDDDD
+         cube=#E5E5E5
+         points0=#D7DFDF;0.00
+         points1=#878E8F;0.00
+
+   </design>
+
+   </board-design>
+
+
+   <board-design>
+  
      <about> 
-         <title>Red/Blue - Gold/Silver</title>  
-         <author>Ian Shaw</author>
+         <title>Daily Gammon</title>
+         <author>Nardy Pillards</author>
       </about>
   
       <design>
-         board=#020532;0.20
-         border=#004000
-         wood=fir
-         hinges=y
-         light=150;50
-         shape=0.5
-         chequers0=#B4B5CA;1.00;2.10;0.90;17.20
-         chequers1=#DCA52B;1.00;1.50;0.50;3.00
-         dice0=#C3C3C3;0.20;3.00;n
-         dice1=#0C0C19;1.00;30.00;y
-         dot0=#FEFFFE
-         dot1=#E5E5E5
-         cube=#E5E5E5
-         points0=#FF6060;0.20
-         points1=#7EA9CA;0.20 
+         board=#FFFCC4;0,00
+         border=#318567
+         wood=paint
+         hinges=n
+         light=60;66
+         shape=1.0 
+         chequers0=#383BAD;1.00;2.00;0.00;17.00
+         chequers1=#D0BF24;1.00;1.00;0.00;3.00  
+         dice0=#C3C3C3;0.00;3.00;y 
+         dice1=#DCD027;0.00;3.00;y 
+         dot0=#FFFFFF
+         dot1=#000000
+         cube=#AFE5A8 
+         points0=#49D441;0.00   
+         points1=#0A6810;0.00   
       </design> 
-
+  
    </board-design>
 
    <board-design>
@@ -242,33 +272,6 @@
    <board-design>
   
      <about> 
-         <title>Daily Gammon</title>
-         <author>Nardy Pillards</author>
-      </about>
-  
-      <design>
-         board=#FFFCC4;0,00
-         border=#318567
-         wood=paint
-         hinges=n
-         light=60;66
-         shape=1.0 
-         chequers0=#383BAD;1.00;2.00;0.00;17.00
-         chequers1=#D0BF24;1.00;1.00;0.00;3.00  
-         dice0=#C3C3C3;0.00;3.00;y 
-         dice1=#DCD027;0.00;3.00;y 
-         dot0=#FFFFFF
-         dot1=#000000
-         cube=#AFE5A8 
-         points0=#49D441;0.00   
-         points1=#0A6810;0.00   
-      </design> 
-  
-   </board-design>
-
-   <board-design>
-  
-     <about> 
          <title>Jellyfish</title>
          <author>Oeystein Johansen</author>
       </about>
@@ -292,6 +295,61 @@
       </design> 
   
    </board-design>
+
+   <board-design>
+
+     <about> 
+         <title>Red/Blue - Gold/Silver</title>  
+         <author>Ian Shaw</author>
+      </about>
+  
+      <design>
+         board=#020532;0.20
+         border=#004000
+         wood=fir
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#B4B5CA;1.00;2.10;0.90;17.20
+         chequers1=#DCA52B;1.00;1.50;0.50;3.00
+         dice0=#C3C3C3;0.20;3.00;n
+         dice1=#0C0C19;1.00;30.00;y
+         dot0=#FEFFFE
+         dot1=#E5E5E5
+         cube=#E5E5E5
+         points0=#FF6060;0.20
+         points1=#7EA9CA;0.20 
+      </design> 
+
+   </board-design>
+
+   <board-design>
+
+     <about> 
+         <title>Red Green</title>  
+         <author>Nardy Pillards</author>
+      </about>
+  
+      <design>
+         board=#6C9856;0.0
+         border=#004000
+         wood=walnut
+         hinges=n
+         light=51;60
+         shape=0.2
+         chequers0=#98BFA5;1.00;3.10;1.00;51.00
+         chequers1=#982533;1.00;3.00;1.00;41.00
+         dice0=#B4E2B4;1.00;3.00;y 
+         dice1=#5A2D31;1.00;30.00;y
+         dot0=#005600 
+         dot1=#FAF208
+         cube=#D6BA00
+         points0=#CAFDDB;0.00
+         points1=#B52D3C;0.00   
+      </design> 
+
+   </board-design>
+
 
    <board-design>
 

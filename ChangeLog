@@ -1,7 +1,9 @@
-Mon Dec 23 17:54:41 2002  Gary Wong  <gtw@gnu.org>
+Mon Dec 23 18:48:13 2002  Gary Wong  <gtw@gnu.org>
 
 	* rollout.c (RolloutDice): Generate quasi-random dice for initial
 	positions.
+
+	* boards.xml: Add a couple of designs.
 
 Mon Dec 23 19:53:40 2002  Jørn Thyssen  <jth@gnubg.org>
 
