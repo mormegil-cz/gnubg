@@ -131,6 +131,7 @@ strdup.c
 text.c
 timecontrol.c
 timecontrol.h
+timer.c
 userrng.c
 xboard.c
 xboard.h
@@ -146,5 +147,4 @@ board3d/model.c
 board3d/mylist.c
 board3d/shadow.c
 board3d/texture3d.c
-board3d/timer.c
 board3d/widget3d.c
