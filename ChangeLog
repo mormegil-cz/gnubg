@@ -1,3 +1,7 @@
+Tue Nov 02 22:03:30 2004 CET  Petr Kadlec <mormegil@centrum.cz>
+
+        * gtkprefs.c: Fixed an issue when not using HAVE_LIBXML2
+
 Wed Oct 27 01:20:45 2004   Oystein Johansen <oystein@gnubg.org>
 	
 	* boards.xml: Add design by Ian Curtis.

@@ -185,14 +185,10 @@ free_board_designs ( GList *pl ) {
 
 }
 
-#endif /* HAVE_LIBXML2 */
-
-#if HAVE_LIBXML2
 static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
 			  GdkEventButton *pev, gpointer unused );
 static void DesignUnselect( GtkCList *pw, gint nRow, gint nCol,
 			  GdkEventButton *pev, gpointer unused );
-#endif
 
 void ParsePreferences(boarddesign *pbde, renderdata* prdNew)
 {
@@ -223,6 +219,7 @@ static boarddesign* FindDesign (renderdata* prdDesign)
 	}
 	return NULL;
 }
+#endif /* HAVE_LIBXML2 */
 
 void SetTitle()
 {	/* Update dialog title to include design name + author */
