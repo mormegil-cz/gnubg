@@ -393,120 +393,120 @@ extern void CommandExternal( char *sz ) {
     ExternalUnbind( sz );
 
     while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) )
-	if( ParseFIBSBoard( szCommand, anBoard, szName, szOpp, &nMatchTo,
-                            anScore, anScore + 1, anDice, &nCube,
-			    &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) )
-          outputl( _("Warning: badly formed board from external controller.") );
-	else {
+      if( ParseFIBSBoard( szCommand, anBoard, szName, szOpp, &nMatchTo,
+			  anScore, anScore + 1, anDice, &nCube,
+			  &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) )
+	outputl( _("Warning: badly formed board from external controller.") );
+      else {
 
-            if ( ! fTurn )
-              SwapSides( anBoard );
+	if ( ! fTurn )
+	  SwapSides( anBoard );
 
-	    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
-			  fCrawford, fJacoby, nBeavers, bgvDefault ); 
+	SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
+		      fCrawford, fJacoby, nBeavers, bgvDefault ); 
 
-	    memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
+	memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
 
-	    if ( fDoubled > 0 ) {
+	if ( fDoubled > 0 ) {
 
-		/* take decision */
-		if( GeneralCubeDecision( aarOutput, aarStdDev,
-					 aarsStatistics, anBoard, &ci,
-					 &esEvalCube, NULL, NULL ) < 0 )
-		    break;
+	  /* take decision */
+	  if( GeneralCubeDecision( aarOutput, aarStdDev,
+				   aarsStatistics, anBoard, &ci,
+				   &esEvalCube, NULL, NULL ) < 0 )
+	    break;
 	  
-		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {
-		case DOUBLE_PASS:
-		case TOOGOOD_PASS:
-		case REDOUBLE_PASS:
-		case TOOGOODRE_PASS:
-		    strcpy( szResponse, "drop" );
-		    break;
+	  switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
+	  case DOUBLE_PASS:
+	  case TOOGOOD_PASS:
+	  case REDOUBLE_PASS:
+	  case TOOGOODRE_PASS:
+	    strcpy( szResponse, "drop" );
+	    break;
 
-		case NODOUBLE_BEAVER:
-		case DOUBLE_BEAVER:
-		case NO_REDOUBLE_BEAVER:
-		    strcpy( szResponse, "beaver" );
-		    break;
+	  case NODOUBLE_BEAVER:
+	  case DOUBLE_BEAVER:
+	  case NO_REDOUBLE_BEAVER:
+	    strcpy( szResponse, "beaver" );
+	    break;
 		    
-		default:
-		    strcpy( szResponse, "take" );
-		}
+	  default:
+	    strcpy( szResponse, "take" );
+	  }
 
-	    } else if ( fDoubled < 0 ) {
+	} else if ( fDoubled < 0 ) {
               
-                /* if opp wants to resign (extension to FIBS board) */
+	  /* if opp wants to resign (extension to FIBS board) */
 
-		float arOutput[ NUM_ROLLOUT_OUTPUTS ];
-		float rEqBefore, rEqAfter;
-		const float epsilon = 1.0e-6;
+	  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+	  float rEqBefore, rEqAfter;
+	  const float epsilon = 1.0e-6;
 
-		if ( GeneralEvaluationE( arOutput, anBoard, &ci,
-		    &esEvalCube.ec ) )
-		    break;
+	  if ( GeneralEvaluationE( arOutput, anBoard, &ci,
+				   &esEvalCube.ec ) )
+	    break;
 
-		rEqBefore = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
+	  rEqBefore = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
 
-		/* I win 100% if opponent resigns */
-		arOutput[ 0 ] = 1.0; 
-		arOutput[ 1 ] = arOutput[ 2 ] =
-			arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
+	  /* I win 100% if opponent resigns */
+	  arOutput[ 0 ] = 1.0; 
+	  arOutput[ 1 ] = arOutput[ 2 ] =
+	    arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
 
-		/* resigned at least a gammon */
-		if( fDoubled <= -2 ) arOutput[ 1 ] = 1.0;
+	  /* resigned at least a gammon */
+	  if( fDoubled <= -2 ) arOutput[ 1 ] = 1.0;
 
-		/* resigned a backgammon */
-		if( fDoubled == -3 ) arOutput[ 2 ] = 1.0;
+	  /* resigned a backgammon */
+	  if( fDoubled == -3 ) arOutput[ 2 ] = 1.0;
 
-		InvertEvaluation ( arOutput );
-      		rEqAfter = Utility ( arOutput, &ci );
-		if ( nMatchTo ) rEqAfter = eq2mwc( rEqAfter, &ci );
+	  InvertEvaluation ( arOutput );
+	  rEqAfter = Utility ( arOutput, &ci );
+	  if ( nMatchTo ) rEqAfter = eq2mwc( rEqAfter, &ci );
 
-		/* comment this out when debugging is done 
-		printf ("# equity before resignation: %.10f\n"
-			"# equity after resignation : %.10f\n",
-			rEqBefore, rEqAfter );*/
+	  /* comment this out when debugging is done 
+	     printf ("# equity before resignation: %.10f\n"
+	     "# equity after resignation : %.10f\n",
+	     rEqBefore, rEqAfter );*/
 
-		/* if opponent gives up equity by resigning */
-		if( ( rEqBefore - rEqAfter ) >= epsilon )
-		    strcpy( szResponse, "accept" );
-		else
-		    strcpy( szResponse, "reject" );
+	  /* if opponent gives up equity by resigning */
+	  if( ( rEqBefore - rEqAfter ) >= epsilon )
+	    strcpy( szResponse, "accept" );
+	  else
+	    strcpy( szResponse, "reject" );
 
-	    } else if( anDice[ 0 ] ) {
-		/* move */
-		if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
-				  anBoard, &ci, &esEvalChequer.ec,
-                                  aamfEval ) < 0 )
-		    break;
+	} else if( anDice[ 0 ] ) {
+	  /* move */
+	  if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
+			    anBoard, &ci, &esEvalChequer.ec,
+			    aamfEval ) < 0 )
+	    break;
 
-		FormatMovePlain( szResponse, anBoardOrig, anMove );
-	    } else {
-		/* double decision */
-		if( GeneralCubeDecision( aarOutput, aarStdDev,
-					 aarsStatistics, anBoard, &ci,
-					 &esEvalCube, NULL, NULL ) < 0 )
-		    break;
+	  FormatMovePlain( szResponse, anBoardOrig, anMove );
+	} else {
+	  /* double decision */
+	  if( GeneralCubeDecision( aarOutput, aarStdDev,
+				   aarsStatistics, anBoard, &ci,
+				   &esEvalCube, NULL, NULL ) < 0 )
+	    break;
 		
-		switch( FindCubeDecision( arDouble, aarOutput, &ci ) ) {
-		case DOUBLE_TAKE:
-		case DOUBLE_PASS:
-		case DOUBLE_BEAVER:
-		case REDOUBLE_TAKE:
-		case REDOUBLE_PASS:
-		    strcpy( szResponse, "double" );
-		    break;
+	  switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
+	  case DOUBLE_TAKE:
+	  case DOUBLE_PASS:
+	  case DOUBLE_BEAVER:
+	  case REDOUBLE_TAKE:
+	  case REDOUBLE_PASS:
+	    strcpy( szResponse, "double" );
+	    break;
 		    
-		default:
-		    strcpy( szResponse, "roll" );
-		}
-	    }
-	    
-	    strcat( szResponse, "\n" );
-	    
-	    if( ExternalWrite( hPeer, szResponse, strlen( szResponse ) ) )
-		break;
+	  default:
+	    strcpy( szResponse, "roll" );
+	  }
 	}
+	    
+	strcat( szResponse, "\n" );
+	    
+	if( ExternalWrite( hPeer, szResponse, strlen( szResponse ) ) )
+	  break;
+      }
 
     close( hPeer );
 #endif

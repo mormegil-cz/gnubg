@@ -2798,9 +2798,8 @@ extern void InvertEvaluationCf( float ar[ 4 ] ) {
 
 
 extern void
-InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS],
-                    cubeinfo *pci ) {
-
+InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS], const cubeinfo* pci )
+{
   /* invert win, gammon etc. */
 
   InvertEvaluation ( ar );
@@ -3905,9 +3904,10 @@ static classdumpfunc acdf[ N_CLASSES ] = {
   DumpRace, DumpCrashed, DumpContact
 };
 
-extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
-                         evalcontext *pec, cubeinfo *pci, int fOutputMWC,
-			 int fOutputWinPC, int fOutputInvert ) {
+extern int
+DumpPosition( int anBoard[ 2 ][ 25 ], char* szOutput,
+	      const evalcontext* pec, cubeinfo* pci, int fOutputMWC,
+	      int fOutputWinPC, int fOutputInvert ) {
 
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], arDouble[ 4 ];
   positionclass pc = ClassifyPosition( anBoard, pci->bgv );
@@ -3972,8 +3972,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
     /* Calculate cube decision */
 
-    cd = FindCubeDecision ( arDouble, aarOutput, pci );
-
+    cd = FindCubeDecision(arDouble, GCCCONSTAHACK aarOutput, pci);
+    
     /* Print %'s and equities */
 
     strcat( szOutput, ": " );
@@ -4005,7 +4005,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     es.ec = *pec;
 
     strcat( szOutput, "\n\n" );
-    strcat( szOutput, OutputCubeAnalysis( aarOutput, NULL, &es, pci ) );
+    strcat( szOutput,
+	    OutputCubeAnalysis( GCCCONSTAHACK aarOutput, NULL, &es, pci ) );
 
   }
 
@@ -4353,7 +4354,7 @@ winGammon ( const float arOutput[ NUM_ROLLOUT_OUTPUTS ] ) {
  
 extern cubedecision
 FindBestCubeDecision ( float arDouble[], 
-                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                       const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        const cubeinfo *pci ) {
 
 /*
@@ -4525,27 +4526,23 @@ FindBestCubeDecision ( float arDouble[],
 
 extern cubedecision
 FindCubeDecision ( float arDouble[],
-                   float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                   cubeinfo *pci ) {
-
+                   const float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                   const cubeinfo* pci )
+{
   GetDPEq ( NULL, &arDouble[ OUTPUT_DROP ], pci );
   arDouble[ OUTPUT_NODOUBLE ] = aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ];
   arDouble[ OUTPUT_TAKE ] = aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ];
 
   if ( pci->nMatchTo ) {
-
     /* convert to normalized money equity */
 
     int i;
 
     for ( i = 1; i < 4; i++ )
       arDouble[ i ] = mwc2eq ( arDouble[ i ], pci );
-
-
   }
 
   return FindBestCubeDecision ( arDouble, aarOutput, pci );
-
 }
   
 
@@ -5362,7 +5359,8 @@ CalcCubefulEquity ( positionclass pc,
 extern int
 GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, evalcontext *pec, evalsetup *pes ) {
+                       const cubeinfo* pci,
+		       const evalcontext* pec, const evalsetup* pes ) {
 
   float arOutput[ NUM_OUTPUTS ];
   cubeinfo aciCubePos[ 2 ];
@@ -6519,8 +6517,8 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 extern void
 getCubeDecisionOrdering ( int aiOrder[ 3 ],
                           float arDouble[ 4 ], 
-                          float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                          cubeinfo *pci ) {
+                          const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                          const cubeinfo* pci ) {
 
   cubedecision cd;
 
@@ -6789,7 +6787,7 @@ isCloseCubedecision ( const float arDouble[] ) {
 
 extern int
 isMissedDouble ( float arDouble[], 
-                 float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                 const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                  const int fDouble, 
                  const cubeinfo *pci ) {
 

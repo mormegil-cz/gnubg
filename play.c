@@ -867,7 +867,7 @@ extern int ComputerTurn( void ) {
       }
       ProgressEnd();
 
-      cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+      cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
 
       fComputerDecision = TRUE;
 
@@ -1075,7 +1075,7 @@ extern int ComputerTurn( void ) {
 	  }
 	  ProgressEnd();
 
-          cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+          cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
 
           switch ( cd ) {
 
@@ -2094,20 +2094,20 @@ extern void CommandDecline( char *sz ) {
     TurnDone();
 }
 
-static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
+static skilltype GoodDouble (int fisRedouble, moverecord *pmr )
+{
+  float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  cubeinfo ci;
+  cubedecision cd;
+  float rDeltaEquity;
+  int      fAnalyseCubeSave = fAnalyseCube;
+  evalcontext *pec;
+  evalsetup   *pes;
+  monitor m;
+  evalsetup es;
 
-    float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    cubeinfo ci;
-	cubedecision cd;
-    float rDeltaEquity;
-	int      fAnalyseCubeSave = fAnalyseCube;
-	evalcontext *pec;
-	evalsetup   *pes;
-    monitor m;
-    evalsetup es;
-
-	/* reasons that doubling is not an issue */
-    if( (ms.gs != GAME_PLAYING) || 
+  /* reasons that doubling is not an issue */
+  if( (ms.gs != GAME_PLAYING) || 
 		ms.anDice[ 0 ]         || 
 		(ms.fDoubled && !fisRedouble) || 
 		(!ms.fDoubled && fisRedouble) ||
@@ -2115,63 +2115,64 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
 		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
 
       return (SKILL_NONE);
-    }
+  }
 
-    if (fTutorAnalysis) {
-      pes = &esAnalysisCube;
-    } else {
-      pes = &esEvalCube;
-    }
+  if (fTutorAnalysis) {
+    pes = &esAnalysisCube;
+  } else {
+    pes = &esEvalCube;
+  }
 
-     pec = &pes->ec;
-
-
-     GetMatchStateCubeInfo( &ci, &ms );
-
-     fAnalyseCube = TRUE;
-     if( !GetDPEq ( NULL, NULL, &ci ) ) {
-       fAnalyseCube = fAnalyseCubeSave;
-       return (SKILL_NONE);
-     }
-
-     /* Give hint on cube action */
+  pec = &pes->ec;
 
 
-     SuspendInput ( &m );
+  GetMatchStateCubeInfo( &ci, &ms );
 
-     ProgressStart( _("Considering cube action...") );
-     if (GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0 ) {
-       ResumeInput ( &m );
-       ProgressEnd();
-       fAnalyseCube = fAnalyseCubeSave;
-       return (SKILL_NONE);;
-     }
-     ProgressEnd();
+  fAnalyseCube = TRUE;
+  if( !GetDPEq ( NULL, NULL, &ci ) ) {
+    fAnalyseCube = fAnalyseCubeSave;
+    return (SKILL_NONE);
+  }
 
-     /* update analysis for hint */
+  /* Give hint on cube action */
 
-     ec2es ( &es, pec );
-     UpdateStoredCube ( aarOutput, aarOutput /* whatever */,
-			&es, &ms );
 
-     ResumeInput ( &m );
+  SuspendInput ( &m );
+
+  ProgressStart( _("Considering cube action...") );
+  if (GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0 ) {
+    ResumeInput ( &m );
+    ProgressEnd();
+    fAnalyseCube = fAnalyseCubeSave;
+    return (SKILL_NONE);;
+  }
+  ProgressEnd();
+
+  /* update analysis for hint */
+
+  ec2es ( &es, pec );
+  UpdateStoredCube ( aarOutput, aarOutput /* whatever */, &es, &ms );
+
+  ResumeInput ( &m );
 	    
-     /* store cube decision for annotation */
+  /* store cube decision for annotation */
 
-     ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
-     memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
-	      2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+  ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
+  memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
+	   2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
-     memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
-	      2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-     memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
-     pmr->d.st = SKILL_NONE;
+  memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
+	   2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+  pmr->d.st = SKILL_NONE;
 
-     /* find skill */
+  /* find skill */
 
-     cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
+  cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );  
 
-     switch ( cd ) {
+  /* can copy only after it was filled */
+  memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
+  
+  switch ( cd ) {
 	case NODOUBLE_TAKE:
 	case NODOUBLE_BEAVER:
 	case TOOGOOD_TAKE:
@@ -2350,12 +2351,13 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
         memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
                  2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
         pmr->d.st = SKILL_NONE;
 
 	    
-	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
+	cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );  
 
+	memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
+	
 	switch ( cd ) {
 	case DOUBLE_TAKE:
 	case DOUBLE_BEAVER:
@@ -3683,7 +3685,7 @@ static skilltype ShouldDouble ( void ) {
                            &es, &ms );
 
 	    
-	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
+	cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );  
 
 	switch ( cd ) {
 	case DOUBLE_TAKE:
@@ -4134,7 +4136,8 @@ getCurrentMoveRecord ( int *pfHistory ) {
         memcpy ( mrHint.n.aarStdDev, sc.aarStdDev, sizeof ( sc.aarStdDev ) );
 
         GetMatchStateCubeInfo( &ci, &ms );
-        FindCubeDecision ( mrHint.n.arDouble, mrHint.n.aarOutput, &ci );
+        FindCubeDecision ( mrHint.n.arDouble,
+			   GCCCONSTAHACK mrHint.n.aarOutput, &ci );
 
       }
       else {
@@ -4160,7 +4163,7 @@ getCurrentMoveRecord ( int *pfHistory ) {
       
       GetMatchStateCubeInfo( &ci, &ms );
       FindCubeDecision ( mrHint.d.CubeDecPtr->arDouble, 
-                         mrHint.d.CubeDecPtr->aarOutput, &ci );
+			 GCCCONSTAHACK mrHint.d.CubeDecPtr->aarOutput, &ci );
 
       return &mrHint;
 

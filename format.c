@@ -31,6 +31,16 @@
 #include "i18n.h"
 #include "export.h"
 
+/* Totally the wrong place for it. Unfortuanetly, format is lined with
+   makebearoff.
+   eval.c huge size hits again.
+*/
+
+extern int
+badSkill(skilltype const st)
+{
+  return st != SKILL_NONE && st != SKILL_GOOD;
+}
 
 int fOutputMWC = TRUE;
 int fOutputWinPC = FALSE;
@@ -39,13 +49,13 @@ int fOutputDigits = 3;
 
 
 extern char *
-OutputRolloutResult ( const char *szIndent,
-                    char asz[][ 1024 ],
-                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                    float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                    const cubeinfo aci[],
-                    const int cci,
-                    const int fCubeful ) {
+OutputRolloutResult( const char *szIndent,
+		     char asz[][ 1024 ],
+		     const  float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+		     const float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+		     const cubeinfo aci[],
+		     const int cci,
+		     const int fCubeful ) {
 
   static char sz[ 1024 ];
   int ici;
@@ -700,12 +710,12 @@ OutputPercents ( const float ar[], const int f ) {
  */
 
 extern char *
-OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                         float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                         evalsetup *pes, cubeinfo *pci,
-                         int fDouble, int fTake,
-                         skilltype stDouble,
-                         skilltype stTake ) {
+OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                         const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                         const evalsetup* pes, const cubeinfo* pci,
+                         const int fDouble, const int fTake,
+                         const skilltype stDouble,
+                         const skilltype stTake ) {
 
   float r;
 
@@ -731,7 +741,8 @@ OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   fClose = isCloseCubedecision ( arDouble ); 
   fMissed = 
-    fDouble > -1 && isMissedDouble ( arDouble, aarOutput, fDouble, pci );
+    fDouble > -1 &&
+    isMissedDouble ( arDouble, aarOutput, fDouble, pci );
 
   /* print alerts */
 
@@ -846,9 +857,9 @@ OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 }
 
 extern char *
-OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                    evalsetup *pes, cubeinfo *pci ) {
+OutputCubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                    const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                    const evalsetup* pes, const cubeinfo* pci ) {
 
   static char sz[ 4096 ];
   int i;
@@ -976,9 +987,7 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     strcat ( sz, _("Rollout details:\n") );
 
     strcat ( sz, 
-             OutputRolloutResult ( NULL,
-                                   asz,
-                                   aarOutput, aarStdDev,
+             OutputRolloutResult ( NULL, asz, aarOutput, aarStdDev,
                                    aci, 2, pes->rc.fCubeful ) );
              
 
@@ -988,8 +997,6 @@ OutputCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     strcat ( sz, OutputRolloutContext ( NULL, pes ) );
     
   return sz;
-
-
 }
 
 

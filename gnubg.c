@@ -2746,16 +2746,17 @@ static gint UpdateBoard( gpointer p ) {
 }
 #endif
 
-extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
+extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms ) {
 
     return SetCubeInfo( pci, pms->nCube, pms->fCubeOwner, pms->fMove,
 			pms->nMatchTo, pms->anScore, pms->fCrawford,
 			pms->fJacoby, nBeavers, pms->bgv );
 }
 
-static void DisplayCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                                 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                                 evalsetup *pes ) {
+static void
+DisplayCubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+		     const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+		     const evalsetup* pes ) {
 
     cubeinfo ci;
 
@@ -2769,7 +2770,6 @@ static void DisplayCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 	return;
 
     outputl( OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci ) );
-    
 }
 
 extern char *GetLuckAnalysis( matchstate *pms, float rLuck ) {
@@ -2795,7 +2795,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
     
     switch( pmr->mt ) {
     case MOVE_NORMAL:
-        DisplayCubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
+        DisplayCubeAnalysis( GCCCONSTAHACK pmr->n.aarOutput,
+			     GCCCONSTAHACK pmr->n.aarStdDev,
                              &pmr->n.esDouble );
 
 	outputf( _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
@@ -2819,8 +2820,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 
     case MOVE_DOUBLE:
-      DisplayCubeAnalysis( pmr->d.CubeDecPtr->aarOutput,
-                           pmr->d.CubeDecPtr->aarStdDev,
+      DisplayCubeAnalysis( GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput,
+                           GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev,
                            &pmr->n.esDouble );
 	break;
 
@@ -3333,9 +3334,9 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
         strcat ( sz, 
                  OutputRolloutResult ( "     ",
                                        NULL,
-                                       ( float (*)[ NUM_ROLLOUT_OUTPUTS ] )
+                                       ( const float (*)[NUM_ROLLOUT_OUTPUTS] )
                                        ar,
-                                       ( float (*)[ NUM_ROLLOUT_OUTPUTS ] )
+                                       ( const float (*)[NUM_ROLLOUT_OUTPUTS] )
                                        arStdDev,
                                        &ci,
                                        1, 
@@ -3551,9 +3552,9 @@ HintCube( void ) {
   }
 #endif
 
-  outputl( OutputCubeAnalysis( sc.aarOutput, sc.aarStdDev,
+  outputl( OutputCubeAnalysis( GCCCONSTAHACK sc.aarOutput,
+			       GCCCONSTAHACK sc.aarStdDev,
                                &esEvalCube, &ci ) );
-
 }
     
 
@@ -3645,7 +3646,7 @@ HintTake( void ) {
   }
   ProgressEnd();
 
-  FindCubeDecision ( arDouble, aarOutput, &ci );
+  FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
 	
 #if USE_GTK
   if ( fX ) {

@@ -465,7 +465,7 @@ extern int ComputerTurn( void );
 extern void ClearMatch( void );
 extern void FreeMatch( void );
 extern void SetMatchDate( matchinfo *pmi );
-extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms );
+extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms);
 extern int ParseHighlightColour( char *sz );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );

@@ -346,10 +346,10 @@ static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
 }
 
 static void 
-PrintLaTeXCubeAnalysis( FILE *pf, matchstate *pms, int fPlayer,
-                        float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                        evalsetup *pes ) { 
+PrintLaTeXCubeAnalysis( FILE *pf, const matchstate* pms, int fPlayer,
+                        const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                        const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                        const evalsetup *pes ) { 
   
     cubeinfo ci;
 
@@ -422,7 +422,8 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 		PrintLaTeXBoard( pf, &msExport, pmr->n.fPlayer );
 	    
 	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
-				    pmr->n.aarOutput, pmr->n.aarStdDev,
+				    GCCCONSTAHACK pmr->n.aarOutput,
+				    GCCCONSTAHACK pmr->n.aarStdDev,
                                     &pmr->n.esDouble );
             /* FIXME: output cube skill */
 
@@ -455,10 +456,10 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	case MOVE_DOUBLE:
 	    PrintLaTeXBoard( pf, &msExport, pmr->d.fPlayer );
 
-	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-                                    pmr->d.CubeDecPtr->aarOutput, 
-                                    pmr->d.CubeDecPtr->aarStdDev, 
-                                    &pmr->d.CubeDecPtr->esDouble );
+	    PrintLaTeXCubeAnalysis(pf, &msExport, pmr->d.fPlayer,
+				   GCCCONSTAHACK pmr->d.CubeDecPtr->aarOutput, 
+				   GCCCONSTAHACK pmr->d.CubeDecPtr->aarStdDev, 
+				   &pmr->d.CubeDecPtr->esDouble );
 
 	    /* FIXME what about beavers? */
 	    fprintf( pf, "\\begin{center}%s %s%s\\end{center}\n\n",

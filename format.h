@@ -54,24 +54,24 @@ OutputEquityScale ( const float r, const cubeinfo *pci,
 extern char *
 OutputRolloutResult ( const char *szIndent,
                       char asz[][ 1024 ],
-                      float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                      float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                      const float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                      const float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
                       const cubeinfo aci[],
                       const int cci,
                       const int fCubeful );
 
 extern char *
-OutputCubeAnalysisFull ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                         float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                         evalsetup *pes, cubeinfo *pci,
+OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                         const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                         const evalsetup* pes, const cubeinfo* pci,
                          int fDouble, int fTake,
                          skilltype stDouble,
                          skilltype stTake );
 
 extern char *
-OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                     evalsetup *pes, cubeinfo *pci );
+OutputCubeAnalysis ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                     const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                     const evalsetup* pes, const cubeinfo* pci );
 
 extern char *
 OutputMoneyEquity ( const float ar[], const int f );

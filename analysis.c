@@ -71,11 +71,6 @@ int afAnalysePlayers[ 2 ] = { TRUE, TRUE };
 
 evalcontext ecLuck = { TRUE, 0, 0, TRUE, 0.0 };
 
-extern int
-badSkill(skilltype const st)
-{
-  return st != SKILL_NONE && st != SKILL_GOOD;
-}
 
 extern ratingtype
 GetRating ( const float rError ) {
@@ -361,7 +356,8 @@ updateStatcontext ( statcontext *psc,
       psc->anTotalCube[ pmr->n.fPlayer ]++;
 
       if ( isCloseCubedecision ( arDouble ) || 
-           isMissedDouble ( arDouble, pmr->n.aarOutput, FALSE, &ci ) )
+           isMissedDouble ( arDouble, GCCCONSTAHACK pmr->n.aarOutput,
+			    FALSE, &ci ) )
         psc->anCloseCube[ pmr->n.fPlayer ]++;
 	  
       if( arDouble[ OUTPUT_NODOUBLE ] <
@@ -641,7 +637,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
               return -1;
             
             
-	    FindCubeDecision ( arDouble, aarOutput, &ci );
+	    FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
             
 	    pmr->n.esDouble = *pesCube;
 
@@ -774,7 +770,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 						 sizeof ( aarStdDev ) );
               }
 	      
-                FindCubeDecision ( arDouble, aarOutput, &ci );
+                FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
 	      
 		esDouble = pmr->d.CubeDecPtr->esDouble;
 	      

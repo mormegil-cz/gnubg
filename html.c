@@ -2071,8 +2071,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   fActual = fDouble > 0;
   fClose = isCloseCubedecision ( arDouble ); 
-  fMissed = 
-    fDouble > -1 && isMissedDouble ( arDouble, aarOutput, fDouble, pci );
+  fMissed =  fDouble > -1 &&
+    isMissedDouble ( arDouble, GCCCONSTAHACK aarOutput, fDouble, pci );
 
   fDisplay = 
     ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
@@ -2299,7 +2299,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   }
 
-  getCubeDecisionOrdering ( ai, arDouble, aarOutput, pci );
+  getCubeDecisionOrdering ( ai, arDouble, GCCCONSTAHACK aarOutput, pci );
 
   for ( i = 0; i < 3; i++ ) {
 
@@ -2326,7 +2326,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* cube decision */
 
-  cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
+  cd = FindBestCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
 
   fprintf ( pf,
             "<tr><td colspan=\"2\">%s</td>"
