@@ -88,6 +88,12 @@ typedef struct _windowgeometry {
 #endif
 } windowgeometry;
 
+/* predefined board designs */
+
+#if USE_GTK
+GList *plBoardDesigns;
+#endif
+
 extern windowgeometry awg[ NUM_WINDOWS ];
 
 
