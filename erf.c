@@ -1,12 +1,10 @@
 /*
  * erf.c
  *
- * by Gary Wong <gtw@gnu.org>, 2001
+ * by Thomas Meyer <tpmeyer@foxriver.com>, 2002
  *
- * A portable implementation of the Gaussian error function, erf().
- * Based on Algorithm 123, M. Crawford and R. Techo, Comm. ACM, Sep. 1962,
- * which computes the Taylor series expansion of
- * 2/sqrt(pi) * integral from 0 to x of exp( -u^2 ) du.
+ * A portable implementation of the Gaussian error function erf(),
+ * using the Chebyshev algorithm.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -26,41 +24,24 @@
  
 #include <math.h>
 
-#ifndef M_2_SQRTPI
-#define M_2_SQRTPI  1.12837916709551257390
-#endif
-
 extern double erf( double x ) {
 
-    double a, u, v, w, y, z, t;
-    int n;
-
-    z = 0.0;
-
-    while( x != 0.0 ) {
-	if( x > 0.25 )
-	    a = -0.25;
-	else if( x < -0.25 )
-	    a = 0.25;
-	else
-	    a = -x;
-
-	u = v = M_2_SQRTPI * exp( -x * x );
-	y = t = -v * a;
-	n = 1;
-
-	while( y - t != y ) {
-	    n++;
-	    w = -2 * x * v - 2 * u * ( n - 2 );
-	    t *= w * a / ( v * n );
-	    u = v;
-	    v = w;
-	    y += t;
-	}
-
-	z += y;
-	x += a;
-    }
-	    
-    return z;
+    double t, z, retval;
+    
+    z = fabs( x );
+    t = 1.0 / ( 1.0 + 0.5 * z );
+    retval = t * exp( -z * z - 1.26551223 + t *
+		      ( 1.00002368 + t *
+			( 0.37409196 + t *
+			  ( 0.09678418 + t *
+			    ( -0.18628806 + t *
+			      ( 0.27886807 + t *
+				( -1.13520398 + t *
+				  ( 1.48851587 + t *
+				    ( -0.82215223 + t *
+				      0.1708727 ) ) ) ) ) ) ) ) );
+    if( x < 0.0 )
+	return retval - 1.0;
+    
+    return 1.0 - retval;
 }

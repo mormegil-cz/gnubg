@@ -37,6 +37,7 @@ Robert Konigsberg
 Corrin Lakeland
 Tim Laursen
 Kevin Maguire
+Thomas Meyer
 Dave Neary
 Peter Orum
 Roy Passfield

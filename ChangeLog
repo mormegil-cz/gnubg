@@ -1,3 +1,8 @@
+Thu Mar 21 13:57:11 2002  Gary Wong  <gtw@research.att.com>
+
+	* erf.c (erf): Use Thomas Meyer's implementation of the Chebyshev
+	algorithm.
+
 Thu Mar 21 13:11:54 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (ssqrt, hinge_pixel, board_draw_hinges): New functions.
