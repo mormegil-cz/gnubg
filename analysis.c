@@ -158,22 +158,25 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
 
         if ( pec->fCubeful ) {
           if ( pci->nMatchTo )
-            aar[ j ][ i ] = mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], pci );
+            aar[ i ][ j ] = mwc2eq ( ar[ OUTPUT_CUBEFUL_EQUITY ], pci );
           else
-            aar[ j ][ i ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
+            aar[ i ][ j ] = ar[ OUTPUT_CUBEFUL_EQUITY ];
         }
         else
-          aar[ j ][ i ] = ar[ OUTPUT_EQUITY ];
+          aar[ i ][ j ] = ar[ OUTPUT_EQUITY ];
 
       }
       else {
-        aar[ j ][ i ] = - ml.amMoves[ 0 ].rScore;
+        aar[ i ][ j ] = - ml.amMoves[ 0 ].rScore;
         free ( ml.amMoves );
       }
 
-      rMean += aar[ j ][ i ];
+      rMean += aar[ i ][ j ];
 
     }
+
+  printf( "%d %d %f %f %f\n", n0, n1, aar[ n0 ][ n1 ], aar[ n1 ][ n0 ],
+          rMean/30.0f );
 
   if ( n0 > n1 )
     return aar[ n0 ][ n1 ] - rMean / 30.0f;
