@@ -894,7 +894,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
     moverecord *pmr;
     char *pch;
     int anMoveLocal[8];
-    
+
     switch( *sz ) {
     case 'X':
 	iPlayer = fInvert;
@@ -950,13 +950,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
                fail in the sub-call to PlayMove(). This problem should
                maybe be fixed in PlayMove (drawboard.c). Opinions? */
 
-            for( i = 0; i < 8 ; i++ )
-                anMoveLocal[i] = pmr->n.anMove[i] + 1 ;
-
-            CanonicalMoveOrder( anMoveLocal );
-
-	    for( i = 0; i < 8 ; i++ )
-                pmr->n.anMove[i] = anMoveLocal[i] - 1 ;
+            CanonicalMoveOrder( pmr->n.anMove );
 
             /* Now we're ready */
 

@@ -1,3 +1,9 @@
+Mon Sep  1 19:28:48 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ParseOldmove): do not subtract 1 from move
+	before calling CanonicalMoveOrder. 
+	(bug #5016 reported by Alix Martin)
+
 Mon Sep  1 10:16:46 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c (bug 4875) Simplified saving new board designs
