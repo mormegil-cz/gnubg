@@ -250,7 +250,8 @@ extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
 
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
-  PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_MET } 
+  PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
+  PATH_MET } 
 pathformat;
 
 extern char aaszPaths[ PATH_MET + 1 ][ 2 ][ 255 ];
@@ -619,6 +620,7 @@ extern void CommandAccept( char * ),
     CommandSetPathPos( char * ),
     CommandSetPathGam( char * ),
     CommandSetPathPostScript( char * ),
+    CommandSetPathText( char * ),
     CommandSetPlayerChequerplay( char * ),
     CommandSetPlayerCubedecision( char * ),
     CommandSetPlayerExternal( char * ),

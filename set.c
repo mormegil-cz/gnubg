@@ -2450,4 +2450,11 @@ CommandSetPathMET ( char *sz ) {
 
 }
 
+extern void
+CommandSetPathText ( char *sz ) {
+
+  SetPath ( sz, PATH_TEXT );
+
+}
+
 
