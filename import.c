@@ -673,16 +673,119 @@ static void ParseOldmove( char *sz, int fInvert ) {
     }
 }
 
-static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
-				int n1 ) {
+#if 0
+
+static int
+IncreasingScore ( const int anScore[ 2 ], const int n0, const int n1 ) {
+
+  /* check for decreasing score */
+  
+  if ( n0 == anScore[ 0 ] ) {
+    
+    /* n0 is unchanged, n1 must be increasing */
+
+    if ( n1 <= anScore[ 1 ] )
+      /* score is not increasing */
+      return 0;
+    
+  }
+  else if ( n1 == anScore[ 0 ] ) {
+    
+    if ( n0 <= anScore[ 1 ] )
+      /* score is not increasing */
+      return 0;
+    
+  }
+  else if ( n0 == anScore[ 1 ] ) {
+    
+    if ( n1 <= anScore[ 0 ] )
+      /* score is not increasing */
+      return 0;
+    
+  } 
+  else if ( n1 == anScore[ 1 ] ) {
+    
+    if ( n0 <= anScore[ 0 ] )
+      /* score is not increasing */
+      return 0;
+    
+  }
+  else {
+    /* most likely a new game */
+    return 0;
+  }
+  
+  return 1;
+
+}
+
+#endif
+
+static int
+NewPlayers ( const char* szOld0, const char* szOld1,
+             const char *szNew0, const char* szNew1 ) {
+
+
+  if ( ! strcmp ( szOld0, szNew0 ) )
+    /* player 0 have not changed */
+    return strcmp ( szOld1, szNew1 );
+  else if ( ! strcmp ( szOld0, szNew1 ) )
+    /* swap of player1 and player 0 */
+    return strcmp ( szOld1, szNew0 );
+  else 
+    /* definitely a new player */
+    return 1;
+
+}
+
+
+static int
+ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
+                    int n1 ) {
 
     char sz[ 80 ], sz0[ 32 ], sz1[ 32 ], *pch;
     moverecord *pmr;
     int fInvert;
     static int anExpectedScore[ 2 ];
+
+    /* FIXME's:
+     *
+     * what about multiple matches?
+     * pmr->r.nResigned is not correct in ParseOldMove
+     *
+     * Possible solution: read through file one time and collect match scores.
+     * If the score is decreasing or the players's names changes stop.
+     *
+     * Since we now know the score after every game it's easy to 
+     * have pmr->r.nResigned correct. 
+     *
+     */
     
     if( fscanf( pf, " %31s is X - %31s is O\n", sz0, sz1 ) < 2 )
 	return;
+
+    /* consistency checks */
+
+    if ( iGame ) {
+
+      if ( NewPlayers ( ap[ 0 ].szName, ap[ 1 ].szName, sz0, sz1 ) ) 
+        return 1;
+
+      if ( ms.nMatchTo != nLength )
+        /* match length have changed */
+        return 1;
+
+#if 0
+      if ( ! IncreasingScore ( ms.anScore, n0, n1 ) ) {
+        printf ( "not increasing score %d %d %d %d\n",
+                 ms.anScore[ 0 ], ms.anScore[ 1 ], n0, n1 );
+        return 1;
+      }
+#endif
+
+    }
+
+    /* initialise */
 
     InitBoard( ms.anBoard );
 
@@ -695,8 +798,11 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
 	strcpy( ap[ 1 ].szName, sz1 );
 	fInvert = FALSE;
     } else
-	fInvert = strcmp( ap[ 0 ].szName, sz0 ) != 0;
-    
+      fInvert = strcmp( ap[ 0 ].szName, sz0 ) != 0;
+
+    /* add game info */
+
+
     pmr = malloc( sizeof( movegameinfo ) );
     pmr->g.mt = MOVE_GAMEINFO;
     pmr->g.sz = NULL;
@@ -707,11 +813,13 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
 
     /* check if score is swapped (due to fibs oldmoves bug) */
 
-    if ( iGame && pmr->g.anScore[ 0 ] == anExpectedScore[ 1 ] &&
-         pmr->g.anScore[ 1 ] == anExpectedScore[ 0 ] ) {
+    if ( iGame && 
+         ( pmr->g.anScore[ 0 ] == anExpectedScore[ 1 ] ||
+           pmr->g.anScore[ 1 ] == anExpectedScore[ 0 ] ) ) {
 
-      pmr->g.anScore[ 0 ] = anExpectedScore[ 0 ];
-      pmr->g.anScore[ 1 ] = anExpectedScore[ 1 ];
+      int n = pmr->g.anScore[ 0 ];
+      pmr->g.anScore[ 0 ] = pmr->g.anScore[ 1 ];
+      pmr->g.anScore[ 1 ] = n;
 
     }
     
@@ -736,12 +844,14 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     while( strspn( sz, " \n\r\t" ) == strlen( sz ) );
 
     do {
-        /* FIXME This requires that the games are separated with a
-                 line shift */
+
 	if( ( pch = strpbrk( sz, "\n\r" ) ) )
 	    *pch = 0;
 
 	ParseOldmove( sz, fInvert );
+
+        if ( ms.gs != GAME_PLAYING )
+          break;
 	
 	if( !fgets( sz, 80, pf ) )
 	    break;
@@ -753,7 +863,11 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     anExpectedScore[ pmr->g.fWinner ] += pmr->g.nPoints;
 
     AddGame( pmr );
+
+    return 0;
+
 }
+
 
 extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 
@@ -802,7 +916,9 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 	while( ( n = getc( pf ) ) != '\n' && n != EOF )
 	    ;
 	
-	ImportOldmovesGame( pf, i++, nLength, n0, n1 );
+        if ( ImportOldmovesGame( pf, i++, nLength, n0, n1 ) )
+          /* new match */
+          break;
 
 	do {
 	    if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,

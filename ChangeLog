@@ -3,6 +3,17 @@ Mon Jul 15 21:47:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* import.c (ImportGame, ImportMat): read only first match
 	in .mat file.
 
+Mon Jul 15 20:44:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* import.c (ImportOldmovesGame): final fix for the oldmoves
+	bug regarding scores. Also, read in oldmoves files without
+	newlines between games.
+
+Mon Jul 15 20:37:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (GetCubeActionSz): return "Cube not available" for
+	cube decision NOT_AVAILABLE.
+
 Mon Jul 15 16:35:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c (CreateMoveListTools): Put buttons in a table
