@@ -551,8 +551,10 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
 	static char *asz[ 2 ][ 2 ] = {
           { N_("Advantage (actual) in ppg"),
+            /* xgettext: no-c-format */
             N_("95% confidence interval (ppg)") },
           { N_("Advantage (luck adjusted) in ppg"),
+            /* xgettext: no-c-format */
             N_("95% confidence interval (ppg)") }
 	};
         const float *af[ 2 ][ 2 ] = { 

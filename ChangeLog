@@ -1,3 +1,8 @@
+Tue Sep  9 04:34:30 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* formatgs.c (formatGS): Add /* xgettext: no-c-format */ comment
+	for N_("95% confidence interval (ppg)").
+
 Mon Sep 08 20:18:46 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* formatgs.c (formatGS): report cube errors as negative values
