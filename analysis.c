@@ -1867,7 +1867,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
       else
         sprintf ( strchr ( szOutput, 0 ),
                   "%-31s %-7s\n",
-                  _("FIBS rating difference") );
+                  _("FIBS rating difference"), _("n/a") );
     }
 
   }

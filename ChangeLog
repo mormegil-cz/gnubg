@@ -1,3 +1,7 @@
+Sun Aug 17 12:38:22 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* analysis.c (DumpStatcontext): fix typo.
+
 Sun Aug 17 12:15:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubgmodule.c: remove C++ style variable decl. inside code.
