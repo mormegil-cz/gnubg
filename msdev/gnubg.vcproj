@@ -6233,6 +6233,12 @@
 			<File
 				RelativePath="..\gtkpanels.c">
 				<FileConfiguration
+					Name="CmdLine Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="CmdLine Release|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
