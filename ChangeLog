@@ -1,4 +1,8 @@
-Wed Jun 30 20:42:53 CEST 2004   Nis Joergensen  <nis@superlativ.dk>
+Wed Jun 30 22:28:07 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in: write test for ftgl.
+
+Wed Jun 30 20:42:53 CEST 2004  Nis Joergensen  <nis@superlativ.dk>
 
 	* gtkboard.c: fix bug that disallowed certain legal moves.
 

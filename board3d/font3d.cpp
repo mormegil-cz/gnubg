@@ -25,7 +25,7 @@
 #include "backgammon.h"
 #include "inc3d.h"
 
-#if HAVE_FTGL
+#if HAVE_LIBFTGL
 /* Using ftgl in a static libaray */
 #define FTGL_LIBRARY_STATIC
 

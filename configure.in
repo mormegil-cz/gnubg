@@ -505,11 +505,34 @@ if test "$with_board3d" != "no"; then
          AC_DEFINE(USE_BOARD3D,1,[Define if you want to use the 3d boards])
          dnl check for FTGL (dependent on freetype)
          if test "$have_freetype" = "yes"; then
-            dnl fixme: write a test...
-            dnl check for glut if there is no FTGL
-            AC_DEFINE(HAVE_FTGL,1,[Define if you have the FTGL library])
-            FTGL_LIBS="-lftgl"
+            dnl check for ftgl
+            AC_MSG_CHECKING(for libftgl)
+            AC_LANG_PUSH(C++)
+            ac_save_LIBS="$LIBS"
+            LIBS="$LIBS -lftgl"
+            AC_LINK_IFELSE([
+#define FTGL_LIBRARY_STATIC
+#include "FTFace.h"
+                                                                                
+int main()
+{
+  FTFace test(0);
+  return 0;
+}
+],,no_ftgl=yes)
+            AC_LANG_POP(C++)
+            LIBS="$ac_save_LIBS"
+ 
+            if test "x$no_ftgl" != "xyes"; then
+               AC_DEFINE(HAVE_LIBFTGL,1,[Define if you have the FTGL library])
+               FTGL_LIBS="-lftgl"
+               FTGL_FLAGS=""
+               AC_MSG_RESULT(yes)
+            else
+               AC_MSG_RESULT(no)
+            fi
             AC_SUBST(FTGL_LIBS)
+            AC_SUBST(FTGL_CFLAGS)
          fi
       fi
    fi
