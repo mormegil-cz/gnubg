@@ -2906,7 +2906,7 @@ msgstr "投了"
 
 #: gnubg.c:1500 gtkrolls.c:223 sound.c:89
 msgid "Roll"
-msgstr "ダイスを振る"
+msgstr "ダイスを振る(?)"
 
 #: gnubg.c:1502
 msgid "Starting of GNU Backgammon"
@@ -4332,7 +4332,7 @@ msgstr ""
 #: gnubg.c:7889
 #, c-format
 msgid "File \"%s\" exists. Overwrite? "
-msgstr "ファイル \"%s\" は存在しています。上書きしますか？"
+msgstr "ファイル \"%s\" はすでに存在します。上書きしますか？"
 
 #: gnubg.c:8024
 msgid "%Y-%m-%d-%H%M"
@@ -4533,11 +4533,11 @@ msgstr ""
 
 #: gtkchequer.c:834 gtkchequer.c:931
 msgid "Rank"
-msgstr "ランク"
+msgstr ""
 
 #: gtkchequer.c:835 gtkchequer.c:932
 msgid "Type"
-msgstr "タイプ"
+msgstr ""
 
 #: gtkchequer.c:837 gtkrace.c:532 html.c:328
 msgid "W g"
@@ -5515,7 +5515,7 @@ msgstr "/設定(_S)/解析..."
 
 #: gtkgame.c:2657
 msgid "/_Settings/Appearance..."
-msgstr "/設定(_S)/画面..."
+msgstr "/設定(_S)/外観..."
 
 #: gtkgame.c:2659
 msgid "/_Settings/_Evaluation..."
@@ -6251,7 +6251,7 @@ msgstr "プレイヤー %s の解析"
 
 #: gtkgame.c:5658
 msgid "Move limit:"
-msgstr "ムーブ制限："
+msgstr ""
 
 #: gtkgame.c:5668
 msgid "Skill thresholds"
@@ -6427,11 +6427,11 @@ msgstr "投了後のエクイティ"
 
 #: gtkgame.c:6918
 msgid "You should accept the resignation!"
-msgstr "投了を受け入れるべきです。"
+msgstr "投了を受け入れるべきです!"
 
 #: gtkgame.c:6920
 msgid "You should reject the resignation!"
-msgstr "投了を拒否すべきです。"
+msgstr "投了を拒否すべきです!"
 
 #: gtkgame.c:7077
 msgid "About GNU Backgammon"
@@ -7822,7 +7822,7 @@ msgstr "標準設定: "
 
 #: gtkpath.c:221
 msgid "Current: "
-msgstr "現在: "
+msgstr "現在の設定: "
 
 #: gtkpath.c:229
 msgid "Set as default"
@@ -7966,11 +7966,11 @@ msgstr "斑点模様"
 
 #: gtkprefs.c:931
 msgid "Alder"
-msgstr "榛の木"
+msgstr "ハンノキ"
 
 #: gtkprefs.c:932
 msgid "Ash"
-msgstr "秦皮"
+msgstr "トネリコ"
 
 #: gtkprefs.c:933
 msgid "Basswood"
@@ -8038,7 +8038,7 @@ msgstr "光源の高度"
 
 #: gtkprefs.c:1377
 msgid "Display Type"
-msgstr ""
+msgstr "表示形式"
 
 #: gtkprefs.c:1384
 msgid "2d Board"
@@ -8086,7 +8086,7 @@ msgstr ""
 
 #: gtkprefs.c:1439
 msgid "light"
-msgstr ""
+msgstr "明るい"
 
 #: gtkprefs.c:1447
 msgid "Vary the darkness of the shadows"
@@ -8094,11 +8094,11 @@ msgstr ""
 
 #: gtkprefs.c:1451
 msgid "dark"
-msgstr ""
+msgstr "暗い"
 
 #: gtkprefs.c:1456
 msgid "Animate dice rolls"
-msgstr ""
+msgstr "ロールのアニメーション"
 
 #: gtkprefs.c:1457
 msgid "Dice rolls will shake across board"
@@ -8106,7 +8106,7 @@ msgstr ""
 
 #: gtkprefs.c:1461
 msgid "Animate resignation flag"
-msgstr ""
+msgstr "白旗のアニメーション"
 
 #: gtkprefs.c:1462
 msgid "Waves resignation flag"
@@ -8122,7 +8122,7 @@ msgstr ""
 
 #: gtkprefs.c:1480
 msgid "Board angle: "
-msgstr ""
+msgstr "ボードの角度: "
 
 #: gtkprefs.c:1488
 msgid "Vary the angle the board is tilted at"
@@ -8130,15 +8130,15 @@ msgstr ""
 
 #: gtkprefs.c:1517
 msgid "Plan view"
-msgstr ""
+msgstr "平面図"
 
 #: gtkprefs.c:1524
 msgid "Curve accuracy"
-msgstr ""
+msgstr "局面の精度"
 
 #: gtkprefs.c:1530
 msgid "low"
-msgstr ""
+msgstr "低"
 
 #: gtkprefs.c:1538
 msgid ""
@@ -8148,7 +8148,7 @@ msgstr ""
 
 #: gtkprefs.c:1544
 msgid "high"
-msgstr ""
+msgstr "高"
 
 #: gtkprefs.c:1548
 msgid "Dice size"
@@ -8168,7 +8168,7 @@ msgstr "大"
 
 #: gtkprefs.c:1569
 msgid "Test performance"
-msgstr ""
+msgstr "性能テスト"
 
 #: gtkprefs.c:1776
 #, c-format
