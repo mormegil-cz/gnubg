@@ -29,8 +29,10 @@
 
 #define MAX_STACK 30
 
+#if ENABLE_NLS
 static char *aszLocaleStack [ MAX_STACK ];
 static int iLocale = -1;
+#endif
 
 void PushLocale ( const char *locale ) {
   
