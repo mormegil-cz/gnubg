@@ -167,6 +167,92 @@
    </board-design>
 
 
+   <board-design>
+
+     <about> 
+         <title>Red/Blue - Gold/Silver</title>  
+         <author>Ian Shaw</author>
+         <preview-file>boards/ian.xpm</preview-file>
+      </about>
+  
+      <design>
+         board=#020532;0.20
+         border=#004000
+         translucent=n
+         wood=fir
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#B4B5CA;0.50;2.10;0.90;17.20
+         chequers1=#DCA52B;0.90;1.50;0.50;3.00
+         dice0=#C3C3C3;0.20;3.00;n
+         dice1=#0C0C19;1.00;30.00;y
+         dot0=#FEFFFE
+         dot1=#E5E5E5
+         cube=#E5E5E5
+         points0=#FF6060;0.20
+         points1=#7EA9CA;0.20 
+      </design> 
+
+   </board-design>
+
+   <board-design>
+
+     <about> 
+         <title>GamesGrid Classic</title>  
+         <author>Ned Cross</author>
+         <preview-file>boards/ggclassic.xpm</preview-file>
+      </about>
+  
+      <design>
+         board=#EFB43B;0.09
+         border=#004000
+         translucent=n
+         wood=walnut
+         hinges=n
+         light=150;50
+         shape=0.5
+         chequers0=#94211A;0.90;1.50;0.20;3.00
+         chequers1=#E7EDEF;0.50;1.50;0.80;30.00
+         dice0=#D140B9;0.10;6.70;n
+         dice1=#1C5FED;0.30;4.20;n
+         dot0=#C7C7C7
+         dot1=#EFEFEF
+         cube=#F7C80A
+         points0=#9A6750;0.09
+         points1=#5F7287;0.09 
+      </design> 
+
+   </board-design>
+
+   <board-design>
+
+     <about> 
+         <title>GoL Blue and White</title>  
+         <author>Ian Shaw</author>
+         <preview-file>boards/gol.xpm</preview-file>
+      </about>
+  
+      <design>
+         board=#F6F6FF;0.09
+         border=#E6E9FF
+         wood=paint
+         hinges=n
+         light=150;50
+         shape=0.5
+         chequers0=#F3EFF7;0.50;1.50;1.00;30.00
+         chequers1=#3F4FAF;0.90;1.50;0.20;3.00
+         dice0=#FFFEFE;0.90;1.00;n
+         dice1=#6464E5;1.00;30.00;n
+         dot0=#000000
+         dot1=#FFFFFF
+         cube=#FBF7FF
+         points0=#8B8C8E;0.09
+         points1=#D4D4D4;0.09
+      </design> 
+
+   </board-design>
+
 </board-designs>
 
 
