@@ -1026,8 +1026,6 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 
       /* save the board we're working on */
       memcpy (anBoardOrig, apBoard[ alt ], sizeof (anBoardOrig));
-      if ( fInvert )
-        SwapSides( anBoardOrig );
 
       /* get the dice generator set up... */
       if( prc->fRotate ) 

@@ -1,3 +1,10 @@
+Mon Sep 22 19:38:07 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* rollout.c (RolloutGeneral): do not invert board for
+	sanity check
+	(reported by Daniel Murphy,
+	http://www.gammonline.com/members/board/config.cgi?read=61387)
+
 Sun Sep 21 18:31:55 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (getMoneyPoints): fix bug in calculation of W and L.

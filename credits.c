@@ -56,6 +56,7 @@ char *aszCredits[] = {
     "William Maslen",
     "Thomas Meyer",
     "Achim Mueller",
+    "Daniel Murphy",
     "Magnar Naustdalslid",
     "Dave Neary",
     "Rolf Nielsen",
