@@ -87,7 +87,7 @@ msgid ""
 "You must specify at least one type of analysis to perform (see `help set\n"
 "analysis')."
 msgstr ""
-"Devi specificare almeno un tipo di analisi da eseguire\\n(vai a 'aiuto "
+"Devi specificare almeno un tipo di analisi da eseguire\n(vai a 'aiuto "
 "settaggi analisi')."
 
 #: analysis.c:1250 analysis.c:1672 analysis.c:1933 record.c:393 show.c:925
@@ -125,7 +125,7 @@ msgstr "Statistiche del cubo"
 #: analysis.c:1614 html.c:2950
 #, fuzzy
 msgid "Overall statistics"
-msgstr "Statistiche complessive:\\n\\n"
+msgstr "Statistiche complessive:\n\n"
 
 #: analysis.c:1651 gtkgame.c:7937
 msgid "Statistics for all games"
@@ -190,8 +190,8 @@ msgid ""
 "   - %s\n"
 "   - number of reads: %lu\n"
 msgstr ""
-" * %s:\\n   - generato da %s\\n   - fino a %d pedine su %d punti (%d "
-"posizioni) per giocatore\\n   - %s\\n   - numero di letture: %lu\\n"
+" * %s:\n   - generato da %s\n   - fino a %d pedine su %d punti (%d "
+"posizioni) per giocatore\n   - %s\n   - numero di letture: %lu\n"
 
 #: bearoff.c:1030
 msgid "In memory 2-sided bearoff database evaluator"
@@ -218,8 +218,8 @@ msgid ""
 "%s%s   - %s\n"
 "   - number of reads: %lu\n"
 msgstr ""
-" * %s:\\n   - generato da %s\\n   - fino a %d pedine su %d punti (%d "
-"posizioni) per giocatore\\n%s%s   - %s\\n   - numero di letture: %lu\\n"
+" * %s:\n   - generato da %s\n   - fino a %d pedine su %d punti (%d "
+"posizioni) per giocatore\n%s%s   - %s\n   - numero di letture: %lu\n"
 
 #: bearoff.c:1052
 msgid "In memory 1-sided bearoff database evaluator"
@@ -233,7 +233,7 @@ msgstr "Sul disco è caricato il database di valutazione per 1 lato di gioco"
 #, fuzzy
 msgid "   - distributions are approximated with a normal distribution\n"
 msgstr ""
-"   - le distribuzioni sono approssimate con una normale distribuzione\\n"
+"   - le distribuzioni sono approssimate con una normale distribuzione\n"
 
 #: bearoff.c:1061
 msgid "   - with heuristic moves "
@@ -264,14 +264,14 @@ msgid ""
 "   - up to %d chequers on %d points (%d positions) per player\n"
 "   - number of reads: %lu\n"
 msgstr ""
-" * %s:\\n   - generato da %s\\n   - fino a %d pedine su %d punti (%d "
-"posizioni) per giocatore\\n   - %s\\n   - numero di letture: %lu\\n"
+" * %s:\n   - generato da %s\n   - fino a %d pedine su %d punti (%d "
+"posizioni) per giocatore\n   - %s\n   - numero di letture: %lu\n"
 
 #: bearoff.c:1094
 #, fuzzy, c-format
 msgid "   - cache: size %lu entries, %lu look-ups (%lu hits, and %lu misses)\n"
 msgstr ""
-"   - cache: misura %lu entrate, %lu sguardi (%lu presi, e %lu mancati)\\n"
+"   - cache: misura %lu entrate, %lu sguardi (%lu presi, e %lu mancati)\n"
 
 #: bearoff.c:1112
 msgid "Cubeless equity"
@@ -292,12 +292,12 @@ msgstr "L'avversario possiede il cubo"
 #: bearoff.c:1170
 #, fuzzy
 msgid "Bearing off\t\t\t\tBearing at least one chequer off\n"
-msgstr "Uscita delle pedine\\t\\t\\t\\tPortar fuori una pedina al massimo\\n"
+msgstr "Uscita delle pedine\t\t\t\tPortar fuori una pedina al massimo\n"
 
 #: bearoff.c:1172
 #, fuzzy
 msgid "Rolls\tPlayer\tOpponent\tPlayer\tOpponent\n"
-msgstr "Lanci dei dadi\\tGiocatore\\nAvversario\\tGiocatore\\tAvversario\\n"
+msgstr "Lanci dei dadi\tGiocatore\nAvversario\tGiocatore\tAvversario\n"
 
 #: bearoff.c:1212 bearoff.c:1237 bearoff.c:1252 format.c:879 formatgs.c:205
 #: formatgs.c:321 formatgs.c:374 formatgs.c:389 formatgs.c:441 formatgs.c:456
@@ -315,17 +315,17 @@ msgstr "n/d"
 msgid ""
 "\n"
 "Average rolls\n"
-msgstr "\\nMedia lanci dei dadi\\n"
+msgstr "\nMedia lanci dei dadi\n"
 
 #: bearoff.c:1219
 #, fuzzy
 msgid "Bearing off\t\t\t\tSaving gammon\n"
-msgstr "Uscita delle pedine\\t\\t\\tEvitare il gammon\\n"
+msgstr "Uscita delle pedine\t\t\tEvitare il gammon\n"
 
 #: bearoff.c:1221
 #, fuzzy
 msgid "\tPlayer\tOpponent\tPlayer\tOpponent\n"
-msgstr "\\tGiocatore\\tAvversario\\tGiocatore\\tAvversario\\n"
+msgstr "\tGiocatore\tAvversario\tGiocatore\tAvversario\n"
 
 #: bearoff.c:1259
 msgid ""
@@ -372,12 +372,12 @@ msgstr "Senza il cubo in gioco"
 msgid ""
 "incomplete bearoff database\n"
 "(expected size: %d)\n"
-msgstr "database uscita delle pedine incompleto\\n(grandezza prevista: %d)\\n"
+msgstr "database uscita delle pedine incompleto\n(grandezza prevista: %d)\n"
 
 #: bearoff.c:1704
 #, fuzzy, c-format
 msgid "%s: incomplete bearoff database\n"
-msgstr "%s: database uscita delle pedine incompleto\\n"
+msgstr "%s: database uscita delle pedine incompleto\n"
 
 #: bearoff.c:1737
 #, fuzzy, c-format
@@ -385,7 +385,7 @@ msgid ""
 "%s: incomplete bearoff database\n"
 "(type is illegal: '%2s')\n"
 msgstr ""
-"%s: database uscita delle pedine incompleto\\n(il tipo è illegale: '%2s')\\n"
+"%s: database uscita delle pedine incompleto\n(il tipo è illegale: '%2s')\n"
 
 #: bearoff.c:1754
 #, fuzzy, c-format
@@ -393,7 +393,7 @@ msgid ""
 "%s: incomplete bearoff database\n"
 "(illegal number of points is %d)"
 msgstr ""
-"%s: database uscita delle pedine incompleto\\n(il numero illegale di punti è "
+"%s: database uscita delle pedine incompleto\n(il numero illegale di punti è "
 "%d)"
 
 #: bearoff.c:1767
@@ -402,7 +402,7 @@ msgid ""
 "%s: incomplete bearoff database\n"
 "(illegal number of chequers is %d)"
 msgstr ""
-"%s: database uscita delle pedine incompleto\\n(il numero illegale di pedine "
+"%s: database uscita delle pedine incompleto\n(il numero illegale di pedine "
 "è %d)"
 
 #: bearoff.c:1837
@@ -413,13 +413,13 @@ msgid ""
 "(read: botton %ld, top %ld)\n"
 msgstr ""
 "GNU Backgammon può leggere soltanto Database Uscita pedine esatti con un"
-"\\nnumero uguale di pedine su entrambi i lati\\n(lettura: in basso %ld, in "
-"alto %ld)\\n"
+"\nnumero uguale di pedine su entrambi i lati\n(lettura: in basso %ld, in "
+"alto %ld)\n"
 
 #: bearoff.c:1875
 #, fuzzy
 msgid "Unknown bearoff database\n"
-msgstr "Database uscita pedine sconosciuto\\n"
+msgstr "Database uscita pedine sconosciuto\n"
 
 #: database.c:79
 msgid "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials Date"
@@ -428,7 +428,7 @@ msgstr "Posizione      Vittoria   V(g)  V(bg) P(g)  P(bg) Tentativi Data"
 #: database.c:89
 #, fuzzy
 msgid " (no rollout data)\n"
-msgstr " (non ci sono dati di rollout)\\n"
+msgstr " (non ci sono dati di rollout)\n"
 
 #: database.c:111
 msgid "The database is empty."
@@ -461,7 +461,7 @@ msgid ""
 "If you specify a parameter to `database generate', it\n"
 "must be a number of positions to create."
 msgstr ""
-"Se specifichi un parametro al 'database crea',\\nci deve essere un numero di "
+"Se specifichi un parametro al 'database crea',\nci deve essere un numero di "
 "posizione da creare."
 
 #: database.c:391
@@ -474,7 +474,7 @@ msgid ""
 "If you specify a parameter to `database train', it\n"
 "must be a number of positions to train on."
 msgstr ""
-"Se specifichi un parametro al 'database apprendi',\\nci deve essere un "
+"Se specifichi un parametro al 'database apprendi',\nci deve essere un "
 "numero di posizione su cui apprendere."
 
 #: database.c:492
@@ -490,12 +490,12 @@ msgstr "Non ci sono obbiettivi di valutazione nel databse da cui apprendere"
 msgid ""
 "Error in: p(W) %5.3f p(WG) %5.3f p(WBG) %5.3f p(LG) %5.3f p(LBG) %5.3f\n"
 msgstr ""
-"Errore in: p(V) %5.3f p(VG) %5.3f p(VBG) %5.3f p(PG) %5.3f p(PBG) %5.3f\\n"
+"Errore in: p(V) %5.3f p(VG) %5.3f p(VBG) %5.3f p(PG) %5.3f p(PBG) %5.3f\n"
 
 #: database.c:629
 #, fuzzy, c-format
 msgid "Equity error %5.3f\n"
-msgstr "Errore Equity %5.3f\\n"
+msgstr "Errore Equity %5.3f\n"
 
 #: database.c:631
 msgid "There are no target evaluations in the database to verify against."
@@ -509,7 +509,7 @@ msgid ""
 "support, and does not implement position database operations."
 msgstr ""
 "Questa installazione di GNU Backgammon è stata compilata senza il supporto "
-"di GDBM,\\ne non implementa l'operatività del database delle posizioni."
+"di GDBM,\ne non implementa l'operatività del database delle posizioni."
 
 #: dice.c:125 gtkoptions.c:183
 msgid "ANSI"
@@ -563,7 +563,7 @@ msgstr "Devi inserire due numeri compresi fra 1 e 6"
 #: dice.c:287 dice.c:299
 #, fuzzy, c-format
 msgid "%s is an invalid Blum factor; using %s instead.\n"
-msgstr "%s è un fattore Blum invalido; usa %s al suo posto.\\n"
+msgstr "%s è un fattore Blum invalido; usa %s al suo posto.\n"
 
 #: dice.c:372
 #, fuzzy
@@ -582,12 +582,12 @@ msgstr "La sistemazione corrente è %s, "
 #: dice.c:436
 #, fuzzy, c-format
 msgid "and the modulus is %s.\n"
-msgstr "ed il modulo è %s.\\n"
+msgstr "ed il modulo è %s.\n"
 
 #: dice.c:446
 #, fuzzy, c-format
 msgid "The current seed is %u.\n"
-msgstr "La sistemazione corrente è %u.\\n"
+msgstr "La sistemazione corrente è %u.\n"
 
 #: dice.c:450
 #, fuzzy, c-format
@@ -603,7 +603,7 @@ msgstr ""
 #: dice.c:701
 #, fuzzy, c-format
 msgid "Fetching %d random numbers from <www.random.org>\n"
-msgstr "Sto prelevando %d numeri casuali da <www.random.org>\\n"
+msgstr "Sto prelevando %d numeri casuali da <www.random.org>\n"
 
 #: dice.c:758
 msgid "Done."
@@ -616,7 +616,7 @@ msgid ""
 "seed and/or modulus before continuing."
 msgstr ""
 "Il generatore Blum, Blum and Shub è in uno stato illegale. Per favore resetta"
-"\\nla sistemazione e/o il modulo prima di continuare"
+"\nla sistemazione e/o il modulo prima di continuare"
 
 #: dice.c:938
 #, c-format
@@ -764,7 +764,7 @@ msgstr ""
 #: eval.c:768 eval.c:821
 #, fuzzy, c-format
 msgid "%s: not a weights file\n"
-msgstr "%s: non è un file weights\\n"
+msgstr "%s: non è un file weights\n"
 
 #: eval.c:772
 #, fuzzy, c-format
@@ -773,7 +773,7 @@ msgid ""
 "are %.2f)\n"
 msgstr ""
 "%s: versione incorretta del weights (la versione %s  è richiesta, ma questo "
-"weights è %.2f)\\n"
+"weights è %.2f)\n"
 
 #: eval.c:823
 #, fuzzy, c-format
@@ -781,8 +781,8 @@ msgid ""
 "%s: incorrect weights version (version %s is required,\n"
 "but these weights are %s)\n"
 msgstr ""
-"%s: versione incorretta del weights (la versione %s  è richiesta,\\nma "
-"questo weights è %s)\\n"
+"%s: versione incorretta del weights (la versione %s  è richiesta,\nma "
+"questo weights è %s)\n"
 
 #: eval.c:3694
 msgid "Win "
@@ -804,7 +804,7 @@ msgstr ""
 #: eval.c:3705
 #, fuzzy
 msgid "(single)\n"
-msgstr "(singolo)\\n"
+msgstr "(singolo)\n"
 
 #: eval.c:3920
 msgid "OVER"
@@ -867,7 +867,7 @@ msgstr "ID del match"
 #: eval.c:3946
 #, fuzzy
 msgid "Evaluator: \t"
-msgstr "Valutatore: \\t"
+msgstr "Valutatore: \t"
 
 #: eval.c:3955 gtkchequer.c:836 gtkcube.c:335 gtkrace.c:543 html.c:327
 #: progress.c:687
@@ -922,7 +922,7 @@ msgid ""
 " * %s neural network evaluator:\n"
 "   - version %s, %d inputs, %d hidden units"
 msgstr ""
-" * %s valutatore rete neurale:\\n   - versione %s, %d ingressi, %d unità "
+" * %s valutatore rete neurale:\n   - versione %s, %d ingressi, %d unità "
 "nascoste"
 
 #: eval.c:4072
@@ -1072,7 +1072,7 @@ msgid ""
 "This installation of GNU Backgammon was compiled without\n"
 "socket support, and does not implement external controllers."
 msgstr ""
-"Questa installazione di GNU Backgammon è stata compilata senza\\nil supporto "
+"Questa installazione di GNU Backgammon è stata compilata senza\nil supporto "
 "del soket, e non implementa i controlli esterni."
 
 #: external.c:347
@@ -1081,7 +1081,7 @@ msgid ""
 "You must specify the name of the socket to the external\n"
 "controller -- try `help external'."
 msgstr ""
-"Devi specificare il nome del socket ai controlli esterni\\n -- prova a "
+"Devi specificare il nome del socket ai controlli esterni\n -- prova a "
 "vedere 'aiuto esterno'."
 
 #: external.c:367
@@ -1112,7 +1112,7 @@ msgstr "senza il cubo"
 #: format.c:243 show.c:69
 #, fuzzy, c-format
 msgid "Skip pruning for %d-ply moves.\n"
-msgstr "Salta l'alleggerimento per le mosse %d-ply.\\n"
+msgstr "Salta l'alleggerimento per le mosse %d-ply.\n"
 
 #: format.c:250 show.c:74
 #, c-format
@@ -1127,12 +1127,12 @@ msgstr "prendi le prime %d mosse %d-ply"
 #: format.c:258 show.c:83
 #, fuzzy, c-format
 msgid " and up to %d more moves within equity %0.3g\n"
-msgstr " e altre %d mosse con equity %0.3g\\n"
+msgstr " e altre %d mosse con equity %0.3g\n"
 
 #: format.c:293 show.c:165 show.c:178 show.c:194
 #, fuzzy, c-format
 msgid "Player %d:\n"
-msgstr "Giocatore %d:\\n"
+msgstr "Giocatore %d:\n"
 
 #: format.c:306
 #, fuzzy, c-format
@@ -1184,12 +1184,12 @@ msgstr "senza var.redn."
 #: format.c:379
 #, fuzzy, c-format
 msgid ", %s dice gen. with seed %d and quasi-random dice\n"
-msgstr "%s generatore dadi con seed %u.\\n"
+msgstr "%s generatore dadi con seed %u.\n"
 
 #: format.c:384
 #, fuzzy, c-format
 msgid ", %s dice generator with seed %d\n"
-msgstr "%s generatore dadi con seed %u.\\n"
+msgstr "%s generatore dadi con seed %u.\n"
 
 #: format.c:392
 #, c-format
@@ -1201,7 +1201,7 @@ msgstr ""
 #: format.c:410
 #, fuzzy, c-format
 msgid "Different evaluations after %d plies:\n"
-msgstr "Troncamento dopo %d plies.\\n"
+msgstr "Troncamento dopo %d plies.\n"
 
 #: format.c:747 html.c:2000
 msgid "Alert: missed double"
@@ -1472,57 +1472,57 @@ msgstr "Vantaggio (corretto dalla fortuna) in ppg"
 #: getopt.c:673
 #, fuzzy, c-format
 msgid "%s: option `%s' is ambiguous\n"
-msgstr "%s: l'ozione `%s' è ambigua\\n"
+msgstr "%s: l'ozione `%s' è ambigua\n"
 
 #: getopt.c:697
 #, fuzzy, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr "%s: l'opzione `--%s' non prevede un argomento\\n"
+msgstr "%s: l'opzione `--%s' non prevede un argomento\n"
 
 #: getopt.c:702
 #, fuzzy, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr "%s: l'opzione `%c%s' non prevede un argomento\\n"
+msgstr "%s: l'opzione `%c%s' non prevede un argomento\n"
 
 #: getopt.c:720 getopt.c:893
 #, fuzzy, c-format
 msgid "%s: option `%s' requires an argument\n"
-msgstr "%s: l'opzione `%s' richiede un argomento\\n"
+msgstr "%s: l'opzione `%s' richiede un argomento\n"
 
 #: getopt.c:749
 #, fuzzy, c-format
 msgid "%s: unrecognized option `--%s'\n"
-msgstr "%s: opzione non riconosciuta `%c%s'\\n"
+msgstr "%s: opzione non riconosciuta `%c%s'\n"
 
 #: getopt.c:753
 #, fuzzy, c-format
 msgid "%s: unrecognized option `%c%s'\n"
-msgstr "%s: opzione non riconosciuta `%c%s'\\n"
+msgstr "%s: opzione non riconosciuta `%c%s'\n"
 
 #: getopt.c:779
 #, fuzzy, c-format
 msgid "%s: illegal option -- %c\n"
-msgstr "%s: opzione illegale -- %c\\n"
+msgstr "%s: opzione illegale -- %c\n"
 
 #: getopt.c:782
 #, fuzzy, c-format
 msgid "%s: invalid option -- %c\n"
-msgstr "%s: opzione invalida -- %c\\n"
+msgstr "%s: opzione invalida -- %c\n"
 
 #: getopt.c:812 getopt.c:942
 #, fuzzy, c-format
 msgid "%s: option requires an argument -- %c\n"
-msgstr "%s: l'opzione richiede un argomento -- %c\\n"
+msgstr "%s: l'opzione richiede un argomento -- %c\n"
 
 #: getopt.c:859
 #, fuzzy, c-format
 msgid "%s: option `-W %s' is ambiguous\n"
-msgstr "%s: l'opzione `-W %s' è ambigua\\n"
+msgstr "%s: l'opzione `-W %s' è ambigua\n"
 
 #: getopt.c:877
 #, fuzzy, c-format
 msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr "%s: l'opzione `-W %s' non richiede un argomento\\n"
+msgstr "%s: l'opzione `-W %s' non richiede un argomento\n"
 
 #: gnubg.c:462
 msgid "<die> <die>"
@@ -2918,13 +2918,13 @@ msgstr "alias per 'setta inversione della matchequitytable'"
 #: gnubg.c:1414
 msgid "Set default path for exporting Encapsulated PostScript files"
 msgstr ""
-"Setta il percorso predefinito per l'esportazione\\ndei files Encapsulated "
+"Setta il percorso predefinito per l'esportazione\ndei files Encapsulated "
 "PostScript"
 
 #: gnubg.c:1417
 msgid "Set default path for importing or exporting Jellyfish .gam files"
 msgstr ""
-"Setta il percorso predefinito per importazione o esportazione\\ndei "
+"Setta il percorso predefinito per importazione o esportazione\ndei "
 "Jellyfish.gam files"
 
 #: gnubg.c:1420
@@ -2938,7 +2938,7 @@ msgstr "Setta il percorso predefinito per l'esportazione dei LaTeX files"
 #: gnubg.c:1426
 msgid "Set default path for importing or exporting Jellyfish .mat files"
 msgstr ""
-"Setta il percorso predefinito per l'importazione o l'esportazione\\ndei "
+"Setta il percorso predefinito per l'importazione o l'esportazione\ndei "
 "Jellyfish .mat files"
 
 #: gnubg.c:1429
@@ -3501,7 +3501,7 @@ msgstr "Mostra se i beavers sono permessi o no in un money game"
 #: gnubg.c:1740
 #, fuzzy
 msgid "Lookup data in various bearoff databases "
-msgstr "Errore di inizializzazione del vecchio bearoff database!\\n"
+msgstr "Errore di inizializzazione del vecchio bearoff database!\n"
 
 #: gnubg.c:1742 gnubg.c:1776
 msgid "Redisplay the board position"
@@ -3985,7 +3985,7 @@ msgstr "Posizione corrente"
 #: gnubg.c:2280
 #, fuzzy, c-format
 msgid "`simple' must be followed by 26 integers; found only %d\n"
-msgstr "`semplice' deve essere seguito da 26 interi; trovato solo %d\\n"
+msgstr "`semplice' deve essere seguito da 26 interi; trovato solo %d\n"
 
 #: gnubg.c:2316
 msgid "You must specify the number of the move to apply."
@@ -3998,7 +3998,7 @@ msgstr "Non c'è una lista di mosse valida."
 #: gnubg.c:2326
 #, fuzzy, c-format
 msgid "Move =%d is out of range.\n"
-msgstr "Mossa =%d è fuori rango.\\n"
+msgstr "Mossa =%d è fuori rango.\n"
 
 #: gnubg.c:2342
 msgid "Illegal position."
@@ -4012,7 +4012,7 @@ msgstr "Devi specificare se settare%s on o off (guarda 'aiuto settaggio %s')"
 #: gnubg.c:2442
 #, fuzzy, c-format
 msgid "Illegal keyword `%s' -- try `help set %s'.\n"
-msgstr "Parola chiave illegale '%s' -- prova 'aiuto settaggio %s'.\\n"
+msgstr "Parola chiave illegale '%s' -- prova 'aiuto settaggio %s'.\n"
 
 #: gnubg.c:2497
 msgid "(Interrupted)"
@@ -4043,7 +4043,7 @@ msgstr "Comando incompleto -- prova 'aiuto'."
 #: gnubg.c:2762
 #, fuzzy, c-format
 msgid "Unknown keyword `%s' -- try `help'.\n"
-msgstr "Parola chiave sconosciuta '%s' -- prova 'aiuto'.\\n"
+msgstr "Parola chiave sconosciuta '%s' -- prova 'aiuto'.\n"
 
 #: gnubg.c:2887 gnubg.c:3044 gnubg.c:4752 gtkgame.c:1675 gtkgame.c:1823
 #: text.c:88 text.c:470
@@ -4054,7 +4054,7 @@ msgstr "Lanciato %d%d"
 #: gnubg.c:2920
 #, fuzzy, c-format
 msgid "Rolled %d%d (%s):\n"
-msgstr "Lanciato %d%d (%s):\\n"
+msgstr "Lanciato %d%d (%s):\n"
 
 #: gnubg.c:2993 gnubg.c:4088
 msgid "No game in progress."
@@ -4131,7 +4131,7 @@ msgstr "Sto valutando la posizione..."
 msgid "No help available for topic `%s' -- try `help' for a list of topics.\n"
 msgstr ""
 "Nessun aiuto disponibile per '%s' -- prova 'aiuto' per la lista di tutti i "
-"disponibili.\\n"
+"disponibili.\n"
 
 #: gnubg.c:3375
 #, fuzzy, c-format
@@ -4139,12 +4139,12 @@ msgid ""
 "%s- %s\n"
 "\n"
 "Usage: %s"
-msgstr "%s- %s\\n\\nUso: %s"
+msgstr "%s- %s\n\nUso: %s"
 
 #: gnubg.c:3378
 #, fuzzy
 msgid "<subcommand>\n"
-msgstr "<sottocomando>\\n"
+msgstr "<sottocomando>\n"
 
 #: gnubg.c:3384
 msgid "Available commands:"
@@ -4202,21 +4202,21 @@ msgstr "Sto considerando il rifiuto..."
 #: gnubg.c:3721
 #, fuzzy, c-format
 msgid "Equity before resignation: %+6.3f\n"
-msgstr "La equity prima del rifiuto: %+6.3f\\n"
+msgstr "La equity prima del rifiuto: %+6.3f\n"
 
 #: gnubg.c:3723
 #, fuzzy, c-format
 msgid ""
 "Equity after resignation : %+6.3f (%+6.3f)\n"
 "\n"
-msgstr "La equity dopo il rifiuto: %+6.3f (%+6.3f)\\n\\n"
+msgstr "La equity dopo il rifiuto: %+6.3f (%+6.3f)\n\n"
 
 #: gnubg.c:3725 gnubg.c:3740
 #, fuzzy, c-format
 msgid ""
 "Correct resign decision  : %s\n"
 "\n"
-msgstr "Correta decisione di rifiuto  : %s\\n\\n"
+msgstr "Correta decisione di rifiuto  : %s\n\n"
 
 #: gnubg.c:3727 gnubg.c:3742 gtkgame.c:2050 gtktoolbar.c:463
 msgid "Accept"
@@ -4229,56 +4229,56 @@ msgstr "Rifiuta"
 #: gnubg.c:3735
 #, fuzzy, c-format
 msgid "Equity before resignation: %6.2f%%\n"
-msgstr "La equity prima del rifiuto: %6.2f%%\\n"
+msgstr "La equity prima del rifiuto: %6.2f%%\n"
 
 #: gnubg.c:3737
 #, fuzzy, c-format
 msgid ""
 "Equity after resignation : %6.2f%% (%6.2f%%)\n"
 "\n"
-msgstr "La equity dopo il rifiuto: %6.2f%% (%6.2f%%)\\n\\n"
+msgstr "La equity dopo il rifiuto: %6.2f%% (%6.2f%%)\n\n"
 
 #: gnubg.c:3782
 #, fuzzy
 msgid "Take decision:\n"
-msgstr "Decide di accettare:\\n"
+msgstr "Decide di accettare:\n"
 
 #: gnubg.c:3786
 #, fuzzy, c-format
 msgid "Equity for take: %+6.3f\n"
-msgstr "Equity per accettare: %+6.3f\\n"
+msgstr "Equity per accettare: %+6.3f\n"
 
 #: gnubg.c:3787
 #, fuzzy, c-format
 msgid ""
 "Equity for pass: %+6.3f\n"
 "\n"
-msgstr "Equity per passare: %+6.3f\\n\\n"
+msgstr "Equity per passare: %+6.3f\n\n"
 
 #: gnubg.c:3791
 #, fuzzy, c-format
 msgid "MWC for take: %6.2f%%\n"
-msgstr "Mwc per accettare: %6.2f%%\\n"
+msgstr "Mwc per accettare: %6.2f%%\n"
 
 #: gnubg.c:3793
 #, fuzzy, c-format
 msgid "MWC for pass: %6.2f%%\n"
-msgstr "Mwc per passare: %6.2f%%\\n"
+msgstr "Mwc per passare: %6.2f%%\n"
 
 #: gnubg.c:3798
 #, fuzzy
 msgid "Your proper cube action: Beaver!\n"
-msgstr "La tua corretta azione di cubo: Beaver!\\n"
+msgstr "La tua corretta azione di cubo: Beaver!\n"
 
 #: gnubg.c:3800
 #, fuzzy
 msgid "Your proper cube action: Take.\n"
-msgstr "La tua corretta azione di cubo: Accetta.\\n"
+msgstr "La tua corretta azione di cubo: Accetta.\n"
 
 #: gnubg.c:3802
 #, fuzzy
 msgid "Your proper cube action: Pass.\n"
-msgstr "La tua corretta azione di cubo: Passa.\\n"
+msgstr "La tua corretta azione di cubo: Passa.\n"
 
 #: gnubg.c:3842 play.c:1274 play.c:2779
 msgid "Considering move..."
@@ -4310,7 +4310,7 @@ msgid ""
 "You cannot do a cube decision rollout for the initial position.\n"
 "Please 'set rollout initial off'."
 msgstr ""
-"Non puoi fare il rollout del cubo per la posizione iniziale.\\nPer favore "
+"Non puoi fare il rollout del cubo per la posizione iniziale.\nPer favore "
 "'setta rollout iniziale off'."
 
 #: gnubg.c:4071
@@ -4319,7 +4319,7 @@ msgid ""
 "You cannot rollout moves as initial position.\n"
 "Please 'set rollout initial off'."
 msgstr ""
-"Non puoi fare il rollout sulle mosse per la posizione iniziale.\\nPer favore "
+"Non puoi fare il rollout sulle mosse per la posizione iniziale.\nPer favore "
 "'setta rollout iniziale off'."
 
 #: gnubg.c:4278
@@ -4403,12 +4403,12 @@ msgid ""
 "You must specify a valid number of hidden nodes (try `help new weights').\n"
 msgstr ""
 "Devi specificare un numero valido di nodi nascosti (prova 'aiuto nuovo "
-"weights').\\n"
+"weights').\n"
 
 #: gnubg.c:4992
 #, fuzzy, c-format
 msgid "A new neural net with %d hidden nodes has been created.\n"
-msgstr "Una nuova rete neurale con %d nodi nascosti è stata creata.\\n"
+msgstr "Una nuova rete neurale con %d nodi nascosti è stata creata.\n"
 
 #: gnubg.c:5235
 #, fuzzy, c-format
@@ -4423,16 +4423,16 @@ msgid ""
 "# use `.gnubgrc' instead.\n"
 "\n"
 msgstr ""
-"#\\n# GNU Backgammon file comandi\\n#   generato da GNU Backgammon %s\\n#"
-"\\n# ATTENZIONE: Il file '.gnubgautorc' è generato automaticamente dal\\n# "
+"#\n# GNU Backgammon file comandi\n#   generato da GNU Backgammon %s\n#"
+"\n# ATTENZIONE: Il file '.gnubgautorc' è generato automaticamente dal\n# "
 "comando 'salva settaggi', e sarà riscritto la prossima volta che premi salva "
-"settaggi.\\n# Se vuoi aggiungere comandi manuali allo startup, puoi farlo"
-"\\n# usando invece '.gnubgrc'.\\n\\n"
+"settaggi.\n# Se vuoi aggiungere comandi manuali allo startup, puoi farlo"
+"\n# usando invece '.gnubgrc'.\n\n"
 
 #: gnubg.c:5620
 #, fuzzy, c-format
 msgid "Settings saved to %s.\n"
-msgstr "I settaggi sono stati salvati in %s.\\n"
+msgstr "I settaggi sono stati salvati in %s.\n"
 
 #: gnubg.c:5621
 msgid "standard output stream"
@@ -4441,7 +4441,7 @@ msgstr "flusso standard di uscita"
 #: gnubg.c:5647
 #, fuzzy, c-format
 msgid "Evaluator weights saved to %s.\n"
-msgstr "Il valutatore weights è stato salvato in %s.\\n"
+msgstr "Il valutatore weights è stato salvato in %s.\n"
 
 #: gnubg.c:5659
 #, fuzzy
@@ -4449,7 +4449,7 @@ msgid ""
 "If you specify a parameter to `train td', it\n"
 "must be a number of positions to train on."
 msgstr ""
-"Se specifichi un parametro per 'train td', esso\\ndeve essere un numero di "
+"Se specifichi un parametro per 'train td', esso\ndeve essere un numero di "
 "posizione su cui applicare il train"
 
 #: gnubg.c:5666
@@ -4482,20 +4482,20 @@ msgid ""
 "For more information, type `help' from within gnubg.\n"
 "Please report bugs to <bug-gnubg@gnu.org>.\n"
 msgstr ""
-"Uso: %s [opzioni] [salvato-game-file]\\nOpzioni:\\n  -b, --no-"
-"bearoff          Non usare il database uscita pedine\\n  -c FILE, --commands "
-"FILE  Leggi i comandi dal FILE e esci\\n  -d DIR, --datadir DIR     Leggi i "
-"files database e weight dalla cartellaDIR\\n  -h, --help                "
-"Visualizza uso e esci\\n  -n[S], --new-weights[=S]  Crea una nuova rete "
-"neurale (di dimensione S)\\n  -q, --quiet               Disabilita gli "
-"effetti sonori\\n  -r, --no-rc               Non leggere i comandi di ."
-"gnubgrc e .gnubgautorc\\n  -s FILE, --script FILE    Valuta il codice schema "
-"nel FILE e esci\\n  -t, --tty                 Inizia su tty invece di usare "
-"il sisteme nella finestra\\n  -v, --version             Visualizza le "
-"informazioni sulla versione e esci\\n  -w, --window-system-only  Ignora "
-"l'input tty quando usi il sistema nella finestra\\n\\nPer maggiori "
-"informazioni, digita 'aiuto' da dentro gnubg.\\nPer favore informa su buchi "
-"nel programma <bug-gnubg@gnu.org>.\\n"
+"Uso: %s [opzioni] [salvato-game-file]\nOpzioni:\n  -b, --no-"
+"bearoff          Non usare il database uscita pedine\n  -c FILE, --commands "
+"FILE  Leggi i comandi dal FILE e esci\n  -d DIR, --datadir DIR     Leggi i "
+"files database e weight dalla cartellaDIR\n  -h, --help                "
+"Visualizza uso e esci\n  -n[S], --new-weights[=S]  Crea una nuova rete "
+"neurale (di dimensione S)\n  -q, --quiet               Disabilita gli "
+"effetti sonori\n  -r, --no-rc               Non leggere i comandi di ."
+"gnubgrc e .gnubgautorc\n  -s FILE, --script FILE    Valuta il codice schema "
+"nel FILE e esci\n  -t, --tty                 Inizia su tty invece di usare "
+"il sisteme nella finestra\n  -v, --version             Visualizza le "
+"informazioni sulla versione e esci\n  -w, --window-system-only  Ignora "
+"l'input tty quando usi il sistema nella finestra\n\nPer maggiori "
+"informazioni, digita 'aiuto' da dentro gnubg.\nPer favore informa su buchi "
+"nel programma <bug-gnubg@gnu.org>.\n"
 
 #: gnubg.c:6949
 #, fuzzy, c-format
@@ -4517,18 +4517,18 @@ msgid ""
 "For more information, type `help' from within gnubg.\n"
 "Please report bugs to <bug-gnubg@gnu.org>.\n"
 msgstr ""
-"Uso: %s [opzioni] [salvato-game-file]\\nOpzioni:\\n  -b, --no-"
-"bearoff          Non usare il database uscita pedine\\n  -c FILE, --commands "
-"FILE  Leggi i comandi dal FILE e esci\\n  -d DIR, --datadir DIR     Leggi i "
-"files database e weight dalla cartellaDIR\\n  -h, --help                "
-"Visualizza uso e esci\\n  -n[S], --new-weights[=S]  Crea una nuova rete "
-"neurale (di dimensione S)\\n  -q, --quiet               Disabilita gli "
-"effetti sonori\\n  -r, --no-rc               Non leggere i comandi di ."
-"gnubgrc e .gnubgautorc\\n  -s FILE, --script FILE    Valuta il codice schema "
-"nel FILE e esci\\n  -v, --version             Visualizza le informazioni "
-"sulla versione e esci\\n\\nPer maggiori informazioni, digita 'aiuto' da "
-"dentro gnubg.\\nPer favore informa su buchi nel programma <bug-gnubg@gnu."
-"org>.\\n"
+"Uso: %s [opzioni] [salvato-game-file]\nOpzioni:\n  -b, --no-"
+"bearoff          Non usare il database uscita pedine\n  -c FILE, --commands "
+"FILE  Leggi i comandi dal FILE e esci\n  -d DIR, --datadir DIR     Leggi i "
+"files database e weight dalla cartellaDIR\n  -h, --help                "
+"Visualizza uso e esci\n  -n[S], --new-weights[=S]  Crea una nuova rete "
+"neurale (di dimensione S)\n  -q, --quiet               Disabilita gli "
+"effetti sonori\n  -r, --no-rc               Non leggere i comandi di ."
+"gnubgrc e .gnubgautorc\n  -s FILE, --script FILE    Valuta il codice schema "
+"nel FILE e esci\n  -v, --version             Visualizza le informazioni "
+"sulla versione e esci\n\nPer maggiori informazioni, digita 'aiuto' da "
+"dentro gnubg.\nPer favore informa su buchi nel programma <bug-gnubg@gnu."
+"org>.\n"
 
 #: gnubg.c:7007
 msgid "Enter new path or press [enter] if unchanged"
@@ -4545,12 +4545,12 @@ msgstr "GNU Backgammon per Windows"
 #: gnubg.c:7314
 #, fuzzy, c-format
 msgid "%s: option `-s' requires Guile\n"
-msgstr "%s opzione '-s' richiede Guile\\n"
+msgstr "%s opzione '-s' richiede Guile\n"
 
 #: gnubg.c:7323
 #, fuzzy, c-format
 msgid "%s: option `-p' requires Python\n"
-msgstr "%s opzione '-s' richiede Guile\\n"
+msgstr "%s opzione '-s' richiede Guile\n"
 
 #: gnubg.c:7358
 #, fuzzy, c-format
@@ -4563,12 +4563,12 @@ msgid ""
 "for\n"
 "details.\n"
 msgstr ""
-"GNU Backgammon %s  Copyright 1999, 2000, 2001, 2002, 2003 Gary Wong.\\nGNU "
+"GNU Backgammon %s  Copyright 1999, 2000, 2001, 2002, 2003 Gary Wong.\nGNU "
 "Backgammon è software libero, coperto dalla GNU General Public License"
-"\\nversione 2, e puoi cambiare e/o distribuirne copie\\nsotto certe "
-"condizioni.  Digita \"mostra copyright\" per leggere le condizoni.\\nNon c'è "
+"\nversione 2, e puoi cambiare e/o distribuirne copie\nsotto certe "
+"condizioni.  Digita \"mostra copyright\" per leggere le condizoni.\nNon c'è "
 "assolutamente alcuna garanzia su GNU Backgammon.  Digita \"mostra garanzia\" "
-"per \\ndettagli.\\n"
+"per \ndettagli.\n"
 
 #: gnubg.c:7379 gnubg.c:7422 gnubg.c:7429 gnubg.c:7467 gnubg.c:7486
 #: gnubg.c:7495 gnubg.c:7502
@@ -4596,9 +4596,9 @@ msgid ""
 "directions for obtaining a pre-trained network."
 msgstr ""
 "ATTENZIONE: Non è stata rilevata alcuna rete neurale. GNU Backgammon creerà"
-"\\nuna rete neurale casuale, ma sarà inadatta all'uso finchè non avrà "
-"terminato l'apprendimento.\\nPer favore consulta il manuale per le "
-"informazioni sull'apprendimento o i\\nsuggerimenti per ottenere una rete "
+"\nuna rete neurale casuale, ma sarà inadatta all'uso finchè non avrà "
+"terminato l'apprendimento.\nPer favore consulta il manuale per le "
+"informazioni sull'apprendimento o i\nsuggerimenti per ottenere una rete "
 "neurale già pronta."
 
 #: gnubg.c:7467
@@ -4640,7 +4640,7 @@ msgstr "Match Specifico"
 #: gnubg.c:7687
 #, fuzzy
 msgid "Could not open X display.  Continuing on TTY.\n"
-msgstr "Non posso aprire X display. Continuo su TTY.\\n"
+msgstr "Non posso aprire X display. Continuo su TTY.\n"
 
 #: gnubg.c:7787 gnubg.c:7830
 msgid "Command only valid in match play"
@@ -4649,17 +4649,17 @@ msgstr "Comando valido solo nei match"
 #: gnubg.c:7798 gnubg.c:7800 gnubg.c:7803
 #, fuzzy, c-format
 msgid "MWC for equity = %+6.3f: %6.2f%%\n"
-msgstr "MWC per equity = %+6.3f: %6.2f%%\\n"
+msgstr "MWC per equity = %+6.3f: %6.2f%%\n"
 
 #: gnubg.c:7802 gnubg.c:7846
 #, fuzzy
 msgid "By linear interpolation:\n"
-msgstr "Per interpolazione lineare:\\n"
+msgstr "Per interpolazione lineare:\n"
 
 #: gnubg.c:7842 gnubg.c:7844 gnubg.c:7847
 #, fuzzy, c-format
 msgid "Equity for MWC = %6.2f%%: %+6.3f\n"
-msgstr "Equity per MWC = %6.2f%%: %+6.3f\\n"
+msgstr "Equity per MWC = %6.2f%%: %+6.3f\n"
 
 #: gnubg.c:7995
 #, c-format
@@ -4732,7 +4732,7 @@ msgstr "Proibisci oltre cinque pedine su una punta"
 #: gnubgmodule.c:747
 #, fuzzy
 msgid "invalid position number"
-msgstr "%s: opzione invalida -- %c\\n"
+msgstr "%s: opzione invalida -- %c\n"
 
 #: gtkbearoff.c:196
 #, fuzzy
@@ -6516,7 +6516,7 @@ msgid ""
 msgstr ""
 "Invece di avere una media su tutti i 21 possibili lanci è possibile avere "
 "una media di un set ridotto, per esempio 7 lanci con l'opzione di velocità "
-"al 33%. La velocit\\xe0 al 33% sar\\xe0 tipicamente tre volte più veloce che "
+"al 33%. La velocit\xe0 al 33% sar\xe0 tipicamente tre volte più veloce che "
 "la ricerca completa senza la riduzione."
 
 #: gtkgame.c:5051
@@ -6588,7 +6588,7 @@ msgid ""
 msgstr ""
 "GNU Backammon valuterà tutte le mosse a 0-ply. Il filtro mosse controlla "
 "quante mosse devono essere valutate a un livello superiore di ply. Un \"più "
-"piccolo\" filtro sar\\xe0 pi\\xf9 veloce, ma GNU Backgammon non troverà la "
+"piccolo\" filtro sar\xe0 pi\xf9 veloce, ma GNU Backgammon non troverà la "
 "miglior mossa. Gli utenti esperti possono settare il proprio filtro "
 "cliccando sul pulsante [Modifica]."
 
@@ -6905,7 +6905,7 @@ msgid ""
 "    http://www.gnu.org/manual/gnubg/"
 msgstr ""
 "Il manuale online non è disponibile con questa installazione di GNU "
-"Backgammon.  Puoi vedere il manuale sul Web a:\\n\\n    http://www.gnu.org/"
+"Backgammon.  Puoi vedere il manuale sul Web a:\n\n    http://www.gnu.org/"
 "manual/gnubg/"
 
 #: gtkgame.c:7257
@@ -6917,7 +6917,7 @@ msgid ""
 "    http://mole.dnsalias.org/~acepoint/GnuBG/gnubg-faq/"
 msgstr ""
 "Le domande frequenti (FAQ) non sono disponibili con questa installazione di "
-"GNU Backgammon.  Puoi vederle sul Web a:\\n\\n    http://mole.dnsalias.org/"
+"GNU Backgammon.  Puoi vederle sul Web a:\n\n    http://mole.dnsalias.org/"
 "~acepoint/GnuBG/gnubg-faq/"
 
 #: gtkgame.c:7268
@@ -6934,7 +6934,7 @@ msgid ""
 "%s- %s\n"
 "\n"
 "Usage: %s%s\n"
-msgstr "%s- %s\\n\\nUso: %s"
+msgstr "%s- %s\n\nUso: %s"
 
 #: gtkgame.c:7394
 msgid "GNU Backgammon - Help"
@@ -6963,7 +6963,7 @@ msgstr "Statistiche sulla fortuna"
 #: gtkgame.c:7777
 #, fuzzy
 msgid "Overall Statistics:"
-msgstr "Statistiche complessive:\\n\\n"
+msgstr "Statistiche complessive:\n\n"
 
 #: gtkgame.c:7942
 #, fuzzy
@@ -7189,12 +7189,12 @@ msgstr "Inverti la tavola"
 #: gtkmet.c:289
 #, fuzzy
 msgid "Pre-Crawford"
-msgstr "Tavola pre-Crawford:\\n\\n"
+msgstr "Tavola pre-Crawford:\n\n"
 
 #: gtkmet.c:293
 #, fuzzy, c-format
 msgid "Post-Crawford for player %s"
-msgstr "Tavola post-Crawford per il giocatore %d (%s):\\n\\n"
+msgstr "Tavola post-Crawford per il giocatore %d (%s):\n\n"
 
 #: gtkmovefilter.c:228
 msgid "Enable this level"
@@ -7237,7 +7237,7 @@ msgstr "Modifica..."
 msgid ""
 "NOT IMPLEMENTED!\n"
 "Please use the command \"%s\" instead"
-msgstr "NON IMPLEMENTATO!\\nUsa il comando \"setta percorso\""
+msgstr "NON IMPLEMENTATO!\nUsa il comando \"setta percorso\""
 
 #: gtkoptions.c:169
 #, fuzzy
@@ -7335,7 +7335,7 @@ msgid ""
 msgstr ""
 "Legge i dadi da un file: GNU Backgammon userà tutti i caratteri di un file "
 "nel range compreso fra '1' e '6' come dadi. Quando l'intero file sarà stato "
-"letto, ritorner\\xe0 all inizio. Sarai avvisato di immettere il file quando "
+"letto, ritorner\xe0 all inizio. Sarai avvisato di immettere il file quando "
 "chiudi queste opzioni di dialogo."
 
 #: gtkoptions.c:205
@@ -7892,11 +7892,11 @@ msgid ""
 "MWCs being output as 50.33%."
 msgstr ""
 "Controlla il numero di cifre da mostrare dopo il punto decimale nelle "
-"probabilità e nelle equities. Questo valore \\xe8 usato da GNU Backgammon "
+"probabilità e nelle equities. Questo valore \xe8 usato da GNU Backgammon "
 "durante, per es., l'esportazione di files, suggerimenti,analisi ecc.. Il "
 "valore predefinito di 3 nelle equities visualizza per es. +0.123. Le "
 "equities e le probabilità sono salvate internamente con 7-8 caratteri "
-"decimali, così \\xe8 possibile cambiare il valore dopo l'analisi se vuoi "
+"decimali, così \xe8 possibile cambiare il valore dopo l'analisi se vuoi "
 "vedere più caratteri dopo la virgola. La visualizzazione delle MWC (match "
 "winning chances) è derivata da questo valore per produrre numeri con "
 "approssimativamente lo stesso numero di caratteri. Il valore predefinito di "
@@ -8087,7 +8087,7 @@ msgid ""
 "or (d) just have fun. Oh, BTW, don't tell the trolls in rec.games."
 "backgammon :-)"
 msgstr ""
-"Ora è provato! GNU Backgammon \\xe8 capace di manipolare i dadi. Questo è un "
+"Ora è provato! GNU Backgammon \xe8 capace di manipolare i dadi. Questo è un "
 "modo per imparare. Esempio d'uso: (a) studia come raddoppiare "
 "aggressivamente dopo una buona sequenza d'apertura, (b) studia come "
 "controllare il temperamento quando le cose vanno male, (c) studia come "
@@ -8313,7 +8313,7 @@ msgstr "GNU Backgammon - Opzioni generali"
 msgid ""
 "NOT IMPLEMENTED!\n"
 "Use the \"set path\" command instead!"
-msgstr "NON IMPLEMENTATO!\\nUsa il comando \"setta percorso\""
+msgstr "NON IMPLEMENTATO!\nUsa il comando \"setta percorso\""
 
 #: gtkpath.c:131 show.c:1828
 msgid "Export of Encapsulated PostScript .eps files"
@@ -8979,7 +8979,7 @@ msgstr ""
 #: gtkrace.c:578
 #, fuzzy, c-format
 msgid "%s on roll:"
-msgstr "%s deve lanciare.\\n"
+msgstr "%s deve lanciare.\n"
 
 #: gtkrace.c:607
 msgid "Std.dev."
@@ -9391,17 +9391,17 @@ msgstr "Errore standard"
 #: html.c:729 html.c:1102 html.c:1549
 #, fuzzy, c-format
 msgid "Pip counts: %s %d, %s %d<br />\n"
-msgstr "Conto delle punte: %s %d, %s %d<br />\\n"
+msgstr "Conto delle punte: %s %d, %s %d<br />\n"
 
 #: html.c:738 html.c:1113 html.c:1558
 #, fuzzy, c-format
 msgid "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"
-msgstr "ID posizione: <tt>%s</tt> ID del match: <tt>%s</tt><br />\\n"
+msgstr "ID posizione: <tt>%s</tt> ID del match: <tt>%s</tt><br />\n"
 
 #: html.c:1587
 #, fuzzy
 msgid "unknown board type\n"
-msgstr "tipo di board sconosciuto\\n"
+msgstr "tipo di board sconosciuto\n"
 
 #: html.c:1625 postscript.c:952
 #, c-format
@@ -9571,7 +9571,7 @@ msgstr ""
 #: html.c:3099
 #, fuzzy, c-format
 msgid "Date: %s<br />\n"
-msgstr "Data: %s<br />\\n"
+msgstr "Data: %s<br />\n"
 
 #: html.c:3105
 #, fuzzy
@@ -9632,17 +9632,17 @@ msgstr "Games (totale)"
 #: html.c:3317
 #, fuzzy, c-format
 msgid "<p %s>%s wins %d point</p>\n"
-msgstr "<p %s>%s vince %d punto</p>\\n"
+msgstr "<p %s>%s vince %d punto</p>\n"
 
 #: html.c:3318
 #, fuzzy, c-format
 msgid "<p %s>%s wins %d points</p>\n"
-msgstr "<p %s>%s vince %d punti</p>\\n"
+msgstr "<p %s>%s vince %d punti</p>\n"
 
 #: html.c:3416
 #, c-format
 msgid "gnubg.css is not written since it already exist in \"%s\"\n"
-msgstr "gnubg.css non è stato scritto poich\\xe8 esiste gi\\xe0 in \"%s\"\n"
+msgstr "gnubg.css non è stato scritto poich\xe8 esiste gi\xe0 in \"%s\"\n"
 
 #: html.c:3445
 msgid "You must specify a file to export to (see `help exportgame html')."
@@ -9663,17 +9663,17 @@ msgstr ""
 #: html.c:3713
 #, fuzzy, c-format
 msgid "<strong>%s (%s, %d pts) vs. %s (%s, %d pts) (Match to %d)</strong>\n"
-msgstr "%s (O, %d punti) vs. %s (X, %d punti) (Match a %d)\\n\\n"
+msgstr "%s (O, %d punti) vs. %s (X, %d punti) (Match a %d)\n\n"
 
 #: html.c:3722
 #, fuzzy, c-format
 msgid "<strong>%s (%s, %d pts) vs. %s (%s, %d pts) (money game)</strong>\n"
-msgstr "%s (O, %d punti) vs. %s (X, %d punti) (money game)\\n\\n"
+msgstr "%s (O, %d punti) vs. %s (X, %d punti) (money game)\n\n"
 
 #: htmlimages.c:124
 #, fuzzy, c-format
 msgid "You must specify a file to export to (see `%s')\n"
-msgstr "Devi specificare un file nel quale esportare (see `%s')\\n"
+msgstr "Devi specificare un file nel quale esportare (see `%s')\n"
 
 #: htmlimages.c:138
 msgid "Generating image:"
@@ -9685,7 +9685,7 @@ msgid ""
 "This installation of GNU Backgammon was compiled without\n"
 "support for writing HTML images."
 msgstr ""
-"Questa installazione di GNU Backgammon è stata compilata senza\\nil supporto "
+"Questa installazione di GNU Backgammon è stata compilata senza\nil supporto "
 "per scrivere le immagini HTML."
 
 #: import.c:104
@@ -9725,7 +9725,7 @@ msgstr ""
 #: import.c:604
 #, fuzzy, c-format
 msgid "WARNING: Invalid move: \"%s\" encountered\n"
-msgstr "ATTENZIONE: Mossa non valida:\"%s\" incontrata\\n"
+msgstr "ATTENZIONE: Mossa non valida:\"%s\" incontrata\n"
 
 #: import.c:706 import.c:1018 import.c:1667 import.c:2453
 msgid "Drop record found but doesn't follow a double"
@@ -9734,7 +9734,7 @@ msgstr "Registrazione di drop trovata ma non segue ad un raddoppio"
 #: import.c:728
 #, fuzzy, c-format
 msgid "Unrecognised move \"%s\" in .mat file.\n"
-msgstr "Mossa non riconosciuta \"%s\" nel .mat file.\\n"
+msgstr "Mossa non riconosciuta \"%s\" nel .mat file.\n"
 
 #: import.c:845
 #, c-format
@@ -9744,12 +9744,12 @@ msgstr "%s: non è un valido .mat file"
 #: import.c:970
 #, fuzzy, c-format
 msgid "WARNING! Illegal or invalid move: '%s'\n"
-msgstr "ATTENZIONE: Mossa non valida:\"%s\" incontrata\\n"
+msgstr "ATTENZIONE: Mossa non valida:\"%s\" incontrata\n"
 
 #: import.c:1045
 #, fuzzy, c-format
 msgid "Unrecognised move \"%s\" in oldmoves file.\n"
-msgstr "Mossa non riconosciuta \"%s\" nel file oldmoves.\\n"
+msgstr "Mossa non riconosciuta \"%s\" nel file oldmoves.\n"
 
 #: import.c:1257
 #, c-format
@@ -9817,14 +9817,14 @@ msgstr ""
 #: makebearoff.c:610 makebearoff.c:1171
 #, fuzzy, c-format
 msgid "Error creating xhash with %d elements\n"
-msgstr "Errore creando xhash con %d elementi\\n"
+msgstr "Errore creando xhash con %d elementi\n"
 
 #: makebearoff.c:1402
 #, fuzzy
 msgid "Size of one-sided bearoff database must be between 0 and 18\n"
 msgstr ""
 "La dimensione del database one-sided bearoff deve essere compresa fra 0 e 18"
-"\\n"
+"\n"
 
 #: makebearoff.c:1408
 #, fuzzy, c-format
@@ -9840,39 +9840,39 @@ msgid ""
 "Size of cache                     : %12d\n"
 "Reuse old bearoff database        : %s %s\n"
 msgstr ""
-"One-sided database:\\nNumero di punti                         : %12d"
-"\\nNumero di pedine                        : %12d\\nNumero di "
-"posizioni                     : %12d\\nApprossimato dalla normale "
-"distribuzione: %s\\nInclude la distribuzione dei gammon     : %s\\nUsa lo "
-"schema di compressione           : %s\\nScrivi "
-"intestazione                     : %s\\nDimensione della "
-"cache                  : %12d\\nRiusa il vecchio bearoff database       : %s "
-"%s\\n"
+"One-sided database:\nNumero di punti                         : %12d"
+"\nNumero di pedine                        : %12d\nNumero di "
+"posizioni                     : %12d\nApprossimato dalla normale "
+"distribuzione: %s\nInclude la distribuzione dei gammon     : %s\nUsa lo "
+"schema di compressione           : %s\nScrivi "
+"intestazione                     : %s\nDimensione della "
+"cache                  : %12d\nRiusa il vecchio bearoff database       : %s "
+"%s\n"
 
 #: makebearoff.c:1432
 #, fuzzy, c-format
 msgid "Size of database                  : %.0f (%.1f MB)\n"
-msgstr "Dimensione del database           : %.0f (%.1f MB)\\n"
+msgstr "Dimensione del database           : %.0f (%.1f MB)\n"
 
 #: makebearoff.c:1438
 #, fuzzy, c-format
 msgid "Size of database (uncompressed)   : %.0f (%.1f MB)\n"
-msgstr "Dimensione del database (non compresso)   : %.0f (%.1f MB)\\n"
+msgstr "Dimensione del database (non compresso)   : %.0f (%.1f MB)\n"
 
 #: makebearoff.c:1443
 #, fuzzy, c-format
 msgid "Estimated size of compressed db   : %.0f (%.1f MB)\n"
-msgstr "Stima della dimensione compressa del db   : %.0f (%.1f MB)\\n"
+msgstr "Stima della dimensione compressa del db   : %.0f (%.1f MB)\n"
 
 #: makebearoff.c:1451 makebearoff.c:1521
 #, fuzzy
 msgid "Error initialising old bearoff database!\n"
-msgstr "Errore di inizializzazione del vecchio bearoff database!\\n"
+msgstr "Errore di inizializzazione del vecchio bearoff database!\n"
 
 #: makebearoff.c:1462 makebearoff.c:1530
 #, fuzzy
 msgid "The old database is not of the same kind as the requested database\n"
-msgstr "Il vecchio database non è dello stesso tipo del database richiesto\\n"
+msgstr "Il vecchio database non è dello stesso tipo del database richiesto\n"
 
 #: makebearoff.c:1496
 #, fuzzy, c-format
@@ -9888,12 +9888,12 @@ msgid ""
 "Size of xhash                 : %12d bytes\n"
 "Reuse old bearoff database   : %s %s\n"
 msgstr ""
-"Two-sided database:\\nNumber of points             : %12d\\nNumber of "
-"chequers           : %12d\\nCalculate equities           : %s\\nWrite "
-"header                 : %s\\nNumber of one-sided positions: %12d\\nTotal "
-"number of positions    : %12d\\nSize of resulting file       : %.0f bytes "
-"(%.1f MB)\\nSize of xhash                 : %12d bytes\\nReuse old bearoff "
-"database   : %s %s\\n"
+"Two-sided database:\nNumber of points             : %12d\nNumber of "
+"chequers           : %12d\nCalculate equities           : %s\nWrite "
+"header                 : %s\nNumber of one-sided positions: %12d\nTotal "
+"number of positions    : %12d\nSize of resulting file       : %.0f bytes "
+"(%.1f MB)\nSize of xhash                 : %12d bytes\nReuse old bearoff "
+"database   : %s %s\n"
 
 #: makebearoff.c:1507
 msgid "cubeless and cubeful"
@@ -10040,7 +10040,7 @@ msgstr "Tempo per la scrittura finale del file: %d secondi\n"
 #: makeweights.c:83
 #, fuzzy, c-format
 msgid "%s: invalid weights file\n"
-msgstr "%s: file weights invalido file\\n"
+msgstr "%s: file weights invalido file\n"
 
 #: makeweights.c:88
 #, fuzzy, c-format
@@ -10048,43 +10048,43 @@ msgid ""
 "%s: incorrect weights version\n"
 "(version %s is required, but these weights are %s)\n"
 msgstr ""
-"%s: versione incorretta di weights \\n(è richiesta la versione %s, questa è "
-"invece %s)\\n"
+"%s: versione incorretta di weights \n(è richiesta la versione %s, questa è "
+"invece %s)\n"
 
 #: makeweights.c:106
 #, fuzzy, c-format
 msgid "%d nets converted\n"
-msgstr "%d nets convertiti\\n"
+msgstr "%d nets convertiti\n"
 
 #: matchequity.c:1292
 #, fuzzy, c-format
 msgid "Error reading XML file (%s): no document root!\n"
-msgstr "Errore leggendo il file XML (%s): nessun documento nel percorso!\\n"
+msgstr "Errore leggendo il file XML (%s): nessun documento nel percorso!\n"
 
 #: matchequity.c:1302
 #, fuzzy, c-format
 msgid "Error reading XML file (%s): wrong DTD (%s)\n"
-msgstr "Errore leggendo il file XML (%s): DTD sbagliato (%s)\\n"
+msgstr "Errore leggendo il file XML (%s): DTD sbagliato (%s)\n"
 
 #: matchequity.c:1332
 #, fuzzy
 msgid "met DTD not found\n"
-msgstr "met DTD non trovato\\n"
+msgstr "met DTD non trovato\n"
 
 #: matchequity.c:1343
 #, fuzzy
 msgid "XML does not validate!\n"
-msgstr "XML non è validato!\\n"
+msgstr "XML non è validato!\n"
 
 #: matchequity.c:1388
 #, fuzzy, c-format
 msgid "Illegal value for attribute player: '%s'\n"
-msgstr "Valore illegale da attribuire al giocatore:'%s'\\n"
+msgstr "Valore illegale da attribuire al giocatore:'%s'\n"
 
 #: matchequity.c:1652
 #, fuzzy
 msgid "Error reading MET\n"
-msgstr "Errore leggendo MET\\n"
+msgstr "Errore leggendo MET\n"
 
 #: matchequity.c:1663
 #, fuzzy
@@ -10093,18 +10093,18 @@ msgid ""
 "reading match equity files.\n"
 "Fallback to default Zadeh table.\n"
 msgstr ""
-"La tua versione di GNU Backgammon non supporta\\nla lettura del match equity "
-"file.\\nRitorno alla tavola di default Zadeh.\\n"
+"La tua versione di GNU Backgammon non supporta\nla lettura del match equity "
+"file.\nRitorno alla tavola di default Zadeh.\n"
 
 #: matchequity.c:1706
 #, fuzzy
 msgid "Error generating post-Crawford MET\n"
-msgstr "Errore generando il MET post-Crawford\\n"
+msgstr "Errore generando il MET post-Crawford\n"
 
 #: matchequity.c:1734
 #, fuzzy
 msgid "Error generating pre-Crawford MET\n"
-msgstr "Errore generando il MET pre-Crawford\\n"
+msgstr "Errore generando il MET pre-Crawford\n"
 
 #: openurl.c:70
 #, c-format
@@ -10176,12 +10176,12 @@ msgstr ""
 #: play.c:401
 #, fuzzy, c-format
 msgid "%s is out of time, %s wins %d point.\n"
-msgstr "%s vince una %s e %d punto.\\n"
+msgstr "%s vince una %s e %d punto.\n"
 
 #: play.c:402
 #, fuzzy, c-format
 msgid "%s is out of time,  %s wins %d points.\n"
-msgstr "%s vince una %s e %d punti.\\n"
+msgstr "%s vince una %s e %d punti.\n"
 
 #: play.c:743 play.c:3033
 msgid ""
@@ -10192,27 +10192,27 @@ msgstr ""
 #: play.c:817
 #, fuzzy, c-format
 msgid "%s rolls %d, %s rolls %d.\n"
-msgstr "%s lancia %d, %s lancia %d.\\n"
+msgstr "%s lancia %d, %s lancia %d.\n"
 
 #: play.c:825
 #, fuzzy, c-format
 msgid "The cube is now at %d.\n"
-msgstr "Il cubo è ora a %d.\\n"
+msgstr "Il cubo è ora a %d.\n"
 
 #: play.c:869
 #, fuzzy, c-format
 msgid "%s cannot move.\n"
-msgstr "%s non può muovere.\\n"
+msgstr "%s non può muovere.\n"
 
 #: play.c:871
 #, fuzzy, c-format
 msgid "%s moves %s.\n"
-msgstr "%s muove %s.\\n"
+msgstr "%s muove %s.\n"
 
 #: play.c:1247 play.c:4042
 #, fuzzy, c-format
 msgid "%s rolls %1i and %1i.\n"
-msgstr "%s lancia %1i e %1i.\\n"
+msgstr "%s lancia %1i e %1i.\n"
 
 #: play.c:1435
 msgid "Warning: badly formed resignation response from external player"
@@ -10229,22 +10229,22 @@ msgstr "Attenzione: mossa sbagliata del giocatore esterno"
 #: play.c:1561
 #, fuzzy, c-format
 msgid "(%s's double has been cancelled.)\n"
-msgstr "(%s's il raddoppio è stato cancellato.)\\n"
+msgstr "(%s's il raddoppio è stato cancellato.)\n"
 
 #: play.c:1756
 #, fuzzy, c-format
 msgid "%s wins a %s and %d point.\n"
-msgstr "%s vince una %s e %d punto.\\n"
+msgstr "%s vince una %s e %d punto.\n"
 
 #: play.c:1757
 #, fuzzy, c-format
 msgid "%s wins a %s and %d points.\n"
-msgstr "%s vince una %s e %d punti.\\n"
+msgstr "%s vince una %s e %d punti.\n"
 
 #: play.c:1796
 #, fuzzy, c-format
 msgid "%s has won the match.\n"
-msgstr "%s ha vinto il match.\\n"
+msgstr "%s ha vinto il match.\n"
 
 #: play.c:1912
 msgid "You can only accept if the cube or a resignation has been offered."
@@ -10265,7 +10265,7 @@ msgstr "Non è stato offerto alcun rifiuto."
 #: play.c:1939
 #, fuzzy, c-format
 msgid "%s accepts and wins a %s.\n"
-msgstr "%s accetta e vince un %s.\\n"
+msgstr "%s accetta e vince un %s.\n"
 
 #: play.c:1969 play.c:2073
 msgid "You must select a move to annotate first."
@@ -10290,7 +10290,7 @@ msgstr "Annotazione di abilità eliminata "
 #: play.c:2059
 #, fuzzy, c-format
 msgid "Move marked as %s.\n"
-msgstr "Mossa segnata come %s.\\n"
+msgstr "Mossa segnata come %s.\n"
 
 #: play.c:2092
 msgid "Luck annotation cleared."
@@ -10299,7 +10299,7 @@ msgstr "Annotazione di fortuna eliminata."
 #: play.c:2094
 #, fuzzy, c-format
 msgid "Roll marked as %s.\n"
-msgstr "Lancio segnato come %s.\\n"
+msgstr "Lancio segnato come %s.\n"
 
 #: play.c:2170
 msgid "You must select a move to clear the comment from."
@@ -10312,7 +10312,7 @@ msgstr "Commento per questa mossa cancellato."
 #: play.c:2264
 #, fuzzy, c-format
 msgid "%s declines the %s.\n"
-msgstr "%s declina il %s.\\n"
+msgstr "%s declina il %s.\n"
 
 #: play.c:2385
 msgid "Doubling is forbidden by the Crawford rule (see `help set crawford')."
@@ -10333,7 +10333,7 @@ msgid ""
 "`redouble' to immediately offer the cube back at a higher value."
 msgstr ""
 "Il comando 'raddoppia' è usato per offrire il cubo, non per accettarlo."
-"\\nUsa 'rraddoppia' per rioffrire il cubo ad un valore più alto."
+"\nUsa 'rraddoppia' per rioffrire il cubo ad un valore più alto."
 
 #: play.c:2407
 msgid "You are only allowed to double if you are on roll."
@@ -10352,12 +10352,12 @@ msgstr "Non possiedi il cubo."
 #: play.c:2426 play.c:3770
 #, fuzzy, c-format
 msgid "The cube is already at %d; you can't double any more.\n"
-msgstr "Il cubo è già a %d; non puoi più raddoppiare.\\n"
+msgstr "Il cubo è già a %d; non puoi più raddoppiare.\n"
 
 #: play.c:2448
 #, fuzzy, c-format
 msgid "%s doubles.\n"
-msgstr "%s raddoppia.\\n"
+msgstr "%s raddoppia.\n"
 
 #: play.c:2588
 msgid "The cube must have been offered before you can drop it."
@@ -10366,12 +10366,12 @@ msgstr "Il cubo deve prima esserti stato offerto perchè tu possa rifiutarlo."
 #: play.c:2619
 #, fuzzy, c-format
 msgid "%s refuses the cube and gives up %d point.\n"
-msgstr "%s rifiuta il cube e concede %d punto.\\n"
+msgstr "%s rifiuta il cube e concede %d punto.\n"
 
 #: play.c:2620
 #, fuzzy, c-format
 msgid "%s refuses the cube and gives up %d points.\n"
-msgstr "%s rifiuta il cube e concede %d punti.\\n"
+msgstr "%s rifiuta il cube e concede %d punti.\n"
 
 #: play.c:2666
 #, c-format
@@ -10397,12 +10397,12 @@ msgstr "Devi prima lanciare i dadi per muovere."
 #: play.c:2827
 #, fuzzy, c-format
 msgid "Please wait for %s to consider the resignation before moving.\n"
-msgstr "Attendi per %s per valutare il rifiuto prima di lanciare.\\n"
+msgstr "Attendi per %s per valutare il rifiuto prima di lanciare.\n"
 
 #: play.c:2834 play.c:3991
 #, fuzzy, c-format
 msgid "Please wait for %s to consider the cube before moving.\n"
-msgstr "Attendi per %s per valutare il cubo prima di muovere.\\n"
+msgstr "Attendi per %s per valutare il cubo prima di muovere.\n"
 
 #: play.c:2909
 msgid "You must specify a move (type `help move' for instructions)."
@@ -10426,8 +10426,8 @@ msgid ""
 "GNU Backgammon is compiled with support only for matches of length %i\n"
 "and below\n"
 msgstr ""
-"GNU Backgammon è compilato col supporto solo per matches di lunghezza %i\\no "
-"inferiore\\n"
+"GNU Backgammon è compilato col supporto solo per matches di lunghezza %i\no "
+"inferiore\n"
 
 #: play.c:3132
 msgid ""
@@ -10439,7 +10439,7 @@ msgstr ""
 #: play.c:3165
 #, fuzzy, c-format
 msgid "A new %d point match has been started.\n"
-msgstr "Un nuovo match di %d punti è iniziato.\\n"
+msgstr "Un nuovo match di %d punti è iniziato.\n"
 
 #: play.c:3182
 msgid ""
@@ -10504,7 +10504,7 @@ msgstr "Solo un beaver è permesso (guarda 'aiuto settaggio beavers')."
 #: play.c:3750
 #, fuzzy, c-format
 msgid "Only %d beavers are permitted (see `help set beavers').\n"
-msgstr "Solo %d beavers sono permessi (guarda 'aiuto settaggio beavers').\\n"
+msgstr "Solo %d beavers sono permessi (guarda 'aiuto settaggio beavers').\n"
 
 #: play.c:3757
 msgid "The cube must have been offered before you can redouble it."
@@ -10514,7 +10514,7 @@ msgstr ""
 #: play.c:3788
 #, fuzzy, c-format
 msgid "%s accepts and immediately redoubles to %d.\n"
-msgstr "%s accetta e immediatamente riraddoppia a %d.\\n"
+msgstr "%s accetta e immediatamente riraddoppia a %d.\n"
 
 #: play.c:3823
 msgid "You can only reject if the cube or a resignation has been offered."
@@ -10527,17 +10527,17 @@ msgstr "Devi stare giocando un game per poterlo resignare."
 #: play.c:3865
 #, fuzzy, c-format
 msgid "Unknown keyword `%s' -- try `help resign'.\n"
-msgstr "Prola chiave sconosciuta '%s' --prova 'aiuto rifiuto'.\\n"
+msgstr "Prola chiave sconosciuta '%s' --prova 'aiuto rifiuto'.\n"
 
 #: play.c:3873
 #, fuzzy, c-format
 msgid "%s has already declined your offer of a %s.\n"
-msgstr "%s ha già rifiutato la tua offerta a un %s.\\n"
+msgstr "%s ha già rifiutato la tua offerta a un %s.\n"
 
 #: play.c:3881
 #, fuzzy, c-format
 msgid "%s offers to resign a %s.\n"
-msgstr "%s offre di resignare un %s.\\n"
+msgstr "%s offre di resignare un %s.\n"
 
 #: play.c:3998 set.c:2460
 msgid "Please resolve the resignation first."
@@ -10555,7 +10555,7 @@ msgstr "Il cubo deve esserti prima offerto perchè tu lo possa accettare."
 #: play.c:4163
 #, fuzzy, c-format
 msgid "%s accepts the cube at %d.\n"
-msgstr "%s accetta il cubo a %d.\\n"
+msgstr "%s accetta il cubo a %d.\n"
 
 #: play.c:4201
 msgid ""
@@ -10568,7 +10568,7 @@ msgstr ""
 #: play.c:4217
 #, fuzzy, c-format
 msgid "Illegal match ID '%s'\n"
-msgstr "Match ID illegale '%s'\\n"
+msgstr "Match ID illegale '%s'\n"
 
 #: play.c:4218
 #, c-format
@@ -10659,7 +10659,7 @@ msgstr " (%d punti)"
 #, fuzzy, c-format
 msgid "You must specify a file to export to (see `help export game %s').\n"
 msgstr ""
-"Devi specificare un file da esportare a (guarda 'esporta un game %s').\\n"
+"Devi specificare un file da esportare a (guarda 'esporta un game %s').\n"
 
 #: postscript.c:1315
 msgid ""
@@ -10672,7 +10672,7 @@ msgstr ""
 #, fuzzy, c-format
 msgid "You must specify a file to export to (see `help export match %s').\n"
 msgstr ""
-"Devi specificare un file da esportare a (guarda 'aiuto esporta match %s).\\n"
+"Devi specificare un file da esportare a (guarda 'aiuto esporta match %s).\n"
 
 #: postscript.c:1375
 msgid ""
@@ -10702,21 +10702,21 @@ msgstr "Statistiche di vincita"
 msgid ""
 "Win Single\n"
 "%s"
-msgstr "Vince Singola\\n%s"
+msgstr "Vince Singola\n%s"
 
 #: progress.c:103
 #, fuzzy, c-format
 msgid ""
 "Win Gammon\n"
 "%s"
-msgstr "Vince Gammon\\n%s"
+msgstr "Vince Gammon\n%s"
 
 #: progress.c:105
 #, fuzzy, c-format
 msgid ""
 "Win BG\n"
 "%s"
-msgstr "Vince BG\\n%s"
+msgstr "Vince BG\n%s"
 
 #: progress.c:131 progress.c:225
 #, c-format
@@ -10733,14 +10733,14 @@ msgstr ">= %d-cubo"
 msgid ""
 "#Double, take\n"
 "%s"
-msgstr "#Raddoppia, accetta\\n%s"
+msgstr "#Raddoppia, accetta\n%s"
 
 #: progress.c:192
 #, fuzzy, c-format
 msgid ""
 "#Double, pass\n"
 "%s"
-msgstr "#Raddoppia, passa\\n%s"
+msgstr "#Raddoppia, passa\n%s"
 
 #: progress.c:258 progress.c:266
 #, c-format
@@ -10861,7 +10861,7 @@ msgstr ""
 msgid "Statistics from %d games were saved to player records.\n"
 msgstr ""
 "Le statistiche del game %d sono state salvate nelle registrazioni de l "
-"giocatore.\\n"
+"giocatore.\n"
 
 #: record.c:451
 msgid "No session is being played."
@@ -10874,12 +10874,12 @@ msgstr "Devi specificare la registrazione di quale giocatore cancellare."
 #: record.c:477
 #, fuzzy, c-format
 msgid "No record exists for player %s.\n"
-msgstr "Non ci sono registrazioni del giocatore %s.\\n"
+msgstr "Non ci sono registrazioni del giocatore %s.\n"
 
 #: record.c:488
 #, fuzzy, c-format
 msgid "Record for player %s erased.\n"
-msgstr "Rgistrazioni del giocatore %s cancellate.\\n"
+msgstr "Rgistrazioni del giocatore %s cancellate.\n"
 
 #: record.c:501
 msgid "Are you sure you want to erase all player records?"
@@ -10900,7 +10900,7 @@ msgstr ""
 #: record.c:568
 #, fuzzy, c-format
 msgid "No record for player `%s' found.\n"
-msgstr "Non ci sono registrazioni per il giocatore %s.\\n"
+msgstr "Non ci sono registrazioni per il giocatore %s.\n"
 
 #: renderprefs.c:599
 #, fuzzy, c-format
@@ -10925,12 +10925,12 @@ msgstr "Setto il cubo on"
 msgid ""
 "Points won:\n"
 "\n"
-msgstr "Punti vinti:\\n\\n"
+msgstr "Punti vinti:\n\n"
 
 #: rollout.c:1589
 #, fuzzy, c-format
 msgid "Number of wins %4d-cube          %8d   %7.3f%%     %8d\n"
-msgstr "Numero di vittorie %4d-cube          %8d   %7.3f%%     %8d\\n"
+msgstr "Numero di vittorie %4d-cube          %8d   %7.3f%%     %8d\n"
 
 #: rollout.c:1604
 #, fuzzy, c-format
@@ -10940,14 +10940,14 @@ msgid ""
 "------------------------------------------------------------------\n"
 "\n"
 msgstr ""
-"------------------------------------------------------------------\\nNumero "
+"------------------------------------------------------------------\nNumero "
 "totale di vittorie              %8d   %7.3f%%     %8ld"
-"\\n------------------------------------------------------------------\\n\\n"
+"\n------------------------------------------------------------------\n\n"
 
 #: rollout.c:1620
 #, fuzzy, c-format
 msgid "Number of gammon wins %4d-cube   %8d   %7.3f%%     %8d\n"
-msgstr "Numero di gammon vinti %4d-cube   %8d   %7.3f%%     %8d\\n"
+msgstr "Numero di gammon vinti %4d-cube   %8d   %7.3f%%     %8d\n"
 
 #: rollout.c:1634
 #, fuzzy, c-format
@@ -10957,14 +10957,14 @@ msgid ""
 "------------------------------------------------------------------\n"
 "\n"
 msgstr ""
-"------------------------------------------------------------------\\nNumero "
+"------------------------------------------------------------------\nNumero "
 "totale di gammon vinti       %8d   %7.3f%%     %8ld"
-"\\n------------------------------------------------------------------\\n\\n"
+"\n------------------------------------------------------------------\n\n"
 
 #: rollout.c:1649
 #, fuzzy, c-format
 msgid "Number of bg wins %4d-cube       %8d   %7.3f%%     %8d\n"
-msgstr "Numero di bg vinti %4d-cube       %8d   %7.3f%%     %8d\\n"
+msgstr "Numero di bg vinti %4d-cube       %8d   %7.3f%%     %8d\n"
 
 #: rollout.c:1662
 #, fuzzy, c-format
@@ -10974,14 +10974,14 @@ msgid ""
 "------------------------------------------------------------------\n"
 "\n"
 msgstr ""
-"------------------------------------------------------------------\\nNumero "
+"------------------------------------------------------------------\nNumero "
 "totale di bg vinti           %8d   %7.3f%%     %8ld"
-"\\n------------------------------------------------------------------\\n\\n"
+"\n------------------------------------------------------------------\n\n"
 
 #: rollout.c:1678
 #, fuzzy, c-format
 msgid "Number of %4d-cube double, drop  %8d   %7.3f%%    %8d\n"
-msgstr "Numero di %4d-cube doppi, passati  %8d   %7.3f%%    %8d\\n"
+msgstr "Numero di %4d-cube doppi, passati  %8d   %7.3f%%    %8d\n"
 
 #: rollout.c:1692
 #, fuzzy, c-format
@@ -10991,9 +10991,9 @@ msgid ""
 "------------------------------------------------------------------\n"
 "\n"
 msgstr ""
-"------------------------------------------------------------------\\nNumero "
+"------------------------------------------------------------------\nNumero "
 "totale di doppi, passati      %8d   %7.3f%%     %8ld"
-"\\n------------------------------------------------------------------\\n\\n"
+"\n------------------------------------------------------------------\n\n"
 
 #: rollout.c:1701
 #, fuzzy, c-format
@@ -11003,9 +11003,9 @@ msgid ""
 "==================================================================\n"
 "\n"
 msgstr ""
-"==================================================================\\nNumero "
+"==================================================================\nNumero "
 "totale di vittorie              %8d   %7.3f%%     %8ld"
-"\\n==================================================================\\n\\n"
+"\n==================================================================\n\n"
 
 #: rollout.c:1710
 #, fuzzy
@@ -11014,24 +11014,24 @@ msgid ""
 "\n"
 "Other statistics:\n"
 "\n"
-msgstr "\\n\\nAltre statistiche:\\n\\n"
+msgstr "\n\nAltre statistiche:\n\n"
 
 #: rollout.c:1719
 #, fuzzy, c-format
 msgid "Number of %4d-cube double, take  %8d   %7.3f%%\n"
-msgstr "Numero di %4d-cube doppi, accetta  %8d   %7.3f%%\\n"
+msgstr "Numero di %4d-cube doppi, accetta  %8d   %7.3f%%\n"
 
 #: rollout.c:1742
 #, fuzzy, c-format
 msgid "Number of hits move %4d          %8d   %7.3f%%\n"
-msgstr "Numero di mosse a colpire %4d          %8d   %7.3f%%\\n"
+msgstr "Numero di mosse a colpire %4d          %8d   %7.3f%%\n"
 
 #: rollout.c:1752
 #, fuzzy, c-format
 msgid ""
 "Total number of hits              %8d   %7.3f%%\n"
 "\n"
-msgstr "Numero totale dei colpi              %8d   %7.3f%%\\n\\n"
+msgstr "Numero totale dei colpi              %8d   %7.3f%%\n\n"
 
 #: set.c:95
 msgid "<number>"
@@ -11105,12 +11105,12 @@ msgstr "devi specificare un seed valido -- prova 'aiuto settaggio seed'."
 #: set.c:151
 #, fuzzy, c-format
 msgid "Seed set to %s.\n"
-msgstr "Seed settato a %s.\\n"
+msgstr "Seed settato a %s.\n"
 
 #: set.c:164
 #, fuzzy, c-format
 msgid "Seed set to %d.\n"
-msgstr "Seed settato a %d.\\n"
+msgstr "Seed settato a %d.\n"
 
 #: set.c:168
 msgid "Seed initialised from system random data."
@@ -11123,7 +11123,7 @@ msgstr "Seed inizializzato dall' orologio di sistema."
 #: set.c:175
 #, fuzzy, c-format
 msgid "You are already using the %s generator.\n"
-msgstr "Stai già usando il generatore %s.\\n"
+msgstr "Stai già usando il generatore %s.\n"
 
 #: set.c:207
 msgid "You must specify a valid modulus (see `help set rng bbs')."
@@ -11136,7 +11136,7 @@ msgstr "Devi specificare due fattori validi (guarda 'aiuto setta rng bbs')."
 #: set.c:256
 #, fuzzy, c-format
 msgid "You are still using the %s generator.\n"
-msgstr "Stai già usando il generatore %s.\\n"
+msgstr "Stai già usando il generatore %s.\n"
 
 #: set.c:271
 msgid "Please enter filename!"
@@ -11150,7 +11150,7 @@ msgstr "Il file %s non esiste o non è leggibile"
 #: set.c:288
 #, fuzzy, c-format
 msgid "GNU Backgammon will now use the %s generator.\n"
-msgstr "GNU Backgammon userà ora il generatore %s.\\n"
+msgstr "GNU Backgammon userà ora il generatore %s.\n"
 
 #: set.c:318
 msgid "You must specify for which ply you want to set a filter"
@@ -11207,7 +11207,7 @@ msgstr "Ogni mossa legale sarà analizzata."
 #: set.c:382 show.c:398
 #, fuzzy, c-format
 msgid "Up to %d moves will be analysed.\n"
-msgstr "Fino a %d mosse saranno analizzate.\\n"
+msgstr "Fino a %d mosse saranno analizzate.\n"
 
 #: set.c:384
 msgid ""
@@ -11225,7 +11225,7 @@ msgid ""
 "`help set analysis moves'.)"
 msgstr ""
 "(Nota che le mosse non saranno analizzate finchè non abiliti l'analisi alle "
-"mosse -- guarda\\n'aiuto setta l'analisi delle mosse'.)"
+"mosse -- guarda\n'aiuto setta l'analisi delle mosse'.)"
 
 #: set.c:397 show.c:390
 msgid "Dice rolls will be analysed."
@@ -11255,12 +11255,12 @@ msgid ""
 "threshold %s').\n"
 msgstr ""
 "Devi specificare un numero positivo per il valore di soglia (guarda 'aiuto "
-"setta analisi\\nsoglia %s').\\n"
+"setta analisi\nsoglia %s').\n"
 
 #: set.c:435 set.c:451
 #, fuzzy, c-format
 msgid "`%s' threshold set to %.3f.\n"
-msgstr "`%s' soglia settata a %.3f.\\n"
+msgstr "`%s' soglia settata a %.3f.\n"
 
 #: set.c:444
 #, fuzzy, c-format
@@ -11270,7 +11270,7 @@ msgid ""
 "threshold %s').\n"
 msgstr ""
 "Devi specificare un numero positivo per il valore di soglia (guarda 'aiuto "
-"setta analisi\\nsoglia %s').\\n"
+"setta analisi\nsoglia %s').\n"
 
 #: set.c:507
 msgid "Move analysis and commentary will be displayed."
@@ -11320,7 +11320,7 @@ msgstr "Prego specifica un limite più piccolo (fino a 12 raddoppi automatici)."
 #: set.c:555
 #, fuzzy, c-format
 msgid "Automatic doubles will be used (up to a limit of %d).\n"
-msgstr "I raddoppi automatici saranno utilizzati(fino al limite di %d).\\n"
+msgstr "I raddoppi automatici saranno utilizzati(fino al limite di %d).\n"
 
 #: set.c:558
 msgid "A single automatic double will be permitted."
@@ -11346,7 +11346,7 @@ msgid ""
 "see `help set cube use'.)"
 msgstr ""
 "(Nota che i raddoppi automatici non avranno effetto finchè non abliti l'uso "
-"del cubo --\\nguarda 'aiuto setta uso del cubo'.)"
+"del cubo --\nguarda 'aiuto setta uso del cubo'.)"
 
 #: set.c:579
 msgid "Will automatically start games after wins."
@@ -11399,12 +11399,12 @@ msgstr "Devi specificare il numero di cache entries da usare."
 #: set.c:666
 #, fuzzy, c-format
 msgid "The position cache has been sized to %d entry.\n"
-msgstr "La posizione di cache è stata dimensionata a %d entry.\\n"
+msgstr "La posizione di cache è stata dimensionata a %d entry.\n"
 
 #: set.c:668
 #, fuzzy, c-format
 msgid "The position cache has been sized to %d entries.\n"
-msgstr "La posizione di cache è stata dimensionata a %d entry.\\n"
+msgstr "La posizione di cache è stata dimensionata a %d entry.\n"
 
 #: set.c:679
 msgid "The evaluation speed has been cleared."
@@ -11424,7 +11424,7 @@ msgid ""
 "The speed estimate has been set to %.0f static evaluations per second.\n"
 msgstr ""
 "La velocità stimata è stata settata a %.0f di valutazioni statiche al "
-"secondo.\\n"
+"secondo.\n"
 
 #: set.c:698 show.c:594
 msgid "Player 1 moves clockwise (and player 0 moves anticlockwise)."
@@ -11466,7 +11466,7 @@ msgstr ""
 #: set.c:799
 #, fuzzy, c-format
 msgid "%s now owns the cube.\n"
-msgstr "%s ora possiede il cubo.\\n"
+msgstr "%s ora possiede il cubo.\n"
 
 #: set.c:810
 msgid "Use of the doubling cube is permitted."
@@ -11483,7 +11483,7 @@ msgid ""
 "backgammons to be scored -- see `help set jacoby')."
 msgstr ""
 "(Nota che dovrai disabilitare la Jacoby rule se vuoi che gammons e"
-"\\nbackgammons siano conteggiati -- guarda 'aiuto setta la jacoby rule')."
+"\nbackgammons siano conteggiati -- guarda 'aiuto setta la jacoby rule')."
 
 #: set.c:820
 #, fuzzy
@@ -11492,12 +11492,12 @@ msgid ""
 "this game.)"
 msgstr ""
 "(Ma la Crawford rule è in corso, così non sarai in grado di usarlo durante"
-"\\nquesto game.)"
+"\nquesto game.)"
 
 #: set.c:859
 #, fuzzy, c-format
 msgid "The cube has been set to %d.\n"
-msgstr "Il cubo è stato settato a %d.\\n"
+msgstr "Il cubo è stato settato a %d.\n"
 
 #: set.c:868
 msgid "You must specify a legal cube value (see `help set cube value')."
@@ -11513,12 +11513,12 @@ msgstr ""
 #: set.c:887
 #, fuzzy, c-format
 msgid "All moves will be shown for at least %d millisecond.\n"
-msgstr "Tutte le mosse saranno mostrate per un massimo di %d millisecondi.\\n"
+msgstr "Tutte le mosse saranno mostrate per un massimo di %d millisecondi.\n"
 
 #: set.c:888
 #, fuzzy, c-format
 msgid "All moves will be shown for at least %d milliseconds.\n"
-msgstr "Tutte le mosse saranno mostrate per un massimo di %d millisecondi.\\n"
+msgstr "Tutte le mosse saranno mostrate per un massimo di %d millisecondi.\n"
 
 #: set.c:891
 msgid ""
@@ -11547,7 +11547,7 @@ msgstr "Devi specificare due numeri da 1 a 6 per i dadi."
 #: set.c:941
 #, fuzzy, c-format
 msgid "The dice have been set to %d and %d.\n"
-msgstr "I dadi sono stati settati a %d e %d.\\n"
+msgstr "I dadi sono stati settati a %d e %d.\n"
 
 #: set.c:951
 msgid "Will display boards for computer moves."
@@ -11560,22 +11560,22 @@ msgstr "Non mostrerà le tavole per le mosse del computer."
 #: set.c:961
 #, fuzzy, c-format
 msgid "%s will use cubeful evaluation.\n"
-msgstr "%s userà le valutazioni con il cubo.\\n"
+msgstr "%s userà le valutazioni con il cubo.\n"
 
 #: set.c:962
 #, fuzzy, c-format
 msgid "%s will use cubeless evaluation.\n"
-msgstr "%s userà le valutazioni senza il cubo.\\n"
+msgstr "%s userà le valutazioni senza il cubo.\n"
 
 #: set.c:973
 #, fuzzy, c-format
 msgid "%s will use deterministic noise.\n"
-msgstr "%s userà il rumore deterministico.\\n"
+msgstr "%s userà il rumore deterministico.\n"
 
 #: set.c:974
 #, fuzzy, c-format
 msgid "%s will use pseudo-random noise.\n"
-msgstr "%s userà il rumore pseudo-random.\\n"
+msgstr "%s userà il rumore pseudo-random.\n"
 
 #: set.c:980
 msgid ""
@@ -11592,17 +11592,17 @@ msgid ""
 "%s noise'.\n"
 msgstr ""
 "Devi specificare una valida quantità di rumore da usare -- prova 'aiuto setta"
-"\\n%s rumore'.\\n"
+"\n%s rumore'.\n"
 
 #: set.c:998
 #, fuzzy, c-format
 msgid "%s will use noise with standard deviation %5.3f.\n"
-msgstr "%s userà il rumore con deviazione standard %5.3f.\\n"
+msgstr "%s userà il rumore con deviazione standard %5.3f.\n"
 
 #: set.c:1001
 #, fuzzy, c-format
 msgid "%s will use noiseless evaluations.\n"
-msgstr "%s userà valutazioni senza rumore.\\n"
+msgstr "%s userà valutazioni senza rumore.\n"
 
 #: set.c:1009
 #, fuzzy, c-format
@@ -11611,23 +11611,23 @@ msgid ""
 "plies'.\n"
 msgstr ""
 "Devi specificare un numero valido di ply da guardare avanti -- prova 'aiuto "
-"setta %s ply'.\\n"
+"setta %s ply'.\n"
 
 #: set.c:1017
 #, fuzzy, c-format
 msgid "%s will use %d ply evaluation.\n"
-msgstr "%s userà %d ply valutazioni.\\n"
+msgstr "%s userà %d ply valutazioni.\n"
 
 #: set.c:1044
 #, fuzzy, c-format
 msgid "You must specify a valid number -- try `help set %s reduced'.\n"
 msgstr ""
-"Devi specificare un numero valido -- prova `aiuto settaggio %s ridotto'.\\n"
+"Devi specificare un numero valido -- prova `aiuto settaggio %s ridotto'.\n"
 
 #: set.c:1050
 #, fuzzy, c-format
 msgid "%s will use %d%% speed multiple ply evaluation.\n"
-msgstr "%s userà %d%% valutazione ply a velocità multipla.\\n"
+msgstr "%s userà %d%% valutazione ply a velocità multipla.\n"
 
 #: set.c:1055
 msgid ""
@@ -11650,7 +11650,7 @@ msgstr ""
 #: set.c:1096
 #, fuzzy, c-format
 msgid "Animation speed set to %d.\n"
-msgstr "Velocità animazione settata a %d.\\n"
+msgstr "Velocità animazione settata a %d.\n"
 
 #: set.c:1102
 msgid "GNU Backgammon will beep on illegal input."
@@ -11745,7 +11745,7 @@ msgid ""
 "(Note that this setting will have no effect until you `set player %s gnu'.)\n"
 msgstr ""
 "(Nota che questi settaggi non avranno effetto finchè non `setti il giocatore "
-"%s gnu'.)\\n"
+"%s gnu'.)\n"
 
 #: set.c:1281
 #, fuzzy
@@ -11753,7 +11753,7 @@ msgid ""
 "This installation of GNU Backgammon was compiled without\n"
 "socket support, and does not implement external players."
 msgstr ""
-"Questa installazione di GNU Backgammon è stata compilata senza\\nil supporto "
+"Questa installazione di GNU Backgammon è stata compilata senza\nil supporto "
 "dei socket, e non implementa giocatori esterni."
 
 #: set.c:1291
@@ -11762,18 +11762,18 @@ msgid ""
 "You must specify the name of the socket to the external\n"
 "player -- try `help set player external'."
 msgstr ""
-"Devi specificare il nome del socket al giocatore\\nesterno -- prova `aiuto "
+"Devi specificare il nome del socket al giocatore\nesterno -- prova `aiuto "
 "settaggio giocatore esterno'."
 
 #: set.c:1343
 #, fuzzy, c-format
 msgid "Moves for %s will now be played by GNU Backgammon.\n"
-msgstr "Le mosse per %s ora verranno giocate da GNU Backgammon.\\n"
+msgstr "Le mosse per %s ora verranno giocate da GNU Backgammon.\n"
 
 #: set.c:1360
 #, fuzzy, c-format
 msgid "Moves for %s must now be entered manually.\n"
-msgstr "Le mosse per %s ora devono essere inserite manualmente.\\n"
+msgstr "Le mosse per %s ora devono essere inserite manualmente.\n"
 
 #: set.c:1367
 msgid "You must specify a name to use."
@@ -11782,12 +11782,12 @@ msgstr "Devi specificare un nome da usare."
 #: set.c:1376
 #, fuzzy, c-format
 msgid "`%c' is not a valid name.\n"
-msgstr "`%c' non è un nome valido.\\n"
+msgstr "`%c' non è un nome valido.\n"
 
 #: set.c:1382
 #, fuzzy
 msgid "`both' is a reserved word; you can't call a player that.\n"
-msgstr "`both' è una parola riservata; non puoi chiamare un giocatore così.\\n"
+msgstr "`both' è una parola riservata; non puoi chiamare un giocatore così.\n"
 
 #: set.c:1389
 msgid "That name is already in use by the other player."
@@ -11796,7 +11796,7 @@ msgstr "Questo nome è già usato dall'altro giocatore."
 #: set.c:1396
 #, fuzzy, c-format
 msgid "Player %d is now known as `%s'.\n"
-msgstr "Il giocatore %d è adesso riconosciuto come `%s'.\\n"
+msgstr "Il giocatore %d è adesso riconosciuto come `%s'.\n"
 
 #: set.c:1409
 msgid ""
@@ -11813,18 +11813,18 @@ msgid ""
 "have no effect yet, because gnubg is not moving for this player).\n"
 msgstr ""
 "Le mosse per %s verranno ora giocate con %d ply di ricerca (nota che questo"
-"\\nnon avrà ancora effetto, perchè gnubg non sta muovendo per questo "
-"giocatore).\\n"
+"\nnon avrà ancora effetto, perchè gnubg non sta muovendo per questo "
+"giocatore).\n"
 
 #: set.c:1422
 #, fuzzy, c-format
 msgid "Moves for %s will be played with %d ply lookahead.\n"
-msgstr "Le mosse per %s verranno giocate con %d ply di ricerca.\\n"
+msgstr "Le mosse per %s verranno giocate con %d ply di ricerca.\n"
 
 #: set.c:1433
 #, fuzzy, c-format
 msgid "Moves for %s will now be played by pubeval.\n"
-msgstr "Le mosse per %s verranno ora giocate da valutazione pubblica.\\n"
+msgstr "Le mosse per %s verranno ora giocate da valutazione pubblica.\n"
 
 #: set.c:1443
 msgid "You must specify a player -- try `help set player'."
@@ -11837,12 +11837,12 @@ msgstr "Memoria insufficiente."
 #: set.c:1483
 #, fuzzy, c-format
 msgid "Unknown player `%s' -- try `help set player'.\n"
-msgstr "Giocatore `%s' sconosciuto -- prova `aiuto settaggio giocatore'.\\n"
+msgstr "Giocatore `%s' sconosciuto -- prova `aiuto settaggio giocatore'.\n"
 
 #: set.c:1493
 #, fuzzy, c-format
 msgid "The prompt has been set to `%s'.\n"
-msgstr "Il prompt è stato settato a `%s'.\\n"
+msgstr "Il prompt è stato settato a `%s'.\n"
 
 #: set.c:1499
 msgid "All games in a session will be recorded."
@@ -11875,7 +11875,7 @@ msgid ""
 "random numbers from <www.random.org>"
 msgstr ""
 "Questa installazione di GNU Backgammon è stata compilata senza il supporto "
-"dei socket necessari per prelevare\\ni numeri casuali da <www.random.org>"
+"dei socket necessari per prelevare\ni numeri casuali da <www.random.org>"
 
 #: set.c:1575
 msgid ""
@@ -11908,7 +11908,7 @@ msgstr "Non verranno fatti cambiamenti di valutazioni durante i rollouts."
 #: set.c:1614
 #, fuzzy, c-format
 msgid "Evaluations will change after %d plies in rollouts.\n"
-msgstr "Le valutazioni cambieranno dopo %d plies nei rollouts.\\n"
+msgstr "Le valutazioni cambieranno dopo %d plies nei rollouts.\n"
 
 #: set.c:1635
 msgid "Stop rollout when STD's are small enough"
@@ -12099,7 +12099,7 @@ msgstr ""
 #: set.c:2004
 #, fuzzy, c-format
 msgid "Rollout seed set to %d.\n"
-msgstr "Origine del rollout settato a %d.\\n"
+msgstr "Origine del rollout settato a %d.\n"
 
 #: set.c:2007
 msgid "Rollout seed initialised from system random data."
@@ -12120,12 +12120,12 @@ msgstr ""
 #: set.c:2025 show.c:218
 #, fuzzy, c-format
 msgid "%d game will be played per rollout.\n"
-msgstr "%d game verranno giocati per ogni rollout.\\n"
+msgstr "%d game verranno giocati per ogni rollout.\n"
 
 #: set.c:2027 show.c:221
 #, fuzzy, c-format
 msgid "%d games will be played per rollout.\n"
-msgstr "%d games verranno giocati per ogni rollout.\\n"
+msgstr "%d games verranno giocati per ogni rollout.\n"
 
 #: set.c:2035
 msgid "Games in rollouts will be stopped after a fixed number of moves."
@@ -12184,12 +12184,12 @@ msgstr "I rollouts non verranno troncati."
 #: set.c:2080
 #, fuzzy, c-format
 msgid "Rollouts will be truncated after %d ply.\n"
-msgstr "I rollouts verranno troncati dopo %d ply.\\n"
+msgstr "I rollouts verranno troncati dopo %d ply.\n"
 
 #: set.c:2082
 #, fuzzy, c-format
 msgid "Rollouts will be truncated after %d plies.\n"
-msgstr "I rollouts verranno troncati dopo %d plies.\\n"
+msgstr "I rollouts verranno troncati dopo %d plies.\n"
 
 #: set.c:2088
 msgid "Chequer play evaluations at rollout truncation point"
@@ -12228,7 +12228,7 @@ msgstr "Verranno eseguiti rollouts senza il cubo in gioco."
 #, fuzzy, c-format
 msgid "You must specify a player -- try `help set %s player'.\n"
 msgstr ""
-"Devi specificare un giocatore -- prova ` aiuto settaggio giocatore %s'.\\n"
+"Devi specificare un giocatore -- prova ` aiuto settaggio giocatore %s'.\n"
 
 #: set.c:2193 set.c:2242 set.c:4300
 #, fuzzy, c-format
@@ -12236,7 +12236,7 @@ msgid ""
 "Unknown player `%s' -- try\n"
 "`help set %s player'.\n"
 msgstr ""
-"Giocatore `%s' sconosciuto -- prova\\n`aiuto settaggio giocatore %s'.\\n"
+"Giocatore `%s' sconosciuto -- prova\n`aiuto settaggio giocatore %s'.\n"
 
 #: set.c:2275 set.c:2286 set.c:2293
 msgid ""
@@ -12279,13 +12279,13 @@ msgid ""
 "You must specify a value for alpha which is greater than\n"
 "zero, and no more than one."
 msgstr ""
-"Devi specificare un valore per alfa che sia maggiore di\\nzero, e minore d "
+"Devi specificare un valore per alfa che sia maggiore di\nzero, e minore d "
 "uno."
 
 #: set.c:2415
 #, fuzzy, c-format
 msgid "Alpha set to %f.\n"
-msgstr "Alfa settato a %f.\\n"
+msgstr "Alfa settato a %f.\n"
 
 #: set.c:2423
 msgid "You must specify a valid annealing rate."
@@ -12294,7 +12294,7 @@ msgstr "Devi specificare un valore di fortificazione valido."
 #: set.c:2428
 #, fuzzy, c-format
 msgid "Annealing rate set to %f.\n"
-msgstr "Valore di fortificazione settato a %f.\\n"
+msgstr "Valore di fortificazione settato a %f.\n"
 
 #: set.c:2436
 msgid "You must specify a valid error threshold."
@@ -12303,7 +12303,7 @@ msgstr "Devi specificare un limite di errore valido."
 #: set.c:2443
 #, fuzzy, c-format
 msgid "Error threshold set to %f.\n"
-msgstr "Limite di errore settato a %f.\\n"
+msgstr "Limite di errore settato a %f.\n"
 
 #: set.c:2445 show.c:1315
 msgid "Error threshold disabled."
@@ -12321,7 +12321,7 @@ msgstr "Quale giocatore vuoi settare con i dadi in mano?"
 #: set.c:2472
 #, fuzzy, c-format
 msgid "Unknown player `%s' -- try `help set turn'.\n"
-msgstr "Giocatore `%s' sconosciuto -- prova `aiuto settaggio turno.\\n"
+msgstr "Giocatore `%s' sconosciuto -- prova `aiuto settaggio turno.\n"
 
 #: set.c:2478
 msgid "You can't set both players on roll."
@@ -12330,7 +12330,7 @@ msgstr "Non puoi settare entrambi i giocatori con i dadi in mano."
 #: set.c:2498
 #, fuzzy, c-format
 msgid "`%s' is now on roll.\n"
-msgstr "`%s' ora ha i dadi in mano.\\n"
+msgstr "`%s' ora ha i dadi in mano.\n"
 
 #: set.c:2504
 msgid "Will use the Egyptian rule."
@@ -12347,7 +12347,7 @@ msgid ""
 "Regenerating them with the rule set may give better results."
 msgstr ""
 "Nota: molto spesso il database e il weights non sono impostati per il gioco "
-"Egiziano.\\nRigenerarli con la regola settata potrebbe dare migliori "
+"Egiziano.\nRigenerarli con la regola settata potrebbe dare migliori "
 "risultati."
 
 #: set.c:2516
@@ -12366,7 +12366,7 @@ msgid ""
 "to be scored -- see `help set cube use'.)"
 msgstr ""
 "(Nota che dovrai abilitare il cubo se vuoi che gammons e backgammons"
-"\\nvengano segnati -- vedi `aiuto setta uso del cubo'.)"
+"\nvengano segnati -- vedi `aiuto setta uso del cubo'.)"
 
 #: set.c:2538
 msgid "This game is the Crawford game (no doubling allowed)."
@@ -12382,7 +12382,7 @@ msgid ""
 "Cannot set whether this is the Crawford game\n"
 "as none of the players are 1-away from winning."
 msgstr ""
-"Non puoi settare se questo è un Crawford game\\npoichè nessuno dei giocatori "
+"Non puoi settare se questo è un Crawford game\npoichè nessuno dei giocatori "
 "è a un punto dalla vittoria."
 
 #: set.c:2558
@@ -12407,7 +12407,7 @@ msgid ""
 "Cannot set whether this is post-Crawford play\n"
 "as none of the players are 1-away from winning."
 msgstr ""
-"Non puoi settare se questo è un gioco post-Crawford\\npoichè nessuno dei "
+"Non puoi settare se questo è un gioco post-Crawford\npoichè nessuno dei "
 "giocatori è a un punto dalla vittoria."
 
 #: set.c:2591
@@ -12421,7 +12421,7 @@ msgstr "Devi specificare il numero di beavers da abilitare."
 #: set.c:2611 show.c:1033
 #, fuzzy, c-format
 msgid "%d beavers/raccoons allowed in money sessions.\n"
-msgstr "%d beavers/racoons abilitato nella sessione money.\\n"
+msgstr "%d beavers/racoons abilitato nella sessione money.\n"
 
 #: set.c:2613 show.c:1035
 msgid "1 beaver allowed in money sessions."
@@ -12491,7 +12491,7 @@ msgstr "Devi specificare un nome il un file. Vedi \"aiuto settaggio met\". "
 #: set.c:2680
 #, fuzzy, c-format
 msgid "GNU Backgammon will now use the %s match equity table.\n"
-msgstr "GNU Backgammon ora userà la tabella della match equity di %s.\\n"
+msgstr "GNU Backgammon ora userà la tabella della match equity di %s.\n"
 
 #: set.c:2685
 #, fuzzy, c-format
@@ -12501,9 +12501,9 @@ msgid ""
 "below.\n"
 "For scores above %i-away an extrapolation scheme is used.\n"
 msgstr ""
-"\\nNota che questa tabella della match equity supporta soltanto matches di "
-"lnghezza %i o inferiore.\\nPer punteggi sotto il %i-away viene usato uno "
-"schema di estrapolazione.\\n"
+"\nNota che questa tabella della match equity supporta soltanto matches di "
+"lnghezza %i o inferiore.\nPer punteggi sotto il %i-away viene usato uno "
+"schema di estrapolazione.\n"
 
 #: set.c:2712
 #, fuzzy, c-format
@@ -12511,12 +12511,12 @@ msgid ""
 "Unknown evaluation type: %s -- see\n"
 "`help set %s type'\n"
 msgstr ""
-"Tipo di valutazione sconosciuto: %s -- vedi\\n`aiuto settaggio tipo %s'\\n"
+"Tipo di valutazione sconosciuto: %s -- vedi\n`aiuto settaggio tipo %s'\n"
 
 #: set.c:2719
 #, fuzzy, c-format
 msgid "%s will now use %s.\n"
-msgstr "%s ora userà %s.\\n"
+msgstr "%s ora userà %s.\n"
 
 #: set.c:2733
 #, fuzzy, c-format
@@ -12524,8 +12524,8 @@ msgid ""
 "(Note that this setting will have no effect until you\n"
 "`set %s type evaluation'.)\n"
 msgstr ""
-"(Nota che questo settaggio non avrà effetto finchè tu\\nnon `setti tipo di "
-"valutazione %s'.)\\n"
+"(Nota che questo settaggio non avrà effetto finchè tu\nnon `setti tipo di "
+"valutazione %s'.)\n"
 
 #: set.c:2747
 #, fuzzy, c-format
@@ -12533,8 +12533,8 @@ msgid ""
 "(Note that this setting will have no effect until you\n"
 "`set %s type rollout.)'\n"
 msgstr ""
-"(Nota che questo settaggio non avrà effetto finchè tu\\nnon `setti tipo di "
-"rollout %s'.)\\n"
+"(Nota che questo settaggio non avrà effetto finchè tu\nnon `setti tipo di "
+"rollout %s'.)\n"
 
 #: set.c:2761
 #, fuzzy
@@ -12547,7 +12547,7 @@ msgid ""
 "Unknown player `%s' -- try\n"
 "`help set analysis player'.\n"
 msgstr ""
-"Giocatore `%s' sconosciuto -- prova\\n`aiuto settaggio giocatore %s'.\\n"
+"Giocatore `%s' sconosciuto -- prova\n`aiuto settaggio giocatore %s'.\n"
 
 #: set.c:2810
 #, fuzzy, c-format
@@ -12578,12 +12578,12 @@ msgstr "`valuta' e `suggerisci' le decisioni del cubo"
 #: set.c:2898
 #, fuzzy, c-format
 msgid "%s set to: %s\n"
-msgstr "%s settato a : %s\\n"
+msgstr "%s settato a : %s\n"
 
 #: set.c:2902
 #, fuzzy, c-format
 msgid "%s cleared.\n"
-msgstr "%s cancellato.\\n"
+msgstr "%s cancellato.\n"
 
 #: set.c:2908
 msgid "Match annotator"
@@ -12602,12 +12602,12 @@ msgstr "Data del match cancellata."
 msgid "%s is not a valid date (see `help set matchinfo date').\n"
 msgstr ""
 "%s non è una data valida (vedi `valuta' e `aiuto settaggio data matchinfo')."
-"\\n"
+"\n"
 
 #: set.c:2952
 #, fuzzy, c-format
 msgid "Match date set to %04d-%02d-%02d.\n"
-msgstr "Data del match settata a %04d-%02d-%02d.\\n"
+msgstr "Data del match settata a %04d-%02d-%02d.\n"
 
 #: set.c:2957
 msgid "Match event"
@@ -12616,12 +12616,12 @@ msgstr "Evento del match"
 #: set.c:2972
 #, fuzzy, c-format
 msgid "New matches will default to %d point.\n"
-msgstr "I nuovi matches saranno a %d punto di default.\\n"
+msgstr "I nuovi matches saranno a %d punto di default.\n"
 
 #: set.c:2973
 #, fuzzy, c-format
 msgid "New matches will default to %d points.\n"
-msgstr "I nuovi matches saranno a %d punti di default.\\n"
+msgstr "I nuovi matches saranno a %d punti di default.\n"
 
 #: set.c:2978
 msgid "Match place"
@@ -12702,7 +12702,7 @@ msgstr "Il board verrà mostrato ogni %d mosse nelle esportazioni."
 msgid "Unknown player `%s' -- try `help set export show player'.\n"
 msgstr ""
 "Giocatore `%s' sconosciuto -- prova `aiuto settaggio esportazione mostra "
-"giocatore'.\\n"
+"giocatore'.\n"
 
 #: set.c:3090
 msgid "Analysis, boards etc will be shown for both players in exports."
@@ -12715,12 +12715,12 @@ msgstr ""
 msgid "Analysis, boards etc will only be shown for player %s in exports.\n"
 msgstr ""
 "Analisi, board ecc verranno mostrati solo per il giocatore %s nelle "
-"esportazioni.\\n"
+"esportazioni.\n"
 
 #: set.c:3112
 #, fuzzy, c-format
 msgid "Show at most %d moves in exports.\n"
-msgstr "Mostra al massimo %d mosse nelle esportazioni.\\n"
+msgstr "Mostra al massimo %d mosse nelle esportazioni.\n"
 
 #: set.c:3120
 msgid "Show detailed probabilities for moves"
@@ -12859,12 +12859,12 @@ msgstr "Non esportare le decisioni del cubo mancate."
 msgid ""
 "HTML export type is now: \n"
 "%s\n"
-msgstr "Il tipo di esportazione HTML ora è: \\n%s\\n"
+msgstr "Il tipo di esportazione HTML ora è: \n%s\n"
 
 #: set.c:3396
 #, fuzzy, c-format
 msgid "CSS stylesheet for HTML export: %s\n"
-msgstr "Foglio di stile CSS per l'esportazione HTML: %s\\n"
+msgstr "Foglio di stile CSS per l'esportazione HTML: %s\n"
 
 #: set.c:3428
 #, fuzzy
@@ -12877,7 +12877,7 @@ msgstr ""
 msgid ""
 "URL for picture in HTML export is now: \n"
 "%s\n"
-msgstr "URL per l'esportazione HTML con figure ora è: \\n%s\\n"
+msgstr "URL per l'esportazione HTML con figure ora è: \n%s\n"
 
 #: set.c:3453
 msgid "Match equity table will be used inverted."
@@ -12926,17 +12926,17 @@ msgstr "Usa i settaggi della Valutazione per generare avvisi."
 #: set.c:3636
 #, fuzzy, c-format
 msgid "Tutor warnings will be give for play marked `%s'.\n"
-msgstr "Gli avvertimenti del tutore verranno dati per gioco marcato `%s'.\\n"
+msgstr "Gli avvertimenti del tutore verranno dati per gioco marcato `%s'.\n"
 
 #: set.c:3814
 #, fuzzy, c-format
 msgid "You must specify a colour -- try `help set %s'.\n"
-msgstr "Devi specificare un colore -- prova `aiuto settaggio %s.\\n"
+msgstr "Devi specificare un colore -- prova `aiuto settaggio %s.\n"
 
 #: set.c:3821
 #, fuzzy, c-format
 msgid "Unknown colour '%s' -- try `help set %s colour'.\n"
-msgstr "Colore '%s' sconosciuto -- prova `aiuto settaggio colore %s'.\\n"
+msgstr "Colore '%s' sconosciuto -- prova `aiuto settaggio colore %s'.\n"
 
 #: set.c:3887
 msgid "Enable sounds."
@@ -12967,7 +12967,7 @@ msgstr ""
 msgid ""
 "GNU Backgammon will use an external command to play sounds:\n"
 "%s\n"
-msgstr "GNU Backgammon userà un comando esterno per eseguire suoni:\\n%s\\n"
+msgstr "GNU Backgammon userà un comando esterno per eseguire suoni:\n%s\n"
 
 #: set.c:3935
 msgid "GNU Backgammon will use the ESD sound system"
@@ -13028,17 +13028,17 @@ msgstr ""
 #: set.c:4022
 #, fuzzy, c-format
 msgid "No sound played for: %s\n"
-msgstr "Nessun suono eseguito per: %s\\n"
+msgstr "Nessun suono eseguito per: %s\n"
 
 #: set.c:4030
 #, fuzzy, c-format
 msgid "Sound for: %s: %s\n"
-msgstr "Suono per: %s: %s\\n"
+msgstr "Suono per: %s: %s\n"
 
 #: set.c:4165
 #, fuzzy, c-format
 msgid "Scheduling priority set to %d.\n"
-msgstr "Priorità di pianificazione settata a %d.\\n"
+msgstr "Priorità di pianificazione settata a %d.\n"
 
 #: set.c:4174
 msgid "time critical"
@@ -13067,18 +13067,18 @@ msgstr "sospeso"
 #: set.c:4193
 #, fuzzy, c-format
 msgid "Priority of program set to: %s\n"
-msgstr "Priorità del programma settata a: %s\\n"
+msgstr "Priorità del programma settata a: %s\n"
 
 #: set.c:4196
 #, fuzzy, c-format
 msgid "Changing priority failed (trying to set priority %s)\n"
 msgstr ""
-"Cambiamento di priorità fallito (prova di settaggio della pripìorità a %s)\\n"
+"Cambiamento di priorità fallito (prova di settaggio della pripìorità a %s)\n"
 
 #: set.c:4199
 #, fuzzy
 msgid "Priority changes are not supported on this platform.\n"
-msgstr "Il cambiamento di priorità non è supportato su questa piattaforma.\\n"
+msgstr "Il cambiamento di priorità non è supportato su questa piattaforma.\n"
 
 #: set.c:4228
 msgid "You must specify a priority between -20 and 20."
@@ -13114,7 +13114,7 @@ msgstr "Devi specificare una grandezza tra 1 e 20."
 #: set.c:4354
 #, fuzzy, c-format
 msgid "Size of generated PNG images are %dx%d pixels\n"
-msgstr "- dimensione delle immagini PNG esportate: %dx%d\\n"
+msgstr "- dimensione delle immagini PNG esportate: %dx%d\n"
 
 #: set.c:4413
 #, fuzzy
@@ -13316,7 +13316,7 @@ msgstr "carattere illegale nel file SGF"
 #: sgf.y:237
 #, fuzzy, c-format
 msgid "sgf error: %s\n"
-msgstr "errore sgf: %s\\n"
+msgstr "errore sgf: %s\n"
 
 #: sgf.y:258
 msgid "Fatal error; can't print collection."
@@ -13329,8 +13329,8 @@ msgid ""
 "        %d%% speed.\n"
 "        %s evaluations.\n"
 msgstr ""
-"        valutazione %d-ply.\\n        velocità %d%%.\\n        valutazioni %"
-"s.\\n"
+"        valutazione %d-ply.\n        velocità %d%%.\n        valutazioni %"
+"s.\n"
 
 #: show.c:118
 #, c-format
@@ -13344,27 +13344,27 @@ msgstr "        Valutazione senza ritardo"
 #: show.c:122
 #, fuzzy
 msgid " (deterministic noise).\n"
-msgstr " (ritardo deterministico).\\n"
+msgstr " (ritardo deterministico).\n"
 
 #: show.c:123
 #, fuzzy
 msgid " (pseudo-random noise).\n"
-msgstr " (ritardo pseudo-casuale).\\n"
+msgstr " (ritardo pseudo-casuale).\n"
 
 #: show.c:157
 #, fuzzy, c-format
 msgid "%s for first %d plies:\n"
-msgstr "%s per i primi %d plies:\\n"
+msgstr "%s per i primi %d plies:\n"
 
 #: show.c:173
 #, fuzzy, c-format
 msgid "%s after %d plies:\n"
-msgstr "%s dopo %d plies:\\n"
+msgstr "%s dopo %d plies:\n"
 
 #: show.c:225
 #, fuzzy, c-format
 msgid "Truncation after %d plies.\n"
-msgstr "Troncamento dopo %d plies.\\n"
+msgstr "Troncamento dopo %d plies.\n"
 
 #: show.c:227
 msgid "Truncation after 1 ply."
@@ -13453,7 +13453,7 @@ msgstr "Rollout come mossa di apertura disabilitato."
 #: show.c:261
 #, fuzzy, c-format
 msgid "%s dice generator with seed %u.\n"
-msgstr "%s generatore dadi con seed %u.\\n"
+msgstr "%s generatore dadi con seed %u.\n"
 
 #: show.c:280
 msgid "Evaluation parameters:"
@@ -13470,12 +13470,12 @@ msgstr "Parametri decisione di cubo:"
 #: show.c:291
 #, fuzzy, c-format
 msgid "Move filter for first %d plies:\n"
-msgstr "Filtro mossa per le prime %d ply:\\n"
+msgstr "Filtro mossa per le prime %d ply:\n"
 
 #: show.c:293
 #, fuzzy, c-format
 msgid "Move filter after %d plies:\n"
-msgstr "Filtro mossa dopo le %d ply:\\n"
+msgstr "Filtro mossa dopo le %d ply:\n"
 
 #: show.c:297
 #, fuzzy
@@ -13531,7 +13531,7 @@ msgstr ""
 msgid ""
 "\n"
 "Analysis thresholds:"
-msgstr "\\nSoglia di analisi:"
+msgstr "\nSoglia di analisi:"
 
 #: show.c:437
 #, fuzzy
@@ -13570,18 +13570,18 @@ msgid ""
 "move    \t(Play the forced move when there is no choice):\t%s\n"
 "roll    \t(Roll the dice if no double is possible):      \t%s\n"
 msgstr ""
-"bearoff \\t(Gioca certe mosse di uscita pedine non in contatto):    \\t%s"
-"\\ncrawford\\t(Abilita la regola di Crawford come appropriata):        \\t%s"
-"\\ndoubles \\t(Raddoppia il cubo se il lancio di apertura è un doppio):\\t%d"
-"\\ngame    \\t(Fa partire un nuovo game quando il precedente è finito):\\t%s"
-"\\nmove    \\t(Gioca le mosse forzate quando non ci sono scelte):      \\t%s"
-"\\nroll    \\t(Lancia i dadi quando non è possibile raddoppiare):      \\t%s"
-"\\n"
+"bearoff \t(Gioca certe mosse di uscita pedine non in contatto):    \t%s"
+"\ncrawford\t(Abilita la regola di Crawford come appropriata):        \t%s"
+"\ndoubles \t(Raddoppia il cubo se il lancio di apertura è un doppio):\t%d"
+"\ngame    \t(Fa partire un nuovo game quando il precedente è finito):\t%s"
+"\nmove    \t(Gioca le mosse forzate quando non ci sono scelte):      \t%s"
+"\nroll    \t(Lancia i dadi quando non è possibile raddoppiare):      \t%s"
+"\n"
 
 #: show.c:546
 #, fuzzy, c-format
 msgid "The delay is set to %d ms.\n"
-msgstr "Il ritardo è settato a %d ms.\\n"
+msgstr "Il ritardo è settato a %d ms.\n"
 
 #: show.c:548
 msgid "No delay is being used."
@@ -13601,7 +13601,7 @@ msgstr "sono state usate %d entrate di cache. %d lookups, %d hits"
 #, fuzzy, c-format
 msgid "Evaluation speed has been set to %.0f evaluations per second.\n"
 msgstr ""
-"La velocità di valutazione è stata settata a %.0f valutazioni al secondo.\\n"
+"La velocità di valutazione è stata settata a %.0f valutazioni al secondo.\n"
 
 #: show.c:588
 msgid "No evaluation speed has been recorded."
@@ -13671,12 +13671,12 @@ msgstr "I dadi non possono essere lanciati prima di iniziare un game."
 #: show.c:701
 #, fuzzy, c-format
 msgid "%s has not yet rolled the dice.\n"
-msgstr "%s non ha ancora lanciato i dadi.\\n"
+msgstr "%s non ha ancora lanciato i dadi.\n"
 
 #: show.c:703
 #, fuzzy, c-format
 msgid "%s has rolled %d and %d.\n"
-msgstr "%s ha lanciato %d e %d.\\n"
+msgstr "%s ha lanciato %d e %d.\n"
 
 #: show.c:710
 msgid "GNU Backgammon will display boards for computer moves."
@@ -13757,17 +13757,17 @@ msgstr "Annotatore: %s"
 #: show.c:804
 #, fuzzy, c-format
 msgid "New matches default to %d point.\n"
-msgstr "Nuovo punteggio di default per i matches a %d punto.\\n"
+msgstr "Nuovo punteggio di default per i matches a %d punto.\n"
 
 #: show.c:805
 #, fuzzy, c-format
 msgid "New matches default to %d points.\n"
-msgstr "Nuovo punteggio di default per i matches a %d punti.\\n"
+msgstr "Nuovo punteggio di default per i matches a %d punti.\n"
 
 #: show.c:822
 #, fuzzy, c-format
 msgid "The pip counts are: %s %d, %s %d.\n"
-msgstr "I conteggi dei pip sono: %s %d, %s %d.\\n"
+msgstr "I conteggi dei pip sono: %s %d, %s %d.\n"
 
 #: show.c:831
 #, fuzzy, c-format
@@ -13775,14 +13775,14 @@ msgid ""
 "Player %d:\n"
 "  Name: %s\n"
 "  Type: "
-msgstr "Giocatore %d:\\n  Nome: %s\\n  Tipo: "
+msgstr "Giocatore %d:\n  Nome: %s\n  Tipo: "
 
 #: show.c:837
 #, fuzzy, c-format
 msgid ""
 "external: %s\n"
 "\n"
-msgstr "esterno: %s\\n\\n"
+msgstr "esterno: %s\n\n"
 
 #: show.c:840
 msgid "gnubg:\n"
@@ -13795,12 +13795,12 @@ msgstr "    Gioco di mossa:"
 #: show.c:849
 #, fuzzy
 msgid "pubeval\n"
-msgstr "valutazione pubblica\\n"
+msgstr "valutazione pubblica\n"
 
 #: show.c:852
 #, fuzzy
 msgid "human\n"
-msgstr "umano\\n"
+msgstr "umano\n"
 
 #: show.c:862
 msgid "This is post-Crawford play."
@@ -13809,12 +13809,12 @@ msgstr "Questo è il gioco post-Crawford."
 #: show.c:873
 #, fuzzy, c-format
 msgid "The prompt is set to `%s'.\n"
-msgstr "Il prompt è settato a '%s'.\\n"
+msgstr "Il prompt è settato a '%s'.\n"
 
 #: show.c:878
 #, fuzzy, c-format
 msgid "You are using the %s generator.\n"
-msgstr "Stai usando il generatore %s.\\n"
+msgstr "Stai usando il generatore %s.\n"
 
 #: show.c:885
 msgid "`rollout' will use:"
@@ -13833,12 +13833,12 @@ msgstr "Il punteggio (dopo %d games) è: %s %d, %s %d"
 #: show.c:901
 #, fuzzy, c-format
 msgid " (match to %d point%s).\n"
-msgstr " (match a %d punto%s).\\n"
+msgstr " (match a %d punto%s).\n"
 
 #: show.c:902
 #, fuzzy, c-format
 msgid " (match to %d points%s).\n"
-msgstr " (match a %d punti%s).\\n"
+msgstr " (match a %d punti%s).\n"
 
 #: show.c:905
 msgid ", Crawford game"
@@ -13853,39 +13853,39 @@ msgstr ""
 msgid ""
 " (money session,\n"
 "with Jacoby rule)."
-msgstr " (money session,\\ncon regola Jacoby)."
+msgstr " (money session,\ncon regola Jacoby)."
 
 #: show.c:912
 #, fuzzy
 msgid ""
 " (money session,\n"
 "without Jacoby rule)."
-msgstr " (money session,\\nsenza regola Jacoby)."
+msgstr " (money session,\nsenza regola Jacoby)."
 
 #: show.c:931
 #, fuzzy, c-format
 msgid "%s in on move.\n"
-msgstr "%s deve muovere.\\n"
+msgstr "%s deve muovere.\n"
 
 #: show.c:934
 #, fuzzy, c-format
 msgid "%s in on roll.\n"
-msgstr "%s deve lanciare.\\n"
+msgstr "%s deve lanciare.\n"
 
 #: show.c:938
 #, fuzzy, c-format
 msgid "%s has offered to resign a %s.\n"
-msgstr "%s ha offerto di rifiutare un %s.\\n"
+msgstr "%s ha offerto di rifiutare un %s.\n"
 
 #: show.c:976
 #, fuzzy
 msgid "Pipcount unsuitable for Kleinman Count.\n"
-msgstr "Conteggio pip inadatto per il Kleinman Count.\\n"
+msgstr "Conteggio pip inadatto per il Kleinman Count.\n"
 
 #: show.c:978
 #, fuzzy, c-format
 msgid "Cubeless Winning Chance (%s on roll): %.4f\n"
-msgstr "Percentuali di vittoria senza cubo: %.4f\\n"
+msgstr "Percentuali di vittoria senza cubo: %.4f\n"
 
 #: show.c:1008
 msgid "Redouble, "
@@ -13902,12 +13902,12 @@ msgstr "Non raddoppia, "
 #: show.c:1024
 #, fuzzy, c-format
 msgid "Bower's interpolation: %d%% cubeless winning chance (%s on roll)\n"
-msgstr "Interpolazione di Bower: %d%% percentuali di vittoria senza cubo\\n"
+msgstr "Interpolazione di Bower: %d%% percentuali di vittoria senza cubo\n"
 
 #: show.c:1060
 #, fuzzy
 msgid "Player        Gammon value    Backgammon value\n"
-msgstr "Giocatore       valore Gammon    valore Backgammon\\n"
+msgstr "Giocatore       valore Gammon    valore Backgammon\n"
 
 #: show.c:1080 show.c:1085
 #, c-format
@@ -13962,7 +13962,7 @@ msgstr "Gwc stimate con cubo in gioco: %8.4f%%"
 #: show.c:1213
 #, fuzzy, c-format
 msgid "One sided rollout with %d trials (%s on roll):\n"
-msgstr "Rollout da un solo lato con %d tentativi:\\n"
+msgstr "Rollout da un solo lato con %d tentativi:\n"
 
 #: show.c:1259
 msgid "Match equity table: "
@@ -13973,14 +13973,14 @@ msgstr "Tavola delle match equity: "
 msgid ""
 "Pre-Crawford table:\n"
 "\n"
-msgstr "Tavola pre-Crawford:\\n\\n"
+msgstr "Tavola pre-Crawford:\n\n"
 
 #: show.c:1271
 #, fuzzy, c-format
 msgid ""
 "Post-Crawford table for player %d (%s):\n"
 "\n"
-msgstr "Tavola post-Crawford per il giocatore %d (%s):\\n\\n"
+msgstr "Tavola post-Crawford per il giocatore %d (%s):\n\n"
 
 #: show.c:1281
 #, fuzzy
@@ -14022,17 +14022,17 @@ msgstr ""
 #: show.c:1299
 #, fuzzy
 msgid "Boards will be shown in raw format.\n"
-msgstr "Le tavole saranno viasualizzate in formato raw.\\n"
+msgstr "Le tavole saranno viasualizzate in formato raw.\n"
 
 #: show.c:1300
 #, fuzzy
 msgid "Boards will be shown in ASCII.\n"
-msgstr "Le tavole saranno visualizzate in formato ASCII.\\n"
+msgstr "Le tavole saranno visualizzate in formato ASCII.\n"
 
 #: show.c:1305
 #, fuzzy, c-format
 msgid "Learning rate (alpha) %f,\n"
-msgstr "Tasso apprendimento (alpha) %f,\\n"
+msgstr "Tasso apprendimento (alpha) %f,\n"
 
 #: show.c:1308
 #, fuzzy, c-format
@@ -14046,7 +14046,7 @@ msgstr ""
 #: show.c:1313
 #, fuzzy, c-format
 msgid "Error threshold %f.\n"
-msgstr "Soglia di errore %f.\\n"
+msgstr "Soglia di errore %f.\n"
 
 #: show.c:1337
 #, fuzzy, c-format
@@ -14064,24 +14064,24 @@ msgstr "Ringraziamenti speciali a:"
 #: show.c:1416
 #, fuzzy, c-format
 msgid "illegal gammon ratio for player %i: %f\n"
-msgstr "illegale rateo di gammon per il giocatore %i: %f\\n"
+msgstr "illegale rateo di gammon per il giocatore %i: %f\n"
 
 #: show.c:1421
 #, fuzzy, c-format
 msgid "illegal backgammon ratio for player %i: %f\n"
-msgstr "illegale rateo di backgammon per il giocatore %i: %f\\n"
+msgstr "illegale rateo di backgammon per il giocatore %i: %f\n"
 
 #: show.c:1451
 #, fuzzy, c-format
 msgid "Player %-25s: gammon rate %6.2f%%, bg rate %6.2f%%\n"
-msgstr "Giocatore %-25s: gammon rate %6.2f%%, bg rate %6.2f%%\\n"
+msgstr "Giocatore %-25s: gammon rate %6.2f%%, bg rate %6.2f%%\n"
 
 #: show.c:1611
 #, fuzzy, c-format
 msgid ""
 "Player %s market window:\n"
 "\n"
-msgstr "Finestra di mercato del giocatore %s:\\n\\n"
+msgstr "Finestra di mercato del giocatore %s:\n\n"
 
 #: show.c:1614
 msgid "Dead cube (opponent doesn't redouble): "
@@ -14096,14 +14096,14 @@ msgstr "Cubo morto: "
 msgid ""
 "Dead cube (opponent redoubles):%6.2f%% - %6.2f%%\n"
 "\n"
-msgstr "Cubo morto (l'avversario riraddoppia):%6.2f%% - %6.2f%%\\n\\n"
+msgstr "Cubo morto (l'avversario riraddoppia):%6.2f%% - %6.2f%%\n\n"
 
 #: show.c:1626
 #, fuzzy, c-format
 msgid ""
 "Live cube:%6.2f%% - %6.2f%%\n"
 "\n"
-msgstr "Cubo vivo:%6.2f%% - %6.2f%%\\n\\n"
+msgstr "Cubo vivo:%6.2f%% - %6.2f%%\n\n"
 
 #: show.c:1661
 #, fuzzy, c-format
@@ -14111,12 +14111,12 @@ msgid ""
 "\n"
 "Player %s cube parameters:\n"
 "\n"
-msgstr "\\nParametri di cubo del giocatore %s:\\n\\n"
+msgstr "\nParametri di cubo del giocatore %s:\n\n"
 
 #: show.c:1662
 #, fuzzy
 msgid "Cube parameter               Dead Cube    Live Cube\n"
-msgstr "Parametri di cubo               Cube morto   Cubo vivo\\n"
+msgstr "Parametri di cubo               Cube morto   Cubo vivo\n"
 
 #: show.c:1689
 #, fuzzy
@@ -14130,9 +14130,9 @@ msgid ""
 "Include: \n"
 "\n"
 msgstr ""
-"\\nSettaggi di Export: \\n\\nATTENZIONE: non tutti i settaggi sono validi "
-"nella modalità export!\\n         Non ti aspettare troppo!\\n\\nIncluso: \\n"
-"\\n"
+"\nSettaggi di Export: \n\nATTENZIONE: non tutti i settaggi sono validi "
+"nella modalità export!\n         Non ti aspettare troppo!\n\nIncluso: \n"
+"\n"
 
 #: show.c:1695
 msgid "- annotations"
@@ -14157,7 +14157,7 @@ msgstr "- informazioni sul match"
 #: show.c:1711
 #, fuzzy
 msgid "Show: \n"
-msgstr "Mostra: \\n"
+msgstr "Mostra: \n"
 
 #: show.c:1712
 msgid "- board"
@@ -14170,7 +14170,7 @@ msgstr "mai"
 #: show.c:1717
 #, fuzzy, c-format
 msgid "on every %d move\n"
-msgstr "su ogni %d mossa\\n"
+msgstr "su ogni %d mossa\n"
 
 #: show.c:1720
 msgid "- players"
@@ -14194,7 +14194,7 @@ msgstr "- mostra al massimo"
 #: show.c:1732
 #, fuzzy, c-format
 msgid "%d moves\n"
-msgstr "%d mosse\\n"
+msgstr "%d mosse\n"
 
 #: show.c:1734 show.c:1759
 msgid "- show detailed probabilities"
@@ -14250,21 +14250,21 @@ msgstr "- decisioni di cubo ravvicinate"
 msgid ""
 "\n"
 "HTML options:\n"
-msgstr "\\nopzioni HTML:\\n"
+msgstr "\nopzioni HTML:\n"
 
 #: show.c:1800
 #, fuzzy, c-format
 msgid ""
 "- HTML export type used in export\n"
 "\t%s\n"
-msgstr "- tipo di HTML usato in esportazione\\n\\t%s\\n"
+msgstr "- tipo di HTML usato in esportazione\n\t%s\n"
 
 #: show.c:1805
 #, fuzzy, c-format
 msgid ""
 "- URL to pictures used in export\n"
 "\t%s\n"
-msgstr "- URL delle immagini usato in esportazione\\n\\t%s\\n"
+msgstr "- URL delle immagini usato in esportazione\n\t%s\n"
 
 #: show.c:1808
 msgid "not defined"
@@ -14273,12 +14273,12 @@ msgstr "non definito"
 #: show.c:1812
 #, fuzzy
 msgid "PNG options:\n"
-msgstr "opzioni PNG:\\n"
+msgstr "opzioni PNG:\n"
 
 #: show.c:1814
 #, fuzzy, c-format
 msgid "- size of exported PNG pictures: %dx%d\n"
-msgstr "- dimensione delle immagini PNG esportate: %dx%d\\n"
+msgstr "- dimensione delle immagini PNG esportate: %dx%d\n"
 
 #: show.c:1841
 msgid "Import of TrueMoneyGames TMG files"
@@ -14293,7 +14293,7 @@ msgstr "Esportazione dei files text"
 #, fuzzy
 msgid "Default and current paths for load, save, import, and export: \n"
 msgstr ""
-"Percorsi predefiniti e correnti per apri, salva, importa e esporta: \\n"
+"Percorsi predefiniti e correnti per apri, salva, importa e esporta: \n"
 
 #: show.c:1861
 msgid "   Default : not defined"
@@ -14302,7 +14302,7 @@ msgstr "   Predefinito : non definito"
 #: show.c:1863
 #, fuzzy, c-format
 msgid "   Default : \"%s\"\n"
-msgstr "   Predefinito : \"%s\"\\n"
+msgstr "   Predefinito : \"%s\"\n"
 
 #: show.c:1866
 msgid "   Current : not defined"
@@ -14311,7 +14311,7 @@ msgstr "   Corrente : non definito"
 #: show.c:1868
 #, fuzzy, c-format
 msgid "   Current : \"%s\"\n"
-msgstr "   Corrente : \"%s\"\\n"
+msgstr "   Corrente : \"%s\"\n"
 
 #: show.c:1881
 msgid "Warnings are given for 'doubtful', 'bad', or 'very bad' moves."
@@ -14358,12 +14358,12 @@ msgstr ""
 #: show.c:1924
 #, fuzzy, c-format
 msgid "Warnings are given for '%s' play.\n"
-msgstr "Avvisi saranno dati per '%s' di gioco.\\n"
+msgstr "Avvisi saranno dati per '%s' di gioco.\n"
 
 #: show.c:1926
 #, fuzzy, c-format
 msgid "Warnings are given for '%s' or worse plays.\n"
-msgstr "Avvisi saranno dati per '%s' o peggiore di gioco.\\n"
+msgstr "Avvisi saranno dati per '%s' o peggiore di gioco.\n"
 
 #: show.c:1933
 #, fuzzy, c-format
@@ -14376,22 +14376,22 @@ msgid ""
 "Hint window       : size %dx%d, position (%d,%d)\n"
 "Message window    : size %dx%d, position (%d,%d)\n"
 msgstr ""
-"Geometries predefinite:\\n\\nFinestra principale : size %dx%d, position (%d,%"
-"d)\\nFinestra annotazioni: window : size %dx%d, position (%d,%d)\\nFinestra "
-"lista games: size %dx%d, position (%d,%d)\\nFinesra suggerimenti: size %dx%"
-"d, position (%d,%d)\\nFinestra messaggi   : size %dx%d, position (%d,%d)\\n"
+"Geometries predefinite:\n\nFinestra principale : size %dx%d, position (%d,%"
+"d)\nFinestra annotazioni: window : size %dx%d, position (%d,%d)\nFinestra "
+"lista games: size %dx%d, position (%d,%d)\nFinesra suggerimenti: size %dx%"
+"d, position (%d,%d)\nFinestra messaggi   : size %dx%d, position (%d,%d)\n"
 
 #: show.c:1965
 #, fuzzy, c-format
 msgid "Moves will be highlighted in %s %s.\n"
-msgstr "Le moves saranno evidenziate in %s %s.\\n"
+msgstr "Le moves saranno evidenziate in %s %s.\n"
 
 #: show.c:1989
 #, fuzzy, c-format
 msgid ""
 "Sounds are enabled          : %s\n"
 "Sound system                : %s\n"
-msgstr "Suoni abilitati             : %s\\nSistema audio               : %s\\n"
+msgstr "Suoni abilitati             : %s\nSistema audio               : %s\n"
 
 #: show.c:1994
 msgid "Sounds for:"
@@ -14583,7 +14583,7 @@ msgid ""
 "If you specify a parameter to `calibrate', it must be a number of iterations "
 "to run."
 msgstr ""
-"Se specifichi un parametro per 'train td', esso\\ndeve essere un numero di "
+"Se specifichi un parametro per 'train td', esso\ndeve essere un numero di "
 "posizione su cui applicare il train"
 
 #: speed.c:89 speed.c:107
@@ -14633,21 +14633,21 @@ msgstr "%s al lancio, decisione di cubo?"
 msgid ""
 "%s (O, %d pts) vs. %s (X, %d pts) (Match to %d)\n"
 "\n"
-msgstr "%s (O, %d punti) vs. %s (X, %d punti) (Match a %d)\\n\\n"
+msgstr "%s (O, %d punti) vs. %s (X, %d punti) (Match a %d)\n\n"
 
 #: text.c:220
 #, fuzzy, c-format
 msgid ""
 "%s (O, %d pts) vs. %s (X, %d pts) (money game)\n"
 "\n"
-msgstr "%s (O, %d punti) vs. %s (X, %d punti) (money game)\\n\\n"
+msgstr "%s (O, %d punti) vs. %s (X, %d punti) (money game)\n\n"
 
 #: text.c:225
 #, fuzzy, c-format
 msgid ""
 "Game number %d\n"
 "\n"
-msgstr "Game numero %d\\n\\n"
+msgstr "Game numero %d\n\n"
 
 #: text.c:253
 #, c-format
@@ -14724,21 +14724,21 @@ msgstr "Commenti: %s"
 msgid ""
 "Statistics from player records:\n"
 "\n"
-msgstr "Statistiche dalle registrazioni del giocatore:\\n\\n"
+msgstr "Statistiche dalle registrazioni del giocatore:\n\n"
 
 #: text.c:875
 #, fuzzy, c-format
 msgid ""
 "%s wins %d points\n"
 "\n"
-msgstr "%s vince %d punti\\n\\n"
+msgstr "%s vince %d punti\n\n"
 
 #: text.c:880
 #, fuzzy, c-format
 msgid ""
 "%s wins %d point\n"
 "\n"
-msgstr "%s vince %d punto\\n\\n"
+msgstr "%s vince %d punto\n\n"
 
 #: text.c:912
 msgid "You must specify a file to export to (see `help exportgame text')."
@@ -14837,7 +14837,7 @@ msgstr "Il robot vince il match"
 #: timecontrol.c:296
 #, fuzzy, c-format
 msgid "%*sNext Time Control: %s\n"
-msgstr "%s settato a : %s\\n"
+msgstr "%s settato a : %s\n"
 
 #: timecontrol.c:308
 #, c-format
@@ -14847,7 +14847,7 @@ msgstr ""
 #: timecontrol.c:424
 #, fuzzy, c-format
 msgid "Time control set to %s\n"
-msgstr "Il prompt è settato a '%s'.\\n"
+msgstr "Il prompt è settato a '%s'.\n"
 
 #: timecontrol.c:461
 msgid "Defined time controls:\n"
