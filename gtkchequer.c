@@ -637,7 +637,7 @@ CreateMoveListTools ( hintdata *phd ) {
     gtk_signal_connect( GTK_OBJECT( pwply ), "clicked",
                         GTK_SIGNAL_FUNC( MoveListEvalPly ), phd );
 
-    gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, free );
+    gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, g_free );
 
     sz = g_strdup_printf ( _("Evaluate play on cubeful %d-ply"), i );
     gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwply, sz, sz );
