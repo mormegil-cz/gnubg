@@ -1,3 +1,8 @@
+Fri Dec 20 15:10:11 2002  Gary Wong  <gtw@gnu.org>
+
+	* export.c (GenerateImage): Ensure that dice position for
+	unrolled dice doesn't interfere with board.
+
 Fri Dec 20 14:48:44 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c (board_cube_widget): New function.  Allow selection of

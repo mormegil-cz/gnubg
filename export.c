@@ -457,9 +457,9 @@ GenerateImage ( renderimages *pri, renderdata *prd,
     anDicePosition[ 1 ][ 1 ] = 32;
   }
   else {
-    anDicePosition[ 0 ][ 0 ] = -1;
-    anDicePosition[ 0 ][ 1 ] = -1;
-    anDicePosition[ 1 ][ 0 ] = -1;
+    anDicePosition[ 0 ][ 0 ] = -7 * nSize;
+    anDicePosition[ 0 ][ 1 ] = 0;
+    anDicePosition[ 1 ][ 0 ] = -7 * nSize;
     anDicePosition[ 1 ][ 1 ] = -1;
   }
 
@@ -496,7 +496,7 @@ GenerateImage ( renderimages *pri, renderdata *prd,
 
   WritePNG( szName, puch, nSizeX * nSize * 3, nSizeX * nSize, nSizeY * nSize );
   
-
+  return 0;
 }
 
 
