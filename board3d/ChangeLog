@@ -1,3 +1,7 @@
+Mon May 10 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* shawdow.c: Fix shadow darnkess bug
+
 Fri May 7 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* misc3d.c: Small bug fix for png position export

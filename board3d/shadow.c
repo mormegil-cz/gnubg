@@ -41,6 +41,9 @@ void shadowInit(BoardData* bd)
 	int i;
 	int stencilBits;
 
+	/* Darkness as percentage of ambient light */
+	bd->rd->dimness = ((bd->rd->lightLevels[1] / 100.0f) * (100 - bd->rd->shadowDarkness)) / 100;
+
 	for (i = 0; i < NUM_OCC; i++)
 		bd->Occluders[i].handle = 0;
 
