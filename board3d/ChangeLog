@@ -1,3 +1,10 @@
+Thu Aug 21 23:21:05 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Experimental code for reading texture file and textures
+	from build directory or install directory.
+
+	* misc3d.c: use PathSearch.
+
 Mon Jun 16 21:35:59 2003  Joern Thyssen  <jth@gnubg.org>
 
 	autoconf magic for BOARD3D

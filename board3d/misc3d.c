@@ -275,9 +275,11 @@ void LoadTextureInfo()
 
 	ListInit(&textures, sizeof(TextureInfo));
 
-	/* Open texture file in home directory */
-	szFile = (char*)malloc(strlen(szHomeDirectory) + strlen(TEXTURE_FILE) + 1);
-	sprintf(szFile, "%s/"TEXTURE_FILE, szHomeDirectory); 
+        if ( ! ( szFile = PathSearch( TEXTTURE_FILE, szDataDirectory ) ) ) {
+          g_print( "PathSearch failed!\n" );
+          return;
+        }
+
 	fp = fopen(szFile, "r");
 	free(szFile);
 	if (!fp)
@@ -415,13 +417,19 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 {
 	unsigned char* bits = 0;
 	int n;
+        char *szFile = PathSearch( filename, szDataDirectory );
+        FILE *pf;
 
-	FILE* fp = fopen(filename, "rb");
-	if (!fp)
-	{
-		g_print("Failed to open texture: %s\n", filename);
+        if ( ! szFile )
+          return 0;
+
+	if ( ! ( fp = fopen( szFile, "rb") ) ) {
+		g_print("Failed to open texture: %s\n", szFile );
+                free( szFile );
 		return 0;	/* failed to load file */
 	}
+
+        free( szFile );
 
 	switch(format)
 	{
