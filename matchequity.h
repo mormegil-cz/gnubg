@@ -25,12 +25,11 @@
 #include "eval.h"
 
 #define MAXSCORE      64
+#define MAXCUBELEVEL  7
 
 /* Structure for information about match equity table */
 
 typedef struct _metinfo {
-
-  /* FIXME: use dynamic memory allocation instead? */
 
   char *szName;          /* Name of match equity table */
   char *szFileName;     /* File name of met */
@@ -49,6 +48,14 @@ typedef struct _metinfo {
 
 extern float aafMET [ MAXSCORE ][ MAXSCORE ];
 extern float aafMETPostCrawford[ 2 ][ MAXSCORE ];
+
+/* gammon prices (calculated once for efficiency) */
+
+extern float aaaafGammonPrices[ MAXCUBELEVEL ]
+    [ MAXSCORE ][ MAXSCORE ][ 4 ];
+extern float aaaafGammonPricesPostCrawford[ MAXCUBELEVEL ]
+    [ MAXSCORE ][ 2 ][ 4 ];
+
 
 
 extern metinfo miCurrent;

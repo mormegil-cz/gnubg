@@ -1,3 +1,11 @@
+Thu Mar 28 22:11:41 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	Cache gammon prices for performance.
+
+	* matchequity.c (calcGammonPrices, getGammonPrice): new functions.
+
+	* eval.c (SetCubeInfoMatch): used cached gammon values.
+
 Thu Mar 28 16:48:24 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (SetCubeInfoMatch): fix bug in calculation of gammon prices.

@@ -42,7 +42,6 @@
 extern double erf( double x );
 #endif
 
-#define MAXCUBELEVEL  7
 #define DELTA         0.08
 #define DELTABAR      0.06
 #define G1            0.25
@@ -93,6 +92,14 @@ typedef struct _metdata {
 
 float aafMET [ MAXSCORE ][ MAXSCORE ];
 float aafMETPostCrawford[ 2 ][ MAXSCORE ];
+
+/* gammon prices (calculated once for efficiency) */
+
+float aaaafGammonPrices[ MAXCUBELEVEL ]
+    [ MAXSCORE ][ MAXSCORE ][ 4 ];
+float aaaafGammonPricesPostCrawford[ MAXCUBELEVEL ]
+    [ MAXSCORE ][ 2 ][ 4 ];
+
 
 metinfo miCurrent;
 
@@ -1488,6 +1495,151 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
 #endif
 
+
+/*
+ * Calculate gammon and backgammon price at the specified score
+ * with specified cube.
+ *
+ * Input:
+ *    aafMET, aafMETPostCrawford: match equity tables.
+ *    nCube: value of cube
+ *    fCrawford: is this the Crawford game
+ *    nScore0, nScore1, nMatchTo: current score and match length.
+ *
+ * Output:
+ *   arGammonPrice: gammon and backgammon prices.
+ *
+ */
+
+static void
+getGammonPrice ( float arGammonPrice[ 4 ],
+                 const int nScore0, const int nScore1, const int nMatchTo,
+                 const int nCube, const int fCrawford,
+                 float aafMET[ MAXSCORE ][ MAXSCORE ],
+                 float aafMETPostCrawford[ 2 ][ MAXSCORE ] ) {
+
+  float rWin = 
+    getME ( nScore0, nScore1, nMatchTo,
+            0, nCube, 0, fCrawford,
+            aafMET, aafMETPostCrawford );
+
+  float rWinGammon = 
+    getME ( nScore0, nScore1, nMatchTo,
+            0, 2 * nCube, 0, fCrawford,
+            aafMET, aafMETPostCrawford );
+
+  float rWinBG = 
+    getME ( nScore0, nScore1, nMatchTo,
+            0, 3 * nCube, 0, fCrawford,
+            aafMET, aafMETPostCrawford );
+
+  float rLose = 
+    getME ( nScore0, nScore1, nMatchTo,
+            0, nCube, 1, fCrawford,
+            aafMET, aafMETPostCrawford );
+
+  float rLoseGammon = 
+    getME ( nScore0, nScore1, nMatchTo,
+            0, 2 * nCube, 1, fCrawford,
+            aafMET, aafMETPostCrawford );
+
+  float rLoseBG = 
+    getME ( nScore0, nScore1, nMatchTo,
+            0, 3 * nCube, 1, fCrawford,
+            aafMET, aafMETPostCrawford );
+
+  float rCenter = ( rWin + rLose ) / 2.0;
+
+  /* FIXME: correct numerical problems in a better way, than done
+     below. If cube is dead gammon or backgammon price might be a
+     small negative number. For example, at -2,-3 with cube on 2
+     the current code gives: 0.9090..., 0, -2.7e-8, 0 instead
+     of the correct 0.9090..., 0, 0, 0. */
+  
+  /* avoid division by zero */
+      
+  if ( rWin != rCenter ) {
+
+    arGammonPrice[ 0 ] = 
+      ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+    arGammonPrice[ 1 ] = 
+      ( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
+    arGammonPrice[ 2 ] = 
+      ( rWinBG - rCenter ) / ( rWin - rCenter ) - 
+      ( arGammonPrice[ 0 ] + 1.0 );
+    arGammonPrice[ 3 ] = 
+      ( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
+      ( arGammonPrice[ 1 ] + 1.0 );
+
+  }
+  else
+    arGammonPrice[ 0 ] = arGammonPrice[ 1 ] = arGammonPrice[ 2 ] =
+      arGammonPrice[ 3 ] = 0.0;
+
+  
+  /* Correct numerical problems */
+  if ( arGammonPrice[ 0 ] < 0 )
+    arGammonPrice[ 0 ] = 0.0;
+  if ( arGammonPrice[ 1 ] < 0 )
+    arGammonPrice[ 1 ] = 0.0;
+  if ( arGammonPrice[ 2 ] < 0 )
+    arGammonPrice[ 2 ] = 0.0;
+  if ( arGammonPrice[ 3 ] < 0 )
+    arGammonPrice[ 3 ] = 0.0;
+  
+  assert( arGammonPrice[ 0 ] >= 0 );
+  assert( arGammonPrice[ 1 ] >= 0 );
+  assert( arGammonPrice[ 2 ] >= 0 );
+  assert( arGammonPrice[ 3 ] >= 0 );
+  
+  
+}
+
+/*
+ * Calculate all gammon and backgammon prices
+ *
+ * Input:
+ *   aafMET, aafMETPostCrawford: match equity tables
+ *
+ * Output:
+ *   aaaafGammonPrices: all gammon prices
+ *
+ */
+
+static void
+calcGammonPrices ( float aafMET[ MAXSCORE ][ MAXSCORE ],
+                   float aafMETPostCrawford[ 2 ][ MAXSCORE ],
+                   float aaaafGammonPrices[ MAXCUBELEVEL ]
+                      [ MAXSCORE ][ MAXSCORE ][ 4 ],
+                   float aaaafGammonPricesPostCrawford[ MAXCUBELEVEL ]
+                      [ MAXSCORE ][ 2 ][ 4 ] ) {
+
+  int i,j,k;
+  int nCube;
+
+  for ( i = 0, nCube = 1; i < MAXCUBELEVEL; i++, nCube *= 2 )
+    for ( j = 0; j < MAXSCORE; j++ )
+      for ( k = 0; k < MAXSCORE; k++ )
+        getGammonPrice( aaaafGammonPrices[ i ][ j ][ k ],
+                        MAXSCORE - j - 1, MAXSCORE - k - 1, MAXSCORE,
+                        nCube, ( MAXSCORE == j ) || ( MAXSCORE == k ), 
+                        aafMET, aafMETPostCrawford );
+
+  for ( i = 0, nCube = 1; i < MAXCUBELEVEL; i++, nCube *= 2 )
+    for ( j = 0; j < MAXSCORE; j++ ) {
+      getGammonPrice( aaaafGammonPricesPostCrawford[ i ][ j ][ 0 ],
+                      1, MAXSCORE - j - 1, MAXSCORE,
+                      nCube, FALSE, aafMET, aafMETPostCrawford );
+      getGammonPrice( aaaafGammonPricesPostCrawford[ i ][ j ][ 1 ],
+                      MAXSCORE - j - 1, 1, MAXSCORE,
+                      nCube, FALSE, aafMET, aafMETPostCrawford );
+    }
+
+
+}
+
+
+
 extern void
 InitMatchEquity ( const char *szFileName, const char *szDir ) {
 
@@ -1615,6 +1767,13 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
   /* save match equity table information */
 
   memcpy ( &miCurrent, &md.mi, sizeof ( metinfo ) );
+
+  /* initialise gammon prices */
+
+  calcGammonPrices ( aafMET,
+                     aafMETPostCrawford,
+                     aaaafGammonPrices,
+                     aaaafGammonPricesPostCrawford );
 
 }
 
