@@ -197,7 +197,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
   int anCubePosition[2];
   int anDicePosition[2][2];
   int nOrient;
-  int color;
+  int doubled, color;
   /* FIXME: resignations */
   int anResignPosition[2];
   int fResign = 0, nResignOrientation = 0;
@@ -217,15 +217,20 @@ GenerateImage (renderimages * pri, renderdata * prd,
 
   /* calculate cube position */
 
+  if (fDoubled)
+    doubled = fTurn ? -1 : 1;
+  else
+    doubled = 0;
+
   if ( ! fCubeOwner )
-    cube_owner = -1;
-  else if ( fCubeOwner == 1 )
     cube_owner = 1;
+  else if ( fCubeOwner == 1 )
+    cube_owner = -1;
   else
     cube_owner = 0;
 
 
-  CubePosition( FALSE, fCube, fDoubled, fTurn ? -1 : 1, cube_owner,
+  CubePosition( FALSE, fCube, doubled, cube_owner,
                 &anCubePosition[ 0 ], &anCubePosition[ 1 ], &nOrient );
 
   /* calculate dice position */
@@ -257,7 +262,7 @@ GenerateImage (renderimages * pri, renderdata * prd,
   CalculateArea( prd, puch, 108 * nSize * 3, pri, anBoard, NULL,
 		 (int *) anDice, anDicePosition,
 		 color, anCubePosition,
-		 LogCube( nCube ) + fDoubled,
+		 LogCube( nCube ) + ( doubled != 0 ),
 		 nOrient,
 		 anResignPosition, fResign, nResignOrientation,
 		 anArrowPosition, ms.gs != GAME_NONE, fMove == 1,
