@@ -27,7 +27,6 @@
 #include <time.h>
 #include <assert.h>
 #include <stdarg.h>
-#include <libgen.h>
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -1651,6 +1650,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   int fDisplay;
   int fAnno = FALSE;
 
+  cubedecision cd;
+
   /* check if cube analysis should be printed */
 
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
@@ -1658,7 +1659,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   fActual = fDouble;
   fClose = isCloseCubedecision ( arDouble ); 
-  fMissed = isMissedDouble ( arDouble, fDouble, pci );
+  fMissed = isMissedDouble ( arDouble, aarOutput, fDouble, pci );
 
   fDisplay = 
     ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
@@ -1842,7 +1843,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* equities */
 
-  getCubeDecisionOrdering ( ai, arDouble, pci );
+  getCubeDecisionOrdering ( ai, arDouble, aarOutput, pci );
 
   for ( i = 0; i < 3; i++ ) {
 
@@ -1868,14 +1869,15 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* cube decision */
 
+  cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
+
   fprintf ( pf,
             "<tr><td colspan=\"2\">%s</td>"
             "<td colspan=\"2\">%s",
             _("Proper cube action:"),
-            GetCubeRecommendation ( FindBestCubeDecision ( arDouble, pci ) ) );
+            GetCubeRecommendation ( cd ) );
 
-  if ( ( r = getPercent ( FindBestCubeDecision ( arDouble, pci ), 
-                          arDouble ) ) >= 0.0 )
+  if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 )
     fprintf ( pf, " (%.1f%%)", 100.0f * r );
 
 

@@ -689,6 +689,8 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   static char sz[ 4096 ];
   char *pc;
 
+  cubedecision cd;
+
   strcpy ( sz, "" );
 
   /* check if cube analysis should be printed */
@@ -700,7 +702,7 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   fActual = fDouble;
   fClose = isCloseCubedecision ( arDouble ); 
-  fMissed = isMissedDouble ( arDouble, fDouble, pci );
+  fMissed = isMissedDouble ( arDouble, aarOutput, fDouble, pci );
 
   /* print alerts */
 
@@ -847,7 +849,7 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   /* equities */
 
-  getCubeDecisionOrdering ( ai, arDouble, pci );
+  getCubeDecisionOrdering ( ai, arDouble, aarOutput, pci );
 
   for ( i = 0; i < 3; i++ ) {
 
@@ -868,13 +870,14 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   /* cube decision */
 
+  cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
+
   sprintf ( pc = strchr ( sz, 0 ),
             "%s %s",
             _("Proper cube action:"),
-            GetCubeRecommendation ( FindBestCubeDecision ( arDouble, pci ) ) );
+            GetCubeRecommendation ( cd ) );
 
-  if ( ( r = getPercent ( FindBestCubeDecision ( arDouble, pci ), 
-                          arDouble ) ) >= 0.0 )
+  if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 )
     sprintf ( pc = strchr ( sz, 0 ), " (%.1f%%)", 100.0f * r );
 
   strcat ( sz, "\n" );
@@ -955,7 +958,7 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   fActual = fDouble;
   fClose = isCloseCubedecision ( arDouble ); 
-  fMissed = isMissedDouble ( arDouble, fDouble, pci );
+  fMissed = isMissedDouble ( arDouble, aarOutput, fDouble, pci );
 
   fDisplay = 
     ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||

@@ -192,7 +192,7 @@ updateStatcontext ( statcontext *psc,
       psc->anTotalCube[ pmr->n.fPlayer ]++;
 
       if ( isCloseCubedecision ( arDouble ) || 
-           isMissedDouble ( arDouble, FALSE, &ci ) )
+           isMissedDouble ( arDouble, pmr->n.aarOutput, FALSE, &ci ) )
         psc->anCloseCube[ pmr->n.fPlayer ]++;
 	  
       if( arDouble[ OUTPUT_NODOUBLE ] <

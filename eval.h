@@ -331,10 +331,12 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
                          cubeinfo *pci, evalcontext *pec, int nPlies );
 
 extern int
-GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci );
+GetDPEq ( int *pfCube, float *prDPEq, const cubeinfo *pci );
 
 extern int 
-GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
+GetCubeActionSz ( float arDouble[ 4 ], 
+                  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                  char *szOutput, cubeinfo *pci,
 		  int fOutputMWC, int fOutputInvert );
 
 extern float
@@ -397,7 +399,9 @@ extern char
 *GetCubeRecommendation ( const cubedecision cd );
 
 extern cubedecision
-FindBestCubeDecision ( float arDouble[], cubeinfo *pci );
+FindBestCubeDecision ( float arDouble[], 
+                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                       const cubeinfo *pci );
 
 extern int
 getCurrentGammonRates ( float aarRates[ 2 ][ 2 ], 
@@ -419,8 +423,10 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
                  float aarRates[ 2 ][ 2 ] );
 
 extern void
-getCubeDecisionOrdering ( int aiOrder[ 3 ], 
-                          float arDouble[ 4 ], cubeinfo *pci );
+getCubeDecisionOrdering ( int aiOrder[ 3 ],
+                          float arDouble[ 4 ], 
+                          float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                          cubeinfo *pci );
 
 extern float
 getPercent ( const cubedecision cd,
@@ -439,6 +445,9 @@ extern int
 isCloseCubedecision ( const float arDouble[] );
 
 extern int
-isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci );
+isMissedDouble ( float arDouble[], 
+                 float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                 const int fDouble, 
+                 const cubeinfo *pci );
 
 #endif

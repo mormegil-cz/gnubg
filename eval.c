@@ -4015,7 +4015,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     szOutput = strchr( szOutput, 0 );    
     sprintf( szOutput, "\n\n" );
     szOutput = strchr( szOutput, 0 );    
-    GetCubeActionSz ( arDouble, szOutput, pci, fOutputMWC, fOutputInvert );
+    GetCubeActionSz ( arDouble, aarOutput, szOutput, 
+                      pci, fOutputMWC, fOutputInvert );
 
   }
 
@@ -4135,7 +4136,9 @@ extern char
 
 
 extern int 
-GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
+GetCubeActionSz ( float arDouble[ 4 ], 
+                  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                  char *szOutput, cubeinfo *pci,
 		  int fOutputMWC, int fOutputInvert ) {
 
   static cubedecision cd;
@@ -4150,7 +4153,7 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
   /* Get cube decision */
 
-  cd = FindBestCubeDecision ( arDouble, pci );
+  cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
 
   if ( cd == NOT_AVAILABLE ) {
 
@@ -4500,9 +4503,17 @@ isOptional ( const float r1, const float r2 ) {
 
 }
 
+static int
+winGammon ( const float arOutput[ NUM_ROLLOUT_OUTPUTS ] ) {
+
+  return ( arOutput[ OUTPUT_WINGAMMON ] > 0.0f );
+
+}
  
 extern cubedecision
-FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
+FindBestCubeDecision ( float arDouble[], 
+                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                       const cubeinfo *pci ) {
 
 /*
  * FindBestCubeDecision:
@@ -4582,15 +4593,28 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
 
       /* 4. DT >= DP >= ND: Double, pass */
 
+      /* 
+       * the double is optional iff:
+       * (1) equity(no double) = equity(drop)
+       * (2) the player can win gammon
+       * (3a) it's match play
+       * or if it's money play
+       * (3b) it's not a centered cube
+       * or
+       * (3c) the Jacoby rule is not in effect
+       */
+
       arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_DROP ];
 
       if ( isOptional ( arDouble[ OUTPUT_NODOUBLE ], 
-                        arDouble[ OUTPUT_DROP ] ) )
+                        arDouble[ OUTPUT_DROP ] ) &&
+           ( winGammon ( aarOutput[ 0 ] ) && 
+             ( pci->nMatchTo || pci->fCubeOwner != -1 || ! pci->fJacoby ) ) ) 
         return ( pci->fCubeOwner == -1 ) ? 
           OPTIONAL_DOUBLE_PASS : OPTIONAL_REDOUBLE_PASS;
       else
         return ( pci->fCubeOwner == -1 ) ? DOUBLE_PASS : REDOUBLE_PASS;
-
+      
     }
   }
   else {
@@ -4605,18 +4629,28 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
 
       /* ND > DT */
 
-      if ( arDouble [ OUTPUT_TAKE ] > arDouble [ OUTPUT_DROP ] )
+      if ( arDouble [ OUTPUT_TAKE ] > arDouble [ OUTPUT_DROP ] ) {
 
         /* 1. ND > DT > DP: Too good, pass */
 
-        return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
+        /* sanety check: don't play on gammon if none is possible... */
 
-      else if ( arDouble[ OUTPUT_NODOUBLE ] > arDouble[ OUTPUT_DROP ] )
+        if ( winGammon ( aarOutput[ 0 ] ) )
+          return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
+        else
+          return ( pci->fCubeOwner == -1 ) ? DOUBLE_PASS : REDOUBLE_PASS;
+
+      }
+      else if ( arDouble[ OUTPUT_NODOUBLE ] > arDouble[ OUTPUT_DROP ] ) {
 
         /* 2. ND > DP > DT: Too good, take */
 
-        return ( pci->fCubeOwner == -1 ) ? TOOGOOD_TAKE : TOOGOODRE_TAKE;
+        if ( winGammon ( aarOutput[ 0 ] ) )
+          return ( pci->fCubeOwner == -1 ) ? TOOGOOD_TAKE : TOOGOODRE_TAKE;
+        else
+          return ( pci->fCubeOwner == -1 ) ? NODOUBLE_TAKE : NO_REDOUBLE_TAKE;
 
+      }
       else {
 
         /* 5. DP > ND > DT: No double, {take, beaver} */
@@ -4633,11 +4667,16 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
       }
 
     } 
-    else
+    else {
 
       /* 3. DT >= ND > DP: Too good, pass */
 
-      return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
+      if ( winGammon ( aarOutput[ 0 ] ) )
+        return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
+      else
+        return ( pci->fCubeOwner == -1 ) ? DOUBLE_PASS : REDOUBLE_PASS;
+
+    }
 
   }
 }
@@ -4664,7 +4703,7 @@ FindCubeDecision ( float arDouble[],
 
   }
 
-  return FindBestCubeDecision ( arDouble, pci );
+  return FindBestCubeDecision ( arDouble, aarOutput, pci );
 
 }
   
@@ -4692,7 +4731,7 @@ fDoCubeful ( cubeinfo *pci ) {
 
     
 extern int
-GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
+GetDPEq ( int *pfCube, float *prDPEq, const cubeinfo *pci ) {
 
   int fCube, fPostCrawford;
 
@@ -6739,13 +6778,15 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 
 extern void
 getCubeDecisionOrdering ( int aiOrder[ 3 ],
-                          float arDouble[ 4 ], cubeinfo *pci ) {
+                          float arDouble[ 4 ], 
+                          float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                          cubeinfo *pci ) {
 
   cubedecision cd;
 
   /* Get cube decision */
 
-  cd = FindBestCubeDecision ( arDouble, pci );
+  cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
 
   switch ( cd ) {
 
@@ -7006,9 +7047,12 @@ isCloseCubedecision ( const float arDouble[] ) {
  */
 
 extern int
-isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci ) {
+isMissedDouble ( float arDouble[], 
+                 float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                 const int fDouble, 
+                 const cubeinfo *pci ) {
 
-  cubedecision cd = FindBestCubeDecision ( arDouble, pci );
+  cubedecision cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
 
   switch ( cd ) {
     

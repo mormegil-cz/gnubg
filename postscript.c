@@ -671,9 +671,11 @@ static void PrintPostScriptComment( FILE *pf, unsigned char *pch ) {
     }
 }
 
-static void PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
-					 int fPlayer, float arDouble[ 4 ],
-					 evalsetup *pes ) { 
+static void 
+PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
+                             int fPlayer, float arDouble[ 4 ],
+                             float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                             evalsetup *pes ) { 
     cubeinfo ci;
     char sz[ 1024 ], *pch, *pchNext;
 
@@ -687,7 +689,7 @@ static void PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
 	/* No cube action possible */
 	return;
     
-    GetCubeActionSz( arDouble, sz, &ci, fOutputMWC, FALSE );
+    GetCubeActionSz( arDouble, aarOutput, sz, &ci, fOutputMWC, FALSE );
 
     Skip( pf, 4 );
     for( pch = sz; pch && *pch; pch = pchNext ) {
@@ -777,7 +779,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    }
 	    
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
-					 pmr->n.arDouble, &pmr->n.esDouble );
+					 pmr->n.arDouble, 
+                                         pmr->n.aarOutput, 
+                                         &pmr->n.esDouble );
 	    
 	    Advance( pf, 10 );
 	    FormatMove( sz, msExport.anBoard, pmr->n.anMove );
@@ -837,7 +841,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptBoard( pf, &msExport, pmr->d.fPlayer );
 
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-					 pmr->d.arDouble, &pmr->d.esDouble );
+					 pmr->d.arDouble, 
+                                         pmr->d.aarOutput, &pmr->d.esDouble );
 
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );

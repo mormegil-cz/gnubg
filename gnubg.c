@@ -1931,7 +1931,9 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 			fJacoby, nBeavers );
 }
 
-static void DisplayCubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
+static void DisplayCubeAnalysis( float arDouble[ 4 ], 
+                                 float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                                 evalsetup *pes ) {
 
     cubeinfo ci;
     char sz[ 1024 ];
@@ -1945,7 +1947,7 @@ static void DisplayCubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
 	/* No cube action possible */
 	return;
     
-    GetCubeActionSz( arDouble, sz, &ci, fOutputMWC, FALSE );
+    GetCubeActionSz( arDouble, aarOutput, sz, &ci, fOutputMWC, FALSE );
 
     outputl( sz );
 }
@@ -1973,7 +1975,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
     
     switch( pmr->mt ) {
     case MOVE_NORMAL:
-	DisplayCubeAnalysis( pmr->n.arDouble, &pmr->n.esDouble );
+        DisplayCubeAnalysis( pmr->n.arDouble, pmr->n.aarOutput,
+                             &pmr->n.esDouble );
 
 	outputf( _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 
@@ -1996,7 +1999,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 
     case MOVE_DOUBLE:
-	DisplayCubeAnalysis( pmr->d.arDouble, &pmr->n.esDouble );
+      DisplayCubeAnalysis( pmr->d.arDouble, pmr->d.aarOutput,
+                             &pmr->n.esDouble );
 	break;
 
     case MOVE_TAKE:
@@ -2728,7 +2732,8 @@ extern void CommandHint( char *sz ) {
 #endif
     FindCubeDecision ( arDouble, aarOutput, &ci );  
     
-    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
+    GetCubeActionSz ( arDouble, aarOutput,
+                      szBuf, &ci, fOutputMWC, FALSE );
     
     outputl ( szBuf );
     

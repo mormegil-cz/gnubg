@@ -413,7 +413,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     }
 
-    getCubeDecisionOrdering ( ai, arDouble, &ci );
+    getCubeDecisionOrdering ( ai, arDouble, aarOutput, &ci );
 
     for ( i = 0; i < 3; i++ ) {
 
