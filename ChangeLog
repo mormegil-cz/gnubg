@@ -1,3 +1,10 @@
+Thu May 30 21:33:47 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Modify game list such that the board is shown with dice rolled as
+	default. 
+
+	* gtkgame.c (GameListSelectRow): roll dice if applicable.
+
 Thu May 30 21:30:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (eq2mwc, mwc2eq): change the prototype.
