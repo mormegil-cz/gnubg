@@ -55,7 +55,8 @@ noinst_PROGRAMS = makebearoff makeweights
 check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
-	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c 
+	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
+	i18n.c i18n.h
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
