@@ -16,8 +16,17 @@
 /* Define if you have <alloca.h> and it should be used (not on Ultrix).  */
 #undef HAVE_ALLOCA_H
 
+/* Define if you don't have vprintf but do have _doprnt.  */
+#undef HAVE_DOPRNT
+
 /* Define if you have a working `mmap' system call.  */
 #undef HAVE_MMAP
+
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+/* Define as __inline if that's what the C compiler calls it.  */
+#undef inline
 
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
@@ -46,6 +55,9 @@
 /* Installation directory (used to determine PKGDATADIR below). */
 #undef DATADIR
 
+/* Define if you have the getdtablesize function.  */
+#undef HAVE_GETDTABLESIZE
+
 /* Define if you have the getlogin function.  */
 #undef HAVE_GETLOGIN
 
@@ -60,9 +72,6 @@
 
 /* Define if you have the isatty function.  */
 #undef HAVE_ISATTY
-
-/* Define if you have the rand_r function.  */
-#undef HAVE_RAND_R
 
 /* Define if you have the random function.  */
 #undef HAVE_RANDOM
@@ -112,6 +121,9 @@
 /* Define if you have the <sys/types.h> header file.  */
 #undef HAVE_SYS_TYPES_H
 
+/* Define if you have the <sys/uio.h> header file.  */
+#undef HAVE_SYS_UIO_H
+
 /* Define if you have the <sys/wait.h> header file.  */
 #undef HAVE_SYS_WAIT_H
 
@@ -139,6 +151,9 @@
 /* Define if you want to use the Guile extensibility language. */
 #undef USE_GUILE
 
+/* Define if you have a signbit() macro faster than a compare to 0.0. */
+#undef HAVE_SIGNBIT
+
 /* Define if you want to use the ext toolkit and widgets. */
 #undef USE_EXT
 
@@ -153,7 +168,16 @@
 /* The directory where the weights and databases will be stored. */
 #define PKGDATADIR DATADIR "/" PACKAGE
 
+/* Define the obvious signbit() if the C library doesn't. */
+#if !HAVE_SIGNBIT
+#define signbit(x) ( (x) < 0.0 )
+#endif
+
 #ifndef FALSE
 #define FALSE 0
 #define TRUE 1
+#endif
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
 #endif

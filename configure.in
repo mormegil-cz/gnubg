@@ -34,8 +34,11 @@ AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
+AC_PROG_RANLIB
 AC_CHECK_PROG(BISON, bison, bison, true)
 AC_CHECK_PROG(FLEX, flex, flex, true)
+AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm)
+AC_CHECK_PROG(PNMTOPS, pnmtops, pnmtops)
 
 dnl Checks for libraries.
 AC_CHECK_LIB(m, sqrt)
@@ -67,20 +70,25 @@ fi
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
-AC_CHECK_HEADERS(fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h stropts.h sys/time.h sys/types.h unistd.h sys/wait.h)
+AC_CHECK_HEADERS(fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h stropts.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA
 AC_FUNC_MMAP
+AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(getlogin getpwuid gettimeofday isatty random readv select)
-AC_REPLACE_FUNCS(rand_r)
-AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(getdtablesize getlogin getpwuid gettimeofday isatty random readv select)
+AC_MSG_CHECKING(for signbit)
+AC_EGREP_CPP(signbit,
+[#define _GNU_SOURCE 1
+#include <math.h>], AC_DEFINE(HAVE_SIGNBIT,1,Define if you have a signbit() macro faster than a compare to 0.0.)  AC_MSG_RESULT(yes), AC_MSG_RESULT(no))
 
 dnl Check for GTK
 AC_ARG_WITH(gtk,[  --with-gtk              use GTK library and widgets])
@@ -95,7 +103,6 @@ if test "$no_gtk" = "yes"; then
   AM_CONDITIONAL(USE_EXT, test "$no_x" != "yes" )
   if test "$no_x" != "yes"; then
     AC_DEFINE(USE_EXT,1,Define if you want to use the ext toolkit and widgets.)
-    conf_ext=ext
   fi
 else
   AC_DEFINE(USE_GTK,1,Define if you want to use the GTK toolkit and widgets.)
@@ -104,6 +111,4 @@ fi
 dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)
 
-AC_CONFIG_SUBDIRS(lib doc $conf_ext)
-
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile)

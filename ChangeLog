@@ -1,3 +1,12 @@
+Fri Nov 10 13:42:37 2000  Gary Wong  <gtw@research.att.com>
+
+	* md5.c, isaac.c, mt19937int.c: Moved to lib/.
+	
+	* gtkboard.c: Use irand() instead of rand_r(), for better portability.
+
+	* gtkgame.c (GTKHint): Recheck whether the move/rollout buttons
+	should be enabled when a move is _de_selected, as well.
+
 Fri Nov 10 16:17:43 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* show.c (ShowMarketWindow): bug fixes; allow user input of gammon

@@ -8,9 +8,8 @@ COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@
 COMMON_LIBS = -Llib -levent @GUILE_LDFLAGS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
-	pub_eval.c set.c show.c database.h database.c mt19937int.c \
-	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h \
-	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h \
+	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
+	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c guile.h
 COMMON_DEPS = lib/libevent.a
 
@@ -52,10 +51,6 @@ makebearoff_DEPENDENCIES = lib/libevent.a
 makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
-
-check_PROGRAMS = md5test
-
-md5test_SOURCES = md5test.c md5.c md5.h
 
 TESTS = gnubgtest md5test
 distcheck-hook:

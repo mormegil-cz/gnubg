@@ -1,2 +1,6 @@
-Written by Gary Wong <gary@cs.arizona.edu>.
+Written by Gary Wong <gtw@gnu.org> and Joseph Heled <pepe@internet.co.nz>.
 
+The MD5 library is by Ulrich Drepper <drepper@gnu.ai.mit.edu>.
+The ISAAC RNG is by Bob Jenkins.
+The Mersenne Twister RNG is by Takuji Nishimura and Makoto Matsumoto
+<matumoto@math.keio.ac.jp>.

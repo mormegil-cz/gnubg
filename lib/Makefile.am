@@ -5,16 +5,16 @@
 
 noinst_LIBRARIES = libevent.a
 libevent_a_SOURCES = buffer.c dynarray.c event.c fifo.c hash.c heap.c list.c \
-	neuralnet.c
-libevent_a_LIBADD = @LIBOBJS@
+	neuralnet.c mt19937int.c isaac.c md5.c
+
 noinst_HEADERS = buffer.h cache.h dynarray.h event.h fifo.h hash.h heap.h \
-	list.h neuralnet.h
+	list.h neuralnet.h mt19937int.h isaac.h isaacs.h md5.h
+
 noinst_TEXINFOS = event.texi
 
-EXTRA_DIST = rand_r.c rand_r.h
+check_PROGRAMS = hashtest md5test
+hashtest_SOURCES = hashtest.c hash.c
 
-check_PROGRAMS = hashtest
-hashtest_SOURCES = hashtest.c
-hashtest_LDADD = -L. -levent
+md5test_SOURCES = md5test.c md5.c md5.h
 
-TESTS = hashtest
+TESTS = hashtest md5test

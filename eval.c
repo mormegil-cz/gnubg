@@ -1741,11 +1741,7 @@ EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] )
 }
 
 /* Fill aaProb with one sided bearoff probabilities for position with id n */
-
-#if defined( __GNUC__ )
-inline
-#endif
-static void
+static inline void
 getBearoffProbs(int n, int aaProb[32])
 {
   int i;

@@ -29,10 +29,6 @@
 #include <string.h>
 #include <X11/Xutil.h>
 
-#ifndef HAVE_RAND_R
-#include <rand_r.h>
-#endif
-
 #include "backgammon.h"
 #include "xboard.h"
 #include "xgame.h"

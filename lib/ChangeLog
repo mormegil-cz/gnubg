@@ -1,3 +1,9 @@
+Fri Nov 10 13:45:53 2000  Gary Wong  <gtw@research.att.com>
+
+	* neuralnet.c (sigmoid): Optimisations.
+	(NeuralNetCreate, NeuralNetResize): Use irand() instead of rand_r(),
+	for better quality random numbers and improved portability.
+
 Fri Sep 29 14:08:05 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* config.h: undef VERSION and PACKAGE before setting them.

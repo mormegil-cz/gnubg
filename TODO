@@ -208,12 +208,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Think about generating huge databases for CD-ROMs (we can get 1-sided
   databases for all chequers up to the 11 point, or 2-sided databases where
   both players have up to 11 chequers in the home board onto a CD-ROM).
-** Move the built-in RNGs into lib/; they can then be used instead of
-  rand_r for better quality random numbers and improved portability.
-** Having recursive configure.in files isn't working very well.  It would
-  be better to move everything into the top level configure.in.  This makes
-  having standalone lib (event) and ext packages more difficult, but that
-  probably isn't critical any more.
 ** Add optional time rules, for tournament play when clocks are used.
 ** Add optional feature tests to "make check" -- Guile, databases, X?
 
