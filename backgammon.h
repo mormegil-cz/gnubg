@@ -786,4 +786,10 @@ extern int fTutor, fTutorCube, fTutorChequer, nTutorSkillCurrent;
 extern int GiveAdvice ( skilltype Skill );
 extern skilltype TutorSkill;
 extern int fTutorAnalysis;
+
+#ifndef HAVE_BASENAME
+extern char *
+basename ( const char *filename );
+#endif
+
 #endif

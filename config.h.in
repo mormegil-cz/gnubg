@@ -1,4 +1,4 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define if using alloca.c.  */
 #undef C_ALLOCA
@@ -85,11 +85,11 @@
 /* Define if you have the atanf function.  */
 #undef HAVE_ATANF
 
+/* Define if you have the basename function.  */
+#undef HAVE_BASENAME
+
 /* Define if you have the cosf function.  */
 #undef HAVE_COSF
-
-/* Define if you have the dcgettext function.  */
-#undef HAVE_DCGETTEXT
 
 /* Define if you have the erf function.  */
 #undef HAVE_ERF
@@ -105,6 +105,9 @@
 
 /* Define if you have the fstat function.  */
 #undef HAVE_FSTAT
+
+/* Define if you have the getc_unlocked function.  */
+#undef HAVE_GETC_UNLOCKED
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
@@ -204,9 +207,6 @@
 
 /* Define if you have the strcasecmp function.  */
 #undef HAVE_STRCASECMP
-
-/* Define if you have the strchr function.  */
-#undef HAVE_STRCHR
 
 /* Define if you have the strdup function.  */
 #undef HAVE_STRDUP
@@ -358,6 +358,9 @@
 
 /* Define if the GNU gettext() function is already present or preinstalled. */
 #undef HAVE_GETTEXT
+
+/* Define if the GNU dcgettext() function is already present or preinstalled. */
+#undef HAVE_DCGETTEXT
 
 /* Are we using either GUI (ext or GTK)? */
 #if USE_EXT || USE_GTK

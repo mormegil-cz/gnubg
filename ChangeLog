@@ -1,3 +1,8 @@
+Thu Aug  8 21:02:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (basename): Basename copied from glibc-2.2. for systems
+	without glibc, e.g. WIN32.
+
 Thu Aug  8 20:50:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New buttons for on game list.

@@ -6096,3 +6096,17 @@ extern int GiveAdvice( skilltype Skill ) {
 	return GetAdviceAnswer( sz );
 }
 
+#ifndef HAVE_BASENAME
+
+/*
+ * Basename copied from glibc-2.2. for users without glibc.
+ */
+
+extern char *
+basename (const char *filename) 
+{ 
+  char *p1 = strrchr (filename, DIR_SEPARATOR); 
+  return p1 ? p1 + 1 : (char *) filename;
+} 
+
+#endif /* ! HAVE_BASENAME */
