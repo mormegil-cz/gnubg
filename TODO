@@ -85,7 +85,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** If a resignation is rejected, don't allow further resignations for
   that amount or below for the rest of the turn.
-** Make "met" a synonym for "matchequitytable".
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
