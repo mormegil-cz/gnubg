@@ -1,3 +1,7 @@
+Tue Jun 13 10:47:36 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* show.c (CommandShowThorp): deleted duplicate line.
+
 Mon Jun 12 09:29:30 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	Bug report from Sam Pottle:

@@ -381,7 +381,6 @@ extern void CommandShowThorp( char *sz ) {
   anMenLeft[0] = 0;
   anMenLeft[1] = 0;
   for (x = 0; x < 25; x++)
-  for (x = 0; x < 25; x++)
     {
       anMenLeft[0] += an[0][x];
       anMenLeft[1] += an[1][x];
