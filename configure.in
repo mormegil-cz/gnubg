@@ -67,17 +67,14 @@ AC_CHECK_FUNCS(alloca getlogin getpwuid gettimeofday isatty random)
 AC_REPLACE_FUNCS(rand_r)
 AC_TYPE_SIGNAL
 
-dnl Check for the X Window System.
-AC_PATH_XTRA
-AM_CONDITIONAL(NOX, test "$no_x" = "yes" )
+dnl Check for GTK
+AM_PATH_GTK(1.2.0)
+AM_CONDITIONAL(NOX, test "$no_gtk" = "yes" )
 
 dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)
 
-if test "$no_x" != "yes"; then
-  conf_ext=ext
-fi
-AC_CONFIG_SUBDIRS(lib doc $conf_ext)
+AC_CONFIG_SUBDIRS(lib doc)
 
 AC_OUTPUT(Makefile)
 

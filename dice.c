@@ -27,6 +27,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -62,7 +65,7 @@ static void *pvUserRNGHandle;
 
 static char szUserRNGSeed[ 32 ];
 static char szUserRNGRandom[ 32 ];
-static char szUserRNG[ MAXPATHLEN ];
+static char szUserRNG[ PATH_MAX ];
 #endif
 
 static int GetManualDice( int anDice[ 2 ] ) {
@@ -236,7 +239,7 @@ extern int RollDice( int anDice[ 2 ] ) {
 extern int  UserRNGOpen() {
 
   char *error;
-  char szFileName[ MAXPATHLEN ];
+  char szFileName[ PATH_MAX ];
 
   strcpy( szUserRNG, "userrng.so" );
 

@@ -75,16 +75,13 @@ static int fReadingOther;
 #include "rollout.h"
 
 #if !X_DISPLAY_MISSING
-#include <ext.h>
-#include <extwin.h>
-#include <stdio.h>
-#include "xgame.h"
+#include <gtk/gtk.h>
+#include "gtkboard.h"
 
-static extdisplay edsp;
-extwindow ewnd;
+GtkWidget *pwMain, *pwBoard;
 int fX = TRUE; /* use X display */
 int nDelay = 0;
-event evNextTurn;
+guint nNextTurn = 0; /* GTK idle function */
 static int fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
 static int fReadingCommand;
@@ -562,8 +559,12 @@ static void ResetInterrupt( void ) {
 	puts( "(Interrupted)" );
 
 	fInterrupt = FALSE;
+	
 #if !X_DISPLAY_MISSING
-	EventPending( &evNextTurn, FALSE );
+	if( nNextTurn ) {
+	    gtk_idle_remove( nNextTurn );
+	    nNextTurn = 0;
+	}
 #endif
     }
 }
@@ -627,8 +628,9 @@ void ShellEscape( char *pch ) {
 	
 	while( !fChildDied ) {
 	    sigsuspend( &ssOld );
+	    /* GTK-FIXME
 	    if( fAction )
-		HandleXAction();
+	    HandleXAction(); */
 	}
 
 	fChildDied = FALSE;
@@ -758,8 +760,9 @@ extern void ShowBoard( void ) {
 #if !X_DISPLAY_MISSING
 	if( fX ) {
 	    InitBoard( anBoard );
-	    GameSet( &ewnd, anBoard, 0, ap[ 1 ].szName, ap[ 0 ].szName,
-		     nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
+	    game_set( BOARD( pwBoard ), anBoard, 0, ap[ 1 ].szName,
+		      ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
+		      -1, -1 );
 	} else
 #endif
 	    puts( "No game in progress." );
@@ -820,14 +823,14 @@ extern void ShowBoard( void ) {
 	if( !fMove )
 	    SwapSides( anBoard );
     
-	GameSet( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
-		 nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
-		 anDice[ 1 ] );
+	game_set( BOARD( pwBoard ), anBoard, fMove, ap[ 1 ].szName,
+		  ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
+		  anDice[ 0 ], anDice[ 1 ] );
 	
 	if( !fMove )
 	    SwapSides( anBoard );
 
-	XFlush( ewnd.pdsp );
+	gdk_flush();
     }    
 #endif    
 }
@@ -1361,7 +1364,7 @@ static void ProcessInput( char *sz, int fFree ) {
        want no prompt at all, yet (if NextTurn is going to be called),
        or if we do want to prompt immediately, we recalculate it in
        case the information in the old one is out of date. */
-    if( evNextTurn.fPending )
+    if( nNextTurn )
 	fNeedPrompt = TRUE;
     else {
 	rl_callback_handler_install( FormatPrompt(), HandleInput );
@@ -1416,14 +1419,14 @@ extern void UserCommand( char *sz ) {
 
     ResetInterrupt();
     
-    if( !evNextTurn.fPending )
+    if( nNextTurn )
 	Prompt();
     else
 	fNeedPrompt = TRUE;
 #endif
 }
 
-int StdinReadNotify( event *pev, void *p ) {
+void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
 #if HAVE_LIBREADLINE
     rl_callback_read_char();
 #else
@@ -1448,24 +1451,20 @@ int StdinReadNotify( event *pev, void *p ) {
 
     ResetInterrupt();
 
-    if( evNextTurn.fPending )
+    if( nNextTurn )
 	fNeedPrompt = TRUE;
     else
 	Prompt();
 #endif
-
-    EventPending( pev, FALSE ); /* FIXME is this necessary? */
-
-    return 0;
 }
 
-int NextTurnNotify( event *pev, void *p ) {
+extern gint NextTurnNotify( gpointer p ) {
 
     NextTurn();
 
     ResetInterrupt();
     
-    if( !pev->fPending && fNeedPrompt ) {
+    if( fNeedPrompt ) {
 #if HAVE_LIBREADLINE
 	rl_callback_handler_install( FormatPrompt(), HandleInput );
 	fReadingCommand = TRUE;
@@ -1475,15 +1474,10 @@ int NextTurnNotify( event *pev, void *p ) {
 	fNeedPrompt = FALSE;
     }
     
-    return 0;
+    return FALSE; /* remove idle handler */
 }
 
-static eventhandler StdinReadHandler = {
-    StdinReadNotify, NULL
-}, NextTurnHandler = {
-    NextTurnNotify, NULL
-};
-
+#if 0
 extern void HandleXAction( void ) {
     /* It is safe to execute this function with SIGIO unblocked, because
        if a SIGIO occurs before fAction is reset, then the I/O it alerts
@@ -1507,50 +1501,98 @@ extern void HandleXAction( void ) {
 
     fBusy = FALSE;
 }
+#endif
 
-void RunX( void ) {
+void RunX( int *pargc, char ***pargv ) {
     /* Attempt to execute under X Window System.  Returns on error (for
        fallback to TTY), or executes until exit() if successful. */
-    Display *pdsp;
-    XrmDatabase rdb;
-    XSizeHints xsh;
-    char *pch;
-    event ev;
-    int n;
+
+    GtkWidget *pwVbox;
+    GtkItemFactory *pif;
+    GtkAccelGroup *pag;
+    static GtkItemFactoryEntry aife[] = {
+	{ "/_File", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_New", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_New/_Game", NULL, NULL, 0, NULL },
+	{ "/_File/_New/_Match", NULL, NULL, 0, NULL },
+	{ "/_File/_New/_Session", NULL, NULL, 0, NULL },
+	{ "/_File/_Open", NULL, NULL, 0, NULL },
+	{ "/_File/_Save", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Save/_Game", NULL, NULL, 0, NULL },
+	{ "/_File/_Save/_Match", NULL, NULL, 0, NULL },
+	{ "/_File/_Save/_Session", NULL, NULL, 0, NULL },
+	{ "/_File/_Save/_Weights", NULL, NULL, 0, NULL },
+	{ "/_File/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_File/_Quit", NULL, NULL, 0, NULL },
+	{ "/_Edit", NULL, NULL, 0, "<Branch>" },
+	{ "/_Edit/_Undo", NULL, NULL, 0, NULL },
+	{ "/_Edit/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Edit/_Copy", NULL, NULL, 0, NULL },
+	{ "/_Edit/_Paste", NULL, NULL, 0, NULL },
+	{ "/_Game", NULL, NULL, 0, "<Branch>" },
+	{ "/_Game/_Roll", NULL, NULL, 0, NULL },
+	{ "/_Game/_Double", NULL, NULL, 0, NULL },
+	{ "/_Game/Re_sign", NULL, NULL, 0, "<Branch>" },
+	{ "/_Game/Re_sign/_Normal", NULL, NULL, 0, NULL },
+	{ "/_Game/Re_sign/_Gammon", NULL, NULL, 0, NULL },
+	{ "/_Game/Re_sign/_Backgammon", NULL, NULL, 0, NULL },
+	{ "/_Analyse", NULL, NULL, 0, "<Branch>" },
+	{ "/_Analyse/_Evaluate", NULL, NULL, 0, NULL },
+	{ "/_Analyse/_Rollout", NULL, NULL, 0, NULL },
+	{ "/_Database", NULL, NULL, 0, "<Branch>" },
+	{ "/_Database/_Dump", NULL, NULL, 0, NULL },
+	{ "/_Database/_Generate", NULL, NULL, 0, NULL },
+	{ "/_Database/_Rollout", NULL, NULL, 0, NULL },
+	{ "/_Settings", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Automatic", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Automatic/_Bearoff", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Automatic/_Crawford", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Automatic/_Game", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Automatic/_Move", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Automatic/_Roll", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Confirmation", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Crawford", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Cube", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Cube/_Owner", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Cube/_Use", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Display", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Jacoby", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Nackgammon", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Help", NULL, NULL, 0, "<Branch>" },
+	{ "/_Help/_About...", NULL, NULL, 0, NULL }
+    };
     
-    XrmInitialize();
+    /* FIXME gtk_init_check should check command line options before
+       main() */
+
+    if( !gtk_init_check( pargc, pargv ) )
+	return;
+
+    gdk_rgb_init();
+    gdk_rgb_set_min_colors( 2 * 2 * 2 );
+    gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
+    gtk_widget_set_default_visual( gdk_rgb_get_visual() );
+
+    pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    gtk_window_set_title( GTK_WINDOW( pwMain ), "GNU Backgammon" );
+    gtk_container_add( GTK_CONTAINER( pwMain ),
+		       pwVbox = gtk_vbox_new( FALSE, 0 ) );
+
+    pag = gtk_accel_group_new();
+    pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pag );
+    gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ),
+				   aife, NULL );
+    gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pag );
+    gtk_box_pack_start( GTK_BOX( pwVbox ),
+			gtk_item_factory_get_widget( pif, "<main>" ),
+			FALSE, FALSE, 0 );
+		       
+    gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
+    gtk_widget_show_all( pwMain );
     
-    if( InitEvents() )
-	return;
-    
-    if( InitExt() )
-	return;
-
-    /* FIXME allow command line options */
-    if( !( pdsp = XOpenDisplay( NULL ) ) )
-	return;
-
-    if( ExtDspCreate( &edsp, pdsp ) ) {
-	XCloseDisplay( pdsp );
-	return;
-    }
-
-    /* FIXME check if XResourceManagerString works! */
-    if( !( pch = XResourceManagerString( pdsp ) ) )
-	pch = "";
-
-    rdb = XrmGetStringDatabase( pch );
-
-    /* FIXME override with $XENVIRONMENT and ~/.gnubgrc */
-
-    /* FIXME get colourmap here; specify it for the new window */
-    
-    ExtWndCreate( &ewnd, NULL, "game", &ewcGame, rdb, NULL, NULL );
-    ExtWndRealise( &ewnd, pdsp, DefaultRootWindow( pdsp ),
-                   "540x480+100+100", None, 0 );
-
     ShowBoard();
-
+#if 0
+    /* GTK-FIXME */
     /* FIXME all this should be done in Ext somehow */
     XStoreName( pdsp, ewnd.wnd, "GNU Backgammon" );
     XSetIconName( pdsp, ewnd.wnd, "GNU Backgammon" );
@@ -1564,22 +1606,19 @@ void RunX( void ) {
     XSetWMNormalHints( pdsp, ewnd.wnd, &xsh );
 
     XMapRaised( pdsp, ewnd.wnd );
+#endif
 
-    EventCreate( &ev, &StdinReadHandler, NULL );
-    ev.h = STDIN_FILENO;
-    ev.fWrite = FALSE;
-    EventHandlerReady( &ev, TRUE, -1 );
-
-    EventCreate( &evNextTurn, &NextTurnHandler, NULL );
-    evNextTurn.h = -1;
-    EventHandlerReady( &evNextTurn, TRUE, -1 );
-
+    gtk_input_add_full( STDIN_FILENO, GDK_INPUT_READ, StdinReadNotify,
+			NULL, NULL, NULL );
+    
     /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
+    /* GTK-FIXME
     fnAction = HandleXAction;
     if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
 	fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
 	fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
     }
+    */
     
 #if HAVE_LIBREADLINE
     fReadingCommand = TRUE;
@@ -1588,12 +1627,12 @@ void RunX( void ) {
 #else
     Prompt();
 #endif
-    
-    HandleEvents();
 
+    gtk_main();
+    
     /* Should never return. */
     
-    abort();
+    abort(); /* GTK-FIXME */
 }
 #endif
 
@@ -1644,9 +1683,9 @@ extern char *GetInput( char *szPrompt ) {
 	while( !szInput ) {
 	    FD_ZERO( &fds );
 	    FD_SET( STDIN_FILENO, &fds );
-	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+/*	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds ); */
 
-	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
+	    select( /* ConnectionNumber( ewnd.pdsp ) + */ 1, &fds, NULL, NULL,
 		    NULL );
 
 	    if( fInterrupt ) {
@@ -1663,9 +1702,10 @@ extern char *GetInput( char *szPrompt ) {
 		    fInputAgain = FALSE;
 		}
 	    }
-
+/*
 	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
 		HandleXAction();
+*/
 	}
 
 	if( fWasReadingCommand ) {
@@ -1854,7 +1894,7 @@ extern int main( int argc, char *argv[] ) {
 	    return EXIT_FAILURE;
 	}
 
-    puts( "GNU Backgammon " VERSION "  Copyright 1999 Gary Wong.\n"
+    puts( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong.\n"
 	  "GNU Backgammon is free software, covered by the GNU "
 	  "General Public License\n"
 	  "version 2, and you are welcome to change it and/or distribute "
@@ -1905,11 +1945,8 @@ extern int main( int argc, char *argv[] ) {
 	CommandLoad( argv[ optind ] );
     
 #if !X_DISPLAY_MISSING
-    if( !getenv( "DISPLAY" ) )
-	fX = FALSE;
-    
     if( fX ) {
-	RunX();
+	RunX( &argc, &argv );
 
 	fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
 	fX = FALSE;

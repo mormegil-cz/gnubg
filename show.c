@@ -36,7 +36,7 @@
 #include "dice.h"
 
 #if !X_DISPLAY_MISSING
-#include "xgame.h"
+#include "gtkboard.h"
 #endif
 
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
@@ -140,7 +140,7 @@ extern void CommandShowBoard( char *sz ) {
 
 #if !X_DISPLAY_MISSING
     if( fX )
-	GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );
+	game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1 );
     else
 #endif
 	puts( DrawBoard( szOut, an, TRUE, ap ) );

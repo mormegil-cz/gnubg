@@ -22,8 +22,6 @@
 #ifndef _DICE_H_
 #define _DICE_H_
 
-#include <sys/param.h>
-
 typedef enum _rng {
     RNG_ANSI, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MERSENNE, RNG_USER
 } rng;

@@ -1,8 +1,4 @@
-if NOX
 SUBDIRS = lib doc
-else
-SUBDIRS = lib doc ext
-endif
 
 COMMON_INCS = -I$(srcdir)/lib
 COMMON_LIBS = -Llib -levent
@@ -21,11 +17,10 @@ gnubg_SOURCES = $(COMMON_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
-INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
-gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
-gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-	$(COMMON_LIBS)
-gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
+INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
+gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h
+gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
+gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 
 pkgdata_DATA = gnubg.bd gnubg.wd

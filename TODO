@@ -106,5 +106,3 @@ duplication of effort and to make sure our changes merge easily.
 ** Add option to flip the board.
 ** Find someone who lives near London and wants to enter gnubg in the
   MSO Olympiad in August: <http://www.msoworld.com/Olympiad/computer.html>.
-** Move the built-in RNGs into lib/; they can then be used instead of
-  rand_r for better quality random numbers and improved portability.

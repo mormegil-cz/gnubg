@@ -235,9 +235,12 @@ extern void NextTurn( void ) {
 #endif
     
 #if !X_DISPLAY_MISSING
-    if( fX )
-	EventPending( &evNextTurn, FALSE );
-    else
+    if( fX ) {
+	if( nNextTurn ) {
+	    gtk_idle_remove( nNextTurn );
+	    nNextTurn = 0;
+	}
+    } else
 #endif
 	fNextTurn = FALSE;
     
@@ -271,11 +274,11 @@ extern void NextTurn( void ) {
 		}
 		
 		FD_ZERO( &fds );
-		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
-		
-		if( select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL,
+/*		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds ); */
+		/* GTK-FIXME: use timeout */
+		if( select( /* ConnectionNumber( ewnd.pdsp ) + */ 1, &fds, NULL,
 			    NULL, &tv ) > 0 ) {
-		    HandleXAction();
+/*		    HandleXAction(); */
 		    if( !fInterrupt )
 			goto restart;
 		}
@@ -354,9 +357,10 @@ extern void NextTurn( void ) {
 	return;
     } else
 #if !X_DISPLAY_MISSING
-	if( fX )
-	    EventPending( &evNextTurn, !ComputerTurn() );
-	else
+	if( fX ) {
+	    if( !ComputerTurn() )
+		nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+	} else
 #endif
 	    fNextTurn = !ComputerTurn();
 }
@@ -365,7 +369,7 @@ extern void TurnDone( void ) {
 
 #if !X_DISPLAY_MISSING
     if( fX )
-	EventPending( &evNextTurn, TRUE );
+	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
     else
 #endif
 	fNextTurn = TRUE;	

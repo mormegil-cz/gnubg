@@ -18,9 +18,6 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #undef TIME_WITH_SYS_TIME
 
-/* Define if the X Window System is missing or not being used.  */
-#undef X_DISPLAY_MISSING
-
 /* Installation directory (used to determine PKGDATADIR below). */
 #undef DATADIR
 

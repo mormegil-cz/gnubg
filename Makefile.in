@@ -59,12 +59,15 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 AWK = @AWK@
 CC = @CC@
+GTK_CFLAGS = @GTK_CFLAGS@
+GTK_CONFIG = @GTK_CONFIG@
+GTK_LIBS = @GTK_LIBS@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
 VERSION = @VERSION@
-@NOX_TRUE@SUBDIRS = lib doc
-@NOX_FALSE@SUBDIRS = lib doc ext
+
+SUBDIRS = lib doc
 
 COMMON_INCS = -I$(srcdir)/lib
 COMMON_LIBS = -Llib -levent
@@ -74,13 +77,13 @@ COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg
 @NOX_TRUE@INCLUDES = $(COMMON_INCS)
-@NOX_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
+@NOX_FALSE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
 @NOX_TRUE@gnubg_SOURCES = $(COMMON_SOURCES)
-@NOX_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
+@NOX_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h
 @NOX_TRUE@gnubg_LDADD = $(COMMON_LIBS)
-@NOX_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 	$(COMMON_LIBS)
+@NOX_FALSE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 @NOX_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
-@NOX_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
+@NOX_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
 pkgdata_DATA = gnubg.bd gnubg.wd
 
@@ -109,17 +112,13 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I.
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-X_CFLAGS = @X_CFLAGS@
-X_LIBS = @X_LIBS@
-X_EXTRA_LIBS = @X_EXTRA_LIBS@
-X_PRE_LIBS = @X_PRE_LIBS@
 @NOX_TRUE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @NOX_TRUE@positionid.o drawboard.o pub_eval.o set.o show.o database.o \
 @NOX_TRUE@mt19937int.o dice.o rollout.o isaac.o copying.o kleinman.o
 @NOX_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @NOX_FALSE@positionid.o drawboard.o pub_eval.o set.o show.o database.o \
 @NOX_FALSE@mt19937int.o dice.o rollout.o isaac.o copying.o kleinman.o \
-@NOX_FALSE@xboard.o xgame.o
+@NOX_FALSE@gtkboard.o
 gnubg_LDFLAGS = 
 makebearoff_OBJECTS =  makebearoff.o eval.o positionid.o pub_eval.o
 makebearoff_LDFLAGS = 
@@ -139,15 +138,14 @@ mkinstalldirs texinfo.tex
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
-DIST_SUBDIRS =  lib doc lib doc ext
 DEP_FILES =  .deps/copying.P .deps/database.P .deps/dice.P \
 .deps/drawboard.P .deps/eval.P .deps/getopt.P .deps/getopt1.P \
-.deps/gnubg.P .deps/isaac.P .deps/kleinman.P .deps/makebearoff.P \
-.deps/makeweights.P .deps/mt19937int.P .deps/play.P .deps/positionid.P \
-.deps/pub_eval.P .deps/rollout.P .deps/set.P .deps/show.P \
-.deps/xboard.P .deps/xgame.P
+.deps/gnubg.P .deps/gtkboard.P .deps/isaac.P .deps/kleinman.P \
+.deps/makebearoff.P .deps/makeweights.P .deps/mt19937int.P .deps/play.P \
+.deps/positionid.P .deps/pub_eval.P .deps/rollout.P .deps/set.P \
+.deps/show.P
 SOURCES = $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 OBJECTS = $(gnubg_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 
@@ -378,7 +376,8 @@ distcheck: dist
 	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
-	dc_install_base=`cd $(distdir)/=inst && pwd`; \	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
 	  && $(MAKE) $(AM_MAKEFLAGS) \
@@ -420,7 +419,7 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-	for subdir in $(DIST_SUBDIRS); do \
+	for subdir in $(SUBDIRS); do \
 	  if test "$$subdir" = .; then :; else \
 	    test -d $(distdir)/$$subdir \
 	    || mkdir $(distdir)/$$subdir \
