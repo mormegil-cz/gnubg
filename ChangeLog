@@ -1,3 +1,9 @@
+Mon Feb  14  12:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+	Fixes from Philippe Michel:
+	rollout.c, format.c: Fix bugs in rollout output
+	gnubg.c: Fix for bug 10099
+	makebearoff1.c: Typo
+
 Thu Feb  10  10:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 	Fixes from Ingo Macherius:
 		external_l.l, external_y.y: Minor parser change
