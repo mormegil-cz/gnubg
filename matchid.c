@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "backgammon.h"
+#include "positionid.h"
 #include "matchid.h"
 
 

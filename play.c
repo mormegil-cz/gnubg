@@ -42,6 +42,7 @@
 #include "external.h"
 #include "eval.h"
 #include "positionid.h"
+#include "matchid.h"
 #include "matchequity.h"
 #include "rollout.h"
 

@@ -1,3 +1,11 @@
+Tue Mar 26 17:50:19 2002  Øystein Johansen <oeysteij@online.no>
+
+        * eval.c: Remove unused variables.
+
+        * play.c: #include "matchid.h"
+
+        * matchid.c: #include "positionid.h"
+
 Sun Mar 24 18:30:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * external.c: Move preprocessor conditions outside functions.
