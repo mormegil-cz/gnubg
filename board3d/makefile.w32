@@ -29,7 +29,7 @@ LIBS=-lftgl -lglib-2.0.dll -lgtk-win32-2.0 -lgobject-2.0.dll \
 TARGET=board.a
 
 SOURCE=	drawboard3d misc3d texture3d font3d widget3d \
-	matrix model shadow mylist timer gtkcolour3d
+	matrix model shadow mylist timer gtkcolour3d graph
 OBJECTS=$(patsubst %,%.o,$(SOURCE)) $(GNUDIR)/luxi.o
 HEADERS=../gnubg/gtkboard.h inc3d.h test/main.h
 
