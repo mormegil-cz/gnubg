@@ -71,6 +71,10 @@ Wed Jul  9 10:32:08 2003  Joern Thyssen  <jth@gnubg.org>
 	output
 	(bug #4236 by Ian Shaw)
 
+Tue Jul 8 23:00 CET 2003 Olivier Baur <olivier.baur@noos.fr>
+
+        * openurl.c: added support for MacOS X
+
 Tue Jul 08 22:58:59 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.h, gtkexport.c, gtkgame.c, gtkmet.c,
