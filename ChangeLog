@@ -1,3 +1,18 @@
+Mon Oct 21 21:31:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New options for the CSS style sheet for HTML Export:
+	- in <head> (default; current behaviour)
+	- inline (to be used for gammonline-specific export)
+	- external (not implemented yet)
+
+	* gnubg.c: new commands "set export html css xxx"	
+	* gnubg.c (CommandSaveSettings): save new setting.
+	* set.c (CommandSetExportHTMLCSS{Head,Inline,External}, 
+	SetExportHTMLCSS): new functions.
+	* gtkexport.c: widgets for new option.
+	* html.c (all functions changed): implement new option.
+	
+
 Mon Oct 21 19:27:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Last iteration of the "set priority" stuff.

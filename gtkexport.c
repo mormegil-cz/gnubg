@@ -72,6 +72,7 @@ typedef struct _exportwidget {
 
   GtkWidget *pwHTMLPictureURL;
   GtkWidget *pwHTMLType;
+  GtkWidget *pwHTMLCSS;
 
 } exportwidget;
 
@@ -147,6 +148,9 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
     strdup ( gtk_entry_get_text( GTK_ENTRY( pew->pwHTMLPictureURL ) ) );
 
   pexs->het = gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLType));
+
+  pexs->hecss = 
+    gtk_option_menu_get_history (GTK_OPTION_MENU (pew->pwHTMLCSS));
 
 }
 
@@ -270,6 +274,13 @@ SetExportCommands ( const exportsetup *pexsOrig,
     g_free ( sz );
   }
 
+  if (  pexsOrig->hecss != pexsNew->hecss ) {
+    char *sz = g_strdup_printf ( "set export html css \"%s\"",
+                                 aszHTMLExportCSSCommand[ pexsNew->hecss ] );
+    UserCommand ( sz );
+    g_free ( sz );
+  }
+
 
 }
 
@@ -358,6 +369,9 @@ ExportSet ( exportwidget *pew ) {
 
   gtk_option_menu_set_history ( GTK_OPTION_MENU (pew->pwHTMLType), 
                                 pexs->het );
+
+  gtk_option_menu_set_history ( GTK_OPTION_MENU (pew->pwHTMLCSS), 
+                                pexs->hecss );
 
 }
 
@@ -661,6 +675,31 @@ GTKShowExport ( exportsetup *pexs ) {
   gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
   gtk_option_menu_set_menu (GTK_OPTION_MENU (pew->pwHTMLType), pwType_menu);
   gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLType), 0);
+
+  gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwHBox, FALSE, FALSE, 0);
+  
+  /* HTML CSS */
+
+  pwHBox = gtk_hbox_new ( FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ),
+                       gtk_label_new ( _("CSS Style sheet:") ),
+                       TRUE, TRUE, 0 );
+  
+  pew->pwHTMLCSS = gtk_option_menu_new ();
+  gtk_box_pack_start (GTK_BOX (pwHBox), pew->pwHTMLCSS, FALSE, FALSE, 0);
+  pwType_menu = gtk_menu_new ();
+  glade_menuitem = gtk_menu_item_new_with_label (_("In <head>"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("Inline (in tags)"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("External file"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwType_menu), glade_menuitem);
+  gtk_option_menu_set_menu (GTK_OPTION_MENU (pew->pwHTMLCSS), pwType_menu);
+  gtk_option_menu_set_history (GTK_OPTION_MENU (pew->pwHTMLCSS), 0);
 
   gtk_container_set_border_width (GTK_CONTAINER (pwHBox), 4);
   gtk_box_pack_start (GTK_BOX (pwVBox), pwHBox, FALSE, FALSE, 0);

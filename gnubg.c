@@ -299,7 +299,8 @@ exportsetup exsExport = {
 
   NULL, /* HTML url to pictures */
   HTML_EXPORT_TYPE_GNU,
-  NULL  /* HTML extension */
+  NULL,  /* HTML extension */
+  HTML_EXPORT_CSS_HEAD /* write CSS stylesheet in <head> */
 
 };
 
@@ -854,7 +855,17 @@ command cER = {
   { "gnu", CommandSetExportHTMLTypeGNU,
     N_("Default images"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportCSS[] = {
+  { "head", CommandSetExportHTMLCSSHead,
+    N_("Write CSS stylesheet in <head>"), NULL, NULL },
+  { "external", CommandSetExportHTMLCSSExternal,
+    N_("Write stylesheet to external file (\"gnubg.css\")"), NULL, NULL },
+  { "inline", CommandSetExportHTMLCSSInline,
+    N_("Write stylesheet inside tags"), NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportHTML[] = {
+  { "css", NULL,
+    N_("Control how the CSS stylesheet is written"), szVALUE, acSetExportCSS },
   { "pictureurl", CommandSetExportHTMLPictureURL,
     N_("set URL to pictures used in HTML export"), szURL, NULL },
   { "type", NULL,
@@ -4281,6 +4292,9 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf ( pf, "set export html type \"%s\"\n",
               aszHTMLExportType[ exsExport.het ] );
+
+    fprintf ( pf, "set export html css %s\n",
+              aszHTMLExportCSSCommand[ exsExport.hecss ] );
 
     /* invert settings */
 
