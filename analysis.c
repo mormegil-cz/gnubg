@@ -172,7 +172,7 @@ AnalyzeGame ( list *plGame ) {
 
                 if ( GeneralCubeDecision ( "",
                                            aarOutput, aarStdDev,
-                                           msAnalyze.anBoard, &ci,
+                                           msAnalyse.anBoard, &ci,
 					   &esAnalysisCube ) < 0 )
                   return;
 
@@ -311,7 +311,7 @@ AnalyzeGame ( list *plGame ) {
 
                     if ( GeneralCubeDecision ( "",
                                                aarOutput, aarStdDev,
-                                               msAnalyze.anBoard, &ci,
+                                               msAnalyse.anBoard, &ci,
 					       &esAnalysisCube ) < 0 )
                       return;
 
