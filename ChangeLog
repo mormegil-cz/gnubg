@@ -1,3 +1,8 @@
+Tue Aug  5 21:41:57 GMT 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gtktheory.c (GTKShowTheory): rearrange theory window so it fits
+	  on 800x600
+
 Tue Aug  5 22:59:25 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am, configure.in: changes needed for win32 cross

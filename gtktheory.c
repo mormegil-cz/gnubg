@@ -648,14 +648,10 @@ PlyClicked( GtkWidget *pw, theorywidget *ptw ) {
 extern void
 GTKShowTheory ( const int fActivePage ) {
 
-  GtkWidget *pwDialog;
-  GtkWidget *pwNotebook;
+  GtkWidget *pwDialog, *pwNotebook;
 
-  GtkWidget *pwVBox;
-  GtkWidget *pwHBox;
-  GtkWidget *pwFrame;
-  GtkWidget *pwTable;
-  GtkWidget *pwAlign;
+  GtkWidget *pwOuterHBox, *pwVBox, *pwHBox;
+  GtkWidget *pwFrame, *pwTable, *pwAlign;
   
   GtkWidget *pw, *pwx, *pwz;
 
@@ -681,14 +677,16 @@ GTKShowTheory ( const int fActivePage ) {
   pwDialog = GTKCreateDialog ( _("GNU Backgammon - Theory"), DT_INFO,
                             NULL, NULL );
 
-  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 400, 400 );
+  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 660, 300 );
 
-  pwVBox = gtk_vbox_new ( FALSE, 8 );
-  gtk_container_set_border_width( GTK_CONTAINER( pwVBox ), 8 );
-
+  pwOuterHBox = gtk_hbox_new ( FALSE, 8 );
+  gtk_container_set_border_width( GTK_CONTAINER( pwOuterHBox ), 8 );
 
   gtk_container_add ( GTK_CONTAINER ( DialogArea ( pwDialog, DA_MAIN ) ),
-                      pwVBox );
+                      pwOuterHBox );
+
+  pwVBox = gtk_vbox_new ( FALSE, 0 );
+  gtk_box_pack_start( GTK_BOX( pwOuterHBox ), pwVBox, FALSE, FALSE, 0 );
 
   /* match/money play */
 
@@ -720,7 +718,7 @@ GTKShowTheory ( const int fActivePage ) {
   ptw->apwFrame[ 0 ] = gtk_frame_new ( _("Match score") );
   gtk_box_pack_start( GTK_BOX( pwVBox ), ptw->apwFrame[ 0 ], FALSE, FALSE, 0 );
 
-  pw = gtk_vbox_new ( 0, FALSE );
+  pw = gtk_vbox_new ( FALSE, 0 );
   gtk_container_add ( GTK_CONTAINER ( ptw->apwFrame[ 0 ] ), pw );
 
   pwTable = gtk_table_new ( 2, 3, FALSE );
@@ -764,7 +762,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   }
 
-  pwHBox = gtk_hbox_new ( 0, FALSE );
+  pwHBox = gtk_hbox_new ( FALSE, 0 );
   gtk_container_add ( GTK_CONTAINER ( pw ), pwHBox );
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
@@ -777,7 +775,7 @@ GTKShowTheory ( const int fActivePage ) {
   ptw->pwCubeFrame = gtk_frame_new ( _("Cube") );
   gtk_container_add ( GTK_CONTAINER ( pw ), ptw->pwCubeFrame );
 
-  pwHBox = gtk_hbox_new ( 0, FALSE );
+  pwHBox = gtk_hbox_new ( FALSE, 0 );
   gtk_container_add ( GTK_CONTAINER ( ptw->pwCubeFrame ), pwHBox );
 
   j = 1;
@@ -824,12 +822,12 @@ GTKShowTheory ( const int fActivePage ) {
   gtk_misc_set_alignment( GTK_MISC( pwz ), 0, 0.5 );
   
 
-  /* money play widhget */
+  /* money play widget */
 
   ptw->apwFrame[ 1 ] = gtk_frame_new ( _("Money play") );
   gtk_box_pack_start( GTK_BOX( pwVBox ), ptw->apwFrame[ 1 ], FALSE, FALSE, 0 );
 
-  pwHBox = gtk_hbox_new ( 0, FALSE );
+  pwHBox = gtk_hbox_new ( FALSE, 0 );
   gtk_container_add ( GTK_CONTAINER ( ptw->apwFrame[ 1 ] ), pwHBox );
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ),
@@ -936,13 +934,13 @@ GTKShowTheory ( const int fActivePage ) {
   /* add notebook pages */
 
   pwNotebook = gtk_notebook_new ();
-  gtk_box_pack_start( GTK_BOX( pwVBox ), pwNotebook, TRUE, TRUE, 0 );
+  gtk_container_set_border_width ( GTK_CONTAINER ( pwNotebook ), 0 );
 
-  gtk_container_set_border_width ( GTK_CONTAINER ( pwNotebook ), 4 );
+  gtk_box_pack_start( GTK_BOX( pwOuterHBox ), pwNotebook, TRUE, TRUE, 0 );
 
   /* market window */
 
-  pwVBox = gtk_vbox_new ( 0, FALSE );
+  pwVBox = gtk_vbox_new ( FALSE, 10 );
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              pwVBox,
                              gtk_label_new ( _("Market window") ) );
@@ -954,7 +952,7 @@ GTKShowTheory ( const int fActivePage ) {
 
     sprintf ( sz, _("Market window for player %s"), ap[ i ].szName );
     pwFrame = gtk_frame_new ( sz );
-    gtk_container_add ( GTK_CONTAINER ( pwVBox ), pwFrame );
+    gtk_box_pack_start( GTK_BOX( pwVBox ), pwFrame, FALSE, FALSE, 0 );
 
     ptw->apwMW[ i ] = gtk_clist_new_with_titles( 4, asz );
 
@@ -974,12 +972,12 @@ GTKShowTheory ( const int fActivePage ) {
     gtk_signal_connect( GTK_OBJECT( ptw->apwMW[ i ] ), "selection_get",
                         GTK_SIGNAL_FUNC( MWGetSelection ), ptw );
 
-    gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwMW[ i ] );
+    gtk_container_add ( GTK_CONTAINER( pwFrame ), ptw->apwMW[ i ] );
 
   }
 
   /* window graph */
-  pwVBox = gtk_vbox_new ( 0, FALSE );
+  pwVBox = gtk_vbox_new ( FALSE, 0 );
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              pwVBox,
                              gtk_label_new ( _("Window graph") ) );
@@ -1002,7 +1000,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* gammon prices */
 
-  pwVBox = gtk_vbox_new ( 0, FALSE );
+  pwVBox = gtk_vbox_new ( FALSE, 0 );
 
   ptw->pwGammonPrice = gtk_text_new( NULL, NULL );
   gtk_text_set_line_wrap ( GTK_TEXT( ptw->pwGammonPrice ), FALSE );
