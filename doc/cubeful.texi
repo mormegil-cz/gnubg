@@ -98,7 +98,7 @@ points:
 
 @multitable @columnfractions 0.67 0.33
 @item @image{mgtp}
-@tab @strong{Figure X} Fully live cubeful equity
+@tab @strong{Figure X} Cubeful equities
 @end multitable
 
 
@@ -239,9 +239,23 @@ for ``no double'' and the cubeful equity for ``double,
 take''. Combined with the equity for ``double, pass'', it's possible
 to determine the correct cube action. 
 
-Note that @gnubg{} takes a double if the cubeful equity for ``double,
-take'' is lower than for ``double, pass'', i.e., @gnubg{} does not
-calculate not use a take point.
+Figure X shows the relevant cubeful equities for O and X's cube
+decisions in sample position from earlier. 
+
+@multitable @columnfractions 0.67 0.33
+@item @image{mgcd}
+@tab @strong{Figure X} Cubeful equities
+@end multitable
+
+On 0-ply X will double when the green curve (O owns 2-cube) is
+above the red curve (centered cube), and O will take as long as the
+green curve is below 1. Similarly, O will double when the blue curve
+(X owns 2-cube) is below the red curve (centered cube), and X takes as
+long as the blue curve is above -1.
+
+Note that @gnubg{} doesn't calculate the take point or double point
+explicitly. The cube decision is simply made by comparing equities
+from Figure X.
 
 
 @section Beyond the simple model
