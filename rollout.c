@@ -42,6 +42,7 @@
 #include "positionid.h"
 #include "rollout.h"
 #include "i18n.h"
+#include "format.h"
 
 
 static void

@@ -41,6 +41,7 @@
 #include "sound.h"
 #include "drawboard.h"
 #include "matchequity.h"
+#include "format.h"
 
 typedef struct _optionswidget {
 

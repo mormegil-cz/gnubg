@@ -35,7 +35,7 @@
 #include "progress.h"
 #include "backgammon.h"
 #include "i18n.h"
-#include "export.h"
+#include "format.h"
 
 #if USE_GTK
 #include "gtkgame.h"

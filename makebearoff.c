@@ -47,6 +47,13 @@ typedef struct _xhash {
   xhashent *phe;
 } xhash;
 
+/* ugly fixes */
+char *aszRNG[]; 
+char *aszSkillType[ 1 ]; 
+int exsExport;
+int ap;
+/* end ugly fixes */
+
 
 static long cLookup;
 

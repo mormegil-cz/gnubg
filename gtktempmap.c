@@ -40,7 +40,7 @@
 #include "gtkgame.h"
 #include "drawboard.h"
 #include "i18n.h"
-#include "export.h"
+#include "format.h"
 #include "render.h"
 #include "renderprefs.h"
 #include "gtkboard.h"

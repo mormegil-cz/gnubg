@@ -33,6 +33,7 @@
 #include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"
+#include "format.h"
 #include "export.h"
 #include "eval.h"
 #include "positionid.h"

@@ -199,7 +199,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h \
-	boardpos.c boardpos.h progress.c progress.h
+	boardpos.c boardpos.h progress.c progress.h format.c format.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -250,7 +250,8 @@ check_PROGRAMS = erftest
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
+	format.c format.h
 
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
@@ -267,7 +268,7 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
         i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-        drawboard.c drawboard.h
+        drawboard.c drawboard.h format.c format.h
 
 makehyper_LDADD = -Llib -levent $(COMMON_LIBS)
 makehyper_DEPENDENCIES = lib/libevent.a
@@ -310,7 +311,7 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	osr.$(OBJEXT) bearoffgammon.$(OBJEXT) bearoff.$(OBJEXT) \
 	onechequer.$(OBJEXT) path.$(OBJEXT) render.$(OBJEXT) \
 	htmlimages.$(OBJEXT) speed.$(OBJEXT) renderprefs.$(OBJEXT) \
-	boardpos.$(OBJEXT) progress.$(OBJEXT)
+	boardpos.$(OBJEXT) progress.$(OBJEXT) format.$(OBJEXT)
 @COMPILE_BR1_TRUE@am__objects_2 = br1.$(OBJEXT)
 @COMPILE_BR1_FALSE@am__objects_2 =
 @USE_SOUND_TRUE@am__objects_3 = sound.$(OBJEXT)
@@ -344,7 +345,7 @@ am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
 	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT) \
-	bearoff.$(OBJEXT) path.$(OBJEXT)
+	bearoff.$(OBJEXT) path.$(OBJEXT) format.$(OBJEXT)
 makebearoff_OBJECTS = $(am_makebearoff_OBJECTS)
 makebearoff_LDFLAGS =
 am_makebearoff1_OBJECTS = makebearoff1.$(OBJEXT) getopt.$(OBJEXT) \
@@ -355,7 +356,8 @@ am_makehyper_OBJECTS = makehyper.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
 	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT) \
-	bearoff.$(OBJEXT) path.$(OBJEXT) drawboard.$(OBJEXT)
+	bearoff.$(OBJEXT) path.$(OBJEXT) drawboard.$(OBJEXT) \
+	format.$(OBJEXT)
 makehyper_OBJECTS = $(am_makehyper_OBJECTS)
 makehyper_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT)
@@ -377,9 +379,9 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/database.Po ./$(DEPDIR)/dice.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/drawboard.Po ./$(DEPDIR)/erftest.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/eval.Po ./$(DEPDIR)/export.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/external.Po ./$(DEPDIR)/getopt.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/getopt1.Po ./$(DEPDIR)/gnubg.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gnubgmodule.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/external.Po ./$(DEPDIR)/format.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/getopt1.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gnubg.Po ./$(DEPDIR)/gnubgmodule.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtk-multiview.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkbearoff.Po ./$(DEPDIR)/gtkboard.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkchequer.Po ./$(DEPDIR)/gtkcolour.Po \
@@ -548,6 +550,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/export.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/external.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/format.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnubg.Po@am__quote@

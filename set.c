@@ -71,6 +71,7 @@
 #include "renderprefs.h"
 #include "export.h"
 #include "drawboard.h"
+#include "format.h"
 
 #include "i18n.h"
 

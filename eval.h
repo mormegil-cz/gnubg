@@ -483,12 +483,6 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 extern int
 GetDPEq ( int *pfCube, float *prDPEq, const cubeinfo *pci );
 
-extern int 
-GetCubeActionSz ( float arDouble[ 4 ], 
-                  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                  char *szOutput, cubeinfo *pci,
-		  int fOutputMWC, int fOutputInvert );
-
 extern float
 mwc2eq ( const float rMwc, const cubeinfo *ci );
 

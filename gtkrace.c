@@ -40,6 +40,7 @@
 #include "i18n.h"
 #include "onechequer.h"
 #include "osr.h"
+#include "format.h"
 
 #if !HAVE_ERF
 extern double erf( double x );

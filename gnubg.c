@@ -106,6 +106,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "sound.h"
 #include "record.h"
 #include "progress.h"
+#include "format.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -192,12 +193,10 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
     fCubeUse = TRUE, 
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
-    nBeavers = 3, fOutputMWC = TRUE, fOutputWinPC = FALSE,
-    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
+    nBeavers = 3, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
     nDefaultLength = 7;
-int fOutputDigits = 3;
 int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
 	fTruncEqualPlayer0 =TRUE;
 int fInvertMET = FALSE;
@@ -2743,12 +2742,11 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 			pms->fJacoby, nBeavers, pms->bgv );
 }
 
-static void DisplayCubeAnalysis( float arDouble[ 4 ], 
-                                 float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+static void DisplayCubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                                 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                                  evalsetup *pes ) {
 
     cubeinfo ci;
-    char sz[ 1024 ];
 
     if( pes->et == EVAL_NONE )
 	return;
@@ -2758,10 +2756,9 @@ static void DisplayCubeAnalysis( float arDouble[ 4 ],
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
 	return;
-    
-    GetCubeActionSz( arDouble, aarOutput, sz, &ci, fOutputMWC, FALSE );
 
-    outputl( sz );
+    outputl( OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci ) );
+    
 }
 
 extern char *GetLuckAnalysis( matchstate *pms, float rLuck ) {
@@ -2787,7 +2784,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
     
     switch( pmr->mt ) {
     case MOVE_NORMAL:
-        DisplayCubeAnalysis( pmr->n.arDouble, pmr->n.aarOutput,
+        DisplayCubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
                              &pmr->n.esDouble );
 
 	outputf( _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
@@ -2811,9 +2808,9 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	break;
 
     case MOVE_DOUBLE:
-      DisplayCubeAnalysis( pmr->d.CubeDecPtr->arDouble, 
-						   pmr->d.CubeDecPtr->aarOutput,
-                             &pmr->n.esDouble );
+      DisplayCubeAnalysis( pmr->d.CubeDecPtr->aarOutput,
+                           pmr->d.CubeDecPtr->aarStdDev,
+                           &pmr->n.esDouble );
 	break;
 
     case MOVE_TAKE:
@@ -3509,8 +3506,6 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 static void
 HintCube( void ) {
           
-  char szBuf[ 1024 ];
-  float arDouble[ 4 ];
   cubeinfo ci;
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
@@ -3550,12 +3545,9 @@ HintCube( void ) {
     return;
   }
 #endif
-  FindCubeDecision ( arDouble, sc.aarOutput, &ci );  
-  
-  GetCubeActionSz ( arDouble, sc.aarOutput,
-                    szBuf, &ci, fOutputMWC, FALSE );
-  
-  outputl ( szBuf );
+
+  outputl( OutputCubeAnalysis( sc.aarOutput, sc.aarStdDev,
+                               &esEvalCube, &ci ) );
 
 }
     
@@ -3864,18 +3856,6 @@ extern void CommandQuit( char *sz ) {
     PromptForExit();
 }
 
-
-extern char *FormatCubePosition ( char *sz, cubeinfo *pci ) {
-
-  if ( pci->fCubeOwner == -1 )
-    sprintf ( sz, _("Centered %d-cube"), pci->nCube );
-  else 
-    sprintf ( sz, _("Player %s owns %d-cube"),
-              ap[ pci->fCubeOwner ].szName, pci->nCube );
-
-  return sz;
-
-}
 
 static move *
 GetMove ( int anBoard[ 2 ][ 25 ] ) {
@@ -8140,23 +8120,4 @@ TextToClipboard( const char *sz ) {
 
 }
 
-
-extern void
-FormatCubePositions( const cubeinfo *pci, char asz[ 2 ][ 40 ] ) {
-
-  cubeinfo aci[ 2 ];
-
-  SetCubeInfo ( &aci[ 0 ], pci->nCube, pci->fCubeOwner, pci->fMove,
-                pci->nMatchTo, pci->anScore, pci->fCrawford, 
-                pci->fJacoby, pci->fBeavers, pci->bgv );
-
-  FormatCubePosition ( asz[ 0 ], &aci[ 0 ] );
-
-  SetCubeInfo ( &aci[ 1 ], 2 * pci->nCube, ! pci->fMove, pci->fMove,
-                pci->nMatchTo, pci->anScore, pci->fCrawford, 
-                pci->fJacoby, pci->fBeavers, pci->bgv );
-
-  FormatCubePosition ( asz[ 1 ], &aci[ 1 ] );
-
-}
 

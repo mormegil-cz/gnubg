@@ -34,6 +34,7 @@
 #include "drawboard.h"
 #include "positionid.h"
 #include "i18n.h"
+#include "format.h"
 #include "export.h"
 #include "matchid.h"
 
@@ -824,11 +825,12 @@ PrintPostScriptComment ( FILE *pf, unsigned char *pch ) {
 
 static void 
 PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
-                             int fPlayer, float arDouble[ 4 ],
+                             int fPlayer, 
                              float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                             float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                              evalsetup *pes ) { 
     cubeinfo ci;
-    char sz[ 1024 ], *pch, *pchNext;
+    char *sz, *pch, *pchNext;
 
     if( pes->et == EVAL_NONE )
 	return;
@@ -841,7 +843,7 @@ PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
 	/* No cube action possible */
 	return;
     
-    GetCubeActionSz( arDouble, aarOutput, sz, &ci, fOutputMWC, FALSE );
+    sz = OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci );
 
     Skip( pf, 4 );
     for( pch = sz; pch && *pch; pch = pchNext ) {
@@ -1068,8 +1070,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    }
 	    
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
-					 pmr->n.arDouble, 
-                                         pmr->n.aarOutput, 
+                                         pmr->n.aarOutput, pmr->n.aarStdDev, 
                                          &pmr->n.esDouble );
 	    
 	    Advance( pf, 10 );
@@ -1132,9 +1133,9 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptBoard( pf, &msExport, pmr->d.fPlayer );
 
 	    PrintPostScriptCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-									 pmr->d.CubeDecPtr->arDouble, 
-									 pmr->d.CubeDecPtr->aarOutput, 
-									 &pmr->d.CubeDecPtr->esDouble );
+                                         pmr->d.CubeDecPtr->aarOutput, 
+                                         pmr->d.CubeDecPtr->aarStdDev, 
+                                         &pmr->d.CubeDecPtr->esDouble );
 
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );

@@ -78,6 +78,7 @@
 #include "sound.h"
 #include "gtkoptions.h"
 #include "gtktoolbar.h"
+#include "format.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 

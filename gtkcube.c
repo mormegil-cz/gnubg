@@ -41,6 +41,7 @@
 #include "gtkcube.h"
 #include "i18n.h"
 #include "progress.h"
+#include "format.h"
 
 
 
@@ -807,9 +808,7 @@ GetContent ( cubehintdata *pchd ) {
   pc = OutputCubeAnalysis ( pchd->aarOutput,
                             pchd->aarStdDev,
                             pchd->pes,
-                            &ci,
-                            -1, -1,
-                            SKILL_NONE, SKILL_NONE );
+                            &ci );
 
   return pc;
 
