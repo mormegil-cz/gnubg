@@ -1,3 +1,13 @@
+Mon Oct 28 22:07:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Compressed one-sided bearoff databases.
+
+	* eval.c (EvalOS): code for reading new compress databases
+	* eval.c (DumpBearoffOS): add some new outputs.
+	* eval.c (StatusOS): new function.
+
+	* makebearoff.c: code for writing compressed bearoff databases.
+
 Mon Oct 28 21:35:50 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New rollout parameters: truncate at bearoff databases.
@@ -10,6 +20,10 @@ Mon Oct 28 21:35:50 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* set.c (CommandSetRolloutBearoffTruncationExact,
 	CommandSetRolloutBearoffTruncationOS): new functions.
 	* show.c (ShowRollout): show new parameters.
+	* sgf.c (RestoreRolloutRolloutContext, WriteRolloutContext):
+	write new rollout parameters.
+	* rollout.c (BasicCubefulRollout): implement new parameters.
+	* text.c (OutputRolloutContext): write new parameters.
 
 Sun Oct 27 00:54:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 

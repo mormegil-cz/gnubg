@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "eval.h"
 #include "positionid.h"
@@ -31,6 +32,37 @@
 
 static unsigned int *ausRolls;
 static double aaEquity[ 924 ][ 924 ];
+
+
+static void
+CalcIndex ( const unsigned short int aProb[ 32 ],
+            unsigned int *piIdx, unsigned int *pnNonZero ) {
+
+  int i;
+  int j = 32;
+
+
+  /* find max non-zero element */
+
+  for ( i = 31; i >= 0; --i )
+    if ( aProb[ i ] ) {
+      j = i;
+      break;
+    }
+
+  /* find min non-zero element */
+
+  *piIdx = 0;
+  for ( i = 0; i <= j; ++i ) 
+    if ( aProb[ i ] ) {
+      *piIdx = i;
+      break;
+    }
+
+
+  *pnNonZero = j - *piIdx + 1;
+
+}
 
 static void BearOff( int nId, int nPoint, 
                      unsigned short aaProb[][ 32 ],
@@ -170,12 +202,17 @@ static void BearOff2( int nUs, int nThem ) {
 
 static void
 generate ( const int nTSP, const int nTSC, 
-           const int nOS, const int fMagicBytes ) {
+           const int nOS, const int fMagicBytes,
+           const int fCompress, const int fGammon ) {
 
     int i, j, k;
     int n;
     unsigned short int *pus;
     unsigned short int *pusGammon;
+    unsigned int iIdx, nNonZero;
+
+    unsigned int npos = 0;
+
 #ifdef STDOUT_FILENO 
     FILE *output;
 
@@ -218,7 +255,7 @@ generate ( const int nTSP, const int nTSC,
       for( i = 1; i < 32; ++i )
         pus[ i ] = 0;
 
-      pusGammon[ i ] = 0xFFFF;
+      pusGammon[ 0 ] = 0xFFFF;
       for( i = 1; i < 32; ++i )
         pusGammon[ i ] = 0;
 
@@ -233,20 +270,76 @@ generate ( const int nTSP, const int nTSC,
 
       if ( fMagicBytes ) {
         char sz[ 21 ];
-        sprintf ( sz, "%02dxxxxxxxxxxxxxxxxxx", nOS );
+        sprintf ( sz, "%02dx%1dxxxxxxxxxxxxxxx", nOS, fCompress );
         puts ( sz );
       }
 
-      for( k = 0, i = 0; i < n; i++ )
-	for( j = 0; j < 32; j++, k++ ) {
-          putc ( pus[ k ] & 0xFF, output );
-          putc ( pus[ k ] >> 8, output );
-          if ( nOS > 6 ) {
-            putc ( pusGammon[ k ] & 0xFF, output );
-            putc ( pusGammon[ k ] >> 8, output );
-          }
-	}
+      if ( fCompress ) {
 
+        npos = 0;
+
+        for ( i = 0; i < n; ++i ) {
+
+          putc ( npos & 0xFF, output );
+          putc ( ( npos >> 8 ) & 0xFF, output );
+          putc ( ( npos >> 16 ) & 0xFF, output );
+          putc ( ( npos >> 24 ) & 0xFF, output );
+          
+          CalcIndex ( pus + i *32, &iIdx, &nNonZero );
+
+          putc ( nNonZero & 0xFF, output );
+
+          putc ( iIdx & 0xFF, output );
+
+          npos += nNonZero;
+
+          CalcIndex ( pusGammon + i *32, &iIdx, &nNonZero );
+
+          putc ( nNonZero & 0xFF, output );
+
+          putc ( iIdx & 0xFF, output );
+
+          npos += nNonZero;
+
+        }
+
+      }
+
+      for( i = 0; i < n; i++ ) {
+
+        if ( fCompress ) {
+          CalcIndex ( pus + i * 32 , &iIdx, &nNonZero );
+        }
+        else {
+          iIdx = 0;
+          nNonZero = 32;
+        }
+
+	for( j = iIdx; j < iIdx + nNonZero; j++ ) {
+          putc ( pus[ i * 32 + j ] & 0xFF, output );
+          putc ( pus[ i * 32 + j ] >> 8, output );
+        }
+
+        if ( fGammon ) {
+          
+          if ( fCompress ) {
+            CalcIndex ( pusGammon + i * 32, &iIdx, &nNonZero );
+          }
+          else {
+            iIdx = 0;
+            nNonZero = 32;
+          }
+          
+          for( j = iIdx; j < iIdx + nNonZero; j++ ) {
+            
+            putc ( pusGammon[ i * 32 + j ] & 0xFF, output );
+            putc ( pusGammon[ i * 32 + j ] >> 8, output );
+          }
+          
+        }
+        
+      }
+      
     }
 
     if ( nTSP && nTSC ) {
@@ -290,6 +383,10 @@ usage ( char *arg0 ) {
            "Options:\n"
            "  -t, --two-sided PxC Number of points and number of chequers\n"
            "                      for two-sided database\n"
+           "  -c, --compress      Use compression scheme "
+                                  "for one-sided databases\n"
+           "  -g, --gammons       Include gammon distribution for one-sided"
+                                  " databases\n"
            "  -o, --one-sided P   Number of points for one-sided database\n"
            "  -m, --magic-bytes   Write magic bytes\n"
            "  -v, --version       Show version information and exit\n"
@@ -297,11 +394,8 @@ usage ( char *arg0 ) {
            "\n"
            "To generate gnubg.bd:\n"
            "%s -t 6x6 -o 6 > gnubg.bd\n"
-           "\n"
-           "To generate gnubg_huge_os.bd:\n"
-           "%s -t 0x0 -o 10 -m > gnubg_huge_os.bd\n"
            "\n",
-           arg0, arg0, arg0 );
+           arg0, arg0 );
 
 }
 
@@ -319,6 +413,8 @@ extern int main( int argc, char **argv ) {
   int nOS = 6;
   int fMagicBytes = FALSE;
   char ch;
+  int fCompress = FALSE;
+  int fGammon = FALSE;
 
   static struct option ao[] = {
     { "two-sided", required_argument, NULL, 't' },
@@ -326,10 +422,12 @@ extern int main( int argc, char **argv ) {
     { "magic-bytes", no_argument, NULL, 'm' },
     { "help", no_argument, NULL, 'h' },
     { "version", no_argument, NULL, 'v' },
+    { "compress", no_argument, NULL, 'c' },
+    { "gammon", no_argument, NULL, 'g' },
     { NULL, 0, NULL, 0 }
   };
 
-  while ( ( ch = getopt_long ( argc, argv, "t:o:mhv", ao, NULL ) ) !=
+  while ( ( ch = getopt_long ( argc, argv, "t:o:mhvcg", ao, NULL ) ) !=
           (char) -1 ) {
     switch ( ch ) {
     case 't': /* size of two-sided */
@@ -349,6 +447,12 @@ extern int main( int argc, char **argv ) {
       version ();
       exit ( 0 );
       break;
+    case 'c': /* compress */
+      fCompress = TRUE;
+      break;
+    case 'g': /* gammons */
+      fGammon = TRUE;
+      break;
     default:
       usage ( argv[ 0 ] );
       exit ( 1 );
@@ -362,15 +466,15 @@ extern int main( int argc, char **argv ) {
     exit ( 2 );
   }
 
-  if ( nOS )
+  if ( nOS ) 
     fprintf ( stderr, 
               "One-sided database:\n"
               "Number of points   : %12d\n"
               "Number of positions: %'12d\n"
-              "Size of file       : %'12d bytes\n",
+              "Size of file (unc) : %'12d bytes\n",
               nOS, 
               Combination ( nOS + 15, nOS ),
-              ( nOS > 6 ) ? 
+              ( fGammon ) ? 
               2 * Combination ( nOS + 15, nOS ) * 64 :
               Combination ( nOS + 15, nOS ) * 64 );
   else
@@ -389,7 +493,7 @@ extern int main( int argc, char **argv ) {
     fprintf ( stderr, 
               "No two-sided database created.\n" );
       
-  generate ( nTSP, nTSC, nOS, fMagicBytes );
+  generate ( nTSP, nTSC, nOS, fMagicBytes, fCompress, fGammon );
 
   return 0;
 
