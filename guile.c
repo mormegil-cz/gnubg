@@ -437,7 +437,6 @@ extern int GuileInitialise( char *szDir ) {
     scm_sysintern( "CLASS_BEAROFF2", SCM_MAKINUM( CLASS_BEAROFF2 ) );
     scm_sysintern( "CLASS_BEAROFF1", SCM_MAKINUM( CLASS_BEAROFF1 ) );
     scm_sysintern( "CLASS_RACE", SCM_MAKINUM( CLASS_RACE ) );
-    scm_sysintern( "CLASS_BPG", SCM_MAKINUM( CLASS_BPG ) );
     scm_sysintern( "CLASS_CONTACT", SCM_MAKINUM( CLASS_CONTACT ) );
     
     scm_make_gsubr( "board->position-id", 1, 0, 0, board_to_position_id );
