@@ -1435,11 +1435,12 @@ extern void CommandDrop( char *sz ) {
 	outputf( "%s refuses the cube and gives up %d point%s.\n",
 		ap[ fTurn ].szName, nCube, nCube == 1 ? "" : "s" );
     
-    pmr = malloc( sizeof( pmr->t ) );
-    pmr->mt = MOVE_DROP;
-    pmr->t.sz = NULL;
-    pmr->t.fPlayer = fTurn;
-    pmr->t.st = SKILL_NONE;
+    pmr = malloc( sizeof( pmr->d ) );
+    pmr->d.mt = MOVE_DROP;
+    pmr->d.sz = NULL;
+    pmr->d.fPlayer = fTurn;
+    pmr->d.etDouble = EVAL_NONE;
+    pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2187,11 +2188,12 @@ extern void CommandTake( char *sz ) {
 	outputf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName,
 		 nCube << 1 );
     
-    pmr = malloc( sizeof( pmr->t ) );
-    pmr->mt = MOVE_TAKE;
-    pmr->t.sz = NULL;
-    pmr->t.fPlayer = fTurn;
-    pmr->t.st = SKILL_NONE;
+    pmr = malloc( sizeof( pmr->d ) );
+    pmr->d.mt = MOVE_TAKE;
+    pmr->d.sz = NULL;
+    pmr->d.fPlayer = fTurn;
+    pmr->d.etDouble = EVAL_NONE;
+    pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
 
     UpdateSetting( &nCube );
