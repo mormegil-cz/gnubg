@@ -1,4 +1,4 @@
-Thu Mar 18 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Mar 19 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Change window order and titles, and put back
 		accelerators from windows (Ned's suggestions)
