@@ -648,7 +648,7 @@ extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
 extern int ParseMove( char *pch, int an[ 8 ] ) {
 
-    int i, j, c = 0, anUser[ 8 ];
+    int i, j, iBegin, iEnd, n, c = 0, anUser[ 8 ];
     unsigned fl = 0;
     
     while( *pch ) {
@@ -718,14 +718,57 @@ extern int ParseMove( char *pch, int an[ 8 ] ) {
             break;
 
         case '*':
+	case ',':
+	case ')':
             /* Currently ignored. */
             break;
 
         case '(':
-            /* FIXME Allow repeated moves (e.g. "6/5(2)"). */
-            errno = ENOSYS;
-            return -1;
-            
+	    if( ( n = strtol( pch + 1, &pch, 10 ) - 1 ) < 1 ) {
+		/* invalid count */
+		errno = EINVAL;
+		return -1;
+	    }
+	    
+	    if( c < 2 ) {
+		/* incomplete move before ( -- syntax error */
+		errno = EINVAL;
+		return -1;
+	    }
+	    
+	    if( fl & ( 1 << c ) ) {
+		/* / immediately before ( -- syntax error */
+		errno = EINVAL;
+		return -1;
+	    }
+
+	    for( iBegin = c - 1; iBegin >= 0; iBegin-- )
+		if( !( fl & ( 1 << iBegin ) ) )
+		    break;
+	    
+	    if( iBegin < 0 ) {
+		/* no / anywhere before ( -- syntax error */
+		errno = EINVAL;
+		return -1;
+	    }
+
+	    iEnd = c;
+
+	    if( c + ( iEnd - iBegin ) * n > 8 ) {
+		/* Too many moves. */
+		errno = EINVAL;
+		return -1;
+	    }
+	    
+	    for( i = 0; i < n; i++ )
+		for( j = iBegin; j < iEnd; j++ ) {
+		    if( fl & ( 1 << j ) )
+			fl |= 1 << c;
+		    anUser[ c++ ] = anUser[ j ];
+		}
+
+	    break;
+	    
         default:
             errno = EINVAL;
             return -1;

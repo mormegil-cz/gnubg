@@ -295,6 +295,7 @@ static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
 static void ImportPos( gpointer *p, guint n, GtkWidget *pw );
+static void ImportSGG( gpointer *p, guint n, GtkWidget *pw );
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
@@ -1710,6 +1711,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_Import/._mat match...", NULL, ImportMat, 0, NULL },
 	{ "/_File/_Import/._pos position...", NULL, ImportPos, 0, NULL },
 	{ "/_File/_Import/FIBS _oldmoves...", NULL, ImportOldmoves, 0, NULL },
+	{ "/_File/_Import/._sgg match...", NULL, ImportSGG, 0, NULL },
 	{ "/_File/_Export", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Export/_Game", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Export/_Game/.gam", NULL, ExportGameGam, 0, NULL },
@@ -2752,6 +2754,11 @@ static void ImportPos( gpointer *p, guint n, GtkWidget *pw ) {
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw ) {
 
     FileCommand( "Import FIBS oldmoves", "import oldmoves" );
+}
+
+static void ImportSGG( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Import .sgg match", "import sgg" );
 }
 
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {

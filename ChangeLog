@@ -1,3 +1,12 @@
+Fri Sep 21 11:10:27 2001  Gary Wong  <gtw@research.att.com>
+
+	* drawboard.c (ParseMove): Allow multiple move syntax (e.g.
+	"8/7(2)").
+
+	* gnubg.c (CommandImportSGG): New function.
+	* gtkgame.c (ImportSGG): New function.
+	* import.c (ImportSGGGame, ImportSGG): New functions.
+
 Thu Sep 20 17:52:08 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (CommandSaveSettings): Save "set beavers" setting, and

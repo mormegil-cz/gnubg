@@ -317,7 +317,8 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
 	    
 	    AddMoveRecord( pmr );
-	}
+	} else
+	    free( pmr );
     } else if( !strncasecmp( sz, "double", 6 ) ) {
 	pmr = malloc( sizeof( pmr->d ) );
 	pmr->d.mt = MOVE_DOUBLE;
@@ -561,7 +562,8 @@ static void ParseOldmove( char *sz, int fInvert ) {
 		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
 	    
 	    AddMoveRecord( pmr );
-	}
+	} else
+	    free( pmr );
 	return;
     } else if( !strncasecmp( sz + 3, "doubles", 7 ) ) {
 	pmr = malloc( sizeof( pmr->d ) );
@@ -739,6 +741,230 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 	    break;
     }
 
+    UpdateSettings();
+    
+#if USE_GTK
+    if( fX ){
+	GTKThaw();
+	GTKSet(ap);
+    }
+#endif
+}
+
+static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
+
+    char sz[ 1024 ];
+    char *pch;
+    int c, fPlayer, anRoll[ 2 ];
+    moverecord *pmgi, *pmr;
+    
+    InitBoard( ms.anBoard );
+
+    ClearMoveRecord();
+
+    ListInsert( &lMatch, plGame );
+
+    pmgi = malloc( sizeof( movegameinfo ) );
+    pmgi->g.mt = MOVE_GAMEINFO;
+    pmgi->g.sz = NULL;
+    pmgi->g.i = i - 1;
+    pmgi->g.nMatch = nLength;
+    pmgi->g.anScore[ 0 ] = n0;
+    pmgi->g.anScore[ 1 ] = n1;
+    pmgi->g.fCrawford = TRUE; /* FIXME */
+    if( ( pmgi->g.fCrawfordGame = !fPostCrawford &&
+	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
+	fPostCrawford = TRUE;
+    pmgi->g.fJacoby = FALSE; /* FIXME */
+    pmgi->g.fWinner = -1;
+    pmgi->g.nPoints = 0;
+    pmgi->g.fResigned = FALSE;
+    pmgi->g.nAutoDoubles = 0; /* FIXME */
+    IniStatcontext( &pmgi->g.sc );
+    AddMoveRecord( pmgi );
+
+    anRoll[ 0 ] = 0;
+    
+    while( fgets( sz, 1024, pf ) ) {
+	/* check for game over */
+	for( pch = sz; *pch; pch++ )
+	    if( !strncmp( pch, "  wins ", 7 ) )
+		goto finished;
+	    else if( *pch == ':' || *pch == ' ' )
+		break;
+
+	if( isdigit( *sz ) ) {
+	    for( pch = sz; isdigit( *pch ); pch++ )
+		;
+
+	    if( *pch++ == '\t' ) {
+		/* we have a move! */
+		if( anRoll[ 0 ] ) {
+		    pmr = malloc( sizeof( pmr->n ) );
+		    pmr->n.mt = MOVE_NORMAL;
+		    pmr->n.sz = NULL;
+		    pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
+		    pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
+		    pmr->n.fPlayer = fPlayer;
+		    pmr->n.ml.cMoves = 0;
+		    pmr->n.ml.amMoves = NULL;
+		    pmr->n.esDouble.et = EVAL_NONE;
+		    pmr->n.lt = LUCK_NONE;
+		    pmr->n.rLuck = -HUGE_VALF;
+		    pmr->n.st = SKILL_NONE;
+		    
+		    if( ( c = ParseMove( pch + 4, pmr->n.anMove ) ) >= 0 ) {
+			for( i = 0; i < ( c << 1 ); i++ )
+			    pmr->n.anMove[ i ]--;
+			if( c < 4 )
+			    pmr->n.anMove[ c << 1 ] =
+				pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+			
+			AddMoveRecord( pmr );
+		    } else
+			free( pmr );
+		    
+		    anRoll[ 0 ] = 0;
+		} else {
+		    if( ( fPlayer = *pch == '\t' ) )
+			pch++;
+
+		    if( *pch >= '1' && *pch <= '6' && pch[ 1 ] >= '1' &&
+			pch[ 1 ] <= '6' ) {
+			/* dice roll */
+			anRoll[ 0 ] = *pch - '0';
+			anRoll[ 1 ] = pch[ 1 ] - '0';
+
+			if( strstr( pch, "O-O" ) ) {
+			    pmr = malloc( sizeof( pmr->n ) );
+			    pmr->n.mt = MOVE_NORMAL;
+			    pmr->n.sz = NULL;
+			    pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
+			    pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
+			    pmr->n.fPlayer = fPlayer;
+			    pmr->n.ml.cMoves = 0;
+			    pmr->n.ml.amMoves = NULL;
+			    pmr->n.anMove[ 0 ] = -1;
+			    pmr->n.esDouble.et = EVAL_NONE;
+			    pmr->n.lt = LUCK_NONE;
+			    pmr->n.rLuck = -HUGE_VALF;
+			    pmr->n.st = SKILL_NONE;
+			    AddMoveRecord( pmr );
+			    anRoll[ 0 ] = 0;
+			} else {
+			    for( pch += 3; *pch; pch++ )
+				if( !isspace( *pch ) )
+				    break;
+			    
+			    if( *pch ) {
+				/* Apparently SGG files can contain spurious
+				   duplicate moves -- the only thing we can
+				   do is ignore them. */
+				anRoll[ 0 ] = 0;
+				continue;
+			    }
+			
+			    pmr = malloc( sizeof( pmr->sd ) );
+			    pmr->sd.mt = MOVE_SETDICE;
+			    pmr->sd.sz = NULL;
+			    pmr->sd.fPlayer = fPlayer;
+			    pmr->sd.anDice[ 0 ] = anRoll[ 0 ];
+			    pmr->sd.anDice[ 1 ] = anRoll[ 1 ];
+			    pmr->sd.lt = LUCK_NONE;
+			    pmr->sd.rLuck = -HUGE_VALF;
+			    AddMoveRecord( pmr );
+			}
+		    } else {
+			if( !strncasecmp( pch, "double", 6 ) ) {
+			    pmr = malloc( sizeof( pmr->d ) );
+			    pmr->d.mt = MOVE_DOUBLE;
+			    pmr->d.sz = NULL;
+			    pmr->d.fPlayer = fPlayer;
+			    pmr->d.esDouble.et = EVAL_NONE;
+			    pmr->d.st = SKILL_NONE;
+			    AddMoveRecord( pmr );
+			} else if( !strncasecmp( pch, "accept", 6 ) ) {
+			    pmr = malloc( sizeof( pmr->d ) );
+			    pmr->d.mt = MOVE_TAKE;
+			    pmr->d.sz = NULL;
+			    pmr->d.fPlayer = fPlayer;
+			    pmr->d.esDouble.et = EVAL_NONE;
+			    pmr->d.st = SKILL_NONE;
+			    AddMoveRecord( pmr );
+			} else if( !strncasecmp( pch, "reject", 6 ) ) {
+			    pmr = malloc( sizeof( pmr->d ) );
+			    pmr->d.mt = MOVE_DROP;
+			    pmr->d.sz = NULL;
+			    pmr->d.fPlayer = fPlayer;
+			    pmr->d.esDouble.et = EVAL_NONE;
+			    pmr->d.st = SKILL_NONE;
+			    AddMoveRecord( pmr );
+			}
+		    }
+		}
+	    }
+	}
+    }
+
+ finished:
+    AddGame( pmgi );
+}
+
+extern void ImportSGG( FILE *pf, char *szFilename ) {
+
+    char sz[ 80 ], sz0[ 32 ], sz1[ 32 ];
+    int n, n0, n1, nLength, i;
+
+    fWarned = fPostCrawford = FALSE;
+    
+    while( 1 ) {
+	if( ( n = fscanf( pf, "%32s vs. %32s\n", sz0, sz1 ) ) == EOF ) {
+	    fprintf( stderr, "%s: not a valid SGG file\n", szFilename );
+	    return;
+	} else if( n == 2 )
+	    break;
+	
+	/* discard line */
+	while( ( n = getc( pf ) ) != '\n' && n != EOF )
+	    ;
+    }
+    
+    if( ms.gs == GAME_PLAYING && fConfirm ) {
+	if( fInterrupt )
+	    return;
+	
+	if( !GetInputYN( "Are you sure you want to import a saved match, "
+			 "and discard the game in progress? " ) )
+	    return;
+    }
+
+#if USE_GTK
+    if( fX )
+	GTKFreeze();
+#endif
+    
+    FreeMatch();
+    ClearMatch();
+
+    strcpy( ap[ 0 ].szName, sz0 );
+    strcpy( ap[ 1 ].szName, sz1 );
+    
+    while( fgets( sz, 80, pf ) ) {
+	if( sscanf( sz, "Game %d. %d-%d/%d\n", &i, &n0, &n1, &nLength ) == 4 )
+	    break;
+
+	/* FIXME check for options -- Jacoby, Crawford, etc. */
+    }
+    
+    while( !feof( pf ) ) {
+	ImportSGGGame( pf, i, nLength, n0, n1 );
+	
+	while( fgets( sz, 80, pf ) )
+	    if( sscanf( sz, "Game %d. %d-%d/%d\n", &i, &n0, &n1,
+			&nLength ) == 4 )
+		break;
+    }
+	
     UpdateSettings();
     
 #if USE_GTK

@@ -68,8 +68,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Make output*() functions wrap words, and pause before scrolling (as in
   gdb).  Make sure output to stderr is available when using GTK -- perror
   calls will have to be replaced, for instance.
-** Extend FormatMove() and ParseMove() to handle abbreviation of
-  multiple moves (e.g. "8/7(2) 6/5(2)").
+** Extend FormatMove() to handle abbreviation of multiple moves (e.g.
+  "8/7(2) 6/5(2)").
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
@@ -258,6 +258,8 @@ duplication of effort and to make sure our changes merge easily.
   many points a resignation was for.  See Little_Sister match
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
+** Trying to import a match when fConfirm is set and a match in
+  progress asks for confirmation twice. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -276,6 +278,8 @@ duplication of effort and to make sure our changes merge easily.
 *** JF .gam, .mat and .pos.
 **** Make the .mat format identical to Jellyfish (things to check:
   beavers, resignations, "and the match"...)
+*** SGG.
+**** Check drops, beavers, resignations, implement Crawford and Jacoby etc.
 *** HTML.
 *** ASCII.
 *** LaTeX.
