@@ -56,6 +56,7 @@ Thomas Meyer
 Achim Mueller
 Magnar Naustdalslid
 Dave Neary
+Rolf Nielsen
 Mirori Orange
 Peter Orum
 Roy Passfield

@@ -377,7 +377,10 @@ updateStatcontext ( statcontext *psc,
      * update chequerplay statistics 
      */
 
-    if ( fAnalyseMove && pmr->n.esChequer.et != EVAL_NONE ) {
+    /* hmm, MOVE_NORMALs which has no legal moves have
+       pmr->n.esChequer.et == EVAL_NONE */
+
+    if ( fAnalyseMove /* && pmr->n.esChequer.et != EVAL_NONE */ ) {
 
       /* find skill */
 
@@ -401,8 +404,8 @@ updateStatcontext ( statcontext *psc,
 	  
       rCost = pms->nMatchTo ? eq2mwc( rChequerSkill, &ci ) -
         eq2mwc( 0.0f, &ci ) : pms->nCube * rChequerSkill;
-	  
-      psc->anTotalMoves[ pmr->n.fPlayer ]++;
+
+      psc->anTotalMoves[ pmr->n.fPlayer ]++;	  
       psc->anMoves[ pmr->n.fPlayer ][ Skill( rChequerSkill ) ]++;
 	  
       if( pmr->n.ml.cMoves > 1 ) {
