@@ -3,7 +3,7 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year February, 2000
+@set month-year July, 2000
 
 @syncodeindex vr cp
 
@@ -79,16 +79,16 @@ to be able to accept a double?''@: and automate complicated rollout
 tasks.
 
 It currently plays at about the level of an advanced flight tournament
-player (depending what parameters are used, it rates in the 1800s to 1900s on
+player (depending what parameters are used, it rates in the 1800s to 2000s on
 @cindex FIBS
-@uref{http://www.fibs.com/,,FIBS},
-the First Internet Backgammon Server --- around the 98th percentile) and
-is gradually improving; it should be somewhat stronger than this when
-released.  Since almost all of the CPU time required during supervised
-training is spent performing rollouts, and rollouts can easily be
-performed in parallel, it is hoped that users will be able to pool
-rollout results and collectively train it to a level stronger than any
-individual could obtain.
+@uref{http://www.fibs.com/,,FIBS}, the First Internet Backgammon Server
+--- at its strongest, it ranks in the top 10 of over 6000 rated players
+there) and is gradually improving; it should be somewhat stronger than
+this when released.  Since almost all of the CPU time required during
+supervised training is spent performing rollouts, and rollouts can
+easily be performed in parallel, it is hoped that users will be able to
+pool rollout results and collectively train it to a level stronger than
+any individual could obtain.
 
 If you can tolerate the rough edges, periodic pre-releases of the source
 will be made on @uref{ftp://alpha.gnu.org/gnu/gnubg/,the alpha.gnu.org
@@ -805,8 +805,8 @@ accept                  playing
 agree                   playing
 beaver                  playing         / cube
 database dump           databases
-database evaluate       databases
 database generate       databases
+database rollout        databases
 database train          databases
 decline                 playing
 double                  playing         / cube
@@ -832,20 +832,25 @@ rollout                 analysis
 save game               playing         / recording
 save match              playing         / recording
 save weights            training
-set autobearoff         playing
-set autocrawford        playing         / matches and sessions
-set autogame            playing         / matches and sessions
-set automove            playing
-set autoroll            playing         / dice
+set auto bearoff        playing
+set auto crawford       playing         / matches and sessions
+set auto doubles        playing         / cube
+set auto game           playing         / matches and sessions
+set auto move           playing
+set auto roll           playing         / dice
 set board               playing
 set cache               analysis?
 set crawford            playing         / matches and sessions
 set cube centre         playing         / cube
 set cube owner          playing         / cube
+set cube use            playing         / cube
 set cube value          playing         / cube
+set delay               playing
 set dice                playing         / dice
-set display             playing?
+set display             playing
+set evaluation          analysis?
 set jacoby              playing         / matches and sessions
+set nackgammon          playing
 set player gnubg        playing         / computer player
 set player human        playing         
 set player name         playing         
@@ -860,21 +865,32 @@ set rng isaac           playing         / dice
 set rng manual          playing         / dice
 set rng mersenne        playing         / dice
 set rng user            playing         / dice
+set rollout *           analysis
 set score               playing         / matches and sessions
 set seed                playing         / dice
 set turn                playing
+show automatic          playing?
 show board              playing
 show cache              analysis?
+show confirm            playing?
 show copying            basic
 show crawford           playing         / matches and sessions
+show cube               playing         / cube
+show delay              playing
 show dice               playing         / dice
+show display
+show evaluation
 show jacoby             playing         / matches and sessions
+show kleinman           analysis
+show nackgammon
 show pipcount           playing
 show player             playing
 show postcrawford       playing         / matches and sessions
+show prompt
 show rng                playing         / dice
+show rollout            analysis
 show score              playing         / matches and sessions
-show seed               playing         / dice
+show thorp
 show turn               playing
 show warranty           basic
 take                    playing         / cube
@@ -917,6 +933,11 @@ GNU Backgammon will normally use a graphical board window under the X
 Window System, if possible.  To prevent this behaviour and use standard
 terminal output instead, you can specify the @option{--tty} option (which
 can be abbreviated to @option{-t}).
+
+By default, @gnubg{} will attempt to load pre-trained neural net
+weights; if you have no weights or wish to train a net from scratch,
+you can supply the @option{--no-weights} (@option{-n}) option, and
+new weights will be randomly generated.
 
 @node Leaving gnubg
 @section Leaving @gnubg
@@ -982,8 +1003,14 @@ and if it has any subcommands then they are listed in brief.
 @kindex show warranty
 @item show copying
 @itemx show warranty
-These commands are used to show the conditions GNU Backgammon is distributed
-under.  FIXME summarise GPL.
+These commands are used to show the conditions GNU Backgammon is
+distributed under (the GNU General Public License).  Essentially, there
+is no warranty for @gnubg{}, and everybody is free to use, inspect,
+copy, modify and distribute it.  You are permitted to do just about
+anything with @gnubg{}, except deny these freedoms to others.  For a
+precise description of your rights and obligations, please use the
+@code{show copying} and @code{show warranty} commands, or see the file
+@file{COPYING} in the @gnubg{} distribution (the contents are identical).
 @end table
 
 @node Playing
@@ -1195,15 +1222,31 @@ may not both share the same name.  Names are not case sensitive.
 @kindex show turn
 @item set turn @var{player}
 @itemx show turn
-FIXME
+The command @code{set turn @var{player}} (where @var{player} can be the
+player's name or number, as above) is used to control which player is on
+roll.  It will cancel the current dice roll and cube action (if any),
+and set the named player on roll.
 @kindex set autobearoff
 @kindex set automove
 @item set autobearoff
 @itemx set automove
-FIXME
+FIXME -- N.B. these are now subcommands of "set auto".
 @kindex set display
-@item set display
-FIXME
+@item set display @var{value}
+By default, @gnubg{} will update the display before and after every move,
+whether made by a human or automatically.  (When using the graphical board,
+the board window is redrawn to the current position; when using the ASCII
+board, a new diagram is displayed on the terminal.)  Information about
+cube actions and resignations offered will also appear as appropriate.
+
+The command @code{set display off} will suppress this output, which can
+speed up the display and reduce clutter (this might be useful when completing
+a game where both sides are played by the computer, for instance).
+@code{set display on} will restore the default behaviour.  The standard
+toggle synonyms may be substituted for @code{on} and @code{off}.
+
+The board will always be updated when it is a human player's turn to move,
+regardless of the @code{display} setting.
 @end table
 
 @node Dice
@@ -1212,16 +1255,34 @@ FIXME
 @cindex rolls, dice
 
 @table @code
+@kindex roll
+@item roll
+This is the basic command used to roll the dice before each turn.  It will
+use the current random number generator to produce a dice roll, and then
+allow the player to move (if there is at least one legal play for the
+dice rolled).  By rolling the dice, the player gives up any opportunity
+to double this turn.
+@kindex set automatic roll
+@itemx set automatic roll @var{value}
+When the cube is not being used, or is owned by the opponent, or at
+certain scores in a match, it is either illegal or pointless for a
+player to double.  Under these circumstances, the player might as well
+roll the dice immediately --- the @code{set automatic roll} command
+instructs @gnubg{} to go ahead and roll the dice without waiting for the
+player to issue @code{roll}, whenever no doubling decision is necessary.
+The standard toggle commands may be used to turn this option on and off.
+@kindex set dice
+@itemx set dice @var{pips} @var{pips}
+To set the dice to a particular roll (whether they have already been rolled
+or not), use the @code{set dice} command.  The player can then play a move
+according to the dice specified.  Like the @code{roll} command, this will
+also forego any opportunity to double; to disregard a dice roll and
+allow the player to roll again (or double, if permitted), use @code{set
+turn @var{player}}.
 @kindex set rng
 @kindex show rng
-@kindex roll
-@kindex set autoroll
-@kindex set dice
 @item set rng @var{generator} [@var{seed}]
 @itemx show rng
-@itemx roll
-@itemx set autoroll
-@itemx set dice @var{pips} @var{pips}
 FIXME
 @end table
 
@@ -1250,7 +1311,7 @@ FIXME
 This section describes how to use GNU Backgammon to play series of
 games, whether those games are part of a match (as in tournament
 backgammon) or a session of independent games (conventionally
-called ``money'' play, regardless of whether any money is involved).
+called ``money'' play, regardless of whether any payment is involved).
 
 @table @code
 @kindex new match
@@ -1409,7 +1470,10 @@ If you want to experiment with the very latest code, the development
 sources are kept in a CVS repository at
 @uref{http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/}; see the @gnubg{}
 web page at @uref{http://www.gnu.org/software/gnubg/gnubg.html} for
-instructions on checking out sources from the repository.
+instructions on checking out sources from the repository.  Snapshots of
+the main branch of the repository are automatically placed in the
+@file{snapshots} directory of the FTP area above, if you wish to retrieve
+this experimental code via FTP.
 
 @node How do I play a game?
 @section How do I play a game?
@@ -1456,9 +1520,16 @@ The file @file{gnubg.weights} contains the trained neural net weights
 for most of @gnubg{}'s position evaluators.  Like @file{gnubg.bd}, it should
 be kept in either the current directory or the installed directory.
 
-You should be able to obtain a copy from wherever you found the @gnubg{}
-distribution.  Future releases of @gnubg{} will allow you to start without
-any existing weights at all, if you want to train your own.
+A binary variant of the weights file named @file{gnubg.wd} can also be
+used (this version can be loaded more quickly, but is not portable
+between different computer architectures).  It will automatically be
+built during the compilation process, and used in preference to
+@file{gnubg.weights} if found.
+
+You should be able to obtain a copy of the weights from wherever you
+found the @gnubg{} distribution.  If you wish to start @gnubg{} without
+any weights (and train your own), you can use the @option{--no-weights}
+option (see @pxref{Invoking gnubg}).
 
 @node Black and white board window
 @section The board window is shown in black and white and looks awful!  What's wrong?
