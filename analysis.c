@@ -660,7 +660,6 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] ) {
 
     static int anBoardMove[ 2 ][ 25 ];
-    static int fFirstMove;
     static unsigned char auch[ 10 ];
     static cubeinfo ci;
     static float rSkill, rChequerSkill;
@@ -679,15 +678,17 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 
     FixMatchState ( pms, pmr );
 
-    if ((pms->anBoard[0][5]  != 5) || (pms->anBoard[1][5]  != 5) ||
-	(pms->anBoard[0][12] != 5) || (pms->anBoard[1][12] != 5) ||
-	(pms->anBoard[0][8]  != 3) || (pms->anBoard[1][8]  != 3) ||
-	(pms->anBoard[0][23] != 2) || (pms->anBoard[1][23] != 2))
-      is_initial_position = 0;
+    /* check if it's the initial position: no cube analysis and special
+       luck analysis */
+
+    if ( pmr->mt != MOVE_GAMEINFO ) {
+      InitBoard( anBoardMove, pms->bgv );
+      is_initial_position = 
+        ! memcmp( anBoardMove, pms->anBoard, 2 * 25 * sizeof ( int ) );
+    }
 
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
-	fFirstMove = 1;
 
         if ( fUpdateStatistics ) {
           IniStatcontext( psc );
@@ -702,11 +703,8 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	    pms->fMove = pmr->n.fPlayer;
 	}
 
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->n.fPlayer ] ) {
-          /* we do not analyse this player */
-          fFirstMove = 0;
+        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->n.fPlayer ] )
           break;
-        }
       
 	rSkill = rChequerSkill = 0.0f;
 	GetMatchStateCubeInfo( &ci, pms );
@@ -714,7 +712,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	/* cube action? */
       
 	if ( ! is_initial_position && fAnalyseCube && 
-	     pmgi->fCubeUse && !fFirstMove && GetDPEq ( NULL, NULL, &ci ) ) {
+	     pmgi->fCubeUse && GetDPEq ( NULL, NULL, &ci ) ) {
           
           if ( cmp_evalsetup ( pesCube, &pmr->n.esDouble ) > 0 ) {
             
@@ -746,7 +744,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	    pmr->n.rLuck = LuckAnalysis( pms->anBoard,
 					 pmr->n.anRoll[ 0 ],
 					 pmr->n.anRoll[ 1 ],
-					 &ci, fFirstMove );
+					 &ci, is_initial_position );
 	    pmr->n.lt = Luck( pmr->n.rLuck );
 	  
 	}
@@ -816,8 +814,6 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
         if ( fUpdateStatistics )
           updateStatcontext ( psc, pmr, pms, plGame );
 	  
-	fFirstMove = 0;
-      
 	break;
       
     case MOVE_DOUBLE:
@@ -995,7 +991,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	    pmr->sd.rLuck = LuckAnalysis( pms->anBoard,
 					  pmr->sd.anDice[ 0 ],
 					  pmr->sd.anDice[ 1 ],
-					  &ci, fFirstMove );
+					  &ci, is_initial_position );
 	    pmr->sd.lt = Luck( pmr->sd.rLuck );
 	}
 
