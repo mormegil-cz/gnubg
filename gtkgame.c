@@ -9211,12 +9211,22 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	static gulong id;
 	static int showingPanels;
 	static int showIDs;
+	static int maximised;
 
 	bd->rd->fShowGameInfo = n;
 
 	if (!n)
 	{
 		GTKShowWarning(WARN_FULLSCREEN_EXIT);
+
+#if USE_GTK2
+		/* Check if window is maximized */
+		{
+		GdkWindowState state = gdk_window_get_state(GTK_WIDGET(ptl)->window);
+		maximised = ((state & GDK_WINDOW_STATE_MAXIMIZED) == GDK_WINDOW_STATE_MAXIMIZED);
+		}
+#endif
+
 		id = gtk_signal_connect(GTK_OBJECT(ptl), "key-press-event", GTK_SIGNAL_FUNC(EndFullScreen), 0);
 
 		gtk_widget_hide(pwMenuBar);
@@ -9235,7 +9245,8 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 
 /* How can I maximize the window ?? */
 #if USE_GTK2
-		gtk_window_maximize(ptl);
+		if (!maximised)
+			gtk_window_maximize(ptl);
 		gtk_window_set_decorated(ptl, FALSE);
 #else
 		/* Not sure about gtk1...
@@ -9257,22 +9268,22 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_show(pwStatus);
 		gtk_widget_show(pwProgress);
 
-		if (showingPanels)
-			ShowAllPanels(NULL, 0, NULL);
-
 		bd->rd->fShowIDs = showIDs;
 
 		gtk_signal_disconnect(GTK_OBJECT(ptl), id);
 
 /* How can I (un)maximize the window ?? */
 #if USE_GTK2
-		gtk_window_unmaximize(ptl);
+		if (!maximised)
+			gtk_window_unmaximize(ptl);
 		gtk_window_set_decorated(ptl, TRUE);
 #else
 		/* Not sure about gtk1...
 		gdk_window_set_decorations(GTK_WIDGET(ptl)->window, 0);
 		*/
 #endif
+		if (showingPanels)
+			ShowAllPanels(NULL, 0, NULL);
 	}
 	UpdateSetting(&bd->rd->fShowIDs);
 }
