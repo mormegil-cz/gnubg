@@ -48,11 +48,6 @@ GeneralEvaluation ( char *sz,
                     cubeinfo *pci, evalsetup *pes );
 
 extern int
-GeneralEvaluationE ( float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
-                     int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, evalcontext *pec );
-
-extern int
 GeneralEvaluationR ( char *sz,
                      float arOutput[ NUM_ROLLOUT_OUTPUTS ],
                      float arStdDev[ NUM_ROLLOUT_OUTPUTS ],
