@@ -1503,7 +1503,7 @@ version ( void ) {
 #ifndef WIN32
   printf ( "makebearoff $Revision$\n" );
 #else
-  MessageBox( NULL, "makebearoff $Revision$\n" );
+  MessageBox( NULL, "makebearoff $Revision$\n", "Makebearoff", MB_OK );
 #endif
 }
 
