@@ -140,6 +140,12 @@ typedef struct _moveresign {
     char *sz;
     int fPlayer;
     int nResigned;
+
+    evalsetup esResign;
+    float arResign[ NUM_ROLLOUT_OUTPUTS ];
+
+    skilltype stResign;
+    skilltype stAccept;
 } moveresign;
 
 typedef struct _movesetboard {

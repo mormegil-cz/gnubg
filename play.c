@@ -407,6 +407,8 @@ extern void AddMoveRecord( void *pv ) {
     case MOVE_RESIGN:
 	assert( pmr->r.fPlayer >= 0 && pmr->r.fPlayer <= 1 );
 	assert( pmr->r.nResigned >= 1 && pmr->r.nResigned <= 3 );
+        assert( pmr->r.esResign.et >= EVAL_NONE &&
+                pmr->r.esResign.et <= EVAL_ROLLOUT );
 	break;
 	
     case MOVE_SETDICE:
@@ -857,35 +859,22 @@ extern int ComputerTurn( void ) {
 	 move with an interrupt. */
       memcpy( anBoardMove, ms.anBoard, sizeof( anBoardMove ) );
 
-      if( ClassifyPosition( ms.anBoard ) <= CLASS_RACE ) {
-	  /* Consider resigning -- no point wasting time over the decision,
-	     so only evaluate at 0 plies. */
-	  if( EvaluatePosition( anBoardMove, arOutput, &ci, NULL ) )
-	      return -1;
+      /* Consider resigning -- no point wasting time over the decision,
+         so only evaluate at 0 plies. */
 
-	  rPlay = Utility( arOutput, &ci );
-	  
-	  arResign[ OUTPUT_WIN ] = arResign[ OUTPUT_WINGAMMON ] =
-	      arResign[ OUTPUT_WINBACKGAMMON ] = 0.0f;
-	  arResign[ OUTPUT_LOSEGAMMON ] =
-	      arResign[ OUTPUT_LOSEBACKGAMMON ] = 1.0f;
-	  if( arOutput[ OUTPUT_LOSEBACKGAMMON ] > 0.0f &&
-	      Utility( arResign, &ci ) == rPlay )
-	      nResign = 3;
-	  else {
-	      /* worth trying to escape the backgammon */
-	      arResign[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
-	      if( arOutput[ OUTPUT_LOSEGAMMON ] > 0.0f &&
-		  Utility( arResign, &ci ) == rPlay )
-		  nResign = 2;
-	      else {
-		  /* worth trying to escape the gammon */
-		  arResign[ OUTPUT_LOSEGAMMON ] = 0.0f;
-		  nResign = Utility( arResign, &ci ) == rPlay;
-	      }
-	  }      
-	  
-	  if( nResign > ms.fResignationDeclined ) {
+      if( ClassifyPosition( ms.anBoard ) <= CLASS_RACE ) {
+
+          evalcontext ecResign = { 0, FALSE, 0, 0, TRUE, 0.0, 0.0 };
+          evalsetup esResign;
+
+          esResign.et = EVAL_EVAL;
+          esResign.ec = ecResign;
+
+          nResign = getResignation ( arResign, anBoardMove, &ci,
+                                     &esResign );
+
+          if ( nResign > 0 && nResign > ms.fResignationDeclined ) {
+
 	      fComputerDecision = TRUE;
 	      ach[ 0 ] = achResign[ nResign - 1 ];
 	      ach[ 1 ] = 0;
@@ -893,7 +882,9 @@ extern int ComputerTurn( void ) {
 	      fComputerDecision = FALSE;
 	      
 	      return 0;
-	  }
+
+          }
+          
       }
       
       /* Consider doubling */
@@ -1500,6 +1491,8 @@ extern void CommandAgree( char *sz ) {
     pmr->sz = NULL;
     pmr->fPlayer = !ms.fTurn;
     pmr->nResigned = ms.fResigned;
+    pmr->esResign.et = EVAL_NONE;
+    
     AddMoveRecord( pmr );
 
     TurnDone();
