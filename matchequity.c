@@ -367,9 +367,10 @@ int
 GetTakePoint ( float arOutput [ 5 ],
 	       int   anScore[ 2 ], int nMatchTo,
 	       int   nCube,
-	       float arTakePoint[ 4 ] ) {
+	       float arTakePoint[ 2 ] ) {
 
   /*
+
    * Input:
    * - arOutput: we need the gammon ratios (and in a more refined model
    *   we could include the backgammon ratios. We assume that arOutput
@@ -490,21 +491,7 @@ GetTakePoint ( float arOutput [ 5 ],
        arTakePoint[ 1 ] = arD2[ 0 ]; */
     arTakePoint[ 0 ] = arD1bar[ 0 ]; 
     arTakePoint[ 1 ] = arD2bar[ 0 ];
-    arTakePoint[ 2 ] = 0.0;
-    arTakePoint[ 3 ] = 0.0;
 
-  /* Take point for recubes */
-
-    /*
-    if ( n ) {
-      arTakePoint[ 2 ] = arD1[ 1 ];
-      arTakePoint[ 3 ] = arD2[ 1 ];
-    }
-    else {
-      arTakePoint[ 2 ] = 0.0;
-      arTakePoint[ 3 ] = 0.0;
-    }
-    */
   } /* endif-else ! nMatchTo */
 }
 
@@ -545,3 +532,12 @@ int main ()
 }
 
 #endif
+
+
+
+
+
+
+
+
+

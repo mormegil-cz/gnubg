@@ -50,4 +50,4 @@ int
 GetTakePoint ( float arOutput [ 5 ],
 	       int   nScore[ 2 ], int nMatchTo,
 	       int   nCube,
-	       float arTakePoint[ 4 ] );
+	       float arTakePoint[ 2 ] );
