@@ -436,6 +436,7 @@ if test "with_board3d" != "no"; then
          dnl check for FTGL (dependent on freetype)
          if test "$have_freetype" = "yes"; then
             dnl fixme: write a test...
+            dnl check for glut if there is no FTGL
             AC_DEFINE(HAVE_FTGL,1,[Define if you have the FTGL library])
             FTGL_LIBS="-lftgl"
             AC_SUBST(FTGL_LIBS)
