@@ -61,6 +61,11 @@ duplication of effort and to make sure our changes merge easily.
   allows moving back and forth.
 ** Try to use some optimisation like XCheckIfEvent() to ignore all but
   the most recent MotionNotify event in the queue when dragging chequers.
+** Don't flood the server with requests (which can happen if gnubg is
+  playing itself at ply 0).  Wait until the server has finished the
+  previous ShowBoard before sending a new one; boards in the meantime
+  can be silently discarded.  What does xterm do to implement jump
+  scrolling?
 ** Allow clicking on a point to make that point.
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
@@ -83,11 +88,6 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
-** Sam Pottle points out errors in the standard error calculation. (gary)
-** C-c doesn't seem to interrupt like it should when not using X
-  (set player both gnubg; new game; C-c -- nothing happens). (gary)
-** C-d doesn't ask if you're sure when not using X. (gary)
-** When fInterrupt is true and using X, C-d goes into an infinite loop. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
