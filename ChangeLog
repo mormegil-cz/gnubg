@@ -1,3 +1,11 @@
+Mon Nov 18 19:18:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (printNumbers): remove debug code.
+	* html.c (printHTMLBoardGNU): move position ID/match ID into 
+	paragraph.
+	* html.c (HTMLEpilogue): fix markup (to improve layout in ns 4.78)
+	(suggested by Scott Steiner)
+
 Thu Nov 14 19:54:20 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (printHTMLBoardGNU, printNumbers): implement 

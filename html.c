@@ -1169,8 +1169,6 @@ printNumbers ( FILE *pf, const int fTop, const htmlexportcss hecss ) {
 
   int i;
 
-  printf ( "clock %d\n", fClockwise );
-
   if ( fClockwise ) {
 
     if ( fTop ) {
@@ -1599,27 +1597,23 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   printNumbers ( pf, ! fTurn, hecss );
 
+  fputs ( "</table>\n\n", pf );
+
   /* position ID */
 
-  fputs ( "<tr>", pf );
-  fputs ( "<td colspan=\"15\">", pf );
+  fputs ( "<p>", pf );
+
   fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
             PositionID ( pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
-  fputs ( "</td>", pf );
-  fputs ( "</tr>\n", pf );
 
   /* pip counts */
 
   PipCount ( anBoard, anPips );
-  fputs ( "<tr>", pf );
-  fputs ( "<td colspan=\"15\">", pf );
   fprintf ( pf, _("Pip counts: Black %d, Red %d<br />\n"),
             anPips[ 0 ], anPips[ 1 ] );
-  fputs ( "</td>", pf );
-  fputs ( "</tr>\n", pf );
 
-  fputs ( "</table>\n\n", pf );
+  fputs ( "</p>\n", pf );
 
 }
 
@@ -1914,11 +1908,11 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ],
             "</address>\n"
             "<p>\n"
             "<a href=\"http://validator.w3.org/check/referer\">"
-            "<img style=\"border:0;width:88px;height:31px\" "
+            "<img style=\"border: 0\" width=\"88\" height=\"31\" "
             "src=\"http://www.w3.org/Icons/valid-xhtml10\" "
             "alt=\"%s\" /></a>\n"
             "<a href=\"http://jigsaw.w3.org/css-validator/check/referer\">"
-            "<img style=\"border:0;width:88px;height:31px\" "
+            "<img style=\"border: 0\" width=\"88\" height=\"31\" "
             "src=\"http://jigsaw.w3.org/css-validator/images/vcss\" "
             "alt=\"%s\" />"
             "</a>\n"
@@ -2329,6 +2323,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   fprintf ( pf,
             "</table>\n" );
+
+  fputs ( "<p>&nbsp;</p>\n", pf );
 
   fputs ( "\n<!-- End Cube Analysis -->\n\n", pf );
 
