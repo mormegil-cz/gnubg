@@ -1,3 +1,9 @@
+Fri Feb  8 17:25:31 2002  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (ClassifyPosition): Reintroduce code which coped if
+	bearoff databases were not present (lost in the merge of the
+	crashed net code).
+
 Fri Feb  8 17:02:15 2002  Gary Wong  <gtw@research.att.com>
 
 	* Makefile.am, configure.in, acinclude.m4: Use GUILE_LIBS instead

@@ -1907,11 +1907,12 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ] )
 
     return CLASS_CONTACT;
   }
-  else if( nBack > 5 || nOppBack > 5 )
+  else if( nBack > 5 || nOppBack > 5 || !pBearoff1 )
     return CLASS_RACE;
 
   if( PositionBearoff( anBoard[ 0 ] ) > 923 ||
-      PositionBearoff( anBoard[ 1 ] ) > 923 )
+      PositionBearoff( anBoard[ 1 ] ) > 923 ||
+      !pBearoff2 )
     return CLASS_BEAROFF1;
 
   return CLASS_BEAROFF2;
