@@ -584,7 +584,6 @@ extern void ClearMatch( void );
 extern void FreeMatch( void );
 extern void SetMatchDate( matchinfo* pmi );
 extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms);
-extern int ParseHighlightColour( char* sz );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char* sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char* pchDesc );
@@ -735,15 +734,13 @@ extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetRollout[], acSetRolloutLate[], acSetRolloutLimit[], 
   acSetTruncation [], acSetRolloutJsd[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
-    acSetRolloutPlayer[], acSetRolloutLatePlayer[], cOnOff, cFilename,
-    cHighlightColour;
+    acSetRolloutPlayer[], acSetRolloutLatePlayer[], cOnOff, cFilename;
 extern command acSetCheatPlayer[];
 extern command acSetAnalysisPlayer[];
 
 extern command acAnnotateMove[];
 extern command acSetExportParameters[];
 extern command acSetGeometryValues[];
-extern command acSetHighlightIntensity[];
 
 extern float rRatingOffset;
 
@@ -1014,11 +1011,6 @@ extern void CommandAccept( char * ),
     CommandSetGUIShowEPCs( char * ),
     CommandSetGUIDragTargetHelp( char * ),
     CommandSetGUIUseStatsPanel( char * ),
-    CommandSetHighlight ( char * ),
-    CommandSetHighlightColour ( char * ),
-    CommandSetHighlightDark ( char * ),
-    CommandSetHighlightLight ( char * ),
-    CommandSetHighlightMedium ( char * ),
     CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
     CommandSetLang( char * ),
@@ -1221,7 +1213,6 @@ extern void CommandAccept( char * ),
     CommandShowFullBoard( char * ),
     CommandShowGammonValues( char * ),
     CommandShowGeometry ( char * ),
-    CommandShowHighlightColour ( char * ),
     CommandShowEgyptian( char * ),
     CommandShowJacoby( char * ),
     CommandShowKleinman( char * ),
@@ -1310,15 +1301,6 @@ extern void
 OptimumRoll ( int anBoard[ 2 ][ 25 ], 
               const cubeinfo* pci, const evalcontext* pec,
               const int fBest, int anDice[ 2 ] );
-
-typedef struct _highlightcolour {
-  int   rgbs[3][3];
-  char* colourname;
-} highlightcolour;
-
-extern highlightcolour* HighlightColour, HighlightColourTable[];
-extern int HighlightIntensity;
-extern int* Highlightrgb;
 
 extern void
 SetMatchInfo( char **ppch, char* sz, char* szMessage );

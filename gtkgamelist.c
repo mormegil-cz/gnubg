@@ -199,7 +199,7 @@ void UpdateStyle(GtkStyle *psStyle, GtkStyle *psNew, GtkStyle *psDefault)
 		gtk_set_font(psStyle, psNew);
 }
 
-void GetStyleFromRCFile(GtkStyle** ppStyle, char* name)
+void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase)
 {	/* Note gtk 1.3 doesn't seem to have a nice way to do this... */
 	BoardData *bd = BOARD(pwBoard)->board_data;
 	GtkStyle *psDefault, *psNew;
@@ -211,7 +211,7 @@ void GetStyleFromRCFile(GtkStyle** ppStyle, char* name)
 	psDefault = temp->style;
 
 	/* Get Style from rc file */
-	strcpy(styleName, "gnubg-gamelist-");
+	strcpy(styleName, "gnubg-");
 	strcat(styleName, name);
 	dummy = gtk_label_new("");
 	gtk_widget_ensure_style(dummy);
@@ -220,9 +220,11 @@ void GetStyleFromRCFile(GtkStyle** ppStyle, char* name)
 	gtk_box_pack_start(GTK_BOX(bd->vbox_ids), dummy, FALSE, FALSE, 0);
 	psNew = gtk_widget_get_style(dummy);
 
-	/* Base new style on default for game list */
-	*ppStyle = gtk_style_copy(psGameList);
+	/* Base new style on base style passed in */
+	*ppStyle = gtk_style_copy(psBase);
 	/* Make changes to fg+bg and copy to selected states */
+	if (memcmp(&psNew->fg[GTK_STATE_ACTIVE], &psDefault->fg[GTK_STATE_ACTIVE], sizeof(GdkColor)))
+		memcpy(&(*ppStyle)->fg[GTK_STATE_NORMAL], &psNew->fg[GTK_STATE_ACTIVE], sizeof(GdkColor));
 	if (memcmp(&psNew->fg[GTK_STATE_NORMAL], &psDefault->fg[GTK_STATE_NORMAL], sizeof(GdkColor)))
 		memcpy(&(*ppStyle)->fg[GTK_STATE_NORMAL], &psNew->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
 	memcpy(&(*ppStyle)->fg[GTK_STATE_SELECTED], &(*ppStyle)->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
@@ -284,16 +286,16 @@ GtkWidget* GL_Create()
     psCurrent->fg[ GTK_STATE_SELECTED ] = psCurrent->fg[ GTK_STATE_NORMAL ] =
 	psGameList->bg[ GTK_STATE_NORMAL ];
 
-    GetStyleFromRCFile(&psCubeErrors[SKILL_VERYBAD], "cube-blunder");
-    GetStyleFromRCFile(&psCubeErrors[SKILL_BAD], "cube-error");
-    GetStyleFromRCFile(&psCubeErrors[SKILL_DOUBTFUL], "cube-doubtful");
+	GetStyleFromRCFile(&psCubeErrors[SKILL_VERYBAD], "gamelist-cube-blunder", psGameList);
+    GetStyleFromRCFile(&psCubeErrors[SKILL_BAD], "gamelist-cube-error", psGameList);
+    GetStyleFromRCFile(&psCubeErrors[SKILL_DOUBTFUL], "gamelist-cube-doubtful", psGameList);
 
-    GetStyleFromRCFile(&psChequerErrors[SKILL_VERYBAD], "chequer-blunder");
-    GetStyleFromRCFile(&psChequerErrors[SKILL_BAD], "chequer-error");
-    GetStyleFromRCFile(&psChequerErrors[SKILL_DOUBTFUL], "chequer-doubtful");
+    GetStyleFromRCFile(&psChequerErrors[SKILL_VERYBAD], "gamelist-chequer-blunder", psGameList);
+    GetStyleFromRCFile(&psChequerErrors[SKILL_BAD], "gamelist-chequer-error", psGameList);
+    GetStyleFromRCFile(&psChequerErrors[SKILL_DOUBTFUL], "gamelist-chequer-doubtful", psGameList);
 
-    GetStyleFromRCFile(&psLucky[LUCK_VERYBAD], "luck-bad");
-    GetStyleFromRCFile(&psLucky[LUCK_VERYGOOD], "luck-good");
+    GetStyleFromRCFile(&psLucky[LUCK_VERYBAD], "gamelist-luck-bad", psGameList);
+    GetStyleFromRCFile(&psLucky[LUCK_VERYGOOD], "gamelist-luck-good", psGameList);
 
     nMaxWidth = gdk_string_width( gtk_style_get_font( psCurrent ), _("99") );
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 0, nMaxWidth );

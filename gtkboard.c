@@ -4024,7 +4024,7 @@ static void board_init( Board *board ) {
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                          bd->wmove = gtk_label_new( NULL ),
                          FALSE, FALSE, 0 );
-    gtk_widget_set_name( bd->wmove, "move" );
+    gtk_widget_set_name( bd->wmove, "gnubg-move" );
 
     /* match length */
 

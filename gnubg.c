@@ -529,7 +529,6 @@ static char szDICE[] = N_("<die> <die>"),
 #if USE_SOUND
     szCOMMAND[] = N_("<command>"),
 #endif
-    szCOLOUR[] = N_("<colour>"),
     szER[] = N_("evaluation|rollout"), 
     szFILENAME[] = N_("<filename>"),
     szKEYVALUE[] = N_("[<key>=<value> ...]"),
@@ -621,9 +620,6 @@ command cER = {
 }, cRecordName = {
     /* dummy command used for player record names */
     NULL, NULL, NULL, NULL, &cRecordName
-}, cHighlightColour = {
-    /* dummy command used for highlight colour names */
-    NULL, NULL, NULL, NULL, &cHighlightColour
 }, acAnalyseClear[] = {
     { "game", CommandAnalyseClearGame, 
       N_("Clear analysis for this game"), NULL, NULL },
@@ -1688,21 +1684,6 @@ command cER = {
    N_("Which roll should GNU Backgammon choose (1=Best and 21=Worst)"), 
     szVALUE, NULL },
   { NULL, NULL, NULL, NULL, NULL }    
-}, acSetHighlightColour[] = {
-  { NULL, CommandSetHighlightColour,
-   N_("Set colour for highlighted moves"), szCOLOUR, NULL},
-  { NULL, NULL, NULL, NULL, NULL }    
-}, acSetHighlightIntensity[] = {
-  {"dark", CommandSetHighlightDark,
-   N_("choose dark highlight colour"), 
-   szCOLOUR, acSetHighlightColour},
-  {"light", CommandSetHighlightLight,
-   N_("choose light highlight colour"), 
-   szCOLOUR, acSetHighlightColour},
-  {"medium", CommandSetHighlightMedium,
-   N_("choose medium highlight colour"), 
-   szCOLOUR, acSetHighlightColour},
-  { NULL, NULL, NULL, NULL, NULL }  
 }, acSetVariation[] = {
   { "1-chequer-hypergammon", CommandSetVariation1ChequerHypergammon,
     N_("Play 1-chequer hypergammon"), NULL, NULL },
@@ -1773,9 +1754,6 @@ command cER = {
          "when loading matches or sessions"), NULL, NULL },
     { "gui", NULL, N_("Control parameters for the graphical interface"), NULL,
       acSetGUI },
-    { "highlightcolour", CommandSetHighlight, 
-      N_("Set brightness and colour for highlighting lines"),
-	  NULL, acSetHighlightIntensity},
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -1927,8 +1905,6 @@ command cER = {
       NULL, NULL },
     { "geometry", CommandShowGeometry, N_("Show geometry settings"), 
       NULL, NULL },
-	{ "highlight colour", CommandShowHighlightColour, 
-	  N_("Show colour for highlighting moves"), NULL, NULL },
     { "jacoby", CommandShowJacoby, 
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
     { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
@@ -2167,30 +2143,6 @@ char *aszVersion[] = {
 #endif /* USE_SOUND */
     NULL,
 };
-
-highlightcolour HighlightColourTable[] = {
-  {{{     0,     0,     0}, {     0,     0,     0}, {     0,     0,     0}}, "custom" },
-  {{{     0,     0,     0}, {     0,     0,     0}, {     0,     0,     0}}, "black" },
-  {{{     0,     0, 65280}, {     0,     0, 52480}, {     0,     0, 32768}}, "blue" },
-  {{{ 34560, 52736, 64000}, {     0, 48896, 65280}, {     0, 26624, 35584}}, "skyblue" },
-  {{{ 32512, 65280,     0}, { 26112, 52480,     0}, { 17664, 35584,     0}}, "chartreuse" },
-  {{{     0, 65280, 65280}, {     0, 52480, 52480}, {     0, 35584, 35584}}, "cyan" },
-  {{{ 65280, 55040,     0}, { 52480, 44288,     0}, { 35584, 29952,     0}}, "gold" },
-  {{{     0, 65280,     0}, {     0, 52480,     0}, {     0, 25600,     0}}, "green" },
-  {{{     0, 65280, 32512}, {     0, 52480, 26112}, {     0, 35584, 17664}}, "springgreen" },
-  {{{ 65280, 42240,     0}, { 60928, 30208,     0}, { 35584, 17664,     0}}, "orange" },
-  {{{ 65280, 17664,     0}, { 52480, 14080,     0}, { 35584,  9472,     0}}, "orangered" },
-  {{{ 65280,     0, 65280}, { 52480,     0, 52480}, { 35584,     0, 35584}}, "magenta" },
-  {{{ 40960, 8192,  61440}, { 32000,  9728, 52480}, { 23808, 18176, 35584}}, "purple" },
-  {{{ 65280,     0,     0}, { 52480,     0,     0}, { 35584,     0,     0}}, "red" },
-  {{{     0, 62720, 65280}, {     0, 50432, 52480}, {     0, 52736, 53504}}, "turquoise" },
-  {{{ 60928, 33280, 60928}, { 36864, 16640, 59904}, { 37888,     0, 54016}}, "violet" },
-  {{{ 65280, 65280,     0}, { 52480, 52480,     0}, { 35584, 35584,     0}}, "yellow" },
-};
-
-
-highlightcolour *HighlightColour = &HighlightColourTable[12]; /* default red */
-int HighlightIntensity = 0;
 
 char *szHomeDirectory, *szDataDirectory, *szTerminalCharset;
 /*
@@ -2447,26 +2399,6 @@ extern int ParsePlayer( char *sz ) {
 	return 2;
 
     return -1;
-}
-
-/* look up a colour name and return its index in the HighlightColourTable or
-   -1 if not found
-*/
-extern int ParseHighlightColour( char *sz ) {
-
-  int	i;
-  highlightcolour *hp;
-
-  for (i = 0, hp = HighlightColourTable; 
-	   i < (sizeof (HighlightColourTable) / sizeof (HighlightColourTable[0]));
-	   ++i) {
-	if ( !strncasecmp( sz, HighlightColourTable[i].colourname, strlen (sz) ) )
-	  return i;
-
-  }
-
-  return -1;
-
 }
 
 
@@ -6009,20 +5941,6 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf( pf, "set priority nice %d\n", nThreadPriority );
 
-    for (i = 0; i < 3; ++i) {
-      fprintf ( pf, "set highlightcolour %s custom %d %d %d\n",
-                ( HighlightIntensity == 2 ? "dark" :
-                  HighlightIntensity == 1 ? "medium" : "normal" ),
-                HighlightColourTable[0].rgbs[i][0], 
-                HighlightColourTable[0].rgbs[i][1], 
-                HighlightColourTable[0].rgbs[i][2]);				
-    }
-    
-    fprintf ( pf, "set highlightcolour %s %s\n",
-              ( HighlightIntensity == 2 ? "dark" :
-                HighlightIntensity == 1 ? "medium" : "normal" ),
-              HighlightColour->colourname);
-    
     /* rating offset */
     
     fprintf( pf, "set ratingoffset %f\n", rRatingOffset );
@@ -6184,32 +6102,6 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     return NULL;
 }
 
-static char *HighlightCompletion (const char *sz, int nState ) {
-
-    static int i, cch;
-    char *pch, *szDup;
-
-    if( !nState ) {
-	cch = strlen( sz );
-	i = 0;
-    }
-
-	while (i < 
-		   (sizeof (HighlightColourTable) / 
-			sizeof (HighlightColourTable[0]))) {
-	  pch = HighlightColourTable[i].colourname;
-	  ++i;
-	  if( !strncasecmp( sz, pch, cch ) ) {
-	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
-		  return NULL;
-	    
-	    return strcpy( szDup, pch );
-	  }
-    }
-
-    return NULL;
-}
-
 static char *ERCompletion( const char *sz, int nState ) {
 
     static int i, cch;
@@ -6348,12 +6240,7 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
         while( pc && pc->sz ) {
             if( !strncasecmp( pchCurrent, pc->sz, strlen( pchCurrent ) ) ) {
 		pc = pc->pc;
-		
-		if ( pc == acSetHighlightColour ) {
-		  pcResume = pc;
-		  pc = &cHighlightColour;
-		  break;
-		}
+
 		if( pc == acSetPlayer || pc == acSetRolloutPlayer || 
                     pc == acSetRolloutLatePlayer ||
                     pc == acSetAnalysisPlayer || pc == acSetCheatPlayer ) {
@@ -6407,8 +6294,6 @@ static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 	return rl_completion_matches( szText, PlayerCompletion );
     else if( pcCompleteContext == &cPlayerBoth )
 	return rl_completion_matches( szText, PlayerCompletionBoth );
-	else if ( pcCompleteContext == &cHighlightColour )
-	  return rl_completion_matches( szText, HighlightCompletion );
     else
 	return rl_completion_matches( szText, GenerateKeywords );
 }

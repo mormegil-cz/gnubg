@@ -72,10 +72,10 @@ fg[PRELIGHT] = { 0.2, 0.1, 0.0 }
 
 style "movelabel" = "default"
 {
-  fg[ACTIVE] = { 0xffff, 0xffff, 0 }
+  fg[ACTIVE] = { 0xffff, 0, 0 }
 }
 
-widget "*Board.*move" style "movelabel"
+widget "*.gnubg-move" style "movelabel"
 
 
 #

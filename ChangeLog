@@ -1,3 +1,8 @@
+Wed Jun 16 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkchequer.c: use move style for hint window, also removed highlight
+	code from several files
+
 Tue Jun 15 20:32:05 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.gtkrc.in: autogenerate gnubg.gtkrc

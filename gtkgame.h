@@ -207,3 +207,5 @@ extern void
 GTKShowManual( void );
 
 #endif
+
+extern void GetStyleFromRCFile(GtkStyle** ppStyle, char* name, GtkStyle* psBase);
