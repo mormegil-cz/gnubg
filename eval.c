@@ -4440,7 +4440,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
         *prOutput += ( n0 == n1 ) ? r : 2.0 * r;
 
         for ( i = 0; i < NUM_OUTPUTS; i++ ) 
-          arClOutput[ i ] =
+          arClOutput[ i ] +=
             ( n0 == n1 ) ? arOutput[ i ] : 2.0 * arOutput[ i ];
 
       }
