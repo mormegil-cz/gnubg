@@ -1,3 +1,9 @@
+Fri Jan  3 19:18:54 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (MoveListShowToggled): show moves correctly
+	for player 0.
+	(reported by Oystein)
+
 Fri Jan  3 11:57:24 2003  Gary Wong  <gtw@gnu.org>
 
 	* path.c (PathSearch): Don't use szDir if NULL.  (Suggested by

@@ -292,6 +292,9 @@ MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
     memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
     ApplyMove ( anBoard, pm->anMove, FALSE );
 
+    if ( ! ms.fMove )
+      SwapSides ( anBoard );
+
     sz = g_strdup_printf ( "show board %s", PositionID ( anBoard ) );
     UserCommand( sz );
     g_free ( sz );
@@ -299,7 +302,11 @@ MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
   }
   else {
     
-    sz = g_strdup_printf ( "show board %s", PositionID ( ms.anBoard ) );
+    memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
+    if ( ! ms.fMove )
+      SwapSides ( anBoard );
+
+    sz = g_strdup_printf ( "show board %s", PositionID ( anBoard ) );
     UserCommand( sz );
     g_free ( sz );
 
