@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "backgammon.h"
 #include "eval.h"
@@ -64,8 +65,10 @@ UpdateTable ( mettable *pmt,
               metinfo *pmi,
               const int nRows, const int nCols, const int fInvert ) {
 
-  int i, j;
-  char sz[ 16 ];
+#define STRINGLENGTH 64
+
+  int i, j, nBytes;
+  char sz[ STRINGLENGTH ];
 
   /* set labels */
 
@@ -79,14 +82,17 @@ UpdateTable ( mettable *pmt,
     for( j = 0; j < nCols; j++ ) {
 
       if ( fInvert )
-        sprintf( sz, "%8.4f", GET_MET( j, i, aafMET ) * 100.0f );
+        nBytes = sprintf( sz, "%8.4f", GET_MET( j, i, aafMET ) * 100.0f );
       else
-        sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
+        nBytes = sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
+
+      assert( nBytes < STRINGLENGTH );
 
       gtk_label_set_text ( GTK_LABEL ( pmt->aapwLabel[ i ][ j ] ), sz );
 
     }
 
+#undef STRINGLENGTH
 }
 
 
