@@ -416,9 +416,6 @@ getCurrentMoveRecord ( void );
 extern void
 UpdateStoredMoves ( const movelist *pml, const matchstate *pms );
 
-extern void
-CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );
-
 #ifdef WIN32
 extern void WinCopy( char *szOut );
 #endif

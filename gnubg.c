@@ -5746,25 +5746,3 @@ UpdateStoredMoves ( const movelist *pml, const matchstate *pms ) {
   sm.ms = *pms;
 
 }
-
-extern void
-CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
-
-  if ( pmlDest == pmlSrc )
-    return;
-
-  pmlDest->cMoves = pmlSrc->cMoves;
-  pmlDest->cMaxMoves = pmlSrc->cMaxMoves;
-  pmlDest->cMaxPips = pmlSrc->cMaxPips;
-  pmlDest->iMoveBest = pmlSrc->iMoveBest;
-  pmlDest->rBestScore = pmlSrc->rBestScore;
-
-  if ( pmlSrc->cMoves ) {
-    pmlDest->amMoves = (move *) malloc ( pmlSrc->cMoves * sizeof ( move ) );
-    memcpy ( pmlDest->amMoves, pmlSrc->amMoves, 
-             pmlSrc->cMoves * sizeof ( move ) );
-  }
-  else
-    pmlDest->amMoves = NULL;
-	
-}
