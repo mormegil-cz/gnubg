@@ -7353,7 +7353,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_PYTHON
 #  if USE_GTK
     PushSplash( pwSplash,
-                _("Initialasing"), _("Python"), 500 );
+                _("Initialising"), _("Python"), 500 );
 #  endif
     PythonInitialise( argv[ 0 ], szDataDirectory );
 #endif

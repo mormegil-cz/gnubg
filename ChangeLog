@@ -1,3 +1,7 @@
+Mon Sep  1 02:48:46 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gnubg.c (real_main): Fix typo.
+
 Mon Sep  1 12:39:20 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* gnubgmodule.c (PythonMatch): Add match statistics to gnubg.match().
