@@ -142,6 +142,7 @@ typedef struct _movegameinfo {
 	nPoints, /* how many points were scored by the winner */
 	fResigned, /* the game was ended by resignation */
 	nAutoDoubles; /* how many automatic doubles were rolled */
+    bgvariation bgv;
     statcontext sc;
 } movegameinfo;
 
@@ -251,6 +252,7 @@ typedef struct _matchstate {
     int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned,
 	fResignationDeclined, fDoubled, cGames, fMove, fCubeOwner, fCrawford,
 	fPostCrawford, nMatchTo, anScore[ 2 ], nCube, cBeavers;
+    bgvariation bgv;
     gamestate gs;
 } matchstate;
 
@@ -356,7 +358,7 @@ extern player ap[ 2 ];
 extern char *GetInput( char *szPrompt );
 extern int GetInputYN( char *szPrompt );
 extern void HandleCommand( char *sz, command *ac );
-extern void InitBoard( int anBoard[ 2 ][ 25 ] );
+extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
 extern char *NextToken( char **ppch );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );

@@ -392,7 +392,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
   ProgressStart( _("Generating database...") );
   
   while( ( !n || c <= n ) && !fInterrupt ) {
-    InitBoard( anBoardGenerate );
+    InitBoard( anBoardGenerate, bgvDefault );
 	
     do {    
 	if( !( ++c % 10 ) )

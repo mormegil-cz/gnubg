@@ -1,3 +1,13 @@
+Thu Mar 13 21:28:43 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Better support for variations in SGF, SGG, and TMG.
+
+	* eval.c, gtkgame.c, show.c, set.c, gnubg.c: rename bgv to bgvDefault.
+	* play.c (InitBoard): new parameter bgv. Change all callers.
+	* sgf.c: better support for variations in SGF.
+	* play.c: better support for variations during play.
+	* import.c: better support for variations during import of SGG and TMG.
+
 Thu Mar 13 17:56:15 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* record.c (RecordAddGame): update statistics before writing
