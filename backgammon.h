@@ -103,11 +103,16 @@ extern double ParseReal( char **ppch );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
+extern char *FormatPrompt( void );
 
 #if !X_DISPLAY_MISSING
 extern gint NextTurnNotify( gpointer p );
 extern void UserCommand( char *sz );
 extern void HandleXAction( void );
+#if HAVE_LIBREADLINE
+extern int fReadingCommand;
+extern void HandleInput( char *sz );
+#endif
 #endif
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],

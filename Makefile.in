@@ -79,7 +79,7 @@ bin_PROGRAMS = gnubg
 @NOX_TRUE@INCLUDES = $(COMMON_INCS)
 @NOX_FALSE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
 @NOX_TRUE@gnubg_SOURCES = $(COMMON_SOURCES)
-@NOX_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h
+@NOX_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h
 @NOX_TRUE@gnubg_LDADD = $(COMMON_LIBS)
 @NOX_FALSE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 @NOX_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
@@ -118,7 +118,7 @@ LIBS = @LIBS@
 @NOX_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @NOX_FALSE@positionid.o drawboard.o pub_eval.o set.o show.o database.o \
 @NOX_FALSE@mt19937int.o dice.o rollout.o isaac.o copying.o kleinman.o \
-@NOX_FALSE@gtkboard.o
+@NOX_FALSE@gtkboard.o gtkgame.o
 gnubg_LDFLAGS = 
 makebearoff_OBJECTS =  makebearoff.o eval.o positionid.o pub_eval.o
 makebearoff_LDFLAGS = 
@@ -142,10 +142,10 @@ TAR = gtar
 GZIP_ENV = --best
 DEP_FILES =  .deps/copying.P .deps/database.P .deps/dice.P \
 .deps/drawboard.P .deps/eval.P .deps/getopt.P .deps/getopt1.P \
-.deps/gnubg.P .deps/gtkboard.P .deps/isaac.P .deps/kleinman.P \
-.deps/makebearoff.P .deps/makeweights.P .deps/mt19937int.P .deps/play.P \
-.deps/positionid.P .deps/pub_eval.P .deps/rollout.P .deps/set.P \
-.deps/show.P
+.deps/gnubg.P .deps/gtkboard.P .deps/gtkgame.P .deps/isaac.P \
+.deps/kleinman.P .deps/makebearoff.P .deps/makeweights.P \
+.deps/mt19937int.P .deps/play.P .deps/positionid.P .deps/pub_eval.P \
+.deps/rollout.P .deps/set.P .deps/show.P
 SOURCES = $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 OBJECTS = $(gnubg_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 

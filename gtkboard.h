@@ -1,5 +1,5 @@
 /*
- * board.h
+ * gtkboard.h
  *
  * by Gary Wong <gtw@gnu.org>, 1997-2000.
  *
@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ * $Id$
  */
 
 #ifndef _GTKBOARD_H_

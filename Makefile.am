@@ -18,7 +18,7 @@ gnubg_LDADD = $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
-gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h
+gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif

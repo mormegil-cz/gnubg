@@ -1,3 +1,7 @@
+Tue Jul 11 13:44:49 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkgame.c: New file.  More extensive changes elsewhere.
+
 Mon Jul 10 09:54:48 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gtkboard.c: New file.  Extensive changes elsewhere for GTK port.

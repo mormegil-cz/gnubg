@@ -1,5 +1,5 @@
 /*
- * board.c
+ * gtkboard.c
  *
  * by Gary Wong <gtw@gnu.org>, 1997-2000.
  *
@@ -42,8 +42,8 @@ static unsigned int nSeed = 1; /* for rand_r */
 #define RAND ( ( (unsigned int) rand_r( &nSeed ) ) & RAND_MAX )
 
 typedef struct _BoardData {
-    GtkWidget *drawing_area, *hbox_move, *table, *hbox_match, *move,
-	*position_id;
+    GtkWidget *drawing_area, *dice_area, *hbox_move, *table, *hbox_match,
+	*move, *position_id;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point;
@@ -52,7 +52,8 @@ typedef struct _BoardData {
     gint board_size; /* basic unit of board size, in pixels -- a chequer's
 			diameter is 6 of these units (and is 2 units thick) */
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
-	dice_colour[ 2 ], cube_font_rotated, old_board[ 2 ][ 25 ];
+	dice_colour[ 2 ], cube_font_rotated, old_board[ 2 ][ 25 ],
+	dice_roll[ 2 ]; /* roll showing on the off-board dice */
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
     move *valid_move;
     movelist move_list;
@@ -439,6 +440,20 @@ static void update_move( BoardData *bd ) {
     gtk_label_set_text( GTK_LABEL( bd->move ), move );
 }
 
+static void Confirm( BoardData *bd ) {
+
+    char move[ 40 ];
+
+    if( bd->valid_move && bd->valid_move->cMoves == bd->move_list.cMaxMoves &&
+        bd->valid_move->cPips == bd->move_list.cMaxPips ) {
+        FormatMove( move, bd->old_board, bd->valid_move->anMove );
+    
+        UserCommand( move );
+    } else
+        /* Illegal move */
+	gdk_beep();
+}
+
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
     GdkPixmap *pm_swap;
@@ -501,9 +516,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    
 	    if( event->button.button == 1 )
-		/* Button 1 on dice confirms move. */
-/* 		StatsConfirm( &bd->ewndStats ); */ /* FIXME emit signal */
-		;
+		Confirm( bd );
 	    else {
 		/* Other buttons on dice swaps positions. */
 		n = bd->dice[ 0 ];
@@ -949,20 +962,23 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     
     board_set( board, board_str );
     
-#if 0
-    /* FIXME */
-    StatsSet( &pbd->ewndStats, points, die0, die1 );
-
-    if( !pewnd->pdsp )
+    /* FIXME update names, score, match length */
+    if( pbd->board_size <= 0 )
 	return 0;
-    
-    if( pbd->anDice[ 0 ] )
-	XUnmapWindow( pewnd->pdsp, pbd->ewndDice.wnd );
-    else if( old_dice )
-	XMapWindow( pewnd->pdsp, pbd->ewndDice.wnd );
+
+    if( die0 ) {
+	/* dice have been rolled; hide off-board dice */
+	pbd->dice_roll[ 0 ] = die0;
+	pbd->dice_roll[ 1 ] = die1;
+	gtk_widget_unmap( pbd->dice_area );
+    } else if( old_dice )
+	/* dice have been removed from board; show dice ready to roll */
+	gtk_widget_map( pbd->dice_area );
     else
-	DiceRedraw( &pbd->ewndDice, pbd->ewndDice.pv );
-#endif
+	;
+    /* FIXME what is this for? */
+    /* DiceRedraw( &pbd->ewndDice, pbd->ewndDice.pv ); */
+
     return 0;
 }
 
@@ -1580,23 +1596,23 @@ static void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
     if( bd->pm_board )
 	board_free_pixmaps( bd );
 
-    board_draw( board /* ->drawing_area */, bd );
-    board_draw_chequers( board /* ->drawing_area */, bd );
-    board_draw_dice( board /* ->drawing_area */, bd );
-    board_draw_pips( board /* ->drawing_area */, bd );
-    board_draw_cube( board /* ->drawing_area */, bd );
-    board_set_cube_font( board /* ->drawing_area */, bd );
+    board_draw( board, bd );
+    board_draw_chequers( board, bd );
+    board_draw_dice( board, bd );
+    board_draw_pips( board, bd );
+    board_draw_cube( board, bd );
+    board_set_cube_font( board, bd );
     
-    bd->pm_saved = gdk_pixmap_new( board /* ->drawing_area */->window,
+    bd->pm_saved = gdk_pixmap_new( board->window,
 				   6 * bd->board_size,
 				   6 * bd->board_size, -1 );
-    bd->pm_temp = gdk_pixmap_new( board /* ->drawing_area */->window,
+    bd->pm_temp = gdk_pixmap_new( board->window,
 				  6 * bd->board_size,
 				  6 * bd->board_size, -1 );
-    bd->pm_temp_saved = gdk_pixmap_new( board /* ->drawing_area */->window,
+    bd->pm_temp_saved = gdk_pixmap_new( board->window,
 					6 * bd->board_size,
 					6 * bd->board_size, -1 );
-    bd->pm_point = gdk_pixmap_new( board /* ->drawing_area */->window,
+    bd->pm_point = gdk_pixmap_new( board->window,
 				   6 * bd->board_size,
 				   35 * bd->board_size, -1 );
 }
@@ -1635,7 +1651,7 @@ static void board_size_allocate( GtkWidget *board,
     gtk_widget_size_allocate( bd->hbox_move, &child_allocation );
 
     if( ( bd->board_size = MIN( allocation->width / 108,
-				allocation->height / 72 ) ) != old_size &&
+				allocation->height / 80 ) ) != old_size &&
 	GTK_WIDGET_REALIZED( board ) )
 	board_create_pixmaps( board, bd );
 
@@ -1644,9 +1660,14 @@ static void board_size_allocate( GtkWidget *board,
 					     child_allocation.width ) >> 1 );
     child_allocation.height = 72 * bd->board_size;
     child_allocation.y = allocation->y + ( ( allocation->height -
-					     child_allocation.height ) >> 1 );
-    
+					     80 * bd->board_size ) >> 1 );
     gtk_widget_size_allocate( bd->drawing_area, &child_allocation );
+
+    child_allocation.width = 15 * bd->board_size;
+    child_allocation.x += ( 108 - 15 ) * bd->board_size;
+    child_allocation.height = 7 * bd->board_size;
+    child_allocation.y += 73 * bd->board_size;
+    gtk_widget_size_allocate( bd->dice_area, &child_allocation );
 }
 
 static void board_realize( GtkWidget *board ) {
@@ -1657,6 +1678,29 @@ static void board_realize( GtkWidget *board ) {
 	GTK_WIDGET_CLASS( parent_class )->realize( board );
 
     board_create_pixmaps( board, bd );
+}
+
+static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
+			     BoardData *bd ) {
+    
+    if( !bd->pm_board )
+	return TRUE;
+
+    /* FIXME only redraw if xexpose.count == 0 */
+
+    board_redraw_die( dice, bd, 0, 0, bd->turn, bd->dice_roll[ 0 ] );
+    board_redraw_die( dice, bd, 8 * bd->board_size, 0, bd->turn,
+		      bd->dice_roll[ 1 ] );
+
+    return TRUE;
+}
+
+static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
+			    BoardData *bd ) {
+
+    UserCommand( "roll" );
+    
+    return TRUE;
 }
 
 static void board_init( Board *board ) {
@@ -1696,6 +1740,12 @@ static void board_init( Board *board ) {
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area );
 
+    bd->dice_area = gtk_drawing_area_new();
+    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15 * 3, 8 * 3 );
+    gtk_widget_set_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
+			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
+    gtk_container_add( GTK_CONTAINER( board ), bd->dice_area );
+    
     bd->hbox_move = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( board ), bd->hbox_move, FALSE, FALSE, 0 );
 
@@ -1744,7 +1794,14 @@ static void board_init( Board *board ) {
     gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "button_release_event",
 			GTK_SIGNAL_FUNC( board_pointer ), bd );    
     gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "motion_notify_event",
-			GTK_SIGNAL_FUNC( board_pointer ), bd );    
+			GTK_SIGNAL_FUNC( board_pointer ), bd );
+
+    gtk_signal_connect( GTK_OBJECT( bd->dice_area ), "expose_event",
+			GTK_SIGNAL_FUNC( dice_expose ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->dice_area ), "button_press_event",
+			GTK_SIGNAL_FUNC( dice_press ), bd );
+
+    /* FIXME also trap keys in the board window; redirect them to xterm */
 }
 
 static void board_class_init( BoardClass *c ) {

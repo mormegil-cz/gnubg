@@ -21,6 +21,9 @@
 
 #include "config.h"
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 #include <ctype.h>
 #include <errno.h>
 #if HAVE_FCNTL_H
@@ -77,6 +80,7 @@ static int fReadingOther;
 #if !X_DISPLAY_MISSING
 #include <gtk/gtk.h>
 #include "gtkboard.h"
+#include "gtkgame.h"
 
 GtkWidget *pwMain, *pwBoard;
 int fX = TRUE; /* use X display */
@@ -84,7 +88,7 @@ int nDelay = 0;
 guint nNextTurn = 0; /* GTK idle function */
 static int fNeedPrompt = FALSE;
 #if HAVE_LIBREADLINE
-static int fReadingCommand;
+int fReadingCommand;
 #endif
 #endif
 
@@ -835,7 +839,7 @@ extern void ShowBoard( void ) {
 #endif    
 }
 
-static char *FormatPrompt( void ) {
+extern char *FormatPrompt( void ) {
 
     static char sz[ 128 ]; /* FIXME check for overflow in rest of function */
     char *pch = szPrompt, *pchDest = sz;
@@ -1334,8 +1338,6 @@ static void Prompt( void ) {
 
 #if !X_DISPLAY_MISSING
 #if HAVE_LIBREADLINE
-static void HandleInput( char *sz );
-
 static void ProcessInput( char *sz, int fFree ) {
     
     rl_callback_handler_remove();
@@ -1372,7 +1374,7 @@ static void ProcessInput( char *sz, int fFree ) {
     }
 }
 
-static void HandleInput( char *sz ) {
+extern void HandleInput( char *sz ) {
 
     ProcessInput( sz, TRUE );
 }
@@ -1397,11 +1399,26 @@ void HandleInputRecursive( char *sz ) {
 #endif
 
 /* Handle a command as if it had been typed by the user. */
-extern void UserCommand( char *sz ) {
+extern void UserCommand( char *szCommand ) {
 
 #if HAVE_LIBREADLINE
     int nOldEnd;
+#endif
+    int cch = strlen( szCommand ) + 1;
+#if __GNUC__
+    char sz[ cch ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( cch );
+#else
+    char sz[ 1024 ];
+    assert( cch <= 1024 );
+#endif
     
+    /* Unfortunately we need to copy the command, because it might be in
+       read-only storage and HandleCommand might want to modify it. */
+    strcpy( sz, szCommand );
+
+#if HAVE_LIBREADLINE
     nOldEnd = rl_end;
     rl_end = 0;
     rl_redisplay();
@@ -1423,38 +1440,6 @@ extern void UserCommand( char *sz ) {
 	Prompt();
     else
 	fNeedPrompt = TRUE;
-#endif
-}
-
-void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
-#if HAVE_LIBREADLINE
-    rl_callback_read_char();
-#else
-    char sz[ 2048 ], *pch;
-
-    sz[ 0 ] = 0;
-	
-    fgets( sz, sizeof( sz ), stdin );
-
-    if( ( pch = strchr( sz, '\n' ) ) )
-	*pch = 0;
-    
-	
-    if( feof( stdin ) ) {
-	PromptForExit();
-	return 0;
-    }	
-
-    fInterrupt = FALSE;
-
-    HandleCommand( sz, acTop );
-
-    ResetInterrupt();
-
-    if( nNextTurn )
-	fNeedPrompt = TRUE;
-    else
-	Prompt();
 #endif
 }
 
@@ -1502,138 +1487,6 @@ extern void HandleXAction( void ) {
     fBusy = FALSE;
 }
 #endif
-
-void RunX( int *pargc, char ***pargv ) {
-    /* Attempt to execute under X Window System.  Returns on error (for
-       fallback to TTY), or executes until exit() if successful. */
-
-    GtkWidget *pwVbox;
-    GtkItemFactory *pif;
-    GtkAccelGroup *pag;
-    static GtkItemFactoryEntry aife[] = {
-	{ "/_File", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_New", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_New/_Game", NULL, NULL, 0, NULL },
-	{ "/_File/_New/_Match", NULL, NULL, 0, NULL },
-	{ "/_File/_New/_Session", NULL, NULL, 0, NULL },
-	{ "/_File/_Open", NULL, NULL, 0, NULL },
-	{ "/_File/_Save", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_Save/_Game", NULL, NULL, 0, NULL },
-	{ "/_File/_Save/_Match", NULL, NULL, 0, NULL },
-	{ "/_File/_Save/_Session", NULL, NULL, 0, NULL },
-	{ "/_File/_Save/_Weights", NULL, NULL, 0, NULL },
-	{ "/_File/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_File/_Quit", NULL, NULL, 0, NULL },
-	{ "/_Edit", NULL, NULL, 0, "<Branch>" },
-	{ "/_Edit/_Undo", NULL, NULL, 0, NULL },
-	{ "/_Edit/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Edit/_Copy", NULL, NULL, 0, NULL },
-	{ "/_Edit/_Paste", NULL, NULL, 0, NULL },
-	{ "/_Game", NULL, NULL, 0, "<Branch>" },
-	{ "/_Game/_Roll", NULL, NULL, 0, NULL },
-	{ "/_Game/_Double", NULL, NULL, 0, NULL },
-	{ "/_Game/Re_sign", NULL, NULL, 0, "<Branch>" },
-	{ "/_Game/Re_sign/_Normal", NULL, NULL, 0, NULL },
-	{ "/_Game/Re_sign/_Gammon", NULL, NULL, 0, NULL },
-	{ "/_Game/Re_sign/_Backgammon", NULL, NULL, 0, NULL },
-	{ "/_Analyse", NULL, NULL, 0, "<Branch>" },
-	{ "/_Analyse/_Evaluate", NULL, NULL, 0, NULL },
-	{ "/_Analyse/_Rollout", NULL, NULL, 0, NULL },
-	{ "/_Database", NULL, NULL, 0, "<Branch>" },
-	{ "/_Database/_Dump", NULL, NULL, 0, NULL },
-	{ "/_Database/_Generate", NULL, NULL, 0, NULL },
-	{ "/_Database/_Rollout", NULL, NULL, 0, NULL },
-	{ "/_Settings", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Automatic", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Automatic/_Bearoff", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Automatic/_Crawford", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Automatic/_Game", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Automatic/_Move", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Automatic/_Roll", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Confirmation", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Crawford", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Cube", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Cube/_Owner", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Cube/_Use", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Display", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Jacoby", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Nackgammon", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Help", NULL, NULL, 0, "<Branch>" },
-	{ "/_Help/_About...", NULL, NULL, 0, NULL }
-    };
-    
-    /* FIXME gtk_init_check should check command line options before
-       main() */
-
-    if( !gtk_init_check( pargc, pargv ) )
-	return;
-
-    gdk_rgb_init();
-    gdk_rgb_set_min_colors( 2 * 2 * 2 );
-    gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
-    gtk_widget_set_default_visual( gdk_rgb_get_visual() );
-
-    pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-    gtk_window_set_title( GTK_WINDOW( pwMain ), "GNU Backgammon" );
-    gtk_container_add( GTK_CONTAINER( pwMain ),
-		       pwVbox = gtk_vbox_new( FALSE, 0 ) );
-
-    pag = gtk_accel_group_new();
-    pif = gtk_item_factory_new( GTK_TYPE_MENU_BAR, "<main>", pag );
-    gtk_item_factory_create_items( pif, sizeof( aife ) / sizeof( aife[ 0 ] ),
-				   aife, NULL );
-    gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pag );
-    gtk_box_pack_start( GTK_BOX( pwVbox ),
-			gtk_item_factory_get_widget( pif, "<main>" ),
-			FALSE, FALSE, 0 );
-		       
-    gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
-    gtk_widget_show_all( pwMain );
-    
-    ShowBoard();
-#if 0
-    /* GTK-FIXME */
-    /* FIXME all this should be done in Ext somehow */
-    XStoreName( pdsp, ewnd.wnd, "GNU Backgammon" );
-    XSetIconName( pdsp, ewnd.wnd, "GNU Backgammon" );
-    xsh.flags = PMinSize | PAspect;
-    xsh.min_width = 124;
-    xsh.min_height = 132;
-    xsh.min_aspect.x = 108;
-    xsh.min_aspect.y = 102;
-    xsh.max_aspect.x = 162;
-    xsh.max_aspect.y = 102;
-    XSetWMNormalHints( pdsp, ewnd.wnd, &xsh );
-
-    XMapRaised( pdsp, ewnd.wnd );
-#endif
-
-    gtk_input_add_full( STDIN_FILENO, GDK_INPUT_READ, StdinReadNotify,
-			NULL, NULL, NULL );
-    
-    /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
-    /* GTK-FIXME
-    fnAction = HandleXAction;
-    if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
-	fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
-	fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
-    }
-    */
-    
-#if HAVE_LIBREADLINE
-    fReadingCommand = TRUE;
-    rl_callback_handler_install( FormatPrompt(), HandleInput );
-    atexit( rl_callback_handler_remove );
-#else
-    Prompt();
-#endif
-
-    gtk_main();
-    
-    /* Should never return. */
-    
-    abort(); /* GTK-FIXME */
-}
 #endif
 
 /* Read a line from stdin, and handle X and readline input if
@@ -1847,8 +1700,9 @@ extern int main( int argc, char *argv[] ) {
 	{ "datadir", required_argument, NULL, 'd' },
         { "help", no_argument, NULL, 'h' },
 	{ "no-weights", no_argument, NULL, 'n' },
-        { "tty", no_argument, NULL, 't' },
         { "version", no_argument, NULL, 'v' },
+	/* `tty' must be the last option -- see below. */
+        { "tty", no_argument, NULL, 't' },
         { NULL, 0, NULL, 0 }
     };
 #if HAVE_GETPWUID
@@ -1856,6 +1710,30 @@ extern int main( int argc, char *argv[] ) {
 #endif
 #if HAVE_LIBREADLINE
     char *sz;
+#endif
+    
+#if !X_DISPLAY_MISSING
+    /* The GTK interface is fairly grotty; it makes it impossible to
+       separate argv handling from attempting to open the display, so
+       we have to check for -t before the other options to avoid connecting
+       to the X server if it is specified.
+
+       We use the last element of ao to get the "--tty" option only. */
+    
+    opterr = 0;
+    
+    while( ( ch = getopt_long( argc, argv, "t", ao + sizeof( ao ) /
+			       sizeof( ao[ 0 ] ) - 2, NULL ) ) != (char) -1 )
+	if( ch == 't' ) {
+	    fX = FALSE;
+	    break;
+	}
+    
+    optind = 0;
+    opterr = 1;
+    
+    if( fX )
+	fX = gtk_init_check( &argc, &argv );
 #endif
     
     fInteractive = isatty( STDIN_FILENO );
@@ -1873,12 +1751,8 @@ extern int main( int argc, char *argv[] ) {
 	case 'n':
 	    fNoWeights = TRUE;
 	    break;
-	case 't': /* tty */
-#if !X_DISPLAY_MISSING
-	    fX = FALSE;
-#else
-	    /* Silently ignore */
-#endif
+	case 't':
+	    /* silently ignore (if it was relevant, it was handled earlier). */
 	    break;
 	case 'v': /* version */
 	    puts( "GNU Backgammon " VERSION );
@@ -1946,10 +1820,9 @@ extern int main( int argc, char *argv[] ) {
     
 #if !X_DISPLAY_MISSING
     if( fX ) {
-	RunX( &argc, &argv );
+	RunGTK();
 
-	fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
-	fX = FALSE;
+	return EXIT_SUCCESS;
     }
 #endif
     
