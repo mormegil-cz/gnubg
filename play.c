@@ -1432,8 +1432,10 @@ static int TryBearoff( void ) {
     int i, iMove, cMoves;
     movenormal *pmn;
     
-    if( ClassifyPosition( ms.anBoard, ms.bgv ) > CLASS_RACE )
+    if( ClassifyPosition( ms.anBoard, VARIATION_STANDARD ) > CLASS_RACE )
 	/* It's a contact position; don't automatically bear off */
+        /* note that we use VARIATION_STANDARD instead of ms.bgv in order
+           to avoid automatic bearoff in contact positions for hypergammon */
 	return -1;
     
     GenerateMoves( &ml, ms.anBoard, ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE );
