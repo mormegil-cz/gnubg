@@ -1,5 +1,12 @@
 GNU Backgammon NEWS -- history of user-visible changes.  10 May
 
+** analysis
+   - new command "analyse move" (Analyse->Analyse Move)
+   - analysis of resignations
+   - automatic analysis 
+     ("set automatic analysis on" or Settings->Automatic->Analysis)
+    (a tutor mode is under implementation)
+
 ** match equity tables are now read from XML files. Allows the user to specify
    her own favorite MET. 
 
