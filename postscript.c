@@ -937,6 +937,8 @@ static void ExportGameGeneral( int f, char *sz ) {
 
     FILE *pf;
 
+    sz = NextToken( &sz );
+    
     if( !plGame ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 	return;
@@ -987,6 +989,8 @@ static void ExportMatchGeneral( int f, char *sz ) {
     FILE *pf;
     list *pl;
 
+    sz = NextToken( &sz );
+    
     if( !plGame ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 	return;

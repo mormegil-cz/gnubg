@@ -480,6 +480,8 @@ extern void CommandExportGameLaTeX( char *sz ) {
 
     FILE *pf;
     
+    sz = NextToken( &sz );
+    
     if( !plGame ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 	return;
@@ -513,6 +515,8 @@ extern void CommandExportMatchLaTeX( char *sz ) {
     FILE *pf;
     list *pl;
 
+    sz = NextToken( &sz );
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export "
 		 "match latex')." );

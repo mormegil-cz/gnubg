@@ -1,3 +1,19 @@
+Thu Nov  1 10:43:49 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (AnalyzeMove, AnalyzeGame, CommandAnalyseMatch): Handle
+	interruptions/errors.
+	* eval.c (FindnSaveBestMoves): Clean up *pml when reporting
+	interruption/error.
+	
+	* database.c, external.c, gnubg.c, latex.c, postscript.c, sgf.c: Call
+	NextToken to dequote filename parameters.
+	* gtkgame.c (FileCommand): Quote the specified filename.
+	* gnubg.c (NextToken): Change the quote character from `\' to `%' on
+	MS DOS/Windows.
+
+	* gtkboard.c (board_quick_edit): New function.  Revise edit mode
+	(contributed by John Chuang).
+	
 Wed Oct 31 14:00:12 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtk-multiview.c (gtk_multiview_expose): Eliminate redundant function

@@ -143,6 +143,8 @@ extern void CommandExternal( char *sz ) {
 	anMove[ 8 ];
     cubeinfo ci;
     
+    sz = NextToken( &sz );
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify the name of the socket to the external\n"
 		 "controller -- try `help external'." );

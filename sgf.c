@@ -809,6 +809,8 @@ extern void CommandLoadGame( char *sz ) {
 
     list *pl;
 
+    sz = NextToken( &sz );
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to load from (see `help load "
 		 "game')." );
@@ -854,6 +856,8 @@ extern void CommandLoadMatch( char *sz ) {
 
     list *pl;
 
+    sz = NextToken( &sz );
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to load from (see `help load "
 		 "match')." );
@@ -1280,6 +1284,8 @@ extern void CommandSaveGame( char *sz ) {
 
     FILE *pf;
 
+    sz = NextToken( &sz );
+    
     if( !plGame ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 	return;
@@ -1309,6 +1315,8 @@ extern void CommandSaveMatch( char *sz ) {
     FILE *pf;
     list *pl;
 
+    sz = NextToken( &sz );
+    
     if( !plGame ) {
 	outputl( "No game in progress (type `new game' to start one)." );
 	return;

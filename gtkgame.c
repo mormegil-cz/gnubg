@@ -2745,7 +2745,7 @@ static void FileCommand( char *szPrompt, char *szCommand ) {
 #else
 	char sz[ 1024 ];
 #endif
-	sprintf( sz, "%s %s", szCommand, pch );
+	sprintf( sz, "%s \"%s\"", szCommand, pch );
 	UserCommand( sz );
 
 	g_free( pch );

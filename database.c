@@ -126,6 +126,8 @@ extern void CommandDatabaseExport( char *sz ) {
 	return;
     }
 
+    sz = NextToken( &sz );
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help database "
 		 "export')." );
@@ -207,6 +209,8 @@ extern void CommandDatabaseImport( char *sz ) {
 	return;
     }
 
+    sz = NextToken( &sz );
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to import from (see `help database "
 		 "import')." );
