@@ -5,7 +5,7 @@ player and analysis tool.  Please send comments and suggestions to
 Look for news and upcoming releases of GNU Backgammon at:
     http://gnubg.sourceforge.net/
 
-It is still very unfinished, but I hope some people may find it useful.
+It is still unfinished, but we hope some people may find it useful.
 These features are currently implemented:
 
  - A 2-sided bearoff database which gives perfect cubeless evaluations
@@ -17,27 +17,27 @@ These features are currently implemented:
  - Functions to generate legal moves and evaluate positions at varying
    search depths
  - A command line interface (with full command editing features if GNU
-   readline is available) that lets you play games against gnubg with
-   a rough ASCII representation of a board
+   readline is available) that lets you play matches and sessions against
+   gnubg
+ - Support for either an X11 interface with a graphical board window, or
+   a rough ASCII representation of a board on text terminals
  - Automated rollouts of positions, with lookahead and race variance
    reduction where appropriate
- - TD training of neural net weights
- - Optional X11 interface replacing the ASCII board (still very rudimentary;
-   if you have problems with it, you can build the ASCII version instead
-   by using "./configure --without-x")
- - Supervised training of neural net weights
+ - Both TD(0) and supervised training of neural net weights
 
-I intend to add the following before release:
+We intend to add the following before release:
 
+ - Cube decision evaluations
+ - Loading and saving positions, games, matches and sessions
  - Optional scripting ability (if GNU Guile is available)
  - Most importantly, to improve the accuracy of the evaluation functions!
 
 
-The distribution is still messier than it should be, I'm afraid; I intend
+The distribution is still messier than it should be, I'm afraid; we intend
 to fix this in future.  One of the difficulties is in constructing the
 bearoff database and neural net weights -- these files are several
-megabytes large and can take hours to generate.  For the meantime, I
-have made them available on the WWW:
+megabytes large and can take hours to generate.  For the meantime, they
+are available on the WWW:
 
     http://gnubg.sourceforge.net/development/
 
@@ -52,5 +52,3 @@ instead.  If you want to do this, copy it BEFORE you start compilation,
 to avoid creating one yourself.
 
 Thanks for trying GNU Backgammon!
-
-Gary.

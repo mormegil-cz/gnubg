@@ -35,7 +35,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow abbreviation of multiple moves (e.g. "8/7(2) 6/5(2)") and
   concatenation of moves (e.g. "24/18*/13").
 ** Finish "help" -- add detailed help for each command.
-** Add undo, reroll, and viewing next/prev moves in game/match. (gary)
+** Add undo, reroll, and viewing next/prev moves in game/match.
 ** Allow reading commands from scripts.  A .gnubgrc file would contain
   startup commands.  This needs some thought to make sure it works well
   with Guile scripts.
@@ -51,7 +51,7 @@ duplication of effort and to make sure our changes merge easily.
   some of this should wait for Gnome.
 ** Keyboard input (or at least some of it) to the board window could
   be redirected to $WINDOWID. (gary)
-** Allow doubling by clicking the cube in the board window.  (gary)
+** Allow doubling by clicking the cube in the board window. (gary)
 ** Add an option to slow down display if moves happen too quickly (e.g.
   computer move, unable to move, auto bearoff, etc.)
 ** Perform better move checking in the X window; provide visual feedback
@@ -60,6 +60,9 @@ duplication of effort and to make sure our changes merge easily.
   interface?
 ** Try to use some optimisation like XCheckIfEvent() to ignore all but
   the most recent MotionNotify event in the queue when dragging chequers.
+** Allow clicking on a point to make that point.
+** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
+  board window, if available.
 ** Add Gnome support.  This may also allow us to fix the problem of being
   unresponsive to X events during long computations, which I don't think
   is worth fixing until then.  Better to wait until Gnome is rock solid,
@@ -87,6 +90,11 @@ duplication of effort and to make sure our changes merge easily.
   the mouse which causes the manual dice prompt?  All this mess can
   probably wait for Gnome. (gary)
 
+* Documentation:
+** Complete the Texinfo manual.  Perhaps for now, only things that are
+  unlikely to change should be documented.
+** Describe the ASCII vs. binary weights behaviour.
+
 * Miscellaneous:
 ** Add internationalisation (gettext).
 ** Use Guile if available.
@@ -95,8 +103,8 @@ duplication of effort and to make sure our changes merge easily.
   HTML formatted manual, and perhaps pages to submit training data,
   an online evaluator like Monte Carlo, maybe even an entire game like
   Motif.
-** Complete the Texinfo manual.  Perhaps for now, only things that are
-  unlikely to change should be documented.
 ** When $USER, $LOGNAME, getlogin(), getpwnam() or equivalent is available,
-  set the player name to the user's name.  (Maybe this isn't a good idea.)
+  set the player name to the user's name (otherwise, just say "You").  Set
+  gnubg's name to "gnubg".  Make ShowBoard() add "X" and "O" to the
+  player name strings, so you can see who is who on the ASCII board. (gary)
 ** Allow loading and saving weights to specify binary or ASCII format.
