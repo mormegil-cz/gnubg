@@ -1,3 +1,7 @@
+Thu Dec 26 00:18:10 2002  Joern Thyssen  <jth@gnubg.org>
+
+	* bearoff.texi: add better size estimates for one-sided databases.
+
 Sun Dec 22 00:10:28 2002  Joern Thyssen  <jth@freeshell.org>
 
 	* bearoff.texi: add some MD5 checksums.

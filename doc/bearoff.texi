@@ -210,20 +210,20 @@ bearoff and gammon distributions):
 @multitable @columnfractions 0.25 0.25 0.25
 @item @strong{Chequers}  
 @tab @strong{Points}   
-@tab @strong{Approximate size in MB}
-@item 15        @tab 6        @tab 1.5
+@tab @strong{Size in MB}
+@item 15        @tab 6        @tab 1.4
 @item 15        @tab 7        @tab 5
 @item 15        @tab 8        @tab 15
-@item 15        @tab 9        @tab 44
-@item 15        @tab 10       @tab 120
-@item 15        @tab 11       @tab 250
-@item 15        @tab 12       @tab 560
-@item 15        @tab 13       @tab 1,200
-@item 15        @tab 14       @tab 2,500
-@item 15        @tab 15       @tab 5,000
-@item 15        @tab 16       @tab 10,000
-@item 15        @tab 17       @tab 18,000
-@item 15        @tab 18       @tab 32,000
+@item 15        @tab 9        @tab 42
+@item 15        @tab 10       @tab 112
+@item 15        @tab 11       @tab 284
+@item 15        @tab 12       @tab 682
+@item 15        @tab 13       @tab approx 1,700 
+@item 15        @tab 14       @tab approx 4,300
+@item 15        @tab 15       @tab approx 10,700
+@item 15        @tab 16       @tab approx 26,700
+@item 15        @tab 17       @tab approx 66,700
+@item 15        @tab 18       @tab approx 166,000
 @end multitable
 
 So, the practical limit is probably around the 11 to 13 point,
