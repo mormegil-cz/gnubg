@@ -375,7 +375,7 @@ command acAnnotate[] = {
       "parameters", NULL, acSetEvaluation },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, NULL },
-    { "met", NULL, "Select match equity table", NULL,
+    { "met", NULL, "Synonym for `set matchequitytable'", NULL,
       acSetMET },
     { "matchequitytable", NULL, "Select match equity table", NULL,
       acSetMET },
@@ -439,7 +439,7 @@ command acAnnotate[] = {
     { "matchequitytable", CommandShowMatchEquityTable, 
       "Show match equity table", szOPTVALUE, NULL },
     { "met", CommandShowMatchEquityTable, 
-      "Show match equity table", szOPTVALUE, NULL },
+      "Synonym for `show matchequitytable'", szOPTVALUE, NULL },
     { "nackgammon", CommandShowNackgammon, "Display which starting position "
       "will be used", NULL, NULL },
     { "output", CommandShowOutput, "Show how results will be formatted",
