@@ -527,7 +527,7 @@ extern void CommandSetNackgammon( char *sz ) {
     
     SetToggle( "nackgammon", &fNackgammon, sz, "New games will use the "
 	       "Nackgammon starting position.", "New games will use the "
-	       "standards backgammon starting position." );
+	       "standard backgammon starting position." );
 
 #if !X_DISPLAY_MISSING
     if( fX && fTurn == -1 )
