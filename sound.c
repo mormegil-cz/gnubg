@@ -1121,17 +1121,30 @@ play_file_child(soundcache *psc, const char *filename) {
 		return;
 	}
 	SetLastError(0);
-	while (!PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC | SND_NOSTOP | SND_NODEFAULT)
-		&& !GetLastError())
-		Sleep(1);	/* Wait (1ms) for previous sound to finish */
-
-	if (GetLastError())
+	while (!PlaySound(filename, NULL, SND_FILENAME | SND_ASYNC | SND_NOSTOP | SND_NODEFAULT))
 	{
-		g_print("Error playing sound file: %s\n", filename);
-		PrintWinError();
-		SetLastError(0);
-		return;
+		static int soundDeviceAttached = -1;
+		if (soundDeviceAttached == -1)
+		{	/* Check for sound card */
+			soundDeviceAttached = waveOutGetNumDevs();
+		}
+		if (!soundDeviceAttached)
+		{	/* No sound card found - disable sound */
+			g_print("No soundcard found - sounds disabled\n");
+			fSound = FALSE;
+			return;
+		}
+		/* Check for errors */
+		if (GetLastError())
+		{
+			g_print("Error playing sound file: %s\n", filename);
+			PrintWinError();
+			SetLastError(0);
+			return;
+		}
+		Sleep(1);	/* Wait (1ms) for current sound to finish */
 	}
+
 #else
       assert ( FALSE );
 #endif
