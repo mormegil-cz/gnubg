@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+TEMP=/tmp/gnubgtest.$$
+
 if [ -n "$srcdir" ]; then
   dirparam="--datadir=$srcdir"
 else
@@ -11,9 +13,13 @@ die () {
   exit 1
 }
 
-# Basic test -- could fail if there are problems with the binary.
-./gnubg $dirparam -t -n -b <> /dev/null || die '--- Basic gnubg test fails.'
-echo '--- Basic gnubg test succeeds.'
+# Feature test
+./gnubg -v > $TEMP || die '--- Feature test fails.'
+grep -q Guile $TEMP && GUILE=yes || GUILE=""
+grep -q databases $TEMP && DATABASES=yes || DATABASES=""
+grep -q Window $TEMP && WINDOW=yes || WINDOW=""
+rm -f $TEMP
+echo '--- Feature test succeeds.'
 
 # Test without -b; now requires bearoff database.
 ./gnubg $dirparam -t -n <> /dev/null || die '--- Bearoff database test fails.'
@@ -62,8 +68,8 @@ new game
 EOF
 echo '--- Cubeful self-play test succeeds.'
 
-# Test game navigation.
-./gnubg $dirparam -t << "EOF" | grep -q '167.*163' || die \
+# Test game navigation (and save game for later load test).
+./gnubg $dirparam -t << EOF | grep -q '167.*163' || die \
     '--- Game navigation fails.'
 set rng manual
 set player both human
@@ -78,6 +84,7 @@ previous
 next
 next
 previous
+save game $TEMP
 show pipcount
 EOF
 echo '--- Game navigation succeeds.'
@@ -102,6 +109,36 @@ resign gammon
 accept
 EOF
 echo '--- Resignation test succeeds.'
+
+# Test beavers.
+./gnubg $dirparam -t << "EOF" | grep -q 'a 0, b 4' || die \
+    '--- Beaver test fails.'
+set rng manual
+set player 0 human
+set player 0 name a
+set player 1 gnu
+set player 1 name b
+set automatic game no
+new game
+21
+6/5 6/4
+11
+double
+take
+11
+resign normal
+EOF
+echo '--- Beaver test succeeds.'
+
+# Test saving.
+./gnubg $dirparam -t << EOF | grep -q '163.*161' || die \
+    '--- Load test fails.'
+set player both human
+load game $TEMP
+show pipcount
+EOF
+rm -f $TEMP
+echo '--- Load test succeeds.'
 
 # Test miscellaneous commands.
 ./gnubg $dirparam -t << "EOF" > /dev/null || die \
