@@ -1519,10 +1519,13 @@ static void
 HTMLBoardHeader ( FILE *pf, const matchstate *pms, 
                   const htmlexporttype het,
                   const htmlexportcss hecss,
-                  const int iGame, const int iMove ) {
+                  const int iGame, const int iMove,
+                  const int fHR ) {
+
+  if ( fHR )
+    fputs ( "<hr />\n", pf );
 
   fprintf ( pf,
-            "<hr />\n"
             "<p><b>"
             "<a name=\"game%d.move%d\">",
             iGame + 1, iMove + 1 );
@@ -1730,6 +1733,7 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ],
                 aszLinks[ i ], aszLinkText[ i ] );
     }
 
+
   if ( ! fFirst )
     fputs ( "</p>\n", pf );
 
@@ -1765,6 +1769,53 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ],
             "</p>\n"
             "</body>\n"
             "</html>\n",
+            _("Valid XHTML 1.0!"),
+            _("Valid CSS!") );
+         
+
+}
+
+
+
+/*
+ * Print html header: dtd, head etc.
+ *
+ * Input:
+ *   pf: output file
+ *   ms: current match state
+ *
+ */
+
+static void 
+HTMLEpilogueComment ( FILE *pf ) {
+
+  time_t t;
+  int fFirst;
+  int i;
+
+  const char szVersion[] = "$Revision$";
+  int iMajor, iMinor;
+
+  iMajor = atoi ( strchr ( szVersion, ' ' ) );
+  iMinor = atoi ( strchr ( szVersion, '.' ) + 1 );
+
+  time ( &t );
+
+  fprintf ( pf, 
+            _("<!-- Output generated %s by "
+              "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
+              "%s") ,
+            ctime ( &t ), VERSION );
+
+  fputs ( " ", pf );
+            
+  fprintf ( pf,
+            _("(HTML Export version %d.%d)"),
+            iMajor, iMinor );
+
+  fprintf ( pf,
+            "-->\n"
+            "<!-- %s and %s -->\n", 
             _("Valid XHTML 1.0!"),
             _("Valid CSS!") );
          
@@ -3334,7 +3385,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
         msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
         msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
 
-        HTMLBoardHeader ( pf, &msExport, het, hecss, iGame, iMove );
+        HTMLBoardHeader ( pf, &msExport, het, hecss, iGame, iMove, TRUE );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
                         szImageDir, szExtension, het, hecss );
@@ -3348,7 +3399,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
       case MOVE_TAKE:
       case MOVE_DROP:
 
-        HTMLBoardHeader ( pf,&msExport, het, hecss, iGame, iMove );
+        HTMLBoardHeader ( pf,&msExport, het, hecss, iGame, iMove, TRUE );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
                         szImageDir, szExtension, het, hecss );
@@ -3671,7 +3722,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     HTMLBoardHeader ( pf, &ms, exsExport.het, exsExport.hecss,
                       getGameNumber ( plGame ),
-                      getMoveNumber ( plGame, pmr ) - 1 );
+                      getMoveNumber ( plGame, pmr ) - 1, TRUE );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
@@ -3691,3 +3742,57 @@ extern void CommandExportPositionHtml( char *sz ) {
 
 }
 
+
+extern void
+CommandExportPositionBBSHtml ( char *sz ) {
+
+
+    FILE *pf;
+    moverecord *pmr = getCurrentMoveRecord ();
+	
+    sz = NextToken( &sz );
+    
+    if( ms.gs == GAME_NONE ) {
+	outputl( _("No game in progress (type `new game' to start one).") );
+	return;
+    }
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a file to export to (see `help export "
+		 "position html').") );
+	return;
+    }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	outputerr( sz );
+	return;
+    }
+
+    HTMLBoardHeader ( pf, &ms, exsExport.het, exsExport.hecss,
+                      getGameNumber ( plGame ),
+                      getMoveNumber ( plGame, pmr ) - 1, FALSE );
+
+    printHTMLBoard( pf, &ms, ms.fTurn,
+                    "http://www.gammonline.com/demo/Images/",
+                    "gif", HTML_EXPORT_TYPE_BBS, 
+                    HTML_EXPORT_CSS_INLINE );
+
+    if( pmr )
+      HTMLAnalysis ( pf, &ms, pmr,
+                     "http://www.gammonline.com/demo/Images/",
+                     "gif", HTML_EXPORT_TYPE_BBS, 
+                     HTML_EXPORT_CSS_INLINE );
+    
+    HTMLEpilogueComment ( pf );
+
+    if( pf != stdout )
+	fclose( pf );
+
+}
+
+  

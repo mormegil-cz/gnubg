@@ -1,3 +1,14 @@
+Mon Oct 21 22:47:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Export position for BBS.
+
+	Currently, it will only export to a file, but in the future
+	it will be possible to export onto the clipboard.
+
+	* gnubg.c: new command "export position bbshtml".
+	* html.c (CommandExportPositionBBSHtml): new function.
+	* html.c (HTMLEpilogueComment): new function.
+
 Mon Oct 21 21:31:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New options for the CSS style sheet for HTML Export:
