@@ -1,3 +1,19 @@
+Mon Dec 23 19:53:40 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	Generalise reduced evaluations to other than 2-ply, and
+	introduce 25% and 50% reductions.
+
+	* set.c (CommandSetEvalReduced): handle new reductions.
+	* eval.c (EvaluatePositionCubeful3, EvaluatePositionFull):
+	simplify code a bit (introduce "reduced" list of all rolls) and
+	handle new reductions.	
+	NOTE! I've also fixed a bug in the loop over rolls!
+	* eval.c (EvaluatePositionCache): small correction in calculation
+	of nEvalContext as nReduced is now 3 bit.
+
+        * gtkgame.c (EvalWidget): use option menu for reductions instead
+        of check box. 
+
 Mon Dec 23 12:51:23 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkcolour.c: New file.  Small colour selection widget which pops
@@ -5,7 +21,6 @@ Mon Dec 23 12:51:23 2002  Gary Wong  <gtw@gnu.org>
 	* gtkprefs.c (append_preview_page): New function.  Show a preview
 	of the board in most notebook pages.
 	
-
 Sun Dec 22 17:02:56 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
 	* play.c - deal with locateMove not finding the move 

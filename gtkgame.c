@@ -3589,11 +3589,19 @@ typedef struct _evalwidget {
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
 
+  GtkWidget *pwMenu, *pwItem;
+  int *pi;
+
     pec->nPlies = pew->padjPlies->value;
     pec->fCubeful = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
-    pec->nReduced = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pew->pwReduced ) ) ? 7 : 0;
+
+    /* reduced */
+    pwMenu = gtk_option_menu_get_menu ( GTK_OPTION_MENU ( pew->pwReduced ) );
+    pwItem = gtk_menu_get_active ( GTK_MENU ( pwMenu ) );
+    pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pwItem ) );
+    pec->nReduced = *pi;
+
     pec->rNoise = pew->padjNoise->value;
     pec->fDeterministic = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwDeterministic ) );
@@ -3643,7 +3651,7 @@ static void EvalNoiseValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 
 static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 
-    gtk_widget_set_sensitive( pew->pwReduced, padj->value == 2 );
+    gtk_widget_set_sensitive( pew->pwReduced, padj->value > 0 );
 
     EvalChanged ( NULL, pew );
 
@@ -3668,7 +3676,7 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
   gtk_adjustment_set_value ( pew->padjPlies, pec->nPlies );
   gtk_adjustment_set_value ( pew->padjNoise, pec->rNoise );
 
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwReduced ),
+  gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwReduced ), 
                                 pec->nReduced );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
                                 pec->fCubeful );
@@ -3694,6 +3702,14 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     GtkWidget *pwMenu;
     GtkWidget *pwItem;
+
+    const char *aszReduced[] = {
+      N_("No reduction"),
+      NULL,
+      N_("50% speed"),
+      N_("33% speed"),
+      N_("25% speed") 
+    };
 
     int i;
     int *pi;
@@ -3791,11 +3807,27 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     pw4 = gtk_vbox_new ( FALSE, 0 );
     gtk_container_add ( GTK_CONTAINER ( pwFrame2 ), pw4 );
 
-    gtk_container_add( GTK_CONTAINER( pw4 ),
-		       pew->pwReduced = gtk_check_button_new_with_label(
-			   _("Reduced 2 ply evaluation") ) );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwReduced ),
-				  pec->nReduced );
+    pwMenu = gtk_menu_new ();
+    for ( i = 0; i < 5; ++i ) {
+      if ( i == 1 )
+        continue;
+      
+      pwItem = gtk_menu_item_new_with_label ( gettext ( aszReduced[ i ] ) );
+      gtk_menu_append ( GTK_MENU ( pwMenu ), pwItem );
+      pi = g_malloc ( sizeof ( int ) );
+      *pi = i;
+      gtk_object_set_data_full ( GTK_OBJECT ( pwItem ), "user_data", 
+                                 pi, g_free );
+
+    }
+    
+    pew->pwReduced = gtk_option_menu_new ();
+    gtk_option_menu_set_menu( GTK_OPTION_MENU( pew->pwReduced ), pwMenu );
+
+    gtk_container_add( GTK_CONTAINER( pw4 ), pew->pwReduced );
+
+    gtk_option_menu_set_history( GTK_OPTION_MENU( pew->pwReduced ), 
+                                 pec->nReduced );
 
     /* cubeful */
     
@@ -3862,7 +3894,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_signal_connect ( GTK_OBJECT( pew->pwCubeful ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
-    gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "toggled",
+    gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "changed",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );

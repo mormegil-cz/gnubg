@@ -953,25 +953,39 @@ extern void CommandSetEvalReduced( char *sz ) {
 
     int n = ParseNumber( &sz );
 
-    if( ( n < 0 ) || ( n > 21 ) ) {
-	outputf( _("You must specify a valid number -- "
-		"try `help set %s reduced'.\n"), szSetCommand );
-
-	return;
+    switch ( n ) {
+    case 0:
+    case 1:
+    case 21: 
+    case 100: /* full search */
+      pecSet->nReduced = 0;
+      break;
+    case 2:
+    case 50: /* 50% */
+      pecSet->nReduced = 2;
+      break;
+    case 4:
+    case 25: /* 25% */
+      pecSet->nReduced = 4;
+      break;
+    case 3:
+    case 33: /* 33% */
+      pecSet->nReduced = 3;
+      break;
+    default:
+      outputf( _("You must specify a valid number -- "
+                 "try `help set %s reduced'.\n"), szSetCommand );
+      return;
+      break;
     }
 
-    if ( n == 0 || n == 21 )
-      pecSet->nReduced = 0;
-    else
-      pecSet->nReduced = 3;
-
-    outputf( _("%s will use %d%% speed 2 ply evaluation.\n"), 
+    outputf( _("%s will use %d%% speed multiple ply evaluation.\n"), 
 	     szSet, 
 	     pecSet->nReduced ? 100 / pecSet->nReduced : 100 );
 
-    if( pecSet->nPlies != 2 )
+    if( !pecSet->nPlies )
 	outputl( _("(Note that this setting will have no effect until you "
-		 "choose 2 ply evaluation.)") );
+		 "choose evaluations with ply > 0.)") );
 }
 
 extern void CommandSetEvaluation( char *sz ) {

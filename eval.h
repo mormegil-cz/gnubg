@@ -97,7 +97,7 @@ typedef struct _evalcontext {
        classes */
     unsigned int fCubeful : 1; /* cubeful evaluation */
     unsigned int nPlies : 3;
-    unsigned int nReduced : 2; /* this will need to be expanded if we add
+    unsigned int nReduced : 3; /* this will need to be expanded if we add
 				  support for nReduced != 3 */
     unsigned int fDeterministic : 1;
     float        rNoise; /* standard deviation */
