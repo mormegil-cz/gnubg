@@ -1,3 +1,8 @@
+Fri Jun 27 20:38:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktheory.c (TheoryUpdated, GTKShowTheory): use gtk_text for
+	showing gammon values (allows copy'n'paste).
+
 Wed Jun 25 21:13:29 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Implement luck adjusted results.
