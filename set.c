@@ -1004,7 +1004,19 @@ extern void CommandSetBeavers( char *sz ) {
 
   SetToggle( "beavers", &fBeavers, sz,
              "Beavers/racoons allowed in money sessions.",
-             "Beavers/raccons allowed in money sessions." ); 
+             "Beavers/raccons not allowed in money sessions." ); 
+
+}
+
+
+extern void CommandSetOutputMWC( char *sz ) {
+
+  if ( nMatchTo )
+    SetToggle( "outputmwc", &fOutputMWC, sz,
+	       "Output shown in MWC (match winning chance).",
+	       "Output shown in equity." ); 
+  else
+    outputl( "Cannot set `outputmwc' for money play." );
 
 }
 
