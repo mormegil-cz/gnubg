@@ -298,15 +298,19 @@ static void EnterCommand( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw );
+static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw );
+static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw );
+static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw );
+static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw );
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw );
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw );
@@ -1887,22 +1891,28 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_Export", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Export/_Game", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Export/_Game/.gam...", NULL, ExportGameGam, 0, NULL },
+	{ "/_File/_Export/_Game/HTML...", NULL, ExportGameHtml, 0, NULL },
 	{ "/_File/_Export/_Game/LaTeX...", NULL, ExportGameLaTeX, 0, NULL },
 	{ "/_File/_Export/_Game/PDF...", NULL, ExportGamePDF, 0, NULL },
 	{ "/_File/_Export/_Game/PostScript...", NULL, ExportGamePostScript, 0,
 	  NULL },
 	{ "/_File/_Export/_Match", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Match/Html...", NULL, ExportMatchHtml, 0, NULL },
 	{ "/_File/_Export/_Match/LaTeX...", NULL, ExportMatchLaTeX, 0, NULL },
 	{ "/_File/_Export/_Match/.mat...", NULL, ExportMatchMat, 0, NULL },
 	{ "/_File/_Export/_Match/PDF...", NULL, ExportMatchPDF, 0, NULL },
 	{ "/_File/_Export/_Match/PostScript...", NULL, ExportMatchPostScript,
 	  0, NULL },
 	{ "/_File/_Export/_Position", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Position/HTML...", NULL,
+	  ExportPositionHtml, 0, NULL },
 	{ "/_File/_Export/_Position/Encapsulated PostScript...", NULL,
 	  ExportPositionEPS, 0, NULL },
 	{ "/_File/_Export/_Position/.pos...", NULL, ExportPositionPos, 0,
 	  NULL },
 	{ "/_File/_Export/_Session", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Session/HTML...", NULL, ExportSessionHtml, 0,
+	  NULL },
 	{ "/_File/_Export/_Session/LaTeX...", NULL, ExportSessionLaTeX, 0,
 	  NULL },
 	{ "/_File/_Export/_Session/PDF...", NULL, ExportSessionPDF, 0, NULL },
@@ -2990,6 +3000,11 @@ static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw ) {
     FileCommand( "Export .gam game", "export game gam" );
 }
 
+static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export HTML game", "export game html" );
+}
+
 static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
     FileCommand( "Export LaTeX game", "export game latex" );
@@ -3008,6 +3023,11 @@ static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
     FileCommand( "Export LaTeX match", "export match latex" );
+}
+
+static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export HTML match", "export match html" );
 }
 
 static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw ) {
@@ -3030,6 +3050,11 @@ static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
     FileCommand( "Export EPS position", "export position eps" );
 }
 
+static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export HTML position", "export position html" );
+}
+
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
 
     FileCommand( "Export .pos position", "export position pos" );
@@ -3043,6 +3068,11 @@ static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw ) {
 
     FileCommand( "Export PDF session", "export session pdf" );
+}
+
+static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Export HTML session", "export session html" );
 }
 
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {

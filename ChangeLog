@@ -1,3 +1,18 @@
+Sun Feb  3 15:56:24 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	Check-in of HTML-export skeleton.
+
+	* gnubg.c: define commands for exporting HTML files. Define 
+	parameters for exports.
+
+	* export.h: new file. Settings for export.
+
+	* html.c: Export of html (so far only dummy routines have been
+	defined)
+
+	* gtkgame.c (ExportGameHtml, ExportMatchHtml, ExportSessionHtml,
+	ExportPositionHtml): new subroutines.
+
 Sun Feb  3 14:36:30 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* import.c (ImportOldmovesGame): implement a workaround fibs 
