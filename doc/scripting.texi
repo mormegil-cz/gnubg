@@ -1,0 +1,134 @@
+@node Scripting
+@chapter Scripting
+
+@section Accessing @gnubg{} Python shell 
+
+To access the Python shell, either type @samp{>} from the command line
+or select @code{Windows->Python Shell(IDLE...)} from the GUI.
+
+@section gnubg module functions
+
+@table @code
+@item board()
+@item command(cmd)
+@item evaluate()
+@item evalcontext()
+@item eq2mwc()
+@item mwc2eq()
+@item cubeinfo()
+@item met()
+@item positionid()
+@item positionfromid()
+@item positionkey()
+@item positionfromkey()
+@item positionbearoff()
+@item positionfrombearoff()
+@item match([analysis=1/0, boards=1/0, statistics=0/1, verbose=0/1])
+
+Return the current match. For example,
+
+@example
+> m = gnubg.match()
+@end example
+
+Takes the following optional keyword arguments:
+
+@table @code
+@item analysis
+When 0, discard analysis data. default is 1.
+
+@item boards
+When 1, add current board to move/double records. Default is 1.
+
+@item statistics
+When 1, include game statistics. Default is 0.
+
+@item verbose
+When 1, include derived analysis values. Default is 0.
+
+@end table
+
+@end table
+
+
+@subsection Match description 
+
+@code{gnubg.match()} returns a dictionary containing the following items
+@table @code
+@item match-info
+General match info. @ref{match-info}
+@item games
+A sequence, one elemet per game. @ref{game}
+@end table
+
+@anchor{match-info}
+@subsubsection Match info
+A dictionary containing the following items,
+@table @code
+@item match-length
+
+@item variation
+One of @code{Standard},@code{Nackgammon}, @code{Hypergammon1},
+@code{Hypergammon2} or @code{Hypergammon3}.
+
+@item rules (optional)
+Additional rules used. A subset of @code{NoCube}, @code{Crawford} and
+@code{Jacoby}.
+  
+@item X
+@itemx O
+Per player information. Each a dictionary containing @code{rating} and
+@code{name}.
+@item annotator
+@item round
+@item place
+@item date
+Sequence of (Day,Month,Year).
+@item event
+@item sgf-rollout-version
+@item default-eval-context
+Default evaluation context. 
+@item default-rollout-context
+Default rollout context. 
+@end table
+
+Example,
+@example
+>>> m['match-info']
+FIXME
+@end example
+
+@anchor{game}
+@subsubsection Python game
+
+A dictionary containing the following items,
+
+@table @code
+@item info
+General game info. For example,
+@example
+>>> m['games'][0]['info']
+@{'points-won': 1, 'score-X': 0, 'score-O': 0, 'winner': 'X', 'resigned': False@}
+@end example
+
+If no winner is given, @code{winner} is @code{None}.
+
+@example
+>>> m['games'][2]['info']
+@{'score-X': 2, 'winner': None, 'score-O': 0@}
+@end example
+
+@item game
+A Sequence of actions. @ref{actions}
+
+@item stats (optional)
+Game statistics. Similar entries to @code{Analyse->Game statistics} from the
+GUI. 
+@end table
+
+
+@anchor{actions}
+@subsubsection Game actions
+
+
+
