@@ -6,7 +6,7 @@
 
      Kazaross-Shaw.xml
 
-     by Øystein Johansen <oystein@gnubg.org>, 2003
+     by Oystein Johansen <oystein@gnubg.org>, 2003
 
 
      This file is distributed as a part of the GNU Backgammon program.
@@ -25,22 +25,40 @@
 
 <met>
   <info>
-    <name>Kazaross and Shaw</name>
-    <description>Neil Kazaross, Ian Shaw and GNU Backgammon, Table based on GNU Backgammon rollouts.</description>
-    <length>2</length>
+    <name>Kazaross</name>
+    <description>Neil Kazaross and GNU Backgammon, Table based on GNU Backgammon rollouts.</description>
+    <length>4</length>
   </info>
 
   <pre-crawford-table type="explicit">
 
     <row>
-      <me>0.500</me>
-      <me>0.682</me>
+      <me>0.5000</me>
+      <me>0.6822</me>
+      <me>0.7495</me>
+	  <me>0.8178</me>
     </row>
 
     <row>
-      <me>0.318</me>
-      <me>0.500</me>
+      <me>0.3178</me>
+      <me>0.5000</me>
+      <me>0.5990</me>
+	  <me>0.6720</me>
     </row>
+	
+    <row>
+      <me>0.2505</me>
+      <me>0.4010</me>
+      <me>0.5000</me>
+	  <me>0.5739</me>
+    </row>
+	
+	<row>
+	  <me>0.1822</me>
+	  <me>0.3280</me>
+	  <me>0.4261</me>
+	  <me>0.5000</me>
+	</row>
 
   </pre-crawford-table>      
   
@@ -48,8 +66,10 @@
   <post-crawford-table type="explicit" player="both">
 
     <row>
-      <me>0.50</me>
-      <me>0.485</me>
+      <me>0.5000</me>
+      <me>0.4874</me>
+      <me>0.3178</me>
+	  <me>0.3052</me>
     </row>
 
   </post-crawford-table>   
