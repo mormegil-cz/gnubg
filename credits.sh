@@ -108,6 +108,7 @@ Kit Woolsey
 Frank Worrell
 Christopher D. Yep
 Anders Zachrison
+Douglas Zare
 EOF
 
 column -c 72 < $contributors | expand | sed 's/^/    /' >> AUTHORS
@@ -128,6 +129,7 @@ Rick Janowski
 Brian Sheppard
 Gerry Tesauro
 Morten Wang
+Douglas Zare
 Michael Zehr
 EOF
 

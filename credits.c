@@ -97,6 +97,7 @@ char *aszCredits[] = {
     "Kit Woolsey",
     "Frank Worrell",
     "Anders Zachrison",
+    "Douglas Zare",
     "Michael Zehr",
     0
 };
