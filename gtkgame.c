@@ -94,9 +94,11 @@ typedef enum _gnubgcommand {
     CMD_NEW_SESSION,
     CMD_NEXT,
     CMD_NEXT_GAME,
+    CMD_NEXT_ROLL,
     CMD_PLAY,
     CMD_PREV,
     CMD_PREV_GAME,
+    CMD_PREV_ROLL,
     CMD_QUIT,
     CMD_REDOUBLE,
     CMD_RESIGN_N,
@@ -104,6 +106,7 @@ typedef enum _gnubgcommand {
     CMD_RESIGN_B,
     CMD_ROLL,
     CMD_ROLLOUT,
+    CMD_ROLLOUT_CUBE,
     CMD_SAVE_SETTINGS,
     CMD_SET_ANALYSIS_CUBE,
     CMD_SET_ANALYSIS_LUCK,
@@ -212,9 +215,11 @@ static char *aszCommands[ NUM_CMDS ] = {
     "new session",
     "next",
     "next game",
+    "next roll",
     "play",
     "previous",
     "previous game",
+    "previous roll",
     "quit",
     "redouble",
     "resign normal",
@@ -222,6 +227,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "resign backgammon",
     "roll",
     "rollout",
+    "rollout =cube",
     "save settings",
     "set analysis cube",
     "set analysis luck",
@@ -952,10 +958,10 @@ static void CreateGameWindow( void ) {
 			PixmapButton( pcmap, prevgame_xpm, "previous game" ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, prevmove_xpm, "previous" ),
+			PixmapButton( pcmap, prevmove_xpm, "previous roll" ),
 			FALSE, FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, nextmove_xpm, "next" ),
+			PixmapButton( pcmap, nextmove_xpm, "next roll" ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( phbox ),
 			PixmapButton( pcmap, nextgame_xpm, "next game" ),
@@ -1732,25 +1738,28 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_Import/._sgg match...", NULL, ImportSGG, 0, NULL },
 	{ "/_File/_Export", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Export/_Game", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_Export/_Game/.gam", NULL, ExportGameGam, 0, NULL },
-	{ "/_File/_Export/_Game/LaTeX", NULL, ExportGameLaTeX, 0, NULL },
-	{ "/_File/_Export/_Game/PDF", NULL, ExportGamePDF, 0, NULL },
-	{ "/_File/_Export/_Game/PostScript", NULL, ExportGamePostScript, 0,
+	{ "/_File/_Export/_Game/.gam...", NULL, ExportGameGam, 0, NULL },
+	{ "/_File/_Export/_Game/LaTeX...", NULL, ExportGameLaTeX, 0, NULL },
+	{ "/_File/_Export/_Game/PDF...", NULL, ExportGamePDF, 0, NULL },
+	{ "/_File/_Export/_Game/PostScript...", NULL, ExportGamePostScript, 0,
 	  NULL },
 	{ "/_File/_Export/_Match", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_Export/_Match/LaTeX", NULL, ExportMatchLaTeX, 0, NULL },
-	{ "/_File/_Export/_Match/.mat", NULL, ExportMatchMat, 0, NULL },
-	{ "/_File/_Export/_Match/PDF", NULL, ExportMatchPDF, 0, NULL },
-	{ "/_File/_Export/_Match/PostScript", NULL, ExportMatchPostScript, 0,
-	  NULL },
-	{ "/_File/_Export/_Position", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_Export/_Position/Encapsulated PostScript", NULL,
-	  ExportPositionEPS, 0, NULL },
-	{ "/_File/_Export/_Position/.pos", NULL, ExportPositionPos, 0, NULL },
-	{ "/_File/_Export/_Session", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_Export/_Session/PDF", NULL, ExportSessionPDF, 0, NULL },
-	{ "/_File/_Export/_Session/PostScript", NULL, ExportSessionPostScript,
+	{ "/_File/_Export/_Match/LaTeX...", NULL, ExportMatchLaTeX, 0, NULL },
+	{ "/_File/_Export/_Match/.mat...", NULL, ExportMatchMat, 0, NULL },
+	{ "/_File/_Export/_Match/PDF...", NULL, ExportMatchPDF, 0, NULL },
+	{ "/_File/_Export/_Match/PostScript...", NULL, ExportMatchPostScript,
 	  0, NULL },
+	{ "/_File/_Export/_Position", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Position/Encapsulated PostScript...", NULL,
+	  ExportPositionEPS, 0, NULL },
+	{ "/_File/_Export/_Position/.pos...", NULL, ExportPositionPos, 0,
+	  NULL },
+	{ "/_File/_Export/_Session", NULL, NULL, 0, "<Branch>" },
+	{ "/_File/_Export/_Session/LaTeX...", NULL, ExportSessionLaTeX, 0,
+	  NULL },
+	{ "/_File/_Export/_Session/PDF...", NULL, ExportSessionPDF, 0, NULL },
+	{ "/_File/_Export/_Session/PostScript...", NULL,
+	  ExportSessionPostScript, 0, NULL },
 	{ "/_File/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_File/_Quit", "<control>Q", Command, CMD_QUIT, NULL },
 	{ "/_Edit", NULL, NULL, 0, "<Branch>" },
@@ -1777,8 +1786,10 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Game/Play computer turn", NULL, Command, CMD_PLAY, NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Game/Next move", "Page_Down", Command, CMD_NEXT, NULL },
-	{ "/_Game/Previous move", "Page_Up", Command, CMD_PREV, NULL },
+	{ "/_Game/Next roll", "Page_Down", Command, CMD_NEXT_ROLL, NULL },
+	{ "/_Game/Previous roll", "Page_Up", Command, CMD_PREV_ROLL, NULL },
+	{ "/_Game/Next move", "<shift>Page_Down", Command, CMD_NEXT, NULL },
+	{ "/_Game/Previous move", "<shift>Page_Up", Command, CMD_PREV, NULL },
 	{ "/_Game/Next game", "<control>Page_Down", Command, CMD_NEXT_GAME,
 	  NULL },
 	{ "/_Game/Previous game", "<control>Page_Up", Command, CMD_PREV_GAME,
@@ -1816,6 +1827,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Analyse/_Evaluate", "<control>E", Command, CMD_EVAL, NULL },
 	{ "/_Analyse/_Hint", "<control>H", Command, CMD_HINT, NULL },
 	{ "/_Analyse/_Rollout", NULL, Command, CMD_ROLLOUT, NULL },
+	{ "/_Analyse/Rollout _cube decision", NULL, Command, CMD_ROLLOUT_CUBE,
+	  NULL },
 	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Analyse/Analyse game", NULL, Command, CMD_ANALYSE_GAME, NULL },
 	{ "/_Analyse/Analyse match", NULL, Command, CMD_ANALYSE_MATCH, NULL },
@@ -2076,7 +2089,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 
 extern void RunGTK( void ) {
 
-    int n;
     togglecommand *ptc;
     
     /* Ensure all menu item settings are initialised to the correct state. */
@@ -2096,12 +2108,21 @@ extern void RunGTK( void ) {
     
     if( fTTY ) {
 #ifdef ConnectionNumber /* FIXME use configure somehow to detect this */
+#if O_ASYNC
+    /* BSD O_ASYNC-style I/O notification */
+    {
+	int n;
+	
 	if( ( n = fcntl( ConnectionNumber( GDK_DISPLAY() ),
 			 F_GETFL ) ) != -1 ) {
-	    /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
 	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETOWN, getpid() );
-	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | FASYNC );
+	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | O_ASYNC );
 	}
+    }
+#else
+    /* System V SIGPOLL-style I/O notification */
+    ioctl( ConnectionNumber( GDK_DISPLAY() ), I_SETSIG, S_RDNORM );
+#endif
 #endif
     
 #if HAVE_LIBREADLINE
@@ -3099,15 +3120,9 @@ static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     GTKAllowStdin();
 
-    if( fOK ) {
-        /* FIXME this is a temporary hack for compatibility with the
-           old evalsetup... the interface should be extended to allow
-           different settings for chequer and cube evaluations, and
-           rollouts. */
+    if( fOK )
         SetEvalCommands( "set analysis cubedecision eval", &ec,
-                         &esAnalysisCube.ec );
-    /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
-    }
+			 &esAnalysisCube.ec );
 }
 
 static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
@@ -3141,15 +3156,9 @@ static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     GTKAllowStdin();
 
-    if( fOK ) {
-        /* FIXME this is a temporary hack for compatibility with the
-           old evalsetup... the interface should be extended to allow
-           different settings for chequer and cube evaluations, and
-           rollouts. */
+    if( fOK )
         SetEvalCommands( "set analysis chequer eval", &ec,
                          &esAnalysisChequer.ec );
-    /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
-    }
 }
 
 static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
@@ -3180,15 +3189,9 @@ static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     GTKAllowStdin();
 
-    if( fOK ) {
-        /* FIXME this is a temporary hack for compatibility with the
-           old evalsetup... the interface should be extended to allow
-           different settings for chequer and cube evaluations, and
-           rollouts. */
+    if( fOK )
         SetEvalCommands( "set evaluation chequer eval", &ec,
                          &esEvalChequer.ec );
-    /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
-    }
 }
 
 static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
@@ -3219,16 +3222,10 @@ static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     GTKAllowStdin();
 
-    if( fOK ) {
-        /* FIXME this is a temporary hack for compatibility with the
-           old evalsetup... the interface should be extended to allow
-           different settings for chequer and cube evaluations, and
-           rollouts. */
-     /*   SetEvalCommands( "set evaluation chequer eval", &ec,
-                         &esEvalChequer.ec ); */
+    if( fOK )
         SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );
-    }
 }
+ 
 typedef struct _playerswidget {
     int *pfOK;
     player *ap;
@@ -3383,6 +3380,9 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 	outputpostpone();
 
 	for( i = 0; i < 2; i++ ) {
+	    /* NB: this comparison is case-sensitive, and does not use
+	       CompareNames(), so that the user can modify the case of
+	       names. */
 	    if( strcmp( ap[ i ].szName, apTemp[ i ].szName ) ) {
 		sprintf( sz, "set player %d name %s", i, apTemp[ i ].szName );
 		UserCommand( sz );
@@ -3402,8 +3402,8 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 		    UserCommand( sz );
 		}
 
-		/* FIXME another temporary hack (see comment in
-		   SetEval) */
+		/* FIXME another temporary hack (should be some way to set
+		   chequer and cube parameters independently) */
 		sprintf( sz, "set player %d chequer evaluation", i );
 		SetEvalCommands( sz, &apTemp[ i ].esChequer.ec,
 				 &ap[ i ].esChequer.ec );
@@ -3433,8 +3433,8 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 
 typedef struct _rolloutwidget {
     evalcontext ec;
-    int nTrials, nTruncate, fVarRedn, nSeed;
-    GtkWidget *pwEval, *pwVarRedn;
+    int nTrials, nTruncate, fCubeful, fVarRedn, nSeed;
+    GtkWidget *pwEval, *pwCubeful, *pwVarRedn;
     GtkAdjustment *padjTrials, *padjTrunc, *padjSeed;
     int *pfOK;
 } rolloutwidget;
@@ -3446,6 +3446,8 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
     prw->nTrials = prw->padjTrials->value;
     prw->nTruncate = prw->padjTrunc->value;
     prw->nSeed = prw->padjSeed->value;
+    prw->fCubeful = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( prw->pwCubeful ) );
     prw->fVarRedn = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( prw->pwVarRedn ) );
     
@@ -3461,7 +3463,7 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     rolloutwidget rw;
     char sz[ 256 ];
     
-    memcpy( &rw.ec, &ecRollout, sizeof( ecRollout ) );
+    memcpy( &rw.ec, &rcRollout.aecChequer[ 0 ], sizeof( rw.ec ) );
     rw.pfOK = &fOK;
     
     pwDialog = CreateDialog( "GNU Backgammon - Rollouts", TRUE,
@@ -3489,6 +3491,12 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 		       gtk_label_new( "Truncation:" ) );
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_spin_button_new( rw.padjTrunc, 1, 0 ) );
+
+    gtk_container_add( GTK_CONTAINER( pwBox ),
+		       rw.pwCubeful = gtk_check_button_new_with_label(
+			   "Cubeful" ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwCubeful ),
+				  rcRollout.fCubeful );
 
     gtk_container_add( GTK_CONTAINER( pwBox ),
 		       rw.pwVarRedn = gtk_check_button_new_with_label(
@@ -3535,6 +3543,12 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 	    UserCommand( sz );
 	}
 
+	if( rw.fCubeful != rcRollout.fCubeful ) {
+	    sprintf( sz, "set rollout cubeful %s",
+		     rw.fCubeful ? "on" : "off" );
+	    UserCommand( sz );
+	}
+
 	if( rw.fVarRedn != rcRollout.fVarRedn ) {
 	    sprintf( sz, "set rollout varredn %s",
 		     rw.fVarRedn ? "on" : "off" );
@@ -3546,9 +3560,12 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 	    UserCommand( sz );
 	}
 
-	/* FIXME another temporary hack (see comment in SetEval) */
-	SetEvalCommands( "set rollout chequer", &rw.ec, &ecRollout );
-	SetEvalCommands( "set rollout cube", &rw.ec, &ecRollout );
+	/* FIXME another temporary hack (should be able to set chequer and
+	   cube parameters independently) */
+	SetEvalCommands( "set rollout chequer", &rw.ec,
+			 &rcRollout.aecChequer[ 0 ] );
+	SetEvalCommands( "set rollout cube", &rw.ec,
+			 &rcRollout.aecCube[ 0 ] );
 	
 	outputresume();
     }
@@ -4327,6 +4344,18 @@ extern void GTKSet( void *p ) {
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Game" ),
 			 ms.gs == GAME_PLAYING );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_NEXT_ROLL ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_PREV_ROLL ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_NEXT ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_PREV ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_NEXT_GAME ), !ListEmpty( &lMatch ) );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_PREV_GAME ), !ListEmpty( &lMatch ) );
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
 			 ms.gs == GAME_PLAYING );

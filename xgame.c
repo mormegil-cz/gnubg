@@ -834,14 +834,14 @@ extern void RunExt( void ) {
     /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
     fnAction = HandleXAction;
 
-#if FASYNC
-    /* BSD FASYNC-style I/O notification */
+#if O_ASYNC
+    /* BSD O_ASYNC-style I/O notification */
     {
 	int n;
 	
 	if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
 	    fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
-	    fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
+	    fcntl( ConnectionNumber( pdsp ), F_SETFL, n | O_ASYNC );
 	}
     }
 #else
