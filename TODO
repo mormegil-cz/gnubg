@@ -27,6 +27,8 @@ duplication of effort and to make sure our changes merge easily.
   speed increase.  See FindBestMoveInEval() in eval.c from fibs2html.
 ** The cubedecision REDOUBLE_BEAVER should never occur -- should it be
   removed?
+** Add an option for rollouts of "opening" positions: neither player on
+  roll, and no doubles permitted (suggested by Ian Shaw).  
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -250,7 +252,7 @@ functions:
   of both problems.
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
-** "help next" (and "next <tab>" areincomplete.
+** "help next" (and "next <tab>" are incomplete.
 ** Make sure that GTKSet() allows analysis after a move is imported. (gary)
 
 * Documentation:
