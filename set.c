@@ -31,6 +31,7 @@
 #if defined(sun)
 #define AF_LOCAL AF_UNIX
 #define PF_LOCAL PF_UNIX
+#include <limits.h>
 #endif
 
 #include <sys/socket.h>
