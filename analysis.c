@@ -295,7 +295,9 @@ AnalyzeGame ( list *plGame ) {
 			rCost;
 		}
 	    }
-	    
+
+	    fFirstMove = 0;
+ 
 	    break;
 	    
 	case MOVE_DOUBLE:
