@@ -5720,16 +5720,16 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
   float arCf[ 2 * cci ];
   float arCfTemp[ 2 * cci ];
   cubeinfo aci[ 2 * cci ];
-#elif _HAVE_ALLOCA
+#elif HAVE_ALLOCA
   float *arCf =
-    alloca( 2 * cci * sizeof float );
+    alloca( 2 * cci * sizeof(float) );
   float *arCfTemp =
-    alloca( 2 * cci * sizeof float );
-  float *aci = alloca ( 2 * cci * sizeof ( cubeinfo ) );
+    alloca( 2 * cci * sizeof(float) );
+  cubeinfo *aci = alloca ( 2 * cci * sizeof ( cubeinfo ) );
 #else
-  float arCf[ 32 ];
-  float arCfTemp[ 32 ];
-  cubeinfo aci[ 32 ];
+  float arCf[ 128 ];
+  float arCfTemp[ 128 ];
+  cubeinfo aci[ 128 ];
 #endif
   int fUseReduction;
   laRollList_t *rolls = NULL;
