@@ -1,30 +1,41 @@
 /*
- * matchequity.c
- * by Joern Thyssen, 1999
- *
- * Calculate matchequity table based on 
- * formulas from [insert the Managent Science ref here].
- *
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of version 2 of the GNU General Public License as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * $Id$
- */
+* matchequity.c
+* by Joern Thyssen, 1999-2002
+*
+* Calculate matchequity table based on 
+* formulas from [insert the Managent Science ref here].
+*
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of version 2 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+* $Id$
+*/
 
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+#include "config.h"
+#include "list.h"
+
+#if HAVE_LIBXML2
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#endif
 
 #if !HAVE_ERF
 extern double erf( double x );
@@ -37,29 +48,59 @@ extern double erf( double x );
 #define G2            0.15
 #define GAMMONRATE    0.25
 
-
-
 #include "matchequity.h"
 
+typedef struct _parameter {
+
+  char *szName, *szValue;
+
+} parameter;
+
+
+typedef struct _metparameters {
+
+  char *szName;
+  list lParameters;
+
+} metparameters;
+
+typedef struct _metdata {
+
+  /* Data saved */
+
+  /* Pre crawford MET */
+
+  float aarMET[ MAXSCORE ][ MAXSCORE ];
+  metparameters mpPreCrawford;
+
+  /* post-crawford MET */
+
+  float arMETPostCrawford[ MAXSCORE ];
+  metparameters mpPostCrawford;
+
+  /* MET info */
+
+  metinfo mi;
+
+} metdata;
 
 /*
- * A1 (A2) is the match equity of player 1 (2)
- * Btilde is the post-crawford match equities.
- */
+* A1 (A2) is the match equity of player 1 (2)
+* Btilde is the post-crawford match equities.
+*/
 
 float aafMET [ MAXSCORE ][ MAXSCORE ];
 float afMETPostCrawford [ MAXSCORE ];
 
-met metCurrent = MET_ZADEH;
 metinfo miCurrent;
 
 
 /*
- * Match equity table from Kit Woolsey: "How to Play Tournament
- * Backgammon", GammonPress, 1993.
- *
- * Used with permission from Kit Woolsey. 
- */
+* Match equity table from Kit Woolsey: "How to Play Tournament
+* Backgammon", GammonPress, 1993.
+*
+* Used with permission from Kit Woolsey. 
+*/
 
 float aafMETWoolsey[ 15 ][ 15 ] =
 { { 0.50, 0.70, 0.75, 0.83, 0.85, 0.90, 0.91, 0.94, 0.95, 0.97,
@@ -109,7 +150,7 @@ float aafMETJacobs[ 25 ][ 25 ] =
   { 0.178, 0.314, 0.421, 0.500, 0.579, 0.647, 0.704, 0.753, 0.795,
     0.831, 0.861, 0.886, 0.907, 0.925, 0.939, 0.951, 0.960, 0.968,
     0.974, 0.979, 0.983, 0.987, 0.989, 0.992, 0.993, } ,
-  
+
   { 0.156, 0.247, 0.346, 0.421, 0.500, 0.568, 0.629, 0.683, 0.730,
     0.773, 0.808, 0.840, 0.866, 0.889, 0.908, 0.924, 0.938, 0.949,
     0.958, 0.966, 0.972, 0.978, 0.982, 0.985, 0.988, } ,
@@ -200,7 +241,7 @@ float aafMETSnowie[ 15 ][ 15 ] =
 {
   {0.500, 0.685, 0.748, 0.819, 0.843, 0.891, 0.907, 0.935, 0.944,
    0.961, 0.967, 0.977, 0.980, 0.986, 0.988},
-  
+
   {0.315, 0.500, 0.594, 0.664, 0.735, 0.791, 0.832, 0.866, 0.893,
    0.916, 0.932, 0.947, 0.957, 0.967, 0.973},
 
@@ -244,29 +285,6 @@ float aafMETSnowie[ 15 ][ 15 ] =
    0.300, 0.341, 0.382, 0.422, 0.462, 0.500},
 };
 
-extern int
-GetMaxScore ( met metx ) {
-
-   switch ( metx ) {
-
-   case MET_ZADEH:
-      return MAXSCORE;
-      break;
-   case MET_WOOLSEY:
-      return 15;
-      break;
-   case MET_JACOBS:
-      return 25;
-      break;
-   case MET_SNOWIE:
-      return 15;
-      break;
-   default:
-      return -1;
-      break;
-   }
-
-}
 
 
 /*
@@ -300,20 +318,43 @@ NormalDistArea ( float rMin, float rMax, float rMu, float rSigma ) {
 
 
 
+/*
+ * Calculate post-Crawford match equity table
+ *
+ * Formula taken from Zadeh, Management Science xx
+ *
+ * Input:
+ *    rG: gammon rate for trailer
+ *    rFD2: value of free drop at 1-away, 2-away
+ *    rFD4: value of free drop at 1-away, 4-away
+ *    iStart: score where met starts, e.g.
+ *       iStart = 0 : 1-away, 1-away
+ *       iStart = 15: 1-away, 16-away
+ *    
+ *   
+ * Output:
+ *    afMETPostCrawford: post-Crawford match equity table
+ *
+ */
+
 void 
-initPostCrawfordMET ( float afMETPostCrawford[],
-                      const float rG ) {
+initPostCrawfordMET ( float afMETPostCrawford[ MAXSCORE ],
+                      const int iStart,
+                      const float rG,
+                      const float rFD2, const float rFD4 ) {
 
   int i;
-  
-  /* post-crawford match equity */
 
-  for ( i = 0; i < MAXSCORE; i++ ) {
+  /*
+   * Calculate post-crawford match equities
+   */
+
+  for ( i = iStart; i < MAXSCORE; i++ ) {
 
     afMETPostCrawford[ i ] = 
       rG * 0.5 * 
       ( (i-4 >=0) ? afMETPostCrawford[ i-4 ] : 1.0 )
-      + (1.0 - rG ) * 0.5 * 
+      + (1.0 - rG) * 0.5 * 
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 );
 
     /*
@@ -322,248 +363,224 @@ initPostCrawfordMET ( float afMETPostCrawford[],
      */
 
     if ( i == 1 )
-      afMETPostCrawford[ i ] -= 0.015;
+      afMETPostCrawford[ i ] -= rFD2;
 
     if ( i == 3 )
-      afMETPostCrawford[ i ] -= 0.004;
+      afMETPostCrawford[ i ] -= rFD4;
 
   }
+
 
 }
 
 
 /*
- * Calculate match equity table from Zadeh's formula published
- * in Management Science xx.xx,xx.
- *
- * Input:
- *    rG1: gammon rate for leader of match
- *    rG2: gammon rate for trailer of match
- *    rDelta, rDeltaBar: parameters in the Zadeh model
- *      (something to do with cube efficiencies)
- *    rG3: post-Crawford gammon rate for trailer of match
- *
- * Output:
- *    aafMET: match equity table
- *    afMETPostCrawford: post-Crawford match equity table
- *
- */
+* Calculate match equity table from Zadeh's formula published
+* in Management Science xx.xx,xx.
+*
+* Input:
+*    rG1: gammon rate for leader of match
+*    rG2: gammon rate for trailer of match
+*    rDelta, rDeltaBar: parameters in the Zadeh model
+*      (something to do with cube efficiencies)
+*    rG3: post-Crawford gammon rate for trailer of match
+*    afMETPostCrawford: post-Crawford match equity table
+*
+* Output:
+*    aafMET: match equity table
+*
+*/
 
 void
 initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ], 
-               float afMETPostCrawford[ MAXSCORE ],
+               const float afMETPostCrawford[ MAXSCORE ],
                const float rG1, const float rG2, 
-               const float rDelta, const float rDeltaBar,
-               const float rG3 ) {
+               const float rDelta, const float rDeltaBar ) {
 
   int i,j,k;
   int nCube;
   int nCubeValue, nCubePrimeValue;
 
-  /*
-   * D1bar (D2bar) is the equity of player 1 (2) at the drop point
-   * of player 2 (1) assuming dead cubes. 
-   * D1 (D2) is the equity of player 1 (2) at the drop point
-   * of player 2 (1) assuming semiefficient recubes.
-   */
-  
+/*
+* D1bar (D2bar) is the equity of player 1 (2) at the drop point
+* of player 2 (1) assuming dead cubes. 
+* D1 (D2) is the equity of player 1 (2) at the drop point
+* of player 2 (1) assuming semiefficient recubes.
+*/
+
   float aaafD1 [ MAXSCORE ][ MAXSCORE ][ MAXCUBELEVEL ];
   float aaafD2 [ MAXSCORE ][ MAXSCORE ][ MAXCUBELEVEL ];
   float aaafD1bar [ MAXSCORE ][ MAXSCORE ][ MAXCUBELEVEL ];
   float aaafD2bar [ MAXSCORE ][ MAXSCORE ][ MAXCUBELEVEL ];
-  
-  /*
-   * Calculate post-crawford match equities
-   */
 
-  for ( i = 0; i < MAXSCORE; i++ ) {
-
-    afMETPostCrawford[ i ] = 
-      rG3 * 0.5 * 
-      ( (i-4 >=0) ? afMETPostCrawford[ i-4 ] : 1.0 )
-      + (1.0 - rG3) * 0.5 * 
-      ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 );
-
-    /*
-     * add 1.5% at 1-away, 2-away for the free drop
-     * add 0.4% at 1-away, 4-away for the free drop
-     */
-
-    if ( i == 1 )
-      afMETPostCrawford[ i ] -= 0.015;
-
-    if ( i == 3 )
-      afMETPostCrawford[ i ] -= 0.004;
-
-  }
 
   /*
-   * Calculate 1-away,n-away match equities
-   */
+* Calculate 1-away,n-away match equities
+*/
 
   for ( i = 0; i < MAXSCORE; i++ ) {
 
     aafMET[ i ][ 0 ] = 
-      rG3 * 0.5 *
+      rG2 * 0.5 *
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 )
-      + (1.0 - rG3) * 0.5 * 
+      + (1.0 - rG2) * 0.5 * 
       ( (i-1 >=0) ? afMETPostCrawford[ i-1 ] : 1.0 );
     aafMET[ 0 ][ i ] = 1.0 - aafMET[ i ][ 0 ];
 
   }
 
   for ( i = 0; i < MAXSCORE ; i++ ) {
-    
+
     for ( j = 0; j <= i ; j++ ) {
-      
+
       for ( nCube = MAXCUBELEVEL-1; nCube >=0 ; nCube-- ) {
 
-	nCubeValue = 1;
-	for ( k = 0; k < nCube ; k++ )
-	  nCubeValue *= 2;
+        nCubeValue = 1;
+        for ( k = 0; k < nCube ; k++ )
+          nCubeValue *= 2;
 
-				/* Calculate D1bar */
-	
-	nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
+        /* Calculate D1bar */
 
-	aaafD1bar[ i ][ j ][ nCube ] = 
-	  ( GET_MET ( i - nCubeValue, j, aafMET )
-	    - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
-	  /
-	  ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
-	    + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
-	    - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
+        nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
 
-
-
-	if ( i != j ) {
-
-	  nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
-
-	  aaafD1bar[ j ][ i ][ nCube ] = 
-	    ( GET_MET ( j - nCubeValue, i, aafMET )
-	      - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
-	    /
-	    ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
-	      + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
-	      - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
+        aaafD1bar[ i ][ j ][ nCube ] = 
+          ( GET_MET ( i - nCubeValue, j, aafMET )
+            - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+            - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
+          /
+          ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
+            + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
+            - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+            - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
 
 
-	  
-	}
 
-				/* Calculate D2bar */
+        if ( i != j ) {
 
-	nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
-	
-	aaafD2bar[ i ][ j ][ nCube ] = 
-	  ( GET_MET ( j - nCubeValue, i, aafMET )
-	    - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
-	  /
-	  ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
-	    + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
-	    - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
+          nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
+
+          aaafD1bar[ j ][ i ][ nCube ] = 
+            ( GET_MET ( j - nCubeValue, i, aafMET )
+              - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+              - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
+            /
+            ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
+              + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
+              - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+              - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
 
 
-	if ( i != j ) {
-
-	  nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
-	  
-	  aaafD2bar[ j ][ i ][ nCube ] = 
-	    ( GET_MET ( i - nCubeValue, j, aafMET )
-	      - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
-	    /
-	    ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
-	      + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
-	      - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
-	  
-
-
-	}
-
-				/* Calculate D1 */
-
-	if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) ) {
-
-	  aaafD1[ i ][ j ][ nCube ] = aaafD1bar[ i ][ j ][ nCube ];
-	  if ( i != j )
-	    aaafD1[ j ][ i ][ nCube ] = aaafD1bar[ j ][ i ][ nCube ];
-
-	} 
-	else {
-	  
-	  aaafD1[ i ][ j ][ nCube ] = 
-	    1.0 + 
-	    ( aaafD2[ i ][ j ][ nCube+1 ] + rDelta )
-	    * ( aaafD1bar[ i ][ j ][ nCube ] - 1.0 );
-	  if ( i != j )
-	    aaafD1[ j ][ i ][ nCube ] = 
-	      1.0 + 
-	      ( aaafD2[ j ][ i ][ nCube+1 ] + rDelta )
-	      * ( aaafD1bar[ j ][ i ][ nCube ] - 1.0 );
-	  
-	}
-
-
-				/* Calculate D2 */
-
-	if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) ) {
-
-	  aaafD2[ i ][ j ][ nCube ] = aaafD2bar[ i ][ j ][ nCube ];
-	  if ( i != j )
-	    aaafD2[ j ][ i ][ nCube ] = aaafD2bar[ j ][ i ][ nCube ];
-
-	} 
-	else {
-	  
-	  aaafD2[ i ][ j ][ nCube ] = 
-	    1.0 + 
-	    ( aaafD1[ i ][ j ][ nCube+1 ] + rDelta )
-	    * ( aaafD2bar[ i ][ j ][ nCube ] - 1.0 );
-	
-	  if ( i != j ) 
-	    aaafD2[ j ][ i ][ nCube ] = 
-	      1.0 + 
-	      ( aaafD1[ j ][ i ][ nCube+1 ] + rDelta )
-	      * ( aaafD2bar[ j ][ i ][ nCube ] - 1.0 );
-	}
-
-
-				/* Calculate A1 & A2 */
-
-	if ( (nCube == 0) && ( i > 0 ) && ( j > 0 ) ) {
-
-	  aafMET[ i ][ j ] = 
-	    ( 
-	     ( aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
-	     * GET_MET( i - 1, j, aafMET ) 
-	     + ( aaafD1[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
-	     * GET_MET( i, j - 1, aafMET ) )
-	    /
-	    (
-	     aaafD1[ i ][ j ][ 0 ] + rDeltaBar +
-	     aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 1.0 );
-
-
-	  if ( i != j )
-	    aafMET[ j ][ i ] = 1.0 - aafMET[ i ][ j ];
-
-	}
-	
-      }
-      
-    }
-    
-  }
   
+        }
+
+        /* Calculate D2bar */
+
+        nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
+
+        aaafD2bar[ i ][ j ][ nCube ] = 
+          ( GET_MET ( j - nCubeValue, i, aafMET )
+            - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+            - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
+          /
+          ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
+            + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
+            - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+            - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
+
+
+        if ( i != j ) {
+
+          nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
+  
+          aaafD2bar[ j ][ i ][ nCube ] = 
+            ( GET_MET ( i - nCubeValue, j, aafMET )
+              - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+              - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
+            /
+            ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
+              + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
+              - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+              - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
+  
+
+
+        }
+
+        /* Calculate D1 */
+
+        if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) ) {
+
+          aaafD1[ i ][ j ][ nCube ] = aaafD1bar[ i ][ j ][ nCube ];
+          if ( i != j )
+            aaafD1[ j ][ i ][ nCube ] = aaafD1bar[ j ][ i ][ nCube ];
+
+        } 
+        else {
+  
+          aaafD1[ i ][ j ][ nCube ] = 
+            1.0 + 
+            ( aaafD2[ i ][ j ][ nCube+1 ] + rDelta )
+            * ( aaafD1bar[ i ][ j ][ nCube ] - 1.0 );
+          if ( i != j )
+            aaafD1[ j ][ i ][ nCube ] = 
+              1.0 + 
+              ( aaafD2[ j ][ i ][ nCube+1 ] + rDelta )
+              * ( aaafD1bar[ j ][ i ][ nCube ] - 1.0 );
+  
+        }
+
+
+        /* Calculate D2 */
+
+        if ( ( i < 2 * nCubeValue ) || ( j < 2 * nCubeValue ) ) {
+
+          aaafD2[ i ][ j ][ nCube ] = aaafD2bar[ i ][ j ][ nCube ];
+          if ( i != j )
+            aaafD2[ j ][ i ][ nCube ] = aaafD2bar[ j ][ i ][ nCube ];
+
+        } 
+        else {
+  
+          aaafD2[ i ][ j ][ nCube ] = 
+            1.0 + 
+            ( aaafD1[ i ][ j ][ nCube+1 ] + rDelta )
+            * ( aaafD2bar[ i ][ j ][ nCube ] - 1.0 );
+
+          if ( i != j ) 
+            aaafD2[ j ][ i ][ nCube ] = 
+              1.0 + 
+              ( aaafD1[ j ][ i ][ nCube+1 ] + rDelta )
+              * ( aaafD2bar[ j ][ i ][ nCube ] - 1.0 );
+        }
+
+
+        /* Calculate A1 & A2 */
+
+        if ( (nCube == 0) && ( i > 0 ) && ( j > 0 ) ) {
+
+          aafMET[ i ][ j ] = 
+            ( 
+             ( aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
+             * GET_MET( i - 1, j, aafMET ) 
+             + ( aaafD1[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
+             * GET_MET( i, j - 1, aafMET ) )
+            /
+            (
+             aaafD1[ i ][ j ][ 0 ] + rDeltaBar +
+             aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 1.0 );
+
+
+          if ( i != j )
+            aafMET[ j ][ i ] = 1.0 - aafMET[ i ][ j ];
+
+        }
+
+      }
+
+    }
+
+  }
+
 }
 
 
@@ -690,8 +707,8 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
   }
 
   for ( nCubeValue = nDead, n = nMax; 
-	nCubeValue >= nCube; 
-	nCubeValue >>= 1, n-- ) {
+        nCubeValue >= nCube; 
+        nCubeValue >>= 1, n-- ) {
 
     /* Calculate dead and live cube cash points.
        See notes by me (Joern Thyssen) available from the
@@ -703,42 +720,42 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
     nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
 
     /* Dead cube cash point for player 0 */
-    
+
     arCPDead[ 0 ][ n ] = 
       ( ( 1.0 - rG1 - rBG1 ) * 
-       GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) 
-       + rG1 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET ) 
-       + rBG1 * GET_MET ( i, j - 6 * nCubePrimeValue, aafMET ) 
-       - GET_MET ( i - nCubeValue, j, aafMET ) )
-     /
+        GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) 
+        + rG1 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET ) 
+        + rBG1 * GET_MET ( i, j - 6 * nCubePrimeValue, aafMET ) 
+        - GET_MET ( i - nCubeValue, j, aafMET ) )
+      /
       ( ( 1.0 - rG1 - rBG1 ) * 
-       GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) 
-       + rG1 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET ) 
-       + rBG1 * GET_MET ( i, j - 6 * nCubePrimeValue, aafMET ) 
-	- ( 1.0 - rG0 - rBG0 ) *
-	GET_MET( i - 2 * nCubePrimeValue, j, aafMET )
-	- rG0 * GET_MET ( i - 4 * nCubePrimeValue, j, aafMET )
-	- rBG0 * GET_MET ( i - 6 * nCubePrimeValue, j, aafMET ) );
+        GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) 
+        + rG1 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET ) 
+        + rBG1 * GET_MET ( i, j - 6 * nCubePrimeValue, aafMET ) 
+        - ( 1.0 - rG0 - rBG0 ) *
+        GET_MET( i - 2 * nCubePrimeValue, j, aafMET )
+        - rG0 * GET_MET ( i - 4 * nCubePrimeValue, j, aafMET )
+        - rBG0 * GET_MET ( i - 6 * nCubePrimeValue, j, aafMET ) );
 
     /* Dead cube cash point for player 1 */
-    
+
     nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
 
     arCPDead[ 1 ][ n ] = 
       ( ( 1.0 - rG0 - rBG0 ) * 
-       GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) 
-       + rG0 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET ) 
-       + rBG0 * GET_MET ( j, i - 6 * nCubePrimeValue, aafMET ) 
-       - GET_MET ( j - nCubeValue, i, aafMET ) )
-     /
+        GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) 
+        + rG0 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET ) 
+        + rBG0 * GET_MET ( j, i - 6 * nCubePrimeValue, aafMET ) 
+        - GET_MET ( j - nCubeValue, i, aafMET ) )
+      /
       ( ( 1.0 - rG0 - rBG0 ) * 
-       GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) 
-       + rG0 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET ) 
-       + rBG0 * GET_MET ( j, i - 6 * nCubePrimeValue, aafMET ) 
-	- ( 1.0 - rG1 - rBG1 ) *
-	GET_MET( j - 2 * nCubePrimeValue, i, aafMET )
-	- rG1 * GET_MET ( j - 4 * nCubePrimeValue, i, aafMET )
-	- rBG1 * GET_MET ( j - 6 * nCubePrimeValue, i, aafMET ) );
+        GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) 
+        + rG0 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET ) 
+        + rBG0 * GET_MET ( j, i - 6 * nCubePrimeValue, aafMET ) 
+        - ( 1.0 - rG1 - rBG1 ) *
+        GET_MET( j - 2 * nCubePrimeValue, i, aafMET )
+        - rG1 * GET_MET ( j - 4 * nCubePrimeValue, i, aafMET )
+        - rBG1 * GET_MET ( j - 6 * nCubePrimeValue, i, aafMET ) );
 
     /* Live cube cash point for player 0 and 1 */
 
@@ -755,30 +772,30 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
       /* Doubled cube is alive */
 
       arCPLive[ 0 ][ n ] = 1.0 - arCPLive[ 1 ][ n + 1] *
-	( GET_MET ( i - nCubeValue, j, aafMET )   
-	  - ( 1.0 - rG0 - rBG0 ) *
-	  GET_MET( i - 2 * nCubeValue, j, aafMET )
-	  - rG0 * GET_MET ( i - 4 * nCubeValue, j, aafMET )
-	  - rBG0 * GET_MET ( i - 6 * nCubeValue, j, aafMET ) )
-	/
-	( GET_MET ( i, j - 2 * nCubeValue, aafMET )
-	  - ( 1.0 - rG0 - rBG0 ) *
-	  GET_MET( i - 2 * nCubeValue, j, aafMET )
-	  - rG0 * GET_MET ( i - 4 * nCubeValue, j, aafMET )
-	  - rBG0 * GET_MET ( i - 6 * nCubeValue, j, aafMET ) );
+        ( GET_MET ( i - nCubeValue, j, aafMET )   
+          - ( 1.0 - rG0 - rBG0 ) *
+          GET_MET( i - 2 * nCubeValue, j, aafMET )
+          - rG0 * GET_MET ( i - 4 * nCubeValue, j, aafMET )
+          - rBG0 * GET_MET ( i - 6 * nCubeValue, j, aafMET ) )
+        /
+        ( GET_MET ( i, j - 2 * nCubeValue, aafMET )
+          - ( 1.0 - rG0 - rBG0 ) *
+          GET_MET( i - 2 * nCubeValue, j, aafMET )
+          - rG0 * GET_MET ( i - 4 * nCubeValue, j, aafMET )
+          - rBG0 * GET_MET ( i - 6 * nCubeValue, j, aafMET ) );
 
       arCPLive[ 1 ][ n ] = 1.0 - arCPLive[ 0 ][ n + 1 ] *
-	( GET_MET ( j - nCubeValue, i, aafMET )   
-	  - ( 1.0 - rG1 - rBG1 ) *
-	  GET_MET( j - 2 * nCubeValue, i, aafMET )
-	  - rG1 * GET_MET ( j - 4 * nCubeValue, i, aafMET )
-	  - rBG1 * GET_MET ( j - 6 * nCubeValue, i, aafMET ) )
-	/
-	( GET_MET ( j, i - 2 * nCubeValue, aafMET )
-	  - ( 1.0 - rG1 - rBG1 ) *
-	  GET_MET( j - 2 * nCubeValue, i, aafMET )
-	  - rG1 * GET_MET ( j - 4 * nCubeValue, i, aafMET )
-	  - rBG1 * GET_MET ( j - 6 * nCubeValue, i, aafMET ) );
+        ( GET_MET ( j - nCubeValue, i, aafMET )   
+          - ( 1.0 - rG1 - rBG1 ) *
+          GET_MET( j - 2 * nCubeValue, i, aafMET )
+          - rG1 * GET_MET ( j - 4 * nCubeValue, i, aafMET )
+          - rBG1 * GET_MET ( j - 6 * nCubeValue, i, aafMET ) )
+        /
+        ( GET_MET ( j, i - 2 * nCubeValue, aafMET )
+          - ( 1.0 - rG1 - rBG1 ) *
+          GET_MET( j - 2 * nCubeValue, i, aafMET )
+          - rG1 * GET_MET ( j - 4 * nCubeValue, i, aafMET )
+          - rBG1 * GET_MET ( j - 6 * nCubeValue, i, aafMET ) );
 
     }
 
@@ -790,22 +807,22 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
   arCP[ 1 ] = arCPLive[ 1 ][ 0 ];
 
   /* debug output 
-  for ( n = nMax; n >= 0; n-- ) {
-    
-    printf ("Cube %i\n"
-	    "Dead cube:    cash point 0 %6.3f\n"
-	    "              cash point 1 %6.3f\n"
-	    "Live cube:    cash point 0 %6.3f\n"
-	    "              cash point 1 %6.3f\n\n", 
-	    n,
-	    arCPDead[ 0 ][ n ], arCPDead[ 1 ][ n ],
-	    arCPLive[ 0 ][ n ], arCPLive[ 1 ][ n ] );
-    
-  }
+     for ( n = nMax; n >= 0; n-- ) {
+
+     printf ("Cube %i\n"
+     "Dead cube:    cash point 0 %6.3f\n"
+     "              cash point 1 %6.3f\n"
+     "Live cube:    cash point 0 %6.3f\n"
+     "              cash point 1 %6.3f\n\n", 
+     n,
+     arCPDead[ 0 ][ n ], arCPDead[ 1 ][ n ],
+     arCPLive[ 0 ][ n ], arCPLive[ 1 ][ n ] );
+
+     }
   */
 
   return 0;
-  
+
 }
 
 
@@ -897,22 +914,22 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
     /* match equity for double, take; win */
     rDTW = (1.0 - rG1 - rBG1) * GET_MET ( i - 2 * nCube, j, aafMET ) +
       rG1 * GET_MET ( i - 4 * nCube, j, aafMET );
-      rBG1 * GET_MET ( i - 6 * nCube, j, aafMET );
+    rBG1 * GET_MET ( i - 6 * nCube, j, aafMET );
 
     /* match equity for no double; win */
     rNDW = (1.0 - rG1 - rBG1) * GET_MET ( i - nCube, j, aafMET ) +
       rG1 * GET_MET ( i - 2 * nCube, j, aafMET );
-      rBG1 * GET_MET ( i - 3 * nCube, j, aafMET );
+    rBG1 * GET_MET ( i - 3 * nCube, j, aafMET );
 
     /* match equity for double, take; loose */
     rDTL = (1.0 - rG2 - rBG2) * GET_MET ( i, j - 2 * nCube, aafMET ) +
       rG2 * GET_MET ( i, j - 4 * nCube, aafMET );
-      rBG2 * GET_MET ( i, j - 6 * nCube, aafMET );
+    rBG2 * GET_MET ( i, j - 6 * nCube, aafMET );
 
     /* match equity for double, take; loose */
     rNDL = (1.0 - rG2 - rBG2) * GET_MET ( i, j - nCube, aafMET ) +
       rG2 * GET_MET ( i, j - 2 * nCube, aafMET );
-      rBG2 * GET_MET ( i, j - 3 * nCube, aafMET );
+    rBG2 * GET_MET ( i, j - 3 * nCube, aafMET );
 
     /* risk & gain */
 
@@ -926,18 +943,32 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
 }
 
 
+
+/* 
+ * Extend match equity table to MAXSCORE using
+ * David Montgomery's extrapolation algorithm.
+ *
+ * Input:
+ *    nMaxScore: the length of the native met
+ *    aarMET: the match equity table for scores below nMaxScore
+ *
+ * Output:
+ *    aarMET: the match equity table for scores up to MAXSCORE.
+ *
+ */
+
 static void
 ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
             const int nMaxScore ) {
 
   static const float arStddevTable[] =
-     { 0, 1.24, 1.27, 1.47, 1.50, 1.60, 1.61, 1.66, 1.68, 1.70, 1.72, 1.77 };
-  
+  { 0, 1.24, 1.27, 1.47, 1.50, 1.60, 1.61, 1.66, 1.68, 1.70, 1.72, 1.77 };
+
   float rStddev0, rStddev1, rGames, rSigma;
   int i,j;
   int nScore0, nScore1;
 
-  /* Extend match equity table */
+/* Extend match equity table */
 
   for ( i = nMaxScore; i < MAXSCORE; i++ ) {
 
@@ -981,98 +1012,687 @@ ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
 }
 
 
-void
-InitMatchEquity ( met metInit ) {
+static void
+initMP ( metparameters *pmp ) {
+
+  pmp->szName = NULL;
+  ListCreate ( &pmp->lParameters );
+
+}
+
+
+static void 
+initMD ( metdata *pmd ) {
+
+  pmd->mi.szName = NULL;
+  pmd->mi.szFileName = NULL;
+  pmd->mi.szDescription = NULL;
+
+  initMP ( &pmd->mpPreCrawford );
+  initMP ( &pmd->mpPostCrawford );
+
+}
+
+
+extern void
+freeP ( parameter *pp ) {
+
+  if ( pp->szName )
+    free ( pp->szName );
+  if ( pp->szValue )
+    free ( pp->szValue );
+  free ( pp );
+
+}
+
+
+extern void
+freeMP ( metparameters *pmp ) {
+
+  list *pl;
+
+  if ( pmp->szName )
+    free ( pmp->szName );
+
+  pl = &pmp->lParameters;
+
+  while( pl->plNext != pl ) {
+
+    freeP ( pl->plNext->p );
+    ListDelete( pl->plNext );
+
+  }
+
+}
+
+
+extern void
+getDefaultMET ( metdata *pmd ) {
+
+  int i;
+  parameter *pp;
+
+  static parameter apPreCrawford[] = 
+  { { "gammon-rate-leader", "0.25" },
+    { "gammon-rate-trailer", "0.15" },
+    { "delta", "0.08" },
+    { "deltebar", "0.06" } };
+
+  static parameter apPostCrawford[] = 
+  { { "gammon-rate-trailer", "0.25" },
+    { "free-drop-2-away", "0.015" },
+    { "free-drop-4-away", "0.004" } };
+
+  /* Setup default met */
+
+  initMD ( pmd );
+
+  for ( i = 0; i < 4; i++ ) {
+    pp = (parameter *) malloc ( sizeof ( parameter ) );
+    pp->szName = strdup ( apPreCrawford[ i ].szName );
+    pp->szValue = strdup ( apPreCrawford[ i ].szValue );
+    ListInsert ( &pmd->mpPreCrawford.lParameters, pp );
+  }
+
+  for ( i = 0; i < 3; i++ ) {
+    pp = (parameter *) malloc ( sizeof ( parameter ) );
+    pp->szName = strdup ( apPostCrawford[ i ].szName );
+    pp->szValue = strdup ( apPostCrawford[ i ].szValue );
+    ListInsert ( &pmd->mpPostCrawford.lParameters, pp );
+  }
+
+  pmd->mpPreCrawford.szName = strdup ( "zadeh" );
+  pmd->mpPostCrawford.szName = strdup ( "zadeh" );
+
+  pmd->mi.szName = strdup ( "N. Zadeh, Management Science 23, 986 (1977)" );
+  pmd->mi.szFileName = strdup ( "met/zadeh.xml" );
+  pmd->mi.szDescription = strdup ( "" );
+  pmd->mi.nLength = MAXSCORE;
+
+}
+
+
+static int
+initMETFromParameters ( float aafMET [ MAXSCORE ][ MAXSCORE ],
+                        float afMETPostCrawford[ MAXSCORE ],
+                        int nLength,
+                        metparameters *pmp ) {
+
+  if ( ! strcmp ( pmp->szName, "zadeh" ) ) {
+    
+    float rG1 = 0.25;
+    float rG2 = 0.15;
+    float rDelta = 0.08;
+    float rDeltaBar = 0.06;
+    list *pl; 
+    parameter *pp;
+
+    /* 
+     * Use Zadeh's formulae 
+     */
+
+    /* obtain parameters */
+
+    for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
+          pl = pl->plNext ) {
+
+      pp = pl->p;
+
+      if ( ! strcmp ( pp->szName, "gammon-rate-leader" ) )
+        rG1 = atof ( pp->szValue );
+      else if ( ! strcmp ( pp->szName, "gammon-rate-trailer" ) )
+        rG2 = atof ( pp->szValue );
+      else if ( ! strcmp ( pp->szName, "delta" ) )
+        rDelta = atof ( pp->szValue );
+      else if ( ! strcmp ( pp->szName, "delta-bar" ) )
+        rDeltaBar = atof ( pp->szValue );
+
+    }
+    
+
+    /* calculate table */
+
+    initMETZadeh ( aafMET, afMETPostCrawford, rG1, rG2, rDelta, rDeltaBar );
+    return 0;
+
+  }
+  else {
+
+    /* unknown type */
+
+    return -1;
+
+  }    
+  
+
+}
+
+
+static int
+initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
+                                    int nLength,
+                                    metparameters *pmp ) {
+
+  if ( ! strcmp ( pmp->szName, "zadeh" ) ) {
+    
+    float rG = 0.25;
+    float rFD2 = 0.015;
+    float rFD4 = 0.004;
+    list *pl;
+    parameter *pp;
+
+    /* 
+     * Use Zadeh's formulae 
+     */
+
+    /* obtain parameters */
+
+    for ( pl = pmp->lParameters.plNext; pl != &pmp->lParameters; 
+          pl = pl->plNext ) {
+
+      pp = pl->p;
+
+      if ( ! strcmp ( pp->szName, "gammon-rate-trailer" ) )
+        rG = atof ( pp->szValue );
+      else if ( ! strcmp ( pp->szName, "free-drop-2-away" ) )
+        rFD2 = atof ( pp->szValue );
+      else if ( ! strcmp ( pp->szName, "free-drop-4-away" ) )
+        rFD4 = atof ( pp->szValue );
+
+    }
+
+    /* calculate table */
+
+    initPostCrawfordMET ( afMETPostCrawford, 0, rG, rFD2, rFD4 );
+    return 0;
+
+  }
+  else {
+
+    /* unknown type */
+
+    return -1;
+
+  }    
+  
+
+}
+
+
+extern void
+InitMatchEquity ( const char *szFileName ) {
 
   int i,j;
-  int nMaxScore;
 
-  metCurrent = metInit;
+  metdata md;
+  int rc;
 
-  /* zero current MET */
+  static int fTableLoaded = FALSE;
 
-  for ( i = 0; i < MAXSCORE; i++ ) 
-    for ( j = 0; j < MAXSCORE; j++ ) 
-      aafMET[ i ][ j ] = 0.0;
+#ifdef HAVE_LIBXML2
 
-  /* calc. or init MET */
+  /*
+   * Read match equity table from XML file
+   */
 
-  nMaxScore = GetMaxScore ( metInit );
+  if ( readMET ( &md, szFileName ) ) {
 
-  switch ( metInit ) {
+    if ( ! fTableLoaded ) {
 
-  case MET_ZADEH:
+      /* must read met */
 
-    initMETZadeh ( aafMET, afMETPostCrawford,
-                   G1, G2, DELTA, DELTABAR, GAMMONRATE );
+      getDefaultMET ( &md );
 
-    strcpy ( miCurrent.szName, "N. Zadeh, Management Science 23, 986 (1977)" );
-    strcpy ( miCurrent.szFileName, "zadeh.xml" );
-    strcpy ( miCurrent.szDescription,
-             "Match equity table based on N. Zadeh's formulae." );
-    miCurrent.nLength = MAXSCORE;
+    }
+    else {
+
+      fprintf ( stderr, "Error reading MET\n" );
+      return;
+
+    }
     
-    break;
+  }
 
-  case MET_WOOLSEY:
+  fTableLoaded = TRUE;
 
-    for ( i = 0; i < 15; i++ ) 
-      for ( j = 0; j < 15; j++ ) 
-        aafMET[ i ][ j ] = aafMETWoolsey[ i ][ j ];
+#else
 
-    initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
-  
-    strcpy ( miCurrent.szName,
-             "K. Woolsey, How to Play Tournament Backgammon (1993)" );
-    strcpy ( miCurrent.szFileName, "woolsey.xml" );
-    strcpy ( miCurrent.szDescription, "" );
-    miCurrent.nLength = 15;
+  printf ( "Your version of GNU Backgammon does not support\n"
+           "reading match equity files.\n"
+           "Fallback to default Zadeh table.\n" );
 
-    break;
+  getDefaultMET ( &md );
 
-  case MET_JACOBS:
+#endif
 
-    for ( i = 0; i < 25; i++ ) 
-      for ( j = 0; j < 25; j++ ) 
-        aafMET[ i ][ j ] = aafMETJacobs[ i ][ j ];
+  /*
+   * Copy met to current met
+   * Extend met (if needed)
+   */
 
-    initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
+  /* post-Crawford table */
 
-    strcpy ( miCurrent.szName,
-             "J. Jacobs & W. Trice, Can a Fish Taste Twice as Good (1996)" );
-    strcpy ( miCurrent.szFileName, "jacobs.xml" );
-    strcpy ( miCurrent.szDescription, "" );
-    miCurrent.nLength = 25;
+  if ( ! strcmp ( md.mpPostCrawford.szName, "explicit" ) ) {
 
-    break;
+    /* copy and extend table */
 
-  case MET_SNOWIE:
+    /* FIXME: implement better extension of post-Crawford table */
 
-    for ( i = 0; i < 15; i++ ) 
-      for ( j = 0; j < 15; j++ ) 
-        aafMET[ i ][ j ] = aafMETSnowie[ i ][ j ];
+    for ( i = 0; i < md.mi.nLength; i++ )
+      afMETPostCrawford[ i ] = md.arMETPostCrawford[ i ];
 
-    initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
+    initPostCrawfordMET ( afMETPostCrawford, md.mi.nLength, 
+                          GAMMONRATE, 0.015, 0.004 );
 
-    strcpy ( miCurrent.szName,
-             "Snowie 2.1, Oasya (1999)" );
-    strcpy ( miCurrent.szFileName, "snowie2.1.xml" );
-    strcpy ( miCurrent.szDescription, "" );
-    miCurrent.nLength = 25;
+  }
+  else {
 
-    break;
+    /* generate match equity table using Zadeh's formula */
+
+    if ( initPostCrawfordMETFromParameters ( afMETPostCrawford, 
+                                             md.mi.nLength,
+                                             &md.mpPostCrawford ) < 0 ) {
+
+      fprintf ( stderr, "Error generating post-Crawford MET\n" );
+      return;
+
+    }
+
+  }
+
+  /* pre-Crawford table */
+
+  if ( ! strcmp ( md.mpPreCrawford.szName, "explicit" ) ) {
+
+    /* copy table */
+
+    for ( i = 0; i < md.mi.nLength; i++ )
+      for ( j = 0; j < md.mi.nLength; j++ )
+        aafMET[ i ][ j ] = md.aarMET[ i ][ j ];
+
+  }
+  else {
+
+    /* generate matc equity table using Zadeh's formula */
+
+    if ( initMETFromParameters ( aafMET, afMETPostCrawford,
+                                 md.mi.nLength,
+                                 &md.mpPreCrawford ) < 0 ) {
+
+      fprintf ( stderr, "Error generating pre-Crawford MET\n" );
+      return;
+
+    }
+
+  }
+
+  /* Extend match equity table */
+
+  ExtendMET ( aafMET, md.mi.nLength );
 
 
-  default:
-    break;
+  /* garbage collect */
+
+  freeMP ( &md.mpPreCrawford );
+  freeMP ( &md.mpPostCrawford );
+
+  if ( miCurrent.szName ) free ( miCurrent.szName );
+  if ( miCurrent.szFileName ) free ( miCurrent.szFileName );
+  if ( miCurrent.szDescription ) free ( miCurrent.szDescription );
+
+  /* save match equity table information */
+
+  memcpy ( &miCurrent, &md.mi, sizeof ( metinfo ) );
+
+}
+
+
+
+
+#if HAVE_LIBXML2
+
+static void
+parseRow ( float arRow[], xmlDocPtr doc, xmlNodePtr root ) {
+
+  int iCol;
+  xmlNodePtr cur;
+
+  iCol = 0;
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "me" ) ) {
+      arRow[ iCol ]  = 
+        atof ( xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 ) );
+
+      iCol++;
+
+    }
+
+  }
+
+}
+
+
+static void
+parsePreCrawfordExplicit ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
+
+  xmlNodePtr cur;
+  int iRow;
+
+  iRow = 0;
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "row" ) )
+      parseRow ( pmd->aarMET[ iRow++ ], doc, cur );
+
+  }
+
+}
+
+static void
+parseParameters ( list *plList, xmlDocPtr doc, xmlNodePtr root ) {
+
+  xmlNodePtr cur;
+  char *pc;
+  parameter *pp;
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "parameter" ) ) {
+
+      pp = (parameter *) malloc ( sizeof ( parameter ) );
+
+      pc = xmlGetProp ( cur, "name" );
+      pp->szName = strdup ( pc ? pc : "" );
+      
+      pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
+      pp->szValue = strdup ( pc ? pc : "" );
+
+      ListInsert ( plList, pp );
+
+    }
+
   }
 
 
-  /* 
-   * Extend match equity table to MAXSCORE using
-   * David Montgomery's extrapolation algorithm.
-   */
+}
 
-  ExtendMET ( aafMET, nMaxScore );
+
+static void
+parsePreCrawfordFormula ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
+
+  xmlNodePtr cur;
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "parameters" ) )
+      parseParameters ( &pmd->mpPreCrawford.lParameters, 
+                        doc, cur );
+
+  }
 
 }
+
+
+static void
+parsePostCrawfordFormula ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
+
+  xmlNodePtr cur;
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "parameters" ) )
+      parseParameters ( &pmd->mpPostCrawford.lParameters, 
+                        doc, cur );
+
+  }
+
+}
+
+
+
+static void
+parsePostCrawfordExplicit ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
+
+  xmlNodePtr cur;
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "row" ) )
+      parseRow ( pmd->arMETPostCrawford, doc, cur );
+
+  }
+
+}
+
+
+
+
+static void parsePreCrawford ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
+
+  if ( ! strcmp ( pmd->mpPreCrawford.szName, "explicit" ) )
+    parsePreCrawfordExplicit ( pmd, doc, root );
+  else
+    parsePreCrawfordFormula ( pmd, doc, root );
+
+}
+
+
+static void parsePostCrawford ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
+
+  if ( ! strcmp ( pmd->mpPostCrawford.szName, "explicit" ) )
+    parsePostCrawfordExplicit ( pmd, doc, root );
+  else
+    parsePostCrawfordFormula ( pmd, doc, root );
+
+}
+
+
+static void parseInfo ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
+
+  xmlNodePtr cur;
+  char *pc;
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "name" ) ) {
+      pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
+      pmd->mi.szName = ( pc ) ? strdup ( pc ) : NULL;
+    }
+    else if ( ! strcmp ( cur->name, "description" ) ) {
+      pc = xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 );
+      pmd->mi.szDescription = ( pc ) ? strdup ( pc ) : NULL;
+    }
+    else if ( ! strcmp ( cur->name, "length" ) )
+      pmd->mi.nLength =
+        atoi ( xmlNodeListGetString ( doc, cur->xmlChildrenNode, 1 ) );
+
+  }
+
+}
+
+void validateWarning ( void *ctx,
+                        const char *msg, 
+                        ... ) {
+
+  va_list ap;
+  
+  va_start ( ap, msg );
+  vprintf ( msg, ap );
+  va_end ( ap );
+
+}
+
+void validateError ( void *ctx,
+                     const char *msg, 
+                     ... ) {
+
+  va_list ap;
+
+  va_start ( ap, msg );
+  vprintf ( msg, ap );
+  va_end ( ap );
+
+}
+
+
+extern int readMET ( metdata *pmd, const char *szFileName ) {
+
+  xmlDocPtr doc;
+  xmlNodePtr root, cur;
+
+  xmlValidCtxt ctxt;
+
+  char *pc;
+
+  int i, j;
+  int fError;
+
+  fError = 0;
+
+  /* parse document */
+
+  doc = xmlParseFile( szFileName );
+
+  /* check root */
+
+  root = xmlDocGetRootElement ( doc );
+
+  if ( ! root ) {
+
+    printf ( "Error reading XML file (%s): no document root!\n", szFileName );
+    fError = 1;
+    goto finish;
+
+  }
+
+  /* check if the dtd has the correct name */
+
+  if ( xmlStrcmp ( root->name, (const xmlChar *) "met" ) ) {
+
+    printf ( "Error reading XML file (%s): wrong DTD (%s)\n", 
+             szFileName, root->name );
+    fError = 1;
+    goto finish;
+
+  }
+
+  /* 
+   * validate document 
+   */
+
+  /* load catalogs */
+
+  /* FIXME: any tweaks needed for win32? */
+
+  xmlLoadCatalog ( PKGDATADIR "/met/catalog " );
+  if ( pc = getenv ( "SGML_CATALOG_FILES" ) )
+    xmlLoadCatalog ( pc );
+  xmlLoadCatalog ( "./met/catalog" );
+  xmlLoadCatalog ( "./catalog" );
+       
+  if ( ! xmlCatalogGetSystem ( "met.dtd" ) ) {
+
+    printf ( "met DTD not found\n" );
+    fError = 1;
+    goto finish;
+
+  }
+
+  ctxt.error = validateError;
+  ctxt.warning = validateWarning;
+
+  if ( ! xmlValidateDocument ( &ctxt, doc ) ) {
+
+    printf ( "XML does not validate!\n" );
+    fError = 1;
+    goto finish;
+
+  }
+
+  /* initialise data */
+
+  initMD ( pmd );
+
+  /* fetch information from xml doc */
+
+  for ( cur = root->xmlChildrenNode; cur; cur = cur->next ) {
+
+    if ( ! strcmp ( cur->name, "info" ) )
+      parseInfo ( pmd, doc, cur );
+    else if ( ! strcmp ( cur->name, "pre-crawford-table" ) ) {
+
+      pc = xmlGetProp ( cur, "type" );
+      if ( pc )
+        pmd->mpPreCrawford.szName = pc;
+      else
+        pmd->mpPreCrawford.szName = strdup ( "explicit" );
+
+      parsePreCrawford ( pmd, doc, cur );
+
+    }
+    else if ( ! strcmp ( cur->name, "post-crawford-table" ) ) {
+
+      pc = xmlGetProp ( cur, "type" );
+      if ( pc )
+        pmd->mpPostCrawford.szName = pc;
+      else
+        pmd->mpPostCrawford.szName = strdup ( "explicit" );
+
+      parsePostCrawford ( pmd, doc, cur );
+
+    }
+
+  }
+
+  if ( pmd->mi.nLength < 0 ) pmd->mi.nLength = MAXSCORE;
+
+#ifdef UNDEF
+
+  /* debug dump */
+
+  printf ( "Name          : '%s'\n", pmd->mi.szName );
+  printf ( "Description   : '%s'\n", pmd->mi.szDescription );
+  printf ( "Length        : %d\n", pmd->mi.nLength );
+  printf ( "pre-Crawford:\n" );
+
+  if ( ! strcmp ( pmd->mpPreCrawford.szName, "explicit" ) ) {
+    for ( j = 0; j < pmd->mi.nLength; j++ ) {
+      printf ( "row %2d: ", j );
+      for ( i = 0; i < pmd->mi.nLength; i++ ) {
+        printf ( "%5.3f ", pmd->aarMET[ j ][ i ] );
+      }
+      printf ( "\n" );
+    }
+  }
+
+  printf ( "post-Crawford:\n" );
+
+  if ( ! strcmp ( pmd->mpPostCrawford.szName, "explicit" ) ) {
+    printf ( "row %2d: ", 0 );
+    for ( i = 0; i < pmd->mi.nLength; i++ ) {
+      printf ( "%5.3f ", pmd->arMETPostCrawford[ i ] );
+    }
+    printf ( "\n" );
+  }
+
+#endif
+
+ finish:
+
+  if ( doc )
+    xmlFreeDoc ( doc );
+
+  if ( ! fError )
+    pmd->mi.szFileName = strdup ( szFileName );
+
+  return fError;
+
+  
+  
+}
+
+#endif
+
