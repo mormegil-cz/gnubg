@@ -77,6 +77,7 @@ duplication of effort and to make sure our changes merge easily.
   to perform a rollout to judge cube decisions (under GTK, there should
   be a "Rollout" button in the hint window for cube decisions, and something
   under the Analyse menu).
+** Make "show marketwindow" say something for money games.
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -84,7 +85,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Defer and allow Guile interrupts at appropriate places in guile.c.
 ** Use Guile keywords in cube-info.  Add a similar function for eval
   contexts.
-** Allow Guile code to execute gnubg commands (except ":" and "!" escapes).
 ** Add Guile functions to access the current game state.
 
 * TTY interface:
@@ -179,13 +179,11 @@ duplication of effort and to make sure our changes merge easily.
 ** "set eval cubeful" gives a poor error message.
 ** Cosmetic bug when using the rollout button in the hint window (the
   commands echoed to stdout and the prompts are in the wrong order).
-** "show marketwindow" tries to give output when no game is active.
 ** Changing a player's name doesn't affect the names in the drop-down
   menu in the game window.
 ** The SGF loading (saving?) routines don't abort on interrupt.
   "load commands /dev/zero" aborts on a TTY interrupt, but not the
   GTK `stop' button.
-** Evaluation outside a game (e.g. "eval u3cAAIDNhjkQCA") crashes.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

@@ -1,3 +1,12 @@
+Thu Feb  8 11:38:12 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (HandleCommand): Print the result of Scheme expressions.
+
+	* gnubg.c (CommandEval): Give a cubeless evaluation if a position
+	is specified while no game is being played.
+
+	* show.c (CommandShowMarketWindow): Complain if there's no game.
+
 Wed Feb  7 12:58:50 2001  Gary Wong  <gtw@research.att.com>
 
 	* rollout.c (Rollout): Don't set fInterrupt when GTKRolloutUpdate

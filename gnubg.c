@@ -937,13 +937,18 @@ extern void HandleCommand( char *sz, command *ac ) {
 	       a good idea to prohibit the execution of the ":" gnubg
 	       command from Guile... that's far too much reentrancy for
 	       good taste! */
-	    if( sz[ 1 ] )
+	    if( sz[ 1 ] ) {
 		/* Expression specified -- evaluate it */
-		scm_internal_catch( SCM_BOOL_T,
+		SCM sResult;
+
+		if( ( sResult = scm_internal_catch( SCM_BOOL_T,
 				    (scm_catch_body_t) scm_eval_0str,
 				    sz + 1, scm_handle_by_message_noexit,
-				    NULL );
-	    else
+				    NULL ) ) != SCM_UNSPECIFIED ) {
+		    scm_write( sResult, SCM_UNDEFINED );
+		    scm_newline( SCM_UNDEFINED );
+		}
+	    } else
 		/* No command -- start a Scheme shell */
 		scm_eval_0str( "(top-repl)" );
 #else
@@ -1248,8 +1253,11 @@ extern void CommandEval( char *sz ) {
 	/* =n notation used; the opponent is on roll in the position given. */
 	SwapSides( an );
 
-    SetCubeInfo( &ci, nCube, fCubeOwner, n ? !fMove : fMove, nMatchTo, anScore,
-		 fCrawford, fJacoby, fBeavers );    
+    if( gs == GAME_NONE )
+	memcpy( &ci, &ciCubeless, sizeof( ci ) );
+    else
+	SetCubeInfo( &ci, nCube, fCubeOwner, n ? !fMove : fMove, nMatchTo,
+		     anScore, fCrawford, fJacoby, fBeavers );    
     
     if( !DumpPosition( an, szOutput, &ecEval, &ci, fOutputMWC, n ) ) {
 #if USE_GTK
