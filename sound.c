@@ -67,6 +67,10 @@
 #include <audio/audiolib.h>
 #endif
 
+#if HAVE_AUDIOFILE
+#include <audiofile.h>
+#endif
+
 #ifdef WIN32
 /* for PlaySound */
 #include "windows.h"

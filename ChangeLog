@@ -1,3 +1,7 @@
+Sun Apr  4 09:43:17 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* sound.c: include <libaudiofile.h>
+
 Thu Apr 1 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkchequer.c: Reset interupt flag on analysis start
