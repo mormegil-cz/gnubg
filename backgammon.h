@@ -134,6 +134,7 @@ typedef struct _movenormal {
     movelist ml;
     int iMove; /* index into the movelist of the move that was made */
     lucktype lt;
+    float rLuck; /* -HUGE_VALF means unknown */
     skilltype st;
 } movenormal;
 
@@ -156,6 +157,7 @@ typedef struct _movesetdice {
     int fPlayer;
     int anDice[ 2 ];
     lucktype lt;
+    float rLuck; /* -HUGE_VALF means unknown */
 } movesetdice;
 
 typedef struct _movesetcubeval {

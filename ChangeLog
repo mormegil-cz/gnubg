@@ -1,3 +1,9 @@
+Thu Apr 12 12:37:15 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (LuckAnalysis): New function.
+	* gnubg.c (GetLuckAnalysis): New function.
+	* gtkgame.c (RollAnalysis): New function.
+
 Wed Apr 11 17:56:10 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (CompleteKeyword): Use rl_completion_matches() instead

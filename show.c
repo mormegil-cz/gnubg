@@ -319,7 +319,7 @@ extern void CommandShowEngine( char *sz ) {
 
 extern void CommandShowEvaluation( char *sz ) {
 
-    outputl( "`eval' and `hint' will use:" );
+    outputl( "`eval', `hint' and analysis will use:" );
     ShowEvaluation( &ecEval );
 }
 

@@ -125,6 +125,10 @@ int fReadline = TRUE;
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
+#ifndef HUGE_VALF
+#define HUGE_VALF (-1e38)
+#endif
+
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
 static int fInteractive, cOutputDisabled, cOutputPostponed;
@@ -1175,6 +1179,23 @@ static void DisplayCubeAnalysis( float arDouble[ 4 ], evaltype et,
     outputl( sz );
 }
 
+static char *GetLuckAnalysis( float rLuck ) {
+
+    static char sz[ 16 ];
+    cubeinfo ci;
+    
+    if( fOutputMWC && nMatchTo ) {
+	SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		     fCrawford, fJacoby, fBeavers );
+	
+	sprintf( sz, "%+0.3f%%", 100.0f * ( eq2mwc( rLuck, &ci ) -
+					    eq2mwc( 0.0f, &ci ) ) );
+    } else
+	sprintf( sz, "%+0.3f", rLuck );
+
+    return sz;
+}
+
 static void DisplayAnalysis( moverecord *pmr ) {
 
     int i;
@@ -1185,7 +1206,12 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	DisplayCubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
 			     &pmr->n.esDouble );
 
-	outputf( "Rolled %d%d:\n", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
+	outputf( "Rolled %d%d", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
+
+	if( pmr->n.rLuck != -HUGE_VALF )
+	    outputf( " (%s):\n", GetLuckAnalysis( pmr->n.rLuck ) );
+	else
+	    outputl( ":" );
 	
 	for( i = 0; i < pmr->n.ml.cMoves; i++ ) {
 	    if( i >= 10 /* FIXME allow user to choose limit */ &&
@@ -1203,6 +1229,12 @@ static void DisplayAnalysis( moverecord *pmr ) {
 			     &pmr->n.esDouble );
 	break;
 
+    case MOVE_SETDICE:
+	if( pmr->n.rLuck != -HUGE_VALF )
+	    outputf( "Rolled %d%d (%s):\n", pmr->sd.anDice[ 0 ],
+		     pmr->sd.anDice[ 1 ], GetLuckAnalysis( pmr->sd.rLuck ) );
+	break;
+	
     default:
 	break;
     }

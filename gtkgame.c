@@ -1124,9 +1124,31 @@ static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
     return gtk_label_new( sz );
 }
 
+static GtkWidget *RollAnalysis( int n0, int n1, float rLuck ) {
+
+    char sz[ 64 ];
+    cubeinfo ci;
+    
+    if( rLuck == -HUGE_VALF )
+	/* no luck information */
+	return NULL;
+
+    if( fOutputMWC && nMatchTo ) {
+	SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		     fCrawford, fJacoby, fBeavers );
+	
+	sprintf( sz, "Rolled %d%d (%+0.3f%%)", n0, n1,
+		 100.0f * ( eq2mwc( rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
+    } else
+	sprintf( sz, "Rolled %d%d (%+0.3f)", n0, n1, rLuck );
+
+    return gtk_label_new( sz );    
+}
+
 static void SetAnnotation( moverecord *pmr ) {
 
-    GtkWidget *pwParent = pwAnalysis->parent, *pwCube, *pwList;
+    GtkWidget *pwParent = pwAnalysis->parent, *pw;
+    int fMoveOld, fTurnOld;
     static hintdata hd = { NULL, NULL, NULL, NULL, FALSE };
     list *pl;
     
@@ -1161,41 +1183,56 @@ static void SetAnnotation( moverecord *pmr ) {
 			     pmr->a.sz, -1 );
 	    fAutoCommentaryChange = FALSE;
 	}
-	
-	if( pmr->mt == MOVE_NORMAL ) {
-	    int fMoveOld = fMove, fTurnOld = fTurn;
 
+	switch( pmr->mt ) {
+	case MOVE_NORMAL:
+	    fMoveOld = fMove;
+	    fTurnOld = fTurn;
+	    
+	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
+	    
 	    fMove = fTurn = pmr->n.fPlayer;
 	    
-	    pwCube = CubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
-				   &pmr->n.esDouble );
+	    if( ( pw = CubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
+				     &pmr->n.esDouble ) ) )
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
+				    4 );
+	    
+	    if( ( pw = RollAnalysis( pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
+				     pmr->n.rLuck ) ) )
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
+				    4 );
+	    
 	    if( pmr->n.ml.cMoves ) {
 		hd.pml = &pmr->n.ml;
-		hd.pw = pwList = gtk_scrolled_window_new( NULL, NULL );
+		hd.pw = pw = gtk_scrolled_window_new( NULL, NULL );
 		gtk_scrolled_window_set_policy(
-		    GTK_SCROLLED_WINDOW( pwList ),
+		    GTK_SCROLLED_WINDOW( pw ),
 		    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-		gtk_container_add( GTK_CONTAINER( pwList ),
+		gtk_container_add( GTK_CONTAINER( pw ),
 				   CreateMoveList( &hd, pmr->n.iMove ) );
-	    } else
-		pwList = NULL;
-	    
-	    if( pwCube && pwList ) {
-		pwAnalysis = gtk_vbox_new( FALSE, 0 );
-		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwCube,
-				    FALSE, FALSE, 0 );
-		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwList,
-				    TRUE, TRUE, 0 );
-	    } else if( pwCube )
-		pwAnalysis = pwCube;
-	    else if( pwList )
-		pwAnalysis = pwList;
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, TRUE, TRUE,
+				    0 );
+	    }
 
 	    fMove = fMoveOld;
 	    fTurn = fTurnOld;
-	} else if( pmr->mt == MOVE_DOUBLE )
+	    break;
+
+	case MOVE_DOUBLE:
 	    pwAnalysis = CubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
 				       &pmr->n.esDouble );
+	    break;
+	    
+	case MOVE_SETDICE:
+	    pwAnalysis = RollAnalysis( pmr->sd.anDice[ 0 ],
+				       pmr->sd.anDice[ 1 ],
+				       pmr->sd.rLuck );
+	    break;
+
+	default:
+	    break;
+	}
     }
 	
     if( !pwAnalysis )

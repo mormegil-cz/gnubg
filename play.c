@@ -23,6 +23,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,6 +42,10 @@
 #include "eval.h"
 #include "positionid.h"
 #include "matchequity.h"
+
+#ifndef HUGE_VALF
+#define HUGE_VALF (-1e38)
+#endif
 
 char *aszGameResult[] = { "single game", "gammon", "backgammon" },
     *aszSkillType[] = { "very bad", "bad", "doubtful", NULL,
@@ -565,6 +570,7 @@ static void NewGame( void ) {
     pmr->sd.anDice[ 1 ] = anDice[ 1 ];
     pmr->sd.fPlayer = anDice[ 1 ] > anDice[ 0 ];
     pmr->sd.lt = LUCK_NONE;
+    pmr->sd.rLuck = -HUGE_VALF;
     AddMoveRecord( pmr );
     UpdateSetting( &fTurn );
     UpdateSetting( &gs );
@@ -755,6 +761,7 @@ static int ComputerTurn( void ) {
       pmn->ml.amMoves = NULL;
       pmn->etDouble = EVAL_NONE;
       pmn->lt = LUCK_NONE;
+      pmn->rLuck = -HUGE_VALF;
       pmn->st = SKILL_NONE;
       
       if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
@@ -809,6 +816,7 @@ static int ComputerTurn( void ) {
     pmn->ml.amMoves = NULL;
     pmn->etDouble = EVAL_NONE;
     pmn->lt = LUCK_NONE;
+    pmn->rLuck = -HUGE_VALF;
     pmn->st = SKILL_NONE;
     
     FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard, pmn->anMove );
@@ -867,6 +875,7 @@ static int ComputerTurn( void ) {
       pmn->ml.amMoves = NULL;
       pmn->etDouble = EVAL_NONE;
       pmn->lt = LUCK_NONE;
+      pmn->rLuck = -HUGE_VALF;
       pmn->st = SKILL_NONE;
       
       if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
@@ -946,6 +955,7 @@ static int TryBearoff( void ) {
 		pmn->ml.amMoves = NULL;
 		pmn->etDouble = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
+		pmn->rLuck = -HUGE_VALF;
 		pmn->st = SKILL_NONE;
 		
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
@@ -1511,6 +1521,7 @@ CommandMove( char *sz ) {
 	    pmn->ml.amMoves = NULL;
 	    pmn->etDouble = EVAL_NONE;
 	    pmn->lt = LUCK_NONE;
+	    pmn->rLuck = -HUGE_VALF;
 	    pmn->st = SKILL_NONE;
 	    
 	    if( ml.cMoves )
@@ -1580,6 +1591,7 @@ CommandMove( char *sz ) {
 	pmn->ml.amMoves = NULL;
 	pmn->etDouble = EVAL_NONE;
 	pmn->lt = LUCK_NONE;
+	pmn->rLuck = -HUGE_VALF;
 	pmn->st = SKILL_NONE;
         memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
                 sizeof( pmn->anMove ) );
@@ -2091,6 +2103,7 @@ CommandRoll( char *sz ) {
   pmr->sd.anDice[ 1 ] = anDice[ 1 ];
   pmr->sd.fPlayer = fTurn;
   pmr->sd.lt = LUCK_NONE;
+  pmr->sd.rLuck = -HUGE_VALF;
   AddMoveRecord( pmr );
   
   ShowBoard();
@@ -2120,6 +2133,7 @@ CommandRoll( char *sz ) {
     pmn->ml.amMoves = NULL;
     pmn->etDouble = EVAL_NONE;
     pmn->lt = LUCK_NONE;
+    pmn->rLuck = -HUGE_VALF;
     pmn->st = SKILL_NONE;
     
     ShowAutoMove( anBoard, pmn->anMove );
@@ -2139,6 +2153,7 @@ CommandRoll( char *sz ) {
     pmn->ml.amMoves = NULL;
     pmn->etDouble = EVAL_NONE;
     pmn->lt = LUCK_NONE;
+    pmn->rLuck = -HUGE_VALF;
     pmn->st = SKILL_NONE;
     memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
 

@@ -50,15 +50,13 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more completions to readline (player names, filenames for load/save).
 ** Add interactive rollouts.
 ** Analyse games and matches.
-*** Add luck analysis/variance reduction, error rates, etc.  Luck analysis
-  should be done a lot like variance reduction: 21 n-ply evaluations are
-  done before the roll is considered, and averaged; the evaluation of the
-  actual roll is then compared with the mean.
+*** Calculate luck/error rates over games and matches. (gary)
+*** Load and save luck analysis. (gary)
 *** Add an "analyse move" command.
 *** Allow re-evaluating analysis with different settings, and rollouts.
 *** Add "set automatic analysis".
-*** Automatically mark moves good/bad and lucky/unlucky.
-*** Allow a limit on the number of moves saved.
+*** Automatically mark moves good/bad and lucky/unlucky. (gary)
+*** Allow user to enable luck/cube/chequer analysis independently. (gary)
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -211,7 +209,8 @@ duplication of effort and to make sure our changes merge easily.
   the grab.  Unfortunately, grab add/remove calls must nest, and we
   can't guarantee that...
 ** There's no way to see the annotation on the opening move using the
-  TTY interface.
+  TTY interface.  Changing ShowBoard() to display the starting position
+  and then the annotation might work.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

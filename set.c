@@ -51,6 +51,10 @@
 #include "matchequity.h"
 #include "positionid.h"
 
+#ifndef HUGE_VALF
+#define HUGE_VALF (-1e38)
+#endif
+
 #if defined(AF_UNIX) && !defined(AF_LOCAL)
 #define AF_LOCAL AF_UNIX
 #define PF_LOCAL PF_UNIX
@@ -74,8 +78,8 @@ command acSetEvaluation[] = {
       "noise is determined by position", szONOFF, NULL },
     { "noise", CommandSetEvalNoise, "Distort evaluations with noise",
       szSTDDEV, NULL },
-    { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
-      "`hint' commands look ahead", szPLIES, NULL },
+    { "plies", CommandSetEvalPlies, "Choose how many plies to look ahead",
+      szPLIES, NULL },
     { "reduced", CommandSetEvalReduced,
       "Control how thoroughly deep plies are searched", szNUMBER, NULL },
     { "tolerance", CommandSetEvalTolerance, "Control the equity range "
@@ -525,6 +529,7 @@ extern void CommandSetDice( char *sz ) {
     pmsd->anDice[ 0 ] = n0;
     pmsd->anDice[ 1 ] = n1;
     pmsd->lt = LUCK_NONE;
+    pmsd->rLuck = -HUGE_VALF;
     
     AddMoveRecord( pmsd );
 
@@ -667,7 +672,7 @@ extern void CommandSetEvalTolerance( char *sz ) {
 
 extern void CommandSetEvaluation( char *sz ) {
 
-    szSet = "`eval' and `hint'";
+    szSet = "`eval', `hint' and analysis";
     szSetCommand = "";
     pecSet = &ecEval;
     HandleCommand( sz, acSetEvaluation );

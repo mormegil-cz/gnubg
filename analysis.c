@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,46 +32,44 @@
 #include "positionid.h"
 #include "analysis.h"
 
-void
-AnalyzeGame ( list *plGame, int iGame ) ;
-
-extern void CommandAnalyseGame( char *sz ) {
-
-    if( !plGame ) {
-	outputl( "No game is being played." );
-	return;
-    }
-    
-    ProgressStart( "Analysing game..." );
-    
-    AnalyzeGame( plGame, 0 );
-
-    ProgressEnd();
-}
-
-extern void CommandAnalyseMatch( char *sz ) {
-
-  int i;
-  list *pl;
-
-#if DEBUG_ANALYSIS
-  printf( " %d point match\n\n", nMatchTo );
+#ifndef HUGE_VALF
+#define HUGE_VALF (-1e38)
 #endif
-  
-  ProgressStart( "Analysing match..." );
-  
-  for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
-    AnalyzeGame( pl->p, i );
 
-  ProgressEnd();
+static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
+			   cubeinfo *pci, int fFirstMove ) {
+
+    int anBoardTemp[ 2 ][ 25 ], i, j;
+    float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
+
+    if( n0-- < n1-- )
+	swap( &n0, &n1 );
+    
+    for( i = 0; i < 6; i++ )
+	for( j = 0; j <= i; j++ ) {
+	    memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+		    2 * 25 * sizeof( int ) );
+	    
+	    /* Find the best move for each roll at ply 0 only. */
+	    if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, pci,
+			      NULL ) < 0 )
+		return -HUGE_VALF;
+	    
+	    SwapSides( anBoardTemp );
+	    
+	    if( EvaluatePosition( anBoardTemp, ar, pci, NULL ) )
+		return -HUGE_VALF;
+
+	    InvertEvaluation( ar );
+	    aar[ i ][ j ] = Utility( ar, pci );
+	    
+	    rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][ j ] * 2.0f;
+	}
+    
+    return fFirstMove ? aar[ n0 ][ n1 ] : aar[ n0 ][ n1 ] - rMean / 36.0f;
 }
 
-extern void CommandAnalyseSession( char *sz ) {
-
-    CommandAnalyseMatch( sz );
-}
-
-void
+static void
 AnalyzeGame ( list *plGame, int iGame ) {
 
     list *pl;
@@ -142,8 +141,6 @@ AnalyzeGame ( list *plGame, int iGame ) {
         anDice[ 1 ] = pmr->n.anRoll[ 1 ];
         fPlayer = pmr->n.fPlayer;
 
-	/* FIXME calculate luck */
-	
 #if DEBUG_ANALYSIS
         apch [ fPlayer ? 5 : 1 ] = szText;
         sprintf( szText, "Rolled %d%d", anDice[ 0 ], anDice[ 1 ] );
@@ -191,6 +188,12 @@ AnalyzeGame ( list *plGame, int iGame ) {
 
         }
 
+        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+		      anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
+	pmr->n.rLuck = LuckAnalysis( anBoard, anDice[ 0 ], anDice[ 1 ], &ci,
+				     fFirstMove );
+	
         fFirstMove = 0;
 
         /* evaluate move */
@@ -205,9 +208,6 @@ AnalyzeGame ( list *plGame, int iGame ) {
 	    free( pmr->n.ml.amMoves );
 	
         /* find best moves */
-
-        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
-		      anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
 
         FindnSaveBestMoves ( &(pmr->n.ml), anDice[ 0 ], anDice[ 1 ],
                              anBoard, auch, &ci, &ecEval );
@@ -352,7 +352,15 @@ AnalyzeGame ( list *plGame, int iGame ) {
 	  anDice[ 1 ] = pmr->sd.anDice[ 1 ];
 	  fPlayer = pmr->sd.fPlayer;
 	  
-	  /* FIXME calculate luck */
+	  if ( ! fPlayer )
+	      SwapSides( anBoard );
+	  
+	  pmr->sd.rLuck = LuckAnalysis( anBoard, anDice[ 0 ], anDice[ 1 ],
+					&ci, fFirstMove );
+
+	  if ( ! fPlayer )
+	      SwapSides( anBoard );
+	  
 	  fDoubled = FALSE;
 	  break;
 	  
@@ -387,9 +395,38 @@ AnalyzeGame ( list *plGame, int iGame ) {
 #endif
 }
 
+extern void CommandAnalyseGame( char *sz ) {
 
+    if( !plGame ) {
+	outputl( "No game is being played." );
+	return;
+    }
+    
+    ProgressStart( "Analysing game..." );
+    
+    AnalyzeGame( plGame, 0 );
 
+    ProgressEnd();
+}
 
+extern void CommandAnalyseMatch( char *sz ) {
 
+  int i;
+  list *pl;
 
+#if DEBUG_ANALYSIS
+  printf( " %d point match\n\n", nMatchTo );
+#endif
+  
+  ProgressStart( "Analysing match..." );
+  
+  for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
+    AnalyzeGame( pl->p, i );
 
+  ProgressEnd();
+}
+
+extern void CommandAnalyseSession( char *sz ) {
+
+    CommandAnalyseMatch( sz );
+}
