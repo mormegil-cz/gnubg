@@ -1831,171 +1831,1342 @@ FIXME
   <chapter>
    <title>Frequently Asked Questions</title>
    <para><indexterm index="cp">frequently asked questions</indexterm><indexterm index="cp">FAQ</indexterm>
+This chapter documents the most frequently asked questions. Sources are the
+newsgroup <uref><urefurl>news:rec.games.backgammon</urefurl><urefreplacement>rec.games.backgammon</urefreplacement></uref>, the
+<uref><urefurl>mailto:bug-gnubg@gnu.org</urefurl><urefreplacement><tt>gnubg</tt>-mailinglist</urefreplacement></uref> and the
+<uref><urefurl>http://www.gammonline.com</urefurl><urefreplacement>bulletin board of Kit Woolseys online magazine <emph>GammOnLine</emph></urefreplacement></uref>.
    </para>
    <menu>
     <para>
     </para>
 
     <menuentry>
-     <menunode>Where can I get GNU Backgammon?</menunode>
-     <menutitle>Where can I get GNU Backgammon?</menutitle>
+     <menunode>General questions</menunode>
+     <menutitle>General questions</menutitle>
      <menucomment>
       <para>
 
       </para></menucomment></menuentry>
     <menuentry>
-     <menunode>How do I play a game?</menunode>
-     <menutitle>How do I play a game?</menutitle>
+     <menunode>Installation questions</menunode>
+     <menutitle>Installation questions</menutitle>
      <menucomment>
       <para>
 
       </para></menucomment></menuentry>
     <menuentry>
-     <menunode>gnubg.bd errors</menunode>
-     <menutitle>gnubg.bd errors</menutitle>
+     <menunode>&lt;tt>gnubg&lt;/tt> startup questions</menunode>
+     <menutitle><tt>gnubg</tt> startup questions</menutitle>
      <menucomment>
       <para>
 
       </para></menucomment></menuentry>
     <menuentry>
-     <menunode>gnubg.weights errors</menunode>
-     <menutitle>gnubg.weights errors</menutitle>
+     <menunode>Backgammon playing questions</menunode>
+     <menutitle>Backgammon playing questions</menutitle>
      <menucomment>
       <para>
 
       </para></menucomment></menuentry>
     <menuentry>
-     <menunode>Black and white board window</menunode>
-     <menutitle>Black and white board window</menutitle>
+     <menunode>Settings questions</menunode>
+     <menutitle>Settings questions</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Analysis questions</menunode>
+     <menutitle>Analysis questions</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Database questions</menunode>
+     <menutitle>Database questions</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Abbreviations</menunode>
+     <menutitle>Abbreviations</menutitle>
      <menucomment>
       <para>
 
       </para></menucomment></menuentry></menu>   </chapter></node>
  <node>
-  <nodename>Where can I get GNU Backgammon?</nodename>
-  <nodenext>How do I play a game?</nodenext>
+  <nodename>General questions</nodename>
+  <nodenext>Installation questions</nodenext>
   <nodeup>Frequently Asked Questions</nodeup>
 
   <section>
-   <title>Where can I get GNU Backgammon?</title>
-   <para><indexterm index="cp">obtaining <tt>gnubg</tt></indexterm>
-Pre-release snapshots of GNU Backgammon are periodically made available
-for FTP at <uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/</urefurl></uref>.
-   </para>
-   <para>
-If you want to experiment with the very latest code, the development
-sources are kept in a CVS repository at
-<uref><urefurl>http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/</urefurl></uref>; see the <tt>gnubg</tt>
-web page at <uref><urefurl>http://www.gnu.org/software/gnubg/gnubg.html</urefurl></uref> for
-instructions on checking out sources from the repository.  Daily snapshots of
-the main branch of the repository are automatically placed in the
-<code>snapshots</code> directory of the FTP area above, if you wish to retrieve
-this experimental code via FTP.
-   </para></section></node>
+   <title>General questions</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>What is GNU Backgammon?</menunode>
+     <menutitle>What is GNU Backgammon?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What operating systems are supported?</menunode>
+     <menutitle>What operating systems are supported?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Where do I get it?</menunode>
+     <menutitle>Where do I get it?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What do I have to pay for GNU Backgammon?</menunode>
+     <menutitle>What do I have to pay for GNU Backgammon?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>This GNU stuff sounds interesting.</menunode>
+     <menutitle>This GNU stuff sounds interesting.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>I want to learn more about backgammon.</menunode>
+     <menutitle>I want to learn more about backgammon.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Though I really read all the documentation I still have questions.</menunode>
+     <menutitle>Though I really read all the documentation I still have questions.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>I want to make a few proposals. I have new ideas.</menunode>
+     <menutitle>I want to make a few proposals. I have new ideas.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>This F.A.Q. is full of typos and in bad English.</menunode>
+     <menutitle>This F.A.Q. is full of typos and in bad English.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
  <node>
-  <nodename>How do I play a game?</nodename>
-  <nodenext>gnubg.bd errors</nodenext>
-  <nodeprev>Where can I get GNU Backgammon?</nodeprev>
+  <nodename>What is GNU Backgammon?</nodename>
+  <nodenext>What operating systems are supported?</nodenext>
+  <nodeup>General questions</nodeup>
+
+  <subsection>
+   <title>What is GNU Backgammon?</title>
+   <para>
+GNU Backgammon (<tt>gnubg</tt>) is for playing and analysing backgammon
+positions, games and matches. It's based on a neural network. Though it
+already plays on a very high level, it's still work in progress. You may
+play GNU Backgammon using the command line or a graphical interface
+(based on GTK+).
+   </para></subsection></node>
+ <node>
+  <nodename>What operating systems are supported?</nodename>
+  <nodenext>Where do I get it?</nodenext>
+  <nodeprev>What is GNU Backgammon?</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>What operating systems are supported?</title>
+   <para>
+Currently GNU Backgammon is actually designed for <emph>GNU/Linux</emph>. It
+also compiles and (hopefully) runs under <emph>*BSD, IRIX, Solaris</emph> and
+<emph>True64 Unix</emph>. Last but not least there are frequently binaries for
+<emph>MS Windows</emph> and <emph>MS DOS</emph>. Porting to <emph>MacOS</emph> is planned
+but not yet released. When you successfully port GNU Backgammon to other
+operating systems you are welcome to give us a note at
+<uref><urefurl>bug-gnubg@gnu.org</urefurl></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>Where do I get it?</nodename>
+  <nodenext>What do I have to pay for GNU Backgammon?</nodenext>
+  <nodeprev>What operating systems are supported?</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>Where do I get it?</title>
+   <para>
+The official website is
+<uref><urefurl>http://www.gnu.org/software/gnubg/gnubg.html</urefurl></uref>. You can get daily
+snapshots at <uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/snapshots/</urefurl></uref>. <emph>MS
+Windows</emph> binaries are available at
+<uref><urefurl>http://home.online.no/-1.997997E+00oeysteij/</urefurl></uref>. <emph>GNU/Linux</emph>-Rpm's are
+(hopefully) soon available at <uref><urefurl>http://mole.dnsalias.org/~acepoint/</urefurl><urefreplacement>acepoint's home</urefreplacement></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>What do I have to pay for GNU Backgammon?</nodename>
+  <nodenext>This GNU stuff sounds interesting.</nodenext>
+  <nodeprev>Where do I get it?</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>What do I have to pay for GNU Backgammon?</title>
+   <para>
+GNU Backgammon is <emph>Open Source Software</emph> and belongs to
+the <emph>GNU Project</emph>. You may download it for free. For more
+information see the <uref><urefurl>http://www.gnu.org/licenses/gpl.html</urefurl><urefreplacement>GNU General Public License</urefreplacement></uref>. But be aware that GNU Backgammon is not
+<emph>public domain software</emph> or <emph>shareware</emph> as you perhaps know
+from <emph>MS Windows</emph>.
+   </para></subsection></node>
+ <node>
+  <nodename>This GNU stuff sounds interesting.</nodename>
+  <nodenext>I want to learn more about backgammon.</nodenext>
+  <nodeprev>What do I have to pay for GNU Backgammon?</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>This GNU stuff sounds interesting.</title>
+   <para>
+Take a look at the <uref><urefurl>http://www.gnu.org</urefurl><urefreplacement>GNU's homepage</urefreplacement></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>I want to learn more about backgammon.</nodename>
+  <nodenext>Though I really read all the documentation I still have questions.</nodenext>
+  <nodeprev>This GNU stuff sounds interesting.</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>I want to learn more about backgammon.</title>
+   <para>
+A good place to start is <uref><urefurl>http://www.bkgm.com</urefurl><urefreplacement>The Backgammon Galore</urefreplacement></uref>. For an extensive link collection go to
+<uref><urefurl>http://www.chicagopoint.com/links.html</urefurl><urefreplacement>Gammon-links</urefreplacement></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>Though I really read all the documentation I still have questions.</nodename>
+  <nodenext>I want to make a few proposals. I have new ideas.</nodenext>
+  <nodeprev>I want to learn more about backgammon.</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>Though I really read all the documentation I still have questions.</title>
+   <para>
+Send an email to the <uref><urefurl>mailto:bug-gnubg@gnu.org</urefurl><urefreplacement><tt>gnubg</tt>-mailinglist</urefreplacement></uref>. If it is a bug, be sure to include a reference of
+your operating system, the version of <tt>gnubg</tt> you use and possible
+error messages you get. Try to describe exactly what happens, before the
+error occurs.
+   </para></subsection></node>
+ <node>
+  <nodename>I want to make a few proposals. I have new ideas.</nodename>
+  <nodenext>This F.A.Q. is full of typos and in bad English.</nodenext>
+  <nodeprev>Though I really read all the documentation I still have questions.</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>I want to make a few proposals. I have new ideas.</title>
+   <para>
+You're welcome! Send an email with your suggestions to
+<uref><urefurl>mailto:bug-gnubg@gnu.org</urefurl><urefreplacement><tt>gnubg</tt>-mailinglist</urefreplacement></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>This F.A.Q. is full of typos and in bad English.</nodename>
+  <nodeprev>I want to make a few proposals. I have new ideas.</nodeprev>
+  <nodeup>General questions</nodeup>
+  <subsection>
+   <title>This F.A.Q. is full of typos and in bad English.</title>
+   <para>
+Probably you are right. But you are cordially invited to send
+corrections to <email><emailaddress>acepoint@deltacity.net</emailaddress></email>. And keep the following
+quote in mind ;-):
+   </para>
+   <para><cite>Documentation is like sex: when it is good, it is very, very good,
+and when it is bad, it is better than nothing.</cite>
+   </para>
+   <para><cite>[ Dick Brandon ]</cite>
+   </para></subsection></node>
+ <node>
+  <nodename>Installation questions</nodename>
+  <nodenext><tt>gnubg</tt>startup questions</nodenext>
+  <nodeprev>General questions</nodeprev>
   <nodeup>Frequently Asked Questions</nodeup>
   <section>
-   <title>How do I play a game?</title>
-   <para><indexterm index="cp">playing a game</indexterm><indexterm index="cp">moving chequers, commands</indexterm>
-Once you are running <tt>gnubg</tt>, enter <kbd>new game</kbd> at the
-<code>(gnubg)</code> prompt to start a game against the computer opponent.
-You should now see a board (if a window system is available, <tt>gnubg</tt>
-will use a graphical board window; otherwise, it will display an ASCII
-board on your terminal).  If <tt>gnubg</tt> won the opening roll, it will have
-moved; you can now type <kbd>roll</kbd> (or click on the dice below the board
-window) to roll the dice yourself.  In either case, it will now be your
-move; you should enter the moves for each chequer as pairs of numbers.
-For instance, if you have rolled 3 and 1, you could type <kbd>8 5 6 5</kbd>
-to move one chequer from the 8 point to the 5 point and another from the
-6 point to the 5 point.  Use <kbd>bar</kbd> to move from the bar, and
-<kbd>off</kbd> to bear off.  If you are using the board window, you can also
-drag chequers around the board.  Click on the dice when you have
-finished.
-   </para></section></node>
+   <title>Installation questions</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>Where do I find an installable version for my operating system?</menunode>
+     <menutitle>Where do I find an installable version for my operating system?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Do I need some other software to run GNU Backgammon?</menunode>
+     <menutitle>Do I need some other software to run GNU Backgammon?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>I want to install a newer version.</menunode>
+     <menutitle>I want to install a newer version.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>I would like to compile it from the source code.</menunode>
+     <menutitle>I would like to compile it from the source code.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What software do I need for compiling under &lt;emph>GNU/Linux&lt;/emph>?</menunode>
+     <menutitle>What software do I need for compiling under <emph>GNU/Linux</emph>?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What software do I need for compiling under &lt;emph>MS Windows&lt;/emph>?</menunode>
+     <menutitle>What software do I need for compiling under <emph>MS Windows</emph>?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>It does not compile.</menunode>
+     <menutitle>It does not compile.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
  <node>
-  <nodename>gnubg.bd errors</nodename>
-  <nodenext>gnubg.weights errors</nodenext>
-  <nodeprev>How do I play a game?</nodeprev>
-  <nodeup>Frequently Asked Questions</nodeup>
-  <section>
-   <title>I only see <code>gnubg.bd: No such file or directory</code>.  What's wrong?</title>
-   <para><indexterm index="vr">gnubg.bd</indexterm><indexterm index="cp">errors starting <tt>gnubg</tt></indexterm>
-The file <code>gnubg.bd</code> is the bearoff database that <tt>gnubg</tt> uses to
-evaluate endgame positions.  <tt>gnubg</tt> will look for it first in the current
-directory and then in the installed directory (<code>/usr/local/share/gnubg/</code>
-by default).
+  <nodename>Where do I find an installable version for my operating system?</nodename>
+  <nodenext>Do I need some other software to run GNU Backgammon?</nodenext>
+  <nodeup>Installation questions</nodeup>
+
+  <subsection>
+   <title>Where do I find an installable version for my operating system?</title>
+   <para>
+For <emph>MS Windows</emph> go to <uref><urefurl>http://home.online.no/-1.997997E+00oeysteij/</urefurl><urefreplacement>this place</urefreplacement></uref>. <emph>GNU/Linux</emph>-Rpm's are (hopefully) soon available at
+<uref><urefurl>http://mole.dnsalias.org/~acepoint/</urefurl><urefreplacement>acepoint's home</urefreplacement></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>Do I need some other software to run GNU Backgammon?</nodename>
+  <nodenext>I want to install a newer version.</nodenext>
+  <nodeprev>Where do I find an installable version for my operating system?</nodeprev>
+  <nodeup>Installation questions</nodeup>
+  <subsection>
+   <title>Do I need some other software to run GNU Backgammon?</title>
+   <para>
+No. All stuff you need is included in the binaries.
+   </para></subsection></node>
+ <node>
+  <nodename>I want to install a newer version.</nodename>
+  <nodenext>I would like to compile it from the source code.</nodenext>
+  <nodeprev>Do I need some other software to run GNU Backgammon?</nodeprev>
+  <nodeup>Installation questions</nodeup>
+  <subsection>
+   <title>I want to install a newer version.</title>
+   <para>
+If you are using a <emph>MS Windows</emph> operating system make a copy of
+either <code>.gnubgrc</code> or <code>.gnubgautorc</code> and
+<code>.gnubgmenurc</code>. You will find them either in <code>c:</code> or the home
+directory of your GNU Backgammon (for instance: <code>c:\program
+files\gnubg\</code>). After you have installed the new version, copy them
+back.
    </para>
    <para>
-The <tt>gnubg</tt> distribution is set up to create <code>gnubg.bd</code> by itself
-during compilation, but it can be a slow process (taking half an hour
-or more, depending on the speed of your computer).  If you would rather
-not wait to generate the database yourself, you can obtain a copy
-via FTP from <uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/gnubg.bd.gz</urefurl></uref>.
+If you are working with <emph>GNU/Linux</emph> these files are
+probably in your home directory (<code>~/</code>). They won't be overwritten
+by installing a new version of GNU Backgammon. But it's always a good
+idea to have a backup of them.
+   </para></subsection></node>
+ <node>
+  <nodename>I would like to compile it from the source code.</nodename>
+  <nodenext>What software do I need for compiling under <emph>GNU/Linux</emph>?</nodenext>
+  <nodeprev>I want to install a newer version.</nodeprev>
+  <nodeup>Installation questions</nodeup>
+  <subsection>
+   <title>I would like to compile it from the source code.</title>
+   <para>
+Good luck to you! Download the source code and make sure to read one of the
+following two items: <xref><xrefnodename>What software do I need for compiling under <emph>GNU/Linux</emph>?</xrefnodename></xref>, <xref><xrefnodename>What software do I need for compiling under <emph>MS Windows</emph>?</xrefnodename></xref>.
+   </para></subsection></node>
+ <node>
+  <nodename>What software do I need for compiling under <emph>GNU/Linux</emph>?</nodename>
+  <nodenext>What software do I need for compiling under <emph>MS Windows</emph>?</nodenext>
+  <nodeprev>I would like to compile it from the source code.</nodeprev>
+  <nodeup>Installation questions</nodeup>
+  <subsection>
+   <title>What software do I need for compiling under <emph>GNU/Linux</emph>?</title>
+   <para>
+Depending on the distribution you are working with:
+   </para>
+   <itemize>
+    <itemfunction>&bullet;</itemfunction>
+    <item>
+     <para><uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/snapshots/</urefurl><urefreplacement>GNU Backgammon snapshots</urefreplacement></uref>
+     </para></item>
+    <item>
+     <para>
+a <emph>"C-"</emph>compiler
+     </para></item>
+    <item>
+     <para>
+autoconf and automake
+     </para></item>
+    <item>
+     <para>
+xdevel (for the graphical interface)
+     </para></item>
+    <item>
+     <para>
+gtk+ &gt;= 1.2 (for the graphical interface)
+     </para></item>
+    <item>
+     <para>
+gtk+-devel
+     </para></item>
+    <item>
+     <para>
+guile (optional, for invoking your own macros)
+     </para></item>
+    <item>
+     <para>
+guile-devel
+     </para></item>
+    <item>
+     <para>
+gdbm (optional, for using your own databases)
+     </para></item>
+    <item>
+     <para>
+gdbm-devel
+     </para></item></itemize>   
+   <para>
+Unpack the GNU Backgammon snapshots and follow the instructions of the
+file <code>INSTALL</code>.
+   </para></subsection></node>
+ <node>
+  <nodename>What software do I need for compiling under <emph>MS Windows</emph>?</nodename>
+  <nodenext>It does not compile.</nodenext>
+  <nodeprev>What software do I need for compiling under <emph>GNU/Linux</emph>?</nodeprev>
+  <nodeup>Installation questions</nodeup>
+
+  <subsection>
+   <title>What software do I need for compiling under <emph>MS Windows</emph>?</title>
+   <para>
+Download the following files:
+   </para>
+   <itemize>
+    <itemfunction>&bullet;</itemfunction>
+    <item>
+     <para><uref><urefurl>ftp://alpha.gnu.org/gnu/gnubg/snapshots/</urefurl><urefreplacement>GNU Backgammon snapshots</urefreplacement></uref>
+     </para></item>
+    <item>
+     <para><uref><urefurl>ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/mingw32/gcc-2.95.2/gcc-2.95.2-msvcrt.exe</urefurl><urefreplacement>The GNU-Compiler for <emph>MS Windows</emph></urefreplacement></uref>
+     </para></item>
+    <item>
+     <para><uref><urefurl>http://www.gimp.org/~tml/gimp/win32/downloads.html</urefurl><urefreplacement>The following files can be found here:</urefreplacement></uref>
+     </para>
+     <itemize>
+      <itemfunction>&bullet;</itemfunction>
+      <item>
+       <para>
+(glib-*.zip)
+       </para></item>
+      <item>
+       <para>
+glib-dev-*.zip
+       </para></item>
+      <item>
+       <para>
+(libiconv-*.zip)
+       </para></item>
+      <item>
+       <para>
+libiconv-dev-*.zip
+       </para></item>
+      <item>
+       <para>
+(gtk+-*.zip)
+       </para></item>
+      <item>
+       <para>
+gtk+-dev-*.zip
+       </para></item></itemize>     </item>
+    <item>
+     <para><uref><urefurl>http://home.online.no/~oeysteij/Makefile</urefurl><urefreplacement>Makefile</urefreplacement></uref>
+     </para></item></itemize>
+   <para>
+Install everything and put <code>Makefile</code> into the source tree of GNU
+Backgammon. At last run your compiler.
+   </para></subsection></node>
+ <node>
+  <nodename>It does not compile.</nodename>
+  <nodeprev>What software do I need for compiling under <emph>MS Windows</emph>?</nodeprev>
+  <nodeup>Installation questions</nodeup>
+
+  <subsection>
+   <title>It does not compile.</title>
+   <para>
+Check that you have installed all necessary development packages. For
+   </para>
+   <para><emph>GNU/Linux</emph>:<xref><xrefnodename>What software do I need for compiling under <emph>GNU/Linux</emph>?</xrefnodename></xref>,
    </para>
    <para>
-FIXME this is out of date; gnubg can cope without gnubg.bd if it has to.
-   </para></section></node>
+and for
+   </para>
+   <para><emph>MS Windows</emph>:<xref><xrefnodename>What software do I need for compiling under <emph>MS Windows</emph>?</xrefnodename></xref> should be listed all you probably want.
+   </para>
+   <para>
+Look for warnings or errors during compiling. If you still don't get a
+clue, send a message to the <uref><urefurl>mailto:bug-gnubg@gnu.org</urefurl><urefreplacement><tt>gnubg</tt>-mailinglist</urefreplacement></uref>.
+   </para></subsection></node>
  <node>
-  <nodename>gnubg.weights errors</nodename>
-  <nodenext>Black and white board window</nodenext>
-  <nodeprev>gnubg.bd errors</nodeprev>
+  <nodename><tt>gnubg</tt>startup questions</nodename>
+  <nodenext>Backgammon playing questions</nodenext>
+  <nodeprev>Installation questions</nodeprev>
   <nodeup>Frequently Asked Questions</nodeup>
   <section>
-   <title>Now I get <code>gnubg.weights: No such file or directory</code>.  What's that?</title>
-   <para><indexterm index="vr">gnubg.weights</indexterm><indexterm index="cp">errors starting <tt>gnubg</tt></indexterm>
+   <title><tt>gnubg</tt>startup questions</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>I get an error message when starting.</menunode>
+     <menutitle>I get an error message when starting.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>GNU Backgammon complains about missing files.</menunode>
+     <menutitle>GNU Backgammon complains about missing files.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Starting from the &lt;emph>WinXP&lt;/emph> menu she plays like a beginner.</menunode>
+     <menutitle>Starting from the <emph>WinXP</emph> menu she plays like a beginner.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>My screen mixes up while starting GNU Backgammon.</menunode>
+     <menutitle>My screen mixes up while starting GNU Backgammon.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>I only get a command-line interface. Where is the nice Board</menunode>
+     <menutitle>I only get a command-line interface. Where is the nice Board</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>When I restart GNU Backgammon all my settings are gone.</menunode>
+     <menutitle>When I restart GNU Backgammon all my settings are gone.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>I do not need this graphical stuff. Where is the terminal for commands?</menunode>
+     <menutitle>I do not need this graphical stuff. Where is the terminal for commands?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
+ <node>
+  <nodename>I get an error message when starting.</nodename>
+  <nodenext>GNU Backgammon complains about missing files.</nodenext>
+  <nodeup><tt>gnubg</tt>startup questions</nodeup>
+
+  <subsection>
+   <title>I get an error message when starting.</title>
+   <para>
+Well, your computer wants to communicate with you. Give him a chance and
+read (and try to understand) what he is telling you. Then read the next
+items carefully &enddots;
+   </para></subsection></node>
+ <node>
+  <nodename>GNU Backgammon complains about missing files.</nodename>
+  <nodenext>Starting from the <emph>WinXP</emph>menu she plays like a beginner.</nodenext>
+  <nodeprev>I get an error message when starting.</nodeprev>
+  <nodeup><tt>gnubg</tt>startup questions</nodeup>
+  <subsection>
+   <title>GNU Backgammon complains about missing files.</title>
+   <para>
+GNU Backgammon is probably either missing the file <code>gnubg.weights</code>
+or <code>gnubg.bd</code>. <code>Gnubg.bd</code> is the bearoff database that <tt>gnubg</tt> uses to
+evaluate endgame positions.
+   </para>
+   <para>
 The file <code>gnubg.weights</code> contains the trained neural net weights
 for most of <tt>gnubg</tt>'s position evaluators.  Like <code>gnubg.bd</code>, it should
 be kept in either the current directory or the installed directory.
-   </para>
-   <para>
-A binary variant of the weights file named <code>gnubg.wd</code> can also be
-used (this version can be loaded more quickly, but is not portable
-between different computer architectures).  It will automatically be
-built during the compilation process, and used in preference to
-<code>gnubg.weights</code> if found.
-   </para>
-   <para>
-You should be able to obtain a copy of the weights from wherever you
-found the <tt>gnubg</tt> distribution.  If you wish to start <tt>gnubg</tt> without
-any weights (and train your own), you can use the <code>-no-weights</code>
-option (see <xref><xrefnodename>Invoking gnubg</xrefnodename></xref>).
-   </para></section></node>
+   </para></subsection></node>
  <node>
-  <nodename>Black and white board window</nodename>
-  <nodeprev>gnubg.weights errors</nodeprev>
+  <nodename>Starting from the <emph>WinXP</emph>menu she plays like a beginner.</nodename>
+  <nodenext>My screen mixes up while starting GNU Backgammon.</nodenext>
+  <nodeprev>GNU Backgammon complains about missing files.</nodeprev>
+  <nodeup><tt>gnubg</tt>startup questions</nodeup>
+  <subsection>
+   <title>Starting from the <emph>WinXP</emph>menu she plays like a beginner.</title>
+   <para>
+Open the <emph>MS Windows</emph> menu and go to the entry of
+<tt>gnubg</tt>. Right-click with the mouse and choose
+<code>properties</code>. Check, if the <code>working path</code> is the same
+directory as the <code>*.exe</code>-file one line above. If not, adjust the
+working path.
+   </para></subsection></node>
+ <node>
+  <nodename>My screen mixes up while starting GNU Backgammon.</nodename>
+  <nodenext>I only get a command-line interface. Where is the nice Board</nodenext>
+  <nodeprev>Starting from the <emph>WinXP</emph>menu she plays like a beginner.</nodeprev>
+  <nodeup><tt>gnubg</tt>startup questions</nodeup>
+  <subsection>
+   <title>My screen mixes up while starting GNU Backgammon.</title>
+   <para>
+Install the newest driver for your graphic card. Be sure that you have
+chosen at least a desktop resolution of 65535 (16 bit colour depth). If
+your card is a <emph>ATI Rage "somewhat"</emph> there still might be some
+problems with the graphical interface (GTK+)and <emph>MS Windows</emph>.
+   </para></subsection></node>
+ <node>
+  <nodename>I only get a command-line interface. Where is the nice Board</nodename>
+  <nodenext>When I restart GNU Backgammon all my settings are gone.</nodenext>
+  <nodeprev>My screen mixes up while starting GNU Backgammon.</nodeprev>
+  <nodeup><tt>gnubg</tt>startup questions</nodeup>
+  <subsection>
+   <title>I only get a command-line interface. Where is the nice Board</title>
+   <para>
+Using <emph>MS Windows</emph> just click on the correct menu entry (<code>GNU
+Backgammon for windows</code>). If it still doesn't work, check whether
+<code>c:\[path-to-your-gnubg]\gnubg.exe</code> exists or not.
+   </para>
+   <para><emph>GNU/Linux</emph> users should check if <uref><urefurl>http://www.gtk.org/</urefurl><urefreplacement>GTK+</urefreplacement></uref> is
+installed.
+   </para></subsection></node>
+ <node>
+  <nodename>When I restart GNU Backgammon all my settings are gone.</nodename>
+  <nodenext>I do not need this graphical stuff. Where is the terminal for commands?</nodenext>
+  <nodeprev>I only get a command-line interface. Where is the nice Board</nodeprev>
+  <nodeup><tt>gnubg</tt>startup questions</nodeup>
+  <subsection>
+   <title>When I restart GNU Backgammon all my settings are gone.</title>
+   <para>
+Did you save your settings (menu <code>Settings, Save settings</code>) before? If
+you have just installed a newer version of GNU Backgammon go to <xref><xrefnodename>I want to install a newer version.</xrefnodename></xref>
+   </para></subsection></node>
+ <node>
+  <nodename>I do not need this graphical stuff. Where is the terminal for commands?</nodename>
+  <nodeprev>When I restart GNU Backgammon all my settings are gone.</nodeprev>
+  <nodeup><tt>gnubg</tt>startup questions</nodeup>
+  <subsection>
+   <title>I do not need this graphical stuff. Where is the terminal for commands?</title>
+   <para>
+For <emph>GNU/Linux</emph> users: open a terminal and start <tt>gnubg</tt> with the
+option <code>-t</code>.
+   </para>
+   <para><emph>MS Windows</emph> users: Look for a file called <code>gnubg-no-gui.exe</code>
+in <tt>gnubg</tt>'s directory or open the <emph>MS Windows</emph> menu
+<code>execute</code> and type <code>c:\[path-to-your-gnubg]\gnubg-no-gui.exe</code>.
+There is also a menu entry <code>GNU Backgammon Command Line Interface</code>.
+   </para></subsection></node>
+ <node>
+  <nodename>Backgammon playing questions</nodename>
+  <nodenext>Settings questions</nodenext>
+  <nodeprev><tt>gnubg</tt>startup questions</nodeprev>
   <nodeup>Frequently Asked Questions</nodeup>
   <section>
-   <title>The board window is shown in black and white and looks awful!  What's wrong?</title>
+   <title>Backgammon playing questions</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>What is the difference of a new game or match or session?</menunode>
+     <menutitle>What is the difference of a new game or match or session?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What the heck is a beaver in Backgammon?</menunode>
+     <menutitle>What the heck is a beaver in Backgammon?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How do I move the checkers?</menunode>
+     <menutitle>How do I move the checkers?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Why am I allowed to place more than 5 checkers on a spot?</menunode>
+     <menutitle>Why am I allowed to place more than 5 checkers on a spot?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>GNU Backgammon plays poorly.</menunode>
+     <menutitle>GNU Backgammon plays poorly.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>GNU Backgammon is to strong for me.</menunode>
+     <menutitle>GNU Backgammon is to strong for me.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>I think the bot is cheating. She always gets good dice.</menunode>
+     <menutitle>I think the bot is cheating. She always gets good dice.</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
+ <node>
+  <nodename>What is the difference of a new game or match or session?</nodename>
+  <nodenext>What the heck is a beaver in Backgammon?</nodenext>
+  <nodeup>Backgammon playing questions</nodeup>
+
+  <subsection>
+   <title>What is the difference of a new game or match or session?</title>
    <para>
-If you see this problem, your X server is probably using a
-<dfn>PseudoColor</dfn> visual, and is dynamically allocating colours
-to clients from a limited colourmap.  On these types of displays,
-<tt>gnubg</tt> tries to be a well-behaved client by using colours from the
-default standard colourmap.  This will allow it to share colours
-with other clients that use the same scheme, which will help them
-all to use as many colours as possible without exhausting the
-colourmap.
+When you start a new match you will be asked to play to a certain
+amount of points (for example: 7 points). The player who firstly reaches
+this amount wins the match.
    </para>
    <para>
-Unfortunately, not all X clients use standard colourmaps.  If other
-clients have been run before <tt>gnubg</tt> and allocated most of the colours,
-then there may not be enough left for <tt>gnubg</tt> to allocate a standard
-colourmap.  If this happens, it will just take what it can get (which
-in the worst case might be black and white only).  You can try to
-avoid this problem by running <tt>gnubg</tt> before other colour-hungry clients,
-or by using the <code>xstdcmap</code> utility to install the default
-standard colourmap early in your session while colours are still
-available.  Depending on your hardware, you may be able to configure
-your display to allow more colours, or use a <dfn>DirectColor</dfn> or
-<dfn>TrueColor</dfn> visual which should resolve the problem.
+Starting a new session means playing to an infinite amount. Be aware
+that the rules do slightly differ then. You may break this session at
+every point and save it.
    </para>
    <para>
-Of course, if your X server can only display black and white (not even
-shades of grey), then there's not much you can do!
-   </para></section></node>
+If you choose to play a new game, GNU Backgammon will open the last
+saved match or session you quit. When there is no saved match or session
+you will start a new infinite session.
+   </para></subsection></node>
+ <node>
+  <nodename>What the heck is a beaver in Backgammon?</nodename>
+  <nodenext>How do I move the checkers?</nodenext>
+  <nodeprev>What is the difference of a new game or match or session?</nodeprev>
+  <nodeup>Backgammon playing questions</nodeup>
+  <subsection>
+   <title>What the heck is a beaver in Backgammon?</title>
+   <para>
+A <emph>beaver</emph> is only allowed in a moneygame session. To <emph>beaver</emph>
+means redoubling (and keeping the cube) directly after your opponent
+doubled. For more information go to
+<uref><urefurl>http://www.bkgm.com/glossary.html#B</urefurl><urefreplacement>Backgammon Galore (Glossary)</urefreplacement></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>How do I move the checkers?</nodename>
+  <nodenext>Why am I allowed to place more than 5 checkers on a spot?</nodenext>
+  <nodeprev>What the heck is a beaver in Backgammon?</nodeprev>
+  <nodeup>Backgammon playing questions</nodeup>
+  <subsection>
+   <title>How do I move the checkers?</title>
+   <para>
+The easiest way to move chequers is to <emph>"drag and drop."</emph> Put your
+mouse pointer to a chequer you want to move, press the left mouse button
+and drag the chequer to the desired point (hold down the button while
+dragging).
+   </para>
+   <para>
+If you want to use mouse clicks you have to know, that the left mouse
+button is for the left die shown on your board. Right click your mouse
+for the right die.
+   </para>
+   <para>
+For always getting the higher number on the left go to the menu
+<code>Settings, Appearance, General</code> and activate <code>Show higher
+die on left.</code>
+   </para></subsection></node>
+ <node>
+  <nodename>Why am I allowed to place more than 5 checkers on a spot?</nodename>
+  <nodenext>GNU Backgammon plays poorly.</nodenext>
+  <nodeprev>How do I move the checkers?</nodeprev>
+  <nodeup>Backgammon playing questions</nodeup>
+  <subsection>
+   <title>Why am I allowed to place more than 5 checkers on a spot?</title>
+   <para>
+The official backgammon tournament rules allow to put all 15 chequers on a pip
+(spot). If you want to play with a maximum of 5 chequers, go to the menu
+<code>Settings</code> and activate the <code>Egyptian Rule.</code>
+   </para></subsection></node>
+ <node>
+  <nodename>GNU Backgammon plays poorly.</nodename>
+  <nodenext>GNU Backgammon is to strong for me.</nodenext>
+  <nodeprev>Why am I allowed to place more than 5 checkers on a spot?</nodeprev>
+  <nodeup>Backgammon playing questions</nodeup>
+  <subsection>
+   <title>GNU Backgammon plays poorly.</title>
+   <para>
+Are you sure? If the answer is <emph>yes</emph> you should think about going
+to Monte Carlo this summer and win the Backgammon World Championship.
+   </para>
+   <para>
+If this plan fails, check whether <code>gnubg.weights</code> is correctly
+installed. See also <xref><xrefnodename>GNU Backgammon complains about missing files.</xrefnodename></xref>
+   </para></subsection></node>
+ <node>
+  <nodename>GNU Backgammon is to strong for me.</nodename>
+  <nodenext>I think the bot is cheating. She always gets good dice.</nodenext>
+  <nodeprev>GNU Backgammon plays poorly.</nodeprev>
+  <nodeup>Backgammon playing questions</nodeup>
+  <subsection>
+   <title>GNU Backgammon is to strong for me.</title>
+   <para>
+Go to the menu <code>Settings, Players</code> and change the values of
+<code>Player 0</code>. There is also a set of predefined settings you may
+choose from.
+   </para></subsection></node>
+ <node>
+  <nodename>I think the bot is cheating. She always gets good dice.</nodename>
+  <nodeprev>GNU Backgammon is to strong for me.</nodeprev>
+  <nodeup>Backgammon playing questions</nodeup>
+  <subsection>
+   <title>I think the bot is cheating. She always gets good dice.</title>
+   <para>
+In the menu <code>Settings</code> you may choose between different random dice
+generator. If you still think GNU Backgammon is cheating, program your
+own dice generator or roll manually.
+   </para></subsection></node>
+ <node>
+  <nodename>Settings questions</nodename>
+  <nodenext>Analysis questions</nodenext>
+  <nodeprev>Backgammon playing questions</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+  <section>
+   <title>Settings questions</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>Where can I change the name of the human player?</menunode>
+     <menutitle>Where can I change the name of the human player?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How do I change the colours?</menunode>
+     <menutitle>How do I change the colours?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How do I stop the annoying beeps?"</menunode>
+     <menutitle>How do I stop the annoying beeps?"</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What are "Plies?"</menunode>
+     <menutitle>What are "Plies?"</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What is "noise?"</menunode>
+     <menutitle>What is "noise?"</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What is "reduced evaluation?"</menunode>
+     <menutitle>What is "reduced evaluation?"</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
+ <node>
+  <nodename>Where can I change the name of the human player?</nodename>
+  <nodenext>How do I change the colours?</nodenext>
+  <nodeup>Settings questions</nodeup>
+
+  <subsection>
+   <title>Where can I change the name of the human player?</title>
+   <para>
+Go to the menu <code>Settings, Players ...</code> and click on <code>Player
+1</code>. At the top there is a field to change the human players name.
+   </para></subsection></node>
+ <node>
+  <nodename>How do I change the colours?</nodename>
+  <nodenext>How do I stop the annoying beeps?"</nodenext>
+  <nodeprev>Where can I change the name of the human player?</nodeprev>
+  <nodeup>Settings questions</nodeup>
+  <subsection>
+   <title>How do I change the colours?</title>
+   <para>
+Go to the menu <code>Settings, Appearance</code>. Here you may change the colour
+of chequers, the points and the board itself.
+   </para></subsection></node>
+ <node>
+  <nodename>How do I stop the annoying beeps?"</nodename>
+  <nodenext>What are "Plies?"</nodenext>
+  <nodeprev>How do I change the colours?</nodeprev>
+  <nodeup>Settings questions</nodeup>
+  <subsection>
+   <title>How do I stop the annoying beeps?"</title>
+   <para>
+Go to the menu <code>Settings, Appearance</code> and click on the card
+<code>General</code> at the right. Disable the option <code>Beep on illegal input</code>.
+   </para></subsection></node>
+ <node>
+  <nodename>What are "Plies?"</nodename>
+  <nodenext>What is "noise?"</nodenext>
+  <nodeprev>How do I stop the annoying beeps?"</nodeprev>
+  <nodeup>Settings questions</nodeup>
+  <subsection>
+   <title>What are "Plies?"</title>
+   <para>
+A <emph>ply</emph> describes how far GNU Backgammon evaluates  the
+position. <emph>"0-ply"</emph> means, GNU Backgammon estimates the worth of the
+position as it is. A <emph>"1-ply"</emph> evaluation looks one step
+deeper. GNU Backgammon also evaluates positions that may occur one roll
+further. <emph>"2-ply"</emph> is another roll further and so on.
+   </para>
+   <para>
+The more plies you choose the more you strengthen GNU Backgammon. But
+keep in mind that it will also decrease her playing speed.
+   </para>
+   <para>
+Note also that <emph>"0-ply"</emph> in GNU Backgammon is equivalent to the
+<emph>"1-ply"</emph> evaluation of Snowie.
+   </para></subsection></node>
+ <node>
+  <nodename>What is "noise?"</nodename>
+  <nodenext>What is "reduced evaluation?"</nodenext>
+  <nodeprev>What are "Plies?"</nodeprev>
+  <nodeup>Settings questions</nodeup>
+  <subsection>
+   <title>What is "noise?"</title>
+   <para>
+Noise is nothing but kind of disturbing GNU Backgammons <xref><xrefnodename>What are "Plies?"</xrefnodename><xrefprinteddesc>0-ply</xrefprinteddesc></xref> evaluation. Rising the noise decreases her playing
+strength.
+   </para></subsection></node>
+ <node>
+  <nodename>What is "reduced evaluation?"</nodename>
+  <nodeprev>What is "noise?"</nodeprev>
+  <nodeup>Settings questions</nodeup>
+  <subsection>
+   <title>What is "reduced evaluation?"</title>
+   <para>
+Reduced searches only work with 2-ply evaluations and deeper. It
+somehow cuts the searching for candidates to increase speed.
+   </para></subsection></node>
+ <node>
+  <nodename>Analysis questions</nodename>
+  <nodenext>Database questions</nodenext>
+  <nodeprev>Settings questions</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+  <section>
+   <title>Analysis questions</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>What are these funny letters at the right bottom?</menunode>
+     <menutitle>What are these funny letters at the right bottom?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How do I set up a position manually?</menunode>
+     <menutitle>How do I set up a position manually?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Which formats must I use to import positions?</menunode>
+     <menutitle>Which formats must I use to import positions?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Which formats must I use to import matches?</menunode>
+     <menutitle>Which formats must I use to import matches?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How can I switch the players sides?</menunode>
+     <menutitle>How can I switch the players sides?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What does "!" and "?" mean?</menunode>
+     <menutitle>What does "!" and "?" mean?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>How is the error rate determined?</menunode>
+     <menutitle>How is the error rate determined?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
+ <node>
+  <nodename>What are these funny letters at the right bottom?</nodename>
+  <nodenext>How do I set up a position manually?</nodenext>
+  <nodeup>Analysis questions</nodeup>
+
+  <subsection>
+   <title>What are these funny letters at the right bottom?</title>
+   <para>
+You will find two small windows titled <code>Position</code> and <code>Match
+ID</code> at the bottom of the GNU Backgammon window. Here you may use the
+<code>position_id</code>- or <code>match_id</code>-format for setting up or
+copying positions.
+   </para>
+   <para>
+An explanation of both formats will follow in GNU Backgammon's
+documentation (hopefully soon).
+   </para></subsection></node>
+ <node>
+  <nodename>How do I set up a position manually?</nodename>
+  <nodenext>Which formats must I use to import positions?</nodenext>
+  <nodeprev>What are these funny letters at the right bottom?</nodeprev>
+  <nodeup>Analysis questions</nodeup>
+  <subsection>
+   <title>How do I set up a position manually?</title>
+   <para>
+Open a new game, match or session. If <tt>gnubg</tt> already rolls the dice,
+don't bother. Press <code>edit</code> and either type the <xref><xrefnodename>What are these funny letters at the right bottom?</xrefnodename><xrefprinteddesc>position_id</xrefprinteddesc></xref> and press <kbd>Enter</kbd>
+at your keyboard. Or use the mouse to set up the chequers.
+   </para>
+   <para>
+A mouse click at the border of the board empties the pip. A left (right)
+mouse click sets up a certain amount of chequers depending on where
+exactly on the pip you click. Set up the cube with a right mouse click
+on it.
+   </para>
+   <para>
+At last go to the menu <code>Game, Set turn</code> and choose the player on
+roll. The dice will disappear then.
+   </para></subsection></node>
+ <node>
+  <nodename>Which formats must I use to import positions?</nodename>
+  <nodenext>Which formats must I use to import matches?</nodenext>
+  <nodeprev>How do I set up a position manually?</nodeprev>
+  <nodeup>Analysis questions</nodeup>
+  <subsection>
+   <title>Which formats must I use to import positions?</title>
+   <para>
+Currently only <code>*.pos</code> by <uref><urefurl>http://jelly.effect.no/</urefurl><urefreplacement>Jellyfish</urefreplacement></uref> are supported.
+   </para></subsection></node>
+ <node>
+  <nodename>Which formats must I use to import matches?</nodename>
+  <nodenext>How can I switch the players sides?</nodenext>
+  <nodeprev>Which formats must I use to import positions?</nodeprev>
+  <nodeup>Analysis questions</nodeup>
+  <subsection>
+   <title>Which formats must I use to import matches?</title>
+   <para>
+You may import <code>*.mat</code> by <uref><urefurl>http://jelly.effect.no/</urefurl><urefreplacement>Jellyfish</urefreplacement></uref> or <code>*.ssg</code> by <uref><urefurl>http://www.gamesgrid.com/</urefurl><urefreplacement>Gamesgrid</urefreplacement></uref>. Also supported is the <emph>oldmove</emph> format used on
+<uref><urefurl>http://www.fibs.com</urefurl><urefreplacement>Fibs</urefreplacement></uref>.
+   </para></subsection></node>
+ <node>
+  <nodename>How can I switch the players sides?</nodename>
+  <nodenext>What does "!" and "?" mean?</nodenext>
+  <nodeprev>Which formats must I use to import matches?</nodeprev>
+  <nodeup>Analysis questions</nodeup>
+  <subsection>
+   <title>How can I switch the players sides?</title>
+   <para>
+Go to the menu <code>Game and click on Swap players</code>.
+   </para></subsection></node>
+ <node>
+  <nodename>What does "!" and "?" mean?</nodename>
+  <nodenext>How is the error rate determined?</nodenext>
+  <nodeprev>How can I switch the players sides?</nodeprev>
+  <nodeup>Analysis questions</nodeup>
+  <subsection>
+   <title>What does "!" and "?" mean?</title>
+   <para>
+After analysing a game or a match GNU Backgammon is able to do some
+comments on chequer play or cube decisions. Open the menu <code>Window,
+Game record</code> and you will see a list of the moves. If the actual  move or cube
+decision differs from the best, GNU Backgammon will put a comment on it.
+   </para>
+   <para>
+The default settings are:
+   </para>
+   <multitable>
+    <columnfraction>29</columnfraction>
+    <columnfraction>22</columnfraction>
+    <columnfraction>18</columnfraction>
+    <row>
+     <entry>+0.040 (very good): </entry>
+     <entry><emph>Not in use yet</emph>
+</entry></row>
+    <row>
+     <entry>+0.020 (good):      </entry>
+     <entry><emph>Not in use yet</emph>
+</entry></row>
+    <row>
+     <entry>-0.040 (doubtful):  </entry>
+     <entry><emph>?!</emph>
+</entry></row>
+    <row>
+     <entry>-0.080 (bad):       </entry>
+     <entry><emph>?</emph>
+</entry></row>
+    <row>
+     <entry>-0.160 (very bad):  </entry>
+     <entry><emph>??</emph>
+
+   </entry></row></multitable>
+   <para>
+You may change these comment in the menu <code>Window, Annotation</code>
+choosing another comment for moves and/or double.
+   </para></subsection></node>
+ <node>
+  <nodename>How is the error rate determined?</nodename>
+  <nodeprev>What does "!" and "?" mean?</nodeprev>
+  <nodeup>Analysis questions</nodeup>
+
+  <subsection>
+   <title>How is the error rate determined?</title>
+   <para>
+GNU Backgammon determines the players strength as follows: If a player
+has an average error (per move) of:
+   </para>
+   <multitable>
+    <columnfraction>29</columnfraction>
+    <columnfraction>22</columnfraction>
+    <columnfraction>18</columnfraction>
+    <row>
+     <entry>&lt;0.005 --&gt; </entry>
+     <entry><emph>Extra-terrestrial</emph>
+</entry></row>
+    <row>
+     <entry>&lt; 0.010 --&gt; </entry>
+     <entry><emph>World class</emph>
+</entry></row>
+    <row>
+     <entry>&lt; 0.015 --&gt; </entry>
+     <entry><emph>Expert</emph>
+</entry></row>
+    <row>
+     <entry>&lt; 0.020 --&gt; </entry>
+     <entry><emph>Advanced</emph>
+</entry></row>
+    <row>
+     <entry>&lt; 0.025 --&gt; </entry>
+     <entry><emph>Intermediate</emph>
+</entry></row>
+    <row>
+     <entry>&lt; 0.030 --&gt; </entry>
+     <entry><emph>Novice</emph>
+</entry></row>
+    <row>
+     <entry>&gt; 0.030 --&gt; </entry>
+     <entry><emph>Beginner</emph>
+
+   </entry></row></multitable>
+   <para>
+After analysing a game, match or session you can see the summary in the
+menu <code>Analyse, &dots; statistics</code>. Note that you can't change the
+ranges of these values.
+   </para></subsection></node>
+ <node>
+  <nodename>Database questions</nodename>
+  <nodenext>Abbreviations</nodenext>
+  <nodeprev>Analysis questions</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+
+  <section>
+   <title>Database questions</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>What is the &lt;code>Database&lt;/code> menu for?</menunode>
+     <menutitle>What is the <code>Database</code> menu for?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>"There are no target evaluations in the database to train from."</menunode>
+     <menutitle>"There are no target evaluations in the database to train from."</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>What is &lt;code>Train with TD(0)&lt;/code>?</menunode>
+     <menutitle>What is <code>Train with TD(0)</code>?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
+ <node>
+  <nodename>What is the <code>Database</code>menu for?</nodename>
+  <nodenext>"There are no target evaluations in the database to train from."</nodenext>
+  <nodeup>Database questions</nodeup>
+
+  <subsection>
+   <title>What is the <code>Database</code>menu for?</title>
+   <para>
+In the menu <code>Train, Generate database</code> GNU Backgammon will play
+against herself (0-ply with <code>gnubg.weights</code>) generating a position
+database. This database will be automatically saved as
+<code>gnubg.gdbm</code> when you press the button <code>stop</code> at the left
+side.
+   </para>
+   <para>
+After the database is generated you may use <code>Train, Rollout
+database</code> to do a 36-trial rollout of all positions. Then you may train
+<code>gnubg.weights</code> with the new evaluated positions using
+<code>Train, Train database</code>.
+   </para></subsection></node>
+ <node>
+  <nodename>"There are no target evaluations in the database to train from."</nodename>
+  <nodenext>What is <code>Train with TD(0)</code>?</nodenext>
+  <nodeprev>What is the <code>Database</code>menu for?</nodeprev>
+  <nodeup>Database questions</nodeup>
+  <subsection>
+   <title>"There are no target evaluations in the database to train from."</title>
+   <para>
+You have forgotten to rollout the database before. See <xref><xrefnodename>What is the <code>Database</code> menu for?</xrefnodename></xref>.
+   </para></subsection></node>
+ <node>
+  <nodename>What is <code>Train with TD(0)</code>?</nodename>
+  <nodeprev>"There are no target evaluations in the database to train from."</nodeprev>
+  <nodeup>Database questions</nodeup>
+  <subsection>
+   <title>What is <code>Train with TD(0)</code>?</title>
+   <para>
+This will train the network by TD(0) using zero-knowledge self-play.
+   </para></subsection></node>
+ <node>
+  <nodename>Abbreviations</nodename>
+  <nodeprev>Database questions</nodeprev>
+  <nodeup>Frequently Asked Questions</nodeup>
+  <section>
+   <title>Abbreviations</title>
+   <menu>
+    <para>
+
+    </para>
+    <menuentry>
+     <menunode>"gwc"?</menunode>
+     <menutitle>"gwc"?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>"mwc"?</menunode>
+     <menutitle>"mwc"?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>"dp"?</menunode>
+     <menutitle>"dp"?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>"tg"?</menunode>
+     <menutitle>"tg"?</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </section></node>
+ <node>
+  <nodename>"gwc"?</nodename>
+  <nodenext>"mwc"?</nodenext>
+  <nodeup>Abbreviations</nodeup>
+
+  <subsection>
+   <title>"gwc"?</title>
+   <para>
+"gwc" is an abbreviation for <emph>game winning chances</emph>.
+   </para></subsection></node>
+ <node>
+  <nodename>"mwc"?</nodename>
+  <nodenext>"dp"?</nodenext>
+  <nodeprev>"gwc"?</nodeprev>
+  <nodeup>Abbreviations</nodeup>
+  <subsection>
+   <title>"mwc"?</title>
+   <para>
+"mwc" is an abbreviation for <emph>match winning chances</emph>.
+   </para></subsection></node>
+ <node>
+  <nodename>"dp"?</nodename>
+  <nodenext>"tg"?</nodenext>
+  <nodeprev>"mwc"?</nodeprev>
+  <nodeup>Abbreviations</nodeup>
+  <subsection>
+   <title>"dp"?</title>
+   <para>
+In the menu <code>Analyse, Game/Match/Session statistics</code> you will see
+a window with some statistics. Near the bottom you'll see four lines
+beginning with <code>Missed &dots; and Wrong &dots;</code>.  "dp" means "doubling
+point" and describes a situation in the game, where you probably should have
+doubled your opponent.
+   </para></subsection></node>
+ <node>
+  <nodename>"tg"?</nodename>
+  <nodeprev>"dp"?</nodeprev>
+  <nodeup>Abbreviations</nodeup>
+  <subsection>
+   <title>"tg"?</title>
+   <para>
+"tg" is an abbreviation for "too good". It points to  a situation in the
+game, where you probably should have kept the cube (mostly because of
+huge gammon chances) rather than doubling out your opponent.
+   </para></subsection></node>
  <node>
   <nodename>GNU Free Documentation License</nodename>
   <nodenext>Appendices</nodenext>
