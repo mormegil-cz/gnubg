@@ -22,6 +22,14 @@
 #ifndef _PATH_H_
 #define _PATH_H_
 
+#ifdef WIN32
+#define DIR_SEPARATOR  '\\'
+#define DIR_SEPARATOR_S  "\\"
+#else
+#define DIR_SEPARATOR  '/'
+#define DIR_SEPARATOR_S  "/"
+#endif
+
 extern char *PathSearch( const char *szFile, const char *szDir );
 
 extern int 

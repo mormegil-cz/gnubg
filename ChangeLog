@@ -1,3 +1,8 @@
+Fri Jul 11 20:48:34 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* path.c (PathOpen, PathSearch): use DIR_SEPARATOR as
+	directory separator instead of hardcoded /.
+
 Fri Jul 11 20:47:56 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* external.c: ignore SIGPIPE on Windows

@@ -69,7 +69,7 @@ extern char *PathSearch( const char *szFile, const char *szDir ) {
     if( !szFile )
 	return NULL;
 
-    if( *szFile == '/' )
+    if( *szFile == DIR_SEPARATOR )
 	/* Absolute file name specified; don't bother searching. */
 	return strdup( szFile );
 
@@ -83,7 +83,7 @@ extern char *PathSearch( const char *szFile, const char *szDir ) {
 	return NULL;
 
     if( szDir ) {
-	sprintf( pch, "%s/%s", szDir, szFile );
+	sprintf( pch, "%s%c%s", szDir, DIR_SEPARATOR, szFile );
 	if( !access( pch, R_OK ) )
 	    return realloc( pch, strlen( pch ) + 1 );
     }
@@ -92,7 +92,7 @@ extern char *PathSearch( const char *szFile, const char *szDir ) {
     if( !access( pch, R_OK ) )
 	return realloc( pch, strlen( pch ) + 1 );
     
-    sprintf( pch, PKGDATADIR "/%s", szFile );
+    sprintf( pch, PKGDATADIR DIR_SEPARATOR_S "%s", szFile );
     if( !access( pch, R_OK ) )
 	return realloc( pch, strlen( pch ) + 1 );
 
@@ -118,7 +118,7 @@ PathOpen( const char *szFile, const char *szDir, const int f ) {
 #endif
     
     if( szDir ) {
-	sprintf( szPath, "%s/%s", szDir, szFile );
+	sprintf( szPath, "%s%c%s", szDir, DIR_SEPARATOR, szFile );
 	if( ( h = open( szPath, O_RDONLY | f ) ) >= 0 )
 	    return h;
 
@@ -134,7 +134,7 @@ PathOpen( const char *szFile, const char *szDir, const int f ) {
     if( !idFirstError && errno != ENOENT )
 	idFirstError = errno;
 
-    sprintf( szPath, PKGDATADIR "/%s", szFile );
+    sprintf( szPath, PKGDATADIR DIR_SEPARATOR_S "%s", szFile );
     if( ( h = open( szPath, O_RDONLY | f ) ) >= 0 )
 	return h;
 
