@@ -74,7 +74,9 @@ static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges, *pwLightTable, *pwMoveIndicator,
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ], *pwNotebook, *pwLabels, *pwDynamicLabels;
+#if HAVE_LIBXML2
 static GList *plBoardDesigns;
+#endif
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
 	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource,
@@ -117,8 +119,9 @@ static int fWood, fUpdate;
 static void GetPrefs ( renderdata *bd );
 void AddPages(BoardData* bd, GtkWidget* pwNotebook);
 
-static void
-AddDesignRow ( gpointer data, gpointer user_data );
+#if HAVE_LIBXML2
+static void AddDesignRow ( gpointer data, gpointer user_data );
+#endif
 
 #if USE_BOARD3D
 void UpdatePreviewBar(GdkPixmap *pixmap);
@@ -1166,7 +1169,11 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 
 #if USE_GTK && !USE_GTK2
 	/* Realize preview for gtk1 - otherwise doesn't show straight away */
+#if HAVE_LIBXML2
 	gtk_widget_realize(pwPreview[PI_DESIGN]);
+#else
+	gtk_widget_realize(pwPreview[PI_CHEQUERS0]);
+#endif
 #endif
 }
 
@@ -2336,9 +2343,6 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
 #if USE_BOARD3D
 	if (previewType == DT_3D)
 	{
-		glpixPreview = CreatePreviewBoard3d(&bd3d, ppm);
-		pwPreview[PI_DESIGN] = gtk_pixmap_new(ppm, NULL),
-
 		/* design preview */
 		gtk_box_pack_start (GTK_BOX(pwvbox), pwPreview[PI_DESIGN],
 			FALSE, FALSE, 0);
@@ -2348,16 +2352,14 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
 	else
 	{
 		/* design preview */
-		gtk_box_pack_start (GTK_BOX(pwvbox),
-			pwPreview[PI_DESIGN] = gtk_pixmap_new(ppm, NULL),
+		gtk_box_pack_start (GTK_BOX(pwvbox), pwPreview[PI_DESIGN],
 			FALSE, FALSE, 0);
 	}
 	gtk_signal_connect_after(GTK_OBJECT(pwPreview[PI_DESIGN]), "realize", 
 		GTK_SIGNAL_FUNC(ShowPreview), 0);
 #else
 	/* design preview */
-	gtk_box_pack_start (GTK_BOX(pwvbox),
-		pwPreview[PI_DESIGN] = gtk_pixmap_new(ppm, NULL),
+	gtk_box_pack_start (GTK_BOX(pwvbox), pwPreview[PI_DESIGN],
 		FALSE, FALSE, 0);
 
 	gtk_signal_connect(GTK_OBJECT(pwPreview[PI_DESIGN]), "realize", 
@@ -2627,6 +2629,16 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
     ppm = gdk_pixmap_new( bd->drawing_area->window,
 			  BOARD_WIDTH * 3, BOARD_HEIGHT * 3, -1 );
 
+#if USE_BOARD3D
+	if (previewType == DT_3D)
+		glpixPreview = CreatePreviewBoard3d(&bd3d, ppm);
+#endif
+#if HAVE_LIBXML2
+	pwPreview[PI_DESIGN] = gtk_pixmap_new(ppm, NULL);
+#else
+	pwPreview[PI_CHEQUERS0] = gtk_pixmap_new(ppm, NULL);
+#endif
+
 #if HAVE_LIBXML2
 {
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
@@ -2668,6 +2680,10 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 				 PI_DICE1 );
 		append_preview_page( pwNotebook, CubePrefs( bd ), _("Cube"), PI_CUBE );
 	}
+#if !HAVE_LIBXML2
+	gtk_signal_connect_after(GTK_OBJECT(pwPreview[PI_CHEQUERS0]), "realize", 
+		GTK_SIGNAL_FUNC(ShowPreview), 0);
+#endif
 }
 
 void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page, 

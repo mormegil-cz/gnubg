@@ -1,3 +1,8 @@
+Mon Nov 24 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c: Make sure preview appears if libxml not present
+	* gtkboard.c: Remove valgrind error
+
 Sat Nov 21 21:19:17 2003 Oystein Johansen <oystein@gnubg.org>
 
         * gtkgame.c: corrected some links (reported by Frank Grosse)
