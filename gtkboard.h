@@ -89,6 +89,7 @@ typedef struct _BoardData {
 	dice_roll[ 2 ]; /* roll showing on the off-board dice */
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
     gint clockwise; /* last drawn orientation */
+    gint qedit_point; /* used to remember last point in quick edit mode */
     move *all_moves, *valid_move;
     movelist move_list;
 

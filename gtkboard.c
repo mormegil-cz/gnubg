@@ -47,10 +47,12 @@
 #define gtk_style_get_font(s) ((s)->font)
 #endif
 
-#define POINT_DICE 28
-#define POINT_CUBE 29
-#define POINT_RIGHT 30
-#define POINT_LEFT 31
+#define POINT_UNUSED0 28 /* the top unused bearoff tray */
+#define POINT_UNUSED1 29 /* the bottom unused bearoff tray */
+#define POINT_DICE 30
+#define POINT_CUBE 31
+#define POINT_RIGHT 32
+#define POINT_LEFT 33
 
 #define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
 			  same point is considered a real drag rather than a
@@ -67,7 +69,7 @@ static int fWine; /* TRUE if we're running under Wine */
 #endif
 
 
-static int positions[ 2 ][ 28 ][ 3 ] = { {
+static int positions[ 2 ][ 30 ][ 3 ] = { {
     { 51, 25, 7 },
     { 90, 63, 6 }, { 84, 63, 6 }, { 78, 63, 6 }, { 72, 63, 6 }, { 66, 63, 6 },
     { 60, 63, 6 }, { 42, 63, 6 }, { 36, 63, 6 }, { 30, 63, 6 }, { 24, 63, 6 },
@@ -75,7 +77,7 @@ static int positions[ 2 ][ 28 ][ 3 ] = { {
     { 12, 3, -6 }, { 18, 3, -6 }, { 24, 3, -6 }, { 30, 3, -6 }, { 36, 3, -6 },
     { 42, 3, -6 }, { 60, 3, -6 }, { 66, 3, -6 }, { 72, 3, -6 }, { 78, 3, -6 },
     { 84, 3, -6 }, { 90, 3, -6 },
-    { 51, 41, -7 }, { 99, 63, 6 }, { 99, 3, -6 }
+    { 51, 41, -7 }, { 99, 63, 6 }, { 99, 3, -6 }, { 3, 63, 6 }, { 3, 3, -6 }
 }, {
     { 51, 25, 7 },
     { 12, 63, 6 }, { 18, 63, 6 }, { 24, 63, 6 }, { 30, 63, 6 }, { 36, 63, 6 },
@@ -84,7 +86,7 @@ static int positions[ 2 ][ 28 ][ 3 ] = { {
     { 90, 3, -6 }, { 84, 3, -6 }, { 78, 3, -6 }, { 72, 3, -6 }, { 66, 3, -6 },
     { 60, 3, -6 }, { 42, 3, -6 }, { 36, 3, -6 }, { 30, 3, -6 }, { 24, 3, -6 },
     { 18, 3, -6 }, { 12, 3, -6 },
-    { 51, 41, -7 }, { 3, 63, 6 }, { 3, 3, -6 }
+    { 51, 41, -7 }, { 3, 63, 6 }, { 3, 3, -6 }, { 99, 63, 6 }, { 99, 3, -6 }
 } };
 
 static GtkVBoxClass *parent_class = NULL;
@@ -932,6 +934,234 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
     return placed;
 }
 
+/* jsc: Special version :( of board_point which only looks for point
+   0-27 and also allows clicking on a small border and all bearoff trays */
+static int board_point_with_border( GtkWidget *board, BoardData *bd, 
+				    int x0, int y0 ) {
+    int i, y, cy;
+
+    x0 /= bd->board_size;
+    y0 /= bd->board_size;
+    
+    /* Similar to board_point, but adds the nasty y-=3 cy+=3 border
+       allowances */
+    for( i = 0; i < 30; i++ ) {
+	y = positions[ fClockwise ][ i ][ 1 ];
+	cy = -5 * positions[ fClockwise ][ i ][ 2 ];
+	if( cy < 0 ) {
+	    y += cy * 4 / 5;
+	    cy = -cy;
+	} else {
+	    y -= 3;
+	    if( i == 0 || i == 25 )
+		y -= 3;
+	}
+
+	cy += 3;
+
+	if( intersects( x0, y0, 0, 0,
+			positions[ fClockwise ][ i ][ 0 ], y, 6, cy ) )
+	    return i;
+    }
+
+    /* Could not find an overlapping point */
+    return -1;
+}
+
+/* jsc: Given (x0,y0) which is ASSUMED to intersect point, return a
+   non-negative integer i representing the ith chequer position which
+   intersects (x0, y0).  On failure, return -1 */
+static int board_chequer_number( GtkWidget *board, BoardData *bd, 
+				 int point, int x0, int y0 ) {
+    int i, x, y, cx, cy, dy, c_chequer;
+
+    if( point < 0 || point > 27 )
+	return -1;
+
+    if( bd->board_size <= 0 )
+	return -1;
+
+    x0 /= bd->board_size;
+    y0 /= bd->board_size;
+
+    c_chequer = ( !point || point == 25 ) ? 3 : 5;
+
+    x = positions[ fClockwise ][ point ][ 0 ]; 
+    cx = 6;
+
+    y = positions[ fClockwise ][ point ][ 1 ];
+    dy = -positions[ fClockwise ][ point ][ 2 ];
+
+    if( dy < 0 ) cy = -dy;
+    else         cy = dy;
+
+    /* FIXME: test for border overlap before for() loop to see if we
+       should return 0, and return -1 if the for() loop completes */
+
+    for( i = 1; i <= c_chequer; ++i ) {
+	/* We use cx+1 and cy+1 because intersects may return 0 at boundary */
+	if( intersects( x0, y0, 0, 0, 
+			positions[ fClockwise ][ point ][ 0 ], y, 
+			cx+1, cy+1 ) )
+	    return i;
+	
+	y += dy;
+    }
+
+    /* Didn't intersect any position on the point */
+    return 0;
+}
+
+/* jsc: Snowie style editing: we will try to place i chequers of the
+   indicated colour on point n.  The x,y coordinates will be used to
+   map to a point n and a checker position i.
+
+   Clicking on a point occupied by the opposite color clears the point
+   first.  If not enough chequers are available in the bearoff tray,
+   we try to add what we can.  So if there are no chequers in the
+   bearoff tray, no chequers will be added.  This may be a point of
+   confusion during usage.  Clicking on the outside border of a point
+   corresponds to i=0, i.e. remove all chequers from that point. */
+static void board_quick_edit( GtkWidget *board, BoardData *bd, 
+			      int x, int y, int colour, int dragging ) {
+
+    int current, delta, c_chequer, avail;
+    int off, opponent_off;
+    int bar, opponent_bar;
+    int n, i;
+    int points[ 2 ][ 25 ];
+    
+    /* These should be asserted */
+    if( board == NULL || bd == NULL || bd->points == NULL )
+	return;
+
+    /* Map (x,y) to a point from 0..27 using a version of
+       board_point() that ignores the dice and cube and which allows
+       clicking on a narrow border */
+    n = board_point_with_border( board, bd, x, y );
+
+    if( !dragging && ( n == 26 || n == 27 ) ) {
+	/* click on bearoff tray in edit mode -- bear off all chequers */
+	for( i = 0; i < 26; i++ ) {
+	    bd->points[ i ] = 0;
+	    board_expose_point( board, bd, i );
+	}
+	
+	bd->points[ 26 ] = 15;
+	bd->points[ 27 ] = -15;
+	board_expose_point( board, bd, 26 );
+	board_expose_point( board, bd, 27 );
+
+	read_board( bd, points );
+	update_position_id( bd, points );
+
+	return;
+    } else if ( !dragging && ( n == POINT_UNUSED0 || n == POINT_UNUSED1 ) ) {
+	/* click on unused bearoff tray in edit mode -- reset to starting
+	   position */
+	for( i = 0; i < 28; i++ )
+	    bd->points[ i ] = 0;
+
+	/* FIXME use appropriate position if playing nackgammon */
+	
+	bd->points[ 1 ] = -2;
+	bd->points[ 6 ] = 5;
+	bd->points[ 8 ] = 2;
+	bd->points[ 12 ] = -5;
+	bd->points[ 13 ] = 5;
+	bd->points[ 17 ] = -3;
+	bd->points[ 19 ] = -5;
+	bd->points[ 24 ] = 2;
+	
+	for( i = 0; i < 28; i++ )
+	    board_expose_point( board, bd, i );
+	    
+	read_board( bd, points );
+	update_position_id( bd, points );
+    }
+    
+    /* Only points or bar allowed */
+    if( n < 0 || n > 25 )
+	return;
+
+    /* Make sure that if we drag across a bar, we started on that bar.
+       This is to make sure that if you drag a prime across say point
+       4 to point 9, you don't inadvertently add chequers to the bar */
+    if( dragging && ( n == 0 || n == 25 ) && n != bd->qedit_point )
+	return;
+    else
+	bd->qedit_point = n;
+
+    off          = (colour == 1) ? 26 : 27;
+    opponent_off = (colour == 1) ? 27 : 26;
+
+    bar          = (colour == 1) ? 25 : 0;
+    opponent_bar = (colour == 1) ? 0 : 25;
+
+    /* Can't add checkers to the wrong bar */
+    if( n == opponent_bar )
+	return;
+
+    c_chequer = ( n == 0 || n == 25 ) ? 3 : 5;
+
+    current = bd->points[ n ];
+    
+    /* Given n, map (x, y) to the ith checker position on point n*/
+    i = board_chequer_number( board, bd, n, x, y );
+
+    if( i < 0 )
+	return;
+
+    /* We are at the maximum position in the point, so we should not
+       respond to dragging.  Each click will try to add one more
+       chequer */
+    if( !dragging && i == c_chequer && current*colour >= c_chequer )
+	i = current*colour + 1;
+    
+    /* Clear chequers of the other colour from this point */
+    if( current*colour < 0 ) {
+	bd->points[ opponent_off ] += current;
+	bd->points[ n ] = 0;
+	current = 0;
+	
+	board_expose_point( board, bd, n );
+	board_expose_point( board, bd, opponent_off );
+    }
+    
+    delta = i*colour - current;
+    
+    /* No chequers of our colour added or removed */
+    if( delta == 0 )
+	return;
+
+    /* g_assert( bd->points[ off ]*colour >= 0 ); */
+
+    if( delta*colour < 0 ) {
+	/* Need to remove some chequers of the same colour */
+	bd->points[ off ] -= delta;
+	bd->points[ n ] += delta;
+    } else if( ( avail = bd->points[ off ] ) == 0 ) {
+	/* No more possible updates since not enough free chequers */
+	return;
+    } else if( delta*colour > avail*colour ) {
+	/* Not enough free chequers in bearoff, so move all of them */
+	bd->points[ off ] -= avail;
+	bd->points[ n ] += avail;
+	/* g_assert( bd->points[ off ] == 0 ); */
+    } else {
+	/* Have enough free chequers, move needed number to point n */
+	bd->points[ off ] -= delta;
+	bd->points[ n ] += delta;
+	/* g_assert( bd->points[ off ]*colour >= 0 ); */
+    }
+
+    board_expose_point( board, bd, n );
+    board_expose_point( board, bd, off );
+
+    read_board( bd, points );
+    update_position_id( bd, points );
+}
+
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
     int i, n, dest, x, y, bar;
@@ -971,6 +1201,22 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( board ) ),
 			      NULL );
 	
+	bd->click_time = gdk_event_get_time( event );
+	bd->drag_button = event->button.button;
+	
+	/* jsc: In editing mode, clicking on a point or a bar. */
+	if( bd->playing &&
+	    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    !( event->button.state & GDK_CONTROL_MASK ) ) {
+	    int dragging = 0;
+	    int colour = bd->drag_button == 1 ? 1 : -1;
+	    
+	    board_quick_edit( board, bd, x, y, colour, dragging );
+	    
+	    bd->drag_point = -1;
+	    return TRUE;
+	}
+	
 	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
 	    /* Click on illegal area. */
 	    board_beep( bd );
@@ -978,9 +1224,6 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
-	bd->click_time = gdk_event_get_time( event );
-	bd->drag_button = event->button.button;
-	
 	if( bd->drag_point == POINT_CUBE ) {
 	    /* Clicked on cube; double. */
 	    bd->drag_point = -1;
@@ -1220,6 +1463,19 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	/* fall through */
 	
     case GDK_MOTION_NOTIFY:
+	/* jsc: In quick editing mode, dragging across point, but not a bar. */
+	if( bd->playing && bd->drag_point < 0 &&
+	    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    !( event->button.state & GDK_CONTROL_MASK ) ) {
+	    int dragging = 1;
+	    int colour = bd->drag_button == 1 ? 1 : -1;
+	    
+	    board_quick_edit( board, bd, x, y, colour, dragging );
+	    
+	    bd->drag_point = -1;
+	    return TRUE;
+	}
+	
 	if( bd->drag_point < 0 )
 	    break;
 
