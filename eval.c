@@ -3609,7 +3609,6 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	
 
     ec.nPlies = i;
-    ec.fCubeful = TRUE;
 
     /* For lower level plies we do not need equities for
        both no double and double take */
@@ -3626,7 +3625,8 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
       /* intermediate ply */
 
-      if ( GeneralEvaluationE ( aarOutput[ 0 ], anBoard, pci, & ec )  < 0 ) 
+      if ( GeneralEvaluationEPliedCubeful ( aarOutput[ 0 ], anBoard,
+                                            pci, &ec, i )  < 0 ) 
         return -1;
 
     }
@@ -6102,6 +6102,29 @@ GeneralEvaluationE( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
 }
 
 
+extern int 
+GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                                 int anBoard[ 2 ][ 25 ],
+                                 cubeinfo *pci, evalcontext *pec,
+                                 int nPlies ) {
+
+  float rCubeful;
+
+  if ( EvaluatePositionCubeful3 ( anBoard, 
+                                  arOutput, 
+                                  &rCubeful,
+                                  pci, 1,
+                                  pci, pec, nPlies, FALSE ) )
+    return -1;
+
+  arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
+  arOutput[ OUTPUT_CUBEFUL_EQUITY ] = rCubeful;
+
+  return 0;
+
+}
+
+
 extern int
 GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
@@ -6109,18 +6132,10 @@ GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
 
   if ( pec->fCubeful ) {
 
-    float rCubeful;
-
-    if ( EvaluatePositionCubeful3 ( anBoard, 
-                                    arOutput, 
-                                    &rCubeful,
-                                    pci, 1,
-                                    pci, pec, nPlies, FALSE ) )
+    if ( GeneralEvaluationEPliedCubeful ( arOutput, anBoard, pci,
+                                          pec, nPlies ) )
       return -1;
 
-    arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
-    arOutput[ OUTPUT_CUBEFUL_EQUITY ] = rCubeful;
- 
   } 
   else {
 

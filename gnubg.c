@@ -2045,6 +2045,7 @@ extern void CommandHint( char *sz ) {
     int i;
     char szBuf[ 1024 ];
     float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ];
+		float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
     int n = ParseNumber ( &sz );
     
@@ -2060,10 +2061,11 @@ extern void CommandHint( char *sz ) {
 	if ( GetDPEq ( NULL, NULL, &ci ) ) {
 	    /* Give hint on cube action */
 
-	    if ( EvaluatePositionCubeful ( ms.anBoard, arDouble, arOutput,
-					   &ci, &esEvalCube.ec,
-					   esEvalCube.ec.nPlies ) < 0 )
-		return;
+  		if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+			                            &esEvalCube.ec ) < 0 )
+				return;
+
+			FindCubeDecision ( arDouble, aarOutput, &ci );  
 
 	    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
 
@@ -2096,11 +2098,10 @@ extern void CommandHint( char *sz ) {
 	/* Give hint on take decision */
 	GetMatchStateCubeInfo( &ci, &ms );
 
-	if ( EvaluatePositionCubeful ( ms.anBoard, arDouble, arOutput, &ci, 
-				       &esEvalCube.ec,
-				       esEvalCube.ec.nPlies ) < 0 )
-	    return;
-	
+	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+			                            &esEvalCube.ec ) < 0 )
+		return;
+
 #if USE_GTK
 	/*
 	  if ( fX ) {

@@ -344,4 +344,9 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
                           cubeinfo *pciMove,
                           evalcontext *pec, int nPlies, int fTop );
 
+extern int 
+GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                                 int anBoard[ 2 ][ 25 ],
+                                 cubeinfo *pci, evalcontext *pec,
+                                 int nPlies );
 #endif
