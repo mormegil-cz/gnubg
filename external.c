@@ -111,8 +111,7 @@
 extern extcmd ec;
 static int fError = FALSE;
 static char *szError = NULL;
-extern void ext_scan_string( const char *s );
-extern void extparse();
+extern void ExtStartParse( const char *s );
 
 
 #if defined(AF_UNIX) && !defined(AF_LOCAL)
@@ -580,7 +579,7 @@ extern void CommandExternal( char *sz ) {
     int h, hPeer, cb;
     struct sockaddr *psa;
     char szCommand[ 256 ];
-    char *szResponse;
+    char *szResponse = NULL;
     struct sockaddr_in saRemote;
     socklen_t saLen;
     extcmd *pec;
