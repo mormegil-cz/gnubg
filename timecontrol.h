@@ -84,7 +84,7 @@ extern gboolean UpdateClockNotify(gpointer *p);
 extern int UpdateClockNotify(event *pev, void *p); 
 #endif
 #else
-extern int UpdateClockNotify(void *p)
+extern int UpdateClockNotify(void *p);
 #endif
 
 
