@@ -1681,8 +1681,13 @@ extern void CommandExportPositionText( char *sz ) {
 
     printTextBoard( pf, &ms );
 
-    if( pmr )
+    if( pmr ) {
+
       TextAnalysis ( pf, &ms, pmr );
+
+      TextPrintComment ( pf, pmr );
+
+    }
     
     TextEpilogue ( pf, &ms );
 

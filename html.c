@@ -3322,6 +3322,9 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr,
 
   if ( sz ) {
 
+
+    fputs ( "<!-- Annotation -->\n\n", pf );
+
     fprintf ( pf, 
               "<br />\n"
               "<div %s>", 
@@ -3343,8 +3346,9 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr,
 
     }
 
-    fputs ( "</div>\n", pf );
+    fputs ( "</div>\n\n", pf );
 
+    fputs ( "<!-- End Annotation -->\n\n", pf );
     
 
   }
@@ -3830,10 +3834,15 @@ extern void CommandExportPositionHtml( char *sz ) {
                     exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
                     exsExport.het, exsExport.hecss );
 
-    if( pmr )
+    if( pmr ) {
+
       HTMLAnalysis ( pf, &ms, pmr,
                      exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
                      exsExport.het, exsExport.hecss );
+
+      HTMLPrintComment ( pf, pmr, exsExport.hecss );
+
+    }
     
     HTMLEpilogue ( pf, &ms, NULL, exsExport.hecss );
 
@@ -3920,11 +3929,15 @@ CommandExportPositionGammOnLine ( char *sz ) {
                     "gif", HTML_EXPORT_TYPE_BBS, 
                     HTML_EXPORT_CSS_INLINE );
 
-    if( pmr )
+    if( pmr ) {
       HTMLAnalysis ( pf, &ms, pmr,
                      "../Images/",
                      "gif", HTML_EXPORT_TYPE_BBS, 
                      HTML_EXPORT_CSS_INLINE );
+
+      HTMLPrintComment ( pf, pmr, HTML_EXPORT_CSS_INLINE );
+
+    }
 
     HTMLEpilogueComment ( pf );
 

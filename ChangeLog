@@ -1,3 +1,13 @@
+Wed Nov 13 18:06:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Show annoation in html/text export of positions
+
+	* html.c (HTMLPrintComment): add html-comments.
+	* html.c (CommandExportPositionHtml, CommandExportPositionGammOnLine):
+	call HTMLPrintComment.
+	* text.c (CommandExportPositionText): call TextComment.
+	
+
 Tue Nov 12 15:37:34 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* bearoffgammon.c (getRaceBGprobs): added exact BG race probs for
