@@ -324,6 +324,7 @@ ToolbarUpdate ( GtkWidget *pwToolbar,
   gtk_widget_set_sensitive ( ptw->pwExport,  plGame != NULL);
   gtk_widget_set_sensitive ( ptw->pwResign, fPlaying  && !fEdit);
   gtk_widget_set_sensitive ( ptw->pwHint, fPlaying  && !fEdit);
+  gtk_widget_set_sensitive ( ptw->pwEdit, plGame != NULL );
 
   return c;
 

@@ -1,3 +1,11 @@
+Thu Jan  1 12:44:52 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Happy New Year to all!
+
+	* gtktoolbar.c (ToolbarUpdate): disable edit button if there
+	is no match in progress
+	(reported by Misja Alma)
+
 Wed Dec 31 23:24:55 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Change external interface to use yacc/lex parser/scanner.
