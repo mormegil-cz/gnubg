@@ -1,3 +1,9 @@
+Wed Jan 29 20:24:32 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* rollout.c (getResignation): resign single in money game with
+	Jacoby rule and centered cube.
+	(reported by Ric Gerace)
+
 Wed Jan 29 20:02:10 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c, render.c: Show pseudo-cube on resignations.

@@ -1532,7 +1532,8 @@ getResignation ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
   if ( arResign [ OUTPUT_LOSEBACKGAMMON ] > 0.0f &&
        Utility ( ar, pci ) == rPlay )
-    return 3; /* resign backgammon */
+    /* resign backgammon */
+    return ( !pci->nMatchTo && pci->fJacoby && pci->fCubeOwner == -1 ) ? 1 : 3;
   else {
 
     /* worth trying to escape the backgammon */
@@ -1541,8 +1542,8 @@ getResignation ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
     if ( arResign[ OUTPUT_LOSEGAMMON ] > 0.0f &&
          Utility ( ar, pci ) == rPlay )
-      return 2; /* resign gammon */
-
+      /* resign gammon */
+      return ( !pci->nMatchTo && pci->fJacoby && pci->fCubeOwner == -1 ) ? 1 : 2; 
     else {
 
       /* worth trying to escape gammon */

@@ -33,6 +33,7 @@ Bill Davidson
 Michael Depreli
 Max Durbano
 Fotis
+Ric Gerace
 Michel Grimminck
 Eric Groleau
 Jeff Haferman
