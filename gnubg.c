@@ -749,7 +749,7 @@ static void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
     sigemptyset( &sa.sa_mask );
     sa.sa_flags =
 # if SA_RESTART
-	SA_RESTART |
+	nSignal == SIGINT ? 0 : SA_RESTART |
 # endif
 # if SA_NOCLDSTOP
 	SA_NOCLDSTOP |
@@ -761,7 +761,7 @@ static void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
 
     sv.sv_handler = p;
     sigemptyset( &sv.sv_mask );
-    sv.sv_flags = 0;
+    sv.sv_flags = nSignal == SIGINT ? SV_INTERRUPT : 0;
 
     sigvec( nSignal, &sv, pOld );
 #else
@@ -2804,7 +2804,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
     if( fTTY )
 #endif
-	puts( "GNU Backgammon " VERSION "  Copyright 1999, 2000 Gary Wong.\n"
+	puts( "GNU Backgammon " VERSION "  Copyright 1999, 2000, 2001 "
+	      "Gary Wong.\n"
 	      "GNU Backgammon is free software, covered by the GNU "
 	      "General Public License\n"
 	      "version 2, and you are welcome to change it and/or "
