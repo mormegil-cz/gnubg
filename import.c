@@ -294,8 +294,11 @@ ImportJF( FILE * fp, char *szFileName) {
   }
   
 #if USE_GTK
-  if( fX )
-    GTKFreeze();
+	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
 
   if ( ParseJF( fp, &nMatchTo, &fJacoby, &fTurn, aszPlayer,
@@ -902,8 +905,11 @@ extern int ImportMat( FILE *fp, char *szFilename ) {
     }
 
 #if USE_GTK
-    if( fX )
-	GTKFreeze();
+	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
     
     FreeMatch();
@@ -1360,8 +1366,11 @@ extern int ImportOldmoves( FILE *pf, char *szFilename ) {
     }
 
 #if USE_GTK
-    if( fX )
-	GTKFreeze();
+	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
     
     FreeMatch();
@@ -2123,8 +2132,11 @@ extern int ImportSGG( FILE *pf, char *szFilename ) {
     }
 
 #if USE_GTK
-    if( fX )
-	GTKFreeze();
+	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
     
     FreeMatch();
@@ -2610,8 +2622,11 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   bgvariation bgv;
 
 #if USE_GTK
-  if( fX )
-    GTKFreeze();
+	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
   
   FreeMatch();
@@ -2802,8 +2817,11 @@ extern int ImportBKG( FILE *pf, const char *szFilename ) {
     }
 
 #if USE_GTK
-    if( fX )
-	GTKFreeze();
+	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
     
     FreeMatch();
@@ -3003,8 +3021,11 @@ ImportSnowieTxt( FILE *pf ) {
   }
   
 #if USE_GTK
-  if( fX )
-    GTKFreeze();
+	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
   
   /* 

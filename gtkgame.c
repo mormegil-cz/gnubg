@@ -435,6 +435,7 @@ static guint idOutput, idProgress;
 static list lOutput;
 int fTTY = TRUE;
 int fGUISetWindowPos = TRUE;
+int frozen = FALSE;
 
 static guint nStdin, nDisabledCount = 1;
 int lastImportType = -1;
@@ -1249,11 +1250,15 @@ static void ShowAnalysis( void )
 extern void GTKFreeze( void ) {
 
 	GL_Freeze();
+	frozen = TRUE;
 }
 
 extern void GTKThaw( void ) {
 
 	GL_Thaw();
+	frozen = FALSE;
+	/* Make sure analysis window is correct */
+	GTKSetMoveRecord( plLastMove->p );
 }
 
 static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {

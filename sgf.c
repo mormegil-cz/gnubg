@@ -1449,7 +1449,10 @@ extern void CommandLoadGame( char *sz ) {
 
 #if USE_GTK
 	if( fX )
-	    GTKFreeze();
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
 	
 	FreeMatch();
@@ -1506,7 +1509,10 @@ CommandLoadPosition( char *sz ) {
 
 #if USE_GTK
 	if( fX )
-	    GTKFreeze();
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
+		GTKFreeze();
+	}
 #endif
 	
 	FreeMatch();
@@ -1561,7 +1567,10 @@ extern void CommandLoadMatch( char *sz ) {
 
 #if USE_GTK
 	if( fX )
+	{	// Clear record to avoid ugly updates
+		GTKClearMoveRecord();
 		GTKFreeze();
+	}
 #endif
 	
 	FreeMatch();

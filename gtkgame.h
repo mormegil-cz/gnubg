@@ -156,6 +156,7 @@ extern void SetMET( GtkWidget *pw, gpointer p );
 extern void HintMove( GtkWidget *pw, GtkWidget *pwMoves );
 
 extern int fTTY;
+extern int frozen;
 
 extern int 
 GtkTutor ( char *sz );

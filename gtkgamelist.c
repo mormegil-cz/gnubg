@@ -31,6 +31,7 @@
 #include "gtkboard.h"
 #include "drawboard.h"
 #include "positionid.h"
+#include "gtkgame.h"
 
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_style_get_font(s) ((s)->font)
@@ -70,16 +71,6 @@ typedef struct _gamelistrow {
     moverecord *apmr[ 2 ]; /* moverecord entries for each column */
     int fCombined; /* this message's row is combined across both columns */
 } gamelistrow;
-
-extern void GL_Freeze( void ) {
-
-    gtk_clist_freeze( GTK_CLIST( pwGameList ) );
-}
-
-extern void GL_Thaw( void ) {
-
-    gtk_clist_thaw( GTK_CLIST( pwGameList ) );
-}
 
 extern void GTKClearMoveRecord( void ) {
 
@@ -517,8 +508,9 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
     GtkCList *pcl = GTK_CLIST( pwGameList );
     gamelistrow *pglr;
     int i;
-
-    SetAnnotation( pmr );
+	/* Avoid lots of screen updates */
+	if (!frozen)
+		SetAnnotation( pmr );
 
     if( woPanel[WINDOW_HINT].pwWin ) {
 
@@ -631,4 +623,13 @@ extern void GTKPopMoveRecord( moverecord *pmr ) {
     }
     
     gtk_clist_thaw( pcl );
+}
+
+extern void GL_Freeze( void ) {
+    gtk_clist_freeze( GTK_CLIST( pwGameList ) );
+}
+extern void GTKSetMoveRecord( moverecord *pmr );
+
+extern void GL_Thaw( void ) {
+    gtk_clist_thaw( GTK_CLIST( pwGameList ) );
 }
