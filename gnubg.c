@@ -2369,6 +2369,7 @@ CommandRollout( char *sz ) {
 	    fOpponent = TRUE;
 	}
 
+    /*
     if( fOpponent ) {
 	an[ 0 ] = ms.anScore[ 1 ];
 	an[ 1 ] = ms.anScore[ 0 ];
@@ -2376,9 +2377,11 @@ CommandRollout( char *sz ) {
 	an[ 0 ] = ms.anScore[ 0 ];
 	an[ 1 ] = ms.anScore[ 1 ];
     }
+    */
     
     SetCubeInfo ( &ci, ms.nCube, ms.fCubeOwner, fOpponent ? !ms.fMove :
-		  ms.fMove, ms.nMatchTo, an, ms.fCrawford, fJacoby, nBeavers );
+		  ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, fJacoby,
+                  nBeavers );
 
 #if USE_GTK
     if( fX )
