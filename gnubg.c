@@ -203,6 +203,13 @@ extern void ShowCommandWindow();
 extern void DeleteCommandWindow();
 #endif
 
+static char *aszExportTypes[] = {"html", "gol", "pos", "mat", "gam",
+	"latex", "pdf", "postscript", "eps", "png", "text",
+        "equity", "snowietxt", ""};
+
+static char *aszImportTypes[] = {"bkg", "mat", "pos", "oldmoves", "sgg",
+	"tmg", "snowiemat", "snowietext", ""};
+
 /* Set up window and panel details */
 windowobject woPanel[NUM_WINDOWS] =
 {
@@ -615,6 +622,7 @@ static char szDICE[] = N_("<die> <die>"),
     szURL[] = N_("<URL>"),
     szMAXERR[] = N_("<fraction>"),
     szMINGAMES[] = N_("<minimum games to rollout>"),
+    szFILETYPE[] = N_("<filetype>"),
 #if USE_TIMECONTROL
     szSETTC[] = N_("[<timecontrol>|off]"),
     szSETTCTYPE[] = N_("plain|bronstein|fischer|hourglass"),
@@ -1562,6 +1570,8 @@ command cER = {
       szVALUE, NULL },
   { NULL, NULL, NULL, NULL, NULL }
 }, acSetExport[] = {
+  { "filetype", CommandSetExportFileType, N_("Set default filetype "
+      "for export"), szFILETYPE, &cFilename },
   { "html", NULL,
     N_("Set options for HTML export"), NULL, acSetExportHTML },
   { "include", NULL,
@@ -1576,6 +1586,9 @@ command cER = {
   { "cube", NULL,
     N_("Control display of cube in exports"), NULL, acSetExportCube },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetImport[] = {
+  { "filetype", CommandSetImportFileType, N_("Set default filetype "
+      "for import"), szFILETYPE, &cFilename },
 }, acSetInvert[] = {
   { "matchequitytable", CommandSetInvertMatchEquityTable,
     N_("invert match equity table"), szONOFF, &cOnOff },
@@ -1816,6 +1829,7 @@ command cER = {
          "when loading matches or sessions"), NULL, NULL },
     { "gui", NULL, N_("Control parameters for the graphical interface"), NULL,
       acSetGUI },
+    { "import", NULL, N_("Set settings for import"), NULL, acSetImport },
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
       "money games"), szONOFF, &cOnOff },
@@ -2162,6 +2176,8 @@ command cER = {
 static int iProgressMax, iProgressValue, fInProgress;
 static char *pcProgress;
 static psighandler shInterruptOld;
+int lastImportType = -1;
+int lastExportType = -1;
 
 char *aszVersion[] = {
     "GNU Backgammon " VERSION,
@@ -5896,7 +5912,15 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set training threshold %f\n",
 	     rAlpha, rAnneal, rThreshold );
 
+    /* save import settings */
+
+	if (lastImportType != -1)
+		fprintf(pf, "set import filetype %s\n", aszImportTypes[lastImportType]);
+
     /* save export settings */
+
+	if (lastExportType != -1)
+		fprintf(pf, "set export filetype %s\n", aszExportTypes[lastExportType]);
 
     fprintf ( pf, 
               "set export include annotations %s\n"
@@ -9337,3 +9361,50 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
 }
 
+extern void CommandSetExportFileType(char *sz)
+{
+	int type;
+	int num = 0;
+
+	if (!sz || !*sz)
+	{
+		outputl(_("No file type specified"));
+		return;
+	}
+
+	while (*aszExportTypes[num])
+	{
+		if (!strncasecmp(sz, aszExportTypes[num], strlen(sz)))
+		{
+			lastExportType = num;
+			return;
+		}
+		num++;
+	}
+
+ 	outputl(_("Invalid file type specified"));
+}
+
+extern void CommandSetImportFileType(char *sz)
+{
+	int type;
+	int num = 0;
+
+	if (!sz || !*sz)
+	{
+		outputl(_("No file type specified"));
+		return;
+	}
+
+	while (*aszImportTypes[num])
+	{
+		if (!strncasecmp(sz, aszImportTypes[num], strlen(sz)))
+		{
+			lastImportType = num;
+			return;
+		}
+		num++;
+	}
+
+ 	outputl(_("Invalid file type specified"));
+}

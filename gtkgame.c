@@ -439,8 +439,6 @@ int fGUISetWindowPos = TRUE;
 int frozen = FALSE;
 
 static guint nStdin, nDisabledCount = 1;
-int lastImportType = -1;
-int lastExportType = -1;
 
 static char *szCopied; /* buffer holding copied data */
 
