@@ -61,7 +61,7 @@
 #endif
 
 
-static int iPlayerSet;
+static int iPlayerSet, iPlayerLateSet;
 
 static char szEQUITY[] = N_ ("<equity>"),
     szFILENAME[] = N_ ("<filename>"),
@@ -1228,6 +1228,44 @@ extern void CommandSetRNGUser( char *sz ) {
 
 }
 
+extern void CommandSetRolloutLate ( char *sz ) {
+
+  HandleCommand ( sz, acSetRolloutLate );
+
+}
+
+extern void CommandSetRolloutLateEnable ( char *sz ) {
+
+  SetToggle( "separate evaluation for later plays", &prcSet->fLateEvals, sz,
+		 _("Use different evaluation for later moves of rollout."),
+		 _("Do not change evaluations during rollout.") );
+}
+
+extern void CommandSetRolloutLatePlies ( char *sz ) {
+    
+    int n = ParseNumber( &sz );
+
+    if( n < 1 ) {
+	outputl( _("You must specify a valid ply at which to change evaluations  "
+        "-- try `help set rollout late plies'.") );
+
+	return;
+    }
+
+    prcSet->nLate = n;
+
+    if( !n )
+	   outputl( _("No evaluations changes will be made during rollouts.") );
+    else
+      outputf( _("Evaluations will change after %d plies in rollouts.\n"), n );
+
+}
+
+
+extern void CommandSetRolloutTruncation  ( char *sz ) {
+
+  HandleCommand ( sz, acSetTruncation );
+}
 
 extern void CommandSetRollout ( char *sz ) {
 
@@ -1246,68 +1284,158 @@ CommandSetRolloutRNG ( char *sz ) {
 
 }
   
+/* set an eval context, then copy to other player's settings */
+static void
+SetRolloutEvaluationContextBoth ( char *sz, evalcontext  *pec[] ) {
 
-extern void
-CommandSetRolloutChequerplay ( char *sz ) {
+  assert (pec [0] != 0);
+  assert (pec [1] != 0);
 
-  szSet = _("Chequer play in rollouts");
-  szSetCommand = "rollout chequerplay";
-  
-  pecSet = &prcSet->aecChequer[ 0 ];
+  pecSet = pec[ 0 ];
 
   HandleCommand ( sz, acSetEvaluation );
 
   /* copy to both players */
   /* FIXME don't copy if there was an error setting player 0 */  
-  memcpy ( &prcSet->aecChequer[ 1 ], &prcSet->aecChequer[ 0 ],
-           sizeof ( evalcontext ) );  
+  memcpy ( pec [1] , pec[ 0 ], sizeof ( evalcontext ) );  
+
+}
+
+extern void
+CommandSetRolloutChequerplay ( char *sz ) {
+
+  evalcontext *pec[2];
+
+  szSet = _("Chequer play in rollouts");
+  szSetCommand = "rollout chequerplay";
+  
+  pec[0] = prcSet->aecChequer;
+  pec[1] = prcSet->aecChequer + 1;
+
+  SetRolloutEvaluationContextBoth (sz, pec);
+
+}
+  
+
+extern void
+CommandSetRolloutLateChequerplay ( char *sz ) {
+
+  evalcontext *pec[2];
+
+  szSet = _("Chequer play for later moves in rollouts");
+  szSetCommand = "rollout late chequerplay";
+
+  pec[0] = prcSet->aecChequerLate;
+  pec[1] = prcSet->aecChequerLate + 1;
+
+  SetRolloutEvaluationContextBoth (sz, pec);
 
 }
 
 
+static void
+SetRolloutEvaluationContext ( char *sz, evalcontext *pec[], int iPlayer ) {
+
+    assert ((iPlayer == 0) || (iPlayer == 1));
+    assert (pec [ iPlayer ] != 0);
+
+    pecSet = pec [ iPlayer ];
+
+    HandleCommand ( sz, acSetEvaluation );
+}
+
 extern void
 CommandSetRolloutPlayerChequerplay ( char *sz ) {
+
+    evalcontext *pec[2];
 
     szSet = iPlayerSet ? _("Chequer play in rollouts (for player 1)") :
 	_("Chequer play in rollouts (for player 0)");
     szSetCommand = iPlayerSet ? _("rollout player 1 chequerplay") :
 	_("rollout player 0 chequerplay");
   
-    pecSet = &prcSet->aecChequer[ iPlayerSet ];
+    pec[0] = prcSet->aecChequer;
+	pec[1] = prcSet->aecChequer + 1;
+	SetRolloutEvaluationContext ( sz, pec, iPlayerSet);
+}
 
-    HandleCommand ( sz, acSetEvaluation );
+extern void
+CommandSetRolloutPlayerLateChequerplay ( char *sz ) {
+
+    evalcontext *pec[2];
+
+    szSet = iPlayerLateSet ? 
+	  _("Chequer play for later moves in rollouts (for player 1)") :
+	_("Chequer play for later moves in rollouts (for player 0)");
+    szSetCommand = iPlayerLateSet ? _("rollout late player 1 chequerplay") :
+	_("rollout late player 0 chequerplay");
+  
+    pec[0] = prcSet->aecChequerLate;
+	pec[1] = prcSet->aecChequerLate + 1;
+	SetRolloutEvaluationContext ( sz, pec, iPlayerLateSet);
 }
 
 
 extern void
 CommandSetRolloutCubedecision ( char *sz ) {
 
+  evalcontext *pec[2];
+
   szSet = _("Cube decisions in rollouts");
   szSetCommand = "rollout cubedecision";
 
-  pecSet = &prcSet->aecCube[ 0 ];
+  pec[0] = prcSet->aecCube;
+  pec[1] = prcSet->aecCube + 1;
 
-  HandleCommand ( sz, acSetEvaluation );
-
-  /* copy to both players */
-  /* FIXME don't copy if there was an error setting player 0 */  
-  memcpy ( &prcSet->aecCube[ 1 ], &prcSet->aecCube[ 0 ],
-           sizeof ( evalcontext ) );  
+  SetRolloutEvaluationContextBoth (sz, pec);
 
 }
 
+extern void
+CommandSetRolloutLateCubedecision ( char *sz ) {
+
+  evalcontext *pec[2];
+
+  szSet = _("Cube decisions for later plies in rollouts");
+  szSetCommand = "rollout late cubedecision";
+
+  pec[0] = prcSet->aecCubeLate;
+  pec[1] = prcSet->aecCubeLate + 1;
+
+  SetRolloutEvaluationContextBoth (sz, pec);
+
+}
 
 extern void
 CommandSetRolloutPlayerCubedecision ( char *sz ) {
+
+    evalcontext *pec[2];
 
     szSet = iPlayerSet ? _("Cube decisions in rollouts (for player 1)") :
 	_("Cube decisions in rollouts (for player 0)");
     szSetCommand = iPlayerSet ? "rollout player 1 cubedecision" :
 	"rollout player 0 cubedecision";
   
-    pecSet = &prcSet->aecCube[ iPlayerSet ];
+    pec[0] = prcSet->aecCube;
+	pec[1] = prcSet->aecCube + 1;
+	SetRolloutEvaluationContext ( sz, pec, iPlayerSet);
 
-    HandleCommand ( sz, acSetEvaluation );
+}
+
+extern void
+CommandSetRolloutPlayerLateCubedecision ( char *sz ) {
+
+    evalcontext *pec[2];
+
+    szSet = iPlayerLateSet ? _("Cube decisions for later plies of rollouts (for player 1)") :
+	_("Cube decisions in later plies of rollouts (for player 0)");
+    szSetCommand = iPlayerLateSet ? "rollout late player 1 cubedecision" :
+	"rollout late player 0 cubedecision";
+  
+    pec[0] = prcSet->aecCubeLate;
+	pec[1] = prcSet->aecCubeLate + 1;
+	SetRolloutEvaluationContext ( sz, pec, iPlayerLateSet);
+
 }
 
 extern void
@@ -1401,7 +1529,14 @@ extern void CommandSetRolloutTrials( char *sz ) {
 
 }
 
-extern void CommandSetRolloutTruncation( char *sz ) {
+extern void CommandSetRolloutTruncationEnable ( char *sz ) {
+
+  SetToggle( "truncated rollouts", &prcSet->fDoTruncate, sz,
+		 _("Games in rollouts will be stop after a fixed number of moves."),
+		 _("Games in rollouts will be played out until the end.") );
+}
+
+extern void CommandSetRolloutTruncationPlies ( char *sz ) {
     
     int n = ParseNumber( &sz );
 
@@ -1422,6 +1557,27 @@ extern void CommandSetRolloutTruncation( char *sz ) {
       outputf( _("Rollouts will be truncated after %d plies.\n"), n );
 
 }
+
+extern void CommandSetRolloutTruncationChequer ( char *sz ) {
+
+    szSet = _("Chequer play evaluations at rollout truncation point");
+    szSetCommand = "rollout truncation chequerplay";
+
+	pecSet = &prcSet->aecChequerTrunc;
+
+	HandleCommand ( sz, acSetEvaluation );
+}
+
+extern void CommandSetRolloutTruncationCube ( char *sz ) {
+
+    szSet = _("Cube decisions at rollout truncation point");
+    szSetCommand = "rollout truncation cubedecision";
+
+	pecSet = &prcSet->aecCubeTrunc;
+
+	HandleCommand ( sz, acSetEvaluation );
+}
+
 
 extern void CommandSetRolloutVarRedn( char *sz ) {
 
@@ -1501,6 +1657,55 @@ CommandSetRolloutPlayer ( char *sz ) {
 
 	iPlayerSet = 1;
 	HandleCommand( pchCopy, acSetRolloutPlayer );
+
+	outputresume();
+	
+	free( pchCopy );
+	
+	return;
+    }
+    
+    outputf( _("Unknown player `%s' -- try\n"
+             "`help set %s player'.\n"), pch, szSetCommand );
+}
+
+extern void
+CommandSetRolloutLatePlayer ( char *sz ) {
+
+    char *pch = NextToken( &sz ), *pchCopy;
+    int i;
+
+    if( !pch ) {
+	outputf( _("You must specify a player -- try `help set %s player'.\n"),
+		 szSetCommand );
+	
+	return;
+    }
+
+    if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+	iPlayerLateSet = i;
+
+	HandleCommand( sz, acSetRolloutLatePlayer );
+	
+	return;
+    }
+
+    if( i == 2 ) {
+	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+	    outputl( _("Insufficient memory.") );
+		
+	    return;
+	}
+
+	strcpy( pchCopy, sz );
+
+	outputpostpone();
+	
+	iPlayerLateSet = 0;
+	HandleCommand( sz, acSetRolloutLatePlayer );
+
+	iPlayerLateSet = 1;
+	HandleCommand( pchCopy, acSetRolloutLatePlayer );
 
 	outputresume();
 	

@@ -76,11 +76,77 @@ static void ShowEvaluation( evalcontext *pec ) {
 	     _(" (pseudo-random noise).\n") );
 }
 
+extern int
+EvalCmp (evalcontext *E1, evalcontext *E2, int nElements) {
+
+  int  i, cmp;
+ 
+  if (nElements < 1)
+    return 0;
+
+  for (i = 0;  i < nElements; ++i, ++E1, ++E2) {
+    cmp = memcmp ((void *) E1, (void *) E2, sizeof (evalcontext));
+    if (cmp != 0)
+      break;
+  }
+
+  return cmp;
+}
+
+/* all the sundry displays of evaluations. Deals with identical/different
+   player settings, displays late evaluations where needed */
+
+static void 
+show_evals (char *text, evalcontext *early, evalcontext *late,
+              int fPlayersAreSame, int fLateEvals, int nLate) {
+
+  int  i;
+
+  if (fLateEvals) 
+    outputf (_("%s for first %d plies:\n"), text, nLate);
+  else
+    outputf ("%s\n", text);
+
+  if (fPlayersAreSame)
+    ShowEvaluation (early);
+  else {
+    for (i = 0; i < 2; i++ ) {
+      outputf (_("Player %d:\n"), i);
+      ShowEvaluation (early + i);
+    }
+  }
+
+  if (!fLateEvals)
+    return;
+
+  outputf (_("%s after %d plies:\n"), text, nLate);
+  if (fPlayersAreSame)
+    ShowEvaluation (late);
+  else {
+    for (i = 0; i < 2; i++ ) {
+      outputf (_("Player %d:\n"), i);
+      ShowEvaluation (late + i);
+    }
+  }
+}
 
 extern void
 ShowRollout ( rolloutcontext *prc ) {
 
   int i;
+  int fDoTruncate = 0;
+  int fLateEvals = 0;
+  int nTruncate = prc->nTruncate;
+  int nLate = prc->nLate;
+  int fCubeEqualChequer = 1;
+  int fPlayersAreSame = 1;
+
+  if (prc->fDoTruncate && (nTruncate > 0))
+    fDoTruncate = 1;
+
+  if (prc->fLateEvals && 
+      (!fDoTruncate || (nTruncate > nLate) && (nLate > 2)))
+    fLateEvals = 1;
 
   if ( prc->nTrials == 1 )
     outputf ( _("%d game will be played per rollout.\n"),
@@ -89,9 +155,9 @@ ShowRollout ( rolloutcontext *prc ) {
     outputf ( _("%d games will be played per rollout.\n"),
               prc->nTrials );
 
-  if( prc->nTruncate > 1 )
-      outputf( _("Truncation after %d plies.\n"), prc->nTruncate );
-  else if( prc->nTruncate == 1 )
+  if( fDoTruncate && (nTruncate > 1 ) )
+      outputf( _("Truncation after %d plies.\n"), nTruncate );
+  else if( fDoTruncate && (nTruncate == 1) )
       outputl( _("Truncation after 1 ply.") );
   else
       outputl( _("No truncation.") );
@@ -123,24 +189,46 @@ ShowRollout ( rolloutcontext *prc ) {
   outputf ( _("%s dice generator with seed %u.\n"),
             gettext ( aszRNG[ prc->rngRollout ] ), prc->nSeed );
             
-  /* FIXME: more compact notation when aecCube = aecChequer etc. */
+  /* see if the players settings are the same */
+  if (EvalCmp (prc->aecChequer, prc->aecChequer + 1, 1) ||
+      EvalCmp (prc->aecCube, prc->aecCube + 1, 1) ||
+     (fLateEvals &&
+        (EvalCmp (prc->aecChequerLate, prc->aecChequerLate + 1, 1) ||
+         EvalCmp (prc->aecCubeLate, prc->aecCubeLate + 1, 1))))
+     fPlayersAreSame = 0;
+    
+  /* see if the cube and chequer evals are the same */
+  if (EvalCmp (prc->aecChequer, prc->aecCube, 2) ||
+     (fLateEvals &&
+        (EvalCmp (prc->aecChequerLate, prc->aecCubeLate, 2))))
+    fCubeEqualChequer = 0;
 
-  outputl (_("Chequer play parameters:"));
-
-  for ( i = 0; i < 2; i++ ) {
-    outputf ( _("  Player %d:\n"), i );
-    ShowEvaluation ( &prc->aecChequer[ i ] );
+  if (fCubeEqualChequer) {
+    /* simple summary - show_evals will deal with player differences */
+    show_evals (_("Evaluation parameters:"), prc->aecChequer,
+                  prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate);
+  } else {
+    /* Cube different from Chequer */
+    show_evals ( _( "Chequer play parameters:"), prc->aecChequer,
+                   prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate);
+    show_evals ( _( "Cube decision parameters:"), prc->aecCube,
+                   prc->aecCubeLate, fPlayersAreSame, fLateEvals, nLate);
   }
 
-  outputl (_("Cube decision parameters:"));
 
-  for ( i = 0; i < 2; i++ ) {
-    outputf ( _("  Player %d:\n"), i );
-    ShowEvaluation ( &prc->aecCube[ i ] );
+  if (fDoTruncate) {
+    if (EvalCmp (&prc->aecCubeTrunc, &prc->aecChequerTrunc, 1)) {
+      show_evals (_("Truncation point Chequer play evaluation:"), 
+                  &prc->aecChequerTrunc, 0, 1, 0, 0);
+      show_evals (_("Truncation point Cube evaluation:"), 
+                  &prc->aecCubeTrunc, 0, 1, 0, 0);
+    }
+    else {
+      show_evals (_("Truncation point evaluation:"),
+                  &prc->aecChequerTrunc, 0, 1, 0, 0);
+    } 
   }
-
 }
-
 
 extern void
 ShowEvalSetup ( evalsetup *pes ) {
