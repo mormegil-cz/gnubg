@@ -4713,6 +4713,10 @@ fDoCubeful ( cubeinfo *pci ) {
 	/* score is -2,-2 */
 	return FALSE;
 
+    if ( pci->fCrawford )
+      /* cube is dead in Crawford game */
+      return FALSE;
+
     return TRUE;
 }
 
