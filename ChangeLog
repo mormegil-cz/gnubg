@@ -1,3 +1,11 @@
+Thu Jul 10 11:14:30 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Trim gtkgame.c: move gtk widget for Settings->Options and
+	Settings->Path into new files.
+	
+	* gtkoptions.c, gtkpath.c: new files
+	* gtkgame.c: rename a few functions and move many to new files.
+
 Thu Jul 10 10:35:00 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Initial experimental support of Hugh Sconyers' full 15x15

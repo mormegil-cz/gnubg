@@ -27,6 +27,8 @@ getopt1.c
 getopt.c
 getopt.h
 gnubg.c
+gtkbearoff.c
+gtkbearoff.h
 gtkboard.c
 gtkboard.h
 gtkchequer.c
@@ -45,6 +47,10 @@ gtkmovefilter.c
 gtkmovefilter.h
 gtk-multiview.c
 gtk-multiview.h
+gtkoptions.c
+gtkoptions.h
+gtkpath.c
+gtkpath.h
 gtkprefs.c
 gtkprefs.h
 gtkrace.c

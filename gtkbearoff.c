@@ -30,6 +30,7 @@
 #include <gtk/gtk.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 
 #include "backgammon.h"
@@ -239,7 +240,6 @@ GTKShowBearoff( const matchstate *pms ) {
   GtkWidget *pwDialog;
   GtkWidget *pwNotebook;
   GtkWidget *pwv;
-  GtkWidget *pw;
   sconyerswidget *psw;
 
   pwDialog = GTKCreateDialog( _("Bearoff Databases"), 

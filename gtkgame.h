@@ -134,8 +134,6 @@ extern void GTKSaveSettings( void );
 extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKHelp( char *sz );
-extern void 
-GTKShowPath( void );
 extern void GTKMatchInfo( void );
 
 extern void SetEvaluation( gpointer *p, guint n, GtkWidget *pw );
@@ -169,5 +167,15 @@ GTKTextToClipboard( const char *sz );
 extern char *
 GTKChangeDisk( const char *szMsg, const int fChange, 
                const char *szMissingFile );
+
+extern int 
+GTKMessage( char *sz, dialogtype dt );
+
+extern int 
+GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
+               int nMin, int nMax, int nInc );
+
+extern void GTKFileCommand( char *szPrompt, char *szDefault, char *szCommand,
+                            char *szPath, int fExportSetting );
 
 #endif
