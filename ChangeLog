@@ -1,3 +1,8 @@
+Sat Jan 11 11:29:01 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktexi.c, gtkmovefilter.c, import.c, show.c, gtkgame.c, eval.c:
+	pacify fussy compilers.
+
 Sat Jan 11 10:58:54 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* rollout.c (BasicCubefulRollout): fix bug for bearoff truncation

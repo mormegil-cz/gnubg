@@ -179,7 +179,8 @@ show_evals ( const char *text,
 static void
 show_movefilters ( const movefilter aaamf[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
-  if ( equal_movefilters ( aaamf[ 0 ], aaamf[ 1 ] ) ) 
+  if ( equal_movefilters ( (movefilter (*)[]) aaamf[ 0 ], 
+                           (movefilter (*)[]) aaamf[ 1 ] ) ) 
     ShowMoveFilters ( aaamf[ 0 ] );
   else {
     int i;
@@ -420,7 +421,7 @@ extern void CommandShowAnalysis( char *sz ) {
              "following evaluation parameters:") );
   outputl( _("    Chequer play:") );
   ShowEvalSetup ( &esAnalysisChequer );
-  ShowMoveFilters ( aamfAnalysis );
+  ShowMoveFilters ( (const movefilter (*)[]) aamfAnalysis );
   outputl( _("    Cube decisions:") );
   ShowEvalSetup ( &esAnalysisCube );
 
@@ -688,7 +689,7 @@ extern void CommandShowEvaluation( char *sz ) {
     outputl( _("    Chequer play:") );
     ShowEvalSetup ( &esEvalChequer );
     outputl( _("    Move filters:") );
-    ShowMoveFilters ( aamfEval );
+    ShowMoveFilters ( (const movefilter (*)[]) aamfEval );
     outputl( _("    Cube decisions:") );
     ShowEvalSetup ( &esEvalCube );
 
@@ -792,7 +793,7 @@ extern void CommandShowPlayer( char *sz ) {
             outputl( _("    Checker play:") );
             ShowEvalSetup ( &ap[ i ].esChequer );
             outputl( _("    Move filters:") );
-            ShowMoveFilters ( ap[ i ].aamf );
+            ShowMoveFilters ( (const movefilter (*)[]) ap[ i ].aamf );
             outputl( _("    Cube decisions:") );
             ShowEvalSetup ( &ap[ i ].esCube );
 	    break;

@@ -1637,8 +1637,6 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     "MaxRakeAbs:", "Startdate:", "Jacoby:", "AutoDistrib:", "Beavers:", 
     "Raccoons:", "Crawford:", "Cube:", "MaxCube:", "Length:", "MaxGames:",
     "Variant:", "PlayMoney:", NULL };
-  double arRating[ 2 ];
-  int anExp[ 2 ];
   char *pc;
   char szName[ 80 ];
 
@@ -1757,14 +1755,8 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
     char *pch;
     int c, fPlayer = 0, anRoll[ 2 ];
     moverecord *pmgi, *pmr;
-    char *szComment = NULL;
-    int fBeaver = FALSE;
-
-    int fPlayerOld, nMoveOld; 
-    int nMove = -1;
     int iMove;
     int j;
-    int fRecordType;
 
     typedef enum _tmgrecordtype {
       TMG_ROLL = 1,

@@ -1035,7 +1035,7 @@ static void HistoryAdd( GtkTexi *pw, char *szFile, char *szTag ) {
 
 static int RenderNode( GtkTexi *pw, char *szTag ) {
 
-    nodeinfo *pni;
+    nodeinfo *pni = NULL;
     list *pl;
     char ach[ BLOCK_SIZE ];
     int cch, i;

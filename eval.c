@@ -89,6 +89,14 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 static float
 EvalEfficiency( int anBoard[2][25], positionclass pc );
 
+static int 
+EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
+                          float arOutput[ NUM_OUTPUTS ],
+                          float arCubeful[],
+                          cubeinfo aciCubePos[], int cci, 
+                          cubeinfo *pciMove,
+                          evalcontext *pec, int nPlies, int fTop );
+
 static int MaxTurns( int i );
 
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[]
@@ -5661,7 +5669,6 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   int fAll = TRUE;
   evalcache ec, *pecx;
   unsigned long l;
-  int rc;
   
   PositionKey ( anBoard, ec.auchKey );
     
@@ -5719,7 +5726,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 }
 
 
-extern int 
+static int 
 EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],

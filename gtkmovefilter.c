@@ -142,7 +142,7 @@ static void
 AcceptChanged ( GtkWidget *pw, movefiltersetupwidget *pmfsw ) {
 
   int fFound;
-  int i, j;
+  int i;
   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
   /* see if current settings match a predefined one */

@@ -26,5 +26,6 @@ extern void ImportMat( FILE *fp, char *szFilename );
 extern void ImportOldmoves( FILE *pf, char *szFilename );
 extern void ImportSGG( FILE *pf, char *szFilename );
 extern void ImportTMG( FILE *pf, const char *szFilename );
+extern void ImportBKG( FILE *pf, const char *szFilename );
 
 #endif
