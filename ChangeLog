@@ -1,3 +1,9 @@
+Fri Jun 13 08:47:50 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* fix bearoff-database targets in Makefile.[ia] to invoke
+	  makebearoff with an output file name, delete attempt to
+	  make target gnubg.bd
+	
 Thu Jun 12 20:58:18 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (FindnSaveBestMoves): evaluate top move and actual move
