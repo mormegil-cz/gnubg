@@ -190,8 +190,6 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       else
         aar[ i ][ j ] = - ar[ OUTPUT_EQUITY ];
 
-      printf ( "LuckNormal: %d %d %f\n", i , j, aar[ i ][ j ] );
-
       rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][j ] * 2.0f;
 
     }
