@@ -1,5 +1,5 @@
 info_TEXINFOS = gnubg.texi
-gnubg_TEXINFOS = fdl.texi
+gnubg_TEXINFOS = fdl.texi faq.texi
 if XML_MANUAL
 pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
 	rulfig4.png rulfig5.png annealing.png
@@ -56,10 +56,6 @@ annealing.png: annealing.eps
 
 ## Old versions of makeinfo don't support --xml, and there's not much point
 ## worrying about them, so we ignore failures.
-## There is a bug in Makeinfo (at least in version 4.0g) which generates
-## rubbish if the -o parameter is used, so we use redirection below... once
-## this bug is fixed, replace the > with -o so that Automake's "missing"
-## replacement for makeinfo will work.
 .texi.xml:
-	-cd $(srcdir) && $(MAKEINFO) --xml `echo $< | sed 's,.*/,,'` > $@ 
+	-cd $(srcdir) && $(MAKEINFO) --xml `echo $< | sed 's,.*/,,'` -o $@ 
 	-cp $(datadir)/texinfo/texinfo.dtd $(srcdir)/

@@ -375,6 +375,7 @@ static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 static void SetCubeValue( GtkWidget *wd, int data);
 static void SetCubeOwner( GtkWidget *wd, int i);
 static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
+static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
@@ -2809,6 +2810,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP, NULL },
 	{ N_("/_Help/gnubg _Manual"), NULL, ShowManual, 0, NULL },
+	{ N_("/_Help/_Frequently Asked Questions"), NULL, ShowFAQ, 0, NULL },
 	{ N_("/_Help/Co_pying gnubg"), NULL, Command, CMD_SHOW_COPYING, NULL },
 	{ N_("/_Help/gnubg _Warranty"), NULL, Command, CMD_SHOW_WARRANTY,
 	  NULL },
@@ -6527,6 +6529,38 @@ extern void GTKShowVersion( void ) {
     gtk_widget_show_all( pwDialog );
 }
 
+#if HAVE_GTKTEXI
+static int ShowManualSection( char *szTitle, char *szNode ) {
+    
+    static GtkWidget *pw;
+    char *pch;
+    
+    if( pw ) {
+	gtk_window_present( GTK_WINDOW( pw ) );
+	gtk_texi_render_node( GTK_TEXI( pw ), szNode );
+	return 0;
+    }
+
+    if( !( pch = PathSearch( "gnubg.xml", szDataDirectory ) ) )
+	return -1;
+    else if( access( pch, R_OK ) ) {
+	perror( pch );
+	free( pch );
+	return -1;
+    }
+    
+    pw = gtk_texi_new();
+    g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer *) &pw );
+    gtk_window_set_title( GTK_WINDOW( pw ), _(szTitle) );
+    gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
+    gtk_widget_show_all( pw );
+
+    gtk_texi_load( GTK_TEXI( pw ), pch );
+    free( pch );
+    gtk_texi_render_node( GTK_TEXI( pw ), szNode );
+}
+#endif
+
 static void NoManual( void ) {
     
     outputl( _("The online manual is not available with this installation of "
@@ -6537,38 +6571,34 @@ static void NoManual( void ) {
     outputx();
 }
 
+static void NoFAQ( void ) {
+    
+    outputl( _("The Frequently Asked Questions are not available with this "
+	       "installation of GNU Backgammon.  You can view them on "
+	       "the WWW at:\n"
+	       "\n"
+	       "    http://mole.dnsalias.org/~acepoint/GnuBG/gnubg-faq/") );
+
+    outputx();
+}
+
 static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
 #if HAVE_GTKTEXI
-    static GtkWidget *pw;
-    char *pch;
-    
-    if( pw ) {
-	gtk_window_present( GTK_WINDOW( pw ) );
+    if( !ShowManualSection( _("GNU Backgammon - Manual"), "Top" ) )
 	return;
-    }
-
-    if( !( pch = PathSearch( "gnubg.xml", szDataDirectory ) ) ) {
-	NoManual();
-	return;
-    } else if( access( pch, R_OK ) ) {
-	perror( pch );
-	free( pch );
-	NoManual();
-	return;
-    }
-    
-    pw = gtk_texi_new();
-    g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer *) &pw );
-    gtk_window_set_title( GTK_WINDOW( pw ), _("GNU Backgammon - Manual") );
-    gtk_window_set_default_size( GTK_WINDOW( pw ), 600, 400 );
-    gtk_widget_show_all( pw );
-
-    gtk_texi_load( GTK_TEXI( pw ), pch );
-    free( pch );
-    gtk_texi_render_node( GTK_TEXI( pw ), _("Top") );
-#else
-    NoManual();
 #endif
+
+    NoManual();
+}
+
+static void ShowFAQ( gpointer *p, guint n, GtkWidget *pwEvent ) {
+#if HAVE_GTKTEXI
+    if( !ShowManualSection( _("GNU Backgammon - Frequently Asked Questions"),
+			    "Frequently Asked Questions" ) )
+	return;
+#endif
+
+    NoFAQ();
 }
 
 #if GTK_CHECK_VERSION(2,0,0)

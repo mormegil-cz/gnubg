@@ -1661,6 +1661,10 @@ FIXME
 FIXME
 @end table
 
+@include faq.texi
+
+@c This is the old FAQ chapter:
+@ignore
 @node Frequently Asked Questions
 @chapter Frequently Asked Questions
 @cindex frequently asked questions
@@ -1775,10 +1779,8 @@ your display to allow more colours, or use a @dfn{DirectColor} or
 Of course, if your X server can only display black and white (not even
 shades of grey), then there's not much you can do!
 
-@ignore
-Hopefully nobody will ask this question, but I suppose it will happen...
-
 @node Are the dice fair?
+
 @end ignore
 
 @include fdl.texi

@@ -322,7 +322,7 @@
 /* Define if you have a signbit() macro faster than a compare to 0.0. */
 #undef HAVE_SIGNBIT
 
-/* Define if the system supports AC_LOCAL sockets. */
+/* Define if the system supports AF_LOCAL sockets. */
 #undef HAVE_SOCKETS
 
 /* Define if you want to use the ext toolkit and widgets. */

@@ -1,22 +1,8 @@
 <!DOCTYPE texinfo SYSTEM "texinfo.dtd">
 <texinfo>
- <setfilename> gnubg.info</setfilename>
+ <setfilename>gnubg.xml</setfilename>
  <settitle>GNU Backgammon</settitle>
  <dircategory>Games</dircategory>
- <para>
-This file documents GNU Backgammon, a program for playing and analysing
-backgammon games and matches.
- </para>
- <para>
-Copyright &copyright; 1999, 2000, 2001 Gary Wong.
- </para>
- <para>
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1; with
-no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
-copy of the license is included in the section entitled "GNU Free
-Documentation License".
- </para>
  <node>
   <nodename>Top</nodename>
   <nodenext>Introduction</nodenext>
@@ -570,19 +556,7 @@ This one game without doubling is called the Crawford game.
 Once the Crawford game has been played, if the match has not yet been decided, the doubling
 cube is active again.
    </para>
-   <example>
-    <para>
-Match to 5                    White  Black
---------------------------------------------------------------
-Game 1:  White wins 2 points    2      0  \
-Game 2:  Black wins 1 point     2      1   } Doubling Allowed
-Game 3:  White wins 2 points    4      1  /
-Game 4:  Black wins 1 point     4      2     Crawford Game
-Game 5:  Black wins 2 points    4      4  \
-Game 6:  White wins 2 points    6      4  /  Doubling Allowed
-    </para></example>   
    <quotation>
-
     <para>
 In this example, White and Black are playing a 5-point match.
 After three games White has 4 points, which is just one point

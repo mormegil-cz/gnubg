@@ -1,115 +1,27 @@
-\input texinfo   @c -*-texinfo-*-
-@setfilename gnubg-faq.info
-@settitle GNU Backgammon F.A.Q.
-@include version.texi
+@node Frequently Asked Questions
+@chapter Frequently Asked Questions
+@cindex frequently asked questions
+@cindex FAQ
 
-@set month-year May, 2002
-
-@syncodeindex vr cp
-
-@macro gnubg
-@t{gnubg}
-@end macro
-
-@ifinfo
-This file documents the most frequently asked questions. Sources are the
-newsgroup rec.games.backgammon, the @gnubg{}-mailinglist and the
-bulletin board of Kit Woolseys online magazine @emph{GammOnLine}.
-
-Copyright @copyright{} 2002 Achim Mueller.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1; with
-no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
-copy of the license is included in the section entitled "GNU Free
-Documentation License".
-@end ifinfo
-
-@ifhtml
-This file documents the most frequently asked questions. Sources are the
+This chapter documents the most frequently asked questions. Sources are the
 newsgroup @uref{news:rec.games.backgammon,, rec.games.backgammon}, the
 @uref{mailto:bug-gnubg@@gnu.org,, @gnubg{}-mailinglist} and the
 @uref{http://www.gammonline.com,, bulletin board of Kit Woolseys online
 magazine @emph{GammOnLine}}.
-
-Copyright @copyright{} 2002 Achim Mueller.
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1; with
-no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
-copy of the license is included in the section entitled "GNU Free
-Documentation License".
-@end ifhtml
-
-@titlepage
-@sp 10
-@title GNU Backgammon F.A.Q.
-@subtitle version @value{VERSION}
-@subtitle @value{month-year}
-@author Achim Mueller
-@page
-@vskip 0pt plus 1filll
-
-This file documents the most frequently asked questions. Sources are the
-newsgroup @uref{news:rec.games.backgammon,, rec.games.backgammon}, the
-@uref{mailto:bug-gnubg@@gnu.org,, @gnubg{}-mailinglist} and the
-@uref{http://www.gammonline.com,, bulletin board of Kit Woolseys online
-magazine @emph{GammOnLine}}.
-
-@sp 3
-
-Copyright @copyright{} 2002 Achim Mueller.
-
-@sp 3
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1; with
-no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
-copy of the license is included in the section entitled "GNU Free
-Documentation License".
-@end titlepage
-
-@contents
-
-@ifnottex
-@node Top
-@top GNU Backgammon F.A.Q.
-
-This file documents the most frequently asked questions. Source are the
-newsgroup @uref{news:rec.games.backgammon,, rec.games.backgammon}, the
-@uref{mailto:bug-gnubg@@gnu.org,, @gnubg{}-mailinglist} and the
-@uref{http://www.gammonline.com,, bulletin board of Kit Woolseys online
-magazine @emph{GammOnLine}}.
-
-@sp 3
-
-Copyright @copyright{} 2002 Achim Mueller.
-
-@sp 3
-
-Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1; with
-no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.  A
-copy of the license is included in the section entitled "GNU Free
-Documentation License".
-
-@sp 5
 
 @menu
 * General questions::
-* How to install::
-* Starting @gnubg{}::
-* Playing backgammon::
-* Settings::
-* Analysing::
-* Databases::
+* Installation questions::
+* @gnubg{} startup questions::
+* Backgammon playing questions::
+* Settings questions::
+* Analysis questions::
+* Database questions::
 * Abbreviations::
-* GNU Free Documentation License::
 @end menu
-@end ifnottex
 
 @node General questions
-@chapter General questions
+@section General questions
 
 @menu
 * What is GNU Backgammon?::
@@ -125,7 +37,7 @@ Documentation License".
 
 
 @node What is GNU Backgammon?    
-@section What is GNU Backgammon?
+@subsection What is GNU Backgammon?
 
 GNU Backgammon (@gnubg{}) is for playing and analysing backgammon
 positions, games and matches. It's based on a neural network. Though it
@@ -134,7 +46,7 @@ play GNU Backgammon using the command line or a graphical interface
 (based on GTK+).
 
 @node What operating systems are supported?
-@section What operating systems are supported?
+@subsection What operating systems are supported?
 
 Currently GNU Backgammon is actually designed for @emph{GNU/Linux}. It
 also compiles and (hopefully) runs under @emph{*BSD, IRIX, Solaris} and
@@ -145,7 +57,7 @@ operating systems you are welcome to give us a note at
 @uref{bug-gnubg@@gnu.org}.
 
 @node Where do I get it?
-@section Where do I get it?
+@subsection Where do I get it?
 
 The official website is
 @uref{http://www.gnu.org/software/gnubg/gnubg.html}. You can get daily
@@ -157,7 +69,7 @@ acepoint's home}.
 
 
 @node What do I have to pay for GNU Backgammon?
-@section What do I have to pay for GNU Backgammon?
+@subsection What do I have to pay for GNU Backgammon?
 
 GNU Backgammon is @emph{Open Source Software} and belongs to
 the @emph{GNU Project}. You may download it for free. For more
@@ -167,19 +79,19 @@ General Public License}. But be aware that GNU Backgammon is not
 from @emph{MS Windows}.
 
 @node This GNU stuff sounds interesting.
-@section This GNU stuff sounds interesting.
+@subsection This GNU stuff sounds interesting.
 
 Take a look at the @uref{http://www.gnu.org,, GNU's homepage}.
 
 @node I want to learn more about backgammon.
-@section I want to learn more about backgammon.
+@subsection I want to learn more about backgammon.
 
 A good place to start is @uref{http://www.bkgm.com,, The Backgammon
 Galore}. For an extensive link collection go to
 @uref{http://www.chicagopoint.com/links.html,, Gammon-links}.
 
 @node Though I really read all the documentation I still have questions.
-@section Though I really read all the documentation I still have questions.
+@subsection Though I really read all the documentation I still have questions.
 
 Send an email to the @uref{mailto:bug-gnubg@@gnu.org,,
 @gnubg{}-mailinglist}. If it is a bug, be sure to include a reference of
@@ -188,13 +100,13 @@ error messages you get. Try to describe exactly what happens, before the
 error occurs.
 
 @node I want to make a few proposals. I have new ideas.
-@section I want to make a few proposals. I have new ideas.
+@subsection I want to make a few proposals. I have new ideas.
 
 You're welcome! Send an email with your suggestions to 
 @uref{mailto:bug-gnubg@@gnu.org,, @gnubg{}-mailinglist}.
 
 @node This F.A.Q. is full of typos and in bad English.
-@section This F.A.Q. is full of typos and in bad English.
+@subsection This F.A.Q. is full of typos and in bad English.
 
 Probably you are right. But you are cordially invited to send
 corrections to @email{acepoint@@deltacity.net}. And keep the following
@@ -205,8 +117,8 @@ and when it is bad, it is better than nothing.}
 
 @cite{[ Dick Brandon ]}
 
-@node How to install
-@chapter How to install
+@node Installation questions
+@section Installation questions
 
 @menu
 * Where do I find an installable version for my operating system?::
@@ -219,19 +131,19 @@ and when it is bad, it is better than nothing.}
 @end menu
 
 @node Where do I find an installable version for my operating system?
-@section Where do I find an installable version for my operating system?
+@subsection Where do I find an installable version for my operating system?
 
 For @emph{MS Windows} go to @uref{http://home.online.no/%7Eoeysteij/,, this
 place}. @emph{GNU/Linux}-Rpm's are (hopefully) soon available at
 @uref{http://mole.dnsalias.org/~acepoint/,, acepoint's home}.
 
 @node Do I need some other software to run GNU Backgammon?
-@section Do I need some other software to run GNU Backgammon?
+@subsection Do I need some other software to run GNU Backgammon?
 
 No. All stuff you need is included in the binaries.
 
 @node I want to install a newer version.
-@section  I want to install a newer version.
+@subsection  I want to install a newer version.
 
 If you are using a @emph{MS Windows} operating system make a copy of
 either @file{.gnubgrc} or @file{.gnubgautorc} and
@@ -246,7 +158,7 @@ by installing a new version of GNU Backgammon. But it's always a good
 idea to have a backup of them. 
 
 @node I would like to compile it from the source code.
-@section I would like to compile it from the source code.
+@subsection I would like to compile it from the source code.
 
 @ifnottex
 Good luck to you! Download the source code and make sure to read one of the
@@ -263,7 +175,7 @@ Windows}.
 @end iftex
 
 @node What software do I need for compiling under @emph{GNU/Linux}?
-@section What software do I need for compiling under @emph{GNU/Linux}?
+@subsection What software do I need for compiling under @emph{GNU/Linux}?
 
 Depending on the distribution you are working with:
 
@@ -285,7 +197,7 @@ Unpack the GNU Backgammon snapshots and follow the instructions of the
 file @file{INSTALL}.
 
 @node What software do I need for compiling under @emph{MS Windows}?
-@section  What software do I need for compiling under @emph{MS Windows}?
+@subsection  What software do I need for compiling under @emph{MS Windows}?
 
 Download the following files:
 
@@ -312,7 +224,7 @@ Backgammon. At last run your compiler.
 
 
 @node It does not compile.
-@section It does not compile.
+@subsection It does not compile.
 
 @ifnottex
 Check that you have installed all necessary development packages. For
@@ -342,8 +254,8 @@ Look for warnings or errors during compiling. If you still don't get a
 clue, send a message to the @uref{mailto:bug-gnubg@@gnu.org,,
 @gnubg{}-mailinglist}.
 
-@node Starting @gnubg{}
-@chapter Starting @gnubg{}
+@node @gnubg{} startup questions
+@section @gnubg{} startup questions
 
 @menu
 * I get an error message when starting.::
@@ -356,14 +268,14 @@ clue, send a message to the @uref{mailto:bug-gnubg@@gnu.org,,
 @end menu
 
 @node I get an error message when starting.
-@section I get an error message when starting.
+@subsection I get an error message when starting.
 
 Well, your computer wants to communicate with you. Give him a chance and
 read (and try to understand) what he is telling you. Then read the next
 items carefully @enddots{} 
 
 @node GNU Backgammon complains about missing files.
-@section  GNU Backgammon complains about missing files.
+@subsection  GNU Backgammon complains about missing files.
 
 GNU Backgammon is probably either missing the file @file{gnubg.weights}
 or @file{gnubg.bd}. @file{Gnubg.bd} is the bearoff database that @gnubg{} uses to
@@ -374,7 +286,7 @@ for most of @gnubg{}'s position evaluators.  Like @file{gnubg.bd}, it should
 be kept in either the current directory or the installed directory.
 
 @node Starting from the @emph{WinXP} menu she plays like a beginner.
-@section Starting from the @emph{WinXP} menu she plays like a beginner.
+@subsection Starting from the @emph{WinXP} menu she plays like a beginner.
 
 Open the @emph{MS Windows} menu and go to the entry of
 @gnubg{}. Right-click with the mouse and choose
@@ -384,7 +296,7 @@ working path.
 
 
 @node My screen mixes up while starting GNU Backgammon.
-@section My screen mixes up while starting GNU Backgammon.
+@subsection My screen mixes up while starting GNU Backgammon.
 
 Install the newest driver for your graphic card. Be sure that you have
 chosen at least a desktop resolution of 65535 (16 bit colour depth). If
@@ -392,7 +304,7 @@ your card is a @emph{ATI Rage "somewhat"} there still might be some
 problems with the graphical interface (GTK+)and @emph{MS Windows}.
 
 @node I only get a command-line interface. Where is the nice Board
-@section I only get a command-line interface. Where is the nice Board
+@subsection I only get a command-line interface. Where is the nice Board
 
 Using @emph{MS Windows} just click on the correct menu entry (@option{GNU
 Backgammon for windows}). If it still doesn't work, check whether
@@ -402,14 +314,14 @@ Backgammon for windows}). If it still doesn't work, check whether
 installed. 
 
 @node When I restart GNU Backgammon all my settings are gone.
-@section When I restart GNU Backgammon all my settings are gone.
+@subsection When I restart GNU Backgammon all my settings are gone.
 
 Did you save your settings (menu @option{Settings, Save settings}) before? If
 you have just installed a newer version of GNU Backgammon go to @ref{I
 want to install a newer version.}
 
 @node I do not need this graphical stuff. Where is the terminal for commands?
-@section I do not need this graphical stuff. Where is the terminal for commands?
+@subsection I do not need this graphical stuff. Where is the terminal for commands?
 
 For @emph{GNU/Linux} users: open a terminal and start @gnubg{} with the
 option @file{-t}.
@@ -419,8 +331,8 @@ in @gnubg{}'s directory or open the @emph{MS Windows} menu
 @option{execute} and type @file{c:\[path-to-your-gnubg]\gnubg-no-gui.exe}.
 There is also a menu entry @option{GNU Backgammon Command Line Interface}.
 
-@node Playing backgammon
-@chapter Playing backgammon
+@node Backgammon playing questions
+@section Backgammon playing questions
 
 @menu
 * What is the difference of a new game or match or session?::
@@ -433,7 +345,7 @@ There is also a menu entry @option{GNU Backgammon Command Line Interface}.
 @end menu
 
 @node What is the difference of a new game or match or session?
-@section What is the difference of a new game or match or session?
+@subsection What is the difference of a new game or match or session?
 
 When you start a new match you will be asked to play to a certain
 amount of points (for example: 7 points). The player who firstly reaches
@@ -449,7 +361,7 @@ you will start a new infinite session.
 
 
 @node What the heck is a beaver in Backgammon?
-@section  What the heck is a beaver in Backgammon?
+@subsection  What the heck is a beaver in Backgammon?
 
 A @emph{beaver} is only allowed in a moneygame session. To @emph{beaver}
 means redoubling (and keeping the cube) directly after your opponent
@@ -457,7 +369,7 @@ doubled. For more information go to
 @uref{http://www.bkgm.com/glossary.html#B,, Backgammon Galore (Glossary)}.
 
 @node How do I move the checkers?
-@section  How do I move the checkers?
+@subsection  How do I move the checkers?
 
 The easiest way to move chequers is to @emph{"drag and drop."} Put your
 mouse pointer to a chequer you want to move, press the left mouse button
@@ -473,14 +385,14 @@ For always getting the higher number on the left go to the menu
 die on left.}
 
 @node Why am I allowed to place more than 5 checkers on a spot?
-@section  Why am I allowed to place more than 5 checkers on a spot?
+@subsection  Why am I allowed to place more than 5 checkers on a spot?
 
 The official backgammon tournament rules allow to put all 15 chequers on a pip
 (spot). If you want to play with a maximum of 5 chequers, go to the menu
 @option{Settings} and activate the @option{Egyptian Rule.}
 
 @node GNU Backgammon plays poorly.
-@section  GNU Backgammon plays poorly.
+@subsection  GNU Backgammon plays poorly.
 
 Are you sure? If the answer is @emph{yes} you should think about going
 to Monte Carlo this summer and win the Backgammon World Championship.
@@ -489,21 +401,21 @@ If this plan fails, check whether @file{gnubg.weights} is correctly
 installed. See also @ref{GNU Backgammon complains about missing files.}
 
 @node GNU Backgammon is to strong for me.
-@section GNU Backgammon is to strong for me.
+@subsection GNU Backgammon is to strong for me.
 
 Go to the menu @option{Settings, Players} and change the values of
 @option{Player 0}. There is also a set of predefined settings you may
 choose from.
 
 @node I think the bot is cheating. She always gets good dice.
-@section I think the bot is cheating. She always gets good dice.
+@subsection I think the bot is cheating. She always gets good dice.
 
 In the menu @option{Settings} you may choose between different random dice
 generator. If you still think GNU Backgammon is cheating, program your
 own dice generator or roll manually.
 
-@node Settings
-@chapter Settings
+@node Settings questions
+@section Settings questions
 
 @menu 
 * Where can I change the name of the human player?::
@@ -515,24 +427,24 @@ own dice generator or roll manually.
 @end menu
 
 @node Where can I change the name of the human player?
-@section Where can I change the name of the human player?
+@subsection Where can I change the name of the human player?
 
 Go to the menu @option{Settings, Players ...} and click on @option{Player
 1}. At the top there is a field to change the human players name.
 
 @node How do I change the colours?
-@section How do I change the colours?
+@subsection How do I change the colours?
 Go to the menu @option{Settings, Appearance}. Here you may change the colour
 of chequers, the points and the board itself.
 
 @node How do I stop the annoying beeps?"
-@section How do I stop the annoying beeps?"
+@subsection How do I stop the annoying beeps?"
 
 Go to the menu @option{Settings, Appearance} and click on the card
 @option{General} at the right. Disable the option @option{Beep on illegal input}.
 
 @node What are "Plies?"
-@section What are "Plies?" 
+@subsection What are "Plies?" 
 
 A @emph{ply} describes how far GNU Backgammon evaluates  the
 position. @emph{"0-ply"} means, GNU Backgammon estimates the worth of the
@@ -547,21 +459,21 @@ Note also that @emph{"0-ply"} in GNU Backgammon is equivalent to the
 @emph{"1-ply"} evaluation of Snowie. 
 
 @node What is "noise?"
-@section What is "noise?"
+@subsection What is "noise?"
 
 Noise is nothing but kind of disturbing GNU Backgammons @ref{What are
 "Plies?",, 0-ply} evaluation. Rising the noise decreases her playing
 strength.
 
 @node What is "reduced evaluation?"
-@section What is "reduced evaluation?"
+@subsection What is "reduced evaluation?"
 
 Reduced searches only work with 2-ply evaluations and deeper. It
 somehow cuts the searching for candidates to increase speed.
 
 
-@node Analysing
-@chapter Analysing
+@node Analysis questions
+@section Analysis questions
 
 @menu
 * What are these funny letters at the right bottom?::
@@ -574,7 +486,7 @@ somehow cuts the searching for candidates to increase speed.
 @end menu
 
 @node What are these funny letters at the right bottom?
-@section What are these funny letters at the right bottom?
+@subsection What are these funny letters at the right bottom?
 
 You will find two small windows titled @option{Position} and @option{Match
 ID} at the bottom of the GNU Backgammon window. Here you may use the
@@ -585,7 +497,7 @@ An explanation of both formats will follow in GNU Backgammon's
 documentation (hopefully soon).
 
 @node How do I set up a position manually?
-@section How do I set up a position manually?
+@subsection How do I set up a position manually?
 
 Open a new game, match or session. If @gnubg{} already rolls the dice,
 don't bother. Press @option{edit} and either type the @ref{What are these
@@ -601,13 +513,13 @@ At last go to the menu @option{Game, Set turn} and choose the player on
 roll. The dice will disappear then.
 
 @node Which formats must I use to import positions?
-@section Which formats must I use to import positions?
+@subsection Which formats must I use to import positions?
 
 Currently only @file{*.pos} by @uref{http://jelly.effect.no/,,
 Jellyfish} are supported.
 
 @node Which formats must I use to import matches?
-@section Which formats must I use to import matches?
+@subsection Which formats must I use to import matches?
 
 You may import @file{*.mat} by @uref{http://jelly.effect.no/,,
 Jellyfish} or @file{*.ssg} by @uref{http://www.gamesgrid.com/,,
@@ -615,12 +527,12 @@ Gamesgrid}. Also supported is the @emph{oldmove} format used on
 @uref{http://www.fibs.com,, Fibs}. 
 
 @node How can I switch the players sides?
-@section How can I switch the players sides?
+@subsection How can I switch the players sides?
 
 Go to the menu @option{Game and click on Swap players}.
 
 @node What does "!" and "?" mean?
-@section What does "!" and "?" mean?
+@subsection What does "!" and "?" mean?
 
 After analysing a game or a match GNU Backgammon is able to do some
 comments on chequer play or cube decisions. Open the menu @option{Window,
@@ -641,7 +553,7 @@ You may change these comment in the menu @option{Window, Annotation}
 choosing another comment for moves and/or double.
 
 @node How is the error rate determined?
-@section How is the error rate determined?
+@subsection How is the error rate determined?
 
 GNU Backgammon determines the players strength as follows: If a player
 has an average error (per move) of:
@@ -660,8 +572,8 @@ After analysing a game, match or session you can see the summary in the
 menu @option{Analyse, @dots{} statistics}. Note that you can't change the
 ranges of these values.
 
-@node Databases
-@chapter Databases
+@node Database questions
+@section Database questions
 
 @menu
 * What is the @option{Database} menu for?::
@@ -670,7 +582,7 @@ ranges of these values.
 @end menu
 
 @node What is the @option{Database} menu for?
-@section What is the @option{Database} menu for?
+@subsection What is the @option{Database} menu for?
 
 In the menu @option{Train, Generate database} GNU Backgammon will play
 against herself (0-ply with @file{gnubg.weights}) generating a position
@@ -685,7 +597,7 @@ database} to do a 36-trial rollout of all positions. Then you may train
 
 
 @node "There are no target evaluations in the database to train from."
-@section "There are no target evaluations in the database to train from."
+@subsection "There are no target evaluations in the database to train from."
 
 @ifnottex
 You have forgotten to rollout the database before. See @ref{What is the
@@ -700,14 +612,14 @@ Database menu for?}.
 
 
 @node What is @option{Train with TD(0)}?
-@section What is @option{Train with TD(0)}?
+@subsection What is @option{Train with TD(0)}?
 
 This will train the network by TD(0) using zero-knowledge self-play.
 
 
 
 @node Abbreviations
-@chapter Abbreviations
+@section Abbreviations
 
 @menu
 * "gwc"?::
@@ -717,17 +629,17 @@ This will train the network by TD(0) using zero-knowledge self-play.
 @end menu
 
 @node "gwc"?
-@section "gwc"?
+@subsection "gwc"?
 
 "gwc" is an abbreviation for @emph{game winning chances}. 
 
 @node "mwc"?
-@section "mwc"?
+@subsection "mwc"?
 
 "mwc" is an abbreviation for @emph{match winning chances}.
 
 @node "dp"?
-@section "dp"?
+@subsection "dp"?
 
 In the menu @option{Analyse, Game/Match/Session statistics} you will see
 a window with some statistics. Near the bottom you'll see four lines
@@ -736,12 +648,8 @@ point" and describes a situation in the game, where you probably should have
 doubled your opponent.
 
 @node "tg"?
-@section "tg"?
+@subsection "tg"?
 
 "tg" is an abbreviation for "too good". It points to  a situation in the
 game, where you probably should have kept the cube (mostly because of
 huge gammon chances) rather than doubling out your opponent. 
-
-@include fdl.texi
-
-@bye

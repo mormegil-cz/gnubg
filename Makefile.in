@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -101,43 +101,31 @@ TR = @TR@
 USE_INCLUDED_LIBINTL = @USE_INCLUDED_LIBINTL@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
-@USE_EXT_TRUE@SUBDIRS = @USE_EXT_TRUE@intl lib doc ext met po
-@USE_EXT_FALSE@SUBDIRS = @USE_EXT_FALSE@intl lib doc met po
+@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po
+@USE_EXT_FALSE@SUBDIRS = intl lib doc met po
 
 localedir = $(datadir)/locale
 
-COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
-              -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\"
+COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\"
 
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@
-COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
-	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
-	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
-	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
-	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
-        guile.h import.c import.h external.c external.h credits.c latex.c \
-	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c
+COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c dice.c dice.h 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c         guile.h import.c import.h external.c external.h credits.c latex.c 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
-@USE_GTK_TRUE@INCLUDES = @USE_GTK_TRUE@$(COMMON_INCS) @GTK_CFLAGS@
-@USE_GTK_FALSE@@USE_EXT_TRUE@INCLUDES = @USE_GTK_FALSE@@USE_EXT_TRUE@$(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
-@USE_GTK_FALSE@@USE_EXT_FALSE@INCLUDES = @USE_GTK_FALSE@@USE_EXT_FALSE@$(COMMON_INCS)
-@USE_GTK_TRUE@gnubg_SOURCES = @USE_GTK_TRUE@$(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
-@USE_GTK_TRUE@	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
-@USE_GTK_TRUE@	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
-@USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
-@USE_GTK_TRUE@	gtkexport.c gtkexport.h
-@USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_SOURCES = @USE_GTK_FALSE@@USE_EXT_TRUE@$(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
-@USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_SOURCES = @USE_GTK_FALSE@@USE_EXT_FALSE@$(COMMON_SOURCES)
-@USE_GTK_TRUE@gnubg_LDADD = @USE_GTK_TRUE@@GTK_LIBS@ $(COMMON_LIBS)
-@USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_LDADD = @USE_GTK_FALSE@@USE_EXT_TRUE@-Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
-@USE_GTK_FALSE@@USE_EXT_TRUE@	$(COMMON_LIBS)
-@USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_LDADD = @USE_GTK_FALSE@@USE_EXT_FALSE@$(COMMON_LIBS)
-@USE_GTK_TRUE@gnubg_DEPENDENCIES = @USE_GTK_TRUE@$(COMMON_DEPS)
-@USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_DEPENDENCIES = @USE_GTK_FALSE@@USE_EXT_TRUE@$(COMMON_DEPS) ext/libext.a
-@USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_DEPENDENCIES = @USE_GTK_FALSE@@USE_EXT_FALSE@$(COMMON_DEPS)
+@USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
+@USE_GTK_FALSE@@USE_EXT_TRUE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
+@USE_GTK_FALSE@@USE_EXT_FALSE@INCLUDES = $(COMMON_INCS)
+@USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h 	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm 	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h 	gtkexport.c gtkexport.h
+@USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
+@USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_SOURCES = $(COMMON_SOURCES)
+@USE_GTK_TRUE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
+@USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 	$(COMMON_LIBS)
+@USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_LDADD = $(COMMON_LIBS)
+@USE_GTK_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
+@USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
+@USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
 pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 
@@ -146,9 +134,7 @@ man_MANS = gnubg.6
 noinst_PROGRAMS = makebearoff makeweights
 check_PROGRAMS = erftest
 
-makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
-	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-	i18n.c i18n.h
+makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c 	i18n.c i18n.h
 
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
@@ -161,9 +147,7 @@ erftest_SOURCES = erftest.c
 
 TESTS = gnubgtest erftest
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
-	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h 	ABOUT-NLS
 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -232,7 +216,7 @@ erf.c install-sh missing mkinstalldirs strdup.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DIST_SUBDIRS =  intl lib doc ext met po intl lib doc met po
 DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/credits.P \
@@ -263,7 +247,7 @@ Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 $(ACLOCAL_M4):  configure.in  acinclude.m4
 	cd $(srcdir) && $(ACLOCAL)
 
-config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+config.status: $(srcdir)/configure.in $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
 $(srcdir)/configure: $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
@@ -465,7 +449,7 @@ maintainer-clean-recursive:
 	dot_seen=no; \
 	rev=''; list='$(SUBDIRS)'; for subdir in $$list; do \
 	  rev="$$subdir $$rev"; \
-	  test "$$subdir" != "." || dot_seen=yes; \
+	  test "$$subdir" = "." && dot_seen=yes; \
 	done; \
 	test "$$dot_seen" = "no" && rev=". $$rev"; \
 	target=`echo $@ | sed s/-recursive//`; \

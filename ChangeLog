@@ -1,3 +1,8 @@
+Tue Jun 18 12:50:02 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (ShowManual): New function.  Open the manual at the FAQ
+	chapter.
+
 Tue Jun 18 15:31:41 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (PlayersPage,SetPlayer): separate widgets for 
