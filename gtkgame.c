@@ -7638,7 +7638,6 @@ extern void GTKShowVersion( void ) {
 		*pwOK, *pwPrompt, *pwImage, *pwButton;
 	GtkRcStyle *ps = gtk_rc_style_new();
 	char PromptStr[255];
-	int i;
 	GtkAccelGroup *pag = gtk_accel_group_new();
 
 	if( pwDialog )
@@ -7850,7 +7849,7 @@ credits creditList[] =
 extern void GTKCommandShowCredits(void)
 {
 	extern char *aszCredits[];
-	GtkWidget *pwDialog, *pwBox, *pwHBox, *pwPrompt,
+	GtkWidget *pwDialog, *pwBox, *pwHBox,
 		*pwList = gtk_list_new(),
 		*pwScrolled = gtk_scrolled_window_new( NULL, NULL );
 	int i;
