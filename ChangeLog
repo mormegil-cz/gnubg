@@ -1,3 +1,7 @@
+Mon Sep  8 03:07:11 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gtkrace.c (OSRPage): Don't use gettext on empty strings.
+
 Sun Sep  7 15:23:01 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (NewSet): ensure that tutor mode flag follows
