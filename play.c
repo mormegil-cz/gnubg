@@ -368,9 +368,9 @@ extern void AddMoveRecord( void *pv ) {
 	break;
 	
     case MOVE_NORMAL:
+        assert( pmr->n.esDouble.et >= EVAL_NONE &&
+                pmr->n.esDouble.et <= EVAL_ROLLOUT );
 	assert( pmr->n.fPlayer >= 0 && pmr->n.fPlayer <= 1 );
-	assert( pmr->n.etDouble >= EVAL_NONE &&
-		pmr->n.etDouble <= EVAL_ROLLOUT );
 	assert( pmr->n.ml.cMoves >= 0 && pmr->n.ml.cMoves < MAX_MOVES );
 	if( pmr->n.ml.cMoves )
 	    assert( pmr->n.iMove >= 0 && pmr->n.iMove <= pmr->n.ml.cMoves );
@@ -381,9 +381,9 @@ extern void AddMoveRecord( void *pv ) {
     case MOVE_DOUBLE:
     case MOVE_TAKE:
     case MOVE_DROP:
+        assert( pmr->d.esDouble.et >= EVAL_NONE &&
+                pmr->d.esDouble.et <= EVAL_ROLLOUT );
 	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
-	assert( pmr->d.etDouble >= EVAL_NONE &&
-		pmr->d.etDouble <= EVAL_ROLLOUT );
 	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
 	break;
 	
@@ -763,7 +763,7 @@ extern int ComputerTurn( void ) {
       pmn->fPlayer = ms.fTurn;
       pmn->ml.cMoves = 0;
       pmn->ml.amMoves = NULL;
-      pmn->etDouble = EVAL_NONE;
+      pmn->esDouble.et = EVAL_NONE;
       pmn->lt = LUCK_NONE;
       pmn->rLuck = -HUGE_VALF;
       pmn->st = SKILL_NONE;
@@ -822,7 +822,7 @@ extern int ComputerTurn( void ) {
     pmn->fPlayer = ms.fTurn;
     pmn->ml.cMoves = 0;
     pmn->ml.amMoves = NULL;
-    pmn->etDouble = EVAL_NONE;
+    pmn->esDouble.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
     pmn->rLuck = -HUGE_VALF;
     pmn->st = SKILL_NONE;
@@ -884,7 +884,7 @@ extern int ComputerTurn( void ) {
       pmn->fPlayer = ms.fTurn;
       pmn->ml.cMoves = 0;
       pmn->ml.amMoves = NULL;
-      pmn->etDouble = EVAL_NONE;
+      pmn->esDouble.et = EVAL_NONE;
       pmn->lt = LUCK_NONE;
       pmn->rLuck = -HUGE_VALF;
       pmn->st = SKILL_NONE;
@@ -965,7 +965,7 @@ static int TryBearoff( void ) {
 		pmn->fPlayer = ms.fTurn;
 		pmn->ml.cMoves = 0;
 		pmn->ml.amMoves = NULL;
-		pmn->etDouble = EVAL_NONE;
+                pmn->esDouble.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
 		pmn->rLuck = -HUGE_VALF;
 		pmn->st = SKILL_NONE;
@@ -1446,7 +1446,7 @@ extern void CommandDouble( char *sz ) {
     pmr->d.mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.etDouble = EVAL_NONE;
+    pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
@@ -1477,7 +1477,7 @@ extern void CommandDrop( char *sz ) {
     pmr->d.mt = MOVE_DROP;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.etDouble = EVAL_NONE;
+    pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
     AddMoveRecord( pmr );
@@ -1551,6 +1551,7 @@ CommandMove( char *sz ) {
     GenerateMoves( &ml, ms.anBoard, ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE );
 
     if( ml.cMoves <= 1 ) {
+
 	pmn = malloc( sizeof( *pmn ) );
 	pmn->mt = MOVE_NORMAL;
 	pmn->sz = NULL;
@@ -1559,7 +1560,7 @@ CommandMove( char *sz ) {
 	pmn->fPlayer = ms.fTurn;
 	pmn->ml.cMoves = 0;
 	pmn->ml.amMoves = NULL;
-	pmn->etDouble = EVAL_NONE;
+	pmn->esDouble.et = EVAL_NONE;
 	pmn->lt = LUCK_NONE;
 	pmn->rLuck = -HUGE_VALF;
 	pmn->st = SKILL_NONE;
@@ -1629,7 +1630,7 @@ CommandMove( char *sz ) {
         pmn->fPlayer = ms.fTurn;
 	pmn->ml.cMoves = 0;
 	pmn->ml.amMoves = NULL;
-	pmn->etDouble = EVAL_NONE;
+        pmn->esDouble.et = EVAL_NONE;
 	pmn->lt = LUCK_NONE;
 	pmn->rLuck = -HUGE_VALF;
 	pmn->st = SKILL_NONE;
@@ -2028,7 +2029,7 @@ extern void CommandRedouble( char *sz ) {
     pmr->mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.etDouble = EVAL_NONE;
+    pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
@@ -2176,7 +2177,7 @@ CommandRoll( char *sz ) {
     pmn->anMove[ 0 ] = -1;
     pmn->ml.cMoves = 0;
     pmn->ml.amMoves = NULL;
-    pmn->etDouble = EVAL_NONE;
+    pmn->esDouble.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
     pmn->rLuck = -HUGE_VALF;
     pmn->st = SKILL_NONE;
@@ -2196,7 +2197,7 @@ CommandRoll( char *sz ) {
     pmn->fPlayer = ms.fTurn;
     pmn->ml.cMoves = 0;
     pmn->ml.amMoves = NULL;
-    pmn->etDouble = EVAL_NONE;
+    pmn->esDouble.et = EVAL_NONE;
     pmn->lt = LUCK_NONE;
     pmn->rLuck = -HUGE_VALF;
     pmn->st = SKILL_NONE;
@@ -2236,7 +2237,7 @@ extern void CommandTake( char *sz ) {
     pmr->d.mt = MOVE_TAKE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    pmr->d.etDouble = EVAL_NONE;
+    pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
     AddMoveRecord( pmr );
