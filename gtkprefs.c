@@ -201,12 +201,12 @@ void SetTitle()
 
 	strcpy(title, _("GNU Backgammon - Appearance"));
 
-	pbdeSelected = 0;
 #if HAVE_LIBXML2
 {	/* Search for current settings in designs */
 	gchar *sz, *pch;
 	renderdata rdTest;
 	char *apch[ 2 ];
+	pbdeSelected = 0;
 	strcat(title, ": ");
 	for (i = 0; i < g_list_length(plBoardDesigns) - 1; i++)
 	{
@@ -2817,8 +2817,10 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 			return;
 		}
 	}
+#if HAVE_LIBXML2
 	if (page_num == NUM_NONPREVIEW_PAGES)
 		ShowSelectedRow();
+#endif
 
 #if USE_BOARD3D
 	if (rdPrefs.fDisplayType == DT_3D && redrawChange)

@@ -1,3 +1,8 @@
+Sun Apr 11 22:52:49 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkprefs.c (SetTitle): move misplaced pbdeSelected.
+	(contributed by Petr Kadlec)
+
 Sun Apr 11 19:20:52 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Various patches from Mike Petch.

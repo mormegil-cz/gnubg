@@ -43,6 +43,7 @@ cat > $contributors <<EOF
 Olivier Baur
 Holger Bochnig
 Nis Joergensen
+Petr Kadlec
 Kaoru Takahashi
 Stein Kulseth
 Mike Petch

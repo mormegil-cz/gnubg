@@ -19,6 +19,7 @@ credEntry ceContrib[] = {
   {"Olivier Baur", 0},
   {"Holger Bochnig", 0},
   {"Nis Joergensen", 0},
+  {"Petr Kadlec", 0},
   {"Kaoru Takahashi", 0},
   {"Stein Kulseth", 0},
   {"Mike Petch", 0},
@@ -64,13 +65,13 @@ credEntry ceCredits[] = {
   {"Tristan Colgate", 0},
   {"Olivier Croisille", 0},
   {"Ned Cross", 0},
-  {"Christopher D. Yep", 0},
   {"Bill Davidson", 0},
   {"Giulio De Marco", 0},
   {"Michael Depreli", 0},
   {"Alberta di Silvio", 0},
   {"Ian Dunstan", 0},
   {"Max Durbano", 0},
+  {"Christopher D. Yep", 0},
   {"Peter Eberhard", 0},
   {"Robert Eberlein", 0},
   {"James F. Kibler", 0},
@@ -143,8 +144,8 @@ credEntry ceCredits[] = {
   {"Sander van Rijnswou", 0},
   {"Robert-Jan Veldhuizen", 0},
   {"Morten Wang", 0},
-  {"JP White", 0},
   {"Jeff White", 0},
+  {"JP White", 0},
   {"Mike Whitton", 0},
   {"Chris Wilson", 0},
   {"Kit Woolsey", 0},
@@ -178,8 +179,8 @@ char aszAUTHORS[] =
 "\n"
 "                         Contributors of code include:\n"
 "\n"
-"    Olivier Baur    Nis Joergensen  Stein Kulseth   Rod Roark\n"
-"    Holger Bochnig  Kaoru Takahashi Mike Petch\n"
+"    Olivier Baur    Nis Joergensen  Kaoru Takahashi Mike Petch\n"
+"    Holger Bochnig  Petr Kadlec     Stein Kulseth   Rod Roark\n"
 "\n"
 "                            Translations by:\n"
 "\n"
