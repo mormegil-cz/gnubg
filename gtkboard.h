@@ -53,7 +53,7 @@ typedef enum _animation {
 extern animation animGUI;
 extern int nGUIAnimSpeed, fGUIBeep, fGUIHighDieFirst,
     fGUIIllegal, fGUIShowPips, fGUISetWindowPos,
-    fGUIDragTargetHelp, fGUIUseStatsPanel;
+    fGUIDragTargetHelp, fGUIUseStatsPanel, fGUIShowEPCs;
 
 typedef struct _Board {
     GtkVBox vbox;
@@ -150,6 +150,8 @@ typedef struct _BoardData {
     GtkWidget *take, *drop, *redouble;
     GtkWidget *vbox_ids;
     GtkWidget *pipcount0, *pipcount1;
+    GtkWidget *epclabel0, *epclabel1;
+    GtkWidget *epc0, *epc1;
 #if USE_TIMECONTROL
     GtkWidget *clock0, *clock1;
 #endif

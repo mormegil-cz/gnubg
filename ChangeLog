@@ -1,3 +1,13 @@
+Thu Apr  8 16:03:09 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Show EPCs in GUI.  (suggested by Ian Shaw)
+
+	* gtkboard.c (update_pipcount): show EPCs
+	* gnubg.c: new command "set gui showepcs on|off"
+	* set.c (CommandSetGUIShowEPCs): new sub.
+	* gnubg.c (EPC): new parameter fOnlyRace
+	* gtkoptions.c: gui control for setting fGUIShowEPCs
+
 Wed Apr  7 10:46:00 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* configure.in, sound.c, config.h.in: check for _af_ulaw2linear

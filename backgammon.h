@@ -1048,6 +1048,7 @@ extern void CommandAccept( char * ),
     CommandSetGUIWindowPositions( char * ),
     CommandSetGUIShowIDs( char * ),
     CommandSetGUIShowPips( char * ),
+    CommandSetGUIShowEPCs( char * ),
     CommandSetGUIDragTargetHelp( char * ),
     CommandSetGUIUseStatsPanel( char * ),
     CommandSetHighlight ( char * ),
@@ -1367,7 +1368,7 @@ ShowBearoff( char* sz, matchstate* pms, bearoffcontext* pbc );
 
 extern int
 EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma, 
-     int *pfSource );
+     int *pfSource, const int fOnlyRace );
 
 extern char *
 ShowEPC( int anBoard[ 2 ][ 25 ] );

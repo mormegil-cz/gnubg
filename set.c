@@ -1197,6 +1197,15 @@ extern void CommandSetGUIShowPips( char *sz ) {
 	UpdateSetting( &fGUIShowPips );
 }
 
+extern void CommandSetGUIShowEPCs( char *sz ) {
+
+    if( SetToggle( "gui showepcs", &fGUIShowEPCs, sz,
+		   _("The effective pip counts (EPCs) will be shown "
+                     "below the board."),
+		   _("The effective pip counts (EPCs) will not be shown.") ) )
+	UpdateSetting( &fGUIShowEPCs );
+}
+
 extern void CommandSetGUIWindowPositions( char *sz ) {
 
     SetToggle( "gui windowpositions", &fGUISetWindowPos, sz,

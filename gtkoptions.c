@@ -70,7 +70,7 @@ typedef struct _optionswidget {
       *pwSoundNAS, *pwSoundNormal, *pwSoundWindows, *pwSoundQuickTime,
       *pwSoundSettings;
 
-  GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips,
+  GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips, *pwShowEPCs,
       *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide, *pwBeepIllegal,
       *pwHigherDieFirst, *pwSetWindowPos, *pwDragTargetHelp;
   GtkAdjustment *padjSpeed;
@@ -586,6 +586,16 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			  _("The \"pip counts\" (number of points each player "
 			    "must advance all of their chequers to bear them "
 			    "all off) will be shown below the scores."),
+			  NULL );
+	
+    pow->pwShowEPCs = gtk_check_button_new_with_label(
+	_("Show EPCs below board") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowEPCs ),
+				  fGUIShowEPCs );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowEPCs, FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pow->pwShowEPCs,
+			  _("The \"effective pip counts\" "
+                            "will be shown below the scores."),
 			  NULL );
 	
     pwAnimBox = gtk_hbox_new( FALSE, 0 );
@@ -1727,6 +1737,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE( pow->pwUseDiceIcon, bd->rd->fDiceArea, "set gui dicearea %s" )
   CHECKUPDATE( pow->pwShowIDs, bd->rd->fShowIDs, "set gui showids %s" )
   CHECKUPDATE( pow->pwShowPips, fGUIShowPips, "set gui showpips %s" )
+  CHECKUPDATE( pow->pwShowEPCs, fGUIShowEPCs, "set gui showepcs %s" )
   CHECKUPDATE( pow->pwBeepIllegal, fGUIBeep, "set gui beep %s" )
   CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst,
 	       "set gui highdiefirst %s" )
