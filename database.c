@@ -1,7 +1,7 @@
 /*
  * database.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1999.
+ * by Gary Wong <gary@cs.arizona.edu>, 1999, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -273,7 +273,7 @@ extern void CommandDatabaseRollout( char *sz ) {
 	
 	pev = (dbevaluation *) dValue.dptr;
 	
-	if( pev->c < nRollouts /* FIXME */ ) {
+	if( pev->c < rcRollout.nTrials /* FIXME */ ) {
 	    c++;
 	    
 	    PositionFromKey( anBoardEval, (unsigned char *) dKey.dptr );
@@ -283,7 +283,8 @@ extern void CommandDatabaseRollout( char *sz ) {
 	    /* FIXME allow user to change these parameters */
 	    if( ( pev->c = Rollout( anBoardEval, PositionIDFromKey(
 		(unsigned char *) dKey.dptr ), arOutput, NULL,
-				    nRolloutTruncate, nRollouts, fVarRedn,
+				    rcRollout.nTruncate,
+				    rcRollout.nTrials, rcRollout.fVarRedn,
 				    &ciCubeless, &ecRollout, FALSE ) ) > 0 ) {
 		for( i = 0; i < NUM_OUTPUTS; i++ )
 		    pev->asEq[ i ] = arOutput[ i ] * 0xFFFF;
