@@ -2552,30 +2552,30 @@ extern void CommandHint( char *sz ) {
         
         UpdateStoredCube ( aarOutput, aarStdDev, &esEvalCube, &ms );
         
+      } else {
+        
+        outputl( _("You cannot double.") );
+        return;
+        
       }
+  
+    }
+    
       
 #if USE_GTK
-      if ( fX ) {
-        GTKDoubleHint( sc.aarOutput, sc.aarStdDev, &sc.es );
-        return;
-      }
-#endif
-      FindCubeDecision ( arDouble, aarOutput, &ci );  
-    
-      GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
-    
-      outputl ( szBuf );
-    
+    if ( fX ) {
+      GTKDoubleHint( sc.aarOutput, sc.aarStdDev, &sc.es );
       return;
-    
-    } else {
-    
-      outputl( _("You cannot double.") );
-    
-      return;
-    
     }
-  
+#endif
+    FindCubeDecision ( arDouble, aarOutput, &ci );  
+    
+    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
+    
+    outputl ( szBuf );
+    
+    return;
+
   }
     
 
