@@ -6038,7 +6038,7 @@ GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                     arOutput, 
                                     &rCubeful,
                                     pci, 1,
-                                    pci, pec, pec->nPlies, TRUE ) )
+                                    pci, pec, nPlies, TRUE ) )
       return -1;
 
     arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
