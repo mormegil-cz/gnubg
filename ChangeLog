@@ -1,3 +1,11 @@
+Sat Mar 16 21:58:11 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (point_area): New function.
+
+	* autogen.sh: New file.  Touches all the automatically generated
+	files so they won't be remade unnecessarily when checking out
+	from CVS.
+
 Sat Mar 16 18:45:58 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (wood_pixel, board_draw_frame_wood, 
