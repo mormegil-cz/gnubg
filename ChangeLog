@@ -1,3 +1,16 @@
+Mon Oct 28 21:35:50 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New rollout parameters: truncate at bearoff databases.
+
+	* gtkgame.c (SetRollouts): show widgets for new paramaters.
+	* gtkgame.c (InvertRolloutCubeful): new function.
+	* gnubg.c (SaveRolloutSettings): save new parameters.
+	* gnubg.c: new commands 
+	"set rollout bearofftruncation {exact,onesided} on|off"
+	* set.c (CommandSetRolloutBearoffTruncationExact,
+	CommandSetRolloutBearoffTruncationOS): new functions.
+	* show.c (ShowRollout): show new parameters.
+
 Sun Oct 27 00:54:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (SetRollouts): fix typo.

@@ -1310,6 +1310,39 @@ CommandSetRolloutPlayerCubedecision ( char *sz ) {
     HandleCommand ( sz, acSetEvaluation );
 }
 
+extern void
+CommandSetRolloutBearoffTruncationExact ( char *sz ) {
+
+  int f = prcSet->fTruncBearoff2;
+
+  SetToggle ( "rollout bearofftruncation exact", &f, sz,
+              _("Will truncate *cubeless* rollouts when reaching"
+                " exact bearoff database"),
+              _("Will not truncate *cubeless* rollouts when reaching"
+                " exact bearoff database") );
+
+  prcSet->fTruncBearoff2 = f;
+
+}
+
+
+extern void
+CommandSetRolloutBearoffTruncationOS ( char *sz ) {
+
+  int f = prcSet->fTruncBearoff2;
+
+  SetToggle ( "rollout bearofftruncation onesided", &f, sz,
+              _("Will truncate *cubeless* rollouts when reaching"
+                " one-sided bearoff database"),
+              _("Will not truncate *cubeless* rollouts when reaching"
+                " one-sided bearoff database") );
+
+  prcSet->fTruncBearoff2 = f;
+
+
+}
+
+
 extern void CommandSetRolloutInitial( char *sz ) {
     
     int f = prcSet->fCubeful;

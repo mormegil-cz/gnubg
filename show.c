@@ -96,6 +96,18 @@ ShowRollout ( rolloutcontext *prc ) {
   else
       outputl( _("No truncation.") );
 
+  outputl ( prc->fTruncBearoff2 ?
+            _("Will truncate *cubeless* rollouts when reaching "
+              "exact bearoff database.") :
+            _("Will not truncate *cubeless* rollouts when reaching "
+              "exact bearoff database.") );
+
+  outputl ( prc->fTruncBearoffOS ?
+            _("Will truncate *cubeless* rollouts when reaching "
+              "one-sided bearoff database.") :
+            _("Will not truncate *cubeless* rollouts when reaching "
+              "one-sided bearoff database.") );
+
   outputl ( prc->fVarRedn ? 
             _("Lookahead variance reduction is enabled.") :
             _("Lookahead variance reduction is disabled.") );

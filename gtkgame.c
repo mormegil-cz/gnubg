@@ -4545,7 +4545,9 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
 typedef struct _rolloutwidget {
     evalcontext ec;
     int nTrials, nTruncate, fCubeful, fVarRedn, nSeed, fInitial, fRotate;
+    int fTruncBearoff2, fTruncBearoffOS;
     GtkWidget *pwEval, *pwCubeful, *pwVarRedn, *pwInitial, *pwRotate;
+    GtkWidget *pwTruncBearoff2, *pwTruncBearoffOS;
     GtkAdjustment *padjTrials, *padjTrunc, *padjSeed;
     int *pfOK;
 } rolloutwidget;
@@ -4565,15 +4567,33 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 	GTK_TOGGLE_BUTTON( prw->pwRotate ) );
     prw->fInitial = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( prw->pwInitial ) );
+    prw->fTruncBearoff2 = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( prw->pwTruncBearoff2 ) );
+    prw->fTruncBearoffOS = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( prw->pwTruncBearoffOS ) );
     
     EvalOK( prw->pwEval, prw->pwEval );
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
+
+static void
+InvertRolloutCubeful ( GtkWidget *pw, gpointer data ) {
+
+  rolloutwidget *prw = (rolloutwidget *) data;
+  int f = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( pw ) );
+  
+  gtk_widget_set_sensitive ( GTK_WIDGET ( prw->pwTruncBearoff2 ), ! f );
+  gtk_widget_set_sensitive ( GTK_WIDGET ( prw->pwTruncBearoffOS ), ! f );
+
+}
+
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
     GtkWidget *pwDialog, *pwBox, *pw;
+    GtkWidget *pwFrame;
+    GtkWidget *pwvbox;
     int fOK = FALSE;
     rolloutwidget rw;
     char sz[ 256 ];
@@ -4598,20 +4618,16 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_spin_button_new( rw.padjTrials, 36, 0 ) );
     
-    rw.padjTrunc = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTruncate, 0,
-						       1000, 1, 1, 0 ) );
-    pw = gtk_hbox_new( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( pwBox ), pw );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( _("Truncation:") ) );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_spin_button_new( rw.padjTrunc, 1, 0 ) );
-
     gtk_container_add( GTK_CONTAINER( pwBox ),
 		       rw.pwCubeful = gtk_check_button_new_with_label(
 			   _("Cubeful") ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwCubeful ),
 				  rcRollout.fCubeful );
+
+    gtk_signal_connect ( GTK_OBJECT ( rw.pwCubeful ), "toggled",
+                         GTK_SIGNAL_FUNC ( InvertRolloutCubeful ), &rw );
+                         
+    /* variance reduction */
 
     gtk_container_add( GTK_CONTAINER( pwBox ),
 		       rw.pwVarRedn = gtk_check_button_new_with_label(
@@ -4640,6 +4656,45 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_spin_button_new( rw.padjSeed, 1, 0 ) );
 
+    /* 
+     * Truncation 
+     */
+
+    pwFrame = gtk_frame_new ( _("Truncation") );
+    gtk_container_add ( GTK_CONTAINER ( pwBox ), pwFrame );
+
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
+
+    /* truncation at plies */
+
+    rw.padjTrunc = GTK_ADJUSTMENT( gtk_adjustment_new( rcRollout.nTruncate, 0,
+						       1000, 1, 1, 0 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwvbox ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( _("Truncation:") ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_spin_button_new( rw.padjTrunc, 1, 0 ) );
+
+    /* truncation at BEAROFF2 */
+
+    rw.pwTruncBearoff2 = 
+      gtk_check_button_new_with_label ( _("Truncate at exact bearoff" ) );
+    gtk_container_add ( GTK_CONTAINER ( pwvbox ), rw.pwTruncBearoff2 );
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( rw.pwTruncBearoff2 ),
+                                   rcRollout.fTruncBearoff2 );
+
+    /* truncation at BEAROFF_OS */
+
+    rw.pwTruncBearoffOS = 
+      gtk_check_button_new_with_label ( _("Truncate at one-sided bearoff" ) );
+    gtk_container_add ( GTK_CONTAINER ( pwvbox ), rw.pwTruncBearoffOS );
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( rw.pwTruncBearoffOS ),
+                                   rcRollout.fTruncBearoffOS );
+
+    /* eval context */
+
     gtk_container_add( GTK_CONTAINER( pwBox ), pw =
 		       gtk_frame_new( _("Evaluation") ) );
     gtk_container_add( GTK_CONTAINER( pw ), rw.pwEval =
@@ -4650,6 +4705,8 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+    InvertRolloutCubeful ( rw.pwCubeful, &rw );
     
     gtk_widget_show_all( pwDialog );
 
@@ -4667,6 +4724,18 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
 	if( rw.nTruncate != rcRollout.nTruncate ) {
 	    sprintf( sz, "set rollout truncation %d", rw.nTruncate );
+	    UserCommand( sz );
+	}
+
+	if( rw.fTruncBearoff2 != rcRollout.fTruncBearoff2 ) {
+	    sprintf( sz, "set rollout bearofftruncation exact %s", 
+                     rw.fTruncBearoff2 ? "on" : "off" );
+	    UserCommand( sz );
+	}
+
+	if( rw.fTruncBearoffOS != rcRollout.fTruncBearoffOS ) {
+	    sprintf( sz, "set rollout bearofftruncation onesided %s", 
+                     rw.fTruncBearoffOS ? "on" : "off" );
 	    UserCommand( sz );
 	}
 

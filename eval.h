@@ -106,6 +106,9 @@ typedef struct _rolloutcontext {
   unsigned short nTruncate; /* truncation */
   unsigned int nTrials; /* number of rollouts */
 
+  unsigned int fTruncBearoff2 : 1; /* cubeless rollout: trunc at BEAROFF2 */
+  unsigned int fTruncBearoffOS: 1; /* cubeless rollout: trunc at BEAROFF_OS */
+
   rng rngRollout;
   int nSeed;
 } rolloutcontext;

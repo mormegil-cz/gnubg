@@ -238,6 +238,8 @@ rolloutcontext rcRollout =
   TRUE, /* rotate */
   11, /* truncation */
   36, /* number of trials */
+  TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
+  TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
   RNG_MERSENNE, /* RNG */
   0 /* seed */
 };
@@ -800,7 +802,19 @@ command cER = {
       N_("Specify parameters for cube decisions during rollouts"),
       NULL, acSetEvaluation },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetRolloutBearoffTruncation[] = {
+    { "exact", CommandSetRolloutBearoffTruncationExact, 
+      N_("Truncate *cubeless* rollouts at exact bearoff database"),
+      NULL, &cOnOff },
+    { "onesided", CommandSetRolloutBearoffTruncationOS, 
+      N_("Truncate *cubeless* rollouts when reaching "
+         "one-sided bearoff database"),
+      NULL, &cOnOff },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetRollout[] = {
+    { "bearofftruncation", NULL, 
+      N_("Control truncation of rollout when reaching bearoff databases"),
+      NULL, acSetRolloutBearoffTruncation },
     { "chequerplay", CommandSetRolloutChequerplay, N_("Specify parameters "
       "for chequerplay during rollouts"), NULL, acSetEvaluation },
     { "cubedecision", CommandSetRolloutCubedecision, N_("Specify parameters "
@@ -3968,13 +3982,17 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s rotate %s\n"
 	    "%s initial %s\n"
             "%s truncation %d\n"
-            "%s trials %d\n",
+            "%s trials %d\n"
+            "%s truncatebearoff exact %s\n"
+            "%s truncatebearoff onesided %s\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
 	    sz, prc->fInitial ? "on" : "off",
             sz, prc->nTruncate,
-            sz, prc->nTrials );
+            sz, prc->nTrials,
+            sz, prc->fTruncBearoff2 ? "on" : "off",
+            sz, prc->fTruncBearoffOS ? "on" : "off" );
 
   SaveRNGSettings ( pf, sz, prc->rngRollout );
 
