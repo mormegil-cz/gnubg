@@ -1,5 +1,16 @@
+Mon Jan  8 14:28:55 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ParseKeyValue): New function.
+	* gtkboard.c (board_create_pixmaps): Set user_data on the key widgets;
+	fixes a crash when toggling translucency.
+	* gtkprefs.c (BoardPreferencesStart, BoardPreferencesDone,
+	BoardPreferencesParam): New functions.
+	* set.c (CommandSetColours): Start handling parameters to
+	"set colours".  Not finished yet.
+
 Thu Jan  4 10:28:09 2001  Gary Wong  <gtw@research.att.com>
 
+	* gdkgetrgb.c: New file; allows image capture to RGB format.
 	* gtkboard.c: Added translucent chequers option.
 	* gtkprefs.c: New file; allows changing board appearance.
 	* set.c (CommandSetColours): New function.

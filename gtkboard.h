@@ -52,7 +52,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
 	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
-	*crawford, *widget;
+	*crawford, *widget, *key0, *key1;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,

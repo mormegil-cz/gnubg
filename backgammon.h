@@ -226,6 +226,7 @@ extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc );
 extern double ParseReal( char **ppch );
+extern int ParseKeyValue( char **ppch, char *apch[ 2 ] );
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );

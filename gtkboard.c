@@ -2285,6 +2285,8 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 	bd->rgb_temp = malloc( 6 * bd->board_size * 6 * bd->board_size * 3 );
 	bd->rgb_temp_saved = malloc( 6 * bd->board_size * 6 * bd->board_size *
 				     3 );
+	gtk_object_set_user_data( GTK_OBJECT( bd->key0 ), &bd->rgba_x_key );
+	gtk_object_set_user_data( GTK_OBJECT( bd->key1 ), &bd->rgba_o_key );
     } else {
 	bd->pm_saved = gdk_pixmap_new( board->window,
 				       6 * bd->board_size,
@@ -2298,7 +2300,9 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 	bd->pm_point = gdk_pixmap_new( board->window,
 				       6 * bd->board_size,
 				       35 * bd->board_size, -1 );
-    }
+	gtk_object_set_user_data( GTK_OBJECT( bd->key0 ), &bd->pm_x_key );
+	gtk_object_set_user_data( GTK_OBJECT( bd->key1 ), &bd->pm_o_key );
+    }    
 }
 
 static void board_size_allocate( GtkWidget *board,
@@ -2512,9 +2516,6 @@ static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
 static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
 			    BoardData *bd ) {
     
-    gdk_window_clear_area( pw->window, event->area.x, event->area.y,
-                           event->area.width, event->area.height );
-
     if( bd->translucent ) {
 	guchar aaauch[ 20 ][ 20 ][ 3 ], *p = *(
 	    (char **) gtk_object_get_user_data( GTK_OBJECT( pw ) ) );
@@ -2551,9 +2552,12 @@ static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
 			    0, 0, 20, 20, GDK_RGB_DITHER_MAX,
 			    (guchar *) aaauch, 60 );
     } else {
+	/* FIXME draw board background instead of window_clear_area */
+	gdk_window_clear_area( pw->window, event->area.x, event->area.y,
+			       event->area.width, event->area.height );
+
 	draw_bitplane( pw->window, bd->gc_and, bd->bm_key_mask, 0, 0, 0, 0,
 		       20, 20, 1 );
-
 	gdk_draw_pixmap( pw->window, bd->gc_or,
 			 *( (GdkPixmap **) gtk_object_get_user_data(
 			     GTK_OBJECT( pw ) ) ), 0, 0, 0, 0,
@@ -2565,8 +2569,8 @@ static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
 
 static gboolean key_press( GtkWidget *pw, GdkEvent *event,
 			   BoardData *bd ) {
-    
-    BoardPreferences( bd );
+
+    UserCommand( "set colours" );
     
     return TRUE;
 }
@@ -2717,10 +2721,10 @@ static void board_init( Board *board ) {
     gtk_signal_connect( GTK_OBJECT( bd->name1 ), "activate",
 			GTK_SIGNAL_FUNC( board_set_name ), bd );
     
-    gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 0, bd ),
-		      0, 1, 1, 2, 0, 0, 8, 1 );
-    gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 1, bd ),
-		      0, 1, 2, 3, 0, 0, 8, 0 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->key0 =
+		      chequer_key_new( 0, bd ), 0, 1, 1, 2, 0, 0, 8, 1 );
+    gtk_table_attach( GTK_TABLE( bd->table ), bd->key1 =
+		      chequer_key_new( 1, bd ), 0, 1, 2, 3, 0, 0, 8, 0 );
     
     gtk_table_attach( GTK_TABLE( bd->table ), bd->score0 =
 		      gtk_spin_button_new( GTK_ADJUSTMENT(

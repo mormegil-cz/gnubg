@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <ctype.h>
 #include <gtk/gtk.h>
 #include <math.h>
 
@@ -196,10 +197,30 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     return pw;
 }
 
+extern void BoardPreferencesStart( GtkWidget *pwBoard ) {
+
+    BoardData *bd = BOARD( pwBoard )->board_data;
+
+    board_free_pixmaps( bd );
+}
+
+extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
+    
+    BoardData *bd = BOARD( pwBoard )->board_data;
+    
+    board_create_pixmaps( pwBoard, bd );
+    
+    gtk_widget_queue_draw( bd->drawing_area );
+    gtk_widget_queue_draw( bd->dice_area );
+    gtk_widget_queue_draw( bd->table );
+}
+
 static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
     int i;
     gdouble ar[ 4 ];
+
+    BoardPreferencesStart( bd->widget );
     
     for( i = 0; i < 2; i++ ) {
 	bd->arRefraction[ i ] = apadj[ i ]->value;
@@ -237,21 +258,18 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     bd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
 	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
     
-    board_free_pixmaps( bd );
     bd->translucent = fTranslucent;
-    board_create_pixmaps( bd->widget, bd );
-    
-    gtk_widget_queue_draw( bd->drawing_area );
-    gtk_widget_queue_draw( bd->dice_area );
-    gtk_widget_queue_draw( bd->table );
+
+    BoardPreferencesDone( bd->widget );
 			   
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-extern void BoardPreferences( BoardData *bd ) {
+extern void BoardPreferences( GtkWidget *pwBoard ) {
 
     GtkWidget *pwDialog, *pwNotebook;
-
+    BoardData *bd = BOARD( pwBoard )->board_data;
+    
     fTranslucent = bd->translucent;
     
     pwDialog = CreateDialog( "Board appearance", TRUE,
@@ -293,4 +311,36 @@ extern void BoardPreferences( BoardData *bd ) {
     gtk_widget_show_all( pwDialog );
 
     gtk_main();
+}
+
+extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
+				   char *szValue ) {
+
+    int c, fValueError = FALSE;
+    BoardData *bd = BOARD( pwBoard )->board_data;
+	
+    if( !szParam || !*szParam )
+	return;
+
+    if( !szValue )
+	szValue = "";
+    
+    c = strlen( szParam );
+    
+    if( !g_strncasecmp( szParam, "board", c ) ) {
+	/* FIXME set board=rgb,speck */
+    } else if( !g_strncasecmp( szParam, "translucent", c ) )
+	bd->translucent = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "light", c ) ) {
+	/* FIXME set light=azi,elev */
+    } else if( c > 1 &&
+	       ( !g_strncasecmp( szParam, "chequers", c - 1 ) ||
+		 !g_strncasecmp( szParam, "checkers", c - 1 ) ) &&
+	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) ) {
+	/* FIXME set chequers=rgba,refrac,shine,spec */
+    } else if( c > 1 && !g_strncasecmp( szParam, "points", c - 1 ) &&
+	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) ) {
+	/* FIXME set points=rgb,speck */
+    } else
+	outputf( "Unknown setting `%s'\n", szParam );
 }

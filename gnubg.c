@@ -92,7 +92,6 @@ static int fReadingOther;
 #elif USE_EXT
 #include <ext.h>
 #include <extwin.h>
-#include <stdio.h>  /* Gary, isn't this also included at line 42? ØJ */
 #include "xgame.h"
 
 extwindow ewnd;
@@ -609,6 +608,24 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	strcpy( pchDesc, pch );
     
     return 0;
+}
+
+/* Parse "key=value" pairs on a command line.  PPCH takes a pointer to
+   a command line on input, and returns a pointer to the next parameter.
+   The key is returned in apch[ 0 ], and the value in apch[ 1 ].
+   The function return value is the number of parts successfully read
+   (0 = no key was found, 1 = key only, 2 = both key and value). */
+extern int ParseKeyValue( char **ppch, char *apch[ 2 ] ) {
+
+    if( !ppch || !( apch[ 0 ] = NextToken( ppch ) ) )
+	return 0;
+
+    if( !( apch[ 1 ] = strchr( apch[ 0 ], '=' ) ) )
+	return 1;
+
+    *apch[ 1 ] = 0;
+    apch[ 1 ]++;
+    return 2;
 }
 
 extern void UpdateSetting( void *p ) {

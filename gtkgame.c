@@ -85,6 +85,7 @@ typedef enum _gnubgcommand {
     CMD_SET_AUTO_GAME,
     CMD_SET_AUTO_MOVE,
     CMD_SET_AUTO_ROLL,
+    CMD_SET_COLOURS,
     CMD_SET_CONFIRM,
     CMD_SET_CUBE_CENTRE,
     CMD_SET_CUBE_OWNER_0,
@@ -169,6 +170,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set automatic game",
     "set automatic move",
     "set automatic roll",
+    "set colours",
     "set confirm",
     "set cube centre",
     NULL, /* set cube owner 0 */
@@ -929,6 +931,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/_Automatic/_Roll", NULL, Command, CMD_SET_AUTO_ROLL,
 	  "<CheckItem>" },
 	{ "/_Settings/Cache...", NULL, NULL, 0, NULL },
+	{ "/_Settings/Colours...", NULL, Command, CMD_SET_COLOURS, NULL },
 	{ "/_Settings/_Confirmation", NULL, Command, CMD_SET_CONFIRM,
 	  "<CheckItem>" },
 	{ "/_Settings/De_lay...", NULL, NULL, 0, NULL },
