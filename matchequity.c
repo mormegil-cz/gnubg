@@ -1560,7 +1560,7 @@ getGammonPrice ( float arGammonPrice[ 4 ],
   
   /* avoid division by zero */
       
-  if ( abs ( rWin - rCenter ) > epsilon ) {
+  if ( fabs ( rWin - rCenter ) > epsilon ) {
 
     arGammonPrice[ 0 ] = 
       ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
