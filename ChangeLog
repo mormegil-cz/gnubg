@@ -1,3 +1,8 @@
+Wed Aug  7 20:54:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (GTKDumpStatcontext): fix bug with empty line
+	in statistics.
+
 Wed Aug  7 20:35:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix bug that give "Optional double, pass" when it's not.
