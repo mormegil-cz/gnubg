@@ -1210,7 +1210,7 @@ extern int main( int argc, char **argv ) {
                 "Include gammon distributions      : %s\n"
                 "Use compression scheme            : %s\n"
                 "Write header                      : %s\n"
-                "Size of cache                     : %'12d\n"
+                "Size of cache                     : %12d\n"
                 "Reuse old bearoff database        : %s %s\n"),
               nOS, 
               15, 
