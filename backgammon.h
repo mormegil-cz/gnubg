@@ -280,11 +280,12 @@ extern int fCheat;
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
   PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
-  PATH_MET } 
+  PATH_MET, PATH_TMG,
+  NUM_PATHS } 
 pathformat;
 
-extern char aaszPaths[ PATH_MET + 1 ][ 2 ][ 255 ];
-extern char *aszExtensions[ PATH_MET + 1 ];
+extern char aaszPaths[ NUM_PATHS ][ 2 ][ 255 ];
+extern char *aszExtensions[ NUM_PATHS ];
 extern char *szCurrentFileName;
 
 extern evalcontext ecTD;
@@ -590,6 +591,7 @@ extern void CommandAccept( char * ),
     CommandImportMat( char * ),
     CommandImportOldmoves( char * ),
     CommandImportSGG( char * ),
+    CommandImportTMG( char * ),
     CommandListGame( char * ),
     CommandListMatch( char * ),
     CommandLoadCommands( char * ),
@@ -760,6 +762,7 @@ extern void CommandAccept( char * ),
     CommandSetPathMat( char * ),
     CommandSetPathMET( char * ),
     CommandSetPathSGG( char * ),
+    CommandSetPathTMG( char * ),
     CommandSetPathOldMoves( char * ),
     CommandSetPathPos( char * ),
     CommandSetPathGam( char * ),
@@ -960,5 +963,9 @@ typedef struct _highlightcolour {
 extern highlightcolour *HighlightColour, HighlightColourTable[];
 extern int HighlightIntensity;
 extern int *Highlightrgb;
+
+extern void
+SetMatchInfo( char **ppch, char *sz, char *szMessage );
+
 
 #endif
