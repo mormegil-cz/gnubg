@@ -825,10 +825,6 @@ static int NewGame( void ) {
 	PopGame( lMatch.plNext->p, TRUE );
     }
 
-#if USE_BOARD3D
-	RestrictiveRedraw();
-#endif
-
     InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();
@@ -910,6 +906,10 @@ static int NewGame( void ) {
     assert( ms.anDice[ 1 ] != ms.anDice[ 0 ] );
 
     outputx();
+
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
     
     AddGame( pmr );
     
