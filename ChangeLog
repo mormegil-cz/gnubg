@@ -1,3 +1,11 @@
+Sun Mar 30 10:17:50 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (GetValue): new function.
+	* import.c (ParseSGGOptions): sscanf is not a good choice here,
+	it causes gnubg to misunderstand the two-word SGG options, like
+	"Doubling Cube: Yes".
+	(reported by Albert Silver)
+
 Sat Mar 29 16:47:16 2003  Joern Thyssen  <jth@gnubg.org>
 
 	New command "set path snowietxt ...".

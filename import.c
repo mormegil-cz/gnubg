@@ -1504,6 +1504,41 @@ static int ParseSGGGame( char *pch, int *pi, int *pn0, int *pn1,
 }
 
 
+static char *
+GetValue( const char *sz, char *szValue ) {
+
+  const char *pc;
+  char *pc2;
+
+  /* skip "Keyword:" */
+
+  pc = strchr( sz, ':' );
+  if ( ! pc )
+    return NULL;
+
+  ++pc;
+
+  /* string leading blanks */
+
+  while ( isspace( *pc) )
+    ++pc;
+
+  if ( !*pc )
+    return NULL;
+
+  strcpy( szValue, pc );
+
+  /* strip trailing blanks */
+
+  pc2 = strchr( szValue, 0 ) - 1;
+
+  while ( pc2 >= szValue && isspace( *pc2 ) )
+    *pc2-- = 0;
+
+  return szValue;
+
+}
+
 static void
 ParseSGGDate ( const char *sz, int *pnDay, int *pnMonth, int *pnYear ) {
 
@@ -1588,7 +1623,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
     /* Jacoby rule */
 
-    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+    if ( ! GetValue( sz, szTemp ) )
       break;
     
     *pfJacobyRule = ! strcmp ( szTemp, "Yes" );
@@ -1598,7 +1633,7 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
     /* automatic doubles */
 
-    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+    if ( ! GetValue( sz, szTemp ) )
       break;
     
     *pfAutoDoubles = ! strcmp ( szTemp, "Yes" );
@@ -1608,9 +1643,9 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
     /* crawford rule */
 
-    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+    if ( ! GetValue( sz, szTemp ) )
       break;
-
+    
     *pfCrawfordRule = ! strcmp ( szTemp, "Yes" );
     break;
 
@@ -1626,9 +1661,9 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
     /* doubling cube */
 
-    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+    if ( ! GetValue( sz, szTemp ) )
       break;
-
+    
     *pfCubeUse = ! strcmp ( szTemp, "Yes" );
     break;
 
@@ -1648,9 +1683,9 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     
     /* variant */
 
-    if( ( sscanf( sz, "%*s %s", szTemp ) ) != 1 )
+    if ( ! GetValue( sz, szTemp ) )
       break;
-
+    
     if ( ! strcmp( szTemp, "HyperGammon" ) )
       *pbgv = VARIATION_HYPERGAMMON_3;
     else if ( ! strcmp( szTemp, "Nackgammon" ) )
