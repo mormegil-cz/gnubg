@@ -2993,6 +2993,8 @@ static void CommandNextRoll( char *sz ) {
 
     CalculateBoard();
 
+    FixMatchState ( &ms, pmr );
+
     ms.gs = GAME_PLAYING;
     ms.fMove = ms.fTurn = pmr->n.fPlayer;
 	
@@ -3130,6 +3132,7 @@ extern void CommandNext( char *sz ) {
     
     UpdateGame( FALSE );
 
+    FixMatchState ( &ms, plLastMove->p );
     SetMoveRecord( plLastMove->p );
 }
 
@@ -3219,6 +3222,8 @@ static void CommandPreviousRoll( char *sz ) {
 
     CalculateBoard();
     
+    FixMatchState ( &ms, pmr );
+
     ms.anDice[ 0 ] = 0;
     ms.anDice[ 1 ] = 0;
     
@@ -3310,6 +3315,7 @@ extern void CommandPrevious( char *sz ) {
 
     UpdateGame( FALSE );
 
+    FixMatchState ( &ms, plLastMove->p );
     SetMoveRecord( plLastMove->p );
 }
 
