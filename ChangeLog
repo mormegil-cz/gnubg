@@ -1,3 +1,27 @@
+Sat Jun  1 19:33:06 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Prepare gnubg for i18n.
+
+	- checked that settings are written locale independent
+	- checked that SGF and (parts) of the PostScript files are
+          written locale independent.
+
+	* makeweights.c (main): program is now i18n'ed!
+
+	* gtkgame.c (InitGTK): call gtk_set_locale.
+
+	* gnubg.c (real_main): call setlocale.
+
+	* i18n.c: new file. Locale independent printf and scanf functions,
+	plus push-locale and pop-locale functions.
+	* postscript.c (PrintPostScriptBoard): locale independency.
+	* sgf.c (LoadCollection, SaveGame): locale independency.
+	* eval.c (EvalInitialise): locale independency.
+	* gtkprefs.c (SetColourARSS, BoardPreferencesParam, 
+	BoardPreferencesCommand): locale independency.
+	* gtkgame.c (SetAlpha, SetAnneal, SetThreshold): locale independency.
+	* gnubg.c (CommandSaveSettings): locale independency.
+
 Sat Jun  1 13:14:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Denmark 2 - Uruguay 1 !!!
