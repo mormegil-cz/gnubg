@@ -1,3 +1,7 @@
+Tue Oct 14 16:41:16 GMT 2003  <jes@jes-2.demon.nl>
+
+	* LINGUAS, is.po, is.pot - initial translation to Icelandic
+
 Wed Oct  8 02:42:26 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.pot, *.po: merge & update.
