@@ -67,7 +67,8 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Settings::				Changing settings in GNU Backgammon.
 * Analysing and rollouts::		How to analyse positions, games, matches or sessions.
 * Position and match ID's::		A brief technical explanation.
-* Training::				How to store databases abd train the neural nets.
+* Training::				How to store databases and train the neural nets.
+* Bearoff databases::                   How to generate bearoff databases for use with GNU Backgammon
 * Frequently Asked Questions::		A bunch of questions and answers (mostly taken from r.g.b.).
 * GNU Free Documentation License::	Your rights regarding this manual.
 * Command Index::                       Index of available commands
@@ -800,6 +801,7 @@ window, or by executing the command @code{set matchid QYkqASAAIAAA}.
 @node Training
 @chapter Training
 
+@include bearoff.texi
 
 @include faq.texi
 

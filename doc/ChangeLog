@@ -1,3 +1,9 @@
+Sun Nov 24 21:55:38 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* bearoff.texi: new chapter with some info about 
+	bearoff databases (draft).
+	* gnubg.texi: include new chapter.
+
 Wed Aug 14 23:39:43 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.texi: draft for the import and export sections.
