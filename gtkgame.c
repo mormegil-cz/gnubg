@@ -1813,12 +1813,18 @@ extern void SwapBoardToPanel(int ToPanel)
 {	/* Show/Hide panel on right of screen */
 	if (ToPanel)
 	{
-		gtk_widget_show(hpaned);
+		gtk_widget_hide(pwGameBox);
 		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
+		gtk_widget_show(hpaned);
 		SetPanelWidth(panelSize);
 	}
 	else
 	{
+		gtk_widget_show(pwGameBox);
+#if USE_GTK2
+		while(gtk_events_pending())
+		gtk_main_iteration();
+#endif
 		panelSize = GetPanelSize();
 		gtk_widget_reparent(pwEventBox, pwGameBox);
 		gtk_widget_hide(hpaned);
@@ -1978,7 +1984,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 	if (fDockPanels && fDisplayPanels)
 		gtk_paned_set_position(GTK_PANED(hpaned), eCon->width - GetPanelSize());
 
-	return TRUE;
+	return FALSE;
 }
 
 extern int InitGTK( int *argc, char ***argv ) {
@@ -2433,8 +2439,12 @@ extern int InitGTK( int *argc, char ***argv ) {
     
    pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
 
-   gtk_container_add(GTK_CONTAINER(pwVbox), pwGameBox = gtk_hbox_new(FALSE, 0));
-   gtk_container_add(GTK_CONTAINER(pwGameBox), hpaned = gtk_hpaned_new());
+   gtk_box_pack_start( GTK_BOX( pwVbox ),
+			pwGameBox = gtk_hbox_new(FALSE, 0),
+			TRUE, TRUE, 0 );
+   gtk_box_pack_start( GTK_BOX( pwVbox ),
+			hpaned = gtk_hpaned_new(),
+			TRUE, TRUE, 0 );
 
    gtk_paned_add1(GTK_PANED(hpaned), pwPanelGameBox = gtk_hbox_new(FALSE, 0));
    gtk_container_add(GTK_CONTAINER(pwPanelGameBox), pwEventBox = gtk_event_box_new());
@@ -2596,6 +2606,8 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Hide panels"));
 		gtk_widget_hide(gtk_item_factory_get_widget(pif, "/Windows/Restore panels"));
 	}
+	else
+		gtk_widget_hide(pwGameBox);
 	/* Make sure main window is on top */
 	gdk_window_raise(pwMain->window);
 

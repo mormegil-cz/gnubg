@@ -1,3 +1,7 @@
+Sun Sep 19 14:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Fix gtk2 panel bug
+
 Thu Sep 16 8:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* eval.c: Fix bug (navigate to last match crash) - hopefully
