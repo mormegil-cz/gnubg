@@ -97,7 +97,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 
 @node How to play backgammon
 @chapter How to play backgammon
-
+@include rules.texi
 
 
 @node Installing the software
