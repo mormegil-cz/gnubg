@@ -866,6 +866,35 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
+# Extract the first word of "pnmtops", so it can be a program name with args.
+set dummy pnmtops; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:873: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_prog_PNMTOPS'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  if test -n "$PNMTOPS"; then
+  ac_cv_prog_PNMTOPS="$PNMTOPS" # Let the user override the test.
+else
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+  ac_dummy="$PATH"
+  for ac_dir in $ac_dummy; do
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_prog_PNMTOPS="pnmtops"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+fi
+fi
+PNMTOPS="$ac_cv_prog_PNMTOPS"
+if test -n "$PNMTOPS"; then
+  echo "$ac_t""$PNMTOPS" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
+
 trap '' 1 2 15
 cat > confcache <<\EOF
 # This file is a shell script that caches the results of configure
@@ -1023,6 +1052,7 @@ s%@AUTOHEADER@%$AUTOHEADER%g
 s%@MAKEINFO@%$MAKEINFO%g
 s%@SET_MAKE@%$SET_MAKE%g
 s%@PNGTOPNM@%$PNGTOPNM%g
+s%@PNMTOPS@%$PNMTOPS%g
 
 CEOF
 EOF

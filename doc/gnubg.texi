@@ -57,31 +57,32 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 
 GNU Backgammon (@gnubg{}) plays and analyses backgammon games and matches. 
 
-FIXME update this section (latest version is on web page).
-
 It is currently a work-in-progress.  So far it is able to play cubeless
 games and tournament matches, evaluate and roll out positions, tune its
-own evaluation functions using either TD or supervised training,
-maintain databases of positions for training and other purposes, and
-more.
+own evaluation functions using either
+@uref{http://www.research.ibm.com/massdist/tdl.html,,TD} or supervised
+training, maintain databases of positions for training and other
+purposes, and more.
 
 It is driven by a command-line interface, and displays an ASCII
 rendition of a board on text-only terminals, but also allows the user to
-play games and manipulate positions with an X11 board window where
+play games and manipulate positions with an X11
+@uref{http://www.gnu.org/software/gnubg/board.jpg,,board window} where
 available.
 
 Plans for the future include completing its ability to play and analyse
 cubeful games and matches, and making it extensible on platforms where
-Guile is available, so that the user can program it to answer
-sophisticated questions like ``How many chequers must Black have borne
-off in positions like this one to be able to accept a double?''@: and
-automate complicated rollout tasks.
+@uref{http://www.gnu.org/software/guile/guile.html,,Guile} is available,
+so that the user can program it to answer sophisticated questions like
+``How many chequers must Black have borne off in positions like this one
+to be able to accept a double?''@: and automate complicated rollout
+tasks.
 
-It currently plays at about the level of a strong intermediate flight
-tournament player (rated in the mid 1700s on
+It currently plays at about the level of an advanced flight tournament
+player (depending what parameters are used, it rates in the 1800s to 1900s on
 @cindex FIBS
 @uref{http://www.fibs.com/,,FIBS},
-the First Internet Backgammon Server --- around the 90th percentile) and
+the First Internet Backgammon Server --- around the 98th percentile) and
 is gradually improving; it should be somewhat stronger than this when
 released.  Since almost all of the CPU time required during supervised
 training is spent performing rollouts, and rollouts can easily be
@@ -89,10 +90,23 @@ performed in parallel, it is hoped that users will be able to pool
 rollout results and collectively train it to a level stronger than any
 individual could obtain.
 
-If you can tolerate the rough edges, periodic snapshots of @gnubg{} and
-anonymous CVS access to the pre-release source are being made available.
+If you can tolerate the rough edges, periodic pre-releases of the source
+will be made on @uref{ftp://alpha.gnu.org/gnu/gnubg/,the alpha.gnu.org
+FTP server}.
+
+Anonymous CVS access to the very latest code is available: if you have a
+CVS client, set @env{CVSROOT} to
+@code{:pserver:anoncvs@@subversions.gnu.org:/cvs} and check out module
+@file{gnubg}.  If not, daily snapshots of the CVS repository are made
+available by @uref{ftp://alpha.gnu.org/gnu/gnubg/snapshots/,FTP}, or you
+can browse the repository through the
+@uref{http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/,WWW gateway}.  Do
+not expect this code to be stable; it will generally include both more
+features and more bugs than the main pre-release version.
+
 You can also compete against recent versions of @gnubg{} on FIBS; it
-plays there under the names @samp{gnu} and @samp{mgnutest}.
+plays there under the names @samp{gnu}, @samp{mgnutest} and
+@samp{mpgnu}.
 
 @node How to Play Backgammon
 @chapter How to Play Backgammon
@@ -759,10 +773,10 @@ v|                  |BAR|                  |     (Cube: 1)
 
 Our position is now strong.  Let's try doubling --- this can be done by
 entering the command @kbd{double} at the prompt, or by clicking the
-doubling cube in the board window (FIXME not implemented yet).  When
-you are doubled, you should use the command @kbd{take} or @kbd{drop}
-to accept or refuse the cube.  GNU Backgammon will drop this double
-(FIXME actually it doesn't, but it will once it knows how):
+doubling cube in the board window.  When you are doubled, you should use
+the command @kbd{take} or @kbd{drop} to accept or refuse the cube.  GNU
+Backgammon will drop this double (FIXME actually it doesn't, but it will
+once it knows how):
 
 @example
 (X) double
@@ -917,7 +931,7 @@ can be abbreviated to @option{-t}).
 To exit @gnubg{}, use the @kbd{exit} or @kbd{quit} commands (they are
 synonymous).  If you are currently playing a game, the match in progress
 will be lost, so @gnubg{} will ask you if you are sure you want to exit
-in this case.  (FIXME it doesn't yet, but it should.)
+in this case.
 @end table
 
 @gnubg{} will also exit upon end-of-file; you can therefore exit by typing
@@ -939,11 +953,10 @@ You can execute shell commands from @gnubg{} without leaving or suspending it.
 
 @table @code
 @kindex !
-@item !@var{command}
-Invoke a subshell to execute @var{command}.  The environment variable
-@code{SHELL} determines which shell to use (@gnubg{} defaults to
-@file{/bin/sh} if @code{$SHELL} is not set).  If @var{command} is not
-specified, the shell will be invoked.  FIXME not implemented yet.
+@item ![@var{command}]
+Invoke a subshell to execute @var{command}.  If you do not give a
+command, a shell will be invoked (the shell is specified by the environment
+variable @env{SHELL} if it is set, or defaults to @file{/bin/sh} if not).
 @end table
 
 @node Basic Commands

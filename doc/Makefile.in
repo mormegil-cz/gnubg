@@ -60,13 +60,16 @@ POST_UNINSTALL = :
 MAKEINFO = @MAKEINFO@
 PACKAGE = @PACKAGE@
 PNGTOPNM = @PNGTOPNM@
+PNMTOPS = @PNMTOPS@
 VERSION = @VERSION@
 
 info_TEXINFOS = gnubg.texi
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt
 
-SUFFICES = .png .eps
+SUFFIXES = .png .eps .texi .html .txt
+EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps
+CLEANFILES = $(EPSFILES)
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_CLEAN_FILES = 
@@ -90,7 +93,7 @@ TAR = gtar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .dvi .info .ps .texi .texinfo .txi
+.SUFFIXES: .dvi .eps .html .info .png .ps .texi .texinfo .txi .txt
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
 	cd $(top_srcdir) && $(AUTOMAKE) --gnu Makefile
 
@@ -333,6 +336,7 @@ installdirs:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
@@ -376,12 +380,12 @@ ps: gnubg.ps
 
 html: gnubg.html
 
-gnubg.dvi: rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps
+gnubg.dvi: $(EPSFILES)
 
 gnubg.info: rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt
 
 .png.eps:
-	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | pnmtops -noturn > $@
+	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | $(PNMTOPS) -noturn > $@
 
 .texi.html:
 	$(MAKEINFO) --html -I $(srcdir) $<
