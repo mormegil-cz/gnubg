@@ -1765,6 +1765,8 @@ void SetupMove(BoardData* bd)
 	updatePieceOccPos(bd);
 }
 
+int firstFrame;
+
 int idleAnimate(BoardData* bd)
 {
 	float elapsedTime = (float)((get_time() - animStartTime) / 1000.0f);
@@ -1869,6 +1871,33 @@ int idleAnimate(BoardData* bd)
 			stopNextTime = 1;
 		}
 		updateDiceOccPos(bd);
+
+		if (bd->quickDraw)
+		{
+			float pos[3];
+			float overSize;
+			ClipBox temp;
+
+			overSize = bd->diceSize * 1.5f;
+			copyPoint(pos, bd->diceMovingPos[0]);
+			pos[2] -= bd->diceSize / 2.0f;
+			RestrictiveDrawFrame(pos, overSize, overSize, overSize);
+
+			copyPoint(pos, bd->diceMovingPos[1]);
+			pos[2] -= bd->diceSize / 2.0f;
+			RestrictiveDraw(&temp, pos, overSize, overSize, overSize);
+			EnlargeCurrentToBox(&temp);
+
+			CopyBox(&temp, &cb[numRestrictFrames]);
+			if (!firstFrame)
+				EnlargeCurrentToBox(&eraseCb);
+			else if (firstFrame == -1)
+				RestrictiveRedraw();
+			else
+				firstFrame = 0;
+
+			CopyBox(&eraseCb, &temp);
+		}
 	}
 
 	return 1;
@@ -1891,7 +1920,13 @@ void RollDice3d(BoardData *bd)
 		setupDicePaths(bd, bd->dicePaths);
 		/* Make sure shadows are in correct place */
 		updateOccPos(bd);
-
+		if (bd->quickDraw)
+		{	/* Mark this as the first frame (or -1 to indicate full draw in progress) */
+			if (numRestrictFrames == -1)
+				firstFrame = -1;
+			else
+				firstFrame = 1;
+		}
 		gtk_main();
 		ResumeInput( &m );
 	}
