@@ -237,6 +237,8 @@ click will both use the 'first' dice.
 ** The board should be updated before automatic analysis starts.  (Currently,
   if you interrupt the automatic analysis, the move will go into effect, but
   the board shown will be out of date.)
+** the move number shown when exporting positions to text or html is -1
+** the rollout window is a bit to small
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
