@@ -34,7 +34,6 @@
 
 #include "backgammon.h"
 #include "drawboard.h"
-#include "gdkgetrgb.h"
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtk-multiview.h"

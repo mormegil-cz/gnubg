@@ -21,8 +21,6 @@ export.c
 export.h
 external.c
 external.h
-gdkgetrgb.c
-gdkgetrgb.h
 getopt1.c
 getopt.c
 getopt.h
