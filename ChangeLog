@@ -1,3 +1,9 @@
+Wed Jan 17 17:13:46 2001  Gary Wong  <gtw@research.att.com>
+
+	* positionid.c (PositionKey): Added Joseph's optimised version.
+
+	* gnubg.c: Turn variance reduction on by default.
+	
 Tue Jan 16 13:18:49 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (CommandHint): Display probabilities or percentages,
