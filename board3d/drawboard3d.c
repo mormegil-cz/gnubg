@@ -3535,7 +3535,7 @@ void RestrictiveDrawPiece(BoardData* bd, int pos, int depth)
 	RestrictiveDrawFrame(newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 }
 
-void RestrictiveDoDrawDice(BoardData* bd, DiceShown dicePos)
+static void RestrictiveDoDrawDice(BoardData* bd, DiceShown dicePos)
 {
 	float pos[3];
 	float overSize = bd->diceSize * 1.5f;
@@ -3560,6 +3560,9 @@ void RestrictiveDoDrawDice(BoardData* bd, DiceShown dicePos)
 void RestrictiveDrawDice(BoardData* bd)
 {
 	int tempTurn = 0;
+
+	if (numRestrictFrames == -1)
+		return;
 
 	if (fGUIDiceArea)
 		RestrictiveDoDrawDice(bd, DICE_BELOW_BOARD);

@@ -1683,7 +1683,7 @@ int MouseMove3d(BoardData *bd, int x, int y)
 		getProjectedPieceDragPos(x, y, bd->dragPos);
 		updateMovingPieceOccPos(bd);
 
-		if(bd->quickDraw)
+		if(bd->quickDraw && numRestrictFrames != -1)
 		{
 			if (!freezeRestrict)
 				CopyBox(&eraseCb, &lastCb);
@@ -1703,9 +1703,12 @@ int MouseMove3d(BoardData *bd, int x, int y)
 void RestrictiveStartMouseMove(BoardData *bd, int pos, int depth)
 {
 	float erasePos[3];
-	getPiecePos(pos, depth, fClockwise, erasePos);
-	RestrictiveDrawFrame(erasePos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
-	CopyBox(&eraseCb, &cb[numRestrictFrames]);
+	if (numRestrictFrames != -1)
+	{
+		getPiecePos(pos, depth, fClockwise, erasePos);
+		RestrictiveDrawFrame(erasePos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+		CopyBox(&eraseCb, &cb[numRestrictFrames]);
+	}
 	freezeRestrict = 1;
 }
 
@@ -1713,6 +1716,9 @@ void RestrictiveEndMouseMove(BoardData *bd, int pos, int depth)
 {
 	float newPos[3];
 	getPiecePos(pos, depth, fClockwise, newPos);
+
+	if (numRestrictFrames == -1)
+		return;
 
 	if (pos == 26 || pos == 27)
 	{
@@ -1820,7 +1826,7 @@ int idleAnimate(BoardData* bd)
 
 			PlaceMovingPieceRotation(bd, moveDest, moveStart);
 
-			if (bd->quickDraw)
+			if (bd->quickDraw && numRestrictFrames != -1)
 			{
 				float new_pos[3];
 				getPiecePos(moveDest, abs(bd->points[moveDest]), fClockwise, new_pos);
@@ -1851,9 +1857,10 @@ int idleAnimate(BoardData* bd)
 		else
 		{
 			updateMovingPieceOccPos(bd);
-			RestrictiveDraw(&temp, bd->movingPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
+			if (bd->quickDraw && numRestrictFrames != -1)
+				RestrictiveDraw(&temp, bd->movingPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 		}
-		if (bd->quickDraw)
+		if (bd->quickDraw && numRestrictFrames != -1)
 		{
 			RestrictiveDrawFrame(old_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 			EnlargeCurrentToBox(&temp);
@@ -1874,7 +1881,7 @@ int idleAnimate(BoardData* bd)
 		}
 		updateDiceOccPos(bd);
 
-		if (bd->quickDraw)
+		if (bd->quickDraw && numRestrictFrames != -1)
 		{
 			float pos[3];
 			float overSize;
