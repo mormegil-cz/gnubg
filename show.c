@@ -574,6 +574,12 @@ extern void CommandShowGammonPrice ( char *sz ) {
   cubeinfo ci;
   int i;
 
+  if( gs != GAME_PLAYING ) {
+    outputl( "No game in progress (type `new game' to start one)." );
+
+    return;
+  }
+      
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
 		fCrawford, fJacoby, fBeavers );
 
