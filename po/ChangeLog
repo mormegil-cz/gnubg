@@ -1,3 +1,8 @@
+Sat Jul 10 07:14:19 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* da.po, de.po, fr.po, it.po, ja.po, tr.po: Added Plural-Forms.
+	* gnubg.pot, *.po: merge & update
+
 Wed Jun 16 20:33:28 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* cs.po: fix invalid msgstr
