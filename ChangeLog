@@ -1,3 +1,8 @@
+Sun Jul 25 19:19:41 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* rollout.h: Suppress compiler warnings; static declaration for
+	`nSkip' follows non-static.
+
 Sun Jul 25 18:15:47 UTC 2004 Jim Segrave   <jes@jes-2.demon.nl>
 
 	* gtkexport.c - fix handling of cube export settings (typo and 

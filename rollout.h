@@ -59,8 +59,6 @@ typedef struct _rolloutstat {
 
 } rolloutstat;
 
-extern int nSkip;
-
 typedef void
 (rolloutprogressfunc) ( float arOutput[][ NUM_ROLLOUT_OUTPUTS ],
                         float arStdDev[][ NUM_ROLLOUT_OUTPUTS ],
