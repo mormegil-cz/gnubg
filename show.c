@@ -1,7 +1,7 @@
 /*
  * show.c
  *
- * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001.
+ * by Gary Wong <gtw@gnu.org>, 1999, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -560,8 +560,6 @@ extern void CommandShowRollout( char *sz ) {
 
 extern void CommandShowScore( char *sz ) {
 
-    /* FIXME this display will be wrong if the current game is not the
-       last one */
     outputf( "The score (after %d game%s) is: %s %d, %s %d",
 	    ms.cGames, ms.cGames == 1 ? "" : "s",
 	    ap[ 0 ].szName, ms.anScore[ 0 ],
@@ -578,9 +576,9 @@ extern void CommandShowScore( char *sz ) {
     } 
     else {
         if ( fJacoby )
-	    outputl ( " (money session,\nwith Jacoby rule).\n" );
+	    outputl ( " (money session,\nwith Jacoby rule)." );
         else
-	    outputl ( " (money session,\nwithout Jacoby rule).\n" );
+	    outputl ( " (money session,\nwithout Jacoby rule)." );
     }
 
 }
@@ -777,7 +775,6 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   /* Read a number n. */
 
   int n = ParseNumber ( &sz );
-  int i, j;
 
   /* If n > 0 write n x n match equity table,
      else if match write nMatchTo x nMatchTo table,

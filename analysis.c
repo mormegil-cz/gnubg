@@ -428,7 +428,6 @@ AnalyzeMove ( moverecord *pmr ) {
         
         int nResign;
         float rBefore, rAfter;
-        float ar[ NUM_OUTPUTS ] = { 0, 0, 0, 0, 0 };
 
         GetMatchStateCubeInfo ( &ci, &msAnalyse );
 
