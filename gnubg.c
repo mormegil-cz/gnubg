@@ -106,7 +106,9 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "sound.h"
 #include "record.h"
 #include "progress.h"
+#include "osr.h"
 #include "format.h"
+#include "onechequer.h"
 
 #if USE_PYTHON
 #include <gnubgmodule.h>
@@ -1807,6 +1809,8 @@ command cER = {
       NULL, NULL },
     { "egyptian", CommandShowEgyptian,
       N_("See if the Egyptian rule is used in sessions"), NULL, NULL },
+    { "epc", CommandShowEPC,
+      N_("Show Effective Pip Count for position"), szPOSITION, NULL },
     { "export", CommandShowExport, N_("Show current export settings"), 
       NULL, NULL },
     { "geometry", CommandShowGeometry, N_("Show geometry settings"), 
@@ -8840,3 +8844,162 @@ CommandClearHint( char *sz ) {
   outputl( _("Analysis used for `hint' has been cleared") );
 
 }
+
+
+/*
+ * Description:  Calculate Effective Pip Counts (EPC), either
+ *               by lookup in one-sided databases or by doing a
+ *               one-sided rollout.  
+ * Parameters :  
+ *   Input       anBoard (the board)
+ *   Output      arEPC (the calculate EPCs)
+ *               pfSource (source of EPC; 0 = database, 1 = OSR)
+ *
+ * Returns:      0 on success, non-zero otherwise 
+ *               
+ */
+
+extern int
+EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource ) {
+
+  const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
+                    5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
+                    1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+
+  if ( isBearoff ( pbc1, anBoard ) ) {
+    /* one sided in-memory database */
+    float ar[ 4 ];
+    unsigned int n;
+    int i;
+
+    for ( i = 0; i < 2; ++i ) {
+      n = PositionBearoff( anBoard[ i ], pbc1->nPoints, pbc1->nChequers );
+
+      if ( BearoffDist( pbc1, n, NULL, NULL, ar, NULL, NULL ) )
+        return -1;
+
+      arEPC[ i ] = x * ar[ 0 ];
+
+    }
+
+    if ( pfSource )
+      *pfSource = 0;
+
+    return 0;
+
+  }
+  else if ( isBearoff( pbcOS, anBoard ) ) {
+    /* one sided in-memory database */
+    float ar[ 4 ];
+    unsigned int n;
+    int i;
+
+    for ( i = 0; i < 2; ++i ) {
+      n = PositionBearoff( anBoard[ i ], pbcOS->nPoints, pbcOS->nChequers );
+
+      if ( BearoffDist( pbcOS, n, NULL, NULL, ar, NULL, NULL ) )
+        return -1;
+
+      arEPC[ i ] = x * ar[ 0 ];
+
+    }
+
+    if ( pfSource )
+      *pfSource = 0;
+
+    return 0;
+
+  }
+  else {
+
+    /* one-sided rollout */
+
+    int anBoard[ 2 ][ 25 ];
+    int nTrials = 576;
+    float arMu[ 2 ];
+    float ar[ 5 ];
+    int i;
+
+    raceProbs ( anBoard, nTrials, ar, arMu );
+
+    for ( i = 0; i < 2; ++i )
+      arEPC[ i ] = arMu[ i ] * x;
+
+    if ( pfSource )
+      *pfSource = 1;
+
+    return 0;
+
+  }
+
+  /* code not reachable */
+  return -1;
+
+
+}
+
+
+
+
+
+extern char *
+ShowEPC( int anBoard[ 2 ][ 25 ] ) {
+
+  int anPips[ 2 ];
+  float arEPC[ 2 ];
+  int f;
+  char *sz;
+  char *szx;
+  char *szy;
+  char *szz;
+
+  float aarDist[ 2 ][ 32 ];
+  float r;
+  int i, j;
+
+  if ( EPC( anBoard, arEPC, &f ) ) {
+    sz = g_strdup( _("Sorry, EPCs cannot be calculated for this position") );
+    return sz;
+  }
+
+  PipCount( anBoard, anPips );
+
+  szx = g_strdup_printf( _("Effective pip count from %s:\n\n"),
+                         !f ? _("one-sided bearoff database") : 
+                         _("one-sided rollout") );
+    
+  szy = g_strdup_printf( "         %-10.10s %-10.10s\n"
+                         "%-10.10s %7.3f   %7.3f\n\n"
+                         "%-10.10s %3d       %3d\n"
+                         "%-10.10s %7.3f   %7.3f\n\n"
+                         ,
+                         _("Player"), _("Opponent"),
+                         _("EPC"), arEPC[ 1 ], arEPC[ 0 ],
+                         _("Pip count"), anPips[ 1 ], anPips[ 0 ],
+                         _("Wastage"), 
+                         arEPC[ 1 ] - anPips[ 1 ], arEPC[ 0 ] - anPips[ 0 ] );
+  
+  /* estimate gwc */
+
+  for ( i = 0; i < 2; ++i )
+    DistFromEPC( arEPC[ i ], aarDist[ i ] );
+
+  r = 0;
+  for ( i = 0; i < 32; ++i )
+    for ( j = i; j < 32; ++j )
+      r += aarDist[ 1 ][ i ] * aarDist[ 0 ][ j ];
+  
+  szz = g_strdup_printf( _("Estimated gwc: %8.4f\n\n"), r );
+
+
+  sz = g_strconcat( szx, szy, szz, _("EPC = 8.167 * Average rolls\n"
+                                     "Wastage = EPC - pips\n\n" ), NULL );
+  g_free( szx );
+  g_free( szy );
+  g_free( szz );
+
+  return sz;
+
+}
+
+

@@ -1229,6 +1229,7 @@ extern void CommandAccept( char * ),
     CommandShowDisplay( char * ),
     CommandShowDisplayPanels( char * ),
     CommandShowEngine( char * ),
+    CommandShowEPC( char * ),
     CommandShowEvaluation( char * ),
     CommandShowExport ( char * ),
     CommandShowFullBoard( char * ),
@@ -1341,5 +1342,11 @@ PrintCheatRoll( const int fPlayer, const int n );
 
 extern void
 ShowBearoff( char* sz, matchstate* pms, bearoffcontext* pbc );
+
+extern int
+EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource );
+
+extern char *
+ShowEPC( int anBoard[ 2 ][ 25 ] );
 
 #endif

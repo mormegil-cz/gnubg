@@ -64,7 +64,7 @@ onecheck ( const int npips, float *prSigma, float arMu[], float arSigma[] ) {
      *prSigma = arSigma[ npips ];
      return arMu[ npips ];
   }
-  else
+  else {
 
     rMean = *prSigma = 0.0f;
 
@@ -82,6 +82,8 @@ onecheck ( const int npips, float *prSigma, float arMu[], float arSigma[] ) {
     arSigma[ npips ] = *prSigma = sqrt ( *prSigma / 36.0f - rMean * rMean );
     
     return rMean;
+
+  }
 
 }
 
@@ -107,6 +109,21 @@ OneChequer ( const int nPips, float *prMu, float *prSigma ) {
 
    return 0;
 
+}
+
+
+extern void
+DistFromEPC( const float rEPC, float arDist[ 32 ] ) {
+
+  float rSigma, rMu;
+  int i;
+  int nPips = rEPC + 1;
+
+  OneChequer( nPips, &rMu, &rSigma );
+
+  for ( i = 0; i < 32; ++i ) 
+    arDist[ i ] = fnd ( 1.0f * i, rMu, rSigma );
+  
 }
 
 

@@ -25,4 +25,7 @@
 extern int
 OneChequer ( const int nPips, float *prMu, float *prSigma );
 
+extern void
+DistFromEPC( const float rEPC, float arDist[ 32 ] );
+
 #endif /* _ONECHEQUER_H_ */
