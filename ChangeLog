@@ -1,4 +1,13 @@
+Fri Aut 30 12:31:43 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
+	* fixes for graph functions
+	* gtkgame.c  include gtktext.h, fix trailing ';' on #endif
+	* board3d Makefile.am - add graph.c to sources
+	* graph.c - include config.h and some gl includes
+	* inc3d.h - add glconfig as global, make idempotent
+	* shadow.h - make idempotent
+	* widget3d.c - include config.h
+	
 Thu Aug 29 10:39:52 2003  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c - display statistics in a graph
