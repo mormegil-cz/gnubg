@@ -4283,7 +4283,7 @@ Shutdown( void ) {
 extern void PromptForExit( void ) {
 
     static int fExiting = FALSE;
-#if USE_BOARD3D
+#if USE_GTK
 	BoardData* bd = NULL;
 	
 	if (fX)
@@ -4339,7 +4339,8 @@ extern void PromptForExit( void ) {
 	PortableSignalRestore( SIGINT, &shInterruptOld );
     
 #if USE_GTK
-	board_free_pixmaps(bd);
+	if (fx)
+		board_free_pixmaps(bd);
 #if USE_BOARD3D
 	if (fX)
 		Tidy3dObjects(bd);
