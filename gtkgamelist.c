@@ -495,10 +495,6 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	/* Highlight current move */
 	gtk_clist_set_cell_style(pcl, yCurrent, xCurrent, psCurrent);
 
-	/* Wait for screen to resize to make sure move will be shown */
-	while( gtk_events_pending() )
-		gtk_main_iteration();
-
 	if( gtk_clist_row_is_visible( pcl, yCurrent ) != GTK_VISIBILITY_FULL )
 		gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.8, 0.5 );
 }

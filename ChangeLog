@@ -1,3 +1,8 @@
+Tue Feb  2  19:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgamelist.c: Remove gtk loop, hopefully fixing "can't move" bug
+	* gtkgame.c: More relational db code
+
 Tue Jan  5  8:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* relational.c: Add warning if adding unfinished or unanalyzed match

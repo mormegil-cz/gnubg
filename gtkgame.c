@@ -2967,7 +2967,7 @@ extern void GTKOutputX( void ) {
     if( !cchOutput )
 	return;
     
-    pchDest = sz = g_malloc( cchOutput + 1 );
+    pchDest = sz = g_malloc( cchOutput + 2 );	/* + 2 as /n/0 may be added */
 
     for( pl = lOutput.plNext; pl != &lOutput; pl = pl->plNext ) {
 	pchSrc = pl->p;
@@ -9713,7 +9713,8 @@ static GtkWidget* GetRelList(RowSet* pRow)
 }
 
 int curPlayerId, curRow;
-GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult, *aliases, *pwAliasList;
+GtkWidget *pwPlayerName, *pwPlayerNotes, *pwQueryText, *pwQueryResult, *pwQueryBox,
+	*aliases, *pwAliasList;
 
 static void ClearText(GtkWidget* pwText)
 {
@@ -9791,7 +9792,7 @@ static void RelationalQuery(GtkWidget *pw, GtkWidget *pwVbox)
 	{
 		gtk_widget_destroy(pwQueryResult);
 		pwQueryResult = GetRelList(&r);
-		gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryResult, TRUE, TRUE, 0);
+		gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult, TRUE, TRUE, 0);
 		gtk_widget_show(pwQueryResult);
 		FreeRowset(&r);
 	}
@@ -9893,10 +9894,10 @@ ShowRelationalSelect(pwRelList, curRow, 0, 0, 0);
 	}
 }
 
-static void RelationalErase(GtkWidget *pw, GtkWidget* pwList)
+static void RelationalOpen(GtkWidget *pw, GtkWidget* pwList)
 {
     char *player, *env;
-	char args[200];
+	char buf[200];
 
 	if (curPlayerId == -1)
 		return;
@@ -9905,8 +9906,29 @@ static void RelationalErase(GtkWidget *pw, GtkWidget* pwList)
 	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &player);
 	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 1, &env);
 
-	sprintf(args, "\"%s\" \"%s\"", player, env);
-	CommandRelationalErase(args);
+	sprintf(buf, "Open (%s, %s)", player, env);
+	output(buf);
+	outputx();
+}
+
+static void RelationalErase(GtkWidget *pw, GtkWidget* pwList)
+{
+    char *player, *env;
+	char buf[200];
+
+	if (curPlayerId == -1)
+		return;
+
+	/* Get player name and env from list */
+	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 0, &player);
+	gtk_clist_get_text(GTK_CLIST(pwList), curRow, 1, &env);
+
+	sprintf(buf, _("Remove all data for %s?"), player);
+	if(!GetInputYN(buf))
+	    return;
+
+	sprintf(buf, "\"%s\" \"%s\"", player, env);
+	CommandRelationalErase(buf);
 
 	gtk_clist_remove(GTK_CLIST(pwList), curRow);
 }
@@ -10144,8 +10166,8 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 {
 	RowSet r;
 	GtkWidget *pwRun, *pwList, *pwDialog, *pwHbox2, *pwVbox2,
-		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwn,
-		*pwLabel, *pwLink;
+		*pwPlayerFrame, *pwUpdate, *pwHbox, *pwVbox, *pwErase, *pwOpen, *pwn,
+		*pwLabel, *pwLink, *pwScrolled;
 	int multipleEnv;
 
 	/* See if there's more than one environment */
@@ -10173,7 +10195,7 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
 
 	if (!RunQuery(&r, "name AS Nickname, place AS env FROM nick INNER JOIN env"
-		" ON nick.env_id = env.env_id"))
+		" ON nick.env_id = env.env_id ORDER BY name"))
 		return;
 
 	if (r.rows < 2)
@@ -10181,17 +10203,30 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 		GTKMessage(_("No data in database"), DT_ERROR);
 		return;
 	}
+
 	pwList = GetRelList(&r);
 	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
 							GTK_SIGNAL_FUNC( ShowRelationalSelect ), pwList );
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwList, TRUE, TRUE, 0);
 	FreeRowset(&r);
-	gtk_widget_set_usize(pwList, -1, 150);
+
+	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
+				GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+	gtk_container_add(GTK_CONTAINER(pwScrolled), pwList);
+		gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
+
+	pwHbox2 = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwHbox2, FALSE, FALSE, 4);
+
+	pwOpen = gtk_button_new_with_label( _("Open" ) );
+	gtk_signal_connect(GTK_OBJECT(pwOpen), "clicked",
+				GTK_SIGNAL_FUNC(RelationalOpen), pwList);
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwOpen, FALSE, FALSE, 4);
 
 	pwErase = gtk_button_new_with_label( _("Erase" ) );
 	gtk_signal_connect(GTK_OBJECT(pwErase), "clicked",
 				GTK_SIGNAL_FUNC(RelationalErase), pwList);
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwErase, FALSE, FALSE, 4);
+	gtk_box_pack_start(GTK_BOX(pwHbox2), pwErase, FALSE, FALSE, 4);
 
 	gtk_box_pack_start(GTK_BOX(pwHbox), pwVbox = gtk_vbox_new(FALSE, 0), FALSE, FALSE, 0);
 
@@ -10271,7 +10306,14 @@ static void GtkShowRelational( gpointer *p, guint n, GtkWidget *pw )
 	gtk_clist_column_titles_show(GTK_CLIST(pwQueryResult));
 	gtk_clist_column_titles_passive(GTK_CLIST(pwQueryResult));
 
-	gtk_box_pack_start(GTK_BOX(pwVbox), pwQueryResult, TRUE, TRUE, 0);
+	pwQueryBox = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwQueryBox), pwQueryResult, TRUE, TRUE, 0);
+
+	pwScrolled = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(pwScrolled),
+				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+	gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(pwScrolled), pwQueryBox);
+	gtk_box_pack_start(GTK_BOX(pwVbox), pwScrolled, TRUE, TRUE, 0);
 
 	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
