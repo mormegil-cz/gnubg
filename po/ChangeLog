@@ -2,6 +2,7 @@ Sat Feb 14 19:55:29 CET 2004 Joern Thyssen  <jth@gnubg.org>
 
 	* cs.po: add Czech translation
 	* LINGUAS: add cs
+	* README.cs: readme :-)
 	(contributed by Petr Kadlec)
 
 Fri Jan  2 11:13:15 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
