@@ -1240,8 +1240,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
               ms.nMatchTo ?
               "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n"
               "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
-              "%-31s %+6.3f (%+7.3f%)        %+6.3f (%+7.3f%)\n"
-              "%-31s %+6.3f (%+7.3f%)        %+6.3f (%+7.3f%)\n",
+              "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n"
+              "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
               _("Error rate (total)"),
               -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
               -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
@@ -1297,7 +1297,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       sprintf ( strchr ( szOutput, 0 ),
                 ms.nMatchTo ?
                 "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
-                "%-31s %+6.3f (%+7.3f%)        %+6.3f (%+7.3f%)\n",
+                "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
                 _("Luck rate (total)"),
                 psc->arLuck[ 0 ][ 0 ],
                 psc->arLuck[ 0 ][ 1 ] * rFac,
@@ -1313,7 +1313,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
           sprintf ( strchr ( szOutput, 0 ),
                     ms.nMatchTo ?
                     "%+6.3f (%+7.3f%%)" :
-                    "%+6.3f (%+7.3f%) ",
+                    "%+6.3f (%+7.3f) ",
                     psc->arLuck[ i ][ 0 ] / psc->anTotalMoves[ i ],
                     psc->arLuck[ i ][ 1 ] * rFac / psc->anTotalMoves[ i ] );
           if ( ! i ) 
@@ -1378,12 +1378,12 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
               "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" 
               "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" 
               "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" :
-              "%-31s %3d (%+6.3f (%+7.3f%)   %3d (%+6.3f (%+7.3f%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%)   %3d (%+6.3f (%+7.3f%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%)   %3d (%+6.3f (%+7.3f%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%)   %3d (%+6.3f (%+7.3f%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%)   %3d (%+6.3f (%+7.3f%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%)   %3d (%+6.3f (%+7.3f%))\n" 
+              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
+              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
+              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
+              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
+              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
+              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
               ,
               _("Missed doubles around DP"),
               psc->anCubeMissedDoubleDP[ 0 ],
@@ -1432,7 +1432,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       sprintf ( strchr ( szOutput, 0 ),
                 ms.nMatchTo ?
                 "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
-                "%-31s %+6.3f (%+7.3f%)        %+6.3f (%+7.3f%)\n",
+                "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
                 _("Error rate (total)"),
                 -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                 -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
@@ -1449,7 +1449,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
           sprintf ( strchr ( szOutput, 0 ),
                     ms.nMatchTo ?
                     "%+6.3f (%+7.3f%%)" :
-                    "%+6.3f (%+7.3f%) ",
+                    "%+6.3f (%+7.3f) ",
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ],
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ UNNORMALISED ] * rFac );
           if ( ! i ) 
@@ -1487,13 +1487,13 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       sprintf ( strchr ( szOutput, 0 ),
                 ms.nMatchTo ?
                 "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
-                "%-31s %+6.3f (%+7.3f%)        %+6.3f (%+7.3f%)\n",
+                "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
                 _("Error rate (total)"),
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f,
+                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
                     
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * 100.0f );
+                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * rFac );
 
       sprintf ( strchr ( szOutput, 0 ),
                 "%-31s ", 
@@ -1504,9 +1504,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
           sprintf ( strchr ( szOutput, 0 ),
                     ms.nMatchTo ?
                     "%+6.3f (%+7.3f%%)" :
-                    "%+6.3f (%+7.3f%) ",
+                    "%+6.3f (%+7.3f) ",
                   -aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ],
-                  -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ] * 100.0f );
+                  -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ] * rFac );
           if ( ! i ) 
             strcat ( szOutput, "       " );
         }
