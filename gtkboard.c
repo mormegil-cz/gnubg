@@ -1961,6 +1961,9 @@ static void board_size_allocate( GtkWidget *board,
     allocation->height -= MAX( requisition.height, new_size * 7 ) + 2;
     gtk_widget_size_allocate( bd->move, &child_allocation );
 
+    /* FIXME what should we do if new_size < 1?  If the window manager
+       honours our minimum size this won't happen, but... */
+    
     if( ( bd->board_size = new_size ) != old_size &&
 	GTK_WIDGET_REALIZED( board ) )
 	board_create_pixmaps( board, bd );

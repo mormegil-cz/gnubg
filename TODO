@@ -95,7 +95,6 @@ duplication of effort and to make sure our changes merge easily.
   concentrated on the GTK interface anyway).
 
 * GTK interface:
-** Make sure the board window behaves properly with ICCCM things.
 ** Allow copy/paste and drag & drop of the board ID in the board window.
 ** Add silly bells and whistles.  Things like colour selector for chequer
   colours, angle of light, surface of pieces, transparent background, etc.
@@ -135,6 +134,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Make usage() show the GDK and GTK options, if appropriate.
 ** Add a GTK interface to allow input for manual dice (J*llyf*sh does it
   with a pop-up window with 21 buttons).
+** Try gdk_pixmap_colormap_create_from_xpm and gtk_widget_get_colormap,
+  to avoid realising windows just to create pixmaps.
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need

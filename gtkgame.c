@@ -541,6 +541,10 @@ static void CreateGameWindow( void ) {
 			GTK_SIGNAL_FUNC( GameListSelectRow ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwGame ), "delete_event",
 			GTK_SIGNAL_FUNC( gtk_widget_hide ), NULL );
+    /* FIXME gtk_widget_hide is no good -- we want a function that returns
+       TRUE to avoid running the default handler */
+    /* FIXME actually we should unmap the window, and send a synthetic
+       UnmapNotify event to the window manager -- see the ICCCM */
 }
 
 extern void ShowGameWindow( void ) {
@@ -975,6 +979,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     gtk_window_set_title( GTK_WINDOW( pwMain ), "GNU Backgammon" );
+    /* FIXME add an icon */
     gtk_container_add( GTK_CONTAINER( pwMain ),
 		       pwVbox = gtk_vbox_new( FALSE, 0 ) );
 
@@ -1365,7 +1370,7 @@ static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
     
     if( ( pch = SelectFile( "Open game" ) ) ) {
 	CommandLoadGame( pch );
-	free( pch );
+	g_free( pch );
     }
 }
 
@@ -1375,7 +1380,7 @@ static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
     
     if( ( pch = SelectFile( "Open match" ) ) ) {
 	CommandLoadMatch( pch );
-	free( pch );
+	g_free( pch );
     }
 }
 
@@ -1391,7 +1396,7 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
     
     if( ( pch = SelectFile( "Save game" ) ) ) {
 	CommandSaveGame( pch );
-	free( pch );
+	g_free( pch );
     }
 }
 
@@ -1409,7 +1414,7 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
     
     if( ( pch = SelectFile( "Save match" ) ) ) {
 	CommandSaveMatch( pch );
-	free( pch );
+	g_free( pch );
     }
 }
 

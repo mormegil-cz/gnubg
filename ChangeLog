@@ -1,3 +1,8 @@
+Mon Nov 13 18:21:57 2000  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (LoadGame, LoadMatch, SaveGame, SaveMatch): use
+	g_free() instead of free().
+
 Mon Nov 13 10:42:29 2000  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (AnalyzeGame): Pacify compiler warnings.
