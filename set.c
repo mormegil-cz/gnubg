@@ -281,7 +281,7 @@ extern void CommandSetCubeUse( char *sz ) {
 	   centred. */
 	nCube = 1;
 	fCubeOwner = -1;
-	CalcGammonPrice ();
+	CalcGammonPrice ( nCube, fCubeOwner );
 	
 #if !X_DISPLAY_MISSING
 	if( fX )
@@ -309,7 +309,7 @@ extern void CommandSetCubeValue( char *sz ) {
     for( i = fDoubled ? MAX_CUBE >> 1 : MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
 	    printf( "The cube has been set to %d.\n", nCube = n );
-	    CalcGammonPrice ();
+	    CalcGammonPrice ( nCube, fCubeOwner );
 	    
 #if !X_DISPLAY_MISSING
 	    if( fX )
@@ -572,8 +572,11 @@ extern void CommandSetScore( char *sz ) {
 
     fCrawford = ( n0 == nMatchTo - 1 ) || ( n1 == nMatchTo - 1 );
     fPostCrawford = FALSE;
+
+    CalcGammonPrice ( nCube, fCubeOwner );
     
     CommandShowScore( NULL );
+    
 }
 
 extern void CommandSetSeed( char *sz ) {
@@ -648,7 +651,7 @@ extern void CommandSetJacoby( char *sz ) {
   SetToggle( "jacoby", &fJacoby, sz, 
 	     "Will use the Jacoby rule for money sessions.",
 	     "Will not use the Jacoby rule for money sessions." );
-  CalcGammonPrice ();
+  CalcGammonPrice ( nCube, fCubeOwner );
 }
 
 

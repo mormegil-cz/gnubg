@@ -49,6 +49,7 @@
 #include "getopt.h"
 #include "positionid.h"
 #include "rollout.h"
+#include "matchequity.h"
 
 #if !X_DISPLAY_MISSING
 #include <ext.h>
@@ -1178,6 +1179,8 @@ extern int main( int argc, char *argv[] ) {
 			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
 			GNUBG_BEAROFF ) )
 	return EXIT_FAILURE;
+
+    CalcMatchEq ();
 
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );

@@ -113,10 +113,9 @@ extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ], int nPlies,
 extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
 extern int
 EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] );
-static int 
+extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], 
 			 int nCube, int fCubeOwner, int fMove,
-			 int fDoDouble,
 			 float *prOutput,
 			 int nPlies );
 
@@ -128,5 +127,11 @@ extern void swap( int *p0, int *p1 );
 extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
 extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] );
+
+extern float 
+mwc2eq ( float rMwc );
+
+extern float 
+eq2mwc ( float rEq );
 
 #endif

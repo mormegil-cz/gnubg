@@ -18,6 +18,7 @@
 #include "drawboard.h"
 #include "eval.h"
 #include "positionid.h"
+#include "matchequity.h"
 
 #include <sys/time.h>
 #include <unistd.h>
@@ -54,7 +55,7 @@ static void NewGame( void ) {
     }
 
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
-    CalcGammonPrice ();
+    CalcGammonPrice ( nCube, fCubeOwner );
 }
 
 static int ComputerTurn( void ) {
@@ -72,7 +73,12 @@ static int ComputerTurn( void ) {
 	if( fResigned ) {
 	    float ar[ NUM_OUTPUTS ];
 
+
+	    /* FIXME: use EvaluatePosition cubeful instead */
+
 	    EvaluatePosition( anBoard, ar, ap[ fTurn ].nPlies );
+
+	    printf ( "equity for resigning %6.3f\n", Utility ( ar ) );
 
 	    if( -fResigned <= Utility ( ar ) ) {
 		CommandAgree( NULL );
@@ -85,19 +91,26 @@ static int ComputerTurn( void ) {
 	  /* consider cube action */
 	  
 	  gettimeofday ( &tv0, NULL );
-	  EvaluateDouble ( ap [ fTurn ].nPlies, anBoard, arDouble );
+	  if ( EvaluatePositionCubeful( anBoard, nCube, fCubeOwner, 
+					fMove, arDouble, 
+					ap [ fTurn ].nPlies ) < 0 ) 
+	    return -1;
 	  gettimeofday ( &tv1, NULL );
-
-	    printf ("Time for EvaluateDouble: %10.6f seconds\n",
-		    1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
-		    (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
-
-	  /* debug printf */
-	  printf ( "equity for take decision %+6.3f\n", arDouble[ 1 ]);
+	  printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
+		  1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+		  (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
+	  printf ( "equity(new code) for take decision"
+		   " %+6.3f %+6.3f %+6.3f\n",  
+		   arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ]);
 	  
-	  if ( ( arDouble[ 0 ] < 0.0 ) && ( ! nMatchTo ) )
+	  if ( ( arDouble[ 2 ] < 0.0 ) && ( ! nMatchTo ) ) {
+
+	    /* FIXME: proper code should evaluate position 
+	       with opponent owning cube */
+
 	    CommandRedouble ( NULL );
-	  else if ( arDouble[ 1 ] <= 1.0 )
+	  }
+	  else if ( arDouble[ 2 ] <= 1.0 )
 	    CommandTake( NULL );
 	  else
 	    CommandReject ( NULL );
@@ -105,8 +118,34 @@ static int ComputerTurn( void ) {
 	    return 0;
 	} else {
 
+	  
 	  /* consider doubling */
 	  
+	  if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
+	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) ) {
+
+	    gettimeofday ( &tv0, NULL );
+
+	    if ( EvaluatePositionCubeful( anBoard, nCube, fCubeOwner, 
+					  fMove, arDouble, 
+					  ap [ fTurn ].nPlies ) < 0 ) 
+	      return -1;
+	    gettimeofday ( &tv1, NULL );
+	    printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
+		    1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+		    (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
+	    printf ( "equity(new code) for double decision"
+		     " %+6.3f %+6.3f %+6.3f\n",  
+		     arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ]);
+
+	    if ( ( arDouble[ 1 ] <= 1.0 ) && 
+		 ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
+	      CommandDouble ( NULL );
+	      return 0;
+	    }
+
+	  }
+	  /*
 	  if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
 	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) ) {
 
@@ -128,6 +167,7 @@ static int ComputerTurn( void ) {
 	      return 0;
 	    }
 	  }
+	  */
 	  
 	  if ( ! anDice[ 0 ] )
 	    RollDice( anDice );
@@ -305,7 +345,7 @@ extern void NextTurn( void ) {
 
 	if( fAutoRoll && !anDice[ 0 ] &&
 	    ( !fCubeUse || ( fCubeOwner >= 0 && fCubeOwner != fTurn &&
-			     !fDoubled ) ) ) {
+			     !fDoubled && !fCrawford ) ) ) {
 	    CommandRoll( NULL );
 
 	    if( fShouldRecurse )
@@ -753,7 +793,7 @@ extern void CommandRedouble( char *sz ) {
 		ap[ fTurn ].szName, nCube << 1 );
     
     fCubeOwner = !fMove;
-    CalcGammonPrice ();
+    CalcGammonPrice ( nCube, fCubeOwner );
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
@@ -897,7 +937,7 @@ extern void CommandTake( char *sz ) {
     fDoubled = FALSE;
 
     fCubeOwner = fTurn;
-    CalcGammonPrice ();
+    CalcGammonPrice ( nCube, fCubeOwner );
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;
@@ -912,13 +952,13 @@ SetCube ( int nNewCube, int fNewCubeOwner ) {
   nCube = nNewCube;
   fCubeOwner = fNewCubeOwner;
 
-  CalcGammonPrice ();
+  CalcGammonPrice ( nCube, fCubeOwner );
 
 }
 
 
 extern void
-CalcGammonPrice ( void ) {
+CalcGammonPrice ( int nCube, int fCubeOwner ) {
 
   if ( ! nMatchTo ) {
 
@@ -939,11 +979,52 @@ CalcGammonPrice ( void ) {
 
     /*
      * Match play.
-     * FIXME: calculate gammon price based on score and cube value.
+     * FIXME: calculate gammon price when initializing program
+     * instead of recalculating it again and again.
      */
 
-    SetGammonPrice ( 1.0, 1.0, 1.0, 1.0 );
+    int nScore0 = nMatchTo - anScore[ 0 ];
+    int nScore1 = nMatchTo - anScore[ 1 ];
 
+    float rWin = 
+      GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
+    float rLoose =
+      GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+    float rWinGammon =
+      GET_A1 ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafA1 );
+    float rLooseGammon =
+      GET_A1 ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafA1 );
+    float rWinBG =
+      GET_A1 ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafA1 );
+    float rLooseBG =
+      GET_A1 ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafA1 );
+
+    float rCenter = ( rWin + rLoose ) / 2.0;
+
+    printf ( "CalcGammonPrice: %6.3f %6.3f %6.3f\n"
+	     "                 %6.3f %6.3f %6.3f\n",
+	     rWin, rLoose, rWinGammon, rLooseGammon, rWinBG, rLooseBG
+	     );
+
+    SetGammonPrice ( ( nScore0 == 1 ) ? 
+		     0.0 : 
+		     ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0,
+		     ( nScore0 == 1 ) ?
+		     0.0 :
+		     ( rCenter - rLooseGammon ) / ( rWin - rCenter ) - 1.0,
+		     ( nScore1 == 1 ) ?
+		     0.0 :
+		     ( rWinBG - rCenter ) / ( rWin - rCenter ) - 2.0,
+		     ( nScore1 == 1 ) ?
+		     0.0 :
+		     ( rCenter - rLooseBG ) / ( rWin - rCenter ) - 2.0
+
+
+
+);
   }
 
 }
+
+
+

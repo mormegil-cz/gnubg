@@ -1151,20 +1151,53 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] ) {
 extern void SetGammonPrice( float rGammon, float rLoseGammon,
 			    float rBackgammon, float rLoseBackgammon ) {
     
-    arGammonPrice[ 0 ] = rGammon;
-    arGammonPrice[ 1 ] = rLoseGammon;
-    arGammonPrice[ 2 ] = rBackgammon;
-    arGammonPrice[ 3 ] = rLoseBackgammon;
+  /* 
+   * FIXME: why not declare arGammonPrice as an 'extern float' in
+   * eval.h to avoid this function and calls to it.
+   */
 
+  arGammonPrice[ 0 ] = rGammon;
+  arGammonPrice[ 1 ] = rLoseGammon;
+  arGammonPrice[ 2 ] = rBackgammon;
+  arGammonPrice[ 3 ] = rLoseBackgammon;
+  
+  printf ( "SetGammonPrice: %6.3f %6.3f %6.3f %6.3f\n",
+	   arGammonPrice[ 0 ], arGammonPrice[ 1 ],
+	   arGammonPrice[ 2 ], arGammonPrice[ 3 ] );
+ 
 }
 
 extern float Utility( float ar[ NUM_OUTPUTS ] ) {
 
-    return ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
-	ar[ OUTPUT_WINGAMMON ] * arGammonPrice[ 0 ] -
-	ar[ OUTPUT_LOSEGAMMON ] * arGammonPrice[ 1 ] +
-	ar[ OUTPUT_WINBACKGAMMON ] * arGammonPrice[ 2 ] -
-	ar[ OUTPUT_LOSEBACKGAMMON ] * arGammonPrice[ 3 ];
+  /* 
+   * Utility returns:
+   * - Money game: money equity
+   * - Match play: normalized money game equity
+   *
+   * For match play normalized equity can be converted to mwc and vice
+   * versa via the mwc2eq and eq2mwc routines.
+   */
+
+  return ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
+    ar[ OUTPUT_WINGAMMON ] * arGammonPrice[ 0 ] -
+    ar[ OUTPUT_LOSEGAMMON ] * arGammonPrice[ 1 ] +
+    ar[ OUTPUT_WINBACKGAMMON ] * arGammonPrice[ 2 ] -
+    ar[ OUTPUT_LOSEBACKGAMMON ] * arGammonPrice[ 3 ];
+
+}
+
+extern float 
+mwc2eq ( float rMwc ) {
+
+  /* FIXME: implement */
+
+}
+
+extern float 
+eq2mwc ( float rEq ) {
+
+  /* FIXME: implement */
+
 }
 
 static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll ) {
@@ -1646,7 +1679,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     float arOutput[ NUM_OUTPUTS ];
     positionclass pc = ClassifyPosition( anBoard );
     int i;
-    float arDouble[ 4 ], r;
+    float arDouble[ 4 ], pr[ 3 ];
     
     strcpy( szOutput, "Evaluator: \t" );
     
@@ -1689,7 +1722,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	if( EvaluatePosition( anBoard, arOutput, i ) < 0 )
 	    return -1;
 	if ( EvaluatePositionCubeful( anBoard, nCube, fCubeOwner, 
-				      fMove, 1, &r, i ) < 0 )
+				      fMove, pr, i ) < 0 )
 	  return -1;
 
 	if( !i )
@@ -1702,7 +1735,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	sprintf( szOutput,
 		 ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f (%+6.3f))\n",
 		 arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ], arOutput[ 3 ],
-		 arOutput[ 4 ], Utility ( arOutput ), r );
+		 arOutput[ 4 ], Utility ( arOutput ), pr[ 0 ] );
     }
 
     /*
@@ -1711,22 +1744,19 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
     szOutput = strchr( szOutput, 0 );
     
-    EvaluatePositionCubeful( anBoard, nCube, fCubeOwner, 
-			     fMove, 0, &r, nPlies );
-    sprintf ( szOutput, "No double      +%6.3f\n", r );
+    sprintf ( szOutput, "No double      %+6.3f\n", pr[ 1 ] );
     szOutput = strchr( szOutput, 0 );
 
-    EvaluatePositionCubeful( anBoard, nCube*2, ! fMove,
-			     fMove, 1, &r, nPlies );
-    sprintf ( szOutput, "Double, take   +%6.3f\n", 2.0 * r );
+    sprintf ( szOutput, "Double, take   %+6.3f\n", pr[ 2 ] );
     szOutput = strchr( szOutput, 0 );
 
-    sprintf ( szOutput, "Double, pass   +%6.3f\n", +1.0 );
+    sprintf ( szOutput, "Double, pass   %+6.3f\n", +1.0 );
     szOutput = strchr( szOutput, 0 );
 
 
     return 0;
 
+    /*
     if ( (fCubeOwner != -1) && (fCubeOwner != fMove) ) return 0;
     szOutput = strchr( szOutput, 0 );
 
@@ -1766,6 +1796,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	     ( arDouble[ 1 ] <= 1.0 ) ? "take.\n" : "pass.\n" );
 
     return 0;
+    */
 }
 
 extern int EvalCacheResize( int cNew ) {
@@ -2191,48 +2222,62 @@ EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] ) {
 }
 
 
-static int 
+extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], 
 			 int nCube, int fCubeOwner, int fMove,
-			 int fDoDouble,
-			 float *prOutput,
+			 float prOutput[ 2 ],
 			 int nPlies ) {
+
+  /* 
+   * Input: 
+   * - anBoard: position to evaluate
+   * - nCube, fCubeOwner: owner and value of cube
+   *   (nCube is only used for match play)
+   * - fMove: player on roll
+   *   (used to check against fCubeOwner for
+   *    legal cube actions
+   *    FIXME: can probably be eliminated...)
+   * - fDoDouble: not used...
+   * - nPlies: search depth
+   * Output:
+   * Equivalent to EvaluatePosition, except that
+   * this routine returns cubeful equities.
+   * Returns an array with 3 elements:
+   * prOutput[ 1 ] = 
+   *    the cubeful equity for this position
+   *    assuming player on roll does not double.
+   * prOutput[ 2 ] = 
+   *    the cubeful equity for this position
+   *    assuming player on roll double and 
+   *    opponent takes.
+   * prOutput[ 0 ] =
+   *    cubeful equity after correct cube action
+   *    for player on roll. 
+   */
 
   int i, n0, n1;
   positionclass pc;
   float arOutput[ NUM_OUTPUTS ];
 
-  //  if ( nPlies == 2 )
-  //    printf ("2ply-------------------------\n");
-
   if( ( pc = ClassifyPosition( anBoard ) ) != CLASS_OVER &&
       nPlies > 0 ) {
     /* internal node; recurse */
     
-    float rNoDouble, rDoubleTake, rDoublePass, r;
+    float rDoublePass, pr[ 3 ];
     int anBoardNew[ 2 ][ 25 ];
     int anMove[ 8 ];
     int fNewCubeOwner, fNewMove;
 
-    *prOutput = 0.0;
-	
     /* don't double */
 
-//    printf ( "--> no double, %1i-ply fmove, fcubeowner %+1i %1i\n",
-//	     nPlies, fMove, fCubeOwner );
-
     fNewCubeOwner = fCubeOwner;
-      //      ( fCubeOwner == -1 ) ? -1 : ( fCubeOwner ? 0 : 1 );
     fNewMove = fMove ? 0 : 1;
 
-    /* position 1: bJsFwANt82AFAA */
-    /* position 1: bfPBAQBsmwXAAw */
-
-    rNoDouble = 0.0;
+    prOutput[ 1 ] = 0.0;
 
     for( n0 = 1; n0 <= 6; n0++ )
       for( n1 = 1; n1 <= n0; n1++ ) {
-	//	printf ("%1d-ply no double dice %1i %1i\n", nPlies, n0,n1);
+
 	for( i = 0; i < 25; i++ ) {
 	  anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
 	  anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
@@ -2248,31 +2293,29 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	SwapSides( anBoardNew );
 
 	if( EvaluatePositionCubeful( anBoardNew, nCube, fNewCubeOwner,
-				     fNewMove, TRUE, &r, nPlies - 1 ) )
+				     fNewMove, pr, nPlies - 1 ) )
 	  return -1;
 
-	rNoDouble -= ( n0 == n1 ) ? r : 2.0 * r;
+	prOutput[ 1 ] -= ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
 
       }
     
-    rNoDouble /= 36.0;
-
-//    printf ( "no double   %1i-ply %+6.3f\n", nPlies, rNoDouble );
+    prOutput[ 1 ] /= 36.0;
 
     /* double */
 
-    if ( fDoDouble && 
-	 ( ( fCubeOwner == -1 ) || ( fCubeOwner == fMove) ) ) {
+    prOutput[ 2 ] = 0.0;
+
+    if ( ( fCubeOwner == -1 ) || ( fCubeOwner == fMove) ) {
 
       rDoublePass = 1.0;
-      rDoubleTake = 0.0;
 
       fNewCubeOwner = ( fMove ) ? 0 : 1;
 
+      CalcGammonPrice ( nCube * 2, fNewCubeOwner );
+
       for( n0 = 1; n0 <= 6; n0++ )
 	for( n1 = 1; n1 <= n0; n1++ ) {
-
-	//	  printf ("%1d-ply    double dice %1i %1i\n", nPlies, n0,n1);
 
 	  for( i = 0; i < 25; i++ ) {
 	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
@@ -2289,39 +2332,50 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	  SwapSides( anBoardNew );
 
 	  fNewCubeOwner = fNewMove = fMove ? 0 : 1;
-	  if( EvaluatePositionCubeful( anBoardNew, nCube * 2 , fNewCubeOwner,
-				       fNewMove, 1, &r, nPlies - 1 ) )
+	  if( EvaluatePositionCubeful( anBoardNew, nCube * 2, fNewCubeOwner,
+				       fNewMove, pr, nPlies - 1 ) )
 	    return -1;
 
-	  rDoubleTake -= ( n0 == n1 ) ? r : 2.0 * r;
+	  prOutput[ 2 ] -= ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
 
 	}
-      /* 3xkAAHC3AAAAAA */
-      rDoubleTake /= 18.0;
-//      printf ( "double-take %1i-ply %+6.3f\n", nPlies, rDoubleTake );
 
-      if ( ( rDoubleTake >= rNoDouble ) && 
-	   ( rDoublePass >= rNoDouble ) ) {
+      prOutput[ 2 ] /= 18.0;
 
-	if ( rDoubleTake < rDoublePass ) 
-	  *prOutput = rDoubleTake;
+      CalcGammonPrice ( nCube, fCubeOwner );
+
+      /*
+       * If
+       *    equity(double, take) > equity(no double) and
+       *    equity(double, pass) > equity(no double)
+       * we have a double.
+       */
+
+      if ( ( prOutput[ 2 ] >= prOutput[ 1 ] ) && 
+	   ( rDoublePass >= prOutput[ 1 ] ) ) {
+
+	if ( prOutput[ 2 ] < rDoublePass ) 
+	  prOutput[ 0 ] = prOutput[ 2 ];
 	else
-	  *prOutput = rDoublePass;
+	  prOutput[ 0 ] = rDoublePass;
 
       }
       else
-	*prOutput = rNoDouble;
+	prOutput[ 0 ] = prOutput[ 1 ];
       
     }
     else
-      *prOutput = rNoDouble;
-
-//    printf ( "equity %1i-ply %+6.3f\n", nPlies, *prOutput);
+      prOutput[ 0 ] = prOutput[ 1 ];
 
   } else {
-    /* at leaf node; use static evaluation */
 
-    acef[ pc ]( anBoard, arOutput );
+    /* 
+     * At leaf node; use static evaluation.
+     * Call EvaluatePosition such that the
+     * call is cached.
+     */
+    
+    EvaluatePosition ( anBoard, arOutput, 0 );
     
     SanityCheck( anBoard, arOutput );
     
@@ -2331,15 +2385,12 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
       /* no value of holding the cube */
 
-      *prOutput = Utility ( arOutput );
+      prOutput[ 0 ] = Utility ( arOutput );
 
     } 
     else {
 
       float rEq = Utility ( arOutput );
-
-//      printf ( "eval static %s %+6.3f %+1i %1i\n", 
-//	       PositionID ( anBoard ), rEq, fCubeOwner, fMove );
 
       if ( fCubeOwner == -1 ) {
 
@@ -2363,15 +2414,15 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	 */
 
 	if ( rEq > 1.0 )
-	  *prOutput = rEq;
+	  prOutput[ 0 ] = rEq;
 	else if ( rEq > 0.5 )
-	  *prOutput = 1.0;
+	  prOutput[ 0 ] = 1.0;
 	else if ( rEq > -0.5 )
-	  *prOutput = 1.5 * rEq;
+	  prOutput[ 0 ] = 1.5 * rEq;
 	else if ( rEq > -1.0 )
-	  *prOutput = -1;
+	  prOutput[ 0 ] = -1;
 	else
-	  *prOutput = rEq;
+	  prOutput[ 0 ] = rEq;
 
       } 
       else if ( fCubeOwner == fMove ) {
@@ -2389,13 +2440,13 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	 */
 
 	if ( rEq > 1.0 )
-	  *prOutput = rEq;
+	  prOutput[ 0 ] = rEq;
 	else if ( rEq > 0.5 )
-	  *prOutput = 1.0;
+	  prOutput[ 0 ] = 1.0;
 	else if ( rEq > -1.0 )
-	  *prOutput = 1.25 * rEq + 0.25;
+	  prOutput[ 0 ] = 1.25 * rEq + 0.25;
 	else
-	  *prOutput = rEq;
+	  prOutput[ 0 ] = rEq;
 
       }
       else { /* fCubeOwner != fMove */
@@ -2413,18 +2464,18 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	 */
 
 	if ( rEq > 1.0 )
-	  *prOutput = rEq;
+	  prOutput[ 0 ] = rEq;
 	else if ( rEq > -0.5 )
-	  *prOutput = 1.25 * rEq - 0.25;
+	  prOutput[ 0 ] = 1.25 * rEq - 0.25;
 	else if ( rEq > -1.0 )
-	  *prOutput = -1.0;
+	  prOutput[ 0 ] = -1.0;
 	else
-	  *prOutput = rEq;
+	  prOutput[ 0 ] = rEq;
 
       }
 
     }
-    //printf ( "  static              %+6.3f\n", *prOutput );
+
   }
 
   return 0;
