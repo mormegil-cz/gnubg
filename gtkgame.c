@@ -2469,7 +2469,6 @@ extern int InitGTK( int *argc, char ***argv ) {
     GtkWidget *pwVboxRight;
 #endif
     static GtkItemFactoryEntry aife[] = {
-	{ N_("/_Edit/Copy as"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_New"), "<control>N", NewDialog, 0, NULL },
 #if 0
