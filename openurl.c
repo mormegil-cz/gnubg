@@ -44,6 +44,8 @@
 #include "backgammon.h"
 
 
+#ifndef WIN32
+
 static int
 RunCommand( const gchar *szCmd ) {
 
@@ -56,6 +58,7 @@ RunCommand( const gchar *szCmd ) {
 
 }
 
+#endif
 
 
 extern void

@@ -396,7 +396,6 @@ static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
-static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
 static void ReportBug( gpointer *p, guint n, GtkWidget *pw );
 static void ShowFAQ( gpointer *p, guint n, GtkWidget *pw );
 static void FinishMove( gpointer *p, guint n, GtkWidget *pw );
