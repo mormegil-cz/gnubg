@@ -2293,12 +2293,14 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
 	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
 	  }
-				
+
+	  if( fAction )
+	      fnAction();
+	  
 	  if( fInterrupt ) {
 	    errno = EINTR;
 	    return -1;
-	  } else if( fAction )
-	    fnAction();
+	  }
 	      
 	  FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
 	      
@@ -2365,11 +2367,13 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
 	  }
 
+	  if( fAction )
+	      fnAction();
+	  
 	  if( fInterrupt ) {
 	    errno = EINTR;
 	    return -1;
-	  } else if( fAction )
-	    fnAction();
+	  }
 	      
 	  FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
 	      
@@ -4092,6 +4096,9 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
           anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
         }
 
+	if( fAction )
+	    fnAction();
+	  
         if( fInterrupt ) {
           errno = EINTR;
           return -1;
@@ -4161,6 +4168,9 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
             anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
           }
         
+	  if( fAction )
+	      fnAction();
+	  
           if( fInterrupt ) {
             errno = EINTR;
             return -1;
@@ -4430,6 +4440,9 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
           anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
         }
 
+	if( fAction )
+	    fnAction();
+	  
         if( fInterrupt ) {
           errno = EINTR;
           return -1;
