@@ -714,7 +714,7 @@ command cER = {
       "engine", NULL, NULL },
     { "evaluation", CommandShowEvaluation, "Display evaluation settings "
       "and statistics", NULL, NULL },
-    { "gammonprice", CommandShowGammonPrice, "Show gammon price",
+    { "gammonvalues", CommandShowGammonValues, "Show gammon values",
       NULL, NULL },
     { "egyptian", CommandShowEgyptian,
       "See if the Egyptian rule is used in sessions", NULL, NULL },
