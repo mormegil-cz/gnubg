@@ -3523,7 +3523,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
       if ( i < NUM_SEARCHSPACES )
         gtk_menu_append ( GTK_MENU ( pwMenu ),
                           pwItem = gtk_menu_item_new_with_label ( 
-                          aszSearchSpaces[ i ] ) );
+                          gettext ( aszSearchSpaces[ i ] ) ) ),
       else
         gtk_menu_append ( GTK_MENU ( pwMenu ),
                           pwItem = gtk_menu_item_new_with_label (
@@ -4130,7 +4130,7 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
 
   for (i = 0; i < 5; i++){
-    pwLabel = gtk_label_new ( aszSkillLabel[i] );
+    pwLabel = gtk_label_new ( gettext ( aszSkillLabel[i] ) );
     gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
@@ -4159,7 +4159,7 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
  
   for (i = 0; i < 4; i++){
-    pwLabel = gtk_label_new ( aszLuckLabel[i] );
+    pwLabel = gtk_label_new ( gettext ( aszLuckLabel[i] ) );
     gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
