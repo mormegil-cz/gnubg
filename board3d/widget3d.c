@@ -39,9 +39,9 @@
 #include <gtkgl/gtkglarea.h>
 #endif
 
-#include "../backgammon.h"
-#include "../sound.h"
-#include "../renderprefs.h"
+#include "backgammon.h"
+#include "sound.h"
+#include "renderprefs.h"
 
 int screenHeight;
 guint id = 0;

@@ -173,7 +173,7 @@ void preDrawPiece0(BoardData* bd)
 
 	/* Draw top/bottom of piece */
 	if (bd->checkerMat[0].pTexture)
-	{	/* Note: texturing will be enabled at this point */
+	{
 		glEnable(GL_TEXTURE_2D);
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_HEIGHT);
@@ -269,8 +269,8 @@ void preDrawPiece1(BoardData* bd)
 
 	/* Draw top of piece */
 	if (bd->checkerMat[0].pTexture)
-	{	/* Note: texturing will be enabled at this point */
-glEnable(GL_TEXTURE_2D);
+	{
+		glEnable(GL_TEXTURE_2D);
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_HEIGHT);
 		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
