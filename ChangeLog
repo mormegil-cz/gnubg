@@ -1,3 +1,26 @@
+Mon Nov 13 10:42:29 2000  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (AnalyzeGame): Pacify compiler warnings.
+
+	* backgammon.h, gnubg.c, play.c, set.c, sgf.c, show.c: Add
+	variable gs indicating the game state; don't use fTurn to decide
+	whether there's a game in progress.
+
+	* configure.in: Cache the test for signbit().
+	
+	* gnubg.c (ParsePosition): Allow "=n" notation for boards.
+
+	* gtkboard.c: Replaced the "set" button with "reset".
+	
+	* gtkgame.c: Added buttons in the game window for next/prev
+	move/game.  Fixed the game option menu.  Added menu items and
+	accelerator keys.  Added file selection dialogs for loading and
+	saving.
+
+	* guile.c: evaluate "gnubg.scm" at startup.
+
+	* set.c (CommandSetDice): add a MOVE_SETDICE moverecord.
+	
 Fri Nov 10 14:14:35 2000  Gary Wong  <gtw@research.att.com>
 
 	* Makefile.am (gnubg.wd): Ignore errors from makeweights.
