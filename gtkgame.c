@@ -2266,14 +2266,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Help/_Report bug"), NULL, ReportBug, 0, NULL },
 	{ N_("/_Help/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Help/_About gnubg"), NULL, Command, CMD_SHOW_VERSION,
-#if GTK_CHECK_VERSION(2,0,0)
+#if GTK_CHECK_VERSION(2,6,0)
 		"<StockItem>", GTK_STOCK_ABOUT
 #else
 		NULL
 #endif
 	}
     };
-    int i;
+    
 #if __GNUC__
     char sz[ strlen( szHomeDirectory ) + 15 ];
 #elif HAVE_ALLOCA

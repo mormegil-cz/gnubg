@@ -1,3 +1,7 @@
+Sun Mar  06  18:00:45 2005 Oystein Johansen <oystein@gnubg.org>
+
+	* gtkgame.c InitGTK(): Exclude GTK_STOCK_ABOUT when gtkversion < 2.6
+
 Sat Mar  05  23:50:45 2005 Oystein Johansen <oystein@gnubg.org>
 
 	This is the first commit in a large GUI cleanup I intend to do.
