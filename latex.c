@@ -529,7 +529,7 @@ extern void CommandExportMatchLaTeX( char *sz ) {
     for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext )
 	ExportGameLaTeX( pf, pl->p );
     
-    LaTeXPrologue( pf );
+    LaTeXEpilogue( pf );
     
     if( pf != stdout )
 	fclose( pf );
