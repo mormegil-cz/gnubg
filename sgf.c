@@ -793,6 +793,7 @@ static void RestoreGame( list *pl ) {
 	pmrResign = malloc( sizeof( pmrResign ->r ) );
 	pmrResign->mt = MOVE_RESIGN;
 	pmrResign->r.sz = NULL;
+        pmrResign->r.esResign.et = EVAL_NONE;
 	pmrResign->r.fPlayer = !pmr->g.fWinner;
 	pmrResign->r.nResigned = pmr->g.nPoints / ms.nCube;
 

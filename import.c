@@ -347,6 +347,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	    pmr = malloc( sizeof( pmr->r ) );
 	    pmr->r.mt = MOVE_RESIGN;
 	    pmr->r.sz = NULL;
+            pmr->r.esResign.et = EVAL_NONE;
 	    pmr->r.fPlayer = !iPlayer;
 	    if( ( pmr->r.nResigned = atoi( sz + 4 ) / ms.nCube ) < 1 )
 		pmr->r.nResigned = 1;
@@ -620,6 +621,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	       resigned. */
 	    pmr = malloc( sizeof( pmr->r ) );
 	    pmr->r.mt = MOVE_RESIGN;
+            pmr->r.esResign.et = EVAL_NONE;
 	    pmr->r.sz = NULL;
 	    pmr->r.fPlayer = !iPlayer;
 	    pmr->r.nResigned = 1; /* FIXME determine from score */

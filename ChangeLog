@@ -1,3 +1,10 @@
+Thu Jan 31 20:12:54 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* import.c (ParseOldMove,ParseMatMove), sgf.c (RestoreGame): set
+      	evaltype for moveresign to EVAL_NONE (otherwise assert in 
+	AddMoveRecord will fail).
+
+
 Thu Jan 31 12:33:01 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_quick_edit): Correct resetting to starting
