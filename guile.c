@@ -419,8 +419,9 @@ static SCM rollout_position( SCM sBoard, SCM sCube, SCM sRolloutContext,
     SCMToCubeInfo( sCube, &ci );
 
     PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );    
-    n = GeneralEvaluationR( SCM_CHARS( sDesc ), ar, arStdDev, arsStatistics, anBoard,
-			    &ci, &rcRollout /* FIXME use sRolloutContext */ );
+    n = GeneralEvaluationR( ar, arStdDev, arsStatistics, anBoard,
+			    &ci, &rcRollout, /* FIXME use sRolloutContext */ 
+			    NULL, NULL);
     PortableSignalRestore( SIGINT, &sh );
     if( fInterrupt ) {
 	raise( SIGINT );

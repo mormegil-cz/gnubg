@@ -1,3 +1,8 @@
+Sat Jul 18 09:55:40 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
+
+	* guile.c - adjust call to GeneralEvaluationR to match
+	  new rollout progress functions.
+	
 Sat Jul 18 07:13:40 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
 
 	* gtkgame.c - search the stack of grab owners for the
