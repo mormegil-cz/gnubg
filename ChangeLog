@@ -1,3 +1,7 @@
+Sun Nov 24 22:24:17 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* osr.c (osp): remove debug printf.
+
 Sun Nov 24 20:32:00 2002 GMT  jsegrave <jsegrave@jes2.demon.nl>
 
 	* show.c - report no truncation when setting truncation point 

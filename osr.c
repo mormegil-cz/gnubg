@@ -760,7 +760,7 @@ osp ( const int anBoard[ 25 ], const int nGames,
     for ( i = 0; i < 32; ++i ) {
       n = min ( i, MAX_PROBS - 1 );
       arProbs[ n ] += anProb[ i ] / 65535.0f;
-      printf ( "arProbs[%d]=%f\n", n, arProbs[n] );
+      /* printf ( "arProbs[%d]=%f\n", n, arProbs[n] ); */
     }
 
   }
