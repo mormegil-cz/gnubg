@@ -1,3 +1,7 @@
+Wed Jan 17 17:55:58 2002  Øystein Johansen <oeysteij@online.no>
+
+        * drawboard.c (DrawBoardCls): Fix Position ID bug
+
 Sat Jan 12 17:37:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* matchequity.c (InitMatchEquity): initialise new structure

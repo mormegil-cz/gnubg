@@ -292,7 +292,7 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     
     strcpy( pch, "    GNU Backgammon  Position ID: " );
 
-    pch += 30;
+    pch += 33;
 
     if( fRoll )
         strcpy( pch, PositionID( anBoard ) );
@@ -545,11 +545,11 @@ extern char *FormatMovePlain( char *sz, int anBoard[ 2 ][ 25 ],
         }
         
         if( i < 6 )
-            *pch++ = ' ';
+            *pch++ = ' '; 
     }
 
     *pch = 0;
-    
+
     return sz;
 }
 
