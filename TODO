@@ -36,7 +36,6 @@ duplication of effort and to make sure our changes merge easily.
   2-sided.)
 
 * Commands:
-** Add more completions to readline (e.g. player names). (gary)
 ** Add interactive rollouts.
 ** Analyse games and matches.
 *** Add an "analyse move" command.
@@ -78,8 +77,6 @@ duplication of effort and to make sure our changes merge easily.
   suggestion is to maximise the chance of finding the right play for
   the initial roll and response, and whatever speeds things along while
   still finding reasonable plays after that.)
-** Should CommandSetEvalParamType really allow setting EVAL_NONE?
-  What effect is that supposed to have?
 ** When a resignation has been offered, "hint" should show whether to
   accept or decline the resignation.
 
@@ -160,6 +157,8 @@ duplication of effort and to make sure our changes merge easily.
   and only output the relevant statistics.
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
   the new evalsetups. (gary)
+** update_buttons() should be able to detect when it's the computer's
+  turn, and show a "play" button (suggested by Olivier Croisille). (gary)
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -238,12 +237,6 @@ functions:
 ** When a match is over, the prev game/prev move menu items are disabled.
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
-** FindContext() doesn't understand quoting.  That means that
-  a command like "\set <tab>" (including the backslash) won't handle
-  completion.  FindContext() probably needs to duplicate its parameter
-  and call NextToken(). (gary)
-** The command "set turn 0 <tab>" incorrectly allows completion for
-  additional parameters. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

@@ -360,7 +360,7 @@ extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
     acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
-  acSetRolloutPlayer[];
+  acSetRolloutPlayer[], cOnOff;
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),

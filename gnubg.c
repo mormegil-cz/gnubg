@@ -284,12 +284,21 @@ static char szDICE[] = "<die> <die>",
     szTRIALS[] = "<trials>",
     szVALUE[] = "<value>";
 
-command cFilename = {
+command cER = {
+    /* dummy command used for evaluation/rollout parameters */
+    NULL, NULL, NULL, NULL, &cER
+}, cFilename = {
     /* dummy command used for filename parameters */
     NULL, NULL, NULL, NULL, &cFilename
+}, cOnOff = {
+    /* dummy command used for on/off parameters */
+    NULL, NULL, NULL, NULL, &cOnOff
 }, cPlayer = {
     /* dummy command used for player parameters */
     NULL, NULL, NULL, NULL, &cPlayer
+}, cPlayerBoth = {
+    /* dummy command used for player parameters; "both" also permitted */
+    NULL, NULL, NULL, NULL, &cPlayerBoth
 }, acAnalyse[] = {
     { "game", CommandAnalyseGame, "Compute analysis and annotate current game",
       NULL, NULL },
@@ -463,7 +472,7 @@ command cFilename = {
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetEvalParam[] = {
   { "type", CommandSetEvalParamType,
-    "Specify type (evaluation or rollout)", szER, NULL },
+    "Specify type (evaluation or rollout)", szER, &cER },
   { "evaluation", CommandSetEvalParamEvaluation,
     "Speficy parameters for neural net evaluation", NULL,
     acSetEvaluation },
@@ -475,32 +484,32 @@ command cFilename = {
     { "chequerplay", CommandSetAnalysisChequerplay, "Specify parameters "
       "for the analysis of chequerplay", NULL, acSetEvalParam },
     { "cube", CommandSetAnalysisCube, "Select whether cube action will be "
-      "analysed", szONOFF, NULL },
+      "analysed", szONOFF, &cOnOff },
     { "cubedecision", CommandSetAnalysisCubedecision, "Specify parameters "
       "for the analysis of cube decisions", NULL,
       acSetEvalParam },
     { "limit", CommandSetAnalysisLimit, "Specify the maximum number of "
       "possible moves analysed", szOPTLIMIT, NULL },
     { "luck", CommandSetAnalysisLuck, "Select whether dice rolls will be "
-      "analysed", szONOFF, NULL },
+      "analysed", szONOFF, &cOnOff },
     { "moves", CommandSetAnalysisMoves, "Select whether chequer play will be "
-      "analysed", szONOFF, NULL },
+      "analysed", szONOFF, &cOnOff },
     { "threshold", NULL, "Specify levels for marking moves", NULL,
       acSetAnalysisThreshold },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
-      "chequers as possible", szONOFF, NULL },
+      "chequers as possible", szONOFF, &cOnOff },
     { "crawford", CommandSetAutoCrawford, "Enable the Crawford game "
-      "based on match score", szONOFF, NULL },
+      "based on match score", szONOFF, &cOnOff },
     { "doubles", CommandSetAutoDoubles, "Control automatic doubles "
       "during (money) session play", szLIMIT, NULL },
     { "game", CommandSetAutoGame, "Select whether to start new games "
-      "after wins", szONOFF, NULL },
+      "after wins", szONOFF, &cOnOff },
     { "move", CommandSetAutoMove, "Select whether forced moves will be "
-      "made automatically", szONOFF, NULL },
+      "made automatically", szONOFF, &cOnOff },
     { "roll", CommandSetAutoRoll, "Control whether dice will be rolled "
-      "automatically", szONOFF, NULL },
+      "automatically", szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetCube[] = {
     { "center", CommandSetCubeCentre, "The U.S.A. spelling of `centre'",
@@ -510,21 +519,21 @@ command cFilename = {
     { "owner", CommandSetCubeOwner, "Allow only one player to double",
       szPLAYER, &cPlayer },
     { "use", CommandSetCubeUse, "Control use of the doubling cube", szONOFF,
-      NULL },
+      &cOnOff },
     { "value", CommandSetCubeValue, "Fix what the cube stake has been set to",
       szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
       "Show match equities as percentages (on) or probabilities (off)",
-      szONOFF, NULL },
+      szONOFF, &cOnOff },
     { "mwc", CommandSetOutputMWC, "Show output in MWC (on) or "
-      "equity (off) (match play only)", szONOFF, NULL },
+      "equity (off) (match play only)", szONOFF, &cOnOff },
     { "rawboard", CommandSetOutputRawboard, "Give FIBS \"boardstyle 3\" "
-      "output (on), or an ASCII board (off)", szONOFF, NULL },
+      "output (on), or an ASCII board (off)", szONOFF, &cOnOff },
     { "winpc", CommandSetOutputWinPC,
       "Show winning chances as percentages (on) or probabilities (off)",
-      szONOFF, NULL },
+      szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
@@ -554,7 +563,7 @@ command cFilename = {
     { "cubedecision", CommandSetRolloutCubedecision, "Specify parameters "
       "for cube decisions during rollouts", NULL, acSetEvaluation },
     { "cubeful", CommandSetRolloutCubeful, "Specify whether the "
-      "rollout is cubeful or cubeless", szONOFF, NULL }, 
+      "rollout is cubeful or cubeless", szONOFF, &cOnOff }, 
     { "player", CommandSetRolloutPlayer, "Control evaluation "
       "parameters for each side individually", szPLAYER, acSetRolloutPlayer }, 
     { "rng", CommandSetRolloutRNG, "Specify the random number "
@@ -566,7 +575,7 @@ command cFilename = {
     { "truncation", CommandSetRolloutTruncation, "End rollouts at a "
       "particular depth", szPLIES, NULL },
     { "varredn", CommandSetRolloutVarRedn, "Use lookahead during rollouts "
-      "to reduce variance", szONOFF, NULL },
+      "to reduce variance", szONOFF, &cOnOff },
     /* FIXME add commands for cubeful rollouts, cube variance reduction,
        quasi-random dice, settlements... */
     { NULL, NULL, NULL, NULL, NULL }
@@ -590,50 +599,50 @@ command cFilename = {
     { "analysis", NULL, "Control parameters used when analysing moves",
       NULL, acSetAnalysis },
     { "annotation", CommandSetAnnotation, "Select whether move analysis and "
-      "commentary are shown", szONOFF, NULL },
+      "commentary are shown", szONOFF, &cOnOff },
     { "appearance", CommandSetAppearance, "Modify the look and feel of the "
       "graphical interface", szKEYVALUE, NULL },
     { "automatic", NULL, "Perform certain functions without user input",
       NULL, acSetAutomatic },
     { "beavers", CommandSetBeavers, 
       "Set whether beavers are allowed in money game or not", 
-      szONOFF, NULL },
+      szONOFF, &cOnOff },
     { "board", CommandSetBoard, "Set up the board in a particular "
       "position", szPOSITION, NULL },
     { "cache", CommandSetCache, "Set the size of the evaluation cache",
       szSIZE, NULL },
     { "clockwise", CommandSetClockwise, "Control the board orientation",
-      szONOFF, NULL },
+      szONOFF, &cOnOff },
     { "colours", CommandSetAppearance, "Synonym for `set appearance'", NULL,
       NULL },
     { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
-      "a game in progress", szONOFF, NULL },
+      "a game in progress", szONOFF, &cOnOff },
     { "crawford", CommandSetCrawford, 
-      "Set whether this is the Crawford game", szONOFF, NULL },
+      "Set whether this is the Crawford game", szONOFF, &cOnOff },
     { "cube", NULL, "Set the cube owner and/or value", NULL, acSetCube },
     { "delay", CommandSetDelay, "Limit the speed at which moves are made",
       szMILLISECONDS, NULL },
     { "dice", CommandSetDice, "Select the roll for the current move",
       szDICE, NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
-      "the computer's turn", szONOFF, NULL },
+      "the computer's turn", szONOFF, &cOnOff },
     { "evaluation", NULL, "Control position evaluation "
       "parameters", NULL, acSetEval },
-    { "egyptian", CommandSetEgyptian, "Set whether to use the Egyptian rule in "      "games", szONOFF, NULL },
+    { "egyptian", CommandSetEgyptian, "Set whether to use the Egyptian rule in "      "games", szONOFF, &cOnOff },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
-      "money games", szONOFF, NULL },
+      "money games", szONOFF, &cOnOff },
     { "matchequitytable", NULL, "Select match equity table", NULL,
       acSetMET },
     { "met", NULL, "Synonym for `set matchequitytable'", NULL,
       acSetMET },
     { "nackgammon", CommandSetNackgammon, "Set the starting position",
-      szONOFF, NULL },
+      szONOFF, &cOnOff },
     { "output", NULL, "Modify options for formatting results", NULL,
       acSetOutput },
     { "player", CommandSetPlayer, "Change options for one or both "
       "players", szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
-      "Set whether this is a post-Crawford game", szONOFF, NULL },
+      "Set whether this is a post-Crawford game", szONOFF, &cOnOff },
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
       "ready for commands", szPROMPT, NULL },
     { "rng", NULL, "Select the random number generator algorithm", NULL,
@@ -2921,9 +2930,6 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
   char szTemp[ 1024 ];
 
   switch ( pes->et ) {
-  case EVAL_NONE:
-    fprintf (pf, "%s type none\n", sz );
-    break;
   case EVAL_EVAL:
     fprintf (pf, "%s type evaluation\n", sz );
     break;
@@ -3226,8 +3232,56 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     
     return NULL;
 }
+static char *ERCompletion( const char *sz, int nState ) {
 
-static char *PlayerCompletion( const char *sz, int nState ) {
+    static int i, cch;
+    char *pch, *szDup;
+
+    if( !nState ) {
+	cch = strlen( sz );
+	i = 0;
+    }
+
+    while( i < 2 ) {
+	pch = i++ ? "rollout" : "evaluation";
+	
+	if( !strncasecmp( sz, pch, cch ) ) {
+	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
+		return NULL;
+	    
+	    return strcpy( szDup, pch );
+	}
+    }
+
+    return NULL;
+}
+
+static char *OnOffCompletion( const char *sz, int nState ) {
+
+    static int i, cch;
+    static char *asz[] = { "false", "no", "off", "on", "true", "yes" };
+    char *pch, *szDup;
+    
+    if( !nState ) {
+	cch = strlen( sz );
+	i = 0;
+    }
+
+    while( i < DIM( asz ) ) {
+	pch = asz[ i++ ];
+
+	if( !strncasecmp( sz, pch, cch ) ) {
+	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
+		return NULL;
+
+	    return strcpy( szDup, pch );
+	}
+    }
+    
+    return NULL;
+}
+
+static char *PlayerCompletionGen( const char *sz, int nState, int fBoth ) {
 
     static int i, cch;
     char *pch, *szDup;
@@ -3237,7 +3291,7 @@ static char *PlayerCompletion( const char *sz, int nState ) {
 	i = 0;
     }
 
-    while( i < 5 ) {
+    while( i < ( fBoth ? 5 : 4 ) ) {
 	switch( i ) {
 	case 0:
 	    pch = "0";
@@ -3252,7 +3306,6 @@ static char *PlayerCompletion( const char *sz, int nState ) {
 	    pch = ap[ 1 ].szName;
 	    break;
 	case 4:
-	    /* FIXME not all commands allow "both" */
 	    pch = "both";
 	    break;
 	default:
@@ -3272,45 +3325,77 @@ static char *PlayerCompletion( const char *sz, int nState ) {
     return NULL;
 }
 
-static command *FindContext( command *pc, char *sz, int ich ) {
+static char *PlayerCompletion( const char *sz, int nState ) {
 
-    int i = 0, c;
+    return PlayerCompletionGen( sz, nState, FALSE );
+}
 
+static char *PlayerCompletionBoth( const char *sz, int nState ) {
+
+    return PlayerCompletionGen( sz, nState, TRUE );
+}
+
+static command *FindContext( command *pc, char *szOrig, int ich ) {
+
+#if __GNUC__
+    char sz[ strlen( szOrig ) + 1 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( szOrig ) + 1 );
+#else
+    char sz[ 4096 ];
+#endif
+    char *pch, *pchCurrent;
+    command *pcResume = NULL;
+    
+    pch = strcpy( sz, szOrig );
+    pch[ ich ] = 0;
+    
     do {
-        while( i < ich && isspace( sz[ i ] ) )
-            i++;
+	if( !( pchCurrent = NextToken( &pch ) ) )
+	    /* no command */
+	    return pc;
 
-        if( i == ich )
-            /* no command */
-            return pc;
+	if( !pch )
+	    /* incomplete command */
+	    return pc;
 
-        c = strcspn( sz + i, szCommandSeparators );
-
-        if( i + c >= ich )
-            /* incomplete command */
-            return pc;
-
+	if( pcResume ) {
+	    pc = pcResume;
+	    pcResume = NULL;
+	    continue;
+	}
+	
         while( pc && pc->sz ) {
-            if( !strncasecmp( sz + i, pc->sz, c ) ) {
-                pc = pc->pc;
-
-                if( i + c >= ich )
-                    return pc;
-                
-                i += c;
+            if( !strncasecmp( pchCurrent, pc->sz, strlen( pchCurrent ) ) ) {
+		pc = pc->pc;
+		
+		if( pc == acSetPlayer || pc == acSetRolloutPlayer ) {
+		    pcResume = pc;
+		    pc = &cPlayerBoth;
+		}
+		
                 break;
             }
 
             pc++;
         }
-    } while( pc && pc->sz );
+    } while( pcResume || ( pc && pc->sz ) );
 
-    if( pc && pc->pc )
+    if( pc && pc->pc ) {
 	/* dummy command for parameter completion */
-	return pc;
-    
+	if( !NextToken( &pch ) )
+	    return pc;
+    }
+
+    /* the command is already complete */
     return NULL;
 }
+
+#if !HAVE_RL_COMPLETION_MATCHES
+    /* assume obselete version of readline */
+#define rl_completion_matches( text, func ) \
+	completion_matches( (char *) (text), (func) )
+#endif
 
 static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 
@@ -3325,26 +3410,21 @@ static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 
     if( !pcCompleteContext )
 	return NULL;
-    
-#if HAVE_RL_COMPLETION_MATCHES
-    if( pcCompleteContext == &cFilename ) {
+
+    if( pcCompleteContext == &cER )
+	return rl_completion_matches( szText, ERCompletion );
+    else if( pcCompleteContext == &cFilename ) {
 	rl_filename_completion_desired = TRUE;
 	return rl_completion_matches( szText,
 				      rl_filename_completion_function );
-    } else if( pcCompleteContext == &cPlayer )
+    } else if( pcCompleteContext == &cOnOff )
+	return rl_completion_matches( szText, OnOffCompletion );
+    else if( pcCompleteContext == &cPlayer )
 	return rl_completion_matches( szText, PlayerCompletion );
+    else if( pcCompleteContext == &cPlayerBoth )
+	return rl_completion_matches( szText, PlayerCompletionBoth );
     else
 	return rl_completion_matches( szText, GenerateKeywords );
-#else
-    /* assume obselete version of readline */
-    if( pcCompleteContext == &cFilename )
-	return completion_matches( (char *) szText,
-				   filename_completion_function );
-    else if( pcCompleteContext == &cPlayer )
-	return completion_matches( (char *) szText, PlayerCompletion );
-    else
-	return completion_matches( (char *) szText, GenerateKeywords );
-#endif
 }
 #endif
 

@@ -1,3 +1,22 @@
+Wed Nov  7 11:29:36 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (SanityCheck): Detect some certain or impossible wins,
+	gammons and backgammons.
+	(MaxTurns): New function.
+
+	* gnubg.c (ERCompletion, OnOffCompletion, PlayerCompletionBoth): New
+	functions.
+	(FindContext): Handle quoting, and handle more parameter contexts.
+
+	* gnubgtest: Add more tests.
+
+	* play.c (PlayMove): Be more careful about setting fLastMove, to
+	avoid spurious animation.
+
+	* set.c (CommandSetEvalParamType): Don't allow setting EVAL_NONE.
+
+	* show.c (ShowCommands): Properly recurse for parameters.
+
 Tue Nov  6 10:48:56 2001  Gary Wong  <gtw@research.att.com>
 
 	* latex.c, postscript.c (ExportGameLaTeX, ExportGamePostScript): Set
