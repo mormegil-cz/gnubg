@@ -1768,7 +1768,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	if( bd->x_dice[ 0 ] > 0 ) {
 	    /* dice were visible before; now they're not */
 	    int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
-	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * rdAppearance.nSize;
+	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
             if ( rdAppearance.nSize > 0 ) {
               board_invalidate_rect( bd->drawing_area,
                                      ax[ 0 ] * rdAppearance.nSize,
@@ -1786,7 +1786,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	if( ( bd->turn == bd->colour ? bd->dice[ 0 ] :
 	       bd->dice_opponent[ 0 ] ) <= 0 )
 	    /* dice have not been rolled */
-	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * rdAppearance.nSize;
+	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
 	else {
 	    /* FIXME different dice for first turn */
 	    int iAttempt = 0, iPoint, x, y, cx, cy;
@@ -1803,22 +1803,24 @@ static gint board_set( Board *board, const gchar *board_text,
 	    
 	    bd->y_dice[ 0 ] = RAND % 10 + 28;
 	    bd->y_dice[ 1 ] = RAND % 10 + 28;
-	    
-	    for( iPoint = 1; iPoint <= 24; iPoint++ )
-		if( abs( bd->points[ iPoint ] ) >= 5 ) {
-		    point_area( bd, iPoint, &x, &y, &cx, &cy );
-		    x /= rdAppearance.nSize;
-		    y /= rdAppearance.nSize;
-		    cx /= rdAppearance.nSize;
-		    cy /= rdAppearance.nSize;
-		    
-		    if( ( intersects( bd->x_dice[ 0 ], bd->y_dice[ 0 ],
-				      7, 7, x, y, cx, cy ) ||
-			  intersects( bd->x_dice[ 1 ], bd->y_dice[ 1 ],
-				      7, 7, x, y, cx, cy ) ) &&
-			iAttempt++ < 0x80 )
-			goto cocked;
-		}
+
+	    if( rdAppearance.nSize > 0 ) {
+		for( iPoint = 1; iPoint <= 24; iPoint++ )
+		    if( abs( bd->points[ iPoint ] ) >= 5 ) {
+			point_area( bd, iPoint, &x, &y, &cx, &cy );
+			x /= rdAppearance.nSize;
+			y /= rdAppearance.nSize;
+			cx /= rdAppearance.nSize;
+			cy /= rdAppearance.nSize;
+			
+			if( ( intersects( bd->x_dice[ 0 ], bd->y_dice[ 0 ],
+					  7, 7, x, y, cx, cy ) ||
+			      intersects( bd->x_dice[ 1 ], bd->y_dice[ 1 ],
+					  7, 7, x, y, cx, cy ) ) &&
+			    iAttempt++ < 0x80 )
+			    goto cocked;
+		    }
+	    }
 	}
     }
 

@@ -1,3 +1,8 @@
+Mon Feb  3 12:11:36 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_set): More fixes for dice positions -- set
+	position independently of size when moving dice off board.
+
 Thu Jan 30 18:52:34 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (InvalidateStoredMoves): new function.
