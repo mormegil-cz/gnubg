@@ -1,3 +1,8 @@
+Fre Nov 29 12:56:20 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
+
+	* makebearoff.c - add -f output file option (to ensure that
+	  the file will be opened in binary mode
+	
 Wed Nov 27 21:40:42 2002  Gary Wong  <gtw@gnu.org>
 
 	* import.c (ParseMatMove): Handle resignations from the player not
