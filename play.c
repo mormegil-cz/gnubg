@@ -877,7 +877,7 @@ extern int ComputerTurn( void ) {
           /* Note, this should not happen as the computer plays
              "perfectly"!! */
 
-          if ( arOutput[ OUTPUT_TAKE ] <= -1.0 )
+          if ( arDouble[ OUTPUT_TAKE ] <= -1.0 )
             /* drop beaver */
             CommandDrop ( NULL );
           else

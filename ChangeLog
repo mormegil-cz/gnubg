@@ -1,3 +1,7 @@
+Thu Jun 27 21:11:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c (ComputerTurn): fix typo, otherwise gnubg might drop beavers.
+
 Thu Jun 27 20:28:21 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* import.c (ImportGame): initialise pchLeft and pchRight inside
