@@ -105,6 +105,7 @@ extern void ShowBoard( void );
 
 #if !X_DISPLAY_MISSING
 extern void UserCommand( char *sz );
+extern void HandleXAction( void );
 #endif
 
 extern void CommandAccept( char * ),

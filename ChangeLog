@@ -1,3 +1,8 @@
+Thu Feb  3 09:36:22 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (ShowAutoMove): New function.
+	(NextTurn): Handle X events while pausing for "set delay".
+
 Wed Feb  2 14:34:22 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* set.c (CommandSetAutoDoubles): Correct output for cAutoDoubles = 0.

@@ -16,7 +16,7 @@ duplication of effort and to make sure our changes merge easily.
 
 * Game play:
 ** Add cube handling for computer player.  See tag "thyssen-double-branch"
-  in the CVS archive for work on this.
+  in the CVS repository for work on this.
 
 * Command interface:
 ** Check "show" exists for every "set"!
@@ -48,8 +48,9 @@ duplication of effort and to make sure our changes merge easily.
   the board window would be better.)
 ** Show rollout results while in progress, and allow resuming interrupted
   rollouts.
-** Save partial input when reading something below the top level, or when
-  TTY input is overwritten by an X command.
+** Save partial input when TTY input is overwritten by an X command.
+  The best way would be to unify what GetInput does and ProcessInput,
+  with push/pop semantics for readline state. (gary)
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -72,8 +73,6 @@ duplication of effort and to make sure our changes merge easily.
 * Bugs:
 ** Think about what should happen with variance reduction in Rollout()
   when a probability turns out <0 or >1.
-** Make sure as much as possible can happen during delays from
-  "set delay". (gary)
 ** Nothing handles running out of memory gracefully.  A solution
   could be to write a malloc() wrapper that (if malloc fails) first
   tries to free memory (e.g. flush the eval cache); if malloc still
@@ -83,6 +82,7 @@ duplication of effort and to make sure our changes merge easily.
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
 ** X events are not handled during shell escapes.
+** Forced and automatic moves do not pause for "set delay". (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

@@ -84,6 +84,13 @@ static void NewGame( void ) {
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
 }
 
+static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
+
+    char sz[ 40 ];
+
+    printf( "Moving %s\n", FormatMove( sz, anBoard, anMove ) );
+}
+
 static int ComputerTurn( void ) {
 
     movenormal *pmn;
@@ -212,6 +219,8 @@ static int TryBearoff( void ) {
 			sizeof( pmn->anMove ) );
 		ListInsert( plGame, pmn );
 		
+		ShowAutoMove( anBoard, pmn->anMove );
+		
 		PositionFromKey( anBoard, ml.amMoves[ i ].auch );
 		
 		return 0;
@@ -225,6 +234,7 @@ extern void NextTurn( void ) {
     int n, fWinner;
 #if !X_DISPLAY_MISSING
     static struct timeval tvLast, tv;
+    fd_set fds;
 #endif
     
 #if !X_DISPLAY_MISSING
@@ -245,31 +255,35 @@ extern void NextTurn( void ) {
 
 #if !X_DISPLAY_MISSING
     if( fX && nDelay ) {
-	/* FIXME this is awful... it does delay, but it shouldn't do it by
-	   sleeping here -- it should set a timeout and return to the main
-	   event loop.
-
-	   Another problem with this implementation is that the delay
-	   will not work the first time NextTurn is called, because
-	   tvLast will be initialised to zero and this code will assume
-	   the delay has already elapsed. */
-	gettimeofday( &tv, NULL );
-	if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
-	    tvLast.tv_sec += tvLast.tv_usec / 1000000;
-	    tvLast.tv_usec %= 1000000;
-	}
-	
-	if( tvLast.tv_sec > tv.tv_sec || ( tvLast.tv_sec == tv.tv_sec &&
-					   tvLast.tv_usec > tv.tv_usec ) ) {
-	    tvLast.tv_sec -= tv.tv_sec;
-	    if( ( tvLast.tv_usec -= tv.tv_usec ) < 0 ) {
-		tvLast.tv_usec += 1000000;
-		tvLast.tv_sec--;
+	if( tvLast.tv_sec ) {
+	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
+		tvLast.tv_sec += tvLast.tv_usec / 1000000;
+		tvLast.tv_usec %= 1000000;
 	    }
-	    
-	    select( 0, NULL, NULL, NULL, &tvLast );
-	}
 	
+	restart:
+	    gettimeofday( &tv, NULL );
+		
+	    if( tvLast.tv_sec > tv.tv_sec ||
+		( tvLast.tv_sec == tv.tv_sec &&
+		  tvLast.tv_usec > tv.tv_usec ) ) {
+		tv.tv_sec = tvLast.tv_sec - tv.tv_sec;
+		if( ( tv.tv_usec = tvLast.tv_usec - tv.tv_usec ) < 0 ) {
+		    tv.tv_usec += 1000000;
+		    tv.tv_sec--;
+		}
+		
+		FD_ZERO( &fds );
+		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+		
+		if( select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL,
+			    NULL, &tv ) > 0 ) {
+		    HandleXAction();
+		    if( !fInterrupt )
+			goto restart;
+		}
+	    }
+	}
 	gettimeofday( &tvLast, NULL );
     }
 #endif
@@ -550,6 +564,8 @@ extern void CommandMove( char *sz ) {
 	    memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
 		    sizeof( pmn->anMove ) );
 	    ListInsert( plGame, pmn );
+
+	    ShowAutoMove( anBoard, pmn->anMove );
 	    
 	    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 
@@ -898,6 +914,9 @@ extern void CommandRoll( char *sz ) {
 	pmn->anRoll[ 1 ] = anDice[ 1 ];
 	pmn->fPlayer = fTurn;
 	memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
+
+	ShowAutoMove( anBoard, pmn->anMove );
+	
 	ListInsert( plGame, pmn );
 	
 	PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );

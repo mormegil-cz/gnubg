@@ -1238,8 +1238,7 @@ static eventhandler StdinReadHandler = {
     NextTurnNotify, NULL
 };
 
-static void HandleXAction( void ) {
-
+extern void HandleXAction( void ) {
     /* It is safe to execute this function with SIGIO unblocked, because
        if a SIGIO occurs before fAction is reset, then the I/O it alerts
        us to will be processed anyway.  If one occurs after fAction is reset,
