@@ -501,9 +501,14 @@ extern int GuileInitialise( char *szDir ) {
     scm_protect_object( sInterrupt );
 
 #if USE_GTK && HAVE_LIBGUILEGTK_1_2
-    if( fX )
+    if( fX ) {
 	sgtk_init();
+	sgtk_set_standalone( FALSE );
+    }
 #endif
+
+    scm_set_current_module( scm_resolve_module(
+	scm_read_0str( "(guile-user)" ) ) );
     
     if( szDir ) {
 #if __GNUC__
