@@ -1,3 +1,9 @@
+Wed Aug  6 20:24:31 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in, configure: ensure $host is known by envoking
+	AC_CANONICAL_HOST.
+	(reported by Mike Petch)
+
 Tue Aug  5 21:41:57 GMT 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* gtktheory.c (GTKShowTheory): rearrange theory window so it fits

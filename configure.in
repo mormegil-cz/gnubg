@@ -48,6 +48,8 @@ AC_CHECK_PROG(PSTOPNM, pstopnm, pstopnm)
 AC_CHECK_PROG(SRCONV, srconv, srconv, true)
 AC_CHECK_PROG(TR, tr, tr)
 
+AC_CANONICAL_HOST 
+
 dnl Shamelessly stolen taken from the libgnomecanvas configure.in
 dnl with slight modifications. Check for Win32 Native platform
 dnl then determine appropriate directive for the gcc compiler -
