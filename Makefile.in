@@ -116,8 +116,11 @@ NAS_LIBS = @NAS_LIBS@
 PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
 PNGTOPNM = @PNGTOPNM@
+PNMSCALE = @PNMSCALE@
+PNMTOPNG = @PNMTOPNG@
 PNMTOPS = @PNMTOPS@
 POSUB = @POSUB@
+PSTOPNM = @PSTOPNM@
 RANLIB = @RANLIB@
 SRCONV = @SRCONV@
 STRIP = @STRIP@
@@ -187,7 +190,7 @@ bin_PROGRAMS = gnubg makebearoff
 @USE_EXT_TRUE@@USE_GTK_FALSE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 
 @USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
-@USE_GTK_TRUE@	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
+@USE_GTK_TRUE@	gtkprefs.c gtkprefs.h gtk-multiview.c \
 @USE_GTK_TRUE@	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 @USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
@@ -235,8 +238,10 @@ TESTS = gnubgtest erftest
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h \
-	ABOUT-NLS
+	ABOUT-NLS boards.xml
 
+
+DISTCLEANFILES = gnubg.wd
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -278,13 +283,13 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_2) $(am__objects_3) \
 @USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_4)
 @USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_1) gtkboard.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkgame.$(OBJEXT) gdkgetrgb.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkprefs.$(OBJEXT) gtk-multiview.$(OBJEXT) \
-@USE_GTK_TRUE@	gtktheory.$(OBJEXT) gtktexi.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkexport.$(OBJEXT) gtkcube.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkchequer.$(OBJEXT) gtkrace.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkmovefilter.$(OBJEXT) $(am__objects_2) \
-@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4)
+@USE_GTK_TRUE@	gtkgame.$(OBJEXT) gtkprefs.$(OBJEXT) \
+@USE_GTK_TRUE@	gtk-multiview.$(OBJEXT) gtktheory.$(OBJEXT) \
+@USE_GTK_TRUE@	gtktexi.$(OBJEXT) gtkexport.$(OBJEXT) \
+@USE_GTK_TRUE@	gtkcube.$(OBJEXT) gtkchequer.$(OBJEXT) \
+@USE_GTK_TRUE@	gtkrace.$(OBJEXT) gtkmovefilter.$(OBJEXT) \
+@USE_GTK_TRUE@	$(am__objects_2) $(am__objects_3) \
+@USE_GTK_TRUE@	$(am__objects_4)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -316,9 +321,9 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/database.Po ./$(DEPDIR)/dice.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/drawboard.Po ./$(DEPDIR)/erftest.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/eval.Po ./$(DEPDIR)/export.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/external.Po ./$(DEPDIR)/gdkgetrgb.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/getopt1.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gnubg.Po ./$(DEPDIR)/gtk-multiview.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/external.Po ./$(DEPDIR)/getopt.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/getopt1.Po ./$(DEPDIR)/gnubg.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtk-multiview.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkboard.Po ./$(DEPDIR)/gtkchequer.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkcube.Po ./$(DEPDIR)/gtkexport.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkmovefilter.Po \
@@ -474,7 +479,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eval.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/export.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/external.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gdkgetrgb.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnubg.Po@am__quote@
@@ -882,6 +886,7 @@ clean-generic:
 
 distclean-generic:
 	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -951,8 +956,8 @@ uninstall-man: uninstall-man6
 	uninstall-pkgdataDATA uninstall-recursive
 
 distcheck-hook:
-	-cp $(srcdir)/gnubg_os0.bd $(srcdir)/gnubg_ts0.bd \
-	$(srcdir)/gnubg.weights $(distdir)/
+	chmod -R a+w $(distdir)
+	-cp $(srcdir)/gnubg.weights $(distdir)/
 
 br1.c:	makebearoff makebearoff1
 	if [ ! -f br1.c ]; then \
