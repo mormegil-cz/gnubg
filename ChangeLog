@@ -1,3 +1,8 @@
+Sat Jul 26 11:01:26 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* rollout.c - pass no-double cube value so money game rollouts of
+	  cube decisions give correct equity
+	
 Sat Jul 26 12:58:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Remove toolbar from "inside" of board.
