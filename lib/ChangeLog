@@ -1,3 +1,8 @@
+Wed Aug  2 13:26:08 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* neuralnet.c: Improve sigmoid accuracy by using a table lookup for
+	the first two digits and using (exp(x) = 1 + x) for x < 0.1. 
+
 Thu Jul 27 18:20:58 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* event.c: Define nothing on systems that can't support it.

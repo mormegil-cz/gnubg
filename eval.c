@@ -57,8 +57,33 @@ typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
 typedef int ( *cfunc )( const void *, const void * );
 
+/* Race inputs */
+enum {
+  /* In a race position, bar and the 24 points are always empty, so only */
+  /* 23*4 (92) are needed */
 
-/* Race and contact inputs */
+  /* (0 <= k < 14), RI_OFF + k = */
+  /*                       1 if more than k checkers are off, 0 otherwise */
+
+  RI_OFF = 92,
+
+  /* Number of cross-overs by outside checkers */
+  
+  RI_NCROSS = 92 + 14,
+
+  /* Pip-count of checkers outside homeboard */
+  
+  RI_OPIP,
+
+  /* total Pip-count */
+
+  RI_PIP,
+  
+  HALF_RACE_INPUTS
+};
+
+
+/* Contact inputs -- see Berliner for most of these */
 enum {
   /* n - number of checkers off
      
@@ -74,11 +99,7 @@ enum {
   */
      
   I_OFF1 = 100, I_OFF2, I_OFF3,
-
-  HALF_RACE_INPUTS };
-
-/* Contact inputs -- see Berliner for most of these */
-enum {
+  
   /* Minimum number of pips required to break contact.
 
      For each checker x, N(x) is checker location,
@@ -88,7 +109,7 @@ enum {
 
      152 is dgree of contact of start position.
   */
-  I_BREAK_CONTACT = HALF_RACE_INPUTS,
+  I_BREAK_CONTACT,
 
   /* Location of back checker (Normalized to [01])
    */
@@ -640,7 +661,9 @@ CalculateHalfInputs( int anBoard[ 25 ],
   afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0);
 
   {
+    /* timing in pips */
     int t = 0;
+
     int no = 0;
       
     t += 24 * anBoard[24];
@@ -1121,25 +1144,136 @@ CalculateHalfInputs( int anBoard[ 25 ],
   return 0;
 }
 
-
-/* Calculates neural net inputs from the board position.  Returns 0 for contact
-   positions, 1 for races. */
-static int CalculateInputs( int anBoard[ 2 ][ 25 ], float arInput[] ) {
-
-    float ar[ HALF_INPUTS ];
+static void 
+CalculateRaceInputs(int anBoard[2][25], float inputs[])
+{
+  unsigned int side;
+  
+  for(side = 0; side < 2; ++side) {
+    const int* const board = anBoard[side];
+    float* const afInput = inputs + side * HALF_RACE_INPUTS;
     int i;
     
-    int fRace = CalculateHalfInputs( anBoard[ 1 ], anBoard[ 0 ], ar );
+    /* assert( board[24] == 0 ); */
+    /* assert( board[23] == 0 ); */
+    
+    /* Points */
+    for(i = 0; i < 23; ++i) {
+      unsigned int const nc = board[ i ];
 
-    for( i = fRace ? HALF_RACE_INPUTS - 1 : HALF_INPUTS - 1; i >= 0; i-- )
-	arInput[ i << 1 ] = ar[ i ];
+      unsigned int k = i * 4;
+      
+      afInput[ k++ ] = nc == 1;
+      afInput[ k++ ] = nc >= 2;
+      afInput[ k++ ] = nc >= 3;
+      afInput[ k ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
+    }
+
+    /* Men off */
+    {
+      int menOff = 15;
+      int i;
+      
+      for(i = 0; i < 25; ++i) {
+	menOff -= board[i];
+      }
+
+      {
+	int k;
+	for(k = 0; k < 14; ++k) {
+	  afInput[ RI_OFF + k ] = menOff > k ? 1.0 : 0.0;
+	}
+      }
+    }
+
+    {
+      unsigned int nCross = 0;
+      unsigned int np = 0;
+      unsigned int k;
+      unsigned int i;
+      
+      for(k = 1; k < 4; ++k) {
+      
+	for(i = 6*k; i < 6*k + 6; ++i) {
+	  unsigned int const nc = board[i];
+
+	  if( nc ) {
+	    nCross += nc * k;
+
+	    np += nc * (i+1);
+	  }
+	}
+      }
+      
+      afInput[RI_NCROSS] = nCross / 10.0;
+      
+      afInput[RI_OPIP] = np / 50.0;
+
+      for(i = 0; i < 6; ++i) {
+	unsigned int const nc = board[i];
+
+	if( nc ) {
+	  np += nc * (i+1);
+	}
+      }
+      
+      afInput[RI_PIP] = np / 100.0;
+    }
+  }
+}
+
+static int
+isRace(int anBoard[2][25])
+{
+  int nOppBack;
+  int i;
+  
+  for(nOppBack = 24; nOppBack >= 0; --nOppBack) {
+    if( anBoard[1][nOppBack] ) {
+      break;
+    }
+  }
+    
+  nOppBack = 23 - nOppBack;
+
+  for(i = nOppBack + 1; i < 25; i++ ) {
+    if( anBoard[0][i] ) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+/* Calculates neural net inputs from the board position.
+   Returns 0 for contact positions, 1 for races. */
+
+int
+CalculateInputs(int anBoard[2][25], float arInput[])
+{
+  if( isRace(anBoard) ) {
+    CalculateRaceInputs(anBoard, arInput);
+    
+    return 1;
+  } else {
+
+    float ar[ HALF_INPUTS ];
+    int i, l;
+    
+    CalculateHalfInputs( anBoard[ 1 ], anBoard[ 0 ], ar );
+
+    l = HALF_INPUTS - 1;
+     
+    for( i = l; i >= 0; i-- )
+      arInput[ i << 1 ] = ar[ i ];
 
     CalculateHalfInputs( anBoard[ 0 ], anBoard[ 1 ], ar );
     
-    for( i = fRace ? HALF_RACE_INPUTS - 1 : HALF_INPUTS - 1; i >= 0; i-- )
-	arInput[ ( i << 1 ) | 1 ] = ar[ i ];
+    for( i = l; i >= 0; i-- )
+      arInput[ ( i << 1 ) | 1 ] = ar[ i ];
+  }
 
-    return fRace;
+  return 0;
 }
 
 extern void swap( int *p0, int *p1 ) {
