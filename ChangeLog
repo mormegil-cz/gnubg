@@ -1,3 +1,16 @@
+Sat Jun 26 16:49:31 CEST 2004  Nis Joergensen  <nis@superlativ.dk>
+
+	* speed.c (CommandCalibrate): Speed Calibration" now avoids using the
+	same seed for randomization every time, so gives reliable results on
+	consecutive runs.
+	* gtkboard.c: Dragging checkers allows for pick-and-pass. The logic I
+	have implemented is to hit if possible, and if there are two options,
+	hit with the "left" die (ie highest in standard setup). I am still
+	working on undo of pick-and-pass.
+	* play.c: Gnubg allows you to resign AFTER you roll, based on what you
+	rolled.  This actually fixes a way to cheat - resigning if your equity
+	drops to below -1 or -2  when you roll.
+
 Thu Jun 17 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkchequer.c, gtkgamelist.c: Fixes for styles in gamelist

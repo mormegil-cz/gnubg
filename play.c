@@ -150,6 +150,10 @@ NewMoveRecord( void ) {
 static int
 CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest );
 
+
+static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, int anBoard[ 2 ][ 25], 
+                    const cubeinfo *pci, const evalcontext *pec);
+
 #if USE_GTK
 #include "gtkgame.h"
 
@@ -1016,10 +1020,19 @@ extern int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
       const float epsilon = 1.0e-6;
-      const evalsetup* ces = &ap[ ms.fTurn ].esCube;;
-      
+
+      const evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
+     
       ProgressStart( _("Considering resignation...") );
-      getResignation( arOutput, ms.anBoard, &ci, ces );
+
+      if (ms.anDice[0] > 0) {
+          /* Opponent has rolled the dice and then resigned. We
+             want to find out if the resignation is OK after the roll */
+          EvaluateRoll (arOutput, ms.anDice[0], ms.anDice[1], ms.anBoard, &ci, NULL);
+      } else { 
+          GeneralEvaluationE( arOutput, ms.anBoard, &ci, &ecResign ) ;
+      }
+
       ProgressEnd();
 
       getResignEquities ( arOutput, &ci, ms.fResigned,
@@ -4298,23 +4311,13 @@ SetMatchID ( const char *szMatchID ) {
   int nMatchTo, fCubeOwner, fMove, fCrawford, nCube;
   int fTurn, fDoubled, fResigned;
   gamestate gs;
-
+  
   char szID[ 15 ];
 
   moverecord *pmr;
 
   if ( ! szMatchID || ! *szMatchID )
      return;
-
-  if( ms.gs == GAME_PLAYING && fConfirm ) {
-    if( fInterrupt )
-      return;
-	    
-    if( !GetInputYN( _("Are you sure you want to setup a new match id, "
-			 "and discard the game in progress? ") ) )
-      return;
-  }
-    
 
   if ( ms.gs == GAME_PLAYING )
     strcpy ( szID, PositionID ( ms.anBoard ) );
@@ -4633,33 +4636,17 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
               const cubeinfo *pci, const evalcontext *pec,
               const int fBest, int anDice[ 2 ] ) {
 
-  int anBoardTemp[ 2 ][ 25 ], i, j, k;
+  int i, j, k;
   float ar[ NUM_ROLLOUT_OUTPUTS ];
-  cubeinfo ciOpp;
   rollequity are[ 21 ];
   float r;
 
-  memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
-  ciOpp.fMove = ! pci->fMove;
-
   anDice[ 0 ] = anDice[ 1 ] = -1;
 
-  for( i = 0, k = 0; i < 6; i++ )
-    for( j = 0; j <= i; j++, ++k ) {
-      memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-              2 * 25 * sizeof( int ) );
-      
-      /* Find the best move for each roll at ply 0 only. */
-      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
-                        (cubeinfo *) pci, NULL, defaultFilters ) < 0 )
-        return;
-      
-      SwapSides( anBoardTemp );
-      
-      /* FIXME should we use EvaluatePositionCubeful here? */
+  for( i = 1, k = 0; i <= 6; i++ )
+    for( j = 1; j <= i; j++, ++k ) {
 
-      if ( GeneralEvaluationE( ar, anBoardTemp, &ciOpp, (evalcontext *) pec ) )
-        return;
+      EvaluateRoll (ar, i , j , anBoard, pci, pec);
 
       r = 
         ( pec->fCubeful ) ? ar[ OUTPUT_CUBEFUL_EQUITY ] : ar[ OUTPUT_EQUITY ];
@@ -4670,8 +4657,8 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
         r = -r;
 
       are[ k ].r = r;
-      are[ k ].anDice[ 0 ] = i + 1;
-      are[ k ].anDice[ 1 ] = j + 1;
+      are[ k ].anDice[ 0 ] = i;
+      are[ k ].anDice[ 1 ] = j;
 
     }
 
@@ -4679,6 +4666,28 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
 
   anDice[ 0 ] = are[ fBest ].anDice[ 0 ];
   anDice[ 1 ] = are[ fBest ].anDice[ 1 ];
+
+}
+
+static void EvaluateRoll ( float ar[ NUM_ROLLOUT_OUTPUTS ], int nDie1, int nDie2, int anBoard[ 2 ][ 25], 
+                    const cubeinfo *pci, const evalcontext *pec) {
+    int anBoardTemp[ 2 ][ 25 ];
+    cubeinfo ciOpp;
+
+    memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
+    ciOpp.fMove = ! pci->fMove;
+
+    memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ], 2 * 25 * sizeof( int ) );
+
+    if( FindBestMove( NULL, nDie1, nDie2, anBoardTemp,
+        (cubeinfo *) pci, NULL, defaultFilters ) < 0 )
+        return;
+
+
+    SwapSides( anBoardTemp );
+
+    if ( GeneralEvaluationE( ar, anBoardTemp, &ciOpp, (evalcontext *) pec ) )
+        return;
 
 }
 
