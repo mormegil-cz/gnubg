@@ -1,3 +1,23 @@
+Sat Oct 21 10:59:00 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* eval.h: `float *pEval' is changed to `float arEvalMove[ 5 ]'.
+	* eval.c (FindnSaveBestMoves): new function that find best moves,
+	but save evaluation for all moves (used for analysis).
+	* eval.c (Cl2CfMatchCentered): new function to calculate cube
+	centered cubeful equities for match play.
+	* eval.c (FormatEval5): return a 5 character string of the
+	evaluation type, for example: `2-ply' or 'R'.
+	* backgammon.h: Added new `movedouble' and added evaluation stuff
+	to `movenormal'.
+	* analysis.c: starting to implement analysis. It's working so far,
+	but it generates lots of debug output. Still missing: count
+	(anti-)jokers, errors, blunders etc.
+	* play.c (CommandDouble): New `movedouble' record.
+	* gnubg.c (CommandHint): new format for giving hint on moves. What
+	do you think?
+	* gnubg.c (ExportGame): bugfixes: missing new lines, and much
+	more. Snowie likes the format again :-)
+
 Sat Oct 21 01:04:26 2000  Gary Wong  <gary@research.att.com>
 
 	* play.c: Fix stupid bugs to _allow_ the computer to use the
