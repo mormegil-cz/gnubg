@@ -4646,7 +4646,7 @@ static void board_init( Board *board ) {
     
 
 #if USE_GTK2
-    bd->toolbar = gt_toolbar_new ();
+    bd->toolbar = gtk_toolbar_new ();
     gtk_toolbar_set_orientation ( GTK_TOOLBAR ( bd->toolbar ),
                                   GTK_ORIENTATION_HORIZONTAL );
     gtk_toolbar_set_style ( GTK_TOOLBAR ( bd->toolbar ),

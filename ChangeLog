@@ -1,3 +1,7 @@
+Mon Sep  9 15:38:11 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_init): Correct typo.
+
 Mon Sep  9 21:19:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Changed layout of main window.
