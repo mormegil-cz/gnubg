@@ -117,7 +117,9 @@ static void Write(const char* name, unsigned char* img, int cx, int cy)
 
 static void DrawArrow(int side, int player)
 { /* side 0 = left, 1 = right */
+#if HAVE_LIBART
 	int x, y;
+#endif
 	int offset_x = 0;
 
 	memcpy( auchMidlb, auchBoard, BOARD_WIDTH * s * BOARD_HEIGHT * s * 3 );
