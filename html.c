@@ -728,8 +728,8 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
-            ap[ 1 ].szName, anPips[ 0 ], 
-            ap[ 0 ].szName, anPips[ 1 ] );
+            ap[ 0 ].szName, anPips[ 1 ], 
+            ap[ 1 ].szName, anPips[ 0 ] );
   
 
 }
@@ -1097,8 +1097,8 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
-            ap[ 1 ].szName, anPips[ 0 ], 
-            ap[ 0 ].szName, anPips[ 1 ] );
+            ap[ 0 ].szName, anPips[ 1 ], 
+            ap[ 1 ].szName, anPips[ 0 ] );
   
   fprintf ( pf, "</p>\n" );
 
@@ -1607,8 +1607,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
-            ap[ 1 ].szName, anPips[ 0 ], 
-            ap[ 0 ].szName, anPips[ 1 ] );
+            ap[ 0 ].szName, anPips[ 1 ], 
+            ap[ 1 ].szName, anPips[ 0 ] );
 
   fputs ( "</p>\n", pf );
 
