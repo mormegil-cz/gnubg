@@ -1,3 +1,9 @@
+Thu Jul 25 21:06:42 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (AnalyzeMove): change prototype to take
+	evalsetup's instead of using esAnalysis{Cube,Chequer}.
+	Changed all callers.
+
 Thu Jul 25 20:01:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (getMWCFromError): avoid division by zero.
