@@ -2379,7 +2379,6 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
               "<th>%s</th><th>%s</th><th>%s</th>\n"
               "</tr>\n",
               _("Player"), 
-              iGame,
               ap[ 0 ].szName, ap[ 1 ].szName );
   }
   else {
