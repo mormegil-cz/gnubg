@@ -1596,9 +1596,6 @@ void drawTable(BoardData* bd)
 
 	glPopMatrix();
 
-	if (bd->State == BOARD_OPEN)
-		tidyEdges(bd);
-
 	if (rdAppearance.showMoveIndicator)
 		showMoveIndicator(bd);
 }
@@ -2855,6 +2852,9 @@ void drawBoard(BoardData* bd)
 	/* Draw things in correct order so transparency works correctly */
 	/* First pieces, then dice, then moving pieces */
 	drawPieces(bd);
+
+	if (bd->State == BOARD_OPEN)
+		tidyEdges(bd);
 
 	if (DiceShowing(bd))
 		drawDie(bd);

@@ -309,7 +309,7 @@ extern int BoardPoint3d(BoardData *bd, int x, int y, int point);
 extern int MouseMove3d(BoardData *bd, int x, int y);
 extern void ReadBoard3d(BoardData* bd, GtkWidget *widget, unsigned char* buf);
 extern void Tidy3dObjects(BoardData* bd);
-extern void TestPerformance3d(GtkWidget *pw, BoardData* bd);
+extern int TestPerformance3d(BoardData* bd);
 extern void testSet3dSetting(BoardData* bd, renderdata *prd, int testRow);
 extern void CopySettings3d(BoardData* from, BoardData* to);
 

@@ -1482,10 +1482,6 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 
 		/* -2 to avoid motion causing immediate edit */
 		bd->drag_point = -2;
-		/* Don't roll dice */
-		bd->diceShown = DICE_ON_BOARD;
-		bd->diceRoll[0] = 0;
-
 		GTKSetDice( NULL, 0, NULL );
 		return TRUE;
 	}
@@ -2213,8 +2209,9 @@ static gint board_set( Board *board, const gchar *board_text,
     if (fGUIHighDieFirst && bd->diceRoll[ 0 ] < bd->diceRoll[ 1 ] )
 	    swap( bd->diceRoll, bd->diceRoll + 1 );
 
-    if (bd->diceRoll[0] != old_dice[0] ||
-		bd->diceRoll[1] != old_dice[1] )
+	if (bd->diceRoll[0] != old_dice[0] ||
+		bd->diceRoll[1] != old_dice[1] ||
+		bd->drag_point == -2)	/* editing */
 	{
 		redrawNeeded = 1;
 
@@ -4113,7 +4110,6 @@ void InitBoardData()
 		bd->resigned = 0;
 	}
 	/* Set dice so 3d roll happens */
-g_print("Init data: dice roll ok?\n");
 	bd->diceShown = DICE_NOT_SHOWN;
 	bd->diceRoll[0] = bd->diceRoll[1] = -1;
 

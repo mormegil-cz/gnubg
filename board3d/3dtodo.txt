@@ -3,15 +3,18 @@ Todo
 
 Display settings
 ----------------
-* Get all options working...
+* Remove rdAppearance from notebook pages - pass in correct ones
+	+ So settings saved when switching 3d<->2d
 
 * Add material settings to appearnce dialog (see selmat.c)
 	+ Save/restore in designs
 	+ Display texture preview in a small box/rectangle
 * Store availiable textures in a text file or the xml file
 	+ Show list of available textures in drop-down
+	+ Assign types to textures (allow multiple) i.e. board, base, hinge, etc.
 + Move texture location from data directory to boards or boards/3d or boards/textures
 	+ Add them to cvs (as binary files)
+* Get all options working...
 + Remove testgtkboard.c file from lib build (and cvs)
 * Only enable 2d/3d skin options when selected
 * Move non-skin settings to new display option page
@@ -20,12 +23,13 @@ Bugs
 ====
 
 * Switch to 2d view - couple of gtk errors...
+* Switch to 2d and back to 3d, test performance -> lots of errors...
+
+* In 3d mode change settings - little pieces don't get invalidated
+	+ draw in BoardPreferencesDone() 3d bit
 
 * Show colour selection box in appearances, strange (gtk) error on settings exit
 	+ General delete case...?
-
-* 2+32 draw wrongly on cube after several changes
-	+ Not sure when happens... (still a problem?)
 
 Other things
 ============
@@ -35,6 +39,7 @@ Add tooltips for new options
 Add gtk 1.3 option (via other gtk widget)
 	+ Check compiles on windows
 		* Check running on linux box with BOARD3D set
+	* Get preview working (list sharing with gtkglarea) too
 Add check for unaccellerated graphics under linux
 	+ use glX functions
 
@@ -46,10 +51,8 @@ On close, remap background to a better shape?
 export position png - and any other place that uses rendered board
 FTGL uses C++
 
-Remove any build warnings
-Remove any g_prints/debug code
+Remove any warnings
 Check builds and runs without BOARD3D defined
-Remove BUILDING_LIB #define's/code
 
 Skin help
 =========

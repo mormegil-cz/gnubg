@@ -31,20 +31,13 @@
 #include "shadow.h"
 #include "renderprefs.h"
 #include "sound.h"
-#ifdef BUILDING_LIB
+#include "event.h"
 #include "backgammon.h"
-#endif
 
 double animStartTime = 0;
 int stopNextTime;
 int slide_move;
 extern int convert_point( int i, int player );
-
-#if !BUILDING_LIB
-#define gtk_main_quit() 0
-#define gtk_main() 0
-#endif
-
 extern void BuildFont(BoardData* bd);
 extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
@@ -952,37 +945,17 @@ int idleTestPerformance(BoardData* bd)
 	return 1;
 }
 
-void TestPerformance3d(GtkWidget *pw, BoardData* bd)
+int TestPerformance3d(BoardData* bd)
 {
-	GtkWidget *dialog;
-	char str[255];
-	char *msg;
 	float elapsedTime;
-	int fps;
+
 	setIdleFunc(bd, idleTestPerformance);
 	testStartTime = get_time();
 	numFrames = 0;
 	gtk_main();
 	elapsedTime = (float)(get_time() - testStartTime);
 
-	fps = numFrames / (elapsedTime / 1000);
-	if (fps >= 30)
-		msg = "3d Performance is very fast.\n";
-	else if (fps > 15)
-		msg = "3d Performance is good.\n";
-	else if (fps > 10)
-		msg = "3d Performance is ok.\n";
-	else if (fps > 5)
-		msg = "3d Performance is poor.\n";
-	else
-		msg = "3d Performance is very poor.\n";
-
-	sprintf(str, "%s\n(%d frames per second)\n",msg, fps);
-
-	dialog = gtk_message_dialog_new (0, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-			GTK_MESSAGE_INFO, GTK_BUTTONS_OK, str);
-	gtk_dialog_run(GTK_DIALOG(dialog));
-	gtk_widget_destroy(dialog);
+	return (int)(numFrames / (elapsedTime / 1000.0f));
 }
 
 void InitialPos(BoardData *bd)

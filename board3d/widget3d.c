@@ -26,6 +26,7 @@
 #include "inc3d.h"
 #include "shadow.h"
 #include "renderprefs.h"
+#include "backgammon.h"
 
 #if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
@@ -179,8 +180,10 @@ void realize(GtkWidget *widget, BoardData* bd)
 	InitGL(bd);
 	testSet3dSetting(bd, &rdAppearance, 0);
 
+#if HAVE_GTKGLEXT
 	if (!bd->preview)
 		mainContext = gtk_widget_get_gl_context(widget);
+#endif
 
 #if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
@@ -236,7 +239,9 @@ void CreateGLWidget(BoardData* bd, GtkWidget **drawing_area, int createBoard)
 	}
 	else
 	{	/* Set OpenGL-capability to the widget - share main lists */
+#if HAVE_GTKGLEXT
 		gtk_widget_set_gl_capability(*drawing_area, glconfig, mainContext, TRUE, GDK_GL_RGBA_TYPE);
+#endif
 	}
 #else
 	/* create new OpenGL widget */
@@ -246,7 +251,7 @@ void CreateGLWidget(BoardData* bd, GtkWidget **drawing_area, int createBoard)
 	if (*drawing_area == NULL)
 	{
 		g_print("Can't create GtkGLArea widget\n");
-		return FALSE;
+		return;
 	}
 #endif
 	gtk_widget_set_events(*drawing_area, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
@@ -352,7 +357,7 @@ void DoAcceleratedCheck(GtkWidget* board)
 		return;
 #endif
 {
-	int accl, dbl, col, depth, stencil, accum;
+	int accl = 0, dbl, col, depth, stencil, accum;
 	HDC dc = wglGetCurrentDC();
 
 /* Display graphics card details
@@ -379,20 +384,19 @@ void DoAcceleratedCheck(GtkWidget* board)
 		g_print("%sAccelerated\n(%s, %d bit col, %d bit depth, %d bit stencil, %d bit accum)\n",
 			accl ? "" : "NOT ", dbl?"Double buffered":"Single buffered", col, depth, stencil, accum);
 */
-		if (!accl)
-		{	/* Display warning message as performance will be bad */
-			GtkWidget *dialog = gtk_message_dialog_new (0, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-					GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, 
-					"No hardware accelerated graphics card found - performance may be slow.\n");
-			gtk_dialog_run(GTK_DIALOG(dialog));
-			gtk_widget_destroy(dialog);
-		}
 	}
-}
 #if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
 #endif
+
+	if (!accl)
+	{	/* Display warning message as performance will be bad */
+		outputl("No hardware accelerated graphics card found, ");
+		outputl("performance may be slow.\n");
+		outputx();
+	}
+}
 }
 
 #else
