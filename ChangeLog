@@ -1,6 +1,29 @@
+Thu Jul 13 09:08:01 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* configure.in: Merged the GTK and Ext ports back together.  Use
+	GTK if possible; otherwise use Ext if possible; otherwise use
+	plain TTY.  Extensive changes elsewhere to support merge.
+
+	* makebearoff.c (main): use binary mode on stdout, if possible,
+	to avoid problems on non-POSIX systems.
+
+Wed Jul 12 10:27:11 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkgame.c (HandleXAction): Recursive event handling is now
+	implemented again.  More GTK changes.  The GTK port should now
+	be more functional than the old X one.
+
 Wed Jul 12 09:14:34 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* eval.c: Added fRelativeAccuracy=TRUE to ecBasic.
+
+Tue Jul 11 13:44:49 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkgame.c: New file.  More extensive changes elsewhere.
+
+Mon Jul 10 09:54:48 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkboard.c: New file.  Extensive changes elsewhere for GTK port.
 
 Mon Jul 10 09:40:11 2000  Gary Wong  <gary@cs.arizona.edu>
 

@@ -1,7 +1,7 @@
 /*
- * dice.h
+ * gtkgame.h
  *
- * by Gary Wong, 1999
+ * by Gary Wong <gtw@gnu.org>, 2000.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -16,23 +16,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id$
  */
 
-#ifndef _DICE_H_
-#define _DICE_H_
+#ifndef _GTKGAME_H_
+#define _GTKGAME_H_
 
-typedef enum _rng {
-    RNG_ANSI, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MERSENNE, RNG_USER
-} rng;
-
-extern rng rngCurrent;
-
-extern int InitRNG( void );
-extern void InitRNGSeed( int n );
-extern int RollDice( int anDice[ 2 ] );
-
-extern void UserRNGClose();
-extern int UserRNGOpen();
+extern void RunGTK( void );
 
 #endif

@@ -23,12 +23,18 @@
 
 #include <ext.h>
 #include <extwin.h>
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef HAVE_RAND_R
-#include <rand_r.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#if HAVE_LIBREADLINE
+#include <readline/history.h>
+#include <readline/readline.h>
 #endif
 
 #include "xboard.h"
@@ -117,8 +123,7 @@ extwindowspec aewsStats[] = {
 
 int fBusy = FALSE;
 
-static unsigned int nSeed = 1; /* for rand_r */
-#define RAND ( ( (unsigned int) rand_r( &nSeed ) ) & RAND_MAX )
+static extdisplay edsp;
 
 static int StatsRedraw( extwindow *pewnd, statsdata *psd, int fClear ) {
 
@@ -378,14 +383,6 @@ static int DiceRedraw( extwindow *pewnd, dicedata *pdd ) {
     return 0;
 }
 
-static int DiceUnmapNotify( extwindow *pewnd, dicedata *pdd ) {
-
-    pdd->an[ 0 ] = ( RAND % 6 ) + 1;
-    pdd->an[ 1 ] = ( RAND % 6 ) + 1;
-    
-    return 0;
-}
-
 static int DicePreCreate( extwindow *pewnd ) {
 
     dicedata *pdd = malloc( sizeof( *pdd ) );
@@ -393,7 +390,7 @@ static int DicePreCreate( extwindow *pewnd ) {
     pdd->pgd = pewnd->pv;
     pewnd->pv = pdd;
 
-    return DiceUnmapNotify( pewnd, pdd );
+    return 0;
 }
 
 static int DiceHandler( extwindow *pewnd, XEvent *pxev ) {
@@ -405,10 +402,6 @@ static int DiceHandler( extwindow *pewnd, XEvent *pxev ) {
 
 	break;
 
-    case UnmapNotify:
-	DiceUnmapNotify( pewnd, pewnd->pv );
-	break;
-	
     case ButtonPress:
 	if( fBusy )
 	    XBell( pewnd->pdsp, 100 );
@@ -633,11 +626,16 @@ extern int GameSet( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
     if( !pewnd->pdsp )
 	return 0;
     
-    if( pgd->anDice[ 0 ] )
+    if( pgd->anDice[ 0 ] ) {
+	/* dice have been rolled; hide off-board dice */
+	( (dicedata *) pgd->ewndDice.pv )->an[ 0 ] = anDice[ 0 ];
+	( (dicedata *) pgd->ewndDice.pv )->an[ 1 ] = anDice[ 1 ];
 	XUnmapWindow( pewnd->pdsp, pgd->ewndDice.wnd );
-    else if( fDiceOld )
+    } else if( fDiceOld )
+	/* dice have been removed from board; show dice ready to roll */
 	XMapWindow( pewnd->pdsp, pgd->ewndDice.wnd );
     else
+	/* FIXME what is this for? */
 	DiceRedraw( &pgd->ewndDice, pgd->ewndDice.pv );
     
     return 0;
@@ -691,3 +689,157 @@ extwindowclass ewcGame = {
     "Game",
     aedGame
 };
+
+static int StdinReadNotify( event *pev, void *p ) {
+#if HAVE_LIBREADLINE
+    rl_callback_read_char();
+#else
+    char sz[ 2048 ], *pch;
+
+    sz[ 0 ] = 0;
+        
+    fgets( sz, sizeof( sz ), stdin );
+
+    if( ( pch = strchr( sz, '\n' ) ) )
+        *pch = 0;
+    
+        
+    if( feof( stdin ) ) {
+        PromptForExit();
+        return 0;
+    }   
+
+    fInterrupt = FALSE;
+
+    HandleCommand( sz, acTop );
+
+    ResetInterrupt();
+
+    if( evNextTurn.fPending )
+        fNeedPrompt = TRUE;
+    else
+        Prompt();
+#endif
+
+    EventPending( pev, FALSE ); /* FIXME is this necessary? */
+
+    return 0;
+}
+
+static eventhandler StdinReadHandler = {
+    StdinReadNotify, NULL
+}, NextTurnHandler = {
+    NextTurnNotify, NULL
+};
+
+extern void HandleXAction( void ) {
+    /* It is safe to execute this function with SIGIO unblocked, because
+       if a SIGIO occurs before fAction is reset, then the I/O it alerts
+       us to will be processed anyway.  If one occurs after fAction is reset,
+       that will cause this function to be executed again, so we will
+       still process its I/O. */
+    fAction = FALSE;
+
+    /* Set flag so that the board window knows this is a re-entrant
+       call, and won't allow commands like roll, move or double. */
+    fBusy = TRUE;
+
+    /* Process incoming X events.  It's important to handle all of them,
+       because we won't get another SIGIO for events that are buffered
+       but not processed. */
+    while( XEventsQueued( edsp.pdsp, QueuedAfterReading ) )
+        EventProcess( &edsp.ev );
+
+    /* Now we need to commit (the timeout will call ExtDspCommit). */
+    EventTimeout( &edsp.ev );
+
+    fBusy = FALSE;
+}
+
+extern void RunExt( void ) {
+    /* Attempt to execute under X Window System.  Returns on error (for
+       fallback to TTY), or executes until exit() if successful. */
+    Display *pdsp;
+    XrmDatabase rdb;
+    XSizeHints xsh;
+    char *pch;
+    event ev;
+    int n;
+    
+    XrmInitialize();
+    
+    if( InitEvents() )
+        return;
+    
+    if( InitExt() )
+        return;
+
+    /* FIXME allow command line options */
+    if( !( pdsp = XOpenDisplay( NULL ) ) )
+        return;
+
+    if( ExtDspCreate( &edsp, pdsp ) ) {
+        XCloseDisplay( pdsp );
+        return;
+    }
+
+    /* FIXME check if XResourceManagerString works! */
+    if( !( pch = XResourceManagerString( pdsp ) ) )
+        pch = "";
+
+    rdb = XrmGetStringDatabase( pch );
+
+    /* FIXME override with $XENVIRONMENT and ~/.gnubgrc */
+
+    /* FIXME get colourmap here; specify it for the new window */
+    
+    ExtWndCreate( &ewnd, NULL, "game", &ewcGame, rdb, NULL, NULL );
+    ExtWndRealise( &ewnd, pdsp, DefaultRootWindow( pdsp ),
+                   "540x480+100+100", None, 0 );
+
+    ShowBoard();
+
+    /* FIXME all this should be done in Ext somehow */
+    XStoreName( pdsp, ewnd.wnd, "GNU Backgammon" );
+    XSetIconName( pdsp, ewnd.wnd, "GNU Backgammon" );
+    xsh.flags = PMinSize | PAspect;
+    xsh.min_width = 124;
+    xsh.min_height = 132;
+    xsh.min_aspect.x = 108;
+    xsh.min_aspect.y = 102;
+    xsh.max_aspect.x = 162;
+    xsh.max_aspect.y = 102;
+    XSetWMNormalHints( pdsp, ewnd.wnd, &xsh );
+
+    XMapRaised( pdsp, ewnd.wnd );
+
+    EventCreate( &ev, &StdinReadHandler, NULL );
+    ev.h = STDIN_FILENO;
+    ev.fWrite = FALSE;
+    EventHandlerReady( &ev, TRUE, -1 );
+
+    EventCreate( &evNextTurn, &NextTurnHandler, NULL );
+    evNextTurn.h = -1;
+    EventHandlerReady( &evNextTurn, TRUE, -1 );
+
+    /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
+    fnAction = HandleXAction;
+    if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
+        fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
+        fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
+    }
+    
+#if HAVE_LIBREADLINE
+    fReadingCommand = TRUE;
+    rl_callback_handler_install( FormatPrompt(), HandleInput );
+    atexit( rl_callback_handler_remove );
+#else
+    Prompt();
+#endif
+    
+    HandleEvents();
+
+    /* Should never return. */
+    
+    abort();
+}

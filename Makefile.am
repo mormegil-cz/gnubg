@@ -1,7 +1,7 @@
-if NOX
-SUBDIRS = lib doc
-else
+if USE_EXT
 SUBDIRS = lib doc ext
+else
+SUBDIRS = lib doc
 endif
 
 COMMON_INCS = -I$(srcdir)/lib
@@ -15,17 +15,27 @@ COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg
 
-if NOX
-INCLUDES = $(COMMON_INCS)
-gnubg_SOURCES = $(COMMON_SOURCES)
-gnubg_LDADD = $(COMMON_LIBS)
+if USE_GTK
+## --- GTK
+INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
+gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h
+gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
+if USE_EXT
+## --- EXT
 INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
 gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
 gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
 	$(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
+else
+## --- Plain
+INCLUDES = $(COMMON_INCS)
+gnubg_SOURCES = $(COMMON_SOURCES)
+gnubg_LDADD = $(COMMON_LIBS)
+gnubg_DEPENDENCIES = $(COMMON_DEPS)
+endif
 endif
 
 pkgdata_DATA = gnubg.bd gnubg.wd

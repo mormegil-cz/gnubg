@@ -254,7 +254,7 @@ extern void CommandSetCubeCentre( char *sz ) {
 
     puts( "The cube has been centred (either player may double)." );
     
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX )
 	ShowBoard();
 #endif
@@ -292,7 +292,7 @@ extern void CommandSetCubeOwner( char *sz ) {
 
     printf( "%s now owns the cube.\n", ap[ fCubeOwner ].szName );
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX )
 	ShowBoard();
 #endif    
@@ -325,7 +325,7 @@ extern void CommandSetCubeUse( char *sz ) {
 	nCube = 1;
 	fCubeOwner = -1;
 	
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 	if( fX )
 	    ShowBoard();
 #endif
@@ -352,7 +352,7 @@ extern void CommandSetCubeValue( char *sz ) {
 	if( n == i ) {
 	    printf( "The cube has been set to %d.\n", nCube = n );
 	    
-#if !X_DISPLAY_MISSING
+#if USE_GUI
 	    if( fX )
 		ShowBoard();
 #endif
@@ -363,7 +363,7 @@ extern void CommandSetCubeValue( char *sz ) {
 }
 
 extern void CommandSetDelay( char *sz ) {
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     int n;
 
     if( fX ) {
@@ -387,8 +387,8 @@ extern void CommandSetDelay( char *sz ) {
 	nDelay = n;
     } else
 #endif
-	puts( "The `set delay' command applies only when using the X Window "
-	      "System." );
+	puts( "The `set delay' command applies only when using a window "
+	      "system." );
 }
 
 extern void CommandSetDice( char *sz ) {
@@ -419,7 +419,7 @@ extern void CommandSetDice( char *sz ) {
     printf( "The dice have been set to %d and %d.\n", anDice[ 0 ] = n0,
 	    anDice[ 1 ] = n1 );
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX )
 	ShowBoard();
 #endif
@@ -543,7 +543,7 @@ extern void CommandSetNackgammon( char *sz ) {
 	       "Nackgammon starting position.", "New games will use the "
 	       "standard backgammon starting position." );
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX && fTurn == -1 )
 	ShowBoard();
 #endif
@@ -880,7 +880,7 @@ extern void CommandSetTurn( char *sz ) {
 
     anDice[ 0 ] = anDice[ 1 ] = 0;
 
-#if !X_DISPLAY_MISSING
+#if USE_GUI
     if( fX )
 	ShowBoard();
 #endif

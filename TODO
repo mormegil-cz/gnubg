@@ -50,10 +50,6 @@ duplication of effort and to make sure our changes merge easily.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
-** Add a board edit mode (button 1 drags chequers, button 2 adds
-  player 0/removes player 1, button 3 adds player 1/removes player 0).
-** Add a game window, which lists the moves made in the game so far and
-  allows moving back and forth.
 ** Don't flood the server with requests (which can happen if gnubg is
   playing itself at ply 0).  Wait until the server has finished the
   previous ShowBoard before sending a new one; boards in the meantime
@@ -62,12 +58,17 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow clicking on a point to make that point.
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
-** Add GTK support.
-*** Make sure the board window behaves properly with ICCCM things.
-*** Allow copy/paste and drag & drop of the board ID in the board window.
-*** Add silly bells and whistles.  Things like colour selector for chequer
+
+* GTK interface:
+** Add a board edit mode (button 1 drags chequers, button 2 adds
+  player 0/removes player 1, button 3 adds player 1/removes player 0).
+** Add a game window, which lists the moves made in the game so far and
+  allows moving back and forth.
+** Make sure the board window behaves properly with ICCCM things.
+** Allow copy/paste and drag & drop of the board ID in the board window.
+** Add silly bells and whistles.  Things like colour selector for chequer
   colours, angle of light, surface of pieces, transparent background, etc.
-*** Add menus and dialogs so that games can be played without the
+** Add menus and dialogs so that games can be played without the
   terminal window at all.
 
 * Bugs:
@@ -84,6 +85,8 @@ duplication of effort and to make sure our changes merge easily.
   the dice, which then need updating.
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages; "help r" doesn't do anything.
+** The GTK code uses ConnectionNumber() at various places to detect X
+  events.  This is unportable and ugly; find something better. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

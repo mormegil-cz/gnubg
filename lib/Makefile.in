@@ -110,7 +110,7 @@ rand_r.c
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 DEP_FILES =  .deps/buffer.P .deps/dynarray.P .deps/event.P .deps/fifo.P \
 .deps/hash.P .deps/hashtest.P .deps/heap.P .deps/list.P \
