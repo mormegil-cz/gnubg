@@ -143,11 +143,9 @@ static list *LoadCollection( char *sz ) {
 	}
 	    
 	if( ListEmpty( plCollection ) ) {
-	    fError = FALSE; /* we always want to see this one */
 	    ErrorHandler( _("warning: no backgammon games in SGF file"), TRUE );
 	    free( plCollection );
-            PopLocale ();
-	    return NULL;
+	    plCollection = NULL;
 	}
     }
     
