@@ -70,8 +70,10 @@ typedef enum _stylesheetclass {
   CLASS_BLOCK,
   CLASS_PERCENT,
   CLASS_POSITIONID,
-  CLASS_CUBENUMBER,
-  CLASS_CUBEACTIONTEXT,
+  CLASS_CUBE_EQUITY,
+  CLASS_CUBE_ACTION,
+  CLASS_CUBE_PLY,
+  CLASS_CUBE_PROBABILITIES,
   NUM_CLASSES 
 } stylesheetclass;
 
@@ -110,8 +112,10 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "block", "display: block" },
   { "percent", "text-align: right" },
   { "positionid", "font-size: 75%; color: #787878" },
-  { "cubenumbers", "font-weight: bold" },
-  { "cubeactiontext", "color: red" }
+  { "cubeequity", "font-weight: bold" },
+  { "cubeaction", "color: red" },
+  { "cubeply", "font-weight: bold" },
+  { "cubeprobs", "font-weight: bold" }
 };
 
 
@@ -2146,7 +2150,10 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* ply */
 
-  fputs ( "<td colspan=\"2\">", pf );
+  fprintf ( pf, 
+            "<td colspan=\"2\">"
+            "<span %s>", 
+            GetStyle( CLASS_CUBE_PLY, hecss ) );
   
   switch ( pes->et ) {
   case EVAL_NONE:
@@ -2165,11 +2172,16 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   /* cubeless equity */
 
   if ( pci->nMatchTo ) 
-    fprintf ( pf, " %s</td><td>%s</td><td>(%s: %s)</td>\n",
+    fprintf ( pf, 
+              "</span> %s</td>"
+              "<td %s>%s</td>"
+              "<td>(%s: <span %s>%s</span>)</td>\n",
               ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
               _("cubeless equity") : _("cubeless MWC"),
+              GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ),
               _("Money"), 
+               GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
   else
     fprintf ( pf, " cubeless equity</td><td>%s</td><td>&nbsp;</td>\n",
@@ -2185,7 +2197,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     fprintf( pf, 
              "<tr><td>&nbsp;</td>"
              "<td colspan=\"3\" %s>", 
-             GetStyle( CLASS_CUBENUMBER, hecss ) );
+             GetStyle( CLASS_CUBE_PROBABILITIES, hecss ) );
 
     fputs ( OutputPercents ( aarOutput[ 0 ], TRUE ), pf );
 
@@ -2220,7 +2232,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     fprintf ( pf,
               "<td %s>%s</td>",
-              GetStyle( CLASS_CUBENUMBER, hecss ),
+              GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputEquity ( arDouble[ ai [ i ] ], pci, TRUE ) );
 
     if ( i )
@@ -2243,7 +2255,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
             "<tr><td colspan=\"2\">%s</td>"
             "<td colspan=\"2\" %s>%s",
             _("Proper cube action:"),
-            GetStyle( CLASS_CUBEACTIONTEXT, hecss ),
+            GetStyle( CLASS_CUBE_ACTION, hecss ),
             GetCubeRecommendation ( cd ) );
 
   if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 )
@@ -2520,7 +2532,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       fprintf ( pf, 
                 "<td %s>%s</td>\n",
                 GetStyle ( CLASS_MOVENUMBER, hecss ), 
-                ( i == pmr->n.iMove ) ? "*" : "&nbsp;" );
+                ( i == pmr->n.iMove ) ? bullet : "&nbsp;" );
 
       /* move no */
 

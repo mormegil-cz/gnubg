@@ -1,3 +1,8 @@
+Sat Jul 26 19:16:45 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (HTMLPrintCubeAnalysisTable): more styles.
+	* html.c (HTMLPrintMoveAnalysi): use bullet instead of *.
+
 Sat Jul 26 17:18:40 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (board_set): oops, get rid of button_clockwise.
