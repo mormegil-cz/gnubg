@@ -664,6 +664,7 @@ extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
             if( j > i ) {
                 pnSource[ i ] = pnSource[ j ];
                 pnDest[ i ] = pnDest[ j ];
+		anCount[ i ] = anCount[ j ];
             }
 
 	    i++;

@@ -1,3 +1,8 @@
+Thu Jan 10 11:43:20 2002  Gary Wong  <gtw@research.att.com>
+
+	* drawboard.c (FormatMove): Add line I omitted when merging
+	Robert Konigsberg's earlier patch.
+
 Wed Jan  9 11:28:54 2002  Gary Wong  <gtw@research.att.com>
 
 	* set.c: #include <limits.h> wherever it is available, not just
