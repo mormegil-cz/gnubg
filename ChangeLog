@@ -1,3 +1,11 @@
+Wed Jul 24 16:44:33 2002  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (ProcessInput): Protect the HandleCommand call with
+	GTKDisallowStdin/GTKAllowStdin when appropriate.  This should
+	fix the readline handler bug noted earlier, but it buffers
+	input instead of discarding it and avoids messing with readline's
+	state.
+
 Wed Jul 24 18:34:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
  	Tutor mode (contributed by Jim Segrave).

@@ -135,7 +135,6 @@ int fReadingCommand;
 
 #if HAVE_LIBREADLINE
 int fReadline = TRUE;
-void HandleInputIgnore( char *sz );
 #endif
 
 #if !defined(SIGIO) && defined(SIGPOLL)
@@ -4317,7 +4316,6 @@ extern void Prompt( void ) {
 static void ProcessInput( char *sz, int fFree ) {
     
     rl_callback_handler_remove();
-    rl_callback_handler_install ("", HandleInputIgnore);
     fReadingCommand = FALSE;
     
     if( !sz ) {
@@ -4331,7 +4329,17 @@ static void ProcessInput( char *sz, int fFree ) {
     if( *sz )
 	add_history( sz );
 	
+#if USE_GTK
+    if( fX )
+	GTKDisallowStdin();
+#endif
+	    
     HandleCommand( sz, acTop );
+    
+#if USE_GTK
+    if( fX )
+	GTKAllowStdin();
+#endif
 
     ResetInterrupt();
 
@@ -4361,12 +4369,6 @@ extern void HandleInput( char *sz ) {
     ProcessInput( sz, TRUE );
 }
 
-extern void HandleInputIgnore( char *sz ) {
-
-  outputl (_("Busy - command ignored"));
-}
-
- 
 static char *szInput;
 static int fInputAgain;
 
@@ -4383,7 +4385,6 @@ void HandleInputRecursive( char *sz ) {
     szInput = sz;
 
     rl_callback_handler_remove();
-    rl_callback_handler_install( "", HandleInputIgnore);        
 }
 #endif
 
@@ -4571,11 +4572,8 @@ extern char *GetInput( char *szPrompt ) {
 		rl_point = nOldPoint;
 		rl_redisplay();
 		fReadingCommand = TRUE;
-	    } else {
+	    } else
 		rl_callback_handler_remove();	
-
-                rl_callback_handler_install( "", HandleInputIgnore);
-            }
 	    
 	    fReadingOther = FALSE;
 	    
