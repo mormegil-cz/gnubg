@@ -765,7 +765,8 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
 
 /* 
  * Extend match equity table to MAXSCORE using
- * David Montgomery's extrapolation algorithm.
+ * David Montgomery's extension algorithm. The formula
+ * is independent of the values for score < nMaxScore.
  *
  * Input:
  *    nMaxScore: the length of the native met
