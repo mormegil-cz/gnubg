@@ -617,7 +617,7 @@ extern void CommandExternal( char *sz ) {
       }
       outputf( _("Waiting for a connection from %s...\n"), sz);
 
-      // Must set length when using windows
+      /* Must set length when using windows */
       saLen = sizeof(struct sockaddr);
       while( ( hPeer = accept( h, (struct sockaddr*)&saRemote, &saLen ) ) < 0 ) {
 	if( errno == EINTR ) {

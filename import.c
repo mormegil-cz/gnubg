@@ -295,7 +295,7 @@ ImportJF( FILE * fp, char *szFileName) {
   
 #if USE_GTK
 	if( fX )
-	{	// Clear record to avoid ugly updates
+	{	/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}
@@ -906,7 +906,7 @@ extern int ImportMat( FILE *fp, char *szFilename ) {
 
 #if USE_GTK
 	if( fX )
-	{	// Clear record to avoid ugly updates
+	{	/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}
@@ -1367,7 +1367,7 @@ extern int ImportOldmoves( FILE *pf, char *szFilename ) {
 
 #if USE_GTK
 	if( fX )
-	{	// Clear record to avoid ugly updates
+	{	/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}
@@ -2133,7 +2133,7 @@ extern int ImportSGG( FILE *pf, char *szFilename ) {
 
 #if USE_GTK
 	if( fX )
-	{	// Clear record to avoid ugly updates
+	{	/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}
@@ -2623,7 +2623,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
 
 #if USE_GTK
 	if( fX )
-	{	// Clear record to avoid ugly updates
+	{	/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}
@@ -2818,7 +2818,7 @@ extern int ImportBKG( FILE *pf, const char *szFilename ) {
 
 #if USE_GTK
 	if( fX )
-	{	// Clear record to avoid ugly updates
+	{	/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}
@@ -3022,7 +3022,7 @@ ImportSnowieTxt( FILE *pf ) {
   
 #if USE_GTK
 	if( fX )
-	{	// Clear record to avoid ugly updates
+	{	/* Clear record to avoid ugly updates */
 		GTKClearMoveRecord();
 		GTKFreeze();
 	}

@@ -2055,7 +2055,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 #endif
     
     for( i = 0; i < 6; i++ ) {
-	// Clear destination buffer (no blending at present - so all overwriten anyway)
+	/* Clear destination buffer (no blending at present - so all overwriten anyway) */
 	memset(puch, 0, nStride * CUBE_LABEL_HEIGHT * prd->nSize);
 
 	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
@@ -2075,7 +2075,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     }
     
     for( ; i < 12; i++ ) {
-	// Clear destination buffer (no blending at present - so all overwriten anyway)
+	/* Clear destination buffer (no blending at present - so all overwriten anyway) */
 	memset(puch, 0, nStride * CUBE_LABEL_HEIGHT * prd->nSize);
 
 	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
@@ -2135,7 +2135,7 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
 #endif
     
     for( i = 0; i < 3; i++ ) {
-	// Clear destination buffer (no blending at present - so all overwriten anyway)
+	/* Clear destination buffer (no blending at present - so all overwriten anyway) */
 	memset(puch, 0, nStride * RESIGN_LABEL_HEIGHT * prd->nSize);
 
 	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
