@@ -4980,11 +4980,11 @@ Tue Aug  6 21:38:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
         as link. Should make it easier to publish produced
         html file on the web, e.g., with links
 
-        <a href="bla.html"> 
+        <a href="bla.html">bla</a>
 
         instead of
 
-        <a href="/home/jth/prog/gnubg-bugfix/bla.html">
+        <a href="/home/jth/prog/gnubg-bugfix/bla.html">bla</a>
 
 Tue Aug  6 21:28:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
