@@ -1,3 +1,9 @@
+Fri Apr 27 13:15:01 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	* analyze.c (AnalyzeGame): bugfix: fPlayer is set in 
+	the preceeding MOVE_DOUBLE, and should be inverted several 
+	places.
+
 Fri Apr 27 11:40:58 2001  Jørn Thyssen  <joern@thyssen.nu>
 
 	* set.c (CommandSetEvalReduced), show.c (ShowEvaluation): 
