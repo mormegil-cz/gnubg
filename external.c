@@ -59,7 +59,7 @@ extern int ExternalRead( int h, char *pch, int cch ) {
 	if( fInterrupt )
 	    return -1;
 
-	PortableSignal( SIGPIPE, SIG_IGN, &sh );
+	PortableSignal( SIGPIPE, SIG_IGN, &sh, FALSE );
 	n = read( h, p, cch );
 	PortableSignalRestore( SIGPIPE, &sh );
 	
@@ -104,7 +104,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 	if( fInterrupt )
 	    return -1;
 
-	PortableSignal( SIGPIPE, SIG_IGN, &sh );
+	PortableSignal( SIGPIPE, SIG_IGN, &sh, FALSE );
 	n = write( h, p, cch );
 	PortableSignalRestore( SIGPIPE, &sh );
 	

@@ -1,3 +1,17 @@
+Fri Apr  6 10:31:39 2001  Gary Wong  <gtw@research.att.com>
+
+	* guile.c (menu_bar): New function.
+	
+	* gnubg.c (PortableSignal): Added fRestart parameter.  All callers
+	changed.
+	
+	* eval.c (EvaluatePositionFull): Added David's reduced 2-ply search
+	code.
+
+	* database.c (CommandDatabaseVerify): New function.
+
+	* configure.in: Support guile-gtk, if available.
+
 Fri Apr  6 16:14:19 2001  Jørn Thyssen  <joern@thyssen.nu>
 
 	* set.c (SetMet): Write info about match equity table being

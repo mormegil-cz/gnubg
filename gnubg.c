@@ -212,6 +212,8 @@ command acAnnotate[] = {
       "for future training", NULL, NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL, NULL },
+    { "verify", CommandDatabaseVerify, "Measure the current network error "
+      "against the database", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExport[] = {
     /* FIXME once we have more formats, add another level in the hierarchy
@@ -375,9 +377,9 @@ command acAnnotate[] = {
       "parameters", NULL, acSetEvaluation },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, NULL },
-    { "met", NULL, "Synonym for `set matchequitytable'", NULL,
-      acSetMET },
     { "matchequitytable", NULL, "Select match equity table", NULL,
+      acSetMET },
+    { "met", NULL, "Synonym for `set matchequitytable'", NULL,
       acSetMET },
     { "nackgammon", CommandSetNackgammon, "Set the starting position",
       szONOFF, NULL },
@@ -825,7 +827,7 @@ static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
 }
 
 extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
-			     psighandler *pOld ) {
+			    psighandler *pOld, int fRestart ) {
 #if HAVE_SIGACTION
     struct sigaction sa;
 
@@ -833,7 +835,7 @@ extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
     sigemptyset( &sa.sa_mask );
     sa.sa_flags =
 # if SA_RESTART
-	nSignal == SIGINT || nSignal == SIGIO ? 0 : SA_RESTART |
+	( fRestart ? SA_RESTART : 0 ) |
 # endif
 # if SA_NOCLDSTOP
 	SA_NOCLDSTOP |
@@ -904,9 +906,9 @@ void ShellEscape( char *pch ) {
 #if USE_GUI
     psighandler shChild;
     
-    PortableSignal( SIGCHLD, HandleChild, &shChild );
+    PortableSignal( SIGCHLD, HandleChild, &shChild, TRUE );
 #endif
-    PortableSignal( SIGQUIT, SIG_IGN, &shQuit );
+    PortableSignal( SIGQUIT, SIG_IGN, &shQuit, TRUE );
     
     if( ( pid = fork() ) < 0 ) {
 	/* Error */
@@ -1031,7 +1033,7 @@ extern void HandleCommand( char *sz, command *ac ) {
 		SCM sResult;
 		psighandler sh;
 
-		PortableSignal( SIGINT, NULL, &sh );
+		PortableSignal( SIGINT, NULL, &sh, FALSE );
 		GuileStartIntHandler();
 		if( ( sResult = scm_internal_catch( SCM_BOOL_T,
 				    (scm_catch_body_t) scm_eval_0str,
@@ -3240,10 +3242,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( fTTY )
 #endif
 	if( fInteractive )
-	    PortableSignal( SIGINT, HandleInterrupt, NULL );
+	    PortableSignal( SIGINT, HandleInterrupt, NULL, FALSE );
     
 #if USE_GUI && defined(SIGIO)
-    PortableSignal( SIGIO, HandleIO, NULL );
+    PortableSignal( SIGIO, HandleIO, NULL, TRUE );
 #endif
     
 #if HAVE_LIBREADLINE

@@ -186,8 +186,6 @@ duplication of effort and to make sure our changes merge easily.
   errors on mmap()ed regions are the most unportable that can be imagined...
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages.
-** The GTK code uses ConnectionNumber() at various places to detect X
-  events.  This is unportable and ugly; find something better. (gary)
 ** "set player <tab>" gives incorrect completions.
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
