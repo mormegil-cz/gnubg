@@ -71,7 +71,7 @@ extern extwindowclass ewcGame;
 /* FIXME these shouldn't be part of the interface... Board windows should
    send client messages to their owners instead */
 extern int StatsConfirm( extwindow *pewnd );
-extern int StatsMove( extwindow *pewnd, int nSource, int nDest, int fHit );
+extern int StatsMove( extwindow *pewnd );
 
 extern void GameRedrawDice( extwindow *pewnd, gamedata *pgd, int x, int y,
 			     int fColour, int i );

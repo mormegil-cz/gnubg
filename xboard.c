@@ -294,7 +294,7 @@ static int BoardPoint( extwindow *pewnd, gamedata *pgd, int x0, int y0 ) {
 static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
     Pixmap pmSwap;
-    int n, nDest, xEvent, yEvent, nBar, fHit;
+    int n, nDest, xEvent, yEvent, nBar;
 
     if( fBusy ) {
 	if( pxev->type == ButtonPress )
@@ -321,6 +321,16 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
     
     switch( pxev->type ) {
     case ButtonPress:
+	pgd->nDragPoint = BoardPoint( pewnd, pgd, xEvent, yEvent );
+
+	/* FIXME if the dice are set, and nDragPoint is between 1 and 24 and
+	   contains no chequers of the player on roll, then scan through all
+	   the legal moves looking for the one which makes that point with
+	   the smallest pip count, make it and return. */
+
+	/* FIXME if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
+	   then bear off as many chequers as possible, and return. */
+	
 	if( ( pgd->nDragPoint = BoardPoint( pewnd, pgd, xEvent, yEvent ) ) < 0
 	    || ( pgd->nDragPoint < 28 && !pgd->anBoard[ pgd->nDragPoint ] ) ) {
 	    /* Click on empty point, or not on a point at all */
@@ -457,7 +467,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	    nDest = pgd->nDragPoint;
 	}
 
-	if( ( fHit = ( pgd->anBoard[ nDest ] == -pgd->fDragColour ) ) ) {
+	if( pgd->anBoard[ nDest ] == -pgd->fDragColour ) {
 	    pgd->anBoard[ nDest ] = 0;
 	    pgd->anBoard[ nBar ] -= pgd->fDragColour;
 
@@ -469,7 +479,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	BoardExposePoint( pewnd, pgd, nDest );
 
 	if( pgd->nDragPoint != nDest )
-	    StatsMove( &pgd->ewndStats, pgd->nDragPoint, nDest, fHit );
+	    StatsMove( &pgd->ewndStats );
 	
 	pgd->nDragPoint = -1;
 

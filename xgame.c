@@ -255,7 +255,7 @@ static void StatsUpdateBoardID( extwindow *pewnd, statsdata *psd,
 			      PositionID( anBoard ), 15 );
 }
 
-extern int StatsMove( extwindow *pewnd, int nSource, int nDest, int fHit ) {
+extern int StatsMove( extwindow *pewnd ) {
 
     char sz[ 40 ], *pch = "Illegal move";
     statsdata *psd = pewnd->pv;
