@@ -7411,3 +7411,24 @@ Convert ( const char *sz,
 
 }
 
+
+extern void
+TextToClipboard( const char *sz ) {
+
+#if USE_GTK
+  if ( fX ) {
+    printf ( "pyf\n" );
+    GTKTextToClipboard( sz );
+    return;
+  }
+#else
+#  if WIN32
+  WinCopy ( sz );
+#  else
+  /* no clipboard: just write string */
+  outputl( sz );
+#  endif
+#endif
+
+
+}

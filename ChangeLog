@@ -1,3 +1,13 @@
+Sun Mar  2 16:31:31 2003  Joern Thyssen  <jth@gnubg.org>
+
+	New function: TextToClipboard. Copies a given string to
+	the clipboard (works for both wintendo and *nix).
+
+	* gnubg.c (TextToClipboard): new function.
+	* gtkgame.c (GTKTextToClipboard): new function.
+	* gtkgame.c (InitGTK): add pwMain as target for primary selections.
+	* html.c (CommandExportPositionGammOnLine): put html on clipboard.
+
 Sun Mar  2 16:02:51 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Rename .gnubgpr to .gnubg/gnubgpr

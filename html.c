@@ -4101,17 +4101,20 @@ CommandExportPositionGammOnLine ( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
     
-#ifdef WIN32
-    /* rewind(pf); */
+    /* copy contents onto clipboard */
+
+    if ( pf != stdout ) {
     
-    pf = fopen( sz, "r");  /* why doesn't rewind(pf) work? */
+       pf = fopen( sz, "r");  /* why doesn't rewind(pf) work? */
     
-    while ( (szClipboard[i] = fgetc(pf)) != EOF )
-	    i++;
-    szClipboard[i]= '\0';
-    WinCopy( szClipboard );
-    fclose( pf );
-#endif
+       while ( (szClipboard[i] = fgetc(pf)) != EOF )
+   	    i++;
+       szClipboard[i]= '\0';
+
+       TextToClipboard(szClipboard);
+       fclose( pf );
+    
+    }
 
 }
 
