@@ -1,3 +1,8 @@
+Tue Sep 17 17:02:57 2002  Gary Wong  <gtw@gnu.org>
+
+	* record.c: New file.  Keep a record of per-player statistics.
+	* gtkgame.c (GTKRecordShow): New function.  View per-player statistics.
+
 Tue Sep 17 10:47:03 2002  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (real_main): Make sound code conditional (reported by

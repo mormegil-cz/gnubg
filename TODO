@@ -303,7 +303,10 @@ the rollouts off and come back later.
 ** Save the results of rollouts/evaluations performed with hint during playing
 ** during tutor mode chequers are sometimes moved around and not
   fully drawn, a.k.a. the "half-chequer" problem reported by Ian Shaw.
-
+  (Hopefully fixed as of 2002-09-15.)
+** Make GTKRecordShow() fancier (when selecting a user, show a detailed view
+  of that record including the cube error breakdowns and the ratings
+  corresponding to each error rate). (gary)
 
 * Obselete or problematic ideas (probably better not to implement these):
 ** Save partial input when TTY input is overwritten by an X command.

@@ -336,6 +336,7 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTCOMMAND[] = N_("[command]"),
     szOPTFILENAME[] = N_("[filename]"),
     szOPTLIMIT[] = N_("[limit]"),
+    szOPTNAME[] = N_("[name]"),
     szOPTPOSITION[] = N_("[position]"),
     szOPTSEED[] = N_("[seed]"),
     szOPTSIZE[] = N_("[size]"),
@@ -378,6 +379,9 @@ command cER = {
 }, cExportCubeDisplay = {
     /* dummy command used for player cube to display */
     NULL, NULL, NULL, NULL, &cExportCubeDisplay
+}, cRecordName = {
+    /* dummy command used for player record names */
+    NULL, NULL, NULL, NULL, &cRecordName
 }, acAnalyse[] = {
     { "game", CommandAnalyseGame, 
       N_("Compute analysis and annotate current game"),
@@ -590,6 +594,20 @@ command cER = {
     { "weights", CommandNewWeights, N_("Create new (random) neural net "
       "weights"), szOPTSIZE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acRecordAdd[] = {
+    { "game", CommandRecordAddGame,
+      N_("Log the game statistics to the player records"), NULL, NULL },
+    { "match", CommandRecordAddMatch, 
+      N_("Log the match statistics to the player records"), NULL, NULL },
+    { "session", CommandRecordAddSession,
+      N_("Log the session statistics to the player records"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }    
+}, acRecord[] = {
+    { "add", NULL, N_("Enter statistics into the player records"), NULL,
+      acRecordAdd },
+    { "show", CommandRecordShow, N_("View the player records"), szOPTNAME,
+      &cRecordName },
+    { NULL, NULL, NULL, NULL, NULL }    
 }, acSave[] = {
     { "game", CommandSaveGame, N_("Record a log of the game so far to a "
       "file"), szFILENAME, &cFilename },
@@ -1173,6 +1191,8 @@ command cER = {
       N_("See if this is post-Crawford play"), NULL, NULL },
     { "prompt", CommandShowPrompt, N_("Show the prompt that will be printed "
       "when ready for commands"), NULL, NULL },
+    { "record", CommandRecordShow, N_("View the player records"), szOPTNAME,
+      &cRecordName },
     { "rng", CommandShowRNG, N_("Display which random number generator "
       "is being used"), NULL, NULL },
     { "rollout", CommandShowRollout, N_("Display the evaluation settings used "
@@ -1263,6 +1283,8 @@ command cER = {
       "than it was offered"), NULL, NULL },
     { "reject", CommandReject, N_("Reject a cube or resignation"), 
       NULL, NULL },
+    { "record", NULL, N_("Keep statistics on player histories"), NULL,
+      acRecord },
     { "resign", CommandResign, N_("Offer to end the current game"), szVALUE,
       NULL },
     { "roll", CommandRoll, N_("Roll the dice"), NULL, NULL },

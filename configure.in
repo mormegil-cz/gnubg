@@ -91,7 +91,7 @@ AC_FUNC_MMAP
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpwuid gettimeofday isatty memmove random readv select setvbuf basename strchr)
+AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpid getpwuid gettimeofday isatty memmove random readv select setvbuf basename strchr)
 
 AH_VERBATIM([signbit],
 [#ifndef HAVE_MEMMOVE

@@ -71,6 +71,7 @@
 #include "gtkchequer.h"
 #include "matchequity.h"
 #include "positionid.h"
+#include "record.h"
 #include "i18n.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
@@ -135,6 +136,10 @@ typedef enum _gnubgcommand {
     CMD_PREV_GAME,
     CMD_PREV_ROLL,
     CMD_QUIT,
+    CMD_RECORD_ADD_GAME,
+    CMD_RECORD_ADD_MATCH,
+    CMD_RECORD_ADD_SESSION,
+    CMD_RECORD_SHOW,
     CMD_REDOUBLE,
     CMD_RESIGN_N,
     CMD_RESIGN_G,
@@ -196,6 +201,10 @@ static char *aszCommands[ NUM_CMDS ] = {
     "previous game",
     "previous roll",
     "quit",
+    "record add game",
+    "record add match",
+    "record add session",
+    "record show",
     "redouble",
     "resign normal",
     "resign gammon",
@@ -2115,6 +2124,16 @@ extern int InitGTK( int *argc, char ***argv ) {
           CMD_SHOW_STATISTICS_MATCH, NULL },
 	{ N_("/_Analyse/Session statistics"), NULL, Command,
           CMD_SHOW_STATISTICS_SESSION, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Player records"), NULL, Command,
+	  CMD_RECORD_SHOW, NULL },
+	{ N_("/_Analyse/Add to player records"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Analyse/Add to player records/Game statistics"), NULL, Command,
+	  CMD_RECORD_ADD_GAME, NULL },
+	{ N_("/_Analyse/Add to player records/Match statistics"), NULL,
+	  Command, CMD_RECORD_ADD_MATCH, NULL },
+	{ N_("/_Analyse/Add to player records/Session statistics"), NULL,
+	  Command, CMD_RECORD_ADD_SESSION, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Pip count"), NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ N_("/_Analyse/_Kleinman count"), 
@@ -6377,6 +6396,14 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_STATISTICS_SESSION ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_RECORD_SHOW ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_RECORD_ADD_GAME ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_RECORD_ADD_MATCH ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_RECORD_ADD_SESSION ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_ENGINE ), TRUE );
@@ -8065,3 +8092,156 @@ GTKGetMove ( int anMove[ 8 ] ) {
 
 }
 
+extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
+
+    GtkWidget *pw, *pwList, *pwScrolled;
+    static char *aszTitles[ 14 ] = { N_("Name"), N_("Chequer (20)"),
+				     N_("Cube (20)"), N_("Chequer (100)"),
+				     N_("Cube (100)"), N_("Chequer (500)"),
+				     N_("Cube (500)"), N_("Chequer (total)"),
+				     N_("Cube (total)"), N_("Luck (20)"),
+				     N_("Luck (100)"), N_("Luck (500)"),
+				     N_("Luck (total)"), N_("Games") };
+    char *asz[ 14 ], sz[ 16 ];
+    int i, f = FALSE;
+    playerrecord pr;
+    
+    while( !RecordReadItem( pfIn, szFile, &pr ) ) {
+	if( !f ) {
+	    f = TRUE;
+	    pw = CreateDialog( _("GNU Backgammon - Player records"), FALSE,
+			       NULL, NULL );
+	    for( i = 0; i < 14; i++ )
+		asz[ i ] = gettext( aszTitles[ i ] );
+	    
+	    pwList = gtk_clist_new_with_titles( 14, asz );
+	    
+	    for( i = 0; i < 14; i++ ) {
+		gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i,
+						  TRUE );
+		gtk_clist_set_column_justification( GTK_CLIST( pwList ), i,
+						    i ? GTK_JUSTIFY_RIGHT :
+						    GTK_JUSTIFY_LEFT );
+	    }
+	    gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
+	    pwScrolled = gtk_scrolled_window_new( NULL, NULL );
+	    gtk_container_add( GTK_CONTAINER( DialogArea( pw, DA_MAIN ) ),
+			       pwScrolled );
+	    gtk_container_add( GTK_CONTAINER( pwScrolled ), pwList );
+	}
+
+	i = gtk_clist_append( GTK_CLIST( pwList ), asz );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 0, pr.szName );
+	
+	if( pr.cGames >= 20 )
+	    sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_20 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 1, sz );
+	
+	if( pr.cGames >= 20 )
+	    sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_20 ] +
+		     pr.arErrorMissedDoubleTG[ EXPAVG_20 ] +
+		     pr.arErrorWrongDoubleDP[ EXPAVG_20 ] +
+		     pr.arErrorWrongDoubleTG[ EXPAVG_20 ] +
+		     pr.arErrorWrongTake[ EXPAVG_20 ] +
+		     pr.arErrorWrongPass[ EXPAVG_20 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 2, sz );
+	
+	if( pr.cGames >= 100 )
+	    sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_100 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 3, sz );
+	
+	if( pr.cGames >= 100 )
+	    sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_100 ] +
+		     pr.arErrorMissedDoubleTG[ EXPAVG_100 ] +
+		     pr.arErrorWrongDoubleDP[ EXPAVG_100 ] +
+		     pr.arErrorWrongDoubleTG[ EXPAVG_100 ] +
+		     pr.arErrorWrongTake[ EXPAVG_100 ] +
+		     pr.arErrorWrongPass[ EXPAVG_100 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 4, sz );
+	
+	if( pr.cGames >= 500 )
+	    sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_500 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 5, sz );
+	
+	if( pr.cGames >= 500 )
+	    sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_500 ] +
+		     pr.arErrorMissedDoubleTG[ EXPAVG_500 ] +
+		     pr.arErrorWrongDoubleDP[ EXPAVG_500 ] +
+		     pr.arErrorWrongDoubleTG[ EXPAVG_500 ] +
+		     pr.arErrorWrongTake[ EXPAVG_500 ] +
+		     pr.arErrorWrongPass[ EXPAVG_500 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 6, sz );
+	
+	sprintf( sz, "%.4f", pr.arErrorCheckerplay[ EXPAVG_TOTAL ] );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 7, sz );
+	
+	sprintf( sz, "%.4f", pr.arErrorMissedDoubleDP[ EXPAVG_TOTAL ] +
+		 pr.arErrorMissedDoubleTG[ EXPAVG_TOTAL ] +
+		 pr.arErrorWrongDoubleDP[ EXPAVG_TOTAL ] +
+		 pr.arErrorWrongDoubleTG[ EXPAVG_TOTAL ] +
+		 pr.arErrorWrongTake[ EXPAVG_TOTAL ] +
+		 pr.arErrorWrongPass[ EXPAVG_TOTAL ] );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 8, sz );
+	
+	if( pr.cGames >= 20 )
+	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_20 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 9, sz );
+	
+	if( pr.cGames >= 100 )
+	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_100 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 10, sz );
+	
+	if( pr.cGames >= 500 )
+	    sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_500 ] );
+	else
+	    strcpy( sz, _("n/a") );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 11, sz );
+	
+	sprintf( sz, "%.4f", pr.arLuck[ EXPAVG_TOTAL ] );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 12, sz );
+
+	sprintf( sz, "%d", pr.cGames );
+	gtk_clist_set_text( GTK_CLIST( pwList ), i, 13, sz );
+
+	if( !CompareNames( pr.szName, szPlayer ) )
+	    gtk_clist_select_row( GTK_CLIST( pwList ), i, 0 );
+    }
+
+    if( ferror( pfIn ) )
+	perror( szFile );
+    else if( !f )
+	outputl( _("No player records found.") );
+
+    if( f ) {
+	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
+	gtk_window_set_modal( GTK_WINDOW( pw ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pw ), GTK_WINDOW( pwMain ) );
+
+	gtk_widget_show_all( pw );
+	
+	gtk_signal_connect( GTK_OBJECT( pw ), "destroy",
+			    GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+	
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
+    }
+    
+    fclose( pfIn );    
+}
