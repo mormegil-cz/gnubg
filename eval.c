@@ -786,13 +786,18 @@ extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
     return CLASS_BEAROFF2;
 }
 
+#define RACE
+
 static void EvalRace( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
-    
+#if defined( RACE )
+    raceProbs( anBoard, arOutput );
+#else    
     float arInput[ NUM_INPUTS ];
 
     CalculateInputs( anBoard, arInput );
     
     NeuralNetEvaluate( &nnRace, arInput, arOutput );
+#endif
 }
 
 static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
