@@ -364,7 +364,7 @@ command cFilename = {
     { "ps", CommandExportMatchPostScript, NULL, szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
-    { "eps", CommandNotImplemented, "Save the current position in "
+    { "eps", CommandExportPositionEPS, "Save the current position in "
       "Encapsulated PostScript format", szFILENAME, &cFilename },
     { "pos", CommandNotImplemented, "Save the current position in .pos "
       "format", szFILENAME, &cFilename },
@@ -446,6 +446,8 @@ command cFilename = {
       "Specify the equity loss for a doubtful move", szVALUE, NULL },
     { "good", CommandSetAnalysisThresholdGood, "Specify the equity gain for a "
       "good move", szVALUE, NULL },
+    { "interesting", CommandSetAnalysisThresholdInteresting, "Specify the "
+      "equity gain for an interesting move", szVALUE, NULL },
     { "lucky", CommandSetAnalysisThresholdLucky, "Specify the equity gain for "
       "a lucky roll", szVALUE, NULL },
     { "unlucky", CommandSetAnalysisThresholdUnlucky, "Specify the equity loss "
@@ -589,7 +591,7 @@ command cFilename = {
       NULL, acSetAnalysis },
     { "annotation", CommandSetAnnotation, "Select whether move analysis and "
       "commentary are shown", szONOFF, NULL },
-    { "appearance", CommandSetColours, "Modify the look and feel of the "
+    { "appearance", CommandSetAppearance, "Modify the look and feel of the "
       "graphical interface", szKEYVALUE, NULL },
     { "automatic", NULL, "Perform certain functions without user input",
       NULL, acSetAutomatic },
@@ -602,7 +604,7 @@ command cFilename = {
       szSIZE, NULL },
     { "clockwise", CommandSetClockwise, "Control the board orientation",
       szONOFF, NULL },
-    { "colours", CommandSetColours, "Synonym for `set appearance'", NULL,
+    { "colours", CommandSetAppearance, "Synonym for `set appearance'", NULL,
       NULL },
     { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
       "a game in progress", szONOFF, NULL },
@@ -1573,7 +1575,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 		i != pmr->n.iMove )
 		continue;
 	    outputc( i == pmr->n.iMove ? '*' : ' ' );
-	    output( FormatMoveHint( szBuf, ms.anBoard, &pmr->n.ml, i,
+	    output( FormatMoveHint( szBuf, &ms, &pmr->n.ml, i,
 				    i != pmr->n.iMove ||
 				    i != pmr->n.ml.cMoves - 1 ) );
 	}
@@ -1972,15 +1974,15 @@ extern void CommandHelp( char *sz ) {
     }
 }
 
-extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
+extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			     int i, int fRankKnown ) {
     
     cubeinfo ci;
     char szTemp[ 1024 ], szMove[ 32 ];
 
-    GetMatchStateCubeInfo( &ci, &ms );
+    GetMatchStateCubeInfo( &ci, pms );
     
-    if ( !ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
+    if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) {
 	/* output in equity */
         float *ar, rEq, rEqTop;
 
@@ -1993,7 +1995,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rEqTop, 
 			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
@@ -2004,7 +2006,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rEqTop, 
 			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
@@ -2024,7 +2026,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rEq, rEq - rEqTop,
 			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
@@ -2035,7 +2037,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rEq, rEq - rEqTop,
 			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
@@ -2056,7 +2058,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rMWCTop, 
 			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
@@ -2067,7 +2069,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
 			 rMWCTop, 
 			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
@@ -2087,7 +2089,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rMWC, rMWC - rMWCTop,
 			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
@@ -2098,7 +2100,7 @@ extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
-			 FormatMove( szMove, anBoard, 
+			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ i ].anMove ),
 			 rMWC, rMWC - rMWCTop,
 			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
@@ -2249,7 +2251,7 @@ extern void CommandHint( char *sz ) {
 #endif
 	
 	for( i = 0; i < n; i++ )
-	    output( FormatMoveHint( szBuf, ms.anBoard, &ml, i, TRUE ) );
+	    output( FormatMoveHint( szBuf, &ms, &ml, i, TRUE ) );
     }
 }
 
@@ -2982,6 +2984,27 @@ extern void CommandSaveSettings( char *szParam ) {
 			    &esAnalysisCube );
     
     fprintf( pf, "set analysis limit %d\n", cAnalysisMoves );
+
+    fprintf( pf, "set analysis threshold bad %.3f\n"
+	     "set analysis threshold doubtful %.3f\n"
+	     "set analysis threshold good %.3f\n"
+	     "set analysis threshold interesting %.3f\n"
+	     "set analysis threshold lucky %.3f\n"
+	     "set analysis threshold unlucky %.3f\n"
+	     "set analysis threshold verybad %.3f\n"
+	     "set analysis threshold verygood %.3f\n"
+	     "set analysis threshold verylucky %.3f\n"
+	     "set analysis threshold veryunlucky %.3f\n",
+	     arSkillLevel[ SKILL_BAD ],
+	     arSkillLevel[ SKILL_DOUBTFUL ],
+	     arSkillLevel[ SKILL_GOOD ],
+	     arSkillLevel[ SKILL_INTERESTING ],
+	     arLuckLevel[ LUCK_GOOD ],
+	     arLuckLevel[ LUCK_BAD ],
+	     arSkillLevel[ SKILL_VERYBAD ],
+	     arSkillLevel[ SKILL_VERYGOOD ],
+	     arLuckLevel[ LUCK_VERYGOOD ],
+	     arLuckLevel[ LUCK_VERYBAD ] );
     
 #if USE_GTK
     fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
