@@ -407,32 +407,25 @@ printStatTableRow2 ( FILE *pf, const char *format1, const char *format2,
 
 
 static void
-printStatTableRow3 ( FILE *pf, const char *format1, const char *format2,
-                     const char *format3, const char *format4, ... ) {
-
-  va_list val;
-  char *sz;
-  int l = 100 + strlen ( format1 ) 
-    + 2 * strlen ( format2 ) + 2 * strlen ( format3 ) + 2 * strlen (format4 );
-
-  va_start( val, format4 );
-
-  sprintf ( sz = (char *) malloc ( l ),
-             "<tr>\n" 
-             "<td>%s</td>\n" 
-             "<td>%s (%s (%s)) </td>\n" 
-             "<td>%s (%s (%s)) </td>\n" 
-             "</tr>\n",
-             format1, 
-             format2, format3, format4, 
-             format2, format3, format4 );
+printStatTableMissed( FILE *pf, int const match, const char* what,
+		      int const v01, float const v02, float const v03,
+		      int const v11, float const v12, float const v13)
+{
+  fprintf(pf, "<tr>\n"
+	  "<td>%s</td>\n", what);
   
-  vfprintf ( pf, sz, val );
-
-  free ( sz );
-
-  va_end( val );
-
+  if( v01 ) {
+    fprintf(pf, "<td>%d (%+6.3f (%+7.3f%s)) </td>\n",
+	    v01, v02, match? v03*100 : v03, match ? "%" : "");
+  } else {
+    fprintf(pf, "<td>0 </td>\n");
+  }
+  if( v11 ) {
+    fprintf(pf, "<td>%d (%+6.3f (%+7.3f%s)) </td>\n",
+	    v11, v12, match? v13*100 : v13, match ? "%" : "");
+  } else {
+    fprintf(pf, "<td>0 </td>\n");
+  }
 }
 
 
@@ -450,10 +443,14 @@ printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
   fputs ( "<td>", pf );
 
   if ( f0 ) {
-    fprintf ( pf, format2, r00 );
-    fputs ( " (", pf );
-    fprintf ( pf, format3, r01 );
-    fputs ( " )", pf );
+    if( r00 == 0.0 && r01 == 0.0 ) {
+      fprintf ( pf, "0" );
+    } else {
+      fprintf ( pf, format2, r00 );
+      fputs ( " (", pf );
+      fprintf ( pf, format3, r01 );
+      fputs ( " )", pf );
+    }
   }
   else
     fputs ( _("n/a"), pf );
@@ -461,10 +458,14 @@ printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
   fputs ( "</td>\n<td>", pf );
 
   if ( f1 ) {
-    fprintf ( pf, format2, r10 );
-    fputs ( " (", pf );
-    fprintf ( pf, format3, r11 );
-    fputs ( " )", pf );
+    if( r10 == 0.0 && r11 == 0.0 ) {
+      fprintf ( pf, "0" );
+    } else {
+      fprintf ( pf, format2, r10 );
+      fputs ( " (", pf );
+      fprintf ( pf, format3, r11 );
+      fputs ( " )", pf );
+    }
   }
   else
     fputs ( _("n/a"), pf );
@@ -3104,107 +3105,54 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                         psc->anPass[ 0 ], 
                         psc->anPass[ 1 ] );
       
-    if ( pms->nMatchTo ) {
-
-      printStatTableRow3 ( pf, _ ( "Missed doubles around DP" ),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeMissedDoubleDP[ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeMissedDoubleDP[ 1 ],
-                           -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Missed doubles around TG" ),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeMissedDoubleTG[ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeMissedDoubleTG[ 1 ],
-                           -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongDoubleDP[ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongDoubleDP[ 1 ],
-                           -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongDoubleTG[ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongDoubleTG[ 1 ],
-                           -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong takes"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongTake[ 0 ],
-                           -psc->arErrorWrongTake[ 0 ][ 0 ],
-                           -psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongTake[ 1 ],
-                           -psc->arErrorWrongTake[ 1 ][ 0 ],
-                           -psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f );
-      printStatTableRow3 ( pf, _ ( "Wrong passes"),
-                           "%d", "%+6.3f", "%+7.3f%%",
-                           psc->anCubeWrongPass[ 0 ],
-                           -psc->arErrorWrongPass[ 0 ][ 0 ],
-                           -psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
-                           psc->anCubeWrongPass[ 1 ],
-                           -psc->arErrorWrongPass[ 1 ][ 0 ],
-                           -psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
-    }
-    else {
-      printStatTableRow3 ( pf, _ ( "Missed doubles around DP"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed (pf, pms->nMatchTo,
+				 _ ( "Missed doubles around DP" ),
                            psc->anCubeMissedDoubleDP[ 0 ],
                            -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
                            -psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
                            psc->anCubeMissedDoubleDP[ 1 ],
                            -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
                            -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Missed doubles around TG"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Missed doubles around TG" ),
                            psc->anCubeMissedDoubleTG[ 0 ],
                            -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
                            -psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
                            psc->anCubeMissedDoubleTG[ 1 ],
                            -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
                            -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong doubles around DP"),
                            psc->anCubeWrongDoubleDP[ 0 ],
                            -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
                            -psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
                            psc->anCubeWrongDoubleDP[ 1 ],
                            -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
                            -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong doubles around TG"),
                            psc->anCubeWrongDoubleTG[ 0 ],
                            -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
                            -psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
                            psc->anCubeWrongDoubleTG[ 1 ],
                            -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
                            -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong takes"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong takes"),
                            psc->anCubeWrongTake[ 0 ],
                            -psc->arErrorWrongTake[ 0 ][ 0 ],
                            -psc->arErrorWrongTake[ 0 ][ 1 ],
                            psc->anCubeWrongTake[ 1 ],
                            -psc->arErrorWrongTake[ 1 ][ 0 ],
                            -psc->arErrorWrongTake[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong passes"),
-                           "%d", "%+6.3f", "%+7.3f",
+      printStatTableMissed ( pf, pms->nMatchTo,
+				  _ ( "Wrong passes"),
                            psc->anCubeWrongPass[ 0 ],
                            -psc->arErrorWrongPass[ 0 ][ 0 ],
                            -psc->arErrorWrongPass[ 0 ][ 1 ],
                            psc->anCubeWrongPass[ 1 ],
                            -psc->arErrorWrongPass[ 1 ][ 0 ],
                            -psc->arErrorWrongPass[ 1 ][ 1 ] );
-    }
 
 
     if ( pms->nMatchTo ) {
