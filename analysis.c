@@ -219,13 +219,13 @@ AnalyzeGame ( list *plGame ) {
 	    if ( fAnalyseCube && !fFirstMove && GetDPEq ( NULL, NULL, &ci ) ) {
 		if ( EvaluatePositionCubeful ( anBoard, arDouble,
 					       arOutput, &ci,
-					       &ecEval, ecEval.nPlies ) < 0 ) 
+					       &esAnalysisCube.ec, esAnalysisCube.ec.nPlies ) < 0 ) 
 		    return;
 
 		psc->anTotalCube[ fPlayer ]++;
 		
-		pmr->n.etDouble = EVAL_EVAL;
-		pmr->n.esDouble.ec = ecEval;
+		pmr->n.etDouble = etAnalysisCube;
+		pmr->n.esDouble = esAnalysisCube;
 		for ( j = 0; j < 4; j++ ) 
 		    pmr->n.arDouble[ j ] = arDouble[ j ];
 		
@@ -294,7 +294,7 @@ AnalyzeGame ( list *plGame ) {
 		/* find best moves */
 		
 		FindnSaveBestMoves ( &(pmr->n.ml), anDice[ 0 ], anDice[ 1 ],
-				     anBoard, auch, &ci, &ecEval );
+				     anBoard, auch, &ci, &esAnalysisChequer.ec );
 		
 		for( pmr->n.iMove = 0; pmr->n.iMove < pmr->n.ml.cMoves;
 		     pmr->n.iMove++ ) {
@@ -377,12 +377,12 @@ AnalyzeGame ( list *plGame ) {
 		
 		if ( GetDPEq ( NULL, NULL, &ci ) ) {
 		    if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput,
-						   &ci, &ecEval,
-						   ecEval.nPlies ) < 0 ) 
+						   &ci, &esAnalysisCube.ec,
+						   esAnalysisCube.ec.nPlies ) < 0 ) 
 			return;
 
-		    etDouble = pmr->d.etDouble = EVAL_EVAL;
-		    esDouble.ec = pmr->d.esDouble.ec = ecEval;
+		    etDouble = pmr->d.etDouble = etAnalysisCube;
+		    esDouble = pmr->d.esDouble = esAnalysisCube;
 
 		    rSkill = arDouble[ OUTPUT_TAKE ] <
 			arDouble[ OUTPUT_DROP ] ?
