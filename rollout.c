@@ -925,7 +925,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ], char asz[][ 40 ],
   int		ii;
   int     err_too_big;
   double	v, s;
-  int nFirstTrial;
+  unsigned int nFirstTrial;
   evalsetup *pes;
   rolloutcontext *prc;
   rolloutstat *prs;
