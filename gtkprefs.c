@@ -2756,6 +2756,9 @@ void Default3dSettings()
 		IsWhiteColour3d(&rdAppearance.rdPointNumberMat) &&
 		IsWhiteColour3d(&rdAppearance.rdBackGroundMat))
 	{
+		renderdata rdNew;
+	    memcpy( &rdNew, &rdAppearance, sizeof rdAppearance );
+
 		plBoardDesigns = read_board_designs ();
 		if (plBoardDesigns && g_list_length(plBoardDesigns) > 0)
 		{
@@ -2767,9 +2770,40 @@ void Default3dSettings()
 
 				pch = sz = g_strdup ( pbde->szBoardDesign );
 				while( ParseKeyValue( &sz, apch ) ) 
-					RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
+					RenderPreferencesParam( &rdNew, apch[ 0 ], apch[ 1 ] );
 
 				g_free ( pch );
+
+				/* Copy 3d settings */
+				rdAppearance.pieceType = rdNew.pieceType;
+				rdAppearance.fHinges = rdNew.fHinges;
+				rdAppearance.showMoveIndicator = rdNew.showMoveIndicator;
+				rdAppearance.showShadows = rdNew.showShadows;
+				rdAppearance.roundedEdges = rdNew.roundedEdges;
+				rdAppearance.shadowDarkness = rdNew.shadowDarkness;
+				rdAppearance.curveAccuracy = rdNew.curveAccuracy;
+				rdAppearance.testSkewFactor = rdNew.testSkewFactor;
+				rdAppearance.boardAngle = rdNew.boardAngle;
+				rdAppearance.diceSize = rdNew.diceSize;
+				rdAppearance.planView = rdNew.planView;
+
+				memcpy(rdAppearance.rdChequerMat, rdNew.rdChequerMat, sizeof(Material[2]));
+				memcpy(rdAppearance.rdDiceMat, rdNew.rdDiceMat, sizeof(Material[2]));
+				rdAppearance.rdDiceMat[0].textureInfo = rdAppearance.rdDiceMat[1].textureInfo = 0;
+				rdAppearance.rdDiceMat[0].pTexture = rdAppearance.rdDiceMat[1].pTexture = 0;
+
+				memcpy(rdAppearance.rdDiceDotMat, rdNew.rdDiceDotMat, sizeof(Material[2]));
+
+				memcpy(&rdAppearance.rdCubeMat, &rdNew.rdCubeMat, sizeof(Material));
+				memcpy(&rdAppearance.rdCubeNumberMat, &rdNew.rdCubeNumberMat, sizeof(Material));
+
+				memcpy(&rdAppearance.rdBaseMat, &rdNew.rdBaseMat, sizeof(Material));
+				memcpy(rdAppearance.rdPointMat, rdNew.rdPointMat, sizeof(Material[2]));
+
+				memcpy(&rdAppearance.rdBoxMat, &rdNew.rdBoxMat, sizeof(Material));
+				memcpy(&rdAppearance.rdHingeMat, &rdNew.rdHingeMat, sizeof(Material));
+				memcpy(&rdAppearance.rdPointNumberMat, &rdNew.rdPointNumberMat, sizeof(Material));
+				memcpy(&rdAppearance.rdBackGroundMat, &rdNew.rdBackGroundMat, sizeof(Material));
 			}
 		}
 		free_board_designs ( plBoardDesigns );
