@@ -994,6 +994,7 @@ static void RestoreNode( list *pl ) {
 	pmr = malloc( sizeof( pmr->sb ) );
 	pmr->mt = MOVE_SETBOARD;
 	pmr->sb.sz = NULL;
+	ClosestLegalPosition( ms.anBoard );
 	PositionKey( ms.anBoard, pmr->sb.auchKey );
     }
 

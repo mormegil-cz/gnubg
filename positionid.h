@@ -36,6 +36,7 @@ extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] );
 
 extern int 
 CheckPosition( int anBoard[ 2 ][ 25 ] );
+extern void ClosestLegalPosition( int anBoard[ 2 ][ 25 ] );
 
 extern int
 Base64( const char ch );

@@ -122,11 +122,18 @@ extern char *PositionID( int anBoard[ 2 ][ 25 ] ) {
     return PositionIDFromKey( auch );
 }
 
-
 extern int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
 
     int ac[ 2 ], i;
 
+    /* Check for a point with a negative number of chequers */
+    for( i = 0; i < 25; i++ )
+	if( anBoard[ 0 ][ i ] < 0 ||
+	    anBoard[ i ][ i ] < 0 ) {
+            errno = EINVAL;
+            return -1;
+	}
+    
     /* Check for a player with over 15 chequers */
     for( i = ac[ 0 ] = ac[ 1 ] = 0; i < 25; i++ )
         if( ( ac[ 0 ] += anBoard[ 0 ][ i ] ) > 15 ||
@@ -152,6 +159,40 @@ extern int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
     
     errno = EINVAL;
     return -1;
+}
+
+extern void ClosestLegalPosition( int anBoard[ 2 ][ 25 ] ) {
+
+    int i, j, ac[ 2 ] = { 15, 15 };
+
+    /* Force a non-negative number of chequers on all points */
+    for( i = 0; i < 2; i++ )
+	for( j = 0; j < 25; j++ )
+	    if( anBoard[ i ][ j ] < 0 )
+		anBoard[ i ][ j ] = 0;
+
+    /* Limit each player to 15 chequers */
+    for( i = 0; i < 2; i++ )
+	for( j = 0; j < 25; j++ )
+	    if( ( ac[ i ] -= anBoard[ i ][ j ] ) < 0 ) {
+		anBoard[ i ][ j ] += ac[ i ];
+		ac[ i ] = 0;
+	    }
+
+    /* Forbid both players having a chequer on the same point */
+    for( i = 0; i < 24; i++ )
+	if( anBoard[ 0 ][ i ] )
+	    anBoard[ 1 ][ 23 - i ] = 0;
+
+    /* If both players have closed boards, let at least one of them off
+       the bar */
+    for( i = 0; i < 6; i++ )
+        if( anBoard[ 0 ][ i ] < 2 || anBoard[ 1 ][ i ] < 2 )
+	    /* open board */
+            return;
+
+    if( anBoard[ 0 ][ 24 ] )
+	anBoard[ 1 ][ 24 ] = 0;
 }
 
 extern void
