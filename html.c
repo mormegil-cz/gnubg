@@ -2041,7 +2041,6 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                              float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              int fPlayer,
                              evalsetup *pes, cubeinfo *pci,
-                             const doubletype dt,
                              int fDouble, int fTake,
                              skilltype stDouble,
                              skilltype stTake,
@@ -2066,7 +2065,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   /* check if cube analysis should be printed */
 
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
-  if ( ! GetDPEq ( NULL, NULL, pci, dt ) ) return; /* cube not available */
+  if ( ! GetDPEq ( NULL, NULL, pci ) ) return; /* cube not available */
 
   fActual = fDouble > 0;
   fClose = isCloseCubedecision ( arDouble ); 
@@ -2297,7 +2296,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   }
 
-  getCubeDecisionOrdering ( ai, arDouble, aarOutput, pci, dt );
+  getCubeDecisionOrdering ( ai, arDouble, aarOutput, pci );
 
   for ( i = 0; i < 3; i++ ) {
 
@@ -2324,7 +2323,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* cube decision */
 
-  cd = FindBestCubeDecision ( arDouble, aarOutput, pci, dt );
+  cd = FindBestCubeDecision ( arDouble, aarOutput, pci );
 
   fprintf ( pf,
             "<tr><td colspan=\"2\">%s</td>"
@@ -2333,7 +2332,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
             GetStyle( CLASS_CUBE_ACTION, hecss ),
             GetCubeRecommendation ( cd ) );
 
-  if ( ( r = getPercent ( cd, dt, arDouble ) ) >= 0.0 )
+  if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 )
     fprintf ( pf, " (%.1f%%)", 100.0f * r );
 
 
@@ -2429,7 +2428,6 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                         const htmlexporttype het, const htmlexportcss hecss ) {
 
   cubeinfo ci;
-  doubletype dt = DoubleType( pms->fDoubled, pms->fMove, pms->fTurn );
 
   GetMatchStateCubeInfo ( &ci, pms );
 
@@ -2442,7 +2440,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     HTMLPrintCubeAnalysisTable ( pf, pmr->n.arDouble, 
                                  pmr->n.aarOutput, pmr->n.aarStdDev,
                                  pmr->n.fPlayer,
-                                 &pmr->n.esDouble, &ci, DT_NORMAL, FALSE, -1,
+                                 &pmr->n.esDouble, &ci, FALSE, -1,
                                  pmr->n.stCube, SKILL_NONE, hecss );
 
     break;
@@ -2451,10 +2449,10 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
                                  pmr->d.CubeDecPtr->aarOutput, 
-                                 pmr->d.CubeDecPtr->aarStdDev,
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
                                  &pmr->d.CubeDecPtr->esDouble, 
-                                 &ci, dt, TRUE, -1,
+								 &ci, TRUE, -1,
                                  pmr->d.st, SKILL_NONE, hecss );
 
     break;
@@ -2466,9 +2464,9 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
                                  pmr->d.CubeDecPtr->aarOutput, 
-                                 pmr->d.CubeDecPtr->aarStdDev,
+								 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.CubeDecPtr->esDouble, &ci, dt, TRUE, 
+                                 &pmr->d.CubeDecPtr->esDouble, &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
                                  SKILL_NONE, /* FIXME: skill from prev. cube */
                                  pmr->d.st, hecss );
