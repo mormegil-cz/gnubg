@@ -325,10 +325,15 @@ class relational:
                                        mi[ 'date' ][ 0 ] )
       else:
          date = "NULL"
-         
-      query = "INSERT INTO match (match_id,env_id0,person_id0,env_id1,person_id1,result,length,added,rating0,rating1,event,round,place,annotator,comment,date) VALUES (%d,%d,%d,%d,%d,%d,%d,CURRENT_TIMESTAMP,'%s','%s','%s','%s','%s','%s','%s',%s) " % \
-              (match_id,env_id,person_id0,env_id,person_id1, \
-               -1,mi[ 'match-length' ],
+
+      # CURRENT_TIMESTAMP - SQL99, may have different names in various databases
+      CURRENT_TIME = "CURRENT_TIMESTAMP"
+
+      query = ("INSERT INTO match( match_id, env_id0, person_id0, env_id1, person_id1, " \
+              "result, length, added, rating0, rating1, event, round, place, annotator, comment, date) " \
+              "VALUES (%d, %d, %d, %d, %d, %d, %d, " + CURRENT_TIME + ", '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s) ") % \
+              (match_id, env_id, person_id0, env_id, person_id1, \
+               -1, mi[ 'match-length' ],
                self.__getKey( mi[ 'X' ], 'rating' )[0:80],
                self.__getKey( mi[ 'O' ], 'rating' )[0:80],
                self.__getKey( mi, 'event' )[0:80],
