@@ -514,6 +514,16 @@ char *aszDoubleTypes[ NUM_DOUBLE_TYPES ] = {
   N_("Raccoon")
 };
 
+/* parameters for EvalEfficiency */
+
+float rOSCubeX = 0.6;
+float rRaceFactorX = 0.00125;
+float rRaceCoefficientX = 0.55;
+float rRaceMax = 0.7;
+float rRaceMin = 0.6;
+float rCrashedX = 0.68;
+float rContactX = 0.68;
+
 
 static void ComputeTable0( void )
 {
@@ -5269,11 +5279,6 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
 }
 
-#define RACEFACTOR 0.00125
-#define RACECOEFF 0.55
-#define RACE_MAX_EFF 0.7
-#define RACE_MIN_EFF 0.6
-
 static float
 EvalEfficiency( int anBoard[2][25], positionclass pc ){
 
@@ -5304,14 +5309,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
        n-ply evaluation will take care of last-roll and 2nd-last-roll
        situations. */
 
-    return 0.60;
-    break;
-
-  case CLASS_BEAROFF2:
-  case CLASS_BEAROFF_TS:
-
-    /* FIXME: use linear interpolation based on pip count */
-    return 0.60;
+    return rOSCubeX;
     break;
 
   case CLASS_RACE:
@@ -5322,70 +5320,39 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
 
       PipCount(anBoard, anPips);
 
-      rEff = anPips[1]*RACEFACTOR + RACECOEFF;
-      if (rEff > RACE_MAX_EFF)
-        return RACE_MAX_EFF;
-      else
-       {
-        if (rEff < RACE_MIN_EFF)
-          return RACE_MIN_EFF;
+      rEff = anPips[1]*rRaceFactorX + rRaceCoefficientX;
+      if (rEff > rRaceMax)
+        return rRaceMax;
+      else {
+        if (rEff < rRaceMin)
+          return rRaceMin;
         else
           return rEff;
-       }
-     }
+      }
+    }
 
   case CLASS_CONTACT:
+
+    /* FIXME: should CLASS_CRASHED be handled differently? */
+    
+    /* FIXME: use Øystein's values published in rec.games.backgammon,
+       or work some other semiempirical values */
+    
+    /* FIXME: very important: use opponents inputs as well */
+    
+    return rContactX ;
+    break;
+
   case CLASS_CRASHED:
 
-    {
-      /* FIXME: should CLASS_CRASHED be handled differently? */
-	
-      /* FIXME: use Øystein's values published in rec.games.backgammon,
-         or work some other semiempirical values */
+    return rCrashedX;
+    break;
 
-      /* FIXME: very important: use opponents inputs as well */
+  case CLASS_BEAROFF2:
+  case CLASS_BEAROFF_TS:
 
-	float arInput[ NUM_INPUTS ] /* , arOutput[ NUM_OUTPUTS ] */;
-
-      return 0.68;
-
-      CalculateInputs( anBoard, arInput );
-
-      if ( arInput [ I_BREAK_CONTACT ] < 0.05 ) {
-        /* less than 8 pips to break contact, i.e. it must
-           be close to a race */
-        return 0.65;
-      } else if ( arInput[ I_FORWARD_ANCHOR ] >= 0.5 &&
-                  arInput[ I_FORWARD_ANCHOR ] <= 1.5 ) {
-        /* I have a forward anchor, i.e. it's a holding game */
-        return 0.5;
-      } else {
-        
-        int side, i, n;
-
-        for(side = 0; side < 2; ++side) {
-          n = 0;
-          for(i = 18; i < 24; ++i) {
-            if( anBoard[side][i] > 1 ) {
-              ++n;
-            }
-          }
-        }
-
-        if ( n >= 2 ) {
-          /* backgame */
-          return 0.4;
-        }
-
-        /* FIXME: if attack position */
-
-        /* else, ... use `typical' value of: */
-
-        return 0.68;
-
-      }
-    
-    }
+    return 0.0f; /* not used */
+    break;
 
   default:
     assert( FALSE );

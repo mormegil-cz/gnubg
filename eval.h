@@ -276,6 +276,18 @@ typedef struct _movelist {
     move *amMoves;
 } movelist;
 
+/* cube efficiencies */
+
+extern float rOSCubeX;
+extern float rRaceFactorX;
+extern float rRaceCoefficientX;
+extern float rRaceMax;
+extern float rRaceMin;
+extern float rCrashedX;
+extern float rContactX;
+
+/* position classes */
+
 typedef enum _positionclass {
     CLASS_OVER = 0,     /* Game already finished */
     CLASS_HYPERGAMMON1, /* hypergammon with 1 chequers */
