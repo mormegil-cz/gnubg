@@ -3855,50 +3855,48 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
   return 0;
 }
 
+extern int SetCubeInfoMoney( cubeinfo *pci, int nCube, int fCubeOwner,
+			     int fMove, int fJacoby ) {
 
-extern int
-SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
-	      int fMove ) {
+    if( nCube < 1 || fCubeOwner < -1 || fCubeOwner > 1 || fMove < 0 ||
+	fMove > 1 ) /* FIXME also illegal if nCube is not a power of 2 */
+	return -1;
 
-  ci->nCube = nCube;
-  ci->fCubeOwner = fCubeOwner;
-  ci->fMove = fMove;
+    pci->nCube = nCube;
+    pci->fCubeOwner = fCubeOwner;
+    pci->fMove = fMove;
 
-  if ( ! nMatchTo ) {
+    pci->arGammonPrice[ 0 ] = pci->arGammonPrice[ 1 ] =
+	pci->arGammonPrice[ 2 ] = pci->arGammonPrice[ 3 ] =
+	    ( fJacoby && fCubeOwner == -1 ) ? 0.0 : 1.0;
 
-    if ( fCubeOwner == -1 && fJacoby ) {
+    return 0;
+}
 
-      ci->arGammonPrice[ 0 ] = 0.0;
-      ci->arGammonPrice[ 1 ] = 0.0;
-      ci->arGammonPrice[ 2 ] = 0.0;
-      ci->arGammonPrice[ 3 ] = 0.0;
-
-    }
-    else {
-
-      ci->arGammonPrice[ 0 ] = 1.0;
-      ci->arGammonPrice[ 1 ] = 1.0;
-      ci->arGammonPrice[ 2 ] = 1.0;
-      ci->arGammonPrice[ 3 ] = 1.0;
-
-    }
-
-  }
-  else {
+extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
+			     int fMove, int nMatchTo, int anScore[ 2 ] ) {
+    int nScore0, nScore1;
+    
+    if( nCube < 1 || fCubeOwner < -1 || fCubeOwner > 1 || fMove < 0 ||
+	fMove > 1 || nMatchTo < 1 || anScore[ 0 ] >= nMatchTo ||
+	anScore[ 1 ] >= nMatchTo ) /* FIXME also illegal if nCube is not a
+				      power of 2 */
+	return -1;
+    
+    pci->nCube = nCube;
+    pci->fCubeOwner = fCubeOwner;
+    pci->fMove = fMove;
 
     /*
-     * Match play.
      * FIXME: calculate gammon price when initializing program
      * instead of recalculating it again and again, or cache it.
      */
               
-    int nScore0 = NORM_SCORE ( anScore[ 0 ] );
-    int nScore1 = NORM_SCORE ( anScore[ 1 ] );
+    nScore0 = NORM_SCORE ( anScore[ 0 ] );
+    nScore1 = NORM_SCORE ( anScore[ 1 ] );
 
-    if ( fCrawford || fPostCrawford ) {
-
-      if ( nScore0 == 1 ) {
-
+    if ( nScore0 == 1 ) {
+	/* after this game will be post-Crawford */
 	float rLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, afMETPostCrawford );
 	float rLoseGammon = 
 	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 2 - 1, afMETPostCrawford );
@@ -3907,97 +3905,89 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 
 	float rCenter = ( 1.0 + rLose ) / 2.0;
 
-	ci->arGammonPrice[ 0 ] = 0.0; 
-	ci->arGammonPrice[ 2 ] = 0.0;
+	pci->arGammonPrice[ 0 ] = 0.0; 
+	pci->arGammonPrice[ 2 ] = 0.0;
 
-	ci->arGammonPrice[ 1 ] = 
+	pci->arGammonPrice[ 1 ] = 
 	  ( rCenter - rLoseGammon ) / ( 1.0 - rCenter ) - 1.0;
 
-	ci->arGammonPrice[ 3 ] = 
+	pci->arGammonPrice[ 3 ] = 
 	  ( rCenter - rLoseBG ) / ( 1.0 - rCenter ) - 
-	  ( ci->arGammonPrice[ 1 ] + 1.0 );
-
-      }
-      else {
-
+	  ( pci->arGammonPrice[ 1 ] + 1.0 );
+    } else if( nScore1 == 1 ) {
+	/* after this game will be post-Crawford */
 	float rWin = GET_METPostCrawford ( nScore0 - nCube - 1, afMETPostCrawford );
 	float rWinGammon = 
 	  GET_METPostCrawford ( nScore0 - nCube * 2 - 1, afMETPostCrawford );
 	float rWinBG = 
 	  GET_METPostCrawford ( nScore0 - nCube * 3 - 1, afMETPostCrawford );
 
-	ci->arGammonPrice[ 0 ] =
+	pci->arGammonPrice[ 0 ] =
 	  2.0 * rWinGammon / rWin - 2.0;
 
-	ci->arGammonPrice[ 2 ] =
-	  2.0 * rWinBG / rWin - ( ci->arGammonPrice[ 0 ] + 2.0 );
+	pci->arGammonPrice[ 2 ] =
+	  2.0 * rWinBG / rWin - ( pci->arGammonPrice[ 0 ] + 2.0 );
 
-	ci->arGammonPrice[ 1 ] = 0.0;
-	ci->arGammonPrice[ 3 ] = 0.0;
-	
-      }
+	pci->arGammonPrice[ 1 ] = 0.0;
+	pci->arGammonPrice[ 3 ] = 0.0;
+    } else {
+	float rWin = 
+	    GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
+	float rLose =
+	    GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
+	float rWinGammon =
+	    GET_MET ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafMET );
+	float rLoseGammon =
+	    GET_MET ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafMET );
+	float rWinBG =
+	    GET_MET ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafMET );
+	float rLoseBG =
+	    GET_MET ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafMET );
 
+	float rCenter = ( rWin + rLose ) / 2.0;
+
+	/* FIXME: correct numerical problems in a better way, than done
+	   below. If cube is dead gammon or backgammon price might be a
+	   small negative number. For example, at -2,-3 with cube on 2
+	   the current code gives: 0.9090..., 0, -2.7e-8, 0 instead
+	   of the correct 0.9090..., 0, 0, 0. */
+	pci->arGammonPrice[ 0 ] = 
+	    ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+	pci->arGammonPrice[ 1 ] = 
+	    ( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
+	pci->arGammonPrice[ 2 ] = 
+	    ( rWinBG - rCenter ) / ( rWin - rCenter ) - 
+	    ( pci->arGammonPrice[ 0 ] + 1.0 );
+	pci->arGammonPrice[ 3 ] = 
+	    ( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
+	    ( pci->arGammonPrice[ 1 ] + 1.0 );
     }
-    else {
-      float rWin = 
-	GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
-      float rLose =
-	GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
-      float rWinGammon =
-	GET_MET ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafMET );
-      float rLoseGammon =
-	GET_MET ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafMET );
-      float rWinBG =
-	GET_MET ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafMET );
-      float rLoseBG =
-	GET_MET ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafMET );
 
-      float rCenter = ( rWin + rLose ) / 2.0;
-
-      /* FIXME: correct numerical problems in a better way, than done
-         below. If cube is dead gammon or backgammon price might be a
-         small negative number. For example, at -2,-3 with cube on 2
-         the current code gives: 0.9090..., 0, -2.7e-8, 0 instead
-         of the correct 0.9090..., 0, 0, 0. */
-
-      ci->arGammonPrice[ 0 ] = 
-        ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
-      ci->arGammonPrice[ 1 ] = 
-	( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
-      ci->arGammonPrice[ 2 ] = 
-	( rWinBG - rCenter ) / ( rWin - rCenter ) - 
-	( ci->arGammonPrice[ 0 ] + 1.0 );
-      ci->arGammonPrice[ 3 ] = 
-	( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
-	( ci->arGammonPrice[ 1 ] + 1.0 );
-
-    } /* Crawford || PostCrawford */
-
-  } /* match play */
-
-  /* Correct numerical problems */
-
-  if ( ci->arGammonPrice[ 0 ] < 0 )
-    ci->arGammonPrice[ 0 ] = 0.0;
-  if ( ci->arGammonPrice[ 1 ] < 0 )
-    ci->arGammonPrice[ 1 ] = 0.0;
-  if ( ci->arGammonPrice[ 2 ] < 0 )
-    ci->arGammonPrice[ 2 ] = 0.0;
-  if ( ci->arGammonPrice[ 3 ] < 0 )
-    ci->arGammonPrice[ 3 ] = 0.0;
-
-  if ( ci->arGammonPrice[ 0 ] < 0 )
-     abort();
-  if ( ci->arGammonPrice[ 1 ] < 0 )
-     abort();
-  if ( ci->arGammonPrice[ 2 ] < 0 )
-     abort();
-  if ( ci->arGammonPrice[ 3 ] < 0 )
-     abort();
-
-  return 0;
+    /* Correct numerical problems */
+    if ( pci->arGammonPrice[ 0 ] < 0 )
+	pci->arGammonPrice[ 0 ] = 0.0;
+    if ( pci->arGammonPrice[ 1 ] < 0 )
+	pci->arGammonPrice[ 1 ] = 0.0;
+    if ( pci->arGammonPrice[ 2 ] < 0 )
+	pci->arGammonPrice[ 2 ] = 0.0;
+    if ( pci->arGammonPrice[ 3 ] < 0 )
+	pci->arGammonPrice[ 3 ] = 0.0;
+    
+    assert( pci->arGammonPrice[ 0 ] >= 0 );
+    assert( pci->arGammonPrice[ 1 ] >= 0 );
+    assert( pci->arGammonPrice[ 2 ] >= 0 );
+    assert( pci->arGammonPrice[ 3 ] >= 0 );
+    
+    return 0;
 }
 
+extern int
+SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove ) {
+
+    return nMatchTo ? SetCubeInfoMatch( pci, nCube, fCubeOwner, fMove,
+					nMatchTo, anScore ) :
+	SetCubeInfoMoney( pci, nCube, fCubeOwner, fMove, fJacoby );
+}
 
 extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],

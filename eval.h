@@ -244,9 +244,12 @@ extern float
 Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
 
 
+extern int SetCubeInfoMoney( cubeinfo *pci, int nCube, int fCubeOwner,
+			     int fMove, int fJacoby );
+extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
+			     int fMove, int nMatchTo, int anScore[ 2 ] );
 extern int 
-SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
-							int fMove );
+SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner, int fMove );
  
 extern void 
 swap( int *p0, int *p1 );
