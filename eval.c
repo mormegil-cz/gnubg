@@ -4983,7 +4983,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   /* Calculate normal, gammon, and backgammon ratios */
 
   if ( arOutput[ 0 ] > 0.0 ) {
-    rG0 = arOutput[ 1 ] / arOutput[ 0 ];
+    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
     rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
   }
   else {
@@ -4992,7 +4992,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   }
 
   if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
     rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
   }
   else {
@@ -5092,7 +5092,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   /* Calculate normal, gammon, and backgammon ratios */
 
   if ( arOutput[ 0 ] > 0.0 ) {
-    rG0 = arOutput[ 1 ] / arOutput[ 0 ];
+    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
     rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
   }
   else {
@@ -5101,7 +5101,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   }
 
   if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
     rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
   }
   else {
@@ -5202,7 +5202,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   /* Calculate normal, gammon, and backgammon ratios */
 
   if ( arOutput[ 0 ] > 0.0 ) {
-    rG0 = arOutput[ 1 ] / arOutput[ 0 ];
+    rG0 = ( arOutput[ 1 ] - arOutput[ 2 ] ) / arOutput[ 0 ];
     rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
   }
   else {
@@ -5211,7 +5211,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   }
 
   if ( arOutput[ 0 ] < 1.0 ) {
-    rG1 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    rG1 = ( arOutput[ 3 ] - arOutput[ 4 ] ) / ( 1.0 - arOutput[ 0 ] );
     rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
   }
   else {
@@ -5268,16 +5268,23 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     /* I'm too good to double */
 
+    /* MWC(live cube) linear interpolation between the
+       points:
+
+       p = TG, MWC = I win 1 point
+       p = 1, MWC = I win (normal, gammon, or backgammon)
+	 
+    */
+
     rMWCWin = 
       ( 1.0 - rG0 - rBG0 ) * 
       GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
       rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
       rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
 
-    if ( arOutput[ 0 ] == rOppTG )
-      rMWCLive = rMWCOppCash + 
-        ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 
-        / ( 1.0 - rOppTG );
+    if ( rTG < 1.0 )
+      rMWCLive = rMWCCash + 
+        ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
     else
       rMWCLive = rMWCWin;
 
