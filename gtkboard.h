@@ -105,6 +105,7 @@ typedef struct _BoardData {
     gfloat arRefraction[ 2 ], arCoefficient[ 2 ], arExponent[ 2 ];
     gfloat arDiceCoefficient[ 2 ], arDiceExponent[ 2 ];
     gfloat arLight[ 3 ];
+    gfloat round;
     gint board_size; /* basic unit of board size, in pixels -- a chequer's
 			diameter is 6 of these units (and is 2 units thick) */
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],

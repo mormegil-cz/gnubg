@@ -47,7 +47,7 @@
 
 static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ], *apadjPoint[ 2 ],
-    *apadjBoard[ 2 ], *padjSpeed;
+    *apadjBoard[ 2 ], *padjSpeed, *padjRound;
 static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
@@ -732,6 +732,31 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 						      1.0, 10.0, 0.0 ) );
     gtk_table_attach( GTK_TABLE( pwTable ), gtk_hscale_new( paElevation ),
 		      1, 2, 1, 2, GTK_EXPAND | GTK_FILL, 0, 4, 2 );
+    
+    pwBox = gtk_hbox_new( FALSE, 0 );
+    
+    padjRound = GTK_ADJUSTMENT( gtk_adjustment_new( 1.0 - bd->round, 0, 1,
+						    0.1, 0.1, 0 ) );
+    pwScale = gtk_hscale_new( padjRound );
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_widget_set_size_request( pwScale, 100, -1 );
+#else
+    gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
+#endif
+    gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
+    gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
+
+    gtk_box_pack_start( GTK_BOX( pwBox ),
+			gtk_label_new( _("Chequer shape:") ),
+			FALSE, FALSE, 8 );
+    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( _("Flat") ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwScale, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( _("Round") ),
+			FALSE, FALSE, 4 );
+    
+    gtk_box_pack_start( GTK_BOX( pw ), pwBox, FALSE, FALSE, 4 );
+
     return pwx;
 }
 
@@ -1123,6 +1148,7 @@ static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
 	anim = ANIMATE_NONE;
 
     bd->animate_speed = (int) ( padjSpeed->value + 0.5 );
+    bd->round = 1.0 - padjRound->value;
     
     for( i = 0; i < 2; i++ ) {
 	bd->arRefraction[ i ] = apadj[ i ]->value;
@@ -1647,6 +1673,15 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 		sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
 	}
         PopLocale ();
+    } else if( !g_strncasecmp( szParam, "shape", c ) ) {
+	float rRound;
+
+	PushLocale ( "C" );
+	if( sscanf( szValue, "%f", &rRound ) < 1 )
+	    fValueError = TRUE;
+	else
+	    bd->round = 1.0 - rRound;
+        PopLocale ();
     } else if( c > 1 &&
 	       ( !g_strncasecmp( szParam, "chequers", c - 1 ) ||
 		 !g_strncasecmp( szParam, "checkers", c - 1 ) ) &&
@@ -1712,7 +1747,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
 	     "beep=%c highdie=%c wood=%s hinges=%c "
              "show_ids=%c show_pips=%c "
-	     "animate=%s speed=%d light=%0.0f;%0.0f " 
+	     "animate=%s speed=%d light=%0.0f;%0.0f shape=%0.1f" 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "dice0=#%02X%02X%02X;%0.2f;%0.2f;%c "
@@ -1740,7 +1775,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
              bd->show_pips ? 'y' : 'n',
              /* animate, speed, ... */
 	     aszAnim[ bd->animate_computer_moves ], bd->animate_speed,
-	     rAzimuth, rElevation, 
+	     rAzimuth, rElevation, 1.0 - bd->round,
              /* chequers0 */
              (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 

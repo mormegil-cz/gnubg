@@ -1,3 +1,8 @@
+Sun Sep 15 15:51:47 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_draw_chequers): Render chequers with a flat top.
+	* gtkprefs.c (GeneralPage): Allow modification of chequer shape.
+
 Sun Sep 15 10:26:56 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c (board_pointer): Reset bd->drag_point earlier when

@@ -3501,7 +3501,7 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
     guchar *buf_x, *buf_o, *buf_mask;
     int ix, iy, in, fx, fy, i;
     float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
-	len;
+	r, x1, y1, len;
     GdkImage *img = NULL;
     GdkGC *gc;
     short *refract_x = 0, *refract_o = 0;
@@ -3553,13 +3553,22 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 		fx = 0;
 		x = x_loop;
 		do {
-		    if( ( z = 1.0 - x * x - y * y ) > 0.0 ) {
+		    r = sqrt( x * x + y * y );
+		    if( r < bd->round )
+			x1 = y1 = 0.0;
+		    else {
+			x1 = x * ( r / ( 1 - bd->round ) -
+				   1 / ( 1 - bd->round ) + 1 );
+			y1 = y * ( r / ( 1 - bd->round ) -
+				   1 / ( 1 - bd->round ) + 1 );
+		    }
+		    if( ( z = 1.0 - x1 * x1 - y1 * y1 ) > 0.0 ) {
 			in++;
 			diffuse += 0.3;
 			z = sqrt( z ) * 1.5;
-			len = sqrt( x * x + y * y + z * z );
-			if( ( cos_theta = ( bd->arLight[ 0 ] * x +
-					    bd->arLight[ 1 ] * -y +
+			len = sqrt( x1 * x1 + y1 * y1 + z * z );
+			if( ( cos_theta = ( bd->arLight[ 0 ] * x1 +
+					    bd->arLight[ 1 ] * -y1 +
 					    bd->arLight[ 2 ] * z ) / len )
 			    > 0 ) {
 			    diffuse += cos_theta;
@@ -3595,13 +3604,19 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 		/* pixel is inside chequer */
 		if( bd->translucent ) {
 		    if( !fKey ) {
-			float r, s, theta, a, b, p, q;
+			float r, s, r1, s1, theta, a, b, p, q;
 			int f;
 			
 			r = sqrt( x_loop * x_loop + y_loop * y_loop );
+			if( r < bd->round )
+			    r1 = 0.0;
+			else
+			    r1 = r / ( 1 - bd->round ) -
+				1 / ( 1 - bd->round ) + 1;
 			s = ssqrt( 1 - r * r );
+			s1 = ssqrt( 1 - r1 * r1 );
 
-			theta = atanf( r / s );
+			theta = atanf( r1 / s1 );
 
 			for( f = 0; f < 2; f++ ) {
 			    b = asinf( sinf( theta ) / bd->arRefraction[ f ] );
@@ -4625,6 +4640,7 @@ static void board_init( Board *board ) {
     bd->animate_speed = 4;
     bd->show_ids = TRUE;
     bd->show_pips = TRUE;
+    bd->round = 0.5;
     bd->arLight[ 0 ] = -0.55667;
     bd->arLight[ 1 ] = 0.32139;
     bd->arLight[ 2 ] = 0.76604;
@@ -4641,7 +4657,6 @@ static void board_init( Board *board ) {
     bd->aarColour[ 1 ][ 1 ] = 0.05;
     bd->aarColour[ 1 ][ 2 ] = 0.10;
     bd->aarColour[ 1 ][ 3 ] = 0.5;
-    bd->arRefraction[ 0 ] = bd->arRefraction[ 1 ] = 1.5; /* unused! */
     bd->arDiceCoefficient[ 0 ] = 0.2;
     bd->arDiceExponent[ 0 ] = 3.0;
     bd->arDiceCoefficient[ 1 ] = 1.0;
