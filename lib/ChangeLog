@@ -1,3 +1,7 @@
+Thu Feb 22 11:42:57 2001  Gary Wong  <gtw@research.att.com>
+
+	* buffer.c: Check whether <sys/uio.h> exists.
+
 Tue Feb 13 13:12:19 2001  Gary Wong  <gtw@research.att.com>
 
 	* neuralnet.c (NeuralNetCreate): Fix initial random weights

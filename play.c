@@ -47,7 +47,9 @@ list lMatch, *plGame, *plLastMove;
 static int fComputerDecision = FALSE;
 
 #if USE_GTK
+#if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
+#endif
 #include "gtkgame.h"
 #endif
 
@@ -347,7 +349,7 @@ extern void ClearMoveRecord( void ) {
     ListCreate( plGame );
 }
 
-#if USE_GUI
+#if USE_GUI && HAVE_SELECT
 static struct timeval tvLast;
 
 static void ResetDelayTimer( void ) {
@@ -805,7 +807,7 @@ static int TryBearoff( void ) {
 extern void NextTurn( void ) {
 
     int n;
-#if USE_GUI
+#if USE_GUI && HAVE_SELECT
     struct timeval tv;
     fd_set fds;
 #endif
@@ -824,7 +826,7 @@ extern void NextTurn( void ) {
 #endif
 	fNextTurn = FALSE;
     
-#if USE_GUI
+#if USE_GUI && HAVE_SELECT
     if( fX && nDelay && fDisplay ) {
 	if( tvLast.tv_sec ) {
 	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {

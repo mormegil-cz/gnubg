@@ -23,6 +23,36 @@
 #define signbit(x) ( (x) < 0.0 )
 #endif
 
+/* Use the double versions of the math functions if the float ones aren't
+   available. */
+#if !HAVE_ACOSF
+#define acosf acos
+#endif
+
+#if !HAVE_ASINF
+#define asinf asin
+#endif
+
+#if !HAVE_ATANF
+#define atanf atan
+#endif
+
+#if !HAVE_COSF
+#define cosf cos
+#endif
+
+#if !HAVE_LRINT
+#define lrint(x) ((long) ((x)+0.5))
+#endif
+
+#if !HAVE_SINF
+#define sinf sin
+#endif
+
+#if !HAVE_TANF
+#define tanf tan
+#endif
+
 #ifndef FALSE
 #define FALSE 0
 #define TRUE 1

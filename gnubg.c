@@ -86,7 +86,9 @@ static int fReadingOther;
 
 #if USE_GTK
 #include <gtk/gtk.h>
+#if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
+#endif
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
@@ -112,7 +114,7 @@ int fReadingCommand;
 int fReadline = TRUE;
 #endif
 
-#ifndef SIGIO
+#if !defined(SIGIO) && defined(SIGPOLL)
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
 
@@ -194,6 +196,7 @@ command acDatabase[] = {
       "file", szFILENAME, NULL },
     { "match", CommandExportMatch, "Record a log of the match so far to a "
       "file", szFILENAME, NULL },
+    /* FIXME export position */
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
     { "database", CommandDatabaseImport, "Merge positions into the database",
@@ -446,12 +449,11 @@ command acDatabase[] = {
     { "export", NULL, "Write data for use by other programs", NULL, acExport },
     { "external", CommandExternal, "Make moves for an external controller",
       szFILENAME, NULL },
+    { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
+    { "hint", CommandHint,  "Give hints on cube action or best legal moves", 
+      szOPTVALUE, NULL }, 
     { "import", NULL, "Import matches, games or positions from other programs",
       NULL, acImport },
-    { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
-    { "hint", CommandHint, 
-      "Give hints on cube action or best legal moves", 
-      szOPTVALUE, NULL }, 
     { "list", NULL, "Show a list of games or moves", NULL, acList },
     { "load", NULL, "Read data from a file", NULL, acLoad },
     { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
@@ -822,7 +824,7 @@ static RETSIGTYPE HandleChild( int n ) {
 #endif
 
 void ShellEscape( char *pch ) {
-
+#if HAVE_FORK
     pid_t pid;
     char *pchShell;
     psighandler shQuit;
@@ -915,8 +917,9 @@ void ShellEscape( char *pch ) {
 #endif
 
     PortableSignalRestore( SIGCHLD, &shQuit );
-    
-    return;
+#else
+    outputl( "This system does not support shell escapes." );
+#endif
 }
 
 extern void HandleCommand( char *sz, command *ac ) {
@@ -1038,8 +1041,10 @@ static guint nUpdate;
 static gint UpdateBoard( gpointer p ) {
 
     /* we've waited long enough -- force this update */
+#if HAVE_GDK_GDKX_H
     nLastRequest = LastKnownRequestProcessed( GDK_DISPLAY() );
-
+#endif
+    
     ShowBoard();
 
     nUpdate = 0;
@@ -1069,7 +1074,9 @@ extern void ShowBoard( void ) {
 	   give it more until it's finished what it has.  (Always update
 	   the board immediately if nDelay is set, though -- show the user
 	   something while they're waiting!) */
+#if HAVE_GDK_GDKX_H
 	XEventsQueued( GDK_DISPLAY(), QueuedAfterReading );
+
 	/* Subtract and compare as signed, just in case the request numbers
 	   wrap around. */
 	if( (long) ( LastKnownRequestProcessed( GDK_DISPLAY() ) -
@@ -1079,6 +1086,7 @@ extern void ShowBoard( void ) {
 
 	    return;
 	}
+#endif
     }
 #endif
     
@@ -1090,7 +1098,9 @@ extern void ShowBoard( void ) {
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
 		      -1, -1 );
+#if HAVE_GDK_GDKX_H
 	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
+#endif
 #else
             GameSet( &ewnd, anBoardTemp, 0, ap[ 1 ].szName, ap[ 0 ].szName,
                      nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
@@ -1161,7 +1171,9 @@ extern void ShowBoard( void ) {
 	game_set( BOARD( pwBoard ), anBoard, fMove, ap[ 1 ].szName,
 		  ap[ 0 ].szName, nMatchTo, anScore[ 1 ], anScore[ 0 ],
 		  anDice[ 0 ], anDice[ 1 ] );
+#if HAVE_GDK_GDKX_H
 	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
+#endif
 #else
         GameSet( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
                  nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
@@ -1170,7 +1182,9 @@ extern void ShowBoard( void ) {
 	if( !fMove )
 	    SwapSides( anBoard );
 #if USE_GTK
+#if HAVE_GDK_GDKX_H	
 	XFlush( GDK_DISPLAY() );
+#endif
 #else
 	XFlush( ewnd.pdsp );
 #endif
@@ -2108,44 +2122,48 @@ extern void CommandSaveWeights( char *sz ) {
 
 extern void CommandTrainTD( char *sz ) {
 
-  int c = 0;
-  int anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ];
-  int anDiceTrain[ 2 ];
-  float ar[ NUM_OUTPUTS ];
+    int c = 0;
+    int anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ];
+    int anDiceTrain[ 2 ];
+    float ar[ NUM_OUTPUTS ];
     
-  while( !fInterrupt ) {
-    InitBoard( anBoardTrain );
+    while( !fInterrupt ) {
+	InitBoard( anBoardTrain );
 	
-    do {    
-	    if( !( ++c % 100 ) && fShowProgress ) {
-        outputf( "%6d\r", c );
-        fflush( stdout );
+	do {    
+	    if( !( ++c % 100 ) && fShowProgress
+#if USE_GTK
+		&& !fX
+#endif
+		) {
+		outputf( "%6d\r", c );
+		fflush( stdout );
 	    }
 	    
 	    RollDice( anDiceTrain );
-
+	    
 	    if( fInterrupt )
-        return;
+		return;
 	    
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
-
+	    
 	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-                    anBoardTrain, &ciCubeless, &ecTD );
-
+			  anBoardTrain, &ciCubeless, &ecTD );
+	    
 	    if( fInterrupt )
-        return;
+		return;
 	    
 	    SwapSides( anBoardTrain );
 	    
 	    EvaluatePosition( anBoardTrain, ar, &ciCubeless, &ecTD );
-
+	    
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar ) )
-        break;
+		break;
 	    
-      /* FIXME can stop as soon as perfect */
-    } while( !fInterrupt && !GameStatus( anBoardTrain ) );
-  }
+	    /* FIXME can stop as soon as perfect */
+	} while( !fInterrupt && !GameStatus( anBoardTrain ) );
+    }
 }
 
 #if HAVE_LIBREADLINE
@@ -2384,7 +2402,9 @@ extern char *GetInput( char *szPrompt ) {
     char *sz;
     char *pch;
 #if USE_GUI
+#ifdef ConnectionNumber
     fd_set fds;
+#endif
 
 #if USE_GTK
     assert( fTTY );
@@ -2766,6 +2786,9 @@ static void version( void ) {
 #if USE_GUI
     puts( "Window system supported." );
 #endif
+#if HAVE_SOCKETS
+    puts( "External players supported." );
+#endif
 }
 
 static void real_main( void *closure, int argc, char *argv[] ) {
@@ -2934,7 +2957,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	if( fInteractive )
 	    PortableSignal( SIGINT, HandleInterrupt, NULL );
     
-#if USE_GUI
+#if USE_GUI && defined(SIGIO)
     PortableSignal( SIGIO, HandleIO, NULL );
 #endif
     

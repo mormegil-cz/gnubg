@@ -23,6 +23,7 @@
 
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "eval.h"
 #include "positionid.h"

@@ -17,7 +17,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#if HAVE_SYS_UIO_H
 #include <sys/uio.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif

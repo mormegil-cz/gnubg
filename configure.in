@@ -83,7 +83,8 @@ AC_FUNC_MMAP
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(getdtablesize getlogin getpwuid gettimeofday isatty random readv select)
+AC_CHECK_FUNCS(fork getdtablesize getlogin getpwuid gettimeofday isatty random readv select)
+AC_CHECK_FUNCS(acosf asinf atanf cosf lrint sinf tanf)
 AC_CACHE_CHECK(for signbit macro, ac_cv_func_signbit,
 [AC_TRY_LINK([#define _GNU_SOURCE 1
 #include <math.h>], [if(signbit(1.0f));],
@@ -110,6 +111,17 @@ if test "$no_gtk" = "yes"; then
   fi
 else
   AC_DEFINE(USE_GTK,1,Define if you want to use the GTK toolkit and widgets.)
+  ac_save_CPPFLAGS="$CPPFLAGS"
+  ac_save_CFLAGS="$CFLAGS"
+  ac_save_LIBS="$LIBS"
+  CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
+  CFLAGS="$CFLAGS $GTK_CFLAGS"
+  LIBS="$LIBS $GTK_LIBS"
+  AC_CHECK_HEADERS(gdk/gdkx.h)
+  AC_CHECK_FUNCS(XCopyPlane)
+  CPPFLAGS="$ac_save_CPPFLAGS"
+  CFLAGS="$ac_save_CFLAGS"
+  LIBS="$ac_save_LIBS"
 fi
 
 dnl Record installation paths.
