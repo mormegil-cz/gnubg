@@ -21,6 +21,7 @@ char *aszCredits[] = {
     "Bill Davidson",
     "Giulio De Marco",
     "Michael Depreli",
+    "Alberta di Silvio",
     "Ian Dunstan",
     "Max Durbano",
     "Christopher D. Yep",

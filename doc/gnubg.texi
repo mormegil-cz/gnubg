@@ -1263,7 +1263,7 @@ A tutorial written by Albert Silver is available at Tom Keith's
 Backgammon Galore @uref{http://www.bkgm.com/gnu/AllAboutGNU.html,All
 About GNU}. An Italian translation is available from
 @uref{http://members.xoom.virgilio.it/free_bgammon/,Tutto su GNU} by
-courtesy of Renzo Campagna and Giulio De Marco.
+courtesy of Renzo Campagna, Giulio De Marco and Alberta di Silvio.
 
 
 @include fdl.texi
