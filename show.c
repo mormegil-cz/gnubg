@@ -2331,8 +2331,10 @@ CommandShowMatchResult( char *sz ) {
     outputf( _("Ave.   %+9.3f   %+9.3f\n"),
              arSum[ 0 ] / n , arSum[ 1 ] / n );
     outputf( _("95%%CI  %9.3f   %9.3f\n" ),
+             1.95996f *
              sqrt ( arSumSquared[ 0 ] / n - 
                     arSum[ 0 ] * arSum[ 0 ] / ( n * n ) ) / sqrt( n ),
+             1.95996f *
              sqrt ( arSumSquared[ 1 ] / n - 
                     arSum[ 1 ] * arSum[ 1 ] / ( n * n ) ) / sqrt( n ) );
   }
