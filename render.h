@@ -65,6 +65,7 @@ typedef struct _renderdata {
 	int animateRoll;	/* Animate dice rolls */
 	int animateFlag;	/* Animate resignation flag */
 	int closeBoardOnExit;	/* Animate board close on quit */
+	int debugTime;	/* Show average drawing time */
 #endif
 } renderdata;
 

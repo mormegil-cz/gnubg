@@ -30,10 +30,7 @@
 #include "inc3d.h"
 #include "matrix.h"
 #include "shadow.h"
-
-#ifdef BUILDING_LIB
 #include "renderprefs.h"
-#endif
 
 // My logcube - more than 32 then return 0 (show 64)
 static int LogCube( const int n )
@@ -177,6 +174,7 @@ void preDrawPiece0(BoardData* bd)
 	/* Draw top/bottom of piece */
 	if (bd->checkerMat[0].pTexture)
 	{	/* Note: texturing will be enabled at this point */
+		glEnable(GL_TEXTURE_2D);
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_HEIGHT);
 		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
@@ -190,12 +188,11 @@ void preDrawPiece0(BoardData* bd)
 	}
 	else	
 	{
-		circle(discradius, PIECE_HEIGHT, bd->step_accuracy);
 		circleRev(discradius, 0, bd->step_accuracy);
+		circle(discradius, PIECE_HEIGHT, bd->step_accuracy);
 	}
-
-	angle = 0;
 	/* Draw side of piece */
+	angle = 0;
 	glBegin(GL_QUAD_STRIP);
 	for (i = 0; i < bd->step_accuracy + 1; i++)
 	{
@@ -273,6 +270,7 @@ void preDrawPiece1(BoardData* bd)
 	/* Draw top of piece */
 	if (bd->checkerMat[0].pTexture)
 	{	/* Note: texturing will be enabled at this point */
+glEnable(GL_TEXTURE_2D);
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_HEIGHT);
 		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
@@ -298,7 +296,6 @@ void preDrawPiece(BoardData* bd, int transparent)
 		glDeleteLists(pieceList, 1);
 
 	pieceList = glGenLists(1);
-
 	glNewList(pieceList, GL_COMPILE);
 
 	switch(bd->pieceType)
@@ -974,52 +971,11 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 void renderPiece(BoardData* bd, int rotation, int colour)
 {
 	glRotatef((float)rotation, 0, 0, 1);
-
 	setMaterial(&bd->checkerMat[colour]);
-
 	glCallList(pieceList);
 }
 
-void drawPiece(BoardData* bd, int point, int pos)
-{
-	float v[3];
-	getPiecePos(point, pos, fClockwise, v);
-
-	glPushMatrix();
-	glTranslatef(v[0], v[1], v[2]);
-
-	/* Home pieces are sideways */
-	if (point == 26)
-		glRotatef(-90, 1, 0, 0);
-	if (point == 27)
-		glRotatef(90, 1, 0, 0);
-
-	renderPiece(bd, bd->pieceRotation[point][pos - 1], (bd->points[point] > 0));
-
-	glPopMatrix();
-}
-
-void drawGreenPiece(BoardData* bd, int point, int pos)
-{
-	float v[3];
-	getPiecePos(point, pos, fClockwise, v);
-
-	glPushMatrix();
-	glTranslatef(v[0], v[1], v[2]);
-
-	/* Home pieces are sideways */
-	if (point == 26)
-		glRotatef(-90, 1, 0, 0);
-	if (point == 27)
-		glRotatef(90, 1, 0, 0);
-
-	glRotatef((float)bd->pieceRotation[point][pos - 1], 0, 0, 1);
-	glCallList(pieceList);
-
-	glPopMatrix();
-}
-
-void drawDraggedPiece(BoardData* bd)
+void renderSpecialPieces(BoardData* bd)
 {
 	if (bd->drag_point >= 0)
 	{
@@ -1030,10 +986,7 @@ void drawDraggedPiece(BoardData* bd)
 
 		glPopMatrix();
 	}
-}
 
-void drawMovingPiece(BoardData* bd)
-{
 	if (bd->moving)
 	{
 		glPushMatrix();
@@ -1047,6 +1000,45 @@ void drawMovingPiece(BoardData* bd)
 	}
 }
 
+void drawSpecialPieces(BoardData* bd)
+{	/* Draw animated or dragged pieces */
+	int blend = (bd->checkerMat[0].alphaBlend) || (bd->checkerMat[1].alphaBlend);
+
+	if (blend)
+	{	/* Draw back of piece separately */
+		glEnable(GL_BLEND);
+		glCullFace(GL_FRONT);
+		renderSpecialPieces(bd);
+		glCullFace(GL_BACK);
+	}
+	renderSpecialPieces(bd);
+
+	if (blend)
+		glDisable(GL_BLEND);
+}
+
+void drawPiece(BoardData* bd, int point, int pos)
+{
+	float v[3];
+	glPushMatrix();
+
+	getPiecePos(point, pos, fClockwise, v);
+
+	glTranslatef(v[0], v[1], v[2]);
+
+	/* Home pieces are sideways */
+	if (point == 26)
+		glRotatef(-90, 1, 0, 0);
+	if (point == 27)
+		glRotatef(90, 1, 0, 0);
+
+	glRotatef((float)bd->pieceRotation[point][pos - 1], 0, 0, 1);
+	
+	glCallList(pieceList);
+
+	glPopMatrix();
+}
+
 void drawPieces(BoardData* bd)
 {
 	int i, j;
@@ -1054,23 +1046,40 @@ void drawPieces(BoardData* bd)
 
 	if (blend)
 	{	/* Draw back of piece separately */
-		glCullFace(GL_FRONT);
 		glEnable(GL_BLEND);
+		glCullFace(GL_FRONT);
 
+		setMaterial(&bd->checkerMat[0]);
 		for (i = 0; i < 28; i++)
 		{
-			for (j = 1; j <= abs(bd->points[i]); j++)
+			for (j = 1; j <= -bd->points[i]; j++)
 			{
 				drawPiece(bd, i, j);
 			}
 		}
-
+		setMaterial(&bd->checkerMat[1]);
+		for (i = 0; i < 28; i++)
+		{
+			for (j = 1; j <= bd->points[i]; j++)
+			{
+				drawPiece(bd, i, j);
+			}
+		}
 		glCullFace(GL_BACK);
 	}
 
+	setMaterial(&bd->checkerMat[0]);
 	for (i = 0; i < 28; i++)
 	{
-		for (j = 1; j <= abs(bd->points[i]); j++)
+		for (j = 1; j <= -bd->points[i]; j++)
+		{
+			drawPiece(bd, i, j);
+		}
+	}
+	setMaterial(&bd->checkerMat[1]);
+	for (i = 0; i < 28; i++)
+	{
+		for (j = 1; j <= bd->points[i]; j++)
 		{
 			drawPiece(bd, i, j);
 		}
@@ -1081,40 +1090,17 @@ void drawPieces(BoardData* bd)
 
 	if (bd->DragTargetHelp)
 	{	/* highlight target points */
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT, GL_LINE);
 		SetColour(0, 1, 0, 0);
 
 		for (i = 0; i <= 3; i++)
 		{
 			int target = bd->iTargetHelpPoints[i];
 			if (target != -1)
-			{
-				drawGreenPiece(bd, target, abs(bd->points[target]) + 1);
-			}
+				drawPiece(bd, target, abs(bd->points[target]) + 1);
 		}
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glPolygonMode(GL_FRONT, GL_FILL);
 	}
-}
-
-void drawSpecialPieces(BoardData* bd)
-{	/* Draw animated or dragged pieces */
-	int blend = (bd->checkerMat[0].alphaBlend) || (bd->checkerMat[1].alphaBlend);
-
-	if (blend)
-	{	/* Draw back of piece separately */
-		glCullFace(GL_FRONT);
-		glEnable(GL_BLEND);
-
-		drawMovingPiece(bd);
-		drawDraggedPiece(bd);
-
-		glCullFace(GL_BACK);
-	}
-
-	drawMovingPiece(bd);
-	drawDraggedPiece(bd);
-
-	glDisable(GL_BLEND);
 }
 
 void DrawNumbers(BoardData* bd, int sides, int mode)

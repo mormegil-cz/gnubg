@@ -4,11 +4,11 @@ Todo
 
 Display settings
 ----------------
-
 	* Change display settings options to allow 3d skin settings
 		Merge in with existing 2d settings?
 	* Add other 3d settings too
 		Add tooltips
+		+ Look at slidetest.c
 
 	Design/think about this bit.
 
@@ -20,37 +20,14 @@ Fails to load (run) on my windows 98 box
 Other things
 ============
 
-Put animation effects in misc3d.c to a new file
-	+ Add stuff in widget.c too (or put animation stuff here)
-
-Add a g_print with fps/render time displayed
-	+ Add an option to show this
-	+ Display roll/move fps and every 10 displays average draw time
-
-1st skin - red pieces look a bit strange (transparancy)
-	+ Draw inside and outside of piece separately
-
-Add specular highlights to skins
-	+ Piece, dice + cube
-
-Blink move animatation - useful?
+Add gtk 1.3 option (via other gtk widget)
 
 Merge button press code together
 	Split up big function at same time
 	Use separate messages too
 
-Move textures from data directory to boards or boards/3d
-	Add to cvs
-
-Change win32 messagebox's to gtk messagebox's
-
-FTGL uses C++
-
-Flag still waves if settings shown when resigning...
-
-Check unaccelerated performance
-
-Remove g_prints/debug code
+Put animation effects in misc3d.c to a new file
+	+ Add stuff in widget.c too (or put animation stuff here)
 
 Remove test files from lib build
 
@@ -66,3 +43,18 @@ Look at base_unit usage
 	Vary board sizes + check things are ok
 
 Check gnubg builds and runs without BOARD3D defined
+
+Move textures from data directory to boards or boards/3d or boards/textures
+	Add to cvs
+
+Remove g_prints/debug code
+
+Remove BUILDING_LIB #define/code
+
+Add check for unaccellerated graphics under linux
+
+Blink move animatation - useful?
+
+FTGL uses C++
+
+Flag still waves if settings shown when resigning

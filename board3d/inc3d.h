@@ -23,9 +23,6 @@
 
 #include "config.h"
 
-/* Comment out next line to remove glut library (needed for debug font) */
-#define USE_GLUT_FONT 1
-
 #if USE_GTK
 	#define BUILDING_LIB 1
 

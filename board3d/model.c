@@ -236,19 +236,13 @@ void AddEdge(OccModel* pMod, winged_edge* we)
 	{
 		winged_edge *we0 = (winged_edge*)ListGet(&pMod->edges, i);
 		if(we0->e[0] == we->e[0]  && we0->e[1] == we->e[1])
-		{
-#ifdef WIN32
-MessageBox(0, "facingness different between polys on edge!\n", "Warning", MB_OK);
-#endif
-		}
+			g_print("facingness different between polys on edge!\n");
+
 		if(we0->e[0] == we->e[1]  && we0->e[1] == we->e[0])
 		{
 			if(we0->w[1] != -1)
-			{
-#ifdef WIN32
-MessageBox(0, "triple edge! bad...\n", "Warning", MB_OK);
-#endif
-			}
+				g_print("triple edge! bad...\n");
+
 			we0->w[1] = we->w[0]; // pair the edge and return
 			return;
 		}

@@ -32,28 +32,44 @@
 #if HAVE_GTKGLEXT
 
 #include <gtk/gtk.h>
+
+#if USE_GTK2
 #include <gtk/gtkgl.h>
-#include "backgammon.h"
-#include "sound.h"
-#include "renderprefs.h"
+#else
+#include <gtkgl/gtkglarea.h>
+#endif
+
+#include "../backgammon.h"
+#include "../sound.h"
+#include "../renderprefs.h"
 
 int screenHeight;
 guint id = 0;
 GtkWidget *widget;
 idleFunc *pIdleFun;
+#if USE_GTK2
 GdkGLConfig *glconfig;
+#endif
 BoardData *pCurBoard;
 
 #ifdef WIN32
 
 void CheckAccelerated()
 {
-const char* vendor = glGetString(GL_VENDOR);
-const char* renderer = glGetString(GL_RENDERER);
-const char* version = glGetString(GL_VERSION);
+	const char* vendor = glGetString(GL_VENDOR);
+	const char* renderer = glGetString(GL_RENDERER);
+//	const char* version = glGetString(GL_VERSION);
 
-if (strstr(vendor, "Microsoft") && strstr(renderer, "Generic"))
-	MessageBox(0, "No hardware accelerated graphics card found - performance may be slow\n", "Warning", MB_OK);
+	if (strstr(vendor, "Microsoft") && strstr(renderer, "Generic"))
+	{
+#if USE_GTK2
+		GtkWidget *dialog = gtk_message_dialog_new (0, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+				GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, 
+				"No hardware accelerated graphics card found - performance may be slow.\n");
+		gtk_dialog_run(GTK_DIALOG(dialog));
+		gtk_widget_destroy(dialog);
+#endif
+	}
 }
 
 #else
@@ -147,52 +163,106 @@ void setIdleFunc(idleFunc* pFun)
 
 void realize(GtkWidget *widget, gpointer data)
 {
+#if USE_GTK2
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	/*** OpenGL BEGIN ***/
 	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
 		return;
+#else
+    if (gtk_gl_area_make_current(GTK_GL_AREA(widget)))
+	{
+#endif
 
 	InitGL();
 	SetSkin(pCurBoard, rdAppearance.skin3d);
 
+#if USE_GTK2
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
+#else
+	}
+#endif
 }
 
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
 {
+#if USE_GTK2
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	/*** OpenGL BEGIN ***/
 	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
 		return FALSE;
+#else
+	/* OpenGL functions can be called only if make_current returns true */
+	if (gtk_gl_area_make_current(GTK_GL_AREA(widget)))
+		return FALSE;
+#endif
 
 	screenHeight = widget->allocation.height;
 	Reshape(widget->allocation.width, widget->allocation.height);
 
+#if USE_GTK2
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
+#endif
 
 	return TRUE;
 }
 
 static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
+#if USE_GTK2
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
 	/*** OpenGL BEGIN ***/
 	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
-		return FALSE;
+		return TRUE;
+#else
+	/* Draw only last expose. */
+	if (event->count > 0)
+		return TRUE;
 
-	Display();
+	/* OpenGL functions can be called only if make_current returns true */
+	if (gtk_gl_area_make_current(GTK_GL_AREA(widget)))
+	{
+#endif
+
+	if (rdAppearance.debugTime)
+	{
+#define NUM_SAMPLES 10
+		static int count = NUM_SAMPLES;
+		static double total = 0;
+		double end, start = get_time();
+		Display();
+		end = get_time();
+		total += end - start;
+		count--;
+		if (!count)
+		{
+			g_print("Average draw time:%.1fms.\n", total / NUM_SAMPLES);
+			count = NUM_SAMPLES;
+			total = 0;
+		}
+	}
+	else
+		Display();
+
+#if USE_GTK2
 	gdk_gl_drawable_swap_buffers(gldrawable);
+#else
+	gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
+#endif
 
+#if USE_GTK2
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
+#else
+	}
+#endif
 
 	return TRUE;
 }
@@ -728,6 +798,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer 
 
 void CreateGLWidget(GtkWidget **drawing_area)
 {
+#if USE_GTK2
 	/* Drawing area for OpenGL */
 	*drawing_area = gtk_drawing_area_new();
 
@@ -743,6 +814,29 @@ void CreateGLWidget(GtkWidget **drawing_area)
 	g_signal_connect(G_OBJECT(*drawing_area), "button_press_event", G_CALLBACK(button_press_event), NULL);
 	g_signal_connect(G_OBJECT(*drawing_area), "button_release_event", G_CALLBACK(button_release_event), NULL);
 	g_signal_connect(G_OBJECT(*drawing_area), "motion_notify_event", G_CALLBACK(motion_notify_event), NULL);
+
+#else
+	/* create new OpenGL widget */
+	*drawing_area = gtk_gl_area_new_vargs(NULL, /* no sharing */
+			 GDK_GL_RGBA,
+			 GDK_GL_DEPTH_SIZE,1,
+			 GDK_GL_DOUBLEBUFFER,
+			 GDK_GL_NONE);
+	if (*drawing_area == NULL)
+	{
+		g_print("Can't create GtkGLArea widget\n");
+		return FALSE;
+	}
+	gtk_widget_set_events(*drawing_area, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
+				GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK);
+
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "realize", GTK_SIGNAL_FUNC(realize), NULL);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "configure_event", GTK_SIGNAL_FUNC(configure_event), NULL);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "expose_event", GTK_SIGNAL_FUNC(expose_event), NULL);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), NULL);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), NULL);
+	gtk_signal_connect(GTK_OBJECT(*drawing_area), "motion_notify_event", GTK_SIGNAL_FUNC(motion_notify_event), NULL);
+#endif
 }
 
 void ShowBoard3d(BoardData *bd)
@@ -763,11 +857,15 @@ void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area)
 
 int InitGTK3d(int *argc, char ***argv)
 {
+#if USE_GTK2
 	gtk_gl_init(argc, argv);
 
 	/* Configure OpenGL-capable visual */
 	glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE | GDK_GL_MODE_STENCIL);
 	if (glconfig == NULL)
+#else
+	if (gdk_gl_query() == FALSE)
+#endif
 	{
 		g_print("*** Cannot find OpenGL-capable visual.\n");
 		return 1;

@@ -32,6 +32,30 @@
 extern void BuildFont();
 extern void setupFlag();
 
+/* Test function to show normal direction*/
+void CheckNormal()
+{
+	float len;
+	GLfloat norms[3];
+	glGetFloatv(GL_CURRENT_NORMAL, norms);
+
+	len = (float)sqrt(norms[0] * norms[0] + norms[1] * norms[1] + norms[2] * norms[2]);
+	if (fabs(len - 1) > 0.000001)
+		len=len; /*break here*/
+	norms[0] *= .1f;
+	norms[1] *= .1f;
+	norms[2] *= .1f;
+
+	glBegin(GL_LINES);
+		glVertex3f(0, 0, 0);
+		glVertex3f(norms[0], norms[1], norms[2]);
+	glEnd();
+	glPointSize(5);
+	glBegin(GL_POINTS);
+		glVertex3f(norms[0], norms[1], norms[2]);
+	glEnd();
+}
+
 void Reshape(int w, int h)
 {
 	glViewport(0, 0, w, h);
@@ -784,7 +808,7 @@ int idleAnimate(void)
 
 		if (!movePath(&path, animateDistance, pRotate, pCurBoard->movingPos))
 		{
-			int moveStart = convert_point(animate_move_list[slide_move], animate_player);
+		    int moveStart = convert_point(animate_move_list[slide_move], animate_player);
 			int moveDest = convert_point(animate_move_list[slide_move + 1], animate_player);
 
 			if ((abs(pCurBoard->points[moveDest]) == 1) && (pCurBoard->turn != SGN(pCurBoard->points[moveDest])))
@@ -841,8 +865,8 @@ void RollDice3d()
 
 	if (rdAppearance.animateRoll)
 	{
-		monitor m;
-		SuspendInput( &m );
+monitor m;
+SuspendInput( &m );
 		animStartTime = get_time();
 
 		pCurBoard->shakingDice = 1;
@@ -853,7 +877,7 @@ void RollDice3d()
 		updateOccPos(pCurBoard);
 
 		gtk_main();
-		ResumeInput( &m );
+ResumeInput( &m );
 	}
 }
 
@@ -882,8 +906,8 @@ void SetupMove()
 
 void AnimateMove3d()
 {
-	monitor m;
-	SuspendInput( &m );
+monitor m;
+SuspendInput( &m );
 	slide_move = 0;
 	pCurBoard->moving = 1;
 
@@ -891,7 +915,7 @@ void AnimateMove3d()
 
 	setIdleFunc(idleAnimate);
 	gtk_main();
-	ResumeInput( &m );
+ResumeInput( &m );
 }
 
 int idleWaveFlag(void)
@@ -917,6 +941,18 @@ void ShowFlag3d()
 	updateFlagOccPos(pCurBoard);
 }
 
+#define PATH "Data//"
+
+#else
+
+#define PATH "../Data//"
+extern double animStartTime;
+
+#define gtk_main_quit() 0
+#define gtk_main() 0
+
+#endif
+
 int idleCloseBoard(void)
 {
 	float elapsedTime = (float)(get_time() - animStartTime);
@@ -937,8 +973,6 @@ int idleCloseBoard(void)
 
 	return 1;
 }
-
-#define PATH "Data//"
 
 void CloseBoard3d(BoardData* bd)
 {
@@ -973,5 +1007,3 @@ void CloseBoard3d(BoardData* bd)
 	
 	gtk_main();
 }
-
-#endif
