@@ -3,6 +3,10 @@ Thu Nov 14 18:11:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* html.c: fix typos in CSS.
 	(reported by Scott Steiner)
 
+Thu Nov 14 09:21:49 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* set.c: make movefilter a global command.
+
 Wed Nov 13 18:06:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Show annoation in html/text export of positions

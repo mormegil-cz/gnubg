@@ -68,8 +68,6 @@ static char szEQUITY[] = N_ ("<equity>"),
     szNAME[] = N_ ("<name>"),
     szNUMBER[] = N_ ("<number>"),
     szONOFF[] = N_ ("on|off"),
-    szFILTER[] = N_ (
- "<ply> <num. to accept (0 = skip)> [<num. of extra moves to accept> <tolerance>]"),
     szPLIES[] = N_ ("<plies>"),
     szSTDDEV[] = N_ ("<std dev>");
     
@@ -91,9 +89,6 @@ command acSetEvaluation[] = {
       N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
     { "tolerance", CommandSetEvalTolerance, N_("Control the equity range "
       "of moves for deep evaluation"), szEQUITY, NULL },
-	{ "movefilter", CommandSetEvalMoveFilter, 
-	  N_("Set parameters for choosing moves to evaluate"), 
-	  szFILTER, NULL},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
     { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
@@ -2261,7 +2256,7 @@ CommandSetEvalCubedecision ( char *sz ) {
 
 
 extern void
-CommandSetEvalMoveFilter(char* sz) {
+CommandSetMoveFilter(char* sz) {
 
   int		  ply = ParseNumber( &sz );
   int		  level;

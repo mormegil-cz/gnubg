@@ -374,6 +374,8 @@ static char szDICE[] = N_("<die> <die>"),
     szLIMIT[] = N_("<limit>"),
     szMILLISECONDS[] = N_("<milliseconds>"),
     szMOVE[] = N_("<from> <to> ..."),
+    szFILTER[] = N_ (
+ "<ply> <num. to accept (0 = skip)> [<num. of extra moves to accept> <tolerance>]"),
     szONOFF[] = N_("on|off"),
     szOPTCOMMAND[] = N_("[command]"),
     szOPTFILENAME[] = N_("[filename]"),
@@ -1244,6 +1246,9 @@ command cER = {
       szONOFF, &cOnOff },
     { "met", CommandSetMET,
       N_("Synonym for `set matchequitytable'"), szFILENAME, &cFilename },
+    { "movefilter", CommandSetMoveFilter, 
+      N_("Set parameters for choosing moves to evaluate"), 
+      szFILTER, NULL},
     { "nackgammon", CommandSetNackgammon, N_("Set the starting position"),
       szONOFF, &cOnOff },
     { "output", NULL, N_("Modify options for formatting results"), NULL,
@@ -4228,12 +4233,10 @@ extern void CommandSaveSettings( char *szParam ) {
               fAnalyseDice ? "on" : "off",
               fAnalyseMove ? "on" : "off" );
 
-    /* HACK - save move filter under 'set evaluation' */
-    /* we want this to be a global command */
     for (i = 0; i < MAX_FILTER_PLIES; ++i) {
       int j;
       for (j = 0; j <= i; ++j) {
-	fprintf (pf, "set evaluation chequerplay evaluation movefilter %d  %d  %d %d %0.3g\n",
+	fprintf (pf, "set movefilter %d  %d  %d %d %0.3g\n",
 		 i+1, j, 
 		 defaultFilters[i][j].Accept,
 		 defaultFilters[i][j].Extra,
