@@ -1065,7 +1065,7 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    break;
 	    
 	case EVAL_EVAL:
-	    fprintf( pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s"
+	    fprintf( pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s "
                      "%d %d %.4f %d %.4f",
 		     pml->amMoves[ i ].arEvalMove[ 0 ],
 		     pml->amMoves[ i ].arEvalMove[ 1 ],
