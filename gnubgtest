@@ -1,9 +1,9 @@
 #!/bin/sh -e
 
 if [ -n "$srcdir" ]; then
-  dirparam="--datadir $srcdir"
+  dirparam="--datadir=$srcdir"
 else
-  dirparam=""
+  dirparam=
 fi
 
 die () {
@@ -54,7 +54,8 @@ EOF
 echo '--- Self-play test succeeds.'
 
 # Play a cubeful game.
-./gnubg $dirparam -t << "EOF" > /dev/null || die '--- Self-play test fails.'
+./gnubg $dirparam -t << "EOF" > /dev/null || die \
+    '--- Cubeful self-play test fails.'
 set automatic game no
 set player both gnubg
 new game
