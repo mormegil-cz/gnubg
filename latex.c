@@ -32,25 +32,35 @@ static char*aszLuckTypeLaTeXAbbr[] = { "$--$", "$-$", "", "$+$", "$++$" };
 static void Points1_12( FILE *pf, int y ) {
 
     int i;
-    
-    for( i = 1; i <= 12; i++ )
-	fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
-		 330 - i * 20 - ( i > 6 ) * 20, y, i );
+
+    if( fClockwise )
+	for( i = 1; i <= 12; i++ )
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+		     50 + i * 20 + ( i > 6 ) * 20, y, i );
+    else
+	for( i = 1; i <= 12; i++ )
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+		     330 - i * 20 - ( i > 6 ) * 20, y, i );
 }
 
 static void Points13_24( FILE *pf, int y ) {
 
     int i;
     
-    for( i = 13; i <= 24; i++ )
-	fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
-		 i * 20 - 190 + ( i > 18 ) * 20, y, i );
+    if( fClockwise )
+	for( i = 13; i <= 24; i++ )
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+		     570 - i * 20 - ( i > 18 ) * 20, y, i );
+    else
+	for( i = 13; i <= 24; i++ )
+	    fprintf( pf, "\\put(%d,%d){\\makebox(20,10){\\textsf{%d}}}\n",
+		     i * 20 - 190 + ( i > 18 ) * 20, y, i );
 }
 
 static void LaTeXPrologue( FILE *pf ) {
 
     fputs( "\\documentclass{article}\n"
-	   "\\usepackage{epic,eepic}\n"
+	   "\\usepackage{epic,eepic,textcomp}\n"
 	   "\\newcommand{\\board}{\n"
 	   "\\shade\\path(70,20)(80,120)(90,20)(110,20)(120,120)(130,20)"
 	   "(150,20)(160,120)\n"
@@ -124,6 +134,9 @@ static void DrawLaTeXPoint( FILE *pf, int i, int fPlayer, int c ) {
 	x = 200;
     else /* off */
 	x = 365;
+
+    if( fClockwise )
+	x = 400 - x;
     
     for( j = 0; j < c; j++ ) {
 	if( j == 5 || ( i == 24 && j == 3 ) ) {
@@ -155,7 +168,7 @@ static void DrawLaTeXPoint( FILE *pf, int i, int fPlayer, int c ) {
 
 static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 
-    int anOff[ 2 ] = { 15, 15 }, i, y;
+    int anOff[ 2 ] = { 15, 15 }, i, x, y;
 
     /* FIXME print position ID and pip count, and the player on roll.
        Print player names too? */
@@ -175,6 +188,11 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     DrawLaTeXPoint( pf, 25, 0, anOff[ !fPlayer ] );
     DrawLaTeXPoint( pf, 25, 1, anOff[ fPlayer ] );
 
+    if( fClockwise )
+	x = 365;
+    else
+	x = 35;
+    
     if( pms->fCubeOwner < 0 )
 	y = 130;
     else if( pms->fCubeOwner )
@@ -182,9 +200,10 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     else
 	y = 230;
 
-    fprintf( pf, "\\path(23,%d)(47,%d)(47,%d)(23,%d)(23,%d)"
-	     "\\put(23,%d){\\makebox(24,24){\\textsf{\\LARGE %d}}}\n",
-	     y - 12, y - 12, y + 12, y + 12, y - 12, y - 12,
+    fprintf( pf, "\\path(%d,%d)(%d,%d)(%d,%d)(%d,%d)(%d,%d)"
+	     "\\put(%d,%d){\\makebox(24,24){\\textsf{\\LARGE %d}}}\n",
+	     x - 12, y - 12, x + 12, y - 12, x + 12, y + 12, x - 12, y + 12,
+	     x - 12, y - 12, x - 12, y - 12,
 	     pms->nCube == 1 ? 64 : pms->nCube );
     
     fputs( "\\end{picture}\\end{center}\\vspace{-4mm}\n\n\\nopagebreak[4]\n",
@@ -326,7 +345,7 @@ static void PrintLaTeXCubeAnalysis( FILE *pf, matchstate *pms, int fPlayer,
 	return;
     
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, fPlayer, pms->nMatchTo,
-		 pms->anScore, pms->fCrawford, fJacoby, fBeavers );
+		 pms->anScore, pms->fCrawford, fJacoby, nBeavers );
     
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
@@ -338,6 +357,11 @@ static void PrintLaTeXCubeAnalysis( FILE *pf, matchstate *pms, int fPlayer,
     fputs( "{\\begin{quote}\\footnotesize\\begin{verbatim}\n", pf );
     fputs( sz, pf );
     fputs( "\\end{verbatim}\\end{quote}}\n", pf );    
+}
+
+static char *PlayerSymbol( int fPlayer ) {
+
+    return fPlayer ? "\\textbullet{}" : "\\textopenbullet{}";
 }
 
 static void ExportGameLaTeX( FILE *pf, list *plGame ) {
@@ -365,7 +389,8 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
 				    pmr->n.arDouble, &pmr->n.esDouble );
 
-	    sprintf( sz, "%d%d%s: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
+	    sprintf( sz, "%s %d%d%s: ", PlayerSymbol( pmr->n.fPlayer ),
+		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
 		     aszLuckTypeLaTeXAbbr[ pmr->n.lt ] );
 	    FormatMove( strchr( sz, 0 ), msExport.anBoard, pmr->n.anMove );
 	    fprintf( pf, "\\begin{center}%s%s\\end{center}\n\n", sz,
@@ -396,7 +421,9 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
 				    pmr->d.arDouble, &pmr->d.esDouble );
 
-	    fprintf( pf, "\\begin{center}Double%s\\end{center}\n\n",
+	    /* FIXME what about beavers? */
+	    fprintf( pf, "\\begin{center}%s Double%s\\end{center}\n\n",
+		     PlayerSymbol( pmr->d.fPlayer ),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 	    
 	    PrintLaTeXComment( pf, pmr->a.sz );
@@ -405,7 +432,8 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    
 	case MOVE_TAKE:
 	    fTook = TRUE;
-	    fprintf( pf, "\\begin{center}Take%s\\end{center}\n\n",
+	    fprintf( pf, "\\begin{center}%s Take%s\\end{center}\n\n",
+		     PlayerSymbol( pmr->d.fPlayer ),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 
 	    PrintLaTeXComment( pf, pmr->a.sz );
@@ -413,7 +441,8 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_DROP:
-	    fprintf( pf, "\\begin{center}Drop%s\\end{center}\n\n",
+	    fprintf( pf, "\\begin{center}%s Drop%s\\end{center}\n\n",
+		     PlayerSymbol( pmr->d.fPlayer ),
 		     aszSkillTypeAbbr[ pmr->d.st ] );
 
 	    PrintLaTeXComment( pf, pmr->a.sz );
@@ -421,8 +450,9 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_RESIGN:
-	    /* FIXME print board? */
-	    /* FIXME print resign */
+	    fprintf( pf, "\\begin{center}%s Resigns %s\\end{center}\n\n",
+		     PlayerSymbol( pmr->r.fPlayer ),
+		     aszGameResult[ pmr->r.nResigned - 1 ] );
 	    /* FIXME print resignation analysis, if available */
 	    PrintLaTeXComment( pf, pmr->a.sz );
 	    break;
@@ -449,6 +479,11 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 extern void CommandExportGameLaTeX( char *sz ) {
 
     FILE *pf;
+    
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export"

@@ -163,6 +163,14 @@ static void RequestFont( FILE *pf, font fnNew, int nFontNew ) {
     }
 }
 
+static void ReleaseFont( FILE *pf ) {
+
+    if( fPDF && fn != FONT_NONE ) {
+	fputs( "ET\n", pf );
+	fn = FONT_NONE;
+    }
+}
+
 static void Ensure( FILE *pf, int cy ) {
 
     assert( cy <= 648 );
@@ -201,20 +209,20 @@ static void PostScriptPrologue( FILE *pf ) {
        encoding */
     
     static char szPrologue[] =
-	"%%Creator: (GNU Backgammon " VERSION ")\n"
-	"%%DocumentData: Clean7Bit\n"
-	"%%DocumentNeededResources: font Courier Helvetica Times-Roman\n"
-	"%%DocumentSuppliedResources: procset GNU-Backgammon-Prolog 1.0 0\n"
-	"%%LanguageLevel: 1\n"
-	"%%Orientation: Portrait\n"
-	"%%Pages: (atend)\n"
-	"%%PageOrder: Ascend\n"
-	"%%EndComments\n"
-	"%%BeginDefaults\n"
-	"%%PageResources: font Courier Helvetica Times-Roman\n"
-	"%%EndDefaults\n"
-	"%%BeginProlog\n"
-	"%%BeginResource: procset GNU-Backgammon-Prolog 1.0 0\n"
+	"%%%%Creator: (GNU Backgammon " VERSION ")\n"
+	"%%%%DocumentData: Clean7Bit\n"
+	"%%%%DocumentNeededResources: font Courier Helvetica Times-Roman\n"
+	"%%%%DocumentSuppliedResources: procset GNU-Backgammon-Prolog 1.0 0\n"
+	"%%%%LanguageLevel: 1\n"
+	"%%%%Orientation: Portrait\n"
+	"%%%%Pages: (atend)\n"
+	"%%%%PageOrder: Ascend\n"
+	"%%%%EndComments\n"
+	"%%%%BeginDefaults\n"
+	"%%%%PageResources: font Courier Helvetica Times-Roman\n"
+	"%%%%EndDefaults\n"
+	"%%%%BeginProlog\n"
+	"%%%%BeginResource: procset GNU-Backgammon-Prolog 1.0 0\n"
 	"\n"
 	"/rm { /Times-Roman findfont exch scalefont setfont } bind def\n"
 	"/sf { /Helvetica findfont exch scalefont setfont } bind def\n"
@@ -238,7 +246,7 @@ static void PostScriptPrologue( FILE *pf ) {
 	"/pointlabels {\n"
 	"  0 1 11 {\n"
 	"    3 copy 4 3 roll dup\n"
-	"    5 gt { 1 add } if 20 mul 80 add\n"
+	"    5 gt { 1 add } if %d mul %d add\n"
 	"    3 1 roll\n"
 	"    1 index 13 lt { 11 exch sub } if add 2 string cvs\n"
 	"    3 1 roll exch\n"
@@ -288,20 +296,20 @@ static void PostScriptPrologue( FILE *pf ) {
 	"\n"
 	"/cube {\n"
 	"  gsave\n"
-	"  exch newpath 35 exch moveto currentpoint\n"
+	"  exch newpath %d exch moveto currentpoint\n"
 	"  -12 -12 rmoveto 24 0 rlineto 0 24 rlineto -24 0 rlineto closepath "
 	"stroke\n"
 	"  18 sf translate rotate 0 -6 moveto 4 string cvs cshow\n"
 	"  grestore\n"
 	"} bind def\n"
 	"\n"
-	"%%EndResource\n"
-	"%%EndProlog\n"
-	"%%BeginSetup\n"
-	"%%IncludeResource: font Courier\n"
-	"%%IncludeResource: font Helvetica\n"
-	"%%IncludeResource: font Times-Roman\n"
-	"%%EndSetup\n";
+	"%%%%EndResource\n"
+	"%%%%EndProlog\n"
+	"%%%%BeginSetup\n"
+	"%%%%IncludeResource: font Courier\n"
+	"%%%%IncludeResource: font Helvetica\n"
+	"%%%%IncludeResource: font Times-Roman\n"
+	"%%%%EndSetup\n";
     time_t t;
     char *sz, *pch;
 
@@ -381,7 +389,8 @@ static void PostScriptPrologue( FILE *pf ) {
 	PostScriptEscape( pf, ap[ 1 ].szName );
 	fputs( ")\n", pf );
 	
-	fputs( szPrologue, pf );
+	fprintf( pf, szPrologue, fClockwise ? -20 : 20,
+		 fClockwise ? 320 : 80, fClockwise ? 365 : 35 );
     }
     
     iPage = 0;
@@ -406,6 +415,9 @@ static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
     else /* off */
 	x = 365;
 
+    if( fClockwise )
+	x = 400 - x;
+    
     for( j = 0; j < c; j++ ) {
 	if( j == 5 || ( i == 24 && j == 3 ) ) {
 	    if( fPDF ) {
@@ -433,7 +445,7 @@ static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
 	    fprintf( pf, "%d %d %d %d %d %d c\n",
 		     x + 5, y + 10, x + 10, y + 5, x + 10, y );
 	    fprintf( pf, "%d %d %d %d %d %d c\n",
-		     x + 10, y - 5, x + 5, y - 10, x, y - 10);
+		     x + 10, y - 5, x + 5, y - 10, x, y - 10 );
 	    fprintf( pf, "%d %d %d %d %d %d c %c\n",
 		     x - 5, y - 10, x - 10, y - 5, x - 10, y,
 		     fPlayer ? 'f' : 'b' );
@@ -444,27 +456,29 @@ static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
 
 static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 
-    int yCube, theta, anOff[ 2 ] = { 15, 15 }, i;
+    int yCube, theta, cos, sin, anOff[ 2 ] = { 15, 15 }, i;
 
     if( pms->fCubeOwner < 0 ) {
 	yCube = 130;
-	theta = 90;
+	theta = fClockwise ? 270 : 90;
+	sin = fClockwise ? -1 : 1;
+	cos = 0;
     } else if( pms->fCubeOwner ) {
 	yCube = 30;
 	theta = 0;
+	sin = 0;
+	cos = 1;
     } else {
 	yCube = 230;
 	theta = 180;
+	sin = 0;
+	cos = -1;
     }
     
     Advance( pf, 260 * nMag / 100 );
-
+    ReleaseFont( pf );
+    
     if( fPDF ) {
-	if( fn != FONT_NONE ) {
-	    fputs( "ET\n", pf );
-	    fn = FONT_NONE;
-	}
-
 	/* FIXME most of the following could be encapsulated into a PDF
 	   XObject to optimise the output file */
 	fprintf( pf, "q 1 0 0 1 %d %d cm %.2f 0 0 %.2f 0 0 cm 0.5 g\n",
@@ -489,16 +503,18 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 	for( i = 1; i <= 12; i++ )
 	    fprintf( pf, "BT /sf 8 Tf 1 0 0 1 %d %d Tm (%d) Tj ET\n",
 		     340 - i * 20 - ( i > 6 ) * 20 - ( i > 9 ? 5 : 2 ),
-		     fPlayer ? 12 : 242, i );
+		     fPlayer ? 12 : 242, fClockwise ? 13 - i : i );
 
 	for( i = 13; i <= 24; i++ )
 	    fprintf( pf, "BT /sf 8 Tf 1 0 0 1 %d %d Tm (%d) Tj ET\n",
-		     i * 20 - 185 + ( i > 18 ) * 20, fPlayer ? 242 : 12, i );
+		     i * 20 - 185 + ( i > 18 ) * 20, fPlayer ? 242 : 12,
+		     fClockwise ? 37 - i : i );
 
-	fprintf( pf, "q %d %d %d %d 35 %d cm -12 -12 24 24 re S\n"
+	fprintf( pf, "q %d %d %d %d %d %d cm -12 -12 24 24 re S\n"
 		 "BT /sf 18 Tf 1 0 0 1 %d -6 Tm (%d) Tj ET Q\n",
-		 1 - theta / 90, theta == 90, -( theta == 90 ), 1 - theta / 90,
-		 yCube, pms->nCube == 1 || pms->nCube > 8 ? -10 : -5,
+		 cos, sin, -sin, cos,
+		 fClockwise ? 365 : 35, yCube,
+		 pms->nCube == 1 || pms->nCube > 8 ? -10 : -5,
 		 pms->nCube == 1 ? 64 : pms->nCube );
     } else
 	fprintf( pf, "gsave\n"
@@ -656,7 +672,7 @@ static void PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
 	return;
     
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, fPlayer, pms->nMatchTo,
-		 pms->anScore, pms->fCrawford, fJacoby, fBeavers );
+		 pms->anScore, pms->fCrawford, fJacoby, nBeavers );
     
     if( !GetDPEq( NULL, NULL, &ci ) )
 	/* No cube action possible */
@@ -677,12 +693,31 @@ static void PrintPostScriptCubeAnalysis( FILE *pf, matchstate *pms,
     Skip( pf, 6 );
 }
 
+static void PlayerSymbol( FILE *pf, int x, int fPlayer ) {
+
+    if( fPDF ) {
+	ReleaseFont( pf );
+	
+	fprintf( pf, "%d %d m %d %d %d %d %d %d c\n",
+		 x - 4, y + 4, x - 4, y + 6, x - 2, y + 8, x, y + 8 );
+	fprintf( pf, "%d %d %d %d %d %d c\n",
+		 x + 2, y + 8, x + 4, y + 6, x + 4, y + 4 );
+	fprintf( pf, "%d %d %d %d %d %d c\n",
+		 x + 4, y + 2, x + 2, y, x, y );
+	fprintf( pf, "%d %d %d %d %d %d c %c\n",
+		 x - 2, y, x - 4, y + 2, x - 4, y + 4,
+		 fPlayer ? 'f' : 's' );
+    } else
+	fprintf( pf, "newpath %d %d 4 0 360 arc %s\n", x, y + 4,
+		 fPlayer ? "fill" : "stroke" );
+}
+
 static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
     list *pl;
     moverecord *pmr;
     matchstate msExport;
-    int fTook = FALSE, i;
+    int fTook = FALSE, i, cx;
     char sz[ 1024 ], *pch;
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
@@ -707,14 +742,17 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Advance( pf, 10 );
 	    FormatMove( sz, msExport.anBoard, pmr->n.anMove );
 	    RequestFont( pf, FONT_RM, 10 );
+	    cx = 15 /* 2 digits + colon + space */ +
+		StringWidth( aszLuckTypeAbbr[ pmr->n.lt ] ) +
+		StringWidth( aszSkillTypeAbbr[ pmr->n.st ] ) +
+		StringWidth( sz );
 	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (%d%d%s: %s%s) Tj\n" :
 		     "%d %d moveto (%d%d%s: %s%s) show\n",
-		     225 - ( 10 + StringWidth( aszLuckTypeAbbr[ pmr->n.lt ] ) +
-			     StringWidth( aszSkillTypeAbbr[ pmr->n.st ] ) +
-			     StringWidth( sz ) ) / 2, y,
+		     225 - cx / 2 + 6, y,
 		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
 		     aszLuckTypeAbbr[ pmr->n.lt ], sz,
 		     aszSkillTypeAbbr[ pmr->n.st ] );
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
 
 	    if( pmr->n.ml.cMoves ) {
 		Skip( pf, 4 );
@@ -763,8 +801,12 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Double) stringwidth = 29.439 */
-	    fprintf( pf, fPDF ? "1 0 0 1 210 %d Tm (Double) Tj\n" :
-		     "210 %d moveto (Double) show\n", y );
+	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 29;
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Double%s) Tj\n" :
+		     "%d %d moveto (Double%s) show\n", 225 - cx / 2 + 6, y,
+		     aszSkillTypeAbbr[ pmr->d.st ] );
+	    
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
 
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
@@ -778,8 +820,12 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Take) stringwidth = 19.9892 */
-	    fprintf( pf, fPDF ? "1 0 0 1 215 %d Tm (Take) Tj\n" :
-		     "215 %d moveto (Take) show\n", y );
+	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 20;
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Take%s) Tj\n" :
+		     "%d %d moveto (Take%s) show\n", 225 - cx / 2 + 6, y,
+		     aszSkillTypeAbbr[ pmr->d.st ] );
+	    
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
 
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
@@ -791,9 +837,13 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    Advance( pf, 10 );
 	    RequestFont( pf, FONT_RM, 10 );
 	    /* (Drop) stringwidth = 20.5494 */
-	    fprintf( pf, fPDF ? "1 0 0 1 215 %d Tm (Drop) Tj\n" :
-		     "215 %d moveto (Drop) show\n", y );
-
+	    cx = StringWidth( aszSkillTypeAbbr[ pmr->d.st ] ) + 20;
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Drop%s) Tj\n" :
+		     "%d %d moveto (Drop%s) show\n", 225 - cx / 2 + 6, y,
+		     aszSkillTypeAbbr[ pmr->d.st ] );
+	    
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+	    
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
 	    Skip( pf, 6 );
@@ -801,9 +851,18 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_RESIGN:
-	    /* FIXME print board? */
-	    /* FIXME print resign */
+	    Advance( pf, 10 );
+	    RequestFont( pf, FONT_RM, 10 );
+	    /* (Resigns ) stringwidth = 34.1685 */
+	    cx = StringWidth( aszGameResult[ pmr->r.nResigned - 1 ] ) + 34;
+	    fprintf( pf, fPDF ? "1 0 0 1 %d %d Tm (Resigns %s) Tj\n" :
+		     "%d %d moveto (Resigns %s) show\n", 225 - cx / 2 + 6, y,
+		     aszGameResult[ pmr->r.nResigned - 1 ] );
+	    
+	    PlayerSymbol( pf, 225 - cx / 2 - 2, pmr->n.fPlayer );
+	    
 	    /* FIXME print resignation analysis, if available */
+	    
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
 	    Skip( pf, 6 );
