@@ -3862,7 +3862,6 @@ extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
 
     evalcontext ec;
     GtkWidget *pwDialog, *pwEval;
-    GtkWidget *pwMoveFilter;
     int fOK;
     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
     

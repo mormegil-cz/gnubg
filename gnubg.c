@@ -278,7 +278,7 @@ rolloutcontext rcRollout =
 
 /* parameters for `eval' and `hint' */
 
-#define EVALSETUP { \
+#define EVALSETUP  { \
   /* evaltype */ \
   EVAL_EVAL, \
   /* evalcontext */ \
@@ -303,6 +303,7 @@ rolloutcontext rcRollout =
     }, \
     { FALSE, 0, 0, TRUE, 0.0 }, /* truncate cube decision */ \
     { FALSE, 0, 0, TRUE, 0.0 }, /* truncate chequerplay */ \
+    MOVEFILTER , MOVEFILTER , \
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \
     FALSE, /* initial position */ \
@@ -318,7 +319,6 @@ rolloutcontext rcRollout =
     0 /* seed */ \
   } \
 } 
-
 
 
 evalsetup esEvalChequer = EVALSETUP;
@@ -407,7 +407,7 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTSEED[] = N_("[seed]"),
     szOPTSIZE[] = N_("[size]"),
     szOPTVALUE[] = N_("[value]"),
-    szPATH[] = N_("<path>"),
+    /* szPATH[] = N_("<path>"), */
     szPLAYER[] = N_("<player>"),
     szPLAYEROPTRATING[] = N_("<player> [rating]"),
     szPLIES[] = N_("<plies>"),

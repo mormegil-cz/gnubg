@@ -100,8 +100,6 @@ ShowMoveFilters ( const movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] 
 static void 
 ShowEvaluation( const evalcontext *pec ) {
   
-  int  i;
-
   outputf( _("        %d-ply evaluation.\n"
              "        %d%% speed.\n"
              "        %s evaluations.\n"),
@@ -273,7 +271,7 @@ ShowRollout ( const rolloutcontext *prc ) {
     ShowMoveFilters ( prc->aamfLate );
   }
   else {
-    outputf ( _("Move filter:\n"), nLate );
+    outputf ( _("Move filter:\n") );
     ShowMoveFilters ( prc->aamfChequer );
   }
 

@@ -450,7 +450,7 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
   float rDP, rRDP, rDTW, rDTL;
 
-  int nDead, n, nMax, nCubeValue, nCubePrimeValue, k;
+  int nDead, n, nMax, nCubeValue, k;
 
 
   float aarMETResults [2][DTLBP1 + 1];
@@ -1876,7 +1876,7 @@ getMEMultiple ( const int nScore0, const int nScore1, const int nMatchTo,
   int i, max_res, s0, s1;
   int *score0, *score1;
   int mult[] = { 1, 2, 3, 4, 6};
-  float *p0, *p1, *p2, *p3, *p4, *p5, f;
+  float *p0, *p1, f;
   int  away0, away1;
   int  fCrawf = fCrawford;
 

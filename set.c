@@ -79,8 +79,7 @@ static rng *rngSet;
 movefilter *aamfSet[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
 
-static char szEQUITY[] = N_ ("<equity>"),
-    szFILENAME[] = N_ ("<filename>"),
+static char szFILENAME[] = N_ ("<filename>"),
     szNAME[] = N_ ("<name>"),
     szNUMBER[] = N_ ("<number>"),
     szONOFF[] = N_ ("on|off"),

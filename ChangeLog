@@ -1,3 +1,19 @@
+Tue Dec 17 00:45:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+        pacify fuzzy compiler.
+
+	* set.c: remove szEQUITY
+	* render.c (CopyAreaRotateClip): Initialize nSrcPixelStride and
+	nSrcRowStride
+	* gtkprefs.c: remove unused variables.
+	* show.c: remove unused variables.
+	* gtkmovefilter.c: remove unused variables.
+	* gtkgame.c: remove unused variables.
+	* gnubg.c: Add MOVEFILTER to EVALSETUP initialzer. Remove unused
+	variable szPATH.
+	* matchequity.c: remove unused variables.
+
+	
 Tue Dec 17 00:09:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	GUI support for setting PNG size

@@ -160,7 +160,7 @@ static void CopyAreaRotateClip( unsigned char *puchDest, int nDestStride,
 				int xSrc, int ySrc, int cx, int cy,
 				int nTheta ) {
 
-    int x, nSrcPixelStride, nSrcRowStride;
+    int x, nSrcPixelStride = 0, nSrcRowStride = 0;
     
     if( !( nTheta %= 4 ) )
 	return CopyAreaClip( puchDest, nDestStride, xDest, yDest, cxDest,

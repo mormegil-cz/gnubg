@@ -825,10 +825,7 @@ WriteDesign ( gpointer data, gpointer user_data ) {
 static void
 DesignSave ( GtkWidget *pw, gpointer data ) {
 
-  gchar *szXML;
   gchar *szFile;
-  gchar *szDir;
-  int rc;
   FILE *pf;
   GList **pplBoardDesigns = (GList **) data;
   time_t t;
@@ -974,7 +971,6 @@ static void
 DesignAdd ( GtkWidget *pw, gpointer data ) {
 
   BoardData bd;
-  gchar *sz;
   float rElevation;
   float rAzimuth;
   boarddesign *pbde;
