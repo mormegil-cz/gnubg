@@ -1,3 +1,7 @@
+Mon Nov 3 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Changes to the panel view
+
 Sat Nov  1 14:36:45 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* htmlimages (CommandExportHTMLImages): make the html image

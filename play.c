@@ -3568,7 +3568,7 @@ static void ShowMark( moverecord *pmr ) {
 #endif
     /* Show the dice roll, if the chequer play is marked but the cube
        decision is not. */
-    if( pmr->mt == MOVE_NORMAL && pmr->n.stCube == SKILL_NONE &&
+    if( pmr->mt == MOVE_NORMAL && (pmr->n.stCube == SKILL_NONE || pmr->n.stCube == SKILL_GOOD) &&
 	pmr->n.stMove != SKILL_NONE ) {
 	ms.gs = GAME_PLAYING;
 	ms.fMove = ms.fTurn = pmr->n.fPlayer;

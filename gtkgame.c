@@ -314,7 +314,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     , "set tc"
 #endif
 };
-enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANNOTATION, TOGGLE_MESSAGE };
+enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANALYSIS, TOGGLE_COMMENTRY, TOGGLE_MESSAGE };
 
 #if ENABLE_TRAIN_MENU
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
@@ -1007,7 +1007,7 @@ static void DeleteAnnotation( void ) {
   gtk_widget_hide ( pwAnnotation );
 #if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/Windows/Annotation")), FALSE);
+			  "/Windows/Commentry")), FALSE);
 #endif
 }
 
@@ -1078,6 +1078,16 @@ static void DeleteMessage ( void ) {
 #endif
 }
 
+#if !USE_OLD_LAYOUT
+static void DeleteAnalysis( void ) {
+
+  fAnalysis = FALSE;
+  gtk_widget_hide ( pwAnalysis->parent );
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
+			  "/Windows/Analysis")), FALSE);
+}
+#endif
+
 static GtkWidget *CreateMessageWindow( void ) {
 
     GtkWidget *vscrollbar, *pwhbox;  
@@ -1116,17 +1126,16 @@ static GtkWidget *CreateMessageWindow( void ) {
 			GTK_SIGNAL_FUNC( DeleteMessage ), NULL );
     return pwMessage;
 #else
-    gtk_widget_set_usize(GTK_WIDGET(pwvbox), 0, 80);
     return pwvbox;
 #endif
 }
 
 static GtkWidget *CreateAnnotationWindow( void ) {
 
-    GtkWidget *pwPaned = gtk_vpaned_new() ;
     GtkWidget *vscrollbar, *pHbox;    
-
 #if USE_OLD_LAYOUT
+    GtkWidget *pwPaned = gtk_vpaned_new() ;
+
     GtkWidget *pwAnnotation = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
     gtk_window_set_title( GTK_WINDOW( pwAnnotation ),
@@ -1142,13 +1151,17 @@ static GtkWidget *CreateAnnotationWindow( void ) {
     setWindowGeometry ( pwAnnotation, &awg[ WINDOW_ANNOTATION ] );
 
     gtk_container_add( GTK_CONTAINER( pwAnnotation ), pwPaned); 
-#endif
     
     gtk_paned_pack1( GTK_PANED( pwPaned ),
 		     pwAnalysis = gtk_label_new( NULL ), TRUE, FALSE );
     
     gtk_paned_pack2( GTK_PANED( pwPaned ),
 		     pHbox = gtk_hbox_new( FALSE, 0 ), FALSE, TRUE );
+#else
+	pHbox = gtk_hbox_new( FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX( pHbox ), pwAnalysis = gtk_label_new( NULL ), TRUE, TRUE, 0 );
+	pHbox = gtk_hbox_new( FALSE, 0 );
+#endif
     
     pwCommentary = gtk_text_new( NULL, NULL ) ;
 
@@ -1156,7 +1169,6 @@ static GtkWidget *CreateAnnotationWindow( void ) {
     gtk_text_set_editable( GTK_TEXT( pwCommentary ), TRUE );
     gtk_widget_set_sensitive( pwCommentary, FALSE );
 
-    
     vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pwCommentary)->vadj);
     gtk_box_pack_start(GTK_BOX(pHbox), pwCommentary, TRUE, TRUE, 0);
     gtk_box_pack_end(GTK_BOX(pHbox), vscrollbar, FALSE, FALSE, 0);
@@ -1168,7 +1180,7 @@ static GtkWidget *CreateAnnotationWindow( void ) {
 			GTK_SIGNAL_FUNC( DeleteAnnotation ), NULL );
     return pwAnnotation;
 #else
-    return pwPaned;
+    return pHbox;
 #endif
 }
 
@@ -1315,7 +1327,6 @@ static GtkWidget *CreateGameWindow( void ) {
 			GTK_SIGNAL_FUNC( DeleteGame ), NULL );
     return pwGame;
 #else
-    gtk_widget_set_usize(GTK_WIDGET(pvbox), 0, 300);
     return pvbox;
 #endif
 }
@@ -1333,14 +1344,16 @@ extern void ShowGameWindow( void ) {
 			  "/Windows/Game record")), TRUE);
 #endif
 }
+
 static void ShowAnnotation( void ) {
     fAnnotation = TRUE;
     gtk_widget_show_all( pwAnnotation );
 #if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
-			  "/Windows/Annotation")), TRUE);
+			  "/Windows/Commentry")), TRUE);
 #endif
 }
+
 static void ShowMessage( void ) {
     fMessage = TRUE;
     gtk_widget_show_all( pwMessage );
@@ -1349,6 +1362,15 @@ static void ShowMessage( void ) {
 			  "/Windows/Message")), TRUE);
 #endif
 }
+
+#if !USE_OLD_LAYOUT
+static void ShowAnalysis( void ) {
+    fAnalysis = TRUE;
+    gtk_widget_show_all( pwAnalysis->parent );
+  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
+			  "/Windows/Analysis")), TRUE);
+}
+#endif
 
 static int AddMoveRecordRow( void ) {
 
@@ -1957,8 +1979,13 @@ static void SetAnnotation( moverecord *pmr ) {
 
             }
             else if ( pwMoveAnalysis )
+			{
+#if !USE_OLD_LAYOUT
+              gtk_widget_set_usize(GTK_WIDGET(pwMoveAnalysis), 0, 200);
+#endif
               gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
                                    pwMoveAnalysis, TRUE, TRUE, 0 );
+			}
             else if ( pwCubeAnalysis )
               gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
                                    pwCubeAnalysis, TRUE, TRUE, 0 );
@@ -2105,7 +2132,11 @@ static void SetAnnotation( moverecord *pmr ) {
     if( !pwAnalysis )
 	pwAnalysis = gtk_label_new( _("No analysis available.") );
     
+#if USE_OLD_LAYOUT
     gtk_paned_pack1( GTK_PANED( pwParent ), pwAnalysis, TRUE, FALSE );
+#else
+	gtk_box_pack_start( GTK_BOX( pwParent ), pwAnalysis, TRUE, TRUE, 0 );
+#endif
     gtk_widget_show_all( pwAnalysis );
 
 
@@ -2443,6 +2474,27 @@ MainSelectionReceived ( GtkWidget *pw, GtkSelectionData *data,
 
 }
 
+static GtkWidget *StatsPixmapButton(GdkColormap *pcmap, char **xpm,
+				void *fn );
+
+#if !USE_OLD_LAYOUT
+static GtkWidget* CreateHeadWindow(const char* sz, GtkWidget* pwWidge, void* fn)
+{
+	#include "xpm/x.xpm"
+	GtkWidget* pwLab = gtk_label_new( sz );
+	GtkWidget* pwVbox = gtk_vbox_new(FALSE, 0);
+	GtkWidget* pwHbox = gtk_hbox_new(FALSE, 0);
+	GdkColormap *pcmap = gtk_widget_get_colormap( pwMain );
+	GtkWidget* pwX = StatsPixmapButton(pcmap, x_xpm, fn);
+
+	gtk_box_pack_start( GTK_BOX( pwVbox ), pwHbox, FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX( pwHbox ), pwLab, FALSE, FALSE, 10 );
+	gtk_box_pack_end( GTK_BOX( pwHbox ), pwX, FALSE, FALSE, 1 );
+	gtk_box_pack_start( GTK_BOX( pwVbox ), pwWidge, TRUE, TRUE, 0 );
+
+	return pwVbox;
+}
+#endif
 
 extern void
 GTKTextToClipboard( const char *sz ) {
@@ -2745,7 +2797,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 #else
 	{ N_("/_Windows/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
 	  "<CheckItem>" },
-	{ N_("/_Windows/_Annotation"), NULL, TogglePanel, TOGGLE_ANNOTATION,
+	{ N_("/_Windows/_Analysis"), NULL, TogglePanel, TOGGLE_ANALYSIS,
+	  "<CheckItem>" },
+	{ N_("/_Windows/_Commentry"), NULL, TogglePanel, TOGGLE_COMMENTRY,
 	  "<CheckItem>" },
 	{ N_("/_Windows/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
 	  "<CheckItem>" },
@@ -2907,16 +2961,19 @@ extern int InitGTK( int *argc, char ***argv ) {
    pwGame = CreateGameWindow();
    gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwGame, TRUE, TRUE, 0 );
 
-   pwAnnotation =CreateAnnotationWindow();
-   gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwAnnotation, TRUE, TRUE, 0 );
+   pwAnnotation = CreateHeadWindow(_("Commentry"), CreateAnnotationWindow(), DeleteAnnotation);
+   gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwAnalysis->parent, FALSE, FALSE, 0 );
+   gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwAnnotation, FALSE, FALSE, 0 );
 
-   pwMessage = CreateMessageWindow();
+   pwMessage = CreateHeadWindow(_("Messages"), CreateMessageWindow(), DeleteMessage);
    gtk_box_pack_start( GTK_BOX( pwVboxRight ), pwMessage, FALSE, FALSE, 0 );
 
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 	   gtk_item_factory_get_widget( pif, "/Windows/Message")), TRUE);
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
-	   gtk_item_factory_get_widget( pif, "/Windows/Annotation")), TRUE);
+	   gtk_item_factory_get_widget( pif, "/Windows/Analysis")), TRUE);
+   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
+	   gtk_item_factory_get_widget( pif, "/Windows/Commentry")), TRUE);
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 	   gtk_item_factory_get_widget( pif, "/Windows/Game record")), TRUE);
 #endif
@@ -9505,6 +9562,7 @@ extern void
 ShowAllPanels ( gpointer *p, guint n, GtkWidget *pw ) {
   fDisplayPanels = 1;
   ShowAnnotation();
+  ShowAnalysis();
   ShowMessage();
   ShowGameWindow();
 }
@@ -9513,6 +9571,7 @@ extern void
 HideAllPanels ( gpointer *p, guint n, GtkWidget *pw ) {
   fDisplayPanels = 0;
   DeleteAnnotation();
+  DeleteAnalysis();
   DeleteMessage();
   DeleteGame();
   gtk_window_set_default_size( GTK_WINDOW( pwMain ),
@@ -9528,7 +9587,13 @@ TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
   
   f = GTK_CHECK_MENU_ITEM( pw )->active ;
   switch( n ) {
-	  case TOGGLE_ANNOTATION:
+	  case TOGGLE_ANALYSIS:
+		if (f)
+			ShowAnalysis();
+		else
+		        DeleteAnalysis();
+                break;
+	  case TOGGLE_COMMENTRY:
 		if (f)
 			ShowAnnotation();
 		else

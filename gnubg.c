@@ -219,6 +219,7 @@ int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int fDisplayPanels = TRUE;
 int fMessage = FALSE;
+int fAnalysis = FALSE;
 int fGameList = FALSE;
 int nThreadPriority = 0;
 int fCheat = FALSE;

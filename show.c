@@ -2375,6 +2375,10 @@ extern void CommandShowTCTutorial( char *sz ) {
 
 
 extern void CommandShowDisplayPanels( char *sz ) {
-  outputf( _("Game list, Annotation and Message panels/windows "
-             "will%s be displayed."), fDisplayPanels ? "": " not");
+	if (fDisplayPanels)
+	  outputf( _("Game list, Annotation and Message panels/windows "
+		        "will be displayed."));
+	else
+	  outputf( _("Game list, Annotation and Message panels/windows "
+		        "will not be displayed."));
 }
