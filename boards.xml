@@ -72,25 +72,25 @@
          <title>Green/Black</title>
          <author>Albert Silver</author>
       </about>
- 
+
       <design>
-         board=#306030;0.20
-         border=#004000
-         wood=alder
+         board=#F2E5D8;0.09 
+         border=#003F00 
+         wood=ebony 
          hinges=y
-         light=150;50
+         light=150;50 
          shape=0.5
-         chequers0=#FF3333;#0.90;1.50;#0.20;3.00
-         chequers1=#0C0C19;#0.50;1.50;#1.00;30.00
-         dice0=#FF3333;0.20;3.00;y
-         dice1=#0C0C19;1.00;30.00;y
-         dot0=#B2B2B2
-         dot1=#B2B2B2
-         cube=#E5E5E5
-         points0=#FF6060;0.20
-         points1=#C0C0C0;0.20
+         chequers0=#FDFDFD;1.00;3.00;0.90;20.00
+         chequers1=#0B0B0B;1.00;3.00;0.90;15.00 
+         dice0=#EE2222;0.20;3.00;y
+         dice1=#000008;1.00;30.00;y 
+         dot0=#EDEFF2 
+         dot1=#EDEFF2 
+         cube=#D6D6C6
+         points0=#4CA57F;0.09 
+         points1=#4C4C4C;0.20
          piecetype=0
-		roundededges=y
+         roundededges=y
          lighttype=p
          lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
          lightambient=50 lightdiffuse=70 lightspecular=100
@@ -110,6 +110,7 @@
          numbers3d=#E3E3E3;#D0CBCE;#010101;128;100
          background3d=#C62149;#993559;#1A4312;128;0;board.bmp
       </design>
+
    </board-design>
 
    <board-design>
