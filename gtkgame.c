@@ -3835,7 +3835,7 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames ) {
     
     static char *aszTitle[] = {
 	"", "Win", "Win (g)", "Win (bg)", "Lose (g)", "Lose (bg)",
-        "Equity", "Cubeful"
+        "Cubeless", "Cubeful"
     }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     int i;
     GtkWidget *pwVbox;
@@ -3945,7 +3945,8 @@ extern void GTKRolloutRow( int i ) {
 extern int
 GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
                   float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
-                  int iGame, int cGames, int fCubeful, int cRows ) {
+                  int iGame, int cGames, int fCubeful, int cRows,
+                  cubeinfo aci[] ) {
 
     char sz[ 32 ];
     int i, j, iRow;
@@ -3961,13 +3962,35 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
         
         if ( i < OUTPUT_EQUITY )
           sprintf( sz, "%5.3f", aarMu[ j ][ i ] );
-        else if ( i == OUTPUT_EQUITY )
-          sprintf( sz, "%+6.3f", aarMu[ j ][ i ] );
-        else {
-          if ( fCubeful )
+        else if ( i == OUTPUT_EQUITY ) {
+
+          if ( ! ms.nMatchTo )
+            /* money game */
             sprintf( sz, "%+6.3f", aarMu[ j ][ i ] );
-          else
+          else if ( fOutputMWC )
+            /* match play (mwc) */
+            sprintf( sz, "%6.2f%%", 100.0f * eq2mwc ( aarMu[ j ][ i ], &aci[ j ] ) );
+          else 
+            /* match play (equity) */
+            sprintf( sz, "%+6.3f",
+                     mwc2eq ( eq2mwc ( aarMu[ j ][ i ], &aci[ j ] ), &aci[ 0 ] ) );
+
+        }
+        else {
+          if ( fCubeful ) {
+            if ( ! ms.nMatchTo ) 
+              /* money game */
+              sprintf( sz, "%+6.3f", aarMu[ j ][ i ] );
+            else if ( fOutputMWC )
+              /* match play (mwc) */
+              sprintf( sz, "%6.2f%%", 100.0f * aarMu[ j ][ i ] );
+            else
+              /* match play (equity) */
+              sprintf( sz, "%+6.3f", mwc2eq ( aarMu[ j ][ i ], &aci[ 0 ] ) );
+          }
+          else {
             strcpy ( sz, "n/a" );
+          }
         }
 
 	gtk_clist_set_text( GTK_CLIST( pwRolloutResult ), iRow << 1,

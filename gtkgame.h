@@ -79,7 +79,8 @@ extern void GTKRolloutRow( int i );
 extern int
 GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
                   float aarSigma[][ NUM_ROLLOUT_OUTPUTS ],
-                  int iGame, int cGames, int fCubeful, int cRows );
+                  int iGame, int cGames, int fCubeful, int cRows,
+                  cubeinfo aci[] );
 
 extern void GTKRolloutDone( void );
 extern void GTKSet( void *p );
