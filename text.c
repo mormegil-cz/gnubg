@@ -1215,7 +1215,7 @@ extern void CommandExportGameText( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    // setDefaultFileName ( sz, PATH_TEXT );
+    setDefaultFileName ( sz, PATH_TEXT );
     
 }
 
@@ -1253,7 +1253,7 @@ extern void CommandExportMatchText( char *sz ) {
         if ( ! confirmOverwrite ( sz, fConfirmSave ) )
           return;
 
-        // setDefaultFileName ( sz, PATH_TEXT );
+        setDefaultFileName ( sz, PATH_TEXT );
 
       }
 
@@ -1294,6 +1294,15 @@ extern void CommandExportPositionText( char *sz ) {
 	return;
     }
 
+
+    if ( ! plLastMove || ! plLastMove->plNext || ! plLastMove->plNext->p ) {
+
+      outputl ( "Sorry, cannot export move!" );
+      return;
+
+    }
+
+
     if ( ! confirmOverwrite ( sz, fConfirmSave ) )
       return;
 
@@ -1320,7 +1329,7 @@ extern void CommandExportPositionText( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
-    // setDefaultFileName ( sz, PATH_TEXT );
+    setDefaultFileName ( sz, PATH_TEXT );
 
 }
 
