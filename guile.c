@@ -389,6 +389,7 @@ static SCM rollout_position( SCM sBoard, SCM sCube, SCM sRolloutContext,
 			     SCM sDesc ) {
     int i, anBoard[ 2 ][ 25 ], n;
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
+    rolloutstat arsStatistics[ 2 ];
     SCM s;
     cubeinfo ci;
     static char sz[] = "rollout-position";
@@ -407,7 +408,7 @@ static SCM rollout_position( SCM sBoard, SCM sCube, SCM sRolloutContext,
     SCMToCubeInfo( sCube, &ci );
 
     PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );    
-    n = GeneralEvaluationR( SCM_CHARS( sDesc ), ar, arStdDev, anBoard,
+    n = GeneralEvaluationR( SCM_CHARS( sDesc ), ar, arStdDev, arsStatistics, anBoard,
 			    &ci, &rcRollout /* FIXME use sRolloutContext */ );
     PortableSignalRestore( SIGINT, &sh );
     if( fInterrupt ) {

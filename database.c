@@ -317,7 +317,7 @@ extern void CommandDatabaseRollout( char *sz ) {
 	    /* FIXME if position has some existing rollouts, merge them */
 
 	    if( !GeneralEvaluationR( PositionIDFromKey(
-		(unsigned char *) dKey.dptr ), arOutput, NULL, anBoardEval,
+		(unsigned char *) dKey.dptr ), arOutput, NULL, NULL, anBoardEval,
 				     &ciCubeless, &rcRollout ) ) {
 		pev->c = rcRollout.nTrials;
 		pev->t = time( NULL );

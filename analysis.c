@@ -139,6 +139,7 @@ AnalyzeMove ( moverecord *pmr ) {
     static float rSkill, rChequerSkill, rCost;
     static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    static rolloutstat aarsStatistics[ 2 ][ 2 ];
     static evalsetup esDouble; /* shared between the
 				  double and subsequent take/drop */
     static float arDouble[ NUM_CUBEFUL_OUTPUTS ]; /* likewise */
@@ -169,7 +170,7 @@ AnalyzeMove ( moverecord *pmr ) {
 	     GetDPEq ( NULL, NULL, &ci ) ) {
 
 	    if ( GeneralCubeDecision ( "",
-				       aarOutput, aarStdDev,
+				       aarOutput, aarStdDev, aarsStatistics, 
 				       msAnalyse.anBoard, &ci,
 				       &esAnalysisCube ) < 0 )
 		return -1;
@@ -311,7 +312,7 @@ AnalyzeMove ( moverecord *pmr ) {
 	    if ( GetDPEq ( NULL, NULL, &ci ) ) {
 	      
 		if ( GeneralCubeDecision ( "",
-					   aarOutput, aarStdDev,
+					   aarOutput, aarStdDev, aarsStatistics, 
 					   msAnalyse.anBoard, &ci,
 					   &esAnalysisCube ) < 0 )
 		    return -1;

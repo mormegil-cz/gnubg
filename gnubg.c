@@ -2323,9 +2323,11 @@ CommandRollout( char *sz ) {
 #if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
     char ( *asz )[ 40 ];
+    rolloutstat ( *aars)[ 2 ];
 #else
     int aan[ 10 ][ 2 ][ 25 ];
     char asz[ 10 ][ 40 ];
+    rolloutstat aars[ 10 ][ 2 ];
 #endif
 
     if( !( c = CountTokens( sz ) ) ) {
@@ -2340,6 +2342,7 @@ CommandRollout( char *sz ) {
     if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) ) {
       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+      rolloutstat aarsStatistics[ 2 ][ 2 ];
 
       if( ms.gs != GAME_PLAYING ) {
 	  outputl( "No game in progress." );
@@ -2348,8 +2351,8 @@ CommandRollout( char *sz ) {
       
       GetMatchStateCubeInfo( &ci, &ms );
 
-      GeneralCubeDecisionR ( "", aarOutput, aarStdDev, ms.anBoard, &ci,
-                             &rcRollout );
+      GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
+                             ms.anBoard, &ci, &rcRollout );
       return;
 
     }
@@ -2358,6 +2361,7 @@ CommandRollout( char *sz ) {
 #if HAVE_ALLOCA
     aan = alloca( 50 * c * sizeof( int ) );
     asz = alloca( 40 * c );
+    aars = alloca( 2 * c * sizeof ( rolloutstat ) );
 #else
     if( c > 10 )
 	c = 10;
@@ -2398,7 +2402,8 @@ CommandRollout( char *sz ) {
 	    GTKRolloutRow( i );
 #endif
 	if( ( cGames = RolloutGeneral( aan[ i ], &asz[ i ], &ar, &arStdDev,
-                                       &rcRollout, &ci, &fCubeDecTop, 1, fOpponent ) ) <= 0 )
+                                       &aars[ i ], &rcRollout, &ci, &fCubeDecTop,
+                                       1, fOpponent ) ) <= 0 )
 	    return;
 
 #if USE_GTK

@@ -1,3 +1,25 @@
+Sun Dec 16 12:45:04 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (printRolloutstat, initRolloutstat): new functions:
+	dump rollout statistics and initialise statistics, respectively. 
+
+	* rollout.c (getCubeTurns): calculate log ( nCube ) / log ( 2 )
+
+	* rollout.c: pass rollout statistics to all rollout functions, and
+	change all callers.
+
+	* rollout.c (BasicCubefulRollout): gather statistics.
+
+	* rollout.c (GeneralRollout): initialise and dump rollout
+	statistics.
+
+	* rollout.c (BasicCubefulRollout): fix bug for match play cubeful
+	rollouts reported by Robert-Jan Veldhuizen (missing conversion to
+	mwc).
+
+	* gtkgame.c (GTKRolloutUpdate): new parameter: cubeinfo
+	struct. The functions now honours the fOutputMWC flag.
+
 Thu Dec 13 15:30:45 2001  Gary Wong  <gtw@research.att.com>
 
 	* import.c (ParseSGGGame): New function.  Parse an SGG "Game ..."
