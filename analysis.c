@@ -1299,6 +1299,8 @@ CommandShowStatisticsMatch ( char *sz ) {
 
     char szOutput[4096];
 
+    updateStatisticsMatch ( &lMatch );
+
 #if USE_GTK
     if ( fX ) {
 	GTKDumpStatcontext ( &scMatch, &ms, "Statistics for all games" );
@@ -1329,6 +1331,8 @@ CommandShowStatisticsGame ( char *sz ) {
 	outputl( "No game is being played." );
 	return;
     }
+
+    updateStatisticsGame ( plGame );
 
     pmgi = plGame->plNext->p;
 
@@ -1372,3 +1376,105 @@ extern void CommandAnalyseMove ( char *sz ) {
     outputl ( "Sorry, cannot analyse move!" );
 
 }
+
+
+static void
+updateStatisticsMove ( moverecord *pmr, matchstate *pms, 
+                       statcontext *psc ) {
+
+
+  switch ( pmr->mt ) {
+  case MOVE_GAMEINFO:
+    IniStatcontext ( psc );
+    break;
+
+  case MOVE_NORMAL:
+    if( pmr->n.fPlayer != pms->fMove ) {
+      SwapSides( pms->anBoard );
+      pms->fMove = pmr->n.fPlayer;
+    }
+      
+    updateStatcontext ( psc, pmr, pms );
+    break;
+
+  case MOVE_DOUBLE:
+    if( pmr->d.fPlayer != pms->fMove ) {
+      SwapSides( pms->anBoard );
+      pms->fMove = pmr->d.fPlayer;
+    }
+      
+      
+    updateStatcontext ( psc, pmr, pms );
+    break;
+
+  case MOVE_TAKE:
+  case MOVE_DROP:
+
+    updateStatcontext ( psc, pmr, pms );
+    break;
+
+  default:
+    break;
+
+  }
+
+  ApplyMoveRecord( pms, pmr );
+  
+  psc->fMoves = fAnalyseMove;
+  psc->fCube = fAnalyseCube;
+  psc->fDice = fAnalyseDice;
+  
+}
+
+
+
+extern void
+updateStatisticsGame ( list *plGame ) {
+
+  list *pl;
+  moverecord *pmr;
+  movegameinfo *pmgi = plGame->plNext->p;
+  matchstate msAnalyse;
+  
+  assert( pmgi->mt == MOVE_GAMEINFO );
+    
+  for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
+    
+    pmr = pl->p;
+    
+    updateStatisticsMove ( pmr, &msAnalyse, &pmgi->sc );
+
+  }
+    
+}
+
+
+
+
+
+extern void
+updateStatisticsMatch ( list *plMatch ) {
+
+  list *pl;
+  movegameinfo *pmgi;
+
+  if( ListEmpty( plMatch ) ) 
+    /* no match in progress */
+    return;
+
+  IniStatcontext( &scMatch );
+  
+  for( pl = plMatch->plNext; pl != plMatch; pl = pl->plNext ) {
+    
+    updateStatisticsGame( pl->p );
+    
+    pmgi = ( (list *) pl->p )->plNext->p;
+    assert( pmgi->mt == MOVE_GAMEINFO );
+    AddStatcontext( &pmgi->sc, &scMatch );
+
+  }
+
+}
+
+
+

@@ -22,6 +22,8 @@
 #ifndef _ANALYSIS_H_
 #define _ANALYSIS_H_
 
+#include <list.h>
+
 typedef enum _lucktype {
     LUCK_VERYBAD, LUCK_BAD, LUCK_NONE, LUCK_GOOD, LUCK_VERYGOOD
 } lucktype;
@@ -84,5 +86,11 @@ extern void AddStatcontext ( statcontext *pscA, statcontext *pscB );
 
 extern void
 DumpStatcontext ( char *szOutput, statcontext *psc, char * sz );
+
+extern void
+updateStatisticsGame ( list *plGame );
+
+extern void
+updateStatisticsMatch ( list *plMatch );
 
 #endif
