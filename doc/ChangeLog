@@ -1,6 +1,10 @@
-Fri Dec 13 16:08:36 2002  Gary Wong  <gtw@gnu.org>
+Fri Dec 13 16:59:11 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am (EXTRA_DIST): Add some necessary files.
+
+	* Makefile.am: Try to cope without gnuplot and the PBM utilities.
+
+	* bearoff.texi, gnubg.texi: Syntax changes to make TeX happy.
 
 Sat Dec  7 15:06:33 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 

@@ -37,17 +37,21 @@ gnubg.txt: $(TXTFILES)
 gnubg.xml: $(TXTFILES) annealing.png
 
 annealing.txt annealing.eps: annealing.gp
+	if [ -n "$(GNUPLOT)" ]; then \
 	$(GNUPLOT) $< && \
-	$(TR) -d '\f' < anneal.txt > $(srcdir)/annealing.txt
+	$(TR) -d '\f' < anneal.txt > $(srcdir)/annealing.txt; fi
 
 annealing.png: annealing.eps
-	pstopnm -portrait -xsize 1024 $<
-	pnmscale 0.5 < annealing.eps001.ppm | pnmtopng > \
-		$(srcdir)/annealing.png
+	if [ -n "$(PSTOPNM)" -a -n "$(PNMSCALE)" -a -n "$(PNMTOPNG)" ]; then \
+	$(PSTOPNM) -portrait -xsize 1024 $<; \
+	$(PNMSCALE) 0.5 < annealing.eps001.ppm | $(PNMTOPNG) > \
+		$(srcdir)/annealing.png; fi
 	-rm annealing.eps001.ppm
 
 .png.eps:
-	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | $(PNMTOPS) -noturn > $@
+	if [ -n "$(PNGTOPNM)" -a -n "$(PNMTOPS)" ]; then \
+	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | \
+	$(PNMTOPS) -noturn > $@; fi
 
 .texi.html:
 	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'` -o $@

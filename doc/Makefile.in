@@ -81,6 +81,9 @@ ESD_CFLAGS = @ESD_CFLAGS@
 ESD_CONFIG = @ESD_CONFIG@
 ESD_LIBS = @ESD_LIBS@
 FLEX = @FLEX@
+FT2_CFLAGS = @FT2_CFLAGS@
+FT2_CONFIG = @FT2_CONFIG@
+FT2_LIBS = @FT2_LIBS@
 GENCAT = @GENCAT@
 GLIBC21 = @GLIBC21@
 GMSGFMT = @GMSGFMT@
@@ -113,8 +116,11 @@ NAS_LIBS = @NAS_LIBS@
 PACKAGE = @PACKAGE@
 PKG_CONFIG = @PKG_CONFIG@
 PNGTOPNM = @PNGTOPNM@
+PNMSCALE = @PNMSCALE@
+PNMTOPNG = @PNMTOPNG@
 PNMTOPS = @PNMTOPS@
 POSUB = @POSUB@
+PSTOPNM = @PSTOPNM@
 RANLIB = @RANLIB@
 SRCONV = @SRCONV@
 STRIP = @STRIP@
@@ -137,7 +143,8 @@ gnubg_TEXINFOS = fdl.texi faq.texi bearoff.texi
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt \
-	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd
+	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd \
+	annealing.png annealing.eps
 
 SUFFIXES = .png .eps .texi .html .txt .xml
 EPSFILES = rulfig1.eps rulfig2.eps rulfig3.eps rulfig4.eps rulfig5.eps \
@@ -437,16 +444,21 @@ gnubg.txt: $(TXTFILES)
 gnubg.xml: $(TXTFILES) annealing.png
 
 annealing.txt annealing.eps: annealing.gp
+	if [ -n "$(GNUPLOT)" ]; then \
 	$(GNUPLOT) $< && \
-	$(TR) -d '\f' < anneal.txt > $(srcdir)/annealing.txt
+	$(TR) -d '\f' < anneal.txt > $(srcdir)/annealing.txt; fi
 
 annealing.png: annealing.eps
-	pstopnm -portrait -xsize 1024 $<
-	pnmscale 0.5 < annealing.eps001.ppm | pnmtopng > \
-		$(srcdir)/annealing.png
+	if [ -n "$(PSTOPNM)" -a -n "$(PNMSCALE)" -a -n "$(PNMTOPNG)" ]; then \
+	$(PSTOPNM) -portrait -xsize 1024 $<; \
+	$(PNMSCALE) 0.5 < annealing.eps001.ppm | $(PNMTOPNG) > \
+		$(srcdir)/annealing.png; fi
+	-rm annealing.eps001.ppm
 
 .png.eps:
-	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | $(PNMTOPS) -noturn > $@
+	if [ -n "$(PNGTOPNM)" -a -n "$(PNMTOPS)" ]; then \
+	$(PNGTOPNM) -mix -background 1.0,1.0,1.0 < $< | \
+	$(PNMTOPS) -noturn > $@; fi
 
 .texi.html:
 	cd $(srcdir) && $(MAKEINFO) --html `echo $< | sed 's,.*/,,'` -o $@

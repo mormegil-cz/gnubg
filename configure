@@ -3016,7 +3016,6 @@ do
 done
 done
 
-  test -z "$ac_cv_prog_GNUPLOT" && ac_cv_prog_GNUPLOT="$MISSING gnuplot"
 fi
 fi
 GNUPLOT=$ac_cv_prog_GNUPLOT
@@ -3052,13 +3051,82 @@ do
 done
 done
 
-  test -z "$ac_cv_prog_PNGTOPNM" && ac_cv_prog_PNGTOPNM="$MISSING pngtopnm "
 fi
 fi
 PNGTOPNM=$ac_cv_prog_PNGTOPNM
 if test -n "$PNGTOPNM"; then
   echo "$as_me:$LINENO: result: $PNGTOPNM" >&5
 echo "${ECHO_T}$PNGTOPNM" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+# Extract the first word of "pnmscale", so it can be a program name with args.
+set dummy pnmscale; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_PNMSCALE+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$PNMSCALE"; then
+  ac_cv_prog_PNMSCALE="$PNMSCALE" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_PNMSCALE="pnmscale"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+fi
+fi
+PNMSCALE=$ac_cv_prog_PNMSCALE
+if test -n "$PNMSCALE"; then
+  echo "$as_me:$LINENO: result: $PNMSCALE" >&5
+echo "${ECHO_T}$PNMSCALE" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+# Extract the first word of "pnmtopng", so it can be a program name with args.
+set dummy pnmtopng; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_PNMTOPNG+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$PNMTOPNG"; then
+  ac_cv_prog_PNMTOPNG="$PNMTOPNG" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_PNMTOPNG="pnmtopng"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+fi
+fi
+PNMTOPNG=$ac_cv_prog_PNMTOPNG
+if test -n "$PNMTOPNG"; then
+  echo "$as_me:$LINENO: result: $PNMTOPNG" >&5
+echo "${ECHO_T}$PNMTOPNG" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -3088,13 +3156,47 @@ do
 done
 done
 
-  test -z "$ac_cv_prog_PNMTOPS" && ac_cv_prog_PNMTOPS="$MISSING pnmtops "
 fi
 fi
 PNMTOPS=$ac_cv_prog_PNMTOPS
 if test -n "$PNMTOPS"; then
   echo "$as_me:$LINENO: result: $PNMTOPS" >&5
 echo "${ECHO_T}$PNMTOPS" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+# Extract the first word of "pstopnm", so it can be a program name with args.
+set dummy pstopnm; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_PSTOPNM+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$PSTOPNM"; then
+  ac_cv_prog_PSTOPNM="$PSTOPNM" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_PSTOPNM="pstopnm"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+fi
+fi
+PSTOPNM=$ac_cv_prog_PSTOPNM
+if test -n "$PSTOPNM"; then
+  echo "$as_me:$LINENO: result: $PSTOPNM" >&5
+echo "${ECHO_T}$PSTOPNM" >&6
 else
   echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
@@ -13273,7 +13375,10 @@ s,@CSOUND@,$CSOUND,;t t
 s,@FLEX@,$FLEX,;t t
 s,@GNUPLOT@,$GNUPLOT,;t t
 s,@PNGTOPNM@,$PNGTOPNM,;t t
+s,@PNMSCALE@,$PNMSCALE,;t t
+s,@PNMTOPNG@,$PNMTOPNG,;t t
 s,@PNMTOPS@,$PNMTOPS,;t t
+s,@PSTOPNM@,$PSTOPNM,;t t
 s,@SRCONV@,$SRCONV,;t t
 s,@TR@,$TR,;t t
 s,@ALLOCA@,$ALLOCA,;t t
