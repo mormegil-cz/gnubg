@@ -1064,6 +1064,8 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
       pmr = pl->p;
 
+      FixMatchState ( &msExport, pmr );
+
       switch( pmr->mt ) {
 
       case MOVE_GAMEINFO:
