@@ -1308,6 +1308,7 @@ extern void CommandHint( char *sz ) {
 #if USE_GTK
       if( fX ) {
         GTKHint( &ml );
+	free( ml.amMoves );
         return;
       }
 #endif

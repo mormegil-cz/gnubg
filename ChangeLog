@@ -1,3 +1,8 @@
+Thu Oct 26 10:27:21 2000  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (CommandHint): [USE_GTK] Free the move list allocated
+	by FindnSaveBestMoves().
+
 Thu Oct 26 10:13:51 2000  Gary Wong  <gtw@research.att.com>
 
 	* Makefile.am: Don't build gnubg.bd by default (since we don't
