@@ -462,7 +462,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     nBeavers, fJacoby,
     fOutputRawboard, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord,
-	nDefaultLength, nToolbarStyle;
+	nDefaultLength, nToolbarStyle, fStyledGamelist;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
@@ -1161,6 +1161,7 @@ extern void CommandAccept( char * ),
     CommandSetSoundSoundResign ( char * ),
     CommandSetSoundSoundRoll ( char * ),
     CommandSetSoundSoundStart ( char * ),
+    CommandSetStyledGameList ( char * ),
     CommandSetSoundSoundTake ( char * ),
 #if USE_TIMECONTROL
     CommandSetTCMove( char * ),

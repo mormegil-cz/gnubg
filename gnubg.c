@@ -218,7 +218,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     nBeavers = 3, fOutputRawboard = FALSE, 
     cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
-    nDefaultLength = 7, nToolbarStyle = 2;
+    nDefaultLength = 7, nToolbarStyle = 2, fStyledGamelist = TRUE;
 int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
 	fTruncEqualPlayer0 =TRUE;
 int fInvertMET = FALSE;
@@ -1823,6 +1823,8 @@ command cER = {
     { "sound", NULL, 
       N_("Control audio parameters"), NULL, acSetSound },
 #endif /* USE_SOUND */
+    { "styledgamelist", CommandSetStyledGameList, N_("Display colours for marked moves in game window"),
+      szONOFF, &cOnOff },
 #if USE_TIMECONTROL
     { "tc", CommandSetTimeControl, N_("Select time control to use"), szSETTC, NULL}, 
     { "tcmovetime", CommandSetTCMove, N_("Set time per move"), szSETTCMOVE, NULL}, 
@@ -6042,6 +6044,10 @@ extern void CommandSaveSettings( char *szParam ) {
 	/* Save panel dock state (if not docked - default is docked) */
 	if (!fDockPanels)
 		fputs("set dockpanels off\n", pf);
+
+	/* Save gamelist style on/off (if not set - default is set) */
+	if (!fStyledGamelist)
+		fputs("set styledgamelist off\n", pf);
 
     /* the end */
 

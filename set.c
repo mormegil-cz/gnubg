@@ -538,6 +538,18 @@ extern void CommandSetGameList( char *sz ) {
 	UpdateSetting(&woPanel[WINDOW_GAME].showing);
 }
 
+extern void CommandSetStyledGameList( char *sz ) {
+
+    SetToggle( "styledgamelist", &fStyledGamelist, sz,
+		   _("Show colours in game window"),
+		   _("Do not show colours in game window.") );
+
+#if USE_GTK
+    if( fX )
+		GTKUpdateAnnotations();
+#endif
+}
+
 extern void CommandSetAnalysisWindows( char *sz ) {
 
     if( SetToggle( "analysis window", &woPanel[WINDOW_ANALYSIS].showing, sz,

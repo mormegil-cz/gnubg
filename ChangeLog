@@ -1,3 +1,7 @@
+Wed Jun  9  14:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkgamelist.c, gnubg.gtkrc: Get game list colours from gtkrc file
+
 Tue Jun  8  8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkgamelist.c: Colour mistakes in game list

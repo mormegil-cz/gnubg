@@ -1,13 +1,55 @@
+# style <name> [= <name>]
+# {
+#   <option>
+# }
 #
-# gnubg.gtkrc
-#
+# widget <widget_set> style <style_name>
+# widget_class <widget_class_set> style <style_name>
+
+module_path "C:/Program Files/gnubg/themes/engines"
+#pixmap_path "./Themes/brushed"
+
+style "default"
+{
+#  font = "-*-lucida-small-r-normal-*-14-*-*-*-*-*-iso8859-1"
+font = "-*-tahoma-normal-r-normal-*-*-100-*-*-*-*-*-*"
+#bg_pixmap[NORMAL] = "brushed.xpm"
+#bg_pixmap[INSENSITIVE] = "brushed.xpm"
+#bg_pixmap[ACTIVE] = "brushed-dark.xpm"
+#bg_pixmap[PRELIGHT] = "brushed-light.xpm" 
+
+# base, text, bg, fg are possible
+#bg[NORMAL] = { 0.77, 0.77, 0.77 }
+bg[SELECTED] = { 0.67, 0.67, 0.67 }
+bg[INSENSITIVE] = { 0.77, 0.77, 0.77 }
+bg[ACTIVE] = { 0.67, 0.67, 0.67 }
+bg[PRELIGHT] = { 0.80, 0.82, 0.84 }
+
+fg[NORMAL] = { 0.0, 0.0, 0.0 }
+fg[SELECTED] = { 0.9, 0.9, 0.9 }
+fg[ACTIVE] = { 0.0, 0.0, 0.0 }
+fg[PRELIGHT] = { 0.2, 0.1, 0.0 }
+
+#text[INSENSITIVE] = { 0.60, 0.65, 0.57 }
+
+  engine "engradient"
+  {
+    use_gradient = TRUE
+    handlebox_marks = TRUE
+    scrollbar_marks = TRUE
+  }
+
+}
+
+style "ruler" = "default"
+{
+  font = "-adobe-helvetica-medium-r-normal--*-80-*-*-*-*-*-*"
+}
 
 style "movelabel" = "default"
 {
   fg[ACTIVE] = { 0xffff, 0, 0 }
 }
-
-widget "*Board.*move" style "movelabel"
 
 style "doubling-window-graph" = "default"
 {
@@ -16,7 +58,67 @@ style "doubling-window-graph" = "default"
   bg[SELECTED] = { 0, 0, 0xffff }
 }
 
+#
+# Styles for moves in game list
+#
+
+style "gamelist-chequer-blunder" = "default"
+{
+  fg[ NORMAL ] = { 0xffff, 0, 0 }
+  bg[ NORMAL ] = { 0, 0xffff, 0 }
+}
+style "gamelist-chequer-error" = "default"
+{
+  fg[ NORMAL ] = { 0xffff, 0xffff, 0 }
+  bg[ NORMAL ] = { 0, 0xffff, 0 }
+}
+style "gamelist-chequer-doubtful" = "default"
+{
+  fg[ NORMAL ] = { 0, 0, 0xffff }
+  bg[ NORMAL ] = { 0, 0xffff, 0 }
+}
+
+style "gamelist-cube-blunder" = "default"
+{
+  fg[ NORMAL ] = { 0xffff, 0, 0 }
+  bg[ NORMAL ] = { 0, 0, 0xffff }
+}
+style "gamelist-cube-error" = "default"
+{
+  fg[ NORMAL ] = { 0xffff, 0xffff, 0 }
+  bg[ NORMAL ] = { 0, 0, 0xffff }
+}
+style "gamelist-cube-doubtful" = "default"
+{
+  fg[ NORMAL ] = { 0, 0xffff, 0 }
+  bg[ NORMAL ] = { 0, 0, 0xffff }
+}
+
+style "gamelist-luck-bad" = "default"
+{
+  font = "-*-tahoma-normal-i-normal-*-*-100-*-*-*-*-*-*"
+}
+style "gamelist-luck-good" = "default"
+{
+  fg[ NORMAL ] = { 0x1100, 0x5500, 0x1100 }
+  font = "-*-tahoma-bold-r-normal-*-*-100-*-*-*-*-*-*"
+}
+
+widget "*.gnubg-gamelist-chequer-blunder" style "gamelist-chequer-blunder"
+widget "*.gnubg-gamelist-chequer-error" style "gamelist-chequer-error"
+widget "*.gnubg-gamelist-chequer-doubtful" style "gamelist-chequer-doubtful"
+
+widget "*.gnubg-gamelist-cube-blunder" style "gamelist-cube-blunder"
+widget "*.gnubg-gamelist-cube-error" style "gamelist-cube-error"
+widget "*.gnubg-gamelist-cube-doubtful" style "gamelist-cube-doubtful"
+
+widget "*.gnubg-gamelist-luck-good" style "gamelist-luck-good"
+widget "*.gnubg-gamelist-luck-bad" style "gamelist-luck-bad"
+
+widget "*Board.*move" style "movelabel"
 widget "*.gnubg-doubling-window-graph" style "doubling-window-graph"
+widget_class "*Ruler*" style "ruler"
+widget_class "*" style "default"
 
 #
 # Styles for match equity table
@@ -34,3 +136,4 @@ style "met-the-score" = "met-matching-score"
 
 widget "*.gnubg-met-matching-score" style "met-matching-score"
 widget "*.gnubg-met-the-score" style "met-the-score"
+

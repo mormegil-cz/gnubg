@@ -41,7 +41,7 @@ static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
 #endif
 
 GtkWidget *pwGameList;
-GtkStyle *psGameList, *psCurrent, *psNumbers;
+GtkStyle *psGameList, *psCurrent, *psCubeErrors[3], *psChequerErrors[3], *psLucky[LUCK_VERYGOOD + 1];
 
 extern void SetAnnotation( moverecord *pmr );
 
@@ -75,7 +75,7 @@ void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev, gpoin
     list *pl;
     
     if( x < 1 || x > 2 )
-	return;
+    	return;
 
     pglr = gtk_clist_get_row_data( pcl, y );
     if (!pglr)
@@ -98,25 +98,25 @@ void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev, gpoin
     	pmrPrev = pglr->apmr[(pglr->fCombined) ? 0 : x - 1];
 
     if (!pmr)
-	return;
+    	return;
 
     for( pl = plGame->plPrev; pl != plGame; pl = pl->plPrev ) {
-	assert( pl->p );
-	if( pl == plGame->plPrev && pl->p == pmr && pmr->mt == MOVE_SETDICE )
-	    break;
+    	assert( pl->p );
+    	if( pl == plGame->plPrev && pl->p == pmr && pmr->mt == MOVE_SETDICE )
+    	break;
 
-	if( pl->p == pmrPrev && pmr != pmrPrev ) {
-	    /* pmr = pmrPrev; */
-	    break;
-	} else if( pl->plNext->p == pmr ) {
+    	if( pl->p == pmrPrev && pmr != pmrPrev ) {
+    	/* pmr = pmrPrev; */
+    	break;
+    	} else if( pl->plNext->p == pmr ) {
 	    /* pmr = pl->p; */
 	    break;
 	}
     }
 
     if( pl == plGame )
-	/* couldn't find the moverecord they selected */
-	return;
+    	/* couldn't find the moverecord they selected */
+    	return;
     
     plLastMove = pl;
     
@@ -154,12 +154,60 @@ extern void GL_SetNames()
                                 ( ap[1].szName ));
 }
 
+void SetColourIfDifferent(GdkColor cOrg[5], GdkColor cNew[5], GdkColor cDefault[5])
+{
+	int i;
+	for (i = 0; i < 5; i++)
+	{
+		if (memcmp(&cNew[i], &cDefault[i], sizeof(GdkColor)))
+			memcpy(&cOrg[i], &cNew[i], sizeof(GdkColor));
+	}
+}
+
+void GetStyleFromRCFile(GtkStyle** ppStyle, char* name)
+{	/* Note gtk 1.3 doesn't seem to have a nice way to do this... */
+	BoardData *bd = BOARD(pwBoard)->board_data;
+	GtkStyle *psDefault, *psNew;
+	GtkWidget *dummy, *temp;
+	char styleName[100];
+	/* Get default style so only changes to this are applied */
+	temp = gtk_button_new();
+	gtk_widget_ensure_style(temp);
+	psDefault = temp->style;
+
+	/* Get Style from rc file */
+	strcpy(styleName, "gnubg-gamelist-");
+	strcat(styleName, name);
+	dummy = gtk_label_new("");
+	gtk_widget_ensure_style(dummy);
+	gtk_widget_set_name(dummy, styleName);
+	/* Pack in box to make sure style is loaded */
+	gtk_box_pack_start(GTK_BOX(bd->vbox_ids), dummy, FALSE, FALSE, 0);
+	psNew = gtk_widget_get_style(dummy);
+
+	/* Base new style on default for game list */
+	*ppStyle = gtk_style_copy(psGameList);
+	/* Only set specified attributes */
+	SetColourIfDifferent((*ppStyle)->bg, psNew->bg, psDefault->bg);
+	SetColourIfDifferent((*ppStyle)->fg, psNew->fg, psDefault->fg);
+	/* Copy some settings, used when row is selected */
+	memcpy(&(*ppStyle)->fg[GTK_STATE_SELECTED], &(*ppStyle)->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
+	memcpy(&(*ppStyle)->bg[GTK_STATE_SELECTED], &(*ppStyle)->bg[GTK_STATE_NORMAL], sizeof(GdkColor));
+	memcpy(&(*ppStyle)->base[GTK_STATE_NORMAL], &(*ppStyle)->bg[GTK_STATE_NORMAL], sizeof(GdkColor));
+
+	if (!gdk_font_equal(gtk_style_get_font(psNew), gtk_style_get_font(psDefault)))
+		gtk_style_set_font(*ppStyle, gtk_style_get_font(psNew));
+
+	/* Remove useless widgets */
+	gtk_widget_destroy(dummy);
+	gtk_widget_destroy(temp);
+}
+
 GtkWidget* GL_Create()
 {
     GtkStyle *ps;
     gint nMaxWidth; 
     char *asz[] = {_("#"), NULL, NULL};
-    GdkColor blue = {0, 0, 0, 0xFFFF};
 
     pwGameList = gtk_clist_new_with_titles(3, asz);
     GTK_WIDGET_UNSET_FLAGS(pwGameList, GTK_CAN_FOCUS);
@@ -175,7 +223,6 @@ GtkWidget* GL_Create()
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 0, FALSE );
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 1, FALSE );
     gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 2, FALSE );
-
     gtk_widget_ensure_style( pwGameList );
     ps = gtk_style_new();
     ps->base[ GTK_STATE_SELECTED ] =
@@ -201,8 +248,14 @@ GtkWidget* GL_Create()
     psCurrent->fg[ GTK_STATE_SELECTED ] = psCurrent->fg[ GTK_STATE_NORMAL ] =
 	psGameList->bg[ GTK_STATE_NORMAL ];
 
-    psNumbers = gtk_style_copy( psGameList );
-    psNumbers->fg[ GTK_STATE_SELECTED ] = blue;
+    GetStyleFromRCFile(&psCubeErrors[SKILL_VERYBAD], "cube-blunder");
+    GetStyleFromRCFile(&psCubeErrors[SKILL_BAD], "cube-error");
+    GetStyleFromRCFile(&psCubeErrors[SKILL_DOUBTFUL], "cube-doubtful");
+    GetStyleFromRCFile(&psChequerErrors[SKILL_VERYBAD], "chequer-blunder");
+    GetStyleFromRCFile(&psChequerErrors[SKILL_BAD], "chequer-error");
+    GetStyleFromRCFile(&psChequerErrors[SKILL_DOUBTFUL], "chequer-doubtful");
+    GetStyleFromRCFile(&psLucky[LUCK_VERYBAD], "luck-bad");
+    GetStyleFromRCFile(&psLucky[LUCK_VERYGOOD], "luck-good");
 
     nMaxWidth = gdk_string_width( gtk_style_get_font( psCurrent ), _("99") );
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 0, nMaxWidth );
@@ -228,7 +281,6 @@ static int AddMoveRecordRow( void )
     aszData[0] = szIndex;
     row = gtk_clist_append(GTK_CLIST(pwGameList), aszData);
     gtk_clist_set_row_style(GTK_CLIST(pwGameList), row, psGameList);
-    gtk_clist_set_cell_style(GTK_CLIST(pwGameList), row, 0, psNumbers);
 
     pglr = malloc(sizeof(*pglr));
     pglr->fCombined = FALSE;
@@ -238,66 +290,30 @@ static int AddMoveRecordRow( void )
     return row;
 }
 
-GtkStyle* NewStyle(int redBack, int greenBack, int blueBack, int redFront, int greenFront, int blueFront)
-{
-    GtkStyle *pStyle;
-    GdkColor color;
-
-    pStyle = gtk_style_new();
-    gtk_style_set_font( pStyle, gtk_style_get_font( pwGameList->style ) );
-
-    color.red = redBack;
-    color.green = greenBack;
-    color.blue = blueBack;
-    pStyle->base[ GTK_STATE_SELECTED ] =
-	pStyle->base[ GTK_STATE_ACTIVE ] =
-	pStyle->base[ GTK_STATE_NORMAL ] =
-    pStyle->bg[ GTK_STATE_SELECTED ] =
-	pStyle->bg[ GTK_STATE_ACTIVE ] =
-	pStyle->bg[ GTK_STATE_NORMAL ] =
-	color;
-
-    color.red = redFront;
-    color.green = greenFront;
-    color.blue = blueFront;
-    pStyle->fg[ GTK_STATE_SELECTED ] =
-	pStyle->fg[ GTK_STATE_ACTIVE ] =
-	pStyle->fg[ GTK_STATE_NORMAL ] =
-	color;
-
-    return pStyle;
-}
-
-void SetCellColour(int row, int col, moverecord *pmr, GtkStyle *psDefault)
+void SetCellColour(int row, int col, moverecord *pmr)
 {
 	GtkStyle *pStyle;
 
-	if (pmr->n.stMove == SKILL_VERYBAD)
-	{
-		pStyle = NewStyle(0, 0xFFFF, 0, 0xFFFF, 0, 0);
-	}
+	if (!fStyledGamelist)
+		pStyle = psGameList;
+	else if (pmr->n.stMove == SKILL_VERYBAD)
+		pStyle = psChequerErrors[SKILL_VERYBAD];
 	else if (pmr->stCube == SKILL_VERYBAD)
-	{
-		pStyle = NewStyle(0, 0, 0xFFFF, 0xFFFF, 0, 0);
-	}
+		pStyle = psCubeErrors[SKILL_VERYBAD];
 	else if (pmr->n.stMove == SKILL_BAD)
-	{
-		pStyle = NewStyle(0, 0xFFFF, 0, 0xFFFF, 0xFFFF, 0);
-	}
+		pStyle = psChequerErrors[SKILL_BAD];
 	else if (pmr->stCube == SKILL_BAD)
-	{
-		pStyle = NewStyle(0, 0, 0xFFFF, 0xFFFF, 0xFFFF, 0);
-	}
+		pStyle = psCubeErrors[SKILL_BAD];
 	else if (pmr->n.stMove == SKILL_DOUBTFUL)
-	{
-		pStyle = NewStyle(0, 0xFFFF, 0, 0, 0, 0xFFFF);
-	}
+		pStyle = psChequerErrors[SKILL_DOUBTFUL];
 	else if (pmr->stCube == SKILL_DOUBTFUL)
-	{
-		pStyle = NewStyle(0, 0, 0xFFFF, 0, 0xFFFF, 0);
-	}
+		pStyle = psCubeErrors[SKILL_DOUBTFUL];
+	else if (pmr->lt == LUCK_VERYGOOD)
+		pStyle = psLucky[LUCK_VERYGOOD];
+	else if (pmr->lt == LUCK_VERYBAD)
+		pStyle = psLucky[LUCK_VERYBAD];
 	else
-		pStyle = psDefault;
+		pStyle = psGameList;
 
 	gtk_clist_set_cell_style(GTK_CLIST(pwGameList), row, col, pStyle);
 }
@@ -435,7 +451,7 @@ extern void GTKAddMoveRecord( moverecord *pmr )
     
     gtk_clist_set_text(GTK_CLIST(pwGameList), i, fPlayer + 1, pch);
 
-    SetCellColour(i, fPlayer + 1, pmr, psGameList);
+    SetCellColour(i, fPlayer + 1, pmr);
 }
 
 
@@ -464,14 +480,16 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
     
 	if (yCurrent != -1 && xCurrent != -1)
 	{
-		moverecord *pmrLast;
+		moverecord *pmrLast = NULL;
 		pglr = gtk_clist_get_row_data(pcl, yCurrent);
 		if (pglr)
 		{
 			pmrLast = pglr->apmr[xCurrent - 1];
 			if (pmrLast)
-				SetCellColour(yCurrent, xCurrent, pmrLast, psGameList);
+				SetCellColour(yCurrent, xCurrent, pmrLast);
 		}
+		if (!pmrLast)
+		   gtk_clist_set_cell_style(pcl, yCurrent, xCurrent, psGameList);
 	}
 
     yCurrent = xCurrent = -1;
@@ -522,10 +540,15 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	}
     }
 
-    gtk_clist_set_cell_style(pcl, yCurrent, xCurrent, psCurrent);
+	/* Highlight current move */
+	gtk_clist_set_cell_style(pcl, yCurrent, xCurrent, psCurrent);
 
-    if( gtk_clist_row_is_visible( pcl, yCurrent ) == GTK_VISIBILITY_NONE )
-	gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.5, 0.5 );
+	/* Wait for screen to resize to make sure move will be shown */
+	while( gtk_events_pending() )
+		gtk_main_iteration();
+
+	if( gtk_clist_row_is_visible( pcl, yCurrent ) != GTK_VISIBILITY_FULL )
+		gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.8, 0.5 );
 }
 
 extern void GTKPopMoveRecord( moverecord *pmr ) {

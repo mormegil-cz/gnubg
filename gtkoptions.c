@@ -76,7 +76,7 @@ typedef struct _optionswidget {
   GtkAdjustment *padjSpeed;
 
   GtkWidget *pwCheat, *pwCheatRollBox, *apwCheatRoll[ 2 ];
-  GtkWidget *pwGotoFirstGame;
+  GtkWidget *pwGotoFirstGame, *pwGameListStyles;
   GtkWidget *pwLangMenu;
 
   GtkWidget *pwSconyers15x15DVD;
@@ -1440,6 +1440,18 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
                             "show the first move in the first game"),
                           NULL );
 
+    /* display styles in game list */
+
+    pow->pwGameListStyles = gtk_check_button_new_with_label (
+	_("Display colours for marked moves in game list"));
+    gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwGameListStyles,
+			FALSE, FALSE, 0);
+    gtk_tooltips_set_tip( ptt, pow->pwGameListStyles,
+			  _("This option controls whether moves in the "
+                            "game list window are shown in different "
+                            "colours depending on their analysis"),
+                          NULL );
+
     /* language preference */
 
     pwhbox = gtk_hbox_new( FALSE, 4 );
@@ -1794,6 +1806,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   }
 
   CHECKUPDATE( pow->pwGotoFirstGame, fGotoFirstGame, "set gotofirstgame %s" )
+  CHECKUPDATE( pow->pwGameListStyles, fStyledGamelist, "set styledgamelist %s" )
       
   /* language preference */
 
@@ -1897,6 +1910,8 @@ OptionsSet( optionswidget *pow) {
                                 fConfirmSave );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGotoFirstGame ),
                                 fGotoFirstGame );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGameListStyles ),
+                                fStyledGamelist );
 
   /* language preference */
 
