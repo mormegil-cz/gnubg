@@ -681,7 +681,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
 	(pms->anBoard[0][12] != 5) || (pms->anBoard[1][12] != 5) ||
 	(pms->anBoard[0][8]  != 3) || (pms->anBoard[1][8]  != 3) ||
 	(pms->anBoard[0][23] != 2) || (pms->anBoard[1][23] != 2))
-      is_initial_position = 1;
+      is_initial_position = 0;
 
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:

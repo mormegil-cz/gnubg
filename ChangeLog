@@ -1,3 +1,9 @@
+Thu Nov  6 13:18:48 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
+
+	* analysis.c - Stupid, stupid, stupid. My silly last minute change 
+	  prevented cube analysis on any position except the initial one.
+	  Arrgh.
+
 Wed Nov  5 00:31:27 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
 
 	* analysis.c - don't analyse cube if board is in initial position
