@@ -550,7 +550,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
     printPointBBS ( pf, szImageDir, szExtension, 
                     anBoard[ 1 ][ 23 - i ],
                     anBoard[ 0 ][ i ],
-                    ! ( i % 2 ), FALSE );
+                    ( i % 2 ), FALSE );
 
   /* player 0's chequers on the bar */
 
@@ -563,7 +563,7 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
     printPointBBS ( pf, szImageDir, szExtension, 
                     anBoard[ 1 ][ 17 - i ],
                     anBoard[ 0 ][ i + 6 ],
-                    ! ( i % 2 ), FALSE );
+                    ( i % 2 ), FALSE );
 
   /* player 1 owning cube */
 
