@@ -193,6 +193,15 @@ duplication of effort and to make sure our changes merge easily.
 ** When selecting a cell in the game record window with the mouse, the
   window shouldn't scroll to centre the current record -- checking
   gtk_clist_row_is_visible should fix this. (gary)
+** Analysis of the following game crashes:
+
+  (;FF[4]GM[6]AP[GNU Backgammon:0.02]PW[gnubg]PB[gtw]RU[Jacoby]
+  ;W[21xvxw];B[33lx])
+
+  Note that if the 33 (13/1) is recorded as 13/10/7/4/1, it works:
+
+  (;FF[4]GM[6]AP[GNU Backgammon:0.02]PW[gnubg]PB[gtw]RU[Jacoby]
+  ;W[21xvxw];B[33loorruux])
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
