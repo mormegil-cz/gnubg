@@ -1,7 +1,13 @@
+Thu Sep  5 22:38:41 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (GTKRollout): 8th column in rollout window to small.
+	(reported by Zorba)
+
 Thu Sep  5 22:18:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* text.c (OutputCubeAnalysis): new parameter fOutputAlerts.
 	Change all callers.
+	(reported by Zorba)
 
 Thu Sep  5 19:33:42 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 

@@ -4824,7 +4824,7 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     gtk_box_pack_start( GTK_BOX( pwVbox ), pwRolloutProgress, FALSE, FALSE,
 			0 );
     
-    for( i = 0; i < 7; i++ ) {
+    for( i = 0; i < 8; i++ ) {
 	gtk_clist_set_column_auto_resize( GTK_CLIST( pwRolloutResult ), i,
 					  TRUE );
 	gtk_clist_set_column_justification( GTK_CLIST( pwRolloutResult ), i,
