@@ -88,7 +88,7 @@ extern void CommandDatabaseDump( char *sz ) {
     }
 
     if( !c )
-	puts( "There database is empty." );
+	puts( "The database is empty." );
 
     gdbm_close( pdb );
 }
@@ -278,7 +278,6 @@ extern void CommandDatabaseTrain( char *sz ) {
 
     gdbm_close( pdb );
 }
-
 #else
 static void NoGDBM( void ) {
 
