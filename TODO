@@ -168,10 +168,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow some way to specify long RNG seeds, and RNG parameters besides the
   seed (e.g. BBS modulus, user .so file) in the GUI.
 ** Clean up the board rendering code, so we can: (gary)
-*** Render previews of board designs, rather than using bitmaps.
 *** Show a preview of the chequers in the appearances dialog.
 *** Consider somehow rendering html-images directly.
-*** Render without GTK+ (optionally using freetype).
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,

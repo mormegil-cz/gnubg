@@ -1,3 +1,8 @@
+Wed Dec 11 11:57:42 2002  Gary Wong  <gtw@gnu.org>
+
+	* luxi.c: New file.  Contains glyphs of digits from the Luxi fonts.
+	* render.c: Use compiled-in Luxi fonts instead of reading from files.
+
 Tue Dec 10 21:30:38 2002  Gary Wong  <gtw@gnu.org>
 
 	* render.c, render.h: New files.  GTK+ independent replacement for the
