@@ -553,6 +553,25 @@ extern void PauseGameClock(matchstate *pms)
     assert (0);
 }
 
+#if WIN32
+int gettimeofday (struct timeval *tv, void * arg)
+{
+    FILETIME file_time;
+	ULARGE_INTEGER _100ns;
+    GetSystemTimeAsFileTime (&file_time);
+
+    _100ns.QuadPart = file_time.dwLowDateTime +
+			(((__int64)file_time.dwHighDateTime) << 32);
+
+    _100ns.QuadPart -= 0x19db1ded53e8000;
+
+    tv->tv_sec = (long) (_100ns.QuadPart / (10000 * 1000));
+    tv->tv_usec = (long) ((_100ns.LowPart % (DWORD) (10000 * 1000)) / 10);
+
+    return 0;
+}
+#endif
+
 extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
 {
     int pen=0;
@@ -561,9 +580,7 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
     if (0 == tvp)
     {
 	tvp = &ts;
-#if !WIN32
 	gettimeofday(tvp,0);
-#endif
     }
 
 #ifdef TCDEBUG
