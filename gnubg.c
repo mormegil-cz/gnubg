@@ -91,6 +91,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "export.h"
 #include "i18n.h"
 #include "sound.h"
+#include "path.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -109,7 +110,6 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <ext.h>
 #include <extwin.h>
 #include "xgame.h"
-#include "path.h"
 
 extwindow ewnd;
 event evNextTurn;
