@@ -5590,7 +5590,7 @@ GTKStatPageCube ( const rolloutstat *prs, const int cGames ) {
   }
 
   if ( anTotal[ 2 ] + anTotal[ 3 ] ) {
-    sprintf ( sz, _("Cube efficiency for p%s: %7.4f"),
+    sprintf ( sz, _("Cube efficiency for %s: %7.4f"),
               ap[ 0 ].szName,
 	      (float) anTotal[ 2 ] / ( anTotal[ 3 ] + anTotal[ 2 ] ) );
     pwLabel = gtk_label_new ( sz );

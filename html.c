@@ -2493,10 +2493,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
                             psc->anUnforcedMoves[ i ] );
     
-    printStatTableHeader ( pf,
-                           _("Checker play rating"), "%s",
-                           gettext ( aszRating[ rt [ 0 ] ] ), 
-                           gettext ( aszRating[ rt [ 1 ] ] ) );
+    printStatTableRow ( pf, 
+                        _( "Chequer play rating"), "%s",
+                        gettext ( aszLuckRating[ rt[ 0 ] ] ), 
+                        gettext ( aszLuckRating[ rt[ 1 ] ] ) );
 
   }
 
@@ -2680,7 +2680,7 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            psc->anCubeWrongDoubleTG[ 1 ],
                            psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
                            psc->arErrorWrongDoubleTG[ 1 ][ 1 ] );
-      printStatTableRow3 ( pf, _ ( "Wrong tales"),
+      printStatTableRow3 ( pf, _ ( "Wrong takes"),
                            "%d", "%+6.3f", "%+7.3f",
                            psc->anCubeWrongTake[ 0 ],
                            psc->arErrorWrongTake[ 0 ][ 0 ],
