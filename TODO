@@ -15,7 +15,8 @@ duplication of effort and to make sure our changes merge easily.
   cubeful evaluation.
 
 * Game play:
-** Add cube handling for computer player.
+** Add cube handling for computer player.  See tag "thyssen-double-branch"
+  in the CVS archive for work on this.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
   progress.  To do it properly requires improved input routines. (gary)
 
@@ -91,16 +92,22 @@ duplication of effort and to make sure our changes merge easily.
   until input is ready).  Also, what happens when the user types half
   a command and then moves with the mouse which causes the manual dice
   prompt?  "set delay" is related to this; other things should happen
-  while waiting for the delay.  All this mess can probably wait for
-  Gnome. (gary)
+  while waiting for the delay.  The simplest fix is probably to enable
+  asynchronous I/O on the X connection so we get a SIGIO and set a flag
+  in the signal handler.  Slow code can then poll this flag (as we do
+  for fInterrupt) and call a routine to handle certain X events
+  immediately.  Some X events (those that cause immediate command
+  execution) shouldn't be handled immediately because of reentrancy
+  problems, but we can cope with the important Expose and KeyPress
+  ones. (gary)
 ** The interrupt key doesn't work from the board window during a long
   computation (the process is too busy doing other things and never
   notices the key press in the event queue).  This is tricky to fix
-  and probably needs better event handling everywhere.
+  and probably needs better event handling everywhere. (gary)
 ** When the interrupt key is pressed during processing in response to
-  a board window event, "(Interrupted)" is not shown.
+  a board window event, "(Interrupted)" is not shown. (gary)
 ** Make sure that ComputerMove() updating anBoard and the call to
-  NextTurn() are atomic, even if a SIGINT occurs.
+  NextTurn() are atomic, even if a SIGINT occurs. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
