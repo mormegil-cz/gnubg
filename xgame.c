@@ -620,8 +620,9 @@ extern int GameSet( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
     }
     
     sprintf( strchr( sz, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:%d:0:0:0:"
-	     "0:0:0", nDice0, nDice1, nDice0, nDice1, nCube, fCubeOwner != 0,
-	     fCubeOwner != 1, fDoubled, anOff[ 1 ], anOff[ 0 ] );
+	     "0:0:0", nDice0, nDice1, nDice0, nDice1, ms.nCube,
+	     ms.fCubeOwner != 0, ms.fCubeOwner != 1, ms.fDoubled,
+	     anOff[ 1 ], anOff[ 0 ] );
     
     BoardSet( &pgd->ewndBoard, sz );
     StatsSet( &pgd->ewndStats, anBoard, nDice0, nDice1 );
@@ -631,8 +632,8 @@ extern int GameSet( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
     
     if( pgd->anDice[ 0 ] ) {
 	/* dice have been rolled; hide off-board dice */
-	( (dicedata *) pgd->ewndDice.pv )->an[ 0 ] = anDice[ 0 ];
-	( (dicedata *) pgd->ewndDice.pv )->an[ 1 ] = anDice[ 1 ];
+	( (dicedata *) pgd->ewndDice.pv )->an[ 0 ] = ms.anDice[ 0 ];
+	( (dicedata *) pgd->ewndDice.pv )->an[ 1 ] = ms.anDice[ 1 ];
 	XUnmapWindow( pewnd->pdsp, pgd->ewndDice.wnd );
     } else if( fDiceOld )
 	/* dice have been removed from board; show dice ready to roll */

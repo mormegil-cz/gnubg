@@ -1591,7 +1591,7 @@ extern void ShowBoard( void ) {
 #endif
 #else
             GameSet( &ewnd, anBoardTemp, 0, ap[ 1 ].szName, ap[ 0 ].szName,
-                     nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
+                     ms.nMatchTo, ms.anScore[ 1 ], ms.anScore[ 0 ], -1, -1 );
 #endif
 	} else
 #endif
