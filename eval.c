@@ -5171,7 +5171,7 @@ Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   /* Check if this requires a cubeful evaluation */
 
-  if ( fDoCubeful ( pci ) ) {
+  if ( ! fDoCubeful ( pci ) ) {
 
     /* cubeless eval */
 
