@@ -2334,7 +2334,16 @@ extern void GTKRegenerateGames( void ) {
 
     if( !fGameMenuUsed )
 	return;
+
+    /* update player names */
     
+    gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 1, 
+                                ( ap[0].szName ));
+    gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 2, 
+                                ( ap[1].szName ));
+
+    /* add games */
+
     GTKPopGame( 0 );
 
     for( pl = lMatch.plNext; pl->p; pl = pl->plNext ) {

@@ -7,6 +7,8 @@ Sun Apr 21 21:55:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* gnubg.c (swapGame): swap player in a game.
 
 	* gtkgame.c: new command "swap players".
+	* gtkgame.c (GTKRegenerateGames): update player names besides
+	updating game list.
 
 Sun Apr 21 18:26:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
