@@ -230,6 +230,7 @@ extern void RollDice3d();
 extern void AnimateMove3d();
 extern void ShowFlag3d();
 extern void StopIdle3d();
+extern void SetShadowDimness3d();
 
 extern void PlaceMovingPieceRotation(int dest, int src);
 extern void SetMovingPieceRotation(int pt);

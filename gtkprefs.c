@@ -69,7 +69,7 @@ static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ];
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard, *pwSpin,
-	*pwDebugTime;
+	*pwDebugTime, *pwDarkness, *lightLab, *darkLab;
 #endif
 
 #if HAVE_LIBXML2
@@ -638,18 +638,24 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 }
 
 #if USE_BOARD3D
-void toggle_display_type(GtkWidget *widget, gpointer data)
+void toggle_display_type(GtkWidget *widget, GtkWidget *pw)
 {
 	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget)))
   		CheckAccelerated();
 }
-#endif
 
-#if USE_BOARD3D
+void toggle_show_shadows(GtkWidget *widget, GtkWidget *pw)
+{
+	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	gtk_widget_set_sensitive(lightLab, set);
+	gtk_widget_set_sensitive(pwDarkness, set);
+	gtk_widget_set_sensitive(darkLab, set);
+}
+
 GtkWidget *Board3dPage(BoardData *bd)
 {
     GtkWidget *pw, *pwx;
-	GtkWidget *dtBox, *pwev, *pwhbox, *lab;
+	GtkWidget *dtBox, *hBox, *pwev, *pwhbox, *lab;
 	GtkAdjustment *adj;
 
     pwx = gtk_hbox_new ( FALSE, 0 );
@@ -662,7 +668,24 @@ GtkWidget *Board3dPage(BoardData *bd)
 	pwShowShadows = gtk_check_button_new_with_label ("Show shadows");
 	gtk_box_pack_start (GTK_BOX (dtBox), pwShowShadows, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), rdAppearance.showShadows);
-	
+	gtk_signal_connect(G_OBJECT(pwShowShadows), "toggled", GTK_SIGNAL_FUNC(toggle_show_shadows), NULL);
+
+	hBox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
+
+	lightLab = gtk_label_new("light");
+	gtk_box_pack_start(GTK_BOX(hBox), lightLab, FALSE, FALSE, 0);
+
+	pwDarkness = gtk_hscale_new_with_range(3, 100, 1);
+	gtk_scale_set_draw_value(pwDarkness, FALSE);
+	gtk_range_set_value(pwDarkness, rdAppearance.shadowDarkness);
+	gtk_box_pack_start(GTK_BOX(hBox), pwDarkness, TRUE, TRUE, 0);
+
+	darkLab = gtk_label_new("dark");
+	gtk_box_pack_start(GTK_BOX(hBox), darkLab, FALSE, FALSE, 0);
+
+	toggle_show_shadows(pwShowShadows, 0);
+
 	pwAnimateRoll = gtk_check_button_new_with_label ("Animate dice rolls");
 	gtk_box_pack_start (GTK_BOX (dtBox), pwAnimateRoll, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwAnimateRoll), rdAppearance.animateRoll);
@@ -674,7 +697,7 @@ GtkWidget *Board3dPage(BoardData *bd)
 	pwCloseBoard = gtk_check_button_new_with_label ("Close board on exit");
 	gtk_box_pack_start (GTK_BOX (dtBox), pwCloseBoard, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), rdAppearance.closeBoardOnExit );
-	
+
 	pwDebugTime = gtk_check_button_new_with_label ("Show drawing time");
 	gtk_box_pack_start (GTK_BOX (dtBox), pwDebugTime, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDebugTime), rdAppearance.debugTime);
@@ -726,7 +749,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 	button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwBoardType), "3d Board");
 	gtk_box_pack_start (GTK_BOX (dtBox), button, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.fDisplayType == DT_3D));
-	gtk_signal_connect_object(GTK_OBJECT(button), "toggled", GTK_SIGNAL_FUNC(toggle_display_type), NULL);
+	gtk_signal_connect(GTK_OBJECT(button), "toggled", GTK_SIGNAL_FUNC(toggle_display_type), NULL);
 #endif
 
     pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
@@ -1481,6 +1504,7 @@ static void GetPrefs ( renderdata *prd ) {
 
 	rdAppearance.fDisplayType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwBoardType ) ) ? DT_2D : DT_3D;
 	rdAppearance.showShadows = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwShowShadows));
+	rdAppearance.shadowDarkness = gtk_range_get_value(pwDarkness);
 	rdAppearance.skin3d = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(pwSpin));
 	SetSkin(bd, rdAppearance.skin3d);
 	rdAppearance.animateRoll = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateRoll));

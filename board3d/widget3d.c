@@ -233,18 +233,33 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer 
 
 	if (rdAppearance.debugTime)
 	{
-#define NUM_SAMPLES 10
-		static int count = NUM_SAMPLES;
+		#define NUM_SAMPLES 10
+		static int count = 0;
 		static double total = 0;
 		double end, start = get_time();
 		Display();
+		glFinish();	/* Execute opengl commands */
 		end = get_time();
 		total += end - start;
-		count--;
-		if (!count)
+		count++;
+		if (!(count % NUM_SAMPLES))
 		{
-			g_print("Average draw time:%.1fms.\n", total / NUM_SAMPLES);
-			count = NUM_SAMPLES;
+			double ave = total / NUM_SAMPLES;
+			if (count > NUM_SAMPLES)	/* Skip first NUM_SAMPLES */
+			{
+				double fps = 1000 / ave;
+				g_print("Average draw time:%.1fms.\n", ave);
+				if (fps > 30)
+					g_print("3d Performance is very fast.\n");
+				else if (fps > 10)
+					g_print("3d Performance is good.\n");
+				else if (fps > 5)
+					g_print("3d Performance is poor.\n");
+				else
+					g_print("3d Performance is very poor.\n");
+				
+				count = 0;
+			}
 			total = 0;
 		}
 	}

@@ -281,6 +281,11 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 #if USE_BOARD3D
     else if( !strncasecmp( szParam, "boardshadows", c ) )
 		prd->showShadows = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "shadowdarkness", c ) )
+	{
+		prd->shadowDarkness = atoi(szValue);
+		SetShadowDimness3d();
+	}
     else if( !strncasecmp( szParam, "testskin", c ) )
 		prd->skin3d = atoi( szValue );
     else if( !strncasecmp( szParam, "animateroll", c ) )
@@ -435,6 +440,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 #if USE_BOARD3D
 		 "boardtype=%c "
 		 "boardshadows=%c "
+		 "shadowdarkness=%d "
 		 "testskin=%d "
 		 "animateroll=%c "
 		 "animateflag=%c "
@@ -461,6 +467,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 #if USE_BOARD3D
 		prd->fDisplayType == DT_2D ? '2' : '3',
 		prd->showShadows ? 'y' : 'n',
+		prd->shadowDarkness,
 		prd->skin3d,
 		prd->animateRoll ? 'y' : 'n',
 		prd->animateFlag ? 'y' : 'n',

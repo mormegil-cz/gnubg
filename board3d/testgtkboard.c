@@ -208,6 +208,7 @@ setDicePos(bd);
 
 #if !BUILDING_LIB
 	InitialPos(bd);
+	SetShadowDimness(bd, 50);
 #endif
 
 	bd->fovAngle = 45.0f;
@@ -215,8 +216,6 @@ setDicePos(bd);
 
 	bd->resigned = 0;
 	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
-
-	SetShadowDimness(bd, 50);
 
 	bd->DragTargetHelp = 0;
 }

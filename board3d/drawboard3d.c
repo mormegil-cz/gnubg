@@ -2806,9 +2806,9 @@ void TidyShadows()
 	freeOccluder(&Occluders[OCC_PIECE]);
 }
 
-void SetShadowDimness(BoardData* bd, int percent)
+void SetShadowDimness3d()
 {
-	dim = (bd->LightDiffuse * (100 - percent)) / 100;
+	dim = (pCurBoard->LightDiffuse * (100 - rdAppearance.shadowDarkness)) / 100;
 }
 
 void RotateClosingBoard(BoardData* bd)
