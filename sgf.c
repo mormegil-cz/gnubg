@@ -558,6 +558,8 @@ static void RestoreNode( list *pl ) {
 	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'E' )
 	    st = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
 	    SKILL_GOOD;
+	else if( pp->ach[ 0 ] == 'L' && pp->ach[ 1 ] == 'U' )
+	    rLuck = atof( pp->pl->plNext->p );
 	/* FIXME handle GB and GW */
     }
     
@@ -814,7 +816,7 @@ static void WriteDoubleAnalysis( FILE *pf, evaltype et, float ar[],
 
     switch( et ) {
     case EVAL_EVAL:
-	fprintf( pf, "DA[E %7.4f %7.4f %7.4f %7.4f %d%s]", ar[ 0 ], ar[ 1 ],
+	fprintf( pf, "DA[E %.4f %.4f %.4f %.4f %d%s]", ar[ 0 ], ar[ 1 ],
 		 ar[ 2 ], ar[ 3 ], pes->ec.nPlies,
 		 pes->ec.fCubeful ? "C" : "" );
 	break;
@@ -863,7 +865,7 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 	    break;
 	    
 	case EVAL_EVAL:
-	    fprintf( pf, "E %6.4f %6.4f %6.4f %6.4f %6.4f %6.4f %d%s",
+	    fprintf( pf, "E %.4f %.4f %.4f %.4f %.4f %.4f %d%s",
 		     pml->amMoves[ i ].arEvalMove[ 0 ],
 		     pml->amMoves[ i ].arEvalMove[ 1 ],
 		     pml->amMoves[ i ].arEvalMove[ 2 ],
@@ -885,8 +887,11 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
     }
 }
 
-static void WriteLuck( FILE *pf, int fPlayer, lucktype lt ) {
+static void WriteLuck( FILE *pf, int fPlayer, float rLuck, lucktype lt ) {
 
+    if( rLuck != -HUGE_VALF )
+	fprintf( pf, "LU[%+.3f]", rLuck );
+    
     switch( lt ) {
     case LUCK_VERYBAD:
 	fprintf( pf, "G%c[2]", fPlayer ? 'W' : 'B' );
@@ -998,7 +1003,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 		WriteMoveAnalysis( pf, pmr->n.fPlayer, &pmr->n.ml,
 				   pmr->n.iMove );
 
-	    WriteLuck( pf, pmr->n.fPlayer, pmr->n.lt );
+	    WriteLuck( pf, pmr->n.fPlayer, pmr->n.rLuck, pmr->n.lt );
 	    WriteSkill( pf, pmr->n.st );
 	    
 	    break;
@@ -1050,7 +1055,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    fprintf( pf, "\n;PL[%c]DI[%d%d]", pmr->sd.fPlayer ? 'B' : 'W',
 		     pmr->sd.anDice[ 0 ], pmr->sd.anDice[ 1 ] );
 	    
-	    WriteLuck( pf, pmr->sd.fPlayer, pmr->sd.lt );
+	    WriteLuck( pf, pmr->sd.fPlayer, pmr->sd.rLuck, pmr->sd.lt );
 	    
 	    break;
 	    
