@@ -313,6 +313,7 @@ static void ImportSnowieTxt( gpointer *p, guint n, GtkWidget *pw );
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw );
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
+static void LoadPosition( gpointer *p, guint n, GtkWidget *pw );
 static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
 static void NewWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
@@ -2222,6 +2223,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Open/_Game..."), NULL, LoadGame, 0, NULL },
 	{ N_("/_File/_Open/_Match or session..."), "<control>O", 
           LoadMatch, 0, NULL },
+	{ N_("/_File/_Open/_Position..."), NULL, LoadPosition, 0, NULL },
 	{ N_("/_File/_Save"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Save/_Game..."), NULL, SaveGame, 0, NULL },
 	{ N_("/_File/_Save/_Match or session..."), "<control>S", 
@@ -3451,6 +3453,15 @@ static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SGF );
   FileCommand( _("Open match or session"), sz, "load match", "sgf", 0 );
+  if ( sz ) 
+    free ( sz );
+
+}
+
+static void LoadPosition( gpointer *p, guint n, GtkWidget *pw ) {
+
+  char *sz = getDefaultPath ( PATH_SGF );
+  FileCommand( _("Open position"), sz, "load position", "sgf", 0 );
   if ( sz ) 
     free ( sz );
 

@@ -1270,6 +1270,61 @@ extern void CommandLoadGame( char *sz ) {
     }
 }
 
+
+extern void 
+CommandLoadPosition( char *sz ) {
+
+    list *pl;
+    char szCharset[ 80 ] = "ISO-8859-1";
+
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a file to load from (see `help load "
+		 "position').") );
+	return;
+    }
+
+    if( ( pl = LoadCollection( sz ) ) ) {
+	if( ms.gs == GAME_PLAYING && fConfirm ) {
+	    if( fInterrupt )
+		return;
+	    
+	    if( !GetInputYN( _("Are you sure you want to load a saved position, "
+			     "and discard the match in progress? ") ) )
+		return;
+	}
+
+#if USE_GTK
+	if( fX )
+	    GTKFreeze();
+#endif
+	
+	FreeMatch();
+	ClearMatch();
+	
+	/* FIXME if pl contains multiple games, ask which one to load */
+
+	RestoreGame( pl->plNext->p, szCharset );
+	
+	FreeGameTreeSeq( pl );
+
+	UpdateSettings();
+	
+#if USE_GTK
+	if( fX ){
+	    GTKThaw();
+	    GTKSet(ap);
+        }
+
+        setDefaultFileName ( sz, PATH_SGF );
+
+#endif
+
+    }
+}
+
+
 extern void CommandLoadMatch( char *sz ) {
 
     list *pl;

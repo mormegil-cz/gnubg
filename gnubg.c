@@ -725,6 +725,8 @@ command cER = {
     { "match", CommandLoadMatch, 
       N_("Read a saved match from a file"), szFILENAME,
       &cFilename },
+    { "position", CommandLoadPosition, 
+      N_("Read a saved position from a file"), szFILENAME, &cFilename },
     { "weights", CommandNotImplemented, 
       N_("Read neural net weights from a file"),
       szOPTFILENAME, &cFilename },

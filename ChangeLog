@@ -1,3 +1,9 @@
+Fri Apr 25 20:26:27 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c: new command "load position ..."
+	* sgf.c (CommandLoadPosition): new function
+	* gtkgame.c: new menu entry for loading position.
+
 Mon Apr 14 16:31:12 2003  Oystein Johansen  <oystein@gnubg.org>
 
         * export.c (CommandExportPositionJF): Based on tests by Michael
