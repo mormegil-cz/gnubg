@@ -45,6 +45,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Databases::                     Storing information about positions.
 * Training::                      Modifying gnubg's neural nets.
 * Frequently Asked Questions::    Brief answers to things you might ask.
+* Command Index::                 A summary of all the gnubg commands.
 * Concept Index::                 Index of concepts described in this manual.
 @end menu
 
@@ -63,22 +64,23 @@ either TD or supervised training, maintain databases of positions for
 training and other purposes, and more.
 
 It will be extensible on platforms where Guile is available, so that the
-user can program it to answer sophisticated questions like "How many
+user can program it to answer sophisticated questions like ``How many
 chequers must Black have borne off in positions like this one to be able
-to accept a double?" and automate complicated rollout tasks.  It will be
+to accept a double?'' and automate complicated rollout tasks.  It will be
 driven by a command-line interface, and will display an ASCII rendition
 of a board on text-only terminals, but will also allow the user to play
 games and manipulate positions with an X11 board window where available.
 
 It currently plays at about the level of a strong intermediate flight
-tournament player (rated in the mid 1700s on @dfn{FIBS}, the First Internet
-Backgammon Server --- around the 90th percentile) and is gradually
-improving; it should be somewhat stronger than this when released.  Since
-almost all of the CPU time required during supervised training is spent
-performing rollouts, and rollouts can easily be performed in parallel,
-it is hoped that users will be able to pool rollout results and
-collectively train it to a level stronger than any individual could
-obtain.
+tournament player (rated in the mid 1700s on @dfn{FIBS},
+@cindex FIBS
+the First Internet Backgammon Server --- around the 90th percentile) and
+is gradually improving; it should be somewhat stronger than this when
+released.  Since almost all of the CPU time required during supervised
+training is spent performing rollouts, and rollouts can easily be
+performed in parallel, it is hoped that users will be able to pool
+rollout results and collectively train it to a level stronger than any
+individual could obtain.
 
 If you can tolerate the rough edges, periodic snapshots of @gnubg{} and
 anonymous CVS access to the pre-release source are being made available.
@@ -108,7 +110,7 @@ are used during routine play.  This chapter demonstrates some of those
 most commonly used.
 
 If your @gnubg{} installation is complete, you should be able to start it
-and get output similar to the following:
+and see output similar to the following:
 
 @example
 GNU Backgammon 0.02  Copyright 1999 Gary Wong.
@@ -174,11 +176,11 @@ better representation of a backgammon board than this.  Exactly the
 same information is available, either way.
 
 You have just won the opening roll (you have a 3, and @gnubg{} has a 1) --- the
-dice roll is in the bottom right hand corner for the TTY board, and shown
+dice roll is in the bottom right hand corner for the TTY board, or shown
 as graphical dice on the right hand side of the board window.  The
 position ID (the @samp{4HPwATDgc/ABMA} in this example) is an encoded
-representation of the current position that comes in useful when using
-some of @gnubg{}'s advanced commands; you can safely ignore it for now.
+representation of the current position.  It comes in useful when using
+some of @gnubg{}'s advanced commands, but you can safely ignore it for now.
 Notice that the prompt has changed to @samp{(X)}, to indicate that it
 is X's (your) turn.
 
@@ -358,7 +360,7 @@ that appropriate commands are documented together.  We can easily make
 a table or summary later to group commands by name; for the rest of
 the manual it is better to group them by purpose.
 
-accept                  playing         / cube
+accept                  playing
 agree                   playing
 beaver                  playing         / cube
 database dump           databases
@@ -491,7 +493,7 @@ in this case.  (FIXME it doesn't yet, but it should.)
 @end table
 
 @gnubg{} will also exit upon end-of-file; you can therefore exit by typing
-an end-of-file character (usually @kbd{C-d}, i.e. hold the @key{CTRL}
+an end-of-file character (usually @kbd{C-d}, i.e.@: hold the @key{CTRL}
 key and press D).
 
 @cindex interrupting @t{gnubg}
@@ -512,7 +514,8 @@ You can execute shell commands from @gnubg{} without leaving or suspending it.
 @item !@var{command}
 Invoke a subshell to execute @var{command}.  The environment variable
 @code{SHELL} determines which shell to use (@gnubg{} defaults to
-@file{/bin/sh} if @code{$SHELL} is not set).  FIXME not implemented yet.
+@file{/bin/sh} if @code{$SHELL} is not set).  If @var{command} is not
+specified, the shell will be invoked.  FIXME not implemented yet.
 @end table
 
 @node Basic Commands
@@ -520,9 +523,27 @@ Invoke a subshell to execute @var{command}.  The environment variable
 @cindex basic commands
 @cindex commands, basic
 
-There are a few simple commands...
+There are a few simple commands you can use within GNU Backgammon to
+display information you might need to know:
 
-FIXME help, ?, show copying, show warranty
+@table @code
+@kindex help
+@kindex ?
+@item help @var{command}
+@itemx ? @var{command}
+Describe the commands that @gnubg{} understands.  @code{help} by itself
+lists the main commands with a one-line description of each; when
+@var{command} is specified, that command is explained in more detail,
+and if it has any subcommands then they are listed in brief.
+
+@code{?} is a synonym for @code{help}.
+@kindex show copying
+@kindex show warranty
+@item show copying
+@itemx show warranty
+These commands are used to show the conditions GNU Backgammon is distributed
+under.  FIXME summarise GPL.
+@end table
 
 @node Playing
 @chapter Playing Backgammon with @gnubg
@@ -544,35 +565,241 @@ FIXME introduction
 @section Commands Used During the Game
 @cindex game commands
 
-FIXME
+@table @code
+@kindex new game
+@item new game
+This command is used to start a game within a match or session.  (Note
+that all games are played within matches or sessions; see
+@ref{Matches and Sessions}.  To play a single game, use either a
+1 point match or a session lasting for one game, depending whether
+you want gammons and the doubling cube to be active.)  @code{new game}
+will set up the board in the starting position, and roll one die for
+each player for the opening move.
 
-agree
-decline
-hint
-move
-new game
-set/show board
-show pipcount
-set player human,set player name, show player
-set/show turn
-reject
-resign
-set autobearoff, set automove
-set display
+If you are in the middle of a game, @code{new game} will ask you if
+you want to abort the game in progress.  If you do, a new game will
+replace the current one (i.e.@: the partially completed game will have
+no effect on the score).  If you want the current game to be scored
+for either player, you should use the @code{resign} command instead.
+@kindex move
+@item move @var{from} @var{to} @dots{}
+@itemx @var{from} @var{to} @dots{}
+The @code{move} command allows you to make chequer plays when it is your
+turn.  In its normal form, you should specify pairs of point numbers
+indicating the points you want to move a chequer from and to.  Specify
+one pair for each chequer you want to move.  (For instance, on an
+opening roll of 31, you might use @code{move 8 5 6 5} to move two
+chequers --- one from your 8 point to your 5 point, and the other from
+your 6 point to your 5 point.)  For several example moves, see
+@ref{Sample Game}.
+
+You should use the words @code{bar} and @code{off} when moving a chequer
+from the bar or bearing it off the board, e.g.@: @code{move bar 20} or
+@code{move 3 off}.  These words can be abbreviated to @code{b} and
+@code{o} respectively.
+
+If there is only one legal move you can make, then the command @code{move}
+by itself will make it for you without requiring you to specify it in full.
+Similarly, if there is no play available at all, then @code{move} will
+end your turn without moving.
+
+As long as you specify at least one pair of points, then the word
+@code{move} is optional --- the command @code{bar 20 24 20} means exactly
+the same thing as @code{move bar 20 24 20}, for instance.
+
+If you are using the X Window System, you can also move chequers using
+the board window.  One way to do this is to use mouse button 1 to drag
+a chequer (that is, press the button when the pointer is over the
+chequer you wish to move; move the pointer to the point you wish to
+play it to, and then release the button).
+
+An alternative is to click buttons 2 or 3 on the chequer; button 2 will
+move it by the number of pips showing on the left die, and button 3 will
+move it according to the right die.  If you don't like the order the
+dice are displayed in, pressing either button 2 or 3 on the dice will
+swap their positions.
+
+Whichever method you use to move the chequers, once you have made a legal
+move you can end your turn by clicking mouse button 1 on the dice.
+
+FIXME reference set automove and set autobearoff.
+@kindex resign
+@kindex agree
+@kindex accept
+@kindex decline
+@kindex reject
+@item resign [@var{type}]
+@itemx agree
+@itemx accept
+@itemx decline
+@itemx reject
+The @code{resign} command is used to give up a game without playing it to
+completion.  It is often useful during endgame play when the game reaches
+a position where it is impossible for one player to win.  If you do not
+specify a value @var{type}, then the player whose turn it is offers to
+give up one game (at the current cube value) to the opponent; you can
+also specify @code{1}, @code{2} or @code{3} to resign a single, double
+or triple game.  Specifying @code{normal}, @code{gammon} or
+@code{backgammon} is also legal, and is identical to expressing the
+number of points as a digit.  @code{single} is yet another synonym for
+one game.
+
+The opponent may accept the resignation with either the @code{agree} or
+@code{accept} commands, but is not obliged to.  To ignore the
+resignation and continue play normally, use either the @code{decline} or
+@code{reject} commands.  (@code{accept} and @code{reject} are also legal
+commands in response to a double; @pxref{Cube}.)
+@kindex set board
+@item set board @var{id}
+If you wish to directly set the chequers to a different position, you
+can use the @code{set board} command.  You need to know the
+@dfn{position ID} of the chequer arrangement you want; position IDs
+are always displayed when the board is shown.  (If you are playing
+on a text terminal, the position ID is in the upper right hand corner
+of the board diagram; when using the X board window, the ID is shown
+below the board on the right hand side.)  For instance, to set the
+chequers to the starting position, use the command
+@code{set board 4HPwATDgc/ABMA}.
+
+FIXME add a mode to set the board to an arbitrary position when the user
+doesn't know the ID, in the X version at least.
+@kindex show board
+@item show board [@var{id}]
+The @code{show board} command is used to display a particular position ---
+normally the board of the current game, but it is also possible to view
+unrelated layouts.  When specified without the optional @var{id} parameter,
+the current position is displayed.  (When using a text terminal, this
+is useful if subsequent output has caused the board diagram to scroll
+off the screen.  In the X board window, the command can be used to undo
+erroneous chequer plays by resetting the window to the position at the
+start of the turn.)
+
+When a position ID @var{id} is given, the chequers are arranged into
+the position specified and that board is displayed.  Note that this
+command affects the display only; the current game is unchanged.  Use
+the @code{show board} command with no parameter if you want to see
+the current game again.
+@kindex hint
+@item hint
+At any time during the game when the dice have been rolled, you can
+use the @code{hint} command to see the moves @gnubg{} recommends.
+The output is of the following form:
+
+@example
+@group
+Win    W(g)   W(bg)  L(g)   L(bg)  Equity       Move
+0.542  0.142  0.008  0.113  0.008  (+0.114)     6/5 8/5 
+0.505  0.120  0.008  0.122  0.007  (+0.009)     24/23 23/20 
+0.498  0.126  0.008  0.123  0.007  (+0.000)     24/23 13/10 
+0.499  0.113  0.008  0.121  0.007  (-0.011)     24/23 24/21 
+0.486  0.125  0.008  0.120  0.009  (-0.024)     13/10 10/9 
+0.481  0.116  0.008  0.129  0.008  (-0.051)     6/5 24/21 
+0.472  0.122  0.008  0.129  0.009  (-0.064)     6/5 13/10 
+@end group
+@end example
+
+The moves are listed in descending order of preference, so in this case,
+@gnubg{} recommends the move @samp{6/5 8/5}.  The first five columns are
+its estimates of the probability of the player on roll winning
+(@samp{Win}), winning a gammon (@samp{W(g)}), winning a backgammon
+(@samp{W(bg)}), losing a gammon (@samp{L(g)}), and losing a backgammon
+(@samp{L(bg)}) if the game is played to completion without use of the
+doubling cube, after the candidate move in that row is
+made@footnote{Note that the probability of winning includes the
+probability of winning a gammon or backgammon, and likewise the gammon
+probabilities include the backgammon probabilities.}.  The sixth column,
+@samp{Equity}, is the estimated cubeless equity following the move ---
+this is the expected number of points per game won by the player on
+roll.
+
+@gnubg{} will `look ahead' a certain number of moves when evaluating
+the probabilities, according to the search depth set by the
+@code{set plies} command (@pxref{Analysis}).
+@kindex show pipcount
+@item show pipcount
+Use @code{show pipcount} to automatically count the number of `pips'
+each player needs to bear off.  Depending on the position, the output
+will look something like:
+
+@example
+The pip counts are: X 103, O 112.
+@end example
+@kindex set player human
+@kindex set player name
+@kindex show player
+@itemx show player
+@item set player @var{name} human
+@itemx set player @var{old-name} name @var{new-name}
+Both players have a certain amount of configuration information; use the
+command @code{show player} to summarise these settings.  By default,
+@gnubg{} will play for player 0, whose name is initially @samp{O}.
+Player 1 defaults to a human (i.e.@: @gnubg{} will prompt the user
+for a move when it is player 1's turn) whose name is @samp{X}.
+
+Either player can be set to a human with the command
+@code{set player @var{name} human}, where @var{name} is either the number
+of the player (0 or 1) or that player's name (initially @samp{O} and
+@samp{X}).  You can also specify @code{both} which will set both players
+simultaneously.  There are also options for computer players
+(@pxref{Computer Player}).
+
+You can change the names of the players with the
+@code{set player @var{old-name} name @var{new-name}} command.  Again,
+either the player numbers or names are valid for the @var{old-name}
+parameter.  Names may not contain whitespace characters, and may not
+be longer than 31 characters.  The names @samp{0}, @samp{1} and
+@samp{both} are not permitted, to avoid ambiguities, and the players
+may not both share the same name.  Names are not case sensitive.
+@kindex set turn
+@kindex show turn
+@item set turn @var{player}
+@itemx show turn
+FIXME
+@kindex set autobearoff
+@kindex set automove
+@item set autobearoff
+@itemx set automove
+FIXME
+@kindex set display
+@item set display
+FIXME
+@end table
 
 @node Dice
 @section Controlling Dice Rolls
 @cindex dice
 @cindex rolls, dice
 
+@table @code
+@kindex set rng
+@kindex show rng
+@kindex roll
+@kindex set autoroll
+@kindex set dice
+@item set rng @var{generator} [@var{seed}]
+@itemx show rng
+@itemx roll
+@itemx set autoroll
+@itemx set dice @var{pips} @var{pips}
 FIXME
+@end table
 
 @node Computer Player
 @section Having @gnubg{} Make Moves
 @cindex computer player
-@cindex @t{gnubg}, making moves @comment @gnubg{}, doesn't work here, why?
+@cindex @t{gnubg}, making moves
 
+@table @code
+@kindex play
+@kindex set player gnubg
+@kindex set player pubeval
+@kindex set player plies
+@item play
+@itemx set player @var{name} gnubg
+@itemx set player @var{name} pubeval
+@itemx set player @var{name} plies @var{depth}
 FIXME
+@end table
 
 @node Matches and Sessions
 @section Matches and Sessions
@@ -584,14 +811,60 @@ games, whether those games are part of a match (as in tournament
 backgammon) or a session of independent games (conventionally
 called ``money'' play, regardless of whether any money is involved).
 
+@table @code
+@kindex new match
+@kindex new session
+@kindex set autogame
+@kindex set crawford
+@kindex set postcrawford
+@kindex set jacoby
+@kindex set score
+@kindex show crawford
+@kindex show postcrawford
+@kindex show jacoby
+@kindex show score
+@item new match @var{length}
+@itemx new session
+@itemx set autogame
+@itemx set crawford
+@itemx set postcrawford
+@itemx set jacoby
+@itemx set score @var{points} @var{points}
+@itemx show crawford
+@itemx show postcrawford
+@itemx show jacoby
+@itemx show score
 FIXME
+@end table
 
 @node Cube
 @section The Doubling Cube
 @cindex cube, doubling
 @cindex doubling
 
+@table @code
+@kindex double
+@kindex redouble
+@kindex beaver
+@kindex take
+@kindex accept
+@kindex drop
+@kindex reject
+@kindex set cube centre
+@kindex set cube owner
+@kindex set cube value
+@item double
+@itemx redouble
+@itemx beaver
+@itemx take
+@itemx accept
+@itemx drop
+@itemx reject
+@itemx set cube centre
+@itemx set cube owner @var{player}
+@itemx set cube value @var{points}
 FIXME
+@end table
 
 @node Recording
 @section Saving Games and Matches
@@ -600,28 +873,71 @@ FIXME
 @cindex matches, saving
 @cindex games, saving
 
+@table @code
+@kindex save game
+@kindex save match
+@kindex load game
+@kindex load match
+@item save game @var{file}
+@itemx save match @var{file}
+@itemx load game @var{file}
+@itemx load match @var{file}
 FIXME
+@end table
 
 @node Analysis
 @chapter Using @gnubg{} to Analyse Positions
 @cindex analysis of positions
 @cindex position analysis
 
+@table @code
+@kindex eval
+@kindex rollout
+@kindex set plies
+@kindex set cache
+@kindex show cache
+@item eval [@var{id}]
+@itemx rollout [@var{id}]
+@itemx set plies @var{depth}
+@itemx set cache @var{size}
+@itemx show cache
 FIXME
+@end table
 
 @node Databases
 @chapter Position Databases
 @cindex databases
 @cindex position databases
 
+@table @code
+@kindex database dump
+@kindex database evaluate
+@kindex database generate
+@item database dump
+@itemx database evaluate
+@itemx database generate
 FIXME
+@item database train
+@itemx train database
+FIXME pointer only
+@end table
 
 @node Training
 @chapter Modifying @gnubg{}'s Neural Nets
 @cindex training
 @cindex neural nets, training
 
+@table @code
+@kindex save weights
+@kindex load weights
+@kindex database train
+@kindex train database
+@item save weights @var{file}
+@itemx load weights @var{file}
+@itemx database train
+@itemx train database
 FIXME
+@end table
 
 @node Frequently Asked Questions
 @chapter Frequently Asked Questions
@@ -728,6 +1044,10 @@ Hopefully nobody will ask this question, but I suppose it will happen...
 
 @node Are the dice fair?
 @end ignore
+
+@node Command Index
+@unnumbered Command Index
+@printindex ky
 
 @node Concept Index
 @unnumbered Index
