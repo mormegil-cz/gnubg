@@ -818,16 +818,20 @@ static int NewGame( void ) {
                ap[ 1 ].szName, ms.anDice[ 1 ] );
     }
 
-    if( ms.anDice[ 0 ] == ms.anDice[ 1 ] && ms.nCube < MAX_CUBE ) {
-	if( !ms.nMatchTo && ms.nCube < ( 1 << cAutoDoubles ) && ms.fCubeUse ) {
+    if( ms.anDice[ 0 ] == ms.anDice[ 1 ] ) {
+	if( !ms.nMatchTo && ms.nCube < ( 1 << cAutoDoubles ) &&
+          ms.fCubeUse && ms.nCube < MAX_CUBE ) {
 	    pmr->g.nAutoDoubles++;
 	    if( fDisplay )
 		outputf( _("The cube is now at %d.\n"), ms.nCube <<= 1 );
 	    UpdateSetting( &ms.nCube );
 	}
-	
+
 	goto reroll;
     }
+
+    assert( ms.nCube <= MAX_CUBE );
+    assert( ms.anDice[ 1 ] != ms.anDice[ 0 ] );
 
     outputx();
     

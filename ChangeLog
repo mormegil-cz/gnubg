@@ -1,3 +1,7 @@
+Sat Sep 13 22:32:01 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* play.c (NewGame): Fixed reroll conditional.
+
 Sat Sep 13 04:59:01 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gtkgame.c (SetAnnotation): Use strlen gettext string instead
