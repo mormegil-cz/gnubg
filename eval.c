@@ -69,6 +69,9 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies, int fCheckAutoRedoubles);
 
+static cubedecision
+FindBestCubeDecision ( float arDouble[], cubeinfo *pci );
+
 static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
@@ -3742,216 +3745,218 @@ extern void EvalStatus( char *szOutput ) {
 	    acsf[ i ]( strchr( szOutput, 0 ) );
 }
 
+
+static char 
+*GetCubeRecommendation ( const cubedecision cd ) {
+
+  switch ( cd ) {
+
+  case DOUBLE_TAKE:
+    return "Double, take";
+  case DOUBLE_PASS:
+    return "Double, pass";
+  case NODOUBLE_TAKE:
+    return "No double, take";
+  case TOOGOOD_TAKE:
+    return "Too good to double, take";
+  case TOOGOOD_PASS:
+    return "Too good to double, pass";
+  case DOUBLE_BEAVER:
+    return "Double, beaver";
+  case NODOUBLE_BEAVER:
+    return "No double, beaver";
+  case REDOUBLE_TAKE:
+    return "Redouble, take";
+  case REDOUBLE_PASS:
+    return "Redouble, pass";
+  case NO_REDOUBLE_TAKE:
+    return "No redouble, take";
+  case TOOGOODRE_TAKE:
+    return "Too good to redouble, take";
+  case TOOGOODRE_PASS:
+    return "Too good to redouble, pass";
+  case REDOUBLE_BEAVER:
+    return "Redouble, beaver";
+  case NO_REDOUBLE_BEAVER:
+    return "No redouble, beaver";
+  default:
+    return "I have no idea!";
+  }
+
+}
+
+
 extern int 
 GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 		  int fOutputMWC, int fOutputInvert ) {
+
+  static cubedecision cd;
+  static int iOptimal, iBest, iWorst;
+  static char *pc;
+
+  static char *aszCubeString[ 4 ][ 2 ] = {
+    { "Unknown", "Unknown" },
+    { "No double", "No redouble" },
+    { "Double, take", "Redouble, take" },
+    { "Double, pass", "Redouble, pass" } };
+
+  /* Get cube decision */
+
+  cd = FindBestCubeDecision ( arDouble, pci );
 
   /* write string with cube action */
 
   if( fOutputInvert )
     pci->fMove = !pci->fMove;
 
-  if ( arDouble[ 2 ] >= arDouble[ 1 ] && arDouble[ 3 ] >= arDouble[ 1 ] ) {
+  switch ( cd ) {
 
-    /* it's correct to double */
+  case DOUBLE_TAKE:
+  case DOUBLE_BEAVER:
+  case REDOUBLE_TAKE:
+  case REDOUBLE_BEAVER:
 
-    if ( arDouble[ 2 ] < arDouble[ 3 ] ) {
+    /*
+     * Optimal     : Double, take
+     * Best for me : Double, pass
+     * Worst for me: No Double 
+     */
 
-      /* Optimal     : Double, take
-         Best for me : Double, pass
-         Worst for me: No Double */
+    iOptimal = OUTPUT_TAKE;
+    iBest    = OUTPUT_DROP;
+    iWorst   = OUTPUT_NODOUBLE;
 
-      if( fOutputInvert ) {
-	arDouble[ 1 ] = -arDouble[ 1 ];
-	arDouble[ 2 ] = -arDouble[ 2 ];
-	arDouble[ 3 ] = -arDouble[ 3 ];
-      }
-	
-      if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-	sprintf ( szOutput,
-		  "Double, take  : %+6.3f\n"
-		  "Double, pass  : %+6.3f   (%+6.3f)\n"
-		  "No double     : %+6.3f   (%+6.3f)\n\n"
-		  "Correct cube action: Double, take",
-		  arDouble[ 2 ],
-		  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 2 ],
-		  arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 2 ] );
-      else
-	sprintf ( szOutput,
-		  "Double, take  : %6.2f%%\n"
-		  "Double, pass  : %6.2f%%   (%+6.2f%%)\n"
-		  "No double     : %6.2f%%   (%+6.2f%%)\n\n"
-		  "Correct cube action: Double, take",
-		  100.0 * eq2mwc ( arDouble[ 2 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 3 ], pci ) -
-		  100.0 * eq2mwc ( arDouble[ 2 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 1 ], pci ), 
-		  100.0 * eq2mwc ( arDouble[ 1 ], pci ) - 
-		  100.0 * eq2mwc ( arDouble[ 2 ], pci ) );
+    break;
 
-    }
-    else {
+  case DOUBLE_PASS:
+  case REDOUBLE_PASS:
 
-      /* Optimal     : Double, pass
-         BEst for me : Double, take
-         Worst for me: no double */
+    /*
+     * Optimal     : Double, pass
+     * Best for me : Double, take
+     * Worst for me: no double 
+     */
+    iOptimal = OUTPUT_DROP;
+    iBest    = OUTPUT_TAKE;
+    iWorst   = OUTPUT_NODOUBLE;
 
-      if( fOutputInvert ) {
-	arDouble[ 1 ] = -arDouble[ 1 ];
-	arDouble[ 2 ] = -arDouble[ 2 ];
-	arDouble[ 3 ] = -arDouble[ 3 ];
-      }
-	
-      if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-	sprintf ( szOutput,
-		  "Double, pass  : %+6.3f\n"
-		  "Double, take  : %+6.3f   (%+6.3f)\n"
-		  "No double     : %+6.3f   (%+6.3f)\n\n"
-		  "Correct cube action: Double, pass",
-		  arDouble[ 3 ],
-		  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 3 ],
-		  arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 3 ] );
-      else
-	sprintf ( szOutput,
-		  "Double, pass  : %+6.2f%%\n"
-		  "Double, take  : %+6.2f%%   (%+6.2f%%)\n"
-		  "No double     : %+6.2f%%   (%+6.2f%%)\n\n"
-		  "Correct cube action: Double, pass",
-		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 2 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 2 ], pci ) -
-		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 1 ], pci ), 
-		  100.0 * eq2mwc ( arDouble[ 1 ], pci ) - 
-		  100.0 * eq2mwc ( arDouble[ 3 ], pci ) );
-    }
+    break;
 
-  } 
-  else {
+  case NODOUBLE_TAKE:
+  case NODOUBLE_BEAVER:
+  case TOOGOOD_TAKE:
+  case NO_REDOUBLE_TAKE:
+  case NO_REDOUBLE_BEAVER:
+  case TOOGOODRE_TAKE:
 
-    /* it's correct not to double */
+    /*
+     * Optimal     : no double
+     * Best for me : double, pass
+     * Worst for me: double, take
+     */
 
-    if ( arDouble[ 1 ] > arDouble[ 3 ] ) {
+    iOptimal = OUTPUT_NODOUBLE;
+    iBest    = OUTPUT_DROP;
+    iWorst   = OUTPUT_TAKE;
 
-      if ( arDouble[ 2 ] > arDouble[ 3 ] ) {
+    break;
 
-        /* Optimal     : no double
-           Best for me : Double, take
-           Worst for me: Double, pass */
+  case TOOGOOD_PASS:
+  case TOOGOODRE_PASS:
 
-        if( fOutputInvert ) {
-	  arDouble[ 1 ] = -arDouble[ 1 ];
-	  arDouble[ 2 ] = -arDouble[ 2 ];
-	  arDouble[ 3 ] = -arDouble[ 3 ];
-        }
-	
-	if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-	  sprintf ( szOutput,
-		    "No double     : %+6.3f\n"
-		    "Double, take  : %+6.3f   (%+6.3f)\n"
-		    "Double, pass  : %+6.3f   (%+6.3f)\n\n"
-		    "Correct cube action: too good to double, pass",
-		    arDouble[ 1 ],
-		    arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ],
-		    arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ] );
-	else
-	  sprintf ( szOutput,
-		    "No double     : %+6.2f%%\n"
-		    "Double, take  : %+6.2f%%   (%+6.2f%%)\n"
-		    "Double, pass  : %+6.2f%%   (%+6.2f%%)\n\n"
-		    "Correct cube action: too good to double, pass",
-		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
-		    100.0 * eq2mwc ( arDouble[ 2 ], pci ),
-		    100.0 * eq2mwc ( arDouble[ 2 ], pci ) -
-		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
-		    100.0 * eq2mwc ( arDouble[ 3 ], pci ), 
-		    100.0 * eq2mwc ( arDouble[ 3 ], pci ) - 
-		    100.0 * eq2mwc ( arDouble[ 1 ], pci ) );
+    /*
+     * Optimal     : no double
+     * Best for me : double, take
+     * Worst for me: double, pass
+     */
 
-      }
-      else {
-        
-        /* Optimal     : no double
-           Best for me : Double, pass
-           Worst for me: Double, take */
+    iOptimal = OUTPUT_NODOUBLE;
+    iBest    = OUTPUT_TAKE;
+    iWorst   = OUTPUT_DROP;
 
-        /* This situation may arise in match play. */
+    break;
 
-        if( fOutputInvert ) {
-	  arDouble[ 1 ] = -arDouble[ 1 ];
-	  arDouble[ 2 ] = -arDouble[ 2 ];
-	  arDouble[ 3 ] = -arDouble[ 3 ];
-        }
-	
-	if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-	  sprintf ( szOutput,
-		    "No double     : %+6.3f\n"
-		    "Double, pass  : %+6.3f   (%+6.3f)\n"
-		    "Double, take  : %+6.3f   (%+6.3f)\n\n"
-		    "Correct cube action: too good to double, take(!)",
-		    arDouble[ 1 ],
-		    arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ],
-		    arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ] );
-	else
-	  sprintf ( szOutput,
-		    "No double     : %+6.2f%%\n"
-		    "Double, pass  : %+6.2f%%   (%+6.2f%%)\n"
-		    "Double, take  : %+6.2f%%   (%+6.2f%%)\n\n"
-		    "Correct cube action: too good to double, take(!)",
-		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
-		    100.0 * eq2mwc ( arDouble[ 3 ], pci ),
-		    100.0 * eq2mwc ( arDouble[ 3 ], pci ) -
-		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
-		    100.0 * eq2mwc ( arDouble[ 2 ], pci ), 
-		    100.0 * eq2mwc ( arDouble[ 2 ], pci ) - 
-		    100.0 * eq2mwc ( arDouble[ 1 ], pci ) );
+  default:
 
-      }
+    iOptimal = OUTPUT_OPTIMAL;
+    iOptimal = OUTPUT_OPTIMAL;
+    iOptimal = OUTPUT_OPTIMAL;
 
-    }
-    else { /* arDouble[ 2 ] < arDouble[ 1 ] */
-    
-      /* Optimal     : no double
-         Best for me : Double, pass
-         Worst for me: Double, take */
-
-      if( fOutputInvert ) {
-	arDouble[ 1 ] = -arDouble[ 1 ];
-	arDouble[ 2 ] = -arDouble[ 2 ];
-	arDouble[ 3 ] = -arDouble[ 3 ];
-      }
-	
-      if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-        sprintf ( szOutput,
-                  "No double     : %+6.3f\n"
-                  "Double, pass  : %+6.3f   (%+6.3f)\n"
-                  "Double, take  : %+6.3f   (%+6.3f)\n\n"
-                  "Correct cube action: No double, take",
-                  arDouble[ 1 ],
-                  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ],
-                  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ] );
-      else
-        sprintf ( szOutput,
-                  "No double     : %+6.2f%%\n"
-                  "Double, pass  : %+6.2f%%   (%+6.2f%%)\n"
-                  "Double, take  : %+6.2f%%   (%+6.2f%%)\n\n"
-                  "Correct cube action: No double, take",
-		  100.0 * eq2mwc ( arDouble[ 1 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 3 ], pci ) -
-		  100.0 * eq2mwc ( arDouble[ 1 ], pci ),
-		  100.0 * eq2mwc ( arDouble[ 2 ], pci ), 
-		  100.0 * eq2mwc ( arDouble[ 2 ], pci ) - 
-		  100.0 * eq2mwc ( arDouble[ 1 ], pci ) );
-    }
+    break;
 
   }
 
+  /* Invert equities if necesary */
+  
   if( fOutputInvert ) {
-    arDouble[ 1 ] = -arDouble[ 1 ];
-    arDouble[ 2 ] = -arDouble[ 2 ];
-    arDouble[ 3 ] = -arDouble[ 3 ];
+    arDouble[ OUTPUT_NODOUBLE ] = -arDouble[ OUTPUT_NODOUBLE ];
+    arDouble[ OUTPUT_TAKE ] = -arDouble[ OUTPUT_TAKE ];
+    arDouble[ OUTPUT_DROP ] = -arDouble[ OUTPUT_DROP ];
+  }
+
+  /* Write string */
+
+  /* Optimal */
+
+  pc = szOutput;
+
+  if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
+    sprintf ( pc, "%-20s: %+6.3f\n",
+              aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ],
+              arDouble [ iOptimal ] );
+  else
+    sprintf ( pc, "%-20s: %6.2f%%\n",
+              aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ],
+              100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
+
+  
+  /* Best for me */
+
+  pc = strchr ( pc, 0 );
+  if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
+    sprintf ( pc, "%-20s: %+6.3f   (%+6.3f)\n",
+              aszCubeString[ iBest ][ pci->fCubeOwner != -1 ],
+              arDouble[ iBest ],
+              arDouble [ iBest ] - arDouble [ iOptimal ] );
+  else
+    sprintf ( pc, "%-20s: %+6.2f%%   (%+6.2f%%)\n",
+              aszCubeString[ iBest ][ pci->fCubeOwner != -1 ],
+              100.0 * eq2mwc ( arDouble[ iBest ], pci ),
+              100.0 * eq2mwc ( arDouble[ iBest ], pci ) - 
+              100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
+
+
+  /* Worst for me */
+
+
+  pc = strchr ( pc, 0 );
+  if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
+    sprintf ( pc, "%-20s: %+6.3f   (%+6.3f)\n\n",
+              aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ],
+              arDouble[ iWorst ],
+              arDouble [ iWorst ] - arDouble [ iOptimal ] );
+  else
+    sprintf ( pc, "%-20s: %+6.2f%%   (%+6.2f%%)\n\n",
+              aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ],
+              100.0 * eq2mwc ( arDouble[ iWorst ], pci ),
+              100.0 * eq2mwc ( arDouble[ iWorst ], pci ) - 
+              100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
+
+
+  /* add recommended cube action string */
+
+  pc = strchr ( pc, 0 );
+
+  sprintf ( pc, "Correct cube action: %s\n",
+            GetCubeRecommendation ( cd ) );
+
+
+  /* restore input values */
+
+  if( fOutputInvert ) {
+    arDouble[ OUTPUT_NODOUBLE ] = -arDouble[ OUTPUT_NODOUBLE ];
+    arDouble[ OUTPUT_TAKE ] = -arDouble[ OUTPUT_TAKE ];
+    arDouble[ OUTPUT_DROP ] = -arDouble[ OUTPUT_DROP ];
       
     pci->fMove = !pci->fMove;
   }
@@ -4181,7 +4186,7 @@ SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove,
 
 
 static cubedecision
-FindBestCubeDecision ( float arDouble[] ) {
+FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
 
   if ( ( arDouble[ OUTPUT_TAKE ] >= arDouble[ OUTPUT_NODOUBLE ] ) &&
        ( arDouble[ OUTPUT_DROP ] >= arDouble[ OUTPUT_NODOUBLE ] ) ) {
@@ -4189,14 +4194,21 @@ FindBestCubeDecision ( float arDouble[] ) {
     /* we have a double */
 
     if ( arDouble[ OUTPUT_TAKE ] < arDouble[ OUTPUT_DROP ] ) {
+
+      arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_TAKE ];
+
+      if ( ! pci->nMatchTo && arDouble[ DOUBLE_TAKE ] <= 0.0 )
+        /* beaver (jacoby paradox) */
+        return ( pci->fCubeOwner == -1 ) ? DOUBLE_BEAVER : REDOUBLE_BEAVER;
+      else
         /* ...take */
-        arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_TAKE ];
-        return DOUBLE_TAKE;
+        return ( pci->fCubeOwner == -1 ) ? DOUBLE_TAKE : REDOUBLE_TAKE;
+      
     }
     else {
       /* ...pass */
       arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_DROP ];
-      return DOUBLE_PASS;
+      return ( pci->fCubeOwner == -1 ) ? DOUBLE_PASS : REDOUBLE_PASS;
     }
   }
   else {
@@ -4208,12 +4220,16 @@ FindBestCubeDecision ( float arDouble[] ) {
     if ( arDouble [ OUTPUT_NODOUBLE ] > arDouble [ OUTPUT_TAKE ] ) {
       
       if ( arDouble [ OUTPUT_NODOUBLE ] > arDouble [ OUTPUT_DROP ] )
-        return TOOGOOD_TAKE; 
+        return ( pci->fCubeOwner == -1 ) ? TOOGOOD_TAKE : TOOGOODRE_TAKE;
+      else if ( arDouble[ DOUBLE_TAKE ] <= 0.0 )
+        return ( pci->fCubeOwner == -1 ) ?
+          NODOUBLE_BEAVER : NO_REDOUBLE_BEAVER; 
       else
-        return NODOUBLE_TAKE;
+        return ( pci->fCubeOwner == -1 ) ?
+          NODOUBLE_TAKE : NO_REDOUBLE_TAKE; 
 
     } else
-      return TOOGOOD_PASS;
+      return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
   }
 }
 
@@ -4239,7 +4255,7 @@ FindCubeDecision ( float arDouble[],
 
   }
 
-  return FindBestCubeDecision ( arDouble );
+  return FindBestCubeDecision ( arDouble, pci );
 
 }
   

@@ -1,3 +1,15 @@
+Thu Oct 11 21:44:07 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (FindBestCubeDecision): New parameter: cubeinfo
+	struct. FindBestCubeDecision now handles beavers and distinguishes
+	between initial doubles and redoubles.
+
+	* eval.c (GetCubeRecommendation): New function. Returns a static
+	string a la "Double, take" or "Redouble, beaver".
+
+	* eval.c (GetCubeActionSz): Total rewrite: handles beavers,
+	initial doubles, redoubles.
+
 Wed Oct 10 11:38:02 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (GeneralEvaluationEPlied): Use nPlies (not pec->nPlies) to
