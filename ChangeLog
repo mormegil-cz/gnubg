@@ -1,3 +1,10 @@
+Thu Oct 31 22:26:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (CommandExportPositionGammOnLine): 
+	remove <div style="font-family: sans-serif"> </div> as
+	it doesn't look right on GammOnLine.
+	(reported by Ian Shaw)
+
 Thu Oct 31 21:57:21 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New improved rollout settings widget 

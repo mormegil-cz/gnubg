@@ -3877,9 +3877,6 @@ CommandExportPositionGammOnLine ( char *sz ) {
 	return;
     }
 
-    fprintf ( pf, "<div %s>\n", 
-              GetStyle ( CLASS_FONT_FAMILY, HTML_EXPORT_CSS_INLINE ) );
-
     fputs ( "\n<!-- Score -->\n\n", pf );
 
     if ( ms.nMatchTo )
@@ -3930,8 +3927,6 @@ CommandExportPositionGammOnLine ( char *sz ) {
                      HTML_EXPORT_CSS_INLINE );
 
     HTMLEpilogueComment ( pf );
-
-    fputs ( "</div>\n", pf );
 
     if( pf != stdout )
 	fclose( pf );
