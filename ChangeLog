@@ -1,3 +1,9 @@
+Tue Oct 24 13:42:37 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* eval.c (SetCubeInfo): bugfix: reset negative(!) gammon price to 
+        zero. Gammon prices can be negative due to numerical instabilities
+        (FIXME: think of a stable way to calculate them)
+
 Tue Oct 24 12:45:59 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* set.c (CommandSetEvalCubeful): new function. Controls whether

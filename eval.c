@@ -3973,8 +3973,14 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 
       float rCenter = ( rWin + rLose ) / 2.0;
 
+      /* FIXME: correct numerical problems in a better way, than done
+         below. If cube is dead gammon or backgammon price might be a
+         small negative number. For example, at -2,-3 with cube on 2
+         the current code gives: 0.9090..., 0, -2.7e-8, 0 instead
+         of the correct 0.9090..., 0, 0, 0. */
+
       ci->arGammonPrice[ 0 ] = 
-	( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+        ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
       ci->arGammonPrice[ 1 ] = 
 	( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
       ci->arGammonPrice[ 2 ] = 
@@ -3988,10 +3994,25 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 
   } /* match play */
 
-  assert ( ci->arGammonPrice[ 0 ] >= 0 );
-  assert ( ci->arGammonPrice[ 1 ] >= 0 );
-  assert ( ci->arGammonPrice[ 2 ] >= 0 );
-  assert ( ci->arGammonPrice[ 3 ] >= 0 );
+  /* Correct numerical problems */
+
+  if ( ci->arGammonPrice[ 0 ] < 0 )
+    ci->arGammonPrice[ 0 ] = 0.0;
+  if ( ci->arGammonPrice[ 1 ] < 0 )
+    ci->arGammonPrice[ 1 ] = 0.0;
+  if ( ci->arGammonPrice[ 2 ] < 0 )
+    ci->arGammonPrice[ 2 ] = 0.0;
+  if ( ci->arGammonPrice[ 3 ] < 0 )
+    ci->arGammonPrice[ 3 ] = 0.0;
+
+  if ( ci->arGammonPrice[ 0 ] < 0 )
+     abort();
+  if ( ci->arGammonPrice[ 1 ] < 0 )
+     abort();
+  if ( ci->arGammonPrice[ 2 ] < 0 )
+     abort();
+  if ( ci->arGammonPrice[ 3 ] < 0 )
+     abort();
 
   return 0;
 }
