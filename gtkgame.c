@@ -5349,6 +5349,32 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_container_add( GTK_CONTAINER( pw ),
                      gtk_spin_button_new( prpw->padjTrials, 36, 0 ) );
 
+  pwFrame = gtk_frame_new ( _("Truncation") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
+
+  pw = gtk_vbox_new( FALSE, 8 );
+  gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
+   
+  prpw->pwDoTrunc = gtk_check_button_new_with_label (
+                                                     _( "Truncate Rollouts" ) );
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwDoTrunc );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prpw->pwDoTrunc ),
+                                 prw->rcRollout.fDoTruncate);
+  gtk_signal_connect( GTK_OBJECT( prpw->pwDoTrunc ), "toggled",
+                      GTK_SIGNAL_FUNC (TruncEnableToggled), prw);
+
+  prpw->pwAdjTruncPlies = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+                     gtk_label_new( _("Truncate at ply:" ) ) );
+
+  prpw->padjTruncPlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
+                                                            prw->rcRollout.nTruncate, 0, 1000, 1, 1, 0 ) );
+  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
+                                                                  prpw->padjTruncPlies, 1, 0 ) );
+
+
   pwFrame = gtk_frame_new ( _("Evaluation for later plies") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
 
@@ -5448,37 +5474,12 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                    gtk_label_new( _("No of j.s.d.s from best move" ) ) );
 
   prpw->padjJsdLimit = GTK_ADJUSTMENT( gtk_adjustment_new( 
-                       prw->rcRollout.rJsdLimit, 0, 1, .0001, .0001, 0.001 ) );
+                       prw->rcRollout.rJsdLimit, 0, 8, .0001, .0001, 0.001 ) );
 
   prpw->pwJsdAdjLimit = gtk_spin_button_new(prpw->padjJsdLimit, .0001, 4 );
 
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwJsdAdjLimit);
 
-
-  pwFrame = gtk_frame_new ( _("Truncation") );
-  gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
-
-  pw = gtk_vbox_new( FALSE, 8 );
-  gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
-  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
-   
-  prpw->pwDoTrunc = gtk_check_button_new_with_label (
-                                                     _( "Truncate Rollouts" ) );
-  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwDoTrunc );
-  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prpw->pwDoTrunc ),
-                                 prw->rcRollout.fDoTruncate);
-  gtk_signal_connect( GTK_OBJECT( prpw->pwDoTrunc ), "toggled",
-                      GTK_SIGNAL_FUNC (TruncEnableToggled), prw);
-
-  prpw->pwAdjTruncPlies = pwHBox = gtk_hbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
-  gtk_container_add( GTK_CONTAINER( pwHBox ), 
-                     gtk_label_new( _("Truncate at ply:" ) ) );
-
-  prpw->padjTruncPlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
-                                                            prw->rcRollout.nTruncate, 0, 1000, 1, 1, 0 ) );
-  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
-                                                                  prpw->padjTruncPlies, 1, 0 ) );
 
   prpw->pwCubeful = gtk_check_button_new_with_label ( _("Cubeful") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwCubeful );
