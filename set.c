@@ -1576,7 +1576,7 @@ extern void CommandSetSeed( char *sz ) {
 
     int n;
     
-    if( *rngSet == RNG_MANUAL || *rngSet == RNG_RANDOM_DOT_ORG ) {
+    if( rngCurrent == RNG_MANUAL || rngCurrent == RNG_RANDOM_DOT_ORG ) {
 	outputl( _("You can't set a seed "
                    "if you're using manual dice generation or random.org") );
 	return;
@@ -1591,10 +1591,10 @@ extern void CommandSetSeed( char *sz ) {
 	    return;
 	}
 
-	InitRNGSeed( n, *rngSet );
+	InitRNGSeed( n, rngCurrent );
 	outputf( _("Seed set to %d.\n"), n );
     } else
-	outputl( InitRNG( NULL, TRUE, *rngSet ) ?
+	outputl( InitRNG( NULL, TRUE, rngCurrent ) ?
 		 _("Seed initialised from system random data.") :
 		 _("Seed initialised by system clock.") );
 }

@@ -1,3 +1,7 @@
+Tue Aug  6 13:41:15 2002  Gary Wong  <gtw@gnu.org>
+
+	* set.c (CommandSetSeed): Use rngCurrent instead of *prngSet.
+
 Mon Aug  5 20:15:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Correct problems with loading RNG settings.
