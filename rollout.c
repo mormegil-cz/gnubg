@@ -946,8 +946,10 @@ GeneralEvaluationR ( char *sz,
                      cubeinfo *pci, rolloutcontext *prc ) {
 
   int fCubeDecTop = TRUE;
-
-  if ( RolloutGeneral ( anBoard, sz, arOutput, arStdDev,
+  
+  if ( RolloutGeneral ( anBoard, ( char (*)[ 40 ] ) sz,
+			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arOutput,
+			( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) arStdDev,
                         prc, pci, &fCubeDecTop, 1, FALSE ) < 0 )
     return -1;
 
