@@ -187,7 +187,7 @@ libboard3d_a_LIBADD =
 am_libboard3d_a_OBJECTS = drawboard3d.$(OBJEXT) mylist.$(OBJEXT) \
 	timer.$(OBJEXT) misc3d.$(OBJEXT) widget3d.$(OBJEXT) \
 	gtkcolour3d.$(OBJEXT) matrix.$(OBJEXT) model.$(OBJEXT) \
-	shadow.$(OBJEXT) texture3d.$(OBJEXT) font3d.$(OBJEXT) graph.($OBJEXT)
+	shadow.$(OBJEXT) texture3d.$(OBJEXT) font3d.$(OBJEXT) graph.$(OBJEXT)
 libboard3d_a_OBJECTS = $(am_libboard3d_a_OBJECTS)
 
 DEFS = @DEFS@
