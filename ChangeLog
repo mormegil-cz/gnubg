@@ -1,3 +1,10 @@
+Fri Jan  7 21:14:19 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* xgame.c (GameHandler): Forward keyboard input in the board window
+	on to the window specified by $WINDOWID (if any), so that the user
+	can type data into the controlling xterm (or similar) while focus
+	is on the board window.
+
 Thu Jan  6 22:07:28 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* makeweights.c: New file.

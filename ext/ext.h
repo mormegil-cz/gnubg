@@ -1,7 +1,7 @@
 /*
  * ext.h
  *
- * by Gary Wong, 1997
+ * by Gary Wong, 1997-2000
  *
  */
 
@@ -19,7 +19,7 @@
 
 typedef struct _extdisplay {
     Display *pdsp;
-    list levReply;
+    list levReply, levRequestErrorHandler;
     event ev;    
     unsigned long nLast;
 } extdisplay;
@@ -27,6 +27,9 @@ typedef struct _extdisplay {
 extern int ExtDspCreate( extdisplay *pedsp, Display *pdsp );
 extern int ExtDspDestroy( extdisplay *pedsp );
 extern int ExtDspReplyEvent( extdisplay *pedsp, unsigned long n, event *pev );
+extern int ExtDspHandleNextError( extdisplay *pedsp,
+				  int ( *fn )( extdisplay *pedsp,
+					       XErrorEvent *pxeev ) );
 extern extdisplay *ExtDspFind( Display *pdsp );
 
 extern int InitExt( void );

@@ -49,8 +49,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow copy/paste and drag & drop of the board ID in the board window. (gary)
 ** Make sure the board window behaves properly with ICCCM things.  Maybe
   some of this should wait for Gnome.
-** Keyboard input (or at least some of it) to the board window could
-  be redirected to $WINDOWID. (gary)
 ** Allow doubling by clicking the cube in the board window. (gary)
 ** Add an option to slow down display if moves happen too quickly (e.g.
   computer move, unable to move, auto bearoff, etc.)

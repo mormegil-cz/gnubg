@@ -1,7 +1,7 @@
 /*
  * ext.c
  *
- * by Gary Wong, 1997
+ * by Gary Wong, 1997-2000
  *
  */
 
@@ -26,6 +26,8 @@
 static XContext xc;
 
 static hash hFont, hColourMap, hColourName, hColour, hGC, hdsp;
+
+static int ( *fnErrorHandlerOld )() = NULL;
 
 #define MAKE_QUARK( q ) extquark eq_##q = { #q, 0 };
 
@@ -210,13 +212,47 @@ typedef struct _replyevent {
     unsigned long n;
 } replyevent;
 
+typedef struct _requesterrorhandler {
+    int ( *fn )( extdisplay *pedsp, XErrorEvent *pxeev );
+    unsigned long n;
+} requesterrorhandler;
+
+static int ExtDspErrorHandler( Display *pdsp, XErrorEvent *pxeev ) {
+
+    extdisplay *pedsp;
+    list *pl;
+    requesterrorhandler *preh;
+    
+    if( !( pedsp = ExtDspFind( pdsp ) ) )
+	return -1;
+
+    for( pl = pedsp->levRequestErrorHandler.plNext;
+	 pl != &pedsp->levRequestErrorHandler; pl = pl->plNext ) {
+	preh = pl->p;
+
+	if( pxeev->serial == preh->n ) {
+	    int ( *fn )( extdisplay *pedsp, XErrorEvent *pxeev ) = preh->fn;
+
+	    ListDelete( pl );
+	    free( preh );
+
+	    return fn ? fn( pedsp, pxeev ) : 0;
+	} else if( pxeev->serial < preh->n )
+	    break;
+    }
+    
+    /* Daisy chain to the old handler */
+    return fnErrorHandlerOld( pdsp, pxeev );
+}
+
 static int ExtDspNotify( event *pev, extdisplay *pedsp ) {
     
     XEvent xev;
     extwindow *pewnd;
     list *pl;
     replyevent *prev;
-
+    requesterrorhandler *preh;
+    
 #if EXT_DEBUG    
     puts( "reading" );    
 #endif
@@ -224,7 +260,9 @@ static int ExtDspNotify( event *pev, extdisplay *pedsp ) {
     XEventsQueued( pedsp->pdsp, QueuedAfterReading );
 
     pedsp->nLast = LastKnownRequestProcessed( pedsp->pdsp );
-    
+
+    /* Search for saved reply events; handle and free any that have
+       occurred. */
     while( pedsp->levReply.plNext != &pedsp->levReply ) {
 	pl = pedsp->levReply.plNext;
 	prev = pl->p;
@@ -237,6 +275,25 @@ static int ExtDspNotify( event *pev, extdisplay *pedsp ) {
 	    
 	    EventPending( pev, TRUE );
 	    EventProcess( pev );
+	} else
+	    break;
+    }
+
+    /* Search for errors from marked requests; if a request has been
+       processed then it must have completed without error, so delete
+       the list entry. */
+    /* FIXME is this really right?  The Xlib documentation doesn't
+       seem to be precise about whether XEventsQueued will call any
+       pending error handlers (XSync does, but it doesn't mention
+       XEventsQueued).  We presume it does... */
+    while( pedsp->levRequestErrorHandler.plNext !=
+	   &pedsp->levRequestErrorHandler ) {
+	pl = pedsp->levRequestErrorHandler.plNext;
+	preh = pl->p;
+
+	if( pedsp->nLast >= preh->n ) {
+	    ListDelete( pl );
+	    free( preh );
 	} else
 	    break;
     }
@@ -294,6 +351,10 @@ extern int ExtDspCreate( extdisplay *pedsp, Display *pdsp ) {
     pedsp->pdsp = pdsp;
     
     ListCreate( &pedsp->levReply );
+    ListCreate( &pedsp->levRequestErrorHandler );
+
+    if( !fnErrorHandlerOld )
+	fnErrorHandlerOld = XSetErrorHandler( ExtDspErrorHandler );
     
     EventHandlerReady( &pedsp->ev, TRUE, 0 );
 
@@ -304,6 +365,10 @@ extern int ExtDspDestroy( extdisplay *pedsp ) {
 
     while( pedsp->levReply.plNext != &pedsp->levReply )
 	ListDelete( pedsp->levReply.plNext );
+    
+    while( pedsp->levRequestErrorHandler.plNext !=
+	   &pedsp->levRequestErrorHandler )
+	ListDelete( pedsp->levRequestErrorHandler.plNext );
     
     EventDestroy( &pedsp->ev );
 
@@ -331,7 +396,28 @@ extern int ExtDspReplyEvent( extdisplay *pedsp, unsigned long n, event *pev ) {
     prevNew->pev = pev;
     prevNew->n = n;
     
-    return ( ListInsert( pl, prevNew ) != NULL );
+    return !ListInsert( pl, prevNew );
+}
+
+extern int ExtDspHandleNextError( extdisplay *pedsp,
+				  int ( *fn )( extdisplay *pedsp,
+					       XErrorEvent *pxeev ) ) {
+    list *pl;
+    requesterrorhandler *preh, *prehNew = malloc( sizeof( *prehNew ) );
+    int n = NextRequest( pedsp->pdsp );
+    
+    for( pl = pedsp->levRequestErrorHandler.plNext;
+	 pl != &pedsp->levRequestErrorHandler; pl = pl->plNext ) {
+	preh = pl->p;
+
+	if( n < preh->n )
+	    break;
+    }
+
+    prehNew->fn = fn;
+    prehNew->n = n;
+    
+    return !ListInsert( pl, prehNew );
 }
 
 extern int ExtQuarkCreate( extquark *peq ) {
