@@ -1,3 +1,7 @@
+Sat Oct 18 13:46:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkboard.h, play.c, sgf.c: Tidy 3d dice shake code
+
 Sat Oct 18 11:19:06 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* formatgs.c (formatGS): use fOutputDigits and fix typo in 

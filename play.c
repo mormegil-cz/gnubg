@@ -783,6 +783,7 @@ void DiceRolled()
 		BoardData *bd = BOARD(pwBoard)->board_data;
 		/* Make sure dice are updated */
 		bd->diceRoll[0] = 0;
+		bd->diceShown = DICE_ROLLING;
 		ShowBoard();
 	}
 #endif

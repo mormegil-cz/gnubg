@@ -43,7 +43,7 @@ extern "C" {
 #define IS_BOARD_CLASS( c ) ( GTK_CHECK_CLASS_TYPE( (c), TYPE_BOARD ) )
 
 typedef enum _DiceShown {
-	DICE_NOT_SHOWN = 0, DICE_BELOW_BOARD, DICE_ON_BOARD
+	DICE_NOT_SHOWN = 0, DICE_BELOW_BOARD, DICE_ON_BOARD, DICE_ROLLING
 } DiceShown;
 
 typedef enum _animation {

@@ -33,7 +33,6 @@
 #include "eval.h"
 #if USE_GTK
 #include "gtkgame.h"
-#include "gtkboard.h"
 #endif
 #include "analysis.h"
 #include "positionid.h"
@@ -1566,12 +1565,7 @@ extern void CommandLoadMatch( char *sz ) {
 
 #if USE_GTK
 	if( fX )
-	{
-		BoardData *bd = BOARD( pwBoard )->board_data;
 		GTKFreeze();
-		/* Don't roll dice (nasty hack) */
-		bd->diceShown = DICE_ON_BOARD;
-	}
 #endif
 	
 	FreeMatch();
