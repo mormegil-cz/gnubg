@@ -682,7 +682,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
 			     NUM_OUTPUTS );	
     } else
-	CreateWeights( 128 );    
+	CreateWeights( nSize );    
     
     return 0;
 }
