@@ -1,3 +1,8 @@
+
+Mon Sep 1 16:44:58 GMT    Jim Segrave <jes@jes-2.demon.nl>
+
+	* Makefile.in - add graph.c/o/Po
+	
 Fri Aug 22 17:05:05 2003  Oystein Johansen  <oystein@gnubg.org>
 
 	* misc3d.c: Fix typos.

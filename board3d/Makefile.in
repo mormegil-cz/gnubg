@@ -172,7 +172,7 @@ INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@ \
 noinst_LIBRARIES = libboard3d.a
 libboard3d_a_SOURCES = drawboard3d.c matrix.h mylist.c \
 	timer.c misc3d.c  widget3d.c gtkcolour3d.c \
-        matrix.c model.c shadow.c texture3d.c  font3d.cpp
+        matrix.c model.c shadow.c texture3d.c  font3d.cpp graph.c
 
 
 noinst_HEADERS = shadow.h mylist.h inc3d.h
@@ -187,7 +187,7 @@ libboard3d_a_LIBADD =
 am_libboard3d_a_OBJECTS = drawboard3d.$(OBJEXT) mylist.$(OBJEXT) \
 	timer.$(OBJEXT) misc3d.$(OBJEXT) widget3d.$(OBJEXT) \
 	gtkcolour3d.$(OBJEXT) matrix.$(OBJEXT) model.$(OBJEXT) \
-	shadow.$(OBJEXT) texture3d.$(OBJEXT) font3d.$(OBJEXT)
+	shadow.$(OBJEXT) texture3d.$(OBJEXT) font3d.$(OBJEXT) graph.($OBJEXT)
 libboard3d_a_OBJECTS = $(am_libboard3d_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -202,7 +202,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/misc3d.Po ./$(DEPDIR)/model.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mylist.Po ./$(DEPDIR)/shadow.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/texture3d.Po ./$(DEPDIR)/timer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/widget3d.Po
+@AMDEP_TRUE@	./$(DEPDIR)/widget3d.Po ./$(DEPDIR)/graph.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -256,6 +256,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/texture3d.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/widget3d.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/graph.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
