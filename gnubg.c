@@ -488,6 +488,7 @@ command acAnalyse[] = {
     { "score", CommandShowScore, "View the match or session score ",
       NULL, NULL },
     { "seed", CommandShowSeed, "Show the dice generator seed", NULL, NULL },
+    { "statistics", CommandShowStatistics, "Show statistics", NULL, NULL },
     { "thorp", CommandShowThorp, "Calculate Thorp Count for "
       "position", szOPTPOSITION, NULL },
     { "training", CommandShowTraining, "Display the training parameters",
@@ -3457,7 +3458,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     rl_readline_name = "gnubg";
     rl_basic_word_break_characters = szCommandSeparators;
     rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
-    rl_completion_entry_function = NullGenerator;
+    rl_completion_entry_function = (Function *) NullGenerator;
 #endif
 
     if( !fNoRC )
