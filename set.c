@@ -194,6 +194,76 @@ extern void CommandSetAnalysisMoves( char *sz ) {
 	UpdateSetting( &fAnalyseMove );
 }
 
+static void SetLuckThreshold( char *szCommand, lucktype lt, char *sz ) {
+
+    double r = ParseReal( &sz );
+
+    if( r <= 0.0 ) {
+	outputf( "You must specify a positive number for the threshold (see "
+		 "`help set analysis\nthreshold %s').\n", szCommand );
+	return;
+    }
+
+    arLuckLevel[ lt ] = r;
+
+    outputf( "`%s' threshold set to %.3f.\n", szCommand, r );
+}
+
+static void SetSkillThreshold( char *szCommand, skilltype lt, char *sz ) {
+
+    double r = ParseReal( &sz );
+
+    if( r <= 0.0 ) {
+	outputf( "You must specify a positive number for the threshold (see "
+		 "`help set analysis\nthreshold %s').\n", szCommand );
+	return;
+    }
+
+    arSkillLevel[ lt ] = r;
+
+    outputf( "`%s' threshold set to %.3f.\n", szCommand, r );
+}
+
+extern void CommandSetAnalysisThresholdBad( char *sz ) {
+
+    SetSkillThreshold( "bad", SKILL_BAD, sz );
+}
+
+extern void CommandSetAnalysisThresholdGood( char *sz ) {
+
+    SetSkillThreshold( "good", SKILL_GOOD, sz );
+}
+
+extern void CommandSetAnalysisThresholdLucky( char *sz ) {
+
+    SetLuckThreshold( "lucky", LUCK_GOOD, sz );
+}
+
+extern void CommandSetAnalysisThresholdUnlucky( char *sz ) {
+
+    SetLuckThreshold( "unlucky", LUCK_BAD, sz );
+}
+
+extern void CommandSetAnalysisThresholdVeryBad( char *sz ) {
+
+    SetSkillThreshold( "very bad", SKILL_VERYBAD, sz );
+}
+
+extern void CommandSetAnalysisThresholdVeryGood( char *sz ) {
+
+    SetSkillThreshold( "very good", SKILL_VERYGOOD, sz );
+}
+
+extern void CommandSetAnalysisThresholdVeryLucky( char *sz ) {
+
+    SetLuckThreshold( "very lucky", LUCK_VERYGOOD, sz );
+}
+
+extern void CommandSetAnalysisThresholdVeryUnlucky( char *sz ) {
+
+    SetLuckThreshold( "very unlucky", LUCK_VERYBAD, sz );
+}
+
 extern void CommandSetAnnotation( char *sz ) {
 
     if( SetToggle( "annotation", &fAnnotation, sz,

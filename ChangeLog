@@ -1,6 +1,17 @@
+Mon Apr 16 12:59:27 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (AnalyzeGame): Automatically mark moves/rolls good/bad
+	and lucky/unlucky.  (This should probably be made optional.)
+
+	* gtkgame.c (TakeAnalysis): New function.
+
+	* set.c (SetLuckThreshold, SetSkillThreshold): New functions.
+
+	* sgf.c (WriteTakeAnalysis): New function.
+
 Sun Apr 15 12:26:06 2001  Jørn Thyssen  <joern@thyssen.nu>
 
- 	* eval.c (Cl2CfMatchCentered, Cl2CfMatchOwned, 
+	* eval.c (Cl2CfMatchCentered, Cl2CfMatchOwned, 
 	Cl2CfMatchUnavailable): fix bug in the calculation of 
 	gammon chances (reported by David Montgomery). 
 

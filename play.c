@@ -54,6 +54,7 @@ char *aszGameResult[] = { "single game", "gammon", "backgammon" },
     *aszLuckType[] = { "very unlucky", "unlucky", NULL, "lucky",
 		       "very lucky" };
 list lMatch, *plGame, *plLastMove;
+summary sMatch;
 static int fComputerDecision = FALSE;
 
 #if USE_GTK
@@ -374,15 +375,11 @@ extern void AddMoveRecord( void *pv ) {
 	break;
 	
     case MOVE_DOUBLE:
-	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
-	assert( pmr->d.etDouble >= EVAL_NONE &&
-		pmr->d.etDouble <= EVAL_ROLLOUT );
-	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
-	break;
-	
     case MOVE_TAKE:
     case MOVE_DROP:
 	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
+	assert( pmr->d.etDouble >= EVAL_NONE &&
+		pmr->d.etDouble <= EVAL_ROLLOUT );
 	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
 	break;
 	
@@ -524,6 +521,7 @@ static void NewGame( void ) {
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
+    ClearSummary( &pmr->g.s );
     AddMoveRecord( pmr );
         
     UpdateSetting( &nCube );
@@ -1237,7 +1235,7 @@ static void AnnotateMove( skilltype st ) {
 
 static void AnnotateRoll( lucktype lt ) {
 
-    /* FIXME */
+    CommandNotImplemented( NULL ); /* FIXME */
 }
 
 static int Emphasis( char *sz, char *szDescription ) {
@@ -1257,7 +1255,7 @@ extern void CommandAnnotateBad( char *sz ) {
 
 extern void CommandAnnotateClear( char *sz ) {
 
-    /* FIXME */
+    CommandNotImplemented( NULL ); /* FIXME */
 }
 
 extern void CommandAnnotateDoubtful( char *sz ) {
@@ -1441,6 +1439,7 @@ extern void CommandDrop( char *sz ) {
     pmr->d.fPlayer = fTurn;
     pmr->d.etDouble = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
+
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -1660,6 +1659,19 @@ extern void CommandNewGame( char *sz ) {
 	    TurnDone();
 }
 
+extern void ClearSummary( summary *ps ) {
+
+    int i;
+    
+    memset( ps, 0, sizeof( *ps ) );
+
+    for( i = 0; i < 2; i++ ) {
+	ps->arCubeError[ i ] = -HUGE_VALF;
+	ps->arChequerError[ i ] = -HUGE_VALF;
+	ps->arLuck[ i ] = -HUGE_VALF;
+    }
+}
+
 extern void FreeMatch( void ) {
 
     list *plMatch;
@@ -1668,6 +1680,8 @@ extern void FreeMatch( void ) {
 	FreeGame( plMatch->p );
 	ListDelete( plMatch );
     }
+
+    ClearSummary( &sMatch );
 }
 
 extern void CommandNewMatch( char *sz ) {
@@ -2194,6 +2208,7 @@ extern void CommandTake( char *sz ) {
     pmr->d.fPlayer = fTurn;
     pmr->d.etDouble = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
+
     AddMoveRecord( pmr );
 
     UpdateSetting( &nCube );

@@ -128,6 +128,21 @@ extern void CommandShowAnalysis( char *sz ) {
 	    outputf( "Up to %d moves will be analysed.\n", cAnalysisMoves );
     } else
 	outputl( "Chequer play will not be analysed." );
+
+    outputf( "\nAnalysis thresholds:\n"
+	     "  +%.3f very good\n"
+	     "  +%.3f good\n"
+	     "  -%.3f bad\n"
+	     "  -%.3f very bad\n"
+	     "\n"
+	     "  +%.3f very lucky\n"
+	     "  +%.3f lucky\n"
+	     "  -%.3f unlucky\n"
+	     "  -%.3f very unlucky\n",
+	     arSkillLevel[ SKILL_VERYGOOD ], arSkillLevel[ SKILL_GOOD ],
+	     arSkillLevel[ SKILL_BAD ], arSkillLevel[ SKILL_VERYBAD ],
+	     arLuckLevel[ LUCK_VERYGOOD ], arLuckLevel[ LUCK_GOOD ],
+	     arLuckLevel[ LUCK_BAD ], arLuckLevel[ LUCK_VERYBAD ] );
 }
 
 extern void CommandShowAutomatic( char *sz ) {

@@ -87,6 +87,14 @@ typedef enum _skilltype {
     SKILL_INTERESTING, SKILL_GOOD, SKILL_VERYGOOD
 } skilltype;
 
+typedef struct _summary {
+    /* Always in points for money games, and MWC for matches.  Never
+       normalised.  -HUGEVAL_F indicates summary has not been calculated. */
+    float arCubeError[ 2 ], arChequerError[ 2 ], arLuck[ 2 ];
+    int acMoves[ 2 ], acForcedMoves[ 2 ], acCubeDecisions[ 2 ],
+	acSkill[ 2 ][ SKILL_VERYGOOD + 1 ], acLuck[ 2 ][ LUCK_VERYGOOD + 1 ];
+} summary;
+
 typedef struct _movegameinfo {
     movetype mt;
     char *sz;
@@ -100,14 +108,8 @@ typedef struct _movegameinfo {
 	nPoints, /* how many points were scored by the winner */
 	fResigned, /* the game was ended by resignation */
 	nAutoDoubles; /* how many automatic doubles were rolled */
+    summary s;
 } movegameinfo;
-
-typedef struct _movebasic {
-    movetype mt;
-    char *sz;
-    int fPlayer;
-    skilltype st;
-} movebasic;
 
 typedef struct _movedouble {
     movetype mt;
@@ -180,7 +182,6 @@ typedef union _moverecord {
     } a;
     movegameinfo g;
     movedouble d; /* cube decisions */
-    movebasic t; 
     movenormal n;
     moveresign r;
     movesetboard sb;
@@ -217,7 +218,8 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC,
     fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard, nRolloutSeed,
     fAnnotation, cAnalysisMoves, fAnalyseCube, fAnalyseDice, fAnalyseMove;
-extern float rAlpha, rAnneal, rThreshold;
+extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
+    arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
@@ -227,6 +229,7 @@ extern evalcontext ecEval, ecRollout, ecTD;
    lMatch is a list of games (i.e. a list of list of moverecords),
    and plGame points to a game within it (again, typically the last). */
 extern list lMatch, *plGame, *plLastMove;
+extern summary sMatch;
 
 /* There is a global storedmoves struct to maintain the list of moves
    for "=n" notation (e.g. "hint", "rollout =1 =2 =4").
@@ -262,6 +265,7 @@ extern void ChangeGame( list *plGameNew );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern void FreeMatch( void );
+extern void ClearSummary( summary *ps );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc );
@@ -397,6 +401,14 @@ extern void CommandAccept( char * ),
     CommandSetAnalysisLimit( char * ),
     CommandSetAnalysisLuck( char * ),
     CommandSetAnalysisMoves( char * ),
+    CommandSetAnalysisThresholdBad( char * ),
+    CommandSetAnalysisThresholdGood( char * ),
+    CommandSetAnalysisThresholdLucky( char * ),
+    CommandSetAnalysisThresholdUnlucky( char * ),
+    CommandSetAnalysisThresholdVeryBad( char * ),
+    CommandSetAnalysisThresholdVeryGood( char * ),
+    CommandSetAnalysisThresholdVeryLucky( char * ),
+    CommandSetAnalysisThresholdVeryUnlucky( char * ),
     CommandSetAnnotation( char * ),
     CommandSetAutoBearoff( char * ),
     CommandSetAutoCrawford( char * ),

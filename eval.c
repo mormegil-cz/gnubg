@@ -4107,10 +4107,10 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
   /* Calculate cubeful equity. 
      
-     Output is: arCfOutput[ 0 ]: equity for optimal cube action,
-                arCfOutput[ 1 ]: equity for no double,
-                arCfOutput[ 2 ]: equity for double, take,
-                arCfOutput[ 3 ]: equity for double, pass.
+     Output is: arCfOutput[ OUTPUT_OPTIMAL ]: equity for optimal cube action,
+                arCfOutput[ OUTPUT_NODOUBLE ]: equity for no double,
+                arCfOutput[ OUTPUT_TAKE ]: equity for double, take,
+                arCfOutput[ OUTPUT_DROP ]: equity for double, pass.
 
                 arClOutput [ ]: cubeless evaluation.
 

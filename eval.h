@@ -36,6 +36,7 @@
 
 #define NUM_OUTPUTS 5
 #define NUM_ROLLOUT_OUTPUTS 6 /* Includes equity */
+#define NUM_CUBEFUL_OUTPUTS 4
 
 #define BETA_HIDDEN 0.1
 #define BETA_OUTPUT 1.0
@@ -48,7 +49,12 @@
 
 #define OUTPUT_EQUITY 5 /* NB: neural nets do not output equity, only
 			   rollouts do. */
-			   
+
+#define OUTPUT_OPTIMAL 0 /* Cubeful evalutions */
+#define OUTPUT_NODOUBLE 1
+#define OUTPUT_TAKE 2
+#define OUTPUT_DROP 3
+
 #define GNUBG_WEIGHTS "gnubg.weights"
 #define GNUBG_WEIGHTS_BINARY "gnubg.wd"
 #define GNUBG_BEAROFF "gnubg.bd"

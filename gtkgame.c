@@ -103,6 +103,7 @@ typedef enum _gnubgcommand {
     CMD_SET_AUTO_GAME,
     CMD_SET_AUTO_MOVE,
     CMD_SET_AUTO_ROLL,
+    CMD_SET_BEAVERS,
     CMD_SET_CONFIRM,
     CMD_SET_CUBE_CENTRE,
     CMD_SET_CUBE_OWNER_0,
@@ -167,6 +168,7 @@ static togglecommand atc[] = {
     { &fAutoGame, CMD_SET_AUTO_GAME },
     { &fAutoMove, CMD_SET_AUTO_MOVE },
     { &fAutoRoll, CMD_SET_AUTO_ROLL },
+    { &fBeavers, CMD_SET_BEAVERS },
     { &fConfirm, CMD_SET_CONFIRM },
     { &fCubeUse, CMD_SET_CUBE_USE },
     { &fDisplay, CMD_SET_DISPLAY },
@@ -218,6 +220,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set automatic game",
     "set automatic move",
     "set automatic roll",
+    "set beavers",
     "set confirm",
     "set cube centre",
     NULL, /* set cube owner 0 */
@@ -1010,7 +1013,13 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 
     case MOVE_DOUBLE:
 	fPlayer = pmr->d.fPlayer;
-	sprintf( pch = sz, "Double to %d", nCube * 2 );
+	pch = sz;
+	
+	if( fDoubled )
+	    sprintf( sz, "Redouble to %d", nCube << 2 );
+	else
+	    sprintf( sz, "Double to %d", nCube << 1 );
+	    
 	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
 	break;
 	
@@ -1139,24 +1148,72 @@ static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evaltype et,
     return gtk_label_new( sz );
 }
 
-static GtkWidget *RollAnalysis( int n0, int n1, float rLuck ) {
-
-    char sz[ 64 ];
+static GtkWidget *TakeAnalysis( movetype mt, float arDouble[], evaltype et,
+				evalsetup *pes ) {
+    char sz[ 128 ], *pch;
     cubeinfo ci;
+    float rError;
     
-    if( rLuck == -HUGE_VALF )
-	/* no luck information */
+    if( et == EVAL_NONE )
 	return NULL;
+
+    switch( mt ) {
+    case MOVE_TAKE:
+	if( -arDouble[ OUTPUT_TAKE ] < -arDouble[ OUTPUT_DROP ] )
+	    rError = -arDouble[ OUTPUT_TAKE ] - -arDouble[ OUTPUT_DROP ];
+	else
+	    rError = 0.0f;
+
+	break;
+
+    case MOVE_DROP:
+	if( -arDouble[ OUTPUT_DROP ] < -arDouble[ OUTPUT_TAKE ] )
+	    rError = -arDouble[ OUTPUT_DROP ] - -arDouble[ OUTPUT_TAKE ];
+	else
+	    rError = 0.0f;
+
+	break;
+
+    default:
+	assert( FALSE );
+    }
+    
+    pch = ( mt == MOVE_TAKE && rError == 0.0f ) ||
+	( mt == MOVE_DROP && rError != 0.0f ) ? "Take" : "Pass";
 
     if( fOutputMWC && nMatchTo ) {
 	SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
 		     fCrawford, fJacoby, fBeavers );
 	
-	sprintf( sz, "Rolled %d%d (%+0.3f%%)", n0, n1,
-		 100.0f * ( eq2mwc( rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
+	sprintf( sz, "Correct response: %s (%+0.3f%%)", pch,
+		 100.0f * ( eq2mwc( rError, &ci ) - eq2mwc( 0.0f, &ci ) ) );
     } else
-	sprintf( sz, "Rolled %d%d (%+0.3f)", n0, n1, rLuck );
+	sprintf( sz, "Correct response: %s (%+0.3f)", pch, rError );
 
+    return gtk_label_new( sz );
+}
+
+static GtkWidget *RollAnalysis( int n0, int n1, float rLuck, lucktype lt ) {
+
+    char sz[ 64 ], *pch;
+    cubeinfo ci;
+
+    pch = sz + sprintf( sz, "Rolled %d%d", n0, n1 );
+    
+    if( rLuck != -HUGE_VALF ) {
+	if( fOutputMWC && nMatchTo ) {
+	    SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+			 fCrawford, fJacoby, fBeavers );
+	    
+	    pch += sprintf( pch, " (%+0.3f%%)",
+		     100.0f * ( eq2mwc( rLuck, &ci ) - eq2mwc( 0.0f, &ci ) ) );
+	} else
+	    pch += sprintf( pch, " (%+0.3f)", rLuck );
+    }
+
+    if( aszLuckType[ lt ] )
+	sprintf( pch, " (%s)", aszLuckType[ lt ] );
+    
     return gtk_label_new( sz );    
 }
 
@@ -1214,7 +1271,7 @@ static void SetAnnotation( moverecord *pmr ) {
 				    4 );
 	    
 	    if( ( pw = RollAnalysis( pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
-				     pmr->n.rLuck ) ) )
+				     pmr->n.rLuck, pmr->n.lt ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
 	    
@@ -1242,13 +1299,19 @@ static void SetAnnotation( moverecord *pmr ) {
 
 	case MOVE_DOUBLE:
 	    pwAnalysis = CubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
-				       &pmr->n.esDouble );
+				       &pmr->d.esDouble );
+	    break;
+
+	case MOVE_TAKE:
+	case MOVE_DROP:
+	    pwAnalysis = TakeAnalysis( pmr->mt, pmr->d.arDouble,
+				       pmr->d.etDouble, &pmr->d.esDouble );
 	    break;
 	    
 	case MOVE_SETDICE:
 	    pwAnalysis = RollAnalysis( pmr->sd.anDice[ 0 ],
 				       pmr->sd.anDice[ 1 ],
-				       pmr->sd.rLuck );
+				       pmr->sd.rLuck, pmr->sd.lt );
 	    break;
 
 	default:
@@ -1570,7 +1633,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Roll", NULL, Command, CMD_SET_AUTO_ROLL,
 	  "<CheckItem>" },
-	{ "/_Settings/_Beavers...", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Beavers", NULL, Command, CMD_SET_BEAVERS,
+	  "<CheckItem>" },
 	{ "/_Settings/Cache...", NULL, SetCache, 0, NULL },
 	{ "/_Settings/_Confirmation", NULL, Command, CMD_SET_CONFIRM,
 	  "<CheckItem>" },

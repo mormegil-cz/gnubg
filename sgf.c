@@ -205,7 +205,8 @@ static void RestoreRootNode( list *pl ) {
     pmgi->nPoints = 0;
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
-
+    ClearSummary( &pmgi->s );
+    
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
 	if( pp->ach[ 0 ] == 'M' && pp->ach[ 1 ] == 'I' )
 	    /* MI - Match info property */
@@ -273,6 +274,7 @@ static int Point( char ch, int f ) {
 
 static void RestoreDoubleAnalysis( property *pp, evaltype *pet,
 				   float ar[], evalsetup *pes ) {
+    
     char *pch = pp->pl->plNext->p, ch;
 
     switch( *pch ) {
@@ -431,15 +433,17 @@ static void RestoreNode( list *pl ) {
 		pmr->d.fPlayer = fPlayer;
 		pmr->d.etDouble = EVAL_NONE;
 	    } else if( !strcmp( pch, "take" ) ) {
-		pmr = malloc( sizeof( pmr->t ) );
+		pmr = malloc( sizeof( pmr->d ) );
 		pmr->mt = MOVE_TAKE;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
+		pmr->d.etDouble = EVAL_NONE;
 	    } else if( !strcmp( pch, "drop" ) ) {
-		pmr = malloc( sizeof( pmr->t ) );
+		pmr = malloc( sizeof( pmr->d ) );
 		pmr->mt = MOVE_DROP;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
+		pmr->d.etDouble = EVAL_NONE;
 	    } else {
 		pmr = malloc( sizeof( pmr->n ) );
 		pmr->mt = MOVE_NORMAL;
@@ -588,15 +592,12 @@ static void RestoreNode( list *pl ) {
 	    break;
 	    
 	case MOVE_DOUBLE:
+	case MOVE_TAKE:
+	case MOVE_DROP:
 	    if( ppDA )
 		RestoreDoubleAnalysis( ppDA, &pmr->d.etDouble,
 				       pmr->d.arDouble, &pmr->d.esDouble );
 	    pmr->d.st = st;
-	    break;
-
-	case MOVE_TAKE:
-	case MOVE_DROP:
-	    pmr->t.st = st;
 	    break;
 	    
 	case MOVE_SETDICE:
@@ -813,7 +814,6 @@ static void WriteEscapedString( FILE *pf, char *pch, int fEscapeColons ) {
 
 static void WriteDoubleAnalysis( FILE *pf, evaltype et, float ar[],
 				 evalsetup *pes ) {
-
     switch( et ) {
     case EVAL_EVAL:
 	fprintf( pf, "DA[E %.4f %.4f %.4f %.4f %d%s]", ar[ 0 ], ar[ 1 ],
@@ -827,6 +827,22 @@ static void WriteDoubleAnalysis( FILE *pf, evaltype et, float ar[],
     default:
 	assert( FALSE );
     }
+}
+
+static void WriteTakeAnalysis( FILE *pf, evaltype et, float r,
+			       evalsetup *pes ) {
+    switch( et ) {
+    case EVAL_EVAL:
+	fprintf( pf, "TA[E %.4f %d%s]", r, pes->ec.nPlies,
+		 pes->ec.fCubeful ? "C" : "" );
+	break;
+
+    case EVAL_ROLLOUT:
+	/* FIXME */
+
+    default:
+	assert( FALSE );
+    }    
 }
 
 static void WriteMove( FILE *pf, int fPlayer, int anMove[] ) {
@@ -1020,19 +1036,27 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_TAKE:
-	    fprintf( pf, "\n;%c[take]", pmr->t.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[take]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    WriteSkill( pf, pmr->t.st );
-
+	    if( pmr->d.etDouble != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.etDouble, pmr->d.arDouble,
+				     &pmr->d.esDouble );
+	    
+	    WriteSkill( pf, pmr->d.st );
+	    
 	    break;
 	    
 	case MOVE_DROP:
-	    fprintf( pf, "\n;%c[drop]", pmr->t.fPlayer ? 'B' : 'W' );
+	    fprintf( pf, "\n;%c[drop]", pmr->d.fPlayer ? 'B' : 'W' );
 
-	    WriteSkill( pf, pmr->t.st );
-
-	    break;
+	    if( pmr->d.etDouble != EVAL_NONE )
+		WriteDoubleAnalysis( pf, pmr->d.etDouble, pmr->d.arDouble,
+				     &pmr->d.esDouble );
 	    
+	    WriteSkill( pf, pmr->d.st );
+	    
+	    break;
+	    	    
 	case MOVE_RESIGN:
 	    break;
 

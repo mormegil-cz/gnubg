@@ -54,9 +54,8 @@ duplication of effort and to make sure our changes merge easily.
 *** Add an "analyse move" command.
 *** Allow re-evaluating analysis with different settings, and rollouts.
 *** Add "set automatic analysis".
-*** Automatically mark moves good/bad and lucky/unlucky. (gary)
-*** Complain if they try to analyse when cube, luck and move analysis are
-  all off. (gary)
+*** Make sure cube analysis works for beavers.
+*** Should luck be evaluated cubefully?  (An option, perhaps?)
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -99,6 +98,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Display the score and match length in ShowBoard().
 ** Handle "list game" and "list match".
 ** Allow setting/editing commentary.
+** Show take/drop analysis.
 
 * X interface:
 ** Does anybody still use the old Xlib (Ext) interface any more?  If so,
@@ -108,9 +108,6 @@ duplication of effort and to make sure our changes merge easily.
 
 * GTK interface:
 ** Allow copy/paste and drag & drop of the board ID in the board window.
-** Finish menus.  Make sure there is a GUI equivalent for every command.
-  Currently missing:
-*** set beavers
 ** Add a prompt and entry field to allow commands to be entered (replacing
   stdin).
 ** Allow the user to decide whether short messages appear in dialogs
@@ -161,6 +158,9 @@ duplication of effort and to make sure our changes merge easily.
   annotation.
 ** Add the players' names in the drop-down menu in the game window.  (They
   used to be there, but weren't updated if the names were changed.)
+** Add a menu in the annotation window.  It should contain at least
+  the "annotate" commands.
+** Use a progress bar when generating a heuristic bearoff database. (gary)
 ** Write GTKDumpStatcontext (show statistics).
 
 ** Dialogs:
@@ -212,6 +212,9 @@ duplication of effort and to make sure our changes merge easily.
 ** There's no way to see the annotation on the opening move using the
   TTY interface.  Changing ShowBoard() to display the starting position
   and then the annotation might work.
+** Jørn: should the "Overall rating" calculated at the end of
+  DumpStatcontext divide the error rate by 2 (i.e. the average of
+  cube and chequer errors, rather than the sum)?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -251,6 +254,12 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow printing positions/games/matches/etc.
 ** Keep statistics of won/lost games/matches.
 ** Consider "-s scheme-file" and "-c command-file" options to read scripts.
+** Finish the annotation commands in play.c.
+** Load and save take/drop errors in sgf.c.
+** Make sure the Nackgammon option works properly: record when loading/saving,
+  make sure that InitBoard during analysis gets it right, etc.
+** Make calls to irandinit() in eval.c and lib/neuralnet.c give the time as
+  a seed.
 
 
 Local Variables:

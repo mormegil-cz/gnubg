@@ -145,7 +145,22 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed,
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE;
-float rAlpha = 0.1, rAnneal = 0.3, rThreshold = 0.1;
+float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
+    arLuckLevel[] = {
+	0.6f, /* LUCK_VERYBAD */
+	0.3f, /* LUCK_BAD */
+	0, /* LUCK_NONE */
+	0.3f, /* LUCK_GOOD */
+	0.6f /* LUCK_VERYGOOD */
+    }, arSkillLevel[] = {
+	0.16f, /* SKILL_VERYBAD */
+	0.08f, /* SKILL_BAD */
+	0, /* SKILL_DOUBTFUL */
+	0, /* SKILL_NONE */
+	0, /* SKILL_INTERESTING */
+	0.02f, /* SKILL_GOOD */
+	0.04f /* SKILL_VERYGOOD	*/
+    };
 
 gamestate gs = GAME_NONE;
 
@@ -285,6 +300,24 @@ command acAnalyse[] = {
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
       szOPTFILENAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetAnalysisThreshold[] = {
+    { "bad", CommandSetAnalysisThresholdBad, "Specify the equity loss for a "
+      "bad move", szVALUE, NULL },
+    { "good", CommandSetAnalysisThresholdGood, "Specify the equity gain for a "
+      "good move", szVALUE, NULL },
+    { "lucky", CommandSetAnalysisThresholdLucky, "Specify the equity gain for "
+      "a lucky roll", szVALUE, NULL },
+    { "unlucky", CommandSetAnalysisThresholdUnlucky, "Specify the equity loss "
+      "for an unlucky roll", szVALUE, NULL },
+    { "verybad", CommandSetAnalysisThresholdVeryBad, "Specify the equity loss "
+      "for a very bad move", szVALUE, NULL },
+    { "verygood", CommandSetAnalysisThresholdVeryGood, "Specify the equity "
+      "gain for a very good move", szVALUE, NULL },
+    { "verylucky", CommandSetAnalysisThresholdVeryLucky, "Specify the equity "
+      "gain for a very lucky roll", szVALUE, NULL },
+    { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, "Specify the "
+      "equity loss for a very unlucky roll", szVALUE, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysis[] = {
     { "cube", CommandSetAnalysisCube, "Select whether cube action will be "
       "analysed", szONOFF, NULL },
@@ -294,6 +327,8 @@ command acAnalyse[] = {
       "analysed", szONOFF, NULL },
     { "moves", CommandSetAnalysisMoves, "Select whether chequer play will be "
       "analysed", szONOFF, NULL },
+    { "threshold", NULL, "Specify levels for marking moves", NULL,
+      acSetAnalysisThreshold },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
@@ -3451,6 +3486,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
     
     ListCreate( &lMatch );
+    ClearSummary( &sMatch );
     
 #if USE_GTK
     if( fTTY )
@@ -3466,7 +3502,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     rl_readline_name = "gnubg";
     rl_basic_word_break_characters = szCommandSeparators;
     rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
+#if HAVE_RL_COMPLETION_MATCHES
+    /* assume readline 4.2 or later */
+    rl_completion_entry_function = NullGenerator;
+#else
+    /* assume old readline */
     rl_completion_entry_function = (Function *) NullGenerator;
+#endif
 #endif
 
     if( !fNoRC )
