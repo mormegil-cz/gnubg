@@ -96,6 +96,7 @@ static void NewGame( void ) {
 
     if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
 	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse ) {
+	    /* FIXME we need a moverecord type for automatic doubles... */
 	    outputf( "The cube is now at %d.\n", nCube <<= 1 );
 	    UpdateSetting( &nCube );
 	}
@@ -283,8 +284,14 @@ static int ComputerTurn( void ) {
         ShowBoard();
     }
     
-    /* FIXME save move */
-    return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
+    pmn = malloc( sizeof( *pmn ) );
+    pmn->mt = MOVE_NORMAL;
+    pmn->anRoll[ 0 ] = anDice[ 0 ];
+    pmn->anRoll[ 1 ] = anDice[ 1 ];
+    pmn->fPlayer = fTurn;
+    ListInsert( plGame, pmn );
+    
+    return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard, pmn->anMove );
 
   default:
     assert( FALSE );

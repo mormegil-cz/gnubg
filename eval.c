@@ -3502,15 +3502,19 @@ extern int EvalCacheStats( int *pc, int *pcLookup, int *pcHit ) {
   return CacheStats( &cEval, pcLookup, pcHit );
 }
 
-extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] ) {
+extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
+			    int anMove[ 8 ] ) {
 
   movelist ml;
   int i, j, anBoardTemp[ 2 ][ 25 ], anPubeval[ 28 ], fRace;
 
+  for( i = 0; i < 8; i++ )
+      anMove[ i ] = -1;
+  
   fRace = ClassifyPosition( anBoard ) <= CLASS_RACE;
     
   GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
-    
+
   if( !ml.cMoves )
     /* no legal moves */
     return 0;
@@ -3546,7 +3550,11 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] ) {
 	    }
     }
   }
-	
+
+  if( anMove )
+      for( i = 0; i < ml.cMaxMoves * 2; i++ )
+	  anMove[ i ] = ml.amMoves[ ml.iMoveBest ].anMove[ i ];
+  
   PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
 
   return 0;

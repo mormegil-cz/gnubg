@@ -174,7 +174,8 @@ FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
               int anBoard[ 2 ][ 25 ], cubeinfo *pci, evalcontext *pec );
 
 extern int 
-FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] );
+FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
+		 int anMove[ 8 ] );
 
 extern int 
 TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] );
