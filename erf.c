@@ -26,6 +26,10 @@
  
 #include <math.h>
 
+#ifndef M_2_SQRTPI
+#define M_2_SQRTPI  1.12837916709551257390
+#endif
+
 extern double erf( double x ) {
 
     double a, u, v, w, y, z, t;

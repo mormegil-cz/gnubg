@@ -3836,3 +3836,70 @@ extern void GTKSet( void *p ) {
 	    gtk_widget_hide( pwAnnotation );
     }
 }
+
+
+extern void GTKAutoAnalysis( movelist *pmlOrig ) {
+
+    GtkWidget  *psw = gtk_scrolled_window_new( NULL, NULL ),
+	*pwButtons,
+	*pwMove = gtk_button_new_with_label( "Move" ),
+	*pwRollout = gtk_button_new_with_label( "Rollout" ),
+	*pwMoves;
+    static hintdata hd;
+    movelist *pml;
+    
+    if( pwHint )
+	gtk_widget_destroy( pwHint );
+
+    pml = malloc( sizeof( *pml ) );
+    memcpy( pml, pmlOrig, sizeof( *pml ) );
+    
+    pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
+    memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
+
+    hd.pwMove = pwMove;
+    hd.pwRollout = pwRollout;
+    hd.pml = pml;
+    hd.fButtonsValid = TRUE;
+//    hd.pw = pwMoves = CreateMoveList( &hd, -1 /* FIXME change if they've
+//						 already moved */ );
+    
+    pwHint = CreateDialog( "GNU Backgammon - Automatic analysis", FALSE, 
+                           NULL, NULL );
+    gtk_object_set_user_data( GTK_OBJECT( pwHint ), &hd );
+    pwButtons = DialogArea( pwHint, DA_BUTTONS );
+    
+    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
+				    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
+    gtk_container_add( GTK_CONTAINER( psw ), pwMoves );
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), psw );
+
+    gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
+			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
+    gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
+			GTK_SIGNAL_FUNC( HintRollout ), pwMoves );
+
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwRollout );
+
+    gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
+			      GDK_SELECTION_TYPE_STRING, 0 );
+    
+    HintSelect( pwMoves, 0, 0, NULL, &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
+			GTK_SIGNAL_FUNC( HintSelect ), &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "unselect-row",
+			GTK_SIGNAL_FUNC( HintSelect ), &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_clear_event",
+			GTK_SIGNAL_FUNC( HintClearSelection ), &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_get",
+			GTK_SIGNAL_FUNC( HintGetSelection ), &hd );
+    
+    gtk_window_set_default_size( GTK_WINDOW( pwHint ), 0, 300 );
+    
+    gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, &pwHint );
+    
+    gtk_widget_show_all( pwHint );
+}
+
