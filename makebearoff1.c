@@ -185,7 +185,7 @@ main ( int argc, char **argv ) {
 
     for ( i = 0; i < n; ++i ) {
 
-      fprintf ( pfOut, "0x%02hhX, ", ac[ i ] );
+      fprintf ( pfOut, "0x%02hhX, ", (ac[ i ] & 0xff) );
 
       if ( ! ( ( i + 1 ) % 8 ) )
         fprintf ( pfOut, 
