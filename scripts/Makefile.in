@@ -170,14 +170,18 @@ pkgpyexecdir = @pkgpyexecdir@
 pkgpythondir = @pkgpythondir@
 pyexecdir = @pyexecdir@
 pythondir = @pythondir@
-scriptfiles = gnubg.py batch.py
+scriptfiles = gnubg.py batch.py database.py batch_win.py
+scriptsdir = $(pkgdatadir)/scripts
+scripts_DATA = $(scriptfiles)
 EXTRA_DIST = $(scriptfiles)
 subdir = scripts
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 DIST_SOURCES =
-DIST_COMMON = Makefile.am Makefile.in
+DATA = $(scripts_DATA)
+
+DIST_COMMON = ChangeLog Makefile.am Makefile.in
 all: all-am
 
 .SUFFIXES:
@@ -187,6 +191,24 @@ $(srcdir)/Makefile.in:  Makefile.am  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 Makefile:  $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)
 uninstall-info-am:
+scriptsDATA_INSTALL = $(INSTALL_DATA)
+install-scriptsDATA: $(scripts_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(scriptsdir)
+	@list='$(scripts_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " $(scriptsDATA_INSTALL) $$d$$p $(DESTDIR)$(scriptsdir)/$$f"; \
+	  $(scriptsDATA_INSTALL) $$d$$p $(DESTDIR)$(scriptsdir)/$$f; \
+	done
+
+uninstall-scriptsDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(scripts_DATA)'; for p in $$list; do \
+	  f="`echo $$p | sed -e 's|^.*/||'`"; \
+	  echo " rm -f $(DESTDIR)$(scriptsdir)/$$f"; \
+	  rm -f $(DESTDIR)$(scriptsdir)/$$f; \
+	done
 tags: TAGS
 TAGS:
 
@@ -218,9 +240,10 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile
+all-am: Makefile $(DATA)
 
 installdirs:
+	$(mkinstalldirs) $(DESTDIR)$(scriptsdir)
 
 install: install-am
 install-exec: install-exec-am
@@ -262,7 +285,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-scriptsDATA
 
 install-exec-am:
 
@@ -280,15 +303,16 @@ mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-generic
 
-uninstall-am: uninstall-info-am
+uninstall-am: uninstall-info-am uninstall-scriptsDATA
 
 .PHONY: all all-am check check-am clean clean-generic distclean \
 	distclean-generic distdir dvi dvi-am info info-am install \
 	install-am install-data install-data-am install-exec \
 	install-exec-am install-info install-info-am install-man \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-generic uninstall uninstall-am uninstall-info-am
+	install-scriptsDATA install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic uninstall uninstall-am \
+	uninstall-info-am uninstall-scriptsDATA
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
