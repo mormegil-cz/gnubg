@@ -235,9 +235,9 @@ TextPrologue ( FILE *pf, const matchstate *pms, const int iGame ) {
 
   if ( pms->nMatchTo > 0 ) 
     fprintf( pf,
-             pms->nMatchTo == 1 ?
-             _(" (match to %d point%s)") :
-             _(" (match to %d points%s)"),
+             ngettext( " (match to %d point)", 
+                       " (match to %d points)",
+                       pms->nMatchTo ),
              pms->nMatchTo,
              pms->fCrawford ? 
              _(", Crawford game") : ( pms->fPostCrawford ?
