@@ -390,6 +390,51 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
     for ( ici = 0, pci = pciLocal, pf = pfFinished;
           ici < cci; ici++, pci++, pf++ ) {
 
+      /* check for truncation at bearoff databases */
+
+      pc = ClassifyPosition ( aanBoard[ ici ] );
+      if ( prc->fTruncBearoff2 && pc <= CLASS_PERFECT &&
+           prc->fCubeful && *pf && ! pci->nMatchTo &&
+           ! ( afCubeDecTop[ ici ] && ! prc->fInitial && ! iTurn ) ) {
+
+        float arEquity[ 4 ];
+
+        /* truncate at two sided bearoff if money game */
+
+        EvaluatePerfectCubeful ( aanBoard[ ici ], arEquity );
+
+        aarOutput[ ici ][ 0 ] = ( arEquity[ 0 ] + 1.0 ) / 2.0;
+        aarOutput[ ici ][ 1 ] = aarOutput[ ici ][ 2 ] =
+          aarOutput[ ici ][ 3 ] = aarOutput[ ici ][ 4 ] = 0.0;
+
+        aarOutput[ ici ][ OUTPUT_EQUITY ] = arEquity[ 0 ];
+
+        aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 
+          CFMONEY ( arEquity, pci );
+
+        if ( ! ( iTurn & 1 ) ) InvertEvaluationR ( aarOutput[ ici ], pci );
+
+        *pf = FALSE;
+        cUnfinished--;
+
+      }
+      else if ( ( ( prc->fTruncBearoff2 && pc <= CLASS_PERFECT ) ||
+                  ( prc->fTruncBearoffOS && pc <= CLASS_BEAROFF_OS ) ) &&
+                ! prc->fCubeful && *pf ) {
+          
+        /* cubeless rollout, requested to truncate at bearoff db */
+
+        GeneralEvaluationE ( aarOutput[ ici ],
+                             aanBoard[ ici ],
+                             pci, &ecCubeless0ply );
+
+        if ( ! ( iTurn & 1 ) ) InvertEvaluationR ( aarOutput[ ici ], pci );
+
+        *pf = FALSE;
+        cUnfinished--;
+
+      }
+      
       if ( *pf ) {
 
         if ( prc->fCubeful && GetDPEq ( NULL, &rDP, pci ) &&
@@ -710,48 +755,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       pci->anScore, pci->fCrawford,
                       pci->fJacoby, pci->fBeavers );
 
-        /* check for truncation at bearoff databases */
-
-        if ( prc->fTruncBearoff2 && pc <= CLASS_PERFECT &&
-             prc->fCubeful && *pf && ! pci->nMatchTo ) {
-
-          float arEquity[ 4 ];
-
-          /* truncate at two sided bearoff if money game */
-
-          EvaluatePerfectCubeful ( aanBoard[ ici ], arEquity );
-
-          aarOutput[ ici ][ 0 ] = ( arEquity[ 0 ] + 1.0 ) / 2.0;
-          aarOutput[ ici ][ 1 ] = aarOutput[ ici ][ 2 ] =
-            aarOutput[ ici ][ 3 ] = aarOutput[ ici ][ 4 ] = 0.0;
-
-          aarOutput[ ici ][ OUTPUT_EQUITY ] = arEquity[ 0 ];
-          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 
-            CFMONEY ( arEquity, pci );
-
-          if ( ! ( iTurn & 1 ) ) InvertEvaluationR ( aarOutput[ ici ], pci );
-
-          *pf = FALSE;
-          cUnfinished--;
-
-        }
-        else if ( ( ( prc->fTruncBearoff2 && pc <= CLASS_PERFECT ) ||
-                    ( prc->fTruncBearoffOS && pc <= CLASS_BEAROFF_OS ) ) &&
-                  ! prc->fCubeful && *pf ) {
-          
-          /* cubeless rollout, requested to truncate at bearoff db */
-
-          GeneralEvaluationE ( aarOutput[ ici ],
-                               aanBoard[ ici ],
-                               pci, &ecCubeless0ply );
-
-          if ( ! ( iTurn & 1 ) ) InvertEvaluationR ( aarOutput[ ici ], pci );
-
-          *pf = FALSE;
-          cUnfinished--;
-
-        }
-        
         assert ( cUnfinished >= 0 );
 
 
