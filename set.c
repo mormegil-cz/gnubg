@@ -817,16 +817,15 @@ extern void CommandSetTurn( char *sz ) {
 
 extern void CommandSetJacoby( char *sz ) {
 
-    if( SetToggle( "jacoby", &fJacoby, sz, 
-		   "Will use the Jacoby rule for money sessions.",
-		   "Will not use the Jacoby rule for money sessions." ) )
-      return;
+  SetToggle( "jacoby", &fJacoby, sz, 
+	     "Will use the Jacoby rule for money sessions.",
+             "Will not use the Jacoby rule for money sessions." );
 
-    CalcGammonPrice ( nCube, fCubeOwner );
+  CalcGammonPrice ( nCube, fCubeOwner );
 
-    if( fJacoby && !fCubeUse )
-      puts( "(Note that you'll have to enable the cube if you want gammons "
-	    "and backgammons\nto be scored -- see `help set cube use'.)" );
+  if( fJacoby && !fCubeUse )
+    puts( "(Note that you'll have to enable the cube if you want gammons "
+          "and backgammons\nto be scored -- see `help set cube use'.)" );
 
 }
 
