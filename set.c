@@ -75,6 +75,8 @@ static evalsetup *pesSet;
 
 static rng *rngSet;
 
+movefilter *aamfSet[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+
 
 static char szEQUITY[] = N_ ("<equity>"),
     szFILENAME[] = N_ ("<filename>"),
@@ -82,8 +84,9 @@ static char szEQUITY[] = N_ ("<equity>"),
     szNUMBER[] = N_ ("<number>"),
     szONOFF[] = N_ ("on|off"),
     szPLIES[] = N_ ("<plies>"),
-    szSTDDEV[] = N_ ("<std dev>");
-    
+    szSTDDEV[] = N_ ("<std dev>"),
+    szFILTER[] = N_ ( "<ply> <num. to accept (0 = skip)> "
+                      "[<num. of extra moves to accept> <tolerance>]");
 command acSetEvaluation[] = {
     { "cubeful", CommandSetEvalCubeful, N_("Cubeful evaluations"), szONOFF,
       &cOnOff },
@@ -108,6 +111,9 @@ command acSetEvaluation[] = {
       NULL, NULL },
     { "human", CommandSetPlayerHuman, N_("Have a human make all moves for a "
       "player"), NULL, NULL },
+    { "movefilter", CommandSetPlayerMoveFilter, 
+      N_("Set parameters for choosing moves to evaluate"), 
+      szFILTER, NULL},
     { "name", CommandSetPlayerName, 
       N_("Change a player's name"), szNAME, NULL },
     { "pubeval", CommandSetPlayerPubeval, 
@@ -252,6 +258,66 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
     if( ( *prng = rngNew ) != RNG_MANUAL )
 	SetSeed( *prng, szSeed );
 }
+
+
+extern void
+SetMoveFilter(char* sz, 
+              movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  int		  ply = ParseNumber( &sz );
+  int		  level;
+  int		  accept;
+  movefilter *pmfFilter; 
+  int		  extras;
+  float 	  tolerance;
+
+  if (ply < 0) {
+	outputl ( N_("You must specify for which ply you want to set a filter") );
+	return;
+  }
+
+  if ( ! ( 0 < ply &&  ply <= MAX_FILTER_PLIES ) ) {
+	outputf( _("You must specify a valid ply for setting move filters -- try "
+			   "help set %s movefilter"), szSetCommand );
+	return;
+  }
+
+  if (((level = ParseNumber( &sz ) ) < 0) || (level >= ply)) {
+	outputf( _("You must specify a valid level 0..%d for the filter -- try "
+			   "help set %s movefilter"), ply - 1, szSetCommand );
+	return;
+  }
+
+  pmfFilter = &aamf[ply-1][level];
+
+  if ((accept = ParseNumber( &sz ) ) < 0) {
+	outputf (N_ ("You must specify a number of moves to accept (or 0 to skip "
+			 "this level -- try help set %s movefilter "), szSetCommand);
+	return;
+  }
+
+  if (accept == 0) {
+	pmfFilter->Accept = 0;
+	pmfFilter->Extra = 0;
+	pmfFilter->Threshold = 0.0;
+	return;
+  }
+
+  if ( ( ( extras = ParseNumber( &sz ) ) < 0 )  || 
+	   ( ( tolerance = ParseReal( &sz ) ) < 0.0 )) {
+	outputf (N_ ("You must set a count of extra moves and a search tolerance "
+				 "-- try help set %s movefilter plies level accept"), 
+			 szSetCommand);
+	return;
+  }
+
+  pmfFilter->Accept = accept;
+  pmfFilter->Extra = extras;
+  pmfFilter->Threshold = tolerance;
+}
+
+
+
 
 extern void CommandSetAnalysisCube( char *sz ) {
 
@@ -928,6 +994,13 @@ extern void CommandSetNackgammon( char *sz ) {
 #endif
 }
 
+
+extern void
+CommandSetPlayerMoveFilter ( char *sz ) {
+
+  SetMoveFilter ( sz, ap[ iPlayerSet ].aamf );
+
+}
 
 extern void 
 CommandSetPlayerChequerplay( char *sz ) {
@@ -2292,60 +2365,19 @@ CommandSetEvalCubedecision ( char *sz ) {
 }
 
 
-extern void
-CommandSetMoveFilter(char* sz) {
+extern void CommandSetEvalMoveFilter( char *sz ) {
 
-  int		  ply = ParseNumber( &sz );
-  int		  level;
-  int		  accept;
-  movefilter *pmfFilter; 
-  int		  extras;
-  float 	  tolerance;
+  SetMoveFilter ( sz, aamfEval );
 
-  if (ply < 0) {
-	outputl ( N_("You must specify for which ply you want to set a filter") );
-	return;
-  }
-
-  if ( ! ( 0 < ply &&  ply <= MAX_FILTER_PLIES ) ) {
-	outputf( _("You must specify a valid ply for setting move filters -- try "
-			   "help set %s movefilter"), szSetCommand );
-	return;
-  }
-
-  if (((level = ParseNumber( &sz ) ) < 0) || (level >= ply)) {
-	outputf( _("You must specify a valid level 0..%d for the filter -- try "
-			   "help set %s movefilter"), ply - 1, szSetCommand );
-	return;
-  }
-
-  pmfFilter = &defaultFilters[ply-1][level];
-
-  if ((accept = ParseNumber( &sz ) ) < 0) {
-	outputf (N_ ("You must specify a number of moves to accept (or 0 to skip "
-			 "this level -- try help set %s movefilter "), szSetCommand);
-	return;
-  }
-
-  if (accept == 0) {
-	pmfFilter->Accept = 0;
-	pmfFilter->Extra = 0;
-	pmfFilter->Threshold = 0.0;
-	return;
-  }
-
-  if ( ( ( extras = ParseNumber( &sz ) ) < 0 )  || 
-	   ( ( tolerance = ParseReal( &sz ) ) < 0.0 )) {
-	outputf (N_ ("You must set a count of extra moves and a search tolerance "
-				 "-- try help set %s movefilter plies level accept"), 
-			 szSetCommand);
-	return;
-  }
-
-  pmfFilter->Accept = accept;
-  pmfFilter->Extra = extras;
-  pmfFilter->Threshold = tolerance;
 }
+
+extern void CommandSetAnalysisMoveFilter( char *sz ) {
+
+  SetMoveFilter ( sz, aamfEval );
+
+}
+
+
   
 
 static void SetMatchInfo( char **ppch, char *sz, char *szMessage ) {
@@ -3655,3 +3687,7 @@ CommandSetCheat ( char *sz ) {
              _("Disallow GNU Backgammon to manipulate the dice.") );
 
 }
+
+
+
+

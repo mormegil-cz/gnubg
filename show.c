@@ -56,7 +56,7 @@
 
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
-static void ShowMoveFilter (movefilter *pmf, int ply) {
+static void ShowMoveFilter ( const movefilter *pmf, const int ply) {
   
   if (pmf->Accept == 0) {
 	outputf( _("Skip pruning for %d-ply moves.\n"), ply );
@@ -76,9 +76,30 @@ static void ShowMoveFilter (movefilter *pmf, int ply) {
   outputf ( _(" and up to %d more moves within equity %0.3g\n" ),
 			pmf->Extra, pmf->Threshold);
 }	  
+
+
+static void
+ShowMoveFilters ( const movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  int i, j;
+
+  for ( i = 0; i < MAX_FILTER_PLIES; ++i ) {
+
+    outputf ( "      Move filter for %d ply:\n", i + 1 );
+  
+    for ( j = 0; j <= i; ++j ) {
+      outputf ( "        " );
+      ShowMoveFilter ( &aamf[i ][ j ], i );
+    }
+  }
+
+  outputl ( "" );
+  
+}
 	  
-static void ShowEvaluation( const evalcontext *pec, const int fChequer ) {
-    
+static void 
+ShowEvaluation( const evalcontext *pec ) {
+  
   int  i;
 
   outputf( _("        %d-ply evaluation.\n"
@@ -88,17 +109,10 @@ static void ShowEvaluation( const evalcontext *pec, const int fChequer ) {
            (pec->nReduced) ? 100 / pec->nReduced : 100,
            pec->fCubeful ? _("Cubeful") : _("Cubeless") );
 
-  if (pec->nPlies > 0 && fChequer ) {
-    for (i = 0; i < pec->nPlies; ++i) {
-      outputf ( "        " );
-      ShowMoveFilter ( &defaultFilters[pec->nPlies-1][ i ], i );
-    }
-  }
-		
   if( pec->rNoise )
-    outputf( _("    Noise standard deviation %5.3f"), pec->rNoise );
+    outputf( _("        Noise standard deviation %5.3f"), pec->rNoise );
   else
-    output( _("    Noiseless evaluations") );
+    output( _("        Noiseless evaluations") );
   
   outputl( pec->fDeterministic ? _(" (deterministic noise).\n") :
            _(" (pseudo-random noise).\n") );
@@ -130,8 +144,7 @@ static void
 show_evals ( const char *text, 
              const evalcontext *early, const evalcontext *late,
              const int fPlayersAreSame, const int fLateEvals, 
-             const int nLate, 
-             const int fChequer ) {
+             const int nLate ) { 
 
   int  i;
 
@@ -141,11 +154,11 @@ show_evals ( const char *text,
     outputf ("%s\n", text);
 
   if (fPlayersAreSame)
-    ShowEvaluation (early, fChequer );
+    ShowEvaluation (early );
   else {
     for (i = 0; i < 2; i++ ) {
       outputf (_("Player %d:\n"), i);
-      ShowEvaluation (early + i, fChequer );
+      ShowEvaluation (early + i );
     }
   }
 
@@ -154,11 +167,11 @@ show_evals ( const char *text,
 
   outputf (_("%s after %d plies:\n"), text, nLate);
   if (fPlayersAreSame)
-    ShowEvaluation (late, fChequer );
+    ShowEvaluation (late );
   else {
     for (i = 0; i < 2; i++ ) {
       outputf (_("Player %d:\n"), i);
-      ShowEvaluation (late + i, fChequer );
+      ShowEvaluation (late + i );
     }
   }
 }
@@ -171,6 +184,7 @@ ShowRollout ( const rolloutcontext *prc ) {
   int nTruncate = prc->nTruncate;
   int nLate = prc->nLate;
   int fPlayersAreSame = 1;
+  int fCubeEqualChequer = 1;
 
   if (prc->fDoTruncate && (nTruncate > 0))
     fDoTruncate = 1;
@@ -200,9 +214,9 @@ ShowRollout ( const rolloutcontext *prc ) {
               "exact bearoff database.") );
 
   outputl ( prc->fTruncBearoff2 ?
-            _("Will truncate *cubeless* rollouts when reaching "
+            _("Will truncate money game rollouts when reaching "
               "exact bearoff database.") :
-            _("Will not truncate *cubeless* rollouts when reaching "
+            _("Will not truncate money game rollouts when reaching "
               "exact bearoff database.") );
 
   outputl ( prc->fTruncBearoffOS ?
@@ -234,22 +248,46 @@ ShowRollout ( const rolloutcontext *prc ) {
          EvalCmp (prc->aecCubeLate, prc->aecCubeLate + 1, 1))))
      fPlayersAreSame = 0;
     
-  show_evals ( _( "Chequer play parameters:"), prc->aecChequer,
-               prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate, TRUE );
-  show_evals ( _( "Cube decision parameters:"), prc->aecCube,
-               prc->aecCubeLate, fPlayersAreSame, fLateEvals, nLate, FALSE );
+ /* see if the cube and chequer evals are the same */
+  if (EvalCmp (prc->aecChequer, prc->aecCube, 2) ||
+      (fLateEvals &&
+       (EvalCmp (prc->aecChequerLate, prc->aecCubeLate, 2))))
+    fCubeEqualChequer = 0;
+  
+  if (fCubeEqualChequer) {
+    /* simple summary - show_evals will deal with player differences */
+    show_evals (_("Evaluation parameters:"), prc->aecChequer,
+                prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate);
+  } else {
+    /* Cube different from Chequer */
+    show_evals ( _( "Chequer play parameters:"), prc->aecChequer,
+                 prc->aecChequerLate, fPlayersAreSame, fLateEvals, nLate);
+    show_evals ( _( "Cube decision parameters:"), prc->aecCube,
+                 prc->aecCubeLate, fPlayersAreSame, fLateEvals, nLate);
+  }
+
+  if ( fLateEvals ) {
+    outputf ( _("Move filter for first %d plies:\n"), nLate );
+    ShowMoveFilters ( prc->aamfChequer );
+    outputf ( _("Move filter after %d plies:\n"), nLate );
+    ShowMoveFilters ( prc->aamfLate );
+  }
+  else {
+    outputf ( _("Move filter:\n"), nLate );
+    ShowMoveFilters ( prc->aamfChequer );
+  }
 
   if (fDoTruncate) {
     show_evals (_("Truncation point Chequer play evaluation:"), 
-                &prc->aecChequerTrunc, 0, 1, 0, 0, TRUE );
+                &prc->aecChequerTrunc, 0, 1, 0, 0 );
     show_evals (_("Truncation point Cube evaluation:"), 
-                &prc->aecCubeTrunc, 0, 1, 0, 0, FALSE );
+                &prc->aecCubeTrunc, 0, 1, 0, 0 );
   }
 
 }
 
 extern void
-ShowEvalSetup ( const evalsetup *pes, const int fChequer ) {
+ShowEvalSetup ( const evalsetup *pes ) {
 
   switch ( pes->et ) {
 
@@ -258,7 +296,7 @@ ShowEvalSetup ( const evalsetup *pes, const int fChequer ) {
     break;
   case EVAL_EVAL:
     outputl ( _("      Neural net evaluation:") );
-    ShowEvaluation ( &pes->ec, fChequer );
+    ShowEvaluation ( &pes->ec);
     break;
   case EVAL_ROLLOUT:
     outputl ( _("      Rollout:") );
@@ -367,12 +405,13 @@ extern void CommandShowAnalysis( char *sz ) {
                "Analysis will be performed with the "
              "following evaluation parameters:") );
   outputl( _("    Chequer play:") );
-  ShowEvalSetup ( &esAnalysisChequer, TRUE );
+  ShowEvalSetup ( &esAnalysisChequer );
+  ShowMoveFilters ( aamfAnalysis );
   outputl( _("    Cube decisions:") );
-  ShowEvalSetup ( &esAnalysisCube, FALSE );
+  ShowEvalSetup ( &esAnalysisCube );
 
   outputl( _("    Luck analysis:") );
-  ShowEvaluation ( &ecLuck, FALSE );
+  ShowEvaluation ( &ecLuck );
 
 }
 
@@ -596,9 +635,11 @@ extern void CommandShowEvaluation( char *sz ) {
 
     outputl( _("`eval' and `hint' will use:") );
     outputl( _("    Chequer play:") );
-    ShowEvalSetup ( &esEvalChequer, TRUE );
+    ShowEvalSetup ( &esEvalChequer );
+    outputl( _("    Move filters:") );
+    ShowMoveFilters ( aamfEval );
     outputl( _("    Cube decisions:") );
-    ShowEvalSetup ( &esEvalCube, FALSE );
+    ShowEvalSetup ( &esEvalCube );
 
 }
 
@@ -698,9 +739,11 @@ extern void CommandShowPlayer( char *sz ) {
 	case PLAYER_GNU:
 	    outputf( _("gnubg:\n") );
             outputl( _("    Checker play:") );
-            ShowEvalSetup ( &ap[ i ].esChequer, TRUE );
+            ShowEvalSetup ( &ap[ i ].esChequer );
+            outputl( _("    Move filters:") );
+            ShowMoveFilters ( ap[ i ].aamf );
             outputl( _("    Cube decisions:") );
-            ShowEvalSetup ( &ap[ i ].esCube, FALSE );
+            ShowEvalSetup ( &ap[ i ].esCube );
 	    break;
 	case PLAYER_PUBEVAL:
 	    outputl( _("pubeval\n") );

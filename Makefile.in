@@ -192,6 +192,7 @@ bin_PROGRAMS = gnubg makebearoff
 @USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
 @USE_GTK_TRUE@	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
+@USE_GTK_TRUE@	gtkmovefilter.c gtkmovefilter.h \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
@@ -282,8 +283,8 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktheory.$(OBJEXT) gtktexi.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkexport.$(OBJEXT) gtkcube.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkchequer.$(OBJEXT) gtkrace.$(OBJEXT) \
-@USE_GTK_TRUE@	$(am__objects_2) $(am__objects_3) \
-@USE_GTK_TRUE@	$(am__objects_4)
+@USE_GTK_TRUE@	gtkmovefilter.$(OBJEXT) $(am__objects_2) \
+@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -320,13 +321,13 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gnubg.Po ./$(DEPDIR)/gtk-multiview.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkboard.Po ./$(DEPDIR)/gtkchequer.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkcube.Po ./$(DEPDIR)/gtkexport.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkprefs.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkrace.Po ./$(DEPDIR)/gtktexi.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtktheory.Po ./$(DEPDIR)/guile.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/html.Po ./$(DEPDIR)/i18n.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/import.Po ./$(DEPDIR)/kleinman.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/latex.Po ./$(DEPDIR)/luxi.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/makebearoff.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkmovefilter.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkprefs.Po ./$(DEPDIR)/gtkrace.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtktexi.Po ./$(DEPDIR)/gtktheory.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/guile.Po ./$(DEPDIR)/html.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/i18n.Po ./$(DEPDIR)/import.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/kleinman.Po ./$(DEPDIR)/latex.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/luxi.Po ./$(DEPDIR)/makebearoff.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makebearoff1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makeweights.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/matchequity.Po ./$(DEPDIR)/matchid.Po \
@@ -483,6 +484,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkcube.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkexport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkgame.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkmovefilter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkprefs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkrace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtktexi.Po@am__quote@

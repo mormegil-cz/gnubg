@@ -109,6 +109,8 @@ typedef struct _rolloutcontext {
   evalcontext aecCube[ 2 ], aecChequer [ 2 ]; /* evaluation parameters */
   evalcontext aecCubeLate[ 2 ], aecChequerLate [ 2 ]; /* ... for later moves */
   evalcontext aecCubeTrunc, aecChequerTrunc; /* ... at truncation point */
+  movefilter aamfChequer[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  movefilter aamfLate[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   unsigned int fCubeful : 1; /* Cubeful rollout */
   unsigned int fVarRedn : 1; /* variance reduction */
   unsigned int fInitial: 1;  /* roll out as opening position */
@@ -167,6 +169,14 @@ typedef enum _cubedecision {
 
 extern evalcontext aecSettings[ NUM_SETTINGS  ];
 extern const char *aszSettings[ NUM_SETTINGS ];
+
+
+#define NUM_MOVEFILTER_SETTINGS 3
+
+extern const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ];
+extern movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+
+
 
 typedef struct _move {
   int anMove[ 8 ];
@@ -272,15 +282,18 @@ InvertEvaluation( float ar[ NUM_OUTPUTS ] );
 extern void 
 InvertEvaluationCf( float ar[ 4 ] );
 
-extern int 
-FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
-              int anBoard[ 2 ][ 25 ], cubeinfo *pci, evalcontext *pec );
+extern 
+int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
+                  int anBoard[ 2 ][ 25 ], cubeinfo *pci,
+                  evalcontext *pec,
+                  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ); 
 
 extern int 
 FindnSaveBestMoves( movelist *pml,
                     int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
                     unsigned char *auchMove,
-                    cubeinfo *pci, evalcontext *pec );
+                    cubeinfo *pci, evalcontext *pec,
+                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 extern int 
 FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],

@@ -74,6 +74,7 @@
 #include "record.h"
 #include "i18n.h"
 #include "path.h"
+#include "gtkmovefilter.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -3501,11 +3502,13 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
 typedef struct _evalwidget {
     evalcontext *pec;
+    movefilter *pmf;
     GtkWidget *pwCubeful, *pwReduced, *pwDeterministic;
     GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
 	*padjNoise;
     int *pfOK;
   GtkWidget *pwOptionMenu;
+  int fMoveFilter;
 } evalwidget;
 
 static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
@@ -3604,7 +3607,8 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
  *
  */
 
-static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
+static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf, 
+                              int *pfOK, const int fMoveFilter ) {
 
     evalwidget *pew;
     GtkWidget *pwEval, *pw;
@@ -3752,9 +3756,20 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
 				  pec->fDeterministic );
 
+    /* move filter */
+
+    if ( fMoveFilter ) {
+      
+      GtkWidget *pwMoveFilter = MoveFilterWidget ( pmf, pfOK );
+      gtk_container_add ( GTK_CONTAINER ( pwEval ), pwMoveFilter );
+
+    }
+
     /* setup signals */
 
     pew->pec = pec;
+    pew->pmf = pmf;
+    pew->fMoveFilter = fMoveFilter;
     pew->pfOK = pfOK;
 
     gtk_signal_connect( GTK_OBJECT( pew->padjPlies ), "value-changed",
@@ -3835,11 +3850,16 @@ extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
 
     evalcontext ec;
     GtkWidget *pwDialog, *pwEval;
+    GtkWidget *pwMoveFilter;
     int fOK;
+    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
     
     memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+    memcpy( aamf, aamfEval, sizeof ( aamfEval ) );
 
-    pwEval = EvalWidget( &ec, &fOK );
+    /* widgets */
+
+    pwEval = EvalWidget( &ec, (movefilter *) aamf, &fOK, TRUE );
     
     pwDialog = CreateDialog( _("GNU Backgammon - Chequer play"), DT_QUESTION,
                              GTK_SIGNAL_FUNC( EvalOK ), pwEval );
@@ -3859,9 +3879,12 @@ extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     GTKAllowStdin();
 
-    if( fOK )
+    if( fOK ) {
         SetEvalCommands( "set evaluation chequer eval", &ec,
                          &esEvalChequer.ec );
+        SetMovefilterCommands ( "set evaluation movefilter",
+                                aamf, aamfEval );
+    }
 }
 
 extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
@@ -3872,7 +3895,7 @@ extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
     
     memcpy( &ec, &esEvalCube.ec, sizeof ec );
 
-    pwEval = EvalWidget( &ec, &fOK );
+    pwEval = EvalWidget( &ec, NULL, &fOK, FALSE );
     
     pwDialog = CreateDialog( _("GNU Backgammon - Cube decisions"), DT_QUESTION,
                              GTK_SIGNAL_FUNC( EvalOK ), pwEval );
@@ -3957,7 +3980,9 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
 
     gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalChequer[ i ] =
-		       EvalWidget( &ppw->ap[ i ].esChequer.ec, NULL ) );
+		       EvalWidget( &ppw->ap[ i ].esChequer.ec, 
+                                   (movefilter *) ppw->ap[ i ].aamf, 
+                                   NULL, TRUE ) );
     gtk_widget_set_sensitive( ppw->apwEvalChequer[ i ],
 			      ap[ i ].pt == PLAYER_GNU );
 
@@ -3966,7 +3991,8 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
     gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
 
     gtk_container_add( GTK_CONTAINER( pwFrame ), ppw->apwEvalCube[ i ] =
-		       EvalWidget( &ppw->ap[ i ].esCube.ec, NULL ) );
+		       EvalWidget( &ppw->ap[ i ].esCube.ec, 
+                                   NULL, NULL, FALSE ) );
     gtk_widget_set_sensitive( ppw->apwEvalCube[ i ],
 			      ap[ i ].pt == PLAYER_GNU );
 
@@ -4102,6 +4128,8 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 		sprintf( sz, "set player %d chequer evaluation", i );
 		SetEvalCommands( sz, &apTemp[ i ].esChequer.ec,
 				 &ap[ i ].esChequer.ec );
+                sprintf ( sz, "set player %d movefilter", i );
+                SetMovefilterCommands ( sz, apTemp[ i ].aamf, ap[ i ].aamf );
 		sprintf( sz, "set player %d cube evaluation", i );
 		SetEvalCommands( sz, &apTemp[ i ].esCube.ec,
 				 &ap[ i ].esCube.ec );
@@ -4133,6 +4161,7 @@ typedef struct _analysiswidget {
 
   evalsetup esChequer;
   evalsetup esCube; 
+  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
   GtkAdjustment *padjMoves;
   GtkAdjustment *apadjSkill[5], *apadjLuck[4];
@@ -4278,14 +4307,17 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
 
   gtk_container_add(GTK_CONTAINER (pwFrame ), 
-		  paw->pwEvalChequer = EvalWidget( &paw->esChequer.ec, NULL ));
+		  paw->pwEvalChequer = EvalWidget( &paw->esChequer.ec, 
+                                                   (movefilter *) paw->aamf,
+                                                   NULL, TRUE ));
 
   pwFrame = gtk_frame_new (_("Cube decisions"));
   gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
   
   gtk_container_add(GTK_CONTAINER (pwFrame ), 
-		  paw->pwEvalCube = EvalWidget( &paw->esCube.ec, NULL ));
+		  paw->pwEvalCube = EvalWidget( &paw->esCube.ec, NULL,
+                                                NULL, FALSE ));
 
   return pwPage;
 }
@@ -4343,6 +4375,7 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   
   SetEvalCommands( "set analysis chequerplay eval", &paw->esChequer.ec,
 		  &esAnalysisChequer.ec );
+  SetMovefilterCommands ( "set analysis movefilter", paw->aamf, aamfAnalysis );
   SetEvalCommands( "set analysis cubedecision eval", &paw->esCube.ec,
 		  &esAnalysisCube.ec );
 
@@ -4390,6 +4423,7 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
 
   memcpy( &aw.esCube, &esAnalysisCube, sizeof( aw.esCube ) );
   memcpy( &aw.esChequer, &esAnalysisChequer, sizeof( aw.esChequer ) );
+  memcpy( &aw.aamf, aamfAnalysis, sizeof( aw.aamf ) );
 
   pwDialog = CreateDialog( _("GNU Backgammon - Analysis Settings"),
 			   DT_QUESTION, GTK_SIGNAL_FUNC( AnalysisOK ), &aw );
@@ -4408,6 +4442,7 @@ typedef struct _rolloutpagewidget {
   int *pfOK;
   GtkWidget *arpwEvCube, *arpwEvCheq;
   evalcontext *precCube, *precCheq;
+  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 } rolloutpagewidget;
 
 typedef struct _rolloutpagegeneral {
@@ -4540,13 +4575,14 @@ static GtkWidget *RolloutPage( rolloutpagewidget *prpw) {
   gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
 
   gtk_container_add( GTK_CONTAINER( pwFrame ), prpw->arpwEvCheq =
-                     EvalWidget( prpw->precCheq, NULL ) );
+                     EvalWidget( prpw->precCheq, 
+                                 (movefilter *) prpw->aamf, NULL, TRUE ) );
     
   pwFrame = gtk_frame_new ( _("Cube decisions") );
   gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
 
   gtk_container_add( GTK_CONTAINER( pwFrame ), prpw->arpwEvCube =
-                     EvalWidget( prpw->precCube, NULL ) );
+                     EvalWidget( prpw->precCube, NULL, NULL, FALSE ) );
     
   return pwPage;
 }
@@ -4909,6 +4945,11 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
         SetEvalCommands( sz, &rw.rcRollout.aecChequer[i], 
                          &rcRollout.aecChequer[ i ] );
       }
+      
+      sprintf ( sz, "set rollout player %d movefilter", i );
+      SetMovefilterCommands ( sz, 
+                              rw.rcRollout.aamfChequer, 
+                              rcRollout.aamfChequer );
 
       if (EvalCmp (&rw.rcRollout.aecCubeLate[i], 
                    &rcRollout.aecCubeLate[i], 1 ) ) {
@@ -4923,6 +4964,12 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
         SetEvalCommands( sz, &rw.rcRollout.aecChequerLate[i], 
                          &rcRollout.aecChequerLate[ i ] );
       }
+
+      sprintf ( sz, "set rollout late player %d movefilter", i );
+      SetMovefilterCommands ( sz, 
+                              rw.rcRollout.aamfLate, 
+                              rcRollout.aamfLate );
+
     }
 
     if (EvalCmp (&rw.rcRollout.aecCubeTrunc, &rcRollout.aecCubeTrunc, 1) ) {

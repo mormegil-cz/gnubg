@@ -296,11 +296,10 @@ static evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
 movefilter
 defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
  { { 8, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
- { { 2, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
- { { 16, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } }, 
+ { { 2, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
+ { { 16, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } },
  { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } ,
 };
-
 
 #if defined( GARY_CACHE )
 typedef struct _evalcache {
@@ -360,6 +359,32 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 0, 0, TRUE, 0.0 }, /* expert */
   { TRUE, 2, 0, TRUE, 0.0 }, /* world class */
 };
+
+
+const char *aszMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ] = {
+  N_("Narrow"),
+  N_("Normal"),
+  N_("Large")
+};
+
+movefilter aaamfMoveFilterSettings[ NUM_MOVEFILTER_SETTINGS ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = {
+  /* narrow */
+  { { { 8, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
+    { { 2, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
+    { { 16, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } }, 
+    { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } },
+  /* normal */
+  { { { 9, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
+    { { 3, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
+    { { 26, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } }, 
+    { { 9, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } },
+  /* large */
+  { { { 10, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
+    { { 11, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
+    { { 12, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } }, 
+    { { 13, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } }
+};
+
 
 
 static void ComputeTable0( void )
@@ -2166,9 +2191,9 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 static int 
 FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
-                   int anBoard[ 2 ][ 25 ], cubeinfo *pci, 
-                   evalcontext *pec, int nPlies );
-
+                   int anBoard[ 2 ][ 25 ], cubeinfo *pci,
+                   evalcontext *pec, int nPlies,
+                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 
 static int 
@@ -2208,7 +2233,8 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    return -1;
 	  }
 	      
-	  FindBestMovePlied( 0, n0, n1, anBoardNew, pci, pec, 0 );
+	  FindBestMovePlied( 0, n0, n1, anBoardNew, pci, pec, 0, 
+                             defaultFilters );
 	      
 	  SwapSides( anBoardNew );
 
@@ -2283,7 +2309,8 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
                         return -1;
                 }
 
-                FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0 );
+                FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
+                                   defaultFilters );
 
                 SwapSides( anBoardNew );
 
@@ -3057,9 +3084,11 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 
 static movefilter NullFilter = {0, 0, 0.0};
 
-static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
-			      int anBoard[ 2 ][ 25 ], cubeinfo *pci,
-			      evalcontext *pec, int nPlies ) {
+static int 
+FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
+                   int anBoard[ 2 ][ 25 ], cubeinfo *pci,
+                   evalcontext *pec, int nPlies,
+                   movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
   int i, iPly;
   movelist ml;
   move amCandidates[ MAX_SEARCH_CANDIDATES ];
@@ -3092,7 +3121,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
     /* for ply higher than given filters, use the highest entry */
     
     movefilter* mFilters = (nPlies > 0 && nPlies <= MAX_FILTER_PLIES) ?
-      defaultFilters[nPlies-1] : defaultFilters[MAX_FILTER_PLIES-1];
+      aamf[nPlies-1] : aamf[MAX_FILTER_PLIES-1];
 
     for( iPly = 0; iPly < nPlies; ++iPly ) {
       movefilter* mFilter =
@@ -3153,18 +3182,20 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 extern 
 int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
                   int anBoard[ 2 ][ 25 ], cubeinfo *pci,
-                  evalcontext *pec ) {
+                  evalcontext *pec,
+                  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) { 
 
   return FindBestMovePlied( anMove, nDice0, nDice1, anBoard, 
                             pci, pec ? pec :
-                            &ecBasic, pec ? pec->nPlies : 0 );
+                            &ecBasic, pec ? pec->nPlies : 0, aamf );
 }
 
 extern int 
 FindnSaveBestMoves( movelist *pml,
-                  int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-                  unsigned char *auchMove,
-                  cubeinfo *pci, evalcontext *pec ) {
+                    int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
+                    unsigned char *auchMove,
+                    cubeinfo *pci, evalcontext *pec,
+                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
   /* Find best moves. 
      Ensure that auchMove is evaluated at the deepest ply. */
@@ -3192,7 +3223,7 @@ FindnSaveBestMoves( movelist *pml,
   nMoves = pml->cMoves;
 
   mFilters = ( pec->nPlies > 0 && pec->nPlies <= MAX_FILTER_PLIES) ?
-      defaultFilters[ pec->nPlies-1] : defaultFilters[MAX_FILTER_PLIES-1];
+      aamf[ pec->nPlies-1] : aamf[MAX_FILTER_PLIES-1];
 
   for ( iPly = 0; iPly < pec->nPlies; iPly++ ) {
 
@@ -5645,7 +5676,8 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 	    return -1;
 	  }
 	      
-	  FindBestMovePlied( 0, n0, n1, anBoardNew, pciMove, pec, 0 );
+	  FindBestMovePlied( 0, n0, n1, anBoardNew, pciMove, pec, 0,
+                             defaultFilters );
 	      
 	  SwapSides( anBoardNew );
 
@@ -5759,7 +5791,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
         }
 
         FindBestMovePlied( NULL, n0, n1, anBoardNew,
-                           pciMove, pec, 0 );
+                           pciMove, pec, 0, defaultFilters );
 
         SwapSides( anBoardNew );
 

@@ -97,7 +97,7 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
       /* Find the best move for each roll at ply 0 only. */
       if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
-                        (cubeinfo *) pci, NULL ) < 0 )
+                        (cubeinfo *) pci, NULL, defaultFilters ) < 0 )
         return ERR_VAL;
       
       SwapSides( anBoardTemp );
@@ -128,7 +128,8 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       SwapSides ( anBoardTemp );
       
       /* Find the best move for each roll at ply 0 only. */
-      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, &ciOpp, NULL ) < 0 )
+      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, &ciOpp, 
+                        NULL, defaultFilters ) < 0 )
         return ERR_VAL;
       
       SwapSides( anBoardTemp );
@@ -172,7 +173,7 @@ LuckNormal ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
       
       /* Find the best move for each roll at ply 0 only. */
       if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
-                        (cubeinfo *) pci, NULL ) < 0 )
+                        (cubeinfo *) pci, NULL, defaultFilters ) < 0 )
         return ERR_VAL;
       
       SwapSides( anBoardTemp );
@@ -495,6 +496,7 @@ updateStatcontext ( statcontext *psc,
 extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
               evalsetup *pesChequer, evalsetup *pesCube,
+              movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 	      int fUpdateStatistics ) {
 
     static int anBoardMove[ 2 ][ 25 ];
@@ -595,7 +597,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
               if( FindnSaveBestMoves ( &(pmr->n.ml), pmr->n.anRoll[ 0 ],
                                        pmr->n.anRoll[ 1 ],
                                        pms->anBoard, auch, &ci,
-                                       &pesChequer->ec ) < 0 )
+                                       &pesChequer->ec, aamf ) < 0 )
 		return -1;
 
             }
@@ -840,7 +842,7 @@ AnalyzeGame ( list *plGame ) {
 
         if( AnalyzeMove ( pmr, &msAnalyse, plGame, &pmgi->sc, 
                           &esAnalysisChequer,
-                          &esAnalysisCube, TRUE ) < 0 ) {
+                          &esAnalysisCube, aamfAnalysis, TRUE ) < 0 ) {
 	    /* analysis incomplete; erase partial summary */
 	    IniStatcontext( &pmgi->sc );
  	    return -1;
@@ -1646,7 +1648,7 @@ extern void CommandAnalyseMove ( char *sz ) {
 
     memcpy ( &msx, &ms, sizeof ( matchstate ) );
     AnalyzeMove ( plLastMove->plNext->p, &msx, plGame, NULL, 
-                  &esAnalysisChequer, &esAnalysisCube, FALSE );
+                  &esAnalysisChequer, &esAnalysisCube, aamfAnalysis, FALSE );
 
 #if USE_GTK
   if( fX )

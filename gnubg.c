@@ -223,6 +223,14 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
 
 evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
 
+#define MOVEFILTER \
+{ \
+ { { 8, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
+ { { 2, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , \
+ { { 16, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } }, \
+ { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } , \
+}
+
 rolloutcontext rcRollout =
 { 
   {
@@ -249,6 +257,9 @@ rolloutcontext rcRollout =
   /* truncation point cube and chequerplay */
   { FALSE, 0, 0, TRUE, 0.0 },
   { FALSE, 0, 0, TRUE, 0.0 },
+
+  /* move filters */
+  MOVEFILTER, MOVEFILTER,
 
   FALSE, /* cubeful */
   TRUE, /* variance reduction */
@@ -308,10 +319,15 @@ rolloutcontext rcRollout =
   } \
 } 
 
+
+
 evalsetup esEvalChequer = EVALSETUP;
 evalsetup esEvalCube = EVALSETUP;
 evalsetup esAnalysisChequer = EVALSETUP;
 evalsetup esAnalysisCube = EVALSETUP;
+
+movefilter aamfEval[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
+movefilter aamfAnalysis[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] = MOVEFILTER;
 
 exportsetup exsExport = {
   TRUE, /* include annotations */
@@ -349,8 +365,8 @@ storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
 storedcube  sc; 
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP },
-    { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP } 
+    { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP, MOVEFILTER },
+    { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER } 
 };
 
 
@@ -376,8 +392,8 @@ static char szDICE[] = N_("<die> <die>"),
     szLIMIT[] = N_("<limit>"),
     szMILLISECONDS[] = N_("<milliseconds>"),
     szMOVE[] = N_("<from> <to> ..."),
-    szFILTER[] = N_ (
- "<ply> <num. to accept (0 = skip)> [<num. of extra moves to accept> <tolerance>]"),
+    szFILTER[] = N_ ( "<ply> <num.xjoin to accept (0 = skip)> "
+                      "[<num. of extra moves to accept> <tolerance>]"),
     szNAME[] = N_("<name>"),
     szONOFF[] = N_("on|off"),
     szOPTCOMMAND[] = N_("[command]"),
@@ -739,6 +755,9 @@ command cER = {
       N_("Specify parameters for the luck analysis"), NULL, acSetEvaluation },
     { "luck", CommandSetAnalysisLuck, N_("Select whether dice rolls will be "
       "analysed"), szONOFF, &cOnOff },
+    { "movefilter", CommandSetAnalysisMoveFilter, 
+      N_("Set parameters for choosing moves to evaluate"), 
+      szFILTER, NULL},
     { "moves", CommandSetAnalysisMoves, 
       N_("Select whether chequer play will be "
       "analysed"), szONOFF, &cOnOff },
@@ -957,6 +976,9 @@ command cER = {
   { "cubedecision", CommandSetEvalCubedecision,
     N_("Set evaluation parameters for cube decisions"), NULL,
     acSetEvalParam },
+  { "movefilter", CommandSetEvalMoveFilter, 
+    N_("Set parameters for choosing moves to evaluate"), 
+    szFILTER, NULL},
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportParameters[] = {
   { "evaluation", CommandSetExportParametersEvaluation,
@@ -1287,9 +1309,6 @@ command cER = {
       szONOFF, &cOnOff },
     { "met", CommandSetMET,
       N_("Synonym for `set matchequitytable'"), szFILENAME, &cFilename },
-    { "movefilter", CommandSetMoveFilter, 
-      N_("Set parameters for choosing moves to evaluate"), 
-      szFILTER, NULL},
     { "nackgammon", CommandSetNackgammon, N_("Set the starting position"),
       szONOFF, &cOnOff },
     { "output", NULL, N_("Modify options for formatting results"), NULL,
@@ -3275,7 +3294,8 @@ extern void CommandHint( char *sz ) {
           if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
                                   ms.anBoard, 
                                   fHasMoved ? auch : NULL, &ci,
-                                  &esEvalChequer.ec ) < 0 || fInterrupt ) {
+                                  &esEvalChequer.ec,
+                                  aamfEval ) < 0 || fInterrupt ) {
 	    ProgressEnd();
 	    return;
           }
@@ -4244,6 +4264,25 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 }
 
 
+static void
+SaveMoveFilterSettings ( FILE *pf, 
+                         const char *sz,
+                         movefilter aamf [ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  int i, j;
+
+    for (i = 0; i < MAX_FILTER_PLIES; ++i) 
+      for (j = 0; j <= i; ++j) {
+	fprintf (pf, "%s %d  %d  %d %d %0.3g\n",
+                 sz, 
+		 i+1, j, 
+		 aamf[i][j].Accept,
+		 aamf[i][j].Extra,
+		 aamf[i][j].Threshold);
+      }
+}
+
+
 extern void CommandSaveSettings( char *szParam ) {
 
     char szTemp[ 1024 ];
@@ -4298,6 +4337,7 @@ extern void CommandSaveSettings( char *szParam ) {
 			    &esAnalysisChequer );
     SaveEvalSetupSettings ( pf, "set analysis cubedecision",
 			    &esAnalysisCube );
+    SaveMoveFilterSettings ( pf, "set analysis movefilter", aamfAnalysis );
 
     SaveEvalSettings ( pf, "set analysis luckanalysis", &ecLuck );
     
@@ -4332,16 +4372,6 @@ extern void CommandSaveSettings( char *szParam ) {
               fAnalyseDice ? "on" : "off",
               fAnalyseMove ? "on" : "off" );
 
-    for (i = 0; i < MAX_FILTER_PLIES; ++i) {
-      int j;
-      for (j = 0; j <= i; ++j) {
-	fprintf (pf, "set movefilter %d  %d  %d %d %0.3g\n",
-		 i+1, j, 
-		 defaultFilters[i][j].Accept,
-		 defaultFilters[i][j].Extra,
-		 defaultFilters[i][j].Threshold);
-      }
-    }
 
 #if USE_GTK
     if ( fX ) {
@@ -4401,6 +4431,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     SaveEvalSetupSettings ( pf, "set evaluation chequerplay", &esEvalChequer );
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );
+    SaveMoveFilterSettings ( pf, "set evaluation movefilter", aamfEval );
 
     fprintf( pf, "set cheat %s\n", fCheat ? "on" : "off" );
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
@@ -4428,6 +4459,8 @@ extern void CommandSaveSettings( char *szParam ) {
 	    SaveEvalSetupSettings( pf, szTemp, &ap[ i ].esChequer );
 	    sprintf( szTemp, "set player %d cubedecision", i );
 	    SaveEvalSetupSettings( pf, szTemp, &ap[ i ].esCube );
+	    sprintf( szTemp, "set player %d movefilter", i );
+            SaveMoveFilterSettings ( pf, szTemp, ap[ i ].aamf );
 	    break;
 	    
 	case PLAYER_HUMAN:
@@ -4671,7 +4704,8 @@ extern void CommandTrainTD( char *sz ) {
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
 	    
 	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-			  anBoardTrain, &ciCubeless, &ecTD );
+			  anBoardTrain, &ciCubeless, &ecTD,
+                          defaultFilters );
 	    
 	    if( fAction )
 		fnAction();

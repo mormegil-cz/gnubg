@@ -1,3 +1,18 @@
+Thu Dec 12 22:59:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Separate movefilters for evaluation, analysis, rollouts, and players.
+
+	* gtkmovefilter.c, Makefile.am: new file.
+	* gtkgame.c: use new widget for movefilters.
+	* gnubg.c: new commands "set evaluation movefilter", 
+	"set analysis movefilter", "set player x movefilter".
+	* gnubg.c (CommandSaveSettings): save movefilters.
+	* set.c (CommandSetEvalMovefilter, SetMoveFilter, 
+	CommandSetAnalysisMoveFilter, CommandSetPlayerMovefilter): new routines.
+	* show.c: output movefilters.
+	* eval.c (FindBestMove, FindnSaveBestMoves): new paremeter movefilters
+	(changed all callers)
+
 Thu Dec 12 18:11:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* path.c (BackupFile): can't use outputerr here, since 

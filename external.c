@@ -325,7 +325,8 @@ extern void CommandExternal( char *sz ) {
 	    } else if( anDice[ 0 ] ) {
 		/* move */
 		if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
-				  anBoard, &ci, &esEvalChequer.ec ) < 0 )
+				  anBoard, &ci, &esEvalChequer.ec,
+                                  aamfEval ) < 0 )
 		    break;
 
 		FormatMovePlain( szResponse, anBoardOrig, anMove );

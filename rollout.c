@@ -520,7 +520,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
               /* Find the best move for each roll on ply 0 only */
 
               if ( FindBestMove ( NULL, i + 1, j + 1, aaanBoard[ i ][ j ],
-                                  pci, NULL ) < 0 )
+                                  pci, NULL, defaultFilters ) < 0 )
                 return -1;
 
               SwapSides ( aaanBoard[ i ][ j ] );
@@ -556,7 +556,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
             FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
                           aanBoard[ ici ], pci,
-                          pecChequer [ pci->fMove ] );
+                          pecChequer [ pci->fMove ],
+                          ( iTurn < nLateEvals ) ? 
+                          prc->aamfChequer : prc->aamfLate );
 
           else {
 
@@ -596,7 +598,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
               
           FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
                         aanBoard[ ici ], pci,
-                        pecChequer [ pci->fMove ] );
+                        pecChequer [ pci->fMove ],
+                        ( iTurn < nLateEvals ) ? 
+                        prc->aamfChequer : prc->aamfLate );
 
         }
 

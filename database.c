@@ -404,7 +404,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	    break;
 	    
 	FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
-		      anBoardGenerate, &ciCubeless, NULL );
+		      anBoardGenerate, &ciCubeless, NULL, defaultFilters );
 
 	if( fAction )
 	    fnAction();
