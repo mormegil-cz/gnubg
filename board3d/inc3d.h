@@ -149,7 +149,7 @@ void setIdleFunc(BoardData* bd, idleFunc* pFun);
 
 #if HAVE_GTKGLEXT
 #include <gdk/gdkgltypes.h>
-GdkGLConfig *glconfig;
+extern GdkGLConfig *glconfig;
 #endif
 
 #endif

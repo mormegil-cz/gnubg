@@ -3361,13 +3361,15 @@ extern void GTKOutputX( void ) {
       /* Short message; display in status bar. */
       gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idOutput, sz );
     
-    if ( fMessage ) {
+    if ( fMessage && *sz ) {
       strcat ( sz, "\n" );
       gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
                        sz, -1 );
+      /* Hack to make sure message is drawn correctly */
+      gtk_text_freeze(GTK_TEXT( pwMessageText ));
+      gtk_text_thaw(GTK_TEXT( pwMessageText ));
 
     }
-
       
     cchOutput = 0;
     g_free( sz );
@@ -7729,12 +7731,21 @@ extern void GTKSet( void *p ) {
 
 
 /* Match stats variables */
-static GtkWidget* statLists[4];
+#define FORMATGS_ALL -1
+#define NUM_STAT_TYPES 4
+char *aszStatHeading [ NUM_STAT_TYPES ] = {
+  N_("Chequer Play Statistics:"), 
+  N_("Cube Statistics:"),
+  N_("Luck Statistics:"),
+  N_("Overall Statistics:")};
+static GtkWidget* statLists[NUM_STAT_TYPES], *pwList;
 static int numStatGames, curStatGame;
 static GtkWidget* statPom;
 GtkWidget *pwStatDialog;
-
-typedef enum _cdPageType {CD_ALL, CD_OVERALL, CD_CHEQUER, CD_CUBE, CD_LUCK} cdPageType;
+int fGUIUseStatsPanel = TRUE;
+GtkWidget *pwUsePanels;
+GtkWidget *pswList;
+GtkWidget *pwNotebook;
 
 static gboolean ContextCopyMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget* copyMenu)
 {
@@ -7747,24 +7758,28 @@ static gboolean ContextCopyMenu(GtkWidget *widget, GdkEventButton *event, GtkWid
 }
 
 #if WIN32
+/* Convert newline to line feed + carriage return */
 void AddWinLF(const char* str)
 {
 	char* psz = strchr(str, 0);
-	psz[-1] = '\r';
-	psz[0] = '\n';
-	psz[1] = '\0';
+	if (psz[-1] == '\n')
+	{
+		psz[-1] = '\r';
+		psz[0] = '\n';
+		psz[1] = '\0';
+	}
 }
 #else
 /* Just remove function call */
 #define AddWinLF(x)
 #endif
 
-static void AddList(char* pStr, GtkCList* pList, char* pTitle)
+static void AddList(char* pStr, GtkCList* pList, const char* pTitle)
 {
 	int i;
 	gchar *sz;
 
-	sprintf ( strchr ( pStr, 0 ), "%s", pTitle);
+	sprintf ( strchr ( pStr, 0 ), "%s\n", pTitle);
 	AddWinLF(pStr);
 
 	for (i = 0; i < pList->rows; i++ )
@@ -7786,21 +7801,21 @@ static void AddList(char* pStr, GtkCList* pList, char* pTitle)
 	AddWinLF(pStr);
 }
 
-static void CopyData(GtkWidget *pwNotebook, cdPageType page)
+static void CopyData(GtkWidget *pwNotebook, enum _formatgs page)
 {
 	char szOutput[4096];
 
 	sprintf(szOutput, "%-37.37s %-20.20s %-20.20s\n", "", ap[ 0 ].szName, ap[ 1 ].szName);
 	AddWinLF(szOutput);
 
-	if (page == CD_CHEQUER || page == CD_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[1]), _("Chequer Statistics:\n"));
-	if (page == CD_LUCK || page == CD_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[3]), _("Luck Statistics:\n"));
-	if (page == CD_CUBE || page == CD_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[2]), _("Cube Statistics:\n"));
-	if (page == CD_OVERALL || page == CD_ALL)
-		AddList(szOutput, GTK_CLIST(statLists[0]), _("Overall Statistics:\n"));
+	if (page == FORMATGS_CHEQUER || page == FORMATGS_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_CHEQUER]), aszStatHeading[FORMATGS_CHEQUER]);
+	if (page == FORMATGS_LUCK || page == FORMATGS_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_LUCK]), aszStatHeading[FORMATGS_LUCK]);
+	if (page == FORMATGS_CUBE || page == FORMATGS_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_CUBE]), aszStatHeading[FORMATGS_CUBE]);
+	if (page == FORMATGS_OVERALL || page == FORMATGS_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[FORMATGS_OVERALL]), aszStatHeading[FORMATGS_OVERALL]);
 
 	TextToClipboard(szOutput);
 }
@@ -7810,23 +7825,23 @@ static void CopyPage( GtkWidget *pwWidget, GtkWidget *pwNotebook )
 	switch(gtk_notebook_get_current_page(GTK_NOTEBOOK(pwNotebook)))
 	{
 	case 0:
-		CopyData(pwNotebook, CD_OVERALL);
+		CopyData(pwNotebook, FORMATGS_OVERALL);
 		break;
 	case 1:
-		CopyData(pwNotebook, CD_CHEQUER);
+		CopyData(pwNotebook, FORMATGS_CHEQUER);
 		break;
 	case 2:
-		CopyData(pwNotebook, CD_CUBE);
+		CopyData(pwNotebook, FORMATGS_CUBE);
 		break;
 	case 3:
-		CopyData(pwNotebook, CD_LUCK);
+		CopyData(pwNotebook, FORMATGS_LUCK);
 		break;
 	}
 }
 
 static void CopyAll( GtkWidget *pwWidget, GtkWidget *pwNotebook )
 {
-	CopyData(pwNotebook, CD_ALL);
+	CopyData(pwNotebook, FORMATGS_ALL);
 }
 
 static GtkWidget *CreateList()
@@ -7851,7 +7866,7 @@ static GtkWidget *CreateList()
 }
 
 static void FillStats(const statcontext *psc, const matchstate *pms,
-                      const enum _formatgs gs, const int f )
+                      const enum _formatgs gs, GtkWidget* statList )
 {
 
   int fIsMatch = (curStatGame == 0);
@@ -7862,7 +7877,7 @@ static void FillStats(const statcontext *psc, const matchstate *pms,
     
     char **aasz = pl->data;
     
-    gtk_clist_append( GTK_CLIST( statLists[ f ] ), aasz );
+    gtk_clist_append( GTK_CLIST( statList ), aasz );
     
   }
   
@@ -7872,24 +7887,52 @@ static void FillStats(const statcontext *psc, const matchstate *pms,
 
 static void SetStats(const statcontext *psc)
 {
+    char *aszLine[] = { NULL, NULL, NULL };
+	int i;
 
-  int i;
-  static enum _formatgs ags[] = {
-    FORMATGS_OVERALL, FORMATGS_CHEQUER, FORMATGS_CUBE, FORMATGS_LUCK
-  };
+	for ( i = 0; i < NUM_STAT_TYPES; ++i )
+		gtk_clist_clear(GTK_CLIST(statLists[i]));
 
-  /* Clear old stats */
-  for ( i = 0; i < 4; ++i )
-    gtk_clist_clear(GTK_CLIST(statLists[i]));
+	for ( i = 0; i < NUM_STAT_TYPES; ++i )
+		FillStats( psc, &ms, i, statLists[ i ] );
 
-  for ( i = 0; i < 4; ++i )
-    FillStats( psc, &ms, ags[ i ], i );
+	gtk_clist_clear(GTK_CLIST(pwList));
 
+	aszLine[0] = aszStatHeading[FORMATGS_CHEQUER];
+	gtk_clist_append( GTK_CLIST( pwList ), aszLine );
+	FillStats( psc, &ms, FORMATGS_CHEQUER, pwList );
+	FillStats( psc, &ms, FORMATGS_LUCK, pwList );
+	
+	aszLine[0] = aszStatHeading[FORMATGS_CUBE];
+	gtk_clist_append( GTK_CLIST( pwList ), aszLine );
+	FillStats( psc, &ms, FORMATGS_CUBE, pwList );
+	
+	aszLine[0] = aszStatHeading[FORMATGS_OVERALL];
+	gtk_clist_append( GTK_CLIST( pwList ), aszLine );
+	FillStats( psc, &ms, FORMATGS_OVERALL, pwList );
+}
+
+const statcontext *GetStatContext(int game)
+{
+	movegameinfo *pmgi;
+	int i;
+
+	if (!game)
+		return &scMatch;
+	else
+	{
+		list *plGame, *pl = lMatch.plNext;
+		for (i = 1; i < game; i++)
+			pl = pl->plNext;
+
+		plGame = pl->p;
+		pmgi = plGame->plNext->p;
+		return &pmgi->sc;
+	}
 }
 
 static void StatsSelectGame(GtkWidget *pw, int i)
 {
-	movegameinfo *pmgi;
 	curStatGame = i;
 
     gtk_option_menu_set_history( GTK_OPTION_MENU( statPom ), curStatGame );
@@ -7897,23 +7940,15 @@ static void StatsSelectGame(GtkWidget *pw, int i)
 	if (!curStatGame)
 	{
 		gtk_window_set_title(GTK_WINDOW(pwStatDialog), _("Statistics for all games"));
-		SetStats(&scMatch);
 	}
 	else
 	{
 		char sz[100];
-		list *plGame, *pl = lMatch.plNext;
-		for (i = 1; i < curStatGame; i++)
-			pl = pl->plNext;
-
-		plGame = pl->p;
-		pmgi = plGame->plNext->p;
-
 		strcpy(sz, _("Statistics for game "));
 		sprintf(sz + strlen(sz), "%d", curStatGame);
 		gtk_window_set_title(GTK_WINDOW(pwStatDialog), sz);
-		SetStats(&pmgi->sc);
 	}
+	SetStats(GetStatContext(curStatGame));
 }
 
 static void StatsAllGames( GtkWidget *pw, char *szCommand )
@@ -7976,7 +8011,7 @@ static void AddNavigation(GtkWidget* pvbox)
 #include "prevmove.xpm"
 #include "nextmove.xpm"
 #include "nextgame.xpm"
-#include "nextmarked.xpm"
+#include "allgames.xpm"
 
 	pcmap = gtk_widget_get_colormap( pwMain );
 
@@ -7984,7 +8019,7 @@ static void AddNavigation(GtkWidget* pvbox)
 	gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
 
 	gtk_box_pack_start( GTK_BOX( phbox ),
-			pw = StatsPixmapButton(pcmap, nextmarked_xpm, StatsAllGames),
+			pw = StatsPixmapButton(pcmap, allgames_xpm, StatsAllGames),
 			FALSE, FALSE, 4 );
 	gtk_tooltips_set_tip( ptt, pw, _("Show all games"), "" );
 	gtk_box_pack_start( GTK_BOX( phbox ),
@@ -8039,14 +8074,130 @@ static void AddNavigation(GtkWidget* pvbox)
     gtk_box_pack_start( GTK_BOX( phbox ), statPom, TRUE, TRUE, 4 );
 }
 
+void toggle_fGUIUseStatsPanel(GtkWidget *widget, GtkWidget *pw)
+{
+	fGUIUseStatsPanel = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+
+	if (fGUIUseStatsPanel)
+	{
+		gtk_widget_hide(pswList);
+		gtk_widget_show(pwNotebook);
+	}
+	else
+	{
+		gtk_widget_hide(pwNotebook);
+		gtk_widget_show(pswList);
+	}
+}
+
+static void
+StatcontextSelect ( GtkWidget *pw, int y, int x, GdkEventButton *peb,
+                    GtkWidget *pwCopy ) {
+
+  int c;
+  GList *pl;
+
+  for ( c = 0, pl = GTK_CLIST ( pw )->selection; c < 2 && pl; pl = pl->next )
+    c++;
+
+  if ( c && peb )
+    gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, peb->time );
+
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwCopy ), c );
+
+}
+
+
+gint 
+compare_func( gconstpointer a, gconstpointer b ) {
+
+  gint i = GPOINTER_TO_INT( a );
+  gint j = GPOINTER_TO_INT( b );
+
+  if ( i < j )
+    return -1;
+  else if ( i == j )
+    return 0;
+  else
+    return 1;
+
+}
+
+static void
+StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
+                          guint n, guint t, void *unused ) {
+
+  GList *pl;
+  GList *plCopy;
+  int i;
+  static char szOutput[ 4096 ];
+  char *pc;
+  gchar *sz;
+
+  sprintf ( szOutput, 
+            "%-37.37s %-20.20s %-20.20s\n",
+            "", ap[ 0 ].szName, ap[ 1 ].szName );
+  AddWinLF(szOutput);
+
+  /* copy list (note that the integers in the list are NOT copied) */
+  plCopy = g_list_copy( GTK_CLIST ( pw )->selection );
+
+  /* sort list; otherwise the lines are returned in whatever order the
+     user clicked the lines (bug #4160) */
+  plCopy = g_list_sort( plCopy, compare_func );
+
+  for ( pl = plCopy; pl; pl = pl->next ) {
+
+    i = GPOINTER_TO_INT( pl->data );
+
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-37.37s ", 
+              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 0, &sz ) ) ?
+              sz : "" );
+      
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s ", 
+              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 1, &sz ) ) ?
+              sz : "" );
+      
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s\n", 
+              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 2, &sz ) ) ?
+              sz : "" );
+    AddWinLF(szOutput);
+      
+  }
+
+  /* garbage collect */
+  g_list_free( plCopy );
+
+  gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
+                          szOutput, strlen( szOutput ) );
+
+}
+
+static gint
+StatcontextClearSelection  ( GtkWidget *pw, GdkEventSelection *pes,
+                             void *unused ) {
+
+  gtk_clist_unselect_all ( GTK_CLIST ( pw ) );
+
+  return TRUE;
+
+}
+
+static void
+StatcontextCopy ( GtkWidget *pw, void *unused ) {
+
+  UserCommand ( "xcopy" );
+
+}
+
 extern void GTKDumpStatcontext( int game )
 {
-	GtkWidget *pwNotebook, *copyMenu, *menu_item, *pvbox;
+	GtkWidget *copyMenu, *menu_item, *pvbox;
+	int i;
 #if USE_BOARD3D
 	GraphData gd;
 	GtkWidget *pw;
 	list *pl;
-	int i;
 #endif
 	pwStatDialog = GTKCreateDialog( "", DT_INFO, NULL, NULL );
 
@@ -8057,20 +8208,29 @@ extern void GTKDumpStatcontext( int game )
 	pvbox = gtk_vbox_new( FALSE, 0 ),
     gtk_box_pack_start( GTK_BOX( pvbox ), pwNotebook, TRUE, TRUE, 0);
 
-	AddNavigation(pvbox);
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwStatDialog, DA_MAIN ) ), pvbox );
-
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[0] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_OVERALL] = CreateList(),
 					  gtk_label_new(_("Overall")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[1] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_CHEQUER] = CreateList(),
 					  gtk_label_new(_("Chequer play")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[2] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_CUBE] = CreateList(),
 					  gtk_label_new(_("Cube decisions")));
 
-	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[3] = CreateList(),
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), statLists[FORMATGS_LUCK] = CreateList(),
 					  gtk_label_new(_("Luck")));
+
+	pwList = CreateList();
+
+	pswList = gtk_scrolled_window_new( NULL, NULL );
+	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pswList ),
+				GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
+	gtk_container_add( GTK_CONTAINER( pswList ), pwList );
+
+	gtk_box_pack_start (GTK_BOX (pvbox), pswList, TRUE, TRUE, 0);
+
+	AddNavigation(pvbox);
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwStatDialog, DA_MAIN ) ), pvbox );
 
 #if USE_BOARD3D
 	SetNumGames(&gd, numStatGames);
@@ -8093,6 +8253,42 @@ extern void GTKDumpStatcontext( int game )
 		" The games are along the bottom and the error rates up the side."
 		" Chequer error in green, cube error in blue."), "" );
 #endif
+
+	pwUsePanels = gtk_check_button_new_with_label(_("Split statistics into panels"));
+	gtk_tooltips_set_tip(ptt, pwUsePanels, "Show data in a single list or split other several panels", 0);
+	gtk_box_pack_start (GTK_BOX (pvbox), pwUsePanels, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwUsePanels), fGUIUseStatsPanel);
+	gtk_signal_connect(GTK_OBJECT(pwUsePanels), "toggled", GTK_SIGNAL_FUNC(toggle_fGUIUseStatsPanel), NULL);
+
+	/* list view (selections) */
+	copyMenu = gtk_menu_new ();
+
+	menu_item = gtk_menu_item_new_with_label ("Copy selection");
+	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
+	gtk_widget_show (menu_item);
+	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( StatcontextCopy ), pwNotebook );
+    gtk_widget_set_sensitive( menu_item, FALSE );
+
+	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
+					  GTK_SIGNAL_FUNC( StatcontextSelect ), menu_item );
+	gtk_signal_connect( GTK_OBJECT( pwList ), "unselect-row",
+					  GTK_SIGNAL_FUNC( StatcontextSelect ), menu_item );
+	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_clear_event",
+					  GTK_SIGNAL_FUNC( StatcontextClearSelection ), 0 );
+	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_get",
+					  GTK_SIGNAL_FUNC( StatcontextGetSelection ), 0 );
+
+	menu_item = gtk_menu_item_new_with_label ("Copy all");
+	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
+	gtk_widget_show (menu_item);
+	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( CopyAll ), pwNotebook );
+
+	gtk_signal_connect( GTK_OBJECT( pwList ), "button-press-event", GTK_SIGNAL_FUNC( ContextCopyMenu ), copyMenu );
+
+	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), GTK_SELECTION_EXTENDED );
+
+	gtk_selection_add_target( pwList, GDK_SELECTION_PRIMARY,
+							GDK_SELECTION_TYPE_STRING, 0 );
 
 	/* modality */
 	gtk_window_set_default_size( GTK_WINDOW( pwStatDialog ), 0, 300 );
@@ -8120,6 +8316,7 @@ extern void GTKDumpStatcontext( int game )
 	gtk_widget_show_all( pwStatDialog );
 
 	StatsSelectGame(0, game);
+	toggle_fGUIUseStatsPanel(pwUsePanels, 0);
 
 	GTKDisallowStdin();
 	gtk_main();

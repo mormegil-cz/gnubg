@@ -1514,7 +1514,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 	gtk_scale_set_digits( GTK_SCALE( pwSkewFactor ), 0 );
 	gtk_box_pack_start(GTK_BOX(hBox), pwSkewFactor, FALSE, FALSE, 0);
 
-	pwPlanView = gtk_check_button_new_with_label ("Plan view");
+	pwPlanView = gtk_check_button_new_with_label (_("Plan view"));
 	gtk_tooltips_set_tip(ptt, pwPlanView, "Display the 3d board with a 2d overhead view", 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwPlanView, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwPlanView), rdAppearance.planView);

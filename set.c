@@ -1145,6 +1145,13 @@ extern void CommandSetGUIDragTargetHelp( char *sz ) {
 	UpdateSetting( &fGUIDragTargetHelp );
 }
 
+extern void CommandSetGUIUseStatsPanel( char *sz ) {
+
+    SetToggle( "gui usestatspanel", &fGUIUseStatsPanel, sz,
+		   _("The match statistics will be shown in a panel"),
+		   _("The match statistics will be shown in a list") );
+}
+
 extern void CommandSetGUIShowPips( char *sz ) {
 
     if( SetToggle( "gui showpips", &fGUIShowPips, sz,

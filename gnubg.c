@@ -1021,6 +1021,8 @@ command cER = {
 #if	USE_GTK
     { "dragtargethelp", CommandSetGUIDragTargetHelp,
       N_("Show target help while dragging a chequer"), szONOFF, NULL },
+    { "usestatspanel", CommandSetGUIUseStatsPanel,
+      N_("Show statistcs in a panel"), szONOFF, NULL },
 #endif
     { "highdiefirst", CommandSetGUIHighDieFirst,
       N_("Show the higher die on the left"), szONOFF, NULL },
@@ -5246,7 +5248,8 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set gui illegal %s\n"
 	     "set gui showids %s\n"
 	     "set gui showpips %s\n"
-	     "set gui dragtargethelp %s\n",
+	     "set gui dragtargethelp %s\n"
+		 "set gui usestatspanel %s\n",
 	     aszAnimation[ animGUI ], nGUIAnimSpeed,
 	     fGUIBeep ? "on" : "off",
 	     fGUIDiceArea ? "on" : "off",
@@ -5254,7 +5257,8 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fGUIIllegal ? "on" : "off",
 	     fGUIShowIDs ? "on" : "off",
 	     fGUIShowPips ? "on" : "off",
-	     fGUIDragTargetHelp ? "on" : "off" );
+	     fGUIDragTargetHelp ? "on" : "off",
+		 fGUIUseStatsPanel ? "on" : "off");
 #endif
     
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
