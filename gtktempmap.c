@@ -370,6 +370,8 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
   int x = ( pw->allocation.width - SIZE_DIE * 7 ) / 2;
   int y = ( pw->allocation.height - SIZE_DIE * 7 ) / 2;
 
+  gdk_window_clear_area( pw->window, pev->area.x, pev->area.y,
+			 pev->area.width, pev->area.height);
   DrawDie( pw->window, ptmw->achDice, ptmw->achPips, SIZE_DIE,
            gc, x, y, ptmw->atm[ 0 ].pms->fMove, *pi + 1 );
 

@@ -1,3 +1,8 @@
+Mon Jun 02 17:11:48 2003  Holger Bochnig <hbgg@gmx.net>
+
+        * gtktempmap.c (ExposeDie): bug fix: after a resize artefacts
+          of the old dice remained
+
 Sun Jun  1 22:39:24 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Several improvements to temp. maps.
