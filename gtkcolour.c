@@ -29,8 +29,8 @@
 #include "i18n.h"
 
 #if !GTK_CHECK_VERSION(1,3,10)
-#define gtk_color_selection_set_has_opacity_control(p) \
-    gtk_color_selection_set_opacity(p)
+#define gtk_color_selection_set_has_opacity_control(p,f) \
+    gtk_color_selection_set_opacity(p,f)
 #define gtk_color_selection_get_has_opacity_control(p) \
     ( (p)->use_opacity )
 #endif
