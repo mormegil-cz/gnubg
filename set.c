@@ -546,7 +546,7 @@ extern void CommandSetAutoDoubles( char *sz ) {
 
     if( n > 12 ) {
 	outputl( _("Please specify a smaller limit (up to 12 automatic "
-	      "doubles.") );
+	      "doubles).") );
 	return;
     }
 	
@@ -1578,7 +1578,7 @@ extern void CommandSetRolloutLate ( char *sz ) {
 
 extern void CommandSetRolloutLateEnable ( char *sz ) {
 
-  SetToggle( "separate evaluation for later plays", &prcSet->fLateEvals, sz,
+  SetToggle( "separate evaluation for later plies", &prcSet->fLateEvals, sz,
 		 _("Use different evaluation for later moves of rollout."),
 		 _("Do not change evaluations during rollout.") );
 }

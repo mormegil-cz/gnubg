@@ -634,12 +634,12 @@ command cER = {
       N_("Records a log of the game "
       "in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportGamePostScript, NULL, szFILENAME, &cFilename },
-    { "text", CommandExportGameText, N_("Export a log of the game in text formet"), 
+    { "text", CommandExportGameText, N_("Export a log of the game in text format"), 
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
     { "equityevolution", CommandExportMatchEquityEvolution, 
-      N_("Exports the equity evolution of the match (for import into a spreadsheet"), 
+      N_("Exports the equity evolution of the match (for import into a spreadsheet)"), 
       szFILENAME, &cFilename },
     { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
       "format"), szFILENAME, &cFilename },
@@ -1913,7 +1913,7 @@ char *aszVersion[] = {
     N_("Long RNG seeds supported."),
 #endif
 #if USE_SOUND
-    N_("Sound systems supported:"),
+    N_("Sound systems supported."),
 #   if HAVE_ARTSC
     N_("  ArtsC sound system"),
 #   endif
@@ -3664,9 +3664,9 @@ HintTake( void ) {
 	    
   }
   else {
-    outputf ( _("Mwc for take: %6.2f%%\n"), 
+    outputf ( _("MWC for take: %6.2f%%\n"), 
               100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
-    outputf ( _("Mwc for pass: %6.2f%%\n"), 
+    outputf ( _("MWC for pass: %6.2f%%\n"), 
               100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
   }
 	
@@ -4197,7 +4197,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	case MOVE_SETCUBEPOS:
 	    if( !fWarned ) {
 		fWarned = TRUE;
-		outputl( _("Warning: this game was edited during play, and "
+		outputl( _("Warning: this game was edited during play and "
 			 "cannot be recorded in this format.") );
 	    }
 	    break;
