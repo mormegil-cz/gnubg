@@ -1007,9 +1007,6 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
       memcpy ( &aanBoardEval[alt][0][0], apBoard[ alt ], 
                sizeof( anBoardOrig ));
 
-      if (fInvert)
-        SwapSides( anBoardOrig );
-
       /* roll something out */
 #if 0
       printf ("rollout game %d alt %d\n", i, alt);

@@ -1,3 +1,9 @@
+Sun 19 Jul 22:01:18 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
+
+	* rollout.c - called SanityCheck with reversed board, so
+	  it didn't deal with rollouts where one side has borne 
+	  off.
+	
 Sun 19 Jul 14:49:33 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
 
 	* gtkgame.c - fix limits on j.s.d. spinner, re-arrange
