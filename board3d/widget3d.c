@@ -23,6 +23,9 @@
 
 #include <GL/gl.h>
 #include <GL/glu.h>
+#if !WIN32
+#include <GL/glx.h>
+#endif
 #include "inc3d.h"
 #include "shadow.h"
 #include "renderprefs.h"
@@ -341,10 +344,10 @@ int CheckAccelerated(GtkWidget* board)
 
 #else
 
-void CheckAccelerated(GtkWidget* board)
+int CheckAccelerated(GtkWidget* board)
 {
 	Display* display = glXGetCurrentDisplay();
-	GLXContext* context = glXGetCurrentContext();
+	GLXContext context = glXGetCurrentContext();
 	if (!display || !context)
 	{
 		g_print("Unable to get current display information.\n");
