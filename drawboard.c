@@ -911,6 +911,13 @@ extern int ParseMove( char *pch, int an[ 8 ] ) {
     return i >> 1;
 }
 
+/*
+ * Generate FIBS board
+ *
+ * (see <URL:http://www.fibs.com/fibs_interface.html#board_state>)
+ *
+ */
+
 extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
 			char *szPlayer, char *szOpp, int nMatchTo,
 			int nScore, int nOpponent, int nDice0, int nDice1,
@@ -953,7 +960,7 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
     sprintf( strchr( sz, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:%d:0:0:0:"
 	     "0:%d:0", nDice0, nDice1, nDice0, nDice1, fTurn < 0 ? 1 : nCube,
 	     fTurn < 0 || fCubeOwner != 0, fTurn < 0 || fCubeOwner != 1,
-	     fDoubled ? ( fTurn ? -1 : 1 ) : 0, anOff[ 1 ], anOff[ 0 ],
+	     fDoubled, anOff[ 1 ], anOff[ 0 ],
 	     fCrawford );
 
     return pch;

@@ -1,3 +1,14 @@
+Sat Sep  6 11:35:32 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Align the FIBSBoard routines to the FIBS board spec.
+	This should fix Kees' external player problems.
+
+	* drawboard.c (FIBSBoard): write correct value for "doubled".
+	* boardpos.c (CubePosition): value of "doubled" changed according to
+	specs. Change all callers.
+	* export.c (GenerateImage): do.
+	* gtkboard.c (cube_position, board_set): do.
+
 Fri Sep 05 22:57:49 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* backgammon.h, play.c (getFinalScore): new function
