@@ -747,6 +747,7 @@ extern int ComputerTurn( void ) {
     if( ms.fResigned ) {
 
       float rEqBefore, rEqAfter;
+      const float epsilon = 1.0e-6;
 
       ProgressStart( _("Considering resignation...") );
       if ( GeneralEvaluationE( arOutput, ms.anBoard, &ci,
@@ -777,14 +778,13 @@ extern int ComputerTurn( void ) {
       if ( ms.nMatchTo )
         rEqAfter = eq2mwc( rEqAfter, &ci );
 
-      /*
-      printf ("equity before resignation: %7.3f\n"
-              "equity after resignation : %7.3f\n",
-              rEqBefore, rEqAfter );*/
+      /* printf ("equity before resignation: %.10f\n"
+              "equity after resignation : %.10f\n",
+              rEqBefore, rEqAfter ); */
 
       fComputerDecision = TRUE;
 
-      if( rEqAfter <= rEqBefore )
+      if( ( rEqAfter - rEqBefore ) <= epsilon )
         /* i.e., opponent gives up equity by resigning */
         CommandAgree( NULL );
       else

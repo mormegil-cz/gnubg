@@ -1,3 +1,9 @@
+Wed May 21 21:34:53 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* play.c (ComputerTurn): try to eliminate noise in
+	resignations.	
+	(reported by Bille Patterson)
+
 Wed May 21 21:21:41 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (ShowManualWeb, ReportBug): new functions.
