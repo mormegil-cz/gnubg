@@ -58,16 +58,8 @@
 static void
 UpdateMoveList ( const hintdata *phd ) {
 
-  static int aanColumns[][ 2 ] = {
-    { 2, OUTPUT_WIN },
-    { 3, OUTPUT_WINGAMMON },
-    { 4, OUTPUT_WINBACKGAMMON },
-    { 6, OUTPUT_LOSEGAMMON },
-    { 7, OUTPUT_LOSEBACKGAMMON }
-  };
-  
   GtkWidget *pwMoves = phd->pwMoves;
-  int i, j, col;
+  int i, col;
   char sz[ 32 ];
   float rBest;
   cubeinfo ci;
@@ -92,7 +84,6 @@ UpdateMoveList ( const hintdata *phd ) {
     gtk_clist_set_column_title( GTK_CLIST( pwMoves ), col, _("Equity") );
     
   for( i = 0; i < pml->cMoves; i++ ) {
-    float *ar = pml->amMoves[ i ].arEvalMove;
 
     gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
 
