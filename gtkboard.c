@@ -4536,7 +4536,7 @@ static void board_init( Board *board ) {
 #endif
     bd->wood = WOOD_ALDER;
     bd->hinges = TRUE;
-    bd->labels = FALSE;
+    bd->labels = TRUE;
     bd->usedicearea = TRUE;
     bd->permit_illegal = FALSE;
     bd->beep_illegal = TRUE;
