@@ -580,7 +580,7 @@ If your @gnubg{} installation is complete, you should be able to start it
 and see output similar to the following:
 
 @example
-GNU Backgammon 0.02  Copyright 1999 Gary Wong.
+GNU Backgammon 0.02  Copyright 1999, 2000 Gary Wong.
 GNU Backgammon is free software, covered by the GNU General Public
 License, and you are welcome to change it and/or distribute copies
 of it under certain conditions.  Type "show copying" to see the
@@ -616,10 +616,10 @@ at its full strength.  Let's start a game.
 
 @example
 (No game) new game
-O rolls 1, X rolls 3.
+gnubg rolls 1, user rolls 3.
 @group
  GNU Backgammon  Position ID: 4HPwATDgc/ABMA
- +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
  | X           O    |   | O              X |     
  | X           O    |   | O              X |     
  | X           O    |   | O                |     
@@ -631,10 +631,10 @@ v|                  |BAR|                  |     (Cube: 1)
  | O           X    |   | X                |     
  | O           X    |   | X              O |     
  | O           X    |   | X              O |     Rolled 13
- +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
 @end group
 
-(X) 
+(user) 
 @end example
 
 This is the output you will see if a graphical board is unavailable or
@@ -648,14 +648,15 @@ as graphical dice on the right hand side of the board window.  The
 position ID (the @samp{4HPwATDgc/ABMA} in this example) is an encoded
 representation of the current position.  It comes in useful when using
 some of @gnubg{}'s advanced commands, but you can safely ignore it for now.
-Notice that the prompt has changed to @samp{(X)}, to indicate that it
-is X's (your) turn.
+Notice that the prompt has changed to @samp{(user)}, to indicate that it
+is your turn; on systems where a login name is available, @gnubg{} will
+use that instead.
 
 If you are familiar with backgammon, you will know that the best play
 for this roll is to make your 5 point.  The command to do that is:
 
 @example
-(X) 8 5 6 5
+(user) 8 5 6 5
 @end example
 
 @noindent
@@ -672,7 +673,7 @@ Once you have done that, @gnubg{} will take its turn, rolling 63 and playing
 @example
 @group
  GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
- +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
  | X           O    |   | O              X |     
  | X           O    |   | O              X |     
  | X           O    |   | O                |     
@@ -684,10 +685,10 @@ v|                  |BAR|                  |     (Cube: 1)
  | O                |   | X                |     
  | O           X    |   | X  X             |     
  | O     O     X    |   | X  X           O |     On roll
- +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
 @end group
 
-(X) 
+(user) 
 @end example
 
 Since it is no longer the opening roll, you have the option of doubling
@@ -695,10 +696,10 @@ before rolling your dice.  To roll without doubling, just enter the
 command @kbd{roll} (or @kbd{r} for short):
 
 @example
-(X) roll
+(gnubg) roll
 @group
  GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
- +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
  | X           O    |   | O              X |     
  | X           O    |   | O              X |     
  | X           O    |   | O                |     
@@ -710,10 +711,10 @@ v|                  |BAR|                  |     (Cube: 1)
  | O                |   | X                |     
  | O           X    |   | X  X             |     
  | O     O     X    |   | X  X           O |     Rolled 35
- +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
 @end group
 
-(X)
+(user)
 @end example
 
 @noindent
@@ -727,10 +728,10 @@ bar.  You can also make this move by dragging chequers in the board window,
 of course.
 
 @example
-(X) 13 10 6 1
+(user) 13 10 6 1
 @group
  GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
- +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
  | X           O    | O | O              X |     
  | X           O    | O | O              X |     
  | X           O    |   | O                |     
@@ -742,20 +743,20 @@ v|                  |BAR|                  |     (Cube: 1)
  | O                |   | X                |     
  | O           X    |   | X  X             |     
  | O     X     X    |   | X  X           X |     On roll
- +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
 @end group
 
-(X) 
+(user) 
 @end example
 
 GNU Backgammon has rolled 65 and been unable to move.  Let's take another
 roll:
 
 @example
-(X) roll
+(user) roll
 @group
  GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
- +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
  | X           O    | O | O              X |     
  | X           O    | O | O              X |     
  | X           O    |   | O                |     
@@ -767,10 +768,10 @@ v|                  |BAR|                  |     (Cube: 1)
  | O                |   | X                |     
  | O           X    |   | X  X             |     
  | O     X     X    |   | X  X           X |     Rolled 25
- +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
 @end group
 
-(X)
+(user)
 @end example
 
 Play this roll as @kbd{13 11 6 1}.  @gnubg{} will now roll 16 --- and still
@@ -779,7 +780,7 @@ can't move!
 @example
 @group
  GNU Backgammon  Position ID: 4HPwAWDDZsoBMA
- +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     gnubg
  | X           O    | O | O              X |     
  | X           O    | O | O              X |     
  | X           O    |   | O                |     
@@ -791,10 +792,10 @@ v|                  |BAR|                  |     (Cube: 1)
  | O                |   |                  |     
  | O           X    |   | X  X           X |     
  | O  X  X     X    |   | X  X           X |     On roll
- +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     user
 @end group
 
-(X) 
+(user) 
 @end example
 
 Our position is now strong.  Let's try doubling --- this can be done by
@@ -804,7 +805,7 @@ the command @kbd{take} or @kbd{drop} to accept or refuse the cube.  GNU
 Backgammon will drop this double:
 
 @example
-(X) double
+(user) double
 O refuses the cube and gives up 1 point.
 X wins a single game and 1 points.
 The score (after 1 game) is: O 0, X 1.
@@ -945,16 +946,16 @@ are finished.
 Start GNU Backgammon by running the program @kbd{gnubg}.  Once started, it
 will process commands from the terminal.
 
-You can also instruct @gnubg{} to read an existing match from a file, to
-play or analyse.  To read the match from @var{filename}, specify
+You can also instruct @gnubg{} to read an existing game or match from a
+file, to play or analyse.  To read from @var{filename}, specify
 @kbd{gnubg @var{filename}}.
 
 @gnubg{} will give you a short summary of how to invoke it if given the
 option @option{--help} (@option{-h} for short), and report its version
 with @option{--version} (@option{-v}).
 
-GNU Backgammon will normally use a graphical board window under the X
-Window System, if possible.  To prevent this behaviour and use standard
+GNU Backgammon will normally use a graphical board window if a window
+system is available.  To prevent this behaviour and use standard
 terminal output instead, you can specify the @option{--tty} option (which
 can be abbreviated to @option{-t}).
 
@@ -962,6 +963,8 @@ By default, @gnubg{} will attempt to load pre-trained neural net
 weights; if you have no weights or wish to train a net from scratch,
 you can supply the @option{--no-weights} (@option{-n}) option, and
 new weights will be randomly generated.
+
+FIXME document --no-bearoff, --datadir and --window-system-only options.
 
 @node Leaving gnubg
 @section Leaving @gnubg
@@ -1016,8 +1019,8 @@ display information you might need to know:
 @table @code
 @kindex help
 @kindex ?
-@item help @var{command}
-@itemx ? @var{command}
+@item help [@var{command}]
+@itemx ? [@var{command}]
 Describe the commands that @gnubg{} understands.  @code{help} by itself
 lists the main commands with a one-line description of each; when
 @var{command} is specified, that command is explained in more detail,
@@ -1077,7 +1080,10 @@ no effect on the score).  If you want the current game to be scored
 for either player, you should use the @code{resign} command instead.
 @kindex move
 @item move @var{from} @var{to} @dots{}
+@itemx move =@var{number}
 @itemx @var{from} @var{to} @dots{}
+@itemx =@var{number}
+
 The @code{move} command allows you to make chequer plays when it is your
 turn.  In its normal form, you should specify pairs of point numbers
 indicating the points you want to move a chequer from and to.  Specify
@@ -1101,7 +1107,9 @@ As long as you specify at least one pair of points, then the word
 @code{move} is optional --- the command @code{bar 20 24 20} means exactly
 the same thing as @code{move bar 20 24 20}, for instance.
 
-If you are using the X Window System, you can also move chequers using
+FIXME document `=n' notation.
+
+If you are using a window system, you can also move chequers using
 the board window.  One way to do this is to use mouse button 1 to drag
 a chequer (that is, press the button when the pointer is over the
 chequer you wish to move; move the pointer to the point you wish to
@@ -1144,26 +1152,26 @@ resignation and continue play normally, use either the @code{decline} or
 @code{reject} commands.  (@code{accept} and @code{reject} are also legal
 commands in response to a double; @pxref{Cube}.)
 @kindex set board
-@item set board @var{id}
+@item set board @var{id}|=@var{number}
 If you wish to directly set the chequers to a different position, you
 can use the @code{set board} command.  You need to know the
 @dfn{position ID} of the chequer arrangement you want; position IDs
 are always displayed when the board is shown.  (If you are playing
 on a text terminal, the position ID is in the upper right hand corner
-of the board diagram; when using the X board window, the ID is shown
+of the board diagram; when using the board window, the ID is shown
 below the board on the right hand side.)  For instance, to set the
 chequers to the starting position, use the command
 @code{set board 4HPwATDgc/ABMA}.
 
-FIXME describe the GTK edit mode
+FIXME reference =n notation and describe the GTK edit mode
 @kindex show board
-@item show board [@var{id}]
+@item show board [@var{id}|=@var{number}]
 The @code{show board} command is used to display a particular position ---
 normally the board of the current game, but it is also possible to view
 unrelated layouts.  When specified without the optional @var{id} parameter,
 the current position is displayed.  (When using a text terminal, this
 is useful if subsequent output has caused the board diagram to scroll
-off the screen.  In the X board window, the command can be used to undo
+off the screen.  In the board window, the command can be used to undo
 erroneous chequer plays by resetting the window to the position at the
 start of the turn.)
 
@@ -1205,11 +1213,13 @@ probabilities include the backgammon probabilities.}.  The sixth column,
 this is the expected number of points per game won by the player on
 roll.
 
+FIXME describe =n notation.
+
 @gnubg{} will `look ahead' a certain number of moves when evaluating
 the probabilities, according to the search depth set by the
 @code{set plies} command (@pxref{Analysis}).
 @kindex show pipcount
-@item show pipcount
+@item show pipcount [@var{id}|=@var{number}]
 Use @code{show pipcount} to automatically count the number of `pips'
 each player needs to bear off.  Depending on the position, the output
 will look something like:
@@ -1225,16 +1235,18 @@ The pip counts are: X 103, O 112.
 @itemx set player @var{old-name} name @var{new-name}
 Both players have a certain amount of configuration information; use the
 command @code{show player} to summarise these settings.  By default,
-@gnubg{} will play for player 0, whose name is initially @samp{O}.
+@gnubg{} will play for player 0, whose name is initially @samp{gnubg}.
 Player 1 defaults to a human (i.e.@: @gnubg{} will prompt the user
-for a move when it is player 1's turn) whose name is @samp{X}.
+for a move when it is player 1's turn) whose name is the user's login
+name, on systems where this information is available; on single-user
+systems, the default name @samp{user} applies.
 
-Either player can be set to a human with the command
-@code{set player @var{name} human}, where @var{name} is either the number
-of the player (0 or 1) or that player's name (initially @samp{O} and
-@samp{X}).  You can also specify @code{both} which will set both players
-simultaneously.  There are also options for computer players
-(@pxref{Computer Player}).
+Either player can be set to a human with the command @code{set player
+@var{name} human}, where @var{name} is either the number of the player
+(0 or 1) or that player's name (initially @samp{gnubg} and @samp{user}
+or the user's login name).  You can also specify @code{both} which will
+set both players simultaneously.  There are also options for computer
+players (@pxref{Computer Player}).
 
 You can change the names of the players with the
 @code{set player @var{old-name} name @var{new-name}} command.  Again,
@@ -1339,6 +1351,14 @@ high quality generator.
 By setting the generator to @code{manual}, @gnubg{} will not generate
 the dice itself; rather, it will prompt for a roll to be entered whenever
 one is required.
+@item md5
+MD5 is a public domain message digest algorithm invented by Ron
+Rivest and documented in RFC 1321.  @gnubg{} can use MD5 as a procedure
+for generating dice rolls --- this generator has the property that
+the seed increments by one each roll, and so the sequence generated
+by seed @samp{n+1} will be identical to that generated by seed @samp{n},
+with the first roll omitted.  The command @code{show seed} is available
+when using the @var{md5} generator, for obtaining the current seed value.
 @item mersenne
 Choosing this option will enable the Mersenne Twister generator designed
 by Matsumoto and Nishimura.  This should be an excellent pseudo-random
@@ -1481,9 +1501,10 @@ FIXME
 @kindex set plies
 @kindex set cache
 @kindex show cache
-@item eval [@var{id}]
-@itemx rollout [@var{id}]
-@itemx set plies @var{depth}
+@item eval [@var{id}|=@var{number}]
+@itemx rollout [@var{id}|=@var{number} @dots{}]
+@itemx set evaluation
+@itemx set rollout
 @itemx set cache @var{size}
 @itemx show cache
 FIXME
@@ -1555,7 +1576,7 @@ If you want to experiment with the very latest code, the development
 sources are kept in a CVS repository at
 @uref{http://subversions.gnu.org/cgi-bin/cvsweb/gnubg/}; see the @gnubg{}
 web page at @uref{http://www.gnu.org/software/gnubg/gnubg.html} for
-instructions on checking out sources from the repository.  Snapshots of
+instructions on checking out sources from the repository.  Daily snapshots of
 the main branch of the repository are automatically placed in the
 @file{snapshots} directory of the FTP area above, if you wish to retrieve
 this experimental code via FTP.
@@ -1565,20 +1586,20 @@ this experimental code via FTP.
 @cindex playing a game
 @cindex moving chequers, commands
 
-Once you are running @gnubg{}, enter @kbd{new game} at the @samp{(gnubg)}
-prompt to start a game against the computer opponent.  You should now
-see a board (if an X display is available, @gnubg{} will use a graphical
-board window; otherwise, it will display an ASCII board on your
-terminal).  If @gnubg{} won the opening roll, it will have moved; you can
-now type @kbd{roll} (or click on the dice below the board if you are
-using X) to roll the dice yourself.  In either case, it will now be your
+Once you are running @gnubg{}, enter @kbd{new game} at the
+@samp{(gnubg)} prompt to start a game against the computer opponent.
+You should now see a board (if a window system is available, @gnubg{}
+will use a graphical board window; otherwise, it will display an ASCII
+board on your terminal).  If @gnubg{} won the opening roll, it will have
+moved; you can now type @kbd{roll} (or click on the dice below the board
+window) to roll the dice yourself.  In either case, it will now be your
 move; you should enter the moves for each chequer as pairs of numbers.
 For instance, if you have rolled 3 and 1, you could type @kbd{8 5 6 5}
-to move one chequer from the 8 point to the 5 point and another from
-the 6 point to the 5 point.  Use @kbd{bar} to move from the bar, and
-@kbd{off} to bear off.  If you are using the X board window, you
-can also drag chequers around the board with mouse button 1.  Click on
-the dice when you have finished.
+to move one chequer from the 8 point to the 5 point and another from the
+6 point to the 5 point.  Use @kbd{bar} to move from the bar, and
+@kbd{off} to bear off.  If you are using the board window, you can
+also drag chequers around the board with mouse button 1.  Click on the
+dice when you have finished.
 
 @node gnubg.bd errors
 @section I only see @samp{gnubg.bd: No such file or directory}.  What's wrong?
