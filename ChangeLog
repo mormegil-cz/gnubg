@@ -1,3 +1,7 @@
+Tue Aug 26 07:16:35 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* gtkgame.c (SkillMenu): ignore skill "good" in gtk game.
+
 Sun Aug 24 21:22:13 2003  Oystein Johansen  <oystein@gnubg.org>
 
 	This is a big patch to integrate the GUI. There are still
