@@ -494,4 +494,31 @@
 
    </board-design>
 
+   <board-design>
+
+      <about>
+         <title>Easy Going</title>
+         <author>Albert Silver</author>
+      </about>
+
+      <design>
+         board=#FFEDCB;0.00 
+         border=#5A2F33 
+         wood=paint
+         hinges=y 
+         light=147;60 
+         shape=0.3 
+         chequers0=#FFFFFF;1.00;3.00;0.80;89.20
+         chequers1=#8D0000;1.00;3.00;0.70;14.80 
+         dice0=#FFFFFF;0.80;89.20;y 
+         dice1=#8D0000;0.70;14.80;y 
+         dot0=#000000 
+         dot1=#EBEDF0 
+         cube=#B1C5CE
+         points0=#E9CED1;0.00 
+         points1=#A0ADD6;0.00 
+      </design>
+
+   </board-design>
+
 </board-designs>
