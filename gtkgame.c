@@ -61,6 +61,8 @@
 #include "matchequity.h"
 #include "positionid.h"
 
+#define GNUBGMENURC ".gnubgmenurc"
+
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_style_get_font(s) ((s)->font)
 
@@ -1909,6 +1911,25 @@ extern void GTKUpdateAnnotations( void ) {
     GTKThaw();
 }
 
+extern void GTKSaveSettings( void ) {
+
+#if __GNUC__
+    char sz[ strlen( szHomeDirectory ) + 15 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( szHomeDirectory ) + 15 );
+#else
+    char sz[ 4096 ];
+#endif
+    GtkPatternSpec ps;
+
+    gtk_pattern_spec_init( &ps, "*" );
+    
+    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
+    gtk_item_factory_dump_rc( sz, &ps, TRUE );
+
+    gtk_pattern_spec_free_segs( &ps );
+}
+
 static gboolean main_delete( GtkWidget *pw ) {
     
     UserCommand( "quit" );
@@ -2214,9 +2235,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Help/_About gnubg", NULL, Command, CMD_SHOW_VERSION, NULL }
     };
 #if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + 14 ];
+    char sz[ strlen( szHomeDirectory ) + 15 ];
 #elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + 14 );
+    char *sz = alloca( strlen( szHomeDirectory ) + 15 );
 #else
     char sz[ 4096 ];
 #endif
@@ -2254,7 +2275,9 @@ extern int InitGTK( int *argc, char ***argv ) {
 			pwMenuBar = gtk_item_factory_get_widget( pif,
 								 "<main>" ),
 			FALSE, FALSE, 0 );
-
+    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
+    gtk_item_factory_parse_rc( sz );
+    
 #if !HAVE_LIBGDBM
     gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	pif, CMD_DATABASE_DUMP ), FALSE );

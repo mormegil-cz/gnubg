@@ -3328,6 +3328,11 @@ extern void CommandSaveSettings( char *szParam ) {
 	perror( sz );
     else
 	outputl( "Settings saved." );
+
+#if USE_GTK
+    if( fX )
+	GTKSaveSettings();
+#endif
 }
 
 extern void CommandSaveWeights( char *sz ) {

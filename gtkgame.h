@@ -109,7 +109,8 @@ extern void GTKWinCopy( GtkWidget *widget, gpointer data);
 extern void
 GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
                cubeinfo *pci, int fMWC );
-    
+extern void GTKSaveSettings( void );
+
 extern int fTTY;
 
 #endif

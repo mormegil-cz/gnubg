@@ -1,14 +1,19 @@
+Wed Feb 20 19:36:09 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (GTKUpdateAnnotations): New function (dumps menu
+	settings to ~/.gnubgmenurc).
+
 Tue Feb 19 15:04:42 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c: Add missing fClockwise entry in atc[].
 
 Thu Feb 14 18:10:19 2002  Øystein Johansen <oeysteij@online.no>
 
-        * gtkgame.c, gtkgame.h, play.c: Change GTKAddGame back to 
-        to the way it used to be for WIN32 systems, since the code added
-        crash bug when starting new games on that platform.
-
-        * gtkboard.c: CLIP_MASK bug in GTK for Windows have now been fixed
+	* gtkgame.c, gtkgame.h, play.c: Change GTKAddGame back to 
+	to the way it used to be for WIN32 systems, since the code added
+	crash bug when starting new games on that platform.
+	
+	* gtkboard.c: CLIP_MASK bug in GTK for Windows have now been fixed
          
 Wed Feb 13 21:03:19 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
