@@ -1,3 +1,7 @@
+Sun Jun  2 18:44:00 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* POTFILES.in: entire application's strings marked for gettext.
+
 2002-04-04  gettextize  <bug-gnu-utils@gnu.org>
 
 	* Makefile.in.in: Upgrade to gettext-0.10.38.
