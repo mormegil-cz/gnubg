@@ -1,3 +1,8 @@
+Sat Jul 10 14:35:26 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gtkoptions.c (aaszLang): Use ja_JP instead of ja_JA.  Added
+	ru_RU.
+
 Sat Jul 10 08:17:26 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* i18n.h [!ENABLE_NLS] (ngettext): New macro.

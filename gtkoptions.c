@@ -175,8 +175,9 @@ static char *aaszLang[][ 2 ] = {
     { N_("German"),	    "de_DE" },
     { N_("Icelandic"),      "is_IS" },
     { N_("Italian"),	    "it_IT" },
-    { N_("Japanese"),	    "ja_JA" },
-    { N_("Turkish"),        "tr_TR" },
+    { N_("Japanese"),	    "ja_JP" },
+    { N_("Russian"),	    "ru_RU" },
+    { N_("Turkish"),	    "tr_TR" },
     { NULL, NULL }
 };
 
