@@ -1,3 +1,8 @@
+Mon Aug 25 23:26:25 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c: ensure that TOGGLE_GAMELIST and friends to not
+	overlap with enum _gnubgcommand.
+
 Mon Aug 25 20:53:03 GMT 2003  Jim Segrave jes@jes-2.dmeon.nl
 
 	* gnubg.c = glibc putenv() doesn't copy strings 

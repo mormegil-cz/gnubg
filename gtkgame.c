@@ -283,7 +283,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "train td",
     "xcopy"
 };
-enum { TOGGLE_GAMELIST, TOGGLE_ANNOTATION, TOGGLE_MESSAGE };
+enum { TOGGLE_GAMELIST = NUM_CMDS + 1, TOGGLE_ANNOTATION, TOGGLE_MESSAGE };
 
 #if ENABLE_TRAIN_MENU
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
