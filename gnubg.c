@@ -242,15 +242,22 @@ exportsetup exsExport = {
   TRUE, /* include analysis */
   TRUE, /* include statistics */
   TRUE, /* include legend */
+
   1, /* display board for all moves */
-  EXPORT_SIDE_PLAYER0 | EXPORT_SIDE_PLAYER1, 
+  -1, /* both players */
+
   5, /* display max 5 moves */
   TRUE, /* show detailed probabilities */
-  EXPORT_MOVES_NONE, /* do not show move parameters */
-  EXPORT_MOVES_ERROR | EXPORT_MOVES_BLUNDER | EXPORT_MOVES_ALL,
-  TRUE, /* show detailed prob. */
-  EXPORT_CUBE_NONE, /* do not show move parameters */
-  EXPORT_CUBE_ACTUAL | EXPORT_CUBE_MISSED | EXPORT_CUBE_CLOSE 
+  /* do not show move parameters */
+  { FALSE, TRUE },
+  /* display all moves */
+  { TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE },
+
+  TRUE, /* show detailed prob. for cube decisions */
+  { FALSE, TRUE }, /* do not show move parameters */
+  /* display all cube decisions */
+  { TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE },
+
 };
 
   
@@ -307,6 +314,15 @@ command cER = {
 }, cPlayerBoth = {
     /* dummy command used for player parameters; "both" also permitted */
     NULL, NULL, NULL, NULL, &cPlayerBoth
+}, cExportParameters = {
+    /* dummy command used for export parameters */
+    NULL, NULL, NULL, NULL, &cExportParameters
+}, cExportMovesDisplay = {
+    /* dummy command used for export moves to display */
+    NULL, NULL, NULL, NULL, &cExportMovesDisplay
+}, cExportCubeDisplay = {
+    /* dummy command used for player cube to display */
+    NULL, NULL, NULL, NULL, &cExportCubeDisplay
 }, acAnalyse[] = {
     { "game", CommandAnalyseGame, "Compute analysis and annotate current game",
       NULL, NULL },
@@ -636,6 +652,94 @@ command cER = {
     "Set evaluation parameters for cube decisions", NULL,
     acSetEvalParam },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportParameters[] = {
+  { "evaluation", CommandSetExportParametersEvaluation,
+    "show detailed parameters for evaluations", szONOFF, &cOnOff },
+  { "rollout", CommandSetExportParametersRollout,
+    "show detailed parameters for rollouts", szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportMovesDisplay[] = {
+  { "verybad", CommandSetExportMovesDisplayVeryBad,
+    "show very bad moves", szONOFF, &cOnOff },
+  { "bad", CommandSetExportMovesDisplayBad,
+    "show bad moves", szONOFF, &cOnOff },
+  { "doubtful", CommandSetExportMovesDisplayDoubtful,
+    "show doubtful moves", szONOFF, &cOnOff },
+  { "unmarked", CommandSetExportMovesDisplayUnmarked,
+    "show unmarked moves", szONOFF, &cOnOff },
+  { "interesting", CommandSetExportMovesDisplayInteresting,
+    "show interesting moves", szONOFF, &cOnOff },
+  { "good", CommandSetExportMovesDisplayGood,
+    "show good moves", szONOFF, &cOnOff },
+  { "verygood", CommandSetExportMovesDisplayVeryGood,
+    "show very good moves", szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportCubeDisplay[] = {
+  { "verybad", CommandSetExportCubeDisplayVeryBad,
+    "show very bad moves", szONOFF, &cOnOff },
+  { "bad", CommandSetExportCubeDisplayBad,
+    "show bad moves", szONOFF, &cOnOff },
+  { "doubtful", CommandSetExportCubeDisplayDoubtful,
+    "show doubtful moves", szONOFF, &cOnOff },
+  { "unmarked", CommandSetExportCubeDisplayUnmarked,
+    "show unmarked moves", szONOFF, &cOnOff },
+  { "interesting", CommandSetExportCubeDisplayInteresting,
+    "show interesting moves", szONOFF, &cOnOff },
+  { "good", CommandSetExportCubeDisplayGood,
+    "show good moves", szONOFF, &cOnOff },
+  { "verygood", CommandSetExportCubeDisplayVeryGood,
+    "show very good moves", szONOFF, &cOnOff },
+  { "actual", CommandSetExportCubeDisplayActual,
+    "show very good moves", szONOFF, &cOnOff },
+  { "close", CommandSetExportCubeDisplayClose,
+    "show very good moves", szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportInclude[] = {
+  { "annotations", CommandSetExportIncludeAnnotations,
+    "include annotations", szONOFF, &cOnOff },
+  { "analysis", CommandSetExportIncludeAnalysis,
+    "include analysis (evaluations/rollouts)", szONOFF, &cOnOff },
+  { "statistics", CommandSetExportIncludeStatistics,
+    "include statistics (# of bad moves, # of jokers, etc)", 
+    szONOFF, &cOnOff },
+  { "legend", CommandSetExportIncludeLegend,
+    "include a legend that describes the output of the export", 
+    szONOFF, &cOnOff },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportShow[] = {
+  { "board", CommandSetExportShowBoard,
+    "show board every [value] move (0 for never)", szVALUE, NULL },
+  { "player", CommandSetExportShowPlayer,
+    "which player(s) to show", szPLAYER, &cPlayerBoth },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportMoves[] = {
+  { "number", CommandSetExportMovesNumber,
+    "show at most [value] moves", szVALUE, NULL },
+  { "probabilities", CommandSetExportMovesProb,
+    "show detailed probabilities", szONOFF, &cOnOff },
+  { "parameters", CommandSetExportMovesParameters,
+    "show detailed rollout/evaluation parameters", NULL, 
+    acSetExportParameters },
+  { "display", NULL, "when to show moves", NULL, acSetExportMovesDisplay },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportCube[] = {
+  { "probabilities", CommandSetExportCubeProb,
+    "show detailed probabilities", szONOFF, &cOnOff },
+  { "parameters", CommandSetExportCubeParameters,
+    "show detailed rollout/evaluation parameters", NULL, 
+    acSetExportParameters },
+  { "display", NULL, "when to show moves", NULL, acSetExportCubeDisplay },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExport[] = {
+  { "include", NULL,
+    "Control which blocks to include in exports", NULL, acSetExportInclude },
+  { "show", NULL,
+    "Control display of boards/players in exports", NULL, acSetExportShow },
+  { "moves", NULL,
+    "Control display of moves in exports", NULL, acSetExportMoves },
+  { "cube", NULL,
+    "Control display of cube in exports", NULL, acSetExportCube },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
     { "analysis", NULL, "Control parameters used when analysing moves",
       NULL, acSetAnalysis },
@@ -670,6 +774,7 @@ command cER = {
     { "evaluation", NULL, "Control position evaluation "
       "parameters", NULL, acSetEval },
     { "egyptian", CommandSetEgyptian, "Set whether to use the Egyptian rule in "      "games", szONOFF, &cOnOff },
+    { "export", NULL, "Set settings for export", NULL, acSetExport },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, &cOnOff },
     { "matchequitytable", CommandSetMET,
@@ -746,6 +851,8 @@ command cER = {
       NULL, NULL },
     { "egyptian", CommandShowEgyptian,
       "See if the Egyptian rule is used in sessions", NULL, NULL },
+    { "export", CommandShowExport, "Show current export settings", 
+      NULL, NULL },
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL, NULL },
     { "kleinman", CommandShowKleinman, "Calculate Kleinman count for "
@@ -3474,6 +3581,7 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     
     return NULL;
 }
+
 static char *ERCompletion( const char *sz, int nState ) {
 
     static int i, cch;
@@ -3576,6 +3684,7 @@ static char *PlayerCompletionBoth( const char *sz, int nState ) {
 
     return PlayerCompletionGen( sz, nState, TRUE );
 }
+
 
 static command *FindContext( command *pc, char *szOrig, int ich ) {
 

@@ -1,3 +1,13 @@
+Sun Mar 31 00:51:07 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	Modify and setup settings for export. So far only the HTML export
+	honours most settings.
+
+	* html.c (HTMLPrintCubeAnalysisTable): modify logic for printing.
+	* show.c (CommandShowExport): show export settings.
+	* gnubg.c: new commands for setting export settings.
+	* set.c (CommandSetExport*): new functions.
+
 Sat Mar 30 12:35:02 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_set): Don't overwrite the names or scores in

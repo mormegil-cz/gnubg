@@ -43,6 +43,7 @@
 #include "dice.h"
 #include "eval.h"
 #include "external.h"
+#include "export.h"
 #if USE_GTK
 #include "gtkgame.h"
 #include "gtkprefs.h"
@@ -1920,3 +1921,332 @@ CommandSetMatchID ( char *sz ) {
 
 }
 
+
+extern void
+CommandSetExportIncludeAnnotations ( char *sz ) {
+
+  SetToggle( "annotations", &exsExport.fIncludeAnnotation, sz,
+             "Include annotations in exports",
+             "Do not include annotations in exports" );
+
+}
+
+extern void
+CommandSetExportIncludeAnalysis ( char *sz ) {
+
+  SetToggle( "analysis", &exsExport.fIncludeAnalysis, sz,
+             "Include analysis in exports",
+             "Do not include analysis in exports" );
+
+}
+
+extern void
+CommandSetExportIncludeStatistics ( char *sz ) {
+
+  SetToggle( "statistics", &exsExport.fIncludeStatistics, sz,
+             "Include statistics in exports",
+             "Do not include statistics in exports" );
+
+}
+
+extern void
+CommandSetExportIncludeLegend ( char *sz ) {
+
+  SetToggle( "annotations", &exsExport.fIncludeLegend, sz,
+             "Include legend in exports",
+             "Do not include legend in exports" );
+
+}
+
+extern void
+CommandSetExportShowBoard ( char *sz ) {
+
+  int n;
+
+  if( ( n = ParseNumber( &sz ) ) < 0 ) {
+    outputl( "You must specify a semi-positive number." );
+
+    return;
+  }
+
+  exsExport.fDisplayBoard = n;
+
+  if ( ! n )
+    output ( "The board will never been shown in exports." );
+  else
+    outputf ( "The board will be shown every %d. move in exports.", n );
+
+}
+
+
+extern void
+CommandSetExportShowPlayer ( char *sz ) {
+
+  int i;
+
+  if( ( i = ParsePlayer( sz ) ) < 0 ) {
+    outputf( "Unknown player `%s' "
+             "-- try `help set export show player'.\n", sz );
+    return;
+  }
+
+  if ( i == 2 )
+    exsExport.fSide = -1;
+  else
+    exsExport.fSide = i;
+
+  if ( i == 2 )
+    outputl ( "Analysis, boards etc will be "
+              "shown for both players in exports." );
+  else
+    outputf ( "Analysis, boards etc will only be shown for "
+              "player %s in exports.\n", ap[ i ].szName );
+
+}
+
+
+extern void
+CommandSetExportMovesNumber ( char *sz ) {
+
+  int n;
+
+  if( ( n = ParseNumber( &sz ) ) < 0 ) {
+    outputl( "You must specify a semi-positive number." );
+
+    return;
+  }
+
+  exsExport.nMoves = n;
+
+  outputf ( "Show at most %d moves in exports.\n", n );
+
+}
+
+extern void
+CommandSetExportMovesProb ( char *sz ) {
+
+  SetToggle( "probabilities", &exsExport.fMovesDetailProb, sz,
+             "Show detailed probabilities for moves",
+             "Do not show detailed probabilities for moves" );
+
+}
+
+static int *pParameter;
+static char *szParameter;
+
+extern void
+CommandSetExportMovesParameters ( char *sz ) {
+
+  pParameter = exsExport.afMovesParameters;
+  szParameter = "moves";
+  HandleCommand ( sz, acSetExportParameters );
+
+}
+
+extern void
+CommandSetExportCubeProb ( char *sz ) {
+
+  SetToggle( "probabilities", &exsExport.fCubeDetailProb, sz,
+             "Show detailed probabilities for cube decisions",
+             "Do not show detailed probabilities for cube decisions" );
+
+}
+
+extern void
+CommandSetExportCubeParameters ( char *sz ) {
+
+
+  pParameter = exsExport.afCubeParameters;
+  szParameter = "cube";
+  HandleCommand ( sz, acSetExportParameters );
+
+}
+
+
+extern void
+CommandSetExportParametersEvaluation ( char *sz ) {
+
+  SetToggle( "evaluation", &pParameter[ 0 ], sz,
+             "Show detailed parameters for evaluations",
+             "Do not show detailed parameters for evaluations" );
+
+}
+
+extern void
+CommandSetExportParametersRollout ( char *sz ) {
+
+  SetToggle( "rollout", &pParameter[ 1 ], sz,
+             "Show detailed parameters for rollouts",
+             "Do not show detailed parameters for rollouts" );
+
+}
+
+
+static void
+SetExportDisplay ( char *szSkill, char *szText, char *sz, int *pf ) {
+
+  char sz1[ 100 ], sz2[ 100 ];
+
+  sprintf ( sz1, "Show %s", szText );
+  sprintf ( sz2, "Do not show %s", szText );
+
+  SetToggle ( szSkill, pf, sz, sz1, sz2 );
+    
+}
+
+
+extern void
+CommandSetExportMovesDisplayVeryBad ( char *sz ) {
+  
+  SetExportDisplay ( "verybad", "moves marked very bad", 
+                     sz, 
+                     &exsExport.afMovesDisplay[ SKILL_VERYBAD ] );
+
+}
+    
+extern void
+CommandSetExportMovesDisplayBad ( char *sz ) {
+  
+  SetExportDisplay ( "bad", "moves marked bad", 
+                     sz, 
+                     &exsExport.afMovesDisplay[ SKILL_BAD ] );
+
+}
+    
+extern void
+CommandSetExportMovesDisplayDoubtful ( char *sz ) {
+  
+  SetExportDisplay ( "doubtful", "moves marked doubtful", 
+                     sz, 
+                     &exsExport.afMovesDisplay[ SKILL_DOUBTFUL ] );
+
+}
+    
+extern void
+CommandSetExportMovesDisplayUnmarked ( char *sz ) {
+  
+  SetExportDisplay ( "unmarked", "unmarked moves", 
+                     sz, 
+                     &exsExport.afMovesDisplay[ SKILL_NONE ] );
+
+}
+    
+extern void
+CommandSetExportMovesDisplayInteresting ( char *sz ) {
+  
+  SetExportDisplay ( "interesting", "moves marked interesting", 
+                     sz, 
+                     &exsExport.afMovesDisplay[ SKILL_INTERESTING ] );
+
+}
+    
+extern void
+CommandSetExportMovesDisplayGood ( char *sz ) {
+  
+  SetExportDisplay ( "good", "moves marked good", 
+                     sz, 
+                     &exsExport.afMovesDisplay[ SKILL_GOOD ] );
+
+}
+    
+extern void
+CommandSetExportMovesDisplayVeryGood ( char *sz ) {
+  
+  SetExportDisplay ( "verygood", "moves marked very good", 
+                     sz, 
+                     &exsExport.afMovesDisplay[ SKILL_VERYGOOD ] );
+
+}
+    
+
+extern void
+CommandSetExportCubeDisplayVeryBad ( char *sz ) {
+  
+  SetExportDisplay ( "verybad", "cube decisions marked very bad", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ SKILL_VERYBAD ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayBad ( char *sz ) {
+  
+  SetExportDisplay ( "bad", "cube decisions marked bad", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ SKILL_BAD ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayDoubtful ( char *sz ) {
+  
+  SetExportDisplay ( "doubtful", "cube decisions marked doubtful", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ SKILL_DOUBTFUL ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayUnmarked ( char *sz ) {
+  
+  SetExportDisplay ( "unmarked", "unmarked cube decisions", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ SKILL_NONE ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayInteresting ( char *sz ) {
+  
+  SetExportDisplay ( "interesting", "cube decisions marked interesting", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ SKILL_INTERESTING ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayGood ( char *sz ) {
+  
+  SetExportDisplay ( "good", "cube decisions marked good", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ SKILL_GOOD ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayVeryGood ( char *sz ) {
+  
+  SetExportDisplay ( "verygood", "cube decisions marked very good", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ SKILL_VERYGOOD ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayActual ( char *sz ) {
+  
+  SetExportDisplay ( "actual", "actual cube actions", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayClose ( char *sz ) {
+  
+  SetExportDisplay ( "close", "close cube decision", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] );
+
+}
+    
+extern void
+CommandSetExportCubeDisplayMissed ( char *sz ) {
+  
+  SetExportDisplay ( "missed", "missed doubles", 
+                     sz, 
+                     &exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] );
+
+}
+    
+     
