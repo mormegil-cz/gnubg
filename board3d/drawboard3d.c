@@ -31,8 +31,8 @@
 #include "matrix.h"
 #include "shadow.h"
 
-#if BUILDING_LIB
-#include "../renderprefs.h"
+#ifdef BUILDING_LIB
+#include "renderprefs.h"
 #endif
 
 // My logcube - more than 32 then return 0 (show 64)

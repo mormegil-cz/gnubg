@@ -26,7 +26,7 @@
 /* Duplicate definition of base_unit as including inc3d.h caused problems */
 #define base_unit .05f
 
-#if HAVE_FREETYPE
+#if HAVE_FTGL
 
 #include "FTGLPolygonFont.h"
 #include "FTGLOutlineFont.h"

@@ -21,20 +21,21 @@
 * $Id$
 */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "inc3d.h"
 #include <assert.h>
 
-#if USE_GTKGLEXT
+#if HAVE_GTKGLEXT
 
 #include <gtk/gtk.h>
 #include <gtk/gtkgl.h>
-#include "../config.h"
-#include "../backgammon.h"
-#include "../sound.h"
-#include "../renderprefs.h"
+#include "backgammon.h"
+#include "sound.h"
+#include "renderprefs.h"
 
 int screenHeight;
 guint id = 0;
