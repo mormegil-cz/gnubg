@@ -1,3 +1,9 @@
+Wed Dec  4 20:59:50 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (EvaluatePositionCubeful3): fix bug leading to
+	wrong equities in bearoffs.
+	(reported Ned Cross)
+
 Tue Dec 3 22:32:15 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
 	* split Path functions from eval.c to new separate file path.[ch]
