@@ -1,3 +1,11 @@
+Mon Jul 22 18:27:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Try to fix the "double prompt" bug.
+
+	* gnubg.c (ProcessInput, GetInput, HandleInputRecursive):
+	call rl_callback_handler_install with empty prompt.
+	I'm not sure this is correct, but it seems to work....
+
 Mon Jul 22 17:32:16 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	
 	* rollout.c (ScoreMoveRollout): fix typo. (Wrong cubeinfo

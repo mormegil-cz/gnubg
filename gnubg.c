@@ -4310,7 +4310,7 @@ extern void Prompt( void ) {
 static void ProcessInput( char *sz, int fFree ) {
     
     rl_callback_handler_remove();
-       rl_callback_handler_install (FormatPrompt(), HandleInputIgnore);
+    rl_callback_handler_install ("", HandleInputIgnore);
     fReadingCommand = FALSE;
     
     if( !sz ) {
@@ -4376,7 +4376,7 @@ void HandleInputRecursive( char *sz ) {
     szInput = sz;
 
     rl_callback_handler_remove();
-       rl_callback_handler_install( FormatPrompt(), HandleInputIgnore);        
+    rl_callback_handler_install( "", HandleInputIgnore);        
 }
 #endif
 
@@ -4567,7 +4567,7 @@ extern char *GetInput( char *szPrompt ) {
 	    } else {
 		rl_callback_handler_remove();	
 
-                rl_callback_handler_install( FormatPrompt(), HandleInputIgnore);
+                rl_callback_handler_install( "", HandleInputIgnore);
             }
 	    
 	    fReadingOther = FALSE;
