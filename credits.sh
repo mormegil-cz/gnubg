@@ -109,6 +109,7 @@ Frank Worrell
 Christopher D. Yep
 Anders Zachrison
 Douglas Zare
+XX
 EOF
 
 column -c 72 < $contributors | expand | sed 's/^/    /' >> AUTHORS
