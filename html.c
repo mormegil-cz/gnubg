@@ -70,8 +70,8 @@ typedef enum _stylesheetclass {
 } stylesheetclass;
 
 static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
-  { "movetable", "background-color: #c7c7c7" },
-  { "moveheader", "background-color: #787878" },
+  { "movetable", "background-color: #ddddee" },
+  { "moveheader", "background-color: #89d0e2; padding: 0.5em" },
   { "movenumber", "width: 2em; text-align: right" },
   { "moveply", "width: 5em; text-align: center" },
   { "movemove", "width: 20em; text-align: left" },
@@ -90,9 +90,9 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
     "background-color: yellow; font-weight: bold; text-align: center; "
     "color: black; width: 40em; padding: 0.2em" },
   { "tiny", "font-size: 25%" },
-  { "cubedecision", "background-color: #ddddee; text-align: left" },
-
-  { "cubedecisionheader", "background-color: #89d0e2; text-align: center" },
+  { "cubedecision", "background-color: #ddddee; text-align: left;" },
+  { "cubedecisionheader", 
+    "background-color: #89d0e2; text-align: center; padding: 0.5em" },
   { "comment", "background-color: #449911; width: 39.5em; padding: 0.5em" },
   { "commentheader", 
     "background-color: #557711; font-weight: bold; text-align: center; "
@@ -2479,17 +2479,21 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
   /* table header */
 
   fprintf ( pf,
-            "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" %s>\n",
+            "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" %s>\n"
+            "<tr>\n",
             GetStyle ( CLASS_MOVETABLE, hecss ) );
-  fprintf ( pf, "<tr %s>\n", GetStyle ( CLASS_MOVEHEADER, hecss ) );
-  fprintf ( pf, "<th %s colspan=\"2\">%s</th>\n",
+  fprintf ( pf, "<th %s %s colspan=\"2\">%s</th>\n",
+            GetStyle ( CLASS_MOVEHEADER, hecss ),
             GetStyle ( CLASS_MOVENUMBER, hecss ), _("#") );
-  fprintf ( pf, "<th %s>%s</th>\n",
+  fprintf ( pf, "<th %s %s>%s</th>\n",
+            GetStyle ( CLASS_MOVEHEADER, hecss ),
             GetStyle ( CLASS_MOVEPLY, hecss ), _("Ply") );
-  fprintf ( pf, "<th %s>%s</th>\n",
+  fprintf ( pf, "<th %s %s>%s</th>\n",
+            GetStyle ( CLASS_MOVEHEADER, hecss ),
             GetStyle ( CLASS_MOVEMOVE, hecss ), _("Move") );
   fprintf ( pf,
-            "<th %s>%s</th>\n" "</tr>\n",
+            "<th %s %s>%s</th>\n" "</tr>\n",
+            GetStyle ( CLASS_MOVEHEADER, hecss ),
             GetStyle ( CLASS_MOVEEQUITY, hecss ),
             ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) ?
             _("Equity") : _("MWC") );
@@ -2514,7 +2518,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       /* selected move or not */
       
       fprintf ( pf, 
-                "<td>%s</td>\n",
+                "<td %s>%s</td>\n",
+                GetStyle ( CLASS_MOVENUMBER, hecss ), 
                 ( i == pmr->n.iMove ) ? "*" : "&nbsp;" );
 
       /* move no */
@@ -2522,9 +2527,11 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       if ( i != pmr->n.iMove || i != pmr->n.ml.cMoves - 1 || 
            pmr->n.ml.cMoves == 1 ) 
         fprintf ( pf, 
-                  "<td>%d</td>\n", i + 1 );
+                  "<td %s>%d</td>\n", 
+                  GetStyle ( CLASS_MOVENUMBER, hecss ), i + 1 );
       else
-        fprintf ( pf, "<td>\?\?</td>\n" );
+        fprintf ( pf, "<td %s>\?\?</td>\n",
+                  GetStyle ( CLASS_MOVENUMBER, hecss ) );
 
       /* ply */
 

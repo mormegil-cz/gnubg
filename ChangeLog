@@ -1,3 +1,7 @@
+Mon Mar  3 20:06:22 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c: update some colors and CSS styles.
+
 Mon Mar 3 18:54:15 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* renderprefs.c, gnubg.c - conditionals to allow a build
