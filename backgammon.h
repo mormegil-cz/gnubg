@@ -787,7 +787,7 @@ extern int GiveAdvice ( skilltype Skill );
 extern skilltype TutorSkill;
 extern int fTutorAnalysis;
 
-#ifndef HAVE_BASENAME
+#if ! defined(HAVE_BASENAME) && ! defined (HAVE_LIBGEN_H)
 extern char *
 basename ( const char *filename );
 #endif
