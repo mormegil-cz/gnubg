@@ -1,3 +1,8 @@
+Mon Apr 22 11:18:42 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c (SetMatchID): return if empty match id.
+	* matchid.c (MatchFromKey): implement consistency check.
+
 Mon Apr 22 10:53:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c, backgammon.h: insert some missing #if USE_GTK

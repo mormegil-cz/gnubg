@@ -27,6 +27,7 @@
 #include "backgammon.h"
 #include "positionid.h"
 #include "matchid.h"
+#include "matchequity.h"
 
 
 /*
@@ -209,6 +210,17 @@ MatchFromKey ( int anDice[ 2 ],
   GetBits ( auchKey, 51, 15, &anScore[ 1 ] );
 
   /* FIXME: implement a consistency check */
+
+  if ( anDice[ 0 ] < 0 || anDice[ 0 ] > 6 )
+     return -1;
+  if ( anDice[ 1 ] < 0 || anDice[ 1 ] > 6 )
+     return -1;
+  if ( *pnMatchTo < 0 || *pnMatchTo > MAXSCORE )
+     return -1;
+  if ( anScore[ 0 ] < 0 || anScore[ 0 ] > *pnMatchTo )
+     return -1;
+  if ( anScore[ 1 ] < 0 || anScore[ 1 ] > *pnMatchTo )
+     return -1;
 
   return 0;
 

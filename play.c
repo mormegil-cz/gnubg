@@ -3101,6 +3101,8 @@ SetMatchID ( const char *szMatchID ) {
 
   moverecord *pmr;
 
+  if ( ! szMatchID || ! *szMatchID )
+     return;
 
   if( ms.gs == GAME_PLAYING && fConfirm ) {
     if( fInterrupt )
