@@ -1,3 +1,13 @@
+Thu Sep 19 22:06:27 2003 GMT  Jim Segrave <jes@jes-2.demon.nl>
+
+	* first cut at paramaterising board. It now appears to be possible
+	  to alter the aspect ratio (adding space in the middle). A 72x108
+	  board is buildable, but should not be used (there's no guarantee
+	  that the dice or doubling cube can be placed on the board
+	  without intersecting chequers, although changing the die and 
+	  doubling cube size will fix that)
+
+
 Wed Sep 17 11:42:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* timercontrol.c: Changed timing function for win32
@@ -6,6 +16,7 @@ Wed Sep 17 11:42:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 Tue Sep 16 17:42:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkgame.c: Add dynamic help to enter command.
+
 
 Mon Sep 15 12:55:45 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 

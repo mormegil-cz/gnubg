@@ -26,29 +26,9 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#include "boarddim.h"
 #include "boardpos.h"
 #include "i18n.h"
-
-int positions[ 2 ][ 30 ][ 3 ] = { {
-    { 51, 25, 7 },
-    { 90, 73, 6 }, { 84, 73, 6 }, { 78, 73, 6 }, { 72, 73, 6 }, { 66, 73, 6 },
-    { 60, 73, 6 }, { 42, 73, 6 }, { 36, 73, 6 }, { 30, 73, 6 }, { 24, 73, 6 },
-    { 18, 73, 6 }, { 12, 73, 6 },
-    { 12, 3, -6 }, { 18, 3, -6 }, { 24, 3, -6 }, { 30, 3, -6 }, { 36, 3, -6 },
-    { 42, 3, -6 }, { 60, 3, -6 }, { 66, 3, -6 }, { 72, 3, -6 }, { 78, 3, -6 },
-    { 84, 3, -6 }, { 90, 3, -6 },
-    { 51, 51, -7 }, { 99, 73, 6 }, { 99, 3, -6 }, { 3, 73, 6 }, { 3, 3, -6 }
-}, {
-    { 51, 25, 7 },
-    { 12, 73, 6 }, { 18, 73, 6 }, { 24, 73, 6 }, { 30, 73, 6 }, { 36, 73, 6 },
-    { 42, 73, 6 }, { 60, 73, 6 }, { 66, 73, 6 }, { 72, 73, 6 }, { 78, 73, 6 },
-    { 84, 73, 6 }, { 90, 73, 6 },
-    { 90, 3, -6 }, { 84, 3, -6 }, { 78, 3, -6 }, { 72, 3, -6 }, { 66, 3, -6 },
-    { 60, 3, -6 }, { 42, 3, -6 }, { 36, 3, -6 }, { 30, 3, -6 }, { 24, 3, -6 },
-    { 18, 3, -6 }, { 12, 3, -6 },
-    { 51, 51, -7 }, { 3, 73, 6 }, { 3, 3, -6 }, { 99, 73, 6 }, { 99, 3, -6 }
-} };
-
 
 extern void
 ChequerPosition( const int clockwise, 
@@ -74,18 +54,22 @@ PointArea( const int fClockwise, const int nSize,
            const int n,
            int *px, int *py, int *pcx, int *pcy ) {
 
+    /* max chequer in column */
     int c_chequer = ( !n || n == 25 ) ? 3 : 5;
     
     *px = positions[ fClockwise ][ n ][ 0 ] * nSize;
     *py = positions[ fClockwise ][ n ][ 1 ] * nSize;
-    *pcx = 6 * nSize;
+    *pcx = CHEQUER_WIDTH * nSize;
     *pcy = positions[ fClockwise ][ n ][ 2 ] * nSize;
     
     if( *pcy > 0 ) {
-	*pcy = *pcy * ( c_chequer - 1 ) + 10 * nSize;
-	*py += 6 * nSize - *pcy;
+	*pcy = *pcy * ( c_chequer - 1 ) + 
+	  (CHEQUER_HEIGHT + DISPLAY_POINT_EXTRA) * nSize;
+	*py += CHEQUER_HEIGHT * nSize - *pcy;
     } else
-	*pcy = -*pcy * ( c_chequer - 1 ) + 10 * nSize;
+	*pcy = -*pcy * ( c_chequer - 1 ) + 
+	  (CHEQUER_HEIGHT + DISPLAY_POINT_EXTRA) * nSize;
+
 
 
 
@@ -99,16 +83,17 @@ CubePosition( const int crawford_game, const int cube_use,
 
     if( crawford_game || !cube_use ) {
 	/* no cube */
-	if( px ) *px = -32768;
-	if( py ) *py = -32768;
+	if( px ) *px = NO_CUBE;
+	if( py ) *py = NO_CUBE;
 	if( porient ) *porient = -1;
     } else if( doubled ) {
-	if( px ) *px = 50 - 25 * doubled;
-	if( py ) *py = 37;
+      if( px ) *px = (doubled > 0) ? CUBE_RIGHT_X: CUBE_LEFT_X;
+	if( py ) *py = CUBE_CENTRE_Y;
 	if( porient ) *porient = doubled;
     } else {
-	if( px ) *px = 50;
-	if( py ) *py = 37 - 34 * cube_owner;
+	if( px ) *px = CUBE_CENTRE_X;
+	if( py ) *py = (cube_owner < 0)  ? CUBE_OWN_1_Y :
+	               (cube_owner == 0) ? CUBE_CENTRE_Y :  CUBE_OWN_0_Y;
 	if( porient ) *porient = cube_owner;
     }
 
@@ -119,14 +104,15 @@ extern void
 ResignPosition( const int resigned, int *px, int *py, int *porient ) {
 
   if( resigned ) {
-    if ( px ) *px = 50 + 30 * resigned / abs ( resigned );
-    if ( py ) *py = 37;
+    if ( px ) *px = (resigned / abs ( resigned ) < 0) ? 
+		CUBE_RESIGN_LEFT_X : CUBE_RESIGN_RIGHT_X;
+    if ( py ) *py = CUBE_CENTRE_Y;
     if( porient ) *porient = - resigned / abs ( resigned );
   }
   else {
     /* no resignation */
-    if( px ) *px = -32768;
-    if( py ) *py = -32768;
+    if( px ) *px = NO_CUBE;
+    if( py ) *py = NO_CUBE;
     if( porient ) *porient = -1;
   }
 
@@ -142,6 +128,7 @@ ArrowPosition( const int clockwise, const int nSize, int *px, int *py ) {
 
     int Point28_x, Point28_y, Point28_dx, Point28_dy;
     int Point29_x, Point29_y, Point29_dx, Point29_dy;
+
     PointArea( clockwise, nSize, POINT_UNUSED0, 
                &Point28_x, &Point28_y, &Point28_dx, &Point28_dy );
     PointArea( clockwise, nSize, POINT_UNUSED1, 
@@ -153,8 +140,7 @@ ArrowPosition( const int clockwise, const int nSize, int *px, int *py ) {
 
     if ( px ) *px = Point29_x + Point29_dx / 2
 			- nSize * ARROW_SIZE / 2;
-    if ( py ) *py = (Point29_y + Point29_dy + Point29_dx / 2
-			- nSize * ARROW_SIZE / 2) + nSize;
+    if ( py ) *py = (nSize * (BOARD_HEIGHT - ARROW_HEIGHT) / 2);
 
 
 }

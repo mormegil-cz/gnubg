@@ -9466,3 +9466,4 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	*/
 #endif
 }
+

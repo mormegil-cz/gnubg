@@ -394,16 +394,16 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
     x0 /= rdAppearance.nSize;
     y0 /= rdAppearance.nSize;
 
-    if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], 7, 7 ) ||
-	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
+    if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], DIE_WIDTH, DIE_HEIGHT ) ||
+	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], DIE_WIDTH, DIE_HEIGHT ) )
 	return POINT_DICE;
     
     cube_position( bd, &xCube, &yCube, NULL );
-    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+    if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
 	return POINT_CUBE;
 
     resign_position( bd, &xCube, &yCube, NULL );
-    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+    if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
 	return POINT_RESIGN;
     
     /* jsc: support for faster rolling of dice by clicking board
@@ -411,9 +411,13 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
       * These arguments should be dynamically calculated instead 
       * of hardcoded, but it's too painful right now.
       */
-    if( intersects( x0, y0, 0, 0, 60, 37, 36, 8 ) )
+    if( intersects( x0, y0, 0, 0, (BOARD_WIDTH + BAR_WIDTH)/2, 
+		    (BOARD_HEIGHT - CHEQUER_HEIGHT)/2 - 1, 
+		    6 * CHEQUER_WIDTH, CHEQUER_HEIGHT + 2 ) )
 	return POINT_RIGHT;
-    else if( intersects( x0, y0, 0, 0, 12, 37, 36, 8 ) )
+    else if( intersects( x0, y0, 0, 0, BEAROFF_WIDTH, 
+			 (BOARD_HEIGHT - CHEQUER_HEIGHT)/2 - 1, 
+			 6 * CHEQUER_WIDTH, CHEQUER_HEIGHT + 2 ) )
 	return POINT_LEFT;
 
 
@@ -1229,13 +1233,16 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
     /* Similar to board_point, but adds the nasty y-=3 cy+=3 border
        allowances */
     
-    if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], 7, 7 ) ||
-	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
+    if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], DIE_WIDTH, DIE_HEIGHT ) ||
+	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], DIE_WIDTH, DIE_HEIGHT ) )
 	return POINT_DICE;
     
-    if( intersects( x0, y0, 0, 0, 60, 33, 36, 6 ) )
+    if( intersects( x0, y0, 0, 0, (BOARD_WIDTH + BAR_WIDTH)/ 2, 
+		    BORDER_HEIGHT + 5 * CHEQUER_HEIGHT, 
+		    6 * CHEQUER_WIDTH, CHEQUER_HEIGHT ) )
 	return POINT_RIGHT;
-    else if( intersects( x0, y0, 0, 0, 12, 33, 36, 6 ) )
+    else if( intersects( x0, y0, 0, 0, BEAROFF_WIDTH, 5 * CHEQUER_HEIGHT + BORDER_HEIGHT, 
+			 6 * CHEQUER_WIDTH, CHEQUER_HEIGHT ) )
 	return POINT_LEFT;
     
     for( i = 0; i < 30; i++ ) {
@@ -1246,10 +1253,10 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 	cx /= rdAppearance.nSize;
 	cy /= rdAppearance.nSize;
 
-	if( y < 36 )
-	    y -= 3;
+	if( y < 6 * CHEQUER_HEIGHT )
+	  y -= (BORDER_HEIGHT);
 
-	cy += 3;
+	cy += BORDER_HEIGHT;
 
 	if( intersects( x0, y0, 0, 0, x, y, cx, cy ) )
 	    return i;
@@ -1257,11 +1264,11 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 
     cube_position( bd, &xCube, &yCube, NULL );
     
-    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+    if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
 	return POINT_CUBE;
     
     resign_position( bd, &xCube, &yCube, NULL );
-    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+    if( intersects( x0, y0, 0, 0, xCube, yCube, CUBE_WIDTH, CUBE_HEIGHT ) )
 	return POINT_RESIGN;
     
     /* Could not find an overlapping point */
@@ -1287,7 +1294,7 @@ static int board_chequer_number( GtkWidget *board, BoardData *bd,
     c_chequer = ( !point || point == 25 ) ? 3 : 5;
 
     x = positions[ fClockwise ][ point ][ 0 ]; 
-    cx = 6;
+    cx = CHEQUER_WIDTH;
 
     y = positions[ fClockwise ][ point ][ 1 ];
     dy = -positions[ fClockwise ][ point ][ 2 ];
@@ -2134,18 +2141,26 @@ void RollDice2d(BoardData* bd)
 {
 	int iAttempt = 0, iPoint, x, y, cx, cy;
 
-	bd->x_dice[ 0 ] = RAND % 21 + 13;
-	bd->x_dice[ 1 ] = RAND % ( 34 - bd->x_dice[ 0 ] ) +
-	bd->x_dice[ 0 ] + 8;
+	bd->x_dice[ 0 ] = RAND % (3 * DIE_WIDTH) + BEAROFF_WIDTH + 1;
+	bd->x_dice[ 1 ] = RAND % ( 6 * CHEQUER_WIDTH - 2 - bd->x_dice[ 0 ] ) +
+	bd->x_dice[ 0 ] + DIE_WIDTH + 1;
 
 	if( bd->colour == bd->turn )
 	{
-		bd->x_dice[ 0 ] += 48;
-		bd->x_dice[ 1 ] += 48;
+		bd->x_dice[ 0 ] += 6 * CHEQUER_WIDTH + BAR_WIDTH;
+		bd->x_dice[ 1 ] += 6 * CHEQUER_WIDTH + BAR_WIDTH;
 	}
+#define POINT_GAP (BOARD_HEIGHT  - 10 * CHEQUER_HEIGHT - 2 * BORDER_HEIGHT)
+#if (POINT_GAP > DIE_HEIGHT)
+	bd->y_dice[ 0 ] = RAND % (POINT_GAP - DIE_HEIGHT) +
+	  5 * CHEQUER_HEIGHT + BORDER_HEIGHT;
+	bd->y_dice[ 1 ] = RAND % (POINT_GAP - DIE_HEIGHT) +
+	  5 * CHEQUER_HEIGHT + BORDER_HEIGHT;
+#else
+	bd->y_dice[ 0 ] = 5 * CHEQUER_HEIGHT + BORDER_HEIGHT;
+	bd->y_dice[ 1 ] = 5 * CHEQUER_HEIGHT + BORDER_HEIGHT;
 
-	bd->y_dice[ 0 ] = RAND % 9 + 33;
-	bd->y_dice[ 1 ] = RAND % 9 + 33;
+#endif
 
 	if( rdAppearance.nSize > 0 )
 	{
@@ -2160,9 +2175,9 @@ void RollDice2d(BoardData* bd)
 				cy /= rdAppearance.nSize;
 				
 				if( ( intersects( bd->x_dice[ 0 ], bd->y_dice[ 0 ],
-						  7, 7, x, y, cx, cy ) ||
+						  DIE_WIDTH, DIE_HEIGHT, x, y, cx, cy ) ||
 					  intersects( bd->x_dice[ 1 ], bd->y_dice[ 1 ],
-						  7, 7, x, y, cx, cy ) ) &&
+						  DIE_WIDTH, DIE_HEIGHT, x, y, cx, cy ) ) &&
 					iAttempt++ < 0x80 )
 				{	/* Try placing again */
 					RollDice2d(bd);
@@ -2363,26 +2378,24 @@ static gint board_set( Board *board, const gchar *board_text,
 #endif
 			)
 		{
-			/* dice were visible before; now they're not */
-			int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
-			bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
-				if ( rdAppearance.nSize > 0 ) {
-				  board_invalidate_rect( bd->drawing_area,
-										 ax[ 0 ] * rdAppearance.nSize,
-										 bd->y_dice[ 0 ] * rdAppearance.nSize,
-										 7 * rdAppearance.nSize, 
-										 7 * rdAppearance.nSize, bd );
-				  board_invalidate_rect( bd->drawing_area,
-										 ax[ 1 ] * rdAppearance.nSize,
-										 bd->y_dice[ 1 ] * rdAppearance.nSize,
-										 7 * rdAppearance.nSize, 
-										 7 * rdAppearance.nSize, bd );
-				}
+		  /* dice were visible before; now they're not */
+		  int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
+		  bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -DIE_WIDTH - 3;
+		  if ( rdAppearance.nSize > 0 ) {
+		    board_invalidate_rect( bd->drawing_area,
+					   ax[ 0 ] * rdAppearance.nSize,
+					   bd->y_dice[ 0 ] * rdAppearance.nSize,
+					   DIE_WIDTH * rdAppearance.nSize,  
+					   DIE_HEIGHT * rdAppearance.nSize, bd);
+		    board_invalidate_rect( bd->drawing_area, ax[ 1 ] * rdAppearance.nSize,
+					   bd->y_dice[ 1 ] * rdAppearance.nSize, DIE_WIDTH * rdAppearance.nSize, 
+					   DIE_HEIGHT * rdAppearance.nSize, bd );
+		  }
 		}
 
 		if (bd->diceRoll[0] <= 0)
 		{	/* Dice not on board */
-			bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
+			bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -DIE_WIDTH - 3;
 
 			if (bd->diceRoll[ 0 ] == 0)
 			{
@@ -2626,22 +2639,26 @@ static gint board_slide_timeout( gpointer p ) {
 
     switch( slide_phase ) {
     case 0:
+#define SLIDE_BOTTOM (BOARD_HEIGHT / 2 - 3 * CHEQUER_HEIGHT)
+#define SLIDE_MIDDLE (BOARD_HEIGHT / 2)
+#define SLIDE_TOP    (SLIDE_MIDDLE + 3 * CHEQUER_HEIGHT)
+
 	/* start slide */
 	chequer_position( src, abs( pbd->points[ src ] ), &x, &y );
-	x += 3;
-	y += 3;
-	if( y < 18 )
-	    y_lift = 18;
-	else if( y < 36 )
-	    y_lift = y + 3;
-	else if( y > 54 )
-	    y_lift = 54;
+	x += (CHEQUER_WIDTH / 2);
+	y += (CHEQUER_HEIGHT / 2);
+	if( y < SLIDE_BOTTOM )
+	    y_lift = SLIDE_BOTTOM;
+	else if( y < SLIDE_MIDDLE )
+	    y_lift = y + CHEQUER_HEIGHT / 2;
+	else if( y > SLIDE_TOP )
+	    y_lift = SLIDE_TOP;
 	else
-	    y_lift = y - 3;
+	    y_lift = y - CHEQUER_HEIGHT / 2;
 	chequer_position( dest, abs( pbd->points[ dest ] ) + 1, &x_dest,
 			  &y_dest );
-	x_dest += 3;
-	y_dest += 3;
+	x_dest += CHEQUER_WIDTH / 2;
+	y_dest += CHEQUER_HEIGHT / 2;
 	x_mid = ( x + x_dest ) >> 1;
 	board_start_drag( pbd->drawing_area, pbd, src, x * rdAppearance.nSize,
 			  y * rdAppearance.nSize );
@@ -2649,10 +2666,10 @@ static gint board_slide_timeout( gpointer p ) {
 	/* fall through */
     case 1:
 	/* lift */
-	if( y < 36 && y < y_lift ) {
+	if( y < SLIDE_MIDDLE && y < y_lift ) {
 	    y += 2;
 	    break;
-	} else if( y > 36 && y > y_lift ) {
+	} else if( y > SLIDE_MIDDLE && y > y_lift ) {
 	    y -= 2;
 	    break;
 	} else
@@ -2660,16 +2677,16 @@ static gint board_slide_timeout( gpointer p ) {
 	/* fall through */
     case 2:
 	/* to mid point */
-	if( y > 36 )
+	if( y > SLIDE_MIDDLE )
 	    y--;
-	else if( y < 36 )
+	else if( y < SLIDE_MIDDLE )
 	    y++;
 	
 	if( x > x_mid + 2 ) {
-	    x -= 3;
+	    x -= CHEQUER_WIDTH / 2;
 	    break;
 	} else if( x < x_mid - 2 ) {
-	    x += 3;
+	    x += CHEQUER_WIDTH / 2;
 	    break;
 	} else
 	    slide_phase++;
@@ -2682,10 +2699,10 @@ static gint board_slide_timeout( gpointer p ) {
 	    y += 2;
 	
 	if( x < x_dest - 2 ) {
-	    x += 3;
+	    x += CHEQUER_WIDTH / 2;
 	    break;
 	} else if( x > x_dest + 2 ) {
-	    x -= 3;
+	    x -= CHEQUER_WIDTH / 2;
 	    break;
 	} else
 	    slide_phase++;
@@ -2693,9 +2710,9 @@ static gint board_slide_timeout( gpointer p ) {
     case 4:
 	/* drop */
 	if( y > y_dest + 2 )
-	    y -= 3;
+	    y -= CHEQUER_HEIGHT / 2;
 	else if( y < y_dest - 2 )
-	    y += 3;
+	    y += CHEQUER_HEIGHT / 2;
 	else {
 	    board_end_drag( pbd->drawing_area, pbd );
 	    
@@ -2920,6 +2937,7 @@ extern void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
 	
 	gdk_draw_rgb_image( bd->appmKey[ i ], bd->gc_copy, 0, 0, 20, 20,
 			    GDK_RGB_DITHER_MAX, auch, 20 * 3 );
+
     }
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
@@ -3002,7 +3020,7 @@ static void board_size_allocate( GtkWidget *board,
 #endif
 	) {
       new_size = MIN( allocation->width / BOARD_WIDTH,
-                      ( allocation->height - 2 ) / 89 );    /* FIXME: is 89 correct? */
+                      ( allocation->height - 2 ) / (BOARD_HEIGHT + DIE_HEIGHT ));    /* FIXME: is 89 correct? */
 
       /* subtract pixels used */
       allocation->height -= new_size * DIE_HEIGHT + 2;
@@ -3723,7 +3741,7 @@ static void board_init( Board *board ) {
     gtk_container_add ( GTK_CONTAINER ( board ),
                         bd->dice_area = gtk_drawing_area_new() );
     /* gtk_widget_set_name( GTK_WIDGET(bd->dice_area), "dice_area"); */
-    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );
+    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 2 * DIE_WIDTH + 1, DIE_HEIGHT );
     gtk_widget_add_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
 			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
 
