@@ -53,6 +53,7 @@ Jim Segrave
 Ian Shaw
 Peter Sochovsky
 Maik Stiebler
+Rob Stroop
 Jacques Thiriat
 Robert-Jan Veldhuizen
 JP White
