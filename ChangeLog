@@ -1,3 +1,8 @@
+Wed Jan  9 11:28:54 2002  Gary Wong  <gtw@research.att.com>
+
+	* set.c: #include <limits.h> wherever it is available, not just
+	for Suns.
+
 Wed Jan  8 23:43:58 2002  Øystein Johansen <oeysteij@online.no>
 
         * kleinman.c : Simplify by using erf() instead of silly regression.

@@ -24,16 +24,12 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <math.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
-
-#if defined(sun)
-#define AF_LOCAL AF_UNIX
-#define PF_LOCAL PF_UNIX
-#include <limits.h>
-#endif
-
 #include <sys/socket.h>
 #include <sys/un.h>
 #endif
