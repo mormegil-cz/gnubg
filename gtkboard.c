@@ -1417,6 +1417,16 @@ static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
     return TRUE;
 }
 
+extern gint game_set_old_dice( Board *board, gint die0, gint die1 ) {
+
+    BoardData *pbd = board->board_data;
+    
+    pbd->dice_roll[ 0 ] = die0;
+    pbd->dice_roll[ 1 ] = die1;
+
+    return 0;
+}
+
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 ) {
@@ -2484,6 +2494,11 @@ static void board_set_score( GtkWidget *pw, BoardData *bd ) {
     UserCommand( sz );
 }
 
+static void board_stop( GtkWidget *pw, BoardData *bd ) {
+
+    fInterrupt = TRUE;
+}
+
 static void board_edit( GtkWidget *pw, BoardData *bd ) {
 
     int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
@@ -2689,7 +2704,10 @@ static void board_init( Board *board ) {
     
     bd->hbox_match = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( board ), bd->hbox_match, FALSE, FALSE, 0 );
-    
+
+    gtk_box_pack_start( GTK_BOX( bd->hbox_pos ), bd->stop =
+			gtk_button_new_with_label( "Stop" ),
+			FALSE, FALSE, 8 );
     gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->edit =
 		      gtk_toggle_button_new_with_label( "Edit" ),
 		      FALSE, FALSE, 8 );
@@ -2761,6 +2779,9 @@ static void board_init( Board *board ) {
     gtk_signal_connect( GTK_OBJECT( bd->reset ), "clicked",
 			GTK_SIGNAL_FUNC( ShowBoard ), NULL );
 
+    gtk_signal_connect( GTK_OBJECT( bd->stop ), "clicked",
+			GTK_SIGNAL_FUNC( board_stop ), NULL );
+    
     gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
 			GTK_SIGNAL_FUNC( board_edit ), bd );
     

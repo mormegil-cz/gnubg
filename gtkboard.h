@@ -48,12 +48,13 @@ extern GtkWidget *board_dice_widget( Board *board );
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1 );
-
+extern gint game_set_old_dice( Board *board, gint die0, gint die1 );
+    
 /* private data */
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
 	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
-	*crawford, *widget, *key0, *key1;
+	*crawford, *widget, *key0, *key1, *stop;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
