@@ -1469,6 +1469,28 @@ extern void GTKSetGame( int i ) {
     gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), i );
 }
 
+/* The annotation for one or more moves has been modified.  We refresh
+   the entire game and annotation windows, just to be safe. */
+extern void GTKUpdateAnnotations( void ) {
+
+    list *pl;
+    
+    GTKFreeze();
+    
+    GTKClearMoveRecord();
+
+    for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
+	GTKAddMoveRecord( pl->p );
+	ApplyMoveRecord( pl->p );
+    }
+
+    CalculateBoard();
+
+    GTKSetMoveRecord( plLastMove->p );
+
+    GTKThaw();
+}
+
 static gboolean main_delete( GtkWidget *pw ) {
     
     UserCommand( "quit" );

@@ -107,7 +107,7 @@ static void ApplyGameOver( void ) {
     anScore[ pmgi->fWinner ] += pmgi->nPoints;
 }
 
-static void ApplyMoveRecord( moverecord *pmr ) {
+extern void ApplyMoveRecord( moverecord *pmr ) {
 
     int n;
     movegameinfo *pmgi = plGame->plNext->p;

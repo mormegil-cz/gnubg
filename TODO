@@ -158,8 +158,8 @@ duplication of effort and to make sure our changes merge easily.
   annotation.
 ** Add the players' names in the drop-down menu in the game window.  (They
   used to be there, but weren't updated if the names were changed.)
-** Add a menu in the annotation window.  It should contain at least
-  the "annotate" commands.
+** Add option menus corresponding to the "annotate" commands in the
+  annotation window. (gary)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
 ** Write GTKDumpStatcontext (show statistics).
 
@@ -194,8 +194,8 @@ duplication of effort and to make sure our changes merge easily.
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
   see what the REPL in guile-gtk does.
-** Analysing a game or annotating a move doesn't immediately affect the
-  game window or the annotation window.
+** Check that calls to GTKUpdateAnnotations() are made where necessary
+  (e.g. the "annotate" commands probably should).
 ** The SGF loading (saving?) routines and CommandLoadCommands use
   stdio, which restarts system calls on signals.  This means TTY interrupts
   and the GTK `stop' button don't work. (gary)

@@ -30,6 +30,9 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
+#if USE_GTK
+#include "gtkgame.h"
+#endif
 #include "positionid.h"
 #include "analysis.h"
 
@@ -527,11 +530,15 @@ extern void CommandAnalyseGame( char *sz ) {
     AnalyzeGame( plGame );
 
     ProgressEnd();
+
+#if USE_GTK
+    if( fX )
+	GTKUpdateAnnotations();
+#endif
 }
 
 extern void CommandAnalyseMatch( char *sz ) {
 
-  int i;
   list *pl;
 
 #if DEBUG_ANALYSIS
@@ -548,10 +555,15 @@ extern void CommandAnalyseMatch( char *sz ) {
   
   ProgressStart( "Analysing match..." );
   
-  for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
+  for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext )
     AnalyzeGame( pl->p );
 
   ProgressEnd();
+
+#if USE_GTK
+  if( fX )
+      GTKUpdateAnnotations();
+#endif
 }
 
 extern void CommandAnalyseSession( char *sz ) {
@@ -1520,6 +1532,7 @@ StatMatch ( statcontext *pscStatMatch, int *pfCompleteAnalysis ) {
 
   }
 
+  return 0;
 }
 
 
@@ -1528,6 +1541,7 @@ StatGame ( statcontext *pscStatGame, int *pfCompleteAnalysis ) {
 
   *pfCompleteAnalysis = ComputeStatGame ( plGame, pscStatGame );
 
+  return 0;
 }
 
 

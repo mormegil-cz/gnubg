@@ -258,6 +258,7 @@ extern char *NextToken( char **ppch );
 extern void NextTurn( void );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
+extern void ApplyMoveRecord( moverecord *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
 extern void AddGame( moverecord *pmr );

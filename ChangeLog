@@ -1,3 +1,9 @@
+Tue Apr 17 13:26:17 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (CommandAnalyseGame, CommandAnalyseMatch): Update
+	GTK windows after analysing.
+	* gtkgame.c (GTKUpdateAnnotations): New function.
+
 Mon Apr 16 12:59:27 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (AnalyzeGame): Automatically mark moves/rolls good/bad
