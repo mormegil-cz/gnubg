@@ -1194,7 +1194,7 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 
     if( !dragging && ( n == 26 || n == 27 ) ) {
 	/* click on bearoff tray in edit mode -- bear off all chequers */
-	for( i = 0; i < 26; i++ ) {
+	for( i = 0; i < 28; i++ ) {
 	    bd->points[ i ] = 0;
 	    board_invalidate_point( bd, i );
 	}
