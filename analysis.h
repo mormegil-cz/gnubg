@@ -112,7 +112,7 @@ extern int afAnalysePlayers[ 2 ];
 
 extern ratingtype GetRating ( const float rError );
 extern void IniStatcontext ( statcontext* psc );
-extern void AddStatcontext ( statcontext* pscA, statcontext* pscB );
+extern void AddStatcontext ( const statcontext* pscA, statcontext* pscB );
 
 extern void
 DumpStatcontext ( char* szOutput, const statcontext* psc, const char* sz,

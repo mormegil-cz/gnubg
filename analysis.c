@@ -441,8 +441,7 @@ updateStatcontext(statcontext*       psc,
 	  
       for( i = 0; i < pmr->n.ml.cMoves; i++ ) 
 
-        if( EqualKeys( auch,
-                       pmr->n.ml.amMoves[ i ].auch ) ) {
+        if( EqualKeys(auch, pmr->n.ml.amMoves[ i ].auch) ) {
 
           rChequerSkill =
             pmr->n.ml.amMoves[ i ].rScore - pmr->n.ml.amMoves[ 0 ].rScore;
@@ -496,17 +495,13 @@ updateStatcontext(statcontext*       psc,
         if( arDouble[ OUTPUT_NODOUBLE ] >= 0.95f ) {
           /* around too good point */
           psc->anCubeWrongDoubleTG[ pmr->d.fPlayer ]++;
-          psc->arErrorWrongDoubleTG[ pmr->d.fPlayer ][ 0 ] -=
-            rSkill;
-          psc->arErrorWrongDoubleTG[ pmr->d.fPlayer ][ 1 ] -=
-            rCost;
+          psc->arErrorWrongDoubleTG[ pmr->d.fPlayer ][ 0 ] -= rSkill;
+          psc->arErrorWrongDoubleTG[ pmr->d.fPlayer ][ 1 ] -= rCost;
         } else {
           /* around double point */
           psc->anCubeWrongDoubleDP[ pmr->d.fPlayer ]++;
-          psc->arErrorWrongDoubleDP[ pmr->d.fPlayer ][ 0 ] -=
-            rSkill;
-          psc->arErrorWrongDoubleDP[ pmr->d.fPlayer ][ 1 ] -=
-            rCost;
+          psc->arErrorWrongDoubleDP[ pmr->d.fPlayer ][ 0 ] -= rSkill;
+          psc->arErrorWrongDoubleDP[ pmr->d.fPlayer ][ 1 ] -= rCost;
         }
       }
 
@@ -538,9 +533,7 @@ updateStatcontext(statcontext*       psc,
         psc->anCubeWrongTake[ pmr->d.fPlayer ]++;
         psc->arErrorWrongTake[ pmr->d.fPlayer ][ 0 ] -= rSkill;
         psc->arErrorWrongTake[ pmr->d.fPlayer ][ 1 ] -= rCost;
-
       }
-
     }
 
     break;
@@ -569,9 +562,7 @@ updateStatcontext(statcontext*       psc,
         psc->anCubeWrongPass[ pmr->d.fPlayer ]++;
         psc->arErrorWrongPass[ pmr->d.fPlayer ][ 0 ] -= rSkill;
         psc->arErrorWrongPass[ pmr->d.fPlayer ][ 1 ] -= rCost;
-
       }
-
     }
 
     break;
@@ -1030,7 +1021,7 @@ UpdateVariance( float *prVariance,
 }
       	
 extern void
-AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
+AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
 
   /* pscB = pscB + pscA */
 
