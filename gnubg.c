@@ -80,6 +80,11 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <iconv.h>
 #endif
 
+#if USE_PYTHON
+#include <Python.h>
+#include <gnubgmodule.h>
+#endif
+
 #include <glib/gutils.h>
 
 #include "analysis.h"
@@ -1861,6 +1866,9 @@ char *aszVersion[] = {
 #if USE_GUILE
     N_ ("Guile supported."),
 #endif
+#if USE_PYTHON
+    N_ ("Python supported."),
+#endif
 #if HAVE_LIBGDBM
     N_ ("Position databases supported."),
 #endif
@@ -2566,6 +2574,36 @@ extern void HandleCommand( char *sz, command *ac ) {
 #endif
 	    return;
 	}
+        else if ( *sz == '>' ) {
+
+          while ( *sz == '>' )
+            ++sz;
+
+#if USE_PYTHON
+#if USE_GTK
+	    if( fX )
+		GTKDisallowStdin();
+#endif
+          if ( *sz ) {
+            /* expression specified -- evalute it */
+
+            PyRun_SimpleString( sz );
+          }
+          else {
+            /* no expresision -- start python shell */
+            PyRun_AnyFile( stdin, NULL );
+          }
+#if USE_GTK
+	    if( fX )
+		GTKAllowStdin();
+#endif
+#else
+	    outputl( _("This installation of GNU Backgammon was compiled "
+		     "without Python support.") );
+	    outputx();
+#endif
+            return;
+        }
     }
     
     if( !( pch = NextToken( &sz ) ) ) {
@@ -3678,6 +3716,17 @@ extern void CommandHint( char *sz ) {
     }
 }
 
+static void
+Shutdown( void ) {
+
+  EvalShutdown();
+#if USE_PYTHON
+  PythonShutdown();
+#endif
+
+}
+
+
 /* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
    etc.  If stdin is not a TTY, this should always exit immediately (to
    avoid enless loops on EOF).  If stdin is a TTY, and fConfirm is set,
@@ -3716,7 +3765,7 @@ extern void PromptForExit( void ) {
     playSound ( SOUND_EXIT );
     SoundWait();
 
-    EvalShutdown ();
+    Shutdown ();
     
     exit( EXIT_SUCCESS );
 }
@@ -4166,6 +4215,10 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 	    continue;
 	}
 #endif
+
+#if USE_PYTHON
+        /* FIXME... implement something here... */
+#endif        
 	
 	HandleCommand( sz, acTop );
 
@@ -6548,7 +6601,7 @@ static void version( void ) {
     char **ppch = aszVersion;
 
     while( *ppch )
-	puts( *ppch++ );
+      puts( gettext( *ppch++ ) );
 }
 
 #if HAVE_FORK
@@ -6935,6 +6988,15 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     GuileInitialise( szDataDirectory );
 #endif
 
+
+#if USE_PYTHON
+#  if USE_GTK
+    PushSplash( pwSplash,
+                _("Initialasing"), _("Python"), 500 );
+#  endif
+    PythonInitialise( argv[ 0 ], szDataDirectory );
+#endif
+
 #if USE_GTK
     PushSplash ( pwSplash, 
                  _("Initialising"), _("Board Images"), 500 );
@@ -7067,14 +7129,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
         DestroySplash ( pwSplash );
 #endif
 	CommandLoadCommands( pchCommands );
-        EvalShutdown();
+        Shutdown();
 	exit( EXIT_SUCCESS );
     }
 
 #if USE_GUILE
     if( pchScript ) {
 	scm_primitive_load( scm_makfrom0str( pchScript ) );
-        EvalShutdown();
+        Shutdown();
 	exit( EXIT_SUCCESS );
     }
 #endif
@@ -7094,7 +7156,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
       
 	RunGTK( pwSplash );
 
-        EvalShutdown();
+        Shutdown();
 	exit( EXIT_SUCCESS );
     }
 #elif USE_EXT
@@ -7142,7 +7204,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		
 		if( feof( stdin ) ) {
 		    if( !isatty( STDIN_FILENO ) ) {
-                        EvalShutdown();
+                        Shutdown();
 			exit( EXIT_SUCCESS );
                     }
 		    

@@ -1,3 +1,10 @@
+Sat Jul 12 15:27:04 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Add Python support for gnubg.
+
+	* gnubg.c: support for Python.
+	* gnubgmodule.c: new file: python support for gnubg.
+
 Sat Jul 12 10:11:00 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (EvalWidget): ugly fix for problematic string.
