@@ -156,7 +156,7 @@ static void BoardRedrawPoint( extwindow *pewnd, gamedata *pgd, int n ) {
 	    iChequer = 0;
 	    cChequer--;
 
-	    yChequer = fInvert ? cy + ( 3 - 3 * cChequer ) * pgd->nBoardSize :
+	    yChequer = fInvert ? cy + ( 3 * cChequer - 21 ) * pgd->nBoardSize :
 		( 15 - 3 * cChequer ) * pgd->nBoardSize;
 	}
     }
