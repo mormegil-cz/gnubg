@@ -91,8 +91,13 @@ FT2_LIBS = @FT2_LIBS@
 FTGL_LIBS = @FTGL_LIBS@
 GENCAT = @GENCAT@
 GLIBC21 = @GLIBC21@
+GLIB_CFLAGS = @GLIB_CFLAGS@
+GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
+GLIB_LIBS = @GLIB_LIBS@
+GLIB_MKENUMS = @GLIB_MKENUMS@
 GMSGFMT = @GMSGFMT@
 GNUPLOT = @GNUPLOT@
+GOBJECT_QUERY = @GOBJECT_QUERY@
 GTKDATA = @GTKDATA@
 GTKEXTRA_LIBS = @GTKEXTRA_LIBS@
 GTKGLEXT_CFLAGS = @GTKGLEXT_CFLAGS@
@@ -213,10 +218,11 @@ SUBDIRS = intl lib doc met po m4 xpm sounds $(BOARD3D_DIR) $(EXT_DIR)
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @PYTHON_CFLAGS@ 
+              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @PYTHON_CFLAGS@ \
+              @GLIB_CFLAGS@
 
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@ \
-              @FT2_LIBS@ @GTKEXTRA_LIBS@ @PYTHON_LIBS@ 
+              @FT2_LIBS@ @GTKEXTRA_LIBS@ @PYTHON_LIBS@ @GLIB_LIBS@
 
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
@@ -251,8 +257,7 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 
 @USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 @USE_GTK_TRUE@	gtkprefs.c gtkprefs.h gtk-multiview.c \
-@USE_GTK_TRUE@	gtk-multiview.h \
-@USE_GTK_TRUE@	gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
+@USE_GTK_TRUE@	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
 @USE_GTK_TRUE@	gtkrace.c gtkrace.h \
 @USE_GTK_TRUE@	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
