@@ -187,6 +187,9 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	    
 	    RollDice( anDiceGenerate );
 
+	    if( fInterrupt )
+		break;
+	    
 	    FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
 			  anBoardGenerate, NULL );
 

@@ -32,8 +32,7 @@ extern rng rngCurrent;
 
 extern int InitRNG( void );
 extern void InitRNGSeed( int n );
-extern void RollDice( int anDice[ 2 ] );
-extern void GetManualDice( int anDice[ 2 ] );
+extern int RollDice( int anDice[ 2 ] );
 
 extern void UserRNGClose();
 extern int UserRNGOpen();
