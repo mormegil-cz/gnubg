@@ -2939,6 +2939,12 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 					 GDK_RGB_DITHER_MAX, 0, 0 );
     g_object_unref( G_OBJECT( ppb ) );
 #else
+    /* according to the API documentation "mask" should be freed again,
+       when the image is freed, so no explicit call to "free" here 
+       <URL: http://developer.gnome.org/doc/API/2.0/gdk/gdk-Images.html#
+       gdk-image-new-bitmap>
+    */
+
     guchar *mask = malloc( ( cy ) * ( cx + 7 ) >> 3 );
     GdkImage *pi = gdk_image_new_bitmap( gdk_window_get_visual( pd ),
 					  mask, cx, cy );
