@@ -1977,6 +1977,7 @@ static skilltype GoodDouble (int fisRedouble) {
     float rDeltaEquity;
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
+    monitor m;
 
 	/* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
@@ -2005,14 +2006,20 @@ static skilltype GoodDouble (int fisRedouble) {
 
 	/* Give hint on cube action */
 
+
+        SuspendInput ( &m );
+
 	ProgressStart( _("Considering cube action...") );
 	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
 								pec ) < 0 ) {
+          ResumeInput ( &m );
 	  ProgressEnd();
 	  fAnalyseCube = fAnalyseCubeSave;
 	  return (SKILL_NONE);;
 	}
 	ProgressEnd();
+
+        ResumeInput ( &m );
 	    
 	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
 
@@ -2131,6 +2138,7 @@ static skilltype ShouldDrop (int fIsDrop) {
     float rDeltaEquity;
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
+    monitor m;
 
 	/* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
@@ -2157,14 +2165,17 @@ static skilltype ShouldDrop (int fIsDrop) {
 
 	/* Give hint on cube action */
 
+        SuspendInput ( &m );
 	ProgressStart( _("Considering cube action...") );
 	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
 								pec ) < 0 ) {
 	  ProgressEnd();
+          ResumeInput ( &m );
 	  fAnalyseCube = fAnalyseCubeSave;
 	  return (SKILL_NONE);
 	}
 	ProgressEnd();
+        ResumeInput ( &m );
 	    
 	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
 
@@ -2356,31 +2367,47 @@ extern void CommandListMatch( char *sz ) {
 
 static skilltype GoodMove (movenormal *p) {
 
-	 matchstate msx;
-	 int        fAnalyseMoveSaved = fAnalyseMove;
-	 moverecord *pmr = (moverecord *) p;
+  matchstate msx;
+  int        fAnalyseMoveSaved = fAnalyseMove;
+  moverecord *pmr = (moverecord *) p;
+  evalsetup *pesCube, *pesChequer;
+  monitor m;
 
-	 /* should never happen, but if it does, tutoring
-	  * is a non-starter
-	  */
-	 if ((pmr == 0) ||
-		 (pmr->mt != MOVE_NORMAL) ||
-		 (ap[ pmr->n.fPlayer ].pt != PLAYER_HUMAN))
-	   return SKILL_NONE;
+  /* should never happen, but if it does, tutoring
+   * is a non-starter
+   */
+  if ((pmr == 0) ||
+      (pmr->mt != MOVE_NORMAL) ||
+      (ap[ pmr->n.fPlayer ].pt != PLAYER_HUMAN))
+    return SKILL_NONE;
 	 
-	 /* ensure we're analyzing moves */
-	 fAnalyseMove = 1;
-	 memcpy ( &msx, &ms, sizeof ( matchstate ) );
-	 if (fTutorAnalysis)
-	   AnalyzeMove ( pmr, &msx, NULL, &esAnalysisChequer, &esAnalysisCube,
-					FALSE );
-	 else
-	   AnalyzeMove ( pmr, &msx, NULL, &esEvalChequer, &esEvalCube, FALSE );
+  /* ensure we're analyzing moves */
+  fAnalyseMove = 1;
+  memcpy ( &msx, &ms, sizeof ( matchstate ) );
 
+  if (fTutorAnalysis) {
+    pesCube = &esAnalysisCube;
+    pesChequer = &esAnalysisChequer;
+  } else {
+    pesCube = &esEvalCube;
+    pesChequer = &esEvalChequer;
+  }
 
-	 fAnalyseMove = fAnalyseMoveSaved;
+  SuspendInput ( &m );
+  ProgressStart( _("Considering move...") );
+  if (AnalyzeMove ( pmr, &msx, NULL, pesChequer, pesChequer, FALSE ) < 0) {
+    fAnalyseMove = fAnalyseMoveSaved;
+    ProgressEnd();
+    ResumeInput ( &m );
+    return SKILL_NONE;
+  }
 
-     return pmr->n.stMove;
+  fAnalyseMove = fAnalyseMoveSaved;
+
+  ProgressEnd ();
+  ResumeInput ( &m );
+
+  return pmr->n.stMove;
 }
 
 extern void 
