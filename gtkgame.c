@@ -4352,7 +4352,7 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 
   CHECKUPDATE(paw->pwMoves,fAnalyseMove, "set analysis moves %s")
   CHECKUPDATE(paw->pwCube,fAnalyseCube, "set analysis cube %s")
-  CHECKUPDATE(paw->pwLuck,fAnalyseDice, "set analysis dice %s")
+  CHECKUPDATE(paw->pwLuck,fAnalyseDice, "set analysis luck %s")
 
   if((n = paw->padjMoves->value) != cAnalysisMoves) {
     sprintf(sz, "set analysis limit %d", n );

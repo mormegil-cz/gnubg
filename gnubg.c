@@ -751,10 +751,10 @@ command cER = {
       acSetEvalParam },
     { "limit", CommandSetAnalysisLimit, N_("Specify the maximum number of "
       "possible moves analysed"), szOPTLIMIT, NULL },
-    { "luckanalysis", CommandSetAnalysisLuckAnalysis,
-      N_("Specify parameters for the luck analysis"), NULL, acSetEvaluation },
     { "luck", CommandSetAnalysisLuck, N_("Select whether dice rolls will be "
       "analysed"), szONOFF, &cOnOff },
+    { "luckanalysis", CommandSetAnalysisLuckAnalysis,
+      N_("Specify parameters for the luck analysis"), NULL, acSetEvaluation },
     { "movefilter", CommandSetAnalysisMoveFilter, 
       N_("Set parameters for choosing moves to evaluate"), 
       szFILTER, NULL},
