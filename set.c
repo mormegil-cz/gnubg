@@ -1855,9 +1855,30 @@ extern void CommandSetRolloutTrials( char *sz ) {
 
 extern void CommandSetRolloutTruncationEnable ( char *sz ) {
 
-  SetToggle( "truncated rollouts", &prcSet->fDoTruncate, sz,
+  SetToggle( "rollout truncation enable", &prcSet->fDoTruncate, sz,
 		 _("Games in rollouts will be stopped after a fixed number of moves."),
 		 _("Games in rollouts will be played out until the end.") );
+}
+
+extern void CommandSetRolloutCubeEqualChequer ( char *sz ) {
+
+  SetToggle( "rollout cube-equal-chequer", &fCubeEqualChequer, sz,
+ _("Rollouts use same settings for cube and chequer play."),
+ _("Rollouts use separate settings for cube and chequer play.") );
+}
+
+extern void CommandSetRolloutPlayersAreSame ( char *sz ) {
+
+  SetToggle( "rollout players-are-same", &fPlayersAreSame, sz,
+ _("Rollouts use same settings for both players."),
+ _("Rollouts use separate settings for both players.") );
+}
+
+extern void CommandSetRolloutTruncationEqualPlayer0 ( char *sz ) {
+
+  SetToggle( "rollout truncate-equal-player0", &fTruncEqualPlayer0, sz,
+ _("Evaluation of rollouts at truncation point will be same as player 0."),
+ _("Evaluation of rollouts at truncation point are separately specified.") );
 }
 
 extern void CommandSetRolloutTruncationPlies ( char *sz ) {
@@ -1865,8 +1886,8 @@ extern void CommandSetRolloutTruncationPlies ( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	outputl( _("You must specify a valid ply at which to truncate  -- "
-		"try `help set rollout truncation'.") );
+       outputl( _("You must specify a valid ply at which to truncate rollouts  -- "
+		"try `help set rollout'.") );
 
 	return;
     }

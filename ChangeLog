@@ -1,3 +1,9 @@
+Wed Mar 4  11:26:54 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c, backgammon.h, set.c, gnubg.c - save the options
+	  for players-are-same, cube-equal-chequer and
+	  truncation-equal-player0 in rollout settings.
+
 Tue Mar 3  15:28:15 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkgame.c - fix EvalWidget to display the actual reduction

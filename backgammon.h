@@ -311,6 +311,8 @@ extern movefilter aamfAnalysis[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
 
 extern rolloutcontext rcRollout;
 
+extern int fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;
+
 /* plGame is the list of moverecords representing the current game;
    plLastMove points to a move within it (typically the most recently
    one played, but "previous" and "next" commands navigate back and forth).
@@ -831,6 +833,7 @@ extern void CommandAccept( char * ),
     CommandSetRolloutLateCubedecision ( char * ),
     CommandSetRolloutCubeful ( char * ),
     CommandSetRolloutChequerplay ( char * ),
+    CommandSetRolloutCubeEqualChequer ( char * ),
     CommandSetRolloutInitial( char * ),
     CommandSetRolloutMoveFilter( char * ),
     CommandSetRolloutPlayer ( char * ),
@@ -840,6 +843,7 @@ extern void CommandAccept( char * ),
     CommandSetRolloutPlayerLateChequerplay ( char * ),
     CommandSetRolloutPlayerLateCubedecision ( char * ),
     CommandSetRolloutPlayerLateMoveFilter( char * ),
+    CommandSetRolloutPlayersAreSame( char * ),
     CommandSetRolloutLate ( char * ),
     CommandSetRolloutLateChequerplay ( char * ),
     CommandSetRolloutLateMoveFilter( char * ),
@@ -849,6 +853,7 @@ extern void CommandAccept( char * ),
     CommandSetRolloutTruncationChequer ( char * ),
     CommandSetRolloutTruncationCube ( char * ),
     CommandSetRolloutTruncationEnable ( char * ),
+    CommandSetRolloutTruncationEqualPlayer0 (char *),
     CommandSetRolloutTruncationPlies ( char * ),    
     CommandSetRolloutRNG ( char * ),
     CommandSetRolloutRotate ( char * ),

@@ -4816,12 +4816,17 @@ typedef struct _rolloutwidget {
   rolloutpagegeneral  *prwGeneral;
   rolloutpagewidget *prpwPages[4], *prpwTrunc;
   GtkWidget *RolloutNotebook;    
+  int  fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;
   int *pfOK;
 } rolloutwidget;
 
+int fCubeEqualChequer = 1;
+int fPlayersAreSame = 1;
+int fTruncEqualPlayer0 = 1;
+
 static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
   int   p0, p1, i;
-  int fCubeEqualChequer, fPlayersAreSame, nTruncPlies;
+  int fCubeEqChequer, fPlayersAreSame, nTruncPlies;
   *prw->pfOK = TRUE;
 
   prw->rcRollout.nTrials = prw->prwGeneral->padjTrials->value;
@@ -4859,7 +4864,7 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 
   prw->rcRollout.nLate = prw->prwGeneral->padjLatePlies->value;
 
-  fCubeEqualChequer = 
+  fCubeEqChequer = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                                     prw->prwGeneral->pwCubeEqualChequer ) );
 
@@ -4893,7 +4898,7 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
   /* if cube is same as chequer, copy the chequer settings to the
      cube settings */
 
-  if (fCubeEqualChequer) {
+  if (fCubeEqChequer) {
     for (i = 0; i < 4; ++i) {
       memcpy (prw->prpwPages[i]->precCube, prw->prpwPages[i]->precCheq,
               sizeof (evalcontext));
@@ -5006,6 +5011,7 @@ static void TruncEqualPlayer0Toggled( GtkWidget *pw, rolloutwidget *prw) {
 	gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
 									prw->prwGeneral->pwTruncEqualPlayer0));
 
+  prw->fTruncEqualPlayer0 = sameas_p0;
   /* turn on/off the truncation page */
   gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
                (prw->RolloutNotebook), ROLL_TRUNC), do_trunc && !sameas_p0);
@@ -5017,6 +5023,8 @@ static void CubeEqCheqToggled( GtkWidget *pw, rolloutwidget *prw) {
   int  i;
   int are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                                    prw->prwGeneral->pwCubeEqualChequer ) );
+
+  prw->fCubeEqualChequer = are_same;
 
   /* turn the cube evals on/off in the rollout pages */
   for (i = 0; i < 4; ++i) {
@@ -5044,6 +5052,7 @@ static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw) {
   int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                                   prw->prwGeneral->pwDoLate ) );
 
+  prw->fPlayersAreSame = are_same;
   gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
                                                         (prw->RolloutNotebook), ROLL_P1), !are_same);
 
@@ -5191,7 +5200,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                                                               _("Cube decisions use same settings as Chequer play") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwCubeEqualChequer );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwCubeEqualChequer),
-                                1);
+                                prw->fCubeEqualChequer);
   gtk_signal_connect( GTK_OBJECT( prpw->pwCubeEqualChequer ), "toggled",
                       GTK_SIGNAL_FUNC ( CubeEqCheqToggled ), prw);
 
@@ -5199,7 +5208,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                                                             _("Use same settings for both players") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwPlayersAreSame );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwPlayersAreSame),
-                                1);
+                                prw->fPlayersAreSame);
   gtk_signal_connect( GTK_OBJECT( prpw->pwPlayersAreSame ), "toggled",
                       GTK_SIGNAL_FUNC ( PlayersSameToggled ), prw);
 
@@ -5207,7 +5216,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
             _("Use player0 setting for truncation point") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwTruncEqualPlayer0 );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwTruncEqualPlayer0),
-                                1);
+                                prw->fTruncEqualPlayer0);
   gtk_signal_connect( GTK_OBJECT( prpw->pwTruncEqualPlayer0 ), "toggled",
                       GTK_SIGNAL_FUNC ( TruncEqualPlayer0Toggled), prw);
 
@@ -5232,6 +5241,9 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
   rw.prpwPages[2] = &RPPlayer0Late;
   rw.prpwPages[3] = &RPPlayer1Late;
   rw.prpwTrunc = &RPTrunc;
+  rw.fCubeEqualChequer = fCubeEqualChequer;
+  rw.fPlayersAreSame = fPlayersAreSame;
+  rw.fTruncEqualPlayer0 = fTruncEqualPlayer0;
   rw.pfOK = &fOK;
 
   RPPlayer0.precCube = &rw.rcRollout.aecCube[0];
@@ -5428,6 +5440,24 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
                rw.rcRollout.fTruncBearoffOS ? "on" : "off" );
       UserCommand( sz );
     }
+
+	if ( rw.fCubeEqualChequer != fCubeEqualChequer) {
+	  sprintf( sz, "set rollout cube-equal-chequer %s",
+               rw.fCubeEqualChequer ? "on" : "off" );
+	  UserCommand( sz );
+	}
+
+	if ( rw.fPlayersAreSame != fPlayersAreSame) {
+	  sprintf( sz, "set rollout players-are-same %s",
+               rw.fPlayersAreSame ? "on" : "off" );
+	  UserCommand( sz );
+	}
+
+	if ( rw.fTruncEqualPlayer0 != fTruncEqualPlayer0) {
+	  sprintf( sz, "set rollout truncate-equal-player0 %s",
+               rw.fTruncEqualPlayer0 ? "on" : "off" );
+	  UserCommand( sz );
+	}
 
     outputresume();
   }	

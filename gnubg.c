@@ -999,6 +999,9 @@ command cER = {
       "for chequerplay during rollouts"), NULL, acSetEvaluation },
     { "cubedecision", CommandSetRolloutCubedecision, N_("Specify parameters "
       "for cube decisions during rollouts"), NULL, acSetEvaluation },
+	{ "cube-equal-chequer", CommandSetRolloutCubeEqualChequer,
+	  N_("Use same rollout evaluations for cube and chequer play"),
+      szONOFF, &cOnOff },
     { "cubeful", CommandSetRolloutCubeful, N_("Specify whether the "
       "rollout is cubeful or cubeless"), szONOFF, &cOnOff },
     { "initial", CommandSetRolloutInitial, 
@@ -1012,6 +1015,8 @@ command cER = {
     { "player", CommandSetRolloutPlayer, 
       N_("Control evaluation parameters for each side individually"), 
       szPLAYER, acSetRolloutPlayer }, 
+    { "players-are-same", CommandSetRolloutPlayersAreSame,
+      N_("Use same settings for both players in rollouts"), szONOFF, &cOnOff },
     { "quasirandom", CommandSetRolloutRotate, 
       N_("Permute the dice rolls according to a uniform distribution"),
       szONOFF, &cOnOff },
@@ -1025,6 +1030,9 @@ command cER = {
       "perform"), szTRIALS, NULL },
 	{ "truncation", CommandSetRolloutTruncation, N_("Set parameters for "
       "truncating rollouts"), NULL, acSetTruncation },
+    { "truncate-equal-player0", CommandSetRolloutTruncationEqualPlayer0,
+      N_("Use player 0 settings for rollout evaluation at truncation point"),
+      szONOFF, &cOnOff },
     { "varredn", CommandSetRolloutVarRedn, N_("Use lookahead during rollouts "
       "to reduce variance"), szONOFF, &cOnOff },
     /* FIXME add commands for cube variance reduction, settlements... */
@@ -4462,7 +4470,10 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s truncatebearoff onesided %s\n"
             "%s later enable %s\n"
             "%s later plies %d\n"
-            "%s trials %d\n",
+            "%s trials %d\n"
+            "%s cube-equal-chequer %s\n"
+            "%s players-are-same %s\n"
+            "%s truncate-equal-player0 %s\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
@@ -4473,7 +4484,10 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->fTruncBearoffOS ? "on" : "off", 
             sz, prc->fLateEvals ? "on" : "off",
             sz, prc->nLate,
-            sz, prc->nTrials
+            sz, prc->nTrials,
+            sz, fCubeEqualChequer ? "on" : "off",
+            sz, fPlayersAreSame ? "on" : "off",
+            sz, fTruncEqualPlayer0 ? "on" : "off"
             );
   
   SaveRNGSettings ( pf, sz, prc->rngRollout );
