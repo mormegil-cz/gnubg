@@ -1,3 +1,10 @@
+Mon Oct  7 21:26:08 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Update the tooltips on Hint dialog.
+
+	* gtkcube.c (CreateCubeAnalysisTools): update tooltips.
+	* gtkchequer.c (CreateMoveListTools): update tooltips.
+
 Mon Oct  7 21:03:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkboard.c (board_init): reshuffle boxes below board.

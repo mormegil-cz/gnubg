@@ -803,7 +803,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   for ( i = 0; i < 5; ++i ) {
 
-    sz = g_strdup_printf ( "%d", i );
+    sz = g_strdup_printf ( "%d", i ); /* string is freed by set_data_full */
     pwply = gtk_button_new_with_label ( sz );
 
     gtk_box_pack_start ( GTK_BOX ( pw ), pwply, TRUE, TRUE, 0 );
@@ -812,6 +812,10 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                         GTK_SIGNAL_FUNC( CubeAnalysisEvalPly ), pchd );
 
     gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, free );
+
+    sz = g_strdup_printf ( _("Evaluate play on cubeful %d-ply"), i );
+    gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwply, sz, sz );
+    g_free ( sz );
 
   }
 
@@ -867,12 +871,12 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   /* tool tips */
 
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRollout,
-                         _("Rollout cube decision"),
-                         _("Rollout cube decision") );
+                         _("Rollout cube decision with current settings"),
+                         _("Rollout cube decision with current settings") );
 
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwEval,
-                         _("Evaluate cube decision"),
-                         _("Evaluate cube decision") );
+                         _("Evaluate cube decision with current settings"),
+                         _("Evaluate cube decision with current settings") );
 
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRolloutSettings,
                          _("Modify rollout settings"),
