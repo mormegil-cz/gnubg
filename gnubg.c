@@ -7489,25 +7489,14 @@ ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
 static char *
 getInstallDir( void ) {
 
-  char *pc = NULL;
   char buf[_MAX_PATH];
-  DWORD buflen = _MAX_PATH;
-  HKEY key;
-  LONG res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\gnubg",
-                          0, KEY_READ, &key);
-  if (res == ERROR_SUCCESS) {
-    res = RegQueryValueEx(key, "Install_dir", 0, 0,
-                          (LPBYTE)buf, &buflen);
-    if (res == ERROR_SUCCESS) 
-      pc = strdup( buf );
+  char *p;
 
-    RegCloseKey(key);
-    
-  }
-
-  return pc;
-
-
+  GetModuleFileName(NULL, buf, sizeof(buf));
+  p = max(strrchr(buf, '/'), strrchr(buf, '\\'));
+  if (p)
+	  *p = '\0';
+  return strdup(buf);
 }
 
 /* expand any environment variables in str into ret */
