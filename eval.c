@@ -4638,7 +4638,7 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
       /* 3. DT >= ND > DP: Too good, pass */
 
       return ( pci->fCubeOwner == -1 ) ? 
-        OPTIONAL_DOUBLE_PASS : OPTIONAL_REDOUBLE_PASS;
+        DOUBLE_PASS : REDOUBLE_PASS;
 
   }
 }
