@@ -2,25 +2,26 @@
 #      Русский перевод программы GNU Backgammon (Короткие нарды).
 #
 # This file is distributed under the same license as the GNU Backgammon package.
-# Copyright (C) 2004 Free Software Foundation, Inc.
+# Copyright (C) 2004-2005 Dmitri I GOULIAEV <dig@telkel.net>
 #
-# First translator: Dmitri I GOULIAEV <dig@telkel.net>, 2004.
+# First translator: Dmitri I GOULIAEV <dig@telkel.net>, 2004-2005.
 #
-# See file README.ru in current directory for more information.
+# See file README.ru in the current directory for more information.
 #
+
 msgid ""
 msgstr ""
-"Project-Id-Version: GNU Backgammon\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-07-16 16:37+0200\n"
-"PO-Revision-Date: 2004-04-14 21:35+CDT\n"
-"Last-Translator: Dmitri I GOULIAEV <dig@telkel.net>\n"
-"Language-Team: Russian <ru@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=KOI8-R\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%"
-"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+	"Project-Id-Version: GNU Backgammon\n"
+	"Report-Msgid-Bugs-To: \n"
+	"POT-Creation-Date: 2004-07-16 16:37+0200\n"
+	"PO-Revision-Date: 2004-04-14 21:35+CDT\n"
+	"Last-Translator: Dmitri I GOULIAEV <dig@telkel.net>\n"
+	"Language-Team: Russian <ru@li.org>\n"
+	"MIME-Version: 1.0\n"
+	"Content-Type: text/plain; charset=KOI8-R\n"
+	"Content-Transfer-Encoding: 8bit\n"
+	"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 "
+	"&& n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #: analysis.c:48
 msgid "Awful!"
@@ -4118,9 +4119,9 @@ msgstr ""
 #, c-format
 msgid "Time penalty: %s loses %d point\n"
 msgid_plural "Time penalty: %s loses %d points\n"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Штрафное время: %s проигрывает %d очко\n"
+msgstr[1] "Штрафное время: %s проигрывает %d очка\n"
+msgstr[2] "Штрафное время: %s проигрывает %d очка\n"
 
 #: gnubg.c:3048 gnubg.c:3053 gnubg.c:3058
 #, c-format
@@ -4158,9 +4159,9 @@ msgstr ""
 #, c-format
 msgid "%d point"
 msgid_plural "%d points"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%d очко"
+msgstr[1] "%d очка"
+msgstr[2] "%d очков"
 
 #: gnubg.c:3267 gnubg.c:5075 text.c:87
 #, c-format
@@ -5332,9 +5333,9 @@ msgstr ""
 #, c-format
 msgid "Time penalty: %s loses %d point"
 msgid_plural "Time penalty: %s loses %d points"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Штрафное время: %s проигрывает %d очко"
+msgstr[1] "Штрафное время: %s проигрывает %d очка"
+msgstr[2] "Штрафное время: %s проигрывает %d очка"
 
 #: gtkgame.c:1370
 msgid "Loss from penalty:"
@@ -7028,9 +7029,9 @@ msgstr ""
 #, c-format
 msgid "Match to %d point"
 msgid_plural "Match to %d points"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Встреча до %d очка"
+msgstr[1] "Встреча до %d очков"
+msgstr[2] "Встреча до %d очков"
 
 #: gtkgame.c:7335 show.c:983
 msgid "Money Session"
@@ -9178,12 +9179,14 @@ msgstr "Определён пользователем"
 msgid "File not found or not designs in file."
 msgstr ""
 
+# DIG: FIXME
 #: gtkprefs.c:2487
 #, c-format
 msgid "%d design added.\n"
 msgid_plural "%d designs added.\n"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d design добавлен.\n"
+msgstr[1] "%d design добавлен.\n"
+msgstr[2] "%d design добавлен.\n"
 
 #: gtkprefs.c:2504
 #, c-format
@@ -9806,17 +9809,17 @@ msgstr ""
 #, c-format
 msgid "The score (after %d game) is: %s %d, %s %d"
 msgid_plural "The score (after %d games) is: %s %d, %s %d"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "Счёт (после %d игры): %s %d, %s %d"
+msgstr[1] "Счёт (после %d игр): %s %d, %s %d"
+msgstr[2] "Счёт (после %d игр): %s %d, %s %d"
 
 #: html.c:1762 html.c:3790
 #, c-format
 msgid " (match to %d point%s)"
 msgid_plural " (match to %d points%s)"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] " (встреча до %d очка%s)"
+msgstr[1] " (встреча до %d очков%s)"
+msgstr[2] " (встреча до %d очков%s)"
 
 #: html.c:1767 html.c:3795 show.c:911 text.c:243
 msgid ", Crawford game"
@@ -10006,9 +10009,9 @@ msgstr ""
 #, c-format
 msgid "<p %s>%s wins %d point</p>\n"
 msgid_plural "<p %s>%s wins %d points</p>\n"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "<p %s>%s выигрывает %d очко</p>\n"
+msgstr[1] "<p %s>%s выигрывает %d очка</p>\n"
+msgstr[2] "<p %s>%s выигрывает %d очка</p>\n"
 
 #: html.c:3483
 #, c-format
@@ -10466,16 +10469,22 @@ msgid_plural ""
 "%s is out of time\n"
 "%s wins %d points and the match.\n"
 msgstr[0] ""
+"%s исчерпал лимит времени\n"
+"%s выигрывает %d очко и встречу.\n"
 msgstr[1] ""
+"%s исчерпал лимит времени\n"
+"%s выигрывает %d очка и встречу.\n"
 msgstr[2] ""
+"%s исчерпал лимит времени\n"
+"%s выигрывает %d очка и встречу.\n"
 
 #: play.c:511
 #, c-format
 msgid "%s is out of time, %s wins %d point.\n"
 msgid_plural "%s is out of time,  %s wins %d points.\n"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%s исчерпал лимит времени, %s выигрывает %d очко.\n"
+msgstr[1] "%s исчерпал лимит времени, %s выигрывает %d очка.\n"
+msgstr[2] "%s исчерпал лимит времени, %s выигрывает %d очка.\n"
 
 #: play.c:862 play.c:3201
 msgid ""
@@ -10528,14 +10537,14 @@ msgstr ""
 #, c-format
 msgid "%s wins a %s and %d point.\n"
 msgid_plural "%s wins a %s and %d points.\n"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%s выигрывает %s и %d очко.\n"
+msgstr[1] "%s выигрывает %s и %d очка.\n"
+msgstr[2] "%s выигрывает %s и %d очка.\n"
 
 #: play.c:1940
 #, c-format
 msgid "%s has won the match.\n"
-msgstr ""
+msgstr "%s выиграл встречу.\n"
 
 #: play.c:2062
 msgid "You can only accept if the cube or a resignation has been offered."
@@ -14322,11 +14331,11 @@ msgstr ""
 
 #: show.c:1828
 msgid "- players"
-msgstr ""
+msgstr "- игроки"
 
 #: show.c:1831
 msgid "both"
-msgstr ""
+msgstr "оба"
 
 #: show.c:1836
 msgid ""
@@ -14340,8 +14349,11 @@ msgstr ""
 
 #: show.c:1840
 #, c-format
-msgid "%d moves\n"
-msgstr ""
+msgid "%d move\n"
+msgid_plural "%d moves\n"
+msgstr[0] "%d ход\n"
+msgstr[1] "%d хода\n"
+msgstr[2] "%d хода\n"
 
 #: show.c:1842 show.c:1867
 msgid "- show detailed probabilities"
@@ -14743,7 +14755,7 @@ msgstr "Калибровка не закончена."
 #: text.c:75 text.c:80
 #, c-format
 msgid "%d points"
-msgstr ""
+msgstr "%d очка"
 
 #: text.c:172
 #, c-format
@@ -14790,8 +14802,9 @@ msgstr ""
 #, c-format
 msgid " (match to %d point)"
 msgid_plural " (match to %d points)"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] " (встреча до %d очка)"
+msgstr[1] " (встреча до %d очков)"
+msgstr[2] " (встреча до %d очков)"
 
 #: text.c:276
 #, c-format
@@ -14951,7 +14964,7 @@ msgstr ""
 
 #: timecontrol.c:303 timecontrol.c:304 timecontrol.c:307
 msgid "(modified)"
-msgstr ""
+msgstr "(изменено)"
 
 #: timecontrol.c:351
 #, c-format
@@ -14980,7 +14993,7 @@ msgstr ""
 
 #: timecontrol.c:376
 msgid "lose match\n"
-msgstr ""
+msgstr "проиграл встречу\n"
 
 #: timecontrol.c:414
 #, c-format
@@ -15000,7 +15013,7 @@ msgstr ""
 #: timecontrol.c:549
 #, c-format
 msgid "Time control set to %s\n"
-msgstr ""
+msgstr "Контроль времени установлен в %s\n"
 
 #: timecontrol.c:641
 msgid "Defined time controls:\n"
