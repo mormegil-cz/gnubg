@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "backgammon.h"
 #include "dice.h"
@@ -664,7 +665,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         if ( ( ( prc->fTruncBearoff2 && pc == CLASS_BEAROFF2 ) ||
                     ( prc->fTruncBearoffOS && pc <= CLASS_BEAROFF_OS ) ) &&
-                  ! prc->fCubeful ) {
+                  ! prc->fCubeful && *pf ) {
           
           /* cubeless rollout, requested to truncate at bearoff db */
 
@@ -679,7 +680,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         }
         
-          
+        assert ( cUnfinished >= 0 );
 
 
       }

@@ -1,3 +1,9 @@
+Wed Oct 30 19:41:05 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (BasicCubefulRollout): do not truncate at 
+	bearoff DB if game is already over.
+	(reported by Morten Wang)
+
 Wed Oct 30 19:02:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (DumpBearoff1, DumpBearoffOSND, DumpBearoffOS):

@@ -97,6 +97,7 @@ Chuck Bower
 Rick Janowski
 Brian Sheppard
 Gerry Tesauro
+Morten Wang
 Michael Zehr
 EOF
 
