@@ -1,4 +1,7 @@
-Tue Dec 31 12:52:44 2002  Gary Wong  <gtw@gnu.org>
+Tue Dec 31 13:10:57 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtksplash.c (DestroySplash, PushSplash): Use g_usleep(), for
+	better portability.
 
 	* postscript.c (PostScriptEscape): Convert charset to ISO-8859-1.
 	* postscript.c (PrintPostScriptLineWithSkip): Convert charset to

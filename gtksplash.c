@@ -23,7 +23,6 @@
 #include <config.h>
 #endif
 
-#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 
 #include <stdio.h>
@@ -104,7 +103,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
   if ( ! pwSplash )
     return;
   
-  usleep ( 1000 );
+  g_usleep ( 1000 );
 
   gtk_widget_destroy ( pwSplash );
 
@@ -130,6 +129,6 @@ PushSplash ( GtkWidget *pwSplash,
   while( gtk_events_pending() )
     gtk_main_iteration();
 
-  usleep ( nMuSec );
+  g_usleep ( nMuSec );
 
 }
