@@ -212,16 +212,16 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     CheckRC();
     
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
-	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cOutput * cHidden, pf = pnn->arOutputWeight; i; i-- )
-	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cHidden, pf = pnn->arHiddenThreshold; i; i-- )
-	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cOutput, pf = pnn->arOutputThreshold; i; i-- )
-	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( (int) ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
 
     return 0;
 }
