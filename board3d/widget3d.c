@@ -152,13 +152,6 @@ void realize(GtkWidget *widget, BoardData* bd)
 #endif
 }
 
-void CheckOpenglError()
-{
-	GLenum glErr = glGetError();
-	if (glErr != GL_NO_ERROR)
-		g_print("OpenGL Error: %s\n", gluErrorString(glErr));
-}
-
 void MakeCurrent3d(GtkWidget *widget)
 {
 #if HAVE_GTKGLEXT

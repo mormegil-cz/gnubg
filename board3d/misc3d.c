@@ -67,6 +67,13 @@ void CheckNormal()
 	glEnd();
 }
 
+void CheckOpenglError()
+{
+	GLenum glErr = glGetError();
+	if (glErr != GL_NO_ERROR)
+		g_print("OpenGL Error: %s\n", gluErrorString(glErr));
+}
+
 void SetupLight3d(BoardData *bd, renderdata* prd)
 {
 	float lp[4];
