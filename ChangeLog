@@ -1,3 +1,9 @@
+Mon Feb  4 21:01:30 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c: fix typo.
+
+	* html.c: improve output of HTML.
+
 Mon Feb  4 10:31:24 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (GTKAddGame, GTKRegenerateGames, GTKPopGame),
