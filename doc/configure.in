@@ -1,6 +1,6 @@
 AC_INIT(gnubg.texi)
 AM_INIT_AUTOMAKE(gnubg,0.02)
 AC_PROG_INSTALL
-
+AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm)
 AC_OUTPUT(Makefile)
 
