@@ -1,3 +1,11 @@
+Thu Aug  8 20:50:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New buttons for on game list.
+
+	* gtkgame.c (CreateGameWindow): add new buttons.
+	* play.c (MoveIsMarked): new function.
+	* play.c (CommandNext, CommandPrevious): locate marked moves.
+
 Thu Aug  8 13:37:16 2002  Gary Wong  <gtw@gnu.org>
 
 	* postscript.c (ExportGamePostScript): Request player name font

@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * $Id$
+ * $Id $
  */
 
 #if HAVE_CONFIG_H
@@ -858,6 +858,8 @@ static void CreateGameWindow( void ) {
 #include "prevmove.xpm"
 #include "nextmove.xpm"
 #include "nextgame.xpm"
+#include "prevmarked.xpm"
+#include "nextmarked.xpm"
     
     pwGame = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     pcmap = gtk_widget_get_colormap( pwGame );
@@ -884,6 +886,13 @@ static void CreateGameWindow( void ) {
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( phbox ),
 			PixmapButton( pcmap, nextgame_xpm, "next game" ),
+			FALSE, FALSE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( phbox ),
+			PixmapButton( pcmap, prevmarked_xpm, "previous marked" ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( phbox ),
+			PixmapButton( pcmap, nextmarked_xpm, "next marked" ),
 			FALSE, FALSE, 0 );
         
     gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(

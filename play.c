@@ -2944,17 +2944,44 @@ static void CommandNextRolled( char *sz ) {
 
 }
 
+static int MoveIsMarked (moverecord *pmr)
+{
+  if (pmr == 0)
+	return FALSE;
+
+  switch( pmr->mt )
+	{
+	case MOVE_NORMAL:
+	  return (pmr->n.stMove != SKILL_NONE) || (pmr->n.stCube != SKILL_NONE);
+
+	case MOVE_DOUBLE:
+	case MOVE_TAKE:
+	case MOVE_DROP:
+	  return (pmr->d.st != SKILL_NONE);
+
+	default:
+	  break;
+	}
+
+  return FALSE;
+}
 
 extern void CommandNext( char *sz ) {
 
     int n;
     char *pch;
+    int fMarkedMoves = FALSE;
+	list *p;
+	moverecord *pmr;
+    matchstate SaveMs;
     
     if( !plGame ) {
 	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
+    n = 1;
+
     if( ( pch = NextToken( &sz ) ) ) {
 	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
 	    CommandNextGame( sz );
@@ -2965,10 +2992,14 @@ extern void CommandNext( char *sz ) {
 	} else if( !strncasecmp( pch, "rolled", strlen( pch ) ) ) {
 	    CommandNextRolled( sz );
 	    return;
-	}
+	} else if( !strncasecmp( pch, "marked", strlen( pch ) ) ) {
+	  fMarkedMoves = TRUE;
+	  if( ( pch = NextToken( &sz ) ) ) {
 	    n = ParseNumber( &pch );
+	  }
     } else
-	n = 1;
+	  n = ParseNumber( &pch );
+	}
     
     if( n < 1 ) {
 	outputl( _("If you specify a parameter to the `next' command, it must "
@@ -2976,10 +3007,40 @@ extern void CommandNext( char *sz ) {
 	return;
     }
     
+	if( fMarkedMoves ) {
+	  p =  plLastMove;
+	  memcpy ((void *) &SaveMs, (const void *) &ms, sizeof( matchstate ) );
+	  /* we need to increment the count if we're pointing to a marked
+         move */
+	  if ( p->plNext->p && MoveIsMarked( (moverecord *) p->plNext->p ) )
+		++n;
+		
+	  while( p->plNext->p ) {
+		p = p->plNext;
+		pmr = (moverecord *) p->p;
+		FixMatchState ( &ms, pmr);
+		ApplyMoveRecord( &ms, pmr);
+		if( MoveIsMarked (pmr) && ( --n <= 0 ) )
+			break;
+	  }
+
+	  if (p->plNext->p == 0) {
+		/* didn't find the requested move, put things back */
+		memcpy ((void *) &ms, (const void *) &SaveMs, sizeof( matchstate ) );
+		FixMatchState ( &ms, plLastMove->p );
+		ApplyMoveRecord( &ms, plLastMove->p );
+		return;
+	  }
+
+	  plLastMove = p->plPrev;
+	  CalculateBoard();
+
+	} else {
     while( n-- && plLastMove->plNext->p ) {
 	plLastMove = plLastMove->plNext;
         FixMatchState ( &ms, plLastMove->p );
 	ApplyMoveRecord( &ms, plLastMove->p );
+    }
     }
     
     UpdateGame( FALSE );
@@ -3097,17 +3158,21 @@ static void CommandPreviousRolled( char *sz ) {
 
 }
 
-
 extern void CommandPrevious( char *sz ) {
 
     int n;
     char *pch;
+    int fMarkedMoves = FALSE;
+	list *p;
+	moverecord *pmr;
     
     if( !plGame ) {
 	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
+	n = 1;
+
     if( ( pch = NextToken( &sz ) ) ) {
 	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
 	    CommandPreviousGame( sz );
@@ -3118,10 +3183,14 @@ extern void CommandPrevious( char *sz ) {
 	} else if( !strncasecmp( pch, "roll", strlen( pch ) ) ) {
 	    CommandPreviousRoll( sz );
 	    return;
-	} else
+	} else if( !strncasecmp( pch, "marked", strlen( pch ) ) ) {
+	  fMarkedMoves = TRUE;
+	  if( ( pch = NextToken( &sz ) ) ) {
 	    n = ParseNumber( &pch );
+	  }
     } else
-	n = 1;
+	  n = ParseNumber( &pch );	
+    }
     
     if( n < 1 ) {
 	outputl( _("If you specify a parameter to the `previous' command, it "
@@ -3130,8 +3199,24 @@ extern void CommandPrevious( char *sz ) {
 	return;
     }
 
+	if( fMarkedMoves ) {
+	  p =  plLastMove;
+	  while( ( p->p ) != 0 ) {
+		pmr = (moverecord *) p->p;
+		if( MoveIsMarked (pmr) && ( --n <= 0 ) )
+			break;
+
+		p = p->plPrev;
+	  }
+
+	  if (p->p == 0)
+		return;
+
+	  plLastMove = p->plPrev;
+	} else {
     while( n-- && plLastMove->plPrev->p )
 	plLastMove = plLastMove->plPrev;
+	}
 
     CalculateBoard();
 
