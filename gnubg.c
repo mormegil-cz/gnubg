@@ -193,6 +193,9 @@ matchstate ms = {
     TRUE, /* fCubeUse */
     TRUE, /* fJacoby */
     GAME_NONE /* gs */
+#if USE_TIMECONTROL
+    , { } /* gc */
+#endif
 };
 matchinfo mi;
 
@@ -498,7 +501,22 @@ static char szDICE[] = N_("<die> <die>"),
     szURL[] = N_("<URL>"),
     szMAXERR[] = N_("<fraction>"),
     szMINGAMES[] = N_("<minimum games to rollout>"),
+#if USE_TIMECONTROL
+    szSETTC[] = N_("[<timecontrol>|off]"),
+    szSETTCTYPE[] = N_("plain|bronstein|fischer|hourglass"),
+    szSETTCTIME[] = N_("<time>"),
+    szSETTCPOINT[] = N_("<time per point>"),
+    szSETTCMOVE[] = N_("<time per move>"),
+    szSETTCMULT[] = N_("<factor>"),
+    szSETTCPENALTY[] = N_("<points>|lose"),
+    szSETTCNEXT[] = N_("<next time control> [<opponent's next time control>]"),
+    szSETTCNAME[] = N_("<name>"),
+    szSETTCUNNAME[] = N_("<name>"),
+    szSHOWTC[] = N_("[<name> [<levels>]]"),
+    szSHOWTCLIST[] = N_("[all]"),
+#endif
     szJSDS[] = N_("<joint standard deviations>");
+
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
     NULL, NULL, NULL, NULL, &cER
@@ -1673,6 +1691,19 @@ command cER = {
     { "sound", NULL, 
       N_("Control audio parameters"), NULL, acSetSound },
 #endif /* USE_SOUND */
+#if USE_TIMECONTROL
+    { "tc", CommandSetTimeControl, N_("Select time control to use"), szSETTC, NULL}, 
+    { "tcmovetime", CommandSetTCMove, N_("Set time per move"), szSETTCMOVE, NULL}, 
+    { "tcmultiplier", CommandSetTCMultiplier, N_("Set how much of remaining time to keep"), szSETTCMULT, NULL}, 
+    { "tcname", CommandSetTCName, N_("Name this time control setting"), szSETTCNAME, NULL}, 
+    { "tcnext", CommandSetTCNext, N_("Set next time control(s)"), szSETTCNEXT, NULL}, 
+    { "tcpenalty", CommandSetTCPenalty, N_("Set penalty type"), szSETTCPENALTY, NULL}, 
+    { "tcpointtime", CommandSetTCPoint, N_("Set total time per point in match"), szSETTCPOINT, NULL}, 
+    { "tctime", CommandSetTCTime, N_("Set total (added) time for entire match"), szSETTCTIME, NULL}, 
+    { "tctype", CommandSetTCType, N_("Set time control type"), szSETTCTYPE, NULL}, 
+    { "tcunname", CommandSetTCUnname, N_("Undefine a named time control setting"), szSETTCUNNAME, NULL}, 
+    
+#endif
     { "training", NULL, 
       N_("Control training parameters"), NULL, acSetTraining },
     { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
@@ -1802,6 +1833,14 @@ command cER = {
       NULL, NULL },
     { "thorp", CommandShowThorp, N_("Calculate Thorp Count for "
       "position"), szOPTPOSITION, NULL },
+#if USE_TIMECONTROL
+    { "tc", CommandShowTimeControl, N_("Show time control information"),
+      szSHOWTC, NULL },
+    { "tclist", CommandShowTCList, N_("Show list of defined time controls"),
+      szSHOWTCLIST, NULL },
+    { "tctutorial", CommandShowTCTutorial, N_("Show time control tutorial"),
+      NULL, NULL },
+#endif
     { "training", CommandShowTraining, N_("Display the training parameters"),
       NULL, NULL },
     { "turn", CommandShowTurn, 
@@ -1825,6 +1864,11 @@ command cER = {
     { "td", CommandTrainTD, N_("Train the network by TD(0) zero-knowledge "
       "self-play"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+#if USE_TIMECONTROL
+}, acTc[] = {
+    { "show", CommandShowTimeControl, N_("alt show"), NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+#endif
 }, acTop[] = {
     { "accept", CommandAccept, N_("Accept a cube or resignation"),
       NULL, NULL },
@@ -2437,10 +2481,14 @@ extern void PortableSignalRestore( int nSignal, psighandler *p ) {
 /* Reset the SIGINT handler, on return to the main command loop.  Notify
    the user if processing had been interrupted. */
 extern void ResetInterrupt( void ) {
-    
     if( fInterrupt ) {
+#if USE_TIMECONTROL
+	if (ms.gs != GAME_TIMEOUT)
+#endif
+	{
 	outputl( _("(Interrupted)") );
 	outputx();
+	}
 	
 	fInterrupt = FALSE;
 	
@@ -2876,7 +2924,13 @@ extern void ShowBoard( void ) {
     char szBoard[ 2048 ];
     char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ],
 	szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
+#if USE_TIMECONTROL
+    char szTime0[20], szTime1[20];
+    char *apch[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#else
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#endif
+
 #if USE_GUI
     int anBoardTemp[ 2 ][ 25 ];
 #endif
@@ -3010,6 +3064,13 @@ extern void ShowBoard( void ) {
 			     ms.nMatchTo );
 	    }
 	}
+#if USE_TIMECONTROL
+	apch[7] = apch[8] = 0;
+	if (ms.gc.pc[0].tc.timing != TC_NONE)
+		 apch[7] = FormatClock(&ms.tvTimeleft[0], szTime0);
+	if (ms.gc.pc[1].tc.timing != TC_NONE)
+		 apch[8] = FormatClock(&ms.tvTimeleft[1], szTime1);
+#endif
     
 	if( ms.fResigned )
 	    /* FIXME it's not necessarily the player on roll that resigned */
@@ -3111,6 +3172,9 @@ extern char *FormatPrompt( void ) {
 		    strcpy( pchDest, ap[ ms.fTurn ].szName );
 		    break;
 
+#if USE_TIMECONTROL
+		case GAME_TIMEOUT:
+#endif
 		case GAME_OVER:
 		case GAME_RESIGNED:
 		case GAME_DROP:
@@ -3125,6 +3189,27 @@ extern char *FormatPrompt( void ) {
 		sprintf( pchDest, "%d:%d", ms.anScore[ 0 ], ms.anScore[ 1 ] );
 		break;
 
+#if USE_TIMECONTROL
+	    case 't':
+	    case 'T':
+		/* Time */
+		switch( ms.gs ) {
+		case GAME_NONE:
+		    strcpy( pchDest, _("No game") );
+		    break;
+		case GAME_TIMEOUT:
+		case GAME_OVER:
+		case GAME_RESIGNED:
+		case GAME_DROP:
+		    strcpy( pchDest, _("Game over") );
+		    break;
+		case GAME_PLAYING:
+		    sprintf(pchDest, "%s - ", FormatClock(&ms.tvTimeleft[0], 0));
+		    FormatClock(&ms.tvTimeleft[1], pchDest+strlen(pchDest));
+		    break;
+		}
+		break;
+#endif
 	    case 'v':
 	    case 'V':
 		/* Version */
@@ -5507,6 +5592,9 @@ extern void CommandSaveSettings( char *szParam ) {
     /* rating offset */
     
     fprintf( pf, "set ratingoffset %f\n", rRatingOffset );
+#if USE_TIMECONTROL
+     SaveTimeControlSettings( pf );
+#endif
 
     /* the end */
 
@@ -6651,7 +6739,7 @@ extern void Progress( void ) {
 
     static int i = 0;
     static char ach[ 4 ] = "/-\\|";
-    
+   
     if( !fShowProgress )
 	return;
 
@@ -6686,7 +6774,7 @@ static void CallbackProgress( void ) {
 	ResumeInput( &m );
     }
 #endif
-    
+
     if( fInProgress && !iProgressMax )
 	Progress();
 }
@@ -6794,7 +6882,6 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
 
 #if ( USE_GUI || USE_SOUND ) && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
-
 #if USE_GUI
     /* NB: It is safe to write to fAction even if it cannot be read
        atomically, because it is only used to hold a binary value. */
@@ -7612,14 +7699,17 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		char sz[ 2048 ], *pch;
 	
 		sz[ 0 ] = 0;
-		
 		Prompt();
 		
 		clearerr( stdin );		    
+
 		/* FIXME shouldn't restart sys calls on signals during this
 		   fgets */
 		fgets( sz, sizeof( sz ), stdin );
 
+#if USE_TIMECONTROL
+		UpdateClockNotify(0);
+#endif
 		if( ( pch = strchr( sz, '\n' ) ) )
 		    *pch = 0;
 		
@@ -7645,7 +7735,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 	while( fNextTurn )
 	    NextTurn( TRUE );
-
 	ResetInterrupt();
     }
 }

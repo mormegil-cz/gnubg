@@ -95,6 +95,10 @@ char *aszSoundDesc[ NUM_SOUNDS ] = {
   N_("Bot wins game"),
   N_("Bot wins match"),
   N_("Analysis is finished")
+#if USE_TIMECONTROL
+  , N_("Human time expires")
+  , N_("Bot time expires")
+#endif
 };
 
 char *aszSoundCommand[ NUM_SOUNDS ] = {
@@ -114,8 +118,12 @@ char *aszSoundCommand[ NUM_SOUNDS ] = {
   "humanwinsmatch",
   "botfans",
   "botwinsgame",
-  "botwinsmatch"
+  "botwinsmatch",
   "analysisfinished"
+#if USE_TIMECONTROL
+  , "humantimeout"
+  , "bottimeout"
+#endif
 };
 
 char aszSound[ NUM_SOUNDS ][ 80 ] = {
@@ -140,6 +148,10 @@ char aszSound[ NUM_SOUNDS ][ 80 ] = {
   "sounds/gameover.wav",
   "sounds/matchover.wav",
   "sounds/fanfare.wav"
+#if USE_TIMECONTROL
+  , "sounds/humantimeout.wav"
+  , "sounds/bottimeout.wav"
+#endif
 };
 
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";

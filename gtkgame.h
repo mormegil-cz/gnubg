@@ -78,6 +78,10 @@ extern void GTKThaw( void );
 extern void GTKSuspendInput( monitor *pm );
 extern void GTKResumeInput( monitor *pm );
 
+#if USE_TIMECONTROL
+extern void GTKUpdateClock();
+#endif
+
 extern int InitGTK( int *argc, char ***argv );
 extern void RunGTK( GtkWidget *pwSplash );
 extern void GTKAllowStdin( void );

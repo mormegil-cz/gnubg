@@ -2357,3 +2357,19 @@ CommandShowMatchResult( char *sz ) {
   }
             
 }
+
+#if USE_TIMECONTROL
+
+#include "tctutorial.h"
+
+extern void CommandShowTCTutorial( char *sz ) {
+#if USE_GTK
+    if ( fX )
+	ShowList( aszTcTutorial, _("Time Control Tutorial") );
+    else
+#endif
+	ShowPaged(aszTcTutorial);
+}
+#endif
+
+

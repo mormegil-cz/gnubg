@@ -22,6 +22,7 @@
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
 
+
 #include <float.h>
 #include <list.h>
 #include <math.h>
@@ -154,12 +155,89 @@ typedef enum _movetype {
     MOVE_SETDICE,
     MOVE_SETCUBEVAL,
     MOVE_SETCUBEPOS
+#if USE_TIMECONTROL
+    , MOVE_TIME
+#endif
 } movetype;
+
+#ifdef USE_TIMECONTROL
+
+#include <time.h>
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
+/* The different timing types
+ * TC_PLAIN - normal chess clock timing
+ * TC_FISCHER - Fischer clock - a fixed time is added to clock each move
+ * TC_BRONSTEIN - Bronstein (FIDE) clock - The player gets a little "free"
+ *	time each move, before the clock starts, but no time is added.
+ * TC_HOURGLASS - Hourglass timing, what player A spends is added to B's
+ *	clock and vice versa
+ * TC_UNKNOWN - unknown timing type (e.g. read from file)
+ */
+typedef enum _tctiming {
+TC_NONE=0, TC_PLAIN, TC_FISCHER, TC_BRONSTEIN, TC_HOURGLASS, TC_UNKNOWN
+} tctiming;
+
+/* The different penalty types
+ * TC_POINT - a number of points - possibly 0 if there is no penalty -
+ *	 is added to the other players score
+ * TC_LOSS - the player loses the match
+ */
+typedef enum _tcpenalty {
+TC_POINT, TC_LOSS
+} tcpenalty;
+
+typedef struct _timecontrol {
+    char *szName;
+    tctiming timing;
+    tcpenalty penalty;
+
+    int nAddedTime;		/* A fixed time to add at the start of this
+	time control */
+    int nPointAllowance; 	/* Time to add per point remaining in match */
+    double dMultiplier; 	/* How much of old time allowance to keep when
+	starting this time control */
+    int nMoveAllowance;		/* Time allowance per move */
+    int nPenalty;		/* Point penalty for timing out.  May be 0. */
+
+    char *szNext;
+	/* Next time control for the player whose time runs out. 
+	   NULL means reiterate same */
+    char *szNextB; 
+	/* The other guy's next time control
+	   NULL means no change to his time control*/
+} timecontrol;
+   
+typedef struct _tcnode {
+    timecontrol *ptc;
+    struct _tcnode *next;
+} tcnode;
+
+typedef struct _playerclock {
+    struct timeval tvStamp; 
+    struct timeval tvTimeleft;
+    timecontrol tc;
+   //  int nTimeouts;
+} playerclock;
+   
+typedef struct _gameclock {
+   playerclock pc[2];
+   struct timeval pausedtime;
+   int fPaused; 
+} gameclock;
+    
+#endif
 
 typedef struct _movegameinfo {
   /* "standard" header */
   movetype mt;
   char* sz;
+#if USE_TIMECONTROL
+  /* time left after the move */
+  struct timeval tl[2];
+#endif
 
   /* ordinal number of the game within a match */
   int i;
@@ -197,6 +275,12 @@ typedef struct _movegameinfo {
   int fCubeUse;
 
   statcontext sc;
+#if USE_TIMECONTROL
+  /* the game ended on time */ 
+    int fTimeout; 
+  /* how many timeouts (clock expiry) have happened during the match */
+    int nTimeouts[2];
+#endif
 } movegameinfo;
 
 typedef struct cubedecisiondata {
@@ -208,6 +292,9 @@ typedef struct cubedecisiondata {
 typedef struct _movedouble {
     movetype mt;
     char* sz;
+#if USE_TIMECONTROL
+    struct timeval tl[2];
+#endif
     int fPlayer;
     int nAnimals;    /* 0 in match play, even numbers are doubles, raccoons
                         odd numbers are beavers, aardvarken, etc. */
@@ -220,6 +307,9 @@ typedef struct _movenormal {
   /* "standard" header */
   movetype mt;
   char* sz;
+#if USE_TIMECONTROL
+  struct timeval tl[2];
+#endif
 
   int fPlayer;
 
@@ -256,6 +346,9 @@ typedef struct _movenormal {
 typedef struct _moveresign {
     movetype mt;
     char* sz;
+#if USE_TIMECONTROL
+    struct timeval tl[2];
+#endif
     int fPlayer;
     int nResigned;
 
@@ -269,12 +362,18 @@ typedef struct _moveresign {
 typedef struct _movesetboard {
     movetype mt;
     char* sz;
+#if USE_TIMECONTROL
+    struct timeval tl[2];
+#endif
     unsigned char auchKey[ 10 ]; /* always stored as if player 0 was on roll */
 } movesetboard;
 
 typedef struct _movesetdice {
     movetype mt;
     char* sz;
+#if USE_TIMECONTROL
+    struct timeval tl[2];
+#endif
     int fPlayer;
     int anDice[ 2 ];
     lucktype lt;
@@ -284,20 +383,39 @@ typedef struct _movesetdice {
 typedef struct _movesetcubeval {
     movetype mt;
     char* sz;
+#if USE_TIMECONTROL
+    struct timeval tl[2];
+#endif
     int nCube;
 } movesetcubeval;
 
 typedef struct _movesetcubepos {
     movetype mt;
-    char* sz;
+    char *sz;
+#if USE_TIMECONTROL
+    struct timeval tl[2];
+#endif
     int fCubeOwner;
 } movesetcubepos;
+
+#if USE_TIMECONTROL
+typedef struct _movetime {
+    movetype mt;
+    char *sz;
+    struct timeval tl[2];
+    int fPlayer;
+    int nPoints;
+} movetime;
+#endif
 
 typedef union _moverecord {
     movetype mt;
     struct _moverecordall {
 	movetype mt;
 	char* sz;
+#if USE_TIMECONTROL
+	struct timeval tl[2];
+#endif
     } a;
     movegameinfo g;
     movedouble d; /* cube decisions */
@@ -307,12 +425,18 @@ typedef union _moverecord {
     movesetdice sd;
     movesetcubeval scv;
     movesetcubepos scp;
+#if USE_TIMECONTROL
+    movetime t;
+#endif
 } moverecord;
 
 extern char* aszGameResult[], szDefaultPrompt[], *szPrompt;
 
 typedef enum {
     GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
+#if USE_TIMECONTROL
+	, GAME_TIMEOUT
+#endif
 } gamestate; 
 
 /* The match state is represented by the board position (anBoard),
@@ -329,6 +453,11 @@ typedef struct {
     int fCubeUse;
     int fJacoby;
     gamestate gs;
+#if USE_TIMECONTROL
+    gameclock gc;
+    struct timeval tvTimeleft[2];
+    int nTimeouts[2];
+#endif
 } matchstate;
 
 typedef struct _matchinfo { /* SGF match information */
@@ -1015,6 +1144,18 @@ extern void CommandAccept( char * ),
     CommandSetSoundSoundRoll ( char * ),
     CommandSetSoundSoundStart ( char * ),
     CommandSetSoundSoundTake ( char * ),
+#if USE_TIMECONTROL
+    CommandSetTCMove( char * ),
+    CommandSetTCMultiplier( char * ),
+    CommandSetTCName( char * ),
+    CommandSetTCNext( char * ),
+    CommandSetTCPenalty( char * ),
+    CommandSetTCPoint( char * ),
+    CommandSetTCTime( char * ),
+    CommandSetTCType( char * ),
+    CommandSetTCUnname( char * ),
+    CommandSetTimeControl( char * ),
+#endif
     CommandSetTrainingAlpha( char * ),
     CommandSetTrainingAnneal( char * ),
     CommandSetTrainingThreshold( char * ),
@@ -1082,6 +1223,11 @@ extern void CommandAccept( char * ),
     CommandShowStatisticsGame( char * ),
     CommandShowStatisticsMatch( char * ),
     CommandShowStatisticsSession( char * ),
+#if USE_TIMECONTROL
+    CommandShowTCList( char * ),
+    CommandShowTCTutorial( char * ),
+    CommandShowTimeControl( char * ),
+#endif
     CommandShowTemperatureMap( char * ),
     CommandShowThorp( char * ),
     CommandShowTraining( char * ),

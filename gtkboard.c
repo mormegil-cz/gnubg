@@ -568,6 +568,40 @@ void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
 }
 
+#if USE_TIMECONTROL
+extern void board_set_clock(Board *board, gchar *c0, gchar *c1)
+{
+	gtk_label_set_text ( GTK_LABEL(((BoardData *) board->board_data)->clock0), c0 );  
+	gtk_label_set_text ( GTK_LABEL(((BoardData *) board->board_data)->clock1), c1 );
+}
+
+extern void board_set_scores(Board *board,int s0, int s1)
+{
+    char buf[16];
+    BoardData *bd = (BoardData *) board->board_data;
+    if ( bd->match_to ) {
+	if ( (bd->score_opponent=s0) >= bd->match_to )
+	    sprintf( buf, "%d (won match)", bd->score_opponent );
+	else
+	    sprintf( buf, "%d (%d-away)", bd->score_opponent,
+		bd->match_to - bd->score_opponent );
+	gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
+
+	if ( (bd->score=s1) >= bd->match_to )
+	    sprintf( buf, "%d (won match)", bd->score );
+	else
+	    sprintf( buf, "%d (%d-away)", bd->score,
+		bd->match_to - bd->score );
+	gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
+    } else {
+	sprintf( buf, "%d", bd->score_opponent = s0 );
+	gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
+	sprintf( buf, "%d", bd->score = s1 );
+	gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
+    }
+}
+#endif
+
 /* A chequer has been moved or the board has been updated -- update the
    move and position ID labels. */
 int update_move(BoardData *bd)
@@ -3515,6 +3549,23 @@ static void board_init( Board *board ) {
     gtk_box_pack_start ( GTK_BOX ( pw ), 
                          bd->pipcount0 = gtk_label_new ( NULL ), 
                          FALSE, FALSE, 0 );
+#if USE_TIMECONTROL 
+    /* third row: clock */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* clock label */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Clock:") ), FALSE, FALSE, 0 );
+
+    /* clock */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         bd->clock0 = gtk_label_new ( NULL ), 
+                         FALSE, FALSE, 0 );
+#endif
 
     /* 
      * player 1
@@ -3585,6 +3636,24 @@ static void board_init( Board *board ) {
     gtk_box_pack_start ( GTK_BOX ( pw ), 
                          bd->pipcount1 = gtk_label_new ( NULL ), 
                          FALSE, FALSE, 0 );
+
+#if USE_TIMECONTROL 
+    /* third row: clock */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* clock label */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Clock:") ), FALSE, FALSE, 0 );
+
+    /* clock */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         bd->clock1 = gtk_label_new ( NULL ), 
+                         FALSE, FALSE, 0 );
+#endif
 
 
     /* 

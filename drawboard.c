@@ -137,6 +137,11 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
         if( y < 2 && asz[ y + 1 ] )
             for( pchIn = asz[ y + 1 ]; *pchIn; pchIn++ )
                 *pch++ = *pchIn;
+#if USE_TIMECONTROL
+	if ((y==3) && asz[7])
+            for( pchIn = asz[ 7 ]; *pchIn; pchIn++ )
+                *pch++ = *pchIn;
+#endif
 
         *pch++ = '\n';
     }
@@ -251,6 +256,11 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
             for( pchIn = asz[ 5 - y ]; *pchIn; pchIn++ )
                 *pch++ = *pchIn;
         
+#if USE_TIMECONTROL
+	if ((y==3) && asz[8])
+            for( pchIn = asz[ 8 ]; *pchIn; pchIn++ )
+                *pch++ = *pchIn;
+#endif
         *pch++ = '\n';
     }
 
