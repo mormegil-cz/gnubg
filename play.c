@@ -3616,10 +3616,11 @@ InternalCommandNext(int fMarkedMoves, int n)
   int done = 0;
   
   if( fMarkedMoves ) {
-	list* p =  plLastMove;
 	moverecord* pmr = 0;
+	list* p =  plLastMove->plNext;
+
 	/* we need to increment the count if we're pointing to a marked move */
-	if ( p->plNext->p && MoveIsMarked( (moverecord *) p->plNext->p ) )
+	if ( p->p && MoveIsMarked( (moverecord *) p->p ) )
 	  ++n;
 
 	while(p->p) {
