@@ -7471,7 +7471,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     textdomain (PACKAGE);
     bind_textdomain_codeset( PACKAGE, GNUBG_CHARSET );
 			     
-#if HAVE_NL_LANGINFO
+#if HAVE_LANGINFO_CODESET
  {
    char *cs = nl_langinfo( CODESET );
    char *cset;

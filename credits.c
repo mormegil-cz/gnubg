@@ -14,6 +14,7 @@ char *aszCredits[] = {
     "Holger Bochnig",
     "Chuck Bower",
     "Nick Bratby",
+    "Adrian Bunk",
     "Renzo Campagna",
     "Craig Campbell",
     "John Chuang",

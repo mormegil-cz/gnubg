@@ -27,6 +27,7 @@
 #include <config.h>
 #endif
 #include <assert.h>
+#include <sys/types.h>
 #if HAVE_SYS_AUDIOIO_H
 #include <sys/audioio.h>
 #endif
@@ -44,7 +45,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 #if HAVE_ESD
