@@ -1,3 +1,9 @@
+Fri Jan 10 19:42:38 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (EvalCHanged): fix bug when comparing to
+	predefined settings.
+	(reported by Scott Steiner)
+
 Fri Jan 10 19:18:59 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c: new command "show fullboard" that also shows

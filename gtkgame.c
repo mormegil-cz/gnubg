@@ -3736,7 +3736,7 @@ static void EvalChanged ( GtkWidget *pw, evalwidget *pew ) {
   for ( i = 0; i < NUM_SETTINGS; i++ ) {
 
     fEval = ! cmp_evalcontext ( &aecSettings[ i ], &ecCurrent );
-    fMoveFilter = aecSettings[ i ].nPlies &&
+    fMoveFilter = ! aecSettings[ i ].nPlies ||
       ( ! pew->fMoveFilter || 
         equal_movefilters ( pew->pmf, 
                             aaamfMoveFilterSettings[ aiSettingsMoveFilter[ i ] ] ) );
