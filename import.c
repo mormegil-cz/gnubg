@@ -643,6 +643,7 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     char sz[ 80 ], sz0[ 32 ], sz1[ 32 ], *pch;
     moverecord *pmr;
     int fInvert;
+    static int anExpectedScore[ 2 ];
     
     if( fscanf( pf, " %31s is X - %31s is O\n", sz0, sz1 ) < 2 )
 	return;
@@ -665,8 +666,20 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     pmr->g.sz = NULL;
     pmr->g.i = iGame;
     pmr->g.nMatch = nLength;
-    pmr->g.anScore[ 0 ] = n1;
-    pmr->g.anScore[ 1 ] = n0;
+    pmr->g.anScore[ fInvert ] = n0;
+    pmr->g.anScore[ ! fInvert ] = n1;
+
+    /* check if score is swapped (due to fibs oldmoves bug) */
+
+    if ( iGame && pmr->g.anScore[ 0 ] == anExpectedScore[ 1 ] &&
+         pmr->g.anScore[ 1 ] == anExpectedScore[ 0 ] ) {
+
+      pmr->g.anScore[ 0 ] = anExpectedScore[ 0 ];
+      pmr->g.anScore[ 1 ] = anExpectedScore[ 1 ];
+
+    }
+    
+
     pmr->g.fCrawford = nLength != 0; /* assume matches use Crawford rule */
     if( ( pmr->g.fCrawfordGame = !fPostCrawford &&
 	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
@@ -697,6 +710,11 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
 	if( !fgets( sz, 80, pf ) )
 	    break;
     } while( strspn( sz, " \n\r\t" ) != strlen( sz ) );
+
+
+    anExpectedScore[ 0 ] = pmr->g.anScore[ 0 ];
+    anExpectedScore[ 1 ] = pmr->g.anScore[ 1 ];
+    anExpectedScore[ pmr->g.fWinner ] += pmr->g.nPoints;
 
     AddGame( pmr );
 }
