@@ -1,3 +1,7 @@
+Sun Jul 21 22:22:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c: Add widget for advanced options + some cleaning.
+ 
 Sun Jul 21 21:41:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (HTMLEpilogue): update link to CSS validator.

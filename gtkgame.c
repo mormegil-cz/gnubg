@@ -325,16 +325,12 @@ static void NewWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
-static void SetAlpha( gpointer *p, guint n, GtkWidget *pw );
+static void SetAdvOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
-static void SetAnneal( gpointer *p, guint n, GtkWidget *pw );
-static void SetCache( gpointer *p, guint n, GtkWidget *pw );
-static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
 static void SetMET( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
-static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 static void SetCubeValue( GtkWidget *wd, int data);
 static void SetCubeOwner( GtkWidget *wd, int i);
 static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
@@ -2036,8 +2032,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Settings/_Players..."), NULL, SetPlayers, 0, NULL },
 	{ N_("/_Settings/_Rollouts..."), NULL, SetRollouts, 0, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Settings/Options..."), 
-          NULL, SetOptions, 0, NULL },
+	{ N_("/_Settings/Options..."), NULL, SetOptions, 0, NULL },
+	{ N_("/_Settings/Advanced options..."), NULL, SetAdvOptions, 0, NULL },
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL },
@@ -2559,6 +2555,7 @@ static char *ReadString( char *szTitle, char *szPrompt, char *szDefault ) {
 
     return sz;
 }
+#if 0
 
 static void RealOK( GtkWidget *pw, float *pr ) {
 
@@ -2603,7 +2600,7 @@ static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
 
     return r;
 }
-
+#endif
 static void EnterCommand( gpointer *p, guint n, GtkWidget *pw ) {
 
     char *pch = ReadString( _("GNU Backgammon - Enter command"), FormatPrompt(),
@@ -2641,58 +2638,6 @@ static void NewWeights( gpointer *p, guint n, GtkWidget *pw ) {
     }
 }
 
-static void SetAlpha( gpointer *p, guint k, GtkWidget *pw ) {
-
-    float r = ReadReal( _("GNU Backgammon - Learning rate"),
-			_("Learning rate:"), rAlpha, 0.0f, 1.0f, 0.01f );
-
-    if( r >= 0.0f ) {
-	char sz[ 32 ];
-
-	lisprintf( sz, "set training alpha %f", r );
-	UserCommand( sz );
-    }
-}
-
-static void SetAnneal( gpointer *p, guint k, GtkWidget *pw ) {
-
-    float r = ReadReal( _("GNU Backgammon - Annealing rate"),
-			_("Annealing rate:"), rAnneal, -5.0f, 5.0f, 0.1f );
-
-    if( r >= -5.0f ) {
-	char sz[ 32 ];
-
-	lisprintf( sz, "set training anneal %f", r );
-	UserCommand( sz );
-    }
-}
-
-static void SetCache( gpointer *p, guint k, GtkWidget *pw ) {
-
-    int n = ReadNumber( _("GNU Backgammon - Position cache"),
-			_("Cache size (entries):"), 65536, 0, 1048576, 1 );
-
-    if( n >= 0 ) {
-	char sz[ 32 ];
-
-	sprintf( sz, "set cache %d", n );
-	UserCommand( sz );
-    }
-}
-
-static void SetDelay( gpointer *p, guint k, GtkWidget *pw ) {
-    
-    int n = ReadNumber( _("GNU Backgammon - Delay"),
-			_("Delay (ms):"), nDelay, 0, 10000, 100 );
-
-    if( n >= 0 ) {
-	char sz[ 32 ];
-
-	sprintf( sz, "set delay %d", n );
-	UserCommand( sz );
-    }
-}
-
 static void SetSeed( gpointer *p, guint k, GtkWidget *pw ) {
 
     int nRandom, n;
@@ -2705,19 +2650,6 @@ static void SetSeed( gpointer *p, guint k, GtkWidget *pw ) {
 	char sz[ 32 ];
 
 	sprintf( sz, "set seed %d", n );
-	UserCommand( sz );
-    }
-}
-
-static void SetThreshold( gpointer *p, guint k, GtkWidget *pw ) {
-
-    float r = ReadReal( _("GNU Backgammon - Error threshold"),
-			_("Error threshold:"), rThreshold, 0.0f, 6.0f, 0.01f );
-
-    if( r >= 0.0f ) {
-	char sz[ 32 ];
-
-	lisprintf( sz, "set training threshold %f", r );
 	UserCommand( sz );
     }
 }
@@ -3896,11 +3828,23 @@ typedef struct _analysiswidget {
     
 } analysiswidget;
 
-/* static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
+static void AnalysisCheckToggled( GtkWidget *pw, analysiswidget *paw ) {
 
-   FIXME: Write this function 
-   
-} */
+  gint fMov = 
+     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwMoves ) ); 
+  gint fCub = 
+     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwCube ) ); 
+  /* FIXME: The Luck frame should be set inactive if Luck is checked off */  
+  /* FIXME: The Skill frame should be set inactive if both Moves and Chequer
+            are checked off */  
+
+  /*   gint fDic = 
+     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwLuck ) ); */
+
+  gtk_widget_set_sensitive( paw->pwEvalCube, fCub );
+  gtk_widget_set_sensitive( paw->pwEvalChequer, fMov );
+
+} 
 
 static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 
@@ -3917,62 +3861,56 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
   
   hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox1);
   gtk_box_pack_start (GTK_BOX (pwPage), hbox1, TRUE, TRUE, 0);
 
   vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
   gtk_box_pack_start (GTK_BOX (hbox1), vbox1, TRUE, TRUE, 0);
 
   pwFrame = gtk_frame_new (_("Analysis"));
-  gtk_widget_show (pwFrame);
   gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
 
   vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
   gtk_container_add (GTK_CONTAINER (pwFrame), vbox2);
 
   paw->pwMoves = gtk_check_button_new_with_label (_("Chequer play"));
-  gtk_widget_show (paw->pwMoves);
   gtk_box_pack_start (GTK_BOX (vbox2), paw->pwMoves, FALSE, FALSE, 0);
 
   paw->pwCube = gtk_check_button_new_with_label (_("Cube decisions"));
-  gtk_widget_show (paw->pwCube);
   gtk_box_pack_start (GTK_BOX (vbox2), paw->pwCube, FALSE, FALSE, 0);
 
   paw->pwLuck = gtk_check_button_new_with_label (_("Luck"));
-  gtk_widget_show (paw->pwLuck);
   gtk_box_pack_start (GTK_BOX (vbox2), paw->pwLuck, FALSE, FALSE, 0);
 
+  gtk_signal_connect ( GTK_OBJECT ( paw->pwMoves ), "toggled",
+                       GTK_SIGNAL_FUNC ( AnalysisCheckToggled ), paw );
+  gtk_signal_connect ( GTK_OBJECT ( paw->pwCube ), "toggled",
+                       GTK_SIGNAL_FUNC ( AnalysisCheckToggled ), paw );
+  gtk_signal_connect ( GTK_OBJECT ( paw->pwLuck ), "toggled",
+                       GTK_SIGNAL_FUNC ( AnalysisCheckToggled ), paw );
+
   hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox2, TRUE, TRUE, 0);
 
   pwLabel = gtk_label_new (_("Move limit:"));
-  gtk_widget_show (pwLabel);
   gtk_box_pack_start (GTK_BOX (hbox2), pwLabel, FALSE, FALSE, 0);
 
   paw->padjMoves =  
     GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 1000, 1, 1, 0 ) );
 
   pwSpin = gtk_spin_button_new (GTK_ADJUSTMENT (paw->padjMoves), 1, 0);
-  gtk_widget_show (pwSpin);
   gtk_box_pack_start (GTK_BOX (hbox2), pwSpin, TRUE, TRUE, 0);
   gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpin), TRUE);
 
   pwFrame = gtk_frame_new (_("Skill thresholds"));
-  gtk_widget_show (pwFrame);
   gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
 
   pwTable = gtk_table_new (5, 2, FALSE);
-  gtk_widget_show (pwTable);
   gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
 
   for (i = 0; i < 5; i++){
     pwLabel = gtk_label_new ( aszSkillLabel[i] );
-    gtk_widget_show (pwLabel);
     gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
@@ -3987,7 +3925,6 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
     pwSpin = 
 	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjSkill[i]), 1, 2);
     
-    gtk_widget_show (pwSpin);
     gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
                       (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                       (GtkAttachOptions) (0), 0, 0);
@@ -3995,17 +3932,14 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   }
   
   pwFrame = gtk_frame_new (_("Luck thresholds"));
-  gtk_widget_show (pwFrame);
   gtk_box_pack_start (GTK_BOX (vbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
 
   pwTable = gtk_table_new (4, 2, FALSE);
-  gtk_widget_show (pwTable);
   gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
  
   for (i = 0; i < 4; i++){
     pwLabel = gtk_label_new ( aszLuckLabel[i] );
-    gtk_widget_show (pwLabel);
     gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, i, i+1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
@@ -4020,7 +3954,6 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
     pwSpin = 
 	    gtk_spin_button_new (GTK_ADJUSTMENT (paw->apadjLuck[i]), 1, 2);
     
-    gtk_widget_show (pwSpin);
     gtk_table_attach (GTK_TABLE (pwTable), pwSpin, 1, 2, i, i+1,
                       (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                       (GtkAttachOptions) (0), 0, 0);
@@ -4028,7 +3961,6 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   }
   
   pwFrame = gtk_frame_new (_("Chequer play"));
-  gtk_widget_show (pwFrame);
   gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
 
@@ -4036,7 +3968,6 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
 		  paw->pwEvalChequer = EvalWidget( &paw->esChequer.ec, NULL ));
 
   pwFrame = gtk_frame_new (_("Cube decisions"));
-  gtk_widget_show (pwFrame);
   gtk_box_pack_start (GTK_BOX (hbox1), pwFrame, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
   
@@ -4053,13 +3984,24 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
            UserCommand(sz); \
    }
 
+#define ADJUSTSKILLUPDATE(button,flag,string) \
+  if( paw->apadjSkill[(button)]->value != arSkillLevel[(flag)] ) \
+  { \
+     lisprintf(sz,  (string), paw->apadjSkill[(button)]->value ); \
+     UserCommand(sz); \
+  }
+
+#define ADJUSTLUCKUPDATE(button,flag,string) \
+  if( paw->apadjLuck[(button)]->value != arLuckLevel[(flag)] ) \
+  { \
+     lisprintf(sz, (string), paw->apadjLuck[(button)]->value ); \
+     UserCommand(sz); \
+  }
+     
 static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 
-  /* FIXME: Don't send the commands that does not change a setting */
-	
   char sz[128]; 
   int n;
-  float rCompare;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
 
@@ -4072,64 +4014,16 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
     UserCommand(sz); 
   }
 
-  rCompare = paw->apadjSkill[0]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_VERYGOOD]) > 0.0001 )
-  {
-     lisprintf(sz, "set analysis threshold verygood %.3f", rCompare );
-     UserCommand(sz); 
-  }
-    
-  rCompare = paw->apadjSkill[1]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_GOOD] ) > 0.0001 )
-  {
-     lisprintf(sz, "set analysis threshold good %.3f", rCompare );
-     UserCommand(sz); 
-  }
+  ADJUSTSKILLUPDATE( 0, SKILL_VERYGOOD, "set analysis threshold verygood %.3f" )
+  ADJUSTSKILLUPDATE( 1, SKILL_GOOD, "set analysis threshold good %.3f" )
+  ADJUSTSKILLUPDATE( 2, SKILL_DOUBTFUL, "set analysis threshold doubtful %.3f" )
+  ADJUSTSKILLUPDATE( 3, SKILL_BAD, "set analysis threshold bad %.3f" )
+  ADJUSTSKILLUPDATE( 4, SKILL_VERYBAD, "set analysis threshold verybad %.3f" )
 
-  rCompare = paw->apadjSkill[2]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_DOUBTFUL] ) > 0.0001 )
-  {
-     lisprintf(sz, "set analysis threshold doubtful %.3f", rCompare );
-     UserCommand(sz); 
-  }
-
-  rCompare = paw->apadjSkill[3]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_BAD] ) > 0.0001 )
-  {
-     lisprintf(sz, "set analysis threshold bad %.3f", rCompare );
-     UserCommand(sz); 
-  }
-
-  rCompare = paw->apadjSkill[4]->value;
-  if(fabs( rCompare - arSkillLevel[SKILL_VERYBAD] ) > 0.0001 )
-  {
-     lisprintf(sz, "set analysis threshold verybad %.3f", rCompare );
-     UserCommand(sz); 
-  }
-
-  if(( rCompare = paw->apadjLuck[0]->value ) != arLuckLevel[LUCK_VERYGOOD] )
-  {
-     lisprintf(sz, "set analysis threshold verylucky %.3f", rCompare );
-     UserCommand(sz); 
-  }
-
-  if(( rCompare = paw->apadjLuck[1]->value ) != arLuckLevel[LUCK_GOOD] )
-  {
-     lisprintf(sz, "set analysis threshold lucky %.3f", rCompare );
-     UserCommand(sz); 
-  }
-
-  if(( rCompare = paw->apadjLuck[2]->value ) != arLuckLevel[LUCK_BAD] )
-  {
-     lisprintf(sz, "set analysis threshold unlucky %.3f", rCompare );
-     UserCommand(sz); 
-  }
-
-  if(( rCompare = paw->apadjLuck[3]->value ) != arLuckLevel[LUCK_VERYBAD] )
-  {
-     lisprintf(sz, "set analysis threshold veryunlucky %.3f", rCompare );
-     UserCommand(sz); 
-  }
+  ADJUSTLUCKUPDATE( 0, LUCK_VERYGOOD, "set analysis threshold verylucky %.3f" )
+  ADJUSTLUCKUPDATE( 1, LUCK_GOOD, "set analysis threshold lucky %.3f" )
+  ADJUSTLUCKUPDATE( 2, LUCK_BAD, "set analysis threshold unlucky %.3f" )
+  ADJUSTLUCKUPDATE( 3, LUCK_VERYBAD, "set analysis threshold veryunlucky %.3f" )
 
   EvalOK( paw->pwEvalChequer, paw->pwEvalChequer );
   EvalOK( paw->pwEvalCube, paw->pwEvalCube );
@@ -4143,6 +4037,8 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 
 }
 #undef CHECKUPDATE
+#undef ADJUSTSKILLUPDATE
+#undef ADJUSTLUCKUPDATE
 
 static void AnalysisSet( analysiswidget *paw) {
 
@@ -6645,21 +6541,16 @@ static GtkWidget* CreateSetCubeDialog ( int *pfOK )
 
   *pfOK = FALSE;
   SetCubeWindow = CreateDialog( _("GNU Backgammon - Cube"), TRUE, NULL, pfOK );
-  gtk_object_set_data (GTK_OBJECT (SetCubeWindow), "SetCubeWindow",
-                         SetCubeWindow);
 
   hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox1);
   gtk_container_add (GTK_CONTAINER (DialogArea( SetCubeWindow, DA_MAIN )),
 		     hbox1);
 
   frame1 = gtk_frame_new (_("Value"));
-  gtk_widget_show (frame1);
   gtk_box_pack_start (GTK_BOX (hbox1), frame1, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame1), 3);
 
   vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
   gtk_container_add (GTK_CONTAINER (frame1), vbox1);
 
   for (i = 0; i < 7; i++){
@@ -6672,31 +6563,25 @@ static GtkWidget* CreateSetCubeDialog ( int *pfOK )
   }
 
   vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
   gtk_box_pack_start (GTK_BOX (hbox1), vbox1, TRUE, TRUE, 0);
 
   frame1 = gtk_frame_new (_("Owner"));
-  gtk_widget_show (frame1);
   gtk_box_pack_start (GTK_BOX (vbox1), frame1, TRUE, TRUE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (frame1), 3);
 
   vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
   gtk_container_add (GTK_CONTAINER (frame1), vbox2);
 
   pwRBOwner[0] = gtk_radio_button_new_with_label (owner_group, _("Centred"));
   owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (pwRBOwner[0]));
-  gtk_widget_show (pwRBOwner[0]);
   gtk_box_pack_start (GTK_BOX (vbox2), pwRBOwner[0], FALSE, FALSE, 0);
 
   pwRBOwner[1] = gtk_radio_button_new_with_label (owner_group, ap[0].szName);
   owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (pwRBOwner[1]));
-  gtk_widget_show (pwRBOwner[1]);
   gtk_box_pack_start (GTK_BOX (vbox2), pwRBOwner[1], FALSE, FALSE, 0);
 
   pwRBOwner[2] = gtk_radio_button_new_with_label (owner_group, ap[1].szName);
   owner_group = gtk_radio_button_group (GTK_RADIO_BUTTON (pwRBOwner[2]));
-  gtk_widget_show (pwRBOwner[2]);
   gtk_box_pack_start (GTK_BOX (vbox2), pwRBOwner[2], FALSE, FALSE, 0);
 
   for (i = 0; i < 7 ; i++) {
@@ -7235,212 +7120,12 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   gtk_box_pack_start (GTK_BOX (pwVBox), pwAdvbutton, FALSE, FALSE, 0);
   gtk_container_set_border_width (GTK_CONTAINER (pwAdvbutton), 4);
 
-  /* gtk_signal_connect ( GTK_OBJECT ( pwAdvbutton ), "clicked",
-                       GTK_SIGNAL_FUNC ( SetAdvancedOptions ), NULL ); */
+  gtk_signal_connect ( GTK_OBJECT ( pwAdvbutton ), "clicked",
+                       GTK_SIGNAL_FUNC ( SetAdvOptions ), NULL ); 
 
   return pwHBoxMain;
 }
-#if 0
-GtkWidget*
-create_window2 ()
-{
-  GtkWidget *window2;
-  GtkWidget *vbox1;
-  GtkWidget *hbox5;
-  GtkWidget *pwLabel3;
-  GtkObject *spinbutton3_adj;
-  GtkWidget *spinbutton3;
-  GtkWidget *hbox6;
-  GtkWidget *pwLabel4;
-  GtkObject *spinbutton4_adj;
-  GtkWidget *spinbutton4;
-  GtkWidget *pwLabel5;
-  GtkWidget *pwcbRecord;
-  GtkWidget *pwcbDisplay;
-  GtkWidget *pwFrame8;
-  GtkWidget *table1;
-  GtkWidget *pwLabel6;
-  GtkWidget *pwLabel7;
-  GtkWidget *pwLabel8;
-  GtkObject *spinbutton5_adj;
-  GtkWidget *spinbutton5;
-  GtkObject *spinbutton6_adj;
-  GtkWidget *spinbutton6;
-  GtkObject *spinbutton7_adj;
-  GtkWidget *spinbutton7;
-  GtkWidget *pwPath;
-  GtkWidget *pwPrompt;
 
-  window2 = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_object_set_data (GTK_OBJECT (window2), "window2", window2);
-  gtk_window_set_title (GTK_WINDOW (window2), _("Advanced options"));
-
-  vbox9 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_ref (vbox9);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "vbox9", vbox9,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (vbox9);
-  gtk_container_add (GTK_CONTAINER (window2), vbox9);
-
-  hbox5 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_ref (hbox5);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "hbox5", hbox5,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (hbox5);
-  gtk_box_pack_start (GTK_BOX (vbox9), hbox5, TRUE, TRUE, 0);
-
-  pwLabel3 = gtk_label_new (_("Cache size:"));
-  gtk_widget_ref (pwLabel3);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwLabel3", pwLabel3,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwLabel3);
-  gtk_box_pack_start (GTK_BOX (hbox5), pwLabel3, FALSE, FALSE, 0);
-
-  spinbutton3_adj = gtk_adjustment_new (65536, 0, 1e+09, 1, 10, 10);
-  spinbutton3 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton3_adj), 128, 0);
-  gtk_widget_ref (spinbutton3);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "spinbutton3", spinbutton3,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (spinbutton3);
-  gtk_box_pack_start (GTK_BOX (hbox5), spinbutton3, TRUE, TRUE, 0);
-
-  hbox6 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_ref (hbox6);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "hbox6", hbox6,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (hbox6);
-  gtk_box_pack_start (GTK_BOX (vbox9), hbox6, FALSE, FALSE, 0);
-
-  pwLabel4 = gtk_label_new (_("Delay:"));
-  gtk_widget_ref (pwLabel4);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwLabel4", pwLabel4,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwLabel4);
-  gtk_box_pack_start (GTK_BOX (hbox6), pwLabel4, FALSE, FALSE, 0);
-
-  spinbutton4_adj = gtk_adjustment_new (100, 0, 3000, 1, 10, 10);
-  spinbutton4 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton4_adj), 1, 0);
-  gtk_widget_ref (spinbutton4);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "spinbutton4", spinbutton4,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (spinbutton4);
-  gtk_box_pack_start (GTK_BOX (hbox6), spinbutton4, TRUE, TRUE, 0);
-
-  pwLabel5 = gtk_label_new (_("(ms)"));
-  gtk_widget_ref (pwLabel5);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwLabel5", pwLabel5,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwLabel5);
-  gtk_box_pack_start (GTK_BOX (hbox6), pwLabel5, FALSE, FALSE, 0);
-
-  pwcbRecord = gtk_check_button_new_with_label (_("Record all games"));
-  gtk_widget_ref (pwcbRecord);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwcbRecord", pwcbRecord,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwcbRecord);
-  gtk_box_pack_start (GTK_BOX (vbox9), pwcbRecord, FALSE, FALSE, 0);
-
-  pwcbDisplay = gtk_check_button_new_with_label (_("Display computer moves"));
-  gtk_widget_ref (pwcbDisplay);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwcbDisplay", pwcbDisplay,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwcbDisplay);
-  gtk_box_pack_start (GTK_BOX (vbox9), pwcbDisplay, FALSE, FALSE, 0);
-
-  pwFrame8 = gtk_frame_new (_("Training"));
-  gtk_widget_ref (pwFrame8);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwFrame8", pwFrame8,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwFrame8);
-  gtk_box_pack_start (GTK_BOX (vbox9), pwFrame8, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwFrame8), 4);
-
-  table1 = gtk_table_new (3, 2, FALSE);
-  gtk_widget_ref (table1);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "table1", table1,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (table1);
-  gtk_container_add (GTK_CONTAINER (pwFrame8), table1);
-
-  pwLabel6 = gtk_label_new (_("Learning rate:"));
-  gtk_widget_ref (pwLabel6);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwLabel6", pwLabel6,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwLabel6);
-  gtk_table_attach (GTK_TABLE (table1), pwLabel6, 0, 1, 0, 1,
-                    (GtkAttachOptions) (0),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (pwLabel6), GTK_JUSTIFY_RIGHT);
-
-  pwLabel7 = gtk_label_new (_("Annealing rate:"));
-  gtk_widget_ref (pwLabel7);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwLabel7", pwLabel7,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwLabel7);
-  gtk_table_attach (GTK_TABLE (table1), pwLabel7, 0, 1, 1, 2,
-                    (GtkAttachOptions) (0),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (pwLabel7), GTK_JUSTIFY_RIGHT);
-
-  pwLabel8 = gtk_label_new (_("Threshold:"));
-  gtk_widget_ref (pwLabel8);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwLabel8", pwLabel8,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwLabel8);
-  gtk_table_attach (GTK_TABLE (table1), pwLabel8, 0, 1, 2, 3,
-                    (GtkAttachOptions) (0),
-                    (GtkAttachOptions) (0), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (pwLabel8), GTK_JUSTIFY_RIGHT);
-
-  spinbutton5_adj = gtk_adjustment_new (1, 0, 100, 1, 10, 10);
-  spinbutton5 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton5_adj), 1, 0);
-  gtk_widget_ref (spinbutton5);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "spinbutton5", spinbutton5,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (spinbutton5);
-  gtk_table_attach (GTK_TABLE (table1), spinbutton5, 1, 2, 0, 1,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-
-  spinbutton6_adj = gtk_adjustment_new (1, 0, 100, 1, 10, 10);
-  spinbutton6 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton6_adj), 1, 0);
-  gtk_widget_ref (spinbutton6);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "spinbutton6", spinbutton6,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (spinbutton6);
-  gtk_table_attach (GTK_TABLE (table1), spinbutton6, 1, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-
-  spinbutton7_adj = gtk_adjustment_new (1, 0, 100, 1, 10, 10);
-  spinbutton7 = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton7_adj), 1, 0);
-  gtk_widget_ref (spinbutton7);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "spinbutton7", spinbutton7,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (spinbutton7);
-  gtk_table_attach (GTK_TABLE (table1), spinbutton7, 1, 2, 2, 3,
-                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-
-  pwPath = gtk_button_new_with_label (_("Set paths..."));
-  gtk_widget_ref (pwPath);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwPath", pwPath,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwPath);
-  gtk_box_pack_start (GTK_BOX (vbox9), pwPath, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwPath), 4);
-
-  pwPrompt = gtk_button_new_with_label (_("Set prompt..."));
-  gtk_widget_ref (pwPrompt);
-  gtk_object_set_data_full (GTK_OBJECT (window2), "pwPrompt", pwPrompt,
-                            (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pwPrompt);
-  gtk_box_pack_start (GTK_BOX (vbox9), pwPrompt, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwPrompt), 4);
-
-  return window2;
-}
-#endif
 #define CHECKUPDATE(button,flag,string) \
    n = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( (button) ) ); \
    if ( n != (flag)){ \
@@ -7449,8 +7134,6 @@ create_window2 ()
    }
 
 static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
-
-  /* FIXME: Don't send the commands that does not change a setting */
 
   char sz[128];
   int n;
@@ -7604,4 +7287,202 @@ static void SetOptions( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
+typedef struct _advoptionswidget {
+
+  GtkWidget *pwRecordGames, *pwDisplay;
+  GtkAdjustment *padjCache, *padjDelay;
+  GtkAdjustment *padjLearning, *padjAnnealing, *padjThreshold;
+  
+} advoptionswidget; 
+
+static GtkWidget* AdvOptionsPage (advoptionswidget *paow )
+{
+
+  GtkWidget *pwVBox = gtk_vbox_new (FALSE, 0),
+            *pwTable = gtk_table_new (2, 3, FALSE),
+            *pwPath = gtk_button_new_with_label (_("Set paths...")),
+//            *pwPrompt = gtk_button_new_with_label (_("Set prompt...")),
+            *pwFrame = gtk_frame_new (_("Training parameters")),
+            *pwLabel, *pwSpinbutton;
+
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwTable, TRUE, TRUE, 0);
+
+  pwLabel = gtk_label_new (_("Cache size:"));
+  gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, 0, 1,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  paow->padjCache = GTK_ADJUSTMENT (gtk_adjustment_new (65536,
+                                           0, 1e+09, 128, 512, 512) );
+  pwSpinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (paow->padjCache ), 128, 0);
+  gtk_table_attach (GTK_TABLE (pwTable), pwSpinbutton, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  pwLabel = gtk_label_new (_("Delay:"));
+  gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, 1, 2,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  paow->padjDelay = GTK_ADJUSTMENT (gtk_adjustment_new (nDelay, 0,
+                                    3000, 1, 10, 10) );
+  pwSpinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (paow->padjDelay), 1, 0);
+  gtk_table_attach (GTK_TABLE (pwTable), pwSpinbutton, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  pwLabel = gtk_label_new (_("(ms)"));
+  gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 2, 3, 1, 2,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  pwLabel = gtk_label_new (_("(enteries)"));
+  gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 2, 3, 0, 1,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  paow->pwRecordGames = gtk_check_button_new_with_label (_("Record all games"));
+  gtk_box_pack_start (GTK_BOX (pwVBox), paow->pwRecordGames, FALSE, FALSE, 0);
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paow->pwRecordGames ),
+                                fRecord );
+
+  paow->pwDisplay = gtk_check_button_new_with_label (_("Display computer moves"));
+  gtk_box_pack_start (GTK_BOX (pwVBox), paow->pwDisplay, FALSE, FALSE, 0);
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paow->pwDisplay ),
+                                fDisplay );
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwFrame, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwFrame), 4);
+
+  pwTable = gtk_table_new (3, 2, FALSE);
+  gtk_container_add (GTK_CONTAINER (pwFrame), pwTable);
+
+  pwLabel = gtk_label_new (_("Learning rate:"));
+  gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, 0, 1,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+
+  pwLabel = gtk_label_new (_("Annealing rate:"));
+  gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, 1, 2,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+
+  pwLabel = gtk_label_new (_("Threshold:"));
+  gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 0, 1, 2, 3,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (pwLabel), GTK_JUSTIFY_RIGHT);
+
+  paow->padjLearning = GTK_ADJUSTMENT (gtk_adjustment_new (rAlpha, 
+                                        0, 1, 0.01, 10, 10) );
+  pwSpinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (paow->padjLearning),
+                                        1 , 2);
+  gtk_table_attach (GTK_TABLE (pwTable), pwSpinbutton, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpinbutton), TRUE);
+
+  paow->padjAnnealing = GTK_ADJUSTMENT (gtk_adjustment_new (rAnneal, 
+                                        -5, 5, 0.1, 10, 10) );
+  pwSpinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (paow->padjAnnealing), 
+                                        1, 2);
+  gtk_table_attach (GTK_TABLE (pwTable), pwSpinbutton, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpinbutton), TRUE);
+
+  paow->padjThreshold = GTK_ADJUSTMENT (gtk_adjustment_new (rThreshold,
+                                        0, 6, 0.01, 0.1, 0.1) );
+  pwSpinbutton = gtk_spin_button_new (GTK_ADJUSTMENT (paow->padjThreshold),
+                                        1, 2);
+  gtk_table_attach (GTK_TABLE (pwTable), pwSpinbutton, 1, 2, 2, 3,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pwSpinbutton), TRUE);
+
+  gtk_box_pack_start (GTK_BOX (pwVBox), pwPath, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (pwPath), 4);
+
+//  gtk_box_pack_start (GTK_BOX (pwVBox), pwPrompt, FALSE, FALSE, 0);
+//  gtk_container_set_border_width (GTK_CONTAINER (pwPrompt), 4);
+
+  gtk_signal_connect( GTK_OBJECT( pwPath ), "clicked",
+			GTK_SIGNAL_FUNC( CommandShowPath ), NULL );
+
+//  gtk_signal_connect( GTK_OBJECT( pwPrompt ), "clicked",
+//			GTK_SIGNAL_FUNC( SetPrompt ), NULL );
+
+  return pwVBox;
+}
+
+#define CHECKUPDATE(button,flag,string) \
+   n = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( (button) ) ); \
+   if ( n != (flag)){ \
+           sprintf(sz, (string), n ? "on" : "off"); \
+           UserCommand(sz); \
+   }
+
+static void AdvOptionsOK( GtkWidget *pw, advoptionswidget *paow ){
+
+  char sz[40];
+  int n, cCache;  
+
+  gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
+
+  EvalCacheStats( NULL, &cCache, NULL, NULL );
+
+  CHECKUPDATE(paow->pwRecordGames,fRecord, "set record %s" )   
+  CHECKUPDATE(paow->pwDisplay,fDisplay, "set display %s" )   
+
+  if((n = paow->padjCache->value) != cCache) {
+    sprintf(sz, "set cache %d", n );
+    UserCommand(sz); 
+  }
+
+  if((n = paow->padjDelay->value) != nDelay) {
+    sprintf(sz, "set delay %d", n );
+    UserCommand(sz); 
+  }
+
+  if( paow->padjLearning->value != rAlpha ) 
+  { 
+     lisprintf(sz, "set training alpha %0.3f", paow->padjLearning->value); 
+     UserCommand(sz); 
+  }
+
+  if( paow->padjAnnealing->value != rAnneal ) 
+  { 
+     lisprintf(sz, "set training anneal %0.3f", paow->padjAnnealing->value); 
+     UserCommand(sz); 
+  }
+
+  if( paow->padjThreshold->value != rThreshold ) 
+  { 
+     lisprintf(sz, "set training threshold %0.3f", paow->padjThreshold->value); 
+     UserCommand(sz); 
+  }
+  /* Destroy widget on exit */
+  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+}
+
+#undef CHECKUPDATE
+
+static void SetAdvOptions( gpointer *p, guint n, GtkWidget *pw ) {
+
+  GtkWidget *pwDialog, *pwAdvOptions;
+  advoptionswidget aow;
+
+  pwDialog = CreateDialog( _("GNU Backgammon - Advanced options"), TRUE,
+			     GTK_SIGNAL_FUNC( AdvOptionsOK ), &aow );
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+ 		        pwAdvOptions = AdvOptionsPage( &aow ) );
+  gtk_widget_show_all( pwDialog );
+
+  gtk_main();
+
+}
 
