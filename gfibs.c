@@ -50,10 +50,12 @@ typedef struct _gamedata {
 
 char szBot[ 32 ], szOpponent[ 32 ];
 int fWon = -1, cIntro = -1, fQuit = FALSE, fJoining = TRUE;
-int fResigned = 0;
+int fResigned = 0, fIDoubled = 0;
 FILE *pfLog, *pfShouts;
+float arDouble[ 4 ];
 
 static int FibsParse( fibs *pf, char *sz );
+static int IsDropper ( char *szName );
 
 static int FibsReadNotify( event *pev, fibs *pf ) {
 
@@ -96,6 +98,8 @@ static int FibsReadNotify( event *pev, fibs *pf ) {
             *pch = 0;
 
 	FibsParse( pf, sz );
+
+	fflush ( stdout );
 
         /* FIXME if( message handler destroys this connection ) return -1; */
         
@@ -307,7 +311,7 @@ static void FixName( char *pch ) {
 
 static int FibsParse( fibs *pf, char *sz ) {
 
-    char szName[ 256 ], szTemp[ 256 ];
+    char szName[ 1024 ], szTemp[ 1024 ];
     int n;
     gamedata gd;
     evalcontext ecMoves = { 1, 8, 0.16 };
@@ -334,17 +338,26 @@ static int FibsParse( fibs *pf, char *sz ) {
 	
 	return 0;
     }
+
+    if ( sscanf( sz, "Starting a new game with %s", szName ) == 1 ) {
+
+	printf ("starting a new game");
+	FixName( szName );
+	strcpy( szOpponent, szName );
+
+    }
+
     
-    //if( sscanf( sz, "Starting a new game with %s", szName ) == 1 ) {
-    if( ( sscanf( sz, "Player %s has joined you for a", szName ) == 1
-	  ) ||
-	( sscanf( sz, "Starting a new game with %s", szName ) == 1 ) ) {
+    if( ( sscanf( sz, "Player %s has joined you for a", szName ) == 1 ) ||
+	( sscanf( sz, "** You are now playing a %i point match with %s",
+		  &n, szName ) == 2 ) ) {
+
+	printf ("starting a new match");
 	FixName( szName );
 
 	strcpy( szOpponent, szName );
 
-	if ( gd.nScore == 0 && gd.nScoreOpponent == 0 )
-	  cIntro = 0;
+	cIntro = 0;
 
 	return 0;
     }
@@ -356,6 +369,8 @@ static int FibsParse( fibs *pf, char *sz ) {
 	strcpy( szOpponent, szName );
 
 	FibsCommand( pf, "board" );
+
+	cIntro = 0;
 	
 	return 0;
     }
@@ -364,7 +379,7 @@ static int FibsParse( fibs *pf, char *sz ) {
 	*szTemp == 'l' ) ) 
 	|| ! strncmp ( sz, "It's your turn. Please roll or double", 37
 		       )
-	|| ! strncmp ( sz, "It's your turn to roll our double", 33 ) 
+	|| ! strncmp ( sz, "It's your turn to roll or double", 32 ) 
 	|| ! strncmp ( sz, "Please move", 11 ) 
 	|| ! strncmp ( sz, "** You did already roll the dice.", 33 ) )
 
@@ -395,10 +410,12 @@ static int FibsParse( fibs *pf, char *sz ) {
 	return 0;
     }
 
-    if( sscanf( sz, "%s wants to resign. You will win %i points.", 
+    if( sscanf( sz, "%s wants to resign. You will win %i point", 
 		szName, &fResigned ) == 2 ) {
 
       /* FIXME: check for: **blabla wanted to resign */
+
+      printf ( "Opponent wants to resign %i points.\n", fResigned );
 
       FibsCommand ( pf, "board" );
 
@@ -416,7 +433,8 @@ static int FibsParse( fibs *pf, char *sz ) {
 	    return 0;
 	} else{
 	    BufferWritef( &pf->b, 
-			  "tell %s Sorry, i only play 3-17 point matches",
+			  "tell %s Sorry, I'm a bot, and I "
+			  "only play 3-17 point matches\r\n",
 			  szName );
 	    
 	    return 0;
@@ -425,9 +443,11 @@ static int FibsParse( fibs *pf, char *sz ) {
 
     if( ( sscanf( sz, "%s wants to resume %s", szName, szTemp ) == 2 ) &&
 	fJoining ) {
-	BufferWritef( &pf->b, "invite %s\r\n", szName );
 
-	return 0;
+      sleep ( 2 );
+      BufferWritef( &pf->b, "invite %s\r\n", szName );
+
+      return 0;
     }
 
     if ( ! strncmp ( sz, "Type 'join' if you want to pla", 30 ) ) {
@@ -447,7 +467,10 @@ static int FibsParse( fibs *pf, char *sz ) {
     if( sscanf( sz, "** There's no saved match with %s", szName ) == 1 ) {
 	FixName( szName );
 
-	BufferWritef( &pf->b, "join %s\r\n", szName );
+	if ( ! IsDropper ( szName ) ) 
+	  BufferWritef( &pf->b, "join %s\r\n", szName );
+	else
+	  FibsCommand ( pf, "I don't play droppers..." );
 
 	return 0;	
     }
@@ -455,19 +478,32 @@ static int FibsParse( fibs *pf, char *sz ) {
     if( sscanf( sz, "%s win the %i point match %i-%i", szName, &n, &n, &n )
 	== 4 ||
 	sscanf( sz, "%s wins the %i point match", szName, &n ) == 2 ) {
-/* FIXME check for opponent accepting resignations too (in case of manual
-   intervention) */
+
+      int n1, n2, n3;
+      time_t t;
       
       printf ( "The match is over...\n" );
+      printf ( "sz=%s\nszName=%s\n", sz , szName );
 
-      if ( ! strcmp ( szName, "You" ) )
+      if ( ! strcmp ( szName, "You" ) ) {
+	sscanf ( sz, "You win the %i point match %i-%i", 
+		 &n1, &n2, &n3 ); 
 	fWon = TRUE;
-      else
+	printf ( "n1,n2,n3=%i,%i,%i\n", n1,n2,n3);
+      }
+      else {
+	sscanf ( sz, "%s wins the %i point match %i-%i",
+		 szTemp, &n1, &n2, &n3 );
 	fWon = FALSE;
+	printf ( "n1,n2,n3=%i,%i,%i\n", n1,n2,n3);
+      }
       
       BufferWritef( &pf->b, "rawwho %s\r\n", szOpponent );
 
-      fprintf( pfLog, "%s", sz );
+      time ( &t );
+
+      fprintf ( pfLog, "%s: %2i-%2i (%2i point match), ",
+		ctime ( &t ), n2, n3, n1 );
       
       return 0;
     }
@@ -485,17 +521,22 @@ static int FibsParse( fibs *pf, char *sz ) {
 
     /* FIXME only at the end of a MATCH, not the game */
     if( fWon >= 0 && !strncmp( sz, "who:", 4 ) ) {
-	int nRating, nRatingCents, nExperience;
-	
-	sscanf( sz, "who: %*d %*c%*c%*c %*s %d.%d %d", &nRating, &nRatingCents,
-		&nExperience );
 
-	fprintf( pfLog, "%5d %4d.%02d %c %s\n", nExperience, nRating,
-		 nRatingCents, fWon ? 'w' : 'l', szOpponent );
+      int nRating, nRatingCents, nExperience;
 	
-	fflush( pfLog );
+      sscanf( sz, "who: %*d %*c%*c%*c %*s %d.%d %d", &nRating, &nRatingCents,
+	      &nExperience );
 
-	fWon = -1;
+      fprintf( pfLog, "%5d %4d.%02d %c %s\n", 
+	       nExperience, nRating,
+	       nRatingCents, fWon ? 'w' : 'l', szOpponent );
+
+      fflush( pfLog );
+
+      BufferWritef( &pf->b, "tell %s thanks for the match\r\n",
+		    szOpponent);
+
+      fWon = -1;
     }
 
     if( sscanf( sz, "%s doubles. Type %s", szName, szTemp ) == 2 ) {
@@ -521,7 +562,28 @@ static int FibsParse( fibs *pf, char *sz ) {
 	    return 0;
 	}
 
-	if( gd.anDiceOpponent[ 0 ] ) { /* not our move */
+	printf ( "resign-bug: test = %1i\n",
+		 gd.anDiceOpponent[ 0 ] && fResigned );
+		 
+
+	if( gd.anDiceOpponent[ 0 ] && ! ( fResigned ) ) { 
+	  /* not our move */
+
+	  if ( fIDoubled ) {
+
+	    /* we are not about to display the kibitzes below */
+
+	    fIDoubled = 0;
+
+	    sprintf ( szTemp, "kibitz your mwc for "
+		      "Double, take: %7.4f and Double, pass: %7.4f",
+		      1.0 - arDouble[ 2 ], 1.0 - arDouble[ 3 ] );
+
+	    FibsCommand ( pf, szTemp );
+
+	    return 0;
+
+	  }
 	    switch( cIntro ) {
 	    case 0:
 		FibsCommand( pf, "k Hi!  I'm a computer player.  Please send "
@@ -574,14 +636,9 @@ static int FibsParse( fibs *pf, char *sz ) {
 	anScore[ 0 ] = gd.nScore;
 	anScore[ 1 ] = gd.nScoreOpponent;
 	fCrawford    = 0;
-	fPostCrawford = 0;
+	fPostCrawford = 0; /* FIXME: use the gd.nCrawford instead */
 
 	/* the fibs nCrawford flag is actually a Post-Crawford flag */
-
-	printf ( "gd.nCrawford %1i\n"
-		 "gd.fDouble   %1i\n"
-		 "gd.fDoubleOp %1i\n",
-		 gd.nCrawford, gd.fDouble, gd.fDoubleOpponent );
 
 	if ( ( nMatchTo - anScore[ 0 ] == 1 || nMatchTo - anScore[ 1 ]
 	       == 1 ) ) {
@@ -592,9 +649,6 @@ static int FibsParse( fibs *pf, char *sz ) {
 	    fCrawford = 1;
 	}
 
-	printf ("fCrawford/fPostCrawford %+1i %1i\n",
-		fCrawford, fPostCrawford );
-	
 	if ( gd.fDouble && gd.fDoubleOpponent )
 	  fCubeOwner = -1;
 	else if ( gd.fDouble )
@@ -604,28 +658,25 @@ static int FibsParse( fibs *pf, char *sz ) {
 
 	SetCubeInfo ( &ci, gd.nCube, fCubeOwner, 0 );
 
+	printf ( "nCube, owner %1i %+1i\n", gd.nCube, fCubeOwner );
+
+
 	if ( fResigned ) {
 
 	  float rEq, rMwc;
 	  int nR;
-	  float arDouble[ 4 ];
 
 	  EvaluatePositionCubeful ( anBoard, arDouble, &ci,
 				    &ecDouble, ecDouble.nPlies );
 
 	  nR = fResigned / ci.nCube;
 
-	  printf ( "fResigned = %i\n"
-		   "nCube     = %i\n"
-		   "nR        = %i\n",
-		   fResigned, ci.nCube, nR );
-
 	  if ( nR == 1 )
 	    rEq = 1.0;
 	  else if ( nR == 2 )
-	    rEq = ci.arGammonPrice[ 0 ];
+	    rEq = ci.arGammonPrice[ 0 ] + 1.0;
 	  else 
-	    rEq = ci.arGammonPrice[ 2 ];
+	    rEq = ci.arGammonPrice[ 2 ] + ci.arGammonPrice[ 0 ] + 1.0;
 
 	  rMwc = eq2mwc ( rEq, &ci );
 
@@ -648,8 +699,6 @@ static int FibsParse( fibs *pf, char *sz ) {
 	else if ( gd.fDoubled ) {
 
 	  /* I'm doubled, consider the take */
-
-	  float arDouble[ 4 ];
 
 	  ci.fMove = 1; /* other player on roll */
 	  SwapSides ( anBoard );
@@ -684,26 +733,13 @@ static int FibsParse( fibs *pf, char *sz ) {
 
 	  int fUseCube;
 
-	  printf ( "considering to double...\n" );
-
 	  fUseCube = gd.fDouble &&   /* I can double */
 	    ( ! fCrawford ) &&       /* it's not the crawford game */
 	    ( gd.nScore + gd.nCube < nMatchTo ); /* cube is alive */
 
-	  printf ("fUseCube %1i\n"
-		  "fDoudble %1i\n"
-		  "fCrawfor %1i\n"
-		  "gd.nScore %2i\n"
-		  "gd.nCube  %2i\n"
-		  "nMatchTo %2i\n",
-		  fUseCube, gd.fDouble, fCrawford,
-		  gd.nScore, gd.nCube, nMatchTo );
-
 	  if ( fUseCube ) {
 
 	    /* I'm allowed to double */
-
-	    float arDouble[ 4 ];
 
 	    EvaluatePositionCubeful( anBoard, arDouble, &ci,
 				     &ecDouble, ecDouble.nPlies );
@@ -713,10 +749,14 @@ static int FibsParse( fibs *pf, char *sz ) {
 	    printf ("double, pass: mwc %6.3f\n", arDouble[ 3 ] );
 
 	    if ( ( arDouble[ 2 ] >= arDouble[ 1 ] ) &&
-		 ( arDouble[ 3 ] >= arDouble[ 1 ] ) )
+		 ( arDouble[ 3 ] >= arDouble[ 1 ] ) ) {
 	      FibsCommand ( pf, "double" );
+	      fIDoubled = 1;
+	    }
 	    else
 	      FibsCommand ( pf, "roll" );
+
+
 
 	    return 0;
 	    
@@ -734,7 +774,28 @@ static int FibsParse( fibs *pf, char *sz ) {
 	} else {
 	  c = FindBestMove( anMove, gd.anDice[ 0 ], gd.anDice[ 1 ],
 			    anBoard, &ci, &ecMoves );
-	
+
+#if 1	
+	for( i = 0; i < c >> 1; i++ ) {
+	    if( anMove[ 2 * i ] == 24 )
+		printf( "bar " );
+	    else
+		printf( "%d ", gd.fDirection < 0 ?
+			      anMove[ 2 * i ] + 1 : 24 - anMove[ 2 * i ] );
+
+	    if( anMove[ 2 * i + 1 ] < 0 )
+		printf( "off " );
+	    else
+		printf( "%d ", gd.fDirection < 0 ?
+			      anMove[ 2 * i + 1 ] + 1 :
+			      24 - anMove[ 2 * i + 1 ] );
+	}
+	putchar( '\n' );
+
+#endif
+
+	sleep ( 2 );
+
 	  for( i = 0; i < c >> 1; i++ ) {
 	    if( anMove[ 2 * i ] == 24 )
 	      BufferWritef( &pf->b, "bar " );
@@ -749,6 +810,7 @@ static int FibsParse( fibs *pf, char *sz ) {
 			    anMove[ 2 * i + 1 ] + 1 :
 			    24 - anMove[ 2 * i + 1 ] );
 	  }
+	  printf ("sending move command...\n");
 	
 	  FibsCommand( pf, "" );
 	
@@ -814,4 +876,23 @@ int main( int argc, char *argv[] ) {
 	
 	sleep( nDelay );
     }
+}
+
+static int IsDropper ( char *szName ) {
+
+  /* check with known list of droppers */
+
+  static char *aszDroppers[] = { "tiggie" };
+  int nDroppers = 1;
+  int i;
+
+  for ( i = 0; i < nDroppers; i++ ) {
+
+    if ( ! strcmp ( szName, aszDroppers[ i ] ) )
+      return 1;
+
+  }
+
+  return 0;
+
 }

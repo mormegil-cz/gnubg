@@ -2324,9 +2324,24 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
     }
     else {
       /* mwc for passing cube */
-      prOutput[ 3 ] = rDoublePass = 
-	GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube, 
-		 nMatchTo - anScore[ !fMove ] - 1, aafA1 );
+
+      if ( fPostCrawford ) {
+	if ( nMatchTo - anScore[ fMove ] - 1 == 1 )
+	  prOutput[ 3 ] = rDoublePass = 1.0;
+	else {
+	  prOutput[ 3 ] = rDoublePass =
+	    GET_Btilde ( nMatchTo - anScore [ fMove ] - 1 - nCube, 
+			 afBtilde );
+
+	  printf ( "EvalCubeful (fPostCrawford): %2i %2i %2i %7.4f\n",
+		   nMatchTo, anScore[ fMove ], nCube, rDoublePass );
+	}
+      }
+      else
+	prOutput[ 3 ] = rDoublePass = 
+	  GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube, 
+		   nMatchTo - anScore[ !fMove ] - 1, aafA1 );
+
       /* 
        * I can/will use cube:
        * - if it is not the Crawford game,
@@ -2448,10 +2463,14 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
       /* no value of holding the cube */
 
-      if ( ! nMatchTo ) 
+      if ( ! nMatchTo )
 	prOutput[ 0 ] = Utility ( arOutput, ci );
       else
 	prOutput[ 0 ] = UtilityMwc ( arOutput, ci );
+
+      prOutput[ 1 ] = prOutput[ 0 ];
+      prOutput[ 2 ] = 2.0 * prOutput[ 0 ];
+      prOutput[ 3 ] = prOutput[ 0 ];
 
     } 
     else {
@@ -2555,26 +2574,90 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
 	/* check if there is an automatic/optional redouble */
 
-	if ( ( ( 
-		 ( ( fCubeOwner == -1 ) || ( fCubeOwner == fMove ) ) &&
-		 ( anScore[ fMove ] + nCube < nMatchTo ) && 
-		 ( anScore[ !fMove ] + nCube >= nMatchTo )
-	       ) || (
-		 ( ( fCubeOwner == -1 ) || ( fCubeOwner == !fMove ) ) &&
-		 ( anScore[ !fMove ] + nCube < nMatchTo ) &&
-		 ( anScore[ fMove ] + nCube >= nMatchTo ) 
-	       ) ) && ( ! fCrawford ) ) {
+	int fAuto0 =
+	  ( ( fCubeOwner == -1 ) || ( fCubeOwner == fMove ) ) &&
+	  ( anScore[ fMove ] + nCube < nMatchTo ) && 
+	  ( anScore[ !fMove ] + nCube >= nMatchTo );
+	int fAuto1 =
+	  ( ( fCubeOwner == -1 ) || ( fCubeOwner == !fMove ) ) &&
+	  ( anScore[ !fMove ] + nCube < nMatchTo ) &&
+	  ( anScore[ fMove ] + nCube >= nMatchTo );
+
+	/* check also if opponent takes the automatic redouble */
+
+	//	if ( ( fAuto0 || fAuto1 ) && ! fCrawford ) {
+	if ( fAuto0 && ! fCrawford ) {
 
 	  cubeinfo cix;
 
-	  SetCubeInfo ( &cix, nCube * 2, 0, fMove );
+	  //	  printf ( " opponent's take point: %+7.4f",
+	  //   -ci->arTakePoint[ !fMove ] );
+	  //	  printf ( " my take point: %+7.4f",
+	  //   -ci->arTakePoint[ fMove ] );
 
-	  //printf ("automatic double...\n");
-	  //printf ("ci->nCube: %1i\n", cix.nCube );
-	  //printf ("ci->fCubeOwner: %1i\n", cix.fCubeOwner );
-	  //printf ("ci->fMove: %1i\n", cix.fMove );
+	  if ( fAuto0 ) {
+
+	    //	    printf ("player 0 automatic redouble\n" );
+
+	    /* 
+	     * player on roll has automatic redouble. 
+	     * The cube efficiency is 100%.
+	     */
+	    
+	    if ( rEq >= -ci->arTakePoint[ !fMove ] ) {
+	      /* opponent will pass */
+	      rEq = eq2mwc ( 1.0, ci );
+	      //printf ("opponent passes %7.4f\n", rEq );
+	    }
+	    else {
+
+	      SetCubeInfo ( &cix, nCube * 2, 0, fMove );
+
+	      //printf ("automatic double...\n");
+	      //printf ("ci->nCube: %1i\n", cix.nCube );
+	      //printf ("ci->fCubeOwner: %1i\n", cix.fCubeOwner );
+	      //printf ("ci->fMove: %1i\n", cix.fMove );
 	  
-	  rEq = UtilityMwc ( arOutput, &cix );
+	      rEq = UtilityMwc ( arOutput, &cix );
+	      //printf ("opp take %7.4f\n", rEq );
+	    }
+	  }
+	  else { /* fAuto1 */
+
+	    /* 
+	     * opponent has automatic redouble 
+	     * Assume cube efficiency is lower than 100%,
+	     * since I might have a drop next turn:
+	     * assume it is 80%.
+	     */
+	    
+	    if ( rEq >= -ci->arTakePoint[ fMove ] ) {
+	      /* I will pass */
+	      rEq = eq2mwc ( 0.8 - 0.2 * ci->arTakePoint[ fMove ], ci );
+	      //	      printf ("I pass %7.4f\n", rEq );
+	    }
+	    else {
+
+	      SetCubeInfo ( &cix, nCube * 2, 0, fMove );
+
+ 	      /*
+	      printf ("automatic double...\n");
+	      printf ("ci->nCube: %1i\n", cix.nCube );
+	      printf ("ci->fCubeOwner: %1i\n", cix.fCubeOwner );
+	      printf ("ci->fMove: %1i\n", cix.fMove );
+	      printf ("rEq  %7.4f\n"
+		      "UMWC %7.4f\n",
+		      eq2mwc( rEq, ci) , UtilityMwc ( arOutput, &cix )
+		      );
+	      */
+		      	  
+	      rEq = 0.2 * eq2mwc ( rEq, ci ) 
+		+ 0.8 * UtilityMwc ( arOutput, &cix );
+
+	      //printf ("I take %7.4f\n", rEq );
+	    }
+	       
+	  }
 
 	}
 	else
@@ -2678,7 +2761,7 @@ extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
      *
      */
 
-    if ( fCrawford || fPostCrawford )
+    if ( fCrawford || fPostCrawford ) 
       ci->arTakePoint[ 0 ] = ci->arTakePoint[ 1 ] = 0;
     else {
 
