@@ -153,6 +153,7 @@ char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ] = {
 };
 
 
+#ifndef WIN32
 
 static int check_dev(char *dev) {
 
@@ -217,7 +218,7 @@ static void play_audio_file(const char *file) {
 static int can_play_audio() {
   return check_dev("/dev/audio");
 }
-
+#endif  /* #ifndef WIN32 */
 
 #ifdef HAVE_ARTSC
 
@@ -403,18 +404,16 @@ static int play_nas_file(char *file)
   return ret;
 }
 
-#endif
+#endif /* HAVE_NAS */
 
 static void 
 play_file(const char *filename) {
-
-  int pid;
 
   /* fork, so we don't have to wait for the sound to finish */
 
 #ifndef WIN32
 
-  pid = fork();
+  int pid = fork();
 
   if (pid < 0)
     /* parent */
@@ -434,7 +433,7 @@ play_file(const char *filename) {
     switch ( ssSoundSystem ) {
 
     case SOUND_SYSTEM_COMMAND:
-
+#ifndef WIN32
       if ( *szSoundCommand ) {
 	
         char *args[4];
@@ -449,7 +448,9 @@ play_file(const char *filename) {
         execvp(args[0], args);
         _exit(0);
       }
-
+#else
+      assert( FALSE );
+#endif
       break;
 
     case SOUND_SYSTEM_ESD:
@@ -478,10 +479,10 @@ play_file(const char *filename) {
     case SOUND_SYSTEM_NAS:
 
 #ifdef HAVE_NAS
-    else if (sound_options & OPT_SOUND_NAS) {
+
       if (play_nas_file(filename))
         _exit(0);
-    }
+
 #else
       assert ( FALSE );
 #endif
@@ -489,19 +490,20 @@ play_file(const char *filename) {
       break;
 
     case SOUND_SYSTEM_NORMAL:
-
+#ifndef WIN32
       if ( can_play_audio() ) {
         play_audio_file(filename);
         _exit(0);
       }
-      
+#else
+      assert( FALSE );
+#endif
       break;
 
     case SOUND_SYSTEM_WINDOWS:
 
 #ifdef WIN32
       PlaySound ( filename, NULL, SND_FILENAME | SND_ASYNC );
-      _exit(0);
 #else
       assert ( FALSE );
 #endif

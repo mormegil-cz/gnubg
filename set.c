@@ -2828,8 +2828,17 @@ CommandSetSoundSystemNAS ( char *sz ) {
 extern void
 CommandSetSoundSystemNormal ( char *sz ) {
 
+#ifndef WIN32
+
   ssSoundSystem = SOUND_SYSTEM_NORMAL;
   outputl ( _("GNU Backgammon will play sounds to /dev/audio" ) );
+
+#else
+
+  outputl ( _("GNU Backgammon was compiled without support for "
+              "playing sounds to /dev/audio" ) );
+
+#endif
 
 }
 
