@@ -3726,8 +3726,13 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf ( pf, "set export cube close %s\n", 
               exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
 
-    fprintf ( pf, "set export html pictureurl \"%s\"\n",
-              exsExport.szHTMLPictureURL );
+    if ( *exsExport.szHTMLPictureURL != '"' && 
+         strchr ( exsExport.szHTMLPictureURL, ' ' ) )
+       fprintf ( pf, "set export html pictureurl  \"%s\"\n",
+                 exsExport.szHTMLPictureURL );
+    else
+       fprintf ( pf, "set export html pictureurl  %s\n",
+                 exsExport.szHTMLPictureURL );
 
     /* invert settings */
 

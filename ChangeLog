@@ -1,3 +1,8 @@
+Tue Jun 11 15:50:03 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (CommandSaveSettings): do not add " to 
+        "set export html pictureurl" unless it's necessary.
+
 Thu Jun  6 16:41:20 2002  Gary Wong  <gtw@gnu.org>
 
 	* sgf.y: #include "config.h".
