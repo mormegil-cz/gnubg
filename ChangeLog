@@ -1,3 +1,7 @@
+Sun Jan  2 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubgmodule.c: Look for local python installation (windows)
+
 Sun 12 Dec 13:27:54 gmt 2004 Jim Segrave <jes@jes-2.demon.nl>
 
 	* fix some bugs in scripts/database.py

@@ -8169,7 +8169,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     PushSplash( pwSplash,
                 _("Initialising"), _("Python"), 500 );
 #  endif
-    PythonInitialise( argv[ 0 ], szDataDirectory );
+    PythonInitialise( szDataDirectory );
 #endif
 
 #if USE_GTK

@@ -2316,40 +2316,30 @@ PythonReadline( char *p ) {
 #endif
 
 extern void
-PythonInitialise( const char *argv0, const char *szDir ) {
+PythonInitialise( const char *szDir ) {
 
   char *pch;
+	static char workingDir[BIG_PATH];
+    _getcwd(workingDir, _MAX_PATH);
 
 #if WIN32
 {	/* Setup python to look in the pythonlib directory if present */
-	const char* dirSep = argv0 + strlen(argv0);
-	while (*dirSep != '\\' && *dirSep != '/')
-	{
-		if (dirSep == argv0)
-			break;	/* No dir seperator found... */
-		dirSep--;
+	char pythonDir[BIG_PATH];
+	strcpy(pythonDir, workingDir);
+	strcat(pythonDir, "/PythonLib");
+	if (!access(pythonDir, F_OK))
+	{	/* Set Pyton to use this directory */
+		char buf[BIG_PATH + 100];
+		sprintf(buf, "PYTHONPATH=%s", pythonDir);
+		_putenv(buf);
+		sprintf(buf, "PYTHONROOT=%s", pythonDir);
+		_putenv(buf);
 	}
-	if (dirSep != argv0)
-	{
-		char pythonDir[BIG_PATH];
-		strncpy(pythonDir, argv0, dirSep - argv0 + 1);
-		pythonDir[dirSep - argv0 + 1] = '\0';
-		strcat(pythonDir, "PythonLib");
-		if (!access(pythonDir, F_OK))
-		{	/* Set Pyton to use this directory */
-			char buf[BIG_PATH + 100];
-			sprintf(buf, "PYTHONPATH=%s", pythonDir);
-			_putenv(buf);
-			sprintf(buf, "PYTHONROOT=%s", pythonDir);
-		}
-	}
-	}
+}
 #endif
 
-  Py_SetProgramName( (char *) argv0 );
+  Py_SetProgramName(workingDir);
   Py_Initialize();
-
-  PySys_SetArgv( 1, (char **) &argv0 );
 
   /* ensure that python know about our gnubg module */
   Py_InitModule( "gnubg", gnubgMethods );

@@ -36,7 +36,7 @@
 #define HAVE_FSTAT _HAVE_FSTAT
 
 extern void
-PythonInitialise( const char *arg0, const char *szDir );
+PythonInitialise( const char *szDir );
 
 extern void
 PythonShutdown();
