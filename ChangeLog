@@ -1,3 +1,8 @@
+Mon Jan 28 13:36:03 2002  Gary Wong  <gtw@research.att.com>
+
+	* play.c (ComputerTurn): Declare arResign as length
+	NUM_ROLLOUT_OUTPUTS, not just NUM_OUTPUTS.
+
 2002-01-26  Jørn Thyssen  <jth@tp22.home>
 
 	* play.c (ComputerTurn): move resignation decision into

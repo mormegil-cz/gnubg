@@ -849,7 +849,7 @@ extern int ComputerTurn( void ) {
 
     } else {
       int anBoardMove[ 2 ][ 25 ];
-      float rPlay, arResign[ NUM_OUTPUTS ];
+      float arResign[ NUM_ROLLOUT_OUTPUTS ];
       int nResign;
       static char achResign[ 3 ] = { 'n', 'g', 'b' };
       char ach[ 2 ];
