@@ -32,6 +32,8 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 
 @menu
 * Introduction::
+* How to Play Backgammon::
+* Sample Game::
 * Frequently Asked Questions::
 * Concept Index::		  Index of concepts described in this manual.
 @end menu
@@ -42,6 +44,259 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 @cindex introduction
 
 FIXME general introduction.
+
+@node How to Play Backgammon
+@chapter How to Play Backgammon
+@cindex backgammon
+@cindex rules of backgammon
+
+If you already know how to play backgammon, you can skip this chapter --- it
+describes the rules of the game only, and does not contain any information
+specific to GNU Backgammon.
+
+FIXME write this.  Perhaps Tom Keith will let us steal the rules from
+his web site.
+
+@node Sample Game
+@chapter Sample Game
+@cindex sample game
+
+Although GNU Backgammon has many commands and options, only a few of them
+are used during routine play.  This chapter demonstrates some of those
+most commonly used.
+
+If your gnubg installation is complete, you should be able to start it
+and get output similar to the following:
+
+@example
+GNU Backgammon 0.02  Copyright 1999 Gary Wong.
+GNU Backgammon is free software, covered by the GNU General Public
+License, and you are welcome to change it and/or distribute copies
+of it under certain conditions.  Type "show copying" to see the
+conditions.
+There is absolutely no warranty for GNU Backgammon.  Type "show
+warranty" for details.
+(No game) 
+@end example
+
+When you start a game, gnubg will (by default) show which player's move it
+is; it is displaying @code{(No game)} at the moment to indicate that it
+isn't anybody's turn.
+
+GNU Backgammon uses a pseudo-random number generator to produce dice
+rolls.  It will normally initialise the state of the generator to
+some value based on the current time (and perhaps other system information,
+depending what features are available on your platform).  But for purposes
+of this example, it will be better to start the generator from a known
+state, so that the rolls it generates will be repeatable.  Enter the
+following command to change the generator state (``seed''):
+
+@example
+(No game) set seed 15
+Seed set to 15.
+(No game)   
+@end example
+
+The default settings allow you to play X (the black pieces, if you have
+a graphical board window) and the computer will play O (red).  It will
+play with no lookahead by default; it is very fast at choosing moves
+in this mode (instantaneous, on most hardware) though it does not play
+at its full strength.  Let's start a game.
+
+@example
+(No game) new game
+O rolls 1, X rolls 3.
+ GNU Backgammon  Position ID: 4HPwATDgc/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ | X           O    |   | O              X |     
+ | X           O    |   | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   | X                |    
+ | O                |   | X                |     
+ | O           X    |   | X                |     
+ | O           X    |   | X              O |     
+ | O           X    |   | X              O |     Rolled 13
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+
+(X) 
+@end example
+
+This is the output you will see if a graphical board is unavailable or
+disabled; if your environment supports a graphical board, you will see a
+better representation of a backgammon board than this.  Exactly the
+same information is available, either way.
+
+You have just won the opening roll (you have a 3, and gnubg has a 1) --- the
+dice roll is in the bottom right hand corner for the TTY board, and shown
+as graphical dice on the right hand side of the board window.  The
+position ID (the @code{4HPwATDgc/ABMA} in this example) is an encoded
+representation of the current position that comes in useful when using
+some of gnubg's advanced commands; you can safely ignore it for now.
+Notice that the prompt has changed to @code{X}, to indicate that it
+is X's (your) turn.
+
+If you are familiar with backgammon, you will know that the best play
+for this roll is to make your 5 point.  The command to do that is:
+
+@example
+(X) 8 5 6 5
+@end example
+
+@noindent
+in the terminal window (move one chequer from your 8 point to your 5
+point, and move another from your 6 to your 5 point); or by dragging
+each chequer to the destination point with mouse button 1 in the board
+window.  Click mouse button 1 on the dice to indicate you have finished
+your move (just as you would pick up your dice to end your move if you
+were playing on a real board).
+
+Once you have done that, gnubg will take its turn, rolling 63 and playing
+24/15.  It is now your move again:
+
+@example
+ GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ | X           O    |   | O              X |     
+ | X           O    |   | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   | X                |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     O     X    |   | X  X           O |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+
+(X) 
+@end example
+
+Since it is no longer the opening roll, you have the option of doubling
+before rolling your dice.  To roll without doubling, just enter the
+command @code{roll} (or @code{r} for short):
+
+@example
+(X) roll
+ GNU Backgammon  Position ID: 4HPwCSCwZ/ABMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ | X           O    |   | O              X |     
+ | X           O    |   | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ | X                |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   | X                |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     O     X    |   | X  X           O |     Rolled 35
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+
+(X)
+@end example
+
+@noindent
+(You can also roll by clicking the dice just underneath the board
+window.)
+
+Let's play this roll by hitting twice: 13/10*, 6/1*.  You can enter this
+move with @code{13 10 6 1} --- note that you don't need to specify anything
+special to hit; gnubg will automatically move blots that are hit to the
+bar.  You can also make this move by dragging chequers in the board window,
+of course.
+
+@example
+(X) 13 10 6 1
+ GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ | X           O    | O | O              X |     
+ | X           O    | O | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ |                  |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   |                  |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     X     X    |   | X  X           X |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+
+(X) 
+@end example
+
+GNU Backgammon has rolled 65 and been unable to move.  Let's take another
+roll:
+
+@example
+(X) roll
+ GNU Backgammon  Position ID: 4HPwAWBhZ+IBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ | X           O    | O | O              X |     
+ | X           O    | O | O              X |     
+ | X           O    |   | O                |     
+ | X                |   | O                |     
+ |                  |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   |                  |     
+ | O                |   | X                |     
+ | O           X    |   | X  X             |     
+ | O     X     X    |   | X  X           X |     Rolled 25
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+
+(X)
+@end example
+
+Play this roll as @code{13 11 6 1}.  gnubg will now roll 16 --- and still
+can't move!
+
+@example
+ GNU Backgammon  Position ID: 4HPwAWDDZsoBMA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O
+ | X           O    | O | O              X |     
+ | X           O    | O | O              X |     
+ | X           O    |   | O                |     
+ |                  |   | O                |     
+ |                  |   | O                |    
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   |                  |    
+ | O                |   |                  |     
+ | O                |   |                  |     
+ | O           X    |   | X  X           X |     
+ | O  X  X     X    |   | X  X           X |     On roll
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X
+
+(X) 
+@end example
+
+Our position is now strong.  Let's try doubling --- this can be done by
+entering the command @code{double} at the prompt, or by clicking the
+doubling cube in the board window (FIXME not implemented yet).  When
+you are doubled, you should use the command @code{take} or @code{drop}
+to accept or refuse the cube.  GNU Backgammon will drop this double
+(FIXME actually it doesn't, but it will once it knows how):
+
+@example
+(X) double
+O refuses the cube and gives up 1 point.
+X wins a single game and 1 points.
+The score (after 1 game) is: O 0, X 1.
+@end example
+
+That concludes the example game.  You have seen most of the commands
+normally used while playing; others you will need include @code{bar}
+when re-entering a hit chequer (e.g.@: @code{bar 20 24 20}) and
+@code{off} to remove a chequer from the board when bearing off
+(e.g.@: @code{6 off 5 off}).
+
+Type @code{help} from within gnubg for a summary of all commands, or
+browse the rest of this manual to learn more.  Have fun playing
+GNU Backgammon!
 
 @node Frequently Asked Questions
 @chapter Frequently Asked Questions
@@ -75,7 +330,8 @@ using X) to roll the dice yourself.  In either case, it will now be your
 move; you should enter the moves for each chequer as pairs of numbers.
 For instance, if you have rolled 3 and 1, you could type @code{8 5 6 5}
 to move one chequer from the 8 point to the 5 point and another from
-the 6 point to the 5 point.  If you are using the X board window, you
+the 6 point to the 5 point.  Use @code{bar} to move from the bar, and
+@code{off} to bear off.  If you are using the X board window, you
 can also drag chequers around the board with mouse button 1.  Click on
 the dice when you have finished.
 
