@@ -328,6 +328,7 @@ extern void RestrictiveEndMouseMove(BoardData *bd, int pos, int depth);
 extern void RestrictiveDrawDice(BoardData* bd);
 extern void RestrictiveDrawCube(BoardData* bd, int old_doubled, int old_cube_owner);
 extern void RestrictiveDrawMoveIndicator(BoardData* bd);
+extern void RestrictiveDrawBoardNumbers(BoardData* bd);
 
 #endif
 

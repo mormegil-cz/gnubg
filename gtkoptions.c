@@ -1459,16 +1459,6 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	}
     }
 
-#if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
-	{
-		if (rdAppearance.quickDraw)
-		{	/* Dice below board disabled in quick draw mode - for now */
-			gtk_widget_set_sensitive(pow->pwUseDiceIcon, 0);
-		}
-	}
-#endif
-		
     gtk_widget_show_all( pwm );
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pow->pwLangMenu ), pwm );
 

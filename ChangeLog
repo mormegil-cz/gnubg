@@ -1,3 +1,7 @@
+Thu Jan 29 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkboard.c, gtkprefs.c: 3d quick draw-last options added
+
 Wed Jan 28 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c: 3d quick draw-chequer target help added

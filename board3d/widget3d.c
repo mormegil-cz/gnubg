@@ -186,6 +186,7 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 	{	/* Quick drawing mode */
 		if (numRestrictFrames > 0)
 		{
+//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			RestrictiveRender(bd);
 		}
 		else if (numRestrictFrames < 0)

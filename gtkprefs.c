@@ -1092,10 +1092,6 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	redrawChange = FALSE;
 	if (rdAppearance.fDisplayType == DT_3D)
 	{	/* Make sure main drawing area's context is current */
-		if (rdAppearance.quickDraw)
-		{	/* Disable dice below board - for now */
-			fGUIDiceArea = 0;
-		}
 		MakeCurrent3d(bd->drawing_area3d);
 		/* Delete old objects */
 		ClearTextures(bd, TRUE);
@@ -1130,10 +1126,6 @@ LabelsToggled( GtkWidget *pwLabels, GtkWidget *pwDynamicLabels ) {
   int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
 
 #if USE_BOARD3D
-	if (previewType == DT_3D &&
-		pwQuickDraw && gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwQuickDraw)))
-		f = 0;	/* Disable for quick drawing */
-
 	redrawChange = TRUE;
 #endif
 
@@ -1191,17 +1183,14 @@ void toggle_quick_draw(GtkWidget *widget, int init)
 	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
 	gtk_widget_set_sensitive(pwShowShadows, !set);
 	gtk_widget_set_sensitive(pwCloseBoard, !set);
-	gtk_widget_set_sensitive(pwDynamicLabels, !set);
 
 	if (set)
 	{
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwShowShadows), 0);
 		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), 0);
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDynamicLabels), 0);
 		if (init != -1)
 			GTKShowWarning(WARN_QUICKDRAW_MODE);
 	}
-	LabelsToggled( pwLabels, pwDynamicLabels );
 
 	redrawChange = TRUE;
 }
@@ -1686,7 +1675,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 				   GTK_SIGNAL_FUNC(DoTestPerformance), bd);
 
 	pwQuickDraw = gtk_check_button_new_with_label (_("Quick drawing"));
-	gtk_tooltips_set_tip(ptt, pwQuickDraw, _("Cut down drawing to improve performance"), 0);
+	gtk_tooltips_set_tip(ptt, pwQuickDraw, _("Fast drawing option to improve performance"), 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwQuickDraw, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwQuickDraw), rdAppearance.quickDraw);
 	gtk_signal_connect(GTK_OBJECT(pwQuickDraw), "toggled", GTK_SIGNAL_FUNC(toggle_quick_draw), NULL);

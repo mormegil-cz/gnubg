@@ -3535,22 +3535,16 @@ void RestrictiveDrawPiece(BoardData* bd, int pos, int depth)
 	RestrictiveDrawFrame(newPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 }
 
-void RestrictiveDrawDice(BoardData* bd)
+void RestrictiveDoDrawDice(BoardData* bd, DiceShown dicePos)
 {
 	float pos[3];
-	float overSize;
+	float overSize = bd->diceSize * 1.5f;
 	ClipBox temp;
-	int tempTurn = 0;
 	DiceShown tempDiceShown;
 
-	if (bd->diceShown != DICE_ON_BOARD)
-	{
-		tempDiceShown = bd->diceShown;
-		bd->diceShown = DICE_ON_BOARD;
-		tempTurn = bd->turn;
-		bd->turn *= -1;
-	}
-	overSize = bd->diceSize * 1.5f;
+	tempDiceShown = bd->diceShown;
+	bd->diceShown = dicePos;
+
 	getDicePos(bd, 0, pos);
 	pos[2] -= bd->diceSize / 2.0f;
 	RestrictiveDrawFrame(pos, overSize, overSize, overSize);
@@ -3559,11 +3553,26 @@ void RestrictiveDrawDice(BoardData* bd)
 	pos[2] -= bd->diceSize / 2.0f;
 	RestrictiveDraw(&temp, pos, overSize, overSize, overSize);
 	EnlargeCurrentToBox(&temp);
-	if (tempTurn)
+
+	bd->diceShown = tempDiceShown;
+}
+
+void RestrictiveDrawDice(BoardData* bd)
+{
+	int tempTurn = 0;
+
+	if (fGUIDiceArea)
+		RestrictiveDoDrawDice(bd, DICE_BELOW_BOARD);
+
+	if (bd->diceShown != DICE_ON_BOARD)
 	{
-		bd->diceShown = tempDiceShown;
-		bd->turn = tempTurn;
+		tempTurn = bd->turn;
+		bd->turn *= -1;
 	}
+	RestrictiveDoDrawDice(bd, DICE_ON_BOARD);
+
+	if (tempTurn)
+		bd->turn = tempTurn;
 }
 
 void RestrictiveDrawCube(BoardData* bd, int old_doubled, int old_cube_owner)
@@ -3593,6 +3602,17 @@ void RestrictiveDrawMoveIndicator(BoardData* bd)
 	bd->turn *= -1;
 	getMoveIndicatorPos(bd, pos);
 	RestrictiveDrawFrame(pos, ARROW_SIZE, ARROW_SIZE, LIFT_OFF);
+}
+
+void RestrictiveDrawBoardNumbers(BoardData* bd)
+{
+#define NUMBER_WIDTH (TOTAL_WIDTH - (2 * TRAY_WIDTH) + ARROW_SIZE)
+	float pos[3] = {TRAY_WIDTH + (NUMBER_WIDTH / 2.0f), TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT / 2.0f), BASE_DEPTH + EDGE_DEPTH};
+	float textHeight = getFontHeight(bd);
+
+	RestrictiveDrawFrame(pos, NUMBER_WIDTH, textHeight, LIFT_OFF);
+	pos[1] = EDGE_HEIGHT / 2.0f;
+	RestrictiveDrawFrame(pos, NUMBER_WIDTH, textHeight, LIFT_OFF);
 }
 
 void RestrictiveDrawFlag(BoardData* bd)

@@ -1601,6 +1601,7 @@ UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 			{
 				int min = MIN(abs(old_points[an[i]]), abs(bd->points[an[i]]));
 				int max = MAX(abs(old_points[an[i]]), abs(bd->points[an[i]]));
+				min = MIN(min, max - 1);	/* huffed - no change in number of chequers */
 				for (k = min + 1; k <= max; k++)
 					RestrictiveDrawPiece(bd, an[i], k);
 			}
@@ -2563,8 +2564,13 @@ static gint board_set( Board *board, const gchar *board_text,
 		if (bd->resigned)
 			updateFlagOccPos(bd);
 
-		if (bd->quickDraw && bd->showMoveIndicator)
-			RestrictiveDrawMoveIndicator(bd);
+		if (bd->quickDraw)
+		{
+			if (rdAppearance.fDynamicLabels)
+				RestrictiveDrawBoardNumbers(bd);
+			else if (bd->showMoveIndicator)
+				RestrictiveDrawMoveIndicator(bd);
+		}
 #endif
 	  redrawNeeded = 1;
 	}
