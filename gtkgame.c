@@ -337,7 +337,7 @@ int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
 
 #ifndef HUGE_VALF
-#define HUGE_VALF (-1e38)
+#define HUGE_VALF 1e38
 #endif
 
 #if WIN32
@@ -2021,6 +2021,12 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_box_pack_start( GTK_BOX( pwHbox ),
 			pwProgress = gtk_progress_bar_new(),
 			FALSE, FALSE, 0 );
+    /* This is a kludge to work around an ugly bug in GTK: we don't want to
+       show text in the progress bar yet, but we might later.  So we have to
+       pretend we want text in order to be sized correctly, and then set the
+       format string to empty so we don't get the default text. */
+    gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
+    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), "" );
     /* Make sure the window is reasonably big, but will fit on a 640x480
        screen. */
     gtk_window_set_default_size( GTK_WINDOW( pwMain ), 500, 465 );
@@ -2485,7 +2491,7 @@ static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
 					GTK_SIGNAL_FUNC( RealOK ), &r ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
-    pwEntry = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), rInc, 0 );
+    pwEntry = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), rInc, 2 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwEntry ), TRUE );
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
