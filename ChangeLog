@@ -1,3 +1,17 @@
+Tue Apr  8 21:32:48 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Add experimental code for export of Jellyfish .pos,
+	and improve the import of Jellyfish .pos.
+	(contributed by Øystein and Jørn)
+
+	* import.c (ParseJF): new function.
+	* import.c (ImportJF): call ParseJF, and create list of move records
+	for position.
+	* gnubg.c (CommandExportPositionJF), gtkgame.c (GTKSet): it's now 
+	possible to import .pos without opening a match first.
+
+	* export.c (CommandExportPositionJF): new function.
+
 Mon Apr  7 21:51:11 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* makehyper.c (StartGuessHyper): add some information about
