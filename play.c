@@ -2998,8 +2998,7 @@ static void CommandNextRolled( char *sz ) {
 
 }
 
-extern int MoveIsMarked (moverecord *pmr)
-{
+static int MoveIsMarked (moverecord *pmr) {
   if (pmr == 0)
 	return FALSE;
 
@@ -3018,6 +3017,20 @@ extern int MoveIsMarked (moverecord *pmr)
 	}
 
   return FALSE;
+}
+
+static void ShowMark( moverecord *pmr ) {
+
+    /* Show the dice roll, if the chequer play is marked but the cube
+       decision is not. */
+    if( pmr->mt == MOVE_NORMAL && pmr->n.stCube == SKILL_NONE &&
+	pmr->n.stMove != SKILL_NONE ) {
+	ms.gs = GAME_PLAYING;
+	ms.fMove = ms.fTurn = pmr->n.fPlayer;
+	
+	ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
+	ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+    }
 }
 
 extern void CommandNext( char *sz ) {
@@ -3061,40 +3074,40 @@ extern void CommandNext( char *sz ) {
 	return;
     }
     
-	if( fMarkedMoves ) {
-	  p =  plLastMove;
-	  memcpy ((void *) &SaveMs, (const void *) &ms, sizeof( matchstate ) );
-	  /* we need to increment the count if we're pointing to a marked
-         move */
-	  if ( p->plNext->p && MoveIsMarked( (moverecord *) p->plNext->p ) )
-		++n;
-		
-	  while( p->plNext->p ) {
-		p = p->plNext;
-		pmr = (moverecord *) p->p;
-		FixMatchState ( &ms, pmr);
-		ApplyMoveRecord( &ms, pmr);
-		if( MoveIsMarked (pmr) && ( --n <= 0 ) )
-			break;
-	  }
+    if( fMarkedMoves ) {
+	p = plLastMove;
+	memcpy( &SaveMs, &ms, sizeof( matchstate ) );
+	/* we need to increment the count if we're pointing to a marked
+	   move */
+	if ( p->plNext->p && MoveIsMarked( (moverecord *) p->plNext->p ) )
+	    ++n;
+	
+	while( p->plNext->p ) {
+	    p = p->plNext;
+	    pmr = (moverecord *) p->p;
+	    FixMatchState ( &ms, pmr);
+	    ApplyMoveRecord( &ms, pmr);
+	    if( MoveIsMarked (pmr) && ( --n <= 0 ) )
+		break;
+	}
 
-	  if (p->plNext->p == 0) {
-		/* didn't find the requested move, put things back */
-		memcpy ((void *) &ms, (const void *) &SaveMs, sizeof( matchstate ) );
-		FixMatchState ( &ms, plLastMove->p );
-		ApplyMoveRecord( &ms, plLastMove->p );
-		return;
-	  }
-
-	  plLastMove = p->plPrev;
-	  CalculateBoard();
-
-	} else {
-    while( n-- && plLastMove->plNext->p ) {
-	plLastMove = plLastMove->plNext;
-        FixMatchState ( &ms, plLastMove->p );
-	ApplyMoveRecord( &ms, plLastMove->p );
-    }
+	if (p->plNext->p == 0) {
+	    /* didn't find the requested move, put things back */
+	    memcpy( &ms, &SaveMs, sizeof( matchstate ) );
+	    FixMatchState ( &ms, plLastMove->p );
+	    ApplyMoveRecord( &ms, plLastMove->p );
+	    return;
+	}
+	
+	plLastMove = p->plPrev;
+	CalculateBoard();
+	ShowMark( pmr );		
+    } else {
+	while( n-- && plLastMove->plNext->p ) {
+	    plLastMove = plLastMove->plNext;
+	    FixMatchState ( &ms, plLastMove->p );
+	    ApplyMoveRecord( &ms, plLastMove->p );
+	}
     }
     
     UpdateGame( FALSE );
@@ -3217,8 +3230,8 @@ extern void CommandPrevious( char *sz ) {
     int n;
     char *pch;
     int fMarkedMoves = FALSE;
-	list *p;
-	moverecord *pmr;
+    list *p;
+    moverecord *pmr = NULL;
     
     if( !plGame ) {
 	outputl( _("No game in progress (type `new game' to start one).") );
@@ -3253,26 +3266,29 @@ extern void CommandPrevious( char *sz ) {
 	return;
     }
 
-	if( fMarkedMoves ) {
-	  p =  plLastMove;
-	  while( ( p->p ) != 0 ) {
-		pmr = (moverecord *) p->p;
-		if( MoveIsMarked (pmr) && ( --n <= 0 ) )
-			break;
-
-		p = p->plPrev;
-	  }
-
-	  if (p->p == 0)
-		return;
-
-	  plLastMove = p->plPrev;
-	} else {
-    while( n-- && plLastMove->plPrev->p )
-	plLastMove = plLastMove->plPrev;
+    if( fMarkedMoves ) {
+	p =  plLastMove;
+	while( ( p->p ) != 0 ) {
+	    pmr = (moverecord *) p->p;
+	    if( MoveIsMarked (pmr) && ( --n <= 0 ) )
+		break;
+	    
+	    p = p->plPrev;
 	}
 
+	if (p->p == 0)
+	    return;
+
+	plLastMove = p->plPrev;
+    } else {
+	while( n-- && plLastMove->plPrev->p )
+	    plLastMove = plLastMove->plPrev;
+    }
+
     CalculateBoard();
+    
+    if( pmr )
+	ShowMark( pmr );
 
     UpdateGame( FALSE );
 

@@ -1,3 +1,8 @@
+Tue Sep 24 16:45:05 2002  Gary Wong  <gtw@gnu.org>
+
+	* play.c (ShowMark): New function.  When moving to next or previous
+	marked move, and the mark is for a chequer play, show the dice roll.
+
 Tue Sep 24 13:52:53 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (SetDefaultPath): New function.  Add a button in file
