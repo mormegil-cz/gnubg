@@ -294,7 +294,8 @@ extern void CommandSetAutoBearoff( char *sz ) {
 extern void CommandSetAutoAnalysis( char *sz ) {
 
     SetToggle( "automatic analysis", &fAutoAnalysis, sz, 
-               _("Will analyse match during play"), 
+               _("Will analyse match during play\n"
+                 "WARNING: EXTREMELY BUGGY!!! USE AT OWN RISK!!!"), 
                _("Will not analyse match during play") );
 }
 
