@@ -225,7 +225,7 @@ int BufferWritef( buffer *pb, char *szFormat, ... ) {
 
     va_list val;
     /* FIXME this is terrible... there's no limit on the vsprintf()
-       buffer size!! */
+       buffer size!!  If vsnprintf() is available, we can do better. */
 #if __GNUC__
     char sz[ FifoRemaining( &pb->fWrite ) > 65536 ?
 	   FifoRemaining( &pb->fWrite ) : 65536 ];
