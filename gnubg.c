@@ -8858,12 +8858,12 @@ dirname (char *path)
 
 extern char *
 Convert ( const char *sz, 
-          const char *szDestCharset, const char *szSourceCharset ) {
-
+          const char *szDestCharset, const char *szSourceCharset )
+{
 #if HAVE_ICONV
-
   iconv_t id;
-  int lIn, lOut, l, rc, nUsed;
+  size_t lIn, lOut, l, rc;
+  int nUsed;
 #if WIN32
   const char *pchIn;
 #else
@@ -8897,7 +8897,7 @@ Convert ( const char *sz,
     rc = iconv ( id, (ICONV_CONST char **) &pchIn, &lIn, &pchOut, &l );
 #endif
 
-    if ( rc == -1 ) 
+    if ( rc == (size_t)(-1) ) 
       switch ( errno ) {
       case EINVAL:
         /* incomplete text, do not report an error */
