@@ -2042,6 +2042,19 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
   addProperty(matchInfoDict, "annotator", mi.pchAnnotator);
   addProperty(matchInfoDict, "comment", mi.pchComment);
 
+  {	/* Work out the result (-1,0,1) - (p0 win, unfinished, p1 win) */
+	int result = 0;
+  	int anFinalScore[2];
+	if (getFinalScore(anFinalScore))
+	{
+		if (anFinalScore[0] > g->nMatch)
+			result = -1;
+		else if (anFinalScore[1] > g->nMatch)
+			result = 1;
+	}
+	DictSetItemSteal(matchInfoDict, "result", PyInt_FromLong(result));
+  }
+
   {
     char* v[] = { "Standard", "Nackgammon", "Hypergammon1", "Hypergammon2",
 		  "Hypergammon3" };

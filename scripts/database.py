@@ -333,7 +333,7 @@ class relational:
               "result, length, added, rating0, rating1, event, round, place, annotator, comment, date) " \
               "VALUES (%d, '%s', %d, %d, %d, %d, " + CURRENT_TIME + ", '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s) ") % \
               (match_id, key, nick_id0, nick_id1, \
-               -1, mi[ 'match-length' ],
+               mi[ 'result' ], mi[ 'match-length' ],
                self.__getKey( mi[ 'X' ], 'rating' )[0:80],
                self.__getKey( mi[ 'O' ], 'rating' )[0:80],
                self.__getKey( mi, 'event' )[0:80],
