@@ -238,12 +238,13 @@ extern int fNextTurn, fComputing;
 
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
-    fCubeUse, fNackgammon, fConfirm, fDisplay, fAutoBearoff, fShowProgress,
+    fCubeUse, fNackgammon, fDisplay, fAutoBearoff, fShowProgress,
     nBeavers, fOutputMWC, fEgyptian, fOutputWinPC, fOutputMatchPC, fJacoby,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord;
 extern int fAutoAnalysis;
 extern int fInvertMET;
+extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
@@ -381,6 +382,9 @@ extern int
 AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
               int fUpdateStatistics );
 
+extern int
+confirmOverwrite ( const char *sz, const int f );
+
 #ifdef WIN32
 extern void WinCopy( char *szOut );
 #endif
@@ -512,7 +516,8 @@ extern void CommandAccept( char * ),
     CommandSetBeavers( char * ),
     CommandSetCache( char * ),
     CommandSetClockwise( char * ),
-    CommandSetConfirm( char * ),
+    CommandSetConfirmNew( char * ),
+    CommandSetConfirmSave( char * ),
     CommandSetCrawford( char * ),
     CommandSetCubeCentre( char * ),
     CommandSetCubeOwner( char * ),

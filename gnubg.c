@@ -165,6 +165,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE;
 int fAutoAnalysis = FALSE;
 int fInvertMET = FALSE;
+int fConfirmSave = TRUE;
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
@@ -578,6 +579,12 @@ command cER = {
     { "roll", CommandSetAutoRoll, "Control whether dice will be rolled "
       "automatically", szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetConfirm[] = {
+    { "new", CommandSetConfirmNew, "Ask for confirmation before aborting "
+      "a game in progress", szONOFF, &cOnOff },
+    { "save", CommandSetConfirmSave, "Ask for confirmation before "
+      "overwriting existing files", szONOFF, &cOnOff },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetCube[] = {
     { "center", CommandSetCubeCentre, "The U.S.A. spelling of `centre'",
       NULL, NULL },
@@ -778,8 +785,7 @@ command cER = {
       szONOFF, &cOnOff },
     { "colours", CommandSetAppearance, "Synonym for `set appearance'", NULL,
       NULL },
-    { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
-      "a game in progress", szONOFF, &cOnOff },
+    { "confirm", NULL, "Confirmation settings", NULL, acSetConfirm },
     { "crawford", CommandSetCrawford, 
       "Set whether this is the Crawford game", szONOFF, &cOnOff },
     { "cube", NULL, "Set the cube owner and/or value", NULL, acSetCube },
@@ -3151,6 +3157,9 @@ extern void CommandExportGameGam( char *sz ) {
 	return;
     }
 
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
@@ -3184,6 +3193,9 @@ extern void CommandExportMatchMat( char *sz ) {
 		 "match mat')." );
 	return;
     }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
@@ -3587,6 +3599,9 @@ extern void CommandSaveWeights( char *sz ) {
     
     if( !sz || !*sz )
 	sz = GNUBG_WEIGHTS;
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
 
     if( EvalSave( sz ) )
 	perror( sz );
@@ -5207,3 +5222,30 @@ extern void CommandSwapPlayers ( char *sz ) {
   ShowBoard();
 
 }
+
+
+extern int
+confirmOverwrite ( const char *sz, const int f ) {
+
+  char *szPrompt;
+  int i;
+
+  /* check for existing file */
+
+  if ( f && ! access ( sz, F_OK ) ) {
+
+    szPrompt = (char *) malloc ( 50 + strlen ( sz ) );
+    sprintf ( szPrompt, "File \"%s\" exists. Overwrite? ", sz );
+    i = GetInputYN ( szPrompt );
+    free ( szPrompt );
+    return i;
+
+  }
+  else
+    return TRUE;
+
+
+}
+
+
+
