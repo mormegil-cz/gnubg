@@ -245,8 +245,6 @@ functions:
   grabbed -- see HandleXAction and board_animate).
 ** Does VarRednRollout use the pci parameter correctly?  It looks like
   it doesn't pay attention to which player is on roll.
-** "show player" and the GTK player settings should show the socket
-  address for external players (reported by Robert Konigsberg). (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

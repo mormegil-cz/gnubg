@@ -1908,6 +1908,11 @@ extern void GTKSaveSettings( void ) {
 #else
     char sz[ 4096 ];
 #endif
+
+#if GTK_CHECK_VERSION(1,3,15)
+    sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
+    gtk_accel_map_save( sz );
+#else
     GtkPatternSpec ps;
 
     gtk_pattern_spec_init( &ps, "*" );
@@ -1916,6 +1921,7 @@ extern void GTKSaveSettings( void ) {
     gtk_item_factory_dump_rc( sz, &ps, TRUE );
 
     gtk_pattern_spec_free_segs( &ps );
+#endif
 }
 
 static gboolean main_delete( GtkWidget *pw ) {
@@ -2265,7 +2271,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 								 "<main>" ),
 			FALSE, FALSE, 0 );
     sprintf( sz, "%s/" GNUBGMENURC, szHomeDirectory );
+#if GTK_CHECK_VERSION(1,3,15)
+    gtk_accel_map_load( sz );
+#else
     gtk_item_factory_parse_rc( sz );
+#endif
     
 #if !HAVE_LIBGDBM
     gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
@@ -2486,8 +2496,8 @@ extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 				   GTK_OBJECT( pwDialog ) );
     }
 
-#if GTK_CHECK_VERSION(1,3,10)
-    gtk_accel_group_attach( pag, G_OBJECT( pwDialog ) );
+#if GTK_CHECK_VERSION(1,3,15)
+    gtk_window_add_accel_group( GTK_WINDOW( pwDialog ), pag );
 #else
     gtk_accel_group_attach( pag, GTK_OBJECT( pwDialog ) );
 #endif
@@ -3509,6 +3519,9 @@ static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
 		       gtk_label_new( "Socket:" ) );
     gtk_container_add( GTK_CONTAINER( pw ),
 		       ppw->apwSocket[ i ] = gtk_entry_new() );
+    if( ap[ i ].szSocket )
+	gtk_entry_set_text( GTK_ENTRY( ppw->apwSocket[ i ] ),
+			    ap[ i ].szSocket );
     
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(
 	ppw->apwRadio[ i ][ aiRadioButton[ ap[ i ].pt ] ] ), TRUE );
@@ -3630,9 +3643,12 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 		break;
 		
 	    case PLAYER_EXTERNAL:
-		sprintf( sz, "set player %d external %s", i,
-			 plw.aszSocket[ i ] );
-		UserCommand( sz );
+		if( ap[ i ].pt != PLAYER_EXTERNAL ||
+		    strcmp( ap[ i ].szSocket, plw.aszSocket[ i ] ) ) {
+		    sprintf( sz, "set player %d external %s", i,
+			     plw.aszSocket[ i ] );
+		    UserCommand( sz );
+		}
 		break;
 	    }
 	}
@@ -5479,7 +5495,7 @@ extern void GTKSet( void *p ) {
 	fAutoCommand = FALSE; */
     } else if( p == &ms.nCube ) {
 	/* Handle the cube value radio items. */
-	int i;
+/*	int i; */
 
 	/* Find log_2 of the cube value. */
 /*	for( i = 0; ms.nCube >> ( i + 1 ); i++ )

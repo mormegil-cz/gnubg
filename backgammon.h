@@ -79,10 +79,14 @@ typedef enum _playertype {
 } playertype;
 
 typedef struct _player {
+    /* For all player types: */
     char szName[ 32 ];
     playertype pt;
-    evalsetup esChequer, esCube; /* PLAYER_GNU */
-    int h; /* PLAYER_EXTERNAL */
+    /* For PLAYER_GNU: */
+    evalsetup esChequer, esCube;
+    int h;
+    /* For PLAYER_EXTERNAL: */
+    char *szSocket;
 } player;
 
 typedef enum _movetype {

@@ -504,7 +504,7 @@ extern void CommandShowPlayer( char *sz ) {
 
 	switch( ap[ i ].pt ) {
 	case PLAYER_EXTERNAL:
-	    outputl( "external\n" );
+	    outputf( "external: %s\n\n", ap[ i ].szSocket );
 	    break;
 	case PLAYER_GNU:
 	    outputf( "gnubg:\n" );

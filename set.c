@@ -861,7 +861,8 @@ extern void CommandSetPlayerExternal( char *sz ) {
 #else
     int h, cb;
     struct sockaddr *psa;
-       
+    char *pch;
+    
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
@@ -870,8 +871,11 @@ extern void CommandSetPlayerExternal( char *sz ) {
 	return;
     }
 
+    pch = strcpy( malloc( strlen( sz ) + 1 ), sz );
+    
     if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
-	perror( sz );
+	perror( pch );
+	free( pch );
 	return;
     }
 
@@ -883,21 +887,26 @@ extern void CommandSetPlayerExternal( char *sz ) {
 	    if( fInterrupt ) {
 		close( h );
 		free( psa );
+		free( pch );
 		return;
 	    }
 	    
 	    continue;
 	}
 	
-	perror( sz );
+	perror( pch );
 	close( h );
 	free( psa );
+	free( pch );
 	return;
     }
     
     ap[ iPlayerSet ].pt = PLAYER_EXTERNAL;
     ap[ iPlayerSet ].h = h;
-
+    if( ap[ iPlayerSet ].szSocket )
+	free( ap[ iPlayerSet ].szSocket );
+    ap[ iPlayerSet ].szSocket = pch;
+    
     free( psa );
 #endif
 }
