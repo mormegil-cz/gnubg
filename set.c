@@ -360,10 +360,13 @@ extern void CommandSetDelay( char *sz ) {
 	    return;
 	}
 
-	if( n )
+	if( n ) {
 	    printf( "All moves will be shown for at least %d millisecond%s.\n",
 		    n, n > 1 ? "s" : "" );
-	else
+	    if( !fDisplay )
+		puts( "(You will also need to use `set display' to turn "
+		      "board updates on -- see `help set display'.)" );
+	} else
 	    puts( "Moves will not be delayed." );
 	
 	nDelay = n;
