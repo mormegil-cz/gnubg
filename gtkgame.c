@@ -6136,6 +6136,11 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
     if( fOK ) {
 	outputpostpone();
 
+	if (!CompareNames(apTemp[0].szName, ap[1].szName) && 
+		CompareNames(apTemp[0].szName, apTemp[1].szName))
+	{	/* Trying to swap names - change current name to avoid error */
+		sprintf(ap[1].szName, "_%s", apTemp[0].szName);
+	}
 	for( i = 0; i < 2; i++ ) {
 	    /* NB: this comparison is case-sensitive, and does not use
 	       CompareNames(), so that the user can modify the case of

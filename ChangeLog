@@ -1,3 +1,7 @@
+Mon Mar 29 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Fixed small bug to allow both names to be swapped
+
 Mon Mar 29 09:40:02 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: target for br1.c not kept up to date with
