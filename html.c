@@ -1352,8 +1352,13 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* left part of bar */
 
   fputs ( "<td>", pf );
-  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
-               hecss, HTML_EXPORT_TYPE_GNU );
+  if ( fClockwise )
+    printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_GNU );
+  else
+    printImage ( pf, szImageDir, fTurn ? "b-midlb-o" : "b-midlb-x", 
+                 szExtension, "|", hecss, HTML_EXPORT_TYPE_GNU );
+
   fputs ( "</td>", pf );
 
   /* center of board */
@@ -1453,8 +1458,12 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   /* right part of bar */
 
   fputs ( "<td>", pf );
-  printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
-               hecss, HTML_EXPORT_TYPE_GNU );
+  if ( ! fClockwise )
+    printImage ( pf, szImageDir, "b-midlb", szExtension, "|", 
+                 hecss, HTML_EXPORT_TYPE_GNU );
+  else
+    printImage ( pf, szImageDir, fTurn ? "b-midlb-o" : "b-midlb-x", 
+                 szExtension, "|", hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
 
   fputs ( "</tr>\n", pf );

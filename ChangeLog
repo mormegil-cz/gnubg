@@ -1,3 +1,11 @@
+Sat Jul 26 22:45:35 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Include Holger's arrows in the html export.
+
+	* htmlimages.c (CommandExportHTMLImages): write images
+	with arrows if LIBART is present.
+	* html.c (printHTMLBoardGNU): use new images.
+
 Sat Jul 26 18:15:27 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis.c - utilise the combined double/take data and preserve

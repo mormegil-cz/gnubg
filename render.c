@@ -390,7 +390,7 @@ extern void AlphaBlend2( unsigned char *puchDest, int nDestStride,
     }
 }
 
-static void AlphaBlendClip2( unsigned char *puchDest, int nDestStride,
+extern void AlphaBlendClip2( unsigned char *puchDest, int nDestStride,
 			     int xDest, int yDest, int cxDest, int cyDest,
 			     unsigned char *puchBack, int nBackStride,
 			     int xBack, int yBack,
@@ -2322,7 +2322,7 @@ static void Render_Path( art_u8 *puchRGBAbuf, const ArtBpath* bpPath,
 
 #if HAVE_LIBART
 #define ARROW_SIZE 5
-static void RenderArrows( renderdata *prd, unsigned char* puch0,
+extern void RenderArrows( renderdata *prd, unsigned char* puch0,
 			  unsigned char* puch1, int nStride ) {
 /* render arrows for direction of play and player on turn */
 

@@ -92,6 +92,12 @@ extern void RefractBlendClip( unsigned char *puchDest, int nDestStride,
 			      int xFore, int yFore,
 			      unsigned short *psRefract, int nRefractStride,
 			      int cx, int cy );
+extern void AlphaBlendClip2( unsigned char *puchDest, int nDestStride,
+			     int xDest, int yDest, int cxDest, int cyDest,
+			     unsigned char *puchBack, int nBackStride,
+			     int xBack, int yBack,
+			     unsigned char *puchFore, int nForeStride,
+			     int xFore, int yFore, int cx, int cy );
 extern void RenderBoard( renderdata *prd, unsigned char *puch, int nStride );
 extern void RenderChequers( renderdata *prd, unsigned char *puch0,
 			    unsigned char *puch1, unsigned short *psRefract0,
@@ -107,6 +113,10 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 extern void RenderPips( renderdata *prd, unsigned char *puch0,
 			unsigned char *puch1, int nStride );
 extern void RenderImages( renderdata *prd, renderimages *pri );
+#if HAVE_LIBART
+extern void RenderArrows( renderdata *prd, unsigned char* puch0,
+			  unsigned char* puch1, int nStride );
+#endif
 extern void FreeImages( renderimages *pri );
     
 extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,

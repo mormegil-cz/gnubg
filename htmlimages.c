@@ -36,11 +36,27 @@
 #include <unistd.h>
 #endif
 
+#if HAVE_LIBART
+#include <libart_lgpl/art_misc.h>
+#include <libart_lgpl/art_affine.h>
+#include <libart_lgpl/art_point.h>
+#include <libart_lgpl/art_vpath.h>
+#include <libart_lgpl/art_bpath.h>
+#include <libart_lgpl/art_vpath_bpath.h>
+#include <libart_lgpl/art_svp.h>
+#include <libart_lgpl/art_svp_vpath.h>
+#include <libart_lgpl/art_gray_svp.h>
+#include <libart_lgpl/art_rgb.h>
+#include <libart_lgpl/art_rgb_svp.h>
+#endif
+
 #include "backgammon.h"
 #include "export.h"
 #include "i18n.h"
 #include "render.h"
 #include "renderprefs.h"
+#include "boardpos.h"
+
 
 #if HAVE_LIBPNG
 
@@ -93,6 +109,11 @@ extern void CommandExportHTMLImages( char *sz ) {
 	auchMidBoard[ 36 * 4 * 3 * 6 * 4 ];
     unsigned short asRefract[ 2 ][ 6 * 4 * 6 * 4 ];
     static char *aszCube[ 3 ] = { "ct", "midc", "cb" };
+#if HAVE_LIBART
+    unsigned char *auchArrow[ 2 ];
+    unsigned char auchMidlb[ 108 * 4 * 72 * 4 * 3 ];
+    int x, y;
+#endif
 	
     sz = NextToken( &sz );
     
@@ -131,12 +152,24 @@ extern void CommandExportHTMLImages( char *sz ) {
 		    asRefract[ 1 ], 6 * 4 * 4 );
     RenderChequerLabels( &rd, auchChequerLabels, 4 * 4 * 3 );
 
+#if HAVE_LIBART
+#define ARROW_SIZE 5
+    for ( i = 0; i < 2; ++i )
+      auchArrow[ i ] = 
+        art_new( art_u8, s * s * ARROW_SIZE * ARROW_SIZE * 4 );
+
+    RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_SIZE * 4 );
+#endif /* HAVE_LIBART */
+
+
     rd.nSize = ss;
 
     RenderCube( &rd, auchCube, 8 * ss * 4 );
     RenderCubeFaces( &rd, auchCubeFaces, 6 * ss * 3, auchCube, 8 * ss * 4 );
     RenderDice( &rd, auchDice[ 0 ], auchDice[ 1 ], 7 * ss * 4 );
     RenderPips( &rd, auchPips[ 0 ], auchPips[ 1 ], ss * 3 );
+
+    
 
 #define WRITE( img, stride, cx, cy ) \
     if( WritePNG( szFile, (img), (stride), (cx), (cy) ) ) { \
@@ -179,6 +212,39 @@ extern void CommandExportHTMLImages( char *sz ) {
 	   12 * s, 8 * s );
 
     /* bearoff tray dividers */
+
+#if HAVE_LIBART
+
+    /* the code below is a bit ugly, but what the heck: it works! */
+
+    for ( i = 0; i < 2; ++i ) {
+
+      memcpy( auchMidlb, auchBoard, 108 * 4 * 72 * 4 * 3 );
+      ArrowPosition( rd.fClockwise, s, &x, &y );
+
+      AlphaBlendClip2( auchMidlb, nStride,
+                       x, y,
+                       108 * s, 72 * s, 
+                       auchMidlb, nStride,
+                       x, y, 
+                       auchArrow[ i ],
+                       s * ARROW_SIZE * 4,
+                       0, 0,
+                       s * ARROW_SIZE,
+                       s * ARROW_SIZE );
+
+      sprintf( pchFile, "b-midlb-%c.png", i ? 'o' : 'x' );
+      WRITE( auchMidlb + s * nStride * 33, nStride, 12 * s, 6 * s );
+
+    }
+
+#else
+    for ( i = 0; i < 2; ++i ) {
+      sprintf( pchFile, "b-midlb-%c.png", i ? 'x' : 'o' );
+      WRITE( auchBoard + s * nStride * 33, nStride, 12 * s, 6 * s );
+    }
+#endif
+
     strcpy( pchFile, "b-midlb.png" );
     WRITE( auchBoard + s * nStride * 33, nStride, 12 * s, 6 * s );
 
@@ -481,6 +547,11 @@ extern void CommandExportHTMLImages( char *sz ) {
 		WRITE( auchMidBoard, 36 * s * 3, 36 * s, 6 * s );
 	    }
     }
+
+#if HAVE_LIBART
+    for ( i = 0; i < 2; ++i )
+      art_free( auchArrow[ i ] );
+#endif /* HAVE_LIBART */
 
     ProgressEnd ();
     
