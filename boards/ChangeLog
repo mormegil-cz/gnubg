@@ -1,3 +1,8 @@
+Mon Dec  9 20:43:19 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* jellyfish.xpm: updated picture.
+	(reported by Ian Shaw)
+
 Sat Dec  7 22:50:34 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* Makefile.am: add new files.
