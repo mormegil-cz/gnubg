@@ -115,7 +115,7 @@ fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 if test "$no_gtk" = "yes"; then
   AC_PATH_XTRA
-  AM_CONDITIONAL(USE_EXT, test "$use_ext" = "yes" )
+  AM_CONDITIONAL(USE_EXT, test "$no_x" = "yes" )
   if test "$no_x" != "yes"; then
     AC_DEFINE(USE_EXT,1,Define if you want to use the ext toolkit and widgets.)
   fi
