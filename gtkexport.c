@@ -38,6 +38,7 @@
 #include "gtkgame.h"
 #include "export.h"
 #include "gtkexport.h"
+#include "i18n.h"
 
 typedef struct _exportwidget {
 
@@ -235,28 +236,31 @@ GTKShowExport ( exportsetup *pexs ) {
   GtkWidget *pw, *pwx;
 
   char *aszInclude[] = {
-    "Annotations", "Analysis", "Statistics", "Legend" };
+    N_ ("Annotations"), 
+    N_ ("Analysis"), 
+    N_("Statistics"), 
+    N_("Legend") };
 
   char *aszMovesDisplay[] = {
-    "Show moves marked 'verybad'",
-    "Show moves marked 'bad'",
-    "Show moves marked 'doubtful'",
-    "Show unmarked moves",
-    "Show moves marked 'interesting'",
-    "Show moves marked 'good'",
-    "Show moves marked 'verygood'" };
+    N_("Show moves marked 'verybad'"),
+    N_("Show moves marked 'bad'"),
+    N_("Show moves marked 'doubtful'"),
+    N_("Show unmarked moves"),
+    N_("Show moves marked 'interesting'"),
+    N_("Show moves marked 'good'"),
+    N_("Show moves marked 'verygood'") };
 
   char *aszCubeDisplay[] = {
-    "Show cube decisions marked 'verybad'",
-    "Show cube decisions marked 'bad'",
-    "Show cube decisions marked 'doubtful'",
-    "Show unmarked cube decisions",
-    "Show cube decisions marked 'interesting'",
-    "Show cube decisions marked 'good'",
-    "Show cube decisions marked 'verygood'",
-    "Show actual cube decisions",
-    "Show missed doubles",
-    "Show close cube decisions" };
+    N_("Show cube decisions marked 'verybad'"),
+    N_("Show cube decisions marked 'bad'"),
+    N_("Show cube decisions marked 'doubtful'"),
+    N_("Show unmarked cube decisions"),
+    N_("Show cube decisions marked 'interesting'"),
+    N_("Show cube decisions marked 'good'"),
+    N_("Show cube decisions marked 'verygood'"),
+    N_("Show actual cube decisions"),
+    N_("Show missed doubles"),
+    N_("Show close cube decisions") };
 
   int i, j, k;
   char sz[ 256 ];
@@ -269,7 +273,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( "GNU Backgammon - Export Settings", TRUE, 
+  pwDialog = CreateDialog ( _("GNU Backgammon - Export Settings"), TRUE, 
                             GTK_SIGNAL_FUNC ( ExportOK ), pew );
 
   pwTable = gtk_table_new ( 3, 2, FALSE );
@@ -278,7 +282,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* include stuff */
 
-  pwFrame = gtk_frame_new ( "Include" );
+  pwFrame = gtk_frame_new ( _("Include") );
   gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
   gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,
                      0, 1, 0, 1,
@@ -294,13 +298,14 @@ GTKShowExport ( exportsetup *pexs ) {
 
     gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                          pew->apwInclude[ i ] =
-                         gtk_check_button_new_with_label ( aszInclude[ i ] ),
+                         gtk_check_button_new_with_label ( 
+                            gettext ( aszInclude[ i ] ) ),
                          TRUE, TRUE, 0 );
   }
 
   /* show stuff */
 
-  pwFrame = gtk_frame_new ( "Board" );
+  pwFrame = gtk_frame_new ( _("Board") );
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
   gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,
@@ -315,7 +320,7 @@ GTKShowExport ( exportsetup *pexs ) {
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTableX );
 
   gtk_table_attach ( GTK_TABLE ( pwTableX ), 
-                     pw = gtk_label_new ( "Board" ),
+                     pw = gtk_label_new ( _("Board") ),
                      0, 1, 0, 1,
                      GTK_FILL, 
                      GTK_FILL, 
@@ -333,7 +338,7 @@ GTKShowExport ( exportsetup *pexs ) {
                        TRUE, TRUE, 0 );
 
   gtk_box_pack_start ( GTK_BOX ( pw ), 
-                       gtk_label_new ( "move(s) between board shown" ),
+                       gtk_label_new ( _("move(s) between board shown") ),
                        TRUE, TRUE, 0 );
 
   gtk_table_attach ( GTK_TABLE ( pwTableX ), 
@@ -345,7 +350,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
 
   gtk_table_attach ( GTK_TABLE ( pwTableX ), 
-                     pw = gtk_label_new ( "Players" ),
+                     pw = gtk_label_new ( _("Players") ),
                      0, 1, 1, 2,
                      GTK_FILL, 
                      GTK_FILL, 
@@ -370,7 +375,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* moves */
 
-  pwFrame = gtk_frame_new ( "Output moves" );
+  pwFrame = gtk_frame_new ( _("Output moves") );
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
   gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,
@@ -386,7 +391,7 @@ GTKShowExport ( exportsetup *pexs ) {
   pw = gtk_hbox_new ( FALSE, 0 );
   gtk_box_pack_start ( GTK_BOX ( pwVBox ), pw, TRUE, TRUE, 0 );
 
-  gtk_box_pack_start ( GTK_BOX ( pw ), gtk_label_new ( "Show at most" ),
+  gtk_box_pack_start ( GTK_BOX ( pw ), gtk_label_new ( _("Show at most") ),
                        TRUE, TRUE, 4 );
 
   pew->padjMoves =  
@@ -398,24 +403,24 @@ GTKShowExport ( exportsetup *pexs ) {
                        TRUE, TRUE, 4 );
 
   gtk_box_pack_start ( GTK_BOX ( pw ), 
-                       gtk_label_new ( "move(s)" ),
+                       gtk_label_new ( _("move(s)") ),
                        TRUE, TRUE, 4 );
 
 
   gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                        pew->pwMovesDetailProb =
-                       gtk_check_button_new_with_label ( "Show detailed "
-                                                         "probabilities" ), 
+                       gtk_check_button_new_with_label ( _("Show detailed "
+                                                         "probabilities") ), 
                        TRUE, TRUE, 0 );
 
   gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                        pew->apwMovesParameters[ 0 ] =
-                       gtk_check_button_new_with_label ( "Show evaluation parameters" ), 
+                       gtk_check_button_new_with_label ( _("Show evaluation parameters") ), 
                        TRUE, TRUE, 0 );
 
   gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                        pew->apwMovesParameters[ 1 ] =
-                       gtk_check_button_new_with_label ( "Show rollout parameters" ), 
+                       gtk_check_button_new_with_label ( _("Show rollout parameters") ), 
                        TRUE, TRUE, 0 );
 
 
@@ -423,13 +428,14 @@ GTKShowExport ( exportsetup *pexs ) {
 
     gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                          pew->apwMovesDisplay[ i ] =
-                         gtk_check_button_new_with_label ( aszMovesDisplay[ i ] ), 
+                         gtk_check_button_new_with_label ( 
+                            gettext ( aszMovesDisplay[ i ] ) ), 
                          TRUE, TRUE, 0 );
                          
 
   /* cube */
 
-  pwFrame = gtk_frame_new ( "Output cube decisions" );
+  pwFrame = gtk_frame_new ( _("Output cube decisions") );
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
   gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,
@@ -444,20 +450,20 @@ GTKShowExport ( exportsetup *pexs ) {
 
   gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                        pew->pwCubeDetailProb =
-                       gtk_check_button_new_with_label ( "Show detailed " 
-                                                         "probabilities" ), 
+                       gtk_check_button_new_with_label ( _("Show detailed " 
+                                                         "probabilities") ), 
                        TRUE, TRUE, 0 );
 
   gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                        pew->apwCubeParameters[ 0 ] =
-                       gtk_check_button_new_with_label ( "Show evaluation "
-                                                         "parameters" ), 
+                       gtk_check_button_new_with_label ( _("Show evaluation "
+                                                         "parameters") ), 
                        TRUE, TRUE, 0 );
 
   gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                        pew->apwCubeParameters[ 1 ] =
-                       gtk_check_button_new_with_label ( "Show rollout "
-                                                         "parameters" ), 
+                       gtk_check_button_new_with_label ( _("Show rollout "
+                                                         "parameters") ), 
                        TRUE, TRUE, 0 );
 
 
@@ -465,13 +471,14 @@ GTKShowExport ( exportsetup *pexs ) {
 
     gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                          pew->apwCubeDisplay[ i ] =
-                         gtk_check_button_new_with_label ( aszCubeDisplay[ i ] ), 
+                         gtk_check_button_new_with_label ( 
+                            gettext ( aszCubeDisplay[ i ] ) ), 
                          TRUE, TRUE, 0 );
                     
 
   /* html */
 
-  pwFrame = gtk_frame_new ( "HTML export options" );
+  pwFrame = gtk_frame_new ( _("HTML export options") );
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
   gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,
@@ -486,7 +493,7 @@ GTKShowExport ( exportsetup *pexs ) {
   
   
   gtk_box_pack_start ( GTK_BOX ( pwVBox ),
-                       pw = gtk_label_new ( "URL to pictures" ),
+                       pw = gtk_label_new ( _("URL to pictures") ),
                        TRUE, TRUE, 0 );
   gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
 
