@@ -1045,6 +1045,9 @@ extern int ComputerTurn( void ) {
       getResignEquities ( arOutput, &ci, ms.fResigned,
                           &rEqBefore, &rEqAfter );
 
+      if (ms.anDice[0] > 0)
+		  rEqBefore = -rEqBefore;	/* Swap equity as move has been made */
+
       fComputerDecision = TRUE;
 
       if( ( rEqAfter - epsilon ) < rEqBefore )
