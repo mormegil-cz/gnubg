@@ -1288,10 +1288,10 @@ extern int main( int argc, char **argv ) {
                 "Number of chequers           : %12d\n"
                 "Calculate equities           : %s\n"
                 "Write header                 : %s\n"
-                "Number of one-sided positions: %'12d\n"
-                "Total number of positions    : %'12d\n"
-                "Size of resulting file       : %'12d bytes\n"
-                "Size of hash                 : %'12d bytes\n"
+                "Number of one-sided positions: %12d\n"
+                "Total number of positions    : %12d\n"
+                "Size of resulting file       : %12d bytes\n"
+                "Size of hash                 : %12d bytes\n"
                 "Reuse old bearoff database   : %s %s\n"),
               nTSP, nTSC,
               fCubeful ? _("cubeless and cubeful") : _("cubeless only"),
