@@ -924,7 +924,8 @@ static void CreateGameWindow( void ) {
     GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pvbox = gtk_vbox_new( FALSE, 0 ),
 	*phbox = gtk_hbox_new( FALSE, 0 ),
-	*pm = gtk_menu_new();
+	*pm = gtk_menu_new(),
+        *pwButton = gtk_button_new_with_label("Dump");
     GtkStyle *ps;
     GdkColormap *pcmap;
     
@@ -966,6 +967,7 @@ static void CreateGameWindow( void ) {
 			      pm );
     gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), 0 );
     gtk_box_pack_start( GTK_BOX( phbox ), pom, TRUE, TRUE, 4 );
+    gtk_box_pack_start( GTK_BOX( phbox ), pwButton, TRUE, TRUE, 4 );
     
     gtk_container_add( GTK_CONTAINER( pvbox ), psw );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
@@ -3037,7 +3039,7 @@ static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
     GtkWidget *pwDialog, *pwEval;
     int fOK;
     
-    memcpy( &ec, &esAnalysisChequer.ec, sizeof ec );
+    memcpy( &ec, &esAnalysisCube.ec, sizeof ec );
 
     pwEval = EvalWidget( &ec, &fOK );
     
@@ -3065,7 +3067,7 @@ static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
            different settings for chequer and cube evaluations, and
            rollouts. */
         SetEvalCommands( "set analysis cubedecision eval", &ec,
-                         &esAnalysisChequer.ec );
+                         &esAnalysisCube.ec );
     /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
     }
 }
@@ -3157,7 +3159,7 @@ static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
     GtkWidget *pwDialog, *pwEval;
     int fOK;
     
-    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+    memcpy( &ec, &esEvalCube.ec, sizeof ec );
 
     pwEval = EvalWidget( &ec, &fOK );
     

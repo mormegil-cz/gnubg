@@ -1,3 +1,7 @@
+Thu Oct 25 20:35:25 2001  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c (SetAnalysisEvalCube, SetEvalCube): Fix old typo.
+
 Thu Oct 25 00:38:25 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_animate): New function.  Optionally animate
