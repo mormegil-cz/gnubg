@@ -22,4 +22,52 @@
 #ifndef _ANALYSIS_H_
 #define _ANALYSIS_H_
 
+#include "backgammon.h"
+
+extern void
+CommandShowStatistics ( char *sz );
+
+
+typedef struct _statcontext {
+
+  int anUnforcedMoves[ 2 ];
+  int anTotalMoves[ 2 ];
+
+  int anTotalCube[ 2 ];
+  int anDouble[ 2 ];
+  int anTake[ 2 ];
+  int anPass[ 2 ];
+
+  int anMoves[ 2 ][ SKILL_VERYGOOD + 1 ];
+
+  int anLuck[ 2 ][ LUCK_VERYGOOD + 1 ];
+
+  int anCubeMissedDoubleDP[ 2 ];
+  int anCubeMissedDoubleTG[ 2 ];
+  int anCubeWrongDoubleDP [ 2 ];
+  int anCubeWrongDoubleTG [ 2 ];
+  int anCubeWrongTake [ 2 ];
+  int anCubeWrongPass [ 2 ];
+
+  /* all accumulated errors have dimension 2x2 
+   *  - first dimension is player
+   *  - second dimension is error rate in:
+   *    - EMG and MWC for match play
+   *    - Normalized and unnormalized equity for money games
+   */
+
+  float arErrorCheckerplay[ 2 ][ 2 ];
+  float arErrorMissedDoubleDP [ 2 ][ 2 ];
+  float arErrorMissedDoubleTG [ 2 ][ 2 ];
+  float arErrorWrongDoubleDP [ 2 ][ 2 ];
+  float arErrorWrongDoubleTG [ 2 ][ 2 ];
+  float arErrorWrongTake [ 2 ][ 2 ];
+  float arErrorWrongPass [ 2 ][ 2 ];
+  float arLuck[ 2 ][ 2 ];
+  
+  
+
+} statcontext;
+
+
 #endif
