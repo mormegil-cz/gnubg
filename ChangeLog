@@ -1,3 +1,7 @@
+Fri Aug 16 13:08:13 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkprefs.c (GeneralPage): Resize chequer speed range widget.
+
 Tue Aug 13 22:54:15 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Output gammon values in "usual" metric.

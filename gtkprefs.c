@@ -529,6 +529,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     padjSpeed = GTK_ADJUSTMENT( gtk_adjustment_new( bd->animate_speed, 0, 7,
 						    1, 1, 0 ) );
     pwScale = gtk_hscale_new( padjSpeed );
+    gtk_widget_set_size_request( pwScale, 100, -1 );
     gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
     gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
 
