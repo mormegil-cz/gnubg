@@ -125,9 +125,11 @@ extern void CommandSetAutoDoubles( char *sz ) {
 	
     if( ( cAutoDoubles = n ) > 1 )
 	printf( "Automatic doubles will be used (up to a limit of %d).\n", n );
-    else
+    else if( cAutoDoubles )
 	puts( "A single automatic double will be permitted." );
-
+    else
+	puts( "Automatic doubles will not be used." );
+	
     if( cAutoDoubles ) {
 	if( nMatchTo > 0 )
 	    puts( "(Note that automatic doubles will have no effect until you "

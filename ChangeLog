@@ -1,3 +1,7 @@
+Wed Feb  2 14:34:22 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c (CommandSetAutoDoubles): Correct output for cAutoDoubles = 0.
+
 Tue Feb  1 21:28:41 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (HandleInputRecursive, GetInput): Ask for confirmation
