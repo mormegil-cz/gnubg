@@ -2727,15 +2727,6 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   return 0;
 }
 
-static int LogCube( int n ) {
-
-    int i;
-
-    for( i = 0; ; i++ )
-	if( n <= ( 1 << i ) )
-	    return i;
-}
-
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
                        cubeinfo *pci, evalcontext *pecx, int nPlies,
