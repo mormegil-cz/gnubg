@@ -3839,7 +3839,8 @@ CommandExportPositionGammOnLine ( char *sz ) {
 
     fputs ( "\n<!-- Header -->\n\n", pf );
 
-    HTMLBoardHeader ( pf, &ms, exsExport.het, exsExport.hecss,
+    HTMLBoardHeader ( pf, &ms, HTML_EXPORT_TYPE_BBS,
+                      HTML_EXPORT_CSS_INLINE,
                       getGameNumber ( plGame ),
                       getMoveNumber ( plGame, pmr ) - 1, FALSE );
 
