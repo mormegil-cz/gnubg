@@ -1,3 +1,13 @@
+Mon Jul 21 23:05:10 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (write_points): fix bug when writing boards
+	for turn=-1.
+	(reported by Dean Gay)
+
+Mon Jul 21 22:13:49 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (HTMLMatchInfo): only print non-empty values.
+
 Mon Jul 21 21:17:30 2003  Joern Thyssen  <jth@gnubg.org>
 
         * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 

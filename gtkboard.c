@@ -140,10 +140,10 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
 
   /* Board */
   for( i = 0; i < 24; i++ ) {
-    if ( anBoard[ turn > 0 ][ i ] )
-      points[ i + 1 ] = turn * anBoard[ turn > 0 ][ i ];
-    if ( anBoard[ turn <= 0 ][ i ] )
-      points[ 24 - i ] = -turn * anBoard[ turn <= 0 ][ i ];
+    if ( anBoard[ 1 ][ i ] )
+      points[ i + 1 ] = anBoard[ 1 ][ i ];
+    if ( anBoard[ 0 ][ i ] )
+      points[ 24 - i ] = -anBoard[ 0 ][ i ];
   }
 
   /* Player on bar */
@@ -155,8 +155,8 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
     anOff[ 1 ] -= anBoard[ 1 ][ i ];
   }
     
-  points[ 26 ] = anOff[ turn >= 0  ] * turn;
-  points[ 27 ] = - anOff[ turn < 0 ] * turn;
+  points[ 26 ] = anOff[ 0 ];
+  points[ 27 ] = -anOff[ 1 ];
 
 }
 
