@@ -3435,6 +3435,7 @@ extern void CommandCopy (char *sz)
   char szOut[2048];
   char szCube[32], szPlayer0[35], szPlayer1[35],
     szScore0[35], szScore1[35], szMatch[35];
+  char szRolled[ 32 ];
   int anBoardTemp[ 2 ][ 25 ];
     
   aps[0] = szPlayer0;
@@ -3463,14 +3464,14 @@ extern void CommandCopy (char *sz)
       sprintf (szPlayer0, "O: %s", ap[0].szName);
       sprintf (szPlayer1, "X: %s", ap[1].szName);
 
-      aps[ms.fMove ? 4 : 2] = sz;
+      aps[ms.fMove ? 4 : 2] = szRolled;
 
       if (ms.anDice[0])
-	sprintf (sz, _("Rolled %d%d"), ms.anDice[0], ms.anDice[1]);
+	sprintf (szRolled, _("Rolled %d%d"), ms.anDice[0], ms.anDice[1]);
       else if (!GameStatus (ms.anBoard))
-	strcpy (sz, _("On roll"));
+	strcpy (szRolled, _("On roll"));
       else
-	sz[0] = 0;
+	szRolled[0] = 0;
 
       if (ms.fCubeOwner < 0)
 	{
