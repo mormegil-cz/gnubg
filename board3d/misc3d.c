@@ -800,7 +800,7 @@ void initDT(diceTest* dt, int x, int y, int z)
 	dt->side[2] = 2;
 	dt->side[3] = 4;
 
-	/* Simulate rotations to determine actually dice position */
+	/* Simulate rotations to determine actual dice position */
 	while (x--)
 	{
 		int temp = dt->top;
