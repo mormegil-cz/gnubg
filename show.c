@@ -302,6 +302,16 @@ extern void CommandShowCache( char *sz ) {
     outputc( '\n' );
 }
 
+extern void CommandShowClockwise( char *sz ) {
+
+    if( fClockwise )
+	outputl( "Player 1 moves clockwise (and player 0 moves "
+		 "anticlockwise)." );
+    else
+	outputl( "Player 1 moves anticlockwise (and player 0 moves "
+		 "clockwise)." );
+}
+
 static void ShowCommands( command *pc, char *szPrefix ) {
 
     char sz[ 64 ], *pch;
@@ -428,6 +438,14 @@ extern void CommandShowEvaluation( char *sz ) {
 
 }
 
+extern void CommandShowEgyptian( char *sz ) {
+
+    if ( fEgyptian )
+      outputl( "Sessions are played with the Egyptian rule." );
+    else
+      outputl( "Sessions are played without the Egyptian rule." );
+
+}
 
 extern void CommandShowJacoby( char *sz ) {
 

@@ -159,6 +159,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed,
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE;
+
 float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
     arLuckLevel[] = {
 	0.6f, /* LUCK_VERYBAD */
@@ -576,6 +577,8 @@ command acAnalyse[] = {
       "position", szPOSITION, NULL },
     { "cache", CommandSetCache, "Set the size of the evaluation cache",
       szSIZE, NULL },
+    { "clockwise", CommandSetClockwise, "Control the board orientation",
+      szONOFF, NULL },
     { "colours", CommandSetColours, "Synonym for `set appearance'", NULL,
       NULL },
     { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
@@ -591,6 +594,7 @@ command acAnalyse[] = {
       "the computer's turn", szONOFF, NULL },
     { "evaluation", NULL, "Control position evaluation "
       "parameters", NULL, acSetEval },
+    { "egyptian", CommandSetEgyptian, "Set whether to use the Egyptian rule in "      "games", szONOFF, NULL },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, NULL },
     { "matchequitytable", NULL, "Select match equity table", NULL,
@@ -637,6 +641,8 @@ command acAnalyse[] = {
       NULL },
     { "cache", CommandShowCache, "Display statistics on the evaluation "
       "cache", NULL, NULL },
+    { "clockwise", CommandShowClockwise, "Display the board orientation",
+      NULL, NULL },
     { "commands", CommandShowCommands, "List all available commands",
       NULL, NULL },
     { "confirm", CommandShowConfirm, "Show whether confirmation is required "
@@ -659,6 +665,8 @@ command acAnalyse[] = {
       "and statistics", NULL, NULL },
     { "gammonprice", CommandShowGammonPrice, "Show gammon price",
       NULL, NULL },
+    { "egyptian", CommandShowEgyptian,
+      "See if the Egyptian rule is used in sessions", NULL, NULL },
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL, NULL },
     { "kleinman", CommandShowKleinman, "Calculate Kleinman count for "
@@ -2769,17 +2777,20 @@ extern void CommandSaveSettings( char *szParam ) {
     fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
     fputc( '\n', pf );
 #endif
-    fprintf( pf, "set confirm %s\n"
+    fprintf( pf, "set clockwise %s\n"
+	     "set confirm %s\n"
 	     "set cube use %s\n"
 #if USE_GUI
 	     "set delay %d\n"
 #endif
-	     "set display %s\n",
-	     fConfirm ? "on" : "off", fCubeUse ? "on" : "off",
+	     "set display %s\n"
+	     "set egyptian %s\n",
+	     fClockwise ? "on" : "off", fConfirm ? "on" : "off",
+	     fCubeUse ? "on" : "off",
 #if USE_GUI
 	     nDelay,
 #endif
-	     fDisplay ? "on" : "off" );
+	     fDisplay ? "on" : "off", fEgyptian ? "on" : "off" );
 
     sprintf( szTemp, "set evaluation chequerplay" );
     SaveEvalSetupSettings ( pf, szTemp, &esEvalChequer );
@@ -2792,6 +2803,8 @@ extern void CommandSaveSettings( char *szParam ) {
 
     sprintf( szTemp, "set analysis cubedecision" );
     SaveEvalSetupSettings ( pf, szTemp, &esAnalysisCube );
+
+    fprintf( pf, "set egyptian %s\n", fEgyptian ? "on" : "off" );
 
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 

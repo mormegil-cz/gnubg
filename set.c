@@ -50,6 +50,7 @@
 #endif
 #include "matchequity.h"
 #include "positionid.h"
+#include "drawboard.h"
 
 #ifndef HUGE_VALF
 #define HUGE_VALF (-1e38)
@@ -418,7 +419,20 @@ extern void CommandSetCache( char *sz ) {
 		n == 1 ? "y" : "ies" );
 }
 
+extern void CommandSetClockwise( char *sz ) {
+
+    SetToggle( "clockwise", &fClockwise, sz, "Player 1 moves clockwise (and "
+	"player 0 moves anticlockwise).", "Player 1 moves anticlockwise (and "
+	"player 0 moves clockwise)." );
+    
+#if USE_GUI
+    if( fX )
+	ShowBoard();
+#endif
+}
+
 extern void CommandSetColours( char *sz ) {
+    
 #if USE_GTK
     if( fX ) {
 	char *apch[ 2 ];
@@ -430,7 +444,7 @@ extern void CommandSetColours( char *sz ) {
 
 	BoardPreferencesDone( pwBoard );	    
     } else
-#endif    
+#endif
 	outputl( "The colours may not be changed when using this user "
 		 "interface." );
 }
@@ -1444,6 +1458,18 @@ extern void CommandSetTurn( char *sz ) {
 #endif
     
     outputf( "`%s' is now on roll.\n", ap[ i ].szName );
+}
+
+extern void CommandSetEgyptian( char *sz ) {
+
+    if( SetToggle( "egyptian", &fEgyptian, sz,
+                   "Will use the Egyptian rule.",
+                   "Will not use the Egyptian rule." ) ) {
+        outputl( "Note: most likely the database and weights are not "
+                 "tuned for Egyptian play.\nRegenerating them with "
+                 "the rule set may give better results." );
+        return;
+    } ;
 }
 
 extern void CommandSetJacoby( char *sz ) {

@@ -50,7 +50,9 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gint score, gint opp_score, gint die0, gint die1 );
 extern gint game_set_old_dice( Board *board, gint die0, gint die1 );
 extern void board_set_playing( Board *board, gboolean f );
-    
+extern void board_set_classical (Board *board, int true );
+ 
+
 /* private data */
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
@@ -67,7 +69,8 @@ typedef struct _BoardData {
 	*rgb_saved, *rgb_temp, *rgb_temp_saved, *rgb_bar;
     short *ai_refract[ 2 ];
     GdkFont *cube_font;
-    gboolean translucent, labels, usedicearea, permit_illegal, playing;
+    gboolean translucent, labels, classical, usedicearea, permit_illegal,
+        playing;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
     guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
     int aSpeckle[ 4 ]; /* speckle for background, border, pts */
@@ -79,9 +82,10 @@ typedef struct _BoardData {
 	dice_colour[ 2 ], cube_font_rotated, old_board[ 2 ][ 25 ],
 	dice_roll[ 2 ]; /* roll showing on the off-board dice */
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
+    gint clockwise; /* last drawn orientation */
     move *all_moves, *valid_move;
     movelist move_list;
-    
+
     /* remainder is from FIBS board: data */
     char name[ 32 ], name_opponent[ 32 ];
     gint match_to, score, score_opponent;

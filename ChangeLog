@@ -1,3 +1,12 @@
+Thu Jul 26 10:29:41 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (LegalMove): Optionally disallow more than 5 chequers per
+	point (contributed by Tristan Colgate).
+
+	* drawboard.c (DrawBoardCls): New function.  Draw board with
+	player 1 moving clockwise (contributed by Tristan Colgate).
+	* gtkboard.c: Similar changes for the GTK+ board widget.
+	
 Thu Jul 19 09:59:28 2001  Gary Wong  <gtw@research.att.com>
 
 	* postscript.c (ExportGamePostScript): Fix bug (noted by Øystein)

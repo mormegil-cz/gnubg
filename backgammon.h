@@ -88,6 +88,7 @@ typedef struct _movegameinfo {
 	anScore[ 2 ], /* match score BEFORE the game */
 	fCrawford, /* the Crawford rule applies during this match */
 	fCrawfordGame, /* this is the Crawford game */
+	fEgyptian, /* Limit stacking to 5 per pin */
 	fJacoby,
 	fWinner, /* who won (-1 = unfinished) */
 	nPoints, /* how many points were scored by the winner */
@@ -198,7 +199,7 @@ extern int fNextTurn;
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
-    fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC,
+    fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC, fEgyptian,
     fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard, nRolloutSeed,
     fAnnotation, cAnalysisMoves, fAnalyseCube, fAnalyseDice, fAnalyseMove;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
@@ -432,6 +433,7 @@ extern void CommandAccept( char * ),
     CommandSetBoard( char * ),
     CommandSetBeavers( char * ),
     CommandSetCache( char * ),
+    CommandSetClockwise( char * ),
     CommandSetColours( char * ),
     CommandSetConfirm( char * ),
     CommandSetCrawford( char * ),
@@ -455,6 +457,7 @@ extern void CommandAccept( char * ),
     CommandSetEvalParamEvaluation( char * ),
     CommandSetEvalChequerplay ( char * ),
     CommandSetEvalCubedecision ( char * ),
+    CommandSetEgyptian( char * ),
     CommandSetJacoby( char * ),
     CommandSetMETZadeh( char * ),
     CommandSetMETWoolsey( char * ),
@@ -507,6 +510,7 @@ extern void CommandAccept( char * ),
     CommandShowBoard( char * ),
     CommandShowBeavers( char * ),
     CommandShowCache( char * ),
+    CommandShowClockwise( char * ),
     CommandShowCommands( char * ),
     CommandShowConfirm( char * ),
     CommandShowCopying( char * ),
@@ -518,6 +522,7 @@ extern void CommandAccept( char * ),
     CommandShowEngine( char * ),
     CommandShowEvaluation( char * ),
     CommandShowGammonPrice( char * ),
+    CommandShowEgyptian( char * ),
     CommandShowJacoby( char * ),
     CommandShowKleinman( char * ),
     CommandShowMarketWindow( char * ),

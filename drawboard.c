@@ -31,9 +31,10 @@
 #include "drawboard.h"
 #include "positionid.h"
 
+int fClockwise = FALSE; /* Player 1 moves clockwise */
+
 /*
  *  GNU Backgammon  Position ID: 0123456789ABCD
- *
  *  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg (0 points)
  *  |                  |   | O  O  O  O     O | OO  Cube: 2
  *  |                  |   | O     O          | OO  On roll
@@ -50,8 +51,8 @@
  *
  */
 
-extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
-                        char *asz[] ) {
+static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
+                           char *asz[] ) {
 
     char *pch = sz, *pchIn;
     int x, y, an[ 2 ][ 25 ], cOffO = 15, cOffX = 15;
@@ -256,6 +257,241 @@ extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 
     return sz;
 }
+
+
+/*
+ *     GNU Backgammon  Position ID: 0123456789ABCD
+ *     +24-23-22-21-20-19------18-17-16-15-14-13-+  O: gnubg (0 points)
+ *  OO | O     O  O  O  O |   |                  |  Cube: 2
+ *  OO |          O     O |   |                  |  On roll
+ *   O |          O       |   |                  |
+ *   O |                  |   |                  |
+ *   O |                  |   |                  | 
+ *     |                  |BAR|                  |v Cube: 1 (7 point match)
+ *   X |                  |   |                  | 
+ *   X |                  |   |                  |
+ *   X |                  |   |                  |
+ *   X | X  X  X  X       |   |                  |  Rolled 11
+ *  XX | X  X  X  X  X    |   |                  |  Cube: 2
+ *     +-1--2--3--4--5--6-------7--8--9-10-11-12-+  X: Gary (0 points)
+ *
+ */
+
+static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
+                           char *asz[] ) {
+
+    char *pch = sz, *pchIn;
+    int x, y, an[ 2 ][ 25 ], cOffO = 15, cOffX = 15;
+    static char achX[ 16 ] = "     X6789ABCDEF",
+        achO[ 16 ] = "     O6789ABCDEF";
+
+    for( x = 0; x < 25; x++ ) {
+        cOffO -= anBoard[ 0 ][ x ];
+        cOffX -= anBoard[ 1 ][ x ];
+    }
+    
+    strcpy( pch, "    GNU Backgammon  Position ID: " );
+
+    pch += 30;
+
+    if( fRoll )
+        strcpy( pch, PositionID( anBoard ) );
+    else {
+        for( x = 0; x < 25; x++ ) {
+            an[ 0 ][ x ] = anBoard[ 1 ][ x ];
+            an[ 1 ][ x ] = anBoard[ 0 ][ x ];
+        }
+        
+        strcpy( pch, PositionID( an ) );
+    }
+    
+    pch += 14;
+    *pch++ = '\n';
+            
+    strcpy( pch, fRoll ? "    +24-23-22-21-20-19------18-17-16-15-14-13-+  " :
+            "    +-1--2--3--4--5--6-------7--8--9-10-11-12-+  " );
+    pch += 49;
+
+    if( asz[ 0 ] )
+        for( pchIn = asz[ 0 ]; *pchIn; pchIn++ )
+            *pch++ = *pchIn;
+
+    *pch++ = '\n';
+
+    for( y = 0; y < 4; y++ ) {
+    
+        for( x = 2; x >= 0; x-- )
+            *pch++ = ( cOffO > 5 * x + y ) ? 'O' : ' ';
+
+        *pch++ = ' ';
+        *pch++ = '|';
+
+        for( x = 23 ; x > 17; x-- ) {
+            *pch++ = ' ';
+            *pch++ = anBoard[ 1 ][ x ] > y ? 'X' :
+                anBoard[ 0 ][ 23 - x ] > y ? 'O' : ' ';
+            *pch++ = ' ';
+        }
+
+        *pch++ = '|';
+        *pch++ = ' ';
+        *pch++ = anBoard[ 0 ][ 24 ] > y ? 'O' : ' ';
+        *pch++ = ' ';
+        *pch++ = '|';
+        
+        for( ; x > 11; x-- ) {
+            *pch++ = ' ';
+            *pch++ = anBoard[ 1 ][ x ] > y ? 'X' :
+                anBoard[ 0 ][ 23 - x ] > y ? 'O' : ' ';
+            *pch++ = ' ';
+        }
+
+        *pch++ = '|';
+        *pch++ = ' ';
+	*pch++ = ' ';
+        if( y < 2 && asz[ y + 1 ] )
+            for( pchIn = asz[ y + 1 ]; *pchIn; pchIn++ )
+                *pch++ = *pchIn;
+
+        *pch++ = '\n';
+    }
+
+    for( x = 2; x >= 0; x-- )
+        *pch++ = ( cOffO > 5 * x + 4 ) ? 'O' : ' ';
+
+    *pch++ = ' ';
+    *pch++ = '|';
+
+    for( x = 23; x > 17; x-- ) {
+        *pch++ = ' ';
+        *pch++ = anBoard[ 1 ][ x ] ? achX[ anBoard[ 1 ][ x ] ] :
+                achO[ anBoard[ 0 ][ 23 - x ] ];
+        *pch++ = ' ';
+    }
+
+    *pch++ = '|';
+    *pch++ = ' ';
+    *pch++ = achO[ anBoard[ 0 ][ 24 ] ];
+    *pch++ = ' ';
+    *pch++ = '|';
+        
+    for( ; x > 11; x-- ) {
+        *pch++ = ' ';
+        *pch++ = anBoard[ 1 ][ x ] ? achX[ anBoard[ 1 ][ x ] ] :
+                achO[ anBoard[ 0 ][ 23 - x ] ];
+        *pch++ = ' ';
+    }
+
+    *pch++ = '|';
+
+    *pch++ = ' ';
+    *pch++ = ' ';
+
+    *pch++ = '\n';
+    
+    strcpy( pch, "    |                  |BAR|                  |" );
+    pch += 47;
+    *pch++ = fRoll ? 'v' : '^';
+    *pch++ = ' ';   
+    
+    if( asz[ 3 ] )
+        for( pchIn = asz[ 3 ]; *pchIn; pchIn++ )
+            *pch++ = *pchIn;
+
+    *pch++ = '\n';
+
+    for( x = 2; x >= 0; x-- )
+        *pch++ = ( cOffX > 5 * x + 4 ) ? 'X' : ' ';
+
+    *pch++ = ' ';
+    *pch++ = '|';
+
+    for( x = 0; x < 6; x++ ) {
+        *pch++ = ' ';
+        *pch++ = anBoard[ 1 ][ x ] ? achX[ anBoard[ 1 ][ x ] ] :
+                achO[ anBoard[ 0 ][ 23 - x ] ];
+        *pch++ = ' ';
+    }
+
+    *pch++ = '|';
+    *pch++ = ' ';
+    *pch++ = achX[ anBoard[ 1 ][ 24 ] ];
+    *pch++ = ' ';
+    *pch++ = '|';
+        
+    for( ; x < 12; x++ ) {
+        *pch++ = ' ';
+        *pch++ = anBoard[ 1 ][ x ] ? achX[ anBoard[ 1 ][ x ] ] :
+                achO[ anBoard[ 0 ][ 23 - x ] ];
+        *pch++ = ' ';
+    }
+
+    *pch++ = '|';
+
+    *pch++ = ' ';
+    *pch++ = ' ';
+
+    *pch++ = '\n';
+    
+    for( y = 3; y >= 0; y-- ) {
+
+        for( x = 2; x >= 0; x-- )
+            *pch++ = ( cOffX > 5 * x + y ) ? 'X' : ' ';
+
+        *pch++ = ' ';
+        *pch++ = '|';
+
+        for( x = 0; x < 6; x++ ) {
+            *pch++ = ' ';
+            *pch++ = anBoard[ 1 ][ x ] > y ? 'X' :
+                anBoard[ 0 ][ 23 - x ] > y ? 'O' : ' ';
+            *pch++ = ' ';
+        }
+
+        *pch++ = '|';
+        *pch++ = ' ';
+        *pch++ = anBoard[ 1 ][ 24 ] > y ? 'X' : ' ';
+        *pch++ = ' ';
+        *pch++ = '|';
+        
+        for( ; x < 12; x++ ) {
+            *pch++ = ' ';
+            *pch++ = anBoard[ 1 ][ x ] > y ? 'X' :
+                anBoard[ 0 ][ 23 - x ] > y ? 'O' : ' ';
+            *pch++ = ' ';
+        }
+        
+        *pch++ = '|';
+        *pch++ = ' ';
+        *pch++ = ' ';       
+        if( y < 2 && asz[ 5 - y ] )
+            for( pchIn = asz[ 5 - y ]; *pchIn; pchIn++ )
+                *pch++ = *pchIn;
+        
+        *pch++ = '\n';
+    }
+
+    strcpy( pch, fRoll ? "    +-1--2--3--4--5--6-------7--8--9-10-11-12-+   " :
+            "    +24-23-22-21-20-19------18-17-16-15-14-13-+  " );
+    pch += 49;
+
+    if( asz[ 6 ] )
+        for( pchIn = asz[ 6 ]; *pchIn; pchIn++ )
+            *pch++ = *pchIn;
+    
+    *pch++ = '\n';
+    *pch = 0;
+
+    return sz;
+}
+
+extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
+                        char *asz[] ) {
+    if( fClockwise == FALSE ) 
+        return ( DrawBoardStd( sz, anBoard, fRoll, asz ) ) ;
+
+    return ( DrawBoardCls( sz, anBoard, fRoll, asz ) ) ;   
+};
 
 static char *FormatPoint( char *pch, int n ) {
 

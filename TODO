@@ -266,7 +266,8 @@ duplication of effort and to make sure our changes merge easily.
 *** HTML.
 *** ASCII.
 *** LaTeX.
-** Add option to flip the board.
+** Make the LaTeX, PS and PDF formats pay attention to fClockwise when
+  they draw boards.
 ** Think about generating huge databases for CD-ROMs (we can get 1-sided
   databases for all chequers up to the 11 point, or 2-sided databases where
   both players have up to 11 chequers in the home board onto a CD-ROM).

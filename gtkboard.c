@@ -55,15 +55,26 @@ static int fWine; /* TRUE if we're running under Wine */
 #define MASK_VISIBLE 0
 #endif
 
-static int positions[ 28 ][ 3 ] = {
+
+static int positions[ 2 ][ 28 ][ 3 ] = { {
     { 51, 25, 7 },
     { 90, 63, 6 }, { 84, 63, 6 }, { 78, 63, 6 }, { 72, 63, 6 }, { 66, 63, 6 },
     { 60, 63, 6 }, { 42, 63, 6 }, { 36, 63, 6 }, { 30, 63, 6 }, { 24, 63, 6 },
-    { 18, 63, 6 }, { 12, 63, 6 }, { 12, 3, -6 }, { 18, 3, -6 }, { 24, 3, -6 },
-    { 30, 3, -6 }, { 36, 3, -6 }, { 42, 3, -6 }, { 60, 3, -6 }, { 66, 3, -6 },
-    { 72, 3, -6 }, { 78, 3, -6 }, { 84, 3, -6 }, { 90, 3, -6 },
+    { 18, 63, 6 }, { 12, 63, 6 },
+    { 12, 3, -6 }, { 18, 3, -6 }, { 24, 3, -6 }, { 30, 3, -6 }, { 36, 3, -6 },
+    { 42, 3, -6 }, { 60, 3, -6 }, { 66, 3, -6 }, { 72, 3, -6 }, { 78, 3, -6 },
+    { 84, 3, -6 }, { 90, 3, -6 },
     { 51, 41, -7 }, { 99, 63, 6 }, { 99, 3, -6 }
-};
+}, {
+    { 51, 25, 7 },
+    { 12, 63, 6 }, { 18, 63, 6 }, { 24, 63, 6 }, { 30, 63, 6 }, { 36, 63, 6 },
+    { 42, 63, 6 }, { 60, 63, 6 }, { 66, 63, 6 }, { 72, 63, 6 }, { 78, 63, 6 },
+    { 84, 63, 6 }, { 90, 63, 6 },
+    { 90, 3, -6 }, { 84, 3, -6 }, { 78, 3, -6 }, { 72, 3, -6 }, { 66, 3, -6 },
+    { 60, 3, -6 }, { 42, 3, -6 }, { 36, 3, -6 }, { 30, 3, -6 }, { 24, 3, -6 },
+    { 18, 3, -6 }, { 12, 3, -6 },
+    { 51, 41, -7 }, { 3, 63, 6 }, { 3, 3, -6 }
+} };
 
 static GtkVBoxClass *parent_class = NULL;
 
@@ -183,10 +194,10 @@ static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
 	refract = bd->ai_refract[ 0 ];
     }
     
-    x = positions[ n ][ 0 ] * bd->board_size;
-    y = positions[ n ][ 1 ] * bd->board_size;
+    x = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
+    y = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
     cx = 6 * bd->board_size;
-    cy = -c_chequer * bd->board_size * positions[ n ][ 2 ];
+    cy = -c_chequer * bd->board_size * positions[ fClockwise ][ n ][ 2 ];
 
     if( ( invert = cy < 0 ) ) {
 	y += cy * 4 / 5;
@@ -203,7 +214,7 @@ static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
     else {
 	/* on board; copy saved image */
 	p_src = bd->rgb_points;
-	if( !( ( n ^ invert ) & 1 ) )
+	if( !( ( n ^ invert ^ fClockwise ) & 1 ) )
 	    p_src += 6 * bd->board_size * 3;
 	if( invert )
 	    p_src += 36 * bd->board_size * 12 * bd->board_size * 3;
@@ -247,7 +258,7 @@ static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
 	if( ++i_chequer == c_chequer )
 	    break;
 	
-	y_chequer -= bd->board_size * positions[ n ][ 2 ];
+	y_chequer -= bd->board_size * positions[ fClockwise ][ n ][ 2 ];
     }
 
     gdk_draw_rgb_image( board->window, bd->gc_copy, x, y, cx, cy,
@@ -273,10 +284,10 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
     
     c_chequer = ( !n || n == 25 ) ? 3 : 5;
     
-    x = positions[ n ][ 0 ] * bd->board_size;
-    y = positions[ n ][ 1 ] * bd->board_size;
+    x = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
+    y = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
     cx = 6 * bd->board_size;
-    cy = -c_chequer * bd->board_size * positions[ n ][ 2 ];
+    cy = -c_chequer * bd->board_size * positions[ fClockwise ][ n ][ 2 ];
 
     if( ( invert = cy < 0 ) ) {
 	y += cy * 4 / 5;
@@ -309,7 +320,7 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
 	if( ++i_chequer == c_chequer )
 	    break;
 
-	y_chequer -= bd->board_size * positions[ n ][ 2 ];
+	y_chequer -= bd->board_size * positions[ fClockwise ][ n ][ 2 ];
     }
 
     gdk_gc_set_clip_mask( bd->gc_copy, NULL );
@@ -475,8 +486,8 @@ static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
     for( i = 0; i < 28; i++ ) {
 	int y, cy;
 
-	y = positions[ i ][ 1 ] * bd->board_size;
-	cy = -5 * bd->board_size * positions[ i ][ 2 ];
+	y = positions[ fClockwise ][ i ][ 1 ] * bd->board_size;
+	cy = -5 * bd->board_size * positions[ fClockwise ][ i ][ 2 ];
 
 	if( cy < 0 ) {
 	    y += cy * 4 / 5;
@@ -484,21 +495,23 @@ static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
 	}
 
 	if( intersects( event->area.x, event->area.y, event->area.width,
-			event->area.height, positions[ i ][ 0 ] *
+			event->area.height, positions[ fClockwise ][ i ][ 0 ] *
 			bd->board_size, y, 6 * bd->board_size, cy ) ) {
 	    board_redraw_point( board, bd, i );
 	    /* Redrawing the point might have drawn outside the exposed
 	       area; enlarge the invalid area in case the dice now need
 	       redrawing as well. */
-	    if( event->area.x > positions[ i ][ 0 ] * bd->board_size ) {
+	    if( event->area.x > positions[ fClockwise ][ i ][ 0 ] *
+		bd->board_size ) {
 		event->area.width += event->area.x -
-		    positions[ i ][ 0 ] * bd->board_size;
-		event->area.x = positions[ i ][ 0 ] * bd->board_size;
+		    positions[ fClockwise ][ i ][ 0 ] * bd->board_size;
+		event->area.x = positions[ fClockwise ][ i ][ 0 ] *
+		    bd->board_size;
 	    }
 	    
-	    if( event->area.x + event->area.width < ( positions[ i ][ 0 ] + 6 )
-		* bd->board_size )
-		event->area.width = ( positions[ i ][ 0 ] + 6 ) *
+	    if( event->area.x + event->area.width <
+		( positions[ fClockwise ][ i ][ 0 ] + 6 ) * bd->board_size )
+		event->area.width = ( positions[ fClockwise ][ i ][ 0 ] + 6 ) *
 		    bd->board_size - event->area.x;
 	    
 	    if( event->area.y > y ) {
@@ -544,10 +557,10 @@ static void board_expose_point( GtkWidget *board, BoardData *bd, int n ) {
 	return;
 
     event.count = 0;
-    event.area.x = positions[ n ][ 0 ] * bd->board_size;
-    event.area.y = positions[ n ][ 1 ] * bd->board_size;
+    event.area.x = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
+    event.area.y = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
     event.area.width = 6 * bd->board_size;
-    cy = -5 * bd->board_size * positions[ n ][ 2 ];
+    cy = -5 * bd->board_size * positions[ fClockwise ][ n ][ 2 ];
     if( cy < 0 ) {
         event.area.y += cy * 4 / 5;
         event.area.height = -cy;
@@ -574,14 +587,14 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 	return POINT_CUBE;
     
     for( i = 0; i < 28; i++ ) {
-	y = positions[ i ][ 1 ];
-	cy = -5 * positions[ i ][ 2 ];
+	y = positions[ fClockwise ][ i ][ 1 ];
+	cy = -5 * positions[ fClockwise ][ i ][ 2 ];
 	if( cy < 0 ) {
 	    y += cy * 4 / 5;
 	    cy = -cy;
 	}
 
-	if( intersects( x0, y0, 0, 0, positions[ i ][ 0 ],
+	if( intersects( x0, y0, 0, 0, positions[ fClockwise ][ i ][ 0 ],
 			y, 6, cy ) )
 	    return i;
     }
@@ -1188,7 +1201,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
     gchar *dest, buf[ 32 ];
     gint i, *pn, **ppn;
     gint old_board[ 28 ];
-    int old_direction, old_cube, old_doubled, old_xCube, old_yCube;
+    int old_cube, old_doubled, old_xCube, old_yCube;
     GdkEventExpose event;
     GtkAdjustment *padj0, *padj1;
     
@@ -1281,8 +1294,6 @@ static gint board_set( Board *board, const gchar *board_text ) {
 
     old_board[ 26 ] = bd->points[ 26 ];
     old_board[ 27 ] = bd->points[ 27 ];
-
-    old_direction = bd->direction;
 
     old_cube = bd->cube;
     old_doubled = bd->doubled;
@@ -1433,31 +1444,19 @@ static gint board_set( Board *board, const gchar *board_text ) {
 
 	board_expose( bd->drawing_area, &event, bd );
     }
-    
-    if( bd->direction != old_direction ) {
-	for( i = 0; i < 28; i++ ) {
-	    /* FIXME this will break if there are multiple board widgets */
-	    positions[ i ][ 0 ] = 102 - positions[ i ][ 0 ];
-	    positions[ i ][ 1 ] = 66 - positions[ i ][ 1 ];
-	    positions[ i ][ 2 ] = -positions[ i ][ 2 ];
-	}
-	
-	event.count = event.area.x = event.area.y = 0;
-	event.area.width = 108 * bd->board_size;
-	event.area.height = 72 * bd->board_size;
-	
-	board_expose( bd->drawing_area, &event, bd );
-    } else {
-	for( i = 0; i < 28; i++ )
-	    if( bd->points[ i ] != old_board[ i ] )
-		board_redraw_point( bd->drawing_area, bd, i );
-	
-	/* FIXME only redraw dice/cube if changed */
-	board_redraw_dice( bd->drawing_area, bd, 0 );
-	board_redraw_dice( bd->drawing_area, bd, 1 );
-	board_redraw_cube( bd->drawing_area, bd );
-    }
 
+    for( i = 0; i < 28; i++ )
+	if( ( bd->points[ i ] != old_board[ i ] ) ||
+	    ( fClockwise != bd->clockwise ) )
+	    board_redraw_point( bd->drawing_area, bd, i );
+
+    /* FIXME only redraw dice/cube if changed */
+    board_redraw_dice( bd->drawing_area, bd, 0 );
+    board_redraw_dice( bd->drawing_area, bd, 1 );
+    board_redraw_cube( bd->drawing_area, bd );
+
+    bd->clockwise = fClockwise;
+    
 #if WIN32
     if( fWine )
 	/* For some reason, Wine manages to completely mess up updates
@@ -1675,14 +1674,14 @@ static void board_draw_labels( BoardData *bd ) {
 				 GDK_GC_FOREGROUND | GDK_GC_FONT );
     
     for( i = 1; i <= 24; i++ ) {
-	sprintf( sz, "%d", i );
+        sprintf( sz, "%d", i );
 
-	gdk_string_extents( gcv.font, sz, NULL, NULL, &cx, &cy0, &cy1 );
+        gdk_string_extents( gcv.font, sz, NULL, NULL, &cx, &cy0, &cy1 );
 	
-	gdk_draw_string( bd->pm_board, gcv.font, gc,
-			 ( positions[ i ][ 0 ] + 3 ) * bd->board_size - cx / 2,
-			 ( ( i > 12 ? 3 : 141 ) * bd->board_size + cy0 ) / 2 -
-			 cy1, sz );
+        gdk_draw_string( bd->pm_board, gcv.font, gc,
+	   ( positions[ fClockwise ][ i ][ 0 ] + 3 ) * bd->board_size - cx / 2,
+	   ( ( i > 12 ? 3 : 141 ) * bd->board_size + cy0 ) / 2 -
+	   cy1, sz );
     }
 
     gdk_gc_unref( gc );

@@ -22,6 +22,8 @@
 #ifndef _DRAWBOARD_H_
 #define _DRAWBOARD_H_
 
+extern int fClockwise; /* Player 1 moves clockwise */
+
 extern char *DrawBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
                         char *asz[] );
 /* Fill the buffer pch with a representation of the move anMove, assuming
