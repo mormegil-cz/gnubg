@@ -9185,8 +9185,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     pow->pwCheat = 
       gtk_check_button_new_with_label( _("Enable dice manupulation") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON ( pow->pwCheat ),
-                                  fCheat );
+
     gtk_box_pack_start( GTK_BOX( pwb ), pow->pwCheat, FALSE, FALSE, 0 );
 
     gtk_signal_connect( GTK_OBJECT ( pow->pwCheat ), "toggled",
@@ -9584,6 +9583,14 @@ OptionsSet( optionswidget *pow) {
                                 fConfirm );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwConfOverwrite ),
                                 fConfirmSave );
+
+  /* dice manipulation */
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwCheat ), fCheat );
+
+  for ( i = 0; i< 2; ++i )
+    gtk_option_menu_set_history( GTK_OPTION_MENU( pow->apwCheatRoll[ i ] ),
+                                 afCheatRoll[ i ] );
 
 }
 

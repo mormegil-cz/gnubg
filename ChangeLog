@@ -1,3 +1,9 @@
+Tue Apr  1 18:16:03 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (OptionsSet): missing initialisation of the 
+	cheat-roll menues.
+	(reported by Nardy Pillards)
+
 Mon Mar 31 21:50:51 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Restore "export position gammonline ..." to the previous
