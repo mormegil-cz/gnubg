@@ -445,9 +445,11 @@ command cER = {
       "against the database"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
+#if 0
     { "equityevolution", CommandExportGameEquityEvolution, 
       N_("Exports the equity evolution of the game (for import into a spreadsheet"), 
       szFILENAME, &cFilename },
+#endif
     { "gam", CommandExportGameGam, N_("Records a log of the game in .gam "
       "format"), szFILENAME, &cFilename },
     { "html", CommandExportGameHtml,
@@ -465,9 +467,11 @@ command cER = {
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
+#if 0
     { "equityevolution", CommandExportMatchEquityEvolution, 
       N_("Exports the equity evolution of the match (for import into a spreadsheet"), 
       szFILENAME, &cFilename },
+#endif
     { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
       "format"), szFILENAME, &cFilename },
     { "html", CommandExportMatchHtml,
