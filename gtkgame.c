@@ -2011,6 +2011,10 @@ extern int InitGTK( int *argc, char ***argv ) {
     
     gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
 		      TRUE, TRUE, 0 );
+    /* It's a bit naughty to access pwStatus->label, but its default alignment
+       is ugly, and GTK gives us no other way to change it. */
+    gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
+			    0.0f, 0.5f );
     idOutput = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
 					     "gnubg output" );
     idProgress = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
