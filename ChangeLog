@@ -1,3 +1,9 @@
+Wed Oct 31 19:46:31 CET 2001
+
+	* eval.c (FindBestCubeDecision): only beaver if equity > -2, otherwise "you
+	can currently take advantage of gnubg to escape a backgammon by doubling, if
+	you have cube access; gnubg doesn't realise it's too good to beaver."
+
 Fri Nov  2 17:31:43 2001  Gary Wong  <gtw@research.att.com>
 
 	* configure.in: Automatically detect whether -ieee is required in
