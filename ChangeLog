@@ -1,3 +1,9 @@
+Tue Aug 29 20:48:56 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c (EvalBearoff1Full): Fix evaluation of bearoff positions
+	where gammons are possible. The former use of the race net is not
+	appropriate, since the race net has not been trained on such positions.
+
 Mon Aug 28 07:39:17 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gtkboard.c (game_set): If no game is in progress, display the
