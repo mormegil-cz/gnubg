@@ -1,3 +1,8 @@
+Wed Dec  4 23:23:02 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c (BoardPrefsDestroy): add missing #if
+	(reported by Morten Wang)
+
 Wed Dec  4 22:17:18 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c (UseDesign): wood=paint did not work with board

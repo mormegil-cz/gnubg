@@ -1319,7 +1319,9 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 static void
 BoardPrefsDestroy ( GtkWidget *pw, GList *plBoardDesigns ) {
 
+#if HAVE_LIBXML2
   free_board_designs ( plBoardDesigns );
+#endif /* HAVE_LIBXML2 */
 
 }
 
