@@ -1,3 +1,7 @@
+Thu Oct  2 19:37:15 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktheory.c (TheoryUpdated): ensure that bg <= g.
+
 Thu Oct 2 10:59:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	play.c, gnubg.c: Added first move command

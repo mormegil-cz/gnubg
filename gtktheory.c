@@ -281,6 +281,11 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
   TheoryGetValues ( ptw, &ci, aarRates );
 
+  /* set max on the gammon spinners */
+
+  for ( i = 0; i < 2; ++i ) 
+    ptw->aapwRates[ i ][ 1 ]->upper = ptw->aapwRates[ i ][ 0 ]->value;
+
   SetCubeInfo ( &ci, ci.nCube, 0, 0, ci.nMatchTo,
                 ci.anScore, ci.fCrawford, ci.fJacoby, ci.fBeavers, ci.bgv );
 
