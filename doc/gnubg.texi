@@ -848,7 +848,7 @@ export database         databases
 export game
 export match
 export pos
-external
+external		playing		/ computer player
 help                    basic
 hint                    playing		/ the game
 list game
@@ -1449,6 +1449,9 @@ FIXME
 @kindex play
 @item play
 FIXME
+@kindex external
+@item external
+FIXME
 @end table
 
 @node Matches and Sessions
@@ -1634,6 +1637,8 @@ FIXME pointer only
 @itemx train td
 FIXME
 @end table
+
+@image{annealing}
 
 @node Guile
 @chapter Extending @gnubg{}
