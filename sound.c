@@ -1010,6 +1010,21 @@ void PlaySound_QuickTime (const char *cSoundFilename)
 
 #endif /* __APPLE__ */
 
+#ifdef WIN32
+void PrintWinError()
+{
+	LPVOID lpMsgBuf;
+	FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+		FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS ,
+		NULL, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR) &lpMsgBuf, 0, NULL);
+
+	g_print("Windows error: ");
+	g_print((LPCTSTR)lpMsgBuf);
+
+	LocalFree(lpMsgBuf);
+}
+#endif
 
 static void 
 play_file_child(soundcache *psc, const char *filename) {
@@ -1109,6 +1124,7 @@ play_file_child(soundcache *psc, const char *filename) {
 	if (GetLastError())
 	{
 		g_print("Error playing sound file: %s\n", filename);
+		PrintWinError();
 		SetLastError(0);
 		return;
 	}
