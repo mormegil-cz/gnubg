@@ -285,7 +285,7 @@ typedef enum _animation {
     
 extern animation animGUI;
 extern int nGUIAnimSpeed, fGUIBeep, fGUIDiceArea, fGUIHighDieFirst,
-    fGUIIllegal, fGUIShowIDs, fGUIShowPips;
+    fGUIIllegal, fGUIShowIDs, fGUIShowPips, fGUISetWindowPos;
 #endif
 
 typedef enum _pathformat {
@@ -748,6 +748,7 @@ extern void CommandAccept( char * ),
     CommandSetGUIDiceArea( char * ),
     CommandSetGUIHighDieFirst( char * ),
     CommandSetGUIIllegal( char * ),
+    CommandSetGUIWindowPositions( char * ),
     CommandSetGUIShowIDs( char * ),
     CommandSetGUIShowPips( char * ),
     CommandSetHighlight ( char * ),

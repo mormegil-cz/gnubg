@@ -1,3 +1,16 @@
+Tue Jan 21 16:52:35 2003  Gary Wong  <gtw@gnu.org>
+
+	* set.c (CommandSetGUIWindowPositions): New function.  Make restoring
+	window positions optional, for use with window/session managers that 
+	can do the job.
+
+	* gtkgame.c: Don't use the deprecated gtk_window_set_wmclass(); call
+	gtk_window_set_role() instead (under GTK+ 2.0).
+
+	* gtksplash.c (CreateSplash): Use GDK_WINDOW_TYPE_HINT_SPLASHSCREEN
+	under GTK+ 2.0, and add a couple of borders in case the window
+	manager decides not to decorate us.
+
 Tue Jan 21 14:49:29 2003  Gary Wong  <gtw@gnu.org>
 
 	* eval.c (EvalKey): Bug fixes for cubeful equity caching: always

@@ -1098,6 +1098,14 @@ extern void CommandSetGUIShowPips( char *sz ) {
 		   _("The pip counts will not be shown.") ) )
 	UpdateSetting( &fGUIShowPips );
 }
+
+extern void CommandSetGUIWindowPositions( char *sz ) {
+
+    SetToggle( "gui windowpositions", &fGUISetWindowPos, sz,
+	       _("Saved window positions will be applied to new windows."),
+	       _("Saved window positions will not be applied to new "
+		 "windows.") );
+}
 #else
 static void NoGUI( void ) {
 
@@ -1151,6 +1159,11 @@ extern void CommandSetGUIShowIDs( char *sz ) {
 }
 
 extern void CommandSetGUIShowPips( char *sz ) {
+
+    NoGUI();
+}
+ 
+extern void CommandSetGUIWindowPositions( char *sz ) {
 
     NoGUI();
 }

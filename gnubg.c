@@ -877,6 +877,8 @@ command cER = {
       N_("Show the position and match IDs above the board"), szONOFF, NULL },
     { "showpips", CommandSetGUIShowPips,
       N_("Show the pip counts below the board"), szONOFF, NULL },
+    { "windowpositions", CommandSetGUIWindowPositions,
+      N_("Save and restore window positions and sizes"), szONOFF, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetMatchInfo[] = {
     { "annotator", CommandSetMatchAnnotator,
@@ -4809,6 +4811,9 @@ extern void CommandSaveSettings( char *szParam ) {
                   acSetPath[ i ].sz, aaszPaths[ i ][ 0 ] );
 
     /* geometries */
+    /* "set gui windowpositions" must come first */
+    fprintf( pf, "set gui windowpositions %s\n",
+	     fGUISetWindowPos ? "on" : "off" );
 #if USE_GTK
     if ( fX )
        RefreshGeometries ();

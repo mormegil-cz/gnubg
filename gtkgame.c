@@ -332,6 +332,8 @@ static int cchOutput;
 static guint idOutput, idProgress;
 static list lOutput;
 int fTTY = TRUE;
+int fGUISetWindowPos = TRUE;
+
 static guint nStdin, nDisabledCount = 1;
 
 static char *szCopied; /* buffer holding copied data */
@@ -362,7 +364,7 @@ static char *ToUTF8( unsigned char *sz ) {
 static void
 setWindowGeometry ( GtkWidget *pw, const windowgeometry *pwg ) {
 
-  if ( ! pw )
+  if ( ! pw || !fGUISetWindowPos)
     return;
 
 #if GTK_CHECK_VERSION(2,0,0)
@@ -913,9 +915,12 @@ static void CreateMessageWindow( void ) {
 
     gtk_window_set_title( GTK_WINDOW( pwMessage ),
 			  _("GNU Backgammon - Messages") );
-    gtk_window_set_wmclass( GTK_WINDOW( pwMessage ), "message",
-			    "Message" );
-
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_window_set_role( GTK_WINDOW( pwMessage ), "messages" );
+    gtk_window_set_type_hint( GTK_WINDOW( pwMessage ),
+			      GDK_WINDOW_TYPE_HINT_UTILITY );
+#endif
+    
     setWindowGeometry ( pwMessage, &awg[ WINDOW_MESSAGE ] );
 
     gtk_container_add( GTK_CONTAINER( pwMessage ),
@@ -945,11 +950,13 @@ static void CreateAnnotationWindow( void ) {
 
     pwAnnotation = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
-
     gtk_window_set_title( GTK_WINDOW( pwAnnotation ),
 			  _("GNU Backgammon - Annotation") );
-    gtk_window_set_wmclass( GTK_WINDOW( pwAnnotation ), "annotation",
-			    "Annotation" );
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_window_set_role( GTK_WINDOW( pwAnnotation ), "annotation" );
+    gtk_window_set_type_hint( GTK_WINDOW( pwAnnotation ),
+			      GDK_WINDOW_TYPE_HINT_UTILITY );
+#endif
 
     setWindowGeometry ( pwAnnotation, &awg[ WINDOW_ANNOTATION ] );
 
@@ -1005,8 +1012,11 @@ static void CreateGameWindow( void ) {
     
     gtk_window_set_title( GTK_WINDOW( pwGame ), _("GNU Backgammon - "
 			  "Game record") );
-    gtk_window_set_wmclass( GTK_WINDOW( pwGame ), "gamerecord",
-			    "GameRecord" );
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_window_set_role( GTK_WINDOW( pwGame ), "game record" );
+    gtk_window_set_type_hint( GTK_WINDOW( pwGame ),
+			      GDK_WINDOW_TYPE_HINT_UTILITY );
+#endif
 
     setWindowGeometry ( pwGame, &awg[ WINDOW_GAME ] );
     
@@ -2440,7 +2450,11 @@ extern int InitGTK( int *argc, char ***argv ) {
     ptt = gtk_tooltips_new();
     
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
-
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_window_set_role( GTK_WINDOW( pwMain ), "main" );
+    gtk_window_set_type_hint( GTK_WINDOW( pwMain ),
+			      GDK_WINDOW_TYPE_HINT_NORMAL );
+#endif
     /* NB: the following call to gtk_object_set_user_data is needed
        to work around a nasty bug in GTK+ (the problem is that calls to
        gtk_object_get_user_data relies on a side effect from a previous
@@ -6929,8 +6943,11 @@ extern void GTKBearoffProgress( int i ) {
 
     if( !pwDialog ) {
 	pwDialog = CreateDialog( _("GNU Backgammon"), DT_INFO, NULL, NULL );
-	gtk_window_set_wmclass( GTK_WINDOW( pwDialog ), "progress",
-				"Progress" );
+#if GTK_CHECK_VERSION(2,0,0)
+	gtk_window_set_role( GTK_WINDOW( pwDialog ), "progress" );
+	gtk_window_set_type_hint( GTK_WINDOW( pwAnnotation ),
+			      GDK_WINDOW_TYPE_HINT_DIALOG );
+#endif
 	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
 	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			    GTK_SIGNAL_FUNC( GTKBearoffProgressCancel ),
@@ -7919,7 +7936,7 @@ typedef struct _optionswidget {
 
   GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips,
       *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide, *pwBeepIllegal,
-      *pwHigherDieFirst;
+      *pwHigherDieFirst, *pwSetWindowPos;
   GtkAdjustment *padjSpeed;
 } optionswidget;   
 
@@ -8398,6 +8415,20 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "might want to turn this off when playing games "
 			    "between computer players, to speed things "
 			    "up."), NULL );
+
+    pow->pwSetWindowPos = gtk_check_button_new_with_label(
+	_("Restore window positions") );
+    gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwSetWindowPos,
+			FALSE, FALSE, 0);
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwSetWindowPos ),
+				  fGUISetWindowPos );
+    gtk_tooltips_set_tip( ptt, pow->pwSetWindowPos,
+			  _("Restore the previous size and position when "
+			    "recreating windows.  This is really the job "
+			    "of the session manager and window manager, "
+			    "but since some platforms have poor or missing "
+			    "window managers, GNU Backgammon tries to "
+			    "do the best it can."), NULL );
     
     pow->pwOutputMWC = gtk_check_button_new_with_label (
 	_("Match equity as MWC"));
@@ -9033,6 +9064,8 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE( pow->pwBeepIllegal, fGUIBeep, "set gui beep %s" )
   CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst,
 	       "set gui highdiefirst %s" )
+  CHECKUPDATE( pow->pwSetWindowPos, fGUISetWindowPos,
+	       "set gui windowpositions %s" )
 
   if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAnimateNone ) )
       && animGUI != ANIMATE_NONE )
