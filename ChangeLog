@@ -1,3 +1,8 @@
+Wed Aug 27 14:04:44 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubg.c - make szLang writeable, ensure LANG env setting
+	  is not a local variable
+
 Wed Aug 27 10:11:28 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* board3d/inc3d.h - remove doubled directory separator
