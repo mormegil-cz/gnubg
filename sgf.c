@@ -291,6 +291,7 @@ static void RestoreDoubleAnalysis( property *pp, evaltype *pet,
 
     default:
 	/* FIXME */
+	break;
     }
 }
 
@@ -348,6 +349,7 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	    
 	default:
 	    /* FIXME */
+	    break;
 	}
     }
 }

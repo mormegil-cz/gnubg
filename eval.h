@@ -149,13 +149,6 @@ typedef enum _positionclass {
 
 #define CLASS_PERFECT CLASS_BEAROFF2
 				      
-typedef struct _redevaldata {
-  float arOutput[ NUM_OUTPUTS ];
-  float rScore;
-  float rWeight;
-  unsigned char auch[ 10 ];
-} RedEvalData;
-
 extern int 
 EvalInitialise( char *szWeights, char *szWeightsBinary,
                 char *szDatabase, char *szDir, int nSize, int fProgress );

@@ -62,7 +62,6 @@
 
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
-static int CompareRedEvalData( const void *p0, const void *p1 );
 
 static int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
@@ -2209,6 +2208,7 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
   /* sanity check will take care of rest */
 }
 
+#if 0
 static void EvalBPG( int anBoard[ 2 ][ 25 ], float arOutput[] )
 {
   float arInput[ NUM_INPUTS ];
@@ -2220,6 +2220,7 @@ static void EvalBPG( int anBoard[ 2 ][ 25 ], float arOutput[] )
   NeuralNetEvaluate(nnBPG.cInput != 0 ? &nnBPG : &nnContact,
 		    arInput, arOutput);
 }
+#endif
 
 static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     
@@ -2309,15 +2310,6 @@ static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 static classevalfunc acef[ N_CLASSES ] = {
     EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalContact
 };
-
-static int CompareRedEvalData( const void *p0, const void *p1 ) {
-
-  return 
-    ( ( ( RedEvalData * ) p0 ) -> rScore ) <
-    ( ( ( RedEvalData * ) p1 ) -> rScore );
-  
-
-}
 
 static float Noise( evalcontext *pec, int anBoard[ 2 ][ 25 ], int iOutput ) {
 
@@ -3113,7 +3105,6 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], cubeinfo *pci,
 			      evalcontext *pec, int nPlies ) {
   int i, j, iPly;
-  positionclass pc;
   movelist ml;
 #if __GNUC__
   move amCandidates[ pec->nSearchCandidates ];
@@ -3147,7 +3138,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
     ml.iMoveBest = 0;
   else {
     /* choice of moves */
-    if( ( pc = ScoreMoves( &ml, pci, pec, 0 ) ) < 0 )
+    if( ScoreMoves( &ml, pci, pec, 0 ) < 0 )
       return -1;
 
     for( iPly = 0; iPly < nPlies; iPly++ ) {

@@ -313,7 +313,7 @@ command acAnalyse[] = {
       NULL },
     { "value", CommandSetCubeValue, "Fix what the cube stake has been set to",
       szVALUE, NULL },
-    { NULL, NULL, NULL, NULL }
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
       "Show match equities as percentages (on) or probabilities (off)",
@@ -325,7 +325,7 @@ command acAnalyse[] = {
     { "winpc", CommandSetOutputWinPC,
       "Show winning chances as percentages (on) or probabilities (off)",
       szONOFF, NULL },
-    { NULL, NULL, NULL, NULL }
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
       "congruential) generator", szOPTSEED, NULL },

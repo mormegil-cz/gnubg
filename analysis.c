@@ -70,7 +70,7 @@ static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 }
 
 static void
-AnalyzeGame ( list *plGame, int iGame ) {
+AnalyzeGame ( list *plGame ) {
 
     list *pl;
     moverecord *pmr;
@@ -404,7 +404,7 @@ extern void CommandAnalyseGame( char *sz ) {
     
     ProgressStart( "Analysing game..." );
     
-    AnalyzeGame( plGame, 0 );
+    AnalyzeGame( plGame );
 
     ProgressEnd();
 }
@@ -421,7 +421,7 @@ extern void CommandAnalyseMatch( char *sz ) {
   ProgressStart( "Analysing match..." );
   
   for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
-    AnalyzeGame( pl->p, i );
+    AnalyzeGame( pl->p );
 
   ProgressEnd();
 }

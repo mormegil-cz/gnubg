@@ -1918,9 +1918,14 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
     
 #define BUFX( y, x, i ) buf_x[ ( (y) * size + (x) ) * 4 + (i) ]
 #define BUFO( y, x, i ) buf_o[ ( (y) * size + (x) ) * 4 + (i) ]
-    
-    buf_x = ( fKey ? bd->rgba_x_key : bd->rgba_x ) = malloc( size * size * 4 );
-    buf_o = ( fKey ? bd->rgba_o_key : bd->rgba_o ) = malloc( size * size * 4 );
+
+    if( fKey ) {
+	buf_x = bd->rgba_x_key = malloc( size * size * 4 );
+	buf_o = bd->rgba_o_key = malloc( size * size * 4 );
+    } else {
+	buf_x = bd->rgba_x = malloc( size * size * 4 );
+	buf_o = bd->rgba_o = malloc( size * size * 4 );
+    }
     
     if( bd->translucent ) {
 	if( !fKey ) {
