@@ -1,3 +1,24 @@
+Wed Nov  1 10:08:44 2000  Gary Wong  <gtw@research.att.com>
+
+	* guile.c (cube_info, cube_info_match, cube_info_money): New functions.
+
+	* play.c (CommandRedouble): Don't increase the cube value -- that's
+	already done by ApplyMoveRecord().
+	(CommandTake): Show message _before_ calling ApplyMoveRecord, so
+	that fTurn is still correct.
+
+	* gnubg.c (real_main): Don't treat an empty argument as a filename
+	to load.
+
+	* gnubgtest: Fix --datadir parameter.
+
+	* eval.c (SetCubeInfoMoney, SetCubeInfoMatch): New functions.
+
+Tue Oct 31 10:29:15 2000  Gary Wong  <gtw@research.att.com>
+
+	* guile.c (board_to_position_id, position_id_to_board,
+	rollout_position): New functions.
+
 Mon Oct 30 11:34:16 2000  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.scm: New file.

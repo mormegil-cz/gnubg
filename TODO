@@ -77,6 +77,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Define Scheme "port"s for the gnubg output() functions.
 ** Automatically load "gnubg.scm" on startup.  Put gnubg.scm somewhere
   during "make install".
+** Defer and allow Guile interrupts at appropriate places in guile.c.
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
@@ -165,6 +166,11 @@ duplication of effort and to make sure our changes merge easily.
   to add an external interface to change them.)
 ** Cosmetic problems when a "set board" is shown in the game list (the
   wrong cell is highlighted).
+** When using guile and guile isn't using readline, X events are not
+  handled while in the REPL.  When using guile and guile _is_ using
+  readline, its readline state and ours get completely confused...
+** Not everything pays attention to MAX_CUBE.
+** Loading can't be interrupted (e.g. "load game /dev/zero" hangs).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -192,6 +198,7 @@ duplication of effort and to make sure our changes merge easily.
   having standalone lib (event) and ext packages more difficult, but that
   probably isn't critical any more.
 ** Add optional time rules, for tournament play when clocks are used.
+** Add more tests to "make check"; beavers, loading and saving.
 
 
 Local Variables:
