@@ -1232,7 +1232,7 @@ PyDoubleAnalysis(const evalsetup* pes,
 }
 
 static PyObject*
-PyGameStats(const statcontext* sc, const int nMatchTo, const int fIsMatch )
+PyGameStats(const statcontext* sc, const int fIsMatch, const int nMatchTo)
 {
   PyObject* p[2];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];

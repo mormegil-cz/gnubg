@@ -1,3 +1,8 @@
+Sun Aug 01 00:40:47 UTC  2004   Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubgmodule.c - calls to PythonGame had arguments in different
+	  order, so database ratings were calculated on 1 point matches
+	
 Fri Jul 30 23:08:58 CEST 2004   Oystein Johansen  <oystein@gnubg.org>
 
 	* gtkgame.c (PythonShell): starting "idle" differs between platforms.
