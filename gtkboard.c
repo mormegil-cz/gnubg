@@ -3664,6 +3664,28 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
     float x, y, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
 	x_norm, y_norm, z_norm;
 
+    gdouble aarDiceColour[ 2 ][ 4 ];
+    gfloat arDiceCoefficient[ 2 ];
+    gfloat arDiceExponent[ 2 ];
+
+    for ( i = 0; i < 2; ++i ) {
+
+      if ( bd->afDieColor[ i ] ) {
+        /* die same color as chequers */
+        memcpy ( aarDiceColour[ i ], bd->aarColour[ i ], 
+                 4 * sizeof ( gdouble ) );
+        arDiceCoefficient[ i ] = bd->arCoefficient[ i ];
+        arDiceExponent[ i ] = bd->arExponent[ i ];
+      }
+      else {
+        /* user color */
+        memcpy ( aarDiceColour[ i ], bd->aarDiceColour[ i ], 
+                 4 * sizeof ( gdouble ) );
+        arDiceCoefficient[ i ] = bd->arDiceCoefficient[ i ];
+        arDiceExponent[ i ] = bd->arDiceExponent[ i ];
+      }
+    }
+
     /* We need to use malloc() for this, since Xlib will free() it. */
     buf_mask = malloc( ( 7 * bd->board_size ) * ( 7 * bd->board_size + 7 )
 		       >> 3 );
@@ -3695,11 +3717,11 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			in++;
 			diffuse += bd->arLight[ 2 ] * 0.8 + 0.2;
 			specular_x += pow( bd->arLight[ 2 ],
-					   bd->arDiceExponent[ 0 ] ) *
-			    bd->arDiceCoefficient[ 0 ];
+					   arDiceExponent[ 0 ] ) *
+			    arDiceCoefficient[ 0 ];
 			specular_o += pow( bd->arLight[ 2 ],
-					   bd->arDiceExponent[ 1 ] ) *
-			    bd->arDiceCoefficient[ 1 ];
+					   arDiceExponent[ 1 ] ) *
+			    arDiceCoefficient[ 1 ];
 		    } else {
 			if( fabs( x ) < 6.0 / 7.0 ) {
 			    /* top/bottom edge */
@@ -3730,11 +3752,11 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			    cos_theta = 2 * z_norm * cos_theta -
 				bd->arLight[ 2 ];
 			    specular_x += pow( cos_theta,
-					       bd->arDiceExponent[ 0 ] ) *
-				bd->arDiceCoefficient[ 0 ];
+					       arDiceExponent[ 0 ] ) *
+				arDiceCoefficient[ 0 ];
 			    specular_o += pow( cos_theta,
-					       bd->arDiceExponent[ 1 ] ) *
-				bd->arDiceCoefficient[ 1 ];
+					       arDiceExponent[ 1 ] ) *
+				arDiceCoefficient[ 1 ];
 			}
 		    }
 		missed:		    
@@ -3753,28 +3775,28 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 		gdk_image_put_pixel( img, ix, iy, MASK_VISIBLE );
 
 		buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse *
-						  bd->aarDiceColour[ 0 ][ 0 ] +
+						  aarDiceColour[ 0 ][ 0 ] +
 						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_x[ iy ][ ix ][ 1 ] = clamp( ( diffuse *
-						  bd->aarDiceColour[ 0 ][ 1 ] +
+						  aarDiceColour[ 0 ][ 1 ] +
 						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_x[ iy ][ ix ][ 2 ] = clamp( ( diffuse *
-						  bd->aarDiceColour[ 0 ][ 2 ] +
+						  aarDiceColour[ 0 ][ 2 ] +
 						  specular_x )
 						* 64.0 + ( 4 - in ) * 32.0 );
 
 		buf_o[ iy ][ ix ][ 0 ] = clamp( ( diffuse *
-						  bd->aarDiceColour[ 1 ][ 0 ] +
+						  aarDiceColour[ 1 ][ 0 ] +
 						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_o[ iy ][ ix ][ 1 ] = clamp( ( diffuse *
-						  bd->aarDiceColour[ 1 ][ 1 ] +
+						  aarDiceColour[ 1 ][ 1 ] +
 						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 		buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse *
-						  bd->aarDiceColour[ 1 ][ 2 ] +
+						  aarDiceColour[ 1 ][ 2 ] +
 						  specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 	    }
@@ -3806,28 +3828,55 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
     float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
 	dice_top[ 2 ][ 3 ];
 
+    gdouble aarDiceColour[ 2 ][ 4 ];
+    gfloat arDiceCoefficient[ 2 ];
+    gfloat arDiceExponent[ 2 ];
+    int i;
+
+    /* setup colors */
+
+    for ( i = 0; i < 2; ++i ) {
+
+      if ( bd->afDieColor[ i ] ) {
+        /* die same color as chequers */
+        memcpy ( aarDiceColour[ i ], bd->aarColour[ i ], 
+                 4 * sizeof ( gdouble ) );
+        arDiceCoefficient[ i ] = bd->arCoefficient[ i ];
+        arDiceExponent[ i ] = bd->arExponent[ i ];
+      }
+      else {
+        /* user color */
+        memcpy ( aarDiceColour[ i ], bd->aarDiceColour[ i ], 
+                 4 * sizeof ( gdouble ) );
+        arDiceCoefficient[ i ] = bd->arDiceCoefficient[ i ];
+        arDiceExponent[ i ] = bd->arDiceExponent[ i ];
+      }
+    }
+
+    /* draw pips */
+
     bd->pm_x_pip = gdk_pixmap_new( widget->window, bd->board_size,
 				   bd->board_size, -1 );
     bd->pm_o_pip = gdk_pixmap_new( widget->window, bd->board_size,
 				   bd->board_size, -1 );
 
     diffuse = bd->arLight[ 2 ] * 0.8 + 0.2;
-    specular_x = pow( bd->arLight[ 2 ], bd->arDiceExponent[ 0 ] ) *
-	bd->arDiceCoefficient[ 0 ];
-    specular_o = pow( bd->arLight[ 2 ], bd->arDiceExponent[ 1 ] ) *
-	bd->arDiceCoefficient[ 1 ];
+    specular_x = pow( bd->arLight[ 2 ], arDiceExponent[ 0 ] ) *
+	arDiceCoefficient[ 0 ];
+    specular_o = pow( bd->arLight[ 2 ], arDiceExponent[ 1 ] ) *
+	arDiceCoefficient[ 1 ];
     dice_top[ 0 ][ 0 ] = 
-      ( diffuse * bd->aarDiceColour[ 0 ][ 0 ] + specular_x ) * 64.0;
+      ( diffuse * aarDiceColour[ 0 ][ 0 ] + specular_x ) * 64.0;
     dice_top[ 0 ][ 1 ] = 
-      ( diffuse * bd->aarDiceColour[ 0 ][ 1 ] + specular_x ) * 64.0;
+      ( diffuse * aarDiceColour[ 0 ][ 1 ] + specular_x ) * 64.0;
     dice_top[ 0 ][ 2 ] = 
-      ( diffuse * bd->aarDiceColour[ 0 ][ 2 ] + specular_x ) * 64.0;
+      ( diffuse * aarDiceColour[ 0 ][ 2 ] + specular_x ) * 64.0;
     dice_top[ 1 ][ 0 ] = 
-      ( diffuse * bd->aarDiceColour[ 1 ][ 0 ] + specular_o ) * 64.0;
+      ( diffuse * aarDiceColour[ 1 ][ 0 ] + specular_o ) * 64.0;
     dice_top[ 1 ][ 1 ] = 
-      ( diffuse * bd->aarDiceColour[ 1 ][ 1 ] + specular_o ) * 64.0;
+      ( diffuse * aarDiceColour[ 1 ][ 1 ] + specular_o ) * 64.0;
     dice_top[ 1 ][ 2 ] = 
-      ( diffuse * bd->aarDiceColour[ 1 ][ 2 ] + specular_o ) * 64.0;
+      ( diffuse * aarDiceColour[ 1 ][ 2 ] + specular_o ) * 64.0;
 
     for( iy = 0, y_loop = -1.0; iy < bd->board_size; iy++ ) {
 	for( ix = 0, x_loop = -1.0; ix < bd->board_size; ix++ ) {
@@ -3851,11 +3900,11 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
 			    cos_theta = 2 * z / 5 * cos_theta -
 				bd->arLight[ 2 ];
 			    specular_x += pow( cos_theta,
-					       bd->arDiceExponent[ 0 ] ) *
-				bd->arDiceCoefficient[ 0 ];
+					       arDiceExponent[ 0 ] ) *
+				arDiceCoefficient[ 0 ];
 			    specular_o += pow( cos_theta,
-					       bd->arDiceExponent[ 1 ] ) *
-				bd->arDiceCoefficient[ 1 ];
+					       arDiceExponent[ 1 ] ) *
+				arDiceCoefficient[ 1 ];
 			}
 		    }
 		    x += 1.0 / ( bd->board_size );
@@ -3980,12 +4029,15 @@ static void board_draw_cube( GtkWidget *widget, BoardData *bd ) {
 	    } else {
 		gdk_image_put_pixel( img, ix, iy, MASK_VISIBLE );
 
-		buf[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.9 + specular ) *
-					      64.0 + ( 4 - in ) * 32.0 );
-		buf[ iy ][ ix ][ 1 ] = clamp( ( diffuse * 0.9 + specular ) *
-					      64.0 + ( 4 - in ) * 32.0 );
-		buf[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.9 + specular ) *
-					      64.0 + ( 4 - in ) * 32.0 );
+		buf[ iy ][ ix ][ 0 ] = 
+                  clamp( ( diffuse * bd->arCubeColour[ 0 ] + specular ) * 64.0
+                         + ( 4 - in ) * 32.0 );
+		buf[ iy ][ ix ][ 1 ] = 
+                  clamp( ( diffuse * bd->arCubeColour[ 1 ] + specular ) * 64.0
+                         + ( 4 - in ) * 32.0 );
+		buf[ iy ][ ix ][ 2 ] = 
+                  clamp( ( diffuse * bd->arCubeColour[ 2 ] + specular ) * 64.0 
+                         + ( 4 - in ) * 32.0 );
 	    }
 	    x_loop += 2.0 / ( 8 * bd->board_size );
 	}
@@ -4513,21 +4565,27 @@ static void board_init( Board *board ) {
     bd->arDiceCoefficient[ 1 ] = 1.0;
     bd->arDiceExponent[ 1 ] = 30.0;
     bd->aarDiceColour[ 0 ][ 0 ] = 1.0;
-    bd->aarDiceColour[ 0 ][ 1 ] = 0.40;
-    bd->aarDiceColour[ 0 ][ 2 ] = 0.00;
+    bd->aarDiceColour[ 0 ][ 1 ] = 0.2;
+    bd->aarDiceColour[ 0 ][ 2 ] = 0.2;
     bd->aarDiceColour[ 0 ][ 3 ] = 0.9;
-    bd->aarDiceColour[ 1 ][ 0 ] = 0.15;
-    bd->aarDiceColour[ 1 ][ 1 ] = 0.45;
-    bd->aarDiceColour[ 1 ][ 2 ] = 0.00;
+    bd->aarDiceColour[ 1 ][ 0 ] = 0.05;
+    bd->aarDiceColour[ 1 ][ 1 ] = 0.05;
+    bd->aarDiceColour[ 1 ][ 2 ] = 0.1;
     bd->aarDiceColour[ 1 ][ 3 ] = 0.5;
-    bd->aarDiceDotColour[ 0 ][ 0 ] = 1.0;
-    bd->aarDiceDotColour[ 0 ][ 1 ] = 0.00;
-    bd->aarDiceDotColour[ 0 ][ 2 ] = 0.00;
+    bd->afDieColor[ 0 ] = TRUE;
+    bd->afDieColor[ 1 ] = TRUE;
+    bd->aarDiceDotColour[ 0 ][ 0 ] = 0.7;
+    bd->aarDiceDotColour[ 0 ][ 1 ] = 0.7;
+    bd->aarDiceDotColour[ 0 ][ 2 ] = 0.7;
     bd->aarDiceDotColour[ 0 ][ 3 ] = 0.0; /* unused */
-    bd->aarDiceDotColour[ 1 ][ 0 ] = 0.00;
-    bd->aarDiceDotColour[ 1 ][ 1 ] = 1.00;
-    bd->aarDiceDotColour[ 1 ][ 2 ] = 0.00;
+    bd->aarDiceDotColour[ 1 ][ 0 ] = 0.7;
+    bd->aarDiceDotColour[ 1 ][ 1 ] = 0.7;
+    bd->aarDiceDotColour[ 1 ][ 2 ] = 0.7;
     bd->aarDiceDotColour[ 1 ][ 3 ] = 0.0; /*unused */
+    bd->arCubeColour[ 0 ] = 0.90;
+    bd->arCubeColour[ 1 ] = 0.90;
+    bd->arCubeColour[ 2 ] = 0.90;
+    bd->arCubeColour[ 3 ] = 0.0; /*unused */
     bd->aanBoardColour[ 0 ][ 0 ] = 0x30;
     bd->aanBoardColour[ 0 ][ 1 ] = 0x60;
     bd->aanBoardColour[ 0 ][ 2 ] = 0x30;
@@ -4557,6 +4615,7 @@ static void board_init( Board *board ) {
     bd->gc_copy = gtk_gc_get( vis->depth, cmap, &gcval, 0 );
 
     gcval.foreground.pixel = gdk_rgb_xpixel_from_rgb( 0x000080 );
+    // ^^^ use gdk_get_color  and gdk_gc_set_foreground....
     bd->gc_cube = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND );
 
     bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;    

@@ -52,7 +52,10 @@ static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
     *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges;
 static GtkWidget *apwDiceColour[ 2 ];
+static GtkWidget *pwCubeColour;
 static GtkWidget *apwDiceDotColour[ 2 ];
+static GtkWidget *apwDieColor[ 2 ];
+static GtkWidget *apwDiceColorBox[ 2 ];
 static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
     fHigherDieFirst, fWood, fHinges;
 static animation anim;
@@ -107,21 +110,44 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     return pw;
 }
 
+
+static void
+DieColorChanged ( GtkWidget *pw, GtkWidget *pwBox ) {
+
+  int f = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( pw ) );
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwBox ), ! f );
+
+}
+
 static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 
     GtkWidget *pw, *pwhbox;
-    GtkWidget *pwFrame;
     GtkWidget *pwvbox;
+    GtkWidget *pwFrame;
 
     pw = gtk_vbox_new( FALSE, 4 );
 
     /* frame with color selections for the dice */
 
     pwFrame = gtk_frame_new ( _("Dice color") );
-    gtk_box_pack_start ( GTK_BOX ( pw ), pwFrame, FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pw ), pwFrame, 
+                         FALSE, FALSE, 0 );
 
     pwvbox = gtk_vbox_new ( FALSE, 0 );
     gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
+
+    apwDieColor[ f ] = 
+      gtk_check_button_new_with_label ( _("Die color same "
+                                          "as chequer color" ) );
+    gtk_box_pack_start( GTK_BOX( pwvbox ),
+			apwDieColor[ f ], FALSE, FALSE, 0 );
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColor[ f ] ),
+                                   bd->afDieColor[ f ] );
+
+
+    apwDiceColorBox[ f ] = gtk_vbox_new ( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwvbox ),
+			apwDiceColorBox[ f ], FALSE, FALSE, 0 );
 
     /*
       refractive index not used for dice
@@ -134,14 +160,15 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     apadjDiceExponent[ f ] = GTK_ADJUSTMENT( gtk_adjustment_new(
 	bd->arDiceExponent[ f ], 1.0, 100.0, 1.0, 10.0, 0.0 ) );
     
-    gtk_box_pack_start( GTK_BOX( pwvbox ),
+    gtk_box_pack_start( GTK_BOX( apwDiceColorBox[ f ] ),
 			apwDiceColour[ f ] = gtk_color_selection_new(),
 			FALSE, FALSE, 0 );
     gtk_color_selection_set_has_opacity_control(
 	GTK_COLOR_SELECTION( apwDiceColour[ f ] ), FALSE );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwDiceColour[ f ] ),
 				   bd->aarDiceColour[ f ] );
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+    gtk_box_pack_start( GTK_BOX( apwDiceColorBox[ f ] ), 
+                        pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
     /*
     gtk_box_pack_start( GTK_BOX( pwhbox ),
@@ -151,7 +178,8 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 		      TRUE, 4 );
     */
 
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+    gtk_box_pack_start( GTK_BOX( apwDiceColorBox[ f ] ), 
+                        pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Dull") ), FALSE,
 			FALSE, 4 );
@@ -160,14 +188,20 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Shiny") ), FALSE,
 			FALSE, 4 );
     
-    gtk_box_pack_start( GTK_BOX( pwvbox ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+    gtk_box_pack_start( GTK_BOX( apwDiceColorBox[ f ] ), 
+                        pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Diffuse") ), FALSE,
+    gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                        gtk_label_new( _("Diffuse") ), FALSE,
 			FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
 	apadjDiceExponent[ f ] ), TRUE, TRUE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Specular") ), FALSE,
+    gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                        gtk_label_new( _("Specular") ), FALSE,
 			FALSE, 4 );
+
+    gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColorBox[ f ] ),
+                               ! bd->afDieColor[ f ] );
 
     /* color of dot on dice */
     
@@ -178,10 +212,40 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 			apwDiceDotColour[ f ] = gtk_color_selection_new() );
     gtk_color_selection_set_has_opacity_control(
 	GTK_COLOR_SELECTION( apwDiceDotColour[ f ] ), FALSE );
-    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwDiceDotColour[ f ] ),
-				   bd->aarDiceDotColour[ f ] );
+    gtk_color_selection_set_color( 
+        GTK_COLOR_SELECTION( apwDiceDotColour[ f ] ),
+        bd->aarDiceDotColour[ f ] );
+
+    /* signals */
+
+    gtk_signal_connect ( GTK_OBJECT( apwDieColor[ f ] ), "toggled",
+                         GTK_SIGNAL_FUNC( DieColorChanged ), 
+                         apwDiceColorBox[ f ] );
+
+
 
     return pw;
+}
+
+static GtkWidget *CubePrefs( BoardData *bd ) {
+
+
+    GtkWidget *pw;
+
+    pw = gtk_vbox_new( FALSE, 4 );
+
+    /* frame with cube color */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         pwCubeColour = gtk_color_selection_new(),
+                         FALSE, FALSE, 0 );
+    gtk_color_selection_set_has_opacity_control(
+	GTK_COLOR_SELECTION( pwCubeColour ), FALSE );
+    gtk_color_selection_set_color( GTK_COLOR_SELECTION( pwCubeColour ),
+				   bd->arCubeColour );
+
+    return pw;
+
 }
 
 static GtkWidget *PointPrefs( BoardData *bd, int f ) {
@@ -586,6 +650,24 @@ static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
 	bd->aarDiceDotColour[ j ][ 3 ] = ar[ 3 ];
     }
 
+    /* dice color same as chequer color */
+
+    for ( i = 0; i < 2; ++i )
+      bd->afDieColor[ i ] = 
+        gtk_toggle_button_get_active ( 
+           GTK_TOGGLE_BUTTON ( apwDieColor[ i ] ) );
+
+    /* cube color */
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( pwCubeColour ), 
+                                   ar );
+    for( i = 0; i < 3; i++ )
+	bd->arCubeColour[ i ] = ar[ i ];
+    if( fTranslucent )
+	bd->arCubeColour[ 3 ] = ar[ 3 ];
+
+    /* board color */
+
     gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwBoard[ 0 ] ),
 				   ar );
     for( i = 0; i < 3; i++ )
@@ -695,6 +777,9 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 			      ChequerPrefs( bd, 1 ),
 			      gtk_label_new( _("Chequers (1)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      CubePrefs( bd ),
+			      gtk_label_new( _("Cube") ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      DicePrefs( bd, 0 ),
 			      gtk_label_new( _("Dice (0)") ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
@@ -737,6 +822,8 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
       gtk_color_selection_set_has_opacity_control(
          GTK_COLOR_SELECTION( apwDiceDotColour[ i ] ), FALSE );
     }
+    gtk_color_selection_set_has_opacity_control(
+         GTK_COLOR_SELECTION( pwCubeColour ), FALSE );
 
 
 
@@ -802,9 +889,9 @@ static int SetColourARSS( gdouble aarColour[ 2 ][ 4 ],
 	*pch++ = 0;
 
     if( gdk_color_parse( sz, &col ) ) {
-	aarColour[ i ][ 0 ] = col.red / 65535.0f;
-	aarColour[ i ][ 1 ] = col.green / 65535.0f;
-	aarColour[ i ][ 2 ] = col.blue / 65535.0f;
+	aarColour[ i ][ 0 ] = col.red / ( 256.0f * 255.0f );
+	aarColour[ i ][ 1 ] = col.green / ( 256.0f * 255.0f );
+	aarColour[ i ][ 2 ] = col.blue / ( 256.0f * 255.0f );
 
         PushLocale ( "C" );
 
@@ -852,11 +939,12 @@ static int SetColourARSS( gdouble aarColour[ 2 ][ 4 ],
     return -1;
 }
 
-/* Set colour, shine, specular. */
-static int SetColourSS( gdouble aarColour[ 2 ][ 4 ], 
-                        gfloat arCoefficient[ 2 ],
-                        gfloat arExponent[ 2 ],
-                        char *sz, int i ) {
+/* Set colour, shine, specular, flag. */
+static int SetColourSSF( gdouble aarColour[ 2 ][ 4 ], 
+                         gfloat arCoefficient[ 2 ],
+                         gfloat arExponent[ 2 ],
+                         int afDieColor[ 2 ],
+                         char *sz, int i ) {
 
     char *pch;
     GdkColor col;
@@ -865,9 +953,9 @@ static int SetColourSS( gdouble aarColour[ 2 ][ 4 ],
 	*pch++ = 0;
 
     if( gdk_color_parse( sz, &col ) ) {
-	aarColour[ i ][ 0 ] = col.red / 65535.0f;
-	aarColour[ i ][ 1 ] = col.green / 65535.0f;
-	aarColour[ i ][ 2 ] = col.blue / 65535.0f;
+	aarColour[ i ][ 0 ] = col.red / ( 256.0f * 255.0f );
+	aarColour[ i ][ 1 ] = col.green / ( 256.0f * 255.0f );
+	aarColour[ i ][ 2 ] = col.blue / ( 256.0f * 255.0f );
 
         PushLocale ( "C" );
 
@@ -889,6 +977,15 @@ static int SetColourSS( gdouble aarColour[ 2 ][ 4 ],
 	} else
 	    arExponent[ i ] = 10.0f;	
 
+	if( pch ) {
+            /* die color same as chequer color */
+            afDieColor[ i ] = ( toupper ( *pch ) == 'Y' );
+	    
+	    if( ( pch = strchr( pch, ';' ) ) )
+		*pch++ = 0;
+	} else
+            afDieColor[ i ] = TRUE;
+
         PopLocale ();
 
 	return 0;
@@ -898,8 +995,7 @@ static int SetColourSS( gdouble aarColour[ 2 ][ 4 ],
 }
 
 /* Set colour (with floats) */
-static int SetColourX( gdouble aarColour[ 2 ][ 4 ], 
-                        char *sz, int i ) {
+static int SetColourX( gdouble arColour[ 4 ], char *sz ) {
 
     char *pch;
     GdkColor col;
@@ -908,9 +1004,10 @@ static int SetColourX( gdouble aarColour[ 2 ][ 4 ],
 	*pch++ = 0;
 
     if( gdk_color_parse( sz, &col ) ) {
-	aarColour[ i ][ 0 ] = col.red / 65535.0f;
-	aarColour[ i ][ 1 ] = col.green / 65535.0f;
-	aarColour[ i ][ 2 ] = col.blue / 65535.0f;
+
+	arColour[ 0 ] = col.red / ( 256.0f * 255.0f );
+	arColour[ 1 ] = col.green / ( 256.0f * 255.0f );
+	arColour[ 2 ] = col.blue / ( 256.0f * 255.0f );
 	return 0;
     }
 
@@ -957,6 +1054,9 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
     else if( !g_strncasecmp( szParam, "border", c ) )
 	/* border=colour */
 	fValueError = SetColour( szValue, bd->aanBoardColour[ 1 ] );
+    else if( !g_strncasecmp( szParam, "cube", c ) )
+	/* cube=colour */
+        fValueError = SetColourX( bd->arCubeColour, szValue );
     else if( !g_strncasecmp( szParam, "translucent", c ) )
 	/* translucent=bool */
 	bd->translucent = toupper( *szValue ) == 'Y';
@@ -1028,18 +1128,20 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
              ( !g_strncasecmp( szParam, "dice", c - 1 ) ||
                !g_strncasecmp( szParam, "dice", c - 1 ) ) &&
 	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
-	/* dice=colour;shine;spec */
-	fValueError = SetColourSS( bd->aarDiceColour, 
-                                   bd->arDiceCoefficient,
-                                   bd->arDiceExponent,
-                                   szValue, szParam[ c - 1 ] - '0' );
+	/* dice=colour;shine;spec;flag */
+        fValueError = SetColourSSF( bd->aarDiceColour, 
+                                    bd->arDiceCoefficient,
+                                    bd->arDiceExponent,
+                                    bd->afDieColor,
+                                    szValue, szParam[ c - 1 ] - '0' );
     else if( c > 1 &&
              ( !g_strncasecmp( szParam, "dot", c - 1 ) ||
                !g_strncasecmp( szParam, "dot", c - 1 ) ) &&
 	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
         /* dot=colour */
-	fValueError = SetColourX( bd->aarDiceDotColour, 
-                                  szValue, szParam[ c - 1 ] - '0' );
+	fValueError = 
+          SetColourX( bd->aarDiceDotColour [ szParam[ c - 1 ] - '0' ],
+                      szValue );
     else if( c > 1 && !g_strncasecmp( szParam, "points", c - 1 ) &&
 	     ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
 	/* pointsn=colour;speckle */
@@ -1054,6 +1156,7 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
     if( fValueError )
 	outputf( _("`%s' is not a legal value for parameter `%s'.\n"), szValue,
 		 szParam );
+
 }
 
 extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
@@ -1078,10 +1181,11 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     "animate=%s speed=%d light=%0.0f;%0.0f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
-	     "dice0=#%02X%02X%02X;%0.2f;%0.2f "
-	     "dice1=#%02X%02X%02X;%0.2f;%0.2f "
+	     "dice0=#%02X%02X%02X;%0.2f;%0.2f;%c "
+	     "dice1=#%02X%02X%02X;%0.2f;%0.2f;%c "
 	     "dot0=#%02X%02X%02X "
 	     "dot1=#%02X%02X%02X "
+	     "cube=#%02X%02X%02X "
 	     "points0=#%02X%02X%02X;%0.2f "
 	     "points1=#%02X%02X%02X;%0.2f",
              /* board */
@@ -1118,11 +1222,13 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     (int) ( bd->aarDiceColour[ 0 ][ 1 ] * 0xFF ), 
 	     (int) ( bd->aarDiceColour[ 0 ][ 2 ] * 0xFF ), 
              bd->arDiceCoefficient[ 0 ], bd->arDiceExponent[ 0 ],
+             bd->afDieColor[ 0 ] ? 'y' : 'n',
              /* dice1 */
 	     (int) ( bd->aarDiceColour[ 1 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarDiceColour[ 1 ][ 1 ] * 0xFF ), 
 	     (int) ( bd->aarDiceColour[ 1 ][ 2 ] * 0xFF ), 
              bd->arDiceCoefficient[ 1 ], bd->arDiceExponent[ 1 ],
+             bd->afDieColor[ 1 ] ? 'y' : 'n',
              /* dot0 */
 	     (int) ( bd->aarDiceDotColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarDiceDotColour[ 0 ][ 1 ] * 0xFF ), 
@@ -1131,6 +1237,10 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     (int) ( bd->aarDiceDotColour[ 1 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarDiceDotColour[ 1 ][ 1 ] * 0xFF ), 
 	     (int) ( bd->aarDiceDotColour[ 1 ][ 2 ] * 0xFF ), 
+             /* cube */
+	     (int) ( bd->arCubeColour[ 0 ] * 0xFF ),
+	     (int) ( bd->arCubeColour[ 1 ] * 0xFF ), 
+	     (int) ( bd->arCubeColour[ 2 ] * 0xFF ), 
              /* points0 */
 	     bd->aanBoardColour[ 2 ][ 0 ], bd->aanBoardColour[ 2 ][ 1 ], 
 	     bd->aanBoardColour[ 2 ][ 2 ], bd->aSpeckle[ 2 ] / 128.0f,

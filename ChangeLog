@@ -1,3 +1,17 @@
+Sat Aug  3 12:00:54 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New flag "Die color same as chequer color". 
+	Introduce possibility to adjust cube color.	
+
+	* gtkboard.c (board_draw_dice, board_draw_pip): honour
+	"die color same as chequer color".
+	* gtkboard.c (board_draw_cube): use cube color.
+
+	* gtkprefs.c (DicePrefs): new checkbox.
+	* gtkprefs.c (SetColourSS): parse new flag.
+	* gtkprefs.c (BoardPreferencesCommand): write new flag and
+	cube colour.
+
 Fri Aug  2 14:13:12 2002  Gary Wong  <gtw@gnu.org>
 
 	* eval.c (StatusNeuralNet): Correct output.
@@ -24,7 +38,6 @@ Fri Aug  2 20:19:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* gtkprefs.c (BoardPreferencesCommand): write dice and dice
 	dot colors.
 
->>>>>>> 1.588
 Fri Aug  2 18:06:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Make tutor mode save cube decisions in game list.

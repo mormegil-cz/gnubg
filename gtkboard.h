@@ -87,7 +87,9 @@ typedef struct _BoardData {
     int animate_speed;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
     gdouble aarDiceColour[ 2 ][ 4 ]; /* color of dice for each player */
+    int afDieColor[ 2 ];
     gdouble aarDiceDotColour[ 2 ][ 4 ]; /* color of dice dot for each player */
+    gdouble arCubeColour[ 4 ]; /* color of cube */
     guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
     int aSpeckle[ 4 ]; /* speckle for background, border, pts */
     gfloat arRefraction[ 2 ], arCoefficient[ 2 ], arExponent[ 2 ];
