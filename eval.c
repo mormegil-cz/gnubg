@@ -3996,6 +3996,10 @@ extern char
     return "Too good to redouble, pass";
   case NO_REDOUBLE_BEAVER:
     return "No redouble, beaver";
+  case NODOUBLE_DEADCUBE:
+    return "Never double, take (dead cube)";
+  case NO_REDOUBLE_DEADCUBE:
+    return "Never redouble, take (dead cube)";
   default:
     return "I have no idea!";
   }
@@ -4064,6 +4068,8 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
   case NO_REDOUBLE_TAKE:
   case NO_REDOUBLE_BEAVER:
   case TOOGOODRE_TAKE:
+  case NODOUBLE_DEADCUBE:
+  case NO_REDOUBLE_DEADCUBE:
 
     /*
      * Optimal     : no double
@@ -4365,7 +4371,15 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
   if ( ! GetDPEq ( NULL, NULL, pci ) ) {
 
     arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_NODOUBLE ];
-    return NOT_AVAILABLE;
+
+    /* for match play distinguish between dead cube and not available cube */
+
+    if ( pci->nMatchTo && 
+         ( pci->fCubeOwner < 0 || pci->fCubeOwner == pci->fMove ) )
+      return ( pci->fCubeOwner == -1 ) ? 
+        NODOUBLE_DEADCUBE : NO_REDOUBLE_DEADCUBE;
+    else
+      return NOT_AVAILABLE;
 
   }
 
@@ -7333,6 +7347,8 @@ getCubeDecisionOrdering ( int aiOrder[ 3 ],
   case NO_REDOUBLE_TAKE:
   case NO_REDOUBLE_BEAVER:
   case TOOGOODRE_TAKE:
+  case NODOUBLE_DEADCUBE:
+  case NO_REDOUBLE_DEADCUBE:
 
     /*
      * Optimal     : no double
