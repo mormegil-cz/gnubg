@@ -295,6 +295,7 @@ exportsetup exsExport = {
 #define DEFAULT_NET_SIZE 128
 
 storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
+storedcube  sc; 
 
 player ap[ 2 ] = {
     { "gnubg", PLAYER_GNU, EVALSETUP, EVALSETUP },
@@ -2516,57 +2517,67 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 
 extern void CommandHint( char *sz ) {
 
-    movelist ml;
-    int i;
-    char szBuf[ 1024 ];
-    float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    cubeinfo ci;
-    int n = ParseNumber ( &sz );
+  movelist ml;
+  int i;
+  char szBuf[ 1024 ];
+  float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  cubeinfo ci;
+  int n = ParseNumber ( &sz );
+  
+  if( ms.gs != GAME_PLAYING ) {
+    outputl( _("You must set up a board first.") );
     
-    if( ms.gs != GAME_PLAYING ) {
-      outputl( _("You must set up a board first.") );
+    return;
+  }
+  
+  if( !ms.anDice[ 0 ] && !ms.fDoubled && ! ms.fResigned ) {
+    GetMatchStateCubeInfo( &ci, &ms );
+    
+    if ( memcmp ( &sc.ms, &ms, sizeof ( matchstate ) ) ) {
       
+      /* no analysis performed yet */
+      
+      if ( GetDPEq ( NULL, NULL, &ci ) ) {
+        
+        /* calculate cube action */
+        
+        ProgressStart( _("Considering cube action...") );
+        if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+                                    &esEvalCube.ec ) < 0 ) {
+          ProgressEnd();
+          return;
+        }
+        ProgressEnd();
+        
+        UpdateStoredCube ( aarOutput, aarStdDev, &esEvalCube, &ms );
+        
+      }
+      
+    }
+    
+#if USE_GTK
+    if ( fX ) {
+      GTKDoubleHint( sc.aarOutput, sc.aarStdDev, &sc.es );
       return;
     }
-
-    if( !ms.anDice[ 0 ] && !ms.fDoubled && ! ms.fResigned ) {
-	GetMatchStateCubeInfo( &ci, &ms );
-
-	if ( GetDPEq ( NULL, NULL, &ci ) ) {
-	    /* Give hint on cube action */
-
-	    ProgressStart( _("Considering cube action...") );
-	    if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-					&esEvalCube.ec ) < 0 ) {
-		ProgressEnd();
-		return;
-	    }
-	    ProgressEnd();
-	    
-#if USE_GTK
-	    if ( fX ) {
-		GTKDoubleHint( aarOutput, aarStdDev, &esEvalCube );
-		return;
-	    }
 #endif
-	    FindCubeDecision ( arDouble, aarOutput, &ci );  
-
-	    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
-
-	    outputl ( szBuf );
-	    
-	    return;
-	    
-	} else {
-	    
-	    outputl( _("You cannot double.") );
-	    
-	    return;
-	    
-	}
-	
-    }
+    FindCubeDecision ( arDouble, aarOutput, &ci );  
+    
+    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
+    
+    outputl ( szBuf );
+    
+    return;
+    
+  } else {
+    
+    outputl( _("You cannot double.") );
+    
+    return;
+    
+  }
+  
 
     /* Give hints on resignation */
 
@@ -5760,5 +5771,23 @@ UpdateStoredMoves ( const movelist *pml, const matchstate *pms ) {
   CopyMoveList ( &sm.ml, pml );
 
   sm.ms = *pms;
+
+}
+
+
+extern void
+UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                   const evalsetup *pes,
+                   const matchstate *pms ) {
+
+  memcpy ( sc.aarOutput, aarOutput, 
+           2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+
+  memcpy ( sc.aarStdDev, aarStdDev, 
+           2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+
+  sc.ms = *pms;
+  sc.es = *pes;
 
 }
