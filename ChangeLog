@@ -1,3 +1,9 @@
+Wed Oct 30 19:02:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (DumpBearoff1, DumpBearoffOSND, DumpBearoffOS):
+	fix typo. Replace "variance" with "std dev".
+	(reported by Øystein).
+
 Mon Oct 28 22:07:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Compressed one-sided bearoff databases.

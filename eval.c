@@ -4101,7 +4101,7 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 
 static float 
 AverageRolls ( const unsigned short int aus[ 32 ],
-               float *prMu ) {
+               float *prSigma ) {
 
   float sx;
   float sx2;
@@ -4116,8 +4116,8 @@ AverageRolls ( const unsigned short int aus[ 32 ],
     sx2 += i * i * r;
   }
 
-  if ( prMu )
-    *prMu = sqrt ( sx2 - sx *sx );
+  if ( prSigma )
+    *prSigma = sqrt ( sx2 - sx *sx );
 
   return sx;
 
@@ -4127,7 +4127,7 @@ static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
     int i, n, nOpp, f0 = FALSE, f1 = FALSE;
     unsigned short int aaProb[ 2 ][ 32 ];
-    float arMu[ 2 ];
+    float arSigma[ 2 ];
 
     assert( pBearoff1 );
     
@@ -4173,11 +4173,11 @@ static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
     sprintf ( szOutput = strchr ( szOutput, 0 ),
               "Mean\t%7.3f\t%7.3f\n",
-              AverageRolls ( aaProb[ 0 ], &arMu[ 0 ] ),
-              AverageRolls ( aaProb[ 1 ], &arMu[ 1 ] ) );
+              AverageRolls ( aaProb[ 0 ], &arSigma[ 0 ] ),
+              AverageRolls ( aaProb[ 1 ], &arSigma[ 1 ] ) );
 
     sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Var.\t%7.3f\t%7.3f\n", arMu[ 0 ], arMu[ 1 ] );
+              "Std dev\t%7.3f\t%7.3f\n", arSigma[ 0 ], arSigma[ 1 ] );
 
 }
 
@@ -4225,7 +4225,7 @@ DumpBearoffOSND ( int anBoard[ 2 ][ 25 ],
               ar[ 0 ], arOpp[ 0 ], ar[ 2 ], arOpp[ 2 ] );
 
     sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Var.\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n\n",
+              "Std dev\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n\n",
               ar[ 1 ], arOpp[ 1 ], ar[ 3 ], arOpp[ 3 ] );
 
     strcat( szOutput, _("Approximative distribution:\n") );
@@ -4281,7 +4281,7 @@ DumpBearoffOSExact ( int anBoard[ 2 ][ 25 ],
     int f0 = FALSE, f1 = FALSE, f2 = FALSE, f3 = FALSE;
     unsigned short int aaProb[ 2 ][ 32 ];
     unsigned short int aaGammonProb[ 2 ][ 32 ];
-    float arMu[ 2 ], arMuG[ 2 ];
+    float arSigma[ 2 ], arSigmaG[ 2 ];
 
     assert( fBearoffOS >= 0 );
     
@@ -4344,14 +4344,14 @@ DumpBearoffOSExact ( int anBoard[ 2 ][ 25 ],
 
     sprintf ( szOutput = strchr ( szOutput, 0 ),
               "Mean\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
-              AverageRolls ( aaProb[ 0 ], &arMu[ 0 ] ),
-              AverageRolls ( aaProb[ 1 ], &arMu[ 1 ] ),
-              AverageRolls ( aaGammonProb[ 0 ], &arMuG[ 0 ] ),
-              AverageRolls ( aaGammonProb[ 1 ], &arMuG[ 1 ] ) );
+              AverageRolls ( aaProb[ 0 ], &arSigma[ 0 ] ),
+              AverageRolls ( aaProb[ 1 ], &arSigma[ 1 ] ),
+              AverageRolls ( aaGammonProb[ 0 ], &arSigmaG[ 0 ] ),
+              AverageRolls ( aaGammonProb[ 1 ], &arSigmaG[ 1 ] ) );
 
     sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Var.\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
-              arMu[ 0 ], arMu[ 1 ], arMuG[ 0 ], arMuG[ 1 ] );
+              "Std dev\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
+              arSigma[ 0 ], arSigma[ 1 ], arSigmaG[ 0 ], arSigmaG[ 1 ] );
 
 }
 
