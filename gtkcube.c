@@ -675,22 +675,11 @@ CubeAnalysisMWC ( GtkWidget *pw, cubehintdata *pchd ) {
 }
 
 
-static void
-CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
+static char *
+GetContent ( cubehintdata *pchd ) {
 
-  gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME );
-
-}
-
-static void
-CubeAnalysisGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
-                           guint n, guint t, cubehintdata *pchd ) {
-
-  float arDouble[ 4 ];
+  static char *pc;
   cubeinfo ci;
-
-  char *pc;
-
 
   GetMatchStateCubeInfo ( &ci, &pchd->ms );
 
@@ -701,11 +690,49 @@ CubeAnalysisGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
                             FALSE, FALSE,
                             SKILL_NONE, SKILL_NONE );
 
+  return pc;
+
+}
+
+
+static void
+CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
+
+#ifdef WIN32
+
+  if ( pc = GetContext ( pchd ) )
+    Wincopy ( pc );
+
+#else /* WIN32 */
+
+  /* claim primary selection and CLIPBOARD */
+
+  gtk_selection_owner_set ( pw, gdk_atom_intern ("CLIPBOARD", FALSE), 
+                            GDK_CURRENT_TIME );
+  gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, 
+                            GDK_CURRENT_TIME );
+
+#endif /* ! WIN32 */
+
+}
+
+#ifndef WIN32
+
+static void
+CubeAnalysisGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
+                           guint n, guint t, cubehintdata *pchd ) {
+
+  /* copy cube analysis to primary selection and CLIPBOARD */
+
+  char *pc = GetContent ( pchd );
+
   if ( pc )
     gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
                             pc, strlen ( pc ) );
 
 }
+
+#endif /* WIN32 */
 
 
 static GtkWidget *
@@ -757,7 +784,11 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   /* selection */
 
-  gtk_selection_add_target( pwCopy, GDK_SELECTION_PRIMARY,
+  gtk_selection_add_target( pwCopy, 
+                            gdk_atom_intern ("CLIPBOARD", FALSE),
+                            GDK_SELECTION_TYPE_STRING, 0 );
+  gtk_selection_add_target( pwCopy, 
+                            GDK_SELECTION_PRIMARY,
                             GDK_SELECTION_TYPE_STRING, 0 );
 
   /* signals */
@@ -774,8 +805,10 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                       GTK_SIGNAL_FUNC( CubeAnalysisMWC ), pchd );
   gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
                       GTK_SIGNAL_FUNC( CubeAnalysisCopy ), pchd );
+#ifndef WIN32
   gtk_signal_connect( GTK_OBJECT( pwCopy ), "selection_get",
                       GTK_SIGNAL_FUNC( CubeAnalysisGetSelection ), pchd );
+#endif /* WIN32 */
 
   /* tool tips */
 

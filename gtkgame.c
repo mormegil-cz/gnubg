@@ -4436,9 +4436,9 @@ static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
    if (n > 12) n = 12;  /* FIXME There should be some kind of way to
                          * control how many moves you want to copy */
 #ifdef WIN32
-   sprintf(szBuf, "");
+   strcpy(szBuf, "");
 #else
-   sprintf(szBuf, "\n");
+   strcpy(szBuf, "\n");
 #endif
 
    for( i = 0; i < n; i++ )

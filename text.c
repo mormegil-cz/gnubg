@@ -945,7 +945,7 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                           arDouble ) ) >= 0.0 )
     sprintf ( pc = strchr ( sz, 0 ), " (%.1f%%)", 100.0f * r );
 
-  strcat ( sz, "n\n" );
+  strcat ( sz, "\n" );
 
   /* dump rollout */
 

@@ -2421,7 +2421,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
     if ( i ) 
       sprintf ( pc = strchr ( sz, 0 ),
                 " (%s)\n",
-                OutputEquityDiff ( rEqTop, rEq, &ci ) );
+                OutputEquityDiff ( rEq, rEqTop, &ci ) );
     else
       strcat ( sz, "\n" );
 

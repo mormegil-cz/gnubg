@@ -1,3 +1,16 @@
+Tue Jul 23 17:30:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (HintCopy): pacify fussy compilers.
+	* gnubg.c (FormatMoveHint): fix sign of reported differences.
+	* text.c (OutputCubeAnalysis): fix typo.
+
+	* gtkcube.c (CreateCubeAnalysisTools): only connect 
+	CubeAnalysisGetSelection for #ifndef WIN32.
+	* gtkcube.c (GetContent): new function. Return the text to
+	be copied.
+	* gtkcube.c (CubeAnalysisGetSelection): surround by #ifndef WIN32.
+	* gtkcube.c (CubeAnalysisCopy): call WinCopy for WIN32.
+
 Mon Jul 22 20:24:34 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Implement a "Copy" button in the cube widget.
