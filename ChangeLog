@@ -1,3 +1,10 @@
+Wed Sep  3 20:07:45 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* sgf.c (WriteLuck): uses 5 digits for luck to avoid
+	rounding errors, e.g., after analysis you get 17.66% luck
+	but after you get 17.63% as the luck is only saved with 3 digits.
+	(reported by Chris D. Yep)
+
 Wed Sep  3 19:12:12 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* external.c (CommandExternal): fix bug leading to

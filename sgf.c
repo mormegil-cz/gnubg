@@ -1822,7 +1822,7 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 static void WriteLuck( FILE *pf, int fPlayer, float rLuck, lucktype lt ) {
 
     if( rLuck != ERR_VAL )
-	fprintf( pf, "LU[%+.3f]", rLuck );
+	fprintf( pf, "LU[%+.5f]", rLuck );
     
     switch( lt ) {
     case LUCK_VERYBAD:
