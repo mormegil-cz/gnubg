@@ -104,7 +104,7 @@ command acSetEvaluation[] = {
 };
 
 static void
-SetSeed ( const rngx, char *sz ) {
+SetSeed ( const rng rngx, char *sz ) {
     
     int n;
 
