@@ -157,7 +157,9 @@ typedef struct _redevaldata {
 
 extern int 
 EvalInitialise( char *szWeights, char *szWeightsBinary,
-                char *szDatabase, char *szDir, int fProgress );
+                char *szDatabase, char *szDir, int nSize, int fProgress );
+
+extern int EvalNewWeights( int nSize );
 
 extern int 
 EvalSave( char *szWeights );
@@ -195,7 +197,7 @@ PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
 extern int 
 DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
               evalcontext *pec, cubeinfo *pci, int fOutputMWC,
-	      int fOutputInvert );
+	      int fOutputWinPC, int fOutputInvert );
 
 extern void 
 SwapSides( int anBoard[ 2 ][ 25 ] );

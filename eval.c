@@ -531,8 +531,36 @@ static unsigned char *HeuristicDatabase( int fProgress ) {
     return p;
 }
 
+static void CreateWeights( int nSize ) {
+
+    NeuralNetCreate( &nnContact, NUM_INPUTS, nSize,
+		     NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
+	
+    NeuralNetCreate( &nnBPG, NUM_INPUTS, nSize,
+		     NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
+	
+    NeuralNetCreate( &nnRace, NUM_RACE_INPUTS, nSize,
+		     NUM_OUTPUTS, BETA_HIDDEN, BETA_OUTPUT );
+}
+
+static void DestroyWeights( void ) {
+
+    NeuralNetDestroy( &nnContact );
+    NeuralNetDestroy( &nnBPG );
+    NeuralNetDestroy( &nnRace );
+}
+
+extern int EvalNewWeights( int nSize ) {
+
+    DestroyWeights();
+    CreateWeights( nSize );
+    
+    return 0;
+}
+
 extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
-			   char *szDatabase, char *szDir, int fProgress ) {
+			   char *szDatabase, char *szDir, int nSize,
+			   int fProgress ) {
     FILE *pfWeights;
     int h, fReadWeights = FALSE;
     char szFileVersion[ 16 ];
@@ -653,18 +681,8 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    nnRace.cOutput != NUM_OUTPUTS )
 	    NeuralNetResize( &nnRace, NUM_RACE_INPUTS, nnRace.cHidden,
 			     NUM_OUTPUTS );	
-    } else {
-	/* FIXME eval.c shouldn't write to stdout */
-	puts( "Creating random neural net weights..." );
-	NeuralNetCreate( &nnContact, NUM_INPUTS, 128 /* FIXME */,
-			 NUM_OUTPUTS, 0.1, 1.0 );
-	
-	NeuralNetCreate( &nnBPG, NUM_INPUTS, 128 /* FIXME */,
-			 NUM_OUTPUTS, 0.1, 1.0 );
-	
-	NeuralNetCreate( &nnRace, NUM_RACE_INPUTS, 128 /* FIXME */,
-			 NUM_OUTPUTS, 0.1, 1.0 );
-    }
+    } else
+	CreateWeights( 128 );    
     
     return 0;
 }
@@ -3051,8 +3069,8 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 }
 
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
-			      int anBoard[ 2 ][ 25 ], cubeinfo *pci, evalcontext *pec,
-			      int nPlies ) {
+			      int anBoard[ 2 ][ 25 ], cubeinfo *pci,
+			      evalcontext *pec, int nPlies ) {
   int i, j, iPly;
   positionclass pc;
   movelist ml;
@@ -3489,7 +3507,7 @@ static classdumpfunc acdf[ N_CLASSES ] = {
 
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
                          evalcontext *pec, cubeinfo *pci, int fOutputMWC,
-			 int fOutputInvert ) {
+			 int fOutputWinPC, int fOutputInvert ) {
 
   float arOutput[ NUM_OUTPUTS ], arCfOutput[ 4 ];
   float arClOutput[ NUM_OUTPUTS ];
@@ -3530,10 +3548,10 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   szOutput = strchr( szOutput, 0 );    
 
   if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    strcpy( szOutput, "\n       \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+    strcpy( szOutput, "\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
 	    "Equity  (cubeful)\n" );
   else
-    strcpy( szOutput, "\n       \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+    strcpy( szOutput, "\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
 	    "Mwc     (cubeful)\n" );
 
   nPlies = pec->nPlies > 9 ? 9 : pec->nPlies;
@@ -3561,24 +3579,43 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
       InvertEvaluationCf( arCfOutput );
       pci->fMove = !pci->fMove;
     }
-    
-    if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-      sprintf( szOutput,
-	       ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-	       "(%+6.3f  (%+6.3f))\n",
-	       arOutput[ 0 ], arOutput[ 1 ],
-	       arOutput[ 2 ], arOutput[ 3 ],
-	       arOutput[ 4 ], Utility ( arOutput, pci ), 
-	       arCfOutput[ 0] ); 
-    else {
-      sprintf( szOutput,
-	       ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-	       "(%6.2f%% (%6.2f%%))\n",
-	       arOutput[ 0 ], arOutput[ 1 ],
-	       arOutput[ 2 ], arOutput[ 3 ],
-	       arOutput[ 4 ], 
-	       100.0 * eq2mwc ( Utility ( arOutput, pci ), pci ), 
-	       100.0 * eq2mwc ( arCfOutput[ 0], pci ) ); 
+
+    if( pci->nMatchTo && fOutputMWC ) {
+	if( fOutputWinPC )
+	    sprintf( szOutput,
+		     ":\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t"
+		     "(%6.2f%% (%6.2f%%))\n",
+		     100.0f * arOutput[ 0 ], 100.0f * arOutput[ 1 ],
+		     100.0f * arOutput[ 2 ], 100.0f * arOutput[ 3 ],
+		     100.0f * arOutput[ 4 ], 
+		     100.0 * eq2mwc ( Utility ( arOutput, pci ), pci ), 
+		     100.0 * eq2mwc ( arCfOutput[ 0], pci ) ); 
+	else
+	    sprintf( szOutput,
+		     ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+		     "(%6.2f%% (%6.2f%%))\n",
+		     arOutput[ 0 ], arOutput[ 1 ],
+		     arOutput[ 2 ], arOutput[ 3 ],
+		     arOutput[ 4 ], 
+		     100.0 * eq2mwc ( Utility ( arOutput, pci ), pci ), 
+		     100.0 * eq2mwc ( arCfOutput[ 0], pci ) ); 
+    } else {
+	if( fOutputWinPC )
+	    sprintf( szOutput,
+		     ":\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t"
+		     "(%+6.3f  (%+6.3f))\n",
+		     100.0f * arOutput[ 0 ], 100.0f * arOutput[ 1 ],
+		     100.0f * arOutput[ 2 ], 100.0f * arOutput[ 3 ],
+		     100.0f * arOutput[ 4 ], Utility ( arOutput, pci ), 
+		     arCfOutput[ 0] ); 
+	else
+	    sprintf( szOutput,
+		     ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+		     "(%+6.3f  (%+6.3f))\n",
+		     arOutput[ 0 ], arOutput[ 1 ],
+		     arOutput[ 2 ], arOutput[ 3 ],
+		     arOutput[ 4 ], Utility ( arOutput, pci ), 
+		     arCfOutput[ 0] ); 
     }
     
     if( fOutputInvert ) {
