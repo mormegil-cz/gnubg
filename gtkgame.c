@@ -208,6 +208,7 @@ typedef enum _gnubgcommand {
     CMD_SHOW_CALIBRATION,
     CMD_SHOW_COPYING,
     CMD_SHOW_ENGINE,
+    CMD_SHOW_EPC,
     CMD_SHOW_EXPORT,
     CMD_SHOW_GAMMONVALUES,
     CMD_SHOW_MARKETWINDOW,
@@ -294,6 +295,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show calibration",
     "show copying",
     "show engine",
+    "show epc",
     "show export",
     "show gammonvalues",
     "show marketwindow",
@@ -2747,6 +2749,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/Bearoff Databases"), NULL, Command, 
           CMD_SHOW_BEAROFF, NULL },
+	{ N_("/_Analyse/Effective Pip Count"), NULL, Command, 
+          CMD_SHOW_EPC, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Gammon values"), NULL, Command, CMD_SHOW_GAMMONVALUES,
 	  NULL },
@@ -7160,10 +7164,10 @@ extern void GTKEval( char *szOutput ) {
 #if WIN32
     /* Windows fonts come out smaller than you ask for, for some reason... */
     pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
-			"*-*-*-m-*-*" );
+			"*-*-*-m-*-*-*" );
 #else
     pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
-			"*-*-*-m-*-*" );
+			"*-*-*-m-*-*-*" );
 #endif
 
     /* FIXME There should be some way to extract the text on Unix as well */
@@ -7488,7 +7492,7 @@ extern void GTKShowVersion( void ) {
     pango_font_description_set_size( ps->font_desc, 64 * PANGO_SCALE );    
 #else
     ps->font_name = g_strdup( "-*-times-medium-r-normal-*-64-*-*-*-p-*-"
-			      "*" );
+			      "*-*" );
 #endif
     gtk_widget_modify_style( pwPrompt, ps );
     gtk_rc_style_unref( ps );
@@ -7511,7 +7515,7 @@ extern void GTKShowVersion( void ) {
     pango_font_description_set_size( ps->font_desc, 8 * PANGO_SCALE );    
 #else
     ps->font_name = g_strdup( "-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-"
-			      "*" );
+			      "*-*" );
 #endif
     gtk_widget_modify_style( pwPrompt, ps );
 
