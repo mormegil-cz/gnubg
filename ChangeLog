@@ -1,3 +1,8 @@
+Sat Sep 6 16:14:58 GMT 2003   Jim Segrave <jes@jes-2.demon.nl>
+
+	* play.c - try to improve distinguishing cube & chequer play
+	  error flags
+
 Sat Sep  6 15:07:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkrace.c, show.c:	Small improvements in output of race stuff and

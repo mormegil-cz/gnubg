@@ -79,7 +79,7 @@ char *aszSkillTypeCommand[] = {
 /*   "good",  */
 /*   "verygood" */
  };
-char* aszSkillTypeAbbr[] = { "??", "?", "?!", "", ""};
+char* aszSkillTypeAbbr[] = { "??", "? ", "?!", "  ", "  "};
 
 char* aszLuckTypeCommand[] = { 
   "veryunlucky", 
