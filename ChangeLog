@@ -4,7 +4,7 @@ Sun Mar  3 10:56:47 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c: define predefined settings for evalcontexts.
 
-	* gtkgame.c (EvalWidget): resign widget, and introduce predefined
+	* gtkgame.c (EvalWidget): redesign widget, and introduce predefined
 	settings.
 	* gtkgame.c (EvalChanged): called when values in EvalWidget changes.
 	* gtkgame.c (EvalGetValues): fetch values from EvalWidget.
