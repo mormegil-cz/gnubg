@@ -279,6 +279,29 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 			return;
 		}
 	}
+	{	/* Not in texture list, see if old texture on disc */
+		char *szFile = PathSearch( file, szDataDirectory );
+		if (szFile)
+		{
+			int len = strlen(file);
+			/* Add entry for unknown texture */
+			TextureInfo text;
+			strcpy(text.file, file);
+			if (len > 4 && !stricmp(&file[len - 4], ".png"))
+				text.format = TF_PNG;
+			else
+				text.format = TF_BMP;
+			strcpy(text.name, file);
+			text.type = TT_NONE;	/* Don't show in lists */
+
+			ListAdd(&textures, &text);
+			*textureInfo = (TextureInfo*)ListGet(&textures, ListSize(&textures) - 1);
+
+			free( szFile );
+			return;
+		}
+	}
+
 	*textureInfo = 0;
 	/* Only warn user if textures.txt file has been loaded */
 	if (ListSize(&textures) > 0)

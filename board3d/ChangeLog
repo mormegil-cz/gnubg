@@ -1,3 +1,7 @@
+Mon Mar 29 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* misc3d.c: Try to load old textures
+
 Fri Mar 19 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* drawboard3d.c: Avoid readjusting board when cube changes
