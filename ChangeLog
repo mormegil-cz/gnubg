@@ -1,3 +1,7 @@
+Mon Dec 29 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* htmlimages.c, html.c: Small fixes and variable size html image generation
+
 Wed Dec 3 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* htmlimages.c: Tidied code

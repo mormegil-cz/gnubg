@@ -4459,7 +4459,23 @@ CommandSetCheatPlayerRoll( char *sz ) {
 
 }
 
+extern void
+CommandSetExportHtmlSize ( char *sz ) {
 
+    int n;
+    
+    if( ( n = ParseNumber( &sz ) ) < 1 || n > 20 ) {
+	outputl( _("You must specify a size between 1 and 20.") );
+	return;
+    }
+
+    exsExport.nHtmlSize = n;
+
+    outputf ( _("Size of generated Html images are %dx%d pixels\n"),
+              n * BOARD_WIDTH, n * BOARD_HEIGHT );
+
+
+}
 
 extern void
 CommandSetExportPNGSize ( char *sz ) {

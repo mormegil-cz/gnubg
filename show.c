@@ -1808,6 +1808,9 @@ CommandShowExport ( char *sz ) {
             exsExport.szHTMLPictureURL ? exsExport.szHTMLPictureURL :
             _("not defined") );
 
+  outputf ( _("- size of exported Html pictures: %dx%d\n"),
+            exsExport.nHtmlSize * BOARD_WIDTH, exsExport.nHtmlSize * BOARD_HEIGHT );
+
   /* PNG options */
 
   outputl ( _("PNG options:\n") );

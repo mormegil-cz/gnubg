@@ -65,49 +65,48 @@
 #if HAVE_LIBPNG
 
 char *szFile, *pchFile;
+int imagesWritten;
 
-/* Basic size + small size value */
-#define s 4
-#define ss (s - 1)
+#define NUM_IMAGES 344
+
+/* Overall board size */
+int s;
+/* Size of cube and dice - now same as rest of board */
+#define ss s
 
 /* Helpers for 2d position in arrays */
 #define boardStride (BOARD_WIDTH * s * 3)
 #define coord(x, y) ((x) * s * 3 + (y) * s * boardStride)
 #define coordStride(x, y, stride) ((x) * s * 3 + (y) * s * stride)
 
-unsigned char auchBoard[BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s],
-auchChequer[2][CHEQUER_WIDTH * s * 4 * CHEQUER_HEIGHT * s],
-auchChequerLabels[12 * CHEQUER_LABEL_WIDTH * s * 3 * CHEQUER_LABEL_HEIGHT * s],
-auchLo[BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s],
-auchHi[BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s],
-auchCube[CUBE_WIDTH * ss * 4 * CUBE_HEIGHT * ss],
-auchCubeFaces[12 * CUBE_LABEL_WIDTH * ss * 3 * CUBE_LABEL_HEIGHT * ss],
-auchDice[2][DIE_WIDTH * ss * 4 * DIE_HEIGHT * ss],
-auchPips[2][ss * ss * 3];
+unsigned char *auchBoard, *auchChequer[2], *auchChequerLabels, *auchLo, *auchHi,
+	*auchLoRev, *auchHiRev, *auchCube, *auchCubeFaces, *auchDice[2], *auchPips[2],
+	*auchLabel, *auchOff[2], *auchMidBoard, *auchBar[2], *auchPoint[2][2][2];
 
-unsigned short asRefract[2][CHEQUER_WIDTH * s * CHEQUER_HEIGHT * s];
+unsigned short *asRefract[2];
 
 #if HAVE_LIBART
 unsigned char *auchArrow[ 2 ];
-unsigned char auchMidlb[ BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s ];
+unsigned char *auchMidlb;
 #endif
 
 static void WriteImageStride(unsigned char* img, int stride, int cx, int cy)
 {
-	if (!WritePNG(szFile, img, stride, cx, cy))
-		ProgressValueAdd(1);
-}
-
-static void WriteImage(unsigned char* img, int cx, int cy)
-{
-	if (!WritePNG(szFile, img, boardStride, cx, cy))
-		ProgressValueAdd(1);
+	if (WritePNG(szFile, img, stride, cx, cy) == -1)
+		outputf("Error creating file %s\n", szFile);
+	imagesWritten++;
+	ProgressValueAdd(1);
 }
 
 static void WriteStride(const char* name, unsigned char* img, int stride, int cx, int cy)
 {
 	strcpy(pchFile, name);
 	WriteImageStride(img, stride, cx, cy);
+}
+
+static void WriteImage(unsigned char* img, int cx, int cy)
+{
+	WriteImageStride(img, boardStride, cx, cy);
 }
 
 static void Write(const char* name, unsigned char* img, int cx, int cy)
@@ -168,38 +167,32 @@ static void DrawPips(unsigned char *auchDest, int nStride,
 	}
 }
 
+static void WriteBorder(char* file, unsigned char *auchSrc, unsigned char *auchBoardSrc)
+{
+	CopyArea(auchLabel, boardStride, auchBoardSrc, boardStride,
+				BOARD_WIDTH * s, BORDER_HEIGHT * s);
+
+	AlphaBlendClip(auchLabel, boardStride, 0, 0, 
+				BOARD_WIDTH * s, BORDER_HEIGHT * s,
+				auchLabel, boardStride, 0, 0,
+				auchSrc, BOARD_WIDTH * s * 4, 0, 0,
+				BOARD_WIDTH * s, BORDER_HEIGHT * s);
+
+	Write(file, auchLabel, BOARD_WIDTH * s, BORDER_HEIGHT * s);
+}
+
 static void WriteImages()
 {
 	int i, j, k;
-	unsigned char auchLabel[BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s],
-		auchPoint[2][2][2][POINT_WIDTH * s * 3 * DISPLAY_POINT_HEIGHT * s],
-		auchOff[2][BEAROFF_WIDTH * s * 3 * DISPLAY_BEAROFF_HEIGHT * s],
-		auchMidBoard[BOARD_CENTER_WIDTH * s * 3 * BOARD_CENTER_HEIGHT * s],
-		auchBar[2][BAR_WIDTH * s * 3 * (POINT_HEIGHT - CUBE_HEIGHT) * s];
+	imagesWritten = 0;
 
 	/* top border-high numbers */
-	CopyArea(auchLabel, boardStride, auchBoard, boardStride,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s);
-
-	AlphaBlendClip( auchLabel, boardStride, 0, 0, 
-				BOARD_WIDTH * s, BORDER_HEIGHT * s,
-				auchLabel, boardStride, 0, 0,
-				auchHi, BOARD_WIDTH * s * 4, 0, 0,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s );
-
-	Write("b-hitop.png", auchLabel, BOARD_WIDTH * s, BORDER_HEIGHT * s);
+	WriteBorder("b-hitop.png", auchHi, auchBoard);
+	WriteBorder("b-hitopr.png", auchHiRev, auchBoard);
 
 	/* top border-low numbers */
-	CopyArea( auchLabel, boardStride, auchBoard, boardStride,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s );
-
-	AlphaBlendClip( auchLabel, boardStride, 0, 0, 
-				BOARD_WIDTH * s, BORDER_HEIGHT * s,
-				auchLabel, boardStride, 0, 0,
-				auchLo, BOARD_WIDTH * s * 4, 0, 0,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s );
-
-	Write("b-lotop.png", auchLabel, BOARD_WIDTH * s, BORDER_HEIGHT * s);
+	WriteBorder("b-lotop.png", auchLo, auchBoard);
+	WriteBorder("b-lotopr.png", auchLoRev, auchBoard);
 
 	/* empty points */
 	Write("b-gd.png", auchBoard + coord(BEAROFF_WIDTH, BORDER_HEIGHT),
@@ -283,30 +276,12 @@ static void WriteImages()
 		BAR_WIDTH * s, CUBE_HEIGHT * s);
 
 	/* bottom border-high numbers */
-	CopyArea( auchLabel, boardStride,
-				auchBoard + coord(0, BOARD_HEIGHT - BORDER_HEIGHT), boardStride,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s );
-
-	AlphaBlendClip( auchLabel, boardStride, 0, 0, 
-				BOARD_WIDTH * s, BORDER_HEIGHT * s,
-				auchLabel, boardStride, 0, 0,
-				auchHi, BOARD_WIDTH * s * 4, 0, 0,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s );
-
-	Write("b-hibot.png", auchLabel, BOARD_WIDTH * s, BORDER_HEIGHT * s);
+	WriteBorder("b-hibot.png", auchHi, auchBoard + coord(0, BOARD_HEIGHT - BORDER_HEIGHT));
+	WriteBorder("b-hibotr.png", auchHiRev, auchBoard + coord(0, BOARD_HEIGHT - BORDER_HEIGHT));
 
 	/* bottom border-low numbers */
-	CopyArea( auchLabel, boardStride,
-				auchBoard + coord(0, BOARD_HEIGHT - BORDER_HEIGHT), boardStride,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s );
-
-	AlphaBlendClip( auchLabel, boardStride, 0, 0, 
-				BOARD_WIDTH * s, BORDER_HEIGHT * s,
-				auchLabel, boardStride, 0, 0,
-				auchLo, BOARD_WIDTH * s * 4, 0, 0,
-				BOARD_WIDTH * s, BORDER_HEIGHT * s );
-
-	Write("b-lobot.png", auchLabel, BOARD_WIDTH * s, BORDER_HEIGHT * s);
+	WriteBorder("b-lobot.png", auchLo, auchBoard + coord(0, BOARD_HEIGHT - BORDER_HEIGHT));
+	WriteBorder("b-lobotr.png", auchLoRev, auchBoard + coord(0, BOARD_HEIGHT - BORDER_HEIGHT));
 
 	/* Copy 4 points (top/bottom and both colours) */
 	CopyArea(auchPoint[0][0][0], POINT_WIDTH * s * 3,
@@ -620,7 +595,7 @@ static void WriteImages()
 							auchDice[i], DIE_WIDTH * ss * 4,
 							DIE_WIDTH * ss, DIE_HEIGHT * ss);
 
-		AlphaBlend(auchBoard + dice_x + DIE_WIDTH * ss * 3 + dice_y, boardStride, 
+		AlphaBlend(auchBoard + dice_x + DIE_WIDTH * ss * 3 + dice_y, boardStride,
 							auchBoard + dice_x + DIE_WIDTH * ss * 3 + dice_y, boardStride,
 							auchDice[i], DIE_WIDTH * ss * 4,
 							DIE_WIDTH * ss, DIE_HEIGHT * ss);
@@ -650,11 +625,15 @@ static void WriteImages()
 			}
 		}
 	}
+
+	if (imagesWritten != NUM_IMAGES)
+		g_print("Wrong number of images generated - %d written, expected %d\n",
+			imagesWritten, NUM_IMAGES);
 }
 
 static void RenderObjects()
 {
-	int i;
+	int clockwise;
 	renderdata rd;
 	memcpy( &rd, &rdAppearance, sizeof( renderdata ) );
 
@@ -667,13 +646,16 @@ static void RenderObjects()
 	RenderChequerLabels( &rd, auchChequerLabels, CHEQUER_LABEL_WIDTH * s * 3 );
 
 #if HAVE_LIBART
-	for (i = 0; i < 2; i++)
-		auchArrow[i] = art_new( art_u8, s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT );
-
 	RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_WIDTH * 4 );
 #endif /* HAVE_LIBART */
 
-	RenderBoardLabels( &rd, auchLo, auchHi, BOARD_WIDTH * s * 4 );
+	/* Render numbers in both directions */
+	clockwise = rd.fClockwise;
+	rd.fClockwise = TRUE;
+	RenderBoardLabels(&rd, auchLo, auchHi, BOARD_WIDTH * s * 4);
+	rd.fClockwise = FALSE;
+	RenderBoardLabels(&rd, auchLoRev, auchHiRev, BOARD_WIDTH * s * 4);
+	rd.fClockwise = clockwise;
 
 	/* cubes and dices are rendered a bit smaller */
 	rd.nSize = ss;
@@ -716,14 +698,83 @@ static char* GetFilenameBase(char* sz)
 	return szFile;
 }
 
+static void AllocObjects()
+{
+	int i, j, k;
+
+	s = exsExport.nHtmlSize;
+
+#if HAVE_LIBART
+	auchMidlb = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
+	for (i = 0; i < 2; i++)
+		auchArrow[i] = art_new( art_u8, s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT );
+#endif
+
+	auchBoard = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
+	for (i = 0; i < 2; i++)
+		auchChequer[i] = malloc((CHEQUER_WIDTH * s * 4 * CHEQUER_HEIGHT * s) * sizeof(char));
+	auchChequerLabels = malloc((12 * CHEQUER_LABEL_WIDTH * s * 3 * CHEQUER_LABEL_HEIGHT * s) * sizeof(char));
+	auchLo = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
+	auchHi = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
+	auchLoRev = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
+	auchHiRev = malloc((BOARD_WIDTH * s * 4 * BORDER_HEIGHT * s) * sizeof(char));
+	auchCube = malloc((CUBE_WIDTH * ss * 4 * CUBE_HEIGHT * ss) * sizeof(char));
+	auchCubeFaces = malloc((12 * CUBE_LABEL_WIDTH * ss * 3 * CUBE_LABEL_HEIGHT * ss) * sizeof(char));
+	for (i = 0; i < 2; i++)
+	{
+		auchDice[i] = malloc((DIE_WIDTH * ss * 4 * DIE_HEIGHT * ss) * sizeof(char));
+		auchPips[i] = malloc((ss * ss * 3) * sizeof(char));
+	}
+	auchLabel = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
+	for (i = 0; i < 2; i++)
+		auchOff[i] = malloc((BEAROFF_WIDTH * s * 3 * DISPLAY_BEAROFF_HEIGHT * s) * sizeof(char));
+	auchMidBoard = malloc((BOARD_CENTER_WIDTH * s * 3 * BOARD_CENTER_HEIGHT * s) * sizeof(char));
+	for (i = 0; i < 2; i++)
+		auchBar[i] = malloc((BAR_WIDTH * s * 3 * (POINT_HEIGHT - CUBE_HEIGHT) * s) * sizeof(char));
+	for (i = 0; i < 2; i++)
+		for (j = 0; j < 2; j++)
+			for (k = 0; k < 2; k++)
+				auchPoint[i][j][k] = malloc((POINT_WIDTH * s * 3 * DISPLAY_POINT_HEIGHT * s) * sizeof(char));
+	for (i = 0; i < 2; i++)
+		asRefract[i] = malloc((CHEQUER_WIDTH * s * CHEQUER_HEIGHT * s) * sizeof(short));
+}
+
 static void TidyObjects()
 {
+	int i, j, k;
 #if HAVE_LIBART
-	int i;
-	for ( i = 0; i < 2; ++i )
+	free(auchMidlb);
+	for (i = 0; i < 2; i++)
 		art_free( auchArrow[ i ] );
 #endif /* HAVE_LIBART */
 	free(szFile);
+	free(auchBoard);
+	for (i = 0; i < 2; i++)
+		free(auchChequer[i]);
+	free(auchChequerLabels);
+	free(auchLo);
+	free(auchHi);
+	free(auchLoRev);
+	free(auchHiRev);
+	free(auchCube);
+	free(auchCubeFaces);
+	for (i = 0; i < 2; i++)
+	{
+		free(auchDice[i]);
+		free(auchPips[i]);
+	}
+	free(auchLabel);
+	for (i = 0; i < 2; i++)
+		free(auchOff[i]);
+	free(auchMidBoard);
+	for (i = 0; i < 2; i++)
+		free(auchBar[i]);
+	for (i = 0; i < 2; i++)
+		for (j = 0; j < 2; j++)
+			for (k = 0; k < 2; k++)
+				free(auchPoint[i][j][k]);
+	for (i = 0; i < 2; i++)
+		free(asRefract[i]);
 }
 
 extern void CommandExportHTMLImages(char *sz)
@@ -732,13 +783,11 @@ extern void CommandExportHTMLImages(char *sz)
 	if (!szFile)
 		return;
 
-	ProgressStartValue(_("Generating image:"), 342);
-
+	ProgressStartValue(_("Generating image:"), NUM_IMAGES);
+	AllocObjects();
 	RenderObjects();
 	WriteImages();
-
 	ProgressEnd();
-
 	TidyObjects();
 }
 

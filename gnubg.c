@@ -434,7 +434,8 @@ exportsetup exsExport = {
   NULL,  /* HTML extension */
   HTML_EXPORT_CSS_HEAD, /* write CSS stylesheet in <head> */
 
-  4 /* PNG size */
+  4, /* PNG size */
+  4 /* Html size */
 };
 
   
@@ -1326,6 +1327,9 @@ command cER = {
   { "type", NULL,
     N_("set type of HTML boards used in HTML export"), NULL, 
     acSetExportHTMLType },
+  { "size", CommandSetExportHtmlSize, 
+      N_("Set size of board for Html image export"), 
+      szVALUE, NULL },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportMovesDisplay[] = {
   { "verybad", CommandSetExportMovesDisplayVeryBad,
@@ -1405,10 +1409,10 @@ command cER = {
   { "display", NULL, N_("when to show moves"), NULL, acSetExportCubeDisplay },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportPNG[] = {
-    { "size", CommandSetExportPNGSize, 
-      N_("Set size of board for PNG export and HTML image export"), 
+    { "size", CommandSetExportPNGSize,
+      N_("Set size of board for PNG export"),
       szVALUE, NULL },
-  { NULL, NULL, NULL, NULL, NULL }    
+  { NULL, NULL, NULL, NULL, NULL }
 }, acSetExport[] = {
   { "html", NULL,
     N_("Set options for HTML export"), NULL, acSetExportHTML },
@@ -5707,6 +5711,7 @@ extern void CommandSaveSettings( char *szParam ) {
               aszHTMLExportCSSCommand[ exsExport.hecss ] );
 
     fprintf ( pf, "set export png size %d\n", exsExport.nPNGSize );
+    fprintf ( pf, "set export html size %d\n", exsExport.nHtmlSize );
 
     /* invert settings */
 

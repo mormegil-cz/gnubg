@@ -81,9 +81,9 @@ typedef struct _exportsetup {
   char *szHTMLExtension;
   htmlexportcss hecss;
 
-  /* png */
-
+  /* sizes */
   int nPNGSize;
+  int nHtmlSize;
 
 } exportsetup;
 

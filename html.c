@@ -837,7 +837,8 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
   fprintf ( pf, "<p>\n" );
   printImage ( pf, szImageDir, "b-indent", szExtension, "", 
                hecss, HTML_EXPORT_TYPE_FIBS2HTML );
-  printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
+  sprintf ( sz, "b-%stop%s", fTurn ? "hi" : "lo", fClockwise ? "" : "r");
+  printImage ( pf, szImageDir, sz, szExtension,
                fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+",
                hecss, HTML_EXPORT_TYPE_FIBS2HTML );
@@ -1095,7 +1096,8 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
 
   printImage ( pf, szImageDir, "b-indent", szExtension, "", 
                hecss, HTML_EXPORT_TYPE_FIBS2HTML );
-  printImage ( pf, szImageDir, fTurn ? "b-lobot" : "b-hibot", szExtension,
+  sprintf ( sz, "b-%sbot%s", fTurn ? "lo" : "hi", fClockwise ? "" : "r");
+  printImage ( pf, szImageDir, sz, szExtension,
                fTurn ?
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
                "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+", 
@@ -1216,7 +1218,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
 
-  printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
+  sprintf ( sz, "b-%stop%s", fTurn ? "hi" : "lo", fClockwise ? "" : "r");
+  printImage ( pf, szImageDir, sz, szExtension,
                fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+",
                hecss, HTML_EXPORT_TYPE_GNU );
@@ -1230,7 +1233,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<td rowspan=\"2\">", pf );
   if ( fClockwise )
-    sprintf ( sz, "b-loff-x%d", acOff[ 1 ] );
+    /* Use roff as loff not generated (and probably not needed) */
+    sprintf ( sz, "b-roff-x%d", acOff[ 1 ] );
   else
     strcpy ( sz, "b-loff-x0" );
   printImage ( pf, szImageDir, sz, szExtension, "|", 
@@ -1448,7 +1452,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<td rowspan=\"2\">", pf );
   if ( fClockwise )
-    sprintf ( sz, "b-loff-o%d", acOff[ 0 ] );
+    /* Use roff as loff not generated (and probably not needed) */
+    sprintf ( sz, "b-roff-o%d", acOff[ 0 ] );
   else
     strcpy ( sz, "b-loff-o0" );
   printImage ( pf, szImageDir, sz, szExtension, "|", 
@@ -1540,7 +1545,8 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
-  printImage ( pf, szImageDir, fTurn ? "b-lobot" : "b-hibot", szExtension,
+  sprintf ( sz, "b-%sbot%s", fTurn ? "lo" : "hi", fClockwise ? "" : "r");
+  printImage ( pf, szImageDir, sz, szExtension,
                fTurn ?
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
                "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+", 
