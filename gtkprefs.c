@@ -1073,6 +1073,7 @@ static void BoardPrefsOK( GtkWidget *pw, GtkWidget *mainBoard ) {
 	redrawChange = FALSE;
 	rdPrefs.quickDraw = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwQuickDraw));
 
+	freeEigthPoints(&bd->boardPoints, bd->rd->curveAccuracy);
 	if (rdPrefs.fDisplayType == DT_3D)
 	{
 		/* Delete old objects */
@@ -1194,6 +1195,8 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	{
 		/* Make sure 3d code is initialized */
 		Init3d();
+
+		DoAcceleratedCheck(bd->drawing_area3d);
 
 		updateDiceOccPos(bd);
 	}			

@@ -1,3 +1,7 @@
+Mon Apr 19 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c: Small 3d bug fix
+
 Sun Apr 18 10:53:26 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Define functions for CLI and GUI support for relational
@@ -11,7 +15,7 @@ Sun Apr 18 10:53:26 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 Sat Apr 17 23:43:07 2004  Oystein Johansen  <oystein@gnubg.org>
 
-        * render.c (RenderFrameWood): Fix typo.
+	* render.c (RenderFrameWood): Fix typo.
 
 Sat Apr 17 20:01:07 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
