@@ -175,9 +175,6 @@ LuckFirst ( int anBoard[ 2 ][ 25 ], const int n0, const int n1,
 
     }
 
-  printf( "%d %d %f %f %f\n", n0, n1, aar[ n0 ][ n1 ], aar[ n1 ][ n0 ],
-          rMean/30.0f );
-
   if ( n0 > n1 )
     return aar[ n0 ][ n1 ] - rMean / 30.0f;
   else
