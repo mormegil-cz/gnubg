@@ -4143,7 +4143,7 @@ extern void CommandImportTMG( char *sz ) {
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportTMG( pf, sz );
 	fclose( pf );
-        //setDefaultFileName ( sz, PATH_SGG );
+        setDefaultFileName ( sz, PATH_TMG );
     } else
 	outputerr( sz );
 }

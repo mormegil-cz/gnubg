@@ -1930,6 +1930,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
       TMG_MOVE = 4,
       TMG_DOUBLE = 5,
       TMG_TAKE = 7,
+      TMG_BEAVER = 8,
       TMG_PASS = 10,
       TMG_WIN_SINGLE = 14,
       TMG_WIN_GAMMON = 15,
@@ -2066,6 +2067,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           break;
 
         case TMG_DOUBLE: /* double:   -7 5 Double to 2 */
+        case TMG_BEAVER: /* beaver:      25 8 Beaver to 8 */
 
           pmr = malloc( sizeof( pmr->d ) );
           pmr->d.mt = MOVE_DOUBLE;
@@ -2103,12 +2105,12 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           AddMoveRecord( pmr );
 
           break;
-                            
+
         case TMG_WIN_SINGLE: /* win single:    4 14 1 thj wins 1 point */
         case TMG_WIN_GAMMON: /* resign:  -30 15 2 Saltyzoo7 wins 2 points */
         case TMG_WIN_BACKGAMMON: /* win backgammon: ??? */
 
-          if ( ! GameStatus ( ms.anBoard ) ) {
+          if ( ms.gs == GAME_PLAYING ) {
             /* game is in progress: the opponent resigned */
             pmr = malloc( sizeof( *pmr ) );
             pmr->r.mt = MOVE_RESIGN;
@@ -2182,6 +2184,11 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   char sz[ 80 ];
   bgvariation bgv;
 
+#if USE_GTK
+  if( fX )
+    GTKFreeze();
+#endif
+  
   FreeMatch();
   ClearMatch();
 
