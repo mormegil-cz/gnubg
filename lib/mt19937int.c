@@ -57,7 +57,7 @@ static int mti=N+1; /* mti==N+1 means mt[N] is not initialized */
 /* initializes mt[N] with a seed */
 void sgenrand(unsigned long s)
 {
-    s ^= 2476690254UL; /* so the example in the gnubg manual still works */
+    s ^= 2923316694UL; /* so the example in the gnubg manual still works */
     
     mt[0]= s & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {

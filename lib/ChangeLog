@@ -1,3 +1,8 @@
+Mon Aug  5 13:48:34 2002  Gary Wong  <gtw@gnu.org>
+
+	* mt19937int.c (sgenrand): Fudge the seed so that it fits the
+	example in the manual more closely.
+
 Mon Jul 29 13:15:22 2002  Gary Wong  <gtw@gnu.org>
 
 	* mt19937int.c (sgenrand): Upgrade to Makoto Matsumoto's
