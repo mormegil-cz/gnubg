@@ -350,7 +350,7 @@ extern int StatsSet( extwindow *pewnd, char *sz ) {
 				    STATS_OSCORE ), TP_TEXT, 8,
 				  szScore, strlen( szScore ) );
 
-	if( pgd->nMatchTo == 9999 )
+	if( pgd->nMatchTo == 0 )
 	    strcpy( szScore, "unlimited" );
 	else
 	    sprintf( szScore, "%d", pgd->nMatchTo );
