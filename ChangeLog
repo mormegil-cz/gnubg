@@ -1,3 +1,8 @@
+Mon Jul  7 12:33:17 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* rollout.c (RolloutDice): fix bug in generated dice for
+	rollout as initial position.
+
 Sun Jul  6 18:01:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* openurl.c (OpenURL): commit old fix.
