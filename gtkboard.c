@@ -1742,6 +1742,19 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 			
 			return TRUE;
 		}
+
+		if (ap[ms.fTurn].pt != PLAYER_HUMAN && !editing)
+		{
+			outputl( _("It is the computer's turn -- type `play' to force it to "
+				"move immediately.") );
+			outputx();
+
+			board_beep(bd);
+			bd->drag_point = -1;
+
+			return TRUE;
+		}
+
 		if (editing && !(event->state & GDK_CONTROL_MASK))
 		{
 			board_quick_edit(board, bd, x, y, 0);
