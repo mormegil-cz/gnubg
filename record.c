@@ -50,15 +50,24 @@ static float arDecay[ NUM_AVG - 1 ] = {
     DECAY(20), DECAY(100), DECAY(500)
 };
 
+static int nVersion; /* file format when reading player record file */
+/* 0: unknown format */
+/* 1: original format (locale dependent) */
+/* 2: locale independent format, with version header */
+
 extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 
     int ch, i;
     expaverage ea;
+    char ach[ 80 ];
 
+ reread:
     while( isspace( ch = getc( pf ) ) )
 	;
 
     if( ch == EOF ) {
+	nVersion = 0;
+	
 	if( feof( pf ) )
 	    return 1;
 	else {
@@ -66,7 +75,24 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    return -1;
 	}
     }
-    
+
+    if( !nVersion ) {
+	/* we don't know which format we're parsing yet */
+	fgets( ach, 80, pf );
+
+	if( ch != '#' || strncmp( ach, " %Version:", 10 ) ) {
+	    /* no version header; must be version 1 */
+	    nVersion = 1;
+	    rewind( pf );
+	} else
+	    if( ( nVersion = atoi( ach + 10 ) ) < 2 ) {
+		nVersion = 0;
+		outputerrf( "%s: invalid record file version", pch );
+		return -1;
+	    }
+	goto reread;
+    }
+
     /* read and unescape name */
     i = 0;
     do {
@@ -75,6 +101,9 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 		outputerrf( "%s: invalid record file", pch );
 	    else
 		outputerr( pch );
+
+	    nVersion = 0;
+	    
 	    return -1;
 	} else if( ch == '\\' ) {
 	    ppr->szName[ i ] = ( getc( pf ) & 007 ) << 6;
@@ -84,6 +113,9 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    ppr->szName[ i++ ] = ch;
     } while( i < 31 && !isspace( ch = getc( pf ) ) );
     ppr->szName[ i ] = 0;
+    
+    if( nVersion > 1 )
+	PushLocale( "C" );
     
     fscanf( pf, " %d ", &ppr->cGames );
     if( ppr->cGames < 0 )
@@ -99,10 +131,18 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 		outputerr( pch );
 	    else
 		outputerrf( "%s: invalid record file", pch );
+
+	    nVersion = 0;
 	    
+	    if( nVersion > 1 )
+		PopLocale();
+    
 	    return -1;
 	}
 
+    if( nVersion > 1 )
+	PopLocale();
+    
     return 0;
 }
 
@@ -119,6 +159,8 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    return -1;
 	}
 
+    PushLocale( "C" );
+    
     fprintf( pf, " %d ", ppr->cGames );
     for( ea = 0; ea < NUM_AVG; ea++ )
 	fprintf( pf, "%g %g %g %g ",
@@ -129,6 +171,8 @@ static int RecordWriteItem( FILE *pf, char *pch, playerrecord *ppr ) {
 
     putc( '\n', pf );
 
+    PopLocale();
+    
     if( ferror( pf ) ) {
 	outputerr( pch );
 	return -1;
@@ -166,6 +210,12 @@ static int RecordRead( FILE **ppfOut, char **ppchOut, playerrecord apr[ 2 ] ) {
 	return -1;
     }
 
+    if( fputs( "# %Version: 2 ($Revision$)\n", *ppfOut ) < 0 ) {
+	outputerr( *ppchOut );
+	free( *ppchOut );
+	return -1;
+    }
+    
     for( i = 0; i < 2; i++ ) {
 	strcpy( apr[ i ].szName, ap[ i ].szName );
 	apr[ i ].cGames = 0;

@@ -1,3 +1,8 @@
+Sat Nov 23 22:12:37 2002  Gary Wong  <gtw@gnu.org>
+
+	* record.c (RecordReadItem, RecordWriteItem): Add locale-independent
+	formatting and file format versioning to the player record file.
+
 Sat Nov 23 12:16:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* configure.in: rename DATADIR to _DATADIR to avoid overlap
