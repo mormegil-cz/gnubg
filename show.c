@@ -2100,9 +2100,9 @@ extern void
 CommandShowVariation( char *sz ) {
 
   if ( ms.gs != GAME_NONE )
-    outputf( _("You are playing: %s\n"), aszVariations[ ms.bgv ] );
+    outputf( _("You are playing: %s\n"), gettext( aszVariations[ ms.bgv ] ) );
 
-  outputf( _("Default variation is: %s\n"), aszVariations[ bgvDefault ] );
+  outputf( _("Default variation is: %s\n"), gettext( aszVariations[ bgvDefault ] ) );
 
 }
 
