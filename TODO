@@ -230,7 +230,8 @@ duplication of effort and to make sure our changes merge easily.
   number of games finished, but seem to report the total number of games
   started, regardless of the current location within the match.  Actually,
   the entire use of ms.cGames is questionable, since we might not have
-  every game in a match/session recorded. (gary)
+  every game in a match/session recorded.  This has ramifications in
+  gtkgame.c: SelectGame, GTKAddGame, GTKPopGame, etc. (gary)
 ** If "set turn" has been used during a game (so a player has two
   consecutive moves), then export to .mat format saves it incorrectly.
 ** "set score" does not update the score in the GTK game window option menu.

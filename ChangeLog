@@ -1,3 +1,7 @@
+Tue Oct 23 20:38:04 2001  Gary Wong  <gtw@research.att.com>
+
+	* import.c (ImportSGGGame): Handle duplicated lines in SGG files.
+
 Tue Oct 23 23:41:13 2001  Øystein Johansen <oeysteij@online.no>
 
         play.c (DumpListGame): New function

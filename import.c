@@ -876,6 +876,11 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 			}
 		    } else {
 			if( !strncasecmp( pch, "double", 6 ) ) {
+			    if( ms.fDoubled && ms.fTurn != fPlayer )
+				/* Presumably a duplicated move in the
+				   SGG file -- ignore */
+				continue;
+			    
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_DOUBLE;
 			    pmr->d.sz = NULL;
@@ -884,6 +889,9 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 			    pmr->d.st = SKILL_NONE;
 			    AddMoveRecord( pmr );
 			} else if( !strncasecmp( pch, "accept", 6 ) ) {
+			    if( !ms.fDoubled )
+				continue;
+			    
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_TAKE;
 			    pmr->d.sz = NULL;
