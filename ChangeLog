@@ -1,3 +1,17 @@
+Mon Oct 23 12:31:30 2000  Gary Wong  <gtw@research.att.com>
+
+	* backgammon.h: New `setdice' record.
+	* gnubg.c (UpdateBoard): New function; defer board updates 
+	until the server has caught up with the previous board.
+	* gnubgtest: Added a pubeval game, cubeful game, and test of
+	previous/next commands.
+	* gtkgame.c: Extensive changes to add a "game record" window
+	("list game" to see it).
+	* play.c (AddMoveRecord, ApplyMoveRecord, PopMoveRecord,
+	SetMoveRecord): Revised moverecord handling.
+	* eval.c (HeuristicDatabase): Show progress indicator while
+	building database.
+
 Sat Oct 21 10:59:00 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* eval.h: `float *pEval' is changed to `float arEvalMove[ 5 ]'.

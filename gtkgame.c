@@ -202,14 +202,16 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
 
-GtkWidget *pwMain, *pwBoard;
-static GtkWidget *pwStatus;
+GtkWidget *pwBoard;
+static GtkWidget *pwStatus, *pwMain, *pwGame, *pwGameList;
+static GtkStyle *psGameList, *psCurrent;
+static int yCurrent, xCurrent; /* highlighted row/col in game record */
 static GtkItemFactory *pif;
 guint nNextTurn = 0; /* GTK idle function */
 static int cchOutput;
 static guint idOutput;
 static list lOutput;
-int fGTKOutput = FALSE, fTTY = TRUE;
+int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
 
 void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
@@ -339,9 +341,239 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
     }
 }
 
-static gboolean main_delete( GtkWidget *dice, GdkEvent *event,
-			     gpointer p ) {
+static void CreateGameWindow( void ) {
 
+    static char *asz[] = { "Move", NULL, NULL };
+    GtkWidget *phbox = gtk_hbox_new( FALSE, 0 ),
+	*psb = gtk_vscrollbar_new( NULL );
+    GtkStyle *ps;
+    
+    pwGame = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    gtk_window_set_title( GTK_WINDOW( pwGame ), "GNU Backgammon - "
+			  "Game record" );
+    gtk_window_set_wmclass( GTK_WINDOW( pwGame ), "gamerecord",
+			    "GameRecord" );
+    gtk_window_set_default_size( GTK_WINDOW( pwGame ), 0, 400 );
+
+    gtk_container_add( GTK_CONTAINER( pwGame ), phbox );
+
+    gtk_container_add( GTK_CONTAINER( phbox ),
+		       pwGameList = gtk_clist_new_with_titles( 3, asz ) );
+    gtk_clist_set_selection_mode( GTK_CLIST( pwGameList ),
+				  GTK_SELECTION_BROWSE );
+    gtk_clist_column_titles_passive( GTK_CLIST( pwGameList ) );
+    gtk_clist_set_column_justification( GTK_CLIST( pwGameList ), 0,
+					GTK_JUSTIFY_RIGHT );
+    gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 0, 40 );
+    gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 1, 200 );
+    gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 2, 200 );
+    gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 0, FALSE );
+    gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 1, FALSE );
+    gtk_clist_set_column_resizeable( GTK_CLIST( pwGameList ), 2, FALSE );
+
+    ps = gtk_style_new();
+    ps->base[ GTK_STATE_SELECTED ] =
+	ps->base[ GTK_STATE_ACTIVE ] =
+	ps->base[ GTK_STATE_NORMAL ] =
+	pwGameList->style->base[ GTK_STATE_NORMAL ];
+    ps->fg[ GTK_STATE_SELECTED ] =
+	ps->fg[ GTK_STATE_ACTIVE ] =
+	ps->fg[ GTK_STATE_NORMAL ] =
+	pwGameList->style->fg[ GTK_STATE_NORMAL ];
+    gdk_font_ref( ps->font = pwGameList->style->font );
+    gtk_widget_set_style( pwGameList, ps );
+    
+    psGameList = gtk_style_copy( ps );
+    psGameList->bg[ GTK_STATE_SELECTED ] = psGameList->bg[ GTK_STATE_NORMAL ] =
+	ps->base[ GTK_STATE_NORMAL ];
+
+    psCurrent = gtk_style_copy( psGameList );
+    psCurrent->bg[ GTK_STATE_SELECTED ] = psCurrent->bg[ GTK_STATE_NORMAL ] =
+	psCurrent->base[ GTK_STATE_SELECTED ] =
+	psCurrent->base[ GTK_STATE_NORMAL ] =
+	psGameList->fg[ GTK_STATE_NORMAL ];
+    psCurrent->fg[ GTK_STATE_SELECTED ] = psCurrent->fg[ GTK_STATE_NORMAL ] =
+	psGameList->bg[ GTK_STATE_NORMAL ];
+    
+    gtk_clist_set_vadjustment( GTK_CLIST( pwGameList ),
+			       gtk_range_get_adjustment( GTK_RANGE( psb ) ) );
+
+    gtk_container_add( GTK_CONTAINER( phbox ), psb );
+    
+    gtk_signal_connect( GTK_OBJECT( pwGame ), "delete_event",
+			GTK_SIGNAL_FUNC( gtk_widget_hide ), NULL );
+}
+
+extern void ShowGameWindow( void ) {
+
+    gtk_widget_show_all( pwGame );
+}
+
+typedef struct _gamelistrow {
+    moverecord *apmr[ 2 ]; /* moverecord entries for each column */
+    int fCombined; /* this message's row is combined across both columns */
+} gamelistrow;
+
+static int AddMoveRecordRow( void ) {
+
+    gamelistrow *pglr;
+    static char *aszEmpty[] = { NULL, NULL, NULL };
+    char szIndex[ 5 ];    
+    int i = gtk_clist_append( GTK_CLIST( pwGameList ), aszEmpty );
+    
+    sprintf( szIndex, "%d", GTK_CLIST( pwGameList )->rows );
+    gtk_clist_set_text( GTK_CLIST( pwGameList ), i, 0, szIndex );
+    gtk_clist_set_row_style( GTK_CLIST( pwGameList ), i, psGameList );
+    gtk_clist_set_row_data_full( GTK_CLIST( pwGameList ), i,
+				 pglr = malloc( sizeof( *pglr ) ), free );
+    pglr->fCombined = FALSE;
+    pglr->apmr[ 0 ] = pglr->apmr[ 1 ] = NULL;
+
+    return i;
+}
+
+extern void GTKAddMoveRecord( moverecord *pmr ) {
+
+    gamelistrow *pglr;
+    int i, fPlayer;
+    char *pch, sz[ 40 ];
+    
+    switch( pmr->mt ) {
+    case MOVE_GAMEINFO:
+	/* no need to list this */
+	return;
+
+    case MOVE_NORMAL:
+	fPlayer = pmr->n.fPlayer;
+	pch = sz;
+	sz[ 0 ] = pmr->n.anRoll[ 0 ] + '0';
+	sz[ 1 ] = pmr->n.anRoll[ 1 ] + '0';
+	sz[ 2 ] = ':';
+	sz[ 3 ] = ' ';
+	FormatMove( sz + 4, anBoard, pmr->n.anMove );
+	break;
+
+    case MOVE_DOUBLE:
+	fPlayer = pmr->d.fPlayer;
+	pch = " Double"; /* FIXME show value */
+	break;
+	
+    case MOVE_TAKE:
+	fPlayer = pmr->t.fPlayer;
+	pch = " Take";
+	break;
+	
+    case MOVE_DROP:
+	fPlayer = pmr->t.fPlayer;
+	pch = " Drop";
+	break;
+	
+    case MOVE_RESIGN:
+	fPlayer = pmr->r.fPlayer;
+	pch = " Resigns"; /* FIXME show value */
+	break;
+
+    case MOVE_SETDICE:
+	fPlayer = pmr->sd.fPlayer;
+	sprintf( pch = sz, "Rolled %d%d", pmr->sd.anDice[ 0 ],
+		 pmr->sd.anDice[ 1 ] );
+	break;
+
+    default:
+	fPlayer = -1;
+	pch = "FIXME";
+    }
+
+    if( !GTK_CLIST( pwGameList )->rows || 
+	( pglr = gtk_clist_get_row_data( GTK_CLIST( pwGameList ),
+					 GTK_CLIST( pwGameList )->rows - 1 ) )
+	->fCombined || pglr->apmr[ 1 ] || ( !fPlayer && pglr->apmr[ 0 ] ) )
+	i = AddMoveRecordRow();
+    else
+	i = GTK_CLIST( pwGameList )->rows - 1;
+    
+    pglr = gtk_clist_get_row_data( GTK_CLIST( pwGameList ), i );
+
+    if( ( pglr->fCombined = fPlayer == -1 ) )
+	fPlayer = 0;
+
+    pglr->apmr[ fPlayer ] = pmr;
+    
+    gtk_clist_set_text( GTK_CLIST( pwGameList ), i, fPlayer + 1, pch );
+}
+
+extern void GTKPopMoveRecord( moverecord *pmr ) {
+
+    GtkCList *pcl = GTK_CLIST( pwGameList );
+    gamelistrow *pglr;
+    
+    gtk_clist_freeze( pcl );
+
+    while( pcl->rows ) {
+	pglr = gtk_clist_get_row_data( pcl, pcl->rows - 1 );
+	
+	if( pglr->apmr[ 0 ] != pmr && pglr->apmr[ 1 ] != pmr )
+	    gtk_clist_remove( pcl, pcl->rows - 1);
+	else
+	    break;
+    }
+
+    if( pcl->rows ) {
+	if( pglr->apmr[ 0 ] == pmr )
+	    /* the left column matches; delete the row */
+	    gtk_clist_remove( pcl, pcl->rows - 1 );
+	else {
+	    /* the right column matches; delete that column only */
+	    gtk_clist_set_text( pcl, pcl->rows - 1, 2, NULL );
+	    pglr->apmr[ 1 ] = NULL;
+	}
+    }
+    
+    gtk_clist_thaw( pcl );
+}
+
+extern void GTKSetMoveRecord( moverecord *pmr ) {
+
+    GtkCList *pcl = GTK_CLIST( pwGameList );
+    gamelistrow *pglr;
+    int i;
+    
+    gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psGameList );
+
+    for( i = pcl->rows - 1; i >= 0; i-- ) {
+	pglr = gtk_clist_get_row_data( pcl, i );
+	if( pglr->apmr[ 1 ] == pmr ) {
+	    xCurrent = 2;
+	    break;
+	} else if( pglr->apmr[ 0 ] == pmr ) {
+	    xCurrent = 1;
+	    break;
+	}
+    }
+
+    yCurrent = i;
+    
+    if( yCurrent >= 0 && pmr->mt != MOVE_SETDICE ) {
+	if( ++xCurrent > 2 ) {
+	    xCurrent = 1;
+	    yCurrent++;
+	}
+
+	if( yCurrent >= pcl->rows )
+	    AddMoveRecordRow();
+    }
+
+    gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psCurrent );
+    gtk_clist_moveto( pcl, yCurrent, xCurrent, 0.5, 0.5 );
+}
+
+extern void GTKClearMoveRecord( void ) {
+
+    gtk_clist_clear( GTK_CLIST( pwGameList ) );
+}
+
+static gboolean main_delete( GtkWidget *pw ) {
+    
     UserCommand( "quit" );
     
     return TRUE;
@@ -357,13 +589,10 @@ static void TextPopped( GtkWidget *pw, guint id, gchar *text, void *p ) {
 	fFinishedPopping = TRUE;
 }
 
-extern void RunGTK( void ) {
-
+extern int InitGTK( int *argc, char ***argv ) {
+    
     GtkWidget *pwVbox;
     GtkAccelGroup *pag;
-    int n;
-    togglecommand *ptc;
-    
     static GtkItemFactoryEntry aife[] = {
 	{ "/_File", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_New", NULL, NULL, 0, "<Branch>" },
@@ -501,8 +730,11 @@ extern void RunGTK( void ) {
 	{ "/_Help/_About...", NULL, NULL, 0, NULL }
     };
 
-    fShowProgress = TRUE;
+    if( !gtk_init_check( argc, argv ) )
+	return FALSE;
     
+    fnAction = HandleXAction;
+
     gdk_rgb_init();
     gdk_rgb_set_min_colors( 2 * 2 * 2 );
     gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
@@ -535,17 +767,25 @@ extern void RunGTK( void ) {
     
     /* Make sure the window is reasonably big, but will fit on a 640x480
        screen. */
-    gtk_window_set_default_size( GTK_WINDOW( pwMain ), 500, 460 );
-    gtk_widget_show_all( pwMain );
+    gtk_window_set_default_size( GTK_WINDOW( pwMain ), 500, 465 );
     
     gtk_signal_connect( GTK_OBJECT( pwMain ), "delete_event",
 			GTK_SIGNAL_FUNC( main_delete ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwMain ), "destroy_event",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
+    CreateGameWindow();
+    
     ListCreate( &lOutput );
-    fGTKOutput = TRUE;
 
+    return TRUE;
+}
+
+extern void RunGTK( void ) {
+
+    int n;
+    togglecommand *ptc;
+    
     /* Ensure all menu item settings are initialised to the correct state. */
     for( ptc = atc; ptc->p; ptc++ )
 	GTKSet( ptc->p );
@@ -559,8 +799,6 @@ extern void RunGTK( void ) {
 
     AllowStdin();
     
-    fnAction = HandleXAction;
-
     if( fTTY ) {
 #ifdef ConnectionNumber /* FIXME use configure somehow to detect this */
 	if( ( n = fcntl( ConnectionNumber( GDK_DISPLAY() ),
@@ -579,6 +817,8 @@ extern void RunGTK( void ) {
 	Prompt();
 #endif
     }
+    
+    gtk_widget_show_all( pwMain );
     
     gtk_main();
 }
@@ -845,6 +1085,7 @@ extern void GTKHint( movelist *pml ) {
 					    i == 6 ? GTK_JUSTIFY_LEFT :
 					    GTK_JUSTIFY_RIGHT );
     }
+    gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
     
     for( i = 0; i < pml->cMoves; i++ ) {
 	float *ar = pml->amMoves[ i ].arEvalMove;
@@ -903,6 +1144,8 @@ extern void GTKRollout( int c ) {
     pwVbox = gtk_vbox_new( FALSE, 4 );
 	
     pwRolloutResult = gtk_clist_new_with_titles( 7, aszTitle );
+    gtk_clist_column_titles_passive( GTK_CLIST( pwRolloutResult ) );
+    
     pwProgress = gtk_progress_bar_new();
 
     gtk_box_pack_start( GTK_BOX( pwVbox ), pwRolloutResult, TRUE, TRUE, 0 );
@@ -969,6 +1212,11 @@ extern int GTKRolloutUpdate( float arMu[], float arSigma[], int iGame,
 
 extern void GTKRolloutDone( void ) {
 
+    /* if they cancelled the rollout early, pwRolloutDialog has already been
+       destroyed */
+    if( !pwRolloutDialog )
+	return;
+    
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
 				    "Finished (%v trials)" );
     
@@ -997,9 +1245,6 @@ extern void GTKSet( void *p ) {
 
     togglecommand *ptc;
 
-    if( !fGTKOutput )
-	return;
-    
     /* Handle normal `toggle' menu items. */
     for( ptc = atc; ptc->p; ptc++ )
 	if( p == ptc->p ) {
@@ -1050,6 +1295,11 @@ extern void GTKSet( void *p ) {
 	gtk_label_set_text( GTK_LABEL( GTK_BIN(
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_TURN_1 )
 	    )->child ), ap[ 1 ].szName );
+
+	gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 1,
+				    ap[ 0 ].szName );
+	gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 2,
+				    ap[ 1 ].szName );
     } else if( p == &fTurn ) {
 	/* Handle the player on roll. */
 	fAutoCommand = TRUE;

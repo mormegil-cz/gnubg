@@ -32,6 +32,7 @@ duplication of effort and to make sure our changes merge easily.
   number of turns on the bar, whether each player is closed out, average
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
+** Make gnubg offer resignations when its position is hopeless.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -55,9 +56,8 @@ duplication of effort and to make sure our changes merge easily.
   calls will have to be replaced, for instance.
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
   multiple moves (e.g. "8/7(2) 6/5(2)").
-** Add undo, reroll, and viewing next/prev moves in game/match.  (Reroll
-  is not really necessary, since "set turn <player>" will let them roll
-  again.)
+** Allow "next game [n]" and "previous game [n]" for selecting other games
+  in the match.
 ** Add ":" as a Guile escape, once it's here.
 ** Allow resuming interrupted rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
@@ -68,6 +68,10 @@ duplication of effort and to make sure our changes merge easily.
 ** Add some kind of command to perform batch rollouts.
 *** Make "hint" label the moves it lists, and allow you to roll out
   a choice of alternatives.
+** Add a "set record" command; when "record" is off, no moves are
+  recorded (which implies that "save", "list" and the game list window
+  won't work, but it will save memory for situations like playing
+  10,000 games vs. pubeval).
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
@@ -122,7 +126,12 @@ duplication of effort and to make sure our changes merge easily.
   checker that cannot be moved with the left die, it should move the 
   checker with the right die if possible [this is analogous to the
   behaviour in Snowie].
-
+** Add progress indicators for everything that checks fShowProgress.
+  A function that generates a progress bar/ASCII to stdout would help.
+** Allow selection of moves in the game list window.
+** Add a pop-up menu in the game list window to allow selection of old games.
+** Show "take" and "drop" buttons in the off-board dice window when
+  a double is offered; also "agree" and "decline" for resignations.
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
   changes in eval.c to give the information in a useful form; probably
@@ -149,6 +158,11 @@ duplication of effort and to make sure our changes merge easily.
 ** "set player <tab>" gives incorrect completions.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
+** When the game window is full, resizing it makes it MUCH bigger
+  than it should be.
+** When ShowBoard() postpones an update, the off-board dice are not set.
+  ("next" and "previous" don't change the dice, either -- it would be nice
+  to add an external interface to change them.)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -175,6 +189,7 @@ duplication of effort and to make sure our changes merge easily.
   be better to move everything into the top level configure.in.  This makes
   having standalone lib (event) and ext packages more difficult, but that
   probably isn't critical any more.
+** Add optional time rules, for tournament play when clocks are used.
 
 
 Local Variables:
