@@ -3,7 +3,7 @@ Fri Jul 19 09:33:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* html.c (HTMLDumpStatContext), analysis.c (DumpStatContext),
 	gtkgame.c (GTKDumpStatContext): fix some typos.
 
- 	Patch contributed by Jim Jesgrave.
+ 	Patch contributed by Jim Segrave.
 
 	Get rid of core dump if you type a command while gnubg is, say,
 	analysing.
