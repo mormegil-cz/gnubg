@@ -3827,7 +3827,7 @@ extern void PromptForExit( void ) {
 
     static int fExiting;
 #if USE_BOARD3D
-	BoardData* bd;
+	BoardData* bd = NULL;
 	
 	if (fX)
 	  bd = BOARD(pwBoard)->board_data;

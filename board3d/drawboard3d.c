@@ -235,7 +235,8 @@ void preDrawPiece0(BoardData* bd)
 	{
 		latitude = (float)sin(angle2) * lip;
 		angle = 0;
-		new_radius = (float)sqrt((lip * lip) - (latitude * latitude));
+
+		new_radius = Dist2d(lip, latitude);
 
 		for (i = 0; i < bd->curveAccuracy; i++)
 		{
@@ -391,7 +392,7 @@ void renderDice(BoardData* bd, float size)
 	for (i = 0; i < lns + 1; i++)
 	{
 		latitude = (float)sin(lat_angle) * radius;
-		new_radius = (float)sqrt(radius * radius - (latitude * latitude));
+		new_radius = Dist2d(radius, latitude);
 
 		ns = (bd->curveAccuracy / 4) - i;
 
@@ -1694,7 +1695,7 @@ if (bd->roundedEdges)
 		tuv = (TEXTURE_SCALE) / bd->boxMat.pTexture->width;
 		st = (float)sin((2 * PI) / bd->curveAccuracy) * BOARD_FILLET;
 		ct = ((float)cos((2 * PI) / bd->curveAccuracy) - 1) * BOARD_FILLET;
-		dInc = (float)sqrt(st * st + (ct * ct));
+		dInc = (float)sqrt(st * st + ct * ct);
 		curveTextOff = (bd->curveAccuracy / 4) * dInc;
 	}
 

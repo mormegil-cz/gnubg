@@ -99,6 +99,7 @@ void updateMovingPieceOccPos(BoardData* bd);
 void LoadTextureInfo();
 GList *GetTextureList(int type);
 int IsSet(int flags, int bit);
+float Dist2d(float a, float b);
 
 typedef int idleFunc(BoardData* bd);
 void setIdleFunc(BoardData* bd, idleFunc* pFun);

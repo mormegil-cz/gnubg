@@ -60,7 +60,7 @@ double get_time()
 
 double get_time()
 {	/* Return elapsed time in milliseconds */
-	return clock() / 1000.0;
+	return 1000 * clock() / CLOCKS_PER_SEC;
 }
 
 #endif

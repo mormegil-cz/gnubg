@@ -44,7 +44,7 @@ extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
 extern void waveFlag(BoardData* bd, float wag);
 
-/* Test function to show normal direction*/
+/* Test function to show normal direction */
 void CheckNormal()
 {
 	float len;
@@ -204,6 +204,15 @@ void setMaterial(Material* pMat)
 	{
 		glDisable(GL_TEXTURE_2D);
 	}
+}
+
+float Dist2d(float a, float b)
+{
+	float sqdD = a * a - b * b;
+	if (sqdD == 0)
+		return 0;
+	else
+		return (float)sqrt(fabs(sqdD));
 }
 
 int IsSet(int flags, int bit)
@@ -1095,7 +1104,7 @@ void QuarterCylinder(float radius, float len, int accuracy, Texture* texture)
 	{
 		float st = (float)sin((2 * PI) / accuracy) * radius;
 		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
-		dInc = (float)sqrt(st * st + (ct * ct));
+		dInc = (float)sqrt(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
 	else
@@ -1139,7 +1148,7 @@ void QuarterCylinderSplayedRev(float radius, float len, int accuracy, Texture* t
 	{
 		float st = (float)sin((2 * PI) / accuracy) * radius;
 		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
-		dInc = (float)sqrt(st * st + (ct * ct));
+		dInc = (float)sqrt(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
 	else
@@ -1183,7 +1192,7 @@ void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* text
 	{
 		float st = (float)sin((2 * PI) / accuracy) * radius;
 		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
-		dInc = (float)sqrt(st * st + (ct * ct));
+		dInc = (float)sqrt(st * st + ct * ct);
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
 	else
@@ -1255,7 +1264,7 @@ void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
 	{
 		latitude = (float)sin(lat_angle) * radius;
 		angle = 0;
-		new_radius = (float)sqrt(radius * radius - (latitude * latitude) );
+		new_radius = Dist2d(radius, latitude);
 
 		ns = (accuracy / 4) - i;
 		step = (2 * PI) / (ns * 4);

@@ -3077,7 +3077,7 @@ static void CommandNextRoll( char *sz ) {
     moverecord *pmr;
 
 #if USE_GTK
-    BoardData *bd;
+    BoardData *bd = NULL;
 
     if (fX) {
       bd = BOARD( pwBoard )->board_data;
