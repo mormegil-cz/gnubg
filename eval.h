@@ -127,6 +127,28 @@ typedef enum _cubedecision {
   NOT_AVAILABLE, /* Cube not available */
 } cubedecision;
 
+/*
+ * prefined settings
+ *
+ */
+
+#define NUM_SETTINGS            6
+#define SETTINGS_WORLDCLASS     5
+#define SETTINGS_ADVANCED       4
+#define SETTINGS_EXPERT         3
+#define SETTINGS_INTERMEDIATE   2
+#define SETTINGS_NOVICE         1
+#define SETTINGS_BEGINNER       0
+
+extern evalcontext aecSettings[ NUM_SETTINGS  ];
+extern const char *aszSettings[ NUM_SETTINGS ];
+
+#define NUM_SEARCHSPACES        6
+
+extern const char *aszSearchSpaces[ NUM_SEARCHSPACES ];
+extern const int anSearchCandidates[ NUM_SEARCHSPACES ];
+extern const float arSearchTolerances[ NUM_SEARCHSPACES ];
+
 
 typedef struct _move {
   int anMove[ 8 ];

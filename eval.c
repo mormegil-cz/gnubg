@@ -317,6 +317,36 @@ static  laRollList_t thirdLists[3] = {
 /* Random context, for generating non-deterministic noisy evaluations. */
 static randctx rc;
 
+/*
+ * predefined settings 
+ */
+
+const char *aszSettings[ NUM_SETTINGS ] = {
+  "beginner", "novice", "intermediate", "advanced", "expert", "world class" };
+
+evalcontext aecSettings[ NUM_SETTINGS ] = {
+  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.060 }, /* beginner */
+  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.050 }, /* novice */
+  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.040 }, /* intermediate */
+  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.015 }, /* advanced */
+  { 0, TRUE, 0, 0, TRUE, 0.0 , 0.0 },   /* expert */
+  { 8, TRUE, 2, 0, TRUE, 0.16, 0.0 }    /* world class */
+};
+
+
+const char *aszSearchSpaces[ NUM_SEARCHSPACES ] = {
+  "super tiny", "tiny", "small", "medium", "large", "huge" };
+
+const int anSearchCandidates[ NUM_SEARCHSPACES ] = {
+  2, 3, 4, 6, 7, 8
+};
+
+const float arSearchTolerances[ NUM_SEARCHSPACES ] = {
+  0.050, 0.070, 0.090, 0.110, 0.130, 0.160
+};
+
+
+
 static void ComputeTable0( void )
 {
   int i, c, n0, n1;
@@ -6835,17 +6865,21 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
 
   /* Search candidates */
 
-  if ( pec1->nSearchCandidates < pec2->nSearchCandidates )
-    return -1;
-  else if ( pec1->nSearchCandidates > pec2->nSearchCandidates )
-    return +1;
+  if ( pec1->nPlies ) {
 
-  /* Search tolerance */
+    if ( pec1->nSearchCandidates < pec2->nSearchCandidates )
+      return -1;
+    else if ( pec1->nSearchCandidates > pec2->nSearchCandidates )
+      return +1;
+    
+    /* Search tolerance */
+    
+    if ( pec1->rSearchTolerance < pec2->rSearchTolerance )
+      return -1;
+    else if ( pec1->rSearchTolerance > pec2->rSearchTolerance )
+      return +1;
 
-  if ( pec1->rSearchTolerance < pec2->rSearchTolerance )
-    return -1;
-  else if ( pec1->rSearchTolerance > pec2->rSearchTolerance )
-    return +1;
+  }
 
   /* Noise  */
 
@@ -6854,13 +6888,22 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
   else if ( pec1->rNoise < pec2->rNoise )
     return +1;
 
-  if ( ! pec1->nPlies ) {
+  if ( pec1->rNoise > 0 ) {
+
+    if ( pec1->fDeterministic > pec2->fDeterministic )
+      return -1;
+    else if ( pec1->fDeterministic > pec2->fDeterministic )
+      return +1;
+
+  }
+
+  if ( pec1->nPlies > 1 ) {
 
     int n1 = ( pec1->nReduced != 21 ) ? pec1->nReduced : 0;
     int n2 = ( pec2->nReduced != 21 ) ? pec2->nReduced : 0;
     if ( n1 > n2 )
       return -1;
-    else if ( n2 < n1 )
+    else if ( n1 < n2 )
       return +1;
   }
 
