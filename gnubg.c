@@ -221,7 +221,8 @@ char *aszExtensions [ NUM_PATHS ] = {
   "txt",
   "xml",
   "tmg",
-  "bkg"
+  "bkg",
+  "txt"
 };
 
 
@@ -1265,6 +1266,12 @@ command cER = {
     szFILENAME, &cFilename },
   { "tmg", CommandSetPathTMG,
     N_("Set default path for loading TrueMoneyGames .tmg files"), 
+    szFILENAME, &cFilename },
+  { "bkg", CommandSetPathBKG,
+    N_("Set default path for loading BKG files"), 
+    szFILENAME, &cFilename },
+  { "snowietxt", CommandSetPathSnowieTxt,
+    N_("Set default path for import of Snowie .txt files"), 
     szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetPriority[] = {
@@ -4178,7 +4185,7 @@ extern void CommandImportSnowieTxt( char *sz ) {
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportSnowieTxt( pf );
 	fclose( pf );
-        //setDefaultFileName ( sz, PATH_SGG );
+        setDefaultFileName ( sz, PATH_SNOWIE_TXT );
     } else
 	outputerr( sz );
 }

@@ -1,3 +1,14 @@
+Sat Mar 29 16:47:16 2003  Joern Thyssen  <jth@gnubg.org>
+
+	New command "set path snowietxt ...".
+	(reported by Michael Depreli)
+
+	* gnubg.c: new command "set path snowietxt ..."
+	* set.c (CommandSetPathBKG, CommandSetPathSnowieTxt): new routines.
+	* show.c (CommandShowPaths): show new path.
+	* gtkgame.c (GTKShowPath): show new path.
+	* gtkgame.c (ImportSnowieTxt): use new path.
+
 Sat Mar 29 16:23:37 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Try to stop the never-ending discussion regarding cubeless

@@ -1769,6 +1769,7 @@ CommandShowPath ( char *sz ) {
     N_("Export of text files"),
     N_("Loading of match equity files (.xml)"),
     N_("Import of TrueMoneyGames TMG files"),
+    N_("Import of Snowie .txt files"),
   };
 
   /* make GTK widget that allows editing of paths */

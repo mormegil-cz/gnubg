@@ -3247,6 +3247,14 @@ SetPath ( char *sz, pathformat f ) {
 
 
 extern void
+CommandSetPathSnowieTxt ( char *sz ) {
+
+  SetPath ( sz, PATH_SNOWIE_TXT );
+
+}
+
+
+extern void
 CommandSetPathGam ( char *sz ) {
 
   SetPath ( sz, PATH_GAM );
@@ -3352,6 +3360,13 @@ extern void
 CommandSetPathText ( char *sz ) {
 
   SetPath ( sz, PATH_TEXT );
+
+}
+
+extern void
+CommandSetPathBKG ( char *sz ) {
+
+  SetPath ( sz, PATH_BKG );
 
 }
 

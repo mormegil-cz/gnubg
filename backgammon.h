@@ -298,7 +298,7 @@ extern int nGUIAnimSpeed, fGUIBeep, fGUIDiceArea, fGUIHighDieFirst,
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
   PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
-  PATH_MET, PATH_TMG, PATH_BKG,
+  PATH_MET, PATH_TMG, PATH_BKG, PATH_SNOWIE_TXT,
   NUM_PATHS } 
 pathformat;
 
@@ -801,7 +801,9 @@ extern void CommandAccept( char * ),
     CommandSetPathPos( char * ),
     CommandSetPathGam( char * ),
     CommandSetPathPostScript( char * ),
+    CommandSetPathSnowieTxt( char * ),
     CommandSetPathText( char * ),
+    CommandSetPathBKG( char * ),
     CommandSetPlayerChequerplay( char * ),
     CommandSetPlayerCubedecision( char * ),
     CommandSetPlayerExternal( char * ),
