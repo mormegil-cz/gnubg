@@ -3122,7 +3122,7 @@ extern void CommandNext( char *sz ) {
     int n;
     char *pch;
     int fMarkedMoves = FALSE;
-    list *p;
+    list *p, *orig_p;
     moverecord *pmr = NULL;
     matchstate SaveMs;
     
@@ -3159,7 +3159,7 @@ extern void CommandNext( char *sz ) {
     }
     
     if( fMarkedMoves ) {
-	p = plLastMove;
+	p = orig_p = plLastMove;
 	memcpy( &SaveMs, &ms, sizeof( matchstate ) );
 	/* we need to increment the count if we're pointing to a marked
 	   move */
@@ -3175,7 +3175,11 @@ extern void CommandNext( char *sz ) {
 		break;
 	}
 
-	if (p->plNext->p == 0) {
+	if ((p->plNext->p == 0)  /* ran out of moves to examine */
+		&& (!MoveIsMarked (pmr) /* last move is not an error */
+			|| (p == orig_p)    /* or there were no moves to look at on */
+            || (p == orig_p->plNext))) /* or we were on the last move */   
+	{
 	    /* didn't find the requested move, put things back */
 	    memcpy( &ms, &SaveMs, sizeof( matchstate ) );
 	    FixMatchState ( &ms, plLastMove->p );
