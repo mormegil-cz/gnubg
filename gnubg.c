@@ -3031,8 +3031,10 @@ extern void PromptForExit( void ) {
 
 #if USE_GTK
     if( fX ) {
+#if USE_GTK2
 	g_list_foreach( gtk_window_list_toplevels(), (GFunc) gtk_widget_hide,
 			NULL );
+#endif
 	
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
@@ -3133,7 +3135,6 @@ CommandRollout( char *sz ) {
       return;
 
     }
-
 
 #if HAVE_ALLOCA
     aan = alloca( 50 * c * sizeof( int ) );
