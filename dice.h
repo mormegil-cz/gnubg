@@ -30,7 +30,8 @@ typedef enum _rng {
 
 extern rng rngCurrent;
 
-extern void InitRNG( void ), InitRNGSeed( int n );
+extern int InitRNG( void );
+extern void InitRNGSeed( int n );
 extern void RollDice( int anDice[ 2 ] );
 extern void GetManualDice( int anDice[ 2 ] );
 

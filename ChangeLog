@@ -1,3 +1,12 @@
+Mon Jan  3 21:13:22 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* dice.c (InitRNG): Use /dev/random for initial seed if possible.
+
+Mon Jan  3 20:15:46 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c (SetRNG): Don't call CommandSetSeed() when changing
+	to manual dice.
+
 Mon Jan  3 03:13:02 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* xgame.c (StatsMove): call StatsUpdateBoardID earlier, so that the
