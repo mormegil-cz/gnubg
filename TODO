@@ -67,23 +67,22 @@ duplication of effort and to make sure our changes merge easily.
   won't work, but it will save memory for situations like playing
   10,000 games vs. pubeval).
 ** Extend "rollout" to take a _list_ of positions to roll out, and not
-  just one.
-** Wherever a position ID or move is expected, also allow an expression
-  of the form "=123", where 123 is the move number listed by "hint".
-  This allows command sequences like "roll", "hint", "=1" (play the move
-  gnubg ranks highest), and "roll", "hint", "rollout =1 =2 =4" (roll out
-  3 of the top 4 choices).
+  just one. (gary)
 ** Add a command "show moves" which shows a list of legal moves, like hint
   does, but without evaluating them.
+** Also "add move", to add a specific move to the list (e.g.
+  "add move 8/5 6/5").
 ** Let the user choose whether probabilities are shown as probabilities
   (0.123) or percentages (12.3%); match equities can be probabilities,
   percentages or just numbers (-1.000 = 0%, 0.000 = 50%, 1.000 = 100%).
+** Once we have cubeful rollouts, allow the command "rollout =cube"
+  to perform a rollout to judge cube decisions (under GTK, there should
+  be a "Rollout" button in the hint window for cube decisions, and something
+  under the Analyse menu).
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
 ** Define Scheme "port"s for the gnubg output() functions.
-** Automatically load "gnubg.scm" on startup.  Put gnubg.scm somewhere
-  during "make install".
 ** Defer and allow Guile interrupts at appropriate places in guile.c.
 
 * TTY interface:
@@ -107,16 +106,11 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow the user to decide whether short messages appear in dialogs
   instead of the status bar, or whether all messages are appended to a
   message window.
-** Disable the set/edit buttons in the board window when no game is in
+** Disable the reset/edit buttons in the board window when no game is in
   progress.  (Disable appropriate menu items, too.)
 ** Add a "stop" button which sets fInterrupt; this should be the grab
   widget when gnubg is busy.
 ** Add optional point number labels on the board.
-** Remove the superfluous "Set" position button.
-** Add a "Reset" button that restores the position, from
-  before the user started to move or edit the position [is useful for
-  undoing moves]. Alternatively there could be button for restoring the
-  last moved checker, and one for restoring all checkers moved. 
 ** Add "beavers" in the Set menu.
 ** Have a progress bar along with some text in the main window, which
    indicates progress for the current possibly time-consuming operation.
@@ -132,7 +126,6 @@ duplication of effort and to make sure our changes merge easily.
   behaviour in Snowie].
 ** Add progress indicators for everything that checks fShowProgress.
   A function that generates a progress bar/ASCII to stdout would help.
-** Finish the option menu in the game list window for selecting games.
 ** Show "take" and "drop" buttons in the off-board dice window when
   a double is offered; also "agree" and "decline" for resignations.
 ** Make sure we apply GTK styles correctly: create a GtkRcStyle; set the
@@ -140,6 +133,8 @@ duplication of effort and to make sure our changes merge easily.
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
   style will survive across theme changes.
 ** Make usage() show the GDK and GTK options, if appropriate.
+** Add a GTK interface to allow input for manual dice (J*llyf*sh does it
+  with a pop-up window with 21 buttons).
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
@@ -148,6 +143,8 @@ duplication of effort and to make sure our changes merge easily.
 *** Make "help" show its output in a CList (CTree?).  The user must be able
   to recurse through help for subcommands.
 *** Update GTKHint to match the new TTY hint. (gary)
+*** Allow copy and paste from data presented in dialogs (at least the important
+  ones like eval, hint, rollout).
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution
@@ -174,20 +171,12 @@ duplication of effort and to make sure our changes merge easily.
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
-** Not everything pays attention to MAX_CUBE.
 ** Loading can't be interrupted (e.g. "load game /dev/zero" hangs).
 ** "set eval cubeful" gives a poor error message.
 ** Cosmetic bug when using the rollout button in the hint window (the
   commands echoed to stdout and the prompts are in the wrong order).
-** When using the TTY interface and loading a game/match that has
-  finished, the ShowBoard() in UpdateSettings() will display
-  "No game in progress."
 ** When selecting a cell in the game record window with the mouse, the
   window shouldn't scroll to centre the current record.
-** Many commands test "fTurn == -1" to determine if a game is in progress.
-  Some of these tests would be better off testing other conditions (so that
-  they can cope with the beginning or end of a game) -- seeing whether
-  plGame is NULL might work.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -210,6 +199,10 @@ duplication of effort and to make sure our changes merge easily.
   both players have up to 11 chequers in the home board onto a CD-ROM).
 ** Add optional time rules, for tournament play when clocks are used.
 ** Add optional feature tests to "make check" -- Guile, databases, X?
+** Change the fConfirm ("are you sure you want to abort the game in
+  progress") checks so that they _do_ ask when the game is over but the
+  match is still in progress, and they _don't_ ask if a game has not been
+  modified since it was last loaded/saved.
 
 
 Local Variables:

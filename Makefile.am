@@ -19,7 +19,8 @@ if USE_GTK
 ## --- GTK
 INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
 gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
-	gnu.xpm question.xpm
+	gnu.xpm question.xpm nextgame.xpm nextmove.xpm prevgame.xpm \
+	prevmove.xpm
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
@@ -39,7 +40,7 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif
 
-pkgdata_DATA = gnubg.bd gnubg.wd
+pkgdata_DATA = gnubg.bd gnubg.wd gnubg.scm
 
 noinst_PROGRAMS = makebearoff makeweights
 
@@ -52,17 +53,17 @@ makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
 
-TESTS = gnubgtest md5test
+TESTS = gnubgtest
 distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y 
 
 sgfp.h sgfp.c: sgf.y
-	$(BISON) -o sgfp.c -p sgf -d sgf.y
+	$(BISON) -o $@ -p sgf -d $<
 
 sgfl.c: sgf.l
-	$(FLEX) -osgfl.c -Psgf sgf.l
+	$(FLEX) -o$@ -Psgf $<
 
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $< > $@

@@ -87,7 +87,7 @@ bin_PROGRAMS = gnubg
 @USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@
 @USE_GTK_FALSE@@USE_EXT_TRUE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
 @USE_GTK_FALSE@@USE_EXT_FALSE@INCLUDES = $(COMMON_INCS)
-@USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h 	gnu.xpm question.xpm
+@USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h 	gnu.xpm question.xpm nextgame.xpm nextmove.xpm prevgame.xpm 	prevmove.xpm
 @USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_SOURCES = $(COMMON_SOURCES)
 @USE_GTK_TRUE@gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS)
@@ -97,7 +97,7 @@ bin_PROGRAMS = gnubg
 @USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
-pkgdata_DATA = gnubg.bd gnubg.wd
+pkgdata_DATA = gnubg.bd gnubg.wd gnubg.scm
 
 noinst_PROGRAMS = makebearoff makeweights
 
@@ -110,9 +110,9 @@ makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
 
-TESTS = gnubgtest md5test
+TESTS = gnubgtest
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
@@ -611,10 +611,10 @@ distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 sgfp.h sgfp.c: sgf.y
-	$(BISON) -o sgfp.c -p sgf -d sgf.y
+	$(BISON) -o $@ -p sgf -d $<
 
 sgfl.c: sgf.l
-	$(FLEX) -osgfl.c -Psgf sgf.l
+	$(FLEX) -o$@ -Psgf $<
 
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $< > $@
@@ -645,7 +645,7 @@ gnubg.weights:
 	@[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
 
 gnubg.wd: gnubg.weights makeweights
-	./makeweights < $< > $@
+	-./makeweights < $< > $@
 
 .DELETE_ON_ERROR:
 

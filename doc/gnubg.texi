@@ -3,13 +3,18 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year July, 2000
+@set month-year November, 2000
 
 @syncodeindex vr cp
 
 @macro gnubg
 @t{gnubg}
 @end macro
+
+@dircategory Games
+@direntry
+* gnubg: (gnubg).               GNU Backgammon.
+@end direntry
 
 @ifinfo
 This file documents GNU Backgammon, a program for playing and analysing
@@ -59,6 +64,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Analysis::                       Using gnubg to evaluate positions.
 * Databases::                      Storing information about positions.
 * Training::                       Modifying gnubg's neural nets.
+* Guile::                          Extending GNU Backgammon with Guile.
 * Frequently Asked Questions::     Brief answers to things you might ask.
 * GNU Free Documentation License:: Your rights regarding this manual.
 * Command Index::                  A summary of all the gnubg commands.
@@ -424,17 +430,21 @@ The following optional rules are in widespread use.
 
 @table @dfn
 @item Automatic doubles
+@cindex automatic doubles
+@cindex doubles, automatic
 If identical numbers are thrown on the first roll, the stakes are doubled.
 The doubling cube is turned to 2 and remains in the middle. 
 Players usually agree to limit the number of automatic doubles to one per game.
 
 @item Beavers
+@cindex beavers
 When a player is doubled, he may immediately redouble (beaver) while 
 retaining possession of the cube.  
 The original doubler has the option of accepting or refusing as with a
 normal double.
 
 @item The Jacoby Rule
+@cindex Jacoby rule
 Gammons and backgammons count only as a single game if neither player has
 offered a double during the course of the game.
 This rule speeds up play by eliminating situations where a player avoids 
@@ -957,6 +967,7 @@ new weights will be randomly generated.
 @section Leaving @gnubg
 @cindex leaving @t{gnubg}
 @cindex exiting @t{gnubg}
+@cindex quitting @t{gnubg}
 
 @table @code
 @kindex exit
@@ -1348,9 +1359,8 @@ on how to write your own.
 @table @code
 @kindex set player gnubg
 @item set player @var{name} gnubg
-This command will instruct @gnubg{} to choose moves (and make cube decisions
-FIXME not yet, but it will) for the specified player, using its evaluation
-engine.
+This command will instruct @gnubg{} to choose moves (and make cube decisions)
+for the specified player, using its evaluation engine.
 @kindex set player pubeval
 @item set player @var{name} pubeval
 An alternative computer player can be chosen by setting a player to
@@ -1513,6 +1523,13 @@ FIXME pointer only
 @itemx train database
 FIXME
 @end table
+
+@node Guile
+@chapter Extending @gnubg{}
+@cindex extending @t{gnubg}
+@cindex Guile
+@cindex Scheme
+FIXME
 
 @node Frequently Asked Questions
 @chapter Frequently Asked Questions

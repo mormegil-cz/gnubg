@@ -93,9 +93,8 @@ TEXI2DVI = texi2dvi
 INFO_DEPS = gnubg.info
 DVIS = gnubg.dvi
 TEXINFOS = gnubg.texi
-DIST_COMMON =  README AUTHORS COPYING ChangeLog INSTALL Makefile.am \
-Makefile.in NEWS configure.in mdate-sh stamp-vti texinfo.tex \
-version.texi
+DIST_COMMON =  README ChangeLog Makefile.am Makefile.in mdate-sh \
+stamp-vti texinfo.tex version.texi
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
