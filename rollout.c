@@ -399,7 +399,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 
           CFMONEY ( arEquity, pci );
 
-        if ( ! ( iTurn & 1 ) ) InvertEvaluationR ( aarOutput[ ici ], pci );
+        if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
 
         *pf = FALSE;
         cUnfinished--;
