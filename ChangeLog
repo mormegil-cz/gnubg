@@ -1,3 +1,8 @@
+Thu Nov  4 13:12:07 2004  Joseph Heled  <joseph@gnubg.org>
+
+	* eval.c: Make evals after prunning cubeful. See if it makes a
+	difference. Would be nice to offer this as a global option.
+
 Wed Nov 03 20:44:45 2004   Oystein Johansen <oystein@gnubg.org>
 
 	* gtkgame.c (EvalWidget): Fix a copy'n'waste error

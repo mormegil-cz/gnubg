@@ -1828,21 +1828,22 @@ extern void SwapSides( int anBoard[ 2 ][ 25 ] ) {
     }
 }
 
-extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+extern void
+SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] )
+{
+  int i, j, ac[ 2 ], anBack[ 2 ], anCross[ 2 ], anGammonCross[ 2 ],
+    anBackgammonCross[ 2 ], anMaxTurns[ 2 ], fContact;
 
-    int i, j, ac[ 2 ], anBack[ 2 ], anCross[ 2 ], anGammonCross[ 2 ],
-	anBackgammonCross[ 2 ], anMaxTurns[ 2 ], fContact;
-
-    if( arOutput[ OUTPUT_WIN ] < 0.0f )
-	arOutput[ OUTPUT_WIN ] = 0.0f;
-    else if( arOutput[ OUTPUT_WIN ] > 1.0f )
-	arOutput[ OUTPUT_WIN ] = 1.0f;
+  if( arOutput[ OUTPUT_WIN ] < 0.0f )
+    arOutput[ OUTPUT_WIN ] = 0.0f;
+  else if( arOutput[ OUTPUT_WIN ] > 1.0f )
+    arOutput[ OUTPUT_WIN ] = 1.0f;
     
-    ac[ 0 ] = ac[ 1 ] = anBack[ 0 ] = anBack[ 1 ] = anCross[ 0 ] =
-	anCross[ 1 ] = anBackgammonCross[ 0 ] = anBackgammonCross[ 1 ] = 0;
-    anGammonCross[ 0 ] = anGammonCross[ 1 ] = 1;
+  ac[ 0 ] = ac[ 1 ] = anBack[ 0 ] = anBack[ 1 ] = anCross[ 0 ] =
+    anCross[ 1 ] = anBackgammonCross[ 0 ] = anBackgammonCross[ 1 ] = 0;
+  anGammonCross[ 0 ] = anGammonCross[ 1 ] = 1;
 	
-    for( j = 0; j < 2; j++ )
+  for( j = 0; j < 2; j++ )
 	for( i = 0; i < 25; i++ )
 	    if( anBoard[ j ][ i ] ) {
 		anBack[ j ] = i;
@@ -1854,19 +1855,19 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 			anBoard[ j ][ i ];
 	    }
 
-    fContact = anBack[ 0 ] + anBack[ 1 ] >= 24;
+  fContact = anBack[ 0 ] + anBack[ 1 ] >= 24;
 
-    if( !fContact ) {
-        for( i = 0; i < 2; i++ ) 
-            if( anBack[ i ] < 6 && pbc1 )
-		anMaxTurns[ i ] = 
-                  MaxTurns( PositionBearoff( anBoard[ i ], 6, 15 ) );
-	    else
-		anMaxTurns[ i ] = anCross[ i ] * 2;
+  if( !fContact ) {
+    for( i = 0; i < 2; i++ ) 
+      if( anBack[ i ] < 6 && pbc1 )
+	anMaxTurns[ i ] = 
+	  MaxTurns( PositionBearoff( anBoard[ i ], 6, 15 ) );
+      else
+	anMaxTurns[ i ] = anCross[ i ] * 2;
       
-        if ( ! anMaxTurns[ 1 ] ) anMaxTurns[ 1 ] = 1;
+    if ( ! anMaxTurns[ 1 ] ) anMaxTurns[ 1 ] = 1;
 
-    }
+  }
     
     if( !fContact && anCross[ 0 ] > 4 * ( anMaxTurns[ 1 ] - 1 ) )
 	/* Certain win */
@@ -2069,18 +2070,19 @@ EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
 
 /* An upper bound on the number of turns it can take to complete a bearoff
    from bearoff position ID i. */
-static int MaxTurns( int id ) {
-
-    unsigned short int aus[ 32 ];
-    int i;
+static int
+MaxTurns( int id )
+{
+  unsigned short int aus[ 32 ];
+  int i;
     
-    BearoffDist ( pbc1, id, NULL, NULL, NULL, aus, NULL );
+  BearoffDist ( pbc1, id, NULL, NULL, NULL, aus, NULL );
 
-    for( i = 31; i >= 0; i-- )
-      if( aus[ i] )
-        return i;
+  for( i = 31; i >= 0; i-- )
+    if( aus[i] )
+      return i;
 
-    abort();
+  abort();
 }
 
 static int
@@ -2170,7 +2172,7 @@ enum {
 static int nContext[3] = {-1, -1, -1};
 
 static inline NNEvalType
-NNevalAction(positionclass p)
+NNevalAction(positionclass const p)
 {
   {                     assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
   
@@ -2557,10 +2559,16 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 
+static int
+ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
+	    int nPlies );
+
 #define nPruneMoves 10
+static int cubefullPrune = 1;
 
 static void
-FindBestMoveInEval(int nDice0, int nDice1, int anBoard[2][25], const cubeinfo* pci)
+FindBestMoveInEval(int const nDice0, int const nDice1, int anBoard[2][25],
+		   const cubeinfo* const pci, const evalcontext* pec)
 {
   unsigned int i;
   float rScore, rBestScore;
@@ -2658,6 +2666,24 @@ FindBestMoveInEval(int nDice0, int nDice1, int anBoard[2][25], const cubeinfo* p
       }
     }
 
+    /* See if this is the problem */
+    if( cubefullPrune ) {
+      ((cubeinfo*)pci)->fMove = !pci->fMove;
+      if( use ) {
+	move amMoves[ ml.cMoves ];
+	for(i = 0; (int)i < ml.cMoves; i++) {
+	  int const j = bmovesi[i];
+	  memcpy(&amMoves[i], &ml.amMoves[j], sizeof(amMoves[0]));
+	  bmovesi[i] = i;
+	}
+	memcpy(&ml.amMoves[0], amMoves, ml.cMoves * sizeof(amMoves[0]));
+      }
+      ScoreMoves(&ml, pci, pec, 0);
+
+      //((cubeinfo*)pci)->fMove = !pci->fMove;
+      //int c = ml.iMoveBest;
+    } else {
+
     nContext[0] = nContext[1] = nContext[2] = 0;
     rBestScore = 99999.9;
     for(i = 0; (int)i < ml.cMoves; i++) {
@@ -2698,7 +2724,8 @@ FindBestMoveInEval(int nDice0, int nDice1, int anBoard[2][25], const cubeinfo* p
 
     ((cubeinfo*)pci)->fMove = !pci->fMove;
   }
-
+  }
+  
   PositionFromKey(anBoard, ml.amMoves[ml.iMoveBest].auch);
 }
 
@@ -2782,7 +2809,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 #if !defined(REDUCTION_CODE)
       if( usePrune ) {
-	FindBestMoveInEval(n0, n1, anBoardNew, pci);
+	FindBestMoveInEval(n0, n1, anBoardNew, pci, pec);
       } else {
 #endif
 	FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
@@ -5529,6 +5556,7 @@ extern char *FormatEval ( char *sz, evalsetup *pes ) {
 
 }
 
+#if 0 
 static void
 CalcCubefulEquity ( positionclass pc,
                     float arOutput[ NUM_ROLLOUT_OUTPUTS ],
@@ -5682,7 +5710,7 @@ CalcCubefulEquity ( positionclass pc,
   arOutput[ OUTPUT_CUBEFUL_EQUITY ] = r;
 
 }
-
+#endif 
 
 extern int
 GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
@@ -6129,7 +6157,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
 #if !defined( REDUCTION_CODE )
       if( usePrune ) {
-	FindBestMoveInEval(n0, n1, anBoardNew, pciMove);
+	FindBestMoveInEval(n0, n1, anBoardNew, pciMove, pec);
       } else {
 #endif
 	FindBestMovePlied( NULL, n0, n1, anBoardNew,
