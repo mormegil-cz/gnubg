@@ -332,7 +332,7 @@ setWindowGeometry ( GtkWidget *pw, const windowgeometry *pwg ) {
 
 #if GTK_CHECK_VERSION(2,0,0)
 
-  gtk_window_resize ( GTK_WINDOW ( pw ),
+  gtk_window_set_default_size ( GTK_WINDOW ( pw ),
                       ( pwg->nWidth > 0 ) ? pwg->nWidth : -1,
                       ( pwg->nHeight > 0 ) ? pwg->nHeight : -1 );
 

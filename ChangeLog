@@ -1,3 +1,9 @@
+Mon Aug  5 13:44:28 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (setWindowGeometry): [GTK_CHECK_VERSION(2,0,0)] Use
+	gtk_window_set_default_size instead of gtk_window_resize, to
+	avoid errors when size < 0.
+
 Mon Aug  5 18:37:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* matchid.c (MatchFromID): don't do consistency check on
