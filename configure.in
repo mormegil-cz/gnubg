@@ -19,7 +19,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 AC_REVISION($Revision$)
-AC_INIT(GNU Backgammon,0.14.1-devel,bug-gnubg@gnu.org,gnubg)
+AC_INIT(GNU Backgammon,0.14.1,bug-gnubg@gnu.org,gnubg)
 AC_CONFIG_SRCDIR(gnubg.c)
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
@@ -524,8 +524,8 @@ AC_SUBST(WINMMSND_CFLAGS)
 dnl Clocks
 
 AC_ARG_WITH(timecontrol,[  --with-timecontrol	enable clocks])
-AM_CONDITIONAL(USE_TIMECONTROL, test "$with_timecontrol" == "yes" )
-if test "$with_timecontrol" == "yes"; then
+AM_CONDITIONAL(USE_TIMECONTROL, test "$with_timecontrol" != "no" )
+if test "$with_timecontrol" != "no"; then
   AC_DEFINE(USE_TIMECONTROL,1,Define if you want to use time controls (eg. clocks) with GNU Backgammon)
 fi
 

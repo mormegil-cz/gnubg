@@ -37,7 +37,9 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "record.h"
+#if USE_TIMECONTROL
 #include "timecontrol.h"
+#endif
 
 #include "i18n.h"
 
