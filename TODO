@@ -25,8 +25,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
   speed increase.  See FindBestMoveInEval() in eval.c from fibs2html.
-** The cubedecision REDOUBLE_BEAVER should never occur -- should it be
-  removed?
 ** Add an option for rollouts of "opening" positions: neither player on
   roll, and no doubles permitted (suggested by Ian Shaw).  
 ** Bearoff database changes:
@@ -66,16 +64,12 @@ duplication of effort and to make sure our changes merge easily.
   does, but without evaluating them.
 ** Also "add move", to add a specific move to the list (e.g.
   "add move 8/5 6/5").
-** Make "show marketwindow" say something for money games.  (This looks like
-  it's done already.)
 ** Kit suggests that it's more important to get early plays right in
   rollouts.  Should we consider options that allow larger search space/
   search depth/etc. for early moves in rollouts than later ones?  (Kit's
   suggestion is to maximise the chance of finding the right play for
   the initial roll and response, and whatever speeds things along while
   still finding reasonable plays after that.)
-** When a resignation has been offered, "hint" should show whether to
-  accept or decline the resignation.
 ** Importing and exporting:
 *** Add missing export formats (FIBS, SGG).
 *** Make the .mat format identical to Jellyfish (things to check:
@@ -177,6 +171,7 @@ duplication of effort and to make sure our changes merge easily.
   button 1 increases value, button 2+ decreases value, ctrl+button cycles
   through owners/centred).
 ** Add some kind of GTK interface for viewing rollout statistics.
+** Make GTK widget for "show marketwindow"
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
