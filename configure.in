@@ -39,6 +39,7 @@ AC_CHECK_PROG(FLEX, flex, flex, true)
 AC_CHECK_PROG(GNUPLOT, gnuplot, gnuplot)
 AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm)
 AC_CHECK_PROG(PNMTOPS, pnmtops, pnmtops)
+AC_CHECK_PROG(SRCONV, srconv, srconv, true)
 AC_CHECK_PROG(TR, tr, tr)
 
 AC_DEFINE(_GNU_SOURCE,1,Enable GNU extensions on systems that have them.)

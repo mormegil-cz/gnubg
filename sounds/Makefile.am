@@ -8,4 +8,4 @@ EXTRA_DIST = gnubg.orc music.orc
 %.wav: %.sco music.orc gnubg.orc
 	if [ $< = haere-ra.sco -o $< = fanfare.sco ]; then orc=music.orc; \
 	else orc=gnubg.orc; fi; $(CSOUND) $$orc $< -W -o $@.tmp && \
-	srconv -W -r 22050 -o $@ $@.tmp; $(RM) $@.tmp
+	$(SRCONV) -W -r 22050 -o $@ $@.tmp; $(RM) $@.tmp

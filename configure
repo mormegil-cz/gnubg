@@ -3090,6 +3090,42 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+# Extract the first word of "srconv", so it can be a program name with args.
+set dummy srconv; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_SRCONV+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$SRCONV"; then
+  ac_cv_prog_SRCONV="$SRCONV" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_SRCONV="srconv"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_prog_SRCONV" && ac_cv_prog_SRCONV="true"
+fi
+fi
+SRCONV=$ac_cv_prog_SRCONV
+if test -n "$SRCONV"; then
+  echo "$as_me:$LINENO: result: $SRCONV" >&5
+echo "${ECHO_T}$SRCONV" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 # Extract the first word of "tr", so it can be a program name with args.
 set dummy tr; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -12772,6 +12808,7 @@ s,@FLEX@,$FLEX,;t t
 s,@GNUPLOT@,$GNUPLOT,;t t
 s,@PNGTOPNM@,$PNGTOPNM,;t t
 s,@PNMTOPS@,$PNMTOPS,;t t
+s,@SRCONV@,$SRCONV,;t t
 s,@TR@,$TR,;t t
 s,@ALLOCA@,$ALLOCA,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
