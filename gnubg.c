@@ -7708,8 +7708,11 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
 	fX = InitGTK( &argc, &argv );
 
+#ifndef WIN32
+        /* look for DISPLAY on unix systems */
         if( !getenv( "DISPLAY" ) )
 	    fX = FALSE;
+#endif /* ! WIN32 */
 #endif /* ! USE_GTK */
 
     if( fX ) {
