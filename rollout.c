@@ -1508,3 +1508,93 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
 }
 
+/*
+ * Calculate whether we should resign or not
+ *
+ * Input:
+ *    anBoard   - current board
+ *    pci       - current cube info
+ *    pesResign - evaluation parameters
+ *
+ * Output:
+ *    arResign  - evaluation
+ *
+ * Returns:
+ *    -1 on error
+ *     0 if we should not resign
+ *     1,2, or 3 if we should resign normal, gammon, or backgammon,
+ *     respectively.  
+ *
+ */
+
+extern int
+getResignation ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
+                 int anBoard[ 2 ][ 25 ],
+                 cubeinfo *pci, 
+                 evalsetup *pesResign ) {
+
+  float arStdDev[ NUM_ROLLOUT_OUTPUTS ];
+  rolloutstat arsStatistics[ 2 ];
+  float ar[ NUM_OUTPUTS ] = { 0.0, 0.0, 0.0, 1.0, 1.0 };
+
+  float rPlay;
+
+  /* Evaluate current position */
+
+  if ( GeneralEvaluation ( NULL,
+                           arResign, arStdDev,
+                           arsStatistics,
+                           anBoard,
+                           pci, pesResign ) < 0 )
+    return -1;
+
+  /* check if we want to resign */
+
+  rPlay = Utility ( arResign, pci );
+
+  if ( arResign [ OUTPUT_LOSEBACKGAMMON ] > 0.0f &&
+       Utility ( ar, pci ) == rPlay )
+    return 3; /* resign backgammon */
+  else {
+
+    /* worth trying to escape the backgammon */
+
+    ar[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
+
+    if ( arResign[ OUTPUT_LOSEGAMMON ] > 0.0f &&
+         Utility ( ar, pci ) == rPlay )
+      return 2; /* resign gammon */
+
+    else {
+
+      /* worth trying to escape gammon */
+
+      ar[ OUTPUT_LOSEGAMMON ] = 0.0f;
+
+      return Utility ( ar, pci ) == rPlay;
+
+    }
+
+  }
+
+}
+
+
+extern void
+getResignEquities ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
+                    cubeinfo *pci, 
+                    int nResigned,
+                    float *prBefore, float *prAfter ) {
+
+  float ar[ NUM_OUTPUTS ] = { 0, 0, 0, 0, 0 };
+
+  *prBefore = Utility ( arResign, pci );
+
+  if ( nResigned > 1 )
+    ar[ OUTPUT_LOSEGAMMON ] = 1.0f;
+  if ( nResigned > 2 )
+    ar[ OUTPUT_LOSEBACKGAMMON ] = 1.0f;
+
+  *prAfter = Utility ( ar, pci );
+
+}
