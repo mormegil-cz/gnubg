@@ -1,4 +1,3 @@
-/*
  * gfibs.c
  *
  * by Gary Wong <gary@cs.arizona.edu>, 1998-1999.
@@ -48,10 +47,10 @@ typedef struct _gamedata {
     int nRedoubles; /* number of instant redoubles allowed */
 } gamedata;
 
-char szBot[ 32 ], szOpponent[ 32 ];
+char szBot[ 32 ], szOpponent[ 32 ], szShoutLog[ 32 ], szKibitzLog[ 32 ];
 int fWon = -1, cIntro = -1, fQuit = FALSE, fJoining = TRUE;
 int fResigned = 0, fIDoubled = 0;
-FILE *pfLog, *pfShouts;
+FILE *pfLog, *pfShouts, *pfKibitz;
 float arDouble[ 4 ];
 
 static int FibsParse( fibs *pf, char *sz );
@@ -334,9 +333,17 @@ static int FibsParse( fibs *pf, char *sz ) {
     }
 
     if( sscanf( sz, "%s shouts: %s", szTemp, szTemp ) == 2 ) {
-	/* FIXME save shouts */
 	
-	return 0;
+      if ( strstr ( sz, "mpgnu" ) || strstr ( sz, "bot" ) ) {
+
+	/* this might be an interesting shout */
+
+	fprintf ( pfShouts, "%s\n", sz );
+
+      }
+
+      return 0;
+
     }
 
     if ( sscanf( sz, "Starting a new game with %s", szName ) == 1 ) {
@@ -386,11 +393,15 @@ static int FibsParse( fibs *pf, char *sz ) {
       {
                             
 
-      printf ( "opponent wants me to roll\n" );
+      printf ( "board...\n" );
 
       /* the board command should make me roll */
       
       FibsCommand( pf, "board" ); 
+
+      sleep ( 2 );
+
+      printf ( "thx for the board\n" );
 
 	return 0;
     }
@@ -470,7 +481,7 @@ static int FibsParse( fibs *pf, char *sz ) {
 	if ( ! IsDropper ( szName ) ) 
 	  BufferWritef( &pf->b, "join %s\r\n", szName );
 	else
-	  FibsCommand ( pf, "I don't play droppers..." );
+	  BufferWritef( &pf->b, "tell %s you\'re blacklisted...\r\n" );
 
 	return 0;	
     }
@@ -508,18 +519,6 @@ static int FibsParse( fibs *pf, char *sz ) {
       return 0;
     }
  
-    /*
-    if( !strncmp( sz, "You win the game and", 20 ) ||
-	!strncmp( sz, "You accept and win", 18 ) ) {
-	fWon = TRUE;
-
-	BufferWritef( &pf->b, "rawwho %s\r\n", szOpponent );
-	
-	return 0;
-    }
-    */
-
-    /* FIXME only at the end of a MATCH, not the game */
     if( fWon >= 0 && !strncmp( sz, "who:", 4 ) ) {
 
       int nRating, nRatingCents, nExperience;
@@ -549,6 +548,17 @@ static int FibsParse( fibs *pf, char *sz ) {
 
     }
 
+    if(  sscanf( sz, "%s kibitzes: %s", szName, szTemp ) == 2 ) {
+
+      if ( strcmp ( szName, "mpgnu" ) )
+
+	fprintf ( pfKibitz, "%s: %s\n", szName, szTemp );
+
+      return 0;
+
+    }
+
+
     if( !strncmp( sz, "board:", 6 ) ) {
 	int anBoard[ 2 ][ 25 ], anMove[ 8 ], i, c;
 	cubeinfo ci;
@@ -561,10 +571,6 @@ static int FibsParse( fibs *pf, char *sz ) {
 
 	    return 0;
 	}
-
-	printf ( "resign-bug: test = %1i\n",
-		 gd.anDiceOpponent[ 0 ] && fResigned );
-		 
 
 	if( gd.anDiceOpponent[ 0 ] && ! ( fResigned ) ) { 
 	  /* not our move */
@@ -659,6 +665,9 @@ static int FibsParse( fibs *pf, char *sz ) {
 	SetCubeInfo ( &ci, gd.nCube, fCubeOwner, 0 );
 
 	printf ( "nCube, owner %1i %+1i\n", gd.nCube, fCubeOwner );
+	printf ( "gammon price %7.4f %7.4f %7.4f %7.4f\n",
+		 ci.arGammonPrice[ 0 ], ci.arGammonPrice[ 1 ],
+		 ci.arGammonPrice[ 2 ], ci.arGammonPrice[ 3 ] );
 
 
 	if ( fResigned ) {
@@ -771,9 +780,23 @@ static int FibsParse( fibs *pf, char *sz ) {
 	  }
 
 
-	} else {
+	} else { 
+
+	  if ( gd.anDice[ 0 ] ) {
+
+	  float arOutput[ NUM_OUTPUTS ];
+
 	  c = FindBestMove( anMove, gd.anDice[ 0 ], gd.anDice[ 1 ],
 			    anBoard, &ci, &ecMoves );
+
+	  EvaluatePosition ( anBoard, arOutput, &ci, &ecMoves );
+
+	  printf("\tWin\tW(g)\tW(bg)\tL(g)\tL(bg)\tEquity\tmwc\n");
+	  printf("\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%6.4f\t%+7.4f\t%6.4f\n",
+		 arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
+		 arOutput[ 3 ], arOutput[ 4 ], 
+		 Utility ( arOutput, &ci ),
+		 UtilityMwc ( arOutput, &ci ) );
 
 #if 1	
 	for( i = 0; i < c >> 1; i++ ) {
@@ -816,7 +839,10 @@ static int FibsParse( fibs *pf, char *sz ) {
 	
 	  return 0;
 
-	} 
+	}
+	  else {
+	    printf ("board, but no dice\n" );
+	}
     }
     
     return 0;
@@ -838,6 +864,12 @@ int main( int argc, char *argv[] ) {
     strcpy( szBot, argv[ 1 ] );
 
     pfLog = fopen( szBot, "a" );
+
+    strcpy ( szShoutLog, szBot );
+    pfShouts = fopen ( strcat ( szShoutLog, ".shouts" ) , "a" );
+
+    strcpy ( szKibitzLog, szBot );
+    pfKibitz = fopen ( strcat ( szKibitzLog, ".kibitz" ) , "a" );
     
     EvalInitialise( GNUBG_WEIGHTS, GNUBG_WEIGHTS_BINARY, GNUBG_BEAROFF
 		    );
@@ -882,11 +914,10 @@ static int IsDropper ( char *szName ) {
 
   /* check with known list of droppers */
 
-  static char *aszDroppers[] = { "tiggie" };
-  int nDroppers = 1;
+  static char *aszDroppers[] = { "tiggie", "phs", NULL };
   int i;
 
-  for ( i = 0; i < nDroppers; i++ ) {
+  for ( i = 0; aszDroppers[ i ] != NULL ; i++ ) {
 
     if ( ! strcmp ( szName, aszDroppers[ i ] ) )
       return 1;
