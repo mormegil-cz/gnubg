@@ -4290,7 +4290,10 @@ SetCubeInfoMoney( cubeinfo *pci, const int nCube, const int fCubeOwner,
 
     if( nCube < 1 || fCubeOwner < -1 || fCubeOwner > 1 || fMove < 0 ||
 	fMove > 1 ) /* FIXME also illegal if nCube is not a power of 2 */
+    {
+	memset(pci, 0, sizeof(cubeinfo));
 	return -1;
+    }
 
     pci->nCube = nCube;
     pci->fCubeOwner = fCubeOwner;
@@ -4314,9 +4317,11 @@ SetCubeInfoMatch( cubeinfo *pci, const int nCube, const int fCubeOwner,
     
     if( nCube < 1 || fCubeOwner < -1 || fCubeOwner > 1 || fMove < 0 ||
 	fMove > 1 || nMatchTo < 1 || anScore[ 0 ] >= nMatchTo ||
-	anScore[ 1 ] >= nMatchTo ) /* FIXME also illegal if nCube is not a
-				      power of 2 */
+	anScore[ 1 ] >= nMatchTo ) /* FIXME also illegal if nCube is not a power of 2 */
+    {
+	memset(pci, 0, sizeof(cubeinfo));
 	return -1;
+    }
     
     pci->nCube = nCube;
     pci->fCubeOwner = fCubeOwner;

@@ -1,3 +1,7 @@
+Thu Sep 16 8:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* eval.c: Fix bug (navigate to last match crash) - hopefully
+
 Fri Sep 10 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c, gtkgame.c, gnubg.c, gtkpanels.c: Added command and theory
