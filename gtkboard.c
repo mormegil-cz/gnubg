@@ -43,11 +43,13 @@ static unsigned int nSeed = 1; /* for rand_r */
 
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_move, *table, *hbox_match,
-	*move, *position_id, *set, *edit;
+	*move, *position_id, *set, *edit, *name0, *name1, *score0, *score1,
+	*match;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
-	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point;
-    GdkBitmap *bm_mask, *bm_dice_mask, *bm_cube_mask;
+	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
+	*pm_x_key, *pm_o_key;
+    GdkBitmap *bm_mask, *bm_dice_mask, *bm_cube_mask, *bm_key_mask;
     GdkFont *cube_font;
     gint board_size; /* basic unit of board size, in pixels -- a chequer's
 			diameter is 6 of these units (and is 2 units thick) */
@@ -488,9 +490,6 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     case GDK_BUTTON_PRESS:
 	bd->drag_point = board_point( board, bd, x, y );
 
-	/* FIXME if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
-	   then bear off as many chequers as possible, and return. */
-	
 	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
 	    /* Click on illegal area. */
 	    gdk_beep();
@@ -503,26 +502,32 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    /* Clicked on cube; double. */
 	    bd->drag_point = -1;
 	    
-	    UserCommand( "double" ); /* FIXME emit signal */
+	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+		gdk_beep();
+	    else
+		UserCommand( "double" );
+	    
 	    return TRUE;
 	}
 	
 	if( bd->drag_point == POINT_DICE ) {
-	    /* Clicked on dice. */
+	    /* Clicked on dice; end move. */
 	    bd->drag_point = -1;
 	    
-	    if( event->button.button == 1 )
+	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+		gdk_beep();
+	    else if( event->button.button == 1 )
 		Confirm( bd );
 	    else {
 		/* Other buttons on dice swaps positions. */
 		n = bd->dice[ 0 ];
 		bd->dice[ 0 ] = bd->dice[ 1 ];
 		bd->dice[ 1 ] = n;
-
+		
 		n = bd->dice_opponent[ 0 ];
 		bd->dice_opponent[ 0 ] = bd->dice_opponent[ 1 ];
 		bd->dice_opponent[ 1 ] = n;
-
+		
 		board_redraw_dice( board, bd, 0 );
 		board_redraw_dice( board, bd, 1 );
 	    }
@@ -530,6 +535,9 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
+	/* FIXME if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
+	   then bear off as many chequers as possible, and return. */
+	
 	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
 	    bd->drag_point > 0 && bd->drag_point < 25 &&
 	    ( !bd->points[ bd->drag_point ] ||
@@ -621,6 +629,61 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
+	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    event->button.button != 1 ) {
+	    /* Button 2 or more in edit mode; modify point directly. */
+	    if( event->button.button == 2 ) {
+		if( bd->points[ bd->drag_point ] >= 0 ) {
+		    /* Add player 1 */
+		    bd->drag_colour = 1;
+		    dest = bd->drag_point;
+		    bd->drag_point = 26;
+		} else {
+		    /* Remove player -1 */
+		    bd->drag_colour = -1;
+		    dest = 27;
+		}
+	    } else {
+		if( bd->points[ bd->drag_point ] <= 0 ) {
+		    /* Add player -1 */
+		    bd->drag_colour = -1;
+		    dest = bd->drag_point;
+		    bd->drag_point = 27;
+		} else {
+		    /* Remove player 1 */
+		    bd->drag_colour = 1;
+		    dest = 26;
+		}
+	    }
+
+	    if( bd->points[ bd->drag_point ] * bd->drag_colour < 1 ||
+		bd->drag_point == dest ||
+		( bd->drag_colour == 1 && ( !bd->drag_point ||
+					    !dest ||
+					    bd->drag_point == 27 ||
+					    dest == 27 ) ) ||
+		( bd->drag_colour == -1 && ( bd->drag_point == 25 ||
+					     dest == 25 ||
+					     bd->drag_point == 26 ||
+					     dest == 26 ) ) )
+		gdk_beep();
+	    else {
+		int points[ 2 ][ 25 ];
+		
+		bd->points[ bd->drag_point ] -= bd->drag_colour;
+		bd->points[ dest ] += bd->drag_colour;
+
+		board_expose_point( board, bd, bd->drag_point );
+		board_expose_point( board, bd, dest );
+		
+		read_board( bd, points );
+		update_position_id( bd, points );
+	    }
+	    
+	    bd->drag_point = -1;
+	    return TRUE;
+	}
+	
 	if( !bd->points[ bd->drag_point ] ) {
 	    /* click on empty bearoff tray */
 	    gdk_beep();
@@ -630,6 +693,14 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	}
 	
 	bd->drag_colour = bd->points[ bd->drag_point ] < 0 ? -1 : 1;
+
+	if( event->button.button != 1 && bd->drag_colour != bd->turn ) {
+	    /* trying to move opponent's chequer */
+	    gdk_beep();
+	    
+	    bd->drag_point = -1;
+	    return TRUE;
+	}
 	
 	bd->points[ bd->drag_point ] -= bd->drag_colour;
 
@@ -639,8 +710,6 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    /* Automatically place chequer on destination point
 	       (as opposed to starting a drag). */
 
-	    /* FIXME handle edit mode differently */
-	    
 	    dest = bd->drag_point - ( event->button.button == 2 ?
 					bd->dice[ 0 ] :
 					bd->dice[ 1 ] ) * bd->drag_colour;
@@ -804,11 +873,13 @@ static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
 extern gint board_set( Board *board, const gchar *board_text ) {
 
     BoardData *bd = board->board_data;
-    gchar *dest;
+    gchar *dest, buf[ 32 ];
     gint i, *pn, **ppn;
     gint old_board[ 28 ];
     int old_direction;
     GdkEventExpose event;
+    GtkAdjustment *padj0, *padj1;
+    
 #if __GNUC__
     int *match_settings[] = { &bd->match_to, &bd->score,
 			      &bd->score_opponent };
@@ -921,7 +992,26 @@ extern gint board_set( Board *board, const gchar *board_text ) {
 	bd->points[ 27 ] = bd->off;
     }
 
-    /* FIXME update names, score, match length, etc. */
+    gtk_entry_set_text( GTK_ENTRY( bd->name0 ), bd->name_opponent );
+    gtk_entry_set_text( GTK_ENTRY( bd->name1 ), bd->name );
+
+    if( bd->match_to ) {
+	sprintf( buf, "%d", bd->match_to );
+	gtk_label_set_text( GTK_LABEL( bd->match ), buf );
+    } else
+	gtk_label_set_text( GTK_LABEL( bd->match ), "unlimited" );
+
+    padj0 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score0 ) );
+    padj1 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score1 ) );
+    padj0->upper = padj1->upper = bd->match_to ? bd->match_to : 65535;
+    gtk_adjustment_changed( padj0 );
+    gtk_adjustment_changed( padj1 );
+    
+    /* FIXME indicate Crawford in score */
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
+			       bd->score_opponent );
+    gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
+			       bd->score );
     
     read_board( bd, bd->old_board );
     update_position_id( bd, bd->old_board );
@@ -1321,33 +1411,34 @@ static inline guchar clamp( gint n ) {
 	return n;
 }
 
-static void board_draw_chequers( GtkWidget *widget, BoardData *bd ) {
+static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 
-    guchar buf_x[ 6 * bd->board_size ][ 6 * bd->board_size ][ 3 ],
-	buf_o[ 6 * bd->board_size ][ 6 * bd->board_size ][ 3 ],
-	*buf_mask;
+    int size = fKey ? 20 : 6 * bd->board_size;
+    guchar buf_x[ size ][ size ][ 3 ], buf_o[ size ][ size ][ 3 ], *buf_mask;
     int ix, iy, in, fx, fy, i;
     float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta;
     GdkImage *img;
     GdkGC *gc;
 
     /* We need to use malloc() for this, since Xlib will free() it. */
-    buf_mask = malloc( ( 6 * bd->board_size ) * ( 6 * bd->board_size + 7 )
-		       >> 3 );
-    
-    bd->pm_x = gdk_pixmap_new( widget->window, 6 * bd->board_size,
-			       6 * bd->board_size, -1 );
-    bd->pm_o = gdk_pixmap_new( widget->window, 6 * bd->board_size,
-			       6 * bd->board_size, -1 );
-    bd->bm_mask = gdk_pixmap_new( NULL, 6 * bd->board_size,
-			       6 * bd->board_size, 1 );
+    buf_mask = malloc( ( size ) * ( size + 7 ) >> 3 );
 
-    img = gdk_image_new_bitmap( gdk_window_get_visual( widget->window ),
-				buf_mask, 6 * bd->board_size,
-				6 * bd->board_size );
+    if( fKey ) {
+	bd->pm_x_key = gdk_pixmap_new( widget->window, size, size, -1 );
+	bd->pm_o_key = gdk_pixmap_new( widget->window, size, size, -1 );
+	bd->bm_key_mask = gdk_pixmap_new( NULL, size, size, 1 );
+    } else {
+	bd->pm_x = gdk_pixmap_new( widget->window, size, size, -1 );
+	bd->pm_o = gdk_pixmap_new( widget->window, size, size, -1 );
+	bd->bm_mask = gdk_pixmap_new( NULL, size, size, 1 );
+    }
     
-    for( iy = 0, y_loop = -1.0; iy < 6 * bd->board_size; iy++ ) {
-	for( ix = 0, x_loop = -1.0; ix < 6 * bd->board_size; ix++ ) {
+    img = gdk_image_new_bitmap( gdk_window_get_visual( widget->window ),
+				buf_mask, size,
+				size );
+    
+    for( iy = 0, y_loop = -1.0; iy < size; iy++ ) {
+	for( ix = 0, x_loop = -1.0; ix < size; ix++ ) {
 	    in = 0;
 	    diffuse = specular_x = specular_o = 0.0;
 	    fy = 0;
@@ -1367,12 +1458,12 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd ) {
 			    specular_o += pow( cos_theta, 30 ) * 0.8;
 			}
 		    }
-		    x += 1.0 / ( 6 * bd->board_size );
+		    x += 1.0 / ( size );
 		} while( !fx++ );
-		y += 1.0 / ( 6 * bd->board_size );
+		y += 1.0 / ( size );
 	    } while( !fy++ );
 	    
-	    if( in < 3 ) {
+	    if( in < ( fKey ? 1 : 3 ) ) {
 		for( i = 0; i < 3; i++ )
 		    buf_x[ iy ][ ix ][ i ] = buf_o[ iy ][ ix ][ i ] = 0;
 		gdk_image_put_pixel( img, ix, iy, 0 );
@@ -1393,21 +1484,21 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd ) {
 		buf_o[ iy ][ ix ][ 2 ] = clamp( ( diffuse * 0.02 + specular_o )
 						* 64.0 + ( 4 - in ) * 32.0 );
 	    }
-	    x_loop += 2.0 / ( 6 * bd->board_size );
+	    x_loop += 2.0 / ( size );
 	}
-	y_loop += 2.0 / ( 6 * bd->board_size );
+	y_loop += 2.0 / ( size );
     }
 
-    gdk_draw_rgb_image( bd->pm_x, bd->gc_copy, 0, 0, 6 * bd->board_size,
-			6 * bd->board_size, GDK_RGB_DITHER_MAX,
-			&buf_x[ 0 ][ 0 ][ 0 ], 6 * bd->board_size * 3 );
-    gdk_draw_rgb_image( bd->pm_o, bd->gc_copy, 0, 0, 6 * bd->board_size,
-			6 * bd->board_size, GDK_RGB_DITHER_MAX,
-			&buf_o[ 0 ][ 0 ][ 0 ], 6 * bd->board_size * 3 );
+    gdk_draw_rgb_image( fKey ? bd->pm_x_key : bd->pm_x, bd->gc_copy, 0, 0,
+			size, size, GDK_RGB_DITHER_MAX,
+			&buf_x[ 0 ][ 0 ][ 0 ], size * 3 );
+    gdk_draw_rgb_image( fKey ? bd->pm_o_key : bd->pm_o, bd->gc_copy, 0, 0,
+			size, size, GDK_RGB_DITHER_MAX,
+			&buf_o[ 0 ][ 0 ][ 0 ], size * 3 );
 
-    gc = gdk_gc_new( bd->bm_mask );
-    gdk_draw_image( bd->bm_mask, gc, img, 0, 0, 0, 0, 6 * bd->board_size,
-		    6 * bd->board_size );
+    gc = gdk_gc_new( fKey ? bd->bm_key_mask : bd->bm_mask );
+    gdk_draw_image( fKey ? bd->bm_key_mask : bd->bm_mask, gc, img, 0, 0, 0, 0,
+		    size, size );
     gdk_gc_unref( gc );
     
     gdk_image_destroy( img );
@@ -1699,13 +1790,15 @@ static void board_draw_cube( GtkWidget *widget, BoardData *bd ) {
     gdk_image_destroy( img );
 }
 
+/* Create all of the size-dependent pixmaps.  The chequer key pixmaps are
+   not included here, since they are not resized with the board. */
 static void board_create_pixmaps( GtkWidget *board, BoardData *bd ) {
     
     if( bd->pm_board )
 	board_free_pixmaps( bd );
 
     board_draw( board, bd );
-    board_draw_chequers( board, bd );
+    board_draw_chequers( board, bd, FALSE );
     board_draw_dice( board, bd );
     board_draw_pips( board, bd );
     board_draw_cube( board, bd );
@@ -1786,6 +1879,7 @@ static void board_realize( GtkWidget *board ) {
 	GTK_WIDGET_CLASS( parent_class )->realize( board );
 
     board_create_pixmaps( board, bd );
+    board_draw_chequers( board, bd, TRUE );
 }
 
 static void board_set_position( GtkWidget *pw, BoardData *bd ) {
@@ -1795,6 +1889,27 @@ static void board_set_position( GtkWidget *pw, BoardData *bd ) {
     sprintf( sz, "set board %s", gtk_entry_get_text( GTK_ENTRY(
 	bd->position_id ) ) );
     
+    UserCommand( sz );
+}
+
+static void board_set_name( GtkWidget *pw, BoardData *bd ) {
+
+    char sz[ 82 ]; /* "set player ..32.. name ..32.." */
+
+    sprintf( sz, "set player %s name %s", ap[ pw == bd->name0 ? 0 : 1 ].szName,
+	     gtk_entry_get_text( GTK_ENTRY( pw ) ) );
+
+    UserCommand( sz );
+}
+
+static void board_set_score( GtkWidget *pw, BoardData *bd ) {
+
+    char sz[ 32 ]; /* "set score ..10.. ..10.." */
+
+    sprintf( sz, "set score %s %s",
+	     gtk_entry_get_text( GTK_ENTRY( bd->score0 ) ),
+	     gtk_entry_get_text( GTK_ENTRY( bd->score1 ) ) );
+
     UserCommand( sz );
 }
 
@@ -1835,6 +1950,40 @@ static gboolean dice_press( GtkWidget *dice, GdkEvent *event,
     UserCommand( "roll" );
     
     return TRUE;
+}
+
+static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
+			    BoardData *bd ) {
+    
+    gdk_window_clear_area( pw->window, event->area.x, event->area.y,
+                           event->area.width, event->area.height );
+
+    draw_bitplane( pw->window, bd->gc_and, bd->bm_key_mask, 0, 0, 0, 0,
+		   20, 20, 1 );
+
+    gdk_draw_pixmap( pw->window, bd->gc_or,
+		     *( (GdkPixmap **) gtk_object_get_user_data(
+			 GTK_OBJECT( pw ) ) ), 0, 0, 0, 0,
+		     20, 20 );
+    
+    return TRUE;
+}
+
+/* Create a drawing area to display a single chequer (used as a key in the
+   player table). */
+static GtkWidget *chequer_key_new( int iPlayer, BoardData *bd ) {
+
+    GtkWidget *pw = gtk_drawing_area_new();
+
+    gtk_drawing_area_size( GTK_DRAWING_AREA( pw ), 20, 20 );
+
+    gtk_object_set_user_data( GTK_OBJECT( pw ), 
+			      iPlayer ? &bd->pm_o_key : &bd->pm_x_key );
+    
+    gtk_signal_connect( GTK_OBJECT( pw ), "expose_event",
+			GTK_SIGNAL_FUNC( key_expose ), bd );
+    
+    return pw;
 }
 
 static void board_init( Board *board ) {
@@ -1908,24 +2057,47 @@ static void board_init( Board *board ) {
 			  gtk_label_new( "Position:" ), FALSE, FALSE, 0 );
 	    
 	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Name" ),
-			  1, 2, 0, 1, 0, 0, 4, 0 );
+			  1, 2, 0, 1, 0, 0, 8, 0 );
 	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Score" ),
-			  2, 3, 0, 1, 0, 0, 4, 0 );
-#if 0
-	/* FIXME needs gnome */
-	gtk_table_attach( GTK_TABLE( bd->table ), gnome_color_picker_new(),
-			  0, 1, 1, 2, 0, 0, 0, 0 );
-	gtk_table_attach( GTK_TABLE( bd->table ), gnome_color_picker_new(),
-			  0, 1, 2, 3, 0, 0, 0, 0 );
-#endif
-	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "0" ),
+			  2, 3, 0, 1, 0, 0, 8, 0 );
+
+	gtk_table_attach( GTK_TABLE( bd->table ), bd->name0 =
+			  gtk_entry_new_with_max_length( 32 ),
+			  1, 2, 1, 2, 0, 0, 4, 0 );
+	gtk_table_attach( GTK_TABLE( bd->table ), bd->name1 =
+			  gtk_entry_new_with_max_length( 32 ),
+			  1, 2, 2, 3, 0, 0, 4, 0 );
+	gtk_signal_connect( GTK_OBJECT( bd->name0 ), "activate",
+			    GTK_SIGNAL_FUNC( board_set_name ), bd );
+	gtk_signal_connect( GTK_OBJECT( bd->name1 ), "activate",
+			    GTK_SIGNAL_FUNC( board_set_name ), bd );
+	
+	gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 0, bd ),
+			  0, 1, 1, 2, 0, 0, 8, 1 );
+	gtk_table_attach( GTK_TABLE( bd->table ), chequer_key_new( 1, bd ),
+			  0, 1, 2, 3, 0, 0, 8, 0 );
+
+	gtk_table_attach( GTK_TABLE( bd->table ), bd->score0 =
+			  gtk_spin_button_new( GTK_ADJUSTMENT(
+			      gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
+					       1, 0 ),
 			  2, 3, 1, 2, 0, 0, 4, 0 );
-	gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "0" ),
+	gtk_table_attach( GTK_TABLE( bd->table ), bd->score1 =
+			  gtk_spin_button_new( GTK_ADJUSTMENT(
+			      gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ),
+					       1, 0 ),
 			  2, 3, 2, 3, 0, 0, 4, 0 );
+	gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
+	gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
+	gtk_signal_connect( GTK_OBJECT( bd->score0 ), "activate",
+			    GTK_SIGNAL_FUNC( board_set_score ), bd );
+	gtk_signal_connect( GTK_OBJECT( bd->score1 ), "activate",
+			    GTK_SIGNAL_FUNC( board_set_score ), bd );
+	
 	gtk_box_pack_start( GTK_BOX( bd->hbox_match ),
 			    gtk_label_new( "Match:" ), FALSE, FALSE, 4 );
-	gtk_box_pack_start( GTK_BOX( bd->hbox_match ),
-			    gtk_label_new( "unlimited" ), FALSE, FALSE, 0 );
+	gtk_box_pack_start( GTK_BOX( bd->hbox_match ), bd->match =
+			    gtk_label_new( NULL ), FALSE, FALSE, 0 );
     }
 
     board_set( board, "board:::1:0:0:"
