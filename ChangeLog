@@ -1,3 +1,7 @@
+Wed Jun 30 20:42:53 CEST 2004   Nis Joergensen  <nis@superlativ.dk>
+
+	* gtkboard.c: fix bug that disallowed certain legal moves.
+
 Mon Jun 28 16:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* boards.xml: Add 2 new designs by Ruth Schneider and Ausbilder Schmidt

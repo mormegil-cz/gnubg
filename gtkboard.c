@@ -1226,7 +1226,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
      * list of valid destination points (since we have the code for that available 
      * 
      * Known problems:
-     
+     *    
      * Not tested for "allow dragging to illegal points". Unlikely to work, might crash 
      * It is not possible to drag checkers from the bearoff tray. This must be corrected in 
      * the pick-up code - this proc should be ready for it.
@@ -1277,29 +1277,31 @@ gboolean place_chequer_or_revert(BoardData *bd,
              bd->points[ bar ] -= bd->drag_colour;
              board_invalidate_point( bd, bar );
         }
+
         if ( bd->diceRoll[0] == bd->diceRoll[1] ) {
             for (i = 1; i <= 3; i++) {
                     passpoint = source - i * bd->diceRoll[0] * bd->drag_colour;
-                    if ((dest2 - passpoint) * bd->drag_colour > 0 ) break;
-                    if (bd->points[ passpoint ] == - bd->drag_colour) {
+                    if ((dest2 - passpoint) * bd->drag_colour >= 0 ) break;
+                    if (bd->points[ passpoint ] == -bd->drag_colour) {
                         hit++;
                         hitCheckers[ i ] = passpoint;
-                        bd->points[ passpoint ] = 0;
+                        bd->points[ passpoint ] += bd->drag_colour;
                         bd->points[ bar ] -= bd->drag_colour;
                         board_invalidate_point( bd, bar );
                         board_invalidate_point( bd, passpoint );
                     }
             }
         } else {
-          if (ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] 
-              || dest > 25 ) 
+          if (ABS(source - dest2) == bd->diceRoll [ 0 ] + bd->diceRoll [ 1 ] || (
+              dest > 25 && ABS (source - dest2) > MAX (bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]))
+              ) 
             for (i = 0; i < 2; i++) {
                     passpoint = source - bd->diceRoll[ i ] * bd->drag_colour;
-                    if ((dest2 - passpoint) * bd->drag_colour > 0 ) continue;
+                    if ((dest2 - passpoint) * bd->drag_colour >= 0 ) continue;
                     if (bd->points[ passpoint ] == - bd->drag_colour) {
                         hit++;
                         hitCheckers[ i + 1 ] = passpoint;
-                        bd->points[ passpoint ] = 0;
+                        bd->points[ passpoint ] += bd->drag_colour;
                         bd->points[ bar ] -= bd->drag_colour;
                         board_invalidate_point( bd, bar );
                         board_invalidate_point( bd, passpoint );
@@ -1308,7 +1310,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
                     }
                 }
         } 
-    } else {
+    } else if  ( (source - dest2) * bd->drag_colour < 0 )  {
 
     /* 
      * Check for taking chequer off point where we hit 
@@ -1366,12 +1368,9 @@ gboolean place_chequer_or_revert(BoardData *bd,
     bd->points[ dest ] += bd->drag_colour;
     board_invalidate_point( bd, dest );
 
-/* Not sure why this was made conditional on dest != source
- * I encountered at least one case where it was needed anyway (when we tried 
- * to unhit on that point so commenting out */ 
 
-/*    if( source != dest ) { */
-      if( update_move( bd ) && !fGUIIllegal ) {
+    if( source != dest ) { 
+        if( update_move( bd ) && !fGUIIllegal ) {
 	    /* the move was illegal; undo it */
 	    bd->points[ source ] += bd->drag_colour;
 	    board_invalidate_point( bd, source );
@@ -1387,7 +1386,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
                     }
 	    }
 
-          if ( unhit > 0 ) {
+            if ( unhit > 0 ) {
               bd->points[ bar ] -= unhit * bd->drag_colour;
               board_invalidate_point( bd, bar );
               for (i = 0; i < 4; i++) 
@@ -1399,10 +1398,10 @@ gboolean place_chequer_or_revert(BoardData *bd,
 
 	    update_move( bd );
 	    placed = FALSE;
-	}
-/*    } */
+        }
+    } 
 
-	board_invalidate_point( bd, placed ? dest : bd->drag_point );
+    board_invalidate_point( bd, placed ? dest : source );
 
 #if USE_BOARD3D
 	if (bd->rd->fDisplayType == DT_3D && bd->rd->quickDraw)
