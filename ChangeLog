@@ -1,3 +1,10 @@
+Fri Oct 12 11:10:22 2001  Gary Wong  <gtw@research.att.com>
+
+	* drawboard.c (ParseMove): Sort the move into a sensible order
+	before returning it.  This is required to cope with SGG files,
+	which can include strangely ordered moves such as "3/off(3) 6/3"
+	when only 2 chequers are on the 3 point (reported by JP White).
+
 Fri Oct 12 10:37:52 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_pointer): Could not move opponent's chequers

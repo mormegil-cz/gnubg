@@ -826,6 +826,8 @@ extern int ParseMove( char *pch, int an[ 8 ] ) {
     if( i < 8 )
 	an[ i ] = 0;
 
+    qsort( an, i >> 1, sizeof( int ) << 1, CompareMoves );
+    
     return i >> 1;
 }
 
