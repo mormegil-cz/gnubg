@@ -1,3 +1,8 @@
+Tue Aug 13 22:20:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (CommandExportMatchHtml): fix some memory allocation
+	problems.
+
 Tue Aug 13 14:59:06 2002  Gary Wong  <gtw@gnu.org>
 
 	* postscript.c (PrintPostScriptBoard): Use locale-independent
