@@ -1,3 +1,9 @@
+Wed Dec  4 22:17:18 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c (UseDesign): wood=paint did not work with board
+	designs
+	(reported by Nardy Pillards)
+
 Wed Dec  4 22:00:46 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* bearoff.c (ReadTwoSidedBearoff, ReadBearoffOneSidedExact):

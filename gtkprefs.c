@@ -58,7 +58,8 @@ static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
-    *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges;
+    *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
+    *pwWoodF;
 
 #if HAVE_LIBXML2
 static GtkWidget *pwDesignTitle;
@@ -425,7 +426,7 @@ static void ToggleWood( GtkWidget *pw, BoardData *bd ) {
 
 static GtkWidget *BorderPage( BoardData *bd ) {
 
-    GtkWidget *pw, *pwWoodF;
+    GtkWidget *pw;
     gdouble ar[ 4 ];
     int i;
     static char *aszWood[] = {
@@ -850,6 +851,9 @@ UseDesign ( GtkWidget *pw, BoardData *bdBoard ) {
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwHinges ), 
                                  bd.hinges );
   gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), bd.wood );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd.wood != WOOD_PAINT ?
+                                                   pwWood : pwWoodF ),
+                                TRUE );
 
   gtk_widget_set_sensitive( pwWoodType, bd.wood != WOOD_PAINT );
   gtk_widget_set_sensitive( apwBoard[ 1 ], bd.wood == WOOD_PAINT);
