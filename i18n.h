@@ -36,10 +36,13 @@
 #else
 # define _(Text) Text
 # define gettext(Text) Text
-#define textdomain(Domain)
-#define bindtextdomain(Package, Directory)
-#define bind_textdomain_codeset(d,c)
+# define ngettext(Singular, Plural, N) \
+    ((N == 1) ? Singular : Plural)
+# define textdomain(Domain)
+# define bindtextdomain(Package, Directory)
+# define bind_textdomain_codeset(d,c)
 #endif
+
 #ifdef gettext_noop
 # define N_(String) gettext_noop (String)
 #else
