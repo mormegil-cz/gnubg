@@ -3,8 +3,6 @@ gnubg_TEXINFOS = fdl.texi
 if XML_MANUAL
 pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png \
 	rulfig4.png rulfig5.png annealing.png
-else
-pkgdata_DATA = gnubg.xml texinfo.dtd
 endif
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \

@@ -83,7 +83,6 @@ VERSION = @VERSION@
 info_TEXINFOS = gnubg.texi
 gnubg_TEXINFOS = fdl.texi
 @XML_MANUAL_TRUE@pkgdata_DATA = gnubg.xml texinfo.dtd rulfig1.png rulfig2.png rulfig3.png 	rulfig4.png rulfig5.png annealing.png
-@XML_MANUAL_FALSE@pkgdata_DATA = gnubg.xml texinfo.dtd
 
 EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png 	rulfig1.txt rulfig2.txt rulfig3.txt rulfig4.txt rulfig5.txt 	annealing.gp annealing.txt fdl.texi
 
