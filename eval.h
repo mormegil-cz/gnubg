@@ -346,13 +346,6 @@ se_eq2mwc ( const float rEq, const cubeinfo *ci );
 extern char 
 *FormatEval ( char *sz, evalsetup *pes );
 
-extern int 
-EvaluatePositionCubeful2( int anBoard[ 2 ][ 25 ],
-                          float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                          cubeinfo aci[], int cci,
-                          evalcontext *pec, int nPlies,
-                          int nPliesTop, int fDTTop, cubeinfo aciTop[] );
-
 extern cubedecision
 FindCubeDecision ( float arDouble[],
                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], cubeinfo *pci );

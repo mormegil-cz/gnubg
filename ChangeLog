@@ -1,3 +1,7 @@
+Thu Jun 27 19:46:46 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c: remove dead code.
+
 Thu Jun 27 19:05:13 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (relativeFibsRating): optimize calculation of
