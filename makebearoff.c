@@ -32,17 +32,20 @@
 static unsigned int *ausRolls;
 static double aaEquity[ 924 ][ 924 ];
 
-static void BearOff( int nId, int nPoint, unsigned short aaProb[][ 32 ] ) {
+static void BearOff( int nId, int nPoint, 
+                     unsigned short aaProb[][ 32 ],
+                     unsigned short aaGammonProb[][ 32 ] ) {
 
     int i, iBest, iMode, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ],
-	anBoardTemp[ 2 ][ 25 ], aProb[ 32 ];
+      anBoardTemp[ 2 ][ 25 ], aProb[ 32 ], aGammonProb[ 32 ];
     movelist ml;
+    int k;
     unsigned int us;
 
     PositionFromBearoff( anBoard[ 1 ], nId, nPoint );
 
     for( i = 0; i < 32; i++ )
-	aProb[ i ] = 0;
+	aProb[ i ] = aGammonProb[ i ] = 0;
     
     for( i = nPoint; i < 25; i++ )
 	anBoard[ 1 ][ i ] = 0;
@@ -50,6 +53,12 @@ static void BearOff( int nId, int nPoint, unsigned short aaProb[][ 32 ] ) {
     for( i = 0; i < 25; i++ )
 	anBoard[ 0 ][ i ] = 0;
 
+    for ( i = 0, k = 0; i < nPoint; ++i )
+      k += anBoard[ 1 ][ i ];
+
+    if ( k < 15 )
+      aGammonProb[ 0 ] = 0xFFFF * 36;
+	    
     for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
 	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
 	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ], FALSE );
@@ -71,13 +80,21 @@ static void BearOff( int nId, int nPoint, unsigned short aaProb[][ 32 ] ) {
 	    }
 
 	    assert( iBest >= 0 );
-	    
-	    if( anRoll[ 0 ] == anRoll[ 1 ] )
-		for( i = 0; i < 31; i++ )
-		    aProb[ i + 1 ] += aaProb[ iBest ][ i ];
-	    else
-		for( i = 0; i < 31; i++ )
-		    aProb[ i + 1 ] += ( aaProb[ iBest ][ i ] << 1 );
+
+	    if( anRoll[ 0 ] == anRoll[ 1 ] ) {
+              for( i = 0; i < 31; i++ ) {
+                aProb[ i + 1 ] += aaProb[ iBest ][ i ];
+                if ( k == 15 )
+                  aGammonProb[ i + 1 ] += aaGammonProb[ iBest ][ i ];
+              }
+            }
+	    else {
+              for( i = 0; i < 31; i++ ) {
+                aProb[ i + 1 ] += ( aaProb[ iBest ][ i ] << 1 );
+                if ( k == 15 )
+                  aGammonProb[ i + 1 ] += aaGammonProb[ iBest ][ i ] << 1;
+              }
+            }
 	}
     
     for( i = 0, j = 0, iMode = 0; i < 32; i++ ) {
@@ -92,6 +109,17 @@ static void BearOff( int nId, int nPoint, unsigned short aaProb[][ 32 ] ) {
 	j += i * aProb[ i ];
 
     ausRolls[ nId ] = j / 2359;
+
+    /* gammon probs */
+
+    for( i = 0, j = 0, iMode = 0; i < 32; i++ ) {
+	j += ( aaGammonProb[ nId ][ i ] = ( aGammonProb[ i ] + 18 ) / 36 );
+	if( aaGammonProb[ nId ][ i ] > aaGammonProb[ nId ][ iMode ] )
+	    iMode = i;
+    }
+
+    aaGammonProb[ nId ][ iMode ] -= ( j - 0xFFFF );
+
 }
 
 static void BearOff2( int nUs, int nThem ) {
@@ -147,6 +175,7 @@ generate ( const int nTSP, const int nTSC,
     int i, j, k;
     int n;
     unsigned short int *pus;
+    unsigned short int *pusGammon;
 #ifdef STDOUT_FILENO 
     FILE *output;
 
@@ -177,14 +206,26 @@ generate ( const int nTSP, const int nTSC,
         exit (3);
       }
 
+      pusGammon = 
+        (unsigned short int *) malloc ( sizeof ( unsigned short int ) * 
+                                        n * 32 );
+      if ( ! pusGammon ) {
+        fprintf ( stderr, "malloc failed for aaGammonProb!\n" );
+        exit (3);
+      }
+
       pus[ 0 ] = 0xFFFF;
       for( i = 1; i < 32; ++i )
         pus[ i ] = 0;
 
+      pusGammon[ i ] = 0xFFFF;
+      for( i = 1; i < 32; ++i )
+        pusGammon[ i ] = 0;
+
       ausRolls[ 0 ] = 0;
 
       for( i = 1; i < n; i++ ) {
-	BearOff( i, nOS, pus );
+	BearOff( i, nOS, pus, pusGammon );
 
 	if( !( i % 100 ) )
           fprintf( stderr, "1:%d/%d        \r", i, n );
@@ -200,6 +241,10 @@ generate ( const int nTSP, const int nTSC,
 	for( j = 0; j < 32; j++, k++ ) {
           putc ( pus[ k ] & 0xFF, output );
           putc ( pus[ k ] >> 8, output );
+          if ( nOS > 6 ) {
+            putc ( pusGammon[ k ] & 0xFF, output );
+            putc ( pusGammon[ k ] >> 8, output );
+          }
 	}
 
     }
@@ -325,6 +370,8 @@ extern int main( int argc, char **argv ) {
               "Size of file       : %'12d bytes\n",
               nOS, 
               Combination ( nOS + 15, nOS ),
+              ( nOS > 6 ) ? 
+              2 * Combination ( nOS + 15, nOS ) * 64 :
               Combination ( nOS + 15, nOS ) * 64 );
   else
     fprintf ( stderr, 

@@ -85,10 +85,6 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 static float
 EvalEfficiency( int anBoard[2][25], positionclass pc );
 
-static void
-EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ );
-
-
 static int MaxTurns( int i );
 
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[]
@@ -2305,18 +2301,20 @@ setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
 
 
 static void
-EvalOS ( const int n, unsigned short int aProb[ 32 ] ) {
+EvalOS ( const int n, 
+         unsigned short int aProb[ 32 ],
+         unsigned short int aGammonProb[ 32 ] ) {
 
-  unsigned char ac[ 64 ];
+  unsigned char ac[ 128 ];
   int i;
-  off_t iOffset = 21 + n * 64;
+  off_t iOffset = 21 + n * 64 * 2;
 
   if ( lseek ( fBearoffOS, iOffset, SEEK_SET ) < 0 ) {
     perror ( "OS bearoff database" );
     return;
   }
 
-  if ( read ( fBearoffOS, ac, 64 ) < 64 ) {
+  if ( read ( fBearoffOS, ac, 128 ) < 128 ) {
     if ( errno )
       perror ( "OS bearoff database" );
     else
@@ -2324,8 +2322,10 @@ EvalOS ( const int n, unsigned short int aProb[ 32 ] ) {
     return;
   }
 
-  for ( i = 0; i < 32; ++i )
-    aProb[ i ] = ac[ 2 * i ] | ac[ 2 * i + 1 ] << 8;
+  for ( i = 0; i < 32; ++i ) {
+    aProb[ i ] = ac[ 4 * i ] | ac[ 4 * i + 1 ] << 8;
+    aGammonProb[ i ] = ac[ 4 * i  + 2 ] | ac[ 4 * i + 3 ] << 8;
+  }
 
 }
 
@@ -2338,17 +2338,16 @@ EvalBearoffOSFull ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
   unsigned short int aaProb[ 2 ][ 32 ];
   unsigned long x;
 
+  int an[ 2 ][ 25 ];
+  unsigned short int aaGammonProb[ 2 ][ 32 ];
+
   assert ( fBearoffOS >= 0 );
 
   nOpp = PositionBearoff ( anBoard[ 0 ], nBearoffOSPoints );
   n = PositionBearoff ( anBoard[ 1 ], nBearoffOSPoints );
 
-  /* FIXME: calculate gammon percentages */
-
-  EvalRace ( anBoard, arOutput );
-
-  EvalOS ( n, aaProb[ 0 ] );
-  EvalOS ( nOpp, aaProb[ 1 ] );
+  EvalOS ( n, aaProb[ 0 ], aaGammonProb[ 0 ] );
+  EvalOS ( nOpp, aaProb[ 1 ], aaGammonProb[ 1 ] );
 
   x = 0;
   for( i = 0; i < 32; i++ )
@@ -2360,6 +2359,34 @@ EvalBearoffOSFull ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
   x = 0;
   for( i = 0; i < 32; i++ )
     x += i * aaProb[ 1 ][ i ];
+
+  /* calculate gammon percentages */
+
+  /* my gammon chance */
+
+  /* I'm out in i rolls and my opponent isn't inside home quadrant
+     in less than i rolls */
+
+  x = 0;
+  for( i = 0; i < 32; i++ )
+    for( j = i; j < 32; j++ )
+      x += aaProb[ 0 ][ i ] * aaGammonProb[ 1 ][ j ];
+
+  arOutput[ OUTPUT_WINGAMMON ] = x / ( 65535.0 * 65535.0 );
+
+  /* opp gammon chance */
+
+  x = 0;
+  for( i = 0; i < 32; i++ )
+    for( j = i + 1; j < 32; j++ )
+      x += aaProb[ 1 ][ i ] * aaGammonProb[ 0 ][ j ];
+
+  arOutput[ OUTPUT_LOSEGAMMON ] = x / ( 65535.0 * 65535.0 );
+
+  /* no backgammons possible */
+
+  arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
+  arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0f;
 
   return 0;
 
@@ -3883,7 +3910,12 @@ static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
     nOpp = PositionBearoff( anBoard[ 0 ], 6 );
     n = PositionBearoff( anBoard[ 1 ], 6 );
 
-    strcpy( szOutput, _("Rolls\tPlayer\tOpponent\n") );
+    sprintf ( strchr ( szOutput, 0 ),
+              "             Player       Opponent\n"
+              "Position %12d  %12d\n\n", 
+              n, nOpp );
+
+    strcat( szOutput, _("Rolls\tPlayer\tOpponent\n") );
     
     for( i = 0; i < 32; i++ ) {
 	an[ 0 ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
@@ -3921,21 +3953,27 @@ static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 }
 
 static void DumpBearoffOS ( int anBoard[ 2 ][ 25 ], 
-                                 char *szOutput ) {
+                            char *szOutput ) {
 
 
     int i, n, nOpp, f0 = FALSE, f1 = FALSE;
     unsigned short int aaProb[ 2 ][ 32 ];
+    unsigned short int aaGammonProb[ 2 ][ 32 ];
 
     assert( fBearoffOS >= 0 );
     
     nOpp = PositionBearoff( anBoard[ 0 ], nBearoffOSPoints );
     n = PositionBearoff( anBoard[ 1 ], nBearoffOSPoints );
 
-    EvalOS ( nOpp, aaProb[ 1 ] );
-    EvalOS ( n, aaProb[ 0 ] );
+    EvalOS ( nOpp, aaProb[ 1 ], aaGammonProb[ 1 ] );
+    EvalOS ( n, aaProb[ 0 ], aaGammonProb[ 0 ] );
 
-    strcpy( szOutput, _("Rolls\tPlayer\tOpponent\n") );
+    sprintf ( strchr ( szOutput, 0 ),
+              "             Player       Opponent\n"
+              "Position %12d  %12d\n\n", 
+              n, nOpp );
+
+    strcat( szOutput, _("Rolls\tPlayer\tOpponent\n") );
     
     for( i = 0; i < 32; i++ ) {
 

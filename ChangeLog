@@ -1,12 +1,19 @@
+Sat Oct  5 02:30:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Gammon percentages working with huge OS database.
+
+	* makebearoff.c: calculate gammon distributions.
+	* eval.c (EvalBearoffOSFull): calculate gammon percentages.
+
 Fri Oct  4 21:23:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
-	Initial implementation of huge OSR database.
+	Initial implementation of huge OS database.
 
 	* positionid.c (PositionBearoff, PositionFromBearoff):
 	new parameter n, which is the number of points.
 	* gnubg.c: new parameter to EvalInitialise. Call EvalShutdown before
 	exiting.	
-	* eval.c: new evaluation routines for EVAL_BEAROFF_HUGE_OSR
+	* eval.c: new evaluation routines for EVAL_BEAROFF_OS
 
 Fri Oct  4 19:37:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
