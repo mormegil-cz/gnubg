@@ -22,6 +22,12 @@
 #include "config.h"
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#if HAVE_LIBDL
+#include <dlfcn.h>
+#endif
 
 #if TIME_WITH_SYS_TIME
 #include <sys/time.h>
@@ -50,8 +56,12 @@ extern void InitRNGSeed( int n ) {
 	break;
 
     case RNG_BSD:
+#if HAVE_RANDOM
 	srandom( n );
 	break;
+#else
+        abort();
+#endif
 
     case RNG_ISAAC: {
 	int i;
@@ -69,11 +79,17 @@ extern void InitRNGSeed( int n ) {
 	break;
 
     case RNG_USER:
-	/* FIXME */
+#if HAVE_LIBDL
+	(*pfUserRNGSeed) ( n );
 	break;
+#else
+	abort();
+#endif
 
     case RNG_MANUAL:
 	/* no-op */
+      break;
+
     }
 }
 
@@ -117,7 +133,8 @@ extern void RollDice( int anDice[ 2 ] ) {
 	break;
 	
     case RNG_MANUAL:
-	abort();
+	GetManualDice ( anDice );
+	break;
 	
     case RNG_MERSENNE:
 	anDice[ 0 ] = ( genrand() % 6 ) + 1;
@@ -125,6 +142,161 @@ extern void RollDice( int anDice[ 2 ] ) {
 	break;
 	
     case RNG_USER:
+#if HAVE_LIBDL
+	anDice[ 0 ] = ( (*pfUserRNGRandom) () % 6 ) + 1;
+	anDice[ 1 ] = ( (*pfUserRNGRandom) () % 6 ) + 1;
+	break;
+#else
 	abort();
+#endif
+
     }
 }
+
+extern void GetManualDice( int anDice[ 2 ] ) {
+
+  char sz[ 2048 ];
+  char *pz;
+  int i;
+
+  sz[ 0 ] = 0;
+
+  
+  for (;;) {
+    
+    fputs( "enter dice -> ", stdout );
+    fflush( stdout );    
+  
+    fgets( sz, sizeof( sz ), stdin );
+  
+    if( feof( stdin ) ) {
+      putchar( '\n' );
+    
+      if( !sz[ 0 ] )
+	return;
+      
+    }	
+ 
+    /* parse input and read a couple of dice */
+    /* any string with two numbers is allowed */
+    
+    pz = &sz[0];
+    for ( i=0 ; i<2 ; i++ ) {
+
+      while ( *pz && ( ( *pz < '1' ) && ( *pz > '6' ) ) ) pz++;
+
+      if ( !*pz ) 
+	continue;
+
+      anDice[ i ] = (int) (*pz - '0');
+      pz++;
+    }
+
+    return;
+
+
+  }
+
+}
+
+#if HAVE_LIBDL
+
+/*
+ * Functions for handling the user supplied RNGs
+ * Ideas for further development:
+ * - read szUserRNG, szUserRNGSeed, and szUserRNGRandom
+ *   from user input
+ */
+
+extern int  UserRNGOpen() {
+
+  char *error;
+  char szFileName[ MAXPATHLEN ];
+
+  strcpy( szUserRNG, "userrng.so" );
+
+  /* 
+   * (1)
+   * Try opening shared object from standard and
+   * LD_LIBRARY_PATH paths. 
+   */
+
+  strcpy( szFileName, szUserRNG );
+
+  pvUserRNGHandle = dlopen( szFileName, RTLD_LAZY );
+
+  if (!pvUserRNGHandle ) {
+    
+    /*
+     * (2)
+     * Try opening shared object from current directory
+     */
+
+    strcpy( szFileName, "./" );
+    strcat( szFileName, szUserRNG );
+    
+    pvUserRNGHandle = dlopen( szFileName, RTLD_LAZY );
+
+  }
+
+  if (!pvUserRNGHandle ) {
+    
+    /* 
+     * Bugger! Can't load shared library
+     */
+
+    printf ( "Could not load shared library %s.\n", szUserRNG );
+    
+    return 0;
+
+  } 
+    
+    
+  /* 
+   * Shared library should now be open.
+   * Get addresses for seed and random in user's RNG 
+   */
+
+  strcpy( szUserRNGSeed , "setseed" );
+  strcpy( szUserRNGRandom , "getrandom" );
+
+  (void *) pfUserRNGSeed = dlsym( pvUserRNGHandle, szUserRNGSeed );
+
+  if ((error = dlerror()) != NULL)  {
+    
+    fputs( error, stderr );
+    fputs ( "\n", stderr );
+    return 0;
+
+  }
+  
+  (void *) pfUserRNGRandom = dlsym( pvUserRNGHandle, szUserRNGRandom );
+
+  if ((error = dlerror()) != NULL)  {
+    
+    fputs( error, stderr );
+    fputs ( "\n", stderr );
+    return 0;
+
+  }
+
+  /*
+   * Everthing should be fine...
+   */
+
+  return 1;
+   
+  
+}
+
+extern void UserRNGClose() {
+
+  dlclose(pvUserRNGHandle);
+
+}
+
+#endif /* HAVE_LIBDL */
+
+
+
+
