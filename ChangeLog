@@ -1,3 +1,8 @@
+Fri 12 Sep 23:26:21 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c gnubg.c play.c  - move panels flag out to 
+	  unconditional compile point.
+	
 Fri 12 Sep 19:17:25 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	backgammon.h MOVE_TIME needn't be conditional

@@ -217,6 +217,7 @@ int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
+int fDisplayPanels = TRUE;
 int fMessage = FALSE;
 int fGameList = FALSE;
 int nThreadPriority = 0;

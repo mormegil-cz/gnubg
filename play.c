@@ -405,6 +405,9 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 	    outputx();
 	}
 	break;
+#else
+    case MOVE_TIME:
+      break;
 #endif
     }
 

@@ -385,8 +385,6 @@ static list lOutput;
 int fTTY = TRUE;
 int fGUISetWindowPos = TRUE;
 
-int fDisplayPanels = TRUE;
-
 static guint nStdin, nDisabledCount = 1;
 
 static char *szCopied; /* buffer holding copied data */
