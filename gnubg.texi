@@ -7,6 +7,10 @@
 
 @syncodeindex vr cp
 
+@macro gnubg
+@code{gnubg}
+@end macro
+
 @ifinfo
 This file documents GNU Backgammon, a program for playing and analysing
 backgammon games and matches.
@@ -31,11 +35,16 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 (updated in @value{month-year}).
 
 @menu
-* Introduction::
-* How to Play Backgammon::
-* Sample Game::
-* Frequently Asked Questions::
-* Concept Index::		  Index of concepts described in this manual.
+* Introduction::                  What GNU Backgammon does.
+* How to Play Backgammon::        The rules of the game.
+* Sample Game::                   An example of how to play against gnubg.
+* Basic Commands::                Fundamental operations in gnubg.
+* Playing::                       gnubg's game playing features.
+* Analysis::                      Using gnubg to evaluate positions.
+* Databases::                     Storing information about positions.
+* Training::                      Modifying gnubg's neural nets.
+* Frequently Asked Questions::    Brief answers to things you might ask.
+* Concept Index::                 Index of concepts described in this manual.
 @end menu
 @end ifinfo
 
@@ -43,7 +52,38 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 @chapter Introduction
 @cindex introduction
 
-FIXME general introduction.
+GNU Backgammon (@gnubg{}) plays and analyses backgammon games and matches. 
+
+It is currently a work-in-progress.  When it is finished, it will be able
+to play and analyse cubeless and cubeful games and tournament matches,
+evaluate and roll out positions, tune its own evaluation functions using
+either TD or supervised training, maintain databases of positions for
+training and other purposes, and more.
+
+It will be extensible on platforms where Guile is available, so that the
+user can program it to answer sophisticated questions like "How many
+chequers must Black have borne off in positions like this one to be able
+to accept a double?" and automate complicated rollout tasks.  It will be
+driven by a command-line interface, and will display an ASCII rendition
+of a board on text-only terminals, but will also allow the user to play
+games and manipulate positions with an X11 board window where available.
+
+It currently plays at about the level of a strong intermediate flight
+tournament player (rated in the mid 1700s on FIBS, the First Internet
+Backgammon Server -- around the 90th percentile) and is gradually
+improving; it should be somewhat stronger than this when released.  Since
+almost all of the CPU time required during supervised training is spent
+performing rollouts, and rollouts can easily be performed in parallel,
+it is hoped that users will be able to pool rollout results and
+collectively train it to a level stronger than any individual could
+obtain.
+
+If you can tolerate the rough edges, periodic snapshots of and anonymous
+CVS access to the pre-release source are being made available.  You can
+also compete against a recent version of @gnubg on FIBS; it plays there
+under the name "gnu".
+
+FIXME update this section.
 
 @node How to Play Backgammon
 @chapter How to Play Backgammon
@@ -65,7 +105,7 @@ Although GNU Backgammon has many commands and options, only a few of them
 are used during routine play.  This chapter demonstrates some of those
 most commonly used.
 
-If your gnubg installation is complete, you should be able to start it
+If your @gnubg installation is complete, you should be able to start it
 and get output similar to the following:
 
 @example
@@ -79,7 +119,7 @@ warranty" for details.
 (No game) 
 @end example
 
-When you start a game, gnubg will (by default) show which player's move it
+When you start a game, @gnubg will (by default) show which player's move it
 is; it is displaying @samp{(No game)} at the moment to indicate that it
 isn't anybody's turn.
 
@@ -131,12 +171,12 @@ disabled; if your environment supports a graphical board, you will see a
 better representation of a backgammon board than this.  Exactly the
 same information is available, either way.
 
-You have just won the opening roll (you have a 3, and gnubg has a 1) --- the
+You have just won the opening roll (you have a 3, and @gnubg has a 1) --- the
 dice roll is in the bottom right hand corner for the TTY board, and shown
 as graphical dice on the right hand side of the board window.  The
 position ID (the @samp{4HPwATDgc/ABMA} in this example) is an encoded
 representation of the current position that comes in useful when using
-some of gnubg's advanced commands; you can safely ignore it for now.
+some of @gnubg{}'s advanced commands; you can safely ignore it for now.
 Notice that the prompt has changed to @samp{(X)}, to indicate that it
 is X's (your) turn.
 
@@ -155,7 +195,7 @@ window.  Click mouse button 1 on the dice to indicate you have finished
 your move (just as you would pick up your dice to end your move if you
 were playing on a real board).
 
-Once you have done that, gnubg will take its turn, rolling 63 and playing
+Once you have done that, @gnubg will take its turn, rolling 63 and playing
 24/15.  It is now your move again:
 
 @example
@@ -211,7 +251,7 @@ window.)
 
 Let's play this roll by hitting twice: 13/10*, 6/1*.  You can enter this
 move with @kbd{13 10 6 1} --- note that you don't need to specify anything
-special to hit; gnubg will automatically move blots that are hit to the
+special to hit; @gnubg will automatically move blots that are hit to the
 bar.  You can also make this move by dragging chequers in the board window,
 of course.
 
@@ -262,7 +302,7 @@ v|                  |BAR|                  |     (Cube: 1)
 (X)
 @end example
 
-Play this roll as @kbd{13 11 6 1}.  gnubg will now roll 16 --- and still
+Play this roll as @kbd{13 11 6 1}.  @gnubg will now roll 16 --- and still
 can't move!
 
 @example
@@ -306,9 +346,180 @@ when re-entering a hit chequer (e.g.@: @kbd{bar 20 24 20}) and
 @kbd{off} to remove a chequer from the board when bearing off
 (e.g.@: @kbd{6 off 5 off}).
 
-Type @kbd{help} from within gnubg for a summary of all commands, or
+Type @kbd{help} from within @gnubg for a summary of all commands, or
 browse the rest of this manual to learn more.  Have fun playing
 GNU Backgammon!
+
+@ignore
+We need to think of logical sections that each command belongs to so
+that appropriate commands are documented together.  We can easily make
+a table or summary later to group commands by name; for the rest of
+the manual it is better to group them by purpose.
+
+accept                  playing         / cube
+agree                   playing
+beaver                  playing         / cube
+database dump           databases
+database evaluate       databases
+database generate       databases
+database train          databases
+decline                 playing
+double                  playing         / cube
+drop                    playing         / cube
+eval                    analysis
+exit                    basic
+help                    basic
+hint                    playing?
+load game               playing         / recording
+load match              playing         / recording
+load weights            training
+move                    playing
+new game                playing
+new match               playing         / matches and sessions
+new session             playing         / matches and sessions
+play                    playing         / computer player
+quit                    basic
+redouble                playing         / cube
+reject                  playing
+resign                  playing
+roll                    playing         / dice
+rollout                 analysis
+save game               playing         / recording
+save match              playing         / recording
+save weights            training
+set autobearoff         playing
+set autogame            playing         / matches and sessions
+set automove            playing
+set autoroll            playing         / dice
+set board               playing
+set cache               analysis?
+set crawford            playing         / matches and sessions
+set cube centre         playing         / cube
+set cube owner          playing         / cube
+set cube value          playing         / cube
+set dice                playing         / dice
+set display             playing?
+set jacoby              playing         / matches and sessions
+set player gnubg        playing
+set player human        playing
+set player name         playing
+set player plies        playing
+set player pubeval      playing
+set plies               analysis
+set postcrawford        playing         / matches and sessions
+set prompt              playing?
+set rng ansi            playing         / dice
+set rng bsd             playing         / dice
+set rng isaac           playing         / dice
+set rng manual          playing         / dice
+set rng mersenne        playing         / dice
+set rng user            playing         / dice
+set score               playing         / matches and sessions
+set seed                playing         / dice
+set turn                playing
+show board              playing
+show cache              analysis?
+show copying            basic
+show crawford           playing         / matches and sessions
+show dice               playing         / dice
+show jacoby             playing         / matches and sessions
+show pipcount           playing
+show player             playing
+show postcrawford       playing         / matches and sessions
+show rng                playing         / dice
+show score              playing         / matches and sessions
+show seed               playing         / dice
+show turn               playing
+show warranty           basic
+take                    playing         / cube
+train database          databases
+train td                training
+@end ignore
+
+@node Basic Commands
+@chapter Basic Commands
+@cindex basic commands
+@cindex commands, basic
+
+FIXME exit, quit, help, ?, show copying, show warranty
+
+@node Playing
+@chapter Playing Backgammon with @gnubg
+@cindex playing commands
+@cindex commands, playing
+
+FIXME introduction
+
+@menu
+* Dice::                          Controlling dice rolls.
+* Computer Player::               Having gnubg make moves.
+* Matches and Sessions::          Playing series of games.
+* Cube::                          Using the doubling cube.
+* Recording::                     Saving games and matches.
+@end menu
+
+@node Dice
+@section Controlling Dice Rolls
+@cindex dice
+@cindex rolls, dice
+
+FIXME
+
+@node Computer Player
+@section Having @gnubg Make Moves
+@cindex computer player
+@cindex @code{gnubg}, making moves @comment @gnubg{}, doesn't work here, why?
+
+FIXME
+
+@node Matches and Sessions
+@section Matches and Sessions
+@cindex matches
+@cindex sessions
+
+This section describes how to use GNU Backgammon to play series of
+games, whether those games are part of a match (as in tournament
+backgammon) or a session of independent games (conventionally
+called ``money'' play, regardless of whether any money is involved).
+
+FIXME
+
+@node Cube
+@section The Doubling Cube
+@cindex cube, doubling
+@cindex doubling
+
+FIXME
+
+@node Recording
+@section Saving Games and Matches
+@cindex recording matches
+@cindex saving matches
+@cindex matches, saving
+@cindex games, saving
+
+FIXME
+
+@node Analysis
+@chapter Using @gnubg to Analyse Positions
+@cindex analysis of positions
+@cindex position analysis
+
+FIXME
+
+@node Databases
+@chapter Position Databases
+@cindex databases
+@cindex position databases
+
+FIXME
+
+@node Training
+@chapter Modifying @gnubg{}'s Neural Nets
+@cindex training
+@cindex neural nets, training
+
+FIXME
 
 @node Frequently Asked Questions
 @chapter Frequently Asked Questions
@@ -325,13 +536,13 @@ GNU Backgammon!
 
 @node Where can I get GNU Backgammon?
 @section Where can I get GNU Backgammon?
-@cindex obtaining gnubg
+@cindex obtaining @code{gnubg}
 
 Pre-release snapshots of GNU Backgammon are periodically made available
-for FTP at @file{alpha.gnu.org}.  FIXME:complete URL.
+for FTP at @url{ftp://alpha.gnu.org/}.  FIXME:complete URL.
 
 If you want to experiment with the very latest code, the development
-sources are kept in a CVS repository at @file{subversions.gnu.org}.
+sources are kept in a CVS repository at @url{http://subversions.gnu.org/}.
 FIXME:complete URL.
 
 @node How do I play a game?
@@ -339,11 +550,11 @@ FIXME:complete URL.
 @cindex playing a game
 @cindex moving chequers
 
-Once you are running gnubg, enter @kbd{new game} at the @samp{(gnubg)}
+Once you are running @gnubg{}, enter @kbd{new game} at the @samp{(gnubg)}
 prompt to start a game against the computer opponent.  You should now
-see a board (if an X display is available, gnubg will use a graphical
+see a board (if an X display is available, @gnubg will use a graphical
 board window; otherwise, it will display an ASCII board on your
-terminal).  If gnubg won the opening roll, it will have moved; you can
+terminal).  If @gnubg won the opening roll, it will have moved; you can
 now type @kbd{roll} (or click on the dice below the board if you are
 using X) to roll the dice yourself.  In either case, it will now be your
 move; you should enter the moves for each chequer as pairs of numbers.
@@ -357,30 +568,30 @@ the dice when you have finished.
 @node gnubg.bd errors
 @section I only see @samp{gnubg.bd: No such file or directory}.  What's wrong?
 @vindex gnubg.bd
-@cindex errors starting gnubg
+@cindex errors starting @code{gnubg}
 
-The file @file{gnubg.bd} is the bearoff database that gnubg uses to
-evaluate endgame positions.  gnubg will look for it first in the current
+The file @file{gnubg.bd} is the bearoff database that @gnubg uses to
+evaluate endgame positions.  @gnubg will look for it first in the current
 directory and then in the installed directory (@file{/usr/local/share/gnubg/}
 by default).
 
-The gnubg distribution is set up to create @file{gnubg.bd} by itself
+The @gnubg distribution is set up to create @file{gnubg.bd} by itself
 during compilation, but it can be a slow process (taking half an hour
 or more, depending on the speed of your computer).  If you would rather
 not wait to generate the database yourself, you can obtain a copy
-via FTP from @file{alpha.gnu.org}. FIXME:complete URL.
+via FTP from @url{ftp://alpha.gnu.org/}. FIXME:complete URL.
 
 @node gnubg.weights errors
 @section Now I get @samp{gnubg.weights: No such file or directory}.  What's that?
 @vindex gnubg.weights
-@cindex errors starting gnubg
+@cindex errors starting @code{gnubg}
 
 The file @file{gnubg.weights} contains the trained neural net weights
-for most of gnubg's position evaluators.  Like @file{gnubg.bd}, it should
+for most of @gnubg{}'s position evaluators.  Like @file{gnubg.bd}, it should
 be kept in either the current directory or the installed directory.
 
-You should be able to obtain a copy from wherever you found the gnubg
-distribution.  Future releases of gnubg will allow you to start without
+You should be able to obtain a copy from wherever you found the @gnubg
+distribution.  Future releases of @gnubg will allow you to start without
 any existing weights at all, if you want to train your own.
 
 @node Black and white board window
@@ -389,18 +600,18 @@ any existing weights at all, if you want to train your own.
 If you see this problem, your X server is probably using a
 @dfn{PseudoColor} visual, and is dynamically allocating colours
 to clients from a limited colourmap.  On these types of displays, 
-gnubg tries to be a well-behaved client by using colours from the
+@gnubg tries to be a well-behaved client by using colours from the
 default standard colourmap.  This will allow it to share colours
 with other clients that use the same scheme, which will help them
 all to use as many colours as possible without exhausting the
 colourmap.
 
 Unfortunately, not all X clients use standard colourmaps.  If other
-clients have been run before gnubg and allocated most of the colours,
-then there may not be enough left for gnubg to allocate a standard
+clients have been run before @gnubg and allocated most of the colours,
+then there may not be enough left for @gnubg to allocate a standard
 colourmap.  If this happens, it will just take what it can get (which
 in the worst case might be black and white only).  You can try to
-avoid this problem by running gnubg before other colour-hungry clients,
+avoid this problem by running @gnubg before other colour-hungry clients,
 or by using the @file{xstdcmap} utility to install the default
 standard colourmap early in your session while colours are still
 available.  Depending on your hardware, you may be able to configure

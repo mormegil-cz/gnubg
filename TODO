@@ -35,8 +35,7 @@ duplication of effort and to make sure our changes merge easily.
   count, match score, etc.).  Also, echo commands input with the mouse
   as if they had been typed. (gary)
 ** Be more liberal in the move syntax accepted. (gary)
-** Finish "help" -- make it quote sections from the manual (how does gdb
-  do it?)
+** Finish "help" -- add detailed help for each command.
 ** Allow changing the eval cache size. (gary)
 ** Add undo, reroll, and viewing next/prev moves in game/match. (gary)
 
