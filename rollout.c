@@ -148,9 +148,9 @@ void log_game_start (char *name, const cubeinfo *pci, int fCubeful,
 	   pci->fCubeOwner == 1 ? "b" : "c");
   fprintf (logfp, ";CV[%d]\n", pci->nCube);
   fprintf (logfp, ";AE[a:y]AW");
-  board_to_sgf (anBoard[0], 1);
+  board_to_sgf (anBoard[1],  1);
   fprintf (logfp, "AB");
-  board_to_sgf (anBoard[1], -1);
+  board_to_sgf (anBoard[0], -1);
   fprintf (logfp, "\n");
 }
 
