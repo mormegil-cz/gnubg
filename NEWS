@@ -1,5 +1,25 @@
 GNU Backgammon NEWS -- history of user-visible changes.  10 May
 
+** match equity tables are now read from XML files. Allows the user to specify
+   her own favorite MET. 
+
+** Support for "skewed" METs, for example, tables from Jacobs and Trice's
+   fish book.
+
+** Rollouts:
+   - rollout positions as initial position (i.e., no doubles on first roll).
+   - simple variance reduction for cubeful rollouts.
+   - statistics (e.g, number of times closed out, cube efficiency etc).
+
+** A set of predefined settings for evaluations.
+
+** Introduction of a Match ID for simple and convinient exchange of positions.
+
+** Export in PDF, PostScript, LaTeX, and HTML.
+
+** and much more....
+
+
 * Changes in GNU Backgammon 0.12
 
 ** Various bug fixes.
