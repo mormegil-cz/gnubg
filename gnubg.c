@@ -4226,9 +4226,11 @@ extern void PromptForExit( void ) {
         }
 #endif /* HAVE_READLINE */
 
+#if USE_GTK
 	if (gtk_main_level() == 1)
 		gtk_main_quit();
 	else
+#endif
 		exit( EXIT_SUCCESS );
 }
 
