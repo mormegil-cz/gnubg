@@ -3402,16 +3402,13 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
     /* assume obselete version of readline */
 #define rl_completion_matches( text, func ) \
 	completion_matches( (char *) (text), (func) )
+#define rl_filename_completion_function filename_completion_function
 #endif
 
 static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 
     if( fReadingOther )
-#if HAVE_RL_COMPLETION_MATCHES
 	return rl_completion_matches( szText, NullGenerator );
-#else
-        return completion_matches( (char *) szText, NullGenerator );
-#endif
     
     pcCompleteContext = FindContext( acTop, rl_line_buffer, iStart );
 

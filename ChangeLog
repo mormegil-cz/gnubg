@@ -1,3 +1,13 @@
+Thu Dec  6 16:38:23 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (CompleteKeyword): Use filename_completion_function
+	(the old name for rl_filename_completion_function) if necessary.
+
+	* eval.c (SanityCheck): Don't use MaxTurns() to calculate the
+	number of turns to bear off if no position database is available.
+
+	* gnubgtest: Allow variable expansion in here document.
+
 Tue Nov 27 18:02:15 2001  Gary Wong  <gtw@research.att.com>
 
 	* database.c (CommandDatabaseGenerate): Fix wrong evalcontext
