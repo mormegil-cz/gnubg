@@ -1101,7 +1101,8 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 	sz[ 2 ] = ':';
 	sz[ 3 ] = ' ';
 	FormatMove( sz + 4, ms.anBoard, pmr->n.anMove );
-	strcat( sz, aszSkillTypeAbbr[ pmr->n.st ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->n.stMove ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->n.stCube ] );
 	break;
 
     case MOVE_DOUBLE:
@@ -1228,14 +1229,16 @@ static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
 	"verygood"
     };
     char sz[ 64 ];
-    
-    sprintf( sz, "annotate %s", aszSkillCmd[ st ] );
+
+    sprintf( sz, "annotate %s %s", 
+             (char *) gtk_object_get_user_data( GTK_OBJECT( pw ) ),
+             aszSkillCmd[ st ] );
     UserCommand( sz );
 
     GTKUpdateAnnotations();
 }
 
-static GtkWidget *SkillMenu( skilltype stSelect ) {
+static GtkWidget *SkillMenu( skilltype stSelect, char *szAnno ) {
 
     GtkWidget *pwMenu, *pwOptionMenu, *pwItem;
     skilltype st;
@@ -1245,6 +1248,7 @@ static GtkWidget *SkillMenu( skilltype stSelect ) {
 	gtk_menu_append( GTK_MENU( pwMenu ),
 			 pwItem = gtk_menu_item_new_with_label(
 			     aszSkillType[ st ] ? aszSkillType[ st ] : "" ) );
+        gtk_object_set_user_data( GTK_OBJECT( pwItem ), szAnno );
 	gtk_signal_connect( GTK_OBJECT( pwItem ), "activate",
 			    GTK_SIGNAL_FUNC( SkillMenuActivate ),
 			    GINT_TO_POINTER( st ) );
@@ -1425,7 +1429,7 @@ static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
     };
     char sz[ 64 ];
     
-    sprintf( sz, "annotate %s", aszLuckCmd[ lt ] );
+    sprintf( sz, "annotate roll %s", aszLuckCmd[ lt ] );
     UserCommand( sz );
 }
 
@@ -1523,9 +1527,11 @@ static void SetAnnotation( moverecord *pmr ) {
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
 	    
 	    if( ( pw = CubeAnalysis( pmr->n.arDouble, 
-				     &pmr->n.esDouble ) ) )
+				     &pmr->n.esDouble ) ) ) {
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
+                /* FIXME: add cube skill */
+            }
 
 	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
@@ -1536,12 +1542,29 @@ static void SetAnnotation( moverecord *pmr ) {
 					      pmr->n.rLuck, pmr->n.lt ),
 				FALSE, FALSE, 4 );
 
-	    gtk_box_pack_end( GTK_BOX( pwBox ), SkillMenu( pmr->n.st ),
+	    gtk_box_pack_end( GTK_BOX( pwBox ), 
+                              SkillMenu( pmr->n.stMove, "move" ),
 			      FALSE, FALSE, 4 );
 	    strcpy( sz, "Moved " );
 	    FormatMove( sz + 6, ms.anBoard, pmr->n.anMove );
 	    gtk_box_pack_end( GTK_BOX( pwBox ),
 			      gtk_label_new( sz ), FALSE, FALSE, 0 );
+
+            /* Skill for cube */
+
+            pwBox = gtk_hbox_new ( FALSE, 0 );
+
+            gtk_box_pack_start ( GTK_BOX ( pwAnalysis ), pwBox, FALSE, FALSE,
+                                 0 );
+
+            gtk_box_pack_start ( GTK_BOX ( pwBox ),
+                                 gtk_label_new ( "Didn't double" ),
+                                 FALSE, FALSE, 4 );
+            gtk_box_pack_start ( GTK_BOX ( pwBox ),
+                                 SkillMenu ( pmr->n.stCube, "cube" ),
+                                 FALSE, FALSE, 4 );
+
+            /* move */
 			      
 	    if( pmr->n.ml.cMoves ) {
 		hd.pml = &pmr->n.ml;
@@ -1575,7 +1598,8 @@ static void SetAnnotation( moverecord *pmr ) {
 	    pwBox = gtk_hbox_new( FALSE, 0 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( "Double" ),
 				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->d.st ),
+	    gtk_box_pack_start( GTK_BOX( pwBox ), 
+                                SkillMenu( pmr->d.st, "double" ),
 				FALSE, FALSE, 2 );
 
 	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
@@ -1600,7 +1624,10 @@ static void SetAnnotation( moverecord *pmr ) {
 				gtk_label_new( pmr->mt == MOVE_TAKE ? "Take" :
 				    "Drop" ),
 				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->d.st ),
+	    gtk_box_pack_start( GTK_BOX( pwBox ), 
+                                SkillMenu( pmr->d.st, 
+                                           ( pmr->d.mt == MOVE_TAKE ) ?
+                                           "take" : "drop" ),
 				FALSE, FALSE, 2 );
 
 	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
@@ -1628,7 +1655,8 @@ static void SetAnnotation( moverecord *pmr ) {
 	    gtk_box_pack_start( GTK_BOX( pwBox ),
 				gtk_label_new( "Resign" ),
 				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->r.stResign ),
+	    gtk_box_pack_start( GTK_BOX( pwBox ), 
+                                SkillMenu( pmr->r.stResign, "resign" ),
 				FALSE, FALSE, 2 );
 
 	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
@@ -1643,7 +1671,8 @@ static void SetAnnotation( moverecord *pmr ) {
 	    gtk_box_pack_start( GTK_BOX( pwBox ),
 				gtk_label_new( "Accept" ),
 				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), SkillMenu( pmr->r.stAccept ),
+	    gtk_box_pack_start( GTK_BOX( pwBox ), 
+                                SkillMenu( pmr->r.stAccept, "accept" ),
 				FALSE, FALSE, 2 );
 
 	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
