@@ -262,7 +262,7 @@ static int anEscapes[ 0x1000 ];
 static int anEscapes1[ 0x1000 ];
 
 static neuralnet nnContact, nnRace, nnCrashed;
-static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
+unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
 static int fBearoffOS = -1;
 static int nBearoffOSPoints = -1;
 static int fBearoffHeuristic;

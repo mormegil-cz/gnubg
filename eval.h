@@ -199,6 +199,8 @@ extern cubeinfo ciCubeless;
 extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;
 
+extern unsigned char *pBearoff1;
+extern unsigned char *pBearoff2;
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */

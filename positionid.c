@@ -333,8 +333,8 @@ static int PositionF( int fBits, int n, int r ) {
         PositionF( fBits, n - 1, r - 1 ) : PositionF( fBits, n - 1, r );
 }
 
-extern unsigned int PositionBearoff( int anBoard[],
-                                       const int n ) {
+extern unsigned int PositionBearoff( const int anBoard[],
+                                     const int n ) {
 
     int i, fBits, j;
 

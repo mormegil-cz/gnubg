@@ -1,3 +1,11 @@
+Mon Oct 21 18:31:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Make OSR code compile.
+
+	* eval.c: make pBearoff1 and pBearoff2 extern.
+	* osr:c change calls to PositionBearoff
+	* positionid.c: change prototype of PositionBearoff
+
 Fri Oct 18 11:56:31 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* osr.c: new file. OSR code ported from fibs2html.

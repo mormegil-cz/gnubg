@@ -154,7 +154,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
-	export.c sound.h record.c record.h
+	export.c sound.h record.c record.h osr.c osr.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -233,7 +233,8 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	sgfp.$(OBJEXT) sgfl.$(OBJEXT) guile.$(OBJEXT) import.$(OBJEXT) \
 	external.$(OBJEXT) credits.$(OBJEXT) latex.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
-	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) record.$(OBJEXT)
+	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) record.$(OBJEXT) \
+	osr.$(OBJEXT)
 @USE_SOUND_TRUE@am__objects_2 = sound.$(OBJEXT)
 @USE_SOUND_FALSE@am__objects_2 =
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
@@ -285,14 +286,14 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/makebearoff.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makeweights.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/matchequity.Po ./$(DEPDIR)/matchid.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/play.Po ./$(DEPDIR)/positionid.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/postscript.Po ./$(DEPDIR)/pub_eval.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/record.Po ./$(DEPDIR)/rollout.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/set.Po ./$(DEPDIR)/sgf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgfl.Po ./$(DEPDIR)/sgfp.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/show.Po ./$(DEPDIR)/sound.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/text.Po ./$(DEPDIR)/xboard.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/xgame.Po
+@AMDEP_TRUE@	./$(DEPDIR)/osr.Po ./$(DEPDIR)/play.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/positionid.Po ./$(DEPDIR)/postscript.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/pub_eval.Po ./$(DEPDIR)/record.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/rollout.Po ./$(DEPDIR)/set.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgf.Po ./$(DEPDIR)/sgfl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sound.Po ./$(DEPDIR)/text.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/xboard.Po ./$(DEPDIR)/xgame.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -442,6 +443,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/makeweights.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchequity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchid.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/osr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/play.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/positionid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postscript.Po@am__quote@
