@@ -5975,7 +5975,7 @@ static void PlayersOK( GtkWidget *pw, playerswidget *pplw ) {
 
     for( i = 0; i < 2; i++ ) {
 	strcpyn( pplw->ap[ i ].szName, gtk_entry_get_text(
-	    GTK_ENTRY( pplw->apwName[ i ] ) ), 32 );
+	    GTK_ENTRY( pplw->apwName[ i ] ) ), MAX_NAME_LEN );
 	
 	for( j = 0; j < 4; j++ )
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(

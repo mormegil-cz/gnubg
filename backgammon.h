@@ -137,9 +137,11 @@ typedef enum _playertype {
     PLAYER_EXTERNAL, PLAYER_HUMAN, PLAYER_GNU, PLAYER_PUBEVAL
 } playertype;
 
+#define MAX_NAME_LEN 32
+
 typedef struct _player {
   /* For all player types: */
-  char szName[ 32 ];
+  char szName[ MAX_NAME_LEN ];
 
   playertype pt;
 

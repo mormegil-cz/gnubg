@@ -40,7 +40,7 @@
 static int
 ParseSnowieTxt( char *sz,  
                 int *pnMatchTo, int *pfJacoby, int *pfUnused1, int *pfUnused2,
-                int *pfTurn, char aszPlayer[ 2 ][ 32 ], int *pfCrawfordGame,
+                int *pfTurn, char aszPlayer[ 2 ][ MAX_NAME_LEN ], int *pfCrawfordGame,
                 int anScore[ 2 ], int *pnCube, int *pfCubeOwner,
                 int anBoard[ 2 ][ 25 ], int anDice[ 2 ] );
 
@@ -85,7 +85,7 @@ static int ReadInt16( FILE *pf ) {
 static int
 ParseJF( FILE *fp,
          int *pnMatchTo, int *pfJacoby, 
-         int *pfTurn, char aszPlayer[ 2 ][ 32 ], int *pfCrawfordGame,
+         int *pfTurn, char aszPlayer[ 2 ][ MAX_NAME_LEN ], int *pfCrawfordGame,
          int *pfPostCrawford, int anScore[ 2 ], int *pnCube, int *pfCubeOwner, 
          int anBoard[ 2 ][ 25 ], int anDice[ 2 ], int *pfCubeUse,
          int *pfBeavers ) {
@@ -278,7 +278,7 @@ ImportJF( FILE * fp, char *szFileName) {
   int nMatchTo, fJacoby, fTurn, fCrawfordGame, fPostCrawford;
   int anScore[ 2 ], nCube, fCubeOwner, anBoard[ 2 ][ 25 ], anDice[ 2 ];
   int fCubeUse, fBeavers;
-  char aszPlayer[ 2 ][ 32 ];
+  char aszPlayer[ 2 ][ MAX_NAME_LEN ];
   int i;
   
   if( ms.gs == GAME_PLAYING && fConfirm ) {
@@ -520,7 +520,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
           int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
           int anScore[ 2 ], nCube, fCubeOwner, anBoard[ 2 ][ 25 ], anDice[ 2 ];
-          char aszPlayer[ 2 ][ 32 ];
+          char aszPlayer[ 2 ][ MAX_NAME_LEN ];
 
           if ( ! ( pch = strchr( sz + 4, '(' ) ) ) {
             outputl( _("No '(' following text 'Illegal play'") );
@@ -733,12 +733,45 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 static int 
 ImportGame( FILE *pf, int iGame, int nLength ) {
 
-    char sz[ 256 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight = NULL;
+    char sz[ 256 ], sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ], *pch, *pchLeft, *pchRight = NULL;
     int n0, n1;
+	char *colon, *psz, *pszEnd;
     moverecord *pmr;
-    
-    if( fscanf( pf, " %31[^:]:%d %31[^:]:%d%*[ ]", sz0, &n0, sz1, &n1 ) < 4 )
-        return 0;
+
+	/* Process player score line, avoid fscanf(%nn) as buffer may overrun */
+	fgets(sz, sizeof(sz), pf);
+	/* 1st player name */
+	colon = strchr(sz, ':');
+	if (!colon)
+		return 0;
+	pszEnd = colon - 1;
+	while(isspace(*pszEnd))
+		pszEnd--;
+	sz[MIN(pszEnd - sz + 1, MAX_NAME_LEN - 1)] = '\0';
+	strcpy(sz0, sz);
+	/* 1st score */
+	psz = colon + 1;
+	while (isspace(*psz))
+		psz++;
+	n0 = atoi(psz);
+	/* 2nd player name */
+	while (!isspace(*psz))
+		psz++;
+	while (isspace(*psz))
+		psz++;
+	colon = strchr(psz, ':');
+	if (!colon)
+		return 0;
+	pszEnd = colon - 1;
+	while(isspace(*pszEnd))
+		pszEnd--;
+	psz[MIN(pszEnd - psz + 1, MAX_NAME_LEN - 1)] = '\0';
+	strcpy(sz1, psz);
+	/* 2nd score */
+	psz = colon + 1;
+	while (isspace(*psz))
+		psz++;
+	n1 = atoi(psz);
 
     if( nLength && ( n0 >= nLength || n1 >= nLength ) )
 	/* match is already over -- ignore extra games */
@@ -1138,7 +1171,8 @@ static int
 ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
                     int n1 ) {
 
-    char sz[ 80 ], sz0[ 32 ], sz1[ 32 ], *pch;
+    char sz[ 80 ], sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ], *pch;
+	char buf[ 256 ], *pNext;
     moverecord *pmr;
     int fInvert;
     static int anExpectedScore[ 2 ];
@@ -1156,8 +1190,32 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
      *
      */
     
-    if( fscanf( pf, " %31s is X - %31s is O\n", sz0, sz1 ) < 2 )
-	return 0;
+	/* Process player score line, avoid fscanf(%nn) as buffer may overrun */
+	fgets(buf, sizeof(buf), pf);
+	pch = strstr(buf, "is X");
+	if (!pch)
+		return 0;
+	pNext = pch + strlen("is X -");
+	do
+		pch--;
+	while(isspace(*pch));
+	pch[1] = '\0';
+	pch = buf;
+	while (isspace(*pch))
+		pch++;
+	strcpy(sz0, pch);
+
+	pch = strstr(pNext, "is O");
+	if (!pch)
+		return 0;
+	do
+		pch--;
+	while(isspace(*pch));
+	pch[1] = '\0';
+	pch = pNext;
+	while (isspace(*pch))
+		pch++;
+	strcpy(sz1, pch);
 
     /* consistency checks */
 
@@ -2041,28 +2099,52 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
 
 extern int ImportSGG( FILE *pf, char *szFilename ) {
 
-    char sz[ 80 ], sz0[ 32 ], sz1[ 32 ];
-    int n, n0, n1, nLength, i, fCrawford;
+    char sz[ 80 ], sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ];
+    int n0, n1, nLength, i, fCrawford;
     int fCrawfordRule = TRUE;
     int fJacobyRule = TRUE;
     int fAutoDoubles = 0;
     int fCubeUse = TRUE;
+	char buf[ 256 ], *pNext, *psz;
     bgvariation bgv = VARIATION_STANDARD;
 
     fWarned = FALSE;
-    
-    while( 1 ) {
-	if( ( n = fscanf( pf, "%32s vs. %32s\n", sz0, sz1 ) ) == EOF ) {
-	    outputerrf( _("%s: not a valid SGG file"), szFilename );
-	    return -1;
-	} else if( n == 2 )
-	    break;
-	
-	/* discard line */
-	while( ( n = getc( pf ) ) != '\n' && n != EOF )
-	    ;
-    }
-    
+
+	*sz0 = '\0';
+	while(fgets(buf, sizeof(buf), pf))
+	{
+		psz = strstr(buf, "vs.");
+		if (psz)
+		{	/* Found player line, avoid fscanf(%nn) as buffer may overrun */
+			pNext = psz + strlen("vs.");
+			do
+				psz--;
+			while(isspace(*psz));
+			psz[1] = '\0';
+			psz = buf;
+			while (isspace(*psz))
+				psz++;
+			strcpy(sz0, psz);
+
+			psz = pNext + strlen(pNext);
+			do
+				psz--;
+			while(isspace(*psz));
+			psz[1] = '\0';
+			psz = pNext;
+			while (isspace(*psz))
+				psz++;
+			strcpy(sz1, psz);
+			break;
+		}
+	}
+
+	if (!*sz0)
+	{	/* No player line found */
+		outputerrf( _("%s: not a valid SGG file"), szFilename );
+		return -1;
+	}
+
     if( ms.gs == GAME_PLAYING && fConfirm ) {
 	if( fInterrupt )
 	    return -1;
@@ -2842,7 +2924,7 @@ extern int ImportBKG( FILE *pf, const char *szFilename ) {
 static int
 ParseSnowieTxt( char *sz,  
                 int *pnMatchTo, int *pfJacoby, int *pfUnused1, int *pfUnused2,
-                int *pfTurn, char aszPlayer[ 2 ][ 32 ], int *pfCrawfordGame,
+                int *pfTurn, char aszPlayer[ 2 ][ MAX_NAME_LEN ], int *pfCrawfordGame,
                 int anScore[ 2 ], int *pnCube, int *pfCubeOwner, 
                 int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
@@ -2881,9 +2963,9 @@ ParseSnowieTxt( char *sz,
       if ( c == 6 )
         j = ! j;
 
-      memset( aszPlayer[ j ], 0, 32 );
+      memset( aszPlayer[ j ], 0, MAX_NAME_LEN );
       if ( *pc )
-        strncpy( aszPlayer[ j ], pc, 31 );
+        strncpy( aszPlayer[ j ], pc, MAX_NAME_LEN - 1 );
       else
         sprintf( aszPlayer[ j ], "Player %d", j );
       break;
@@ -2992,7 +3074,7 @@ ImportSnowieTxt( FILE *pf ) {
   int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
   int fCubeOwner, nCube;
   int anScore[ 2 ], anDice[ 2 ], anBoard[ 2 ][ 25 ];
-  char aszPlayer[ 2 ][ 32 ];
+  char aszPlayer[ 2 ][ MAX_NAME_LEN ];
 
   if( ms.gs == GAME_PLAYING && fConfirm ) {
     if( fInterrupt )

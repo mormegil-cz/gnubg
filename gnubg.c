@@ -3106,7 +3106,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 extern void ShowBoard( void ) {
 
     char szBoard[ 2048 ];
-    char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ],
+    char sz[ 32 ], szCube[ 32 ], szPlayer0[ MAX_NAME_LEN + 3 ], szPlayer1[ MAX_NAME_LEN + 3 ],
 	szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
 #if USE_TIMECONTROL
     char szTime0[20], szTime1[20];
@@ -4941,7 +4941,7 @@ extern void CommandCopy (char *sz)
 {
   char *aps[7] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
   char szOut[2048];
-  char szCube[32], szPlayer0[35], szPlayer1[35],
+  char szCube[32], szPlayer0[MAX_NAME_LEN + 3], szPlayer1[MAX_NAME_LEN + 3],
     szScore0[35], szScore1[35], szMatch[35];
   char szRolled[ 32 ];
   int anBoardTemp[ 2 ][ 25 ];

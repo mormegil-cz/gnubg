@@ -23,6 +23,7 @@
 #define _GTKBOARD_H_
 
 #include "render.h"
+#include "backgammon.h"
 
 #if USE_BOARD3D
 #include <GL/gl.h>
@@ -173,7 +174,7 @@ typedef struct _BoardData {
     renderimages ri;
     
     /* remainder is from FIBS board: data */
-    char name[ 32 ], name_opponent[ 32 ];
+    char name[ MAX_NAME_LEN ], name_opponent[ MAX_NAME_LEN ];
     gint match_to, score, score_opponent;
     gint points[ 28 ]; /* 0 and 25 are the bars */
     gint turn; /* -1 is X, 1 is O, 0 if game over */

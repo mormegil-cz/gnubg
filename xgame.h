@@ -43,7 +43,7 @@ typedef struct _gamedata {
     int fCubeOwner; /* -1 = bottom, 0 = centred, 1 = top */ 
     
     /* remainder is from FIBS board: data */
-    char szName[ 32 ], szNameOpponent[ 32 ];
+    char szName[ MAX_NAME_LEN ], szNameOpponent[ MAX_NAME_LEN ];
     int nMatchTo, nScore, nScoreOpponent;
     int anBoard[ 28 ]; /* 0 and 25 are the bars */
     int fTurn; /* -1 is X, 1 is O, 0 if game over */

@@ -1,3 +1,8 @@
+Wed Feb 4 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* import.c (and minor changes in others) : Limit size of player
+	names in import files, bug #7526
+
 Mon Feb 02 2004 18:42:05 GMT
 	
 	* timer.c - wrong #if around include

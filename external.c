@@ -362,7 +362,7 @@ ExtParse( const char *szCommand ) {
 static char *
 ExtEvaluation( extcmd *pec ) {
 
-  char szName[ 32 ], szOpp[ 32 ];
+  char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
   int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
     anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
     anMove[ 8 ];
@@ -425,7 +425,7 @@ ExtEvaluation( extcmd *pec ) {
 static char *
 ExtFIBSBoard( extcmd *pec ) {
 
-  char szName[ 32 ], szOpp[ 32 ];
+  char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
   int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
     anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
     anMove[ 8 ];

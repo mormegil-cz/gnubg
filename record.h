@@ -27,7 +27,7 @@ typedef enum _expaverage {
 } expaverage;
 
 typedef struct _playerrecord {
-    char szName[ 32 ];
+    char szName[ MAX_NAME_LEN ];
     int cGames;
     float arErrorChequerplay[ NUM_AVG ];
     float arErrorCube[ NUM_AVG ];

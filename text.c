@@ -54,7 +54,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
 
   int anBoard[ 2 ][ 25 ];
   char szBoard[ 2048 ];
-  char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ],
+  char sz[ 32 ], szCube[ 32 ], szPlayer0[ MAX_NAME_LEN + 3 ], szPlayer1[ MAX_NAME_LEN + 3 ],
     szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
 #if USE_TIMECONTROL
     char szTime0[20], szTime1[20];

@@ -26,6 +26,7 @@
 #endif
 
 #include "config.h"
+#include "backgammon.h"
 #include "inc3d.h"
 
 #if HAVE_FTGL
