@@ -44,9 +44,10 @@ static void
 printImage ( FILE *pf, const char *szImageDir, const char *szImage,
              const char *szExtension ) {
 
-  fprintf ( pf, "<img src=\"%s%s%s.%s\">",
+  fprintf ( pf, "<img src=\"%s%s%s.%s\" alt=\" %s.%s\" />",
             ( szImageDir ) ? szImageDir : "",
             ( ! szImageDir || szImageDir[ strlen ( szImageDir ) - 1 ] == '/' ) ? "" : "/",
+            szImage, szExtension, 
             szImage, szExtension );
 
 }
@@ -107,10 +108,10 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
   int fColor;
   int i;
 
-  char *aszDieO[] = { "b-odie1", "b-odie2", "b-oide3",
-                     "b-odie4", "b-odie5", "b-oide6" };
-  char *aszDieX[] = { "b-xdie1", "b-xdie2", "b-xide3",
-                     "b-xdie4", "b-xdie5", "b-xide6" };
+  char *aszDieO[] = { "b-odie1", "b-odie2", "b-odie3",
+                     "b-odie4", "b-odie5", "b-odie6" };
+  char *aszDieX[] = { "b-xdie1", "b-xdie2", "b-xdie3",
+                     "b-xdie4", "b-xdie5", "b-xdie6" };
 
   int anBoard[ 2 ][ 25 ];
   int anPips[ 2 ];
@@ -124,7 +125,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
   fprintf ( pf, "<p>\n" );
   printImage ( pf, szImageDir, "b-indent", szExtension );
   printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension );
-  fprintf ( pf, "<br>\n" );
+  fprintf ( pf, "<br />\n" );
 
   /* cube image */
 
@@ -176,11 +177,11 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
   /* display bar */
 
-  if ( anBoard[ 1 ][ 24 ] ) {
+  if ( anBoard[ 0 ][ 24 ] ) {
 
     sprintf ( sz, "b-bar-x%d", 
-              ( anBoard[ 1 ][ 24 ] > 4 ) ?
-              4 : anBoard[ 1 ][ 24 ] );
+              ( anBoard[ 0 ][ 24 ] > 4 ) ?
+              4 : anBoard[ 0 ][ 24 ] );
     printImage ( pf, szImageDir, sz, szExtension );
 
   }
@@ -206,7 +207,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
   printImage ( pf, szImageDir, "b-right", szExtension );
 
-  fprintf ( pf, "<br>\n" );
+  fprintf ( pf, "<br />\n" );
 
   /* center of board */
 
@@ -231,7 +232,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
     printImage ( pf, szImageDir, fTurn ? "b-midg2" : "b-midg", szExtension );
     printImage ( pf, szImageDir, "b-midr", szExtension );
 
-    fprintf ( pf, "<br>\n" );
+    fprintf ( pf, "<br />\n" );
 
   }
   else {
@@ -247,7 +248,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
     printImage ( pf, szImageDir, "b-midg", szExtension );
     printImage ( pf, szImageDir, "b-midr", szExtension );
 
-    fprintf ( pf, "<br>\n" );
+    fprintf ( pf, "<br />\n" );
 
   }
 
@@ -299,11 +300,11 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
 
   /* display bar */
 
-  if ( anBoard[ 0 ][ 24 ] ) {
+  if ( anBoard[ 1 ][ 24 ] ) {
 
     sprintf ( sz, "b-bar-o%d", 
-              ( anBoard[ 0 ][ 24 ] > 4 ) ?
-              4 : anBoard[ 0 ][ 24 ] );
+              ( anBoard[ 1 ][ 24 ] > 4 ) ?
+              4 : anBoard[ 1 ][ 24 ] );
     printImage ( pf, szImageDir, sz, szExtension );
 
   }
@@ -328,30 +329,113 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
   /* right border */
 
   printImage ( pf, szImageDir, "b-right", szExtension );
-  fprintf ( pf, "<br>\n" );
+  fprintf ( pf, "<br />\n" );
 
   /* bottom */
 
   printImage ( pf, szImageDir, "b-indent", szExtension );
   printImage ( pf, szImageDir, fTurn ? "b-lobot" : "b-hibot", szExtension );
-  fprintf ( pf, "<br>\n" );
+  fprintf ( pf, "<br />\n" );
 
   /* position ID */
 
   printImage ( pf, szImageDir, "b-indent", szExtension );
-  fprintf ( pf, "PositionID: <tt>%s</tt><br>\n", PositionID ( ms.anBoard ) );
+  fprintf ( pf, "PositionID: <tt>%s</tt><br />\n", PositionID ( ms.anBoard ) );
 
   /* pip counts */
 
   printImage ( pf, szImageDir, "b-indent", szExtension );
 
   PipCount ( anBoard, anPips );
-  fprintf ( pf, "Pip counts: Red %d, White %d<br>\n",
+  fprintf ( pf, "Pip counts: Red %d, White %d<br />\n",
             anPips[ 0 ], anPips[ 1 ] );
   
+  fprintf ( pf, "</p>\n" );
 
 }
 
+
+/*
+ * Print html header: dtd, head etc.
+ *
+ * Input:
+ *   pf: output file
+ *   ms: current match state
+ *
+ */
+
+static void 
+HTMLPrologue ( FILE *pf, const matchstate *pms ) {
+
+  char szTitle[ 100 ];
+  char szHeader[ 100 ];
+
+  /* DTD */
+
+  if ( pms->nMatchTo )
+    sprintf ( szTitle,
+              "%s versus %s, score is %d-%d in %d points match (game %d)",
+              ap [ 1 ].szName, ap[ 0 ].szName,
+              pms->anScore[ 1 ], pms->anScore[ 0 ], pms->nMatchTo,
+              pms->cGames );
+  else
+    sprintf ( szTitle,
+              "%s versus %s, score is %d-%d in money game session (game %d)",
+              ap [ 1 ].szName, ap[ 0 ].szName,
+              pms->anScore[ 1 ], pms->anScore[ 0 ], 
+              pms->cGames );
+
+  if ( pms->nMatchTo )
+    sprintf ( szHeader,
+              "%s (white, %d pts) vs. %s (red, %d pts) (Match to %d)",
+              ap [ 1 ].szName, pms->anScore[ 1 ],
+              ap [ 0 ].szName, pms->anScore[ 0 ],
+              pms->nMatchTo );
+  else
+    sprintf ( szHeader,
+              "%s (white, %d pts) vs. %s (red, %d pts) (money game sesssion)",
+              ap [ 1 ].szName, pms->anScore[ 1 ],
+              ap [ 0 ].szName, pms->anScore[ 0 ] );
+
+
+  fprintf ( pf,
+            "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
+            "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
+            "<html>\n"
+            "<head>\n"
+            "<meta name=\"generator\" content=\"GNU Backgammon\" />\n"
+            "<meta http-equiv=\"Content-Type\" "
+            "content=\"text/html; charset=us-ascii\" />\n" 
+            "<title>%s</title>\n"
+            "</head>\n"
+            "\n"
+            "<body>\n"
+            "<h1>Game number %d</h1>\n"
+            "<h2>%s</h2>\n"
+            "<hr />\n"
+            ,
+            szTitle, pms->cGames, szHeader );
+
+}
+
+
+/*
+ * Print html header: dtd, head etc.
+ *
+ * Input:
+ *   pf: output file
+ *   ms: current match state
+ *
+ */
+
+static void 
+HTMLEpilogue ( FILE *pf, const matchstate *pms ) {
+
+  fprintf ( pf,
+            "</body>\n"
+            "</html>\n" );
+
+}
 
 
 extern void CommandExportGameHtml( char *sz ) {
@@ -450,11 +534,15 @@ extern void CommandExportPositionHtml( char *sz ) {
 	return;
     }
 
+    HTMLPrologue ( pf, &ms );
+
     sprintf( szTitle, "Position %s", PositionID( ms.anBoard ) );
 
     printHTMLBoard( pf, &ms, ms.fTurn,
                     "http://fibs2html.sourceforge.net/images/", "gif" );
     
+    HTMLEpilogue ( pf, &ms );
+
     if( pf != stdout )
 	fclose( pf );
 }
