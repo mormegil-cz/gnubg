@@ -7775,11 +7775,17 @@ static void real_main( void *closure, int argc, char *argv[] ) {
             /* setup history */
             {
               char temp[ BIG_PATH ];
+              char *pch;
+              int i;
               strcpy( temp, szHomeDirectory );
               strcat( temp, DIR_SEPARATOR_S );
               strcat( temp, GNUBG_HISTORY_FILE );
               read_history( temp );
               using_history();
+              if ( ( pch = getenv( "HISTSIZE" ) ) &&
+                   ( ( i = atoi( pch ) ) > 0 ) )
+                stifle_history( i );
+
             }
 #endif
 	}
@@ -8809,14 +8815,12 @@ CommandDiceRolls (char *sz) {
 extern void
 CommandHistory( char *sz ) {
 
-  int c = history_length;
-  int s = ( ( c - 50 ) > -1 ) ? ( c - 50 ) : 0;
   int i;
   HIST_ENTRY *phe;
 
-  for ( i = s; i < c; ++i ) {
-    phe = history_get( i + 1 );
-    outputf( "%6d %s\n", i + 1, phe->line );
+  for ( i = 0; i < history_length; ++i ) {
+    phe = history_get( i + history_base );
+    outputf( "%6d %s\n", i + history_base, phe->line );
   }
   
 
