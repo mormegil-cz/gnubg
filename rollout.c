@@ -732,21 +732,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 }
 
 
-static int
-isHyperGammon( const bgvariation bgv ) {
-
-  if ( bgv == VARIATION_HYPERGAMMON_1 )
-    return 1;
-  if ( bgv == VARIATION_HYPERGAMMON_2 )
-    return 1;
-  if ( bgv == VARIATION_HYPERGAMMON_3 )
-    return 1;
-
-  return 0;
-
-}
-
-
 /* called with a collection of moves or a cube decision to be rolled out.
    when called with a cube decision, the number of alternatives is always 2
    (nodouble/double or take/drop). Otherwise the number of moves is
@@ -1085,9 +1070,6 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
       
         aarSigma[ alt ][ j ] = sqrt( aarVariance[ alt ][ j ] / ( i + 1 ) );
       } /* for (j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) */
-
-      if ( ! isHyperGammon( apci[ alt ]->bgv ) )
-        SanityCheck( anBoardOrig, aarMu[ alt ] );
 
       if( fShowProgress && pfProgress ) {
         (*pfProgress)( aarMu, aarSigma, prc, aciLocal,
