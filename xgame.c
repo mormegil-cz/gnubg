@@ -785,6 +785,12 @@ extern void RunExt( void ) {
         return;
     }
 
+    fputs( "Please note: This Xlib user interface is deprecated, and may not\n"
+	   "be supported in the future.  Please consider using the GTK+\n"
+	   "interface if you can.  If you would like to maintain this Xlib\n"
+	   "version to ensure it will be retained in GNU Backgammon, please\n"
+	   "contact <bug-gnubg@gnu.org>.  Thank you.\n", stderr );
+    
     /* FIXME check if XResourceManagerString works! */
     if( !( pch = XResourceManagerString( pdsp ) ) )
         pch = "";
