@@ -47,6 +47,10 @@ dnl
 dnl @author Gary Wong <gtw@gnu.org>
 
 AC_DEFUN(AM_GUILE,[
+  AC_ARG_WITH(guile-prefix,[  --with-guile-prefix=PREFIX Prefix where Guile is installed (optional)], guile_config_prefix="$withval", guile_config_prefix="")
+  if test "$guile_config_prefix"; then
+    GUILE_CONFIG=$guile_config_prefix/bin/guile-config
+  fi
   AC_PATH_PROG(GUILE_CONFIG, guile-config, no)
   if test "$GUILE_CONFIG" = "no"; then
     no_guile=yes
