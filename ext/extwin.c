@@ -26,15 +26,13 @@
 			| Button5Mask )
 #define BUTTONTOMASK(b) ( 1 << ( (b) + 7 ) )
 
-#define MAKE_QUARK( q ) static extquark eq_##q = { #q, 0 };
+#define MAKE_QUARK( q ) static extquark eq_##q = { #q, 0 }
 
 MAKE_QUARK( body );
 MAKE_QUARK( cursor );
 MAKE_QUARK( cursorFont );
 MAKE_QUARK( dark );
 MAKE_QUARK( dark2 );
-MAKE_QUARK( font );
-MAKE_QUARK( Font );
 MAKE_QUARK( highlight );
 MAKE_QUARK( justification );
 MAKE_QUARK( Justification );
@@ -811,11 +809,12 @@ static int ExtScrollBarPointer( extwindow *pewnd, extscrollbardata *pesbd,
 	return 0;
     }
 
-    if( xevNotify.xclient.data.s[ 2 ] == SBN_TRACK )
+    if( xevNotify.xclient.data.s[ 2 ] == SBN_TRACK ) {
 	if( pesbd->fHoriz )
 	    pesbd->nPos = x * pesbd->nMax / (int) pewnd->cx;
 	else
 	    pesbd->nPos = y * pesbd->nMax / (int) pewnd->cy;
+    }
     
     if( pesbd->nPos > pesbd->nMax - pesbd->nSize )
 	pesbd->nPos = pesbd->nMax - pesbd->nSize;

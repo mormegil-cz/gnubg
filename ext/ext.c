@@ -11,6 +11,7 @@
 #include <event.h>
 #include <hash.h>
 #include <stdlib.h>
+#include <string.h>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xresource.h>
@@ -29,7 +30,7 @@ static hash hFont, hColourMap, hColourName, hColour, hGC, hdsp;
 
 static int ( *fnErrorHandlerOld )() = NULL;
 
-#define MAKE_QUARK( q ) extquark eq_##q = { #q, 0 };
+#define MAKE_QUARK( q ) extquark eq_##q = { #q, 0 }
 
 MAKE_QUARK( background );
 MAKE_QUARK( Background );
@@ -268,13 +269,13 @@ static int ExtDspNotify( event *pev, extdisplay *pedsp ) {
 	prev = pl->p;
 
 	if( pedsp->nLast >= prev->n ) {
-	    event *pev = prev->pev;
+	    event *pevReply = prev->pev;
 	    
 	    ListDelete( pl );
 	    free( prev );
 	    
-	    EventPending( pev, TRUE );
-	    EventProcess( pev );
+	    EventPending( pevReply, TRUE );
+	    EventProcess( pevReply );
 	} else
 	    break;
     }
@@ -326,6 +327,8 @@ static int ExtDspCommit( event *pev, extdisplay *pedsp ) {
 
     if( ( LastKnownRequestProcessed( pedsp->pdsp ) > pedsp->nLast ) ||
 	( XEventsQueued( pedsp->pdsp, QueuedAlready ) ) )
+	/* FIXME won't this be useless, because EventTimeout will reset
+	   fPending to FALSE as soon as we return? */
 	EventPending( &pedsp->ev, TRUE );
     
     return 0;
@@ -1227,6 +1230,7 @@ extern int ExtHandler( extwindow *pewnd, XEvent *pxev ) {
 	
     case ClientMessage:
 	/* FIXME anything here? */
+	break;
     }
 
     return 0;

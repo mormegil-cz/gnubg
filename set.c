@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,14 +30,22 @@
 #include "dice.h"
 #include "eval.h"
 
-static command acSetPlayer[] = {
+static command acSetEvaluation[] = {
+    { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
+      "for deep evaluation", NULL },
+    { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
+      "`hint' commands look ahead", NULL },
+    { "tolerance", CommandSetEvalTolerance, "Control the equity range "
+      "of moves for deep evaluation", NULL },
+    { NULL, NULL, NULL, NULL }
+}, acSetPlayer[] = {
+    { "evaluation", CommandSetPlayerEvaluation, "Control evaluation "
+      "parameters when gnubg plays", NULL },
     { "gnubg", CommandSetPlayerGNU, "Have gnubg make all moves for a player",
       NULL },
     { "human", CommandSetPlayerHuman, "Have a human make all moves for a "
       "player", NULL },
     { "name", CommandSetPlayerName, "Change a player's name", NULL },
-    { "plies", CommandSetPlayerPlies, "Set the lookahead depth when gnubg "
-      "plays", NULL },
     { "pubeval", CommandSetPlayerPubeval, "Have pubeval make all moves for a "
       "player", NULL },
     { NULL, NULL, NULL, NULL }
@@ -86,14 +95,14 @@ static void SetRNG( rng rngNew, char *szSeed ) {
 
 extern void CommandSetAutoBearoff( char *sz ) {
 
-    SetToggle( "autobearoff", &fAutoBearoff, sz, "Will automatically bear "
-	       "off as many chequers as possible.", "Will not automatically "
-	       "bear off chequers." );
+    SetToggle( "automatic bearoff", &fAutoBearoff, sz, "Will automatically "
+	       "bear off as many chequers as possible.", "Will not "
+	       "automatically bear off chequers." );
 }
 
 extern void CommandSetAutoCrawford( char *sz ) {
 
-    SetToggle( "autocrawford", &fAutoCrawford, sz, "Will enable the "
+    SetToggle( "automatic crawford", &fAutoCrawford, sz, "Will enable the "
 	       "Crawford game according to match score.", "Will not "
 	       "enable the Crawford game according to match score." );
 }
@@ -104,7 +113,7 @@ extern void CommandSetAutoDoubles( char *sz ) {
     
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
 	puts( "You must specify how many automatic doubles to use "
-	      "(try `help set autodouble')." );
+	      "(try `help set automatic double')." );
 	return;
     }
 
@@ -131,26 +140,28 @@ extern void CommandSetAutoDoubles( char *sz ) {
 
 extern void CommandSetAutoGame( char *sz ) {
 
-    SetToggle( "autogame", &fAutoGame, sz, "Will automatically start games "
-	       "after wins.", "Will not automatically start games." );
+    SetToggle( "automatic game", &fAutoGame, sz, "Will automatically start "
+	       "games after wins.", "Will not automatically start games." );
 }
 
 extern void CommandSetAutoMove( char *sz ) {
 
-    SetToggle( "automove", &fAutoMove, sz, "Forced moves will be made "
+    SetToggle( "automatic move", &fAutoMove, sz, "Forced moves will be made "
 	       "automatically.", "Forced moves will not be made "
 	       "automatically." );
 }
 
 extern void CommandSetAutoRoll( char *sz ) {
 
-    SetToggle( "autoroll", &fAutoRoll, sz, "Will automatically roll the "
+    SetToggle( "automatic roll", &fAutoRoll, sz, "Will automatically roll the "
 	       "dice when no cube action is possible.", "Will not "
 	       "automatically roll the dice." );
 }
 
 extern void CommandSetBoard( char *sz ) {
 
+    int an[ 2 ][ 25 ];
+    
     if( fTurn < 0 ) {
 	puts( "There must be a game in progress to set the board." );
 
@@ -163,28 +174,14 @@ extern void CommandSetBoard( char *sz ) {
 	return;
     }
 
-    ParsePosition( anBoard, sz );
-
-    /* FIXME check errors */
-
-    ShowBoard();
-}
-
-extern void CommandSetCache( char *sz ) {
-
-    int n;
-
-    if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	puts( "You must specify the number of cache entries to use." );
-
+    if( ParsePosition( an, sz ) ) {
+	puts( "Illegal position." );
 	return;
     }
 
-    if( EvalCacheResize( n ) )
-	perror( "EvalCacheResize" );
-    else
-	printf( "The position cache has been sized to %d entr%s.\n", n,
-		n == 1 ? "y" : "ies" );
+    memcpy( anBoard, an, sizeof( an ) );
+
+    ShowBoard();
 }
 
 static int CheckCubeAllowed( void ) {
@@ -207,6 +204,23 @@ static int CheckCubeAllowed( void ) {
     return 0;
 }
 
+extern void CommandSetCache( char *sz ) {
+
+    int n;
+
+    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+	puts( "You must specify the number of cache entries to use." );
+
+	return;
+    }
+
+    if( EvalCacheResize( n ) )
+	perror( "EvalCacheResize" );
+    else
+	printf( "The position cache has been sized to %d entr%s.\n", n,
+		n == 1 ? "y" : "ies" );
+}
+
 extern void CommandSetCubeCentre( char *sz ) {
 
     if( CheckCubeAllowed() )
@@ -224,7 +238,7 @@ extern void CommandSetCubeCentre( char *sz ) {
     if( fDoubled ) {
 	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	fDoubled = FALSE;
-	NextTurn();
+	fNextTurn = TRUE;
     }
 }
 
@@ -262,7 +276,7 @@ extern void CommandSetCubeOwner( char *sz ) {
     if( fDoubled ) {
 	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	fDoubled = FALSE;
-	NextTurn();
+	fNextTurn = TRUE;
     }
 }
 
@@ -273,6 +287,11 @@ extern void CommandSetCubeUse( char *sz ) {
 		   "Use of the doubling cube is disabled." ) < 0 )
 	return;
 
+    if( !nMatchTo && fJacoby && !fCubeUse )
+	puts( "(Note that you'll have to disable the Jacoby rule if you want "
+	      "gammons and\nbackgammons to be scored -- see `help set "
+	      "jacoby')." );
+    
     if( fCrawford && fCubeUse )
 	puts( "(But the Crawford rule is in effect, so you won't be able to "
 	      "use it during\nthis game.)" );
@@ -292,7 +311,7 @@ extern void CommandSetCubeUse( char *sz ) {
 	    printf( "(%s's double has been cancelled.)\n",
 		    ap[ fMove ].szName );
 	    fDoubled = FALSE;
-	    NextTurn();
+	    fNextTurn = TRUE;
 	}
     }
 }
@@ -319,6 +338,32 @@ extern void CommandSetCubeValue( char *sz ) {
 	}
 
     puts( "You must specify a legal cube value (see `help set cube value')." );
+}
+
+extern void CommandSetDelay( char *sz ) {
+#if !X_DISPLAY_MISSING
+    int n;
+
+    if( fX ) {
+	if( *sz && !strncasecmp( sz, "none", strlen( sz ) ) )
+	    n = 0;
+	else if( ( n = ParseNumber( &sz ) ) < 0 || n > 10000 ) {
+	    puts( "You must specify a legal move delay (see `help set "
+		  "delay')." );
+	    return;
+	}
+
+	if( n )
+	    printf( "All moves will be shown for at least %d millisecond%s.\n",
+		    n, n > 1 ? "s" : "" );
+	else
+	    puts( "Moves will not be delayed." );
+	
+	nDelay = n;
+    } else
+#endif
+	puts( "The `set delay' command applies only when using the X Window "
+	      "System." );
 }
 
 extern void CommandSetDice( char *sz ) {
@@ -353,7 +398,94 @@ extern void CommandSetDisplay( char *sz ) {
 	       "moves.", "Will not display boards for computer moves." );
 }
 
+static evalcontext *pecSet;
+static char *szSet, *szSetCommand;
+
+extern void CommandSetEvalCandidates( char *sz ) {
+
+    int n = ParseNumber( &sz );
+
+    if( n < 0 || n > MAX_SEARCH_CANDIDATES ) {
+	printf( "You must specify a valid number of moves to consider -- try "
+	      "`help set %sevaluation candidates'.\n", szSetCommand );
+
+	return;
+    }
+
+    pecSet->nSearchCandidates = n;
+
+    printf( "%s will consider up to %d move%s for evaluation at deeper "
+	    "plies.\n", szSet, pecSet->nSearchCandidates,
+	    pecSet->nSearchCandidates == 1 ? "" : "s" );
+}
+
+extern void CommandSetEvalPlies( char *sz ) {
+
+    int n = ParseNumber( &sz );
+
+    if( n < 0 ) {
+	printf( "You must specify a valid number of plies to look ahead -- "
+		"try `help set %sevaluation plies'.\n", szSetCommand );
+
+	return;
+    }
+
+    pecSet->nPlies = n;
+
+    printf( "%s will use %d ply evaluation.\n", szSet, pecSet->nPlies );
+}
+
+extern void CommandSetEvalTolerance( char *sz ) {
+
+    double r = ParseReal( &sz );
+
+    if( r < 0.0 ) {
+	printf( "You must specify a valid cubeless equity tolerance to use -- "
+		"try `help set\n%sevaluation tolerance'.", szSetCommand );
+
+	return;
+    }
+
+    pecSet->rSearchTolerance = r;
+
+    printf( "%s will select moves within %0.3g cubeless equity for\n"
+	    "evaluation at deeper plies.\n", szSet, pecSet->rSearchTolerance );
+}
+
+extern void CommandSetEvaluation( char *sz ) {
+
+    szSet = "`eval' and `hint'";
+    szSetCommand = "";
+    pecSet = &ecEval;
+    HandleCommand( sz, acSetEvaluation );
+}
+
+extern void CommandSetNackgammon( char *sz ) {
+    
+    SetToggle( "nackgammon", &fNackgammon, sz, "New games will use the "
+	       "Nackgammon starting position.", "New games will use the "
+	       "standards backgammon starting position." );
+
+#if !X_DISPLAY_MISSING
+    if( fX && fTurn == -1 )
+	ShowBoard();
+#endif
+}
+
 static int iPlayerSet;
+
+extern void CommandSetPlayerEvaluation( char *sz ) {
+
+    szSet = ap[ iPlayerSet ].szName;
+    szSetCommand = "player ";
+    pecSet = &ap[ iPlayerSet ].ec;
+
+    HandleCommand( sz, acSetEvaluation );
+
+    if( ap[ iPlayerSet ].pt != PLAYER_GNU )
+	printf( "(Note that this setting will have no effect until you "
+		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
+}
 
 extern void CommandSetPlayerGNU( char *sz ) {
 
@@ -419,7 +551,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
 	return;
     }
 
-    ap[ iPlayerSet ].nPlies = n;
+    ap[ iPlayerSet ].ec.nPlies = n;
     
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	printf( "Moves for %s will be played with %d ply lookahead (note that "
@@ -480,22 +612,6 @@ extern void CommandSetPlayer( char *sz ) {
     printf( "Unknown player `%s' -- try `help set player'.\n", pch );
 }
 
-extern void CommandSetPlies( char *sz ) {
-
-    int n = ParseNumber( &sz );
-
-    if( n < 0 ) {
-	puts( "You must specify a valid number of plies to look ahead -- try "
-	      "`help set plies'." );
-
-	return;
-    }
-
-    nPliesEval = n;
-
-    printf( "`eval' and `hint' will use %d ply evaluation.\n", nPliesEval );
-}
-
 extern void CommandSetPrompt( char *szParam ) {
 
     static char sz[ 128 ]; /* FIXME check overflow */
@@ -546,6 +662,55 @@ extern void CommandSetRNGUser( char *sz ) {
 
 }
 
+extern void CommandSetRolloutEvaluation( char *sz ) {
+
+    szSet = "Rollouts";
+    szSetCommand = "rollout ";
+    pecSet = &ecRollout;
+    HandleCommand( sz, acSetEvaluation );
+}
+
+extern void CommandSetRolloutTrials( char *sz ) {
+    
+    int n = ParseNumber( &sz );
+
+    if( n < 1 ) {
+	puts( "You must specify a valid number of trials to make -- "
+		"try `help set rollout trials'." );
+
+	return;
+    }
+
+    nRollouts = n;
+
+    printf( "%d game%s will be played per rollout.\n", nRollouts,
+	    nRollouts == 1 ? "" : "s" );
+}
+
+extern void CommandSetRolloutTruncation( char *sz ) {
+    
+    int n = ParseNumber( &sz );
+
+    if( n < 1 ) {
+	puts( "You must specify a valid ply at which to truncate  -- "
+		"try `help set rollout truncation'." );
+
+	return;
+    }
+
+    nRolloutTruncate = n;
+
+    printf( "Rollouts will be truncated after %d pl%s.\n", nRolloutTruncate,
+	    nRolloutTruncate == 1 ? "y" : "ies" );
+}
+
+extern void CommandSetRolloutVarRedn( char *sz ) {
+    
+    SetToggle( "rollout varredn", &fVarRedn, sz, "Will lookahead during "
+	       "rollouts to reduce variance.", "Will not use lookahead "
+	       "variance reduction during rollouts." );
+}
+    
 extern void CommandSetScore( char *sz ) {
 
     int n0, n1;
@@ -581,7 +746,6 @@ extern void CommandSetScore( char *sz ) {
 
 extern void CommandSetSeed( char *sz ) {
 
-    /* FIXME allow setting very long seeds */
     int n;
     
     if( rngCurrent == RNG_MANUAL ) {
@@ -642,16 +806,28 @@ extern void CommandSetTurn( char *sz ) {
 
     anDice[ 0 ] = anDice[ 1 ] = 0;
 
+#if !X_DISPLAY_MISSING
+    if( fX )
+	ShowBoard();
+#endif
+    
     printf( "`%s' is now on roll.\n", ap[ i ].szName );
 }
 
 
 extern void CommandSetJacoby( char *sz ) {
 
-  SetToggle( "jacoby", &fJacoby, sz, 
-	     "Will use the Jacoby rule for money sessions.",
-	     "Will not use the Jacoby rule for money sessions." );
-  CalcGammonPrice ( nCube, fCubeOwner );
+    if( SetToggle( "jacoby", &fJacoby, sz, 
+		   "Will use the Jacoby rule for money sessions.",
+		   "Will not use the Jacoby rule for money sessions." ) )
+      return;
+
+    CalcGammonPrice ( nCube, fCubeOwner );
+
+    if( fJacoby && !fCubeUse )
+      puts( "(Note that you'll have to enable the cube if you want gammons "
+	    "and backgammons\nto be scored -- see `help set cube use'.)" );
+
 }
 
 
@@ -675,8 +851,9 @@ extern void CommandSetCrawford( char *sz ) {
 	CommandSetPostCrawford ( "on" );
 
       if( fCrawford && fDoubled ) {
+	  printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	  fDoubled = FALSE;
-	  NextTurn();
+	  fNextTurn = TRUE;
       }
     }
     else {

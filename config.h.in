@@ -9,6 +9,9 @@
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
 /* Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
@@ -17,6 +20,9 @@
 
 /* Define if the X Window System is missing or not being used.  */
 #undef X_DISPLAY_MISSING
+
+/* Define if you have the alloca function.  */
+#undef HAVE_ALLOCA
 
 /* Define if you have the getlogin function.  */
 #undef HAVE_GETLOGIN
@@ -30,6 +36,9 @@
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
 
+/* Define if you have the isatty function.  */
+#undef HAVE_ISATTY
+
 /* Define if you have the rand_r function.  */
 #undef HAVE_RAND_R
 
@@ -39,20 +48,41 @@
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION
 
+/* Define if you have the sigblock function.  */
+#undef HAVE_SIGBLOCK
+
+/* Define if you have the sigprocmask function.  */
+#undef HAVE_SIGPROCMASK
+
 /* Define if you have the sigvec function.  */
 #undef HAVE_SIGVEC
+
+/* Define if you have the <alloca.h> header file.  */
+#undef HAVE_ALLOCA_H
 
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H
 
+/* Define if you have the <limits.h> header file.  */
+#undef HAVE_LIMITS_H
+
 /* Define if you have the <pwd.h> header file.  */
 #undef HAVE_PWD_H
+
+/* Define if you have the <sys/file.h> header file.  */
+#undef HAVE_SYS_FILE_H
+
+/* Define if you have the <sys/ioctl.h> header file.  */
+#undef HAVE_SYS_IOCTL_H
 
 /* Define if you have the <sys/mman.h> header file.  */
 #undef HAVE_SYS_MMAN_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
+
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
 
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
@@ -69,6 +99,9 @@
 /* Define if you have the readline library (-lreadline).  */
 #undef HAVE_LIBREADLINE
 
+/* Define if you have the termcap library (-ltermcap).  */
+#undef HAVE_LIBTERMCAP
+
 /* Name of package */
 #undef PACKAGE
 
@@ -83,6 +116,3 @@
 #define FALSE 0
 #define TRUE 1
 #endif
-
-#undef PACKAGE
-#undef VERSION

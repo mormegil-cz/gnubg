@@ -23,7 +23,15 @@
 
 #include <ctype.h>
 #include <errno.h>
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#if HAVE_SYS_FILE_H
+#include <sys/file.h>
+#endif
+#if HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <math.h>
 #if HAVE_PWD_H
 #include <pwd.h>
@@ -32,7 +40,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if TIME_WITH_SYS_TIME
+#include <sys/time.h>
 #include <time.h>
+#else
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#else
+#include <time.h>
+#endif
+#endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -55,11 +75,17 @@
 #include <ext.h>
 #include <extwin.h>
 #include <stdio.h>
-#include <X11/Xutil.h>
 #include "xgame.h"
 
+static extdisplay edsp;
 extwindow ewnd;
 int fX = TRUE; /* use X display */
+int nDelay = 0;
+event evNextTurn;
+static int fNeedPrompt = FALSE;
+#if HAVE_LIBREADLINE
+static int fReadingCommand, fReadingOther;
+#endif
 #endif
 
 char szDefaultPrompt[] = "(\\p) ",
@@ -68,24 +94,29 @@ static int fInteractive;
 
 int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
-    fResigned = FALSE, fMove = -1, nPliesEval = 1, anScore[ 2 ] = { 0, 0 },
-    cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
-    fAutoRoll = TRUE, nMatchTo = 0, fJacoby = TRUE, fCrawford = FALSE,
-    fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 0,
-    fCubeUse = TRUE;
+    fResigned = FALSE, 
+    cGames = 0, fDoubled = FALSE, 
+    fAutoRoll = TRUE, 
+    fAutoCrawford = TRUE, cAutoDoubles = 1,
+    fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
+    nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
+    fConfirm = TRUE;
+
+evalcontext ecTD = { 0, 8, 0.16 }, ecEval = { 1, 8, 0.16 },
+    ecRollout = { 0, 8, 0.16 };
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, 0 },
-    { "user", PLAYER_HUMAN, 0 }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16 } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16 } }
 };
 
 static command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
       NULL },
-    { "evaluate", CommandDatabaseEvaluate, "Evaluate positions in database "
+    { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
       "for future training", NULL },
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
-      "self-play)", NULL },
+      "self-play", NULL },
     { "train", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL },
     { NULL, NULL, NULL, NULL }
@@ -103,6 +134,20 @@ static command acDatabase[] = {
       NULL },
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
       NULL },
+    { NULL, NULL, NULL, NULL }
+}, acSetAutomatic[] = {
+    { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
+      "chequers as possible", NULL },
+    { "crawford", CommandSetAutoCrawford, "Enable the Crawford game "
+      "based on match score", NULL },
+    { "doubles", CommandSetAutoDoubles, "Control automatic doubles "
+      "during (money) session play", NULL },
+    { "game", CommandSetAutoGame, "Select whether to start new games "
+      "after wins", NULL },
+    { "move", CommandSetAutoMove, "Select whether forced moves will be "
+      "made automatically", NULL },
+    { "roll", CommandSetAutoRoll, "Control whether dice will be rolled "
+      "automatically", NULL },
     { NULL, NULL, NULL, NULL }
 }, acSetCube[] = {
     { "center", CommandSetCubeCentre, "The U.S.A. spelling of `centre'",
@@ -126,55 +171,69 @@ static command acDatabase[] = {
       NULL },
     { "user", CommandSetRNGUser, "Specify an external generator", NULL },
     { NULL, NULL, NULL, NULL }
+}, acSetRollout[] = {
+    { "evaluation", CommandSetRolloutEvaluation, "Specify parameters "
+      "for evaluation during rollouts", NULL },
+    { "seed", CommandNotImplemented, "Specify the base pseudo-random seed "
+      "to use for rollouts", NULL },
+    { "trials", CommandSetRolloutTrials, "Control how many rollouts to "
+      "perform", NULL },
+    { "truncation", CommandSetRolloutTruncation, "End rollouts at a "
+      "particular depth", NULL },
+    { "varredn", CommandSetRolloutVarRedn, "Use lookahead during rollouts "
+      "to reduce variance", NULL },
+    /* FIXME add commands for cubeful rollouts, cube variance reduction,
+       quasi-random dice, settlements... */
+    { NULL, NULL, NULL, NULL }
 }, acSet[] = {
-    { "autobearoff", CommandSetAutoBearoff, "Automatically bear off as many "
-      "chequers as possible", NULL },
-    { "autocrawford", CommandSetAutoCrawford, "Enable the Crawford game "
-      "based on match score", NULL },
-    { "autodoubles", CommandSetAutoDoubles, "Control automatic doubles "
-      "during (money) session play", NULL },
-    { "autogame", CommandSetAutoGame, "Select whether to start new games "
-      "after wins", NULL },
-    { "automove", CommandSetAutoMove, "Select whether forced moves will be "
-      "made automatically", NULL },
-    { "autoroll", CommandSetAutoRoll, "Control whether dice will be rolled "
-      "automatically", NULL },
+    { "automatic", NULL, "Perform certain functions without user input",
+      acSetAutomatic },
     { "board", CommandSetBoard, "Set up the board in a particular "
       "position", NULL },
-    { "cache", CommandSetCache, "Set the size of the evaluation "
-      "cache", NULL },
+    { "cache", CommandSetCache, "Set the size of the evaluation cache", NULL },
     { "crawford", CommandSetCrawford, 
       "Set whether this is the Crawford game", NULL },
     { "cube", NULL, "Set the cube owner and/or value", acSetCube },
+    { "delay", CommandSetDelay, "Limit the speed at which moves are made",
+      NULL },
     { "dice", CommandSetDice, "Select the roll for the current move",
       NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
       "the computer's turn", NULL },
+    { "evaluation", CommandSetEvaluation, "Control position evaluation "
+      "parameters", NULL },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in"
       "money game", NULL },
+    { "nackgammon", CommandSetNackgammon, "Set the starting position", NULL },
     { "player", CommandSetPlayer, "Change options for one or both "
       "players", NULL },
-    { "plies", CommandSetPlies, "Choose how many plies the `eval' and `hint' "
-      "commands look ahead", NULL },
     { "postcrawford", CommandSetPostCrawford, 
       "Set whether this is post-Crawford games", NULL },
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
       "ready for commands", NULL },
     { "rng", NULL, "Select the random number generator algorithm", acSetRNG },
+    { "rollout", NULL, "Control rollout parameters", acSetRollout },
     { "score", CommandSetScore, "Set the match or session score ",
       NULL },
     { "seed", CommandSetSeed, "Set the dice generator seed", NULL },
     { "turn", CommandSetTurn, "Set which player is on roll", NULL },
     { NULL, NULL, NULL, NULL }
 }, acShow[] = {
+    { "automatic", CommandShowAutomatic, "List which functions will be "
+      "performed without user input", NULL },
     { "board", CommandShowBoard, "Redisplay the board position", NULL },
-    { "cache", CommandShowCache, "See statistics on the performance of "
-      "the evaluation cache", NULL },
-    { "copying", CommandNotImplemented, "Conditions for redistributing copies "
+    { "cache", CommandShowCache, "Display statistics on the evaluation "
+      "cache", NULL },
+    { "copying", CommandShowCopying, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
+    /* FIXME show cube */
     { "crawford", CommandShowCrawford, 
       "See if this is the Crawford game", NULL },
+    /* FIXME show delay */
     { "dice", CommandShowDice, "See what the current dice roll is", NULL },
+    /* FIXME show display */
+    { "evaluation", CommandShowEvaluation, "Display evaluation settings "
+      "and statistics", NULL },
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
@@ -184,12 +243,12 @@ static command acDatabase[] = {
       "See if this is post-Crawford play", NULL },
     { "rng", CommandShowRNG, "Display which random number generator "
       "is being used", NULL },
+    { "rollout", CommandShowRollout, "Display the evaluation settings used "
+      "during rollouts", NULL },
     { "score", CommandShowScore, "View the match or session score ",
       NULL },
-    { "seed", CommandNotImplemented, "View the state of the dice generator",
-      NULL },
     { "turn", CommandShowTurn, "Show which player is on roll", NULL },
-    { "warranty", CommandNotImplemented, "Various kinds of warranty you do "
+    { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
       "not have", NULL },
     { NULL, NULL, NULL, NULL }    
 }, acTrain[] = {
@@ -218,7 +277,7 @@ static command acDatabase[] = {
     { "pass", CommandDrop, "Synonym for `drop'", NULL },
     { "play", CommandPlay, "Force the computer to move", NULL },
     { "quit", CommandQuit, "Leave GNU Backgammon", NULL },
-    { "r", CommandRoll, "Abbreviation for `roll'", NULL },
+    { "r", CommandRoll, NULL, NULL },
     { "redouble", CommandRedouble, "Accept the cube one level higher "
       "than it was offered", NULL },
     { "reject", CommandReject, "Reject a cube or resignation", NULL },
@@ -263,6 +322,19 @@ extern char *NextToken( char **ppch ) {
     return pch;
 }
 
+extern double ParseReal( char **ppch ) {
+
+    char *pch, *pchOrig;
+    double r;
+    
+    if( !ppch || !( pchOrig = NextToken( ppch ) ) )
+	return -HUGE_VAL;
+
+    r = strtod( pchOrig, &pch );
+
+    return *pch ? -HUGE_VAL : r;
+}
+
 extern int ParseNumber( char **ppch ) {
 
     char *pch, *pchOrig;
@@ -304,11 +376,8 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
 	return 0;
     }
 
-    PositionFromID( an, sz );
+    return PositionFromID( an, sz );
 
-    /* FIXME check position is legal! */
-
-    return 0;
 }
 
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
@@ -439,6 +508,32 @@ extern void HandleCommand( char *sz, command *ac ) {
 	HandleCommand( sz, pc->pc );
 }
 
+/* Reset the SIGINT handler, on return to the main command loop.  Notify
+   the user if processing had been interrupted. */
+static void ResetInterrupt( void ) {
+    
+    if( fInterrupt ) {
+	puts( "(Interrupted)" );
+
+	fInterrupt = FALSE;
+#if !X_DISPLAY_MISSING
+	EventPending( &evNextTurn, FALSE );
+#endif
+    }
+    
+#if HAVE_SIGPROCMASK
+    {
+	sigset_t ss;
+
+	sigemptyset( &ss );
+	sigaddset( &ss, SIGINT );
+	sigprocmask( SIG_UNBLOCK, &ss, NULL );
+    }
+#elif HAVE_SIGBLOCK
+    sigsetmask( 0 );
+#endif
+}
+
 extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
 
     int i;
@@ -446,10 +541,13 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
     for( i = 0; i < 25; i++ )
 	anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
 
-    anBoard[ 0 ][ 5 ] = anBoard[ 1 ][ 5 ] = 5;
+    anBoard[ 0 ][ 5 ] = anBoard[ 1 ][ 5 ] =
+	anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = fNackgammon ? 4 : 5;
     anBoard[ 0 ][ 7 ] = anBoard[ 1 ][ 7 ] = 3;
-    anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = 5;
     anBoard[ 0 ][ 23 ] = anBoard[ 1 ][ 23 ] = 2;
+
+    if( fNackgammon )
+	anBoard[ 0 ][ 22 ] = anBoard[ 1 ][ 22 ] = 2;
 }
 
 extern void ShowBoard( void ) {
@@ -532,13 +630,6 @@ extern void ShowBoard( void ) {
 	if( !fMove )
 	    SwapSides( anBoard );
 
-	/* FIXME this is a horrible hack to get the board to display when
-	   it's the computer's turn (i.e. may be performing a long evaluation
-	   and be unresponsive for a while).  A much better mechanism is
-	   needed that can respond to other events in the meantime
-	   (especially Expose, but perhaps some menu commands).  There
-	   may also be some need to check whether events need to be enabled
-	   (see ExtDspCommit). */
 	XFlush( ewnd.pdsp );
     }    
 #endif    
@@ -612,7 +703,7 @@ extern void CommandEval( char *sz ) {
     int an[ 2 ][ 25 ];
 
     if( !*sz && fTurn == -1 ) {
-	puts( "No position specified." );
+	puts( "No position specified and no game in progress." );
 	return;
     }
     
@@ -622,7 +713,7 @@ extern void CommandEval( char *sz ) {
 	return;
     }
 
-    if( !DumpPosition( an, szOutput, nPliesEval ) )
+    if( !DumpPosition( an, szOutput, &ecEval ) )
 	puts( szOutput );
 
 }
@@ -645,7 +736,8 @@ extern void CommandHelp( char *sz ) {
     }
     
     for( ; pc->sz; pc++ )
-	printf( "%-15s\t%s\n", pc->sz, pc->szHelp );
+	if( pc->szHelp )
+	    printf( "%-15s\t%s\n", pc->sz, pc->szHelp );
 }
 
 extern void CommandHint( char *sz ) {
@@ -672,10 +764,9 @@ extern void CommandHint( char *sz ) {
 
       /* give hints on cube action */
 
-      if( EvaluatePositionCubeful( anBoard, nCube, fCubeOwner,
-				     fMove, arDouble, nPliesEval ) )
-	  return -1;
-
+      EvaluatePositionCubeful( anBoard, nCube, fCubeOwner,
+			       fMove, arDouble, &ecEval, ecEval.nPlies );
+      
       if ( fInterrupt )
 	return;
       
@@ -695,9 +786,10 @@ extern void CommandHint( char *sz ) {
 
       /* give hints on moves */
 
-      FindBestMoves( &ml, aar, nPliesEval, anDice[ 0 ], anDice[ 1 ], anBoard,
-		     10, 0.2 );
-
+      FindBestMoves( &ml, aar, anDice[ 0 ], anDice[ 1 ], anBoard,
+		     ecEval.nSearchCandidates, ecEval.rSearchTolerance,
+		     &ecEval );
+      
       if( fInterrupt )
 	return;
       
@@ -739,16 +831,17 @@ extern void CommandRollout( char *sz ) {
 	return;
     }
 
-    if( ( c = Rollout( an, ar, arStdDev, 1, 500, 1296 ) ) < 0 )
+    if( ( c = Rollout( an, ar, arStdDev, nRolloutTruncate, nRollouts,
+		       fVarRedn, &ecRollout ) ) < 0 )
 	return;
 
     printf( "Result (after %d trials):\n\n"
-	    "                   \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+	    "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
 	    "Equity\n"
-	    "              Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+	    "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
 	    "(%+6.3f)\n"
-	    "Standard deviation:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-	    "(%+6.3f)\n\n",
+	    "Standard error:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+	    "(%6.3f)\n\n",
 	    c, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
 	    arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
 	    arStdDev[ 4 ], arStdDev[ 5 ] );
@@ -773,7 +866,7 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
 	    sprintf( sz, "%d%d: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
-	    FormatMove( sz + 4, anBoard, pmr->n.anMove );
+	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
 	    ApplyMove( anBoard, pmr->n.anMove );
 	    SwapSides( anBoard );
 	    break;
@@ -846,7 +939,7 @@ extern void CommandSaveMatch( char *sz ) {
 
 extern void CommandSaveWeights( char *sz ) {
 
-    if( EvalSave( GNUBG_WEIGHTS /* FIXME */ ) )
+    if( EvalSave( GNUBG_WEIGHTS /* FIXME accept file name parameter */ ) )
 	perror( GNUBG_WEIGHTS );
     else
 	puts( "Evaluator weights saved." );
@@ -869,18 +962,21 @@ extern void CommandTrainTD( char *sz ) {
 	    
 	    RollDice( anDiceTrain );
 
+	    if( fInterrupt )
+		return;
+	    
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
 	    
-	    FindBestMove( 0, NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-			  anBoardTrain );
+	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
+			  anBoardTrain, &ecTD );
 
 	    if( fInterrupt )
 		return;
 	    
 	    SwapSides( anBoardTrain );
 	    
-	    EvaluatePosition( anBoardTrain, ar, 0 );
-	    /* FIXME handle interrupts */
+	    EvaluatePosition( anBoardTrain, ar, &ecTD );
+
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar ) )
 		break;
@@ -891,7 +987,6 @@ extern void CommandTrainTD( char *sz ) {
 }
 
 #if HAVE_LIBREADLINE
-
 static command *pcCompleteContext;
 
 static char *NullGenerator( char *sz, int nState ) {
@@ -904,6 +999,9 @@ static char *GenerateKeywords( char *sz, int nState ) {
     static int cch;
     static command *pc;
     char *szDup;
+
+    if( fReadingOther )
+	return NULL;
     
     if( !nState ) {
 	cch = strlen( sz );
@@ -911,7 +1009,7 @@ static char *GenerateKeywords( char *sz, int nState ) {
     }
 
     while( pc && pc->sz ) {
-	if( !strncasecmp( sz, pc->sz, cch ) ) {
+	if( !strncasecmp( sz, pc->sz, cch ) && pc->szHelp ) {
 	    if( !( szDup = malloc( strlen( pc->sz ) + 1 ) ) )
 		return NULL;
 
@@ -950,10 +1048,14 @@ static void Prompt( void ) {
 
 #if !X_DISPLAY_MISSING
 #if HAVE_LIBREADLINE
-void HandleInput( char *sz ) {
+static void HandleInput( char *sz );
 
+static void ProcessInput( char *sz, int fFree ) {
+    
+    rl_callback_handler_remove();
+    fReadingCommand = FALSE;
+    
     if( !sz ) {
-	rl_callback_handler_remove();
 	StopEvents();
 	return;
     }
@@ -965,18 +1067,73 @@ void HandleInput( char *sz ) {
 	
     HandleCommand( sz, acTop );
 
-    if( fInterrupt ) {
-	puts( "(Interrupted)" );
+    ResetInterrupt();
 
-	fInterrupt = FALSE;
+    if( fFree )
+	free( sz );
+
+    /* Recalculate prompt -- if we call nothing, then readline will
+       redisplay the old prompt.  This isn't what we want: we either
+       want no prompt at all, yet (if NextTurn is going to be called),
+       or if we do want to prompt immediately, we recalculate it in
+       case the information in the old one is out of date. */
+    if( evNextTurn.fPending )
+	fNeedPrompt = TRUE;
+    else {
+	rl_callback_handler_install( FormatPrompt(), HandleInput );
+	fReadingCommand = TRUE;
     }
-    
-    free( sz );
+}
 
-    /* Need to reinstall handler in case the prompt has changed */
-    rl_callback_handler_install( FormatPrompt(), HandleInput );
+static void HandleInput( char *sz ) {
+
+    ProcessInput( sz, TRUE );
+}
+
+static char *szInput;
+
+void HandleInputRecursive( char *sz ) {
+
+    if( !sz ) {
+	putchar( '\n' );
+	exit( EXIT_SUCCESS );
+    }
+
+    szInput = sz;
+
+    rl_callback_handler_remove();
 }
 #endif
+
+/* Handle a command as if it had been typed by the user. */
+extern void UserCommand( char *sz ) {
+
+#if HAVE_LIBREADLINE
+    int nOldEnd;
+    
+    nOldEnd = rl_end;
+    rl_end = 0;
+    rl_redisplay();
+    puts( sz );
+    ProcessInput( sz, FALSE );
+    return;
+#else
+    putchar( '\n' );
+    Prompt();
+    puts( sz );
+
+    fInterrupt = FALSE;
+    
+    HandleCommand( sz, acTop );
+
+    ResetInterrupt();
+    
+    if( !evNextTurn.fPending )
+	Prompt();
+    else
+	fNeedPrompt = TRUE;
+#endif
+}
 
 int StdinReadNotify( event *pev, void *p ) {
 #if HAVE_LIBREADLINE
@@ -997,38 +1154,91 @@ int StdinReadNotify( event *pev, void *p ) {
 
     fInterrupt = FALSE;
 
-    if( fInterrupt ) {
-	puts( "(Interrupted)" );
-
-	fInterrupt = FALSE;
-    }
-	
     HandleCommand( sz, acTop );
 
-    Prompt();
+    ResetInterrupt();
+
+    if( evNextTurn.fPending )
+	fNeedPrompt = TRUE;
+    else
+	Prompt();
 #endif
 
-    EventPending( pev, FALSE );
+    EventPending( pev, FALSE ); /* FIXME is this necessary? */
 
     return 0;
 }
 
+int NextTurnNotify( event *pev, void *p ) {
+
+    EventPending( pev, FALSE );
+
+    /* FIXME should we really abort now?  If we've gotten this far, it might
+       be too late... */
+#if 1
+    if( fInterrupt ) {
+	puts( "(Interrupted)" );
+
+	fInterrupt = FALSE;
+    } else
+#endif
+	NextTurn();
+
+    ResetInterrupt();
+    
+    if( !pev->fPending && fNeedPrompt ) {
+#if HAVE_LIBREADLINE
+	rl_callback_handler_install( FormatPrompt(), HandleInput );
+	fReadingCommand = TRUE;
+#else
+	Prompt();
+#endif
+	fNeedPrompt = FALSE;
+    }
+    
+    return 0;
+}
+
 static eventhandler StdinReadHandler = {
-    (eventhandlerfunc) StdinReadNotify, NULL
+    StdinReadNotify, NULL
+}, NextTurnHandler = {
+    NextTurnNotify, NULL
 };
+
+static void HandleXAction( void ) {
+
+    /* It is safe to execute this function with SIGIO unblocked, because
+       if a SIGIO occurs before fAction is reset, then the I/O it alerts
+       us to will be processed anyway.  If one occurs after fAction is reset,
+       that will cause this function to be executed again, so we will
+       still process its I/O. */
+    fAction = FALSE;
+
+    /* Set flag so that the board window knows this is a re-entrant
+       call, and won't allow commands like roll, move or double. */
+    fBusy = TRUE;
+
+    /* Process incoming X events.  It's important to handle all of them,
+       because we won't get another SIGIO for events that are buffered
+       but not processed. */
+    while( XEventsQueued( edsp.pdsp, QueuedAfterReading ) )
+	EventProcess( &edsp.ev );
+
+    /* Now we need to commit (the timeout will call ExtDspCommit). */
+    EventTimeout( &edsp.ev );
+
+    fBusy = FALSE;
+}
 
 void RunX( void ) {
     /* Attempt to execute under X Window System.  Returns on error (for
        fallback to TTY), or executes until exit() if successful. */
     Display *pdsp;
-    extdisplay edsp;
-    Atom a;
     XrmDatabase rdb;
     XSizeHints xsh;
-    int i;
-    unsigned long n, l;
-    unsigned char *pch;
+    char *pch;
     event ev;
+    int n;
     
     XrmInitialize();
     
@@ -1047,15 +1257,10 @@ void RunX( void ) {
 	return;
     }
 
-    /* FIXME use XResourceManagerString(), XScreenResourceString() */
-    a = XInternAtom( pdsp, "RESOURCE_MANAGER", 0 );
+    /* FIXME check if XResourceManagerString works! */
+    if( !( pch = XResourceManagerString( pdsp ) ) )
+	pch = "";
 
-    XGetWindowProperty( pdsp, DefaultRootWindow( pdsp ), a, 0, 32768, 0,
-                            AnyPropertyType, &a, &i, &n, &l, &pch );
-
-    if( !pch )
-        pch = ""; /* FIXME grotty hack to avoid creating a NULL database */
-    
     rdb = XrmGetStringDatabase( pch );
 
     /* FIXME override with $XENVIRONMENT and ~/.gnubgrc */
@@ -1086,9 +1291,22 @@ void RunX( void ) {
     ev.h = STDIN_FILENO;
     ev.fWrite = FALSE;
     EventHandlerReady( &ev, TRUE, -1 );
+
+    EventCreate( &evNextTurn, &NextTurnHandler, NULL );
+    evNextTurn.h = -1;
+    EventHandlerReady( &evNextTurn, TRUE, -1 );
+
+    /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
+    fnAction = HandleXAction;
+    if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
+	fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
+	fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
+    }
     
 #if HAVE_LIBREADLINE
+    fReadingCommand = TRUE;
     rl_callback_handler_install( FormatPrompt(), HandleInput );
+    atexit( rl_callback_handler_remove );
 #else
     Prompt();
 #endif
@@ -1101,10 +1319,174 @@ void RunX( void ) {
 }
 #endif
 
+/* Read a line from stdin, and handle X and readline input if
+ * appropriate.  This function blocks until a line is ready, and does
+ * not call HandleEvents(), and because fBusy will be set some X
+ * commands will not work.  Therefore, it should not be used for
+ * reading top level commands.  The line it returns has been allocated
+ * with malloc (as with readline()). */
+extern char *GetInput( char *szPrompt ) {
+
+    /* FIXME handle interrupts and EOF in this function. */
+    
+    char *sz;
+#if !HAVE_LIBREADLINE
+    char *pch;
+#endif
+#if !X_DISPLAY_MISSING
+    fd_set fds;
+    
+    if( fX ) {
+#if HAVE_LIBREADLINE
+	/* Using readline and X. */
+	char *szOldPrompt, *szOldInput;
+	int nOldEnd, nOldMark, nOldPoint;
+	
+	if( fInterrupt )
+	    return NULL;
+
+	fReadingOther = TRUE;
+	
+	if( fReadingCommand ) {
+	    /* Save old readline context. */
+	    szOldPrompt = rl_prompt;
+	    szOldInput = rl_copy_text( 0, rl_end );
+	    nOldEnd = rl_end;
+	    nOldMark = rl_mark;
+	    nOldPoint = rl_point;
+	    /* FIXME this is unnecessary when handling an X command! */
+	    putchar( '\n' );
+	}
+	
+	szInput = NULL;
+	
+	rl_callback_handler_install( szPrompt, HandleInputRecursive );
+
+	while( !szInput ) {
+	    FD_ZERO( &fds );
+	    FD_SET( STDIN_FILENO, &fds );
+	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+
+	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
+		    NULL );
+
+	    if( fInterrupt ) {
+		putchar( '\n' );
+		break;
+	    }
+	    
+	    if( FD_ISSET( STDIN_FILENO, &fds ) )
+		rl_callback_read_char();
+
+	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
+		HandleXAction();
+	}
+
+	if( fReadingCommand ) {
+	    /* Restore old readline context. */
+	    rl_callback_handler_install( szOldPrompt, HandleInput );
+	    rl_insert_text( szOldInput );
+	    free( szOldInput );
+	    rl_end = nOldEnd;
+	    rl_mark = nOldMark;
+	    rl_point = nOldPoint;
+	    rl_redisplay();
+	} else
+	    rl_callback_handler_remove();	
+
+	fReadingOther = FALSE;
+	
+	return szInput;
+#else
+	/* Using X, but not readline. */
+	if( fInterrupt )
+	    return NULL;
+
+	putchar( '\n' );
+	fputs( szPrompt, stdout );
+	fflush( stdout );
+
+	do {
+	    FD_ZERO( &fds );
+	    FD_SET( STDIN_FILENO, &fds );
+	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+
+	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
+		    NULL );
+
+	    if( fInterrupt ) {
+		putchar( '\n' );
+		return NULL;
+	    }
+	    
+	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
+		HandleXAction();
+	} while( !FD_ISSET( STDIN_FILENO, &fds ) );
+
+	goto ReadDirect;
+#endif
+    }
+#endif
+#if HAVE_LIBREADLINE
+    /* Using readline, but not X. */
+    if( fInterrupt )
+	return NULL;
+
+    if( !( sz = readline( szPrompt ) ) ) {
+	putchar( '\n' );
+	exit( EXIT_SUCCESS );
+    }
+    
+    if( fInterrupt )
+	return NULL;
+
+    return sz;
+#else
+    /* Not using readline or X. */
+    if( fInterrupt )
+	return NULL;
+
+    fputs( szPrompt, stdout );
+    fflush( stdout );
+
+ ReadDirect:
+    sz = malloc( 256 );
+    
+    fgets( sz, 256, stdin );
+    
+    if( fInterrupt ) {
+	free( sz );
+	return NULL;
+    }
+    
+    if( ( pch = strchr( sz, '\n' ) ) )
+	*pch = 0;
+    
+    if( feof( stdin ) && !*sz ) {
+	putchar( '\n' );
+	exit( EXIT_SUCCESS );
+    }
+    
+    return sz;
+#endif
+}
+
 static RETSIGTYPE HandleInterrupt( int idSignal ) {
 
+    /* NB: It is safe to write to fInterrupt even if it cannot be read
+       atomically, because it is only used to hold a binary value. */
     fInterrupt = TRUE;
 }
+
+#if !X_DISPLAY_MISSING
+static RETSIGTYPE HandleIO( int idSignal ) {
+
+    /* NB: It is safe to write to fAction even if it cannot be read
+       atomically, because it is only used to hold a binary value. */
+    if( fX )
+	fAction = TRUE;
+}
+#endif
 
 static void usage( char *argv0 ) {
 
@@ -1119,7 +1501,7 @@ static void usage( char *argv0 ) {
 "  -v, --version             Show version information and exit\n"
 "\n"
 "For more information, type `help' from within gnubg.\n"
-"Please report bugs to <gnubg@sourceforge.net>.\n", argv0 );
+"Please report bugs to <gtw@gnu.org>.\n", argv0 );
 }
 
 extern int main( int argc, char *argv[] ) {
@@ -1135,6 +1517,9 @@ extern int main( int argc, char *argv[] ) {
     };
 #if HAVE_GETPWUID
     struct passwd *ppwd;
+#endif
+#if HAVE_LIBREADLINE
+    char *sz;
 #endif
     
     fInteractive = isatty( STDIN_FILENO );
@@ -1157,7 +1542,12 @@ extern int main( int argc, char *argv[] ) {
 	    break;
 	case 'v': /* version */
 	    puts( "GNU Backgammon " VERSION );
-	    /* FIXME show optional features installed (Guile, X, etc.) */
+#if !X_DISPLAY_MISSING
+	    puts( "X Window System supported." );
+#endif
+#if HAVE_LIBGDBM
+	    puts( "Position databases supported." );
+#endif
 	    return EXIT_SUCCESS;
 	default:
 	    usage( argv[ 0 ] );
@@ -1166,10 +1556,10 @@ extern int main( int argc, char *argv[] ) {
 
     puts( "GNU Backgammon " VERSION "  Copyright 1999 Gary Wong.\n"
 	  "GNU Backgammon is free software, covered by the GNU "
-	  "General Public License,\n"
-	  "and you are welcome to change it and/or distribute "
-	  "copies of it under certain\n"
-	  "conditions.  Type \"show copying\" to see "
+	  "General Public License\n"
+	  "version 2, and you are welcome to change it and/or distribute "
+	  "copies of it\n"
+	  "under certain conditions.  Type \"show copying\" to see "
 	  "the conditions.\n"
 	  "There is absolutely no warranty for GNU Backgammon.  "
 	  "Type \"show warranty\" for\n"
@@ -1213,9 +1603,13 @@ extern int main( int argc, char *argv[] ) {
 	sa.sa_flags = 0;
 # endif
 	sigaction( SIGINT, &sa, NULL );
+
+# if !X_DISPLAY_MISSING
+	sa.sa_handler = HandleIO;
+	sigaction( SIGIO, &sa, NULL );
+# endif
     }
-#else
-# if HAVE_SIGVEC
+#elif HAVE_SIGVEC
     {
 	struct sigvec sv;
 
@@ -1224,9 +1618,15 @@ extern int main( int argc, char *argv[] ) {
 	sv.sv_flags = 0;
 
 	sigvec( SIGINT, &sv, NULL );
+# if !X_DISPLAY_MISSING
+	sv.sv_handler = HandleIO;
+	sigaction( SIGIO, &sv, NULL );
+# endif
     }
-# else
+#else
     signal( SIGINT, HandleInterrupt );
+# if !X_DISPLAY_MISSING
+    signal( SIGIO, HandleIO );
 # endif
 #endif
 
@@ -1248,10 +1648,10 @@ extern int main( int argc, char *argv[] ) {
     
     for(;;) {
 #if HAVE_LIBREADLINE
-	char *sz;
-	
-	if( !( sz = readline( FormatPrompt() ) ) )
+	if( !( sz = readline( FormatPrompt() ) ) ) {
+	    putchar( '\n' );
 	    return EXIT_SUCCESS;
+	}
 	
 	fInterrupt = FALSE;
 	
@@ -1280,13 +1680,14 @@ extern int main( int argc, char *argv[] ) {
 	    continue;
 	}	
 
+	fInterrupt = FALSE;
+	
 	HandleCommand( sz, acTop );
 #endif
 
-	if( fInterrupt ) {
-	    puts( "(Interrupted)" );
-	    
-	    fInterrupt = FALSE;
-	}
+	while( !fInterrupt && fNextTurn )
+	    NextTurn();
+
+	ResetInterrupt();
     }
 }

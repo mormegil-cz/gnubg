@@ -59,10 +59,10 @@ int FifoCopyTo( fifo *pf, char *pch, int cch ) {
     if( cFirst > cch )
 	cFirst = cch;
 
-    bcopy( pch, pf->pchBuffer + ( pf->iHead + pf->cb ) % pf->cbSize, cFirst );
+    memcpy( pf->pchBuffer + ( pf->iHead + pf->cb ) % pf->cbSize, pch, cFirst );
 
     if( cch > cFirst )
-	bcopy( pch + cFirst, pf->pchBuffer, cch - cFirst );
+	memcpy( pf->pchBuffer, pch + cFirst, cch - cFirst );
 
     return cch;
 }
@@ -85,10 +85,10 @@ int FifoCopyFrom( fifo *pf, char *pch, int cch ) {
     if( cFirst > cch )
 	cFirst = cch;
     
-    bcopy( pf->pchBuffer + pf->iHead, pch, cFirst );
+    memcpy( pch, pf->pchBuffer + pf->iHead, cFirst );
 
     if( cch > cFirst )
-	bcopy( pf->pchBuffer, pch + cFirst, cch - cFirst );
+	memcpy( pch + cFirst, pf->pchBuffer, cch - cFirst );
 
     return cch;
 }

@@ -1,20 +1,25 @@
 /*
  * event.c
  *
- * by Gary Wong, 1996
+ * by Gary Wong, 1996-2000
  *
+ * $Id$
  */
 
 #include "config.h"
 
 #include <assert.h>
 #include <errno.h>
+#if HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <list.h>
+#include <stdio.h>
 #include <stdlib.h>
-#include <syslog.h>
 #include <sys/types.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #if EVENT_DEBUG
 #include <stdio.h>
@@ -170,9 +175,13 @@ extern int EventPending( event *pev, int fPending ) {
 
 extern int InitEvents( void ) {
 
+#if HAVE_GETDTABLESIZE
     if( ( cDescriptors = getdtablesize() ) > FD_SETSIZE )
 	cDescriptors = FD_SETSIZE;
-
+#else
+    cDescriptors = OPEN_MAX > FD_SETSIZE ? FD_SETSIZE : OPEN_MAX;
+#endif
+    
     if( !( aapev = calloc( cDescriptors, sizeof( eventpair ) ) ) )
 	return -1;
     
@@ -302,7 +311,7 @@ extern int HandleEvents( void ) {
 	    if( errno == EINTR )
 		continue;
 
-	    syslog( LOG_ERR, "select: %m" );
+	    perror( "select" );
 
 	    return -1;
 	}

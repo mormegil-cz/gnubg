@@ -1,3 +1,180 @@
+Mon Jan 31 10:43:48 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (ResetInterrupt): New function.
+	(ProcessInput): New function.
+	(HandleInputRecursive): New function.
+	(UserCommand): New function.  Handles non-TTY commands (e.g. input
+	from board window), and echos them to TTY.
+	(GetInput): New function.  Reads input from TTY below the top level.
+	* play.c (NewGame): Abort new game if interrupted during the opening
+	roll.
+	(ComputerPlayer): Block SIGINTs if anBoard is going to be updated,
+	so that the end of the move is atomic.
+	(CommandNewGame): Ask "are you sure" if game already in progress.
+	
+	* dice.c (RollDice): Can now be interrupted (and return error).  All
+	callers changed.
+	(GetManualDice): Use GetInput to read dice, and return error on
+	interrupt.
+
+Thu Jan 27 17:34:45 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c [HAVE_SYS_FILE_H]: #include <sys/file.h> if present, to
+	get FASYNC (required on Solaris).
+
+Wed Jan 19 09:59:02 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (HandleIO): Handle X events asynchronously.  Many other
+	small related changes.
+
+Mon Jan 17 15:25:14 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (CommandRollout): Label the standard error as such, rather
+	than standard deviation (not quite the same thing).
+
+	* rollout.c (VarRednRollout): Do not invert evaluation after calling
+	BearoffRollout (BearoffRollout already correctly adjusts for which
+	player is on roll).
+	(BasicRollout): Add parameter pec to correctly handle cases with
+	lookahead but no variance reduction.
+	
+Sun Jan 16 11:44:10 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (GenerateKeywords, CommandHelp): Don't list commands with
+	no help string (e.g. "r", as abbreviation for "roll") in the help
+	or completion list.
+
+	* gnubg.c (HandleInput, StdinReadNotify, NextTurnNotify): Fix
+	bugs in prompt handling.
+
+Sat Jan 15 19:00:40 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (NewGame) [!X_DISPLAY_MISSING]: Show board after opening
+	roll.
+
+	* play.c, gnubg.c: Reorganised NextTurn() to avoid recursion.
+	Code should now call TurnDone() (which will return immediately)
+	to schedule the next turn.  This should simplify event handler
+	implementation and allow better input handling.
+	
+	* play.c (CommandRoll): Give error message if it's the computer's
+	turn.
+	(ComputerTurn): Don't roll the dice when making a take decision.
+	(NextTurn): Don't apply fAutoRoll to computer turns.
+	
+Sat Jan 15 18:04:43 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* database.c, gnubg.c, backgammon.h: Give error message in
+	CommandDatabaseRollout if libgdbm is not available.
+
+	* play.c (CommandMove): Fix bug bearing off against opponent on bar.
+
+	* set.c (CommandSetTurn) [!X_DISPLAY_MISSING]: Show board after
+	setting turn.
+
+Sat Jan 15 16:56:27 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* gnubg.c, backgammon.h: add '#if HAVE_LIBGDBM' around
+        CommandDatabaseRollout
+
+Fri Jan 14 21:18:37 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c, show.c: Added commands to control rollout parameters.
+
+	* database.c: Renamed CommandDatabaseEvaluate to
+	CommandDatabaseRollout.
+
+	* set.c, gnubg.c, eval.c: Added "evalcontext" parameter to
+	several evaluation calls.  The settings for each kind of evaluation
+	(per player, for rollouts, for "eval" and "hint", etc.) are now
+	maintained separately -- e.g. "set player 0 evaluation plies 1",
+	"set rollout evaluation tolerance 0.2", "set evaluation candidates 6".
+
+Thu Jan 13 22:20:11 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* drawboard.c (ParseMove): Fixed off-by-one bug in bit mask fl,
+	which caused moves like 13/12*/11 to fail (reported by Jared
+	Riley).
+
+	* rollout.c (Rollout): Added parameter fVarRedn.
+	(BearoffRollout, BasicRollout, VarRednRollout): Old function
+	RolloutGame split into 3.
+
+	* show.c (CommandShowAutomatic, CommandShowEvaluation): Show
+	current settings.
+	* drawboard.c (FormatMovePlain): Reinstate the ugly FormatMove,
+	for saving `.mat' files.
+
+Wed Jan 12 23:29:59 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c, eval.h: Added another net for special contact positions.
+
+Wed Jan 12 21:08:03 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c (CommandSetEvalCandidates, CommandSetEvalTolerance,
+	CommandSetNackgammon): New functions.
+	* gnubg.c (ParseReal): New function.
+	(InitBoard): Use the Nackgammon starting position if requested.
+	* eval.c (FindBestMove): Use variables nSearchCandidates and
+	rSearchTolerance.
+
+Wed Jan 12 14:51:37 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* show.c (CommandShowCopying, CommandShowWarranty, ShowPaged): New
+	functions.
+	* copying.c: New file.
+
+Tue Jan 11 21:42:53 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (CommandTake): Fix bug when accepting beavers -- the owner
+	of the cube after an (eventual) take should be the opponent of the
+	_original_ doubler, which is not necessarily the player who finally
+	accepted.
+
+	* drawboard.c (ParseMove): New function.
+	(FormatMove): Generate prettier output (e.g. "24/13" or "24/18*/13"
+	rather than "24/18 18/13").
+
+Mon Jan 10 22:18:55 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (NextTurn): Don't show the board if fDisplay is not set.
+
+	* rollout.c (RolloutGame): Don't attempt variance reduction when doing
+	0-ply evaluations.
+	(Rollout): Fix standard deviation calculation (we want the standard
+	error in the estimated mean; the code was calculating the population
+	standard deviation).
+	
+Sat Jan  8 23:33:18 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* show.c (CommandShowPipCount): Take an optional position ID parameter.
+
+	* gnubg.c (main): Make --version list optional features supported.
+	Use XResourceManagerString instead of requesting property manually.
+
+	* positionid.c (CheckPosition): New function.
+	(PositionFromKey, PositionFromID): Fail if the position specified
+	is illegal.
+
+	* eval.c (DumpBearoff1): Wrote function.
+
+	* eval.c (SanityCheck): Don't evaluate more backgammons than gammons.
+
+	* gnubg.c: Jacoby rule defaults to off (until we have proper cube
+	evaluations).
+
+	* play.c (NextTurn): Partially implemented delay (some problems
+	remaining).
+	* set.c (CommandSetDelay): New function.
+
+	* set.c (CommandSetCubeUse, CommandSetJacoby): Print warnings if
+	the user tries to enable the Jacoby rule and disable cube use.
+	
+	* gnubg.c (main): add rl_callback_handler_remove to the atexit list.
+	
+	* xboard.c (BoardPoint, BoardPointer): Allow clicking on the cube to
+	double.
+
 2000-01-09  Joern Thyssen  <jth@localhost.localdomain>
 
 	* play.c (ComputerTurn): Call Utility for calculation of equity
@@ -18,10 +195,13 @@ Sat Jan  8 14:16:08 2000  Gary Wong  <gary@cs.arizona.edu>
 	parameter fPartial, and include incomplete moves in the list
 	if set.
 	* positionid.c, positionid.h (EqualBoards): New function.
+	
 	* set.c (CommandSetCubeCentre, CommandSetCubeOwner,
 	CommandSetCubeValue): New functions.
+	
 	* set.c (CommandSetCubeUse): If the cube had been offered and
 	cube use is being disabled, go back to the player on roll.
+	
 	* gnubg.c (main): Initialise the players' names to "gnubg" and
 	the user's login name.
 	* gnubg.c (ShowBoard): Label the players' names with X or O in the
@@ -45,22 +225,23 @@ Wed Jan  5 22:20:09 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* play.c (NextTurn): ignore gammons when appropriate under the
 	Jacoby rule.
+	
 	* gnubg.c (ShowBoard): when no game is in progress under X, display
 	an empty board window.
+	
 	* set.c (CommandSetCubeUse): New function.
 	* gnubg.c (SetToggle): Add "enabled" and "disabled" (along with
 	yes/no, on/off, true/false).
+	
 	* play.c (NextTurn): Don't autoroll if the opponent has just
 	doubled.
+	
 	* set.c (CommandSetAutoDoubles): New function.
 	* play.c (NewGame): Apply automatic doubles when appropriate.
 
 Mon Jan  3 21:13:22 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* dice.c (InitRNG): Use /dev/random for initial seed if possible.
-
-Mon Jan  3 20:15:46 2000  Gary Wong  <gary@cs.arizona.edu>
-
 	* set.c (SetRNG): Don't call CommandSetSeed() when changing
 	to manual dice.
 
@@ -108,6 +289,7 @@ Sun Dec 19 22:57:49 1999  Gary Wong  <gary@cs.arizona.edu>
 	* gnubg.c (SaveGame, CommandSaveMatch): finished saving.
 	* eval.c (SaveMoves): store all bearoff moves as destination
 	point 0 (previous patch to do this was incomplete).
+	
 	* play.c (FreeGame): New function.
 	* play.c (FreeMatch): New function.
 
@@ -186,7 +368,6 @@ Fri Dec 10 18:19:16 1999  Gary Wong  <gary@cs.arizona.edu>
 Thu Dec  9 17:24:14 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* isaac.c: New file.  Added support for ISAAC dice generator.
-	
 	* dice.c: Added support for ISAAC.
 
 Fri Dec  3 17:07:35 1999  Gary Wong  <gary@cs.arizona.edu>

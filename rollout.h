@@ -23,6 +23,7 @@
 #define _ROLLOUT_H_
 
 extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
-		    int nPlies, int nTruncate, int cGames );
+		    int nTruncate, int cGames, int fVarRedn,
+		    evalcontext *pec );
 
 #endif

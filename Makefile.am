@@ -10,7 +10,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c mt19937int.c \
 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h \
-	isaacs.h
+	isaacs.h copying.c
 COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -43,7 +43,10 @@ makeweights_DEPENDENCIES = lib/libevent.a
 
 info_TEXINFOS = gnubg.texi
 
-EXTRA_DIST = userrng.c
+EXTRA_DIST = userrng.c copying.awk
+
+copying.c: COPYING copying.awk
+	$(AWK) -f $(srcdir)/copying.awk < $(srcdir)/COPYING > $@
 
 gnubg.bd: makebearoff
 	[ -s $@ ] || ./makebearoff > $@
@@ -53,10 +56,11 @@ gnubg.weights:
 	@echo ' ** a "gnubg.weights" file containing neural net'
 	@echo ' ** parameters.  This file is not included in the'
 	@echo ' ** distribution, but you can obtain it from the GNU'
-	@echo ' ** Backgammon home page <http://gnubg.sourceforge.net/>'
+	@echo ' ** Backgammon home page <http://www.gnu.org/software/gnubg/>'
 	@echo ' ** or generate one by training a neural net yourself.'
 
 gnubg.wd: gnubg.weights
-	if [ -s $< ]; then ./makeweights < $< > $@; fi
+	if [ -s $(srcdir)/gnubg.weights ]; \
+	then ./makeweights < $(srcdir)/gnubg.weights > $@; fi
 
 .DELETE_ON_ERROR:

@@ -60,7 +60,7 @@ extern long int getrandom ( void ) {
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <strings.h>
+#include <string.h>
 
 extern void setseed ( unsigned long int seed );
 extern long int getrandom ( void );

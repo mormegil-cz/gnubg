@@ -6,6 +6,9 @@
 
 #include "config.h"
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 #include <errno.h>
 #include <math.h>
 #include <neuralnet.h>
@@ -131,17 +134,32 @@ static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
 
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 			      float arOutput[] ) {
+#if __GNUC__
     float ar[ pnn->cHidden ];
-
+#elif HAVE_ALLOCA
+    float *ar = alloca( pnn->cHidden * sizeof( float ) );
+#else
+    float ar[ 1024 ];
+#endif
+    
     return Evaluate( pnn, arInput, ar, arOutput );
 }
 
 extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 			   float arDesired[], float rAlpha ) {
     int i, j;    
+    float *pr, *prWeight;
+#if __GNUC__
     float ar[ pnn->cHidden ], arOutputError[ pnn->cOutput ],
-	arHiddenError[ pnn->cHidden ], *pr, *prWeight;
-
+	arHiddenError[ pnn->cHidden ];
+#elif HAVE_ALLOCA
+    float *ar = alloca( pnn->cHidden * sizeof( float ) ),
+	*arOutputError = alloca( pnn->cOutput * sizeof( float ) ),
+	*arHiddenError = alloca( pnn->cHidden * sizeof( float ) );
+#else
+    float ar[ 1024 ], arOutputError[ 128 ], arHiddenError[ 1024 ];
+#endif
+    
     Evaluate( pnn, arInput, ar, arOutput );
 
     /* Calculate error at output nodes */

@@ -3,12 +3,32 @@
  *
  * by Gary Wong, 1999
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * $Id$
  */
 
 #include "config.h"
 
+#if HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
 #include <stdio.h>
+#include <stdlib.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -18,6 +38,83 @@
 #if !X_DISPLAY_MISSING
 #include "xgame.h"
 #endif
+
+extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
+
+static void ShowEvaluation( evalcontext *pec ) {
+    
+    printf( "    %d-ply evaluation.\n"
+	    "    %d move search candidate%s.\n"
+	    "    %0.3g cubeless search tolerance.\n\n",
+	    pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
+	    "" : "s", pec->rSearchTolerance );
+}
+
+static void ShowPaged( char **ppch ) {
+
+    int i, nRows = 0, ch;
+    char *pchLines;
+#if TIOCGWINSZ
+    struct winsize ws;
+#endif
+
+#if HAVE_ISATTY
+    if( isatty( STDIN_FILENO ) ) {
+#endif
+#if TIOCGWINSZ
+	if( !( ioctl( STDIN_FILENO, TIOCGWINSZ, &ws ) ) )
+	    nRows = ws.ws_row;
+#endif
+	if( !nRows && ( pchLines = getenv( "LINES" ) ) )
+	    nRows = atoi( pchLines );
+
+	/* FIXME we could try termcap-style tgetnum( "li" ) here, but it
+	   hardly seems worth it */
+	
+	if( !nRows )
+	    nRows = 24;
+
+	i = 0;
+
+	while( *ppch ) {
+	    puts( *ppch++ );
+	    if( ++i >= nRows - 1 ) {
+		fputs( "-- Press <return> to continue --", stdout );
+		
+		/* FIXME use better input handling */
+		while( ( ch = getchar() ) != '\n' && ch != EOF )
+		    ;
+		
+		if( fInterrupt )
+		    return;
+		
+		i = 0;
+	    }
+	}
+#if HAVE_ISATTY
+    } else
+#endif
+	while( *ppch )
+	    puts( *ppch++ );
+}
+
+extern void CommandShowAutomatic( char *sz ) {
+
+    static char *szOn = "On", *szOff = "Off";
+    
+    printf( "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
+	    "crawford\t(Enable the Crawford rule as appropriate):     \t%s\n"
+	    "doubles \t(Turn the cube when opening roll is a double): \t%d\n"
+	    "game    \t(Start a new game after each one is completed):\t%s\n"
+	    "move    \t(Play the forced move when there is no choice):\t%s\n"
+	    "roll    \t(Roll the dice if no double is possible):      \t%s\n",
+	    fAutoBearoff ? szOn : szOff,
+	    fAutoCrawford ? szOn : szOff,
+	    cAutoDoubles,
+	    fAutoGame ? szOn : szOff,
+	    fAutoMove ? szOn : szOff,
+	    fAutoRoll ? szOn : szOff );
+}
 
 extern void CommandShowBoard( char *sz ) {
 
@@ -51,7 +148,7 @@ extern void CommandShowBoard( char *sz ) {
 extern void CommandShowCache( char *sz ) {
 
     int c, cLookup, cHit;
-    
+
     EvalCacheStats( &c, &cLookup, &cHit );
 
     printf( "%d cache entries have been used.  %d lookups, %d hits",
@@ -63,6 +160,24 @@ extern void CommandShowCache( char *sz ) {
 	putchar( '.' );
 
     putchar( '\n' );
+}
+
+extern void CommandShowCopying( char *sz ) {
+
+    ShowPaged( aszCopying );
+}
+
+extern void CommandShowCrawford( char *sz ) {
+
+  if( nMatchTo > 0 ) 
+    puts( fCrawford ?
+	  "This game is the Crawford game." :
+	  "This game is not the Crawford game" );
+  else if ( ! nMatchTo )
+    puts( "Crawford rule is not used in money sessions." );
+  else
+    puts( "No match is being played." );
+
 }
 
 extern void CommandShowDice( char *sz ) {
@@ -80,22 +195,40 @@ extern void CommandShowDice( char *sz ) {
 		anDice[ 1 ] );
 }
 
+extern void CommandShowEvaluation( char *sz ) {
+
+    puts( "`eval' and `hint' will use:" );
+    ShowEvaluation( &ecEval );
+}
+
+extern void CommandShowJacoby( char *sz ) {
+
+    if ( fJacoby ) 
+      puts( "Money sessions is played with the Jacoby rule." );
+    else
+      puts( "Money sessions is played without the Jacoby rule." );
+
+}
+
 extern void CommandShowPipCount( char *sz ) {
 
-    int an[ 2 ];
+    int anPips[ 2 ], an[ 2 ][ 25 ];
 
-    /* FIXME take a board argument */
+    if( !sz && !*sz && fTurn == -1 ) {
+	puts( "No position specified and no game in progress." );
+	return;
+    }
     
-    if( fTurn < 0 ) {
-	puts( "There must be a game in progress to see the pip count." );
+    if( ParsePosition( an, sz ) ) {
+	puts( "Illegal position." );
 
 	return;
     }
-
-    PipCount( anBoard, an );
+    
+    PipCount( an, anPips );
     
     printf( "The pip counts are: %s %d, %s %d.\n", ap[ fMove ].szName,
-	    an[ 1 ], ap[ !fMove ].szName, an[ 0 ] );
+	    anPips[ 1 ], ap[ !fMove ].szName, anPips[ 0 ] );
 }
 
 extern void CommandShowPlayer( char *sz ) {
@@ -109,7 +242,8 @@ extern void CommandShowPlayer( char *sz ) {
 
 	switch( ap[ i ].pt ) {
 	case PLAYER_GNU:
-	    printf( "gnubg (%d ply)\n\n", ap[ i ].nPlies );
+	    printf( "gnubg:\n" );
+	    ShowEvaluation( &ap[ i ].ec );
 	    break;
 	case PLAYER_PUBEVAL:
 	    puts( "pubeval\n" );
@@ -119,6 +253,42 @@ extern void CommandShowPlayer( char *sz ) {
 	    break;
 	}
     }
+}
+
+extern void CommandShowPostCrawford( char *sz ) {
+
+  if( nMatchTo > 0 ) 
+    puts( fPostCrawford ?
+	  "This is post-Crawford play." :
+	  "This is not post-Crawford play." );
+  else if ( ! nMatchTo )
+    puts( "Crawford rule is not used in money sessions." );
+  else
+    puts( "No match is being played." );
+
+}
+
+extern void CommandShowRNG( char *sz ) {
+
+  static char *aszRNG[] = {
+    "ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
+    "user supplied"
+  };
+
+  printf( "You are using the %s generator.\n",
+	  aszRNG[ rngCurrent ] );
+    
+}
+
+extern void CommandShowRollout( char *sz ) {
+
+    puts( "Rollouts will use:" );
+    ShowEvaluation( &ecRollout );
+
+    printf( "%d game%s will be played per rollout, truncating after %d "
+	    "pl%s.\nLookahead variance reduction is %sabled.\n",
+	    nRollouts, nRollouts == 1 ? "" : "s", nRolloutTruncate,
+	    nRolloutTruncate == 1 ? "y" : "ies", fVarRedn ? "en" : "dis" );
 }
 
 extern void CommandShowScore( char *sz ) {
@@ -162,53 +332,7 @@ extern void CommandShowTurn( char *sz ) {
 		aszGameResult[ fResigned - 1 ] );
 }
 
-extern void CommandShowRNG( char *sz ) {
+extern void CommandShowWarranty( char *sz ) {
 
-  static char *aszRNG[] = {
-    "ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
-    "user supplied"
-  };
-
-  printf( "You are using the %s generator.\n",
-	  aszRNG[ rngCurrent ] );
-    
+    ShowPaged( aszWarranty );
 }
-
-
-extern void CommandShowJacoby( char *sz ) {
-
-    if ( fJacoby ) 
-      puts( "Money sessions is played with the Jacoby rule." );
-    else
-      puts( "Money sessions is played without the Jacoby rule." );
-
-}
-
-
-extern void CommandShowCrawford( char *sz ) {
-
-  if( nMatchTo > 0 ) 
-    puts( fCrawford ?
-	  "This game is the Crawford game." :
-	  "This game is not the Crawford game" );
-  else if ( ! nMatchTo )
-    puts( "Crawford rule is not used in money sessions." );
-  else
-    puts( "No match is being played." );
-
-}
-
-
-extern void CommandShowPostCrawford( char *sz ) {
-
-  if( nMatchTo > 0 ) 
-    puts( fPostCrawford ?
-	  "This is post-Crawford play." :
-	  "This is not post-Crawford play." );
-  else if ( ! nMatchTo )
-    puts( "Crawford rule is not used in money sessions." );
-  else
-    puts( "No match is being played." );
-
-}
-

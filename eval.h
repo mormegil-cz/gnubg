@@ -53,6 +53,32 @@
 #define GNUBG_WEIGHTS_BINARY "gnubg.wd"
 #define GNUBG_BEAROFF "gnubg.bd"
 
+/* A trivial upper bound on the number of (complete or incomplete)
+ * legal moves of a single roll: if all 15 chequers are spread out,
+ * then there are 18 C 4 + 17 C 3 + 16 C 2 + 15 C 1 = 3875
+ * combinations in which a roll of 11 could be played (up to 4 choices from
+ * 15 chequers, and a chequer may be chosen more than once).  The true
+ * bound will be lower than this (because there are only 26 points,
+ * some plays of 15 chequers must "overlap" and map to the same
+ * resulting position), but that would be more difficult to
+ * compute. */
+#define MAX_INCOMPLETE_MOVES 3875
+#define MAX_MOVES 3060
+
+#if __GNUC__ || HAVE_ALLOCA
+#define MAX_SEARCH_CANDIDATES MAX_MOVES
+#else
+#define MAX_SEARCH_CANDIDATES 64
+#endif
+
+typedef struct _evalcontext {
+    /* FIXME expand this... e.g. different settings for different position
+       classes */
+    int nPlies;
+    int nSearchCandidates;
+    float rSearchTolerance;
+} evalcontext;
+
 typedef struct _move {
     int anMove[ 8 ];
     unsigned char auch[ 10 ];
@@ -60,7 +86,11 @@ typedef struct _move {
     float rScore, *pEval;
 } move;
 
-extern volatile int fInterrupt;
+extern volatile int fInterrupt, fAction;
+extern int fMove, fCubeOwner, nCube, fJacoby, fCrawford;
+extern int fPostCrawford, nMatchTo, anScore[ 2 ];
+
+extern void ( *fnAction )( void );
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -71,12 +101,15 @@ typedef struct _movelist {
 } movelist;
 
 typedef enum _positionclass {
-    CLASS_OVER, /* Game already finished */
+    CLASS_OVER = 0, /* Game already finished */
     CLASS_BEAROFF2, /* Two-sided bearoff database */
     CLASS_BEAROFF1, /* One-sided bearoff database */
-    CLASS_RACE, /* Race neural network */
-    CLASS_CONTACT /* Contact neural network */
+    CLASS_RACE,     /* Race neural network */
+    CLASS_CONTACT,  /* Contact neural network */
+    CLASS_BPG       /* On Bar, Back game, or Prime */
 } positionclass;
+
+#define N_CLASSES (CLASS_BPG + 1)
 
 #define CLASS_PERFECT CLASS_BEAROFF2
 
@@ -86,18 +119,22 @@ extern int EvalSave( char *szWeights );
 
 extern void SetGammonPrice( float rGammon, float rLoseGammon,
 			    float rBackgammon, float rLoseBackgammon );
+extern void 
+CalcGammonPrice ( int nCube, int fCubeOwner ); 
+
 extern int EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
-			     int nPlies );
+			     evalcontext *pec );
 extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] );
-extern int FindBestMove( int nPlies, int anMove[ 8 ], int nDice0, int nDice1,
-			 int anBoard[ 2 ][ 25 ] );
+extern int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
+			 int anBoard[ 2 ][ 25 ], evalcontext *pec );
 extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] );
 
 extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] );
 
 extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
 
-extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput, int nPlies );
+extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
+			 evalcontext *pec );
 
 extern void SwapSides( int anBoard[ 2 ][ 25 ] );
 extern int GameStatus( int anBoard[ 2 ][ 25 ] );
@@ -107,17 +144,18 @@ extern int EvalCacheStats( int *pc, int *pcLookup, int *pcHit );
 
 extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 			  int n0, int n1, int fPartial );
-extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ], int nPlies,
+extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
 			  int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-			  int c, float d );
+			  int c, float d, evalcontext *pec );
 extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
+
 extern int
 EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] );
 extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], 
 			 int nCube, int fCubeOwner, int fMove,
 			 float *prOutput,
-			 int nPlies );
+			 evalcontext *pec, int nPlies );
 
 /* internal use only */
 extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
@@ -126,6 +164,7 @@ extern float Utility( float ar[ NUM_OUTPUTS ] );
 extern void swap( int *p0, int *p1 );
 extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
+
 extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] );
 
 extern float 
@@ -135,3 +174,5 @@ extern float
 eq2mwc ( float rEq );
 
 #endif
+
+

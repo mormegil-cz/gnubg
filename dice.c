@@ -46,13 +46,64 @@
 #include <unistd.h>
 #endif
 
+#include "backgammon.h"
 #include "dice.h"
 #include "mt19937int.h"
 #include "isaac.h"
 
 rng rngCurrent = RNG_MERSENNE;
 
-randctx rc;
+static randctx rc;
+
+static void (*pfUserRNGSeed) (unsigned long int);
+static long int (*pfUserRNGRandom) (void);
+static void *pvUserRNGHandle;
+
+static char szUserRNGSeed[ 32 ];
+static char szUserRNGRandom[ 32 ];
+static char szUserRNG[ MAXPATHLEN ];
+
+static int GetManualDice( int anDice[ 2 ] ) {
+
+  char *sz, *pz;
+  int i;
+
+  for (;;) {
+  TryAgain:
+      if( fInterrupt ) {
+	  anDice[ 0 ] = anDice[ 1 ] = 0;
+	  return -1;
+      }
+      
+      sz = GetInput( "Enter dice: " );
+
+      if( fInterrupt ) {
+	  anDice[ 0 ] = anDice[ 1 ] = 0;
+	  return -1;
+      }
+      
+      /* parse input and read a couple of dice */
+      /* any string with two numbers is allowed */
+    
+      pz = sz;
+      
+      for ( i=0; i<2; i++ ) {
+	  while ( *pz && ( ( *pz < '1' ) || ( *pz > '6' ) ) )
+	      pz++;
+
+	  if ( !*pz ) {
+	      puts( "You must enter two numbers between 1 and 6." );
+	      goto TryAgain;
+	  }
+	  
+	  anDice[ i ] = (int) (*pz - '0');
+	  pz++;
+      }
+
+      free( sz );
+      return 0;
+  }
+}
 
 extern void InitRNGSeed( int n ) {
     
@@ -127,97 +178,52 @@ extern int InitRNG( void ) {
     return f;
 }
 
-extern void RollDice( int anDice[ 2 ] ) {
+extern int RollDice( int anDice[ 2 ] ) {
 
     switch( rngCurrent ) {
     case RNG_ANSI:
 	anDice[ 0 ] = ( rand() % 6 ) + 1;
 	anDice[ 1 ] = ( rand() % 6 ) + 1;
-	break;
+	return 0;
 	
     case RNG_BSD:
 #if HAVE_RANDOM
 	anDice[ 0 ] = ( random() % 6 ) + 1;
 	anDice[ 1 ] = ( random() % 6 ) + 1;
+	return 0;
 #else
 	abort();
 #endif
-	break;
 	
     case RNG_ISAAC:
 	anDice[ 0 ] = ( irand( &rc ) % 6 ) + 1;
 	anDice[ 1 ] = ( irand( &rc ) % 6 ) + 1;
-	break;
+	return 0;
 	
     case RNG_MANUAL:
-	GetManualDice ( anDice );
-	break;
+	return GetManualDice( anDice );
 	
     case RNG_MERSENNE:
 	anDice[ 0 ] = ( genrand() % 6 ) + 1;
 	anDice[ 1 ] = ( genrand() % 6 ) + 1;
-	break;
+	return 0;
 	
     case RNG_USER:
 #if HAVE_LIBDL
-	anDice[ 0 ] = ( (*pfUserRNGRandom) () % 6 ) + 1;
-	anDice[ 1 ] = ( (*pfUserRNGRandom) () % 6 ) + 1;
-	break;
+	if( ( anDice[ 0 ] = ( (*pfUserRNGRandom) () % 6 ) + 1 ) <= 0 ||
+	    ( anDice[ 1 ] = ( (*pfUserRNGRandom) () % 6 ) + 1 ) <= 0 )
+	    return -1;
+	else
+	    return 0;
 #else
 	abort();
 #endif
-
-    }
-}
-
-extern void GetManualDice( int anDice[ 2 ] ) {
-
-  char sz[ 2048 ];
-  char *pz;
-  int i;
-
-  sz[ 0 ] = 0;
-
-  
-  for (;;) {
-    
-    fputs( "enter dice -> ", stdout );
-    fflush( stdout );    
-  
-    fgets( sz, sizeof( sz ), stdin );
-  
-    if( feof( stdin ) ) {
-      putchar( '\n' );
-    
-      if( !sz[ 0 ] )
-	return;
-      
-    }	
- 
-    /* parse input and read a couple of dice */
-    /* any string with two numbers is allowed */
-    
-    pz = &sz[0];
-    for ( i=0 ; i<2 ; i++ ) {
-
-      while ( *pz && ( ( *pz < '1' ) && ( *pz > '6' ) ) ) pz++;
-
-      if ( !*pz ) 
-	continue;
-
-      anDice[ i ] = (int) (*pz - '0');
-      pz++;
     }
 
-    return;
-
-
-  }
-
+    return -1;
 }
 
 #if HAVE_LIBDL
-
 /*
  * Functions for handling the user supplied RNGs
  * Ideas for further development:
@@ -277,7 +283,8 @@ extern int  UserRNGOpen() {
   strcpy( szUserRNGSeed , "setseed" );
   strcpy( szUserRNGRandom , "getrandom" );
 
-  (void *) pfUserRNGSeed = dlsym( pvUserRNGHandle, szUserRNGSeed );
+  pfUserRNGSeed = (void (*)(unsigned long int))
+      dlsym( pvUserRNGHandle, szUserRNGSeed );
 
   if ((error = dlerror()) != NULL)  {
     
@@ -287,7 +294,8 @@ extern int  UserRNGOpen() {
 
   }
   
-  (void *) pfUserRNGRandom = dlsym( pvUserRNGHandle, szUserRNGRandom );
+  pfUserRNGRandom = (long int (*)(void)) dlsym( pvUserRNGHandle,
+						szUserRNGRandom );
 
   if ((error = dlerror()) != NULL)  {
     

@@ -3,6 +3,19 @@
  *
  * by Gary Wong, 1997-1999
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * $Id$
  */
 
@@ -101,6 +114,8 @@ extwindowspec aewsStats[] = {
     { "move", &ewcText, aedStatsTextC, NULL, STATS_MOVE },
     { "board", &ewcText, aedStatsTextPlainC, NULL, STATS_BOARD }
 };
+
+int fBusy = FALSE;
 
 static unsigned int nSeed = 1; /* for rand_r */
 #define RAND ( ( (unsigned int) rand_r( &nSeed ) ) & RAND_MAX )
@@ -207,11 +222,9 @@ extern int StatsConfirm( extwindow *pewnd ) {
 
     if( psd->pm && psd->pm->cMoves == psd->ml.cMaxMoves &&
 	psd->pm->cPips == psd->ml.cMaxPips ) {
-	FormatMove( sz, NULL, psd->pm->anMove );
+	FormatMove( sz, psd->pgd->anBoardOld, psd->pm->anMove );
     
-	CommandMove( sz ); /* FIXME output from this command (if any) looks a
-			      bit grotty, because no linefeed was typed after
-			      the prompt */
+	UserCommand( sz );
     } else
 	/* Illegal move */
 	XBell( pewnd->pdsp, 100 );
@@ -397,7 +410,11 @@ static int DiceHandler( extwindow *pewnd, XEvent *pxev ) {
 	break;
 	
     case ButtonPress:
-	CommandRoll( NULL );
+	if( fBusy )
+	    XBell( pewnd->pdsp, 100 );
+	else
+	    UserCommand( "roll" );
+	
 	break;
 	
     case ExtPreCreateNotify:
@@ -576,10 +593,11 @@ extern int GameSet( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
 		    int nScore, int nOpponent, int nDice0, int nDice1 ) {
 
     char sz[ 256 ];
-    int i, anOff[ 2 ];
+    int i, anOff[ 2 ], fDiceOld;
     gamedata *pgd = pewnd->pv;
 
     memcpy( pgd->anBoardOld, anBoard, sizeof( pgd->anBoardOld ) );
+    fDiceOld = pgd->anDice[ 0 ];
     
     /* Names and match length/score */
     sprintf( sz, "board:%s:%s:%d:%d:%d:", szPlayer, szOpp, nMatchTo, nScore,
@@ -617,8 +635,10 @@ extern int GameSet( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
     
     if( pgd->anDice[ 0 ] )
 	XUnmapWindow( pewnd->pdsp, pgd->ewndDice.wnd );
-    else
+    else if( fDiceOld )
 	XMapWindow( pewnd->pdsp, pgd->ewndDice.wnd );
+    else
+	DiceRedraw( &pgd->ewndDice, pgd->ewndDice.pv );
     
     return 0;
 }

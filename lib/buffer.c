@@ -1,11 +1,16 @@
 /*
  * buffer.c
  *
- * by Gary Wong, 1996
+ * by Gary Wong, 1996-2000
+ *
+ * $Id$
  */
 
 #include "config.h"
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 #include <buffer.h>
 #include <errno.h>
 #include <stdarg.h>
@@ -13,7 +18,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 int BufferReadNotify( event *pev, buffer *pb ) {
 
@@ -218,9 +225,17 @@ int BufferWritef( buffer *pb, char *szFormat, ... ) {
 
     va_list val;
     /* FIXME this is terrible... there's no limit on the vsprintf()
-       buffer size!! */
+       buffer size!!  If vsnprintf() is available, we can do better. */
+#if __GNUC__
     char sz[ FifoRemaining( &pb->fWrite ) > 65536 ?
 	   FifoRemaining( &pb->fWrite ) : 65536 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( FifoRemaining( &pb->fWrite ) > 65536 ?
+		       FifoRemaining( &pb->fWrite ) : 65536 );
+#else
+    char sz[ 65536 ];
+#endif
+    
     int cch;
     
     va_start( val, szFormat );

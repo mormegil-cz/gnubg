@@ -3,6 +3,19 @@
  *
  * by Gary Wong, 1997-1999
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
  * $Id$
  */
 
@@ -20,10 +33,14 @@
 #include <rand_r.h>
 #endif
 
+#include "backgammon.h"
 #include "xboard.h"
 #include "xgame.h"
 
 static extquark eq_cubeFont = { "cubeFont", 0 };
+
+#define POINT_DICE 28
+#define POINT_CUBE 29
 
 static int aanPosition[ 28 ][ 3 ] = {
     { 51, 25, 7 },
@@ -47,10 +64,10 @@ static int Intersects( int x0, int y0, int cx0, int cy0,
 
 static void BoardRedrawDice( extwindow *pewnd, gamedata *pgd, int i ) {
 
-    return GameRedrawDice( pewnd, pgd, pgd->xDice[ i ] * pgd->nBoardSize,
-			   pgd->yDice[ i ] * pgd->nBoardSize,
-			   pgd->fDiceColour[ i ], pgd->fTurn == pgd->fColour ?
-			   pgd->anDice[ i ] : pgd->anDiceOpponent[ i ] );
+    GameRedrawDice( pewnd, pgd, pgd->xDice[ i ] * pgd->nBoardSize,
+		    pgd->yDice[ i ] * pgd->nBoardSize,
+		    pgd->fDiceColour[ i ], pgd->fTurn == pgd->fColour ?
+		    pgd->anDice[ i ] : pgd->anDiceOpponent[ i ] );
 }
 
 static void BoardRedrawCube( extwindow *pewnd, gamedata *pgd ) {
@@ -140,7 +157,8 @@ static void BoardRedrawPoint( extwindow *pewnd, gamedata *pgd, int n ) {
 	y += cy * 4 / 5;
 	cy = -cy;
     }
-    
+
+    /* FIXME draw straight to screen and return if point is empty */
     XCopyArea( pewnd->pdsp, pgd->pmBoard, pgd->pmPoint, pgd->gcCopy, x, y,
 	       cx, cy, 0, 0 );
 
@@ -252,9 +270,10 @@ static int BoardPoint( extwindow *pewnd, gamedata *pgd, int x0, int y0 ) {
 
     if( Intersects( x0, y0, 0, 0, pgd->xDice[ 0 ], pgd->yDice[ 0 ], 7, 7 ) ||
 	Intersects( x0, y0, 0, 0, pgd->xDice[ 1 ], pgd->yDice[ 1 ], 7, 7 ) )
-	return 28;
+	return POINT_DICE;
 
-    /* FIXME check for cube */
+    if( Intersects( x0, y0, 0, 0, 50, 30 - 29 * pgd->fCubeOwner, 8, 8 ) )
+	return POINT_CUBE;
     
     for( i = 0; i < 28; i++ ) {
 	y = aanPosition[ i ][ 1 ];
@@ -276,6 +295,13 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
     Pixmap pmSwap;
     int n, nDest, xEvent, yEvent, nBar, fHit;
+
+    if( fBusy ) {
+	if( pxev->type == ButtonPress )
+	    XBell( pewnd->pdsp, 100 );
+
+	return;
+    }
     
     switch( pxev->type ) {
     case ButtonPress:
@@ -305,15 +331,22 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	    return;
 	}
 
-	if( pgd->nDragPoint == 28 ) {
-	    /* Clicked on dice */
+	if( pgd->nDragPoint == POINT_CUBE ) {
+	    /* Clicked on cube; double. */
+	    pgd->nDragPoint = -1;
+	    UserCommand( "double" );
+	    return;
+	}
+	
+	if( pgd->nDragPoint == POINT_DICE ) {
+	    /* Clicked on dice. */
 	    pgd->nDragPoint = -1;
 	    
 	    if( pxev->xbutton.button == Button1 )
-		/* Button 1 on dice confirms move */
+		/* Button 1 on dice confirms move. */
 		StatsConfirm( &pgd->ewndStats );
 	    else {
-		/* Other buttons on dice swaps positions */
+		/* Other buttons on dice swaps positions. */
 		n = pgd->anDice[ 0 ];
 		pgd->anDice[ 0 ] = pgd->anDice[ 1 ];
 		pgd->anDice[ 1 ] = n;
@@ -324,8 +357,6 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
 		BoardRedrawDice( pewnd, pgd, 0 );
 		BoardRedrawDice( pewnd, pgd, 1 );
-		
-		pgd->nDragPoint = -1;
 	    }
 	    
 	    return;
@@ -339,7 +370,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
 	if( pxev->xbutton.button != Button1 ) {
 	    /* Automatically place chequer on destination point
-	       (as opposed to starting a drag) */
+	       (as opposed to starting a drag). */
 	    nDest = pgd->nDragPoint - ( pxev->xbutton.button == Button2 ?
 					pgd->anDice[ 0 ] :
 					pgd->anDice[ 1 ] ) * pgd->fDragColour;
@@ -522,6 +553,10 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
     gamedata *pgd = pewnd->pv;
     char *pchDest;
     int i, *pn, **ppn;
+    int anBoardOld[ 28 ];
+    int fDirectionOld;
+    XExposeEvent xeev;
+#if __GNUC__
     int *apnMatch[] = { &pgd->nMatchTo, &pgd->nScore, &pgd->nScoreOpponent };
     int *apnGame[] = { &pgd->fTurn, pgd->anDice, pgd->anDice + 1,
 		       pgd->anDiceOpponent, pgd->anDiceOpponent + 1,
@@ -532,10 +567,41 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
 		       &pgd->nForced, &pgd->nCrawford, &pgd->nRedoubles };
     int anDiceOld[] = { pgd->anDice[ 0 ], pgd->anDice[ 1 ],
 			pgd->anDiceOpponent[ 0 ], pgd->anDiceOpponent[ 1 ] };
-    int anBoardOld[ 28 ];
-    int fDirectionOld;
-    XExposeEvent xeev;
-	    
+#else
+    int *apnMatch[ 3 ], *apnGame[ 21 ], anDiceOld[ 4 ];
+
+    apnMatch[ 0 ] = &pgd->nMatchTo;
+    apnMatch[ 1 ] = &pgd->nScore;
+    apnMatch[ 2 ] = &pgd->nScoreOpponent;
+
+    apnGame[ 0 ] = &pgd->fTurn;
+    apnGame[ 1 ] = pgd->anDice;
+    apnGame[ 2 ] = pgd->anDice + 1;
+    apnGame[ 3 ] = pgd->anDiceOpponent;
+    apnGame[ 4 ] = pgd->anDiceOpponent + 1;
+    apnGame[ 5 ] = &pgd->nCube;
+    apnGame[ 6 ] = &pgd->fDouble;
+    apnGame[ 7 ] = &pgd->fDoubleOpponent;
+    apnGame[ 8 ] = &pgd->fDoubled;
+    apnGame[ 9 ] = &pgd->fColour;
+    apnGame[ 10 ] = &pgd->fDirection;
+    apnGame[ 11 ] = &pgd->nHome;
+    apnGame[ 12 ] = &pgd->nBar;
+    apnGame[ 13 ] = &pgd->nOff;
+    apnGame[ 14 ] = &pgd->nOffOpponent;
+    apnGame[ 15 ] = &pgd->nOnBar;
+    apnGame[ 16 ] = &pgd->nOnBarOpponent;
+    apnGame[ 17 ] = &pgd->nToMove;
+    apnGame[ 18 ] = &pgd->nForced;
+    apnGame[ 19 ] = &pgd->nCrawford;
+    apnGame[ 20 ] = &pgd->nRedoubles;
+
+    anDiceOld[ 0 ] = pgd->anDice[ 0 ];
+    anDiceOld[ 1 ] = pgd->anDice[ 1 ];
+    anDiceOld[ 2 ] = pgd->anDiceOpponent[ 0 ];
+    anDiceOld[ 3 ] = pgd->anDiceOpponent[ 1 ];
+#endif
+    
     if( strncmp( pch, "board:", 6 ) )
 	return -1;
     
