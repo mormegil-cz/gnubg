@@ -85,6 +85,10 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 static float
 EvalEfficiency( int anBoard[2][25], positionclass pc );
 
+static void
+EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ );
+
+
 static int MaxTurns( int i );
 
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[]
