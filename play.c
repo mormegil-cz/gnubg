@@ -2286,6 +2286,32 @@ static void CommandNextGame( char *sz ) {
     ChangeGame( pl->p );
 }
 
+static void CommandNextRoll( char *sz ) {
+
+    moverecord *pmr;
+    
+    if( !plLastMove || !plLastMove->plNext ||
+	!( pmr = plLastMove->plNext->p ) )
+	/* silently ignore */
+	return;
+
+    if( pmr->mt != MOVE_NORMAL || ms.anDice[ 0 ] )
+	/* to skip over the "dice roll" for anything other than a normal
+	   move, or if the dice are already rolled, just skip the entire
+	   move */
+	return CommandNext( NULL );
+
+    CalculateBoard();
+
+    ms.gs = GAME_PLAYING;
+    ms.fMove = ms.fTurn = pmr->n.fPlayer;
+	
+    ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
+    ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+    
+    ShowBoard();
+}
+
 extern void CommandNext( char *sz ) {
 
     int n;
@@ -2300,7 +2326,10 @@ extern void CommandNext( char *sz ) {
 	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
 	    CommandNextGame( sz );
 	    return;
-	} else
+	} else if( !strncasecmp( pch, "roll", strlen( pch ) ) ) {
+	    CommandNextRoll( sz );
+	    return;
+	}
 	    n = ParseNumber( &pch );
     } else
 	n = 1;
@@ -2373,6 +2402,41 @@ static void CommandPreviousGame( char *sz ) {
     ChangeGame( pl->p );
 }
 
+static void CommandPreviousRoll( char *sz ) {
+
+    moverecord *pmr;
+    
+    if( !plLastMove || !plLastMove->p )
+	/* silently ignore */
+	return;
+
+    if( !( pmr = plLastMove->plNext->p ) || pmr->mt != MOVE_NORMAL ||
+	!ms.anDice[ 0 ] ) {
+	/* to skip back over the "dice roll" for anything other than a normal
+	   move, or if the dice haven't been rolled, just skip the entire
+	   move */
+	CommandPrevious( NULL );
+
+	if( plLastMove->plNext->p != pmr ) {
+	    pmr = plLastMove->plNext->p;
+
+	    if( pmr && pmr->mt == MOVE_NORMAL )
+		/* We've stepped back a whole move; now we need to recover
+		   the previous dice roll. */
+		CommandNextRoll( NULL );
+	}
+	
+	return;
+    }
+
+    CalculateBoard();
+    
+    ms.anDice[ 0 ] = 0;
+    ms.anDice[ 1 ] = 0;
+    
+    ShowBoard();
+}
+
 extern void CommandPrevious( char *sz ) {
 
     int n;
@@ -2386,6 +2450,9 @@ extern void CommandPrevious( char *sz ) {
     if( ( pch = NextToken( &sz ) ) ) {
 	if( !strncasecmp( pch, "game", strlen( pch ) ) ) {
 	    CommandPreviousGame( sz );
+	    return;
+	} else if( !strncasecmp( pch, "roll", strlen( pch ) ) ) {
+	    CommandPreviousRoll( sz );
 	    return;
 	} else
 	    n = ParseNumber( &pch );

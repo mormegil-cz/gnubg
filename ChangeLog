@@ -1,3 +1,54 @@
+Mon Dec 10 10:41:45 2001  Gary Wong  <gtw@research.att.com>
+
+	* drawboard.c (FIBSBoard): Cope if player names contain `:' characters.
+
+	* database.c (CommandDatabaseRollout): Use rcRollout.
+
+	* gnubg.c (CompareNames): New function.
+	(ParsePlayer): Use CompareNames().
+
+	* gnubg.c (CommandRollout): Change TTY output formatting to fit in
+	80 columns.
+
+	* gnubg.c (SaveEvalSettings): Correct "varredn" and "truncation"
+	keywords.
+
+	* gtkgame.c (CreateGameWindow): Change navigation buttons to step
+	with "next roll"/"prev roll" rather than "next"/"prev" (reported
+	by Robert-Jan Veldhuizen).
+	(InitGTK): Add "rollout cube decision" menu item.
+
+	* gtkgame.c (RunGTK): Use O_ASYNC instead of FASYNC, or the I_SETSIG
+	ioctl if necessary (reported by Frank Worrell).
+	* xgame.c (RunExt): Likewise.
+	
+	* gtkgame.c (SetAnalysisEvalChequer, SetAnalysisEvalCube,
+	SetEvalChequer, SetEvalCube): Correct command strings.
+
+	* gtkgame.c (SetRollouts): Add check button for cubeful rollouts.
+
+	* gtkgame.c (SetRollouts): Initialise displayed values correctly.
+
+	* gtkgame.c (GTKSet): Selectively enable the game navigation menu
+	items more carefully.
+
+	* guile.c (rollout_position): Use rcRollout (and add an optional
+	rollout context parameter, though this is not used yet).
+
+	* play.c (CommandNextRoll, CommandPreviousRoll): New functions.
+
+	* rollout.c (RolloutGeneral): Complain that cubeful rollouts with
+	variance reduction are not yet supported.
+
+	* rollout.c (RolloutGeneral, GeneralCubeDecisionR): Change TTY output
+	formatting to fit in 80 columns.
+
+	* set.c: Various changes to improve the use of szSetCommand.  There
+	are still some cases which are not handled correctly.
+
+	* set.c (CommandSetPlayerGNU): Redisplay the board under GTK (the
+	"play" button might now be required).
+	
 Thu Dec  6 16:38:23 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (CompleteKeyword): Use filename_completion_function

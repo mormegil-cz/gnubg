@@ -36,6 +36,7 @@ char *aszCredits[] = {
     "Brian Sheppard",
     "Gerry Tesauro",
     "Jacques Thiriat",
+    "Robert-Jan Veldhuizen",
     "JP White",
     "Kit Woolsey",
     "Frank Worrell",

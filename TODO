@@ -19,7 +19,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more statistics for rollouts (e.g. number of times each player hit,
   number of turns on the bar, whether each player is closed out, average
   number of pips wasted bearing off, etc.)
-** Add cubeful rollouts
+** Make cubeful rollouts work with variance reduction.  See Michael Zehr's
+  method for cube variance reduction in money games.
 ** Add a cache for cubeful evaluations.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
@@ -65,7 +66,8 @@ duplication of effort and to make sure our changes merge easily.
   does, but without evaluating them.
 ** Also "add move", to add a specific move to the list (e.g.
   "add move 8/5 6/5").
-** Make "show marketwindow" say something for money games.
+** Make "show marketwindow" say something for money games.  (This looks like
+  it's done already.)
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** Kit suggests that it's more important to get early plays right in
   rollouts.  Should we consider options that allow larger search space/
@@ -75,14 +77,26 @@ duplication of effort and to make sure our changes merge easily.
   still finding reasonable plays after that.)
 ** When a resignation has been offered, "hint" should show whether to
   accept or decline the resignation.
-** Allow some way to "activate" the old dice when navigating through
-  recorded moves. (gary)
+** Importing and exporting:
+*** Add missing export formats (FIBS, SGG).
+*** Make the .mat format identical to Jellyfish (things to check:
+  beavers, resignations, "and the match"...)
+*** Check drops, beavers, resignations, implement Crawford and Jacoby etc. in
+  SGG importing.
+*** Export to ASCII and HTML.
+*** Improve the LaTeX, PS and PDF output:
+**** Add commands to change paper size, board magnification, and number of
+  move candidates listed in analysis. (gary)
+**** Add names and scores before each game.
+**** Show game and match statistics (if available) at end of game/match.
+**** Allow some option for selecting which boards to print (see the
+  "FG" SGF property).
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
 ** Define Scheme "port"s for the gnubg output() functions.
-** Use Guile keywords in cube-info.  Add a similar function for eval
-  contexts.
+** Use Guile keywords in cube-info.  Add similar functions for eval
+  contexts and rollout contexts.
 ** Add Guile functions to access and modify the current game state.
 ** Add whatever Guile functions are necessary for implementing Cam Trenor's
   suggestion (generating random positions which are initial doubles). (gary)
@@ -160,9 +174,9 @@ duplication of effort and to make sure our changes merge easily.
   the new evalsetups. (gary)
 ** Make sure copy/paste works correctly everywhere.  See
   <http://www.freedesktop.org/standards/clipboards.txt>. (gary)
-** Add a "Rollout" button in the hint window for cube decisions (which
-  performs a "rollout =cube"), and something under the Analyse menu.  Also
-  add a "cubeful" toggle under Settings/Rollout. (gary)
+** Add some shortcuts to set the cube owner/value in edit mode (e.g.
+  button 1 increases value, button 2+ decreases value, ctrl+button cycles
+  through owners/centred).
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -171,7 +185,8 @@ duplication of effort and to make sure our changes merge easily.
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
 *** Allow copy/paste from the "hint" cube output and statistics dialogs.
-*** Display "hint" output for cube decisions in some kind of table.
+*** Display "hint" output for cube decisions in some kind of table, and
+  include a "rollout" button (which performs a "rollout =cube"). (gary)
 
 ** MS Windows:
 *** The stop button has no effect.  One approach would be to define a
@@ -192,8 +207,8 @@ functions:
   SIGBUS/SIGSEGV to trap I/O errors.  Unfortunately, the semantics of
   errors on mmap()ed regions are the most unportable that can be imagined...
 ** The erroneous commands "set player both" and "set player both evaluation"
-  give poor error messages.  Bad "set rollout" commands (e.g.
-  "set rollout chequerplay plies") also give bad errors.
+  give poor error messages.  szSetCommand is not always set correctly, which
+  leads to other bad errors (e.g. "set player 0 cubedecision rollout").
 ** "help load sfdkljsdlf" gives a poor error message.
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
@@ -229,7 +244,6 @@ functions:
   consecutive moves), then export to .mat format saves it incorrectly.
 ** "set score" does not update the score in the GTK game window option menu.
   (See item about adding player names to the menu above.) (gary)
-** TTY rollout output is wider than 80 columns.
 ** Analysis with rollouts crashes under GTK.  (There are problems with the
   rollout window -- do we really want a window in this case?)
 ** We only allow the player on roll to resign.  But the other player can
@@ -238,14 +252,10 @@ functions:
   many points a resignation was for.  See Little_Sister match
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
-** When a match is over, the prev game/prev move menu items are disabled.
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
-** "set player both gnu" should display the "Play" button, if it's
-  now the computer's turn. (gary)
 ** Problems importing .sgg files (see Peter Sochovsky's bug report).
-** ecRollout is obselete; everything should use the relevant parts of
-  rcRollout instead.  Why does rcTD exist?
+** "help next" (and "next <tab>" areincomplete.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -257,25 +267,8 @@ functions:
   submit training data, an online evaluator like Monte Carlo, maybe even an
   entire game like Motif.
 ** Submit something to <http://www.distributed.net/nextgen/projects.html>.
-** Allow loading and saving weights to specify binary or ASCII format.
-** Import and export games, positions and matches in various formats:
-*** FIBS `oldmoves'.
-*** PostScript, EPS and PDF.
-*** JF .gam, .mat and .pos.
-**** Make the .mat format identical to Jellyfish (things to check:
-  beavers, resignations, "and the match"...)
-*** SGG.
-**** Check drops, beavers, resignations, implement Crawford and Jacoby etc.
-*** HTML.
-*** ASCII.
-*** LaTeX.
-** Improve the LaTeX, PS and PDF output:
-*** Add commands to change paper size, board magnification, and number of
-  move candidates listed in analysis. (gary)
-*** Add names and scores before each game.
-*** Show game and match statistics (if available) at end of game/match.
-*** Allow some option for selecting which boards to print (see the
-  "FG" SGF property).
+** Allow loading and saving weights to specify binary or ASCII format (perhaps
+  load and save use binary, import and export use ASCII).
 ** Think about generating huge databases for CD-ROMs (we can get 1-sided
   databases for all chequers up to the 11 point, or 2-sided databases where
   both players have up to 11 chequers in the home board onto a CD-ROM).
@@ -307,16 +300,10 @@ functions:
   bad move, or a costly missed double.
 ** Consider some kind of interface for recording live matches as quickly
   as possible.
-** The current name setting code silently converts whitespace into
-  underscores.  This isn't really necessary; it would be OK to use names
-  verbatim, and equate whitespace and underscores in the command parsing
-  code instead. (gary)
 ** $HOME might not exist on non-POSIX settings.  What are better alternatives
   for finding a place to save per-user settings?
 ** Think about adding features which attempt to predict the time and
   standard error of rollouts in advance (see Chuck's work). (gary)
-** Make sure that player names containing a `:' don't mess up the FIBS
-  string. (gary)
 ** Allow very large (128 bit+) seeds. (gary)
 ** Allow the caller of the Rollout* functions to specify a callback function
   (to replace the current hard-coded GTKRollout()/output* calls).
