@@ -877,6 +877,11 @@ static void PostScriptEpilogue( FILE *pf ) {
 static void ExportGameGeneral( int f, char *sz ) {
 
     FILE *pf;
+
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export"
@@ -923,6 +928,11 @@ static void ExportMatchGeneral( int f, char *sz ) {
     FILE *pf;
     list *pl;
 
+    if( !plGame ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	return;
+    }
+    
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export "
 		 "match postscript')." ); /* FIXME not necessarily PS */
