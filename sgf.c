@@ -1682,6 +1682,9 @@ static void WriteStatContext( FILE *pf, statcontext *psc ) {
 
 static void WriteProperty( FILE *pf, char *szName, char *szValue ) {
 
+    if( !szValue || !*szValue )
+	return;
+    
     fputs( szName, pf );
     putc( '[', pf );
     WriteEscapedString( pf, szValue, FALSE );
