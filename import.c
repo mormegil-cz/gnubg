@@ -1412,7 +1412,8 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
     ListInsert( &lMatch, plGame );
 
-    pmr = NewMoveRecord();
+    pmgi = NewMoveRecord();
+
     pmgi->mt = MOVE_GAMEINFO;
     pmgi->g.i = i - 1;
     pmgi->g.nMatch = nLength;

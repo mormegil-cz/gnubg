@@ -9226,7 +9226,8 @@ extern void GTKDumpStatcontext( int game )
 	for (i = 0; i < numStatGames; i++)
 	{
 		list *plGame = pl->p;
-		xmovegameinfo *pmgi = plGame->plNext->p;
+		moverecord *mr = plGame->plNext->p;
+		xmovegameinfo *pmgi = &mr->g;
 		AddGameData(&gd, i, &pmgi->sc);
 		pl = pl->plNext;
 	}
