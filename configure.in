@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
+AC_REVISION($Revision$)
 AC_INIT(GNU Backgammon,0.14-devel,bug-gnubg@gnu.org,gnubg)
 AC_CONFIG_SRCDIR(gnubg.c)
 AM_INIT_AUTOMAKE
@@ -159,6 +159,16 @@ AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
+AC_CHECK_TYPE(socklen_t,,
+  AC_DEFINE(socklen_t,int,
+            Define to `int' if <sys/socket.h> does not define.),[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+])
 
 dnl Checks for library functions.
 AC_FUNC_ALLOCA

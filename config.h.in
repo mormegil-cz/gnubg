@@ -545,6 +545,9 @@
 /* Define to `unsigned' if <sys/types.h> does not define. */
 #undef size_t
 
+/* Define to `int' if <sys/socket.h> does not define. */
+#undef socklen_t
+
 /* use double version of tanf if float one isn't available */
 #undef tanf
 
