@@ -3,6 +3,7 @@
 
 char *aszCredits[] = {
     "Fotis",
+    "Misja Alma",
     "Kazuaki Asai",
     "Eric Augustine",
     "Steve Baedke",

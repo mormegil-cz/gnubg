@@ -19,6 +19,7 @@ EOF
 
 cat > $contributors <<'EOF'
 Elias Kritikos
+Misja Alma
 Kazuaki Asai
 Eric Augustine
 Erik Barfoed
