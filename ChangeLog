@@ -8,6 +8,8 @@ Sun Oct  8 14:15:35 2000  Joern Thyssen  <joern@thyssen.nu>
 	* gnubg.c: new code for output in mwc or normalized equity; bugfix
 	in SaveGame; initialize match equity table.
 	* eval.c: implement cubeless to cubeful formulae for match play.
+	* matchequity.[ch]: new files; match equity tables.
+	* analysis.[ch]: new files; analyze match (not implemented yet!)
 
 Tue Aug 29 20:48:56 2000  Joseph Heled  <pepe@internet.co.nz>
 
