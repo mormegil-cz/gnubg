@@ -1,3 +1,18 @@
+Thu Feb  10  10:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+	Fixes from Ingo Macherius:
+		external_l.l, external_y.y: Minor parser change
+		gnubg.c: No-gui build fixes
+		gtkpanels.c: Remove compiler warning
+		gnubgmodule.c/h: Add paramater to FindCubeDecision
+	
+	Fix from Philippe Michel:
+		matchid.c: Buffer fix for matchidfromkey
+
+	Fixes for gtk 2.6:
+		gnubg.c: Don't hide windows on close - so sound finishes correctly
+		gtkprefs.c: Fix long pause if no boards.xml file
+		misc3d.c, play.c: Dice not shown until after roll sound (3d)
+
 Wed Feb  8  16:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* Various fixes for gtk 2.6:
