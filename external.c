@@ -447,7 +447,7 @@ extern void CommandExternal( char *sz ) {
                               &rEqBefore, &rEqAfter );
 
 	  /* if opponent gives up equity by resigning */
-          if( fabs(rEqAfter - rEqBefore) <= epsilon )
+          if( ( rEqAfter - epsilon ) < rEqBefore )
 	    strcpy( szResponse, "accept" );
 	  else
 	    strcpy( szResponse, "reject" );
