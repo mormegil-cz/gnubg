@@ -3781,10 +3781,10 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf ( pf, "set export show board %d\n", exsExport.fDisplayBoard );
 
-    if ( exsExport.fSide < 0 )
+    if ( exsExport.fSide == 3 )
       fprintf ( pf, "set export show player both\n" );
-    else
-      fprintf ( pf, "set export show player %d\n", exsExport.fSide );
+    else if ( exsExport.fSide )
+      fprintf ( pf, "set export show player %d\n", exsExport.fSide - 1 );
 
     fprintf ( pf, "set export move number %d\n", exsExport.nMoves );
 
@@ -3817,18 +3817,18 @@ extern void CommandSaveSettings( char *szParam ) {
     for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
       if ( i == SKILL_NONE )
         fprintf ( pf, "set export cube display unmarked %s\n", 
-                  exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+                  exsExport.afCubeDisplay[ i ] ? "yes" : "no" );
       else
         fprintf ( pf, "set export cube display %s %s\n", 
                   aszSkillTypeCommand[ i ], 
                   exsExport.afCubeDisplay[ i ] ? "yes" : "no" );
     }
     
-    fprintf ( pf, "set export cube actual %s\n", 
+    fprintf ( pf, "set export cube display actual %s\n", 
               exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ? "yes" : "no" );
-    fprintf ( pf, "set export cube missed %s\n", 
+    fprintf ( pf, "set export cube display missed %s\n", 
               exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? "yes" : "no" );
-    fprintf ( pf, "set export cube close %s\n", 
+    fprintf ( pf, "set export cube display close %s\n", 
               exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
 
     if ( *exsExport.szHTMLPictureURL != '"' &&
