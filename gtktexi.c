@@ -1290,11 +1290,13 @@ static void gtk_texi_init( GtkTexi *pw ) {
     pwToolbar = gtk_toolbar_new();
     gtk_box_pack_start( GTK_BOX( pwHbox ), pwToolbar, FALSE, FALSE, 0 );
     pw->apwButton[ 0 ] = gtk_toolbar_insert_stock(
-	GTK_TOOLBAR( pwToolbar ), GTK_STOCK_GO_BACK, "tooltip", "private",
+	GTK_TOOLBAR( pwToolbar ), GTK_STOCK_GO_BACK,
+	_("Move to the node you viewed before this one"), "",
 	G_CALLBACK( GoBack ), pw, -1 );
     gtk_widget_set_sensitive( pw->apwButton[ 0 ], FALSE );
     pw->apwButton[ 1 ] = gtk_toolbar_insert_stock(
-	GTK_TOOLBAR( pwToolbar ), GTK_STOCK_GO_FORWARD, "tooltip", "private",
+	GTK_TOOLBAR( pwToolbar ), GTK_STOCK_GO_FORWARD,
+	_("Move to the node you viewed after this one"), "",
 	G_CALLBACK( GoForward ), pw, -1 );
     gtk_widget_set_sensitive( pw->apwButton[ 1 ], FALSE );
 
