@@ -21,17 +21,10 @@
 
 #if HAVE_CONFIG_H
 #include "config.h"
+#endif
 #if USE_PYTHON
 #undef HAVE_FSTAT
-#endif
-#endif
-
-#if USE_PYTHON
 #include <Python.h>
-#if HAVE_CONFIG_H
-#undef HAVE_FSTAT
-#include "config.h"
-#endif
 
 #include <signal.h>
 #include <assert.h>

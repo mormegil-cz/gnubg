@@ -22,21 +22,7 @@
 #ifndef _PYTHONMODULE_H_
 #define _PYTHONMODULE_H_
 
-#if HAVE_CONFIG_H
-#include "config.h"
 #if USE_PYTHON
-#undef HAVE_FSTAT
-#endif
-#endif
-
-#if USE_PYTHON
-#include <Python.h>
-#if HAVE_CONFIG_H
-#undef HAVE_FSTAT
-#include "config.h"
-#endif
-
-extern PyMethodDef gnubgMethods[];
 
 extern void
 PythonInitialise( const char *arg0, const char *szDir );
