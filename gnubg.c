@@ -2382,7 +2382,7 @@ CommandRollout( char *sz ) {
 
 #if USE_GTK
     if( fX )
-	GTKRollout( c, asz, rcRollout.nTrials );
+	GTKRollout( c, asz, rcRollout.nTrials, aars );
     else
 #endif
 	outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
