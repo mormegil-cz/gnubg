@@ -132,63 +132,66 @@ cmp_matchstate ( const matchstate *pms1, const matchstate *pms2 ) {
 
 
 
-static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
-
-    int i, nSrc, nDest;
+static void
+PlayMove(matchstate* pms, int const anMove[ 8 ], int const fPlayer)
+{
+  int i, nSrc, nDest;
 
 #if USE_GTK
-    if( pms == &ms ) {
-	memcpy( anLastMove, anMove, sizeof anLastMove );
-	CanonicalMoveOrder( anLastMove );
-	fLastPlayer = fPlayer;
-	fLastMove = anMove[ 0 ] >= 0;
-    }
+  if( pms == &ms ) {
+    memcpy( anLastMove, anMove, sizeof anLastMove );
+    CanonicalMoveOrder( anLastMove );
+    fLastPlayer = fPlayer;
+    fLastMove = anMove[ 0 ] >= 0;
+  }
 #endif
     
-    if( pms->fMove != -1 && fPlayer != pms->fMove )
-	SwapSides( pms->anBoard );
+  if( pms->fMove != -1 && fPlayer != pms->fMove )
+    SwapSides( pms->anBoard );
     
-    for( i = 0; i < 8; i += 2 ) {
-	nSrc = anMove[ i ];
-	nDest = anMove[ i | 1 ];
+  for( i = 0; i < 8; i += 2 ) {
+    nSrc = anMove[ i ];
+    nDest = anMove[ i | 1 ];
 
-	if( nSrc < 0 )
-	    /* move is finished */
-	    break;
+    if( nSrc < 0 )
+      /* move is finished */
+      break;
 	
-	if( !pms->anBoard[ 1 ][ nSrc ] )
-	    /* source point is empty; ignore */
-	    continue;
+    if( !pms->anBoard[ 1 ][ nSrc ] )
+      /* source point is empty; ignore */
+      continue;
 
-	pms->anBoard[ 1 ][ nSrc ]--;
-	if( nDest >= 0 )
-	    pms->anBoard[ 1 ][ nDest ]++;
+    pms->anBoard[ 1 ][ nSrc ]--;
+    if( nDest >= 0 )
+      pms->anBoard[ 1 ][ nDest ]++;
 
-	if( nDest >= 0 && nDest <= 23 ) {
-	    pms->anBoard[ 0 ][ 24 ] += pms->anBoard[ 0 ][ 23 - nDest ];
-	    pms->anBoard[ 0 ][ 23 - nDest ] = 0;
-	}
+    if( nDest >= 0 && nDest <= 23 ) {
+      pms->anBoard[ 0 ][ 24 ] += pms->anBoard[ 0 ][ 23 - nDest ];
+      pms->anBoard[ 0 ][ 23 - nDest ] = 0;
     }
+  }
 
-    pms->fMove = pms->fTurn = !fPlayer;
-    SwapSides( pms->anBoard );    
+  pms->fMove = pms->fTurn = !fPlayer;
+  SwapSides( pms->anBoard );    
 }
 
-static void ApplyGameOver(matchstate *pms, const list* plGame ) {
+static void
+ApplyGameOver(matchstate* pms, const list* plGame)
+{
+  movegameinfo* pmgi = plGame->plNext->p;
 
-    movegameinfo* pmgi = plGame->plNext->p;
+  assert( pmgi->mt == MOVE_GAMEINFO );
 
-    assert( pmgi->mt == MOVE_GAMEINFO );
-
-    if( pmgi->fWinner < 0 )
-	return;
+  if( pmgi->fWinner < 0 )
+    return;
     
-    pms->anScore[ pmgi->fWinner ] += pmgi->nPoints;
-    pms->cGames++;
+  pms->anScore[ pmgi->fWinner ] += pmgi->nPoints;
+  pms->cGames++;
 }
 
-extern void ApplyMoveRecord( matchstate *pms, const list* plGame, moverecord *pmr ) {
-
+extern void
+ApplyMoveRecord(matchstate* pms, const list* plGame, const moverecord* pmr)
+{
     int n;
     movegameinfo *pmgi = plGame->plNext->p;
     /* FIXME this is wrong -- plGame is not necessarily the right game */
@@ -340,26 +343,24 @@ extern void ApplyMoveRecord( matchstate *pms, const list* plGame, moverecord *pm
     }
 }
 
-extern void CalculateBoard( void ) {
+extern void
+CalculateBoard( void )
+{
+  list *pl;
 
-    list *pl;
+  pl = plGame;
+  do {
+    pl = pl->plNext;
 
-    pl = plGame;
-    do {
-	pl = pl->plNext;
+    assert( pl->p );
 
-	assert( pl->p );
+    ApplyMoveRecord( &ms, plGame, pl->p );
 
-	ApplyMoveRecord( &ms, plGame, pl->p );
-
-        if ( pl->plNext && pl->plNext->p )
-          FixMatchState ( &ms, pl->plNext->p );
+    if ( pl->plNext && pl->plNext->p )
+      FixMatchState ( &ms, pl->plNext->p );
 
         
-    } while( pl != plLastMove );
-
-
-
+  } while( pl != plLastMove );
 }
 
 static void FreeMoveRecord( moverecord *pmr ) {
@@ -4055,8 +4056,8 @@ SetMatchID ( const char *szMatchID ) {
 
 
 extern void
-FixMatchState ( matchstate *pms, const moverecord *pmr ) {
-
+FixMatchState(matchstate* pms, const moverecord* pmr )
+{
   switch ( pmr->mt ) {
   case MOVE_NORMAL:
     if ( pms->fTurn != pmr->n.fPlayer ) {

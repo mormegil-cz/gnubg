@@ -31,16 +31,6 @@
 #include "i18n.h"
 #include "export.h"
 
-/* Totally the wrong place for it. Unfortuanetly, format is lined with
-   makebearoff.
-   eval.c huge size hits again.
-*/
-
-extern int
-badSkill(skilltype const st)
-{
-  return st != SKILL_NONE && st != SKILL_GOOD;
-}
 
 int fOutputMWC = TRUE;
 int fOutputWinPC = FALSE;

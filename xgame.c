@@ -193,9 +193,10 @@ static void StatsPreCreate( extwindow *pewnd ) {
 
 static void StatsCreate( extwindow *pewnd, statsdata *psd ) {
 
-    psd->paewnd = ExtWndCreateWindows( pewnd, aewsStats, DIM( aewsStats ) );
+  psd->paewnd = ExtWndCreateWindows( pewnd, aewsStats,
+				     sizeof(aewsStats)/sizeof(aewsStats[0]) );
 
-    XMapSubwindows( pewnd->pdsp, pewnd->wnd );
+  XMapSubwindows( pewnd->pdsp, pewnd->wnd );
 }
 
 static int StatsHandler( extwindow *pewnd, XEvent *pxev ) {

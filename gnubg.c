@@ -5623,7 +5623,7 @@ static char *OnOffCompletion( const char *sz, int nState ) {
 	i = 0;
     }
 
-    while( i < DIM( asz ) ) {
+    while( i < sizeof(asz)/sizeof(asz[0]) ) {
 	pch = asz[ i++ ];
 
 	if( !strncasecmp( sz, pch, cch ) ) {

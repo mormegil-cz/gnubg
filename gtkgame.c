@@ -3704,13 +3704,13 @@ static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
-static void ExportGameText( gpointer *p, guint n, GtkWidget *pw ) {
-
+static void
+ExportGameText( gpointer *p, guint n, GtkWidget *pw )
+{
   char *sz = getDefaultFileName ( PATH_TEXT );
   GTKFileCommand( _("Export text game"), sz, "export game text", "text", 1 );
   if ( sz ) 
     free ( sz );
-
 }
 
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {

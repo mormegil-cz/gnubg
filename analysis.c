@@ -267,19 +267,17 @@ static lucktype Luck( float r ) {
 	return LUCK_NONE;
 }
 
-extern skilltype Skill( float r ) {
-    /* FIXME if the move is correct according to the selected evaluator
-       but incorrect according to 0-ply, then return SKILL_GOOD or
-       SKILL_VERYGOOD */
-
-    if( r <= -arSkillLevel[ SKILL_VERYBAD ] )
-	return SKILL_VERYBAD;
-    else if( r <= -arSkillLevel[ SKILL_BAD ] )
-	return SKILL_BAD;
-    else if( r <= -arSkillLevel[ SKILL_DOUBTFUL ] )
-	return SKILL_DOUBTFUL;
-    else
-      return SKILL_GOOD; // SKILL_NONE;
+extern skilltype
+Skill( float const r )
+{
+  if( r <= -arSkillLevel[ SKILL_VERYBAD ] )
+    return SKILL_VERYBAD;
+  else if( r <= -arSkillLevel[ SKILL_BAD ] )
+    return SKILL_BAD;
+  else if( r <= -arSkillLevel[ SKILL_DOUBTFUL ] )
+    return SKILL_DOUBTFUL;
+  else
+    return SKILL_GOOD;
 }
 
 /*
@@ -296,10 +294,10 @@ extern skilltype Skill( float r ) {
  */
 
 static void
-updateStatcontext ( statcontext *psc,
-                    moverecord *pmr,
-                    matchstate *pms ) {
-
+updateStatcontext(statcontext*       psc,
+		  const moverecord*  pmr,
+		  const matchstate*  pms)
+{
   cubeinfo ci;
   static unsigned char auch[ 10 ];
   float rSkill, rChequerSkill, rCost;
@@ -1253,18 +1251,16 @@ IniStatcontext ( statcontext *psc ) {
   }
 
   psc->nGames = 0;
-
 }
 
 
 
 extern float
-relativeFibsRating ( const float r, const int n ) {
-
-  float x = - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
+relativeFibsRating ( const float r, const int n )
+{
+  float const x = - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
 
   return ( x < -2100 ) ? -2100 : x;
-
 } 
 
 
@@ -1419,9 +1415,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
               "%s\n\n"
               "%-31s %3d                     %3d\n"
               "%-31s %3d                     %3d\n" 
-/*               "%-31s %3d                     %3d\n" */
-/*               "%-31s %3d                     %3d\n" */
-/*               "%-31s %3d                     %3d\n" */
+	      "%-31s %3d                     %3d\n"
               "%-31s %3d                     %3d\n"
               "%-31s %3d                     %3d\n"
               "%-31s %3d                     %3d\n"
@@ -1431,15 +1425,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 	      psc->anTotalMoves[ 0 ], psc->anTotalMoves[ 1 ],
               _("Unforced moves"),
 	      psc->anUnforcedMoves[ 0 ], psc->anUnforcedMoves[ 1 ],
-/*               _("Moves marked very good"), */
-/* 	      psc->anMoves[ 0 ][ SKILL_VERYGOOD ], */
-/* 	      psc->anMoves[ 1 ][ SKILL_VERYGOOD ], */
-/*               _("Moves marked good"), */
-/* 	      psc->anMoves[ 0 ][ SKILL_GOOD ], */
-/* 	      psc->anMoves[ 1 ][ SKILL_GOOD ], */
-/*               _("Moves marked interesting"), */
-/* 	      psc->anMoves[ 0 ][ SKILL_INTERESTING ], */
-/* 	      psc->anMoves[ 1 ][ SKILL_INTERESTING ], */
+	      _("Unmarked moves"), 
+ 	      psc->anMoves[ 0 ][ SKILL_NONE ], 
+ 	      psc->anMoves[ 1 ][ SKILL_NONE ], 
               _("Moves marked good"),
 	      psc->anMoves[ 0 ][ SKILL_GOOD ],
 	      psc->anMoves[ 1 ][ SKILL_GOOD ],
@@ -1852,10 +1840,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       sprintf ( strchr ( szOutput, 0 ),
                 "%-31s %-7s                 %-7s\n",
                 _("Relative FIBS rating"), _("n/a"), _("n/a") );
-
-
   }
-
 }
 
 
@@ -1887,43 +1872,44 @@ CommandShowStatisticsSession ( char *sz ) {
 
 
 extern void
-CommandShowStatisticsGame ( char *sz ) {
+CommandShowStatisticsGame ( char *sz )
+{
 
-    movegameinfo *pmgi;
-    char szOutput[4096];
+  movegameinfo *pmgi;
+  char szOutput[4096];
     
-    if( !plGame ) {
-	outputl( _("No game is being played.") );
-	return;
-    }
+  if( !plGame ) {
+    outputl( _("No game is being played.") );
+    return;
+  }
 
-    updateStatisticsGame ( plGame );
+  updateStatisticsGame ( plGame );
 
-    pmgi = plGame->plNext->p;
+  pmgi = plGame->plNext->p;
 
-    assert( pmgi->mt == MOVE_GAMEINFO );
+  assert( pmgi->mt == MOVE_GAMEINFO );
     
 #if USE_GTK
-    if ( fX ) {
-	GTKDumpStatcontext ( &pmgi->sc, &ms, _("Statistics for current game") );
-	return;
-    }
+  if ( fX ) {
+    GTKDumpStatcontext ( &pmgi->sc, &ms, _("Statistics for current game") );
+    return;
+  }
 #endif
 
-    DumpStatcontext ( szOutput, &pmgi->sc, _("Statistics for current game"));
-    outputl( szOutput );
+  DumpStatcontext ( szOutput, &pmgi->sc, _("Statistics for current game"));
+  outputl( szOutput );
 }
 
 
-extern void CommandAnalyseMove ( char *sz ) {
-
+extern void
+CommandAnalyseMove ( char *sz )
+{
   matchstate msx;
 
   if( ms.gs == GAME_NONE ) {
     outputl( _("No game in progress (type `new game' to start one).") );
     return;
   }
-    
 
   if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
 
@@ -1944,14 +1930,14 @@ extern void CommandAnalyseMove ( char *sz ) {
   }
   else
     outputl ( _("Sorry, cannot analyse move!") );
-
 }
 
 
 static void
-updateStatisticsMove ( moverecord *pmr, matchstate *pms, const list* plGame,
-                       statcontext *psc ) {
-
+updateStatisticsMove( const moverecord* pmr,
+		      matchstate* pms, const list* plGame,
+		      statcontext* psc )
+{
   FixMatchState ( pms, pmr );
 
   switch ( pmr->mt ) {

@@ -34,14 +34,21 @@ typedef enum _skilltype {
   SKILL_DOUBTFUL,
   SKILL_NONE,
   SKILL_GOOD,
-  /* SKILL_INTERESTING, SKILL_VERYGOOD */
 } skilltype;
 
-extern int badSkill(skilltype st);
+#if defined(__GNUC__)
+static inline int
+badSkill(skilltype const st)
+{
+  return st != SKILL_NONE && st != SKILL_GOOD;
+}
+#else
+#define badSkill(st)  ((st) != SKILL_NONE && (st) != SKILL_GOOD)
+#endif
 
 #define N_SKILLS (SKILL_GOOD + 1)
 
-typedef struct _statcontext {
+typedef struct {
   int fMoves, fCube, fDice; /* which statistics have been computed? */
     
   int anUnforcedMoves[ 2 ];
@@ -89,34 +96,34 @@ typedef struct _statcontext {
 
 } statcontext;
 
-typedef enum _ratingtype {
+typedef enum {
   RAT_AWFUL,
   RAT_BEGINNER, RAT_CASUAL_PLAYER, RAT_INTERMEDIATE, RAT_ADVANCED,
   RAT_EXPERT, RAT_WORLD_CLASS, RAT_SUPERNATURAL, RAT_UNDEFINED
 } ratingtype;
 
-extern const char *aszRating [ RAT_UNDEFINED + 1 ];
-extern const char *aszLuckRating[ 7 ];
+extern const char* aszRating [ RAT_UNDEFINED + 1 ];
+extern const char* aszLuckRating[ 7 ];
 
 extern int afAnalysePlayers[ 2 ];
 
 extern ratingtype GetRating ( const float rError );
-extern void IniStatcontext ( statcontext *psc );
-extern void AddStatcontext ( statcontext *pscA, statcontext *pscB );
+extern void IniStatcontext ( statcontext* psc );
+extern void AddStatcontext ( statcontext* pscA, statcontext* pscB );
 
 extern void
-DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz );
+DumpStatcontext ( char* szOutput, const statcontext* psc, const char* sz );
 
 extern void
 updateStatisticsGame ( const list* plGame );
 
 extern void
-updateStatisticsMatch ( list *plMatch );
+updateStatisticsMatch ( list* plMatch );
 
-extern int getLuckRating ( const float rLuck );
+extern int getLuckRating(float rLuck);
 
 extern float
-relativeFibsRating ( const float r, const int n );
+relativeFibsRating(float r, int n);
 
 extern float
 absoluteFibsRating ( const float r, const int n );
@@ -135,7 +142,7 @@ absoluteFibsRating ( const float r, const int n );
 #define UNNORMALISED 1
 
 extern float
-getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] );
+getMWCFromError ( const statcontext* psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] );
 
 extern skilltype
 Skill( float r );

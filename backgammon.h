@@ -44,7 +44,7 @@
 
 #if USE_GTK
 #include <gtk/gtk.h>
-extern GtkWidget *pwBoard;
+extern GtkWidget* pwBoard;
 extern int fX, nDelay, fNeedPrompt;
 extern guint nNextTurn; /* GTK idle function */
 #elif USE_EXT
@@ -120,7 +120,7 @@ typedef struct _command {
   char* szUsage; 
 
   /* List of subcommands (NULL if none) */
-  struct _command *pc; 
+  struct _command* pc; 
 } command;
 
 typedef enum _playertype {
@@ -208,11 +208,11 @@ typedef struct cubedecisiondata {
 
 typedef struct _movedouble {
     movetype mt;
-    char *sz;
+    char* sz;
     int fPlayer;
     int nAnimals;    /* 0 in match play, even numbers are doubles, raccoons
                         odd numbers are beavers, aardvarken, etc. */
-    cubedecisiondata *CubeDecPtr;
+    cubedecisiondata* CubeDecPtr;
     cubedecisiondata  CubeDec;
     skilltype st;
 } movedouble;
@@ -220,7 +220,7 @@ typedef struct _movedouble {
 typedef struct _movenormal {
   /* "standard" header */
   movetype mt;
-  char *sz;
+  char* sz;
 
   int fPlayer;
 
@@ -259,7 +259,7 @@ typedef struct _movenormal {
 
 typedef struct _moveresign {
     movetype mt;
-    char *sz;
+    char* sz;
     int fPlayer;
     int nResigned;
 
@@ -272,13 +272,13 @@ typedef struct _moveresign {
 
 typedef struct _movesetboard {
     movetype mt;
-    char *sz;
+    char* sz;
     unsigned char auchKey[ 10 ]; /* always stored as if player 0 was on roll */
 } movesetboard;
 
 typedef struct _movesetdice {
     movetype mt;
-    char *sz;
+    char* sz;
     int fPlayer;
     int anDice[ 2 ];
     lucktype lt;
@@ -287,13 +287,13 @@ typedef struct _movesetdice {
 
 typedef struct _movesetcubeval {
     movetype mt;
-    char *sz;
+    char* sz;
     int nCube;
 } movesetcubeval;
 
 typedef struct _movesetcubepos {
     movetype mt;
-    char *sz;
+    char* sz;
     int fCubeOwner;
 } movesetcubepos;
 
@@ -301,7 +301,7 @@ typedef union _moverecord {
     movetype mt;
     struct _moverecordall {
 	movetype mt;
-	char *sz;
+	char* sz;
     } a;
     movegameinfo g;
     movedouble d; /* cube decisions */
@@ -313,7 +313,7 @@ typedef union _moverecord {
     movesetcubepos scp;
 } moverecord;
 
-extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
+extern char* aszGameResult[], szDefaultPrompt[], *szPrompt;
 
 typedef enum _gamestate {
     GAME_NONE, GAME_PLAYING, GAME_OVER, GAME_RESIGNED, GAME_DROP
@@ -336,7 +336,7 @@ typedef struct _matchstate {
 } matchstate;
 
 typedef struct _matchinfo { /* SGF match information */
-    char *pchRating[ 2 ], *pchEvent, *pchRound, *pchPlace, *pchAnnotator,
+    char* pchRating[ 2 ], *pchEvent, *pchRound, *pchPlace, *pchAnnotator,
 	*pchComment; /* malloc()ed, or NULL if unknown */
     int nYear, nMonth, nDay; /* 0 for nYear means date unknown */
 } matchinfo;
@@ -372,8 +372,8 @@ typedef enum _pathformat {
 pathformat;
 
 extern char aaszPaths[ NUM_PATHS ][ 2 ][ 255 ];
-extern char *aszExtensions[ NUM_PATHS ];
-extern char *szCurrentFileName;
+extern char* aszExtensions[ NUM_PATHS ];
+extern char* szCurrentFileName;
 
 extern evalcontext ecTD;
 extern evalcontext ecLuck;
@@ -441,77 +441,77 @@ extern storedcube sc;
 
 extern player ap[ 2 ];
 
-extern char *GetInput( char *szPrompt );
-extern int GetInputYN( char *szPrompt );
-extern void HandleCommand( char *sz, command *ac );
+extern char* GetInput( char* szPrompt );
+extern int GetInputYN( char* szPrompt );
+extern void HandleCommand( char* sz, command* ac );
 extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
-extern char *NextToken( char **ppch );
-extern char *NextTokenGeneral( char **ppch, const char *szTokens );
+extern char* NextToken( char **ppch );
+extern char* NextTokenGeneral( char **ppch, const char* szTokens );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
-extern void AddMoveRecord( void *pmr );
-extern moverecord *LinkToDouble( moverecord *pmr);
-extern void ApplyMoveRecord( matchstate *pms, const list* plGame,
-			     moverecord *pmr );
-extern void SetMoveRecord( void *pmr );
+extern void AddMoveRecord( void* pmr );
+extern moverecord* LinkToDouble( moverecord* pmr);
+extern void ApplyMoveRecord( matchstate* pms, const list* plGame,
+			     const moverecord* pmr );
+extern void SetMoveRecord( void* pmr );
 extern void ClearMoveRecord( void );
-extern void AddGame( moverecord *pmr );
-extern void ChangeGame( list *plGameNew );
+extern void AddGame( moverecord* pmr );
+extern void ChangeGame( list* plGameNew );
 extern void
-FixMatchState ( matchstate *pms, const moverecord *pmr );
+FixMatchState ( matchstate* pms, const moverecord* pmr );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern int ComputerTurn( void );
 extern void ClearMatch( void );
 extern void FreeMatch( void );
-extern void SetMatchDate( matchinfo *pmi );
+extern void SetMatchDate( matchinfo* pmi );
 extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms);
-extern int ParseHighlightColour( char *sz );
+extern int ParseHighlightColour( char* sz );
 extern int ParseNumber( char **ppch );
-extern int ParsePlayer( char *sz );
-extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc );
+extern int ParsePlayer( char* sz );
+extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char* pchDesc );
 extern double ParseReal( char **ppch );
-extern int ParseKeyValue( char **ppch, char *apch[ 2 ] );
-extern int CompareNames( char *sz0, char *sz1 );
-extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
-		       char *szOff );
+extern int ParseKeyValue( char **ppch, char* apch[ 2 ] );
+extern int CompareNames( char* sz0, char* sz1 );
+extern int SetToggle( char* szName, int* pf, char* sz, char* szOn,
+		       char* szOff );
 extern void ShowBoard( void );
-extern void SetMatchID ( const char *szMatchID );
-extern char *FormatPrompt( void );
-extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
+extern void SetMatchID ( const char* szMatchID );
+extern char* FormatPrompt( void );
+extern char* FormatMoveHint( char* sz, matchstate* pms, movelist* pml,
 			     int i, int fRankKnown,
                              int fDetailProb, int fShowParameters );
-extern void UpdateSetting( void *p );
+extern void UpdateSetting( void* p );
 extern void UpdateSettings( void );
 extern void ResetInterrupt( void );
 extern void PromptForExit( void );
 extern void Prompt( void );
 extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
-			    psighandler *pOld, int fRestart );
-extern void PortableSignalRestore( int nSignal, psighandler *p );
+			    psighandler* pOld, int fRestart );
+extern void PortableSignalRestore( int nSignal, psighandler* p );
 extern RETSIGTYPE HandleInterrupt( int idSignal );
 
 /* Like strncpy, except it does the right thing */
-extern char *strcpyn( char *szDest, const char *szSrc, int cch );
+extern char* strcpyn( char* szDest, const char* szSrc, int cch );
 
 /* Write a string to stdout/status bar/popup window */
-extern void output( const char *sz );
+extern void output( const char* sz );
 /* Write a string to stdout/status bar/popup window, and append \n */
-extern void outputl( const char *sz );
+extern void outputl( const char* sz );
 /* Write a character to stdout/status bar/popup window */
 extern void outputc( const char ch );
 /* Write a string to stdout/status bar/popup window, printf style */
-extern void outputf( const char *sz, ... ) __attribute__((format(printf,1,2)));
+extern void outputf( const char* sz, ... ) __attribute__((format(printf,1,2)));
 /* Write a string to stdout/status bar/popup window, vprintf style */
-extern void outputv( const char *sz, va_list val )
+extern void outputv( const char* sz, va_list val )
     __attribute__((format(printf,1,0)));
 /* Write an error message, perror() style */
-extern void outputerr( const char *sz );
+extern void outputerr( const char* sz );
 /* Write an error message, fprintf() style */
-extern void outputerrf( const char *sz, ... )
+extern void outputerrf( const char* sz, ... )
     __attribute__((format(printf,1,2)));
 /* Write an error message, vfprintf() style */
-extern void outputerrv( const char *sz, va_list val )
+extern void outputerrv( const char* sz, va_list val )
     __attribute__((format(printf,1,0)));
 /* Signifies that all output for the current command is complete */
 extern void outputx( void );
@@ -527,12 +527,12 @@ extern void outputoff( void );
 extern void outputon( void );
 
 /* Temporarily ignore TTY/GUI input. */
-extern void SuspendInput( monitor *pm );
+extern void SuspendInput( monitor* pm );
 /* Resume input (must match a previous SuspendInput). */
-extern void ResumeInput( monitor *pm );
+extern void ResumeInput( monitor* pm );
 
-extern void ProgressStart( char *sz );
-extern void ProgressStartValue( char *sz, int iMax );
+extern void ProgressStart( char* sz );
+extern void ProgressStartValue( char* sz, int iMax );
 extern void Progress( void );
 extern void ProgressValue ( int iValue );
 extern void ProgressValueAdd ( int iValue );
@@ -542,13 +542,13 @@ extern void ProgressEnd( void );
 #if USE_GTK
 extern gint NextTurnNotify( gpointer p );
 #else
-extern int NextTurnNotify( event *pev, void *p );
+extern int NextTurnNotify( event* pev, void* p );
 #endif
-extern void UserCommand( char *sz );
+extern void UserCommand( char* sz );
 extern void HandleXAction( void );
 #if HAVE_LIBREADLINE
 extern int fReadingCommand;
-extern void HandleInput( char *sz );
+extern void HandleInput( char* sz );
 #endif
 #endif
 
@@ -558,19 +558,19 @@ extern int fReadline;
 #endif
 
 extern int
-AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
-              evalsetup *pesChequer, evalsetup *pesCube,
+AnalyzeMove ( moverecord* pmr, matchstate* pms, list* plGame, statcontext* psc,
+              evalsetup* pesChequer, evalsetup* pesCube,
               movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 	      int fUpdateStatistics, const int afAnalysePlayers[ 2 ] );
 
 extern int
-confirmOverwrite ( const char *sz, const int f );
+confirmOverwrite ( const char* sz, const int f );
 
 extern void
-setDefaultPath ( const char *sz, const pathformat f );
+setDefaultPath ( const char* sz, const pathformat f );
 
 extern void
-setDefaultFileName ( const char *sz, const pathformat f );
+setDefaultFileName ( const char* sz, const pathformat f );
 
 extern char *
 getDefaultFileName ( const pathformat f );
@@ -578,27 +578,27 @@ getDefaultFileName ( const pathformat f );
 extern char *
 getDefaultPath ( const pathformat f );
 
-extern char *GetLuckAnalysis( matchstate *pms, float rLuck );
+extern char* GetLuckAnalysis( matchstate* pms, float rLuck );
 
 extern moverecord *
-getCurrentMoveRecord ( int *pfHistory );
+getCurrentMoveRecord ( int* pfHistory );
 
 extern void
-UpdateStoredMoves ( const movelist *pml, const matchstate *pms );
+UpdateStoredMoves ( const movelist* pml, const matchstate* pms );
 
 extern void
 UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                   const evalsetup *pes,
-                   const matchstate *pms );
+                   const evalsetup* pes,
+                   const matchstate* pms );
 
 extern void
 InvalidateStoredMoves( void );
 
-extern char *aszVersion[], *szHomeDirectory, *szDataDirectory,
+extern char* aszVersion[], *szHomeDirectory, *szDataDirectory,
     *szTerminalCharset;
 
-extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
+extern char* aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
@@ -645,7 +645,7 @@ extern void CommandAccept( char * ),
     CommandAnnotateVeryGood( char * ),
     CommandAnnotateVeryLucky( char * ),
     CommandAnnotateVeryUnlucky( char * ),
-    CommandCalibrate( char *sz ),
+    CommandCalibrate( char* sz ),
     CommandCopy ( char * ),
     CommandDatabaseDump( char * ),
     CommandDatabaseExport( char * ),
@@ -1010,12 +1010,12 @@ extern void CommandAccept( char * ),
     CommandSetTrainingThreshold( char * ),
     CommandSetTurn( char * ),
     CommandSetTutorCube( char * ),
-    CommandSetTutorEval( char *sz ),
+    CommandSetTutorEval( char* sz ),
     CommandSetTutorChequer( char * ),
     CommandSetTutorMode( char * ),  
-    CommandSetTutorSkillDoubtful( char *sz ),
-    CommandSetTutorSkillBad( char *sz ), 
-    CommandSetTutorSkillVeryBad( char *sz ),
+    CommandSetTutorSkillDoubtful( char* sz ),
+    CommandSetTutorSkillBad( char* sz ), 
+    CommandSetTutorSkillVeryBad( char* sz ),
     CommandSetVariationStandard( char * sz ),
     CommandSetVariationNackgammon( char * sz ),
     CommandSetVariation1ChequerHypergammon( char * sz ),
@@ -1095,12 +1095,12 @@ extern int EvalCmp ( const evalcontext *, const evalcontext *, const int);
 
 #ifndef HAVE_BASENAME
 extern char *
-basename ( const char *filename );
+basename ( const char* filename );
 #endif
 
 #ifndef HAVE_DIRNAME
 extern char *
-dirname ( char *filename );
+dirname ( char* filename );
 #endif
 
 #if USE_GTK
@@ -1114,25 +1114,25 @@ dirname ( char *filename );
 #endif
 
 extern char *
-Convert ( const char *sz, 
-          const char *szSourceCharset, const char *szDestCharset );
+Convert ( const char* sz, 
+          const char* szSourceCharset, const char* szDestCharset );
 
 extern void
 OptimumRoll ( int anBoard[ 2 ][ 25 ], 
-              const cubeinfo *pci, const evalcontext *pec,
+              const cubeinfo* pci, const evalcontext* pec,
               const int fBest, int anDice[ 2 ] );
 
 typedef struct _highlightcolour {
   int   rgbs[3][3];
-  char *colourname;
+  char* colourname;
 } highlightcolour;
 
-extern highlightcolour *HighlightColour, HighlightColourTable[];
+extern highlightcolour* HighlightColour, HighlightColourTable[];
 extern int HighlightIntensity;
-extern int *Highlightrgb;
+extern int* Highlightrgb;
 
 extern void
-SetMatchInfo( char **ppch, char *sz, char *szMessage );
+SetMatchInfo( char **ppch, char* sz, char* szMessage );
 
 extern void
 TextToClipboard ( const char * sz );
@@ -1141,6 +1141,6 @@ extern void
 PrintCheatRoll( const int fPlayer, const int n );
 
 extern void
-ShowBearoff( char *sz, matchstate *pms, bearoffcontext *pbc );
+ShowBearoff( char* sz, matchstate* pms, bearoffcontext* pbc );
 
 #endif
