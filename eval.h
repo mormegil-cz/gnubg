@@ -423,7 +423,7 @@ extern void
 EvalCacheFlush(void);
 
 extern int 
-EvalCacheResize( int cNew );
+EvalCacheResize( unsigned int cNew );
 
 extern int 
 EvalCacheStats( int *pcUsed, int *pcSize, int *pcLookup, int *pcHit );

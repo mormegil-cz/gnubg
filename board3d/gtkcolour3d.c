@@ -193,11 +193,10 @@ void UpdateColourPreview(void *arg)
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpDiffuse), diffuse);
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpSpecular), specular);
 
-	SetupMat(col3d, 
-		ambient[0], ambient[1], ambient[2],
-		diffuse[0], diffuse[1], diffuse[2],
-		specular[0], specular[1], specular[2],
-		padjShine->value, opacityValue);
+	SetupMat(col3d, (float)ambient[0], (float)ambient[1], (float)ambient[2],
+		(float)diffuse[0], (float)diffuse[1], (float)diffuse[2],
+		(float)specular[0], (float)specular[1], (float)specular[2],
+		(int)padjShine->value, opacityValue);
 
 	UpdatePreviewBar(col3d, xppm);
 
@@ -470,7 +469,7 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	setCol(GTK_COLOUR_PICKER(pcpDiffuse), col3d->diffuseColour);
 	setCol(GTK_COLOUR_PICKER(pcpSpecular), col3d->specularColour);
 
-	gtk_adjustment_set_value (padjShine, col3d->shine);
+	gtk_adjustment_set_value (padjShine, (float)col3d->shine);
 	if (IsSet(pDetails->opacity, DF_VARIABLE_OPACITY))
 	{
 		useOpacity = 1;

@@ -321,7 +321,7 @@ void preDrawPiece1(BoardData* bd)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 }
 
-void preDrawPiece(BoardData* bd, int transparent)
+void preDrawPiece(BoardData* bd)
 {
 	if (bd->pieceList)
 		glDeleteLists(bd->pieceList, 1);
@@ -2436,7 +2436,7 @@ void drawFlagPick(BoardData* bd)
 	glPopMatrix();
 }
 
-void drawPointPick(BoardData* bd, int point)
+static void drawPointPick(int point)
 {	/* Draw sub parts of point to work out which part of point clicked */
 	int i;
 	float pos[3];
@@ -2525,7 +2525,7 @@ int BoardPoint3d(BoardData *bd, int x, int y, int point)
 		if (point == -1)
 			drawPick(bd);
 		else
-			drawPointPick(bd, point);
+			drawPointPick(point);
 	}
 
 	glPopName();
@@ -3496,8 +3496,6 @@ void MakeShadowModel(BoardData* bd)
 
 void preDraw3d(BoardData* bd)
 {
-	int transparentPieces = (bd->chequerMat[0].alphaBlend) || (bd->chequerMat[1].alphaBlend);
-
 	if (!bd->qobjTex)
 	{
 		bd->qobjTex = gluNewQuadric();
@@ -3517,7 +3515,7 @@ void preDraw3d(BoardData* bd)
 		freeEigthPoints(bd->boardPoints, bd->curveAccuracy);
 	calculateEigthPoints(&bd->boardPoints, BOARD_FILLET, bd->curveAccuracy);
 
-	preDrawPiece(bd, transparentPieces);
+	preDrawPiece(bd);
 	preDrawDice(bd);
 
 	MakeShadowModel(bd);
@@ -3528,7 +3526,7 @@ void SetShadowDimness3d(BoardData* bd)
 	bd->dim = ((rdAppearance.lightLevels[1] / 100.0f) * (100 - bd->shadowDarkness)) / 100;
 }
 
-void RestrictiveDrawPiece(BoardData* bd, int pos, int depth)
+void RestrictiveDrawPiece(int pos, int depth)
 {
 	float newPos[3];
 	getPiecePos(pos, depth, fClockwise, newPos);

@@ -323,9 +323,9 @@ extern void updateHingeOccPos(BoardData* bd);
 extern void updateFlagOccPos(BoardData* bd);
 
 extern void RestrictiveRedraw();
-extern void RestrictiveDrawPiece(BoardData* bd, int pos, int depth);
-extern void RestrictiveStartMouseMove(BoardData *bd, int pos, int depth);
-extern void RestrictiveEndMouseMove(BoardData *bd, int pos, int depth);
+extern void RestrictiveDrawPiece(int pos, int depth);
+extern void RestrictiveStartMouseMove(int pos, int depth);
+extern void RestrictiveEndMouseMove(int pos, int depth);
 extern void RestrictiveDrawDice(BoardData* bd);
 extern void RestrictiveDrawCube(BoardData* bd, int old_doubled, int old_cube_owner);
 extern void RestrictiveDrawMoveIndicator(BoardData* bd);

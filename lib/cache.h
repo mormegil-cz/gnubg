@@ -28,7 +28,7 @@ extern int CacheDestroy( cache *pc );
 extern int CacheAdd( cache *pc, unsigned long l, void *p, size_t cb );
 extern void *CacheLookup( cache *pc, unsigned long l, void *p );
 extern int CacheFlush( cache *pc );
-extern int CacheResize( cache *pc, int cNew );
+extern int CacheResize( cache *pc, unsigned int cNew );
 extern int CacheStats( cache *pc, int *pcLookup, int *pcHit );
 
 #else
@@ -56,7 +56,7 @@ int
 CacheCreate(cache* pc, unsigned int size);
 
 int
-CacheResize(cache *pc, int cNew);
+CacheResize(cache *pc, unsigned int cNew);
 
 /* l is filled with a value which is passed to CacheAdd */
 cacheNode*
@@ -68,7 +68,7 @@ void CacheDestroy(cache* pc);
 void CacheStats(cache* pc, int* pcLookup, int* pcHit);
 
 extern unsigned long
-keyToLong(char k[10], int np);
+keyToLong(unsigned char k[10], int np);
 
 #endif
 

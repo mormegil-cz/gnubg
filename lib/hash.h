@@ -11,7 +11,7 @@ typedef int ( *hashcomparefunc )( void *p0, void *p1 );
 
 typedef struct _hashnode {
     struct _hashnode *phnNext;
-    long l;
+    unsigned long l;
     void *p;
 } hashnode;
 

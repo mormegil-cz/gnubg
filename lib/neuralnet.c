@@ -486,11 +486,11 @@ static int EvaluateOld( neuralnet *pnn, float arInput[], float ar[],
 
 static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
 		     float arOutput[], float *saveAr ) {
-  int i;
 
 #if !HAVE_LIBATLAS
-  return EvaluateOld( pnn, arInput, ar, arOutput, saveAr );
+    return EvaluateOld( pnn, arInput, ar, arOutput, saveAr );
 #else /* HAVE_LIBATLAS */
+    int i;
 
     /* BLAS implementation */
 
@@ -591,11 +591,11 @@ static int EvaluateFromBaseOld( neuralnet *pnn, float arInputDif[], float ar[],
 
 static int EvaluateFromBase( neuralnet *pnn, float arInputDif[], float ar[],
 		     float arOutput[] ) {
-    int i;
 
 #if !HAVE_LIBATLAS
     return EvaluateFromBaseOld( pnn, arInputDif, ar, arOutput );
 #else /* HAVE_LIBATLAS */
+    int i;
 
     /* BLAS implementation */
 

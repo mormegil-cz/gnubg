@@ -705,7 +705,7 @@ static void board_start_drag( GtkWidget *widget, BoardData *bd,
 		SetMovingPieceRotation(bd, bd->drag_point);
 		updatePieceOccPos(bd);
 		if (bd->quickDraw)
-			RestrictiveStartMouseMove(bd, drag_point, abs(bd->points[drag_point] + bd->drag_colour));
+			RestrictiveStartMouseMove(drag_point, abs(bd->points[drag_point] + bd->drag_colour));
 	}
 	else
 #endif
@@ -1222,9 +1222,9 @@ gboolean place_chequer_or_revert(BoardData *bd,
 	if (rdAppearance.fDisplayType == DT_3D && rdAppearance.quickDraw)
 	{
 		if (placed)
-			RestrictiveEndMouseMove(bd, dest, abs(bd->points[dest]));
+			RestrictiveEndMouseMove(dest, abs(bd->points[dest]));
 		if (placed && hit)
-			RestrictiveDrawPiece(bd, bar, abs(bd->points[bar]));
+			RestrictiveDrawPiece(bar, abs(bd->points[bar]));
 	}
 	if (placed && rdAppearance.fDisplayType == DT_3D)
 		PlaceMovingPieceRotation(bd, dest, bd->drag_point);
@@ -1565,7 +1565,7 @@ static void RestrictiveDrawTargetHelp(BoardData* bd)
 	for (i = 0; i < 4; i++)
 	{
 		if (bd->iTargetHelpPoints[i] != -1)
-			RestrictiveDrawPiece(bd, bd->iTargetHelpPoints[i], abs(bd->points[bd->iTargetHelpPoints[i]]) + 1);
+			RestrictiveDrawPiece(bd->iTargetHelpPoints[i], abs(bd->points[bd->iTargetHelpPoints[i]]) + 1);
 	}
 }
 #endif
@@ -1603,7 +1603,7 @@ UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 				int max = MAX(abs(old_points[an[i]]), abs(bd->points[an[i]]));
 				min = MIN(min, max - 1);	/* huffed - no change in number of chequers */
 				for (k = min + 1; k <= max; k++)
-					RestrictiveDrawPiece(bd, an[i], k);
+					RestrictiveDrawPiece(an[i], k);
 			}
 		}
 		updatePieceOccPos(bd);
@@ -1910,17 +1910,17 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 					{
 						if (rdAppearance.quickDraw)
 						{	/* Redraw 2 start positions, end position and perhaps bar */
-							RestrictiveDrawPiece(bd, n[0], abs(bd->points[n[0]]) + 1);
+							RestrictiveDrawPiece(n[0], abs(bd->points[n[0]]) + 1);
 							if (n[0] == n[1])
-								RestrictiveDrawPiece(bd, n[0], abs(bd->points[n[0]]) + 2);
+								RestrictiveDrawPiece(n[0], abs(bd->points[n[0]]) + 2);
 							else
-								RestrictiveDrawPiece(bd, n[1], abs(bd->points[n[1]]) + 1);
+								RestrictiveDrawPiece(n[1], abs(bd->points[n[1]]) + 1);
 							
-							RestrictiveDrawPiece(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
-							RestrictiveDrawPiece(bd, bd->drag_point, abs(bd->points[bd->drag_point]) - 1);
+							RestrictiveDrawPiece(bd->drag_point, abs(bd->points[bd->drag_point]));
+							RestrictiveDrawPiece(bd->drag_point, abs(bd->points[bd->drag_point]) - 1);
 							
 							if (old_points[bd->drag_point])
-								RestrictiveDrawPiece(bd, bar, abs(bd->points[bar]));
+								RestrictiveDrawPiece(bar, abs(bd->points[bar]));
 						}
 						updatePieceOccPos(bd);
 						gtk_widget_queue_draw(board);
@@ -2015,7 +2015,7 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 			place_chequer_or_revert(bd, dest);
 #if USE_BOARD3D
 			if (rdAppearance.fDisplayType == DT_3D && rdAppearance.quickDraw)
-				RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+				RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
 #endif
 		}
 		else
@@ -2063,7 +2063,7 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 					if (rdAppearance.fDisplayType == DT_3D)
 					{
 						if (rdAppearance.quickDraw)
-							RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+							RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
 					}
 					else
 #endif
@@ -2082,7 +2082,7 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 			board_beep(bd);
 #if USE_BOARD3D
 			if (rdAppearance.fDisplayType == DT_3D && rdAppearance.quickDraw)
-				RestrictiveEndMouseMove(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+				RestrictiveEndMouseMove(bd->drag_point, abs(bd->points[bd->drag_point]));
 #endif
 		}
 	}

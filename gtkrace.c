@@ -568,7 +568,7 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
   g_free( pch );
 
   for ( i = 0; i < 6; ++i )
-    asz[ i ] = aszTitle[ i ] ? gettext ( aszTitle[ i ] ) :  "";
+    asz[ i ] = (char*)(aszTitle[ i ] ? gettext ( aszTitle[ i ] ) :  "");
 
   prw->pwOutput = gtk_clist_new_with_titles( 6, asz );
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 

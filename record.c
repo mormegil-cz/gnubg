@@ -537,7 +537,10 @@ extern void CommandRecordShow( char *szPlayer ) {
 
 #if USE_GTK
     if( fX )
-	return GTKRecordShow( pfIn, sz, szPlayer );
+	{
+		GTKRecordShow( pfIn, sz, szPlayer );
+		return;
+	}
 #endif
     
     while( !RecordReadItem( pfIn, sz, &pr ) )

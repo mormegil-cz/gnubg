@@ -4184,7 +4184,7 @@ EvalCacheFlush(void)
   CacheFlush( & cEval );
 }
 
-extern int EvalCacheResize( int cNew ) {
+extern int EvalCacheResize( unsigned int cNew ) {
 
     cCache = cNew;
     

@@ -8,7 +8,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "config.h"
 
+#if !HAVE_STRDUP
 extern char *strdup( const char *sz ) {
 
     char *pch;
@@ -26,3 +28,4 @@ extern char *strdup( const char *sz ) {
 
     return pch;
 }
+#endif

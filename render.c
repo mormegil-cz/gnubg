@@ -1518,10 +1518,16 @@ RenderLabels( renderdata *prd, unsigned char *puch, int nStride,
     FT_Glyph aftg[ 10 ];
 
     if( FT_New_Memory_Face( ftl, auchLuxiSB, cbLuxiSB, 0, &ftf ) )
-	return RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
+	{
+		RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
+		return;
+	}
     
     if( FT_Set_Pixel_Sizes( ftf, 0, prd->nSize * 5 / 2 ) )
-	return RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
+	{
+		RenderBasicLabels( prd, puch, nStride, iStart, iEnd, iDelta );
+		return;
+	}
 
 	if (prd->fLabels)
 	{
