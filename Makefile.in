@@ -67,6 +67,7 @@ OBJEXT = @OBJEXT@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 AMTAR = @AMTAR@
 AM_YFLAGS = @AM_YFLAGS@
+APPLE_QTIME_LIBS = @APPLE_QTIME_LIBS@
 ARTSC_CFLAGS = @ARTSC_CFLAGS@
 ARTSC_CONFIG = @ARTSC_CONFIG@
 ARTSC_LIBS = @ARTSC_LIBS@
@@ -185,7 +186,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 @USE_SOUND_FALSE@SOUND_INCS = 
 @USE_SOUND_TRUE@SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@ @AUDIOFILE_LIBS@ \
-@USE_SOUND_TRUE@	@WINMMSND_LIBS@
+@USE_SOUND_TRUE@	@WINMMSND_LIBS@ @APPLE_QTIME_LIBS@
 
 @USE_SOUND_FALSE@SOUND_LIBS = 
 
@@ -241,7 +242,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h \
 	boardpos.c boardpos.h progress.c progress.h format.c format.h \
 	formatgs.c formatgs.h boarddim.h timer.c $(LIBGEN_SOURCES) \
-	external_y.y external_l.l external_y.h
+	external_y.y external_l.l external_y.h openurl.c openurl.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -260,7 +261,7 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 @USE_GTK_TRUE@	gtkrace.c gtkrace.h \
 @USE_GTK_TRUE@	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
 @USE_GTK_TRUE@	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
-@USE_GTK_TRUE@        openurl.c openurl.h gtktempmap.c gtktempmap.h \
+@USE_GTK_TRUE@        gtktempmap.c gtktempmap.h \
 @USE_GTK_TRUE@	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 @USE_GTK_TRUE@	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
@@ -357,7 +358,7 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	htmlimages.$(OBJEXT) speed.$(OBJEXT) renderprefs.$(OBJEXT) \
 	boardpos.$(OBJEXT) progress.$(OBJEXT) format.$(OBJEXT) \
 	formatgs.$(OBJEXT) timer.$(OBJEXT) $(am__objects_1) \
-	external_y.$(OBJEXT) external_l.$(OBJEXT)
+	external_y.$(OBJEXT) external_l.$(OBJEXT) openurl.$(OBJEXT)
 @COMPILE_BR1_TRUE@am__objects_3 = br1.$(OBJEXT)
 @COMPILE_BR1_FALSE@am__objects_3 =
 @USE_SOUND_TRUE@am__objects_4 = sound.$(OBJEXT)
@@ -376,12 +377,11 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkrace.$(OBJEXT) gtkmovefilter.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkmet.$(OBJEXT) gtkcolour.$(OBJEXT) \
 @USE_GTK_TRUE@	gtksplash.$(OBJEXT) gtkrolls.$(OBJEXT) \
-@USE_GTK_TRUE@	openurl.$(OBJEXT) gtktempmap.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkbearoff.$(OBJEXT) gtkoptions.$(OBJEXT) \
-@USE_GTK_TRUE@	gtkpath.$(OBJEXT) gtktoolbar.$(OBJEXT) \
-@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4) \
-@USE_GTK_TRUE@	$(am__objects_5) $(am__objects_6) \
-@USE_GTK_TRUE@	$(am__objects_7)
+@USE_GTK_TRUE@	gtktempmap.$(OBJEXT) gtkbearoff.$(OBJEXT) \
+@USE_GTK_TRUE@	gtkoptions.$(OBJEXT) gtkpath.$(OBJEXT) \
+@USE_GTK_TRUE@	gtktoolbar.$(OBJEXT) $(am__objects_3) \
+@USE_GTK_TRUE@	$(am__objects_4) $(am__objects_5) \
+@USE_GTK_TRUE@	$(am__objects_6) $(am__objects_7)
 @USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_2) $(am__objects_3) \
 @USE_GTK_FALSE@	$(am__objects_4) $(am__objects_5) \
 @USE_GTK_FALSE@	$(am__objects_6) $(am__objects_7)
