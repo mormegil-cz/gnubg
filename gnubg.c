@@ -4745,6 +4745,10 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 extern void
 CommandLoadPython( char * sz ) {
 
+#if !USE_PYTHON
+  output( _("This build of GNU Backgammon does not support Python"));
+  return;
+#else
   FILE *pf;
 
   sz = NextToken( &sz );
@@ -4760,7 +4764,7 @@ CommandLoadPython( char * sz ) {
     fclose( pf );
   } else
     outputerr( sz );
-  
+#endif
 }
 
 
