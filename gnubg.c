@@ -285,6 +285,7 @@ static char szDICE[] = "<die> <die>",
     szRATE[] = "<rate>",
     szSCORE[] = "<score>",
     szSIZE[] = "<size>",
+    szSTEP[] = "[game|roll] [count]",
     szTRIALS[] = "<trials>",
     szVALUE[] = "<value>",
     szMATCHID[] = "<matchid>";
@@ -800,13 +801,13 @@ command cER = {
     { "mwc2eq", CommandMWC2Eq,
       "Convert match winning chance to normalised money equity",
       szVALUE, NULL },
-    { "n", CommandNext, NULL, NULL, NULL },
+    { "n", CommandNext, NULL, szSTEP, NULL },
     { "new", NULL, "Start a new game, match or session", NULL, acNew },
-    { "next", CommandNext, "Step ahead within the game", NULL, NULL },
-    { "p", CommandPrevious, NULL, NULL, NULL },
+    { "next", CommandNext, "Step ahead within the game", szSTEP, NULL },
+    { "p", CommandPrevious, NULL, szSTEP, NULL },
     { "pass", CommandDrop, "Synonym for `drop'", NULL, NULL },
     { "play", CommandPlay, "Force the computer to move", NULL, NULL },
-    { "previous", CommandPrevious, "Step backward within the game", NULL,
+    { "previous", CommandPrevious, "Step backward within the game", szSTEP,
       NULL },
     { "quit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
     { "r", CommandRoll, NULL, NULL, NULL },
@@ -848,7 +849,7 @@ char *aszVersion[] = {
     NULL
 };
 
-char *szHomeDirectory;
+char *szHomeDirectory, *szDataDirectory;
 
 extern char *NextToken( char **ppch ) {
 
@@ -4393,7 +4394,7 @@ static void version( void ) {
 
 static void real_main( void *closure, int argc, char *argv[] ) {
 
-    char ch, *pch, *pchCommands = NULL, *pchDataDir = NULL, *pchScript = NULL;
+    char ch, *pch, *pchCommands = NULL, *pchScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
@@ -4418,7 +4419,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     if( !( szHomeDirectory = getenv( "HOME" ) ) )
 	/* FIXME what should non-POSIX systems do? */
-	szHomeDirectory = "";
+	szHomeDirectory = ".";
     
 #if USE_GUI
     /* The GTK interface is fairly grotty; it makes it impossible to
@@ -4512,7 +4513,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    fInteractive = FALSE;
 	    break;
 	case 'd': /* datadir */
-	    pchDataDir = optarg;
+	    szDataDirectory = optarg;
 	    break;
 	case 'h': /* help */
             usage( argv[ 0 ] );
@@ -4577,12 +4578,12 @@ static void real_main( void *closure, int argc, char *argv[] ) {
        it up a little bit */
     rcRollout.nSeed ^= 0x792A584B;
     
-    InitMatchEquity ( "met/zadeh.xml" );
+    InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
     
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
 			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			      fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir,
-			      nNewWeights,
+			      fNoBearoff ? NULL : GNUBG_BEAROFF,
+			      szDataDirectory, nNewWeights,
 			      fShowProgress ? BearoffProgress : NULL ) ) < 0 )
 	exit( EXIT_FAILURE );
     else if( n > 0 && !nNewWeights ) {
@@ -4596,7 +4597,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	outputx();
     }
 #if USE_GUILE
-    GuileInitialise( pchDataDir );
+    GuileInitialise( szDataDirectory );
 #endif
     
     if( ( pch = getenv( "LOGNAME" ) ) )
