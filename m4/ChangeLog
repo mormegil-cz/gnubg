@@ -1,3 +1,7 @@
+Sat Dec  7 22:45:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* Makefile.am: add new files.
+
 Wed Sep 11 22:22:43 2002  Gary Wong  <gtw@research.att.com>
 
 	* gettext.m4, gtk.m4, gtk-2.0.m4: New files.
