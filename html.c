@@ -1967,7 +1967,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf,
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
   if ( ! GetDPEq ( NULL, NULL, pci ) ) return; /* cube not available */
 
-  cd = FindBestCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
+  cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
 
   fActual = fDouble > 0;
   fClose = isCloseCubedecision ( arDouble ); 
