@@ -1,3 +1,8 @@
+Sun Jul 27 01:46:23 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (CommandExportHTMLImages): render board label pictures
+	correctly.
+
 Sun Jul 27 01:20:51 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Update board labels dynamically.

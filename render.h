@@ -82,6 +82,12 @@ extern void AlphaBlend( unsigned char *puchDest, int nDestStride,
 			unsigned char *puchBack, int nBackStride,
 			unsigned char *puchFore, int nForeStride,
 			int cx, int cy );
+extern void AlphaBlendClip( unsigned char *puchDest, int nDestStride,
+			    int xDest, int yDest, int cxDest, int cyDest,
+			    unsigned char *puchBack, int nBackStride,
+			    int xBack, int yBack,
+			    unsigned char *puchFore, int nForeStride,
+			    int xFore, int yFore, int cx, int cy );
 extern void RefractBlend( unsigned char *puchDest, int nDestStride,
 			  unsigned char *puchBack, int nBackStride,
 			  unsigned char *puchFore, int nForeStride,
@@ -120,6 +126,11 @@ extern void RenderImages( renderdata *prd, renderimages *pri );
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
 			  unsigned char* puch1, int nStride );
 #endif
+
+extern void
+RenderBoardLabels( renderdata *prd, 
+                   unsigned char *achLo, unsigned char *achHi, int nStride );
+
 extern void FreeImages( renderimages *pri );
     
 extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,

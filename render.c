@@ -312,7 +312,7 @@ extern void AlphaBlend( unsigned char *puchDest, int nDestStride,
     }
 }
 
-static void AlphaBlendClip( unsigned char *puchDest, int nDestStride,
+extern void AlphaBlendClip( unsigned char *puchDest, int nDestStride,
 			    int xDest, int yDest, int cxDest, int cyDest,
 			    unsigned char *puchBack, int nBackStride,
 			    int xBack, int yBack,
