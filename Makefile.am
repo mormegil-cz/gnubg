@@ -23,7 +23,7 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
 INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@
 gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
-gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lX11 -lXmu @X_EXTRA_LIBS@ \
+gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
 	$(COMMON_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 endif

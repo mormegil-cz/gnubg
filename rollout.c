@@ -314,7 +314,7 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 	rt = BASIC;
     
     for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-	arResult[ i ] = arVariance[ i ] = 0.0f;
+	arResult[ i ] = arVariance[ i ] = arMu[ i ] = 0.0f;
     
     for( i = 0; i < cGames; i++ ) {
 	memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],

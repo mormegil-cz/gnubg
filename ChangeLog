@@ -1,3 +1,12 @@
+Mon Jun 19 20:39:36 2000  Oystein Johansen <oeysteij@online.no>
+
+        * rollout.c: Fixed Cygwin bug
+
+        * Makefile.am: Changed the linking order of the X11 libraries
+        to make it easyer to compile for Win32/Cygwin
+
+        * /lib/rand_r.h: Don't include the prototype in Cygwin
+ 
 Tue Jun 13 10:47:36 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* show.c (CommandShowThorp): deleted duplicate line.

@@ -78,7 +78,7 @@ bin_PROGRAMS = gnubg
 @NOX_TRUE@gnubg_SOURCES = $(COMMON_SOURCES)
 @NOX_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h
 @NOX_TRUE@gnubg_LDADD = $(COMMON_LIBS)
-@NOX_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lX11 -lXmu @X_EXTRA_LIBS@ 	$(COMMON_LIBS)
+@NOX_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 	$(COMMON_LIBS)
 @NOX_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 @NOX_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 
