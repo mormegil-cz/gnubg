@@ -391,7 +391,10 @@ PythonCommand( PyObject* self IGNORE, PyObject *args ) {
 
   PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
   HandleCommand( sz, acTop );
-  NextTurn( FALSE );
+  fNextTurn = TRUE;
+  while( fNextTurn ) {
+    NextTurn( TRUE );
+  }
   outputx();
   free( sz );
   PortableSignalRestore( SIGINT, &sh );
