@@ -417,7 +417,7 @@ extern char *pcProgress;
 extern char *aszVersion[], *szHomeDirectory, *szDataDirectory;
 
 extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
-    *aszLuckTypeAbbr[];
+    *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
