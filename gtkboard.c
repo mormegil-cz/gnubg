@@ -437,8 +437,7 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
     
     int x, y, orient;
 #if !USE_GTK2
-    int two_chars, lbearing[ 2 ], width[ 2 ], ascent[ 2 ], descent[ 2 ],
-	orient, n;
+    int two_chars, lbearing[ 2 ], width[ 2 ], ascent[ 2 ], descent[ 2 ], n;
     char cube_text[ 3 ];
 #endif
     

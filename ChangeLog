@@ -1,3 +1,8 @@
+Thu Sep 19 11:35:41 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_init): [!USE_GTK2] Avoid redeclating `orient'.
+	(Reported by Nardy Pillards.)
+
 Wed Sep 18 17:42:55 2002  Gary Wong  <gtw@gnu.org>
 
 	* sgf.c (CommandSavePosition): New function.
