@@ -1,3 +1,7 @@
+Wed Apr 24 18:01:49 2002  Øystein Johansen <oeysteij@online.no>
+
+        * eval.c (FindBestMovePlied): Pay attention to fNoOnePlyPruning.
+
 Mon Apr 22 19:04:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix problem with cube analysis not being restored.

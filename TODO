@@ -25,7 +25,6 @@ duplication of effort and to make sure our changes merge easily.
   used for the internal evaluations of deep searches for a significant
   speed increase.  See FindBestMoveInEval() in eval.c from fibs2html.
 ** Consider making EvalEfficiency() more sophisticated.
-** Make FindBestMove pay attention to if 'No 1-ply pruning' is selected.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
