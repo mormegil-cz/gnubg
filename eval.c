@@ -56,6 +56,7 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "matchequity.h"
+#include "i18n.h"
 
 #if WIN32
 #define BINARY O_BINARY
@@ -857,11 +858,16 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 			 WEIGHTS_VERSION " is required,\nbut these weights "
 			 "are %s)\n", szWeights, szFileVersion );
 	    else {
+
+                PushLocale ( "C" );
+
 		if( !( fReadWeights =
 		       !NeuralNetLoad( &nnContact, pfWeights ) &&
 		       !NeuralNetLoad( &nnRace, pfWeights ) &&
 		       !NeuralNetLoad( &nnCrashed, pfWeights ) ) )
 		    perror( szWeights );
+
+                PopLocale ();
 
 		fclose( pfWeights );
 	    }

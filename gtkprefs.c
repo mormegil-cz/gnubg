@@ -32,6 +32,7 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
+#include "i18n.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -648,6 +649,8 @@ static int SetColourARSS( BoardData *bd, char *sz, int i ) {
 	bd->aarColour[ i ][ 1 ] = col.green / 65535.0f;
 	bd->aarColour[ i ][ 2 ] = col.blue / 65535.0f;
 
+        PushLocale ( "C" );
+
 	if( pch ) {
 	    /* alpha */
 	    bd->aarColour[ i ][ 3 ] = atof( pch );
@@ -683,6 +686,8 @@ static int SetColourARSS( BoardData *bd, char *sz, int i ) {
 		*pch++ = 0;
 	} else
 	    bd->arExponent[ i ] = 10.0f;	
+
+        PopLocale ();
 
 	return 0;
     }
@@ -771,7 +776,7 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	/* light=azimuth;elevation */
 	float rAzimuth, rElevation;
 
-	if( sscanf( szValue, "%f;%f", &rAzimuth, &rElevation ) < 2 )
+	if( lisscanf( szValue, "%f;%f", &rAzimuth, &rElevation ) < 2 )
 	    fValueError = TRUE;
 	else {
 	    if( rElevation < 0.0f )
@@ -818,6 +823,8 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	180 / M_PI;
     if( bd->arLight[ 1 ] < 0 )
 	rAzimuth = 360 - rAzimuth;
+
+    PushLocale ( "C" );
     
     sprintf( sz, "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
@@ -852,6 +859,8 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->aanBoardColour[ 2 ][ 2 ], bd->aSpeckle[ 2 ] / 128.0f,
 	     bd->aanBoardColour[ 3 ][ 0 ], bd->aanBoardColour[ 3 ][ 1 ], 
 	     bd->aanBoardColour[ 3 ][ 2 ], bd->aSpeckle[ 3 ] / 128.0f );
+
+    PopLocale ();
 
     return sz;
 }

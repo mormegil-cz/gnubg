@@ -35,6 +35,7 @@
 #include "analysis.h"
 #include "positionid.h"
 #include "sgf.h"
+#include "i18n.h"
 
 static char *szFile;
 static int fError;
@@ -92,10 +93,13 @@ static list *LoadCollection( char *sz ) {
     
     fError = FALSE;
     SGFErrorHandler = ErrorHandler;
+
+    PushLocale ( "C" );
     
     if( strcmp( sz, "-" ) ) {
 	if( !( pf = fopen( sz, "r" ) ) ) {
 	    perror( sz );
+            PopLocale ();
 	    return NULL;
 	}
 	szFile = sz;
@@ -140,10 +144,12 @@ static list *LoadCollection( char *sz ) {
 	    fError = FALSE; /* we always want to see this one */
 	    ErrorHandler( "warning: no backgammon games in SGF file", TRUE );
 	    free( plCollection );
+            PopLocale ();
 	    return NULL;
 	}
     }
     
+    PopLocale ();
     return plCollection;
 }
 
@@ -1224,6 +1230,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
     int i, j, anBoard[ 2 ][ 25 ];
 
     updateStatisticsGame ( plGame );
+    PushLocale ( "C" );
     
     pl = plGame->plNext;
     pmr = pl->p;
@@ -1372,6 +1379,8 @@ static void SaveGame( FILE *pf, list *plGame ) {
        player to move, add a PL property */
 
     fputs( ")\n", pf );
+
+    PopLocale ();
 }
 
 extern void CommandSaveGame( char *sz ) {
