@@ -63,6 +63,11 @@ static int aaanPositions[ 2 ][ 30 ][ 3 ] = { {
 
 #if HAVE_FREETYPE
 FT_Library ftl;
+
+#if ( FREETYPE_MINOR < 1 ) || ( ( FREETYPE_MINOR == 1 ) && ( FREETYPE_PATCH < 3 ) )
+#define FT_GLYPH_FORMAT_BITMAP ft_glyph_format_bitmap
+#define FT_PIXEL_MODE_GRAY ft_pixel_mode_grays
+#endif
 #endif
 
 static inline unsigned char clamp( int n ) {

@@ -1,4 +1,7 @@
-Wed Dec 11 17:18:07 2002  Gary Wong  <gtw@gnu.org>
+Wed Dec 11 17:30:02 2002  Gary Wong  <gtw@gnu.org>
+
+	* render.c: Add #defines for deprecated constants, for compatibility
+	with freetype2 before 2.1.3.
 
 	* boards.xml: Remove "translucency=" parameters, and change some
 	opacities.  (Reported by Nardy Pillards.)
