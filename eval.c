@@ -69,6 +69,11 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies, int fCheckAutoRedoubles);
 
+extern void
+CalcCubefulEquity ( float arCF[ 4 ], positionclass pc,
+                    float arOutput[ NUM_OUTPUTS ], 
+                    int nPlies, int fDT, cubeinfo *pci, int fMove );
+
 static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
@@ -270,6 +275,9 @@ static float rCubeX = 2.0/3.0;
 
 cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
 			      { 1.0, 1.0, 1.0, 1.0 } };
+
+char *aszEvalType[] = 
+   { "No evaluation", "Neural net evaluation", "Rollout" };
 
 static evalcontext ecBasic = { 0, 0, 0, 0, FALSE, 0.0, TRUE };
 
@@ -1765,7 +1773,7 @@ barPrimeBackGame(int anBoard[ 2 ][ 25 ])
 extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
 
     int i, nOppBack = -1, nBack = -1;
-    
+
     for( i = 0; i < 25; i++ ) {
 	if( anBoard[ 0 ][ i ] )
 	    nOppBack = i;
@@ -3049,12 +3057,23 @@ static int ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
     ci.fMove = ! ci.fMove;
     
     if ( pec->fCubeful ) {
+
+         /*
+        if ( EvaluatePositionCubeful2 ( anBoardTemp, arEval, arEvalCf, &ci,
+                                       pec, nPlies, nPlies,
+                                        FALSE, &ci ) ) 
+          return -1;
+
+         */
+
         if ( EvaluatePositionCubeful ( anBoardTemp, arEvalCf, arEval, &ci,
                                        pec, nPlies ) ) 
 	    return -1;
-	
-        InvertEvaluation ( arEval );
-        InvertEvaluationCf ( arEvalCf );
+
+
+      InvertEvaluation ( arEval );
+      InvertEvaluationCf ( arEvalCf );
+
     } else {
         if( EvaluatePositionCache( anBoardTemp, arEval, &ci, pec, nPlies,
                                    ClassifyPosition( anBoardTemp ) ) )
@@ -3638,7 +3657,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     GetCubeActionSz ( arCfOutput, szOutput, pci, fOutputMWC, fOutputInvert );
 
   }
-  
+
   return 0;
 }
 
@@ -4131,6 +4150,62 @@ SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove,
 	SetCubeInfoMoney( pci, nCube, fCubeOwner, fMove, fJacoby, fBeavers );
 }
 
+
+static cubedecision
+FindBestCubeDecision ( float arCfOutput[] ) {
+
+  if ( ( arCfOutput[ OUTPUT_TAKE ] >= arCfOutput[ OUTPUT_NODOUBLE ] ) &&
+       ( arCfOutput[ OUTPUT_DROP ] >= arCfOutput[ OUTPUT_NODOUBLE ] ) ) {
+
+    /* we have a double */
+
+    if ( arCfOutput[ OUTPUT_TAKE ] < arCfOutput[ OUTPUT_DROP ] ) {
+        /* ...take */
+        arCfOutput[ OUTPUT_OPTIMAL ] = arCfOutput[ OUTPUT_TAKE ];
+        return DOUBLE_TAKE;
+    }
+    else {
+      /* ...pass */
+      arCfOutput[ OUTPUT_OPTIMAL ] = arCfOutput[ OUTPUT_TAKE ];
+      return DOUBLE_PASS;
+    }
+  }
+  else {
+    
+    /* no double */
+
+    arCfOutput [ OUTPUT_OPTIMAL ] = arCfOutput[ OUTPUT_NODOUBLE ];
+
+    if ( arCfOutput [ OUTPUT_NODOUBLE ] > arCfOutput [ OUTPUT_TAKE ] ) {
+      
+      if ( arCfOutput [ OUTPUT_NODOUBLE ] > arCfOutput [ OUTPUT_DROP ] )
+        return TOOGOOD_TAKE; 
+      else
+        return NODOUBLE_TAKE;
+
+    } else
+      return TOOGOOD_PASS;
+  }
+}
+
+
+extern int
+FindCubeDecision ( cubedecision *pcd, float arCfOutput[],
+                   float arClOutput[], int anBoard[ 2 ][ 25 ],
+                   cubeinfo *pci, evalcontext *pec ) {
+
+  if ( EvaluatePositionCubeful ( anBoard, arCfOutput, arClOutput,
+                                 pci, pec, pec->nPlies ) )
+     return -1;
+
+  *pcd = FindBestCubeDecision ( arCfOutput );
+
+  return 0;
+
+}
+  
+
+
 extern int 
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
                          float arClOutput[ NUM_OUTPUTS ],
@@ -4382,6 +4457,7 @@ fDoCubeful ( cubeinfo *pci ) {
 
     
 extern int
+
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
                           float arClOutput[ NUM_OUTPUTS ],
                           cubeinfo *pci, evalcontext *pec, 
@@ -5455,6 +5531,373 @@ extern char *FormatEval ( char *sz, evaltype et, evalsetup es ) {
   }
 
   return sz;
+
+}
+
+static int 
+EvaluatePositionCubeful2( int anBoard[ 2 ][ 25 ], float arOutput[],
+                          float arCF[ 4 ],
+                          cubeinfo *pci, evalcontext *pec, int nPlies,
+                          int nPliesTop, int fDTTop, cubeinfo *pciTop ) {
+  int i, n0, n1;
+  int bUsingReduction;
+  positionclass pc;
+
+  pc = ClassifyPosition ( anBoard );
+  
+  if( pc > CLASS_PERFECT && nPlies > 0 ) {
+    /* internal node; recurse */
+
+    float ar[ NUM_OUTPUTS ]; 
+    float arCFNew [ 4 ];
+    int anBoardNew[ 2 ][ 25 ];
+    /* int anMove[ 8 ]; */
+    cubeinfo ciOpp;
+
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+      arOutput[ i ] = 0.0;
+    for ( i = 0; i < 4; i++ )
+      arCF[ i ] = 0.0;
+
+    bUsingReduction = (pec->nReduced && nPlies == 1 && bRecursingFor2ply );
+    if ( !bUsingReduction ) {
+
+      /* full search */
+      for( n0 = 1; n0 <= 6; n0++ )
+	for( n1 = 1; n1 <= n0; n1++ ) {
+	  for( i = 0; i < 25; i++ ) {
+	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	  }
+
+	  if( fAction )
+	      fnAction();
+	  
+	  if( fInterrupt ) {
+	    errno = EINTR;
+	    return -1;
+	  }
+	      
+	  FindBestMovePlied( 0, n0, n1, anBoardNew, pci, pec, 0 );
+	      
+	  SwapSides( anBoardNew );
+
+	  SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, ! pci->fMove,
+		  pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby,
+		  pci->fBeavers );
+	  
+	  bRecursingFor2ply = (nPlies == 2);
+
+	  if( EvaluatePositionCubeful2( anBoardNew, ar, arCFNew, &ciOpp,
+                                        pec, nPlies - 1,
+                                        nPliesTop, fDTTop, pciTop ) )
+              return -1;
+
+	  bRecursingFor2ply = FALSE; /* note, didn't restore it on error */
+	      
+	  if( n0 == n1 ) {
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+	      arOutput[ i ] += ar[ i ];
+            for ( i = 0; i < 4; i++ )
+              arCF[ i ] += arCFNew[ i ];
+          }
+	  else {
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+	      arOutput[ i ] += ar[ i ] * 2.0;
+            for ( i = 0; i < 4; i++ )
+              arCF[ i ] += 2.0 * arCFNew[ i ];
+          }
+	}
+
+      arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
+	  
+      ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
+      arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
+      arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
+	  
+      ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
+      arOutput[ OUTPUT_WINBACKGAMMON ] =
+	arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
+
+      if ( pci->nMatchTo ) {
+        for ( i = 0; i < 4; i++ )
+          arCF[ i ] = 1.0 - arCF[ i ] / 36.0;
+      }
+      else {
+        for ( i = 0; i < 4; i++ )
+          arCF[ i ] = - arCF[ i ] / 36.0;
+      }
+
+
+    } else {
+      /* reduced search */
+        laRollList_t *rolls = NULL;
+        float arVariationOutput[ NUM_OUTPUTS ];
+        float arCFVariation[ 4 ];
+        float rTemp;
+        int r, w, sumW;
+        int n0, n1;
+
+        /* set up reduction group */
+        pec->nReduced = 3;  /* hack: other support not added yet */
+        switch ( pec->nReduced ) {
+        case 3:
+                nReductionGroup = (nReductionGroup + 1) % 3;
+                rolls = &thirdLists[ nReductionGroup ];
+                break;
+        default:
+                assert( 0 );
+                break;
+        }
+
+        /* do 0-ply eval for each roll */
+        sumW = 0;
+        for ( r=0; r <= rolls->numRolls; r++ ) {
+                n0 = rolls->d1[r];
+                n1 = rolls->d2[r];
+                w  = rolls->wt[r];
+
+                for( i = 0; i < 25; i++ ) {
+                        anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+                        anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+                }
+
+                if( fAction )
+                        fnAction();
+
+                if( fInterrupt ) {
+                        errno = EINTR;
+                        return -1;
+                }
+
+                FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0 );
+
+                SwapSides( anBoardNew );
+
+                SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, !pci->fMove,
+                        pci->nMatchTo, pci->anScore, pci->fCrawford,
+                        pci->fJacoby, pci->fBeavers );
+
+                /* Evaluate at 0-ply */
+                if( EvaluatePositionCubeful2( anBoardNew, arVariationOutput,
+                                              arCFVariation , &ciOpp,
+                                              pec, 0,
+                                              nPliesTop, fDTTop, pciTop ) )
+                  return -1;
+
+                for( i = 0; i < NUM_OUTPUTS; i++ )
+                        arOutput[ i ] += w * arVariationOutput[ i ];
+                for ( i = 0; i < 4; i++ )
+                  arCF[ i ] += w * arCFVariation[ i ];
+                sumW += w;
+        }
+
+        /* normalize */
+        for ( i = 0; i < NUM_OUTPUTS; i++ )
+                arOutput[ i ] /= sumW;
+
+        /* flop eval */
+        arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ];
+
+        rTemp = arOutput[ OUTPUT_WINGAMMON ];
+        arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
+        arOutput[ OUTPUT_LOSEGAMMON ] = rTemp;
+
+        rTemp = arOutput[ OUTPUT_WINBACKGAMMON ];
+        arOutput[ OUTPUT_WINBACKGAMMON ] = arOutput[ OUTPUT_LOSEBACKGAMMON ];
+        arOutput[ OUTPUT_LOSEBACKGAMMON ] = rTemp;
+
+
+        if ( pci->nMatchTo ) {
+          for ( i = 0; i < 4; i++ )
+            arCF[ i ] = 1.0 - arCF[ i ] / sumW;
+        }
+        else {
+          for ( i = 0; i < 4; i++ )
+            arCF[ i ] = - arCF[ i ] / sumW;
+        }
+
+
+
+    }
+  } else {
+    /* at leaf node; use static evaluation */
+
+    /* Add cube positions to list */
+
+    EvaluatePosition ( anBoard, arOutput, pci, 0 );
+
+    if( pec->rNoise )
+	for( i = 0; i < NUM_OUTPUTS; i++ )
+	    arOutput[ i ] += Noise( pec, anBoard, i );
+    
+    SanityCheck( anBoard, arOutput );
+
+    rCubeX = EvalEfficiency ( anBoard, pc );
+    CalcCubefulEquity ( arCF, pc, arOutput, nPliesTop, fDTTop, pciTop,
+                        ! (nPliesTop % 2) );
+
+  }
+
+  return 0;
+
+}
+
+
+extern void
+CalcCubefulEquity ( float arCF[ 4 ], positionclass pc,
+                    float arOutput[ NUM_OUTPUTS ], 
+                    int nPlies, int fDT, cubeinfo *pci, int fMax ) {
+
+  float rND, rDT, rDP, r;
+  int fCube;
+  float arCFTemp[ 4 ];
+  cubeinfo ci;
+
+  if ( ! nPlies ) {
+
+    /* leaf node */
+
+    if ( pc == CLASS_OVER ||
+         ( pci->nMatchTo && ! fDoCubeful( pci ) ) ) {
+
+      /* cubeless */
+
+      rND = ( pci->nMatchTo ) ?
+        eq2mwc ( Utility ( arOutput, pci ), pci ) :
+        Utility ( arOutput, pci );
+
+    }
+    else {
+
+      /* cubeful */
+
+      rND = ( pci->nMatchTo ) ?
+        Cl2CfMatch ( arOutput, pci ) :
+        Cl2CfMoney ( arOutput, pci );
+
+    }
+
+  }
+  else {
+
+    /* internal node; recurse */
+
+    SetCubeInfo ( &ci, pci->nCube, pci->fCubeOwner, ! pci->fMove,
+                  pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby,
+                  pci->fBeavers );
+
+    CalcCubefulEquity ( arCFTemp, pc, arOutput, nPlies - 1, TRUE, &ci, 
+                        ! fMax );
+    rND = arCFTemp[ 0 ];
+
+  }
+
+  GetDPEq ( &fCube, &rDP, pci );
+
+  if ( fCube && fDT ) {
+
+    /* double, take */
+
+    if ( ! nPlies ) {
+
+      SetCubeInfo ( &ci, 2 * pci->nCube, ! pci->fMove, pci->fMove,
+                    pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby,
+                    pci->fBeavers );
+
+      /* leaf node */
+
+      if ( pc == CLASS_OVER ||
+           ( pci->nMatchTo && ! fDoCubeful( &ci ) ) ) {
+
+        /* cubeless */
+
+        rDT = ( pci->nMatchTo ) ?
+          eq2mwc ( Utility ( arOutput, &ci ), &ci ) :
+          2.0 * Utility ( arOutput, &ci );
+
+      }
+      else {
+
+        /* cubeful */
+
+        rDT = ( pci->nMatchTo ) ?
+          Cl2CfMatch ( arOutput, &ci ) :
+          2.0 * Cl2CfMoney ( arOutput, &ci );
+
+      }
+
+    }
+    else {
+
+      /* internal node; recurse */
+
+      SetCubeInfo ( &ci, 2 * pci->nCube, ! pci->fMove, ! pci->fMove,
+                    pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby,
+                    pci->fBeavers );
+
+      CalcCubefulEquity ( arCFTemp, pc, arOutput, nPlies - 1, TRUE, &ci,
+                        ! fMax );
+
+      if ( ! ci.nMatchTo ) 
+        rDT = 2.0 * arCFTemp[ 0 ];
+      else
+        rDT = arCFTemp[ 0 ];
+
+    }
+
+    if ( fMax ) {
+
+      /* maximize my equity */
+
+      if ( rDP > rND && rDT > rND ) {
+
+        /* it's a double */
+
+        if ( rDT >= rDP )
+          r = rDP; /* pass */
+        else
+          r = rDT; /* take */
+        
+      }
+      else
+        r = rND; /* no double */
+      
+    } 
+    else {
+
+      /* minimize my equity */
+
+      if ( pci->nMatchTo )
+        rDP = 1.0 - rDP;
+      else
+        rDP = - rDP;
+
+      if ( rDP < rND && rDT < rND ) {
+        
+        /* it's a double */
+
+        if ( rDT < rDP )
+          r = rDP; /* pass */
+        else
+          r = rDT; /* take */
+
+      }
+      else
+        r= rND; /* no double */
+
+    }
+  }
+  else {
+    r = rND;
+    rDT = 0.0;
+  }
+
+  arCF[ 0 ] = r;
+  arCF[ 1 ] = rND;
+  arCF[ 2 ] = rDT;
+  arCF[ 3 ] = rDP;
 
 }
 

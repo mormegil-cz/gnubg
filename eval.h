@@ -22,6 +22,8 @@
 #ifndef _EVAL_H_
 #define _EVAL_H_
 
+#include "dice.h"
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -35,7 +37,7 @@
 #define WEIGHTS_MAGIC_BINARY 472.3782f
 
 #define NUM_OUTPUTS 5
-#define NUM_ROLLOUT_OUTPUTS 6 /* Includes equity */
+#define NUM_ROLLOUT_OUTPUTS 7
 #define NUM_CUBEFUL_OUTPUTS 4
 
 #define BETA_HIDDEN 0.1
@@ -49,6 +51,7 @@
 
 #define OUTPUT_EQUITY 5 /* NB: neural nets do not output equity, only
 			   rollouts do. */
+#define OUTPUT_CUBEFUL_EQUITY 6
 
 #define OUTPUT_OPTIMAL 0 /* Cubeful evalutions */
 #define OUTPUT_NODOUBLE 1
@@ -90,14 +93,34 @@ typedef struct _evalcontext {
     int fDeterministic;
 } evalcontext;
 
+
+typedef struct _rolloutcontext {
+
+  evalcontext aecCube[ 2 ], aecChequer [ 2 ]; /* evaluation parameters */
+
+  int fCubeful; /* Cubeful rollout */
+  int fVarRedn; /* variance reduction */
+
+  int nTruncate; /* truncation */
+  int nTrials; /* number of rollouts */
+
+  rng rngRollout;
+  int nSeed;
+} rolloutcontext;
+
+
 typedef enum _evaltype {
   EVAL_NONE, EVAL_EVAL, EVAL_ROLLOUT
 } evaltype;
 
-typedef union _evalsetup {
+typedef struct _evalsetup {
   evalcontext ec;
-  /* rolloutcontext rc; */
+  rolloutcontext rc;
 } evalsetup;
+
+typedef enum _cubedecision {
+  DOUBLE_TAKE, DOUBLE_PASS, NODOUBLE_TAKE, TOOGOOD_TAKE, TOOGOOD_PASS
+} cubedecision;
 
 
 typedef struct _move {
@@ -134,6 +157,7 @@ typedef struct _cubeinfo {
 extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
 extern cubeinfo ciCubeless;
+extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -274,5 +298,16 @@ eq2mwc ( float rEq, cubeinfo *ci );
  
 extern char 
 *FormatEval ( char *sz, evaltype et, evalsetup es );
+
+static int 
+EvaluatePositionCubeful2( int anBoard[ 2 ][ 25 ], float arOutput[],
+                          float arCF[ 4 ],
+                          cubeinfo *pci, evalcontext *pec, int nPlies,
+                          int nPliesTop, int fDTTop, cubeinfo *pciTop );
+
+extern int
+FindCubeDecision ( cubedecision *pcd, float arCfOutput[],
+                   float arClOutput[], int anBoard[ 2 ][ 25 ],
+                   cubeinfo *pci, evalcontext *pec );
 
 #endif
