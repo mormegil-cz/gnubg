@@ -1,3 +1,11 @@
+Mon Oct 14 21:14:08 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Set priorities for Windows version of gnubg.
+	Us unix user can settle with nice :-)
+
+	* gnubg.c: new commands "set priority xxx".
+	* set.c (CommandSetPriorityXXX): new commands.	
+
 Mon Oct 14 20:29:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (HTMLBoardHeader): fix typos.

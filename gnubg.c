@@ -171,6 +171,12 @@ int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int fMessage = FALSE;
+#ifdef WIN32
+int fThreadPriority = THREAD_PRIORITY_NORMAL;
+#else /* WIN32 */
+int fThreadPriority = -1;
+#endif /* ! WIN32 */
+
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
@@ -988,6 +994,22 @@ command cER = {
     N_("Set default path for loading match equity files"), 
     szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
+#ifdef WIN32
+}, acSetPriority[] = {
+  { "idle", CommandSetPriorityIdle, 
+    N_("Set priority to IDLE_PRIORITY_CLASS"), NULL, NULL },
+  { "belownormal", CommandSetPriorityBelowNormal, 
+    N_("Set priority to BELOW_NORMAL_PRIORITY_CLASS"), NULL, NULL },
+  { "normal", CommandSetPriorityNormal, 
+    N_("Set priority to NORMAL_PRIORITY_CLASS"), NULL, NULL },
+  { "abovenormal", CommandSetPriorityAboveNormal, 
+    N_("Set priority to ABOVE_NORMAL_PRIORITY_CLASS"), NULL, NULL },
+  { "high", CommandSetPriorityHigh, 
+    N_("Set priority to HIGH_PRIORITY_CLASS"), NULL, NULL },
+  { "realtime", CommandSetPriorityRealtime, 
+    N_("Set priority to REALTIME_PRIORITY_CLASS"), NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
+#endif /* WIN32 */
 #ifdef USE_SOUND
 }, acSetSoundSystem[] = {
   { "artsc", CommandSetSoundSystemArtsc, 
@@ -1124,6 +1146,11 @@ command cER = {
       "players"), szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
       N_("Set whether this is a post-Crawford game"), szONOFF, &cOnOff },
+#ifdef WIN32
+    { "priority", NULL, 
+      N_("Set the priority of gnubg running under Windows"), 
+      NULL, acSetPriority },
+#endif /* WIN32 */
     { "prompt", CommandSetPrompt, N_("Customise the prompt gnubg prints when "
       "ready for commands"), szPROMPT, NULL },
     { "record", CommandSetRecord, N_("Set whether all games in a session are "
@@ -4300,6 +4327,33 @@ extern void CommandSaveSettings( char *szParam ) {
     
 
 #endif /* USE_SOUND */
+
+#ifdef WIN32
+
+    switch ( fThreadPriority ) {
+    case THREAD_PRIORITY_ABOVE_NORMAL:
+      fprintf ( pf, "set priority abovenormal\n" );
+      break;
+    case THREAD_PRIORITY_NELOW_NORMAL:
+      fprintf ( pf, "set priority below normal\n" );
+      break;
+    case THREAD_PRIORITY_NORMAL:
+      fprintf ( pf, "set priority normal\n" );
+      break;
+    case THREAD_PRIORITY_IDLE:
+      fprintf ( pf, "set priority idle\n" );
+      break;
+    case THREAD_PRIORITY_HIGH:
+      fprintf ( pf, "set priority high\n" );
+      break;
+    case THREAD_PRIORITY_REALTIME:
+      fprintf ( pf, "set priority realtime\n" );
+      break;
+    default:
+      break;
+    }
+      
+#endif /* WIN32 */
 
     /* the end */
 

@@ -277,6 +277,7 @@ extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
+extern int fThreadPriority;
 
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
@@ -742,6 +743,12 @@ extern void CommandAccept( char * ),
     CommandSetPlayerPubeval( char * ),
     CommandSetPlayer( char * ),
     CommandSetPostCrawford( char * ),
+    CommandSetPriorityIdle ( char * ),
+    CommandSetPriorityBelowNormal ( char * ),
+    CommandSetPriorityNormal ( char * ),
+    CommandSetPriorityAboveNormal ( char * ),
+    CommandSetPriorityHigh ( char * ),
+    CommandSetPriorityRealtime ( char * ),
     CommandSetPrompt( char * ),
     CommandSetRecord( char * ),
     CommandSetRNG( char * ),

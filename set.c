@@ -56,6 +56,11 @@
 
 #include "sound.h"
 
+#ifdef WIN32
+#include<windows.h>
+#endif
+
+
 static int iPlayerSet;
 
 static char szEQUITY[] = N_ ("<equity>"),
@@ -3108,5 +3113,70 @@ CommandSetSoundSoundTake ( char *sz ) {
 
 }
 
+
+#endif
+
+#ifdef WIN32
+
+static void
+Win32SetPriority ( const int tp, const char *sz ) {
+
+  if ( SetThreadPriority(GetCurrentThread(), tp ) ) {
+    outputf ( _("Priority of program set to: %s\n"), sz );
+    fThreadPriority = tp;
+  }
+  else
+    outputf ( _("Changing priority failed (trying to set priority %s)\n",
+                sz ) );
+
+}
+
+extern void
+CommandSetPriorityIdle ( char *sz ) {
+
+  Win32SetPriority ( THREAD_IDLE_PRIORITY_CLASS, 
+                     "IDLE_PRIORITY_CLASS" );
+
+}
+
+extern void
+CommandSetPriorityBelowNormal ( char *sz ) {
+
+  Win32SetPriority ( THREAD_BELOW_NORMAL_PRIORITY_CLASS, 
+                     "BELOW_NORMAL_PRIORITY_CLASS" );
+
+}
+
+extern void
+CommandSetPriorityNormal ( char *sz ) {
+
+  Win32SetPriority ( THREAD_NORMAL_PRIORITY_CLASS, 
+                     "NORMAL_PRIORITY_CLASS" );
+
+}
+
+extern void
+CommandSetPriorityAboveNormal ( char *sz ) {
+
+  Win32SetPriority ( THREAD_ABOVE_NORMAL_PRIORITY_CLASS, 
+                     "ABOVE_NORMAL_PRIORITY_CLASS" );
+
+}
+
+extern void
+CommandSetPriorityHigh ( char *sz ) {
+
+  Win32SetPriority ( THREAD_HIGH_PRIORITY_CLASS, , 
+                     "HIGH_PRIORITY_CLASS" );
+
+}
+
+extern void
+CommandSetPriorityRealtime ( char *sz ) {
+
+  Win32SetPriority ( THREAD_REALTIME_PRIORITY_CLASS, 
+                     "REALTIME_PRIORITY_CLASS" );
+
+}
 
 #endif
