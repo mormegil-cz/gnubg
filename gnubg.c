@@ -1934,7 +1934,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	    outputc( i == pmr->n.iMove ? '*' : ' ' );
 	    output( FormatMoveHint( szBuf, &ms, &pmr->n.ml, i,
 				    i != pmr->n.iMove ||
-				    i != pmr->n.ml.cMoves - 1 ) );
+				    i != pmr->n.ml.cMoves - 1, TRUE, TRUE ) );
+
 	}
 	
 	break;
@@ -2379,12 +2380,112 @@ extern void CommandHelp( char *sz ) {
 }
 
 extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
-			     int i, int fRankKnown ) {
+			     int i, int fRankKnown,
+                             int fDetailProb, int fShowParameters ) {
     
     cubeinfo ci;
     char szTemp[ 1024 ], szMove[ 32 ];
+    char *pc;
+    float *ar, *arStdDev;
+    float rEq, rEqTop;
 
     GetMatchStateCubeInfo( &ci, pms );
+
+    strcpy ( sz, "" );
+
+    /* number */
+
+    if ( i && ! fRankKnown )
+      strcat( sz, "   ?? " );
+    else
+      sprintf ( pc = strchr ( sz, 0 ),
+                " %4i. ", i + 1 );
+
+    /* eval */
+
+    sprintf ( pc = strchr ( sz, 0 ),
+              "%-14s   %-28s %s: ",
+              FormatEval ( szTemp, &pml->amMoves[ i ].esMove ),
+              FormatMove( szMove, pms->anBoard, 
+                          pml->amMoves[ i ].anMove ),
+              ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) ?
+              _("Eq.") : _("MWC") );
+
+    /* equity or mwc for move */
+
+    ar = pml->amMoves[ i ].arEvalMove;
+    arStdDev = pml->amMoves[ i ].arEvalStdDev;
+    rEq = pml->amMoves[ i ].rScore;
+    rEqTop = pml->amMoves[ 0 ].rScore;
+    
+    strcat ( sz, OutputEquity ( rEq, &ci, TRUE ) );
+
+    /* difference */
+   
+    if ( i ) 
+      sprintf ( pc = strchr ( sz, 0 ),
+                " (%s)\n",
+                OutputEquityDiff ( rEqTop, rEq, &ci ) );
+    else
+      strcat ( sz, "\n" );
+
+    /* percentages */
+
+    if ( fDetailProb ) {
+
+      switch ( pml->amMoves[ i ].esMove.et ) {
+      case EVAL_EVAL:
+        /* FIXME: add cubeless and cubeful equities */
+        strcat ( sz, "       " );
+        strcat ( sz, OutputPercents ( ar, TRUE ) );
+        strcat ( sz, "\n" );
+        break;
+      case EVAL_ROLLOUT:
+        strcat ( sz, 
+                 OutputRolloutResult ( "     ",
+                                       NULL,
+                                       ( float (*)[ NUM_ROLLOUT_OUTPUTS ] )
+                                       ar,
+                                       ( float (*)[ NUM_ROLLOUT_OUTPUTS ] )
+                                       arStdDev,
+                                       &ci,
+                                       1, 
+                                       pml->amMoves[ i ].esMove.rc.fCubeful ) );
+        break;
+      default:
+        break;
+
+      }
+    }
+
+    /* eval parameters */
+
+    if ( fShowParameters ) {
+
+      switch ( pml->amMoves[ i ].esMove.et ) {
+      case EVAL_EVAL:
+        strcat ( sz, "        " );
+        strcat ( sz, 
+                 OutputEvalContext ( &pml->amMoves[ i ].esMove.ec, TRUE ) );
+        strcat ( sz, "\n" );
+        break;
+      case EVAL_ROLLOUT:
+        strcat ( sz,
+                 OutputRolloutContext ( "        ",
+                                        &pml->amMoves[ i ].esMove.rc ) );
+        break;
+
+      default:
+        break;
+
+      }
+
+    }
+
+    return sz;
+
+#if 0
+
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) {
 	/* output in equity */
@@ -2514,6 +2615,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
     }
 
     return sz;
+#endif
 }
 
 extern void CommandHint( char *sz ) {
@@ -2734,7 +2836,8 @@ extern void CommandHint( char *sz ) {
 #endif
 	
 	for( i = 0; i < n; i++ )
-	    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, TRUE ) );
+	    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, 
+                                    TRUE, TRUE, TRUE ) );
     }
 }
 

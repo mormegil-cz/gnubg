@@ -4558,7 +4558,7 @@ static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
 #endif
 
    for( i = 0; i < n; i++ )
-      strcat( szBuf, FormatMoveHint( szTemp, &ms, pml, i, TRUE ) );
+      strcat( szBuf, FormatMoveHint( szTemp, &ms, pml, i, TRUE, TRUE, TRUE ) );
 
 #ifdef WIN32   
    WinCopy( szBuf ); 

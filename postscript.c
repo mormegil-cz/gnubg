@@ -810,7 +810,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 		    putc( i == pmr->n.iMove ? '*' : ' ', pf );
 		    FormatMoveHint( sz, &msExport, &pmr->n.ml, i,
 				    i != pmr->n.iMove ||
-				    i != pmr->n.ml.cMoves - 1 );
+				    i != pmr->n.ml.cMoves - 1, TRUE, TRUE );
 		    pch = strchr( sz, '\n' );
 		    *pch++ = 0;
 		    fputs( sz, pf );
