@@ -621,6 +621,12 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
 
+    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+	outputl( "It is the computer's turn -- type `play' to force it to "
+		 "move immediately." );
+	return;
+    }
+
     if( fCrawford ) {
 	outputl( "Doubling is forbidden by the Crawford rule (see `help set "
 	      "crawford')." );
@@ -681,6 +687,12 @@ extern void CommandDrop( char *sz ) {
     if( fTurn < 0 || !fDoubled ) {
 	outputl( "The cube must have been offered before you can drop it." );
 
+	return;
+    }
+
+    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+	outputl( "It is the computer's turn -- type `play' to force it to "
+		 "move immediately." );
 	return;
     }
 
@@ -1022,6 +1034,12 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
     
+    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+	outputl( "It is the computer's turn -- type `play' to force it to "
+		 "move immediately." );
+	return;
+    }
+
     nCube <<= 1;
     UpdateSetting( &nCube );    
 
@@ -1058,6 +1076,12 @@ extern void CommandResign( char *sz ) {
     if( fTurn < 0 ) {
 	outputl( "You must be playing a game if you want to resign it." );
 
+	return;
+    }
+
+    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+	outputl( "It is the computer's turn -- type `play' to force it to "
+		 "move immediately." );
 	return;
     }
 
@@ -1189,6 +1213,12 @@ extern void CommandTake( char *sz ) {
     if( fTurn < 0 || !fDoubled ) {
 	outputl( "The cube must have been offered before you can take it." );
 
+	return;
+    }
+
+    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+	outputl( "It is the computer's turn -- type `play' to force it to "
+		 "move immediately." );
 	return;
     }
 
