@@ -295,7 +295,8 @@ void DieColourChanged (GtkWidget *pw, int f)
 	UpdatePreview(pwPreview + PI_DICE0 + f);
 
 #if USE_BOARD3D
-	UpdateColPreview(pc3dDiceId[f]);
+	if (previewType == DT_3D)
+		UpdateColPreview(pc3dDiceId[f]);
 #endif
 }
 
@@ -1695,9 +1696,6 @@ if (rd.fDisplayType == DT_3D)
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pieceTypeCombo)->entry), pieceTypeStr[bd3d.pieceType]);
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(textureTypeCombo)->entry), textureTypeStr[bd3d.pieceTextureType]);
 
-	for(i = 0; i < 2; i++)
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(apwDieColour[i]), rd.afDieColour[i]);
-
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwRoundedEdges ),
                                 rd.roundedEdges );
 
@@ -1792,6 +1790,9 @@ else
   gtk_adjustment_set_value ( GTK_ADJUSTMENT ( padjRound ),
                              1.0f - rd.rRound );
 }
+
+  for(i = 0; i < 2; i++)
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(apwDieColour[i]), rd.afDieColour[i]);
 
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwHinges ), 
                                  rd.fHinges );
