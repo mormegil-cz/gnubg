@@ -50,6 +50,7 @@ Alain Henry
 Jens Hoefkens
 Martin Janke
 Nis Jorgensen
+Petr Kadlec
 Neil Kazaross
 Matija Kejzar
 Bert Van Kerckhove

@@ -1,3 +1,9 @@
+Sun Nov 30 09:56:25 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkbearoff.c, gtkgame.c, gtktheory.c: subst. "iso8859-1" with "*"
+	in font names.
+	(suggested by Petr Kadlec)
+
 Sun Nov 30 09:10:46 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (HintCube): improve logic for determining whether a move

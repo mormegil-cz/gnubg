@@ -7160,10 +7160,10 @@ extern void GTKEval( char *szOutput ) {
 #if WIN32
     /* Windows fonts come out smaller than you ask for, for some reason... */
     pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-14-"
-			"*-*-*-m-*-iso8859-1" );
+			"*-*-*-m-*-*" );
 #else
     pf = gdk_font_load( "-b&h-lucidatypewriter-medium-r-normal-sans-12-"
-			"*-*-*-m-*-iso8859-1" );
+			"*-*-*-m-*-*" );
 #endif
 
     /* FIXME There should be some way to extract the text on Unix as well */
@@ -7488,7 +7488,7 @@ extern void GTKShowVersion( void ) {
     pango_font_description_set_size( ps->font_desc, 64 * PANGO_SCALE );    
 #else
     ps->font_name = g_strdup( "-*-times-medium-r-normal-*-64-*-*-*-p-*-"
-			      "iso8859-1" );
+			      "*" );
 #endif
     gtk_widget_modify_style( pwPrompt, ps );
     gtk_rc_style_unref( ps );
@@ -7511,7 +7511,7 @@ extern void GTKShowVersion( void ) {
     pango_font_description_set_size( ps->font_desc, 8 * PANGO_SCALE );    
 #else
     ps->font_name = g_strdup( "-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-"
-			      "iso8859-1" );
+			      "*" );
 #endif
     gtk_widget_modify_style( pwPrompt, ps );
 
