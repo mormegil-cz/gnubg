@@ -2369,6 +2369,39 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   return 0;
 }
 
+
+static int
+EvalKey ( const evalcontext *pec, const int nPlies,
+          const cubeinfo *pci ) {
+
+  int iKey;
+
+  /* Record the signature of important evaluation settings. */
+  iKey = pec->nReduced | ( nPlies << 3 ) |
+    ( pec->fCubeful << 6 ) | ( ( (int) ( pec->rNoise * 1000 ) ) << 7 );
+
+  /* In match play, the score and cube value and position are important. */
+  if( pci->nMatchTo )
+    iKey ^=
+      ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 17 ) ^
+      ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 21 ) ^
+      ( LogCube( pci->nCube ) << 25 ) ^
+      ( ( pci->fCubeOwner < 0 ? 2 :
+          pci->fCubeOwner == pci->fMove ) << 29 ) ^
+      ( pci->fCrawford << 31 );
+  else if ( pec->fCubeful )
+    /* in cubeful money games the position is important 
+       FIXME: jacoby and beavers does also matter, but we're running out
+       of bits */
+    iKey ^=
+      ( ( pci->fCubeOwner < 0 ? 2 :
+          pci->fCubeOwner == pci->fMove ) << 29 );
+  
+  return iKey;
+
+}
+
+
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
                        cubeinfo *pci, evalcontext *pecx, int nPlies,
@@ -2392,20 +2425,8 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     
     PositionKey( anBoard, ec.auchKey );
 
-    /* Record the signature of important evaluation settings. */
-    ec.nEvalContext = pecx->nReduced | ( nPlies << 3 ) |
-	( pecx->fCubeful << 6 ) | ( ( (int) ( pecx->rNoise * 1000 ) ) << 7 );
+    ec.nEvalContext = EvalKey ( pecx, nPlies, pci );
 
-    /* In match play, the score and cube value and position are important. */
-    if( pci->nMatchTo )
-	ec.nEvalContext ^=
-	    ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 17 ) ^
-	    ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 21 ) ^
-	    ( LogCube( pci->nCube ) << 25 ) ^
-	    ( ( pci->fCubeOwner < 0 ? 2 :
-		pci->fCubeOwner == pci->fMove ) << 29 ) ^
-	    ( pci->fCrawford << 31 );
-    
 #if defined( GARY_CACHE )
     l = EvalCacheHash( &ec );
     
@@ -2414,7 +2435,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     if( ( pec = CacheLookup( &cEval, &ec, &l ) ) ) 
 #endif
       {
-	memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
+	memcpy( arOutput, pec->ar, sizeof ( float ) * NUM_OUTPUTS );
 	
 	return 0;
     }
@@ -2422,7 +2443,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     if( EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies, pc ) )
 	return -1;
     
-    memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
+    memcpy( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
 #if defined( GARY_CACHE )
     return CacheAdd( &cEval, l, &ec, sizeof ec );
 #else
@@ -5612,6 +5633,8 @@ MakeCubePos ( cubeinfo aciCubePos[], const int cci,
 }
 
 
+/* EvaluatePositionCubeful3 is now just a wrapper for ....Cubeful4, which
+   first checks the cache, and then calls ...Cubeful3 */
 
 extern int 
 EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
@@ -5621,7 +5644,77 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
                           cubeinfo *pciMove,
                           evalcontext *pec, int nPlies, int fTop ) {
 
+  int ici;
+  int fAll = TRUE;
+  evalcache ec, *pecx;
+  unsigned long l;
+  int rc;
+  
+  PositionKey ( anBoard, ec.auchKey );
+    
+  /* check cache for existence for earlier calculation */
+  
+  if ( pec->rNoise == 0.0f || pec->fDeterministic ) 
+    
+    for ( ici = 0; ici < cci && fAll; ++ici ) {
 
+      if ( aciCubePos[ ici ].nCube < 0 )
+        continue;
+
+      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ] );
+      
+      if ( ( pecx = CacheLookup ( &cEval, &ec, &l ) ) ) {
+        /* cache hit */
+        memcpy ( arOutput, pecx->ar, sizeof ( float ) * NUM_OUTPUTS );
+        arCubeful[ ici ] = pecx->ar[ OUTPUT_CUBEFUL_EQUITY ];
+        
+      }
+      else
+        fAll = FALSE;
+      
+    }
+
+  /* get equities */
+  
+  if ( ! fAll ) {
+    /* cache miss */
+    if ( EvaluatePositionCubeful4 ( anBoard, arOutput, arCubeful, 
+                                    aciCubePos, 
+                                    cci, pciMove, pec, nPlies, fTop ) )
+      return -1;
+    
+    /* add to cache */
+    
+    for ( ici = 0; ici < cci; ++ici ) {
+
+      if ( aciCubePos[ ici ].nCube < 0 )
+        continue;
+
+      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ] );
+      l = keyToLong ( ec.auchKey, ec.nEvalContext );
+      l = (l & ((cEval.size >> 1)-1)) << 1;
+      memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
+      ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
+      
+      CacheAdd ( &cEval, &ec, l );
+      
+    }
+  }
+
+  return 0;
+  
+}
+
+
+extern int 
+EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
+                          float arOutput[ NUM_OUTPUTS ],
+                          float arCubeful[],
+                          cubeinfo aciCubePos[], int cci, 
+                          cubeinfo *pciMove,
+                          evalcontext *pec, int nPlies, int fTop ) {
+  
+  
   /* calculate cubeful equity */
 
   int i, ici;
