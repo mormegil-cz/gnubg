@@ -2758,6 +2758,8 @@ extern int InitGTK( int *argc, char ***argv ) {
     char sz[ 4096 ];
 #endif
 
+    gtk_set_locale ();
+
     sprintf( sz, "%s/.gnubg.gtkrc", szHomeDirectory );
     if( !access( sz, R_OK ) )
 	gtk_rc_add_default_file( sz );
@@ -3337,7 +3339,7 @@ static void SetAlpha( gpointer *p, guint k, GtkWidget *pw ) {
     if( r >= 0.0f ) {
 	char sz[ 32 ];
 
-	sprintf( sz, "set training alpha %f", r );
+	lisprintf( sz, "set training alpha %f", r );
 	UserCommand( sz );
     }
 }
@@ -3367,7 +3369,7 @@ static void SetAnneal( gpointer *p, guint k, GtkWidget *pw ) {
     if( r >= -5.0f ) {
 	char sz[ 32 ];
 
-	sprintf( sz, "set training anneal %f", r );
+	lisprintf( sz, "set training anneal %f", r );
 	UserCommand( sz );
     }
 }
@@ -3450,7 +3452,7 @@ static void SetThreshold( gpointer *p, guint k, GtkWidget *pw ) {
     if( r >= 0.0f ) {
 	char sz[ 32 ];
 
-	sprintf( sz, "set training threshold %f", r );
+	lisprintf( sz, "set training threshold %f", r );
 	UserCommand( sz );
     }
 }
