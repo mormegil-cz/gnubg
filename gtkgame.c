@@ -6474,7 +6474,7 @@ extern void GTKShowVersion( void ) {
     gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt, FALSE, FALSE, 0 );
 #if GTK_CHECK_VERSION(1,3,10)
     ps->font_desc = pango_font_description_new();
-    pango_font_description_set_family_static( ps->font_desc, "times" );
+    pango_font_description_set_family_static( ps->font_desc, "serif" );
     pango_font_description_set_size( ps->font_desc, 64 * PANGO_SCALE );    
 #else
     ps->font_name = g_strdup( "-*-times-medium-r-normal-*-64-*-*-*-p-*-"
@@ -6497,7 +6497,7 @@ extern void GTKShowVersion( void ) {
 				       "Gary Wong" ), FALSE, FALSE, 4 );
 #if GTK_CHECK_VERSION(1,3,10)
     ps->font_desc = pango_font_description_new();
-    pango_font_description_set_family_static( ps->font_desc, "helvetica" );
+    pango_font_description_set_family_static( ps->font_desc, "sans" );
     pango_font_description_set_size( ps->font_desc, 8 * PANGO_SCALE );    
 #else
     ps->font_name = g_strdup( "-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-"
@@ -8656,6 +8656,13 @@ static void RecordEraseAll( GtkWidget *pw, recordwindowinfo *prwi ) {
     gtk_clist_clear( GTK_CLIST( prwi->pwList ) );
 }
 
+static gint RecordRowCompare( GtkCList *pcl, GtkCListRow *p0,
+			      GtkCListRow *p1 ) {
+
+    return strcasecmp( GTK_CELL_TEXT( p0->cell[ pcl->sort_column ] )->text,
+		       GTK_CELL_TEXT( p1->cell[ pcl->sort_column ] )->text );
+}
+
 /* 0: name [visible]
    1: chequer (20)
    2: cube (20)
@@ -8704,7 +8711,9 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
 		asz[ i ] = "";
 	    
 	    rwi.pwList = pwList = gtk_clist_new_with_titles( 22, asz );
-
+	    gtk_clist_set_compare_func(
+		GTK_CLIST( pwList ), (GtkCListCompareFunc) RecordRowCompare );
+	    
 	    for( i = 0; i < 22; i++ ) {
 		gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i,
 						  TRUE );

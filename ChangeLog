@@ -1,3 +1,8 @@
+Fri Dec 27 16:02:28 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (RecordEraseAll): Sort records case-insensitively
+	(suggested by Albert Silver).
+
 Fri Dec 27 16:21:07 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	* htmlimages (CommandExportHTMLImages): add call to ProgressEnd.
