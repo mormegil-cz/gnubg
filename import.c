@@ -1022,6 +1022,17 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 	    if( *pch++ == '\t' ) {
 		/* we have a move! */
 		if( anRoll[ 0 ] ) {
+
+                    /* check for
+                     * 1	43:  
+                     * 1	43:             <---- check for this line
+                     * 1	43: 13/9, 13/10 
+                     */
+
+                    if ( *(pch+4) == '\n' || !*(pch+4) )
+                       continue;
+                  
+                
 		    pmr = malloc( sizeof( pmr->n ) );
 		    pmr->n.mt = MOVE_NORMAL;
 		    pmr->n.sz = szComment;
@@ -1091,6 +1102,12 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 				/* Apparently SGG files can contain spurious
 				   duplicate moves -- the only thing we can
 				   do is ignore them. */
+
+                                /* this catches:
+                                   1	43: 
+                                   1	43: 13/9, 13/10
+                                   1	43: 13/9, 13/10 */
+
 				anRoll[ 0 ] = 0;
 				continue;
 			    }

@@ -1,3 +1,9 @@
+Wed Dec 18 19:08:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* import.c (ImportSGGGame): try to cope with duplicate rolls
+	in SGG files
+	(reported by Albert Silver)
+
 Wed Dec 18 18:33:37 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Don't use 64 bits longs, as some systems can't print them
