@@ -234,6 +234,8 @@ functions:
   to be ISO 8859-1, and the terminal is locale-dependent. (gary)
 ** "save settings" when using the TTY interface will delete GTK settings
   (e.g. "set appearance") that were there previously.
+** It is possible to give some commands (e.g. "roll", "play") while in edit
+  mode, which messes things up.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

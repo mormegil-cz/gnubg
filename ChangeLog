@@ -1,3 +1,11 @@
+Sat Mar 30 12:35:02 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_set): Don't overwrite the names or scores in
+	edit mode (reported by Ian Shaw).
+	
+	* gtkboard.c (game_set): Fix bug when player 0 is on roll in edit
+	mode.
+
 Sat Mar 30 16:35:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	New structure of "annotate". Allows for separate skills in
@@ -38,7 +46,6 @@ Fri Mar 29 21:17:19 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 	* analysis.c (AnalyzeMove): do analysis only if not analysed
 	already on the same or higher settings.
 	
-
 Thu Mar 28 22:11:41 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	Cache gammon prices for performance.

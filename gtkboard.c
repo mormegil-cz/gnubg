@@ -1701,7 +1701,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
     gchar *dest, buf[ 32 ];
     gint i, *pn, **ppn;
     gint old_board[ 28 ];
-    int old_cube, old_doubled, old_crawford, old_xCube, old_yCube;
+    int old_cube, old_doubled, old_crawford, old_xCube, old_yCube, editing;
     GdkEventExpose event;
     GtkAdjustment *padj0, *padj1;
     
@@ -1752,6 +1752,9 @@ static gint board_set( Board *board, const gchar *board_text ) {
     old_dice[ 3 ] = bd->dice_opponent[ 1 ];
 #endif
     
+    editing = bd->playing &&
+	gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) );
+
     if( strncmp( board_text, "board:", 6 ) )
 	return -1;
     
@@ -1821,41 +1824,39 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	bd->points[ 27 ] = bd->off;
     }
 
-    gtk_entry_set_text( GTK_ENTRY( bd->name0 ), bd->name_opponent );
-    gtk_entry_set_text( GTK_ENTRY( bd->name1 ), bd->name );
-    gtk_label_set_text( GTK_LABEL( bd->lname0 ), bd->name_opponent );
-    gtk_label_set_text( GTK_LABEL( bd->lname1 ), bd->name );
+    if( !editing ) {
+	gtk_entry_set_text( GTK_ENTRY( bd->name0 ), bd->name_opponent );
+	gtk_entry_set_text( GTK_ENTRY( bd->name1 ), bd->name );
+	gtk_label_set_text( GTK_LABEL( bd->lname0 ), bd->name_opponent );
+	gtk_label_set_text( GTK_LABEL( bd->lname1 ), bd->name );
     
-    if( bd->match_to ) {
-	sprintf( buf, "%d", bd->match_to );
-	gtk_label_set_text( GTK_LABEL( bd->match ), buf );
-    } else
-	gtk_label_set_text( GTK_LABEL( bd->match ), "unlimited" );
+	if( bd->match_to ) {
+	    sprintf( buf, "%d", bd->match_to );
+	    gtk_label_set_text( GTK_LABEL( bd->match ), buf );
+	} else
+	    gtk_label_set_text( GTK_LABEL( bd->match ), "unlimited" );
 
-    padj0 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score0 ) );
-    padj1 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score1 ) );
-    padj0->upper = padj1->upper = bd->match_to ? bd->match_to : 65535;
-    gtk_adjustment_changed( padj0 );
-    gtk_adjustment_changed( padj1 );
-    
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
-			       bd->score_opponent );
-    gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
-			       bd->score );
-    sprintf( buf, "%d", bd->score_opponent );
-    gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
-    sprintf( buf, "%d", bd->score );
-    gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
+	padj0 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score0 ) );
+	padj1 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score1 ) );
+	padj0->upper = padj1->upper = bd->match_to ? bd->match_to : 65535;
+	gtk_adjustment_changed( padj0 );
+	gtk_adjustment_changed( padj1 );
+	
+	gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
+				   bd->score_opponent );
+	gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
+				   bd->score );
+	sprintf( buf, "%d", bd->score_opponent );
+	gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
+	sprintf( buf, "%d", bd->score );
+	gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
 
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
-				  bd->crawford_game );
-    gtk_widget_set_sensitive( bd->crawford, bd->match_to > 1 &&
-			      ( bd->score == bd->match_to - 1 ||
-				bd->score_opponent == bd->match_to - 1 ) );
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
+				      bd->crawford_game );
+	gtk_widget_set_sensitive( bd->crawford, bd->match_to > 1 &&
+				  ( bd->score == bd->match_to - 1 ||
+				    bd->score_opponent == bd->match_to - 1 ) );
 
-    /* Don't touch bd->old_board when in edit mode. */
-    if( !bd->playing ||
-	!gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
 	read_board( bd, bd->old_board );
 	update_position_id( bd, bd->old_board );
     }
@@ -2328,6 +2329,8 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) &&
 	pbd->playing && EqualBoards( pbd->old_board, points ) ) {
 	read_board( pbd, old_points );
+	if( pbd->turn < 0 )
+	    SwapSides( old_points );
 	points = old_points;
     } else
 	memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
