@@ -1,3 +1,7 @@
+Wed Sep 29 21:29:45 2004 Oystein Johansen <oystein@gnubg.org>
+	
+	* relational.c: make it compile without gtk
+
 Wed Sep 29 18:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* database.py, relational.c, gtkgame.c: Added more relational
