@@ -187,7 +187,7 @@ void UpdateColourPreview(void *arg)
 		return;
 
 	if (useOpacity)
-		opacityValue = padjOpacity->value / 100.0f;
+		opacityValue = (float)padjOpacity->value / 100.0f;
 
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpAmbient), ambient);
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpDiffuse), diffuse);
