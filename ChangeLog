@@ -1,3 +1,9 @@
+Sun Sep  1 12:16:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	_Untested_ Experimental support for sounds under MS windows.
+
+	* sound.c (play_file): added support for MS Windows.
+
 Sun Sep  1 11:54:30 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	configure support for ArtsC and rudimentary configure support

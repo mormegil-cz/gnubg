@@ -347,12 +347,6 @@ play_file(const char *filename) {
 
   int pid;
 
-#ifdef WIN32
-
-  /* FIXME: Write me */
-  return;
-#endif
-
   /* fork, so we don't have to wait for the sound to finish */
 
   pid = fork();
@@ -430,6 +424,16 @@ play_file(const char *filename) {
         _exit(0);
       }
       
+      break;
+
+    case SOUND_OPTION_WINDOWS:
+
+#ifdef WIN32
+      PlaySound ( filename, NULL, SND_FILENAME );
+      _exit(0);
+#else
+      assert ( FALSE );
+#endif
       break;
 
     default:
