@@ -242,7 +242,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	htmlimages.c speed.c renderprefs.c renderprefs.h \
 	boardpos.c boardpos.h progress.c progress.h format.c format.h \
 	formatgs.c formatgs.h boarddim.h timer.c $(LIBGEN_SOURCES) \
-	external_y.y external_l.l external_y.h openurl.c openurl.h
+	external_y.y external_l.l external_y.h openurl.c openurl.h \
+	mec.h mec.c
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -290,7 +291,7 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
 	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-	format.c format.h $(LIBGEN_SOURCES)  $(BR1_SOURCES)
+	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)  $(BR1_SOURCES)
 
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makebearoff_DEPENDENCIES = lib/libevent.a
@@ -309,7 +310,8 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
         pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
         i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
-        drawboard.c drawboard.h format.c format.h $(LIBGEN_SOURCES) $(BR1_SOURCES)
+        drawboard.c drawboard.h format.c format.h mec.h mec.c \
+	$(LIBGEN_SOURCES) $(BR1_SOURCES)
 
 
 makehyper_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
@@ -358,7 +360,8 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	htmlimages.$(OBJEXT) speed.$(OBJEXT) renderprefs.$(OBJEXT) \
 	boardpos.$(OBJEXT) progress.$(OBJEXT) format.$(OBJEXT) \
 	formatgs.$(OBJEXT) timer.$(OBJEXT) $(am__objects_1) \
-	external_y.$(OBJEXT) external_l.$(OBJEXT) openurl.$(OBJEXT)
+	external_y.$(OBJEXT) external_l.$(OBJEXT) openurl.$(OBJEXT) \
+	mec.$(OBJEXT)
 @COMPILE_BR1_TRUE@am__objects_3 = br1.$(OBJEXT)
 @COMPILE_BR1_FALSE@am__objects_3 =
 @USE_SOUND_TRUE@am__objects_4 = sound.$(OBJEXT)
@@ -390,7 +393,7 @@ am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
 	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT) \
-	bearoff.$(OBJEXT) path.$(OBJEXT) format.$(OBJEXT) \
+	bearoff.$(OBJEXT) path.$(OBJEXT) format.$(OBJEXT) mec.$(OBJEXT) \
 	$(am__objects_1) $(am__objects_3)
 makebearoff_OBJECTS = $(am_makebearoff_OBJECTS)
 makebearoff_LDFLAGS =
@@ -403,7 +406,8 @@ am_makehyper_OBJECTS = makehyper.$(OBJEXT) eval.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
 	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT) \
 	bearoff.$(OBJEXT) path.$(OBJEXT) drawboard.$(OBJEXT) \
-	format.$(OBJEXT) $(am__objects_1) $(am__objects_3)
+	format.$(OBJEXT) mec.$(OBJEXT) $(am__objects_1) \
+	$(am__objects_3)
 makehyper_OBJECTS = $(am_makehyper_OBJECTS)
 makehyper_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT) \
@@ -450,18 +454,19 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/makebearoff1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makehyper.Po ./$(DEPDIR)/makeweights.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/matchequity.Po ./$(DEPDIR)/matchid.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/onechequer.Po ./$(DEPDIR)/openurl.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/osr.Po ./$(DEPDIR)/path.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/play.Po ./$(DEPDIR)/positionid.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/postscript.Po ./$(DEPDIR)/progress.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/pub_eval.Po ./$(DEPDIR)/record.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/render.Po ./$(DEPDIR)/renderprefs.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/rollout.Po ./$(DEPDIR)/set.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgf.Po ./$(DEPDIR)/sgfl.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/simplelibgen.Po ./$(DEPDIR)/sound.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/speed.Po ./$(DEPDIR)/text.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/timecontrol.Po ./$(DEPDIR)/timer.Po
+@AMDEP_TRUE@	./$(DEPDIR)/mec.Po ./$(DEPDIR)/onechequer.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/openurl.Po ./$(DEPDIR)/osr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/path.Po ./$(DEPDIR)/play.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/positionid.Po ./$(DEPDIR)/postscript.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/progress.Po ./$(DEPDIR)/pub_eval.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/record.Po ./$(DEPDIR)/render.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/renderprefs.Po ./$(DEPDIR)/rollout.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/set.Po ./$(DEPDIR)/sgf.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgfl.Po ./$(DEPDIR)/sgfp.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/show.Po ./$(DEPDIR)/simplelibgen.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sound.Po ./$(DEPDIR)/speed.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/text.Po ./$(DEPDIR)/timecontrol.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/timer.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -645,6 +650,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/makeweights.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchequity.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/matchid.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/onechequer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/openurl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/osr.Po@am__quote@

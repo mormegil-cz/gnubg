@@ -82,6 +82,7 @@
              Bob Jenkins (the ISAAC pseudo random number generator)
        Takuji Nishimura and Makoto Matsumoto (the Mersenne Twister PRNG)
                 Gerry Tesauro (the "pubeval" position evaluator)
+             Claes Tornberg (the mec match equity table generator)
 
 
       If you feel that you're not given credits for your contributions to

@@ -250,6 +250,7 @@ char aszAUTHORS[] =
 "             Bob Jenkins (the ISAAC pseudo random number generator)\n"
 "       Takuji Nishimura and Makoto Matsumoto (the Mersenne Twister PRNG)\n"
 "                Gerry Tesauro (the \"pubeval\" position evaluator)\n"
+"             Claes Tornberg (the mec match equity table generator)\n"
 "\n"
 "\n"
 "      If you feel that you're not given credits for your contributions to\n"

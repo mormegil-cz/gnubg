@@ -1,3 +1,7 @@
+Fri Apr 16 22:08:54 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* mec.c: new file; built-in support for mec
+
 Fri Mar 26 20:36:02 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* snowie.xml: update post-Crawford values

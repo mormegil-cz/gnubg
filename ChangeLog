@@ -1,4 +1,14 @@
-Fir Apr 16 16:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Apr 16 22:02:23 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Add built-in support for mec
+
+	* mec.c: new file (copy of original mec.c with modfications
+        for gnubg)
+	* Makefile.am: add mec.c
+	* matchequity.c (initMetFromParameters, 
+	initPostCrawfordMETFromParameters): support for mec.
+
+Fri Apr 16 16:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* sound.c: Fix bug if no sound card on windows
 
