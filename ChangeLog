@@ -1,3 +1,20 @@
+Sun Jan  6 16:34:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (GTKRollout): new parameter ars (rollout statistics).
+
+	* gnubg.c (CommandRollout): changed call to GTKRollout.c.
+
+	* gtkgame.c (GTKViewRolloutStatistics, GTKStatPageWin,
+	GTKStatPageCube, GTKStatPageHit, GTKStatPageBearoff,
+	GTKStatPageClosedOut, GTKRolloutStatPage): new functions. GTK
+	widgets for rollout statistics.
+
+	Needs improvements!
+
+	* rollout.c (ClosedBoard): is board closed?
+	* rollout.c (BasicCubefulRollout): fix bug for statistics, and
+	implement bearoff statistics and closed board statistics.
+
 Sun Jan  6 16:04:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (RolloutGeneral): invert cubeinfo struct if fInvert
