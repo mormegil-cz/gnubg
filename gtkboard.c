@@ -583,7 +583,7 @@ static void board_expose_point( GtkWidget *board, BoardData *bd, int n ) {
 	r.x = x;
 	r.y = y;
 	r.width = cx;
-	r.height = y;
+	r.height = cy;
 	
 	gdk_window_invalidate_rect( board->window, &r, FALSE );
     }
@@ -595,7 +595,7 @@ static void board_expose_point( GtkWidget *board, BoardData *bd, int n ) {
 	event.area.x = x;
 	event.area.y = y;
 	event.area.width = cx;
-	event.area.height = y;
+	event.area.height = cy;
 	
 	board_expose( board, &event, bd );
     }

@@ -1,4 +1,6 @@
-Mon Mar 18 16:56:17 2002  Gary Wong  <gtw@research.att.com>
+Mon Mar 18 17:30:22 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_expose_point): Fix stupid typo.
 
 	* eval.c, matchequity.c, play.c, positionid.c: pacify fussy compiler.
 
