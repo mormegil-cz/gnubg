@@ -1,3 +1,8 @@
+Thu Jul 24 19:29:36 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ImportSGGGame): better support for resignations
+	in SGG files.
+
 Wed Jul 22 16:34:15 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* backgammon.h gnubg.c gtkgame.c html.c latex.c postscript.c
