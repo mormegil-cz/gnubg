@@ -3104,9 +3104,9 @@ extern void CommandHint( char *sz ) {
   movelist ml;
   int i;
   char szBuf[ 1024 ];
-  float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  cubeinfo ci;
+  static float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  static cubeinfo ci;
   int n = ParseNumber ( &sz );
   int anMove[ 8 ];
   unsigned char auch[ 10 ];
