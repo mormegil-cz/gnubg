@@ -1,3 +1,13 @@
+Fri Aug  1 19:49:01 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* Makefile.am - allow environment variable for thread libs
+	* acinclude.m4 - mispled synopsis
+	* configure.in - allow environment variable for thread libs
+	  export THREAD_LIBS="-lc_r" or similar
+	  The contents of THREAD_LIBS will be added to the flags for
+	  ld 
+	  changes thanks to Phil Pennock pdp@nl.demon.net
+	
 Fri Aug  1 08:43:01 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* rollout.c - off by one error in minimum games check
