@@ -120,8 +120,11 @@ static GtkWidget *PointPrefs( BoardData *bd, int f ) {
     
     gtk_box_pack_start( GTK_BOX( pw ), apwPoint[ f ] =
 			gtk_color_selection_new(), FALSE, FALSE, 0 );
+    gtk_color_selection_set_has_opacity_control(
+                        GTK_COLOR_SELECTION( apwPoint[ f ] ), FALSE );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwPoint[ f ] ),
 				   ar );
+
     
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
@@ -151,6 +154,8 @@ static GtkWidget *BoardPage( BoardData *bd ) {
     
     gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 0 ] =
 			gtk_color_selection_new(), FALSE, FALSE, 0 );
+    gtk_color_selection_set_has_opacity_control(
+                        GTK_COLOR_SELECTION( apwBoard[ 0 ] ), FALSE );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ 0 ] ),
 				   ar );
 
@@ -232,8 +237,11 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     
     gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 1 ] =
 			gtk_color_selection_new(), FALSE, FALSE, 0 );
+    gtk_color_selection_set_has_opacity_control(
+                        GTK_COLOR_SELECTION( apwBoard[ 1 ] ), FALSE );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ 1 ] ),
 				   ar );
+
 
     pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), fHinges );
@@ -541,6 +549,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
 extern void BoardPreferences( GtkWidget *pwBoard ) {
 
+    int i;
     GtkWidget *pwDialog, *pwNotebook,
         *pwApply = gtk_button_new_with_label( _("Apply") );
     BoardData *bd = BOARD( pwBoard )->board_data;
@@ -600,6 +609,18 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
     gtk_widget_show_all( pwDialog );
+
+    /* hack the set_opacity function does not work until widget has been
+       drawn */
+
+    for ( i = 0; i < 2; i++ ) {
+      gtk_color_selection_set_has_opacity_control(
+         GTK_COLOR_SELECTION( apwPoint[ i ] ), FALSE );
+      gtk_color_selection_set_has_opacity_control(
+         GTK_COLOR_SELECTION( apwBoard[ i ] ), FALSE );
+    }
+
+
 
     gtk_main();
 }

@@ -1,3 +1,8 @@
+Mon Jun 24 19:31:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c (BoardPreferences, BoardPage, PointsPrefs,
+	BorderPage): don't show opacity for board, border, and points.
+
 Mon Jun 24 18:30:06 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandSaveSettings): save fAnalyseCube, fAnalyseMove,
