@@ -3440,7 +3440,7 @@ GetDoublePointDeadCube ( float arOutput [ 5 ],
       /* centered cube */
 
       if ( fBeavers ) {
-        return ( rL - 0.25 ) / ( rW + rL + 0.5 );
+        return ( rL - 0.25 ) / ( rW + rL - 0.5 );
       }
       else {
         return ( rL - 0.5 ) / ( rW + rL - 1.0 );

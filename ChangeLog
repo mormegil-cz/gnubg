@@ -1,3 +1,8 @@
+Mon Aug 14 00:22:48 2000  Joern Thyssen  <joern@thyssen.nu>
+
+  * eval.c (GetDoublePointDeadCube): Corrected bugfix for double
+	point for Jacoby and Beavers.
+
 Sun Aug 13 23:14:23 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* gnubg.c (CommandHint): Give hints on cube action.
