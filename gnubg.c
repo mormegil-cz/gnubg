@@ -1,7 +1,7 @@
 /*
  * gnubg.c
  *
- * by Gary Wong <gtw@gnu.org>, 1998, 1999, 2000, 2001, 2001.
+ * by Gary Wong <gtw@gnu.org>, 1998, 1999, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -161,7 +161,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     nBeavers = 3, fOutputMWC = TRUE, fOutputWinPC = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
-    fAnalyseDice = TRUE, fAnalyseMove = TRUE;
+    fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE;
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
@@ -655,6 +655,8 @@ command cER = {
       "Set whether this is a post-Crawford game", szONOFF, &cOnOff },
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
       "ready for commands", szPROMPT, NULL },
+    { "record", CommandSetRecord, "Set whether all games in a session are "
+      "recorded", szONOFF, &cOnOff },
     { "rng", NULL, "Select the random number generator algorithm", NULL,
       acSetRNG },
     { "rollout", CommandSetRollout, "Control rollout parameters",
@@ -2397,7 +2399,7 @@ extern void
 CommandRollout( char *sz ) {
     
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
-    int i, c, n, fOpponent = FALSE, cGames, an[ 2 ], fCubeDecTop = TRUE;
+    int i, c, n, fOpponent = FALSE, cGames, fCubeDecTop = TRUE;
     cubeinfo ci;
 #if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
@@ -2629,10 +2631,35 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
     }
 }
 
+#if USE_GUILE
+static SCM LoadCommandsGuileCatch( void *p, SCM sTag, SCM sArgs ) {
+
+    if( SCM_NFALSEP( scm_eq_p( sTag, SCM_CAR( scm_intern0( "quit" ) ) ) ) ||
+	SCM_NFALSEP( scm_eq_p( sTag, SCM_CAR( scm_intern0(
+	    "end-of-file" ) ) ) ) )
+	return SCM_BOOL_T;
+    else
+	return scm_handle_by_message_noexit( p, sTag, sArgs ); /* SCM_BOOL_F */
+}
+
+static void LoadCommandsGuile( SCM s ) {
+
+    for(;;)
+	scm_read_and_eval_x( s );
+}
+#endif
+
 static void LoadCommands( FILE *pf, char *szFile ) {
     
     char sz[ 2048 ], *pch;
 
+#if USE_GUILE
+    /* We have to be conservative with input buffering, because if there
+       is a Guile escape in the file, we will want Guile to take over
+       parsing for us, and we won't want to have buffered ahead. */
+    setvbuf( pf, NULL, _IONBF, 0 );
+#endif
+    
     for(;;) {
 	sz[ 0 ] = 0;
 	
@@ -2655,6 +2682,40 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 
 	if( *sz == '#' ) /* Comment */
 	    continue;
+
+#if USE_GUILE
+	if( !strcmp( sz, ":" ) ) {
+	    /* Guile escape.  If we let HandleCommand() take care of this,
+	       it will start a REPL, which is not what we want; we need to
+	       read and evaluate expressions from the file ourselves. */
+	    SCM s;
+	    psighandler sh;
+
+#if USE_GTK
+	    if( fX )
+		GTKDisallowStdin();
+#endif
+	    PortableSignal( SIGINT, NULL, &sh, FALSE );
+	    GuileStartIntHandler();
+
+	    s = scm_fdes_to_port( fileno( pf ), "r0",
+				  scm_makfrom0str( szFile ) );
+	    scm_set_port_revealed_x( s, SCM_MAKINUM( 1 ) );
+
+	    while( SCM_FALSEP( scm_internal_catch(
+		SCM_BOOL_T, (scm_catch_body_t) LoadCommandsGuile,
+		(void *) s, LoadCommandsGuileCatch, NULL ) ) )
+		;
+	    
+	    GuileEndIntHandler();
+	    PortableSignalRestore( SIGINT, &sh );
+#if USE_GTK
+	    if( fX )
+		GTKAllowStdin();
+#endif
+	    continue;
+	}
+#endif
 	
 	HandleCommand( sz, acTop );
 
