@@ -363,9 +363,8 @@ static char *
 ExtEvaluation( extcmd *pec ) {
 
   char szName[ MAX_NAME_LEN ], szOpp[ MAX_NAME_LEN ];
-  int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
-    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
-    anMove[ 8 ];
+  int anBoard[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
+    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford;
   float arOutput[ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo ci;
   int nScore, nScoreOpponent;

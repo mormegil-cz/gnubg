@@ -24,6 +24,7 @@
 #endif
 
 #include <gtk/gtk.h>
+#include <string.h>
 
 #include "gtkcolour.h"
 #include "i18n.h"

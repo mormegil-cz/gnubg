@@ -56,8 +56,6 @@ typedef struct _extcmd {
   char *szFIBSBoard;
 } extcmd;
 
-static extcmd cmd;
-
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz );
 extern int ExternalRead( int h, char *pch, int cch );
 extern int ExternalWrite( int h, char *pch, int cch );
