@@ -2479,18 +2479,17 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
   /* table header */
 
   fprintf ( pf,
-            "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" %s>\n"
-            "<tr %s>\n"
-            "<th %s colspan=\"2\">%s</th>\n"
-            "<th %s>%s</th>\n"
-            "<th %s>%s</th>\n"
-            "<th %s>%s</th>\n"
-            "</tr>\n",
-            GetStyle ( CLASS_MOVETABLE, hecss ),
-            GetStyle ( CLASS_MOVEHEADER, hecss ),
-            GetStyle ( CLASS_MOVENUMBER, hecss ), _("#"),
-            GetStyle ( CLASS_MOVEPLY, hecss ), _("Ply"),
-            GetStyle ( CLASS_MOVEMOVE, hecss ), _("Move"),
+            "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\" %s>\n",
+            GetStyle ( CLASS_MOVETABLE, hecss ) );
+  fprintf ( pf, "<tr %s>\n", GetStyle ( CLASS_MOVEHEADER, hecss ) );
+  fprintf ( pf, "<th %s colspan=\"2\">%s</th>\n",
+            GetStyle ( CLASS_MOVENUMBER, hecss ), _("#") );
+  fprintf ( pf, "<th %s>%s</th>\n",
+            GetStyle ( CLASS_MOVEPLY, hecss ), _("Ply") );
+  fprintf ( pf, "<th %s>%s</th>\n",
+            GetStyle ( CLASS_MOVEMOVE, hecss ), _("Move") );
+  fprintf ( pf,
+            "<th %s>%s</th>\n" "</tr>\n",
             GetStyle ( CLASS_MOVEEQUITY, hecss ),
             ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) ?
             _("Equity") : _("MWC") );
