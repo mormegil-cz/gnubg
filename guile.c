@@ -23,10 +23,15 @@
 
 #if USE_GUILE
 
+#include <errno.h>
 #include <libguile.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 
 #include "backgammon.h"
 #include "eval.h"
+#include "guile.h"
 #include "positionid.h"
 #include "rollout.h"
 
@@ -128,7 +133,7 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove ) {
     SCM_ASSERT( SCM_INUMP( sMove ) || sMove == SCM_UNDEFINED, sMove,
 		SCM_ARG3, sz );
 
-    if( sMove == SCM_UNDEFINED && fTurn < 0 )
+    if( sMove == SCM_UNDEFINED && gs == GAME_NONE )
 	/* no move specified, and no game in progress */
 	return SCM_BOOL_F;
     
@@ -182,7 +187,7 @@ static SCM cube_info_money( SCM sCube, SCM sCubeOwner, SCM sMove,
 
 static SCM current_board( void ) {
 
-    return fTurn == -1 ? SCM_BOOL_F : BoardToSCM( anBoard );
+    return gs == GAME_NONE ? SCM_BOOL_F : BoardToSCM( anBoard );
 }
 
 static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
@@ -271,7 +276,16 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
     return s;
 }
 
-extern int GuileInitialise( void ) {
+static void LoadGuile( char *sz ) {
+    
+    scm_internal_catch( SCM_BOOL_T, (scm_catch_body_t) scm_primitive_load,
+			(void *) scm_makfrom0str( sz ),
+			scm_handle_by_message_noexit, NULL );
+}
+
+extern int GuileInitialise( char *szDir ) {
+
+    char szPath[ PATH_MAX ];
 
     scm_make_gsubr( "board->position-id", 1, 0, 0, board_to_position_id );
     scm_make_gsubr( "cube-info", 0, 3, 0, cube_info );
@@ -282,7 +296,26 @@ extern int GuileInitialise( void ) {
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
     scm_make_gsubr( "rollout-position", 1, 5, 0, rollout_position );
     
-    return 0;
+    if( szDir ) {
+	sprintf( szPath, "%s/" GNUBG_SCM, szDir );
+	if( !access( szPath, R_OK ) ) {
+	    LoadGuile( szPath );
+	    return 0;
+	}
+    }
+
+    if( !access( GNUBG_SCM, R_OK ) ) {
+	LoadGuile( GNUBG_SCM );
+	return 0;
+    }
+
+    if( !access( PKGDATADIR "/" GNUBG_SCM, R_OK ) ) {
+	LoadGuile( PKGDATADIR "/" GNUBG_SCM );
+	return 0;
+    }
+    
+    perror( GNUBG_SCM );
+    return -1;
 }
 
 #endif

@@ -24,7 +24,9 @@
 #ifndef _GUILE_H_
 #define _GUILE_H_
 
-extern int GuileInitialise( void );
+#define GNUBG_SCM "gnubg.scm"
+
+extern int GuileInitialise( char *szDir );
 
 #endif
 
