@@ -52,7 +52,7 @@ AC_DEFUN(AM_GUILE,[
     if test `expr "${guile_major_version:-0}" \* 1000 + \
 	"${guile_minor_version:-0}"` -ge 1004; then
       GUILE_CFLAGS="`$GUILE_CONFIG compile`"
-      GUILE_LDFLAGS="`$GUILE_CONFIG link`"
+      GUILE_LIBS="`$GUILE_CONFIG link`"
       AC_MSG_RESULT(yes)
       ifelse([$1], , :, [$1])
     else
@@ -62,7 +62,7 @@ AC_DEFUN(AM_GUILE,[
     fi
   fi
   AC_SUBST(GUILE_CFLAGS)
-  AC_SUBST(GUILE_LDFLAGS)
+  AC_SUBST(GUILE_LIBS)
 ])
 
 dnl @synopsis AM_GTK2

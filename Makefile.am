@@ -5,7 +5,7 @@ SUBDIRS = lib doc
 endif
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@
-COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LDFLAGS@
+COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \

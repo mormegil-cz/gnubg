@@ -121,6 +121,7 @@ if test "$no_gtk" = "yes"; then
     AC_DEFINE(USE_EXT,1,Define if you want to use the ext toolkit and widgets.)
   fi
 else
+  AM_CONDITIONAL(USE_EXT, false)
   AC_DEFINE(USE_GTK,1,Define if you want to use the GTK toolkit and widgets.)
   ac_save_CPPFLAGS="$CPPFLAGS"
   ac_save_CFLAGS="$CFLAGS"
@@ -149,7 +150,7 @@ if test "$with_guile" = "no"; then
 else
   AM_GUILE
   if test "$with_guile" != ""; then
-    GUILE_LDFLAGS="$with_guile"
+    GUILE_LIBS="$with_guile"
   fi
 fi
 if test "$no_guile" != "yes"; then
@@ -159,12 +160,12 @@ if test "$no_guile" != "yes"; then
   ac_save_LIBS="$LIBS"
   CPPFLAGS="$CPPFLAGS $GUILE_CFLAGS $GTK_CFLAGS"
   CFLAGS="$CFLAGS $GUILE_CFLAGS $GTK_CFLAGS"
-  LIBS="$LIBS $GUILE_LDFLAGS $GTK_LIBS"
+  LIBS="$LIBS $GUILE_LIBS $GTK_LIBS"
   AC_CHECK_FUNCS(scm_set_current_module scm_select_module)
   AC_CHECK_HEADERS(guile-gtk.h)
   AC_CHECK_LIB(guilegtk-1.2, sgtk_wrap_gtkobj,
 [AC_DEFINE_UNQUOTED(HAVE_LIBGUILEGTK_1_2)
-GUILE_LDFLAGS="-lguilegtk-1.2 $GUILE_LDFLAGS"
+GUILE_LIBS="-lguilegtk-1.2 $GUILE_LIBS"
 ])
   CPPFLAGS="$ac_save_CPPFLAGS"
   CFLAGS="$ac_save_CFLAGS"

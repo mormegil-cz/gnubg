@@ -1,3 +1,11 @@
+Fri Feb  8 17:02:15 2002  Gary Wong  <gtw@research.att.com>
+
+	* Makefile.am, configure.in, acinclude.m4: Use GUILE_LIBS instead
+	of GUILE_LDFLAGS, since _LDFLAGS is a special suffix for automake.
+
+	* configure.in: Invoke AC_CONDITIONAL(USE_EXT, false) when using
+	GTK.
+
 Fri Feb  8 00:01:08 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	
 	* html.c (HTMLPrologue): html did not validate. Also, insert
