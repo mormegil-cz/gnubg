@@ -673,6 +673,12 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
   int i, fAutoRedouble[ 2 ], afDead[ 2 ], anNormScore[ 2 ];
 
+  if( gs != GAME_PLAYING ) {
+    outputl( "No game in progress (type `new game' to start one)." );
+
+    return;
+  }
+      
   /* Show market window */
 
   /* First, get gammon and backgammon percentages */
