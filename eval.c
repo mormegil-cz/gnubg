@@ -3847,6 +3847,29 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
 }
 
+
+extern int
+fDoCubeful ( cubeinfo *pci ) {
+
+  int fNoCF;
+
+  /* cube is dead */
+
+  fNoCF = 
+    ( anScore[ pci -> fMove ] + pci -> nCube >= nMatchTo );
+  fNoCF = fNoCF ||
+    ( anScore[ ! pci -> fMove ] + pci -> nCube >= nMatchTo );
+
+  /* score is -2,-2 */
+
+  fNoCF = fNoCF ||
+    ( ( anScore[ pci -> fMove ] == nMatchTo - 2 ) &&
+      ( anScore[ ! pci -> fMove ] == nMatchTo - 2 ) );
+
+  return ! fNoCF;
+
+}
+
     
 extern int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
@@ -4015,7 +4038,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
   } /* end recurse */
   else {
 
-    /* At leaf node or gave over: use static evaluation.
+    /* At leaf node or game over: use static evaluation.
        Call EvaluatePostion to ensure that the evaluation
        is cached. */
 
@@ -4027,7 +4050,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     rEq = Utility ( arOutput, pci );
 
-    if ( pc == CLASS_OVER ) {
+    if ( pc == CLASS_OVER || ! fDoCubeful( pci ) ) {
 
       /* if the game is over, there is very little value
          of holding the cube */
@@ -4047,7 +4070,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
       else
 	*prOutput = Cl2CfMatch ( arOutput, pci );
 
-    } /* CLASS_OVER */
+    }/* CLASS_OVER */
       
   } /* internal node */
 
