@@ -2437,8 +2437,8 @@ static gint board_set( Board *board, const gchar *board_text,
 #if USE_BOARD3D
 			if (rdAppearance.fDisplayType == DT_3D)
 			{
-				/* Has been shaken, so roll dice (if not editing) */
-				if (bd->diceShown != DICE_ON_BOARD && !ToolbarIsEditing( pwToolbar ))
+				/* Has been shaken, so roll dice */
+				if (bd->diceShown == DICE_ROLLING)
 				{
 					bd->diceShown = DICE_ON_BOARD;
 					RollDice3d(bd);
