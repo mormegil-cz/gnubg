@@ -1,3 +1,7 @@
+Mon Jan 31 21:25:20 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (HandleCommand): Handle "!" as shell escape.
+
 Mon Jan 31 10:43:48 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (ResetInterrupt): New function.

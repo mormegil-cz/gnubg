@@ -24,6 +24,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Check "show" exists for every "set"!
 ** Add more completions to help and readline.
 ** Allow timeouts for "train" (and others?).
+** Add interactive rollouts.
 ** Load, save and analyse games and matches.  Also load matches given
   as command line parameters.
 ** Finish saving positions and evaluations to databases.
@@ -43,7 +44,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow reading commands from scripts.  A .gnubgrc file would contain
   startup commands.  This needs some thought to make sure it works well
   with Guile scripts.
-** Add "!" as a shell escape.
 ** Add ":" as a Guile escape, once it's here.
 ** When "set board" is given with no parameters under X, set it to the
   current position displayed in the board window.  (Perhaps a button in
@@ -89,6 +89,7 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
+** X events are not handled during shell escapes.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
