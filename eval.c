@@ -3368,6 +3368,9 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 
     if ( ml.cMoves == 1 )
       /* if there is only one move to evaluate there is no need to continue */
+      /* no test for accept=1 as in FindnSaveBestMoves as the moves are not
+         stored, so there is really no need to do a pointless 2-ply evaluation
+         of the move even though accept=1 forces us to do so */
       goto finished;
 
     if( ScoreMoves( &ml, pci, pec, nPlies ) < 0 ) {
@@ -3471,7 +3474,7 @@ FindnSaveBestMoves( movelist *pml,
 
       nMaxPly = iPly;
 
-    if ( pml->cMoves == 1 )
+    if ( pml->cMoves == 1 && mFilter->Accept != 1 )
       /* if there is only one move to evaluate there is no need to continue */
       goto finished;
 

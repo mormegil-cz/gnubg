@@ -1,3 +1,9 @@
+Mon May 19 22:02:52 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (FindnSaveBestMoves): force evaluation for accept=1 and 
+	cMoves=1.
+	(reported by Michael Depreli)
+
 Mon May 19 21:32:24 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseSnowieTxt): use strsep instead of strtok
