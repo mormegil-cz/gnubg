@@ -65,11 +65,14 @@ static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
     int anBoardTemp[ 2 ][ 25 ], i, j;
     float aar[ 6 ][ 6 ], ar[ NUM_OUTPUTS ], rMean = 0.0f;
 
+    if( fFirstMove && n0 == n1 )
+	fFirstMove = FALSE; /* games shouldn't start with a double */
+
     if( n0-- < n1-- )
 	swap( &n0, &n1 );
     
     for( i = 0; i < 6; i++ )
-	for( j = 0; j <= i; j++ ) {
+	for( j = 0; fFirstMove ? j < i : j <= i; j++ ) {
 	    memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
 		    2 * 25 * sizeof( int ) );
 	    
@@ -84,16 +87,19 @@ static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 	    if( EvaluatePosition( anBoardTemp, ar, pci, NULL ) )
 		return -HUGE_VALF;
 
-	    InvertEvaluation( ar );
-	    aar[ i ][ j ] = Utility( ar, pci );
-	    
-	    rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][ j ] * 2.0f;
+	    if( fFirstMove ) {
+		rMean += Utility( ar, pci );
+		InvertEvaluation( ar );
+		rMean += aar[ i ][ j ] = Utility( ar, pci );
+	    } else {
+		InvertEvaluation( ar );
+		aar[ i ][ j ] = Utility( ar, pci );
+		
+		rMean += ( i == j ) ? aar[ i ][ j ] : aar[ i ][ j ] * 2.0f;
+	    }
 	}
 
-    /* FIXME this assumes the equity before the first roll was 0, which
-       isn't true in match play where the players have different
-       gammon prices */
-    return fFirstMove ? aar[ n0 ][ n1 ] : aar[ n0 ][ n1 ] - rMean / 36.0f;
+    return aar[ n0 ][ n1 ] - rMean / ( fFirstMove ? 30.0f : 36.0f );
 }
 
 static lucktype Luck( float r ) {
@@ -732,7 +738,8 @@ DumpStatcontext ( statcontext *psc, char * sz ) {
   /* FIXME: the code below is only for match play */
   /* FIXME: honour fOutputMWC etc. */
   /* FIXME: calculate ratings (ET, World class, etc.) */
-
+  /* FIXME: use output*() functions, not printf */
+  
   printf ( "Player\t\t\t\t%-15s\t\t%-15s\n\n",
            ap[ 0 ].szName, ap [ 1 ].szName );
   

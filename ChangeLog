@@ -1,3 +1,17 @@
+Wed Aug 29 11:14:05 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (LuckAnalysis): Correct luck analysis for first roll
+	with asymmetric gammon prices.
+
+	* gtkboard.c (board_beep): Name changed from Beep(), to avoid
+	name collisions.
+
+	* gtkboard.c (board_pointer): Allow entering edit mode (for changing
+	name and score) when not playing a game.
+
+	* set.c (CommandSetScore, CommandSetCrawford, CommandSetPostCrawford):
+	Update the MOVE_GAMEINFO record when the score is changed.
+
 Mon Aug 27 21:31:47 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (InitGTK): Fix the alignment of the statusbar label.

@@ -184,8 +184,6 @@ duplication of effort and to make sure our changes merge easily.
   might be able to fix this.
 ** Make GTKDumpStatcontext check psc->fMoves, psc->fDice and psc->fCube,
   and only output the relevant statistics.
-** There should be a way to edit the player names when no game is being
-  played.  (The existing Edit button should do.) (gary)
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
   the new evalsetups. (gary)
 
@@ -245,16 +243,13 @@ duplication of effort and to make sure our changes merge easily.
    (Update: untested bugfix commited)
 ** "show score" (and the Guile function current-score) should show the
   number of games finished, but seem to report the total number of games
-  started, regardless of the current location within the match. (gary)
+  started, regardless of the current location within the match.  Actually,
+  the entire use of ms.cGames is questionable, since we might not have
+  every game in a match/session recorded. (gary)
 ** Importing a position should add MOVE_SETBOARD (etc.) records. (gary)
 ** If "set turn" has been used during a game (so a player has two
   consecutive moves), then export to .mat format saves it incorrectly.
 ** "set score" does not update the score in the GTK game window option menu.
-  Also, setting the score when browsing an existing game soon reverts to
-  the old score.
-** LuckAnalysis() in analysis.c assumes the equity before the first
-  move was 0, which is not true when the two players have different
-  gammon prices.
 ** TTY rollout output is wider than 80 columns.
 ** Analysis with rollouts crashes under GTK.  (There are problems with the
   rollout window -- do we really want a window in this case?)
@@ -327,6 +322,10 @@ duplication of effort and to make sure our changes merge easily.
   bad move, or a costly missed double.
 ** Consider some kind of interface for recording live matches as quickly
   as possible.
+** The current name setting code silently converts whitespace into
+  underscores.  This isn't really necessary; it would be OK to use names
+  verbatim, and equate whitespace and underscores in the command parsing
+  code instead. (gary)
 
 Local Variables:
 mode: outline
