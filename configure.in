@@ -78,7 +78,7 @@ AC_CHECK_LIB(dl, dlopen)
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
-AC_CHECK_HEADERS(sys/audioio.h fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h stropts.h sys/socket.h sys/soundcard.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h)
+AC_CHECK_HEADERS(sys/audioio.h fcntl.h sys/file.h sys/ioctl.h limits.h sys/mman.h pwd.h sys/resource.h stropts.h sys/socket.h sys/soundcard.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -92,7 +92,7 @@ AC_FUNC_MMAP
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpid getpwuid gettimeofday isatty memmove random readv select setvbuf basename strchr)
+AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpid getpwuid gettimeofday isatty memmove random readv select setvbuf basename strchr setpriority)
 
 AH_VERBATIM([signbit],
 [#ifndef HAVE_MEMMOVE

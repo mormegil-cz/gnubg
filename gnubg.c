@@ -173,11 +173,7 @@ int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int fMessage = FALSE;
-#ifdef WIN32
-int fThreadPriority = THREAD_PRIORITY_NORMAL;
-#else /* WIN32 */
-int fThreadPriority = -1;
-#endif /* ! WIN32 */
+int nThreadPriority = 0;
 
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
@@ -390,6 +386,7 @@ static char szDICE[] = N_("<die> <die>"),
     szPLAYEROPTRATING[] = N_("<player> [rating]"),
     szPLIES[] = N_("<plies>"),
     szPOSITION[] = N_("<position>"),
+    szPRIORITY[] = N_("<priority>"),
     szPROMPT[] = N_("<prompt>"),
     szRATE[] = N_("<rate>"),
     szSCORE[] = N_("<score>"),
@@ -1108,22 +1105,22 @@ command cER = {
     N_("Set default path for loading match equity files"), 
     szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
-#ifdef WIN32
 }, acSetPriority[] = {
-  { "idle", CommandSetPriorityIdle,
-    N_("Set priority to IDLE_PRIORITY_CLASS"), NULL, NULL },
-  { "belownormal", CommandSetPriorityBelowNormal,
-    N_("Set priority to BELOW_NORMAL_PRIORITY_CLASS"), NULL, NULL },
-  { "normal", CommandSetPriorityNormal,
-    N_("Set priority to NORMAL_PRIORITY_CLASS"), NULL, NULL },
   { "abovenormal", CommandSetPriorityAboveNormal,
-    N_("Set priority to ABOVE_NORMAL_PRIORITY_CLASS"), NULL, NULL },
+    N_("Set priority to above normal"), NULL, NULL },
+  { "belownormal", CommandSetPriorityBelowNormal,
+    N_("Set priority to below normal"), NULL, NULL },
   { "highest", CommandSetPriorityHighest, 
-    N_("Set priority to HIGHEST_PRIORITY_CLASS"), NULL, NULL },
+    N_("Set priority to highest"), NULL, NULL },
+  { "idle", CommandSetPriorityIdle,
+    N_("Set priority to idle"), NULL, NULL },
+  { "nice", CommandSetPriorityNice, N_("Specify priority numerically"),
+    szPRIORITY, NULL },
+  { "normal", CommandSetPriorityNormal,
+    N_("Set priority to normal"), NULL, NULL },
   { "timecritical", CommandSetPriorityTimeCritical,
-    N_("Set priority to TIME_CRITICAL_PRIORITY_CLASS"), NULL, NULL },
+    N_("Set priority to time critical"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
-#endif /* WIN32 */
 #ifdef USE_SOUND
 }, acSetSoundSystem[] = {
   { "artsc", CommandSetSoundSystemArtsc, 
@@ -1281,11 +1278,7 @@ command cER = {
       "players"), szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
       N_("Set whether this is a post-Crawford game"), szONOFF, &cOnOff },
-#ifdef WIN32
-    { "priority", NULL, 
-      N_("Set the priority of gnubg running under Windows"), 
-      NULL, acSetPriority },
-#endif /* WIN32 */
+    { "priority", NULL, N_("Set the priority of gnubg"), NULL, acSetPriority },
     { "prompt", CommandSetPrompt, N_("Customise the prompt gnubg prints when "
       "ready for commands"), szPROMPT, NULL },
     { "record", CommandSetRecord, N_("Set whether all games in a session are "
@@ -4550,32 +4543,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
 #endif /* USE_SOUND */
 
-#ifdef WIN32
-  
-    switch ( fThreadPriority ) {
-    case THREAD_PRIORITY_ABOVE_NORMAL: 
-      fprintf ( pf, "set priority abovenormal\n" );
-      break;
-    case THREAD_PRIORITY_BELOW_NORMAL:
-      fprintf ( pf, "set priority belownormal\n" );
-      break;
-    case THREAD_PRIORITY_NORMAL:
-      fprintf ( pf, "set priority normal\n" );
-      break;
-    case THREAD_PRIORITY_IDLE:
-      fprintf ( pf, "set priority idle\n" );
-      break;
-    case THREAD_PRIORITY_HIGHEST:
-      fprintf ( pf, "set priority highest\n" );
-      break;
-    case THREAD_PRIORITY_TIME_CRITICAL:
-      fprintf ( pf, "set priority timecritical\n" ); 
-      break;
-    default:
-      break;
-    }
-  
-#endif /* WIN32 */
+    fprintf( pf, "set priority nice %d\n", nThreadPriority );
 
 	for (i = 0; i < 3; ++i) {
 	  fprintf ( pf, "set highlightcolour %s custom %d %d %d\n",

@@ -28,6 +28,9 @@
 #include <limits.h>
 #endif
 #include <math.h>
+#if HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -3523,67 +3526,88 @@ CommandSetSoundSoundTake ( char *sz ) {
 
 #endif
 
-#ifdef WIN32
+static void SetPriority( int n ) {
 
-static void
-Win32SetPriority ( const int tp, const char *sz ) {
+#if HAVE_SETPRIORITY
+    if( setpriority( PRIO_PROCESS, getpid(), n ) )
+	outputerr( "setpriority" );
+    else {
+	outputf( _("Scheduling priority set to %d.\n"), n );
+	nThreadPriority = n;
+    }
+#elif WIN32
+    int tp;
+    char *pch;
+       
+    if( n < -19 ) {
+	tp = THREAD_PRIORITY_TIME_CRITICAL;
+	pch = _N("time critical");
+    } else if( n < -10 ) {
+	tp = THREAD_PRIORITY_HIGHEST;
+	pch = _N("highest");
+    } else if( n < 0 ) {
+	tp = THREAD_PRIORITY_ABOVE_NORMAL;
+	pch = _N("above normal");
+    } else if( !n ) {
+	tp = THREAD_PRIORITY_NORMAL;
+	pch = _N("normal");
+    } else if( n < 19 ) {
+	tp = THREAD_PRIORITY_BELOW_NORMAL;
+	pch = _N("below normal");
+    } else {
+	tp = THREAD_PRIORITY_IDLE;
+	pch = _N("idle");
+    }
 
-  if ( SetThreadPriority(GetCurrentThread(), tp ) ) {
-    outputf ( _("Priority of program set to: %s\n"), sz );
-    fThreadPriority = tp;
-  }
-  else
-    outputf ( _("Changing priority failed (trying to set priority %s)\n"),
-                sz );
-
-}
-
-extern void
-CommandSetPriorityIdle ( char *sz ) {
-
-  Win32SetPriority ( THREAD_PRIORITY_IDLE, 
-                     "idle priority" );
-
-}
-
-extern void
-CommandSetPriorityBelowNormal ( char *sz ) {
-
-  Win32SetPriority ( THREAD_PRIORITY_BELOW_NORMAL, 
-                     "below normal" );
-
-}
-
-extern void
-CommandSetPriorityNormal ( char *sz ) {
-
-  Win32SetPriority ( THREAD_PRIORITY_NORMAL, 
-                     "normal priority" );
-
-}
-
-extern void
-CommandSetPriorityAboveNormal ( char *sz ) {
-
-  Win32SetPriority ( THREAD_PRIORITY_ABOVE_NORMAL, 
-                     "above normal priority" );
-
-}
-
-extern void
-CommandSetPriorityHighest ( char *sz ) {
-
-  Win32SetPriority ( THREAD_PRIORITY_HIGHEST, 
-                     "highest priority" );
-
-}
-
-extern void 
-CommandSetPriorityTimeCritical ( char *sz ) {
-
-  Win32SetPriority ( THREAD_PRIORITY_TIME_CRITICAL,
-                     "time critical" );
-      
-}     
-
+    if ( SetThreadPriority(GetCurrentThread(), tp ) ) {
+	outputf ( _("Priority of program set to: %s\n"), pch );
+	nThreadPriority = n;
+    } else
+	outputerrf( _("Changing priority failed (trying to set priority "
+		      "%s)\n"), pch );
+#else
+    outputerrf( _("Priority changes are not supported on this platform.\n") );
 #endif
+}
+
+extern void CommandSetPriorityAboveNormal ( char *sz ) {
+
+    SetPriority( -10 );
+}
+
+extern void CommandSetPriorityBelowNormal ( char *sz ) {
+
+    SetPriority( 10 );
+}
+
+extern void CommandSetPriorityHighest ( char *sz ) {
+
+    SetPriority( -19 );
+}
+
+extern void CommandSetPriorityIdle ( char *sz ) {
+
+    SetPriority( 19 );
+}
+
+extern void CommandSetPriorityNice ( char *sz ) {
+
+    int n;
+    
+    if( ( n = ParseNumber( &sz ) ) < -20 || n > 20 ) {
+	outputl( _("You must specify a priority between -20 and 20.") );
+	return;
+    }
+
+    SetPriority( n );
+}
+
+extern void CommandSetPriorityNormal ( char *sz ) {
+
+    SetPriority( 0 );
+}
+
+extern void CommandSetPriorityTimeCritical ( char *sz ) {
+
+    SetPriority( -20 );
+}
