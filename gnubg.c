@@ -2560,7 +2560,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     LoadRCFiles();
     
-    if( optind < argc )
+    if( optind < argc && *argv[ optind ] )
        CommandLoadMatch( argv[ optind ] );
     
 #if USE_GTK
