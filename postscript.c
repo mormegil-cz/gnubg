@@ -33,6 +33,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "positionid.h"
+#include "i18n.h"
 
 typedef enum _font { FONT_NONE, FONT_RM, FONT_SF, FONT_TT } font;
 static char *aszFont[ FONT_TT + 1 ] = { NULL, "rm", "sf", "tt" };
@@ -489,7 +490,7 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
     if( fPDF ) {
 	/* FIXME most of the following could be encapsulated into a PDF
 	   XObject to optimise the output file */
-	fprintf( pf, "q 1 0 0 1 %d %d cm %.2f 0 0 %.2f 0 0 cm 0.5 g\n",
+	lifprintf( pf, "q 1 0 0 1 %d %d cm %.2f 0 0 %.2f 0 0 cm 0.5 g\n",
 		 225 - 200 * nMag / 100, y, nMag / 100.0, nMag / 100.0 );
 	fputs( "60 10 280 240 re S\n", pf );
 	for( i = 0; i < 6; i++ ) {
