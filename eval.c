@@ -121,23 +121,52 @@ static long EvalCacheHash( evalcache *pec ) {
     return l;    
 }
 
+/* Open a file for reading with the search path "(szDir):.:(PKGDATADIR)". */
+static int PathOpen( char *szFile, char *szDir ) {
+
+    int h, idFirstError = 0;
+    char szPath[ PATH_MAX ];
+    
+    if( szDir ) {
+	sprintf( szPath, "%s/%s", szDir, szFile );
+	if( ( h = open( szPath, O_RDONLY ) ) >= 0 )
+	    return h;
+
+	/* Try to report the more serious error (ENOENT is less
+           important than, say, EACCESS). */
+	if( errno != ENOENT )
+	    idFirstError = errno;
+    }
+
+    if( ( h = open( szFile, O_RDONLY ) ) >= 0 )
+	return h;
+
+    if( !idFirstError && errno != ENOENT )
+	idFirstError = errno;
+
+    sprintf( szPath, PKGDATADIR "/%s", szFile );
+    if( ( h = open( szPath, O_RDONLY ) ) >= 0 )
+	return h;
+
+    if( idFirstError )
+	errno = idFirstError;
+
+    return -1;
+}
+
 extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
-			   char *szDatabase ) {
+			   char *szDatabase, char *szDir ) {
 
     FILE *pfWeights;
-    int h, fReadWeights = FALSE, idFirstError;
+    int h, fReadWeights = FALSE;
     char szFileVersion[ 16 ];
-    char szPath[ PATH_MAX ];
     float r;
     
     if( !pBearoff1 ) {
 	/* not yet initialised */
-	if( ( h = open( szDatabase, O_RDONLY ) ) < 0 ) {
-	    sprintf( szPath, PKGDATADIR "/%s", szDatabase );
-	    if( ( h = open( szPath, O_RDONLY ) ) < 0 ) {
-		perror( szDatabase );
-		return -1;
-	    }
+	if( ( h = PathOpen( szDatabase, szDir ) ) < 0 ) {
+	    perror( szDatabase );
+	    return -1;
 	}
 
 #if HAVE_MMAP
@@ -168,50 +197,37 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	ComputeTable();
     }
 
-    if( szWeightsBinary ) {
-	if( !( pfWeights = fopen( szWeightsBinary, "r" ) ) ) {
-	    sprintf( szPath, PKGDATADIR "/%s", szWeightsBinary );
-	    pfWeights = fopen( szPath, "r" );
-	}
-
-	if( pfWeights ) {
-	    if( fread( &r, sizeof r, 1, pfWeights ) < 1 ||
-		r != WEIGHTS_MAGIC_BINARY ||
-		fread( &r, sizeof r, 1, pfWeights ) < 1 ||
-		r != WEIGHTS_VERSION_BINARY )
-		fprintf( stderr, "%s: Invalid weights file\n",
-			 szWeightsBinary );
-	    else {
-		if( !( fReadWeights =
-		       !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
-		       !NeuralNetLoadBinary(&nnRace, pfWeights ) ) ) {
-		    perror( szWeightsBinary );
-		}
-
-		if( fReadWeights ) {
-		  if( NeuralNetLoadBinary( &nnBPG, pfWeights ) == -1 ) {
+    if( szWeightsBinary &&
+	( h = PathOpen( szWeightsBinary, szDir ) ) >= 0 &&
+	( pfWeights = fdopen( h, "r" ) ) ) {
+	if( fread( &r, sizeof r, 1, pfWeights ) < 1 ||
+	    r != WEIGHTS_MAGIC_BINARY ||
+	    fread( &r, sizeof r, 1, pfWeights ) < 1 ||
+	    r != WEIGHTS_VERSION_BINARY )
+	    fprintf( stderr, "%s: Invalid weights file\n",
+		     szWeightsBinary );
+	else {
+	    if( !( fReadWeights =
+		   !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
+		   !NeuralNetLoadBinary(&nnRace, pfWeights ) ) ) {
+		perror( szWeightsBinary );
+	    }
+	    
+	    if( fReadWeights ) {
+		if( NeuralNetLoadBinary( &nnBPG, pfWeights ) == -1 ) {
 		    /* HACK */
 		    nnBPG.cInput = 0;
-		  }
 		}
-		
-		fclose( pfWeights );
 	    }
+	    
+	    fclose( pfWeights );
 	}
     }
 
     if( !fReadWeights && szWeights ) {
-	if( !( pfWeights = fopen( szWeights, "r" ) ) ) {
-	    idFirstError = errno;
-	    sprintf( szPath, PKGDATADIR "/%s", szWeights );
-	    if( !( pfWeights = fopen( szPath, "r" ) ) ) {
-		/* try to report the more serious error (ENOENT is less
-		   important than, say, EPERM) */
-		if( errno == ENOENT && idFirstError != ENOENT )
-		    errno = idFirstError;
-		perror( szWeights );
-	    }
-	}
+	if( ( h = PathOpen( szWeights, szDir ) ) < 0 ||
+	    !( pfWeights = fdopen( h, "r" ) ) )
+	    perror( szWeights );
 
 	if( pfWeights ) {
 	    if( fscanf( pfWeights, "GNU Backgammon %15s\n",

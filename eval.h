@@ -111,7 +111,7 @@ typedef enum _positionclass {
 #define CLASS_PERFECT CLASS_BEAROFF2
 
 extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
-			   char *szDatabase );
+			   char *szDatabase, char *szDir );
 extern int EvalSave( char *szWeights );
 
 extern void SetGammonPrice( float rGammon, float rLoseGammon,

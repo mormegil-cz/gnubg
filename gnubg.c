@@ -1693,9 +1693,10 @@ static void usage( char *argv0 ) {
 
 extern int main( int argc, char *argv[] ) {
 
-    char ch, *pch;
+    char ch, *pch, *pchDataDir = NULL;
     static int fNoWeights = FALSE;
     static struct option ao[] = {
+	{ "datadir", required_argument, NULL, 'd' },
         { "help", no_argument, NULL, 'h' },
 	{ "no-weights", no_argument, NULL, 'n' },
         { "tty", no_argument, NULL, 't' },
@@ -1712,9 +1713,12 @@ extern int main( int argc, char *argv[] ) {
     fInteractive = isatty( STDIN_FILENO );
     fShowProgress = isatty( STDOUT_FILENO );
     
-    while( ( ch = getopt_long( argc, argv, "hntv", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "d:hntv", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
+	case 'd': /* datadir */
+	    pchDataDir = optarg;
+	    break;
 	case 'h': /* help */
             usage( argv[ 0 ] );
             return EXIT_SUCCESS;
@@ -1757,7 +1761,7 @@ extern int main( int argc, char *argv[] ) {
     
     if( EvalInitialise( fNoWeights ? NULL : GNUBG_WEIGHTS,
 			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			GNUBG_BEAROFF ) )
+			GNUBG_BEAROFF, pchDataDir ) )
 	return EXIT_FAILURE;
 
     if( ( pch = getenv( "LOGNAME" ) ) )
