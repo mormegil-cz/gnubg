@@ -16,7 +16,7 @@ duplication of effort and to make sure our changes merge easily.
   equities n rolls ahead.  SW does bar graphs of this stuff; Cam Trenor
   suggests alternative output.
 ** Create multiple threads to parallelise rollouts (and evaluations?) on
-  multiprocessors.  Perhaps start remote processes?
+  multiprocessors.  Perhaps start remote processes? (Olivier Baur)
 ** Add more statistics for rollouts, e.g.
     number of turns on the bar, average number of forced moves
 ** Add Michael Zehr's method for cube variance reduction in money games.
