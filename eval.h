@@ -570,6 +570,11 @@ getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
                         evalcontext *pec );
 
 extern void
+calculate_gammon_rates( float aarRates[ 2 ][ 2 ],
+                        float arOutput[],
+                        cubeinfo *pci );
+
+extern void
 getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
                  const int fJacoby, const int fBeavers,
                  float aarRates[ 2 ][ 2 ] );

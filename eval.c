@@ -6194,28 +6194,11 @@ cmp_rolloutcontext ( const rolloutcontext *prc1, const rolloutcontext *prc2 ) {
 
 }
 
-/*
- * Get current gammon rates
- *
- * Input:
- *   anBoard: current board
- *   pci: current cubeinfo
- *   pec: eval context
- *
- * Output:
- *   aarRates: gammon and backgammon rates (first index is player)
- *
- */
 
-extern int
-getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
+extern void
+calculate_gammon_rates( float aarRates[ 2 ][ 2 ],
                         float arOutput[],
-                        int anBoard[ 2 ][ 25 ],
-                        cubeinfo *pci,
-                        evalcontext *pec ) {
-
-  if( EvaluatePosition( anBoard, arOutput, pci, pec ) < 0 )
-      return -1;
+                        cubeinfo *pci ) {
 
   if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
     aarRates[ pci->fMove ][ 0 ] =
@@ -6240,6 +6223,33 @@ getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
   else {
     aarRates[ ! pci->fMove ][ 0 ] = aarRates[ ! pci->fMove ][ 1 ] = 0;
   }
+
+}
+
+/*
+ * Get current gammon rates
+ *
+ * Input:
+ *   anBoard: current board
+ *   pci: current cubeinfo
+ *   pec: eval context
+ *
+ * Output:
+ *   aarRates: gammon and backgammon rates (first index is player)
+ *
+ */
+
+extern int
+getCurrentGammonRates ( float aarRates[ 2 ][ 2 ],
+                        float arOutput[],
+                        int anBoard[ 2 ][ 25 ],
+                        cubeinfo *pci,
+                        evalcontext *pec ) {
+
+  if( EvaluatePosition( anBoard, arOutput, pci, pec ) < 0 )
+      return -1;
+
+  calculate_gammon_rates( aarRates, arOutput, pci );
 
   return 0;
 

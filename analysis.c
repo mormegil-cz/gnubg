@@ -287,19 +287,16 @@ Skill( float r )
  */
 
 static float
-CashPoint( const matchstate* pms )
+CashPoint( const matchstate* pms, float arOutput[] )
 {
     cubeinfo ci;
-    evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
     float aarRates[ 2 ][ 2 ];
-    float arOutput[ NUM_OUTPUTS ];
     int afAutoRedouble[ 2 ];
     int afDead[ 2 ];
 
     GetMatchStateCubeInfo( &ci, pms );
 
-    getCurrentGammonRates( aarRates, arOutput, (void *) pms->anBoard,
-			   &ci, &ec );
+    calculate_gammon_rates( aarRates, arOutput, &ci );
 
     if ( ci.nMatchTo ) {
     	/* Match play */
@@ -309,9 +306,9 @@ CashPoint( const matchstate* pms )
 	getMatchPoints( aaarPointsMatch, afAutoRedouble, afDead,
 		    &ci, aarRates );
 
-	nIndex = ! afDead[ ci.fMove ];
+	nIndex = ! afDead[ 0 ];
 
-	return aaarPointsMatch[ ci.fMove ][ 2 ][ nIndex ];
+	return aaarPointsMatch[ 0 ][ 2 ][ nIndex ];
     }
     else {
     	/* Money play */
@@ -319,7 +316,7 @@ CashPoint( const matchstate* pms )
 
 	getMoneyPoints( aaarPointsMoney, ci.fJacoby, ci.fBeavers, aarRates );
 
-	return aaarPointsMoney[ ci.fMove ][ 5 ][ 0 ];
+	return aaarPointsMoney[ 0 ][ 5 ][ 0 ];
     }
     assert( 0 );
     return 0.0;
@@ -422,7 +419,8 @@ updateStatcontext(statcontext*       psc,
         rCost = pms->nMatchTo ? eq2mwc( rSkill, &ci ) -
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
 
-        if ( pmr->CubeDecPtr->aarOutput[ 0 ][ OUTPUT_WIN ] >= CashPoint( pms ) ) {
+        if ( pmr->CubeDecPtr->aarOutput[ 0 ][ OUTPUT_WIN ] >= 
+             CashPoint( pms, pmr->CubeDecPtr->aarOutput[ 0 ] ) ) {
           /* missed double above cash point */
           psc->anCubeMissedDoubleTG[ pmr->fPlayer ]++;
           psc->arErrorMissedDoubleTG[ pmr->fPlayer ][ 0 ] -=
@@ -541,7 +539,7 @@ updateStatcontext(statcontext*       psc,
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
 
         if ( pmr->CubeDecPtr->aarOutput[ 0 ][ OUTPUT_WIN ] >=
-	     CashPoint( pms ) ) {
+	     CashPoint( pms, pmr->CubeDecPtr->aarOutput[ 0 ] ) ) {
           /* wrong double above too good point */
           psc->anCubeWrongDoubleTG[ pmr->fPlayer ]++;
           psc->arErrorWrongDoubleTG[ pmr->fPlayer ][ 0 ] -= rSkill;
