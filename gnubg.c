@@ -4989,8 +4989,11 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'c': /* commands */
 	case 't': /* tty */
 #ifdef WIN32
+         /* Bad hack */
             fX = TRUE;
-            outputl( _("Sorry, this build does not support the -tty option"));
+            MessageBox (NULL,
+              TEXT (_("Sorry, this build does not support the -tty option")),
+              TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
 #else
 	    fX = FALSE;
 #endif

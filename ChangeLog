@@ -1,3 +1,7 @@
+Fri Jul  5 17:48:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gnubg.c (real_main): Fix mistake from yesterday.
+ 
 Thu Jul  4 22:47:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* sgf.c (SaveGame): always write score and game number.
