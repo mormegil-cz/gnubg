@@ -580,8 +580,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
           /* Find best move */
 
-          if ( pecChequer[ pci->fMove ]->nPlies &&
-               prc->fCubeful == pecChequer[ pci->fMove ]->fCubeful )
+          if ( pecChequer[ pci->fMove ]->nPlies ||
+               prc->fCubeful != pecChequer[ pci->fMove ]->fCubeful )
 
             /* the user requested n-ply (n>0). Another call to
                FindBestMove is required */

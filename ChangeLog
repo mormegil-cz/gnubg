@@ -1,3 +1,8 @@
+Tue Jan  7 10:10:10 2003  Gary Wong  <gtw@gnu.org>
+
+	* rollout.c (BasicCubefulRollout): Fix ply and cubeful test for 
+	FindBestMove call (debugged by Jørn).
+
 Mon Jan  6 16:14:14 2003  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (real_main): [!USE_GUI] Call RenderInitialise() (we
