@@ -10,15 +10,12 @@
 #include <alloca.h>
 #endif
 #include <errno.h>
+#include <isaac.h>
 #include <math.h>
 #include <neuralnet.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifndef HAVE_RAND_R
-#include "rand_r.h"
-#endif
 
 /* e[k] = exp(k/10) / 10 */
 static float e[100] = {
@@ -124,27 +121,40 @@ static float e[100] = {
 1993.0370438230298, 
 };
 
+/* Calculate an approximation to the sigmoid function 1 / ( 1 + e^x ).
+   This is executed very frequently during neural net evaluation, so
+   careful optimisation here pays off.
 
-static
-#if defined( __GNUC__ )
-inline
-#endif
-float
-sigmoid(float const xin)
-{
-  float const x = xin < 0 ? -xin : xin;
-  
-  float x1 = 10 * x;
+   Statistics on sigmoid(x) calls:
+   * >99% of the time, x is positive.
+   *  82% of the time, 3 < abs(x) < 8.
 
-  unsigned int const i = (int)x1;
-
-  if( i < 100 ) {
-    x1 = e[i] * (10 - (int)i + x1);
-  } else {
-    x1 = 1993.0370438230298 * 10;
-  }
-
-  return ( (xin < 0 ) ? x1 : 1.0 ) / (1.0 + x1);
+   The Intel x87's `f2xm1' instruction makes calculating accurate
+   exponentials comparatively fast, but still about 30% slower than
+   the lookup table used here. */
+static inline float sigmoid(float const xin) {
+    
+    if( !signbit( xin ) ) { /* signbit() can be faster than a compare to 0.0 */
+	/* xin is almost always positive; we place this branch of the `if'
+	   first, in the hope that the compiler/processor will predict the
+	   conditional branch will not be taken. */
+	if( xin < 10.0f ) {
+	    /* again, predict the branch not to be taken */
+	    const float x1 = 10.0f * xin;
+	    const unsigned int i = (int) x1;
+	    
+	    return 1.0f / ( 1.0f + e[ i ] * ( 10.0f - (int) i + x1 ) );
+	} else
+	    return 1.0f / 19931.370438230298f;
+    } else {
+	if( xin > -10.0f ) {
+	    const float x1 = -10.0f * xin;
+	    const unsigned int i = (int) x1;
+	    
+	    return 1.0f - 1.0f / ( 1.0f + e[ i ] * ( 10.0f - (int) i + x1 ) );
+	} else
+	    return 19930.370438230298f / 19931.370438230298f;	
+    }
 }
 
 /*  #define sigmoid( x ) ( (x) > 0.0f ? \ */
@@ -152,7 +162,16 @@ sigmoid(float const xin)
 /*  		       1.0f - 1.0f / ( 2.0f + -(x) + \ */
 /*  				       (1.0f / 2.0f) * (x) * (x) ) ) */
 
-static unsigned int nSeed = 1; /* for rand_r */
+static int frc;
+static randctx rc; /* for irand */
+
+static void CheckRC( void ) {
+
+    if( !frc ) {
+	irandinit( &rc, FALSE );
+	frc = TRUE;
+    }
+}
 
 extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 			    int cOutput, float rBetaHidden,
@@ -190,17 +209,19 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 	return -1;
     }
 
+    CheckRC();
+    
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
-	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cOutput * cHidden, pf = pnn->arOutputWeight; i; i-- )
-	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cHidden, pf = pnn->arHiddenThreshold; i; i-- )
-	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cOutput, pf = pnn->arOutputThreshold; i; i-- )
-	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) / 131072.0;
 
     return 0;
 }
@@ -448,13 +469,15 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
     int i, j;
     float *pr, *prNew;
 
+    CheckRC();
+    
     if( cHidden != pnn->cHidden ) {
 	if( !( pnn->arHiddenThreshold = realloc( pnn->arHiddenThreshold,
 		cHidden * sizeof( float ) ) ) )
 	    return -1;
 
 	for( i = pnn->cHidden; i < cHidden; i++ )
-	    pnn->arHiddenThreshold[ i ] = ( ( rand_r( &nSeed ) & 0xFFFF ) -
+	    pnn->arHiddenThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
 					    0x8000 ) / 131072.0;
     }
     
@@ -467,10 +490,10 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	for( i = 0; i < cInput; i++ )
 	    for( j = 0; j < cHidden; j++ )
 		if( j >= pnn->cHidden )
-		    *prNew++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) /
+		    *prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
 			131072.0;
 		else if( i >= pnn->cInput )
-		    *prNew++ = ( ( rand_r( &nSeed ) & 0x0FFF ) - 0x0800 ) /
+		    *prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
 			131072.0;
 		else
 		    *prNew++ = pnn->arHiddenWeight[ i * pnn->cHidden + j ];
@@ -486,7 +509,7 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	    return -1;
 
 	for( i = pnn->cOutput; i < cOutput; i++ )
-	    pnn->arOutputThreshold[ i ] = ( ( rand_r( &nSeed ) & 0xFFFF ) -
+	    pnn->arOutputThreshold[ i ] = ( ( irand( &rc ) & 0xFFFF ) -
 					    0x8000 ) / 131072.0;
     }
     
@@ -499,10 +522,10 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	for( i = 0; i < cHidden; i++ )
 	    for( j = 0; j < cOutput; j++ )
 		if( j >= pnn->cOutput )
-		    *prNew++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) /
+		    *prNew++ = ( ( irand( &rc ) & 0xFFFF ) - 0x8000 ) /
 			131072.0;
 		else if( i >= pnn->cHidden )
-		    *prNew++ = ( ( rand_r( &nSeed ) & 0x0FFF ) - 0x0800 ) /
+		    *prNew++ = ( ( irand( &rc ) & 0x0FFF ) - 0x0800 ) /
 			131072.0;
 		else
 		    *prNew++ = pnn->arOutputWeight[ i * pnn->cOutput + j ];
@@ -523,7 +546,7 @@ extern int NeuralNetLoad( neuralnet *pnn, FILE *pf ) {
 
     int i, nTrained;
     float *pr;
-    
+
     if( fscanf( pf, "%d %d %d %d %f %f\n", &pnn->cInput, &pnn->cHidden,
 		&pnn->cOutput, &nTrained, &pnn->rBetaHidden,
 		&pnn->rBetaOutput ) < 5 || pnn->cInput < 1 ||
