@@ -24,6 +24,9 @@
 #include <ctype.h>
 #include <gtk/gtk.h>
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "backgammon.h"
 #include "gtkboard.h"
@@ -313,12 +316,40 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_main();
 }
 
+static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
+    
+    char *pch;
+    GdkColor col;
+    
+    if( ( pch = strchr( sz, ';' ) ) )
+	*pch++ = 0;
+
+    if( gdk_color_parse( sz, &col ) ) {
+	anColour[ 0 ] = col.red >> 8;
+	anColour[ 1 ] = col.green >> 8;
+	anColour[ 2 ] = col.blue >> 8;
+	
+	if( pch ) {
+	    *pnSpeckle = atof( pch ) * 128;
+	    
+	    if( *pnSpeckle < 0 )
+		*pnSpeckle = 0;
+	    else if( *pnSpeckle > 128 )
+		*pnSpeckle = 128;
+	}
+
+	return 0;
+    }
+
+    return -1;
+}
+
 extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 				   char *szValue ) {
 
     int c, fValueError = FALSE;
     BoardData *bd = BOARD( pwBoard )->board_data;
-	
+    
     if( !szParam || !*szParam )
 	return;
 
@@ -327,20 +358,48 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
     
     c = strlen( szParam );
     
-    if( !g_strncasecmp( szParam, "board", c ) ) {
-	/* FIXME set board=rgb,speck */
-    } else if( !g_strncasecmp( szParam, "translucent", c ) )
+    if( !g_strncasecmp( szParam, "board", c ) )
+	/* board=colour;speckle */
+	fValueError = SetColourSpeckle( szValue, bd->aanBoardColour[ 0 ],
+					&bd->aSpeckle[ 0 ] );
+    else if( !g_strncasecmp( szParam, "translucent", c ) )
+	/* translucent=bool */
 	bd->translucent = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "light", c ) ) {
-	/* FIXME set light=azi,elev */
+	/* light=azimuth;elevation */
+	float rAzimuth, rElevation;
+
+	if( sscanf( szValue, "%f;%f", &rAzimuth, &rElevation ) < 2 )
+	    fValueError = TRUE;
+	else {
+	    if( rElevation < 0.0f )
+		rElevation = 0.0f;
+	    else if( rElevation > 90.0f )
+		rElevation = 90.0f;
+	    
+	    bd->arLight[ 2 ] = sinf( rElevation / 180 * M_PI );
+	    bd->arLight[ 0 ] = cosf( rAzimuth / 180 * M_PI ) *
+		sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
+	    bd->arLight[ 1 ] = sinf( rAzimuth / 180 * M_PI ) *
+		sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
+	}
     } else if( c > 1 &&
 	       ( !g_strncasecmp( szParam, "chequers", c - 1 ) ||
 		 !g_strncasecmp( szParam, "checkers", c - 1 ) ) &&
 	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) ) {
-	/* FIXME set chequers=rgba,refrac,shine,spec */
+	/* FIXME set chequers=colour;alpha;refrac;shine;spec */
     } else if( c > 1 && !g_strncasecmp( szParam, "points", c - 1 ) &&
-	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) ) {
-	/* FIXME set points=rgb,speck */
-    } else
-	outputf( "Unknown setting `%s'\n", szParam );
+	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
+	/* pointsn=colour;speckle */
+	fValueError = SetColourSpeckle( szValue,
+					bd->aanBoardColour[
+					    szParam[ c - 1 ] - '0' + 2 ],
+					&bd->aSpeckle[
+					    szParam[ c - 1 ] - '0' + 2 ] );
+    else
+	outputf( "Unknown setting `%s'.\n", szParam );
+
+    if( fValueError )
+	outputf( "`%s' is not a legal value for parameter `%s'.\n", szValue,
+		 szParam );
 }

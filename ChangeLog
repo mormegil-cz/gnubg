@@ -1,3 +1,8 @@
+Wed Jan 10 19:34:57 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkprefs.c (BoardPreferencesParam): More work on parameters to
+	"set colours".  Still not quite finished.
+
 Mon Jan  8 14:28:55 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (ParseKeyValue): New function.
