@@ -7221,7 +7221,7 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   pow->pwConfStart = gtk_check_button_new_with_label (_("Starting new game"));
   gtk_box_pack_start (GTK_BOX (pwVBox2), pow->pwConfStart, FALSE, FALSE, 0);
 
-  pow->pwConfOverwrite = gtk_check_button_new_with_label (_("Overwriteing existing files"));
+  pow->pwConfOverwrite = gtk_check_button_new_with_label (_("Overwriting existing files"));
   gtk_box_pack_start (GTK_BOX (pwVBox2), pow->pwConfOverwrite, FALSE, FALSE, 0);
 
   pwAdvbutton = gtk_button_new_with_label (_("Advanced option..."));

@@ -1,3 +1,7 @@
+Tue Jul 30 17:15:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+        gtkgame.c (OptionsPage): Fix typo (reported by Nardy Pillards
+
 Mon Jul 29 20:53:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Updates to tutor mode: more detailed settings and
