@@ -1,10 +1,16 @@
+Sun Apr 22 20:03:00 2001  Øystein Johansen <oeysteij@online.no>
+
+	* sgf.c (CommandLoadGame and CommandLoadMatch): Make sure
+	the names of the players are updated in the gamelist when
+	loading a match/game.
+
 Fri Apr 20 11:45:06 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (EvalBearoff1Full): Make aaProb unsigned.
 
 Fri Apr 20 11:31:52 2001  Gary Wong  <gtw@research.att.com>
 
-	* eval.o (StatusNeuralNet): Report weights version.
+	* eval.c (StatusNeuralNet): Report weights version.
 	
 	* analysis.c (AnalyzeGame): Record whether moves, cube or dice
 	were analysed.

@@ -847,8 +847,10 @@ extern void CommandLoadGame( char *sz ) {
 	UpdateSettings();
 	
 #if USE_GTK
-	if( fX )
+	if( fX ){
 	    GTKThaw();
+	    GTKSet(ap);
+        }
 #endif
     }
 }
@@ -891,8 +893,10 @@ extern void CommandLoadMatch( char *sz ) {
 	UpdateSettings();
 	
 #if USE_GTK
-	if( fX )
+	if( fX ){
 	    GTKThaw();
+	    GTKSet(ap);
+        }
 #endif
     }
 }
