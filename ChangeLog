@@ -1,3 +1,7 @@
+Tue Aug 26 01:43:26 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkgame.c (SetAnnotation): rearrange skill widgets to save space
+
 Mon Aug 25 23:39:47 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (GTKNew): add call to gtk_main_quit when dialog

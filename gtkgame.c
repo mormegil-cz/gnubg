@@ -1665,6 +1665,7 @@ fixOutput ( float arDouble[], float aarOutput[][ NUM_ROLLOUT_OUTPUTS ] ) {
 }
 
 
+#define ANALYSIS_HORIZONTAL 0
 
 static void SetAnnotation( moverecord *pmr ) {
 
@@ -1713,10 +1714,27 @@ static void SetAnnotation( moverecord *pmr ) {
 	case MOVE_NORMAL:
 	    fMoveOld = ms.fMove;
 	    fTurnOld = ms.fTurn;
-	    
+
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
-	    pwBox = gtk_table_new( 3,2, FALSE );
-	    
+
+#if ANALYSIS_HORIZONTAL
+	    pwBox = gtk_table_new( 3, 2, FALSE );
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
+				0 );
+#else
+	    pwBox = gtk_table_new( 2, 3, FALSE );
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
+				4 );
+#endif
+
+#if 0
+	    gtk_box_pack_start( GTK_BOX( pwBox ),
+				RollAnalysis( pmr->n.anRoll[ 0 ],
+					      pmr->n.anRoll[ 1 ],
+					      pmr->n.rLuck, pmr->n.lt ),
+				FALSE, FALSE, 4 );
+#endif
+
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
 
             fixOutput ( pmr->n.arDouble, pmr->n.aarOutput );
@@ -1727,15 +1745,6 @@ static void SetAnnotation( moverecord *pmr ) {
 
             /* luck */
 
-	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
-				0 );
-#if 0
-	    gtk_box_pack_start( GTK_BOX( pwBox ),
-				RollAnalysis( pmr->n.anRoll[ 0 ],
-					      pmr->n.anRoll[ 1 ],
-					      pmr->n.rLuck, pmr->n.lt ),
-				FALSE, FALSE, 4 );
-#endif
 	{
     char sz[ 64 ], *pch;
     cubeinfo ci;
@@ -1770,8 +1779,13 @@ static void SetAnnotation( moverecord *pmr ) {
     pwOptionMenu = gtk_option_menu_new();
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
     gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), pmr->n.lt );
-    
-    gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 1,2,0,1 );
+
+#if ANALYSIS_HORIZONTAL
+    gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 1, 2, 0, 1 );
+#else
+    gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 0, 1, 1, 2 );
+#endif
+
 	}
             /* Skill for cube */
 
@@ -1786,12 +1800,19 @@ static void SetAnnotation( moverecord *pmr ) {
                                    FALSE, FALSE, 4 );
 
 #endif
+
+#if ANALYSIS_HORIZONTAL
               gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
                                    gtk_label_new ( _("Didn't double") ),
-                                   0,1,1,2 );
+                                   0, 1, 1, 2 );
+#else
+              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
+                                   gtk_label_new ( _("Didn't double") ),
+                                   1, 2, 0, 1 );
+#endif
               gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
                                    SkillMenu ( pmr->n.stCube, "cube" ),
-                                   1,2,1,2 );
+                                   1, 2, 1, 2 );
             }
 
             /* chequer play skill */
@@ -1805,14 +1826,32 @@ static void SetAnnotation( moverecord *pmr ) {
 			      gtk_label_new( sz ), FALSE, FALSE, 0 );
 
 #endif
-	    gtk_table_attach_defaults( GTK_TABLE( pwBox ), 
-                              SkillMenu( pmr->n.stMove, "move" ),
-			      1,2,2,3 );
+
 	    strcpy( sz, _("Moved ") );
 	    FormatMove( sz + 6, ms.anBoard, pmr->n.anMove );
+
+#if ANALYSIS_HORIZONTAL
 	    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
 			      gtk_label_new( sz ), 
-			      0,1,2,3 );
+			      0, 1, 2, 3 );
+#else
+	    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
+			      gtk_label_new( sz ), 
+			      2, 3, 0, 1 );
+#endif
+
+#if ANALYSIS_HORIZONTAL
+	    gtk_table_attach_defaults( GTK_TABLE( pwBox ), 
+                              SkillMenu( pmr->n.stMove, "move" ),
+			      1, 2, 2, 3 );
+#else
+	    gtk_table_attach_defaults( GTK_TABLE( pwBox ), 
+                              SkillMenu( pmr->n.stMove, "move" ),
+			      2, 3, 1, 2 );
+#endif
+
+#undef ANALYSIS_HORIZONTAL
+
             /* cube */
 
             pwCubeAnalysis = CreateCubeAnalysis( pmr->n.aarOutput, 
