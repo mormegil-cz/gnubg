@@ -1611,7 +1611,7 @@ CommandSetRolloutBearoffTruncationExact ( char *sz ) {
 extern void
 CommandSetRolloutBearoffTruncationOS ( char *sz ) {
 
-  int f = prcSet->fTruncBearoff2;
+  int f = prcSet->fTruncBearoffOS;
 
   SetToggle ( "rollout bearofftruncation onesided", &f, sz,
               _("Will truncate *cubeless* rollouts when reaching"
@@ -1619,7 +1619,7 @@ CommandSetRolloutBearoffTruncationOS ( char *sz ) {
               _("Will not truncate *cubeless* rollouts when reaching"
                 " one-sided bearoff database") );
 
-  prcSet->fTruncBearoff2 = f;
+  prcSet->fTruncBearoffOS = f;
 
 
 }
