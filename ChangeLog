@@ -1,3 +1,7 @@
+Sat Mar 27 10:45:08 CET 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Prerelease 0.14.2
+
 Thu Mar 25 22:22:57 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am, */Makefile.am: add a few missing files
