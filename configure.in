@@ -221,6 +221,7 @@ else
   LIBS="$ac_save_LIBS"
   GTKDATA=gnubg.gtkrc
   AC_SUBST(GTKDATA)
+  AM_PATH_LIBART(,AC_DEFINE(HAVE_LIBART,1,[Define if you have the art library]))
 fi
 
 AH_VERBATIM([USE_GUI],
