@@ -265,22 +265,22 @@ GTKShowExport ( exportsetup *pexs ) {
     N_("Legend") };
 
   char *aszMovesDisplay[] = {
-    N_("Show for moves marked 'verybad'"),
+    N_("Show for moves marked 'very bad'"),
     N_("Show for moves marked 'bad'"),
     N_("Show for moves marked 'doubtful'"),
     N_("Show for unmarked moves"),
     N_("Show for moves marked 'interesting'"),
     N_("Show for moves marked 'good'"),
-    N_("Show for moves marked 'verygood'") };
+    N_("Show for moves marked 'very good'") };
 
   char *aszCubeDisplay[] = {
-    N_("Show for cube decisions marked 'verybad'"),
+    N_("Show for cube decisions marked 'very bad'"),
     N_("Show for cube decisions marked 'bad'"),
     N_("Show for cube decisions marked 'doubtful'"),
     N_("Show for unmarked cube decisions"),
     N_("Show for cube decisions marked 'interesting'"),
     N_("Show for cube decisions marked 'good'"),
-    N_("Show for cube decisions marked 'verygood'"),
+    N_("Show for cube decisions marked 'very good'"),
     N_("Show for actual cube decisions"),
     N_("Show for missed doubles"),
     N_("Show for close cube decisions") };
