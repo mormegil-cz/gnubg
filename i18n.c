@@ -71,6 +71,7 @@ void PopLocale ( void ) {
 
 }
 
+#if 0
 
 extern int 
 liscanf ( const char *format, ... ) {
@@ -126,6 +127,8 @@ lisscanf( const char *str, const char *format, ...) {
     return rc;
 
 }
+
+#endif
 
 
 extern int 

@@ -790,7 +790,8 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	/* light=azimuth;elevation */
 	float rAzimuth, rElevation;
 
-	if( lisscanf( szValue, "%f;%f", &rAzimuth, &rElevation ) < 2 )
+	PushLocale ( "C" );
+	if( sscanf( szValue, "%f;%f", &rAzimuth, &rElevation ) < 2 )
 	    fValueError = TRUE;
 	else {
 	    if( rElevation < 0.0f )
@@ -804,6 +805,7 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	    bd->arLight[ 1 ] = sinf( rAzimuth / 180 * M_PI ) *
 		sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
 	}
+        PopLocale ();
     } else if( c > 1 &&
 	       ( !g_strncasecmp( szParam, "chequers", c - 1 ) ||
 		 !g_strncasecmp( szParam, "checkers", c - 1 ) ) &&
