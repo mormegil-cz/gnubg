@@ -1,3 +1,7 @@
+Fri Sep 26 2003 19:18:48 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* play.c = missing conditional around call to HitGameClock
+
 Tue Sep 23 17:47:55 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
 
 	* sgfp.c sgfl.c - regenerated for users who don't have working

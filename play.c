@@ -1839,8 +1839,9 @@ extern int NextTurn( int fPlayNext ) {
     
     if( fDisplay || ap[ ms.fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
-
+#if USE_TIMECONTROL
     HitGameClock ( &ms );
+#endif
     /* We have reached a safe point to check for interrupts.  Until now,
        the board could have been in an inconsistent state. */
     if( fAction )
