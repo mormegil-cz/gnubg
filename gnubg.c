@@ -75,6 +75,8 @@ static int fReadingOther;
 #include "getopt.h"
 #include "positionid.h"
 #include "rollout.h"
+#include "matchequity.h"
+#include "analysis.h"
 
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -143,7 +145,8 @@ static char szDICE[] = "<die> <die>",
     szSEED[] = "<seed>",
     szSIZE[] = "<size>",
     szTRIALS[] = "<trials>",
-    szVALUE[] = "<value>";
+    szVALUE[] = "<value>",
+    szOPTVALUE[] = "[value]";
 
 command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
@@ -260,6 +263,8 @@ command acDatabase[] = {
       "money games", szONOFF, NULL },
     { "nackgammon", CommandSetNackgammon, "Set the starting position",
       szONOFF, NULL },
+    { "outputmwc", CommandSetOutputMWC, "Show output in MWC (on) or "
+      "equity (off) (match play only)", szONOFF, NULL },
     { "player", CommandSetPlayer, "Change options for one or both "
       "players", szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
@@ -300,12 +305,18 @@ command acDatabase[] = {
       "on the computer's turn", NULL, NULL },
     { "evaluation", CommandShowEvaluation, "Display evaluation settings "
       "and statistics", NULL, acSetEvaluation },
+    { "gammonprice", CommandShowGammonPrice, "Show gammon price",
+      NULL, NULL },
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL, NULL },
     { "kleinman", CommandShowKleinman, "Calculate Kleinman count for "
       "position", szOPTPOSITION, NULL },
+    { "matchequitytable", CommandShowMatchEquityTable, 
+      "Show match equity table", szOPTVALUE, NULL },
     { "nackgammon", CommandShowNackgammon, "Display which starting position "
       "will be used", NULL, NULL },
+    { "outputmwc", CommandShowOutputMWC, "Show whether output is in MWC or "
+      "equity (match play only)", NULL, NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
       "must move to bear off", szOPTPOSITION, NULL },
     { "player", CommandShowPlayer, "View per-player options", NULL, NULL },
@@ -336,6 +347,7 @@ command acDatabase[] = {
     { "accept", CommandAccept, "Accept a cube or resignation",
       NULL, NULL },
     { "agree", CommandAgree, "Agree to a resignation", NULL, NULL },
+    { "analysis", CommandAnalysis, "Run analysis", szFILENAME, NULL },
     { "beaver", CommandRedouble, "Synonym for `redouble'", NULL, NULL },
     { "database", NULL, "Manipulate a database of positions", NULL,
       acDatabase },
@@ -351,6 +363,7 @@ command acDatabase[] = {
     { "load", NULL, "Read data from a file", NULL, acLoad },
     { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
     { "new", NULL, "Start a new game, match or session", NULL, acNew },
+    { "pass", CommandDrop, "Synonum for `drop'", NULL, NULL },
     { "play", CommandPlay, "Force the computer to move", NULL, NULL },
     { "quit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
     { "r", CommandRoll, NULL, NULL, NULL },
@@ -1089,7 +1102,7 @@ extern void CommandHint( char *sz ) {
                                      ecEval.nPlies ) < 0 )
         return;
 
-      GetCubeActionSz ( arDouble, szTemp );
+      GetCubeActionSz ( arDouble, szTemp, &ci );
 
 #if USE_GTK
       /*
@@ -1131,16 +1144,17 @@ extern void CommandHint( char *sz ) {
 
       outputl ( "Take decision:\n" );
 
-      if ( ! nMatchTo ) {
+      if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) ) {
 
         outputf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
         outputf ( "Equity for pass: %+6.3f\n\n", -arDouble[ 3 ] );
 
       }
       else {
-
-        /* FIXME */
-
+	outputf ( "Mwc for take: %6.2f%%\n", 
+		  100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
+	outputf ( "Mwc for pass: %6.2f%%\n", 
+		  100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
       }
 
       if ( arDouble[ 2 ] < 0 && ! nMatchTo && fBeavers )
@@ -1173,18 +1187,41 @@ extern void CommandHint( char *sz ) {
         return;
       }
 #endif
+
+      if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) ) {
+
+	/* output in equity */
     
-      outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
+	outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
     
-      for( i = 0; i < ml.cMoves; i++ ) {
-        float *ar = ml.amMoves[ i ].pEval;
-        outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
-                 ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
-                 ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] - ar[ 4 ] - 1.0 );
-        outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove ) );
+	for( i = 0; i < ml.cMoves; i++ ) {
+	  float *ar = ml.amMoves[ i ].pEval;
+	  outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
+		   ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
+		   Utility ( ar, &ci ) );
+	  outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove
+			       ) );
+
+	}
 
       }
+      else {
 
+	/* output in mwc */
+
+	outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+		 " Mwc\tMove" );
+    
+	for( i = 0; i < ml.cMoves; i++ ) {
+	  float *ar = ml.amMoves[ i ].pEval;
+	  float rMwc = Utility ( ar, &ci );
+	  outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%6.2f%%\t",
+		   ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
+		   100.0 * eq2mwc ( Utility ( ar, &ci ), &ci ) );
+	  outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove
+			       ) );
+	}
+      }
     }
 }
 
@@ -1298,7 +1335,8 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	    strcpy( sz, " Takes" ); /* FIXME beavers? */
 	    break;
 	case MOVE_DROP:
-	    strcpy( sz, " Drops" );
+	    strcpy( sz, " Drops\n" );
+	    anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
 	case MOVE_RESIGN:
 	    /* FIXME how does JF do it? */
@@ -2247,6 +2285,8 @@ extern int main( int argc, char *argv[] ) {
 	  "details." );
 
     InitRNG();
+
+    InitMatchEquity ();
     
     if( EvalInitialise( fNoWeights ? NULL : GNUBG_WEIGHTS,
 			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
