@@ -251,6 +251,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow printing positions/games/matches/etc.
 ** Keep statistics of won/lost games/matches.
 ** Consider "-s scheme-file" and "-c command-file" options to read scripts.
+** Supply erf() if necessary (it wasn't available until ISO C 99).
 
 
 Local Variables:
