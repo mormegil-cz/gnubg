@@ -1,6 +1,20 @@
-GNU Backgammon NEWS -- history of user-visible changes.  19 October 2000
+GNU Backgammon NEWS -- history of user-visible changes.  1 February 2001
+
+** Importing of JF ".pos" position files added.
+
+** Added Guile support, if Guile is available.
+
+** Allow "=n" notation for moves (e.g. "eval =1" evaluates the position
+after gnubg's first choice move is played; "rollout =1 =3" rolls out the
+best and 3rd best moves).
+
+** Generate an in-memory heuristic bearoff database if it can't be read
+from the filesystem.
 
 ** .SGF format support for loading and saving added.
+
+** Added game and match navigation: use `next' and `previous' commands,
+or equivalent buttons in game window.
 
 ** Cubeful evaluation added.
 
@@ -11,8 +25,8 @@ GNU Backgammon NEWS -- history of user-visible changes.  19 October 2000
 
 ** MD5 dice generation added.
 
-** Added command line options `-d' (--datadir), `-b' (--no-bearoff) and
-`-w' (--window-system-only).
+** Added command line options `-d' (--datadir), `-b' (--no-bearoff),
+`-r' (--no-rc) and `-w' (--window-system-only).
 
 ** Reduced searches added.
 
