@@ -1,7 +1,7 @@
 /*
  * eval.h
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998-2000.
+ * by Gary Wong <gary@cs.arizona.edu>, 1998-2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -216,10 +216,6 @@ EvalCacheStats( int *pcUsed, int *pcSize, int *pcLookup, int *pcHit );
 extern int 
 GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
                int n0, int n1, int fPartial );
-extern int 
-FindBestMoves( movelist *pml, 
-               int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-               int c, float d, cubeinfo *pci, evalcontext *pec );
 
 extern int 
 ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int fCheckLegal );
