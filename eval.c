@@ -3124,7 +3124,7 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], cubeinfo *pci,
 			      evalcontext *pec, int nPlies ) {
-  int i, j = 0, iPly;
+  int i, iPly;
   movelist ml;
 #if __GNUC__
   move amCandidates[ pec->nSearchCandidates ];
@@ -3389,6 +3389,8 @@ ThorpCount( int anBoard[ 2 ][ 25 ], int *pnLeader, int *pnTrailer ) {
   *pnTrailer += anBoard[0][0];
   *pnTrailer -= anCovered[0];
   
+  return 0;
+
 }
   
   

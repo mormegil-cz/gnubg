@@ -23,6 +23,8 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #ifdef STANDALONE
 #include <stdio.h>
 #endif
