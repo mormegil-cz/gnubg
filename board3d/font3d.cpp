@@ -21,6 +21,10 @@
 * $Id$
 */
 
+#if USE_MSDEV_TEST_HARNESS
+#include <gl/gl.h>
+#endif
+
 #include "config.h"
 #include "inc3d.h"
 
