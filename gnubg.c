@@ -232,14 +232,29 @@ rolloutcontext rcRollout =
       { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 chequerplay */
       { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 chequerplay */
   }, 
+
+  {
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late cube decision */
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late cube decision */
+  }, 
+  {
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late chequerplay */
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late  chequerplay */
+  }, 
+  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncation cube decision */
+  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncation chequerplay */
+
   FALSE, /* cubeful */
   TRUE, /* variance reduction */
   FALSE, /* initial position */
   TRUE, /* rotate */
+  FALSE, /* late evaluations */
+  TRUE,  /* Truncation enabled */
   11, /* truncation */
   36, /* number of trials */
   TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
+  5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
   0 /* seed */
 };
@@ -261,12 +276,27 @@ rolloutcontext rcRollout =
       { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 chequerplay */ \
       { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 chequerplay */ \
     }, \
+    { \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late cube decision */ \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late cube decision */ \
+    }, \
+    { \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late chequerplay */ \
+      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late chequerplay */ \
+    }, \
+    { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncate cube decision */ \
+    { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncate chequerplay */ \
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \
     FALSE, /* initial position */ \
     TRUE, /* rotate */ \
+    FALSE, /* late evals */ \
+	TRUE, /* truncation enabled */ \
     7, /* truncation */ \
     36, /* number of trials */ \
+    TRUE, /* truncate at BEAROFF2 */ \
+    TRUE, /* truncate at BEAROFF2_OS */ \
+    5,  /* late evals start here */ \
     RNG_MERSENNE, /* RNG */ \
     0 /* seed */ \
   } \
@@ -668,10 +698,10 @@ command cER = {
   { "type", CommandSetEvalParamType,
     N_("Specify type (evaluation or rollout)"), szER, &cER },
   { "evaluation", CommandSetEvalParamEvaluation,
-    N_("Speficy parameters for neural net evaluation"), NULL,
+    N_("Specify parameters for neural net evaluation"), NULL,
     acSetEvaluation },
   { "rollout", CommandSetEvalParamRollout,
-    N_("Speficy parameters for rollout"), NULL,
+    N_("Specify parameters for rollout"), NULL,
     acSetRollout },
   { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysis[] = {
@@ -794,6 +824,16 @@ command cER = {
     { "user", CommandSetRNGUser, 
       N_("Specify an external generator"), szOPTSEED, NULL,},
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetRolloutLatePlayer[] = {
+    { "chequerplay", CommandSetRolloutPlayerLateChequerplay, 
+      N_("Specify parameters "
+         "for chequerplay during later plies of rollouts"), 
+      NULL, acSetEvaluation },
+    { "cubedecision", CommandSetRolloutPlayerLateCubedecision,
+      N_("Specify parameters "
+         "for cube decisions during later plies of rollouts"),
+      NULL, acSetEvaluation },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutPlayer[] = {
     { "chequerplay", CommandSetRolloutPlayerChequerplay, 
       N_("Specify parameters "
@@ -811,6 +851,24 @@ command cER = {
          "one-sided bearoff database"),
       NULL, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetRolloutLate[] = {
+  { "chequerplay", CommandSetRolloutLateChequerplay, 
+    N_("Specify parameters for chequerplay during later plies of rollouts"), 
+    NULL, acSetEvaluation },
+  { "cubedecision", CommandSetRolloutLateCubedecision, 
+    N_("Specify parameters "
+       "for cube decisions during later plies of rollouts"), 
+    NULL, acSetEvaluation },
+  { "enable", CommandSetRolloutLateEnable, 
+    N_("Enable/Disable different evaluations for later plies of rollouts"), 
+    szONOFF, &cOnOff },
+  { "plies", CommandSetRolloutLatePlies, 
+    N_("Change evaluations for later plies in rollouts"),
+    szPLIES, NULL },
+  { "player", CommandSetRolloutLatePlayer, 
+    N_("Control eval parameters on later plies for each side individually"), 
+    szPLAYER, acSetRolloutLatePlayer }, 
+  { NULL, NULL, NULL, NULL, NULL }
 }, acSetRollout[] = {
     { "bearofftruncation", NULL, 
       N_("Control truncation of rollout when reaching bearoff databases"),
@@ -822,8 +880,10 @@ command cER = {
     { "cubeful", CommandSetRolloutCubeful, N_("Specify whether the "
       "rollout is cubeful or cubeless"), szONOFF, &cOnOff },
     { "initial", CommandSetRolloutInitial, 
-      N_("Roll out as the initial position "
-      "of a game"), szONOFF, &cOnOff },
+      N_("Roll out as the initial position of a game"), szONOFF, &cOnOff },
+    {"later", CommandSetRolloutLate,
+     N_("Control evaluation parameters for later plies of rollout"),
+     NULL, acSetRolloutLate },
     { "player", CommandSetRolloutPlayer, 
       N_("Control evaluation parameters for each side individually"), 
       szPLAYER, acSetRolloutPlayer }, 
@@ -835,12 +895,24 @@ command cER = {
       "to use for rollouts"), szOPTSEED, NULL },
     { "trials", CommandSetRolloutTrials, N_("Control how many rollouts to "
       "perform"), szTRIALS, NULL },
-    { "truncation", CommandSetRolloutTruncation, N_("End rollouts at a "
-      "particular depth"), szPLIES, NULL },
+	{ "truncation", CommandSetRolloutTruncation, N_("Set parameters for "
+      "truncating rollouts"), NULL, acSetTruncation },
     { "varredn", CommandSetRolloutVarRedn, N_("Use lookahead during rollouts "
       "to reduce variance"), szONOFF, &cOnOff },
     /* FIXME add commands for cubeful rollouts, cube variance reduction,
        quasi-random dice, settlements... */
+    { NULL, NULL, NULL, NULL, NULL }
+}, acSetTruncation[] = {
+    { "chequerplay", CommandSetRolloutTruncationChequer,
+	  N_("Set chequerplay evaluation when truncating a rollout"), NULL,
+	  acSetEvaluation},
+    { "cubedecision", CommandSetRolloutTruncationCube,
+	  N_("Set cubedecision evaluation when truncating a rollout"), NULL,
+	  acSetEvaluation},
+    { "enable", CommandSetRolloutTruncationEnable, 
+	N_("Enable/Disable truncated rollouts"), szONOFF, &cOnOff },
+    { "plies", CommandSetRolloutTruncationPlies,
+	N_("End rollouts at a particular depth"), szPLIES, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetTraining[] = {
     { "alpha", CommandSetTrainingAlpha, 
@@ -3980,20 +4052,27 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s cubeful %s\n"
             "%s varredn %s\n"
             "%s rotate %s\n"
-	    "%s initial %s\n"
-            "%s truncation %d\n"
-            "%s trials %d\n"
+            "%s initial %s\n"
+            "%s truncation enable %s\n"
+            "%s truncation plies %d\n"
             "%s truncatebearoff exact %s\n"
-            "%s truncatebearoff onesided %s\n",
+            "%s truncatebearoff onesided %s\n"
+            "%s later enable %s\n"
+            "%s later plies %d\n"
+            "%s trials %d\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
-	    sz, prc->fInitial ? "on" : "off",
+            sz, prc->fInitial ? "on" : "off",
+            sz, prc->fDoTruncate ? "on" : "off",
             sz, prc->nTruncate,
-            sz, prc->nTrials,
             sz, prc->fTruncBearoff2 ? "on" : "off",
-            sz, prc->fTruncBearoffOS ? "on" : "off" );
-
+            sz, prc->fTruncBearoffOS ? "on" : "off", 
+            sz, prc->fLateEvals ? "on" : "off",
+            sz, prc->nLate,
+            sz, prc->nTrials
+            );
+  
   SaveRNGSettings ( pf, sz, prc->rngRollout );
 
   /* chequer play and cube decision evalcontexts */
@@ -4011,6 +4090,21 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
     SaveEvalSettings ( pf, pch, &prc->aecCube[ i ] );
 
   }
+
+  for ( i = 0; i < 2; i++ ) {
+
+    sprintf ( pch, "%s later player %i chequerplay", sz, i );
+    SaveEvalSettings ( pf, pch, &prc->aecChequerLate[ i ] );
+
+    sprintf ( pch, "%s later player %i cubedecision", sz, i );
+    SaveEvalSettings ( pf, pch, &prc->aecCubeLate[ i ] );
+
+  }
+
+  sprintf (pch, "%s truncation cubedecision", sz);
+  SaveEvalSettings ( pf, pch, &prc->aecCubeTrunc );
+  sprintf (pch, "%s truncation chequerplay", sz );
+  SaveEvalSettings ( pf, pch, &prc->aecChequerTrunc);
 
   free ( pch );
 
@@ -4664,7 +4758,8 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
             if( !strncasecmp( pchCurrent, pc->sz, strlen( pchCurrent ) ) ) {
 		pc = pc->pc;
 		
-		if( pc == acSetPlayer || pc == acSetRolloutPlayer ) {
+		if( pc == acSetPlayer || pc == acSetRolloutPlayer || 
+			pc == acSetRolloutLatePlayer) {
 		    pcResume = pc;
 		    pc = &cPlayerBoth;
 		}

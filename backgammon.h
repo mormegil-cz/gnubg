@@ -505,9 +505,11 @@ extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
-    acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
+    acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], 
+    acSetRollout[], acSetRolloutLate[], acSetTruncation [], 
     acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
-    acSetRolloutPlayer[], cOnOff, cFilename;
+    acSetRolloutPlayer[], acSetRolloutLatePlayer[], cOnOff, cFilename;
+
 extern command acAnnotateMove[];
 extern command acSetExportParameters[];
 extern command acSetGeometryValues[];
@@ -768,12 +770,24 @@ extern void CommandAccept( char * ),
     CommandSetRolloutBearoffTruncationExact ( char * ),
     CommandSetRolloutBearoffTruncationOS ( char * ),
     CommandSetRolloutCubedecision ( char * ),
+    CommandSetRolloutLateCubedecision ( char * ),
     CommandSetRolloutCubeful ( char * ),
     CommandSetRolloutChequerplay ( char * ),
     CommandSetRolloutInitial( char * ),
     CommandSetRolloutPlayer ( char * ),
     CommandSetRolloutPlayerChequerplay ( char * ),
     CommandSetRolloutPlayerCubedecision ( char * ),
+    CommandSetRolloutPlayerLateChequerplay ( char * ),
+    CommandSetRolloutPlayerLateCubedecision ( char * ),
+    CommandSetRolloutLate ( char * ),
+    CommandSetRolloutLateChequerplay ( char * ),
+    CommandSetRolloutLateEnable ( char * ),
+    CommandSetRolloutLatePlayer ( char * ),
+    CommandSetRolloutLatePlies ( char * ),
+    CommandSetRolloutTruncationChequer ( char * ),
+    CommandSetRolloutTruncationCube ( char * ),
+    CommandSetRolloutTruncationEnable ( char * ),
+    CommandSetRolloutTruncationPlies ( char * ),    
     CommandSetRolloutRNG ( char * ),
     CommandSetRolloutRotate ( char * ),
     CommandSetRolloutSeed( char * ),
@@ -873,6 +887,8 @@ extern int fTutor, fTutorCube, fTutorChequer, nTutorSkillCurrent;
 extern int GiveAdvice ( skilltype Skill );
 extern skilltype TutorSkill;
 extern int fTutorAnalysis;
+
+extern int EvalCmp (evalcontext *, evalcontext *, int);
 
 #ifndef HAVE_BASENAME
 extern char *
