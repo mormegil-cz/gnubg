@@ -287,11 +287,11 @@ extern void CommandDatabaseDump( char *sz ) {
     NoGDBM();
 }
 
-extern void CommandDatabaseEvaluate( char *sz ) {
+extern void CommandDatabaseGenerate( char *sz ) {
     NoGDBM();
 }
 
-extern void CommandDatabaseGenerate( char *sz ) {
+extern void CommandDatabaseRollout( char *sz ) {
     NoGDBM();
 }
 

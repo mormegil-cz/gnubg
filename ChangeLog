@@ -1,4 +1,7 @@
-Sat Jan 15 17:48:30 2000  Gary Wong  <gary@cs.arizona.edu>
+Sat Jan 15 18:04:43 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* database.c, gnubg.c, backgammon.h: Give error message in
+	CommandDatabaseRollout if libgdbm is not available.
 
 	* play.c (CommandMove): Fix bug bearing off against opponent on bar.
 
