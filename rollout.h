@@ -67,11 +67,6 @@ GeneralCubeDecision ( char *sz,
                       cubeinfo *pci, evalsetup *pes );
 
 extern int
-GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                       int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, evalcontext *pec );
-
-extern int
 GeneralCubeDecisionR ( char *sz, 
                        float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                        float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
