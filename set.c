@@ -2525,7 +2525,8 @@ extern void CommandSetToolbar( char *sz )
 		return;
 	}
 #if USE_GUI
-	SetToolbarStyle(n);
+	if (fX)
+	  SetToolbarStyle(n);
 #endif
 }
 

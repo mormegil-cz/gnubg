@@ -1,3 +1,9 @@
+
+Mon 12 Apr 2004 13:12:06 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* set.c - put if (fX) wrapper around SetToolbarStyle, stops
+	  GTK complaints in text mode
+
 Sun Apr 11 22:52:49 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkprefs.c (SetTitle): move misplaced pbdeSelected.
