@@ -1,3 +1,8 @@
+Sun Jul 25 18:15:47 UTC 2004 Jim Segrave   <jes@jes-2.demon.nl>
+
+	* gtkexport.c - fix handling of cube export settings (typo and 
+	  corrections for unused entries)
+
 Mon Jul 19 09:53:10 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (real_main): initialise random seed for rollout

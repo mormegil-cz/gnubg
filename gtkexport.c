@@ -67,9 +67,9 @@ static char *aszCubeDisplay[] = {
     N_("Show for cube decisions marked 'bad'"),
     N_("Show for cube decisions marked 'doubtful'"),
     N_("Show for unmarked cube decisions"),
-/*     N_("Show for cube decisions marked 'interesting'"), */
-/*     N_("Show for cube decisions marked 'good'"), */
-/*     N_("Show for cube decisions marked 'very good'"), */
+    0, /*     N_("Show for cube decisions marked 'interesting'"), */
+    0, /*     N_("Show for cube decisions marked 'good'"), */
+    0, /*     N_("Show for cube decisions marked 'very good'"), */
     N_("Show for actual cube decisions"),
     N_("Show for missed doubles"),
     N_("Show for close cube decisions") };
@@ -181,10 +181,14 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
       gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                        pew->apwCubeParameters[ i ] ) );
 
-  for ( i = 0; i < NUM_CUBES ; i++ )
-    pexs->afCubeDisplay[ i ] =
-      gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
-                                       pew->apwCubeDisplay[ i ] ) );
+  /* skip unused entries */
+  for ( i = 0; i < NUM_CUBES ; i++ ) {	
+    if (aszCubeDisplay[ i ]) {
+      pexs->afCubeDisplay[ i ] =
+	gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
+				 pew->apwCubeDisplay[ i ] ) );
+    }
+  }
 
   /* html */
 
@@ -410,17 +414,20 @@ ExportSet ( exportwidget *pew ) {
   /* cube */
   
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeDetailProb ),
-                                pexs->fMovesDetailProb );
+                                pexs->fCubeDetailProb );
 
   for ( i = 0; i < 2; i++ )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( 
                                      pew->apwCubeParameters[ i ] ),
                                   pexs->afCubeParameters[ i ] );
 
-  for ( i = 0; i < NUM_CUBES ; i++ )
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( 
-                                     pew->apwCubeDisplay[ i ] ),
+  for ( i = 0; i < NUM_CUBES ; i++ ) {
+    if (aszCubeDisplay[i]) {
+      gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( 
+				  pew->apwCubeDisplay[ i ] ),
                                   pexs->afCubeDisplay[ i ] );
+    }
+  }
 
   /* html */
 
@@ -676,14 +683,16 @@ GTKShowExport ( exportsetup *pexs ) {
                        TRUE, TRUE, 0 );
 
 
-  for ( i = 0; i < NUM_CUBES ; i++ )
-
-    gtk_box_pack_start ( GTK_BOX ( pwVBox ),
-                         pew->apwCubeDisplay[ i ] =
-                         gtk_check_button_new_with_label ( 
-                            gettext ( aszCubeDisplay[ i ] ) ), 
+  for ( i = 0; i < NUM_CUBES ; i++ ) {
+    if (aszCubeDisplay[i]) {
+      gtk_box_pack_start ( GTK_BOX ( pwVBox ),
+			   pew->apwCubeDisplay[ i ] =
+			   gtk_check_button_new_with_label ( 
+			       gettext ( aszCubeDisplay[ i ] ) ), 
                          TRUE, TRUE, 0 );
-                    
+    }
+  }
+                 
 
   /* html */
 
