@@ -386,13 +386,22 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 }
 extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
  
-   pnn->cInput = *( ( (int *) p )++ );
-   pnn->cHidden = *( ( (int *) p )++ );
-   pnn->cOutput = *( ( (int *) p )++ );
-   pnn->nTrained = *( ( (int *) p )++ );
+   float *fp;
+   int *ip = (int *)p;
+   pnn->cInput = *ip;
+   ip++;
+   pnn->cHidden = *ip;
+   ip++;
+   pnn->cOutput = *ip;
+   ip++;
+   pnn->nTrained = *ip;
+   ip++;
    pnn->fDirect = TRUE;
-   pnn->rBetaHidden = *( ( (float *) p )++ );
-   pnn->rBetaOutput = *( ( (float *) p )++ );
+   fp = (float*)ip;
+   pnn->rBetaHidden = *fp;
+   fp++;
+   pnn->rBetaOutput = *fp;
+   fp++;
  
    if( pnn->cInput < 1 || pnn->cHidden < 1 || pnn->cOutput < 1 ||
      pnn->nTrained < 0 || pnn->rBetaHidden <= 0.0 ||
@@ -402,19 +411,19 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
      return NULL;
    }
  
-   pnn->arHiddenWeight = p;
-   ( (float *) p ) += pnn->cInput * pnn->cHidden;
-   pnn->arOutputWeight = p;
-   ( (float *) p ) += pnn->cHidden * pnn->cOutput;
-   pnn->arHiddenThreshold = p;
-   ( (float *) p ) += pnn->cHidden;
-   pnn->arOutputThreshold = p;
-   ( (float *) p ) += pnn->cOutput;
+   pnn->arHiddenWeight = fp;
+   fp += pnn->cInput * pnn->cHidden;
+   pnn->arOutputWeight = fp;
+   fp += pnn->cHidden * pnn->cOutput;
+   pnn->arHiddenThreshold = fp;
+   fp += pnn->cHidden;
+   pnn->arOutputThreshold = fp;
+   fp += pnn->cOutput;
 
    pnn->savedBase = malloc( pnn->cHidden * sizeof( float ) ); 
    pnn->savedIBase = malloc( pnn->cInput * sizeof( float ) ); 
 
-   return p;
+   return fp;
 }
 
 extern int
