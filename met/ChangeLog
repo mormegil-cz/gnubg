@@ -1,3 +1,9 @@
+Fri Apr 23 18:15:56 CEST 2004  JOern Thyssen  <jth@gnubg.org>
+
+	* g7.xml: delete file
+	* g11.xml: new file
+	(contributed by Zorba)
+
 Fri Apr 16 22:08:54 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* mec.c: new file; built-in support for mec
