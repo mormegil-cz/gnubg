@@ -1,3 +1,7 @@
+Fri Dec 13 15:14:54 2002  Gary Wong  <gtw@gnu.org>
+
+	* Makefile.am (EXTRA_DIST): Add freetype2.m4.
+
 Sat Dec  7 22:45:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* Makefile.am: add new files.
