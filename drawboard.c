@@ -34,7 +34,8 @@
 int fClockwise = FALSE; /* Player 1 moves clockwise */
 
 /*
- *  GNU Backgammon  Position ID: 0123456789ABCD
+ *  GNU Backgammon  Position ID: 0123456789ABCD 
+ *                  Match ID   : 0123456789ABCD
  *  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg (Cube: 2)
  *  |                  |   | O  O  O  O     O | OO  0 points
  *  |                  |   | O     O          | OO  Cube offered at 2
@@ -52,7 +53,7 @@ int fClockwise = FALSE; /* Player 1 moves clockwise */
  */
 
 static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
-                           char *asz[] ) {
+                           char *asz[], char *szMatchID ) {
 
     char *pch = sz, *pchIn;
     int x, y, an[ 2 ][ 25 ], cOffO = 15, cOffX = 15;
@@ -81,6 +82,13 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     
     pch += 14;
     *pch++ = '\n';
+
+    /* match id */
+
+    if ( szMatchID && *szMatchID ) {
+      sprintf ( pch, "                 Match ID   : %s\n", szMatchID );
+      pch = strchr ( pch, 0 );
+    }
             
     strcpy( pch, fRoll ? " +13-14-15-16-17-18------19-20-21-22-23-24-+     " :
             " +12-11-10--9--8--7-------6--5--4--3--2--1-+     " );
@@ -261,6 +269,7 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 
 /*
  *     GNU Backgammon  Position ID: 0123456789ABCD
+ *                     Match ID   : 0123456789ABCD
  *     +24-23-22-21-20-19------18-17-16-15-14-13-+  O: gnubg (Cube: 2)     
  *  OO | O     O  O  O  O |   |                  |  0 points               
  *  OO |          O     O |   |                  |  Cube offered at 2      
@@ -278,7 +287,7 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
  */
 
 static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
-                           char *asz[] ) {
+                           char *asz[], char *szMatchID ) {
 
     char *pch = sz, *pchIn;
     int x, y, an[ 2 ][ 25 ], cOffO = 15, cOffX = 15;
@@ -307,6 +316,13 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     
     pch += 14;
     *pch++ = '\n';
+            
+    /* match id */
+
+    if ( szMatchID && *szMatchID ) {
+      sprintf ( pch, "                 Match ID   : %s\n", szMatchID );
+      pch = strchr ( pch, 0 );
+    }
             
     strcpy( pch, fRoll ? "    +24-23-22-21-20-19------18-17-16-15-14-13-+  " :
             "    +-1--2--3--4--5--6-------7--8--9-10-11-12-+  " );
@@ -486,11 +502,11 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 }
 
 extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
-                        char *asz[] ) {
+                        char *asz[], char *szMatchID ) {
     if( fClockwise == FALSE ) 
-        return ( DrawBoardStd( sz, anBoard, fRoll, asz ) ) ;
+        return ( DrawBoardStd( sz, anBoard, fRoll, asz, szMatchID ) ) ;
 
-    return ( DrawBoardCls( sz, anBoard, fRoll, asz ) ) ;   
+    return ( DrawBoardCls( sz, anBoard, fRoll, asz, szMatchID ) ) ;   
 };
 
 static char *FormatPoint( char *pch, int n ) {

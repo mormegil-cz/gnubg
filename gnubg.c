@@ -1782,7 +1782,8 @@ extern void ShowBoard( void ) {
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
 	
-	outputl( DrawBoard( szBoard, ms.anBoard, ms.fMove, apch ) );
+	outputl( DrawBoard( szBoard, ms.anBoard, ms.fMove, apch,
+                            MatchIDFromMatchState ( &ms ) ) );
 
 	if( fAnnotation && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
@@ -2887,7 +2888,7 @@ extern void CommandCopy( char *sz ) {
   /* FIXME - Rewrite for new WinCopy command */
 
 #ifdef WIN32
-  DrawBoard( szOut, ms.anBoard, 1, aps );
+  DrawBoard( szOut, ms.anBoard, 1, aps, MatchIDFromMatchState ( &ms ) );
   strcat(szOut, "\n");
 
   if(OpenClipboard(0)) {
@@ -2908,7 +2909,8 @@ extern void CommandCopy( char *sz ) {
     outputl( "Can't open clipboard" ); 
   }
 #else
-  puts( DrawBoard( szOut, ms.anBoard, 1, aps ) );
+  puts( DrawBoard( szOut, ms.anBoard, 1, aps, 
+                   MatchIDFromMatchState ( &ms ) ) );
 #endif
 }
 

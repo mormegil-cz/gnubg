@@ -37,6 +37,7 @@
 #include "eval.h"
 #include "dice.h"
 #include "matchequity.h"
+#include "matchid.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -278,7 +279,8 @@ extern void CommandShowBoard( char *sz ) {
 #endif
     else
 #endif
-	outputl( DrawBoard( szOut, an, TRUE, ap ) );
+        outputl( DrawBoard( szOut, an, TRUE, ap, 
+                            MatchIDFromMatchState ( &ms ) ) );
 }
 
 extern void CommandShowDelay( char *sz ) {
