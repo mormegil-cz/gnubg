@@ -167,6 +167,23 @@ int fAutoAnalysis = FALSE;
 int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 
+char aaszPaths[ PATH_MET + 1 ][ 2 ][ 255 ];
+char *szCurrentFileName = NULL;
+char *aszExtensions [ PATH_MET + 1 ] = {
+  "eps",
+  "gam",
+  "html",
+  "tex",
+  "mat",
+  "fibs",
+  "pdf",
+  "pos",
+  "ps",
+  "sgf",
+  "sgg",
+  "xml"
+};
+
 int fNextTurn = FALSE, fComputing = FALSE;
 
 float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
@@ -765,6 +782,44 @@ command cER = {
   { "met", CommandSetInvertMatchEquityTable,
     "alias for 'set invert matchequitytable'", szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetPath[] = {
+  { "eps", CommandSetPathEPS,
+    "Set default path for exporting Encapsulated PostScript files", 
+    szFILENAME, &cFilename },
+  { "gam", CommandSetPathGam,
+    "Set default path for importing or exporting Jellyfish .gam files", 
+    szFILENAME, &cFilename },
+  { "html", CommandSetPathHTML,
+    "Set default path for exporting HTML files", 
+    szFILENAME, &cFilename },
+  { "latex", CommandSetPathLaTeX,
+    "Set default path for exporting LaTeX files", 
+    szFILENAME, &cFilename },
+  { "mat", CommandSetPathMat,
+    "Set default path for importing or exporting Jellyfish .mat files", 
+    szFILENAME, &cFilename },
+  { "oldmoves", CommandSetPathOldMoves,
+    "Set default path for importing FIBS oldmoves files", 
+    szFILENAME, &cFilename },
+  { "pdf", CommandSetPathPDF,
+    "Set default path for exporting PDF files", 
+    szFILENAME, &cFilename },
+  { "pos", CommandSetPathPos,
+    "Set default path for importing Jellyfish .pos files", 
+    szFILENAME, &cFilename },
+  { "postscript", CommandSetPathPostScript,
+    "Set default path for exporting PostScript files", 
+    szFILENAME, &cFilename },
+  { "sgf", CommandSetPathSGF,
+    "Set default path for loading and saving SGF files", 
+    szFILENAME, &cFilename },
+  { "sgg", CommandSetPathSGG,
+    "Set default path for importing GamesGrid SGG files", 
+    szFILENAME, &cFilename },
+  { "met", CommandSetPathMET,
+    "Set default path for loading match equity files", 
+    szFILENAME, &cFilename },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
     { "analysis", NULL, "Control parameters used when analysing moves",
       NULL, acSetAnalysis },
@@ -811,6 +866,8 @@ command cER = {
       szONOFF, &cOnOff },
     { "output", NULL, "Modify options for formatting results", NULL,
       acSetOutput },
+    { "path", NULL, "Set default path when saving, loading, importing, "
+      "and exporting files.", NULL, acSetPath },
     { "player", CommandSetPlayer, "Change options for one or both "
       "players", szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
@@ -892,6 +949,8 @@ command cER = {
       "will be used", NULL, NULL },
     { "output", CommandShowOutput, "Show how results will be formatted",
       NULL, NULL },
+    { "path", CommandShowPath, "Show default paths for save, load, export, "
+      "and import", NULL, NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
       "must move to bear off", szOPTPOSITION, NULL },
     { "player", CommandShowPlayer, "View per-player options", NULL, NULL },
@@ -2991,6 +3050,7 @@ extern void CommandImportJF( char *sz ) {
     if( ( pf = fopen( sz, "rb" ) ) ) {
 	ImportJF( pf, sz );
 	fclose( pf );
+        setDefaultFileName ( sz, PATH_POS );
     } else
 	perror( sz );
 
@@ -3012,6 +3072,7 @@ extern void CommandImportMat( char *sz ) {
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportMat( pf, sz );
 	fclose( pf );
+        setDefaultFileName ( sz, PATH_MAT );
     } else
 	perror( sz );
 }
@@ -3031,6 +3092,7 @@ extern void CommandImportOldmoves( char *sz ) {
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportOldmoves( pf, sz );
 	fclose( pf );
+        setDefaultFileName ( sz, PATH_OLDMOVES );
     } else
 	perror( sz );
 }
@@ -3050,6 +3112,7 @@ extern void CommandImportSGG( char *sz ) {
     if( ( pf = fopen( sz, "r" ) ) ) {
 	ImportSGG( pf, sz );
 	fclose( pf );
+        setDefaultFileName ( sz, PATH_SGG );
     } else
 	perror( sz );
 }
@@ -3171,6 +3234,9 @@ extern void CommandExportGameGam( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_GAM );
+
 }
 
 extern void CommandExportMatchMat( char *sz ) {
@@ -3213,6 +3279,9 @@ extern void CommandExportMatchMat( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_MAT );
+
 }
 
 extern void CommandNewWeights( char *sz ) {
@@ -3577,6 +3646,14 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf ( pf, 
               "set invert matchequitytable %s\n",
               fInvertMET ? "on" : "off" );
+
+    /* paths */
+
+    for ( i = 0; i <= PATH_MET; i++ )
+      if ( strlen ( aaszPaths[ i ][ 0 ] ) )
+        fprintf ( pf,
+                  "set path %s \"%s\"\n",
+                  acSetPath[ i ].sz, aaszPaths[ i ][ 0 ] );
 
     /* the end */
 
@@ -4661,6 +4738,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchCommands = NULL, *pchScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE;
+    int i, j;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
 	{ "no-bearoff", no_argument, NULL, 'b' },
@@ -4842,6 +4920,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
        could happen if InitRNG had to use the current time as a seed) -- mix
        it up a little bit */
     rcRollout.nSeed ^= 0x792A584B;
+
+    /* initialise paths */
+
+    for ( i = 0; i <= PATH_SGG; i++ )
+      for ( j = 0; j < 2; j++ )
+        strcpy ( aaszPaths[ i ][ j ], "" );
+
+    /* init met */
     
     InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
     
@@ -5252,5 +5338,169 @@ confirmOverwrite ( const char *sz, const int f ) {
 
 }
 
+
+
+extern void
+setDefaultPath ( const char *sz, const pathformat f ) {
+
+  char *pc;
+
+  /* set path up last slash as 'current path' */
+  
+  strcpy ( aaszPaths[ f ][ 1 ], sz );
+  pc = strrchr ( aaszPaths[ f ][ 1 ], '/' );
+  if ( ! pc )
+    pc = aaszPaths[ f ][ 1 ];
+  *pc = 0;
+
+}
+
+
+
+extern void
+setDefaultFileName ( const char *sz, const pathformat f ) {
+
+  char *pc;
+  char *pcdot;
+
+  /* set path up last slash as 'current path' */
+
+  setDefaultPath ( sz, f );
+  
+  /* garbage collect */
+
+  if ( szCurrentFileName )
+    free ( szCurrentFileName );
+
+
+  if ( ( pc = strrchr ( sz, '/' ) ) ) {
+    szCurrentFileName = strdup ( pc + 1 );
+    if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
+      *pcdot = 0; /* remove extension */
+  }
+  else if ( strlen ( sz ) ) {
+    szCurrentFileName = strdup ( sz );
+    if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
+      *pcdot = 0; /* remove extension */
+  }
+  else
+    szCurrentFileName = NULL;
+
+}
+
+
+
+/*
+ * Return default file name for saving a file with the specified
+ * extension.
+ *
+ * Input:
+ *   f: the type of the file (SGF, SGG, HTML, etc etc)
+ *
+ * Returns:
+ *   file name (pointer must be freed by caller if not null)
+ *
+ * Garbage collect:
+ *   Returned pointer must be freed by caller if not NULL).
+ *
+ */
+
+extern char *
+getDefaultFileName ( const pathformat f ) {
+
+  int l;
+  char *sz, *pc, *szPath;
+  char *szExt = aszExtensions [ f ];
+  time_t t;
+
+  /* get default path */
+
+  szPath = getDefaultPath ( f );
+
+  if ( szCurrentFileName && *szCurrentFileName ) {
+
+    /* use current filename */
+
+    l = ( szPath ? ( 1 + strlen ( szPath ) ) : 0 ) + 
+      strlen ( szCurrentFileName ) + 1 + 1 + strlen ( szExt );
+    sz = (char *) malloc ( l );
+
+    if ( szPath ) {
+      strcpy ( sz, szPath );
+      strcat ( sz, "/" );
+    }
+    else
+      strcpy ( sz, "" );
+    
+    strcat ( sz, szCurrentFileName );
+    strcat ( sz, "." );
+    strcat ( sz, szExt );
+
+  }
+  else {
+
+    /* Generate new filename */
+
+    /* "timestamp"-"name for player 0"-"name for player 1"-"length".ext */
+
+    l = 10 + 1 + strlen ( ap[ 0 ].szName ) + 1 +
+      strlen ( ap[ 1 ].szName ) + 1 + 5 + 1 + 
+      strlen ( szExt ) + ( szPath ? ( 1 + strlen ( szPath ) ) : 0 );
+
+    sz = (char *) malloc ( l );
+
+    if ( szPath ) {
+      strcpy ( sz, szPath );
+      strcat ( sz, "/" );
+    }
+    else
+      strcpy ( sz, "" );
+
+    pc = strchr ( sz, 0 );
+    time ( &t );
+    strftime ( pc, l, "%Y-%m-%d-%H%M", localtime ( &t ) );
+  
+    pc = strchr ( pc, 0 );
+    strcat ( pc, "-" );
+
+    pc = strchr ( pc, 0 );
+    strcat ( pc, ap[ 0 ].szName );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, "-" );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, ap [ 1 ].szName );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, "-" );
+
+    pc = strchr ( pc, 0 );
+    sprintf ( pc, "%d", ms.nMatchTo );
+
+    pc = strchr ( pc, 0 );
+    strcat (pc, "." );
+    
+    pc = strchr ( pc, 0 );
+    strcat (pc, szExt );
+
+  }
+
+  return sz;
+
+}
+
+
+extern char *
+getDefaultPath ( const pathformat f ) {
+
+  if ( strlen ( aaszPaths[ f ][ 1 ] ) )
+    return PathSearch ( aaszPaths[ f ][ 1 ], szDataDirectory );
+  else if ( strlen ( aaszPaths[ f ][ 0 ] ) )
+    return PathSearch ( aaszPaths[ f ][ 0 ], szDataDirectory );
+  else 
+    return NULL;
+
+}
 
 

@@ -248,6 +248,15 @@ extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
+typedef enum _pathformat {
+  PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
+  PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_MET } 
+pathformat;
+
+extern char aaszPaths[ PATH_MET + 1 ][ 2 ][ 255 ];
+extern char *aszExtensions[ PATH_MET + 1 ];
+extern char *szCurrentFileName;
+
 extern evalcontext ecTD;
 
 extern evalsetup esEvalCube, esEvalChequer;
@@ -384,6 +393,19 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 
 extern int
 confirmOverwrite ( const char *sz, const int f );
+
+extern void
+setDefaultPath ( const char *sz, const pathformat f );
+
+extern void
+setDefaultFileName ( const char *sz, const pathformat f );
+
+extern char *
+getDefaultFileName ( const pathformat f );
+
+extern char *
+getDefaultPath ( const pathformat f );
+
 
 #ifdef WIN32
 extern void WinCopy( char *szOut );
@@ -580,6 +602,18 @@ extern void CommandAccept( char * ),
     CommandSetOutputMWC ( char * ),
     CommandSetOutputRawboard( char * ),
     CommandSetOutputWinPC( char * ),
+    CommandSetPathEPS( char * ),
+    CommandSetPathSGF( char * ),
+    CommandSetPathLaTeX( char * ),
+    CommandSetPathPDF( char * ),
+    CommandSetPathHTML( char * ),
+    CommandSetPathMat( char * ),
+    CommandSetPathMET( char * ),
+    CommandSetPathSGG( char * ),
+    CommandSetPathOldMoves( char * ),
+    CommandSetPathPos( char * ),
+    CommandSetPathGam( char * ),
+    CommandSetPathPostScript( char * ),
     CommandSetPlayerChequerplay( char * ),
     CommandSetPlayerCubedecision( char * ),
     CommandSetPlayerExternal( char * ),
@@ -643,6 +677,7 @@ extern void CommandAccept( char * ),
     CommandShowNackgammon( char * ),
     CommandShowMatchEquityTable( char * ),
     CommandShowOutput( char * ),
+    CommandShowPath( char * ),
     CommandShowPipCount( char * ),
     CommandShowPostCrawford( char * ),
     CommandShowPlayer( char * ),

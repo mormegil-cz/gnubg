@@ -1811,7 +1811,14 @@ extern void CommandSetMET( char *sz ) {
 
   sz = NextToken ( &sz );
 
+  if ( !sz || !*sz ) {
+    outputl ( "You must specify a filename. "
+              "See \"help set met\". " );
+    return;
+  }
+
   InitMatchEquity ( sz, szDataDirectory );
+  setDefaultPath ( sz, PATH_MET );
 
   outputf( "GNU Backgammon will now use the %s match equity table.\n",
            miCurrent.szName );
@@ -2288,6 +2295,117 @@ CommandSetInvertMatchEquityTable ( char *sz ) {
   if ( fOldInvertMET != fInvertMET )
     invertMET ();
 
+
+}
+
+
+static void
+SetPath ( char *sz, pathformat f ) {
+
+  sz = NextToken ( &sz );
+
+  if ( ! sz || ! *sz ) {
+    outputl ( "You must specify a path." );
+    return;
+  }
+
+  strcpy ( aaszPaths[ f ][ 0 ], sz );
+
+}
+
+
+extern void
+CommandSetPathGam ( char *sz ) {
+
+  SetPath ( sz, PATH_GAM );
+
+}
+
+
+extern void
+CommandSetPathHTML ( char *sz ) {
+
+  SetPath ( sz, PATH_HTML );
+
+}
+
+
+extern void
+CommandSetPathLaTeX ( char *sz ) {
+
+  SetPath ( sz, PATH_LATEX );
+
+}
+
+
+extern void
+CommandSetPathMat ( char *sz ) {
+
+  SetPath ( sz, PATH_MAT );
+
+}
+
+
+extern void
+CommandSetPathOldMoves ( char *sz ) {
+
+  SetPath ( sz, PATH_OLDMOVES );
+
+}
+
+
+extern void
+CommandSetPathPDF ( char *sz ) {
+
+  SetPath ( sz, PATH_PDF );
+
+}
+
+
+extern void
+CommandSetPathPos ( char *sz ) {
+
+  SetPath ( sz, PATH_POS );
+
+}
+
+
+extern void
+CommandSetPathEPS ( char *sz ) {
+
+  SetPath ( sz, PATH_EPS );
+
+}
+
+
+extern void
+CommandSetPathPostScript ( char *sz ) {
+
+  SetPath ( sz, PATH_POSTSCRIPT );
+
+}
+
+
+extern void
+CommandSetPathSGF ( char *sz ) {
+
+  SetPath ( sz, PATH_SGF );
+
+}
+
+
+extern void
+CommandSetPathSGG ( char *sz ) {
+
+  SetPath ( sz, PATH_SGG );
+
+}
+
+
+extern void
+CommandSetPathMET ( char *sz ) {
+
+  SetPath ( sz, PATH_MET );
 
 }
 
