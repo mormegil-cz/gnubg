@@ -1,3 +1,8 @@
+Sat Dec  7 15:06:33 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* bearoff.texi: add MD5 sums
+	* Makefile.am: add bearoff.texi (forgotten in previous commit)
+
 Sun Nov 24 21:55:38 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* bearoff.texi: new chapter with some info about 
