@@ -257,12 +257,12 @@ fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 
 
-if test "$no_gtk" != "no"; then
-   dnl Look for Glib 1.x
-   AM_PATH_GLIB(1.2.0)
-elif test "$no_gtk2" != "no"; then
+if test "$no_gtk2" != "no"; then
    dnl look for Glib 2.x
    AM_PATH_GLIB_2_0(2.0.0)
+elif test "$no_gtk" != "no"; then
+   dnl Look for Glib 1.x
+   AM_PATH_GLIB(1.2.0)
 else
    dnl look for glib 2.x
    AM_PATH_GLIB_2_0(2.0.0)
