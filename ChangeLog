@@ -1,3 +1,7 @@
+Wed Jan 12 23:29:59 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c, eval.h: Added another net for special contact positions.
+
 Wed Jan 12 21:08:03 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* set.c (CommandSetEvalCandidates, CommandSetEvalTolerance,

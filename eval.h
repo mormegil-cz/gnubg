@@ -91,12 +91,15 @@ typedef struct _movelist {
 } movelist;
 
 typedef enum _positionclass {
-    CLASS_OVER, /* Game already finished */
+    CLASS_OVER = 0, /* Game already finished */
     CLASS_BEAROFF2, /* Two-sided bearoff database */
     CLASS_BEAROFF1, /* One-sided bearoff database */
-    CLASS_RACE, /* Race neural network */
-    CLASS_CONTACT /* Contact neural network */
+    CLASS_RACE,     /* Race neural network */
+    CLASS_CONTACT,  /* Contact neural network */
+    CLASS_BPG,      /* On Bar, Back game, or Prime */
 } positionclass;
+
+#define N_CLASSES (CLASS_BPG + 1)
 
 #define CLASS_PERFECT CLASS_BEAROFF2
 

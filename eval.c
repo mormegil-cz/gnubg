@@ -66,7 +66,7 @@ enum { I_BREAK_CONTACT = HALF_RACE_INPUTS, I_BACK_CHEQUER, I_BACK_ANCHOR,
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
 
 static int anEscapes[ 0x1000 ];
-static neuralnet nnContact, nnRace;
+static neuralnet nnContact, nnBPG, nnRace;
 static unsigned char *pBearoff1 = NULL, *pBearoff2;
 static cache cEval;
 volatile int fInterrupt = FALSE;
@@ -178,11 +178,19 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 		fprintf( stderr, "%s: Invalid weights file\n",
 			 szWeightsBinary );
 	    else {
-		if( !( fReadWeights = !NeuralNetLoadBinary( &nnContact,
-							    pfWeights ) &&
-		       !NeuralNetLoadBinary( &nnRace, pfWeights ) ) )
+		if( !( fReadWeights =
+		       !NeuralNetLoadBinary(&nnContact, pfWeights ) &&
+		       !NeuralNetLoadBinary(&nnRace, pfWeights ) ) ) {
 		    perror( szWeightsBinary );
-	
+		}
+
+		if( fReadWeights ) {
+		  if( NeuralNetLoadBinary( &nnBPG, pfWeights ) == -1 ) {
+		    /* HACK */
+		    nnBPG.cInput = 0;
+		  }
+		}
+		
 		fclose( pfWeights );
 	    }
 	}
@@ -211,7 +219,14 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 						      pfWeights ) &&
 		       !NeuralNetLoad( &nnRace, pfWeights ) ) )
 		    perror( szWeights );
-	
+
+		if( fReadWeights ) {
+		  if( NeuralNetLoad( &nnBPG, pfWeights ) == -1 ) {
+		    /* HACK */
+		    nnBPG.cInput = 0;
+		  }
+		}
+		
 		fclose( pfWeights );
 	    }
 	}
@@ -231,6 +246,10 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	puts( "Creating random neural net weights..." );
 	NeuralNetCreate( &nnContact, NUM_INPUTS, 128 /* FIXME */,
 			 NUM_OUTPUTS, 0.1, 1.0 );
+	
+	NeuralNetCreate( &nnBPG, NUM_INPUTS, 128 /* FIXME */,
+			 NUM_OUTPUTS, 0.1, 1.0 );
+	
 	NeuralNetCreate( &nnRace, NUM_RACE_INPUTS, 128 /* FIXME */,
 			 NUM_OUTPUTS, 0.1, 1.0 );
     }
@@ -240,19 +259,23 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 
 extern int EvalSave( char *szWeights ) {
     
-    FILE *pfWeights;
+  FILE *pfWeights;
     
-    if( !( pfWeights = fopen( szWeights, "w" ) ) )
-	return -1;
+  if( !( pfWeights = fopen( szWeights, "w" ) ) )
+    return -1;
     
-    fprintf( pfWeights, "GNU Backgammon %s\n", WEIGHTS_VERSION );
+  fprintf( pfWeights, "GNU Backgammon %s\n", WEIGHTS_VERSION );
 
-    NeuralNetSave( &nnContact, pfWeights );
-    NeuralNetSave( &nnRace, pfWeights );
+  NeuralNetSave( &nnContact, pfWeights );
+  NeuralNetSave( &nnRace, pfWeights );
     
-    fclose( pfWeights );
+  if( nnBPG.cInput != 0 ) { /* HACK */
+    NeuralNetSave( &nnBPG, pfWeights );
+  }
+    
+  fclose( pfWeights );
 
-    return 0;
+  return 0;
 }
 
 static int Escapes( int anBoard[ 25 ], int n ) {
@@ -820,6 +843,62 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 	arOutput[ OUTPUT_LOSEBACKGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
 }
 
+static int
+barPrimeBackGame(int anBoard[ 2 ][ 25 ])
+{
+  int side, i, k;
+  
+  /* on bar */
+  if( anBoard[0][24] || anBoard[1][24] ) {
+    return 1;
+  }
+
+  /* two or more anchors in opponent home */
+  
+  for(side = 0; side < 2; ++side) {
+    unsigned int n = 0;
+    for(i = 18; i < 24; ++i) {
+      if( anBoard[side][i] > 1 ) {
+	++n;
+      }
+    }
+    if( n > 1 ) {
+      return 1;
+    }
+  }
+
+  for(side = 0; side < 2; ++side) {
+    int first;
+    
+    for(first = 23; first >= 0; --first) {
+      if( anBoard[side][first] > 0 ) {
+	break;
+      }
+    }
+    {                                                  assert( first >= 0 ); }
+
+    for(i = 24 - first; i < 20; ++i) {
+      unsigned int n = 0;
+      for(k = i; k <= i+3; ++k) {
+	if( anBoard[1-side][k] > 0 ) {
+	  ++n;
+	}
+      }
+
+      if( n == 4 ) {
+	/* 4 prime */
+	return 1;
+      }
+
+      if( n == 3 && i < 20 && anBoard[1-side][i+4] > 1 ) {
+	/* broken 5 prime */
+	return 1;
+      }
+    }
+  }
+  return 0;
+}
+
 extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
 
     int i, nOppBack = -1, nBack = -1;
@@ -834,8 +913,13 @@ extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
     if( nBack < 0 || nOppBack < 0 )
 	return CLASS_OVER;
 
-    if( nBack + nOppBack > 22 )
-	return CLASS_CONTACT;
+    if( nBack + nOppBack > 22 ) {
+      if( barPrimeBackGame(anBoard) ) {
+	return CLASS_BPG;
+      }
+
+      return CLASS_CONTACT;
+    }
     else if( nBack > 5 || nOppBack > 5 )
 	return CLASS_RACE;
 
@@ -853,6 +937,18 @@ static void EvalRace( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     CalculateInputs( anBoard, arInput );
     
     NeuralNetEvaluate( &nnRace, arInput, arOutput );
+}
+
+static void EvalBPG( int anBoard[ 2 ][ 25 ], float arOutput[] )
+{
+  float arInput[ NUM_INPUTS ];
+
+  CalculateInputs(anBoard, arInput);
+
+  /* HACK - if not loaded, use contact */
+  
+  NeuralNetEvaluate(nnBPG.cInput != 0 ? &nnBPG : &nnContact,
+		    arInput, arOutput);
 }
 
 static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
@@ -1001,8 +1097,8 @@ extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     EvalBearoff1Full( anBoard, arOutput );
 }
 
-static classevalfunc acef[ 5 ] = {
-    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalContact
+static classevalfunc acef[ N_CLASSES ] = {
+    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalContact, EvalBPG
 };
 
 static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
@@ -1128,24 +1224,33 @@ extern int GameStatus( int anBoard[ 2 ][ 25 ] ) {
 
 extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] ) {
 
-    float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
-    int fRace;
+  float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
+  int fRace;
 
-    /* FIXME implement per-class training */
-    if( ClassifyPosition( anBoard ) < CLASS_RACE ) {
-	errno = EDOM;
-	return -1;
+  int pc = ClassifyPosition( anBoard );
+  
+  neuralnet* nn;
+  
+  switch( pc ) {
+    case CLASS_CONTACT: nn = &nnContact; break;
+    case CLASS_RACE:    nn = &nnRace; break;
+    case CLASS_BPG:     nn = &nnBPG; break;
+    default:
+    {
+      errno = EDOM;
+      return -1;
     }
-    
-    SanityCheck( anBoard, arDesired );
-    
-    fRace = CalculateInputs( anBoard, arInput );
+  }
 
-    NeuralNetTrain( fRace ? &nnRace : &nnContact, arInput, arOutput, arDesired,
-		    2.0 / pow( 100.0 + ( fRace ? nnRace : nnContact ).nTrained,
-			       0.25 ) );
+  SanityCheck( anBoard, arDesired );
+    
+  fRace = CalculateInputs( anBoard, arInput );
 
-    return 0;
+  NeuralNetTrain( nn, arInput, arOutput, arDesired,
+		  2.0 / pow( 100.0 + ( fRace ? nnRace : nnContact ).nTrained,
+			     0.25 ) );
+
+  return 0;
 }
 
 extern void SetGammonPrice( float rGammon, float rLoseGammon,
@@ -1664,8 +1769,8 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 	     arInput[ I_TOP_EVEN ], arInput[ I_TOP2_EVEN ] );
 }
 
-static classdumpfunc acdf[ 5 ] = {
-    DumpOver, DumpBearoff2, DumpBearoff1, DumpRace, DumpContact
+static classdumpfunc acdf[ N_CLASSES ] = {
+    DumpOver, DumpBearoff2, DumpBearoff1, DumpRace, DumpContact, DumpContact
 };
 
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
@@ -1696,6 +1801,10 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
     case CLASS_CONTACT: /* Contact neural network */
 	strcat( szOutput, "CONTACT" );
+	break;
+	
+    case CLASS_BPG: 
+	strcat( szOutput, "BPG" );
 	break;
     }
 
