@@ -27,4 +27,7 @@ extern char *PathSearch( const char *szFile, const char *szDir );
 extern int 
 PathOpen( const char *szFile, const char *szDir, const int f );
 
+extern int
+BackupFile ( const char *sz );
+
 #endif

@@ -1,3 +1,12 @@
+Wed Dec 11 21:19:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	User defined board designs.
+
+	* gtkprefs.c (DesignSave, DesignAddOK, DesignAddChanged,
+	DesignAddTitle, DesgnAdd, RemoveDesign): new functions.
+
+	* path.c (BackupFile): new function.
+
 Wed Dec 11 19:37:01 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Convert code in FindnSaveBestMoves to use movefilters.

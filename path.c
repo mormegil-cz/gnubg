@@ -143,3 +143,44 @@ PathOpen( const char *szFile, const char *szDir, const int f ) {
     return -1;
 }
 
+
+/*
+ * Backup file by renaming it to sz~
+ *
+ */
+
+extern int
+BackupFile ( const char *sz ) {
+
+  char *szNew;
+  int rc;
+
+  if ( ! sz || !*sz )
+    return 0;
+
+  if ( access ( sz, R_OK ) )
+    return 0;
+
+  if ( ! ( szNew = (char *) malloc ( strlen ( sz ) + 2 ) ) ) 
+    return -1;
+
+  strcpy ( szNew, sz );
+  strcat ( szNew, "~" );
+
+#ifdef WIN32
+  /* windows can not rename to an existing file */
+  if ( unlink ( szNew ) && errno != ENOENT ) {
+    /* do not complain if file is not found */
+    outputerr ( szNew );
+    free ( szNew );
+    return -1;
+  }
+#endif
+
+
+  rc = rename ( sz, szNew );
+  free ( szNew );
+
+  return rc;
+
+}
