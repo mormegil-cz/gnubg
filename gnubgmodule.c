@@ -47,138 +47,74 @@
 
 static PyObject *
 BoardToPy( int anBoard[ 2 ][ 25 ] ) {
+  PyObject* b = PyTuple_New(2);
+  PyObject* b0 = PyTuple_New(25);
+  PyObject* b1 = PyTuple_New(25);
+  unsigned int k;
+  
+  for(k = 0; k < 25; ++k) {
+    PyTuple_SET_ITEM(b0, k, PyInt_FromLong(anBoard[ 0 ][k]));
+    PyTuple_SET_ITEM(b1, k, PyInt_FromLong(anBoard[ 1 ][k]));
+  }
 
-  return 
-    Py_BuildValue( "[[i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i],"
-                   " [i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i]]",
-                   anBoard[ 0 ][ 0 ],
-                   anBoard[ 0 ][ 1 ],
-                   anBoard[ 0 ][ 2 ],
-                   anBoard[ 0 ][ 3 ],
-                   anBoard[ 0 ][ 4 ],
-                   anBoard[ 0 ][ 5 ],
-                   anBoard[ 0 ][ 6 ],
-                   anBoard[ 0 ][ 7 ],
-                   anBoard[ 0 ][ 8 ],
-                   anBoard[ 0 ][ 9 ],
-                   anBoard[ 0 ][ 10 ],
-                   anBoard[ 0 ][ 11 ],
-                   anBoard[ 0 ][ 12 ],
-                   anBoard[ 0 ][ 13 ],
-                   anBoard[ 0 ][ 14 ],
-                   anBoard[ 0 ][ 15 ],
-                   anBoard[ 0 ][ 16 ],
-                   anBoard[ 0 ][ 17 ],
-                   anBoard[ 0 ][ 18 ],
-                   anBoard[ 0 ][ 19 ],
-                   anBoard[ 0 ][ 20 ],
-                   anBoard[ 0 ][ 21 ],
-                   anBoard[ 0 ][ 22 ],
-                   anBoard[ 0 ][ 23 ],
-                   anBoard[ 0 ][ 24 ],
-                   anBoard[ 1 ][ 0 ],
-                   anBoard[ 1 ][ 1 ],
-                   anBoard[ 1 ][ 2 ],
-                   anBoard[ 1 ][ 3 ],
-                   anBoard[ 1 ][ 4 ],
-                   anBoard[ 1 ][ 5 ],
-                   anBoard[ 1 ][ 6 ],
-                   anBoard[ 1 ][ 7 ],
-                   anBoard[ 1 ][ 8 ],
-                   anBoard[ 1 ][ 9 ],
-                   anBoard[ 1 ][ 10 ],
-                   anBoard[ 1 ][ 11 ],
-                   anBoard[ 1 ][ 12 ],
-                   anBoard[ 1 ][ 13 ],
-                   anBoard[ 1 ][ 14 ],
-                   anBoard[ 1 ][ 15 ],
-                   anBoard[ 1 ][ 16 ],
-                   anBoard[ 1 ][ 17 ],
-                   anBoard[ 1 ][ 18 ],
-                   anBoard[ 1 ][ 19 ],
-                   anBoard[ 1 ][ 20 ],
-                   anBoard[ 1 ][ 21 ],
-                   anBoard[ 1 ][ 22 ],
-                   anBoard[ 1 ][ 23 ],
-                   anBoard[ 1 ][ 24 ] );
+  PyTuple_SET_ITEM(b, 0, b0);
+  PyTuple_SET_ITEM(b, 1, b1);
 
+  return b;
 }
 
 static PyObject *
 Board1ToPy( int anBoard [ 25 ] ) {
-
-  return 
-    Py_BuildValue( "[i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i,i]",
-                   anBoard[ 0 ],
-                   anBoard[ 1 ],
-                   anBoard[ 2 ],
-                   anBoard[ 3 ],
-                   anBoard[ 4 ],
-                   anBoard[ 5 ],
-                   anBoard[ 6 ],
-                   anBoard[ 7 ],
-                   anBoard[ 8 ],
-                   anBoard[ 9 ],
-                   anBoard[ 10 ],
-                   anBoard[ 11 ],
-                   anBoard[ 12 ],
-                   anBoard[ 13 ],
-                   anBoard[ 14 ],
-                   anBoard[ 15 ],
-                   anBoard[ 16 ],
-                   anBoard[ 17 ],
-                   anBoard[ 18 ],
-                   anBoard[ 19 ],
-                   anBoard[ 20 ],
-                   anBoard[ 21 ],
-                   anBoard[ 22 ],
-                   anBoard[ 23 ],
-                   anBoard[ 24 ] );
-
+  unsigned int k;
+  PyObject* b = PyTuple_New(25);
+  
+  for(k = 0; k < 25; ++k) {
+    PyTuple_SET_ITEM(b, k, PyInt_FromLong(anBoard[k]));
+  }
+  
+  return b;
 }
 
 
 static int
-PyToBoard1( PyObject *p, int anBoard[ 25 ] ) {
+PyToBoard1( PyObject *p, int anBoard[ 25 ] )
+{
+  if( PySequence_Check(p) && PySequence_Size(p) == 25 ) {
+    int j;
 
-  int j;
-  PyObject *pi;
-
-  for ( j = 0; j < 25; ++j ) {
-    if ( ! ( pi = PyList_GetItem( p, j ) ) )
-      return -1;
+    for ( j = 0; j < 25; ++j ) {
+      PyObject* pi = PySequence_Fast_GET_ITEM(p, j);
     
-    anBoard[ j ] = (int) PyInt_AsLong( pi );
-      
+      anBoard[ j ] = (int) PyInt_AsLong( pi );
+    }
+    return 1;
   }
 
   return 0;
-
 }
 
 static int
-PyToBoard( PyObject *p, int anBoard[ 2 ][ 25 ] ) {
+PyToBoard(PyObject* p, int anBoard[ 2 ][ 25 ])
+{
+  if( PySequence_Check(p) && PySequence_Size(p) == 2 ) {
+    int i;
+    for(i = 0; i < 2; ++i) {
+      PyObject* py = PySequence_Fast_GET_ITEM(p, i);
 
-  PyObject *py;
-  int i;
-
-  for ( i = 0; i < 2; ++i ) {
-    if ( ! ( py = PyList_GetItem( p, i ) ) )
-      return -1;
-
-    if ( PyToBoard1( py, anBoard[ i ] ) )
-      return -1;
-
+      if ( ! PyToBoard1( py, anBoard[ i ] ) ) {
+	return 0;
+      }
+    }
+    return 1;
   }
 
   return 0;
-
 }
 
 
 static PyObject *
-CubeInfoToPy( const cubeinfo *pci ) {
-
+CubeInfoToPy( const cubeinfo *pci )
+{
   return Py_BuildValue( "{s:i,s:i,s:i,s:i,s:(i,i),"
                         "s:i,s:i,s:i,s:((f,f),(f,f)),s:i}",
                         "cube", pci->nCube,
@@ -195,7 +131,6 @@ CubeInfoToPy( const cubeinfo *pci ) {
                         pci->arGammonPrice[ 1 ],
                         pci->arGammonPrice[ 3 ],
                         "bgv", pci->bgv );
-
 }
 
 
@@ -459,8 +394,8 @@ PythonCommand( PyObject *self, PyObject *args ) {
     fInterrupt = FALSE;
   }
   
-  return Py_BuildValue( "" ); /* None */
-
+  Py_INCREF(Py_None);
+  return Py_None;
 }
 
 
@@ -470,9 +405,11 @@ PythonBoard( PyObject *self, PyObject *args ) {
   if ( ! PyArg_ParseTuple( args, ":board" ) )
     return NULL;
 
-  if ( ms.gs == GAME_NONE )
+  if ( ms.gs == GAME_NONE ) {
     /* no board available */
-    return Py_BuildValue( "" );
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
 
   return BoardToPy( ms.anBoard );
 }
@@ -497,7 +434,7 @@ PythonEvaluate( PyObject *self, PyObject *args ) {
                            &pyBoard, &pyCubeInfo, &pyEvalContext ) )
     return NULL;
 
-  if ( pyBoard && PyToBoard( pyBoard, anBoard ) )
+  if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
   if ( pyCubeInfo && PyToCubeInfo( pyCubeInfo, &ci ) )
@@ -512,15 +449,14 @@ PythonEvaluate( PyObject *self, PyObject *args ) {
     return NULL;
   }
 
-  return Py_BuildValue( "[fffffff]", 
-                        arOutput[ 0 ],
-                        arOutput[ 1 ],
-                        arOutput[ 2 ],
-                        arOutput[ 3 ],
-                        arOutput[ 4 ],
-                        arOutput[ 5 ],
-                        arOutput[ 6 ] );
-
+  {
+    PyObject* p = PyTuple_New(6);
+    int k;
+    for(k = 0; k < 6; ++k) {
+      PyTuple_SET_ITEM(p, k, PyFloat_FromDouble(arOutput[k]));
+    }
+    return p;
+  }
 }
 
 
@@ -568,7 +504,6 @@ METPre( float aar[ MAXSCORE ][ MAXSCORE ], const int n ) {
   }
 
   return pyList;
-
 }
 
 
@@ -653,7 +588,6 @@ PythonMwc2eq( PyObject *self, PyObject *args ) {
     return NULL;
 
   return Py_BuildValue( "f", mwc2eq( r, &ci ) );
-
 }
 
 
@@ -668,7 +602,7 @@ PythonPositionID( PyObject *self, PyObject *args ) {
   if ( ! PyArg_ParseTuple( args, "|O:positionid", &pyBoard ) )
     return NULL;
 
-  if ( pyBoard && PyToBoard( pyBoard, anBoard ) )
+  if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
   return Py_BuildValue( "s", PositionID( anBoard ) );
@@ -709,16 +643,19 @@ PythonPositionKey( PyObject *self, PyObject *args ) {
   if ( ! PyArg_ParseTuple( args, "|O!:positionkey", &PyList_Type, &pyBoard ) )
     return NULL;
 
-  if ( pyBoard && PyToBoard( pyBoard, anBoard ) )
+  if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
   PositionKey( anBoard, auch );
 
-  return Py_BuildValue( "[iiiiiiiiii]", 
-                        auch[ 0 ], auch[ 1 ], auch[ 2 ], auch[ 3 ],
-                        auch[ 4 ], auch[ 5 ], auch[ 6 ], auch[ 7 ],
-                        auch[ 8 ], auch[ 9 ] );
-
+  {
+    PyObject* a = PyTuple_New(10);
+    int i;
+    for(i = 0; i < 10; ++i) {
+      PyTuple_SET_ITEM(a, i, PyInt_FromLong(auch[i]));
+    }
+    return a;
+  }
 }
 
 static PyObject *
@@ -758,9 +695,8 @@ PythonPositionFromKey( PyObject *self, PyObject *args ) {
 
 
 static PyObject *
-PythonPositionBearoff( PyObject *self, PyObject *args ) {
-
-
+PythonPositionBearoff( PyObject *self, PyObject *args )
+{
   PyObject *pyBoard = NULL;
   int nChequers = 15;
   int nPoints = 6;
@@ -772,7 +708,7 @@ PythonPositionBearoff( PyObject *self, PyObject *args ) {
                            &pyBoard, &nPoints, &nChequers ) )
     return NULL;
 
-  if ( pyBoard && PyToBoard1( pyBoard, anBoard ) )
+  if ( pyBoard && !PyToBoard1( pyBoard, anBoard ) )
     return NULL;
 
   return Py_BuildValue( "i", PositionBearoff( anBoard, nPoints, nChequers ) );
@@ -811,8 +747,6 @@ PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
   PositionFromBearoff( anBoard, iPos, nPoints, nChequers );
 
   return Board1ToPy( anBoard );
-
-
 }
 
 
