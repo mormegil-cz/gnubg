@@ -286,8 +286,8 @@ Skill( float const r )
  * get middle of doubling window
  */
 
-void
-getMarketWindowDividerMWC( float rMarketWindowDividerMWC, const matchstate* pms )
+static void
+getMarketWindowDividerMWC( float* prMarketWindowDividerMWC, const matchstate* pms )
 {
     cubeinfo ci;
     evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
@@ -309,9 +309,9 @@ getMarketWindowDividerMWC( float rMarketWindowDividerMWC, const matchstate* pms 
 		    &ci, aarRates );
 
 	/* calculate middle of double window in MWC: DP+(TG-DP)/2 */
-	rMarketWindowDividerMWC = aaarPointsMatch[ 1 ][ 1 ][ 0 ] +
-				  ( aaarPointsMatch[ 1 ][ 3 ][ 0 ] -
-				    aaarPointsMatch[ 1 ][ 1 ][ 0 ] ) / 2;
+	*prMarketWindowDividerMWC = aaarPointsMatch[ ci.fMove ][ 1 ][ 0 ] +
+				    ( aaarPointsMatch[ ci.fMove ][ 3 ][ 0 ] -
+				      aaarPointsMatch[ ci.fMove ][ 1 ][ 0 ] ) / 2;
     }
     else {
     	/* Money play */
@@ -320,9 +320,9 @@ getMarketWindowDividerMWC( float rMarketWindowDividerMWC, const matchstate* pms 
 	getMoneyPoints( aaarPointsMoney, ci.fJacoby, ci.fBeavers, aarRates );
 
 	/* calculate middle of double window in MWC: DP+(TG-DP)/2 */
-	rMarketWindowDividerMWC = aaarPointsMoney[ 1 ][ 3 ][ 0 ] +
-				  ( aaarPointsMoney[ 1 ][ 6 ][ 0 ] -
-				    aaarPointsMoney[ 1 ][ 3 ][ 0 ] ) / 2;
+	*prMarketWindowDividerMWC = aaarPointsMoney[ ci.fMove ][ 3 ][ 0 ] +
+				    ( aaarPointsMoney[ ci.fMove ][ 6 ][ 0 ] -
+				      aaarPointsMoney[ ci.fMove ][ 3 ][ 0 ] ) / 2;
     }
 }
 
@@ -413,7 +413,7 @@ updateStatcontext(statcontext*       psc,
           arDouble[ OUTPUT_OPTIMAL ] ) {
         /* it was a double */
 
-	float rMarketWindowDividerMWC;
+	float rMarketWindowDividerMWC = 0.0;
 
         rSkill = arDouble[ OUTPUT_NODOUBLE ] -
           arDouble[ OUTPUT_OPTIMAL ];
@@ -421,7 +421,7 @@ updateStatcontext(statcontext*       psc,
         rCost = pms->nMatchTo ? eq2mwc( rSkill, &ci ) -
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
 
-	getMarketWindowDividerMWC( rMarketWindowDividerMWC, pms );
+	getMarketWindowDividerMWC( &rMarketWindowDividerMWC, pms );
 
         if ( eq2mwc( arDouble[ OUTPUT_NODOUBLE ], &ci ) >
 	     rMarketWindowDividerMWC ) {
@@ -540,12 +540,12 @@ updateStatcontext(statcontext*       psc,
       if ( rSkill < 0.0f ) {
         /* it was not a double */
 
-	float rMarketWindowDividerMWC;
+	float rMarketWindowDividerMWC = 0.0;
 
         rCost = pms->nMatchTo ? eq2mwc( rSkill, &ci ) -
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
 
-	getMarketWindowDividerMWC( rMarketWindowDividerMWC, pms );
+	getMarketWindowDividerMWC( &rMarketWindowDividerMWC, pms );
 
         if ( eq2mwc( arDouble[ OUTPUT_NODOUBLE ], &ci ) >
 	     rMarketWindowDividerMWC ) {
