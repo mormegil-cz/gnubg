@@ -19,10 +19,11 @@
 #include "rand_r.h"
 #endif
 
+
 #define sigmoid( x ) ( (x) > 0.0f ? \
-		       1.0f / ( 2.0f + (x) + 77.0f / 60.0f * (x) * (x) ) : \
+		       1.0f / ( 2.0f + (x) + (1.0f / 2.0f) * (x) * (x) ) : \
 		       1.0f - 1.0f / ( 2.0f + -(x) + \
-				       77.0f / 60.0f * (x) * (x) ) )
+				       (1.0f / 2.0f) * (x) * (x) ) )
 
 static unsigned int nSeed = 1; /* for rand_r */
 
