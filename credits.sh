@@ -56,6 +56,7 @@ Robert-Jan Veldhuizen
 JP White
 Kit Woolsey
 Frank Worrell
+Anders Zachrison
 EOF
 
 column -c 72 < $contributors | expand | sed 's/^/    /' >> AUTHORS
