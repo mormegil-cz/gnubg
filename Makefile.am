@@ -30,7 +30,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
-	export.c sound.h record.c record.h osr.c osr.h
+	export.c sound.h record.c record.h osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -74,7 +75,8 @@ check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-	i18n.c i18n.h getopt.c getopt.h getopt1.c
+	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 

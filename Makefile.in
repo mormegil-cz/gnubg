@@ -154,7 +154,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
-	export.c sound.h record.c record.h osr.c osr.h bearoffgammon.c bearoffgammon.h
+	export.c sound.h record.c record.h osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -192,7 +193,8 @@ check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-	i18n.c i18n.h getopt.c getopt.h getopt1.c
+	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h
 
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
@@ -235,7 +237,6 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
 	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) record.$(OBJEXT) \
 	osr.$(OBJEXT) bearoffgammon.$(OBJEXT)
-
 @USE_SOUND_TRUE@am__objects_2 = sound.$(OBJEXT)
 @USE_SOUND_FALSE@am__objects_2 =
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
@@ -254,8 +255,7 @@ gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
-	getopt1.$(OBJEXT) bearoffgammon.$(OBJEXT)
-
+	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT)
 makebearoff_OBJECTS = $(am_makebearoff_OBJECTS)
 makebearoff_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT)
@@ -270,7 +270,8 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/erf.Po $(DEPDIR)/strdup.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/analysis.Po ./$(DEPDIR)/copying.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/analysis.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bearoffgammon.Po ./$(DEPDIR)/copying.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/credits.Po ./$(DEPDIR)/database.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/dice.Po ./$(DEPDIR)/drawboard.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/erftest.Po ./$(DEPDIR)/eval.Po \
@@ -413,6 +414,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/erf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/strdup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/analysis.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bearoffgammon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copying.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/credits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/database.Po@am__quote@
