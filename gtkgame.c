@@ -231,10 +231,18 @@ static guint nStdin, nDisabledCount = 1;
 void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     
 #if HAVE_LIBREADLINE
+    /* Handle "next turn" processing before more input (otherwise we might
+       not even have a readline handler installed!) */
+    while( nNextTurn )
+	NextTurnNotify( NULL );
+    
     rl_callback_read_char();
 #else
     char sz[ 2048 ], *pch;
 
+    while( nNextTurn )
+	NextTurnNotify( NULL );
+    
     sz[ 0 ] = 0;
 	
     fgets( sz, sizeof( sz ), stdin );
