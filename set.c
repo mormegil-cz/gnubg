@@ -260,12 +260,16 @@ extern void CommandSetConfirm( char *sz ) {
 
 extern void CommandSetCubeCentre( char *sz ) {
 
+    movesetcubepos *pmscp;
+    
     if( CheckCubeAllowed() )
 	return;
     
-    fCubeOwner = -1;
-
-    UpdateSetting( &fCubeOwner );
+    pmscp = malloc( sizeof( *pmscp ) );
+    pmscp->mt = MOVE_SETCUBEPOS;
+    pmscp->fCubeOwner = -1;
+    
+    AddMoveRecord( pmscp );
     
     outputl( "The cube has been centred (either player may double)." );
     
@@ -273,12 +277,12 @@ extern void CommandSetCubeCentre( char *sz ) {
     if( fX )
 	ShowBoard();
 #endif
-
-    CancelCubeAction();
 }
 
 extern void CommandSetCubeOwner( char *sz ) {
 
+    movesetcubepos *pmscp;
+    
     int i;
     
     if( CheckCubeAllowed() )
@@ -287,9 +291,6 @@ extern void CommandSetCubeOwner( char *sz ) {
     switch( i = ParsePlayer( sz ) ) {
     case 0:
     case 1:
-	fCubeOwner = i;
-	UpdateSetting( &fCubeOwner );
-	
 	break;
 	
     case 2:
@@ -303,14 +304,18 @@ extern void CommandSetCubeOwner( char *sz ) {
 	return;
     }
 
+    pmscp = malloc( sizeof( *pmscp ) );
+    pmscp->mt = MOVE_SETCUBEPOS;
+    pmscp->fCubeOwner = i;
+    
+    AddMoveRecord( pmscp );
+    
     outputf( "%s now owns the cube.\n", ap[ fCubeOwner ].szName );
-
+    
 #if USE_GUI
     if( fX )
 	ShowBoard();
-#endif    
-
-    CancelCubeAction();
+#endif
 }
 
 extern void CommandSetCubeUse( char *sz ) {
@@ -348,7 +353,8 @@ extern void CommandSetCubeUse( char *sz ) {
 extern void CommandSetCubeValue( char *sz ) {
 
     int i, n;
-
+    movesetcubeval *pmscv;
+    
     if( CheckCubeAllowed() )
 	return;
     
@@ -356,8 +362,14 @@ extern void CommandSetCubeValue( char *sz ) {
 
     for( i = fDoubled ? MAX_CUBE >> 1 : MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
-	    outputf( "The cube has been set to %d.\n", nCube = n );
-	    UpdateSetting( &nCube );
+	    pmscv = malloc( sizeof( *pmscv ) );
+
+	    pmscv->mt = MOVE_SETCUBEVAL;
+	    pmscv->nCube = n;
+
+	    AddMoveRecord( pmscv );
+	    
+	    outputf( "The cube has been set to %d.\n", n );
 	    
 #if USE_GUI
 	    if( fX )
