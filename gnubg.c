@@ -1286,7 +1286,9 @@ extern double ParseReal( char **ppch ) {
     if( !ppch || !( pchOrig = NextToken( ppch ) ) )
 	return ERR_VAL;
 
+    PushLocale ( "C" );
     r = strtod( pchOrig, &pch );
+    PopLocale ();
 
     return *pch ? ERR_VAL : r;
 }
