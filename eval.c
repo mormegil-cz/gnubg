@@ -7285,3 +7285,89 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 
 }
 
+extern void
+getCubeDecisionOrdering ( int aiOrder[ 3 ],
+                          float arDouble[ 4 ], cubeinfo *pci ) {
+
+  cubedecision cd;
+
+  /* Get cube decision */
+
+  cd = FindBestCubeDecision ( arDouble, pci );
+
+  switch ( cd ) {
+
+  case DOUBLE_TAKE:
+  case DOUBLE_BEAVER:
+  case REDOUBLE_TAKE:
+
+    /*
+     * Optimal     : Double, take
+     * Best for me : Double, pass
+     * Worst for me: No Double 
+     */
+
+    aiOrder[ 0 ] = OUTPUT_TAKE;
+    aiOrder[ 1 ] = OUTPUT_DROP;
+    aiOrder[ 2 ] = OUTPUT_NODOUBLE;
+
+    break;
+
+  case DOUBLE_PASS:
+  case REDOUBLE_PASS:
+
+    /*
+     * Optimal     : Double, pass
+     * Best for me : Double, take
+     * Worst for me: no double 
+     */
+    aiOrder[ 0 ] = OUTPUT_DROP;
+    aiOrder[ 1 ] = OUTPUT_TAKE;
+    aiOrder[ 2 ] = OUTPUT_NODOUBLE;
+
+    break;
+
+  case NODOUBLE_TAKE:
+  case NODOUBLE_BEAVER:
+  case TOOGOOD_TAKE:
+  case NO_REDOUBLE_TAKE:
+  case NO_REDOUBLE_BEAVER:
+  case TOOGOODRE_TAKE:
+
+    /*
+     * Optimal     : no double
+     * Best for me : double, pass
+     * Worst for me: double, take
+     */
+
+    aiOrder[ 0 ] = OUTPUT_NODOUBLE;
+    aiOrder[ 1 ] = OUTPUT_DROP;
+    aiOrder[ 2 ] = OUTPUT_TAKE;
+
+    break;
+
+  case TOOGOOD_PASS:
+  case TOOGOODRE_PASS:
+
+    /*
+     * Optimal     : no double
+     * Best for me : double, take
+     * Worst for me: double, pass
+     */
+
+    aiOrder[ 0 ] = OUTPUT_NODOUBLE;
+    aiOrder[ 1 ] = OUTPUT_TAKE;
+    aiOrder[ 2 ] = OUTPUT_DROP;
+
+    break;
+
+  default:
+
+    assert ( FALSE );
+
+    break;
+
+  }
+
+}
+

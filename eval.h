@@ -409,4 +409,8 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
                  cubeinfo *pci,
                  float aarRates[ 2 ][ 2 ] );
 
+extern void
+getCubeDecisionOrdering ( int aiOrder[ 3 ], 
+                          float arDouble[ 4 ], cubeinfo *pci );
+
 #endif
