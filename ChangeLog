@@ -1,3 +1,9 @@
+Sun May  4 22:36:03 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ParseMatMove): handle bug in mat files produced by 
+	GamesGrid: some forced moves are not written with a move.
+	(reported by David Montgomery)
+
 Sun May  4 22:18:46 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (CommandRollout): fMove must be inverted to calculate rScore.
