@@ -623,6 +623,8 @@ updateStatcontext(statcontext*       psc,
      * update luck statistics for roll
      */
 
+
+    GetMatchStateCubeInfo ( &ci, pms );
     if ( fAnalyseDice && pmr->sd.rLuck != ERR_VAL ) {
 
       float r = pms->nMatchTo ?

@@ -1,3 +1,8 @@
+Sat Nov  8 19:56:58 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
+
+	* analysis.c - set up cubeinfo before analysis of a SET_DICE
+	  moverecord.
+
 Thu Nov  6 13:18:48 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
 
 	* analysis.c - Stupid, stupid, stupid. My silly last minute change 
