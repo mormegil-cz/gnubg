@@ -79,11 +79,7 @@ static void ShowPaged( char **ppch ) {
 	while( *ppch ) {
 	    puts( *ppch++ );
 	    if( ++i >= nRows - 1 ) {
-		fputs( "-- Press <return> to continue --", stdout );
-		
-		/* FIXME use better input handling */
-		while( ( ch = getchar() ) != '\n' && ch != EOF )
-		    ;
+		GetInput( "-- Press <return> to continue --" );
 		
 		if( fInterrupt )
 		    return;
