@@ -344,8 +344,7 @@ printStatTableHeader ( FILE *pf, const htmlexportcss hecss,
   fprintf ( pf, 
             "<tr %s>\n"
             "<th colspan=\"3\" style=\"text-align: center\">", 
-            GetStyle ( CLASS_STATTABLEHEADER, hecss ),
-            pf );
+            GetStyle ( CLASS_STATTABLEHEADER, hecss ) );
   vfprintf ( pf, format, val );
   fputs ( "</th>\n</tr>\n", pf );
 
@@ -3744,7 +3743,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 
 
 extern void
-CommandExportPositionGammOnline ( char *sz ) {
+CommandExportPositionGammOnLine ( char *sz ) {
 
 
     FILE *pf;

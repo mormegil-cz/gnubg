@@ -264,7 +264,7 @@ static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw );
-static void ExportPositionGammOnline( gpointer *p, guint n, GtkWidget *pw );
+static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw );
 static void ExportPositionText( gpointer *p, guint n, GtkWidget *pw );
 static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw );
@@ -2076,8 +2076,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_File/_Export/_Position"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_Export/_Position/HTML..."), NULL,
 	  ExportPositionHtml, 0, NULL },
-	{ N_("/_File/_Export/_Position/GammOnline (HTML)..."), NULL,
-	  ExportPositionGammOnline, 0, NULL },
+	{ N_("/_File/_Export/_Position/GammOnLine (HTML)..."), NULL,
+	  ExportPositionGammOnLine, 0, NULL },
 	{ N_("/_File/_Export/_Position/Encapsulated PostScript..."), NULL,
 	  ExportPositionEPS, 0, NULL },
 	{ N_("/_File/_Export/_Position/.pos..."), NULL, ExportPositionPos, 0,
@@ -3379,10 +3379,10 @@ static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
 }
 
-static void ExportPositionGammOnline( gpointer *p, guint n, GtkWidget *pw ) {
+static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_HTML );
-  FileCommand( _("Export position to GammOnline (HTML)"), 
+  FileCommand( _("Export position to GammOnLine (HTML)"), 
                sz, "export position gammonline", "html" );
   if ( sz ) 
     free ( sz );
