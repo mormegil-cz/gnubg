@@ -226,6 +226,20 @@ static SCM current_board( void ) {
     return gs == GAME_NONE ? SCM_BOOL_F : BoardToSCM( anBoard );
 }
 
+static SCM current_score( void ) {
+
+    SCM s;
+    
+    s = scm_make_vector( SCM_MAKINUM( 4 ), SCM_UNSPECIFIED );
+    scm_vector_set_x( s, SCM_MAKINUM( 0 ), SCM_MAKINUM( anScore[ 0 ] ) );
+    scm_vector_set_x( s, SCM_MAKINUM( 1 ), SCM_MAKINUM( anScore[ 1 ] ) );
+    scm_vector_set_x( s, SCM_MAKINUM( 2 ), fCrawford ? SCM_BOOL_T :
+		      SCM_BOOL_F );
+    scm_vector_set_x( s, SCM_MAKINUM( 3 ), SCM_MAKINUM( cGames ) );
+
+    return s;
+}
+
 static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
 
     int i, anBoard[ 2 ][ 25 ], n;
@@ -283,6 +297,14 @@ static SCM gnubg_command( SCM sCommand ) {
 	fInterrupt = FALSE;
     }
     
+    return SCM_UNSPECIFIED;
+}
+
+static SCM play_game( void ) {
+
+    while( gs == GAME_PLAYING && ap[ fTurn ].pt != PLAYER_HUMAN )
+	NextTurn();
+
     return SCM_UNSPECIFIED;
 }
 
@@ -408,8 +430,10 @@ extern int GuileInitialise( char *szDir ) {
     scm_make_gsubr( "cube-info-match", 6, 0, 0, cube_info_match );
     scm_make_gsubr( "cube-info-money", 3, 2, 0, cube_info_money );
     scm_make_gsubr( "current-board", 0, 0, 0, current_board );
+    scm_make_gsubr( "current-score", 0, 0, 0, current_score );
     scm_make_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
     scm_make_gsubr( "gnubg-command", 1, 0, 0, gnubg_command );
+    scm_make_gsubr( "play-game", 0, 0, 0, play_game );
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
     scm_make_gsubr( "rollout-position", 1, 7, 0, rollout_position );
 
