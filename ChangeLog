@@ -1,3 +1,10 @@
+Wed Jul 17 12:37:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkcube.c: new file. Widgets for cube and take anslysis.
+	* gtkchequer.c: new file. Widgets for chequer play analysis.
+	* gtkgame.c: move all cube, take, and chequer play analysis
+	widgets into other files (trimming gtkgame.c a bit).
+
 Wed Jul 17 11:24:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandRollout): call UpdateStoredCube for 
