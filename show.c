@@ -1300,7 +1300,7 @@ CommandShowExport ( char *sz ) {
   if ( exsExport.fSide == 3 )
     outputl ( _("both") );
   else
-    outputf ( _("%s\n"), 
+    outputf ( "%s\n", 
               ap[ exsExport.fSide - 1 ].szName );
 
   outputl ( _("\nOutput moves:\n") );
