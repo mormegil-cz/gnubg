@@ -1936,6 +1936,7 @@ static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
 
   parsecontext *ppc = pv;
   char *sz = g_strndup ( pchIn, cch );
+  char *pc;
 
   switch ( ppc->aps[ ppc->ips ] ) {
   case STATE_BOARD_DESIGNS:
@@ -1945,21 +1946,29 @@ static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
 
   case STATE_TITLE:
 
-    ppc->pbde->szTitle = strdup ( sz );
+    pc = ppc->pbde->szTitle;
+    ppc->pbde->szTitle = g_strdup_printf ( "%s%s", pc, sz );
+    g_free ( pc );
     break;
 
   case STATE_AUTHOR:
 
-    ppc->pbde->szAuthor = strdup ( sz );
+    pc = ppc->pbde->szAuthor;
+    ppc->pbde->szAuthor = g_strdup_printf ( "%s%s", pc, sz );
+    g_free ( pc );
     break;
 
   case STATE_PREVIEW_FILE:
 
-    ppc->pbde->szFilePreview = strdup ( sz );
+    pc = ppc->pbde->szFilePreview;
+    ppc->pbde->szFilePreview = g_strdup_printf ( "%s%s", pc, sz );
+    g_free ( pc );
     break;
 
   case STATE_DESIGN:
-    ppc->pbde->szBoardDesign = strdup ( sz );
+    pc = ppc->pbde->szBoardDesign;
+    ppc->pbde->szBoardDesign = g_strdup_printf ( "%s%s", pc, sz );
+    g_free ( pc );
     break;
 
   default:
@@ -2004,24 +2013,28 @@ static void ScanStartElement( void *pv, const xmlChar *pchName,
             ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
 
     PushState ( ppc, STATE_TITLE );
+    ppc->pbde->szTitle = g_strdup ( "" );
 
   }
   else if ( ! strcmp ( pchName, "author" ) &&
             ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
 
     PushState ( ppc, STATE_AUTHOR );
+    ppc->pbde->szAuthor = g_strdup ( "" );
 
   }
   else if ( ! strcmp ( pchName, "preview-file" ) &&
             ppc->aps[ ppc->ips ] == STATE_ABOUT ) {
 
     PushState ( ppc, STATE_PREVIEW_FILE );
+    ppc->pbde->szFilePreview = g_strdup ( "" );
 
   }
   else if ( ! strcmp ( pchName, "design" ) &&
             ppc->aps[ ppc->ips ] == STATE_BOARD_DESIGN ) {
 
     PushState ( ppc, STATE_DESIGN );
+    ppc->pbde->szBoardDesign = g_strdup ( "" );
 
   }
   else

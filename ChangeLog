@@ -1,3 +1,8 @@
+Sun Dec  1 10:45:34 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c (ScanCharacters): fix bug: characters must be appended 
+	(reported by Nardy Pillards)
+
 Sat Nov 30 21:15:31 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* configure.in: change check for gnuplot and png*.
