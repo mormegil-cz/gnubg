@@ -91,9 +91,11 @@ ShowRollout ( rolloutcontext *prc ) {
 
   outputf( "Lookahead variance reduction is %sabled.\n"
            "Cube%s rollout.\n"
+	   "Rollout as opening move %sabled.\n"
            "%s dice generator with seed %u.\n",
            prc->fVarRedn ? "en" : "dis",
            prc->fCubeful ? "ful" : "less",
+	   prc->fInitial ? "en" : "dis",
            aszRNG[ prc->rngRollout ], prc->nSeed );
 
   /* FIXME: more compact notation when aecCube = aecChequer etc. */

@@ -1198,6 +1198,16 @@ CommandSetRolloutPlayerCubedecision ( char *sz ) {
     HandleCommand ( sz, acSetEvaluation );
 }
 
+extern void CommandSetRolloutInitial( char *sz ) {
+    
+    int f = prcSet->fCubeful;
+    
+    SetToggle( "rollout initial", &f, sz, 
+               "Rollouts will be made as the initial position of a game.",
+	       "Rollouts will be made for normal (non-opening) positions." );
+
+    prcSet->fInitial = f;
+}
 
 extern void CommandSetRolloutSeed( char *sz ) {
 
