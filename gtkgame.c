@@ -73,6 +73,7 @@
 #include "positionid.h"
 #include "record.h"
 #include "i18n.h"
+#include "path.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 

@@ -109,6 +109,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <ext.h>
 #include <extwin.h>
 #include "xgame.h"
+#include "path.h"
 
 extwindow ewnd;
 event evNextTurn;

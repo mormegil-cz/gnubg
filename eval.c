@@ -59,6 +59,7 @@
 #include "matchequity.h"
 #include "i18n.h"
 #include "bearoff.h"
+#include "path.h"
 
 #if WIN32
 #define BINARY O_BINARY
@@ -485,88 +486,6 @@ static long EvalCacheHash( evalcache *pec ) {
 }
 #endif
 
-/* Search for a readable file in szDir, ., and PKGDATADIR.  The
-   return string is malloc()ed. */
-extern char *PathSearch( const char *szFile, const char *szDir ) {
-
-    char *pch;
-    size_t cch;
-    
-    if( !szFile )
-	return NULL;
-
-    if( *szFile == '/' )
-	/* Absolute file name specified; don't bother searching. */
-	return strdup( szFile );
-
-    cch = szDir ? strlen( szDir ) : 0;
-    if( cch < strlen( PKGDATADIR ) )
-	cch = strlen( PKGDATADIR );
-
-    cch += strlen( szFile ) + 2;
-
-    if( !( pch = malloc( cch ) ) )
-	return NULL;
-
-    sprintf( pch, "%s/%s", szDir, szFile );
-    if( !access( pch, R_OK ) )
-	return realloc( pch, strlen( pch ) + 1 );
-
-    strcpy( pch, szFile );
-    if( !access( pch, R_OK ) )
-	return realloc( pch, strlen( pch ) + 1 );
-    
-    sprintf( pch, PKGDATADIR "/%s", szFile );
-    if( !access( pch, R_OK ) )
-	return realloc( pch, strlen( pch ) + 1 );
-
-    /* Return sz, so that a sensible error message can be given. */
-    strcpy( pch, szFile );
-    return realloc( pch, strlen( pch ) + 1 );
-}
-
-/* Open a file for reading with the search path "(szDir):.:(PKGDATADIR)". */
-extern int 
-PathOpen( const char *szFile, const char *szDir, const int f ) {
-
-    int h, idFirstError = 0;
-#if __GNUC__
-    char szPath[ strlen( PKGDATADIR ) + ( szDir ? strlen( szDir ) : 0 ) +
-	       strlen( szFile ) + 2 ];
-#elif HAVE_ALLOCA
-    char *szPath = alloca( strlen( PKGDATADIR ) +
-			   ( szDir ? strlen( szDir ) : 0 ) +
-			   strlen( szFile ) + 2 );
-#else
-    char szPath[ 4096 ];
-#endif
-    
-    if( szDir ) {
-	sprintf( szPath, "%s/%s", szDir, szFile );
-	if( ( h = open( szPath, O_RDONLY | f ) ) >= 0 )
-	    return h;
-
-	/* Try to report the more serious error (ENOENT is less
-           important than, say, EACCESS). */
-	if( errno != ENOENT )
-	    idFirstError = errno;
-    }
-
-    if( ( h = open( szFile, O_RDONLY | f ) ) >= 0 )
-	return h;
-
-    if( !idFirstError && errno != ENOENT )
-	idFirstError = errno;
-
-    sprintf( szPath, PKGDATADIR "/%s", szFile );
-    if( ( h = open( szPath, O_RDONLY | f ) ) >= 0 )
-	return h;
-
-    if( idFirstError )
-	errno = idFirstError;
-
-    return -1;
-}
 
 static void
 CreateWeights(int nSize)
@@ -3160,7 +3079,9 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
     return pml->cMoves;
 }
 
+#ifndef min
 #define min(x,y)   (((x) > (y)) ? (y) : (x))
+#endif
 
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], cubeinfo *pci,

@@ -1,3 +1,7 @@
+Tue Dec 3 22:32:15 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
+
+	* split Path functions from eval.c to new separate file path.[ch]
+
 Tue Dec 3 18:10:27 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
 	* eval.c - crufty workaround for mix between new movefilters and

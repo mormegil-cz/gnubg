@@ -31,6 +31,7 @@
 
 #include "config.h"
 #include "list.h"
+#include "path.h"
 
 #if HAVE_LIBXML2
 #include <libxml/tree.h>

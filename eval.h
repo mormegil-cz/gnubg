@@ -250,8 +250,6 @@ typedef enum _positionclass {
    ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 1 ] : arEquity[ 3 ] ) )
 
 
-extern char *PathSearch( const char *szFile, const char *szDir );
-			      
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
 		int fNoBearoff, 
@@ -499,8 +497,5 @@ locateMove ( int anBoard[ 2 ][ 25 ],
 extern int
 MoveKey ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ], 
           unsigned char auch[ 10 ] );
-
-extern int 
-PathOpen( const char *szFile, const char *szDir, const int f );
 
 #endif

@@ -68,6 +68,7 @@
 #include "eval.h"
 #include "i18n.h"
 #include "sound.h"
+#include "path.h"
 
 #if !defined(SIGIO) && defined(SIGPOLL)
 #define SIGIO SIGPOLL /* The System V equivalent */

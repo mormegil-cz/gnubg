@@ -40,8 +40,7 @@
 #include "gtkgame.h"
 #include "gtkprefs.h"
 #include "i18n.h"
-
-
+#include "path.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
