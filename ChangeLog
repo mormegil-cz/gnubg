@@ -1,3 +1,8 @@
+Thu Oct 12 18:18:37 2000  Gary Wong  <gtw@research.att.com>
+
+	* play.c (ComputerTurn): Don't consider doubling if !fCubeUse
+	(i.e. "set cube use off").
+	
 Wed Oct 11 23:30:47 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gtkboard.c (cube_position): New function.  Calculate where
