@@ -1,4 +1,8 @@
-Thu Jul 18 22:15:03 2002  Øystein Johansen <oeysteij@online.no>
+Thu Jul 25 17:13:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkcube.c (CubeAnalysisCopy): Fix typo again!
+
+Thu Jul 25 17:10:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkcube.c (CubeAnalysisCopy): Fix typo.
         * gtkgame.c (GTKRollout): Remove "Copy rollout results" button.   
