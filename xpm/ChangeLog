@@ -1,3 +1,7 @@
+Fri Dec 13 15:11:54 2002  Gary Wong  <gtw@gnu.org>
+
+	* Makefile.am (EXTRA_DIST): Remove no_picture.xpm.
+
 Sat Dec  7 22:46:36 2002  J?rn Thyssen  <jthyssen@dk.ibm.com>
 
 	* Makefile.am: add new files.
