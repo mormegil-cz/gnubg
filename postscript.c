@@ -29,6 +29,7 @@
 #include <string.h>
 #include <time.h>
 
+#include "analysis.h"
 #include "backgammon.h"
 #include "drawboard.h"
 #include "positionid.h"
@@ -726,6 +727,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
     matchstate msExport;
     int fTook = FALSE, i, cx;
     char sz[ 1024 ], *pch;
+
+    updateStatisticsGame ( plGame );
 
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;

@@ -32,6 +32,7 @@
 #if USE_GTK
 #include "gtkgame.h"
 #endif
+#include "analysis.h"
 #include "positionid.h"
 #include "sgf.h"
 
@@ -1191,6 +1192,8 @@ static void SaveGame( FILE *pf, list *plGame ) {
     list *pl;
     moverecord *pmr;
     int i, j, anBoard[ 2 ][ 25 ];
+
+    updateStatisticsGame ( plGame );
     
     pl = plGame->plNext;
     pmr = pl->p;

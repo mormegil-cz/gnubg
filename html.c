@@ -2077,6 +2077,8 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
     if ( ! iGame )
       IniStatcontext ( &scTotal );
 
+    updateStatisticsGame ( plGame );
+
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 
       pmr = pl->p;
