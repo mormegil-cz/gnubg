@@ -501,13 +501,20 @@ static GtkWidget *BoardPage3d( BoardData *bd )
 		gtk_colour_picker_new3d(pwPreview + PI_BOARD, bd->drawing_area3d->window, 
 				&bd3d.pointMat[1], DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
 
-	pwRoundedEdges = gtk_check_button_new_with_label ("rbe");
-	gtk_tooltips_set_tip(ptt, pwRoundedEdges, "This option not yet coded", 0);
-//	gtk_box_pack_start (GTK_BOX (pw), pwRoundedEdges, FALSE, FALSE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwRoundedEdges), rdAppearance.roundedEdges);
-	gtk_signal_connect(GTK_OBJECT(pwRoundedEdges), "toggled", GTK_SIGNAL_FUNC(option_changed), NULL);
-
 	return pwx;
+}
+
+void redraw_changed(GtkWidget *widget, GtkWidget **ppw)
+{
+	renderdata rd;
+	GetPrefs(&rd);
+	SetupLight3d(&bd3d, &rd);
+	SetPreviewLightLevel(rd.lightLevels);
+	setDicePos(&bd3d);
+	Preview(&rd);
+	UpdateColPreviews();
+	if (ppw)
+		gtk_widget_queue_draw(*ppw);
 }
 
 static GtkWidget *BorderPage3d( BoardData *bd )
@@ -528,6 +535,12 @@ static GtkWidget *BorderPage3d( BoardData *bd )
     gtk_box_pack_start( GTK_BOX( pwhbox ),
 		gtk_colour_picker_new3d(pwPreview + PI_BORDER, bd->drawing_area3d->window, 
 				&bd3d.boxMat, DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+	pwRoundedEdges = gtk_check_button_new_with_label ("Rounded board edges");
+	gtk_tooltips_set_tip(ptt, pwRoundedEdges, "Toggle rounded or square edges to the board", 0);
+	gtk_box_pack_start (GTK_BOX (pw), pwRoundedEdges, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwRoundedEdges), rdAppearance.roundedEdges);
+	gtk_signal_connect(GTK_OBJECT(pwRoundedEdges), "toggled", GTK_SIGNAL_FUNC(redraw_changed), (GtkObject*) ( pwPreview + PI_BORDER ));
 
     pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), rdAppearance.fHinges );
@@ -2594,15 +2607,8 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 		}
 		if (redrawChange)
 		{
-			renderdata rd;
+			redraw_changed(NULL, NULL);
 			redrawChange = FALSE;
-
-			GetPrefs(&rd);
-			SetupLight3d(&bd3d, &rd);
-			SetPreviewLightLevel(rd.lightLevels);
-			setDicePos(&bd3d);
-			Preview(&rd);
-			UpdateColPreviews();
 		}
 	}
 #endif

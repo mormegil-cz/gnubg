@@ -942,6 +942,66 @@ void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture
 	glPopMatrix();
 }
 
+void QuarterCylinder(float radius, float len, int accuracy)
+{
+	int i;
+	float angle;
+	glBegin(GL_QUAD_STRIP);
+	for (i = 0; i < accuracy / 4 + 1; i++)
+	{
+		angle = (i * 2 * PI) / accuracy;
+		glNormal3f((float)sin(angle), 0, (float)cos(angle));
+		glVertex3f((float)sin(angle) * radius, len, (float)cos(angle) * radius);
+		glVertex3f((float)sin(angle) * radius, 0, (float)cos(angle) * radius);
+	}
+	glEnd();
+}
+
+void QuarterCylinderSplayed(float radius, float len, int accuracy)
+{
+	int i;
+	float angle, z;
+	glBegin(GL_QUAD_STRIP);
+	for (i = 0; i < accuracy / 4 + 1; i++)
+	{
+		angle = (i * 2 * PI) / accuracy;
+		glNormal3f((float)sin(angle), 0, (float)cos(angle));
+		z = (float)cos(angle) * radius;
+		glVertex3f((float)sin(angle) * radius, len + z, z);
+		glVertex3f((float)sin(angle) * radius, -z, z);
+	}
+	glEnd();
+}
+
+void InsideFillet(float x, float y, float z, float w, float h, float radius, int accuracy)
+{
+	glPushMatrix();
+
+	glTranslatef(x, y + radius, z - radius);
+	QuarterCylinderSplayed(radius, h, accuracy);
+
+	glTranslatef(w + radius, -radius, 0);
+	glRotatef(90, 0, 0, 1);
+	QuarterCylinderSplayed(radius, w, accuracy);
+
+	glPopMatrix();
+	glPushMatrix();
+
+	glTranslatef(x + w + radius * 2, y + h + radius, z - radius);
+	glRotatef(-180, 0, 1, 0);
+	glRotatef(180, 1, 0, 0);
+	QuarterCylinderSplayed(radius, h, accuracy);
+
+	glPopMatrix();
+	glPushMatrix();
+
+	glTranslatef(x + radius, y + h + radius * 2, z - radius);
+	glRotatef(-90, 0, 0, 1);
+	QuarterCylinderSplayed(radius, w, accuracy);
+
+	glPopMatrix();
+}
+
 void SetColour(float r, float g, float b, float a)
 {
 	Material col;
@@ -1400,6 +1460,8 @@ void InitBoard3d(BoardData *bd)
 	bd->flagNurb = 0;
 
 	bd->numTextures = 0;
+
+	bd->boardPoints = NULL;
 }
 
 void InitBoardPreview(BoardData *bd)

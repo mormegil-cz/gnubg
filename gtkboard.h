@@ -258,6 +258,8 @@ typedef struct _BoardData {
 	float dim;
 	float shadow_light_position[4];
 
+	float ***boardPoints;	/* Used for rounded corners */
+
 	/* Textures */
 #define MAX_TEXTURES 10
 	Texture textureList[MAX_TEXTURES];
