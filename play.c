@@ -828,18 +828,57 @@ extern int ComputerTurn( void ) {
 
           /* We're in market window */
 
-          if( EvaluatePositionCubeful( ms.anBoard, arDouble, arOutput, &ci,
-				       &ap [ ms.fTurn ].esCube.ec,
-				       ap [ ms.fTurn ].esCube.ec.nPlies ) < 0 )
+          float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+          float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+          cubedecision cd;
+
+          /* Consider cube action */
+
+          if ( GeneralCubeDecision ( "Computer player",
+                                     aarOutput, aarStdDev,
+                                     ms.anBoard,
+                                     &ci, &ap [ ms.fTurn ].esCube ) < 0 )
             return -1;
 
-          if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) &&
-               ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
-	      fComputerDecision = TRUE;
-	      CommandDouble ( NULL );
-	      fComputerDecision = FALSE;
-	      return 0;
+          cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+
+          switch ( cd ) {
+
+          case DOUBLE_TAKE:
+          case REDOUBLE_TAKE:
+          case DOUBLE_PASS:
+          case REDOUBLE_PASS:
+          case DOUBLE_BEAVER:
+          case REDOUBLE_BEAVER:
+
+            /* Double */
+
+            fComputerDecision = TRUE;
+            CommandDouble ( NULL );
+            fComputerDecision = FALSE;
+            return 0;
+            
+            break;
+
+          case NODOUBLE_TAKE:
+          case TOOGOOD_TAKE:
+          case NO_REDOUBLE_TAKE:
+          case TOOGOODRE_TAKE:
+          case TOOGOOD_PASS:
+          case TOOGOODRE_PASS:
+          case NODOUBLE_BEAVER:
+          case NO_REDOUBLE_BEAVER:
+
+            /* better leave cube where it is: no op */
+            break;
+
+          default:
+
+            assert ( FALSE );
+            break;
+
           }
+
         } /* market window */
       } /* access to cube */
 

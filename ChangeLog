@@ -1,3 +1,9 @@
+Thu Oct 11 22:37:49 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c (ComputerTurn): Use GeneralCubedecision instead of the
+	/very/ old EvaluatePositionCubeful for computer players cube
+	decisions. 
+
 Thu Oct 11 22:29:23 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (ComputerTurn): Updated play when doubled. Now handles
