@@ -1788,7 +1788,11 @@ extern int GetPanelSize()
 {
     if( GTK_WIDGET_REALIZED( pwMain ) )
 	{
+#if GTK_CHECK_VERSION(2,0,0)
+		int pos = gtk_paned_get_position(GTK_PANED(hpaned));
+#else
 		int pos = GTK_PANED(hpaned)->handle_xpos;
+#endif
 		return pwMain->allocation.width - pos;
 	}
 	else
