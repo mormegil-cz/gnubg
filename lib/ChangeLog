@@ -1,3 +1,7 @@
+Fir Feb 25 11:16:41 CEST 2004  Jon Kinsey
+
+	* neuralnet.c Relegate BLAS code as proved slower
+
 Mon May  3 15:16:41 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* mt19937ar.c (init_genrand): add mti as parameter to init_genrand.
