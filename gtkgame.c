@@ -1,4 +1,3 @@
-
 /*
  * gtkgame.c
  *
@@ -3433,7 +3432,13 @@ static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
 
 extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
 
-    char *pch = PathSearch( "met/", szDataDirectory );
+    char *pchMet = NULL, *pch = NULL;
+
+    pchMet = getDefaultPath( PATH_MET );
+    if ( pchMet && *pchMet )
+	pch = PathSearch( ".", pchMet );
+    else
+	pch = PathSearch( "met/", szDataDirectory );
 
     if( pch && access( pch, R_OK ) ) {
 	free( pch );
@@ -3443,8 +3448,14 @@ extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
     GTKFileCommand( _("Set match equity table"), pch, "set matchequitytable ",
 		 "met", 0 );
 
+    /* FIXME: update filename on option page */
+    if ( p && GTK_WIDGET_VISIBLE( p ) )
+	gtk_label_set_text( GTK_LABEL( p ), miCurrent.szFileName );
+
     if( pch )
 	free( pch );
+    if( pchMet )
+	free( pchMet );
 }
 
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {

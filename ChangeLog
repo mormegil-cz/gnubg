@@ -1,3 +1,7 @@
+Fri Jul 18 21:32:34 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkgame.c gtkoptions.c: fix [bug #4288] Incorrect path to MET
+
 Fri Jul 18 13:49:30 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
 
 	* backgammon.h eval.h gnubg.c rollout.c rollout.h progress.c
