@@ -785,6 +785,7 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   /* Read a number n. */
 
   int n = ParseNumber ( &sz );
+  int i;
 
   /* If n > 0 write n x n match equity table,
      else if match write nMatchTo x nMatchTo table,
@@ -815,8 +816,11 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   output ( "Pre-Crawford table:\n\n" );
   writeMET ( aafMET, n, n, FALSE );
 
-  output ( "Post-Crawford table:\n\n" );
-  writeMET ( (float (*)[MAXSCORE] ) afMETPostCrawford, 1, n, TRUE );
+  for ( i = 0; i < 2; i++ ) {
+    outputf ( "Post-Crawford table for player %d (%s):\n\n",
+              i, ap[ i ].szName );
+  writeMET ( (float (*)[MAXSCORE] ) aafMETPostCrawford[ i ], 1, n, TRUE );
+  }
   
 }
 

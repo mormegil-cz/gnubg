@@ -5462,14 +5462,16 @@ static GtkWidget
 
 extern void GTKShowMatchEquityTable( int n ) {
 
+    int i;
+    char sz[ 50 ];
     GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Match equity table",
                                         FALSE, NULL, NULL );
     GtkWidget *pwNotebook = gtk_notebook_new ();
-
-
-
+    
+    
+    
     gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
-  
+    
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pwNotebook );
 
@@ -5477,10 +5479,17 @@ extern void GTKShowMatchEquityTable( int n ) {
                                GTKWriteMET ( aafMET, n, n, FALSE ),
                                gtk_label_new ( "Pre-Crawford" ) );
 
-    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                               GTKWriteMET ( (float (*)[ MAXSCORE ])
-                                             afMETPostCrawford, n, 1, TRUE ),
-                               gtk_label_new ( "Post-Crawford" ) );
+    for ( i = 0; i < 2; i++ ) {
+      
+      sprintf ( sz, "Post-Crawford for player %s", ap[ i ].szName );
+      
+      gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                                 GTKWriteMET ( (float (*)[ MAXSCORE ])
+                                               aafMETPostCrawford[ i ], 
+                                               n, 1, TRUE ),
+                                 gtk_label_new ( sz ) );
+
+    }
 
     
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
