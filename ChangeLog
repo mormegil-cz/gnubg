@@ -1,3 +1,7 @@
+Wed Mar 24 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: More credits and version info now copyable.
+
 Tue Mar 23 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* boards.xml, textures.txt: Added settings for final few 3d designs,

@@ -7763,6 +7763,47 @@ extern void GTKShowVersion( void ) {
 	gtk_widget_show_all( pwDialog );
 }
 
+# if GTK_CHECK_VERSION(2,0,0)
+GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
+{
+	GtkWidget* pwLabel = gtk_label_new(text);
+	gtk_label_set_selectable(GTK_LABEL(pwLabel), TRUE);
+	return pwLabel;
+}
+#else
+/* Hack a gtk 1 entry into a selectable label... */
+void deletestop(GtkEditable *editable, gint start_pos, gint end_pos, gpointer user_data)
+{
+	gtk_signal_emit_stop_by_name(GTK_OBJECT(editable), "delete-text");
+}                                            
+
+void insertstop(GtkEditable *editable, gint start_pos, gint end_pos, gpointer user_data)
+{
+	gtk_signal_emit_stop_by_name(GTK_OBJECT(editable), "insert-text");
+}                                            
+
+GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
+{
+	GtkWidget* entry = gtk_entry_new();
+	GtkRcStyle *rc_style = gtk_rc_style_new ();
+
+	GtkStyle* style = gtk_widget_get_style (reference);
+	rc_style->base[GTK_STATE_NORMAL] = style->bg[GTK_STATE_NORMAL];
+	rc_style->color_flags[GTK_STATE_NORMAL] |= GTK_RC_BASE;
+	gtk_widget_modify_style (entry, rc_style);
+	gtk_rc_style_unref (rc_style);
+
+	gtk_entry_set_text (GTK_ENTRY (entry), text);
+
+	gtk_signal_connect ( GTK_OBJECT (entry), "delete-text",
+						GTK_SIGNAL_FUNC ( deletestop ), 0 );
+	gtk_signal_connect ( GTK_OBJECT (entry), "insert-text",
+						GTK_SIGNAL_FUNC ( insertstop ), 0 );
+
+	return entry;
+}
+#endif
+
 extern void GTKShowBuildInfo(void)
 {
 	GtkWidget *pwDialog, *pwBox, *pwPrompt;
@@ -7781,8 +7822,7 @@ extern void GTKShowBuildInfo(void)
 	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
-	gtk_box_pack_start( GTK_BOX( pwBox ),
-		gtk_label_new( "Version " VERSION 
+	gtk_box_pack_start( GTK_BOX( pwBox ), SelectableLabel(pwDialog, "Version " VERSION 
 #ifdef WIN32
 		" (build " __DATE__ ")"
 #endif
@@ -7831,8 +7871,7 @@ static void AddTitle(GtkWidget* pwBox, char* Title)
 	gtk_widget_modify_style( pwTitle, ps );
 	gtk_rc_style_unref( ps );
 
-	gtk_label_set_justify (GTK_LABEL (pwTitle), GTK_JUSTIFY_RIGHT);
-	gtk_box_pack_start(GTK_BOX(pwHBox), pwTitle, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwHBox), pwTitle, TRUE, FALSE, 0);
 }
 
 static void AddName(GtkWidget* pwBox, char* name, char* type)
@@ -7843,7 +7882,7 @@ static void AddName(GtkWidget* pwBox, char* name, char* type)
 	else
 		strcpy(buf, TRANS(name));
 
-	gtk_box_pack_start(GTK_BOX(pwBox), gtk_label_new(buf), TRUE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwBox), gtk_label_new(buf), FALSE, FALSE, 0);
 	ListInsert(&names, name);
 }
 
@@ -7872,10 +7911,17 @@ static credEntry ceAuthors[] = {{"Joseph Heled", 0}, {"Øystein Johansen", 0},
 	{"Jonathan Kinsey", 0}, {"David Montgomery", 0}, {"Jim Segrave", 0},
 	{"Jørn Thyssen", 0}, {"Gary Wong", 0}, {0, 0} };
 
+static credEntry ceContrib[] ={
+	{"Holger Bochnig", 0},
+	{"Stein Kulseth", 0},
+	{"Olivier Baur", 0},
+	{0, 0}};
+
 static credEntry ceSupport[] = {{"Øystein Johansen", N_("Web Pages")},
 	{"Achim Mueller", N_("Manual")},
 	{"Nardy Pillards", N_("Web Pages")},
-	{"Albert Silver", N_("Tutorial")}, {0, 0}};
+	{"Albert Silver", N_("Tutorial")},
+	{0, 0}};
 
 static credEntry ceTranslations[] = {
 	{"Petr Kadlec", N_("Czech")},
@@ -7891,18 +7937,19 @@ static credEntry ceTranslations[] = {
 credits creditList[] =
 {
 	{N_("Developers"), ceAuthors},
-	{N_("Support"), ceSupport},
 	{N_("Translations"), ceTranslations},
+	{N_("Code Contributors"), ceContrib},
+	{N_("Support"), ceSupport},
 	{0, 0}
 };
 
 extern void GTKCommandShowCredits(void)
 {
 	extern char *aszCredits[];
-	GtkWidget *pwDialog, *pwBox, *pwHBox,
+	GtkWidget *pwDialog, *pwBox, *pwMainHBox, *pwHBox = 0, *pwVBox,
 		*pwList = gtk_list_new(),
 		*pwScrolled = gtk_scrolled_window_new( NULL, NULL );
-	int i;
+	int i = 0;
 	credits *credit = &creditList[0];
 	credEntry* ce;
 
@@ -7910,11 +7957,10 @@ extern void GTKCommandShowCredits(void)
 
 	pwDialog = GTKCreateDialog( _("GNU Backgammon - Credits"),
 					DT_INFO, NULL, NULL );
-	gtk_widget_set_usize(pwDialog, 300, -1);
-	pwBox = gtk_vbox_new( FALSE, 0);
-	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
 
-	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
+	pwMainHBox = gtk_hbox_new(FALSE, 0);
+
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwMainHBox);
 
 	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
@@ -7922,27 +7968,44 @@ extern void GTKCommandShowCredits(void)
 	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
+	pwBox = gtk_vbox_new( FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwMainHBox), pwBox, FALSE, FALSE, 0);
+	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
+
 	while (credit->Title)
 	{
-		AddTitle(pwBox, _(credit->Title));
+		/* Two columns, so new hbox every-other one */
+		if (i / 2 == (i + 1) / 2)
+		{
+			pwHBox = gtk_hbox_new( TRUE, 0);
+			gtk_box_pack_start(GTK_BOX(pwBox), pwHBox, TRUE, FALSE, 0);
+		}
+
+		pwVBox = gtk_vbox_new( FALSE, 0);
+		gtk_box_pack_start(GTK_BOX(pwHBox), pwVBox, FALSE, FALSE, 0);
+
+		AddTitle(pwVBox, _(credit->Title));
 
 		ce = credit->Entry;
 		while(ce->Name)
 		{
-			AddName(pwBox, ce->Name, ce->Type);
+			AddName(pwVBox, ce->Name, ce->Type);
 			ce++;
 		}
-		gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
+		if (i == 1)
+			gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
 		credit++;
+		i++;
 	}
 
-	AddTitle(pwBox, _("Special thanks"));
+	pwVBox = gtk_vbox_new( FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwMainHBox), pwVBox, FALSE, FALSE, 0);
 
-	pwHBox = gtk_hbox_new( FALSE, 0);
-	gtk_box_pack_start( GTK_BOX( pwBox ), pwHBox, FALSE, FALSE, 0 );
+	AddTitle(pwVBox, _("Special thanks"));
 
-	gtk_box_pack_start( GTK_BOX( pwHBox ), pwScrolled, TRUE, FALSE, 0 );
-	gtk_widget_set_usize( pwScrolled, 150, 150 );
+	gtk_container_set_border_width( GTK_CONTAINER(pwVBox), 8);
+	gtk_box_pack_start( GTK_BOX( pwVBox ), pwScrolled, TRUE, TRUE, 0 );
+	gtk_widget_set_usize( pwScrolled, 150, -1 );
 	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScrolled ),
 						pwList );
 	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
