@@ -1,3 +1,9 @@
+Mon Jun 17 19:56:33 CEST 2002  Achim Mueller <acepoint@deltacity.net>
+	Added doc/faq.texi and doc/faq.html
+	Using a modified version of texi2html --> is it neccesary to
+	add the texi2html also?
+
+
 Mon Jun 17 15:18:20 2002  Achim Mueller  <acepoint@deltacity.net>
 
 	Added po/de.po
