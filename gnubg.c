@@ -6880,6 +6880,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	{ "window-system-only", no_argument, NULL, 'w' },
         { "no-splash", no_argument, NULL, 'S' },
 	/* these options must come last -- see below. */
+	{ "lang", required_argument, NULL, 'l'},
 	{ "datadir", required_argument, NULL, 'd' },
 	{ "commands", required_argument, NULL, 'c' },
         { "help", no_argument, NULL, 'h' },
@@ -6899,6 +6900,61 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     GtkWidget *pwSplash = NULL;
 #endif
 
+#if USE_GUI
+    /* The GTK interface is fairly grotty; it makes it impossible to
+       separate argv handling from attempting to open the display, so
+       we have to check for -t before the other options to avoid connecting
+       to the X server if it is specified.
+
+       We use the last eight elements of ao to get the "--help", "--tty",
+       "--commands", "--script", "--datadir" and "--version" options only. */
+    
+    opterr = 0;
+    
+    while( ( ch = getopt_long( argc, argv, "cd:hsptvl:", ao + sizeof( ao ) /
+			       sizeof( ao[ 0 ] ) - 9, NULL ) ) != (char) -1 )
+	switch( ch ) {
+	case 's': /* guile script */
+	case 'c': /* commands */
+        case 'p': /* python script */
+	case 't': /* tty */
+#ifdef WIN32
+         /* Bad hack */
+            fX = TRUE;
+            MessageBox (NULL,
+              TEXT (_("Sorry, this build does not support the -tty option")),
+              TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
+#else
+	    fX = FALSE;
+#endif
+	    break;
+	case 'h': /* help */
+            usage( argv[ 0 ] );
+	    exit( EXIT_SUCCESS );
+
+	case 'd': /* datadir */
+	    szDataDirectory = optarg;
+
+#ifdef WIN32
+	    _getcwd( szInvokingDirectory, _MAX_PATH );
+	    _chdir( szDataDirectory );
+#endif
+
+	    break;
+
+	case 'v': /* version */
+	    version();
+	    exit( EXIT_SUCCESS );
+
+	case 'l': {
+	  char *lang = malloc (1 + strlen ("LANG=") + strlen (optarg));
+	  assert (lang != 0);
+	  sprintf (lang, "LANG=%s", optarg);
+	  putenv (lang);
+	  free (lang);
+	  }
+	}
+    
 #if HAVE_SETLOCALE
     setlocale (LC_ALL, "");
 #endif
@@ -6947,53 +7003,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     szTerminalCharset = "ISO-8859-1"; /* best guess */
 #endif
 
-#if USE_GUI
-    /* The GTK interface is fairly grotty; it makes it impossible to
-       separate argv handling from attempting to open the display, so
-       we have to check for -t before the other options to avoid connecting
-       to the X server if it is specified.
-
-       We use the last six elements of ao to get the "--help", "--tty",
-       "--commands", "--script", "--datadir" and "--version" options only. */
-    
-    opterr = 0;
-    
-    while( ( ch = getopt_long( argc, argv, "cd:hsptv", ao + sizeof( ao ) /
-			       sizeof( ao[ 0 ] ) - 7, NULL ) ) != (char) -1 )
-	switch( ch ) {
-	case 's': /* guile script */
-	case 'c': /* commands */
-        case 'p': /* python script */
-	case 't': /* tty */
-#ifdef WIN32
-         /* Bad hack */
-            fX = TRUE;
-            MessageBox (NULL,
-              TEXT (_("Sorry, this build does not support the -tty option")),
-              TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
-#else
-	    fX = FALSE;
-#endif
-	    break;
-	case 'h': /* help */
-            usage( argv[ 0 ] );
-	    exit( EXIT_SUCCESS );
-
-	case 'd': /* datadir */
-	    szDataDirectory = optarg;
-
-#ifdef WIN32
-	    _getcwd( szInvokingDirectory, _MAX_PATH );
-	    _chdir( szDataDirectory );
-#endif
-
-	    break;
-
-	case 'v': /* version */
-	    version();
-	    exit( EXIT_SUCCESS );
-	}
-    
     optind = 0;
     opterr = 1;
 
@@ -7048,7 +7057,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #endif
 		
-    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:p:tvwS", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:p:tvwSl:", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -7111,7 +7120,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
         case 'S': /* no splash screen */
           fSplash = FALSE;
           break;
-          
+
+	case 'l':
+	  break;
+
 	default:
 	    usage( argv[ 0 ] );
 	    exit( EXIT_FAILURE );
