@@ -63,20 +63,24 @@ char *aszSkillType[] = {
   N_("bad"), 
   N_("doubtful"), 
   NULL,
-  N_("interesting"), 
   N_("good"), 
-  N_("very good") };
+/*   N_("interesting"),  */
+/*   N_("good"),  */
+/*   N_("very good")  */
+};
 char *aszSkillTypeCommand[] = { 
   "verybad", 
   "bad", 
   "doubtful", 
   "none",
-  "interesting", 
-  "good", 
-  "verygood"
+  "good",
+/*   "interesting",  */
+/*   "good",  */
+/*   "verygood" */
  };
-char *aszSkillTypeAbbr[] = { "??", "?", "?!", "", "!?", "!", "!!" };
-char *aszLuckTypeCommand[] = { 
+char* aszSkillTypeAbbr[] = { "??", "?", "?!", "", ""};
+
+char* aszLuckTypeCommand[] = { 
   "veryunlucky", 
   "unlucky", 
   "none",
@@ -477,10 +481,8 @@ extern void AddMoveRecord( void *pv ) {
 	if( pmr->n.ml.cMoves )
 	    assert( pmr->n.iMove >= 0 && pmr->n.iMove <= pmr->n.ml.cMoves );
 	assert( pmr->n.lt >= LUCK_VERYBAD && pmr->n.lt <= LUCK_VERYGOOD );
-	assert( pmr->n.stMove >= SKILL_VERYBAD && 
-                pmr->n.stMove <= SKILL_VERYGOOD );
-	assert( pmr->n.stCube >= SKILL_VERYBAD && 
-                pmr->n.stCube <= SKILL_VERYGOOD );
+	assert( 0 <= pmr->n.stMove && pmr->n.stMove < N_SKILLS );
+	assert( 0 <= pmr->n.stCube && pmr->n.stCube < N_SKILLS );
 	break;
 	
     case MOVE_DOUBLE:
@@ -489,7 +491,7 @@ extern void AddMoveRecord( void *pv ) {
         assert( pmr->d.CubeDecPtr->esDouble.et >= EVAL_NONE &&
                 pmr->d.CubeDecPtr->esDouble.et <= EVAL_ROLLOUT );
 	assert( pmr->d.fPlayer >= 0 && pmr->d.fPlayer <= 1 );
-	assert( pmr->d.st >= SKILL_VERYBAD && pmr->d.st <= SKILL_VERYGOOD );
+	assert( 0 <= pmr->d.st && pmr->d.st < N_SKILLS );
 	break;
 	
     case MOVE_RESIGN:
@@ -2021,15 +2023,15 @@ extern void CommandAnnotateDoubtful( char *sz ) {
     AnnotateMove( SKILL_DOUBTFUL );
 }
 
-extern void CommandAnnotateGood( char *sz ) {
+extern void CommandAnnotateGood( char *sz ) { 
 
-    AnnotateMove( SKILL_GOOD );
+  AnnotateMove( SKILL_GOOD ); 
 }
 
-extern void CommandAnnotateInteresting( char *sz ) {
+/* extern void CommandAnnotateInteresting( char *sz ) { */
 
-    AnnotateMove( SKILL_INTERESTING );
-}
+/*     AnnotateMove( SKILL_INTERESTING ); */
+/* } */
 
 extern void CommandAnnotateLucky( char *sz ) {
 
@@ -2046,10 +2048,10 @@ extern void CommandAnnotateVeryBad( char *sz ) {
     AnnotateMove( SKILL_VERYBAD );
 }
 
-extern void CommandAnnotateVeryGood( char *sz ) {
+/* extern void CommandAnnotateVeryGood( char *sz ) { */
 
-    AnnotateMove( SKILL_VERYGOOD );
-}
+/*     AnnotateMove( SKILL_VERYGOOD ); */
+/* } */
 
 extern void CommandAnnotateVeryLucky( char *sz ) {
 
@@ -2124,52 +2126,52 @@ static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
      pec = &pes->ec;
 
 
-	GetMatchStateCubeInfo( &ci, &ms );
+     GetMatchStateCubeInfo( &ci, &ms );
 
-	fAnalyseCube = TRUE;
-	if( !GetDPEq ( NULL, NULL, &ci ) ) {
-	  fAnalyseCube = fAnalyseCubeSave;
-	  return (SKILL_NONE);
-	}
+     fAnalyseCube = TRUE;
+     if( !GetDPEq ( NULL, NULL, &ci ) ) {
+       fAnalyseCube = fAnalyseCubeSave;
+       return (SKILL_NONE);
+     }
 
-	/* Give hint on cube action */
+     /* Give hint on cube action */
 
 
-        SuspendInput ( &m );
+     SuspendInput ( &m );
 
-	ProgressStart( _("Considering cube action...") );
-	if (GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0 ) {
-          ResumeInput ( &m );
-	  ProgressEnd();
-	  fAnalyseCube = fAnalyseCubeSave;
-	  return (SKILL_NONE);;
-	}
-	ProgressEnd();
+     ProgressStart( _("Considering cube action...") );
+     if (GeneralCubeDecisionE( aarOutput, ms.anBoard, &ci, pec, pes) < 0 ) {
+       ResumeInput ( &m );
+       ProgressEnd();
+       fAnalyseCube = fAnalyseCubeSave;
+       return (SKILL_NONE);;
+     }
+     ProgressEnd();
 
-        /* update analysis for hint */
+     /* update analysis for hint */
 
-        ec2es ( &es, pec );
-        UpdateStoredCube ( aarOutput, aarOutput /* whatever */,
-                           &es, &ms );
+     ec2es ( &es, pec );
+     UpdateStoredCube ( aarOutput, aarOutput /* whatever */,
+			&es, &ms );
 
-        ResumeInput ( &m );
+     ResumeInput ( &m );
 	    
-        /* store cube decision for annotation */
+     /* store cube decision for annotation */
 
-        ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
-        memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
-                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+     ec2es ( &pmr->d.CubeDecPtr->esDouble, pec );
+     memcpy ( pmr->d.CubeDecPtr->aarOutput, aarOutput, 
+	      2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
-        memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
-                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
-        pmr->d.st = SKILL_NONE;
+     memset ( pmr->d.CubeDecPtr->aarStdDev, 0,
+	      2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+     memcpy ( pmr->d.CubeDecPtr->arDouble, arDouble, 4 * sizeof ( float ) );
+     pmr->d.st = SKILL_NONE;
 
-        /* find skill */
+     /* find skill */
 
-	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
+     cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
 
-	switch ( cd ) {
+     switch ( cd ) {
 	case NODOUBLE_TAKE:
 	case NODOUBLE_BEAVER:
 	case TOOGOOD_TAKE:
@@ -2368,7 +2370,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
         case OPTIONAL_REDOUBLE_TAKE:
 	  /* best response is take, player took - good move */
 	  if ( !fIsDrop )
-		return ( SKILL_NONE );
+		return ( SKILL_GOOD );
 
 	  /* equity loss for dropping when you shouldn't */
  	  rDeltaEquity =  arDouble [OUTPUT_DROP] - arDouble [OUTPUT_TAKE];
@@ -2382,7 +2384,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
         case OPTIONAL_REDOUBLE_PASS:
 	  /* best response is drop, player dropped - good move */
 	  if ( fIsDrop )
-		return (SKILL_NONE);
+		return (SKILL_GOOD);
 
  	  rDeltaEquity = arDouble [OUTPUT_TAKE] - arDouble [OUTPUT_DROP];
 	  break;
@@ -3150,19 +3152,18 @@ static int MoveIsMarked (moverecord *pmr) {
   if (pmr == 0)
 	return FALSE;
 
-  switch( pmr->mt )
-	{
-	case MOVE_NORMAL:
-	  return (pmr->n.stMove != SKILL_NONE) || (pmr->n.stCube != SKILL_NONE);
+  switch( pmr->mt ) {
+  case MOVE_NORMAL:
+    return badSkill(pmr->n.stMove) || badSkill(pmr->n.stCube);
 
-	case MOVE_DOUBLE:
-	case MOVE_TAKE:
-	case MOVE_DROP:
-	  return (pmr->d.st != SKILL_NONE);
+  case MOVE_DOUBLE:
+  case MOVE_TAKE:
+  case MOVE_DROP:
+    return badSkill(pmr->d.st);
 
-	default:
-	  break;
-	}
+  default:
+    break;
+  }
 
   return FALSE;
 }

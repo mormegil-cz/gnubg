@@ -213,7 +213,7 @@ static void RestoreGS( list *pl, statcontext *psc ) {
 	    psc->anTotalMoves[ 0 ] = strtol( pch, &pch, 10 );
 	    psc->anTotalMoves[ 1 ] = strtol( pch, &pch, 10 );
 
-	    for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ ) {
+	    for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
 		psc->anMoves[ 0 ][ st ] = strtol( pch, &pch, 10 );
 		psc->anMoves[ 1 ][ st ] = strtol( pch, &pch, 10 );
 	    }
@@ -1231,24 +1231,24 @@ static void RestoreNode( list *pl, char *szCharset ) {
 	    SKILL_BAD;
 	else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'O' )
 	    ast[ 0 ] = SKILL_DOUBTFUL;
-	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'T' )
-	    ast[ 0 ] = SKILL_INTERESTING;
-	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'E' )
-	    ast[ 0 ] 
-              = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
-	    SKILL_GOOD;
+/* 	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'T' ) */
+/* 	    ast[ 0 ] = SKILL_INTERESTING; */
+/* 	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'E' ) */
+/* 	    ast[ 0 ]  */
+/*               = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD : */
+/* 	    SKILL_GOOD; */
 	else if( pp->ach[ 0 ] == 'B' && pp->ach[ 1 ] == 'C' )
 	    ast[ 1 ] 
               = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYBAD :
 	    SKILL_BAD;
 	else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'C' )
 	    ast[ 1 ] = SKILL_DOUBTFUL;
-	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'C' )
-	    ast[ 1 ] = SKILL_INTERESTING;
-	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'C' )
-	    ast[ 1 ] 
-              = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
-	    SKILL_GOOD;
+/* 	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'C' ) */
+/* 	    ast[ 1 ] = SKILL_INTERESTING; */
+/* 	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'C' ) */
+/* 	    ast[ 1 ]  */
+/*               = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD : */
+/* 	    SKILL_GOOD; */
 	else if( pp->ach[ 0 ] == 'L' && pp->ach[ 1 ] == 'U' )
 	    rLuck = atof( pp->pl->plNext->p );
 	else if( pp->ach[ 0 ] == 'G' && pp->ach[ 1 ] == 'B' )
@@ -1887,18 +1887,22 @@ WriteSkill ( FILE *pf, const skilltype st ) {
 	
     case SKILL_NONE:
 	break;
+
+    case SKILL_GOOD: 
+      fputs( "TE[1]", pf ); 
+      break; 
 	
-    case SKILL_INTERESTING:
-	fputs( "IT[]", pf );
-	break;
+/*     case SKILL_INTERESTING: */
+/* 	fputs( "IT[]", pf ); */
+/* 	break; */
 	
-    case SKILL_GOOD:
-	fputs( "TE[1]", pf );
-	break;
+/*     case SKILL_GOOD: */
+/* 	fputs( "TE[1]", pf ); */
+/* 	break; */
 	
-    case SKILL_VERYGOOD:
-	fputs( "TE[2]", pf );
-	break;
+/*     case SKILL_VERYGOOD: */
+/* 	fputs( "TE[2]", pf ); */
+/* 	break; */
     }
 }
 
@@ -1921,17 +1925,17 @@ WriteSkillCube ( FILE *pf, const skilltype st ) {
     case SKILL_NONE:
 	break;
 	
-    case SKILL_INTERESTING:
-	fputs( "IC[]", pf );
-	break;
+/*     case SKILL_INTERESTING: */
+/* 	fputs( "IC[]", pf ); */
+/* 	break; */
 	
     case SKILL_GOOD:
 	fputs( "TC[1]", pf );
 	break;
 	
-    case SKILL_VERYGOOD:
-	fputs( "TC[2]", pf );
-	break;
+/*     case SKILL_VERYGOOD: */
+/* 	fputs( "TC[2]", pf ); */
+/* 	break; */
     }
 }
 
@@ -1946,7 +1950,7 @@ static void WriteStatContext( FILE *pf, statcontext *psc ) {
 	fprintf( pf, "[M:%d %d %d %d ", psc->anUnforcedMoves[ 0 ],
 		 psc->anUnforcedMoves[ 1 ], psc->anTotalMoves[ 0 ],
 		 psc->anTotalMoves[ 1 ] );
-	for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ )
+	for( st = SKILL_VERYBAD; st < N_SKILLS; st++ )
 	    fprintf( pf, "%d %d ", psc->anMoves[ 0 ][ st ],
 		     psc->anMoves[ 1 ][ st ] );
 	fprintf( pf, "%.6f %.6f %.6f %.6f]", psc->arErrorCheckerplay[ 0 ][ 0 ],

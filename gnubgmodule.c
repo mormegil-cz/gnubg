@@ -867,7 +867,8 @@ static PyObject*
 RolloutContextToPy(const rolloutcontext* rc)
 {
   PyObject* dict =
-    Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i}",
+    Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,"
+		  "s:i,s:i,s:i}",
 		  "cubeful", rc->fCubeful,
 		  "variance-reduction", rc->fVarRedn,
 		  "initial-position", rc->fInitial,
@@ -875,7 +876,12 @@ RolloutContextToPy(const rolloutcontext* rc)
 		  "late-eval", rc->fLateEvals,
 		  "truncated-rollouts", rc->fDoTruncate,
 		  "n-truncation", rc->nTruncate,
-		  "trials", rc->nTrials);
+		  "trials", rc->nTrials,
+		  "truncate-bearoff2", rc->fTruncBearoff2,
+		  "truncate-bearoffOS", rc->fTruncBearoffOS,
+		  "seed", rc->nSeed,
+		  "stopOnSTD", rc->fStopOnSTD,
+		  "minimum-games", rc->nMinimumGames);
   return dict;
 }
 
@@ -928,9 +934,10 @@ skillString(skilltype const st, int const ignoreNone)
     case SKILL_BAD:         return "bad";
     case SKILL_DOUBTFUL:    return "doubtful";
     case SKILL_NONE:        return ignoreNone ? 0 : "unmarked";
-    case SKILL_INTERESTING: return "interesting";
-    case SKILL_GOOD:        return "good"; 
-    case SKILL_VERYGOOD:    return "verygood";
+    case SKILL_GOOD:        return "good";
+/*     case SKILL_INTERESTING: return "interesting"; */
+/*     case SKILL_GOOD:        return "good";  */
+/*     case SKILL_VERYGOOD:    return "verygood"; */
   }
   assert(0);
   return 0;
@@ -1183,7 +1190,7 @@ PyGameStats(const statcontext* sc)
 
       {
 	skilltype st;
-	for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ ) {
+	for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
 	  DictSetItemSteal(m, skillString(st, 0),
 			   PyInt_FromLong(sc->anMoves[side][st]));
 	}
@@ -1288,12 +1295,12 @@ PyGameStats(const statcontext* sc)
  */
 
 static PyObject*
-PythonGame(const list* plGame,
-	   int const doAnalysis,
-	   int const verbose,
-	   int const includeStatistics,
-	   int const includeBoards,
-	   PyMatchState* ms)
+PythonGame(const list*    plGame,
+	   int const      doAnalysis,
+	   int const      verbose,
+	   int const      includeStatistics,
+	   int const      includeBoards,
+	   PyMatchState*  ms)
 {
   const list* pl = plGame->plNext;
   const moverecord* pmr = pl->p;            assert( pmr->mt == MOVE_GAMEINFO );
@@ -1722,14 +1729,77 @@ PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
     PyObject* e = RolloutContextToPy(s.rc);
     DictSetItemSteal(matchInfoDict, "default-rollout-context", e);
 
-    DictSetItemSteal(matchInfoDict, "sgf-rollout-version",
-		     PyInt_FromLong(SGF_ROLLOUT_VER));
-
+    /* No need for that, I think */
+/*     DictSetItemSteal(matchInfoDict, "sgf-rollout-version", */
+/* 		     PyInt_FromLong(SGF_ROLLOUT_VER)); */
   }
 
   PopLocale();
 
   return matchDict;
+}
+
+
+static PyObject*
+PythonNavigate(PyObject* self, PyObject* args, PyObject* keywds)
+{
+  int nextRecord = INT_MIN;
+  int nextGame = INT_MIN;
+  int absolute = INT_MIN;
+  
+  static char* kwlist[] = {"next", "game", "absolute", 0};
+
+  if( ! lMatch.plNext ) {
+    PyErr_SetString(PyExc_RuntimeError, "no active match");
+    return 0;
+  }
+    
+  if( !PyArg_ParseTupleAndKeywords(args, keywds, "|iii", kwlist,
+				   &nextRecord, &nextGame, &absolute) )
+    return 0;
+
+  if( nextRecord == INT_MIN && nextGame == INT_MIN ) {
+    /* no args, go to start */
+    ChangeGame( lMatch.plNext->p );
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  
+  if( nextGame != INT_MIN ) {
+    list* pl;
+    if( absolute ) {
+      if( nextGame < 0 ) {
+	PyErr_SetString(PyExc_RuntimeError, "negative game in absolute mode");
+	return 0;
+      }
+      pl = lMatch.plNext;
+    } else {
+      for( pl = lMatch.plNext; pl->p != plGame && pl != &lMatch; 
+         pl = pl->plNext )
+	;
+
+      assert( pl->p == plGame );
+    }
+    {
+      int n = nextGame;
+      if( n > 0 ) {
+	while( n > 0 && pl->plNext->p ) {
+	  pl = pl->plNext;
+	  --n;
+	}
+      } else if( n < 0 ) {
+	while( n < 0 && pl->plPrev->p ) {
+	  pl = pl->plPrev;
+	  ++n;
+	}
+      }
+      ChangeGame(pl->p);
+    }
+  }
+  
+  if( nextRecord != INT_MIN ) {
+    
+  }
 }
 
 
@@ -1765,6 +1835,8 @@ PyMethodDef gnubgMethods[] = {
     "return position from key" },
   { "match", (PyCFunction)PythonMatch, METH_VARARGS|METH_KEYWORDS,
     "Get the current match" },
+  { "navigate", (PyCFunction)PythonNavigate, METH_VARARGS|METH_KEYWORDS,
+    "" },
   { NULL, NULL, 0, NULL }
 
 };

@@ -1388,9 +1388,9 @@ extern void GTKPopMoveRecord( moverecord *pmr ) {
 
 static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
 
-    static char *aszSkillCmd[ SKILL_VERYGOOD + 1 ] = {
-	"verybad", "bad", "doubtful", "clear skill", "interesting", "good",
-	"verygood"
+    static char *aszSkillCmd[ N_SKILLS ] = {
+	"verybad", "bad", "doubtful", "clear skill",
+	//"interesting", "good",	"verygood"
     };
     char sz[ 64 ];
 
@@ -1408,7 +1408,7 @@ static GtkWidget *SkillMenu( skilltype stSelect, char *szAnno ) {
     skilltype st;
     
     pwMenu = gtk_menu_new();
-    for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ ) {
+    for( st = SKILL_VERYBAD; st < N_SKILLS; st++ ) {
 	gtk_menu_append( GTK_MENU( pwMenu ),
 			 pwItem = gtk_menu_item_new_with_label(
 			     aszSkillType[ st ] ? 
@@ -1915,7 +1915,8 @@ static void SetAnnotation( moverecord *pmr ) {
 
     if ( pmr && pmr->mt == MOVE_NORMAL && pwMoveAnalysis && pwCubeAnalysis ) {
 
-      if ( pmr->n.stCube != SKILL_NONE )
+      /* (FIXME) Not sure here about SKILL_GOOD */
+      if ( badSkill(pmr->n.stCube) )
         gtk_notebook_set_page ( GTK_NOTEBOOK ( pw ), 1 );
 
 
@@ -4960,8 +4961,8 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
     UserCommand(sz); 
   }
 
-  ADJUSTSKILLUPDATE( 0, SKILL_VERYGOOD, "set analysis threshold verygood %.3f" )
-  ADJUSTSKILLUPDATE( 1, SKILL_GOOD, "set analysis threshold good %.3f" )
+/*   ADJUSTSKILLUPDATE( 0, SKILL_VERYGOOD, "set analysis threshold verygood %.3f" ) */
+/*   ADJUSTSKILLUPDATE( 1, SKILL_GOOD, "set analysis threshold good %.3f" ) */
   ADJUSTSKILLUPDATE( 2, SKILL_DOUBTFUL, "set analysis threshold doubtful %.3f" )
   ADJUSTSKILLUPDATE( 3, SKILL_BAD, "set analysis threshold bad %.3f" )
   ADJUSTSKILLUPDATE( 4, SKILL_VERYBAD, "set analysis threshold verybad %.3f" )
@@ -5005,10 +5006,10 @@ static void AnalysisSet( analysiswidget *paw) {
 
   gtk_adjustment_set_value ( paw->padjMoves, cAnalysisMoves );
   
-  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[0] ), 
-		 arSkillLevel[SKILL_VERYGOOD] );
-  gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[1] ),
-		 arSkillLevel[SKILL_GOOD] );
+/*   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[0] ),  */
+/* 		 arSkillLevel[SKILL_VERYGOOD] ); */
+/*   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[1] ), */
+/* 		 arSkillLevel[SKILL_GOOD] ); */
   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[2] ),
 		 arSkillLevel[SKILL_DOUBTFUL] );
   gtk_adjustment_set_value ( GTK_ADJUSTMENT( paw->apadjSkill[3] ),
@@ -7032,10 +7033,12 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Checkerplay statistics:"),
          N_("Total moves"),
          N_("Unforced moves"),
-         N_("Moves marked very good"),
-         N_("Moves marked good"),
-         N_("Moves marked interesting"),
+/*          N_("Moves marked very good"), */
+/*          N_("Moves marked good"), */
+/*          N_("Moves marked interesting"), */
+/*          N_("Moves marked good"), */
          N_("Moves unmarked"),
+         N_("Moves marked good"),
          N_("Moves marked doubtful"),
          N_("Moves marked bad"),
          N_("Moves marked very bad"),
@@ -7150,8 +7153,9 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
 
   {
-    int i[] = {SKILL_VERYGOOD, SKILL_GOOD, SKILL_INTERESTING,
-	       SKILL_NONE, SKILL_DOUBTFUL, SKILL_BAD, SKILL_VERYBAD};
+    int i[] = {//SKILL_VERYGOOD, SKILL_GOOD, SKILL_INTERESTING,
+	       SKILL_NONE, SKILL_GOOD, SKILL_DOUBTFUL, SKILL_BAD,
+	       SKILL_VERYBAD};
     unsigned int k;
     
     for(k = 0; k < sizeof(i)/sizeof(i[0]); ++k) {

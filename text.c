@@ -424,7 +424,7 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
   /* print alerts */
 
-  if ( pmr->n.stMove <= SKILL_BAD || pmr->n.stMove > SKILL_NONE ) {
+  if ( badSkill(pmr->n.stMove) ) {
 
     /* blunder or error */
 

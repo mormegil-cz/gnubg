@@ -265,10 +265,12 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f, rEvalsPerSec = -1.0f,
 	0.16f, /* SKILL_VERYBAD */
 	0.08f, /* SKILL_BAD */
 	0.04f, /* SKILL_DOUBTFUL */
-	0, /* SKILL_NONE */
-	0, /* SKILL_INTERESTING */
-	0.02f, /* SKILL_GOOD */
-	0.04f /* SKILL_VERYGOOD	*/
+	0,     /* SKILL_NONE */
+ 	0,     /* SKILL_GOOD */
+	
+/* 	0, /\* SKILL_INTERESTING *\/ */
+/* 	0.02f, /\* SKILL_GOOD *\/ */
+/* 	0.04f /\* SKILL_VERYGOOD	*\/ */
     };
 
 evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
@@ -563,11 +565,11 @@ command cER = {
       N_("Remove annotations"), NULL, NULL },
     { "doubtful", CommandAnnotateDoubtful, N_("Mark as doubtful"), NULL, NULL },
     { "good", CommandAnnotateGood, N_("Mark as good"), NULL, NULL },
-    { "interesting", CommandAnnotateInteresting, N_("Mark as interesting"),
-      NULL, NULL },
+    //{ "interesting", CommandAnnotateInteresting, N_("Mark as interesting"),
+    //NULL, NULL },
     { "verybad", CommandAnnotateVeryBad, N_("Mark as very bad"), NULL, NULL },
-    { "verygood", CommandAnnotateVeryGood, 
-      N_("Mark as very good"), NULL, NULL },
+    //    { "verygood", CommandAnnotateVeryGood, 
+    //N_("Mark as very good"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateRoll[] = {
     { "clear", CommandAnnotateClearLuck, 
@@ -817,11 +819,11 @@ command cER = {
       N_("Specify the equity loss for a bad move"), szVALUE, NULL },
     { "doubtful", CommandSetAnalysisThresholdDoubtful, 
       N_("Specify the equity loss for a doubtful move"), szVALUE, NULL },
-    { "good", CommandSetAnalysisThresholdGood, 
-      N_("Specify the equity gain for a "
-      "good move"), szVALUE, NULL },
-    { "interesting", CommandSetAnalysisThresholdInteresting, N_("Specify the "
-      "equity gain for an interesting move"), szVALUE, NULL },
+/*     { "good", CommandSetAnalysisThresholdGood,  */
+/*       N_("Specify the equity gain for a " */
+/*       "good move"), szVALUE, NULL }, */
+/*     { "interesting", CommandSetAnalysisThresholdInteresting, N_("Specify the " */
+/*       "equity gain for an interesting move"), szVALUE, NULL }, */
     { "lucky", CommandSetAnalysisThresholdLucky, 
       N_("Specify the equity gain for "
       "a lucky roll"), szVALUE, NULL },
@@ -831,9 +833,9 @@ command cER = {
     { "verybad", CommandSetAnalysisThresholdVeryBad, 
       N_("Specify the equity loss "
       "for a very bad move"), szVALUE, NULL },
-    { "verygood", CommandSetAnalysisThresholdVeryGood, 
-      N_("Specify the equity "
-      "gain for a very good move"), szVALUE, NULL },
+/*     { "verygood", CommandSetAnalysisThresholdVeryGood,  */
+/*       N_("Specify the equity " */
+/*       "gain for a very good move"), szVALUE, NULL }, */
     { "verylucky", CommandSetAnalysisThresholdVeryLucky, 
       N_("Specify the equity "
       "gain for a very lucky roll"), szVALUE, NULL },
@@ -1281,12 +1283,12 @@ command cER = {
     N_("show doubtful moves"), szONOFF, &cOnOff },
   { "unmarked", CommandSetExportMovesDisplayUnmarked,
     N_("show unmarked moves"), szONOFF, &cOnOff },
-  { "interesting", CommandSetExportMovesDisplayInteresting,
-    N_("show interesting moves"), szONOFF, &cOnOff },
-  { "good", CommandSetExportMovesDisplayGood,
-    N_("show good moves"), szONOFF, &cOnOff },
-  { "verygood", CommandSetExportMovesDisplayVeryGood,
-    N_("show very good moves"), szONOFF, &cOnOff },
+/*   { "interesting", CommandSetExportMovesDisplayInteresting, */
+/*     N_("show interesting moves"), szONOFF, &cOnOff }, */
+   { "good", CommandSetExportMovesDisplayGood, 
+     N_("show good moves"), szONOFF, &cOnOff }, 
+/*   { "verygood", CommandSetExportMovesDisplayVeryGood, */
+/*     N_("show very good moves"), szONOFF, &cOnOff }, */
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportCubeDisplay[] = {
   { "actual", CommandSetExportCubeDisplayActual,
@@ -1297,18 +1299,18 @@ command cER = {
     N_("show close cube decisions"), szONOFF, &cOnOff },
   { "doubtful", CommandSetExportCubeDisplayDoubtful,
     N_("show doubtful cube decisions"), szONOFF, &cOnOff },
-  { "good", CommandSetExportCubeDisplayGood,
-    N_("show good cube decisions"), szONOFF, &cOnOff },
-  { "interesting", CommandSetExportCubeDisplayInteresting,
-    N_("show interesting cube decisions"), szONOFF, &cOnOff },
+/*   { "verygood", CommandSetExportCubeDisplayVeryGood, */
+/*     N_("show very good cube decisions"), szONOFF, &cOnOff }, */
+/*   { "good", CommandSetExportCubeDisplayGood, */
+/*     N_("show good cube decisions"), szONOFF, &cOnOff }, */
+/*   { "interesting", CommandSetExportCubeDisplayInteresting, */
+/*     N_("show interesting cube decisions"), szONOFF, &cOnOff }, */
   { "missed", CommandSetExportCubeDisplayMissed,
     N_("show missed doubles"), szONOFF, &cOnOff },
   { "unmarked", CommandSetExportCubeDisplayUnmarked,
     N_("show unmarked cube decisions"), szONOFF, &cOnOff },
   { "verybad", CommandSetExportCubeDisplayVeryBad,
     N_("show very bad cube decisions"), szONOFF, &cOnOff },
-  { "verygood", CommandSetExportCubeDisplayVeryGood,
-    N_("show very good cube decisions"), szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportInclude[] = {
   { "annotations", CommandSetExportIncludeAnnotations,
@@ -5089,22 +5091,22 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf( pf, "set analysis threshold bad %.3f\n"
 	     "set analysis threshold doubtful %.3f\n"
-	     "set analysis threshold good %.3f\n"
-	     "set analysis threshold interesting %.3f\n"
+	     //"set analysis threshold good %.3f\n"
+	     //"set analysis threshold interesting %.3f\n"
 	     "set analysis threshold lucky %.3f\n"
 	     "set analysis threshold unlucky %.3f\n"
 	     "set analysis threshold verybad %.3f\n"
-	     "set analysis threshold verygood %.3f\n"
+	     //"set analysis threshold verygood %.3f\n"
 	     "set analysis threshold verylucky %.3f\n"
 	     "set analysis threshold veryunlucky %.3f\n",
 	     arSkillLevel[ SKILL_BAD ],
 	     arSkillLevel[ SKILL_DOUBTFUL ],
-	     arSkillLevel[ SKILL_GOOD ],
-	     arSkillLevel[ SKILL_INTERESTING ],
+	     //arSkillLevel[ SKILL_GOOD ],
+	     //arSkillLevel[ SKILL_INTERESTING ],
 	     arLuckLevel[ LUCK_GOOD ],
 	     arLuckLevel[ LUCK_BAD ],
 	     arSkillLevel[ SKILL_VERYBAD ],
-	     arSkillLevel[ SKILL_VERYGOOD ],
+	     //arSkillLevel[ SKILL_VERYGOOD ],
 	     arLuckLevel[ LUCK_VERYGOOD ],
 	     arLuckLevel[ LUCK_VERYBAD ] );
 
@@ -5305,7 +5307,7 @@ extern void CommandSaveSettings( char *szParam ) {
               exsExport.afMovesParameters[ 1 ] ? "yes" : "no",
               exsExport.fMovesDetailProb  ? "yes" : "no" );
 
-    for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+    for ( i = 0; i < N_SKILLS; i++ ) {
       if ( i == SKILL_NONE ) 
         fprintf ( pf, "set export moves display unmarked %s\n", 
                   exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
@@ -5323,7 +5325,7 @@ extern void CommandSaveSettings( char *szParam ) {
               exsExport.afCubeParameters[ 1 ] ? "yes" : "no",
               exsExport.fCubeDetailProb ? "yes" : "no" );
 
-    for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+    for ( i = 0; i < N_SKILLS; i++ ) {
       if ( i == SKILL_NONE )
         fprintf ( pf, "set export cube display unmarked %s\n", 
                   exsExport.afCubeDisplay[ i ] ? "yes" : "no" );

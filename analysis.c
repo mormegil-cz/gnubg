@@ -71,6 +71,12 @@ int afAnalysePlayers[ 2 ] = { TRUE, TRUE };
 
 evalcontext ecLuck = { TRUE, 0, 0, TRUE, 0.0 };
 
+extern int
+badSkill(skilltype const st)
+{
+  return st != SKILL_NONE && st != SKILL_GOOD;
+}
+
 extern ratingtype
 GetRating ( const float rError ) {
 
@@ -278,7 +284,7 @@ extern skilltype Skill( float r ) {
     else if( r <= -arSkillLevel[ SKILL_DOUBTFUL ] )
 	return SKILL_DOUBTFUL;
     else
-	return SKILL_NONE;
+      return SKILL_GOOD; // SKILL_NONE;
 }
 
 /*
@@ -409,10 +415,17 @@ updateStatcontext ( statcontext *psc,
      * update chequerplay statistics 
      */
 
-    /* hmm, MOVE_NORMALs which has no legal moves have
-       pmr->n.esChequer.et == EVAL_NONE */
+    /* Count total regradless of analysis */
+    psc->anTotalMoves[ pmr->n.fPlayer ]++;
 
-    if ( fAnalyseMove /* && pmr->n.esChequer.et != EVAL_NONE */ ) {
+    /* hmm, MOVE_NORMALs which has no legal moves have
+       pmr->n.esChequer.et == EVAL_NONE
+       (Joseph) But we can detect them by checking if a move was actually
+       made or not.
+    */
+    
+    if( fAnalyseMove &&
+	 (pmr->n.esChequer.et != EVAL_NONE || pmr->n.anMove[0] < 0) ) {
 
       /* find skill */
 
@@ -437,17 +450,17 @@ updateStatcontext ( statcontext *psc,
       rCost = pms->nMatchTo ? eq2mwc( rChequerSkill, &ci ) -
         eq2mwc( 0.0f, &ci ) : pms->nCube * rChequerSkill;
 
-      psc->anTotalMoves[ pmr->n.fPlayer ]++;	  
       psc->anMoves[ pmr->n.fPlayer ][ Skill( rChequerSkill ) ]++;
 	  
       if( pmr->n.ml.cMoves > 1 ) {
         psc->anUnforcedMoves[ pmr->n.fPlayer ]++;
-        psc->arErrorCheckerplay[ pmr->n.fPlayer ][ 0 ] -=
-          rChequerSkill;
-        psc->arErrorCheckerplay[ pmr->n.fPlayer ][ 1 ] -=
-          rCost;
+        psc->arErrorCheckerplay[ pmr->n.fPlayer ][ 0 ] -= rChequerSkill;
+        psc->arErrorCheckerplay[ pmr->n.fPlayer ][ 1 ] -= rCost;
       }
 
+    } else {
+      /* unmarked move */
+      psc->anMoves[ pmr->n.fPlayer ][ SKILL_NONE ] ++;
     }
 
     break;
@@ -873,13 +886,13 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
         if ( rAfter < rBefore ) {
           /* wrong resign */
           pmr->r.stResign = Skill ( rAfter - rBefore );
-          pmr->r.stAccept = SKILL_VERYGOOD;
+          pmr->r.stAccept = SKILL_GOOD; //VERYGOOD;
         }
 
         if ( rBefore < rAfter ) {
           /* wrong accept */
           pmr->r.stAccept = Skill ( rBefore - rAfter );
-          pmr->r.stResign = SKILL_VERYGOOD;
+          pmr->r.stResign = SKILL_GOOD; // VERYGOOD;
         }
 
 
@@ -1009,10 +1022,10 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
     pscB->anTake[ i ] += pscA->anTake[ i ];
     pscB->anPass[ i ] += pscA->anPass[ i ];
 
-    for ( j = 0; j <= SKILL_VERYGOOD; j++ )
+    for ( j = 0; j < N_SKILLS; j++ )
       pscB->anMoves[ i ][ j ] += pscA->anMoves[ i ][ j ];
 
-    for ( j = 0; j <= LUCK_VERYGOOD; j++ )
+    for ( j = 0; j < N_SKILLS; j++ )
       pscB->anLuck[ i ][ j ] += pscA->anLuck[ i ][ j ];
 
     pscB->anCubeMissedDoubleDP [ i ] += pscA->anCubeMissedDoubleDP [ i ];
@@ -1211,7 +1224,7 @@ IniStatcontext ( statcontext *psc ) {
     psc->anTake[ i ] = 0;
     psc->anPass[ i ] = 0;
 
-    for ( j = 0; j <= SKILL_VERYGOOD; j++ )
+    for ( j = 0; j < N_SKILLS; j++ )
       psc->anMoves[ i ][ j ] = 0;
 
     for ( j = 0; j <= LUCK_VERYGOOD; j++ )
@@ -1410,9 +1423,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
               "%s\n\n"
               "%-31s %3d                     %3d\n"
               "%-31s %3d                     %3d\n" 
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n"
+/*               "%-31s %3d                     %3d\n" */
+/*               "%-31s %3d                     %3d\n" */
+/*               "%-31s %3d                     %3d\n" */
               "%-31s %3d                     %3d\n"
               "%-31s %3d                     %3d\n"
               "%-31s %3d                     %3d\n"
@@ -1422,18 +1435,18 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 	      psc->anTotalMoves[ 0 ], psc->anTotalMoves[ 1 ],
               _("Unforced moves"),
 	      psc->anUnforcedMoves[ 0 ], psc->anUnforcedMoves[ 1 ],
-              _("Moves marked very good"),
-	      psc->anMoves[ 0 ][ SKILL_VERYGOOD ],
-	      psc->anMoves[ 1 ][ SKILL_VERYGOOD ],
+/*               _("Moves marked very good"), */
+/* 	      psc->anMoves[ 0 ][ SKILL_VERYGOOD ], */
+/* 	      psc->anMoves[ 1 ][ SKILL_VERYGOOD ], */
+/*               _("Moves marked good"), */
+/* 	      psc->anMoves[ 0 ][ SKILL_GOOD ], */
+/* 	      psc->anMoves[ 1 ][ SKILL_GOOD ], */
+/*               _("Moves marked interesting"), */
+/* 	      psc->anMoves[ 0 ][ SKILL_INTERESTING ], */
+/* 	      psc->anMoves[ 1 ][ SKILL_INTERESTING ], */
               _("Moves marked good"),
 	      psc->anMoves[ 0 ][ SKILL_GOOD ],
 	      psc->anMoves[ 1 ][ SKILL_GOOD ],
-              _("Moves marked interesting"),
-	      psc->anMoves[ 0 ][ SKILL_INTERESTING ],
-	      psc->anMoves[ 1 ][ SKILL_INTERESTING ],
-              _("Moves unmarked"),
-	      psc->anMoves[ 0 ][ SKILL_NONE ],
-	      psc->anMoves[ 1 ][ SKILL_NONE ],
               _("Moves marked doubtful"),
 	      psc->anMoves[ 0 ][ SKILL_DOUBTFUL ],
 	      psc->anMoves[ 1 ][ SKILL_DOUBTFUL ],

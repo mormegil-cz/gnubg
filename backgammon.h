@@ -354,7 +354,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
-    arSkillLevel[ SKILL_VERYGOOD + 1 ], rEvalsPerSec;
+    arSkillLevel[ N_SKILLS ], rEvalsPerSec;
 extern int nThreadPriority;
 extern int fCheat;
 extern int afCheatRoll[ 2 ];
@@ -388,12 +388,25 @@ extern rolloutcontext rcRollout;
 
 extern int fCubeEqualChequer, fPlayersAreSame, fTruncEqualPlayer0;
 
-/* plGame is the list of moverecords representing the current game;
-   plLastMove points to a move within it (typically the most recently
+
+/* The current match.
+  A list of games. Each game is a list of moverecords.
+  Note that the first list element is empty. The first game is in
+  lMatch.plNext->p. Same is true for games.
+*/
+extern list lMatch;
+
+/*  List of moverecords representing the current game. One of the elements in
+    lMatch.
+    Typically the last game in the match).
+*/
+extern list* plGame;
+
+/* Current move inside plGame (typically the most recently
    one played, but "previous" and "next" commands navigate back and forth).
-   lMatch is a list of games (i.e. a list of list of moverecords),
-   and plGame points to a game within it (again, typically the last). */
-extern list lMatch, *plGame, *plLastMove;
+*/
+extern list* plLastMove;
+
 extern statcontext scMatch;
 
 /* There is a global storedmoves struct to maintain the list of moves

@@ -405,8 +405,8 @@ extern void CommandShowAnalysis( char *sz ) {
                ap[ i ].szName, afAnalysePlayers[ i ] ? _("yes") : _("no") );
 
     outputl( _("\nAnalysis thresholds:") );
-    outputf( "  +%.3f %s\n"
-	     "  +%.3f %s\n"
+    outputf( //"  +%.3f %s\n"
+	     //"  +%.3f %s\n"
 	     "  -%.3f %s\n"
 	     "  -%.3f %s\n"
 	     "  -%.3f %s\n"
@@ -415,10 +415,10 @@ extern void CommandShowAnalysis( char *sz ) {
 	     "  +%.3f %s\n"
 	     "  -%.3f %s\n"
 	     "  -%.3f %s\n",
-	     arSkillLevel[ SKILL_VERYGOOD ], 
-             gettext ( aszSkillType[ SKILL_VERYGOOD ] ),
-             arSkillLevel[ SKILL_GOOD ], 
-             gettext ( aszSkillType[ SKILL_GOOD ] ),
+/* 	     arSkillLevel[ SKILL_VERYGOOD ],  */
+/*              gettext ( aszSkillType[ SKILL_VERYGOOD ] ), */
+/*              arSkillLevel[ SKILL_GOOD ],  */
+/*              gettext ( aszSkillType[ SKILL_GOOD ] ), */
 	     arSkillLevel[ SKILL_DOUBTFUL ], 
              gettext ( aszSkillType[ SKILL_DOUBTFUL ] ),
 	     arSkillLevel[ SKILL_BAD ], 
@@ -1728,7 +1728,7 @@ CommandShowExport ( char *sz ) {
   output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afMovesParameters[ 1 ] ? _("yes") : _("no") );
 
-  for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+  for ( i = 0; i < N_SKILLS; i++ ) {
     if ( i == SKILL_NONE ) 
       output ( _("- for unmarked moves" ) );
     else
@@ -1753,7 +1753,7 @@ CommandShowExport ( char *sz ) {
   output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afCubeParameters[ 1 ] ? _("yes") : _("no") );
 
-  for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+  for ( i = 0; i < N_SKILLS; i++ ) {
     if ( i == SKILL_NONE ) 
       output ( _("- for unmarked cube decisions" ) );
     else

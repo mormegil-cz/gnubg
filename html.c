@@ -2105,7 +2105,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                                  arDouble[ OUTPUT_TAKE ],
                                  pci ) );
     
-    if ( stDouble != SKILL_NONE )
+    if ( badSkill(stDouble) )
       fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
     
     fprintf ( pf, "</span></p>\n" );
@@ -2127,7 +2127,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                                  arDouble[ OUTPUT_TAKE ],
                                  pci ) );
 
-    if ( stTake != SKILL_NONE )
+    if ( badSkill(stTake) )
       fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
     
     fprintf ( pf, "</span></p>\n" );
@@ -2149,7 +2149,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                                  arDouble[ OUTPUT_DROP ],
                                  pci ) );
 
-    if ( stTake != SKILL_NONE )
+    if ( badSkill(stTake) )
       fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
     
     fprintf ( pf, "</span></p>\n" );
@@ -2178,16 +2178,16 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                                  arDouble[ OUTPUT_NODOUBLE ], 
                                  pci ) );
 
-    if ( stDouble != SKILL_NONE )
+    if ( badSkill(stDouble) )
       fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
 
     fprintf ( pf, "</span></p>\n" );
 
   }
 
-  if ( ( stDouble != SKILL_NONE || stTake != SKILL_NONE ) && ! fAnno ) {
+  if ( ( badSkill(stDouble) || badSkill(stTake) ) && ! fAnno ) {
     
-    if ( stDouble != SKILL_NONE ) {
+    if ( badSkill(stDouble) ) {
       fprintf ( pf, "<p><span %s>", 
                 GetStyle ( CLASS_BLUNDER, hecss ) );
       fprintf ( pf, _("Alert: double decision marked %s"),
@@ -2195,7 +2195,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fputs ( "</span></p>\n", pf );
     }
 
-    if ( stTake != SKILL_NONE ) {
+    if ( badSkill(stTake) ) {
       fprintf ( pf, "<p><span %s>", 
                 GetStyle ( CLASS_BLUNDER, hecss ) );
       fprintf ( pf, _("Alert: take decision marked %s"),
@@ -2452,10 +2452,10 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
                                  pmr->d.CubeDecPtr->aarOutput, 
-								 pmr->d.CubeDecPtr->aarStdDev,
+				 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
                                  &pmr->d.CubeDecPtr->esDouble, 
-								 &ci, TRUE, -1,
+				 &ci, TRUE, -1,
                                  pmr->d.st, SKILL_NONE, hecss );
 
     break;
@@ -2467,7 +2467,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     HTMLPrintCubeAnalysisTable ( pf, pmr->d.CubeDecPtr->arDouble, 
                                  pmr->d.CubeDecPtr->aarOutput, 
-								 pmr->d.CubeDecPtr->aarStdDev,
+				 pmr->d.CubeDecPtr->aarStdDev,
                                  pmr->d.fPlayer,
                                  &pmr->d.CubeDecPtr->esDouble, &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
@@ -2522,7 +2522,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   /* print alerts */
 
-  if ( pmr->n.stMove <= SKILL_BAD || pmr->n.stMove > SKILL_NONE ) {
+  if ( badSkill(pmr->n.stMove) ) {
 
     /* blunder or error */
 
@@ -3001,22 +3001,26 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                         _("Unforced moves"), "%d",
                         psc->anUnforcedMoves[ 0 ], 
                         psc->anUnforcedMoves[ 1 ] );
-    printStatTableRow ( pf, 
-                        _("Moves marked very good"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_VERYGOOD ],
-                        psc->anMoves[ 1 ][ SKILL_VERYGOOD ] );
-    printStatTableRow ( pf, 
-                        _("Moves marked good"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_GOOD ],
-                        psc->anMoves[ 1 ][ SKILL_GOOD ] );
-    printStatTableRow ( pf, 
-                        _("Moves marked interesting"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_INTERESTING ],
-                        psc->anMoves[ 1 ][ SKILL_INTERESTING ] );
+/*     printStatTableRow ( pf,  */
+/*                         _("Moves marked very good"), "%d", */
+/*                         psc->anMoves[ 0 ][ SKILL_VERYGOOD ], */
+/*                         psc->anMoves[ 1 ][ SKILL_VERYGOOD ] ); */
+/*     printStatTableRow ( pf,  */
+/*                         _("Moves marked good"), "%d", */
+/*                         psc->anMoves[ 0 ][ SKILL_GOOD ], */
+/*                         psc->anMoves[ 1 ][ SKILL_GOOD ] ); */
+/*     printStatTableRow ( pf,  */
+/*                         _("Moves marked interesting"), "%d", */
+/*                         psc->anMoves[ 0 ][ SKILL_INTERESTING ], */
+/*                         psc->anMoves[ 1 ][ SKILL_INTERESTING ] ); */
     printStatTableRow ( pf, 
                         _("Moves unmarked"), "%d",
                         psc->anMoves[ 0 ][ SKILL_NONE ],
                         psc->anMoves[ 1 ][ SKILL_NONE ] );
+    printStatTableRow ( pf, 
+                        _("Moves marked good"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_GOOD ],
+                        psc->anMoves[ 1 ][ SKILL_GOOD ] );
     printStatTableRow ( pf, 
                         _("Moves marked doubtful"), "%d",
                         psc->anMoves[ 0 ][ SKILL_DOUBTFUL ],
@@ -3093,7 +3097,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     printStatTableRow ( pf, _( "Rolls marked lucky" ), "%d",
                         psc->anLuck[ 0 ][ LUCK_GOOD ],
                         psc->anLuck[ 1 ][ LUCK_GOOD ] );
-    printStatTableRow ( pf, _( "Rolls unmarked" ), "%d",
+    printStatTableRow ( pf, _( "Rolls marked good" ), "%d",
                         psc->anLuck[ 0 ][ LUCK_NONE ],
                         psc->anLuck[ 1 ][ LUCK_NONE ] );
     printStatTableRow ( pf, _( "Rolls marked unlucky" ), "%d",

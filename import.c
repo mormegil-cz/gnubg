@@ -1388,7 +1388,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                       pmr->d.mt = MOVE_TAKE;
                       pmr->d.sz = szComment;
                       pmr->d.fPlayer = fPlayer;
-					  pmr->d.st = SKILL_NONE;
+		      pmr->d.st = SKILL_NONE;
 		      if( !LinkToDouble( pmr ) ) {
 			outputl( _( "Beaver record found but doesn't follow a double" ) );
 						free (pmr);

@@ -1,3 +1,8 @@
+Fri Aug 15 10:19:01 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* analysis.h: Remove SKILL_INTERESTING, SKILL_VERYGOOD, but keep
+	SKILL_GOOD with a "new" interpretation - to flag analyzed good
+	moves as opposed to non-analyzed (SKILL_NONE).
 
 Wed Aug 13 22:02:30 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
 
