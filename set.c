@@ -3734,6 +3734,12 @@ CommandSetPathPos ( char *sz ) {
 
 }
 
+extern void
+CommandSetPathPNG ( char *sz ) {
+
+  SetPath ( sz, PATH_PNG );
+
+}
 
 extern void
 CommandSetPathEPS ( char *sz ) {

@@ -5278,10 +5278,10 @@ static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
 
 static void ExportPositionPNG( gpointer *p, guint n, GtkWidget *pw ) {
 
-  /* char *sz = getDefaultFileName ( PATH_PNG ); */
-  GTKFileCommand( _("Export PNG position"), NULL, "export position png", "png", FDT_EXPORT );
-  /* if ( sz ) 
-     free ( sz ); */
+  char *sz = getDefaultFileName ( PATH_PNG );
+  GTKFileCommand( _("Export PNG position"), sz, "export position png", "png", FDT_EXPORT );
+  if ( sz ) 
+     free ( sz );
 
 }
 

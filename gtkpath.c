@@ -142,6 +142,8 @@ GTKShowPath ( void ) {
       N_("FIBS oldmoves") },
     { N_("Export of PDF files") , 
       N_("PDF") },
+    { N_("Export of PNG positions") , 
+      N_("PNG") },
     { N_("Import of Jellyfish .pos files") , 
       N_("Jellyfish .pos") },
     { N_("Export of PostScript files") , 

@@ -1,3 +1,7 @@
+Fri May  8 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkgame.c, gtkpath.c, set.c: Added png to set path command
+
 Fri May  7 07:48:47 CEST 2004  Joern Thyssen  <jth@gnubg.org>
                                                                                 
         Prerelease 0.14.3. CVS tag is pre-rel-0-14-3

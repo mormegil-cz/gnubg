@@ -523,12 +523,12 @@ extern char szLang[ 32 ];
 
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
-  PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
+  PATH_PDF, PATH_PNG, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 
   PATH_MET, PATH_TMG, PATH_BKG, PATH_SNOWIE_TXT,
   NUM_PATHS } 
 pathformat;
 
-extern char aaszPaths[ NUM_PATHS ][ 2 ][ 255 ];
+extern char aaszPaths[ NUM_PATHS ][ 2 ][ BIG_PATH ];
 extern char* aszExtensions[ NUM_PATHS ];
 extern char* szCurrentFileName;
 
@@ -1092,6 +1092,7 @@ extern void CommandAccept( char * ),
     CommandSetPathSGG( char * ),
     CommandSetPathTMG( char * ),
     CommandSetPathOldMoves( char * ),
+    CommandSetPathPNG( char * ),
     CommandSetPathPos( char * ),
     CommandSetPathGam( char * ),
     CommandSetPathPostScript( char * ),

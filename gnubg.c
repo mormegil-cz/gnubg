@@ -250,7 +250,7 @@ char szPathSconyers15x15Disk[ BIG_PATH ];/* Path to Sconyers's databases */
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
 
-char aaszPaths[ NUM_PATHS ][ 2 ][ 255 ];
+char aaszPaths[ NUM_PATHS ][ 2 ][ BIG_PATH ];
 char *szCurrentFileName = NULL;
 char *aszExtensions [ NUM_PATHS ] = {
   "eps",
@@ -260,6 +260,7 @@ char *aszExtensions [ NUM_PATHS ] = {
   "mat",
   "fibs",
   "pdf",
+  "png",
   "pos",
   "ps",
   "sgf",
@@ -1545,6 +1546,9 @@ command cER = {
     szFILENAME, &cFilename },
   { "pdf", CommandSetPathPDF,
     N_("Set default path for exporting PDF files"), 
+    szFILENAME, &cFilename },
+  { "png", CommandSetPathPNG,
+    N_("Set default path for exporting PNG positions"), 
     szFILENAME, &cFilename },
   { "pos", CommandSetPathPos,
     N_("Set default path for importing Jellyfish .pos files"), 
