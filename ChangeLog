@@ -1,3 +1,21 @@
+Thu Dec 18 23:35:16 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in: search for ATLAS libblas.
+	* bearoff.c: disable cache, since it appears to be rather 
+	inefficient.
+	* bearoff.c (ReadBearoffOneSidedExact): only use cache when
+	initialised.
+	* show.c (CommandShowEPC): new subroutines.
+	* gnubg.c (ShowEPC, EPC): new functions.
+	* gnubg.c: new command "show epc".	
+	* onechequer.c (DistFromEPC): new function.
+	* makebearoff.c (BearOff): fix database lookup bug.
+	* gtktheory.c, gtkbearoff.c, gtkgame.c: fix font bug introduced earlier.
+	* gtkbearoff.c (GTKShowEPC): new function.
+	* eval.c (EvalInitialise): initialise table used for neural net
+	evaluation 
+	* gtkgame.c: add "show epc" to menu.
+
 Sat Dec 13 21:15:52 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkrace.c (OneChequerPage): remove call to SwapSides
