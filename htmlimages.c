@@ -67,7 +67,7 @@
 char *szFile, *pchFile;
 int imagesWritten;
 
-#define NUM_IMAGES 344
+#define NUM_IMAGES 346
 
 /* Overall board size */
 int s;
@@ -87,8 +87,8 @@ unsigned short *asRefract[2];
 
 #if HAVE_LIBART
 unsigned char *auchArrow[ 2 ];
-unsigned char *auchMidlb;
 #endif
+unsigned char *auchMidlb;
 
 static void WriteImageStride(unsigned char* img, int stride, int cx, int cy)
 {
@@ -115,13 +115,14 @@ static void Write(const char* name, unsigned char* img, int cx, int cy)
 	WriteImage(img, cx, cy);
 }
 
-#if HAVE_LIBART
 static void DrawArrow(int side, int player)
 { /* side 0 = left, 1 = right */
 	int x, y;
 	int offset_x = 0;
 
 	memcpy( auchMidlb, auchBoard, BOARD_WIDTH * s * BOARD_HEIGHT * s * 3 );
+
+#if HAVE_LIBART
 	ArrowPosition(side /* rd.fClockwise */, s, &x, &y);
 
 	AlphaBlendClip2( auchMidlb, boardStride,
@@ -134,6 +135,7 @@ static void DrawArrow(int side, int player)
 				0, 0,
 				s * ARROW_WIDTH,
 				s * ARROW_HEIGHT );
+#endif
 
 	sprintf( pchFile, "b-mid%cb-%c.png", side ? 'r' : 'l', player ? 'o' : 'x' );
 	if (side == 1)
@@ -142,7 +144,6 @@ static void DrawArrow(int side, int player)
 	WriteImage(auchMidlb + coord(offset_x, BOARD_HEIGHT / 2 - BOARD_CENTER_HEIGHT / 2),
 				BEAROFF_WIDTH * s, BOARD_CENTER_HEIGHT * s);
 }
-#endif
 
 static void DrawPips(unsigned char *auchDest, int nStride,
 				unsigned char *auchPip, int n)
@@ -228,23 +229,11 @@ static void WriteImages()
 		BAR_WIDTH * s, CUBE_HEIGHT * s);
 
 	/* bearoff tray dividers */
-#if HAVE_LIBART
 	/* 4 arrows, left+right side for each player */
 	DrawArrow(0, 0);
 	DrawArrow(0, 1);
 	DrawArrow(1, 0);
 	DrawArrow(1, 1);
-#else
-	for (i = 0; i < 2; i++)
-	{
-		int offset_x = 0;
-		sprintf( pchFile, "b-midlb-%c.png", i ? 'x' : 'o' );
-		if (i == 1)
-			offset_x = BOARD_WIDTH - BEAROFF_WIDTH;
-		WriteImage(auchBoard + coord(offset_x, BOARD_HEIGHT / 2 - BOARD_CENTER_HEIGHT / 2),
-			BEAROFF_WIDTH * s, BOARD_CENTER_HEIGHT * s);
-	}
-#endif
 
 	/* left bearoff centre */
 	strcpy( pchFile, "b-midlb.png" );
@@ -704,8 +693,8 @@ static void AllocObjects()
 
 	s = exsExport.nHtmlSize;
 
-#if HAVE_LIBART
 	auchMidlb = malloc((BOARD_WIDTH * s * 3 * BOARD_HEIGHT * s) * sizeof(char));
+#if HAVE_LIBART
 	for (i = 0; i < 2; i++)
 		auchArrow[i] = art_new( art_u8, s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT );
 #endif
@@ -742,8 +731,8 @@ static void AllocObjects()
 static void TidyObjects()
 {
 	int i, j, k;
-#if HAVE_LIBART
 	free(auchMidlb);
+#if HAVE_LIBART
 	for (i = 0; i < 2; i++)
 		art_free( auchArrow[ i ] );
 #endif /* HAVE_LIBART */
