@@ -3776,6 +3776,11 @@ CommandRollout( char *sz ) {
 
           if ( ( pm = GetMove ( aan[ i ] ) ) ) {
 
+            cubeinfo cix;
+
+            memcpy( &cix, &ci, sizeof( cubeinfo ) );
+            cix.fMove = ! cix.fMove;
+
             memcpy ( pm->arEvalMove, ar, 
                      NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
             memcpy ( pm->arEvalStdDev, arStdDev, 
@@ -3790,9 +3795,9 @@ CommandRollout( char *sz ) {
                rScore2 is the secondary score (cubeless) */
             
             if ( rcRollout.fCubeful ) {
-              if ( ci.nMatchTo )
+              if ( cix.nMatchTo )
                 pm->rScore = 
-                  mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &ci );
+                  mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &cix );
               else
                 pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
   }
