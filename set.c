@@ -1712,7 +1712,7 @@ extern void CommandSetRolloutJsdLimit ( char *sz ) {
 
     outputf ( 
   _("Rollouts (or rollouts of moves) may  stop when the equity is more "
-   "than %5.f joint standard deviatons from the best move being rolled out\n"),
+ "than %5.3f joint standard deviations from the best move being rolled out\n"),
 	      r);
 }
 

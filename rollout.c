@@ -893,6 +893,16 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   if (alternatives < 2)
     rcRollout.fStopMoveOnJsd = 0;
 
+  /* make sure cube decisions are rolled out cubeful */
+  if (fCubeRollout) {
+	rcRollout.fCubeful = rcRollout.aecCubeTrunc.fCubeful =
+	  rcRollout.aecChequerTrunc.fCubeful = 1;
+	for (i = 0; i < 2; ++i) 
+	  rcRollout.aecCube[ i ].fCubeful = rcRollout.aecChequer[ i ].fCubeful =
+	  rcRollout.aecCubeLate[ i ].fCubeful = 
+		rcRollout.aecChequerLate[ i] .fCubeful = 1;
+  }
+
   /* initialise internal variables and figure out what the first 
      trial will be */
 
