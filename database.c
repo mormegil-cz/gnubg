@@ -339,14 +339,13 @@ extern void CommandDatabaseGenerate( char *sz ) {
     return;
   }
 
+  ProgressStart( "Generating database..." );
+  
   while( ( !n || c <= n ) && !fInterrupt ) {
     InitBoard( anBoardGenerate );
 	
     do {    
-	if( !( ++c % 100 ) && fShowProgress ) {
-	    outputf( "%6d\r", c );
-	    fflush( stdout );
-	}
+	Progress();
 	    
 	RollDice( anDiceGenerate );
 
@@ -401,6 +400,8 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	     ClassifyPosition( anBoardGenerate ) > CLASS_PERFECT );
   }
 
+  ProgressEnd();
+  
   gdbm_close( pdb );
 }
 
@@ -427,6 +428,8 @@ extern void CommandDatabaseTrain( char *sz ) {
         
 	return;
     }
+
+    ProgressStart( "Training from database..." );
     
     while( ( !n || c <= n ) && !fInterrupt ) {
 	dKey = gdbm_firstkey( pdb );
@@ -437,10 +440,8 @@ extern void CommandDatabaseTrain( char *sz ) {
 	    pev = (dbevaluation *) dValue.dptr;
 
 	    if( pev->c >= 36 /* FIXME */ ) {
-		if( !( ++c % 1000 ) && fShowProgress ) {
-		    outputf( "%8d\r", c );
-		    fflush( stdout );
-		}
+		if( !( ++c % 1000 ) )
+		    Progress();
 		
 		for( i = 0; i < NUM_OUTPUTS; i++ )
 		    arDesired[ i ] = (float) pev->asEq[ i ] / 0xFFFF;
@@ -473,6 +474,8 @@ extern void CommandDatabaseTrain( char *sz ) {
 	    break;
 	}
     }
+
+    ProgressEnd();
     
     gdbm_close( pdb );
 }

@@ -425,7 +425,7 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
       && !fX
 #endif
       ) {
-      for( i = 0; i < 72; i++ )
+      for( i = 0; i < 79; i++ )
 	  outputc( ' ' );
 
       outputc( '\r' );

@@ -65,6 +65,9 @@
    sync with the string array! */
 typedef enum _gnubgcommand {
     CMD_AGREE,
+    CMD_ANALYSE_GAME,
+    CMD_ANALYSE_MATCH,
+    CMD_ANALYSE_SESSION,
     CMD_DATABASE_DUMP,
     CMD_DATABASE_GENERATE,
     CMD_DATABASE_ROLLOUT,
@@ -168,6 +171,9 @@ static togglecommand atc[] = {
 
 static char *aszCommands[ NUM_CMDS ] = {
     "agree",
+    "analyse game",
+    "analyse match",
+    "analyse session",
     "database dump",
     "database generate",
     "database rollout",
@@ -272,8 +278,8 @@ static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 static GtkWidget *pwGrab;
 
 GtkWidget *pwBoard, *pwMain, *pwMenuBar;
-static GtkWidget *pwStatus, *pwGame, *pwGameList, *pom, *pwAnnotation,
-    *pwAnalysis, *pwCommentary, *pwHint;
+static GtkWidget *pwStatus, *pwProgress, *pwGame, *pwGameList, *pom,
+    *pwAnnotation, *pwAnalysis, *pwCommentary, *pwHint;
 static moverecord *pmrAnnotation;
 static GtkAccelGroup *pagMain;
 static GtkStyle *psGameList, *psCurrent;
@@ -281,7 +287,7 @@ static int yCurrent, xCurrent; /* highlighted row/col in game record */
 static GtkItemFactory *pif;
 guint nNextTurn = 0; /* GTK idle function */
 static int cchOutput;
-static guint idOutput;
+static guint idOutput, idProgress;
 static list lOutput;
 int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
@@ -386,7 +392,7 @@ extern void GTKDelay( void ) {
 
 extern void HandleXAction( void ) {
 
-    int f;
+    int f, id;
     
     /* It is safe to execute this function with SIGIO unblocked, because
        if a SIGIO occurs before fAction is reset, then the I/O it alerts
@@ -400,6 +406,9 @@ extern void HandleXAction( void ) {
     if( ( f = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) )
 	gtk_grab_add( pwGrab );
     
+    id = gtk_signal_connect_after( GTK_OBJECT( pwGrab ), "key-press-event",
+				   GTK_SIGNAL_FUNC( gtk_true ), NULL );
+    
     /* Don't check stdin here; readline isn't ready yet. */
     GTKDisallowStdin();
     
@@ -411,6 +420,8 @@ extern void HandleXAction( void ) {
 
     GTKAllowStdin();
 
+    gtk_signal_disconnect( GTK_OBJECT( pwGrab ), id );
+    
     if( f )
 	gtk_grab_remove( pwGrab );
 }
@@ -689,7 +700,13 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 
 	gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
 
-	sprintf( sz, "%d", i + 1 );
+	if( i == pml->cMoves - 1 && i == iHighlight )
+	    /* The move made is the last on the list.  Some moves might
+	       have been deleted to fit this one in, so its rank isn't
+	       known. */
+	    strcpy( sz, "??" );
+	else
+	    sprintf( sz, "%d", i + 1 );
 	gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 0, sz );
 
 	FormatEval( sz, pml->amMoves[ i ].etMove, pml->amMoves[ i ].esMove );
@@ -783,6 +800,11 @@ static void CommentaryChanged( GtkWidget *pw, void *p ) {
 	   of malloc(). */
 	pmrAnnotation->a.sz = strdup( pch );
 	g_free( pch );
+
+	/* Strip trailing whitespace from the copy. */
+	for( pch = strchr( pmrAnnotation->a.sz, 0 ) - 1;
+	     pch > pmrAnnotation->a.sz && isspace( *pch ); pch-- )
+	    *pch = 0;
     } else
 	pmrAnnotation->a.sz = NULL;
 }
@@ -1344,7 +1366,7 @@ static void TextPopped( GtkWidget *pw, guint id, gchar *text, void *p ) {
 
 extern int InitGTK( int *argc, char ***argv ) {
     
-    GtkWidget *pwVbox;
+    GtkWidget *pwVbox, *pwHbox;
     static GtkItemFactoryEntry aife[] = {
 	{ "/_File", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_New", NULL, NULL, 0, "<Branch>" },
@@ -1427,6 +1449,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Analyse/_Evaluate", "<control>E", Command, CMD_EVAL, NULL },
 	{ "/_Analyse/_Hint", "<control>H", Command, CMD_HINT, NULL },
 	{ "/_Analyse/_Rollout", NULL, Command, CMD_ROLLOUT, NULL },
+	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Analyse/Analyse game", NULL, Command, CMD_ANALYSE_GAME, NULL },
+	{ "/_Analyse/Analyse match", NULL, Command, CMD_ANALYSE_MATCH, NULL },
+	{ "/_Analyse/Analyse session", NULL, Command, CMD_ANALYSE_SESSION,
+	  NULL },
 	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Analyse/_Pip count", NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ "/_Analyse/_Kleinman count", NULL, Command, CMD_SHOW_KLEINMAN,
@@ -1595,14 +1622,22 @@ extern int InitGTK( int *argc, char ***argv ) {
 
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
     pwGrab = ( (BoardData *) BOARD( pwBoard )->board_data )->stop;
-    
-    gtk_box_pack_end( GTK_BOX( pwVbox ), pwStatus = gtk_statusbar_new(),
+
+    gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
 		      FALSE, FALSE, 0 );
+    
+    gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
+		      TRUE, TRUE, 0 );
     idOutput = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
 					     "gnubg output" );
+    idProgress = gtk_statusbar_get_context_id( GTK_STATUSBAR( pwStatus ),
+					       "progress" );
     gtk_signal_connect( GTK_OBJECT( pwStatus ), "text-popped",
 			GTK_SIGNAL_FUNC( TextPopped ), NULL );
     
+    gtk_box_pack_start( GTK_BOX( pwHbox ),
+			pwProgress = gtk_progress_bar_new(),
+			FALSE, FALSE, 0 );
     /* Make sure the window is reasonably big, but will fit on a 640x480
        screen. */
     gtk_window_set_default_size( GTK_WINDOW( pwMain ), 500, 465 );
@@ -1890,11 +1925,45 @@ extern void GTKOutputX( void ) {
 
 extern void GTKOutputNew( void ) {
 
+    /* This is horribly ugly, but fFinishedPopping will never be set if
+       the progress bar leaves a message in the status stack.  There should
+       be at most one message, so we get rid of it here. */
+    gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
+    
     fFinishedPopping = FALSE;
     
     do
 	gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idOutput );
     while( !fFinishedPopping );
+}
+
+extern void GTKProgressStart( char *sz ) {
+
+    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), TRUE );
+    gtk_progress_bar_set_activity_step( GTK_PROGRESS_BAR( pwProgress ), 5 );
+    gtk_progress_bar_set_activity_blocks( GTK_PROGRESS_BAR( pwProgress ), 5 );
+
+    if( sz )
+	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
+}
+
+extern void GTKProgress( void ) {
+
+    static int i;
+    
+    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i++ );
+
+    GTKDisallowStdin();
+    while( gtk_events_pending() )
+        gtk_main_iteration();
+    GTKAllowStdin();    
+}
+
+extern void GTKProgressEnd( void ) {
+
+    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), FALSE );
+    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), 0 );
+    gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
 }
 
 static GtkWidget *pwEntry;
@@ -2363,11 +2432,17 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
 typedef struct _evalwidget {
     evalcontext *pec;
-    GtkWidget *pwCubeful;
-    GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
-	*padjReduced;
+    GtkWidget *pwCubeful, *pwReduced, *pwSearchCandidates, *pwSearchTolerance;
+    GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance;
     int *pfOK;
 } evalwidget;
+
+static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
+
+    gtk_widget_set_sensitive( pew->pwSearchCandidates, padj->value > 0 );
+    gtk_widget_set_sensitive( pew->pwSearchTolerance, padj->value > 0 );
+    gtk_widget_set_sensitive( pew->pwReduced, padj->value == 2 );
+}
 
 static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 
@@ -2398,8 +2473,8 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_label_new( "Search candidates:" ) );
     gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_spin_button_new( pew->padjSearchCandidates,
-					    1, 0 ) );
+		       pew->pwSearchCandidates = gtk_spin_button_new(
+			   pew->padjSearchCandidates, 1, 0 ) );
     
     pew->padjSearchTolerance = GTK_ADJUSTMENT( gtk_adjustment_new(
 	pec->rSearchTolerance, 0, 1, 0.01, 0.01, 0.01 ) );
@@ -2408,14 +2483,26 @@ static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_label_new( "Search tolerance:" ) );
     gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_spin_button_new( pew->padjSearchTolerance, 0.01,
-					    3 ) );
+		       pew->pwSearchTolerance = gtk_spin_button_new(
+			   pew->padjSearchTolerance, 0.01, 3 ) );
 
+    /* FIXME if and when we support different values for nReduced, this
+       check button won't work */
+    gtk_container_add( GTK_CONTAINER( pwEval ),
+		       pew->pwReduced = gtk_check_button_new_with_label(
+			   "Reduced 2 ply evaluation" ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwReduced ),
+				  pec->nReduced );
+    
     gtk_container_add( GTK_CONTAINER( pwEval ),
 		       pew->pwCubeful = gtk_check_button_new_with_label(
 			   "Cubeful chequer evaluation" ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
 				  pec->fCubeful );
+
+    gtk_signal_connect( GTK_OBJECT( pew->padjPlies ), "value-changed",
+			GTK_SIGNAL_FUNC( EvalPliesValueChanged ), pew );
+    EvalPliesValueChanged( pew->padjPlies, pew );
     
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
 
@@ -2438,6 +2525,8 @@ static void EvalOK( GtkWidget *pw, void *p ) {
     pew->pec->rSearchTolerance = pew->padjSearchTolerance->value;
     pew->pec->fCubeful = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
+    pew->pec->nReduced = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pew->pwReduced ) ) ? 7 : 0;
 
     if( pew->pfOK )
 	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -2465,7 +2554,7 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
 	UserCommand( sz );
     }
     
-    if( pec->nPlies > 1 && pec->nReduced != pecOrig->nReduced ) {
+    if( pec->nReduced != pecOrig->nReduced ) {
 	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
 	UserCommand( sz );
     }
@@ -2974,7 +3063,7 @@ static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
     qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
 
     for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
-	FormatMoveHint( pch, phd->pml, an[ i ] );
+	FormatMoveHint( pch, phd->pml, an[ i ], TRUE );
         
     gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
 			    sz, strlen( sz ) );
@@ -3521,6 +3610,12 @@ extern void GTKSet( void *p ) {
 	
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/Analyse" ),
 			 gs == GAME_PLAYING );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_ANALYSE_GAME ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_ANALYSE_MATCH ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_ANALYSE_SESSION ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(

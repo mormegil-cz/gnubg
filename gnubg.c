@@ -139,14 +139,14 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
     fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed,
-    fAnnotation = FALSE;
+    fAnnotation = FALSE, cAnalysisMoves = 20;
 float rAlpha = 0.1, rAnneal = 0.3, rThreshold = 0.1;
 
 gamestate gs = GAME_NONE;
 
-evalcontext ecTD = { 0, 8, 0.16, 0, FALSE };
-evalcontext ecEval = { 1, 8, 0.16, 0, FALSE };
-evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE };
+evalcontext ecTD = { 0, 8, 0.16, 7, FALSE };
+evalcontext ecEval = { 1, 8, 0.16, 7, FALSE };
+evalcontext ecRollout = { 0, 8, 0.16, 7, FALSE };
 
 #define DEFAULT_NET_SIZE 128
 
@@ -155,8 +155,8 @@ storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0].
 		 NULL, if NULL is not filled with 0 bits? */
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE } }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 7, FALSE } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 7, FALSE } }
 };
 
 /* Usage strings */
@@ -171,6 +171,7 @@ static char szDICE[] = "<die> <die>",
     szOPTCOMMAND[] = "[command]",
     szOPTEMPHASIS[] = "[emphasis]",
     szOPTFILENAME[] = "[filename]",
+    szOPTLIMIT[] = "[limit]",
     szOPTPOSITION[] = "[position]",
     szOPTSEED[] = "[seed]",
     szOPTSIZE[] = "[size]",
@@ -185,7 +186,15 @@ static char szDICE[] = "<die> <die>",
     szTRIALS[] = "<trials>",
     szVALUE[] = "<value>";
 
-command acAnnotate[] = {
+command acAnalyse[] = {
+    { "game", CommandAnalyseGame, "Compute analysis and annotate current game",
+      NULL, NULL },
+    { "match", CommandAnalyseMatch, "Compute analysis and annotate every game "
+      "in the match", NULL, NULL },
+    { "session", CommandAnalyseSession, "Compute analysis and annotate every "
+      "game in the session", NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acAnnotate[] = {
     { "bad", CommandAnnotateBad, "Mark a bad move", szOPTEMPHASIS, NULL },
     { "clear", CommandAnnotateClear, "Remove annotations from a move",
       NULL, NULL },
@@ -271,6 +280,10 @@ command acAnnotate[] = {
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
       szOPTFILENAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetAnalysis[] = {
+    { "limit", CommandSetAnalysisLimit, "Specify the maximum number of "
+      "possible moves analysed", szOPTLIMIT, NULL },
+    { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
       "chequers as possible", szONOFF, NULL },
@@ -347,6 +360,8 @@ command acAnnotate[] = {
       "position database generation", szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
+    { "analysis", NULL, "Control parameters used when analysing moves",
+      NULL, acSetAnalysis },
     { "annotation", CommandSetAnnotation, "Select whether move analysis and "
       "commentary are shown", szONOFF, NULL },
     { "appearance", CommandSetColours, "Modify the look and feel of the "
@@ -401,6 +416,8 @@ command acAnnotate[] = {
     { "turn", CommandSetTurn, "Set which player is on roll", szPLAYER, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShow[] = {
+    { "analysis", CommandShowAnalysis, "Show parameters used for analysing "
+      "moves", NULL, NULL },
     { "automatic", CommandShowAutomatic, "List which functions will be "
       "performed without user input", NULL, NULL },
     { "beavers", CommandShowBeavers, 
@@ -491,7 +508,9 @@ command acAnnotate[] = {
     { "accept", CommandAccept, "Accept a cube or resignation",
       NULL, NULL },
     { "agree", CommandAgree, "Agree to a resignation", NULL, NULL },
-    { "analysis", CommandAnalysis, "Run analysis", szFILENAME, NULL },
+    { "analyse", NULL, "Run analysis", NULL, acAnalyse },
+    { "analysis", NULL, NULL, NULL, acAnalyse },
+    { "analyze", NULL, NULL, NULL, acAnalyse },
     { "annotate", NULL, "Record notes about a game", NULL, acAnnotate },
     { "beaver", CommandRedouble, "Synonym for `redouble'", NULL, NULL },
     { "copy", CommandCopy, "Copy current position to clipboard", NULL,
@@ -1136,12 +1155,66 @@ static gint UpdateBoard( gpointer p ) {
 }
 #endif
 
+static void DisplayCubeAnalysis( float arDouble[ 4 ], evaltype et,
+				 evalsetup *pes ) {
+    cubeinfo ci;
+    char sz[ 1024 ];
+
+    if( et == EVAL_NONE )
+	return;
+    
+    SetCubeInfo( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		 fCrawford, fJacoby, fBeavers );
+    
+    if( !GetDPEq( NULL, NULL, &ci ) )
+	/* No cube action possible */
+	return;
+    
+    GetCubeActionSz( arDouble, sz, &ci, fOutputMWC, FALSE );
+
+    outputl( sz );
+}
+
+static void DisplayAnalysis( moverecord *pmr ) {
+
+    int i;
+    char szBuf[ 1024 ];
+    
+    switch( pmr->mt ) {
+    case MOVE_NORMAL:
+	DisplayCubeAnalysis( pmr->n.arDouble, pmr->n.etDouble,
+			     &pmr->n.esDouble );
+
+	outputf( "Rolled %d%d:\n", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
+	
+	for( i = 0; i < pmr->n.ml.cMoves; i++ ) {
+	    if( i >= 10 /* FIXME allow user to choose limit */ &&
+		i != pmr->n.iMove )
+		continue;
+	    outputc( i == pmr->n.iMove ? '*' : ' ' );
+	    output( FormatMoveHint( szBuf, &pmr->n.ml, i, i != pmr->n.iMove ||
+		i != pmr->n.ml.cMoves - 1 ) );
+	}
+	
+	break;
+
+    case MOVE_DOUBLE:
+	DisplayCubeAnalysis( pmr->d.arDouble, pmr->d.etDouble,
+			     &pmr->n.esDouble );
+	break;
+
+    default:
+	break;
+    }
+}
+
 extern void ShowBoard( void ) {
 
     char szBoard[ 2048 ];
     char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ];
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
     int anBoardTemp[ 2 ][ 25 ];
+    moverecord *pmr;
     
     if( cOutputDisabled )
 	return;
@@ -1253,6 +1326,12 @@ extern void ShowBoard( void ) {
 	    SwapSides( anBoard );
 	
 	outputl( DrawBoard( szBoard, anBoard, fMove, apch ) );
+
+	if( fAnnotation && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
+	    DisplayAnalysis( pmr );
+	    if( pmr->a.sz )
+		outputl( pmr->a.sz ); /* FIXME word wrap */
+	}
 	
 	if( !fMove )
 	    SwapSides( anBoard );
@@ -1484,7 +1563,7 @@ extern void CommandHelp( char *sz ) {
     }
 }
 
-extern char *FormatMoveHint( char *sz, movelist *pml, int i ) {
+extern char *FormatMoveHint( char *sz, movelist *pml, int i, int fRankKnown ) {
     
     cubeinfo ci;
     char szTemp[ 1024 ], szMove[ 32 ];
@@ -1528,11 +1607,16 @@ extern char *FormatMoveHint( char *sz, movelist *pml, int i ) {
 	    ar = pml->amMoves[ i ].arEvalMove;
 	    rEq = pml->amMoves[ i ].rScore;
 
+	    if( fRankKnown )
+		sprintf( sz, " %4i.", i + 1 );
+	    else
+		strcpy( sz, "   ?? " );
+	    
 	    if( fOutputWinPC )
-		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
+		sprintf( sz + 6, " %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
-			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
 					    pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
@@ -1541,10 +1625,10 @@ extern char *FormatMoveHint( char *sz, movelist *pml, int i ) {
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
+		sprintf( sz + 6, " %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
-			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
 					    pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
@@ -1590,11 +1674,16 @@ extern char *FormatMoveHint( char *sz, movelist *pml, int i ) {
 	    ar = pml->amMoves[ i ].arEvalMove;
 	    rMWC = 100.0 * eq2mwc ( pml->amMoves[ i ].rScore, &ci );
 
+	    if( fRankKnown )
+		sprintf( sz, " %4i.", i + 1 );
+	    else
+		strcpy( sz, "   ?? " );
+	    
 	    if( fOutputWinPC )
-		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, " %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n",
-			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
 					    pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
@@ -1603,10 +1692,10 @@ extern char *FormatMoveHint( char *sz, movelist *pml, int i ) {
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, " %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n",
-			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+			 FormatEval ( szTemp, pml->amMoves[ i ].etMove,
 					    pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, anBoard, 
 				     pml->amMoves[ i ].anMove ),
@@ -1763,7 +1852,7 @@ extern void CommandHint( char *sz ) {
 #endif
 
       for( i = 0; i < n; i++ )
-	  output( FormatMoveHint( szBuf, &ml, i ) );
+	  output( FormatMoveHint( szBuf, &ml, i, TRUE ) );
     }
 }
 
@@ -1892,7 +1981,7 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
     list *pl;
     moverecord *pmr;
     char sz[ 40 ];
-    int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ];
+    int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
 
     if( iGame >= 0 )
 	fprintf( pf, " Game %d\n", iGame + 1 );
@@ -1932,9 +2021,18 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	case MOVE_RESIGN:
 	    /* FIXME how does JF do it? */
 	    break;
-	default:
-	    printf ("%i\n", pmr->mt );
-	    assert( FALSE );
+	case MOVE_SETDICE:
+	    /* ignore */
+	    break;
+	case MOVE_SETBOARD:
+	case MOVE_SETCUBEVAL:
+	case MOVE_SETCUBEPOS:
+	    if( !fWarned ) {
+		fWarned = TRUE;
+		outputl( "Warning: this game was edited during play, and "
+			 "cannot be recorded in this format." );
+	    }
+	    break;
 	}
 
 	if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) {
@@ -2367,24 +2465,20 @@ extern void CommandTrainTD( char *sz ) {
 	}
     } else
 	n = 0;
-      
+
+    ProgressStart( "Training..." );
+    
     while( ( !n || c <= n ) && !fInterrupt ) {
 	InitBoard( anBoardTrain );
 	
 	do {    
-	    if( !( ++c % 100 ) && fShowProgress
-#if USE_GTK
-		&& !fX
-#endif
-		) {
-		outputf( "%6d\r", c );
-		fflush( stdout );
-	    }
+	    if( !( ++c % 100 ) )
+		Progress();
 	    
 	    RollDice( anDiceTrain );
 	    
 	    if( fInterrupt )
-		return;
+		break;
 	    
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
 	    
@@ -2395,7 +2489,7 @@ extern void CommandTrainTD( char *sz ) {
 		fnAction();
 	
 	    if( fInterrupt )
-		return;
+		break;
 	    
 	    SwapSides( anBoardTrain );
 	    
@@ -2409,6 +2503,8 @@ extern void CommandTrainTD( char *sz ) {
 	} while( ( !n || c <= n ) && !fInterrupt &&
 		 !GameStatus( anBoardTrain ) );
     }
+
+    ProgressEnd();
 }
 
 #if HAVE_LIBREADLINE
@@ -2998,6 +3094,66 @@ extern void outputresume( void ) {
 
     if( !--cOutputPostponed )
 	outputx();
+}
+
+extern void ProgressStart( char *sz ) {
+
+    if( !fShowProgress )
+	return;
+
+#if USE_GTK
+    if( fX ) {
+	GTKProgressStart( sz );
+	return;
+    }
+#endif
+
+    if( sz ) {
+	fputs( sz, stdout );
+	fflush( stdout );
+    }
+}
+
+extern void Progress( void ) {
+
+    static int i = 0;
+    static char ach[ 4 ] = "/-\\|";
+    
+    if( !fShowProgress )
+	return;
+
+#if USE_GTK
+    if( fX ) {
+	GTKProgress();
+	return;
+    }
+#endif
+
+    putchar( ach[ i++ ] );
+    i &= 0x03;
+    putchar( '\b' );
+    fflush( stdout );
+}
+
+extern void ProgressEnd( void ) {
+
+    int i;
+    
+    if( !fShowProgress )
+	return;
+    
+#if USE_GTK
+    if( fX ) {
+	GTKProgressEnd();
+	return;
+    }
+#endif
+
+    putchar( '\r' );
+    for( i = 0; i < 79; i++ )
+	putchar( ' ' );
+    putchar( '\r' );
+    fflush( stdout );
 }
 
 extern RETSIGTYPE HandleInterrupt( int idSignal ) {
