@@ -833,9 +833,9 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "<tr>", pf );
   fputs ( "<td>", pf );
 
-  sprintf ( sz, "b-bar-x%d", anBoard[ 0 ][ 24 ] );
-  if ( anBoard[ 0 ][ 24 ] )
-    sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 0 ][ 24 ] );
+  sprintf ( sz, "b-bar-o%d", anBoard[ 1 ][ 24 ] );
+  if ( anBoard[ 1 ][ 24 ] )
+    sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 1 ][ 24 ] );
   else
     strcpy ( szAlt, "|&nbsp;&nbsp;&nbsp;|" );
   printImage ( pf, szImageDir, sz, szExtension, szAlt );
@@ -971,9 +971,9 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<td>", pf );
 
-  sprintf ( sz, "b-bar-o%d", anBoard[ 1 ][ 24 ] );
-  if ( anBoard[ 1 ][ 24 ] )
-    sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 1 ][ 24 ] );
+  sprintf ( sz, "b-bar-x%d", anBoard[ 0 ][ 24 ] );
+  if ( anBoard[ 0 ][ 24 ] )
+    sprintf ( szAlt, "|%1X&nbsp;|", anBoard[ 0 ][ 24 ] );
   else
     strcpy ( szAlt, "|&nbsp;&nbsp;&nbsp;|" );
   printImage ( pf, szImageDir, sz, szExtension, szAlt );

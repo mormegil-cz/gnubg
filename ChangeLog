@@ -1,3 +1,8 @@
+Mon Apr 29 18:37:07 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (printHTMLBoardGNU): switch output of black and red's chequers
+	on the bar.
+
 Sun Apr 28 22:35:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (AnalyzeMove): bugfix. Cube analysis was lost when 
