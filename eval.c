@@ -2981,31 +2981,17 @@ Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
 extern float 
 mwc2eq ( float rMwc, cubeinfo *pci ) {
 
-
-  int nCube = pci->nCube;
-  int fWho  = pci->fMove;
-
-  /* normalized score */
-
-  int nScore0 = pci->nMatchTo - pci->anScore[ fWho ];
-  int nScore1 = pci->nMatchTo - pci->anScore[ ! fWho ];
-  
   /* mwc if I win/lose */
 
   float rMwcWin, rMwcLose;
 
-  if ( nScore0 == 1 ) {
-      rMwcWin = 1.0;
-      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, 
-                                             aafMETPostCrawford[ 0 ] );
-  } else if( nScore1 == 1 ) {
-      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, 
-                                      aafMETPostCrawford[ 0 ] );
-      rMwcLose = 0.0;
-  } else {
-    rMwcWin = GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
-    rMwcLose = GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
-  }
+  rMwcWin = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                    pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+                    aafMET, aafMETPostCrawford );
+
+  rMwcLose = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                     pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+                     aafMET, aafMETPostCrawford );
 
   /* 
    * make linear inter- or extrapolation:
@@ -3034,31 +3020,18 @@ mwc2eq ( float rMwc, cubeinfo *pci ) {
 extern float 
 eq2mwc ( float rEq, cubeinfo *pci ) {
 
-  int nCube = pci->nCube;
-  int fWho  = pci->fMove;
-
-  /* normalized score */
-
-  int nScore0 = pci->nMatchTo - pci->anScore[ fWho ];
-  int nScore1 = pci->nMatchTo - pci->anScore[ ! fWho ];
-
   /* mwc if I win/lose */
 
   float rMwcWin, rMwcLose;
 
-  if ( nScore0 == 1 ) {
-      rMwcWin = 1.0;
-      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, 
-                                             aafMETPostCrawford[ 0 ] );
-  } else if( nScore1 == 1 ) {
-      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, 
-                                      aafMETPostCrawford[ 0 ] );
-      rMwcLose = 0.0;
-  } else {
-      rMwcWin = GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
-      rMwcLose = GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
-  }
-  
+  rMwcWin = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                    pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+                    aafMET, aafMETPostCrawford );
+
+  rMwcLose = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                     pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+                     aafMET, aafMETPostCrawford );
+
   /*
    * Linear inter- or extrapolation.
    * Solve the formula in the routine above (mwc2eq):
@@ -4326,78 +4299,55 @@ extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
     nScore0 = nMatchTo - anScore[ 0 ];
     nScore1 = nMatchTo - anScore[ 1 ];
 
-    if ( nScore0 == 1 ) {
-	/* after this game will be post-Crawford */
-	float rLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, 
-                                                  aafMETPostCrawford[ 0 ] );
-	float rLoseGammon = 
-	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 2 - 1, 
-                                      aafMETPostCrawford[ 0 ] );
-	float rLoseBG =
-	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 3 - 1, 
-                                      aafMETPostCrawford[ 0 ] );
+    {
+      float rWin = 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-	float rCenter = ( 1.0 + rLose ) / 2.0;
+      float rWinGammon = 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-	pci->arGammonPrice[ 0 ] = 0.0; 
-	pci->arGammonPrice[ 2 ] = 0.0;
+      float rWinBG = 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-	pci->arGammonPrice[ 1 ] = 
-	  ( rCenter - rLoseGammon ) / ( 1.0 - rCenter ) - 1.0;
+      float rLose = 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-	pci->arGammonPrice[ 3 ] = 
-	  ( rCenter - rLoseBG ) / ( 1.0 - rCenter ) - 
-	  ( pci->arGammonPrice[ 1 ] + 1.0 );
-    } else if( nScore1 == 1 ) {
-	/* after this game will be post-Crawford */
-	float rWin = GET_METPostCrawford ( nScore0 - nCube - 1, 
-                                           aafMETPostCrawford[ 0 ] );
-	float rWinGammon = 
-	  GET_METPostCrawford ( nScore0 - nCube * 2 - 1, 
-                                aafMETPostCrawford[ 0 ] );
-	float rWinBG = 
-	  GET_METPostCrawford ( nScore0 - nCube * 3 - 1, 
-                                aafMETPostCrawford[ 0 ] );
+      float rLoseGammon = 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-	pci->arGammonPrice[ 0 ] =
-	  2.0 * rWinGammon / rWin - 2.0;
+      float rLoseBG = 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
-	pci->arGammonPrice[ 2 ] =
-	  2.0 * rWinBG / rWin - ( pci->arGammonPrice[ 0 ] + 2.0 );
+      float rCenter = ( rWin + rLose ) / 2.0;
 
-	pci->arGammonPrice[ 1 ] = 0.0;
-	pci->arGammonPrice[ 3 ] = 0.0;
-    } else {
-	float rWin = 
-	    GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
-	float rLose =
-	    GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
-	float rWinGammon =
-	    GET_MET ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafMET );
-	float rLoseGammon =
-	    GET_MET ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafMET );
-	float rWinBG =
-	    GET_MET ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafMET );
-	float rLoseBG =
-	    GET_MET ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafMET );
-
-	float rCenter = ( rWin + rLose ) / 2.0;
-
-	/* FIXME: correct numerical problems in a better way, than done
-	   below. If cube is dead gammon or backgammon price might be a
-	   small negative number. For example, at -2,-3 with cube on 2
-	   the current code gives: 0.9090..., 0, -2.7e-8, 0 instead
-	   of the correct 0.9090..., 0, 0, 0. */
-	pci->arGammonPrice[ 0 ] = 
-	    ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
-	pci->arGammonPrice[ 1 ] = 
-	    ( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
-	pci->arGammonPrice[ 2 ] = 
-	    ( rWinBG - rCenter ) / ( rWin - rCenter ) - 
-	    ( pci->arGammonPrice[ 0 ] + 1.0 );
-	pci->arGammonPrice[ 3 ] = 
-	    ( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
-	    ( pci->arGammonPrice[ 1 ] + 1.0 );
+      /* FIXME: correct numerical problems in a better way, than done
+         below. If cube is dead gammon or backgammon price might be a
+         small negative number. For example, at -2,-3 with cube on 2
+         the current code gives: 0.9090..., 0, -2.7e-8, 0 instead
+         of the correct 0.9090..., 0, 0, 0. */
+      
+      pci->arGammonPrice[ 0 ] = 
+        ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+      pci->arGammonPrice[ 1 ] = 
+        ( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
+      pci->arGammonPrice[ 2 ] = 
+        ( rWinBG - rCenter ) / ( rWin - rCenter ) - 
+        ( pci->arGammonPrice[ 0 ] + 1.0 );
+      pci->arGammonPrice[ 3 ] = 
+        ( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
+        ( pci->arGammonPrice[ 1 ] + 1.0 );
     }
 
     /* Correct numerical problems */
@@ -5146,23 +5096,11 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
 	  && ( ( pci->fCubeOwner == -1 ) ||
 	       ( pci->fCubeOwner == pci->fMove ) );   
 
-    if ( prDPEq ) {
-
-      if ( fPostCrawford || pci->fCrawford ) {
-	if ( pci->nMatchTo - pci->anScore[ pci -> fMove ]  == 1 )
-	  *prDPEq = 1.0;
-	else
-	  *prDPEq =
-	    GET_METPostCrawford ( pci->nMatchTo -
-				  pci->anScore [ pci->fMove ] - 1 - pci->nCube,
-				  aafMETPostCrawford[ 0 ] );
-      }
-      else
-	*prDPEq =
-	  GET_MET ( pci->nMatchTo - pci->anScore[ pci->fMove ] - 1 -
-		    pci->nCube,
-		    pci->nMatchTo - pci->anScore[ !pci->fMove ] - 1, aafMET );
-    }
+    if ( prDPEq )
+      *prDPEq =
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
     if ( pfCube )
       *pfCube = fCube;
@@ -5455,9 +5393,6 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   /* normalized score */
 
-  int nScore0 = pci->nMatchTo - pci->anScore[ pci->fMove ];
-  int nScore1 = pci->nMatchTo - pci->anScore[ ! pci->fMove ];
-
   float rG0, rBG0, rG1, rBG1;
   float arCP[ 2 ];
 
@@ -5494,7 +5429,10 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, pci, arCP );
 
-  rMWCCash = GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET );
+  rMWCCash = 
+    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+            pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+            aafMET, aafMETPostCrawford );
 
   rTG = arCP[ pci->fMove ];
 
@@ -5510,9 +5448,17 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCLose = 
       ( 1.0 - rG1 - rBG1 ) * 
-      GET_MET ( nScore0 - 1, nScore1 - pci->nCube - 1, aafMET ) +
-      rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
-      rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
     if ( rTG > 0.0 )
       rMWCLive = rMWCLose + 
@@ -5539,10 +5485,17 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCWin = 
       ( 1.0 - rG0 - rBG0 ) * 
-      GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
-      rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
-      rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
-    
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG0 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG0 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
@@ -5603,7 +5556,10 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, pci, arCP );
 
-  rMWCOppCash = GET_MET ( nScore0 - 1, nScore1 - pci -> nCube - 1, aafMET );
+  rMWCOppCash = 
+    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+            pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+            aafMET, aafMETPostCrawford );
 
   rOppTG = 1.0 - arCP[ ! pci->fMove ];
 
@@ -5621,9 +5577,17 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCLose = 
       ( 1.0 - rG1 - rBG1 ) * 
-      GET_MET ( nScore0 - 1, nScore1 - pci->nCube - 1, aafMET ) +
-      rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
-      rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
     if ( rOppTG > 0.0 ) 
       /* avoid division by zero */
@@ -5649,9 +5613,17 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCWin = 
       ( 1.0 - rG0 - rBG0 ) * 
-      GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
-      rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
-      rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG0 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG0 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
     if ( arOutput[ 0 ] != rOppTG )
       rMWCLive = rMWCOppCash + 
@@ -5713,8 +5685,15 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, pci, arCP );
 
-  rMWCOppCash = GET_MET ( nScore0 - 1, nScore1 - pci -> nCube - 1, aafMET );
-  rMWCCash = GET_MET ( nScore0 - pci -> nCube - 1, nScore1 - 1, aafMET );
+  rMWCCash = 
+    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+            pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+            aafMET, aafMETPostCrawford );
+
+  rMWCOppCash = 
+    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+            pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+            aafMET, aafMETPostCrawford );
 
   rOppTG = 1.0 - arCP[ ! pci->fMove ];
   rTG = arCP[ pci->fMove ];
@@ -5725,9 +5704,17 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCLose = 
       ( 1.0 - rG1 - rBG1 ) * 
-      GET_MET ( nScore0 - 1, nScore1 - pci->nCube - 1, aafMET ) +
-      rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
-      rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG1 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
     if ( rOppTG > 0.0 ) 
       /* avoid division by zero */
@@ -5764,10 +5751,17 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCWin = 
       ( 1.0 - rG0 - rBG0 ) * 
-      GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
-      rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
-      rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
-
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rG0 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + rBG0 * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
         ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
@@ -7169,54 +7163,76 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
     afDead[ i ] =
       ( anNormScore[ ! i ] - 2 * pci->nCube <=0 );
 
-    /* MWC for "double, take; win" */
+      /* MWC for "double, take; win" */
 
     rDTW =
       (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
-      GET_MET ( anNormScore[ i ] - 2 * pci->nCube - 1,
-                anNormScore[ !i ] - 1, aafMET )
-      + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 4 * pci->nCube - 1,
-                                       anNormScore[ ! i ] - 1, aafMET )
-      + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 6 * pci->nCube - 1,
-                                       anNormScore[ ! i ] - 1, aafMET );
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              2 * pci->nCube, i, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + aarRates[ i ][ 0 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              4 * pci->nCube, i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford )
+      + aarRates[ i ][ 1 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              6 * pci->nCube, i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford );
 
     /* MWC for "no double, take; win" */
 
     rNDW =
       (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
-      GET_MET ( anNormScore[ i ] - pci->nCube - 1,
-                anNormScore[ !i ] - 1, aafMET )
-      + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 2 * pci->nCube - 1,
-                                       anNormScore[ ! i ] - 1, aafMET )
-      + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 3 * pci->nCube - 1,
-                                       anNormScore[ ! i ] - 1, aafMET );
-    
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              pci->nCube, i, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + aarRates[ i ][ 0 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              2 * pci->nCube, i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford )
+      + aarRates[ i ][ 1 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              3 * pci->nCube, i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford );
+
     /* MWC for "Double, take; lose" */
-    
+
     rDTL =
       (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
-      GET_MET ( anNormScore[ i ] - 1,
-                anNormScore[ !i ] - 2 * pci->nCube - 1, aafMET )
-      + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
-                                         anNormScore[ ! i ] - 4 * pci->nCube - 1, aafMET )
-      + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
-                                         anNormScore[ ! i ] - 6 * pci->nCube - 1, aafMET );
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              2 * pci->nCube, ! i, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + aarRates[ ! i ][ 0 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              4 * pci->nCube, ! i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford )
+      + aarRates[ ! i ][ 1 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              6 * pci->nCube, ! i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford );
 
     /* MWC for "No double; lose" */
 
     rNDL =
       (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
-      GET_MET ( anNormScore[ i ] - 1,
-                anNormScore[ !i ] - 1 * pci->nCube - 1, aafMET )
-      + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
-                                         anNormScore[ ! i ] - 2 * pci->nCube - 1, aafMET )
-      + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
-                                         anNormScore[ ! i ] - 3 * pci->nCube - 1, aafMET );
-    
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              1 * pci->nCube, ! i, pci->fCrawford,
+              aafMET, aafMETPostCrawford )
+      + aarRates[ ! i ][ 0 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              2 * pci->nCube, ! i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford )
+      + aarRates[ ! i ][ 1 ] * 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              3 * pci->nCube, ! i, pci->fCrawford, 
+              aafMET, aafMETPostCrawford );
+
     /* MWC for "Double, pass" */
 
-    rDP = GET_MET( anNormScore[ i ] - pci->nCube - 1,
-                   anNormScore[ ! i ] - 1, aafMET );
+    rDP = 
+      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+              pci->nCube, i, pci->fCrawford,
+              aafMET, aafMETPostCrawford );
 
     /* Double point */
 
@@ -7246,23 +7262,31 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 
       rDTW =
         (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
-        GET_MET ( anNormScore[ i ] - 4 * pci->nCube - 1,
-                  anNormScore[ !i ] - 1, aafMET )
-        + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 8 * pci->nCube - 1,
-                                         anNormScore[ ! i ] - 1, aafMET )
-        + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 12 * pci->nCube - 1,
-                                         anNormScore[ ! i ] - 1, aafMET );
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+                4 * pci->nCube, i, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ i ][ 0 ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+                8 * pci->nCube, i, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ i ][ 1 ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+                12 * pci->nCube, i, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
       rDTL =
         (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
-        GET_MET ( anNormScore[ i ] - 1,
-                  anNormScore[ !i ] - 4 * pci->nCube - 1, aafMET )
-        + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
-                                           anNormScore[ ! i ] - 8 * pci->nCube - 1,
-                                           aafMET )
-        + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
-                                           anNormScore[ ! i ] - 12 * pci->nCube - 1,
-                                           aafMET );
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+                4 * pci->nCube, ! i, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ ! i ][ 0 ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+                8 * pci->nCube, ! i, pci->fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ ! i ][ 1 ] * 
+        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo, i,
+                12 * pci->nCube, ! i, pci->fCrawford,
+                aafMET, aafMETPostCrawford );
 
       rRisk = rDTW - rDP;
       rGain = rDP - rDTL;

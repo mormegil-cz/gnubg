@@ -1,3 +1,15 @@
+Sat Mar 23 15:46:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Support for skewed match equity tables.
+
+	* matchequity.c (getME): new function. 
+
+	* matchequity.c (GetPoints, GetDoublePointDeadCube): call getME
+	for match equities.
+	* show.c (CommandShowMarketWindow): call getME.
+	* eval.c (mwc2eq, eq2mwc, SetCubeInfoMatch, GetDPEq, Cl2CfMatchOwned,
+	Cl2CfMatchUnavailable,Cl2CfMatchCentered, getMatchPoints) call getME.
+
 Sat Mar 23 14:21:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Introduce two post-Crawford match equity tables -- one for each
