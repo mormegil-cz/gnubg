@@ -1,3 +1,9 @@
+Fri Apr  7 09:13:50 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (ComputerTurn): return a value after abort(), to pacify
+	compiler warnings.
+	(NextTurn): add parentheses to pacify compiler.
+
 Sat Mar 11 20:10:36 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* eval.c (DumpContact): Show the partial derivates of the

@@ -175,8 +175,12 @@ static int ComputerTurn( void ) {
 	return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
 
     default:
-	assert( FALSE );
     }
+    
+    abort();
+    
+    /* never reached, but fussy compilers might want a return value anyway */
+    return -1;
 }
 
 /* Try to automatically bear off as many chequers as possible.  Only do it
@@ -286,8 +290,8 @@ extern void NextTurn( void ) {
 	ShowBoard();
     
     if( ( n = GameStatus( anBoard ) ) ||
-	( go == GAME_DROP && ( n = 1 ) ) ||
-	( go == GAME_RESIGNED && ( n = fResigned ) ) ) {
+	( go == GAME_DROP && ( ( n = 1 ) ) ) ||
+	( go == GAME_RESIGNED && ( ( n = fResigned ) ) ) ) {
 	fWinner = !fTurn;
 	
 	if( fJacoby && fCubeOwner == -1 && !nMatchTo )
