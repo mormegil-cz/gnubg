@@ -3,6 +3,7 @@
  *
  * by Gary Wong, 1997-2000
  *
+ * $Id$
  */
 
 #ifndef _EXT_H_

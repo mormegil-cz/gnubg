@@ -2,6 +2,7 @@
  * fifo.h
  *
  * by Gary Wong, 1996
+ * $Id$
  *
  */
 

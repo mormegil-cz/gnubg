@@ -2,7 +2,7 @@
  * fifo.c
  *
  * by Gary Wong, 1996
- *
+ * $Id$
  */
 
 #include "config.h"

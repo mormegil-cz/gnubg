@@ -2,6 +2,7 @@
  * buffer.h
  *
  * by Gary Wong, 1996
+ * $Id$
  */
 
 #ifndef _BUFFER_H_

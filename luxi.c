@@ -47,6 +47,7 @@
  * For further information, contact:
  * 
  * info@urwpp.de or design@bigelowandholmes.com
+ * $Id$
  *
  */
 

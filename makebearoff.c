@@ -695,7 +695,7 @@ generate_os ( const int nOS, const int fHeader,
     dlgprintf(127, "Opening temporary file." );
 #endif
     time ( &t );
-    sprintf ( szTmp, "t%06ld.bd", t % 100000 );
+    sprintf ( szTmp, "t%06lu.bd", (unsigned long) t % 100000 );
     if ( ! ( pfTmp = fopen ( szTmp, "w+b" ) ) ) {
       perror ( szTmp );
       exit ( 2 );
@@ -1298,7 +1298,7 @@ generate_ts ( const int nTSP, const int nTSC,
 #endif
 
     time ( &t );
-    sprintf ( szTmp, "t%06ld.bd", t % 100000 );
+    sprintf ( szTmp, "t%06lu.bd", (unsigned long) t % 100000 );
     if ( ! ( pfTmp = fopen ( szTmp, "w+b" ) ) ) {
       perror ( szTmp );
       exit ( 2 );

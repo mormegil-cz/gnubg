@@ -96,5 +96,5 @@ extern void SetDefaultTC ();
 extern void SaveTimeControlSettings( FILE *pf );
 extern void CommandShowTCTutorial ();
 
-#endif // USE_TIMECONTROL
+#endif /* USE_TIMECONTROL */
 #endif /* _TIMECONTROL_H_ */

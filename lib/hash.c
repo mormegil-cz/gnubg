@@ -2,6 +2,7 @@
  * hash.c
  *
  * by Gary Wong, 1997-2000
+ * $Id$
  */
 
 #include <assert.h>
@@ -352,7 +353,7 @@ CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
   cacheNode* ck1 = pc->m + l;
   if( (ck1->nEvalContext == e->nEvalContext
        && memcmp(e->auchKey, ck1->auchKey, sizeof(e->auchKey)) == 0) ) {
-    // found at first slot
+    /* found at first slot */
     ++pc->cHit;
     return ck1;
   }
@@ -361,7 +362,7 @@ CacheLookup(cache* pc, cacheNode* e, unsigned long* m)
     cacheNode* ck2 = pc->m + (l+1);
     if( (ck2->nEvalContext == e->nEvalContext &&
 	 memcmp(e->auchKey, ck2->auchKey, sizeof(e->auchKey)) == 0) ) {
-      // found at second slot. Make it primary
+      /* found at second slot. Make it primary */
       cacheNode tmp = *ck1;
       *ck1 = *ck2;
       *ck2 = tmp;

@@ -2,6 +2,7 @@
  * cache.h
  *
  * by Gary Wong, 1997-2000
+ * $Id$
  */
 
 #ifndef _CACHE_H_

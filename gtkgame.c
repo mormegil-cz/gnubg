@@ -9696,7 +9696,7 @@ extern void Undo()
 static void
 TogglePanel ( gpointer *p, guint n, GtkWidget *pw ) {
   int f;
-  gnubgwindow panel;
+  gnubgwindow panel = 0;
 
   g_assert( GTK_IS_CHECK_MENU_ITEM( pw ) );
   
@@ -9936,9 +9936,10 @@ static void RelationalLinkPlayers(GtkWidget *pw, GtkWidget *pwRelList)
 	if (*linkPlayer)
 	{
 		RelationalLinkNick(linkNick, linkEnv, linkPlayer);
-ShowRelationalSelect(pwRelList, curRow, 0, 0, 0);
-//update new details list...
-//>> change query so person not picked if nick in selected env!
+		ShowRelationalSelect(pwRelList, curRow, 0, 0, 0);
+		/* update new details list...
+		   >> change query so person not picked if nick in selected env!
+		*/
 	}
 }
 

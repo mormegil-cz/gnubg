@@ -2086,9 +2086,9 @@ GetDistCompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
              "The bearoff file '%s' is likely to be corrupted.\n"
              "Please check that the MD5 sum is the same as documented "
              "in the GNU Backgammon manual.\n"
-             "Offset %ld, dist size %u (offset %u), "
+             "Offset %lu, dist size %u (offset %u), "
              "gammon dist size %u (offset %u)\n",
-             pbc->szFilename, iOffset, nz, ioff, nzg, ioffg );
+             pbc->szFilename, (unsigned long) iOffset, nz, ioff, nzg, ioffg );
     assert( FALSE );
   }
 

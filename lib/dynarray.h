@@ -2,6 +2,7 @@
  * dynarray.h
  *
  * by Gary Wong, 1996
+ * $Id$
  */
 
 #ifndef _DYNARRAY_H_

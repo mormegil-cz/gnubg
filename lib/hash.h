@@ -2,6 +2,7 @@
  * hash.h
  *
  * by Gary Wong, 1997
+ * $Id$
  */
 
 #ifndef _HASH_H_

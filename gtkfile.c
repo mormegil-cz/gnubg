@@ -25,7 +25,8 @@
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
-
+#include <stdlib.h>
+#include <string.h>
 #include "gtk/gtk.h"
 #include "backgammon.h"
 #include "gtkgame.h"
@@ -34,24 +35,25 @@
 
 #if GTK_CHECK_VERSION(2,4,0)
 
-// This is a temporary hack and will move and mutate. Too many places where things
-// are hardcoded or omplicated to access -- this clumsy switch is my dynamic copy.
-// I'm not convinced a giant switch statement and pseudo-object orientation are the final
-// solution, but for the time being it's easy to maintain.
-// Disclaimer: This is not optimized or even written with performance as #1 priority (yet),
-// and BETA anyway ...
+/* This is a temporary hack and will move and mutate. Too many places where things
+   are hardcoded or omplicated to access -- this clumsy switch is my dynamic copy.
+   I'm not convinced a giant switch statement and pseudo-object orientation are the final
+   solution, but for the time being it's easy to maintain.
+   Disclaimer: This is not optimized or even written with performance as #1 priority (yet),
+   and BETA anyway ...
+*/
 
 typedef struct {
-	char		*description_long,		// Description of the media type for use in e.g. Bubble Help
-				*description_short,		// Description of the media type for use in e.g. a label
-				*path_current,			// Path where the last file operation on this media type took place
-										// or NULL if none happened during the lifetime of this gnubg
-				*path_default,			// Path where operations on this media type should be started if
-										// none happened during the lifetime of this gnubg so far
-				*file_suffix,			// the file extension used this type
-				*command;				// corresponding no-gui command FIXME: immature
-	pathformat	path_format;			// LEGACY: existing enumeration, De-facto ID.
-	int			capabilities;			// What degree of import / export this format offers?
+	char		*description_long,		/* Description of the media type for use in e.g. Bubble Help */
+				*description_short,		/* Description of the media type for use in e.g. a label */
+				*path_current,			/* Path where the last file operation on this media type took place */
+										/* or NULL if none happened during the lifetime of this gnubg */
+				*path_default,			/* Path where operations on this media type should be started if */
+										/* none happened during the lifetime of this gnubg so far */
+				*file_suffix,			/* the file extension used this type */
+				*command;				/* corresponding no-gui command FIXME: immature */
+	pathformat	path_format;			/* LEGACY: existing enumeration, De-facto ID. */
+	int			capabilities;			/* What degree of import / export this format offers? */
 
 
 } External_IO_Format;
@@ -128,7 +130,7 @@ External_IO_Format *External_IO_Format_new (pathformat id) {
 			eiof.path_default			= aaszPaths[ PATH_OLDMOVES ][ 1 ];
 			eiof.path_format			= PATH_OLDMOVES;
 			eiof.file_suffix			= aszExtensions [PATH_OLDMOVES];
-			eiof.capabilities			= External_IO_match | External_IO_import; //?
+			eiof.capabilities			= External_IO_match | External_IO_import; /*? */
 			break;
 							}
 		case PATH_PDF: {
@@ -218,7 +220,7 @@ External_IO_Format *External_IO_Format_new (pathformat id) {
 			eiof.path_default			= aaszPaths[ PATH_TMG ][ 1 ];
 			eiof.path_format			= PATH_TMG;
 			eiof.file_suffix			= aszExtensions [PATH_TMG];
-			eiof.capabilities			= External_IO_match | External_IO_import; // ?
+			eiof.capabilities			= External_IO_match | External_IO_import; /* ? */
 			break;
 					   }
 		case PATH_BKG: {
@@ -228,7 +230,7 @@ External_IO_Format *External_IO_Format_new (pathformat id) {
 			eiof.path_default			= aaszPaths[ PATH_BKG ][ 1 ];
 			eiof.path_format			= PATH_BKG;
 			eiof.file_suffix			= aszExtensions [PATH_BKG];
-			eiof.capabilities			= External_IO_match | External_IO_import; // ?
+			eiof.capabilities			= External_IO_match | External_IO_import; /* ? */
 			break;
 		  }
 		case PATH_SNOWIE_TXT: {
@@ -238,7 +240,7 @@ External_IO_Format *External_IO_Format_new (pathformat id) {
 			eiof.path_default			= aaszPaths[ PATH_SNOWIE_TXT ][ 1 ];
 			eiof.path_format			= PATH_SNOWIE_TXT;
 			eiof.file_suffix			= aszExtensions [PATH_SNOWIE_TXT ];
-			eiof.capabilities			= External_IO_match | External_IO_import; // ?
+			eiof.capabilities			= External_IO_match | External_IO_import; /* ? */
 			break;
 							  } 
 		case NUM_PATHS:
@@ -274,7 +276,7 @@ External_IO_Format *External_IO_Format_new (pathformat id) {
 		strcpy(result->file_suffix, eiof.file_suffix);
 		*/
 
-		// no need to copy a lot, everything is static already ...
+		/* no need to copy a lot, everything is static already ... */
 
 		result->description_long = eiof.description_long;
 		result->description_short = eiof.description_short;
@@ -305,49 +307,49 @@ void External_IO_Format_destroy (External_IO_Format *eiof) {
 extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
                               char *szPath, filedialogtype fdt, pathformat pathId) {
 
-  	char *filename;				// the result
-	External_IO_Format *eiof;	// a bunch of data on a file format
+  	char *filename;				/* the result */
+	External_IO_Format *eiof;	/* a bunch of data on a file format */
 
 	GtkWidget *filechooser;
 
 	char *dialogTitle;
 
-	// Determine dialog title
-	if (szPrompt) {								// FIXME: When the eiof type ist is complete, all
-		dialogTitle = szPrompt;					// titles should be generated. 
+	/* Determine dialog title */
+	if (szPrompt) {								/* FIXME: When the eiof type ist is complete, all */
+		dialogTitle = szPrompt;					/* titles should be generated.  */
 	} else if (fdt == FDT_NONE_SAVE) {
 		dialogTitle = "GNU Backgammon - Save File";
 	} else {
 		dialogTitle = "GNU Backgammon - Open File";
 	}
 
-	// Creaze dialog
+	/* Creaze dialog */
 	filechooser= gtk_file_chooser_dialog_new (
-					  dialogTitle,										// Window Text
-				      NULL,												// Parent Window
+					  dialogTitle,										/* Window Text */
+				      NULL,												/* Parent Window */
 					  (fdt == FDT_NONE_OPEN)
-							? GTK_FILE_CHOOSER_ACTION_OPEN				// Action
+							? GTK_FILE_CHOOSER_ACTION_OPEN				/* Action */
 							: GTK_FILE_CHOOSER_ACTION_SAVE,
-					  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,			// List of Buttons
+					  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,			/* List of Buttons */
 				      GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
 				      NULL);
 	gtk_window_set_modal( GTK_WINDOW( filechooser ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( filechooser ), GTK_WINDOW( pwMain ) );
-	// Our DAO
+	/* Our DAO */
 
 	eiof = External_IO_Format_new(pathId);
 
-	// Set default path on dialog
+	/* Set default path on dialog */
 	gtk_file_chooser_set_current_folder((GtkFileChooser *) filechooser, eiof->path_current);
 
 	
-	if (fdt == FDT_NONE_SAVE) { // Case: we want to save
-		// Set default filename
+	if (fdt == FDT_NONE_SAVE) { /* Case: we want to save */
+		/* Set default filename */
 		gtk_file_chooser_set_current_name((GtkFileChooser *) filechooser, getDefaultFileName(pathId));
 
-	} else { // FTD_NONE_OPEN, we want to load
+	} else { /* FTD_NONE_OPEN, we want to load */
 
-		// Create 2 File Filters: *.* and *.suffix
+		/* Create 2 File Filters: *.* and *.suffix */
 
 		char *suffixGlobber;
 		char *filterDescription; 
@@ -371,7 +373,7 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 
 	}
 	
-	// launch dialog
+	/* launch dialog */
 	if (gtk_dialog_run (GTK_DIALOG (filechooser)) == GTK_RESPONSE_ACCEPT) {
 	    filename = gtk_file_chooser_get_filename ((GtkFileChooser *)  filechooser);
 
@@ -385,13 +387,13 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 #else
 			char sz[ 1024 ];
 #endif
-			// and actually do the requested IO
+			/* and actually do the requested IO */
 			sprintf( sz, "%s %s", szCommand, filename );
 			UserCommand( sz );
 			g_free (filename);
 		}
 	}
-	// Cleanup
+	/* Cleanup */
 
 	gtk_widget_destroy (filechooser);
 	External_IO_Format_destroy(eiof);

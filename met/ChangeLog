@@ -1,3 +1,7 @@
+Mon Feb 21 23:12:17 2005 Jim Segrave  <jes@jes-2.demon.nl>
+
+	* Makefile, Makefile.in, Makefile.am - fixes for catalog.xml, catalog.dtd
+
 Tue Aug 31 14:21:56 Øystein Johansen  <oystein@gnubg.org>
 
 	* dunstan.xml: new file

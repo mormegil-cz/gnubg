@@ -1,6 +1,6 @@
 #include <string.h>
 #include "md5.h"
-
+/* $Id$ */
 static const struct
 {
   const char *input;

@@ -1,4 +1,5 @@
 /*
+ $Id$
 ------------------------------------------------------------------------------
 isaac.h: definitions for a random number generator
 MODIFIED:

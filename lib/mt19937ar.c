@@ -44,7 +44,7 @@
 
    (1) #UNDEF main(), and other unused functions.
    (2) make mt and mti parameters
-
+   $Id$
 */
 
 #include <stdio.h>

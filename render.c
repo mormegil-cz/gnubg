@@ -2213,8 +2213,8 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 			    arDiceCoefficient[ 1 ];
 		    } else {
 			/* corner */
-			x_norm = 0.707 * x; // - ( x > 0.0 ? 1.0 : 1.0); 
-			y_norm = -0.707 * y; // - ( y > 0.0 ? 1.0 : 1.0 );
+		      x_norm = 0.707 * x; /* - ( x > 0.0 ? 1.0 : 1.0);  */
+		      y_norm = -0.707 * y; /* - ( y > 0.0 ? 1.0 : 1.0 ); */
 			z_norm = 1 - x_norm * x_norm - y_norm * y_norm; 
 			z_norm = ssqrt( z_norm );
 			

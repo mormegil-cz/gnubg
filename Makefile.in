@@ -256,7 +256,7 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 @USE_GTK_TRUE@           $(BOARD3D_INCS)
 
 @USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS) @LIBART_CFLAGS@
-@USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
+@USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h gtkfile.c \
 @USE_GTK_TRUE@	gtkprefs.c gtkprefs.h gtk-multiview.c \
 @USE_GTK_TRUE@	gtk-multiview.h gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
@@ -393,6 +393,7 @@ am__objects_3 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_TIMECONTROL_FALSE@am__objects_7 =
 @USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_3) gtkboard.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkgame.$(OBJEXT) gtkprefs.$(OBJEXT) \
+@USE_GTK_TRUE@	gtkfile.$(OBJEXT) \
 @USE_GTK_TRUE@	gtk-multiview.$(OBJEXT) gtktheory.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktexi.$(OBJEXT) gtkexport.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkcube.$(OBJEXT) gtkchequer.$(OBJEXT) \
@@ -461,6 +462,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gtkchequer.Po ./$(DEPDIR)/gtkcolour.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkcube.Po ./$(DEPDIR)/gtkexport.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkgamelist.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkfile.Po  \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkmet.Po ./$(DEPDIR)/gtkmovefilter.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkoptions.Po ./$(DEPDIR)/gtkpath.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkprefs.Po ./$(DEPDIR)/gtkrace.Po \
@@ -652,6 +654,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkcube.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkexport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkgame.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkgamelist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkmet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkmovefilter.Po@am__quote@

@@ -166,7 +166,7 @@ static float e[100] = {
    The Intel x87's `f2xm1' instruction makes calculating accurate
    exponentials comparatively fast, but still about 30% slower than
    the lookup table used here. */
-//static inline float sigmoid(float const xin) {
+/* static inline float sigmoid(float const xin) { */
 static float sigmoid_original(float const xin) {
     
     if( !signbit( xin ) ) { /* signbit() can be faster than a compare to 0.0 */

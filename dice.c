@@ -513,7 +513,7 @@ PrintRNGSeedMP( mpz_t n ) {
 
 }
 
-#endif /* HAVE_LIBGMP */
+#else
 
 static void
 PrintRNGSeedNormal( int n ) {
@@ -521,6 +521,8 @@ PrintRNGSeedNormal( int n ) {
   outputf( _("The current seed is %d.\n"), n );
 
 }
+#endif /* HAVE_LIBGMP */
+
 
 extern void PrintRNGSeed( const rng rngx, void *p ) {
 

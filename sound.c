@@ -667,9 +667,10 @@ static char *can_play_audio( void ) {
 
 #if HAVE_ARTSC
 
-static int _af_ulaw2linear(unsigned char ulawbyte);
-
 #ifndef HAVE_AF_ULAW2LINEAR
+
+static int _af_ulaw2linear(unsigned char ulawbyte); 
+
 
 /*
 ** This routine converts from ulaw to 16 bit linear.
@@ -703,6 +704,9 @@ static int _af_ulaw2linear(unsigned char ulawbyte)
 
 	return (sample);
 }
+
+#else
+int _af_ulaw2linear(unsigned char ulawbyte); 
 
 #endif /* !HAVE_AF_ULAW2LINEAR */
 

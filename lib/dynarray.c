@@ -2,6 +2,7 @@
  * dynarray.c
  *
  * by Gary Wong, 1996
+ * $Id$
  */
 
 #include <assert.h>

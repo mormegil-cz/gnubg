@@ -7,6 +7,8 @@ MODIFIED:
   980324: make a portable version
   991209: modified for inclusion with GNU Backgammon by Gary Wong  
 ------------------------------------------------------------------------------
+
+  $Id$
 */
 
 #include "isaacs.h"

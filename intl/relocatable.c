@@ -15,7 +15,9 @@
    You should have received a copy of the GNU Library General Public
    License along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
-   USA.  */
+   USA.  
+   $Id$
+*/
 
 
 /* Tell glibc's <stdio.h> to provide a prototype for getline().

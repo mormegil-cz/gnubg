@@ -333,13 +333,13 @@ int MoveAnalysed(moverecord *pmr, matchstate *pms, list *plGame,
         if ( rAfter < rBefore ) {
           /* wrong resign */
           pmr->r.stResign = Skill ( rAfter - rBefore );
-          pmr->r.stAccept = SKILL_GOOD; //VERYGOOD;
+          pmr->r.stAccept = SKILL_GOOD; /* VERYGOOD; */
         }
 
         if ( rBefore < rAfter ) {
           /* wrong accept */
           pmr->r.stAccept = Skill ( rBefore - rAfter );
-          pmr->r.stResign = SKILL_GOOD; // VERYGOOD;
+          pmr->r.stResign = SKILL_GOOD; /* VERYGOOD; */
         }
 
 
