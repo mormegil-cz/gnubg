@@ -1,3 +1,7 @@
+Mon Feb 02 2004 18:42:05 GMT
+	
+	* timer.c - wrong #if around include
+
 Fri Jan 30 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* several files: Small changes for msdev compiler
