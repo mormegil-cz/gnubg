@@ -49,6 +49,9 @@ extern char *
 OutputEquityDiff ( const float r1, const float r2, const cubeinfo *pci );
 
 extern char *
+OutputMWCDiff ( const float r1, const float r2, const cubeinfo *pci );
+
+extern char *
 OutputEquityScale ( const float r, const cubeinfo *pci, 
                     const cubeinfo *pciBase, const int f );
 
