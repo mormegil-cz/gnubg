@@ -3542,7 +3542,7 @@ extern void CommandSaveSettings( char *szParam ) {
     if( errno )
       perror( szFile );
     else
-      outputf( "Settings saved to %s.",
+      outputf( "Settings saved to %s.\n",
                ( ! strcmp ( szFile, "-" ) ) ? "standard output stream" :
                szFile );
     free ( szFile );
