@@ -74,6 +74,9 @@ typedef struct _theorywidget {
 
   GtkWidget *aaapwMW[ 2 ][ 8 ][ 3 ];
 
+  /* window graphs */
+  GtkWidget *apwGraph[ 2 ];
+    
   /* gammon prices */
 
   GtkWidget *apwGammonPrice[ 2 ];
@@ -81,6 +84,8 @@ typedef struct _theorywidget {
   GtkWidget *aapwMatchGP[ 2 ][ 2 ];
   GtkWidget *aaapwMoneyGP[ 2 ][ 2 ][ 2 ];
 
+  /* dead double, live cash, and dead too good points; for graph drawing */
+  float aar[ 2 ][ 3 ];
 } theorywidget;
 
 
@@ -355,7 +360,11 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
           gtk_label_set_text ( GTK_LABEL ( ptw->aaapwMW[ i ][ j ][ k ] ), 
                                "" );
 
-
+      ptw->aar[ i ][ 0 ] = aaarPointsMatch[ i ][ 1 ][ 0 ];
+      ptw->aar[ i ][ 1 ] = aaarPointsMatch[ i ][ 2 ][ 1 ];
+      ptw->aar[ i ][ 2 ] = aaarPointsMatch[ i ][ 3 ][ 0 ];
+      
+      gtk_widget_queue_draw( ptw->apwGraph[ i ] );
     }
 
   }
@@ -389,6 +398,12 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
         }
       }
+      
+      ptw->aar[ i ][ 0 ] = aaarPoints[ i ][ 3 ][ 0 ];
+      ptw->aar[ i ][ 1 ] = aaarPoints[ i ][ 5 ][ 1 ];
+      ptw->aar[ i ][ 2 ] = aaarPoints[ i ][ 6 ][ 0 ];
+
+      gtk_widget_queue_draw( ptw->apwGraph[ i ] );
     }
 
   }
@@ -441,6 +456,56 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
 
 }
 
+static void GraphExpose( GtkWidget *pwGraph, GdkEventExpose *pev,
+			 theorywidget *ptw ) {
+    
+    int i, x = 8, y = 12, cx = pwGraph->allocation.width - 16 - 1,
+	cy = pwGraph->allocation.height - 12, iPlayer, ax[ 3 ];
+    char sz[ 4 ];
+    
+    /* FIXME: The co-ordinates used in this function should be determined
+       from the text size, not hard-coded.  But GDK's text handling will
+       undergo an overhaul with Pango once GTK+ 2.0 comes out, so let's
+       cheat for now and then get it right once 2.0 is here. */
+
+    iPlayer = pwGraph == ptw->apwGraph[ 1 ];
+    
+    for( i = 0; i <= 20; i++ ) {
+	gtk_paint_vline( pwGraph->style, pwGraph->window, GTK_STATE_NORMAL,
+			 NULL, pwGraph, "tick", y - 1, i & 3 ? y - 3 : y - 5,
+			 x + cx * i / 20 );
+
+	if( !( i & 3 ) ) {
+	    sprintf( sz, "%d", i * 5 );
+	    gtk_paint_string( pwGraph->style, pwGraph->window,
+			      GTK_STATE_NORMAL, NULL, pwGraph, "label",
+			      x + cx * i / 20 - 8 /* FIXME */, y - 3, sz );
+	}
+    }
+
+    for( i = 0; i < 3; i++ )
+	ax[ i ] = x + cx * ptw->aar[ iPlayer ][ i ];
+
+    gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_NORMAL,
+		   GTK_SHADOW_IN, NULL, pwGraph, "doubling-window",
+		   x, 12, cx, cy );
+
+    /* FIXME it's horrible to abuse the "state" parameters like this */
+    if( ptw->aar[ iPlayer ][ 1 ] > ptw->aar[ iPlayer ][ 0 ] )
+	gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_ACTIVE,
+		       GTK_SHADOW_OUT, NULL, pwGraph, "take",
+		       ax[ 0 ], 13, ax[ 1 ] - ax[ 0 ], cy - 2 );
+    
+    if( ptw->aar[ iPlayer ][ 2 ] > ptw->aar[ iPlayer ][ 1 ] )
+	gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_PRELIGHT,
+		       GTK_SHADOW_OUT, NULL, pwGraph, "drop",
+		       ax[ 1 ], 13, ax[ 2 ] - ax[ 1 ], cy - 2 );
+    
+    if( ptw->aar[ iPlayer ][ 2 ] < 1.0 )
+	gtk_paint_box( pwGraph->style, pwGraph->window, GTK_STATE_SELECTED,
+		       GTK_SHADOW_OUT, NULL, pwGraph, "too-good",
+		       ax[ 2 ], 13, x + cx - ax[ 2 ], cy - 2 );
+}
 
 /*
  * Display widget with misc. theory:
@@ -461,9 +526,9 @@ GTKShowTheory ( const int fActivePage ) {
   GtkWidget *pwVBox;
   GtkWidget *pwHBox;
   GtkWidget *pwFrame;
-  GtkWidget *pwRadio;
   GtkWidget *pwTable;
-
+  GtkWidget *pwAlign;
+  
   GtkWidget *pw, *pwx;
 
   int i, j, k;
@@ -488,7 +553,7 @@ GTKShowTheory ( const int fActivePage ) {
   /* match/money play */
 
   pwHBox = gtk_hbox_new ( FALSE, 0 );
-  gtk_container_add ( GTK_CONTAINER ( pwVBox ), pwHBox );
+  gtk_box_pack_start( GTK_BOX( pwVBox ), pwHBox, FALSE, FALSE, 0 );
 
   gtk_container_add ( GTK_CONTAINER ( pwHBox ), 
                       ptw->apwRadio[ 0 ] = 
@@ -513,7 +578,7 @@ GTKShowTheory ( const int fActivePage ) {
   /* match score widget */
 
   ptw->apwFrame[ 0 ] = gtk_frame_new ( "Match score" );
-  gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwFrame[ 0 ] );
+  gtk_box_pack_start( GTK_BOX( pwVBox ), ptw->apwFrame[ 0 ], FALSE, FALSE, 0 );
 
   pw = gtk_vbox_new ( 0, FALSE );
   gtk_container_add ( GTK_CONTAINER ( ptw->apwFrame[ 0 ] ), pw );
@@ -600,7 +665,7 @@ GTKShowTheory ( const int fActivePage ) {
   
 
   ptw->apwFrame[ 1 ] = gtk_frame_new ( "Money play" );
-  gtk_container_add ( GTK_CONTAINER ( pwVBox ), ptw->apwFrame[ 1 ] );
+  gtk_box_pack_start( GTK_BOX( pwVBox ), ptw->apwFrame[ 1 ], FALSE, FALSE, 0 );
 
   pwHBox = gtk_hbox_new ( 0, FALSE );
   gtk_container_add ( GTK_CONTAINER ( ptw->apwFrame[ 1 ] ), pwHBox );
@@ -623,7 +688,7 @@ GTKShowTheory ( const int fActivePage ) {
   /* gammon and backgammon percentages */
 
   pwFrame = gtk_frame_new ( "Gammon and backgammon percentages" );
-  gtk_container_add ( GTK_CONTAINER ( pwVBox ), pwFrame );
+  gtk_box_pack_start( GTK_BOX( pwVBox ), pwFrame, FALSE, FALSE, 0 );
 
   pwTable = gtk_table_new ( 3, 3, TRUE );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
@@ -677,7 +742,7 @@ GTKShowTheory ( const int fActivePage ) {
   /* add notebook pages */
 
   pwNotebook = gtk_notebook_new ();
-  gtk_container_add ( GTK_CONTAINER ( pwVBox ), pwNotebook );
+  gtk_box_pack_start( GTK_BOX( pwVBox ), pwNotebook, TRUE, TRUE, 0 );
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwNotebook ), 4 );
 
@@ -718,6 +783,28 @@ GTKShowTheory ( const int fActivePage ) {
 
 
 
+  }
+
+  /* window graph */
+  pwVBox = gtk_vbox_new ( 0, FALSE );
+  gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                             pwVBox,
+                             gtk_label_new ( "Window graph" ) );
+
+  for ( i = 0; i < 2; i++ ) {
+      sprintf( sz, "Window graph for player %s", ap[ i ].szName );
+      pwFrame = gtk_frame_new( sz );
+      gtk_box_pack_start( GTK_BOX ( pwVBox ), pwFrame, FALSE, FALSE, 4 );
+
+      gtk_container_add( GTK_CONTAINER( pwFrame ), pwAlign =
+			 gtk_alignment_new( 0.5, 0.5, 1, 0 ) );
+      gtk_container_add( GTK_CONTAINER( pwAlign ), ptw->apwGraph[ i ] =
+			 gtk_drawing_area_new() );
+      gtk_widget_set_name( ptw->apwGraph[ i ], "gnubg-doubling-window-graph" );
+      gtk_container_set_border_width( GTK_CONTAINER( pwAlign ), 4 );
+      gtk_widget_set_usize( ptw->apwGraph[ i ], -1, 48 );
+      gtk_signal_connect( GTK_OBJECT( ptw->apwGraph[ i ] ), "expose_event",
+			  GTK_SIGNAL_FUNC( GraphExpose ), ptw );
   }
 
   /* gammon prices */
@@ -826,7 +913,7 @@ GTKShowTheory ( const int fActivePage ) {
   /* show dialog */
 
   gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ),
-                          fActivePage );
+                          fActivePage ? 2 /* prices */ : 0 /* market */ );
 
   gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
   gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),

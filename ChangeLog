@@ -1,3 +1,11 @@
+Mon Mar 11 10:59:05 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtktheory.c (GraphExpose): New function.  Add another notebook
+	page to the theory window with a diagram of the doubling windows.
+	
+	* gtkgame.c (CreateSetCubeDialog): Use GTK_WINDOW_TOPLEVEL instead
+	of GTK_WINDOW_DIALOG, for compatibility with GTK+ 2.0.
+
 Sat Mar  9 22:39:37 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_animate), gtkgame.c (GTKDelay): Don't allow

@@ -177,6 +177,8 @@ duplication of effort and to make sure our changes merge easily.
   through owners/centred).
 ** Add some kind of GTK interface for viewing rollout statistics.
 ** Make the 'Set cube' dialog availble by clicking the cube in edit mode.   
+** Think about ways to improve event handling while "busy".  We could save
+  them somewhere and then use gdk_event_put() when we're ready. (gary)
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -210,7 +212,10 @@ functions:
   grab on itself when it gets a "button release".  It would be more
   robust to add a parent to it (box or event box?), and give _that_
   the grab.  Unfortunately, grab add/remove calls must nest, and we
-  can't guarantee that...
+  can't guarantee that...  Another possible workaround would be to
+  set the grab immediately before gtk_main_iteration(); we currently
+  do this in GTKDelay() but only once for the loop in HandleXAction().
+  Perhaps we should do it everywhere we call gtk_main_iteration()? (gary)
 ** There's no way to see the annotation on the opening move using the
   TTY interface.  Changing ShowBoard() to display the starting position
   and then the annotation might work.

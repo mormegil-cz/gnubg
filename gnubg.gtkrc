@@ -8,3 +8,12 @@ style "movelabel" = "default"
 }
 
 widget "*Board.*move" style "movelabel"
+
+style "doubling-window-graph" = "default"
+{
+  bg[ACTIVE] = { 0, 0xffff, 0 }
+  bg[PRELIGHT] = { 0xffff, 0, 0 }
+  bg[SELECTED] = { 0, 0, 0xffff }
+}
+
+widget "*.gnubg-doubling-window-graph" style "doubling-window-graph"
