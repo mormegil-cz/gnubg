@@ -257,15 +257,13 @@ extern void CommandShowAutomatic( char *sz ) {
 
     static char *szOn = N_("On"), *szOff = N_("Off");
     
-    outputf( 
-            _("analysis \t(Analyse game during play (tutor-mode)):      \t%s\n"
+    outputf( _( 
               "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
               "crawford\t(Enable the Crawford rule as appropriate):     \t%s\n"
               "doubles \t(Turn the cube when opening roll is a double): \t%d\n"
               "game    \t(Start a new game after each one is completed):\t%s\n"
               "move    \t(Play the forced move when there is no choice):\t%s\n"
               "roll    \t(Roll the dice if no double is possible):      \t%s\n"),
-	    fAutoAnalysis ? gettext ( szOn ) : gettext ( szOff ),
 	    fAutoBearoff ? gettext ( szOn ) : gettext ( szOff ),
 	    fAutoCrawford ? gettext ( szOn ) : gettext ( szOff ),
 	    cAutoDoubles,

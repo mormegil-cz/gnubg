@@ -6924,7 +6924,7 @@ GTKShowPath ( void ) {
 
 typedef struct _optionswidget {
 
-  GtkWidget *pwAutoAnalyse, *pwAutoBearoff, *pwAutoCrawford, *pwAutoGame,
+  GtkWidget *pwAutoBearoff, *pwAutoCrawford, *pwAutoGame,
             *pwAutoMove, *pwAutoRoll, *pwTutor;
   GtkAdjustment *padjCubeBeaver, *padjCubeAutomatic;
   GtkWidget *pwCubeUsecube, *pwCubeJacoby, *pwCubeInvert;
@@ -6985,9 +6985,6 @@ static GtkWidget* OptionsPage( optionswidget *pow)
 
   pwVBox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (pwFrame), pwVBox);
-
-  pow->pwAutoAnalyse = gtk_check_button_new_with_label (_("Analysis"));
-  gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwAutoAnalyse, FALSE, FALSE, 0);
 
   pow->pwAutoBearoff = gtk_check_button_new_with_label (_("Bearoff"));
   gtk_box_pack_start (GTK_BOX (pwVBox), pow->pwAutoBearoff, FALSE, FALSE, 0);
@@ -7213,7 +7210,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwAutoGame,fAutoGame, "set automatic game %s")
   CHECKUPDATE(pow->pwAutoRoll,fAutoRoll, "set automatic roll %s")
   CHECKUPDATE(pow->pwAutoMove,fAutoMove, "set automatic move %s")
-  CHECKUPDATE(pow->pwAutoAnalyse,fAutoAnalysis, "set automatic analysis %s")
   CHECKUPDATE(pow->pwTutor, fTutor, "set tutor %s")
 
   CHECKUPDATE(pow->pwCubeUsecube,fCubeUse, "set cube use %s")
@@ -7288,8 +7284,6 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 static void 
 OptionsSet( optionswidget *pow) {
 
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAutoAnalyse ),
-                                fAutoAnalysis );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAutoBearoff ),
                                 fAutoBearoff );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwAutoCrawford ),

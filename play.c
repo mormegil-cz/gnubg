@@ -103,52 +103,6 @@ static annotatetype at;
 static int anLastMove[ 8 ], fLastMove, fLastPlayer;
 #endif
 
-static void
-autoAnalyseMove ( void *p, const matchstate *pms ) {
-
-  matchstate msx;
-  moverecord *pmr = p;
-  int f;
-  monitor m;
-  
-  if ( ! p ) 
-    return;
-
-  switch ( pmr->mt ) {
-  case MOVE_NORMAL:
-    f = ap[ pmr->n.fPlayer ].pt == PLAYER_HUMAN;
-    break;
-  case MOVE_DOUBLE:
-  case MOVE_TAKE:
-  case MOVE_DROP:
-    // f = ap[ pmr->d.fPlayer ].pt == PLAYER_HUMAN;
-    f = TRUE;
-    break;
-  case MOVE_SETDICE:
-    f = ap[ pmr->sd.fPlayer ].pt == PLAYER_HUMAN;
-    break;
-  case MOVE_RESIGN:
-    f = ap[ pmr->r.fPlayer ].pt == PLAYER_HUMAN;
-    break;
-  default:
-    f = FALSE;
-    break;
-
-  }
-
-  /* auto-analysis-mode */
-
-  if ( fAutoAnalysis && f ) {
-      SuspendInput( &m );
-      memcpy ( &msx, pms, sizeof ( matchstate ) );
-      ProgressStart( _("Analysing move...") );
-      AnalyzeMove ( pmr, &msx, NULL, FALSE );
-      ProgressEnd();
-      ResumeInput( &m );
-  }
-
-}
-
 static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
 
     int i, nSrc, nDest;
@@ -655,7 +609,6 @@ static int NewGame( void ) {
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
     IniStatcontext( &pmr->g.sc );
-    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
 
@@ -706,7 +659,6 @@ static int NewGame( void ) {
     pmr->sd.fPlayer = ms.anDice[ 1 ] > ms.anDice[ 0 ];
     pmr->sd.lt = LUCK_NONE;
     pmr->sd.rLuck = ERR_VAL;
-    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
@@ -1154,7 +1106,6 @@ extern int ComputerTurn( void ) {
       }
 #endif
       
-      autoAnalyseMove ( pmn, &ms );
       AddMoveRecord( pmn );      
       
       return 0;
@@ -1201,7 +1152,6 @@ extern int ComputerTurn( void ) {
     
     FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, pmn->anMove );
     
-    autoAnalyseMove ( pmn, &ms );
     AddMoveRecord( pmn );
     return 0;
 
@@ -1352,7 +1302,6 @@ extern int ComputerTurn( void ) {
 		      pmn->anMove[ ( i << 1 ) + 1 ] = -1;
 		  }
       
-          autoAnalyseMove ( pmn, &ms );
 	  AddMoveRecord( pmn );
 	  return 0;
       }
@@ -1429,7 +1378,6 @@ static int TryBearoff( void ) {
 		
 		ShowAutoMove( ms.anBoard, pmn->anMove );
 		
-                autoAnalyseMove ( pmn, &ms );
 		AddMoveRecord( pmn );
 
 		return 0;
@@ -1706,7 +1654,6 @@ extern void CommandAgree( char *sz ) {
     pmr->nResigned = ms.fResigned;
     pmr->esResign.et = EVAL_NONE;
     
-    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
 
     TurnDone();
@@ -2102,7 +2049,6 @@ extern void CommandDouble( char *sz ) {
     pmr->d.fPlayer = ms.fTurn;
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
-    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2151,15 +2097,16 @@ extern void CommandDrop( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
-	if ( fTutor && !GiveAdvice ( ShouldDrop ( pmr ) ))
-	  return;
+    if ( fTutor && !GiveAdvice ( ShouldDrop ( pmr ) )) {
+      free ( pmr ); /* garbage collect */
+      return;
+    }
 
 
     if( fDisplay )
 	outputf( _("%s refuses the cube and gives up %d point%s.\n"),
 		ap[ ms.fTurn ].szName, ms.nCube, ms.nCube == 1 ? "" : "s" );
     
-    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2365,7 +2312,6 @@ CommandMove( char *sz ) {
 	    
 	    ShowAutoMove( ms.anBoard, pmn->anMove );
 	    
-            autoAnalyseMove ( pmn, &ms );
 	    AddMoveRecord( pmn );
 
 	    TurnDone();
@@ -2433,8 +2379,10 @@ CommandMove( char *sz ) {
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
 
-		if ( fTutor && !GiveAdvice ( GoodMove( pmn ) ))
-			 return;
+		if ( fTutor && !GiveAdvice ( GoodMove( pmn ) )) {
+                  free ( pmr ); /* garbage collect */
+                  return;
+                }
 
 #ifdef USE_GTK        
 		/* There's no point delaying here. */
@@ -2450,7 +2398,6 @@ CommandMove( char *sz ) {
 		}
 #endif
 		
-                autoAnalyseMove ( pmn, &ms );
 		AddMoveRecord( pmn );
 #if USE_GTK
 		/* Don't animate this move. */
@@ -3008,7 +2955,6 @@ extern void CommandRedouble( char *sz ) {
     pmr->d.fPlayer = ms.fTurn;
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
-    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -3201,7 +3147,6 @@ CommandRoll( char *sz ) {
   pmr->sd.fPlayer = ms.fTurn;
   pmr->sd.lt = LUCK_NONE;
   pmr->sd.rLuck = ERR_VAL;
-  autoAnalyseMove ( pmr, &ms );
   AddMoveRecord( pmr );
   
   ShowBoard();
@@ -3239,7 +3184,6 @@ CommandRoll( char *sz ) {
     
     ShowAutoMove( ms.anBoard, pmn->anMove );
 
-    autoAnalyseMove ( pmn, &ms );
     AddMoveRecord( pmn );
     TurnDone();
   } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( ms.anBoard )
@@ -3263,7 +3207,6 @@ CommandRoll( char *sz ) {
 
     ShowAutoMove( ms.anBoard, pmn->anMove );
 	
-    autoAnalyseMove ( pmn, &ms );
     AddMoveRecord( pmn );
     TurnDone();
   } else
@@ -3315,14 +3258,15 @@ extern void CommandTake( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
-	if ( fTutor && !GiveAdvice ( ShouldTake ( pmr ) ))
-	  return;
+    if ( fTutor && !GiveAdvice ( ShouldTake ( pmr ) )) {
+        free ( pmr ); /* garbage collect */
+        return;
+    }
 
     if( fDisplay )
 	outputf( _("%s accepts the cube at %d.\n"), ap[ ms.fTurn ].szName,
 		 ms.nCube << 1 );
     
-    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
 
     UpdateSetting( &ms.nCube );
@@ -3416,7 +3360,6 @@ SetMatchID ( const char *szMatchID ) {
   pmr->g.fResigned = FALSE;
   pmr->g.nAutoDoubles = 0;
   IniStatcontext( &pmr->g.sc );
-  autoAnalyseMove ( pmr, &ms );
   AddMoveRecord( pmr );
 
   ms.gs = gs;
@@ -3453,7 +3396,6 @@ SetMatchID ( const char *szMatchID ) {
     pmscp->sz = NULL;
     pmscp->fCubeOwner = fCubeOwner;
     
-    autoAnalyseMove ( pmscp, &ms );
     AddMoveRecord( pmscp );
 
   }

@@ -1,3 +1,22 @@
+Thu Jul 25 19:07:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Remove auto analysis, which has been replaced by tutor mode.
+
+	* gnubg.c (CommandSaveSettings): remove auto analysis.
+	* set.c (CommandSetAutoAnalysis): remove unused function.
+	* show.c (CommandShowAuto): remove auto analysis.
+	* gtkgame.c (OptionsPage, OptionsOK): remove auto analysis.
+	* play.c (autoAnalyseMove): remove unused function.
+	* play.c (NewGame, ComputerTurn, TryBearoff, CommandAgree,
+	CommandDecline, CommandDouble, CommandDrop, CommandMove,
+	CommandRedouble, CommandRoll, CommandTake): remove auto 
+	analysis.
+
+	Some garbage collect:
+
+	* play.c (CommandDrop, CommandMove, CommandTake): 
+	garbage collect.
+
 Thu Jul 25 17:13:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkcube.c (CubeAnalysisCopy): Fix typo again!
