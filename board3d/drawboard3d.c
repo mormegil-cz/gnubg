@@ -3070,7 +3070,7 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 
 		/* If the cube not at top of board and some spare vertical space,
 			see if adding cube at top would fit without changing the board size */
-		if ((bd->cube_owner != 1) && (aspectRatio <= getAreaRatio(&va)))
+		if ((bd->doubled || bd->cube_owner != 1) && (aspectRatio <= getAreaRatio(&va)))
 		{
 			WorkOutViewArea(bd, &va, &halfRadianFOV, aspectRatio, TRUE);
 			if (aspectRatio > getAreaRatio(&va))
