@@ -561,10 +561,10 @@ extern void CommandShowBeavers( char *sz ) {
 
   if ( fBeavers )
     puts( "Beavers, racoons, and other critters are allowed in"
-          " money sessions.." );
+          " money sessions." );
   else
     puts( "Beavers, racoons, and other critters are not allowed in"
-          " money sessions.." );
+          " money sessions." );
 
 }
 
