@@ -3747,10 +3747,14 @@ static void StatusBearoff1( char *sz ) {
 static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz ) {
 
   sprintf( sz, _(" * %s neural network evaluator:\n"
-                 "   - version %s, %d inputs, %d hidden units, "
-                 "trained on %d positions.\n\n"),
-           szTitle, WEIGHTS_VERSION, pnn->cInput, pnn->cHidden,
-	   pnn->nTrained );
+                 "   - version %s, %d inputs, %d hidden units"),
+           szTitle, WEIGHTS_VERSION, pnn->cInput, pnn->cHidden );
+  sz = strchr( sz, 0 );
+  
+  if( pnn->nTrained > 1 )
+      sprintf( sz, _("trained on %d positions"), pnn->nTrained );
+
+  strcat( sz, ".\n\n" );
 }
 
 static void StatusRace( char *sz ) {
