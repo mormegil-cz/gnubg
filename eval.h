@@ -309,44 +309,4 @@ extern cubedecision
 FindCubeDecision ( float arDouble[],
                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], cubeinfo *pci );
 
-extern int
-GeneralEvaluation ( char *sz,
-                    float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
-                    float arStdDev[ NUM_ROLLOUT_OUTPUTS ], 
-                    int anBoard[ 2 ][ 25 ],
-                    cubeinfo *pci, evalsetup *pes );
-
-extern int
-GeneralEvaluationE ( float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
-                     int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, evalcontext *pec );
-
-extern int
-GeneralEvaluationR ( char *sz,
-                     float arOutput[ NUM_ROLLOUT_OUTPUTS ],
-                     float arStdDev[ NUM_ROLLOUT_OUTPUTS ],
-                     int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, rolloutcontext *prc );
-
-extern int
-GeneralCubeDecision ( char *sz, 
-                      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                      int anBoard[ 2 ][ 25 ],
-                      cubeinfo *pci, evalsetup *pes );
-
-extern int
-GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                       int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, evalcontext *pec );
-
-extern int
-GeneralCubeDecisionR ( char *sz, 
-                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                       int anBoard[ 2 ][ 25 ],
-                       cubeinfo *pci, rolloutcontext *prc );
-
-
-
 #endif

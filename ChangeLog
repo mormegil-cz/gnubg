@@ -1,3 +1,11 @@
+Wed May 23 12:25:08 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c, rollout.c (GeneralEvaluation, GeneralCubeDecision): Moved
+	these (and associated) functions from eval.c to rollout.c.  The
+	trouble with having them in eval.c was that linking eval.c would
+	then require the GTK+ libraries (when using GTK+), which caused 
+	problems for things like makebearoff.
+
 Wed May 23 17:01:03 2001  Jørn Thyssen  <joern@thyssen.nu>
 
 	* analysis.c (AnalyzeGame): evaltype is now in evalsetup. Also,

@@ -257,11 +257,15 @@ duplication of effort and to make sure our changes merge easily.
   entire game like Motif.
 ** Submit something to <http://www.distributed.net/nextgen/projects.html>.
 ** Allow loading and saving weights to specify binary or ASCII format.
-** Import FIBS `oldmoves' games and matches.
-** Export games, matches and analysis to ASCII, HTML, PostScript, etc.
-  Examples: "export game html foo.html", "export match mat bar.mat". (gary)
-*** Make the .mat format identical to Jellyfish (things to check:
+** Import and export games, positions and matches in various formats:
+*** FIBS `oldmoves'.
+*** PostScript, EPS and PDF.
+*** JF .gam, .mat and .pos.
+**** Make the .mat format identical to Jellyfish (things to check:
   beavers, resignations, "and the match"...)
+*** HTML.
+*** ASCII.
+*** LaTeX.
 ** Add option to flip the board.
 ** Think about generating huge databases for CD-ROMs (we can get 1-sided
   databases for all chequers up to the 11 point, or 2-sided databases where

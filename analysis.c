@@ -34,6 +34,7 @@
 #include "gtkgame.h"
 #endif
 #include "positionid.h"
+#include "rollout.h"
 #include "analysis.h"
 
 #ifndef HUGE_VALF
@@ -135,7 +136,7 @@ AnalyzeGame ( list *plGame ) {
     int fFirstMove = 1;
     unsigned char auch[ 10 ];
     cubeinfo ci;
-    float arOutput [ NUM_OUTPUTS ], rSkill, rChequerSkill, rCost;
+    float rSkill, rChequerSkill, rCost;
     float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     evalsetup esDouble; /* shared between the */

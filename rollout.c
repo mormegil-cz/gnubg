@@ -862,3 +862,245 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
   return cGames;
 }
+
+
+/*
+ * General evaluation functions.
+ */
+
+extern int
+GeneralEvaluation ( char *sz, 
+                    float arOutput[ NUM_ROLLOUT_OUTPUTS ], 
+                    float arStdDev[ NUM_ROLLOUT_OUTPUTS ], 
+                    int anBoard[ 2 ][ 25 ],
+                    cubeinfo *pci, evalsetup *pes ) {
+
+  int i;
+
+  switch ( pes->et ) {
+  case EVAL_EVAL:
+
+    for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+      arStdDev[ i ] = 0.0f;
+
+    return GeneralEvaluationE ( arOutput, anBoard,
+                                pci, &pes->ec );
+    break;
+
+  case EVAL_ROLLOUT:
+
+    return GeneralEvaluationR ( sz, arOutput, arStdDev, anBoard,
+                                pci, &pes->rc );
+    break;
+
+  case EVAL_NONE:
+
+    for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+      arOutput[ i ] = arStdDev[ i ] = 0.0f;
+
+    break;
+  }
+
+  return 0;
+}
+
+
+extern int
+GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                     int anBoard[ 2 ][ 25 ],
+                     cubeinfo *pci, evalcontext *pec ) {
+
+  float arCf [ NUM_CUBEFUL_OUTPUTS ];
+
+  if ( pec->fCubeful ) {
+
+    if ( EvaluatePositionCubeful2 ( anBoard, arOutput, arCf,
+                                    pci, pec, pec->nPlies, pec->nPlies,
+                                    TRUE, pci ) )
+      return -1;
+
+    arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
+    arOutput[ OUTPUT_CUBEFUL_EQUITY ] = arCf[ OUTPUT_OPTIMAL ];
+
+  } 
+  else {
+
+    if ( EvaluatePosition ( anBoard, arOutput, pci, pec ) )
+      return -1;
+
+    arOutput[ OUTPUT_EQUITY ] = Utility ( arOutput, pci );
+    arOutput[ OUTPUT_CUBEFUL_EQUITY ] = 0.0f;
+
+  }
+
+  return 0;
+
+}
+
+
+extern int
+GeneralEvaluationR ( char *sz,
+                     float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                     float arStdDev [ NUM_ROLLOUT_OUTPUTS ],
+                     int anBoard[ 2 ][ 25 ],
+                     cubeinfo *pci, rolloutcontext *prc ) {
+
+  int fCubeDecTop = TRUE;
+
+  if ( RolloutGeneral ( anBoard, sz, arOutput, arStdDev,
+                        prc, pci, &fCubeDecTop, 1, FALSE ) < 0 )
+    return -1;
+
+  return 0;
+}
+
+
+extern int
+GeneralCubeDecision ( char *sz, 
+                      float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                      int anBoard[ 2 ][ 25 ],
+                      cubeinfo *pci, evalsetup *pes ) {
+
+  int i, j;
+
+  switch ( pes->et ) {
+  case EVAL_EVAL:
+
+    for ( j = 0; j < 2; j++ )
+      for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+        aarStdDev[ j ][ i ] = 0.0f;
+
+    return GeneralCubeDecisionE ( aarOutput, anBoard,
+                                  pci, &pes->ec );
+    break;
+
+  case EVAL_ROLLOUT:
+
+    return GeneralCubeDecisionR ( sz, aarOutput, aarStdDev, anBoard,
+                                  pci, &pes->rc );
+    break;
+
+  case EVAL_NONE:
+
+    for ( j = 0; j < 2; j++ )
+      for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+        aarStdDev[ j ][ i ] = 0.0f;
+
+    break;
+  }
+
+  return 0;
+}
+
+extern int
+GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                       int anBoard[ 2 ][ 25 ],
+                       cubeinfo *pci, evalcontext *pec ) {
+
+  float arCf [ 4 ];
+  int i;
+
+  if ( EvaluatePositionCubeful2 ( anBoard, aarOutput[ 0 ], arCf,
+                                  pci, pec, pec->nPlies, pec->nPlies,
+                                  TRUE, pci ) )
+    return -1;
+
+  /* copy cubeless winning chances 
+     FIXME: EvalPosCF2 should return both */
+
+  for ( i = 0; i < OUTPUT_EQUITY; i++ )
+    aarOutput[ 1 ][ i ] = aarOutput[ 0 ][ i ];
+
+  /* Calculate equity */
+
+  for ( i = 0; i < 2; i++ )
+    aarOutput[ i ][ OUTPUT_EQUITY ] = Utility ( aarOutput[ i ], pci );
+
+  /* Assign cubeful equity */
+
+  aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = arCf[ OUTPUT_NODOUBLE ];
+  aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = arCf[ OUTPUT_TAKE ];
+
+  return 0;
+
+}
+
+extern int
+GeneralCubeDecisionR ( char *sz, 
+                       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+                       int anBoard[ 2 ][ 25 ],
+                       cubeinfo *pci, rolloutcontext *prc ) {
+
+  cubeinfo aci[ 2 ];
+
+  char aach[ 2 ][ 40 ];
+
+  int i, cGames;
+  int afCubeDecTop[] = { FALSE, FALSE }; /* no cube decision in 
+                                            iTurn = 0 */
+
+  SetCubeInfo ( &aci[ 0 ], pci->nCube, pci->fCubeOwner, pci->fMove,
+                pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby, pci->fBeavers );
+
+  FormatCubePosition ( aach[ 0 ], &aci[ 0 ] );
+
+  SetCubeInfo ( &aci[ 1 ], 2 * pci->nCube, ! pci->fMove, pci->fMove,
+                pci->nMatchTo, pci->anScore, pci->fCrawford, pci->fJacoby, pci->fBeavers );
+
+  FormatCubePosition ( aach[ 1 ], &aci[ 1 ] );
+
+  if ( ! GetDPEq ( NULL, NULL, &aci[ 0 ] ) ) {
+    outputl ( "Cube not available!" );
+    return -1;
+  }
+
+  if ( ! prc->fCubeful ) {
+    outputl ( "Setting cubeful on" );
+    prc->fCubeful = TRUE;
+  }
+
+
+#if USE_GTK
+  if( fX )
+    GTKRollout( 2, aach, prc->nTrials );
+  else
+#endif
+    outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
+             "Equity                    Trials" );
+	
+#if USE_GTK
+  if( fX )
+    GTKRolloutRow( 0 );
+#endif
+  if( ( cGames = RolloutGeneral( anBoard, aach, aarOutput, aarStdDev,
+                                 prc, aci, afCubeDecTop, 2, FALSE ) ) <= 0 )
+    return -1;
+
+#if USE_GTK
+	if( !fX )
+#endif
+          for ( i = 0; i < 2; i++ )
+	    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
+                     "Cubeful: %6.3f %12d\n"
+		     "              Standard error %5.3f %5.3f %5.3f %5.3f"
+		     " %5.3f (%6.3f)         %6.3f\n\n",
+		     aach[ i ],
+                     aarOutput[ i ][ 0 ], aarOutput[ i ][ 1 ],
+                     aarOutput[ i ][ 2 ], aarOutput[ i ][ 3 ],
+                     aarOutput[ i ][ 4 ], aarOutput[ i ][ 5 ],
+                     aarOutput[ i ][ 6 ],
+                     cGames,
+                     aarStdDev[ i ][ 0 ], aarStdDev[ i ][ 1 ],
+                     aarStdDev[ i ][ 2 ], aarStdDev[ i ][ 3 ],
+                     aarStdDev[ i ][ 4 ], aarStdDev[ i ][ 5 ],
+                     aarStdDev[ i ][ 6 ] ); 
+    
+#if USE_GTK
+    if( fX )
+	GTKRolloutDone();
+#endif	
+  
+    return 0;
+}
