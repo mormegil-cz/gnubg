@@ -4718,7 +4718,7 @@ extern void CommandSetLang( char *sz ) {
 
     if( ! strcmp( sz, szLang ) ) {
 	outputf( _("The current language preference is already set to "
-		   "%s."), sz );
+		   "%s.\n"), sz );
 	return;
     }
 
@@ -4727,7 +4727,7 @@ extern void CommandSetLang( char *sz ) {
     outputf( _( "The language preference has been set to `%s'.\n"
 		"Please remember to save settings.\n"
 		"The new setting will only take effect on the next start "
-		"of gnubg." ), sz );
+		"of gnubg.\n" ), sz );
 
 }
 
