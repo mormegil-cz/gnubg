@@ -123,7 +123,7 @@ int fReadline = TRUE;
 
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
-static int fInteractive, cOutputDisabled;
+static int fInteractive, cOutputDisabled, cOutputPostponed;
 
 int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
@@ -134,8 +134,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fConfirm = TRUE, fShowProgress, fMove, fCubeOwner, fJacoby = TRUE,
     fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
     fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
-    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, fAnneal = TRUE;
-float rAlpha = 0.1;
+    fOutputMatchPC = TRUE, fOutputRawboard = FALSE;
+float rAlpha = 0.1, rAnneal = 0.3;
 
 gamestate gs = GAME_NONE;
 
@@ -171,6 +171,7 @@ static char szDICE[] = "<die> <die>",
     szPLIES[] = "<plies>",
     szPOSITION[] = "<position>",
     szPROMPT[] = "<prompt>",
+    szRATE[] = "<rate>",
     szSCORE[] = "<score>",
     szSEED[] = "<seed>",
     szSIZE[] = "<size>",
@@ -318,7 +319,7 @@ command acDatabase[] = {
     { "alpha", CommandSetTrainingAlpha, "Control magnitude of backpropagation "
       "of errors", szVALUE, NULL },
     { "anneal", CommandSetTrainingAnneal, "Decrease alpha as training "
-      "progresses", szONOFF, NULL },
+      "progresses", szRATE, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
     { "automatic", NULL, "Perform certain functions without user input",
@@ -2145,7 +2146,7 @@ extern void CommandSaveWeights( char *sz ) {
     if( EvalSave( sz ) )
 	perror( sz );
     else
-	outputl( "Evaluator weights saved." );
+	outputf( "Evaluator weights saved to %s.\n", sz );
 }
 
 extern void CommandTrainTD( char *sz ) {
@@ -2195,7 +2196,7 @@ extern void CommandTrainTD( char *sz ) {
 	    EvaluatePosition( anBoardTrain, ar, &ciCubeless, &ecTD );
 	    
 	    InvertEvaluation( ar );
-	    if( TrainPosition( anBoardOld, ar, rAlpha, fAnneal ) )
+	    if( TrainPosition( anBoardOld, ar, rAlpha, rAnneal ) )
 		break;
 	    
 	    /* FIXME can stop as soon as perfect */
@@ -2737,7 +2738,7 @@ extern void outputv( char *sz, va_list val ) {
 /* Signifies that all output for the current command is complete */
 extern void outputx( void ) {
     
-    if( cOutputDisabled )
+    if( cOutputDisabled || cOutputPostponed )
 	return;
     
 #if USE_GTK
@@ -2770,6 +2771,21 @@ extern void outputon( void ) {
     assert( cOutputDisabled );
 
     cOutputDisabled--;
+}
+
+/* Temporarily disable outputx() calls */
+extern void outputpostpone( void ) {
+
+    cOutputPostponed++;
+}
+
+/* Re-enable outputx() calls */
+extern void outputresume( void ) {
+
+    assert( cOutputPostponed );
+
+    if( !--cOutputPostponed )
+	outputx();
 }
 
 extern RETSIGTYPE HandleInterrupt( int idSignal ) {
@@ -2889,6 +2905,11 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 
     if( fX ) {
+#if WIN32
+	/* The MS Windows port cannot support multiplexed GUI/TTY input;
+	   disable the TTY (as if the -w option was specified). */
+	fTTY = FALSE;
+#endif
 	fInteractive = fShowProgress = TRUE;
 #if HAVE_LIBREADLINE
 	fReadline = isatty( STDIN_FILENO );
