@@ -1,3 +1,8 @@
+Mon Mar 11 22:25:25 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* woolsey.xml, jacobs.xml, snowie.xml, zadeh.xml: changed
+	licensing terms.
+
 Sun Mar 10 22:35:28 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* woolsey.xml, jacobs.xml, snowie.xml: Calculate post crawford table as
