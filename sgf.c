@@ -1207,6 +1207,7 @@ static void WriteStatContext( FILE *pf, statcontext *psc ) {
     }
 }
 
+
 static void SaveGame( FILE *pf, list *plGame ) {
 
     list *pl;
@@ -1394,6 +1395,9 @@ extern void CommandSaveGame( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_SGF );
+
 }
 
 extern void CommandSaveMatch( char *sz ) {
@@ -1431,4 +1435,7 @@ extern void CommandSaveMatch( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_SGF );
+
 }

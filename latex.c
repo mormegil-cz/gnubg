@@ -537,6 +537,9 @@ extern void CommandExportGameLaTeX( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_LATEX );
+
 }
 
 extern void CommandExportMatchLaTeX( char *sz ) {
@@ -573,4 +576,7 @@ extern void CommandExportMatchLaTeX( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_LATEX );
+
 }

@@ -2941,6 +2941,8 @@ extern void CommandExportGameHtml( char *sz ) {
     if( pf != stdout )
 	fclose( pf );
 
+    setDefaultFileName ( sz, PATH_HTML );
+    
 }
 
 /*
@@ -3024,8 +3026,15 @@ extern void CommandExportMatchHtml( char *sz ) {
       aszLinks[ 2 ] = ( i < nGames - 1 ) ? HTMLFilename ( sz, i + 1 ) : NULL;
       aszLinks[ 3 ] = HTMLFilename ( sz, nGames - 1 );
 
-      if ( !i && ! confirmOverwrite ( sz, fConfirmSave ) )
-        return;
+      if ( !i ) {
+
+        if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+          return;
+
+        setDefaultFileName ( sz, PATH_HTML );
+
+      }
+
 
       if( !strcmp( szCurrent, "-" ) )
 	pf = stdout;
@@ -3109,5 +3118,8 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_HTML );
+
 }
 

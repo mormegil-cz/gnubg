@@ -1016,6 +1016,9 @@ static void ExportGameGeneral( int f, char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, f ? PATH_PDF : PATH_POSTSCRIPT );
+
 }
 
 extern void CommandExportGamePDF( char *sz ) {
@@ -1076,6 +1079,9 @@ static void ExportMatchGeneral( int f, char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, f ? PATH_PDF : PATH_POSTSCRIPT );
+
 }
 
 extern void CommandExportMatchPDF( char *sz ) {
@@ -1126,4 +1132,7 @@ extern void CommandExportPositionEPS( char *sz ) {
 
     if( pf != stdout )
 	fclose( pf );
+
+    setDefaultFileName ( sz, PATH_EPS );
+
 }
