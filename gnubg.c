@@ -5840,19 +5840,31 @@ static RETSIGTYPE SoundChild ( int n ) {
 
 #endif /* HAVE_FORK */
 
+#ifdef WIN32
+#define BIG_PATH _MAX_PATH
+#else
+#define BIG_PATH PATH_MAX
+#endif
+
 static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchCommands = NULL, *pchScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
     int i, j;
+
+#ifdef WIN32
+    char szInvokingDirectory[ BIG_PATH ];  /* current dir when GNUbg was started */
+#endif
+	char szQuoted[ BIG_PATH ];
+
     static struct option ao[] = {
-	{ "datadir", required_argument, NULL, 'd' },
 	{ "no-bearoff", no_argument, NULL, 'b' },
 	{ "no-rc", no_argument, NULL, 'r' },
 	{ "new-weights", optional_argument, NULL, 'n' },
 	{ "quiet", no_argument, NULL, 'q' },
 	{ "window-system-only", no_argument, NULL, 'w' },
 	/* these options must come last -- see below. */
+	{ "datadir", required_argument, NULL, 'd' },
 	{ "commands", required_argument, NULL, 'c' },
         { "help", no_argument, NULL, 'h' },
 	{ "script", required_argument, NULL, 's' },
@@ -5889,13 +5901,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
        we have to check for -t before the other options to avoid connecting
        to the X server if it is specified.
 
-       We use the last five element of ao to get the "--help", "--tty",
-       "--commands", "--script" and "--version" options only. */
+       We use the last six elements of ao to get the "--help", "--tty",
+       "--commands", "--script", "--datadir" and "--version" options only. */
     
     opterr = 0;
     
-    while( ( ch = getopt_long( argc, argv, "chstv", ao + sizeof( ao ) /
-			       sizeof( ao[ 0 ] ) - 6, NULL ) ) != (char) -1 )
+    while( ( ch = getopt_long( argc, argv, "cd:hstv", ao + sizeof( ao ) /
+			       sizeof( ao[ 0 ] ) - 7, NULL ) ) != (char) -1 )
 	switch( ch ) {
 	case 's': /* script */
 	case 'c': /* commands */
@@ -5913,6 +5925,17 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'h': /* help */
             usage( argv[ 0 ] );
 	    exit( EXIT_SUCCESS );
+
+	case 'd': /* datadir */
+	    szDataDirectory = optarg;
+
+#ifdef WIN32
+	    _getcwd( szInvokingDirectory, _MAX_PATH );
+	    _chdir( szDataDirectory );
+#endif
+
+	    break;
+
 	case 'v': /* version */
 	    version();
 	    exit( EXIT_SUCCESS );
@@ -5983,7 +6006,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    fInteractive = FALSE;
 	    break;
 	case 'd': /* datadir */
-	    szDataDirectory = optarg;
 	    break;
 	case 'h': /* help */
             usage( argv[ 0 ] );
@@ -6160,8 +6182,31 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	fSound = FALSE;
 #endif
     
-    if( optind < argc && *argv[ optind ] )
-       CommandLoadMatch( argv[ optind ] );
+#ifdef WIN32
+    /* change back to directory where GNUbg was started from
+     * in case the match filename comes without an absolute
+     * path
+     */
+    if( szInvokingDirectory && *szInvokingDirectory )
+        _chdir( szInvokingDirectory );
+#endif
+
+    if( optind < argc && *argv[ optind ] ) {
+	if( strcspn( argv[ optind ], " \t\n\r\v\f" ) ) {
+	    /* quote filename with whitespace so that function
+	     * NextToken in CommandLoadCommands doesn't split it
+         */
+	    sprintf( szQuoted, "'%s'", argv[ optind ] );
+	    CommandLoadMatch( szQuoted );
+	}
+	else
+	    CommandLoadMatch( argv[ optind ] );
+    }
+
+#ifdef WIN32
+    if( szDataDirectory && *szDataDirectory )
+        _chdir( szDataDirectory );
+#endif
 
     fflush( stdout );
     fflush( stderr );

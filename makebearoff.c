@@ -1205,7 +1205,7 @@ extern int main( int argc, char **argv ) {
               _("One-sided database:\n"
                 "Number of points                  : %12d\n"
                 "Number of chequers                : %12d\n"
-                "Number of positions               : %'12d\n"
+                "Number of positions               : %12d\n"
                 "Approximate by normal distribution: %s\n"
                 "Include gammon distributions      : %s\n"
                 "Use compression scheme            : %s\n"

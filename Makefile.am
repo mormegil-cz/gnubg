@@ -1,3 +1,4 @@
+## $Id$
 if USE_EXT
 SUBDIRS = intl lib doc ext met po m4 xpm sounds
 else
@@ -83,7 +84,7 @@ makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 
-makebearoff1_SOURCES = makebearoff1.c 
+makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
 makebearoff1_LDADD = 
 makebearoff1_DEPENDENCIES = 
 

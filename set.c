@@ -29,6 +29,7 @@
 #endif
 #include <math.h>
 #if HAVE_SYS_RESOURCE_H
+#include <sys/time.h>
 #include <sys/resource.h>
 #endif
 #if HAVE_SYS_SOCKET_H

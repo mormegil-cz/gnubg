@@ -1,3 +1,12 @@
+Mon Nov 25 12:13:46 2002 GMT jsegrave <jsegrave@jes2.demon.nl>
+
+	* gnubg.c - patches from Holger to makes file associations under
+ 	  Windows work and to provide the ability to load matches with
+ 	  whitespace in the path name
+	* set.c - under FreeBSD, sys/resource.h requires sys/time.h
+	* makebearoff.c - extraneous single quote caused a core dump
+	* Makefile.am - makebearoff1 needs to link getopt and getopt1
+
 Sun Nov 24 22:17:28 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (SetRollouts): Correct typo in check of rcRollout.fInitial.
