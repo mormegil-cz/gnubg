@@ -2003,7 +2003,7 @@ static void DrawChequers( renderdata *prd, unsigned char *puch, int nStride,
 			  int x, int y, int cx, int cy ) {
     int i, c, yChequer;
 
-    c = ( !n || n == 25 ) ? 3 : 5;
+    c = ( !iPoint || iPoint == 25 ) ? 3 : 5;
     yChequer = aaanPositions[ prd->fClockwise ][ iPoint ][ 1 ] * prd->nSize;
     
     for( i = 0; i < n; i++ ) {

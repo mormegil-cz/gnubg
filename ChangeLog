@@ -1,3 +1,8 @@
+Sat Jan 18 11:24:00 2003  Gary Wong  <gtw@gnu.org>
+
+	* render.c (DrawChequers): Fix cosmetic bug with more than 3 chequers
+	on bar (reported by Nardy Pillards).
+
 Fri Jan 17 16:36:08 2003  Gary Wong  <gtw@gnu.org>
 
 	* speed.c (CommandCalibrate): New function.  Measure evaluation speed,
