@@ -183,16 +183,16 @@ EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 
 DISTCLEANFILES=gnubg.wd
 
-br1.c:	makebearoff makebearoff1
+br1.c:	makebearoff makebearoff1 gnubg_os0.bd
 	if [ ! -f br1.c ]; then \
-	   ./makebearoff -o 6 -s 7999999 | ./makebearoff1 -o br1.c; \
+	   ./makebearoff1 -o br1.c < gnubg_os0.bd; \
 	fi
 
 sgfp.c sgfp.h: sgf.y
-	$(BISON) -o sgfp.c -p sgf -d $(srcdir)/sgf.y
+	$(YACC) -o sgfp.c -p sgf -d $(srcdir)/sgf.y
 
 sgfl.c: sgf.l
-	$(FLEX) -o$@ -Psgf $(srcdir)/sgf.l
+	$(LEX) -o$@ -Psgf $(srcdir)/sgf.l
 
 credits.c AUTHORS: credits.sh
 	cd $(srcdir) && $(SHELL) ./credits.sh
