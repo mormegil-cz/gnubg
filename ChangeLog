@@ -1,3 +1,7 @@
+Tue Jun 24 17:57:53 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkprefs.c, boards.xml: preview 3D boards, 3D board designs.
+
 Mon Jun 16 21:28:35 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am, configure.in: autoconf magic for BOARD3D.
