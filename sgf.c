@@ -575,7 +575,7 @@ RestoreRolloutRolloutContext ( rolloutcontext *prc, const char *sz ) {
   if ( ! pc )
     return;
 
-  sscanf ( pc, "RC %d %d %d %hd %hd \"%1023s\" %d %d",
+  sscanf ( pc, "RC %d %d %d %hu %u \"%1023s\" %d",
            &fCubeful,
            &fVarRedn,
            &fInitial,

@@ -104,7 +104,7 @@ typedef struct _rolloutcontext {
   unsigned int fRotate : 1;  /* rotate dice of first two rolls */
     
   unsigned short nTruncate; /* truncation */
-  unsigned short nTrials; /* number of rollouts */
+  unsigned int nTrials; /* number of rollouts */
 
   rng rngRollout;
   int nSeed;
