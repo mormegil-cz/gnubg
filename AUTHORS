@@ -1,40 +1,46 @@
 $Id$
 
-The pre-release version 0.0 of GNU Backgammon was written by Gary Wong.
 
-Since then, contributors (of bug reports, comments, and patches) include:
+			 GNU Backgammon was written by:
 
- Jeff Haferman
- Joseph Heled
- Øystein Johansen
- Kevin Maguire
- David Montgomery
- Dave Neary
- Petri Pitkänen
- Jared Riley
- Jørn Thyssen
- Gary Wong
- Frank Worrell
+	   Joseph Heled            Jørn Thyssen            Gary Wong
 
-The current developers are:
 
- Joseph Heled
- Jakob Hilmer
- Jørn Thyssen
- Gary Wong
 
-Credit is also due to those who have published information about backgammon
-playing programs (references will appear here later).  GNU Backgammon has
-borrowed ideas from:
 
- Hans Berliner
- Chuck Bower
- David Montgomery
- Brian Sheppard
- Gerry Tesauro
- Michael Zehr
+	 Contributors (of bug reports, comments, and patches) include:
 
-Library code from the following authors has been included in GNU Backgammon:
+				 Jeff Haferman
+				Øystein Johansen
+				 Kevin Maguire
+				David Montgomery
+				   Dave Neary
+				 Petri Pitkänen
+				  Jared Riley
+				 Frank Worrell
 
- Bob Jenkins (the ISAAC pseudo random number generator)
- Takuji Nishimura (the Mersenne Twister pseudo random number generator)
+
+  Credit is also due to those who have published information about backgammon
+   playing programs (references will appear here later).  GNU Backgammon has
+			      borrowed ideas from:
+
+				 Hans Berliner
+				  Chuck Bower
+				David Montgomery
+				 Brian Sheppard
+				 Gerry Tesauro
+				  Michael Zehr
+
+					
+    The manual for GNU Backgammon includes a chapter describing the rules of
+      backgammon, written by Tom Keith for his Backgammon Galore web site
+			     <http://www.bkgm.com/>.
+
+
+  Library code from the following authors has been included in GNU Backgammon:
+
+	     Bob Jenkins (the ISAAC pseudo random number generator)
+     Takuji Nishimura (the Mersenne Twister pseudo random number generator)
+
+
+	  Send bug reports for GNU Backgammon to: <bug-gnubg@gnu.org>
