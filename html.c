@@ -1761,7 +1761,7 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
               ap[ 0 ].szName,
               pms->anScore[ 0 ],
               ap[ 1 ].szName,
-              pms->anScore[ 0 ],
+              pms->anScore[ 1 ],
               pms->nMatchTo );
   else
     sprintf ( szHeader,
