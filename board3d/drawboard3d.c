@@ -822,8 +822,6 @@ void drawDice(BoardData* bd, int num)
 	SetupSimpleMat(&whiteMat, 1, 1, 1);
 
 	value = bd->diceRoll[num];
-	if (value == 0)
-		return;	/* No value to show */
 	value--;	/* Zero based for array access */
 
 	/* Get dice rotation */
@@ -2291,7 +2289,7 @@ else
 
 int DiceShowing(BoardData* bd)
 {
-	return (bd->diceShown == DICE_ON_BOARD ||
+	return ((bd->diceShown == DICE_ON_BOARD && bd->diceRoll[0]) ||
 		(bd->rd->fDiceArea && bd->diceShown == DICE_BELOW_BOARD));
 }
 
