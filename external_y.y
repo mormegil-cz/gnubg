@@ -44,6 +44,8 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 %}
 
 %name-prefix="ext"
+%defines
+%token-table
 
 %union {
   int number;

@@ -34,6 +34,8 @@ void escapes(const char *cp, char *tp);
 %option noyywrap
 %option prefix="ext"
 %option nounput
+%option 7bit
+%option case-insensitive
 
 NUMSTR -?[0-9]+
 
@@ -62,7 +64,7 @@ on              { return ON; }
 no              { return OFF; }
 off             { return OFF; }
 
-board:[[:alnum:]]+:[[:alnum:]]+(:{NUMSTR})+  { 
+board:[[:alpha:]_]+:[[:alpha:]_]+(:{NUMSTR})+  { 
 			char *buf = malloc( strlen( exttext ) + 1 );
 			escapes(exttext, buf);
 			extlval.sval = buf;
