@@ -178,6 +178,8 @@ duplication of effort and to make sure our changes merge easily.
    "next move for player 0 marked doubtful".
 ** Problem with auto-analysis
    (X events must be disabled whilst analysing)
+** Change analysis submenu to a widget.
+
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
