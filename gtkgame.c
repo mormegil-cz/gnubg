@@ -8393,6 +8393,8 @@ void DockPanels()
 
 	if (fDockPanels)
 	{
+		RefreshGeometries();	/* Get the current window positions */
+
 		gtk_widget_show(pwArrowVBox);
 		gtk_widget_show(gtk_item_factory_get_widget(pif, "/Windows/Commentary"));
 		gtk_widget_show(gtk_item_factory_get_widget(pif, "/Windows/Hide panels"));
