@@ -160,6 +160,7 @@ typedef struct _cubeinfo {
 
 extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
+extern void ( *fnTick )( void );
 extern cubeinfo ciCubeless;
 extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;

@@ -35,9 +35,9 @@ int fClockwise = FALSE; /* Player 1 moves clockwise */
 
 /*
  *  GNU Backgammon  Position ID: 0123456789ABCD
- *  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg (0 points)
- *  |                  |   | O  O  O  O     O | OO  Cube: 2
- *  |                  |   | O     O          | OO  On roll
+ *  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg (Cube: 2)
+ *  |                  |   | O  O  O  O     O | OO  0 points
+ *  |                  |   | O     O          | OO  Cube offered at 2
  *  |                  |   |       O          | O
  *  |                  |   |                  | O
  *  |                  |   |                  | O   
@@ -46,8 +46,8 @@ int fClockwise = FALSE; /* Player 1 moves clockwise */
  *  |                  |   |                  | X
  *  |                  |   |                  | X
  *  |                  |   |       X  X  X  X | X   Rolled 11
- *  |                  |   |    X  X  X  X  X | XX  Cube: 2
- *  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: Gary (0 points)
+ *  |                  |   |    X  X  X  X  X | XX  0 points
+ *  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: Gary (Cube: 2)
  *
  */
 
@@ -261,19 +261,19 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 
 /*
  *     GNU Backgammon  Position ID: 0123456789ABCD
- *     +24-23-22-21-20-19------18-17-16-15-14-13-+  O: gnubg (0 points)
- *  OO | O     O  O  O  O |   |                  |  Cube: 2
- *  OO |          O     O |   |                  |  On roll
- *   O |          O       |   |                  |
- *   O |                  |   |                  |
- *   O |                  |   |                  | 
+ *     +24-23-22-21-20-19------18-17-16-15-14-13-+  O: gnubg (Cube: 2)     
+ *  OO | O     O  O  O  O |   |                  |  0 points               
+ *  OO |          O     O |   |                  |  Cube offered at 2      
+ *   O |          O       |   |                  |                         
+ *   O |                  |   |                  |                         
+ *   O |                  |   |                  |                         
  *     |                  |BAR|                  |v Cube: 1 (7 point match)
- *   X |                  |   |                  | 
- *   X |                  |   |                  |
- *   X |                  |   |                  |
- *   X | X  X  X  X       |   |                  |  Rolled 11
- *  XX | X  X  X  X  X    |   |                  |  Cube: 2
- *     +-1--2--3--4--5--6-------7--8--9-10-11-12-+  X: Gary (0 points)
+ *   X |                  |   |                  |                         
+ *   X |                  |   |                  |                         
+ *   X |                  |   |                  |                         
+ *   X | X  X  X  X       |   |                  |  Rolled 11              
+ *  XX | X  X  X  X  X    |   |                  |  0 points               
+ *     +-1--2--3--4--5--6-------7--8--9-10-11-12-+  X: Gary (Cube: 2)      
  *
  */
 

@@ -31,9 +31,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if WIN32
-#include <windows.h>
-#endif
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -59,7 +56,6 @@
 			  click */
 
 #if WIN32
-static int fWine; /* TRUE if we're running under Wine */
 /* The Win32 port of GDK wants clip masks to be inverted, for some reason... */
 #define MASK_INVISIBLE 0
 #define MASK_VISIBLE 1
@@ -1896,14 +1892,6 @@ static gint board_set( Board *board, const gchar *board_text ) {
     }
     
     bd->clockwise = fClockwise;
-    
-#if WIN32
-    if( fWine )
-	/* For some reason, Wine manages to completely mess up updates
-	   of the board window.  We assume this is a bug in GTK+ and/or
-	   Wine, and work around it by redrawing the entire window. */
-	gtk_widget_queue_draw( gtk_widget_get_toplevel( bd->drawing_area ) );
-#endif
     
     return 0;
 }
@@ -3807,8 +3795,6 @@ static void board_init( Board *board ) {
 			GTK_SIGNAL_FUNC( dice_expose ), bd );
     gtk_signal_connect( GTK_OBJECT( bd->dice_area ), "button_press_event",
 			GTK_SIGNAL_FUNC( dice_press ), bd );
-
-    /* FIXME also trap keys in the board window; redirect them to xterm */
 }
 
 static void board_class_init( BoardClass *c ) {
@@ -3836,18 +3822,6 @@ extern GtkType board_get_type( void ) {
     if( !board_type ) {
 	irandinit( &rc, FALSE );
 	board_type = gtk_type_unique( GTK_TYPE_VBOX, &board_info );
-#if WIN32
-	{
-	    HKEY hkey;
-	    char sz[ 256 ];
-	    LONG cch = 256;
-	    
-	    fWine = !RegOpenKey( HKEY_LOCAL_MACHINE,
-				 "HARDWARE\\DESCRIPTION\\System", &hkey ) &&
-		!RegQueryValueEx( hkey, "Identifier", NULL, NULL, sz, &cch ) &&
-		!strcmp( sz, "SystemType WINE" );
-	}	
-#endif
     }
     
     return board_type;

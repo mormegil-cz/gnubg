@@ -837,8 +837,8 @@ command cER = {
     { NULL, NULL, NULL, NULL, NULL }
 }, cTop = { NULL, NULL, NULL, NULL, acTop };
 
-int iProgressMax, iProgressValue;
-char *pcProgress;
+static int iProgressMax, iProgressValue, fInProgress;
+static char *pcProgress;
 
 char *aszVersion[] = {
     "GNU Backgammon " VERSION,
@@ -1649,7 +1649,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
 extern void ShowBoard( void ) {
 
     char szBoard[ 2048 ];
-    char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ];
+    char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ],
+	szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
     char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
 #if USE_GUI
     int anBoardTemp[ 2 ][ 25 ];
@@ -1659,9 +1660,6 @@ extern void ShowBoard( void ) {
     if( cOutputDisabled )
 	return;
 
-    apch[ 0 ] = szPlayer0;
-    apch[ 6 ] = szPlayer1;
-    
 #if USE_GTK
     /* FIXME it's ugly to access ...->animate_computer_moves here, but
        postponing updates can lead to animating based on the wrong
@@ -1735,8 +1733,15 @@ extern void ShowBoard( void ) {
 	    return;
 	}
 	
+	apch[ 0 ] = szPlayer0;
+	apch[ 6 ] = szPlayer1;
+	sprintf( apch[ 1 ] = szScore0, "%d point%c", ms.anScore[ 0 ],
+		 ms.anScore[ 0 ] != 1 ? 's' : 0 );
+	sprintf( apch[ 5 ] = szScore1, "%d point%c", ms.anScore[ 1 ],
+		 ms.anScore[ 1 ] != 1 ? 's' : 0 );
+
 	if( ms.fDoubled ) {
-	    apch[ ms.fTurn ? 5 : 1 ] = szCube;
+	    apch[ ms.fTurn ? 4 : 2 ] = szCube;
 
 	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
 	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
@@ -1745,7 +1750,7 @@ extern void ShowBoard( void ) {
 	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
 	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
 
-	    apch[ ms.fMove ? 5 : 1 ] = sz;
+	    apch[ ms.fMove ? 4 : 2 ] = sz;
 	
 	    if( ms.anDice[ 0 ] )
 		sprintf( sz, "Rolled %d%d", ms.anDice[ 0 ], ms.anDice[ 1 ] );
@@ -1756,8 +1761,12 @@ extern void ShowBoard( void ) {
 	    
 	    if( ms.fCubeOwner < 0 ) {
 		apch[ 3 ] = szCube;
-		
-		sprintf( szCube, "(Cube: %d)", ms.nCube );
+
+		if( ms.nMatchTo )
+		    sprintf( szCube, "%d point match (Cube: %d)", ms.nMatchTo,
+			     ms.nCube );
+		else
+		    sprintf( szCube, "(Cube: %d)", ms.nCube );
 	    } else {
 		int cch = strlen( ap[ ms.fCubeOwner ].szName );
 		
@@ -1768,6 +1777,10 @@ extern void ShowBoard( void ) {
 			 'O', cch, ap[ ms.fCubeOwner ].szName, ms.nCube );
 
 		apch[ ms.fCubeOwner ? 6 : 0 ] = szCube;
+
+		if( ms.nMatchTo )
+		    sprintf( apch[ 3 ] = szMatch, "%d point match",
+			     ms.nMatchTo );
 	    }
 	}
     
@@ -1916,9 +1929,11 @@ extern void CommandEval( char *sz ) {
 	SetCubeInfo( &ci, ms.nCube, ms.fCubeOwner, n ? !ms.fMove : ms.fMove,
 		     ms.nMatchTo, ms.anScore, ms.fCrawford, fJacoby,
 		     nBeavers );    
-    
+
+    ProgressStart( "Evaluating position..." );
     if( !DumpPosition( an, szOutput, &esEvalCube.ec, &ci,
                        fOutputMWC, fOutputWinPC, n ) ) {
+	ProgressEnd();
 #if USE_GTK
 	if( fX )
 	    GTKEval( szOutput );
@@ -1926,6 +1941,7 @@ extern void CommandEval( char *sz ) {
 #endif
 	    outputl( szOutput );
     }
+    ProgressEnd();
 }
 
 static command *FindHelpCommand( command *pcBase, char *sz,
@@ -2178,11 +2194,15 @@ extern void CommandHint( char *sz ) {
 	if ( GetDPEq ( NULL, NULL, &ci ) ) {
 	    /* Give hint on cube action */
 
-  		if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-			                            &esEvalCube.ec ) < 0 )
-				return;
-
-			FindCubeDecision ( arDouble, aarOutput, &ci );  
+	    ProgressStart( "Considering cube action..." );
+	    if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+					&esEvalCube.ec ) < 0 ) {
+		ProgressEnd();
+		return;
+	    }
+	    ProgressEnd();
+	    
+	    FindCubeDecision ( arDouble, aarOutput, &ci );  
 
 	    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
 
@@ -2216,11 +2236,15 @@ extern void CommandHint( char *sz ) {
 
       /* evaluate current position */
 
+      ProgressStart( "Considering resignation..." );
       if ( GeneralEvaluationE ( aarOutput[ 0 ],
                                 ms.anBoard,
-                                &ci, &esEvalCube.ec ) < 0 )
-        return;
-
+                                &ci, &esEvalCube.ec ) < 0 ) {
+	  ProgressEnd();
+	  return;
+      }
+      ProgressEnd();
+      
       getResignEquities ( aarOutput[ 0 ], &ci, ms.fResigned, 
                           &rEqBefore, &rEqAfter );
 
@@ -2271,9 +2295,13 @@ extern void CommandHint( char *sz ) {
 	/* Give hint on take decision */
 	GetMatchStateCubeInfo( &ci, &ms );
 
+	ProgressStart( "Considering cube action..." );
 	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-			                            &esEvalCube.ec ) < 0 )
-		return;
+				    &esEvalCube.ec ) < 0 ) {
+	    ProgressEnd();
+	    return;
+	}
+	ProgressEnd();
 
         FindCubeDecision ( arDouble, aarOutput, &ci );
 	
@@ -2320,12 +2348,15 @@ extern void CommandHint( char *sz ) {
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
+	ProgressStart( "Considering moves..." );
 	if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
 				ms.anBoard, NULL, &ci,
-				&esEvalChequer.ec ) < 0 ||
-	    fInterrupt )
+				&esEvalChequer.ec ) < 0 || fInterrupt ) {
+	    ProgressEnd();
 	    return;
-
+	}
+	ProgressEnd();
+	
 	n = ( ml.cMoves > n ) ? n : ml.cMoves;
 
 	if( !ml.cMoves ) {
@@ -3603,6 +3634,8 @@ extern void Prompt( void ) {
     if( !fInteractive || !isatty( STDIN_FILENO ) )
 	return;
 
+    ProgressEnd();
+    
     output( FormatPrompt() );
     fflush( stdout );    
 }
@@ -3644,6 +3677,7 @@ static void ProcessInput( char *sz, int fFree ) {
 #endif
 	fNeedPrompt = TRUE;
     else {
+	ProgressEnd();
 	rl_callback_handler_install( FormatPrompt(), HandleInput );
 	fReadingCommand = TRUE;
     }
@@ -3757,6 +3791,7 @@ extern int NextTurnNotify( event *pev, void *p )
     {
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
+	    ProgressEnd();
 	    rl_callback_handler_install( FormatPrompt(), HandleInput );
 	    fReadingCommand = TRUE;
 	} else
@@ -3778,7 +3813,8 @@ extern int NextTurnNotify( event *pev, void *p )
  * with malloc (as with readline()). */
 extern char *GetInput( char *szPrompt ) {
 
-    /* FIXME handle interrupts and EOF in this function. */
+    /* FIXME handle interrupts and EOF in this function (looks like it's
+       done already). */
     
     char *sz;
     char *pch;
@@ -4143,6 +4179,8 @@ extern void ProgressStart( char *sz ) {
     if( !fShowProgress )
 	return;
 
+    fInProgress = TRUE;
+    
 #if USE_GTK
     if( fX ) {
 	GTKProgressStart( sz );
@@ -4229,6 +4267,18 @@ extern void Progress( void ) {
     fflush( stdout );
 }
 
+static void CallbackProgress( void ) {
+
+#if USE_GTK
+    if( fX )
+	while( gtk_events_pending() )
+	    gtk_main_iteration();
+#endif
+    
+    if( fInProgress && !iProgressMax )
+	Progress();
+}
+
 extern void ProgressEnd( void ) {
 
     int i;
@@ -4236,6 +4286,7 @@ extern void ProgressEnd( void ) {
     if( !fShowProgress )
 	return;
 
+    fInProgress = FALSE;
     iProgressMax = 0;
     iProgressValue = 0;
     pcProgress = NULL;
@@ -4586,6 +4637,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
 #endif
 
+    fnTick = CallbackProgress;
+    
     if( !fNoRC )
 	LoadRCFiles();
     

@@ -28,6 +28,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Add an option for rollouts of "opening" positions: neither player on
   roll, and no doubles permitted (suggested by Ian Shaw).  (A
   "set rollout initial" command has been added, but it has no effect yet.)
+** Consider making EvalEfficiency() more sophisticated.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -49,6 +50,8 @@ duplication of effort and to make sure our changes merge easily.
   complain if not computed, disable the GTK menu items if not available).
 *** Make DumpStatcontext and GTKDumpStatcontext work for money sessions.
 *** Make sure analysis works with resignations.
+*** Consider a way for analysis to mark _good_ moves (e.g. moves which are
+  flagged as errors at 0-ply but turn out to be correct at higher plies).
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -66,6 +69,7 @@ duplication of effort and to make sure our changes merge easily.
   suggestion is to maximise the chance of finding the right play for
   the initial roll and response, and whatever speeds things along while
   still finding reasonable plays after that.)
+** Make "save settings" accept a filename parameter.
 ** Importing and exporting:
 *** Add missing export formats (FIBS, SGG).
 *** Make the .mat format identical to Jellyfish (things to check:
@@ -108,7 +112,6 @@ duplication of effort and to make sure our changes merge easily.
   (e.g. from a menu callback), then things generally seem to work.
 
 * TTY interface:
-** Display the score and match length in ShowBoard().
 ** Handle "list game" and "list match".  (oysteijo)
 ** Allow setting/editing commentary.
 ** Show take/drop analysis.
@@ -127,13 +130,6 @@ duplication of effort and to make sure our changes merge easily.
   instead of the status bar, or whether all messages are appended to a
   message window.
 ** Disable the "stop" button when nothing is happening.
-** Have a progress bar along with some text in the main window, which
-   indicates progress for the current possibly time-consuming operation.
-   E.g. when the user clicks 'hint' the progress text will show
-   "finding best moves..." and the progress bar will indicate how far
-   gnubg is in the process. This could/should be implemented for
-   "evaluation", "hint", when gnubg is considering cube action,
-   when gnubg is searching for it's best move etc.
 ** Add option to exchange the dice after a single click move has been
   made.
 ** Make sure we apply GTK styles correctly: create a GtkRcStyle; set the
@@ -187,12 +183,6 @@ duplication of effort and to make sure our changes merge easily.
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
 *** Allow copy/paste from the "hint" cube output and statistics dialogs.
-
-** MS Windows:
-*** The stop button has no effect.  One approach would be to define a
-  polling macro which sets fAction if gtk_events_pending() is true, and call
-  this macro before testing fAction.  (This might also allow screen refreshes
-  while evaluations are in progress.)
 
 ** Deprecated functions:
   Once GTK+ 2.0 is released, remove references to the following deprecated

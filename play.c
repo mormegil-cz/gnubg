@@ -647,9 +647,13 @@ extern int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
 
+      ProgressStart( "Considering resignation..." );
       if( EvaluatePosition( ms.anBoard, arOutput, &ci,
-			    &ap[ ms.fTurn ].esCube.ec ) )
-        return -1;
+			    &ap[ ms.fTurn ].esCube.ec ) ) {
+	  ProgressEnd();
+	  return -1;
+      }
+      ProgressEnd();
 
       rEqBefore = -Utility ( arOutput, &ci );
 
@@ -729,12 +733,15 @@ extern int ComputerTurn( void ) {
       }
 
       /* Evaluate cube decision */
-
+      ProgressStart( "Considering cube action..." );
       if ( GeneralCubeDecision ( "Computer player",
                                  aarOutput, aarStdDev, aarsStatistics,
                                  ms.anBoard,
-                                 &ci, &ap [ ms.fTurn ].esCube ) < 0 )
-        return -1;
+                                 &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
+	  ProgressEnd();
+	  return -1;
+      }
+      ProgressEnd();
 
       cd = FindCubeDecision ( arDouble, aarOutput, &ci );
 
@@ -923,12 +930,15 @@ extern int ComputerTurn( void ) {
           cubedecision cd;
 
           /* Consider cube action */
-
+	  ProgressStart( "Considering cube action..." );
           if ( GeneralCubeDecision ( "Computer player",
                                      aarOutput, aarStdDev, aarsStatistics,
                                      ms.anBoard,
-                                     &ci, &ap [ ms.fTurn ].esCube ) < 0 )
-            return -1;
+                                     &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
+	      ProgressEnd();
+	      return -1;
+	  }
+	  ProgressEnd();
 
           cd = FindCubeDecision ( arDouble, aarOutput, &ci );
 
@@ -1011,13 +1021,16 @@ extern int ComputerTurn( void ) {
       pmn->lt = LUCK_NONE;
       pmn->rLuck = ERR_VAL;
       pmn->st = SKILL_NONE;
-      
+
+      ProgressStart( "Considering move..." );
       if( FindBestMove( pmn->anMove, ms.anDice[ 0 ], ms.anDice[ 1 ],
                         anBoardMove, &ci,
 			&ap[ ms.fTurn ].esChequer.ec ) < 0 ) {
-        free( pmn );
-        return -1;
+	  ProgressEnd();
+	  free( pmn );
+	  return -1;
       }
+      ProgressEnd();
       
       /* write move to status bar if using GTK */
 #ifdef USE_GTK        

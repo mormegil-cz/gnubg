@@ -2594,67 +2594,6 @@ extern void GTKOutputNew( void ) {
     while( !fFinishedPopping );
 }
 
-extern void GTKProgressStart( char *sz ) {
-
-    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), TRUE );
-    gtk_progress_bar_set_activity_step( GTK_PROGRESS_BAR( pwProgress ), 5 );
-    gtk_progress_bar_set_activity_blocks( GTK_PROGRESS_BAR( pwProgress ), 5 );
-
-    if( sz )
-	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
-}
-
-
-extern void
-GTKProgressStartValue( char *sz, int iMax ) {
-
-  gtk_progress_set_activity_mode ( GTK_PROGRESS ( pwProgress ), FALSE );
-  gtk_progress_configure ( GTK_PROGRESS ( pwProgress ),
-                           0, 0, iMax );
-  gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
-  gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
-				    "%v/%u (%p%%)" );
-
-  if( sz )
-    gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
-
-}
-
-
-extern void
-GTKProgressValue ( int iValue ) {
-
-  gtk_progress_configure ( GTK_PROGRESS ( pwProgress ),
-                           iValue, 0, iProgressMax );
-
-  GTKDisallowStdin();
-  while( gtk_events_pending() )
-    gtk_main_iteration();
-  GTKAllowStdin();    
-
-}
-
-
-extern void GTKProgress( void ) {
-
-    static int i;
-    
-    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i ^= 1 );
-
-    GTKDisallowStdin();
-    while( gtk_events_pending() )
-        gtk_main_iteration();
-    GTKAllowStdin();    
-}
-
-extern void GTKProgressEnd( void ) {
-
-    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), FALSE );
-    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), 0 );
-    gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), FALSE );
-    gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
-}
-
 static GtkWidget *pwEntry;
 
 static void NumberOK( GtkWidget *pw, int *pf ) {
@@ -4310,13 +4249,13 @@ extern void GTKHint( movelist *pmlOrig ) {
     gtk_widget_show_all( pwHint );
 }
 
-static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwProgress;
+static GtkWidget *pwRolloutDialog, *pwRolloutResult, *pwRolloutProgress;
 static int iRolloutRow;
 static guint nRolloutSignal;
 
 static void RolloutCancel( GtkObject *po, gpointer p ) {
 
-    pwRolloutDialog = pwRolloutResult = pwProgress = NULL;
+    pwRolloutDialog = pwRolloutResult = pwRolloutProgress = NULL;
     fInterrupt = TRUE;
 }
 
@@ -4365,10 +4304,11 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     pwRolloutResult = gtk_clist_new_with_titles( 8, aszTitle );
     gtk_clist_column_titles_passive( GTK_CLIST( pwRolloutResult ) );
     
-    pwProgress = gtk_progress_bar_new();
+    pwRolloutProgress = gtk_progress_bar_new();
 
     gtk_box_pack_start( GTK_BOX( pwVbox ), pwRolloutResult, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( pwVbox ), pwProgress, FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwVbox ), pwRolloutProgress, FALSE, FALSE,
+			0 );
     
     for( i = 0; i < 7; i++ ) {
 	gtk_clist_set_column_auto_resize( GTK_CLIST( pwRolloutResult ), i,
@@ -4387,9 +4327,9 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
 			    "Standard error" );
     }
 
-    gtk_progress_configure( GTK_PROGRESS( pwProgress ), 0, 0, cGames );
-    gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
-    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
+    gtk_progress_configure( GTK_PROGRESS( pwRolloutProgress ), 0, 0, cGames );
+    gtk_progress_set_show_text( GTK_PROGRESS( pwRolloutProgress ), TRUE );
+    gtk_progress_set_format_string( GTK_PROGRESS( pwRolloutProgress ),
 				    "%v/%u (%p%%)" );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwRolloutDialog, DA_MAIN ) ),
@@ -4910,7 +4850,7 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
   /* Rollout statistics information */
 
   rolloutstat *prs = data;
-  int cGames = gtk_progress_get_value ( GTK_PROGRESS( pwProgress ) );
+  int cGames = gtk_progress_get_value ( GTK_PROGRESS( pwRolloutProgress ) );
   int nRollouts = GTK_CLIST( pwRolloutResult )->rows / 2;
   int i;
 
@@ -5036,7 +4976,8 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
 
     }
     
-    gtk_progress_configure( GTK_PROGRESS( pwProgress ), iGame + 1, 0, cGames );
+    gtk_progress_configure( GTK_PROGRESS( pwRolloutProgress ),
+			    iGame + 1, 0, cGames );
     
     GTKDisallowStdin();
     while( gtk_events_pending() )
@@ -5053,7 +4994,7 @@ extern void GTKRolloutDone( void ) {
     if( !pwRolloutDialog )
 	return;
     
-    gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
+    gtk_progress_set_format_string( GTK_PROGRESS( pwRolloutProgress ),
 				    "Finished (%v trials)" );
     
     gtk_signal_disconnect( GTK_OBJECT( pwRolloutDialog ), nRolloutSignal );
@@ -5063,8 +5004,68 @@ extern void GTKRolloutDone( void ) {
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
+    
+    pwRolloutProgress = NULL;
 }
 
+extern void GTKProgressStart( char *sz ) {
+
+    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), TRUE );
+    gtk_progress_bar_set_activity_step( GTK_PROGRESS_BAR( pwProgress ), 5 );
+    gtk_progress_bar_set_activity_blocks( GTK_PROGRESS_BAR( pwProgress ), 5 );
+
+    if( sz )
+	gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
+}
+
+
+extern void
+GTKProgressStartValue( char *sz, int iMax ) {
+
+  gtk_progress_set_activity_mode ( GTK_PROGRESS ( pwProgress ), FALSE );
+  gtk_progress_configure ( GTK_PROGRESS ( pwProgress ),
+                           0, 0, iMax );
+  gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), TRUE );
+  gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ),
+				    "%v/%u (%p%%)" );
+
+  if( sz )
+    gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
+
+}
+
+
+extern void
+GTKProgressValue ( int iValue ) {
+
+    gtk_progress_set_value( GTK_PROGRESS ( pwProgress ), iValue );
+
+    GTKDisallowStdin();
+    while( gtk_events_pending() )
+	gtk_main_iteration();
+    GTKAllowStdin();    
+}
+
+
+extern void GTKProgress( void ) {
+
+    static int i;
+
+    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i ^= 1 );
+
+    GTKDisallowStdin();
+    while( gtk_events_pending() )
+        gtk_main_iteration();
+    GTKAllowStdin();    
+}
+
+extern void GTKProgressEnd( void ) {
+
+    gtk_progress_set_activity_mode( GTK_PROGRESS( pwProgress ), FALSE );
+    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), 0 );
+    gtk_progress_set_show_text( GTK_PROGRESS( pwProgress ), FALSE );
+    gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
+}
 
 static GtkWidget 
 *GTKWriteMET ( float aafMET[ MAXSCORE ][ MAXSCORE ],

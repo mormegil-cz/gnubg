@@ -1,3 +1,14 @@
+Thu Feb  7 10:57:46 2002  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ShowBoard): Show score and match length in TTY boards.
+
+	* eval.c (EvaluatePositionCache): Periodically call fnTick.
+	* gnubg.c (CallbackProgress): New function.
+	* gtkgame.c: Rename the pwProgress used for rollouts to
+	pwRolloutProgress.
+
+	* gtkboard.c: Remove Wine-specific code.
+	
 Wed Feb  6 10:00:58 2002  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (EvalNewWeights): Use time() as a seed for irandinit().
