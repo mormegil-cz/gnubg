@@ -1625,7 +1625,7 @@ void ShowFlag3d(BoardData *bd)
 {
 	bd->flagWaved = 0;
 
-	if (rdAppearance.animateFlag && bd->resigned &&
+	if (rdAppearance.animateFlag && bd->resigned && bd->playing &&
 		(ap[bd->turn == 1 ? 0 : 1].pt == PLAYER_HUMAN))		/* not for computer turn */
 	{
 		animStartTime = get_time();

@@ -837,6 +837,7 @@ void drawDice2(BoardData* bd, int num)
 		drawDots(bd, -LIFT_OFF, &dt, 0, 0);
 
 		glCullFace(GL_BACK);
+		glEnable(GL_BLEND);
 	}
 	setMaterial(&bd->diceMat[diceCol]);
 	glCallList(bd->diceList);
