@@ -1,7 +1,4 @@
 Makefile
-config.cache
-config.log
-config.status
 gnubg.html
 gnubg.info*
 gnubg.ps

@@ -94,7 +94,7 @@ INFO_DEPS = gnubg.info
 DVIS = gnubg.dvi
 TEXINFOS = gnubg.texi
 DIST_COMMON =  README AUTHORS COPYING ChangeLog INSTALL Makefile.am \
-Makefile.in NEWS configure configure.in mdate-sh stamp-vti texinfo.tex \
+Makefile.in NEWS configure.in mdate-sh stamp-vti texinfo.tex \
 version.texi
 
 
