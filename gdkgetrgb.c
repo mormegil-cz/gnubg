@@ -76,8 +76,19 @@ gdk_get_rgb_image( GdkDrawable *drawable,
 
     gdk_error_trap_push();
     image = gdk_image_get( drawable, x, y, width, height );
-    if( gdk_error_trap_pop() )
-	return;
+    if( gdk_error_trap_pop() ) {
+	/* Assume an X BadMatch occurred -- GDK doesn't provide a portable
+	   way to check what the error was. */
+	GdkPixmap *ppm = gdk_pixmap_new( drawable, width, height, -1 );
+	GdkGC *pgc = gdk_gc_new( drawable );
+	
+	gdk_draw_pixmap( ppm, pgc, drawable, x, y, 0, 0, width, height );
+
+	image = gdk_image_get( ppm, 0, 0, width, height );
+
+	gdk_gc_unref( pgc );
+	gdk_pixmap_unref( ppm );
+    }
     
     for( ypix = 0; ypix < height; ypix++ ) {
 	p = rgb_buf;
