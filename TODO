@@ -165,6 +165,11 @@ duplication of effort and to make sure our changes merge easily.
 "double"-widget.
 ** Allow some way to specify long RNG seeds, and RNG parameters besides the
   seed (e.g. BBS modulus, user .so file) in the GUI.
+** Clean up the board rendering code, so we can: (gary)
+*** Render previews of board designs, rather than using bitmaps.
+*** Show a preview of the chequers in the appearances dialog.
+*** Consider somehow rendering html-images directly.
+*** Render without GTK+ (optionally using freetype).
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -332,8 +337,6 @@ the rollouts off and come back later.
   does, but without evaluating them.
 *** Also "add move", to add a specific move to the list (e.g.
   "add move 8/5 6/5").
-** Show a preview of the chequers in the appearances dialog.  (Not really
-  required now we have the "Apply" button.)
 ** When 'Allow dragging to illegal input' is selected, Two consecutive Button 1
   click will both use the 'first' dice.  (This is working as intended -- to
   implement the opposite behaviour, see the item about exchanging dice under

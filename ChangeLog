@@ -1,3 +1,11 @@
+Thu Dec  5 22:20:56 2002  Gary Wong  <gtw@gnu.org>
+
+	* configure.in: Add --enable-bearoff option to control how the
+	1-sided database will be used.
+	* eval.c (EvalInitialise): Try reading the 1-sided database from
+	gnubg_os0.bd if the builtin database is unavailable.
+	* Makefile.am (BR1_SOURCES, BR1DATA): New configuration parameters.
+
 Wed Dec 4 23:47:15 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
 	* eval.c - fix use of gcc non ANSI C construct so other

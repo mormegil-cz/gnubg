@@ -15,38 +15,58 @@ the GNU Backgammon manual in the `doc' directory.
 Current features:
 -----------------
 
- - Support for both 1-sided and 2-sided bearoff databases: built-in 1-sided
-   bearoff databases for 15 chequers on the first 6 points is kept in 
-   memory. Optional 2-sided databases to be kept in memory, as well
-   as optional larger 1-sided and 2-sided databases stored on disk.
+ - Support for both 1-sided and 2-sided bearoff databases: 1-sided
+   bearoff database for 15 chequers on the first 6 points and optional
+   2-sided database kept in memory.  Optional larger 1-sided and 2-sided
+   databases stored on disk.
  - Neural net functions for giving cubeless evaluations of all other
-   contact and race positions
+   contact and race positions.
  - Functions to generate legal moves and evaluate positions at varying
-   search depths
- - Tournament match and money session cube handling
+   search depths.
+ - Tournament match and money session cube handling.
  - A command line interface (with full command editing features if GNU
    readline is available) that lets you play matches and sessions against
-   gnubg
+   gnubg.
  - Support for either a GTK+ interface with a graphical board window, or
-   a rough ASCII representation of a board on text terminals
+   a rough ASCII representation of a board on text terminals.
  - Automated rollouts of positions, with lookahead and race variance
-   reduction where appropriate
- - Both TD(0) and supervised training of neural net weights
- - Position databases for supervised training (if GNU dbm is available)
+   reduction where appropriate.
+ - Both TD(0) and supervised training of neural net weights.
+ - Position databases for supervised training (if GNU dbm is available).
  - Loading and saving .sgf games and matches (.sgf files are in the
-   Smart Game Format)
- - Exporting games and matches to .mat, LaTeX, PostScript and PDF formats
- - Importing .pos, .mat, .sgg and FIBS "oldmoves" files
- - Scripting ability (if GNU Guile is available)
+   Smart Game Format).
+ - Exporting games and matches to .mat, LaTeX, PostScript and PDF formats.
+ - Importing .pos, .mat, .sgg and FIBS "oldmoves" files.
+ - Scripting ability (if GNU Guile is available).
  - Automatic and manual annotation (analysis and commentary) of games and
-   matches
+   matches.
 
 Bearoff databases:
 ------------------
 
   GNU Backgammon is designed to work with files containing databases
-of endgame positions, to evaluate moves and cube decisions during the bearoff.  These files may be several megabytes large, and are generally slow to generate,
-so they are not included in the distribution.
+of endgame positions, to evaluate moves and cube decisions during the
+bearoff.  These files may be several megabytes large, and are
+generally slow to generate, so they are not included in the
+distribution.
+
+If you wish to override the configuration for the one-sided 15 chequer,
+6 point database, you have several choices:
+
+  1) Do not generate any database at compile time.  In this case, a
+     heuristic database will be used at runtime.  For this behaviour,
+     you should specify "--disable-bearoff" to "./configure" (see
+     the INSTALL file for more information about configuration options).
+
+  2) Generate a database in a file which can be mapped or read into memory
+     at runtime.  This option is the default if the mmap() system call is
+     available on your system, and can be selected with the
+     "--enable-bearoff=external" configure option.
+
+  3) Statically link the database directly into the GNU Backgammon
+     executable.  This option is the default if the mmap() system call is
+     not available on your system, and can be selected with the
+     "--enable-bearoff=static" configure option.
 
 The "make" process will warn you if do not have "gnubg_ts0.bd", which is the
 2-sided database that is read into memory when GNU Backgammon starts.

@@ -143,6 +143,12 @@ ACLOCAL_AMFLAGS = -I m4
 @USE_SOUND_TRUE@SOUND_LIBS = @ESD_LIBS@ @NAS_LIBS@ @ARTSC_LIBS@
 @USE_SOUND_FALSE@SOUND_LIBS = 
 
+@COMPILE_BR1_TRUE@BR1_SOURCES = br1.c
+@COMPILE_BR1_FALSE@BR1_SOURCES = 
+
+@EXTERNAL_BR1_TRUE@BR1DATA = gnubg_os0.bd
+@EXTERNAL_BR1_FALSE@BR1DATA = 
+
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\"
 
@@ -155,8 +161,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
-        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h br1.c \
-  	onechequer.c onechequer.h path.c path.h
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
+	onechequer.c onechequer.h path.c path.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -175,7 +181,7 @@ bin_PROGRAMS = gnubg
 @USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
 @USE_GTK_TRUE@	gtkrace.c gtkrace.h \
-@USE_GTK_TRUE@	$(SOUND_SOURCES)
+@USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
@@ -186,7 +192,7 @@ bin_PROGRAMS = gnubg
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 @USE_GTK_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
-pkgdata_DATA = gnubg_ts0.bd gnubg.wd @GTKDATA@ @GUILEDATA@
+pkgdata_DATA = gnubg_ts0.bd gnubg.wd @GTKDATA@ @GUILEDATA@ $(BR1DATA)
 
 man_MANS = gnubg.6
 
@@ -244,9 +250,11 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
 	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) record.$(OBJEXT) \
 	osr.$(OBJEXT) bearoffgammon.$(OBJEXT) bearoff.$(OBJEXT) \
-	br1.$(OBJEXT) onechequer.$(OBJEXT) path.$(OBJEXT)
+	onechequer.$(OBJEXT) path.$(OBJEXT)
 @USE_SOUND_TRUE@am__objects_2 = sound.$(OBJEXT)
 @USE_SOUND_FALSE@am__objects_2 =
+@COMPILE_BR1_TRUE@am__objects_3 = br1.$(OBJEXT)
+@COMPILE_BR1_FALSE@am__objects_3 =
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
 @USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_2)
 @USE_EXT_TRUE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
@@ -258,7 +266,7 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktheory.$(OBJEXT) gtktexi.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkexport.$(OBJEXT) gtkcube.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkchequer.$(OBJEXT) gtkrace.$(OBJEXT) \
-@USE_GTK_TRUE@	$(am__objects_2)
+@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_2)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -920,7 +928,8 @@ uninstall-man: uninstall-man6
 	uninstall-pkgdataDATA uninstall-recursive
 
 distcheck-hook:
-	-cp $(srcdir)/gnubg_ts0.bd $(srcdir)/gnubg.weights $(distdir)/
+	-cp $(srcdir)/gnubg_os0.bd $(srcdir)/gnubg_ts0.bd \
+	$(srcdir)/gnubg.weights $(distdir)/
 
 br1.c:	makebearoff makebearoff1
 	if [ ! -f br1.c ]; then \
@@ -942,7 +951,8 @@ copying.c: COPYING copying.awk
 # Create symlinks to all the necessary parts of $(srcdir), so that gnubg
 # can run happily in the build directory.
 all-local:
-	@for i in gnubg_ts0.bd gnubg.gtkrc gnubg.scm gnubg.weights; do \
+	@for i in gnubg_os0.bd gnubg_ts0.bd gnubg.gtkrc gnubg.scm \
+	gnubg.weights; do \
 	[ -s $$i ] || if [ -s $(srcdir)/$$i ]; then $(LN_S) $(srcdir)/$$i .; \
 	fi; done
 	@for i in gnubg.xml annealing.png rulfig1.png rulfig2.png rulfig3.png \
@@ -970,6 +980,14 @@ gnubg.weights:
 @CROSS_COMPILING_FALSE@gnubg.wd: gnubg.weights makeweights
 @CROSS_COMPILING_FALSE@	-./makeweights < $< > $@
 
+@CROSS_COMPILING_TRUE@gnubg_os0.bd:
+@CROSS_COMPILING_TRUE@	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
+@CROSS_COMPILING_TRUE@	@echo ' ** it is not possible to generate the bearoff database'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the build system.  To create this file manually,'
+@CROSS_COMPILING_TRUE@	@echo ' ** use a command like:'
+@CROSS_COMPILING_TRUE@	@echo ' **   makebearoff -o 6 -s 7999999 > gnubg_os0.bd'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
+
 @CROSS_COMPILING_TRUE@bearoff-database: makebearoff
 @CROSS_COMPILING_TRUE@	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
 @CROSS_COMPILING_TRUE@	@echo ' ** it is not possible to generate the bearoff database'
@@ -977,6 +995,9 @@ gnubg.weights:
 @CROSS_COMPILING_TRUE@	@echo ' ** use a command like:'
 @CROSS_COMPILING_TRUE@	@echo ' **   makebearoff -t 6x6 > gnubg_ts0.bd'
 @CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
+@CROSS_COMPILING_FALSE@gnubg_os0.bd: makebearoff
+@CROSS_COMPILING_FALSE@	./makebearoff -o 6 -s 7999999 -f $(srcdir)/gnubg_os0.bd
+
 @CROSS_COMPILING_FALSE@bearoff-database: makebearoff
 @CROSS_COMPILING_FALSE@	@echo ' ** NOTE: you can generate huge one sided and two sided'
 @CROSS_COMPILING_FALSE@	@echo ' ** bearoff databases for usage with gnubg'

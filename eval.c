@@ -567,35 +567,37 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
     }
 
     if( ! fNoBearoff ) {
-
+#if USE_BUILTIN_BEAROFF
       /* read one-sided db from gnubg.bd */
-      if ( ! ( pbc1 = BearoffInitBuiltin () ) )
-        pbc1 = BearoffInit ( NULL, NULL, BO_HEURISTIC, pfProgress );
+	pbc1 = BearoffInitBuiltin();
+#endif
+	if( !pbc1 )
+	    pbc1 = BearoffInit( "gnubg_os0.bd", szDir, BO_IN_MEMORY, NULL );
 
-      /* read two-sided db from gnubg.bd */
-      pbc2 = BearoffInit ( "gnubg_ts0.bd", szDir, 
-                           BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
-
-      if ( ! pbc2 )
-        fprintf ( stderr, 
-                  "\n***WARNING***\n\n" 
-                  "Note that gnubg does not use the gnubg.bd file.\n"
-                  "You should obtain the file gnubg_ts0.bd or generate\n"
-                  "it yourself using the program 'makebearoff'.\n"
-                  "You can generate the file with the command:\n"
-                  "makebearoff -t 6x6 > gnubg_ts0.bd\n"
-                  "You can also generate other bearoff databases; see\n"
-                  "README for more details\n\n" );
-
-      /* init one-sided db */
-      pbcOS = BearoffInit ( "gnubg_os.bd", szDir, BO_NONE, NULL );
-
-      /* init two-sided db */
-      pbcTS = BearoffInit ( "gnubg_ts.bd", szDir, BO_NONE, NULL );
-
+	if( !pbc1 )
+	    pbc1 = BearoffInit ( NULL, NULL, BO_HEURISTIC, pfProgress );
+	
+	/* read two-sided db from gnubg.bd */
+	pbc2 = BearoffInit ( "gnubg_ts0.bd", szDir, 
+			     BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
+	
+	if ( ! pbc2 )
+	    fprintf ( stderr, 
+		      "\n***WARNING***\n\n" 
+		      "Note that gnubg does not use the gnubg.bd file.\n"
+		      "You should obtain the file gnubg_ts0.bd or generate\n"
+		      "it yourself using the program 'makebearoff'.\n"
+		      "You can generate the file with the command:\n"
+		      "makebearoff -t 6x6 > gnubg_ts0.bd\n"
+		      "You can also generate other bearoff databases; see\n"
+		      "README for more details\n\n" );
+	
+	/* init one-sided db */
+	pbcOS = BearoffInit ( "gnubg_os.bd", szDir, BO_NONE, NULL );
+	
+	/* init two-sided db */
+	pbcTS = BearoffInit ( "gnubg_ts.bd", szDir, BO_NONE, NULL );
     }
-      
-
 
     if( szWeightsBinary &&
 	( h = PathOpen( szWeightsBinary, szDir, BINARY ) ) >= 0 &&

@@ -409,6 +409,9 @@
 /* Define TRUE */
 #undef TRUE
 
+/* Define if you have a bearoff database to link to GNU Backgammon */
+#undef USE_BUILTIN_BEAROFF
+
 /* Define if you want to use the ext toolkit and widgets. */
 #undef USE_EXT
 

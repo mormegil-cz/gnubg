@@ -838,6 +838,7 @@ Optional Features:
   --disable-dependency-tracking Speeds up one-time builds
   --enable-dependency-tracking  Do not reject slow dependency extractors
   --disable-gtktest       Do not try to compile and run a test GTK program
+  --enable-bearoff=TYPE   specify bearoff database (TYPE=no,external,static)
   --disable-esdtest       Do not try to compile and run a test ESD program
   --disable-artsc-test      Do not compile and run a test ArtsC program.
   --enable-nas            Enable NAS (Network Audio System) support
@@ -9287,6 +9288,63 @@ _ACEOF
   fi
 
 
+# Check whether --enable-bearoff or --disable-bearoff was given.
+if test "${enable_bearoff+set}" = set; then
+  enableval="$enable_bearoff"
+  bearoff_database="$enable_bearoff"
+fi;
+
+case "$bearoff_database" in
+  "external")
+    ;;
+  "dynamic")
+    # FIXME set up compilation of br1.c as a shared library
+    { { echo "$as_me:$LINENO: error: --enable-bearoff=dynamic is not supported in this version of GNU Backgammon." >&5
+echo "$as_me: error: --enable-bearoff=dynamic is not supported in this version of GNU Backgammon." >&2;}
+   { (exit 1); exit 1; }; }
+    ;;
+  "static")
+    ;;
+  "no")
+    ;;
+  *)
+    if test "$ac_cv_func_mmap_fixed_mapped" = "yes"; then
+      bearoff_database=external
+    else
+      bearoff_database=static
+    fi
+    ;;
+esac
+
+
+
+if test "$bearoff_database" = "external"; then
+  EXTERNAL_BR1_TRUE=
+  EXTERNAL_BR1_FALSE='#'
+else
+  EXTERNAL_BR1_TRUE='#'
+  EXTERNAL_BR1_FALSE=
+fi
+
+
+
+if test "$bearoff_database" = "static"; then
+  COMPILE_BR1_TRUE=
+  COMPILE_BR1_FALSE='#'
+else
+  COMPILE_BR1_TRUE='#'
+  COMPILE_BR1_FALSE=
+fi
+
+
+if test "$bearoff_database" = "static"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define USE_BUILTIN_BEAROFF 1
+_ACEOF
+
+fi
+
 
 
 if test "$cross_compiling" = "yes"; then
@@ -12390,6 +12448,20 @@ echo "$as_me: error: conditional \"USE_EXT\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${EXTERNAL_BR1_TRUE}" && test -z "${EXTERNAL_BR1_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"EXTERNAL_BR1\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"EXTERNAL_BR1\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${COMPILE_BR1_TRUE}" && test -z "${COMPILE_BR1_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"COMPILE_BR1\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"COMPILE_BR1\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${CROSS_COMPILING_TRUE}" && test -z "${CROSS_COMPILING_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"CROSS_COMPILING\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -12984,6 +13056,10 @@ s,@GUILE_LIBS@,$GUILE_LIBS,;t t
 s,@GUILEDATA@,$GUILEDATA,;t t
 s,@LIBXML2_CFLAGS@,$LIBXML2_CFLAGS,;t t
 s,@LIBXML2_LIBS@,$LIBXML2_LIBS,;t t
+s,@EXTERNAL_BR1_TRUE@,$EXTERNAL_BR1_TRUE,;t t
+s,@EXTERNAL_BR1_FALSE@,$EXTERNAL_BR1_FALSE,;t t
+s,@COMPILE_BR1_TRUE@,$COMPILE_BR1_TRUE,;t t
+s,@COMPILE_BR1_FALSE@,$COMPILE_BR1_FALSE,;t t
 s,@CROSS_COMPILING_TRUE@,$CROSS_COMPILING_TRUE,;t t
 s,@CROSS_COMPILING_FALSE@,$CROSS_COMPILING_FALSE,;t t
 s,@XML_MANUAL_TRUE@,$XML_MANUAL_TRUE,;t t
