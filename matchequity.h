@@ -5,6 +5,11 @@
  *               ie the maximum level the cube goes to.
  */
 
+#ifndef _MATCHEQUITY_H_
+#define _MATCHEQUITY_H_
+
+#include "eval.h"
+
 #define MAXSCORE      64
 #define MAXCUBELEVEL  7
 #define DELTA         0.08
@@ -46,8 +51,15 @@ void
 CalcMatchEq ();
 
 
-int
+void
 GetTakePoint ( float arOutput [ 5 ],
 	       int   nScore[ 2 ], int nMatchTo,
 	       int   nCube,
 	       float arTakePoint[ 2 ] );
+
+void
+GetDoublePointDeadCube ( float arOutput [ 5 ],
+			 int   anScore[ 2 ], int nMatchTo,
+			 cubeinfo *pci, float *rDP );
+
+#endif

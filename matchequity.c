@@ -362,8 +362,68 @@ GetCubePrimeValue ( int i, int j, int nCubeValue ) {
 
 }
 
+void
+GetDoublePointDeadCube ( float arOutput [ 5 ],
+			 int   anScore[ 2 ], int nMatchTo,
+			 cubeinfo *pci, float *rDP ) {
 
-int
+  /*
+   * Calculate double point for dead cubes
+   */
+
+  if ( ! nMatchTo ) {
+
+    /* in money games you can double at 50% */
+
+    /* FIXME: use gammon ratios */
+
+    *rDP = 0.50;
+
+  }
+  else {
+
+    /* Match play */
+
+    /* normalize score */
+
+    int i = nMatchTo - anScore[ pci->fMove ] - 1;
+    int j = nMatchTo - anScore[ ! pci->fMove ] - 1;
+    int nCube = pci->nCube;
+
+    float rG1 = arOutput[ 1 ] / arOutput[ 0 ];
+    float rG2 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+
+    /* double point */
+
+    /* match equity for double, take; win */
+    float rDTW = (1.0 - rG1) * GET_A1 ( i - 2 * nCube, j, aafA1 ) +
+      rG1 * GET_A1 ( i - 4 * nCube, j, aafA1 );
+
+    /* match equity for no double; win */
+    float rNDW = (1.0 - rG1) * GET_A1 ( i - nCube, j, aafA1 ) +
+      rG1 * GET_A1 ( i - 2 * nCube, j, aafA1 );
+
+    /* match equity for double, take; loose */
+    float rDTL = (1.0 - rG2) * GET_A1 ( i, j - 2 * nCube, aafA1 ) +
+      rG2 * GET_A1 ( i, j - 4 * nCube, aafA1 );
+
+    /* match equity for double, take; loose */
+    float rNDL = (1.0 - rG2) * GET_A1 ( i, j - nCube, aafA1 ) +
+      rG2 * GET_A1 ( i, j - 2 * nCube, aafA1 );
+
+    /* risk & gain */
+
+    float rRisk = rNDL - rDTL;
+    float rGain = rDTW - rNDW;
+
+    *rDP =  rRisk / ( rRisk +  rGain );
+
+  }
+
+}
+
+
+void
 GetTakePoint ( float arOutput [ 5 ],
 	       int   anScore[ 2 ], int nMatchTo,
 	       int   nCube,
@@ -380,7 +440,7 @@ GetTakePoint ( float arOutput [ 5 ],
    *
    * Output:
    * - return the take point's for both players assuming 
-   *   semi-efficient cubes. The value of DELTA and DELTABAR
+   *   (semi-)efficient cubes. The value of DELTA and DELTABAR
    *   gives you the efficiency of the cube.
    * 
    * This is actually just a recalculation of D1 from the
@@ -395,8 +455,8 @@ GetTakePoint ( float arOutput [ 5 ],
        FIXME: get the formulas for this 
               use current gammon rates */
 
-    arTakePoint[ 0 ] = arTakePoint[ 1 ] = 
-      arTakePoint[ 2 ] = arTakePoint[ 3 ] = 0.78;
+    arTakePoint[ 0 ] = arTakePoint[ 1 ] = 0.8;
+
 
   }
   else {
