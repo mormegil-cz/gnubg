@@ -77,6 +77,38 @@ AC_DEFUN(AM_GUILE,[
   AC_SUBST(GUILE_LDFLAGS)
 ])
 
+dnl @synopsis AM_GTK2
+dnl
+dnl Figure out how to use GTK+ 1.3.x or 2.0 (but unlike the gtk-2.0.m4
+dnl macro, cope gracefully if it's not there at all).
+dnl
+dnl Looks for GTK+ 1.3.10 or newer (since that's what GNU Backgammon needs).
+dnl
+dnl @author Gary Wong <gtw@gnu.org>
+
+AC_DEFUN(AM_GTK2,[
+  AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+  no_gtk=""
+  if test "$PKG_CONFIG" = "no"; then
+    no_gtk=yes
+  else
+    AC_MSG_CHECKING(for GTK+ version 1.3.10 or newer)
+    if $PKG_CONFIG --atleast-version=1.3.10 gtk+-2.0; then
+      GTK_CFLAGS=`$PKG_CONFIG --cflags gtk+-2.0`
+      GTK_LIBS=`$PKG_CONFIG --libs gtk+-2.0`
+    else
+      no_gtk=yes
+    fi
+  fi
+  if test "$no_gtk" = ""; then
+    AC_MSG_RESULT(yes)
+  else
+    AC_MSG_RESULT(no)
+  fi
+  AC_SUBST(GTK_CFLAGS)
+  AC_SUBST(GTK_LIBS)
+])
+
 # Do all the work for Automake.  This macro actually does too much --
 # some checks are only needed if your package does certain things.
 # But this isn't really a big deal.

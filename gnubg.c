@@ -3624,9 +3624,10 @@ extern int GetInputYN( char *szPrompt ) {
 }
 
 /* Like strncpy, except it does the right thing */
-extern char *strcpyn( char *szDest, char *szSrc, int cch ) {
+extern char *strcpyn( char *szDest, const char *szSrc, int cch ) {
 
-    char *pchDest = szDest, *pchSrc = szSrc;
+    char *pchDest = szDest;
+    const char *pchSrc = szSrc;
 
     if( cch-- < 1 )
 	return szDest;

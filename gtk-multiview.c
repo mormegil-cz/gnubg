@@ -230,7 +230,11 @@ gtk_multiview_expose (GtkWidget      *widget,
 	  if (GTK_WIDGET_DRAWABLE (child) &&
 	      GTK_WIDGET_NO_WINDOW (child))
 	    {
-	      gtk_widget_event (child, (GdkEvent*) event);
+#if GTK_CHECK_VERSION(1,3,10)
+		/* FIXME help! */
+#else
+		gtk_widget_event (child, (GdkEvent*) event);
+#endif
 	    }
 	}
     }

@@ -294,7 +294,7 @@ extern void PortableSignalRestore( int nSignal, psighandler *p );
 extern RETSIGTYPE HandleInterrupt( int idSignal );
 
 /* Like strncpy, except it does the right thing */
-extern char *strcpyn( char *szDest, char *szSrc, int cch );
+extern char *strcpyn( char *szDest, const char *szSrc, int cch );
 
 /* Write a string to stdout/status bar/popup window */
 extern void output( char *sz );

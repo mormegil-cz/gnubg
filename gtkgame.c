@@ -30,6 +30,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#define GTK_ENABLE_BROKEN /* for GtkText */
 #include <gtk/gtk.h>
 #if HAVE_GTKEXTRA_GTKSHEET_H
 #include <gtkextra/gtksheet.h>
@@ -59,6 +60,16 @@
 #include "gtkprefs.h"
 #include "matchequity.h"
 #include "positionid.h"
+
+#if !GTK_CHECK_VERSION(1,3,10)
+#define gtk_style_get_font(s) ((s)->font)
+
+static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
+
+    ps->font = pf;
+    gdk_font_ref( pf );
+}
+#endif
 
 /* Enumeration to be used as index to the table of command strings below
    (since GTK will only let us put integers into a GtkItemFactoryEntry,
@@ -335,7 +346,7 @@ static list lOutput;
 int fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
 
-#if WIN32
+#if GTK_CHECK_VERSION(1,3,0)
 static char *ToUTF8( unsigned char *sz ) {
 
     static unsigned char szOut[ 128 ], *pch;
@@ -994,7 +1005,7 @@ static void CreateGameWindow( void ) {
 	ps->fg[ GTK_STATE_ACTIVE ] =
 	ps->fg[ GTK_STATE_NORMAL ] =
 	pwGameList->style->fg[ GTK_STATE_NORMAL ];
-    gdk_font_ref( ps->font = pwGameList->style->font );
+    gtk_style_set_font( ps, gtk_style_get_font( pwGameList->style ) );
     gtk_widget_set_style( pwGameList, ps );
     
     psGameList = gtk_style_copy( ps );
@@ -2003,6 +2014,9 @@ extern int InitGTK( int *argc, char ***argv ) {
     
     gtk_box_pack_start( GTK_BOX( pwHbox ), pwStatus = gtk_statusbar_new(),
 		      TRUE, TRUE, 0 );
+#if GTK_CHECK_VERSION(1,3,10)
+    gtk_statusbar_set_has_resize_grip( GTK_STATUSBAR( pwStatus ), FALSE );
+#endif
     /* It's a bit naughty to access pwStatus->label, but its default alignment
        is ugly, and GTK gives us no other way to change it. */
     gtk_misc_set_alignment( GTK_MISC( GTK_STATUSBAR( pwStatus )->label ),
@@ -2017,6 +2031,9 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_box_pack_start( GTK_BOX( pwHbox ),
 			pwProgress = gtk_progress_bar_new(),
 			FALSE, FALSE, 0 );
+#if GTK_CHECK_VERSION(1,3,10)
+    gtk_progress_bar_set_fraction( GTK_PROGRESS_BAR( pwProgress ), 0.0 );
+#endif
     /* This is a kludge to work around an ugly bug in GTK: we don't want to
        show text in the progress bar yet, but we might later.  So we have to
        pretend we want text in order to be sized correctly, and then set the
@@ -2182,8 +2199,12 @@ extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 				   GTK_SIGNAL_FUNC( gtk_widget_destroy ),
 				   GTK_OBJECT( pwDialog ) );
     }
-    
+
+#if GTK_CHECK_VERSION(1,3,10)
+    gtk_accel_group_attach( pag, G_OBJECT( pwDialog ) );
+#else
     gtk_accel_group_attach( pag, GTK_OBJECT( pwDialog ) );
+#endif
     gtk_widget_add_accelerator( fQuestion ? pwCancel : pwOK, "clicked", pag,
 				GDK_Escape, 0, 0 );
 
@@ -4071,8 +4092,14 @@ extern void GTKShowVersion( void ) {
 		       pwBox );
 
     gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt, FALSE, FALSE, 0 );
+#if GTK_CHECK_VERSION(1,3,10)
+    ps->font_desc = pango_font_description_new();
+    pango_font_description_set_family_static( ps->font_desc, "times" );
+    pango_font_description_set_size( ps->font_desc, 64 * PANGO_SCALE );    
+#else
     ps->font_name = g_strdup( "-*-times-medium-r-normal-*-64-*-*-*-p-*-"
 			      "iso8859-1" );
+#endif
     gtk_widget_modify_style( pwPrompt, ps );
     gtk_rc_style_unref( ps );
     
@@ -4083,8 +4110,14 @@ extern void GTKShowVersion( void ) {
     gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
 			gtk_label_new( "Copyright 1999, 2000, 2001 "
 				       "Gary Wong" ), FALSE, FALSE, 4 );
+#if GTK_CHECK_VERSION(1,3,10)
+    ps->font_desc = pango_font_description_new();
+    pango_font_description_set_family_static( ps->font_desc, "helvetica" );
+    pango_font_description_set_size( ps->font_desc, 8 * PANGO_SCALE );    
+#else
     ps->font_name = g_strdup( "-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-"
 			      "iso8859-1" );
+#endif
     gtk_widget_modify_style( pwPrompt, ps );
 
     for( i = 1; aszVersion[ i ]; i++ ) {

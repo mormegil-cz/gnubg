@@ -24,6 +24,7 @@
 #endif
 
 #include <assert.h>
+#define GDK_ENABLE_BROKEN /* for gdk_image_new_bitmap */
 #include <gtk/gtk.h>
 #include <isaac.h>
 #include <math.h>
@@ -41,6 +42,10 @@
 #include "gtk-multiview.h"
 #include "gtkprefs.h"
 #include "positionid.h"
+
+#if !GTK_CHECK_VERSION(1,3,10)
+#define gtk_style_get_font(s) ((s)->font)
+#endif
 
 #define POINT_DICE 28
 #define POINT_CUBE 29
@@ -180,7 +185,8 @@ static void board_label_chequers( GtkWidget *board, BoardData *bd,
        that's too much work. */
 	
     sprintf( sz, "%d", c );
-    gdk_string_extents( board->style->font, sz, NULL, NULL, &cx, &cy0, &cy1 );
+    gdk_string_extents( gtk_style_get_font( board->style ), sz, NULL, NULL,
+			&cx, &cy0, &cy1 );
 	
     gtk_draw_string( board->style, board->window, GTK_STATE_NORMAL,
 		     x + 3 * bd->board_size - cx / 2,
@@ -1347,7 +1353,7 @@ static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
     }
 
     /* Last ditch attempt: fall back to font from widget style. */
-    gdk_font_ref( bd->cube_font = widget->style->font );
+    gdk_font_ref( bd->cube_font = gtk_style_get_font( widget->style ) );
 
  done:
     gdk_gc_set_font( bd->gc_cube, bd->cube_font );    
@@ -3121,7 +3127,8 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
     } else {
 	/* Editing complete; set board. */
 	int points[ 2 ][ 25 ], anScoreNew[ 2 ];
-	char *pch0, *pch1, sz[ 64 ]; /* "set board XXXXXXXXXXXXXX" */
+	const char *pch0, *pch1;
+	char sz[ 64 ]; /* "set board XXXXXXXXXXXXXX" */
 
 	/* We need to query all the widgets before issuing any commands,
 	   since those commands have side effects which disturb other

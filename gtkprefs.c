@@ -37,6 +37,11 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#if !GTK_CHECK_VERSION(1,3,10)
+#define gtk_color_selection_set_has_opacity_control \
+    gtk_color_selection_set_opacity
+#endif
+
 static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ], *apadjPoint[ 2 ],
     *padjBoard, *padjSpeed;
@@ -65,8 +70,8 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pw ),
 			apwColour[ f ] = gtk_color_selection_new(),
 			FALSE, FALSE, 0 );
-    gtk_color_selection_set_opacity( GTK_COLOR_SELECTION( apwColour[ f ] ),
-				     fTranslucent );
+    gtk_color_selection_set_has_opacity_control(
+	GTK_COLOR_SELECTION( apwColour[ f ] ), fTranslucent );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwColour[ f ] ),
 				   bd->aarColour[ f ] );
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
@@ -166,10 +171,10 @@ static void ToggleTranslucent( GtkWidget *pw, BoardData *bd ) {
     
     fTranslucent = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
 
-    gtk_color_selection_set_opacity( GTK_COLOR_SELECTION( apwColour[ 0 ] ),
-				     fTranslucent );
-    gtk_color_selection_set_opacity( GTK_COLOR_SELECTION( apwColour[ 1 ] ),
-				     fTranslucent );
+    gtk_color_selection_set_has_opacity_control( GTK_COLOR_SELECTION(
+	apwColour[ 0 ] ), fTranslucent );
+    gtk_color_selection_set_has_opacity_control( GTK_COLOR_SELECTION(
+	apwColour[ 1 ] ), fTranslucent );
 
     gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 0 ] ), ar );
     ar[ 3 ] = bd->aarColour[ 0 ][ 3 ];
