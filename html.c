@@ -2935,28 +2935,28 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
   }
     
   /* overall rating */
-    
-  if( psc->fMoves && psc->fCube ) {
 
+  {
+    
     GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_OVERALL );
     GList *pl;
-
+    
     printStatTableHeader ( pf, hecss, 
                            _( "Overall statistics" ) );
-
+  
     for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
       
       char **aasz = pl->data;
-
+      
       printStatTableRow( pf,
                          aasz[ 0 ], "%s", aasz[ 1 ], aasz[ 2 ] );
-
+      
     }
-
+    
     freeGS( list );
 
-
   }
+
 
   fprintf ( pf, "</table>\n" );
 

@@ -1554,25 +1554,26 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
 
   }
 
-  if ( psc->fCube && psc->fCube ) {
+  {
+
     GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_OVERALL );
     GList *pl;
-
+    
     strcat( szOutput, _("Overall statistics") );
     strcat( szOutput, "\n\n" );
-
+    
     for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
-
+      
       char **asz = pl->data;
-
+      
       sprintf( strchr( szOutput, 0 ),
                "%-31s %-23s %-23s\n",
                asz[ 0 ], asz[ 1 ], asz[ 2 ] );
-
+      
     }
-
+    
     strcat( szOutput, "\n\n" );
-
+    
     freeGS( list );
 
   }

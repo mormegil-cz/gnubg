@@ -403,152 +403,164 @@ formatGS( const statcontext *psc, const matchstate *pms,
 
       aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      aasz[ 0 ] = g_strdup( _("Error rate (total)") );
+      if ( psc->fCube || psc->fMoves ) {
 
-      for ( i = 0; i < 2; ++i )
-        aasz[ i + 1 ] = errorRate( 
-              -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ],
-              -aaaar[ COMBINED ][ TOTAL ][ i ][ UNNORMALISED ],
-              pms );
+        aasz[ 0 ] = g_strdup( _("Error rate (total)") );
 
-      list = g_list_append( list, aasz );
+        for ( i = 0; i < 2; ++i )
+          aasz[ i + 1 ] = errorRate( 
+                                    -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ],
+                                    -aaaar[ COMBINED ][ TOTAL ][ i ][ UNNORMALISED ],
+                                    pms );
 
-      /* error rate per decision */
+        list = g_list_append( list, aasz );
 
-      aasz = g_malloc( 3 * sizeof ( *aasz ) );
+        /* error rate per decision */
 
-      aasz[ 0 ] = g_strdup( _("Error rate (per decision)") );
+        aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      for ( i = 0; i < 2; ++i )
-        aasz[ i + 1 ] = errorRateMP( 
-              -aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ],
-              -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ],
-              pms );
+        aasz[ 0 ] = g_strdup( _("Error rate (per decision)") );
 
-      list = g_list_append( list, aasz );
+        for ( i = 0; i < 2; ++i )
+          aasz[ i + 1 ] = errorRateMP( 
+                                      -aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ],
+                                      -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ],
+                                      pms );
 
-      /* eq. snowie error rate */
+        list = g_list_append( list, aasz );
 
-      aasz = g_malloc( 3 * sizeof ( *aasz ) );
+        /* eq. snowie error rate */
 
-      aasz[ 0 ] = g_strdup( _("Equiv. Snowie error rate") );
+        aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      for ( i = 0; i < 2; ++i )
-        if ( ( n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
-          aasz[ i + 1 ] = 
-            errorRateMP( -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n,
-                         0.0f, pms );
-        else
-          aasz[ i + 1 ] = g_strdup( _("n/a") );
+        aasz[ 0 ] = g_strdup( _("Equiv. Snowie error rate") );
 
-      list = g_list_append( list, aasz );
+        for ( i = 0; i < 2; ++i )
+          if ( ( n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
+            aasz[ i + 1 ] = 
+              errorRateMP( -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n,
+                           0.0f, pms );
+          else
+            aasz[ i + 1 ] = g_strdup( _("n/a") );
 
-      /* rating */
+        list = g_list_append( list, aasz );
 
-      aasz = g_malloc( 3 * sizeof ( *aasz ) );
+        /* rating */
 
-      aasz[ 0 ] = g_strdup( _("Overall rating") );
+        aasz = g_malloc( 3 * sizeof ( *aasz ) );
 
-      for ( i = 0; i < 2; ++i )
-        if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
-          aasz[ i + 1 ] =
-            g_strdup( gettext ( aszRating[ GetRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
-        else 
-          aasz[ i + 1 ] = g_strdup( _("n/a") );
+        aasz[ 0 ] = g_strdup( _("Overall rating") );
 
-      list = g_list_append( list, aasz );
+        for ( i = 0; i < 2; ++i )
+          if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
+            aasz[ i + 1 ] =
+              g_strdup( gettext ( aszRating[ GetRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] ) ] ) );
+          else 
+            aasz[ i + 1 ] = g_strdup( _("n/a") );
 
-      /* luck adj. result */
+        list = g_list_append( list, aasz );
 
-      if ( ( psc->arActualResult[ 0 ] > 0.0f || 
-             psc->arActualResult[ 1 ] > 0.0f ) && psc->fDice ) {
+      }
 
-        list = g_list_append( list, 
-                              luckAdjust( _("Actual result"),
-                                          psc->arActualResult,
-                                          pms ) );
+      if ( psc->fDice ) {
+
+        /* luck adj. result */
+
+        if ( ( psc->arActualResult[ 0 ] > 0.0f || 
+               psc->arActualResult[ 1 ] > 0.0f ) && psc->fDice ) {
+
+          list = g_list_append( list, 
+                                luckAdjust( _("Actual result"),
+                                            psc->arActualResult,
+                                            pms ) );
         
-        list = g_list_append( list, 
-                              luckAdjust( _("Luck adjusted result"),
-                                          psc->arLuckAdj,
-                                          pms ) );
+          list = g_list_append( list, 
+                                luckAdjust( _("Luck adjusted result"),
+                                            psc->arLuckAdj,
+                                            pms ) );
+
+          if ( fIsMatch && pms->nMatchTo ) {
+
+            /* luck based fibs rating */
+          
+            float r = 0.5f + psc->arActualResult[ 0 ] - 
+              psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+          
+            aasz = g_malloc( 3 * sizeof ( *aasz ) );
+          
+            aasz[ 0 ] = g_strdup( _("Luck based FIBS rating diff.") );
+            aasz[ 2 ] = g_strdup( "" );
+          
+            if ( r > 0.0f && r < 1.0f )
+              aasz[ 1 ] = g_strdup_printf( "%+7.2f",
+                                           relativeFibsRating( r, 
+                                                               ms.nMatchTo ) );
+            else
+              aasz[ 1 ] = g_strdup_printf( _("n/a") );
+
+            list = g_list_append( list, aasz );
+          
+          }
+        
+        }
+
+      }
+
+      if ( psc->fCube || psc->fMoves ) {
+
+        /* error based fibs rating */
 
         if ( fIsMatch && pms->nMatchTo ) {
 
-          /* luck based fibs rating */
-          
-          float r = 0.5f + psc->arActualResult[ 0 ] - 
-            psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-          
           aasz = g_malloc( 3 * sizeof ( *aasz ) );
-          
-          aasz[ 0 ] = g_strdup( _("Luck based FIBS rating diff.") );
-          aasz[ 2 ] = g_strdup( "" );
-          
-          if ( r > 0.0f && r < 1.0f )
-            aasz[ 1 ] = g_strdup_printf( "%+7.2f",
-                                         relativeFibsRating( r, 
-                                                             ms.nMatchTo ) );
-          else
-            aasz[ 1 ] = g_strdup_printf( _("n/a") );
+          aasz[ 0 ] = g_strdup( _("Error based abs. FIBS rating") );
+      
+          for ( i = 0; i < 2; ++i ) 
+            if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
+              aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
+                                               absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
+                                                                   aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
+                                                                   pms->nMatchTo, rRatingOffset ) );
+            else
+              aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
 
           list = g_list_append( list, aasz );
-          
+
+          /* chequer error fibs rating */
+
+          aasz = g_malloc( 3 * sizeof ( *aasz ) );
+          aasz[ 0 ] = g_strdup( _("Chequerplay errors rating loss") );
+      
+          for ( i = 0; i < 2; ++i ) 
+            if ( psc->anUnforcedMoves[ i ] )
+              aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
+                                               absoluteFibsRatingChequer( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
+                                                                          pms->nMatchTo ) );
+            else
+              aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
+
+          list = g_list_append( list, aasz );
+
+          /* cube error fibs rating */
+
+          aasz = g_malloc( 3 * sizeof ( *aasz ) );
+          aasz[ 0 ] = g_strdup( _("Cube errors rating loss") );
+      
+          for ( i = 0; i < 2; ++i ) 
+            if ( psc->anCloseCube[ i ] )
+              aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
+                                               absoluteFibsRatingCube( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
+                                                                       pms->nMatchTo ) );
+            else
+              aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
+
+          list = g_list_append( list, aasz );
+
         }
-        
-      }
-
-      /* error based fibs rating */
-
-      if ( fIsMatch && pms->nMatchTo ) {
-
-        aasz = g_malloc( 3 * sizeof ( *aasz ) );
-        aasz[ 0 ] = g_strdup( _("Error based abs. FIBS rating") );
-      
-        for ( i = 0; i < 2; ++i ) 
-          if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
-            aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
-                                             absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
-                                                                 aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
-                                                                 pms->nMatchTo, rRatingOffset ) );
-          else
-            aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
-
-        list = g_list_append( list, aasz );
-
-        /* chequer error fibs rating */
-
-        aasz = g_malloc( 3 * sizeof ( *aasz ) );
-        aasz[ 0 ] = g_strdup( _("Chequerplay errors rating loss") );
-      
-        for ( i = 0; i < 2; ++i ) 
-          if ( psc->anUnforcedMoves[ i ] )
-            aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
-                                             absoluteFibsRatingChequer( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
-                                                                        pms->nMatchTo ) );
-          else
-            aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
-
-        list = g_list_append( list, aasz );
-
-        /* cube error fibs rating */
-
-        aasz = g_malloc( 3 * sizeof ( *aasz ) );
-        aasz[ 0 ] = g_strdup( _("Cube errors rating loss") );
-      
-        for ( i = 0; i < 2; ++i ) 
-          if ( psc->anCloseCube[ i ] )
-            aasz[ i + 1 ] = g_strdup_printf( "%6.1f",
-                                             absoluteFibsRatingCube( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
-                                                                     pms->nMatchTo ) );
-          else
-            aasz[ i + 1 ] = g_strdup_printf( _("n/a") );
-
-        list = g_list_append( list, aasz );
 
       }
 
-      if( fIsMatch && !pms->nMatchTo && psc->nGames > 1 ) {
+      if( psc->fDice && fIsMatch && !pms->nMatchTo && psc->nGames > 1 ) {
 
 	static char *asz[ 2 ][ 2 ] = {
           { N_("Advantage (actual) in ppg"),
@@ -572,7 +584,8 @@ formatGS( const statcontext *psc, const matchstate *pms,
       
           for ( j = 0; j < 2; ++j ) 
             aasz[ j + 1 ] = 
-              g_strdup_printf( "%6.1f",
+              g_strdup_printf( "%+*.*f",
+                               fOutputDigits + 3, fOutputDigits,
                                af[ i ][ 0 ][ j ] / psc->nGames );
 
           list = g_list_append( list, aasz );
@@ -584,8 +597,9 @@ formatGS( const statcontext *psc, const matchstate *pms,
       
           for ( j = 0; j < 2; ++j ) 
             aasz[ j + 1 ] = 
-              g_strdup_printf( "%6.1f",
-                               1.95996f * af[ i ][ 1 ][ j ] / psc->nGames );
+              g_strdup_printf( "%*.*f",
+                               fOutputDigits + 3, fOutputDigits,
+                               1.95996f * sqrt( af[ i ][ 1 ][ j ] / psc->nGames ) );
 
           list = g_list_append( list, aasz );
 
