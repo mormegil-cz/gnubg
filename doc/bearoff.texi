@@ -32,7 +32,7 @@ on match score and cube level.
 
 Consider the following position:
 
-@verbatim
+@example
  GNU Backgammon  Position ID: CgAAEAEAAAAAAA
                  Match ID   : cIkMAAAAAAAA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg
@@ -48,7 +48,7 @@ v|                  |BAR|                  |     (Cube: 1)
  |                  |   |                  | XXX On Roll
  |                  |   |    X        X    | XXX 0 points
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: jth
-@end verbatim
+@end example
 
 Using a two-sided bearoff database will yield that player X has 67.1%
 cubeless chance of winning. The database also gives cubeful money
@@ -126,7 +126,7 @@ p = sum(i=0 to infinity) P0(i) [ sum(j=i to infinity) P1(j) ]
 
 For example, consider the following position:
 
-@verbatim
+@example
  GNU Backgammon  Position ID: 2x0AAOi2AQAAAA
                  Match ID   : cAkAAAAAAAAA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg
@@ -142,7 +142,7 @@ v|                  |BAR|                  |     (Cube: 1)
  |                  |   |    X  X  X  X    | X   On roll
  |                  |   |    X  X  X  X  X | X   0 points
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: jth
-@end verbatim
+@end example
 
 The one sided bearoff distributions are
 @multitable @columnfractions 0.25 0.25 0.25
@@ -252,7 +252,7 @@ III. The 12 point database may more than one day!
 3 chequers, but with counting gammons and backgammons. The starting
 position is
 
-@verbatim
+@example
  GNU Backgammon  Position ID: AACgAgAAKgAAAA
                  Match ID   : cAkAAAAAAAAA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg
@@ -269,7 +269,7 @@ v|                  |BAR|                  |     (Cube: 1)
  |                  |   |          O  O  O |     0 points
  +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: jth
 Pip counts: O 69, X 69
-@end verbatim
+@end example
 
 @gnubg{} can also play the two-chequer and one-chequer variations as
 well. Although it looks very simple to play, Hypergammon is in fact
@@ -570,7 +570,7 @@ rounding errors.
 Below is a random position from the database. The equities and
 percentages in your own database should be very similiar (if not identical):
 
-@verbatim
+@example
  GNU Backgammon  Position ID: ADAAAQAkIAAAAA
                  Match ID   : cAkAAAAAAAAA
  +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg
@@ -605,4 +605,4 @@ Double, take        : -0.710   (-0.491)
 
 Correct cube action: No double, beaver
 
-@end verbatim
+@end example
