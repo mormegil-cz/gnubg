@@ -87,7 +87,7 @@ PrintCode ( FILE *pf ) {
           "\n"
           "  md5_buffer ( acBearoff1, sizeof ( acBearoff1 ), ach );\n"
           "  if ( memcmp ( ach, achCorrect, 16 )  ) {\n"
-          "    fprintf ( stderr, _(\"Built-in database is not valid!\n\") );\n"
+          "    fprintf ( stderr, _(\"Built-in database is not valid!\\n\") );\n"
           "    return NULL;\n"
           "  }\n"
           "\n"
