@@ -288,8 +288,11 @@ MoveListMWC ( GtkWidget *pw, hintdata *phd ) {
 
 }
 
+
+
+
 static void
-MoveListEval ( GtkWidget *pw, hintdata *phd ) {
+EvalMoves ( hintdata *phd, evalcontext *pec ) {
 
   GList *pl;
   GtkWidget *pwMoves = phd->pwMoves;
@@ -306,7 +309,7 @@ MoveListEval ( GtkWidget *pw, hintdata *phd ) {
   for(  pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
 
     if ( ScoreMove ( &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ],
-                     &ci, &esEvalChequer.ec, esEvalChequer.ec.nPlies ) < 0 ) {
+                     &ci, pec, pec->nPlies ) < 0 ) {
       ProgressEnd ();
       return;
     }
@@ -333,6 +336,28 @@ MoveListEval ( GtkWidget *pw, hintdata *phd ) {
   ProgressEnd ();
 
 }
+
+static void
+MoveListEval ( GtkWidget *pw, hintdata *phd ) {
+
+  EvalMoves ( phd, &esEvalChequer.ec );
+
+}
+
+
+static void
+MoveListEvalPly ( GtkWidget *pw, hintdata *phd ) {
+
+  char *szPly = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+  evalcontext ec = {
+    0, TRUE, 0, 0, TRUE, FALSE, 0.0f, 0.0f };
+
+  ec.nPlies = atoi ( szPly );
+
+  EvalMoves ( phd, &ec );
+
+}
+
 
 static void
 MoveListEvalSettings ( GtkWidget *pw, void *unused ) {
@@ -440,6 +465,9 @@ CreateMoveListTools ( hintdata *phd ) {
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
   GtkWidget *pwMove = gtk_button_new_with_label ( _("Move") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
+  GtkWidget *pwply;
+  int i;
+  char *sz;
 
   phd->pwRollout = pwRollout;
   phd->pwRolloutSettings = pwRolloutSettings;
@@ -450,7 +478,7 @@ CreateMoveListTools ( hintdata *phd ) {
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pwTools = gtk_table_new (5, 2, FALSE);
+  pwTools = gtk_table_new (6, 2, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -460,23 +488,42 @@ CreateMoveListTools ( hintdata *phd ) {
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
+  phd->pwEvalPly = gtk_hbox_new ( FALSE, 0 );
+  gtk_table_attach (GTK_TABLE (pwTools), phd->pwEvalPly, 0, 2, 1, 2, 
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 2, 3,
+  for ( i = 0; i < 5; ++i ) {
+
+    sz = g_strdup_printf ( "%d", i );
+    pwply = gtk_button_new_with_label ( sz );
+
+    gtk_box_pack_start ( GTK_BOX ( phd->pwEvalPly ), pwply, TRUE, TRUE, 0 );
+
+    gtk_signal_connect( GTK_OBJECT( pwply ), "clicked",
+                        GTK_SIGNAL_FUNC( MoveListEvalPly ), phd );
+
+    gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, free );
+
+  }
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 3, 4,
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 0, 2, 4, 5,
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 3, 4,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 4, 5,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
+  gtk_table_attach (GTK_TABLE (pwTools), pwMove, 0, 2, 5, 6,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
@@ -559,6 +606,7 @@ CheckHintButtons( hintdata *phd ) {
     gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwEvalPly, c && phd->fButtonsValid );
 
     return c;
 }

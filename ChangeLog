@@ -1,3 +1,14 @@
+Sun Sep  8 22:36:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Add buttons for 0-4 ply in cube and move widgets.
+
+	* gtkcube.c (EvalCube): new function.
+	* gtkcube.c (CubeAnalysisEval, CubeAnalysisEvalPly): call EvalCube.
+	* gtkcube.c (CreateCubeAnalysisTools): add buttons for 0-4 ply.
+	* gtkchequer.c (EvalMove): new function.
+	* gtkchequer.c (MoveListEval, MostListEvalPly): call EvalMove.
+	* gtkchequer.c (CreateMoveListTools): add buttons for 0-4 ply.
+
 Sun Sep  8 21:42:30 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Option to rotate first two rolls of rollout. 

@@ -620,7 +620,7 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
 }
 
 static void
-CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
+EvalCube ( cubehintdata *pchd, evalcontext *pec ) {
 
   cubeinfo ci;
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
@@ -630,7 +630,7 @@ CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
   ProgressStart( _("Considering cube action...") );
 
   if ( GeneralCubeDecisionE ( aarOutput, pchd->ms.anBoard, &ci, 
-                              &esEvalCube.ec ) < 0 ) {
+                              pec ) < 0 ) {
     ProgressEnd();
     return;
   }
@@ -642,11 +642,31 @@ CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
   pchd->pes->et = EVAL_EVAL;
-  memcpy ( &pchd->pes->ec, &esEvalCube.ec, sizeof ( evalcontext ) );
+  memcpy ( &pchd->pes->ec, pec, sizeof ( evalcontext ) );
   if ( pchd->arDouble )
      FindCubeDecision ( pchd->arDouble, pchd->aarOutput, &ci );
 
   UpdateCubeAnalysis ( pchd );
+
+}
+
+static void
+CubeAnalysisEvalPly ( GtkWidget *pw, cubehintdata *pchd ) {
+
+  char *szPly = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+  evalcontext ec = {
+    0, TRUE, 0, 0, TRUE, FALSE, 0.0f, 0.0f };
+
+  ec.nPlies = atoi ( szPly );
+
+  EvalCube ( pchd, &ec );
+
+}
+
+static void
+CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
+
+  EvalCube ( pchd, &esEvalCube.ec );
 
 }
 
@@ -752,11 +772,15 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   GtkWidget *pwTools;
   GtkWidget *pwEval = gtk_button_new_with_label ( _("Eval") );
+  GtkWidget *pwply;
   GtkWidget *pwEvalSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
   GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
+  GtkWidget *pw;
+  int i;
+  char *sz;
 
   GtkTooltips *pt = gtk_tooltips_new ();
 
@@ -771,20 +795,39 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   gtk_table_attach (GTK_TABLE (pwTools), pwEvalSettings, 1, 2, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
+
+  pw = gtk_hbox_new ( FALSE, 0 );
+  gtk_table_attach (GTK_TABLE (pwTools), pw, 0, 2, 1, 2, 
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
 
-  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 1, 2,
+  for ( i = 0; i < 5; ++i ) {
+
+    sz = g_strdup_printf ( "%d", i );
+    pwply = gtk_button_new_with_label ( sz );
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), pwply, TRUE, TRUE, 0 );
+
+    gtk_signal_connect( GTK_OBJECT( pwply ), "clicked",
+                        GTK_SIGNAL_FUNC( CubeAnalysisEvalPly ), pchd );
+
+    gtk_object_set_data_full ( GTK_OBJECT ( pwply ), "user_data", sz, free );
+
+  }
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 2, 3,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 2, 3,
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 3, 4,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 3, 4,
+  gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 4, 5,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
