@@ -135,6 +135,67 @@ cmp_matchstate ( const matchstate *pms1, const matchstate *pms2 ) {
 }
 
 
+static int
+cmp_matchstate_cube( const matchstate *pms1, const matchstate *pms2 ) {
+
+  if ( memcmp( pms1->anBoard, pms2->anBoard, sizeof pms1->anBoard ) )
+    return 1;
+  
+  if ( pms1->fTurn != pms2->fTurn )
+    return 1;
+
+  if ( pms1->fMove != pms2->fMove )
+    return 1;
+
+  if ( pms1->fCrawford != pms2->fCrawford )
+    return 1;
+
+  if ( pms1->fPostCrawford != pms2->fPostCrawford )
+    return 1;
+
+  if ( pms1->nMatchTo != pms2->nMatchTo )
+    return 1;
+
+  if ( pms1->nMatchTo &&
+       memcmp( pms1->anScore, pms2->anScore, sizeof pms1->anScore ) )
+    return 1;
+  
+  if ( pms1->nCube != pms2->nCube )
+    return 1;
+
+  if ( pms1->bgv != pms2->bgv )
+    return 1;
+
+  if ( pms1->fCubeOwner != pms2->fCubeOwner )
+    return 1;
+
+  if ( !pms1->nMatchTo && pms1->fJacoby != pms2->fJacoby )
+    return 1;
+
+  if ( !pms1->nMatchTo && pms1->cBeavers != pms2->cBeavers )
+    return 1;
+
+  return 0;
+
+}
+
+static int
+cmp_matchstate_move( const matchstate *pms1, const matchstate *pms2 ) {
+
+  /* check if match state is for same move */
+
+  if ( cmp_matchstate_cube( pms1, pms2 ) )
+    return 1;
+
+  if ( memcmp( pms1->anDice, pms2->anDice, sizeof pms1->anDice ) )
+    return 1;
+
+  return 0;
+
+}
+
+
+
 
 static void
 PlayMove(matchstate* pms, int const anMove[ 8 ], int const fPlayer)
@@ -971,6 +1032,9 @@ extern int ComputerTurn( void ) {
       }
       ProgressEnd();
 
+      UpdateStoredCube( aarOutput, aarStdDev, 
+                        &ap[ ms.fTurn ].esCube, &ms );
+
       cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
 
       fComputerDecision = TRUE;
@@ -1179,6 +1243,9 @@ extern int ComputerTurn( void ) {
 	  }
 	  ProgressEnd();
 
+          UpdateStoredCube( aarOutput, aarStdDev, 
+                            &ap[ ms.fTurn ].esCube, &ms );
+
           cd = FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, &ci );
 
           switch ( cd ) {
@@ -1267,23 +1334,45 @@ extern int ComputerTurn( void ) {
       pmn->fPlayer = ms.fTurn;
       pmn->ml.cMoves = 0;
       pmn->ml.amMoves = NULL;
-      pmn->esDouble.et = EVAL_NONE;
-      pmn->esChequer.et = EVAL_NONE;
+      pmn->esChequer = ap[ ms.fTurn ].esChequer;
       pmn->lt = LUCK_NONE;
       pmn->rLuck = ERR_VAL;
       pmn->stMove = SKILL_NONE;
       pmn->stCube = SKILL_NONE;
 
+      if ( !cmp_matchstate_cube( &sc.ms, &ms ) ) {
+        /* use cube analysis from stored cube */
+        memcpy( pmn->aarOutput, sc.aarOutput,
+                sizeof sc.aarOutput );
+        memcpy( pmn->aarStdDev, sc.aarStdDev,
+                sizeof sc.aarStdDev );
+        memcpy( &pmn->esDouble, &sc.es, sizeof sc.es );
+      }
+      else
+        pmn->esDouble.et = EVAL_NONE;
+
       ProgressStart( _("Considering move...") );
-      if( FindBestMove( pmn->anMove, ms.anDice[ 0 ], ms.anDice[ 1 ],
-                        anBoardMove, &ci,
-			&ap[ ms.fTurn ].esChequer.ec, 
-                        ap[ ms.fTurn ].aamf ) < 0 ) {
+      if( FindnSaveBestMoves( &pmn->ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
+                              anBoardMove, NULL, 0.0f, &ci, 
+                              &ap[ ms.fTurn ].esChequer.ec, 
+                              ap[ ms.fTurn ].aamf ) < 0 ) {
 	  ProgressEnd();
 	  free( pmn );
 	  return -1;
       }
       ProgressEnd();
+
+      if ( pmn->ml.cMoves ) {
+        memcpy( pmn->anMove, pmn->ml.amMoves[ 0 ].anMove,
+                sizeof( pmn->anMove ) );
+        pmn->iMove = 0;
+      }
+      else {
+        pmn->anMove[ 0 ] = pmn->anMove[ 1 ] = -1;
+        pmn->iMove = -1;
+      }
+        
+
      
 #if USE_TIMECONTROL
 	if (ms.gs ==  GAME_TIMEOUT)
@@ -2447,9 +2536,18 @@ extern void CommandDouble( char *sz ) {
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
     if( !LinkToDouble( pmr ) ) {
-    pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
       pmr->d.nAnimals = 0;
+      pmr->d.CubeDecPtr = &pmr->d.CubeDec;
+      if ( ! cmp_matchstate_cube( &sc.ms, &ms ) ) {
+        /* use cube analysis from stored cube */
+        memcpy( pmr->d.CubeDec.aarOutput, sc.aarOutput,
+                sizeof sc.aarOutput );
+        memcpy( pmr->d.CubeDec.aarStdDev, sc.aarStdDev,
+                sizeof sc.aarStdDev );
+        memcpy( &pmr->d.CubeDec.esDouble, &sc.es, sizeof sc.es );
+      }
+      else
+        pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
     }
     pmr->d.st = SKILL_NONE;
 
@@ -2868,7 +2966,13 @@ CommandMove( char *sz ) {
 	    pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 	    pmn->fPlayer = ms.fTurn;
-            if ( cmp_matchstate ( &ms, &sm.ms ) ) {
+	    if( ml.cMoves )
+		memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
+			sizeof( pmn->anMove ) );
+	    else
+		pmn->anMove[ 0 ] = -1;
+	    
+            if ( cmp_matchstate_move ( &ms, &sm.ms ) ) {
 	      pmn->ml.cMoves = 0;
               pmn->ml.amMoves = NULL;
             } else {
@@ -2882,18 +2986,22 @@ CommandMove( char *sz ) {
 	      }
 	    }
 
-	    pmn->esDouble.et = EVAL_NONE;
-	    pmn->esChequer.et = EVAL_NONE;
+            if ( !cmp_matchstate_cube( &sc.ms, &ms ) ) {
+              /* use cube analysis from stored cube */
+              memcpy( pmn->aarOutput, sc.aarOutput,
+                      sizeof sc.aarOutput );
+              memcpy( pmn->aarStdDev, sc.aarStdDev,
+                      sizeof sc.aarStdDev );
+              memcpy( &pmn->esDouble, &sc.es, sizeof sc.es );
+            }
+            else
+              pmn->esDouble.et = EVAL_NONE;
+
+            pmn->esChequer.et = EVAL_NONE;
 	    pmn->lt = LUCK_NONE;
 	    pmn->rLuck = ERR_VAL;
 	    pmn->stMove = SKILL_NONE;
 	    pmn->stCube = SKILL_NONE;
-	    
-	    if( ml.cMoves )
-		memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
-			sizeof( pmn->anMove ) );
-	    else
-		pmn->anMove[ 0 ] = -1;
 	    
 	    ShowAutoMove( ms.anBoard, pmn->anMove );
 	    
@@ -2963,7 +3071,11 @@ CommandMove( char *sz ) {
 		pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 		pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 		pmn->fPlayer = ms.fTurn;
-                if ( cmp_matchstate ( &ms, &sm.ms ) ) { 
+
+                memcpy( pmn->anMove, ml.amMoves[ i ].anMove, 
+                        sizeof pmn->anMove );
+
+                if ( cmp_matchstate_move ( &ms, &sm.ms ) ) {
 		  pmn->ml.cMoves = 0;
 		  pmn->ml.amMoves = NULL;
 		} else {
@@ -2977,8 +3089,18 @@ CommandMove( char *sz ) {
 		  }
                 }
 
-		pmn->esDouble.et = EVAL_NONE;
-		pmn->esChequer.et = EVAL_NONE;
+                if ( !cmp_matchstate_cube( &sc.ms, &ms ) ) {
+                  /* use cube analysis from stored cube */
+                  memcpy( pmn->aarOutput, sc.aarOutput,
+                          sizeof sc.aarOutput );
+                  memcpy( pmn->aarStdDev, sc.aarStdDev,
+                          sizeof sc.aarStdDev );
+                  memcpy( &pmn->esDouble, &sc.es, sizeof sc.es );
+                }
+                else
+                  pmn->esDouble.et = EVAL_NONE;
+
+                pmn->esChequer.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
 		pmn->rLuck = ERR_VAL;
 		pmn->stCube = SKILL_NONE;
