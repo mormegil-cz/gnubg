@@ -267,6 +267,7 @@ RollsTree ( const int n, evalcontext *pec, matchstate *pms ) {
 static void DepthChanged ( GtkRange *pr, rollswidget *prw )
 {
 	GtkWidget *pNewRolls;
+	int n;
 
 	if (fInterrupt)
 	{	/* Stop recursion on cancel */
@@ -274,7 +275,7 @@ static void DepthChanged ( GtkRange *pr, rollswidget *prw )
 		return;
 	}
 
-	int n = gtk_range_get_value(pr);
+	n = gtk_range_get_value(pr);
 	if (n == prw->nDepth)
 		return;
 
@@ -320,8 +321,6 @@ static void DepthChanged ( GtkRange *pr, rollswidget *prw )
 	}
 }
 
-#endif /* USE_GTK2 */
-
 void CancelRolls(GtkWidget* pButton)
 {
 	fInterrupt = TRUE;
@@ -341,6 +340,8 @@ static gint RollsClose(GtkWidget *widget, GdkEvent *event, rollswidget *prw)
 		return FALSE;
 }
 
+#endif /* USE_GTK2 */
+
 extern void
 GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
@@ -348,13 +349,14 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
   GtkWidget *vbox, *hbox;
   GtkAdjustment *padj;
+  int n;
 
   rollswidget *prw = g_malloc ( sizeof ( rollswidget ) );
 
   prw->closing = FALSE;
   prw->pDialog = GTKCreateDialog( _("Distribution of rolls"), DT_INFO, NULL, NULL );
 
-  int n = ( nDepth < 1 ) ? 1 : nDepth;
+  n = ( nDepth < 1 ) ? 1 : nDepth;
 
   prw->pms = pms;
   prw->pec = pec;
