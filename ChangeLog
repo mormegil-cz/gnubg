@@ -1,3 +1,8 @@
+Wed Feb 23   06:49:52 2005 GMT Jim Segrave
+
+	# gtkpanels.c use string.h rather than strings.h to get
+	  prototype for strcasecmp()
+	
 Tue Feb  22  19:26:45 2005 Oystein Johansen <oystein@gnubg.org>
 
         * gtkcube.c (CubeAnalysisEvalPly): Get the evalcontext right!

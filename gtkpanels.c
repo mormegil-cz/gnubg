@@ -31,8 +31,7 @@
 #define GTK_ENABLE_BROKEN /* for GtkText */
 #include "backgammon.h"
 #include <i18n.h>
-#include <strings.h>
-
+#include <string.h>
 #if USE_GTK
 #include "gtkboard.h"
 #include "gtkgame.h"
