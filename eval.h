@@ -318,4 +318,13 @@ GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                        int anBoard[ 2 ][ 25 ],
                        cubeinfo *pci, evalcontext *pec );
 
+extern int
+GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                     int anBoard[ 2 ][ 25 ],
+                     cubeinfo *pci, evalcontext *pec );
+
+extern int
+GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
+                          int anBoard[ 2 ][ 25 ],
+                          cubeinfo *pci, evalcontext *pec, int nPlies );
 #endif

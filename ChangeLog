@@ -1,3 +1,27 @@
+Fri Jun 15 18:44:19 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	* eval.c (InvertEvaluationR): invert rollout evaluation;
+	percentages and equities.
+
+	* eval.c (EvaluatePositionCubeful2): prototype changed. Now takes
+	array of cubeinfo's like the rollout routines. Bugfix for bear-off
+	positions. 
+
+	* eval.c, rollout.c (GeneralCubeDecisionE, GeneralEvaluationE):
+	move from rollout.c to eval.c. 
+
+	* eval.c (FindBestCubeDecision): bugfix.
+
+	* eval.c (GeneralCubeDecisionE, DumpPosition): changed calls to
+	EvaluatePositionCubeful2.
+
+	* eval.c (GeneralEvaluationEPlied): new function.
+
+	* eval.c (ScoreMove): use GeneralEvaluationEPlied.
+
+	* rollout.c (BasicCubefulRollout): use GeneralEvaluationE.
+
+
 Wed May 23 12:25:08 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c, rollout.c (GeneralEvaluation, GeneralCubeDecision): Moved
