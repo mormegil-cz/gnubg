@@ -4305,6 +4305,11 @@ extern void PromptForExit( void ) {
 		StopIdle3d(bd);
 	}
 #endif
+	/* Close any open connections */
+	if( ap[0].pt == PLAYER_EXTERNAL )
+		closesocket( ap[0].h );
+	if( ap[1].pt == PLAYER_EXTERNAL )
+		closesocket( ap[1].h );
 
     playSound ( SOUND_EXIT );
 
