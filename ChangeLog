@@ -1,3 +1,14 @@
+Sun Apr  7 14:39:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (getPercent): new function. Used in CubeAnalysis widget
+	and for HTML export.
+	* gtkgame.c (CubeAnalysis): use function above.
+
+	* html.c (HTMLPrintCubeAnalysisTable): modify logic for printing
+	warning "wrong pass!".
+	* html.c (HTMLPrintCubeAnalysisTable): output win% instead of
+	hardcoded values. (changed all callers)
+
 Fri Apr  5 19:01:49 2002  Øystein Johansen <oeysteij@online.no>
 
         gnubg.c (CommandSaveSettings) Fix typo.

@@ -756,12 +756,13 @@ isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci ) {
 
 static void
 HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
+                             float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                             float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                              int fPlayer,
                              evalsetup *pes, cubeinfo *pci,
                              int fDouble, int fTake,
                              skilltype stDouble,
                              skilltype stTake ) {
-  float ar[ 5 ];
   const char *aszCube[] = {
     NULL, "No double", "Double, take", "Double, pass" };
   int i;
@@ -884,7 +885,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
 
-  if ( ! fTake && r > 0.0f ) {
+  if ( fDouble && ! fTake && r > 0.0f ) {
 
     fAnno = TRUE;
 
@@ -1002,8 +1003,6 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* ply & cubeless equity */
 
-  /* FIXME: include in movenormal and movedouble */
-
   /* FIXME: about parameters if exsExport.afCubeParameters */
 
   fprintf ( pf, "<tr>" );
@@ -1030,10 +1029,11 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   
   if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
     fprintf ( pf, "<td>Cubeless equity</td><td>%+7.3f</td><td>&nbsp;</td>\n",
-             0.0f /* FIXME */ );
+              aarOutput[ 0 ][ OUTPUT_EQUITY ] );
   else
     fprintf ( pf, "<td>Cubeless equity</td><td>%+7.3f</td><td>&nbsp;</td>\n",
-              0.0f /* FIXME */ );
+              eq2mwc ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci ) );
+              
 
   fprintf ( pf, "</tr>\n" );
 
@@ -1043,7 +1043,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* FIXME: include in movenormal and movedouble */
 
-    ar[ 0 ] = ar[ 1 ] = ar[ 2 ] = ar[ 3 ] = ar[ 4 ] = 0;
+    float *ar = aarOutput[ 0 ];
 
     fprintf ( pf,
               "<tr><td>&nbsp;</td>"
@@ -1104,8 +1104,16 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   fprintf ( pf,
             "<tr><td colspan=\"2\">Proper cube action:</td>"
-            "<td colspan=\"2\">%s</td></tr>\n",
+            "<td colspan=\"2\">%s",
             GetCubeRecommendation ( FindBestCubeDecision ( arDouble, pci ) ) );
+
+  if ( ( r = getPercent ( FindBestCubeDecision ( arDouble, pci ), 
+                          arDouble ) ) >= 0.0 )
+    fprintf ( pf, " (%.1f%%)", 100.0f * r );
+
+
+
+  fprintf ( pf, "</td></tr>\n" );
 
   fprintf ( pf,
             "</table>\n" );
@@ -1141,7 +1149,9 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* cube analysis from move */
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->n.arDouble, pmr->n.fPlayer,
+    HTMLPrintCubeAnalysisTable ( pf, pmr->n.arDouble, 
+                                 pmr->n.aarOutput, pmr->n.aarStdDev,
+                                 pmr->n.fPlayer,
                                  &pmr->n.esDouble, &ci, FALSE, FALSE,
                                  pmr->n.stCube, SKILL_NONE );
 
@@ -1149,7 +1159,9 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
   case MOVE_DOUBLE:
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, pmr->d.fPlayer,
+    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
+                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+                                 pmr->d.fPlayer,
                                  &pmr->d.esDouble, &ci, TRUE, FALSE,
                                  pmr->d.st, SKILL_NONE );
 
@@ -1160,7 +1172,9 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* cube analysis from double, {take, drop, beaver} */
 
-    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, pmr->d.fPlayer,
+    HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
+                                 pmr->d.aarOutput, pmr->d.aarStdDev,
+                                 pmr->d.fPlayer,
                                  &pmr->d.esDouble, &ci, TRUE, 
                                  pmr->mt == MOVE_TAKE,
                                  SKILL_NONE, /* FIXME: skill from prev. cube */
