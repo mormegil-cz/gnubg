@@ -1,16 +1,31 @@
 * Check "show" exists for every "set"!
+* Allow setting long seeds for dice generators that support them.  Support
+/dev/random for seed generation where available.
 * Add cube handling for computer player.
 * Add options for Jacoby/cubeless.
-* Save positions and evaluations to databases.
-* Add matches and money sessions.
-* Add supervised training.
+* Finish saving positions and evaluations to databases.
+* Finish matches and money sessions.
+* Finish supervised training, aand allow people to submit training data via
+web.
 * Use Guile if available.
-* Use X (prime interface) if available.
 * Add more completions to help and readline.
 * Allow user to vary parameters for rollouts.
 * Allow timeouts for "train" (and others?).
 * Add a neural net to correct errors in BEAROFF1 class.
-* Clean up the search paths for weights and database.
 * Load, save and analyse games and matches.
-* Add different dice generators.
+* Add "set autobearoff".
+* Write a proper input routine which will read a line from stdin under all
+conditions (with or without X, with or without readline, and whether
+stdin is a TTY or not).  Let the user configure the prompt (add escape
+sequences to display information such as the player on roll, pip count,
+match score, etc.).  Also, echo commands input with the mouse as if they
+had been typed.
+* Add Gnome support.  (Better to wait until Gnome is rock solid, I think.)
+Add silly bells and whistles like colour selector for chequer colours,
+angle of light, surface of pieces, transparent background, etc.
+* When getpwnam() or equivalent is available, set the player name to the
+user's name.
+* Allow copy/paste and drag & drop of the board ID in the board window.
+* Perform better move checking in the X window; provide visual feedback
+so the user can tell whether the move is partial, complete, or illegal.
 * Improve the evaluator!
