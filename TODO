@@ -161,7 +161,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Add option menus corresponding to the "annotate" commands in the
   annotation window. (gary)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
-** Write GTKDumpStatcontext (show statistics).
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
