@@ -1,3 +1,7 @@
+Sun May  6 18:30:27 2001  Øystein Johansen <oeysteij@online.no>
+
+        * import.c (ImportJF): Get the cube right.
+
 Wed May  2 14:41:27 2001  Gary Wong  <gtw@research.att.com>
 
 	* set.c (CommandSetEvalReduced): Use an integer for the reduced speed.

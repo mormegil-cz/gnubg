@@ -18,8 +18,6 @@
  *
  */
 
-#include "config.h"
-
 #include <stdio.h>
 #include <math.h>
 #include "backgammon.h"
@@ -177,10 +175,14 @@ ImportJF( FILE * fp, char *szFileName) {
 
 
   if (nOnRoll == 1 || nOnRoll == 3)
-    idx = 1;
-  else
     idx = 0;
+  else
+    idx = 1;
   
+  fTurn = idx;
+ 
+  if (nOnRoll == 0) fTurn = -1; 
+
   if (nMovesLeft + nMovesRight > 1) {
     anDice[0] = nDie1;
     anDice[1] = nDie2;
@@ -191,10 +193,10 @@ ImportJF( FILE * fp, char *szFileName) {
 
   for( i = 0; i < 25; i++ ) {
     anBoard[ idx ][ i ] = ( anNew[ i + 1 ]  < 0 ) ?  -anNew[ i + 1 ]  : 0;
-    anBoard[ 1-idx ][ i ] = ( anNew[ 24 - i ]  > 0 ) ?  anNew[ 24 - i ]  : 0;
+    anBoard[ ! idx ][ i ] = ( anNew[ 24 - i ]  > 0 ) ?  anNew[ 24 - i ]  : 0;
   }
 
-  anBoard[ 1-idx ][ 24 ] =  anNew[0];
+  anBoard[ ! idx ][ 24 ] =  anNew[0];
   anBoard[ idx ][ 24 ] =  -anNew[25];
  
   return;
