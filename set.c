@@ -24,9 +24,12 @@ static command acSetPlayer[] = {
 static void SetRNG( rng rngNew, char *szSeed ) {
 
     static char *aszRNG[] = {
-	"ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister"
+	"ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
+	"user supplied"
     };
     
+    /* FIXME: read name of file with user RNG */
+
     if( rngCurrent == rngNew ) {
 	printf( "You are already using the %s generator.\n",
 		aszRNG[ rngNew ] );
@@ -35,6 +38,26 @@ static void SetRNG( rng rngNew, char *szSeed ) {
     } else {
 	printf( "GNU Backgammon will now use the %s generator.\n",
 		aszRNG[ rngNew ] );
+
+        /* Dispose dynamically linked user module if necesary */
+
+        if ( rngCurrent == RNG_USER )
+	  UserRNGClose();
+
+	/* Load dynamic library with user RNG */
+
+        if ( rngNew == RNG_USER ) {
+	  
+	  if ( !UserRNGOpen() ) {
+
+	    printf ( "Error loading shared library.\n" );
+	    printf ( "You are still using the %s generator.\n",
+		     aszRNG[ rngCurrent ] );
+            return;
+	  }
+
+	}
+	    
 	rngCurrent = rngNew;
 	CommandSetSeed( szSeed );
     }
@@ -272,12 +295,23 @@ extern void CommandSetRNGIsaac( char *sz ) {
 
 extern void CommandSetRNGManual( char *sz ) {
 
-    CommandNotImplemented( sz );
+    SetRNG ( RNG_MANUAL, sz );
 }
 
 extern void CommandSetRNGMersenne( char *sz ) {
 
     SetRNG( RNG_MERSENNE, sz );
+}
+
+extern void CommandSetRNGUser( char *sz ) {
+
+#if HAVE_LIBDL
+    SetRNG( RNG_USER, sz );
+#else
+    puts( "This installation of GNU Backgammon was compiled without the" );
+    puts( "dynamic linking library needed for user RNG's." );
+#endif
+
 }
 
 extern void CommandSetSeed( char *sz ) {
