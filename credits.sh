@@ -17,6 +17,7 @@ cat > AUTHORS <<'EOF'
 EOF
 
 cat > $contributors <<'EOF'
+Kazuaki Asai
 Eric Augustine
 Steve Baedke
 Chuck Bower

@@ -2,6 +2,7 @@
    Modify credits.sh instead. */
 
 char *aszCredits[] = {
+    "Kazuaki Asai",
     "Eric Augustine",
     "Steve Baedke",
     "Hans Berliner",
