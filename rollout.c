@@ -391,6 +391,11 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
           case TOOGOODRE_TAKE:
           case TOOGOODRE_PASS:
           case NO_REDOUBLE_BEAVER:
+          case OPTIONAL_DOUBLE_BEAVER:
+          case OPTIONAL_DOUBLE_TAKE:
+          case OPTIONAL_REDOUBLE_TAKE:
+          case OPTIONAL_DOUBLE_PASS:
+          case OPTIONAL_REDOUBLE_PASS:
           default:
 
             /* no op */

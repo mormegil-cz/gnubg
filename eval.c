@@ -4117,6 +4117,16 @@ extern char
     return _("Never double, take (dead cube)");
   case NO_REDOUBLE_DEADCUBE:
     return _("Never redouble, take (dead cube)");
+  case OPTIONAL_DOUBLE_BEAVER:
+    return _("Optional double, beaver");
+  case OPTIONAL_DOUBLE_TAKE:
+    return _("Optional double, take");
+  case OPTIONAL_REDOUBLE_TAKE:
+    return _("Optional redouble, take");
+  case OPTIONAL_DOUBLE_PASS:
+    return _("Optional double, pass");
+  case OPTIONAL_REDOUBLE_PASS:
+    return _("Optional redouble, pass");
   default:
     return _("I have no idea!");
   }
@@ -4194,6 +4204,9 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
   case TOOGOODRE_TAKE:
   case NODOUBLE_DEADCUBE:
   case NO_REDOUBLE_DEADCUBE:
+  case OPTIONAL_DOUBLE_BEAVER:
+  case OPTIONAL_DOUBLE_TAKE:
+  case OPTIONAL_REDOUBLE_TAKE:
 
     /*
      * Optimal     : no double
@@ -4209,6 +4222,8 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
   case TOOGOOD_PASS:
   case TOOGOODRE_PASS:
+  case OPTIONAL_DOUBLE_PASS:
+  case OPTIONAL_REDOUBLE_PASS:
 
     /*
      * Optimal     : no double
@@ -4475,6 +4490,16 @@ SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove,
 	SetCubeInfoMoney( pci, nCube, fCubeOwner, fMove, fJacoby, fBeavers );
 }
 
+
+static int
+isOptional ( const float r1, const float r2 ) {
+
+  const float epsilon = 1.0e-5;
+
+  return ( fabs ( r1 - r2 ) <= epsilon );
+
+}
+
  
 extern cubedecision
 FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
@@ -4500,6 +4525,8 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
  *
  */
 
+  int f;
+
   /* Check if cube is avaiable */
 
   if ( ! GetDPEq ( NULL, NULL, pci ) ) {
@@ -4523,13 +4550,15 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
   if ( ( arDouble[ OUTPUT_TAKE ] >= arDouble[ OUTPUT_NODOUBLE ] ) &&
        ( arDouble[ OUTPUT_DROP ] >= arDouble[ OUTPUT_NODOUBLE ] ) ) {
 
-    /* DT > ND and DP > ND */
+    /* DT >= ND and DP >= ND */
 
     /* we have a double */
 
     if ( arDouble[ OUTPUT_DROP ] > arDouble[ OUTPUT_TAKE ] ) {
 
-      /* 6. DP > DT > ND: Double, take */
+      /* 6. DP > DT >= ND: Double, take */
+
+      f = isOptional ( arDouble[ OUTPUT_TAKE ], arDouble[ OUTPUT_NODOUBLE ] );
 
       arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_TAKE ];
 
@@ -4538,18 +4567,30 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
            arDouble[ OUTPUT_TAKE ] <= 0.0 
            && pci->fBeavers )
         /* beaver (jacoby paradox) */
-        return DOUBLE_BEAVER;
-      else
+        return f ? OPTIONAL_DOUBLE_BEAVER : DOUBLE_BEAVER;
+      else {
         /* ...take */
-        return ( pci->fCubeOwner == -1 ) ? DOUBLE_TAKE : REDOUBLE_TAKE;
+        if ( f ) 
+          return ( pci->fCubeOwner == -1 ) ? 
+            OPTIONAL_DOUBLE_TAKE : OPTIONAL_REDOUBLE_TAKE;
+        else
+          return ( pci->fCubeOwner == -1 ) ? DOUBLE_TAKE : REDOUBLE_TAKE;
+      }
       
     }
     else {
 
-      /* 4. DT > DP > ND: Double, pass */
+      /* 4. DT >= DP >= ND: Double, pass */
 
       arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_DROP ];
-      return ( pci->fCubeOwner == -1 ) ? DOUBLE_PASS : REDOUBLE_PASS;
+
+      if ( isOptional ( arDouble[ OUTPUT_NODOUBLE ], 
+                        arDouble[ OUTPUT_DROP ] ) )
+        return ( pci->fCubeOwner == -1 ) ? 
+          OPTIONAL_DOUBLE_PASS : OPTIONAL_REDOUBLE_PASS;
+      else
+        return ( pci->fCubeOwner == -1 ) ? DOUBLE_PASS : REDOUBLE_PASS;
+
     }
   }
   else {
@@ -4594,9 +4635,11 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
     } 
     else
 
-      /* 3. DT > ND > DP: Too good, pass */
-      
-      return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
+      /* 3. DT >= ND > DP: Too good, pass */
+
+      return ( pci->fCubeOwner == -1 ) ? 
+        OPTIONAL_DOUBLE_PASS : OPTIONAL_REDOUBLE_PASS;
+
   }
 }
 
@@ -6745,6 +6788,9 @@ getCubeDecisionOrdering ( int aiOrder[ 3 ],
   case TOOGOODRE_TAKE:
   case NODOUBLE_DEADCUBE:
   case NO_REDOUBLE_DEADCUBE:
+  case OPTIONAL_DOUBLE_BEAVER:
+  case OPTIONAL_DOUBLE_TAKE:
+  case OPTIONAL_REDOUBLE_TAKE:
 
     /*
      * Optimal     : no double
@@ -6760,6 +6806,8 @@ getCubeDecisionOrdering ( int aiOrder[ 3 ],
 
   case TOOGOOD_PASS:
   case TOOGOODRE_PASS:
+  case OPTIONAL_DOUBLE_PASS:
+  case OPTIONAL_REDOUBLE_PASS:
 
     /*
      * Optimal     : no double
@@ -6798,6 +6846,11 @@ getPercent ( const cubedecision cd,
   case REDOUBLE_PASS:
   case NODOUBLE_DEADCUBE:
   case NO_REDOUBLE_DEADCUBE:
+  case OPTIONAL_DOUBLE_BEAVER:
+  case OPTIONAL_DOUBLE_TAKE:
+  case OPTIONAL_REDOUBLE_TAKE:
+  case OPTIONAL_DOUBLE_PASS:
+  case OPTIONAL_REDOUBLE_PASS:
     /* correct cube action */
     return -1.0;
     break;

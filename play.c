@@ -831,6 +831,10 @@ extern int ComputerTurn( void ) {
         case TOOGOOD_PASS:
         case REDOUBLE_PASS:
         case TOOGOODRE_PASS:
+        case OPTIONAL_DOUBLE_TAKE:
+        case OPTIONAL_REDOUBLE_TAKE:
+        case OPTIONAL_DOUBLE_PASS:
+        case OPTIONAL_REDOUBLE_PASS:
 
           /* Opponent out of his right mind: Raccoon if possible */
 
@@ -867,6 +871,7 @@ extern int ComputerTurn( void ) {
         case DOUBLE_BEAVER:
         case NODOUBLE_BEAVER:
         case NO_REDOUBLE_BEAVER:
+        case OPTIONAL_DOUBLE_BEAVER:
 
           /* opponent beaver was correct */
 
@@ -894,6 +899,8 @@ extern int ComputerTurn( void ) {
         case TOOGOODRE_TAKE:
         case NODOUBLE_DEADCUBE:
         case NO_REDOUBLE_DEADCUBE:
+        case OPTIONAL_DOUBLE_TAKE:
+        case OPTIONAL_REDOUBLE_TAKE:
 
           CommandTake ( NULL );
           break;
@@ -902,6 +909,8 @@ extern int ComputerTurn( void ) {
         case TOOGOOD_PASS:
         case REDOUBLE_PASS:
         case TOOGOODRE_PASS:
+        case OPTIONAL_DOUBLE_PASS:
+        case OPTIONAL_REDOUBLE_PASS:
 
           CommandDrop ( NULL );
           break;
@@ -909,6 +918,7 @@ extern int ComputerTurn( void ) {
         case DOUBLE_BEAVER:
         case NODOUBLE_BEAVER:
         case NO_REDOUBLE_BEAVER:
+        case OPTIONAL_DOUBLE_BEAVER:
 
           if ( ms.cBeavers < nBeavers && ! ms.nMatchTo &&
 	       ms.nCube < ( MAX_CUBE >> 1 ) ) 
@@ -1039,6 +1049,11 @@ extern int ComputerTurn( void ) {
           case TOOGOODRE_PASS:
           case NODOUBLE_BEAVER:
           case NO_REDOUBLE_BEAVER:
+          case OPTIONAL_DOUBLE_BEAVER:
+          case OPTIONAL_DOUBLE_TAKE:
+          case OPTIONAL_REDOUBLE_TAKE:
+          case OPTIONAL_DOUBLE_PASS:
+          case OPTIONAL_REDOUBLE_PASS:
 
             /* better leave cube where it is: no op */
             break;
@@ -2237,6 +2252,9 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 	case NO_REDOUBLE_TAKE:
 	case NO_REDOUBLE_BEAVER:
 	case TOOGOODRE_TAKE:
+        case OPTIONAL_DOUBLE_BEAVER:
+        case OPTIONAL_DOUBLE_TAKE:
+        case OPTIONAL_REDOUBLE_TAKE:
 	  /* best response is take, player took - good move */
 	  if ( !fIsDrop )
 		return ( SKILL_NONE );
@@ -2249,6 +2267,8 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 	case REDOUBLE_PASS:
 	case TOOGOOD_PASS:
 	case TOOGOODRE_PASS:
+        case OPTIONAL_DOUBLE_PASS:
+        case OPTIONAL_REDOUBLE_PASS:
 	  /* best response is drop, player dropped - good move */
 	  if ( fIsDrop )
 		return (SKILL_NONE);

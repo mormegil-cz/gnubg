@@ -263,6 +263,8 @@ static GtkWidget *TakeAnalysis( const movetype mt,
     case TOOGOODRE_TAKE:
     case NODOUBLE_DEADCUBE:
     case NO_REDOUBLE_DEADCUBE:
+    case OPTIONAL_DOUBLE_TAKE:
+    case OPTIONAL_REDOUBLE_TAKE:
       pw = gtk_label_new ( _("Take") );
       break;
 
@@ -270,12 +272,15 @@ static GtkWidget *TakeAnalysis( const movetype mt,
     case TOOGOOD_PASS:
     case REDOUBLE_PASS:
     case TOOGOODRE_PASS:
+    case OPTIONAL_DOUBLE_PASS:
+    case OPTIONAL_REDOUBLE_PASS:
       pw = gtk_label_new ( _("Pass") );
       break;
 
     case DOUBLE_BEAVER:
     case NODOUBLE_BEAVER:
     case NO_REDOUBLE_BEAVER:
+    case OPTIONAL_DOUBLE_BEAVER:
       pw = gtk_label_new ( _("Beaver!") );
       break;
 
@@ -356,8 +361,11 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     pwFrame = gtk_frame_new ( _("Cube analysis") );
     gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
 
+    pw = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw );
+
     pwTable = gtk_table_new ( 8, 4, FALSE );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
+    gtk_box_pack_start ( GTK_BOX ( pw ), pwTable, FALSE, FALSE, 0 );
 
     iRow = 0;
 
