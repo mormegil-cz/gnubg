@@ -639,7 +639,11 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
   int fFirst;
   int i;
 
-  const char szID[] = "$Id$";
+  const char szVersion[] = "$Revision$";
+  int iMajor, iMinor;
+
+  iMajor = atoi ( strchr ( szVersion, ' ' ) );
+  iMinor = atoi ( strchr ( szVersion, '.' ) + 1 );
 
   /* add links to other games */
 
@@ -661,14 +665,14 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
             "<hr />\n"
             "<address>Output generated %s by "
             "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
-            VERSION "</a> (%s)</address>\n"
+            VERSION "</a> (HTML Export version %d.%d)</address>\n"
             "<p class=\"tiny\">Validate "
             "<a href=\"http://jigsaw.w3.org/css-validator/check/referer\">CSS</a> or "
             "<a href=\"http://validator.w3.org/check/referer\">XHTML</a>.</p>\n"
             "</body>\n"
             "</html>\n",
             ctime ( &t ),
-            szID );
+            iMajor, iMinor );
 
 }
 
@@ -1452,7 +1456,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     /* FIXME: output equity?? */
 
     fprintf ( pf,
-              "<tr class=\"movethemove\"><td>0</td><td>&nbsp;</td>"
+              "<tr class=\"movethemove\"><td>&nbsp;</td><td>&nbsp;</td>"
               "<td>&nbsp;</td><td>Cannot move</td><td>&nbsp;</td></tr>\n" );
 
   }
@@ -1495,10 +1499,15 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     printImage ( pf, szImageDir, "b-indent", szExtension, "" );
 
-    fprintf ( pf,
-              "*%s moves %s</p>\n",
-              ap[ pmr->n.fPlayer ].szName,
-              FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
+    if ( pmr->n.ml.cMoves )
+      fprintf ( pf,
+                "*%s moves %s</p>\n",
+                ap[ pmr->n.fPlayer ].szName,
+                FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
+    else
+      fprintf ( pf,
+                "*%s cannot move</p>\n",
+                ap[ pmr->n.fPlayer ].szName );
 
     // HTMLRollAlert ( pf, pms, pmr, szImageDir, szExtension );
 
@@ -2092,6 +2101,11 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
       case MOVE_NORMAL:
 
+	if( pmr->n.fPlayer != msExport.fMove ) {
+	    SwapSides( msExport.anBoard );
+	    msExport.fMove = pmr->n.fPlayer;
+	}
+      
         msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
         msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
         msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
@@ -2109,6 +2123,11 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
       case MOVE_TAKE:
       case MOVE_DROP:
 
+	if( pmr->d.fPlayer != msExport.fMove ) {
+	    SwapSides( msExport.anBoard );
+	    msExport.fMove = pmr->d.fPlayer;
+	}
+      
         HTMLBoardHeader ( pf,&msExport, iGame, iMove );
 
         printHTMLBoard( pf, &msExport, msExport.fTurn, 
