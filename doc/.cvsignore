@@ -1,8 +1,11 @@
 Makefile
+config.cache
+config.log
+config.status
 gnubg.html
 gnubg.info*
-gnubg.ps
-gnubg.txt
 gnubg.log gnubg.dvi gnubg.aux gnubg.cp gnubg.fn gnubg.vr
+gnubg.ps
 gnubg.tp gnubg.ky gnubg.pg gnubg.toc gnubg.tmp gnubg.cps gnubg.kys
+gnubg.txt
 rulfig1.eps  rulfig2.eps  rulfig3.eps  rulfig4.eps  rulfig5.eps
