@@ -608,6 +608,9 @@ TextPrologue ( FILE *pf, const matchstate *pms, const int iGame ) {
               ap [ 0 ].szName, pms->anScore[ 0 ],
               ap [ 1 ].szName, pms->anScore[ 1 ] );
 
+  fprintf ( pf, 
+            _("Game number %d\n\n"), iGame + 1 );
+
 }
 
 

@@ -1,3 +1,7 @@
+Thu Aug  1 20:50:17 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* text.c (TextPrologue): add game number.
+
 Thu Aug  1 19:54:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (DumpStatContext, GTKDumpStatContext,
