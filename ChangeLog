@@ -1,3 +1,18 @@
+Thu Feb 22 11:36:18 2001  Gary Wong  <gtw@research.att.com>
+
+	* configure.in: Test fork(), the *f float math functions, and whether
+	GDK is running over X.
+	* acconfig.h: Define alternatives to the *f float math functions.
+
+	* external.c, set.c: Improve portability of the socket calls.
+
+	* gnubg.c (ShellEscape): Disable shell escapes if we can't fork().
+
+	* gtkboard.c, gtkgame.c, gtkprefs.c: Work around problems with GTK+
+	on MS Windows.
+
+	* play.c: Disable the delay if we can't select().
+	
 Thu Feb 15 11:49:16 2001  Joseph Heled  <pepe@internet.co.nz>
 
 	* database.c: added dummy CommandDatabaseExport and

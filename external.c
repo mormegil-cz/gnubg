@@ -21,9 +21,9 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <signal.h>
-#include <assert.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -36,6 +36,14 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "external.h"
+
+#if defined(AF_UNIX) && !defined(AF_LOCAL)
+#define AF_LOCAL AF_UNIX
+#define PF_LOCAL PF_UNIX
+#endif
+#ifndef SUN_LEN
+#define SUN_LEN(x) (sizeof *(x))
+#endif
 
 extern int ExternalRead( int h, char *pch, int cch ) {
 #if HAVE_SOCKETS
@@ -126,7 +134,7 @@ extern void CommandExternal( char *sz ) {
 	     "socket support, and does not implement external controllers." );
 #else
     int h, hPeer;
-    struct sockaddr_un sun;
+    struct sockaddr_un saun;
     char szCommand[ 256 ], szResponse[ 32 ];
     char szName[ 32 ], szOpp[ 32 ];
     int anBoard[ 2 ][ 25 ], nMatchTo, anScore[ 2 ], anDice[ 2 ],
@@ -144,12 +152,12 @@ extern void CommandExternal( char *sz ) {
 	return;
     }
 
-    sun.sun_family = AF_LOCAL;
-    strcpy( sun.sun_path, sz ); /* yuck!  opportunities for buffer overflow
+    saun.sun_family = AF_LOCAL;
+    strcpy( saun.sun_path, sz ); /* yuck!  opportunities for buffer overflow
 				    here... but we didn't write the broken
 				    interface */
 
-    if( bind( h, (struct sockaddr *) &sun, SUN_LEN( &sun ) ) < 0 ) {
+    if( bind( h, (struct sockaddr *) &saun, SUN_LEN( &saun ) ) < 0 ) {
 	perror( sz );
 	close( h );
 	return;

@@ -43,6 +43,14 @@
 #include "matchequity.h"
 #include "positionid.h"
 
+#if defined(AF_UNIX) && !defined(AF_LOCAL)
+#define AF_LOCAL AF_UNIX
+#define PF_LOCAL PF_UNIX
+#endif
+#ifndef SUN_LEN
+#define SUN_LEN(x) (sizeof *(x))
+#endif
+
 static char szEQUITY[] = "<equity>",
     szNAME[] = "<name>",
     szNUMBER[] = "<number>",
