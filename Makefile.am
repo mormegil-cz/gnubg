@@ -48,7 +48,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	onechequer.c onechequer.h path.c path.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
-bin_PROGRAMS = gnubg
+bin_PROGRAMS = gnubg makebearoff
 
 if USE_GTK
 ## --- GTK
@@ -58,7 +58,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
-	gtkrace.c gtkrace.h \
+	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
 	$(BR1_SOURCES) $(SOUND_SOURCES)
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
@@ -85,7 +85,7 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd @GTKDATA@ @GUILEDATA@ $(BR1DATA)
 
 man_MANS = gnubg.6
 
-noinst_PROGRAMS = makebearoff makeweights makebearoff1
+noinst_PROGRAMS = makeweights makebearoff1
 check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \

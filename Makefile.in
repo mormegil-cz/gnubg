@@ -166,7 +166,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
-bin_PROGRAMS = gnubg
+bin_PROGRAMS = gnubg makebearoff
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
@@ -180,7 +180,7 @@ bin_PROGRAMS = gnubg
 @USE_GTK_TRUE@	gtk-multiview.h gnu.xpm question.xpm nextgame.xpm nextmove.xpm \
 @USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
-@USE_GTK_TRUE@	gtkrace.c gtkrace.h \
+@USE_GTK_TRUE@	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
@@ -196,7 +196,7 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd @GTKDATA@ @GUILEDATA@ $(BR1DATA)
 
 man_MANS = gnubg.6
 
-noinst_PROGRAMS = makebearoff makeweights makebearoff1
+noinst_PROGRAMS = makeweights makebearoff1
 check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
@@ -228,10 +228,9 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = intl/Makefile
-bin_PROGRAMS = gnubg$(EXEEXT)
+bin_PROGRAMS = gnubg$(EXEEXT) makebearoff$(EXEEXT)
 check_PROGRAMS = erftest$(EXEEXT)
-noinst_PROGRAMS = makebearoff$(EXEEXT) makeweights$(EXEEXT) \
-	makebearoff1$(EXEEXT)
+noinst_PROGRAMS = makeweights$(EXEEXT) makebearoff1$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
 am_erftest_OBJECTS = erftest.$(OBJEXT)
