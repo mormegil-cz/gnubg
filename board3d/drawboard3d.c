@@ -123,7 +123,6 @@ void Free3d(float ***array, int x, int y);
 #define DICE_STEP_SIZE1 (base_unit * 1.7f)
 
 #define HINGE_GAP (base_unit / 12.0f)
-#define HINGE_SEGMENTS 6
 #define HINGE_WIDTH (base_unit / 2.0f)
 #define HINGE_HEIGHT (base_unit * 7.0f)
 
@@ -152,21 +151,25 @@ void TidyShadows(BoardData* bd)
 	freeOccluder(&bd->Occluders[OCC_PIECE]);
 }
 
-void Tidy3dObjects(BoardData* bd)
+void Tidy3dObjects(BoardData* bd, int glValid)
 {
 	KillFont(bd);
-	glDeleteLists(bd->pieceList, 1);
-	glDeleteLists(bd->diceList, 1);
-	glDeleteLists(bd->DCList, 1);
 
-	gluDeleteQuadric(bd->qobjTex);
-	gluDeleteQuadric(bd->qobj);
+	if (glValid)
+	{
+		glDeleteLists(bd->pieceList, 1);
+		glDeleteLists(bd->diceList, 1);
+		glDeleteLists(bd->DCList, 1);
 
-	gluDeleteNurbsRenderer(bd->flagNurb);
-	
+		gluDeleteQuadric(bd->qobjTex);
+		gluDeleteQuadric(bd->qobj);
+
+		gluDeleteNurbsRenderer(bd->flagNurb);
+	}
+
 	TidyShadows(bd);
 
-	ClearTextures(bd);
+	ClearTextures(bd, glValid);
 }
 
 void preDrawPiece0(BoardData* bd)
@@ -187,11 +190,11 @@ void preDrawPiece0(BoardData* bd)
 	step = (2 * PI) / rdAppearance.curveAccuracy;
 
 	/* Draw top/bottom of piece */
-	if (bd->checkerMat[0].pTexture)
+	if (bd->chequerMat[0].pTexture)
 	{	/* Texturing will be enabled */
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_DEPTH);
-		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
+		glBindTexture(GL_TEXTURE_2D, bd->chequerMat[0].pTexture->texID);
 		gluDisk(bd->qobjTex, 0, discradius, rdAppearance.curveAccuracy, 1);
 		glPopMatrix();
 		/* Draw bottom - faces other way */
@@ -270,7 +273,7 @@ void preDrawPiece0(BoardData* bd)
 		glEnd();
 	}
 
-	if (bd->checkerMat[0].pTexture)
+	if (bd->chequerMat[0].pTexture)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 
 	Free3d(p, rdAppearance.curveAccuracy + 1, rdAppearance.curveAccuracy / 4 + 1);
@@ -285,11 +288,11 @@ void preDrawPiece1(BoardData* bd)
 	pieceBorder = pieceRad * .9f;
 
 	/* Draw top of piece */
-	if (bd->checkerMat[0].pTexture)
+	if (bd->chequerMat[0].pTexture)
 	{	/* Texturing will be enabled */
 		glPushMatrix();
 		glTranslatef(0, 0, PIECE_DEPTH);
-		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
+		glBindTexture(GL_TEXTURE_2D, bd->chequerMat[0].pTexture->texID);
 		gluDisk(bd->qobjTex, 0, pieceBorder, rdAppearance.curveAccuracy, 1);
 		glDisable(GL_TEXTURE_2D);
 		gluDisk(bd->qobj, pieceBorder, pieceRad, rdAppearance.curveAccuracy, 1);
@@ -305,7 +308,7 @@ void preDrawPiece1(BoardData* bd)
 	/* Edge of piece */
 	gluCylinder(bd->qobj, pieceRad, pieceRad, PIECE_DEPTH, rdAppearance.curveAccuracy, 1);
 
-	if (bd->checkerMat[0].pTexture)
+	if (bd->chequerMat[0].pTexture)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 }
 
@@ -319,15 +322,26 @@ void preDrawPiece(BoardData* bd, int transparent)
 
 	switch(bd->pieceType)
 	{
-	case 0:
+	case PT_ROUNDED:
 		preDrawPiece0(bd);
 		break;
-	case 1:
+	case PT_FLAT:
 		preDrawPiece1(bd);
 		break;
+	default:
+		g_print("Error: Unhandled piece type\n");
 	}
 
 	glEndList();
+}
+
+void UnitNormal(float x, float y, float z)
+{
+	// Calculate the length of the vector		
+	float length = (float)sqrt((x * x) + (y * y) + (z * z));
+
+	// Dividing each element by the length will result in a unit normal vector.
+	glNormal3f(x / length, y / length, z / length);
 }
 
 void renderDice(BoardData* bd, float size)
@@ -398,14 +412,15 @@ void renderDice(BoardData* bd, float size)
 		for (i = 0; i < rdAppearance.curveAccuracy / 4; i++)
 		{
 			ns = (rdAppearance.curveAccuracy / 4) - i - 1;
+
 			glBegin(GL_TRIANGLE_STRIP);
-				glNormal3f(corner_points[i][0][0] / radius, corner_points[i][0][1] / radius, corner_points[i][0][2] / radius);
+				UnitNormal(corner_points[i][0][0], corner_points[i][0][1], corner_points[i][0][2]);
 				glVertex3f(corner_points[i][0][0], corner_points[i][0][1], corner_points[i][0][2]);
 				for (j = 0; j <= ns; j++)
 				{
-					glNormal3f(corner_points[i + 1][j][0] / radius, corner_points[i + 1][j][1] / radius, corner_points[i + 1][j][2] / radius);
+					UnitNormal(corner_points[i + 1][j][0], corner_points[i + 1][j][1], corner_points[i + 1][j][2]);
 					glVertex3f(corner_points[i + 1][j][0], corner_points[i + 1][j][1], corner_points[i + 1][j][2]);
-					glNormal3f(corner_points[i][j + 1][0] / radius, corner_points[i][j + 1][1] / radius, corner_points[i][j + 1][2] / radius);
+					UnitNormal(corner_points[i][j + 1][0], corner_points[i][j + 1][1], corner_points[i][j + 1][2]);
 					glVertex3f(corner_points[i][j + 1][0], corner_points[i][j + 1][1], corner_points[i][j + 1][2]);
 				}
 			glEnd();
@@ -985,7 +1000,7 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 void renderPiece(BoardData* bd, int rotation, int colour)
 {
 	glRotatef((float)rotation, 0, 0, 1);
-	setMaterial(&bd->checkerMat[colour]);
+	setMaterial(&bd->chequerMat[colour]);
 
 	glCallList(bd->pieceList);
 }
@@ -1013,7 +1028,7 @@ void renderSpecialPieces(BoardData* bd)
 
 void drawSpecialPieces(BoardData* bd)
 {	/* Draw animated or dragged pieces */
-	int blend = (bd->checkerMat[0].alphaBlend) || (bd->checkerMat[1].alphaBlend);
+	int blend = (bd->chequerMat[0].alphaBlend) || (bd->chequerMat[1].alphaBlend);
 
 	if (blend)
 	{	/* Draw back of piece separately */
@@ -1051,14 +1066,14 @@ void drawPiece(BoardData* bd, int point, int pos)
 void drawPieces(BoardData* bd)
 {
 	int i, j;
-	int blend = (bd->checkerMat[0].alphaBlend) || (bd->checkerMat[1].alphaBlend);
+	int blend = (bd->chequerMat[0].alphaBlend) || (bd->chequerMat[1].alphaBlend);
 
 	if (blend)
 	{	/* Draw back of piece separately */
 		glEnable(GL_BLEND);
 		glCullFace(GL_FRONT);
 
-		setMaterial(&bd->checkerMat[0]);
+		setMaterial(&bd->chequerMat[0]);
 		for (i = 0; i < 28; i++)
 		{
 			for (j = 1; j <= -bd->points[i]; j++)
@@ -1066,7 +1081,7 @@ void drawPieces(BoardData* bd)
 				drawPiece(bd, i, j);
 			}
 		}
-		setMaterial(&bd->checkerMat[1]);
+		setMaterial(&bd->chequerMat[1]);
 		for (i = 0; i < 28; i++)
 		{
 			for (j = 1; j <= bd->points[i]; j++)
@@ -1077,7 +1092,7 @@ void drawPieces(BoardData* bd)
 		glCullFace(GL_BACK);
 	}
 
-	setMaterial(&bd->checkerMat[0]);
+	setMaterial(&bd->chequerMat[0]);
 	for (i = 0; i < 28; i++)
 	{
 		for (j = 1; j <= -bd->points[i]; j++)
@@ -1085,7 +1100,7 @@ void drawPieces(BoardData* bd)
 			drawPiece(bd, i, j);
 		}
 	}
-	setMaterial(&bd->checkerMat[1]);
+	setMaterial(&bd->chequerMat[1]);
 	for (i = 0; i < 28; i++)
 	{
 		for (j = 1; j <= bd->points[i]; j++)
@@ -1107,7 +1122,7 @@ void drawPieces(BoardData* bd)
 			int target = bd->iTargetHelpPoints[i];
 			if (target != -1)
 			{	/* Make sure texturing is disabled */
-				if (bd->checkerMat[0].pTexture)
+				if (bd->chequerMat[0].pTexture)
 					glDisable(GL_TEXTURE_2D);
 				drawPiece(bd, target, abs(bd->points[target]) + 1);
 			}
@@ -1253,11 +1268,10 @@ void drawPoints(BoardData* bd)
  	glEnable(GL_POLYGON_SMOOTH);
 	glEnable(GL_BLEND);
 
-	if (bd->baseMat.pTexture)
-		tuv = (TEXTURE_SCALE) / bd->baseMat.pTexture->width;
+	if (bd->pointMat[0].pTexture)
+		tuv = (TEXTURE_SCALE) / bd->pointMat[0].pTexture->width;
 	else
 		tuv = 0;
-
 	setMaterial(&bd->pointMat[0]);
 	drawPoint(tuv, 0, 0);
 	drawPoint(tuv, 0, 1);
@@ -1266,6 +1280,10 @@ void drawPoints(BoardData* bd)
 	drawPoint(tuv, 4, 0);
 	drawPoint(tuv, 4, 1);
 
+	if (bd->pointMat[1].pTexture)
+		tuv = (TEXTURE_SCALE) / bd->pointMat[1].pTexture->width;
+	else
+		tuv = 0;
 	setMaterial(&bd->pointMat[1]);
 	drawPoint(tuv, 1, 0);
 	drawPoint(tuv, 1, 1);
@@ -1273,7 +1291,6 @@ void drawPoints(BoardData* bd)
 	drawPoint(tuv, 3, 1);
 	drawPoint(tuv, 5, 0);
 	drawPoint(tuv, 5, 1);
-
 
 	glDisable(GL_BLEND);
 	glDisable(GL_POLYGON_SMOOTH);
@@ -1327,22 +1344,18 @@ void tidyEdges(BoardData* bd)
 	glLineWidth(1);
 	glEnable(GL_BLEND);
 	glEnable(GL_LINE_SMOOTH);
+	glDepthMask(GL_FALSE);
 
 	glNormal3f(0, 0, 1);
 
-	/* Careful handiling of pieces obscured by bar */
-	glDepthMask(GL_FALSE);
-		glBegin(GL_LINES);
-			/* bar */
-			glVertex3f(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-
-			glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-			glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
-		glEnd();
-	glDepthMask(GL_TRUE);
-
 	glBegin(GL_LINES);
+		/* bar */
+		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+
+		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+
 		/* left bear off tray */
 		glVertex3f(0, 0, BASE_DEPTH + EDGE_DEPTH);
 		glVertex3f(0, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
@@ -1390,7 +1403,7 @@ void tidyEdges(BoardData* bd)
 		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + LIFT_OFF, EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
 		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
 	glEnd();
-
+	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
 	glDisable(GL_LINE_SMOOTH);
 }
@@ -1399,7 +1412,7 @@ void showMoveIndicator(BoardData* bd)
 {
 /* ARROW_UNIT used to draw sub-bits of arrow */
 #define ARROW_UNIT (ARROW_SIZE / 4.0f)
-	setMaterial(&bd->checkerMat[(bd->turn == 1)]);
+	setMaterial(&bd->chequerMat[(bd->turn == 1)]);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_TEXTURE_2D);
 	glNormal3f(0, 0, 1);
@@ -1587,7 +1600,7 @@ void drawTable(BoardData* bd)
 		if (bd->State == BOARD_OPEN)
 		{	/* Shadow in gap between boards */
 			setMaterial(&bd->gap);
-			drawRect((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, 0, HINGE_GAP, TOTAL_HEIGHT, 0);
+			drawRect((TOTAL_WIDTH - HINGE_GAP) / 2.0f, 0, LIFT_OFF, HINGE_GAP, TOTAL_HEIGHT + LIFT_OFF, 0);
 		}
 	}
 
@@ -2510,7 +2523,7 @@ void renderFlag(BoardData* bd)
 	/* Draw number on flag */
 	glDisable(GL_DEPTH_TEST);
 
-	setMaterial(&bd->cubeNumberMat);
+	setMaterial(&bd->flagNumberMat);
 
 	glPushMatrix();
 	{
@@ -2814,7 +2827,7 @@ void MakeShadowModel(BoardData* bd)
 
 void preDraw3d(BoardData* bd)
 {
-	int transparentPieces = (bd->checkerMat[0].alphaBlend) || (bd->checkerMat[1].alphaBlend);
+	int transparentPieces = (bd->chequerMat[0].alphaBlend) || (bd->chequerMat[1].alphaBlend);
 
 	if (!bd->qobjTex)
 	{

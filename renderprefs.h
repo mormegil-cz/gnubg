@@ -33,4 +33,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 				   char *szValue );
 extern char *RenderPreferencesCommand( renderdata *prd, char *sz );
 
+#if USE_BOARD3D
+char *WriteMaterial(Material* pMat);
+#endif
+
 #endif

@@ -29,7 +29,6 @@
 #include <stdio.h>
 
 void DeleteTexture(Texture* texture);
-int LoadTexture(Texture* texture, const char* Filename);
 
 void SetSkin1(BoardData *bd)
 {
@@ -47,8 +46,8 @@ void SetSkin1(BoardData *bd)
 
 void SetSkin2(BoardData *bd)
 {
-	SetTexture(bd, &bd->checkerMat[0], TEXTURE_PATH"checker.bmp");
-	SetTexture(bd, &bd->checkerMat[1], TEXTURE_PATH"checker.bmp");
+//	SetTexture(bd, &bd->chequerMat[0], TEXTURE_PATH"checker.bmp");
+//	SetTexture(bd, &bd->chequerMat[1], TEXTURE_PATH"checker.bmp");
 
 	SetTexture(bd, &bd->boxMat, TEXTURE_PATH"board2.bmp");
 	SetTexture(bd, &bd->baseMat, TEXTURE_PATH"base2.bmp");
@@ -64,8 +63,8 @@ void SetSkin2(BoardData *bd)
 
 void SetSkin3(BoardData *bd)
 {
-	SetTexture(bd, &bd->checkerMat[0], TEXTURE_PATH"checker2.bmp");
-	SetTexture(bd, &bd->checkerMat[1], TEXTURE_PATH"checker2.bmp");
+//	SetTexture(bd, &bd->chequerMat[0], TEXTURE_PATH"checker2.bmp");
+//	SetTexture(bd, &bd->chequerMat[1], TEXTURE_PATH"checker2.bmp");
 
 	SetTexture(bd, &bd->boxMat, TEXTURE_PATH"board3.bmp");
 	SetTexture(bd, &bd->baseMat, TEXTURE_PATH"base3.bmp");
@@ -89,8 +88,8 @@ void SetSkin4(BoardData *bd)
 	SetupSimpleMat(&bd->cubeMat, .7f, .7f, .65f);
 	SetupSimpleMatAlpha(&bd->cubeNumberMat, 0, 0, .4f, 1);
 
-	SetupSimpleMatAlpha(&bd->checkerMat[0], .85f, .2f, .2f, .7f);
-	SetupSimpleMatAlpha(&bd->checkerMat[1], .2f, .2f, .2f, .7f);
+	SetupSimpleMatAlpha(&bd->chequerMat[0], .85f, .2f, .2f, .7f);
+	SetupSimpleMatAlpha(&bd->chequerMat[1], .2f, .2f, .2f, .7f);
 
 	SetupSimpleMat(&bd->baseMat, 0, .6f, 0);
 	SetupSimpleMatAlpha(&bd->boxMat, .85f, .45f, .15f, 1);
@@ -115,8 +114,8 @@ void SetSkin5(BoardData *bd)
 	SetupMat(&bd->cubeMat, .7f, .7f, .65f, .5f, .5f, .5f, .5f, .5f, .5f, 50, 0);
 	SetupSimpleMatAlpha(&bd->cubeNumberMat, 0, 0, .4f, 1);
 
-	SetupMat(&bd->checkerMat[0], .85f, .2f, .2f, .95f, .2f, .35f, 1, .5f, .5f, 25, .9f);
-	SetupMat(&bd->checkerMat[1], .2f, .2f, .2f, 0, 0, 1, 0, 0, 1, 25, .7f);
+	SetupMat(&bd->chequerMat[0], .85f, .2f, .2f, .95f, .2f, .35f, 1, .5f, .5f, 25, .9f);
+	SetupMat(&bd->chequerMat[1], .2f, .2f, .2f, 0, 0, 1, 0, 0, 1, 25, .7f);
 
 	SetupMat(&bd->baseMat, 0, .6f, 0, 0, .6f, 0, 0, .7f, 0, 70, 0);
 	SetupMat(&bd->boxMat, .85f, .45f, .15f, .9f, .5f, .1f, .9f, .5f, .1f, 70, 1);
@@ -141,8 +140,8 @@ void SetSkin6(BoardData *bd)
 	SetupMat(&bd->cubeMat, .7f, .7f, .65f, .5f, .5f, .5f, .5f, .5f, .5f, 50, 0);
 	SetupSimpleMatAlpha(&bd->cubeNumberMat, 0, 0, .4f, 1);
 
-	SetupMat(&bd->checkerMat[0], .85f, .2f, .2f, .95f, .2f, .35f, 1, .5f, .5f, 25, .9f);
-	SetupMat(&bd->checkerMat[1], .2f, .2f, .2f, 0, 0, 1, 0, 0, 1, 25, .7f);
+	SetupMat(&bd->chequerMat[0], .85f, .2f, .2f, .95f, .2f, .35f, 1, .5f, .5f, 25, .9f);
+	SetupMat(&bd->chequerMat[1], .2f, .2f, .2f, 0, 0, 1, 0, 0, 1, 25, .7f);
 
 	SetupMat(&bd->boxMat, .85f, .45f, .15f, .9f, .5f, .1f, .9f, .5f, .1f, 70, 1);
 	SetTexture(bd, &bd->boxMat, TEXTURE_PATH"board.bmp");
@@ -175,125 +174,76 @@ void SetTestTextures(BoardData *bd, int num)
 		SetSkin3(bd);
 }
 
-void setA(Material* pMat, double val[4])
+void GetTexture(BoardData* bd, Material* pMat)
 {
-	SetupSimpleMatAlpha(pMat, val[0],  val[1],  val[2], val[3]);
-}
-
-void set(Material* pMat, double val[3], int a)
-{
-	double temp[4];
-	temp[0] = val[0];
-	temp[1] = val[1];
-	temp[2] = val[2];
-	temp[3] = a;
-	setA(pMat, temp);
-}
-
-void setX(Material* pMat, unsigned char val[3], int a)
-{
-	int i;
-	double ar[3];
-	for( i = 0; i < 3; i++ )
-		ar[ i ] = val[i] / 255.0;
-
-	set(pMat, ar, a);
-}
-
-void testSet3dSetting(BoardData* bd, renderdata *prd, int testRow)
-{
-	bd->pieceType = 0;
-	ClearTextures(bd);
-
-//	updateHingeOccPos(bd);
-
-//	setA(&bd->checkerMat[0], prd->aarColour[0]);
-//	setA(&bd->checkerMat[1], prd->aarColour[1]);
-bd->checkerMat[0].pTexture = 0;
-bd->checkerMat[1].pTexture = 0;
-
-	set(&bd->diceMat[0], prd->afDieColour[0] ? prd->aarColour[0] : prd->aarDiceColour[0], 0);
-	set(&bd->diceMat[1], prd->afDieColour[1] ? prd->aarColour[1] : prd->aarDiceColour[1], 0);
-	set(&bd->diceDotMat[0], prd->aarDiceDotColour[0], 1);
-	set(&bd->diceDotMat[1], prd->aarDiceDotColour[1], 1);
-
-	set(&bd->cubeMat, prd->arCubeColour, 0);
+	if (pMat->textureInfo)
 	{
-	double testNumberCol[3] = {0, 0, .4};
-	double testPointNumberCol[3] = {.8, .8, .8};
-	double testBackgroundCol[3] = {.2f, .4f, .6f};
-	double testHingeCol[3] = {.75f, .85f, .1f};
-
-	set(&bd->cubeNumberMat, testNumberCol, 1);
-	set(&bd->pointNumberMat, testPointNumberCol, 1);
-	set(&bd->backGroundMat, testBackgroundCol, 1);
-	set(&bd->hingeMat, testHingeCol, 1);
+		char buf[100];
+		strcpy(buf, TEXTURE_PATH);
+		strcat(buf, pMat->textureInfo->file);
+		SetTexture(bd, pMat, buf);
 	}
+	else
+		pMat->pTexture = 0;
+}
 
-	setX(&bd->boxMat, prd->aanBoardColour[1], 1);
-	setX(&bd->baseMat, prd->aanBoardColour[0], 0);
-	setX(&bd->pointMat[0], prd->aanBoardColour[2], 1);
-	setX(&bd->pointMat[1], prd->aanBoardColour[3], 1);
+void GetTextures(BoardData* bd)
+{
+	GetTexture(bd, &bd->chequerMat[0]);
+	GetTexture(bd, &bd->chequerMat[1]);
+	GetTexture(bd, &bd->baseMat);
+	GetTexture(bd, &bd->pointMat[0]);
+	GetTexture(bd, &bd->pointMat[1]);
+	GetTexture(bd, &bd->boxMat);
+	GetTexture(bd, &bd->hingeMat);
+	GetTexture(bd, &bd->backGroundMat);
+}
+
+void testSet3dSetting(BoardData* bd, const renderdata *prd)
+{
+	bd->pieceType = prd->pieceType;
 
 	bd->showHinges = prd->fHinges;
 
+	memcpy(bd->chequerMat, prd->rdChequerMat, sizeof(Material[2]));
 
-//	SetTestTextures(bd, testRow);
+	memcpy(&bd->diceMat[0], prd->afDieColour[0] ? &prd->rdChequerMat[0] : &prd->rdDiceMat[0], sizeof(Material));
+	memcpy(&bd->diceMat[1], prd->afDieColour[1] ? &prd->rdChequerMat[1] : &prd->rdDiceMat[1], sizeof(Material));
+	bd->diceMat[0].textureInfo = bd->diceMat[1].textureInfo = 0;
 
-//	preDraw3d(bd);
-}
+	memcpy(bd->diceDotMat, prd->rdDiceDotMat, sizeof(Material[2]));
 
-void CopyTexture(BoardData* from, BoardData* to, Material* fromMat, Material* toMat)
-{
-	char textureFile[255];
-	int i;
+	memcpy(&bd->cubeMat, &prd->rdCubeMat, sizeof(Material));
+	memcpy(&bd->cubeNumberMat, &prd->rdCubeNumberMat, sizeof(Material));
 
-	if (!fromMat->pTexture || !fromMat->pTexture->texID)
-	{
-		toMat->pTexture = 0;
-		return;
-	}
+	memcpy(&bd->baseMat, &prd->rdBaseMat, sizeof(Material));
+	memcpy(bd->pointMat, prd->rdPointMat, sizeof(Material[2]));
 
-	i = 0;
-	while (&from->textureList[i] != fromMat->pTexture)
-		i++;
-
-	sprintf(textureFile, TEXTURE_PATH"%s", from->textureName[i]);
-	SetTexture(to, toMat, textureFile);
+	memcpy(&bd->boxMat, &prd->rdBoxMat, sizeof(Material));
+	memcpy(&bd->hingeMat, &prd->rdHingeMat, sizeof(Material));
+	memcpy(&bd->pointNumberMat, &prd->rdPointNumberMat, sizeof(Material));
+	memcpy(&bd->backGroundMat, &prd->rdBackGroundMat, sizeof(Material));
 }
 
 void CopySettings3d(BoardData* from, BoardData* to)
 {
-	ClearTextures(to);
+	memcpy(to->chequerMat, from->chequerMat, sizeof(Material[2]));
 
-	memcpy(&to->checkerMat[0], &from->checkerMat[0], sizeof(Material));
-	memcpy(&to->checkerMat[1], &from->checkerMat[1], sizeof(Material));
-
-	memcpy(&to->diceMat[0], &from->diceMat[0], sizeof(Material));
-	memcpy(&to->diceMat[1], &from->diceMat[1], sizeof(Material));
-	memcpy(&to->diceDotMat[0], &from->diceDotMat[0], sizeof(Material));
-	memcpy(&to->diceDotMat[1], &from->diceDotMat[1], sizeof(Material));
+	memcpy(to->diceMat, from->diceMat, sizeof(Material[2]));
+	memcpy(to->diceDotMat, from->diceDotMat, sizeof(Material[2]));
 
 	memcpy(&to->cubeMat, &from->cubeMat, sizeof(Material));
+	memcpy(&to->cubeNumberMat, &from->cubeNumberMat, sizeof(Material));
 
-	memcpy(&to->boxMat, &from->boxMat, sizeof(Material));
 	memcpy(&to->baseMat, &from->baseMat, sizeof(Material));
 	memcpy(&to->pointMat[0], &from->pointMat[0], sizeof(Material));
 	memcpy(&to->pointMat[1], &from->pointMat[1], sizeof(Material));
 
-	CopyTexture(from, to, &from->checkerMat[0], &to->checkerMat[0]);
-	CopyTexture(from, to, &from->checkerMat[1], &to->checkerMat[1]);
-
-	CopyTexture(from, to, &from->boxMat, &to->boxMat);
-	CopyTexture(from, to, &from->baseMat, &to->baseMat);
-	CopyTexture(from, to, &from->pointMat[0], &to->pointMat[0]);
-	CopyTexture(from, to, &from->pointMat[1], &to->pointMat[1]);
-
-	CopyTexture(from, to, &from->backGroundMat, &to->backGroundMat);
-	CopyTexture(from, to, &from->hingeMat, &to->hingeMat);
+	memcpy(&to->boxMat, &from->boxMat, sizeof(Material));
+	memcpy(&to->hingeMat, &from->hingeMat, sizeof(Material));
+	memcpy(&to->pointNumberMat, &from->pointNumberMat, sizeof(Material));
+	memcpy(&to->backGroundMat, &from->backGroundMat, sizeof(Material));
 
 	to->pieceType = from->pieceType;
 	to->showHinges = from->showHinges;
-
-//	preDraw3d(to);
 }

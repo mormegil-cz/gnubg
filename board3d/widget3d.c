@@ -177,7 +177,8 @@ void realize(GtkWidget *widget, BoardData* bd)
 		return;
 #endif
 	InitGL(bd);
-	testSet3dSetting(bd, &rdAppearance, 0);
+	testSet3dSetting(bd, &rdAppearance);
+	GetTextures(bd);
 preDraw3d(bd);
 
 #if HAVE_GTKGLEXT
@@ -296,6 +297,8 @@ int InitGTK3d(int *argc, char ***argv)
 		return 1;
 	}
 
+	LoadTextureInfo();
+
 	return 0;
 }
 
@@ -411,21 +414,13 @@ GdkGLContext *glPixmapContext = NULL;
 
 unsigned char testbuf[ 108 * 3 * 72 * 3 * 3 ];
 
-#if FAST_3D_PREVIEW
-
-void CreatePreviewBoard3d(BoardData* bd, GtkWidget** drawing_area)
-{
-	CreateGLWidget(bd, drawing_area, 0);
-	InitBoardPreview(bd);
-}
-
-#else
-
 void SetupPreview(BoardData* bd)
 {
 	glViewport(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT);
 	SetupViewingVolume3d(bd);
 	InitGL(bd);
+	GetTextures(bd);
+	preDraw3d(bd);
 }
 
 #if HAVE_GTKGLEXT
@@ -470,7 +465,10 @@ void RenderBoard3d(BoardData* bd, void *glpixmap, unsigned char* buf)
 	if (!gdk_gl_drawable_gl_begin (gldrawable, glPixmapContext))
 		return;
 
+ClearTextures(bd, TRUE);
+GetTextures(bd);
 preDraw3d(bd);
+
 	Draw(bd);
 
 	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buf);
@@ -520,13 +518,8 @@ void RenderBoard3d(BoardData* bd, void *ppm, unsigned char* buf)
 	if (!gdk_gl_pixmap_make_current(glpixmap, glPixmapContext))
 		return;
 
+ClearTextures(bd, TRUE);
 	SetupPreview(bd);
-
-preDraw3d(bd);
-
-//REMOVE........ Sort out texture setting (here!...)
-//ClearTextures(bd);
-//SetTestTextures(bd, 1);
 
 	Draw(bd);
 
@@ -535,7 +528,5 @@ preDraw3d(bd);
 	gdk_gl_pixmap_unref(glpixmap);
 	gdk_gl_context_unref(glPixmapContext);
 }
-
-#endif
 
 #endif

@@ -40,6 +40,48 @@ typedef enum _displaytype {
 typedef enum _lighttype {
     LT_POSITIONAL, LT_DIRECTIONAL
 } lighttype;
+
+typedef struct _Texture
+{
+	int texID;
+	int width;
+	int height;
+} Texture;
+
+#define FILENAME_SIZE 15
+#define NAME_SIZE 20
+
+typedef enum _TextureType
+{
+	TT_NONE = 1, TT_GENERAL = 2, TT_PIECE = 4, TT_HINGE = 8, TT_DISABLED = 16, TT_COUNT = 3
+} TextureType;
+
+typedef struct _TextureInfo
+{
+	char file[FILENAME_SIZE + 1];
+	char name[NAME_SIZE + 1];
+	TextureType type;
+} TextureInfo;
+
+typedef struct _Material
+{
+	float ambientColour[4];
+	float diffuseColour[4];
+	float specularColour[4];
+	int shininess;
+	int alphaBlend;
+	TextureInfo* textureInfo;
+	Texture* pTexture;
+} Material;
+
+typedef enum _PieceType
+{
+	PT_ROUNDED, PT_FLAT, NUM_PIECE_TYPES
+} PieceType;
+
+extern void FindTexture(TextureInfo** textureInfo, char* file);
+extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
+
 #endif
 
 typedef struct _renderdata {
@@ -76,6 +118,15 @@ typedef struct _renderdata {
 	int showMoveIndicator;
 	int boardAngle;	/* Angle board is tilted at */
 	int testSkewFactor;	/* Debug FOV adjustment */
+	PieceType pieceType;
+	Material rdChequerMat[2];	/* Chequer colours */
+	Material rdDiceMat[2], rdDiceDotMat[2];
+	Material rdCubeMat, rdCubeNumberMat;
+	Material rdBaseMat, rdPointMat[2];
+	Material rdBoxMat, rdHingeMat;
+	Material rdPointNumberMat;
+	Material rdBackGroundMat;
+
 #endif
 } renderdata;
 

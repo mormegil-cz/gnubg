@@ -4,28 +4,22 @@ Todo
 
 Display settings
 ----------------
-* Add material settings to appearnce dialog (see selmat.c)
-	+ Save/restore in designs
-	+ Display texture preview in a small box/rectangle
-* Store availiable textures in a text file or the xml file
-	+ Show list of available textures in drop-down
-	+ Assign types to textures (allow multiple) i.e. board, base, hinge, etc.
-+ Move texture location from data directory to boards or boards/3d or boards/textures
-	+ Add them to cvs (as binary files)
-* Get all options working...
-* Remove rdAppearance from notebook pages - pass in correct ones
-	+ So settings saved when switching 3d<->2d
-+ Remove testgtkboard.c file from lib build (and cvs)
-* Only enable 2d/3d skin options when selected
-* Move non-skin settings to new display option page
 
-* Update lighting on changes to light paramaters (in preview)
-	* Use lighting levels in appearance settings (for colour preveiw - rather than constants)
+* Get all options working...
+	* Move non-skin settings to (new 3d) display option page
+		+ Only enable when 3d board showing (try disabling page)
+		* Make sure options change correctly!
+		* Add tooltips for new options
+			+ show point labels
+	* Update lighting on changes to light paramaters (in preview)
+		* Use lighting levels in appearance settings (for colour preveiw - rather than constants)
+
++ Remove testgtkboard.c file from lib build (and cvs)
 
 Bugs
 ====
 
-* Sliders not getting set (2nd time) in 3d colour setting
+* Add design - doesn't work...
 
 In current version
 ------------------
@@ -37,20 +31,20 @@ In current version
 * Show a colour selection box in appearances
 	- strange gtk (General delete case) error on settings exit
 
-* Gtk 1, change colour of design element but cancel colour dialog
-	- change not removed until next screen update
+* Gtk 1, change colour of 2d design element but cancel colour dialog
+	- change not removed until next screen update/change
 
 Other things
 ============
 
-Make logo brighter (on close board)
++ Flag waving (change setting when displayed...)
 
-Add tooltips for new options
+* Remove rdAppearance from notebook pages - pass in correct ones
+	+ So settings saved (not overwritten) when switching 3d<->2d?
 
 Add check for unaccellerated graphics under linux
 	+ use glX functions - isDirect()?
-
-Show/hide 2d arrow with option
+	- test
 
 ----------------------------------------------------------
 
@@ -58,10 +52,15 @@ Add a few preset light positions
 	i.e. left of board, top of board, right of board, centre of board.
 On close, remap background to a better shape?
 export position png - and any other place that uses rendered board
+Show/hide 2d arrow with option
+
+----------------------------------------------------------
+
 FTGL uses C++
 
 Remove any warnings
-Check builds and runs without BOARD3D defined
+Check builds and runs without BOARD3D defined (check settings ok too)
+Check Gtk1 + 2 ok
 
 Skin help
 =========

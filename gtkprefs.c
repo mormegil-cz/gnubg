@@ -67,20 +67,24 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjBoard[ 4 ], *padjRound;
 static GtkAdjustment *apadjDiceExponent[ 2 ], *apadjDiceCoefficient[ 2 ];
 static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
-    *pwLabels, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
+    *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges,
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ], *pwNotebook;
 static GList *plBoardDesigns;
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
 	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwMoveIndicator,
-	*pwTestPerformance;
+	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *pwLightTable,
+	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame;
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
 	*padjLightLevelAmbient, *padjLightLevelDiffuse, *padjLightLevelSpecular,
 	*padjLightPosY, *padjLightPosZ;
 
 	BoardData bd3d;
 	displaytype previewType;
+	char lastPieceStr[50];
+	char* pieceTypeStr[NUM_PIECE_TYPES] = {"Rounded disc", "Flat edged disc"};
 
+	int pc3dDiceId[2], pcChequer2;
 	void *glpixPreview;
 #endif
 
@@ -109,10 +113,15 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook);
 static void
 AddDesignRow ( gpointer data, gpointer user_data );
 
+#if USE_BOARD3D
 void UpdatePreviewBar(GdkPixmap *pixmap);
-		GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind, Material* pMat);
-		GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent);
-
+GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind, Material* pMat, int opacity, int texture);
+GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent);
+void ResetPreviews();
+void UpdateColPreviews();
+int GetPreviewId();
+void UpdateColPreview(int ID);
+#endif;
 
 #if HAVE_LIBXML2
 
@@ -212,21 +221,15 @@ Preview2D( const renderdata *prd ) {
     gdk_gc_unref( gc );
 }
 
-int testRow;
-
 #if USE_BOARD3D
 static void Preview3D(const renderdata *prd)
 {
 	unsigned char auch[ 108 * 3 * 72 * 3 * 3 ];
 	GdkGC *gc;
 
-	testSet3dSetting(&bd3d, prd, testRow);
+	testSet3dSetting(&bd3d, prd);
 
-#if FAST_3D_PREVIEW
-	ReadBoard3d(&bd3d, pwPreview[PI_DESIGN], auch);
-#else
 	RenderBoard3d(&bd3d, glpixPreview, auch);
-#endif
 
 	gc = gdk_gc_new( ppm );
 	gdk_draw_rgb_image( ppm, gc, 0, 0, 108 * 3, 72 * 3, GDK_RGB_DITHER_MAX,
@@ -278,16 +281,59 @@ void ShowPreview(GtkWidget *widget, void *arg)
 	Preview(&rdAppearance);
 }
 
+void DieColourChanged (GtkWidget *pw, int f)
+{
+	gtk_widget_set_sensitive(apwDiceColourBox[f], !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pw)));
+	UpdatePreview(pwPreview + PI_DICE0 + f);
+
 #if USE_BOARD3D
+	UpdateColPreview(pc3dDiceId[f]);
+#endif
+}
+
+#if USE_BOARD3D
+
+void HingeChanged (GtkWidget *pw)
+{
+	gtk_widget_set_sensitive(pmHingeCol, gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pwHinges)));
+	UpdatePreview(pwPreview + PI_BORDER);
+}
+
+PieceType getPieceType(char* str)
+{
+	int i;
+	for (i = 0; i < NUM_PIECE_TYPES; i++)
+	{
+		if (!strcmp(str, pieceTypeStr[i]))
+			return i;
+	}
+
+	g_print("unknown piece type %s\n", str);
+	return 0;
+}
+
+void PieceChange(GtkList *list, gpointer user_data)
+{
+	char* current = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(pieceTypeCombo)->entry));
+
+	if (current && *current && *lastPieceStr && (strcmp(current, lastPieceStr)))
+	{
+		strcpy(lastPieceStr, current);
+
+		UpdatePreview(pwPreview + PI_CHEQUERS0);
+	}
+}
 
 static GtkWidget *ChequerPrefs3d( BoardData *bd)
 {
     GtkWidget *pw, *pwhbox;
     GtkWidget *pwx;
+	GList *glist;
+	int i;
 
     pwx = gtk_hbox_new ( FALSE, 0 );
 
-    pw = gtk_vbox_new( FALSE, 0 );
+    pw = gtk_vbox_new( FALSE, 4 );
     gtk_box_pack_start ( GTK_BOX ( pwx ), pw, TRUE, TRUE, 0 );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
@@ -296,9 +342,8 @@ static GtkWidget *ChequerPrefs3d( BoardData *bd)
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-//			apwColour[ 0 ] = 
-gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window, 
-				&bd3d.checkerMat[0]), TRUE, TRUE, 4 );
+		gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window, 
+				&bd3d.chequerMat[0], DF_VARIABLE_OPACITY, TT_PIECE), TRUE, TRUE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 0 );
@@ -306,11 +351,203 @@ gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window,
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-//			apwColour[ 1 ] = 
-gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window, 
-				&bd3d.checkerMat[1]), TRUE, TRUE, 4 );
+		gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window, 
+				&bd3d.chequerMat[1], DF_VARIABLE_OPACITY, TT_PIECE | TT_DISABLED), TRUE, TRUE, 4 );
+	pcChequer2 = GetPreviewId();
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Piece type:") ),
+			FALSE, FALSE, 4 );
+
+	pieceTypeCombo = gtk_combo_new();
+	gtk_combo_set_value_in_list(GTK_COMBO(pieceTypeCombo), TRUE, FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(GTK_COMBO(pieceTypeCombo)->entry), FALSE);
+	gtk_signal_connect(GTK_OBJECT(GTK_COMBO(pieceTypeCombo)->list), "selection-changed",
+							GTK_SIGNAL_FUNC(PieceChange), 0);
+    gtk_box_pack_start( GTK_BOX( pwhbox ), pieceTypeCombo, FALSE, FALSE, 0);
+
+	glist = NULL;
+	for (i = 0; i < NUM_PIECE_TYPES; i++)
+		glist = g_list_append(glist, pieceTypeStr[i]);
+	*lastPieceStr = '\0';	/* Don't update values */
+	gtk_combo_set_popdown_strings(GTK_COMBO(pieceTypeCombo), glist);
+	g_list_free(glist);
+
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pieceTypeCombo)->entry), pieceTypeStr[bd->pieceType]);
+	strcpy(lastPieceStr, pieceTypeStr[bd->pieceType]);
 
   return pwx;
+}
+
+static GtkWidget *DicePrefs3d( BoardData *bd, int f)
+{
+    GtkWidget *pw, *pwhbox;
+    GtkWidget *pwx;
+
+    pwx = gtk_hbox_new ( FALSE, 0 );
+
+    pw = gtk_vbox_new( FALSE, 4 );
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, TRUE, TRUE, 0 );
+
+    apwDieColour[ f ] = 
+      gtk_check_button_new_with_label ( _("Die colour same "
+                                          "as chequer colour" ) );
+    gtk_box_pack_start( GTK_BOX( pw ),
+			apwDieColour[ f ], FALSE, FALSE, 0 );
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColour[ f ] ),
+                                   rdAppearance.afDieColour[ f ] );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Die colour:") ),
+			FALSE, FALSE, 4 );
+
+	apwDiceColourBox[f] = gtk_colour_picker_new3d(pwPreview + PI_DICE0 + f,
+			bd->drawing_area3d->window, &bd3d.diceMat[f], DF_VARIABLE_OPACITY, TT_NONE);
+	pc3dDiceId[f] = GetPreviewId();
+    gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColourBox[ f ] ),
+                               ! rdAppearance.afDieColour[ f ] );
+    gtk_box_pack_start(GTK_BOX(pwhbox),apwDiceColourBox[f], TRUE, TRUE, 4);
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Pip colour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start(GTK_BOX(pwhbox), gtk_colour_picker_new3d(pwPreview + PI_DICE0 + f,
+			bd->drawing_area3d->window, &bd3d.diceDotMat[f], DF_FULL_ALPHA, TT_NONE), TRUE, TRUE, 4);
+
+    gtk_signal_connect ( GTK_OBJECT( apwDieColour[ f ] ), "toggled",
+                         GTK_SIGNAL_FUNC( DieColourChanged ), (void*)f);
+  return pwx;
+}
+
+static GtkWidget *CubePrefs3d( BoardData *bd )
+{
+    GtkWidget *pw, *pwhbox;
+    GtkWidget *pwx;
+
+    pwx = gtk_hbox_new ( FALSE, 0 );
+
+    pw = gtk_vbox_new( FALSE, 4 );
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, TRUE, TRUE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Cube colour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_CUBE, bd->drawing_area3d->window, 
+				&bd3d.cubeMat, DF_NO_ALPHA, TT_NONE), TRUE, TRUE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Text colour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_CUBE, bd->drawing_area3d->window, 
+				&bd3d.cubeNumberMat, DF_FULL_ALPHA, TT_NONE), TRUE, TRUE, 4 );
+
+  return pwx;
+}
+
+static GtkWidget *BoardPage3d( BoardData *bd )
+{
+    GtkWidget *pw, *pwhbox;
+    GtkWidget *pwx;
+
+    pwx = gtk_hbox_new ( FALSE, 0 );
+
+    pw = gtk_vbox_new( FALSE, 4 );
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, TRUE, TRUE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Background\ncolour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_BOARD, bd->drawing_area3d->window, 
+				&bd3d.baseMat, DF_NO_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("First\npoint colour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_BOARD, bd->drawing_area3d->window, 
+				&bd3d.pointMat[0], DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Second\npoint colour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_BOARD, bd->drawing_area3d->window, 
+				&bd3d.pointMat[1], DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+	return pwx;
+}
+
+static GtkWidget *BorderPage3d( BoardData *bd )
+{
+    GtkWidget *pw, *pwhbox;
+    GtkWidget *pwx;
+
+    pwx = gtk_hbox_new ( FALSE, 0 );
+
+    pw = gtk_vbox_new( FALSE, 4 );
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, TRUE, TRUE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Border colour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_BORDER, bd->drawing_area3d->window, 
+				&bd3d.boxMat, DF_FULL_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+    pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), rdAppearance.fHinges );
+    gtk_box_pack_start( GTK_BOX( pw ), pwHinges, FALSE, FALSE, 0 );
+    gtk_signal_connect_object( GTK_OBJECT( pwHinges ), "toggled",
+			       GTK_SIGNAL_FUNC( HingeChanged ), 0);
+    
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Hinge colour:") ),
+			FALSE, FALSE, 4 );
+
+	pmHingeCol = gtk_colour_picker_new3d(pwPreview + PI_BORDER,
+			bd->drawing_area3d->window, &bd3d.hingeMat, DF_NO_ALPHA, TT_HINGE);
+    gtk_widget_set_sensitive(pmHingeCol, rdAppearance.fHinges);
+    gtk_box_pack_start(GTK_BOX(pwhbox), pmHingeCol, TRUE, TRUE, 4);
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Point number\ncolour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_BORDER, bd->drawing_area3d->window, 
+				&bd3d.pointNumberMat, DF_FULL_ALPHA, TT_NONE), TRUE, TRUE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Background\ncolour:") ),
+			FALSE, FALSE, 4 );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+		gtk_colour_picker_new3d(pwPreview + PI_BORDER, bd->drawing_area3d->window, 
+				&bd3d.backGroundMat, DF_NO_ALPHA, TT_GENERAL), TRUE, TRUE, 4 );
+
+	return pwx;
 }
 
 #endif
@@ -392,15 +629,6 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     return pwx;
 }
 
-
-static void
-DieColourChanged ( GtkWidget *pw, GtkWidget *pwBox ) {
-
-  int f = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON ( pw ) );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( pwBox ), ! f );
-
-}
-
 static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 
     GtkWidget *pw, *pwhbox;
@@ -429,7 +657,6 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 			apwDieColour[ f ], FALSE, FALSE, 0 );
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColour[ f ] ),
                                    rdAppearance.afDieColour[ f ] );
-
 
     apwDiceColourBox[ f ] = gtk_vbox_new ( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pwvbox ),
@@ -526,11 +753,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     /* signals */
 
     gtk_signal_connect ( GTK_OBJECT( apwDieColour[ f ] ), "toggled",
-                         GTK_SIGNAL_FUNC( DieColourChanged ), 
-                         apwDiceColourBox[ f ] );
-    gtk_signal_connect_object( GTK_OBJECT( apwDieColour[ f ] ), "toggled",
-			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       (GtkObject*) ( pwPreview + PI_DICE0 + f ) );
+                         GTK_SIGNAL_FUNC( DieColourChanged ), (void*)f);
 
     return pwx;
 }
@@ -750,6 +973,9 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	{	/* Make sure main drawing area's context is current */
 		MakeCurrent3d(bd->drawing_area3d);
 		CopySettings3d(&bd3d, bd);
+ClearTextures(bd, TRUE);
+GetTextures(bd);
+preDraw3d(bd);
 	}
 	else
 	{
@@ -767,6 +993,15 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 }
 
 #if USE_BOARD3D
+
+void ShowLightWidgets(int state)
+{
+	gtk_widget_set_sensitive(dtLightSourceFrame, state);
+	gtk_widget_set_sensitive(dtLightPositionFrame, state);
+	gtk_widget_set_sensitive(dtLightLevelsFrame, state);
+	gtk_widget_set_sensitive(pwLightTable, !state);
+}
+
 void toggle_display_type(GtkWidget *widget, BoardData* bd)
 {
 	int i;
@@ -784,17 +1019,15 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 	previewType = state ? DT_3D : DT_2D;
 	AddPages(bd, pwNotebook);
 
-// Add others here...?
-	gtk_widget_set_sensitive(pwTestPerformance, state);
+#if USE_GTK && !USE_GTK2
+	/* Realize preview for gtk1 - otherwise doesn't show straight away */
+	gtk_widget_realize(pwPreview[PI_DESIGN]);
+#endif
+
+	ShowLightWidgets(state);
 
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
-
-#if FAST_3D_PREVIEW
-#if !GTK2
-	gtk_widget_realize(pwPreview[PI_DESIGN]);
-#endif
-#endif
 
 	if (state)
 		CheckAccelerated(pwPreview[PI_DESIGN]);
@@ -846,10 +1079,8 @@ void DoTestPerformance(GtkWidget *pw, BoardData* bd)
 
 GtkWidget *Board3dPage(BoardData *bd)
 {
-    GtkWidget *pwx, *dtBox, *hBox, *pwev, *pwhbox, *lab, *dtFrame, *frameBox,
-				*button, *vbox, *vbox2, *pwAccuracy, *pwBoardAngle, *pwSkewFactor,
-				*pwLightPosX, *pwLightLevelAmbient, *pwLightLevelDiffuse, *pwLightLevelSpecular,
-				*pwLightPosY, *pwLightPosZ;
+    GtkWidget *pwx, *dtBox, *hBox, *pwev, *pwhbox, *lab,
+				*pwAccuracy, *pwBoardAngle, *pwSkewFactor;
 
     pwx = gtk_hbox_new ( FALSE, 20);
 	
@@ -941,15 +1172,113 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_signal_connect(GTK_OBJECT(pwTestPerformance), "clicked",
 				   GTK_SIGNAL_FUNC(DoTestPerformance), bd);
 
+    return pwx;
+}
+#endif
+
+static GtkWidget *GeneralPage( BoardData *bd, GtkWidget *pwNotebook ) {
+
+    GtkWidget *pw, *pwBox, *pwScale;
+    float rAzimuth, rElevation;
+    GtkWidget *pwx;
+#if USE_BOARD3D
+	GtkWidget *dtBox, *button, *vbox, *vbox2, *dtFrame, *frameBox, *hBox, *lab,
+		*pwLightPosX, *pwLightLevelAmbient, *pwLightLevelDiffuse, *pwLightLevelSpecular,
+		*pwLightPosY, *pwLightPosZ;
+#endif
+
+    pwx = gtk_hbox_new ( FALSE, 0 );
+
+    pw = gtk_vbox_new( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
+
+#if USE_BOARD3D
+	dtFrame = gtk_frame_new("Display Type");
+	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
+	gtk_box_pack_start(GTK_BOX( pw ), dtFrame, FALSE, FALSE, 0);
+	
+	dtBox = gtk_vbox_new (FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (dtFrame), dtBox);
+	
+	pwBoardType = gtk_radio_button_new_with_label (NULL, "2d Board");
+	gtk_box_pack_start (GTK_BOX (dtBox), pwBoardType, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwBoardType), (rdAppearance.fDisplayType == DT_2D));
+	
+	button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwBoardType), "3d Board");
+	gtk_box_pack_start (GTK_BOX (dtBox), button, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.fDisplayType == DT_3D));
+	gtk_signal_connect(GTK_OBJECT(button), "toggled", GTK_SIGNAL_FUNC(toggle_display_type), bd);
+#endif
+
+    pwLightTable = gtk_table_new( 3, 2, FALSE );
+    gtk_box_pack_start( GTK_BOX( pw ), pwLightTable, FALSE, FALSE, 4 );
+    
+    gtk_table_attach( GTK_TABLE( pwLightTable ), gtk_label_new( _("Light azimuth") ),
+		      0, 1, 0, 1, 0, 0, 4, 2 );
+    gtk_table_attach( GTK_TABLE( pwLightTable ), gtk_label_new( _("Light elevation") ),
+		      0, 1, 1, 2, 0, 0, 4, 2 );
+
+    rElevation = asinf( rdAppearance.arLight[ 2 ] ) * 180 / M_PI;
+    if ( fabs ( rdAppearance.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
+      rAzimuth = 0.0;
+    else
+      rAzimuth = 
+        acosf( rdAppearance.arLight[ 0 ] / sqrt( 1.0 - rdAppearance.arLight[ 2 ] *
+                                        rdAppearance.arLight[ 2 ] ) ) * 180 / M_PI;
+    if( rdAppearance.arLight[ 1 ] < 0 )
+	rAzimuth = 360 - rAzimuth;
+    
+    paAzimuth = GTK_ADJUSTMENT( gtk_adjustment_new( rAzimuth, 0.0, 360.0, 1.0,
+						    30.0, 0.0 ) );
+    gtk_table_attach( GTK_TABLE( pwLightTable ), gtk_hscale_new( paAzimuth ),
+		      1, 2, 0, 1, GTK_EXPAND | GTK_FILL, 0, 4, 2 );
+    gtk_signal_connect_object( GTK_OBJECT( paAzimuth ), "value-changed",
+			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
+
+    paElevation = GTK_ADJUSTMENT( gtk_adjustment_new( rElevation, 0.0, 90.0,
+						      1.0, 10.0, 0.0 ) );
+    gtk_table_attach( GTK_TABLE( pwLightTable ), gtk_hscale_new( paElevation ),
+		      1, 2, 1, 2, GTK_EXPAND | GTK_FILL, 0, 4, 2 );
+    gtk_signal_connect_object( GTK_OBJECT( paElevation ), "value-changed",
+			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
+    
+    pwBox = gtk_hbox_new( FALSE, 0 );
+    
+    padjRound = GTK_ADJUSTMENT( gtk_adjustment_new( 1.0 - rdAppearance.rRound, 0, 1,
+						    0.1, 0.1, 0 ) );
+    gtk_signal_connect_object( GTK_OBJECT( padjRound ), "value-changed",
+			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
+    pwScale = gtk_hscale_new( padjRound );
+#if GTK_CHECK_VERSION(2,0,0)
+    gtk_widget_set_size_request( pwScale, 100, -1 );
+#else
+    gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
+#endif
+    gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
+    gtk_scale_set_digits( GTK_SCALE( pwScale ), 2 );
+
+    gtk_table_attach_defaults( GTK_TABLE( pwLightTable ), gtk_label_new( _("Chequer shape:") ),
+		0, 1, 2, 3);
+
+    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( _("Flat") ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwBox ), pwScale, TRUE, TRUE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( _("Round") ),
+			FALSE, FALSE, 4 );
+    
+    gtk_table_attach_defaults( GTK_TABLE( pwLightTable ), pwBox,
+		1, 2, 2, 3);
+
+#if USE_BOARD3D
 	dtBox = gtk_vbox_new (FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(pwx), dtBox, FALSE, FALSE, 0);
 
-	dtFrame = gtk_frame_new("Light Source Type");
-	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
-	gtk_box_pack_start(GTK_BOX(dtBox), dtFrame, FALSE, FALSE, 0);
+	dtLightSourceFrame = gtk_frame_new("Light Source Type");
+	gtk_container_set_border_width (GTK_CONTAINER (dtLightSourceFrame), 4);
+	gtk_box_pack_start(GTK_BOX(dtBox), dtLightSourceFrame, FALSE, FALSE, 0);
 	
 	vbox = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (dtFrame), vbox);
+	gtk_container_add (GTK_CONTAINER (dtLightSourceFrame), vbox);
 	
 	pwLightSource = gtk_radio_button_new_with_label (NULL, "Positional");
 	gtk_box_pack_start (GTK_BOX (vbox), pwLightSource, FALSE, FALSE, 0);
@@ -959,12 +1288,12 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.lightType == LT_DIRECTIONAL));
 
-	dtFrame = gtk_frame_new("Light Position");
-	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
-	gtk_box_pack_start(GTK_BOX(dtBox), dtFrame, FALSE, FALSE, 0);
+	dtLightPositionFrame = gtk_frame_new("Light Position");
+	gtk_container_set_border_width (GTK_CONTAINER (dtLightPositionFrame), 4);
+	gtk_box_pack_start(GTK_BOX(dtBox), dtLightPositionFrame, FALSE, FALSE, 0);
 
 	frameBox = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (dtFrame), frameBox);
+	gtk_container_add (GTK_CONTAINER (dtLightPositionFrame), frameBox);
 
 	hBox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
@@ -1022,12 +1351,12 @@ gtk_range_set_inverted(GTK_RANGE(pwLightPosZ), TRUE);
 	lab = gtk_label_new("Low");
 	gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
 
-	dtFrame = gtk_frame_new("Light Levels");
-	gtk_container_set_border_width(GTK_CONTAINER(dtFrame), 4);
-	gtk_box_pack_start(GTK_BOX(dtBox), dtFrame, FALSE, FALSE, 0);
+	dtLightLevelsFrame = gtk_frame_new("Light Levels");
+	gtk_container_set_border_width(GTK_CONTAINER(dtLightLevelsFrame), 4);
+	gtk_box_pack_start(GTK_BOX(dtBox), dtLightLevelsFrame, FALSE, FALSE, 0);
 
 	frameBox = gtk_vbox_new(FALSE, 0);
-	gtk_container_add (GTK_CONTAINER(dtFrame), frameBox);
+	gtk_container_add (GTK_CONTAINER(dtLightLevelsFrame), frameBox);
 
 	hBox = gtk_hbox_new (FALSE, 0);
 	gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
@@ -1062,105 +1391,8 @@ gtk_range_set_inverted(GTK_RANGE(pwLightPosZ), TRUE);
 	pwLightLevelSpecular = gtk_hscale_new(padjLightLevelSpecular);
 	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelSpecular, TRUE, TRUE, 0);
 
-    return pwx;
-}
+	ShowLightWidgets(rdAppearance.fDisplayType == DT_3D);
 #endif
-
-static GtkWidget *GeneralPage( BoardData *bd, GtkWidget *pwNotebook ) {
-
-    GtkWidget *pw, *pwTable, *pwBox, *pwScale;
-    float rAzimuth, rElevation;
-    GtkWidget *pwx;
-#if USE_BOARD3D
-	GtkWidget *dtBox, *button, *dtFrame;
-#endif
-
-    pwx = gtk_hbox_new ( FALSE, 0 );
-
-    pw = gtk_vbox_new( FALSE, 0 );
-    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
-
-#if USE_BOARD3D
-	dtFrame = gtk_frame_new("Display Type");
-	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
-	gtk_box_pack_start(GTK_BOX( pw ), dtFrame, FALSE, FALSE, 0);
-	
-	dtBox = gtk_vbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (dtFrame), dtBox);
-	
-	pwBoardType = gtk_radio_button_new_with_label (NULL, "2d Board");
-	gtk_box_pack_start (GTK_BOX (dtBox), pwBoardType, FALSE, FALSE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwBoardType), (rdAppearance.fDisplayType == DT_2D));
-	
-	button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwBoardType), "3d Board");
-	gtk_box_pack_start (GTK_BOX (dtBox), button, FALSE, FALSE, 0);
-	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.fDisplayType == DT_3D));
-	gtk_signal_connect(GTK_OBJECT(button), "toggled", GTK_SIGNAL_FUNC(toggle_display_type), bd);
-#endif
-
-    pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), rdAppearance.fLabels );
-    gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
-    gtk_signal_connect_object( GTK_OBJECT( pwLabels ), "toggled",
-			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
-    
-    pwTable = gtk_table_new( 2, 2, FALSE );
-    gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
-    
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( _("Light azimuth") ),
-		      0, 1, 0, 1, 0, 0, 4, 2 );
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( _("Light elevation") ),
-		      0, 1, 1, 2, 0, 0, 4, 2 );
-
-    rElevation = asinf( rdAppearance.arLight[ 2 ] ) * 180 / M_PI;
-    if ( fabs ( rdAppearance.arLight[ 2 ] - 1.0f ) < 1e-5 ) 
-      rAzimuth = 0.0;
-    else
-      rAzimuth = 
-        acosf( rdAppearance.arLight[ 0 ] / sqrt( 1.0 - rdAppearance.arLight[ 2 ] *
-                                        rdAppearance.arLight[ 2 ] ) ) * 180 / M_PI;
-    if( rdAppearance.arLight[ 1 ] < 0 )
-	rAzimuth = 360 - rAzimuth;
-    
-    paAzimuth = GTK_ADJUSTMENT( gtk_adjustment_new( rAzimuth, 0.0, 360.0, 1.0,
-						    30.0, 0.0 ) );
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_hscale_new( paAzimuth ),
-		      1, 2, 0, 1, GTK_EXPAND | GTK_FILL, 0, 4, 2 );
-    gtk_signal_connect_object( GTK_OBJECT( paAzimuth ), "value-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
-
-    paElevation = GTK_ADJUSTMENT( gtk_adjustment_new( rElevation, 0.0, 90.0,
-						      1.0, 10.0, 0.0 ) );
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_hscale_new( paElevation ),
-		      1, 2, 1, 2, GTK_EXPAND | GTK_FILL, 0, 4, 2 );
-    gtk_signal_connect_object( GTK_OBJECT( paElevation ), "value-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
-    
-    pwBox = gtk_hbox_new( FALSE, 0 );
-    
-    padjRound = GTK_ADJUSTMENT( gtk_adjustment_new( 1.0 - rdAppearance.rRound, 0, 1,
-						    0.1, 0.1, 0 ) );
-    gtk_signal_connect_object( GTK_OBJECT( padjRound ), "value-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ), NULL );
-    pwScale = gtk_hscale_new( padjRound );
-#if GTK_CHECK_VERSION(2,0,0)
-    gtk_widget_set_size_request( pwScale, 100, -1 );
-#else
-    gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
-#endif
-    gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
-    gtk_scale_set_digits( GTK_SCALE( pwScale ), 2 );
-
-    gtk_box_pack_start( GTK_BOX( pwBox ),
-			gtk_label_new( _("Chequer shape:") ),
-			FALSE, FALSE, 8 );
-    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( _("Flat") ),
-			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwScale, TRUE, TRUE, 0 );
-    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( _("Round") ),
-			FALSE, FALSE, 4 );
-    
-    gtk_box_pack_start( GTK_BOX( pw ), pwBox, FALSE, FALSE, 4 );
 
     return pwx;
 }
@@ -1191,9 +1423,14 @@ UseDesign ( void ) {
 
   GetPrefs( &rd );
 
+#if USE_BOARD3D
+ClearTextures(&bd3d, FALSE);
+#endif
+
   pch = sz = g_strdup ( pbdeSelected->szBoardDesign );
   while( ParseKeyValue( &sz, apch ) ) 
     RenderPreferencesParam( &rd, apch[ 0 ], apch[ 1 ] );
+
   g_free ( pch );
 
 #if USE_BOARD3D
@@ -1238,7 +1475,34 @@ UseDesign ( void ) {
 
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(padjSkewFactor), rd.testSkewFactor);
 
-	if (previewType == DT_2D)
+if (rd.fDisplayType == DT_3D)
+{
+	bd3d.pieceType = rd.pieceType;
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pieceTypeCombo)->entry), pieceTypeStr[bd3d.pieceType]);
+
+	for(i = 0; i < 2; i++)
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(apwDieColour[i]), rd.afDieColour[i]);
+
+// Use copysettings3d() instead?
+memcpy(bd3d.chequerMat, rd.rdChequerMat, sizeof(Material[2]));
+
+memcpy(bd3d.diceMat, rd.rdDiceMat, sizeof(Material[2]));
+memcpy(bd3d.diceDotMat, rd.rdDiceDotMat, sizeof(Material[2]));
+
+memcpy(&bd3d.cubeMat, &rd.rdCubeMat, sizeof(Material));
+memcpy(&bd3d.cubeNumberMat, &rd.rdCubeNumberMat, sizeof(Material));
+
+memcpy(&bd3d.baseMat, &rd.rdBaseMat, sizeof(Material));
+memcpy(bd3d.pointMat, rd.rdPointMat, sizeof(Material[2]));
+
+memcpy(&bd3d.boxMat, &rd.rdBoxMat, sizeof(Material));
+memcpy(&bd3d.hingeMat, &rd.rdHingeMat, sizeof(Material));
+memcpy(&bd3d.pointNumberMat, &rd.rdPointNumberMat, sizeof(Material));
+memcpy(&bd3d.backGroundMat, &rd.rdBackGroundMat, sizeof(Material));
+
+UpdateColPreviews();
+}
+else
 #endif
 {
   /* chequers */
@@ -1256,44 +1520,11 @@ UseDesign ( void ) {
     gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjExponent[ i ] ),
                                rd.arExponent[ i ] );
   }
-}
-
-
-  /* board, border, and points */
-
-  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwHinges ), 
-                                 rd.fHinges );
-  gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), rd.wt );
-  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rd.wt != WOOD_PAINT ?
-                                                   pwWood : pwWoodF ),
-                                TRUE );
-
-  gtk_widget_set_sensitive( pwWoodType, rd.wt != WOOD_PAINT );
-  gtk_widget_set_sensitive( apwBoard[ 1 ], rd.wt == WOOD_PAINT);
-
-  /* board + points */
-    
-  for ( i = 0; i < 4; ++i ) {
-
-    if ( i != 1 ) 
-      gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjBoard[ i ] ),
-                                 rd.aSpeckle[ i ] / 128.0 );
-
-    for ( j = 0; j < 3; j++ )
-      ar[ j ] = rd.aanBoardColour[ i ][ j ] / 255.0;
-
-    gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwBoard[ i ]),
-                                    ar );
-
-  }
-
 
   /* dice + dice dot */
 
   for ( i = 0; i < 2; ++i ) {
 
-    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColour[ i ] ),
-                                   rd.afDieColour[ i ] );
     gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColourBox[ i ] ),
                                ! rd.afDieColour[ i ] );
 
@@ -1324,6 +1555,36 @@ UseDesign ( void ) {
   
   gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( pwCubeColour ), 
                                   rd.arCubeColour );
+
+  /* board + points */
+    
+  for ( i = 0; i < 4; ++i ) {
+
+    if ( i != 1 ) 
+      gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjBoard[ i ] ),
+                                 rd.aSpeckle[ i ] / 128.0 );
+
+    for ( j = 0; j < 3; j++ )
+      ar[ j ] = rd.aanBoardColour[ i ][ j ] / 255.0;
+
+    gtk_colour_picker_set_colour ( GTK_COLOUR_PICKER ( apwBoard[ i ]),
+                                    ar );
+
+  }
+
+  /* board, border, and points */
+
+  gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), rd.wt );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rd.wt != WOOD_PAINT ?
+                                                   pwWood : pwWoodF ),
+                                TRUE );
+
+  gtk_widget_set_sensitive( pwWoodType, rd.wt != WOOD_PAINT );
+  gtk_widget_set_sensitive( apwBoard[ 1 ], rd.wt == WOOD_PAINT);
+}
+
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwHinges ), 
+                                 rd.fHinges );
 
   /* light */
 
@@ -1494,7 +1755,7 @@ BoardPrefsDestroy ( GtkWidget *pw, void * arg) {
 #endif /* HAVE_LIBXML2 */
 
 #if USE_BOARD3D
-	Tidy3dObjects(&bd3d);
+	Tidy3dObjects(&bd3d, FALSE);
 #endif
 
 	gtk_main_quit();
@@ -1629,13 +1890,29 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
             "         moveindicator=%c "
             "         boardangle=%d "
             "         skewfactor=%d "
+			"         piecetype=%d "
+			"         chequers3d0=%s\n"
+			"         chequers3d1=%s\n"
+			"         dice3d0=%s\n"
+			"         dice3d1=%s\n"
+			"         dot3d0=%s\n"
+			"         dot3d1=%s\n"
+			"         cube3d=%s\n"
+			"         cubetext3d=%s\n"
+			"         base3d=%s\n"
+			"         points3d0=%s\n"
+			"         points3d1=%s\n"
+			"         border3d=%s\n"
+			"         hinge3d=%s\n"
+			"         numbers3d=%s\n"
+			"         background3d=%s\n"
 #endif
             "         wood=%s\n"
             "         hinges=%c\n"
             "         light=%0.0f;%0.0f\n"
             "         shape=%0.1f\n"
-            "         chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f\n"
-            "         chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f\n"
+            "         chequers0=#%02X%02X%02X;#%0.2f;%0.2f;#%0.2f;%0.2f\n"
+            "         chequers1=#%02X%02X%02X;#%0.2f;%0.2f;#%0.2f;%0.2f\n"
             "         dice0=#%02X%02X%02X;%0.2f;%0.2f;%c\n"
             "         dice1=#%02X%02X%02X;%0.2f;%0.2f;%c\n"
             "         dot0=#%02X%02X%02X\n"
@@ -1651,19 +1928,35 @@ DesignAdd ( GtkWidget *pw, gpointer data ) {
             rd.aanBoardColour[ 1 ][ 0 ], rd.aanBoardColour[ 1 ][ 1 ], 
             rd.aanBoardColour[ 1 ][ 2 ],
 #if USE_BOARD3D
-            rd.fDisplayType == DT_2D ? '2' : '3',
-            rd.showShadows ? 'y' : 'n',
-            rd.shadowDarkness,
-            rd.animateRoll ? 'y' : 'n',
-            rd.animateFlag ? 'y' : 'n',
-            rd.closeBoardOnExit ? 'y' : 'n',
-            rd.curveAccuracy,
-            rd.lightType == LT_POSITIONAL ? 'p' : 'd',
-            rd.lightPos[0], rd.lightPos[1], rd.lightPos[2],
-            rd.lightLevels[0], rd.lightLevels[1], rd.lightLevels[2],
-            rd.showMoveIndicator ? 'y' : 'n',
-            rd.boardAngle,
-            rd.testSkewFactor,
+			rd.fDisplayType == DT_2D ? '2' : '3',
+			rd.showShadows ? 'y' : 'n',
+			rd.shadowDarkness,
+			rd.animateRoll ? 'y' : 'n',
+			rd.animateFlag ? 'y' : 'n',
+			rd.closeBoardOnExit ? 'y' : 'n',
+			rd.curveAccuracy,
+			rd.lightType == LT_POSITIONAL ? 'p' : 'd',
+			rd.lightPos[0], rd.lightPos[1], rd.lightPos[2],
+			rd.lightLevels[0], rd.lightLevels[1], rd.lightLevels[2],
+			rd.showMoveIndicator ? 'y' : 'n',
+			rd.boardAngle,
+			rd.testSkewFactor,
+			rd.pieceType,
+			WriteMaterial(&rd.rdChequerMat[0]),
+			WriteMaterial(&rd.rdChequerMat[1]),
+			WriteMaterial(&rd.rdDiceMat[0]),
+			WriteMaterial(&rd.rdDiceMat[1]),
+			WriteMaterial(&rd.rdDiceDotMat[0]),
+			WriteMaterial(&rd.rdDiceDotMat[1]),
+			WriteMaterial(&rd.rdCubeMat),
+			WriteMaterial(&rd.rdCubeNumberMat),
+			WriteMaterial(&rd.rdBaseMat),
+			WriteMaterial(&rd.rdPointMat[0]),
+			WriteMaterial(&rd.rdPointMat[1]),
+			WriteMaterial(&rd.rdBoxMat),
+			WriteMaterial(&rd.rdHingeMat),
+			WriteMaterial(&rd.rdPointNumberMat),
+			WriteMaterial(&rd.rdBackGroundMat),
 #endif
             /* wood ... */
             aszWoodName[ rd.wt ],
@@ -1763,8 +2056,7 @@ static void DesignSelect( GtkCList *pw, gint nRow, gint nCol,
 
   gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), 
                              pbdeSelected->fDeletable );
-/* Just for testing... */
-testRow = nRow;
+
   DesignActivate ( pbdeSelected );
 
 }
@@ -1852,12 +2144,8 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
 #if USE_BOARD3D
 	if (previewType == DT_3D)
 	{
-#if FAST_3D_PREVIEW
-		CreatePreviewBoard3d(&bd3d, &pwPreview[PI_DESIGN]);
-#else
 		glpixPreview = CreatePreviewBoard3d(&bd3d, ppm);
 		pwPreview[PI_DESIGN] = gtk_pixmap_new(ppm, NULL),
-#endif
 
 		/* design preview */
 		gtk_box_pack_start (GTK_BOX(pwvbox), pwPreview[PI_DESIGN],
@@ -1925,6 +2213,7 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
   gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
 
   gtk_widget_show_all( pwPage );
+
   return pwPage;
 
 }
@@ -1961,15 +2250,21 @@ static void GetPrefs ( renderdata *prd ) {
     int i, j;
     gdouble ar[ 4 ];
 
+    /* dice colour same as chequer colour */
+
+    for ( i = 0; i < 2; ++i )
+	{
+      prd->afDieColour[ i ] = 
+        gtk_toggle_button_get_active ( 
+           GTK_TOGGLE_BUTTON ( apwDieColour[ i ] ) );
+	}
+
 #if USE_BOARD3D
-	BoardData *bd = BOARD( pwBoard )->board_data;
 	prd->fDisplayType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwBoardType ) ) ? DT_2D : DT_3D;
 	prd->showShadows = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwShowShadows));
 	prd->animateRoll = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateRoll));
 	prd->animateFlag = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwAnimateFlag));
 	prd->closeBoardOnExit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwCloseBoard));
-	if (prd->fDisplayType == DT_3D && bd->resigned)
-		ShowFlag3d( bd );	/* Showing now - update */
 
 {
 	int newAccuracy;
@@ -1989,10 +2284,33 @@ static void GetPrefs ( renderdata *prd ) {
 	prd->showMoveIndicator = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwMoveIndicator));
 	prd->boardAngle = padjBoardAngle->value;
 	prd->testSkewFactor = padjSkewFactor->value;
+	prd->pieceType = getPieceType(lastPieceStr);
 
-// Best place for these?
-//preDraw3d(bd);
-//SetupViewingVolume3d(bd);
+	/* Both chequers have the same texture */
+	if (bd3d.chequerMat[0].textureInfo != bd3d.chequerMat[1].textureInfo)
+	{
+		bd3d.chequerMat[1].textureInfo = bd3d.chequerMat[0].textureInfo;
+		UpdateColPreview(pcChequer2);
+	}
+	memcpy(prd->rdChequerMat, bd3d.chequerMat, sizeof(Material[2]));
+
+	memcpy(&prd->rdDiceMat[0], prd->afDieColour[0] ? &bd3d.chequerMat[0] : &bd3d.diceMat[0], sizeof(Material));
+	memcpy(&prd->rdDiceMat[1], prd->afDieColour[1] ? &bd3d.chequerMat[1] : &bd3d.diceMat[1], sizeof(Material));
+
+	prd->rdDiceMat[0].textureInfo = prd->rdDiceMat[1].textureInfo = 0;
+
+	memcpy(prd->rdDiceDotMat, bd3d.diceDotMat, sizeof(Material[2]));
+
+	memcpy(&prd->rdCubeMat, &bd3d.cubeMat, sizeof(Material));
+	memcpy(&prd->rdCubeNumberMat, &bd3d.cubeNumberMat, sizeof(Material));
+
+	memcpy(&prd->rdBaseMat, &bd3d.baseMat, sizeof(Material));
+	memcpy(prd->rdPointMat, bd3d.pointMat, sizeof(Material[2]));
+
+	memcpy(&prd->rdBoxMat, &bd3d.boxMat, sizeof(Material));
+	memcpy(&prd->rdHingeMat, &bd3d.hingeMat, sizeof(Material));
+	memcpy(&prd->rdPointNumberMat, &bd3d.pointNumberMat, sizeof(Material));
+	memcpy(&prd->rdBackGroundMat, &bd3d.backGroundMat, sizeof(Material));
 
 	if (previewType == DT_2D)
 #endif
@@ -2013,13 +2331,7 @@ static void GetPrefs ( renderdata *prd ) {
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwColour[ 1 ] ), ar );
     for( i = 0; i < 4; i++ )
 	prd->aarColour[ 1 ][ i ] = ar[ i ];
-}
-    prd->fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
-    prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
-    fWood = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwWood ) );
-    prd->rRound = 1.0 - padjRound->value;
-    
+
     gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( apwDiceColour[ 0 ] ), 
                                    ar );
     for( i = 0; i < 3; i++ )
@@ -2039,19 +2351,11 @@ static void GetPrefs ( renderdata *prd ) {
 	prd->aarDiceDotColour[ j ][ i ] = ar[ i ];
     }
 
-    /* dice colour same as chequer colour */
-
-    for ( i = 0; i < 2; ++i )
-      prd->afDieColour[ i ] = 
-        gtk_toggle_button_get_active ( 
-           GTK_TOGGLE_BUTTON ( apwDieColour[ i ] ) );
-
     /* cube colour */
+    gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( pwCubeColour ), ar );
 
-    gtk_colour_picker_get_colour( GTK_COLOUR_PICKER( pwCubeColour ), 
-                                   ar );
-    for( i = 0; i < 3; i++ )
-	prd->arCubeColour[ i ] = ar[ i ];
+	for( i = 0; i < 3; i++ )
+		prd->arCubeColour[ i ] = ar[ i ];
 
     /* board colour */
 
@@ -2067,14 +2371,21 @@ static void GetPrefs ( renderdata *prd ) {
     prd->aSpeckle[ 2 ] = apadjBoard[ 2 ]->value * 0x80;
     prd->aSpeckle[ 3 ] = apadjBoard[ 3 ]->value * 0x80;
     
+	fWood = gtk_toggle_button_get_active(
+		GTK_TOGGLE_BUTTON( pwWood ) );
+    prd->wt = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
+		pwWoodType ) ) : WOOD_PAINT;
+}
+
+    prd->fHinges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwHinges ) );
+    prd->rRound = 1.0 - padjRound->value;
+    
     prd->arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
     prd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *
 	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
     prd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
 	sqrt( 1.0 - prd->arLight[ 2 ] * prd->arLight[ 2 ] );
 
-    prd->wt = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
-	pwWoodType ) ) : WOOD_PAINT;
     prd->fClockwise = fClockwise; /* yuck */
 }
 
@@ -2109,29 +2420,64 @@ void AddPages(BoardData* bd, GtkWidget* pwNotebook)
 			      gtk_label_new(_("Designs") ) );
 }
 #endif /* HAVE_LIBXML2 */
+
 #if USE_BOARD3D
 	if (previewType == DT_3D)
 	{
+		ResetPreviews();
 		append_preview_page( pwNotebook, ChequerPrefs3d( bd ),
-			 _("Chequers"), PI_CHEQUERS0 );
+			_("Chequers"), PI_CHEQUERS0 );
+		append_preview_page( pwNotebook, BoardPage3d( bd ), _("Board"),
+			PI_BOARD );
+		append_preview_page( pwNotebook, BorderPage3d( bd ), _("Border"),
+			PI_BORDER );
+		append_preview_page( pwNotebook, DicePrefs3d( bd, 0 ),
+			_("Dice (0)"), PI_DICE0 );
+		append_preview_page( pwNotebook, DicePrefs3d( bd, 1 ),
+			_("Dice (1)"), PI_DICE1 );
+	    append_preview_page( pwNotebook, CubePrefs3d( bd ), _("Cube"), PI_CUBE );
 	}
 	else
 #endif
-{
-    append_preview_page( pwNotebook, ChequerPrefs( bd, 0 ),
-			 _("Chequers (0)"), PI_CHEQUERS0 );
-    append_preview_page( pwNotebook, ChequerPrefs( bd, 1 ),
-			 _("Chequers (1)"), PI_CHEQUERS1 );
+	{
+		append_preview_page( pwNotebook, ChequerPrefs( bd, 0 ),
+				 _("Chequers (0)"), PI_CHEQUERS0 );
+		append_preview_page( pwNotebook, ChequerPrefs( bd, 1 ),
+				 _("Chequers (1)"), PI_CHEQUERS1 );
+		append_preview_page( pwNotebook, BoardPage( bd ), _("Board"),
+				 PI_BOARD );
+		append_preview_page( pwNotebook, BorderPage( bd ), _("Border"),
+				 PI_BORDER );
+		append_preview_page( pwNotebook, DicePrefs( bd, 0 ), _("Dice (0)"),
+				 PI_DICE0 );
+		append_preview_page( pwNotebook, DicePrefs( bd, 1 ), _("Dice (1)"),
+				 PI_DICE1 );
+		append_preview_page( pwNotebook, CubePrefs( bd ), _("Cube"), PI_CUBE );
+	}
 }
-    append_preview_page( pwNotebook, BoardPage( bd ), _("Board"),
-			 PI_BOARD );
-    append_preview_page( pwNotebook, BorderPage( bd ), _("Border"),
-			 PI_BORDER );
-    append_preview_page( pwNotebook, DicePrefs( bd, 0 ), _("Dice (0)"),
-			 PI_DICE0 );
-    append_preview_page( pwNotebook, DicePrefs( bd, 1 ), _("Dice (1)"),
-			 PI_DICE1 );
-    append_preview_page( pwNotebook, CubePrefs( bd ), _("Cube"), PI_CUBE );
+
+void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page, 
+				guint page_num, gpointer user_data)
+{
+#if USE_BOARD3D
+	/* Make sure correct dice preview visible */
+	if (previewType == DT_3D && (page_num == NUM_NONPREVIEW_PAGES + PI_DICE0 - 1))
+	{
+		if (bd3d.turn == 1)
+		{
+			bd3d.turn = -1;
+			UpdatePreview(&pwPreview[PI_DICE0]);
+		}
+	}
+	if (previewType == DT_3D && (page_num == NUM_NONPREVIEW_PAGES + PI_DICE1 - 1))
+	{
+		if (bd3d.turn == -1)
+		{
+			bd3d.turn = 1;
+			UpdatePreview(&pwPreview[PI_DICE1]);
+		}
+	}
+#endif
 }
 
 extern void BoardPreferences( GtkWidget *pwBoard ) {
@@ -2187,6 +2533,9 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
 
+    gtk_signal_connect( GTK_OBJECT( pwNotebook ), "switch-page",
+			GTK_SIGNAL_FUNC( ChangePage ), 0);
+
     gtk_widget_show_all( pwDialog );
 
 	gtk_notebook_set_page(GTK_NOTEBOOK(pwNotebook), NUM_NONPREVIEW_PAGES);
@@ -2194,6 +2543,10 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     /* hack the set_opacity function does not work until widget has been
        drawn */
 
+#if USE_BOARD3D
+	if (previewType == DT_2D)
+#endif
+	{
     for ( i = 0; i < 2; i++ ) {
       gtk_colour_picker_set_has_opacity_control(
          GTK_COLOUR_PICKER( apwBoard[ i ] ), FALSE );
@@ -2206,6 +2559,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     }
     gtk_colour_picker_set_has_opacity_control(
          GTK_COLOUR_PICKER( pwCubeColour ), FALSE );
+	}
 
     gdk_pixmap_unref( ppm );
 

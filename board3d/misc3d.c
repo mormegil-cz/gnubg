@@ -162,6 +162,155 @@ void setMaterial(Material* pMat)
 }
 
 /* Texture functions */
+
+myList textures;
+
+char* TextureTypeStrs[TT_COUNT] = {"general", "piece", "hinge"};
+
+GList *GetTextureList(int type)
+{
+	int i;
+	GList *glist = NULL;
+	glist = g_list_append(glist, NO_TEXTURE_STRING);
+	for (i = 0; i < ListSize(&textures); i++)
+	{
+		TextureInfo* text = (TextureInfo*)ListGet(&textures, i);
+		if (IsSet(type, text->type))
+			glist = g_list_append(glist, text->name);
+	}
+	return glist;
+}
+
+void FindNamedTexture(TextureInfo** textureInfo, char* name)
+{
+	int i;
+	for (i = 0; i < ListSize(&textures); i++)
+	{
+		TextureInfo* text = (TextureInfo*)ListGet(&textures, i);
+		if (!strcasecmp(text->name, name))
+		{
+			*textureInfo = text;
+			return;
+		}
+	}
+	*textureInfo = 0;
+	g_print("Texture %s not in texture info file\n", name);
+}
+
+void FindTexture(TextureInfo** textureInfo, char* file)
+{
+	int i;
+	for (i = 0; i < ListSize(&textures); i++)
+	{
+		TextureInfo* text = (TextureInfo*)ListGet(&textures, i);
+		if (!strcasecmp(text->file, file))
+		{
+			*textureInfo = text;
+			return;
+		}
+	}
+	*textureInfo = 0;
+	g_print("Texture %s not in texture info file\n", file);
+}
+
+#define TEXTURE_FILE "textures.txt"
+void LoadTextureInfo()
+{
+	FILE* fp;
+
+	ListInit(&textures, sizeof(TextureInfo));
+	
+	fp = fopen(TEXTURE_FILE, "r");
+	if (!fp)
+	{
+		g_print("Error: Texture file (%s) not found\n", TEXTURE_FILE);
+		return;
+	}
+
+	do
+	{
+		#define BUF_SIZE 100
+		char buf[BUF_SIZE];
+		int err, found, i, len, val;
+		TextureInfo text;
+
+		err = 0;
+
+		/* filename */
+		if (!fgets(buf, BUF_SIZE, fp))
+			return;	/* finished */
+		len = strlen(buf);
+		if (len > 0 && buf[len - 1] == '\n')
+		{
+			len--;
+			buf[len] = '\0';
+		}
+		if (len > FILENAME_SIZE)
+		{
+			g_print("Texture filename %s too big, maximum length %d.  Entry ignored.\n", buf, FILENAME_SIZE);
+			err = 1;
+		}
+		else
+			strcpy(text.file, buf);
+
+		/* name */
+		if (!fgets(buf, BUF_SIZE, fp))
+		{
+			g_print("Error in texture file info.\n");
+			return;
+		}
+		len = strlen(buf);
+		if (len > 0 && buf[len - 1] == '\n')
+		{
+			len--;
+			buf[len] = '\0';
+		}
+		if (len > NAME_SIZE)
+		{
+			g_print("Texture name %s too big, maximum length %d.  Entry ignored.\n", buf, NAME_SIZE);
+			err = 1;
+		}
+		else
+			strcpy(text.name, buf);
+
+		/* type */
+		if (!fgets(buf, BUF_SIZE, fp))
+		{
+			g_print("Error in texture file info.\n");
+			return;
+		}
+		len = strlen(buf);
+		if (len > 0 && buf[len - 1] == '\n')
+		{
+			len--;
+			buf[len] = '\0';
+		}
+		found = -1;
+		val = 2;
+		for (i = 0; i < TT_COUNT; i++)
+		{
+			if (!strcasecmp(buf, TextureTypeStrs[i]))
+			{
+				found = i;
+				break;
+			}
+			val *= 2;
+		}
+		if (found == -1)
+		{
+			g_print("Unknown texture type %s.  Entry ignored.\n", buf);
+			err = 1;
+		}
+		else
+			text.type = (TextureType)val;
+
+		if (!err)
+		{	/* Add texture type */
+			ListAdd(&textures, &text);
+		}
+	} while (!feof(fp));
+}
+
 void DeleteTexture(Texture* texture)
 {
 	if (texture->texID)
@@ -173,6 +322,7 @@ void DeleteTexture(Texture* texture)
 int LoadTexture(Texture* texture, const char* filename)
 {
 	unsigned char* bits;
+
 	bits = LoadDIBitmap(filename, &texture->width, &texture->height);
 	if (!bits)
 	{
@@ -993,7 +1143,7 @@ void CloseBoard3d(BoardData* bd)
 	bd->State = BOARD_CLOSING;
 
 	/* Random logo */
-	SetupSimpleMat(&bd->logoMat, bd->boxMat.ambientColour[0] * 1.5f, bd->boxMat.ambientColour[1] * 1.5f, bd->boxMat.ambientColour[2] * 1.5f);
+	SetupSimpleMat(&bd->logoMat, bd->boxMat.ambientColour[0] + 1 / 2.0f, bd->boxMat.ambientColour[1] + 1 / 2.0f, bd->boxMat.ambientColour[2] + 1 / 2.0f);
 	if (rand() % 2)
 		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp");
 	else
@@ -1073,6 +1223,7 @@ void SetTexture(BoardData* bd, Material* pMat, const char* filename)
 	const char* nameStart = filename;
 	/* Find start of name in filename */
 	char* newStart = 0;
+
 	do
 	{
 		if (!(newStart = strchr(nameStart, '\\')))
@@ -1132,12 +1283,14 @@ void RemoveTexture(Material* pMat)
 	}
 }
 */
-void ClearTextures(BoardData* bd)
+void ClearTextures(BoardData* bd, int glValid)
 {
 	int i;
+
 	for (i = 0; i < bd->numTextures; i++)
 	{
-		DeleteTexture(&bd->textureList[i]);
+		if (glValid)
+			DeleteTexture(&bd->textureList[i]);
 		free(bd->textureName[i]);
 	}
 	bd->numTextures = 0;
@@ -1160,6 +1313,7 @@ void InitBoard3d(BoardData *bd)
 
 	SetupSimpleMat(&bd->gap, 0, 0, 0);
 	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
+	SetupMat(&bd->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 0);
 
 	bd->diceList = bd->DCList = bd->pieceList = 0;
 	bd->qobjTex = bd->qobj = 0;

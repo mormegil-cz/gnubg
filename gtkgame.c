@@ -8263,7 +8263,7 @@ typedef struct _optionswidget {
 
   GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips,
       *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide, *pwBeepIllegal,
-      *pwHigherDieFirst, *pwSetWindowPos, *pwDragTargetHelp;
+      *pwHigherDieFirst, *pwSetWindowPos, *pwDragTargetHelp, *pwLabels;
   GtkAdjustment *padjSpeed;
 
   GtkWidget *pwCheat, *pwCheatRollBox, *apwCheatRoll[ 2 ];
@@ -8795,6 +8795,10 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_signal_connect( GTK_OBJECT( pow->pwAnimateNone ), "toggled",
 			GTK_SIGNAL_FUNC( ToggleAnimation ), pwSpeed );
     ToggleAnimation( pow->pwAnimateNone, pwSpeed );
+
+    pow->pwLabels = gtk_check_button_new_with_label( _("Numbered point labels") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwLabels ), rdAppearance.fLabels );
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwLabels, FALSE, FALSE, 0 );
 
     pow->pwDragTargetHelp = gtk_check_button_new_with_label(
 	_("Show target help when dragging a chequer") );
@@ -9575,6 +9579,17 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 	       "set gui windowpositions %s" )
   CHECKUPDATE( pow->pwDragTargetHelp, fGUIDragTargetHelp,
 	       "set gui dragtargethelp %s" )
+
+	rdAppearance.fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwLabels ) );
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_2D)
+#endif
+	if( GTK_WIDGET_REALIZED( pwBoard ) )
+	{
+		BoardData* bd = BOARD( pwBoard )->board_data;
+		board_create_pixmaps( pwBoard, bd );
+		gtk_widget_queue_draw( bd->drawing_area );
+	}
 
   if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAnimateNone ) )
       && animGUI != ANIMATE_NONE )

@@ -3619,7 +3619,7 @@ extern void PromptForExit( void ) {
     EvalShutdown ();
     
 #if USE_BOARD3D
-	Tidy3dObjects(bd);
+	Tidy3dObjects(bd, TRUE);
 #endif
 
 	exit( EXIT_SUCCESS );

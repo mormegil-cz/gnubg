@@ -79,24 +79,6 @@ extern GtkWidget *
 image_from_xpm_d ( char **xpm, GtkWidget *pw );
 
 #if USE_BOARD3D
-/* New 3d types */
-typedef struct _Texture
-{
-	int texID;
-	int width;
-	int height;
-} Texture;
-
-typedef struct _Material
-{
-	float ambientColour[4];
-	float diffuseColour[4];
-	float specularColour[4];
-	int shininess;
-	int alphaBlend;
-	Texture* pTexture;
-} Material;
-
 typedef struct _DiceRotation
 {
 	float xRotStart, yRotStart;
@@ -216,19 +198,19 @@ typedef struct _BoardData {
 
 	/* Materials for 3d objects */
 	Material diceMat[2], diceDotMat[2];
+	Material chequerMat[2];
 	Material cubeMat, cubeNumberMat;
-	Material checkerMat[2];
 	Material baseMat, boxMat, pointMat[2];
 	Material hingeMat;
 	Material pointNumberMat;
 	Material backGroundMat;
 	Material gap;
 	Material logoMat;
-	Material flagMat;
+	Material flagMat, flagNumberMat;
 	/* Store how "big" the screen maps to in 3d */
 	float backGroundPos[2], backGroundSize[2];
 
-	int pieceType;	/* Different piece models */
+	PieceType pieceType;	/* Different piece models */
 
 	BoardState State;	/* Open/closed board */
 	float perOpen;	/* Percentage open when opening/closing board */
@@ -293,11 +275,7 @@ extern void SetupViewingVolume3d(BoardData *bd);
 extern void DisplayCorrectBoardType();
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
 
-#if FAST_3D_PREVIEW
-extern void CreatePreviewBoard3d(BoardData* bd, GtkWidget** drawing_area);
-#else
 extern void *CreatePreviewBoard3d(BoardData* bd, GdkPixmap *ppm);
-#endif
 extern void RollDice3d(BoardData *bd);
 extern void AnimateMove3d(BoardData *bd);
 extern void ShowFlag3d(BoardData *bd);
@@ -309,11 +287,13 @@ extern int BoardPoint3d(BoardData *bd, int x, int y, int point);
 extern int MouseMove3d(BoardData *bd, int x, int y);
 extern void ReadBoard3d(BoardData* bd, GtkWidget *widget, unsigned char* buf);
 extern void RenderBoard3d(BoardData* bd, void *glpixmap, unsigned char* buf);
-extern void Tidy3dObjects(BoardData* bd);
+extern void Tidy3dObjects(BoardData* bd, int glValid);
 extern int TestPerformance3d(BoardData* bd);
-extern void testSet3dSetting(BoardData* bd, renderdata *prd, int testRow);
+extern void testSet3dSetting(BoardData* bd, const renderdata *prd);
 extern void CopySettings3d(BoardData* from, BoardData* to);
 extern void MakeCurrent3d(GtkWidget *widget);
+extern void GetTextures(BoardData* bd);
+void ClearTextures(BoardData* bd, int glValid);
 
 extern void PlaceMovingPieceRotation(BoardData* bd, int dest, int src);
 extern void SetMovingPieceRotation(BoardData* bd, int pt);
