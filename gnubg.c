@@ -457,6 +457,8 @@ command cER = {
       N_("Records a log of the game "
       "in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportGamePostScript, NULL, szFILENAME, &cFilename },
+    { "text", CommandExportGameText, N_("Export a log of the game in text formet"), 
+      szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
     { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
@@ -473,6 +475,9 @@ command cER = {
       N_("Records a log of the match "
       "in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportMatchPostScript, NULL, szFILENAME, &cFilename },
+    { "text", CommandExportMatchText, 
+      N_("Records a log of the match in text format"), 
+      szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
     { "eps", CommandExportPositionEPS, N_("Save the current position in "
@@ -482,6 +487,9 @@ command cER = {
       szFILENAME, &cFilename },
     { "pos", CommandNotImplemented, N_("Save the current position in .pos "
       "format"), szFILENAME, &cFilename },
+    { "text", CommandExportPositionText,
+      N_("Save the current position in text format"), 
+      szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportSession[] = {
     { "latex", CommandExportMatchLaTeX, N_("Records a log of the session in "
@@ -1863,7 +1871,7 @@ static void DisplayCubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
     outputl( sz );
 }
 
-static char *GetLuckAnalysis( matchstate *pms, float rLuck ) {
+extern char *GetLuckAnalysis( matchstate *pms, float rLuck ) {
 
     static char sz[ 16 ];
     cubeinfo ci;

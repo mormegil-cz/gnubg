@@ -406,6 +406,7 @@ getDefaultFileName ( const pathformat f );
 extern char *
 getDefaultPath ( const pathformat f );
 
+extern char *GetLuckAnalysis( matchstate *pms, float rLuck );
 
 #ifdef WIN32
 extern void WinCopy( char *szOut );
@@ -470,13 +471,16 @@ extern void CommandAccept( char * ),
     CommandExportGameLaTeX( char * ),
     CommandExportGamePDF( char * ),
     CommandExportGamePostScript( char * ),
+    CommandExportGameText( char * ),
     CommandExportMatchMat( char * ),
     CommandExportMatchHtml( char * ),
     CommandExportMatchLaTeX( char * ),
     CommandExportMatchPDF( char * ),
     CommandExportMatchPostScript( char * ),
+    CommandExportMatchText( char * ),
     CommandExportPositionEPS( char * ),
     CommandExportPositionHtml( char * ),
+    CommandExportPositionText( char * ),
     CommandExternal( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
