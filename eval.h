@@ -161,7 +161,8 @@ typedef struct _move {
   /* scores for this move */
   float rScore, rScore2; 
   /* evaluation for this move */
-  float arEvalMove[ NUM_OUTPUTS ];
+  float arEvalMove[ NUM_ROLLOUT_OUTPUTS ];
+  float arEvalStdDev[ NUM_ROLLOUT_OUTPUTS ];
   evalsetup esMove;
 } move;
 
@@ -419,5 +420,11 @@ getCubeDecisionOrdering ( int aiOrder[ 3 ],
 extern float
 getPercent ( const cubedecision cd,
              const float arDouble[] );
+
+extern void
+RefreshMoveList ( movelist *pml );
+
+extern int 
+ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies );
 
 #endif

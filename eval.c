@@ -3344,7 +3344,19 @@ static int CompareMoves( const move *pm0, const move *pm1 ) {
 	1 : -1;
 }
 
-static int ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
+static int CompareMovesGeneral( const move *pm0, const move *pm1 ) {
+
+  int i = cmp_evalsetup ( &pm0->esMove, &pm1->esMove );
+
+  if ( i )
+    return -i; /* sort descending */
+  else
+    return CompareMoves ( pm0, pm1 );
+
+}
+
+extern int 
+ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
 
     int anBoardTemp[ 2 ][ 25 ];
     float arEval[ NUM_ROLLOUT_OUTPUTS ];
@@ -3368,7 +3380,8 @@ static int ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
         mwc2eq ( arEval[ OUTPUT_CUBEFUL_EQUITY ], pci );
 
     /* Save evaluations */  
-    memcpy( pm->arEvalMove, arEval, NUM_OUTPUTS * sizeof ( float ) );
+    memcpy( pm->arEvalMove, arEval, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+    memset( pm->arEvalStdDev, 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
     
     /* Save evaluation setup */
     pm->esMove.et = EVAL_EVAL;
@@ -5480,8 +5493,7 @@ extern char *FormatEval ( char *sz, evalsetup *pes ) {
     sprintf ( sz, "%s", _("Rollout") );
     break;
   default:
-    printf ("pes->et: %i\n", pes->et );
-    assert (FALSE);
+    sprintf ( sz, "Unknown (%d)", pes->et );
     break;
   }
 
@@ -6815,3 +6827,17 @@ getPercent ( const cubedecision cd,
 
 }
 
+
+
+extern void
+RefreshMoveList ( movelist *pml ) {
+
+  if ( ! pml->cMoves )
+    return;
+
+  qsort( pml->amMoves, pml->cMoves, 
+         sizeof( move ), (cfunc) CompareMovesGeneral );
+
+  pml->rBestScore = pml->amMoves[ 0 ].rScore;
+
+}
