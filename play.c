@@ -745,7 +745,7 @@ static gint DelayTimeout( gpointer p ) {
 static void ResetDelayTimer( void ) {
 
     if( fX && nDelay && fDisplay ) {
-      if( nTimeout ) {
+      if( nTimeout )
         gtk_timeout_remove( nTimeout );
 
 	nTimeout = gtk_timeout_add( nDelay, DelayTimeout, NULL );
