@@ -1,3 +1,8 @@
+Thu May  1 16:15:12 2003  Oystein Johansen  <oystein@gnubg.org>
+        
+	* export.c (CommandExportPositionJF): More corrections to export of
+	JellyFish positions. Reported by Michael.
+	
 Fri Apr 25 20:26:27 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c: new command "load position ..."
