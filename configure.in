@@ -34,6 +34,8 @@ AC_PROG_AWK
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
+AC_CHECK_PROG(BISON, bison, bison, true)
+AC_CHECK_PROG(FLEX, flex, flex, true)
 
 dnl Checks for libraries.
 AC_CHECK_LIB(m, sqrt)

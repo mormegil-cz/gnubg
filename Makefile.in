@@ -58,7 +58,9 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 AWK = @AWK@
+BISON = @BISON@
 CC = @CC@
+FLEX = @FLEX@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_CONFIG = @GTK_CONFIG@
 GTK_LIBS = @GTK_LIBS@
@@ -71,7 +73,7 @@ VERSION = @VERSION@
 
 COMMON_INCS = -I$(srcdir)/lib
 COMMON_LIBS = -Llib -levent
-COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h 	analysis.h analysis.c
+COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c
 
 COMMON_DEPS = lib/libevent.a
 
@@ -108,7 +110,7 @@ md5test_SOURCES = md5test.c md5.c md5.h
 
 TESTS = gnubgtest md5test
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
@@ -129,18 +131,20 @@ X_PRE_LIBS = @X_PRE_LIBS@
 @USE_GTK_FALSE@@USE_EXT_TRUE@pub_eval.o set.o show.o database.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@mt19937int.o dice.o rollout.o isaac.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@copying.o kleinman.o md5.o matchequity.o \
-@USE_GTK_FALSE@@USE_EXT_TRUE@analysis.o xboard.o xgame.o
+@USE_GTK_FALSE@@USE_EXT_TRUE@analysis.o sgf.o sgfp.o sgfl.o xboard.o \
+@USE_GTK_FALSE@@USE_EXT_TRUE@xgame.o
 @USE_GTK_TRUE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @USE_GTK_TRUE@positionid.o drawboard.o pub_eval.o set.o show.o \
 @USE_GTK_TRUE@database.o mt19937int.o dice.o rollout.o isaac.o \
-@USE_GTK_TRUE@copying.o kleinman.o md5.o matchequity.o analysis.o \
-@USE_GTK_TRUE@gtkboard.o gtkgame.o
+@USE_GTK_TRUE@copying.o kleinman.o md5.o matchequity.o analysis.o sgf.o \
+@USE_GTK_TRUE@sgfp.o sgfl.o gtkboard.o gtkgame.o
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@getopt1.o eval.o play.o positionid.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@drawboard.o pub_eval.o set.o show.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@database.o mt19937int.o dice.o rollout.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@isaac.o copying.o kleinman.o md5.o \
-@USE_GTK_FALSE@@USE_EXT_FALSE@matchequity.o analysis.o
+@USE_GTK_FALSE@@USE_EXT_FALSE@matchequity.o analysis.o sgf.o sgfp.o \
+@USE_GTK_FALSE@@USE_EXT_FALSE@sgfl.o
 gnubg_LDFLAGS = 
 md5test_OBJECTS =  md5test.o md5.o
 md5test_LDADD = $(LDADD)
@@ -174,7 +178,8 @@ DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/database.P \
 .deps/isaac.P .deps/kleinman.P .deps/makebearoff.P .deps/makeweights.P \
 .deps/matchequity.P .deps/md5.P .deps/md5test.P .deps/mt19937int.P \
 .deps/play.P .deps/positionid.P .deps/pub_eval.P .deps/rollout.P \
-.deps/set.P .deps/show.P .deps/xboard.P .deps/xgame.P
+.deps/set.P .deps/sgf.P .deps/sgfl.P .deps/sgfp.P .deps/show.P \
+.deps/xboard.P .deps/xgame.P
 SOURCES = $(gnubg_SOURCES) $(md5test_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 OBJECTS = $(gnubg_OBJECTS) $(md5test_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 
@@ -418,7 +423,8 @@ distcheck: dist
 	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
-	dc_install_base=`cd $(distdir)/=inst && pwd`; \	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook; \
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
 	  && $(MAKE) $(AM_MAKEFLAGS) \
@@ -453,7 +459,7 @@ distdir: $(DISTFILES)
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
-	    cp -pr $$d/$$file $(distdir)/$$file; \
+	    cp -pr $$/$$file $(distdir)/$$file; \
 	  else \
 	    test -f $(distdir)/$$file \
 	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
@@ -627,6 +633,12 @@ maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
+
+sgfp.h sgfp.c: sgf.y
+	$(BISON) -o sgfp.c -p sgf -d sgf.y
+
+sgfl.c: sgf.l
+	$(FLEX) -osgfl.c -Psgf sgf.l
 
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $< > $@

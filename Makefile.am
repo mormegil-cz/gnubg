@@ -11,7 +11,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	pub_eval.c set.c show.c database.h database.c mt19937int.c \
 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h \
 	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h \
-	analysis.h analysis.c
+	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c
 COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -61,7 +61,13 @@ TESTS = gnubgtest md5test
 distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y
+
+sgfp.h sgfp.c: sgf.y
+	$(BISON) -o sgfp.c -p sgf -d sgf.y
+
+sgfl.c: sgf.l
+	$(FLEX) -osgfl.c -Psgf sgf.l
 
 copying.c: COPYING copying.awk
 	$(AWK) -f $(srcdir)/copying.awk < $< > $@
