@@ -6,6 +6,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow different settings (e.g. search ply, candidates, tolerance) for each
   position class.
 ** Add more evaluation classes.
+*** Write a better race evaluator.
 *** Add a neural net to correct errors in BEAROFF1 class.
 *** Classes for bearing off against contact, back games, containment
   positions, prime-vs-prime...
@@ -48,8 +49,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
   with push/pop semantics for readline state. (gary)
-** Allow comments in command files, and add a "this file is automatically
-  generated" warning comment to .gnubgautorc.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -82,9 +81,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Add optional point number labels on the board.
 ** Position the "move" widget (that displays the move in progress) higher
   up, to the left of the "roll dice" widget.
-** Check that extra whitespace is removed from player names entered in the
-  board window.
 ** Move the Crawford menu item to the name/score table.
+** The "Set" position button is superfluous.
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
@@ -112,8 +110,6 @@ duplication of effort and to make sure our changes merge easily.
   should be redefined to set 1-away, 1-away); "help r" doesn't do anything.
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
-** "eval 4P8PAAADAAAAAA" only finds 3.7% gammons at 1-ply -- why doesn't
-  it see 100%?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

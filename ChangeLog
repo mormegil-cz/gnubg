@@ -1,3 +1,11 @@
+Tue Aug  1 09:34:50 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (CommandSaveSettings): Add "this file is automatically
+	generated" warning at top of output.
+
+	* eval.c (EvaluatePositionFull): Fix bug that would force evaluation
+	using old positionclass, even if fRelativeAccuracy was FALSE.
+
 Mon Jul 31 13:27:37 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* xgame.c (RunExt): If BSD FASYNC-style I/O notification is not
