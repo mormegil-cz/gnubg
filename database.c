@@ -415,9 +415,13 @@ extern void CommandDatabaseGenerate( char *sz ) {
 
 	if( rThreshold ) {
 	    float ar[ NUM_OUTPUTS ], r0, r1;
+#if defined (REDUCTION_CODE)
 	    static evalcontext ec0 = { FALSE, 0, 0, TRUE, 0.0 };
             static evalcontext ec1 = { FALSE, 1, 0, TRUE, 0.0 };
-		
+#else
+	    static evalcontext ec0 = { FALSE, 0, FALSE, TRUE, 0.0 };
+            static evalcontext ec1 = { FALSE, 1, FALSE, TRUE, 0.0 };
+#endif		
 	    if( EvaluatePosition( anBoardGenerate, ar, &ciCubeless, &ec0 )
 		< 0 )
 		break;

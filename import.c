@@ -725,6 +725,10 @@ char* GetMatLine(FILE* fp)
 	return szLine;
 }
 
+#ifndef MIN
+#define MIN(A,B) (A < B) ? A : B
+#endif
+
 static int 
 ImportGame( FILE *fp, int iGame, int nLength ) {
 

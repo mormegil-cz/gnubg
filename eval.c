@@ -328,7 +328,11 @@ char *aszEvalType[] =
      N_ ("Rollout")
    };
 
+#if defined (REDUCTION_CODE)
 static evalcontext ecBasic = { FALSE, 0, 0, TRUE, 0.0 };
+#else
+static evalcontext ecBasic = { FALSE, 0, FALSE, TRUE, 0.0 };
+#endif
 
 /* defaults for the filters  - 0 ply uses no filters */
 movefilter
@@ -457,7 +461,7 @@ const char *aszSettings[ NUM_SETTINGS ] = {
   N_ ("grandmaster") };
 
 /* which evaluation context does the predefined settings use */
-
+#if defined (REDUCTION_CODE)
 evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 0, 0, TRUE, 0.060 }, /* casual play */
   { TRUE, 0, 0, TRUE, 0.050 }, /* beginner */
@@ -469,6 +473,18 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
   { TRUE, 3, 0, TRUE, 0.0 }, /* grand master */
 };
 
+#else
+evalcontext aecSettings[ NUM_SETTINGS ] = {
+  { TRUE, 0, FALSE, TRUE, 0.060 }, /* casual play */
+  { TRUE, 0, FALSE, TRUE, 0.050 }, /* beginner */
+  { TRUE, 0, FALSE, TRUE, 0.040 }, /* intermediate */
+  { TRUE, 0, FALSE, TRUE, 0.015 }, /* advanced */
+  { TRUE, 0, FALSE, TRUE, 0.0 }, /* expert */
+  { TRUE, 2, TRUE, TRUE, 0.0 }, /* world class */
+  { TRUE, 2, TRUE, TRUE, 0.0 }, /* supremo */
+  { TRUE, 3, TRUE, TRUE, 0.0 }, /* grand master */
+};
+#endif
 /* which move filter does the predefined settings use */
 
 int aiSettingsMoveFilter[ NUM_SETTINGS ] = {
@@ -2711,9 +2727,10 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     int anBoardNew[ 2 ][ 25 ];
     /* int anMove[ 8 ]; */
     cubeinfo ciOpp;
+#if !defined(REDUCTION_CODE)
     int const  usePrune =
       pec->fUsePrune && !pec->rNoise && pci->bgv == VARIATION_STANDARD;
-    
+#endif 
       
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
@@ -2763,12 +2780,16 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
         return -1;
       }
 
+#if !defined(REDUCTION_CODE)
       if( usePrune ) {
 	FindBestMoveInEval(n0, n1, anBoardNew, pci);
       } else {
+#endif
 	FindBestMovePlied( NULL, n0, n1, anBoardNew, pci, pec, 0,
 			   defaultFilters );
+#if !defined(REDUCTION_CODE)
       }
+#endif
 
       SwapSides( anBoardNew );
 
@@ -2844,7 +2865,7 @@ EvalKey ( const evalcontext *pec, const int nPlies,
           const cubeinfo *pci, int fCubefulEquity ) {
 
   int iKey;
-
+#if defined( REDUCTION_CODE )
   /*
    * Bit 00-02: nReduced
    * Bit 03-04: nPlies
@@ -2859,9 +2880,7 @@ EvalKey ( const evalcontext *pec, const int nPlies,
 
   /* Record the signature of important evaluation settings. */
   iKey = (
-#if defined( REDUCTION_CODE )
 	   ( pec->nReduced ) | 
-#endif
            ( nPlies << 3 ) |
            ( pec->fCubeful << 6 ) | 
            ( ( ( (int) ( pec->rNoise * 1000 ) ) && 0x00FF ) << 7 ) |
@@ -2897,6 +2916,52 @@ EvalKey ( const evalcontext *pec, const int nPlies,
       iKey ^= 0x6a47b47e;
 
   }
+#else
+  /*
+   * Bit 00-01: nPlies
+   * Bit 02   : fCubeful
+   * Bit 03-10: rNoise
+   * Bit 11   : fMove
+   * Bit 12   : fUsePrune
+   * Bit 13-17: anScore[ 0 ]
+   * Bit 18-22: anScore[ 1 ]
+   * Bit 23-26: log2(nCube)
+   * Bit 27-28: fCubeOwner
+   * Bit 29   : fCrawford
+   */
+
+  iKey = (
+           ( nPlies ) |
+           ( pec->fCubeful << 2 ) | 
+           ( ( ( (int) ( pec->rNoise * 1000 ) ) && 0x00FF ) << 3 ) |
+           ( pci->fMove << 11 ) );
+
+  if( nPlies )
+	  iKey ^= (( pec->fUsePrune ) << 12 );
+
+  
+  if ( nPlies || fCubefulEquity ) {
+
+    /* In match play, the score and cube value and position are important. */
+    if( pci->nMatchTo )
+      iKey ^=
+        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 13 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 18 ) ^
+        ( LogCube( pci->nCube ) << 23 ) ^
+        ( ( pci->fCubeOwner < 0 ? 2 :
+            pci->fCubeOwner == pci->fMove ) << 27 ) ^
+        ( pci->fCrawford << 29 );
+    else if( pec->fCubeful || fCubefulEquity )
+      /* in cubeful money games the cube position and rules are important. */
+      iKey ^=
+        ( ( pci->fCubeOwner < 0 ? 2 :
+            pci->fCubeOwner == pci->fMove ) << 27 ) ^
+	( pci->fJacoby << 29 ) ^ ( pci->fBeavers << 30 );
+    
+    if( fCubefulEquity )
+      iKey ^= 0x6a47b47e;
+  }
+#endif
     
   return iKey;
 
@@ -6000,9 +6065,11 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
     int anBoardNew[ 2 ][ 25 ];
 
+#if !defined( REDUCTION_CODE )
     int const  usePrune =
       pec->fUsePrune && !pec->rNoise && pciMove->bgv == VARIATION_STANDARD;
-    
+#endif
+
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
 
@@ -6060,13 +6127,16 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
         return -1;
       }
 
+#if !defined( REDUCTION_CODE )
       if( usePrune ) {
 	FindBestMoveInEval(n0, n1, anBoardNew, pciMove);
       } else {
+#endif
 	FindBestMovePlied( NULL, n0, n1, anBoardNew,
                          pciMove, pec, 0, defaultFilters );
+#if !defined( REDUCTION_CODE )
       }
-      
+#endif
 
       SwapSides( anBoardNew );
 
@@ -6425,8 +6495,16 @@ cmp_evalcontext ( const evalcontext *pec1, const evalcontext *pec2 ) {
     else if ( n1 < n2 )
       return +1;
   }
+#else
+  if ( pec1->nPlies > 0 ) {
+    int nPrune1 = (pec1->fUsePrune);
+    int nPrune2 = (pec2->fUsePrune);
+    if ( nPrune1 > nPrune2 )
+	    return -1;
+    else if (nPrune1 < nPrune2 )
+	    return +1;
+  }
 #endif
-
   return 0;
 
 }

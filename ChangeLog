@@ -1,3 +1,11 @@
+Tue Oct 26 21:00:45 2004   Oystein Johansen <oystein@gnubg.org>
+
+	Hate me or love me! I've commited the code that removes the reduced
+	searches. (Sorry Nis! Hope it won't cause you any trouble). Hopefully
+	I will be able to combine the two reduction methods later.
+
+	* gtkgame.c, eval.c and other files: Add user interface to prune nets
+
 Fri Oct 22 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* html.c, and others : Fix exports to display cube analysis whenever

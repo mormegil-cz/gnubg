@@ -577,8 +577,9 @@ InitEvalContext ( evalcontext *pec ) {
   pec->fCubeful = FALSE;
 #if defined( REDUCTION_CODE )
   pec->nReduced = 0;
-#endif
+#else
   pec->fUsePrune = FALSE;
+#endif
   pec->fDeterministic = FALSE;
   pec->rNoise = 0.0;
 
@@ -606,10 +607,11 @@ RestoreEvalContext ( evalcontext *pec, const char *sz ) {
 
 #if defined( REDUCTION_CODE )
     pec->nReduced = red;
+#else
+  pec->fUsePrune = fUsePrune;
 #endif
   pec->nPlies = nPlies;
   pec->fCubeful = ch == 'C';
-  pec->fUsePrune = fUsePrune;
   pec->fDeterministic = fDeterministic;
 
 }
@@ -973,8 +975,9 @@ static void RestoreDoubleAnalysis( property *pp,
 	pes->ec.nPlies = nPlies;
 #if defined( REDUCTION_CODE )
         pes->ec.nReduced = nReduced;
-#endif
+#else
         pes->ec.fUsePrune = fUsePrune;
+#endif
         pes->ec.fDeterministic = fDeterministic;
 	pes->ec.fCubeful = ch == 'C';
 
@@ -1091,8 +1094,9 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	    pm->esMove.ec.nPlies = nPlies;
 #if defined( REDUCTION_CODE )
 	    pm->esMove.ec.nReduced = nReduced;
-#endif
+#else
 	    pm->esMove.ec.fUsePrune = fUsePrune;
+#endif
 	    pm->esMove.ec.fDeterministic = fDeterministic;
 	    break;
 
@@ -1737,7 +1741,9 @@ WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
 	   pec->nReduced,
 	   pec->fDeterministic, 
 	   pec->rNoise,
-	   pec->fUsePrune);
+/*         , pec->fUsePrune */
+	   0
+	   );
 #else
   fprintf( pf, "ver %d %d%s %d %.4f %d",
 	   SGF_FORMAT_VER,
@@ -1886,7 +1892,8 @@ static void WriteDoubleAnalysis( FILE *pf,
 	     pes->ec.nReduced,
 	     pes->ec.fDeterministic,
 	     pes->ec.rNoise,
-	     pes->ec.fUsePrune,
+/*	     pes->ec.fUsePrune, */
+	     0,
 	     aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
 	     aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
 	     aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
@@ -1985,7 +1992,12 @@ static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 #endif
                      pml->amMoves[ i ].esMove.ec.fDeterministic, 
                      pml->amMoves[ i ].esMove.ec.rNoise ,
-		     pml->amMoves[ i ].esMove.ec.fUsePrune);
+#if !defined( REDUCTION_CODE )
+		     pml->amMoves[ i ].esMove.ec.fUsePrune
+#else
+	             0 
+#endif
+		     );
 	    break;
 	    
 	case EVAL_ROLLOUT:

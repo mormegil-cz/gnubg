@@ -405,7 +405,11 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f, rEvalsPerSec = -1.0f,
 /* 	0.04f /\* SKILL_VERYGOOD	*\/ */
     };
 
+#if defined (REDUCTION_CODE)
 evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
+#else
+evalcontext ecTD = { FALSE, 0, FALSE, TRUE, 0.0 };
+#endif
 
 #define MOVEFILTER \
 { \
@@ -415,6 +419,7 @@ evalcontext ecTD = { FALSE, 0, 0, TRUE, 0.0 };
  { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } , \
 }
 
+#if defined (REDUCTION_CODE)
 void *rngctxRollout = NULL;
 rolloutcontext rcRollout =
 { 
@@ -459,7 +464,7 @@ rolloutcontext rcRollout =
   FALSE,  /* no stop on JSD */
   FALSE,  /* no move stop on JSD */
   11, /* truncation */
-  36, /* number of trials */
+  1296, /* number of trials */
   5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
   0,  /* seed */
@@ -523,7 +528,117 @@ rolloutcontext rcRollout =
   0 \
   } \
 } 
+#else /* RESUCTION_CODE */
 
+void *rngctxRollout = NULL;
+rolloutcontext rcRollout =
+{ 
+  {
+	/* player 0/1 cube decision */
+        { FALSE, 0, TRUE, TRUE, 0.0 },
+	{ FALSE, 0, TRUE, TRUE, 0.0 }
+  }, 
+  {
+	/* player 0/1 chequerplay */
+	{ FALSE, 0, TRUE, TRUE, 0.0 },
+	{ FALSE, 0, TRUE, TRUE, 0.0 }
+  }, 
+
+  {
+	/* player 0/1 late cube decision */
+	{ FALSE, 0, TRUE, TRUE, 0.0 },
+	{ FALSE, 0, TRUE, TRUE, 0.0 }
+  }, 
+  {
+	/* player 0/1 late chequerplay */
+	{ FALSE, 0, TRUE, TRUE, 0.0 },
+	{ FALSE, 0, TRUE, TRUE, 0.0 } 
+  }, 
+  /* truncation point cube and chequerplay */
+  { FALSE, 0, TRUE, TRUE, 0.0 },
+  { FALSE, 0, TRUE, TRUE, 0.0 },
+
+  /* move filters */
+  { MOVEFILTER, MOVEFILTER },
+  { MOVEFILTER, MOVEFILTER },
+
+  FALSE, /* cubeful */
+  TRUE, /* variance reduction */
+  FALSE, /* initial position */
+  TRUE, /* rotate */
+  TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
+  TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
+  FALSE, /* late evaluations */
+  TRUE,  /* Truncation enabled */
+  FALSE,  /* no stop on STD */
+  FALSE,  /* no stop on JSD */
+  FALSE,  /* no move stop on JSD */
+  11, /* truncation */
+  1296, /* number of trials */
+  5,  /* late evals start here */
+  RNG_MERSENNE, /* RNG */
+  0,  /* seed */
+  144,    /* minimum games  */
+  0.1,	  /* stop when std's are under 10% of value */
+  144,    /* minimum games  */
+  1.96,   /* stop when best has j.s.d. for 95% confidence */
+  0
+
+};
+
+/* parameters for `eval' and `hint' */
+
+#define EVALSETUP  { \
+  /* evaltype */ \
+  EVAL_EVAL, \
+  /* evalcontext */ \
+  { TRUE, 0, TRUE, TRUE, 0.0 }, \
+  /* rolloutcontext */ \
+  { \
+    { \
+      { FALSE, 0, TRUE, TRUE, 0.0 }, /* player 0 cube decision */ \
+      { FALSE, 0, TRUE, TRUE, 0.0 } /* player 1 cube decision */ \
+    }, \
+    { \
+      { FALSE, 0, TRUE, TRUE, 0.0 }, /* player 0 chequerplay */ \
+      { FALSE, 0, TRUE, TRUE, 0.0 } /* player 1 chequerplay */ \
+    }, \
+    { \
+      { FALSE, 0, TRUE, TRUE, 0.0 }, /* p 0 late cube decision */ \
+      { FALSE, 0, TRUE, TRUE, 0.0 } /* p 1 late cube decision */ \
+    }, \
+    { \
+      { FALSE, 0, TRUE, TRUE, 0.0 }, /* p 0 late chequerplay */ \
+      { FALSE, 0, TRUE, TRUE, 0.0 } /* p 1 late chequerplay */ \
+    }, \
+    { FALSE, 0, TRUE, TRUE, 0.0 }, /* truncate cube decision */ \
+    { FALSE, 0, TRUE, TRUE, 0.0 }, /* truncate chequerplay */ \
+    { MOVEFILTER, MOVEFILTER }, \
+    { MOVEFILTER, MOVEFILTER }, \
+  FALSE, /* cubeful */ \
+  TRUE, /* variance reduction */ \
+  FALSE, /* initial position */ \
+  TRUE, /* rotate */ \
+  TRUE, /* truncate at BEAROFF2 for cubeless rollouts */ \
+  TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */ \
+  FALSE, /* late evaluations */ \
+  TRUE,  /* Truncation enabled */ \
+  FALSE,  /* no stop on STD */ \
+  FALSE,  /* no stop on JSD */ \
+  FALSE,  /* no move stop on JSD */ \
+  11, /* truncation */ \
+  1296, /* number of trials */ \
+  5,  /* late evals start here */ \
+  RNG_MERSENNE, /* RNG */ \
+  0,  /* seed */ \
+  144,    /* minimum games  */ \
+  0.1,	  /* stop when std's are under 10% of value */ \
+  144,    /* minimum games  */ \
+  1.96,   /* stop when best has j.s.d. for 95% confidence */ \
+  0 \
+  } \
+} 
+#endif
 
 evalsetup esEvalChequer = EVALSETUP;
 evalsetup esEvalCube = EVALSETUP;
@@ -5513,8 +5628,11 @@ static void
 SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
     fprintf( pf, "%s plies %d\n"
+#if defined( REDUCTION_CODE )
 	     "%s reduced %d\n"
+#else
 	     "%s prune %s\n"
+#endif
 	     "%s cubeful %s\n"
 	     "%s noise %.3f\n"
 	     "%s deterministic %s\n",
@@ -5522,9 +5640,8 @@ SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 #if defined( REDUCTION_CODE )
 	     sz, pec->nReduced,
 #else
-	     sz, 0,
-#endif
 	     sz, pec->fUsePrune ? "on" : "off",
+#endif
 	     sz, pec->fCubeful ? "on" : "off",
 	     sz, pec->rNoise, 
              sz, pec->fDeterministic ? "on" : "off" );

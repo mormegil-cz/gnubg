@@ -432,8 +432,11 @@ static void
 MoveListEvalPly ( GtkWidget *pw, hintdata *phd ) {
 
   char *szPly = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
+#if defined (REDUCTION_CODE)
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
-
+#else
+  evalcontext ec = { TRUE, 0, TRUE, TRUE, 0.0 };
+#endif
   /* Reset interrupt flag */
   fInterrupt = FALSE;
 

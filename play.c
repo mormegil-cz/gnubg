@@ -1023,7 +1023,11 @@ extern int ComputerTurn( void ) {
       float rEqBefore, rEqAfter;
       const float epsilon = 1.0e-6;
 
+#if defined (REDUCTION_CODE)
       const evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
+#else
+      const evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
+#endif
      
       ProgressStart( _("Considering resignation...") );
 
@@ -1252,7 +1256,11 @@ extern int ComputerTurn( void ) {
 
       if( ClassifyPosition( ms.anBoard, ms.bgv ) <= CLASS_RACE ) {
 
+#if defined(REDUCTION_CODE)
           evalcontext ecResign = { FALSE, 0, 0, TRUE, 0.0 };
+#else
+          evalcontext ecResign = { FALSE, 0, FALSE, TRUE, 0.0 };
+#endif
           evalsetup esResign;
 
           esResign.et = EVAL_EVAL;
@@ -4620,7 +4628,11 @@ getCurrentMoveRecord ( int *pfHistory ) {
 static int
 CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest ) {
 
+#if defined (REDUCTION_CODE)
   static evalcontext ec0ply = { FALSE, 0, 0, TRUE, 0.0 };
+#else
+  static evalcontext ec0ply = { FALSE, 0, FALSE, TRUE, 0.0 };
+#endif
   static cubeinfo ci;
     
   GetMatchStateCubeInfo( &ci, pms );

@@ -106,10 +106,9 @@ typedef struct {
     unsigned int nReduced : 3; /* this will need to be expanded if we add
 				  support for nReduced != 3 */
 #else
-  unsigned int filler : 3;
+    unsigned int fUsePrune : 1;
 #endif
     unsigned int fDeterministic : 1;
-    unsigned int fUsePrune : 1;
     float        rNoise;       /* standard deviation */
 } evalcontext;
 

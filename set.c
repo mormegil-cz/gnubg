@@ -120,10 +120,13 @@ command acSetEvaluation[] = {
       szSTDDEV, NULL },
     { "plies", CommandSetEvalPlies, N_("Choose how many plies to look ahead"),
       szPLIES, NULL },
+#if defined(REDUCTION_CODE)
     { "reduced", CommandSetEvalReduced,
       N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
+#else
     { "prune", CommandSetEvalPrune,
       N_("use fast pruning networks"), szONOFF, NULL },
+#endif
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
     { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
@@ -321,7 +324,8 @@ SetMoveFilter(char* sz,
   int		  extras;
   float 	  tolerance;
 
-  outputf( _("Temporary debug: '%s' '%s'\n"), szSetCommand, sz );
+/* Temporary removing the temporary debug ...
+ * outputf( _("Temporary debug: '%s' '%s'\n"), szSetCommand, sz ); */
 
   if (ply < 0) {
 	outputl ( N_("You must specify for which ply you want to set a filter") );
@@ -1018,6 +1022,7 @@ CommandSetEvalCubeful( char *sz ) {
     pecSet->fCubeful = f;
 }
 
+#if !defined(REDUCTION_CODE)
 extern void 
 CommandSetEvalPrune( char *sz ) {
 
@@ -1030,6 +1035,7 @@ CommandSetEvalPrune( char *sz ) {
     SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
     pecSet->fUsePrune = f;
 }
+#endif
 
 extern void CommandSetEvalDeterministic( char *sz ) {
 

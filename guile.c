@@ -305,8 +305,11 @@ static SCM evaluate_position_cubeful( SCM sBoard, SCM sCube,
     SCM s;
     cubeinfo ci;
     psighandler sh;
+#if defined (REDUCTION_CODE)
     evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
-    
+#else
+    evalcontext ec = { TRUE, 0, FALSE, TRUE, 0.0 };
+#endif
     SCMToBoard( sBoard, anBoard );
     
     if( sCube == SCM_UNDEFINED )

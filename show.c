@@ -119,11 +119,15 @@ ShowEvaluation( const evalcontext *pec ) {
              "        %s evaluations.\n"),
 #else
   outputf( _("        %d-ply evaluation.\n"
+             "        %s"
              "        %s evaluations.\n"),
 #endif
            pec->nPlies, 
 #if defined( REDUCTION_CODE )
            (pec->nReduced) ? 100 / pec->nReduced : 100,
+#else
+           (pec->fUsePrune) ? _("Using pruning neural nets.") :
+	   _("Not using pruning neural nets."),
 #endif
            pec->fCubeful ? _("Cubeful") : _("Cubeless") );
 
@@ -2121,7 +2125,11 @@ CommandShowRolls ( char *sz ) {
 #if USE_GTK2
 
   if ( fX ) {
+#if defined (REDUCTION_CODE)
     static evalcontext ec0ply = { TRUE, 0, 0, TRUE, 0.0 };
+#else
+    static evalcontext ec0ply = { TRUE, 0, FALSE, TRUE, 0.0 };
+#endif
     GTKShowRolls( nDepth, &ec0ply, &ms );
     return;
   }

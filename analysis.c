@@ -71,8 +71,11 @@ static const float arThrsRating [ RAT_SUPERNATURAL + 1 ] = {
 
 int afAnalysePlayers[ 2 ] = { TRUE, TRUE };
 
+#if defined (REDUCTION_CODE)
 evalcontext ecLuck = { TRUE, 0, 0, TRUE, 0.0 };
-
+#else
+evalcontext ecLuck = { TRUE, 0, FALSE, TRUE, 0.0 };
+#endif
 
 extern ratingtype
 GetRating ( const float rError ) {

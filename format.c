@@ -126,11 +126,11 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
     sprintf ( pc = strchr ( sz, 0 ),
               " %d%% speed",
               (pec->nReduced) ? 100 / pec->nReduced : 100 );
-#endif
-
+#else
   if( pec->fUsePrune ) {
     sprintf( pc = strchr ( sz, 0 ), " prune" );
   }
+#endif
 	    
   if ( fChequer && pec->nPlies ) {
     /* FIXME: movefilters!!! */

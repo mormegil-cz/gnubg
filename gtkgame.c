@@ -4667,7 +4667,14 @@ static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 typedef struct _evalwidget {
     evalcontext *pec;
     movefilter *pmf;
-    GtkWidget *pwCubeful, *pwReduced, *pwDeterministic;
+    GtkWidget *pwCubeful,
+#if defined (REDUCTION_CODE)
+        *pwReduced, 
+#else
+        *pwUsePrune,
+#endif
+        *pwDeterministic;
+	
     GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
 	*padjNoise;
     int *pfOK;
@@ -4686,11 +4693,15 @@ static void EvalGetValues ( evalcontext *pec, evalwidget *pew ) {
     gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
 
   /* reduced */
+#if defined( REDUCTION_CODE )
   pwMenu = gtk_option_menu_get_menu ( GTK_OPTION_MENU ( pew->pwReduced ) );
   pwItem = gtk_menu_get_active ( GTK_MENU ( pwMenu ) );
   pi = (int *) gtk_object_get_user_data ( GTK_OBJECT ( pwItem ) );
-#if defined( REDUCTION_CODE )
   pec->nReduced = *pi;
+#else
+  pec->fUsePrune =
+    gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON( pew->pwUsePrune ) );
+  
 #endif
 
   pec->rNoise = pew->padjNoise->value;
@@ -4754,9 +4765,11 @@ static void EvalNoiseValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
 }
 
 static void EvalPliesValueChanged( GtkAdjustment *padj, evalwidget *pew ) {
-
+#if defined (REDUCTION_CODE)
     gtk_widget_set_sensitive( pew->pwReduced, padj->value > 0 );
-
+#else
+    gtk_widget_set_sensitive( pew->pwUsePrune, padj->value > 0 );
+#endif
     EvalChanged ( NULL, pew );
 
 }
@@ -4780,13 +4793,13 @@ static void SettingsMenuActivate ( GtkWidget *pwItem,
   gtk_adjustment_set_value ( pew->padjPlies, pec->nPlies );
   gtk_adjustment_set_value ( pew->padjNoise, pec->rNoise );
 
-  gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwReduced ), 
 #if defined( REDUCTION_CODE )
-                                pec->nReduced
+  gtk_option_menu_set_history ( GTK_OPTION_MENU ( pew->pwReduced ), 
+                                pec->nReduced );
 #else
-				0
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwUsePrune ),
+                                pec->fUsePrune );
 #endif
-				);
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
                                 pec->fCubeful );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwDeterministic ),
@@ -4816,7 +4829,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     GtkWidget *pwItem;
 
     GtkWidget *pwev;
-
+#if defined( REDUCTION_CODE )
     const char *aszReduced[] = {
       N_("No reduction"),
       NULL,
@@ -4824,6 +4837,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
       N_("33%% speed"),
       N_("25%% speed") 
     };
+#endif
     gchar *pch;
 
     int i;
@@ -4929,6 +4943,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_container_add( GTK_CONTAINER( pw ),
 		       gtk_spin_button_new( pew->padjPlies, 1, 0 ) );
 
+#if defined( REDUCTION_CODE )
     /* reduced evaluation */
 
     /* FIXME if and when we support different values for nReduced, this
@@ -4981,13 +4996,23 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
      * 0, 2, 3, 4 
      */
 	gtk_option_menu_set_history( GTK_OPTION_MENU( pew->pwReduced ), 
-#if defined( REDUCTION_CODE )
                                  (pec->nReduced < 2) ? 0 : 
-                                  pec->nReduced - 1
+                                  pec->nReduced - 1 );
 #else
-				     0
+	
+    /* Use pruning neural nets */
+    
+    pwFrame2 = gtk_frame_new ( _("Pruning neural nets") );
+    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwFrame2 );
+
+    gtk_container_add( GTK_CONTAINER( pwFrame2 ),
+		       pew->pwUsePrune = gtk_check_button_new_with_label(
+			   _("Use neural net pruning") ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwUsePrune ),
+				  pec->fCubeful );
+    /* FIXME This needs a tool tip */
+
 #endif
-				     );
 
     /* cubeful */
     
@@ -5101,12 +5126,17 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     gtk_signal_connect ( GTK_OBJECT( pew->pwCubeful ), "toggled",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
-
+    
+#if defined (REDUCTION_CODE)
 #if GTK_CHECK_VERSION(2,0,0)
     gtk_signal_connect ( GTK_OBJECT( pew->pwReduced ), "changed",
                          GTK_SIGNAL_FUNC( EvalChanged ), pew );
 #endif
-
+#else
+    gtk_signal_connect ( GTK_OBJECT( pew->pwUsePrune ), "toggled",
+                         GTK_SIGNAL_FUNC( EvalChanged ), pew );
+#endif 
+    
     gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
 
     return pwEval;
@@ -5141,6 +5171,11 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
 #if defined( REDUCTION_CODE )
     if( pec->nReduced != pecOrig->nReduced ) {
 	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
+	UserCommand( sz );
+    }
+#else
+    if( pec->fUsePrune != pecOrig->fUsePrune ) {
+	sprintf( sz, "%s prune %s", szPrefix, pec->fUsePrune ? "on" : "off" );
 	UserCommand( sz );
     }
 #endif
@@ -9504,7 +9539,6 @@ PythonShell( gpointer *p, guint n, GtkWidget *pw ) {
 #else
   char *pch = g_strdup( ">import idle.PyShell; idle.PyShell.main()\n" );
 #endif
-
   UserCommand( pch );
 
   g_free( pch );
