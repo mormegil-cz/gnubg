@@ -1,7 +1,12 @@
-Fri Aut 30 20:34:25 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+Fri Aug 30 22:53:25 2003  Oystein Johansene <oystein@gnubg.org>
+
+	* gtkgame.c, gtkchequer.c: Make the old layout available through
+	the compile option #define USE_OLD_LAYOUT
+	
+Fri Aug 30 20:34:25 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* lots of fiddling with include files etc. to suppress compiler
-          warnings board3d/inc3d.h analysis.h play.c html.c
+          warnings: board3d/inc3d.h analysis.h play.c html.c
 	  text.c format.c gtkgame.c board3d/mylist.c gtktoolbar.c 
 	  board3d/gtkcolour3d.c gnubg.c gnubgmodule.h gnubgmodule.c
 	

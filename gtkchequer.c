@@ -58,8 +58,16 @@
 static void
 UpdateMoveList ( const hintdata *phd ) {
 
+  static int aanColumns[][ 2 ] = {
+    { 2, OUTPUT_WIN },
+    { 3, OUTPUT_WINGAMMON },
+    { 4, OUTPUT_WINBACKGAMMON },
+    { 6, OUTPUT_LOSEGAMMON },
+    { 7, OUTPUT_LOSEBACKGAMMON }
+  };
+  
   GtkWidget *pwMoves = phd->pwMoves;
-  int i;
+  int i, j, col;
   char sz[ 32 ];
   float rBest;
   cubeinfo ci;
@@ -72,14 +80,19 @@ UpdateMoveList ( const hintdata *phd ) {
   assert( ms.fMove == 0 || ms.fMove == 1 );
     
   GetMatchStateCubeInfo( &ci, &ms );
-    
+#if USE_OLD_LAYOUT
+  col = 8;
+#else
+  col = 2;
+#endif
   rBest = pml->amMoves[ 0 ].rScore;
   if( fOutputMWC && ms.nMatchTo ) 
-    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 2, _("MWC") );
+    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), col, _("MWC") );
   else
-    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 2, _("Equity") );
+    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), col, _("Equity") );
     
   for( i = 0; i < pml->cMoves; i++ ) {
+    float *ar = pml->amMoves[ i ].arEvalMove;
 
     gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
 
@@ -97,7 +110,7 @@ UpdateMoveList ( const hintdata *phd ) {
 
     /* gwc */
 
-#if 0
+#if USE_OLD_LAYOUT
     for( j = 0; j < 5; j++ ) 
       gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
                           OutputPercent( ar[ aanColumns[ j ][ 1 ] ] ) );
@@ -107,16 +120,16 @@ UpdateMoveList ( const hintdata *phd ) {
 
     /* cubeless equity */
 
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 2, 
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, col, 
                         OutputEquity( pml->amMoves[ i ].rScore, &ci, TRUE ) );
 
     if( i ) {
-      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 3, 
+      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, col + 1, 
                           OutputEquityDiff( pml->amMoves[ i ].rScore, 
                                             rBest, &ci ) );
     }
 	
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 4,
+    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, col + 2,
                         FormatMove( sz, ms.anBoard,
                                     pml->amMoves[ i ].anMove ) );
   }
@@ -154,7 +167,6 @@ UpdateMoveList ( const hintdata *phd ) {
 
 static void 
 MoveListRollout( GtkWidget *pw, hintdata *phd ) {
-
 
   GList *pl;
   GtkWidget *pwMoves = phd->pwMoves;
@@ -804,7 +816,7 @@ CheckHintButtons( hintdata *phd ) {
 }
 
 
-#if 0
+#if USE_OLD_LAYOUT
 extern GtkWidget *
 CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
                 const int fDestroyOnMove ) {
@@ -900,7 +912,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     return pwHBox;
 
 }
-#endif
+#else
 
 extern GtkWidget *
 CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
@@ -909,14 +921,6 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     static char *aszTitle[] = {
 	N_("Rank"), 
         N_("Type"), 
-#if 0
-        N_("Win"), 
-        N_("W g"), 
-        N_("W bg"), 
-        N_("Lose"), 
-        N_("L g"), 
-        N_("L bg"),
-#endif
 	"", 
         N_("Diff."), 
         N_("Move")
@@ -998,4 +1002,4 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     return pwHBox;
 
 }
-
+#endif

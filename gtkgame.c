@@ -257,9 +257,9 @@ static char *aszCommands[ NUM_CMDS ] = {
     "rollout",
     "rollout =cube",
     "save settings",
-    NULL, /* set annotation on */
+    "set annotation on",
     NULL, /* set appearance */
-    NULL, /* set message on */
+    "set message on",
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
     "show bearoff",
@@ -478,16 +478,24 @@ UpdateGeometry ( const gnubgwindow gw ) {
     pw = pwMain;
     break;
   case WINDOW_ANNOTATION:
-/*    pw = pwAnnotation; */
+#if USE_OLD_LAYOUT
+    pw = pwAnnotation;
+#endif
     break;
   case WINDOW_HINT:
-/*    pw = pwHint; */
+#if USE_OLD_LAYOUT
+    pw = pwHint; 
+#endif
     break;
   case WINDOW_GAME:
-/*    pw = pwGame; */
+#if USE_OLD_LAYOUT
+    pw = pwGame; 
+#endif
     break;
   case WINDOW_MESSAGE:
-/*    pw = pwMessage; */
+#if USE_OLD_LAYOUT
+    pw = pwMessage; 
+#endif
     break;
   default:
     assert ( FALSE );
@@ -501,11 +509,12 @@ extern void
 RefreshGeometries ( void ) {
 
   getWindowGeometry ( &awg[ WINDOW_MAIN ], pwMain );
-/*  getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation ); */
-/*  getWindowGeometry ( &awg[ WINDOW_HINT ], pwHint ); */
-/*  getWindowGeometry ( &awg[ WINDOW_GAME ], pwGame ); */
-/*  getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage ); */
-
+#if USE_OLD_LAYOUT
+  getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
+  getWindowGeometry ( &awg[ WINDOW_HINT ], pwHint );
+  getWindowGeometry ( &awg[ WINDOW_GAME ], pwGame );
+  getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage );
+#endif
 }
 
 typedef struct {
@@ -932,24 +941,32 @@ static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
 }
 
 static void DeleteAnnotation( void ) {
-#if 0
+#if USE_OLD_LAYOUT
   getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
 #endif
   fAnnotation = FALSE;
+#if USE_OLD_LAYOUT
+  UpdateSetting(&fAnnotation);
+#endif
   gtk_widget_hide ( pwAnnotation );
+#if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Annotation")), FALSE);
+#endif
 }
 
 static gboolean DeleteGame( void ) {
-#if 0
+#if USE_OLD_LAYOUT
   getWindowGeometry ( &awg[ WINDOW_GAME ], pwGame );
-#endif
+#else
   fGameList = FALSE;
+#endif
   gtk_widget_hide ( pwGame );
-  return TRUE;
+#if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Game record")), FALSE);
+#endif
+  return TRUE;
 }
 
 static int fAutoCommentaryChange;
@@ -991,20 +1008,26 @@ static void CommentaryChanged( GtkWidget *pw, void *p ) {
 }
 
 static void DeleteMessage ( void ) {
-#if 0
+#if USE_OLD_LAYOUT
   getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage );
 #endif
   fMessage = FALSE;
+#if USE_OLD_LAYOUT
+  UpdateSetting( &fMessage );
+#endif
   gtk_widget_hide ( pwMessage );
+#if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Message")), FALSE);
+#endif
 }
 
 static GtkWidget *CreateMessageWindow( void ) {
 
-    GtkWidget *vscrollbar, *pwhbox, *pwvbox;  
-#if 0
-    pwMessage = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+    GtkWidget *vscrollbar, *pwhbox;  
+    GtkWidget *pwvbox = gtk_vbox_new ( TRUE, 0 ) ;
+#if USE_OLD_LAYOUT
+    GtkWidget *pwMessage = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
 
     gtk_window_set_title( GTK_WINDOW( pwMessage ),
@@ -1018,9 +1041,8 @@ static GtkWidget *CreateMessageWindow( void ) {
 #endif
     
     setWindowGeometry ( pwMessage, &awg[ WINDOW_MESSAGE ] );
-    gtk_container_add( GTK_CONTAINER( pwMessage ),
+    gtk_container_add( GTK_CONTAINER( pwMessage ), pwvbox);
 #endif 
-                       pwvbox = gtk_vbox_new ( TRUE, 0 ) ;
 
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                      pwhbox = gtk_hbox_new ( FALSE, 0 ), FALSE, TRUE, 0);
@@ -1033,21 +1055,23 @@ static GtkWidget *CreateMessageWindow( void ) {
     vscrollbar = gtk_vscrollbar_new (GTK_TEXT(pwMessageText)->vadj);
     gtk_box_pack_start(GTK_BOX(pwhbox), pwMessageText, TRUE, TRUE, 0);
     gtk_box_pack_end(GTK_BOX(pwhbox), vscrollbar, FALSE, FALSE, 0);
-#if 0
+#if USE_OLD_LAYOUT
     gtk_signal_connect( GTK_OBJECT( pwMessage ), "delete_event",
 			GTK_SIGNAL_FUNC( DeleteMessage ), NULL );
-#endif
+    return pwMessage;
+#else
     gtk_widget_set_usize(GTK_WIDGET(pwvbox), 0, 80);
     return pwvbox;
+#endif
 }
 
 static GtkWidget *CreateAnnotationWindow( void ) {
 
-    GtkWidget *pwPaned;
+    GtkWidget *pwPaned = gtk_vpaned_new() ;
     GtkWidget *vscrollbar, *pHbox;    
 
-#if 0
-    pwAnnotation = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+#if USE_OLD_LAYOUT
+    GtkWidget *pwAnnotation = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
     gtk_window_set_title( GTK_WINDOW( pwAnnotation ),
 			  _("GNU Backgammon - Annotation") );
@@ -1061,9 +1085,8 @@ static GtkWidget *CreateAnnotationWindow( void ) {
 
     setWindowGeometry ( pwAnnotation, &awg[ WINDOW_ANNOTATION ] );
 
-    gtk_container_add( GTK_CONTAINER( pwAnnotation ),
+    gtk_container_add( GTK_CONTAINER( pwAnnotation ), pwPaned); 
 #endif
-		    pwPaned = gtk_vpaned_new() ;
     
     gtk_paned_pack1( GTK_PANED( pwPaned ),
 		     pwAnalysis = gtk_label_new( NULL ), TRUE, FALSE );
@@ -1084,11 +1107,13 @@ static GtkWidget *CreateAnnotationWindow( void ) {
 
     gtk_signal_connect( GTK_OBJECT( pwCommentary ), "changed",
 			GTK_SIGNAL_FUNC( CommentaryChanged ), NULL );
-#if 0    
+#if USE_OLD_LAYOUT    
     gtk_signal_connect( GTK_OBJECT( pwAnnotation ), "delete_event",
 			GTK_SIGNAL_FUNC( DeleteAnnotation ), NULL );
-#endif
+    return pwAnnotation;
+#else
     return pwPaned;
+#endif
 }
 
 static GtkWidget *CreateGameWindow( void ) {
@@ -1111,7 +1136,7 @@ static GtkWidget *CreateGameWindow( void ) {
 #include "nextmarked.xpm"
 
     pcmap = gtk_widget_get_colormap( pwMain );
-#if 0 
+#if USE_OLD_LAYOUT 
     pwGame = gtk_window_new( GTK_WINDOW_TOPLEVEL );
     
     gtk_window_set_title( GTK_WINDOW( pwGame ), _("GNU Backgammon - "
@@ -1229,35 +1254,44 @@ static GtkWidget *CreateGameWindow( void ) {
     
     gtk_signal_connect( GTK_OBJECT( pwGameList ), "select-row",
 			GTK_SIGNAL_FUNC( GameListSelectRow ), NULL );
-/*    gtk_signal_connect( GTK_OBJECT( pwGame ), "delete_event",
-			GTK_SIGNAL_FUNC( DeleteGame ), NULL ); */
+#if USE_OLD_LAYOUT
+    gtk_signal_connect( GTK_OBJECT( pwGame ), "delete_event",
+			GTK_SIGNAL_FUNC( DeleteGame ), NULL );
+    return pwGame;
+#else
     gtk_widget_set_usize(GTK_WIDGET(pvbox), 0, 300);
     return pvbox;
+#endif
 }
 
 extern void ShowGameWindow( void ) {
-#if 0
+#if USE_OLD_LAYOUT
   setWindowGeometry ( pwGame, &awg[ WINDOW_GAME ] );
     gtk_widget_show_all( pwGame );
     if( pwGame->window )
 	gdk_window_raise( pwGame->window );
-#endif
+#else
     fGameList = TRUE;
     gtk_widget_show_all( pwGame );
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Game record")), TRUE);
+#endif
 }
 static void ShowAnnotation( void ) {
     fAnnotation = TRUE;
     gtk_widget_show_all( pwAnnotation );
+#if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Annotation")), TRUE);
+#endif
 }
 static void ShowMessage( void ) {
     fMessage = TRUE;
     gtk_widget_show_all( pwMessage );
+#if !USE_OLD_LAYOUT
   gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget(pif,
 			  "/Windows/Message")), TRUE);
+#endif
 }
 
 static int AddMoveRecordRow( void ) {
@@ -2418,7 +2452,10 @@ GTKTextToClipboard( const char *sz ) {
 
 extern int InitGTK( int *argc, char ***argv ) {
     
-    GtkWidget *pwVbox, *pwHbox, *pwVboxRight, *pwHandle; 
+    GtkWidget *pwVbox, *pwHbox, *pwHandle; 
+#if !USE_OLD_LAYOUT
+    GtkWidget *pwVboxRight;
+#endif
     static GtkItemFactoryEntry aife[] = {
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_File/_New"), "<control>N", NewDialog, 0, NULL },
@@ -2681,12 +2718,20 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL },
 	{ N_("/_Windows"), NULL, NULL, 0, "<Branch>" },
+#if USE_OLD_LAYOUT
+ 	{ N_("/_Windows/_Game record"), NULL, Command, CMD_LIST_GAME, NULL },
+	{ N_("/_Windows/_Annotation"), NULL, Command, CMD_SET_ANNOTATION_ON,
+	  NULL },
+	{ N_("/_Windows/_Message"), NULL, Command, CMD_SET_MESSAGE_ON,
+	  NULL },
+#else
 	{ N_("/_Windows/_Game record"), NULL, TogglePanel, TOGGLE_GAMELIST,
 	  "<CheckItem>" },
 	{ N_("/_Windows/_Annotation"), NULL, TogglePanel, TOGGLE_ANNOTATION,
 	  "<CheckItem>" },
 	{ N_("/_Windows/_Message"), NULL, TogglePanel, TOGGLE_MESSAGE,
 	  "<CheckItem>" },
+#endif
 	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Windows/Show all panels"), NULL, ShowAllPanels, 0, NULL },
 	{ N_("/_Windows/Hide all panels"), NULL, HideAllPanels, 0, NULL },
@@ -2834,7 +2879,9 @@ extern int InitGTK( int *argc, char ***argv ) {
                        pwToolbar = ToolbarNew() );
     
    pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
-
+#if USE_OLD_LAYOUT
+   gtk_box_pack_start( GTK_BOX(pwVbox), pwBoard = board_new(), TRUE, TRUE, 0 );
+#else
    gtk_container_add( GTK_CONTAINER( pwVbox ), pwHbox =gtk_hbox_new(FALSE, 0));
    gtk_box_pack_start( GTK_BOX(pwHbox), pwBoard = board_new(), TRUE, TRUE, 0 );
    gtk_box_pack_start( GTK_BOX(pwHbox), pwVboxRight = gtk_vbox_new( FALSE, 1 ),
@@ -2854,7 +2901,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	   gtk_item_factory_get_widget( pif, "/Windows/Annotation")), TRUE);
    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
 	   gtk_item_factory_get_widget( pif, "/Windows/Game record")), TRUE);
-
+#endif
    /* Status bar */
 					
    gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
@@ -2906,14 +2953,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 			GTK_SIGNAL_FUNC( MainGetSelection ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwMain ), "selection_received", 
 			GTK_SIGNAL_FUNC( MainSelectionReceived ), NULL );
-#if 0
-    CreateGameWindow();
+#if USE_OLD_LAYOUT
+    pwGame = CreateGameWindow();
     gtk_window_add_accel_group( GTK_WINDOW( pwGame ), pagMain );
 
-    CreateAnnotationWindow();
+    pwAnnotation = CreateAnnotationWindow();
     gtk_window_add_accel_group( GTK_WINDOW( pwAnnotation ), pagMain );
     
-    CreateMessageWindow();
+    pwMessage = CreateMessageWindow();
     gtk_window_add_accel_group( GTK_WINDOW( pwMessage ), pagMain );
 #endif
     ListCreate( &lOutput );
@@ -2966,10 +3013,6 @@ extern void RunGTK( GtkWidget *pwSplash ) {
     
     gtk_widget_show_all( pwMain );
 
-   gtk_window_set_default_size( GTK_WINDOW( pwMain ),
-                                     awg[ WINDOW_MAIN ].nWidth,
-                                     awg[ WINDOW_MAIN ].nHeight );
-    
 #if USE_BOARD3D
 	DisplayCorrectBoardType();
 #endif
@@ -6814,7 +6857,9 @@ static void DestroyHint( gpointer p ) {
 static void
 HintOK ( GtkWidget *pw, void *unused ) {
 
- /* getWindowGeometry ( &awg[ WINDOW_HINT ], pwHint ); */
+#if USE_OLD_LAYOUT
+ getWindowGeometry ( &awg[ WINDOW_HINT ], pwHint );
+#endif
  gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
  pwHint = NULL;
@@ -6970,10 +7015,13 @@ GTKHint( movelist *pmlOrig, const int iMove ) {
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwMoves );
 
-/*    setWindowGeometry ( pwHint, &awg[ WINDOW_HINT ] ); */
-    
+#if USE_OLD_LAYOUT
+    setWindowGeometry ( pwHint, &awg[ WINDOW_HINT ] );
+#endif
     gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, pml );
+#if !USE_OLD_LAYOUT
     gtk_window_set_default_size(GTK_WINDOW(pwHint), 400, 300);
+#endif
     gtk_widget_show_all( pwHint );
 }
 
@@ -7003,7 +7051,6 @@ GTKProgressStartValue( char *sz, int iMax ) {
     gtk_statusbar_push( GTK_STATUSBAR( pwStatus ), idProgress, sz );
 
 }
-
 
 extern void
 GTKProgressValue ( int iValue ) {
@@ -7656,14 +7703,21 @@ extern void GTKSet( void *p ) {
 	ShowBoard(); /* this is overkill, but it works */
     else if( p == &fAnnotation ) {
 	if( fAnnotation ) {
-       /*   setWindowGeometry ( pwAnnotation, &awg[ WINDOW_ANNOTATION ] ); */
+#if USE_OLD_LAYOUT
+          setWindowGeometry ( pwAnnotation, &awg[ WINDOW_ANNOTATION ] );
+          gtk_widget_show_all( pwAnnotation );
+          if( pwAnnotation->window )
+		gdk_window_raise( pwAnnotation->window ); 
+#else
 	    ShowAnnotation();
-       /*    if( pwAnnotation->window )
-		gdk_window_raise( pwAnnotation->window ); */
+#endif
 	} else {
+#if USE_OLD_LAYOUT
 	    /* FIXME actually we should unmap the window, and send a synthetic
 	       UnmapNotify event to the window manager -- see the ICCCM */
-       /*   getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation ); */
+          getWindowGeometry ( &awg[ WINDOW_ANNOTATION ], pwAnnotation );
+	  gtk_widget_hide(pwAnnotation);
+#else
           DeleteAnnotation();
         }
     }
@@ -7672,23 +7726,26 @@ extern void GTKSet( void *p ) {
           ShowGameWindow();
 	} else {
           DeleteGame();
+#endif
         }
     }
     else if( p == &fMessage ) {
 	if( fMessage ) {
+#if USE_OLD_LAYOUT
+          setWindowGeometry ( pwMessage, &awg[ WINDOW_MESSAGE ] );
           gtk_widget_show_all( pwMessage );
-       /* if( pwMessage->window )
-            gdk_window_raise( pwMessage->window ); 
-	  gtk_window_set_default_size( GTK_WINDOW( pwMain ),
-                                     awg[ WINDOW_MAIN ].nWidth,
-                                     awg[ WINDOW_MAIN ].nHeight ); */
+          if( pwMessage->window )
+            gdk_window_raise( pwMessage->window );
+#else
+          gtk_widget_show_all( pwMessage );
+#endif
 	} else {
+#if USE_OLD_LAYOUT
           /* FIXME actually we should unmap the window, and send a synthetic
              UnmapNotify event to the window manager -- see the ICCCM */
-        gtk_widget_hide(GTK_WIDGET(pwMessage));
-	/* gtk_window_set_default_size( GTK_WINDOW( pwMain ),
-                                     awg[ WINDOW_MAIN ].nWidth,
-                                     awg[ WINDOW_MAIN ].nHeight ); */
+          getWindowGeometry ( &awg[ WINDOW_MESSAGE ], pwMessage );
+#endif
+          gtk_widget_hide( pwMessage );
         }
     } else if( p == &fGUIDiceArea ) {
 	if( GTK_WIDGET_REALIZED( pwBoard ) )
