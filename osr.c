@@ -332,7 +332,7 @@ static void
 FindBestMoveOSR4 ( int anBoard[ 24 ], const int nDice, int *pnOut ) {
 
   int nd = 4;
-  int i, n;
+  int i, n = 0;
   int first, any;
   int lc;
 
