@@ -25,6 +25,8 @@ external.c
 external.h
 format.c
 format.h
+formatgs.c
+formatgs.h
 getopt1.c
 getopt.c
 getopt.h
