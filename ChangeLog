@@ -1,3 +1,26 @@
+Sat Mar 30 16:35:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	New structure of "annotate". Allows for separate skills in
+	movenormal and moveresign.
+
+	FIXME: sgf.c: how to save/read skill for movenormal and moveresign?!
+
+	* play.c (AddMoveRecord, ComputerTurn, TryBearoff, AnnotateMove,
+	DumpGameList, CommandMove, CommandRoll): handle move/cube
+	skill separately for movenormal.  
+	* analysis.c (AnalyzeMove): ditto.
+	* sgf.c (SaveGame, RestoreNode): ditto.
+	* import.c (ParseMatMove, ParseOldMove, ImportSSGGame): ditto.
+	* latex.c (ExportGameLatex): ditto.
+	* postscript.c (ExportGamePostscript): ditto.
+	* html.c (HTMLPrintMoveAnalysis): ditto.
+
+	* gtkgame.c (GTKAddMoveRecord): ditto.
+	* gtkgame.c (SetAnnotation): add cube skill menu for movenormal.
+
+	* gnubg.c: new "annotate" commands.
+	
+
 Fri Mar 29 21:17:19 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	New command "set automatic analysis". When activated it'll
