@@ -118,6 +118,7 @@ typedef struct _renderdata {
 	int showMoveIndicator;
 	int boardAngle;	/* Angle board is tilted at */
 	int testSkewFactor;	/* Debug FOV adjustment */
+	float diceSize;	/* How big are the dice */
 	PieceType pieceType;
 	Material rdChequerMat[2];	/* Chequer colours */
 	Material rdDiceMat[2], rdDiceDotMat[2];
@@ -126,7 +127,6 @@ typedef struct _renderdata {
 	Material rdBoxMat, rdHingeMat;
 	Material rdPointNumberMat;
 	Material rdBackGroundMat;
-
 #endif
 } renderdata;
 

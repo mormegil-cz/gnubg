@@ -77,11 +77,11 @@ GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwClose
 	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame;
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
 	*padjLightLevelAmbient, *padjLightLevelDiffuse, *padjLightLevelSpecular,
-	*padjLightPosY, *padjLightPosZ;
+	*padjLightPosY, *padjLightPosZ, *padjDiceSize;
 	int redrawChange;
 	GtkTooltips *ptt;
 
-	BoardData bd3d;
+	BoardData bd3d;	/* Preview 3d board settings */
 	displaytype previewType;
 	char lastPieceStr[50];
 	char* pieceTypeStr[NUM_PIECE_TYPES] = {"Rounded disc", "Flat edged disc"};
@@ -983,6 +983,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 		preDraw3d(bd);
 		SetupViewingVolume3d(bd, &rdAppearance);
 		ShowFlag3d(bd);
+		if (bd->diceShown == DICE_ON_BOARD)
+			setDicePos(bd);	/* Make sure dice appear ok */
 	}
 	else
 	{
@@ -1089,7 +1091,7 @@ void DoTestPerformance(GtkWidget *pw, BoardData* bd)
 GtkWidget *Board3dPage(BoardData *bd)
 {
 	GtkWidget *pwx, *dtBox, *hBox, *pwev, *pwhbox, *lab,
-				*pwAccuracy, *pwBoardAngle, *pwSkewFactor;
+				*pwAccuracy, *pwBoardAngle, *pwSkewFactor, *pwDiceSize;
 
 	pwx = gtk_hbox_new ( FALSE, 0);
 	
@@ -1209,6 +1211,29 @@ GtkWidget *Board3dPage(BoardData *bd)
 
 	lab = gtk_label_new("high");
 	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+
+	lab = gtk_label_new("Dice size");
+	gtk_box_pack_start (GTK_BOX (dtBox), lab, FALSE, FALSE, 0);
+
+	hBox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (dtBox), hBox, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("small");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+	padjDiceSize = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.diceSize,
+						     1.5, 4, .1, 1, 0));
+	gtk_signal_connect_object( GTK_OBJECT( padjDiceSize ), "value-changed",
+			       GTK_SIGNAL_FUNC( option_changed ), NULL );
+	pwDiceSize = gtk_hscale_new(padjDiceSize);
+	gtk_tooltips_set_tip(ptt, pwDiceSize, "Vary the size of the dice", 0);
+	gtk_scale_set_draw_value(GTK_SCALE(pwDiceSize), FALSE);
+	gtk_box_pack_start(GTK_BOX(hBox), pwDiceSize, TRUE, TRUE, 0);
+
+	lab = gtk_label_new("large");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
 
 	pwTestPerformance = gtk_button_new_with_label("Test performance");
 	gtk_widget_set_sensitive(pwTestPerformance, (rdAppearance.fDisplayType == DT_3D));
@@ -2287,6 +2312,7 @@ static void GetPrefs ( renderdata *prd ) {
 		prd->boardAngle = padjBoardAngle->value;
 		prd->testSkewFactor = padjSkewFactor->value;
 		prd->pieceType = getPieceType(lastPieceStr);
+		prd->diceSize = padjDiceSize->value;
 
 		/* Both chequers have the same texture */
 		if (bd3d.chequerMat[0].textureInfo != bd3d.chequerMat[1].textureInfo)
@@ -2300,6 +2326,7 @@ static void GetPrefs ( renderdata *prd ) {
 		memcpy(&prd->rdDiceMat[1], prd->afDieColour[1] ? &bd3d.chequerMat[1] : &bd3d.diceMat[1], sizeof(Material));
 
 		prd->rdDiceMat[0].textureInfo = prd->rdDiceMat[1].textureInfo = 0;
+		prd->rdDiceMat[0].pTexture = prd->rdDiceMat[1].pTexture = 0;
 
 		memcpy(prd->rdDiceDotMat, bd3d.diceDotMat, sizeof(Material[2]));
 
@@ -2491,6 +2518,7 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 			GetPrefs(&rd);
 			SetupLight3d(&bd3d, &rd);
 			SetPreviewLightLevel(rd.lightLevels);
+			setDicePos(&bd3d);
 			Preview(&rd);
 			UpdateColPreviews();
 		}

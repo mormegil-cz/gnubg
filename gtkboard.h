@@ -228,6 +228,7 @@ typedef struct _BoardData {
 	int boardAngle;	/* Angle board is tilted at */
 	int testSkewFactor;	/* Debug FOV adjustment */
 	int curveAccuracy;	/* Round curve approximation accuracy */
+	float diceSize;
 
 	float movingPos[3];
 	float dragPos[3];

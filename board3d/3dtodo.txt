@@ -2,8 +2,9 @@
 Todo
 ====
 
-_( before strings
------------------
+* Merge code
+	_( before strings
+	-----------------
 	It's internationalisation (i18n), so you can translate gnubg to your
 	preferred language.
 	The macro _(...) marks the string for translation, so you should only do it for strings that need it
@@ -17,22 +18,15 @@ _( before strings
 Bugs
 ====
 
-In current version
-------------------
-* Click on home to move 2 chequers off board when player 0 (human)
-	- causes crash or assertion failure
-	? Problem in UpdateMove() ?
-	* May be fixed - try with latest code
-
 Other things
 ============
 
-On close, remap background to a better shape?
 Show/hide 2d arrow with option (after merge)
+Move display options to appearance?
+On close, remap background to a better shape?
+In edit, undo -> go back to board/dice/cube/turn before edit pressed
 
 ----------------------------------------------------------
-
-FTGL uses C++
 
 Remove any warnings
 Check builds and runs without BOARD3D defined (check settings ok too)

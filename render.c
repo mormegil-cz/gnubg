@@ -121,7 +121,8 @@ renderdata rdDefault = {
 	1,	/* Show move indicator */
 	35,	/* Board angle */
 	20,	/* FOV skew factor */
-	PT_ROUNDED,
+	3,	/* Dice size */
+	PT_ROUNDED,	/* Piece type */
     {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
 	 {{0, 0, 0, 1}, {0, 0, 0, 1}, {0, 0, 0, 1}, 100, 0, 0}},
     {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},

@@ -69,8 +69,6 @@ void CheckNormal()
 
 void SetupLight3d(BoardData *bd, renderdata* prd)
 {
-	/* Ugly - store shadow light position here... 
-		This is because this position needs to be adjusted (below) */
 	float lp[4];
 	float al[4], dl[4], sl[4];
 
@@ -375,12 +373,14 @@ void testSet3dSetting(BoardData* bd, const renderdata *prd)
 	bd->curveAccuracy = prd->curveAccuracy;
 	bd->testSkewFactor = prd->testSkewFactor;
 	bd->boardAngle = prd->boardAngle;
+	bd->diceSize = prd->diceSize * base_unit;
 
 	memcpy(bd->chequerMat, prd->rdChequerMat, sizeof(Material[2]));
 
 	memcpy(&bd->diceMat[0], prd->afDieColour[0] ? &prd->rdChequerMat[0] : &prd->rdDiceMat[0], sizeof(Material));
 	memcpy(&bd->diceMat[1], prd->afDieColour[1] ? &prd->rdChequerMat[1] : &prd->rdDiceMat[1], sizeof(Material));
 	bd->diceMat[0].textureInfo = bd->diceMat[1].textureInfo = 0;
+	bd->diceMat[0].pTexture = bd->diceMat[1].pTexture = 0;
 
 	memcpy(bd->diceDotMat, prd->rdDiceDotMat, sizeof(Material[2]));
 
@@ -1141,7 +1141,7 @@ int idleCloseBoard(BoardData* bd)
 	return 1;
 }
 
-
+/* Performance test data */
 double testStartTime;
 int numFrames;
 #define TEST_TIME 3000.0f
@@ -1390,7 +1390,8 @@ void InitBoardPreview(BoardData *bd)
 	InitialPos(bd);
 	bd->cube_use = 1;
 	bd->crawford_game = 0;
-	bd->doubled = bd->cube_owner = 0;
+	bd->doubled = bd->cube_owner = bd->cube = 0;
+	bd->resigned = 0;
 	bd->diceShown = DICE_ON_BOARD;
 	bd->diceRoll[0] = 4;
 	bd->diceRoll[1] = 3;

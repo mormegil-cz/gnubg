@@ -517,6 +517,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 		prd->boardAngle = atoi(szValue);
     else if( !strncasecmp( szParam, "skewfactor", c ) )
 		prd->testSkewFactor = atoi(szValue);
+    else if( !strncasecmp( szParam, "dicesize", c ) )
+		prd->diceSize = atof(szValue);
     else if( !strncasecmp( szParam, "piecetype", c ) )
 		prd->pieceType = (PieceType)atoi(szValue);
 	else if ((!strncasecmp(szParam, "chequers3d", strlen("chequers3d")) ||
@@ -656,6 +658,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		"moveindicator=%c "
 		"boardangle=%d "
 		"skewfactor=%d "
+		"dicesize=%f "
 		"piecetype=%d "
 		"chequers3d0=%s "
 		"chequers3d1=%s "
@@ -704,6 +707,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->showMoveIndicator ? 'y' : 'n',
 		prd->boardAngle,
 		prd->testSkewFactor,
+		prd->diceSize,
 		prd->pieceType,
 		WriteMaterial(&prd->rdChequerMat[0]),
 		WriteMaterial(&prd->rdChequerMat[1]),

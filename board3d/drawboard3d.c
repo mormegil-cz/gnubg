@@ -114,8 +114,6 @@ void Free3d(float ***array, int x, int y);
 
 /* Other objects */
 
-#define DICE_SIZE (base_unit * 3)
-#define DOT_SIZE (DICE_SIZE / 14.0f)
 #define DOUBLECUBE_SIZE (base_unit * 4.0f)
 
 /* Dice animation step size */
@@ -568,7 +566,7 @@ void preDrawDice(BoardData* bd)
 
 	bd->diceList = glGenLists(1);
 	glNewList(bd->diceList, GL_COMPILE);
-		renderDice(bd, DICE_SIZE);
+		renderDice(bd, bd->diceSize);
 	glEndList();
 
 	if (bd->DCList)
@@ -735,11 +733,12 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 	int c, nd;
 	int* dp;
 	float radius;
-	float ds = (DICE_SIZE * 5.0f / 7.0f);
+	float ds = (bd->diceSize * 5.0f / 7.0f);
 	float hds = (ds / 2);
 	float x, y;
+	float dotSize = bd->diceSize / 14.0f;
 
-	radius = DICE_SIZE / 7.0f;
+	radius = bd->diceSize / 7.0f;
 
 	glPushMatrix();
 	for (c = 0; c < 6; c++)
@@ -774,9 +773,9 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 				glTranslatef(x - hds, y - hds, 0);
 
 				if (drawOutline)
-					circleOutline(DOT_SIZE, dotOffset, bd->curveAccuracy);
+					circleOutline(dotSize, dotOffset, bd->curveAccuracy);
 				else
-					circle(DOT_SIZE, dotOffset, bd->curveAccuracy);
+					circle(dotSize, dotOffset, bd->curveAccuracy);
 
 				glPopMatrix();
 
@@ -814,14 +813,14 @@ void getDicePos(BoardData* bd, int num, float v[3])
 {
 	if (bd->diceShown == DICE_BELOW_BOARD)
 	{	/* Show below board */
-		v[0] = DICE_SIZE * 1.5f;
-		v[1] = -DICE_SIZE / 2.0f;
-		v[2] = DICE_SIZE / 2.0f;
+		v[0] = bd->diceSize * 1.5f;
+		v[1] = -bd->diceSize / 2.0f;
+		v[2] = bd->diceSize / 2.0f;
 
 		if (bd->turn == 1)
-			v[0] += TOTAL_WIDTH - DICE_SIZE * 4;
+			v[0] += TOTAL_WIDTH - bd->diceSize * 4;
 		if (num == 1)
-			v[0] += DICE_SIZE;	/* Place 2nd dice by 1st */
+			v[0] += bd->diceSize;	/* Place 2nd dice by 1st */
 	}
 	else
 	{
@@ -830,7 +829,7 @@ void getDicePos(BoardData* bd, int num, float v[3])
 			v[0] = TOTAL_WIDTH - v[0];	/* Dice on right side */
 
 		v[1] = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f + bd->dicePos[num][1];
-		v[2] = BASE_DEPTH + LIFT_OFF + DICE_SIZE / 2.0f;
+		v[2] = BASE_DEPTH + LIFT_OFF + bd->diceSize / 2.0f;
 	}
 }
 
@@ -1733,11 +1732,11 @@ void drawPick(BoardData* bd)
 		glLoadName(POINT_DICE);
 		glPushMatrix();
 		moveToDicePos(bd, 0);
-		drawCube(DICE_SIZE * .95f);
+		drawCube(bd->diceSize * .95f);
 		glPopMatrix();
 		glPushMatrix();
 		moveToDicePos(bd, 1);
-		drawCube(DICE_SIZE * .95f);
+		drawCube(bd->diceSize * .95f);
 		glPopMatrix();
 	}
 
@@ -2008,14 +2007,14 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 	{	/* up same side */
 		obj1 = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f;
 		obj2 = (TOTAL_HEIGHT + DICE_AREA_HEIGHT) / 2.0f;
-		objHeight = BASE_DEPTH + DICE_SIZE;
+		objHeight = BASE_DEPTH + bd->diceSize;
 		yDir = 1;
 	}
 	else if ((fromBoard == 4 && toBoard == 1) || (fromBoard == 3 && toBoard == 2))
 	{	/* down same side */
 		obj1 = (TOTAL_HEIGHT + DICE_AREA_HEIGHT) / 2.0f;
 		obj2 = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f;
-		objHeight = BASE_DEPTH + DICE_SIZE;
+		objHeight = BASE_DEPTH + bd->diceSize;
 		yDir = 1;
 	}
 	else if (fromBoard == toBoard)
@@ -2122,7 +2121,7 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 				obj2 = TRAY_WIDTH - EDGE_WIDTH;
 
 			*pRotate = 0;
-			objHeight = BASE_DEPTH + EDGE_DEPTH + DICE_SIZE;
+			objHeight = BASE_DEPTH + EDGE_DEPTH + bd->diceSize;
 		}
 	}
 	if ((fromBoard == 3 && toBoard == 4) || (fromBoard == 4 && toBoard == 3))
@@ -2298,16 +2297,16 @@ void setDicePos(BoardData* bd)
 	int iter = 0;
 	float dist;
 	float orgX[2];
-	float firstX = TRAY_WIDTH + DICE_STEP_SIZE0 * 3 + DICE_SIZE * .75f;
+	float firstX = TRAY_WIDTH + DICE_STEP_SIZE0 * 3 + bd->diceSize * .75f;
 	int firstDie = (bd->turn == 1);
 
-	bd->dicePos[firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - DICE_SIZE * 2);
+	bd->dicePos[firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - bd->diceSize * 2);
 	bd->dicePos[firstDie][1] = randRange(DICE_AREA_HEIGHT);
 
 	do	/* insure dice are not too close together */
 	{
-		firstX = bd->dicePos[firstDie][0] + DICE_SIZE;
-		bd->dicePos[!firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - DICE_SIZE * .7f);
+		firstX = bd->dicePos[firstDie][0] + bd->diceSize;
+		bd->dicePos[!firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - bd->diceSize * .7f);
 		bd->dicePos[!firstDie][1] = randRange(DICE_AREA_HEIGHT);
 
 		orgX[0] = bd->dicePos[firstDie][0] - DICE_STEP_SIZE0 * 5;
@@ -2321,7 +2320,7 @@ void setDicePos(BoardData* bd)
 			return;;
 		}
 	}
-	while (dist < DICE_SIZE * 1.1f);
+	while (dist < bd->diceSize * 1.1f);
 
 	bd->dicePos[firstDie][2] = (float)(rand() % 360);
 	bd->dicePos[!firstDie][2] = (float)(rand() % 360);
@@ -2464,8 +2463,8 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 
 	if (fGUIDiceArea)
 	{
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + DICE_SIZE, 0);
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + DICE_SIZE, BASE_DEPTH + DICE_SIZE);
+		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, 0);
+		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, BASE_DEPTH + bd->diceSize);
 	}
 	else
 	{	/* Bottom edge is defined by board */
@@ -2851,7 +2850,7 @@ void MakeShadowModel(BoardData* bd)
 	updateCubeOccPos(bd);
 
 	initOccluder(&bd->Occluders[OCC_DICE1]);
-	addDice(&bd->Occluders[OCC_DICE1], DICE_SIZE / 2.0f);
+	addDice(&bd->Occluders[OCC_DICE1], bd->diceSize / 2.0f);
 	copyOccluder(&bd->Occluders[OCC_DICE1], &bd->Occluders[OCC_DICE2]);
 	bd->Occluders[OCC_DICE1].rotator = bd->Occluders[OCC_DICE2].rotator = 1;
 	updateDiceOccPos(bd);
