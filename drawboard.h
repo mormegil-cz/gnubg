@@ -1,7 +1,7 @@
 /*
  * drawboard.h
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998-2000.
+ * by Gary Wong <gary@cs.arizona.edu>, 1998-2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -33,6 +33,7 @@ extern char *FormatMove( char *pch, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
 extern char *FormatMovePlain( char *pch, int anBoard[ 2 ][ 25 ],
                               int anMove[ 8 ] );
 extern int ParseMove( char *pch, int an[ 8 ] );
+extern void CanonicalMoveOrder( int an[] );
 /* Fill the buffer pch with a FIBS "boardstyle 3" description of the game. */
 extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
 			char *szPlayer, char *szOpp, int nMatchTo,

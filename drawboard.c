@@ -1,7 +1,7 @@
 /*
  * drawboard.c
  *
- * by Gary Wong, 1999-2000
+ * by Gary Wong, 1999-2001
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -563,6 +563,16 @@ static int CompareMoves( const void *p0, const void *p1 ) {
         return *( (int *) p1 + 1 ) - *( (int *) p0 + 1 );
 }
 
+extern void CanonicalMoveOrder( int an[] ) {
+
+    int i;
+
+    for( i = 0; i < 8 && an[ i ] > 0; i++ )
+	;
+    
+    qsort( an, i >> 1, sizeof( int ) << 1, CompareMoves );
+}
+
 extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
     char *pch = sz;
@@ -826,7 +836,7 @@ extern int ParseMove( char *pch, int an[ 8 ] ) {
     if( i < 8 )
 	an[ i ] = 0;
 
-    qsort( an, i >> 1, sizeof( int ) << 1, CompareMoves );
+    CanonicalMoveOrder( an );
     
     return i >> 1;
 }
