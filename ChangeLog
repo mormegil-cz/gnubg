@@ -1,3 +1,8 @@
+Tue Aug 13 14:59:06 2002  Gary Wong  <gtw@gnu.org>
+
+	* postscript.c (PrintPostScriptBoard): Use locale-independent
+	formatting.
+
 Tue Aug 13 12:59:47 2002  Gary Wong  <gtw@gnu.org>
 
 	* play.c (ComputerTurn): Add "break" to avoid falling through to
