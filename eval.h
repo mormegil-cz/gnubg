@@ -83,18 +83,33 @@ typedef struct _evalcontext {
 			      error */
 } evalcontext;
 
+typedef enum _evaltype {
+  EVAL_NONE, EVAL_EVAL, EVAL_ROLLOUT
+} evaltype;
+
+typedef union _evalsetup {
+  evalcontext ec;
+  /* rolloutcontext rc; */
+} evalsetup;
+
+
 typedef struct _move {
-    int anMove[ 8 ];
-    unsigned char auch[ 10 ];
-    int cMoves, cPips;
-    float rScore, *pEval;
+  int anMove[ 8 ];
+  unsigned char auch[ 10 ];
+  int cMoves, cPips;
+  /* scores for this move */
+  float rScore, rScore2; 
+  /* evaluation for this move */
+  float arEvalMove[ NUM_OUTPUTS ];
+  evaltype etMove;
+  evalsetup esMove;
 } move;
 
 typedef struct _cubeinfo {
 
-	/*
-	 * nCube: the current value of the cube,
-	 * fCubeOwner: the owner of the cube,
+  /*
+   * nCube: the current value of the cube,
+   * fCubeOwner: the owner of the cube,
    * fMove: the player for which we are
    *        calculating equity for,
    * arGammonPrice: the gammon prices;
@@ -102,8 +117,8 @@ typedef struct _cubeinfo {
    *   [ 1 ] = gammon price for player 1,
    *   [ 2 ] = backgammon price for player 0,
    *   [ 3 ] = backgammon price for player 1.
-	 *
-	 */
+   *
+   */
 
   int nCube, fCubeOwner, fMove;
   float arGammonPrice[ 4 ];
@@ -174,6 +189,12 @@ FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
               int anBoard[ 2 ][ 25 ], cubeinfo *pci, evalcontext *pec );
 
 extern int 
+FindnSaveBestMoves( movelist *pml,
+                    int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
+                    unsigned char *auchMove,
+                    cubeinfo *pci, evalcontext *pec );
+
+extern int 
 FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
 		 int anMove[ 8 ] );
 
@@ -203,7 +224,7 @@ extern int
 GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
                int n0, int n1, int fPartial );
 extern int 
-FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
+FindBestMoves( movelist *pml, 
                int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
                int c, float d, cubeinfo *pci, evalcontext *pec );
 
@@ -253,4 +274,7 @@ mwc2eq ( float rMwc, cubeinfo *ci );
 extern float
 eq2mwc ( float rEq, cubeinfo *ci );
  
+extern char 
+*FormatEval5 ( char *sz, evaltype et, evalsetup es );
+
 #endif
