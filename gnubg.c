@@ -3966,6 +3966,7 @@ HintChequer( char *sz ) {
   char szBuf[ 1024 ];
   int n = ParseNumber ( &sz );
   int anMove[ 8 ];
+#endif
   moverecord *pmr;
   unsigned char auch[ 10 ];
   int fHasMoved;
@@ -3994,7 +3995,7 @@ HintChequer( char *sz ) {
     MoveKey ( ms.anBoard, anMove, auch );
     fHasMoved = TRUE;
   }
-#endif /* ! USE_GTK */
+#endif /* USE_GTK */
 
   if ( !fHasMoved && plLastMove && ( pmr = plLastMove->plNext->p ) && 
        pmr->mt == MOVE_NORMAL ) {
