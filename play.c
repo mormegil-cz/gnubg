@@ -618,7 +618,7 @@ extern int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
 
-      if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].ec ) )
+      if( EvaluatePosition( anBoard, arOutput, &ci, &ap[ fTurn ].esCube.ec ) )
         return -1;
 
       rEqBefore = -Utility ( arOutput, &ci );
@@ -660,8 +660,8 @@ extern int ComputerTurn( void ) {
       /* Consider cube action */
 
       if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
-                                     &ap [ fTurn ].ec,
-                                     ap [ fTurn ].ec.nPlies ) < 0 )
+                                     &ap [ fTurn ].esCube.ec,
+                                     ap [ fTurn ].esCube.ec.nPlies ) < 0 )
         return -1;
 
       fComputerDecision = TRUE;
@@ -694,8 +694,9 @@ extern int ComputerTurn( void ) {
 	   GetDPEq ( NULL, NULL, &ci ) ) {
 	  evalcontext ecDH;
 
-	  memcpy( &ecDH, &ap[ fTurn ].ec, sizeof ecDH );
+	  memcpy( &ecDH, &ap[ fTurn ].esCube.ec, sizeof ecDH );
 	  ecDH.fCubeful = FALSE;
+          if ( ecDH.nPlies ) ecDH.nPlies--;
         
         /* We have access to the cube */
 
@@ -712,8 +713,8 @@ extern int ComputerTurn( void ) {
           /* We're in market window */
 
           if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
-                                         &ap [ fTurn ].ec,
-                                         ap [ fTurn ].ec.nPlies ) < 0 )
+                                         &ap [ fTurn ].esCube.ec,
+                                         ap [ fTurn ].esCube.ec.nPlies ) < 0 )
             return -1;
 
           if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) &&
@@ -766,7 +767,7 @@ extern int ComputerTurn( void ) {
       pmn->st = SKILL_NONE;
       
       if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-                        anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 ) {
+                        anBoardMove, &ci, &ap[ fTurn ].esChequer.ec ) < 0 ) {
         free( pmn );
         return -1;
       }
