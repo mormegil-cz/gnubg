@@ -1700,6 +1700,18 @@ extern void CommandNewGame( char *sz ) {
 	    TurnDone();
 }
 
+extern void ClearMatch( void ) {
+
+    ms.nMatchTo = 0;
+
+    ms.cGames = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
+    ms.fMove = ms.fTurn = -1;
+    ms.fCrawford = FALSE;
+    ms.fPostCrawford = FALSE;
+    ms.gs = GAME_NONE;
+    IniStatcontext( &scMatch );
+}
+
 extern void FreeMatch( void ) {
 
     list *plMatch;

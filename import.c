@@ -20,9 +20,15 @@
 
 #include "config.h"
 
-#include <stdio.h>
+#include <ctype.h>
 #include <math.h>
+#include <stdio.h>
+#include <string.h>
 #include "backgammon.h"
+#include "drawboard.h"
+#if USE_GTK
+#include "gtkgame.h"
+#endif
 #include "import.h"
 
 static int ReadInt16( FILE *pf ) {
@@ -30,6 +36,8 @@ static int ReadInt16( FILE *pf ) {
     /* Read a little-endian, signed (2's complement) 16-bit integer.
        This is inefficient on hardware which is already little-endian
        or 2's complement, but at least it's portable. */
+
+    /* FIXME what about error handling? */
     
     unsigned char auch[ 2 ];
     int n;
@@ -232,3 +240,209 @@ ImportJF( FILE * fp, char *szFileName) {
   return;
 
 }  
+
+static int fWarned;
+
+static void ParseMatMove( char *sz, int iPlayer ) {
+
+    char *pch;
+    moverecord *pmr;
+    int i, c;
+    
+    sz += strspn( sz, " \t" );
+
+    if( !*sz )
+	return;
+
+    for( pch = strchr( sz, 0 ) - 1;
+	 pch >= sz && ( *pch == ' ' || *pch == '\t' ); pch-- )
+	*pch = 0;
+    
+    if( sz[ 0 ] >= '1' && sz[ 0 ] <= '6' && sz[ 1 ] >= '1' && sz[ 1 ] <= '6' &&
+	sz[ 2 ] == ':' ) {
+        pmr = malloc( sizeof( pmr->n ) );
+        pmr->n.mt = MOVE_NORMAL;
+	pmr->n.sz = NULL;
+        pmr->n.anRoll[ 0 ] = sz[ 0 ] - '0';
+        pmr->n.anRoll[ 1 ] = sz[ 1 ] - '0';
+        pmr->n.fPlayer = iPlayer;
+	pmr->n.ml.cMoves = 0;
+	pmr->n.ml.amMoves = NULL;
+        pmr->n.esDouble.et = EVAL_NONE;
+	pmr->n.lt = LUCK_NONE;
+	pmr->n.rLuck = -HUGE_VALF;
+	pmr->n.st = SKILL_NONE;
+	
+	c = ParseMove( sz + 3, pmr->n.anMove );
+	for( i = 0; i < ( c << 1 ); i++ )
+	    pmr->n.anMove[ i ]--;
+	if( c < 4 )
+	    pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+		
+	AddMoveRecord( pmr );
+    } else if( !strncasecmp( sz, "double", 6 ) ) {
+	pmr = malloc( sizeof( pmr->d ) );
+	pmr->d.mt = MOVE_DOUBLE;
+	pmr->d.sz = NULL;
+	pmr->d.fPlayer = iPlayer;
+	pmr->d.esDouble.et = EVAL_NONE;
+	pmr->d.st = SKILL_NONE;
+	AddMoveRecord( pmr );
+    } else if( !strncasecmp( sz, "take", 4 ) ) {
+	pmr = malloc( sizeof( pmr->d ) );
+	pmr->d.mt = MOVE_TAKE;
+	pmr->d.sz = NULL;
+	pmr->d.fPlayer = iPlayer;
+	pmr->d.esDouble.et = EVAL_NONE;
+	pmr->d.st = SKILL_NONE;
+	AddMoveRecord( pmr );
+    } else if( !strncasecmp( sz, "drop", 4 ) ) {
+	pmr = malloc( sizeof( pmr->d ) );
+	pmr->d.mt = MOVE_DROP;
+	pmr->d.sz = NULL;
+	pmr->d.fPlayer = iPlayer;
+	pmr->d.esDouble.et = EVAL_NONE;
+	pmr->d.st = SKILL_NONE;
+	AddMoveRecord( pmr );
+    } else if( !strncasecmp( sz, "win", 3 ) ) {
+	/* FIXME game over -- update the gameinfo record */
+	/* if there was no double/drop and no bear off to win, presume
+	   a resignation */
+    } else if( !fWarned ) {
+	outputf( "Unrecognised move \"%s\" in .mat file.\n", sz );
+	fWarned = TRUE;
+    }
+}
+
+static void ImportGame( FILE *pf, int iGame, int nLength ) {
+
+    char sz[ 80 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight;
+    int n0, n1;
+    moverecord *pmr;
+    
+    InitBoard( ms.anBoard );
+
+    ClearMoveRecord();
+
+    ListInsert( &lMatch, plGame );
+
+    fscanf( pf, " %31[^:]:%d %31[^:]:%d%*[ ]", sz0, &n0, sz1, &n1 );
+
+    for( pch = sz0; *pch; pch++ )
+	;
+    for( pch--; pch >= sz0 && isspace( *pch ); )
+	*pch-- = 0;
+    for( ; pch >= sz0; pch-- )
+	if( isspace( *pch ) )
+	    *pch = '_';
+    strcpy( ap[ 0 ].szName, sz0 );
+    
+    for( pch = sz1; *pch; pch++ )
+	;
+    for( pch--; pch >= sz1 && isspace( *pch ); )
+	*pch-- = 0;
+    for( ; pch >= sz1; pch-- )
+	if( isspace( *pch ) )
+	    *pch = '_';
+    strcpy( ap[ 1 ].szName, sz1 );
+    
+    pmr = malloc( sizeof( movegameinfo ) );
+    pmr->g.mt = MOVE_GAMEINFO;
+    pmr->g.sz = NULL;
+    pmr->g.i = iGame;
+    pmr->g.nMatch = nLength;
+    pmr->g.anScore[ 0 ] = n0;
+    pmr->g.anScore[ 1 ] = n1;
+    pmr->g.fCrawford = TRUE; /* FIXME assume JF always uses Crawford rule? */
+    pmr->g.fCrawfordGame = FALSE; /* FIXME how does JF mark this? */
+    pmr->g.fJacoby = FALSE; /* FIXME assume JF never uses Jacoby rule? */
+    pmr->g.fWinner = -1;
+    pmr->g.nPoints = 0;
+    pmr->g.fResigned = FALSE;
+    pmr->g.nAutoDoubles = 0;
+    IniStatcontext( &pmr->g.sc );
+    AddMoveRecord( pmr );
+    
+    do
+	fgets( sz, 80, pf );
+    while( strspn( sz, " \n\r\t" ) == strlen( sz ) );
+
+    do {
+	if( ( pch = strpbrk( sz, "\n\r" ) ) )
+	    *pch = 0;
+
+	if( strlen( sz ) > 15 && ( pchRight = strstr( sz + 15, "  " ) ) )
+	    *pchRight++ = 0;
+
+	if( ( pchLeft = strchr( sz, ')' ) ) )
+	    pchLeft++;
+	else
+	    pchLeft = sz;
+
+	ParseMatMove( pchLeft, 0 );
+
+	if( pchRight )
+	    ParseMatMove( pchRight, 1 );
+	
+	if( !fgets( sz, 80, pf ) )
+	    break;
+    } while( strspn( sz, " \n\r\t" ) != strlen( sz ) );
+
+    AddGame( pmr );
+}
+
+extern void ImportMat( FILE *pf, char *szFilename ) {
+
+    int n, nLength, i;
+    char ch;
+
+    fWarned = FALSE;
+    
+    while( 1 ) {
+	if( ( n = fscanf( pf, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
+			  &ch ) ) == EOF ) {
+	    fprintf( stderr, "%s: not a valid .mat file\n", szFilename );
+	    return;
+	} else if( n > 1 )
+	    break;
+
+	/* discard line */
+	while( ( n = getc( pf ) ) != '\n' && n != EOF )
+	    ;
+    }
+    
+    if( ms.gs == GAME_PLAYING && fConfirm ) {
+	if( fInterrupt )
+	    return;
+	    
+	if( !GetInputYN( "Are you sure you want to import a saved match, "
+			 "and discard the game in progress? " ) )
+	    return;
+    }
+
+#if USE_GTK
+    if( fX )
+	GTKFreeze();
+#endif
+    
+    FreeMatch();
+    ClearMatch();
+
+    while( 1 ) {
+	if( ( n = fscanf( pf, " Game %d\n", &i ) ) == 1 )
+	    ImportGame( pf, i - 1, nLength );
+	else if( n == EOF )
+	    break;
+	else
+	    /* discard line */
+	    while( ( n = getc( pf ) ) != '\n' && n != EOF )
+		;
+    }
+    
+#if USE_GTK
+    if( fX ){
+	GTKThaw();
+	GTKSet(ap);
+    }
+#endif
+}

@@ -794,29 +794,6 @@ static void RestoreGame( list *pl ) {
     }
 }
 
-static void ClearMatch( void ) {
-
-    ms.nMatchTo = 0;
-
-    ms.cGames = ms.anScore[ 0 ] = ms.anScore[ 1 ] = 0;
-    ms.fMove = ms.fTurn = -1;
-    ms.fCrawford = FALSE;
-    ms.fPostCrawford = FALSE;
-    ms.gs = GAME_NONE;
-    IniStatcontext( &scMatch );
-}
-
-static void UpdateSettings( void ) {
-
-    UpdateSetting( &ms.nCube );
-    UpdateSetting( &ms.fCubeOwner );
-    UpdateSetting( &ms.fTurn );
-    UpdateSetting( &ms.nMatchTo );
-    UpdateSetting( &ms.fCrawford );
-
-    ShowBoard();
-}
-
 extern void CommandLoadGame( char *sz ) {
 
     list *pl;
