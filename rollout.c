@@ -832,11 +832,16 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	  aarResult[ ici ][ j ] += aar[ ici ][ j ];
 	  rMuNew = aarResult[ ici ][ j ] / ( i + 1 );
 	  
-	  rDelta = rMuNew - aarMu[ ici ][ j ];
+          if ( i ) {
+
+             /* for i=0 aarVariance is not defined */
+
+	     rDelta = rMuNew - aarMu[ ici ][ j ];
 	  
-	  aarVariance[ ici ][ j ] =
-            aarVariance[ ici ][ j ] * ( 1.0 - 1.0 / ( i + 1 ) ) +
-	      ( i + 2 ) * rDelta * rDelta;
+      	     aarVariance[ ici ][ j ] =
+               aarVariance[ ici ][ j ] * ( 1.0 - 1.0 / ( i + 1 ) ) +
+	         ( i + 2 ) * rDelta * rDelta;
+          }
 	  
 	  aarMu[ ici ][ j ] = rMuNew;
 	  

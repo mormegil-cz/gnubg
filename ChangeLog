@@ -1,3 +1,7 @@
+Tue May 21 13:27:19 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (RolloutGeneral): fix bug for calculating standard error.
+
 Mon May 20 20:54:03 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (updateStatcontext): fix [D:0 0 0 0 1 0 0 0 0 0 -inf -inf
