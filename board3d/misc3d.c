@@ -526,6 +526,7 @@ void GetTextures(BoardData* bd)
 void Set3dSettings(BoardData* bd, const renderdata *prd)
 {
 	bd->pieceType = prd->pieceType;
+	bd->pieceTextureType = prd->pieceTextureType;
 	bd->showHinges = prd->fHinges;
 	bd->showMoveIndicator = prd->showMoveIndicator;
 	bd->showShadows = prd->showShadows;
@@ -768,6 +769,29 @@ void Free3d(float ***array, int x, int y)
 	free(array);
 }
 
+void cylinder(float radius, float height, int accuracy, Texture* texture)
+{
+	int i;
+	float angle = 0;
+	float circum = PI * radius * 2 / (accuracy + 1);
+	float step = (2 * PI) / accuracy;
+	glBegin(GL_QUAD_STRIP);
+	for (i = 0; i < accuracy + 1; i++)
+	{
+		glNormal3f((float)sin(angle), (float)cos(angle), 0);
+		if (texture)
+			glTexCoord2f(circum * i / (radius * 2), 0);
+		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, 0);
+
+		if (texture)
+			glTexCoord2f(circum * i / (radius * 2), height / (radius * 2));
+		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+
+		angle += step;
+	}
+	glEnd();
+}
+
 void circleOutline(float radius, float height, int accuracy)
 {	/* Draw an ouline of a disc in current z plane */
 	int i;
@@ -815,6 +839,58 @@ void circleRev(float radius, float height, int accuracy)
 	glVertex3f(0, 0, height);
 	for (i = 0; i <= accuracy; i++)
 	{
+		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		angle += step;
+	}
+	glEnd();
+}
+
+void circleTex(float radius, float height, int accuracy, Texture* texture)
+{	/* Draw a disc in current z plane with a texture */
+	int i;
+	float angle, step;
+
+	if (!texture)
+	{
+		circle(radius, height, accuracy);
+		return;
+	}
+
+	step = (2 * PI) / accuracy;
+	angle = 0;
+	glNormal3f(0, 0, 1);
+	glBegin(GL_TRIANGLE_FAN);
+	glTexCoord2f(.5f, .5f);
+	glVertex3f(0, 0, height);
+	for (i = 0; i <= accuracy; i++)
+	{
+		glTexCoord2f((float)(sin(angle) * radius + radius) / (radius * 2), ((float)cos(angle) * radius + radius) / (radius * 2));
+		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		angle -= step;
+	}
+	glEnd();
+}
+
+void circleRevTex(float radius, float height, int accuracy, Texture* texture)
+{	/* Draw a disc with reverse winding in current z plane with a texture */
+	int i;
+	float angle, step;
+
+	if (!texture)
+	{
+		circleRev(radius, height, accuracy);
+		return;
+	}
+
+	step = (2 * PI) / accuracy;
+	angle = 0;
+	glNormal3f(0, 0, 1);
+	glBegin(GL_TRIANGLE_FAN);
+	glTexCoord2f(.5f, .5f);
+	glVertex3f(0, 0, height);
+	for (i = 0; i <= accuracy; i++)
+	{
+		glTexCoord2f((float)(sin(angle) * radius + radius) / (radius * 2), ((float)cos(angle) * radius + radius) / (radius * 2));
 		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
 		angle += step;
 	}

@@ -215,6 +215,7 @@ typedef struct _BoardData {
 	float backGroundPos[2], backGroundSize[2];
 
 	PieceType pieceType;	/* Different piece models */
+	PieceTextureType pieceTextureType;	/* Different piece texture types */
 
 	BoardState State;	/* Open/closed board */
 	float perOpen;	/* Percentage open when opening/closing board */

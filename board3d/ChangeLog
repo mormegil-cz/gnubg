@@ -1,3 +1,7 @@
+Mon Sep 22 11:50:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c misc3d.c: Add option to cover all of 3d chequer with texture
+
 Mon Sep 15 01:54:44 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* widget3d.c: moving board dimensions to defines in boarddim.h
@@ -27,3 +31,7 @@ Mon Jun 16 21:35:59 2003  Joern Thyssen  <jth@gnubg.org>
 	* shadow.c: fix typo (gl->GL)
 	* inc3d.h: small updates
 	* Makefile.am: autoconf magic
+
+Mon Jun 16 11:50:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	Merged 3d code with main branch.

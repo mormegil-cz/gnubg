@@ -173,6 +173,7 @@ renderdata rdDefault = {
 	3,	/* Dice size */
 	0,	/* Rounded edges */
 	PT_ROUNDED,	/* Piece type */
+	PTT_ALL,	/* Piece texture type */
 	/* Default 3d colours - black+white, should never be used -
 		if no 3d settings the first design will be used */
     {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},

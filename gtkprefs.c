@@ -78,7 +78,7 @@ static GList *plBoardDesigns;
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
 	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource,
-	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *frame3dOptions,
+	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *textureTypeCombo, *frame3dOptions,
 	*pwPlanView, *pwBoardAngle, *pwSkewFactor, *skewLab, *anglelab,
 	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame, *pwRoundedEdges;
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
@@ -89,8 +89,9 @@ GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *p
 
 	BoardData bd3d;	/* Preview 3d board settings */
 	displaytype previewType;
-	char lastPieceStr[50];
+	static char lastPieceStr[50], lastTextureStr[50];
 	char* pieceTypeStr[NUM_PIECE_TYPES] = {N_("Rounded disc"), N_("Flat edged disc")};
+	char* textureTypeStr[NUM_TEXTURE_TYPES] = {N_("Top only"), N_("All of piece")};
 
 	int pc3dDiceId[2], pcChequer2;
 	void *glpixPreview;
@@ -319,6 +320,20 @@ PieceType getPieceType(char* str)
 	return 0;
 }
 
+PieceTextureType getPieceTextureType(char* str)
+{
+	int i;
+
+	for (i = 0; i < NUM_TEXTURE_TYPES; i++)
+	{
+		if (!strcmp(str, textureTypeStr[i]))
+			return i;
+	}
+
+	g_print("unknown texture type %s\n", str);
+	return 0;
+}
+
 void PieceChange(GtkList *list, gpointer user_data)
 {
 	const char* current = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(pieceTypeCombo)->entry));
@@ -326,6 +341,18 @@ void PieceChange(GtkList *list, gpointer user_data)
 	if (current && *current && *lastPieceStr && (strcmp(current, lastPieceStr)))
 	{
 		strcpy(lastPieceStr, current);
+
+		UpdatePreview(pwPreview + PI_CHEQUERS0);
+	}
+}
+
+void textureChange(GtkList *list, gpointer user_data)
+{
+	const char* current = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureTypeCombo)->entry));
+
+	if (current && *current && *lastTextureStr && (strcmp(current, lastTextureStr)))
+	{
+		strcpy(lastTextureStr, current);
 
 		UpdatePreview(pwPreview + PI_CHEQUERS0);
 	}
@@ -388,6 +415,28 @@ static GtkWidget *ChequerPrefs3d( BoardData *bd)
 
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pieceTypeCombo)->entry), pieceTypeStr[bd->pieceType]);
 	strcpy(lastPieceStr, pieceTypeStr[bd->pieceType]);
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Texture type:") ),
+			FALSE, FALSE, 4 );
+
+	textureTypeCombo = gtk_combo_new();
+	gtk_combo_set_value_in_list(GTK_COMBO(textureTypeCombo), TRUE, FALSE);
+	gtk_widget_set_sensitive(GTK_WIDGET(GTK_COMBO(textureTypeCombo)->entry), FALSE);
+	gtk_signal_connect(GTK_OBJECT(GTK_COMBO(textureTypeCombo)->list), "selection-changed",
+							GTK_SIGNAL_FUNC(textureChange), 0);
+	gtk_box_pack_start( GTK_BOX( pwhbox ), textureTypeCombo, FALSE, FALSE, 0);
+
+	glist = NULL;
+	for (i = 0; i < NUM_TEXTURE_TYPES; i++)
+		glist = g_list_append(glist, textureTypeStr[i]);
+	*lastTextureStr = '\0';	/* Don't update values */
+	gtk_combo_set_popdown_strings(GTK_COMBO(textureTypeCombo), glist);
+	g_list_free(glist);
+
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(textureTypeCombo)->entry), textureTypeStr[bd->pieceTextureType]);
+	strcpy(lastTextureStr, textureTypeStr[bd->pieceTextureType]);
 
   return pwx;
 }
@@ -1639,6 +1688,7 @@ if (rd.fDisplayType == DT_3D)
 	gtk_adjustment_set_value(GTK_ADJUSTMENT(padjSkewFactor), rd.testSkewFactor);
 
 	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(pieceTypeCombo)->entry), pieceTypeStr[bd3d.pieceType]);
+	gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(textureTypeCombo)->entry), textureTypeStr[bd3d.pieceTextureType]);
 
 	for(i = 0; i < 2; i++)
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(apwDieColour[i]), rd.afDieColour[i]);
@@ -2020,6 +2070,7 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
             "         points1=#%02X%02X%02X;%0.2f\n"
 #if USE_BOARD3D
             "         piecetype=%d\n"
+            "         piecetexturetype=%d\n"
 			"         roundededges=%c\n"
             "         lighttype=%c\n"
             "         lightposx=%f lightposy=%f lightposz=%f\n"
@@ -2096,6 +2147,7 @@ memcpy(&rd, &rdAppearance, sizeof(renderdata));
 #if USE_BOARD3D
 			, 
 			rd.pieceType,
+			rd.pieceTextureType,
 			rd.roundedEdges ? 'y' : 'n',
 			rd.lightType == LT_POSITIONAL ? 'p' : 'd',
 			rd.lightPos[0], rd.lightPos[1], rd.lightPos[2],
@@ -2142,6 +2194,8 @@ RemoveDesign ( GtkWidget *pw, gpointer data ) {
   sprintf(prompt, _("Permently remove design %s?"), pbdeSelected->szTitle);
   if (!GetInputYN(prompt))
 		return;
+
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwDesignRemove ), FALSE );
 
   *pplBoardDesigns = g_list_remove ( *pplBoardDesigns, pbdeSelected );
 
@@ -2411,6 +2465,7 @@ static void GetPrefs ( renderdata *prd ) {
 		prd->boardAngle = padjBoardAngle->value;
 		prd->testSkewFactor = padjSkewFactor->value;
 		prd->pieceType = getPieceType(lastPieceStr);
+		prd->pieceTextureType = getPieceTextureType(lastTextureStr);
 		prd->diceSize = padjDiceSize->value;
 		prd->roundedEdges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedEdges));
 		prd->planView = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwPlanView));
@@ -2741,7 +2796,7 @@ int IsBlackColour3d(Material* pMat)
 }
 
 void Default3dSettings()
-{	/* If no 3d settings loaded, set appearance to first design */
+{	/* If no 3d settings loaded, set 3d appearance to first design */
 #if HAVE_LIBXML2
 	/* Check if colours are set to default values */
 	if (IsWhiteColour3d(&rdAppearance.rdChequerMat[0]) && IsBlackColour3d(&rdAppearance.rdChequerMat[1]) &&
@@ -2773,6 +2828,7 @@ void Default3dSettings()
 
 				/* Copy 3d settings */
 				rdAppearance.pieceType = rdNew.pieceType;
+				rdAppearance.pieceTextureType = rdNew.pieceTextureType;
 				rdAppearance.fHinges = rdNew.fHinges;
 				rdAppearance.showMoveIndicator = rdNew.showMoveIndicator;
 				rdAppearance.showShadows = rdNew.showShadows;

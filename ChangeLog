@@ -1,3 +1,7 @@
+Mon Sep 22 11:50:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c: Add option to cover all of 3d chequer with texture
+
 Sun Sep 21 19:28:03 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.c (GTKMatchInfo): show match comment text, rearrange window,

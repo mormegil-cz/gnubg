@@ -85,6 +85,11 @@ typedef enum _PieceType
 	PT_ROUNDED, PT_FLAT, NUM_PIECE_TYPES
 } PieceType;
 
+typedef enum _PieceTextureType
+{
+	PTT_TOP, PTT_ALL, NUM_TEXTURE_TYPES
+} PieceTextureType;
+
 extern void FindTexture(TextureInfo** textureInfo, char* file);
 extern void FindNamedTexture(TextureInfo** textureInfo, char* name);
 
@@ -129,7 +134,9 @@ typedef struct _renderdata {
 	int planView;	/* Ortho view? */
 	float diceSize;	/* How big are the dice */
 	int roundedEdges;	/* Rounded board edges? */
-	PieceType pieceType;
+	PieceType pieceType;	/* Different piece models */
+	PieceTextureType pieceTextureType;	/* Different piece texture types */
+
 	Material rdChequerMat[2];	/* Chequer colours */
 	Material rdDiceMat[2], rdDiceDotMat[2];
 	Material rdCubeMat, rdCubeNumberMat;

@@ -530,6 +530,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 		prd->roundedEdges = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "piecetype", c ) )
 		prd->pieceType = (PieceType)atoi(szValue);
+    else if( !strncasecmp( szParam, "piecetexturetype", c ) )
+		prd->pieceTextureType = (PieceTextureType)atoi(szValue);
 	else if ((!strncasecmp(szParam, "chequers3d", strlen("chequers3d")) ||
 		 !strncasecmp(szParam, "checkers3d", strlen("checkers3d"))) &&
 	       (szParam[c - 1] == '0' || szParam[c - 1] == '1'))
@@ -680,6 +682,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		"dicesize=%f "
 		"roundededges=%c "
 		"piecetype=%d "
+		"piecetexturetype=%d "
 		"chequers3d0=%s "
 		"chequers3d1=%s "
         "dice3d0=%s "
@@ -731,6 +734,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->diceSize,
 		prd->roundedEdges ? 'y' : 'n',
 		prd->pieceType,
+		prd->pieceTextureType,
 		WriteMaterial(&prd->rdChequerMat[0]),
 		WriteMaterial(&prd->rdChequerMat[1]),
 		WriteMaterialDice(prd, 0),

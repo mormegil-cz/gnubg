@@ -329,6 +329,7 @@
          points0=#49D441;0.00   
          points1=#0A6810;0.00   
          piecetype=0
+         piecetexturetype=1
          roundededges=y
          lighttype=p
          lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
@@ -423,6 +424,7 @@
          points0=#8B8C8E;0.09
          points1=#D4D4D4;0.09
          piecetype=0
+         piecetexturetype=0
          roundededges=y
          lighttype=p
          lightposx=0.000000 lightposy=2.000000 lightposz=3.500000

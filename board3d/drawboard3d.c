@@ -51,9 +51,12 @@ static int LogCube( const int n )
 }
 
 /* Helper functions in misc3d */
+void cylinder(float radius, float height, int accuracy, Texture* texture);
 void circle(float radius, float height, int accuracy);
-void circleOutline(float radius, float height, int accuracy);
 void circleRev(float radius, float height, int accuracy);
+void circleTex(float radius, float height, int accuracy, Texture* texture);
+void circleRevTex(float radius, float height, int accuracy, Texture* texture);
+void circleOutline(float radius, float height, int accuracy);
 void drawBox(boxType type, float x, float y, float z, float w, float h, float d, Texture* texture);
 void drawCube(float size);
 void drawRect(float x, float y, float z, float w, float h, Texture* texture);
@@ -190,36 +193,18 @@ void preDrawPiece0(BoardData* bd)
 	step = (2 * PI) / bd->curveAccuracy;
 
 	/* Draw top/bottom of piece */
-	if (bd->chequerMat[0].pTexture)
-	{	/* Texturing will be enabled */
-		glPushMatrix();
-		glTranslatef(0, 0, PIECE_DEPTH);
-		glBindTexture(GL_TEXTURE_2D, bd->chequerMat[0].pTexture->texID);
-		gluDisk(bd->qobjTex, 0, discradius, bd->curveAccuracy, 1);
-		glPopMatrix();
-		/* Draw bottom - faces other way */
-		gluQuadricOrientation(bd->qobjTex, GLU_INSIDE);
-		gluDisk(bd->qobjTex, 0, discradius, bd->curveAccuracy, 1);
-		gluQuadricOrientation(bd->qobjTex, GLU_OUTSIDE);
-		glDisable(GL_TEXTURE_2D);
-	}
-	else	
-	{
-		circleRev(discradius, 0, bd->curveAccuracy);
-		circle(discradius, PIECE_DEPTH, bd->curveAccuracy);
-	}
-	/* Draw side of piece */
-	angle = 0;
-	glBegin(GL_QUAD_STRIP);
-	for (i = 0; i < bd->curveAccuracy + 1; i++)
-	{
-		glNormal3f((float)sin(angle), (float)cos(angle), 0);
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, lip);
-		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, lip + height);
+	circleTex(discradius, PIECE_DEPTH, bd->curveAccuracy, bd->chequerMat[0].pTexture);
 
-		angle += step;
-	}
-	glEnd();
+	if (bd->chequerMat[0].pTexture && bd->pieceTextureType == PTT_TOP)
+		glDisable(GL_TEXTURE_2D);
+
+	circleRevTex(discradius, 0, bd->curveAccuracy, bd->chequerMat[0].pTexture);
+
+	/* Draw side of piece */
+	glPushMatrix();
+	glTranslatef(0, 0, lip);
+	cylinder(radius, height, bd->curveAccuracy, bd->chequerMat[0].pTexture);
+	glPopMatrix();
 
 	/* Draw edges of piece */
 	angle2 = 0;
@@ -256,8 +241,13 @@ void preDrawPiece0(BoardData* bd)
 		for (i = 0; i < bd->curveAccuracy + 1; i++)
 		{
 			glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
+			if (bd->chequerMat[0].pTexture)
+				glTexCoord2f((p[i][j][0] + discradius) / (discradius * 2), (p[i][j][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j][0], p[i][j][1], p[i][j][2]);
+
 			glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
+			if (bd->chequerMat[0].pTexture)
+				glTexCoord2f((p[i][j + 1][0] + discradius) / (discradius * 2), (p[i][j + 1][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j + 1][0], p[i][j + 1][1], p[i][j + 1][2]);
 		}
 		glEnd();
@@ -266,14 +256,19 @@ void preDrawPiece0(BoardData* bd)
 		for (i = 0; i < bd->curveAccuracy + 1; i++)
 		{
 			glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
+			if (bd->chequerMat[0].pTexture)
+				glTexCoord2f((p[i][j + 1][0] + discradius) / (discradius * 2), (p[i][j + 1][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j + 1][0], p[i][j + 1][1], PIECE_DEPTH - p[i][j + 1][2]);
+
 			glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
+			if (bd->chequerMat[0].pTexture)
+				glTexCoord2f((p[i][j][0] + discradius) / (discradius * 2), (p[i][j][1] + discradius) / (discradius * 2));
 			glVertex3f(p[i][j][0], p[i][j][1], PIECE_DEPTH - p[i][j][2]);
 		}
 		glEnd();
 	}
 
-	if (bd->chequerMat[0].pTexture)
+	if (bd->chequerMat[0].pTexture && bd->pieceTextureType == PTT_TOP)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 
 	Free3d(p, bd->curveAccuracy + 1, bd->curveAccuracy / 4 + 1);
@@ -287,28 +282,18 @@ void preDrawPiece1(BoardData* bd)
 	pieceRad = PIECE_HOLE / 2.0f;
 	pieceBorder = pieceRad * .9f;
 
-	/* Draw top of piece */
-	if (bd->chequerMat[0].pTexture)
-	{	/* Texturing will be enabled */
-		glPushMatrix();
-		glTranslatef(0, 0, PIECE_DEPTH);
-		glBindTexture(GL_TEXTURE_2D, bd->chequerMat[0].pTexture->texID);
-		gluDisk(bd->qobjTex, 0, pieceBorder, bd->curveAccuracy, 1);
+	/* Draw top/bottom of piece */
+	circleTex(pieceRad, PIECE_DEPTH, bd->curveAccuracy, bd->chequerMat[0].pTexture);
+
+	if (bd->chequerMat[0].pTexture && bd->pieceTextureType == PTT_TOP)
 		glDisable(GL_TEXTURE_2D);
-		gluDisk(bd->qobj, pieceBorder, pieceRad, bd->curveAccuracy, 1);
-		glPopMatrix();
-	}
-	else
-	{
-		circle(pieceRad, PIECE_DEPTH, bd->curveAccuracy);
-	}
-	/* Draw plain bottom of piece */
-	circleRev(pieceRad, 0, bd->curveAccuracy);
+
+	circleRevTex(pieceRad, 0, bd->curveAccuracy, bd->chequerMat[0].pTexture);
 
 	/* Edge of piece */
-	gluCylinder(bd->qobj, pieceRad, pieceRad, PIECE_DEPTH, bd->curveAccuracy, 1);
+	cylinder(pieceRad, PIECE_DEPTH, bd->curveAccuracy, bd->chequerMat[0].pTexture);
 
-	if (bd->chequerMat[0].pTexture)
+	if (bd->chequerMat[0].pTexture && bd->pieceTextureType == PTT_TOP)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 }
 
