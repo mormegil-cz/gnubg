@@ -35,6 +35,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
+#include "export.h"
 #include "format.h"
 #include "dice.h"
 #include "matchequity.h"
