@@ -41,8 +41,8 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ], *apadjPoint[ 2 ],
     *padjBoard;
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *pwBoard, *pwTranslucent,
-    *pwLabels, *pwUseDiceIcon, *pwPermitIllegal, *pwBeepIllegal;
-static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal;
+    *pwLabels, *pwUseDiceIcon, *pwPermitIllegal, *pwBeepIllegal, *pwAnimateComputerMoves;
+static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal, fAnimateComputerMoves;
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 
@@ -211,6 +211,12 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 				  fBeepIllegal );
     gtk_box_pack_start( GTK_BOX( pw ), pwBeepIllegal, FALSE, FALSE, 0 );
     
+    pwAnimateComputerMoves = gtk_check_button_new_with_label(
+	"Animate computer moves" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwAnimateComputerMoves),
+				  fAnimateComputerMoves);
+    gtk_box_pack_start( GTK_BOX( pw ), pwAnimateComputerMoves, FALSE, FALSE, 0 );
+
     pwTable = gtk_table_new( 2, 2, FALSE );
     gtk_box_pack_start( GTK_BOX( pw ), pwTable, FALSE, FALSE, 4 );
     
@@ -281,6 +287,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	GTK_TOGGLE_BUTTON( pwPermitIllegal ) );
     fBeepIllegal = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwBeepIllegal ) );
+    fAnimateComputerMoves = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwAnimateComputerMoves) );
     
     for( i = 0; i < 2; i++ ) {
 	bd->arRefraction[ i ] = apadj[ i ]->value;
@@ -329,6 +337,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     bd->usedicearea = fUseDiceIcon;
     bd->permit_illegal = fPermitIllegal;
     bd->beep_illegal = fBeepIllegal;
+    bd->animate_computer_moves = fAnimateComputerMoves; 
     
     /* This is a horrible hack, but we need translucency set to the new
        value to call BoardPreferencesCommand(), so we get the correct
@@ -357,6 +366,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fUseDiceIcon = bd->usedicearea;
     fPermitIllegal = bd->permit_illegal;
     fBeepIllegal = bd->beep_illegal;
+    fAnimateComputerMoves = bd->animate_computer_moves;
     
     pwDialog = CreateDialog( "GNU Backgammon - Appearance", TRUE,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
@@ -534,6 +544,8 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	bd->permit_illegal = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "beep", c ) )
 	bd->beep_illegal = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "animate", c ) )
+	bd->animate_computer_moves = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "light", c ) ) {
 	/* light=azimuth;elevation */
 	float rAzimuth, rElevation;
@@ -588,7 +600,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     
     sprintf( sz, "set appearance board=rgb:%02X/%02X/%02X;%0.2f "
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
-	     "beep=%c light=%0.0f;%0.0f "
+	     "beep=%c animate=%c light=%0.0f;%0.0f " 
 	     "chequers0=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "points0=rgb:%02X/%02X/%02X;%0.2f "
@@ -597,7 +609,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->aanBoardColour[ 0 ][ 2 ], bd->aSpeckle[ 0 ] / 128.0f,
 	     bd->translucent ? 'y' : 'n', bd->labels ? 'y' : 'n',
 	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
-	     bd->beep_illegal ? 'y' : 'n', rAzimuth, rElevation,
+	     bd->beep_illegal ? 'y' : 'n', bd->animate_computer_moves ? 'y' : 'n', rAzimuth, rElevation,
 	     (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 
 	     (int) ( bd->aarColour[ 0 ][ 2 ] * 0xFF ), bd->aarColour[ 0 ][ 3 ],

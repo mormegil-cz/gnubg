@@ -2044,8 +2044,7 @@ extern void CommandHint( char *sz ) {
     movelist ml;
     int i;
     char szBuf[ 1024 ];
-    float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ];
-		float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
     int n = ParseNumber ( &sz );
     

@@ -135,7 +135,6 @@ duplication of effort and to make sure our changes merge easily.
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
   style will survive across theme changes.
 ** Make usage() show the GDK and GTK options, if appropriate.
-** Animate the chequers when the computer moves.
 ** Show a preview of the chequers in the appearances dialog.
 ** Allow the border colour to be changed, and honour the user's lighting
   angle when rendering the border.  Allow the dice pips colour to be
@@ -247,6 +246,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Trying to import a match when fConfirm is set and a match in
   progress asks for confirmation twice. (gary)
 ** Does "save settings" save the rollout parameters? (gary)
+** When compiled without readline, an EOF from the terminal seems to ask
+  for confirmation for exiting indefinitely. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

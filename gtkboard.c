@@ -1514,6 +1514,83 @@ static gint board_set( Board *board, const gchar *board_text ) {
     return 0;
 }
 
+static int animate_move, animate_count, animate_player, *animate_move_list;
+
+static int convert_point( int i, int player ) {
+
+    if( player )
+	return ( i < 0 ) ? 26 : i + 1; /* FIXME check 26 and 27 are right */
+    else
+	return ( i < 0 ) ? 27 : 24 - i;
+}
+
+static gint board_animate_timeout( gpointer p ) {
+
+    Board *board = p;
+    BoardData *pbd = board->board_data;
+    int src, dest, src_cheq, dest_cheq, colour;
+
+    if( animate_move >= 8 || animate_move_list[ animate_move ] < 0 ) {
+	gtk_main_quit();
+	return FALSE;
+    }
+
+    src = convert_point( animate_move_list[ animate_move ], animate_player );
+    dest = convert_point( animate_move_list[ animate_move + 1 ],
+			  animate_player );
+    colour = animate_player ? 1 : -1;
+
+    if( !( animate_count & 1 ) ) {
+	src_cheq = pbd->points[ src ];
+	dest_cheq = pbd->points[ dest ];
+
+	if( pbd->points[ dest ] == -colour ) {
+	    pbd->points[ dest ] = 0;
+	    
+	    if( animate_count == 4 ) {
+		pbd->points[ animate_player ? 0 : 25 ] -= colour;
+		board_expose_point( pbd->drawing_area, pbd,
+				    animate_player ? 0 : 25 );
+	    }
+	}
+	
+    	pbd->points[ src ] -= colour;
+	pbd->points[ dest ] += colour;
+    }
+
+    board_expose_point( pbd->drawing_area, pbd, src );
+    board_expose_point( pbd->drawing_area, pbd, dest );
+
+    if( !( animate_count & 1 ) && animate_count < 4 ) {
+	pbd->points[ src ] = src_cheq;
+	pbd->points[ dest ] = dest_cheq;
+    }
+    
+    if( animate_count++ >= 4 ) {
+	animate_count = 0;	
+	animate_move += 2;	
+    }
+
+    return TRUE;
+}
+
+extern void board_animate( Board *board, int move[ 8 ], int player ) {
+
+    BoardData *pbd = board->board_data;
+    int n;
+    
+    if( !pbd->animate_computer_moves )
+	return;
+
+    animate_move = animate_count = 0;
+    animate_move_list = move;
+    animate_player = player;
+    
+    n = gtk_timeout_add( 75, board_animate_timeout, board );
+
+    gtk_main();
+}
+
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
 			     BoardData *bd ) {
     
@@ -2968,6 +3045,7 @@ static void board_init( Board *board ) {
     bd->aSpeckle[ 0 ] = 25;
     bd->aSpeckle[ 2 ] = 25;
     bd->aSpeckle[ 3 ] = 25;
+    bd->animate_computer_moves = TRUE;
     
     gcval.function = GDK_AND;
     gcval.foreground.pixel = ~0L; /* AllPlanes */

@@ -1,3 +1,11 @@
+Thu Oct 25 00:38:25 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_animate): New function.  Optionally animate
+	automatic moves (contributed by Peter Orum).
+	* gtkprefs.c (BoardPreferences): Add option for chequer animation.
+	
+	* play.c (CommandListGame): Make sure a game is being played.
+
 Tue Oct 23 20:38:04 2001  Gary Wong  <gtw@research.att.com>
 
 	* import.c (ImportSGGGame): Handle duplicated lines in SGG files.
