@@ -2647,11 +2647,6 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
-
-    ppm = gdk_pixmap_new( bd->drawing_area->window, 108 * 3, 82 * 3, -1 );
-    fUpdate = TRUE;
-    Preview( &rdAppearance );
-    fUpdate = FALSE;
     
 #if USE_BOARD3D
 	colourDialog3d = Create3dColourDialog(bd->drawing_area3d->window, pwDialog);

@@ -3350,13 +3350,13 @@ extern void GTKOutputNew( void ) {
 
 static GtkWidget *pwEntry;
 
+#if 0
 static void NumberOK( GtkWidget *pw, int *pf ) {
 
     *pf = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( pwEntry ) );
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
-#if 0
 extern int 
 GTKReadNumber( char *szTitle, char *szPrompt, int nDefault,
                int nMin, int nMax, int nInc ) {
