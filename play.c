@@ -1028,7 +1028,8 @@ extern int ComputerTurn( void ) {
       if (ms.anDice[0] > 0) {
           /* Opponent has rolled the dice and then resigned. We
              want to find out if the resignation is OK after the roll */
-          EvaluateRoll (arOutput, ms.anDice[0], ms.anDice[1], ms.anBoard, &ci, NULL);
+          EvaluateRoll (arOutput, ms.anDice[0], ms.anDice[1], ms.anBoard, &ci,
+                        &ecResign );
       } else { 
           GeneralEvaluationE( arOutput, ms.anBoard, &ci, &ecResign ) ;
       }
