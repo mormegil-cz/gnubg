@@ -1,0 +1,46 @@
+BASEDIR=c:\copied\mingw
+GNUDIR=c:\gnu\gnubg
+LIBFLAGS=-mwindows
+#CFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
+CPPFLAGS=-fnative-struct -Wall -Os $(INCLUDE)
+RM=del
+AR      = ar cr
+RANLIB  = ranlib
+CC=gcc
+
+INCLUDE= \
+	-I$(BASEDIR)/include/gtk-2.0 \
+	-I$(BASEDIR)/lib/gtk-2.0/include \
+	-I$(BASEDIR)/include/glib-2.0 \
+	-I$(BASEDIR)/lib/glib-2.0/include \
+	-I$(BASEDIR)/include/pango-1.0 \
+	-I$(BASEDIR)/include/atk-1.0 \
+	-I$(BASEDIR)/include/gtkglext-1.0 \
+	-I$(BASEDIR)/lib/gtkglext-1.0/include \
+	-I$(BASEDIR)/include/freetype2 \
+	-I$(BASEDIR)/FTGL/src \
+	-I$(GNUDIR) \
+	-I$(GNUDIR)/lib
+
+LIBS=-lftgl -lglib-2.0.dll -lgtk-win32-2.0 -lgobject-2.0.dll \
+	-lgdkglext-win32-1.0.dll -lgtkglext-win32-1.0.dll -lfreetype \
+	-lopengl32 -lglu32 -lglut32
+
+TARGET=board.a
+
+SOURCE=	drawboard3d misc3d texture3d font3d testgtkboard widget3d \
+	matrix model shadow mylist timer
+OBJECTS=$(patsubst %,%.o,$(SOURCE)) $(GNUDIR)/luxi.o
+HEADERS=../gnubg/gtkboard.h inc3d.h test/main.h
+
+all: $(TARGET)
+	@echo done
+
+$(TARGET): $(OBJECTS)
+	@echo creating lib
+	$(AR) $(TARGET) $(OBJECTS)
+	$(RANLIB) $(TARGET)
+	
+clean:
+	$(RM) $(OBJECTS)
+	@echo clean
