@@ -2143,7 +2143,7 @@ CommandShowCubeEfficiency( char *sz ) {
 extern void
 CommandShowBearoff( char *sz ) {
 
-  char szTemp[ 2048 ];
+  char szTemp[ 4096 ];
 
 #if USE_GTK
   if ( fX ) {

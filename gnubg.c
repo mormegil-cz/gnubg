@@ -3553,7 +3553,7 @@ static char *FormatPromptConvert( void ) {
 
 extern void CommandEval( char *sz ) {
 
-    char szOutput[ 2048 ];
+    char szOutput[ 4096 ];
     int n, an[ 2 ][ 25 ];
     cubeinfo ci;
     
