@@ -102,7 +102,19 @@ relativeFibsRating ( const float r, const int n );
 extern float
 absoluteFibsRating ( const float r, const int n );
 
-extern float
-getMWCFromError ( const statcontext *psc, float *ar );
+#define CHEQUERPLAY  0
+#define CUBEDECISION 1
+#define COMBINED     2
 
+#define TOTAL        0
+#define PERMOVE      1
+
+#define PLAYER_0     0
+#define PLAYER_1     1
+
+#define NORMALISED   0
+#define UNNORMALISED 1
+
+extern float
+getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] );
 #endif

@@ -82,8 +82,8 @@ static char *aszLinkText[] = {
 
 /* Color of chequers */
 
-static char *aszColorNameBBS[] = { N_ ("white"), N_ ("blue") };
-static char *aszColorNameF2H[] = { N_ ("white"), N_ ("red") };
+/* static char *aszColorNameBBS[] = { N_ ("white"), N_ ("blue") }; */
+/* static char *aszColorNameF2H[] = { N_ ("white"), N_ ("red") }; */
 static char *aszColorNameGNU[] = { N_ ("red"), N_ ("black") };
 
 
@@ -2379,9 +2379,9 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   int i;
   ratingtype rt[ 2 ];
-  float ar[ 2 ];
   int ai[ 2 ];
-  float r;
+  float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
+  float r = getMWCFromError ( psc, aaaar );
 
   const char *aszLuckRating[] = {
     N_("&quot;Haaa-haaa&quot;"),
@@ -2472,50 +2472,47 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
       printStatTableRow2 ( pf,
                            _("Error rate (total)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -psc->arErrorCheckerplay[ 0 ][ 0 ],
-                           -psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
-                           -psc->arErrorCheckerplay[ 1 ][ 0 ],
-                           -psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f );
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
+                           * 100.0f,
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
+                           * 100.0f );
+
       printStatTableRow2 ( pf,
                            _("Error rate (pr. move)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           -psc->arErrorCheckerplay[ 0 ][ 0 ] /
-                           psc->anUnforcedMoves[ 0 ],
-                           -psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
-                           psc->anUnforcedMoves[ 0 ],
-                           -psc->arErrorCheckerplay[ 1 ][ 0 ] /
-                           psc->anUnforcedMoves[ 1 ],
-                           -psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
-                           psc->anUnforcedMoves[ 1 ] );
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
+                           * 100.0f,
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
+                           * 100.0f );
+
     }
     else {
 
       printStatTableRow2 ( pf,
                            _("Error rate (total)"), 
                            "%+6.3f", "%+7.3f%",
-                           -psc->arErrorCheckerplay[ 0 ][ 0 ],
-                           -psc->arErrorCheckerplay[ 0 ][ 1 ],
-                           -psc->arErrorCheckerplay[ 1 ][ 0 ],
-                           -psc->arErrorCheckerplay[ 1 ][ 1 ] );
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow2 ( pf,
                            _("Error rate (pr. move)"), 
                            "%+6.3f", "%+7.3f%",
-                           -psc->arErrorCheckerplay[ 0 ][ 0 ] /
-                           psc->anUnforcedMoves[ 0 ],
-                           -psc->arErrorCheckerplay[ 0 ][ 1 ] /
-                           psc->anUnforcedMoves[ 0 ],
-                           -psc->arErrorCheckerplay[ 1 ][ 0 ] /
-                           psc->anUnforcedMoves[ 1 ],
-                           -psc->arErrorCheckerplay[ 1 ][ 1 ] /
-                           psc->anUnforcedMoves[ 1 ] );
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
 
     }
 
     for ( i = 0 ; i < 2; i++ )
-      rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
-                            psc->anUnforcedMoves[ i ] );
+      rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
     
     printStatTableRow ( pf, 
                         _( "Chequer play rating"), "%s",
@@ -2722,15 +2719,53 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -psc->arErrorWrongPass[ 1 ][ 1 ] );
     }
 
+
+    if ( pms->nMatchTo ) {
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (total)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
+                           * 100.0f,
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
+                           * 100.0f );
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (pr. cube decision)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
+                           * 100.0f,
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
+                           * 100.0f );
+
+    }
+    else {
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (total)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (pr. cube decision)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
+
+    }
+
     for ( i = 0 ; i < 2; i++ )
-      rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
-                              + psc->arErrorMissedDoubleTG[ i ][ 0 ]
-                              + psc->arErrorWrongDoubleDP[ i ][ 0 ]
-                              + psc->arErrorWrongDoubleTG[ i ][ 0 ]
-                              + psc->arErrorWrongTake[ i ][ 0 ]
-                              + psc->arErrorWrongPass[ i ][ 0 ] ) /
-                            psc->anTotalCube[ i ] );
-      
+      rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
+
     printStatTableRow ( pf, 
                         _( "Cube decision rating"), "%s",
                         gettext ( aszRating[ rt [ 0 ] ] ), 
@@ -2743,30 +2778,56 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
     cubeinfo ci;
     
-    for ( i = 0 ; i < 2; i++ ) {
-      rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
-                              + psc->arErrorMissedDoubleTG[ i ][ 0 ]
-                              + psc->arErrorWrongDoubleDP[ i ][ 0 ]
-                              + psc->arErrorWrongDoubleTG[ i ][ 0 ]
-                              + psc->arErrorWrongTake[ i ][ 0 ]
-                              + psc->arErrorWrongPass[ i ][ 0 ]
-                              + psc->arErrorCheckerplay[ i ][ 0 ] ) /
-                            ( psc->anTotalCube[ i ] +
-                              psc->anUnforcedMoves[ i ] ) );
-      
-      ar[ i ] = psc->arErrorMissedDoubleDP[ i ][ 1 ]
-        + psc->arErrorMissedDoubleTG[ i ][ 1 ]
-        + psc->arErrorWrongDoubleDP[ i ][ 1 ]
-        + psc->arErrorWrongDoubleTG[ i ][ 1 ]
-        + psc->arErrorWrongTake[ i ][ 1 ]
-        + psc->arErrorWrongPass[ i ][ 1 ]
-        + psc->arErrorCheckerplay[ i ][ 1 ];
 
-    }
-     
     printStatTableHeader ( pf,
                            _("Overall rating" ) );
                             
+    if ( pms->nMatchTo ) {
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (total)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] 
+                           * 100.0f,
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] 
+                           * 100.0f );
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (pr. decision)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
+                           * 100.0f,
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
+                           * 100.0f );
+
+    }
+    else {
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (total)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (pr. decision)"), 
+                           "%+6.3f", "%+7.3f%",
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
+                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
+
+    }
+
+    for ( i = 0 ; i < 2; i++ ) 
+      rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
+      
     printStatTableRow ( pf, 
                         _("Overall rating"), "%s",
                         gettext ( aszRating[ rt [ 0 ] ] ), 
@@ -2780,8 +2841,6 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
       /* skill */
 
-      r = getMWCFromError ( psc, ar );
-
       printStatTableRow ( pf,
                           _( "MWC against current opponent"),
                           "%6.2f%%",
@@ -2791,9 +2850,12 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow ( pf,
                           _( "Guestimated abs. rating"),
                           "%6.2f",
-                          absoluteFibsRating ( ar[ 0 ], pms->nMatchTo ),
-                          absoluteFibsRating ( ar[ 1 ], pms->nMatchTo ) );
-
+                          absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ]
+                                                    [ PLAYER_0 ][ NORMALISED ],
+                                               pms->nMatchTo ),
+                          absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ]
+                                                    [ PLAYER_1 ][ NORMALISED ],
+                                               pms->nMatchTo ) );
 
     }
   

@@ -7239,7 +7239,11 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Wrong doubles around TG"),
          N_("Wrong takes"),
          N_("Wrong passes"),
+         N_("Error rate (total)"),
+         N_("Error rate (pr. cube decision)"),
          N_("Cube decision rating"),
+         N_("Overall error rate (total)"),
+         N_("Overall error rate (pr. decision)"),
          N_("Overall rating"),
          N_("MWC against current opponent"),
          N_("Guestimated abs. rating"),
@@ -7252,8 +7256,8 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   int i;
   char sz[ 32 ];
   ratingtype rt[ 2 ];
-  float ar[ 2 ];
-  float r;
+  float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
+  float r = getMWCFromError ( psc, aaaar );
 #if WIN32
   char szOutput[4096];
     GtkWidget *pwButtons,
@@ -7279,7 +7283,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
 
-  for (i = 0; i < (33 + ( pms->nMatchTo != 0 ) * 2 ); i++) {
+  for (i = 0; i < (37 + ( pms->nMatchTo != 0 ) * 2 ); i++) {
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
     gtk_clist_set_text( GTK_CLIST( pwStats ), i, 0, gettext ( aszLabels[i] ) );
   }
@@ -7367,8 +7371,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 2, sz);
   
   for ( i = 0 ; i < 2; i++ )
-    rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
-                          psc->anUnforcedMoves[ i ] );
+    rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
 
   sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 19, 1, sz);
@@ -7434,49 +7437,67 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 		       psc->arErrorWrongPass[ 1 ], pms->nMatchTo );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 30, 2, sz);
   
-  for ( i = 0 ; i < 2; i++ )
-    rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
-                            + psc->arErrorMissedDoubleTG[ i ][ 0 ]
-                            + psc->arErrorWrongDoubleDP[ i ][ 0 ]
-                            + psc->arErrorWrongDoubleTG[ i ][ 0 ]
-                            + psc->arErrorWrongTake[ i ][ 0 ]
-                            + psc->arErrorWrongPass[ i ][ 0 ] ) /
-                          psc->anTotalCube[ i ] );
-
-  sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ],
+                    1, pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 31, 1, sz);
-  sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ],
+                    1, pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 31, 2, sz);
+  
 
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 1, sz);
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 2, sz);
+  
   for ( i = 0 ; i < 2; i++ )
-    rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
-                            + psc->arErrorMissedDoubleTG[ i ][ 0 ]
-                            + psc->arErrorWrongDoubleDP[ i ][ 0 ]
-                            + psc->arErrorWrongDoubleTG[ i ][ 0 ]
-                            + psc->arErrorWrongTake[ i ][ 0 ]
-                            + psc->arErrorWrongPass[ i ][ 0 ] 
-                            + psc->arErrorCheckerplay[ i ][ 0 ] ) /
-                          ( psc->anTotalCube[ i ] +
-                            psc->anUnforcedMoves[ i ] ) );
+    rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
 
   sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 1, sz);
   sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), 32, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 2, sz);
+
+  FormatStatEquity( sz, aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 1, sz);
+  FormatStatEquity( sz, aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 2, sz);
+  
+
+  FormatStatEquity( sz, aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 1, sz);
+  FormatStatEquity( sz, aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 2, sz);
+  
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
+
+  sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 1, sz);
+  sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 2, sz);
 
   if ( pms->nMatchTo ) {
 
-    r = getMWCFromError ( psc, ar );
-
     sprintf ( sz, "%7.2f%%", 100.0 * r );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 1, sz);
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 37, 1, sz);
     sprintf ( sz, "%7.2f%%", 100.0 * (1.0 - r) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 2, sz);
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 37, 2, sz);
 
-    sprintf ( sz, "%7.2f", absoluteFibsRating ( ar[ 0 ], ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 1, sz);
-    sprintf ( sz, "%7.2f", absoluteFibsRating ( ar[ 1 ], ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 2, sz);
+    sprintf ( sz, "%7.2f", 
+              absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ], 
+                                   ms.nMatchTo ) );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 38, 1, sz);
+    sprintf ( sz, "%7.2f", 
+              absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ], 
+                                   ms.nMatchTo ) );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), 38, 2, sz);
 
   }
 
