@@ -1,3 +1,9 @@
+Fri Mar 14 21:28:43 2003  Oystein Johansen <oystein@gnubg.org>
+
+        * gnubg.c: bugfix in outputv() and outputerrv()
+
+	* gnubg.c, gtkgame.c: clean up in the WinCopy/TextToClipboard functions 
+
 Thu Mar 13 21:28:43 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Better support for variations in SGF, SGG, and TMG.

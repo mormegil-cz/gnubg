@@ -2152,7 +2152,7 @@ MainGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
 #ifdef WIN32
 
   if ( szCopied )
-    WinCopy ( szCopied );
+    TextToClipboard ( szCopied );
 
 #else /* WIN32 */
 
@@ -5491,10 +5491,8 @@ extern void GTKEval( char *szOutput ) {
 					DT_INFO, NULL, NULL ),
 	*pwText = gtk_text_new( NULL, NULL );
     GdkFont *pf;
-#if WIN32
     GtkWidget *pwButtons,
         *pwCopy = gtk_button_new_with_label( "Copy" );
-#endif
 
 #if WIN32
     /* Windows fonts come out smaller than you ask for, for some reason... */
@@ -5505,13 +5503,11 @@ extern void GTKEval( char *szOutput ) {
 			"*-*-*-m-*-iso8859-1" );
 #endif
 
-#if WIN32
     /* FIXME There should be some way to extract the text on Unix as well */
     pwButtons = DialogArea( pwDialog, DA_BUTTONS );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
     gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
 			GTK_SIGNAL_FUNC( GTKWinCopy ), (gpointer) szOutput );
-#endif
     
     gtk_text_set_editable( GTK_TEXT( pwText ), FALSE );
     gtk_text_insert( GTK_TEXT( pwText ), pf, NULL, NULL, szOutput, -1 );
@@ -5677,11 +5673,9 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
     GTKAllowStdin();
 }
 
-#if WIN32
 extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
-   WinCopy( (char *) data);
+   TextToClipboard( (char *) data);
 }
-#endif
 
 extern void 
 GTKHint( movelist *pmlOrig, const int iMove ) {

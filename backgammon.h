@@ -516,10 +516,6 @@ UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 extern void
 InvalidateStoredMoves( void );
 
-#ifdef WIN32
-extern void WinCopy( char *szOut );
-#endif
-
 extern char *aszVersion[], *szHomeDirectory, *szDataDirectory,
     *szTerminalCharset;
 

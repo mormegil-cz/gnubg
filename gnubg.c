@@ -76,7 +76,9 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
+#if HAVE_ICONV
 #include <iconv.h>
+#endif
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -122,6 +124,12 @@ event evNextTurn;
 
 #ifdef WIN32
 #include<windows.h>
+#endif
+
+#if HAVE_ALLOCA
+#ifndef alloca
+#define alloca __builtin_alloca
+#endif
 #endif
 
 #if defined(MSDOS) || defined(__MSDOS__) || defined(WIN32)
@@ -178,6 +186,8 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
     nDefaultLength = 7;
+int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
+	fTruncEqualPlayer0 =TRUE;
 int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
@@ -395,7 +405,9 @@ windowgeometry awg[ NUM_WINDOWS ] =
 
 /* Usage strings */
 static char szDICE[] = N_("<die> <die>"),
+#ifdef USE_SOUND
     szCOMMAND[] = N_("<command>"),
+#endif
     szCOLOUR[] = N_("<colour>"),
     szER[] = N_("evaluation|rollout"), 
     szFILENAME[] = N_("<filename>"),
@@ -3256,7 +3268,9 @@ extern void CommandHint( char *sz ) {
   static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   static cubeinfo ci;
   int n = ParseNumber ( &sz );
+#if USE_GTK
   int anMove[ 8 ];
+#endif
   unsigned char auch[ 10 ];
   int fHasMoved;
   
@@ -4226,15 +4240,9 @@ extern void CommandCopy (char *sz)
   if ( ! ms.fMove )
     SwapSides ( anBoardTemp );
 
-#ifdef WIN32
-
   DrawBoard (szOut, anBoardTemp, ms.fMove, aps, MatchIDFromMatchState (&ms));
   strcat (szOut, "\n");
-  WinCopy (szOut);
-#else
-  puts (DrawBoard (szOut, anBoardTemp, ms.fMove, aps,
-                   MatchIDFromMatchState (&ms)));
-#endif
+  TextToClipboard (szOut);
 
 }
 
@@ -4249,7 +4257,7 @@ CommandXCopy ( char *sz ) {
 }
 
 #ifdef WIN32
-extern void WinCopy( char *szOut ){
+static void WinCopy( const char *szOut ){
 
   if(OpenClipboard(0)) {
 
@@ -4589,8 +4597,10 @@ extern void CommandSaveSettings( char *szParam ) {
     char *szFile;
     static char *aszWindow[] = {
 	"main", "game", "annotation", "hint", "message"
+#if USE_GTK
     }, *aszAnimation[] = {
 	"none", "blink", "slide"
+#endif
     };
 
     szParam = NextToken ( &szParam );
@@ -5822,8 +5832,6 @@ extern void outputv( const char *sz, va_list val ) {
 
 #if USE_GTK || __GLIBC__
     char *szFormatted;
-#else
-    char szFormatted[ 8192 ];
 #endif
     
     if( cOutputDisabled )
@@ -5834,10 +5842,12 @@ extern void outputv( const char *sz, va_list val ) {
 #elif USE_GTK
     szFormatted = g_strdup_vprintf( sz, val );
 #else
-    sprintf( szFormatted, sz, val );
+    vprintf( sz, val );
 #endif
 
+#if USE_GTK || __GLIBC__
     output( szFormatted );
+#endif
 
 #if __GLIBC__
     free( szFormatted );
@@ -5867,11 +5877,9 @@ extern void outputerrf( const char *sz, ... ) {
 /* Write an error message, vfprintf() style */
 extern void outputerrv( const char *sz, va_list val ) {
 
-    char *pch;
 #if USE_GTK || __GLIBC__
+    char *pch;
     char *szFormatted;
-#else
-    char szFormatted[ 8192 ];
 #endif
         
 #if __GLIBC__
@@ -5879,12 +5887,14 @@ extern void outputerrv( const char *sz, va_list val ) {
 #elif USE_GTK
     szFormatted = g_strdup_vprintf( sz, val );
 #else
-    sprintf( szFormatted, sz, val );
+    vfprintf( stderr, sz, val );
 #endif
 
+#if USE_GTK || __GLIBC__
     pch = Convert( szFormatted, szTerminalCharset, GNUBG_CHARSET );
     fputs( pch, stderr );
     free( pch );
+#endif
     putc( '\n', stderr );
 
 #if USE_GTK
