@@ -46,6 +46,7 @@ duplication of effort and to make sure our changes merge easily.
 *** Calculate "advantage" (i.e. luck-adjusted result): ppg in game stats
   for money; MWC in match stats for matches.  Save the results in pairwise
   player records. (gary)
+*** option to analyse one side only
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -182,6 +183,7 @@ details.
 ** The sound setting options page isn't complete yet.
 ** Show player on roll on board, e.g., dice cup, arrow, or whatever
 ** Optionally show numbers based on who's on roll
+** Play sound when analysis is finished
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -255,6 +257,8 @@ functions:
   regret the hit; e.g., play one chequer to but the opponent on the bar. 
   After this it's neither possible to drag the opponent's chequer back
   nor to drag your own chequer back.
+** when there is both a missed double and a chequer play error, gnubg skips 
+  the chequer play error when browsing for marked decisions only
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -327,6 +331,7 @@ the rollouts off and come back later.
   can be displayed efficiently. (gary)
 ** We provide access to non-deterministic dice from random.org.  Add
   completely deterministic dice from noentropy.net as well.
+** option to read dice from file (similar to Jellyfish)
 
 * Bugs believed fixed:
 ** Save the results of rollouts/evaluations performed with hint during playing
