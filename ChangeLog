@@ -1,3 +1,8 @@
+Tue Mar 12 17:24:31 2002  Gary Wong  <gtw@research.att.com>
+
+	* acinclude.m4 (AM_GTK2): Look for GTK+ 2.0.
+	* configure.in: Look for GTK+ 2.0 in preference to 1.2.
+
 Mon Mar 11 22:53:26 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (RolloutGeneral): remove call to VarRednRollout. Use

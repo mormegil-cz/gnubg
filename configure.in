@@ -103,15 +103,18 @@ AC_SEARCH_LIBS(inet_aton,resolv)
 AC_REPLACE_FUNCS(erf)
 
 dnl Check for GTK
-AC_ARG_WITH(gtk,[  --with-gtk              use GTK library and widgets])
-AC_ARG_WITH(gtk2,[  --with-gtk2             use GTK 1.3/2.0 (unstable!)])
+AC_ARG_WITH(gtk,[  --with-gtk              use GTK+ library and widgets])
+AC_ARG_WITH(gtk2,[  --with-gtk2             use GTK+ 2.0])
 AC_ARG_WITH(gtkextra,[  --with-gtkextra         use GtkExtra widgets])
 if test "$with_gtk" = "no"; then
   no_gtk=yes
-elif test "$with_gtk2" = "yes"; then
-  AM_GTK2
 else
-  AM_PATH_GTK(1.2.0)
+  if test "$with_gtk2" != "no"; then
+    AM_GTK2
+  fi
+  if test "$no_gtk" = "yes"; then
+    AM_PATH_GTK(1.2.0)
+  fi
 fi
 AM_CONDITIONAL(USE_GTK, test "$no_gtk" != "yes" )
 if test "$no_gtk" = "yes"; then
@@ -163,10 +166,12 @@ if test "$no_guile" != "yes"; then
   LIBS="$LIBS $GUILE_LIBS $GTK_LIBS"
   AC_CHECK_FUNCS(scm_set_current_module scm_select_module)
   AC_CHECK_HEADERS(guile-gtk.h)
-  AC_CHECK_LIB(guilegtk-1.2, sgtk_wrap_gtkobj,
+  if test "$gtk2" != "yes"; then
+    AC_CHECK_LIB(guilegtk-1.2, sgtk_wrap_gtkobj,
 [AC_DEFINE_UNQUOTED(HAVE_LIBGUILEGTK_1_2)
 GUILE_LIBS="-lguilegtk-1.2 $GUILE_LIBS"
 ])
+  fi
   CPPFLAGS="$ac_save_CPPFLAGS"
   CFLAGS="$ac_save_CFLAGS"
   LIBS="$ac_save_LIBS"
