@@ -1,3 +1,10 @@
+Sun Mar  2 13:05:20 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c [ENABLE_TRAIN_MENU]: disable train menu, unless
+	cpp flag ENABLE_TRAIN_MENU is defined.
+	The menu confuses new users, that either want to train their
+	own network or thinks it generates bearoff databases.
+
 Sun Mar  2 12:51:52 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (HTMLPrintMoveAnalysis): fix bug that lead to wrong

@@ -2384,6 +2384,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SHOW_ENGINE, NULL },
 	{ N_("/_Analyse/Evaluation speed"), NULL, Command,
 	  CMD_SHOW_CALIBRATION, NULL },
+#if ENABLE_TRAIN_MENU
 	{ N_("/_Train"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Train/D_ump database"), 
           NULL, Command, CMD_DATABASE_DUMP, NULL },
@@ -2397,6 +2398,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Train/Train from _database"), 
           NULL, Command, CMD_TRAIN_DATABASE, NULL },
 	{ N_("/_Train/Train with _TD(0)"), NULL, Command, CMD_TRAIN_TD, NULL },
+#endif
 	{ N_("/_Settings"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Settings/Analysis..."), NULL, SetAnalysis, 0, NULL },
 	{ N_("/_Settings/Appearance..."), NULL, Command, CMD_SET_APPEARANCE,
@@ -2513,6 +2515,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_item_factory_parse_rc( sz );
 #endif
     
+#if ENABLE_TRAIN_MENU
 #if !HAVE_LIBGDBM
     gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	pif, CMD_DATABASE_DUMP ), FALSE );
@@ -2526,6 +2529,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	pif, "/Train/Import database..." ), FALSE );
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	pif, "/Train/Export database..." ), FALSE );
+#endif
 #endif
 
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
