@@ -1,3 +1,7 @@
+Wed Jun 16 20:33:28 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* cs.po: fix invalid msgstr
+
 Tue Jun 15 05:16:55 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* ja.po: Fix invalid multibyte sequence.
