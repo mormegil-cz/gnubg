@@ -3980,10 +3980,11 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     const char *aszReduced[] = {
       N_("No reduction"),
       NULL,
-      N_("50% speed"),
-      N_("33% speed"),
-      N_("25% speed") 
+      N_("50%% speed"),
+      N_("33%% speed"),
+      N_("25%% speed") 
     };
+    gchar *pch;
 
     int i;
     int *pi;
@@ -4114,7 +4115,9 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
       if ( i == 1 )
         continue;
       
-      pwItem = gtk_menu_item_new_with_label ( gettext ( aszReduced[ i ] ) );
+      pch = g_strdup_printf( gettext( aszReduced[ i ] ) );
+      pwItem = gtk_menu_item_new_with_label ( pch );
+      g_free( pch );
       gtk_menu_append ( GTK_MENU ( pwMenu ), pwItem );
       pi = g_malloc ( sizeof ( int ) );
       *pi = i;

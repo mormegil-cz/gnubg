@@ -1,3 +1,11 @@
+Sat Jul 12 10:11:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (EvalWidget): ugly fix for problematic string.
+
+Sat Jul 12 01:25:24 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am, configure.in: check for python
+
 Fri Jul 11 20:48:34 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* path.c (PathOpen, PathSearch): use DIR_SEPARATOR as
