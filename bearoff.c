@@ -268,14 +268,14 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
 extern int
 ReadTwoSidedBearoff ( bearoffcontext *pbc,
                       const unsigned int iPos,
-                      float ar[ 4 ] ) {
+                      float ar[ 4 ], unsigned short int aus[ 4 ] ) {
 
   int k = ( pbc->fCubeful ) ? 4 : 1;
   int i;
   unsigned char ac[ 8 ];
   unsigned char *pc;
+  unsigned short int us;
 
-  memset ( ar, 0, 4 * sizeof ( float ) );
   if ( pbc->fInMemory )
     pc = ((char *) pbc->p)+ 40 + 2 * iPos * k;
   else {
@@ -284,13 +284,17 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
     pc = ac;
   }
 
-  for ( i = 0; i < k; ++i )
-    ar[ i ] = 
-      ( pc[ 2 * i ] | ( pc[ 2 * i + 1 ] ) << 8 ) / 32767.5f - 1.0f;
-
-  return 0;
+  for ( i = 0; i < k; ++i ) {
+    us = pc[ 2 * i ] | ( pc[ 2 * i + 1 ] ) << 8;
+    if ( aus )
+      aus[ i ] = us;
+    if ( ar )
+      ar[ i ] = us / 32767.5f - 1.0f;
+  }      
 
   ++pbc->nReads;
+
+  return 0;
 
 }
 
@@ -298,12 +302,12 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
 extern int
 BearoffCubeful ( bearoffcontext *pbc,
                  const unsigned int iPos,
-                 float ar[ 4 ] ) {
+                 float ar[ 4 ], unsigned short int aus[ 4 ] ) {
 
   if ( ! pbc->fCubeful )
     return -1;
   else
-    return ReadTwoSidedBearoff ( pbc, iPos, ar );
+    return ReadTwoSidedBearoff ( pbc, iPos, ar, aus );
 
 }
 
@@ -318,14 +322,10 @@ BearoffEvalTwoSided ( bearoffcontext *pbc,
   int iPos = nUs * n + nThem;
   float ar[ 4 ];
   
-  ReadTwoSidedBearoff ( pbc, iPos, ar );
+  ReadTwoSidedBearoff ( pbc, iPos, ar, NULL );
 
   memset ( arOutput, 0, 5 * sizeof ( float ) );
-  if ( pbc->fCubeful ) 
-    /* stored in equities */
-    arOutput[ OUTPUT_WIN ] = ar[ 0 ] / 2.0f + 0.5;
-  else
-    arOutput[ OUTPUT_WIN ] = ar[ 0 ];
+  arOutput[ OUTPUT_WIN ] = ar[ 0 ] / 2.0f + 0.5;
   
   return ar [ 0 ] * 65535.0;
 
@@ -523,7 +523,7 @@ BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
             "Position %12d  %12d\n\n", 
             nUs, nThem );
 
-  ReadTwoSidedBearoff ( pbc, iPos, ar );
+  ReadTwoSidedBearoff ( pbc, iPos, ar, NULL );
 
   if ( pbc->fCubeful )
     for ( i = 0; i < 4 ; ++i )

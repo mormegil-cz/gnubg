@@ -87,7 +87,7 @@ BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,
 extern int
 BearoffCubeful ( bearoffcontext *pbc,
                  const unsigned int iPos,
-                 float ar[ 4 ] );
+                 float ar[ 4 ], unsigned short int aus[ 4 ] );
 
 extern void
 BearoffClose ( bearoffcontext *pbc );

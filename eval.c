@@ -2434,7 +2434,7 @@ PerfectCubeful ( bearoffcontext *pbc,
   int n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
   unsigned int iPos = nUs * n + nThem;
 
-  BearoffCubeful ( pbc, iPos, arEquity );
+  BearoffCubeful ( pbc, iPos, arEquity, NULL );
 
 }
 
