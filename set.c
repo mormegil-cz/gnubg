@@ -30,6 +30,7 @@
 #include "dice.h"
 #include "eval.h"
 #include "matchequity.h"
+#include "positionid.h"
 
 static char szEQUITY[] = "<equity>",
     szNAME[] = "<name>",
@@ -40,8 +41,6 @@ static char szEQUITY[] = "<equity>",
 command acSetEvaluation[] = {
     { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
       "for deep evaluation", szNUMBER, NULL },
-    { "consistency", CommandSetEvalConsistency, "Use the same evaluator for "
-      "all moves", szONOFF, NULL },
     { "cubeful", CommandSetEvalCubeful, "Cubeful evaluations", szONOFF, NULL },
     { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
       "`hint' commands look ahead", szPLIES, NULL },
@@ -184,6 +183,7 @@ extern void CommandSetAutoRoll( char *sz ) {
 extern void CommandSetBoard( char *sz ) {
 
     int an[ 2 ][ 25 ];
+    movesetboard *pmsb;
     
     if( fTurn < 0 ) {
 	outputl( "There must be a game in progress to set the board." );
@@ -202,8 +202,15 @@ extern void CommandSetBoard( char *sz ) {
 	return;
     }
 
-    memcpy( anBoard, an, sizeof( an ) );
-
+    pmsb = malloc( sizeof( *pmsb ) );
+    pmsb->mt = MOVE_SETBOARD;
+    
+    if( fMove )
+	SwapSides( an );
+    PositionKey( an, pmsb->auchKey );
+    
+    AddMoveRecord( pmsb );
+    
     ShowBoard();
 }
 
@@ -460,13 +467,6 @@ CommandSetEvalCubeful( char *sz ) {
   SetToggle( "cubeful", &pecSet->fCubeful, sz,
              "Cubeful evaluation enabled.",
              "Cubeful evaluation disabled." );
-}
-
-
-extern void CommandSetEvalConsistency( char *sz ) {
-
-    SetToggle( "consistency", &pecSet->fRelativeAccuracy, sz, "Consistent "
-	       "evaluation enabled.", "Consistent evaluation disabled." );
 }
 
 extern void CommandSetEvalPlies( char *sz ) {

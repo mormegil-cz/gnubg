@@ -176,7 +176,11 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	break;
 	
     case MOVE_SETBOARD:
-	assert( FALSE );
+	PositionFromKey( anBoard, pmr->sb.auchKey );
+
+	if( fMove )
+	    SwapSides( anBoard );
+
 	break;
 	
     case MOVE_SETDICE:
@@ -187,13 +191,16 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	break;
 	
     case MOVE_SETCUBEVAL:
-	assert( FALSE );
+	nCube = pmr->scv.nCube;
+	fDoubled = FALSE;
+	fTurn = fMove;
 	break;
 	
     case MOVE_SETCUBEPOS:
-	assert( FALSE );
+	fCubeOwner = pmr->scp.fCubeOwner;
+	fDoubled = FALSE;
+	fTurn = fMove;
 	break;
-	/* FIXME */
     }
 }
 
@@ -412,8 +419,13 @@ static int ComputerTurn( void ) {
       arOutput[ 1 ] = arOutput[ 2 ] =
         arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
 
-      /* I win 100% normal/gammons/backgammons */
-      arOutput[ fResigned - 1 ] = 1.0;
+      if( fResigned >= 2 )
+	  /* resigned at least a gammon */
+	  arOutput[ 1 ] = 1.0;
+
+      if( fResigned == 3 )
+	  /* resigned a backgammon */
+	  arOutput[ 2 ] = 1.0;
 
       InvertEvaluation ( arOutput );
       
@@ -470,7 +482,7 @@ static int ComputerTurn( void ) {
 
       if ( fCubeUse && ! anDice[ 0 ] && GetDPEq ( NULL, NULL, &ci ) ) {
 
-        static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE, FALSE }; 
+        static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE }; 
         
         /* We have access to the cube */
 
@@ -594,11 +606,12 @@ extern void CancelCubeAction( void ) {
     if( fDoubled ) {
 	outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	fDoubled = FALSE;
-	fNextTurn = TRUE;
 
 	if( fDisplay )
 	    ShowBoard();
-	
+
+	/* FIXME should fTurn be set to fMove? */
+	TurnDone(); /* FIXME is this right? */
 	/* FIXME delete all MOVE_DOUBLE records */
     }
 }
@@ -819,6 +832,12 @@ extern void CommandAgree( char *sz ) {
 
     moveresign *pmr;
     
+    if( fTurn < 0 ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+
+	return;
+    }
+
     if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
@@ -846,6 +865,12 @@ extern void CommandAgree( char *sz ) {
 
 extern void CommandDecline( char *sz ) {
 
+    if( fTurn < 0 ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+
+	return;
+    }
+
     if( ap[ fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
 	outputl( "It is the computer's turn -- type `play' to force it to "
 		 "move immediately." );
@@ -863,7 +888,8 @@ extern void CommandDecline( char *sz ) {
 		aszGameResult[ fResigned - 1 ] );
 
     fResigned = FALSE;
-
+    fTurn = !fTurn;
+    
     TurnDone();
 }
 
