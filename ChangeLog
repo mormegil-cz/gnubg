@@ -1,3 +1,10 @@
+Wed Dec 18 19:33:05 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Cope with beavers from TrueMoneyGames
+	(reported by Albert Silver)
+
+	* import.c (ParseMatMove): try to cope with beavers.
+
 Wed Dec 18 19:08:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* import.c (ImportSGGGame): try to cope with duplicate rolls
