@@ -50,6 +50,7 @@ extern double erf( double x );
 
 #include "eval.h"
 #include "matchequity.h"
+#include "i18n.h"
 
 typedef struct _parameter {
 
@@ -1380,6 +1381,8 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   /* initialise data */
 
+  PushLocale ( "C" );
+
   initMD ( pmd );
 
   /* fetch information from xml doc */
@@ -1480,6 +1483,8 @@ static int readMET ( metdata *pmd, const char *szFileName,
 #endif
 
  finish:
+
+  PopLocale ();
 
   if ( doc )
     xmlFreeDoc ( doc );
