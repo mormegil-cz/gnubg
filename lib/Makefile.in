@@ -73,7 +73,7 @@ noinst_TEXINFOS = event.texi
 
 EXTRA_DIST = rand_r.c rand_r.h
 
-EXTRA_PROGRAMS = hashtest
+check_PROGRAMS = hashtest
 hashtest_SOURCES = hashtest.c
 hashtest_LDADD = -L. -levent
 
@@ -193,6 +193,15 @@ libevent.a: $(libevent_a_OBJECTS) $(libevent_a_DEPENDENCIES)
 	-rm -f libevent.a
 	$(AR) cru libevent.a $(libevent_a_OBJECTS) $(libevent_a_LIBADD)
 	$(RANLIB) libevent.a
+
+mostlyclean-checkPROGRAMS:
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
+distclean-checkPROGRAMS:
+
+maintainer-clean-checkPROGRAMS:
 
 hashtest: $(hashtest_OBJECTS) $(hashtest_DEPENDENCIES)
 	@rm -f hashtest
@@ -342,6 +351,7 @@ info: info-am
 dvi-am:
 dvi: dvi-am
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 installcheck-am:
@@ -377,28 +387,29 @@ distclean-generic:
 
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-hdr mostlyclean-noinstLIBRARIES \
-		mostlyclean-compile mostlyclean-tags mostlyclean-depend \
-		mostlyclean-generic
+		mostlyclean-compile mostlyclean-checkPROGRAMS \
+		mostlyclean-tags mostlyclean-depend mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-hdr clean-noinstLIBRARIES clean-compile clean-tags \
-		clean-depend clean-generic mostlyclean-am
+clean-am:  clean-hdr clean-noinstLIBRARIES clean-compile \
+		clean-checkPROGRAMS clean-tags clean-depend \
+		clean-generic mostlyclean-am
 
 clean: clean-am
 
 distclean-am:  distclean-hdr distclean-noinstLIBRARIES distclean-compile \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
+		distclean-checkPROGRAMS distclean-tags distclean-depend \
+		distclean-generic clean-am
 
 distclean: distclean-am
 	-rm -f config.status
 
 maintainer-clean-am:  maintainer-clean-hdr \
 		maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-depend maintainer-clean-generic \
-		distclean-am
+		maintainer-clean-compile maintainer-clean-checkPROGRAMS \
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -409,7 +420,9 @@ maintainer-clean: maintainer-clean-am
 mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
 clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+maintainer-clean-compile mostlyclean-checkPROGRAMS \
+distclean-checkPROGRAMS clean-checkPROGRAMS \
+maintainer-clean-checkPROGRAMS tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \
 distclean-depend clean-depend maintainer-clean-depend check-TESTS \
 info-am info dvi-am dvi check check-am installcheck-am installcheck \

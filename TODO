@@ -55,7 +55,6 @@ duplication of effort and to make sure our changes merge easily.
   previous ShowBoard before sending a new one; boards in the meantime
   can be silently discarded.  What does xterm do to implement jump
   scrolling?
-** Allow clicking on a point to make that point.
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
 
@@ -114,3 +113,4 @@ duplication of effort and to make sure our changes merge easily.
   both players have up to 11 chequers in the home board onto a CD-ROM).
 ** Move the built-in RNGs into lib/; they can then be used instead of
   rand_r for better quality random numbers and improved portability.
+** Add a "show seed" command for the MD5 and user generators.

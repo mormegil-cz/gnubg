@@ -10,7 +10,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c mt19937int.c \
 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h \
-	isaacs.h copying.c kleinman.c
+	isaacs.h copying.c kleinman.c md5.c md5.h
 COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -51,7 +51,11 @@ makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
 
-TESTS = gnubgtest
+check_PROGRAMS = md5test
+
+md5test_SOURCES = md5test.c md5.c md5.h
+
+TESTS = gnubgtest md5test
 distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 

@@ -1,3 +1,10 @@
+Fri Jul 14 10:12:48 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* md5.c: New file.  Add another dice generator (MD5 hash of the seed).
+
+	* gtkboard.c: Allow clicking on an empty point (or opponent blot) to
+	make the point.
+
 Thu Jul 13 09:08:01 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* configure.in: Merged the GTK and Ext ports back together.  Use

@@ -71,7 +71,7 @@ VERSION = @VERSION@
 
 COMMON_INCS = -I$(srcdir)/lib
 COMMON_LIBS = -Llib -levent
-COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinman.c
+COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c mt19937int.c 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h 	isaacs.h copying.c kleinman.c md5.c md5.h
 
 COMMON_DEPS = lib/libevent.a
 
@@ -102,7 +102,11 @@ makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
 
-TESTS = gnubgtest
+check_PROGRAMS = md5test
+
+md5test_SOURCES = md5test.c md5.c md5.h
+
+TESTS = gnubgtest md5test
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -124,17 +128,22 @@ X_PRE_LIBS = @X_PRE_LIBS@
 @USE_GTK_FALSE@@USE_EXT_TRUE@eval.o play.o positionid.o drawboard.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@pub_eval.o set.o show.o database.o \
 @USE_GTK_FALSE@@USE_EXT_TRUE@mt19937int.o dice.o rollout.o isaac.o \
-@USE_GTK_FALSE@@USE_EXT_TRUE@copying.o kleinman.o xboard.o xgame.o
+@USE_GTK_FALSE@@USE_EXT_TRUE@copying.o kleinman.o md5.o xboard.o \
+@USE_GTK_FALSE@@USE_EXT_TRUE@xgame.o
 @USE_GTK_TRUE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @USE_GTK_TRUE@positionid.o drawboard.o pub_eval.o set.o show.o \
 @USE_GTK_TRUE@database.o mt19937int.o dice.o rollout.o isaac.o \
-@USE_GTK_TRUE@copying.o kleinman.o gtkboard.o gtkgame.o
+@USE_GTK_TRUE@copying.o kleinman.o md5.o gtkboard.o gtkgame.o
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@getopt1.o eval.o play.o positionid.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@drawboard.o pub_eval.o set.o show.o \
 @USE_GTK_FALSE@@USE_EXT_FALSE@database.o mt19937int.o dice.o rollout.o \
-@USE_GTK_FALSE@@USE_EXT_FALSE@isaac.o copying.o kleinman.o
+@USE_GTK_FALSE@@USE_EXT_FALSE@isaac.o copying.o kleinman.o md5.o
 gnubg_LDFLAGS = 
+md5test_OBJECTS =  md5test.o md5.o
+md5test_LDADD = $(LDADD)
+md5test_DEPENDENCIES = 
+md5test_LDFLAGS = 
 makebearoff_OBJECTS =  makebearoff.o eval.o positionid.o pub_eval.o
 makebearoff_LDFLAGS = 
 makeweights_OBJECTS =  makeweights.o
@@ -159,11 +168,12 @@ DIST_SUBDIRS =  lib doc ext lib doc
 DEP_FILES =  .deps/copying.P .deps/database.P .deps/dice.P \
 .deps/drawboard.P .deps/eval.P .deps/getopt.P .deps/getopt1.P \
 .deps/gnubg.P .deps/gtkboard.P .deps/gtkgame.P .deps/isaac.P \
-.deps/kleinman.P .deps/makebearoff.P .deps/makeweights.P \
-.deps/mt19937int.P .deps/play.P .deps/positionid.P .deps/pub_eval.P \
-.deps/rollout.P .deps/set.P .deps/show.P .deps/xboard.P .deps/xgame.P
-SOURCES = $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
-OBJECTS = $(gnubg_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
+.deps/kleinman.P .deps/makebearoff.P .deps/makeweights.P .deps/md5.P \
+.deps/md5test.P .deps/mt19937int.P .deps/play.P .deps/positionid.P \
+.deps/pub_eval.P .deps/rollout.P .deps/set.P .deps/show.P \
+.deps/xboard.P .deps/xgame.P
+SOURCES = $(gnubg_SOURCES) $(md5test_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
+OBJECTS = $(gnubg_OBJECTS) $(md5test_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -236,6 +246,15 @@ uninstall-binPROGRAMS:
 	  rm -f $(DESTDIR)$(bindir)/`echo $$p|sed 's/$(EXEEXT)$$//'|sed '$(transform)'|sed 's/$$/$(EXEEXT)/'`; \
 	done
 
+mostlyclean-checkPROGRAMS:
+
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
+distclean-checkPROGRAMS:
+
+maintainer-clean-checkPROGRAMS:
+
 mostlyclean-noinstPROGRAMS:
 
 clean-noinstPROGRAMS:
@@ -264,6 +283,10 @@ maintainer-clean-compile:
 gnubg: $(gnubg_OBJECTS) $(gnubg_DEPENDENCIES)
 	@rm -f gnubg
 	$(LINK) $(gnubg_LDFLAGS) $(gnubg_OBJECTS) $(gnubg_LDADD) $(LIBS)
+
+md5test: $(md5test_OBJECTS) $(md5test_DEPENDENCIES)
+	@rm -f md5test
+	$(LINK) $(md5test_LDFLAGS) $(md5test_OBJECTS) $(md5test_LDADD) $(LIBS)
 
 makebearoff: $(makebearoff_OBJECTS) $(makebearoff_DEPENDENCIES)
 	@rm -f makebearoff
@@ -507,6 +530,7 @@ info: info-recursive
 dvi-am:
 dvi: dvi-recursive
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 installcheck-am:
@@ -544,26 +568,28 @@ distclean-generic:
 
 maintainer-clean-generic:
 mostlyclean-am:  mostlyclean-hdr mostlyclean-binPROGRAMS \
-		mostlyclean-noinstPROGRAMS mostlyclean-compile \
-		mostlyclean-tags mostlyclean-depend mostlyclean-generic
+		mostlyclean-checkPROGRAMS mostlyclean-noinstPROGRAMS \
+		mostlyclean-compile mostlyclean-tags mostlyclean-depend \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-recursive
 
-clean-am:  clean-hdr clean-binPROGRAMS clean-noinstPROGRAMS \
-		clean-compile clean-tags clean-depend clean-generic \
-		mostlyclean-am
+clean-am:  clean-hdr clean-binPROGRAMS clean-checkPROGRAMS \
+		clean-noinstPROGRAMS clean-compile clean-tags \
+		clean-depend clean-generic mostlyclean-am
 
 clean: clean-recursive
 
 distclean-am:  distclean-hdr distclean-binPROGRAMS \
-		distclean-noinstPROGRAMS distclean-compile \
-		distclean-tags distclean-depend distclean-generic \
-		clean-am
+		distclean-checkPROGRAMS distclean-noinstPROGRAMS \
+		distclean-compile distclean-tags distclean-depend \
+		distclean-generic clean-am
 
 distclean: distclean-recursive
 	-rm -f config.status
 
 maintainer-clean-am:  maintainer-clean-hdr maintainer-clean-binPROGRAMS \
+		maintainer-clean-checkPROGRAMS \
 		maintainer-clean-noinstPROGRAMS \
 		maintainer-clean-compile maintainer-clean-tags \
 		maintainer-clean-depend maintainer-clean-generic \
@@ -577,14 +603,16 @@ maintainer-clean: maintainer-clean-recursive
 .PHONY: mostlyclean-hdr distclean-hdr clean-hdr maintainer-clean-hdr \
 mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
-mostlyclean-noinstPROGRAMS distclean-noinstPROGRAMS \
-clean-noinstPROGRAMS maintainer-clean-noinstPROGRAMS \
-mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile uninstall-pkgdataDATA install-pkgdataDATA \
-install-data-recursive uninstall-data-recursive install-exec-recursive \
-uninstall-exec-recursive installdirs-recursive uninstalldirs-recursive \
-all-recursive check-recursive installcheck-recursive info-recursive \
-dvi-recursive mostlyclean-recursive distclean-recursive clean-recursive \
+mostlyclean-checkPROGRAMS distclean-checkPROGRAMS clean-checkPROGRAMS \
+maintainer-clean-checkPROGRAMS mostlyclean-noinstPROGRAMS \
+distclean-noinstPROGRAMS clean-noinstPROGRAMS \
+maintainer-clean-noinstPROGRAMS mostlyclean-compile distclean-compile \
+clean-compile maintainer-clean-compile uninstall-pkgdataDATA \
+install-pkgdataDATA install-data-recursive uninstall-data-recursive \
+install-exec-recursive uninstall-exec-recursive installdirs-recursive \
+uninstalldirs-recursive all-recursive check-recursive \
+installcheck-recursive info-recursive dvi-recursive \
+mostlyclean-recursive distclean-recursive clean-recursive \
 maintainer-clean-recursive tags tags-recursive mostlyclean-tags \
 distclean-tags clean-tags maintainer-clean-tags distdir \
 mostlyclean-depend distclean-depend clean-depend \

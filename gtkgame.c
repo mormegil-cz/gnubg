@@ -223,7 +223,21 @@ extern void RunGTK( void ) {
 	{ "/_Settings/_Cube", NULL, NULL, 0, "<Branch>" },
 	{ "/_Settings/_Cube/_Owner", NULL, NULL, 0, "<Branch>" },
 	{ "/_Settings/_Cube/_Use", NULL, NULL, 0, "<CheckItem>" },
-	{ "/_Settings/_Display", NULL, NULL, 0, "<CheckItem>" },
+	{ "/_Settings/_Dice generation", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Dice generation/_ANSI", NULL, NULL, 0, "<RadioItem>" },
+	{ "/_Settings/_Dice generation/_BSD", NULL, NULL, 0,
+	  "/Settings/Dice generation/ANSI" },
+	{ "/_Settings/_Dice generation/_ISAAC", NULL, NULL, 0,
+	  "/Settings/Dice generation/ANSI" },
+	{ "/_Settings/_Dice generation/Ma_nual", NULL, NULL, 0,
+	  "/Settings/Dice generation/ANSI" },
+	{ "/_Settings/_Dice generation/_MD5", NULL, NULL, 0,
+	  "/Settings/Dice generation/ANSI" },
+	{ "/_Settings/_Dice generation/Mersenne _Twister", NULL, NULL, 0,
+	  "/Settings/Dice generation/ANSI" },
+	{ "/_Settings/_Dice generation/_User", NULL, NULL, 0,
+	  "/Settings/Dice generation/ANSI" },
+	{ "/_Settings/Di_splay", NULL, NULL, 0, "<CheckItem>" },
 	{ "/_Settings/_Jacoby", NULL, NULL, 0, "<CheckItem>" },
 	{ "/_Settings/_Nackgammon", NULL, NULL, 0, "<CheckItem>" },
 	{ "/_Help", NULL, NULL, 0, "<Branch>" },
@@ -254,6 +268,9 @@ extern void RunGTK( void ) {
 			FALSE, FALSE, 0 );
 		       
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
+    /* Make sure the window is reasonably big, but will fit on a 640x480
+       screen. */
+    gtk_window_set_default_size( GTK_WINDOW( pwMain ), 500, 450 );
     gtk_widget_show_all( pwMain );
     
     gtk_signal_connect( GTK_OBJECT( pwMain ), "delete_event",

@@ -64,7 +64,7 @@ command acSetEvaluation[] = {
 static void SetRNG( rng rngNew, char *szSeed ) {
 
     static char *aszRNG[] = {
-	"ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
+	"ANSI", "BSD", "ISAAC", "manual", "MD5", "Mersenne Twister",
 	"user supplied"
     };
     
@@ -721,6 +721,11 @@ extern void CommandSetRNGIsaac( char *sz ) {
 extern void CommandSetRNGManual( char *sz ) {
 
     SetRNG ( RNG_MANUAL, sz );
+}
+
+extern void CommandSetRNGMD5( char *sz ) {
+
+    SetRNG ( RNG_MD5, sz );
 }
 
 extern void CommandSetRNGMersenne( char *sz ) {

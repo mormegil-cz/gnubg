@@ -205,6 +205,7 @@ command acDatabase[] = {
       NULL },
     { "manual", CommandSetRNGManual, "Enter all dice rolls manually", NULL,
       NULL },
+    { "md5", CommandSetRNGMD5, "Use the MD5 generator", szOPTSEED, NULL },
     { "mersenne", CommandSetRNGMersenne, "Use the Mersenne Twister generator",
       szOPTSEED, NULL },
     { "user", CommandSetRNGUser, "Specify an external generator", szOPTSEED,

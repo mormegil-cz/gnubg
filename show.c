@@ -347,7 +347,7 @@ extern void CommandShowPrompt( char *sz ) {
 extern void CommandShowRNG( char *sz ) {
 
   static char *aszRNG[] = {
-    "ANSI", "BSD", "ISAAC", "manual", "Mersenne Twister",
+    "ANSI", "BSD", "ISAAC", "manual", "MD5", "Mersenne Twister",
     "user supplied"
   };
 

@@ -23,7 +23,7 @@
 #define _DICE_H_
 
 typedef enum _rng {
-    RNG_ANSI, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MERSENNE, RNG_USER
+    RNG_ANSI, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MD5, RNG_MERSENNE, RNG_USER
 } rng;
 
 extern rng rngCurrent;

@@ -13,7 +13,7 @@ noinst_TEXINFOS = event.texi
 
 EXTRA_DIST = rand_r.c rand_r.h
 
-EXTRA_PROGRAMS = hashtest
+check_PROGRAMS = hashtest
 hashtest_SOURCES = hashtest.c
 hashtest_LDADD = -L. -levent
 
