@@ -6857,23 +6857,33 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Overall rating"),
          N_("Actual result"),
          N_("Luck adjusted result"),
-         N_("MWC against current opponent"),
-         N_("Guestimated abs. rating")
+  };
+
+  static char *aszLabelsMoney[] = {
+    N_("Advantage (actual) in ppg"),
+    N_("95% confidence interval (ppg)"),
+    N_("Advantage (luck adjusted) in ppg"),
+    N_("95% confidence interval (ppg)")
+  };
+
+  static char *aszLabelsMatch[] = {
+    N_("Relative FIBS rating")
   };
 
   GtkWidget *pwDialog = GTKCreateDialog( szTitle,
                                        DT_INFO, NULL, NULL ),
       *psw = gtk_scrolled_window_new( NULL, NULL ),
       *pwStats = gtk_clist_new_with_titles( 3, aszEmpty );
-  int i;
+  int i, j;
   char sz[ 32 ];
   ratingtype rt[ 2 ];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-  float r = getMWCFromError ( psc, aaaar );
   int irow = 0;
 
   GtkWidget *pwButtons,
     *pwCopy = gtk_button_new_with_label( "Copy" );
+
+  getMWCFromError ( psc, aaaar );
 
   pwButtons = DialogArea( pwDialog, DA_BUTTONS );
   gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
@@ -6891,10 +6901,27 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
 
-  for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) - ( pms->nMatchTo == 0 ) * 2 ); i++ ) {
+  j = 0;
+  for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), i, 0, gettext ( aszLabels[i] ) );
+    gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, gettext ( aszLabels[i] ) );
   }
+  if ( pms->nMatchTo ) 
+    for (i = 0; i < ( sizeof( aszLabelsMatch ) / sizeof( *aszLabelsMatch ) ); 
+         ++i, ++j ) {
+      gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
+      gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
+                          gettext ( aszLabelsMatch[i] ) );
+    }
+  else
+    for (i = 0; i < ( sizeof( aszLabelsMoney ) / sizeof( *aszLabelsMoney ) );
+         ++i, ++j ) {
+      gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
+      gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
+                          gettext ( aszLabelsMoney[i] ) );
+    }
+
+
         
   sprintf(sz,"%d", psc->anTotalMoves[ 0 ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
@@ -7224,43 +7251,62 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
   if ( psc->fDice ) {
 
-    if ( pms->nMatchTo )
+    if ( pms->nMatchTo ) {
+      float r = 0.5f + psc->arActualResult[ 0 ] - 
+        psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+      float rRating = relativeFibsRating( r, pms->nMatchTo );
+
       for ( i = 0; i < 2; ++i ) {
         sprintf( sz, "%.2f%%", 
                  100.0 * ( 0.5f + psc->arActualResult[ i ] - 
                            psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] ) );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
       }
-    else
+
       for ( i = 0; i < 2; ++i ) {
-        sprintf( sz, "%.3f", 
+        sprintf( sz, "%.2f", ( 1 - 2 * i ) * rRating );
+        gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, i + 1, sz);
+      }
+
+    }
+    else {
+      for ( i = 0; i < 2; ++i ) {
+        sprintf( sz, "%+.3f", 
                  psc->arActualResult[ i ] - 
                  psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
-      }
+        
+        if( psc->nGames > 1 ) {
 
+          sprintf( sz, "%+.3f",
+                   psc->arActualResult[ i ] / psc->nGames );
+          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, i + 1, sz );
+
+          sprintf( sz, "%.3f",
+                   1.95996f *
+                   sqrt( psc->arVarianceActual[ i ] / psc->nGames ) );
+          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 2, i + 1, sz );
+
+          sprintf( sz, "%+.3f",
+                   ( psc->arActualResult[ i ] - 
+                     psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] ) / 
+                   psc->nGames );
+          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 3, i + 1, sz );
+          
+          sprintf( sz, "%.3f",
+                   1.95996f *
+                   sqrt( psc->arVarianceLuckAdj[ i ] / psc->nGames ) );
+          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 4, i + 1, sz );
+
+        }
+         
+      }
+    }
+
+    irow += 5;
+    
   }
   
-  /* Guestimated FIBS rating */
-
-  if ( pms->nMatchTo ) {
-
-    sprintf ( sz, "%7.2f%%", 100.0 * r );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-    sprintf ( sz, "%7.2f%%", 100.0 * (1.0 - r) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-
-    sprintf ( sz, "%7.2f", 
-              absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ], 
-                                   ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-    sprintf ( sz, "%7.2f", 
-              absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ], 
-                                   ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-
-  }
-
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
   gtk_container_add( GTK_CONTAINER( psw ), pwStats );

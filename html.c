@@ -2852,7 +2852,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
   ratingtype rt[ 2 ];
   int ai[ 2 ];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-  float r = getMWCFromError ( psc, aaaar );
 
   const char *aszLuckRating[] = {
     N_("&quot;Haaa-haaa&quot;"),
@@ -2863,6 +2862,8 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     N_("Go to Las Vegas immediately"),
     N_("Cheater :-)")
   };
+
+  getMWCFromError ( psc, aaaar );
 
   fprintf ( pf, "\n<!-- %s Statistics -->\n\n", 
             ( iGame >= 0 ) ? "Game" : "Match" );
@@ -3352,66 +3353,83 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                  pms->nMatchTo, pms->anScore, pms->fCrawford,
                  pms->fJacoby, nBeavers, pms->bgv );
 
-    if ( psc->fDice ) {
+  }
 
-      if ( pms->nMatchTo ) {
-        printStatTableRow( pf, 
-                           _("Actual result"),
-                           "%.2f%%",
-                           100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
-                           100.0 * ( 0.5f + psc->arActualResult[ 1 ] ) );
-
-        printStatTableRow( pf, 
-                           _("Luck adjusted result"),
-                           "%.2f%%",
-                           100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
-                                     psc->arLuck[ 0 ][ 1 ] + 
-                                     psc->arLuck[ 1 ][ 1 ] ),
-                           100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
-                                     psc->arLuck[ 1 ][ 1 ] + 
-                                     psc->arLuck[ 0 ][ 1 ] ) );
-      }
-      else {
-
-        printStatTableRow( pf,
-                           _("Actual result"),
-                           "%+.3f",
-                           psc->arActualResult[ 0 ],
-                           psc->arActualResult[ 1 ] );
-        printStatTableRow( pf,
-                           _("Luck adjusted result"),
-                           "%+.3f",
-                           psc->arActualResult[ 0 ] - 
-                           psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
-                           psc->arActualResult[ 1 ] - 
-                           psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
-
-      }
-
-    }
+  if ( psc->fDice ) {
 
     if ( pms->nMatchTo ) {
+      float r = 0.5f + psc->arActualResult[ 0 ] - 
+        psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+      float rRating = relativeFibsRating( r, pms->nMatchTo );
 
-      /* skill */
+      printStatTableRow( pf, 
+                         _("Actual result"),
+                         "%.2f%%",
+                         100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
+                         100.0 * ( 0.5f + psc->arActualResult[ 1 ] ) );
 
-      printStatTableRow ( pf,
-                          _( "MWC against current opponent"),
-                          "%6.2f%%",
-                          100.0 * r, 
-                          100.0 * ( 1.0 - r ) );
+      printStatTableRow( pf, 
+                         _("Luck adjusted result"),
+                         "%.2f%%",
+                         100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
+                                   psc->arLuck[ 0 ][ 1 ] + 
+                                   psc->arLuck[ 1 ][ 1 ] ),
+                         100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
+                                   psc->arLuck[ 1 ][ 1 ] + 
+                                   psc->arLuck[ 0 ][ 1 ] ) );
+      printStatTableRow( pf,
+                         _("Relative FIBS rating"),
+                         "%.2f",
+                         rRating, -rRating );
+    }
+    else {
 
-      printStatTableRow ( pf,
-                          _( "Guestimated abs. rating"),
-                          "%6.2f",
-                          absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ]
-                                                    [ PLAYER_0 ][ NORMALISED ],
-                                               pms->nMatchTo ),
-                          absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ]
-                                                    [ PLAYER_1 ][ NORMALISED ],
-                                               pms->nMatchTo ) );
+      printStatTableRow( pf,
+                         _("Actual result"),
+                         "%+.3f",
+                         psc->arActualResult[ 0 ],
+                         psc->arActualResult[ 1 ] );
+      printStatTableRow( pf,
+                         _("Luck adjusted result"),
+                         "%+.3f",
+                         psc->arActualResult[ 0 ] - 
+                         psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
+                         psc->arActualResult[ 1 ] - 
+                         psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+
+      if ( psc->nGames > 1 ) {
+        printStatTableRow( pf,
+                           _("Advantage (actual) in ppg"),
+                           "%+.3f",
+                           psc->arActualResult[ 0 ] / psc->nGames,
+                           psc->arActualResult[ 1 ] / psc->nGames );
+        printStatTableRow( pf,
+                           _("95%% confidence interval (ppg)"),
+                           "%.3f",
+                           1.95996f *
+                           sqrt( psc->arVarianceActual[ 0 ] / psc->nGames ),
+                           1.95996f *
+                           sqrt( psc->arVarianceActual[ 1 ] / psc->nGames ) );
+        printStatTableRow( pf,
+                           _("Advantage (luck adjusted) in ppg"),
+                           "%+.3f",
+                           ( psc->arActualResult[ 0 ] - 
+                             psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ) / 
+                           psc->nGames,
+                           ( psc->arActualResult[ 1 ] - 
+                             psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) /
+                           psc->nGames );
+        printStatTableRow( pf,
+                           _("95%% confidence interval (ppg)"),
+                           "%.3f",
+                           1.95996f *
+                           sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),
+                           1.95996f *
+                           sqrt( psc->arVarianceLuckAdj[ 1 ] / psc->nGames ) );
+      }
 
     }
-  
+
   }
 
   fprintf ( pf, "</table>\n" );

@@ -959,6 +959,35 @@ AnalyzeGame ( list *plGame ) {
     return 0;
 }
 
+
+static void
+UpdateVariance( float *prVariance,
+                const float rSum,
+                const float rSumAdd,
+                const int nGames ) {
+
+  if ( ! nGames || nGames == 1 ) {
+    *prVariance = 0;
+    return;
+  }
+  else {
+
+    /* See <URL:http://mathworld.wolfram.com/SampleVarianceComputation.html>
+       for formula */
+
+    float rDelta = rSumAdd;
+    float rMuNew = rSum/nGames;
+    float rMuOld = ( rSum - rDelta ) / ( nGames - 1 );
+    float rDeltaMu = rMuNew - rMuOld;
+
+    *prVariance = *prVariance * ( 1.0 - 1.0 / ( nGames - 1.0f ) ) +
+      nGames * rDeltaMu * rDeltaMu;
+
+    return;
+
+  }
+
+}
       	
 extern void
 AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
@@ -966,6 +995,8 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
   /* pscB = pscB + pscA */
 
   int i, j;
+
+  pscB->nGames++;
 
   pscB->fMoves |= pscA->fMoves;
   pscB->fDice |= pscA->fDice;
@@ -1016,7 +1047,23 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
 
     }
 
+  }
+
+  for ( i = 0; i < 2; ++i ) {
+    /* separate loop, else arLuck[ 1 ] is not calculated for i=0 */
+
     pscB->arActualResult[ i ] += pscA->arActualResult[ i ];
+    UpdateVariance( &pscB->arVarianceActual[ i ], 
+                    pscB->arActualResult[ i ],
+                    pscA->arActualResult[ i ],
+                    pscB->nGames );
+    UpdateVariance( &pscB->arVarianceLuckAdj[ i ], 
+                    pscB->arActualResult[ i ] - 
+                    pscB->arLuck[ i ][ 1 ] + pscB->arLuck[ !i ][ 1 ],
+                    pscA->arActualResult[ i ] -
+                    pscA->arLuck[ i ][ 1 ] + pscA->arLuck[ !i ][ 1 ],
+                    pscB->nGames );
+
 
   }
 
@@ -1189,8 +1236,12 @@ IniStatcontext ( statcontext *psc ) {
     }
 
     psc->arActualResult[ i ] = 0.0f;
+    psc->arVarianceActual[ i ] = 0.0f;
+    psc->arVarianceLuckAdj[ i ] = 0.0f;
 
   }
+
+  psc->nGames = 0;
 
 }
 
@@ -1338,18 +1389,14 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
   ratingtype rt[ 2 ];
   char szTemp[1024];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-  float r = getMWCFromError ( psc, aaaar );
   float rFac = ms.nMatchTo ? 100.0f : 1.0f;
   int n;
 
 
+  getMWCFromError ( psc, aaaar );
   /* nice human readable dump */
 
-  /* FIXME: make tty output shorter */
-  /* FIXME: the code below is only for match play */
   /* FIXME: honour fOutputMWC etc. */
-  /* FIXME: calculate ratings (ET, World class, etc.) */
-  /* FIXME: use output*() functions, not printf */
 
   sprintf ( szTemp, "Player\t\t\t\t%-15s\t\t%-15s\n\n",
            ap[ 0 ].szName, ap [ 1 ].szName );
@@ -1729,8 +1776,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                           psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ),
                 100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
                           psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) );
-    else
-      sprintf ( strchr ( szOutput, 0 ),
+    else {
+      sprintf ( strchr ( szOutput, 0 ), 
                 "%-31s %+7.3f                 %+7.3f\n"
                 "%-31s %+7.3f                 %+7.3f\n",
                 _("Actual result"),
@@ -1741,32 +1788,50 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                 psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
                 psc->arActualResult[ 1 ] - 
                 psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+      if ( psc->nGames > 1 ) {
+        sprintf( strchr( szOutput, 0 ),
+                 "\n"
+                 "%-31s %7.3f                 %7.3f\n"
+                 "%-31s %7.3f                 %7.3f\n"
+                 "%-31s %7.3f                 %7.3f\n"
+                 "%-31s %7.3f                 %7.3f\n",
+                 _("Advantage (actual) in ppg"),
+                 psc->arActualResult[ 0 ] / psc->nGames,
+                 psc->arActualResult[ 1 ] / psc->nGames,
+                 _("95% confidence interval (ppg)"),
+                 1.95996f *
+                 sqrt( psc->arVarianceActual[ 0 ] / psc->nGames ),
+                 1.95996f *
+                 sqrt( psc->arVarianceActual[ 1 ] / psc->nGames ),
+                 _("Advantage (luck adjusted) in ppg"),
+                 ( psc->arActualResult[ 0 ] - 
+                   psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ) / 
+                 psc->nGames,
+                 ( psc->arActualResult[ 1 ] - 
+                   psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) /
+                 psc->nGames,
+                 _("95% confidence interval (ppg)"),
+                 1.95996f *
+                 sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),
+                 1.95996f *
+                 sqrt( psc->arVarianceLuckAdj[ 1 ] / psc->nGames ) );
+      }
+
+    }
 
   }
   
   /* calculate total error */
-  
+
   if ( ms.nMatchTo ) {
 
-  sprintf ( strchr ( szOutput, 0 ),
-            "%s\n"
-            "%-31s %7.2f%%                %7.2f%%\n"
-            "%-31s %7.2f                 %7.2f\n",
-            _("Match winning chance"),
-            _("against opponent"),
-            100.0 * r, 100.0 * ( 1.0 - r ),
-            _("Guestimated abs. rating"),
-            absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ], 
-                                 ms.nMatchTo ),
-            absoluteFibsRating ( aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ], 
-                                 ms.nMatchTo ) );
+    float r = 0.5f + psc->arActualResult[ 0 ] - 
+      psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
+    float rRating = relativeFibsRating( r, ms.nMatchTo );
 
-  sprintf( strchr( szOutput, 0 ),
-           "%-31s %7.2f                  %7.2f\n",
-           _("Estimated FIBS rating"),
-           calcFibsRating( aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ], ms.nMatchTo  ),
-           calcFibsRating( aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ], ms.nMatchTo ) );
-
+    sprintf ( strchr ( szOutput, 0 ),
+              "%-31s %7.2f                 %7.2f\n",
+              _("Relative FIBS rating"), rRating, -rRating );
 
   }
 

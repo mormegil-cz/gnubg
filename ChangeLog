@@ -1,3 +1,13 @@
+Thu Jul 17 12:29:20 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Some changes to the match statistics:
+	(a) output ppg advantage for money game
+	(b) REMOVE output of abs. fibs rating
+	(c) add output of relative fibs rating based on luck adj. results
+
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): see above.
+
 Wed Jul 16 21:28:23 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (CommandHint): move code into a set of subroutines.
