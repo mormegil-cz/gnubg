@@ -44,6 +44,8 @@ int stopNextTime;
 int slide_move;
 double animStartTime = 0;
 
+void CreateDotTexture(BoardData *bd);
+
 extern double get_time();
 extern int convert_point( int i, int player );
 extern void setupFlag(BoardData* bd);
@@ -198,6 +200,7 @@ void InitGL(BoardData *bd)
 		if (extensionSupported("GL_EXT_separate_specular_color"))
 			glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
+		CreateDotTexture(bd);
 	}
 }
 
@@ -469,6 +472,17 @@ void DeleteTexture(Texture* texture)
 	texture->texID = 0;
 }
 
+void CreateTexture(int* pID, int width, int height, unsigned char* bits)
+{
+	/* Create texture */
+	glGenTextures(1, pID);
+	glBindTexture(GL_TEXTURE_2D, *pID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	/* Read bits */
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
+}
+
 int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 {
 	unsigned char* bits = 0;
@@ -492,11 +506,11 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 	case TF_BMP:
 		bits = LoadDIBTexture(fp, &texture->width, &texture->height);
 		break;
-	case TF_PNG:
 #if HAVE_LIBPNG
+	case TF_PNG:
 		bits = LoadPNGTexture(fp, &texture->width, &texture->height);
-#endif
 		break;
+#endif
 	default:
 		g_print("Unknown texture type for texture %s\n", filename);
 		return 0;	/* failed to load file */
@@ -524,13 +538,8 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 		return 0;	/* failed to load file */
 	}
 
-	/* Create texture */
-	glGenTextures(1, &texture->texID);
-	glBindTexture(GL_TEXTURE_2D, texture->texID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	/* Read bits */
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, texture->width, texture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
+	CreateTexture(&texture->texID, texture->width, texture->height, bits);
+
 	free(bits);	/* Release loaded image data */
 
 	return 1;
@@ -559,6 +568,39 @@ void GetTextures(BoardData* bd)
 	GetTexture(bd, &bd->rd->BoxMat);
 	GetTexture(bd, &bd->rd->HingeMat);
 	GetTexture(bd, &bd->rd->BackGroundMat);
+}
+
+#define DOT_SIZE 32
+#define MAX_DIST ((DOT_SIZE / 2) * (DOT_SIZE / 2))
+#define MIN_DIST ((DOT_SIZE / 2) * .70f * (DOT_SIZE / 2) * .70f)
+
+void CreateDotTexture(BoardData *bd)
+{
+	int i, j;
+	unsigned char* data = malloc(sizeof(*data) * DOT_SIZE * DOT_SIZE * 3);
+	unsigned char* pData = data;
+
+	for (i = 0; i < DOT_SIZE; i++)
+	{
+		for (j = 0; j < DOT_SIZE; j++)
+		{
+			float xdiff = ((float)i) + .5f - DOT_SIZE / 2;
+			float ydiff = ((float)j) + .5f - DOT_SIZE / 2;
+			float dist = xdiff * xdiff + ydiff * ydiff;
+			float percentage = 1 - ((dist - MIN_DIST) / (MAX_DIST - MIN_DIST));
+			unsigned char value;
+			if (percentage <= 0)
+				value = 0;
+			else if (percentage >= 1)
+				value = 255;
+			else
+				value = (unsigned char)(255 * percentage);
+			pData[0] = pData[1] = pData[2] = value;
+			pData += 3;
+		}
+	}
+	CreateTexture(&bd->dotTexture, DOT_SIZE, DOT_SIZE, data);
+	free(data);
 }
 
 void Set3dSettings(renderdata *prdnew, const renderdata *prd)
@@ -2049,7 +2091,7 @@ int idleTestPerformance(BoardData* bd)
 	return 1;
 }
 
-int TestPerformance3d(BoardData* bd)
+float TestPerformance3d(BoardData* bd)
 {
 	float elapsedTime;
 
@@ -2059,7 +2101,7 @@ int TestPerformance3d(BoardData* bd)
 	gtk_main();
 	elapsedTime = (float)(get_time() - testStartTime);
 
-	return (int)(numFrames / (elapsedTime / 1000.0f));
+	return (numFrames / (elapsedTime / 1000.0f));
 }
 
 void EmptyPos(BoardData *bd)

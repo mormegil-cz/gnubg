@@ -707,7 +707,10 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 	float ds = (DICE_SIZE * 5.0f / 7.0f);
 	float hds = (ds / 2);
 	float x, y;
-	float dotSize = DICE_SIZE / 14.0f;
+	float dotSize = DICE_SIZE / 10.0f;
+	/* Remove specular effects */
+	float zero[4] = {0, 0, 0, 0};
+	glMaterialfv(GL_FRONT, GL_SPECULAR, zero);
 
 	radius = DICE_SIZE / 7.0f;
 
@@ -743,10 +746,15 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 				glPushMatrix();
 				glTranslatef(x - hds, y - hds, 0);
 
-				if (drawOutline)
-					circleOutline(dotSize, dotOffset, bd->rd->curveAccuracy);
-				else
-					circle(dotSize, dotOffset, bd->rd->curveAccuracy);
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D, bd->dotTexture);
+
+				glBegin(GL_QUADS);
+					glTexCoord2f(0, 1); glVertex3f(dotSize, dotSize, dotOffset);
+					glTexCoord2f(1, 1); glVertex3f(-dotSize, dotSize, dotOffset);
+					glTexCoord2f(1, 0); glVertex3f(-dotSize, -dotSize, dotOffset);
+					glTexCoord2f(0, 0); glVertex3f(dotSize, -dotSize, dotOffset);
+				glEnd();
 
 				glPopMatrix();
 
@@ -764,20 +772,6 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 			glRotatef(90, 1, 0, 0);
 	}
 	glPopMatrix();
-}
-
-void DrawDots(BoardData* bd, diceTest* dt)
-{
-	/* Outside dots - middle */
-	drawDots(bd, LIFT_OFF, dt, 1, 0);
-
-	glLineWidth(0.5f);
-	glEnable(GL_LINE_SMOOTH);
-	glEnable(GL_BLEND);
-	/* Outside dots - smooth edges */
-	drawDots(bd, LIFT_OFF, dt, 1, 1);
-	glDisable(GL_BLEND);
-	glDisable(GL_LINE_SMOOTH);
 }
 
 void getDicePos(BoardData* bd, int num, float v[3])
@@ -816,72 +810,72 @@ void moveToDicePos(BoardData* bd, int num)
 	}
 }
 
-void drawDice2(BoardData* bd, int num)
+void drawDice(BoardData* bd, int num)
 {
 	int value;
 	int rotDice[6][2] = {{0, 0}, {0, 1}, {3, 0}, {1, 0}, {0, 3}, {2, 0}};
 	int diceCol = (bd->turn == 1);
-	int blend;
 	int z;
 	diceTest dt;
 	Material* pDiceMat = &bd->rd->DiceMat[diceCol];
+	Material whiteMat;
+	SetupSimpleMat(&whiteMat, 1, 1, 1);
 
-	/* Draw dice */
 	value = bd->diceRoll[num];
+	if (value == 0)
+		return;	/* No value to show */
+	value--;	/* Zero based for array access */
+
+	/* Get dice rotation */
 	if (bd->diceShown == DICE_BELOW_BOARD)
 		z = 0;
 	else
 		z = ((int)bd->dicePos[num][2] + 45) / 90;
 
-	if (value == 0)
-		return;	/* No value to show */
-		
-	value--;	/* Zero based for array access */
+	/* Orientate dice correctly */
 	glRotatef(90.0f * rotDice[value][0], 1, 0, 0);
 	glRotatef(90.0f * rotDice[value][1], 0, 1, 0);
 
 	/* DT = dice test, use to work out which way up the dice is */
 	initDT(&dt, rotDice[value][0], rotDice[value][1], z);
 
-	blend = pDiceMat->alphaBlend;
-
-	if (blend)
+	if (pDiceMat->alphaBlend)
 	{	/* Draw back of dice separately */
 		glCullFace(GL_FRONT);
 		glEnable(GL_BLEND);
 
+		/* Draw dice */
 		setMaterial(pDiceMat);
 		glCallList(bd->diceList);
 
 		/* Place back dots inside dice */
 		setMaterial(&bd->rd->DiceDotMat[diceCol]);
+		glEnable(GL_BLEND);	/* NB. Disabled in diceList */
+		glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR);
 		drawDots(bd, -LIFT_OFF, &dt, 0, 0);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glCullFace(GL_BACK);
-		glEnable(GL_BLEND);
 	}
-	else
-	{	/* Set to .5 for alpha blending */
-		pDiceMat->ambientColour[3] = pDiceMat->diffuseColour[3] = pDiceMat->specularColour[3] = 0.5f;
-	}
-
+	/* Draw dice */
 	setMaterial(&bd->rd->DiceMat[diceCol]);
 	glCallList(bd->diceList);
 
-	/* Draw front dots */
+	/* Draw (front) dots */
+	glEnable(GL_BLEND);
+	/* First blank out space for dots */
+	setMaterial(&whiteMat);
+	glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+	drawDots(bd, LIFT_OFF, &dt, 1, 0);
+
+	/* Now fill space with coloured dots */
 	setMaterial(&bd->rd->DiceDotMat[diceCol]);
-	DrawDots(bd, &dt);
+	glBlendFunc(GL_ONE, GL_ONE);
+	drawDots(bd, LIFT_OFF, &dt, 1, 0);
 
-	if (!blend)	/* Reset alpha values to 1 */
-		pDiceMat->ambientColour[3] = pDiceMat->diffuseColour[3] = pDiceMat->specularColour[3] = 1;
-}
-
-void drawDice(BoardData* bd, int num)
-{
-	glPushMatrix();
-	moveToDicePos(bd, num);
-	drawDice2(bd, num);
-	glPopMatrix();
+	/* Restore blending defaults */
+	glDisable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void getPiecePos(int point, int pos, int swap, float v[3])
@@ -2966,31 +2960,23 @@ void setDicePos(BoardData* bd)
 	updateDiceOccPos(bd);
 }
 
-void drawMovingDice(BoardData* bd, int num)
+void drawDie(BoardData* bd, int num)
 {
 	glPushMatrix();
-	glTranslatef(bd->diceMovingPos[num][0], bd->diceMovingPos[num][1], bd->diceMovingPos[num][2]);
-	glRotatef(bd->diceRotation[num].xRot, 0, 1, 0);
-	glRotatef(bd->diceRotation[num].yRot, 1, 0, 0);
-	glRotatef(bd->dicePos[num][2], 0, 0, 1);
-
-	drawDice2(bd, num);
-	
-	glPopMatrix();
-}
-
-void drawDie(BoardData* bd)
-{
+	/* Move to correct position for die */
 	if (bd->shakingDice)
 	{
-		drawMovingDice(bd, 0);
-		drawMovingDice(bd, 1);
+		glTranslatef(bd->diceMovingPos[num][0], bd->diceMovingPos[num][1], bd->diceMovingPos[num][2]);
+		glRotatef(bd->diceRotation[num].xRot, 0, 1, 0);
+		glRotatef(bd->diceRotation[num].yRot, 1, 0, 0);
+		glRotatef(bd->dicePos[num][2], 0, 0, 1);
 	}
 	else
-	{
-		drawDice(bd, 0);
-		drawDice(bd, 1);
-	}
+		moveToDicePos(bd, num);
+	/* Now draw dice */
+	drawDice(bd, num);
+
+	glPopMatrix();
 }
 
 void initViewArea(viewArea* pva)
@@ -3731,7 +3717,10 @@ void drawBoard(BoardData* bd)
 		tidyEdges(bd->rd);
 
 	if (DiceShowing(bd))
-		drawDie(bd);
+	{
+		drawDie(bd, 0);
+		drawDie(bd, 1);
+	}
 
 	if (bd->moving || bd->drag_point >= 0)
 		drawSpecialPieces(bd);

@@ -261,6 +261,7 @@ typedef struct _BoardData {
 	Texture textureList[MAX_TEXTURES];
 	char* textureName[MAX_TEXTURES];
 	int numTextures;
+	int dotTexture;	/* Holds texture used to draw dots on dice */
 
 #endif
 	renderdata* rd;	/* The board colour settings */
@@ -296,7 +297,7 @@ extern int BoardPoint3d(BoardData *bd, int x, int y, int point);
 extern int MouseMove3d(BoardData *bd, int x, int y);
 extern void RenderBoard3d(BoardData* bd, renderdata* prd, void *glpixmap, unsigned char* buf);
 extern void Tidy3dObjects(BoardData* bd);
-extern int TestPerformance3d(BoardData* bd);
+extern float TestPerformance3d(BoardData* bd);
 extern void Set3dSettings(renderdata *prdnew, const renderdata *prd);
 extern void CopySettings3d(BoardData* from, BoardData* to);
 extern void MakeCurrent3d(GtkWidget *widget);
