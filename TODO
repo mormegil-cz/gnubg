@@ -140,9 +140,8 @@ duplication of effort and to make sure our changes merge easily.
   style will survive across theme changes.
 ** Make usage() show the GDK and GTK options, if appropriate.
 ** Show a preview of the chequers in the appearances dialog.
-** Allow the border specular/shiny parameters to be changed, and honour the
-  user's lighting angle when rendering the border and dice.  Allow the dice
-  pips colour to be changed.
+** Allow the cube and dice pip colours and the border specular/shiny
+  parameters to be changed.
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?  (Wait for
   GTK+ 2.0.)
@@ -177,6 +176,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Think about ways to improve event handling while "busy".  We could save
   them somewhere and then use gdk_event_put() when we're ready. (gary)
 ** CreateDialog() should use GTK+ 2.0 stock icons instead of the gnu. (gary)
+** The edges of the board should cast shadows.  Getting shadows on the
+  board surface is fairly easy... getting shadows on the chequers is not.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,

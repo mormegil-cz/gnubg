@@ -1,3 +1,8 @@
+Fri Mar 15 16:34:57 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_draw, board_draw_dice, board_draw_pips,
+	board_draw_cube): Honour the user's choice of lighting angle.
+
 Fri Mar 15 21:08:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* matchequity.c (readMET): update to libxml2 2.4.16, and resolve
