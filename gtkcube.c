@@ -797,6 +797,15 @@ CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
 
 }
 
+static void
+CubeAnalysisTempMap ( GtkWidget *pw, cubehintdata *pchd ) {
+
+  char *sz = g_strdup( "show temperaturemap =cube" );
+  UserCommand( sz );
+  g_free( sz );
+
+}
+
 static GtkWidget *
 CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
@@ -809,6 +818,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
   GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
+  GtkWidget *pwTempMap = gtk_button_new_with_label( _("Temp. Map" ) );
   GtkWidget *pw;
   int i;
   char *sz;
@@ -817,7 +827,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pchd->pwTools = pwTools = gtk_table_new (4, 2, FALSE);
+  pchd->pwTools = pwTools = gtk_table_new (6, 2, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -865,6 +875,10 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   gtk_table_attach (GTK_TABLE (pwTools), pwCopy, 0, 2, 4, 5,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 0, 2, 5, 6,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
   
   gtk_widget_set_sensitive( pwMWC, pchd->ms.nMatchTo );
   
@@ -885,6 +899,8 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                       GTK_SIGNAL_FUNC( CubeAnalysisMWC ), pchd );
   gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
                       GTK_SIGNAL_FUNC( CubeAnalysisCopy ), pchd );
+  gtk_signal_connect( GTK_OBJECT( pwTempMap ), "clicked",
+                      GTK_SIGNAL_FUNC( CubeAnalysisTempMap ), pchd );
 
   /* tool tips */
 
@@ -911,6 +927,11 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwCopy,
                          _("Copy"),
                          _("Copy") );
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwTempMap,
+                         _("Show Sho Sengoku Temperature Map of position "
+                           "after selected move"),
+                         "" );
 
   return pwTools;
   

@@ -90,7 +90,7 @@ typedef struct _tempmapwidget {
 static int
 TempMapEquities( evalcontext *pec, matchstate *pms, 
                  float aarEquity[ 6 ][ 6 ], int aaanMove[ 6 ][ 6 ][ 8 ],
-                 const gchar *szTitle ) {
+                 const gchar *szTitle, const float rFac ) {
 
 
   int i, j;
@@ -138,8 +138,10 @@ TempMapEquities( evalcontext *pec, matchstate *pms,
         return -1;
       }
 
-      
       InvertEvaluationR( arOutput, &cix );
+
+      if ( ! cix.nMatchTo && rFac != 1.0 )
+        arOutput[ OUTPUT_CUBEFUL_EQUITY ] *= rFac;
 
       aar[ i ][ j ] = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
       aar[ j ][ i ] = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
@@ -172,7 +174,8 @@ CalcTempMapEquities( evalcontext *pec, tempmapwidget *ptmw ) {
     if ( TempMapEquities( pec, ptmw->atm[ i ].pms,
                           ptmw->atm[ i ].aarEquity, 
                           ptmw->atm[ i ].aaanMove,
-                          ptmw->atm[ i ].szTitle ) < 0 ) 
+                          ptmw->atm[ i ].szTitle,
+                          ptmw->atm[ i ].pms->nCube / ptmw->atm[ 0 ].pms->nCube ) < 0 ) 
       return -1;
 
   return 0;

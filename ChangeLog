@@ -1,3 +1,14 @@
+Sun Jun  8 22:09:03 2003  Joern Thyssen  <jth@gnubg.org>
+
+       	New Cube temperature map
+        (suggested by Albert Silver)
+
+        * show.c (CommandShowTemperatureMap): new subcommand "=cube" to
+        show temp. map for cube decision.
+        * gtkgame.c: new menu entry for "show temperaturemap =cube".
+        * gtktempmap.c (TempMapEquities): scale cubeful equity.
+        * gtkcube.c (CreateCubeAnalysisTools): new button for temperature map.
+
 Sun Jun  8 21:41:09 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Fix bug: gnubg crashes when saving or analysing a match

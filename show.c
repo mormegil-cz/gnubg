@@ -2022,7 +2022,44 @@ CommandShowTemperatureMap( char *sz ) {
 #if USE_GTK
 
   if ( fX ) {
-    GTKShowTempMap( &ms, 1, NULL, FALSE );
+
+    if ( sz && *sz && ! strncmp( sz, "=cube", 5 ) ) {
+
+      cubeinfo ci;
+      GetMatchStateCubeInfo( &ci, &ms );
+      if ( GetDPEq( NULL, NULL, &ci ) ) {
+        
+        /* cube is available */
+        
+        matchstate ams[ 2 ];
+        int i;
+        gchar *asz[ 2 ];
+        
+        for ( i = 0; i < 2; ++i )
+          memcpy( &ams[ i ], &ms, sizeof( matchstate ) );
+        
+        ams[ 1 ].nCube *= 2;
+        ams[ 1 ].fCubeOwner = ! ams[ 1 ].fMove;
+        
+        for ( i = 0; i < 2; ++i ) {
+          asz[ i ] = g_malloc( 200 );
+          GetMatchStateCubeInfo( &ci, &ams[ i ] );
+          FormatCubePosition( asz[ i ], &ci );
+        }
+        
+        GTKShowTempMap( ams, 2, (const gchar **) asz, FALSE );
+        
+        for ( i = 0; i < 2; ++i )
+          g_free( asz[ i ] );
+        
+      }
+      else
+        outputl( _("Cube is not available.") );
+      
+    }
+    else
+      GTKShowTempMap( &ms, 1, NULL, FALSE );
+    
     return;
   }
 #endif
