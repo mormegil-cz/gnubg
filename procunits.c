@@ -113,7 +113,9 @@
 #include "gtkgame.h"
 #endif /* #if USE_GTK */
 
-/* set to activate debugging */
+/* set to activate debugging -- warning: avoid using GTK at the same
+   time because some alert windows that pop-up from secondary threads
+   and lock-up GTK */
 #define RPU_DEBUG 0
 #define RPU_DEBUG_PACK 0
 #define RPU_DEBUG_NOTIF 0
@@ -133,7 +135,10 @@
 
 #define DEFAULT_JOBSIZE (100 * 1024)
 
+/* are processing units intialised? */
 static int 		gfProcessingUnitsInitialised = FALSE;
+
+/* main thread descriptor, used by IsMainThread() */
 static pthread_t	gMainThread;
 
 /* TCP port and IP address mask for remote processing */
@@ -180,6 +185,7 @@ pthread_mutex_t		mutexProcunitAccess;
 /* this mutex for debugging purposes only */
 pthread_mutex_t		mutexCPUAccess;
 
+/* globals used by RPU_Pack...()/RPU_Unpack...() functions */
 DECLARE_THREADSTATICGLOBAL (char *, gpPackedData, NULL);
 DECLARE_THREADSTATICGLOBAL (int, gPackedDataPos, 0);
 DECLARE_THREADSTATICGLOBAL (int, gPackedDataSize, 0);
@@ -188,15 +194,14 @@ DECLARE_THREADSTATICGLOBAL (int, gPackedDataSize, 0);
 extern void *Threaded_BearoffRollout (void *data);
 extern void *Threaded_BasicCubefulRollout (void *data);
 
+/* other prototypes */
 void * Thread_RemoteProcessingUnit (void *data);
-
 static int StartProcessingUnit (procunit *ppu, int fWait);
 static int StopProcessingUnit (procunit *ppu);
 static void PrintProcessingUnitInfo (procunit *ppu);
 static int StartRemoteProcessingUnit (procunit *ppu);
 static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char *s, int *step);
 static void RPU_DumpData (unsigned char *data, int len);
-
 static procunit *CreateProcessingUnit (pu_type type, pu_status status, pu_task_type taskMask, int maxTasks);
 static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_task_type taskType, int procunit_id);
 
@@ -204,6 +209,7 @@ static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status stat
 static void GTK_TouchProcunit (procunit *ppu);
 #endif
 
+/* constant strings */
 static const char asProcunitType[][10] = { "None", "Local", "Remote" };
 static const char asProcunitStatus[][14] = { "None", "N/A", "Ready", "Busy", 
                         "Stopped", "Connecting" };
@@ -237,6 +243,7 @@ struct sockaddr_in	ginRPU_NotificationAddr;
 pthread_mutex_t		mutexRPU_Notification;
 pthread_cond_t		condRPU_Notification;
 
+/* notification message struct (sent from available slave to master) */
 typedef struct {
     struct sockaddr_in	inAddress;
     int			port;
@@ -244,6 +251,8 @@ typedef struct {
 } rpuNotificationMsg;
 
 #if USE_GTK
+
+/* globals for window widgets */
 static GtkWidget	*gpwSlaveWindow;
 static GtkWidget	*gpwLabel_Status;
 #if USE_GTK2
@@ -272,17 +281,34 @@ static GtkWidget	*gpwOptionsWindow;
 
 #if USE_GTK2
 static GtkListStore 	*gplsProcunits = NULL;
+/* procunit list used by the GTK list in the master window */
 #endif /* #if USE_GTK2 */
 
+/* this macro yields time to GTK if necessary */
 #define GTK_YIELDTIME 	{if (IsMainThread () && fX) while (gtk_events_pending ()) gtk_main_iteration ();}
 
 #else
+
 static void		*gpwSlaveWindow = NULL;	/* for testing whether there's a slave window 
                                                     without first checking for USE_GTK */
 #define GTK_YIELDTIME
                                                     
 #endif
 
+/* ****************************************************************************
+ *
+ *	PROCESSING UNITS
+ *
+ * ***************************************************************************/
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * GetProcessorCount
+ *
+ * Return: number of processors found on host
+ *
+ * --------------------------------------------------------------------------*/
 
 static int GetProcessorCount (void)
 {
@@ -320,6 +346,16 @@ static int GetProcessorCount (void)
     return cProcessors;
 }
 
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * ClearStats
+ *
+ * Resets counters in passed pu_stat struct
+ *
+ * --------------------------------------------------------------------------*/
+
 static void ClearStats (pu_stats *s)
 {
     s->avgSpeed = 0.0f;
@@ -328,8 +364,17 @@ static void ClearStats (pu_stats *s)
     s->totalFailed = 0;
 }
 
-/* Creates all processing units available on the host.
-*/
+
+/* ----------------------------------------------------------------------------
+ * 
+ * InitProcessingUnits
+ *
+ * Inits the processing units.
+ * Creates all local processing units available on the host.
+ * Inits all needed mutexes.
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void InitProcessingUnits (void)
 {
     int 		i;
@@ -390,16 +435,44 @@ extern void InitProcessingUnits (void)
     
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * IsMainThread
+ *
+ * Return: TRUE if caller is executing in main thread.
+ *
+ * --------------------------------------------------------------------------*/
+
 extern int IsMainThread (void)
 {
     return (gMainThread == pthread_self ());
 }
 
 
+/* ----------------------------------------------------------------------------
+ * 
+ * GetProcessingUnitsMode
+ *
+ * Return: pu_mode_slave or pu_mode_master.
+ *
+ * --------------------------------------------------------------------------*/
+
 extern pu_mode GetProcessingUnitsMode (void)
 {
     return gProcunitsMode;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * SetProcessingUnitsMode
+ *
+ * mode: pu_mode_slave or pu_mode_master.
+ *
+ * Sets gnubg in desired remote processing mode.
+ *
+ * --------------------------------------------------------------------------*/
 
 static void SetProcessingUnitsMode (pu_mode mode)
 {
@@ -421,6 +494,15 @@ static void SetProcessingUnitsMode (pu_mode mode)
 #endif /* #if USE_GTK */
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * GetProcessingUnitsCount
+ *
+ * Return: number of installed processing units (local and remote).
+ *
+ * --------------------------------------------------------------------------*/
+ 
 static int GetProcessingUnitsCount (void)
 {
     procunit 	*ppu;
@@ -439,6 +521,18 @@ static int GetProcessingUnitsCount (void)
     return n;
 }
 
+/* ----------------------------------------------------------------------------
+ * 
+ * GetProcessingUnitTasksString
+ *
+ * ppu: pointer to a procunit
+ * sz: pointer to buffer
+ *
+ * stores in sz a string containing the list of the procunit's capabilities
+ * eg: "rollout analysis eval"
+ *
+ * --------------------------------------------------------------------------*/
+
 static void GetProcessingUnitTasksString (procunit *ppu, char *sz)
 {
     if (ppu->taskMask & pu_task_rollout) strcat (sz, "rollout ");
@@ -446,6 +540,20 @@ static void GetProcessingUnitTasksString (procunit *ppu, char *sz)
     if (ppu->taskMask & pu_task_analysis) strcat (sz, "analysis ");
     if (sz[0] == 0) strcat (sz, "none");
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * GetProcessingUnitAddresssString
+ *
+ * ppu: pointer to a procunit
+ * sz: pointer to buffer
+ *
+ * stores in sz a string containing address of procunit; eg:
+ * - local procunit: "n/a"
+ * - remote rput: "192.168.0.184 (myslave.gnu.org)"
+ *
+ * --------------------------------------------------------------------------*/
 
 static void GetProcessingUnitAddresssString (procunit *ppu, char *sz)
 {
@@ -457,12 +565,25 @@ static void GetProcessingUnitAddresssString (procunit *ppu, char *sz)
         strcpy (sz, "n/a");
 }
 
-/* Creates and adds a new processing unit in the processing units list.
-   Fills it in with passed arguments and default parameters.
-   Returns a pointer to created procunit.
-   
-   Note: in the case of RPU's, doesn't START the RPU (no thread created)
-*/
+
+/* ----------------------------------------------------------------------------
+ * 
+ * CreateProcessingUnit
+ *
+ * type: procunit type (pu_type_local, pu_type_remote)
+ * status: procunit status at creation (pu_stat_stopped, ...)
+ * taskMask: procunit task capability mask (OR pu_task_rollout, ...)
+ * maxTasks: procunit queue size (1 for LPU's, 1 or more for RPU's)
+ *
+ * Return: pointer to created procunit, or NULL if failed.
+ *
+ * Creates and adds a new processing unit in the processing units list.
+ * Fills it in with passed arguments and default parameters.
+ *  
+ * Note: in the case of RPU's, doesn't START the RPU (no thread created)
+ *
+ * --------------------------------------------------------------------------*/
+
 static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_type taskMask, int maxTasks)
 {
     procunit **pppu = &gpulist;
@@ -520,7 +641,21 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
     return *pppu;
 }
 
-/* Create and START a remote processing unit */
+
+/* ----------------------------------------------------------------------------
+ * 
+ * CreateRemoteProcessingUnit
+ *
+ * szAddress: slave address (dotted ip or DNS name)
+ * fWait: if TRUE, function doesn't return till the RPU has been
+ *	successfully started or has failed to start
+ *
+ * Return: pointer to created procunit, or NULL if failed.
+ *
+ * Create and START a remote processing unit 
+ *
+ * --------------------------------------------------------------------------*/
+
 static procunit * CreateRemoteProcessingUnit (char *szAddress, int fWait)
 {
 
@@ -544,6 +679,17 @@ static procunit * CreateRemoteProcessingUnit (char *szAddress, int fWait)
     
     return ppu;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * DestroyProcessingUnit
+ *
+ * procunit_id: id of procunit to destroy
+ *
+ * Stop and destroy specified procunit
+ *
+ * --------------------------------------------------------------------------*/
 
 static void DestroyProcessingUnit (int procunit_id)
 {
@@ -592,6 +738,17 @@ static void DestroyProcessingUnit (int procunit_id)
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * PrintProcessingUnitInfo
+ *
+ * ppu: pointer to procunit
+ *
+ * Print procunit info on one line; suited for PrintProcessingUnitList()
+ *
+ * --------------------------------------------------------------------------*/
+
 static void PrintProcessingUnitInfo (procunit *ppu)
 {
     char asTasks[256] = "";
@@ -613,6 +770,15 @@ static void PrintProcessingUnitInfo (procunit *ppu)
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * PrintProcessingUnitList
+ *
+ * Print info about all installed procunits
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void PrintProcessingUnitList (void)
 {
     procunit *ppu;
@@ -630,6 +796,18 @@ extern void PrintProcessingUnitList (void)
     
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * PrintProcessingUnitStats
+ *
+ * procunit_id: procunit id, or 0
+ *
+ * Print procunit stats (several lines).
+ * If procunit_id == 0, print stats of all procunits (one procunit/line)
+ *
+ * --------------------------------------------------------------------------*/
 
 static void PrintProcessingUnitStats (int procunit_id)
 {
@@ -682,12 +860,24 @@ static void PrintProcessingUnitStats (int procunit_id)
     pthread_mutex_unlock (&mutexProcunitAccess);
 }
 
-/* Finds a processing unit in the available processing units list;
-   search can be started from an arbitrary processing unit ppu in the list;
-   pu_type_none, pu_stat_none and pu_task_none act as jokers for search 
-   criteria type, status and taskType.
-   Returns a pointer to the found processing unit, or NULL if none found.
-*/
+
+/* ----------------------------------------------------------------------------
+ * 
+ * FindProcessingUnit
+ *
+ * type: procunit type (pu_type_local, pu_type_remote), or pu_type_none for any
+ * status: procunit status (pu_stat_stopped, ...), or pu_stat_none for any
+ * taskMask: procunit task capability mask (OR pu_task_rollout, ...), or
+ *   	pu_task_none for any
+ * procunit_id: procunit_id, or 0 for any
+ *
+ * Return: pointer to found procunit, or NULL if none found.
+ *
+ * Find a processing unit in the available processing units list, using above
+ * search criteria.
+ *
+ * --------------------------------------------------------------------------*/
+
 static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_task_type taskType, int procunit_id)
 {
     pthread_mutex_lock (&mutexProcunitAccess);
@@ -709,11 +899,19 @@ static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status stat
     return ppu;
 }
 
-/* ChangeProcessingUnitStatus ()
-    Using this function instead of changing the ppu->status field
-    will allow threads waiting for ppu->condStatusChanged to be
-    immediately unlocked
-*/
+
+/* ----------------------------------------------------------------------------
+ * 
+ * ChangeProcessingUnitStatus
+ *
+ * ppu: pointer to procunit
+ * status: new procunit status  (pu_stat_busy, pu_stat_stopped...)
+ *
+ * Set status of procunit. Trigger ppu->condStatusChanged condition.
+ * Update display in Master Mode Control window.
+ *
+ * --------------------------------------------------------------------------*/
+
 static void ChangeProcessingUnitStatus (procunit *ppu, pu_status status)
 {
     assert (ppu != NULL);
@@ -730,15 +928,28 @@ static void ChangeProcessingUnitStatus (procunit *ppu, pu_status status)
 #endif /* #if USE_GTK */
 }
 
-/* start a processing unit.
-    - local procunit: merely set it to ready state; a thread will
-        be launched according to assigned tasks by calling
-        Threaded_xxxRollout ();
-    - remote procunit: create the thread for handling the connection
-        with the slave; if fWait is set, we don't return till the 
-        RPU is actually running (usage: give synchronous feedback to
-        the user when he enters command "pu start <procunit_id>")
-*/
+
+/* ----------------------------------------------------------------------------
+ * 
+ * StartProcessingUnit
+ *
+ * ppu: pointer to procunit to start
+ * fWait: if TRUE, function doesn't return till the RPU has been
+ *	successfully started or has failed to start
+ *
+ * Return: 0 if successfull, -1 otherwise
+ *
+ * Start procunit:
+ *   - local procunit: merely set it to ready state; a thread will
+ *      be launched according to assigned tasks by calling
+ *      Threaded_xxxRollout ();
+ *   - remote procunit: create the thread for handling the connection
+ *      with the slave; if fWait is set, we don't return till the 
+ *	RPU is actually running (usage: give synchronous feedback to
+ *	the user when he enters command "pu start <procunit_id>")
+ *
+ * --------------------------------------------------------------------------*/
+
 static int StartProcessingUnit (procunit *ppu, int fWait)
 {
     switch (ppu->type) {
@@ -780,6 +991,20 @@ static int StartProcessingUnit (procunit *ppu, int fWait)
     return -1;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * StartRemoteProcessingUnit
+ *
+ * ppu: pointer to remote procunit to start
+ *
+ * Return: 0 if successfull
+ *
+ * Start remote procunit _local_ half in new thread (will handle connection
+ * with slave, which is the remote procunit _remote_ half)
+ *
+ * --------------------------------------------------------------------------*/
+
 static int StartRemoteProcessingUnit (procunit *ppu)
 {
     int err;
@@ -800,6 +1025,23 @@ static int StartRemoteProcessingUnit (procunit *ppu)
     
     return err;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * StopProcessingUnit
+ *
+ * ppu: pointer to procunit to stop
+ *
+ * Return: 0 if successfull
+ *
+ * Stop procunit:
+ * - local: change LPU state, return immediately (LPU will stop upon noticing
+ *	its status has been changed to stopped)
+ * - remote: set RPU's Interrupt and Stop flags, and wait for it to go
+ *	to stopped state before returning.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int StopProcessingUnit (procunit *ppu)
 {
@@ -834,6 +1076,17 @@ static int StopProcessingUnit (procunit *ppu)
     return -1;
 
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * WaitForAllProcessingUnits
+ *
+ * Return: 0 
+ *
+ * Return when all procunits have stopped
+ *
+ * --------------------------------------------------------------------------*/
 
 static int WaitForAllProcessingUnits (void)
 {
@@ -873,6 +1126,19 @@ static int WaitForAllProcessingUnits (void)
     return 0;
 }
 
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * CancelProcessingUnitTasks
+ *
+ * ppu: pointer to procunit to stop
+ *
+ * Cancel all tasks that have been assigned to procunit, whether they're 
+ * already being performed or not. Return cancelled tasks to "to do" status.
+ *
+ * --------------------------------------------------------------------------*/
+
 static void CancelProcessingUnitTasks (procunit *ppu)
 {
     int i;
@@ -902,6 +1168,15 @@ static void CancelProcessingUnitTasks (procunit *ppu)
     pthread_mutex_unlock (&mutexTaskListAccess);
     if (IsMainThread ()) gdk_threads_enter ();
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * InterruptAllProcessingUnits
+ *
+ * Interrupt all busy procunits (they return to ready state).
+ *
+ * --------------------------------------------------------------------------*/
 
 static int InterruptAllProcessingUnits ()
 {
@@ -935,6 +1210,21 @@ static int InterruptAllProcessingUnits ()
 
     return 0;
 }
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RunTaskOnLocalProcessingUnit
+ *
+ * pt: pointer to task to run
+ * ppu: pointer to LPU to run task onto
+ *
+ * Return: TRUE if successful
+ *
+ * Start a LPU thread to perform the assigned task.
+ *
+ * --------------------------------------------------------------------------*/
 
 /* Returns TRUE if successfully started */
 static int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
@@ -988,14 +1278,26 @@ static int RunTaskOnLocalProcessingUnit (pu_task *pt, procunit *ppu)
     return ( err == 0 );
 }
 
-/* RunTaskOnRemoteProcessingUnit ()
-    
-    Returns TRUE if successfully started
-    Caution: the task is considered started as soon as it is
-    accepted by local half of the rpu; it does not assess anything
-    about the task being processed (or even received) on the remote 
-    (slave) half of the rpu 
-*/
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RunTaskOnRemoteProcessingUnit
+ *
+ * pt: pointer to task to run
+ * ppu: pointer to RPU to run task onto
+ *
+ * Return: TRUE if successful
+ *
+ * Notify the already running RPU thread (local half) to start performing
+ * the assigned task (by sending it to the slave -- the remote half).
+ *
+ * Caution: the task is considered running as soon as it is
+ * 	accepted by local half of the rpu; it does not assess anything
+ *   	about the task being actually processed (or even received) on the  
+ *   	remote half (slave) of the rpu 
+ *
+ * --------------------------------------------------------------------------*/
+
 static int RunTaskOnRemoteProcessingUnit (pu_task *pt, procunit *ppu)
 {
     int	err = 0;
@@ -1017,6 +1319,18 @@ static int RunTaskOnRemoteProcessingUnit (pu_task *pt, procunit *ppu)
     
     return ( err == 0 );
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RunTaskOnProcessingUnit
+ *
+ * pt: pointer to task to run
+ * ppu: pointer to procunit to run task onto
+ *
+ * Run task on processing unit
+ *
+ * --------------------------------------------------------------------------*/
 
 static void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
 {
@@ -1051,6 +1365,26 @@ static void RunTaskOnProcessingUnit (pu_task *pt, procunit *ppu)
     }
 }
 
+
+
+
+/* ****************************************************************************
+ *
+ *	TASKS
+ *
+ * ***************************************************************************/
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * InitTasks
+ *
+ * Init the task list.
+ * Call before any other task related call.
+ * Normally called by TaskEngine_Init()
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void InitTasks (void)
 {
     int i;
@@ -1063,6 +1397,17 @@ extern void InitTasks (void)
     for (i = 0; i < taskListMax; i ++)
         taskList[i] = NULL;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * ReleaseTasks
+ *
+ * Release the task list.
+ * Call when done with the task list.
+ * Normally called by TaskEngine_Shutdown()
+ *
+ * --------------------------------------------------------------------------*/
 
 static void ReleaseTasks (void)
 {
@@ -1079,6 +1424,19 @@ static void ReleaseTasks (void)
     free ((char *) taskList);
     taskList = NULL;
 }
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * CreateTask
+ *
+ * type: task type (pu_task_rollout, ...)
+ * fDetached: if TRUE, task is not inserted in the task list.
+ *
+ * Return: pointer to created task, or NULL if failed.
+ *
+ * --------------------------------------------------------------------------*/
 
 extern pu_task *CreateTask (pu_task_type type, int fDetached)
 {
@@ -1120,6 +1478,22 @@ extern pu_task *CreateTask (pu_task_type type, int fDetached)
     return pt;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * FindTask
+ *
+ * status: task status (pu_stat_stopped, ...), or pu_stat_none for any
+ * taskMask: task type mask (OR pu_task_rollout, ...), or pu_task_none for any
+ * taskId: id the task, or 0 for any
+ * procunit_id: id of procunit the task is assigned to, or 0 for any
+ *
+ * Return: pointer to found task, or NULL if none found.
+ *
+ * Find a task in the task list, using above search criteria.
+ *
+ * --------------------------------------------------------------------------*/
+
 static pu_task *FindTask (pu_task_status status, pu_task_type taskMask, int taskId, int procunit_id)
 {
     int i;
@@ -1137,6 +1511,20 @@ static pu_task *FindTask (pu_task_status status, pu_task_type taskMask, int task
     return NULL;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * GetTaskCount
+ *
+ * status: task status (pu_stat_stopped, ...), or pu_stat_none for any
+ * taskMask: task type mask (OR pu_task_rollout, ...), or pu_task_none for any
+ *
+ * Return: number of found tasks.
+ *
+ * Return number of tasks matching above criteria.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int GetTaskCount (pu_task_status status, pu_task_type taskMask)
 {
     int i, n = 0;
@@ -1151,6 +1539,19 @@ static int GetTaskCount (pu_task_status status, pu_task_type taskMask)
             
     return n;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * AttachTask
+ *
+ * pt: pointer to a detached task
+ *
+ * Return: pointer to task, or NULL if failed.
+ *
+ * Attach the task to the task list.
+ *
+ * --------------------------------------------------------------------------*/
 
 static pu_task *AttachTask (pu_task *pt)
 {
@@ -1170,6 +1571,15 @@ static pu_task *AttachTask (pu_task *pt)
     return NULL;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * PrintTaskList
+ *
+ * (debugging only)
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void PrintTaskList (void)
 {
     int i;
@@ -1182,6 +1592,17 @@ extern void PrintTaskList (void)
                         taskList[i]->task_id.taskId, asTaskStatus[taskList[i]->status], taskList[i]->procunit_id);
         }
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * FreeTask
+ *
+ * pt: pointer to task
+ *
+ * Remove task from task list and free allocated memory.
+ *
+ * --------------------------------------------------------------------------*/
 
 void FreeTask (pu_task *pt)
 {
@@ -1234,6 +1655,28 @@ void FreeTask (pu_task *pt)
     
     free ((char *) pt);
 }
+
+
+
+/* ****************************************************************************
+ *
+ *	TASK ENGINE
+ *
+ * ***************************************************************************/
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * AssignTasksToProcessingUnits
+ *
+ * Return: total number of newly assigned tasks
+ *
+ * Look for "to do" tasks in the task list, and assign them to "ready"
+ * procunits. Will try to honor procunit queue size for better performance
+ * with load balancing among ready procunits.
+ * Start the processing of assigned tasks onto procunits.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int AssignTasksToProcessingUnits (void)
 {
@@ -1290,9 +1733,24 @@ static int AssignTasksToProcessingUnits (void)
     return cPickedUpTasks;
 }
 
-/* creates an array of todo tasks (*papt) assigned to ppu;
-    returns the number of tasks put in *papt (caller must
-    free *papt after use), or 0 if none (*papt set to NULL) */
+
+/* ----------------------------------------------------------------------------
+ * 
+ * MakeAssignedTasksList
+ *
+ * ppu: pointer to procunit the tasklist (papt) is being built for
+ * status: status of tasks to put in papt
+ * papt: on return, pointer to array that will contain tasklist, 
+ *		or NULL if failed
+ * maxTasks: max tasks in papt
+ *
+ * Return: number of tasks in returned array, or 0 if failed
+ *
+ * Create an array of todo tasks (*papt) assigned to ppu;
+ * caller must free *papt after use.
+ *
+ * --------------------------------------------------------------------------*/
+    
 static int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task ***papt, int maxTasks)
 {
     int 	i, cTasks = 0;
@@ -1320,20 +1778,26 @@ static int MakeAssignedTasksList (procunit *ppu, pu_task_status status, pu_task 
     return cTasks;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * MarkTaskDone
+ *
+ * pt: pointer to task
+ * ppu: pointer to procunit 
+ *
+ * Mark the task done in task list; send the condResultsAvailable signal.
+ *
+ * --------------------------------------------------------------------------*/
+    
 extern void MarkTaskDone (pu_task *pt, procunit *ppu)
 {
-    /*outputerrf ("# Task done.\n");*/
-    
-    /* mark the task done in task list; 
-        this function is called by threaded procunits (like
-        Threaded_BasicCubefulRollout), so we need to be
-        careful not to access the task list while it is already 
-        operated on by RolloutGeneral() in main thread */
-    
-    /* !!! check first that this task is still in the task list and still
+    /* FIXME: check first that this task is still in the task list and still
         assigned to this procunit (it may have been removed or reassigned 
         to another procunit) !!! */
 
+    /*outputerrf ("# Task done.\n");*/
+    
     if (ppu == NULL)
         ppu = FindProcessingUnit (NULL, pu_type_none, pu_stat_none, pu_task_none, pt->procunit_id);
 
@@ -1371,6 +1835,15 @@ extern void MarkTaskDone (pu_task *pt, procunit *ppu)
     pthread_mutex_unlock (&mutexResultsAvailable);
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * TaskEngine_Init
+ *
+ * Start the Task Engine.
+ *
+ * --------------------------------------------------------------------------*/
+    
 extern void TaskEngine_Init (void)
 {
     if (PU_DEBUG) outputerrf ("Starting Task Engine...\n");
@@ -1378,6 +1851,15 @@ extern void TaskEngine_Init (void)
     gResultsAvailable = FALSE;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * TaskEngine_Shutdown
+ *
+ * Stop the Task Engine.
+ *
+ * --------------------------------------------------------------------------*/
+    
 extern void TaskEngine_Shutdown (void)
 {
     if (PU_DEBUG) outputerrf ("Stopping Task Engine...\n");
@@ -1385,6 +1867,15 @@ extern void TaskEngine_Shutdown (void)
     WaitForAllProcessingUnits ();
     ReleaseTasks ();
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * TaskEngine_Full
+ *
+ * Return: TRUE if task engine is full
+ *
+ * --------------------------------------------------------------------------*/
 
 extern int TaskEngine_Full (void)
 {
@@ -1396,6 +1887,15 @@ extern int TaskEngine_Full (void)
     return TRUE;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * TaskEngine_Empty
+ *
+ * Return: TRUE if task engine is empty
+ *
+ * --------------------------------------------------------------------------*/
+
 extern int TaskEngine_Empty (void)
 {
     int i;
@@ -1405,6 +1905,21 @@ extern int TaskEngine_Empty (void)
         
     return TRUE;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * TaskEngine_GetCompletedTask
+ *
+ * Return: pointer to completed task, or NULL if none available.
+ *
+ * If no task is available in "done status in the task list, return NULL;
+ * a subsequent call to TaskEngine_GetCompletedTask with still no completed
+ * task available will have it block onto the condResultsAvailable condition
+ * and return only when a completed task is available (or polling the
+ * fInterrupt flag set to TRUE)
+ *
+ * --------------------------------------------------------------------------*/
 
 extern pu_task * TaskEngine_GetCompletedTask (void)
 {
@@ -1440,6 +1955,8 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
         
         /* sanity check */
         
+        /* FIXME: add sanity check (RPU timeouts) */
+        
         /* assign procunits to todo tasks */
 #if PROCESSING_UNITS
         gdk_threads_enter ();
@@ -1474,16 +1991,14 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
             break;
         }
 
-        /* if we returned results last call, return immediately
-            control to caller without blocking for new results */
+        /* no results available:if we returned results last call, return
+           immediately control to caller without blocking for new results */
         if (foundLastTime) {
             foundLastTime = FALSE;
             break;
         }
         
-        /* no results available now, so we */
-        /* wait for new results to come in */
-        
+        /* no results available now, so we wait for new results to come in */
         pthread_mutex_lock (&mutexResultsAvailable);
         if (!gResultsAvailable) {
             while (!gResultsAvailable && !fInterrupt) 
@@ -1501,6 +2016,18 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
 
     return pt;
 }
+
+
+
+
+/* ****************************************************************************
+ *
+ *	REMOTE PROCESSING UNITS 
+ *
+ * ***************************************************************************/
+
+
+
 
 /* use (UN)PACKJOB to (un)pack a scalar, eg. char, int, float, etc. */
 #define PACKJOB(x) 			n += RPU_PackJob ((char *) &(x), 1, FALSE,sizeof(x))
@@ -1520,6 +2047,17 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
 #define PACKJOBSTRUCTPTR(x,N,t) 	n += RPU_PackJobStruct_##t ((x), N)
 #define UNPACKJOBSTRUCTPTR(x,t) 	n += RPU_UnpackJobStruct_##t (&(x))
 
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_DumpData
+ *
+ * (debugging)
+ *
+ * --------------------------------------------------------------------------*/
+
 static void RPU_DumpData (unsigned char *data, int len)
 {
     int i;
@@ -1535,6 +2073,21 @@ static void RPU_DumpData (unsigned char *data, int len)
     
     outputerrf ("]\n");
 }
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PackWrite
+ *
+ * data: buffer
+ * size: buffer size
+ *
+ * Return: number of bytes written
+ *
+ * Write buffer to packed data buffer
+ *
+ * --------------------------------------------------------------------------*/
 
 static int RPU_PackWrite (char *data, int size)
 {
@@ -1555,6 +2108,23 @@ static int RPU_PackWrite (char *data, int size)
 
     return size;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PackJob
+ *
+ * data: buffer
+ * cItems: number of items in buffer
+ * fSeveral: if TRUE, will write number of items to packed buffer before
+ *		writing the items themselves; see RPU_UnpackJob
+ * itemSize: size of individual items
+ *
+ * Return: number of bytes written
+ *
+ * Write items to packed data buffer.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int RPU_PackJob (char *data, int cItems, int fSeveral, int itemSize)
 {
@@ -1597,6 +2167,19 @@ static int RPU_PackJob (char *data, int cItems, int fSeveral, int itemSize)
     return n;
 }
 
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PackJobStruct_cubeinfo
+ *
+ * pci: pointer to cubeinfo array
+ * cItems: number of cubeinfo's in array
+ *
+ * Return: number of bytes written
+ *
+ * Write cubeinfo items to packed data buffer, with leading cItems count.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int RPU_PackJobStruct_cubeinfo (cubeinfo *pci, int cItems)
 {
     int n = 0;
@@ -1619,6 +2202,20 @@ static int RPU_PackJobStruct_cubeinfo (cubeinfo *pci, int cItems)
 
     return n;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PackJobStruct_rolloutstat
+ *
+ * prs: pointer to rolloutstat array
+ * cItems: number of rolloutstat's in array
+ *
+ * Return: number of bytes written
+ *
+ * Write rolloutstat items to packed data buffer, with leading cItems count.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int RPU_PackJobStruct_rolloutstat (rolloutstat *prs, int cItems)
 {
@@ -1643,6 +2240,21 @@ static int RPU_PackJobStruct_rolloutstat (rolloutstat *prs, int cItems)
 
     return n;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PackTaskToJobTask
+ *
+ * pt: pointer to task
+ *
+ * Return: pointer to packed jobtask
+ *
+ * Pack the passed task to a flat jobtask (all pointer-referenced data
+ * and substuctures are flattened and concatenated into a single linear
+ * buffer)
+ *
+ * --------------------------------------------------------------------------*/
 
 static rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
 {    
@@ -1714,6 +2326,22 @@ static rpu_jobtask * RPU_PackTaskToJobTask (pu_task *pt)
     return (rpu_jobtask *) THREADGLOBAL(gpPackedData);
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PackTaskListToJob
+ *
+ * apTasks: pointer to task array
+ * cTasks: number of tasks in array
+ *
+ * Return: pointer to packed jobtasklist
+ *
+ * Pack the passed tasks to a flat jobtasklist (all pointer-referenced data
+ * and substuctures are flattened and concatenated into a single linear
+ * buffer)
+ *
+ * --------------------------------------------------------------------------*/
+
 static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
 {
     rpu_job	*pJob = NULL;
@@ -1770,6 +2398,21 @@ static rpu_job * RPU_PackTaskListToJob (pu_task **apTasks, int cTasks)
     return pJob;
 }
 
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PackRead
+ *
+ * dst: pointer to storage for read data
+ * size: size of data to read
+ *
+ * Return: number of read bytes
+ *
+ * Read and return data from the packed buffer
+ *
+ * --------------------------------------------------------------------------*/
+
 static int RPU_PackRead (char *dst, int size)
 {
 #if __BIG_ENDIAN__
@@ -1788,6 +2431,27 @@ static int RPU_PackRead (char *dst, int size)
 
     return size;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_UnpackJob
+ *
+ * dst: if fMalloc == FALSE, pointer to storage for read data;
+ * 	if fMalloc == TRUE, pointer to char* in which will be stored the 
+ *          	 address of a newly allocated pointer in which read data is stored.
+ * fSeveralItems: if TRUE, get number of items to read from leading int
+ *		in packed data buffer (by default, 1 item); see RPU_PackJob()
+ * itemSize: size of items to read
+ * fMalloc: if FALSE, dst points to caller-allocated buffer; if TRUE, 
+ *		RPU_UnpackJobdst will allocate itself the buffer and return its
+ *		address in *dst.
+ *
+ * Return: number of read bytes
+ *
+ * Read and return items from the packed buffer
+ *
+ * --------------------------------------------------------------------------*/
 
 int RPU_UnpackJob (char *dst, int fSeveralItems, int itemSize, int fMalloc)
 {
@@ -1827,6 +2491,20 @@ int RPU_UnpackJob (char *dst, int fSeveralItems, int itemSize, int fMalloc)
     return n;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_UnpackJobStruct_cubeinfo
+ *
+ * ppci: pointer to address of cubeinfo array 
+ *
+ * Return: number of bytes read
+ *
+ * Allocate buffer and read cubeinfo items from packed data buffer.
+ * Return allocated buffer address in *ppci.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int RPU_UnpackJobStruct_cubeinfo (cubeinfo **ppci)
 {
     int 	n = 0;
@@ -1860,6 +2538,21 @@ static int RPU_UnpackJobStruct_cubeinfo (cubeinfo **ppci)
 
     return n;
 }
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_UnpackJobStruct_rolloutstat
+ *
+ * pprs: pointer to address of rolloutstat array 
+ *
+ * Return: number of bytes read
+ *
+ * Allocate buffer and read rolloutstat items from packed data buffer.
+ * Return allocated buffer address in *pprs.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int RPU_UnpackJobStruct_rolloutstat (rolloutstat **pprs)
 {
@@ -1895,6 +2588,21 @@ static int RPU_UnpackJobStruct_rolloutstat (rolloutstat **pprs)
 
     return n;
 }
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_UnpackJobToTask
+ *
+ * pjt: pointer to jobtask
+ * fDetached: if TRUE, will create detached task; see CreateTask() 
+ *
+ * Return: pointer to created task
+ *
+ * Create a new task based on data read from packed data buffer.
+ *
+ * --------------------------------------------------------------------------*/
 
 static pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
 {
@@ -1966,6 +2674,23 @@ static pu_task * RPU_UnpackJobToTask (rpu_jobtask *pjt, int fDetached)
     return pt;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_SendMessage
+ *
+ * toSocket: socket to send message through
+ * msg: message to send
+ * pfInterrupt: pointer to interrupt flag or NULL
+ *
+ * Return: 0 if successful
+ *
+ * Send message from this RPU half to the other RPU half.
+ * If pfInterrupt is not NULL, will return is *pfInterrupt is set to 
+ * TRUE while sending the message.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInterrupt)
 {
     int 	n;
@@ -1999,7 +2724,23 @@ static int RPU_SendMessage (int toSocket, rpu_message *msg, volatile int *pfInte
     return 0;
 }
 
-/* timeout in seconds; timeout == 0 for no timeout */
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_ReceiveMessage
+ *
+ * fromSocket: socket to send message through
+ * pfInterrupt: pointer to interrupt flag or NULL
+ * timeout: in seconds, or 0 for no timeout
+ *
+ * Return: pointer to received message, or NULL if failed.
+ *
+ * Receive a message from the other RPU half.
+ * If pfInterrupt is not NULL, will return is *pfInterrupt is set to 
+ * TRUE while receiving/waiting for the message.
+ *
+ * --------------------------------------------------------------------------*/
+
 static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterrupt, int timeout)
 {
     rpu_message *msg = NULL;
@@ -2060,6 +2801,21 @@ static rpu_message * RPU_ReceiveMessage (int fromSocket, volatile int *pfInterru
     return msg;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_MakeMessage
+ *
+ * type: message type (mmInfo, mmTask, mmTaskResult...)
+ * data: pointer buffer containing message data
+ * datalen: data length
+ *
+ * Return: pointer to newly created message, or NULL if failed.
+ *
+ * Create a message with passed data.
+ *
+ * --------------------------------------------------------------------------*/
+
 static rpu_message * RPU_MakeMessage (pu_message_type type, void *data, int datalen)
 {
     int		msglen = offsetof (rpu_message, data) + datalen;
@@ -2074,6 +2830,21 @@ static rpu_message * RPU_MakeMessage (pu_message_type type, void *data, int data
     
     return msg;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_GetMessageData
+ *
+ * msgType: expected message type (mmInfo, mmTask, mmTaskResult...)
+ * msg: message
+ *
+ * Return: pointer to message data inside message, or NULL if failed.
+ *
+ * Will fail if message type is not as expected, or if incompatible message
+ * version number.
+ *
+ * --------------------------------------------------------------------------*/
 
 static void * RPU_GetMessageData (rpu_message *msg, pu_message_type msgType)
 {
@@ -2097,6 +2868,19 @@ static void * RPU_GetMessageData (rpu_message *msg, pu_message_type msgType)
 
     return &msg->data;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_SetSocketOptions
+ *
+ * s: socket
+ *
+ * Return: 0 if successful
+ *
+ * Set the socket's sockoptions.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int RPU_SetSocketOptions (int s)
 {
@@ -2139,10 +2923,35 @@ static int RPU_SetSocketOptions (int s)
     return err;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_CheckHostList
+ *
+ * Return: 0 if host is authorized
+ *
+ * Check connecting host against authorized host list.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int RPU_CheckHostList (void)
 {
+    /* FIXME: implement feature! */
+    
     return 0;
 }
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_AcceptConnection
+ *
+ * localAddr: local host address
+ * remoteAddr: remote host address
+ *
+ * Return: 1 if remote host is authorized to connect.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_in remoteAddr)
 {
@@ -2164,6 +2973,17 @@ static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_i
     return 0;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_CheckClose
+ *
+ * s: socket to check for close request
+ *
+ * Return: 1 if closing the connection was requested by the other peer.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int RPU_CheckClose (int s)
 {
     rpu_message msg;
@@ -2180,6 +3000,25 @@ static int RPU_CheckClose (int s)
         
     return 0;
 }
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_ReadInternetAddress
+ *
+ * inAddress: address is returned there
+ * sz: the address to read
+ * defaultTCPPort: default TCP port to use if not specified in sz
+ *
+ * Return: 0 if successful.
+ *
+ * Reads an Internet address string, and fills in a sockaddr_in struct.
+ * The passed in string must be in format:
+ *  (<dotted-ip>|<dns-name>)[:<tcp-port>]
+ * eg: "192.168.0.3:80" or "myslave.gnu.org:81"
+ *
+ * --------------------------------------------------------------------------*/
 
 static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
                                     int defaultTCPPort)
@@ -2226,6 +3065,17 @@ static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz,
     return 0;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * RPU_PrintInfo
+ *
+ * info: RPU info 
+ *
+ * Prints out the contents of a rpu_info
+ *
+ * --------------------------------------------------------------------------*/
+
 static void RPU_PrintInfo (rpu_info *info)
 {
     int i;
@@ -2233,6 +3083,31 @@ static void RPU_PrintInfo (rpu_info *info)
     for (i = 0; i < info->cProcunits; i ++)
         PrintProcessingUnitInfo (&info->procunitInfo[i]);
 }
+
+
+
+
+
+/* ****************************************************************************
+ *
+ *	SLAVES (RPU REMOTE HALF)
+ *
+ * ***************************************************************************/
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Slave_DoJob
+ *
+ * toSocket: socket to master
+ * job: job to perform 
+ *
+ * Return: 0 if successul
+ *
+ * Perform the tasks in the job, by dispatching them to available procunits
+ * (either local or remote -- FIXME: remote not fully implemented yet), and
+ * send results back to master as they become available.
+ *
+ * --------------------------------------------------------------------------*/
 
 static int Slave_DoJob (int toSocket, rpu_job *job)
 {
@@ -2346,6 +3221,19 @@ static int Slave_DoJob (int toSocket, rpu_job *job)
     return err;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Slave_DoJob
+ *
+ * toSocket: socket to master
+ *
+ * Return: 0 if successul
+ *
+ * Return a mmInfo message to requesting master.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int Slave_GetInfo (int toSocket)
 {
     int 	i, err;
@@ -2377,6 +3265,15 @@ static int Slave_GetInfo (int toSocket)
     return err;
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Slave_UpdateStatus
+ *
+ * Update slave status in tty or GTK.
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void Slave_UpdateStatus (void)
 {
     int cInTaskList = GetTaskCount (0, 0);
@@ -2394,30 +3291,6 @@ extern void Slave_UpdateStatus (void)
         if (gpwSlaveWindow != NULL) {
             char 	sz[1024];
             int	row;
-            
-            /*sprintf (sz, "Tasks: %d in job\n"
-                        "  To do: %d, In progress: %d, Done: %d\n\n"
-                        "Rollouts: %d done\n"
-                        "  (received: %d, sent: %d, failed: %d)\n\n"
-                        "Evals: %d done\n"
-                        "  (received: %d, sent: %d, failed: %d)\n\n",
-                        cInTaskList,
-                        cTodo,
-                        cInProgress, 
-                        cDone,
-                        
-                        gSlaveStats.rollout.done,
-                        gSlaveStats.rollout.rcvd,
-                        gSlaveStats.rollout.sent,
-                        gSlaveStats.rollout.failed,
-                        
-                        gSlaveStats.eval.done,
-                        gSlaveStats.eval.rcvd,
-                        gSlaveStats.eval.sent,
-                        gSlaveStats.eval.failed);
-                        
-            gtk_text_buffer_set_text (gptbSlaveText, sz, -1);*/
-            
             
             sprintf (sz, "Tasks in job: %d (To do: %d, in progress: %d, done: %d)",
                         cInTaskList, cTodo, cInProgress,  cDone);
@@ -2477,6 +3350,15 @@ extern void Slave_UpdateStatus (void)
 #endif /* #if USE_GTK */
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Slave_PrintStatus
+ *
+ * Print slave status in tty.
+ *
+ * --------------------------------------------------------------------------*/
+
 static void Slave_PrintStatus (void)
 {
 #if USE_GTK
@@ -2494,22 +3376,28 @@ static void Slave_PrintStatus (void)
     Slave_UpdateStatus ();
 }
 
-/* listen for incoming connections from MASTERS, create tasks
-    with incoming tasks, assign the tasks to available 
-    processing units, and return completed tasks to their masters.
-   Its counterpart is the Thread_RemoteProcessingUnit() function,
-   executed in a RPU-specific thread on the master host.
-*/
 
-/* local host = SLAVE, acts as a server (listen for incoming
-                            master connections, receives messages
-                            and responds to them)
-    remote host = MASTER, acts as a client (connects to our local
-                            host, sends messages/requests to slave,
-                             and expects responses)
-*/
 
 extern void *Thread_NotificationSender (void *data);
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Slave
+ *
+ * listen for incoming connections from MASTERS, create tasks
+ * with incoming tasks, assign the tasks to available 
+ * processing units, and return completed tasks to their masters.
+ * Its counterpart is the Thread_RemoteProcessingUnit() function,
+ * executed in a RPU-specific thread on the master host.
+ *
+ * local host = SLAVE, acts as a server (listen for incoming
+ *                           master connections, receives messages
+ *                           and responds to them)
+ * remote host = MASTER, acts as a client (connects to our local
+ *                           host, sends messages/requests to slave,
+ *                            and expects responses)
+ *
+ * --------------------------------------------------------------------------*/
 
 static void Slave (void)
 {
@@ -2717,6 +3605,24 @@ static void Slave (void)
     SetProcessingUnitsMode (pu_mode_master);   
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * WaitForCondition
+ * 
+ * cond: condition to wait for
+ * mutex: condition mutex
+ * s: string to display when step == 0
+ * step: pointer to steps
+ *
+ * Initial call must be made with step fixed to some negative value,
+ * expressing the number of seconds we want to wait before displaying
+ * a "waiting..." message;
+ * its value is incremented at each call; message s is displayed when
+ * step gets equal to 0, and a dot "." is printed every time afterwards.
+ *
+ * --------------------------------------------------------------------------*/
+
 static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char *s, int *step)
 {
     int			err;
@@ -2743,6 +3649,29 @@ static int WaitForCondition (pthread_cond_t *cond, pthread_mutex_t *mutex, char 
     
     return 0;
 }
+
+
+
+
+/* ****************************************************************************
+ *
+ *	MASTER (RPU LOCAL HALF)
+ *
+ * ***************************************************************************/
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Thread_RPU_Loop
+ * 
+ * ppu: pointer to rpu (local half, on master)
+ * rpuSocket: socket to rpu (remote half, on slave)
+ *
+ * Wait for tasks to be assigned to rpu; group tasks into taskjob, send it
+ * remote half (slave), and wait for results to come back.
+ *
+ * --------------------------------------------------------------------------*/
 
 static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
 {
@@ -2941,18 +3870,25 @@ static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
     } /* while (err == 0 && !ppu->info.remote.fStop) */
 }
 
-/*  Thread_RemoteProcessingUnit ()
 
-    this function is called at master remote procunit (rpu) creation
-    time and lasts for the duration of the local half of the rpu; 
-    it is responsible for managing the connection with the
-    remote (slave) half of the rpu.
-    Its counterpart is the Slave() function, executed on slave hosts.
-    
-    local host = MASTER, acts as a client (connects to remote slave
-                            hosts and sends messages)
-    remote hosts = SLAVES, act as servers
-*/
+/* ----------------------------------------------------------------------------
+ * 
+ * Thread_RemoteProcessingUnit
+ * 
+ * data: (procunit *) pointer to rpu executing thread
+ *
+ *   This function is called at master remote procunit (rpu) creation
+ *   time and lasts for the duration of the local half of the rpu; 
+ *   it is responsible for managing the connection with the
+ *   remote (slave) half of the rpu.
+ *   Its counterpart is the Slave() function, executed on slave hosts.
+ *   
+ *   local host = MASTER, acts as a client (connects to remote slave
+ *                           hosts and sends messages)
+ *   remote hosts = SLAVES, act as servers, responding to master's requests
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void * Thread_RemoteProcessingUnit (void *data)
 {
     int 		rpuSocket;
@@ -2985,7 +3921,8 @@ extern void * Thread_RemoteProcessingUnit (void *data)
         }
         else {
             /* connect to remote host */
-            if (connect (rpuSocket, (const struct sockaddr *) &ppu->info.remote.inAddress, 					sizeof(ppu->info.remote.inAddress)) < 0) {
+            if (connect (rpuSocket, (const struct sockaddr *) &ppu->info.remote.inAddress, 
+                            sizeof(ppu->info.remote.inAddress)) < 0) {
                 gdk_threads_enter ();
                 outputerrf ("# (0x%x) RPU could not connect socket (err=%d).\n", 
                     (int) pthread_self (), errno);
@@ -3084,6 +4021,26 @@ extern void * Thread_RemoteProcessingUnit (void *data)
     return 0;
 }
 
+
+
+
+/* ****************************************************************************
+ *
+ *	RPU NOTIFICATIONS
+ *
+ * ***************************************************************************/
+
+
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Thread_NotificationSender
+ * 
+ * Executed by the notification sender thread.
+ * Send slave availability notifications, according to notification settings.
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void *Thread_NotificationSender (void *data)
 {
     int		notifySocket;
@@ -3163,6 +4120,17 @@ extern void *Thread_NotificationSender (void *data)
     close (notifySocket);
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * Thread_NotificationListener
+ * 
+ * Executed by the notification listener thread.
+ * Listen for slave availability notifications, according to notification 
+ * settings. Add notifying slaves as rpu's for master (local host) to use.
+ *
+ * --------------------------------------------------------------------------*/
+
 extern void *Thread_NotificationListener (void *data)
 {
     int		notifySocket;
@@ -3238,6 +4206,15 @@ extern void *Thread_NotificationListener (void *data)
     
 }
 
+
+/* ----------------------------------------------------------------------------
+ * 
+ * StartNotificationListener
+ * 
+ * Start the notification listener thread.
+ *
+ * --------------------------------------------------------------------------*/
+
 int StartNotificationListener (void)
 {
     int err;
@@ -3250,6 +4227,16 @@ int StartNotificationListener (void)
     
     return err;
 }
+
+
+
+/* ****************************************************************************
+ *
+ *	COMMANDS
+ *
+ * ***************************************************************************/
+
+
 
 extern void CommandProcunitsMaster ( char *sz ) 
 {
@@ -3707,6 +4694,16 @@ extern void CommandSetProcunitsRemoteNotifSendDelay ( char *sz )
     else
         gRPU_SlaveNotifDelay = delay;
 }
+
+
+
+/* ****************************************************************************
+ *
+ *	GTK INTERFACE
+ *
+ * ***************************************************************************/
+
+
 
 #if USE_GTK
 
