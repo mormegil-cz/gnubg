@@ -22,13 +22,13 @@
 */
 
 #include "config.h"
+#include "inc3d.h"
 
 #if HAVE_FTGL
 
 #include "FTGLPolygonFont.h"
 #include "FTGLOutlineFont.h"
 #include "FTFont.h"
-#include "inc3d.h"
 
 /* Avoid FTGLOutlineFont::Render() as expensive to call repeatedly */
 class MyOutlineFont : public FTGLOutlineFont
@@ -130,9 +130,9 @@ extern "C" void glPrintCube(BoardData* bd, const char *text, int mode)
 /* Simple glut alternative font for testing */
 #include <GL/glut.h>
 
-extern "C" void KillFont() {}
-extern "C" float getFontHeight() {return base_unit;}
-extern "C" void BuildFont(){}
+extern "C" void KillFont(BoardData* bd) {}
+extern "C" float getFontHeight(BoardData* bd) {return base_unit;}
+extern "C" void BuildFont(BoardData* bd){}
 
 float getTextLen(const char* text)
 {
@@ -159,12 +159,12 @@ void glutPrint(const char *text, float fontSize)
 	glPopMatrix();
 }
 
-extern "C" void glPrintPointNumbers(const char *text, int mode)
+extern "C" void glPrintPointNumbers(BoardData* bd, const char *text, int mode)
 {
 	glutPrint(text, base_unit / 100);
 }
 
-extern "C" void glPrintCube(const char *text, int mode)
+extern "C" void glPrintCube(BoardData* bd, const char *text, int mode)
 {
 	glutPrint(text, base_unit / 80);
 }

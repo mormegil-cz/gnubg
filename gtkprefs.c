@@ -1741,11 +1741,6 @@ else
   gtk_adjustment_set_value ( GTK_ADJUSTMENT ( paElevation ),
                              rElevation );
 
-
-	/* Process changes before continuing */
-	while (gtk_events_pending ())
-		gtk_main_iteration ();
-
 	fUpdate = TRUE;
 
 	UpdatePreview(&pwPreview[PI_DESIGN]);

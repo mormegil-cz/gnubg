@@ -99,6 +99,50 @@ void SetupLight3d(BoardData *bd, renderdata* prd)
 	memcpy(bd->shadow_light_position, lp, sizeof(float[4]));
 }
 
+/////////////////////////////////////
+// Determine if a particular extension is supported
+/////////////////////////////////////
+int 
+extensionSupported(const char *extension)
+{
+  static const GLubyte *extensions = NULL;
+  const GLubyte *start;
+  GLubyte *where, *terminator;
+
+  where = (GLubyte *) strchr(extension, ' ');
+  if (where || *extension == '\0')
+    return 0;
+
+  if (!extensions)
+    extensions = glGetString(GL_EXTENSIONS);
+
+  start = extensions;
+  for (;;) {
+    where = (GLubyte *) strstr((const char *) start, extension);
+    if (!where)
+      break;
+    terminator = where + strlen(extension);
+    if (where == start || *(where - 1) == ' ') {
+      if (*terminator == ' ' || *terminator == '\0') {
+        return 1;
+      }
+    }
+    start = terminator;
+  }
+  return 0;
+}
+
+#if !GL_VERSION_1_2
+int useSepSpecular;
+#ifndef GL_EXT_separate_specular_color
+#define GL_EXT_separate_specular_color      1
+
+#define GL_LIGHT_MODEL_COLOR_CONTROL_EXT    0x81F8
+#define GL_SINGLE_COLOR_EXT                 0x81F9
+#define GL_SEPARATE_SPECULAR_COLOR_EXT      0x81FA
+#endif
+#endif
+
 void InitGL(BoardData *bd)
 {
 	float gal[4];
@@ -138,6 +182,14 @@ void InitGL(BoardData *bd)
 		setupFlag(bd);
 		shadowInit(bd);
 	}
+
+#if GL_VERSION_1_2
+	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+#else
+	useSepSpecular = extensionSupported("GL_EXT_separate_specular_color");
+	if (useSepSpecular)
+		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
+#endif
 }
 
 void setMaterial(Material* pMat)
@@ -948,14 +1000,14 @@ void QuarterCylinder(float radius, float len, int accuracy, Texture* texture)
 	float angle;
 	float d;
 	float sar, car;
-	float st, ct, dInc;
+	float dInc = 0;
 
 	/* texture unit value */
 	float tuv;
 	if (texture)
 	{
-		st = (float)sin((2 * PI) / accuracy) * radius;
-		ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
+		float st = (float)sin((2 * PI) / accuracy) * radius;
+		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
 		dInc = (float)sqrt(st * st + (ct * ct));
 		tuv = (TEXTURE_SCALE) / texture->width;
 	}
@@ -986,21 +1038,23 @@ void QuarterCylinder(float radius, float len, int accuracy, Texture* texture)
 	glEnd();
 }
 
-void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* texture)
+void QuarterCylinderSplayedRev(float radius, float len, int accuracy, Texture* texture)
 {
 	int i;
 	float angle;
 	float d;
 	float sar, car;
-
-float st = (float)sin((2 * PI) / accuracy) * radius;
-float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
-float dInc = (float)sqrt(st * st + (ct * ct));
+	float dInc = 0;
 
 	/* texture unit value */
 	float tuv;
 	if (texture)
+	{
+		float st = (float)sin((2 * PI) / accuracy) * radius;
+		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
+		dInc = (float)sqrt(st * st + (ct * ct));
 		tuv = (TEXTURE_SCALE) / texture->width;
+	}
 	else
 		tuv = 0;
 
@@ -1021,9 +1075,53 @@ float dInc = (float)sqrt(st * st + (ct * ct));
 		if (tuv)
 		{
 			glTexCoord2f(-car * tuv, d * tuv);
-			d += dInc;
+			d -= dInc;
 		}
 		glVertex3f(sar, -car, car);
+	}
+	glEnd();
+}
+
+void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* texture)
+{
+	int i;
+	float angle;
+	float d;
+	float sar, car;
+	float dInc = 0;
+
+	/* texture unit value */
+	float tuv;
+	if (texture)
+	{
+		float st = (float)sin((2 * PI) / accuracy) * radius;
+		float ct = ((float)cos((2 * PI) / accuracy) - 1) * radius;
+		dInc = (float)sqrt(st * st + (ct * ct));
+		tuv = (TEXTURE_SCALE) / texture->width;
+	}
+	else
+		tuv = 0;
+
+	d = 0;
+	glBegin(GL_QUAD_STRIP);
+	for (i = 0; i < accuracy / 4 + 1; i++)
+	{
+		angle = (i * 2 * PI) / accuracy;
+		glNormal3f((float)sin(angle), 0, (float)cos(angle));
+
+		sar = (float)sin(angle) * radius;
+		car = (float)cos(angle) * radius;
+
+		if (tuv)
+			glTexCoord2f((len - car) * tuv, d * tuv);
+		glVertex3f(sar, len - car, car);
+
+		if (tuv)
+		{
+			glTexCoord2f(car * tuv, d * tuv);
+			d -= dInc;
+		}
+		glVertex3f(sar, car, car);
 	}
 	glEnd();
 }

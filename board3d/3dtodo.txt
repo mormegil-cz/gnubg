@@ -2,11 +2,10 @@
 Todo
 ====
 
-* Fillet top edge of board
-	+ Look at textures
-
 Bugs
 ====
+
+* Bar pieces on wrong side?
 
 Ideas
 =====
