@@ -1,3 +1,8 @@
+Tue Jan  8 11:29:50 2002  Gary Wong  <gtw@research.att.com>
+
+	* drawboard.c (FormatMove): Combine repeated moves, e.g. 6/5(2)
+	instead of 6/5 6/5 (contributed by Robert Konigsberg).
+
 Sun Jan  6 18:36:46 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (GTKRolloutStatPage): add scrollbars to notebook pages.

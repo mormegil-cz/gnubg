@@ -20,6 +20,7 @@ char *aszCredits[] = {
     "Tom Keith",
     "Matija Kejzar",
     "Johnny Kirk",
+    "Robert Konigsberg",
     "Corrin Lakeland",
     "Tim Laursen",
     "Kevin Maguire",

@@ -54,8 +54,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Make output*() functions wrap words, and pause before scrolling (as in
   gdb).  Make sure output to stderr is available when using GTK -- perror
   calls will have to be replaced, for instance.
-** Extend FormatMove() to handle abbreviation of multiple moves (e.g.
-  "8/7(2) 6/5(2)").
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
 ** Add a "set record" command; when "record" is off, no moves are
   recorded (which implies that "save", "list" and the game list window
@@ -253,6 +251,7 @@ functions:
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
 ** "help next" (and "next <tab>" areincomplete.
+** Make sure that GTKSet() allows analysis after a move is imported. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

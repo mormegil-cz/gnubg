@@ -576,9 +576,10 @@ extern void CanonicalMoveOrder( int an[] ) {
 extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
     char *pch = sz;
-    int aanMove[ 4 ][ 4 ], *pnSource[ 4 ], *pnDest[ 4 ], i, j, acRepeat[ 4 ];
+    int aanMove[ 4 ][ 4 ], *pnSource[ 4 ], *pnDest[ 4 ], i, j;
     int fl = 0;
-    
+    int anCount[4], nMoves, nDuplicate, k;
+  
     /* Re-order moves into 2-dimensional array. */
     for( i = 0; i < 4 && anMove[ i << 1 ] >= 0; i++ ) {
         aanMove[ i ][ 0 ] = anMove[ i << 1 ] + 1;
@@ -619,15 +620,57 @@ extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
                 pnSource[ i ] = pnSource[ j ];
                 pnDest[ i ] = pnDest[ j ];
             }
-            
-            acRepeat[ i++ ] = 1;
+
+	    i++;
+        }
+
+    while( i < 4 )
+        pnSource[ i++ ] = NULL;
+
+    /* At this point i-1 is the current maximum offset. */
+    
+    for ( i = 0; i < 4; i++)
+        anCount[i] = pnSource[i] ? 1 : 0;
+
+    for ( i = 0; i < 3; i++) {
+        if (pnSource[i]) {
+            nMoves = pnDest[i] - pnSource[i];
+            for (j = i + 1; j < 4; j++) {
+                if (pnSource[j]) {
+                    nDuplicate = 1;
+		    
+                    if (pnDest[j] - pnSource[j] != nMoves)
+                        nDuplicate = 0;
+                    else
+                        for (k = 0; k <= nMoves && nDuplicate; k++)
+			    {
+				if (pnSource[i][k] != pnSource[j][k])
+				    nDuplicate = 0;
+			    }
+                    if (nDuplicate) {
+                        anCount[i]++;
+                        pnSource[j] = NULL;
+                    }
+                }
+            }
+        }
+    }
+
+    /* Compact array. */
+    i = 0;
+
+    for( j = 0; j < 4; j++ )
+        if( pnSource[ j ] ) {
+            if( j > i ) {
+                pnSource[ i ] = pnSource[ j ];
+                pnDest[ i ] = pnDest[ j ];
+            }
+
+	    i++;
         }
 
     if( i < 4 )
         pnSource[ i ] = NULL;
-    
-    /* FIXME Combine repeated moves, e.g. 6/5 6/5 -> 6/5(2).  Then compact
-       again. */
 
     for( i = 0; i < 4 && pnSource[ i ]; i++ ) {
         if( i )
@@ -648,6 +691,12 @@ extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
             !( fl & ( 1 << *pnDest[ i ] ) ) ) {
             *pch++ = '*';
             fl |= 1 << *pnDest[ i ];
+        }
+	
+        if (anCount[i] > 1) {
+            *pch++ = '(';
+            *pch++ = '0' + anCount[i];
+            *pch++ = ')';
         }
     }
 
