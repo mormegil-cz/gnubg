@@ -611,7 +611,7 @@ static void RenderFramePainted( renderdata *prd, unsigned char *puch,
     diffuse = 0.8 * prd->arLight[ 2 ] + 0.2;
     specular = pow( prd->arLight[ 2 ], 20 ) * 0.6;
 
-    FillArea( puch, nStride, prd->nSize * BOARD_WIDTH, prd->nSize * BOARD_HEIGHT /*81?*/,
+    FillArea( puch, nStride, prd->nSize * BOARD_WIDTH, prd->nSize * ( BOARD_HEIGHT - 1 ),
 	      clamp( specular * 0x100 +
 		     diffuse * prd->aanBoardColour[ 1 ][ 0 ] ),
 	      clamp( specular * 0x100 +
