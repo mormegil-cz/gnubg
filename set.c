@@ -598,13 +598,16 @@ extern void CommandSetPlayerName( char *sz ) {
 	return;
     }
 
+    if( strlen( pch ) > 31 )
+	pch[ 31 ] = 0;
+    
     if( ( *pch == '0' || *pch == '1' ) && !pch[ 1 ] ) {
 	outputf( "`%c' is not a legal name.\n", *pch );
 
 	return;
     }
 
-    if( !strncasecmp( pch, "both", strlen( pch ) ) ) {
+    if( !strcasecmp( pch, "both" ) ) {
 	outputl( "`both' is a reserved word; you can't call a player "
 		 "that.\n" );
 
@@ -618,9 +621,6 @@ extern void CommandSetPlayerName( char *sz ) {
 	return;
     }
 
-    if( strlen( pch ) > 31 )
-	pch[ 31 ] = 0;
-    
     strcpy( ap[ iPlayerSet ].szName, pch );
 
     outputf( "Player %d is now known as `%s'.\n", iPlayerSet, pch );
