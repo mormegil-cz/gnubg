@@ -86,10 +86,11 @@ board:[A-Za-z0-9]+:[A-Za-z0-9]+(:-?[0-9]+)+  {
 -?[0-9]+	{ extlval.number = atoi(exttext); return NUMBER; }
 
 [^=;:, \t\r\n]+	{
-			char buf[100];
+			char *buf = malloc( strlen( exttext ) + 1 );
 
 			escapes(exttext, buf);
 			extlval.sval = (char *) strdup(buf);
+                        free( buf );
 			return STRING;
 		}
 

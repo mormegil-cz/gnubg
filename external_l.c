@@ -833,24 +833,25 @@ case 18:
 YY_RULE_SETUP
 #line 88 "external_l.l"
 {
-			char buf[100];
+			char *buf = malloc( strlen( exttext ) + 1 );
 
 			escapes(exttext, buf);
 			extlval.sval = (char *) strdup(buf);
+                        free( buf );
 			return STRING;
 		}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 96 "external_l.l"
+#line 97 "external_l.l"
 ;	/* whitespace */
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 98 "external_l.l"
+#line 99 "external_l.l"
 ECHO;
 	YY_BREAK
-#line 854 "external_l.c"
+#line 855 "external_l.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1732,7 +1733,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 98 "external_l.l"
+#line 99 "external_l.l"
 
 
 void escapes(const char *cp, char *tp)
