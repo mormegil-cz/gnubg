@@ -5264,13 +5264,19 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
     fInterrupt = TRUE;
 }
 
-#if USE_GUI && defined(SIGIO)
+#if ( USE_GUI || USE_SOUND ) && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
 
+#if USE_GUI
     /* NB: It is safe to write to fAction even if it cannot be read
        atomically, because it is only used to hold a binary value. */
     if( fX )
 	fAction = TRUE;
+#endif
+
+#if USE_SOUND
+    SoundSIGIO();
+#endif
 }
 #endif
 
@@ -5300,6 +5306,7 @@ _("Usage: %s [options] [saved-game-file]\n"
 "DIR\n"
 "  -h, --help                Display usage and exit\n"
 "  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
+"  -q, --quiet               Disable sound effects\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
 "  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
 "  -t, --tty                 Start on tty instead of using window system\n"
@@ -5314,11 +5321,14 @@ _("Usage: %s [options] [saved-game-file]\n"
 _("Usage: %s [options] [saved-game-file]\n"
 "Options:\n"
 "  -b, --no-bearoff          Do not use bearoff database\n"
+"  -c FILE, --commands FILE  Read commands from FILE and exit\n"
 "  -d DIR, --datadir DIR     Read database and weight files from directory "
 "DIR\n"
 "  -h, --help                Display usage and exit\n"
 "  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
+"  -q, --quiet               Disable sound effects\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
+"  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
 "  -v, --version             Show version information and exit\n"
 "\n"
 "For more information, type `help' from within gnubg.\n"
@@ -5630,7 +5640,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 	}
     
-#if USE_GUI && defined(SIGIO)
+#if ( USE_GUI || USE_SOUND ) && defined(SIGIO)
     if( fX )
 	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
 #endif

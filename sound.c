@@ -25,6 +25,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -119,7 +120,9 @@ char aszSound[ NUM_SOUNDS ][ 80 ] = {
 
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";
 
-#  if defined (HAVE_ESD)
+#  if defined (SIGIO)
+soundsystem ssSoundSystem = SOUND_SYSTEM_NORMAL;
+#  elif defined (HAVE_ESD)
 soundsystem ssSoundSystem = SOUND_SYSTEM_ESD;
 #  elif defined (HAVE_ARTSC)
 soundsystem ssSoundSystem = SOUND_SYSTEM_ARTSC;
@@ -139,7 +142,7 @@ char *aszSoundSystem[ NUM_SOUND_SYSTEMS ] = {
   N_("External command"),
   N_("ESD"),
   N_("NAS"),
-  N_("/dev/audio"),
+  N_("/dev/dsp"), /* with fallback to /dev/audio */
   N_("MS Windows") 
 };
 
@@ -152,6 +155,31 @@ char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ] = {
   "windows" 
 };
 
+#ifdef SIGIO
+
+static int hSound = -1; /* file descriptor of dsp/audio device */
+static char *pSound, *pSoundCurrent;
+static size_t cbSound; /* bytes remaining */
+
+extern void SoundSIGIO( void ) {
+
+    int cch;
+
+    if( cbSound ) {
+	if( ( ( cch = write( hSound, pSoundCurrent, cbSound ) ) < 0 ) ||
+	    !( cbSound -= cch ) ) {
+	    cbSound = 0;
+	    close( hSound );
+	    hSound = -1;
+	    /* We would like to free( pSound ) here, but it's not safe to
+	       call free() from a signal handler, so we leave that job to
+	       somebody else. */
+	} else
+	    pSoundCurrent += cch;
+    }
+}
+
+#endif
 
 #ifndef WIN32
 
@@ -183,40 +211,173 @@ static int check_dev(char *dev) {
 }
 
 
-static void play_audio_file(const char *file) {
+static void play_audio_file(const char *file, const char *device) {
 
-  /* here we can assume that we can write to /dev/audio */
-  char *buf;
-  struct stat info;
-  int fd = open(file, O_RDONLY);
+    /* here we can assume that we can write to /dev/audio */
+    char *buf, tmp[ 256 ];
+    struct stat info;
+    int fd, n, cb, nSampleRate, nChannels;
+  
+#ifdef SIGIO
+    sigset_t ss, ssOld;
 
-  if (fd <= 0) {
-    return;
-  }
-  fstat(fd, &info);
+    sigemptyset( &ss );
+    sigaddset( &ss, SIGIO );
+    sigprocmask( SIG_BLOCK, &ss, &ssOld );
+  
+    if( pSound ) {
+	free( pSound );
+	cbSound = 0;
+	if( hSound >= 0 ) {
+	    /* FIXME it's a bit silly to close this when we're going to reopen
+	       it in a moment */
+	    close( hSound );
+	    hSound = -1;
+	}
+    }
 
-  if (info.st_size < 24)
-    return;
+    sigprocmask( SIG_SETMASK, &ssOld, NULL );
+#endif
+  
+    if( ( fd = open(file, O_RDONLY) ) < 0 )
+	return;
 
-  buf = malloc(info.st_size + 1);
-  read(fd, buf, 24);
-  read(fd, buf, info.st_size - 24);
-  close(fd);
+    fstat( fd, &info );
 
-  fd = open("/dev/audio", O_WRONLY | O_EXCL | O_NDELAY);
-        
-  if (fd < 0) {
+    if( read( fd, tmp, 4 ) < 4 ) {
+	close( fd );
+	return;
+    }
+
+    if( !memcmp( tmp, ".snd", 4 ) ) {
+	/* .au format */
+	unsigned long nOffset;
+
+	if( read( fd, tmp + 4, 20 ) < 20 ) {
+	    close( fd );
+	    return;
+	}
+	
+	nOffset = ( tmp[ 4 ] << 24 ) | ( tmp[ 5 ] << 16 ) | ( tmp[ 6 ] << 8 ) |
+	    tmp[ 7 ];
+	nSampleRate = ( tmp[ 16 ] << 24 ) | ( tmp[ 17 ] << 16 ) |
+	    ( tmp[ 18 ] << 8 ) | tmp[ 19 ];
+	nChannels = tmp[ 23 ];
+	/* FIXME get encoding */
+
+	if( nOffset != 24 )
+	    lseek( fd, nOffset, SEEK_SET );
+
+	buf = malloc( cb = info.st_size - nOffset );
+	if( ( cb = read( fd, buf, cb ) ) < 0 ) {
+	    free( buf );
+	    close( fd );
+	    return;
+	}
+    } else if( !memcmp( tmp, "RIFF", 4 ) ) {
+	unsigned long nLength;
+	
+	/* .wav format */
+	if( read( fd, tmp, 8 ) < 8 ) {
+	    close( fd );
+	    return;
+	}
+
+	if( memcmp( tmp + 4, "WAVE", 4 ) ) {
+	    /* it wasn't in .wav format after all -- whoops */
+	    close( fd );
+	    return;
+	}
+
+	while( 1 ) {
+	    if( read( fd, tmp, 4 ) < 4 ) {
+		close( fd );
+		return;
+	    }
+
+	    if( !memcmp( tmp, "fmt ", 4 ) )
+		break;
+
+	    nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+		( tmp[ 5 ] << 8 ) | tmp[ 4 ];
+
+	    lseek( fd, nOffset, SEEK_CUR );
+	}
+	
+	/* FIXME read format chunk */
+	
+	while( 1 ) {
+	    if( read( fd, tmp, 4 ) < 4 ) {
+		close( fd );
+		return;
+	    }
+
+	    if( !memcmp( tmp, "data", 4 ) )
+		break;
+
+	    nLength = ( tmp[ 7 ] << 24 ) | ( tmp[ 6 ] << 16 ) |
+		( tmp[ 5 ] << 8 ) | tmp[ 4 ];
+
+	    lseek( fd, nOffset, SEEK_CUR );
+	}
+	
+	/* FIXME read data chunk */
+    } else {
+	/* unknown format -- ignore */
+	close( fd );
+	return;
+    }
+    
+    if( ( fd = open(device, O_WRONLY | O_NDELAY) ) < 0 ) {
+	free(buf);
+	return;
+    }
+
+    /* FIXME match output device to file encoding, convert if necessary */
+    
+#ifdef SIGIO
+    sigemptyset( &ss );
+    sigaddset( &ss, SIGIO );
+    sigprocmask( SIG_BLOCK, &ss, &ssOld );
+    
+    pSound = pSoundCurrent = buf;
+    cbSound = cb;
+    hSound = fd;
+    
+#if O_ASYNC
+    /* BSD O_ASYNC-style I/O notification */
+    if( ( n = fcntl( fd, F_GETFL ) ) != -1 ) {
+	fcntl( fd, F_SETOWN, getpid() );
+	fcntl( fd, F_SETFL, n | O_ASYNC | O_NONBLOCK );
+    }
+#else
+    /* System V SIGPOLL-style I/O notification */
+    if( ( n = fcntl( fd, F_GETFL ) ) != -1 )
+	fcntl( fd, F_SETFL, n | O_NONBLOCK );
+    ioctl( fd, I_SETSIG, S_OUTPUT );
+#endif
+    
+    sigprocmask( SIG_SETMASK, &ssOld, NULL );
+
+    /* the sound will be played asynchronously, and the buffer will be
+       freed later */
+#else
+    write(fd, buf, cb);
     free(buf);
-    return;
-  }
-  write(fd, buf, info.st_size - 24);
-  free(buf);
-  close(fd);
-
+    close(fd);
+#endif
 }
 
-static int can_play_audio() {
-  return check_dev("/dev/audio");
+static char *can_play_audio() {
+
+    static char *asz[] = { "/dev/dsp", "/dev/audio", NULL };
+    char **ppch;
+
+    for( ppch = asz; *ppch; ppch++ )
+	if( check_dev( *ppch ) )
+	    return *ppch;
+
+    return NULL;
 }
 #endif  /* #ifndef WIN32 */
 
@@ -407,29 +568,8 @@ static int play_nas_file(char *file)
 #endif /* HAVE_NAS */
 
 static void 
-play_file(const char *filename) {
+play_file_child(const char *filename) {
 
-  /* fork, so we don't have to wait for the sound to finish */
-
-#ifndef WIN32
-
-  int pid = fork();
-
-  if (pid < 0)
-    /* parent */
-    return;
-  else if (pid == 0) {
-    /* child */
-          
-    /* kill after 30 secs */
-    alarm(30);
-
-#else
-
-    /* don't fork with windows as PlaySound can play async. */
-
-#endif
-	
     switch ( ssSoundSystem ) {
 
     case SOUND_SYSTEM_COMMAND:
@@ -491,10 +631,13 @@ play_file(const char *filename) {
 
     case SOUND_SYSTEM_NORMAL:
 #ifndef WIN32
-      if ( can_play_audio() ) {
-        play_audio_file(filename);
-        _exit(0);
-      }
+    {
+	char *pch;
+	if( ( pch = can_play_audio() ) ) {
+	    play_audio_file(filename, pch);
+	    _exit(0);
+	}
+    }
 #else
       assert( FALSE );
 #endif
@@ -515,6 +658,43 @@ play_file(const char *filename) {
 
     }
 
+}
+
+static void 
+play_file(const char *filename) {
+
+#ifndef WIN32
+
+  int pid;
+
+#ifdef SIGIO
+  if( ssSoundSystem == SOUND_SYSTEM_NORMAL) {
+      /* we can play directly without forking */
+      play_file_child( filename );
+      return;
+  }
+#endif
+  
+  /* fork, so we don't have to wait for the sound to finish */
+  pid = fork();
+
+  if (pid < 0)
+    /* parent */
+    return;
+  else if (pid == 0) {
+    /* child */
+          
+    /* kill after 30 secs */
+    alarm(30);
+
+#else
+
+    /* don't fork with windows as PlaySound can play async. */
+
+#endif
+
+    play_file_child( filename );
+    
 #ifndef WIN32
 
     _exit(0);
@@ -528,7 +708,6 @@ play_file(const char *filename) {
 #endif
 
 }
-
 
 extern void
 playSound ( const gnubgsound gs ) {

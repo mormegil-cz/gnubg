@@ -74,6 +74,10 @@ extern int fSound;
 extern void
 playSound ( const gnubgsound gs );
 
+#ifdef SIGIO
+extern void SoundSIGIO( void );
+#endif
+
 #else /* USE_SOUND */
 
 #define playSound(a) 
