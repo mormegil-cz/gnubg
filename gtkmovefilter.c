@@ -320,7 +320,7 @@ MoveFilterSetup ( movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
   pwSetup = gtk_vbox_new ( FALSE, 4 );
 
   pmfsw = 
-    (movefiltersetupwidget *) malloc ( sizeof ( movefiltersetupwidget ) );
+    (movefiltersetupwidget *) g_malloc ( sizeof ( movefiltersetupwidget ) );
 
   /* predefined settings */
 
@@ -517,7 +517,7 @@ MoveFilterWidget ( movefilter *pmf, int *pfOK ) {
   int *pi;
   
   pwFrame = gtk_frame_new ( _("Move filter") );
-  pmfw = (movefilterwidget *) malloc ( sizeof ( movefilterwidget ) );
+  pmfw = (movefilterwidget *) g_malloc ( sizeof ( movefilterwidget ) );
   pmfw->pmf = pmf;
 
   /* output widget (with "User defined", or "Large" etc */
@@ -580,21 +580,24 @@ SetMovefilterCommands ( const char *sz,
                  movefilter aamfOld[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
   int i, j;
+  char *szCmd;
 
   for ( i = 0; i < MAX_FILTER_PLIES; ++i )
     for ( j = 0; j <= i; ++j ) {
       if ( aamfNew[ i ][ j ].Accept != aamfOld[ i ][ j ].Accept ||
            aamfNew[ i ][ j ].Extra != aamfOld[ i ][ j ].Extra ||
            aamfNew[ i ][ j ].Threshold != aamfOld[ i ][ j ].Threshold ) {
-      char *szCmd = g_strdup_printf ( "%s %d %d %d %d %f",
-                                   sz, i + 1, j,
-                                   aamfNew[ i ][ j ].Accept,
-                                   aamfNew[ i ][ j ].Extra,
-                                   aamfNew[ i ][ j ].Threshold );
-      UserCommand ( szCmd );
-      g_free ( szCmd );
+        PushLocale ( "C" );
+        szCmd = g_strdup_printf ( "%s %d %d %d %d %f",
+                                  sz, i + 1, j,
+                                  aamfNew[ i ][ j ].Accept,
+                                  aamfNew[ i ][ j ].Extra,
+                                  aamfNew[ i ][ j ].Threshold );
+        PopLocale ();
+        UserCommand ( szCmd );
+        g_free ( szCmd );
       }
-
+      
     }
 
 }
