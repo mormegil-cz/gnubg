@@ -751,9 +751,9 @@ extern char *
 OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                          const float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                          const evalsetup* pes, const cubeinfo* pci,
-                         const int fDouble, const int fTake,
-                         const skilltype stDouble,
-                         const skilltype stTake ) {
+                         int fDouble, int fTake,
+                         skilltype stDouble,
+                         skilltype stTake ) {
 
   float r;
 

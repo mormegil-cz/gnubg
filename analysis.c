@@ -270,7 +270,7 @@ static lucktype Luck( float r ) {
 }
 
 extern skilltype
-Skill( float const r )
+Skill( float r )
 {
   if( r < -arSkillLevel[ SKILL_VERYBAD ] )
     return SKILL_VERYBAD;
@@ -1458,7 +1458,7 @@ IniStatcontext ( statcontext *psc ) {
 
 
 extern float
-relativeFibsRating ( const float r, const int n )
+relativeFibsRating ( float r, int n )
 {
   float const x = - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
 
@@ -1899,7 +1899,7 @@ updateStatisticsMatch ( list *plMatch ) {
 
 
 
-extern int getLuckRating ( const float rLuck ) {
+extern int getLuckRating ( float rLuck ) {
 
   if ( rLuck < -0.10 )
     return 0;

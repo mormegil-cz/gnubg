@@ -6717,7 +6717,7 @@ extern void outputl( const char *sz ) {
 }
     
 /* Write a character to stdout/status bar/popup window */
-extern void outputc( char ch ) {
+extern void outputc( const char ch ) {
 
     char sz[ 2 ] = { ch, 0 };
     
@@ -7391,6 +7391,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 #if USE_GTK
     GtkWidget *pwSplash = NULL;
+#endif
+
+#if defined(_MSC_VER) && HAVE_LIBXML2
+	xmlMemSetup(free, malloc, realloc, strdup);
 #endif
 
 #if !WIN32

@@ -274,7 +274,7 @@ static void CopyAreaClip( unsigned char *puchDest, int nDestStride,
     if( cx <= 0 || cy <= 0 )
 	return;
 
-    return CopyArea( puchDest + yDest * nDestStride + xDest * 3, nDestStride,
+    CopyArea( puchDest + yDest * nDestStride + xDest * 3, nDestStride,
 		     puchSrc + ySrc * nSrcStride + xSrc * 3, nSrcStride,
 		     cx, cy );
 }
@@ -288,8 +288,11 @@ extern void CopyAreaRotateClip( unsigned char *puchDest, int nDestStride,
     int x, nSrcPixelStride = 0, nSrcRowStride = 0;
     
     if( !( nTheta %= 4 ) )
-	return CopyAreaClip( puchDest, nDestStride, xDest, yDest, cxDest,
+	{
+		CopyAreaClip( puchDest, nDestStride, xDest, yDest, cxDest,
 			     cyDest, puchSrc, nSrcStride, xSrc, ySrc, cx, cy );
+		return;
+	}
 
     puchSrc += ySrc * nSrcStride + xSrc * 3;
     

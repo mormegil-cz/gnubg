@@ -337,8 +337,8 @@ static int PositionF( const int fBits, const int n, const int r ) {
 
 extern 
 unsigned int PositionBearoff( const int anBoard[],
-                              const int nPoints,
-                              const int nChequers ) {
+                              int nPoints,
+                              int nChequers ) {
 
     int i, fBits, j;
 
@@ -371,8 +371,8 @@ static int PositionInv( int nID, int n, int r ) {
         PositionInv( nID - nC, n - 1, r - 1 ) : PositionInv( nID, n - 1, r );
 }
 
-extern void PositionFromBearoff( int anBoard[], const unsigned int usID,
-                                 const int nPoints, const int nChequers ) {
+extern void PositionFromBearoff( int anBoard[], unsigned int usID,
+                                 int nPoints, int nChequers ) {
     
     int fBits = PositionInv( usID, nChequers + nPoints, nPoints );
     int i, j;
