@@ -7239,12 +7239,12 @@ static void CallbackProgress( void ) {
 #if USE_GTK
     if( fX ) {
 
-	SuspendInput();
+	GTKDisallowStdin();
     
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
 	
-	ResumeInput();
+	GTKAllowStdin();
     }
 #endif
 
