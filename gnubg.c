@@ -72,6 +72,8 @@ static int fReadingOther;
 static char szCommandSeparators[] = " \t\n\r\v\f";
 #endif
 
+#include <iconv.h>
+
 #include "backgammon.h"
 #include "dice.h"
 #include "drawboard.h"
@@ -4334,8 +4336,8 @@ extern void CommandSaveSettings( char *szParam ) {
     case THREAD_PRIORITY_ABOVE_NORMAL:
       fprintf ( pf, "set priority abovenormal\n" );
       break;
-    case THREAD_PRIORITY_NELOW_NORMAL:
-      fprintf ( pf, "set priority below normal\n" );
+    case THREAD_PRIORITY_BELOW_NORMAL:
+      fprintf ( pf, "set priority belownormal\n" );
       break;
     case THREAD_PRIORITY_NORMAL:
       fprintf ( pf, "set priority normal\n" );
@@ -4343,10 +4345,10 @@ extern void CommandSaveSettings( char *szParam ) {
     case THREAD_PRIORITY_IDLE:
       fprintf ( pf, "set priority idle\n" );
       break;
-    case THREAD_PRIORITY_HIGH:
+    case THREAD_PRIORITY_HIGHEST:
       fprintf ( pf, "set priority high\n" );
       break;
-    case THREAD_PRIORITY_REALTIME:
+    case THREAD_PRIORITY_TIME_CRITICAL:
       fprintf ( pf, "set priority realtime\n" );
       break;
     default:
@@ -6507,3 +6509,77 @@ basename (const char *filename)
 } 
 
 #endif /* ! HAVE_BASENAME */
+
+
+extern char *
+Convert ( const char *sz, 
+          const char *szDestCharset, const char *szSourceCharset ) {
+
+  iconv_t id;
+  int lIn, lOut, l, rc, nUsed;
+  const char *pchIn;
+  char *pchOut, *pchDest;
+  int fError = FALSE;
+
+  if ( ! strcmp ( szSourceCharset, szDestCharset ) )
+    /* no need for conversion */
+    return strdup ( sz );
+
+  id = iconv_open ( szDestCharset, szSourceCharset );
+
+  if ( id < 0 ) {
+    outputerr ( "iconv_open" );
+    return strdup ( sz );
+  }
+
+  
+  lIn = strlen ( sz );
+  pchIn = sz;
+
+  l = lOut = lIn + 1;
+  pchOut = pchDest = (char *) malloc ( lOut );
+
+  while ( lIn && ! fError ) {
+
+    rc = iconv ( id, (char **) &pchIn, &lIn, &pchOut, &l );
+
+    if ( rc == -1 ) 
+      switch ( errno ) {
+      case EINVAL:
+        /* incomplete text, do not report an error */
+        break;
+      case E2BIG:
+        /* output buffer to small */
+        nUsed = pchOut - pchDest;
+
+        lOut *= 2;
+        pchDest = (char *) realloc ( pchDest, lOut );
+
+        pchOut = pchDest + nUsed;
+        l = lOut - nUsed - 1;
+        continue;
+
+        break;
+
+      default:
+        outputerr ( "iconv" );
+        fError = TRUE;
+        break;
+
+      }
+
+  }
+
+  if ( fError ) {
+    free ( pchDest );
+    return NULL;
+  }
+
+  *pchOut = 0;
+
+  if ( iconv_close ( id ) )
+    outputerr ( "iconv_close" );
+
+  return pchDest;
+
+}

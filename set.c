@@ -3126,56 +3126,56 @@ Win32SetPriority ( const int tp, const char *sz ) {
     fThreadPriority = tp;
   }
   else
-    outputf ( _("Changing priority failed (trying to set priority %s)\n",
-                sz ) );
+    outputf ( _("Changing priority failed (trying to set priority %s)\n"),
+                sz );
 
 }
 
 extern void
 CommandSetPriorityIdle ( char *sz ) {
 
-  Win32SetPriority ( THREAD_IDLE_PRIORITY_CLASS, 
-                     "IDLE_PRIORITY_CLASS" );
+  Win32SetPriority ( THREAD_PRIORITY_IDLE, 
+                     "idle priority" );
 
 }
 
 extern void
 CommandSetPriorityBelowNormal ( char *sz ) {
 
-  Win32SetPriority ( THREAD_BELOW_NORMAL_PRIORITY_CLASS, 
-                     "BELOW_NORMAL_PRIORITY_CLASS" );
+  Win32SetPriority ( THREAD_PRIORITY_BELOW_NORMAL, 
+                     "below normal" );
 
 }
 
 extern void
 CommandSetPriorityNormal ( char *sz ) {
 
-  Win32SetPriority ( THREAD_NORMAL_PRIORITY_CLASS, 
-                     "NORMAL_PRIORITY_CLASS" );
+  Win32SetPriority ( THREAD_PRIORITY_NORMAL, 
+                     "normal priority" );
 
 }
 
 extern void
 CommandSetPriorityAboveNormal ( char *sz ) {
 
-  Win32SetPriority ( THREAD_ABOVE_NORMAL_PRIORITY_CLASS, 
-                     "ABOVE_NORMAL_PRIORITY_CLASS" );
+  Win32SetPriority ( THREAD_PRIORITY_ABOVE_NORMAL, 
+                     "above normal priority" );
 
 }
 
 extern void
 CommandSetPriorityHigh ( char *sz ) {
 
-  Win32SetPriority ( THREAD_HIGH_PRIORITY_CLASS, , 
-                     "HIGH_PRIORITY_CLASS" );
+  Win32SetPriority ( THREAD_PRIORITY_HIGHEST, 
+                     "highest priority" );
 
 }
 
 extern void
 CommandSetPriorityRealtime ( char *sz ) {
 
-  Win32SetPriority ( THREAD_REALTIME_PRIORITY_CLASS, 
-                     "REALTIME_PRIORITY_CLASS" );
+  Win32SetPriority ( THREAD_PRIORITY_TIME_CRITIAL, 
+                     "time critical" );
 
 }
 
