@@ -1,7 +1,7 @@
 /*
  * gnubg.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1998, 1999, 2000.
+ * by Gary Wong <gtw@gnu.org>, 1998, 1999, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -108,6 +108,10 @@ int fReadingCommand;
 #endif
 #endif
 
+#if HAVE_LIBREADLINE
+int fReadline = TRUE;
+#endif
+
 #ifndef SIGIO
 #define SIGIO SIGPOLL /* The System V equivalent */
 #endif
@@ -133,11 +137,13 @@ evalcontext ecTD = { 0, 8, 0.16, 0, FALSE };
 evalcontext ecEval = { 1, 8, 0.16, 0, FALSE };
 evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE };
 
+#define DEFAULT_NET_SIZE 128
+
 storedmoves sm = {}; /* sm.ml.amMoves is NULL, sm.anDice is [0,0]. */
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE } }
+    { "gnubg", PLAYER_GNU, { { 0, 8, 0.16, 0, FALSE } } },
+    { "user", PLAYER_HUMAN, { { 0, 8, 0.16, 0, FALSE } } }
 };
 
 /* Usage strings */
@@ -152,6 +158,8 @@ static char szDICE[] = "<die> <die>",
     szOPTCOMMAND[] = "[command]",
     szOPTPOSITION[] = "[position]",
     szOPTSEED[] = "[seed]",
+    szOPTSIZE[] = "[size]",
+    szOPTVALUE[] = "[value]",
     szPLAYER[] = "<player>",
     szPLIES[] = "<plies>",
     szPOSITION[] = "<position>",
@@ -160,8 +168,7 @@ static char szDICE[] = "<die> <die>",
     szSEED[] = "<seed>",
     szSIZE[] = "<size>",
     szTRIALS[] = "<trials>",
-    szVALUE[] = "<value>",
-    szOPTVALUE[] = "[value]";
+    szVALUE[] = "<value>";
 
 command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
@@ -210,8 +217,8 @@ command acDatabase[] = {
       szLENGTH, NULL },
     { "session", CommandNewSession, "Start a new (money) session", NULL,
       NULL },
-    { "weights", CommandNotImplemented, "Create new (random) neural net "
-      "weights", szSIZE, NULL },
+    { "weights", CommandNewWeights, "Create new (random) neural net "
+      "weights", szOPTSIZE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSave[] = {
     { "game", CommandSaveGame, "Record a log of the game so far to a "
@@ -429,6 +436,8 @@ command acDatabase[] = {
       NULL },
     { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
     { "export", NULL, "Write data for use by other programs", NULL, acExport },
+    { "external", CommandExternal, "Make moves for an external controller",
+      szFILENAME, NULL },
     { "import", NULL, "Import matches, games or positions from other programs",
       NULL, acImport },
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
@@ -732,15 +741,7 @@ static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
     return NULL;
 }
 
-#if HAVE_SIGACTION
-typedef struct sigaction psighandler;
-#elif HAVE_SIGVEC
-typedef struct sigvec psighandler;
-#else
-typedef RETSIGTYPE (*psighandler)( int );
-#endif
-
-static void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
+extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
 			     psighandler *pOld ) {
 #if HAVE_SIGACTION
     struct sigaction sa;
@@ -749,30 +750,30 @@ static void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
     sigemptyset( &sa.sa_mask );
     sa.sa_flags =
 # if SA_RESTART
-	nSignal == SIGINT ? 0 : SA_RESTART |
+	nSignal == SIGINT || nSignal == SIGIO ? 0 : SA_RESTART |
 # endif
 # if SA_NOCLDSTOP
 	SA_NOCLDSTOP |
 # endif
 	0;
-    sigaction( nSignal, &sa, pOld );
+    sigaction( nSignal, p ? &sa : NULL, pOld );
 #elif HAVE_SIGVEC
     struct sigvec sv;
 
     sv.sv_handler = p;
     sigemptyset( &sv.sv_mask );
-    sv.sv_flags = nSignal == SIGINT ? SV_INTERRUPT : 0;
+    sv.sv_flags = nSignal == SIGINT || nSignal == SIGIO ? SV_INTERRUPT : 0;
 
-    sigvec( nSignal, &sv, pOld );
+    sigvec( nSignal, p ? &sv : NULL, pOld );
 #else
     if( pOld )
 	*pOld = signal( nSignal, p );
-    else
+    else if( p )
 	signal( nSignal, p );
 #endif
 }
 
-static void PortableSignalRestore( int nSignal, psighandler *p ) {
+extern void PortableSignalRestore( int nSignal, psighandler *p ) {
 #if HAVE_SIGACTION
     sigaction( nSignal, p, NULL );
 #elif HAVE_SIGVEC
@@ -940,7 +941,10 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    if( sz[ 1 ] ) {
 		/* Expression specified -- evaluate it */
 		SCM sResult;
+		psighandler sh;
 
+		PortableSignal( SIGINT, NULL, &sh );
+		GuileStartIntHandler();
 		if( ( sResult = scm_internal_catch( SCM_BOOL_T,
 				    (scm_catch_body_t) scm_eval_0str,
 				    sz + 1, scm_handle_by_message_noexit,
@@ -948,6 +952,8 @@ extern void HandleCommand( char *sz, command *ac ) {
 		    scm_write( sResult, SCM_UNDEFINED );
 		    scm_newline( SCM_UNDEFINED );
 		}
+		GuileEndIntHandler();
+		PortableSignalRestore( SIGINT, &sh );
 	    } else
 		/* No command -- start a Scheme shell */
 		scm_eval_0str( "(top-repl)" );
@@ -1259,7 +1265,8 @@ extern void CommandEval( char *sz ) {
 	SetCubeInfo( &ci, nCube, fCubeOwner, n ? !fMove : fMove, nMatchTo,
 		     anScore, fCrawford, fJacoby, fBeavers );    
     
-    if( !DumpPosition( an, szOutput, &ecEval, &ci, fOutputMWC, n ) ) {
+    if( !DumpPosition( an, szOutput, &ecEval, &ci, fOutputMWC, fOutputWinPC,
+		       n ) ) {
 #if USE_GTK
 	if( fX )
 	    GTKEval( szOutput );
@@ -1324,6 +1331,9 @@ extern void CommandHelp( char *sz ) {
     if( pc->szHelp )
 	/* the command has its own help text */
 	szHelp = pc->szHelp;
+    else if( pc == &cTop )
+	/* top-level help isn't for any command */
+	szHelp = NULL;
     else {
 	/* perhaps the command is an abbreviation; search for the full
 	   version */
@@ -1992,6 +2002,22 @@ extern void CommandExportMatch( char *sz ) {
 	fclose( pf );
 }
 
+extern void CommandNewWeights( char *sz ) {
+
+    int n;
+    
+    if( sz && *sz ) {
+	if( ( n = ParseNumber( &sz ) ) < 1 ) {
+	    outputl( "You must specify a valid number of hidden nodes "
+		     "(try `help new weights').\n" );
+	    return;
+	}
+    } else
+	n = DEFAULT_NET_SIZE;
+
+    EvalNewWeights( n );
+}
+
 extern void CommandSaveSettings( char *szParam ) {
 
     char sz[ PATH_MAX ], *pch = getenv( "HOME" );
@@ -2162,16 +2188,16 @@ static char **CompleteKeyword( char *szText, int iStart, int iEnd ) {
     
     return completion_matches( szText, GenerateKeywords );
 }
-#else
+#endif
+
 extern void Prompt( void ) {
 
-    if( !fInteractive )
+    if( !fInteractive || !isatty( STDIN_FILENO ) )
 	return;
 
     output( FormatPrompt() );
     fflush( stdout );    
 }
-#endif
 
 #if USE_GUI
 #if HAVE_LIBREADLINE
@@ -2272,17 +2298,22 @@ extern void UserCommand( char *szCommand ) {
     /* Note that the command is always echoed to stdout; the output*()
        functions are bypassed. */
 #if HAVE_LIBREADLINE
-    nOldEnd = rl_end;
-    rl_end = 0;
-    rl_redisplay();
-    puts( sz );
-    ProcessInput( sz, FALSE );
-    return;
-#else
-    putchar( '\n' );
-    Prompt();
-    puts( sz );
+    if( fReadline ) {
+	nOldEnd = rl_end;
+	rl_end = 0;
+	rl_redisplay();
+	puts( sz );
+	ProcessInput( sz, FALSE );
+	return;
+    }
+#endif
 
+    if( fInteractive ) {
+	putchar( '\n' );
+	Prompt();
+	puts( sz );
+    }
+    
     fInterrupt = FALSE;
     
     HandleCommand( sz, acTop );
@@ -2297,7 +2328,6 @@ extern void UserCommand( char *szCommand ) {
 	Prompt();
     else
 	fNeedPrompt = TRUE;
-#endif
 }
 
 #if USE_GTK
@@ -2318,11 +2348,13 @@ extern int NextTurnNotify( event *pev, void *p )
 #endif
     {
 #if HAVE_LIBREADLINE
-	rl_callback_handler_install( FormatPrompt(), HandleInput );
-	fReadingCommand = TRUE;
-#else
-	Prompt();
+	if( fReadline ) {
+	    rl_callback_handler_install( FormatPrompt(), HandleInput );
+	    fReadingCommand = TRUE;
+	} else
 #endif
+	    Prompt();
+	
 	fNeedPrompt = FALSE;
     }
     
@@ -2341,9 +2373,7 @@ extern char *GetInput( char *szPrompt ) {
     /* FIXME handle interrupts and EOF in this function. */
     
     char *sz;
-#if !HAVE_LIBREADLINE
     char *pch;
-#endif
 #if USE_GUI
     fd_set fds;
 
@@ -2353,79 +2383,81 @@ extern char *GetInput( char *szPrompt ) {
     
     if( fX ) {
 #if HAVE_LIBREADLINE
-	/* Using readline and X. */
-	char *szOldPrompt, *szOldInput;
-	int nOldEnd, nOldMark, nOldPoint, fWasReadingCommand;
+	if( fReadline ) {
+	    /* Using readline and X. */
+	    char *szOldPrompt, *szOldInput;
+	    int nOldEnd, nOldMark, nOldPoint, fWasReadingCommand;
 	
-	if( fInterrupt )
-	    return NULL;
+	    if( fInterrupt )
+		return NULL;
 
-	fReadingOther = TRUE;
-	
-	if( ( fWasReadingCommand = fReadingCommand ) ) {
-	    /* Save old readline context. */
-	    szOldPrompt = rl_prompt;
-	    szOldInput = rl_copy_text( 0, rl_end );
-	    nOldEnd = rl_end;
-	    nOldMark = rl_mark;
-	    nOldPoint = rl_point;
-	    fReadingCommand = FALSE;
-	    /* FIXME this is unnecessary when handling an X command! */
-	    outputc( '\n' );
-	}
-
-	szInput = FALSE;
-
-	rl_callback_handler_install( szPrompt, HandleInputRecursive );
-
-	while( !szInput ) {
-	    FD_ZERO( &fds );
-	    FD_SET( STDIN_FILENO, &fds );
-#ifdef ConnectionNumber
-	    FD_SET( ConnectionNumber( DISPLAY ), &fds );
-
-	    select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL, NULL,
-		    NULL );
-#else
-	    select( STDIN_FILENO + 1, &fds, NULL, NULL, NULL );
-#endif
-	    if( fInterrupt ) {
+	    fReadingOther = TRUE;
+	    
+	    if( ( fWasReadingCommand = fReadingCommand ) ) {
+		/* Save old readline context. */
+		szOldPrompt = rl_prompt;
+		szOldInput = rl_copy_text( 0, rl_end );
+		nOldEnd = rl_end;
+		nOldMark = rl_mark;
+		nOldPoint = rl_point;
+		fReadingCommand = FALSE;
+		/* FIXME this is unnecessary when handling an X command! */
 		outputc( '\n' );
-		break;
 	    }
 	    
-	    if( FD_ISSET( STDIN_FILENO, &fds ) ) {
-		rl_callback_read_char();
-		if( fInputAgain ) {
-		    rl_callback_handler_install( szPrompt,
-						 HandleInputRecursive );
-		    szInput = NULL;
-		    fInputAgain = FALSE;
-		}
-	    }
+	    szInput = FALSE;
+	    
+	    rl_callback_handler_install( szPrompt, HandleInputRecursive );
+	    
+	    while( !szInput ) {
+		FD_ZERO( &fds );
+		FD_SET( STDIN_FILENO, &fds );
 #ifdef ConnectionNumber
-	    if( FD_ISSET( ConnectionNumber( DISPLAY ), &fds ) )
-		HandleXAction();
+		FD_SET( ConnectionNumber( DISPLAY ), &fds );
+		
+		select( ConnectionNumber( DISPLAY ) + 1, &fds, NULL, NULL,
+			NULL );
+#else
+		select( STDIN_FILENO + 1, &fds, NULL, NULL, NULL );
 #endif
+		if( fInterrupt ) {
+		    outputc( '\n' );
+		    break;
+		}
+		
+		if( FD_ISSET( STDIN_FILENO, &fds ) ) {
+		    rl_callback_read_char();
+		    if( fInputAgain ) {
+			rl_callback_handler_install( szPrompt,
+						     HandleInputRecursive );
+			szInput = NULL;
+			fInputAgain = FALSE;
+		    }
+		}
+#ifdef ConnectionNumber
+		if( FD_ISSET( ConnectionNumber( DISPLAY ), &fds ) )
+		    HandleXAction();
+#endif
+	    }
+
+	    if( fWasReadingCommand ) {
+		/* Restore old readline context. */
+		rl_callback_handler_install( szOldPrompt, HandleInput );
+		rl_insert_text( szOldInput );
+		free( szOldInput );
+		rl_end = nOldEnd;
+		rl_mark = nOldMark;
+		rl_point = nOldPoint;
+		rl_redisplay();
+		fReadingCommand = TRUE;
+	    } else
+		rl_callback_handler_remove();	
+	    
+	    fReadingOther = FALSE;
+	    
+	    return szInput;
 	}
 
-	if( fWasReadingCommand ) {
-	    /* Restore old readline context. */
-	    rl_callback_handler_install( szOldPrompt, HandleInput );
-	    rl_insert_text( szOldInput );
-	    free( szOldInput );
-	    rl_end = nOldEnd;
-	    rl_mark = nOldMark;
-	    rl_point = nOldPoint;
-	    rl_redisplay();
-	    fReadingCommand = TRUE;
-	} else
-	    rl_callback_handler_remove();	
-
-	fReadingOther = FALSE;
-	
-	return szInput;
-#else
 	/* Using X, but not readline. */
 	if( fInterrupt )
 	    return NULL;
@@ -2461,24 +2493,26 @@ extern char *GetInput( char *szPrompt ) {
     }
 #endif
 #if HAVE_LIBREADLINE
-    /* Using readline, but not X. */
-    if( fInterrupt )
-	return NULL;
-
-    fReadingOther = TRUE;
-    
-    while( !( sz = readline( szPrompt ) ) ) {
-	outputc( '\n' );
-	PromptForExit();
+    if( fReadline ) {
+	/* Using readline, but not X. */
+	if( fInterrupt )
+	    return NULL;
+	
+	fReadingOther = TRUE;
+	
+	while( !( sz = readline( szPrompt ) ) ) {
+	    outputc( '\n' );
+	    PromptForExit();
+	}
+	
+	fReadingOther = FALSE;
+	
+	if( fInterrupt )
+	    return NULL;
+	
+	return sz;
     }
-
-    fReadingOther = FALSE;
-    
-    if( fInterrupt )
-	return NULL;
-
-    return sz;
-#else
+#endif
     /* Not using readline or X. */
     if( fInterrupt )
 	return NULL;
@@ -2502,12 +2536,14 @@ extern char *GetInput( char *szPrompt ) {
 	*pch = 0;
     
     while( feof( stdin ) && !*sz ) {
+	if( !isatty( STDIN_FILENO ) )
+	    exit( EXIT_SUCCESS );
+	
 	outputc( '\n' );
 	PromptForExit();
     }
     
     return sz;
-#endif
 }
 
 /* Ask a yes/no question.  Interrupting the question is considered a "no"
@@ -2669,7 +2705,7 @@ extern void outputon( void ) {
     cOutputDisabled--;
 }
 
-static RETSIGTYPE HandleInterrupt( int idSignal ) {
+extern RETSIGTYPE HandleInterrupt( int idSignal ) {
 
     /* NB: It is safe to write to fInterrupt even if it cannot be read
        atomically, because it is only used to hold a binary value. */
@@ -2695,7 +2731,7 @@ static void usage( char *argv0 ) {
 "  -d DIR, --datadir DIR     Read database and weight files from direcotry "
 "DIR\n"
 "  -h, --help                Display usage and exit\n"
-"  -n, --no-weights          Do not load existing neural net weights\n"
+"  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
 #if USE_GUI
 "  -t, --tty                 Start on tty instead of using window system\n"
@@ -2709,15 +2745,29 @@ static void usage( char *argv0 ) {
 "Please report bugs to <bug-gnubg@gnu.org>.\n", argv0 );
 }
 
+static void version( void ) {
+    
+    puts( "GNU Backgammon " VERSION );
+#if USE_GUILE
+    puts( "Guile supported." );
+#endif
+#if HAVE_LIBGDBM
+    puts( "Position databases supported." );
+#endif
+#if USE_GUI
+    puts( "Window system supported." );
+#endif
+}
+
 static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchDataDir = NULL;
-    static int fNoWeights = FALSE, fNoRC = FALSE, fNoBearoff = FALSE;
+    static int nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
 	{ "no-bearoff", no_argument, NULL, 'b' },
 	{ "no-rc", no_argument, NULL, 'r' },
-	{ "no-weights", no_argument, NULL, 'n' },
+	{ "new-weights", optional_argument, NULL, 'n' },
 	{ "window-system-only", no_argument, NULL, 'w' },
 	/* `help', `tty' and `version' must come last -- see below. */
         { "help", no_argument, NULL, 'h' },
@@ -2753,16 +2803,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    fX = FALSE;
 	    break;
 	case 'v': /* version */
-	    puts( "GNU Backgammon " VERSION );
-#if USE_GUILE
-	    puts( "Guile supported." );
-#endif
-#if HAVE_LIBGDBM
-	    puts( "Position databases supported." );
-#endif
-#if USE_GUI
-	    puts( "Window system supported." );
-#endif
+	    version();
 	    exit( EXIT_SUCCESS );
 	}
     
@@ -2777,16 +2818,22 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    fX = FALSE;
 #endif
 
-    if( fX )
+    if( fX ) {
 	fInteractive = fShowProgress = TRUE;
-    else 
+#if HAVE_LIBREADLINE
+	fReadline = isatty( STDIN_FILENO );
+#endif
+    } else 
 #endif
 	{
-	    fInteractive = isatty( STDIN_FILENO );
+#if HAVE_LIBREADLINE
+	    fReadline =
+#endif
+		fInteractive = isatty( STDIN_FILENO );
 	    fShowProgress = isatty( STDOUT_FILENO );
 	}
     
-    while( ( ch = getopt_long( argc, argv, "bd:hnrtvw", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bd:hn::rtvw", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -2795,8 +2842,16 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'd': /* datadir */
 	    pchDataDir = optarg;
 	    break;
+	case 'h': /* help */
+            usage( argv[ 0 ] );
+	    exit( EXIT_SUCCESS );
 	case 'n':
-	    fNoWeights = TRUE;
+	    if( optarg )
+		nNewWeights = atoi( optarg );
+
+	    if( nNewWeights < 1 )
+		nNewWeights = DEFAULT_NET_SIZE;
+
 	    break;
 	case 'r':
 	    fNoRC = TRUE;
@@ -2804,6 +2859,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 't':
 	    /* silently ignore (if it was relevant, it was handled earlier). */
 	    break;
+	case 'v': /* version */
+	    version();
+	    exit( EXIT_SUCCESS );
 	case 'w':
 #if USE_GTK
 	    if( fX )
@@ -2836,10 +2894,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     InitMatchEquity ( metCurrent );
     
-    if( EvalInitialise( fNoWeights ? NULL : GNUBG_WEIGHTS,
-			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
+    if( EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
+			nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
 			fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir,
-			fShowProgress ) )
+			nNewWeights, fShowProgress ) )
 	exit( EXIT_FAILURE );
 
 #if USE_GUILE
@@ -2901,46 +2959,53 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     for(;;) {
 #if HAVE_LIBREADLINE
-	while( !( sz = readline( FormatPrompt() ) ) ) {
-	    outputc( '\n' );
-	    PromptForExit();
-	}
-	
-	fInterrupt = FALSE;
-	
-	if( *sz )
-	    add_history( sz );
-	
-	HandleCommand( sz, acTop );
-	
-	free( sz );
-#else
-	char sz[ 2048 ], *pch;
-	
-	sz[ 0 ] = 0;
-	
-	Prompt();
-
-	/* FIXME shouldn't restart sys calls on signals during this fgets */
-	fgets( sz, sizeof( sz ), stdin );
-
-        if( ( pch = strchr( sz, '\n' ) ) )
-           *pch = 0;
-    
-	
-	while( feof( stdin ) ) {
-	    outputc( '\n' );
-	    
-	    if( !sz[ 0 ] )
+	if( fReadline ) {
+	    while( !( sz = readline( FormatPrompt() ) ) ) {
+		outputc( '\n' );
 		PromptForExit();
-
-	    continue;
-	}	
-
-	fInterrupt = FALSE;
-	
-	HandleCommand( sz, acTop );
+	    }
+	    
+	    fInterrupt = FALSE;
+	    
+	    if( *sz )
+		add_history( sz );
+	    
+	    HandleCommand( sz, acTop );
+	    
+	    free( sz );
+	} else
 #endif
+	    {
+		char sz[ 2048 ], *pch;
+	
+		sz[ 0 ] = 0;
+		
+		Prompt();
+		
+		/* FIXME shouldn't restart sys calls on signals during this
+		   fgets */
+		fgets( sz, sizeof( sz ), stdin );
+
+		if( ( pch = strchr( sz, '\n' ) ) )
+		    *pch = 0;
+		
+		
+		while( feof( stdin ) ) {
+		    if( !isatty( STDIN_FILENO ) )
+			exit( EXIT_SUCCESS );
+		    
+		    outputc( '\n' );
+		    
+		    if( !sz[ 0 ] )
+			PromptForExit();
+		    
+		    continue;
+		}	
+		
+		fInterrupt = FALSE;
+	
+		HandleCommand( sz, acTop );
+	    }
 
 	while( fNextTurn )
 	    NextTurn();

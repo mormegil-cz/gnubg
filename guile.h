@@ -27,6 +27,8 @@
 #define GNUBG_SCM "gnubg.scm"
 
 extern int GuileInitialise( char *szDir );
+extern int GuileStartIntHandler( void );
+extern int GuileEndIntHandler( void );
 
 #endif
 

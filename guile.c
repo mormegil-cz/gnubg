@@ -25,6 +25,7 @@
 
 #include <errno.h>
 #include <libguile.h>
+#include <signal.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -148,6 +149,8 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
 	an[ 0 ] = SCM_INUM( SCM_CAR( sScore ) );
 	an[ 1 ] = SCM_INUM( SCM_CDR( sScore ) );
     }
+
+    SCM_DEFER_INTS;
     
     SetCubeInfo( &ci, sCube == SCM_UNDEFINED ? nCube : SCM_INUM( sCube ),
 		 sCubeOwner == SCM_UNDEFINED ? fCubeOwner :
@@ -162,6 +165,8 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
 		 sBeavers == SCM_UNDEFINED ? fBeavers :
 		 SCM_NFALSEP( sBeavers ) );
 
+    SCM_ALLOW_INTS;
+    
     return CubeInfoToSCM( &ci );
 }
 
@@ -181,11 +186,15 @@ static SCM cube_info_match( SCM sCube, SCM sCubeOwner, SCM sMove,
 
     an[ 0 ] = SCM_INUM( SCM_CAR( sScore ) );
     an[ 1 ] = SCM_INUM( SCM_CDR( sScore ) );
+
+    SCM_DEFER_INTS;
     
     SetCubeInfoMatch( &ci, SCM_INUM( sCube ), SCM_INUM( sCubeOwner ),
 		      SCM_INUM( sMove ), SCM_INUM( sMatchTo ), an,
 		      SCM_NFALSEP( sCrawford ) );
 
+    SCM_ALLOW_INTS;
+    
     return CubeInfoToSCM( &ci );
 }
 
@@ -199,12 +208,16 @@ static SCM cube_info_money( SCM sCube, SCM sCubeOwner, SCM sMove,
     SCM_ASSERT( SCM_INUMP( sCubeOwner ), sCubeOwner, SCM_ARG2, sz );
     SCM_ASSERT( SCM_INUMP( sMove ), sMove, SCM_ARG3, sz );
 
+    SCM_DEFER_INTS;
+    
     SetCubeInfoMoney( &ci, SCM_INUM( sCube ), SCM_INUM( sCubeOwner ),
 		      SCM_INUM( sMove ), sJacoby == SCM_UNDEFINED ?
 		      fJacoby : SCM_NFALSEP( sJacoby ),
 		      sBeavers == SCM_UNDEFINED ? fBeavers :
 		      SCM_NFALSEP( sBeavers ) );
-		      
+
+    SCM_ALLOW_INTS;
+    
     return CubeInfoToSCM( &ci );
 }
 
@@ -215,10 +228,11 @@ static SCM current_board( void ) {
 
 static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
 
-    int i, anBoard[ 2 ][ 25 ];
+    int i, anBoard[ 2 ][ 25 ], n;
     float ar[ NUM_OUTPUTS ];
     SCM s;
     cubeinfo ci;
+    psighandler sh;
     
     SCMToBoard( sBoard, anBoard );
     
@@ -228,8 +242,16 @@ static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
 			   SCM_UNDEFINED, SCM_UNDEFINED );
 
     SCMToCubeInfo( sCube, &ci );
- 
-    if( EvaluatePosition( anBoard, ar, &ci, NULL /* FIXME */ ) < 0 )
+
+    PortableSignal( SIGINT, HandleInterrupt, &sh );
+    n = EvaluatePosition( anBoard, ar, &ci, NULL );
+    PortableSignalRestore( SIGINT, &sh );
+    if( fInterrupt ) {
+	raise( SIGINT );
+	fInterrupt = FALSE;
+    }
+    
+    if( n < 0 )
 	return SCM_BOOL_F; /* FIXME throw error? */
     
     s = scm_make_vector( SCM_MAKINUM( NUM_OUTPUTS ), SCM_UNSPECIFIED );
@@ -243,6 +265,7 @@ static SCM gnubg_command( SCM sCommand ) {
 
     int cch;
     char *sz;
+    psighandler sh;
 
     SCM_ASSERT( SCM_ROSTRINGP( sCommand ), sCommand, SCM_ARG1,
 		"gnubg-command" );
@@ -251,11 +274,14 @@ static SCM gnubg_command( SCM sCommand ) {
     /* FIXME use alloca if we can */    
     strcpy( sz = malloc( cch + 1 ), SCM_ROCHARS( sCommand ) );
 
-    fInterrupt = FALSE;
+    PortableSignal( SIGINT, HandleInterrupt, &sh );
     HandleCommand( sz, acTop );
-    ResetInterrupt();
-
     free( sz );
+    PortableSignalRestore( SIGINT, &sh );
+    if( fInterrupt ) {
+	raise( SIGINT );
+	fInterrupt = FALSE;
+    }
     
     return SCM_UNSPECIFIED;
 }
@@ -282,11 +308,12 @@ static SCM position_id_to_board( SCM sPosID ) {
 static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
 			     SCM sVarRedn, SCM sCube, SCM sEvalContext,
 			     SCM sDesc, SCM sInvert ) {
-    int i, anBoard[ 2 ][ 25 ];
+    int i, anBoard[ 2 ][ 25 ], n;
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
     SCM s;
     cubeinfo ci;
     static char sz[] = "rollout-position";
+    psighandler sh;
     
     SCM_ASSERT( SCM_INUMP( sGames ) || sGames == SCM_UNDEFINED, sGames,
 		SCM_ARG2, sz );
@@ -307,15 +334,23 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
 			   SCM_UNDEFINED, SCM_UNDEFINED );
 
     SCMToCubeInfo( sCube, &ci );
- 
-    if( Rollout( anBoard, sDesc == SCM_UNDEFINED ?
+
+    PortableSignal( SIGINT, HandleInterrupt, &sh );    
+    n = Rollout( anBoard, sDesc == SCM_UNDEFINED ?
 		 PositionID( anBoard ) : SCM_CHARS( sDesc ),
 		 ar, arStdDev, sTruncate == SCM_UNDEFINED ?
 		 nRolloutTruncate : SCM_INUM( sTruncate ), sGames ==
 		 SCM_UNDEFINED ? nRollouts : SCM_INUM( sGames ),
 		 SCM_NFALSEP( sVarRedn ), &ci,
 		 &ecRollout /* FIXME use sEvalContext */,
-		 SCM_NFALSEP( sInvert ) ) < 0 )
+		 SCM_NFALSEP( sInvert ) );
+    PortableSignalRestore( SIGINT, &sh );
+    if( fInterrupt ) {
+	raise( SIGINT );
+	fInterrupt = FALSE;
+    }
+    
+    if( n < 0 )
 	return SCM_BOOL_F; /* FIXME throw error? */
 
     s = scm_cons( scm_make_vector( SCM_MAKINUM( NUM_ROLLOUT_OUTPUTS ),
@@ -329,7 +364,28 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
 			  scm_make_real( arStdDev[ i ] ) );
     }
 
+    /* FIXME n (i.e. the number of rollouts completed) should be returned
+       to the caller somehow */
+    
     return s;
+}
+
+static SCM sInterrupt;
+
+extern int GuileStartIntHandler( void ) {
+
+    scm_sigaction( SCM_MAKINUM( SIGINT ), sInterrupt, SCM_MAKINUM( 0 ) );
+    scm_unmask_signals();
+    
+    return 0;
+}
+
+extern int GuileEndIntHandler( void ) {
+
+    scm_mask_signals();
+    scm_sigaction( SCM_MAKINUM( SIGINT ), SCM_BOOL_F, SCM_MAKINUM( 0 ) );
+
+    return 0;
 }
 
 static void LoadGuile( char *sz ) {
@@ -352,6 +408,13 @@ extern int GuileInitialise( char *szDir ) {
     scm_make_gsubr( "gnubg-command", 1, 0, 0, gnubg_command );
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
     scm_make_gsubr( "rollout-position", 1, 7, 0, rollout_position );
+
+    /* This is an ugly way to get something to pass to scm_sigaction,
+       but it works. */
+    sInterrupt = scm_eval_0str( "(lambda (sig) "
+				"(scm-error 'signal #f "
+				"\"User interrupt\" #f (list SIGINT)))" );
+    scm_protect_object( sInterrupt );
     
     if( szDir ) {
 	sprintf( szPath, "%s/" GNUBG_SCM, szDir );
@@ -374,5 +437,4 @@ extern int GuileInitialise( char *szDir ) {
     perror( GNUBG_SCM );
     return -1;
 }
-
 #endif
