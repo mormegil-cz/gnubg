@@ -646,7 +646,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
   float arOutput[ NUM_OUTPUTS ];
   float rG[ 2 ], rBG[ 2 ];
   float arDP1[ 2 ], arDP2[ 2 ],arCP1[ 2 ], arCP2[ 2 ];
-  float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain;
+  float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain, r;
 
   int i, fAutoRedouble[ 2 ], afDead[ 2 ], anNormScore[ 2 ];
 
@@ -656,26 +656,86 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
-  if( EvaluatePosition( anBoard, arOutput, &ci, &ecEval ) < 0 )
-    return;
+  /* see if ratios are given on command line */
 
-  
-  if ( arOutput[ 0 ] > 0.0 ) {
-    rG [ fMove ] = arOutput[ 1 ] / arOutput[ 0 ];
-    rBG [ fMove ] = arOutput[ 2 ] / arOutput[ 0 ];
-  }
-  else {
-    rG [fMove ] = 0.0;
-    rBG [ fMove ] = 0.0;
-  }
+  rG[ 0 ] = ParseReal ( &sz );
 
-  if ( arOutput[ 0 ] < 1.0 ) {
-    rG [ ! fMove ] = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
-    rBG [ ! fMove ] = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
-  }
-  else {
-    rG [ ! fMove ] = 0.0;
-    rBG [ ! fMove ] = 0.0;
+  if ( rG[ 0 ] >= 0 ) {
+
+    /* read the others */
+
+    rG[ 1 ]  = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
+    rBG[ 0 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
+    rBG[ 1 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
+
+    /* If one of the ratios are larger than 1 we assume the user
+       has entered 25.1 instead of 0.251 */
+
+    if ( rG[ 0 ] > 1.0 || rG[ 1 ] > 1.0 ||
+         rBG[ 1 ] > 1.0 || rBG[ 1 ] > 1.0 ) {
+      rG[ 0 ]  /= 100.0;
+      rG[ 1 ]  /= 100.0;
+      rBG[ 0 ] /= 100.0;
+      rBG[ 1 ] /= 100.0;
+    }
+
+    /* Check that ratios are 0 <= ratio <= 1 */
+
+    for ( i = 0; i < 2; i++ ) {
+      if ( rG[ i ] > 1.0 ) {
+        outputf ( "illegal gammon ratio for player %i: %f\n",
+                  i, rG[ i ] );
+        return ;
+      }
+      if ( rBG[ i ] > 1.0 ) {
+        outputf ( "illegal backgammon ratio for player %i: %f\n",
+                  i, rBG[ i ] );
+        return ;
+      }
+    }
+
+    /* Transfer rations to arOutput
+       (used in call to GetPoints below)*/ 
+
+    arOutput[ OUTPUT_WIN ] = 0.5;
+    arOutput[ OUTPUT_WINGAMMON ] =
+      ( rG[ fMove ] + rBG[ fMove ] ) * 0.5;
+    arOutput[ OUTPUT_LOSEGAMMON ] =
+      ( rG[ ! fMove ] + rBG[ ! fMove ] ) * 0.5;
+    arOutput[ OUTPUT_WINBACKGAMMON ] = rBG[ fMove ] * 0.5;
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = rBG[ ! fMove ] * 0.5;
+
+  } else {
+
+    /* calculate them based on current position */
+
+    if( EvaluatePosition( anBoard, arOutput, &ci, &ecEval ) < 0 )
+      return;
+
+    if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
+      rG[ fMove ] = ( arOutput[ OUTPUT_WINGAMMON ] -
+                      arOutput[ OUTPUT_WINBACKGAMMON ] ) /
+        arOutput[ OUTPUT_WIN ];
+      rBG[ fMove ] = arOutput[ OUTPUT_WINBACKGAMMON ] /
+        arOutput[ OUTPUT_WIN ];
+    }
+    else {
+      rG[ fMove ] = 0.0;
+      rBG[ fMove ] = 0.0;
+    }
+
+    if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
+      rG[ ! fMove ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
+                        arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+      rBG[ ! fMove ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
+        ( 1.0 - arOutput[ OUTPUT_WIN ] );
+    }
+    else {
+      rG[ ! fMove ] = 0.0;
+      rBG[ ! fMove ] = 0.0;
+    }
+
   }
 
   for ( i = 0; i < 2; i++ ) 
