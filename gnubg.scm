@@ -31,4 +31,15 @@
 ;; It's not worth defining a Guile interface to the C SwapSides() when
 ;; we can do the same thing more easily in Scheme.
 (define (swap-sides b)
+  "Return a specified position with the opposite player on roll."
   (cons (cdr b) (car b)))
+
+;; Similarly for counting pips.
+(define (pip-count b)
+  "Give the pip count of the specified position.  The cdr is the pip count
+of the player on roll, and the car is the pip count of the opponent."
+  (define (count v i c)
+    (if (>= i 25)
+	c
+	(count v (+ i 1) (+ c (* (vector-ref v i) (+ i 1))))))
+  (cons (count (car b) 0 0) (count (cdr b) 0 0)))

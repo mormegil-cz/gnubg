@@ -122,6 +122,14 @@ static SCM board_to_position_id( SCM sBoard ) {
     return scm_makfrom0str( PositionID( anBoard ) );
 }
 
+static SCM classify_position( SCM sBoard ) {
+
+    int anBoard[ 2 ][ 25 ];
+    
+    SCMToBoard( sBoard, anBoard );
+    return SCM_MAKINUM( ClassifyPosition( anBoard ) );
+}
+
 static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
 		      SCM sScore, SCM sCrawford, SCM sJacoby, SCM sBeavers ) {
 
@@ -425,7 +433,15 @@ extern int GuileInitialise( char *szDir ) {
 
     char szPath[ PATH_MAX ];
 
+    scm_sysintern( "CLASS_OVER", SCM_MAKINUM( CLASS_OVER ) );
+    scm_sysintern( "CLASS_BEAROFF2", SCM_MAKINUM( CLASS_BEAROFF2 ) );
+    scm_sysintern( "CLASS_BEAROFF1", SCM_MAKINUM( CLASS_BEAROFF1 ) );
+    scm_sysintern( "CLASS_RACE", SCM_MAKINUM( CLASS_RACE ) );
+    scm_sysintern( "CLASS_BPG", SCM_MAKINUM( CLASS_BPG ) );
+    scm_sysintern( "CLASS_CONTACT", SCM_MAKINUM( CLASS_CONTACT ) );
+    
     scm_make_gsubr( "board->position-id", 1, 0, 0, board_to_position_id );
+    scm_make_gsubr( "classify-position", 1, 0, 0, classify_position );
     scm_make_gsubr( "cube-info", 0, 8, 0, cube_info );
     scm_make_gsubr( "cube-info-match", 6, 0, 0, cube_info_match );
     scm_make_gsubr( "cube-info-money", 3, 2, 0, cube_info_money );
