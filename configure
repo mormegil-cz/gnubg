@@ -9776,12 +9776,12 @@ else
 
         if test -n "$PYTHON"; then
       # If the user set $PYTHON, use it and don't search something else.
-      echo "$as_me:$LINENO: checking whether $PYTHON version >= 1.5" >&5
-echo $ECHO_N "checking whether $PYTHON version >= 1.5... $ECHO_C" >&6
+      echo "$as_me:$LINENO: checking whether $PYTHON version >= 2.0" >&5
+echo $ECHO_N "checking whether $PYTHON version >= 2.0... $ECHO_C" >&6
       prog="import sys, string
 # split strings by '.' and convert to numeric.  Append some zeros
 # because we need at least 4 digits for the hex conversion.
-minver = map(int, string.split('1.5', '.')) + [0, 0, 0]
+minver = map(int, string.split('2.0', '.')) + [0, 0, 0]
 minverhex = 0
 for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[i]
 sys.exit(sys.hexversion < minverhex)"
@@ -9801,8 +9801,8 @@ fi
     else
       # Otherwise, try each interpreter until we find one that satisfies
       # VERSION.
-      echo "$as_me:$LINENO: checking for a Python interpreter with version >= 1.5" >&5
-echo $ECHO_N "checking for a Python interpreter with version >= 1.5... $ECHO_C" >&6
+      echo "$as_me:$LINENO: checking for a Python interpreter with version >= 2.0" >&5
+echo $ECHO_N "checking for a Python interpreter with version >= 2.0... $ECHO_C" >&6
 if test "${am_cv_pathless_PYTHON+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
@@ -9816,7 +9816,7 @@ echo "$as_me: error: no suitable Python interpreter found" >&2;}
           prog="import sys, string
 # split strings by '.' and convert to numeric.  Append some zeros
 # because we need at least 4 digits for the hex conversion.
-minver = map(int, string.split('1.5', '.')) + [0, 0, 0]
+minver = map(int, string.split('2.0', '.')) + [0, 0, 0]
 minverhex = 0
 for i in xrange(0, 4): minverhex = (minverhex << 8) + minver[i]
 sys.exit(sys.hexversion < minverhex)"
@@ -9926,47 +9926,23 @@ echo "${ECHO_T}$am_cv_python_platform" >&6
 
 
    if test "$PYTHON" != ""; then
-            echo "$as_me:$LINENO: checking for Python header files" >&5
-echo $ECHO_N "checking for Python header files... $ECHO_C" >&6
-      PYTHON_PREFIX=`($PYTHON -c "import sys; print sys.prefix") 2>/dev/null`
-      PYTHON_VERSION=$am_cv_python_version
-      dirs="$PYTHON_PREFIX/include/python$PYTHON_VERSION
-            $PYTHON_PREFIX/include/$PYTHON_VERSION
-            $PYTHON_PREFIX/include/Py"
-      for i in $dirs; do
-         if test -r "$i/Python.h"; then
-            PYTHON_CFLAGS="-I$i"
-            break
-         fi
-      done
-      if test -z "$PYTHON_CFLAGS"; then
-        echo "$as_me:$LINENO: result: Not found" >&5
-echo "${ECHO_T}Not found" >&6
-      else
-        echo "$as_me:$LINENO: result: $PYTHON_CFLAGS" >&5
+      echo "$as_me:$LINENO: checking for python include" >&5
+echo $ECHO_N "checking for python include... $ECHO_C" >&6
+      PYTHON_CFLAGS=-I`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('INCLUDEPY')"`
+      echo "$as_me:$LINENO: result: $PYTHON_CFLAGS" >&5
 echo "${ECHO_T}$PYTHON_CFLAGS" >&6
-      fi
 
-            echo "$as_me:$LINENO: checking for Python library" >&5
-echo $ECHO_N "checking for Python library... $ECHO_C" >&6
-      dirs="python$PYTHON_VERSION/config python$PYTHON_VERSION/lib python/lib"
-      files="libpython.a libpython$PYTHON_VERSION.a"
-      for i in $dirs; do
-         for f in $files; do
-            if test -r $PYTHON_PREFIX/lib/$i/$f; then
-               PYTHON_LIBS="$PYTHON_PREFIX/lib/$i/$f"
-            fi
-         done
-      done
-      if test -z "$PYTHON_LIBS"; then
-         echo "$as_me:$LINENO: result: Not found" >&5
-echo "${ECHO_T}Not found" >&6
-      else
-         echo "$as_me:$LINENO: result: $PYTHON_LIBS" >&5
+            echo "$as_me:$LINENO: checking for python libraries" >&5
+echo $ECHO_N "checking for python libraries... $ECHO_C" >&6
+      PYTHON_LIBS=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LIBS'), distutils.sysconfig.get_config_var('LIBPL')+'/'+distutils.sysconfig.get_config_var('LIBRARY')"`
+      echo "$as_me:$LINENO: result: $PYTHON_LIBS" >&5
 echo "${ECHO_T}$PYTHON_LIBS" >&6
-      fi
 
-                  PYTHON_LDFLAGS="-Wl,--export-dynamic"
+            echo "$as_me:$LINENO: checking for python linker flags" >&5
+echo $ECHO_N "checking for python linker flags... $ECHO_C" >&6
+      PYTHON_LDFLAGS=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LINKFORSHARED')"`
+      echo "$as_me:$LINENO: result: $PYTHON_LDFLAGS" >&5
+echo "${ECHO_T}$PYTHON_LDFLAGS" >&6
 
    else
       no_python=yes

@@ -2521,6 +2521,9 @@ extern void HandleCommand( char *sz, command *ac ) {
     if( ac == acTop ) {
 	outputnew();
     
+	if( *sz == '#' ) /* Comment */
+          return;
+
 	if( *sz == '!' ) {
 	    /* Shell escape */
 	    for( pch = sz + 1; isspace( *pch ); pch++ )
@@ -2591,6 +2594,7 @@ extern void HandleCommand( char *sz, command *ac ) {
           }
           else {
             /* no expresision -- start python shell */
+            PyRun_SimpleString( "import sys; print 'Python', sys.version" );
             PyRun_AnyFile( stdin, NULL );
           }
 #if USE_GTK
@@ -3934,6 +3938,10 @@ CommandRollout( char *sz ) {
     {
       /* create all the explicit pointer arrays for RolloutGeneral */
       /* cdecl is your friend */
+      float aarNoOutput[ NUM_ROLLOUT_OUTPUTS ];
+      float aarNoStdDev[ NUM_ROLLOUT_OUTPUTS ];
+      evalsetup NoEs;
+      int false = FALSE;
 #if HAVE_ALLOCA
       int         (** apBoard)[2][25];
       float       (** apOutput)[ NUM_ROLLOUT_OUTPUTS ];
@@ -3964,11 +3972,6 @@ CommandRollout( char *sz ) {
       move        (*apMoves[10]);
 
 #endif
-      float aarNoOutput[ NUM_ROLLOUT_OUTPUTS ];
-      float aarNoStdDev[ NUM_ROLLOUT_OUTPUTS ];
-      evalsetup NoEs;
-
-      int false = FALSE;
 
       for( i = 0; i < c; i++ ) {
 	/* set up to call RolloutGeneral for all the moves at once */
@@ -4269,9 +4272,39 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 #endif
 
 #if USE_PYTHON
-        /* FIXME... implement something here... */
-#endif        
-	
+
+        if ( ! strcmp( sz, ">" ) ) {
+
+          /* Python escape. */
+
+          /* Ideally we should be able to handle both
+           * > print 1+1
+           * and
+           * >
+           * print 1+1
+           * sys.exit()
+           *
+           * but so far we only handle the latter...
+           */
+
+#  if USE_GTK
+          if( fX )
+            GTKDisallowStdin();
+#  endif
+
+          assert( FALSE ); /* FIXME... */
+
+#if USE_GTK
+          if( fX )
+            GTKAllowStdin();
+#endif
+          
+          continue;
+
+        }
+
+#endif /* USE_PYTHON */
+
 	HandleCommand( sz, acTop );
 
 	/* FIXME handle NextTurn events? */
@@ -6620,6 +6653,7 @@ _("Usage: %s [options] [saved-game-file]\n"
 "  -q, --quiet               Disable sound effects\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
 "  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
+"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
 "  -t, --tty                 Start on tty instead of using window system\n"
 "  -v, --version             Show version information and exit\n"
 "  -w, --window-system-only  Ignore tty input when using window system\n"
@@ -6640,6 +6674,7 @@ _("Usage: %s [options] [saved-game-file]\n"
 "  -q, --quiet               Disable sound effects\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
 "  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
+"  -p FILE, --python FILE    Evaluate Python code in FILE and exit\n"
 "  -v, --version             Show version information and exit\n"
 "\n"
 "For more information, type `help' from within gnubg.\n"
@@ -6707,7 +6742,8 @@ ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
 
 static void real_main( void *closure, int argc, char *argv[] ) {
 
-    char ch, *pch, *pchCommands = NULL, *pchScript = NULL;
+    char ch, *pch, *pchCommands = NULL, *pchGuileScript = NULL;
+    char *pchPythonScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
     int i, j;
     int fSplash = TRUE;
@@ -6730,6 +6766,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	{ "commands", required_argument, NULL, 'c' },
         { "help", no_argument, NULL, 'h' },
 	{ "script", required_argument, NULL, 's' },
+	{ "python", required_argument, NULL, 'p' },
         { "tty", no_argument, NULL, 't' },
         { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
@@ -6772,11 +6809,12 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     opterr = 0;
     
-    while( ( ch = getopt_long( argc, argv, "cd:hstv", ao + sizeof( ao ) /
+    while( ( ch = getopt_long( argc, argv, "cd:hsptv", ao + sizeof( ao ) /
 			       sizeof( ao[ 0 ] ) - 7, NULL ) ) != (char) -1 )
 	switch( ch ) {
-	case 's': /* script */
+	case 's': /* guile script */
 	case 'c': /* commands */
+        case 'p': /* python script */
 	case 't': /* tty */
 #ifdef WIN32
          /* Bad hack */
@@ -6861,7 +6899,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #endif
 		
-    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:tvwS", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:p:tvwS", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -6890,14 +6928,23 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	case 'r': /* no-rc */
 	    fNoRC = TRUE;
 	    break;
-	case 's': /* script */
+	case 's': /* guile script */
 #if !USE_GUILE
 	    fprintf( stderr, _("%s: option `-s' requires Guile\n"), argv[ 0 ] );
 	    exit( EXIT_FAILURE );
 #endif
-	    pchScript = optarg;
+	    pchGuileScript = optarg;
 	    fInteractive = FALSE;
 	    break;
+        case 'p': /* python script */
+#if !USE_PYTHON
+            fprintf( stderr, 
+                     _("%s: option `-p' requires Python\n"), argv[ 0 ] );
+            exit( EXIT_FAILURE );
+#endif
+            pchPythonScript = optarg;
+            fInteractive = FALSE;
+            break;
 	case 't':
 	    /* silently ignore (if it was relevant, it was handled earlier). */
 	    break;
@@ -7186,12 +7233,25 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 
 #if USE_GUILE
-    if( pchScript ) {
+    if( pchGuileScript ) {
 	scm_primitive_load( scm_makfrom0str( pchScript ) );
         Shutdown();
 	exit( EXIT_SUCCESS );
     }
 #endif
+
+#if USE_PYTHON
+    if( pchPythonScript ) {
+      FILE *pf = fopen( pchPythonScript, "r" );
+      if ( ! pf ) {
+        outputerr( pchPythonScript );
+        exit( EXIT_FAILURE );
+      }
+      PyRun_AnyFile( pf, pchPythonScript );
+      Shutdown();
+      exit( EXIT_SUCCESS );
+    }
+#endif /* USE_PYTHON */
 
 #if HAVE_FORK
 

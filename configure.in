@@ -277,47 +277,21 @@ AC_ARG_WITH(python,[  --with-python       provide Python script availabity insid
 if test "$with_python" = "no"; then
    no_python=yes
 else
-   AM_PATH_PYTHON(1.5)
+   AM_PATH_PYTHON(2.0)
    if test "$PYTHON" != ""; then
-      dnl look for header Python.h
-      AC_MSG_CHECKING(for Python header files)
-      PYTHON_PREFIX=`($PYTHON -c "import sys; print sys.prefix") 2>/dev/null`
-      PYTHON_VERSION=$am_cv_python_version
-      dirs="$PYTHON_PREFIX/include/python$PYTHON_VERSION
-            $PYTHON_PREFIX/include/$PYTHON_VERSION
-            $PYTHON_PREFIX/include/Py"
-      for i in $dirs; do
-         if test -r "$i/Python.h"; then
-            PYTHON_CFLAGS="-I$i"
-            break
-         fi
-      done
-      if test -z "$PYTHON_CFLAGS"; then
-        AC_MSG_RESULT(Not found)
-      else
-        AC_MSG_RESULT($PYTHON_CFLAGS)
-      fi
+      AC_MSG_CHECKING(for python include)
+      PYTHON_CFLAGS=-I`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('INCLUDEPY')"`
+      AC_MSG_RESULT($PYTHON_CFLAGS)
       AC_SUBST(PYTHON_CFLAGS)
-      dnl look for library
-      AC_MSG_CHECKING(for Python library)
-      dirs="python$PYTHON_VERSION/config python$PYTHON_VERSION/lib python/lib"
-      files="libpython.a libpython$PYTHON_VERSION.a"
-      for i in $dirs; do
-         for f in $files; do
-            if test -r $PYTHON_PREFIX/lib/$i/$f; then
-               PYTHON_LIBS="$PYTHON_PREFIX/lib/$i/$f"
-            fi
-         done
-      done
-      if test -z "$PYTHON_LIBS"; then
-         AC_MSG_RESULT(Not found)
-      else
-         AC_MSG_RESULT($PYTHON_LIBS)
-      fi
+      dnl libraries
+      AC_MSG_CHECKING(for python libraries)
+      PYTHON_LIBS=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LIBS'), distutils.sysconfig.get_config_var('LIBPL')+'/'+distutils.sysconfig.get_config_var('LIBRARY')"`
+      AC_MSG_RESULT($PYTHON_LIBS)
       AC_SUBST(PYTHON_LIBS)
-      dnl linker flags
-      dnl FIXME: this is not pretty....
-      PYTHON_LDFLAGS="-Wl,--export-dynamic"
+      dnl ld flags
+      AC_MSG_CHECKING(for python linker flags)
+      PYTHON_LDFLAGS=`$PYTHON -c "import distutils.sysconfig; print distutils.sysconfig.get_config_var('LINKFORSHARED')"`      
+      AC_MSG_RESULT($PYTHON_LDFLAGS)
       AC_SUBST(PYTHON_LDFLAGS)
    else
       no_python=yes

@@ -1,3 +1,9 @@
+Sun Jul 13 12:06:05 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (CommandRollout): fix some non-ANSI decls.
+	* configure.in: new autoconf magic for python
+	* gnubg.c (real_main, usage): new option -p.
+
 Sun Jul 13 02:17:05 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* eval.c, eval.h, export.h, gnubg.c, gtkchequer.c, gtkcube.c
