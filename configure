@@ -4753,7 +4753,8 @@ done
 
 
 
-for ac_header in sys/audioio.h fcntl.h sys/file.h gmp.h sys/ioctl.h langinfo.h limits.h sys/mman.h pwd.h sys/resource.h stropts.h sys/socket.h sys/soundcard.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h
+
+for ac_header in sys/audioio.h fcntl.h sys/file.h gmp.h sys/ioctl.h langinfo.h limits.h sys/mman.h pwd.h sys/resource.h stropts.h sys/socket.h sys/soundcard.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h sys/utsname.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then
