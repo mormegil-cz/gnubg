@@ -498,7 +498,7 @@ ClickButton ( GtkWidget *pw, movefilterwidget *pmfw ) {
   memcpy ( aamf, pmfw->pmf, sizeof ( aamf ) );
   pwMoveFilterSetup = MoveFilterSetup( aamf, &fOK );
 
-  pwDialog = CreateDialog( _("GNU Backgammon - Move filter setup"), 
+  pwDialog = GTKCreateDialog( _("GNU Backgammon - Move filter setup"), 
                            DT_QUESTION,
                            GTK_SIGNAL_FUNC( MoveFilterSetupOK ), 
                            pwMoveFilterSetup );

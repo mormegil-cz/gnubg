@@ -517,7 +517,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
 
   /* dialog */
 
-  pwDialog = CreateDialog( _("Sho Sengoku Temperature Map - "
+  pwDialog = GTKCreateDialog( _("Sho Sengoku Temperature Map - "
                              "Distribution of rolls"), DT_INFO, NULL, NULL );
 
 

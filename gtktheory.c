@@ -678,7 +678,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( _("GNU Backgammon - Theory"), DT_INFO,
+  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Theory"), DT_INFO,
                             NULL, NULL );
 
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 400, 400 );

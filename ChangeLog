@@ -1,156 +1,163 @@
+Tue Jul 08 22:58:59 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkgame.h, gtkexport.c, gtkgame.c, gtkmet.c,
+	  gtkmovefilter.c, gtkprefs.c, gtkrace.c, gtkrolls.c,
+	  gtktempmap.c, gtktheory.c: rename CreateDialog to GTKCreateDialog
+	  to avoid name clash with the Windows function
+
 Tue Jul 8 19:05 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
-	* undo change to rollout.c - it was a fix for a problem which
-	  was only in local development source
-	* gtkgame.c - turning off cubefull on the Rollout setting general
-	  page will turn off cubeful chequer play on all other pages
-	  Suggestion by Ian Dunstan
+        * undo change to rollout.c - it was a fix for a problem which
+          was only in local development source
+        * gtkgame.c - turning off cubefull on the Rollout setting general
+          page will turn off cubeful chequer play on all other pages
+          Suggestion by Ian Dunstan
 
 Tue Jul  8 18:29:56 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* text.c (OutputRolloutContext): display later evals.
-	(bug #4229, reported by Ian Dunstan)
+        * text.c (OutputRolloutContext): display later evals.
+        (bug #4229, reported by Ian Dunstan)
 
 
 Tue Jul 8 11:15 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
-	* rollout.c - initialise internal variables on first game of
-	  rollout
-	
+        * rollout.c - initialise internal variables on first game of
+          rollout
+        
 Mon Jul  7 12:33:17 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* rollout.c (RolloutDice): fix bug in generated dice for
-	rollout as initial position.
+        * rollout.c (RolloutDice): fix bug in generated dice for
+        rollout as initial position.
 
 Sun Jul  6 18:01:08 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* openurl.c (OpenURL): commit old fix.
+        * openurl.c (OpenURL): commit old fix.
 
 Sun Jul 6 15:02 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
-	* rolloutc it helps to call fabs() when dealing with floats.
-	  sigh - complete brain fade
-	
+        * rolloutc it helps to call fabs() when dealing with floats.
+          sigh - complete brain fade
+        
 Sun Jul  6 14:33:42 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* eval.c (EvalKey): do not include cubeful flags, match scores, etc.
-	in calculation of hash key for 0-ply evaluations unless called 
-	from EvaluatePositionCubeful.
+        * eval.c (EvalKey): do not include cubeful flags, match scores, etc.
+        in calculation of hash key for 0-ply evaluations unless called 
+        from EvaluatePositionCubeful.
 
 Sun Jul  6 13:48:46 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtkgame.c (StatcontextGetSelection): order lines before copying.
-	(bug #4160 reported by Holger Bochnig)
+        * gtkgame.c (StatcontextGetSelection): order lines before copying.
+        (bug #4160 reported by Holger Bochnig)
 
 Sat Jul  5 20:53:42 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
-	* gnubg.c: replace 'const' with ICONV_CONST to get rid of compiler
-	warning.
+        * gnubg.c: replace 'const' with ICONV_CONST to get rid of compiler
+        warning.
 
 Thu Jul 3 15:02 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
-	* openurl.c gtktheory.c gtkboard.c osr.c eval.c gnubg.c
-	  htmlimages.c export.c lib/event.c
-	  fixes for compiler warnings - unused variables removed, 
-	  cast added in gnubg.c, config.h included in event.c (and
-	  fix of call to outputerr()), add explicit returns in eval.c
-	  for reaching end of non-void function
+        * openurl.c gtktheory.c gtkboard.c osr.c eval.c gnubg.c
+          htmlimages.c export.c lib/event.c
+          fixes for compiler warnings - unused variables removed, 
+          cast added in gnubg.c, config.h included in event.c (and
+          fix of call to outputerr()), add explicit returns in eval.c
+          for reaching end of non-void function
 
 Fri Jun 27 21:20 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
-	* rollout.c - fix results after interupted rollouts
+        * rollout.c - fix results after interupted rollouts
 
 Fri Jun 27 22:15:52 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktheory.c: use clist widget for double, take, etc. points.
+        * gtktheory.c: use clist widget for double, take, etc. points.
 
 Fri Jun 27 20:42:14 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* rollout.c (BasicCubefulRollout): fix bug in variance reduction
-	when rolling out as initial position.
-	(reported on GammOnline).
+        * rollout.c (BasicCubefulRollout): fix bug in variance reduction
+        when rolling out as initial position.
+        (reported on GammOnline).
 
 Fri Jun 27 20:38:00 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktheory.c (TheoryUpdated, GTKShowTheory): use gtk_text for
-	showing gammon values (allows copy'n'paste).
+        * gtktheory.c (TheoryUpdated, GTKShowTheory): use gtk_text for
+        showing gammon values (allows copy'n'paste).
 
 Wed Jun 25 21:13:29 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Implement luck adjusted results.
-	(bug #4012, suggested by Magnar Naustdalslid)
+        Implement luck adjusted results.
+        (bug #4012, suggested by Magnar Naustdalslid)
 
-	* analysis.c (updateStatContext): calculate values needed for
-	luck adjusted results.
+        * analysis.c (updateStatContext): calculate values needed for
+        luck adjusted results.
         * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
         analysis.c (DumpStatcontext): show luck adjusted results.
 
-	* matchequity.c (getMEAtScore): new function.
+        * matchequity.c (getMEAtScore): new function.
 
 Mon Jun 24 00:03 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
-	* Use deprecated gtk_spin_button_get_value_as_float, for gtk1.2
-	  compatibility
+        * Use deprecated gtk_spin_button_get_value_as_float, for gtk1.2
+          compatibility
 
 Mon Jun 23 21:31 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
-	* allow terminating rollouts early if all the standard errors are
-	  below a user set fraction of the value
-	  gnubg.c set.c gtkgame.c show.c rollout.c eval.h backgammon.h
+        * allow terminating rollouts early if all the standard errors are
+          below a user set fraction of the value
+          gnubg.c set.c gtkgame.c show.c rollout.c eval.h backgammon.h
 
 Mon Jun 23 09:07:38 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
-u	* eval.c (DumpAnyContact): Fix incorrect indexing into inputs vector. (Broken for
-	a long time. Since no one really noticed, I guess this proves they are not very
-	useful).
+u       * eval.c (DumpAnyContact): Fix incorrect indexing into inputs vector. (Broken for
+        a long time. Since no one really noticed, I guess this proves they are not very
+        useful).
 
 Sun Jun 22 12:42:10 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
-	* eval.c (DumpContact): fix for crashed positions. 
+        * eval.c (DumpContact): fix for crashed positions. 
 
 Sat Jun 14 13:18:34 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* osr.c: Small rewrite of one sided rollout to handle chequers on the
-	bar.
+        * osr.c: Small rewrite of one sided rollout to handle chequers on the
+        bar.
 
 Sat Jun 14 12:35:47 2003  Joern Thyssen  <jth@gnubg.org>
 
-  	New commands to allow modification of cube efficiency
-	(note that the values are *NOT* saved with "save settings").
+        New commands to allow modification of cube efficiency
+        (note that the values are *NOT* saved with "save settings").
 
-	* gnubg.c: new commands.
-	* eval.c (EvalEfficiency): use new values.
+        * gnubg.c: new commands.
+        * eval.c (EvalEfficiency): use new values.
 
 Fri Jun 13 08:47:50 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
-	* fix bearoff-database targets in Makefile.[ia] to invoke
-	  makebearoff with an output file name, delete attempt to
-	  make target gnubg.bd
-	
+        * fix bearoff-database targets in Makefile.[ia] to invoke
+          makebearoff with an output file name, delete attempt to
+          make target gnubg.bd
+        
 Thu Jun 12 20:58:18 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* eval.c (FindnSaveBestMoves): evaluate top move and actual move
-	on the highest ply if their difference in equity exceeds the
-	given threshold.
-	(change all callers)
-	* eval.c (FindnSaveBestMoves): fix bug leading to duplicate
-	moves in the movelist.
-	(reported/suggested by Michael Depreli)
+        * eval.c (FindnSaveBestMoves): evaluate top move and actual move
+        on the highest ply if their difference in equity exceeds the
+        given threshold.
+        (change all callers)
+        * eval.c (FindnSaveBestMoves): fix bug leading to duplicate
+        moves in the movelist.
+        (reported/suggested by Michael Depreli)
 
 Mon Jun  9 23:20:00 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Allow modifications of the match length during edit.
+        Allow modifications of the match length during edit.
 
-	* gtkboard.c (board_init): add spin button for match length.
-	* gtkboard.c (score_updated): new function.
-	* gtkboard.c (board_edit): issue "set matchid ..." when match 
-	length changes.
+        * gtkboard.c (board_init): add spin button for match length.
+        * gtkboard.c (score_updated): new function.
+        * gtkboard.c (board_edit): issue "set matchid ..." when match 
+        length changes.
 
 Sun Jun  8 21:39:30 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Change how cubeful equities are calculated for money play to match
-	match play. 
- 	(reported by Robert Eberlein and Michael Depreli)
+        Change how cubeful equities are calculated for money play to match
+        match play. 
+        (reported by Robert Eberlein and Michael Depreli)
 
         * eval.c (MoneyLive): new function.
         * eval.c (Cl2CfMoney): rewrite code so it's similar to the
@@ -158,7 +165,7 @@ Sun Jun  8 21:39:30 2003  Joern Thyssen  <jth@gnubg.org>
 
 Sun Jun  8 22:09:03 2003  Joern Thyssen  <jth@gnubg.org>
 
-       	New Cube temperature map
+        New Cube temperature map
         (suggested by Albert Silver)
 
         * show.c (CommandShowTemperatureMap): new subcommand "=cube" to
@@ -169,14 +176,14 @@ Sun Jun  8 22:09:03 2003  Joern Thyssen  <jth@gnubg.org>
 
 Sun Jun  8 21:41:09 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Fix bug: gnubg crashes when saving or analysing a match
-	where the manual dice dialog was cancelled on the first move of 
-	the match.
+        Fix bug: gnubg crashes when saving or analysing a match
+        where the manual dice dialog was cancelled on the first move of 
+        the match.
         (reported by Michael Depreli)
 
         * play.c (NewGame): initialise plGame and plLastMove to
         avoid crashes.
-	* play.c (ApplyGameOver): pass correct game.
+        * play.c (ApplyGameOver): pass correct game.
 
 Sun Jun  8 21:43:40 2003  Joern Thyssen  <jth@gnubg.org>
 
@@ -187,50 +194,50 @@ Sun Jun  8 21:43:40 2003  Joern Thyssen  <jth@gnubg.org>
 
 Sat Jun  7 10:13:31 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* eval.c (EvaluatePositionCubeful4, EvaluatePositionFull):
-	ensure nReductionGroup is reset to zero.
-	(reported by Michael Depreli)
+        * eval.c (EvaluatePositionCubeful4, EvaluatePositionFull):
+        ensure nReductionGroup is reset to zero.
+        (reported by Michael Depreli)
 
 Fri Jun  6 12:43:47 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktempmap.c (ExposeQuadrant): ahem, fix small bug in
-	index calculation.
-	(bug 3873 reported by Ned Cross)
+        * gtktempmap.c (ExposeQuadrant): ahem, fix small bug in
+        index calculation.
+        (bug 3873 reported by Ned Cross)
 
 Fri Jun  6 12:21:14 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* play.c (SetMatchID): dump values for invalid match IDs.
-	* matchid.c (MatchFromKey): no crawford game for money play
-	(reported by Rod Roark)
+        * play.c (SetMatchID): dump values for invalid match IDs.
+        * matchid.c (MatchFromKey): no crawford game for money play
+        (reported by Rod Roark)
 
 Fri Jun  6 11:49:40 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* analysis.c (updateStatcontext): change the way anTotalMoves
-	is calculated.
-	(reported by Rolf Nielsen)
+        * analysis.c (updateStatcontext): change the way anTotalMoves
+        is calculated.
+        (reported by Rolf Nielsen)
 
 Fri Jun  6 11:19:58 2003  Joern Thyssen  <jth@gnubg.org>
 
         * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
         analysis.c (DumpStatcontext): modify formulaes for snowie error
-	rate according to Chris Yep's email.
+        rate according to Chris Yep's email.
 
 Tue Jun  3 09:20:00 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
-	* eval.c: fix compilation with -DGARY_CACHE
+        * eval.c: fix compilation with -DGARY_CACHE
 
 Mon Jun  2 23:19:22 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktempmap.c (GTKShowTempMap): remove gtk_aspect_frame for now.
+        * gtktempmap.c (GTKShowTempMap): remove gtk_aspect_frame for now.
 
 Mon Jun  2 23:11:02 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktempmap.c (UpdateMapEquities): show best move in tool tip.
+        * gtktempmap.c (UpdateMapEquities): show best move in tool tip.
 
 Mon Jun  2 22:32:28 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktempmap.c (ExposeDie, GTKShowTempMap): dynamic resizing of
-	dice.
+        * gtktempmap.c (ExposeDie, GTKShowTempMap): dynamic resizing of
+        dice.
 
 Mon Jun 02 17:11:48 2003  Holger Bochnig <hbgg@gmx.net>
 
@@ -239,92 +246,92 @@ Mon Jun 02 17:11:48 2003  Holger Bochnig <hbgg@gmx.net>
 
 Sun Jun  1 22:39:24 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Several improvements to temp. maps.
+        Several improvements to temp. maps.
 
-	* gtktempmap.c: several improvements.
+        * gtktempmap.c: several improvements.
 
 Sun Jun  1 13:04:08 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktempmap.c (CalTempMapEquities): invert fMove before
-	call to evaluation.
-	* eval.c: replace "default" move filter with "normal" movefilter.
-	(bugs reported by Ned Cross)
+        * gtktempmap.c (CalTempMapEquities): invert fMove before
+        call to evaluation.
+        * eval.c: replace "default" move filter with "normal" movefilter.
+        (bugs reported by Ned Cross)
 
 Sat May 31 18:54:34 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Add ply-buttons to theory widget
-	(suggested by Albert Silver)
+        Add ply-buttons to theory widget
+        (suggested by Albert Silver)
 
-	* gtktheory.c (PlyClicked): new routine.
-	* gtktheory.c (GTKShowTheory): add radio buttons for plies.	
+        * gtktheory.c (PlyClicked): new routine.
+        * gtktheory.c (GTKShowTheory): add radio buttons for plies.     
 
 Fri May 30 21:27:04 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktempmap.c (GTKShowTempMap): make dialog non-modal.
-	* gtkchequer.c (CreateMoveListTools): add temp. map button.
-	* gtkchequer.c (MoveListTempMapClicked): call temp. map.
+        * gtktempmap.c (GTKShowTempMap): make dialog non-modal.
+        * gtkchequer.c (CreateMoveListTools): add temp. map button.
+        * gtkchequer.c (MoveListTempMapClicked): call temp. map.
 
 Fri May 30 20:43:50 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtktempmap.c: improvements of temperature map.
-	(suggested by Ian Shaw and Michael Depreli)
+        * gtktempmap.c: improvements of temperature map.
+        (suggested by Ian Shaw and Michael Depreli)
 
 Fri May 30 17:41:42 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtkboard.c (board_set): move calculation of nchequers to
-	_after_ bd->points[26] and bd->points[27] has been calculated.
-	* gtkboard.c (write_points): fix sign bug.
-	(bug #3806 reported by Henrik Ravn)
+        * gtkboard.c (board_set): move calculation of nchequers to
+        _after_ bd->points[26] and bd->points[27] has been calculated.
+        * gtkboard.c (write_points): fix sign bug.
+        (bug #3806 reported by Henrik Ravn)
 
 Fri May 30 12:58:27 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gtkchequer.c (ShowMove): fix bug #3809
-	* gtkboard.c (UpdateMove): new function.
-	(bug #3809 reported by Henrik Ravn)
+        * gtkchequer.c (ShowMove): fix bug #3809
+        * gtkboard.c (UpdateMove): new function.
+        (bug #3809 reported by Henrik Ravn)
 
 Thu May 29 21:10:47 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Implement Sho Sengoku Equity Temperature Map
-	(suggested by Yoshito Takeuchi)
+        Implement Sho Sengoku Equity Temperature Map
+        (suggested by Yoshito Takeuchi)
 
-	* gtktempmap.c, Makefile.am: new file
-	* gnubg.c: new command "show temperaturemap"
-	* show.c (CommandShowTemperatureMap): new function.
-	* gtkboard.c (DrawDie): declare function extern.
-	* gtkgame.c: new menu entry.
+        * gtktempmap.c, Makefile.am: new file
+        * gnubg.c: new command "show temperaturemap"
+        * show.c (CommandShowTemperatureMap): new function.
+        * gtkboard.c (DrawDie): declare function extern.
+        * gtkgame.c: new menu entry.
 
 Thu May 29 13:28:46 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* external.c (CommandExternal): bug fixes + resignations.
-	* drawboard.c (ParseFIBSBoard): let negative values of "doubled"
-	represent resignations.
-	(contributed by Rod Roark)
+        * external.c (CommandExternal): bug fixes + resignations.
+        * drawboard.c (ParseFIBSBoard): let negative values of "doubled"
+        represent resignations.
+        (contributed by Rod Roark)
 
 Thu May 29 13:11:38 2003  Joern Thyssen  <jth@gnubg.org>
 
-	* gnubg.c (outputl, outputerrv): add fflush.
+        * gnubg.c (outputl, outputerrv): add fflush.
 
 Thu May 29 12:30:33 2003  Joern Thyssen  <jth@gnubg.org>
 
-	New toolbar button for changing direction of play.
+        New toolbar button for changing direction of play.
 
-	* gtkboard.c (board_init): draw new button.
-	* gtkboard.c (toggle_clockwise): new function.
-	* gtkboard.c (toggle_button_from_images): new function.	
+        * gtkboard.c (board_init): draw new button.
+        * gtkboard.c (toggle_clockwise): new function.
+        * gtkboard.c (toggle_button_from_images): new function. 
 
-	* gtkboard.c (game_set, board_set): move invalidation of arrow area 
-	into board_set to avoid gtk warning.
+        * gtkboard.c (game_set, board_set): move invalidation of arrow area 
+        into board_set to avoid gtk warning.
 
 Thu May 29 10:47:39 2003  Joern Thyssen  <jth@gnubg.org>
 
-	Move position calculating routines to new file.
+        Move position calculating routines to new file.
 
-	* boardpos.c, Makefile.am: new file.
-	* gtkboard.c, export.c: call new position calculating routines.	
+        * boardpos.c, Makefile.am: new file.
+        * gtkboard.c, export.c: call new position calculating routines. 
 
 Wed May 28 15:38:58 2003  Holger Bochnig  <hbgg@gmx.net>
 
-	* gtkgame.c (ReportBug): change WWW address to report page
+        * gtkgame.c (ReportBug): change WWW address to report page
 
 Tue May 27 18:04:16 2003  Holger Bochnig  <hbgg@gmx.net>
 

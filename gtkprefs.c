@@ -1002,7 +1002,7 @@ DesignAddTitle ( boarddesign *pbde ) {
   GtkWidget *pwvbox;
   GtkWidget *pwhbox;
 
-  pwDialog = CreateDialog( _("GNU Backgammon - Add current board design"), 
+  pwDialog = GTKCreateDialog( _("GNU Backgammon - Add current board design"), 
                            DT_QUESTION,
                            GTK_SIGNAL_FUNC( DesignAddOK ), pbde );
 
@@ -1520,7 +1520,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fWood = rdAppearance.wt;
     fHinges = rdAppearance.fHinges;
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
+    pwDialog = GTKCreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
     ppm = gdk_pixmap_new( bd->drawing_area->window, 108 * 3, 72 * 3, -1 );

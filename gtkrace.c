@@ -639,7 +639,7 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( _("GNU Backgammon - Race Theory"), DT_INFO,
+  pwDialog = GTKCreateDialog ( _("GNU Backgammon - Race Theory"), DT_INFO,
                             NULL, NULL );
 
   /* add notebook pages */
