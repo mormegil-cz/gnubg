@@ -11,10 +11,13 @@ die () {
   exit 1
 }
 
-# Basic test -- could fail if it can't find the bearoff database, or there
-# are problems with the binary.
-./gnubg $dirparam -t -n <> /dev/null || die '--- Basic gnubg test fails.'
+# Basic test -- could fail if there are problems with the binary.
+./gnubg $dirparam -t -n -b <> /dev/null || die '--- Basic gnubg test fails.'
 echo '--- Basic gnubg test succeeds.'
+
+# Test without -b; now requires bearoff database.
+./gnubg $dirparam -t -n <> /dev/null || die '--- Bearoff database test fails.'
+echo '--- Bearoff database test succeeds.'
 
 # Test without -n; now requires weights files.
 ./gnubg $dirparam -t <> /dev/null || die '--- Neural net weights test fails.'

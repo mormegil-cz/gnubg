@@ -5,8 +5,6 @@ duplication of effort and to make sure our changes merge easily.
 * Evaluations:
 ** Allow different settings (e.g. search ply, candidates, tolerance) for each
   position class.
-** If the bearoff database is not found, use the race evaluator for bearoff
-  positions.
 ** Add more evaluation classes.
 *** Add a neural net to correct errors in BEAROFF1 class.
 *** Classes for bearing off against contact, back games, containment
@@ -128,4 +126,3 @@ duplication of effort and to make sure our changes merge easily.
   both players have up to 11 chequers in the home board onto a CD-ROM).
 ** Move the built-in RNGs into lib/; they can then be used instead of
   rand_r for better quality random numbers and improved portability.
-** Make sure the POSIX-isms in libevent are not used if unavailable. (gary)

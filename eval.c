@@ -189,7 +189,7 @@ enum {
 
 static int anEscapes[ 0x1000 ];
 static neuralnet nnContact, nnBPG, nnRace;
-static unsigned char *pBearoff1 = NULL, *pBearoff2;
+static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
 static cache cEval;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL;
@@ -277,14 +277,20 @@ static int PathOpen( char *szFile, char *szDir ) {
 
 extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 			   char *szDatabase, char *szDir ) {
-
     FILE *pfWeights;
     int h, fReadWeights = FALSE;
     char szFileVersion[ 16 ];
     float r;
+    static int fInitialised = FALSE;
+
+    if( !fInitialised ) {
+	if( CacheCreate( &cEval, 8192, (cachecomparefunc) EvalCacheCompare ) )
+	    return -1;
+	    
+	ComputeTable();
+    }
     
-    if( !pBearoff1 ) {
-	/* not yet initialised */
+    if( szDatabase ) {
 	if( ( h = PathOpen( szDatabase, szDir ) ) < 0 ) {
 	    perror( szDatabase );
 	    return -1;
@@ -311,11 +317,6 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	}
 #endif
 	pBearoff2 = pBearoff1 + 54264 * 32 * 2;
-
-	if( CacheCreate( &cEval, 8192, (cachecomparefunc) EvalCacheCompare ) )
-	    return -1;
-	    
-	ComputeTable();
     }
 
     if( szWeightsBinary &&
@@ -1290,7 +1291,7 @@ extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
 
       return CLASS_CONTACT;
     }
-    else if( nBack > 5 || nOppBack > 5 )
+    else if( nBack > 5 || nOppBack > 5 || !pBearoff1 )
 	return CLASS_RACE;
 
     if( PositionBearoff( anBoard[ 0 ] ) > 923 ||
@@ -1410,6 +1411,8 @@ static void EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
     int n, nOpp;
 
+    assert( pBearoff2 );
+    
     nOpp = PositionBearoff( anBoard[ 0 ] );
     n = PositionBearoff( anBoard[ 1 ] );
 
@@ -1426,6 +1429,8 @@ extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
     
     int i, j, n, nOpp, aaProb[ 2 ][ 32 ];
     unsigned long x;
+
+    assert( pBearoff1 );
     
     nOpp = PositionBearoff( anBoard[ 0 ] );
     n = PositionBearoff( anBoard[ 1 ] );
@@ -2291,12 +2296,16 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 
 static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
+    assert( pBearoff2 );
+    
     /* no-op -- nothing much we can say */
 }
 
 static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
     int i, n, nOpp, an[ 2 ], f = FALSE;
+
+    assert( pBearoff1 );
     
     nOpp = PositionBearoff( anBoard[ 0 ] );
     n = PositionBearoff( anBoard[ 1 ] );

@@ -1,3 +1,15 @@
+Fri Jul 28 10:08:49 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkboard.c (board_pointer, board_edit): More work on board
+	editing.
+
+	* gnubg.c (main): Add a `-b' (--no-bearoff) option, to enable
+	gnubg to run without the bearoff database.
+
+	* eval.c (ClassifyPosition): Do not classify anything as a bearoff
+	position if the bearoff database was not loaded (i.e. use the
+	race evaluator).
+
 Thu Jul 27 10:03:33 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gtkboard.c (board_init): Change position ID to an entry field,

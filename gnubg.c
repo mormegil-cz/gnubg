@@ -1826,6 +1826,7 @@ static void usage( char *argv0 ) {
     outputf(
 "Usage: %s [options]\n"
 "Options:\n"
+"  -b, --no-bearoff          Do not use bearoff database\n"
 "  -d DIR, --datadir DIR     Read database and weight files from direcotry "
 "DIR\n"
 "  -h, --help                Display usage and exit\n"
@@ -1842,10 +1843,11 @@ static void usage( char *argv0 ) {
 extern int main( int argc, char *argv[] ) {
 
     char ch, *pch, *pchDataDir = NULL;
-    static int fNoWeights = FALSE;
+    static int fNoWeights = FALSE, fNoBearoff = FALSE;
     static struct option ao[] = {
 	{ "datadir", required_argument, NULL, 'd' },
         { "help", no_argument, NULL, 'h' },
+	{ "no-bearoff", no_argument, NULL, 'b' },
 	{ "no-weights", no_argument, NULL, 'n' },
         { "version", no_argument, NULL, 'v' },
 	/* `tty' must be the last option -- see below. */
@@ -1891,9 +1893,12 @@ extern int main( int argc, char *argv[] ) {
     fInteractive = isatty( STDIN_FILENO );
     fShowProgress = isatty( STDOUT_FILENO );
     
-    while( ( ch = getopt_long( argc, argv, "d:hntv", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bd:hntv", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
+	case 'b': /* no-bearoff */
+	    fNoBearoff = TRUE;
+	    break;
 	case 'd': /* datadir */
 	    pchDataDir = optarg;
 	    break;
@@ -1935,7 +1940,7 @@ extern int main( int argc, char *argv[] ) {
     
     if( EvalInitialise( fNoWeights ? NULL : GNUBG_WEIGHTS,
 			fNoWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			GNUBG_BEAROFF, pchDataDir ) )
+			fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir ) )
 	return EXIT_FAILURE;
 
     if( ( pch = getenv( "LOGNAME" ) ) )
