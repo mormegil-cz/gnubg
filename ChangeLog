@@ -1,3 +1,7 @@
+Mon Aug  4 23:47:19 2003  Oystein Johansen  <oystein@gnubg.org>
+
+        * simplelibgen.c (dirname): Check for USE_GTK, so gutils can be used.
+
 Mon Aug  4 21:20:15 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c: some color changes in the html export.
@@ -8,11 +12,11 @@ Mon Aug  4 21:04:39 2003  Joern Thyssen  <jth@gnubg.org>
 
 Mon Aug  4 09:18:36 2003 Jim Segrave <jes@jes-2.demon.nl>
 
-	* sgf.c, backgammon.h, play.c, import.c
+	* sgf.c, backgammon.h, play.c, import.c:
 	  count number of successive doubles in move record, clean up
 	  linking of initial double and following cube actions
 	
-Son Aug  3 19:16:13 2003  Joern Thyssen  <jth@gnubg.org>
+Sun Aug  3 19:16:13 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (ReturnHits): enlarge buffer.
 
@@ -58,6 +62,7 @@ Wed Jul 30 09:36:07 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* rollout.c - prevent division by zero when jsds are small
 	
+>>>>>>> 1.1240
 Mon Jul 28 21:31:19 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (InitGTK): new menu entry for IDLE (Python).

@@ -23,7 +23,15 @@
  * This code is taken from glibc-2.2, and modified for Windows systems.
  */
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <string.h>
+
+#if USE_GTK
+#include <glib/gutils.h>
+#endif
 
 #ifdef WIN32
 #define DIR_SEPARATOR  '\\'
@@ -40,9 +48,13 @@ basename (const char *filename)
   return p1 ? p1 + 1 : (char *) filename;
 } 
 
+
 extern char *
 dirname (char *path)
 {
+#if USE_GTK
+  return (char *) g_path_get_dirname( (const gchar *) path );	
+#else
   static const char dot[] = ".";
   char *last_slash;
 
@@ -94,5 +106,6 @@ dirname (char *path)
     path = (char *) dot;
 
   return path;
+#endif
 }
 
