@@ -49,6 +49,9 @@ duplication of effort and to make sure our changes merge easily.
   flagged as errors at 0-ply but turn out to be correct at higher plies).
 *** Option "[X] update annotations if re-evaluated or rolled out", and
   update annotations if option is selected.
+  Alternatively, update annotation if it's different from good/very good.
+*** fix logic for determining whether a double is around too-good or double
+  point.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -134,6 +137,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Make usage() show the GDK and GTK options, if appropriate.
 ** Allow the cube text colour and the border specular/shiny parameters to be 
   changed.
+** cube values larger than 64 is shown as 64. Scale font for larger cube values?
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?  (Wait for
   GTK+ 2.0.)
