@@ -1,6 +1,6 @@
 Èeština pro GNUBG
 *****************
-Verze: 11.2.2004 (gnubg 0.14-dev 1.1506)
+Verze: 22.4.2004 (gnubg 0.14.2-dev 1.1568)
 
 
 Jak nainstalovat?
@@ -84,6 +84,8 @@ Jelikož GNU Backgammon se stále bouølivì vyvíjí, prùbìžnì v nìm pøibývají
 (a mìní se) texty. Proto i pøeklad se musí vyvíjet. Nové verze pøekladu
 by se mìly šíøit spoleènì s GNU Backgammonem, ale budu se snažit udržovat
 vždy poslední verzi na http://mormegil.wz.cz/bg/
+Doporuèeníhodné je vždy updatovat pøeklad souèasnì s GNU Backgammonem tak,
+abyste používali vždy tu verzi pøekladu, která souhlasí s programem.
 
 
 Licence
