@@ -2351,14 +2351,13 @@ static void update_buttons( BoardData *pbd ) {
 
     gtk_widget_set_sensitive ( pbd->play, c == C_PLAY );
 
-    gtk_widget_set_sensitive ( pbd->take, c == C_TAKEDROP );
-    gtk_widget_set_sensitive ( pbd->drop, c == C_TAKEDROP );
+    gtk_widget_set_sensitive ( pbd->take, 
+                               c == C_TAKEDROP || c == C_AGREEDECLINE );
+    gtk_widget_set_sensitive ( pbd->drop, 
+                               c == C_TAKEDROP || c == C_AGREEDECLINE );
     /* FIXME: max beavers etc */
     gtk_widget_set_sensitive ( pbd->redouble, 
                                c == C_TAKEDROP && ! ms.nMatchTo );
-
-    gtk_widget_set_sensitive ( pbd->agree, c == C_AGREEDECLINE );
-    gtk_widget_set_sensitive ( pbd->decline, c == C_AGREEDECLINE );
 
 }
 
@@ -4520,6 +4519,21 @@ static void ButtonClicked( GtkWidget *pw, char *sz ) {
 }
 
 
+static void ButtonClickedYesNo( GtkWidget *pw, char *sz ) {
+
+  if ( ms.fResigned ) {
+    UserCommand ( ! strcmp ( sz, "yes" ) ? "accept" : "decline" );
+    return;
+  }
+
+  if ( ms.fDoubled ) {
+    UserCommand ( ! strcmp ( sz, "yes" ) ? "take" : "drop" );
+    return;
+  }
+
+}
+
+
 static GtkWidget *
 image_from_xpm_d ( char **xpm, GtkWidget *pw ) {
 
@@ -4547,6 +4561,17 @@ button_from_image ( GtkWidget *pwImage ) {
 
 }
   
+static GtkWidget *
+toggle_button_from_image ( GtkWidget *pwImage ) {
+
+  GtkWidget *pw = gtk_toggle_button_new ();
+
+  gtk_container_add ( GTK_CONTAINER ( pw ), pwImage );
+
+  return pw;
+
+}
+  
 
 
 static void board_init( Board *board ) {
@@ -4560,8 +4585,11 @@ static void board_init( Board *board ) {
     GtkWidget *pwvbox;
 
 #ifndef USE_GTK2
-#include "xpm/stock_undo_16.xpm"
-#include "xpm/stock_stop_16.xpm"
+#include "xpm/tb_edit.xpm"
+#include "xpm/tb_no.xpm"
+#include "xpm/tb_yes.xpm"
+#include "xpm/tb_stop.xpm"
+#include "xpm/tb_undo.xpm"
 #endif
     
     board->board_data = bd;
@@ -4724,26 +4752,46 @@ static void board_init( Board *board ) {
 
     gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
 
-    bd->take = gtk_button_new_with_label( _("Take") );
+#if USE_GTK2
+    bd->take =
+      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_YES, 
+                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
+#else
+    bd->take =
+      button_from_image ( image_from_xpm_d ( tb_yes_xpm,
+                                             bd->toolbar ) );
+#endif
+
     gtk_signal_connect( GTK_OBJECT( bd->take ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "take" );
+			GTK_SIGNAL_FUNC( ButtonClickedYesNo ), "yes" );
     gtk_widget_set_sensitive ( GTK_WIDGET ( bd->take ), FALSE );
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->take,
-                                _("Take the offered cube"),
+                                _("Take the offered cube or "
+                                  "accept the offered resignation"),
                                 _("private") );
 
     /* drop button */
 
-    bd->drop = gtk_button_new_with_label( _("Drop") );
+#if USE_GTK2
+    bd->drop =
+      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_NO, 
+                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
+#else
+    bd->drop =
+      button_from_image ( image_from_xpm_d ( tb_no_xpm,
+                                             bd->toolbar ) );
+#endif
+
     gtk_signal_connect( GTK_OBJECT( bd->drop ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "drop" );
+			GTK_SIGNAL_FUNC( ButtonClickedYesNo ), "no" );
     gtk_widget_set_sensitive ( GTK_WIDGET ( bd->drop ), FALSE );
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->drop,
-                                _("Drop the offered cube"),
+                                _("Drop the offered cube or "
+                                  "decline offered resignation"),
                                 _("private") );
 
     /* redouble button */
@@ -4756,32 +4804,6 @@ static void board_init( Board *board ) {
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->redouble,
                                 _("Reoduble immediately (beaver)"),
-                                _("private") );
-
-    /* agree button */
-
-    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
-
-    bd->agree = gtk_button_new_with_label ( _("Agree" ) );
-    gtk_signal_connect( GTK_OBJECT( bd->agree ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "agree" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->agree ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->agree,
-                                _("Agree to offered resignation"),
-                                _("private") );
-
-    /* decline button */
-
-    bd->decline = gtk_button_new_with_label ( _("Decline" ) );
-    gtk_signal_connect( GTK_OBJECT( bd->decline ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "decline" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->decline ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->decline,
-                                _("Decline the offered resignation"),
                                 _("private") );
 
     /* play button */
@@ -4808,7 +4830,7 @@ static void board_init( Board *board ) {
                                                      GTK_ICON_SIZE_SMALL_TOOLBAR ) );
 #else
     bd->reset = 
-      button_from_image ( image_from_xpm_d ( stock_undo_16_xpm, 
+      button_from_image ( image_from_xpm_d ( tb_undo_xpm,
                                              bd->toolbar ) );
 #endif
     gtk_signal_connect( GTK_OBJECT( bd->reset ), "clicked",
@@ -4824,7 +4846,15 @@ static void board_init( Board *board ) {
 
     gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
 
-    bd->edit = gtk_toggle_button_new_with_label ( _("Edit" ) );
+#if USE_GTK2
+    bd->edit =
+      toggle_button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_EDIT, 
+                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
+#else
+    bd->edit =
+      toggle_button_from_image ( image_from_xpm_d ( tb_edit_xpm,
+                                             bd->toolbar ) );
+#endif
     gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
 			GTK_SIGNAL_FUNC( board_edit ), bd );
     
@@ -4844,7 +4874,7 @@ static void board_init( Board *board ) {
                                                      GTK_ICON_SIZE_SMALL_TOOLBAR ) );
 #else
     bd->stop =
-      button_from_image ( image_from_xpm_d ( stock_stop_16_xpm, 
+      button_from_image ( image_from_xpm_d ( tb_stop_xpm,
                                              bd->toolbar ) );
 #endif
     gtk_container_add( GTK_CONTAINER( bd->stopparent ), bd->stop );

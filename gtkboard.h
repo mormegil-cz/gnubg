@@ -74,7 +74,6 @@ typedef struct _BoardData {
     GtkWidget *toolbar, *vbox_toolbar;
     GtkWidget *roll;
     GtkWidget *take, *drop, *redouble;
-    GtkWidget *agree, *decline;
     GtkWidget *vbox_ids;
     GtkWidget *pipcount0, *pipcount1;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
