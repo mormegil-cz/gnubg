@@ -265,11 +265,7 @@ extern void CommandSetCubeCentre( char *sz ) {
 	ShowBoard();
 #endif
 
-    if( fDoubled ) {
-	outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
-	fDoubled = FALSE;
-	fNextTurn = TRUE;
-    }
+    CancelCubeAction();
 }
 
 extern void CommandSetCubeOwner( char *sz ) {
@@ -304,12 +300,8 @@ extern void CommandSetCubeOwner( char *sz ) {
     if( fX )
 	ShowBoard();
 #endif    
-    
-    if( fDoubled ) {
-	outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
-	fDoubled = FALSE;
-	fNextTurn = TRUE;
-    }
+
+    CancelCubeAction();
 }
 
 extern void CommandSetCubeUse( char *sz ) {
@@ -340,12 +332,7 @@ extern void CommandSetCubeUse( char *sz ) {
 	    ShowBoard();
 #endif
 
-	if( fDoubled ) {
-	    outputf( "(%s's double has been cancelled.)\n",
-		    ap[ fMove ].szName );
-	    fDoubled = FALSE;
-	    fNextTurn = TRUE;
-	}
+	CancelCubeAction();
     }
 }
 
@@ -910,8 +897,8 @@ extern void CommandSetTurn( char *sz ) {
 	SwapSides( anBoard );
     
     fTurn = fMove = i;
-    fDoubled = 0;
-
+    CancelCubeAction();
+    fNextTurn = FALSE;
     anDice[ 0 ] = anDice[ 1 ] = 0;
 
     UpdateSetting( &fTurn );
@@ -951,13 +938,9 @@ extern void CommandSetCrawford( char *sz ) {
       /* sanity check */
       fPostCrawford = !fCrawford;
 
-      if( fCrawford && fDoubled ) {
-	  outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
-	  fDoubled = FALSE;
-	  fNextTurn = TRUE;
-      }
-    }
-    else {
+      if( fCrawford )
+	  CancelCubeAction();
+    } else {
       outputl( "Cannot set whether this is the Crawford game\n"
 	    "as none of the players are 1-away from winning." );
     }
@@ -981,13 +964,9 @@ extern void CommandSetPostCrawford( char *sz ) {
       /* sanity check */
       fCrawford = !fPostCrawford;
 
-      if( fCrawford && fDoubled ) {
-	  outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
-	  fDoubled = FALSE;
-	  fNextTurn = TRUE;
-      }
-    }
-    else {
+      if( fCrawford )
+	  CancelCubeAction();
+    } else {
       outputl( "Cannot set whether this is post-Crawford play\n"
 	    "as none of the players are 1-away from winning." );
     }

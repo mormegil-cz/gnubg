@@ -58,15 +58,39 @@ void ResetDelayTimer( void ) {
 #define ResetDelayTimer()
 #endif
 
+static void AddMoveRecord( void *pmr ) {
+
+    /* FIXME delete all records after the current position */
+    
+    ListInsert( plGame, pmr );
+}
+
 static void NewGame( void ) {
 
+    moverecord *pmr;
+    
     InitBoard( anBoard );
 
     plGame = malloc( sizeof( *plGame ) );
     ListCreate( plGame );
 
     ListInsert( &lMatch, plGame );
-    
+
+    pmr = malloc( sizeof( movegameinfo ) );
+    pmr->g.mt = MOVE_GAMEINFO;
+    pmr->g.i = cGames;
+    pmr->g.nMatch = nMatchTo;
+    pmr->g.anScore[ 0 ] = anScore[ 0 ];
+    pmr->g.anScore[ 1 ] = anScore[ 1 ];
+    pmr->g.fCrawford = fAutoCrawford && nMatchTo > 1;
+    pmr->g.fCrawfordGame = fCrawford;
+    pmr->g.fJacoby = fJacoby && !nMatchTo;
+    pmr->g.fWinner = -1;
+    pmr->g.nPoints = 0;
+    pmr->g.fResigned = FALSE;
+    pmr->g.nAutoDoubles = 0;
+    AddMoveRecord( pmr );
+        
     fResigned = fDoubled = FALSE;
     nCube = 1;
     fCubeOwner = -1;
@@ -79,6 +103,8 @@ static void NewGame( void ) {
     RollDice( anDice );
 
     if( fInterrupt ) {
+	ListDelete( plGame->plNext );
+	free( pmr );
 	free( plGame );
 	ListDelete( lMatch.plPrev );
 	fMove = fTurn = -1;
@@ -96,14 +122,14 @@ static void NewGame( void ) {
 
     if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
 	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse ) {
-	    /* FIXME we need a moverecord type for automatic doubles... */
+	    pmr->g.nAutoDoubles++;
 	    outputf( "The cube is now at %d.\n", nCube <<= 1 );
 	    UpdateSetting( &nCube );
 	}
 	
 	goto reroll;
     }
-	
+
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
     UpdateSetting( &fTurn );
     
@@ -239,7 +265,6 @@ static int ComputerTurn( void ) {
       pmn->anRoll[ 0 ] = anDice[ 0 ];
       pmn->anRoll[ 1 ] = anDice[ 1 ];
       pmn->fPlayer = fTurn;
-      ListInsert( plGame, pmn );
       
       if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
                         anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 ) {
@@ -248,6 +273,7 @@ static int ComputerTurn( void ) {
       }
       
       memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
+      AddMoveRecord( pmn );      
       
       /* write move to status bar if using GTK */
 
@@ -289,7 +315,7 @@ static int ComputerTurn( void ) {
     pmn->anRoll[ 0 ] = anDice[ 0 ];
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
-    ListInsert( plGame, pmn );
+    AddMoveRecord( pmn );
     
     return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard, pmn->anMove );
 
@@ -299,6 +325,19 @@ static int ComputerTurn( void ) {
   }
 }
 
+extern void CancelCubeAction( void ) {
+    
+    if( fDoubled ) {
+	outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
+	fDoubled = FALSE;
+	fNextTurn = TRUE;
+
+	if( fDisplay )
+	    ShowBoard();
+	
+	/* FIXME delete all MOVE_DOUBLE records */
+    }
+}
 
 /* Try to automatically bear off as many chequers as possible.  Only do it
    if it's a non-contact position, and each die can be used to bear off
@@ -331,7 +370,7 @@ static int TryBearoff( void ) {
 		pmn->fPlayer = fTurn;
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
-		ListInsert( plGame, pmn );
+		AddMoveRecord( pmn );
 		
 		ShowAutoMove( anBoard, pmn->anMove );
 		
@@ -345,7 +384,7 @@ static int TryBearoff( void ) {
 
 extern void NextTurn( void ) {
 
-    int n, fWinner;
+    int n;
 #if USE_GUI
     struct timeval tv;
     fd_set fds;
@@ -423,14 +462,17 @@ extern void NextTurn( void ) {
     if( ( n = GameStatus( anBoard ) ) ||
 	( go == GAME_DROP && ( ( n = 1 ) ) ) ||
 	( go == GAME_RESIGNED && ( ( n = fResigned ) ) ) ) {
-	fWinner = !fTurn;
+	movegameinfo *pmgi = plGame->plNext->p;
+	
+	pmgi->fWinner = !fTurn;
+	pmgi->fResigned = go == GAME_RESIGNED;
 	
 	if( fJacoby && fCubeOwner == -1 && !nMatchTo )
 	    /* gammons do not count on a centred cube during money
 	       sessions under the Jacoby rule */
 	    n = 1;
 	
-	anScore[ fWinner ] += n * nCube;
+	anScore[ pmgi->fWinner ] += ( pmgi->nPoints = n * nCube );
 	cGames++;
 	
 	fTurn = fMove = -1;
@@ -440,7 +482,7 @@ extern void NextTurn( void ) {
 
 	go = GAME_NORMAL;
 	
-	outputf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
+	outputf( "%s wins a %s and %d point%s.\n", ap[ pmgi->fWinner ].szName,
 		aszGameResult[ n - 1 ], n * nCube,
 		n * nCube > 1 ? "s" : "" );
 	
@@ -450,15 +492,15 @@ extern void NextTurn( void ) {
 #endif
 	
 	if( nMatchTo && fAutoCrawford ) {
-	    fPostCrawford = fCrawford && anScore[ fWinner ] < nMatchTo;
+	    fPostCrawford = fCrawford && anScore[ pmgi->fWinner ] < nMatchTo;
 	    fCrawford = !fPostCrawford && !fCrawford &&
-		anScore[ fWinner ] == nMatchTo - 1;
+		anScore[ pmgi->fWinner ] == nMatchTo - 1;
 	}
 	
 	CommandShowScore( NULL );
 	
-	if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
-	    outputf( "%s has won the match.\n", ap[ fWinner ].szName );
+	if( nMatchTo && anScore[ pmgi->fWinner ] >= nMatchTo ) {
+	    outputf( "%s has won the match.\n", ap[ pmgi->fWinner ].szName );
 	    outputx();
 	    return;
 	}
@@ -549,7 +591,7 @@ extern void CommandAgree( char *sz ) {
     pmr->mt = MOVE_RESIGN;
     pmr->fPlayer = !fTurn;
     pmr->nResigned = fResigned;
-    ListInsert( plGame, pmr );
+    AddMoveRecord( pmr );
 
     TurnDone();
 }
@@ -627,7 +669,7 @@ extern void CommandDouble( char *sz ) {
     
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
-    ListInsert( plGame, pmt );
+    AddMoveRecord( pmt );
     
     TurnDone();
 }
@@ -655,7 +697,7 @@ extern void CommandDrop( char *sz ) {
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DROP;
-    ListInsert( plGame, pmt );
+    AddMoveRecord( pmt );
     
     TurnDone();
 }
@@ -713,7 +755,7 @@ CommandMove( char *sz ) {
 	    pmn->fPlayer = fTurn;
 	    memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
               sizeof( pmn->anMove ) );
-	    ListInsert( plGame, pmn );
+	    AddMoveRecord( pmn );
 
 	    ShowAutoMove( anBoard, pmn->anMove );
 	    
@@ -773,7 +815,7 @@ CommandMove( char *sz ) {
         pmn->fPlayer = fTurn;
         memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
                 sizeof( pmn->anMove ) );
-        ListInsert( plGame, pmn );
+        AddMoveRecord( pmn );
 		
         memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
 		
@@ -982,7 +1024,7 @@ extern void CommandRedouble( char *sz ) {
     
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
-    ListInsert( plGame, pmt );
+    AddMoveRecord( pmt );
     
     TurnDone();
 }
@@ -1102,7 +1144,7 @@ CommandRoll( char *sz ) {
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
     pmn->anMove[ 0 ] = -1;
-    ListInsert( plGame, pmn );
+    AddMoveRecord( pmn );
 	
     outputl( "No legal moves." );
 
@@ -1119,7 +1161,7 @@ CommandRoll( char *sz ) {
 
     ShowAutoMove( anBoard, pmn->anMove );
 	
-    ListInsert( plGame, pmn );
+    AddMoveRecord( pmn );
 	
     PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 	
@@ -1154,7 +1196,7 @@ extern void CommandTake( char *sz ) {
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;
-    ListInsert( plGame, pmt );
+    AddMoveRecord( pmt );
     
     TurnDone();
 }
