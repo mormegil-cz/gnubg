@@ -14,6 +14,8 @@
 
 #include "backgammon.h"
 
+#if USE_TIMECONTROL
+
 extern timecontrol tc;
 
 
@@ -73,5 +75,7 @@ extern int UpdateClockNotify(void *p)
 
 extern void SaveTimeControlSettings( FILE *pf );
 extern void CommandShowTCTutorial ();
+
+#endif
 
 #endif /* _TIMECONTROL_H_ */
