@@ -224,20 +224,24 @@ TextBoardHeader ( FILE *pf, const matchstate *pms,
 static void 
 TextPrologue ( FILE *pf, const matchstate *pms, const int iGame ) {
 
-  if ( pms->nMatchTo )
-    fprintf ( pf,
-              _("%s (O, %d pts) vs. %s (X, %d pts) (Match to %d)\n\n"),
-              ap [ 0 ].szName, pms->anScore[ 0 ],
-              ap [ 1 ].szName, pms->anScore[ 1 ],
-              pms->nMatchTo );
-  else
-    fprintf ( pf,
-              _("%s (O, %d pts) vs. %s (X, %d pts) (money game)\n\n"),
-              ap [ 0 ].szName, pms->anScore[ 0 ],
-              ap [ 1 ].szName, pms->anScore[ 1 ] );
+  fprintf( pf, pms->cGames == 1 ? 
+           _("The score (after %d game) is: %s %d, %s %d") :
+           _("The score (after %d games) is: %s %d, %s %d"),
+           pms->cGames, 
+           ap[ 0 ].szName, pms->anScore[ 0 ],
+           ap[ 1 ].szName, pms->anScore[ 1 ] );
 
-  fprintf ( pf, 
-            _("Game number %d\n\n"), iGame + 1 );
+  if ( pms->nMatchTo > 0 ) 
+    fprintf( pf,
+             pms->nMatchTo == 1 ?
+             _(" (match to %d point%s)") :
+             _(" (match to %d points%s)"),
+             pms->nMatchTo,
+             pms->fCrawford ? 
+             _(", Crawford game") : ( pms->fPostCrawford ?
+					 _(", post-Crawford play") : ""));
+
+  fputs( "\n", pf );
 
 }
 

@@ -39,6 +39,7 @@ char *aszCredits[] = {
     "Rick Janowski",
     "Nis Jorgensen",
     "Morten Juul Henriksen",
+    "Neil Kazaross",
     "Tom Keith",
     "Matija Kejzar",
     "Jonathan Kinsey",

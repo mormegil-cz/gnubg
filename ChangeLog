@@ -1,3 +1,9 @@
+Sat Oct 11 18:00:03 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* text.c (TextPrologue, ExportPositionGammOnLine, HTMLPrologue):
+	change format for writing score, e.g., add text for Crawford game.
+	(in part reported by Neil Kazaross)
+
 Sat Oct 11 13:15:36 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* progress.c (TextRolloutProgress): Improve rollout progress output

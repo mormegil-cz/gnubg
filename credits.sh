@@ -49,6 +49,7 @@ Alain Henry
 Jens Hoefkens
 Martin Janke
 Nis Jorgensen
+Neil Kazaross
 Matija Kejzar
 Bert Van Kerckhove
 James F. Kibler
