@@ -3,9 +3,9 @@ item soon.  Please contact them before working on related areas, to avoid
 duplication of effort and to make sure our changes merge easily.
 
 * Evaluations:
-** Add more evaluation classes.
 ** Allow different settings (e.g. search ply, candidates, tolerance) for each
   position class.
+** Add more evaluation classes.
 *** Add a neural net to correct errors in BEAROFF1 class.
 *** Classes for bearing off against contact, back games, containment
   positions, prime-vs-prime...

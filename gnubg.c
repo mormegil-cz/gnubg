@@ -761,12 +761,12 @@ extern void CommandRollout( char *sz ) {
 	return;
 
     printf( "Result (after %d trials):\n\n"
-	    "                   \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+	    "               \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
 	    "Equity\n"
-	    "              Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+	    "          Mean:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
 	    "(%+6.3f)\n"
-	    "Standard deviation:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-	    "(%+6.3f)\n\n",
+	    "Standard error:\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+	    "(%6.3f)\n\n",
 	    c, ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ], ar[ 5 ],
 	    arStdDev[ 0 ], arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
 	    arStdDev[ 4 ], arStdDev[ 5 ] );

@@ -104,7 +104,9 @@ static int BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	if( anDice[ 0 ]-- < anDice[ 1 ]-- )
 	    swap( anDice, anDice + 1 );
 
-	EvaluatePosition( anBoard, arMean, 0 );
+	if( EvaluatePosition( anBoard, arMean, 0 ) < 0 )
+	    return -1;
+	
 	if( iTurn & 1 )
 	    InvertEvaluation( arMean );
 	    
@@ -137,10 +139,10 @@ static int BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     return 0;
 }
 
-/* Basic rollout, with no lookahead and no variance reduction, until
-   a bearoff position is reached. */
+/* Rollout with no variance reduction, until a bearoff position is reached. */
 static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
-			 int nTruncate, int iTurn, int iGame, int cGames ) {
+			 int nTruncate, int iTurn, int iGame, int cGames,
+			 evalcontext *pec ) {
     positionclass pc;
     int anDice[ 2 ];
     
@@ -149,7 +151,7 @@ static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	QuasiRandomDice( iTurn, iGame, cGames, anDice );
 	
 	if( FindBestMove( NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-			  anBoard, NULL ) < 0 )
+			  anBoard, pec ) < 0 )
 	    return -1;
 	
 	SwapSides( anBoard );
@@ -161,7 +163,7 @@ static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	return BearoffRollout( anBoard, arOutput, nTruncate, iTurn, iGame,
 			       cGames );
 
-    if( EvaluatePosition( anBoard, arOutput, NULL ) )
+    if( EvaluatePosition( anBoard, arOutput, pec ) )
 	return -1;
 
     if( iTurn & 1 )
@@ -215,8 +217,9 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 		SwapSides( aaanBoard[ i ][ j ] );
 
 		/* Re-evaluate the chosen move at ply n-1. */
-		EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
-				  &ec );
+		if( EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
+				      &ec ) )
+		    return -1;
 			
 		if( !( iTurn & 1 ) )
 		    InvertEvaluation( aaar[ i ][ j ] );
@@ -260,13 +263,14 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     if( iTurn < nTruncate && pc == CLASS_BEAROFF1 ) {
 	if( BearoffRollout( anBoard, ar, nTruncate, iTurn, iGame, cGames ) )
 	    return -1;
-    } else
+    } else {
 	if( EvaluatePosition( anBoard, ar, pec ) )
 	    return -1;
 
-    if( iTurn & 1 )
-	InvertEvaluation( ar );
-
+	if( iTurn & 1 )
+	    InvertEvaluation( ar );
+    }
+    
     /* The final output is the sum of the resulting evaluation and all
        variance reduction terms. */
     for( i = 0; i < NUM_OUTPUTS; i++ )
@@ -278,7 +282,7 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 		    int nTruncate, int cGames, int fVarRedn,
 		    evalcontext *pec ) {
-    int i, j, f, anBoardEval[ 2 ][ 25 ];
+    int i, j, anBoardEval[ 2 ][ 25 ];
     float ar[ NUM_ROLLOUT_OUTPUTS ];
     double arResult[ NUM_ROLLOUT_OUTPUTS ], arVariance[ NUM_ROLLOUT_OUTPUTS ];
     enum _rollouttype { BEAROFF, BASIC, VARREDN } rt;
@@ -304,20 +308,19 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 
 	switch( rt ) {
 	case BEAROFF:
-	    f = BearoffRollout( anBoardEval, ar, nTruncate, 0, i, cGames );
+	    BearoffRollout( anBoardEval, ar, nTruncate, 0, i, cGames );
 	    break;
 	case BASIC:
-	    f = BasicRollout( anBoardEval, ar, nTruncate, 0, i, cGames );
+	    BasicRollout( anBoardEval, ar, nTruncate, 0, i, cGames, pec );
 	    break;
 	case VARREDN:
-	    f = VarRednRollout( anBoardEval, ar, nTruncate, 0, i, cGames,
-				pec );
+	    VarRednRollout( anBoardEval, ar, nTruncate, 0, i, cGames, pec );
 	    break;
 	}
 
-	if( f )
+	if( fInterrupt )
 	    break;
-
+	
 	SanityCheck( anBoard, ar ); /* FIXME think about this... */
 	
 	printf( "%6d\r", i + 1 );
