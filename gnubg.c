@@ -2554,30 +2554,30 @@ extern void CommandHint( char *sz ) {
         
       }
       
-    }
-    
 #if USE_GTK
-    if ( fX ) {
-      GTKDoubleHint( sc.aarOutput, sc.aarStdDev, &sc.es );
-      return;
-    }
+      if ( fX ) {
+        GTKDoubleHint( sc.aarOutput, sc.aarStdDev, &sc.es );
+        return;
+      }
 #endif
-    FindCubeDecision ( arDouble, aarOutput, &ci );  
+      FindCubeDecision ( arDouble, aarOutput, &ci );  
     
-    GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
+      GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
     
-    outputl ( szBuf );
+      outputl ( szBuf );
     
-    return;
+      return;
     
-  } else {
+    } else {
     
-    outputl( _("You cannot double.") );
+      outputl( _("You cannot double.") );
     
-    return;
+      return;
     
-  }
+    }
   
+  }
+    
 
     /* Give hints on resignation */
 
