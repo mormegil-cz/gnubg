@@ -4613,7 +4613,8 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     if ( pwHint )
 	gtk_widget_destroy( pwHint );
       
-    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, HintOK, NULL );
+    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE,
+			   GTK_SIGNAL_FUNC( HintOK ), NULL );
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
 
@@ -4759,7 +4760,8 @@ GTKHint( movelist *pmlOrig, const int iMove ) {
 
     /* create dialog */
     
-    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, HintOK, NULL );
+    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE,
+			   GTK_SIGNAL_FUNC( HintOK ), NULL );
     pwButtons = DialogArea( pwHint, DA_BUTTONS );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
