@@ -64,7 +64,6 @@ duplication of effort and to make sure our changes merge easily.
   suggestion is to maximise the chance of finding the right play for
   the initial roll and response, and whatever speeds things along while
   still finding reasonable plays after that.)
-** Make "save settings" accept a filename parameter.
 ** Allow saving positions in SGF. (gary)
 ** Importing and exporting:
 *** Add missing export formats (FIBS, SGG).

@@ -3314,22 +3314,31 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 extern void CommandSaveSettings( char *szParam ) {
 
-#if __GNUC__
-    char sz[ strlen( szHomeDirectory ) + 14 ];
-#elif HAVE_ALLOCA
-    char *sz = alloca( strlen( szHomeDirectory ) + 14 );
-#else
-    char sz[ 16384 ];
-#endif
     char szTemp[ 1024 ];
     FILE *pf;
     int i, cCache;
-    
-    sprintf( sz, "%s/.gnubgautorc", szHomeDirectory ); /* FIXME accept param */
+    char *szFile;
 
-    if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
-	return;
+    szParam = NextToken ( &szParam );
+    
+    if ( !szParam || ! *szParam ) {
+      /* no filename parameter given -- save to default location */
+      szFile = malloc ( strlen ( szHomeDirectory ) + 14 );
+      sprintf( szFile, "%s/.gnubgautorc", szHomeDirectory ); 
+    }
+    else 
+      szFile = strdup ( szParam );
+      
+
+    if( ! strcmp( szFile, "-" ) )
+      pf = stdout;
+    else 
+      pf = fopen( szFile, "w" );
+
+    if ( ! pf ) {
+      free ( szFile );
+      perror( szFile );
+      return;
     }
 
     errno = 0;
@@ -3363,7 +3372,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set analysis threshold verybad %.3f\n"
 	     "set analysis threshold verygood %.3f\n"
 	     "set analysis threshold verylucky %.3f\n"
-	     "set analysis threshold veryunlucky %.3f\n",
+	     "set analysis threshold veryunlucky %.4893f\n",
 	     arSkillLevel[ SKILL_BAD ],
 	     arSkillLevel[ SKILL_DOUBTFUL ],
 	     arSkillLevel[ SKILL_GOOD ],
@@ -3473,13 +3482,68 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set training anneal %f\n"
 	     "set training threshold %f\n",
 	     rAlpha, rAnneal, rThreshold );
+
+    /* save export settings */
+
+    fprintf ( pf, 
+              "set export include annotations %s\n"
+              "set export include analysis %s\n"
+              "set export include statistics %s\n"
+              "set export include legend %s\n",
+              exsExport.fIncludeAnnotation ? "yes" : "no",
+              exsExport.fIncludeAnalysis ? "yes" : "no",
+              exsExport.fIncludeStatistics ? "yes" : "no",
+              exsExport.fIncludeLegend ? "yes" : "no" );
+
+    fprintf ( pf, "set export show board %d\n", exsExport.fDisplayBoard );
+
+    if ( exsExport.fSide < 0 )
+      fprintf ( pf, "set export show player both\n" );
+    else
+      fprintf ( pf, "set export show player %d\n", exsExport.fSide );
+
+    fprintf ( pf, "set export move number %d\n", exsExport.nMoves );
+
+    for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+      if ( i == SKILL_NONE ) 
+        fprintf ( pf, "set export move unmarked %s\n", 
+                  exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+      else
+        fprintf ( pf, "set export move %s %s\n", 
+                  aszSkillType[ i ], 
+                  exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+    }
+
+    for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
+      if ( i == SKILL_NONE )
+        fprintf ( pf, "set export cube unmarked %s\n", 
+                  exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+      else
+        fprintf ( pf, "set export cube %s %s\n", 
+                  aszSkillType[ i ], 
+                  exsExport.afCubeDisplay[ i ] ? "yes" : "no" );
+    }
     
-    fclose( pf );
+    fprintf ( pf, "set export cube actual %s\n", 
+              exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ? "yes" : "no" );
+    fprintf ( pf, "set export cube missed %s\n", 
+              exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? "yes" : "no" );
+    fprintf ( pf, "set export cube close %s\n", 
+              exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
+
+    /* the end */
+
+    
+    if ( pf != stdout )
+      fclose( pf );
     
     if( errno )
-	perror( sz );
+      perror( szFile );
     else
-	outputl( "Settings saved." );
+      outputf( "Settings saved to %s.",
+               ( ! strcmp ( szFile, "-" ) ) ? "standard output stream" :
+               szFile );
+    free ( szFile );
 
 #if USE_GTK
     if( fX )
