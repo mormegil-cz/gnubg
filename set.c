@@ -1553,7 +1553,7 @@ extern void CommandSetRolloutTruncationPlies ( char *sz ) {
 
     prcSet->nTruncate = n;
 
-    if( !n )
+    if( ( n == 0 ) || !prcSet->fDoTruncate )
 	outputl( _("Rollouts will not be truncated.") );
     else if ( n == 1 )
       outputf( _("Rollouts will be truncated after %d ply.\n"), n );

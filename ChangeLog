@@ -1,3 +1,8 @@
+Sun Nov 24 20:32:00 2002 GMT  jsegrave <jsegrave@jes2.demon.nl>
+
+	* show.c - report no truncation when setting truncation point 
+	           in rollouts if the truncation enable flag is off
+	
 Sun Nov 24 13:56:29 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (GTKRecordShow): Improve GTK+ player record interface.
