@@ -7,11 +7,11 @@ config.log
 config.status
 erftest
 gnubg
-gnubg.bd
-gnubg_os.bd
+*.bd
 gnubg.wd
 gnubg.weights
 makebearoff
+makebearoff1
 makeweights
 stamp-*
 br1.c
