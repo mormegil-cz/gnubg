@@ -1,3 +1,32 @@
+Mon Feb  4 10:31:24 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (GTKAddGame, GTKRegenerateGames, GTKPopGame),
+	play.c (ApplyGameOver, ApplyMoveRecord, AddGame): Fix
+	semantics for ms.cGames (it now means the number of games scored,
+	not the number recorded).
+
+	* external.c (CommandExternal), play.c (ComputerTurn): Handle cube
+	decisions for external players.
+
+	* set.c (CommandSetRecord): New function.
+
+	* guile.c (GuileInitialise): Use the (guile-user) module.
+	[USE_GTK && HAVE_LIBGUILEGTK_1_2] Turn off GTK+ "standalone" mode.
+
+	* gnubg.c (LoadCommandsGuile): New function.  Handle Guile escapes
+	in "load commands" files correctly.
+
+	* gtkgame.c (gtk_option_menu_get_history): [!GTK_CHECK_VERSION(1,3,10)]
+	Provide function for GTK+ 1.2.x.
+
+	* gtkgame.c (CreateGameWindow): Use gtk_style_get_font instead of
+	dereferencing style struct, for compatibility with GTK+ 2.
+
+	* analysis.c (AnalyzeMove), gnubg.c (Command Rollout), gtkgame.c
+	(GTKStatPageWin, GTKStatPageHit, GTKStatPageBearoff, 
+	GTKStatPageClosedOut, GTKRolloutStatPage),
+	show.c (CommandShowMatchEquityTable): Remove unused variables.
+
 Sun Feb  3 21:39:34 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (printImage, printPoint, printHTMLBoard): new functions:

@@ -55,11 +55,6 @@ duplication of effort and to make sure our changes merge easily.
   gdb).  Make sure output to stderr is available when using GTK -- perror
   calls will have to be replaced, for instance.
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
-** Add a "set record" command; when "record" is off, no moves are
-  recorded (which implies that "save", "list" and the game list window
-  won't work, but it will save memory for situations like playing
-  10,000 games vs. pubeval).  Better would be to retain only the
-  current game of a money session.
 ** Add a command "show moves" which shows a list of legal moves, like hint
   does, but without evaluating them.
 ** Also "add move", to add a specific move to the list (e.g.
@@ -93,6 +88,23 @@ duplication of effort and to make sure our changes merge easily.
 ** Add Guile functions to access and modify the current game state.
 ** Add whatever Guile functions are necessary for implementing Cam Trenor's
   suggestion (generating random positions which are initial doubles). (gary)
+** What happens if a Guile function sets up a catch handler and executes a
+  gnubg command which evaluates another Guile function which throws an
+  exception?  We probably want to evaluate each Guile expression in its own
+  dynamic root.
+** There are several possible REPLs to choose from:
+*** top-repl from (ice-9 boot-9).  Unfortunately this does not handle X
+  events while in the REPL.
+*** top-repl with the readline ports in (ice-9 readline).  This does handle
+  X events, but its readline state and ours get completely confused.
+*** gtk-repl from (gtk repl).  This handles X events and works for a while,
+  but as soon as NextTurnNotify runs, gnubg and the REPL start fighting over
+  the terminal.
+*** guile-gui, which uses (gui event-loop) etc.  This sets up a REPL in its
+  own window which seems to work, but if it is called from a `:' escape
+  then the terminal is broken, because the call to Guile has not yet returned
+  and so GTKDisallowStdin() is still in effect.  If executed independently
+  (e.g. from a menu callback), then things generally seem to work.
 
 * TTY interface:
 ** Display the score and match length in ShowBoard().
@@ -152,11 +164,6 @@ duplication of effort and to make sure our changes merge easily.
   paned window (suggested by Jeremie Petit).
 ** Use different styles for moves in the game window, depending on the
   annotation.
-** Add the players' names in the drop-down menu in the game window.  (They
-  used to be there, but weren't updated if the names were changed.)  Note
-  that in the worst case, the option menu can be rebuilt by calling
-  gtk_option_set_menu() again; the old menu should automatically be 
-  unref()ed. (gary)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
 ** When a long string is displayed in the status bar, the main window
   grows to accomodate it -- not very pretty.  A Layout or Viewport widget
@@ -200,10 +207,6 @@ functions:
   give poor error messages.  szSetCommand is not always set correctly, which
   leads to other bad errors (e.g. "set player 0 cubedecision rollout").
 ** "help load sfdkljsdlf" gives a poor error message.
-** When using guile and guile isn't using readline, X events are not
-  handled while in the REPL.  When using guile and guile _is_ using
-  readline, its readline state and ours get completely confused...
-  see what the REPL in guile-gtk does.
 ** Check that calls to GTKUpdateAnnotations() are made where necessary
   (e.g. the "annotate" commands probably should, and "set output ...").
 ** The SGF loading (saving?) routines and CommandLoadCommands use
@@ -224,16 +227,8 @@ functions:
   starting position) if no game is being played.
 ** Problems importing JF positions (see David's e-mail).
    (Update: untested bugfix commited)
-** "show score" (and the Guile function current-score) should show the
-  number of games finished, but seem to report the total number of games
-  started, regardless of the current location within the match.  Actually,
-  the entire use of ms.cGames is questionable, since we might not have
-  every game in a match/session recorded.  This has ramifications in
-  gtkgame.c: SelectGame, GTKAddGame, GTKPopGame, etc. (gary)
 ** If "set turn" has been used during a game (so a player has two
   consecutive moves), then export to .mat format saves it incorrectly.
-** "set score" does not update the score in the GTK game window option menu.
-  (See item about adding player names to the menu above.) (gary)
 ** Analysis with rollouts crashes under GTK.  (There are problems with the
   rollout window -- do we really want a window in this case?)
 ** We only allow the player on roll to resign.  But the other player can
@@ -252,6 +247,7 @@ functions:
   point is allowing input, when it shouldn't be (input should be
   grabbed -- see HandleXAction and board_animate).
 ** Make sure that GTKSet() allows analysis after a move is imported. (gary)
+** Illegal input from an external player can lead to an infinite loop.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -280,8 +276,8 @@ functions:
   like "set board (0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0)".
 ** Handle SGF variations.
 ** Allow loading/saving of compressed games/matches with zlib.
-** Make the external player handle cube and resignation decisions, and allow
-  connection via TCP/IP.
+** Make the external player handle resignation decisions, and allow connection
+  via TCP/IP.
 ** Allow an option for illegal moves to be entered.
 ** Allow ~ and $ escapes in filenames (use wordexp()).
 ** Allow printing positions/games/matches/etc.  (More or less the same

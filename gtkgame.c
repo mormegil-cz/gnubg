@@ -1,7 +1,7 @@
 /*
  * gtkgame.c
  *
- * by Gary Wong <gtw@gnu.org>, 2000, 2001.
+ * by Gary Wong <gtw@gnu.org>, 2000, 2001, 2002.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -68,6 +68,24 @@ static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
 
     ps->font = pf;
     gdk_font_ref( pf );
+}
+
+static gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
+    
+    GtkWidget *active_widget;
+  
+    g_return_val_if_fail (GTK_IS_OPTION_MENU (option_menu), -1);
+
+    if (option_menu->menu) {
+	active_widget = gtk_menu_get_active (GTK_MENU (option_menu->menu));
+
+	if (active_widget)
+	    return g_list_index (GTK_MENU_SHELL (option_menu->menu)->children,
+				 active_widget);
+	else
+	    return -1;
+    } else
+	return -1;
 }
 #endif
 
@@ -144,6 +162,7 @@ typedef enum _gnubgcommand {
     CMD_SET_OUTPUT_MATCHPC,
     CMD_SET_OUTPUT_MWC,
     CMD_SET_OUTPUT_WINPC,
+    CMD_SET_RECORD,
     CMD_SET_RNG_ANSI,
     CMD_SET_RNG_BSD,
     CMD_SET_RNG_ISAAC,
@@ -195,6 +214,7 @@ static togglecommand atc[] = {
     { &fOutputMatchPC, CMD_SET_OUTPUT_MATCHPC },
     { &fOutputMWC, CMD_SET_OUTPUT_MWC },
     { &fOutputWinPC, CMD_SET_OUTPUT_WINPC },
+    { &fRecord, CMD_SET_RECORD },
     { NULL }
 };
 
@@ -265,6 +285,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set output matchpc",
     "set output mwc",
     "set output winpc",
+    "set record",
     "set rng ansi",
     "set rng bsd",
     "set rng isaac",
@@ -1030,9 +1051,9 @@ static void CreateGameWindow( void ) {
     psCurrent->fg[ GTK_STATE_SELECTED ] = psCurrent->fg[ GTK_STATE_NORMAL ] =
 	psGameList->bg[ GTK_STATE_NORMAL ];
 
-    nMaxWidth = gdk_string_width( psCurrent->font, "Move" );
+    nMaxWidth = gdk_string_width( gtk_style_get_font( psCurrent ), "Move" );
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 0, nMaxWidth );
-    nMaxWidth = gdk_string_width( psCurrent->font,
+    nMaxWidth = gdk_string_width( gtk_style_get_font( psCurrent ),
                                   " (set board AAAAAAAAAAAAAA)");
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 1, nMaxWidth );
     gtk_clist_set_column_width( GTK_CLIST( pwGameList ), 2, nMaxWidth );
@@ -1764,24 +1785,39 @@ static void SelectGame( GtkWidget *pw, void *p ) {
     ChangeGame( pl->p );    
 }
 
-extern void GTKAddGame( char *sz ) {
+static int fGameMenuUsed;
 
-    GtkWidget *pw = gtk_menu_item_new_with_label( sz ),
+extern void GTKAddGame( moverecord *pmr ) {
+
+    GtkWidget *pw,
 	*pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
+    GList *pl;
+    int c;
+    char sz[ 32 ];
     
-    if( !ms.cGames )
+    if( !fGameMenuUsed ) {
 	/* Delete the "(no game)" item. */
 	gtk_container_foreach( GTK_CONTAINER( pwMenu ),
 			       (GtkCallback) MenuDelete, pwMenu );
+	fGameMenuUsed = TRUE;
+    }
+    
+    sprintf( sz, "Game %d: %s %d, %s %d", pmr->g.i + 1, ap[ 0 ].szName,
+	     pmr->g.anScore[ 0 ], ap[ 1 ].szName, pmr->g.anScore[ 1 ] );
+    pw = gtk_menu_item_new_with_label( sz );
+	
+    pl = gtk_container_children( GTK_CONTAINER( pwMenu ) );
 
     gtk_signal_connect( GTK_OBJECT( pw ), "activate",
 			GTK_SIGNAL_FUNC( SelectGame ),
-			GINT_TO_POINTER( ms.cGames ) );
+			GINT_TO_POINTER( c = g_list_length( pl ) ) );
+
+    g_list_free( pl );
     
     gtk_widget_show( pw );
     gtk_menu_append( GTK_MENU( pwMenu ), pw );
     
-    GTKSetGame( ms.cGames );
+    GTKSetGame( c );
 }
 
 /* Delete i and subsequent games. */
@@ -1806,6 +1842,26 @@ extern void GTKPopGame( int i ) {
 extern void GTKSetGame( int i ) {
 
     gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), i );
+}
+
+/* Recompute the option menu in the game record window (used when the
+   player names change, or the score a game was started at is modified). */
+extern void GTKRegenerateGames( void ) {
+
+    list *pl, *plGame;
+    int i = gtk_option_menu_get_history( GTK_OPTION_MENU( pom ) );
+
+    if( !fGameMenuUsed )
+	return;
+    
+    GTKPopGame( 0 );
+
+    for( pl = lMatch.plNext; pl->p; pl = pl->plNext ) {
+	plGame = pl->p;
+	GTKAddGame( plGame->plNext->p );
+    }
+
+    GTKSetGame( i );
 }
 
 /* The annotation for one or more moves has been modified.  We refresh
@@ -2111,6 +2167,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SET_OUTPUT_MATCHPC, "<CheckItem>" },
 	{ "/_Settings/_Players...", NULL, SetPlayers, 0, NULL },
 	{ "/_Settings/Prompt...", NULL, NULL, 0, NULL },
+	{ "/_Settings/Record all games", NULL, Command, CMD_SET_RECORD,
+	  "<CheckItem>" },
 	{ "/_Settings/_Rollouts...", NULL, SetRollouts, 0, NULL },
 	{ "/_Settings/_Training", NULL, NULL, 0, "<Branch>" },
 	{ "/_Settings/_Training/_Learning rate...", NULL, SetAlpha, 0, NULL },
@@ -4399,7 +4457,6 @@ GTKStatPageWin ( const rolloutstat *prs, const int cGames ) {
 
   static char *aszRow[ 7 ];
   int i;
-  char sz[ 100 ];
   int anTotal[ 6 ];
 
   pw = gtk_vbox_new ( FALSE, 0 );
@@ -4482,7 +4539,6 @@ GTKStatPageHit ( const rolloutstat *prs, const int cGames ) {
 
   static char *aszRow[ 3 ];
   int i;
-  char sz[ 100 ];
   int anTotal[ 2 ];
 
   pw = gtk_vbox_new ( FALSE, 0 );
@@ -4652,8 +4708,6 @@ GTKStatPageBearoff ( const rolloutstat *prs, const int cGames ) {
 
   static char *aszRow[ 3 ];
   int i;
-  char sz[ 100 ];
-  int anTotal[ 2 ];
 
   pw = gtk_vbox_new ( FALSE, 0 );
 
@@ -4724,8 +4778,6 @@ GTKStatPageClosedOut ( const rolloutstat *prs, const int cGames ) {
 
   static char *aszRow[ 3 ];
   int i;
-  char sz[ 100 ];
-  int anTotal[ 2 ];
 
   pw = gtk_vbox_new ( FALSE, 0 );
 
@@ -4792,7 +4844,6 @@ GTKRolloutStatPage ( const rolloutstat *prs,
 
   /* GTK Widgets */
 
-  GtkWidget *pwNotebook;
   GtkWidget *pw;
   GtkWidget *pwWin, *pwCube, *pwHit, *pwBearoff, *pwClosedOut;
 
@@ -5194,7 +5245,7 @@ extern void GTKShowVersion( void ) {
 
     ps = gtk_rc_style_new();
     gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
-			gtk_label_new( "Copyright 1999, 2000, 2001 "
+			gtk_label_new( "Copyright 1999, 2000, 2001, 2002 "
 				       "Gary Wong" ), FALSE, FALSE, 4 );
 #if GTK_CHECK_VERSION(1,3,10)
     ps->font_desc = pango_font_description_new();
@@ -5372,6 +5423,8 @@ extern void GTKSet( void *p ) {
 				    (ap[ 0 ].szName) );
 	gtk_clist_set_column_title( GTK_CLIST( pwGameList ), 2,
 				    (ap[ 1 ].szName) );
+
+	GTKRegenerateGames();
     } else if( p == &ms.fTurn ) {
 	/* Handle the player on roll. */
 	fAutoCommand = TRUE;
