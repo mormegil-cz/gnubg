@@ -2777,11 +2777,13 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     // HTMLRollAlert ( pf, pms, pmr, szImageDir, szExtension );
 
-    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, 
-                            het, hecss );
+    if ( exsExport.fIncludeAnalysis ) {
+      HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, 
+                              het, hecss );
 
-    HTMLPrintMoveAnalysis ( pf, pms, pmr, szImageDir, szExtension, 
-                            het, hecss );
+      HTMLPrintMoveAnalysis ( pf, pms, pmr, szImageDir, szExtension, 
+                              het, hecss );
+    }
 
     break;
 
@@ -2804,8 +2806,9 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
                 ap[ pmr->d.fPlayer ].szName,
                 ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
 
-    HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, 
-                            het, hecss );
+    if ( exsExport.fIncludeAnalysis )
+      HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, 
+                              het, hecss );
 
     break;
 
@@ -3294,7 +3297,8 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
         
       }
 
-      HTMLPrintComment ( pf, pmr, hecss );
+      if ( exsExport.fIncludeAnnotation )
+        HTMLPrintComment ( pf, pmr, hecss );
 
       ApplyMoveRecord ( &msExport, plGame, pmr );
 
@@ -3670,7 +3674,8 @@ extern void CommandExportPositionHtml( char *sz ) {
                      exsExport.szHTMLPictureURL, exsExport.szHTMLExtension,
                      exsExport.het, exsExport.hecss );
 
-      HTMLPrintComment ( pf, pmr, exsExport.hecss );
+      if ( exsExport.fIncludeAnnotation )
+        HTMLPrintComment ( pf, pmr, exsExport.hecss );
 
     }
     

@@ -552,9 +552,11 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
 
     fputs ( "\n", pf );
 
-    TextPrintCubeAnalysis ( pf, pms, pmr );
-
-    TextPrintMoveAnalysis ( pf, pms, pmr );
+    if ( exsExport.fIncludeAnalysis ) {
+      TextPrintCubeAnalysis ( pf, pms, pmr );
+    
+      TextPrintMoveAnalysis ( pf, pms, pmr );
+    }
 
     break;
 
@@ -572,7 +574,8 @@ TextAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
                 ap[ pmr->d.fPlayer ].szName,
                 ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
     
-    TextPrintCubeAnalysis ( pf, pms, pmr );
+    if ( exsExport.fIncludeAnalysis )
+      TextPrintCubeAnalysis ( pf, pms, pmr );
 
     break;
 
@@ -853,7 +856,8 @@ static void ExportGameText ( FILE *pf, list *plGame,
         
       }
 
-      TextPrintComment ( pf, pmr );
+      if ( exsExport.fIncludeAnnotation )
+        TextPrintComment ( pf, pmr );
 
       ApplyMoveRecord ( &msExport, plGame, pmr );
 
@@ -1035,7 +1039,8 @@ extern void CommandExportPositionText( char *sz ) {
 
       TextAnalysis ( pf, &ms, pmr );
 
-      TextPrintComment ( pf, pmr );
+      if ( exsExport.fIncludeAnnotation )
+        TextPrintComment ( pf, pmr );
 
     }
     
