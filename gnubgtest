@@ -149,11 +149,15 @@ set evaluation chequerplay eval plies 1
 set evaluation cubedecision eval plies 1
 eval
 eval 4HPwATDgc/ABMA
+eq2mwc
+mwc2eq
 rollout
 rollout =cube
 help
 new match 1
 eval
+eq2mwc
+mwc2eq
 set rollout trials 8
 set rollout truncation 8
 set rollout cubeful no
@@ -205,7 +209,14 @@ mwc2eq
 list game
 list match
 list session
+export match mat $TEMP
+export match latex $TEMP
+export match pdf $TEMP
+export match postscript $TEMP
+export position eps $TEMP
+export position pos $TEMP
 EOF
+rm -f $TEMP
 echo '--- Miscellaneous test succeeds.'
 
 # Make sure the example game in the manual works.
