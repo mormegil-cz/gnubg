@@ -1,9 +1,11 @@
+# My libboard3d (gtk2) makefile
 
-CPPFLAGS= -g -fnative-struct -Wall -Werror -Os $(INCLUDE)
+CPPFLAGS  = $(COMPOPT) -Wall -Werror $(DEFS) $(INCLUDE)
+CC=gcc
 RM=del
 AR=ar cr
 RANLIB=ranlib
-CC=gcc
+DEFS    = -DHAVE_CONFIG_H
 
 INCLUDE= \
 	-I$(BASEDIR)/include/gtk-2.0 \
@@ -19,14 +21,14 @@ INCLUDE= \
 	-I$(GNUDIR) \
 	-I$(GNUDIR)/lib
 
-TARGET=board.a
+TARGET=libboard3d.a
 
 SOURCE=	drawboard3d misc3d texture3d font3d widget3d \
 	matrix model shadow mylist gtkcolour3d graph
 OBJECTS=$(patsubst %,%.o,$(SOURCE))
 
 all: $(TARGET)
-	@echo done
+	@echo $(TARGET) done
 
 $(TARGET): $(OBJECTS)
 	@echo creating lib
@@ -34,5 +36,6 @@ $(TARGET): $(OBJECTS)
 	$(RANLIB) $(TARGET)
 	
 clean:
-	$(RM) $(GNUDIR)\board3d\$(TARGET) $(GNUDIR)\board3d\*.o
-	@echo clean
+	$(RM) $(OBJECTS)
+	$(RM) $(TARGET)
+	@echo $(TARGET) clean

@@ -367,7 +367,6 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 	label = gtk_label_new(_("Preview:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 3, 4);
 
-	CreatePreview();
 	pwPreview = gtk_pixmap_new(xppm, NULL);
 	gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
 }
@@ -572,6 +571,9 @@ extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind)
 {
 	dialogParent = parent;
 	refWind = wind;
+	if (!xppm)
+		xppm = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
+	CreatePreview();
 }
 
 GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, int texture)
@@ -579,9 +581,6 @@ GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, int texture)
 	GtkWidget *pixmapwid, *button;
 	GdkPixmap *pixmap;
 	pixmap = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
-
-	if (!xppm)
-		xppm = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
 
 	button = gtk_button_new();
 	pixmapwid = gtk_pixmap_new(pixmap, NULL);

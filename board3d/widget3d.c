@@ -42,6 +42,14 @@
 
 #if HAVE_GTKGLEXT
 GdkGLConfig *glconfig;
+
+GdkGLConfig *getGlConfig()
+{
+	if (!glconfig)
+		glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE | GDK_GL_MODE_STENCIL);
+
+	return glconfig;
+}
 #endif
 
 guint idleId = 0;
@@ -214,7 +222,7 @@ extern GtkWidget* CreateGLWidget(BoardData* bd)
 	/* Drawing area for OpenGL */
 	drawing_area = gtk_drawing_area_new();
 	/* Set OpenGL-capability to the widget - no list sharing */
-	gtk_widget_set_gl_capability(drawing_area, glconfig, NULL, TRUE, GDK_GL_RGBA_TYPE);
+	gtk_widget_set_gl_capability(drawing_area, getGlConfig(), NULL, TRUE, GDK_GL_RGBA_TYPE);
 #else
 	drawing_area = gtk_gl_area_new_vargs(NULL, /* no sharing of lists */
 			 GDK_GL_RGBA, GDK_GL_DOUBLEBUFFER, GDK_GL_DEPTH_SIZE, 1, GDK_GL_STENCIL_SIZE, 1, GDK_GL_NONE);
@@ -256,9 +264,7 @@ void Init3d()
 
 	/* Check for opengl support */
 #if HAVE_GTKGLEXT
-	/* Configure OpenGL-capable visual */
-	glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE | GDK_GL_MODE_STENCIL);
-	if (!glconfig)
+	if (!getGlConfig())
 #else
 	if (!gdk_gl_query())
 #endif
