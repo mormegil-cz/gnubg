@@ -2577,7 +2577,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         float *ar = pmr->n.ml.amMoves[ i ].arEvalMove;
 
-        /*,A (Bpercentages */
+        /* percentages */
 
         if ( i == pmr->n.iMove )
           fprintf ( pf, "<tr %s>\n", 
