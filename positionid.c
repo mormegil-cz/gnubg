@@ -129,7 +129,7 @@ extern int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
     /* Check for a point with a negative number of chequers */
     for( i = 0; i < 25; i++ )
 	if( anBoard[ 0 ][ i ] < 0 ||
-	    anBoard[ i ][ i ] < 0 ) {
+	    anBoard[ 1 ][ i ] < 0 ) {
             errno = EINVAL;
             return -1;
 	}
