@@ -1,3 +1,19 @@
+Tue Oct 30 11:10:58 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.h: Change several members of evalcontext to bitfields.
+	
+	* eval.c (EvaluatePositionCache): Cache evaluations above 0-ply in
+	matches.
+	(LogCube): New function.
+
+	* gnubg.c (NextToken): Implement quoting rules.
+
+	* gtkgame.c: Change page_size parameter of gtk_adjustment_new() calls
+	to 0 where appropriate.
+
+	* play.c (ComputerTurn): Don't bother to consider resigning in
+	contact positions.
+
 Mon Oct 29 17:07:32 2001  Gary Wong  <gtw@research.att.com>
 
 	* database.c (CommandDatabaseImport): Use GDBM_WRCREAT.

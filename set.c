@@ -693,22 +693,26 @@ extern void
 CommandSetEvalCubeful( char *sz ) {
 
     char asz[ 2 ][ 128 ], szCommand[ 64 ];
+    int f = pecSet->fCubeful;
     
     sprintf( asz[ 0 ], "%s will use cubeful evaluation.\n", szSet );
     sprintf( asz[ 1 ], "%s will use cubeless evaluation.\n", szSet );
     sprintf( szCommand, "%sevaluation cubeful", szSetCommand );
-    SetToggle( szCommand, &pecSet->fCubeful, sz, asz[ 0 ], asz[ 1 ] );
+    SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
+    pecSet->fCubeful = f;
 }
 
 extern void CommandSetEvalDeterministic( char *sz ) {
 
     char asz[ 2 ][ 128 ], szCommand[ 64 ];
+    int f = pecSet->fDeterministic;
     
     sprintf( asz[ 0 ], "%s will use deterministic noise.\n", szSet );
     sprintf( asz[ 1 ], "%s will use pseudo-random noise.\n", szSet );
     sprintf( szCommand, "%sevaluation deterministic", szSetCommand );
-    SetToggle( szCommand, &pecSet->fDeterministic, sz, asz[ 0 ], asz[ 1 ] );
-
+    SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
+    pecSet->fDeterministic = f;
+    
     if( !pecSet->rNoise )
 	outputl( "(Note that this setting will have no effect unless you "
 		 "set noise to some non-zero value.)" );
@@ -738,7 +742,7 @@ extern void CommandSetEvalPlies( char *sz ) {
 
     int n = ParseNumber( &sz );
 
-    if( n < 0 ) {
+    if( n < 0 || n > 7 ) {
 	outputf( "You must specify a valid number of plies to look ahead -- "
 		"try `help set %sevaluation plies'.\n", szSetCommand );
 
@@ -1244,20 +1248,27 @@ extern void CommandSetRolloutTruncation( char *sz ) {
 }
 
 extern void CommandSetRolloutVarRedn( char *sz ) {
+
+    int f = prcSet->fVarRedn;
     
-    SetToggle( "rollout varredn", &prcSet->fVarRedn, sz,
+    SetToggle( "rollout varredn", &f, sz,
                "Will lookahead during rollouts to reduce variance.",
                "Will not use lookahead variance "
                "reduction during rollouts." );
+
+    prcSet->fVarRedn = f;
 }
 
     
 extern void 
 CommandSetRolloutCubeful( char *sz ) {
+
+    int f = prcSet->fCubeful;
     
-    SetToggle( "rollout cubeful", &prcSet->fCubeful, sz, 
+    SetToggle( "rollout cubeful", &f, sz, 
                "Cubeful rollout", "Cubeless rollout" );
 
+    prcSet->fCubeful = f;
 }
 
 

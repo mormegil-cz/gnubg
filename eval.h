@@ -74,23 +74,21 @@
 #define MAX_INCOMPLETE_MOVES 3875
 #define MAX_MOVES 3060
 
-#if __GNUC__ || HAVE_ALLOCA
-#define MAX_SEARCH_CANDIDATES MAX_MOVES
-#else
-#define MAX_SEARCH_CANDIDATES 64
-#endif
+/* If this is increased, the nSearchCandidates member in struct _evalcontext
+   must also be enlarged. */
+#define MAX_SEARCH_CANDIDATES 127
 
 typedef struct _evalcontext {
     /* FIXME expand this... e.g. different settings for different position
        classes */
-    int nPlies;
-    int nSearchCandidates;
+    unsigned int nSearchCandidates : 7;
+    unsigned int fCubeful : 1; /* cubeful evaluation */
+    unsigned int nPlies : 3;
+    unsigned int nReduced : 2; /* this will need to be expanded if we add
+				  support for nReduced != 3 */
+    unsigned int fDeterministic : 1;
     float rSearchTolerance;
-    int nReduced;
-    /* cubeful evaluation */
-    int fCubeful;
     float rNoise; /* standard deviation */
-    int fDeterministic;
 } evalcontext;
 
 
@@ -98,11 +96,11 @@ typedef struct _rolloutcontext {
 
   evalcontext aecCube[ 2 ], aecChequer [ 2 ]; /* evaluation parameters */
 
-  int fCubeful; /* Cubeful rollout */
-  int fVarRedn; /* variance reduction */
+  unsigned int fCubeful : 1; /* Cubeful rollout */
+  unsigned int fVarRedn : 1; /* variance reduction */
 
-  int nTruncate; /* truncation */
-  int nTrials; /* number of rollouts */
+  unsigned short nTruncate; /* truncation */
+  unsigned short nTrials; /* number of rollouts */
 
   rng rngRollout;
   int nSeed;
