@@ -150,7 +150,7 @@ static int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
 
     /* Check for both players on the bar against closed boards */
     for( i = 0; i < 6; i++ )
-        if( anBoard[ 0 ][ i ] || anBoard[ 1 ][ i ] )
+        if( anBoard[ 0 ][ i ] < 2 || anBoard[ 1 ][ i ] < 2 )
             return 0;
 
     if( !anBoard[ 0 ][ 24 ] || !anBoard[ 1 ][ 24 ] )
