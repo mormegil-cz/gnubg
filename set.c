@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <math.h>
@@ -1310,7 +1311,8 @@ CommandSetRolloutPlayer ( char *sz ) {
 extern void CommandSetScore( char *sz ) {
 
     int n0, n1;
-
+    movegameinfo *pmgi;
+    
     /* FIXME Allow specifying Crawford here, e.g. "set score crawford -3" or
        "set score 4C 3". */
 
@@ -1334,6 +1336,13 @@ extern void CommandSetScore( char *sz ) {
 
     ms.fCrawford = ( n0 == ms.nMatchTo - 1 ) != ( n1 == ms.nMatchTo - 1 );
     ms.fPostCrawford = ( n0 == ms.nMatchTo - 1 ) && ( n1 == ms.nMatchTo - 1 );
+
+    if( plGame && ( pmgi = plGame->plNext->p ) ) {
+	assert( pmgi->mt == MOVE_GAMEINFO );
+	pmgi->anScore[ 0 ] = ms.anScore[ 0 ];
+	pmgi->anScore[ 1 ] = ms.anScore[ 1 ];
+	pmgi->fCrawfordGame = ms.fCrawford;
+    }
     
     CommandShowScore( NULL );
 
@@ -1493,6 +1502,8 @@ extern void CommandSetJacoby( char *sz ) {
 
 extern void CommandSetCrawford( char *sz ) {
 
+  movegameinfo *pmgi;
+    
   if ( ms.nMatchTo > 0 ) {
     if ( ( ms.nMatchTo - ms.anScore[ 0 ] == 1 ) || 
 	 ( ms.nMatchTo - ms.anScore[ 1 ] == 1 ) ) {
@@ -1507,6 +1518,11 @@ extern void CommandSetCrawford( char *sz ) {
 
       if( ms.fCrawford )
 	  CancelCubeAction();
+      
+      if( plGame && ( pmgi = plGame->plNext->p ) ) {
+	  assert( pmgi->mt == MOVE_GAMEINFO );
+	  pmgi->fCrawfordGame = ms.fCrawford;
+      }
     } else {
       outputl( "Cannot set whether this is the Crawford game\n"
 	    "as none of the players are 1-away from winning." );
@@ -1520,6 +1536,8 @@ extern void CommandSetCrawford( char *sz ) {
 
 extern void CommandSetPostCrawford( char *sz ) {
 
+  movegameinfo *pmgi;
+  
   if ( ms.nMatchTo > 0 ) {
     if ( ( ms.nMatchTo - ms.anScore[ 0 ] == 1 ) || 
 	 ( ms.nMatchTo - ms.anScore[ 1 ] == 1 ) ) {
@@ -1533,6 +1551,11 @@ extern void CommandSetPostCrawford( char *sz ) {
 
       if( ms.fCrawford )
 	  CancelCubeAction();
+      
+      if( plGame && ( pmgi = plGame->plNext->p ) ) {
+	  assert( pmgi->mt == MOVE_GAMEINFO );
+	  pmgi->fCrawfordGame = ms.fCrawford;
+      }
     } else {
       outputl( "Cannot set whether this is post-Crawford play\n"
 	    "as none of the players are 1-away from winning." );
