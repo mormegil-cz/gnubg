@@ -13,6 +13,7 @@ touch lib/Makefile.in
 touch m4/Makefile.in
 touch met/Makefile.in
 touch po/Makefile.in
+touch scripts/Makefile.in
 touch sounds/Makefile.in
 touch textures/Makefile.in
 touch xpm/Makefile.in
