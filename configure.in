@@ -68,7 +68,7 @@ AC_DEFINE_DIR(PKGDATADIR, pkgdatadir)
 if test "$no_x" != "yes"; then
   conf_ext=ext
 fi
-AC_CONFIG_SUBDIRS(lib $conf_ext)
+AC_CONFIG_SUBDIRS(lib doc $conf_ext)
 
 AC_OUTPUT(Makefile)
 

@@ -1,7 +1,7 @@
 if NOX
-SUBDIRS = lib
+SUBDIRS = lib doc
 else
-SUBDIRS = lib ext
+SUBDIRS = lib doc ext
 endif
 
 COMMON_INCS = -I$(srcdir)/lib
@@ -40,8 +40,6 @@ makebearoff_DEPENDENCIES = lib/libevent.a
 makeweights_SOURCES = makeweights.c
 makeweights_LDADD = -Llib -levent
 makeweights_DEPENDENCIES = lib/libevent.a
-
-info_TEXINFOS = gnubg.texi
 
 EXTRA_DIST = userrng.c copying.awk
 

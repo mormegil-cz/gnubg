@@ -35,18 +35,18 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 (updated in @value{month-year}).
 
 @menu
-* Introduction::                  What GNU Backgammon does.
-* How to Play Backgammon::        The rules of the game.
-* Sample Game::                   An example of how to play against gnubg.
-* Invocation::                    Starting and leaving gnubg.
-* Basic Commands::                Fundamental operations in gnubg.
-* Playing::                       gnubg's game playing features.
-* Analysis::                      Using gnubg to evaluate positions.
-* Databases::                     Storing information about positions.
-* Training::                      Modifying gnubg's neural nets.
-* Frequently Asked Questions::    Brief answers to things you might ask.
-* Command Index::                 A summary of all the gnubg commands.
-* Concept Index::                 Index of concepts described in this manual.
+* Introduction::                What GNU Backgammon does.
+* How to Play Backgammon::      The rules of the game.
+* Sample Game::                 An example of how to play against gnubg.
+* Invocation::                  Starting and leaving gnubg.
+* Basic Commands::              Fundamental operations in gnubg.
+* Playing::                     gnubg's game playing features.
+* Analysis::                    Using gnubg to evaluate positions.
+* Databases::                   Storing information about positions.
+* Training::                    Modifying gnubg's neural nets.
+* Frequently Asked Questions::  Brief answers to things you might ask.
+* Command Index::               A summary of all the gnubg commands.
+* Concept Index::               Index of concepts described in this manual.
 @end menu
 
 @end ifnottex
@@ -92,14 +92,324 @@ FIXME update this section.
 @node How to Play Backgammon
 @chapter How to Play Backgammon
 @cindex backgammon
-@cindex rules of backgammon
 
-If you already know how to play backgammon, you can skip this chapter --- it
-describes the rules of the game only, and does not contain any information
-specific to GNU Backgammon.
+The rules presented in this chapter were written by Tom Keith for the
+@uref{http://www.bkgm.com/,Backgammon Galore web site}, and are included
+here with his permission.
 
-FIXME write this.  Perhaps Tom Keith will let us steal the rules from
-his web site.
+@menu
+* Rules of Backgammon::         How to play the board game.
+* Match Play::                  Special rules used in tournament matches.
+@end menu
+
+@node Rules of Backgammon
+@section Rules of Backgammon
+@cindex backgammon rules
+@subsection Setup
+@cindex board setup
+
+Backgammon is a game for two players, played on a board consisting of 
+twenty-four narrow triangles called @cindex points
+@dfn{points}. 
+The triangles alternate in color and are grouped into four quadrants of 
+six triangles each. 
+The quadrants are referred to as a player's
+@cindex home board
+@dfn{home board} and
+@cindex outer board
+@dfn{outer board}, and the opponent's home board and outer board. 
+The home and outer boards are separated from each other by a ridge down 
+the center of the board called the
+@cindex bar
+@dfn{bar}. 
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig1} @tab @strong{Figure 1.}  A board with the checkers
+in their initial position.
+
+An alternate arrangement is the reverse of the one shown here, with the
+home board on the left and the outer board on the right.
+@end multitable
+@end ifnottex
+@iftex
+@image{rulfig1}
+@quotation
+@strong{Figure 1.}  A board with the checkers
+in their initial position.
+
+An alternate arrangement is the reverse of the one shown here, with the
+home board on the left and the outer board on the right.
+@end quotation
+@end iftex
+
+The points are numbered for either player starting in that player's home 
+board. 
+The outermost point is the twenty-four point, which is also the opponent's 
+one point.  
+Each player has fifteen checkers of his own color. 
+The initial arrangement of checkers is: 
+two on each player's twenty-four point, five on each player's thirteen point, 
+three on each player's eight point, and five on each player's six point.
+
+@cindex doubling cube
+Both players have their own pair of dice and a dice cup used for shaking.  
+A @dfn{doubling cube}, with the numerals 2, 4, 8, 16, 32, and 64 on its 
+faces, is used to keep track of the current stake of the game.
+
+@subsection Object of the Game
+@cindex object of the game
+
+The object of the game is for a player to move all of his checkers into 
+his own home board and then bear them off. 
+The first player to bear off all of his checkers wins the game.
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig2} @tab @strong{Figure 2.}  Direction of movement of
+White's checkers.  Red's checkers move in the opposite direction.
+@end multitable
+@end ifnottex
+@iftex
+@image{rulfig2}
+@quotation
+@strong{Figure 2.}  Direction of movement of White's checkers.  Red's
+checkers move in the opposite direction.@end quotation
+@end iftex
+
+@subsection Movement of the Checkers
+@cindex moving chequers
+
+To start the game, each player throws a single die.  
+This determines both the player to go first and the numbers to be played. 
+If equal numbers come up, then both players roll again until they roll 
+different numbers.  
+The player throwing the higher number now moves his checkers according to 
+the numbers showing on both dice.  
+After the first roll, the players throw two dice and alternate turns.
+
+@cindex pips
+The roll of the dice indicates how many points, or @dfn{pips}, 
+the player is to move his checkers.  
+The checkers are always moved forward, to a lower-numbered point.
+The following rules apply:
+
+@enumerate
+@item
+@cindex open point
+A checker may be moved only to an @dfn{open point}, one that is not 
+occupied by two or more opposing checkers.
+
+@item
+The numbers on the two dice constitute separate moves. 
+For example, if a player rolls 5 and 3, he may move one checker five 
+spaces to an open point and another checker three spaces to an open 
+point, or he may move the one checker a total of eight spaces to an 
+open point, but only if the intermediate point (either three or five 
+spaces from the starting point) is also open.
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig3} @tab @strong{Figure 3.}  Two ways that White can
+play a roll of 53.
+@end multitable
+@end ifnottex
+@iftex
+@image{rulfig3}
+@quotation
+@strong{Figure 3.}  Two ways that White can
+play a roll of 53.
+@end quotation
+@end iftex
+
+@item
+A player who rolls doubles plays the numbers shown on the dice twice.  
+A roll of 6 and 6 means that the player has four sixes to use, and he 
+may move any combination of checkers he feels appropriate to complete 
+this requirement.
+
+@item
+A player must use both numbers of a roll if this is legally possible 
+(or all four numbers of a double). 
+When only one number can be played, the player must play that number. 
+Or if either number can be played but not both, the player must play 
+the larger one. 
+When neither number can be used, the player loses his turn. 
+In the case of doubles, when all four numbers cannot be played, the 
+player must play as many numbers as he can.
+@end enumerate
+
+@subsection Hitting and Entering
+@cindex hitting
+@cindex entering
+
+A point occupied by a single checker of either color is called a
+@cindex blot
+@dfn{blot}.  If an opposing checker lands on a blot, the blot is @dfn{hit}
+and placed on the bar.
+
+Any time a player has one or more checkers on the bar, his first obligation 
+is to
+@cindex enter
+@dfn{enter} those checker(s) into the opposing home board. 
+A checker is entered by moving it to an open point corresponding to one of 
+the numbers on the rolled dice.
+
+For example, if a player rolls 4 and 6, he may enter a checker 
+onto either the opponent's four point or six point, so long as the 
+prospective point is not occupied by two or more of the opponent's checkers. 
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig4} @tab @strong{Figure 4.}  If White rolls 64 with a
+checker on the bar, he must enter the checker onto Red's four point 
+since Red's six point is not open.
+@end multitable
+@end ifnottex
+@iftex
+@image{rulfig4}
+@quotation
+@strong{Figure 4.}  If White rolls 64 with a
+checker on the bar, he must enter the checker onto Red's four point 
+since Red's six point is not open.
+@end quotation
+@end iftex
+
+If neither of the points is open, the player loses his turn.  
+If a player is able to enter some but not all of his checkers, he must enter 
+as many as he can and then forfeit the remainder of his turn.
+
+After the last of a player's checkers has been entered, any unused numbers 
+on the dice must be played, by moving either the checker that was entered 
+or a different checker.
+
+@subsection Bearing Off
+@cindex bearing off
+
+Once a player has moved all of his fifteen checkers into his home board, 
+he may commence @dfn{bearing off}. 
+A player bears off a checker by rolling a number that corresponds to the 
+point on which the checker resides, and then removing that checker from 
+the board. 
+Thus, rolling a 6 permits the player to remove a checker from the six point.
+
+If there is no checker on the point indicated by the roll, the player 
+must make a legal move using a checker on a higher-numbered point. 
+If there are no checkers on higher-numbered points, the player is 
+permitted (and required) to remove a checker from the highest point on 
+which one of his checkers resides. 
+A player is under no obligation to bear off if he can make an otherwise 
+legal move.
+
+@ifnottex
+@multitable @columnfractions 0.67 0.33
+@item @image{rulfig5} @tab @strong{Figure 5.}  White rolls 64 and bears
+off two checkers.
+@end multitable
+@end ifnottex
+@iftex
+@image{rulfig5}
+@quotation
+@strong{Figure 5.}  White rolls 64 and bears off two checkers.
+@end quotation
+@end iftex
+
+A player must have all of his active checkers in his home board in order 
+to bear off. 
+If a checker is hit during the bear-off process, the player must bring 
+that checker back to his home board before continuing to bear off. 
+The first player to bear off all fifteen checkers wins the game.
+
+@subsection Doubling
+@cindex doubling
+
+Backgammon is played for an agreed stake per point. 
+Each game starts at one point. 
+During the course of the game, a player who feels he has a sufficient 
+advantage may propose doubling the stakes. 
+He may do this only at the start of his own turn and before he has rolled 
+the dice.
+
+A player who is offered a double may @dfn{refuse}, in which case he 
+concedes the game and pays one point. 
+Otherwise, he must @dfn{accept} the double and play on for the new higher 
+stakes.  
+A player who accepts a double becomes the
+@cindex cube owner
+@dfn{owner of the cube} and only he may make the next double.  
+
+Subsequent doubles in the same game are called @dfn{redoubles}. 
+If a player refuses a redouble, he must pay the number of points that were 
+at stake prior to the redouble.  
+Otherwise, he becomes the new owner of the cube and the game continues
+at twice the previous stakes.  
+There is no limit to the number of redoubles in a game.
+
+@subsection Gammons and Backgammons
+@cindex gammons
+@cindex backgammons
+
+At the end of the game, if the losing player has borne off at least one 
+checker, he loses only the value showing on the doubling cube (one point, 
+if there have been no doubles).  
+However, if the loser has @emph{not} borne off any of his checkers, 
+he is @dfn{gammoned} and loses @emph{twice} the value of the doubling cube.  
+Or, worse, if the loser has not borne off any of his checkers and still has 
+a checker on the bar or in the winner's home board, he is @dfn{backgammoned}
+and loses @emph{three times} the value of the doubling cube.
+
+@subsection Optional Rules
+@cindex optional rules
+@cindex rules, optional
+
+The following optional rules are in widespread use.  
+
+@table @dfn
+@item Automatic doubles
+If identical numbers are thrown on the first roll, the stakes are doubled.
+The doubling cube is turned to 2 and remains in the middle. 
+Players usually agree to limit the number of automatic doubles to one per game.
+
+@item Beavers
+When a player is doubled, he may immediately redouble (beaver) while 
+retaining possession of the cube.  
+The original doubler has the option of accepting or refusing as with a
+normal double.
+
+@item The Jacoby Rule
+Gammons and backgammons count only as a single game if neither player has
+offered a double during the course of the game.
+This rule speeds up play by eliminating situations where a player avoids 
+doubling so he can play on for a gammon.
+@end table
+
+@subsection Irregularities
+@cindex irregularities
+
+@enumerate
+@item
+The dice must be rolled together and land flat on the surface of the 
+right-hand section of the board. 
+The player must reroll both dice if a die lands outside the right-hand 
+board, or lands on a checker, or does not land flat.
+
+@item
+A turn is completed when the player picks up his dice. 
+If the play is incomplete or otherwise illegal, the opponent has the option 
+of accepting the play as made or of requiring the player to make a legal play. 
+A play is deemed to have been accepted as made when the opponent rolls his 
+dice or offers a double to start his own turn.
+
+@item
+If a player rolls before his opponent has completed his turn by picking up 
+the dice, the player's roll is voided. 
+This rule is generally waived any time a play is forced or when there is no 
+further contact between the opposing forces.
+@end enumerate
+
+@node Match Play
+@section Match Play
+@cindex match rules
 
 @node Sample Game
 @chapter Sample Game
@@ -554,12 +864,12 @@ under.  FIXME summarise GPL.
 FIXME introduction
 
 @menu
-* The Game::                      Commands used during the game.
-* Dice::                          Controlling dice rolls.
-* Computer Player::               Having gnubg make moves.
-* Matches and Sessions::          Playing series of games.
-* Cube::                          Using the doubling cube.
-* Recording::                     Saving games and matches.
+* The Game::                    Commands used during the game.
+* Dice::                        Controlling dice rolls.
+* Computer Player::             Having gnubg make moves.
+* Matches and Sessions::        Playing series of games.
+* Cube::                        Using the doubling cube.
+* Recording::                   Saving games and matches.
 @end menu
 
 @node The Game
@@ -951,11 +1261,11 @@ FIXME
 @cindex FAQ
 
 @menu
-* Where can I get GNU Backgammon?::
-* How do I play a game?::
-* gnubg.bd errors::
-* gnubg.weights errors::
-* Black and white board window::
+* Where can I get GNU Backgammon?::  
+* How do I play a game?::       
+* gnubg.bd errors::             
+* gnubg.weights errors::        
+* Black and white board window::  
 @end menu
 
 @node Where can I get GNU Backgammon?

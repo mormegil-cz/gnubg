@@ -3099,7 +3099,7 @@ EOF
 if test "$no_x" != "yes"; then
   conf_ext=ext
 fi
-subdirs="lib $conf_ext"
+subdirs="lib doc $conf_ext"
 
 
 trap '' 1 2 15
@@ -3503,7 +3503,7 @@ if test "$no_recursion" != yes; then
     esac
   done
 
-  for ac_config_dir in lib $conf_ext; do
+  for ac_config_dir in lib doc $conf_ext; do
 
     # Do not complain, so a configure script can configure whichever
     # parts of a large source tree are present.
