@@ -1,3 +1,7 @@
+Wed Mar 19 11:17:21 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.h: [!WIN32] Prototype GTKWinCopy().
+
 Fri Mar 14 21:28:43 2003  Oystein Johansen <oystein@gnubg.org>
 
         * gnubg.c: bugfix in outputv() and outputerrv()
