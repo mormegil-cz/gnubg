@@ -1336,6 +1336,8 @@ extern void GTKHint( movelist *pml ) {
     HintSelect( pwMoves, 0, 0, NULL, &hd );
     gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
 			GTK_SIGNAL_FUNC( HintSelect ), &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "unselect-row",
+			GTK_SIGNAL_FUNC( HintSelect ), &hd );
     
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
