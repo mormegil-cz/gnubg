@@ -47,7 +47,16 @@ extern "C" {
 
 extern CONST struct GammonProbs*
 getBearoffGammonProbs(int b[6]);
-  
+
+extern CONST long*
+getRaceBGprobs(int board[6]);
+
+#if defined( __cplusplus )
+static unsigned int const RBG_NPROBS = 5;
+#else
+#define RBG_NPROBS 5
+#endif
+
 #if defined( __cplusplus )
 }
 #endif

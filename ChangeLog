@@ -1,3 +1,8 @@
+Tue Nov 12 15:37:34 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* bearoffgammon.c (getRaceBGprobs): added exact BG race probs for
+	6 checkers or less inside opponent home.
+
 Mon Nov 11 10:18:55 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* eval.c: Use move filters instead of previous hacks.

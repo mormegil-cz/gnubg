@@ -2550,6 +2550,79 @@ NNEvalType NNevalAction(void)
   return NNEVAL_FROMBASE;
 }
 
+static float
+raceBGprob(int anBoard[2][25], int side)
+{
+  int totMenHome = 0;
+  int totPipsOp = 0;
+  int i;
+  int dummy[2][25];
+  
+  for(i = 0; i < 6; ++i) {
+    totMenHome += anBoard[side][i];
+  }
+      
+  for(i = 22; i >= 18; --i) {
+    totPipsOp += anBoard[1-side][i] * (i-17);
+  }
+
+  if(! ((totMenHome + 3) / 4 - (side == 1 ? 1 : 0) <= (totPipsOp + 2) / 3) ) {
+    return 0.0;
+  }
+
+	
+  for(i = 0; i < 25; ++i) {
+    dummy[side][i] = anBoard[side][i];
+  }
+
+  for(i = 0; i < 6; ++i) {
+    dummy[1-side][i] = anBoard[1-side][18+i];
+  }
+
+  for(i = 6; i < 25; ++i) {
+    dummy[1-side][i] = 0;
+  }
+
+  {
+    const long* bgp = getRaceBGprobs(dummy[1-side]);
+    if( bgp ) {
+      int k = PositionBearoff(anBoard[side], 6);
+      int aProb[32];
+
+      float p = 0.0;
+      unsigned int j;
+      unsigned long scale = 1;
+
+      getBearoffProbs(k, aProb);
+
+      for(j = 0; j < RBG_NPROBS; j++) {
+	unsigned long sum = 0;
+	scale *= 36;
+	for(i = j+1+side; i < 32; ++i) {
+	  sum += aProb[i];
+	}
+	p += ((float)bgp[j])/scale * sum;
+      }
+
+      p /= 65535.0;
+	
+      return side == 0 ? p : 1.0 - p;
+	  
+    } else {
+      float p[5];
+      
+      if( PositionBearoff( dummy[0], 6 ) > 923 ||
+	  PositionBearoff( dummy[1], 6 ) > 923 ) {
+	EvalBearoff1(dummy, p);
+      } else {
+	EvalBearoff2(dummy, p);
+      }
+
+      return p[0];
+    }
+  }
+}  
+
 static void
 EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
 {
@@ -2616,56 +2689,22 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
       
       int side = (any & BG_POSSIBLE) ? 1 : 0;
 
-      /* total number of men in side home */
-      int totMenHome = 0;
+      float pr = raceBGprob(anBoard, side);
 
-      /* total number of pips needed by opponent to get all his men out of */
-      /* side home board.                                                  */
-      int totPipsOp = 0;
-
-      for(i = 0; i < 6; ++i) {
-	totMenHome += anBoard[side][i];
-      }
-      
-      for(i = 23; i >= 18; --i) {
-	totPipsOp += anBoard[1-side][i] * (i-17);
-      }
-
-      /* if you can't get a backgammon rolling double 6's while your op */
-      /* rolls 1-2, there is no chance, is there?                       */
-      
-      if( (totMenHome + 3) / 4 - (side == 1 ? 1 : 0) <= (totPipsOp + 2) / 3 ) {
-	/* a dummy board where opponent men as positioned for bearoff. The */
-	/* win percentage for that board is exactly the BG rate.           */
-	int dummy[2][25];
-	
-	float p[5];
-	
-	for(i = 0; i < 25; ++i) {
-	  dummy[side][i] = anBoard[side][i];
-	}
-
-	for(i = 0; i < 6; ++i) {
-	  dummy[1-side][i] = anBoard[1-side][18+i];
-	}
-	for(i = 6; i < 25; ++i) {
-	  dummy[1-side][i] = 0;
-	}
-
-	if( pBearoff2 && PositionBearoff( dummy[ 0 ], 6 ) < 924 &&
-	    PositionBearoff( dummy[ 1 ], 6 ) < 924 )
-	    EvalBearoff2( dummy, p );
-	else if( pBearoff1 )
-	    EvalBearoff1( dummy, p );
-	else
-	    EvalRace( dummy, p );
-
+      if( pr > 0.0 ) {
 	if( side == 1 ) {
-	  arOutput[OUTPUT_WINBACKGAMMON] = p[0];
+	  arOutput[OUTPUT_WINBACKGAMMON] = pr;
+
+	  if( arOutput[OUTPUT_WINGAMMON] < arOutput[OUTPUT_WINBACKGAMMON] ) {
+	    arOutput[OUTPUT_WINGAMMON] = arOutput[OUTPUT_WINBACKGAMMON];
+	  }
 	} else {
-	  arOutput[OUTPUT_LOSEBACKGAMMON] = 1 - p[0];
+	  arOutput[OUTPUT_LOSEBACKGAMMON] = 1 - pr;
+
+	  if(arOutput[OUTPUT_LOSEGAMMON] < arOutput[OUTPUT_LOSEBACKGAMMON]) {
+	    arOutput[OUTPUT_LOSEGAMMON] = arOutput[OUTPUT_LOSEBACKGAMMON];
+	  }
 	}
-  
       } else {
 	if( side == 1 ) {
 	  arOutput[OUTPUT_WINBACKGAMMON] = 0.0;
