@@ -1,3 +1,7 @@
+Wed Apr  7 10:46:00 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* configure.in, sound.c, config.h.in: check for _af_ulaw2linear
+
 Mon Apr  5 08:24:52 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: add gnubg.sql to DATA

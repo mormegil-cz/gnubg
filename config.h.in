@@ -21,6 +21,9 @@
 /* Define to 1 if you have the `acosf' function. */
 #undef HAVE_ACOSF
 
+/* Define if your version of audiofile has _af_u2law2linear */
+#undef HAVE_AF_ULAW2LINEAR
+
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
