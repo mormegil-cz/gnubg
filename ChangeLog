@@ -1,3 +1,7 @@
+Thu Mar 21 20:45:19 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkprefs.c, gtkboard.[ch]: Make hinges optional
+
 Thu Mar 21 13:57:11 2002  Gary Wong  <gtw@research.att.com>
 
 	* erf.c (erf): Use Thomas Meyer's implementation of the Chebyshev

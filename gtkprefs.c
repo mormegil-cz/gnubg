@@ -48,9 +48,9 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
-    *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu;
+    *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges;
 static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
-    fHigherDieFirst, fWood;
+    fHigherDieFirst, fWood, fHinges;
 static animation anim;
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
@@ -221,6 +221,10 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 			gtk_color_selection_new(), FALSE, FALSE, 0 );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ 1 ] ),
 				   ar );
+
+    pwHinges = gtk_check_button_new_with_label( "Show hinges" );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), fHinges );
+    gtk_box_pack_start( GTK_BOX( pw ), pwHinges, FALSE, FALSE, 0 );
 
     gtk_signal_connect( GTK_OBJECT( pwWood ), "toggled",
 			GTK_SIGNAL_FUNC( ToggleWood ), bd );
@@ -421,6 +425,8 @@ static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
 	GTK_TOGGLE_BUTTON( pwBeepIllegal ) );
     fHigherDieFirst = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwHigherDieFirst ) );
+    fHinges = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwHinges ) );
     fWood = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwWood ) );
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ) ) )
@@ -489,6 +495,7 @@ static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
     bd->higher_die_first = fHigherDieFirst;
     bd->wood = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
 	pwWoodType ) ) : WOOD_PAINT;
+    bd->hinges = fHinges;
     bd->animate_computer_moves = anim;
     
     /* This is a horrible hack, but we need translucency set to the new
@@ -532,6 +539,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fBeepIllegal = bd->beep_illegal;
     fHigherDieFirst = bd->higher_die_first;
     fWood = bd->wood;
+    fHinges = bd->hinges;
     anim = bd->animate_computer_moves;
     
     pwDialog = CreateDialog( "GNU Backgammon - Appearance", TRUE,
@@ -738,6 +746,8 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	bd->higher_die_first = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "wood", c ) )
 	fValueError = SetWood( szValue, &bd->wood );
+    else if( !g_strncasecmp( szParam, "hinges", c ) )
+	bd->hinges = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "animate", c ) ) {
 	switch( toupper( *szValue ) ) {
 	case 'B':
@@ -812,7 +822,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     sprintf( sz, "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
-	     "beep=%c highdie=%c wood=%s "
+	     "beep=%c highdie=%c wood=%s hinges=%c "
 	     "animate=%s speed=%d light=%0.0f;%0.0f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
@@ -826,6 +836,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
 	     bd->beep_illegal ? 'y' : 'n', bd->higher_die_first ? 'y' : 'n',
 	     aszWoodName[ bd->wood ],
+	     bd->hinges ? 'y' : 'n',
 	     aszAnim[ bd->animate_computer_moves ], bd->animate_speed,
 	     rAzimuth, rElevation, (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 

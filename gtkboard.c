@@ -3244,7 +3244,8 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     else
 	board_draw_frame_wood( bd, gc );
 
-    board_draw_hinges( bd, gc );
+    if( bd->hinges )
+        board_draw_hinges( bd, gc );
     
     if( bd->labels )
 	board_draw_labels( bd );
