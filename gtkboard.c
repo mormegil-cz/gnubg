@@ -1510,7 +1510,7 @@ void board_quick_edit(GtkWidget *board, BoardData *bd, int x, int y, int draggin
 	updateBoard(board, bd);
 }
 
-int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+static int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
   movelist ml;
 
@@ -1527,7 +1527,7 @@ int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
 }
 
-int GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
   movelist ml;
   int i, iMove, cMoves;
@@ -1584,6 +1584,17 @@ UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
 	{
+		if (rdAppearance.quickDraw)
+		{
+			int k;
+			for ( i = 0; i < j; ++i )
+			{
+				int min = MIN(abs(old_points[an[i]]), abs(bd->points[an[i]]));
+				int max = MAX(abs(old_points[an[i]]), abs(bd->points[an[i]]));
+				for (k = min + 1; k <= max; k++)
+					RestrictiveDrawPiece(bd, an[i], k);
+			}
+		}
 		updatePieceOccPos(bd);
 		gtk_widget_queue_draw(bd->drawing_area3d);
 	}
@@ -1640,6 +1651,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 		else if (bd->drag_point == POINT_RIGHT && bd->turn != 1)
 			UserCommand( "set turn 1" );
 
+		bd->drag_point = -1;
 		GTKSetDice( NULL, 0, NULL );
 		return TRUE;
 	}
@@ -1783,7 +1795,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 		}
 
 		/* if nDragPoint is 26 or 27 (i.e. off), bear off as many chequers as possible. */
-        if (!editing && bd->drag_point == (53 - bd->turn) / 2)
+		if (!editing && bd->drag_point == (53 - bd->turn) / 2)
 		{
           /* user clicked on bear-off tray: try to bear-off chequers or
              show forced move */
@@ -1810,16 +1822,13 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 				if (memcmp(old_points, bd->points, sizeof old_points))
 					playSound( SOUND_CHEQUER );
 			}
-#if USE_BOARD3D
-			RestrictiveRedraw();
-#endif
 			return TRUE;
 		}
 
 		/* How many chequers on clicked point */
 		numOnPoint = bd->points[bd->drag_point];
 
-	    /* Click on an empty point or opponent blot; try to make the point. */
+		/* Click on an empty point or opponent blot; try to make the point. */
 		if (!editing && bd->drag_point <= 24 &&
 			(numOnPoint == 0 || numOnPoint == -bd->turn))
 		{
@@ -1866,7 +1875,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 				n[ 0 ] = bd->drag_point + bd->diceRoll[ 0 ] * bd->drag_colour;
 				n[ 1 ] = bd->drag_point + bd->diceRoll[ 1 ] * bd->drag_colour;
 			}
-			
+
 			if (n[ 0 ] >= 0 && n[ 0 ] <= 25 && n[ 1 ] >= 0 && n[ 1 ] <= 25 &&
 				bd->points[ n[ 0 ] ] * bd->drag_colour > 0 &&
 				bd->points[ n[ 1 ] ] * bd->drag_colour > 0 )
@@ -1888,8 +1897,21 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 #if USE_BOARD3D
 					if (rdAppearance.fDisplayType == DT_3D)
 					{
+						if (rdAppearance.quickDraw)
+						{	/* Redraw 2 start positions, end position and perhaps bar */
+							RestrictiveDrawPiece(bd, n[0], abs(bd->points[n[0]]) + 1);
+							if (n[0] == n[1])
+								RestrictiveDrawPiece(bd, n[0], abs(bd->points[n[0]]) + 2);
+							else
+								RestrictiveDrawPiece(bd, n[1], abs(bd->points[n[1]]) + 1);
+							
+							RestrictiveDrawPiece(bd, bd->drag_point, abs(bd->points[bd->drag_point]));
+							RestrictiveDrawPiece(bd, bd->drag_point, abs(bd->points[bd->drag_point]) - 1);
+							
+							if (old_points[bd->drag_point])
+								RestrictiveDrawPiece(bd, bar, abs(bd->points[bar]));
+						}
 						updatePieceOccPos(bd);
-						RestrictiveRedraw();
 						gtk_widget_queue_draw(board);
 					}
 					else

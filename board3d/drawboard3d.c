@@ -3595,6 +3595,15 @@ void RestrictiveDrawMoveIndicator(BoardData* bd)
 	RestrictiveDrawFrame(pos, ARROW_SIZE, ARROW_SIZE, LIFT_OFF);
 }
 
+void RestrictiveDrawFlag(BoardData* bd)
+{
+	float v[4];
+	getFlagPos(bd, v);
+	v[0] += FLAG_WIDTH / 2.0f - FLAGPOLE_WIDTH;
+	v[2] -= FLAG_WIDTH / 2.0f;
+	RestrictiveDrawFrame(v, FLAG_WIDTH, FLAGPOLE_HEIGHT, FLAG_WIDTH);
+}
+
 void drawBoard(BoardData* bd)
 {
 	drawTable(bd);

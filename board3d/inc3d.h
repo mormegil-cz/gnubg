@@ -123,6 +123,7 @@ void RestrictiveRender(BoardData *bd);
 void RestrictiveDrawFrame(float pos[3], float width, float height, float depth);
 void RestrictiveDraw(ClipBox* pCb, float pos[3], float width, float height, float depth);
 void EnlargeCurrentToBox(ClipBox* pOtherCb);
+void RestrictiveDrawFlag(BoardData* bd);
 
 extern void getPiecePos(int point, int pos, int swap, float v[3]);
 
