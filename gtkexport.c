@@ -39,6 +39,42 @@
 #include "gtkexport.h"
 #include "i18n.h"
 
+
+static char *aszInclude[] = {
+    N_("Annotations"), 
+    N_("Analysis"), 
+    N_("Statistics"), 
+    N_("Legend"),
+    N_("Match Information") };
+
+#define NUM_INCLUDE (sizeof(aszInclude)/sizeof(aszInclude[0]))
+
+static char *aszMovesDisplay[] = {
+    N_("Show for moves marked 'very bad'"),
+    N_("Show for moves marked 'bad'"),
+    N_("Show for moves marked 'doubtful'"),
+    N_("Show for unmarked moves"),
+/*     N_("Show for moves marked 'interesting'"), */
+/*     N_("Show for moves marked 'good'"), */
+/*     N_("Show for moves marked 'very good'")  */
+  };
+
+#define NUM_MOVES (sizeof(aszMovesDisplay)/sizeof(aszMovesDisplay[0]))
+
+static char *aszCubeDisplay[] = {
+    N_("Show for cube decisions marked 'very bad'"),
+    N_("Show for cube decisions marked 'bad'"),
+    N_("Show for cube decisions marked 'doubtful'"),
+    N_("Show for unmarked cube decisions"),
+/*     N_("Show for cube decisions marked 'interesting'"), */
+/*     N_("Show for cube decisions marked 'good'"), */
+/*     N_("Show for cube decisions marked 'very good'"), */
+    N_("Show for actual cube decisions"),
+    N_("Show for missed doubles"),
+    N_("Show for close cube decisions") };
+
+#define NUM_CUBES (sizeof(aszCubeDisplay)/sizeof(aszCubeDisplay[0]))
+
 typedef struct _exportwidget {
 
   /* export settings */
@@ -47,7 +83,7 @@ typedef struct _exportwidget {
 
   /* include */
 
-  GtkWidget *apwInclude[ 5 ];
+  GtkWidget *apwInclude[ NUM_INCLUDE ];
 
   /* board */
 
@@ -59,13 +95,13 @@ typedef struct _exportwidget {
   GtkAdjustment *padjMoves;
   GtkWidget *pwMovesDetailProb;
   GtkWidget *apwMovesParameters[ 2 ];
-  GtkWidget *apwMovesDisplay[ 7 ];
+  GtkWidget *apwMovesDisplay[ NUM_MOVES ];
 
   /* cube */
 
   GtkWidget *pwCubeDetailProb;
   GtkWidget *apwCubeParameters[ 2 ];
-  GtkWidget *apwCubeDisplay[ 10 ];
+  GtkWidget *apwCubeDisplay[ NUM_CUBES ];
 
   /* other stuff */
 
@@ -125,7 +161,7 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
       gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                        pew->apwMovesParameters[ i ] ) );
 
-  for ( i = 0; i < 7; i++ )
+  for ( i = 0; i < NUM_MOVES ; i++ )
     pexs->afMovesDisplay[ i ] =
       gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                        pew->apwMovesDisplay[ i ] ) );
@@ -141,7 +177,7 @@ ExportGetValues ( exportwidget *pew, exportsetup *pexs ) {
       gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                        pew->apwCubeParameters[ i ] ) );
 
-  for ( i = 0; i < 10; i++ )
+  for ( i = 0; i < NUM_CUBES ; i++ )
     pexs->afCubeDisplay[ i ] =
       gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                        pew->apwCubeDisplay[ i ] ) );
@@ -356,7 +392,7 @@ ExportSet ( exportwidget *pew ) {
                                      pew->apwMovesParameters[ i ] ),
                                   pexs->afMovesParameters[ i ] );
 
-  for ( i = 0; i < 7; i++ )
+  for ( i = 0; i < NUM_MOVES ; i++ )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( 
                                      pew->apwMovesDisplay[ i ] ),
                                   pexs->afMovesDisplay[ i ] );
@@ -371,7 +407,7 @@ ExportSet ( exportwidget *pew ) {
                                      pew->apwCubeParameters[ i ] ),
                                   pexs->afCubeParameters[ i ] );
 
-  for ( i = 0; i < 10; i++ )
+  for ( i = 0; i < NUM_CUBES ; i++ )
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( 
                                      pew->apwCubeDisplay[ i ] ),
                                   pexs->afCubeDisplay[ i ] );
@@ -427,35 +463,6 @@ GTKShowExport ( exportsetup *pexs ) {
   
   GtkWidget *pw;
 
-  char *aszInclude[] = {
-    N_("Annotations"), 
-    N_("Analysis"), 
-    N_("Statistics"), 
-    N_("Legend"),
-    N_("Match Information") };
-
-  char *aszMovesDisplay[] = {
-    N_("Show for moves marked 'very bad'"),
-    N_("Show for moves marked 'bad'"),
-    N_("Show for moves marked 'doubtful'"),
-    N_("Show for unmarked moves"),
-/*     N_("Show for moves marked 'interesting'"), */
-/*     N_("Show for moves marked 'good'"), */
-/*     N_("Show for moves marked 'very good'")  */
-  };
-
-  char *aszCubeDisplay[] = {
-    N_("Show for cube decisions marked 'very bad'"),
-    N_("Show for cube decisions marked 'bad'"),
-    N_("Show for cube decisions marked 'doubtful'"),
-    N_("Show for unmarked cube decisions"),
-/*     N_("Show for cube decisions marked 'interesting'"), */
-/*     N_("Show for cube decisions marked 'good'"), */
-/*     N_("Show for cube decisions marked 'very good'"), */
-    N_("Show for actual cube decisions"),
-    N_("Show for missed doubles"),
-    N_("Show for close cube decisions") };
-
   int i;
 
   exportwidget *pew;
@@ -487,7 +494,7 @@ GTKShowExport ( exportsetup *pexs ) {
   pwVBox = gtk_vbox_new ( FALSE, 0 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwVBox );
 
-  for ( i = 0; i < 5; i++ ) {
+  for ( i = 0; i < NUM_INCLUDE ; i++ ) {
 
     gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                          pew->apwInclude[ i ] =
@@ -617,7 +624,7 @@ GTKShowExport ( exportsetup *pexs ) {
                        TRUE, TRUE, 0 );
 
 
-  for ( i = 0; i < 7; i++ )
+  for ( i = 0; i < NUM_MOVES ; i++ )
 
     gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                          pew->apwMovesDisplay[ i ] =
@@ -659,7 +666,7 @@ GTKShowExport ( exportsetup *pexs ) {
                        TRUE, TRUE, 0 );
 
 
-  for ( i = 0; i < 10; i++ )
+  for ( i = 0; i < NUM_CUBES ; i++ )
 
     gtk_box_pack_start ( GTK_BOX ( pwVBox ),
                          pew->apwCubeDisplay[ i ] =

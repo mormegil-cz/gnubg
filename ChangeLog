@@ -1,3 +1,7 @@
+TueAug 26 16:17:05  GMT 2003  Jim Segrave jes@jes-2.dmeon.nl
+
+	* gtkexport.c - make number of options a compile time calculation
+	
 Tue Aug 26 01:43:26 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.c (SetAnnotation): rearrange skill widgets to save space
