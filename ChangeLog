@@ -1,3 +1,7 @@
+Thu Feb 19 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* import.c: Fixed import jellyfish pos problem (bug 6086)
+
 Thu Feb 19 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* scripts: Added new directory to cvs for python scripts
