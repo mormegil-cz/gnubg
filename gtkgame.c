@@ -4551,12 +4551,9 @@ typedef struct _rolloutpagewidget {
 
 typedef struct _rolloutpagegeneral {
   int *pfOK;
-  int nTrials, nSeed, nLatePlies, nTruncPlies;
-  int fCubeful, fVarRedn, fInitial, fRotate, fDoLate, fDoTrunc;
-  int fCubeEqualChequer, fPlayersAreSame;
-  int fTruncBearoff2, fTruncBearoffOS;
   GtkWidget *pwCubeful, *pwVarRedn, *pwInitial, *pwRotate, *pwDoLate;
   GtkWidget *pwDoTrunc, *pwCubeEqualChequer, *pwPlayersAreSame;
+  GtkWidget *pwTruncEqualPlayer0;
   GtkWidget *pwTruncBearoff2, *pwTruncBearoffOS, *pwTruncBearoffOpts;
   GtkWidget *pwAdjLatePlies, *pwAdjTruncPlies;
   GtkAdjustment *padjTrials, *padjTruncPlies, *padjLatePlies, *padjSeed;
@@ -4609,13 +4606,16 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
   prw->rcRollout.fLateEvals = gtk_toggle_button_get_active(
                                                            GTK_TOGGLE_BUTTON( prw->prwGeneral->pwDoLate ) );
 
-  fCubeEqualChequer = prw->prwGeneral->fCubeEqualChequer = 
+  prw->rcRollout.nLate = prw->prwGeneral->padjLatePlies->value;
+
+  fCubeEqualChequer = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                                     prw->prwGeneral->pwCubeEqualChequer ) );
 
-  fPlayersAreSame = prw->prwGeneral->fPlayersAreSame =
+  fPlayersAreSame = 
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                                     prw->prwGeneral->pwPlayersAreSame ) );
+
 
   /* get all the evaluations out of the widgets */
   for (i = 0; i < 4; ++i) {
@@ -4647,6 +4647,14 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 	  
     memcpy (prw->prpwTrunc->precCube, prw->prpwTrunc->precCheq,
             sizeof (evalcontext));
+  }
+
+  if (gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( 
+													   prw->prwGeneral->pwTruncEqualPlayer0))) {
+	memcpy (prw->prpwTrunc->precCube, prw->prpwPages[0]->precCheq,
+			sizeof (evalcontext));
+	memcpy (prw->prpwTrunc->precCheq, prw->prpwPages[0]->precCube,
+			sizeof (evalcontext));
   }
 
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
@@ -4709,15 +4717,33 @@ static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw) {
   int do_trunc = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                                    prw->prwGeneral->pwDoTrunc ) );
 
+  int sameas_p0 = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+			prw->prwGeneral->pwTruncEqualPlayer0));
+
   /* turn on/off the truncation page */
   gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
-                                                        (prw->RolloutNotebook), ROLL_TRUNC), do_trunc);
+                                                        (prw->RolloutNotebook), ROLL_TRUNC), do_trunc && !sameas_p0);
 
   /* turn on/off the truncation ply setting */
   gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjTruncPlies ),
                             do_trunc);
 
 }
+
+static void TruncEqualPlayer0Toggled( GtkWidget *pw, rolloutwidget *prw) {
+
+  int do_trunc = 
+	gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+									 prw->prwGeneral->pwDoTrunc ) );
+  int sameas_p0 = 
+	gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+									prw->prwGeneral->pwTruncEqualPlayer0));
+
+  /* turn on/off the truncation page */
+  gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK
+               (prw->RolloutNotebook), ROLL_TRUNC), do_trunc && !sameas_p0);
+}
+  
 
 static void CubeEqCheqToggled( GtkWidget *pw, rolloutwidget *prw) {
 
@@ -4907,9 +4933,17 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                                                             _("Use same settings for both players") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwPlayersAreSame );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwPlayersAreSame),
-                                0);
+                                1);
   gtk_signal_connect( GTK_OBJECT( prpw->pwPlayersAreSame ), "toggled",
                       GTK_SIGNAL_FUNC ( PlayersSameToggled ), prw);
+
+  prpw->pwTruncEqualPlayer0 = gtk_check_button_new_with_label (
+            _("Use player0 setting for truncation point") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), prpw->pwTruncEqualPlayer0 );
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( prpw->pwTruncEqualPlayer0),
+                                1);
+  gtk_signal_connect( GTK_OBJECT( prpw->pwTruncEqualPlayer0 ), "toggled",
+                      GTK_SIGNAL_FUNC ( TruncEqualPlayer0Toggled), prw);
 
   return pwPage;
 }
