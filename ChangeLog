@@ -1,3 +1,9 @@
+Mon Aug  4 09:18:36 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* sgf.c, backgammon.h, play.c, import.c
+	  count number of successive doubles in move record, clean up
+	  linking of initial double and following cube actions
+	
 Son Aug  3 19:16:13 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (ReturnHits): enlarge buffer.

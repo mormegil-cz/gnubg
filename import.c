@@ -496,19 +496,17 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	sz[ 2 ] == ':' ) {
 
         if ( fBeaver ) {
-		  moverecord *pmrDouble;
           /* look likes the previous beaver was taken */
           pmr = malloc( sizeof( pmr->d ) );
           pmr->d.mt = MOVE_TAKE;
           pmr->d.sz = NULL;
           pmr->d.fPlayer = iPlayer;
           pmr->d.st = SKILL_NONE;
-          if ((pmrDouble = FindTheDouble ()) == 0) {
+          if( !LinkToDouble( pmr ) ) {
             outputl(_("Take record found but doesn't follow a double"));
 			free (pmr);
 			return;
 		  }
-		  pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
           AddMoveRecord( pmr );
         }
         fBeaver = FALSE;
@@ -668,39 +666,39 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	pmr->d.mt = MOVE_DOUBLE;
 	pmr->d.sz = NULL;
 	pmr->d.fPlayer = iPlayer;
+	if( !LinkToDouble( pmr ) ) {
 	pmr->d.CubeDecPtr = &pmr->d.CubeDec;
 	pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+	  pmr->d.nAnimals = 0;
+	}
+
 	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
         fBeaver = !strncasecmp( sz, "beavers", 6 );
-    } else if( !strncasecmp( sz, "take", 4 ) ) {
-	moverecord *pmrDouble;
 
+    } else if( !strncasecmp( sz, "take", 4 ) ) {
 	pmr = malloc( sizeof( pmr->d ) );
 	pmr->d.mt = MOVE_TAKE;
 	pmr->d.sz = NULL;
 	pmr->d.fPlayer = iPlayer;
-	if (( pmrDouble = FindTheDouble() ) == 0) {
+	if( !LinkToDouble( pmr ) ) {
 	  outputl(_("Take record found but doesn't follow a double"));
 	  free (pmr);
 	  return;
 	}
-	pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
 	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
     } else if( !strncasecmp( sz, "drop", 4 ) ) {
-	moverecord *pmrDouble;
 
 	pmr = malloc( sizeof( pmr->d ) );
 	pmr->d.mt = MOVE_DROP;
 	pmr->d.sz = NULL;
 	pmr->d.fPlayer = iPlayer;
-	if (( pmrDouble = FindTheDouble() ) == 0) {
-	  outputl(_("Take record found but doesn't follow a double"));
+	if ( !LinkToDouble( pmr ) ) {
+	  outputl(_("Drop record found but doesn't follow a double"));
 	  free (pmr);
 	  return;
 	}
-	pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
 	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
     } else if( !strncasecmp( sz, "win", 3 ) ) {
@@ -971,40 +969,39 @@ static void ParseOldmove( char *sz, int fInvert ) {
 	pmr->d.mt = MOVE_DOUBLE;
 	pmr->d.sz = NULL;
 	pmr->d.fPlayer = iPlayer;
+	if( !LinkToDouble( pmr ) ) {
     pmr->d.CubeDecPtr = &pmr->d.CubeDec;
 	pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+	  pmr->d.nAnimals = 0;
+	}
 	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
     } else if( !strncasecmp( sz + 3, "accepts", 7 ) ) {
-	moverecord *pmrDouble;
 
 	pmr = malloc( sizeof( pmr->d ) );
 	pmr->d.mt = MOVE_TAKE;
 	pmr->d.sz = NULL;
 	pmr->d.fPlayer = iPlayer;
-	if ((pmrDouble = FindTheDouble ()) == 0) {
+	if( !LinkToDouble( pmr ) ) {
 	  outputl(_("Take record found but doesn't follow a double"));
 	  free (pmr);
 	  return;
 	}
-	pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
 	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
     } else if( !strncasecmp( sz + 3, "rejects", 7 ) ) {
-	moverecord *pmrDouble;
 
 	pmr = malloc( sizeof( pmr->d ) );
 	pmr->d.mt = MOVE_DROP;
 	pmr->d.sz = NULL;
 	pmr->d.fPlayer = iPlayer;
-	if ((pmrDouble = FindTheDouble ()) == 0) {
-	  outputl(_("Take record found but doesn't follow a double"));
+	if( !LinkToDouble( pmr ) ) {
+	  outputl( _( "Drop record found but doesn't follow a double" ) );
 	  free (pmr);
 	  return;
 	}
-	pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
 	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
 	return;
@@ -1386,21 +1383,19 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
                     /* when beavered there is no explicit "take" */
                     if ( fBeaver ) {
-					  moverecord *pmrDouble;
 
                       pmr = malloc( sizeof( pmr->d ) );
                       pmr->d.mt = MOVE_TAKE;
                       pmr->d.sz = szComment;
                       pmr->d.fPlayer = fPlayer;
 					  pmr->d.st = SKILL_NONE;
-					  if ((pmrDouble = FindTheDouble ()) == 0) {
-						outputl(_("Take record found but doesn't follow a double"));
+		      if( !LinkToDouble( pmr ) ) {
+			outputl( _( "Beaver record found but doesn't follow a double" ) );
 						free (pmr);
 						return;
 					  }
-					  pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
-                      pmr->d.st = SKILL_NONE;
                       
+                      pmr->d.st = SKILL_NONE;
                       AddMoveRecord( pmr );
                       szComment = NULL;
                       fBeaver = FALSE;
@@ -1466,19 +1461,17 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
                             /* when beavered there is no explicit "take" */
                             if ( fBeaver ) {
-                              moverecord *pmrDouble;
 
                               pmr = malloc( sizeof( pmr->d ) );
                               pmr->d.mt = MOVE_TAKE;
                               pmr->d.sz = szComment;
                               pmr->d.fPlayer = fPlayer;
                               pmr->d.st = SKILL_NONE;
-                              if ((pmrDouble = FindTheDouble ()) == 0) {
+                              if ( !LinkToDouble( pmr ) ) {
                                 outputl(_("Take record found but doesn't follow a double"));
                                 free (pmr);
                                 return;	
                               }
-                              pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
                               pmr->d.st = SKILL_NONE;
                               
                               AddMoveRecord( pmr );
@@ -1528,13 +1521,12 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
                             /* when beavered there is no explicit "take" */
                             if ( fBeaver ) {
-                              moverecord *pmrDouble;
 
                               pmr = malloc( sizeof( pmr->d ) );
                               pmr->d.mt = MOVE_TAKE;
                               pmr->d.sz = szComment;
                               pmr->d.fPlayer = fPlayer;
-                              if ((pmrDouble = FindTheDouble ()) == 0) {
+                              if( !LinkToDouble( pmr ) ) {
                                 outputl(_("Take record found but doesn't follow a double"));
                                 free (pmr);
                                 return;
@@ -1577,8 +1569,11 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->d.mt = MOVE_DOUBLE;
 			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
+			    if( !LinkToDouble( pmr ) ) {
 			    pmr->d.CubeDecPtr = &pmr->d.CubeDec;                
 			    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+			      pmr->d.nAnimals = 0;
+			    }
 			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
@@ -1595,8 +1590,11 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->d.mt = MOVE_DOUBLE;
 			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
-			    pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-			    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+			    if( !LinkToDouble( pmr ) ) {
+			      outputl( _( "Beaver found but doesn't follow a double" ) );
+			      free( pmr );
+			      return;
+			    }
 			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
@@ -1613,15 +1611,17 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->d.mt = MOVE_DOUBLE;
 			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
-			    pmr->d.CubeDecPtr = &pmr->d.CubeDec;
-			    pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+			    if( !LinkToDouble( pmr ) ) {
+			      outputl( _( "Raccoon found but doesn't follow a double" ) );
+			      free( pmr );
+			      return;
+			    }
 			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
                             fBeaver = TRUE;
 			} else if( !strncasecmp( pch, "accept", 6 ) ) {
-			    moverecord *pmrDouble;
 
 			    if( !ms.fDoubled )
 				continue;
@@ -1630,30 +1630,27 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->d.mt = MOVE_TAKE;
 			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
-			    if ((pmrDouble = FindTheDouble ()) == 0) {
+			    if( !LinkToDouble( pmr ) ) {
 			      outputl(_("Take record found but doesn't follow a double"));
 			      free (pmr);
 			      return;
 			    }
-			    pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
 			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
                             fBeaver = FALSE;
 			} else if( !strncasecmp( pch, "pass", 4 ) ) {
-			    moverecord *pmrDouble;
 
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_DROP;
 			    pmr->d.sz = szComment;
 			    pmr->d.fPlayer = fPlayer;
-			    if ((pmrDouble = FindTheDouble ()) == 0) {
-			      outputl(_("Take record found but doesn't follow a double"));
+			    if( !LinkToDouble( pmr ) ) {
+			      outputl(_("Drop record found but doesn't follow a double"));
 			      free (pmr);
 			      return;
 			    }
-			    pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
 			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
@@ -2245,7 +2242,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
     char sz[ 1024 ];
     char *pch;
     int c, fPlayer = 0, anRoll[ 2 ];
-    moverecord *pmgi, *pmr, *pmrDouble;
+    moverecord *pmgi, *pmr;
     int iMove;
     int j;
 
@@ -2398,10 +2395,13 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           pmr->d.mt = MOVE_DOUBLE;
           pmr->d.sz = NULL;
           pmr->d.fPlayer = fPlayer;
+	  if( !LinkToDouble( pmr ) ) {
           pmr->d.CubeDecPtr = &pmr->d.CubeDec;
           pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
-          pmr->d.st = SKILL_NONE;
+	    pmr->d.nAnimals = 0;
+	  }
           
+          pmr->d.st = SKILL_NONE;
           AddMoveRecord( pmr );
 
           break;
@@ -2412,12 +2412,12 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           pmr->d.mt = MOVE_TAKE;
           pmr->d.sz = NULL;
           pmr->d.fPlayer = fPlayer;
-          if ((pmrDouble = FindTheDouble ()) == 0) {
+          if( !LinkToDouble( pmr ) ) {
+
             outputl(_("Take record found but doesn't follow a double"));
             free (pmr);
             return;
           }
-          pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
           pmr->d.st = SKILL_NONE;
           
           AddMoveRecord( pmr );
@@ -2430,12 +2430,13 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
           pmr->d.mt = MOVE_DROP;
           pmr->d.sz = NULL;
           pmr->d.fPlayer = fPlayer;
-          if ((pmrDouble = FindTheDouble ()) == 0) {
-            outputl(_("Take record found but doesn't follow a double"));
+          if( !LinkToDouble( pmr ) ) {
+
+            outputl(_("Drop record found but doesn't follow a double"));
             free (pmr);
             return;
           }
-          pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
+
           pmr->d.st = SKILL_NONE;
           
           AddMoveRecord( pmr );
@@ -2647,14 +2648,16 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
 		
 		return;
 	    } else if( strlen( sz ) > 6 && !strncmp( sz + 6, "Doubles", 7 ) ) {
-		moverecord *pmrDouble;;
 
 		pmr = malloc( sizeof( pmr->d ) );
 		pmr->d.mt = MOVE_DOUBLE;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = fPlayer;
+		if( !LinkToDouble( pmr ) ) {
 		pmr->d.CubeDecPtr = &pmr->d.CubeDec;
 		pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+		  pmr->d.nAnimals = 0;
+		}
 		pmr->d.st = SKILL_NONE;
 		AddMoveRecord( pmr );
 
@@ -2663,12 +2666,12 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
 		    !strncmp( sz + 22, "Accepted", 8 ) ? MOVE_TAKE : MOVE_DROP;
 		pmr->d.sz = NULL;
 		pmr->d.fPlayer = !fPlayer;
-		if ((pmrDouble = FindTheDouble ()) == 0) {
+		if( !LinkToDouble( pmr ) ) {
 		  outputl(_("Take record found but doesn't follow a double"));
 		  free (pmr);
 		  return;
 		}
-		pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
+
 		pmr->d.st = SKILL_NONE;
 		AddMoveRecord( pmr );
 	    } else if( strlen( sz ) > 9 && isdigit( sz[ 7 ] ) &&

@@ -2251,8 +2251,11 @@ extern void CommandDouble( char *sz ) {
     pmr->d.mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
+    if( !LinkToDouble( pmr ) ) {
     pmr->d.CubeDecPtr = &pmr->d.CubeDec;
     pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+      pmr->d.nAnimals = 0;
+    }
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( FALSE, pmr ) ))
@@ -2389,8 +2392,7 @@ static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
 
 extern void CommandDrop( char *sz ) {
-
-    moverecord *pmr, *pmrDouble;
+      moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( _("The cube must have been offered before you can drop it.") );
@@ -2410,11 +2412,10 @@ extern void CommandDrop( char *sz ) {
     pmr->d.mt = MOVE_DROP;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    if ((pmrDouble = FindTheDouble()) == 0) {
+    if( !LinkToDouble( pmr ) ) {
       free (pmr);
       return;
     }
-    pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( TRUE, pmr ) )) {
@@ -3504,8 +3505,11 @@ extern void CommandRedouble( char *sz ) {
     pmr->mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
+    if( !LinkToDouble( pmr ) ) {
 	pmr->d.CubeDecPtr = &pmr->d.CubeDec;
+      pmr->d.nAnimals = 0;
     pmr->d.CubeDecPtr->esDouble.et = EVAL_NONE;
+    }
     pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
@@ -3804,7 +3808,7 @@ CommandRoll( char *sz ) {
 
 extern void CommandTake( char *sz ) {
 
-    moverecord *pmr, *pmrDouble;
+  moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
 	outputl( _("The cube must have been offered before you can take it.") );
@@ -3824,11 +3828,11 @@ extern void CommandTake( char *sz ) {
     pmr->d.mt = MOVE_TAKE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
-    if ((pmrDouble = FindTheDouble()) == 0) {
+    if( !LinkToDouble( pmr ) ) {
       free (pmr);
       return;
     }
-    pmr->d.CubeDecPtr = pmrDouble->d.CubeDecPtr;
+
     pmr->d.st = SKILL_NONE;
 
     if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( FALSE, pmr ) )) {
@@ -4111,6 +4115,7 @@ getCurrentMoveRecord ( int *pfHistory ) {
       mrHint.d.mt = MOVE_DOUBLE;
       mrHint.d.sz = NULL;
       mrHint.d.fPlayer = ms.fTurn;
+      mrHint.d.nAnimals = 0;
       mrHint.d.CubeDecPtr = &mrHint.d.CubeDec;
       mrHint.d.CubeDecPtr->esDouble = sc.es;
       mrHint.d.st = SKILL_NONE;
@@ -4230,21 +4235,29 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
 
 }
 
-
-/* a routine to find the most recent double record in the current 
-   game list being built
-   Used to allow take/drop records to point their analysis data at the
-   corresponding analysis of the double
-   returns NULL if it can't find one or if it's not a MOVE_DOUBLE
+/* routine to link doubles/beavers/raccoons/etc and their eventual
+   take/drop decisions into a single evaluation data block
+   returns NULL if there is no preceding double record to link to
 */
 
-moverecord *FindTheDouble (void) {
-  
-  moverecord *pmr;
+moverecord *LinkToDouble( moverecord *pmr) {
 
-  if (!plLastMove || ((pmr = plLastMove->p) == 0) ||
-	  pmr->mt != MOVE_DOUBLE)
+  moverecord *prev;
+  
+
+  if( !plLastMove || ( ( prev = plLastMove->p ) == 0 ) ||
+	  prev->mt != MOVE_DOUBLE )
 	return 0;
+
+  /* link the evaluation data */
+  pmr->d.CubeDecPtr = prev->d.CubeDecPtr;
+
+  /* if this is part of a chain of doubles, add to the count
+     nAnimals will be 0 for the first double, 1 for the beaver,
+     2 for the racoon, etc.
+  */
+  if( pmr->d.mt == MOVE_DOUBLE )
+    pmr->d.nAnimals = 1 + prev->d.nAnimals;
 
   return pmr;
 }
