@@ -104,6 +104,10 @@ extwindow ewnd;
 event evNextTurn;
 #endif
 
+#ifdef WIN32
+#include<windows.h>
+#endif
+
 #if USE_GUI
 int fX = TRUE; /* use X display */
 int nDelay = 0;
@@ -134,7 +138,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fConfirm = TRUE, fShowProgress, fMove, fCubeOwner = -1, fJacoby = TRUE,
     fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
     fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
-    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed;
+    fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed,
+    fAnnotation = FALSE;
 float rAlpha = 0.1, rAnneal = 0.3, rThreshold = 0.1;
 
 gamestate gs = GAME_NONE;
@@ -323,6 +328,8 @@ command acDatabase[] = {
       "position database generation", szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
+    { "annotation", CommandSetAnnotation, "Select whether move analysis and "
+      "commentary are shown", szONOFF, NULL },
     { "automatic", NULL, "Perform certain functions without user input",
       NULL, acSetAutomatic },
     { "beavers", CommandSetBeavers, 
@@ -461,6 +468,8 @@ command acDatabase[] = {
     { "agree", CommandAgree, "Agree to a resignation", NULL, NULL },
     { "analysis", CommandAnalysis, "Run analysis", szFILENAME, NULL },
     { "beaver", CommandRedouble, "Synonym for `redouble'", NULL, NULL },
+    { "copy", CommandCopy, "Copy current position to clipboard", NULL,
+      NULL },
     { "database", NULL, "Manipulate a database of positions", NULL,
       acDatabase },
     { "decline", CommandDecline, "Decline a resignation", NULL, NULL },
@@ -2003,6 +2012,35 @@ extern void CommandImportJF( char *sz ) {
 	perror( sz );
 
     ShowBoard();
+}
+
+extern void CommandCopy( char *sz ) {
+  char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+  char szOut[ 2048 ];
+#ifdef WIN32
+  DrawBoard( szOut, anBoard, 1, aps );
+  strcat(szOut, "\n");
+
+  if(OpenClipboard(0)) {
+
+    HGLOBAL clipbuffer;
+    char * buf;
+
+    EmptyClipboard();
+    clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(szOut)+1 );
+    buf = (char*)GlobalLock(clipbuffer);
+    strcpy(buf, szOut);
+    GlobalUnlock(clipbuffer);
+    SetClipboardData(CF_TEXT, clipbuffer);
+    CloseClipboard();
+
+    } else {
+
+    outputl( "Can't open clipboard" ); 
+  }
+#else
+  puts( DrawBoard( szOut, anBoard, 1, aps ) );
+#endif
 }
 
 static void LoadRCFiles( void ) {
