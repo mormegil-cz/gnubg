@@ -7906,6 +7906,7 @@ static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
   gtk_widget_set_sensitive( pow->pwAutomatic, n );
   gtk_widget_set_sensitive( pow->pwBeaversLabel, n );
   gtk_widget_set_sensitive( pow->pwAutomaticLabel, n );
+  gtk_widget_set_sensitive( pow->pwAutoCrawford, n );
 }
 
 static void ManualDiceToggled( GtkWidget *pw, optionswidget *pow){
@@ -8266,7 +8267,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	_("MWC as percentage"));
     gtk_box_pack_start (GTK_BOX (pwvbox), pow->pwOutputMWCpst,
 			FALSE, FALSE, 0);
-    gtk_tooltips_set_tip( ptt, pow->pwOutputMWC,
+    gtk_tooltips_set_tip( ptt, pow->pwOutputMWCpst,
 			  _("Show match winning chances as percentages (e.g. "
 			    "71.2%).  Otherwise, match winning chances will "
 			    "be shown as probabilities (e.g. 0.712)."),
