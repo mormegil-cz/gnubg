@@ -1378,7 +1378,8 @@ ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 
 static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                                 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                                evalsetup *pes ) {
+                                evalsetup *pes,
+                                int fDouble ) {
 
     cubeinfo ci;
 
@@ -1405,7 +1406,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     cd = FindCubeDecision ( arDouble, aarOutput, &ci );
     
-    if( !GetDPEq( NULL, NULL, &ci ) )
+    if( !GetDPEq( NULL, NULL, &ci ) && ! fDouble )
 	/* No cube action possible */
 	return NULL;
 
@@ -1577,25 +1578,6 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     return pwFrame;
 }
 
-#if 0
-static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
-    cubeinfo ci;
-    char sz[ 1024 ];
-
-    if( pes->et == EVAL_NONE )
-	return NULL;
-
-    GetMatchStateCubeInfo( &ci, &ms );
-    
-    if( !GetDPEq( NULL, NULL, &ci ) )
-	/* No cube action possible */
-	return NULL;
-    
-    GetCubeActionSz( arDouble, sz, &ci, fOutputMWC, FALSE );
-
-    return gtk_label_new( sz );
-}
-#endif
 
 static GtkWidget *TakeAnalysis( movetype mt, 
                                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
@@ -1627,10 +1609,6 @@ static GtkWidget *TakeAnalysis( movetype mt,
 
     cd = FindCubeDecision ( arDouble, aarOutput, &ci );
     
-    if( !GetDPEq( NULL, NULL, &ci ) )
-	/* No cube action possible */
-	return NULL;
-
     /* header */
 
     pwFrame = gtk_frame_new ( "Take analysis" );
@@ -1809,6 +1787,8 @@ static GtkWidget *TakeAnalysis( movetype mt,
     case REDOUBLE_TAKE:
     case NO_REDOUBLE_TAKE:
     case TOOGOODRE_TAKE:
+    case NODOUBLE_DEADCUBE:
+    case NO_REDOUBLE_DEADCUBE:
       pw = gtk_label_new ( "Take" );
       break;
 
@@ -1841,48 +1821,6 @@ static GtkWidget *TakeAnalysis( movetype mt,
 
     return pwFrame;
 
-#if 0
-    char sz[ 128 ], *pch;
-    cubeinfo ci;
-    float rError;
-    
-    if( pes->et == EVAL_NONE )
-	return NULL;
-
-    switch( mt ) {
-    case MOVE_TAKE:
-	if( -arDouble[ OUTPUT_TAKE ] < -arDouble[ OUTPUT_DROP ] )
-	    rError = -arDouble[ OUTPUT_TAKE ] - -arDouble[ OUTPUT_DROP ];
-	else
-	    rError = 0.0f;
-
-	break;
-
-    case MOVE_DROP:
-	if( -arDouble[ OUTPUT_DROP ] < -arDouble[ OUTPUT_TAKE ] )
-	    rError = -arDouble[ OUTPUT_DROP ] - -arDouble[ OUTPUT_TAKE ];
-	else
-	    rError = 0.0f;
-
-	break;
-
-    default:
-	assert( FALSE );
-    }
-    
-    pch = ( mt == MOVE_TAKE && rError == 0.0f ) ||
-	( mt == MOVE_DROP && rError != 0.0f ) ? "Take" : "Pass";
-
-    if( fOutputMWC && ms.nMatchTo ) {
-	GetMatchStateCubeInfo( &ci, &ms );
-	
-	sprintf( sz, "Correct response: %s (%+0.3f%%)", pch,
-		 100.0f * ( eq2mwc( rError, &ci ) - eq2mwc( 0.0f, &ci ) ) );
-    } else
-	sprintf( sz, "Correct response: %s (%+0.3f)", pch, rError );
-
-    return gtk_label_new( sz );
-#endif
 }
 
 static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
@@ -1990,7 +1928,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
 	    
 	    if( ( pw = CubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
-				     &pmr->n.esDouble ) ) ) {
+				     &pmr->n.esDouble, FALSE ) ) ) {
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
                 /* FIXME: add cube skill */
@@ -2054,7 +1992,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 	    
 	    if( ( pw = CubeAnalysis( pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble ) ) )
+				     &pmr->d.esDouble, TRUE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 

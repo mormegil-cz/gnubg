@@ -1,3 +1,23 @@
+Thu Apr  4 21:01:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Support for the analysis of a dead cube being doubled.
+	(bug reported by Ian Shaw)
+
+	* eval.h: new double decisions: NODOUBLE_DEADCUBE and 
+	NO_REDOUBLE_DEADCUBE.
+	* play.c (ComputerTurn): take when opponent is stupid enough to
+	double a dead cube.
+	* eval.c (GetCubeRecommendation): return suitable strings for
+	new double decisions.
+	* eval.c (GetCubeActionSz, getCubeDecisionOrdering): support new 
+	double decisions.
+	* eval.c (FindBestCubeDecision): return new double decisions when
+	appropriate.
+	* analysis.c (AnalyseMove): fix typo, and analyse cube if
+	player has access.
+	* gtkgame.c (CubeAnalysis, TakeAnalysis): remove old code, and
+	support new cube decisions.
+
 Thu Apr  4 19:58:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (AnalyzeMove): fix a few bugs: move misplaced free(), and
