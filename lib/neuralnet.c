@@ -278,21 +278,27 @@ extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p ) {
    ( (float *) p ) += pnn->cHidden;
    pnn->arOutputThreshold = p;
    ( (float *) p ) += pnn->cOutput;
- 
+
+   pnn->savedBase = malloc( pnn->cHidden * sizeof( float ) ); 
+   pnn->savedIBase = malloc( pnn->cInput * sizeof( float ) ); 
+
    return p;
 }
 
-extern int NeuralNetDestroy( neuralnet *pnn ) {
+extern int
+NeuralNetDestroy( neuralnet *pnn )
+{
+  if( !pnn->fDirect ) {
+    free( pnn->arHiddenWeight ); pnn->arHiddenWeight = 0;
+    free( pnn->arOutputWeight ); pnn->arOutputWeight = 0;
+    free( pnn->arHiddenThreshold ); pnn->arHiddenThreshold = 0;
+    free( pnn->arOutputThreshold ); pnn->arOutputThreshold = 0;
+  }
 
-    if( !pnn->fDirect ) {
-      free( pnn->arHiddenWeight ); pnn->arHiddenWeight = 0;
-      free( pnn->arOutputWeight ); pnn->arOutputWeight = 0;
-      free( pnn->arHiddenThreshold ); pnn->arHiddenThreshold = 0;
-      free( pnn->arOutputThreshold ); pnn->arOutputThreshold = 0;
-      free(pnn->savedBase); pnn->savedBase = 0;
-      free(pnn->savedIBase); pnn->savedIBase = 0;
-    }
-    return 0;
+  free(pnn->savedBase); pnn->savedBase = 0;
+  free(pnn->savedIBase); pnn->savedIBase = 0;
+  
+  return 0;
 }
 
 static int Evaluate( neuralnet *pnn, float arInput[], float ar[],
