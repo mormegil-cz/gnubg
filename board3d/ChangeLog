@@ -1,3 +1,7 @@
+Sat Apr 17 12:00:59 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* misc3d.c: fix a few includes.
+
 Wed Mar 31 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* most files: Board preferences updated

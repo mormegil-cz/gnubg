@@ -25,8 +25,11 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <io.h>
+#include <sys/io.h>
 #include <memory.h>
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "inc3d.h"
