@@ -647,7 +647,7 @@ extern void CommandSaveGame( char *sz ) {
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to save to (see `help save"
+	outputl( "You must specify a file to save to (see `help save "
 		 "game')." );
 	return;
     }
