@@ -122,7 +122,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
 	
 
   fputs ( DrawBoard( szBoard, anBoard, pms->fMove, apch,
-                     MatchIDFromMatchState ( &ms ) ),
+                     MatchIDFromMatchState ( pms ) ),
           pf);
   fputs ( "\n", pf );
 
@@ -813,7 +813,7 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
   fprintf( pf, _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 
   if( pmr->n.rLuck != ERR_VAL )
-    fprintf( pf, " (%s):\n", GetLuckAnalysis( &ms, pmr->n.rLuck ) );
+    fprintf( pf, " (%s):\n", GetLuckAnalysis( pms, pmr->n.rLuck ) );
   else
     fprintf( pf, ":" );
 
@@ -825,7 +825,7 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
         continue;
 
       fputc( i == pmr->n.iMove ? '*' : ' ', pf );
-      fputs( FormatMoveHint( szBuf, &ms, &pmr->n.ml, i,
+      fputs( FormatMoveHint( szBuf, pms, &pmr->n.ml, i,
                              i != pmr->n.iMove ||
                              i != pmr->n.ml.cMoves - 1 ), pf );
 
@@ -1157,7 +1157,7 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
     }
 
-    TextEpilogue( pf, &ms );
+    TextEpilogue( pf, &msExport );
 
 
     

@@ -3068,7 +3068,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
     }
 
 
-    HTMLEpilogue( pf, &ms, aszLinks );
+    HTMLEpilogue( pf, &msExport, aszLinks );
     
 }
 

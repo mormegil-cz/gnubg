@@ -1,3 +1,11 @@
+Sat Jul 13 19:13:20 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (ExportGameHTML): fix typo [use pms or msExport instead of
+	ms].
+
+	* text.c (ExportGameText, printBoardText, TextPrintMoveAnalysis): 
+	fix typos [use pms or msExport instead of ms].
+
 Tue Jul  9 19:58:03 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c: Add a Dump/Copy button in the hint dialog. 
