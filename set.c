@@ -187,21 +187,136 @@ extern void CommandSetCache( char *sz ) {
 		n == 1 ? "y" : "ies" );
 }
 
+static int CheckCubeAllowed( void ) {
+    
+    if( fTurn < 0 ) {
+	puts( "There must be a game in progress to set the cube." );
+	return -1;
+    }
+
+    if( fCrawford ) {
+	puts( "The cube is disabled during the Crawford game." );
+	return -1;
+    }
+    
+    if( !fCubeUse ) {
+	puts( "The cube is disabled (see `help set cube use')." );
+	return -1;
+    }
+
+    return 0;
+}
+
+extern void CommandSetCubeCentre( char *sz ) {
+
+    if( CheckCubeAllowed() )
+	return;
+    
+    fCubeOwner = -1;
+
+    puts( "The cube has been centred (either player may double)." );
+    
+#if !X_DISPLAY_MISSING
+    if( fX )
+	ShowBoard();
+#endif
+
+    if( fDoubled ) {
+	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
+	fDoubled = FALSE;
+	NextTurn();
+    }
+}
+
+extern void CommandSetCubeOwner( char *sz ) {
+
+    int i;
+    
+    if( CheckCubeAllowed() )
+	return;
+
+    switch( i = ParsePlayer( sz ) ) {
+    case 0:
+    case 1:
+	fCubeOwner = i;
+	break;
+	
+    case 2:
+	/* "set cube owner both" is the same as "set cube centre" */
+	CommandSetCubeCentre( NULL );
+	return;
+
+    default:
+	puts( "You must specify which player owns the cube (see `help set "
+	      "cube owner')." );
+	return;
+    }
+
+    printf( "%s now owns the cube.\n", ap[ fCubeOwner ].szName );
+
+#if !X_DISPLAY_MISSING
+    if( fX )
+	ShowBoard();
+#endif    
+    
+    if( fDoubled ) {
+	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
+	fDoubled = FALSE;
+	NextTurn();
+    }
+}
+
 extern void CommandSetCubeUse( char *sz ) {
 
-    SetToggle( "cube use", &fCubeUse, sz, "Use of the doubling cube is "
-	       "permitted.", "Use of the doubling cube is disabled." );
+    if( SetToggle( "cube use", &fCubeUse, sz, "Use of the doubling cube is "
+		   "permitted.",
+		   "Use of the doubling cube is disabled." ) < 0 )
+	return;
 
-    if( !fCubeUse ) {
+    if( fCrawford && fCubeUse )
+	puts( "(But the Crawford rule is in effect, so you won't be able to "
+	      "use it during\nthis game.)" );
+    else if( fTurn >= 0 && !fCubeUse ) {
+	/* The cube was being used and now it isn't; reset it to 1,
+	   centred. */
 	nCube = 1;
 	fCubeOwner = -1;
-	fDoubled = FALSE;
-
+	
 #if !X_DISPLAY_MISSING
 	if( fX )
 	    ShowBoard();
 #endif
+
+	if( fDoubled ) {
+	    printf( "(%s's double has been cancelled.)\n",
+		    ap[ fMove ].szName );
+	    fDoubled = FALSE;
+	    NextTurn();
+	}
     }
+}
+
+extern void CommandSetCubeValue( char *sz ) {
+
+    int i, n;
+
+    if( CheckCubeAllowed() )
+	return;
+    
+    n = ParseNumber( &sz );
+
+    for( i = fDoubled ? MAX_CUBE >> 1 : MAX_CUBE; i; i >>= 1 )
+	if( n == i ) {
+	    printf( "The cube has been set to %d.\n", nCube = n );
+	    
+#if !X_DISPLAY_MISSING
+	    if( fX )
+		ShowBoard();
+#endif
+	    return;
+	}
+
+    puts( "You must specify a legal cube value (see `help set cube value')." );
 }
 
 extern void CommandSetDice( char *sz ) {
@@ -531,7 +646,6 @@ extern void CommandSetJacoby( char *sz ) {
   SetToggle( "jacoby", &fJacoby, sz, 
 	     "Will use the Jacoby rule for money sessions.",
 	     "Will not use the Jacoby rule for money sessions." );
-
 }
 
 
@@ -541,11 +655,12 @@ extern void CommandSetCrawford( char *sz ) {
     if ( ( nMatchTo - anScore[ 0 ] == 1 ) || 
 	 ( nMatchTo - anScore[ 1 ] == 1 ) ) {
 
-      SetToggle( "crawford", &fCrawford, sz, 
+      if( SetToggle( "crawford", &fCrawford, sz, 
 		 "This game is the Crawford game (no doubling allowed).",
-		 "This game is not the Crawford game." );
+		 "This game is not the Crawford game." ) < 0 )
+	  return;
 
-      /* sanety check */
+      /* sanity check */
 
       if ( fCrawford && fPostCrawford )
 	CommandSetPostCrawford ( "off" );
@@ -553,6 +668,10 @@ extern void CommandSetCrawford( char *sz ) {
       if ( !fCrawford && !fPostCrawford )
 	CommandSetPostCrawford ( "on" );
 
+      if( fCrawford && fDoubled ) {
+	  fDoubled = FALSE;
+	  NextTurn();
+      }
     }
     else {
       puts( "Cannot set whether this is the Crawford game\n"
@@ -563,9 +682,7 @@ extern void CommandSetCrawford( char *sz ) {
     puts ( "Cannot set Crawford play for money sessions." );
   else
     puts ( "No match in progress (type `new match n' to start one)." );
-
 }
-
 
 extern void CommandSetPostCrawford( char *sz ) {
 
@@ -577,7 +694,7 @@ extern void CommandSetPostCrawford( char *sz ) {
 		 "This is post-Crawford play (doubling allowed).",
 		 "This is not post-Crawford play." );
 
-      /* sanety check */
+      /* sanity check */
 
       if ( fPostCrawford && fCrawford )
 	CommandSetCrawford ( "off" );
