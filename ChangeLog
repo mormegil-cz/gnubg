@@ -1,3 +1,8 @@
+Tue May 15 10:35:26 2001  Gary Wong  <gtw@research.att.com>
+
+	* import.c (ReadInt16): New function, to portably read the
+	little-endian integers from .pos files.
+
 Mon May 14 11:10:57 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (FormatMoveHint): Added anBoard parameter (so the move

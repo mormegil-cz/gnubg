@@ -25,12 +25,30 @@
 #include "backgammon.h"
 #include "import.h"
 
+static int ReadInt16( FILE *pf ) {
+
+    /* Read a little-endian, signed (2's complement) 16-bit integer.
+       This is inefficient on hardware which is already little-endian
+       or 2's complement, but at least it's portable. */
+    
+    unsigned char auch[ 2 ];
+    int n;
+    
+    fread( auch, 2, 1, pf );
+    n = auch[ 0 ] | ( auch[ 1 ] << 8 );
+
+    if( n >= 0x8000 )
+	n -= 0x10000;
+
+    return n;
+}
+
 extern void
 ImportJF( FILE * fp, char *szFileName) {
 
   int nVersion, nCubeOwner, nOnRoll, nMovesLeft, nMovesRight;
   int nGameOrMatch, nOpponent, nLevel, nScore1, nScore2;
-  int nCrawford, nDie1, nDie2; 
+  int nDie1, nDie2; 
   int fCaution, fCubeUse, fJacoby, fBeavers, fSwapDice, fJFplayedLast;
 
   int i, idx, anNew[26], anOld[26];
@@ -39,10 +57,9 @@ ImportJF( FILE * fp, char *szFileName) {
   char szPlayer2[40];
   char szLastMove[25];
 
-  short int w;
   unsigned char c;
 
-  fread(&w, 2, 1, fp);   nVersion = (int) w; 
+  nVersion = ReadInt16( fp );
 
   if ( nVersion < 124 || nVersion > 126 ){
     outputl("File not recognised as Jellyfish file.");
@@ -50,21 +67,21 @@ ImportJF( FILE * fp, char *szFileName) {
   }
   if ( nVersion == 126 ){
     /* 3.0 */
-    fread(&w, 2, 1, fp);   fCaution = (int) w; 
-    fread(&w, 2, 1, fp);        /* Not in use */
+      fCaution = ReadInt16( fp );
+      ReadInt16( fp ); /* Not in use */
   }
 
   if ( nVersion == 125 || nVersion == 126 ){
     /* 1.6 or newer */
     /* 3 variables not used by older version */
-    fread(&w, 2, 1, fp);  fCubeUse = (int) w;
-    fread(&w, 2, 1, fp);  fJacoby = (int) w;
-    fread(&w, 2, 1, fp);  fBeavers = (int) w;
+      fCubeUse = ReadInt16( fp );
+      fJacoby = ReadInt16( fp );
+      fBeavers = ReadInt16( fp );
 
-    if ( nVersion == 125 ){
-      /* If reading, caution can be set here
-         use caution = */
-    }
+      if ( nVersion == 125 ){
+	  /* If reading, caution can be set here
+	     use caution = */
+      }
   }
 
   if ( nVersion == 124 ){
@@ -77,45 +94,46 @@ ImportJF( FILE * fp, char *szFileName) {
     */
   }
 
-  fread(&w, 2, 1, fp);  nCube = (int) w;
-  fread(&w, 2, 1, fp);  nCubeOwner = (int) w;
+  nCube = ReadInt16( fp );
+  nCubeOwner = ReadInt16( fp );
   /* Owner: 1 or 2 is player 1 or 2, 
      respectively, 0 means cube in the middle */
 
   fCubeOwner = nCubeOwner - 1;
-  
-  fread(&w, 2, 1, fp);  nOnRoll = (int) w;
+
+  nOnRoll = ReadInt16( fp );
   /* 0 means starting position. 
      If you add 2 to the player (to get 3 or 4)   Sure?
      it means that the player is on roll
      but the dice have not been rolled yet. */
- 
-  fread(&w, 2, 1, fp);  nMovesLeft = (int) w;
-  fread(&w, 2, 1, fp);  nMovesRight = (int) w;
+
+  nMovesLeft = ReadInt16( fp );
+  nMovesRight = ReadInt16( fp );
   /* These two variables are used when you use movement #1,
      (two buttons) and tells how many moves you have left
      to play with the left and the right die, respectively.
      Initialized to 1 (if you roll a double, left = 4 and
      right = 0). If movement #2 (one button), only the first
      one (left) is used to store both dice.  */
- 
-  fread(&w, 2, 1, fp);   /* Not in use */
- 
-  fread(&w, 2, 1, fp);  nGameOrMatch = (int) w;
-  /* 1 = match, 3 = game */
- 
-  fread(&w, 2, 1, fp);  nOpponent = (int) w;
-  /* 1 = 2 players, 2 = JF plays one side */
- 
-  fread(&w, 2, 1, fp);  nLevel = (int) w;
 
-  fread(&w, 2, 1, fp);  nMatchTo = (int) w;
+  ReadInt16( fp ); /* Not in use */
+
+  nGameOrMatch = ReadInt16( fp );
+  /* 1 = match, 3 = game */
+
+  nOpponent = ReadInt16( fp );
+  /* 1 = 2 players, 2 = JF plays one side */
+
+  nLevel = ReadInt16( fp );
+
+  nMatchTo = ReadInt16( fp );
   /* 0 if single game  */
 
-  if(nGameOrMatch == 3) nMatchTo = 0;
+  if(nGameOrMatch == 3)
+      nMatchTo = 0;
 
-  fread(&w, 2, 1, fp);  nScore1 = (int) w;
-  fread(&w, 2, 1, fp);  nScore2 = (int) w;
+  nScore1 = ReadInt16( fp );
+  nScore2 = ReadInt16( fp );
   /* Can be whatever if match length = 0  */
 
   anScore[0] = nScore1;
@@ -131,17 +149,28 @@ ImportJF( FILE * fp, char *szFileName) {
   for (i = 0 ; i < c; i++) fread(&szPlayer2[i], 1, 1, fp);
   szPlayer2[c]='\0';
 
-  fread(&w, 2, 1, fp);  fSwapDice = (int) w;
+  fSwapDice = ReadInt16( fp );
   /* TRUE if lower die is to be drawn to the left  */
 
-  fread(&w, 2, 1, fp);  nCrawford = (int) w;
-  /* 1 = pre-Crawford, 2 = Crawford, 3 = post-Crawford  */
+  switch( ReadInt16( fp ) ) {
+  case 2: /* Crawford */
+      fPostCrawford = FALSE;
+      fCrawford = TRUE;
+      break;
+      
+  case 3: /* post-Crawford  */
+      fPostCrawford = TRUE;
+      fCrawford = FALSE;
+      break;
 
-  if(nCrawford == 2)  fCrawford = TRUE;
-  if(nCrawford == 3)  fPostCrawford = TRUE;
-  if(nGameOrMatch == 3) fCrawford = FALSE;
+  default:
+      fCrawford = fPostCrawford = FALSE;
+      break;
+  }
+  
+  if(nGameOrMatch == 3) fCrawford = fPostCrawford = FALSE;
 
-  fread(&w, 2, 1, fp);  fJFplayedLast = (int) w;
+  fJFplayedLast = ReadInt16( fp );
 
   fread(&c, 1, 1 , fp);
   for (i = 0 ; i < c; i++) fread(&szLastMove[i], 1, 1, fp);
@@ -150,8 +179,8 @@ ImportJF( FILE * fp, char *szFileName) {
      If so, the move is stored in a string to be 
      displayed in the 'Show last' dialog box  */
 
-  fread(&w, 2, 1, fp);    nDie1 = abs( (int) w );
-  fread(&w, 2, 1, fp);    nDie2 = (int) w;
+  nDie1 = abs( ReadInt16( fp ) );
+  nDie2 = ReadInt16( fp );  
   /*  if ( nDie1 < 0 ) { nDie1=65536; } */ /*  What?? */
 
 
@@ -160,11 +189,9 @@ ImportJF( FILE * fp, char *szFileName) {
      The two position arrays can be read like this:   */
 
   for ( i=0; i < 26; i++ ) {
-    fread(&w, 2, 1, fp);
-    anNew[ i ]=( (int) w ) - 20;
-    fread(&w, 2, 1, fp);
-    anOld[ i ]=( (int) w ) - 20;
-    /* 20 has been added to each number when storing */
+      anNew[ i ] = ReadInt16( fp ) - 20;
+      anOld[ i ] = ReadInt16( fp ) - 20;
+      /* 20 has been added to each number when storing */
   }
   /* Player 1's checkers are represented with negative numbers, 
      player 2's with positive. The arrays are representing the 

@@ -222,8 +222,6 @@ duplication of effort and to make sure our changes merge easily.
 ** The SGF loading (saving?) routines and CommandLoadCommands use
   stdio, which restarts system calls on signals.  This means TTY interrupts
   and the GTK `stop' button don't work. (gary)
-** The fread() calls in import.c need to be byte-swapped on big-endian
-  machines. Sure?
 ** The "stop" button (i.e. the grab widget) automatically removes the
   grab on itself when it gets a "button release".  It would be more
   robust to add a parent to it (box or event box?), and give _that_
@@ -242,6 +240,7 @@ duplication of effort and to make sure our changes merge easily.
 ** "show score" (and the Guile function current-score) report the
   number of games _started_, but should probably show the number
   finished.
+** Importing a position should add MOVE_SETBOARD (etc.) records. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
