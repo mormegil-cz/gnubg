@@ -129,6 +129,14 @@ PNMTOPNG = @PNMTOPNG@
 PNMTOPS = @PNMTOPS@
 POSUB = @POSUB@
 PSTOPNM = @PSTOPNM@
+PYTHON = @PYTHON@
+PYTHON_CFLAGS = @PYTHON_CFLAGS@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_LDFLAGS = @PYTHON_LDFLAGS@
+PYTHON_LIBS = @PYTHON_LIBS@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SRCONV = @SRCONV@
 STRIP = @STRIP@
@@ -143,6 +151,10 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 @USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4 xpm sounds
 @USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4 xpm sounds
 
@@ -166,12 +178,15 @@ ACLOCAL_AMFLAGS = -I m4
 @EXTERNAL_BR1_TRUE@BR1DATA = gnubg_os0.bd
 @EXTERNAL_BR1_FALSE@BR1DATA = 
 
+@USE_PYTHON_TRUE@PYTHON_SOURCES = gnubgmodule.c gnubgmodule.h
+@USE_PYTHON_FALSE@PYTHON_SOURCES = 
+
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@ \
               -I$(srcdir)/intl -DLOCALEDIR=\"$(localedir)\" \
-              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@
+              @FT2_CFLAGS@ @GTKEXTRA_CFLAGS@ @PYTHON_CFLAGS@ 
 
 COMMON_LIBS = @LIBOBJS@ -Llib -levent @GUILE_LIBS@ @INTLLIBS@ @LIBXML2_LIBS@ \
-              @FT2_LIBS@ @GTKEXTRA_LIBS@
+              @FT2_LIBS@ @GTKEXTRA_LIBS@ @PYTHON_LIBS@ 
 
 COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
@@ -183,20 +198,22 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	export.c sound.h record.c record.h osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
 	onechequer.c onechequer.h path.c path.h render.c render.h \
-	htmlimages.c speed.c renderprefs.c renderprefs.h boardpos.c boardpos.h
+	htmlimages.c speed.c renderprefs.c renderprefs.h boardpos.c boardpos.h 
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff makehyper
 
+gnubg_LDFLAGS = @PYTHON_LDFLAGS@
+
 @USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
 @USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS) @LIBART_CFLAGS@
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
-@USE_EXT_FALSE@@USE_GTK_FALSE@	$(FONT_SOURCES)
+@USE_EXT_FALSE@@USE_GTK_FALSE@	$(FONT_SOURCES)  $(PYTHON_SOURCES)
 
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES)
 
 @USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 @USE_GTK_TRUE@	gtkprefs.c gtkprefs.h gtk-multiview.c \
@@ -209,7 +226,7 @@ bin_PROGRAMS = gnubg makebearoff makehyper
 @USE_GTK_TRUE@        openurl.c openurl.h gtktempmap.c gtktempmap.h \
 @USE_GTK_TRUE@	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
 @USE_GTK_TRUE@	gtkpath.c gtkpath.h \
-@USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
+@USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
@@ -299,13 +316,15 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_SOUND_FALSE@am__objects_3 =
 @USE_FREETYPE_TRUE@am__objects_4 = luxi.$(OBJEXT)
 @USE_FREETYPE_FALSE@am__objects_4 =
+@USE_PYTHON_TRUE@am__objects_5 = gnubgmodule.$(OBJEXT)
+@USE_PYTHON_FALSE@am__objects_5 =
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
 @USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_2) $(am__objects_3) \
-@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_4)
+@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_4) $(am__objects_5)
 @USE_EXT_TRUE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
 @USE_EXT_TRUE@@USE_GTK_FALSE@	xboard.$(OBJEXT) xgame.$(OBJEXT) \
 @USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_2) $(am__objects_3) \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_4)
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_4) $(am__objects_5)
 @USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_1) gtkboard.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkgame.$(OBJEXT) gtkprefs.$(OBJEXT) \
 @USE_GTK_TRUE@	gtk-multiview.$(OBJEXT) gtktheory.$(OBJEXT) \
@@ -317,9 +336,9 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	openurl.$(OBJEXT) gtktempmap.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkbearoff.$(OBJEXT) gtkoptions.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkpath.$(OBJEXT) $(am__objects_2) \
-@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4)
+@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4) \
+@USE_GTK_TRUE@	$(am__objects_5)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
-gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
@@ -359,6 +378,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/eval.Po ./$(DEPDIR)/export.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/external.Po ./$(DEPDIR)/getopt.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/getopt1.Po ./$(DEPDIR)/gnubg.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gnubgmodule.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtk-multiview.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkbearoff.Po ./$(DEPDIR)/gtkboard.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkchequer.Po ./$(DEPDIR)/gtkcolour.Po \
@@ -410,7 +430,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	Makefile.am Makefile.in NEWS TODO acinclude.m4 aclocal.m4 \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
-	strdup.c
+	py-compile strdup.c
 DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
 
@@ -433,7 +453,7 @@ $(top_builddir)/config.status: $(srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 $(srcdir)/configure:  $(srcdir)/configure.in $(ACLOCAL_M4) $(CONFIGURE_DEPENDENCIES)
 	cd $(srcdir) && $(AUTOCONF)
 
-$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/audiofile.m4 m4/esd.m4 m4/freetype2.m4 m4/gettext.m4 m4/gtk-2.0.m4 m4/gtk.m4 m4/libart.m4
+$(ACLOCAL_M4):  configure.in acinclude.m4 m4/artsc.m4 m4/audiofile.m4 m4/esd.m4 m4/freetype2.m4 m4/gettext.m4 m4/gtk-2.0.m4 m4/gtk.m4 m4/libart.m4 m4/python.m4
 	cd $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 
 config.h: stamp-h1
@@ -528,6 +548,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnubg.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnubgmodule.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtk-multiview.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkbearoff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkboard.Po@am__quote@
