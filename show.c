@@ -1022,7 +1022,7 @@ extern void CommandShowThorp( char *sz ) {
 extern void CommandShowBeavers( char *sz ) {
 
     if( nBeavers > 1 )
-	outputf( _("%d beavers/racoons allowed in money sessions.\n"), nBeavers );
+	outputf( _("%d beavers/raccoons allowed in money sessions.\n"), nBeavers );
     else if( nBeavers == 1 )
 	outputl( _("1 beaver allowed in money sessions.") );
     else

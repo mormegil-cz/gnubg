@@ -1086,7 +1086,7 @@ extern void CommandSetGUIAnimationSpeed( char *sz ) {
 
     if( n < 0 || n > 7 ) {
 	outputl( _("You must specify a speed between 0 and 7 -- try "
-		   "`help set seed'.") );
+		   "`help set speed'.") );
 
 	return;
     }
@@ -2583,7 +2583,7 @@ extern void CommandSetBeavers( char *sz ) {
     nBeavers = n;
 
     if( nBeavers > 1 )
-	outputf( _("%d beavers/racoons allowed in money sessions.\n"), nBeavers );
+	outputf( _("%d beavers/raccoons allowed in money sessions.\n"), nBeavers );
     else if( nBeavers == 1 )
 	outputl( _("1 beaver allowed in money sessions.") );
     else
