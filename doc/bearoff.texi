@@ -373,7 +373,7 @@ sided bearoff databases, i.e., databases generated with default options.
 @item 15        @tab 9        @tab @code{9c4ddab4e51c3e668c9c97b8f8768dbc}
 @item 15        @tab 10       @tab @code{81b3898f06bbd08ee8295a839251a10a}
 @item 15        @tab 11       @tab @code{78ecb4be86dab6af8755ea4063d50fb6}
-@item 15        @tab 12       @tab not available
+@item 15        @tab 12       @tab @code{770fcff48894a96ebb2249343ef94866}
 @item 15        @tab 13       @tab not available
 @item 15        @tab 14       @tab not available
 @item 15        @tab 15       @tab not available
@@ -392,15 +392,15 @@ sided bearoff databases.
 @item @strong{Chequers}  
 @tab @strong{Points}   
 @tab @strong{MD5 checksum}
-@item 1         @tab 6        @tab not available
-@item 2         @tab 6        @tab not available
-@item 3         @tab 6        @tab not available
-@item 4         @tab 6        @tab not available
-@item 5         @tab 6        @tab not available
-@item 6         @tab 6        @tab not available
-@item 7         @tab 6        @tab not available
-@item 8         @tab 6        @tab not available
-@item 9         @tab 6        @tab not available
+@item 1         @tab 6        @tab @code{7ed6f8e7fce16ea2b80e07a4a516653c}
+@item 2         @tab 6        @tab @code{e9d760bf213841c285245ed757a52f4d}
+@item 3         @tab 6        @tab @code{9d67da3db32ad4720cc38eecf9a67967}
+@item 4         @tab 6        @tab @code{9156f37032d1d4b0352a41186e632dfc}
+@item 5         @tab 6        @tab @code{0db19ab08feae1feb33ddbd709479f62}
+@item 6         @tab 6        @tab @code{44b6040b49b46cb9dd2ce8caa947044d}
+@item 7         @tab 6        @tab @code{9eb8b042d4d2ddf8d40e74a892745ad5}
+@item 8         @tab 6        @tab @code{fcdbbc80b7ef84ddc81b839d0f26bed1}
+@item 9         @tab 6        @tab @code{a11b2d410d51401143d05e73f9ffac15}
 @item 10        @tab 6        @tab not available
 @item 11        @tab 6        @tab not available
 @item 12        @tab 6        @tab not available
