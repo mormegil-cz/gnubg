@@ -102,6 +102,7 @@ Jeff Haferman
 Morten Juul Henriksen
 Alain Henry
 Jens Hoefkens
+Casey Hopkins
 Martin Janke
 Nis Jorgensen
 Neil Kazaross

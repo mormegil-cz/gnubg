@@ -1,3 +1,9 @@
+Fri Jun  4 22:58:22 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (EvalKey): add another bit to match scores in
+	hash key.
+	(fixes bug #9211 reported by Casey Hopkins)
+
 Fri Jun 4  18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gnubg.c: Add show scoresheet command (to right click menu)

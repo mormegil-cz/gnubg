@@ -2625,10 +2625,24 @@ EvalKey ( const evalcontext *pec, const int nPlies,
 
   int iKey;
 
+  /*
+   * Bit 00-02: nReduced
+   * Bit 03-04: nPlies
+   * Bit 05   : fCubeful
+   * Bit 06-13: rNoise
+   * Bit 14-19: anScore[ 0 ]
+   * Bit 20-24: anScore[ 1 ]
+   * Bit 25-28: log2(nCube)
+   * Bit 29-30: fCubeOwner
+   * Bit 31   : fCrawford
+   */
+
   /* Record the signature of important evaluation settings. */
-  iKey = pec->nReduced | ( nPlies << 3 ) |
-      ( pec->fCubeful << 6 ) | ( ( (int) ( pec->rNoise * 1000 ) ) << 7 ) |
-      ( pci->fMove << 16 );
+  iKey = ( ( pec->nReduced ) | 
+           ( nPlies << 3 ) |
+           ( pec->fCubeful << 6 ) | 
+           ( ( ( (int) ( pec->rNoise * 1000 ) ) && 0x00FF ) << 7 ) |
+           ( pci->fMove << 14 ) );
 
   if ( nPlies || fCubefulEquity ) {
 
@@ -2643,8 +2657,8 @@ EvalKey ( const evalcontext *pec, const int nPlies,
     /* In match play, the score and cube value and position are important. */
     if( pci->nMatchTo )
       iKey ^=
-        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 17 ) ^
-        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 21 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ pci->fMove ] ) << 15 ) ^
+        ( ( pci->nMatchTo - pci->anScore[ !pci->fMove ] ) << 20 ) ^
         ( LogCube( pci->nCube ) << 25 ) ^
         ( ( pci->fCubeOwner < 0 ? 2 :
             pci->fCubeOwner == pci->fMove ) << 29 ) ^
@@ -5638,6 +5652,12 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
 
       if ( aciCubePos[ ici ].nCube < 0 )
         continue;
+
+      /* argh, bug #9211: the stuff in EvalKey only stores 4 bit for
+         the score, so a score of -20,-20 is treated identical to
+         -4,-4.... */
+
+
 
       ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
 #if defined( GARY_CACHE )
