@@ -1,3 +1,19 @@
+Sat Mar  9 19:50:40 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (getCurrentGammonRates, setMoneyPoints, getMatchPoints):
+	new functions; well, their names says it all :-)
+	Get current gammon rates, and calculate various points (take,
+	double, too good etc) for money and match play.
+
+	* gtktheory.c: new file. GTK theory widget for gammon prices and
+	market windows.
+
+	* show.c (CommandShowGammonPrice): call GTK widget.
+	* show.c (CommandShowMarketWindow): call GTK widget. Move a lot of
+	the code into subroutines, that can be called for both the CLI and
+	GTK version. It is still possible to do some cleanup.
+
+
 Thu Mar  7 20:01:18 2002  Joern Thyssen  <jthyssen@dk.ibm.com> 
 
 	* rollout.c (RolloutGeneral): skip calculation of cubeless equity

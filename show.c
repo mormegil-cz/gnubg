@@ -41,6 +41,7 @@
 #if USE_GTK
 #include "gtkboard.h"
 #include "gtkgame.h"
+#include "gtktheory.h"
 #elif USE_EXT
 #include "xgame.h"
 #endif
@@ -733,6 +734,13 @@ extern void CommandShowGammonPrice ( char *sz ) {
     return;
   }
 
+#if USE_GTK
+  if ( fX ) {
+    GTKShowTheory ( 1 );
+    return;
+  }
+#endif
+
   GetMatchStateCubeInfo( &ci, &ms );
 
   output ( "Player        Gammon price    Backgammon price\n" );
@@ -891,9 +899,10 @@ extern void CommandShowMarketWindow ( char * sz ) {
   cubeinfo ci;
 
   float arOutput[ NUM_OUTPUTS ];
-  float rG[ 2 ], rBG[ 2 ];
   float arDP1[ 2 ], arDP2[ 2 ],arCP1[ 2 ], arCP2[ 2 ];
   float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain, r;
+
+  float aarRates[ 2 ][ 2 ];
 
   int i, fAutoRedouble[ 2 ], afDead[ 2 ], anNormScore[ 2 ];
 
@@ -903,6 +912,14 @@ extern void CommandShowMarketWindow ( char * sz ) {
     return;
   }
       
+#if USE_GTK
+    if( fX ) {
+      GTKShowTheory( 0 ); 
+      return;
+    }
+#endif
+
+
   /* Show market window */
 
   /* First, get gammon and backgammon percentages */
@@ -910,38 +927,38 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
   /* see if ratios are given on command line */
 
-  rG[ 0 ] = ParseReal ( &sz );
+  aarRates[ 0 ][ 0 ] = ParseReal ( &sz );
 
-  if ( rG[ 0 ] >= 0 ) {
+  if ( aarRates[ 0 ][ 0 ] >= 0 ) {
 
     /* read the others */
 
-    rG[ 1 ]  = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
-    rBG[ 0 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
-    rBG[ 1 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
+    aarRates[ 1 ][ 0 ]  = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
+    aarRates[ 0 ][ 1 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
+    aarRates[ 1 ][ 1 ] = ( (r = ParseReal ( &sz ) ) > 0.0) ? r : 0.0;
 
     /* If one of the ratios are larger than 1 we assume the user
        has entered 25.1 instead of 0.251 */
 
-    if ( rG[ 0 ] > 1.0 || rG[ 1 ] > 1.0 ||
-         rBG[ 1 ] > 1.0 || rBG[ 1 ] > 1.0 ) {
-      rG[ 0 ]  /= 100.0;
-      rG[ 1 ]  /= 100.0;
-      rBG[ 0 ] /= 100.0;
-      rBG[ 1 ] /= 100.0;
+    if ( aarRates[ 0 ][ 0 ] > 1.0 || aarRates[ 1 ][ 0 ] > 1.0 ||
+         aarRates[ 1 ][ 1 ] > 1.0 || aarRates[ 1 ][ 1 ] > 1.0 ) {
+      aarRates[ 0 ][ 0 ]  /= 100.0;
+      aarRates[ 1 ][ 0 ]  /= 100.0;
+      aarRates[ 0 ][ 1 ] /= 100.0;
+      aarRates[ 1 ][ 1 ] /= 100.0;
     }
 
     /* Check that ratios are 0 <= ratio <= 1 */
 
     for ( i = 0; i < 2; i++ ) {
-      if ( rG[ i ] > 1.0 ) {
+      if ( aarRates[ i ][ 0 ] > 1.0 ) {
         outputf ( "illegal gammon ratio for player %i: %f\n",
-                  i, rG[ i ] );
+                  i, aarRates[ i ][ 0 ] );
         return ;
       }
-      if ( rBG[ i ] > 1.0 ) {
+      if ( aarRates[ i ][ 1 ] > 1.0 ) {
         outputf ( "illegal backgammon ratio for player %i: %f\n",
-                  i, rBG[ i ] );
+                  i, aarRates[ i ][ 1 ] );
         return ;
       }
     }
@@ -951,48 +968,28 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     arOutput[ OUTPUT_WIN ] = 0.5;
     arOutput[ OUTPUT_WINGAMMON ] =
-      ( rG[ ms.fMove ] + rBG[ ms.fMove ] ) * 0.5;
+      ( aarRates[ ms.fMove ][ 0 ] + aarRates[ ms.fMove ][ 1 ] ) * 0.5;
     arOutput[ OUTPUT_LOSEGAMMON ] =
-      ( rG[ !ms.fMove ] + rBG[ !ms.fMove ] ) * 0.5;
-    arOutput[ OUTPUT_WINBACKGAMMON ] = rBG[ ms.fMove ] * 0.5;
-    arOutput[ OUTPUT_LOSEBACKGAMMON ] = rBG[ !ms.fMove ] * 0.5;
+      ( aarRates[ !ms.fMove ][ 0 ] + aarRates[ !ms.fMove ][ 1 ] ) * 0.5;
+    arOutput[ OUTPUT_WINBACKGAMMON ] = aarRates[ ms.fMove ][ 1 ] * 0.5;
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = aarRates[ !ms.fMove ][ 1 ] * 0.5;
 
   } else {
 
     /* calculate them based on current position */
 
-    if( EvaluatePosition( ms.anBoard, arOutput, &ci, &esEvalCube.ec ) < 0 )
+    if ( getCurrentGammonRates ( aarRates, arOutput, ms.anBoard, 
+                                 &ci, &esEvalCube.ec ) < 0 ) 
       return;
-
-    if ( arOutput[ OUTPUT_WIN ] > 0.0 ) {
-      rG[ ms.fMove ] = ( arOutput[ OUTPUT_WINGAMMON ] -
-                      arOutput[ OUTPUT_WINBACKGAMMON ] ) /
-        arOutput[ OUTPUT_WIN ];
-      rBG[ ms.fMove ] = arOutput[ OUTPUT_WINBACKGAMMON ] /
-        arOutput[ OUTPUT_WIN ];
-    }
-    else {
-      rG[ ms.fMove ] = 0.0;
-      rBG[ ms.fMove ] = 0.0;
-    }
-
-    if ( arOutput[ OUTPUT_WIN ] < 1.0 ) {
-      rG[ !ms.fMove ] = ( arOutput[ OUTPUT_LOSEGAMMON ] -
-                        arOutput[ OUTPUT_LOSEBACKGAMMON ] ) /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
-      rBG[ !ms.fMove ] = arOutput[ OUTPUT_LOSEBACKGAMMON ] /
-        ( 1.0 - arOutput[ OUTPUT_WIN ] );
-    }
-    else {
-      rG[ !ms.fMove ] = 0.0;
-      rBG[ !ms.fMove ] = 0.0;
-    }
 
   }
 
+
+
   for ( i = 0; i < 2; i++ ) 
     outputf ( "Player %-25s: gammon rate %6.2f%%, bg rate %6.2f%%\n",
-              ap[ i ].szName, rG[ i ] * 100.0, rBG[ i ] * 100.0);
+              ap[ i ].szName, 
+              aarRates[ i ][ 0 ] * 100.0, aarRates[ i ][ 1 ] * 100.0);
 
 
   if ( ms.nMatchTo ) {
@@ -1014,45 +1011,45 @@ extern void CommandShowMarketWindow ( char * sz ) {
       /* MWC for "double, take; win" */
 
       rDTW =
-        (1.0 - rG[ i ] - rBG[ i ]) *
+        (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
         GET_MET ( anNormScore[ i ] - 2 * ms.nCube - 1,
                   anNormScore[ !i ] - 1, aafMET )
-        + rG[ i ] * GET_MET ( anNormScore[ i ] - 4 * ms.nCube - 1,
+        + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 4 * ms.nCube - 1,
                               anNormScore[ ! i ] - 1, aafMET )
-        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 6 * ms.nCube - 1,
+        + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 6 * ms.nCube - 1,
                                anNormScore[ ! i ] - 1, aafMET );
 
       /* MWC for "no double, take; win" */
 
       rNDW =
-        (1.0 - rG[ i ] - rBG[ i ]) *
+        (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
         GET_MET ( anNormScore[ i ] - ms.nCube - 1,
                   anNormScore[ !i ] - 1, aafMET )
-        + rG[ i ] * GET_MET ( anNormScore[ i ] - 2 * ms.nCube - 1,
+        + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 2 * ms.nCube - 1,
                               anNormScore[ ! i ] - 1, aafMET )
-        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 3 * ms.nCube - 1,
+        + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 3 * ms.nCube - 1,
                                anNormScore[ ! i ] - 1, aafMET );
 
       /* MWC for "Double, take; lose" */
 
       rDTL =
-        (1.0 - rG[ ! i ] - rBG[ ! i ]) *
+        (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
         GET_MET ( anNormScore[ i ] - 1,
                   anNormScore[ !i ] - 2 * ms.nCube - 1, aafMET )
-        + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+        + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
                               anNormScore[ ! i ] - 4 * ms.nCube - 1, aafMET )
-        + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+        + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
                                anNormScore[ ! i ] - 6 * ms.nCube - 1, aafMET );
 
       /* MWC for "No double; lose" */
 
       rNDL =
-        (1.0 - rG[ ! i ] - rBG[ ! i ]) *
+        (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
         GET_MET ( anNormScore[ i ] - 1,
                   anNormScore[ !i ] - 1 * ms.nCube - 1, aafMET )
-        + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+        + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
                               anNormScore[ ! i ] - 2 * ms.nCube - 1, aafMET )
-        + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+        + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
                                anNormScore[ ! i ] - 3 * ms.nCube - 1, aafMET );
 
       /* MWC for "Double, pass" */
@@ -1080,22 +1077,22 @@ extern void CommandShowMarketWindow ( char * sz ) {
         /* With redouble */
 
         rDTW =
-          (1.0 - rG[ i ] - rBG[ i ]) *
+          (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
           GET_MET ( anNormScore[ i ] - 4 * ms.nCube - 1,
                     anNormScore[ !i ] - 1, aafMET )
-          + rG[ i ] * GET_MET ( anNormScore[ i ] - 8 * ms.nCube - 1,
+          + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 8 * ms.nCube - 1,
                                 anNormScore[ ! i ] - 1, aafMET )
-          + rBG[ i ] * GET_MET ( anNormScore[ i ] - 12 * ms.nCube - 1,
+          + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 12 * ms.nCube - 1,
                                  anNormScore[ ! i ] - 1, aafMET );
 
         rDTL =
-          (1.0 - rG[ ! i ] - rBG[ ! i ]) *
+          (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
           GET_MET ( anNormScore[ i ] - 1,
                     anNormScore[ !i ] - 4 * ms.nCube - 1, aafMET )
-          + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+          + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
                                   anNormScore[ ! i ] - 8 * ms.nCube - 1,
 				  aafMET )
-          + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+          + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
                                    anNormScore[ ! i ] - 12 * ms.nCube - 1,
 				   aafMET );
 
@@ -1152,86 +1149,31 @@ extern void CommandShowMarketWindow ( char * sz ) {
      *          (3) improve layout?
      */
 
-    float arTPDead[ 2 ], arTPLive[ 2 ]; /* take points */
-    float arBPDead[ 2 ], arBPLive[ 2 ]; /* beaver points */
-    float arRPDead[ 2 ], arRPLive[ 2 ]; /* raccon points */
-    float arDPDead[ 2 ], arDPLive[ 2 ]; /* double points */
-    float arCPDead[ 2 ], arCPLive[ 2 ]; /* cash points */
-    float arTGDead[ 2 ], arTGLive[ 2 ]; /* too good point */
-    float arCLV[ 2 ];/* average cubeless value of games won */
-    float rW, rL;
-    int i;
+    const char *aszMoneyPointLabel[] = {
+      "Take Point (TP)",
+      "Beaver Point (BP)",
+      "Raccoon Point (RP)",
+      "Initial Double Point (IDP)",
+      "Redouble Point (RDP)",
+      "Cash Point (CP)",
+      "Too good Point (TP)" };
 
-    for ( i = 0; i < 2; i++ )
-      arCLV[ i ] = 1.0 + rG[ i ] + rBG[ i ];
+    float aaarPoints[ 2 ][ 7 ][ 2 ];
 
-    GetMatchStateCubeInfo( &ci, &ms );
-    
+    int i, j;
+
+    getMoneyPoints ( aaarPoints, ci.fJacoby, ci.fBeavers, aarRates );
+
     for ( i = 0; i < 2; i++ ) {
 
-      /* Determine rW and rL from Rick's formulae */
-
-      rW = arCLV[ i ];
-      rL = arCLV[ ! i ];
-
-      /* Determine points */
-
-      arTPDead[ i ] = ( rL - 0.5 ) / ( rW + rL );
-      arBPDead[ i ] = rL / ( rW + rL );
-      arRPDead[ i ] = rL / ( rW + rL );
-      
-      arTPLive[ i ] = ( rL - 0.5 ) / ( rW + rL + 0.5 );
-      arBPLive[ i ] = rL / ( rW + rL + 0.5 );
-      arRPLive[ i ] = ( rL + 0.5 ) / ( rW + rL + 0.5 );
-      
-      if ( ci.fCubeOwner == -1 ) {
-        /* initial double point */
-        if ( ! ci.fJacoby ) {
-          /* without Jacoby */
-          arDPDead[ i ] = rL / ( rW + rL );
-        }
-        else {
-          /* with Jacoby */
-          
-          if ( ci.fBeavers )
-            /* with beavers */
-            arDPDead[ i ] = ( rL - 0.25 ) / ( rL + rW - 0.5 );
-          else
-            /* without beavers */
-            arDPDead[ i ] = ( rL - 0.5 ) / ( rL + rW - 1.0 );
-
-        }
-
-      }
-      else {
-        /* redouble point */
-        arDPDead[ i ] = rL / ( rW + rL );
-
-      }
-
-      arDPLive[ i ] = ( rL + 1.0 ) / ( rL + rW + 0.5 );
-
-      arCPDead[ i ] = ( rL + 0.5 ) / ( rW + rL );
-      arCPLive[ i ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
-      
-      arTGDead[ i ] = ( rL + 1.0 ) / ( rW + rL );
-      arTGLive[ i ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
-      
       outputf ("\nPlayer %s cube parameters:\n\n", ap[ i ].szName );
-      outputl ( "Cube parameter     Dead Cube   Live Cube\n" );
+      outputl ( "Cube parameter               Dead Cube    Live Cube\n" );
 
-      outputf ( "Take point, TP     %6.2f%%     %6.2f%%\n",
-                arTPDead[ i ] * 100.0, arTPLive[ i ] * 100.0 );
-      outputf ( "Beaver point, BP   %6.2f%%     %6.2f%%\n",
-                arBPDead[ i ] * 100.0, arBPLive[ i ] * 100.0 );
-      outputf ( "Raccoon point, RP  %6.2f%%     %6.2f%%\n",
-                arRPDead[ i ] * 100.0, arRPLive[ i ] * 100.0 );
-      outputf ( "Double point, DP   %6.2f%%     %6.2f%%\n",
-                arDPDead[ i ] * 100.0, arDPLive[ i ] * 100.0 );
-      outputf ( "Cash point, CP     %6.2f%%     %6.2f%%\n",
-                arCPDead[ i ] * 100.0, arCPLive[ i ] * 100.0 );
-      outputf ( "Too good point, CP %6.2f%%     %6.2f%%\n",
-                arTGDead[ i ] * 100.0, arTGLive[ i ] * 100.0 );
+      for ( j = 0; j < 7; j++ ) 
+        outputf ( "%-27s  %7.3f%%     %7.3f%%\n",
+                  aszMoneyPointLabel[ j ],
+                  aaarPoints[ i ][ j ][ 0 ] * 100.0f,
+                  aaarPoints[ i ][ j ][ 1 ] * 100.0f );
 
     }
 
