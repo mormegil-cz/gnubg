@@ -1263,13 +1263,13 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
 
   if ( pms->nMatchTo )
     sprintf ( szHeader,
-              _("%s (white, %d pts) vs. %s (red, %d pts) (Match to %d)"),
+              _("%s (red, %d pts) vs. %s (black, %d pts) (Match to %d)"),
               ap [ 0 ].szName, pms->anScore[ 0 ],
               ap [ 1 ].szName, pms->anScore[ 1 ],
               pms->nMatchTo );
   else
     sprintf ( szHeader,
-              _("%s (white, %d pts) vs. %s (red, %d pts) (money game)"),
+              _("%s (red, %d pts) vs. %s (black, %d pts) (money game)"),
               ap [ 0 ].szName, pms->anScore[ 0 ],
               ap [ 1 ].szName, pms->anScore[ 1 ] );
 
