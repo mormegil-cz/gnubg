@@ -283,6 +283,36 @@
   
    </board-design>
 
+   <board-design>
+  
+     <about> 
+         <title>Jellyfish</title>
+         <author>Oeystein Johansen</author>
+         <preview-file>boards/jellyfish.xpm</preview-file>
+      </about>
+  
+      <design>
+         board=#A5ADAF;0.00 
+         border=#2F3030
+         translucent=y
+         wood=paint
+         hinges=n
+         light=-1;90 
+         shape=0.0
+         chequers0=#FB3232;1.00;1.50;0.00;20.10 
+         chequers1=#7BE0E3;1.00;1.50;0.00;30.00
+         dice0=#FF3838;0.00;30.00;n 
+         dice1=#00FFFF;0.00;30.00;n 
+         dot0=#010101
+         dot1=#010101 
+         cube=#E5E5E5 
+         points0=#FFFEFE;0.00 
+         points1=#010101;0.09
+      </design> 
+  
+   </board-design>
+
+
 
 </board-designs>
 
