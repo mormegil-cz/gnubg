@@ -124,7 +124,7 @@ static void realize(GtkWidget *widget, void* arg)
 #endif
 }
 
-void DrawBar(double col[4], float x, float y, float first, float second)
+void DrawBar(float col[4], float x, float y, float first, float second)
 {
 	glPushMatrix();
 	glTranslatef(x, y, 0);
@@ -160,14 +160,28 @@ void DrawBar(double col[4], float x, float y, float first, float second)
 	glPopMatrix();
 }
 
+void DrawColourBar(int player, float x, float y, float first, float second)
+{
+	float col[4];
+	int i;
+	for (i = 0; i < 4; i++)
+	{
+		if (rdAppearance.fDisplayType == DT_2D)
+			col[i] = rdAppearance.aarColour[player][i];
+		else
+			col[i] = rdAppearance.rdChequerMat[player].ambientColour[i];
+	}
+	DrawBar(col, x, y, first, second);
+}
+
 void DrawBars(int num, float **values, int total)
 {
 	float x = NUM_WIDTH + RES_WIDTH * num;
 	if (total)
 		x += TOTAL_GAP;
 
-	DrawBar(rdAppearance.aarColour[0], x + INTER_GAP / 2.0f, NUM_HEIGHT, values[0][0], values[0][1]);
-	DrawBar(rdAppearance.aarColour[1], x + INTER_GAP / 2.0f + BAR_WIDTH + MID_GAP, NUM_HEIGHT, values[1][0], values[1][1]);
+	DrawColourBar(0, x + INTER_GAP / 2.0f, NUM_HEIGHT, values[0][0], values[0][1]);
+	DrawColourBar(1, x + INTER_GAP / 2.0f + BAR_WIDTH + MID_GAP, NUM_HEIGHT, values[1][0], values[1][1]);
 }
 
 void PrintBottomNumber(int num, float size, float x, float y)
