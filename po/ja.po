@@ -149,7 +149,7 @@ msgstr "ムーブの解析ができません!"
 
 #: analysis.c:1876
 msgid "Cannot clear analysis on this move"
-msgstr ""
+msgstr "このムーブの解析を消去できません"
 
 #: bearoff.c:83 gtkexport.c:712 gtkgame.c:2772 gtkgame.c:5378 gtkgame.c:7062
 #: gtkgame.c:7475
@@ -193,7 +193,7 @@ msgstr "ディスク上の両側ベアオフデータベース"
 
 #: bearoff.c:1036
 msgid "database includes both cubeful and cubeless equities"
-msgstr ""
+msgstr "データベースはキューブフル・キューブレスの両方のエクイティを含んでいます"
 
 #: bearoff.c:1037
 msgid "cubeless database"
@@ -312,6 +312,8 @@ msgid ""
 "\n"
 "Effective pip count:\n"
 msgstr ""
+"\n"
+"エフェクティブピップカウント:\n"
 
 #: bearoff.c:1260
 msgid "\tPlayer\tOpponent\n"
@@ -423,7 +425,7 @@ msgstr "%s: おかしなポジションデータです"
 #: database.c:362
 msgid "There are no unevaluated positions in the database to roll out."
 msgstr ""
-"ロールアウトするのにデータベースで評価されていないポジションがありません。"
+"ロールアウトするのにデータベースで未評価のポジションがありません。"
 
 #: database.c:378
 msgid ""
@@ -466,7 +468,7 @@ msgstr "エクイティ　エラー %5.3f\n"
 
 #: database.c:631
 msgid "There are no target evaluations in the database to verify against."
-msgstr "データベースに確かめる目的の評価がありません。"
+msgstr "データベースに確かめる目的の評価がありません。(?)"
 
 #: database.c:639
 msgid ""
@@ -502,7 +504,7 @@ msgstr "MD5"
 
 #: dice.c:131 gtkoptions.c:184
 msgid "Mersenne Twister"
-msgstr "Mersenne Twister"
+msgstr "メルセンヌ・ツイスター"
 
 #: dice.c:132
 msgid "www.random.org"
@@ -562,7 +564,7 @@ msgstr "この乱数生成器はシードを見ることが出来ません。"
 #: dice.c:701
 #, c-format
 msgid "Fetching %d random numbers from <www.random.org>\n"
-msgstr "乱数 %d を <www.random.org> から取ってきます。\n"
+msgstr "%d個の乱数を <www.random.org> から取ってきます。\n"
 
 #: dice.c:758
 msgid "Done."
@@ -582,7 +584,7 @@ msgstr "%s を共有ライブラリからロードできません。"
 #: dice.c:1021
 #, c-format
 msgid "Rewinding dice file (%s)\n"
-msgstr ""
+msgstr "ダイスファイルを巻き戻し (%s)\n"
 
 #: drawboard.c:70
 msgid " GNU Backgammon  Position ID: "
@@ -821,23 +823,23 @@ msgstr ""
 #: eval.c:3955 gtkchequer.c:836 gtkcube.c:335 gtkrace.c:531 html.c:327
 #: progress.c:687
 msgid "Win"
-msgstr ""
+msgstr "勝ち"
 
 #: eval.c:3955 gtkcube.c:335
 msgid "W(g)"
-msgstr ""
+msgstr "勝ち(ギャモン以上)"
 
 #: eval.c:3955 gtkcube.c:335
 msgid "W(bg)"
-msgstr ""
+msgstr "勝ち(バックギャモン)"
 
 #: eval.c:3955 gtkcube.c:336
 msgid "L(g)"
-msgstr ""
+msgstr "負け(ギャモン以上)"
 
 #: eval.c:3955 gtkcube.c:336
 msgid "L(bg)"
-msgstr ""
+msgstr "負け(バックギャモン)"
 
 #: eval.c:3957 gtkchequer.c:98 gtkrolls.c:225 html.c:2485 show.c:2262
 msgid "Equity"
@@ -1196,7 +1198,7 @@ msgstr "正しいキューブアクション:"
 
 #: format.c:978
 msgid "Rollout details:\n"
-msgstr ""
+msgstr "ロールアウト詳細:\n"
 
 #: format.c:1016
 #, c-format
@@ -1234,7 +1236,7 @@ msgstr "ムーブ総計"
 
 #: formatgs.c:157
 msgid "Unforced moves"
-msgstr "強制されないムーブ"
+msgstr "非強制ムーブ"
 
 #: formatgs.c:170 formatgs.c:278 formatgs.c:397
 msgid "Error rate (total)"
@@ -1373,9 +1375,8 @@ msgid "Advantage (actual) in ppg"
 msgstr ""
 
 #: formatgs.c:546 formatgs.c:548
-#, c-format
 msgid "95% confidence interval (ppg)"
-msgstr ""
+msgstr "95% 信頼区間 (ppg)"
 
 #: formatgs.c:547
 msgid "Advantage (luck adjusted) in ppg"
@@ -1600,7 +1601,7 @@ msgstr ""
 
 #: gnubg.c:498
 msgid "<URL>"
-msgstr ""
+msgstr "<URL>"
 
 #: gnubg.c:499
 msgid "<fraction>"
@@ -2148,7 +2149,7 @@ msgstr "マッチスコアによってクロフォードゲームを採用する"
 
 #: gnubg.c:926
 msgid "Control automatic doubles during (money) session play"
-msgstr "（マネー）セッションでオートマチックダブルを採用する"
+msgstr "(マネー)セッションでオートマチックダブルを採用する"
 
 #: gnubg.c:928
 msgid "Select whether to start new games after wins"
@@ -2156,7 +2157,7 @@ msgstr "ゲーム勝利後、新しいゲームを始めるかどうか選択する"
 
 #: gnubg.c:930
 msgid "Select whether forced moves will be made automatically"
-msgstr "フォースドムーブを自動的に行うか指定する"
+msgstr "強制ムーブを自動的に行うか指定する"
 
 #: gnubg.c:932
 msgid "Control whether dice will be rolled automatically"
@@ -2388,7 +2389,7 @@ msgstr "MD5 関数を使用する"
 
 #: gnubg.c:1084
 msgid "Use the Mersenne Twister generator"
-msgstr "Mersenne Twister 法を使用する"
+msgstr "メルセンヌ・ツイスター法を使用する"
 
 #: gnubg.c:1087
 msgid "Use random numbers fetched from <www.random.org>"
@@ -2873,7 +2874,7 @@ msgstr "Bot マッチ勝ち"
 #: gnubg.c:1484 gtkgame.c:1374 gtkgame.c:1960 latex.c:488 postscript.c:1189
 #: sound.c:84
 msgid "Drop"
-msgstr "ドロップ・拒否"
+msgstr "パス"
 
 #: gnubg.c:1486
 msgid "Exiting of GNU Backgammon"
@@ -3582,7 +3583,7 @@ msgstr "`drop' の同義語"
 
 #: gnubg.c:1881
 msgid "Force the computer to move"
-msgstr "コンピュータのムーブを強制する"
+msgstr "コンピュータのムーブを強制する(?)"
 
 #: gnubg.c:1882
 msgid "Step backward within the game"
@@ -3602,7 +3603,7 @@ msgstr ""
 
 #: gnubg.c:1892
 msgid "Offer to end the current game"
-msgstr "現在のゲームを終わることを申し込む"
+msgstr "現在のゲームを終わることを申し込む(?)"
 
 #: gnubg.c:1894
 msgid "Roll the dice"
@@ -3758,12 +3759,12 @@ msgstr "理解できない keyword です。`%s' -- try `help'.\n"
 #: text.c:88 text.c:470
 #, c-format
 msgid "Rolled %d%d"
-msgstr "出た目は %d%d"
+msgstr "出目は %d%d"
 
 #: gnubg.c:2864
 #, c-format
 msgid "Rolled %d%d (%s):\n"
-msgstr "出た目は %d%d (%s):\n"
+msgstr "出目は %d%d (%s):\n"
 
 #: gnubg.c:2931 gnubg.c:3995
 msgid "No game in progress."
@@ -3811,7 +3812,7 @@ msgstr "%d ポイントマッチ"
 #: gnubg.c:3016 text.c:121
 #, c-format
 msgid ", resigns %s"
-msgstr ", 投了 %s"
+msgstr ", %s で投了"
 
 #: gnubg.c:3069
 #, c-format
@@ -3937,7 +3938,7 @@ msgstr "了承"
 
 #: gnubg.c:3634 gnubg.c:3649
 msgid "Reject"
-msgstr "拒否・却下"
+msgstr "拒否"
 
 #: gnubg.c:3642
 #, c-format
@@ -3983,15 +3984,15 @@ msgstr "パスのマッチ勝率: %6.2f%%\n"
 
 #: gnubg.c:3705
 msgid "Your proper cube action: Beaver!\n"
-msgstr "あなたの正しいキューブアクションは：ビーバー!\n"
+msgstr "あなたの正しいキューブアクションは: ビーバー!\n"
 
 #: gnubg.c:3707
 msgid "Your proper cube action: Take.\n"
-msgstr "あなたの正しいキューブアクションは：テイク。\n"
+msgstr "あなたの正しいキューブアクションは: テイク。\n"
 
 #: gnubg.c:3709
 msgid "Your proper cube action: Pass.\n"
-msgstr "あなたの正しいキューブアクションは：パス。\n"
+msgstr "あなたの正しいキューブアクションは: パス。\n"
 
 #: gnubg.c:3749
 msgid "Considering moves..."
@@ -4147,7 +4148,7 @@ msgstr "設定は %s に保存されました。\n"
 
 #: gnubg.c:5521
 msgid "standard output stream"
-msgstr "標準の出力ストリーム"
+msgstr "標準出力"
 
 #: gnubg.c:5547
 #, c-format
@@ -4285,7 +4286,7 @@ msgstr "Python"
 
 #: gnubg.c:7403
 msgid "Board Images"
-msgstr ""
+msgstr "ボード画像"
 
 #: gnubg.c:7482 gnubg.c:7514
 msgid "Loading"
@@ -4336,7 +4337,7 @@ msgstr "ファイル \"%s\" はすでに存在します。上書きしますか？"
 
 #: gnubg.c:8024
 msgid "%Y-%m-%d-%H%M"
-msgstr ""
+msgstr "%Y-%m-%d-%H%M"
 
 #: gnubg.c:8172
 msgid "You may be about to make a very bad play. Are you sure? "
@@ -4377,7 +4378,7 @@ msgstr ""
 
 #: gnubgmodule.c:530
 msgid "invalid matchlength"
-msgstr ""
+msgstr "不正なマッチのポイント数"
 
 #: gnubgmodule.c:631
 msgid "invalid positionid"
@@ -4389,7 +4390,7 @@ msgstr "不正なチェッカーまたはポイント"
 
 #: gnubgmodule.c:747
 msgid "invalid position number"
-msgstr ""
+msgstr "不正なポジションナンバー"
 
 #: gtkbearoff.c:196
 msgid "Player on roll:"
@@ -4409,16 +4410,16 @@ msgstr ""
 
 #: gtkbearoff.c:314
 msgid "Two-sided (disk)"
-msgstr ""
+msgstr "両側 (ディスク)"
 
 #: gtkbearoff.c:321
 msgid "Two-sided (memory)"
-msgstr ""
+msgstr "両側 (メモリ)"
 
 #: gtkboard.c:528
 #, c-format
 msgid "(no hit: %d rolls)"
-msgstr ""
+msgstr "(ノーヒット: %d rolls) (?)"
 
 #: gtkboard.c:575
 msgid "Illegal move"
@@ -4431,11 +4432,11 @@ msgstr "(編集中)"
 #: gtkboard.c:614
 #, c-format
 msgid "Return hits: %s\n"
-msgstr ""
+msgstr "リターンヒット: %s\n"
 
 #: gtkboard.c:2297
 msgid "unlimited"
-msgstr ""
+msgstr "無制限"
 
 #: gtkboard.c:3355
 #, c-format
@@ -4492,20 +4493,20 @@ msgstr ""
 
 #: gtkchequer.c:596
 msgid "Details"
-msgstr ""
+msgstr "詳細"
 
 #: gtkchequer.c:641 gtkcube.c:918
 #, c-format
 msgid "Evaluate play on cubeful %d-ply"
-msgstr ""
+msgstr "キューブフル %d-ply で評価"
 
 #: gtkchequer.c:714 gtkchequer.c:715
 msgid "Rollout chequer play with current settings"
-msgstr ""
+msgstr "現在の設定でチェッカープレイをロールアウト"
 
 #: gtkchequer.c:718 gtkchequer.c:719
 msgid "Evaluate chequer play with current settings"
-msgstr ""
+msgstr "現在の設定でチェッカープレイを評価"
 
 #: gtkchequer.c:722 gtkchequer.c:723 gtkcube.c:977 gtkcube.c:978
 msgid "Modify rollout settings"
@@ -4517,7 +4518,7 @@ msgstr "評価設定変更"
 
 #: gtkchequer.c:730 gtkchequer.c:731 gtkcube.c:985 gtkcube.c:986
 msgid "Toggle output as MWC or equity"
-msgstr "MWC かエクイティの出力切り替え"
+msgstr "MWC かエクイティかの出力切り替え"
 
 #: gtkchequer.c:734 gtkchequer.c:735
 msgid "Copy selected moves to clipboard"
@@ -4525,7 +4526,7 @@ msgstr "選択したムーブをクリップボードにコピー"
 
 #: gtkchequer.c:738 gtkchequer.c:739
 msgid "Move the selected move"
-msgstr ""
+msgstr "選択したムーブを表示"
 
 #: gtkchequer.c:742 gtkcube.c:993
 msgid "Show Sho Sengoku Temperature Map of position after selected move"
@@ -4533,19 +4534,19 @@ msgstr ""
 
 #: gtkchequer.c:834 gtkchequer.c:931
 msgid "Rank"
-msgstr ""
+msgstr "順位(?)"
 
 #: gtkchequer.c:835 gtkchequer.c:932
 msgid "Type"
-msgstr ""
+msgstr "評価設定"
 
 #: gtkchequer.c:837 gtkrace.c:532 html.c:328
 msgid "W g"
-msgstr ""
+msgstr "ギャモン以上勝ち"
 
 #: gtkchequer.c:838 gtkrace.c:533 html.c:329
 msgid "W bg"
-msgstr ""
+msgstr "バックギャモン勝ち"
 
 #: gtkchequer.c:839 gtkcube.c:336 html.c:330
 msgid "Lose"
@@ -4553,15 +4554,15 @@ msgstr "負け"
 
 #: gtkchequer.c:840 gtkrace.c:534 html.c:331
 msgid "L g"
-msgstr ""
+msgstr "ギャモン以上負け"
 
 #: gtkchequer.c:841 gtkrace.c:535 html.c:332
 msgid "L bg"
-msgstr ""
+msgstr "バックギャモン負け"
 
 #: gtkchequer.c:843 gtkchequer.c:934
 msgid "Diff."
-msgstr "違い"
+msgstr "差."
 
 #: gtkcolour.c:167
 msgid "Choose a colour"
@@ -4819,15 +4820,15 @@ msgstr "GNU Backgammon - 棋譜"
 
 #: gtkgame.c:1163 gtkgame.c:8017
 msgid "Move back to the previous game"
-msgstr ""
+msgstr "前のゲームに戻る"
 
 #: gtkgame.c:1168
 msgid "Move back to the previous roll"
-msgstr ""
+msgstr "前のロールに戻る"
 
 #: gtkgame.c:1173
 msgid "Move ahead to the next roll"
-msgstr ""
+msgstr "次のロール似進む"
 
 #: gtkgame.c:1178 gtkgame.c:8021
 msgid "Move ahead to the next game"
@@ -4835,11 +4836,11 @@ msgstr "次のゲームに進む"
 
 #: gtkgame.c:1184
 msgid "Move back to the previous marked decision"
-msgstr ""
+msgstr "前のマーク済アクションに戻る"
 
 #: gtkgame.c:1190
 msgid "Move ahead to the next marked decision"
-msgstr ""
+msgstr "次のマーク済アクションに進む"
 
 #: gtkgame.c:1194
 msgid "(no game)"
@@ -4847,7 +4848,7 @@ msgstr "(無効試合)"
 
 #: gtkgame.c:1205 html.c:2474
 msgid "#"
-msgstr ""
+msgstr "#"
 
 #: gtkgame.c:1249
 msgid "99"
@@ -4891,11 +4892,11 @@ msgstr "偏差: "
 
 #: gtkgame.c:1761 gtkgame.c:1770
 msgid "Didn't double"
-msgstr "ダブルしてはならない(?)"
+msgstr "ノーダブル"
 
 #: gtkgame.c:1834 gtkgame.c:1841
 msgid "Moved "
-msgstr "移動"
+msgstr "ムーブ "
 
 #: gtkgame.c:1889 gtkgame.c:5281 gtkgame.c:5383 gtkgame.c:5629 gtkgame.c:5726
 #: gtkgame.c:6044 gtkgame.c:8198 gtkoptions.c:454
@@ -4912,12 +4913,12 @@ msgstr "GNU Backgammon はビーバーもラクーンも解析できません"
 
 #: gtkgame.c:2044
 msgid "No analysis available."
-msgstr ""
+msgstr "有効な解析がありません。"
 
 #: gtkgame.c:2181 gtkgame.c:8044
 #, c-format
 msgid "Game %d: %s %d, %s %d"
-msgstr ""
+msgstr "ゲーム %d: %s %d, %s %d"
 
 #: gtkgame.c:2410
 msgid "/_File"
@@ -5744,11 +5745,11 @@ msgstr "指導モード"
 
 #: gtkgame.c:3870
 msgid "GNU Backgammon - New"
-msgstr ""
+msgstr "GNU Backgammon - 新規"
 
 #: gtkgame.c:3894
 msgid "GNU Backgammon - New Weights"
-msgstr ""
+msgstr "GNU Backgammon - 新規 Weights"
 
 #: gtkgame.c:3895
 msgid "Number of hidden nodes:"
@@ -6096,7 +6097,7 @@ msgstr "先読み"
 
 #: gtkgame.c:5000
 msgid "Plies:"
-msgstr "プライ:"
+msgstr "ply:"
 
 #: gtkgame.c:5013
 #, c-format
@@ -6182,7 +6183,7 @@ msgstr "人間"
 
 #: gtkgame.c:5413
 msgid "Pubeval"
-msgstr ""
+msgstr "Pubeval"
 
 #: gtkgame.c:5419
 msgid "External"
@@ -6367,7 +6368,7 @@ msgstr "初期ポジションからロールアウト"
 
 #: gtkgame.c:6420
 msgid "Seed:"
-msgstr "シード"
+msgstr "シード:"
 
 #: gtkgame.c:6427
 msgid "Cube decisions use same settings as Chequer play"
@@ -6548,7 +6549,7 @@ msgstr "最初のゲームに移動"
 
 #: gtkgame.c:8025
 msgid "Move ahead to last game"
-msgstr ""
+msgstr "最後のゲームに移動"
 
 #: gtkgame.c:8029
 #, c-format
@@ -6561,7 +6562,7 @@ msgstr "総合"
 
 #: gtkgame.c:8234
 msgid "Graph"
-msgstr ""
+msgstr "グラフ"
 
 #: gtkgame.c:8235
 msgid ""
@@ -6637,11 +6638,11 @@ msgstr "消去"
 
 #: gtkgame.c:8564
 msgid "Erase All"
-msgstr ""
+msgstr "すべて消去"
 
 #: gtkgame.c:8684 record.c:532 record.c:570
 msgid "No player records found."
-msgstr ""
+msgstr "プレイヤーの記録が見つかりません。"
 
 #: gtkgame.c:8729
 msgid "GNU Backgammon - Match information"
@@ -6654,7 +6655,7 @@ msgstr "%s のレーティング:"
 
 #: gtkgame.c:8755
 msgid "Date:"
-msgstr ""
+msgstr "日時:"
 
 #: gtkgame.c:8758
 msgid "Event:"
@@ -6666,7 +6667,7 @@ msgstr ""
 
 #: gtkgame.c:8764
 msgid "Place:"
-msgstr ""
+msgstr "場所:"
 
 #: gtkgame.c:8767
 msgid "Annotator:"
@@ -6674,7 +6675,7 @@ msgstr "注記"
 
 #: gtkgame.c:8770
 msgid "Comments:"
-msgstr ""
+msgstr "コメント:"
 
 #: gtkgame.c:8910
 msgid "GNU Backgammon - Speed estimate"
@@ -6702,7 +6703,7 @@ msgstr "校正中:"
 
 #: gtkgame.c:8978
 msgid "       (n/a)       "
-msgstr ""
+msgstr "(n/a)"
 
 #: gtkgame.c:9034
 msgid "Change Disk"
@@ -6768,15 +6769,15 @@ msgstr ""
 
 #: gtkmovefilter.c:345
 msgid "Predefined move filters:"
-msgstr "あらかじめ定義した move filter:"
+msgstr "あらかじめ定義したムーブフィルタ:"
 
 #: gtkmovefilter.c:501
 msgid "GNU Backgammon - Move filter setup"
-msgstr "GNU Backgammon - Move filter 設定"
+msgstr "GNU Backgammon - ムーブフィルタ設定"
 
 #: gtkmovefilter.c:542
 msgid "Move filter"
-msgstr "Move filter"
+msgstr "ムーブフィルタ"
 
 #: gtkmovefilter.c:584 gtkpath.c:205
 msgid "Modify..."
@@ -6788,7 +6789,7 @@ msgid ""
 "NOT IMPLEMENTED!\n"
 "Please use the command \"%s\" instead"
 msgstr ""
-"まだ実装されていません!\n"
+"実装されていません!\n"
 "代わりにコマンド \"%s\" を使って下さい"
 
 #: gtkoptions.c:169
@@ -7317,7 +7318,7 @@ msgstr ""
 
 #: gtkoptions.c:703
 msgid "GWC as percentage"
-msgstr "ゲーム勝率のパーセント"
+msgstr "ゲーム勝率をパーセントで(?)"
 
 #: gtkoptions.c:707
 msgid ""
@@ -7327,7 +7328,7 @@ msgstr ""
 
 #: gtkoptions.c:713
 msgid "MWC as percentage"
-msgstr "マッチ勝率のパーセント"
+msgstr "マッチ勝率をパーセントで(?)"
 
 #: gtkoptions.c:717
 msgid ""
@@ -7544,7 +7545,7 @@ msgstr ""
 
 #: gtkoptions.c:1180
 msgid "Annealing rate:"
-msgstr "(学習の)焼きなまし率:"
+msgstr "焼きなまし率:"
 
 #: gtkoptions.c:1189
 msgid ""
@@ -8126,7 +8127,7 @@ msgstr "ボードの角度: "
 
 #: gtkprefs.c:1488
 msgid "Vary the angle the board is tilted at"
-msgstr ""
+msgstr "ボードを傾ける角度を変更"
 
 #: gtkprefs.c:1517
 msgid "Plan view"
@@ -8134,7 +8135,7 @@ msgstr "平面図"
 
 #: gtkprefs.c:1524
 msgid "Curve accuracy"
-msgstr "局面の精度"
+msgstr "曲面の精度"
 
 #: gtkprefs.c:1530
 msgid "low"
@@ -8297,7 +8298,7 @@ msgstr "テイク"
 
 #: gtkrace.c:278
 msgid "Effective pip count"
-msgstr ""
+msgstr "エフェクティブピップカウント"
 
 #: gtkrace.c:288
 msgid "EPC"
@@ -8394,7 +8395,7 @@ msgstr "仙石祥一郎の Temperature Map - Distribution of rolls"
 #: gtktempmap.c:733 gtktheory.c:912
 #, c-format
 msgid "%d ply"
-msgstr ""
+msgstr "%d ply"
 
 #: gtktempmap.c:762
 msgid "Show equities"
@@ -8572,11 +8573,11 @@ msgstr "マッチ・セッション・ゲーム・ポジションを保存"
 
 #: gtktoolbar.c:219
 msgid "Import match, session, game or position"
-msgstr "他のプログラムのマッチ・ゲーム・ポジションのインポート"
+msgstr "他プログラム形式のマッチ・ゲーム・ポジションのインポート"
 
 #: gtktoolbar.c:226
 msgid "Export match, session, game or position"
-msgstr "他のプログラムのマッチ・ゲーム・ポジションのエクスポート"
+msgstr "他プログラム形式へのマッチ・ゲーム・ポジションのエクスポート"
 
 #: gtktoolbar.c:391
 msgid "New"
@@ -8672,15 +8673,15 @@ msgstr "実行中の命令を中止"
 
 #: html.c:141
 msgid "in <head>"
-msgstr ""
+msgstr "<head> 要素の中に"
 
 #: html.c:142
 msgid "inline (inside tags)"
-msgstr ""
+msgstr "インライン (タグの中に)"
 
 #: html.c:143
 msgid "external file (\"gnubg.css\")"
-msgstr ""
+msgstr "別のファイル (\"gnubg.css\")"
 
 #: html.c:154
 msgid "[First Game]"
@@ -8742,7 +8743,7 @@ msgstr ""
 #: html.c:1634
 #, c-format
 msgid " %s resigns %d points"
-msgstr ""
+msgstr "%s が %d ポイントで投了"
 
 #: html.c:1644
 #, c-format
@@ -8807,15 +8808,15 @@ msgstr ""
 #: html.c:1854
 #, c-format
 msgid "(HTML Export version %d.%d)"
-msgstr ""
+msgstr "(HTML Export version %d.%d)"
 
 #: html.c:1872
 msgid "Valid XHTML 1.0!"
-msgstr ""
+msgstr "Valid XHTML 1.0!"
 
 #: html.c:1873
 msgid "Valid CSS!"
-msgstr ""
+msgstr "Valid CSS!"
 
 #: html.c:1910
 #, c-format
@@ -8823,11 +8824,13 @@ msgid ""
 "<!-- Output generated %s by GNU Backgammon %s (http://www.gnu.org/software/"
 "gnubg/) "
 msgstr ""
+"<!-- Output generated %s by GNU Backgammon %s (http://www.gnu.org/software/"
+"gnubg/) "
 
 #: html.c:1917
 #, c-format
 msgid "(HTML Export version %d.%d) -->"
-msgstr ""
+msgstr "(HTML Export version %d.%d) -->"
 
 #: html.c:2250
 msgid "Rollout details"
@@ -8841,15 +8844,15 @@ msgstr "警告: %s ムーブ"
 #: html.c:2453 text.c:456
 #, c-format
 msgid "Alert: %s roll!"
-msgstr "警告：%s ロール！"
+msgstr "警告：%s ロール!"
 
 #: html.c:2477
 msgid "Ply"
-msgstr ""
+msgstr "Ply"
 
 #: html.c:2721 text.c:509
 msgid "Cannot move"
-msgstr "動けません"
+msgstr "ムーブできません"
 
 #: html.c:2770
 #, c-format
@@ -9002,7 +9005,7 @@ msgstr "エクスポートするファイルを指定して下さい。(see `%s')\n"
 
 #: htmlimages.c:138
 msgid "Generating image:"
-msgstr "イメージ作成中:"
+msgstr "画像作成中(?):"
 
 #: htmlimages.c:617
 msgid ""
@@ -9202,7 +9205,7 @@ msgstr "キューブレスのみ"
 #: show.c:1755 show.c:1759 show.c:1763 show.c:1773 show.c:1780 show.c:1785
 #: show.c:1790 show.c:1985
 msgid "yes"
-msgstr ""
+msgstr "はい"
 
 #: makehyper.c:188
 #, c-format
@@ -9243,12 +9246,12 @@ msgstr "チェッカーの数: %d\n"
 #: makehyper.c:691
 #, c-format
 msgid "Total number of one sided positions: %d\n"
-msgstr "one sided ポジションの数: %d\n"
+msgstr "片側ポジションの数: %d\n"
 
 #: makehyper.c:692
 #, c-format
 msgid "Total number of two sided positions: %d\n"
-msgstr "two sided ポジションの数: %d\n"
+msgstr "両側ポジションの数: %d\n"
 
 #: makehyper.c:693
 #, c-format
@@ -9263,7 +9266,7 @@ msgstr "出力ファイル                       : '%s'\n"
 #: makehyper.c:696
 #, c-format
 msgid "Convergens threshold               : %e\n"
-msgstr ""
+msgstr "収束の閾値                         : %e\n"
 
 #: makehyper.c:702
 msgid "*** Obtain start guess ***\n"
@@ -9285,32 +9288,32 @@ msgstr ""
 #: makehyper.c:731
 #, c-format
 msgid "*** Iteration %03d *** \n"
-msgstr ""
+msgstr "*** イテレーション %03d *** \n"
 
 #: makehyper.c:741
 #, c-format
 msgid "norm of delta: %f\n"
-msgstr ""
+msgstr "ノルムの差: %f\n"
 
 #: makehyper.c:754
 #, c-format
 msgid "Time for iteration %03d: %d seconds\n"
-msgstr ""
+msgstr "イテレーション %03d の所要時間: %d 秒\n"
 
 #: makehyper.c:766
 #, c-format
 msgid "Time for writing final file: %d seconds\n"
-msgstr ""
+msgstr "ファイルの書き込み所要時間: %d 秒\n"
 
 #: makehyper.c:770
 #, c-format
 msgid "Total time: %d seconds\n"
-msgstr "合計時間: %d 秒\n"
+msgstr "合計所要時間: %d 秒\n"
 
 #: makeweights.c:83
 #, c-format
 msgid "%s: invalid weights file\n"
-msgstr ""
+msgstr "%s: 不正な weights ファイル\n"
 
 #: makeweights.c:88
 #, c-format
@@ -9340,7 +9343,7 @@ msgstr ""
 
 #: matchequity.c:1343
 msgid "XML does not validate!\n"
-msgstr ""
+msgstr "valid でない XML です!\n"
 
 #: matchequity.c:1388
 #, c-format
@@ -9377,15 +9380,15 @@ msgstr ""
 
 #: play.c:58
 msgid "single game"
-msgstr "シングル勝ち"
+msgstr "シングル"
 
 #: play.c:59
 msgid "gammon"
-msgstr "ギャモン勝ち"
+msgstr "ギャモン"
 
 #: play.c:60
 msgid "backgammon"
-msgstr "バックギャモン勝ち"
+msgstr "バックギャモン"
 
 #: play.c:63 set.c:3651 show.c:1913
 msgid "very bad"
@@ -9427,27 +9430,27 @@ msgstr "現在のゲームを破棄して新しいゲームを始めますか？"
 #: play.c:701
 #, c-format
 msgid "%s rolls %d, %s rolls %d.\n"
-msgstr ""
+msgstr "%s の出目は %d、%s の出目は %d。\n"
 
 #: play.c:709
 #, c-format
 msgid "The cube is now at %d.\n"
-msgstr ""
+msgstr "キューブは現在 %d 倍。\n"
 
 #: play.c:745
 #, c-format
 msgid "%s cannot move.\n"
-msgstr ""
+msgstr "%s はムーブできません。\n"
 
 #: play.c:747
 #, c-format
 msgid "%s moves %s.\n"
-msgstr ""
+msgstr "%s のムーブ %s。\n"
 
 #: play.c:1122 play.c:3767
 #, c-format
 msgid "%s rolls %1i and %1i.\n"
-msgstr ""
+msgstr "%s のロールは %1i と %1i。\n"
 
 #: play.c:1149 play.c:2562
 msgid "Considering move..."
@@ -9468,7 +9471,7 @@ msgstr ""
 #: play.c:1393
 #, c-format
 msgid "(%s's double has been cancelled.)\n"
-msgstr ""
+msgstr "(%s のダブルはキャンセルされました)\n"
 
 #: play.c:1581
 #, c-format
@@ -9483,7 +9486,7 @@ msgstr "%s の%s 勝ち (%d ポイント)\n"
 #: play.c:1620
 #, c-format
 msgid "%s has won the match.\n"
-msgstr ""
+msgstr "マッチは %s の勝ち。\n"
 
 #: play.c:1719
 msgid "You can only accept if the cube or a resignation has been offered."
@@ -9497,32 +9500,32 @@ msgstr ""
 
 #: play.c:1740 play.c:2057
 msgid "No resignation was offered."
-msgstr ""
+msgstr "投了の申し入れはありません。"
 
 #: play.c:1746
 #, c-format
 msgid "%s accepts and wins a %s.\n"
-msgstr ""
+msgstr "%s は %s 勝ちを受け入れました。\n"
 
 #: play.c:1768 play.c:1872
 msgid "You must select a move to annotate first."
-msgstr ""
+msgstr "注記したいムーブを選択してください。"
 
 #: play.c:1784
 msgid "Invalid annotation."
-msgstr ""
+msgstr "不正な注記です。"
 
 #: play.c:1798 play.c:1812 play.c:1827 play.c:1844
 msgid "Invalid annotation"
-msgstr ""
+msgstr "不正な注記"
 
 #: play.c:1851 play.c:1886
 msgid "You cannot annotate this move."
-msgstr ""
+msgstr "このムーブには注記できません。"
 
 #: play.c:1856
 msgid "Skill annotation cleared."
-msgstr ""
+msgstr "スキルの注記を消去しました。"
 
 #: play.c:1858
 #, c-format
@@ -9531,7 +9534,7 @@ msgstr "ムーブを %s とマークしました。\n"
 
 #: play.c:1891
 msgid "Luck annotation cleared."
-msgstr ""
+msgstr "運の注記を消去しました。"
 
 #: play.c:1893
 #, c-format
@@ -9540,16 +9543,16 @@ msgstr "出目を %s をマークしました。\n"
 
 #: play.c:1969
 msgid "You must select a move to clear the comment from."
-msgstr ""
+msgstr "コメントを消去したいムーブを選択してください。"
 
 #: play.c:1978
 msgid "Commentary for this move cleared."
-msgstr ""
+msgstr "このムーブのコメントを消去しました。"
 
 #: play.c:2063
 #, c-format
 msgid "%s declines the %s.\n"
-msgstr ""
+msgstr "%s は %s を拒否しました。\n"
 
 #: play.c:2184
 msgid "Doubling is forbidden by the Crawford rule (see `help set crawford')."
@@ -9576,17 +9579,17 @@ msgstr ""
 
 #: play.c:2219
 msgid "You do not own the cube."
-msgstr ""
+msgstr "あなたはキューブを持っていません。"
 
 #: play.c:2225 play.c:3511
 #, c-format
 msgid "The cube is already at %d; you can't double any more.\n"
-msgstr ""
+msgstr "すでに %d 倍のキューブです; これ以上ダブルできません。\n"
 
 #: play.c:2247
 #, c-format
 msgid "%s doubles.\n"
-msgstr ""
+msgstr "%s ダブル。\n"
 
 #: play.c:2379
 msgid "The cube must have been offered before you can drop it."
@@ -9639,15 +9642,15 @@ msgstr ""
 
 #: play.c:2783
 msgid "Illegal move."
-msgstr ""
+msgstr "不正なムーブ。"
 
 #: play.c:2790
 msgid "The match is already over."
-msgstr ""
+msgstr "マッチは終了しています。"
 
 #: play.c:2876 set.c:2965
 msgid "You must specify a valid match length (1 or longer)."
-msgstr ""
+msgstr "有効なマッチのポイント数を指定してください(1以上)。"
 
 #: play.c:2884
 #, c-format
@@ -9665,7 +9668,7 @@ msgstr ""
 #: play.c:2917
 #, c-format
 msgid "A new %d point match has been started.\n"
-msgstr ""
+msgstr "新規 %d ポイントマッチを開始しました。\n"
 
 #: play.c:2934
 msgid ""
@@ -9675,7 +9678,7 @@ msgstr ""
 
 #: play.c:2954
 msgid "A new session has been started."
-msgstr ""
+msgstr "新規セッションを開始しました。"
 
 #: play.c:3041
 msgid ""
@@ -9691,7 +9694,7 @@ msgstr ""
 
 #: play.c:3294
 msgid "It's not the computer's turn to play."
-msgstr ""
+msgstr "コンピュータの手番ではありません。"
 
 #: play.c:3319
 msgid ""
@@ -9707,7 +9710,7 @@ msgstr ""
 
 #: play.c:3475
 msgid "Redoubles are not permitted during match play."
-msgstr ""
+msgstr "マッチではビーバーは許可されていません。"
 
 #: play.c:3481
 msgid "Beavers are disabled (see `help set beavers')."
@@ -9715,12 +9718,12 @@ msgstr ""
 
 #: play.c:3488
 msgid "Only one beaver is permitted (see `help set beavers')."
-msgstr ""
+msgstr "ビーバーは1回だけ許可されています (see `help set beavers')。"
 
 #: play.c:3491
 #, c-format
 msgid "Only %d beavers are permitted (see `help set beavers').\n"
-msgstr ""
+msgstr "ビーバーは%d回だけ許可されています (see `help set beavers')。\n"
 
 #: play.c:3498
 msgid "The cube must have been offered before you can redouble it."
@@ -9729,7 +9732,7 @@ msgstr ""
 #: play.c:3529
 #, c-format
 msgid "%s accepts and immediately redoubles to %d.\n"
-msgstr ""
+msgstr "%s はテイクして直ちに %d 倍にリダブル。\n"
 
 #: play.c:3556
 msgid "You can only reject if the cube or a resignation has been offered."
@@ -9742,17 +9745,17 @@ msgstr ""
 #: play.c:3598
 #, c-format
 msgid "Unknown keyword `%s' -- try `help resign'.\n"
-msgstr ""
+msgstr "不明なキーワード `%s' -- try `help resign'.\n"
 
 #: play.c:3606
 #, c-format
 msgid "%s has already declined your offer of a %s.\n"
-msgstr ""
+msgstr "すでに %s はあなたの %s の申し入れを拒否しています。\n"
 
 #: play.c:3614
 #, c-format
 msgid "%s offers to resign a %s.\n"
-msgstr ""
+msgstr "%s は %s で投了を申し入れました。\n"
 
 #: play.c:3731 set.c:2460
 msgid "Please resolve the resignation first."
@@ -9760,7 +9763,7 @@ msgstr ""
 
 #: play.c:3737
 msgid "You have already rolled the dice."
-msgstr ""
+msgstr "すでにダイスをロールしています。"
 
 #: play.c:3842
 msgid "The cube must have been offered before you can take it."
@@ -9769,7 +9772,7 @@ msgstr ""
 #: play.c:3872
 #, c-format
 msgid "%s accepts the cube at %d.\n"
-msgstr ""
+msgstr "%s は %d 倍キューブを受け入れました。\n"
 
 #: play.c:3902
 msgid ""
@@ -9780,7 +9783,7 @@ msgstr ""
 #: play.c:3918
 #, c-format
 msgid "Illegal match ID '%s'\n"
-msgstr ""
+msgstr "不正なマッチ ID  '%s'\n"
 
 #: play.c:3919
 #, c-format
@@ -9811,16 +9814,16 @@ msgstr "%s のレーティング: %s"
 #: postscript.c:912
 #, c-format
 msgid "Date: %s"
-msgstr ""
+msgstr "日時:  %s"
 
 #: postscript.c:916
 msgid "Date: n/a"
-msgstr ""
+msgstr "日時:  n/a"
 
 #: postscript.c:920
 #, c-format
 msgid "Event: %s"
-msgstr ""
+msgstr "イベント: %s"
 
 #: postscript.c:924
 #, c-format
@@ -9830,7 +9833,7 @@ msgstr ""
 #: postscript.c:928
 #, c-format
 msgid "Place: %s"
-msgstr ""
+msgstr "場所: %s"
 
 #: postscript.c:932
 #, c-format
@@ -9840,7 +9843,7 @@ msgstr "注記: %s"
 #: postscript.c:936
 #, c-format
 msgid "Comments: %s"
-msgstr ""
+msgstr "コメント: %s"
 
 #: postscript.c:963
 #, c-format
@@ -9865,7 +9868,7 @@ msgstr "%s の手番, キューブアクションは?"
 #: postscript.c:1039 postscript.c:1047
 #, c-format
 msgid " (%d points)"
-msgstr ""
+msgstr " (%d ポイント)"
 
 #: postscript.c:1301
 #, c-format
@@ -9895,7 +9898,7 @@ msgstr ""
 #: postscript.c:1439
 #, c-format
 msgid "Position %s"
-msgstr ""
+msgstr "ポジション %s"
 
 #: progress.c:92
 msgid "Win statistics"
@@ -9959,7 +9962,7 @@ msgstr ""
 #: progress.c:258 progress.c:266
 #, c-format
 msgid "Cube efficiency for %s: %7.4f"
-msgstr "キューブ効率は %s: %7.4f"
+msgstr "%s のキューブ効率: %7.4f"
 
 #: progress.c:291
 msgid "Bearoff statistics"
@@ -10011,19 +10014,19 @@ msgstr "ロールアウト統計"
 
 #: progress.c:688
 msgid "Win (g)"
-msgstr ""
+msgstr "ギャモン以上勝ち"
 
 #: progress.c:689
 msgid "Win (bg)"
-msgstr ""
+msgstr "バックギャモン勝ち"
 
 #: progress.c:690
 msgid "Lose (g)"
-msgstr ""
+msgstr "ギャモン以上負け"
 
 #: progress.c:691
 msgid "Lose (bg)"
-msgstr ""
+msgstr "バックギャモン負け"
 
 #: progress.c:694
 msgid "Rank/no. JSDs"
@@ -10049,7 +10052,7 @@ msgstr "ロールアウト: %d/%d trials"
 #: record.c:90
 #, c-format
 msgid "%s: invalid record file version"
-msgstr ""
+msgstr "%s: 記録ファイルのバージョンが不正"
 
 #: record.c:101 record.c:133
 #, c-format
@@ -10058,7 +10061,7 @@ msgstr "%s: 無効な記録ファイル"
 
 #: record.c:403 record.c:433
 msgid "No game statistics are available."
-msgstr ""
+msgstr "有効なゲーム統計がありません"
 
 #: record.c:407
 msgid "Game statistics saved to player records."
@@ -10079,7 +10082,7 @@ msgstr "プレイされたセッションがありません。"
 
 #: record.c:465
 msgid "You must specify which player's record to erase."
-msgstr ""
+msgstr "記録を消去するプレイヤーを指定してください。"
 
 #: record.c:477
 #, c-format
@@ -10124,7 +10127,7 @@ msgstr "`%s' は不正な入力値です。`%s'.\n"
 
 #: rollout.c:1499
 msgid "Cube not available!"
-msgstr ""
+msgstr "キューブは使えません!(?)"
 
 #: rollout.c:1504
 msgid "Setting cubeful on"
@@ -10246,7 +10249,7 @@ msgstr ""
 
 #: set.c:106
 msgid "Distort evaluations with noise"
-msgstr ""
+msgstr "ノイズで評価をゆがめる"
 
 #: set.c:108
 msgid "Choose how many plies to look ahead"
@@ -10305,16 +10308,16 @@ msgstr "乱数シードを %d に設定。\n"
 
 #: set.c:168
 msgid "Seed initialised from system random data."
-msgstr ""
+msgstr "乱数シードを /dev/urandom で初期化しました。"
 
 #: set.c:169
 msgid "Seed initialised by system clock."
-msgstr ""
+msgstr "乱数シードを時刻で初期化しました。"
 
 #: set.c:175
 #, c-format
 msgid "You are already using the %s generator.\n"
-msgstr ""
+msgstr "すでに %s 乱数生成器を使用しています。\n"
 
 #: set.c:207
 msgid "You must specify a valid modulus (see `help set rng bbs')."
@@ -10324,16 +10327,16 @@ msgstr ""
 
 #: set.c:218
 msgid "You must specify two valid factors (see `help set rng bbs')."
-msgstr ""
+msgstr "ふたつの有効な factor を指定しなければなりません。(see `help set rng bbs')."
 
 #: set.c:256
 #, c-format
 msgid "You are still using the %s generator.\n"
-msgstr ""
+msgstr "%s 乱数生成器を使用を続けます。\n"
 
 #: set.c:271
 msgid "Please enter filename!"
-msgstr ""
+msgstr "ファイル名を入力してください!"
 
 #: set.c:276
 #, c-format
@@ -10343,7 +10346,7 @@ msgstr ""
 #: set.c:288
 #, c-format
 msgid "GNU Backgammon will now use the %s generator.\n"
-msgstr ""
+msgstr "GNU Backgammon は %s 乱数生成器を使用します。\n"
 
 #: set.c:318
 msgid "You must specify for which ply you want to set a filter"
@@ -10493,15 +10496,15 @@ msgstr ""
 #: set.c:555
 #, c-format
 msgid "Automatic doubles will be used (up to a limit of %d).\n"
-msgstr ""
+msgstr "オートマチックダブルを使用します (上限 %d 回)。\n"
 
 #: set.c:558
 msgid "A single automatic double will be permitted."
-msgstr ""
+msgstr "オートマチックダブルを使用します (上限 1 回)。"
 
 #: set.c:560
 msgid "Automatic doubles will not be used."
-msgstr ""
+msgstr "オートマチックダブルを使用しません。"
 
 #: set.c:566
 msgid ""
@@ -11378,11 +11381,11 @@ msgstr ""
 
 #: set.c:2504
 msgid "Will use the Egyptian rule."
-msgstr ""
+msgstr "Egyptian ルールを使用します。"
 
 #: set.c:2505
 msgid "Will not use the Egyptian rule."
-msgstr ""
+msgstr "Egyptian ルールを使用しません。"
 
 #: set.c:2506
 msgid ""
@@ -11407,11 +11410,11 @@ msgstr ""
 
 #: set.c:2538
 msgid "This game is the Crawford game (no doubling allowed)."
-msgstr ""
+msgstr "このゲームはクロフォードゲームです (ダブルはできません)。"
 
 #: set.c:2539
 msgid "This game is not the Crawford game."
-msgstr ""
+msgstr "このゲームはクロフォードゲームではありません。"
 
 #: set.c:2553
 msgid ""
@@ -11611,7 +11614,7 @@ msgstr ""
 #: set.c:2943
 #, c-format
 msgid "%s is not a valid date (see `help set matchinfo date').\n"
-msgstr ""
+msgstr "%s は不正な日付です (see `help set matchinfo date').\n"
 
 #: set.c:2952
 #, c-format
@@ -12963,11 +12966,11 @@ msgstr ""
 
 #: show.c:1608
 msgid "Dead cube (opponent doesn't redouble): "
-msgstr ""
+msgstr "デッドキューブ (相手はダブルできません): "
 
 #: show.c:1610
 msgid "Dead cube: "
-msgstr ""
+msgstr "デッドキューブ: "
 
 #: show.c:1616
 #, c-format
