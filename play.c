@@ -1441,8 +1441,13 @@ static int TryBearoff( void ) {
 		pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 		pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 		pmn->fPlayer = ms.fTurn;
-                if ( ! cmp_matchstate ( &ms, &sm.ms ) ) 
+		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
+			sizeof( pmn->anMove ) );
+                if ( ! cmp_matchstate ( &ms, &sm.ms ) ) {
                   CopyMoveList ( &pmn->ml, &sm.ml );
+                  pmn->iMove = locateMove ( ms.anBoard, pmn->anMove, 
+                                            &pmn->ml );
+                }
                 else {
                   pmn->ml.cMoves = 0;
                   pmn->ml.amMoves = NULL;
@@ -1454,8 +1459,6 @@ static int TryBearoff( void ) {
 		pmn->stMove = SKILL_NONE;
 		pmn->stCube = SKILL_NONE;
 		
-		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
-			sizeof( pmn->anMove ) );
 		
 		ShowAutoMove( ms.anBoard, pmn->anMove );
 		
@@ -2615,8 +2618,11 @@ CommandMove( char *sz ) {
 	    pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 	    pmn->fPlayer = ms.fTurn;
-            if ( ! cmp_matchstate ( &ms, &sm.ms ) ) 
+            if ( ! cmp_matchstate ( &ms, &sm.ms ) ) {
               CopyMoveList ( &pmn->ml, &sm.ml );
+              pmn->iMove = locateMove ( ms.anBoard, pmn->anMove, 
+                                        &pmn->ml );
+            }
             else {
               pmn->ml.cMoves = 0;
               pmn->ml.amMoves = NULL;
@@ -2694,8 +2700,11 @@ CommandMove( char *sz ) {
 		pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 		pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 		pmn->fPlayer = ms.fTurn;
-                if ( ! cmp_matchstate ( &ms, &sm.ms ) ) 
+                if ( ! cmp_matchstate ( &ms, &sm.ms ) ) { 
                   CopyMoveList ( &pmn->ml, &sm.ml );
+                  pmn->iMove = locateMove ( ms.anBoard, pmn->anMove, 
+                                            &pmn->ml );
+                }
                 else {
                   pmn->ml.cMoves = 0;
                   pmn->ml.amMoves = NULL;

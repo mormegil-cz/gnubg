@@ -1,3 +1,9 @@
+Sat Dec 21 22:01:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c: call locateMove when copying stored movelist into
+	a movenormal struct. Hopefully that should fix the problem
+	reported by Rob Stroop.
+
 Sat Dec 21 18:04:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* import.c (ImportSGGGame): check for duplicate dances.
