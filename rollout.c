@@ -434,3 +434,404 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
     
   return cGames;
 }
+
+
+static int
+BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
+                      float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], 
+                      int iTurn, int iGame,
+                      cubeinfo aci[], int cci, rolloutcontext *prc ) {
+
+  positionclass pc;
+  int anDice [ 2 ];
+  cubeinfo *pciLocal, *pci;
+  cubedecision cd;
+  int *pfFinished, *pf, ici;
+
+  float arCf[ NUM_CUBEFUL_OUTPUTS ];
+
+  int nTruncate = prc->nTruncate;
+  int cGames = prc->nTrials;
+
+  /* Make local copy of cubeinfo struct, since it
+     may be modified */
+
+  (cubeinfo *) pciLocal = malloc ( cci * sizeof ( cubeinfo ) );
+  (int *) pfFinished = malloc ( cci * sizeof ( int ) );
+
+  for ( ici = 0; ici < cci; ici++ )
+    pfFinished[ ici ] = TRUE;
+
+  memcpy ( pciLocal, aci, cci * sizeof (cubeinfo) );
+
+  while ( iTurn < nTruncate ) {
+
+    /* Cube decision */
+
+    for ( ici = 0, pci = pciLocal, pf = pfFinished;
+          ici < cci; ici++, pci++, pf++ ) {
+
+      if ( *pf ) {
+
+        if ( prc->fCubeful && GetDPEq ( NULL, NULL, pci ) ) {
+
+          if ( FindCubeDecision ( &cd, arCf,
+                                  aarOutput[ ici ],
+                                  aanBoard[ ici ],
+                                  pci, &prc->aecCube[ pci->fMove ] ) )
+            return -1;
+
+
+          switch ( cd ) {
+
+          case DOUBLE_TAKE:
+
+            SetCubeInfo ( pci, 2 * pci->nCube, ! fMove, fMove, pci->nMatchTo,
+                          pci->anScore, pci->fCrawford, pci->fJacoby,
+                          pci->fBeavers);
+            break;
+        
+          case DOUBLE_PASS:
+
+            /* FIXME: we may check if all pfFinished are false,
+               in which case we are finished */
+
+            *pf = FALSE;
+
+            /* assign cubeful output */
+
+            aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
+              arCf[ OUTPUT_OPTIMAL ];
+
+            /* invert evaluations if required */
+
+            if ( iTurn & 1 ) {
+
+              InvertEvaluation ( aarOutput[ ici ] );
+              aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
+
+            }
+
+            break;
+
+          case NODOUBLE_TAKE:
+          case TOOGOOD_TAKE:
+          case TOOGOOD_PASS:
+          default:
+
+            /* no op */
+            break;
+            
+          }
+        } /* cube */
+      }
+    } /* loop over ci */
+
+    /* Chequer play */
+
+    if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 ) {
+      free ( pciLocal );
+      return -1;
+    }
+
+
+    for ( ici = 0, pci = pciLocal, pf = pfFinished;
+          ici < cci; ici++, pci++, pf++ ) {
+
+      if ( *pf ) {
+
+        FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
+                      aanBoard[ ici ], pci,
+                      &prc->aecChequer [ pci->fMove ] );
+
+        if( fAction )
+          fnAction();
+    
+        if( fInterrupt ) {
+          free ( pciLocal );
+          return -1;
+        }
+
+
+        /* Invert board and more */
+	
+        SwapSides( aanBoard[ ici ] );
+
+        SetCubeInfo ( pci, pci->nCube, pci->fCubeOwner,
+                      ! pci->fMove, pci->nMatchTo,
+                      pci->anScore, pci->fCrawford,
+                      pci->fJacoby, pci->fBeavers );
+
+      }
+    }
+
+    iTurn++;
+
+  } /* loop truncate */
+
+
+  /* evaluation at truncation */
+
+    for ( ici = 0, pci = pciLocal, pf = pfFinished;
+          ici < cci; ici++, pci++, pf++ ) {
+
+      if ( *pf ) {
+        
+        if ( prc->fCubeful ) {
+          if ( EvaluatePositionCubeful ( aanBoard[ ici ], arCf,
+                                         aarOutput[ ici ],
+                                         pci,
+                                         &prc->aecCube[ pci->fMove ], 
+                                         prc->aecCube[ pci->fMove ].nPlies ) )
+            return -1;
+
+          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
+            arCf[ OUTPUT_OPTIMAL ];
+
+        } 
+        else {
+          if ( EvaluatePosition ( aanBoard[ ici ], aarOutput[ ici ],
+                                  pci,
+                                  &prc->aecChequer[ pci->fMove ] ) )
+            return -1;
+
+          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 0.0f;
+          
+        }
+
+
+        if ( iTurn & 1 ) {
+          
+          InvertEvaluation ( aarOutput[ ici ] );
+          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
+          
+        }
+      }
+
+      if ( pci->nMatchTo )
+        aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
+          eq2mwc ( aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ], pci );
+      
+    }
+
+    free ( pciLocal );
+    free ( pfFinished );
+    
+    return 0;
+}
+
+
+extern int
+RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
+                   float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                   float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                   rolloutcontext *prc,
+                   cubeinfo aci[], int cci, int fInvert ) {
+
+  int (*aanBoardEval)[ 2 ][ 25 ];
+  float (*aar)[ NUM_ROLLOUT_OUTPUTS ];
+  float (*aarMu)[ NUM_ROLLOUT_OUTPUTS ];
+  float (*aarSigma)[ NUM_ROLLOUT_OUTPUTS ];
+  double (*aarResult)[ NUM_ROLLOUT_OUTPUTS ];
+  double (*aarVariance)[ NUM_ROLLOUT_OUTPUTS ];
+
+  int i, j, ici;
+  int anBoardOrig[ 2 ][ 25 ];
+
+  enum _rollouttype { BEAROFF, BASIC, VARREDN } rt;
+
+  int cGames = prc->nTrials;
+    
+  /* FIXME: use alloca! */
+
+  aanBoardEval = malloc ( cci * 50 * sizeof ( int ) );
+
+  aar =
+    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+  aarMu =
+    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+  aarSigma =
+    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+
+  aarResult =
+    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( double ) );
+  aarVariance =
+    malloc ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( double ) );
+
+  if( cGames < 1 ) {
+    errno = EINVAL;
+    return -1;
+  }
+
+
+  if( cci < 1 ) {
+    errno = EINVAL;
+    return -1;
+  }
+
+
+  if( ClassifyPosition( anBoard ) == CLASS_BEAROFF1 ) 
+    rt = BEAROFF;
+  else if ( prc->fVarRedn )
+    rt = VARREDN;
+  else
+    rt = BASIC;
+    
+  for ( ici = 0; ici < cci; ici++ )
+    for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+      aarResult[ ici ][ i ] =
+        aarVariance[ ici ][ i ] =
+        aarMu[ ici ][ i ] = 0.0f;
+
+
+  memcpy( &anBoardOrig[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+	  sizeof( anBoardOrig ) );
+
+
+  if( fInvert )
+      SwapSides( anBoardOrig );
+
+  
+  for( i = 0; i < cGames; i++ ) {
+      if( rngCurrent != RNG_MANUAL )
+	  InitRNGSeed( nRolloutSeed + ( i << 8 ) );
+      
+      for ( ici = 0; ici < cci; ici++ )
+        memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoardOrig[ 0 ][ 0 ],
+                 sizeof ( anBoardOrig ) );
+
+      /* FIXME: old code was:
+         
+         memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+         sizeof( anBoardEval ) );
+
+         should it be anBoardOrig? */
+
+      switch( rt ) {
+      case BEAROFF:
+        if ( ! prc->fCubeful )
+	  BearoffRollout( *aanBoardEval, *aar, prc->nTruncate,
+                          0, i, prc->nTrials );
+        else
+	  BasicCubefulRollout( aanBoardEval, aar, 
+                               0, i, aci, cci, prc );
+        break;
+      case BASIC:
+	  BasicCubefulRollout( aanBoardEval, aar, 
+                               0, i, aci, cci, prc );
+	  break;
+      case VARREDN:
+
+        if ( ! prc->fCubeful )
+	  VarRednRollout( *aanBoardEval, *aar, prc->nTruncate,
+                          0, i, cGames, &aci[ 0 ],
+                          &prc->aecChequer[ 0 ] );
+        else
+        /* FIXME: write me
+           VarRednCubefulRollout( aanBoardEval, aar, 
+                                  0, i, pci, prc ); */
+          printf ( "not implemented yet...\n" );
+        break;
+      }
+      
+      if( fInterrupt )
+	  break;
+      
+      for ( ici = 0; ici < cci ; ici++ ) {
+
+        if( fInvert ) {
+
+	  InvertEvaluation( aar[ ici ] );
+          if ( aci[ ici ].nMatchTo )
+            aar[ ici ][ OUTPUT_CUBEFUL_EQUITY ] =
+              1.0 - aar [ ici ][ OUTPUT_CUBEFUL_EQUITY ];
+          else
+            aar[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *= -1.0f;
+
+        }
+
+        aar[ ici ][ OUTPUT_EQUITY ] = Utility ( aar[ ici ], &aci [ ici ]);
+      
+        for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
+	  float rMuNew, rDelta;
+	  
+	  aarResult[ ici ][ j ] += aar[ ici ][ j ];
+	  rMuNew = aarResult[ ici ][ j ] / ( i + 1 );
+	  
+	  rDelta = rMuNew - aarMu[ ici ][ j ];
+	  
+	  aarVariance[ ici ][ j ] =
+            aarVariance[ ici ][ j ] * ( 1.0 - 1.0 / ( i + 1 ) ) +
+	      ( i + 2 ) * rDelta * rDelta;
+	  
+	  aarMu[ ici ][ j ] = rMuNew;
+	  
+	  if( j < OUTPUT_EQUITY ) {
+	      if( aarMu[ ici ][ j ] < 0.0f )
+		  aarMu[ ici ][ j ] = 0.0f;
+	      else if( aarMu[ ici ][ j ] > 1.0f )
+		  aarMu[ ici ][ j ] = 1.0f;
+	  }
+	  
+	  aarSigma[ ici ][ j ] = sqrt( aarVariance[ ici ][ j ] / ( i + 1 ) );
+        }
+
+        SanityCheck( anBoardOrig, aarMu[ ici ] );
+
+      }
+      
+      if( fShowProgress ) {
+#if USE_GTK
+	  if( fX )
+	      GTKRolloutUpdate( *aarMu, *aarSigma, i, cGames );
+	  else
+#endif
+	      {
+		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
+			   "Cubeful: %6.3f %5.3f %5d\r", sz,
+                           aarMu[ 0 ][ 0 ], aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
+			   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ], aarMu[ 0 ][ 5 ],
+                           aarSigma[ 0 ][ 5 ],
+                           aarMu[ 0 ][ 6 ], aarSigma[ 0 ][ 6 ],
+			   i + 1 );
+		  fflush( stdout );
+	      }
+      }
+  }
+
+  if( !( cGames = i ) )
+    return -1;
+
+  if( aarOutput )
+    for ( ici = 0; ici < cci; ici++ )
+      for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+        aarOutput[ ici ][ i ] = aarMu[ ici ][ i ];
+
+  if( aarStdDev )
+    for ( ici = 0; ici < cci; ici++ )
+      for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+        aarStdDev[ ici ][ i ] = aarSigma[ ici ][ i ];	
+
+  if( fShowProgress
+#if USE_GTK
+      && !fX
+#endif
+      ) {
+      for( i = 0; i < 79; i++ )
+	  outputc( ' ' );
+
+      outputc( '\r' );
+      fflush( stdout );
+  }
+
+  free ( aanBoardEval );
+
+  free ( aar );
+  free ( aarMu );
+  free ( aarSigma );
+
+  free ( aarResult );
+  free ( aarVariance );
+
+  return cGames;
+}

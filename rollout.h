@@ -27,4 +27,11 @@ Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[], float arStdDev[],
          int nTruncate, int cGames, int fVarRedn, cubeinfo *pci,
 	 evalcontext *pec, int fInvert );
 
+extern int
+RolloutGeneral( int anBoard[ 2 ][ 25 ], char *sz,
+                float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                rolloutcontext *prc,
+                cubeinfo aci[], int cci, int fInvert );
+
 #endif
