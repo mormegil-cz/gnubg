@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnubg 0.12\n"
 "POT-Creation-Date: 2003-07-12 10:10+0200\n"
-"PO-Revision-Date: 2003-08-30 09:00+0900\n"
+"PO-Revision-Date: 2003-09-01 09:00+0900\n"
 "Last-Translator: TAKAHASHI Kaoru <kaoru@kaisei.org>\n"
 "Language-Team: Japanese\n"
 "MIME-Version: 1.0\n"
@@ -15,7 +15,7 @@ msgstr ""
 
 #: analysis.c:46
 msgid "Awful!"
-msgstr ""
+msgstr "ひどい!"
 
 #: analysis.c:47
 msgid "Beginner"
@@ -23,7 +23,7 @@ msgstr "初級者"
 
 #: analysis.c:48
 msgid "Casual player"
-msgstr ""
+msgstr "初中級者"
 
 #: analysis.c:49
 msgid "Intermediate"
@@ -51,7 +51,7 @@ msgstr "該当無し"
 
 #: analysis.c:57
 msgid "Haaa-haaa"
-msgstr "ハァハァ（ためいき）"
+msgstr "ハァハァ(ためいき)"
 
 #: analysis.c:58 html.c:2859
 msgid "Go to bed"
@@ -67,7 +67,7 @@ msgstr "特に無し"
 
 #: analysis.c:61 html.c:2862
 msgid "Good dice, man!"
-msgstr "良い目だったね。"
+msgstr "いい出目だね!"
 
 #: analysis.c:62 html.c:2863
 msgid "Go to Las Vegas immediately"
@@ -145,11 +145,11 @@ msgstr "非常に悪いムーブ"
 #: gtkgame.c:7704 html.c:2947 html.c:2972 html.c:3212 html.c:3237 html.c:3280
 #: html.c:3322
 msgid "Error rate (total)"
-msgstr "エラーレート（総計）"
+msgstr "エラーレート (総計)"
 
 #: analysis.c:1412
 msgid "Error rate (per move)"
-msgstr "エラーレート（ムーブ毎の平均）"
+msgstr "エラーレート (ムーブ毎の平均)"
 
 #: analysis.c:1426 html.c:2995
 msgid "Chequer play rating"
@@ -196,11 +196,11 @@ msgstr "非常に不運なロール"
 
 #: analysis.c:1462 gtkgame.c:7689 html.c:3030 html.c:3050
 msgid "Luck rate (total)"
-msgstr "運の比率（総計）"
+msgstr "運の比率 (総計)"
 
 #: analysis.c:1470
 msgid "Luck rate (per move)"
-msgstr "運の比率（ムーブ毎の平均）"
+msgstr "運の比率 (ムーブ毎の平均)"
 
 #: analysis.c:1498 gtkgame.c:7691 html.c:3076
 msgid "Luck rating"
@@ -256,7 +256,7 @@ msgstr "間違ったパス"
 
 #: analysis.c:1606 gtkgame.c:7705 html.c:3222 html.c:3245
 msgid "Error rate (per cube decision)"
-msgstr "エラー率（キューブ毎の平均）"
+msgstr "エラー率 (キューブ毎の平均)"
 
 #: analysis.c:1633 gtkgame.c:7706 html.c:3260
 msgid "Cube decision rating"
@@ -272,7 +272,7 @@ msgstr ""
 
 #: analysis.c:1661 html.c:3290 html.c:3330
 msgid "Error rate (per decision)"
-msgstr "エラー率（決断毎の平均）"
+msgstr "エラー率 (決断毎の平均)"
 
 #: analysis.c:1684
 msgid "Equiv. Snowie error rate    "
@@ -292,7 +292,7 @@ msgstr ""
 
 #: analysis.c:1757
 msgid "Match winning chance"
-msgstr "Match winning chance"
+msgstr ""
 
 #: analysis.c:1758
 msgid "against opponent"
@@ -312,7 +312,7 @@ msgstr "ゲーム全体の統計"
 
 #: analysis.c:1824 analysis.c:1829
 msgid "Statistics for current game"
-msgstr "今のゲームの統計"
+msgstr "現在のゲームの統計"
 
 #: analysis.c:1839 export.c:291 export.c:546 export.c:689 export.c:764
 #: gnubg.c:4533 gnubg.c:4573 html.c:3842 html.c:4025 html.c:4158 html.c:4194
@@ -338,7 +338,7 @@ msgstr ""
 #: bearoff.c:84 gtkexport.c:704 gtkgame.c:2563 gtkgame.c:4469 gtkgame.c:6895
 #: gtkgame.c:7308
 msgid "GNU Backgammon"
-msgstr ""
+msgstr "GNU Backgammon"
 
 #: bearoff.c:85
 msgid "ExactBearoff"
@@ -573,7 +573,7 @@ msgstr "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials Date"
 
 #: database.c:89
 msgid " (no rollout data)\n"
-msgstr " （ロールアウトしたデータがありません）\n"
+msgstr " (ロールアウトしたデータがありません)\n"
 
 #: database.c:111
 msgid "The database is empty."
@@ -581,8 +581,7 @@ msgstr "データベースが空です。"
 
 #: database.c:133
 msgid "You must specify a file to export to (see `help database export')."
-msgstr ""
-"エクスポートするファイルを指定して下さい。(see `help database export')."
+msgstr "エクスポートするファイルを指定して下さい。(see `help database export')."
 
 #: database.c:216
 msgid "You must specify a file to import from (see `help database import')."
@@ -595,8 +594,7 @@ msgstr "%s: おかしなポジションデータです。"
 
 #: database.c:363
 msgid "There are no unevaluated positions in the database to roll out."
-msgstr ""
-"ロールアウトするのにデータベースで評価されていないポジションがありません。"
+msgstr "ロールアウトするのにデータベースで評価されていないポジションがありません。"
 
 #: database.c:379
 msgid ""
@@ -620,11 +618,11 @@ msgstr ""
 
 #: database.c:493
 msgid "Training from database..."
-msgstr "データベースの訓練中..."
+msgstr "データベースの学習中..."
 
 #: database.c:543
 msgid "There are no target evaluations in the database to train from."
-msgstr "訓練するデータベースに目的の評価がありません。"
+msgstr "学習するデータベースに目的の評価がありません。"
 
 #: database.c:625
 #, c-format
@@ -900,8 +898,8 @@ msgid ""
 "%s: incorrect weights version (version %s  is required, but these weights "
 "are %.2f)\n"
 msgstr ""
-"%s: 正しくない weights バージョンです（バージョン %s が必要ですが、この "
-"weights は %.2f です)\n"
+"%s: weights のバージョンが違います (バージョン %s が必要ですが、"
+"この weights のバージョンは %.2f です)\n"
 
 #: eval.c:823
 #, c-format
@@ -909,7 +907,7 @@ msgid ""
 "%s: incorrect weights version (version %s is required,\n"
 "but these weights are %s)\n"
 msgstr ""
-"%s: 正しくない weights バージョンです (バージョン %s が必要ですが、\n"
+"%s: weights のバージョンが違います (バージョン %s が必要ですが、\n"
 "この weights のバージョンは %s です)\n"
 
 #: eval.c:3695
@@ -922,11 +920,11 @@ msgstr "負け"
 
 #: eval.c:3701
 msgid "(backgammon)\n"
-msgstr "（バックギャモン）\n"
+msgstr "(バックギャモン)\n"
 
 #: eval.c:3704
 msgid "(gammon)\n"
-msgstr "（ギャモン）\n"
+msgstr "(ギャモン)\n"
 
 #: eval.c:3706
 msgid "(single)\n"
@@ -1015,7 +1013,7 @@ msgstr ""
 #: eval.c:4086
 #, c-format
 msgid "trained on %d positions"
-msgstr "%d ポジションから訓練されました"
+msgstr "%d ポジションから学習しました"
 
 #: eval.c:4094
 msgid "Race"
@@ -1111,7 +1109,7 @@ msgstr "オプショナル・リダブル、パス"
 
 #: eval.c:4185
 msgid "I have no idea!"
-msgstr "どうしたらいいか分からない"
+msgstr "どうしたらいいか分からない!"
 
 #: eval.c:4202
 msgid "Unknown"
@@ -1441,59 +1439,59 @@ msgstr "直前の解析をクリア"
 
 #: gnubg.c:524
 msgid "Compute analysis and annotate current game"
-msgstr "今のゲームを解析して注釈をつけます。"
+msgstr "今のゲームを解析して注記をつけます。"
 
 #: gnubg.c:527
 msgid "Compute analysis and annotate every game in the match"
-msgstr "全てのゲームを解析して注釈をつけます。"
+msgstr "全てのゲームを解析して注記をつけます。"
 
 #: gnubg.c:530
 msgid "Compute analysis and annotate the current move"
-msgstr "今のムーブを解析して注釈をつけます。"
+msgstr "今のムーブを解析して注記をつけます。"
 
 #: gnubg.c:533
 msgid "Compute analysis and annotate every game in the session"
-msgstr "セッションの全てのゲームを解析して注釈をつけます。"
+msgstr "セッションの全てのゲームを解析して注記をつけます。"
 
 #: gnubg.c:538
 msgid "Erase commentary about a move"
-msgstr "ムーブについての注釈を消します。"
+msgstr "ムーブについての注記を消します。"
 
 #: gnubg.c:541
 msgid "Erase annotations for a dice roll"
-msgstr "ダイスの目についての注釈を消します。"
+msgstr "ダイスの出目についての注記を消します。"
 
 #: gnubg.c:544
 msgid "Erase skill annotations for a move"
-msgstr "ムーブについての技術注釈を消します。"
+msgstr "ムーブについての技術注記を消します。"
 
 #: gnubg.c:548
 msgid "Mark as bad"
-msgstr "悪ければマークする"
+msgstr "「悪い」とマークする"
 
 #: gnubg.c:550 gnubg.c:561
 msgid "Remove annotations"
-msgstr "注釈削除"
+msgstr "注記削除"
 
 #: gnubg.c:551
 msgid "Mark as doubtful"
-msgstr "疑わしければマークする"
+msgstr "「疑わしい」とマークする"
 
 #: gnubg.c:552
 msgid "Mark as good"
-msgstr "良ければマークする"
+msgstr "「良い」とマークする"
 
 #: gnubg.c:553
 msgid "Mark as interesting"
-msgstr "興味深ければマークする"
+msgstr "「興味深い」とマークする"
 
 #: gnubg.c:555
 msgid "Mark as very bad"
-msgstr "非常に悪ければマークする"
+msgstr "「非常に悪い」とマークする"
 
 #: gnubg.c:557
 msgid "Mark as very good"
-msgstr "非常に良ければマークする"
+msgstr "「非常に良い」とマークする"
 
 #: gnubg.c:563
 msgid "Mark a lucky dice roll"
@@ -1513,7 +1511,7 @@ msgstr "非常に悪い出目をマークする"
 
 #: gnubg.c:572
 msgid "Clear annotation"
-msgstr "注釈をクリア"
+msgstr "注記をクリア"
 
 #: gnubg.c:573
 msgid "Mark a move"
@@ -2066,7 +2064,7 @@ msgstr "Window の y座標を設定"
 
 #: gnubg.c:972
 msgid "set geometry of annotation window"
-msgstr "注釈 window の設定"
+msgstr "注記 window の設定"
 
 #: gnubg.c:974 gnubg.c:976
 msgid "set geometry of game-list window"
@@ -2474,7 +2472,7 @@ msgstr "非常に悪いキューブアクションの表示"
 
 #: gnubg.c:1282
 msgid "include annotations"
-msgstr "注釈を含む"
+msgstr "注記を含む"
 
 #: gnubg.c:1284
 msgid "include analysis (evaluations/rollouts)"
@@ -3940,7 +3938,7 @@ msgstr "隠れ層のノード数を指定しなければなりません。 (try `help new weights').\n
 #: gnubg.c:4622
 #, c-format
 msgid "A new neural net with %d hidden nodes has been created.\n"
-msgstr "A new neural net with %d hidden nodes has been created.\n"
+msgstr "隠れ層に %d ノードあるニューラルネットを作成しました。\n"
 
 #: gnubg.c:4858
 #, c-format
@@ -3987,7 +3985,7 @@ msgstr ""
 
 #: gnubg.c:5273
 msgid "Training..."
-msgstr "訓練中..."
+msgstr "学習中..."
 
 #: gnubg.c:6002 gnubg.c:7723
 msgid "Please answer `y' or `n'."
@@ -4045,12 +4043,12 @@ msgstr "すみません、この版は -tty オプションをサポートしていません。"
 
 #: gnubg.c:6720
 msgid "GNU Backgammon for Windows"
-msgstr ""
+msgstr "GNU Backgammon for Windows"
 
 #: gnubg.c:6829
 #, c-format
 msgid "%s: option `-s' requires Guile\n"
-msgstr ""
+msgstr "%s: `-s' オプションには Guile が必要です。\n"
 
 #: gnubg.c:6861
 #, c-format
@@ -4066,7 +4064,7 @@ msgstr ""
 
 #: gnubg.c:6882 gnubg.c:6925 gnubg.c:6932 gnubg.c:6974 gnubg.c:6990
 msgid "Initialising"
-msgstr ""
+msgstr "初期化中"
 
 #: gnubg.c:6882
 msgid "Random number generator"
@@ -4248,7 +4246,7 @@ msgstr "ポジションの編集"
 
 #: gtkboard.c:3474
 msgid "Reverse direction of play"
-msgstr ""
+msgstr "ボードの左右を反転"
 
 #: gtkboard.c:3502
 msgid "Stop the current operation"
@@ -4272,11 +4270,11 @@ msgstr "ピップカウント:"
 
 #: gtkboard.c:3725
 msgid "Match:"
-msgstr "マッチ"
+msgstr "マッチ:"
 
 #: gtkboard.c:3743 gtktheory.c:772
 msgid "Crawford game"
-msgstr "クロフォードゲーム"
+msgstr "クロフォード"
 
 #: gtkchequer.c:86 gtkrolls.c:225 html.c:2509 show.c:2252
 msgid "Equity"
@@ -4454,7 +4452,7 @@ msgstr "%dx%d ピクセル"
 
 #: gtkexport.c:431
 msgid "Annotations"
-msgstr "注釈"
+msgstr "注記"
 
 #: gtkexport.c:432 gtkgame.c:4713
 msgid "Analysis"
@@ -4646,7 +4644,7 @@ msgstr "GNU Backgammon - メッセージ"
 
 #: gtkgame.c:983
 msgid "GNU Backgammon - Annotation"
-msgstr "GNU Backgammon - 注釈"
+msgstr "GNU Backgammon - 注記"
 
 #: gtkgame.c:1044
 msgid "GNU Backgammon - Game record"
@@ -5298,39 +5296,39 @@ msgstr ""
 
 #: gtkgame.c:2454
 msgid "/_Train"
-msgstr "/_訓練"
+msgstr "/_学習"
 
 #: gtkgame.c:2455
 msgid "/_Train/D_ump database"
-msgstr "/_訓練/データベースのダンプ"
+msgstr "/_学習/データベースのダンプ"
 
 #: gtkgame.c:2457
 msgid "/_Train/_Generate database"
-msgstr "/_訓練/_データベースの作成"
+msgstr "/_学習/_データベースの作成"
 
 #: gtkgame.c:2459
 msgid "/_Train/_Rollout database"
-msgstr "/_訓練/_データベースのロールアウト"
+msgstr "/_学習/_データベースのロールアウト"
 
 #: gtkgame.c:2461
 msgid "/_Train/_Import database..."
-msgstr "/_訓練/_データベースのインポート..."
+msgstr "/_学習/_データベースのインポート..."
 
 #: gtkgame.c:2462
 msgid "/_Train/_Export database..."
-msgstr "/_訓練/_データベースのエクスポート..."
+msgstr "/_学習/_データベースのエクスポート..."
 
 #: gtkgame.c:2463
 msgid "/_Train/-"
-msgstr "/_訓練/-"
+msgstr "/_学習/-"
 
 #: gtkgame.c:2464
 msgid "/_Train/Train from _database"
-msgstr "/_訓練/データベースを訓練する"
+msgstr "/_学習/データベースを学習する"
 
 #: gtkgame.c:2466
 msgid "/_Train/Train with _TD(0)"
-msgstr "/_訓練/TD(0)を訓練する"
+msgstr "/_学習/TD(0)を学習する"
 
 #: gtkgame.c:2468
 msgid "/_Settings"
@@ -5386,7 +5384,7 @@ msgstr "/_ウィンドウ/_ゲーム棋譜"
 
 #: gtkgame.c:2485
 msgid "/_Windows/_Annotation"
-msgstr "/_ウィンドウ/_注釈"
+msgstr "/_ウィンドウ/_注記"
 
 #: gtkgame.c:2487
 msgid "/_Windows/_Message"
@@ -6439,7 +6437,7 @@ msgstr ""
 
 #: gtkgame.c:8609
 msgid "Annotator:"
-msgstr "注釈"
+msgstr "注記"
 
 #: gtkgame.c:8612
 msgid "Comments:"
@@ -7735,11 +7733,11 @@ msgstr ""
 
 #: gtkprefs.c:875
 msgid "(user defined board design)"
-msgstr "（ユーザ定義のボードデザイン）"
+msgstr "(ユーザ定義のボードデザイン)"
 
 #: gtkprefs.c:876
 msgid "(predefined board design)"
-msgstr "（定義済みのボードデザイン）"
+msgstr "(あらかじめ定義済みのボードデザイン)"
 
 #: gtkprefs.c:916
 msgid "unknown title"
@@ -7755,11 +7753,11 @@ msgstr "GNU Backgammon - 現在のボードデザインを追加"
 
 #: gtkprefs.c:1020
 msgid "Title of new design:"
-msgstr "デザインのタイトル"
+msgstr "デザインのタイトル:"
 
 #: gtkprefs.c:1037
 msgid "Author of new design:"
-msgstr "デザインの作者"
+msgstr "デザインの作者:"
 
 #: gtkprefs.c:1282
 msgid "Selected board design"
@@ -8352,7 +8350,7 @@ msgstr "パス"
 
 #: html.c:3473
 msgid "Annotation"
-msgstr "注釈"
+msgstr "注記"
 
 #: html.c:3520
 #, c-format
@@ -8981,7 +8979,7 @@ msgstr ""
 #: play.c:1876
 #, c-format
 msgid "Move marked as %s.\n"
-msgstr ""
+msgstr "ムーブを %s とマークしました。\n"
 
 #: play.c:1909
 msgid "Luck annotation cleared."
@@ -8990,7 +8988,7 @@ msgstr ""
 #: play.c:1911
 #, c-format
 msgid "Roll marked as %s.\n"
-msgstr ""
+msgstr "出目を %s をマークしました。\n"
 
 #: play.c:1987
 msgid "You must select a move to clear the comment from."
@@ -9289,7 +9287,7 @@ msgstr ""
 #: postscript.c:930
 #, c-format
 msgid "Annotator: %s"
-msgstr "注釈: %s"
+msgstr "注記: %s"
 
 #: postscript.c:934
 #, c-format
@@ -10848,7 +10846,7 @@ msgstr ""
 
 #: set.c:2793
 msgid "Match annotator"
-msgstr "マッチ注釈"
+msgstr "マッチ注記"
 
 #: set.c:2798
 msgid "Match comment"
@@ -11930,12 +11928,12 @@ msgstr ""
 #: show.c:786 text.c:1544
 #, c-format
 msgid "Place: %s\n"
-msgstr "Place: %s\n"
+msgstr "場所: %s\n"
 
 #: show.c:789 text.c:1546
 #, c-format
 msgid "Annotator: %s\n"
-msgstr "注釈: %s\n"
+msgstr "注記: %s\n"
 
 #: show.c:797
 #, c-format
