@@ -42,6 +42,8 @@ dnl
 dnl Figure out how to use Guile (but unlike the guile.m4 macro, don't
 dnl abort if Guile isn't there at all).
 dnl
+dnl Looks for Guile 1.4 or newer (since that's what GNU Backgammon needs).
+dnl
 dnl @author Gary Wong <gtw@gnu.org>
 
 AC_DEFUN(AM_GUILE,[
@@ -50,9 +52,22 @@ AC_DEFUN(AM_GUILE,[
     no_guile=yes
     ifelse([$2], , :, [$2])
   else
-    GUILE_CFLAGS="`guile-config compile`"
-    GUILE_LDFLAGS="`guile-config link`"
-    ifelse([$1], , :, [$1])
+    AC_MSG_CHECKING(for Guile version 1.4 or newer)
+    guile_major_version=`$GUILE_CONFIG --version 2>&1 | \
+	sed -n 's/.* \([[0-9]]\+\)[[^ ]]*$/\1/p'`
+    guile_minor_version=`$GUILE_CONFIG --version 2>&1 | \
+	sed -n 's/.* [[0-9]]\+.\([[0-9]]\+\)[[^ ]]*$/\1/p'`
+    if test `expr "${guile_major_version:-0}" \* 1000 + \
+	"${guile_minor_version:-0}"` -ge 1004; then
+      GUILE_CFLAGS="`$GUILE_CONFIG compile`"
+      GUILE_LDFLAGS="`$GUILE_CONFIG link`"
+      AC_MSG_RESULT(yes)
+      ifelse([$1], , :, [$1])
+    else
+      no_guile=yes
+      AC_MSG_RESULT(no)
+      ifelse([$2], , :, [$2])
+    fi
   fi
   AC_SUBST(GUILE_CFLAGS)
   AC_SUBST(GUILE_LDFLAGS)

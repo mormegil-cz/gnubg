@@ -1,3 +1,16 @@
+Thu Mar  8 10:30:15 2001  Gary Wong  <gtw@research.att.com>
+
+	* database.c (CommandDatabaseTrain): Allow a timeout parameter.
+	* gnubg.c (CommandTrainTD): Likewise.
+	
+	* eval.c (EvalInitialise): Pay attention to the user-specified
+	net size.
+
+	* gnubg.c (CommandSaveWeights): Allow a filename parameter.
+	
+	* acinclude.m4: Check for Guile 1.4 or newer (Zvezdan Petkovic reports
+	gnubg won't link with 1.3.)
+
 Tue Mar  6 11:37:32 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (real_main): Disable stdio buffering for pipes and sockets.
