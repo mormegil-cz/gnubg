@@ -30,10 +30,8 @@ duplication of effort and to make sure our changes merge easily.
   web.
 ** Write a proper input routine which will read a line from stdin under all
   conditions (with or without X, with or without readline, and whether
-  stdin is a TTY or not).  Let the user configure the prompt (add escape
-  sequences to display information such as the player on roll, pip
-  count, match score, etc.).  Also, echo commands input with the mouse
-  as if they had been typed. (gary)
+  stdin is a TTY or not).  Echo commands input with the mouse as if they had
+  been typed. (gary)
 ** Be more liberal in the move syntax accepted. (gary)
 ** Finish "help" -- add detailed help for each command.
 ** Allow changing the eval cache size. (gary)
