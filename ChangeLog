@@ -1,3 +1,20 @@
+Wed Jul 17 17:27:03 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Stabilising the previous commits...
+
+	* sgf.c: save and restore cube rollouts.
+	* gtkgame.c (GTKHint): fix bugs related to the hint dialog.
+	* gtkgame.c (HintMove): declare extern.
+	* gtkcube.c (CreateCubeAnalysis): add arDouble to
+	prototype. Changed all callers. Return NULL widget if cube is not
+	available or no analysis available.
+	* gtkcube.c (CubeAnalysisEval, CubeAnalysisRollout): save
+	arDouble.
+	* gtkcube.c (CubeAnalysisRollout): save rolloutcontext.
+	* gtkchequer.c (HintSelect): call HintMove on double click.
+	* gtkchequer.c (CreateMoveList): assign fButtonsValid and
+	initialise pwMove.
+	
 Wed Jul 17 12:37:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkcube.c: new file. Widgets for cube and take anslysis.

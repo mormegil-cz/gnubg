@@ -49,6 +49,7 @@ typedef struct _cubehintdata {
   GtkWidget *pwTools;   /* the tools */
   float (*aarOutput)[ NUM_ROLLOUT_OUTPUTS ];
   float (*aarStdDev)[ NUM_ROLLOUT_OUTPUTS ];
+  float *arDouble;
   evalsetup *pes;
   movetype mt;
 } cubehintdata;
@@ -652,7 +653,10 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
            2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 
   pchd->pes->et = EVAL_ROLLOUT;
-  memcpy ( &pchd->pes->ec, &esEvalCube.ec, sizeof ( evalcontext ) );
+  memcpy ( &pchd->pes->rc, &rcRollout, sizeof ( rcRollout ) );
+
+  if ( pchd->arDouble )
+    FindCubeDecision ( pchd->arDouble, pchd->aarOutput, &ci );
 
   UpdateCubeAnalysis ( pchd );
 
@@ -682,6 +686,8 @@ CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
 
   pchd->pes->et = EVAL_EVAL;
   memcpy ( &pchd->pes->ec, &esEvalCube.ec, sizeof ( evalcontext ) );
+  if ( pchd->arDouble )
+     FindCubeDecision ( pchd->arDouble, pchd->aarOutput, &ci );
 
   UpdateCubeAnalysis ( pchd );
 
@@ -782,6 +788,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
 extern GtkWidget *
 CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                     float arDouble[],
                      evalsetup *pes,
                      const movetype mt ) {
 
@@ -790,9 +797,9 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   GtkWidget *pw;
   GtkWidget *pwx;
 
-
   pchd->aarOutput = aarOutput;
   pchd->aarStdDev = aarStdDev;
+  pchd->arDouble = arDouble;
   pchd->pes = pes;
   pchd->mt = mt;
 
@@ -822,6 +829,9 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     break;
 
   }
+
+  if ( ! pchd->pwFrame )
+    return NULL;
 
   gtk_box_pack_start ( GTK_BOX ( pw ), pchd->pwFrame, FALSE, FALSE, 0 );
 

@@ -25,6 +25,7 @@
 extern GtkWidget *
 CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                     float arDouble[],
                      evalsetup *pes,
                      const movetype mt );
 

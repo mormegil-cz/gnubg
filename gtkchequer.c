@@ -423,7 +423,8 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 
     /* Double clicking a row makes that move. */
     if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && phd->fButtonsValid )
-	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
+      HintMove ( NULL, phd->pw );
+    
 }
 
 static gint HintClearSelection( GtkWidget *pw, GdkEventSelection *pes,
@@ -489,7 +490,8 @@ CheckHintButtons( hintdata *phd ) {
     for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
 	c++;
 
-    //gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
+    if ( phd->pwMove )
+      gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
 
@@ -527,6 +529,8 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid ) {
 
     phd->piHighlight = piHighlight;
     phd->pml = pml;
+    phd->fButtonsValid = fButtonsValid;
+    phd->pwMove = NULL;
 
     for ( i = 0; i < 11; i++ )
      aszTemp[ i ] = gettext ( aszTitle[ i ] );
