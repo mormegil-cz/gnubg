@@ -74,7 +74,7 @@ read a 2-sided bearoff databases from the file "gnubg_ts.bd". You can
 generate such a 2-sided database with "makebearoff", for example, up to 
 8 chequers on 6 points:
 
-   makebearoff -t 6x8 > gnubg_ts.bd
+   makebearoff -t 6x8 -f gnubg_ts.bd
 
 Note that this database is 72 megabytes and may take up to several hours to
 generate (depending on the speed of your computer). 
@@ -83,7 +83,7 @@ Also, if present GNU Backgammon will use a 1-sided database from the file
 "gnubg_os.bd". You can generate a one-sided databases with 15 chequers on
 10 points with
 
-   makebearoff -o 10 > gnubg_os.bd
+   makebearoff -o 10 -f gnubg_os.bd
 
 Note that this database is 118 megabtes and may take up to several hours
 to generate (depending on the speed of your computer).
