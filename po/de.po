@@ -6,14 +6,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: de\n"
-"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2003-09-13 12:09+0900\n"
-"PO-Revision-Date: 2003-09-11 02:16+0200\n"
+"PO-Revision-Date: 2003-09-17 21:40+0200\n"
 "Last-Translator: Achim Mueller <ace@gnubg.org>\n"
 "Language-Team: Deutsch <de@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Report-Msgid-Bugs-To: \n"
 "X-Generator: KBabel 1.0.2\n"
 
 #: analysis.c:48
@@ -1689,28 +1689,24 @@ msgid "plain|bronstein|fischer|hourglass"
 msgstr ""
 
 #: gnubg.c:512
-#, fuzzy
 msgid "<time>"
-msgstr "<Typ>"
+msgstr "<Zeit>"
 
 #: gnubg.c:513
 msgid "<time per point>"
 msgstr ""
 
 #: gnubg.c:514
-#, fuzzy
 msgid "<time per move>"
-msgstr "Glücks-Rate (pro Zug)"
+msgstr "<Zeit pro Zug>"
 
 #: gnubg.c:515
-#, fuzzy
 msgid "<factor>"
-msgstr "<Anteil>"
+msgstr "<Faktorl>"
 
 #: gnubg.c:516
-#, fuzzy
 msgid "<points>|lose"
-msgstr "Punkte"
+msgstr "<Punkte>verloren"
 
 #: gnubg.c:517
 msgid "<next time control> [<opponent's next time control>]"
@@ -1721,9 +1717,8 @@ msgid "[<name> [<levels>]]"
 msgstr ""
 
 #: gnubg.c:521
-#, fuzzy
 msgid "[all]"
-msgstr "[Wert]"
+msgstr "[alle]"
 
 #: gnubg.c:523
 msgid "<joint standard deviations>"
@@ -3380,9 +3375,8 @@ msgid "Select time control to use"
 msgstr ""
 
 #: gnubg.c:1704
-#, fuzzy
 msgid "Set time per move"
-msgstr "Glücks-Rate (pro Zug)"
+msgstr "Setze Zeit pro Zug"
 
 #: gnubg.c:1705
 msgid "Set how much of remaining time to keep"
@@ -3397,19 +3391,16 @@ msgid "Set next time control(s)"
 msgstr ""
 
 #: gnubg.c:1708
-#, fuzzy
 msgid "Set penalty type"
-msgstr "Setzte den Standard-Pfad"
+msgstr "Setze den Typ der Strafe"
 
 #: gnubg.c:1709
-#, fuzzy
 msgid "Set total time per point in match"
-msgstr "Beginne ein neues %d-Match"
+msgstr "Setze die Gesamtzeit pro Punkt im Match"
 
 #: gnubg.c:1710
-#, fuzzy
 msgid "Set total (added) time for entire match"
-msgstr "Lösche die Analyse für das gesamte Match"
+msgstr "Setze die (addierte) Gesamtzeit für das Match"
 
 #: gnubg.c:1711
 msgid "Set time control type"
@@ -3652,14 +3643,12 @@ msgid "Calculate Thorp Count for position"
 msgstr "Berechne den 'Thorp-Count' für die Position"
 
 #: gnubg.c:1845
-#, fuzzy
 msgid "Show time control information"
-msgstr "- Match-Information"
+msgstr "Zeige Information zur Zeitkontrolle"
 
 #: gnubg.c:1847
-#, fuzzy
 msgid "Show list of defined time controls"
-msgstr "Zeige eine Liste von Partien oder Zügen"
+msgstr "Zeige eine Liste der definierten Zeitkontrollen"
 
 #: gnubg.c:1849
 msgid "Show time control tutorial"
@@ -4740,9 +4729,8 @@ msgid "Pips:"
 msgstr "Pips:"
 
 #: gtkboard.c:3561 gtkboard.c:3649
-#, fuzzy
 msgid "Clock:"
-msgstr "Sockel:"
+msgstr "Uhr:"
 
 #: gtkboard.c:3684
 msgid "Match:"
@@ -9931,14 +9919,14 @@ msgid ""
 msgstr ""
 
 #: play.c:401
-#, fuzzy, c-format
+#, c-format
 msgid "%s is out of time, %s wins %d point.\n"
-msgstr "%s gewinnt ein(e) %s und %d Punkt(e).\n"
+msgstr "%s verliert durch Zeit, %s gewinnt %d Punkt.\n"
 
 #: play.c:402
-#, fuzzy, c-format
+#, c-format
 msgid "%s is out of time,  %s wins %d points.\n"
-msgstr "%s gewinnt ein(e) %s und %d Punkt(e).\n"
+msgstr "%s verliert durch Zeit,  %s gewinnt %d Punkte.\n"
 
 #: play.c:743 play.c:3033
 msgid ""
@@ -14235,7 +14223,7 @@ msgid "disabled"
 msgstr "deaktiviert"
 
 #: show.c:2120
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Parameters for cube evaluations:\n"
 "Cube efficiency for crashed positions           : %7.4f\n"
@@ -14329,9 +14317,8 @@ msgid "95%%CI  %9.3f   %9.3f\n"
 msgstr "95%%CI  %9.3f   %9.3f\n"
 
 #: show.c:2368
-#, fuzzy
 msgid "Time Control Tutorial"
-msgstr "Tutor Einstellungen"
+msgstr "Tutorial für die Zeitkontrolle"
 
 #: show.c:2377
 #, c-format
@@ -14587,28 +14574,24 @@ msgid "bronstein"
 msgstr ""
 
 #: timecontrol.c:51
-#, fuzzy
 msgid "hourglass"
-msgstr "Weltklasse"
+msgstr "Sanduhr"
 
 #: timecontrol.c:52
-#, fuzzy
 msgid "none"
-msgstr "Nichts"
+msgstr "nichts"
 
 #: timecontrol.c:54
 msgid "tctime"
 msgstr ""
 
 #: timecontrol.c:55
-#, fuzzy
 msgid "tcpoint"
-msgstr "Punkte"
+msgstr "tc-Punkt"
 
 #: timecontrol.c:56
-#, fuzzy
 msgid "tcmove"
-msgstr "Züge."
+msgstr "tc-Zug"
 
 #: timecontrol.c:57
 msgid "tcpenalty"
@@ -14623,9 +14606,9 @@ msgid "(modified)"
 msgstr ""
 
 #: timecontrol.c:233
-#, fuzzy, c-format
+#, c-format
 msgid "Time control: %s\n"
-msgstr "Kommentare: %s\n"
+msgstr "Zeitkontrolle: %s\n"
 
 #: timecontrol.c:238
 #, c-format
@@ -14648,14 +14631,13 @@ msgid "%*sHourglass timing\n"
 msgstr ""
 
 #: timecontrol.c:258
-#, fuzzy
 msgid "lose match\n"
-msgstr "Der Computer gewinnt das Match"
+msgstr "Match verloren\n"
 
 #: timecontrol.c:296
-#, fuzzy, c-format
+#, c-format
 msgid "%*sNext Time Control: %s\n"
-msgstr "%s gesetzt auf: %s\n"
+msgstr "%*sNächste Zeitkontrolle: %s\n"
 
 #: timecontrol.c:308
 #, c-format
@@ -14663,9 +14645,9 @@ msgid "%*sOpponent's Next Time Control: %s\n"
 msgstr ""
 
 #: timecontrol.c:424
-#, fuzzy, c-format
+#, c-format
 msgid "Time control set to %s\n"
-msgstr "Der Prompt ist auf `%s' gesetzt.\n"
+msgstr "Die Zeitkontrolle ist auf`%s' gesetzt.\n"
 
 #: timecontrol.c:461
 msgid "Defined time controls:\n"
