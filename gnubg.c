@@ -175,17 +175,17 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
 	0.04f /* SKILL_VERYGOOD	*/
     };
 
-evalcontext ecTD = { 0, 8, 0.16, 0, FALSE, 0.0, TRUE };
-evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE, 0.0, TRUE };
+evalcontext ecTD = { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 };
+evalcontext ecRollout = { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 };
 
 rolloutcontext rcTD = { 
   {
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 cube decision */
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 cube decision */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 cube decision */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 cube decision */
   }, 
   {
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 chequerplay */
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 chequerplay */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 chequerplay */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 chequerplay */
   }, 
   FALSE, /* cubeful */
   FALSE, /* variance reduction */
@@ -198,12 +198,12 @@ rolloutcontext rcTD = {
 rolloutcontext rcRollout =
 { 
   {
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 cube decision */
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 cube decision */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 cube decision */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 cube decision */
   }, 
   {
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 chequerplay */
-    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 chequerplay */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 chequerplay */
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 chequerplay */
   }, 
   FALSE, /* cubeful */
   FALSE, /* variance reduction */
@@ -219,16 +219,16 @@ rolloutcontext rcRollout =
   /* evaltype */ \
   EVAL_EVAL, \
   /* evalcontext */ \
-  { 1, 8, 0.16, 0, FALSE, 0.0, TRUE }, \
+  { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, \
   /* rolloutcontext */ \
   { \
     { \
-      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 cube decision */ \
-      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 cube decision */ \
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 cube decision */ \
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 cube decision */ \
     }, \
     { \
-      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 chequerplay */ \
-      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 chequerplay */ \
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 }, /* player 0 chequerplay */ \
+      { 8, FALSE, 0, 0, TRUE, 0.16, 0.0 } /* player 1 chequerplay */ \
     }, \
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \
@@ -827,26 +827,97 @@ char *szHomeDirectory;
 
 extern char *NextToken( char **ppch ) {
 
-    char *pch;
-
+    char *pch, *pchSave, chQuote = 0;
+    int fEnd = FALSE;
+#ifndef NDEBUG
+    char *pchEnd;
+#endif
+    
     if( !*ppch )
 	return NULL;
+
+#ifndef NDEBUG
+    pchEnd = strchr( *ppch, 0 );
+#endif
     
+    /* skip leading whitespace */
     while( isspace( **ppch ) )
 	( *ppch )++;
 
-    if( !*( pch = *ppch ) )
+    if( !*( pch = pchSave = *ppch ) )
+	/* nothing left */
 	return NULL;
 
-    while( **ppch && !isspace( **ppch ) )
-	( *ppch )++;
+    while( !fEnd ) {
+	switch( **ppch ) {
+	case ' ':
+	case '\t':
+	case '\n':
+	case '\r':
+	case '\v':
+	case '\f':
+	    /* whitespace -- ends token if not quoted */
+	    if( !chQuote )
+		fEnd = TRUE;
+	    else
+		*pchSave++ = **ppch;
+	    break;
+	    
+	case '\'':
+	case '"':
+	    /* quote mark */
+	    if( !chQuote )
+		/* start quoting */
+		chQuote = **ppch;
+	    else if( chQuote == **ppch )
+		/* end quoting */
+		chQuote = 0;
+	    else
+		/* literal */
+		*pchSave++ = **ppch;
+	    break;
+	    
+	case '\\':
+	    /* backslash */
+	    if( chQuote == '\'' )
+		/* literal */
+		*pchSave++ = **ppch;
+	    else {
+		( *ppch )++;
 
-    if( **ppch )
-	*( *ppch )++ = 0;
+		if( **ppch )
+		    /* next character is literal */
+		    *pchSave++ = **ppch;
+		else {
+		    /* end of string -- the backlash doesn't quote anything */
+		    *pchSave++ = '\\';
+		    fEnd = TRUE;
+		}
+	    }
+	    break;
+	    
+	case 0:
+	    /* end of string -- always ends token */
+	    fEnd = TRUE;
+	    break;
+	    
+	default:
+	    *pchSave++ = **ppch;
+	}
+
+	if( !fEnd )
+	    ( *ppch )++;
+    }
 
     while( isspace( **ppch ) )
 	( *ppch )++;
 
+    *pchSave = 0;
+
+    assert( pchSave <= pchEnd );
+    assert( *ppch <= pchEnd );
+    assert( pch <= pchEnd );
+    
     return pch;
 }
 
@@ -3142,7 +3213,7 @@ static command *FindContext( command *pc, char *sz, int ich ) {
     return NULL;
 }
 
-static char **CompleteKeyword( char *szText, int iStart, int iEnd ) {
+static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 
     pcCompleteContext = FindContext( acTop, rl_line_buffer, iStart );
 
@@ -3150,10 +3221,11 @@ static char **CompleteKeyword( char *szText, int iStart, int iEnd ) {
 	return NULL;
     
 #if HAVE_RL_COMPLETION_MATCHES
-    if( pcCompleteContext == &cFilename )
+    if( pcCompleteContext == &cFilename ) {
+	rl_filename_completion_desired = TRUE;
 	return rl_completion_matches( szText,
 				      rl_filename_completion_function );
-    else
+    } else
 	return rl_completion_matches( szText, GenerateKeywords );
 #else
     /* assume obselete version of readline */
@@ -3846,11 +3918,13 @@ static void usage( char *argv0 ) {
 "Usage: %s [options] [saved-game-file]\n"
 "Options:\n"
 "  -b, --no-bearoff          Do not use bearoff database\n"
+"  -c FILE, --commands FILE  Read commands from FILE and exit\n"
 "  -d DIR, --datadir DIR     Read database and weight files from directory "
 "DIR\n"
 "  -h, --help                Display usage and exit\n"
 "  -n[S], --new-weights[=S]  Create new neural net (of size S)\n"
 "  -r, --no-rc               Do not read .gnubgrc and .gnubgautorc commands\n"
+"  -s FILE, --script FILE    Evaluate Scheme code in FILE and exit\n"
 "  -t, --tty                 Start on tty instead of using window system\n"
 "  -v, --version             Show version information and exit\n"
 "  -w, --window-system-only  Ignore tty input when using window system\n"
@@ -4113,14 +4187,17 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    
 #if HAVE_LIBREADLINE
 	    rl_readline_name = "gnubg";
-	    rl_basic_word_break_characters = szCommandSeparators;
-	    rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
+	    rl_basic_word_break_characters = rl_filename_quote_characters =
+		szCommandSeparators;
+	    rl_completer_quote_characters = "\"'";
 #if HAVE_RL_COMPLETION_MATCHES
 	    /* assume readline 4.2 or later */
 	    rl_completion_entry_function = NullGenerator;
+	    rl_attempted_completion_function = CompleteKeyword;
 #else
 	    /* assume old readline */
 	    rl_completion_entry_function = (Function *) NullGenerator;
+	    rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
 #endif
 #endif
 	}
