@@ -1688,7 +1688,7 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
     if( !fContact ) {
 	for( i = 0; i < 2; i++ )
-	    if( anBack[ i ] < 6 )
+	    if( anBack[ i ] < 6 && pBearoff1 )
 		anMaxTurns[ i ] = MaxTurns( PositionBearoff( anBoard[ i ] ) );
 	    else
 		anMaxTurns[ i ] = anCross[ i ] * 2;
@@ -1896,6 +1896,8 @@ getBearoffProbs(int n, unsigned int aaProb[32])
 {
   int i;
 
+  assert( pBearoff1 );
+  
   for( i = 0; i < 32; i++ )
     aaProb[ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
       ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
