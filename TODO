@@ -166,6 +166,10 @@ duplication of effort and to make sure our changes merge easily.
 *** right-blick bearoff tray for bearing off 4 men
     Also, if "allow dragging to illegal points" is disabled right clicking
     on the bearoff tray will hit the chequer in the home board.
+** Annotations: it's not possible to write to the annotation window while playing
+** Redesign some of the GUI. See mails from Albert Silver and others.
+** The "take" hint-widget is not used. Either use it, or alter the current
+"double"-widget.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -181,6 +185,7 @@ functions:
 *** gdk_style_set_font
 *** gdk_image_new_bitmap
 *** GtkText
+*** Save geometry for other windows: match statistics, hint, etc.
 
 * Bugs:
 ** The erroneous commands "set player both" and "set player both evaluation"
@@ -228,6 +233,8 @@ functions:
 ** the move number shown when exporting positions to text or html is -1
 ** the rollout window is a bit to small
 ** try to eliminate dependency on pstopng and friends
+** settings analysis thresholds doesn't seem to work
+   (see http://mail.gnu.org/pipermail/bug-gnubg/2002-October/001313.html)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
