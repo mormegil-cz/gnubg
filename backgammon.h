@@ -32,7 +32,7 @@
 
 #if USE_GTK
 #include <gtk/gtk.h>
-extern GtkWidget *pwMain, *pwBoard;
+extern GtkWidget *pwBoard;
 extern int fX, nDelay, fNeedPrompt;
 extern guint nNextTurn; /* GTK idle function */
 #define DISPLAY GDK_DISPLAY()
@@ -67,7 +67,7 @@ typedef struct _player {
 
 typedef enum _movetype {
     MOVE_GAMEINFO, MOVE_NORMAL, MOVE_DOUBLE, MOVE_TAKE, MOVE_DROP, MOVE_RESIGN,
-    MOVE_SETBOARD, MOVE_SETCUBEVAL, MOVE_SETCUBEPOS
+    MOVE_SETBOARD, MOVE_SETDICE, MOVE_SETCUBEVAL, MOVE_SETCUBEPOS
 } movetype;
 
 typedef struct _movegameinfo {
@@ -84,6 +84,11 @@ typedef struct _movegameinfo {
 	nAutoDoubles; /* how many automatic doubles were rolled */
 } movegameinfo;
 
+typedef struct _movebasic {
+    movetype mt;
+    int fPlayer;
+} movebasic;
+
 typedef struct _movedouble {
   movetype mt;
   int fPlayer;
@@ -92,7 +97,6 @@ typedef struct _movedouble {
   evaltype etDouble;
   evalsetup esDouble;
 } movedouble;
-
 
 typedef struct _movenormal {
   movetype mt;
@@ -118,6 +122,12 @@ typedef struct _movesetboard {
     unsigned char auchKey[ 10 ]; /* always stored as if player 0 was on roll */
 } movesetboard;
 
+typedef struct _movesetdice {
+    movetype mt;
+    int fPlayer;
+    int anDice[ 2 ];
+} movesetdice;
+
 typedef struct _movesetcubeval {
     movetype mt;
     int nCube;
@@ -131,12 +141,14 @@ typedef struct _movesetcubepos {
 typedef union _moverecord {
     movetype mt;
     movegameinfo g;
+    movedouble d;
+    movebasic t; /* double, take, drop */
     movenormal n;
     moveresign r;
     movesetboard sb;
+    movesetdice sd;
     movesetcubeval scv;
     movesetcubepos scp;
-    movedouble d;
 } moverecord;
 
 extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
@@ -166,7 +178,8 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] );
 extern char *NextToken( char **ppch );
 extern void NextTurn( void );
 extern void TurnDone( void );
-extern void ApplyMoveRecord( moverecord *pmr );
+extern void AddMoveRecord( void *pmr );
+extern void ClearMoveRecord( void );
 extern void CancelCubeAction( void );
 extern void FreeMatch( void );
 extern int ParseNumber( char **ppch );
@@ -235,6 +248,8 @@ extern void CommandAccept( char * ),
     CommandExportMatch( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
+    CommandListGame( char * ),
+    CommandListMatch( char * ),
     CommandLoadCommands( char * ),
     CommandLoadGame( char * ),
     CommandLoadMatch( char * ),

@@ -45,10 +45,8 @@ static int fComputerDecision = FALSE;
 
 #if USE_GTK
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
+#include "gtkgame.h"
 #endif
-
-#if USE_GUI
-static struct timeval tvLast;
 
 static void PlayMove( int anMove[ 8 ], int fPlayer ) {
 
@@ -73,7 +71,7 @@ static void PlayMove( int anMove[ 8 ], int fPlayer ) {
 	if( nDest >= 0 )
 	    anBoard[ 1 ][ nDest ]++;
 
-	if( nSrc >= 0 && nSrc < 24 && nDest >= 0 && nDest <= 23 ) {
+	if( nDest >= 0 && nDest <= 23 ) {
 	    anBoard[ 0 ][ 24 ] += anBoard[ 0 ][ 23 - nDest ];
 	    anBoard[ 0 ][ 23 - nDest ] = 0;
 	}
@@ -96,7 +94,14 @@ static void ApplyGameOver( void ) {
     fMove = fTurn = -1;
 }
 
-extern void ApplyMoveRecord( moverecord *pmr ) {
+static void ApplyMoveRecord( moverecord *pmr ) {
+
+    int n;
+    movegameinfo *pmgi = plGame->plNext->p;
+
+    assert( pmr->mt == MOVE_GAMEINFO || pmgi->mt == MOVE_GAMEINFO );
+    
+    fResigned = FALSE;
 
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
@@ -105,61 +110,89 @@ extern void ApplyMoveRecord( moverecord *pmr ) {
 	anScore[ 0 ] = pmr->g.anScore[ 0 ];
 	anScore[ 1 ] = pmr->g.anScore[ 1 ];
 	
+	go = GAME_NORMAL;
 	fMove = fTurn = fCubeOwner = -1;
 	anDice[ 0 ] = anDice[ 1 ] = 0;
 	fResigned = fDoubled = FALSE;
 	nCube = 1 << pmr->g.nAutoDoubles;
+    
 	break;
 	
     case MOVE_DOUBLE:
-	if( fTurn < 0 )
-	    break;
-	
 	if( fDoubled ) {
 	    nCube <<= 1;
 	    fCubeOwner = !fMove;
 	} else
 	    fDoubled = TRUE;
 	
-	fTurn = !fTurn;
+	fTurn = !pmr->d.fPlayer;
 	break;
 
     case MOVE_TAKE:
-	if( fTurn < 0 )
+	if( !fDoubled )
 	    break;
 	
 	nCube <<= 1;
 	fDoubled = FALSE;
-	fTurn = fCubeOwner = !fMove;
+	fCubeOwner = !fMove;
+	fTurn = fMove;
 	break;
 
     case MOVE_DROP:
-	if( fTurn < 0 )
+	if( !fDoubled )
 	    break;
 	
 	fDoubled = FALSE;
+	go = GAME_DROP;
+	pmgi->nPoints = nCube;
+	pmgi->fWinner = !pmr->d.fPlayer;
+	pmgi->fResigned = FALSE;
+	
 	ApplyGameOver();
 	break;
 
     case MOVE_NORMAL:
+	fDoubled = FALSE;
 	PlayMove( pmr->n.anMove, pmr->n.fPlayer );
 	anDice[ 0 ] = anDice[ 1 ] = 0;
 
-	if( GameStatus( anBoard ) )
+	if( ( n = GameStatus( anBoard ) ) ) {
+	    go = GAME_NORMAL;
+	    pmgi->nPoints = nCube * n;
+	    pmgi->fWinner = pmr->n.fPlayer;
+	    pmgi->fResigned = FALSE;
 	    ApplyGameOver();
-
+	}
+	
 	break;
 
     case MOVE_RESIGN:
-	if( fTurn < 0 )
-	    break;
-
+	go = GAME_RESIGNED;
+	pmgi->nPoints = nCube * ( fResigned = pmr->r.nResigned );
+	pmgi->fWinner = !pmr->r.fPlayer;
+	pmgi->fResigned = TRUE;
+	
 	ApplyGameOver();
 	break;
 	
     case MOVE_SETBOARD:
+	assert( FALSE );
+	break;
+	
+    case MOVE_SETDICE:
+	anDice[ 0 ] = pmr->sd.anDice[ 0 ];
+	anDice[ 1 ] = pmr->sd.anDice[ 1 ];
+	fTurn = fMove = pmr->sd.fPlayer;
+	fDoubled = FALSE;
+	break;
+	
     case MOVE_SETCUBEVAL:
+	assert( FALSE );
+	break;
+	
     case MOVE_SETCUBEPOS:
+	assert( FALSE );
+	break;
 	/* FIXME */
     }
 }
@@ -178,6 +211,86 @@ extern void CalculateBoard( void ) {
     } while( pl != plLastMove );
 }
 
+static int PopMoveRecord( list *plDelete ) {
+
+    list *pl;
+    
+    for( pl = plGame->plNext; pl != plGame && pl != plDelete; pl = pl->plNext )
+	;
+
+    if( pl == plGame )
+	/* couldn't find node to delete to */
+	return -1;
+
+#if USE_GTK
+    if( fX ) {
+	GTKPopMoveRecord( pl->p );
+	GTKSetMoveRecord( pl->plPrev->p );
+    }
+#endif
+    
+    pl = pl->plPrev;
+
+    while( pl->plNext->p ) {
+	if( pl->plNext == plLastMove )
+	    plLastMove = pl;
+	free( pl->plNext->p );
+	ListDelete( pl->plNext );
+    }
+
+    return 0;
+}
+
+extern void AddMoveRecord( void *pv ) {
+
+    moverecord *pmr = pv, *pmrOld;
+    
+    /* Delete all records after plLastMove. */
+    /* FIXME when we can handle variations, we should save the old move
+       as an alternate variation. */
+    PopMoveRecord( plLastMove->plNext );
+
+    if( pmr->mt == MOVE_NORMAL &&
+	( pmrOld = plLastMove->p )->mt == MOVE_SETDICE &&
+	pmrOld->sd.fPlayer == pmr->n.fPlayer )
+	PopMoveRecord( plLastMove );
+    
+    /* FIXME perform other elision (e.g. consecutive "set" records) */
+
+#if USE_GTK
+    if( fX ) {
+	GTKAddMoveRecord( pmr );
+	GTKSetMoveRecord( pmr );
+    }
+#endif
+    
+    ApplyMoveRecord( pmr );
+    
+    plLastMove = ListInsert( plGame, pmr );
+}
+
+extern void SetMoveRecord( void *pv ) {
+
+#if USE_GTK
+    if( fX )
+	GTKSetMoveRecord( pv );
+#endif
+}
+
+extern void ClearMoveRecord( void ) {
+    
+#if USE_GTK
+    if( fX )
+	GTKClearMoveRecord();
+#endif
+    
+    plLastMove = plGame = malloc( sizeof( *plGame ) );
+    ListCreate( plGame );
+}
+
+#if USE_GUI
+static struct timeval tvLast;
+
 static void ResetDelayTimer( void ) {
     
     if( fX && nDelay && fDisplay )
@@ -187,35 +300,21 @@ static void ResetDelayTimer( void ) {
 #define ResetDelayTimer()
 #endif
 
-static void AddMoveRecord( void *pmr ) {
-
-    /* Delete all records after plLastMove. */
-    /* FIXME when we can handle variations, we should save the old move
-       as an alternate variation. */
-    while( plLastMove->plNext->p ) {
-	free( plLastMove->plNext->p );
-	ListDelete( plLastMove->plNext );
-    }
-    
-    plLastMove = ListInsert( plGame, pmr );
-}
-
 static void NewGame( void ) {
 
     moverecord *pmr;
     
     /* FIXME delete all games in the match after the current one */
-    
+
     InitBoard( anBoard );
 
-    plLastMove = plGame = malloc( sizeof( *plGame ) );
-    ListCreate( plGame );
+    ClearMoveRecord();
 
     ListInsert( &lMatch, plGame );
 
     pmr = malloc( sizeof( movegameinfo ) );
     pmr->g.mt = MOVE_GAMEINFO;
-    pmr->g.i = cGames;
+    pmr->g.i = cGames; /* FIXME recalculate cGames */
     pmr->g.nMatch = nMatchTo;
     pmr->g.anScore[ 0 ] = anScore[ 0 ];
     pmr->g.anScore[ 1 ] = anScore[ 1 ];
@@ -228,24 +327,18 @@ static void NewGame( void ) {
     pmr->g.nAutoDoubles = 0;
     AddMoveRecord( pmr );
         
-    fResigned = fDoubled = FALSE;
-    nCube = 1;
-    fCubeOwner = -1;
     UpdateSetting( &nCube );
     UpdateSetting( &fCubeOwner );
-    
-    go = GAME_NORMAL;
+    UpdateSetting( &fTurn );
     
  reroll:
     RollDice( anDice );
 
     if( fInterrupt ) {
-	ListDelete( plGame->plNext );
-	free( pmr );
+	PopMoveRecord( plGame->plNext );
+
 	free( plGame );
 	ListDelete( lMatch.plPrev );
-	fMove = fTurn = -1;
-	UpdateSetting( &fTurn );
 
 	return;
     }
@@ -267,7 +360,12 @@ static void NewGame( void ) {
 	goto reroll;
     }
 
-    fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
+    pmr = malloc( sizeof( pmr->sd ) );
+    pmr->mt = MOVE_SETDICE;
+    pmr->sd.anDice[ 0 ] = anDice[ 0 ];
+    pmr->sd.anDice[ 1 ] = anDice[ 1 ];
+    pmr->sd.fPlayer = anDice[ 1 ] > anDice[ 0 ];
+    AddMoveRecord( pmr );
     UpdateSetting( &fTurn );
     
 #if USE_GUI
@@ -381,13 +479,13 @@ static int ComputerTurn( void ) {
       } /* access to cube */
 
       /* Roll dice and move */
-
       if ( ! anDice[ 0 ] ) {
-
         RollDice ( anDice );
-
+	ResetDelayTimer(); /* Start the timer again -- otherwise the time
+			      we spent contemplating the cube could replace
+			      the delay. */
+	
         /* write line to status bar if using GTK */
-
 #ifdef USE_GTK        
         if ( fX ) {
 
@@ -416,11 +514,7 @@ static int ComputerTurn( void ) {
         return -1;
       }
       
-      memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
-      AddMoveRecord( pmn );      
-      
       /* write move to status bar if using GTK */
-
 #ifdef USE_GTK        
       if ( fX ) {
 	  
@@ -430,8 +524,9 @@ static int ComputerTurn( void ) {
       }
 #endif
       
+      AddMoveRecord( pmn );      
+      
       return 0;
-
     }
     
   case PLAYER_PUBEVAL:
@@ -460,10 +555,12 @@ static int ComputerTurn( void ) {
     pmn->anRoll[ 0 ] = anDice[ 0 ];
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
-    AddMoveRecord( pmn );
     
-    return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard, pmn->anMove );
-
+    FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard, pmn->anMove );
+    
+    AddMoveRecord( pmn );
+    return 0;
+    
   default:
     assert( FALSE );
     return -1;
@@ -515,12 +612,11 @@ static int TryBearoff( void ) {
 		pmn->fPlayer = fTurn;
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
-		AddMoveRecord( pmn );
 		
 		ShowAutoMove( anBoard, pmn->anMove );
 		
-		PositionFromKey( anBoard, ml.amMoves[ i ].auch );
-		
+		AddMoveRecord( pmn );
+
 		return 0;
 	    }
 
@@ -549,16 +645,6 @@ extern void NextTurn( void ) {
 #endif
 	fNextTurn = FALSE;
     
-    fTurn = !fTurn;
-    UpdateSetting( &fTurn );
-	
-    if( go == GAME_NORMAL && !fResigned && !fDoubled && fTurn != fMove ) {
-	fMove = !fMove;
-	anDice[ 0 ] = anDice[ 1 ] = 0;
-	    
-	SwapSides( anBoard );
-    }
-
 #if USE_GUI
     if( fX && nDelay && fDisplay ) {
 	if( tvLast.tv_sec ) {
@@ -600,36 +686,24 @@ extern void NextTurn( void ) {
     }
 #endif
     
-    if( go == GAME_NORMAL && ( fDisplay ||
-			       ap[ fTurn ].pt == PLAYER_HUMAN ) )
-	ShowBoard();
-    
+    /* FIXME FIXME FIXME... is this used any more? */
     if( ( n = GameStatus( anBoard ) ) ||
 	( go == GAME_DROP && ( ( n = 1 ) ) ) ||
 	( go == GAME_RESIGNED && ( ( n = fResigned ) ) ) ) {
 	movegameinfo *pmgi = plGame->plNext->p;
-	
-	pmgi->fWinner = !fTurn;
-	pmgi->fResigned = go == GAME_RESIGNED;
 	
 	if( fJacoby && fCubeOwner == -1 && !nMatchTo )
 	    /* gammons do not count on a centred cube during money
 	       sessions under the Jacoby rule */
 	    n = 1;
 	
-	anScore[ pmgi->fWinner ] += ( pmgi->nPoints = n * nCube );
 	cGames++;
 	
-	fTurn = fMove = -1;
-	anDice[ 0 ] = anDice[ 1 ] = 0;
-	
-	UpdateSetting( &fTurn );
-
 	go = GAME_NORMAL;
 	
 	outputf( "%s wins a %s and %d point%s.\n", ap[ pmgi->fWinner ].szName,
-		aszGameResult[ n - 1 ], n * nCube,
-		n * nCube > 1 ? "s" : "" );
+		 aszGameResult[ n - 1 ], pmgi->nPoints,
+		 pmgi->nPoints > 1 ? "s" : "" );
 	
 #if USE_GUI
 	if( fX && fDisplay )
@@ -661,6 +735,10 @@ extern void NextTurn( void ) {
 	    return;
     }
     
+    if( go == GAME_NORMAL && ( fDisplay ||
+			       ap[ fTurn ].pt == PLAYER_HUMAN ) )
+	ShowBoard();
+
     if( fTurn == fMove )
 	fResigned = 0;
 
@@ -738,8 +816,6 @@ extern void CommandAgree( char *sz ) {
 	outputf( "%s accepts and wins a %s.\n", ap[ fTurn ].szName,
 		aszGameResult[ fResigned - 1 ] );
 
-    go = GAME_RESIGNED;
-
     pmr = malloc( sizeof( *pmr ) );
     pmr->mt = MOVE_RESIGN;
     pmr->fPlayer = !fTurn;
@@ -772,7 +848,7 @@ extern void CommandDecline( char *sz ) {
 
 extern void CommandDouble( char *sz ) {
 
-    movedouble *pmt;
+    moverecord *pmr;
     
     if( fTurn < 0 ) {
 	outputl( "No game in progress (type `new game' to start one)." );
@@ -827,22 +903,20 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
     
-    fDoubled = 1;
-
     if( fDisplay )
 	outputf( "%s doubles.\n", ap[ fTurn ].szName );
     
-    pmt = malloc( sizeof( *pmt ) );
-    pmt->mt = MOVE_DOUBLE;
-    pmt->fPlayer = fTurn;
-    AddMoveRecord( pmt );
+    pmr = malloc( sizeof( pmr->d ) );
+    pmr->d.mt = MOVE_DOUBLE;
+    pmr->d.fPlayer = fTurn;
+    AddMoveRecord( pmr );
     
     TurnDone();
 }
 
 extern void CommandDrop( char *sz ) {
 
-    movetype *pmt;
+    moverecord *pmr;
     
     if( fTurn < 0 || !fDoubled ) {
 	outputl( "The cube must have been offered before you can drop it." );
@@ -860,20 +934,35 @@ extern void CommandDrop( char *sz ) {
 	outputf( "%s refuses the cube and gives up %d points.\n",
 		ap[ fTurn ].szName, nCube );
     
-    fDoubled = FALSE;
-
-    go = GAME_DROP;
-
-    fTurn = !fTurn;
-    UpdateSetting( &fTurn );
-
-    pmt = malloc( sizeof( *pmt ) );
-    *pmt = MOVE_DROP;
-    AddMoveRecord( pmt );
+    pmr = malloc( sizeof( pmr->t ) );
+    pmr->mt = MOVE_DROP;
+    pmr->t.fPlayer = fTurn;
+    AddMoveRecord( pmr );
     
     TurnDone();
 }
 
+extern void CommandListGame( char *sz ) {
+#if USE_GTK
+    if( fX ) {
+	ShowGameWindow();
+	return;
+    }
+#endif
+
+    /* FIXME */
+}
+
+extern void CommandListMatch( char *sz ) {
+#if USE_GTK
+    if( fX ) {
+	ShowGameWindow();
+	return;
+    }
+#endif
+
+    /* FIXME */
+}
 
 extern void 
 CommandMove( char *sz ) {
@@ -930,12 +1019,9 @@ CommandMove( char *sz ) {
 	    else
 		pmn->anMove[ 0 ] = -1;
 	    
-	    AddMoveRecord( pmn );
-
 	    ShowAutoMove( anBoard, pmn->anMove );
 
-	    if( ml.cMoves )
-		PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
+	    AddMoveRecord( pmn );
 
 	    TurnDone();
 
@@ -991,9 +1077,6 @@ CommandMove( char *sz ) {
         pmn->fPlayer = fTurn;
         memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
                 sizeof( pmn->anMove ) );
-        AddMoveRecord( pmn );
-		
-        memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
 		
 #ifdef USE_GTK        
         if ( fX ) {
@@ -1001,10 +1084,10 @@ CommandMove( char *sz ) {
           outputnew ();
 	  ShowAutoMove( anBoard, pmn->anMove );
           outputx ();
-        
-      }
+	}
 #endif
 
+        AddMoveRecord( pmn );
         TurnDone();
 		
         return;
@@ -1192,6 +1275,8 @@ extern void CommandNext( char *sz ) {
 	ApplyMoveRecord( plLastMove->p );
     }
 
+    SetMoveRecord( plLastMove->p );
+    
     UpdateGame();
 }
 
@@ -1233,6 +1318,8 @@ extern void CommandPrevious( char *sz ) {
     while( n-- && plLastMove->plPrev->p )
 	plLastMove = plLastMove->plPrev;
 
+    SetMoveRecord( plLastMove->p );
+    
     CalculateBoard();
 
     UpdateGame();
@@ -1240,7 +1327,7 @@ extern void CommandPrevious( char *sz ) {
 
 extern void CommandRedouble( char *sz ) {
 
-    movetype *pmt;
+    moverecord *pmr;
 
     if( nMatchTo > 0 ) {
 	outputl( "Redoubles are not permitted during match play." );
@@ -1271,9 +1358,10 @@ extern void CommandRedouble( char *sz ) {
     fCubeOwner = !fMove;
     UpdateSetting( &fCubeOwner );
     
-    pmt = malloc( sizeof( *pmt ) );
-    *pmt = MOVE_DOUBLE;
-    AddMoveRecord( pmt );
+    pmr = malloc( sizeof( pmr->d ) );
+    pmr->mt = MOVE_DOUBLE;
+    pmr->d.fPlayer = fTurn;
+    AddMoveRecord( pmr );
     
     TurnDone();
 }
@@ -1342,7 +1430,8 @@ CommandRoll( char *sz ) {
 
   movelist ml;
   movenormal *pmn;
-    
+  moverecord *pmr;
+  
   if( fTurn < 0 ) {
     outputl( "No game in progress (type `new' to start one)." );
 
@@ -1377,6 +1466,13 @@ CommandRoll( char *sz ) {
   if( RollDice( anDice ) < 0 )
     return;
 
+  pmr = malloc( sizeof( pmr->sd ) );
+  pmr->mt = MOVE_SETDICE;
+  pmr->sd.anDice[ 0 ] = anDice[ 0 ];
+  pmr->sd.anDice[ 1 ] = anDice[ 1 ];
+  pmr->sd.fPlayer = fTurn;
+  AddMoveRecord( pmr );
+  
   ShowBoard();
 
 #ifdef USE_GTK        
@@ -1399,10 +1495,10 @@ CommandRoll( char *sz ) {
     pmn->anRoll[ 1 ] = anDice[ 1 ];
     pmn->fPlayer = fTurn;
     pmn->anMove[ 0 ] = -1;
-    AddMoveRecord( pmn );
 	
     ShowAutoMove( anBoard, pmn->anMove );
 
+    AddMoveRecord( pmn );
     TurnDone();
   } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
                                                 <= CLASS_BEAROFF1 &&
@@ -1417,9 +1513,6 @@ CommandRoll( char *sz ) {
     ShowAutoMove( anBoard, pmn->anMove );
 	
     AddMoveRecord( pmn );
-	
-    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
-	
     TurnDone();
   } else
     if( fAutoBearoff && !TryBearoff() )
@@ -1429,7 +1522,7 @@ CommandRoll( char *sz ) {
 
 extern void CommandTake( char *sz ) {
 
-    movetype *pmt;
+    moverecord *pmr;
     
     if( fTurn < 0 || !fDoubled ) {
 	outputl( "The cube must have been offered before you can take it." );
@@ -1443,21 +1536,16 @@ extern void CommandTake( char *sz ) {
 	return;
     }
 
-    nCube <<= 1;
-    UpdateSetting( &nCube );
-    
+    pmr = malloc( sizeof( pmr->t ) );
+    pmr->mt = MOVE_TAKE;
+    pmr->t.fPlayer = fTurn;
+    AddMoveRecord( pmr );
+
     if( fDisplay )
 	outputf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName, nCube );
     
-    fDoubled = FALSE;
-
-    fTurn = fCubeOwner = !fMove;
-    UpdateSetting( &fTurn );
+    UpdateSetting( &nCube );
     UpdateSetting( &fCubeOwner );
-
-    pmt = malloc( sizeof( *pmt ) );
-    *pmt = MOVE_TAKE;
-    AddMoveRecord( pmt );
     
     TurnDone();
 }

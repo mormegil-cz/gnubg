@@ -194,7 +194,6 @@ static void RestoreRootNode( list *pl ) {
     pmgi->nPoints = 0;
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
-    plLastMove = ListInsert( plGame, pmgi );
 
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
 	if( pp->ach[ 0 ] == 'M' && pp->ach[ 1 ] == 'I' )
@@ -240,6 +239,8 @@ static void RestoreRootNode( list *pl ) {
 	    else if( !strcmp( pch, "Jacoby" ) )
 		pmgi->fJacoby = TRUE;
 	}
+
+    AddMoveRecord( pmgi );
 }
 
 static int Point( char ch, int f ) {
@@ -257,27 +258,31 @@ static void RestoreNode( list *pl ) {
     property *pp;
     moverecord *pmr;
     char *pch;
-    int i;
+    int i, fPlayer;
     
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
 	if( pp->ach[ 0 ] == 'B' || pp->ach[ 0 ] == 'W' ) {
 	    /* B or W - Move property */
 	    pch = pp->pl->plNext->p;
 	    pmr = NULL;
+	    fPlayer = pp->ach[ 0 ] == 'B';
 	    
 	    if( !strcmp( pch, "double" ) ) {
-		pmr = malloc( sizeof( pmr->mt ) );
+		pmr = malloc( sizeof( pmr->d ) );
 		pmr->mt = MOVE_DOUBLE;
+		pmr->d.fPlayer = fPlayer;
 	    } else if( !strcmp( pch, "take" ) ) {
-		pmr = malloc( sizeof( pmr->mt ) );
+		pmr = malloc( sizeof( pmr->t ) );
 		pmr->mt = MOVE_TAKE;
+		pmr->t.fPlayer = fPlayer;
 	    } else if( !strcmp( pch, "drop" ) ) {
-		pmr = malloc( sizeof( pmr->mt ) );
+		pmr = malloc( sizeof( pmr->t ) );
 		pmr->mt = MOVE_DROP;
+		pmr->t.fPlayer = fPlayer;
 	    } else {
 		pmr = malloc( sizeof( pmr->n ) );
 		pmr->n.mt = MOVE_NORMAL;
-		pmr->n.fPlayer = pp->ach[ 0 ] == 'B';
+		pmr->n.fPlayer = fPlayer;
 		
 		pmr->n.anRoll[ 1 ] = 0;
 		
@@ -302,10 +307,8 @@ static void RestoreNode( list *pl ) {
 		}
 	    }
 	    
-	    if( pmr ) {
-		ApplyMoveRecord( pmr );
-		plLastMove = ListInsert( plGame, pmr );
-	    }
+	    if( pmr )
+		AddMoveRecord( pmr );
 	} else
 	    /* FIXME handle setup properties */
 	    ;
@@ -340,9 +343,8 @@ static void RestoreGame( list *pl ) {
     moverecord *pmr, *pmrResign;
     
     InitBoard( anBoard );
-    
-    plGame = malloc( sizeof( *plGame ) );
-    ListCreate( plGame );
+
+    ClearMoveRecord();
 
     ListInsert( &lMatch, plGame );
 
@@ -368,7 +370,7 @@ static void RestoreGame( list *pl ) {
 	else if( pmrResign->r.nResigned > 3 )
 	    pmrResign->r.nResigned = 3;
 
-	ApplyMoveRecord( pmrResign );
+	AddMoveRecord( pmrResign );
     }
 }
 
@@ -509,6 +511,9 @@ static void SaveGame( FILE *pf, list *plGame ) {
     int nResult = 0, nFileCube = 1, fResigned = FALSE, anBoard[ 2 ][ 25 ];
     char ch;
 
+    /* FIXME get rid of ch in this function and use the values in the
+       moverecords */
+    
     pl = plGame->plNext;
     pmr = pl->p;
     assert( pmr->mt == MOVE_GAMEINFO );
