@@ -26,6 +26,7 @@ char *aszCredits[] = {
     "Jeff Haferman",
     "Alain Henry",
     "Jens Hoefkens",
+    "Martin Janke",
     "Rick Janowski",
     "Nis Jorgensen",
     "Tom Keith",

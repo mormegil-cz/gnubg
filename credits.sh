@@ -40,6 +40,7 @@ Eric Groleau
 Jeff Haferman
 Alain Henry
 Jens Hoefkens
+Martin Janke
 Nis Jorgensen
 Matija Kejzar
 James F. Kibler
