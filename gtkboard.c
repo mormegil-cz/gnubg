@@ -5041,7 +5041,7 @@ static void board_init( Board *board ) {
 
     gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
 
-    bd->stopparent = gtk_hbox_new( 0, FALSE );
+    bd->stopparent = gtk_event_box_new();
 #if USE_GTK2
     bd->stop =
       button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_STOP, 
@@ -5058,7 +5058,7 @@ static void board_init( Board *board ) {
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->stopparent,
-                                _("Stop the current process"),
+                                _("Stop the current operation"),
                                 _("private") );
 
     /* horisontal separator */
