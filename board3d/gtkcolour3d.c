@@ -472,7 +472,8 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	if (IsSet(pDetails->opacity, DF_VARIABLE_OPACITY))
 	{
 		useOpacity = 1;
-		gtk_adjustment_set_value(padjOpacity, (col3d->ambientColour[3] + .001f) * 100);
+		gtk_adjustment_set_value(padjOpacity, 
+			col3d->alphaBlend ? (col3d->ambientColour[3] + .001f) * 100 : 100);
 	}
 	else
 	{
