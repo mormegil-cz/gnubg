@@ -526,6 +526,26 @@ extern void CommandSetMessage( char *sz ) {
 	UpdateSetting( &fMessage );
 }
 
+extern void CommandSetGameList( char *sz ) {
+
+    if( SetToggle( "gamelist", &fGameList, sz,
+		   _("Show game window with moves"),
+		   _("Do not show game window with moves.") )
+	>= 0 )
+	/* Force an update, even if the setting has not changed. */
+	UpdateSetting( &fMessage );
+}
+
+extern void CommandSetAnalysisWindows( char *sz ) {
+
+    if( SetToggle( "analysis window", &fAnalysis, sz,
+		   _("Show window with analysis"),
+		   _("Do not show window with analysis.") )
+	>= 0 )
+	/* Force an update, even if the setting has not changed. */
+	UpdateSetting( &fMessage );
+}
+
 extern void CommandSetAutoBearoff( char *sz ) {
 
     SetToggle( "automatic bearoff", &fAutoBearoff, sz, _("Will automatically "

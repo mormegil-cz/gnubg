@@ -954,6 +954,8 @@ command cER = {
       N_("Player specific options"), szPLAYER, acSetAnalysisPlayer },
     { "threshold", NULL, N_("Specify levels for marking moves"), NULL,
       acSetAnalysisThreshold },
+    { "window", CommandSetAnalysisWindows, N_("Display window with analysis"),
+      szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, N_("Automatically bear off as many "
@@ -1668,6 +1670,8 @@ command cER = {
     { "egyptian", CommandSetEgyptian, 
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
+    { "gamelist", CommandSetGameList, N_("Display game window with moves"),
+      szONOFF, &cOnOff },
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
     { "gotofirstgame", CommandSetGotoFirstGame, 
       N_("Control whether you want to go to the first or last game "
@@ -5818,6 +5822,14 @@ extern void CommandSaveSettings( char *szParam ) {
     if ( fX )
        RefreshGeometries ();
 #endif
+    if (fAnnotation)
+      fputs("set annotation yes\n", pf);
+    if (fMessage)
+      fputs("set message yes\n", pf);
+    if (fGameList)
+      fputs("set gamelist yes\n", pf);
+    if (fAnalysis)
+      fputs("set analysis window yes\n", pf);
 
     fprintf( pf, "set panels %s\n", fDisplayPanels ? "yes" : "no");
     for ( i = 0; i < NUM_WINDOWS; ++i )
@@ -9063,7 +9075,6 @@ EPC( int anBoard[ 2 ][ 25 ], float *arEPC, float *arMu, float *arSigma,
 
     /* one-sided rollout */
 
-    int anBoard[ 2 ][ 25 ];
     int nTrials = 576;
     float arMux[ 2 ];
     float ar[ 5 ];

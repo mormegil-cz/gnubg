@@ -1,3 +1,8 @@
+Thu Feb 26 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkgame.c, set.c: Save shown panels
+	* gnubg.c : Fixed small show epc bug
+
 Fri Feb 20 15:10:39 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am, configure.in: move gnubg.py to scripts.
