@@ -1,3 +1,8 @@
+Mon Mar 22 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c: Make sure messages shown when docked panels are
+	hidden, also don't show a message when setting cube (bug 3973)
+
 Fri Mar 19 12:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Change window order and titles, and put back

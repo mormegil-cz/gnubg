@@ -806,6 +806,7 @@ extern void GTKSetDice( gpointer *p, guint n, GtkWidget *pw ) {
 
 extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
 
+    int valChanged;
     int an[ 2 ];
     char sz[ 20 ]; /* "set cube value 4096" */
     GtkWidget *pwDialog, *pwCube;
@@ -841,13 +842,19 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
 	return;
 
     outputpostpone();
-    
-    if( 1 << an[ 0 ] != ms.nCube ) {
+
+    valChanged = (1 << an[ 0 ] != ms.nCube);
+    if (valChanged) {
 	sprintf( sz, "set cube value %d", 1 << an[ 0 ] );
 	UserCommand( sz );
     }
 
     if( an[ 1 ] != ms.fCubeOwner ) {
+	if (valChanged) {
+		/* Avoid 2 line message, as message box gets in the way */
+	    char* pMsg = lOutput.plNext->p;
+	    pMsg[strlen(pMsg) - 1] = ' ';
+	}
 	if( an[ 1 ] >= 0 ) {
 	    sprintf( sz, "set cube owner %d", an[ 1 ] );
 	    UserCommand( sz );
@@ -3740,7 +3747,7 @@ extern void GTKOutputX( void ) {
       /* Long message; display in dialog. */
       /* FIXME if fDisplay is false, skip to the last line and display
          in status bar. */
-      if (!PanelShowing(WINDOW_MESSAGE))
+      if ((fDockPanels && !fDisplayPanels) || !woPanel[WINDOW_MESSAGE].showing)
         GTKMessage( sz, DT_INFO );
     }
     else
