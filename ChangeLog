@@ -1,3 +1,7 @@
+Mon Nov 11 10:18:55 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c: Use move filters instead of previous hacks.
+
 Tue Nov  5 21:44:05 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* eval.c (setGammonProb): Change from heuristic to almost perfect

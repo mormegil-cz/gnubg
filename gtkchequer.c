@@ -349,8 +349,7 @@ static void
 MoveListEvalPly ( GtkWidget *pw, hintdata *phd ) {
 
   char *szPly = gtk_object_get_data ( GTK_OBJECT ( pw ), "user_data" );
-  evalcontext ec = {
-    0, TRUE, 0, 0, TRUE, FALSE, 0.0f, 0.0f };
+  evalcontext ec = { 0, TRUE, 0, 0, TRUE, FALSE, 0.0f, 0.0f };
 
   ec.nPlies = atoi ( szPly );
 

@@ -79,6 +79,18 @@
    must also be enlarged. */
 #define MAX_SEARCH_CANDIDATES 127
 
+
+typedef struct movefilter_s {
+  int   Accept;    /* always allow this many moves. 0 means don't use this */
+		   /* level, since at least 1 is needed when used. */
+  int   Extra;     /* and add up to this many more... */
+  float Threshold; /* ...if they are within this equity */
+} movefilter;
+
+/* we'll have filters for 1..4 ply evaluation */
+#define MAX_FILTER_PLIES	4
+extern movefilter defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES];
+
 typedef struct _evalcontext {
     /* FIXME expand this... e.g. different settings for different position
        classes */
@@ -89,8 +101,8 @@ typedef struct _evalcontext {
 				  support for nReduced != 3 */
     unsigned int fDeterministic : 1;
     unsigned int fNoOnePlyPrune : 1;
-    float rSearchTolerance;
-    float rNoise; /* standard deviation */
+    float        rSearchTolerance;
+    float        rNoise; /* standard deviation */
 } evalcontext;
 
 

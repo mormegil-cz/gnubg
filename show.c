@@ -53,8 +53,31 @@
 
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
+static void ShowMoveFilter (movefilter *pmf, int ply) {
+  
+  if (pmf->Accept == 0) {
+	outputf( _("Skip pruning for %d-ply moves.\n"), ply );
+	return;
+  }
+  
+  if (pmf->Accept == 1)
+	outputf ( _("keep the best %d-ply move"), ply );
+  else
+	outputf ( _("keep the first %d %d-ply moves"), pmf->Accept, ply);
+
+  if (pmf->Extra == 0) {
+	  outputf ("\n");
+	  return;
+  }
+	
+  outputf ( _(" and up to %d more moves within equity %0.3g\n" ),
+			pmf->Extra, pmf->Threshold);
+}	  
+	  
 static void ShowEvaluation( evalcontext *pec ) {
     
+  int  i;
+
     outputf( _("        %d-ply evaluation.\n"
              "        %d move search candidate%s.\n"
              "        %0.3g cubeless search tolerance.\n"
@@ -67,6 +90,13 @@ static void ShowEvaluation( evalcontext *pec ) {
              pec->fNoOnePlyPrune ? _("No") : _("Normal"),
              pec->fCubeful ? _("Cubeful") : _("Cubeless") );
 
+	if (pec->nPlies > 0) {
+	  for (i = 0; i < pec->nPlies; ++i) {
+		outputf ( "        " );
+		ShowMoveFilter ( &defaultFilters[pec->nPlies-1][ i ], i );
+	  }
+	}
+		
     if( pec->rNoise )
 	outputf( _("    Noise standard deviation %5.3f"), pec->rNoise );
     else

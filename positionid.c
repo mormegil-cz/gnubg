@@ -276,7 +276,7 @@ EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] ) {
     
     return 1;
 }
-
+ 
 extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] ) {
 
     int i;

@@ -288,6 +288,16 @@ char *aszEvalType[] =
 
 static evalcontext ecBasic = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
 
+/* defaults for the filters  - 0 ply uses no filters */
+movefilter
+defaultFilters[MAX_FILTER_PLIES][MAX_FILTER_PLIES] = {
+ { { 8, 0, 0.0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } ,
+ { { 2, 3, 0.10 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 } } , 
+ { { 16, 0, 0.0 }, { 4, 0, 0 }, { 0, 0, 0.0 }, { 0, 0, 0 } }, 
+ { { 8, 0, 0.0 }, { 0, 0, 0 }, { 2, 3, 0.1 }, { 0, 0, 0.0 } } ,
+};
+
+
 #if defined( GARY_CACHE )
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -3678,6 +3688,8 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
     return pml->cMoves;
 }
 
+#define min(x,y)   (((x) > (y)) ? (y) : (x))
+
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], cubeinfo *pci,
 			      evalcontext *pec, int nPlies ) {
@@ -3715,56 +3727,54 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
     ml.iMoveBest = 0;
   else {
     /* choice of moves */
-    if( ScoreMoves( &ml, pci, pec, 0 ) < 0 )
-      return -1;
 
-    for( iPly = 0; iPly < nPlies; iPly++ ) {
-
-      float tol = pec->rSearchTolerance / ( 1 << iPly );
-      
-      if( iPly == 0 && tol < 0.24 ) {
-	/* Set a minimum tolerance for ply 0. The differences between
-           1 and 0ply are sometimes large enough so that a small
-           tolerance eliminates the better moves.  Those situations
-           are more likely to happen when different moves are
-           evaluated with different neural nets. This is a drawback of
-           using several neural nets, and we probably want a better
-           solution in the future. */
-
-	tol = 0.24;
-      }
-      
-      if ( ! ( pec->fNoOnePlyPrune && ( iPly == 1 ) ) ) {
-        for( i = 0, j = 0; i < ml.cMoves; i++ )
-	  if( ml.amMoves[ i ].rScore >= ml.rBestScore - tol ) {
-	    if( i != j )
-	      ml.amMoves[ j ] = ml.amMoves[ i ];
-		    
-	    j++;
-	  }
+    /* for ply higher than given filters, use the highest entry */
     
-        if( j == 1 )
-          break;
+    movefilter* mFilters = (nPlies > 0 && nPlies <= MAX_FILTER_PLIES) ?
+      defaultFilters[nPlies-1] : defaultFilters[MAX_FILTER_PLIES-1];
 
-        qsort( ml.amMoves, j, sizeof( move ), (cfunc) CompareMoves );
+    for( iPly = 0; iPly < nPlies; ++iPly ) {
+      movefilter* mFilter =
+	(iPly < MAX_FILTER_PLIES) ? &mFilters[iPly] : &(movefilter){0,0,0.0};
+	 
+      unsigned int k;
 
-      }     /* if ( ! (pec->fNoOnePlyPrune && ( iPly != 1 ) ) ) */
+      if( mFilter->Accept == 0 ) {
+	continue;
+      }
 
+      if( ScoreMoves( &ml, pci, pec, 0 ) < 0 ) {
+	return -1;
+      }
+
+      qsort(ml.amMoves, ml.cMoves, sizeof(move), (cfunc)CompareMoves);
       ml.iMoveBest = 0;
-	    
-      if ( ! ( pec->fNoOnePlyPrune && ( iPly == 1 ) ) )
-         ml.cMoves = ( j < ( pec->nSearchCandidates >> iPly ) ? j :
-                        ( pec->nSearchCandidates >> iPly ) );
+      
+      k = ml.cMoves;
+      ml.cMoves = min(mFilter->Accept, ml.cMoves);
 
+      {
+	unsigned int limit = min(k, ml.cMoves + mFilter->Extra);
+      
+	for( /**/ ; ml.cMoves < limit; ++ml.cMoves) {
+	  if( ml.amMoves[ml.cMoves].rScore <
+	      ml.amMoves[0].rScore - mFilter->Threshold ) {
+	    break;
+	  }
+	}
+      }
+	
       if( ml.amMoves != amCandidates ) {
-	memcpy( amCandidates, ml.amMoves, ml.cMoves * sizeof( move ) );
+	memcpy(amCandidates, ml.amMoves, ml.cMoves * sizeof(move));
 	    
 	ml.amMoves = amCandidates;
       }
-
-      if( ScoreMoves( &ml, pci, pec, iPly + 1 ) < 0 )
-	return -1;
     }
+
+    if( ScoreMoves( &ml, pci, pec, nPlies ) < 0 ) {
+      return -1;
+    }
+
   }
 
   if( anMove ) {
@@ -5545,6 +5555,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
   float rMWCCash, rTG;
+  float aarMETResult[2][DTLBP1 + 1];
 
   /* I own cube */
 
@@ -5576,10 +5587,12 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, pci, arCP );
 
-  rMWCCash = 
-    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-            pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
-            aafMET, aafMETPostCrawford );
+  getMEMultiple ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+				  pci->nCube, -1, -1, pci->fCrawford,
+				  aafMET, aafMETPostCrawford,
+				  aarMETResult[0], aarMETResult[1]);
+
+  rMWCCash = aarMETResult[pci->fMove][NDW];
 
   rTG = arCP[ pci->fMove ];
 
@@ -5593,19 +5606,9 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	 
     */
 
-    rMWCLose = 
-      ( 1.0 - rG1 - rBG1 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
+      + rG1 * aarMETResult[pci->fMove][NDLG]
+      + rBG1 * aarMETResult[pci->fMove][NDLB];
 
     if ( rTG > 0.0 )
       rMWCLive = rMWCLose + 
@@ -5631,18 +5634,9 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
     */
 
     rMWCWin = 
-      ( 1.0 - rG0 - rBG0 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG0 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG0 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+      ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
+      + rG0 * aarMETResult[pci->fMove][NDWG]
+      + rBG0 * aarMETResult[pci->fMove][NDWB];
 
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
@@ -5669,6 +5663,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
   float rMWCOppCash, rOppTG;
+  float aarMETResult[2][DTLBP1 + 1];
 
   /* I own cube */
 
@@ -5700,10 +5695,12 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, pci, arCP );
 
-  rMWCOppCash = 
-    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-            pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
-            aafMET, aafMETPostCrawford );
+  getMEMultiple ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+				  pci->nCube, -1, -1, pci->fCrawford,
+				  aafMET, aafMETPostCrawford,
+				  aarMETResult[0], aarMETResult[1]);
+
+  rMWCOppCash = aarMETResult[pci->fMove][NDL];
 
   rOppTG = 1.0 - arCP[ ! pci->fMove ];
 
@@ -5719,19 +5716,9 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	 
     */
 
-    rMWCLose = 
-      ( 1.0 - rG1 - rBG1 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
+      + rG1 * aarMETResult[pci->fMove][NDLG]
+      + rBG1 * aarMETResult[pci->fMove][NDLB];
 
     if ( rOppTG > 0.0 ) 
       /* avoid division by zero */
@@ -5755,19 +5742,9 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	 
     */
 
-    rMWCWin = 
-      ( 1.0 - rG0 - rBG0 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG0 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG0 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+    rMWCWin = ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
+      + rG0 * aarMETResult[pci->fMove][NDWG]
+      + rBG0 * aarMETResult[pci->fMove][NDWB];
 
     if ( arOutput[ 0 ] != rOppTG )
       rMWCLive = rMWCOppCash + 
@@ -5795,6 +5772,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
   float rMWCOppCash, rMWCCash, rOppTG, rTG;
+  float aarMETResult[2][DTLBP1 + 1];
 
   /* Centered cube */
 
@@ -5826,15 +5804,14 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, pci, arCP );
 
-  rMWCCash = 
-    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-            pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
-            aafMET, aafMETPostCrawford );
+  getMEMultiple ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+				  pci->nCube, -1, -1, pci->fCrawford,
+				  aafMET, aafMETPostCrawford,
+				  aarMETResult[0], aarMETResult[1]);
 
-  rMWCOppCash = 
-    getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-            pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
-            aafMET, aafMETPostCrawford );
+  rMWCCash = aarMETResult[pci->fMove][NDW];
+
+  rMWCOppCash = aarMETResult[pci->fMove][NDL];
 
   rOppTG = 1.0 - arCP[ ! pci->fMove ];
   rTG = arCP[ pci->fMove ];
@@ -5843,19 +5820,9 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     /* Opp too good to double */
 
-    rMWCLose = 
-      ( 1.0 - rG1 - rBG1 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+    rMWCLose = ( 1.0 - rG1 - rBG1 ) * aarMETResult[pci->fMove][NDL]
+      + rG1 * aarMETResult[pci->fMove][NDLG]
+      + rBG1 * aarMETResult[pci->fMove][NDLB];
 
     if ( rOppTG > 0.0 ) 
       /* avoid division by zero */
@@ -5890,19 +5857,10 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 	 
     */
 
-    rMWCWin = 
-      ( 1.0 - rG0 - rBG0 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG0 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG0 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+    rMWCWin = ( 1.0 - rG0 - rBG0 ) * aarMETResult[pci->fMove][NDW]
+      + rG0 * aarMETResult[pci->fMove][NDWG]
+	  + rBG0 * aarMETResult[pci->fMove][NDWB];
+
     if ( rTG < 1.0 )
       rMWCLive = rMWCCash + 
         ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
@@ -5916,7 +5874,6 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
   } 
 
 }
-
 
 #define RACEFACTOR 0.00125
 #define RACECOEFF 0.55

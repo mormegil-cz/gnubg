@@ -415,7 +415,6 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
 
 }
 
-
 extern int
 GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
@@ -442,8 +441,6 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
   int i = pci->nMatchTo - pci->anScore[ 0 ] - 1;
   int j = pci->nMatchTo - pci->anScore[ 1 ] - 1;
 
-
-
   int nCube = pci -> nCube;
 
   float arCPLive [ 2 ][ MAXCUBELEVEL ];
@@ -453,6 +450,9 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
   float rDP, rRDP, rDTW, rDTL;
 
   int nDead, n, nMax, nCubeValue, nCubePrimeValue, k;
+
+
+  float aarMETResults [2][DTLBP1 + 1];
 
   /* Gammon and backgammon ratio's. 
      Avoid division by zero in extreme cases. */
@@ -539,45 +539,32 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
     /* Dead cube cash point for player 0 */
 
+	  getMEMultiple (pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+					 nCubeValue, 
+					 GetCubePrimeValue ( i, j, nCubeValue ), /* 0 */
+					 GetCubePrimeValue ( j, i, nCubeValue ), /* 1 */
+					 pci->fCrawford, 
+					 aafMET, aafMETPostCrawford,
+					 aarMETResults[ 0 ], aarMETResults[ 1 ]);
+
     for ( k = 0; k < 2; k++ ) {
 
-      if ( ! k )
-        nCubePrimeValue = GetCubePrimeValue ( i, j, nCubeValue );
-      else
-        nCubePrimeValue = GetCubePrimeValue ( j, i, nCubeValue );
 
       rDTL =
         ( 1.0 - arG[ ! k ] - arBG[ ! k ] ) * 
-        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                k, 2 * nCubePrimeValue, ! k, pci->fCrawford,
-                aafMET, aafMETPostCrawford )
-        + arG[ ! k ] * 
-        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                k, 4 * nCubePrimeValue, ! k, pci->fCrawford,
-                aafMET, aafMETPostCrawford )
-        + arBG[ ! k ] * 
-        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                k, 6 * nCubePrimeValue, ! k, pci->fCrawford,
-                aafMET, aafMETPostCrawford );
+		aarMETResults[k][k ? DTLP1 : DTLP0]
+		+ arG[ ! k ] * aarMETResults[k][k ? DTLGP1 : DTLGP0] 
+		+ arBG[ ! k ] * aarMETResults[k][k ? DTLBP1 : DTLBP0];
+
 
       rDP = 
-        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                k, nCubeValue, k, pci->fCrawford,
-                aafMET, aafMETPostCrawford );
+		aarMETResults[k][DP];
 
       rDTW = 
         ( 1.0 - arG[ k ] - arBG[ k ] ) * 
-        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                k, 2 * nCubePrimeValue, k, pci->fCrawford,
-                aafMET, aafMETPostCrawford )
-        + arG[ k ] * 
-        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                k, 4 * nCubePrimeValue, k, pci->fCrawford,
-                aafMET, aafMETPostCrawford )
-        + arBG[ k ] * 
-        getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                k, 6 * nCubePrimeValue, k, pci->fCrawford,
-                aafMET, aafMETPostCrawford );
+		aarMETResults[k][k ? DTWP1 : DTWP0]
+		+ arG[ k ] * aarMETResults[k][k ? DTWGP1 : DTWGP0] 
+		+ arBG[ k ] * aarMETResults[k][k ? DTWBP1 : DTWBP0];
 
       arCPDead[ k ][ n ] = ( rDTL - rDP ) / ( rDTL - rDTW );
 
@@ -591,34 +578,20 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
         /* Doubled cube is alive */
 
         /* redouble, pass */
-
         rRDP =
-          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                  k, 2 * nCubeValue, ! k, pci->fCrawford,
-                  aafMET, aafMETPostCrawford );
+		  aarMETResults[k][DTL];
 
         /* double, pass */
-
         rDP = 
-          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                  k, nCubeValue, k, pci->fCrawford,
-                  aafMET, aafMETPostCrawford );
+		  aarMETResults[k][DP];
 
         /* double, take win */
 
         rDTW = 
           ( 1.0 - arG[ k ] - arBG[ k ] ) * 
-          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                  k, 2 * nCubeValue, k, pci->fCrawford,
-                  aafMET, aafMETPostCrawford )
-          + arG[ k ] * 
-          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                  k, 4 * nCubeValue, k, pci->fCrawford,
-                  aafMET, aafMETPostCrawford )
-          + arBG[ k ] * 
-          getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-                  k, 6 * nCubeValue, k, pci->fCrawford,
-                  aafMET, aafMETPostCrawford );
+		  aarMETResults[k][DTW]
+		  + arG[ k ] * aarMETResults[k][DTWG]
+		  + arBG[ k ] * aarMETResults[k][DTWB];
 
         arCPLive[ k ][ n ] = 
           1.0 - arCPLive[ ! k ][ n + 1] * ( rDP - rDTW ) / ( rRDP - rDTW );
@@ -654,13 +627,14 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] ) {
 
 }
 
-
-
 extern float
 GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
   /*
    * Calculate double point for dead cubes
    */
+
+  float aarMETResults [2][DTLBP1 + 1];
+  int	player = pci->fMove;
 
   if ( ! pci->nMatchTo ) {
 
@@ -733,63 +707,39 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
       rBG2 = 0.0;
     }
 
+	getMEMultiple (pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+				   pci->nCube, -1, -1,
+				   pci->fCrawford, 
+				   aafMET, aafMETPostCrawford,
+				   aarMETResults[ 0 ], aarMETResults[ 1 ]);
+
+    /* double point */
+
     /* double point */
 
     rDTW = 
       ( 1.0 - rG1 - rBG1 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 4 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 6 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+	  aarMETResults[player][DTW]
+      + rG1 * aarMETResults[player][DTWG]
+      + rBG1 * aarMETResults[player][DTWB];
 
     rNDW = 
       ( 1.0 - rG1 - rBG1 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 1 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG1 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+	  aarMETResults[player][NDW] 
+      + rG1 * aarMETResults[player][NDWG]
+      + rBG1 * aarMETResults[player][NDWB];
 
     rDTL = 
       ( 1.0 - rG2 - rBG2 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG2 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 4 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG2 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 6 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+	  aarMETResults[player][DTL]
+      + rG2 * aarMETResults[player][DTLG]
+      + rBG2 * aarMETResults[player][DTLB];
 
     rNDL = 
       ( 1.0 - rG2 - rBG2 ) * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 1 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rG2 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 2 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford )
-      + rBG2 * 
-      getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
-              pci->fMove, 3 * pci->nCube, ! pci->fMove, pci->fCrawford,
-              aafMET, aafMETPostCrawford );
+	  aarMETResults[player][NDL]
+      + rG2 * aarMETResults[player][NDLG]
+      + rBG2 * aarMETResults[player][NDLB];
 
     /* risk & gain */
 
@@ -801,8 +751,6 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
   }
 
 }
-
-
 
 /* 
  * Extend match equity table to MAXSCORE using
@@ -1900,3 +1848,132 @@ invertMET ( void ) {
   }
 
 }
+
+/* given a match score, return a pair of arrays with the METs for
+ * player0 and player 1 winning/losing including gammons & backgammons
+ * 
+ * if nCubePrime0 < 0, then we're only interested in the first
+ * values in each array, using nCube. 
+ *
+ * Otherwise, if nCubePrime0 < 0, we do another set of METs with 
+ * both sides using nCubePrime0 
+ *
+ * if nCubePrime1 >= 0, we do a third set using nCubePrime1
+ *
+ * This reduces the *huge* number of calls to get equity table entries 
+ * when analyzing matches by something like 40 times 
+ */
+
+extern void 
+getMEMultiple ( const int nScore0, const int nScore1, const int nMatchTo,
+				const int nCube, const int nCubePrime0, const int nCubePrime1, 
+				const int fCrawford, float aafMET[ MAXSCORE ][ MAXSCORE ],
+				float aafMETPostCrawford[ 2 ][ MAXSCORE ],
+				float *player0, float *player1) {
+
+  int scores[2][DTLBP1 + 1];		/* the resulting match scores */
+  int i, max_res, s0, s1;
+  int *score0, *score1;
+  int mult[] = { 1, 2, 3, 4, 6};
+  float *p0, *p1, *p2, *p3, *p4, *p5, f;
+  int  away0, away1;
+  int  fCrawf = fCrawford;
+
+  /* figure out how many results we'll be returning */
+  max_res = (nCubePrime0 < 0) ? DTLB + 1 : 
+	(nCubePrime1 < 0) ? DTLBP0 + 1 : DTLBP1 + 1;
+
+  /* set up a table of resulting match scores for all 
+   * the results we're calculating */
+  score0 = scores[0]; score1 = scores[1];
+  away0 = nMatchTo - nScore0 - 1;
+  away1 = nMatchTo - nScore1 - 1;
+  fCrawf |= ( nMatchTo - nScore0 == 1 ) || ( nMatchTo - nScore1 == 1 );
+
+  /* player 0 wins normal, doubled, gammon, backgammon */
+  for (i = 0; i < NDL; ++i) {
+	*score0++ = away0 - mult[i] * nCube;
+	*score1++ = away1;
+  }
+  /* player 1 wins normal, doubled, etc. */
+  for (i = 0; i < NDL; ++i) {
+	*score0++ = away0;
+	*score1++ = away1 - mult[i] * nCube;
+  }
+  /* same using the second cube value */
+  for (i = 0; (max_res > DPP0) && (i < NDL); ++i) {
+	*score0++ = away0 - mult[i] * nCubePrime0;
+	*score1++ = away1;
+  }
+  for (i = 0; (max_res > DPP0) && (i < NDL); ++i) {
+	*score0++ = away0;
+	*score1++ = away1 - mult[i] * nCubePrime0;
+  }
+  /* same using the third cube value */
+  for (i = 0; (max_res > DPP1) && (i < NDL); ++i) {
+	*score0++ = away0 - mult[i] * nCubePrime1;
+	*score1++ = away1;
+  }
+  for (i = 0; (max_res > DPP1) && (i < NDL); ++i) {
+	*score0++ = away0;
+	*score1++ = away1 - mult[i] * nCubePrime1;
+  }
+
+  score0 = scores[0]; score1 = scores[1];
+  p0 = player0; p1 = player1;
+
+  /* now go through the resulting scores, looking up the equities */
+  for (i = 0; i < max_res; ++i) {
+	s0 = *score0++;
+	s1 = *score1++;
+
+	if (s0 < 0) {
+	  /* player 0 wins */
+	  *p0++ = 1.0f; *p1++ = 0.0f;
+	} else if (s1 < 0) {
+	  *p0++ = 0.0f; *p1++ = 1.0f;
+	} else if (fCrawf) {
+	  if (s0 == 0) { /* player 0 is leading */
+		*p0++ = 1.0 - aafMETPostCrawford[ 1 ][ s1 ];
+		*p1++ =       aafMETPostCrawford[ 1 ][ s1 ];
+	  } else {
+		*p0++ =       aafMETPostCrawford[ 0 ][ s0 ];
+		*p1++ = 1.0 - aafMETPostCrawford[ 0 ][ s0 ];
+	  }
+	} else { /* non-post-Crawford */
+	  *p0++ =       aafMET[ s0 ][ s1 ];
+	  *p1++ = 1.0 - aafMET[ s0 ][ s1 ];
+	}
+  }
+
+  /* results for player 0 are done, results for player 1 have the
+   *  losses in cols 0-4 and 8-12, but we want them to be in the same
+   *  order as results0 - e.g wins in cols 0-4, and 8-12
+   */
+  p0 = player1; p1 = player1 + NDL; 
+  for (i = 0; i < NDL; ++i) {
+	f = *p0;
+	*p0++ = *p1;
+	*p1++ = f;
+  }
+
+  if (max_res > DTLBP0) {
+	p0 += NDL; p1 += NDL;
+	for (i = 0; i < NDL; ++i) {
+	  f = *p0;
+	  *p0++ = *p1;
+	  *p1++ = f;
+	}
+  }
+
+  if (max_res > DTLBP1) {
+	p0 += NDL; p1 += NDL;
+	for (i = 0; i < NDL; ++i) {
+	  f = *p0;
+	  *p0++ = *p1;
+	  *p1++ = f;
+	}
+  }
+
+}
+

@@ -303,7 +303,7 @@ static SCM evaluate_position_cubeful( SCM sBoard, SCM sCube,
     SCM s;
     cubeinfo ci;
     psighandler sh;
-    evalcontext ec = { 0, TRUE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
+    evalcontext ec = { 0, TRUE, 0, 0, TRUE, FALSE, 0.0, 0.0, DEFAULT_FILTERS};
     
     SCMToBoard( sBoard, anBoard );
     

@@ -220,29 +220,34 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
 	0.04f /* SKILL_VERYGOOD	*/
     };
 
-evalcontext ecTD = { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 };
+evalcontext ecTD = { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0};
 
 rolloutcontext rcRollout =
 { 
   {
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 cube decision */
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 cube decision */
+	/* player 0/1 cube decision */
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, 
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }
   }, 
   {
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* player 0 chequerplay */
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 chequerplay */
+	/* player 0/1 chequerplay */
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }
   }, 
 
   {
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late cube decision */
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late cube decision */
+	/* player 0/1 late cube decision */
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }
   }, 
   {
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* p 0 late chequerplay */
-      { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* p 1 late  chequerplay */
+	/* player 0/1 late chequerplay */
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
+	{ 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } 
   }, 
-  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncation cube decision */
-  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 }, /* truncation chequerplay */
+  /* truncation point cube and chequerplay */
+  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
+  { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 },
 
   FALSE, /* cubeful */
   TRUE, /* variance reduction */
@@ -4024,6 +4029,8 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
 static void 
 SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
+  int i, j;
+
     fprintf( pf, "%s plies %d\n"
 	     "%s candidates %d\n"
 	     "%s tolerance %.3f\n"
@@ -4220,6 +4227,19 @@ extern void CommandSaveSettings( char *szParam ) {
               fAnalyseCube ? "on" : "off",
               fAnalyseDice ? "on" : "off",
               fAnalyseMove ? "on" : "off" );
+
+    /* HACK - save move filter under 'set evaluation' */
+    /* we want this to be a global command */
+    for (i = 0; i < MAX_FILTER_PLIES; ++i) {
+      int j;
+      for (j = 0; j <= i; ++j) {
+	fprintf (pf, "set evaluation chequerplay evaluation movefilter %d  %d  %d %d %0.3g\n",
+		 i+1, j, 
+		 defaultFilters[i][j].Accept,
+		 defaultFilters[i][j].Extra,
+		 defaultFilters[i][j].Threshold);
+      }
+    }
 
 #if USE_GTK
     if ( fX ) {
@@ -4763,7 +4783,6 @@ static command *FindContext( command *pc, char *szOrig, int ich ) {
 		    pcResume = pc;
 		    pc = &cPlayerBoth;
 		}
-		
                 break;
             }
 

@@ -85,5 +85,36 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci );
 extern void
 invertMET ( void );
 
+/* enums for the entries in the arrays returned by getMEMultiple 
+ * DoublePass, DoubleTakeWin, DoubleTakeWinGammon... for the first 8
+ * then the same values using CubePrimeValues 
+ * DP = Double/Pass, DTWG = double/take/wing gammon, etc
+ * DPP = double/Pass with CubePrime values, etc.
+ */
+typedef enum met_indices { 
+  /* player 0 wins, first cube value */
+  DP = 0, NDW = 0,  DTW = 1, NDWG = 1, NDWB,   DTWG,   DTWB, 
+  /* player 0 loses, first cube value */
+  NDL,              DTL = 6, NDLG = 6, NDLB,   DTLG,   DTLB,
+  /* player 0 wins, 2nd cube value */
+  DPP0,             DTWP0,             NDWBP0, DTWGP0, DTWBP0, 
+  /* player 0 loses, 2nd cube value */
+  NDLP0,            DTLP0,             NDLBP0, DTLGP0, DTLBP0,
+  /* player 0 wins, 3rd cube value */
+  DPP1,             DTWP1,             NDWBP1, DTWGP1, DTWBP1, 
+  /* player 0 loses, 3rd cube value */
+  NDLP1,            DTLP1,             NDLBP1, DTLGP1, DTLBP1 } e_met_indices ;
+
+
+extern void
+getMEMultiple ( const int nScore0, const int nScore1, const int nMatchTo,
+				const int nPoints, 
+				const int nCubePrime0, const int nCubePrime1,
+				const int fCrawford,
+				float aafMET[ MAXSCORE ][ MAXSCORE ],
+				float aafMETPostCrawford[ 2 ][ MAXSCORE ],
+				float *player0, float *player1);
+
+
 #endif
 
