@@ -32,10 +32,9 @@
 #include "inc3d.h"
 #include <assert.h>
 
-#if HAVE_GTKGLEXT
 #include <gtk/gtk.h>
 
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
 #else
 #include <gtkgl/gtkglarea.h>
@@ -46,11 +45,14 @@
 #include "sound.h"
 #include "renderprefs.h"
 
+void Reshape(int w, int h);
+int MouseMove(BoardData *bd, int x, int y);
+
 int screenHeight;
 guint id = 0;
 GtkWidget *widget;
 idleFunc *pIdleFun;
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 GdkGLConfig *glconfig;
 #endif
 BoardData *pCurBoard;
@@ -65,7 +67,7 @@ void CheckAccelerated()
 
 	if (strstr(vendor, "Microsoft") && strstr(renderer, "Generic"))
 	{
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 		GtkWidget *dialog = gtk_message_dialog_new (0, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
 				GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, 
 				"No hardware accelerated graphics card found - performance may be slow.\n");
@@ -105,7 +107,7 @@ void SetupViewingVolume()
 	glLoadIdentity();
 	SetupPerspVolume(pCurBoard, viewport);
 
-	SetupLight(pCurBoard);
+	SetupLight3d(pCurBoard);
 	calculateBackgroundSize(pCurBoard, viewport);
 }
 
@@ -116,7 +118,7 @@ void SetupViewingVolume3d()
 
 gboolean idle(GtkWidget *widget)
 {
-	if (pIdleFun())
+	if (pIdleFun(pCurBoard))
 		gtk_widget_queue_draw(widget);
 
 	return TRUE;
@@ -130,7 +132,7 @@ void StopIdle3d()
 extern int animation_finished;
 
 void stopIdleFunc()
-{
+{	/* NB. Animation could have been interruptted */
 	if (pCurBoard->shakingDice)
 	{
 		pCurBoard->shakingDice = 0;
@@ -166,7 +168,7 @@ void setIdleFunc(idleFunc* pFun)
 
 void realize(GtkWidget *widget, gpointer data)
 {
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
@@ -181,7 +183,7 @@ void realize(GtkWidget *widget, gpointer data)
 	InitGL();
 	SetSkin(pCurBoard, rdAppearance.skin3d);
 
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
 #else
@@ -191,7 +193,7 @@ void realize(GtkWidget *widget, gpointer data)
 
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *event, gpointer data)
 {
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
@@ -207,7 +209,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *event, gpo
 	screenHeight = widget->allocation.height;
 	Reshape(widget->allocation.width, widget->allocation.height);
 
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
 #endif
@@ -217,7 +219,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *event, gpo
 
 static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
@@ -269,13 +271,13 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer 
 	else
 		Display();
 
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	gdk_gl_drawable_swap_buffers(gldrawable);
 #else
 	gtk_gl_area_swapbuffers(GTK_GL_AREA(widget));
 #endif
 
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	gdk_gl_drawable_gl_end(gldrawable);
 	/*** OpenGL END ***/
 #else
@@ -678,9 +680,9 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 	    pCurBoard->points[pCurBoard->drag_point] -= pCurBoard->drag_colour;
 
 		/* Start Dragging piece */
-		MouseMove(x, y);
+		MouseMove(pCurBoard, x, y);
 
-		SetMovingPieceRotation(pCurBoard->drag_point);
+		SetMovingPieceRotation(pCurBoard, pCurBoard->drag_point);
 
 		/* Show hovering piece */
 		updatePieceOccPos(pCurBoard);
@@ -804,7 +806,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer 
 		}
 	}
 
-	if (MouseMove(x, y))
+	if (MouseMove(pCurBoard, x, y))
 		gtk_widget_queue_draw(widget);
 
 	return TRUE;
@@ -812,7 +814,7 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer 
 
 void CreateGLWidget(GtkWidget **drawing_area)
 {
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	/* Drawing area for OpenGL */
 	*drawing_area = gtk_drawing_area_new();
 
@@ -876,7 +878,7 @@ void preDraw3d()
 
 int InitGTK3d(int *argc, char ***argv)
 {
-#if USE_GTK2
+#if HAVE_GTKGLEXT
 	gtk_gl_init(argc, argv);
 
 	/* Configure OpenGL-capable visual */
@@ -892,5 +894,3 @@ int InitGTK3d(int *argc, char ***argv)
 
 	return 0;
 }
-
-#endif

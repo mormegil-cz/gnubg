@@ -704,7 +704,7 @@ extern void CommandSetAppearance( char *sz ) {
     if( fX )
 	BoardPreferencesStart( pwBoard );
 #endif
-    
+
     while( ParseKeyValue( &sz, apch ) )
 	RenderPreferencesParam( &rdAppearance, apch[ 0 ], apch[ 1 ] );
 

@@ -48,3 +48,4 @@ extern void addCubeCentered(Occluder* pOcc, float x, float y, float z, float w, 
 extern void addWonkyCube(Occluder* pOcc, float x, float y, float z, float w, float h, float d, float s, int full);
 extern void addCylinder(Occluder* pOcc, float x, float y, float z, float r, float d, int a);
 extern void addHalfTube(Occluder* pOcc, float r, float h, int a);
+extern void addDice(Occluder* pOcc, float size);

@@ -161,11 +161,6 @@ typedef struct _BoardData {
 /* extra members for 3d board */
 	GtkWidget *drawing_area3d;	/* main 3d widget */
 
-	float LightPosition[4];	/* xyz light posistion + type */
-	float LightDiffuse;	/* Amount of diffuse light from light source */
-	float LightAmbient;	/* Amount of ambient light from light source */
-	float LightSpecular;	/* Amount of ambient light from light source */
-
 	/* Bit of a hack - assign each possible position a set rotation */
 	int pieceRotation[28][15];
 	int movingPieceRotation;
@@ -190,6 +185,7 @@ typedef struct _BoardData {
 	int numTextures;
 
 	int pieceType;	/* Different piece models */
+
 	BoardState State;	/* Open/closed board */
 	float perOpen;	/* Percentage open when opening/closing board */
 
@@ -203,15 +199,10 @@ typedef struct _BoardData {
 	float diceMovingPos[2][3];
 	DiceRotation diceRotation[2];
 
-	int showIndicator;	/* Show move indicator */
 	float flagWaved;	/* How much has flag waved */
-	/* Angle of board display */
-	float fovAngle;	/* y-field of view angle 0-90 */
-	float boardAngle;	/* angle board is rotated at 0-90 */
 
 	int iTargetHelpPoints[4];	/* Drag target position */
-	int DragTargetHelp;
-
+	int DragTargetHelp;	/* Currently showing draw targets? */
 #endif
 } BoardData;
 
@@ -225,17 +216,18 @@ extern void SetupViewingVolume3d();
 extern void DisplayCorrectBoardType();
 extern void ShowBoard3d(BoardData *bd);
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
-extern void RollDice3d();
-extern void AnimateMove3d();
-extern void ShowFlag3d();
+extern void RollDice3d(BoardData *bd);
+extern void AnimateMove3d(BoardData *bd);
+extern void ShowFlag3d(BoardData *bd);
 extern void StopIdle3d();
 extern void SetShadowDimness3d();
 extern void preDraw3d();
 extern void CloseBoard3d(BoardData* bd);
 extern void SetSkin(BoardData *bd, int num);
+void SetupLight3d(BoardData *bd);
 
-extern void PlaceMovingPieceRotation(int dest, int src);
-extern void SetMovingPieceRotation(int pt);
+extern void PlaceMovingPieceRotation(BoardData* bd, int dest, int src);
+extern void SetMovingPieceRotation(BoardData* bd, int pt);
 extern void updateOccPos(BoardData* bd);
 extern void updatePieceOccPos(BoardData* bd);
 extern void updateHingeOccPos(BoardData* bd);
@@ -268,4 +260,3 @@ extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
 #endif /* __cplusplus */
 
 #endif
-;

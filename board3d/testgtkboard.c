@@ -157,20 +157,24 @@ void InitBoard3d(BoardData *bd)
 		for (j = 0; j < 15; j++)
 			bd->pieceRotation[i][j] = rand() % 360;
 
-	bd->cube = 1;
-	bd->cube_owner = 0;
-	bd->doubled = 0;
-
-	bd->crawford_game = 0;
-	bd->cube_use = 1;
+	/* Reset textures */
+	bd->numTextures = 0;
+	for (i = 0; i < MAX_TEXTURES; i++)
+		bd->textureList[i].texID = 0;
 
 	bd->State = BOARD_OPEN;
-
-	fGUIDiceArea = 1;
-
 	bd->moving = 0;
 
 	bd->drag_point = -1;
+
+	bd->DragTargetHelp = 0;
+
+	SetupSimpleMat(&bd->gap, 0, 0, 0);
+	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
+
+#if !BUILDING_LIB
+	bd->resigned = 0;
+	rdAppearance.showMoveIndicator = 1;
 
 	bd->direction = 1;
 	fClockwise = 0;
@@ -178,42 +182,40 @@ void InitBoard3d(BoardData *bd)
 	bd->turn = 1;
 
 	bd->colour = 0;
-	bd->showIndicator = 1;
 
 	bd->shakingDice = 0;
 
 	bd->dice_roll[0] = bd->dice_roll[1] = -1;
 setDicePos(bd);
-	SetupSimpleMat(&bd->gap, 0, 0, 0);
 
-	bd->numTextures = 0;
-	for (i = 0; i < MAX_TEXTURES; i++)
-		bd->textureList[i].texID = 0;
+	bd->cube = 1;
+	bd->cube_owner = 0;
+	bd->doubled = 0;
 
-	bd->LightAmbient = .5f;
-	bd->LightDiffuse = .7f;
-	bd->LightSpecular = 1;
+	bd->crawford_game = 0;
+	bd->cube_use = 1;
 
-	bd->LightPosition[0] = 0;
-	bd->LightPosition[1] = base_unit * 40;
-	bd->LightPosition[2] = base_unit * 70;
-	bd->LightPosition[3] = 1;
+	fGUIDiceArea = 1;
 
-#if !BUILDING_LIB
+	rdAppearance.shadowDarkness = 50;
+
+	rdAppearance.lightLevels[0] = 50;
+	rdAppearance.lightLevels[1] = 70;
+	rdAppearance.lightLevels[2] = 100;
+
+	rdAppearance.lightPos[0] = 0;
+	rdAppearance.lightPos[1] = 2;
+	rdAppearance.lightPos[2] = 3.5f;
+	rdAppearance.lightType = 0;
+
 	InitialPos(bd);
 	SetShadowDimness3d();
 
 	/* Set initial curve accuracy */
 	rdAppearance.curveAccuracy = 36;
+
+	rdAppearance.boardAngle = 25.0f;
 #endif
-
-	bd->fovAngle = 45.0f;
-	bd->boardAngle = 25.0f;
-
-	bd->resigned = 0;
-	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
-
-	bd->DragTargetHelp = 0;
 }
 
 void TidyBoard(BoardData *bd)
@@ -411,9 +413,11 @@ void SetSkin6(BoardData *bd)
 	bd->pieceType = 0;
 }
 
+#include "shadow.h"
+
 void SetSkin(BoardData *bd, int num)
 {
-	TidyBoard(bd);
+    	TidyBoard(bd);
 	if (num == 1)
 		SetSkin1(bd);
 	if (num == 2)

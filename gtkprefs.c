@@ -69,7 +69,9 @@ static GtkWidget *apwColour[ 2 ], *apwBoard[ 4 ],
     *pwWoodF, *pwPreview[ NUM_PIXMAPS ];
 #if USE_BOARD3D
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard, *pwSpin,
-	*pwDebugTime, *pwDarkness, *lightLab, *darkLab, *pwAccuracy;
+	*pwDebugTime, *pwDarkness, *lightLab, *darkLab, *pwAccuracy, *pwLightSource, *pwMoveIndicator,
+	*pwLightPosX, *pwLightPosY, *pwLightPosZ, *pwLightLevelAmbient, *pwLightLevelDiffuse, *pwLightLevelSpecular,
+	*pwBoardAngle, *pwSkewFactor;
 #endif
 
 #if HAVE_LIBXML2
@@ -654,16 +656,14 @@ void toggle_show_shadows(GtkWidget *widget, GtkWidget *pw)
 
 GtkWidget *Board3dPage(BoardData *bd)
 {
-    GtkWidget *pw, *pwx;
-	GtkWidget *dtBox, *hBox, *pwev, *pwhbox, *lab;
+    GtkWidget *pwx, *dtBox, *hBox, *pwev, *pwhbox, *lab, *dtFrame, *frameBox,
+				*button, *vbox, *vbox2;
 	GtkAdjustment *adj;
 
-    pwx = gtk_hbox_new ( FALSE, 0 );
-    pw = gtk_vbox_new( FALSE, 0 );
-    gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
+    pwx = gtk_hbox_new ( FALSE, 20);
 	
 	dtBox = gtk_vbox_new (FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(pw), dtBox, FALSE, FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwx), dtBox, FALSE, FALSE, 0);
 	
 	pwShowShadows = gtk_check_button_new_with_label ("Show shadows");
 	gtk_box_pack_start (GTK_BOX (dtBox), pwShowShadows, FALSE, FALSE, 0);
@@ -720,6 +720,10 @@ GtkWidget *Board3dPage(BoardData *bd)
 	gtk_box_pack_start (GTK_BOX (dtBox), pwDebugTime, FALSE, FALSE, 0);
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwDebugTime), rdAppearance.debugTime);
 	
+	pwMoveIndicator = gtk_check_button_new_with_label ("Show move indicator");
+	gtk_box_pack_start (GTK_BOX (dtBox), pwMoveIndicator, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwMoveIndicator), rdAppearance.showMoveIndicator);
+	
 	pwev = gtk_event_box_new();
 	gtk_box_pack_start(GTK_BOX(dtBox), pwev, FALSE, FALSE, 0);
 	pwhbox = gtk_hbox_new(FALSE, 4);
@@ -732,6 +736,134 @@ GtkWidget *Board3dPage(BoardData *bd)
 	pwSpin = gtk_spin_button_new(adj, 1, 0);
 	gtk_box_pack_start(GTK_BOX(pwhbox), pwSpin, FALSE, FALSE, 0);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(pwSpin), TRUE);
+
+	lab = gtk_label_new("Board angle");
+	gtk_box_pack_start(GTK_BOX(dtBox), lab, FALSE, FALSE, 0);
+
+pwBoardAngle = gtk_hscale_new_with_range(0, 60, 1);
+gtk_range_set_value(GTK_RANGE(pwBoardAngle), rdAppearance.boardAngle);
+	gtk_box_pack_start(GTK_BOX(dtBox), pwBoardAngle, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("test FOV skew factor");
+	gtk_box_pack_start(GTK_BOX(dtBox), lab, FALSE, FALSE, 0);
+
+pwSkewFactor = gtk_hscale_new_with_range(0, 100, 1);
+gtk_range_set_value(GTK_RANGE(pwSkewFactor), rdAppearance.testSkewFactor);
+	gtk_box_pack_start(GTK_BOX(dtBox), pwSkewFactor, FALSE, FALSE, 0);
+
+
+	dtBox = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwx), dtBox, FALSE, FALSE, 0);
+
+	dtFrame = gtk_frame_new("Light Source Type");
+	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
+	gtk_box_pack_start(GTK_BOX(dtBox), dtFrame, FALSE, FALSE, 0);
+	
+	vbox = gtk_vbox_new (FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (dtFrame), vbox);
+	
+	pwLightSource = gtk_radio_button_new_with_label (NULL, "Positional");
+	gtk_box_pack_start (GTK_BOX (vbox), pwLightSource, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwLightSource), (rdAppearance.lightType == LT_POSITIONAL));
+	
+	button = gtk_radio_button_new_with_label_from_widget (GTK_RADIO_BUTTON(pwLightSource), "Directional");
+	gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), (rdAppearance.lightType == LT_DIRECTIONAL));
+
+	dtFrame = gtk_frame_new("Light Position");
+	gtk_container_set_border_width (GTK_CONTAINER (dtFrame), 4);
+	gtk_box_pack_start(GTK_BOX(dtBox), dtFrame, FALSE, FALSE, 0);
+
+	frameBox = gtk_vbox_new (FALSE, 0);
+	gtk_container_add (GTK_CONTAINER (dtFrame), frameBox);
+
+	hBox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("Left");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+pwLightPosX = gtk_hscale_new_with_range(-1.5, 4, .1f);
+gtk_scale_set_draw_value(GTK_SCALE(pwLightPosX), FALSE);
+gtk_range_set_value(GTK_RANGE(pwLightPosX), rdAppearance.lightPos[0]);
+gtk_widget_set_size_request(pwLightPosX, 150, -1);
+	gtk_box_pack_start(GTK_BOX(hBox), pwLightPosX, TRUE, TRUE, 0);
+
+	lab = gtk_label_new("Right");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+
+	hBox = gtk_hbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
+
+	vbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hBox), vbox2, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("Top");
+	gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
+
+pwLightPosY = gtk_vscale_new_with_range(-1.5, 4, .1f);
+gtk_scale_set_draw_value(GTK_SCALE(pwLightPosY), FALSE);
+gtk_range_set_value(GTK_RANGE(pwLightPosY), rdAppearance.lightPos[1]);
+gtk_range_set_inverted(GTK_RANGE(pwLightPosY), TRUE);
+gtk_widget_set_size_request(pwLightPosY, -1, 70);
+	gtk_box_pack_start(GTK_BOX(vbox2), pwLightPosY, TRUE, TRUE, 0);
+
+	lab = gtk_label_new("Bottom");
+	gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
+
+
+	vbox2 = gtk_vbox_new(FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(hBox), vbox2, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("High");
+	gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
+
+pwLightPosZ = gtk_vscale_new_with_range(.5, 5, .1f);
+gtk_scale_set_draw_value(GTK_SCALE(pwLightPosZ), FALSE);
+gtk_range_set_value(GTK_RANGE(pwLightPosZ), rdAppearance.lightPos[2]);
+gtk_range_set_inverted(GTK_RANGE(pwLightPosZ), TRUE);
+	gtk_box_pack_start(GTK_BOX(vbox2), pwLightPosZ, TRUE, TRUE, 0);
+
+	lab = gtk_label_new("Low");
+	gtk_box_pack_start(GTK_BOX(vbox2), lab, FALSE, FALSE, 0);
+
+	dtFrame = gtk_frame_new("Light Levels");
+	gtk_container_set_border_width(GTK_CONTAINER(dtFrame), 4);
+	gtk_box_pack_start(GTK_BOX(dtBox), dtFrame, FALSE, FALSE, 0);
+
+	frameBox = gtk_vbox_new(FALSE, 0);
+	gtk_container_add (GTK_CONTAINER(dtFrame), frameBox);
+
+	hBox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("Ambient");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+pwLightLevelAmbient = gtk_hscale_new_with_range(0, 100, 1);
+gtk_range_set_value(GTK_RANGE(pwLightLevelAmbient), rdAppearance.lightLevels[0]);
+	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelAmbient, TRUE, TRUE, 0);
+
+	hBox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("Diffuse");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+pwLightLevelDiffuse = gtk_hscale_new_with_range(0, 100, 1);
+gtk_range_set_value(GTK_RANGE(pwLightLevelDiffuse), rdAppearance.lightLevels[1]);
+	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelDiffuse, TRUE, TRUE, 0);
+
+	hBox = gtk_hbox_new (FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(frameBox), hBox, FALSE, FALSE, 0);
+
+	lab = gtk_label_new("Specular");
+	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+
+pwLightLevelSpecular = gtk_hscale_new_with_range(0, 100, 1);
+gtk_range_set_value(GTK_RANGE(pwLightLevelSpecular), rdAppearance.lightLevels[2]);
+	gtk_box_pack_start(GTK_BOX(hBox), pwLightLevelSpecular, TRUE, TRUE, 0);
 
     return pwx;
 }
@@ -1530,7 +1662,7 @@ static void GetPrefs ( renderdata *prd ) {
 	rdAppearance.closeBoardOnExit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwCloseBoard));
 	rdAppearance.debugTime = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwDebugTime));
 	if (rdAppearance.fDisplayType == DT_3D && bd->resigned && bd->playing)
-		ShowFlag3d();	/* Showing now - update */
+		ShowFlag3d(bd);	/* Showing now - update */
 
 	newAccuracy = gtk_range_get_value(GTK_RANGE(pwAccuracy)) + 2;
 	newAccuracy -= (newAccuracy % 4);
@@ -1539,7 +1671,21 @@ static void GetPrefs ( renderdata *prd ) {
 		rdAppearance.curveAccuracy = newAccuracy;
 		preDraw3d();
 	}
+	rdAppearance.lightType = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwLightSource) ) ? LT_POSITIONAL : LT_DIRECTIONAL;
+	rdAppearance.lightPos[0] = gtk_range_get_value(GTK_RANGE(pwLightPosX));
+	rdAppearance.lightPos[1] = gtk_range_get_value(GTK_RANGE(pwLightPosY));
+	rdAppearance.lightPos[2] = gtk_range_get_value(GTK_RANGE(pwLightPosZ));
+	rdAppearance.lightLevels[0] = gtk_range_get_value(GTK_RANGE(pwLightLevelAmbient));
+	rdAppearance.lightLevels[1] = gtk_range_get_value(GTK_RANGE(pwLightLevelDiffuse));
+	rdAppearance.lightLevels[2] = gtk_range_get_value(GTK_RANGE(pwLightLevelSpecular));
+	SetupLight3d(bd);
+
+	rdAppearance.showMoveIndicator = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwMoveIndicator));
+	rdAppearance.boardAngle = gtk_range_get_value(GTK_RANGE(pwBoardAngle));
+	rdAppearance.testSkewFactor = gtk_range_get_value(GTK_RANGE(pwSkewFactor));
+	SetupViewingVolume3d();
 #endif
+
     rdAppearance.fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
     rdAppearance.fHinges = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwHinges ) );
@@ -1622,17 +1768,17 @@ static void GetPrefs ( renderdata *prd ) {
     prd->fClockwise = fClockwise; /* yuck */
 }
 
-static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
+char szTemp[1024];
 
-    char sz[ 512 ];
+static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
     GetPrefs ( &rdAppearance );
 
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
-    RenderPreferencesCommand( &rdAppearance, sz );
+    RenderPreferencesCommand( &rdAppearance, szTemp );
 
-    UserCommand( sz );
+    UserCommand( szTemp );
 }
 
 static void

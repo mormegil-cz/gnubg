@@ -831,6 +831,16 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
        ms.gs = GAME_PLAYING;
        ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
        ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+
+#if USE_BOARD3D
+	/* If in 3d mode don't roll the dice */
+    if (rdAppearance.fDisplayType == DT_3D)
+	{
+		BoardData *bd = BOARD( pwBoard )->board_data;
+		bd->dice[0]=ms.anDice[ 0 ];
+		bd->dice[1]=ms.anDice[ 1 ];
+	}
+#endif
    }
 
     UpdateSetting( &ms.nCube );

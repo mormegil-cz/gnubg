@@ -5,6 +5,7 @@
 #include <math.h>
 #include "matrix.h"
 #include "shadow.h"
+#include "inc3d.h"
 
 #define TOP_EDGE -2
 #define PI 3.14159265358979323846f
@@ -276,6 +277,11 @@ void addLine(Occluder* pOcc, float x, float y, float z, float x2, float y2, floa
 	addALine(pOcc, x, y, z, x2, y2, z2, x3, y3, z3, -1);
 }
 
+void addLineV(Occluder* pOcc, float v1[3], float v2[3], float v3[3])
+{
+	 addLine(pOcc, v1[0], v1[1], v1[2], v2[0], v2[1], v2[2], v3[0], v3[1], v3[2]);
+}
+
 void addTopLine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2)
 {
 	float z3;
@@ -483,6 +489,94 @@ void addHalfTube(Occluder* pOcc, float r, float h, int numSteps)
 	}
 	addLine(pOcc, xPts[i], 0, yPts[i], xPts[i], h, yPts[i], xPts[i - 1], 0, yPts[i - 1]);
 	addLine(pOcc, xPts[i], h, yPts[i], xPts[i], 0, yPts[i], xPts[i], 0, yPts[i] - .1f);
+
+	free(xPts);
+	free(yPts);
+}
+
+int converted[8][3][3] = {
+	{{1, 2, 3}, {3, 1, 2}, {2, 3, 1}},
+	{{-2, 1, 3}, {-1, 3, 2}, {-3, 2, 1}},
+	{{-1, -2, 3}, {-3, -1, 2}, {-2, -3, 1}},
+	{{2, -1, 3}, {1, -3, 2}, {3, -2, 1}},
+	{{2, 1, -3}, {1, 3, -2}, {3, 2, -1}},
+	{{-1, 2, -3}, {-3, 1, -2}, {-2, 3, -1}},
+	{{-2, -1, -3}, {-1, -3, -2}, {-3, -2, -1}},
+	{{1, -2, -3}, {3, -1, -2}, {2, -3, -1}}};
+
+float GetValue(float x, float y, float d, int val)
+{
+	int s = SGN(val);
+	switch (abs(val))
+	{
+	case 1:
+		return x * s;
+		break;
+	case 2:
+		return y * s;
+		break;
+	case 3:
+		return d * s;
+		break;
+	}
+	return 0;
+}
+
+void GetCoords(float x, float y, float d, int c, int f, float v[3])
+{
+	v[0] = GetValue(x, y, d, converted[c][f][0]);
+	v[1] = GetValue(x, y, d, converted[c][f][1]);
+	v[2] = GetValue(x, y, d, converted[c][f][2]);
+}
+
+void addDice(Occluder* pOcc, float size)
+{	/* Hard-coded to keep model simple + doesn't work correctly when > 8... */
+	int numSteps = 8;
+	float step = (2 * PI) / numSteps;
+	float *xPts = (float *)malloc(sizeof(float) * numSteps);
+	float *yPts = (float *)malloc(sizeof(float) * numSteps);
+	int i, c, f;
+
+	for (i = 0; i < numSteps; i++)
+	{
+		float ang = step * i;
+		xPts[i] = (float)sin(ang) * size;
+		yPts[i] = (float)cos(ang) * size;
+	}
+
+	for (c = 0; c < 8; c++)
+	{
+		for (f = 0; f < 3; f++)
+		{
+			for (i = 0; i < numSteps / 4; i++)
+			{
+				int prevFace = (f + 2) % 3;
+				int nextFace = (f + 1) % 3;
+				int oppPoint = numSteps / 4 - i;
+
+				float v1[3], v2[3], v3[3];
+				GetCoords(xPts[i], yPts[i], size, c, f, v1);
+				GetCoords(xPts[i + 1], yPts[i + 1], size, c, f, v2);
+
+				GetCoords(0, 0, size, c, f, v3);
+				addLineV(pOcc, v1, v2, v3);
+
+				if (i == 0)
+					GetCoords(xPts[oppPoint - 1], yPts[oppPoint - 1], size, c, prevFace, v3);
+				else
+					GetCoords(xPts[oppPoint], yPts[oppPoint], size, c, nextFace, v3);
+				addLineV(pOcc, v2, v1, v3);
+
+				if (i > 0)
+				{
+					addLineV(pOcc, v1, v3, v2);
+
+					GetCoords(xPts[i], yPts[i], size, c, prevFace, v2);
+					addLineV(pOcc, v3, v1, v2);
+				}
+			}
+		}
+	}
 
 	free(xPts);
 	free(yPts);

@@ -35,9 +35,9 @@
 // My logcube - more than 32 then return 0 (show 64)
 static int LogCube( const int n )
 {
-    int i;
+	int i;
 
-    for( i = 0; ; i++ )
+	for( i = 0; ; i++ )
 	if( n <= ( 1 << i ) )
 		return i < 6 ? i : 0;
 }
@@ -89,31 +89,43 @@ float ctlpoints[S_NUMPOINTS][T_NUMPOINTS][3];
 #define zFar 70
 float vert, hor;
 
-/* All the board element sizes */
-#define EDGE base_unit
+/* All the board element sizes - based on base_unit size */
+
+/* Widths */
+
+/* Side edge width of bearoff trays */
+#define EDGE_WIDTH base_unit
 /* Piece/point size */
 #define PIECE_HOLE (base_unit * 3.0f)
-/* Vertical distance between pieces */
-#define PIECE_GAP (base_unit / 5.0f)
+
+#define TRAY_WIDTH (EDGE_WIDTH * 2.0f + PIECE_HOLE)
 #define BOARD_WIDTH (PIECE_HOLE * 6.0f)
-#define BAR_WIDTH (base_unit * 5.0f)
-#define TOTAL_WIDTH ((EDGE * 2.0f + PIECE_HOLE + BOARD_WIDTH) * 2.0f + BAR_WIDTH)
-#define DICE_AREA_WIDTH BOARD_WIDTH
+#define BAR_WIDTH (PIECE_HOLE * 1.7f)
+#define DICE_AREA_CLICK_WIDTH BOARD_WIDTH
+
+#define TOTAL_WIDTH ((TRAY_WIDTH + BOARD_WIDTH) * 2.0f + BAR_WIDTH)
+
+/* Heights */
 
 /* Bottom + top edge */
-#define SIDE_EDGE (base_unit * 1.5f)
-/* Size of piece trays */
-#define PIECE_HOLE_HEIGHT (base_unit * 20.0f)
-#define POINT_HEIGHT (PIECE_HOLE_HEIGHT * .95f)
-#define MID_SIDE_GAP (base_unit * 3.5f)
-#define TOTAL_HEIGHT ((PIECE_HOLE_HEIGHT + SIDE_EDGE) * 2.0f + MID_SIDE_GAP)
-#define DICE_AREA_HEIGHT (TOTAL_HEIGHT - (POINT_HEIGHT + SIDE_EDGE) * 2.0f)
+#define EDGE_HEIGHT (base_unit * 1.5f)
+
+#define POINT_HEIGHT (PIECE_HOLE * 6)
+#define TRAY_HEIGHT (EDGE_HEIGHT + POINT_HEIGHT)
+#define MID_SIDE_GAP_HEIGHT (base_unit * 3.5f)
+#define DICE_AREA_HEIGHT MID_SIDE_GAP_HEIGHT
+/* Vertical gap between pieces */
+#define PIECE_GAP_HEIGHT (base_unit / 5.0f)
+
+#define TOTAL_HEIGHT (TRAY_HEIGHT * 2.0f + MID_SIDE_GAP_HEIGHT)
+
+/* Depths */
 
 #define EDGE_DEPTH (base_unit * 1.95f)
-#define PIECE_HEIGHT base_unit
-#define BASE_HEIGHT base_unit
- /* Slight offset from surface */
-#define LIFT_OFF (base_unit / 50.0f)
+#define PIECE_DEPTH base_unit
+#define BASE_DEPTH base_unit
+
+/* Other objects */
 
 #define DICE_SIZE (base_unit * 3.5f)
 #define DOT_SIZE (DICE_SIZE / 14.0f)
@@ -124,24 +136,21 @@ float vert, hor;
 #define HINGE_WIDTH (base_unit / 2.0f)
 #define HINGE_HEIGHT (base_unit * 7.0f)
 
+/* Dice animation step size */
 #define DICE_STEP_SIZE0 (base_unit * 1.3f)
 #define DICE_STEP_SIZE1 (base_unit * 1.7f)
 
 #undef ARROW_SIZE
-#define ARROW_SIZE (SIDE_EDGE * .8f)
-#define ARROW_UNIT (ARROW_SIZE / 4.0f)
-
-#define XROT_MIN 1
-#define XROT_RANGE 1.5f
-
-#define YROT_MIN -.5f
-#define YROT_RANGE 1
+#define ARROW_SIZE (EDGE_HEIGHT * .8f)
 
 #define FLAG_HEIGHT (base_unit * 3)
 #define FLAG_WIDTH (FLAG_HEIGHT * 1.4f)
 #define FLAG_WAG (FLAG_HEIGHT * .3f)
 #define FLAGPOLE_WIDTH (base_unit * .2f)
 #define FLAGPOLE_HEIGHT (FLAG_HEIGHT * 2.05f)
+
+/* Slight offset from surface - avoid using unless necessary */
+#define LIFT_OFF (base_unit / 50.0f)
 
 float getBoardWidth() {return TOTAL_WIDTH;}
 float getBoardHeight() {return TOTAL_HEIGHT;}
@@ -174,7 +183,7 @@ void preDrawPiece0(BoardData* bd)
 	float radius = PIECE_HOLE / 2.0f;
 	float discradius = radius * 0.8f;
 	float lip = radius - discradius;
-	float height = PIECE_HEIGHT - 2 * lip;
+	float height = PIECE_DEPTH - 2 * lip;
 	float ***p = Alloc3d(rdAppearance.curveAccuracy + 1, rdAppearance.curveAccuracy / 4 + 1, 3);
 	float ***n = Alloc3d(rdAppearance.curveAccuracy + 1, rdAppearance.curveAccuracy / 4 + 1, 3);
 
@@ -184,7 +193,7 @@ void preDrawPiece0(BoardData* bd)
 	if (bd->checkerMat[0].pTexture)
 	{	/* Texturing will be enabled */
 		glPushMatrix();
-		glTranslatef(0, 0, PIECE_HEIGHT);
+		glTranslatef(0, 0, PIECE_DEPTH);
 		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
 		gluDisk(qobjTex, 0, discradius, rdAppearance.curveAccuracy, 1);
 		glPopMatrix();
@@ -197,7 +206,7 @@ void preDrawPiece0(BoardData* bd)
 	else	
 	{
 		circleRev(discradius, 0, rdAppearance.curveAccuracy);
-		circle(discradius, PIECE_HEIGHT, rdAppearance.curveAccuracy);
+		circle(discradius, PIECE_DEPTH, rdAppearance.curveAccuracy);
 	}
 	/* Draw side of piece */
 	angle = 0;
@@ -257,9 +266,9 @@ void preDrawPiece0(BoardData* bd)
 		for (i = 0; i < rdAppearance.curveAccuracy + 1; i++)
 		{
 			glNormal3f((n[i][j + 1][0]) / lip, (n[i][j + 1][1]) / lip, n[i][j + 1][2] / lip);
-			glVertex3f(p[i][j + 1][0], p[i][j + 1][1], PIECE_HEIGHT - p[i][j + 1][2]);
+			glVertex3f(p[i][j + 1][0], p[i][j + 1][1], PIECE_DEPTH - p[i][j + 1][2]);
 			glNormal3f((n[i][j][0]) / lip, (n[i][j][1]) / lip, n[i][j][2] / lip);
-			glVertex3f(p[i][j][0], p[i][j][1], PIECE_HEIGHT - p[i][j][2]);
+			glVertex3f(p[i][j][0], p[i][j][1], PIECE_DEPTH - p[i][j][2]);
 		}
 		glEnd();
 	}
@@ -282,7 +291,7 @@ void preDrawPiece1(BoardData* bd)
 	if (bd->checkerMat[0].pTexture)
 	{	/* Texturing will be enabled */
 		glPushMatrix();
-		glTranslatef(0, 0, PIECE_HEIGHT);
+		glTranslatef(0, 0, PIECE_DEPTH);
 		glBindTexture(GL_TEXTURE_2D, bd->checkerMat[0].pTexture->texID);
 		gluDisk(qobjTex, 0, pieceBorder, rdAppearance.curveAccuracy, 1);
 		glDisable(GL_TEXTURE_2D);
@@ -291,13 +300,13 @@ void preDrawPiece1(BoardData* bd)
 	}
 	else
 	{
-		circle(pieceRad, PIECE_HEIGHT, rdAppearance.curveAccuracy);
+		circle(pieceRad, PIECE_DEPTH, rdAppearance.curveAccuracy);
 	}
 	/* Draw plain bottom of piece */
 	circleRev(pieceRad, 0, rdAppearance.curveAccuracy);
 
 	/* Edge of piece */
-	gluCylinder(qobj, pieceRad, pieceRad, PIECE_HEIGHT, rdAppearance.curveAccuracy, 1);
+	gluCylinder(qobj, pieceRad, pieceRad, PIECE_DEPTH, rdAppearance.curveAccuracy, 1);
 
 	if (bd->checkerMat[0].pTexture)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
@@ -564,12 +573,12 @@ void getDoubleCubePos(BoardData* bd, float v[3])
 {
 	if (bd->doubled != 0)
 	{
-		if (bd->doubled == 1)
-			v[0] = EDGE * 2 + PIECE_HOLE + BOARD_WIDTH / 2;
-		else
-			v[0] = TOTAL_WIDTH - (EDGE * 2 + PIECE_HOLE + BOARD_WIDTH / 2);
+		v[0] = TRAY_WIDTH + BOARD_WIDTH / 2;
+		if (bd->doubled != 1)
+			v[0] = TOTAL_WIDTH - v[0];
+
 		v[1] = TOTAL_HEIGHT / 2.0f;
-		v[2] = BASE_HEIGHT + DOUBLECUBE_SIZE / 2.0f;
+		v[2] = BASE_DEPTH + DOUBLECUBE_SIZE / 2.0f;
 	}
 	else
 	{
@@ -580,15 +589,15 @@ void getDoubleCubePos(BoardData* bd, float v[3])
 			v[1] = TOTAL_HEIGHT / 2.0f;
 			break;
 		case -1:
-			v[1] = SIDE_EDGE + DOUBLECUBE_SIZE / 2.0f;
+			v[1] = EDGE_HEIGHT + DOUBLECUBE_SIZE / 2.0f;
 			break;
 		case 1:
-			v[1] = TOTAL_HEIGHT - SIDE_EDGE - DOUBLECUBE_SIZE / 2.0f;
+			v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - DOUBLECUBE_SIZE / 2.0f;
 			break;
 		default:
 		  v[1] = 0;	/* error */
 		}
-		v[2] = BASE_HEIGHT + EDGE_DEPTH + DOUBLECUBE_SIZE / 2.0f;
+		v[2] = BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE / 2.0f;
 	}
 }
 
@@ -601,7 +610,7 @@ void moveToDoubleCubePos(BoardData* bd)
 
 void drawDCNumbers(BoardData* bd, int mode, diceTest* dt)
 {
-	int c, tf;
+	int c, nice;
 	float radius = DOUBLECUBE_SIZE / 7.0f;
 	float ds = (DOUBLECUBE_SIZE * 5.0f / 7.0f);
 	float hds = (ds / 2);
@@ -617,22 +626,24 @@ void drawDCNumbers(BoardData* bd, int mode, diceTest* dt)
 			side = c;
 		else
 			side = 8 - c;
-		/* Top or Front */
-		tf = (side == dt->top || side == dt->side[2]);
+		/* Nicer top numbers */
+		nice = (side == dt->top);
 
 		/* Don't draw bottom number or back number */
-		if (tf || (bd->doubled && (side == dt->side[1] || side == dt->side[3])))
+		if (side == dt->top || side == dt->side[2] ||
+			(bd->doubled && (side == dt->side[1] || side == dt->side[3]))
+			|| (bd->cube_owner == -1 && side == dt->side[0]))
 		{
-			if (tf)
+			if (nice)
 				glDisable(GL_DEPTH_TEST);
 
 			glPushMatrix();
-			glTranslatef(0, 0, depth + !tf * LIFT_OFF);
+			glTranslatef(0, 0, depth + !nice * LIFT_OFF);
 
 			glPrintCube(sides[side], mode);
 
 			glPopMatrix();
-			if (tf)
+			if (nice)
 				glEnable(GL_DEPTH_TEST);
 		}
 		if (c % 2 == 0)
@@ -727,7 +738,7 @@ void drawDots(BoardData* bd, float dotOffset, diceTest* dt, int showFront, int d
 			dot = 8 - c;
 
 		/* Make sure top dot looks nice */
-		nd = !bd->shakingDice && (dot == dt->top || dot == dt->side[2]);
+		nd = !bd->shakingDice && (dot == dt->top);
 
 		if (bd->shakingDice
 			|| (showFront && dot != dt->bottom && dot != dt->side[0])
@@ -801,16 +812,14 @@ void getDicePos(BoardData* bd, int num, float v[3])
 	{
 		if (bd->turn == -1)
 		{
-			v[0] = EDGE * 2 + PIECE_HOLE;
-			v[0] += bd->dicePos[num][0];
+			v[0] = bd->dicePos[num][0];
 		}
 		else
 		{
-			v[0] = TOTAL_WIDTH - EDGE * 2 - PIECE_HOLE;
-			v[0] -= bd->dicePos[num][0];
+			v[0] = TOTAL_WIDTH - bd->dicePos[num][0];
 		}
 		v[1] = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f + bd->dicePos[num][1];
-		v[2] = BASE_HEIGHT + LIFT_OFF + DICE_SIZE / 2.0f;
+		v[2] = BASE_DEPTH + LIFT_OFF + DICE_SIZE / 2.0f;
 	}
 }
 
@@ -845,8 +854,6 @@ void drawDice2(BoardData* bd, int num)
 	{
 		value = bd->dice[num];
 		z = ((int)bd->dicePos[num][2] + 45) / 90;
-		if (bd->direction == 1)
-			z++;
 	}
 
 	value--;	/* Zero based for array access */
@@ -856,7 +863,10 @@ void drawDice2(BoardData* bd, int num)
 	if (value >= 0)
 		initDT(&dt, rotDice[value][0], rotDice[value][1], z);
 	else
+	{
 		g_print("no value on dice?\n");
+		return;
+	}
 
 	blend = (bd->diceMat[diceCol].alphaBlend);
 
@@ -899,36 +909,35 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 	{	/* bars */
 		v[0] = TOTAL_WIDTH / 2.0f;
 		v[1] = TOTAL_HEIGHT / 2.0f;
-		v[2] = BASE_HEIGHT + EDGE_DEPTH + ((pos - 1) / 3) * PIECE_HEIGHT;
+		v[2] = BASE_DEPTH + EDGE_DEPTH + ((pos - 1) / 3) * PIECE_DEPTH;
 		pos = ((pos - 1) % 3) + 1;
 
 		if (point == 25)
 		{
-			v[1] -= DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP) * (pos + 1);
+			v[1] -= DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos + 1);
 		}
 		else
 		{
-			v[1] += DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP) * (pos + 1);
+			v[1] += DOUBLECUBE_SIZE / 2.0f + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos + 1);
 		}
-		v[0] -= PIECE_HOLE / 2.0f;
 		v[1] -= PIECE_HOLE / 2.0f;
 	}
 	else if (point >= 26)
 	{	/* homes */
-		v[2] = BASE_HEIGHT;
+		v[2] = BASE_DEPTH;
 		if (swap)
-			v[0] = EDGE;
+			v[0] = TRAY_WIDTH / 2.0f;
 		else
-			v[0] = TOTAL_WIDTH - EDGE - PIECE_HOLE;
+			v[0] = TOTAL_WIDTH - TRAY_WIDTH / 2.0f;
 
 		if (point == 26)
-			v[1] = SIDE_EDGE + (PIECE_HEIGHT * 1.3f * (pos - 1));	/* 1.3 gives a gap between pieces */
+			v[1] = EDGE_HEIGHT + (PIECE_DEPTH * 1.2f * (pos - 1));	/* 1.3 gives a gap between pieces */
 		else
-			v[1] = TOTAL_HEIGHT - SIDE_EDGE - PIECE_HEIGHT - (PIECE_HEIGHT * 1.3f * (pos - 1));
+			v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - PIECE_DEPTH - (PIECE_DEPTH * 1.2f * (pos - 1));
 	}
 	else
 	{
-		v[2] = BASE_HEIGHT + ((pos - 1) / 5) * PIECE_HEIGHT;
+		v[2] = BASE_DEPTH + ((pos - 1) / 5) * PIECE_DEPTH;
 
 		if (point < 13)
 		{
@@ -939,11 +948,11 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 				pos -= 10;
 
 			if (pos > 5)
-				v[1] = SIDE_EDGE + (PIECE_HOLE / 2.0f) + (PIECE_HOLE + PIECE_GAP) * (pos - 5 - 1);
+				v[1] = EDGE_HEIGHT + (PIECE_HOLE / 2.0f) + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos - 5 - 1);
 			else
-				v[1] = SIDE_EDGE + (PIECE_HOLE + PIECE_GAP) * (pos - 1);
+				v[1] = EDGE_HEIGHT + (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos - 1);
 
-			v[0] = EDGE * 2.0f + PIECE_HOLE * (13 - point);
+			v[0] = TRAY_WIDTH + PIECE_HOLE * (12 - point);
 			if (point < 7)
 				v[0] += BAR_WIDTH;
 		}
@@ -956,19 +965,19 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 				pos -= 10;
 
 			if (pos > 5)
-				v[1] = TOTAL_HEIGHT - SIDE_EDGE - (PIECE_HOLE / 2.0f) - (PIECE_HOLE + PIECE_GAP) * (pos - 5);
+				v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - (PIECE_HOLE / 2.0f) - (PIECE_HOLE + PIECE_GAP_HEIGHT) * (pos - 5);
 			else
-				v[1] = TOTAL_HEIGHT - SIDE_EDGE - (PIECE_HOLE + PIECE_GAP) * pos;
+				v[1] = TOTAL_HEIGHT - EDGE_HEIGHT - (PIECE_HOLE + PIECE_GAP_HEIGHT) * pos;
 
-			v[0] = EDGE * 2.0f + PIECE_HOLE * (point - 12);
+			v[0] = TRAY_WIDTH + PIECE_HOLE * (point - 13);
 			if (point > 18)
 				v[0] += BAR_WIDTH;
 		}
+		v[0] += PIECE_HOLE / 2.0f;
 	}
 	v[2] += LIFT_OFF * 2;
 
 	/* Move to centre of piece */
-	v[0] += PIECE_HOLE / 2.0f;
 	if (point < 26)
 	{
 		v[1] += PIECE_HOLE / 2.0f;
@@ -976,7 +985,7 @@ void getPiecePos(int point, int pos, int swap, float v[3])
 	else
 	{	/* Home pieces are sideways */
 		if (point == 27)
-			v[1] += PIECE_HEIGHT;
+			v[1] += PIECE_DEPTH;
 		v[2] += PIECE_HOLE / 2.0f;
 	}
 }
@@ -1005,7 +1014,7 @@ void renderSpecialPieces(BoardData* bd)
 		glPushMatrix();
 		glTranslatef(bd->movingPos[0], bd->movingPos[1], bd->movingPos[2]);
 		if (bd->rotateMovingPiece > 0)
-			glRotatef(-90 * bd->rotateMovingPiece * bd->direction, 1, 0, 0);
+			glRotatef(-90 * bd->rotateMovingPiece * bd->turn, 1, 0, 0);
 
 		renderPiece(bd, bd->movingPieceRotation, (bd->turn == 1));
 
@@ -1129,8 +1138,8 @@ void DrawNumbers(BoardData* bd, int sides, int mode)
 	int n;
 
 	glPushMatrix();
-	glTranslatef(0, (SIDE_EDGE - textHeight) / 2.0f, BASE_HEIGHT + EDGE_DEPTH);
-	x = EDGE * 2.0f + PIECE_HOLE / 2.0f;
+	glTranslatef(0, (EDGE_HEIGHT - textHeight) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+	x = TRAY_WIDTH - PIECE_HOLE / 2.0f;
 
 	for (i = 0; i < 12; i++)
 	{
@@ -1158,8 +1167,8 @@ void DrawNumbers(BoardData* bd, int sides, int mode)
 
 	glPopMatrix();
 	glPushMatrix();
-	glTranslatef(0, TOTAL_HEIGHT - textHeight - (SIDE_EDGE - textHeight) / 2.0f, BASE_HEIGHT + EDGE_DEPTH);
-	x = EDGE * 2.0f + PIECE_HOLE / 2.0f;
+	glTranslatef(0, TOTAL_HEIGHT - textHeight - (EDGE_HEIGHT - textHeight) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
+	x = TRAY_WIDTH - PIECE_HOLE / 2.0f;
 
 	for (i = 0; i < 12; i++)
 	{
@@ -1216,19 +1225,19 @@ void drawPoint(float tuv, int i, int p)
 
 	if (p)
 	{
-		x = EDGE + PIECE_HOLE * (i + 1);
+		x = TRAY_WIDTH - EDGE_WIDTH + PIECE_HOLE * i;
 		y = 0;
 	}
 	else
 	{
-		x = EDGE + PIECE_HOLE + BOARD_WIDTH - (PIECE_HOLE * i);
-		y = TOTAL_HEIGHT - SIDE_EDGE * 2;
+		x = TRAY_WIDTH - EDGE_WIDTH + BOARD_WIDTH - (PIECE_HOLE * i);
+		y = TOTAL_HEIGHT - EDGE_HEIGHT * 2;
 		w = -w;
 		h = -h;
 	}
 
 	glPushMatrix();
-	glTranslatef(EDGE, SIDE_EDGE, BASE_HEIGHT);
+	glTranslatef(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH);
 
 	glBegin(GL_TRIANGLES);
 		glNormal3f(0, 0, 1);
@@ -1253,7 +1262,7 @@ void drawPoints(BoardData* bd)
 	glDepthFunc(GL_ALWAYS);
 
 	setMaterial(&bd->baseMat);
-	drawSplitRect(EDGE, SIDE_EDGE, BASE_HEIGHT, BOARD_WIDTH + EDGE + PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE * 2, bd->baseMat.pTexture);
+	drawSplitRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH + TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, bd->baseMat.pTexture);
 
  	glEnable(GL_POLYGON_SMOOTH);
 	glEnable(GL_BLEND);
@@ -1300,7 +1309,7 @@ void drawHinge(BoardData* bd, float height)
 	glMatrixMode(GL_MODELVIEW);
 
 	glPushMatrix();
-	glTranslatef((TOTAL_WIDTH) / 2.0f, height, BASE_HEIGHT + EDGE_DEPTH);
+	glTranslatef((TOTAL_WIDTH) / 2.0f, height, BASE_DEPTH + EDGE_DEPTH);
 	glRotatef(-90, 1, 0, 0);
 	gluCylinder(qobjTex, HINGE_WIDTH, HINGE_WIDTH, HINGE_HEIGHT, rdAppearance.curveAccuracy, 1);
 
@@ -1328,61 +1337,61 @@ void tidyEdges(BoardData* bd)
 	glDepthMask(GL_FALSE);
 		glBegin(GL_LINES);
 			/* bar */
-			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+			glVertex3f(TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+			glVertex3f(TRAY_WIDTH + BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
-			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+			glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+			glVertex3f(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 		glEnd();
 	glDepthMask(GL_TRUE);
 
 	glBegin(GL_LINES);
 		/* left bear off tray */
-		glVertex3f(0, 0, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(0, TOTAL_HEIGHT, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(0, 0, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(0, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(EDGE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE, SIDE_EDGE + PIECE_HOLE_HEIGHT, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE, SIDE_EDGE + PIECE_HOLE_HEIGHT + MID_SIDE_GAP, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(EDGE + PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE + PIECE_HOLE, SIDE_EDGE + PIECE_HOLE_HEIGHT, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE + PIECE_HOLE, SIDE_EDGE + PIECE_HOLE_HEIGHT + MID_SIDE_GAP, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE + PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(EDGE * 2 + PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE * 2 + PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TRAY_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
 		/* right bear off tray */
-		glVertex3f(TOTAL_WIDTH, 0, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH, TOTAL_HEIGHT, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH, 0, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TOTAL_WIDTH - EDGE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE, SIDE_EDGE + PIECE_HOLE_HEIGHT, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE, SIDE_EDGE + PIECE_HOLE_HEIGHT + MID_SIDE_GAP, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TOTAL_WIDTH - EDGE - PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE - PIECE_HOLE, SIDE_EDGE + PIECE_HOLE_HEIGHT, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE - PIECE_HOLE, SIDE_EDGE + PIECE_HOLE_HEIGHT + MID_SIDE_GAP, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE - PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
-		glVertex3f(TOTAL_WIDTH - EDGE * 2 - PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(TOTAL_WIDTH - EDGE * 2 - PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
 		/* inner edges (sides) */
 		glNormal3f(1, 0, 0);
-		glVertex3f(EDGE + LIFT_OFF, SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
-		glVertex3f(EDGE + LIFT_OFF, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
-		glVertex3f(EDGE * 2 + PIECE_HOLE + LIFT_OFF, SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
-		glVertex3f(EDGE * 2 + PIECE_HOLE + LIFT_OFF, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
+		glVertex3f(EDGE_WIDTH + LIFT_OFF, EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
+		glVertex3f(EDGE_WIDTH + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
+		glVertex3f(TRAY_WIDTH + LIFT_OFF, EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
+		glVertex3f(TRAY_WIDTH + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
 
 		glNormal3f(-1, 0, 0);
-		glVertex3f(TOTAL_WIDTH - EDGE + LIFT_OFF, SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
-		glVertex3f(TOTAL_WIDTH - EDGE + LIFT_OFF, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
-		glVertex3f(TOTAL_WIDTH - EDGE * 2 - PIECE_HOLE + LIFT_OFF, SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
-		glVertex3f(TOTAL_WIDTH - EDGE * 2 - PIECE_HOLE + LIFT_OFF, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + LIFT_OFF);
+		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + LIFT_OFF, EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
+		glVertex3f(TOTAL_WIDTH - EDGE_WIDTH + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + LIFT_OFF, EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
+		glVertex3f(TOTAL_WIDTH - TRAY_WIDTH + LIFT_OFF, TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH + LIFT_OFF);
 	glEnd();
 
 	glDisable(GL_BLEND);
@@ -1391,6 +1400,8 @@ void tidyEdges(BoardData* bd)
 
 void showMoveIndicator(BoardData* bd)
 {
+/* Used to draw sub-bits of arrow */
+#define ARROW_UNIT (ARROW_SIZE / 4.0f)
 	setMaterial(&bd->checkerMat[(bd->turn == 1)]);
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_TEXTURE_2D);
@@ -1399,16 +1410,16 @@ void showMoveIndicator(BoardData* bd)
 	if (!fClockwise)
 	{
 		if (bd->turn == 1)
-			glTranslatef(TOTAL_WIDTH - EDGE - PIECE_HOLE, (SIDE_EDGE - ARROW_SIZE) / 2.0f, BASE_HEIGHT + EDGE_DEPTH);
+			glTranslatef(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, (EDGE_HEIGHT - ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 		else
-			glTranslatef(TOTAL_WIDTH - EDGE - PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE + (SIDE_EDGE - ARROW_SIZE) / 2.0f, BASE_HEIGHT + EDGE_DEPTH);
+			glTranslatef(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT - ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 	}
 	else
 	{
 		if (bd->turn == 1)
-			glTranslatef(EDGE + PIECE_HOLE, (SIDE_EDGE + ARROW_SIZE) / 2.0f, BASE_HEIGHT + EDGE_DEPTH);
+			glTranslatef(TRAY_WIDTH - EDGE_WIDTH, (EDGE_HEIGHT + ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 		else
-			glTranslatef(EDGE + PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE + (SIDE_EDGE + ARROW_SIZE) / 2.0f, BASE_HEIGHT + EDGE_DEPTH);
+			glTranslatef(TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT + (EDGE_HEIGHT + ARROW_SIZE) / 2.0f, BASE_DEPTH + EDGE_DEPTH);
 		glRotatef(180, 0, 0, 1);
 	}
 	glBegin(GL_QUADS);
@@ -1465,27 +1476,27 @@ void drawTable(BoardData* bd)
 	setMaterial(&bd->boxMat);
 
 	/* Right edge */
-	drawBox(BOX_SPLITTOP, TOTAL_WIDTH - EDGE, 0, 0, EDGE, TOTAL_HEIGHT, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_SPLITTOP, TOTAL_WIDTH - EDGE_WIDTH, 0, 0, EDGE_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
 
 	/* Top + bottom edges and bar */
 	if (!rdAppearance.fHinges)
 	{
-		drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE, 0, 0, TOTAL_WIDTH - EDGE * 2, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
-		drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE, TOTAL_HEIGHT - SIDE_EDGE, 0, TOTAL_WIDTH - EDGE * 2, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE_WIDTH, 0, 0, TOTAL_WIDTH - EDGE_WIDTH * 2, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_NOSIDES | BOX_SPLITWIDTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0, TOTAL_WIDTH - EDGE_WIDTH * 2, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
 
-		drawBox(BOX_NOENDS | BOX_SPLITTOP, EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, SIDE_EDGE, BASE_HEIGHT, BAR_WIDTH, TOTAL_HEIGHT - SIDE_EDGE * 2, EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BAR_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, bd->boxMat.pTexture);
 	}
 	else
 	{
-		drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
-		drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - SIDE_EDGE, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_ALL, (TOTAL_WIDTH + HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
 
-		drawBox(BOX_NOENDS | BOX_SPLITTOP, EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, SIDE_EDGE, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - SIDE_EDGE * 2, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH + (BAR_WIDTH + HINGE_GAP) / 2.0f, EDGE_HEIGHT, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
 	}
 
 	/* Bear-off edge */
-	drawBox(BOX_NOENDS | BOX_SPLITTOP, TOTAL_WIDTH - (EDGE * 2 + PIECE_HOLE), SIDE_EDGE, BASE_HEIGHT, EDGE, TOTAL_HEIGHT - SIDE_EDGE * 2, EDGE_DEPTH, bd->boxMat.pTexture);
-	drawBox(BOX_NOSIDES, TOTAL_WIDTH - EDGE - PIECE_HOLE, SIDE_EDGE + PIECE_HOLE_HEIGHT, BASE_HEIGHT, PIECE_HOLE, MID_SIDE_GAP, EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_NOENDS | BOX_SPLITTOP, TOTAL_WIDTH - TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_NOSIDES, TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->boxMat.pTexture);
 
 	if (rdAppearance.fLabels)
 		drawNumbers(bd, 2);
@@ -1499,9 +1510,9 @@ void drawTable(BoardData* bd)
 		if ((bd->State == BOARD_OPENING) || (bd->State == BOARD_CLOSING))
 			boardAngle *= bd->perOpen;
 
-		glTranslatef(TOTAL_WIDTH / 2.0f, 0, BASE_HEIGHT + EDGE_DEPTH);
+		glTranslatef(TOTAL_WIDTH / 2.0f, 0, BASE_DEPTH + EDGE_DEPTH);
 		glRotatef(boardAngle, 0, 1, 0);
-		glTranslatef(-TOTAL_WIDTH / 2.0f, 0, -(BASE_HEIGHT + EDGE_DEPTH));
+		glTranslatef(-TOTAL_WIDTH / 2.0f, 0, -(BASE_DEPTH + EDGE_DEPTH));
 	}
 
 	if (rdAppearance.fHinges)
@@ -1530,19 +1541,19 @@ void drawTable(BoardData* bd)
 	}
 
 	/* Bear off tray */
-	drawBox(BOX_SPLITTOP, 0, 0, 0, EDGE, TOTAL_HEIGHT, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_SPLITTOP, 0, 0, 0, EDGE_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
 
 	if (rdAppearance.fHinges)
 	{	/* Top + bottom edges and bar */
-		drawBox(BOX_ALL, EDGE, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
-		drawBox(BOX_ALL, EDGE, TOTAL_HEIGHT - SIDE_EDGE, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_ALL, EDGE_WIDTH, 0, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_ALL, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT, 0, (TOTAL_WIDTH - HINGE_GAP) / 2.0f - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
 
-		drawBox(BOX_NOENDS | BOX_SPLITTOP, EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, SIDE_EDGE, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - SIDE_EDGE * 2, BASE_HEIGHT + EDGE_DEPTH, bd->boxMat.pTexture);
+		drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH + BOARD_WIDTH, EDGE_HEIGHT, 0, (BAR_WIDTH - HINGE_GAP) / 2.0f, TOTAL_HEIGHT - EDGE_HEIGHT * 2, BASE_DEPTH + EDGE_DEPTH, bd->boxMat.pTexture);
 	}
 
 	/* Bear-off edge */
-	drawBox(BOX_NOENDS | BOX_SPLITTOP, EDGE + PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT, EDGE, TOTAL_HEIGHT - SIDE_EDGE * 2, EDGE_DEPTH, bd->boxMat.pTexture);
-	drawBox(BOX_NOSIDES, EDGE, SIDE_EDGE + PIECE_HOLE_HEIGHT, BASE_HEIGHT, PIECE_HOLE, MID_SIDE_GAP, EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_NOENDS | BOX_SPLITTOP, TRAY_WIDTH - EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH, bd->boxMat.pTexture);
+	drawBox(BOX_NOSIDES, EDGE_WIDTH, TRAY_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, MID_SIDE_GAP_HEIGHT, EDGE_DEPTH, bd->boxMat.pTexture);
 
 	if (rdAppearance.fHinges)
 	{
@@ -1564,7 +1575,7 @@ void drawTable(BoardData* bd)
 	if (bd->State == BOARD_OPEN)
 		tidyEdges(bd);
 
-	if (bd->showIndicator)
+	if (rdAppearance.showMoveIndicator)
 		showMoveIndicator(bd);
 }
 
@@ -1590,50 +1601,51 @@ void drawPick(BoardData* bd)
 			glLoadName(12 - i);
 		else
 			glLoadName(i + 1);
-		drawRect(EDGE * 2 + PIECE_HOLE * (i + 1), SIDE_EDGE, BASE_HEIGHT, PIECE_HOLE, POINT_HEIGHT, 0);
+		drawRect(TRAY_WIDTH + PIECE_HOLE * i, EDGE_HEIGHT, BASE_DEPTH, PIECE_HOLE, POINT_HEIGHT, 0);
 
 		if (!fClockwise)
 			glLoadName(6 - i);
 		else
 			glLoadName(7 + i);
-		drawRect(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH + PIECE_HOLE * i, SIDE_EDGE, BASE_HEIGHT, PIECE_HOLE, POINT_HEIGHT, 0);
+		drawRect(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH + PIECE_HOLE * i, EDGE_HEIGHT, BASE_DEPTH, PIECE_HOLE, POINT_HEIGHT, 0);
 
 		if (!fClockwise)
 			glLoadName(24 - i);
 		else
 			glLoadName(13 + i);
-		drawRect(TOTAL_WIDTH - (EDGE * 2 + PIECE_HOLE) - (PIECE_HOLE * i), TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT, -PIECE_HOLE, -POINT_HEIGHT, 0);
+		drawRect(TOTAL_WIDTH - TRAY_WIDTH - (PIECE_HOLE * i), TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH, -PIECE_HOLE, -POINT_HEIGHT, 0);
 
 		if (!fClockwise)
 			glLoadName(18 - i);
 		else
 			glLoadName(19 + i);
-		drawRect(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH - (PIECE_HOLE * i), TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT, -PIECE_HOLE, -POINT_HEIGHT, 0);
+		drawRect(TRAY_WIDTH + BOARD_WIDTH - (PIECE_HOLE * i), TOTAL_HEIGHT - EDGE_HEIGHT, BASE_DEPTH, -PIECE_HOLE, -POINT_HEIGHT, 0);
 	}
 	/* bars + homes */
-	barHeight = (PIECE_HOLE + PIECE_GAP) * 4;
+	barHeight = (PIECE_HOLE + PIECE_GAP_HEIGHT) * 4;
 	glLoadName(25);
 	drawRect(TOTAL_WIDTH / 2.0f - PIECE_HOLE / 2.0f, TOTAL_HEIGHT / 2.0f - (DOUBLECUBE_SIZE / 2.0f + barHeight + PIECE_HOLE / 2.0f),
-			BASE_HEIGHT + EDGE_DEPTH, PIECE_HOLE, barHeight, 0);
+			BASE_DEPTH + EDGE_DEPTH, PIECE_HOLE, barHeight, 0);
 	glLoadName(0);
 	drawRect(TOTAL_WIDTH / 2.0f - PIECE_HOLE / 2.0f, TOTAL_HEIGHT / 2.0f + (DOUBLECUBE_SIZE / 2.0f + PIECE_HOLE / 2.0f),
-			BASE_HEIGHT + EDGE_DEPTH, PIECE_HOLE, barHeight, 0);
+			BASE_DEPTH + EDGE_DEPTH, PIECE_HOLE, barHeight, 0);
 
+	/* Home/unused trays depend on direction */
 	glLoadName((!fClockwise) ? 26 : POINT_UNUSED0);
-	drawRect(TOTAL_WIDTH - EDGE - PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT, PIECE_HOLE, POINT_HEIGHT, 0);
+	drawRect(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, 0);
 	glLoadName((fClockwise) ? 26 : POINT_UNUSED0);
-	drawRect(EDGE, SIDE_EDGE, BASE_HEIGHT, PIECE_HOLE, POINT_HEIGHT, 0);
+	drawRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, 0);
 
 	glLoadName((!fClockwise) ? 27 : POINT_UNUSED1);
-	drawRect(TOTAL_WIDTH - EDGE - PIECE_HOLE, TOTAL_HEIGHT - SIDE_EDGE - POINT_HEIGHT, BASE_HEIGHT, PIECE_HOLE, POINT_HEIGHT, 0);
+	drawRect(TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT - POINT_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, POINT_HEIGHT, 0);
 	glLoadName((fClockwise) ? 27 : POINT_UNUSED1);
-	drawRect(EDGE, TOTAL_HEIGHT - SIDE_EDGE - POINT_HEIGHT, BASE_HEIGHT, PIECE_HOLE, POINT_HEIGHT, 0);
+	drawRect(EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT - POINT_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, POINT_HEIGHT, 0);
 
 	/* Dice areas */
 	glLoadName(POINT_LEFT);
-	drawRect(EDGE * 2 + PIECE_HOLE, (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f, BASE_HEIGHT, DICE_AREA_WIDTH, DICE_AREA_HEIGHT, 0);
+	drawRect(TRAY_WIDTH, (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f, BASE_DEPTH, DICE_AREA_CLICK_WIDTH, DICE_AREA_HEIGHT, 0);
 	glLoadName(POINT_RIGHT);
-	drawRect(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f, BASE_HEIGHT, DICE_AREA_WIDTH, DICE_AREA_HEIGHT, 0);
+	drawRect(TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f, BASE_DEPTH, DICE_AREA_CLICK_WIDTH, DICE_AREA_HEIGHT, 0);
 
 	/* Dice */
 	if (fGUIDiceArea || !DiceBelowBoard(bd))
@@ -1699,7 +1711,7 @@ void getProjectedPos(int x, int y, float atDepth, float pos[3])
 
 void getProjectedPieceDragPos(int x, int y, float pos[3])
 {
-	getProjectedPos(x, y, BASE_HEIGHT + EDGE_DEPTH + DOUBLECUBE_SIZE + LIFT_OFF * 3, pos);
+	getProjectedPos(x, y, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE + LIFT_OFF * 3, pos);
 }
 
 void calculateBackgroundSize(BoardData *bd, int viewport[4])
@@ -1718,9 +1730,9 @@ void calculateBackgroundSize(BoardData *bd, int viewport[4])
 
 void getFlagPos(BoardData* bd, float v[3])
 {
-	v[0] = EDGE * 2.0f + PIECE_HOLE / 2.0f + BOARD_WIDTH / 2.0f;
+	v[0] = (TRAY_WIDTH + BOARD_WIDTH) / 2.0f;
 	v[1] = TOTAL_HEIGHT / 2.0f;
-	v[2] = BASE_HEIGHT + EDGE_DEPTH;
+	v[2] = BASE_DEPTH + EDGE_DEPTH;
 
 	if (bd->turn == -1)	/* Move to other side of board */
 		v[0] += BOARD_WIDTH + BAR_WIDTH;
@@ -1785,15 +1797,15 @@ void drawPointPick(BoardData* bd, int point)
 
 		glLoadName(0);
 		if (point > 12)
-			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] + (PIECE_HOLE / 2.0f) + PIECE_GAP - SPLIT_HEIGHT, pos[2], PIECE_HOLE, SPLIT_HEIGHT, 0);
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] + (PIECE_HOLE / 2.0f) + PIECE_GAP_HEIGHT - SPLIT_HEIGHT, pos[2], PIECE_HOLE, SPLIT_HEIGHT, 0);
 		else
 			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, SPLIT_HEIGHT, 0);
 
 		glLoadName(1);
 		if (point > 12)
-			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP - SPLIT_HEIGHT, 0);
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP_HEIGHT - SPLIT_HEIGHT, 0);
 		else
-			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f) + SPLIT_HEIGHT, pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP - SPLIT_HEIGHT, 0);
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f) + SPLIT_HEIGHT, pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP_HEIGHT - SPLIT_HEIGHT, 0);
 
 		for (i = 2; i < 6; i++)
 		{
@@ -1802,19 +1814,19 @@ void drawPointPick(BoardData* bd, int point)
 				break;
 			getPiecePos(point, i, fClockwise, pos);
 			glLoadName(i);
-			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP, 0);
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP_HEIGHT, 0);
 		}
 		/* extra bit */
 /*		glLoadName(i);
 		if (point > 12)
 		{
 			pos[1] = pos[1] - (PIECE_HOLE / 2.0f);
-			drawRect(pos[0] - (PIECE_HOLE / 2.0f), TOTAL_HEIGHT - SIDE_EDGE - POINT_HEIGHT, pos[2], PIECE_HOLE, pos[1] - (TOTAL_HEIGHT - SIDE_EDGE - POINT_HEIGHT), 0);
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), TOTAL_HEIGHT - EDGE_HEIGHT - POINT_HEIGHT, pos[2], PIECE_HOLE, pos[1] - (TOTAL_HEIGHT - EDGE_HEIGHT - POINT_HEIGHT), 0);
 		}
 		else
 		{
-			pos[1] = pos[1] + (PIECE_HOLE / 2.0f) + PIECE_GAP;
-			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1], pos[2], PIECE_HOLE, SIDE_EDGE + POINT_HEIGHT - pos[1], 0);
+			pos[1] = pos[1] + (PIECE_HOLE / 2.0f) + PIECE_GAP_HEIGHT;
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1], pos[2], PIECE_HOLE, EDGE_HEIGHT + POINT_HEIGHT - pos[1], 0);
 		}
 */	}
 }
@@ -1927,28 +1939,28 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 	/* Work out what obstacle needs to be avoided */
 	if ((fromBoard == 2 || fromBoard == 3) && (toBoard == 1 || toBoard == 4))
 	{	/* left side to right side */
-		obj1 = EDGE * 2.0f + PIECE_HOLE * 7;
+		obj1 = TRAY_WIDTH + BOARD_WIDTH;
 		obj2 = obj1 + BAR_WIDTH;
-		objHeight = BASE_HEIGHT + EDGE_DEPTH + DOUBLECUBE_SIZE;
+		objHeight = BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE;
 	}
  	else if ((fromBoard == 1 || fromBoard == 4) && (toBoard == 2 || toBoard == 3))
 	{	/* right side to left side */
-		obj2 = EDGE * 2.0f + PIECE_HOLE * 7;
+		obj2 = TRAY_WIDTH + BOARD_WIDTH;
 		obj1 = obj2 + BAR_WIDTH;
-		objHeight = BASE_HEIGHT + EDGE_DEPTH + DOUBLECUBE_SIZE;
+		objHeight = BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE;
 	}
 	else if ((fromBoard == 1 && toBoard == 4) || (fromBoard == 2 && toBoard == 3))
 	{	/* up same side */
 		obj1 = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f;
 		obj2 = (TOTAL_HEIGHT + DICE_AREA_HEIGHT) / 2.0f;
-		objHeight = BASE_HEIGHT + DICE_SIZE;
+		objHeight = BASE_DEPTH + DICE_SIZE;
 		yDir = 1;
 	}
 	else if ((fromBoard == 4 && toBoard == 1) || (fromBoard == 3 && toBoard == 2))
 	{	/* down same side */
 		obj1 = (TOTAL_HEIGHT + DICE_AREA_HEIGHT) / 2.0f;
 		obj2 = (TOTAL_HEIGHT - DICE_AREA_HEIGHT) / 2.0f;
-		objHeight = BASE_HEIGHT + DICE_SIZE;
+		objHeight = BASE_DEPTH + DICE_SIZE;
 		yDir = 1;
 	}
 	else if (fromBoard == toBoard)
@@ -1965,8 +1977,9 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 				toPoint--;
 			else
 				fromPoint--;
-			fromPoint = 13 - fromPoint;
-			toPoint = 13 - toPoint;
+
+			fromPoint = 12 - fromPoint;
+			toPoint = 12 - toPoint;
 		}
 		else
 		{
@@ -1980,18 +1993,18 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 				fromPoint++;
 			else
 				toPoint++;
-			fromPoint = fromPoint - 12;
-			toPoint = toPoint - 12;
+			fromPoint = fromPoint - 13;
+			toPoint = toPoint - 13;
 		}
-		obj1 = EDGE * 2.0f + PIECE_HOLE * fromPoint;
-		obj2 = EDGE * 2.0f + PIECE_HOLE * toPoint;
+		obj1 = TRAY_WIDTH + PIECE_HOLE * fromPoint;
+		obj2 = TRAY_WIDTH + PIECE_HOLE * toPoint;
 		if ((fromBoard == 1) || (fromBoard == 4))
 		{
 			obj1 += BAR_WIDTH;
 			obj2 += BAR_WIDTH;
 		}
 
-		objHeight = BASE_HEIGHT + PIECE_HEIGHT * 3;
+		objHeight = BASE_DEPTH + PIECE_DEPTH * 3;
 	}
 	else
 	{
@@ -1999,54 +2012,68 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 		{	/* Move from bar */
 			if (!fClockwise)
 			{
-				obj1 = EDGE * 2.0f + PIECE_HOLE * 7 + BAR_WIDTH;
+				obj1 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH;
 				if (fromPoint == 0)
-					obj2 = EDGE * 2.0f + BAR_WIDTH + PIECE_HOLE * (toPoint - 13);
+				{
+					obj2 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH;
+					if (toPoint > 20)
+						obj2 += PIECE_HOLE * (toPoint - 20);
+				}
 				else
-					obj2 = EDGE * 2.0f + BAR_WIDTH + PIECE_HOLE * (13 - toPoint);
+				{
+					obj2 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH;
+					if (toPoint < 5)
+						obj2 += PIECE_HOLE * (5 - toPoint);
+				}
 			}
 			else
 			{
-				obj1 = EDGE * 2.0f + PIECE_HOLE * 7;
+				obj1 = TRAY_WIDTH + BOARD_WIDTH;
 				if (fromPoint == 0)
-					obj2 = EDGE * 2.0f + PIECE_HOLE * (26 - toPoint);
+				{
+					obj2 = TRAY_WIDTH + PIECE_HOLE * (25 - toPoint);
+					if (toPoint > 19)
+						obj2 += PIECE_HOLE;
+				}
 				else
-					obj2 = EDGE * 2.0f + PIECE_HOLE * (toPoint + 1);
+				{
+					obj2 = TRAY_WIDTH + PIECE_HOLE * toPoint;
+					if (toPoint < 6)
+						obj2 += PIECE_HOLE;
+				}
 			}
-			objHeight = BASE_HEIGHT + EDGE_DEPTH + DOUBLECUBE_SIZE;
+			objHeight = BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE;
 		}
 		else
 		{	/* Move home */
 			if (!fClockwise)
 			{
 				if (toPoint == 26)
-					obj1 = EDGE * 2.0f + BAR_WIDTH + PIECE_HOLE * (14 - fromPoint);
+					obj1 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH + PIECE_HOLE * (7 - fromPoint);
 				else /* (toPoint == 27) */
-					obj1 = EDGE * 2.0f + BAR_WIDTH + PIECE_HOLE * (fromPoint - 11);
+					obj1 = TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH + PIECE_HOLE * (fromPoint - 18);
 			}
 			else
 			{
 				if (toPoint == 26)
-					obj1 = EDGE * 2.0f + PIECE_HOLE * (fromPoint);
+					obj1 = TRAY_WIDTH + PIECE_HOLE * (fromPoint - 1);
 				else /* (toPoint == 27) */
-					obj1 = EDGE * 2.0f + PIECE_HOLE * (25 - fromPoint);
+					obj1 = TRAY_WIDTH + PIECE_HOLE * (24 - fromPoint);
 			}
 
 			if (!fClockwise)
-				obj2 = TOTAL_WIDTH - EDGE - PIECE_HOLE;
+				obj2 = TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH;
 			else
-				obj2 = EDGE + PIECE_HOLE;
+				obj2 = TRAY_WIDTH - EDGE_WIDTH;
 
-//			if (toPoint == 26)
-//				end[1] -= PIECE_HEIGHT;
 			*pRotate = 0;
-			objHeight = BASE_HEIGHT + EDGE_DEPTH + DICE_SIZE;
+			objHeight = BASE_DEPTH + EDGE_DEPTH + DICE_SIZE;
 		}
 	}
 	if ((fromBoard == 3 && toBoard == 4) || (fromBoard == 4 && toBoard == 3))
 	{	/* Special case when moving along top of board */
 		if ((bd->cube_owner != 1) && (fromDepth <= 2) && (toDepth <= 2))
-			objHeight = BASE_HEIGHT + EDGE_DEPTH + PIECE_HEIGHT;
+			objHeight = BASE_DEPTH + EDGE_DEPTH + PIECE_DEPTH;
 	}
 
 	/* Now setup path object */
@@ -2174,6 +2201,13 @@ void setupDicePath(int num, float stepSize, Path* p, BoardData* bd)
 
 void randomDiceRotation(Path* p, DiceRotation* diceRotation, int dir)
 {
+/* Dice rotation range values */
+#define XROT_MIN 1
+#define XROT_RANGE 1.5f
+
+#define YROT_MIN -.5f
+#define YROT_RANGE 1
+
 	diceRotation->xRotFactor = XROT_MIN + randRange(XROT_RANGE);
 	diceRotation->xRotStart = 1 - (p->pts[p->numSegments][0] - p->pts[0][0]) * diceRotation->xRotFactor;
 	diceRotation->xRot = diceRotation->xRotStart * 360;
@@ -2191,12 +2225,15 @@ void randomDiceRotation(Path* p, DiceRotation* diceRotation, int dir)
 
 void setupDicePaths(BoardData* bd, Path dicePaths[2])
 {
+	int firstDie = (bd->turn == 1);
 	int dir = (bd->turn == 1) ? -1 : 1;
-	setupDicePath(0, dir * DICE_STEP_SIZE0, &dicePaths[0], bd);
-	setupDicePath(1, dir * DICE_STEP_SIZE1, &dicePaths[1], bd);
 
-	randomDiceRotation(&dicePaths[0], &bd->diceRotation[0], dir);
-	randomDiceRotation(&dicePaths[1], &bd->diceRotation[1], dir);
+	setupDicePath(firstDie, dir * DICE_STEP_SIZE0, &dicePaths[firstDie], bd);
+	setupDicePath(!firstDie, dir * DICE_STEP_SIZE1, &dicePaths[!firstDie], bd);
+
+	randomDiceRotation(&dicePaths[firstDie], &bd->diceRotation[firstDie], dir);
+	randomDiceRotation(&dicePaths[!firstDie], &bd->diceRotation[!firstDie], dir);
+
 	copyPoint(bd->diceMovingPos[0], dicePaths[0].pts[0]);
 	copyPoint(bd->diceMovingPos[1], dicePaths[1].pts[0]);
 }
@@ -2208,20 +2245,22 @@ void setDicePos(BoardData* bd)
 	int iter = 0;
 	float dist;
 	float orgX[2];
-	float firstX = (DICE_STEP_SIZE0 * 3 + DICE_SIZE / 2.0f);
-	bd->dicePos[0][0] = firstX + randRange(DICE_AREA_WIDTH - firstX - DICE_SIZE * 2);
-	bd->dicePos[0][1] = randRange(DICE_AREA_HEIGHT);
+	float firstX = TRAY_WIDTH + DICE_STEP_SIZE0 * 3 + DICE_SIZE * .75f;
+	int firstDie = (bd->turn == 1);
+
+	bd->dicePos[firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - DICE_SIZE * 2);
+	bd->dicePos[firstDie][1] = randRange(DICE_AREA_HEIGHT);
 
 	do	/* insure dice are not too close together */
 	{
-		firstX = bd->dicePos[0][0] + DICE_SIZE;
-		bd->dicePos[1][0] = firstX + randRange(DICE_AREA_WIDTH - firstX - DICE_SIZE * .7f);
-		bd->dicePos[1][1] = randRange(DICE_AREA_HEIGHT);
+		firstX = bd->dicePos[firstDie][0] + DICE_SIZE;
+		bd->dicePos[!firstDie][0] = firstX + randRange(BOARD_WIDTH + TRAY_WIDTH - firstX - DICE_SIZE * .7f);
+		bd->dicePos[!firstDie][1] = randRange(DICE_AREA_HEIGHT);
 
-		orgX[0] = bd->dicePos[0][0] - DICE_STEP_SIZE0 * 5;
-		orgX[1] = bd->dicePos[1][0] - DICE_STEP_SIZE1 * 5;
+		orgX[0] = bd->dicePos[firstDie][0] - DICE_STEP_SIZE0 * 5;
+		orgX[1] = bd->dicePos[!firstDie][0] - DICE_STEP_SIZE1 * 5;
 		dist = (float)sqrt((orgX[1] - orgX[0]) * (orgX[1] - orgX[0])
-				+ (bd->dicePos[1][1] - bd->dicePos[0][1]) * (bd->dicePos[1][1] - bd->dicePos[0][1]));
+				+ (bd->dicePos[!firstDie][1] - bd->dicePos[firstDie][1]) * (bd->dicePos[!firstDie][1] - bd->dicePos[firstDie][1]));
 
 		if (++iter > 20)
 		{	/* Trouble placing 2nd dice - replace 1st dice */
@@ -2231,16 +2270,8 @@ void setDicePos(BoardData* bd)
 	}
 	while (dist < DICE_SIZE * 1.1f);
 
-	bd->dicePos[0][2] = (float)(rand() % 360);
-	bd->dicePos[1][2] = (float)(rand() % 360);
-
-	if (bd->turn == 1)	/* Swap dice on right side */
-	{
-		float temp[3];
-		copyPoint(temp, bd->dicePos[0]);
-		copyPoint(bd->dicePos[0], bd->dicePos[1]);
-		copyPoint(bd->dicePos[1], temp);
-	}
+	bd->dicePos[firstDie][2] = (float)(rand() % 360);
+	bd->dicePos[!firstDie][2] = (float)(rand() % 360);
 
 	updateDiceOccPos(bd);
 }
@@ -2281,7 +2312,7 @@ typedef struct _viewArea
 } viewArea;
 
 void initViewArea(viewArea* pva)
-{	/* Initialize values to extreme */
+{	/* Initialize values to extremes */
 	pva->top = -base_unit * 1000;
 	pva->bottom = base_unit * 1000;
 	pva->width = 0;
@@ -2350,7 +2381,13 @@ void workOutWidth(viewArea* pva, float halfRadianFOV, float boardRadAngle, float
 		pva->width = p[0] * 2;
 }
 
-extern char statusString[128];
+float GetFOVAngle()
+{
+	float temp = rdAppearance.boardAngle / 20.0f;
+	float skewFactor = (rdAppearance.testSkewFactor / 100.0f) * (4 - .6f) + .6f;
+	/* Magic numbers to normalize viewing distance */
+	return (47 - 2.3f * temp * temp) / skewFactor;
+}
 
 void SetupPerspVolume(BoardData* bd, int viewport[4])
 {
@@ -2364,8 +2401,8 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 	viewArea va;
 	initViewArea(&va);
 
-	boardRadAngle = (bd->boardAngle * PI) / 180.0f;
-	halfRadianFOV = ((bd->fovAngle * PI) / 180.0f) / 2.0f;
+	boardRadAngle = (rdAppearance.boardAngle * PI) / 180.0f;
+	halfRadianFOV = ((GetFOVAngle() * PI) / 180.0f) / 2.0f;
 
 	if (aspectRatio < .5f)
 	{
@@ -2378,30 +2415,30 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 
 	/* Sort out viewing area */
 	addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, 0);
-	addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, BASE_HEIGHT + EDGE_DEPTH);
+	addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
 
 	if (fGUIDiceArea)
 	{
 		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + DICE_SIZE, 0);
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + DICE_SIZE, BASE_HEIGHT + DICE_SIZE);
+		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + DICE_SIZE, BASE_DEPTH + DICE_SIZE);
 	}
 	else
 	{	/* Bottom edge is defined by board */
 		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, 0);
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, BASE_HEIGHT + EDGE_DEPTH);
+		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
 	}
 
 	if (!bd->doubled)
 	{
 		if (bd->cube_owner == 1)
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - SIDE_EDGE), BASE_HEIGHT + EDGE_DEPTH + DOUBLECUBE_SIZE);
+			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
 		if (bd->cube_owner == -1)
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH + DOUBLECUBE_SIZE);
+			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
 	}
 
 	p[0] = getBoardWidth() / 2;
 	p[1] = getBoardHeight() / 2;
-	p[2] = BASE_HEIGHT + EDGE_DEPTH;
+	p[2] = BASE_DEPTH + EDGE_DEPTH;
 	workOutWidth(&va, halfRadianFOV, boardRadAngle, aspectRatio, p);
 
 	fovScale = zNear * (float)tan(halfRadianFOV);
@@ -2426,13 +2463,12 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 	/* Zoom back so image fills window */
 	zoom = (getViewAreaHeight(&va) / 2) / (float)tan(halfRadianFOV);
 	glTranslatef(0, 0, -zoom);
-//sprintf(statusString, "Zoom: %f ", zoom);
 
 	/* Offset from centre because of perspective */
 	glTranslatef(0, getViewAreaHeight(&va) / 2 + va.bottom, 0);
 
 	/* Rotate board */
-	glRotatef(bd->boardAngle, -1, 0, 0);
+	glRotatef((float)rdAppearance.boardAngle, -1, 0, 0);
 
 	/* Origin is bottom left, so move from centre */
 	glTranslatef(-(getBoardWidth() / 2.0f), -((getBoardHeight()) / 2.0f), 0);
@@ -2629,7 +2665,7 @@ void updateMovingPieceOccPos(BoardData* bd)
 			float id[4][4];
 
 			Occluders[LAST_PIECE].rotator = 1;
-			Occluders[LAST_PIECE].rot[1] = -90 * bd->rotateMovingPiece * bd->direction;
+			Occluders[LAST_PIECE].rot[1] = -90 * bd->rotateMovingPiece * bd->turn;
 			makeInverseTransposeMatrix(id, Occluders[LAST_PIECE].trans);
 			makeInverseRotateMatrixX(Occluders[LAST_PIECE].invMat, Occluders[LAST_PIECE].rot[1]);
 			matrixmult(Occluders[LAST_PIECE].invMat, id);
@@ -2731,20 +2767,20 @@ void updateOccPos(BoardData* bd)
 	updatePieceOccPos(bd);
 }
 
-void make_model(BoardData* bd)
+void MakeShadowModel(BoardData* bd)
 {
 	int i;
 
 	TidyShadows();
 
 	initOccluder(&Occluders[OCC_BOARD]);
-	addClosedSquare(&Occluders[OCC_BOARD], EDGE, SIDE_EDGE, BASE_HEIGHT, PIECE_HOLE, PIECE_HOLE_HEIGHT, EDGE_DEPTH);
-	addClosedSquare(&Occluders[OCC_BOARD], EDGE, SIDE_EDGE + PIECE_HOLE_HEIGHT + MID_SIDE_GAP, BASE_HEIGHT, PIECE_HOLE, PIECE_HOLE_HEIGHT, EDGE_DEPTH);
-	addClosedSquare(&Occluders[OCC_BOARD], TOTAL_WIDTH - EDGE - PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT, PIECE_HOLE, PIECE_HOLE_HEIGHT, EDGE_DEPTH);
-	addClosedSquare(&Occluders[OCC_BOARD], TOTAL_WIDTH - EDGE - PIECE_HOLE, SIDE_EDGE + PIECE_HOLE_HEIGHT + MID_SIDE_GAP, BASE_HEIGHT, PIECE_HOLE, PIECE_HOLE_HEIGHT, EDGE_DEPTH);
-	addClosedSquare(&Occluders[OCC_BOARD], EDGE * 2 + PIECE_HOLE, SIDE_EDGE, BASE_HEIGHT, BOARD_WIDTH, TOTAL_HEIGHT - SIDE_EDGE * 2, EDGE_DEPTH);
-	addClosedSquare(&Occluders[OCC_BOARD], EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, SIDE_EDGE, BASE_HEIGHT, BOARD_WIDTH, TOTAL_HEIGHT - SIDE_EDGE * 2, EDGE_DEPTH);
-	addSquare(&Occluders[OCC_BOARD], 0, 0, 0, TOTAL_WIDTH, TOTAL_HEIGHT, BASE_HEIGHT + EDGE_DEPTH);
+	addClosedSquare(&Occluders[OCC_BOARD], EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, EDGE_DEPTH);
+	addClosedSquare(&Occluders[OCC_BOARD], EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, EDGE_DEPTH);
+	addClosedSquare(&Occluders[OCC_BOARD], TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, EDGE_DEPTH);
+	addClosedSquare(&Occluders[OCC_BOARD], TOTAL_WIDTH - TRAY_WIDTH + EDGE_WIDTH, TRAY_HEIGHT + MID_SIDE_GAP_HEIGHT, BASE_DEPTH, TRAY_WIDTH - EDGE_WIDTH * 2, TRAY_HEIGHT - EDGE_HEIGHT, EDGE_DEPTH);
+	addClosedSquare(&Occluders[OCC_BOARD], TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH);
+	addClosedSquare(&Occluders[OCC_BOARD], TRAY_WIDTH + BOARD_WIDTH + BAR_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, EDGE_DEPTH);
+	addSquare(&Occluders[OCC_BOARD], 0, 0, 0, TOTAL_WIDTH, TOTAL_HEIGHT, BASE_DEPTH + EDGE_DEPTH);
 
 	setIdMatrix(Occluders[OCC_BOARD].invMat);
 	Occluders[OCC_BOARD].trans[0] = Occluders[OCC_BOARD].trans[1] = Occluders[OCC_BOARD].trans[2] = 0;
@@ -2755,7 +2791,7 @@ void make_model(BoardData* bd)
 	addHalfTube(&Occluders[OCC_HINGE1], HINGE_WIDTH, HINGE_HEIGHT, rdAppearance.curveAccuracy / 2);
 
 	Occluders[OCC_HINGE1].trans[0] = Occluders[OCC_HINGE2].trans[0] = (TOTAL_WIDTH) / 2.0f;
-	Occluders[OCC_HINGE1].trans[2] = Occluders[OCC_HINGE2].trans[2] = BASE_HEIGHT + EDGE_DEPTH;
+	Occluders[OCC_HINGE1].trans[2] = Occluders[OCC_HINGE2].trans[2] = BASE_DEPTH + EDGE_DEPTH;
 	Occluders[OCC_HINGE1].trans[1] = ((TOTAL_HEIGHT / 2.0f) - HINGE_HEIGHT) / 2.0f;
 	Occluders[OCC_HINGE2].trans[1] = ((TOTAL_HEIGHT / 2.0f) - HINGE_HEIGHT + TOTAL_HEIGHT) / 2.0f;
 
@@ -2770,16 +2806,17 @@ void make_model(BoardData* bd)
 	updateCubeOccPos(bd);
 
 	initOccluder(&Occluders[OCC_DICE1]);
-	addCubeCentered(&Occluders[OCC_DICE1], 0, 0, 0, DICE_SIZE * .86f, DICE_SIZE * .86f, DICE_SIZE * .86f);
+	addDice(&Occluders[OCC_DICE1], DICE_SIZE / 2.0f);
 	copyOccluder(&Occluders[OCC_DICE1], &Occluders[OCC_DICE2]);
 	Occluders[OCC_DICE1].rotator = Occluders[OCC_DICE2].rotator = 1;
+	updateDiceOccPos(bd);
 
 	initOccluder(&Occluders[OCC_PIECE]);
 	{
 		float radius = PIECE_HOLE / 2.0f;
 		float discradius = radius * 0.8f;
 		float lip = radius - discradius;
-		float height = PIECE_HEIGHT - 2 * lip;
+		float height = PIECE_DEPTH - 2 * lip;
 
 		addCylinder(&Occluders[OCC_PIECE], 0, 0, lip, PIECE_HOLE / 2.0f, height, rdAppearance.curveAccuracy);
 	}
@@ -2818,7 +2855,7 @@ void preDrawThings(BoardData* bd)
 	preDrawPiece(bd, transparentPieces);
 	preDrawDice(bd);
 
-	make_model(bd);
+	MakeShadowModel(bd);
 }
 
 void TidyShadows()
@@ -2833,7 +2870,7 @@ void TidyShadows()
 
 void SetShadowDimness3d()
 {
-	dim = (pCurBoard->LightDiffuse * (100 - rdAppearance.shadowDarkness)) / 100;
+	dim = ((rdAppearance.lightLevels[1] / 100.0f) * (100 - rdAppearance.shadowDarkness)) / 100;
 }
 
 void RotateClosingBoard(BoardData* bd)
@@ -2844,14 +2881,14 @@ void RotateClosingBoard(BoardData* bd)
 
 	glPopMatrix();
 
-	glClearColor(bd->backGroundMat.ambientColour[0], pCurBoard->backGroundMat.ambientColour[1], pCurBoard->backGroundMat.ambientColour[2], 0);
+	glClearColor(bd->backGroundMat.ambientColour[0], bd->backGroundMat.ambientColour[1], bd->backGroundMat.ambientColour[2], 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if ((pCurBoard->State == BOARD_OPENING) || (pCurBoard->State == BOARD_CLOSING))
+	if ((bd->State == BOARD_OPENING) || (bd->State == BOARD_CLOSING))
 	{
-		rotAngle *= pCurBoard->perOpen;
-		trans *= pCurBoard->perOpen;
-		zoom *= pCurBoard->perOpen;
+		rotAngle *= bd->perOpen;
+		trans *= bd->perOpen;
+		zoom *= bd->perOpen;
 	}
 	glPushMatrix();
 	glTranslatef(0, -trans, zoom);

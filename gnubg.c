@@ -4683,8 +4683,6 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 
 extern void CommandSaveSettings( char *szParam ) {
-
-    char szTemp[ 1024 ];
     FILE *pf;
     int i, cCache; 
     char *szFile;

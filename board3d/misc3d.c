@@ -28,6 +28,7 @@
 #include <GL/glu.h>
 #include "inc3d.h"
 #include "shadow.h"
+#include "renderprefs.h"
 
 extern void BuildFont();
 extern void setupFlag();
@@ -61,7 +62,7 @@ void CheckNormal()
 
 extern float (*light_position)[4];
 
-void SetupLight(BoardData * bd)
+void SetupLight3d(BoardData * bd)
 {
 	/* Ugly - store shadow light position here... 
 		This is because this position needs to be adjusted (below) */
@@ -71,7 +72,8 @@ void SetupLight(BoardData * bd)
 	/* Shadow light position */
 	light_position = &lp;
 
-	memcpy(lp, bd->LightPosition, sizeof (float[4]));
+	memcpy(lp, rdAppearance.lightPos, sizeof (float[3]));
+	lp[3] = (float)(rdAppearance.lightType == LT_POSITIONAL);
 
 	/* If directioinal vector is from origin */
 	if (lp[3] == 0)
@@ -81,15 +83,15 @@ void SetupLight(BoardData * bd)
 	}
 	glLightfv(GL_LIGHT0, GL_POSITION, lp);
 
-	al[0] = al[1] = al[2] = bd->LightAmbient;
+	al[0] = al[1] = al[2] = rdAppearance.lightLevels[0] / 100.0f;
 	al[3] = 1;
 	glLightfv(GL_LIGHT0, GL_AMBIENT, al);
 
-	dl[0] = dl[1] = dl[2] = bd->LightDiffuse;
+	dl[0] = dl[1] = dl[2] = rdAppearance.lightLevels[1] / 100.0f;
 	dl[3] = 1;
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, dl);
 
-	sl[0] = sl[1] = sl[2] = bd->LightSpecular;
+	sl[0] = sl[1] = sl[2] = rdAppearance.lightLevels[2] / 100.0f;
 	sl[3] = 1;
 	glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
 }
@@ -740,15 +742,15 @@ void SetColour(float r, float g, float b, float a)
 	setMaterial(&col);
 }
 
-void SetMovingPieceRotation(int pt)
+void SetMovingPieceRotation(BoardData* bd, int pt)
 {	/* Make sure piece is rotated correctly while dragging */
-	pCurBoard->movingPieceRotation = pCurBoard->pieceRotation[pt][abs(pCurBoard->points[pt])];
+	bd->movingPieceRotation = bd->pieceRotation[pt][abs(bd->points[pt])];
 }
 
-void PlaceMovingPieceRotation(int dest, int src)
+void PlaceMovingPieceRotation(BoardData* bd, int dest, int src)
 {	/* Make sure rotation is the correct in new position */
-	pCurBoard->pieceRotation[src][abs(pCurBoard->points[src])] = pCurBoard->pieceRotation[dest][abs(pCurBoard->points[dest] - 1)];
-	pCurBoard->pieceRotation[dest][abs(pCurBoard->points[dest]) - 1] = pCurBoard->movingPieceRotation;
+	bd->pieceRotation[src][abs(bd->points[src])] = bd->pieceRotation[dest][abs(bd->points[dest] - 1)];
+	bd->pieceRotation[dest][abs(bd->points[dest]) - 1] = bd->movingPieceRotation;
 }
 
 Path path, dicePaths[2];
@@ -776,100 +778,115 @@ void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])
 
 double animStartTime = 0;
 extern int animate_player, *animate_move_list, animation_finished;
+int stopNextTime;
 int slide_move;
 extern int convert_point( int i, int player );
 
-void SetupMove()
+void SetupMove(BoardData* bd)
 {
 	int destDepth;
     int target = convert_point( animate_move_list[slide_move], animate_player);
     int dest = convert_point( animate_move_list[slide_move + 1], animate_player);
     int dir = animate_player ? 1 : -1;
 
-	pCurBoard->points[target] -= dir;
+	bd->points[target] -= dir;
 
 	animStartTime = get_time();
 
-	destDepth = abs(pCurBoard->points[dest]) + 1;
-	if ((abs(pCurBoard->points[dest]) == 1) && (dir != SGN(pCurBoard->points[dest])))
+	destDepth = abs(bd->points[dest]) + 1;
+	if ((abs(bd->points[dest]) == 1) && (dir != SGN(bd->points[dest])))
 		destDepth--;
 
-	setupPath(pCurBoard, &path, &pCurBoard->rotateMovingPiece, fClockwise, target, abs(pCurBoard->points[target]) + 1, dest, destDepth);
-	copyPoint(pCurBoard->movingPos, path.pts[0]);
+	setupPath(bd, &path, &bd->rotateMovingPiece, fClockwise, target, abs(bd->points[target]) + 1, dest, destDepth);
+	copyPoint(bd->movingPos, path.pts[0]);
 
-	SetMovingPieceRotation(target);
+	SetMovingPieceRotation(bd, target);
 
-	updatePieceOccPos(pCurBoard);
+	updatePieceOccPos(bd);
 }
 
-int idleAnimate(void)
+int idleAnimate(BoardData* bd)
 {
 	float elapsedTime = (float)((get_time() - animStartTime) / 1000.0f);
 	float vel = .2f + nGUIAnimSpeed * .3f;
 	float animateDistance = elapsedTime * vel;
 
-	if (pCurBoard->moving)
+	if (stopNextTime)
+	{	/* Stop now - last animation frame has been drawn */
+		stopIdleFunc();
+		gtk_main_quit();
+		return 1;
+	}
+
+	if (bd->moving)
 	{
 		float *pRotate = 0;
-		if (pCurBoard->rotateMovingPiece != -1 && path.state == 2)
-			pRotate = &pCurBoard->rotateMovingPiece;
+		if (bd->rotateMovingPiece != -1 && path.state == 2)
+			pRotate = &bd->rotateMovingPiece;
 
-		if (!movePath(&path, animateDistance, pRotate, pCurBoard->movingPos))
+		if (!movePath(&path, animateDistance, pRotate, bd->movingPos))
 		{
+			int points[2][25];
 		    int moveStart = convert_point(animate_move_list[slide_move], animate_player);
 			int moveDest = convert_point(animate_move_list[slide_move + 1], animate_player);
 
-			if ((abs(pCurBoard->points[moveDest]) == 1) && (pCurBoard->turn != SGN(pCurBoard->points[moveDest])))
+			if ((abs(bd->points[moveDest]) == 1) && (bd->turn != SGN(bd->points[moveDest])))
 			{	// huff
-				if (pCurBoard->turn == 1)
-					pCurBoard->points[0]--;
+				if (bd->turn == 1)
+					bd->points[0]--;
 				else
-					pCurBoard->points[25]++;
-				pCurBoard->points[moveDest] = 0;
+					bd->points[25]++;
+				bd->points[moveDest] = 0;
 			}
 
-			pCurBoard->points[moveDest] += pCurBoard->turn;
+			bd->points[moveDest] += bd->turn;
 
-			PlaceMovingPieceRotation(moveDest, moveStart);
+			/* Update pip-count mid move */
+			read_board(bd, points);
+			update_pipcount(bd, points);
+
+			PlaceMovingPieceRotation(bd, moveDest, moveStart);
 
 			/* Next piece */
 			slide_move += 2;
 
 			if (slide_move >= 8 || animate_move_list[ slide_move ] < 0)
 			{	/* All done */
-				stopIdleFunc();
+				bd->moving = 0;
+				updatePieceOccPos(bd);
+				animation_finished = TRUE;
+				stopNextTime = 1;
 			}
 			else
-				SetupMove();
+				SetupMove(bd);
 
 			playSound( SOUND_CHEQUER );
 		}
 		else
-			updateMovingPieceOccPos(pCurBoard);
+			updateMovingPieceOccPos(bd);
 	}
 
-	if (pCurBoard->shakingDice)
+	if (bd->shakingDice)
 	{
 		if (!finishedPath(&dicePaths[0]))
-			updateDicePos(&dicePaths[0], &pCurBoard->diceRotation[0], animateDistance / 2.0f, pCurBoard->diceMovingPos[0]);
+			updateDicePos(&dicePaths[0], &bd->diceRotation[0], animateDistance / 2.0f, bd->diceMovingPos[0]);
 		if (!finishedPath(&dicePaths[1]))
-			updateDicePos(&dicePaths[1], &pCurBoard->diceRotation[1], animateDistance / 2.0f, pCurBoard->diceMovingPos[1]);
+			updateDicePos(&dicePaths[1], &bd->diceRotation[1], animateDistance / 2.0f, bd->diceMovingPos[1]);
 
 		if (finishedPath(&dicePaths[0]) && finishedPath(&dicePaths[1]))
 		{
-			stopIdleFunc();
-			return 1;
+			bd->shakingDice = 0;
+			stopNextTime = 1;
 		}
-
-		updateDiceOccPos(pCurBoard);
+		updateDiceOccPos(bd);
 	}
 
 	return 1;
 }
 
-void RollDice3d()
+void RollDice3d(BoardData *bd)
 {	/* animate the dice roll if not below board */
-	setDicePos(pCurBoard);
+	setDicePos(bd);
 
 	if (rdAppearance.animateRoll)
 	{
@@ -877,44 +894,46 @@ void RollDice3d()
 		SuspendInput( &m );
 		animStartTime = get_time();
 
-		pCurBoard->shakingDice = 1;
+		bd->shakingDice = 1;
+		stopNextTime = 0;
 		setIdleFunc(idleAnimate);
 
-		setupDicePaths(pCurBoard, dicePaths);
+		setupDicePaths(bd, dicePaths);
 		/* Make sure shadows are in correct place */
-		updateOccPos(pCurBoard);
+		updateOccPos(bd);
 
 		gtk_main();
 		ResumeInput( &m );
 	}
 }
 
-void AnimateMove3d()
+void AnimateMove3d(BoardData *bd)
 {
 	monitor m;
 	SuspendInput( &m );
 	slide_move = 0;
-	pCurBoard->moving = 1;
+	bd->moving = 1;
 
-	SetupMove();
+	SetupMove(bd);
 
+	stopNextTime = 0;
 	setIdleFunc(idleAnimate);
 	gtk_main();
 	ResumeInput( &m );
 }
 
-int idleWaveFlag(void)
+int idleWaveFlag(BoardData* bd)
 {
 	float elapsedTime = (float)(get_time() - animStartTime);
-	pCurBoard->flagWaved = elapsedTime / 200;
-	updateFlagOccPos(pCurBoard);
+	bd->flagWaved = elapsedTime / 200;
+	updateFlagOccPos(bd);
 	return 1;
 }
 
-void ShowFlag3d()
+void ShowFlag3d(BoardData *bd)
 {
-	pCurBoard->flagWaved = 0;
-	if (rdAppearance.animateFlag && pCurBoard->resigned)
+	bd->flagWaved = 0;
+	if (rdAppearance.animateFlag && bd->resigned)
 	{
 		animStartTime = get_time();
 		setIdleFunc(idleWaveFlag);
@@ -923,7 +942,7 @@ void ShowFlag3d()
 		stopIdleFunc();
 
 	waveFlag(0);
-	updateFlagOccPos(pCurBoard);
+	updateFlagOccPos(bd);
 }
 
 #define PATH "Data//"
@@ -938,10 +957,10 @@ extern double animStartTime;
 
 #endif
 
-int idleCloseBoard(void)
+int idleCloseBoard(BoardData* bd)
 {
 	float elapsedTime = (float)(get_time() - animStartTime);
-	if (pCurBoard->State == BOARD_CLOSED)
+	if (bd->State == BOARD_CLOSED)
 	{	/* finished */
 		stopIdleFunc();
 		gtk_main_quit();
@@ -949,11 +968,11 @@ int idleCloseBoard(void)
 		return 1;
 	}
 
-	pCurBoard->perOpen = (elapsedTime / 3000);
-	if (pCurBoard->perOpen >= 1)
+	bd->perOpen = (elapsedTime / 3000);
+	if (bd->perOpen >= 1)
 	{
-		pCurBoard->perOpen = 1;
-		pCurBoard->State = BOARD_CLOSED;
+		bd->perOpen = 1;
+		bd->State = BOARD_CLOSED;
 	}
 
 	return 1;
@@ -971,7 +990,7 @@ void CloseBoard3d(BoardData* bd)
 	fClockwise = 0;
 
 	rdAppearance.showShadows = 0;
-	bd->showIndicator = 0;
+	rdAppearance.showMoveIndicator = 0;
 	rdAppearance.fLabels = 0;
 	bd->dice_roll[0] = 0;
 	bd->State = BOARD_CLOSING;
@@ -986,7 +1005,7 @@ void CloseBoard3d(BoardData* bd)
 			SetTexture(bd, &bd->logoMat, PATH"logo2.bmp");
 	}
 	animStartTime = get_time();
-	pCurBoard->perOpen = 0;
+	bd->perOpen = 0;
 	setIdleFunc(idleCloseBoard);
 	/* As idleCloseBoard assumes last matrix is on stack */
 	glPushMatrix();
@@ -994,12 +1013,12 @@ void CloseBoard3d(BoardData* bd)
 	gtk_main();
 }
 
-int MouseMove(int x, int y)
+int MouseMove(BoardData *bd, int x, int y)
 {
-	if (pCurBoard->drag_point >= 0)
+	if (bd->drag_point >= 0)
 	{
-		getProjectedPieceDragPos(x, y, pCurBoard->dragPos);
-		updateMovingPieceOccPos(pCurBoard);
+		getProjectedPieceDragPos(x, y, bd->dragPos);
+		updateMovingPieceOccPos(bd);
 		return 1;
 	}
 	else

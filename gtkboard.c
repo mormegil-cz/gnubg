@@ -1067,7 +1067,7 @@ gboolean place_chequer_or_revert(BoardData *bd,
 
 #if USE_BOARD3D
 	if (placed && rdAppearance.fDisplayType == DT_3D)
-		PlaceMovingPieceRotation(dest, bd->drag_point);
+		PlaceMovingPieceRotation(bd, dest, bd->drag_point);
 #endif
     return placed;
 }
@@ -1981,6 +1981,7 @@ static gint board_set( Board *board, const gchar *board_text,
     int old_resigned;
     int old_xResign, old_yResign;
     int old_turn;
+	int redrawNeeded = 0;
     
 #if __GNUC__
     int *match_settings[] = { &bd->match_to, &bd->score,
@@ -2175,6 +2176,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	bd->dice[ 1 ] != old_dice[ 1 ] ||
 	bd->dice_opponent[ 0 ] != old_dice[ 2 ] ||
 	bd->dice_opponent[ 1 ] != old_dice[ 3 ] ) {
+	redrawNeeded = 1;
 	if( bd->x_dice[ 0 ] > 0 ) {
 	    /* dice were visible before; now they're not */
 	    int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
@@ -2236,7 +2238,10 @@ static gint board_set( Board *board, const gchar *board_text,
 			{
 				/* Has been shaken, so roll dice (if not editing) */
 				if (old_dice[0] <= 0 && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->edit)))
-					RollDice3d();
+				{
+					RollDice3d(bd);
+					redrawNeeded = 0;
+				}
 			}
 #endif
     }
@@ -2246,7 +2251,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	return 0;
 
     if( bd->turn != old_turn )
-      board_invalidate_arrow( bd );
+	  redrawNeeded = 1;
 
     if( bd->doubled != old_doubled || 
         bd->cube != old_cube ||
@@ -2254,32 +2259,34 @@ static gint board_set( Board *board, const gchar *board_text,
 	cube_use != bd->cube_use || 
         bd->crawford_game != old_crawford ) {
 	int xCube, yCube;
+	redrawNeeded = 1;
 
 	bd->cube_owner = bd->opponent_can_double - bd->can_double;
 	bd->cube_use = cube_use;
 
 #if USE_BOARD3D
-if (rdAppearance.fDisplayType == DT_3D)
-	SetupViewingVolume3d();	/* Cube may be out of top of screen */
-else
+	if (rdAppearance.fDisplayType == DT_3D)
+		SetupViewingVolume3d();	/* Cube may be out of top of screen */
+	else
 #endif
 	{
 	/* erase old cube */
 	board_invalidate_rect( bd->drawing_area, old_xCube * rdAppearance.nSize,
-			       old_yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
-			       8 * rdAppearance.nSize, bd );
+				   old_yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
+				   8 * rdAppearance.nSize, bd );
 	
 	cube_position( bd, &xCube, &yCube, NULL );
 	/* draw new cube */
 	board_invalidate_rect( bd->drawing_area, xCube * rdAppearance.nSize,
-			       yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
-			       8 * rdAppearance.nSize, bd );
+				   yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
+				   8 * rdAppearance.nSize, bd );
 	}
-}
+	}
 
     if ( bd->resigned != old_resigned ) {
 	int xResign, yResign;
 
+	redrawNeeded = 1;
 	/* erase old resign */
 	board_invalidate_rect( bd->drawing_area, 
                                old_xResign * rdAppearance.nSize,
@@ -2296,7 +2303,7 @@ else
 			       8 * rdAppearance.nSize, bd );
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
-		ShowFlag3d();
+		ShowFlag3d(bd);
 #endif
     }
 
@@ -2316,20 +2323,24 @@ else
     }
 
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
+	if (rdAppearance.fDisplayType == DT_3D && redrawNeeded)
 		ShowBoard3d(bd);
 	else
 #endif
 	{
     for( i = 0; i < 28; i++ )
 	if( bd->points[ i ] != old_board[ i ] )
+	{
 	    board_invalidate_point( bd, i );
+	}
 
-    /* FIXME only redraw dice/cube if changed */
-    board_invalidate_dice( bd );
-    board_invalidate_cube( bd );
-    board_invalidate_resign( bd );
-    board_invalidate_arrow( bd );
+	if (redrawNeeded)
+	{
+	    board_invalidate_dice( bd );
+	    board_invalidate_cube( bd );
+	    board_invalidate_resign( bd );
+	    board_invalidate_arrow( bd );
+	}
 	}
 
     return 0;
@@ -2547,7 +2558,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
-		AnimateMove3d();
+		AnimateMove3d(board->board_data);
 	else
 #endif
 {    

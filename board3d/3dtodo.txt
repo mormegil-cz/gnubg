@@ -6,56 +6,64 @@ Display settings
 ----------------
 	* Change display settings options to allow 3d skin settings
 		Merge in with existing 2d settings?
-		Look at materials.h for sample colour settings
-	* Add other 3d settings too
-	* Add tooltips
+		(Look at materials.h for sample colour settings)
+
+	? Merge options/display and appearance/general+3d together?
+		Some of the options/display seem out of place
+		animation speed/type + dice below board
+
+	Setting appearance/general messy
+		Change bottom bits to 2d settings / or add a light setting tab?
+
+	* Change skin options to be similiar to windows selection?
+		i.e. two pages, one to select the skin and the other to vary settings
+		select items from drop down - or click on the screen
+
+	Add apply button to appearance dialog?
 
 Bugs
 ====
 
+* Play 2 moves each, go back to your last move in game record window, then resign the game
+ -> strange piece movement before resignation.
+	+ Doesn't work in 2d either
+
 Other things
 ============
 
-board angle/fov
-	Only calculate when they change (use cached values in glFrustrum)
-	Look at deriving fov angle from board angle/aspect to set zoom to consistient value
-		i.e. fix viewing distance - check board looks good at various angles
-	Workout/guess/iterate FOV angle calculation
-
 Tidy files
-	remove pCurBoard and use bd passed in throughout (or as much as poss)?
-
-	Look at base_unit usage
-		Vary board sizes + check things are ok
 	Merge button press code together
 		Split up big function at same time
 		Use separate messages too
-	Put animation effects in misc3d.c to a new file
+	Put animation effects in misc3d.c to a new file/check through files
 		+ Add stuff in widget.c too (or put animation stuff here)
-
-Update pip count between each move by computer
+	Remove test files from lib build (testgtkboard.c)
+		+ Remove initialization code (not needed from lib) - when in settings
+	Sort out dice_roll/dice/dice_opponent rubbish
 
 Add check for unaccellerated graphics under linux
+	+ build/use very simple example to test
+
+Add a few preset light positions
+	i.e. left of board, top of board, right of board, centre of board.
+
+Add tooltips for new options
+
+Move textures from data directory to boards or boards/3d or boards/textures
+	Add them to cvs (as binary files)
+
+Add proper accelerated check
 
 ----------------------------------------------------------
 
-Move textures from data directory to boards or boards/3d or boards/textures
-	Add to cvs
-
-Remove test files from lib build (testgtkboard.c)
-	+ Remove initialization code (not needed from lib) - when in settings
-
 Add gtk 1.3 option (via other gtk widget)
-
-Use show/hide indicator for 2d
-	- if there for 2d (is this checked in?)
-Add apply button to appearance dialog?
+	+ Test ok
 Blink move animatation - useful?
-
 FTGL uses C++
 Flag still waves if settings shown when resigning
-Fails to load (run) on my windows 98 box
+Fails to load (run) on my windows 98 box - freetype problem?
 
 Remove any build warnings
 Remove any g_prints/debug code
+remove pCurBoard as much as poss
 Check gnubg builds and runs without BOARD3D defined

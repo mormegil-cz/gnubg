@@ -278,29 +278,6 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
     else if( !strncasecmp( szParam, "translucent", c ) )
 	/* deprecated option "translucent"; ignore */
 	;
-#if USE_BOARD3D
-    else if( !strncasecmp( szParam, "boardshadows", c ) )
-		prd->showShadows = toupper( *szValue ) == 'Y';
-    else if( !strncasecmp( szParam, "shadowdarkness", c ) )
-	{
-		prd->shadowDarkness = atoi(szValue);
-		SetShadowDimness3d();
-	}
-    else if( !strncasecmp( szParam, "testskin", c ) )
-		prd->skin3d = atoi( szValue );
-    else if( !strncasecmp( szParam, "animateroll", c ) )
-		prd->animateRoll = toupper( *szValue ) == 'Y';
-    else if( !strncasecmp( szParam, "animateflag", c ) )
-		prd->animateFlag = toupper( *szValue ) == 'Y';
-    else if( !strncasecmp( szParam, "closeboard", c ) )
-		prd->closeBoardOnExit = toupper( *szValue ) == 'Y';
-    else if( !strncasecmp( szParam, "debugtime", c ) )
-		prd->debugTime = toupper( *szValue ) == 'Y';
-    else if( !strncasecmp( szParam, "boardtype", c ) )
-		prd->fDisplayType = *szValue == '2' ? DT_2D : DT_3D;
-    else if( !strncasecmp( szParam, "curveaccuracy", c ) )
-		prd->curveAccuracy = atoi( szValue );
-#endif
     else if( !strncasecmp( szParam, "labels", c ) )
 	/* labels=bool */
 	prd->fLabels = toupper( *szValue ) == 'Y';
@@ -376,7 +353,51 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 	else
 	    prd->rRound = 1.0 - rRound;
         PopLocale ();
-    } else if( c > 1 &&
+    }
+#if USE_BOARD3D
+    else if( !strncasecmp( szParam, "boardshadows", c ) )
+		prd->showShadows = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "shadowdarkness", c ) )
+	{
+		prd->shadowDarkness = atoi(szValue);
+		SetShadowDimness3d();
+	}
+    else if( !strncasecmp( szParam, "testskin", c ) )
+		prd->skin3d = atoi( szValue );
+    else if( !strncasecmp( szParam, "animateroll", c ) )
+		prd->animateRoll = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "animateflag", c ) )
+		prd->animateFlag = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "closeboard", c ) )
+		prd->closeBoardOnExit = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "debugtime", c ) )
+		prd->debugTime = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "boardtype", c ) )
+		prd->fDisplayType = *szValue == '2' ? DT_2D : DT_3D;
+    else if( !strncasecmp( szParam, "curveaccuracy", c ) )
+		prd->curveAccuracy = atoi( szValue );
+    else if( !strncasecmp( szParam, "lighttype", c ) )
+		prd->lightType = *szValue == 'p' ? LT_POSITIONAL : LT_DIRECTIONAL;
+    else if( !strncasecmp( szParam, "lightposx", c ) )
+		sscanf(szValue, "%f", &prd->lightPos[0]);
+    else if( !strncasecmp( szParam, "lightposy", c ) )
+		sscanf(szValue, "%f", &prd->lightPos[1]);
+    else if( !strncasecmp( szParam, "lightposz", c ) )
+		sscanf(szValue, "%f", &prd->lightPos[2]);
+    else if( !strncasecmp( szParam, "lightambient", c ) )
+		prd->lightLevels[0] = atoi(szValue);
+    else if( !strncasecmp( szParam, "lightdiffuse", c ) )
+		prd->lightLevels[1] = atoi(szValue);
+    else if( !strncasecmp( szParam, "lightspecular", c ) )
+		prd->lightLevels[2] = atoi(szValue);
+    else if( !strncasecmp( szParam, "moveindicator", c ) )
+		prd->showMoveIndicator = toupper(*szValue) == 'Y';
+    else if( !strncasecmp( szParam, "boardangle", c ) )
+		prd->boardAngle = atoi(szValue);
+    else if( !strncasecmp( szParam, "skewfactor", c ) )
+		prd->testSkewFactor = atoi(szValue);
+#endif
+	else if( c > 1 &&
 	       ( !strncasecmp( szParam, "chequers", c - 1 ) ||
 		 !strncasecmp( szParam, "checkers", c - 1 ) ) &&
 	       ( szParam[ c - 1 ] == '0' || szParam[ c - 1 ] == '1' ) )
@@ -440,15 +461,21 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
              "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
 #if USE_BOARD3D
-		 "boardtype=%c "
-		 "boardshadows=%c "
-		 "shadowdarkness=%d "
-		 "testskin=%d "
-		 "animateroll=%c "
-		 "animateflag=%c "
-		 "closeboard=%c "
-		 "debugTime=%c "
-		 "curveaccuracy=%d "
+		"boardtype=%c "
+		"boardshadows=%c "
+		"shadowdarkness=%d "
+		"testskin=%d "
+		"animateroll=%c "
+		"animateflag=%c "
+		"closeboard=%c "
+		"debugTime=%c "
+		"curveaccuracy=%d "
+		"lighttype=%c "
+		"lightposx=%f lightposy=%f lightposz=%f "
+		"lightambient=%d lightdiffuse=%d lightspecular=%d "
+		"moveindicator=%c "
+		"boardangle=%d "
+		"skewfactor=%d "
 #endif
 	     "labels=%c wood=%s hinges=%c "
 	     "light=%0.0f;%0.0f shape=%0.1f " 
@@ -477,6 +504,12 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->closeBoardOnExit ? 'y' : 'n',
 		prd->debugTime ? 'y' : 'n',
 		prd->curveAccuracy,
+		prd->lightType == LT_POSITIONAL ? 'p' : 'd',
+		prd->lightPos[0], prd->lightPos[1], prd->lightPos[2],
+		prd->lightLevels[0], prd->lightLevels[1], prd->lightLevels[2],
+		prd->showMoveIndicator ? 'y' : 'n',
+		prd->boardAngle,
+		prd->testSkewFactor,
 #endif
              /* labels ... */
              prd->fLabels ? 'y' : 'n',
