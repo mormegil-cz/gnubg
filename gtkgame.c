@@ -61,6 +61,10 @@
 #include <readline/readline.h>
 #endif
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include "glib.h"
 
 #include "analysis.h"
@@ -7645,8 +7649,100 @@ ShowManualWeb( gpointer *p, guint n, GtkWidget *pwEvent ) {
 static void
 ReportBug( gpointer *p, guint n, GtkWidget *pwEvent ) {
 
-  OpenURL( "http://savannah.gnu.org/bugs/?func=addbug&group=gnubg" );
+	char *pchOS = "109", sz[ 1024 ];
 
+#ifdef LINUX
+	/* Linux */
+	pchOS = "101";
+#else
+#ifdef SOLARIS
+	/* Solaris */
+	pchOS = "102";
+#else
+#ifdef FREEBSD
+	/* FreeBSD */
+	pchOS = "103";
+#else
+#ifdef __APPLE__
+	/* Mac OS X */
+	pchOS = "112";
+#else
+#ifdef WIN32
+
+	OSVERSIONINFO VersionInfo;
+
+	memset( &VersionInfo, 0, sizeof( OSVERSIONINFO ) );
+	VersionInfo.dwOSVersionInfoSize = sizeof( OSVERSIONINFO );
+	GetVersionEx( &VersionInfo );
+
+	switch ( VersionInfo.dwPlatformId ) {
+		case VER_PLATFORM_WIN32s:
+			break;
+		case VER_PLATFORM_WIN32_WINDOWS:
+		case VER_PLATFORM_WIN32_NT:
+			switch ( VersionInfo.dwMajorVersion ) {
+				case 3:
+					/* Windows  NT 3.51 */
+					pchOS = "106";
+					break;
+				case 4:
+					switch ( VersionInfo.dwMinorVersion ) {
+						case 0:
+							switch ( VersionInfo.dwPlatformId ) {
+								case VER_PLATFORM_WIN32_WINDOWS:
+									/* Windows  95 */
+									pchOS = "104";
+									break;
+								case VER_PLATFORM_WIN32_NT:
+									/* Windows NT 4.0 */
+									pchOS = "106";
+									break;
+							}
+							break;
+						case 10:
+							if ( VersionInfo.szCSDVersion[1] == 'A' )
+								/* Windows  98 SE */
+								pchOS = "110";
+							else
+								/* Windows  98 */
+								pchOS = "105";
+							break;
+						case 90:
+							/* Windows  Me */
+							pchOS = "105";
+							break;
+					}
+					break;
+				case 5:
+					switch ( VersionInfo.dwMinorVersion ) {
+						case 0:
+							/* Windows  2000 */
+							pchOS = "107";
+							break;
+						case 1:
+							/* Windows XP */
+							pchOS = "108";
+							break;
+						case 2:
+							/* Windows Server 2003 */
+							pchOS = "109";
+							break;
+					}
+					break;
+			}
+			break;
+	}
+#endif /* WIN32 */
+#endif /* __APPLE__ */
+#endif /* FREEBSD */
+#endif /* SOLARIS */
+#endif /* Linux */
+
+	sprintf( sz, "http:///savannah.gnu.org/bugs/?func=additem&group=gnubg"
+		     "&release_id="	"104"
+		     "&custom_tf1="	__DATE__
+		     "&platform_version_id=%s", pchOS );
+ 	OpenURL( sz );
 }
 
 

@@ -1,3 +1,8 @@
+Wed Nov 26 22:12:37 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkgame.c: when opening the bug report page in a browser window
+	make gnubg fill in its version, build date and the operating system
+
 Mon Nov 24 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Make sure preview appears if libxml not present
