@@ -6724,7 +6724,7 @@ extern void GTKShowVersion( void ) {
     
     gtk_box_pack_start( GTK_BOX( pwBox ), pwHBox, FALSE, FALSE, 0 );
 
-    for( i = 0; i < 5; i++ )
+    for( i = 0; i < 6; i++ )
 	gtk_container_add( GTK_CONTAINER( pwHBox ),
 			   gtk_label_new( TRANS( aszAuthors[ i ] ) ) );
     
