@@ -1,3 +1,8 @@
+Sat Dec  7 14:54:46 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* POTFILES.in: add new files.
+	* gnubg.pot, da.po, de.po, ja.po: refresh files.
+
 Fri Dec  6 11:18:13 2002  Gary Wong  <gtw@gnu.org>
 
 	* ja.po: New file (provided by Yoshito Takeuchi).
