@@ -1,3 +1,10 @@
+Mon Apr 10 14:13:37 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* makeweights.c (main): use binary mode on stdout, if possible,
+	to avoid problems on non-POSIX systems.
+	* eval.c (EvalInitialise): open gnubg.wd in binary mode, to
+ 	avoid problems on non-POSIX systems.
+
 Fri Apr  7 09:13:50 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* play.c (ComputerTurn): return a value after abort(), to pacify

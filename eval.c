@@ -337,7 +337,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 
     if( szWeightsBinary &&
 	( h = PathOpen( szWeightsBinary, szDir ) ) >= 0 &&
-	( pfWeights = fdopen( h, "r" ) ) ) {
+	( pfWeights = fdopen( h, "rb" ) ) ) {
 	if( fread( &r, sizeof r, 1, pfWeights ) < 1 ||
 	    r != WEIGHTS_MAGIC_BINARY ||
 	    fread( &r, sizeof r, 1, pfWeights ) < 1 ||

@@ -175,12 +175,9 @@ static int ComputerTurn( void ) {
 	return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
 
     default:
+	assert( FALSE );
+	return -1;
     }
-    
-    abort();
-    
-    /* never reached, but fussy compilers might want a return value anyway */
-    return -1;
 }
 
 /* Try to automatically bear off as many chequers as possible.  Only do it
