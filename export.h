@@ -115,7 +115,8 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      evalsetup *pes, cubeinfo *pci,
                      int fDouble, int fTake,
                      skilltype stDouble,
-                     skilltype stTake );
+                     skilltype stTake,
+                     const int fPrintAlerts );
 
 
 #endif
