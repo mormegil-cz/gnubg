@@ -1,3 +1,24 @@
+Wed Dec 15 15:25:23 1999  Joern Thyssen  <joern@thyssen.nu>
+
+        * userrng.c: New file. Template for a user supplied RNG,
+        includes code for fetching random numbers from www.random.org.
+
+        * gnubg.c: Added support for user and manual RNG.
+	Added function CommandShowRNG.
+	Fixed missing options to getopt_long
+	(option --tty did not work).
+
+	* dice.c: Added support for user and manual RNG.
+
+	* show.c: Added function CommandShowRNG.
+
+	* set.c: Added support for user and manual RNG.
+
+	* configure.in: Search for library 'dl' used for dynamic linking
+	of user RNG.
+
+	* config.h.in: Define HAVE_LIBDL
+
 Fri Dec 10 18:19:16 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c: Added lMatch and lGame data structures, and started
