@@ -1,3 +1,15 @@
+Sun Nov 24 11:16:54 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Enhanced support for bearoff databases.
+
+	* makebearoff.c: heavily modified to generate arbitrary bearoff
+	databases.
+	* bearoff.c: new file. Bearoff database API for gnubg.
+	* makebearoff1.c: generate file br1.c
+	* eval.c: many changes due to the new bearoff databases.
+	* gnubg.c: call to EvalInitialise changed.
+	* osr.c: call BearoffDist
+
 Sat Nov 23 22:12:37 2002  Gary Wong  <gtw@gnu.org>
 
 	* record.c (RecordReadItem, RecordWriteItem): Add locale-independent

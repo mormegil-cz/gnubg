@@ -58,6 +58,7 @@
 #include "matchid.h"
 #include "matchequity.h"
 #include "i18n.h"
+#include "bearoff.h"
 
 #if WIN32
 #define BINARY O_BINARY
@@ -263,11 +264,18 @@ static int anEscapes[ 0x1000 ];
 static int anEscapes1[ 0x1000 ];
 
 static neuralnet nnContact, nnRace, nnCrashed;
-unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
+
+#if 0
 static int fBearoffOS = -1;
 static int nBearoffOSPoints = -1;
 static int fBearoffOSND = FALSE;
-static int fBearoffHeuristic;
+#endif
+
+bearoffcontext *pbcOS = NULL;
+bearoffcontext *pbcTS = NULL;
+bearoffcontext *pbc1 = NULL;
+bearoffcontext *pbc2 = NULL;
+
 static cache cEval;
 static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
@@ -517,7 +525,8 @@ extern char *PathSearch( const char *szFile, const char *szDir ) {
 }
 
 /* Open a file for reading with the search path "(szDir):.:(PKGDATADIR)". */
-static int PathOpen( char *szFile, char *szDir, int f ) {
+extern int 
+PathOpen( const char *szFile, const char *szDir, const int f ) {
 
     int h, idFirstError = 0;
 #if __GNUC__
@@ -558,143 +567,6 @@ static int PathOpen( char *szFile, char *szDir, int f ) {
     return -1;
 }
 
-/* Make a plausible bearoff move (used to create approximate bearoff
-   database). */
-static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
-
-    int i, /* current die being played */
-	c, /* number of dice to play */
-	nMax, /* highest occupied point */
-	anDice[ 4 ],
-	n, /* point to play from */
-	j, iSearch, nTotal;
-
-    if( anRoll[ 0 ] == anRoll[ 1 ] ) {
-	/* doubles */
-	anDice[ 0 ] = anDice[ 1 ] = anDice[ 2 ] = anDice[ 3 ] = anRoll[ 0 ];
-	c = 4;
-    } else {
-	/* non-doubles */
-	assert( anRoll[ 0 ] > anRoll[ 1 ] );
-	
-	anDice[ 0 ] = anRoll[ 0 ];
-	anDice[ 1 ] = anRoll[ 1 ];
-	c = 2;
-    }
-
-    for( i = 0; i < c; i++ ) {
-	for( nMax = 5; nMax >= 0 && !anBoard[ nMax ]; nMax-- )
-	    ;
-
-	if( nMax < 0 )
-	    /* finished bearoff */
-	    break;
-    
-	if( anBoard[ anDice[ i ] - 1 ] ) {
-	    /* bear off exactly */
-	    n = anDice[ i ] - 1;
-	    goto move;
-	}
-
-	if( anDice[ i ] - 1 > nMax ) {
-	    /* bear off highest chequer */
-	    n = nMax;
-	    goto move;
-	}
-	
-	nTotal = anDice[ i ] - 1;
-	for( j = i + 1; j < c; j++ ) {
-	    nTotal += anDice[ j ];
-	    if( nTotal < 6 && anBoard[ nTotal ] ) {
-		/* there's a chequer we can bear off with subsequent dice;
-		   do it */
-		n = nTotal;
-		goto move;
-	    }
-	}
-
-	for( n = -1, iSearch = anDice[ i ]; iSearch <= nMax; iSearch++ )
-	    if( anBoard[ iSearch ] >= 2 && /* at least 2 on source point */
-		!anBoard[ iSearch - anDice[ i ] ] && /* dest empty */
-		( n == -1 || anBoard[ iSearch ] > anBoard[ n ] ) )
-		n = iSearch;
-	if( n >= 0 )
-	    goto move;
-
-	/* find the point with the most on it (or least on dest) */
-	for( iSearch = anDice[ i ]; iSearch <= nMax; iSearch++ )
-	    if( n == -1 || anBoard[ iSearch ] > anBoard[ n ] ||
-		( anBoard[ iSearch ] == anBoard[ n ] &&
-		  anBoard[ iSearch - anDice[ i ] ] <
-		  anBoard[ n - anDice[ i ] ] ) )
-		n = iSearch;
-
-    move:
-	assert( n >= 0 );
-	assert( anBoard[ n ] );
-	anBoard[ n ]--;
-
-	if( n >= anDice[ i ] )
-	    anBoard[ n - anDice[ i ] ]++;
-    }
-
-    return PositionBearoff( anBoard, 6 );
-}
-
-static void GenerateBearoff( unsigned char *p, int nId ) {
-
-    int i, iBest, anRoll[ 2 ], anBoard[ 6 ], aProb[ 32 ];
-    unsigned short us;
-
-    for( i = 0; i < 32; i++ )
-	aProb[ i ] = 0;
-    
-    for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
-	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
-	    PositionFromBearoff( anBoard, nId, 6 );
-	    iBest = HeuristicBearoff( anBoard, anRoll );
-
-	    assert( iBest >= 0 );
-	    assert( iBest < nId );
-	    
-	    if( anRoll[ 0 ] == anRoll[ 1 ] )
-		for( i = 0; i < 31; i++ )
-		    aProb[ i + 1 ] += p[ ( iBest << 6 ) | ( i << 1 ) ] +
-			( p[ ( iBest << 6 ) | ( i << 1 ) | 1 ] << 8 );
-	    else
-		for( i = 0; i < 31; i++ )
-		    aProb[ i + 1 ] += ( p[ ( iBest << 6 ) | ( i << 1 ) ] +
-			( p[ ( iBest << 6 ) | ( i << 1 ) | 1 ] << 8 ) ) << 1;
-	}
-
-    for( i = 0; i < 32; i++ ) {
-	us = ( aProb[ i ] + 18 ) / 36;
-	p[ ( nId << 6 ) | ( i << 1 ) ] = us & 0xFF;
-	p[ ( nId << 6 ) | ( i << 1 ) | 1 ] = us >> 8;
-    }
-}
-
-static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
-
-    unsigned char *p = malloc( DATABASE1_SIZE );
-    int i;
-    
-    if( !p )
-	return NULL;
-
-    p[ 0 ] = p[ 1 ] = 0xFF;
-    for( i = 2; i < 64; i++ )
-	p[ i ] = 0;
-
-    for( i = 1; i < 54264; i++ ) {
-	GenerateBearoff( p, i );
-	if( pfProgress && !( i % 1000 ) )
-	    pfProgress( i );
-    }
-
-    return p;
-}
-
 static void
 CreateWeights(int nSize)
 {
@@ -731,12 +603,10 @@ EvalShutdown ( void ) {
 
   /* close bearoff databases */
 
-  if ( fBearoffOS >= 0 ) {
-
-    if ( close ( fBearoffOS ) < 0 ) 
-      perror ( "huge bearoff database" );
-
-  }
+  BearoffClose ( pbc1 );
+  BearoffClose ( pbc2 );
+  BearoffClose ( pbcOS );
+  BearoffClose ( pbcTS );
 
   return 0;
 
@@ -744,12 +614,12 @@ EvalShutdown ( void ) {
 
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
-		char *szDatabase, char *szOSDatabase, 
+		int fNoBearoff, 
                 char *szDir, int nSize,
-		void (*pfProgress)( int ) )
-{
+		void (*pfProgress)( int ) ) {
+
     FILE *pfWeights;
-    int h, i, fReadWeights = FALSE, fMalloc = FALSE;
+    int h, i, fReadWeights = FALSE;
     char szFileVersion[ 16 ];
     float r;
     static int fInitialised = FALSE;
@@ -776,120 +646,36 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	fInitialised = TRUE;
     }
 
-    pBearoff1 = NULL;
-    
-    if( szDatabase ) {
+    if( ! fNoBearoff ) {
 
-        /* open huge bearoff database */
+      /* read one-sided db from gnubg.bd */
+      if ( ! ( pbc1 = BearoffInitBuiltin () ) )
+        pbc1 = BearoffInit ( NULL, NULL, BO_HEURISTIC, pfProgress );
 
-      if ( ( fBearoffOS = PathOpen ( szOSDatabase, 
-                                       szDir, BINARY ) ) >= 0 ) {
+      /* read two-sided db from gnubg.bd */
+      pbc2 = BearoffInit ( "gnubg_ts0.bd", szDir, 
+                           BO_IN_MEMORY | BO_MUST_BE_TWO_SIDED, NULL );
 
-        char sz[ 21 ];
+      if ( ! pbc2 )
+        fprintf ( stderr, 
+                  "\n***WARNING***\n\n" 
+                  "Note that gnubg does not use the gnubg.bd file.\n"
+                  "You should obtain the file gnubg_ts0.bd or generate\n"
+                  "it yourself using the program 'makebearoff'.\n"
+                  "You can generate the file with the command:\n"
+                  "makebearoff -t 6x6 > gnubg_ts0.bd\n"
+                  "You can also generate other bearoff databases; see\n"
+                  "README for more details\n\n" );
 
-        if ( read ( fBearoffOS, sz, 21 ) < 21 ) {
-          if ( errno )
-            perror ( szOSDatabase );
-          else {
-            fprintf ( stderr, _("%s: incomplete bearoff database\n"),
-                      szOSDatabase );
-            close ( fBearoffOS );
-            fBearoffOS = -1;
-          }
-        }
-        else {
-          nBearoffOSPoints = atoi ( sz );
-          if ( nBearoffOSPoints <= 6 || nBearoffOSPoints >= 24 ) {
-            fprintf ( stderr, _("%s: incomplete bearoff database\n"),
-                      szOSDatabase );
-            close ( fBearoffOS );
-            fBearoffOS = -1;
-          }
+      /* init one-sided db */
+      pbcOS = BearoffInit ( "gnubg_os.bd", szDir, BO_NONE, NULL );
 
-          fBearoffOSND = *(sz+5) == 'N';
+      /* init two-sided db */
+      pbcTS = BearoffInit ( "gnubg_ts.bd", szDir, BO_NONE, NULL );
 
-          if ( *(sz+3) != '1' && ! fBearoffOSND ) {
-            fprintf ( stderr, 
-                      _("Cannot read uncompressed OS bearoff database: %s\n"), 
-                      szOSDatabase );
-            close ( fBearoffOS );
-            fBearoffOS = -1;
-          }
-
-        }
-
-
-      }
-
-      /* open "small" bearoff databases */
-
-	if( ( h = PathOpen( szDatabase, szDir, BINARY ) ) >= 0 ) {
-#if HAVE_MMAP
-	    struct stat st;
-	    
-	    if( fstat( h, &st ) ||
-		st.st_size != DATABASE_SIZE ||
-		!( pBearoff1 = mmap( NULL, DATABASE_SIZE,
-				     PROT_READ, MAP_SHARED, h, 0 ) ) ) {
-#endif
-		if( !( pBearoff1 = malloc( DATABASE_SIZE ) ) ) {
-		    perror( "malloc" );
-		    return -1;
-		}
-
-		errno = 0;
-		if( read( h, pBearoff1, DATABASE_SIZE ) < DATABASE_SIZE ) {
-		    if( errno )
-			perror( szDatabase );
-		    else
-			fprintf( stderr, _("%s: incomplete bearoff database\n"),
-				 szDatabase );
-		    
-		    free( pBearoff1 );
-		    pBearoff1 = NULL;
-		} else
-		    fMalloc = TRUE;
-#if HAVE_MMAP
-	    }
-#endif
-	    close( h );
-	}
-
-	if( pBearoff1 ) {
-	    static unsigned char achCorrect[ 16 ] = {
-		0xFF, 0xBB, 0x21, 0x08, 0xAB, 0xE1, 0xFD, 0x1A,
-		0x79, 0xC6, 0xD9, 0xD3, 0xEA, 0xDF, 0x56, 0xCF
-	    };
-	    unsigned char ach[ 16 ];
-	    
-	    /* Successfully read the file -- now compute its
-	       checksum, to make sure the contents were correct. */
-	    md5_buffer( pBearoff1, DATABASE_SIZE, ach );
-	    if( memcmp( ach, achCorrect, 16 ) ) {
-		fprintf( stderr, _("%s: not a valid bearoff database\n"),
-			 szDatabase );
-		
-		if( fMalloc )
-		    free( pBearoff1 );
-		else
-#if HAVE_MMAP
-		    munmap( pBearoff1, DATABASE_SIZE );
-#else
-		    assert( FALSE );
-#endif
-		pBearoff1 = NULL;
-	    }
-	}
-	
-	if( pBearoff1 ) {
-	    pBearoff2 = pBearoff1 + DATABASE1_SIZE;
-	    fBearoffHeuristic = FALSE;
-	} else {
-	    pBearoff1 = HeuristicDatabase( pfProgress );
-	    pBearoff2 = NULL;
-	    fBearoffHeuristic = TRUE;
-	}
     }
+      
+
 
     if( szWeightsBinary &&
 	( h = PathOpen( szWeightsBinary, szDir, BINARY ) ) >= 0 &&
@@ -1888,7 +1674,7 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
     if( !fContact ) {
         for( i = 0; i < 2; i++ ) 
-            if( anBack[ i ] < 6 && pBearoff1 )
+            if( anBack[ i ] < 6 && pbc1 )
 		anMaxTurns[ i ] = MaxTurns( PositionBearoff( anBoard[ i ], 6 ) );
 	    else
 		anMaxTurns[ i ] = anCross[ i ] * 2;
@@ -2033,472 +1819,74 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ] )
     return CLASS_CONTACT;
   }
   else {
-
-    if ( fBearoffOS >= 0 ) {
-      if ( nBack > nBearoffOSPoints - 1 ||
-           nOppBack > nBearoffOSPoints - 1 )
-        return CLASS_RACE;
-    }
-    else if( nBack > 5 || nOppBack > 5 || !pBearoff1 )
-      return CLASS_RACE;
-
-  }
-
-
-  if ( ( nBack < 6 && nOppBack < 6 ) || ( fBearoffOS < 0 ) ) {
-    /* small bear off database */
-
-    if( PositionBearoff( anBoard[ 0 ], 6 ) > 923 ||
-        PositionBearoff( anBoard[ 1 ], 6 ) > 923 ||
-        !pBearoff2 )
-      return CLASS_BEAROFF1;
     
-    return CLASS_BEAROFF2;
+    if (  isBearoff ( pbc2, anBoard ) )
+      return CLASS_BEAROFF2;
+
+    if ( isBearoff ( pbcTS, anBoard ) )
+      return CLASS_BEAROFF_TS;
+
+    if ( isBearoff ( pbc1, anBoard ) )
+      return CLASS_BEAROFF1;
+
+    if ( isBearoff ( pbcOS, anBoard ) )
+      return CLASS_BEAROFF_OS;
+
+    return CLASS_RACE;
+
   }
-  else
-    return CLASS_BEAROFF_OS;
 
 }
 
 static void
-EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int ignore*/ )
-{
-  int n, nOpp;
+EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int ignore*/ ) {
 
-  {                                                      assert( pBearoff2 ); }
-  
-  nOpp = PositionBearoff( anBoard[ 0 ], 6 );
-  n = PositionBearoff( anBoard[ 1 ], 6 );
-  
-  arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] =
-    arOutput[ OUTPUT_WINBACKGAMMON ] =
-    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-  
-  arOutput[ OUTPUT_WIN ] =
-    ( pBearoff2[ ( n * 924 + nOpp ) << 1 ] |
-      ( pBearoff2[ ( ( n * 924 + nOpp ) << 1 ) | 1 ] << 8 ) ) / 65535.0;
-}
+  assert ( pbc2 );
 
-/* Fill aaProb with one sided bearoff probabilities for position with */
-/* bearoff id n.                                                      */
+  BearoffEval ( pbc2, anBoard, arOutput );
 
-static 
-#if defined( __GNUC__ )
-inline
-#endif
-void
-getBearoffProbs(int n, unsigned int aaProb[32])
-{
-  int i;
-
-  assert( pBearoff1 );
-  
-  for( i = 0; i < 32; i++ )
-    aaProb[ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
-      ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
 }
 
 /* An upper bound on the number of turns it can take to complete a bearoff
    from bearoff position ID i. */
 static int MaxTurns( int id ) {
 
-    unsigned int an[ 32 ];
+    unsigned short int aus[ 32 ];
     int i;
     
-    getBearoffProbs( id, an );
+    BearoffDist ( pbc1, id, NULL, NULL, NULL, aus, NULL );
 
     for( i = 31; i >= 0; i-- )
-	if( an[ i ] )
-	    return i;
+      if( aus[ i] )
+        return i;
 
     abort();
-}
-
-static void
-setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
-{
-  int i;
-  int prob[32];
-
-  int tot0 = 0;
-  int tot1 = 0;
-  
-  for(i = 5; i >= 0; --i) {
-    tot0 += anBoard[0][i];
-    tot1 += anBoard[1][i];
-  }
-
-  {                                       assert( tot0 == 15 || tot1 == 15 ); }
-
-  *g0 = 0.0;
-  *g1 = 0.0;
-
-  if( tot0 == 15 ) {
-    struct GammonProbs* gp = getBearoffGammonProbs(anBoard[0]);
-    double make[3];
-
-    getBearoffProbs(bp1, prob);
-    
-    make[0] = gp->p0/36.0;
-    make[1] = (make[0] + gp->p1/(36.0*36.0));
-    make[2] = (make[1] + gp->p2/(36.0*36.0*36.0));
-    
-    *g1 = ((prob[1] / 65535.0) +
-	   (1 - make[0]) * (prob[2] / 65535.0) +
-	   (1 - make[1]) * (prob[3] / 65535.0) +
-	   (1 - make[2]) * (prob[4] / 65535.0));
-  }
-
-  if( tot1 == 15 ) {
-    struct GammonProbs* gp = getBearoffGammonProbs(anBoard[1]);
-    double make[3];
-
-    getBearoffProbs(bp0, prob);
-
-    make[0] = gp->p0/36.0;
-    make[1] = (make[0] + gp->p1/(36.0*36.0));
-    make[2] = (make[1] + gp->p2/(36.0*36.0*36.0));
-
-    *g0 = ((prob[1] / 65535.0) * (1-make[0]) + (prob[2]/65535.0) * (1-make[1])
-	   + (prob[3]/65535.0) * (1-make[2]));
-  }
-}  
-
-static float
-fnd ( const float x, const float mu, const float sigma  ) {
-
-   const float epsilon = 1.0e-7;
-   const float PI = 3.14159265358979323846;
-
-   if ( sigma <= epsilon )
-      /* dirac delta function */
-      return ( fabs ( mu - x ) < epsilon ) ? 1.0 : 0.0;
-   else {
-
-     float xm = ( x - mu ) / sigma;
-
-     return 1.0 / ( sigma * sqrt ( 2.0 * PI ) ) * exp ( - xm * xm / 2.0 );
-
-   }
-
-}
-
-
-static void
-EvalOSND ( const unsigned int n,
-           float arProb[ 32 ], float arGammonProb[ 32 ],
-           float *ar ) {
-
-  unsigned char ac[ 16 ];
-  float arx[ 4 ];
-  int i;
-
-  if ( lseek ( fBearoffOS, 20 + n * 16, SEEK_SET ) < 0 ) {
-    perror ( "OS bearoff database" );
-    return;
-  }
-
-  if ( read ( fBearoffOS, ac, 16 ) < 16 ) {
-    if ( errno )
-      perror ( "OS bearoff database" );
-    else
-      fprintf ( stderr, "error reading OS bearoff database" );
-    return;
-  }
-
-  memcpy ( arx, ac, 16 );
-
-  for ( i = 0; i < 32; ++i ) {
-    arProb[ i ] = fnd ( 1.0f * i, arx[ 0 ], arx[ 1 ] );
-    arGammonProb[ i ] = fnd ( 1.0f * i, arx[ 2 ], arx[ 3 ] );
-  }
-
-  if ( ar )
-    memcpy ( ar, arx, 16 );
-
-}
-
-
-static void
-EvalOS ( const unsigned int n, 
-         unsigned short int aProb[ 32 ],
-         unsigned short int aGammonProb[ 32 ] ) {
-
-  unsigned char ac[ 128 ];
-  int i, j;
-  off_t iOffset;
-  int nBytes;
-  int nPos = Combination ( nBearoffOSPoints + 15, nBearoffOSPoints );
-
-  unsigned int ioff, nz, ioffg, nzg;
-
-  /* find offsets and no. of non-zero elements */
-
-  if ( lseek ( fBearoffOS, 20 + n * 8, SEEK_SET ) < 0 ) {
-    perror ( "OS bearoff database" );
-    return;
-  }
-
-  if ( read ( fBearoffOS, ac, 8 ) < 8 ) {
-    if ( errno )
-      perror ( "OS bearoff database" );
-    else
-      fprintf ( stderr, "error reading OS bearoff database" );
-    return;
-  }
-
-  iOffset = 
-    ac[ 0 ] | 
-    ac[ 1 ] << 8 |
-    ac[ 2 ] << 16 |
-    ac[ 3 ] << 24;
-
-  nz = ac[ 4 ];
-  ioff = ac[ 5 ];
-  nzg = ac[ 6 ];
-  ioffg = ac[ 7 ];
-
-  /* read prob + gammon probs */
-
-  iOffset = 20     /* the header */
-    + nPos * 8     /* the offset data */
-    + 2 * iOffset; /* offset to current position */
-
-  /* read values */
-
-  nBytes = 2 * ( nz + nzg );
-
-  if ( lseek ( fBearoffOS, iOffset, SEEK_SET ) < 0 ) {
-    perror ( "OS bearoff database" );
-    return;
-  }
-
-  if ( read ( fBearoffOS, ac, nBytes ) < nBytes ) {
-    if ( errno )
-      perror ( "OS bearoff database" );
-    else
-      fprintf ( stderr, "error reading OS bearoff database" );
-    return;
-  }
-
-  i = 0;
-  memset ( aProb, 0, 2 * 32 );
-  for ( j = 0; j < nz; ++j, i += 2 )
-    aProb[ ioff + j ] = ac[ i ] | ac[ i + 1 ] << 8;
-
-
-  memset ( aGammonProb, 0, 2 * 32 );
-  for ( j = 0; j < nzg; ++j, i += 2 ) 
-    aGammonProb[ ioffg + j ] = ac[ i ] | ac[ i+1 ] << 8;
-
-#ifdef OLD_CODE
-  if ( lseek ( fBearoffOS, iOffset, SEEK_SET ) < 0 ) {
-    perror ( "OS bearoff database" );
-    return;
-  }
-
-  if ( read ( fBearoffOS, ac, 128 ) < 128 ) {
-    if ( errno )
-      perror ( "OS bearoff database" );
-    else
-      fprintf ( stderr, "error reading OS bearoff database" );
-    return;
-  }
-
-  for ( i = 0; i < 32; ++i ) {
-    aProb[ i ] = ac[ 4 * i ] | ac[ 4 * i + 1 ] << 8;
-    aGammonProb[ i ] = ac[ 4 * i  + 2 ] | ac[ 4 * i + 3 ] << 8;
-  }
-#endif
-
-}
-
-
-static unsigned long
-EvalBearoffOSFull ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
-
-  int n, nOpp;
-  int i, j;
-  unsigned short int aaProb[ 2 ][ 32 ];
-  unsigned long x;
-
-  unsigned short int aaGammonProb[ 2 ][ 32 ];
-
-  assert ( fBearoffOS >= 0 );
-
-  nOpp = PositionBearoff ( anBoard[ 0 ], nBearoffOSPoints );
-  n = PositionBearoff ( anBoard[ 1 ], nBearoffOSPoints );
-
-  EvalOS ( n, aaProb[ 0 ], aaGammonProb[ 0 ] );
-  EvalOS ( nOpp, aaProb[ 1 ], aaGammonProb[ 1 ] );
-
-  x = 0;
-  for( i = 0; i < 32; i++ )
-    for( j = i; j < 32; j++ )
-      x += aaProb[ 0 ][ i ] * aaProb[ 1 ][ j ];
-
-  arOutput[ OUTPUT_WIN ] = x / ( 65535.0 * 65535.0 );
-
-  x = 0;
-  for( i = 0; i < 32; i++ )
-    x += i * aaProb[ 1 ][ i ];
-
-  /* calculate gammon percentages */
-
-  /* my gammon chance */
-
-  /* I'm out in i rolls and my opponent isn't inside home quadrant
-     in less than i rolls */
-
-  x = 0;
-  for( i = 0; i < 32; i++ )
-    for( j = i; j < 32; j++ )
-      x += aaProb[ 0 ][ i ] * aaGammonProb[ 1 ][ j ];
-
-  arOutput[ OUTPUT_WINGAMMON ] = x / ( 65535.0 * 65535.0 );
-
-  /* opp gammon chance */
-
-  x = 0;
-  for( i = 0; i < 32; i++ )
-    for( j = i + 1; j < 32; j++ )
-      x += aaProb[ 1 ][ i ] * aaGammonProb[ 0 ][ j ];
-
-  arOutput[ OUTPUT_LOSEGAMMON ] = x / ( 65535.0 * 65535.0 );
-
-  /* no backgammons possible */
-
-  arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
-  arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0f;
-
-  return 0;
-
-}
-
-
-static float
-EvalBearoffOSND ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
-
-
-  int n, nOpp;
-  int i, j;
-  float aarProb[ 2 ][ 32 ];
-  float r;
-  float aarGammonProb[ 2 ][ 32 ];
-
-  assert ( fBearoffOS >= 0 );
-
-  nOpp = PositionBearoff ( anBoard[ 0 ], nBearoffOSPoints );
-  n = PositionBearoff ( anBoard[ 1 ], nBearoffOSPoints );
-
-  EvalOSND ( n, aarProb[ 0 ], aarGammonProb[ 0 ], NULL );
-  EvalOSND ( nOpp, aarProb[ 1 ], aarGammonProb[ 1 ], NULL );
-
-  r = 0;
-  for( i = 0; i < 32; i++ )
-    for( j = i; j < 32; j++ )
-      r += aarProb[ 0 ][ i ] * aarProb[ 1 ][ j ];
-
-  arOutput[ OUTPUT_WIN ] = r;
-
-  /* calculate gammon percentages */
-
-  /* my gammon chance */
-
-  /* I'm out in i rolls and my opponent isn't inside home quadrant
-     in less than i rolls */
-
-  r = 0;
-  for( i = 0; i < 32; i++ )
-    for( j = i; j < 32; j++ )
-      r += aarProb[ 0 ][ i ] * aarGammonProb[ 1 ][ j ];
-
-  arOutput[ OUTPUT_WINGAMMON ] = r;
-
-  /* opp gammon chance */
-
-  r = 0;
-  for( i = 0; i < 32; i++ )
-    for( j = i + 1; j < 32; j++ )
-      r += aarProb[ 1 ][ i ] * aarGammonProb[ 0 ][ j ];
-
-  arOutput[ OUTPUT_LOSEGAMMON ] = r;
-
-  /* no backgammons possible */
-
-  arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0f;
-  arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0f;
-
-  return 0;
-
-
-
-
 }
 
 extern void
 EvalBearoffOS( int anBoard[ 2 ][ 25 ], 
                     float arOutput[] /*, int ignore */ ) {
 
-  if ( fBearoffOSND ) 
-    /* normal distribution db */
-    EvalBearoffOSND ( anBoard, arOutput );
-  else
-    /* exact one-sided db */
-    EvalBearoffOSFull ( anBoard, arOutput );
+  BearoffEval ( pbcOS, anBoard, arOutput );
+
+}
+
+
+extern void
+EvalBearoffTS( int anBoard[ 2 ][ 25 ], 
+                    float arOutput[] /*, int ignore */ ) {
+
+  BearoffEval ( pbcTS, anBoard, arOutput );
 
 }
 
 
 
 extern unsigned long
-EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] )
-{
-  int i, j, n, nOpp;
-  unsigned int aaProb[ 2 ][ 32 ];
-  unsigned long x;
+EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 
-  assert( pBearoff1 );
-    
-  nOpp = PositionBearoff( anBoard[ 0 ], 6 );
-  n = PositionBearoff( anBoard[ 1 ], 6 );
+  return BearoffEval ( pbc1, anBoard, arOutput );
 
-  if( n > 38760 || nOpp > 38760 ) {
-    /* a player has no chequers off; gammons are possible */
-			
-    setGammonProb(anBoard, nOpp, n,
-		  &arOutput[ OUTPUT_LOSEGAMMON ],
-		  &arOutput[ OUTPUT_WINGAMMON ] );
-  } else {
-    arOutput[ OUTPUT_WINGAMMON ] =
-    arOutput[ OUTPUT_LOSEGAMMON ] =
-    arOutput[ OUTPUT_WINBACKGAMMON ] =
-    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-  }
-
-  for( i = 0; i < 32; i++ )
-    aaProb[ 0 ][ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
-      ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
-
-  for( i = 0; i < 32; i++ )
-    aaProb[ 1 ][ i ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
-      ( pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) | 1 ] << 8 );
-
-  x = 0;
-  for( i = 0; i < 32; i++ )
-    for( j = i; j < 32; j++ )
-      x += aaProb[ 0 ][ i ] * aaProb[ 1 ][ j ];
-
-  arOutput[ OUTPUT_WIN ] = x / ( 65535.0 * 65535.0 );
-
-  x = 0;
-  for( i = 0; i < 32; i++ )
-    x += i * aaProb[ 1 ][ i ];
-
-  /* return value is the expected number of rolls for opponent to bear off
-     multiplied by 0xFFFF */
-  
-  return x;
 }
 
 extern void
@@ -2589,14 +1977,15 @@ raceBGprob(int anBoard[2][25], int side)
     const long* bgp = getRaceBGprobs(dummy[1-side]);
     if( bgp ) {
       int k = PositionBearoff(anBoard[side], 6);
-      int aProb[32];
+      unsigned short int aProb[32];
 
       float p = 0.0;
       unsigned int j;
 
       unsigned long scale = (side == 0) ? 36 : 1;
 
-      getBearoffProbs(k, aProb);
+      BearoffDist ( pbc1, k, NULL, NULL, NULL, aProb, NULL );
+
 
       for(j = 1-side; j < RBG_NPROBS; j++) {
 	unsigned long sum = 0;
@@ -2820,7 +2209,7 @@ EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm*/ ) {
 }
 
 static classevalfunc acef[ N_CLASSES ] = {
-    EvalOver, EvalBearoff2, EvalBearoff1, EvalBearoffOS, 
+    EvalOver, EvalBearoff2, EvalBearoffTS, EvalBearoff1, EvalBearoffOS, 
     EvalRace, EvalCrashed, EvalContact
 };
 
@@ -3994,273 +3383,41 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 }
 
 
-static float 
-AverageRolls ( const unsigned short int aus[ 32 ],
-               float *prSigma ) {
-
-  float sx;
-  float sx2;
-  float r;
-  int i;
-
-  sx = sx2 = 0.0f;
-
-  for ( i = 1; i < 32; ++i ) {
-    r = aus[ i ] / 65565.0;
-    sx += i * r;
-    sx2 += i * i * r;
-  }
-
-  if ( prSigma )
-    *prSigma = sqrt ( sx2 - sx *sx );
-
-  return sx;
-
-}
-
 static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
-    int i, n, nOpp, f0 = FALSE, f1 = FALSE;
-    unsigned short int aaProb[ 2 ][ 32 ];
-    float arSigma[ 2 ];
-
-    assert( pBearoff1 );
-    
-    nOpp = PositionBearoff( anBoard[ 0 ], 6 );
-    n = PositionBearoff( anBoard[ 1 ], 6 );
-
-    sprintf ( strchr ( szOutput, 0 ),
-              "             Player       Opponent\n"
-              "Position %12d  %12d\n\n", 
-              n, nOpp );
-
-    strcat( szOutput, _("Rolls\tPlayer\tOpponent\n") );
-
-    memset ( aaProb, 0, 2 * 32 * 2 );
-    
-    for( i = 0; i < 32; i++ ) {
-	aaProb[ 0 ][ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
-	    ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
-
-	aaProb[ 1 ][ i ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
-	    ( pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) | 1 ] << 8 );
-
-	if( aaProb[ 0 ][ i ] )
-	    f0 = TRUE;
-
-	if( aaProb[ 1 ][ i ] )
-	    f1 = TRUE;
-
-	if( f0 || f1 ) {
-    if( f0 && f1 && !aaProb[ 0 ][ i ] && !aaProb[ 1 ][ i ] )
-      break;
-
-    szOutput = strchr( szOutput, 0 );
-	
-    sprintf( szOutput, "%5d\t%6.3f\t%8.3f\n", i, aaProb[ 0 ][ i ] / 655.35,
-             aaProb[ 1 ][ i ] / 655.35 );
-	}
-    }
-
-    strcat( szOutput, _("\nAverage rolls\n") );
-    strcat( szOutput, _("Bearing off\n") );
-    strcat( szOutput, _("\tPlayer\tOpponent\n") );
-
-    sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Mean\t%7.3f\t%7.3f\n",
-              AverageRolls ( aaProb[ 0 ], &arSigma[ 0 ] ),
-              AverageRolls ( aaProb[ 1 ], &arSigma[ 1 ] ) );
-
-    sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Std dev\t%7.3f\t%7.3f\n", arSigma[ 0 ], arSigma[ 1 ] );
+  assert ( pbc1 );
+  BearoffDump ( pbc1, anBoard, szOutput );
 
 }
 
 static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
-    assert( pBearoff2 );
+  assert( pbc2 );
 
-    if ( pBearoff1 )
-      DumpBearoff1 ( anBoard, szOutput );
-    
-    /* no-op -- nothing much we can say */
-}
+  BearoffDump ( pbc2, anBoard, szOutput );
 
-static void 
-DumpBearoffOSND ( int anBoard[ 2 ][ 25 ], 
-                  char *szOutput ) {
-
-    int i, n, nOpp; 
-    int f0 = FALSE, f1 = FALSE, f2 = FALSE, f3 = FALSE;
-    float aarProb[ 2 ][ 32 ];
-    float aarGammonProb[ 2 ][ 32 ];
-    float arOpp[ 4 ], ar[ 4 ];
-
-    assert( fBearoffOS >= 0 );
-    
-    nOpp = PositionBearoff( anBoard[ 0 ], nBearoffOSPoints );
-    n = PositionBearoff( anBoard[ 1 ], nBearoffOSPoints );
-
-    EvalOSND ( nOpp, aarProb[ 1 ], aarGammonProb[ 1 ], arOpp );
-    EvalOSND ( n, aarProb[ 0 ], aarGammonProb[ 0 ], ar );
-
-    sprintf ( strchr ( szOutput, 0 ),
-              "             Player       Opponent\n"
-              "Position %12d  %12d\n\n", 
-              n, nOpp );
-
-    strcat( szOutput, _("\nAverage rolls\n") );
-    strcat( szOutput, _("Bearing off" "\t\t\t\t"
-                        "Saving gammon\n") );
-    strcat( szOutput, _("\tPlayer\tOpponent" "\t" 
-                        "Player\tOpponent\n") );
-
-    sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Mean\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
-              ar[ 0 ], arOpp[ 0 ], ar[ 2 ], arOpp[ 2 ] );
-
-    sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Std dev\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n\n",
-              ar[ 1 ], arOpp[ 1 ], ar[ 3 ], arOpp[ 3 ] );
-
-    strcat( szOutput, _("Approximative distribution:\n") );
-    strcat( szOutput, _("Bearing off" "\t\t\t\t"
-                        "Bearing at least one chequer off\n") );
-    strcat( szOutput, _("Rolls\tPlayer\tOpponent" "\t" 
-                        "Player\tOpponent\n") );
-    
-    for( i = 0; i < 32; i++ ) {
-
-        if( aarProb[ 0 ][ i ] > 0.0f )
-	    f0 = TRUE;
-
-        if( aarProb[ 1 ][ i ] > 0.0f )
-	    f1 = TRUE;
-
-        if( aarGammonProb[ 0 ][ i ] > 0.0f )
-	    f2 = TRUE;
-
-        if( aarGammonProb[ 1 ][ i ] > 0.0f )
-	    f3 = TRUE;
-
-
-
-	if( f0 || f1 || f2 || f3 ) {
-          if( f0 && f1 && f2 && f3 &&
-              aarProb[ 0 ][ i ] == 0.0f && aarProb[ 1 ][ i ] == 0.0f &&
-              aarGammonProb[ 0 ][ i ] == 0.0f && 
-              aarGammonProb[ 1 ][ i ] == 0.0f ) 
-            break;
-          
-          szOutput = strchr( szOutput, 0 );
-	
-          sprintf( szOutput, 
-                   "%5d\t%7.3f\t%7.3f" "\t\t"
-                   "%7.3f\t%7.3f\n", 
-                   i, 
-                   aarProb[ 0 ][ i ] * 100.0f,
-                   aarProb[ 1 ][ i ] * 100.0f,
-                   aarGammonProb[ 0 ][ i ] * 100.0f,
-                   aarGammonProb[ 1 ][ i ] * 100.0f );
-
-	}
-    }
+  if ( pbc1 )
+    BearoffDump ( pbc1, anBoard, szOutput );
 
 }
 
-static void 
-DumpBearoffOSExact ( int anBoard[ 2 ][ 25 ], 
-                     char *szOutput ) {
-
-    int i, n, nOpp; 
-    int f0 = FALSE, f1 = FALSE, f2 = FALSE, f3 = FALSE;
-    unsigned short int aaProb[ 2 ][ 32 ];
-    unsigned short int aaGammonProb[ 2 ][ 32 ];
-    float arSigma[ 2 ], arSigmaG[ 2 ];
-
-    assert( fBearoffOS >= 0 );
-    
-    nOpp = PositionBearoff( anBoard[ 0 ], nBearoffOSPoints );
-    n = PositionBearoff( anBoard[ 1 ], nBearoffOSPoints );
-
-    EvalOS ( nOpp, aaProb[ 1 ], aaGammonProb[ 1 ] );
-    EvalOS ( n, aaProb[ 0 ], aaGammonProb[ 0 ] );
-
-    sprintf ( strchr ( szOutput, 0 ),
-              "             Player       Opponent\n"
-              "Position %12d  %12d\n\n", 
-              n, nOpp );
-
-    strcat( szOutput, _("Bearing off" "\t\t\t\t"
-                        "Bearing at least one chequer off\n") );
-    strcat( szOutput, _("Rolls\tPlayer\tOpponent" "\t" 
-                        "Player\tOpponent\n") );
-    
-    for( i = 0; i < 32; i++ ) {
-
-        if( aaProb[ 0 ][ i ] )
-	    f0 = TRUE;
-
-        if( aaProb[ 1 ][ i ])
-	    f1 = TRUE;
-
-        if( aaGammonProb[ 0 ][ i ] )
-	    f2 = TRUE;
-
-        if( aaGammonProb[ 1 ][ i ])
-	    f3 = TRUE;
-
-
-
-	if( f0 || f1 || f2 || f3 ) {
-          if( f0 && f1 && f2 && f3 &&
-              !aaProb[ 0 ][ i ] && !aaProb[ 1 ][ i ] &&
-              !aaGammonProb[ 0 ][ i ] && !aaGammonProb[ 1 ][ i ] ) 
-            break;
-          
-          szOutput = strchr( szOutput, 0 );
-	
-          sprintf( szOutput, 
-                   "%5d\t%7.3f\t%7.3f" "\t\t"
-                   "%7.3f\t%7.3f\n", 
-                   i, 
-                   aaProb[ 0 ][ i ] / 655.35,
-                   aaProb[ 1 ][ i ] / 655.35,
-                   aaGammonProb[ 0 ][ i ] / 655.35,
-                   aaGammonProb[ 1 ][ i ] / 655.35 );
-	}
-    }
-
-    strcat( szOutput, _("\nAverage rolls\n") );
-    strcat( szOutput, _("Bearing off" "\t\t\t\t"
-                        "Saving gammon\n") );
-    strcat( szOutput, _("\tPlayer\tOpponent" "\t" 
-                        "Player\tOpponent\n") );
-
-    sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Mean\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
-              AverageRolls ( aaProb[ 0 ], &arSigma[ 0 ] ),
-              AverageRolls ( aaProb[ 1 ], &arSigma[ 1 ] ),
-              AverageRolls ( aaGammonProb[ 0 ], &arSigmaG[ 0 ] ),
-              AverageRolls ( aaGammonProb[ 1 ], &arSigmaG[ 1 ] ) );
-
-    sprintf ( szOutput = strchr ( szOutput, 0 ),
-              "Std dev\t%7.3f\t%7.3f\t\t%7.3f\t%7.3f\n",
-              arSigma[ 0 ], arSigma[ 1 ], arSigmaG[ 0 ], arSigmaG[ 1 ] );
-
-}
 
 static void DumpBearoffOS ( int anBoard[ 2 ][ 25 ], 
                             char *szOutput ) {
 
-  if ( fBearoffOSND )
-    DumpBearoffOSND ( anBoard, szOutput );
-  else
-    DumpBearoffOSExact ( anBoard, szOutput );
+  assert ( pbcOS );
+  BearoffDump ( pbcOS, anBoard, szOutput );
 
 }
 
 
+static void DumpBearoffTS ( int anBoard[ 2 ][ 25 ], 
+                            char *szOutput ) {
+
+  assert ( pbcTS );
+  BearoffDump ( pbcTS, anBoard, szOutput );
+
+}
 
 
 static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput ) {
@@ -4345,7 +3502,7 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 }
 
 static classdumpfunc acdf[ N_CLASSES ] = {
-  DumpOver, DumpBearoff2, DumpBearoff1, DumpBearoffOS,
+  DumpOver, DumpBearoff2, DumpBearoffTS, DumpBearoff1, DumpBearoffOS,
   DumpRace, DumpContact, DumpContact
 };
 
@@ -4370,13 +3527,16 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     strcat( szOutput, "BEAROFF2" );
     break;
 
+  case CLASS_BEAROFF_TS: /* two-sided bearoff database on disk */
+    strcat( szOutput, "BEAROFF-TS" );
+    break;
+
   case CLASS_BEAROFF1: /* One-sided bearoff database */
     strcat( szOutput, "BEAROFF1" );
     break;
 
   case CLASS_BEAROFF_OS: /* huge one-sided bearoff database */
-    sprintf ( strchr ( szOutput, 0 ), "BEAROFF-OS (%d points)", 
-              nBearoffOSPoints );
+    strcat( szOutput, "BEAROFF-OS" );
     break;
 
   case CLASS_RACE: /* Race neural network */
@@ -4526,21 +3686,14 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
 static void StatusBearoff2( char *sz ) {
 
-    if( !pBearoff2 )
-	return;
-
-    strcpy( sz, _(" * 2-sided bearoff database evaluator:\n"
-	    "   - up to 6 chequers (924 positions) per player.\n\n") );
+  BearoffStatus ( pbc2, sz );
+  
 }
 
 static void StatusBearoff1( char *sz ) {
 
-    if( !pBearoff1 )
-	return;
+  BearoffStatus ( pbc1, sz );
 
-    sprintf( sz, _(" * In memory 1-sided %sbearoff database evaluator:\n"
-	     "   - up to 6 points (54264 positions) per player.\n\n"),
-	     fBearoffHeuristic ? _("heuristic ") : "" );
 }
 
 static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz ) {
@@ -4568,20 +3721,18 @@ static void StatusContact( char *sz ) {
 }
 
 static void StatusOS ( char *sz ) {
+  BearoffStatus ( pbcOS, sz );
+}
 
-  if ( fBearoffOS >= 0 ) {
-    sprintf ( sz, _("* On disk 1-sided (%s) bearoff database evaluator:\n"
-                    "   - up to %d points (%d positions) per player.\n\n"),
-              fBearoffOSND ? _("normal distribution") : _("exact"),
-              nBearoffOSPoints, 
-              Combination ( nBearoffOSPoints + 15, nBearoffOSPoints ) );
-  }
-
+static void StatusTS ( char *sz ) {
+  BearoffStatus ( pbcTS, sz );
 }
 
 static classstatusfunc acsf[ N_CLASSES ] = {
-  NULL, StatusBearoff2, StatusBearoff1, StatusOS, StatusRace, StatusCrashed,
-  StatusContact
+  NULL, 
+  StatusBearoff2, StatusTS, 
+  StatusBearoff1, StatusOS, 
+  StatusRace, StatusCrashed, StatusContact
 };
 
 extern void EvalStatus( char *szOutput ) {
@@ -5928,11 +5079,13 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
   /* Since it's somewhat costly to call CalcInputs, the 
      inputs should preferebly be cached to same time. */
 
-  if (pc == CLASS_OVER)
+  switch ( pc ) {
+  case CLASS_OVER:
     return 0.0; /* dead cube */
+    break;
 
-  if (pc == CLASS_BEAROFF1)
-
+  case CLASS_BEAROFF1:
+  case CLASS_BEAROFF_OS:
     /* FIXME: calculate based on #rolls to get off.
        For example, 15 rolls probably have cube eff. of
        0.7, and 1.25 rolls have cube eff. of 1.0.
@@ -5942,14 +5095,16 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
        situations. */
 
     return 0.60;
+    break;
 
-  if (pc == CLASS_BEAROFF2 || pc == CLASS_BEAROFF_OS )
+  case CLASS_BEAROFF2:
+  case CLASS_BEAROFF_TS:
 
     /* FIXME: use linear interpolation based on pip count */
-
     return 0.60;
+    break;
 
-  if (pc == CLASS_RACE)
+  case CLASS_RACE:
     {
       int anPips[2];
 
@@ -5968,7 +5123,10 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
           return rEff;
        }
      }
-  if (pc == CLASS_CONTACT || pc == CLASS_CRASHED)
+
+  case CLASS_CONTACT:
+  case CLASS_CRASHED:
+
     {
       /* FIXME: should CLASS_CRASHED be handled differently? */
 	
@@ -6019,7 +5177,11 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
     
     }
 
-  assert( FALSE );
+  default:
+    assert( FALSE );
+    break;
+
+  }
   return 0;
 
 }

@@ -45,7 +45,6 @@
 #include "bearoff.h"
 #include "i18n.h"
 #include "bearoffgammon.h"
-#include "br1.h"
 
 #if WIN32
 #define BINARY O_BINARY

@@ -4111,8 +4111,6 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
 static void 
 SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
-  int i, j;
-
     fprintf( pf, "%s plies %d\n"
 	     "%s candidates %d\n"
 	     "%s tolerance %.3f\n"
@@ -6064,8 +6062,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
 			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
-			      fNoBearoff ? NULL : GNUBG_BEAROFF,
-			      fNoBearoff ? NULL : GNUBG_BEAROFF_OS,
+			      fNoBearoff,
 			      szDataDirectory, nNewWeights,
 			      fShowProgress ? BearoffProgress : NULL ) ) < 0 )
 	exit( EXIT_FAILURE );

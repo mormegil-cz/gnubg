@@ -23,6 +23,7 @@
 #define _EVAL_H_
 
 #include "dice.h"
+#include "bearoff.h"
 
 #ifndef FALSE
 #define FALSE 0
@@ -216,8 +217,10 @@ extern cubeinfo ciCubeless;
 extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;
 
-extern unsigned char *pBearoff1;
-extern unsigned char *pBearoff2;
+extern bearoffcontext *pbc1;
+extern bearoffcontext *pbc2;
+extern bearoffcontext *pbcOS;
+extern bearoffcontext *pbcTS;
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -228,24 +231,25 @@ typedef struct _movelist {
 } movelist;
 
 typedef enum _positionclass {
-    CLASS_OVER = 0, /* Game already finished */
-    CLASS_BEAROFF2, /* Two-sided bearoff database */
-    CLASS_BEAROFF1, /* One-sided bearoff database */
-    CLASS_BEAROFF_OS, /* huge one-sided bearoff database */
-    CLASS_RACE,     /* Race neural network */
-    CLASS_CRASHED,  /* Contact, one side has less than 7 active checkers */
-    CLASS_CONTACT   /* Contact neural network */
+    CLASS_OVER = 0,   /* Game already finished */
+    CLASS_BEAROFF2,   /* Two-sided bearoff database (in memory) */
+    CLASS_BEAROFF_TS, /* Two-sided bearoff database (on disk) */
+    CLASS_BEAROFF1,   /* One-sided bearoff database (in memory) */
+    CLASS_BEAROFF_OS, /* One-sided bearoff database /on disk) */
+    CLASS_RACE,       /* Race neural network */
+    CLASS_CRASHED,    /* Contact, one side has less than 7 active checkers */
+    CLASS_CONTACT     /* Contact neural network */
 } positionclass;
 
 #define N_CLASSES (CLASS_CONTACT + 1)
 
-#define CLASS_PERFECT CLASS_BEAROFF2
+#define CLASS_PERFECT CLASS_BEAROFF_TS
 
 extern char *PathSearch( const char *szFile, const char *szDir );
 			      
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
-		char *szDatabase, char *szOSDatabase, 
+		int fNoBearoff, 
                 char *szDir, int nSize,
 		void (*pfProgress)( int ) );
 
@@ -484,5 +488,8 @@ locateMove ( int anBoard[ 2 ][ 25 ],
 extern int
 MoveKey ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ], 
           unsigned char auch[ 10 ] );
+
+extern int 
+PathOpen( const char *szFile, const char *szDir, const int f );
 
 #endif
