@@ -283,11 +283,13 @@ Skill( float const r )
 }
 
 /*
- * get middle of doubling window
+ * get mean of double point and cash point
+ * and cash point and too good point
  */
 
 static void
-getMarketWindowDividerMWC( float* prMarketWindowDividerMWC, const matchstate* pms )
+getMarketWindowDividersEq( float arMarketWindowDividersEq[ 2 ],
+			   const matchstate* pms )
 {
     cubeinfo ci;
     evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
@@ -296,22 +298,31 @@ getMarketWindowDividerMWC( float* prMarketWindowDividerMWC, const matchstate* pm
     int afAutoRedouble[ 2 ];
     int afDead[ 2 ];
 
-    GetMatchStateCubeInfo ( &ci, pms );
+    GetMatchStateCubeInfo( &ci, pms );
 
-    getCurrentGammonRates( aarRates, arOutput, (void*)pms->anBoard,
+    getCurrentGammonRates( aarRates, arOutput, (void *) pms->anBoard,
 			   &ci, &ec );
 
-    if( ci.nMatchTo ) {
+    if ( ci.nMatchTo ) {
     	/* Match play */
 	float aaarPointsMatch[ 2 ][ 4 ][ 2 ];
+	int nIndex;
 
 	getMatchPoints( aaarPointsMatch, afAutoRedouble, afDead,
 		    &ci, aarRates );
 
-	/* calculate middle of double window in MWC: DP+(TG-DP)/2 */
-	*prMarketWindowDividerMWC = aaarPointsMatch[ ci.fMove ][ 1 ][ 0 ] +
-				    ( aaarPointsMatch[ ci.fMove ][ 3 ][ 0 ] -
-				      aaarPointsMatch[ ci.fMove ][ 1 ][ 0 ] ) / 2;
+	nIndex = ! afDead[ ci.fMove ];
+
+	/* calculate divider between DP and CP: DP+(CP-DP)/2 */
+	arMarketWindowDividersEq[ 0 ] =
+		aaarPointsMatch[ ci.fMove ][ 1 ][ nIndex ] +
+		( aaarPointsMatch[ ci.fMove ][ 2 ][ nIndex ] -
+		aaarPointsMatch[ ci.fMove ][ 1 ][ nIndex ] ) / 2;
+	/* calculate divider between CP and TG: CP+(TG-CP)/2 */
+	arMarketWindowDividersEq[ 1 ] =
+		aaarPointsMatch[ ci.fMove ][ 2 ][ nIndex ] +
+		( aaarPointsMatch[ ci.fMove ][ 3 ][ 0 ] -
+		aaarPointsMatch[ ci.fMove ][ 2 ][ nIndex ] ) / 2;
     }
     else {
     	/* Money play */
@@ -319,10 +330,16 @@ getMarketWindowDividerMWC( float* prMarketWindowDividerMWC, const matchstate* pm
 
 	getMoneyPoints( aaarPointsMoney, ci.fJacoby, ci.fBeavers, aarRates );
 
-	/* calculate middle of double window in MWC: DP+(TG-DP)/2 */
-	*prMarketWindowDividerMWC = aaarPointsMoney[ ci.fMove ][ 3 ][ 0 ] +
-				    ( aaarPointsMoney[ ci.fMove ][ 6 ][ 0 ] -
-				      aaarPointsMoney[ ci.fMove ][ 3 ][ 0 ] ) / 2;
+	/* calculate divider between DP and CP: DP+(CP-DP)/2 */
+	arMarketWindowDividersEq[ 0 ] =
+		aaarPointsMoney[ ci.fMove ][ 3 ][ 0 ] +
+		( aaarPointsMoney[ ci.fMove ][ 5 ][ 0 ] -
+		aaarPointsMoney[ ci.fMove ][ 3 ][ 0 ] ) / 2;
+	/* calculate divider between CP and TG: CP+(TG-CP)/2 */
+	arMarketWindowDividersEq[ 1 ] =
+		aaarPointsMoney[ ci.fMove ][ 5 ][ 0 ] +
+		( aaarPointsMoney[ ci.fMove ][ 6 ][ 0 ] -
+		aaarPointsMoney[ ci.fMove ][ 5 ][ 0 ] ) / 2;
     }
 }
 
@@ -413,7 +430,7 @@ updateStatcontext(statcontext*       psc,
           arDouble[ OUTPUT_OPTIMAL ] ) {
         /* it was a double */
 
-	float rMarketWindowDividerMWC = 0.0;
+	float arMarketWindowDividersEq[ 2 ] = { 0.0, 0.0 };
 
         rSkill = arDouble[ OUTPUT_NODOUBLE ] -
           arDouble[ OUTPUT_OPTIMAL ];
@@ -421,10 +438,10 @@ updateStatcontext(statcontext*       psc,
         rCost = pms->nMatchTo ? eq2mwc( rSkill, &ci ) -
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
 
-	getMarketWindowDividerMWC( &rMarketWindowDividerMWC, pms );
+	getMarketWindowDividersEq( arMarketWindowDividersEq, pms );
 
-        if ( eq2mwc( arDouble[ OUTPUT_NODOUBLE ], &ci ) >
-	     rMarketWindowDividerMWC ) {
+        if ( pmr->n.aarOutput[ 0 ][ OUTPUT_WIN ] >
+	     arMarketWindowDividersEq[ 1 ] ) {
           /* around too good point */
           psc->anCubeMissedDoubleTG[ pmr->n.fPlayer ]++;
           psc->arErrorMissedDoubleTG[ pmr->n.fPlayer ][ 0 ] -=
@@ -432,6 +449,15 @@ updateStatcontext(statcontext*       psc,
           psc->arErrorMissedDoubleTG[ pmr->n.fPlayer ][ 1 ] -=
             rCost;
         } 
+        else if ( pmr->n.aarOutput[ 0 ][ OUTPUT_WIN ] >
+		  arMarketWindowDividersEq[ 0 ] ) {
+          /* around cash point */
+          psc->anCubeMissedDoubleCP[ pmr->n.fPlayer ]++;
+          psc->arErrorMissedDoubleCP[ pmr->n.fPlayer ][ 0 ] -=
+            rSkill;
+          psc->arErrorMissedDoubleCP[ pmr->n.fPlayer ][ 1 ] -=
+            rCost;
+        }
         else {
           /* around double point */
           psc->anCubeMissedDoubleDP[ pmr->n.fPlayer ]++;
@@ -540,20 +566,30 @@ updateStatcontext(statcontext*       psc,
       if ( rSkill < 0.0f ) {
         /* it was not a double */
 
-	float rMarketWindowDividerMWC = 0.0;
+	float arMarketWindowDividersEq[ 2 ] = { 0.0, 0.0 };
 
         rCost = pms->nMatchTo ? eq2mwc( rSkill, &ci ) -
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
 
-	getMarketWindowDividerMWC( &rMarketWindowDividerMWC, pms );
+	getMarketWindowDividersEq( arMarketWindowDividersEq, pms );
 
-        if ( eq2mwc( arDouble[ OUTPUT_NODOUBLE ], &ci ) >
-	     rMarketWindowDividerMWC ) {
+        if ( pmr->d.CubeDecPtr->aarOutput[ 0 ][ OUTPUT_WIN ] >
+	     arMarketWindowDividersEq[ 1 ] ) {
           /* around too good point */
           psc->anCubeWrongDoubleTG[ pmr->d.fPlayer ]++;
           psc->arErrorWrongDoubleTG[ pmr->d.fPlayer ][ 0 ] -= rSkill;
           psc->arErrorWrongDoubleTG[ pmr->d.fPlayer ][ 1 ] -= rCost;
-        } else {
+        }
+        else if ( pmr->d.CubeDecPtr->aarOutput[ 0 ][ OUTPUT_WIN ] >
+		  arMarketWindowDividersEq[ 0 ] ) {
+          /* around cash point */
+          psc->anCubeWrongDoubleCP[ pmr->n.fPlayer ]++;
+          psc->arErrorWrongDoubleCP[ pmr->n.fPlayer ][ 0 ] -=
+            rSkill;
+          psc->arErrorWrongDoubleCP[ pmr->n.fPlayer ][ 1 ] -=
+            rCost;
+        }
+        else {
           /* around double point */
           psc->anCubeWrongDoubleDP[ pmr->d.fPlayer ]++;
           psc->arErrorWrongDoubleDP[ pmr->d.fPlayer ][ 0 ] -= rSkill;
@@ -1107,8 +1143,10 @@ AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
       pscB->anLuck[ i ][ j ] += pscA->anLuck[ i ][ j ];
 
     pscB->anCubeMissedDoubleDP [ i ] += pscA->anCubeMissedDoubleDP [ i ];
+    pscB->anCubeMissedDoubleCP [ i ] += pscA->anCubeMissedDoubleCP [ i ];
     pscB->anCubeMissedDoubleTG [ i ] += pscA->anCubeMissedDoubleTG [ i ];
     pscB->anCubeWrongDoubleDP [ i ] += pscA->anCubeWrongDoubleDP [ i ];
+    pscB->anCubeWrongDoubleCP [ i ] += pscA->anCubeWrongDoubleCP [ i ];
     pscB->anCubeWrongDoubleTG [ i ] += pscA->anCubeWrongDoubleTG [ i ];
     pscB->anCubeWrongTake [ i ] += pscA->anCubeWrongTake [ i ];
     pscB->anCubeWrongPass [ i ] += pscA->anCubeWrongPass [ i ];
@@ -1119,10 +1157,14 @@ AddStatcontext ( const statcontext *pscA, statcontext *pscB ) {
         pscA->arErrorCheckerplay[ i ][ j ];
       pscB->arErrorMissedDoubleDP [ i ][ j ] +=
         pscA->arErrorMissedDoubleDP[ i ][ j ];
+      pscB->arErrorMissedDoubleCP [ i ][ j ] +=
+        pscA->arErrorMissedDoubleCP[ i ][ j ];
       pscB->arErrorMissedDoubleTG [ i ][ j ] +=
         pscA->arErrorMissedDoubleTG[ i ][ j ];
       pscB->arErrorWrongDoubleDP [ i ][ j ] +=
         pscA->arErrorWrongDoubleDP[ i ][ j ];
+      pscB->arErrorWrongDoubleCP [ i ][ j ] +=
+        pscA->arErrorWrongDoubleCP[ i ][ j ];
       pscB->arErrorWrongDoubleTG [ i ][ j ] +=
         pscA->arErrorWrongDoubleTG[ i ][ j ];
       pscB->arErrorWrongTake [ i ][ j ] +=
@@ -1307,8 +1349,10 @@ IniStatcontext ( statcontext *psc ) {
       psc->anLuck[ i ][ j ] = 0;
 
     psc->anCubeMissedDoubleDP [ i ] = 0;
+    psc->anCubeMissedDoubleCP [ i ] = 0;
     psc->anCubeMissedDoubleTG [ i ] = 0;
     psc->anCubeWrongDoubleDP [ i ] = 0;
+    psc->anCubeWrongDoubleCP [ i ] = 0;
     psc->anCubeWrongDoubleTG [ i ] = 0;
     psc->anCubeWrongTake [ i ] = 0;
     psc->anCubeWrongPass [ i ] = 0;
@@ -1317,8 +1361,10 @@ IniStatcontext ( statcontext *psc ) {
 
       psc->arErrorCheckerplay [ i ][ j ] = 0.0;
       psc->arErrorMissedDoubleDP [ i ][ j ] = 0.0;
+      psc->arErrorMissedDoubleCP [ i ][ j ] = 0.0;
       psc->arErrorMissedDoubleTG [ i ][ j ] = 0.0;
       psc->arErrorWrongDoubleDP [ i ][ j ] = 0.0;
+      psc->arErrorWrongDoubleCP [ i ][ j ] = 0.0;
       psc->arErrorWrongDoubleTG [ i ][ j ] = 0.0;
       psc->arErrorWrongTake[ i ][ j ] = 0.0;
       psc->arErrorWrongPass[ i ][ j ] = 0.0;
@@ -1423,8 +1469,10 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
 
       aaaar[ CUBEDECISION ][ TOTAL ][ i ][ j ] = 
         psc->arErrorMissedDoubleDP[ i ][ j ]
+        + psc->arErrorMissedDoubleCP[ i ][ j ]
         + psc->arErrorMissedDoubleTG[ i ][ j ]
         + psc->arErrorWrongDoubleDP[ i ][ j ]
+        + psc->arErrorWrongDoubleCP[ i ][ j ]
         + psc->arErrorWrongDoubleTG[ i ][ j ]
         + psc->arErrorWrongTake[ i ][ j ]
         + psc->arErrorWrongPass[ i ][ j ];

@@ -1,3 +1,15 @@
+Mon Sep 08 18:45:56 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	classify cube decisions into 3 categories: around DP, CP and TG
+
+	* analysis.c: rename getMarketWindowDividersMWC to
+	getMarketWindowDividersEq
+	* analysis.c (getMarketWindowDividersEq): calculate two dividers
+	of market window for categorization of doubles
+	* analysis.h: add new variables to statcontext
+	* formatgs.c (formatGS), gnubgmodule.c (PyGameStats),
+	sgf.c (RestoreGS, WriteStatContext): add cube decisions around CP
+
 Mon Sep 08 17:39:45 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.c (GTKMessage): add a scrollbar for message window when
