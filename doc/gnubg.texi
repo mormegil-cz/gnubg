@@ -677,8 +677,8 @@ the total match winning chance given up by the player is reported.
 The error rate per move is the total error rate divided by the number of
 @emph{unforced moves}. Note that is different from Snowie 4 that
 defines the error rate per move as the total error rate divided by the
-total number of decisions, i.e., the sum of the @emph{total} number of
-moves and the @emph{total} number of cube decisions. In general, your
+total number of moves for both players, i.e., the sum of @emph{total
+moves} for both players. In general, your
 error rate per move will be lower in Snowie than in @gnubg{}. 
 @item @strong{ Chequer play rating}:
 @gnubg{} will assign a rating for your chequer play ranging from
@@ -777,12 +777,11 @@ The accumulated cube errors for this game or match reported both
 normalised and unnormalised. 
 @item @strong{ Error rate (per cube decision)}:
 The error rate per cube decision is the total error rate divided
-by the number of @emph{close or actual cube decisions}. Note that is
-different from Snowie 4 that  defines the error rate per cube decision
-as the total error rate divided by the  total number of decisions,
-i.e., the sum of the @emph{total} number of moves and the @emph{total}
-number of cube decisions. In general, your error rate per cube
-decision  will be lower in Snowie than in @gnubg{}.
+by the number of @emph{close or actual cube decisions}. 
+Note that is different from Snowie 4 that
+defines the error rate per cube decision as the total error rate divided by the
+total number of moves for both players. In general, your
+error rate per cube decision will be lower in Snowie than in @gnubg{}. 
 @item @strong{ Cube decision rating}:
 @gnubg{} will assign a rating for your cube decisions ranging from
 @emph{Awful!} to @emph{Supernatural}. See the description for the
@@ -801,9 +800,11 @@ normalised and unnormalised.
 @item @strong{Error rate (per decision)}:
 The error rate per decision is the total error rate divided
 by the number of non-trivial decisions (i.e., the sum of @emph{unforced
-moves} and @emph{close or actual cube decisions}). Again, please note that is
-different from Snowie 4 that  defines the total error rate per decision
-as the total error rate divided by the  total number of decisions.
+moves} and @emph{close or actual cube decisions}). 
+Again, please note that is different from Snowie 4 that
+defines the error rate per decision as the total error rate divided by the
+total number of moves for both players. In general, your
+error rate per move will be lower in Snowie than in @gnubg{}. 
 An investigation of approximately 300 matches showed the on average
 the @gnubg{} error rate with be 1.4 times higher than your Snowie 4
 error rate. 
@@ -815,7 +816,7 @@ Based on your normalised error rate per move @gnubg{} will assign
 you a rating ranging from @emph{Awful!} to @emph{Supernatural}. See
 the table below for the thresholds.
 @item @strong{MWC against current opponent}:
-For match play @gnubg{} will calculate your luck-adjusted MWC
+For match play @gnubg{} will calculate your MWC
 against the current opponent. The number is calculated as 50% - your
 total unnormalised error rate + your opponent's total unnormalised
 error rate. If your opponent is really lucky but plays rather bad, this
@@ -823,7 +824,7 @@ number can become larger than 100%, since he due to the extra luck has
 the possibily to give up even more MWC. However, @gnubg{} will
 report this number as 100%, and 0% for the opposite situation.
 @item @strong{Guestimated abs. rating}:
-change formulas...
+writeme
 @end itemize
 
 Threshold for ratings:
