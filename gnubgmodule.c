@@ -746,8 +746,9 @@ PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
   return Board1ToPy( anBoard );
 }
 
-#define JJ
-#ifdef JJ
+#if PY_MAJOR_VERSION < 3
+#define PyBool_FromLong PyInt_FromLong
+#endif
 
 static inline void
 DictSetItemSteal(PyObject* dict, const char* key, PyObject* val)
@@ -850,7 +851,7 @@ diffRolloutContext(const rolloutcontext* c, PyMatchState* ms)
     }
 
     if( c->nTrials != s->nTrials ) {
-      DictSetItemSteal(context, "reduced", PyInt_FromLong(c->nTrials));
+      DictSetItemSteal(context, "trials", PyInt_FromLong(c->nTrials));
     }
 
     if( PyDict_Size(context) == 0 ) {
@@ -865,8 +866,17 @@ diffRolloutContext(const rolloutcontext* c, PyMatchState* ms)
 static PyObject*
 RolloutContextToPy(const rolloutcontext* rc)
 {
-  Py_INCREF(Py_None);
-  return Py_None;
+  PyObject* dict =
+    Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i}",
+		  "cubeful", rc->fCubeful,
+		  "variance-reduction", rc->fVarRedn,
+		  "initial-position", rc->fInitial,
+		  "quasi-random-dice", rc->fRotate,
+		  "late-eval", rc->fLateEvals,
+		  "truncated-rollouts", rc->fDoTruncate,
+		  "n-truncation", rc->nTruncate,
+		  "trials", rc->nTrials);
+  return dict;
 }
 
   
@@ -1499,7 +1509,7 @@ PythonGame(const list* plGame,
 
 	  PyObject* dice = Py_BuildValue("(ii)", sd->anDice[0], sd->anDice[1]);
 
-	  DictSetItemSteal(recordDict, "board", dice);
+	  DictSetItemSteal(recordDict, "dice", dice);
 	    
 	  addLuck(analysis, sd->rLuck, sd->lt);
 	    
@@ -1721,8 +1731,8 @@ PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
 
   return matchDict;
 }
-#endif
-    
+
+
 PyMethodDef gnubgMethods[] = {
 
   { "board", PythonBoard, METH_VARARGS,

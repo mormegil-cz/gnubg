@@ -69,7 +69,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Position and match IDs::		A brief technical explanation.
 * Cubeful equities::                    How do @gnubg{} calculate cubeful equities.
 * Training::				How to store databases and train the neural nets.
-* Scripting::                           How to use @gnubg{} builtin scripting.
+* Scripting::                           How to use @gnubg{} python scripting.
 * Bearoff databases::                   How to generate bearoff databases for use with GNU Backgammon
 * Frequently Asked Questions::		A bunch of questions and answers (mostly taken from r.g.b.).
 * Additional documentation::            Links to other documentation regarding backgammon or GNU Backgammon 
