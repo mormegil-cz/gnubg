@@ -2002,6 +2002,13 @@ void RollDice3d(BoardData *bd)
 		gtk_main();
 		ResumeInput();
 	}
+	else
+	{
+		/* Show dice on board */
+		gtk_widget_queue_draw(bd->drawing_area3d);
+		while(gtk_events_pending())
+			gtk_main_iteration();	
+	}
 }
 
 void AnimateMove3d(BoardData *bd)
