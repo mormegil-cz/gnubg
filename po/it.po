@@ -12428,7 +12428,7 @@ msgid "Distribution of rolls"
 msgstr "Distribuzione dei lanci"
 
 msgid "Depth"
-msgstr "Profondit\xe0"
+msgstr "Profondità"
 
 msgid "Calculating equities for %s"
 msgstr "Calcolo le equities per %s"
