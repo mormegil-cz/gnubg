@@ -1474,8 +1474,8 @@ void showMoveIndicator(BoardData* bd)
 
 	glBegin(GL_QUADS);
 		glVertex2f(-ARROW_UNIT * 2, -ARROW_UNIT);
-		glVertex2f(0, -ARROW_UNIT);
-		glVertex2f(0, ARROW_UNIT);
+		glVertex2f(LIFT_OFF, -ARROW_UNIT);
+		glVertex2f(LIFT_OFF, ARROW_UNIT);
 		glVertex2f(-ARROW_UNIT * 2, ARROW_UNIT);
 	glEnd();
 	glBegin(GL_TRIANGLES);
