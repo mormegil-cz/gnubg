@@ -23,6 +23,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,6 +57,14 @@ static void NewGame( void ) {
     
  reroll:
     RollDice( anDice );
+
+    if( fInterrupt ) {
+	free( plGame );
+	ListDelete( lMatch.plPrev );
+	fMove = fTurn = -1;
+	return;
+    }
+    
     if( fDisplay )
 	printf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
 		ap[ 1 ].szName, anDice[ 1 ] );
@@ -81,7 +90,8 @@ static int ComputerTurn( void ) {
     
     if( !fDoubled && !fResigned && !anDice[ 0 ] ) {
 	/* FIXME if on roll, consider doubling/resigning */
-	RollDice( anDice );
+	if( RollDice( anDice ) < 0 )
+	    return -1;
 
 	if( fDisplay )
 	    ShowBoard();
@@ -107,14 +117,47 @@ static int ComputerTurn( void ) {
 	    CommandTake( NULL );
 	    return 0;
 	} else {
+	    int anBoardMove[ 2 ][ 25 ];
+	    
 	    pmn = malloc( sizeof( *pmn ) );
 	    pmn->mt = MOVE_NORMAL;
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
 	    ListInsert( plGame, pmn );
-	    return FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-				 anBoard, &ap[ fTurn ].ec ) < 0 ? -1 : 0;
+
+	    /* Don't use the global board for this call, to avoid
+	       race conditions with updating the board and aborting the
+	       move with an interrupt. */
+	    memcpy( anBoardMove, anBoard, sizeof( anBoardMove ) );
+	    if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
+			      anBoardMove, &ap[ fTurn ].ec ) < 0 )
+		return -1;
+
+	    /* The move has been determined without an interrupt.  It's
+	       too late to go back now; go ahead and update the board, and
+	       block SIGINTs, to make sure that the rest of the move
+	       processing proceeds atomically.  On POSIX systems, use
+	       sigprocmask() to do it; on older BSD systems, sigblock()
+	       will have to do.  If their system is broken and doesn't
+	       have either of these, we can't do anything to avoid the
+	       race condition. */
+#if HAVE_SIGPROCMASK
+	    {
+		sigset_t ss;
+
+		sigemptyset( &ss );
+		sigaddset( &ss, SIGINT );
+		sigprocmask( SIG_BLOCK, &ss, NULL );
+	    }
+#elif HAVE_SIGBLOCK
+	    sigblock( sigmask( SIGINT ) );
+#endif
+	    fInterrupt = FALSE;
+
+	    memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
+	    
+	    return 0;
 	}
 
     case PLAYER_PUBEVAL:
@@ -589,6 +632,8 @@ static void FreeGame( list *pl ) {
 
 extern void CommandNewGame( char *sz ) {
 
+    char *pch;
+    
     if( nMatchTo && ( anScore[ 0 ] >= nMatchTo ||
 		      anScore[ 1 ] >= nMatchTo ) ) {
 	puts( "The match is already over." );
@@ -597,9 +642,24 @@ extern void CommandNewGame( char *sz ) {
     }
 
     if( fTurn != -1 ) {
-	/* FIXME ask the user if they're sure?  Perhaps we need a "set confirm"
-	   command to let the user be paranoid about shooting themselves in
-	   the foot. */
+	while( fConfirm ) {
+	    if( fInterrupt )
+		return;
+	    
+	    pch = GetInput( "Are you sure you want to start a new game, "
+			    "and discard the one in progress? " );
+
+	    if( fInterrupt )
+		return;
+
+	    if( pch && ( *pch == 'y' || *pch == 'Y' ) )
+		break;
+
+	    if( pch && ( *pch == 'n' || *pch == 'N' ) )
+		return;
+
+	    puts( "Please answer 'y' or 'n'." );
+	}
 
 	/* The last game of the match should always be the current one. */
 	assert( lMatch.plPrev->p == plGame );
@@ -610,6 +670,9 @@ extern void CommandNewGame( char *sz ) {
     }
     
     NewGame();
+
+    if( fInterrupt )
+	return;
     
     if( ap[ fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
@@ -809,7 +872,8 @@ extern void CommandRoll( char *sz ) {
 	return;
     }
     
-    RollDice( anDice );
+    if( RollDice( anDice ) < 0 )
+	return;
 
     ShowBoard();
 
