@@ -1,3 +1,9 @@
+Tue Sep 24 13:52:53 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (SetDefaultPath): New function.  Add a button in file
+	selection widgets setting default paths for each file type (suggested
+	by Albert Silver).
+
 Tue Sep 24 12:47:34 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkprefs.c (GeneralPage): add 2 decimal places to the chequer
