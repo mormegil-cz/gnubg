@@ -98,7 +98,8 @@ typedef struct _rolloutcontext {
 
   unsigned int fCubeful : 1; /* Cubeful rollout */
   unsigned int fVarRedn : 1; /* variance reduction */
-
+  unsigned int fInitial: 1; /* roll out as opening position */
+    
   unsigned short nTruncate; /* truncation */
   unsigned short nTrials; /* number of rollouts */
 
@@ -187,7 +188,8 @@ typedef enum _positionclass {
 				      
 extern int 
 EvalInitialise( char *szWeights, char *szWeightsBinary,
-                char *szDatabase, char *szDir, int nSize, int fProgress );
+                char *szDatabase, char *szDir, int nSize,
+		void (*pfProgress)( int ) );
 
 extern void EvalStatus( char *szOutput );
 

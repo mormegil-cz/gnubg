@@ -46,6 +46,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -569,7 +570,7 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
     }
 }
 
-static unsigned char *HeuristicDatabase( int fProgress ) {
+static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
 
     unsigned char *p = malloc( DATABASE1_SIZE );
     int i;
@@ -583,13 +584,8 @@ static unsigned char *HeuristicDatabase( int fProgress ) {
 
     for( i = 1; i < 54264; i++ ) {
 	GenerateBearoff( p, i );
-	if( fProgress && !( i % 1000 ) ) {
-	    /* FIXME this progress indicator is not very good for GTK
-	       (especially if fTTY is FALSE)... what else could be done? */
-	    putchar( "\\|/-"[ ( i / 1000 ) % 4 ] );
-	    putchar( '\r' );
-	    fflush( stdout );
-	}
+	if( pfProgress && !( i % 1000 ) )
+	    pfProgress( i );
     }
 
     return p;
@@ -628,10 +624,10 @@ EvalNewWeights(int nSize)
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
 		char *szDatabase, char *szDir, int nSize,
-		int fProgress )
+		void (*pfProgress)( int ) )
 {
     FILE *pfWeights;
-    int h, fReadWeights = FALSE, fMalloc = FALSE;
+    int h, i, fReadWeights = FALSE, fMalloc = FALSE;
     char szFileVersion[ 16 ];
     float r;
     static int fInitialised = FALSE;
@@ -643,7 +639,10 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    
 	ComputeTable();
 
-	irandinit( &rc, FALSE );
+	rc.randrsl[ 0 ] = time( NULL );
+	for( i = 0; i < RANDSIZ; i++ )
+	    rc.randrsl[ i ] = rc.randrsl[ 0 ];
+	irandinit( &rc, TRUE );
 	
 	fInitialised = TRUE;
     }
@@ -713,7 +712,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    pBearoff2 = pBearoff1 + DATABASE1_SIZE;
 	    fBearoffHeuristic = FALSE;
 	} else {
-	    pBearoff1 = HeuristicDatabase( fProgress );
+	    pBearoff1 = HeuristicDatabase( pfProgress );
 	    pBearoff2 = NULL;
 	    fBearoffHeuristic = TRUE;
 	}

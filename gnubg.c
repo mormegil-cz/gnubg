@@ -196,6 +196,7 @@ rolloutcontext rcRollout =
   }, 
   FALSE, /* cubeful */
   FALSE, /* variance reduction */
+  FALSE, /* initial position */
   7, /* truncation */
   36, /* number of trials */
   RNG_MERSENNE, /* RNG */
@@ -221,6 +222,7 @@ rolloutcontext rcRollout =
     }, \
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \
+    FALSE, /* initial position */ \
     7, /* truncation */ \
     36, /* number of trials */ \
     RNG_MERSENNE, /* RNG */ \
@@ -573,7 +575,9 @@ command cER = {
     { "cubedecision", CommandSetRolloutCubedecision, "Specify parameters "
       "for cube decisions during rollouts", NULL, acSetEvaluation },
     { "cubeful", CommandSetRolloutCubeful, "Specify whether the "
-      "rollout is cubeful or cubeless", szONOFF, &cOnOff }, 
+      "rollout is cubeful or cubeless", szONOFF, &cOnOff },
+    { "initial", CommandSetRolloutInitial, "Roll out as the initial position "
+      "of a game", szONOFF, &cOnOff },
     { "player", CommandSetRolloutPlayer, "Control evaluation "
       "parameters for each side individually", szPLAYER, acSetRolloutPlayer }, 
     { "rng", CommandSetRolloutRNG, "Specify the random number "
@@ -1192,7 +1196,8 @@ extern void UpdateSettings( void ) {
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.nMatchTo );
     UpdateSetting( &ms.fCrawford );
-
+    UpdateSetting( &ms.gs );
+    
     ShowBoard();
 }
 
@@ -3058,10 +3063,12 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
   fprintf ( pf,
             "%s cubeful %s\n"
             "%s varredn %s\n"
+	    "%s initial %s\n"
             "%s truncation %d\n"
             "%s trials %d\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
+	    sz, prc->fInitial ? "on" : "off",
             sz, prc->nTruncate,
             sz, prc->nTrials );
 
@@ -4265,6 +4272,19 @@ static RETSIGTYPE HandleIO( int idSignal ) {
 }
 #endif
 
+static void BearoffProgress( int i ) {
+
+#if USE_GTK
+    if( fX ) {
+	GTKBearoffProgress( i );
+	return;
+    }
+#endif
+    putchar( "\\|/-"[ ( i / 1000 ) % 4 ] );
+    putchar( '\r' );
+    fflush( stdout );
+}
+
 static void usage( char *argv0 ) {
 
 #if USE_GUI
@@ -4504,7 +4524,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
 			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
 			      fNoBearoff ? NULL : GNUBG_BEAROFF, pchDataDir,
-			      nNewWeights, fShowProgress ) ) < 0 )
+			      nNewWeights,
+			      fShowProgress ? BearoffProgress : NULL ) ) < 0 )
 	exit( EXIT_FAILURE );
     else if( n > 0 && !nNewWeights ) {
 	outputl( "WARNING: No neural net weights were found.  GNU Backgammon "
