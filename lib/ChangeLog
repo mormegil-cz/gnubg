@@ -1,3 +1,8 @@
+Tue Nov 14 13:03:23 2000  Gary Wong  <gtw@research.att.com>
+
+	* isaacs.h: Remove definitions which polluted the namespace
+	(and weren't even used).
+
 Fri Nov 10 13:45:53 2000  Gary Wong  <gtw@research.att.com>
 
 	* neuralnet.c (sigmoid): Optimisations.
