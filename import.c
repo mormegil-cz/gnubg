@@ -918,7 +918,8 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			
 			    pmr = malloc( sizeof( pmr->sd ) );
 			    pmr->sd.mt = MOVE_SETDICE;
-			    pmr->sd.sz = szComment;
+                            /* we do not want comments on MOVE_SETDICE */
+			    pmr->sd.sz = NULL;
 			    pmr->sd.fPlayer = fPlayer;
 			    pmr->sd.anDice[ 0 ] = anRoll[ 0 ];
 			    pmr->sd.anDice[ 1 ] = anRoll[ 1 ];
@@ -926,7 +927,6 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->sd.rLuck = ERR_VAL;
 
 			    AddMoveRecord( pmr );
-                            szComment = NULL;
 
 			}
 		    } else {
