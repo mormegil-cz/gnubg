@@ -3193,11 +3193,17 @@ FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
       }
     }
 
+    if ( ml.cMoves == 1 )
+      /* if there is only one move to evaluate there is no need to continue */
+      goto finished;
+
     if( ScoreMoves( &ml, pci, pec, nPlies ) < 0 ) {
       return -1;
     }
 
   }
+
+ finished:
 
   if( anMove ) {
     for( i = 0; i < ml.cMaxMoves * 2; i++ ) {
@@ -3289,6 +3295,11 @@ FindnSaveBestMoves( movelist *pml,
 	}
       }
 	
+    if ( pml->cMoves == 1 )
+      /* if there is only one move to evaluate there is no need to continue */
+      goto finished;
+
+
   }
 
   /* evaluate moves on top ply */
@@ -3305,6 +3316,8 @@ FindnSaveBestMoves( movelist *pml,
   
   /* set the proper size of the movelist */
   
+ finished:
+
   pml->cMoves = nMoves;
 
   /* Make sure that auchMove was evaluated at the deepest ply. */

@@ -1,3 +1,9 @@
+Fri Jan 10 22:56:30 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (FindBestMovePlied, FindnSAveBestMoves):
+	change algorithm for accept=0 according to Michael
+	Depreli's suggestions.
+
 Fri Jan 10 19:48:24 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* boards.xml: add Michael Depreli's designs.
