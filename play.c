@@ -2478,7 +2478,11 @@ static void DumpGameList(char *szOut, list *plGame) {
             sprintf( sz, _("      Resigns") );
             break;
 	case MOVE_SETDICE:
-	    /* ignore */
+	    sprintf( sz, "%d%d%-2s: %s", 
+                     pmr->sd.anDice[ 0 ],
+                     pmr->sd.anDice[ 1 ],
+                     aszLuckTypeAbbr[ pmr->n.lt ],
+                     _("Rolled") );
 	    break;
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
