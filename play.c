@@ -103,6 +103,15 @@ static annotatetype at;
 static int anLastMove[ 8 ], fLastMove, fLastPlayer;
 #endif
 
+static void
+ec2es ( evalsetup *pes, const evalcontext *pec ) {
+
+  pes->et = EVAL_EVAL;
+  memcpy ( &pes->ec, pec, sizeof ( evalcontext ) );
+
+}
+
+
 static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
 
     int i, nSrc, nDest;
@@ -1978,6 +1987,7 @@ static skilltype GoodDouble (int fisRedouble) {
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
     monitor m;
+    evalsetup es;
 
 	/* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
@@ -2018,6 +2028,12 @@ static skilltype GoodDouble (int fisRedouble) {
 	  return (SKILL_NONE);;
 	}
 	ProgressEnd();
+
+        /* update analysis for hint */
+
+        ec2es ( &es, pec );
+        UpdateStoredCube ( aarOutput, aarOutput /* whatever */,
+                           &es, &ms );
 
         ResumeInput ( &m );
 	    
@@ -2139,6 +2155,7 @@ static skilltype ShouldDrop (int fIsDrop) {
 	int      fAnalyseCubeSave = fAnalyseCube;
 	evalcontext *pec;
     monitor m;
+    evalsetup es;
 
 	/* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
@@ -2174,6 +2191,15 @@ static skilltype ShouldDrop (int fIsDrop) {
 	  fAnalyseCube = fAnalyseCubeSave;
 	  return (SKILL_NONE);
 	}
+
+        /* stored cube decision for hint */
+
+        ec2es ( &es, pec );
+        UpdateStoredCube ( aarOutput,
+                           aarOutput, /* whatever */
+                           &es, &ms );
+
+	    
 	ProgressEnd();
         ResumeInput ( &m );
 	    
@@ -2403,6 +2429,10 @@ static skilltype GoodMove (movenormal *p) {
   }
 
   fAnalyseMove = fAnalyseMoveSaved;
+
+  /* update move list for hint */
+
+  UpdateStoredMoves ( &p->ml, &ms );
 
   ProgressEnd ();
   ResumeInput ( &m );
@@ -3207,12 +3237,13 @@ static skilltype ShouldDouble (void) {
 
     float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
-	cubedecision cd;
+    cubedecision cd;
     float rDeltaEquity;
-	int      fAnalyseCubeSave = fAnalyseCube;
-	evalcontext *pec;
+    int      fAnalyseCubeSave = fAnalyseCube;
+    evalcontext *pec;
+    evalsetup es;
 
-	/* reasons that doubling is not an issue */
+    /* reasons that doubling is not an issue */
     if( (ms.gs != GAME_PLAYING) || 
 		ms.anDice[ 0 ]         || 
 		ms.fDoubled || 
@@ -3245,6 +3276,14 @@ static skilltype ShouldDouble (void) {
 	  return (SKILL_NONE);;
 	}
 	ProgressEnd();
+
+        /* stored cube decision for hint */
+
+        ec2es ( &es, pec );
+        UpdateStoredCube ( aarOutput,
+                           aarOutput, /* whatever */
+                           &es, &ms );
+
 	    
 	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
 

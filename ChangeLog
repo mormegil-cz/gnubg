@@ -1,3 +1,12 @@
+Wed Jul 31 20:11:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Prevent hint from doing re-calculation in tutor mode.
+
+	* play.c (ec2es): "convert" evalcontext to evalsetup.
+	* play.c (GoodMove, GoodDouble, ShouldDouble ShouldDrop):
+	call UpdatedStoredMoves/UpdatedStoredCube -- hint shouldn't
+	re-calculate now.
+
 Wed Jul 31 16:32:13 2002  Øystein Johansen  <oeysteij@online.no>
 
         * gnubg.c: Add terminating NULL pointers. (Thanks Jim)
