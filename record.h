@@ -40,4 +40,6 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr );
 extern playerrecord *
 GetPlayerRecord( char *szPlayer );
 
+#define GNUBGPR ".gnubg/gnubgpr"
+
 #endif

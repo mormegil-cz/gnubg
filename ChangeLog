@@ -1,3 +1,10 @@
+Sun Mar  2 16:02:51 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Rename .gnubgpr to .gnubg/gnubgpr
+
+	* gnubg.c (Movegnubgpr): new function.
+	* record.c: new name for player's records file
+
 Sun Mar  2 15:51:00 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* boards.xml: add new board by JP White.
