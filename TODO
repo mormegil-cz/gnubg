@@ -167,6 +167,14 @@ duplication of effort and to make sure our changes merge easily.
 ** Add option menus corresponding to the "annotate" commands in the
   annotation window. (gary)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
+** Kit Woolsey suggests modifying the "edit mode" interface.  SW
+  <http://www.oasya.com/HTMLHelp/UserInterface/Editing.html> would be a
+  good starting point.
+** The entry fields and spin buttons for player names and scores are
+  confusing: adjusting things has no effect until you press "enter".  A
+  better approach would be to disallow changing those settings except
+  while in edit mode, and they would take effect once you leave edit
+  mode.
 ** When a long string is displayed in the status bar, the main window
   grows to accomodate it -- not very pretty.
 

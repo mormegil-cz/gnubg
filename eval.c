@@ -1794,7 +1794,7 @@ static
 inline
 #endif
 void
-getBearoffProbs(int n, int aaProb[32])
+getBearoffProbs(int n, unsigned int aaProb[32])
 {
   int i;
 
@@ -1959,7 +1959,7 @@ setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
               float* g0, float* g1)
 {
   int i; float* r;
-  int prob[32];
+  unsigned int prob[32];
 
   /* total checkers to side 0/1 */
   int tot0 = 0;
@@ -2014,7 +2014,8 @@ setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
 extern unsigned long
 EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] )
 {
-  int i, j, n, nOpp, aaProb[ 2 ][ 32 ];
+  int i, j, n, nOpp;
+  unsigned int aaProb[ 2 ][ 32 ];
   unsigned long x;
 
   assert( pBearoff1 );

@@ -1,3 +1,7 @@
+Fri Apr 20 11:45:06 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (EvalBearoff1Full): Make aaProb unsigned.
+
 Fri Apr 20 11:31:52 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.o (StatusNeuralNet): Report weights version.
