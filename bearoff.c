@@ -1437,7 +1437,7 @@ isExactBearoff ( const char ac[ 8 ] ) {
 }
 
 
-bearoffcontext *
+extern bearoffcontext *
 BearoffAlloc( void ) {
 
   bearoffcontext *pbc;
