@@ -155,7 +155,7 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
     }, arSkillLevel[] = {
 	0.16f, /* SKILL_VERYBAD */
 	0.08f, /* SKILL_BAD */
-	0, /* SKILL_DOUBTFUL */
+	0.04f, /* SKILL_DOUBTFUL */
 	0, /* SKILL_NONE */
 	0, /* SKILL_INTERESTING */
 	0.02f, /* SKILL_GOOD */

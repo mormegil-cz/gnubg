@@ -1,3 +1,7 @@
+Wed Apr 18 13:59:06 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (Skill): Return SKILL_DOUBTFUL, if appropriate.
+
 Wed Apr 18 13:09:10 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (AnalyzeGame): Compute Statcontext data.

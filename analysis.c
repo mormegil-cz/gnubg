@@ -119,6 +119,8 @@ static skilltype Skill( float r ) {
 	return SKILL_VERYBAD;
     else if( r <= -arSkillLevel[ SKILL_BAD ] )
 	return SKILL_BAD;
+    else if( r <= -arSkillLevel[ SKILL_DOUBTFUL ] )
+	return SKILL_DOUBTFUL;
     else
 	return SKILL_NONE;
 }
