@@ -3924,6 +3924,8 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     GtkWidget *pwMenu;
     GtkWidget *pwItem;
 
+    GtkWidget *pwev;
+
     const char *aszReduced[] = {
       N_("No reduction"),
       NULL,
@@ -3947,9 +3949,11 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
      * Frame with prefined settings 
      */
 
-    pwFrame = gtk_frame_new ( _("Predefined settings") );
+    pwev = gtk_event_box_new();
+    gtk_container_add ( GTK_CONTAINER ( pwEval ), pwev );
 
-    gtk_container_add ( GTK_CONTAINER ( pwEval ), pwFrame );
+    pwFrame = gtk_frame_new ( _("Predefined settings") );
+    gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame );
 
     pw2 = gtk_vbox_new ( FALSE, 8 );
     gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw2 );
@@ -3959,6 +3963,11 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     gtk_container_add ( GTK_CONTAINER ( pw2 ),
                         gtk_label_new ( _("Select a predefined setting:") ) );
+
+    gtk_tooltips_set_tip( ptt, pwev,
+                          _("Select a predefined setting, ranging from "
+                            "beginner's play to the grandmaster setting "
+                            "that will test your patience"), NULL );
 
     pwMenu = gtk_menu_new ();
 
@@ -4005,8 +4014,18 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
 
     /* lookahead */
 
+    pwev = gtk_event_box_new();
+    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
+
+    gtk_tooltips_set_tip( ptt, pwev,
+                          _("Specify how rolls GNU Backgammon should "
+                            "lookahead. Each ply costs approximately a factor "
+                            "of 21 in computational time. Also note that "
+                            "2-ply is equivalent to Snowie's 3-ply setting."),
+                          NULL );
+
     pwFrame2 = gtk_frame_new ( _("Lookahead") );
-    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwFrame2 );
+    gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame2 );
 
     pw = gtk_hbox_new( FALSE, 0 );
     gtk_container_add( GTK_CONTAINER( pwFrame2 ), pw );
@@ -4023,8 +4042,19 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     /* FIXME if and when we support different values for nReduced, this
        check button won't work */
 
+    pwev = gtk_event_box_new();
+    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
+
+    gtk_tooltips_set_tip( ptt, pwev,
+                          _("Instead of averaging over all 21 possible "
+                            "dice rolls it is possible to average over a "
+                            "reduced set, for example 7 rolls for the 33% "
+                            "speed option. The 33% speed option will "
+                            "typically be three times faster than the "
+                            "full search without reduction."), NULL );
+                          
     pwFrame2 = gtk_frame_new ( _("Reduced evaluations") );
-    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwFrame2 );
+    gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame2 );
     pw4 = gtk_vbox_new ( FALSE, 0 );
     gtk_container_add ( GTK_CONTAINER ( pwFrame2 ), pw4 );
 
@@ -4070,10 +4100,40 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pew->pwCubeful ),
 				  pec->fCubeful );
 
+    if ( fMoveFilter ) 
+      /* checker play */
+      gtk_tooltips_set_tip( ptt, pew->pwCubeful,
+                            _("Instruct GNU Backgammon to use cubeful "
+                              "evaluations, i.e., include the value of "
+                              "cube ownership in the evaluations. It is "
+                              "recommended to enable this option."), NULL );
+    else
+      /* checker play */
+      gtk_tooltips_set_tip( ptt, pew->pwCubeful,
+                            _("GNU Backgammon will always perform "
+                              "cubeful evaluations for cube decisions. "
+                              "Disabling this option will make GNU Backgammon "
+                              "use cubeless evaluations in the interval nodes "
+                              "of higher ply evaluations. It is recommended "
+                              "to enable this option"), NULL );
+
     /* noise */
 
+    pwev = gtk_event_box_new();
+    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
+
+    gtk_tooltips_set_tip( ptt, pwev,
+                          _("You can use this option to introduce noise "
+                            "or errors in the evaluations. This is useful for "
+                            "introducing levels below 0-ply. The lower rated "
+                            "bots (e.g., GGotter) on the GamesGrid backgammon "
+                            "server uses this technique. "
+                            "The introduced noise can be "
+                            "deterministic, i.e., always the same noise for "
+                            "the same position, or it can be random"), NULL );
+
     pwFrame2 = gtk_frame_new ( _("Noise") );
-    gtk_container_add ( GTK_CONTAINER ( pw2 ), pwFrame2 );
+    gtk_container_add ( GTK_CONTAINER ( pwev ), pwFrame2 );
 
     pw3 = gtk_vbox_new ( FALSE, 0 );
     gtk_container_add ( GTK_CONTAINER ( pwFrame2 ), pw3 );
@@ -4108,7 +4168,19 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
       pew->pwMoveFilter = MoveFilterWidget ( pmf, pfOK, 
                                              GTK_SIGNAL_FUNC ( EvalChanged ), 
                                              pew );
-      gtk_container_add ( GTK_CONTAINER ( pwEval ), pew->pwMoveFilter );
+
+      pwev = gtk_event_box_new();
+      gtk_container_add ( GTK_CONTAINER ( pwEval ), pwev ); 
+      gtk_container_add ( GTK_CONTAINER ( pwev ), pew->pwMoveFilter );
+
+      gtk_tooltips_set_tip( ptt, pwev,
+                            _("GNU Backgammon will evaluate all moves at "
+                              "0-ply. The move filter controls how many "
+                              "moves to be evaluted at higher plies. "
+                              "A \"smaller\" filter will be faster, but "
+                              "GNU Backgammon may not find the best move. "
+                              "Power users may set up their own filters "
+                              "by clicking on the [Modify] button"), NULL );
 
     }
     else
