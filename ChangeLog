@@ -1,3 +1,8 @@
+Tue Apr 10 16:36:04 2001  Gary Wong  <gtw@research.att.com>
+
+	* database.c (CommandDatabaseGenerate): Fix stupid bug (increment
+	of loop variable was removed).
+
 Tue Apr 10 09:50:31 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (Noise): New function.

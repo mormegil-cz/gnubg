@@ -345,7 +345,8 @@ extern void CommandDatabaseGenerate( char *sz ) {
     InitBoard( anBoardGenerate );
 	
     do {    
-	Progress();
+	if( !( ++c % 10 ) )
+	    Progress();
 	    
 	RollDice( anDiceGenerate );
 
