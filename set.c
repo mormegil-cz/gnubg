@@ -174,6 +174,10 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 #else
         abort();
 #endif
+    
+    /* close file if necesary */    
+    if ( *prng == RNG_FILE )
+      CloseDiceFile();
 
     /* check for RNG-dependent pre-initialisation */
     switch( rngNew ) {
@@ -249,6 +253,24 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 #endif
 	break;
 
+    case RNG_FILE: 
+      {
+        char *sz = NextToken( &szSeed );
+
+        if ( !sz || !*sz ) {
+          outputl( _("Please enter filename!") );
+          return;
+        }
+
+        if ( OpenDiceFile( sz ) < 0 ) {
+          outputf( _("File %s does not exist or is not readable"), sz );
+          return;
+        }
+
+      }
+      break;
+      
+
     default:
 	;
     }
@@ -256,8 +278,18 @@ static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
     outputf( _("GNU Backgammon will now use the %s generator.\n"),
 	     gettext ( aszRNG[ rngNew ] ) );
     
-    if( ( *prng = rngNew ) != RNG_MANUAL )
-	SetSeed( *prng, szSeed );
+    switch ( ( *prng = rngNew ) ) {
+    case RNG_MANUAL:
+    case RNG_RANDOM_DOT_ORG:
+    case RNG_FILE:
+      /* no-op */
+      break;
+
+    default:
+      SetSeed( *prng, szSeed );
+      break;
+    }
+
 }
 
 
@@ -1461,6 +1493,11 @@ extern void CommandSetRNG ( char *sz ) {
 extern void CommandSetRNGAnsi( char *sz ) {
 
     SetRNG( rngSet, RNG_ANSI, sz );
+}
+
+extern void CommandSetRNGFile( char *sz ) {
+
+    SetRNG( rngSet, RNG_FILE, sz );
 }
 
 extern void CommandSetRNGBBS( char *sz ) {

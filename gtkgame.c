@@ -8178,7 +8178,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     static char *aszRNG[] = {
 	N_("ANSI"), N_("Blum, Blum and Shub"), N_("BSD"), N_("ISAAC"),
-	N_("MD5"), N_("Mersenne Twister"), N_("random.org"), N_("User"), NULL
+	N_("MD5"), N_("Mersenne Twister"), N_("random.org"), N_("User"), 
+        N_("File"), NULL
     }, *aszRNGTip[] = {
 	N_("The rand() generator specified by ANSI C (typically linear "
 	   "congruential)"),
@@ -8190,7 +8191,13 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	N_("A generator based on the Message Digest 5 algorithm"),
 	N_("Makoto Matsumoto and Takuji Nishimura's generator"),
 	N_("The online non-deterministic generator from random.org"),
-	N_("A user-provided external shared library")
+	N_("A user-provided external shared library"),
+	N_("Read dice from a file: "
+           "GNU Backgammon will use all characters from the file "
+           "in the range '1' to '6' "
+           "as dice. When the entire file has been read, it will be "
+           "rewinded. You will be prompted for a file "
+           "when closing the options dialog.")
     }, *aszTutor[] = {
 	N_("Doubtful"), N_("Bad"), N_("Very bad")
     };
@@ -9233,6 +9240,9 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
     case 7:
       if (rngCurrent != RNG_USER)
         UserCommand("set rng user");
+      break;
+    case 8:
+      FileCommand( _("Select file with dice"), NULL, "set rng file", NULL, 0 );
       break;
     default:
       break;

@@ -12,6 +12,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* Define if you want a GTK+ neural network training menu */
+#undef ENABLE_TRAIN_MENU
+
 /* Define FALSE */
 #undef FALSE
 

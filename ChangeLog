@@ -1,3 +1,12 @@
+Fri Mar 28 18:27:12 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Read dice from file.
+
+	* gnubg.c: new command "set rng file <filename>".
+	* set.c (CommandSetRNGFile): new function.
+	* set.c (SetRNG): handle new RNG.
+	* gtkgame.c (OptionsPages, OptionsOK): handle new RNG.
+
 Thu Mar 27 21:18:34 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (EvalWidget): add some tooltips.
