@@ -82,23 +82,6 @@ Board1ToPy( int anBoard [ 25 ] ) {
 
 
 static int
-PyToDice( PyObject* p, int anDice[ 2 ] )
-{
-  if( PySequence_Check(p) && PySequence_Size(p) == 2 ) {
-    int j;
-
-    for ( j = 0; j < 2; ++j ) {
-      PyObject* pi = PySequence_Fast_GET_ITEM(p, j);
-    
-      anDice[ j ] = (int) PyInt_AsLong( pi );
-    }
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
 PyToBoard1( PyObject* p, int anBoard[ 25 ] )
 {
   if( PySequence_Check(p) && PySequence_Size(p) == 25 ) {
@@ -133,6 +116,22 @@ PyToBoard(PyObject* p, int anBoard[ 2 ][ 25 ])
   return 0;
 }
 
+static int
+PyToDice( PyObject* p, int anDice[ 2 ] )
+{
+  if( PySequence_Check(p) && PySequence_Size(p) == 2 ) {
+    int j;
+
+    for ( j = 0; j < 2; ++j ) {
+      PyObject* pi = PySequence_Fast_GET_ITEM(p, j);
+    
+      anDice[ j ] = (int) PyInt_AsLong( pi );
+    }
+    return 1;
+  }
+
+  return 0;
+}
 
 static PyObject *
 CubeInfoToPy( const cubeinfo *pci )
@@ -592,12 +591,17 @@ PythonFindBestMove( PyObject* self IGNORE, PyObject *args ) {
   memcpy( anBoard, ms.anBoard, sizeof anBoard );
   memcpy( anDice, ms.anDice, sizeof anDice );
   GetMatchStateCubeInfo( &ci, &ms );
-  if ( ! PyArg_ParseTuple( args, "|OOO(ii)", 
+  if ( ! PyArg_ParseTuple( args, "|OOOO", 
                            &pyBoard, &pyCubeInfo, &pyEvalContext, &pyDice ) )
     return NULL;
 
-  if ( pyDice && !PyToDice( pyBoard, anDice ) )
+  if ( pyDice && !PyToDice( pyDice, anDice ) )
     return NULL;
+
+  if (!anDice){
+	  printf("What? No dice?\n");
+	  return NULL;
+  }
 
   if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
