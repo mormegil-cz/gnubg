@@ -1,3 +1,9 @@
+Tue Oct  9 12:43:23 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (SetAnalysisEvalChequer, SetAnalysisEvalCube): The
+	wrong settings (eval instead of analysis) were displayed.  Reported
+	by Oliver Riordan.
+
 Tue Oct  9 10:29:09 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (ExportGameJF): Add "Wins n points" following a cube drop

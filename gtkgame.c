@@ -3037,7 +3037,7 @@ static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
     GtkWidget *pwDialog, *pwEval;
     int fOK;
     
-    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+    memcpy( &ec, &esAnalysisChequer.ec, sizeof ec );
 
     pwEval = EvalWidget( &ec, &fOK );
     
@@ -3065,7 +3065,7 @@ static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
            different settings for chequer and cube evaluations, and
            rollouts. */
         SetEvalCommands( "set analysis cubedecision eval", &ec,
-                         &esEvalChequer.ec );
+                         &esAnalysisChequer.ec );
     /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
     }
 }
@@ -3079,7 +3079,7 @@ static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
     GtkWidget *pwDialog, *pwEval;
     int fOK;
     
-    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+    memcpy( &ec, &esAnalysisChequer.ec, sizeof ec );
 
     pwEval = EvalWidget( &ec, &fOK );
     
@@ -3107,7 +3107,7 @@ static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
            different settings for chequer and cube evaluations, and
            rollouts. */
         SetEvalCommands( "set analysis chequer eval", &ec,
-                         &esEvalChequer.ec );
+                         &esAnalysisChequer.ec );
     /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
     }
 }
