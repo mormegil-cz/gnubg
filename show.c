@@ -174,6 +174,21 @@ show_evals ( const char *text,
   }
 }
 
+
+static void
+show_movefilters ( const movefilter aaamf[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
+
+  if ( equal_movefilters ( aaamf[ 0 ], aaamf[ 1 ] ) ) 
+    ShowMoveFilters ( aaamf[ 0 ] );
+  else {
+    int i;
+    for (i = 0; i < 2; i++ ) {
+      outputf (_("Player %d:\n"), i);
+      ShowMoveFilters ( aaamf[ i ] );
+    }
+  }
+}
+
 extern void
 ShowRollout ( const rolloutcontext *prc ) {
 
@@ -266,13 +281,13 @@ ShowRollout ( const rolloutcontext *prc ) {
 
   if ( fLateEvals ) {
     outputf ( _("Move filter for first %d plies:\n"), nLate );
-    ShowMoveFilters ( prc->aamfChequer );
+    show_movefilters ( prc->aaamfChequer );
     outputf ( _("Move filter after %d plies:\n"), nLate );
-    ShowMoveFilters ( prc->aamfLate );
+    show_movefilters ( prc->aaamfLate );
   }
   else {
     outputf ( _("Move filter:\n") );
-    ShowMoveFilters ( prc->aamfChequer );
+    show_movefilters ( prc->aaamfChequer );
   }
 
   if (fDoTruncate) {
@@ -1650,6 +1665,13 @@ CommandShowExport ( char *sz ) {
             "\t%s\n"),
             exsExport.szHTMLPictureURL ? exsExport.szHTMLPictureURL :
             _("not defined") );
+
+  /* PNG options */
+
+  outputl ( _("PNG options:\n") );
+
+  outputf ( _("- size of exported PNG pictures: %dx%d\n"),
+            exsExport.nPNGSize * 108, exsExport.nPNGSize * 72 );
 
   outputl ( "\n" );
 

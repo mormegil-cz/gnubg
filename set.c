@@ -1426,7 +1426,36 @@ CommandSetRolloutChequerplay ( char *sz ) {
   SetRolloutEvaluationContextBoth (sz, pec);
 
 }
-  
+
+extern void
+CommandSetRolloutMoveFilter ( char *sz ) {
+
+  SetMoveFilter ( sz, prcSet->aaamfChequer[ 0 ] );
+  SetMoveFilter ( sz, prcSet->aaamfChequer[ 1 ] );
+
+}  
+
+extern void
+CommandSetRolloutLateMoveFilter ( char *sz ) {
+
+  SetMoveFilter ( sz, prcSet->aaamfLate[ 0 ] );
+  SetMoveFilter ( sz, prcSet->aaamfLate[ 1 ] );
+
+}  
+
+extern void
+CommandSetRolloutPlayerMoveFilter ( char *sz ) {
+
+  SetMoveFilter ( sz, prcSet->aaamfChequer[ iPlayerSet ] );
+
+}  
+
+extern void
+CommandSetRolloutPlayerLateMoveFilter ( char *sz ) {
+
+  SetMoveFilter ( sz, prcSet->aaamfLate[ iPlayerLateSet ] );
+
+}  
 
 extern void
 CommandSetRolloutLateChequerplay ( char *sz ) {

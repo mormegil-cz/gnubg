@@ -109,8 +109,8 @@ typedef struct _rolloutcontext {
   evalcontext aecCube[ 2 ], aecChequer [ 2 ]; /* evaluation parameters */
   evalcontext aecCubeLate[ 2 ], aecChequerLate [ 2 ]; /* ... for later moves */
   evalcontext aecCubeTrunc, aecChequerTrunc; /* ... at truncation point */
-  movefilter aamfChequer[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
-  movefilter aamfLate[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  movefilter aaamfChequer[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  movefilter aaamfLate[ 2 ][ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
   unsigned int fCubeful : 1; /* Cubeful rollout */
   unsigned int fVarRedn : 1; /* variance reduction */
   unsigned int fInitial: 1;  /* roll out as opening position */
@@ -499,5 +499,17 @@ locateMove ( int anBoard[ 2 ][ 25 ],
 extern int
 MoveKey ( int anBoard[ 2 ][ 25 ], const int anMove[ 8 ], 
           unsigned char auch[ 10 ] );
+
+extern int
+equal_movefilter ( const int i, 
+                   movefilter amf1[ MAX_FILTER_PLIES ],
+                   movefilter amf2[ MAX_FILTER_PLIES ] );
+
+extern int
+equal_movefilters ( movefilter aamf1[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
+                    movefilter aamf2[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
+
+
+
 
 #endif

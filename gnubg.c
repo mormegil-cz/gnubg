@@ -259,7 +259,8 @@ rolloutcontext rcRollout =
   { FALSE, 0, 0, TRUE, 0.0 },
 
   /* move filters */
-  MOVEFILTER, MOVEFILTER,
+  { MOVEFILTER, MOVEFILTER },
+  { MOVEFILTER, MOVEFILTER },
 
   FALSE, /* cubeful */
   TRUE, /* variance reduction */
@@ -303,7 +304,8 @@ rolloutcontext rcRollout =
     }, \
     { FALSE, 0, 0, TRUE, 0.0 }, /* truncate cube decision */ \
     { FALSE, 0, 0, TRUE, 0.0 }, /* truncate chequerplay */ \
-    MOVEFILTER , MOVEFILTER , \
+    { MOVEFILTER, MOVEFILTER }, \
+    { MOVEFILTER, MOVEFILTER }, \
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \
     FALSE, /* initial position */ \
@@ -882,6 +884,9 @@ command cER = {
       N_("Specify parameters "
          "for cube decisions during later plies of rollouts"),
       NULL, acSetEvaluation },
+    { "movefilter", CommandSetRolloutPlayerLateMoveFilter, 
+      N_("Set parameters for choosing moves to evaluate"), 
+      szFILTER, NULL},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutPlayer[] = {
     { "chequerplay", CommandSetRolloutPlayerChequerplay, 
@@ -890,6 +895,9 @@ command cER = {
     { "cubedecision", CommandSetRolloutPlayerCubedecision,
       N_("Specify parameters for cube decisions during rollouts"),
       NULL, acSetEvaluation },
+    { "movefilter", CommandSetRolloutPlayerMoveFilter, 
+      N_("Set parameters for choosing moves to evaluate"), 
+      szFILTER, NULL},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutBearoffTruncation[] = {
     { "exact", CommandSetRolloutBearoffTruncationExact, 
@@ -914,6 +922,9 @@ command cER = {
   { "plies", CommandSetRolloutLatePlies, 
     N_("Change evaluations for later plies in rollouts"),
     szPLIES, NULL },
+  { "movefilter", CommandSetRolloutLateMoveFilter, 
+    N_("Set parameters for choosing moves to evaluate"), 
+    szFILTER, NULL},
   { "player", CommandSetRolloutLatePlayer, 
     N_("Control eval parameters on later plies for each side individually"), 
     szPLAYER, acSetRolloutLatePlayer }, 
@@ -933,6 +944,9 @@ command cER = {
     {"later", CommandSetRolloutLate,
      N_("Control evaluation parameters for later plies of rollout"),
      NULL, acSetRolloutLate },
+    { "movefilter", CommandSetRolloutMoveFilter, 
+      N_("Set parameters for choosing moves to evaluate"), 
+      szFILTER, NULL},
     { "player", CommandSetRolloutPlayer, 
       N_("Control evaluation parameters for each side individually"), 
       szPLAYER, acSetRolloutPlayer }, 

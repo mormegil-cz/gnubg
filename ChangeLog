@@ -1,3 +1,14 @@
+Fri Dec 20 00:05:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Movefilters for rollouts (some stuff was missing in 
+	previous checkin)
+
+	* gnubg.c, set.c, gtkgame.c, rollouts.c: movefilters for rollouts.
+
+Thu Dec 19 22:59:29 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* show.c (CommandShowExport): show PNG size.
+
 Thu Dec 19 22:48:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Cache reads from bearoff databases on disk.

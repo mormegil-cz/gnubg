@@ -4459,7 +4459,7 @@ typedef struct _rolloutpagewidget {
   int *pfOK;
   GtkWidget *arpwEvCube, *arpwEvCheq;
   evalcontext *precCube, *precCheq;
-  movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ];
+  movefilter *pmf;
 } rolloutpagewidget;
 
 typedef struct _rolloutpagegeneral {
@@ -4546,6 +4546,9 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
               sizeof (evalcontext));
       memcpy (prw->prpwPages[p1]->precCube, prw->prpwPages[p0]->precCube, 
               sizeof (evalcontext));
+
+      memcpy (prw->prpwPages[p1]->pmf, prw->prpwPages[p0]->pmf,
+              MAX_FILTER_PLIES * MAX_FILTER_PLIES * sizeof ( movefilter ) );
     }
   }
 
@@ -4576,7 +4579,8 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 
 /* create one page for rollout settings  for playes & truncation */
 
-static GtkWidget *RolloutPage( rolloutpagewidget *prpw) {
+static GtkWidget *RolloutPage( rolloutpagewidget *prpw, 
+                               const int fMoveFilter ) {
 
   GtkWidget *pwPage;
   GtkWidget *pwHBox;
@@ -4593,7 +4597,7 @@ static GtkWidget *RolloutPage( rolloutpagewidget *prpw) {
 
   gtk_container_add( GTK_CONTAINER( pwFrame ), prpw->arpwEvCheq =
                      EvalWidget( prpw->precCheq, 
-                                 (movefilter *) prpw->aamf, NULL, TRUE ) );
+                                 prpw->pmf, NULL, fMoveFilter ) );
     
   pwFrame = gtk_frame_new ( _("Cube decisions") );
   gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwFrame, FALSE, FALSE, 0 );
@@ -4883,13 +4887,19 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
   RPPlayer0.precCube = &rw.rcRollout.aecCube[0];
   RPPlayer0.precCheq = &rw.rcRollout.aecChequer[0];
+  RPPlayer0.pmf = (movefilter *) rw.rcRollout.aaamfChequer[ 0 ];
+
   RPPlayer0Late.precCube = &rw.rcRollout.aecCubeLate[0];
   RPPlayer0Late.precCheq = &rw.rcRollout.aecChequerLate[0];
+  RPPlayer0Late.pmf = (movefilter *) rw.rcRollout.aaamfLate[ 0 ];
 
   RPPlayer1.precCube = &rw.rcRollout.aecCube[1];
   RPPlayer1.precCheq = &rw.rcRollout.aecChequer[1];
+  RPPlayer1.pmf = (movefilter *) rw.rcRollout.aaamfChequer[ 1 ];
+
   RPPlayer1Late.precCube = &rw.rcRollout.aecCubeLate[1];
   RPPlayer1Late.precCheq = &rw.rcRollout.aecChequerLate[1];
+  RPPlayer1Late.pmf = (movefilter *) rw.rcRollout.aaamfLate[ 1 ];
 
   RPTrunc.precCube = &rw.rcRollout.aecCubeTrunc;
   RPTrunc.precCheq = &rw.rcRollout.aecChequerTrunc;
@@ -4907,23 +4917,23 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
                             gtk_label_new ( _("General Settings" ) ) );
 
   gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[0]),
+                            RolloutPage (rw.prpwPages[0], TRUE ),
                             gtk_label_new ( _("First Play (0) ") ) );
 
   gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[1]),
+                            RolloutPage (rw.prpwPages[1], TRUE ),
                             gtk_label_new ( _("First Play (1) ") ) );
 
   gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[2]),
+                            RolloutPage (rw.prpwPages[2], TRUE ),
                             gtk_label_new ( _("Later Play (0) ") ) );
 
   gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwPages[3]),
+                            RolloutPage (rw.prpwPages[3], TRUE ),
                             gtk_label_new ( _("Later Play (1) ") ) );
 
   gtk_notebook_append_page( GTK_NOTEBOOK( rw.RolloutNotebook ), 
-                            RolloutPage (rw.prpwTrunc),
+                            RolloutPage (rw.prpwTrunc, FALSE ),
                             gtk_label_new ( _("Truncation Pt.") ) );
 
   gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
@@ -4965,8 +4975,8 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
       
       sprintf ( sz, "set rollout player %d movefilter", i );
       SetMovefilterCommands ( sz, 
-                              rw.rcRollout.aamfChequer, 
-                              rcRollout.aamfChequer );
+                              rw.rcRollout.aaamfChequer[ i ], 
+                              rcRollout.aaamfChequer[ i ] );
 
       if (EvalCmp (&rw.rcRollout.aecCubeLate[i], 
                    &rcRollout.aecCubeLate[i], 1 ) ) {
@@ -4984,8 +4994,8 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
       sprintf ( sz, "set rollout late player %d movefilter", i );
       SetMovefilterCommands ( sz, 
-                              rw.rcRollout.aamfLate, 
-                              rcRollout.aamfLate );
+                              rw.rcRollout.aaamfLate[ i ], 
+                              rcRollout.aaamfLate[ i ] );
 
     }
 

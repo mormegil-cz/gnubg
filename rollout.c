@@ -603,7 +603,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                           aanBoard[ ici ], pci,
                           pecChequer [ pci->fMove ],
                           ( iTurn < nLateEvals ) ? 
-                          prc->aamfChequer : prc->aamfLate );
+                          prc->aaamfChequer[ pci->fMove ] : 
+                          prc->aaamfLate[ pci->fMove ] );
 
           else {
 
@@ -645,7 +646,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                         aanBoard[ ici ], pci,
                         pecChequer [ pci->fMove ],
                         ( iTurn < nLateEvals ) ? 
-                        prc->aamfChequer : prc->aamfLate );
+                        prc->aaamfChequer[ pci->fMove ] : 
+                        prc->aaamfLate[ pci->fMove ] );
 
         }
 
