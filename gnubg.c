@@ -1828,6 +1828,8 @@ command cER = {
       N_("Lookup data in various bearoff databases "), NULL, NULL },
     { "board", CommandShowBoard, 
       N_("Redisplay the board position"), szOPTPOSITION, NULL },
+    { "buildinfo", CommandShowBuildInfo, 
+      N_("Display details of this build of gnubg"), NULL, NULL },
     { "cache", CommandShowCache, N_("Display statistics on the evaluation "
       "cache"), NULL, NULL },
     { "calibration", CommandShowCalibration,
@@ -1845,6 +1847,8 @@ command cER = {
       "of GNU Backgammon"), NULL, NULL },
     { "crawford", CommandShowCrawford, 
       N_("See if this is the Crawford game"), NULL, NULL },
+    { "credits", CommandShowCredits, 
+      N_("Display contributors to gnubg"), NULL, NULL },
     { "cube", CommandShowCube, N_("Display the current cube value and owner"),
       NULL, NULL },
     { "cubeefficiency", CommandShowCubeEfficiency, 
@@ -2083,6 +2087,9 @@ char *aszVersion[] = {
 #endif
 #if HAVE_LIBGMP
     N_("Long RNG seeds supported."),
+#endif
+#if USE_BOARD3D
+    N_("3d Boards supported."),
 #endif
 #if USE_SOUND
     N_("Sound systems supported."),

@@ -7630,125 +7630,284 @@ static void DestroyAbout( gpointer p ) {
 
 extern void GTKShowVersion( void ) {
 
-    static GtkWidget *pwDialog;
-    GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 ),
-	*pwHBox = gtk_hbox_new( FALSE, 8 ),
-	*pwPrompt = gtk_label_new( _("GNU Backgammon") ),
-	*pwList = gtk_list_new(),
-	*pwScrolled = gtk_scrolled_window_new( NULL, NULL ),
-	*pwButton;
-    GtkRcStyle *ps = gtk_rc_style_new();
-    int i;
-    static char *aszAuthors[] = { "Joseph Heled", "Øystein Johansen",
-				  "David Montgomery",
-				  "Jim Segrave",
-				  "Jrn Thyssen", "Gary Wong" };
-    extern char *aszCredits[];
+#include "xpm/gnubg-big.xpm"
+	static GtkWidget *pwDialog;
+	GtkWidget *pwTopHBox = gtk_hbox_new( FALSE, -8 ),
+		*pwImageVBox = gtk_vbox_new( FALSE, 0 ),
+		*pwButtonBox = gtk_vbox_new( FALSE, 0 ),
+		*pwOK, *pwPrompt, *pwImage, *pwButton;
+	GtkRcStyle *ps = gtk_rc_style_new();
+	char PromptStr[255];
+	int i;
+	GtkAccelGroup *pag = gtk_accel_group_new();
 
-    if( pwDialog )
-	gtk_widget_destroy( pwDialog );
-    
-    pwDialog = GTKCreateDialog( _("About GNU Backgammon"), DT_GNU,
-			     NULL, NULL );
-    gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyAbout, &pwDialog );
+	if( pwDialog )
+		gtk_widget_destroy( pwDialog );
 
-    gtk_container_set_border_width( GTK_CONTAINER( pwBox ), 4 );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwBox );
+	pwDialog = gtk_dialog_new();
+	gtk_window_set_title( GTK_WINDOW( pwDialog ), _("About GNU Backgammon") );
+	gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyAbout, &pwDialog );
 
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt, FALSE, FALSE, 0 );
+	gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ), pwTopHBox );
+
+	gtk_box_pack_start( GTK_BOX( pwTopHBox ), pwImageVBox, FALSE, FALSE, 0 );
+	/* image */
+	pwImage = image_from_xpm_d ( gnubg_big_xpm, pwDialog );
+	gtk_misc_set_padding( GTK_MISC( pwImage ), 8, 8 );
+	gtk_box_pack_start( GTK_BOX( pwImageVBox ), pwImage, FALSE, FALSE, 0 );
+
+	sprintf(PromptStr, "%s %s", _("GNU Backgammon"), VERSION);
+	pwPrompt = gtk_label_new(PromptStr);
+	gtk_box_pack_start( GTK_BOX( pwImageVBox ), pwPrompt, FALSE, FALSE, 0 );
 #if GTK_CHECK_VERSION(1,3,10)
-    ps->font_desc = pango_font_description_new();
-    pango_font_description_set_family_static( ps->font_desc, "serif" );
-    pango_font_description_set_size( ps->font_desc, 64 * PANGO_SCALE );    
+	ps->font_desc = pango_font_description_new();
+	pango_font_description_set_family_static( ps->font_desc, "serif" );
+	pango_font_description_set_size( ps->font_desc, 24 * PANGO_SCALE );    
 #else
-    ps->font_name = g_strdup( "-*-times-medium-r-normal-*-64-*-*-*-p-*-"
-			      "*-*" );
+	ps->font_name = g_strdup( "-*-times-medium-r-normal-*-24-*-*-*-p-*-"
+		"*-*" );
 #endif
-    gtk_widget_modify_style( pwPrompt, ps );
-    gtk_rc_style_unref( ps );
-    
-    gtk_box_pack_start( GTK_BOX( pwBox ),
-			gtk_label_new( "version " VERSION 
-#ifdef WIN32
-                                       " (build " __DATE__ ")"
-#endif
-                                       ), 
-                        FALSE, FALSE, 0 );
-
-    ps = gtk_rc_style_new();
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
-			gtk_label_new( "Copyright 1999, 2000, 2001, 2002, "
-				       "2003 Gary Wong" ), FALSE, FALSE, 4 );
-#if GTK_CHECK_VERSION(1,3,10)
-    ps->font_desc = pango_font_description_new();
-    pango_font_description_set_family_static( ps->font_desc, "sans" );
-    pango_font_description_set_size( ps->font_desc, 8 * PANGO_SCALE );    
-#else
-    ps->font_name = g_strdup( "-*-helvetica-medium-r-normal-*-8-*-*-*-p-*-"
-			      "*-*" );
-#endif
-    gtk_widget_modify_style( pwPrompt, ps );
-
-    for( i = 1; aszVersion[ i ]; i++ ) {
-	gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
-			    gtk_label_new( gettext ( aszVersion[ i ] ) ),
-			    FALSE, FALSE, 0 );
 	gtk_widget_modify_style( pwPrompt, ps );
-    }
-    
-    gtk_box_pack_start( GTK_BOX( pwBox ),
-			gtk_label_new( _("GNU Backgammon was written by:") ),
-			FALSE, FALSE, 8 );
-    
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwHBox, FALSE, FALSE, 0 );
+	gtk_rc_style_unref( ps );
 
-    for( i = 0; i < 6; i++ )
-	gtk_container_add( GTK_CONTAINER( pwHBox ),
-			   gtk_label_new( TRANS( aszAuthors[ i ] ) ) );
-    
-    gtk_box_pack_start( GTK_BOX( pwBox ),
-			gtk_label_new( _("With special thanks to:") ),
-			FALSE, FALSE, 8 );
+	pwOK = gtk_button_new_with_label( _("OK") );
 
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwHBox = gtk_hbox_new( FALSE, 0 ),
-			TRUE, TRUE, 0 );
+#if GTK_CHECK_VERSION(1,3,15)
+	gtk_window_add_accel_group( GTK_WINDOW( pwDialog ), pag );
+#else
+	gtk_accel_group_attach( pag, GTK_OBJECT( pwDialog ) );
+#endif
+	gtk_widget_add_accelerator( pwOK, "clicked", pag, GDK_Escape, 0, 0 );
 
-    gtk_box_pack_start( GTK_BOX( pwHBox ), pwScrolled, TRUE, FALSE, 0 );
-    gtk_widget_set_usize( pwScrolled, 200, 100 );
-    gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScrolled ),
-					   pwList );
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
-				    GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
-    
-    for( i = 0; aszCredits[ i ]; i++ ) {
-	gtk_container_add( GTK_CONTAINER( pwList ),
-			   gtk_list_item_new_with_label(
-			       TRANS( aszCredits[ i ] ) ) );
-    }
+	gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->action_area ), pwOK );
+	GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
+	gtk_widget_grab_default( pwOK );
+	gtk_signal_connect( GTK_OBJECT( pwOK ), "clicked", GTK_SIGNAL_FUNC( OK ), NULL );
 
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt = gtk_label_new(
+	/* Buttons on right side */
+	gtk_box_pack_start( GTK_BOX( pwTopHBox ), pwButtonBox, FALSE, FALSE, 8 );
+
+	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
+	pwButton = gtk_button_new_with_label(_("Credits") ),
+	FALSE, FALSE, 8 );
+	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+		GTK_SIGNAL_FUNC( CommandShowCredits ), NULL );
+	
+	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
+	pwButton = gtk_button_new_with_label(_("Build Info") ),
+	FALSE, FALSE, 8 );
+	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+		GTK_SIGNAL_FUNC( CommandShowBuildInfo ), NULL );
+	
+	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
+	pwButton = gtk_button_new_with_label(_("Copying conditions") ),
+	FALSE, FALSE, 8 );
+	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+		GTK_SIGNAL_FUNC( CommandShowCopying ), NULL );
+	
+	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
+	pwButton = gtk_button_new_with_label(_("Warranty") ),
+	FALSE, FALSE, 8 );
+	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
+		GTK_SIGNAL_FUNC( CommandShowWarranty ), NULL );
+
+	gtk_widget_show_all( pwDialog );
+}
+
+extern void GTKShowBuildInfo(void)
+{
+	GtkWidget *pwDialog, *pwBox, *pwPrompt;
+	int i;
+
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Build Info"),
+					DT_INFO, NULL, NULL );
+	pwBox = gtk_vbox_new( FALSE, 0);
+	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
+
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
+
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+	gtk_box_pack_start( GTK_BOX( pwBox ),
+		gtk_label_new( "Version " VERSION 
+#ifdef WIN32
+		" (build " __DATE__ ")"
+#endif
+		), FALSE, FALSE, 4 );
+
+	gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
+
+	for( i = 1; aszVersion[ i ]; i++ )
+		gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt =
+			gtk_label_new( gettext ( aszVersion[ i ] ) ),
+			FALSE, FALSE, 0 );
+
+	gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
+
+	gtk_box_pack_start( GTK_BOX( pwBox ),
+			gtk_label_new( "Copyright 1999-2004 Gary Wong" ), FALSE, FALSE, 4 );
+
+	gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt = gtk_label_new(
 	_("GNU Backgammon is free software, covered by the GNU General Public "
 	"License version 2, and you are welcome to change it and/or "
 	"distribute copies of it under certain conditions.  There is "
 	"absolutely no warranty for GNU Backgammon.") ), FALSE, FALSE, 4 );
-    gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
-    gtk_widget_modify_style( pwPrompt, ps );
-    gtk_rc_style_unref( ps );
+	gtk_label_set_line_wrap( GTK_LABEL( pwPrompt ), TRUE );
+	
+	gtk_widget_show_all( pwDialog );
+	gtk_main();
+}
 
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
-		       pwButton = gtk_button_new_with_label(
-			   _("Copying conditions") ) );
-    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-			GTK_SIGNAL_FUNC( CommandShowCopying ), NULL );
-    
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
-		       pwButton = gtk_button_new_with_label(
-			   _("Warranty") ) );
-    gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-			GTK_SIGNAL_FUNC( CommandShowWarranty ), NULL );
-    
-    gtk_widget_show_all( pwDialog );
+/* Stores names in credits so not duplicated in list at bottom */
+list names;
+
+static void AddTitle(GtkWidget* pwBox, char* Title)
+{
+	GtkRcStyle *ps = gtk_rc_style_new();
+	GtkWidget* pwTitle = gtk_label_new(Title),
+		*pwHBox = gtk_hbox_new( FALSE, 0);
+	gtk_box_pack_start(GTK_BOX(pwBox), pwHBox, FALSE, FALSE, 0);
+
+#if GTK_CHECK_VERSION(1,3,10)
+	ps->font_desc = pango_font_description_new();
+	pango_font_description_set_family_static( ps->font_desc, "serif" );
+	pango_font_description_set_size( ps->font_desc, 16 * PANGO_SCALE );    
+#else
+	ps->font_name = g_strdup( "-*-times-medium-r-normal-*-16-*-*-*-p-*-*-*" );
+#endif
+	gtk_widget_modify_style( pwTitle, ps );
+	gtk_rc_style_unref( ps );
+
+	gtk_label_set_justify (GTK_LABEL (pwTitle), GTK_JUSTIFY_RIGHT);
+	gtk_box_pack_start(GTK_BOX(pwHBox), pwTitle, FALSE, FALSE, 0);
+}
+
+static void AddName(GtkWidget* pwBox, char* name, char* type)
+{
+	char buf[255];
+	if (type)
+		sprintf(buf, "%s: %s", type, TRANS(name));
+	else
+		strcpy(buf, TRANS(name));
+
+	gtk_box_pack_start(GTK_BOX(pwBox), gtk_label_new(buf), TRUE, FALSE, 0);
+	ListInsert(&names, name);
+}
+
+static int FindName(list* pList, char* name)
+{
+	list *pl;
+	for (pl = pList->plNext; pl != pList; pl = pl->plNext )
+	{
+		if (!strcmp(pl->p, name))
+			return TRUE;
+	}
+	return FALSE;
+}
+
+typedef struct _credEntry {
+	char* Name;
+	char* Type;
+} credEntry;
+
+typedef struct _credits {
+	char* Title;
+	credEntry *Entry;
+} credits;
+
+static credEntry ceAuthors[] = {{"Joseph Heled", 0}, {"Øystein Johansen", 0},
+	{"Jonathan Kinsey", 0}, {"David Montgomery", 0}, {"Jim Segrave", 0},
+	{"Jørn Thyssen", 0}, {"Gary Wong", 0}, {0, 0} };
+
+static credEntry ceSupport[] = {{"Øystein Johansen", N_("Web Pages")},
+	{"Achim Mueller", N_("Manual")},
+	{"Nardy Pillards", N_("Web Pages")},
+	{"Albert Silver", N_("Tutorial")}, {0, 0}};
+
+static credEntry ceTranslations[] = {
+	{"Petr Kadlec", N_("Czech")},
+	{"Jørn Thyssen", N_("Danish")},
+	{"Olivier Baur", N_("French")},
+	{"Achim Mueller", N_("German")},
+	{"Hlynur Sigurgíslason", N_("Icelandic")},
+	{"Renzo Campagna", N_("Italian")},
+	{"Kaoru TAKAHASHI", N_("Japanese")},
+	{"Akif Dinc", N_("Turkish")},
+	{0, 0}};
+
+credits creditList[] =
+{
+	{N_("Developers"), ceAuthors},
+	{N_("Support"), ceSupport},
+	{N_("Translations"), ceTranslations},
+	{0, 0}
+};
+
+extern void GTKCommandShowCredits(void)
+{
+	extern char *aszCredits[];
+	GtkWidget *pwDialog, *pwBox, *pwHBox, *pwPrompt,
+		*pwList = gtk_list_new(),
+		*pwScrolled = gtk_scrolled_window_new( NULL, NULL );
+	int i;
+	credits *credit = &creditList[0];
+	credEntry* ce;
+
+	ListCreate(&names);
+
+	pwDialog = GTKCreateDialog( _("GNU Backgammon - Credits"),
+					DT_INFO, NULL, NULL );
+	gtk_widget_set_usize(pwDialog, 300, -1);
+	pwBox = gtk_vbox_new( FALSE, 0);
+	gtk_container_set_border_width( GTK_CONTAINER(pwBox), 8);
+
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwBox);
+
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+	while (credit->Title)
+	{
+		AddTitle(pwBox, _(credit->Title));
+
+		ce = credit->Entry;
+		while(ce->Name)
+		{
+			AddName(pwBox, ce->Name, ce->Type);
+			ce++;
+		}
+		gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
+		credit++;
+	}
+
+	AddTitle(pwBox, _("Special thanks"));
+
+	pwHBox = gtk_hbox_new( FALSE, 0);
+	gtk_box_pack_start( GTK_BOX( pwBox ), pwHBox, FALSE, FALSE, 0 );
+
+	gtk_box_pack_start( GTK_BOX( pwHBox ), pwScrolled, TRUE, FALSE, 0 );
+	gtk_widget_set_usize( pwScrolled, 150, 150 );
+	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW( pwScrolled ),
+						pwList );
+	gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolled ),
+					GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS );
+
+	for( i = 0; aszCredits[ i ]; i++ ) {
+		if (!FindName(&names, aszCredits[ i ]))
+		gtk_container_add( GTK_CONTAINER( pwList ),
+			gtk_list_item_new_with_label(TRANS(aszCredits[ i ])) );
+	}
+
+	ListDeleteAll(&names);
+	gtk_widget_show_all( pwDialog );
+	gtk_main();
 }
 
 #if HAVE_GTKTEXI

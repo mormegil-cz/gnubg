@@ -943,6 +943,22 @@ extern void CommandShowTurn( char *sz ) {
 		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 }
 
+extern void CommandShowBuildInfo( char *sz )
+{
+#if USE_GTK
+	if( fX )
+		GTKShowBuildInfo();
+#endif
+}
+
+extern void CommandShowCredits( char *sz )
+{
+#if USE_GTK
+	if( fX )
+		GTKCommandShowCredits();
+#endif
+}
+
 extern void CommandShowWarranty( char *sz ) {
 
 #if USE_GTK
