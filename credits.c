@@ -2,6 +2,7 @@
    Modify credits.sh instead. */
 
 char *aszCredits[] = {
+    "Fotis",
     "Kazuaki Asai",
     "Eric Augustine",
     "Steve Baedke",
@@ -52,6 +53,7 @@ char *aszCredits[] = {
     "Albert Silver",
     "Peter Sochovsky",
     "Mark Spencer",
+    "Scott Steiner",
     "Maik Stiebler",
     "W. Stroop (Rob)",
     "Gerry Tesauro",
