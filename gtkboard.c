@@ -219,17 +219,19 @@ static void board_redraw_translucent( GtkWidget *board, BoardData *bd,
     x = positions[ fClockwise ][ n ][ 0 ] * bd->board_size;
     y = positions[ fClockwise ][ n ][ 1 ] * bd->board_size;
     cx = 6 * bd->board_size;
-    cy = -c_chequer * bd->board_size * positions[ fClockwise ][ n ][ 2 ];
-
-    if( ( invert = cy < 0 ) ) {
-	y += cy * 4 / 5;
-	cy = -cy;
-    }
-
+    cy = positions[ fClockwise ][ n ][ 2 ] * bd->board_size;
+    
+    if( ( invert = cy > 0 ) ) {
+	cy = cy * ( c_chequer - 1 ) + 6 * bd->board_size;
+	y += 6 * bd->board_size - cy;
+    } else
+	cy = -cy * ( c_chequer - 1 ) + 6 * bd->board_size;
+    
     /* copy empty point image */
     if( !n || n == 25 )
 	/* on bar */
-	memcpy( rgb_under[ 0 ][ 0 ], bd->rgb_bar, sizeof( rgb_under ) );
+	memcpy( rgb_under[ 0 ][ 0 ], n ? bd->rgb_bar1 : bd->rgb_bar0,
+		cy * cx * 3 );
     else if( n > 25 )
 	/* bear off tray */
 	memcpy( rgb_under[ 0 ][ 0 ], bd->rgb_empty, sizeof( rgb_under ) );
@@ -2244,7 +2246,8 @@ extern void board_free_pixmaps( BoardData *bd ) {
 	free( bd->ai_refract[ 1 ] );
 	free( bd->rgb_points );
 	free( bd->rgb_empty );
-	free( bd->rgb_bar );
+	free( bd->rgb_bar0 );
+	free( bd->rgb_bar1 );
 	free( bd->rgb_saved );
 	free( bd->rgb_temp );
 	free( bd->rgb_temp_saved );
@@ -2268,45 +2271,6 @@ extern void board_free_pixmaps( BoardData *bd ) {
     gdk_bitmap_unref( bd->bm_cube_mask );
 
     gdk_font_unref( bd->cube_font );
-}
-
-static void board_draw_border( GdkPixmap *pm, GdkGC *gc, int x0, int y0,
-			       int x1, int y1, int board_size,
-			       GdkColor *colours, gboolean invert ) {
-#define COLOURS( ipix, edge ) ( *( colours + (ipix) * 4 + (edge) ) )
-
-    int i;
-    GdkPoint points[ 5 ];
-
-    points[ 0 ].x = points[ 1 ].x = points[ 4 ].x = x0 * board_size;
-    points[ 2 ].x = points[ 3 ].x = x1 * board_size - 1;
-
-    points[ 1 ].y = points[ 2 ].y = y0 * board_size;
-    points[ 0 ].y = points[ 3 ].y = points[ 4 ].y = y1 * board_size - 1;
-    
-    for( i = 0; i < board_size; i++ ) {
-	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 0 ) :
-			       &COLOURS( i, 2 ) );
-	gdk_draw_lines( pm, gc, points, 2 );
-
-	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 1 ) :
-			       &COLOURS( i, 3 ) );
-	gdk_draw_lines( pm, gc, points + 1, 2 );
-
-	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 2 ) :
-			       &COLOURS( i, 0 ) );
-	gdk_draw_lines( pm, gc, points + 2, 2 );
-
-	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 3 ) :
-			       &COLOURS( i, 1 ) );
-	gdk_draw_lines( pm, gc, points + 3, 2 );
-
-	points[ 0 ].x = points[ 1 ].x = ++points[ 4 ].x;
-	points[ 2 ].x = --points[ 3 ].x;
-
-	points[ 1 ].y = ++points[ 2 ].y;
-	points[ 0 ].y = points[ 3 ].y = --points[ 4 ].y;
-    }
 }
 
 static void board_draw_labels( BoardData *bd ) {
@@ -2368,24 +2332,378 @@ static guchar board_pixel( BoardData *bd, int i, int antialias, int j ) {
 		    antialias ) * ( bd->arLight[ 2 ] * 0.8 + 0.2 ) / 20 );
 }
 
-static void board_draw( GtkWidget *widget, BoardData *bd ) {
+static void wood_pixel( float x, float y, float z, unsigned char auch[ 3 ] ) {
 
-    gint i, ix, iy, antialias;
+    float r;
+    int grain;
+
+    r = sqrt( x * x + y * y );
+    r -= z / 60;
+    r *= 3;
+    grain = ( (int) r ) % 60;
+
+    if( grain > 40 )
+	grain = 120 - 2 * grain;
+    
+    auch[ 0 ] = 80 + ( grain * 3 / 2 );
+    auch[ 1 ] = 40 + grain;
+    auch[ 2 ] = grain / 2;
+}
+
+static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
+
+    int i, x, y, nSpecularTop, anSpecular[ 4 ][ bd->board_size ], nSpecular,
+	s = bd->board_size;
+    unsigned char left[ s * 72 ][ s * 3 ][ 3 ], right[ s * 72 ][ s * 3 ][ 3 ],
+	top[ s * 3 ][ s * 108 ][ 3 ], bottom[ s * 3 ][ s * 108 ][ 3 ],
+	lbar[ s * 72 ][ s * 6 ][ 3 ], rbar[ s * 72 ][ s * 6 ][ 3 ],
+	lsep[ s * 68 ][ s * 3 ][ 3 ], rsep[ s * 68 ][ s * 3 ][ 3 ],
+	ldiv[ s * 6 ][ s * 8 ][ 3 ], rdiv[ s * 6 ][ s * 8 ][ 3 ],
+	a[ 3 ];
+    float rx, rz, arDiffuse[ 4 ][ s ], cos_theta, rDiffuseTop,
+	arHeight[ s ], rHeight, rDiffuse;
+
+    nSpecularTop = pow( bd->arLight[ 2 ], 20 ) * 0.6 * 0x100;
+    rDiffuseTop = 0.8 * bd->arLight[ 2 ] + 0.2;
+	
+    for( x = 0; x < s; x++ ) {
+	rx = 1.0 - ( (float) x / s );
+	rz = sqrt( 1.001 - rx * rx );
+	arHeight[ x ] = rz * s;
+	    
+	for( i = 0; i < 4; i++ ) {
+	    cos_theta = bd->arLight[ 2 ] * rz + bd->arLight[ i & 1 ] * rx;
+	    arDiffuse[ i ][ x ] = 0.8 * cos_theta + 0.2;
+	    anSpecular[ i ][ x ] = pow( cos_theta, 20 ) * 0.6 * 0x100;
+
+	    if( !( i & 1 ) )
+		rx = -rx;
+	}
+    }
+
+    /* Top and bottom edges */
+    for( y = 0; y < s * 3; y++ )
+	for( x = 0; x < s * 108; x++ ) {
+	    if( y < s ) {
+		rDiffuse = arDiffuse[ 3 ][ y ];
+		nSpecular = anSpecular[ 3 ][ y ];
+		rHeight = arHeight[ y ];
+	    } else if( y < 2 * s ) {
+		rDiffuse = rDiffuseTop;
+		nSpecular = nSpecularTop;
+		rHeight = s;
+	    } else {
+		rDiffuse = arDiffuse[ 1 ][ 3 * s - y - 1 ];
+		nSpecular = anSpecular[ 1 ][ 3 * s - y - 1 ];
+		rHeight = arHeight[ 3 * s - y - 1 ];
+	    }
+	    
+	    wood_pixel( 100 - y * 0.85 + x * 0.1, rHeight - x * 0.11,
+			200 + x * 0.93 + y * 0.16, a );
+	    
+	    for( i = 0; i < 3; i++ )
+		top[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	    
+	    wood_pixel( 123 + y * 0.87 - x * 0.08, rHeight + x * 0.06,
+			-100 - x * 0.94 - y * 0.11, a );
+	    
+	    for( i = 0; i < 3; i++ )
+		bottom[ y ][ x ][ i ] =
+		    clamp( a[ i ] * rDiffuse + nSpecular );
+	}
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 0, 0, 108 * s,
+			3 * s, GDK_RGB_DITHER_MAX,
+			top[ 0 ][ 0 ], 108 * s * 3 );
+    gdk_draw_rgb_image( bd->pm_board, gc, 0, 69 * s,
+			108 * s,
+			3 * s, GDK_RGB_DITHER_MAX,
+			bottom[ 0 ][ 0 ], 108 * s * 3 );
+    
+    /* Left and right edges */
+    for( y = 0; y < s * 72; y++ )
+	for( x = 0; x < s * 3; x++ ) {
+	    if( x < s ) {
+		rDiffuse = arDiffuse[ 2 ][ x ];
+		nSpecular = anSpecular[ 2 ][ x ];
+		rHeight = arHeight[ x ];
+	    } else if( x < 2 * s ) {
+		rDiffuse = rDiffuseTop;
+		nSpecular = nSpecularTop;
+		rHeight = s;
+	    } else {
+		rDiffuse = arDiffuse[ 0 ][ 3 * s - x - 1 ];
+		nSpecular = anSpecular[ 0 ][ 3 * s - x - 1 ];
+		rHeight = arHeight[ 3 * s - x - 1 ];
+	    }
+    
+	    wood_pixel( 300 + x * 0.9 + y * 0.1, rHeight + y * 0.06,
+			200 - y * 0.9 + x * 0.1, a );
+
+	    for( i = 0; i < 3; i++ )
+		left[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	    
+	    wood_pixel( -100 - x * 0.86 + y * 0.13, rHeight - y * 0.07,
+			300 + y * 0.92 + x * 0.08, a );
+
+	    for( i = 0; i < 3; i++ )
+		right[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	}
+
+    /* Four outer corners */
+    for( y = 0; y < s * 3; y++ )
+	for( x = y; x < s * 3; x++ )
+	    for( i = 0; i < 3; i++ ) {
+		left[ y ][ x ][ i ] = top[ y ][ x ][ i ];
+		left[ 72 * s - y - 1 ][ x ][ i ] =
+		    bottom[ 3 * s - y - 1 ][ x ][ i ];
+		right[ y ][ 3 * s - x - 1 ][ i ] =
+		    top[ y ][ 108 * s - x - 1 ][ i ];
+		right[ 72 * s - y - 1 ][ 3 * s - x - 1 ][ i ] =
+		    bottom[ 3 * s - y - 1 ][ 108 * s - x - 1 ][ i ];
+	    }
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 0, 0, 3 * s,
+			72 * s, GDK_RGB_DITHER_MAX,
+			left[ 0 ][ 0 ], 3 * s * 3 );
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 105 * s, 0, 3 * s,
+			72 * s, GDK_RGB_DITHER_MAX,
+			right[ 0 ][ 0 ], 3 * s * 3 );
+    
+    /* Bar */
+    for( y = 0; y < s * 72; y++ )
+	for( x = 0; x < s * 6; x++ ) {
+	    if( y < s && y < x && y < s * 6 - x - 1 ) {
+		rDiffuse = arDiffuse[ 3 ][ y ];
+		nSpecular = anSpecular[ 3 ][ y ];
+		rHeight = arHeight[ y ];
+	    } else if( y > 71 * s && s * 72 - y - 1 < x &&
+		       s * 72 - y - 1 < s * 6 - x - 1 ) {
+		rDiffuse = arDiffuse[ 1 ][ 72 * s - y - 1 ];
+		nSpecular = anSpecular[ 1 ][ 72 * s - y - 1 ];
+		rHeight = arHeight[ 72 * s - y - 1 ];
+	    } else if( x < s ) {
+		rDiffuse = arDiffuse[ 2 ][ x ];
+		nSpecular = anSpecular[ 2 ][ x ];
+		rHeight = arHeight[ x ];
+	    } else if( x < 5 * s ) {
+		rDiffuse = rDiffuseTop;
+		nSpecular = nSpecularTop;
+		rHeight = s;
+	    } else {
+		rDiffuse = arDiffuse[ 0 ][ 6 * s - x - 1 ];
+		nSpecular = anSpecular[ 0 ][ 6 * s - x - 1 ];
+		rHeight = arHeight[ 6 * s - x - 1 ];
+	    }
+    
+	    wood_pixel( -100 - x * 0.88 + y * 0.08, rHeight - y * 0.1,
+			-200 + y * 0.99 - x * 0.12, a );
+
+	    for( i = 0; i < 3; i++ )
+		lbar[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	    
+	    wood_pixel( 100 - x * 0.86 + y * 0.02, rHeight - y * 0.07,
+			-300 - y * 0.92 + x * 0.03, a );
+
+	    for( i = 0; i < 3; i++ )
+		rbar[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	}
+
+    /* Four bar corners */
+    for( y = 0; y < s * 3; y++ )
+	for( x = 0; x < 3 * s - y - 1; x++ )
+	    for( i = 0; i < 3; i++ ) {
+		lbar[ y ][ x ][ i ] = top[ y ][ 48 * s + x ][ i ];
+		lbar[ 72 * s - y - 1 ][ x ][ i ] =
+		    bottom[ 3 * s - y - 1 ][ 48 * s + x ][ i ];
+		rbar[ y ][ 6 * s - x - 1 ][ i ] =
+		    top[ y ][ 60 * s - x - 1 ][ i ];
+		rbar[ 72 * s - y - 1 ][ 6 * s - x - 1 ][ i ] =
+		    bottom[ 3 * s - y - 1 ][ 60 * s - x - 1 ][ i ];
+	    }
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 48 * s, 0, 6 * s,
+			72 * s, GDK_RGB_DITHER_MAX,
+			lbar[ 0 ][ 0 ], 6 * s * 3 );
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 54 * s, 0,
+			6 * s, 72 * s, GDK_RGB_DITHER_MAX,
+			rbar[ 0 ][ 0 ], 6 * s * 3 );
+
+    /* Left and right separators (between board and bearoff tray) */
+    for( y = 0; y < s * 68; y++ )
+	for( x = 0; x < s * 3; x++ ) {
+	    if( x < s ) {
+		rDiffuse = arDiffuse[ 2 ][ x ];
+		nSpecular = anSpecular[ 2 ][ x ];
+		rHeight = arHeight[ x ];
+	    } else if( x < 2 * s ) {
+		rDiffuse = rDiffuseTop;
+		nSpecular = nSpecularTop;
+		rHeight = s;
+	    } else {
+		rDiffuse = arDiffuse[ 0 ][ 3 * s - x - 1 ];
+		nSpecular = anSpecular[ 0 ][ 3 * s - x - 1 ];
+		rHeight = arHeight[ 3 * s - x - 1 ];
+	    }
+    
+	    wood_pixel( -300 - x * 0.91 + y * 0.1, rHeight + y * 0.02,
+			-200 + y * 0.94 - x * 0.06, a );
+
+	    for( i = 0; i < 3; i++ )
+		lsep[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	    
+	    wood_pixel( 100 - x * 0.89 - y * 0.07, rHeight + y * 0.05,
+			300 - y * 0.94 + x * 0.11, a );
+
+	    for( i = 0; i < 3; i++ )
+		rsep[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	}
+
+    /* Eight separator corners */
+    for( y = 0; y < s; y++ )
+	for( x = s - y - 1; x >= 0; x-- )
+	    for( i = 0; i < 3; i++ ) {
+		lsep[ y ][ x ][ i ] = top[ y + 2 * s ][ x + 9 * s ][ i ];
+		lsep[ y ][ 3 * s - x - 1 ][ i ] =
+		    top[ y + 2 * s ][ 12 * s - x - 1 ][ i ];
+		lsep[ 68 * s - y - 1 ][ x ][ i ] =
+		    bottom[ s - y - 1 ][ x + 9 * s ][ i ];
+		lsep[ 68 * s - y - 1 ][ 3 * s - x - 1 ][ i ] =
+		    bottom[ s - y - 1 ][ 12 * s - x - 1 ][ i ];
+		
+		rsep[ y ][ x ][ i ] = top[ y + 2 * s ][ x + 96 * s ][ i ];
+		rsep[ y ][ 3 * s - x - 1 ][ i ] =
+		    top[ y + 2 * s ][ 99 * s - x - 1 ][ i ];
+		rsep[ 68 * s - y - 1 ][ x ][ i ] =
+		    bottom[ s - y - 1 ][ x + 96 * s ][ i ];
+		rsep[ 68 * s - y - 1 ][ 3 * s - x - 1 ][ i ] =
+		    bottom[ s - y - 1 ][ 99 * s - x - 1 ][ i ];
+	    }
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 9 * s, 2 * s, 3 * s,
+			68 * s, GDK_RGB_DITHER_MAX,
+			lsep[ 0 ][ 0 ], 3 * s * 3 );
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 96 * s, 2 * s, 3 * s,
+			68 * s, GDK_RGB_DITHER_MAX,
+			rsep[ 0 ][ 0 ], 3 * s * 3 );
+
+    /* Left and right dividers (between the bearoff trays) */
+    for( y = 0; y < s * 6; y++ )
+	for( x = 0; x < s * 8; x++ ) {
+	    if( y < s ) {
+		rDiffuse = arDiffuse[ 3 ][ y ];
+		nSpecular = anSpecular[ 3 ][ y ];
+		rHeight = arHeight[ y ];
+	    } else if( y < 5 * s ) {
+		rDiffuse = rDiffuseTop;
+		nSpecular = nSpecularTop;
+		rHeight = s;
+	    } else {
+		rDiffuse = arDiffuse[ 1 ][ 6 * s - y - 1 ];
+		nSpecular = anSpecular[ 1 ][ 6 * s - y - 1 ];
+		rHeight = arHeight[ 6 * s - y - 1 ];
+	    }
+	    
+	    wood_pixel( -100 - y * 0.85 + x * 0.11, rHeight - x * 0.04,
+			-200 - x * 0.93 + y * 0.08, a );
+	    
+	    for( i = 0; i < 3; i++ )
+		ldiv[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
+					     nSpecular );
+	    
+	    wood_pixel( -123 - y * 0.93 - x * 0.12, rHeight + x * 0.11,
+			100 - x * 0.88 - y * 0.07, a );
+	    
+	    for( i = 0; i < 3; i++ )
+		rdiv[ y ][ x ][ i ] =
+		    clamp( a[ i ] * rDiffuse + nSpecular );
+	}
+    
+    /* Eight divider corners */
+    for( y = 0; y < s; y++ )
+	for( x = s - y - 1; x >= 0; x-- )
+	    for( i = 0; i < 3; i++ ) {
+		ldiv[ y ][ x ][ i ] = left[ y + 33 * s ][ x + 2 * s ][ i ];
+		ldiv[ y ][ 8 * s - x - 1 ][ i ] =
+		    lsep[ y + 31 * s ][ s - x - 1 ][ i ];
+		ldiv[ 6 * s - y - 1 ][ x ][ i ] =
+		    left[ 39 * s - y - 1 ][ x + 2 * s ][ i ];
+		ldiv[ 6 * s - y - 1 ][ 8 * s - x - 1 ][ i ] =
+		    lsep[ 37 * s - y - 1 ][ s - x - 1 ][ i ];
+
+		rdiv[ y ][ x ][ i ] = rsep[ y + 31 * s ][ x + 2 * s ][ i ];
+		rdiv[ y ][ 8 * s - x - 1 ][ i ] =
+		    right[ y + 33 * s ][ s - x - 1 ][ i ];
+		rdiv[ 6 * s - y - 1 ][ x ][ i ] =
+		    rsep[ 37 * s - y - 1 ][ x + 2 * s ][ i ];
+		rdiv[ 6 * s - y - 1 ][ 8 * s - x - 1 ][ i ] =
+		    right[ 39 * s - y - 1 ][ s - x - 1 ][ i ];
+	    }
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 2 * s, 33 * s, 8 * s,
+			6 * s, GDK_RGB_DITHER_MAX,
+			ldiv[ 0 ][ 0 ], 8 * s * 3 );
+    gdk_draw_rgb_image( bd->pm_board, gc, 98 * s, 33 * s, 8 * s,
+			6 * s, GDK_RGB_DITHER_MAX,
+			rdiv[ 0 ][ 0 ], 8 * s * 3 );
+}
+
+static void board_draw_border( GdkPixmap *pm, GdkGC *gc, int x0, int y0,
+			       int x1, int y1, int board_size,
+			       GdkColor *colours, gboolean invert ) {
+#define COLOURS( ipix, edge ) ( *( colours + (ipix) * 4 + (edge) ) )
+
+    int i;
+    GdkPoint points[ 5 ];
+
+    points[ 0 ].x = points[ 1 ].x = points[ 4 ].x = x0 * board_size;
+    points[ 2 ].x = points[ 3 ].x = x1 * board_size - 1;
+
+    points[ 1 ].y = points[ 2 ].y = y0 * board_size;
+    points[ 0 ].y = points[ 3 ].y = points[ 4 ].y = y1 * board_size - 1;
+    
+    for( i = 0; i < board_size; i++ ) {
+	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 0 ) :
+			       &COLOURS( i, 2 ) );
+	gdk_draw_lines( pm, gc, points, 2 );
+
+	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 1 ) :
+			       &COLOURS( i, 3 ) );
+	gdk_draw_lines( pm, gc, points + 1, 2 );
+
+	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 2 ) :
+			       &COLOURS( i, 0 ) );
+	gdk_draw_lines( pm, gc, points + 2, 2 );
+
+	gdk_gc_set_foreground( gc, invert ? &COLOURS( board_size - i - 1, 3 ) :
+			       &COLOURS( i, 1 ) );
+	gdk_draw_lines( pm, gc, points + 3, 2 );
+
+	points[ 0 ].x = points[ 1 ].x = ++points[ 4 ].x;
+	points[ 2 ].x = --points[ 3 ].x;
+
+	points[ 1 ].y = ++points[ 2 ].y;
+	points[ 0 ].y = points[ 3 ].y = --points[ 4 ].y;
+    }
+}
+
+static void board_draw_frame_painted( BoardData *bd ) {
+
+    gint i, ix;
     GdkGC *gc;
     GdkGCValues gcv;
     float x, z, cos_theta, diffuse, specular;
     GdkColor colours[ 4 * bd->board_size ];
-    
-    bd->pm_board = gdk_pixmap_new( widget->window, 108 * bd->board_size,
-				   72 * bd->board_size, -1 );
-
-    bd->rgb_points = malloc( 66 * bd->board_size * 12 * bd->board_size * 3 );
-    bd->rgb_empty = malloc( 30 * bd->board_size * 6 * bd->board_size * 3 );
-    bd->rgb_bar = malloc( 6 * bd->board_size * 21 * bd->board_size * 3 );
-#define buf( y, x, i ) ( bd->rgb_points[ ( ( (y) * 12 * bd->board_size + (x) )\
-					   * 3 ) + (i) ] )
-#define empty( y, x, i ) ( bd->rgb_empty[ ( ( (y) * 6 * bd->board_size + (x) )\
-					    * 3 ) + (i) ] )
     
     diffuse = 0.8 * bd->arLight[ 2 ] + 0.2;
     specular = pow( bd->arLight[ 2 ], 20 ) * 0.6;
@@ -2396,7 +2714,7 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 		       diffuse * bd->aanBoardColour[ 1 ][ 1 ] ) << 8 ) |
 	( (int) clamp( specular * 0x100 +
 		       diffuse * bd->aanBoardColour[ 1 ][ 2 ] ) ) );
-    gc = gdk_gc_new_with_values( widget->window, &gcv, GDK_GC_FOREGROUND );
+    gc = gdk_gc_new_with_values( bd->widget->window, &gcv, GDK_GC_FOREGROUND );
     
     gdk_draw_rectangle( bd->pm_board, gc, TRUE, 0, 0, bd->board_size * 108,
 			bd->board_size * 72 );
@@ -2443,17 +2761,51 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     board_draw_border( bd->pm_board, gc, 59, 2, 97, 70,
 		       bd->board_size, colours, TRUE );
 
+    gdk_gc_unref( gc );
+}
+
+static void board_draw( GtkWidget *widget, BoardData *bd ) {
+
+    gint ix, iy, antialias;
+    GdkGC *gc = gdk_gc_new( bd->widget->window );
+    
+    bd->pm_board = gdk_pixmap_new( widget->window, 108 * bd->board_size,
+				   72 * bd->board_size, -1 );
+
+    bd->rgb_points = malloc( 66 * bd->board_size * 12 * bd->board_size * 3 );
+    bd->rgb_empty = malloc( 30 * bd->board_size * 6 * bd->board_size * 3 );
+
+#define buf( y, x, i ) ( bd->rgb_points[ ( ( (y) * 12 * bd->board_size + (x) )\
+					   * 3 ) + (i) ] )
+#define empty( y, x, i ) ( bd->rgb_empty[ ( ( (y) * 6 * bd->board_size + (x) )\
+					    * 3 ) + (i) ] )
+
+    if( bd->wood )
+	board_draw_frame_wood( bd, gc );
+    else
+	board_draw_frame_painted( bd );
+
     if( bd->labels )
 	board_draw_labels( bd );
     
     /* FIXME shade hinges */
+
+    if( bd->translucent ) {
+	bd->rgb_bar0 = malloc( 6 * bd->board_size * 20 * bd->board_size * 3 );
+	bd->rgb_bar1 = malloc( 6 * bd->board_size * 20 * bd->board_size * 3 );
+
+	gdk_get_rgb_image( bd->pm_board,
+			   gdk_window_get_colormap( widget->window ),
+			   51 * bd->board_size, 11 * bd->board_size,
+			   6 * bd->board_size, 20 * bd->board_size,
+			   bd->rgb_bar0, 6 * bd->board_size * 3 );
+	gdk_get_rgb_image( bd->pm_board,
+			   gdk_window_get_colormap( widget->window ),
+			   51 * bd->board_size, 41 * bd->board_size,
+			   6 * bd->board_size, 20 * bd->board_size,
+			   bd->rgb_bar1, 6 * bd->board_size * 3 );
+    }
     
-    gdk_get_rgb_image( bd->pm_board,
-		       gdk_window_get_colormap( widget->window ),
-		       51 * bd->board_size, 4 * bd->board_size,
-		       6 * bd->board_size, 21 * bd->board_size,
-		       bd->rgb_bar, 6 * bd->board_size * 3 );
-	
     for( iy = 0; iy < 30 * bd->board_size; iy++ )
 	for( ix = 0; ix < 6 * bd->board_size; ix++ ) {
 	    /* <= 0 is board; >= 20 is on a point; interpolate in between */
@@ -3604,6 +3956,7 @@ static void board_init( Board *board ) {
     bd->all_moves = NULL;
 
     bd->translucent = TRUE;
+    bd->wood = TRUE;
     bd->labels = FALSE;
     bd->usedicearea = TRUE;
     bd->permit_illegal = FALSE;
@@ -3611,9 +3964,9 @@ static void board_init( Board *board ) {
     bd->higher_die_first = FALSE;
     bd->animate_computer_moves = ANIMATE_SLIDE;
     bd->animate_speed = 4;
-    bd->arLight[ 0 ] = -0.5;
-    bd->arLight[ 1 ] = 0.5;
-    bd->arLight[ 2 ] = 0.707;
+    bd->arLight[ 0 ] = -0.55667;
+    bd->arLight[ 1 ] = 0.32139;
+    bd->arLight[ 2 ] = 0.76604;
     bd->arRefraction[ 0 ] = bd->arRefraction[ 1 ] = 1.5;
     bd->arCoefficient[ 0 ] = 0.2;
     bd->arExponent[ 0 ] = 3.0;

@@ -48,9 +48,9 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
-    *pwAnimateSlide, *pwSpeed;
+    *pwAnimateSlide, *pwSpeed, *pwWood;
 static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
-    fHigherDieFirst;
+    fHigherDieFirst, fWood;
 static animation anim;
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
@@ -134,7 +134,7 @@ static GtkWidget *PointPrefs( BoardData *bd, int f ) {
     return pw;
 }
 
-static GtkWidget *BoardPage( BoardData *bd, int iCol ) {
+static GtkWidget *BoardPage( BoardData *bd ) {
 
     GtkWidget *pw, *pwhbox;
     gdouble ar[ 4 ];
@@ -142,27 +142,70 @@ static GtkWidget *BoardPage( BoardData *bd, int iCol ) {
     
     pw = gtk_vbox_new( FALSE, 0 );
 
-    apadjBoard[ iCol ] = GTK_ADJUSTMENT( gtk_adjustment_new(
-	bd->aSpeckle[ iCol ] / 128.0, 0, 1, 0.1, 0.1, 0 ) );
+    apadjBoard[ 0 ] = GTK_ADJUSTMENT( gtk_adjustment_new(
+	bd->aSpeckle[ 0 ] / 128.0, 0, 1, 0.1, 0.1, 0 ) );
 
     for( i = 0; i < 3; i++ )
-	ar[ i ] = bd->aanBoardColour[ iCol ][ i ] / 255.0;
+	ar[ i ] = bd->aanBoardColour[ 0 ][ i ] / 255.0;
     
-    gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ iCol ] =
+    gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 0 ] =
 			gtk_color_selection_new(), FALSE, FALSE, 0 );
-    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ iCol ] ),
+    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ 0 ] ),
 				   ar );
 
-    if( !iCol ) {
-	gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
-			    FALSE, FALSE, 4 );
-	gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Smooth" ),
-			    FALSE, FALSE, 4 );
-	gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
-	    apadjBoard[ iCol ] ), TRUE, TRUE, 4 );
-	gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Speckled" ),
-			    FALSE, FALSE, 4 );
-    }
+    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Smooth" ),
+			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
+	apadjBoard[ 0 ] ), TRUE, TRUE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Speckled" ),
+			FALSE, FALSE, 4 );
+    
+    return pw;
+}
+
+static void ToggleWood( GtkWidget *pw, BoardData *bd ) {
+
+    int fWood;
+    
+    fWood = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+    
+    gtk_widget_set_sensitive( apwBoard[ 1 ], !fWood );
+}
+
+static GtkWidget *BorderPage( BoardData *bd ) {
+
+    GtkWidget *pw, *pwWoodF;
+    gdouble ar[ 4 ];
+    int i;
+    
+    pw = gtk_vbox_new( FALSE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( pw ),
+			pwWood = gtk_radio_button_new_with_label( NULL,
+								  "Wooden" ),
+			FALSE, FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pw ),
+			pwWoodF = gtk_radio_button_new_with_label_from_widget(
+			    GTK_RADIO_BUTTON( pwWood ), "Painted" ),
+			FALSE, FALSE, 0 );
+
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->wood ? pwWood :
+						     pwWoodF ), TRUE );
+    
+    for( i = 0; i < 3; i++ )
+	ar[ i ] = bd->aanBoardColour[ 1 ][ i ] / 255.0;
+    
+    gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 1 ] =
+			gtk_color_selection_new(), FALSE, FALSE, 0 );
+    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ 1 ] ),
+				   ar );
+
+    gtk_signal_connect( GTK_OBJECT( pwWood ), "toggled",
+			GTK_SIGNAL_FUNC( ToggleWood ), bd );
+    
+    gtk_widget_set_sensitive( apwBoard[ 1 ], !bd->wood );
     
     return pw;
 }
@@ -341,7 +384,8 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
     }
 }
 
-static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
+/* "OK" if fOK is TRUE; "Apply" if fOK is FALSE. */
+static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
 
     int i, fTranslucentSaved;
     gdouble ar[ 4 ];
@@ -356,6 +400,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	GTK_TOGGLE_BUTTON( pwBeepIllegal ) );
     fHigherDieFirst = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwHigherDieFirst ) );
+    fWood = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwWood ) );
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ) ) )
 	anim = ANIMATE_BLINK;
     else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
@@ -405,7 +451,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	bd->aanBoardColour[ 3 ][ i ] = ar[ i ] * 0xFF;
 
     bd->aSpeckle[ 0 ] = apadjBoard[ 0 ]->value * 0x80;
-    bd->aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80;
+/*    bd->aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80; */
     bd->aSpeckle[ 2 ] = apadjPoint[ 0 ]->value * 0x80;
     bd->aSpeckle[ 3 ] = apadjPoint[ 1 ]->value * 0x80;
     
@@ -420,6 +466,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     bd->permit_illegal = fPermitIllegal;
     bd->beep_illegal = fBeepIllegal;
     bd->higher_die_first = fHigherDieFirst;
+    bd->wood = fWood;
     bd->animate_computer_moves = anim;
     
     /* This is a horrible hack, but we need translucency set to the new
@@ -429,8 +476,9 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     fTranslucentSaved = bd->translucent;
     
     bd->translucent = fTranslucent;
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+
+    if( fOK )
+	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
     BoardPreferencesCommand( bd->widget, sz );
 
@@ -441,102 +489,12 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
 static void BoardPrefsApply( GtkWidget *pw, BoardData *bd ) {
 
-    /* Simply a copy of BoardPrefsOK, but without gtk_widget_destroy */
+    BoardPrefsDo( pw, bd, FALSE );
+}
 
-    int i, fTranslucentSaved;
-    gdouble ar[ 4 ];
-    char sz[ 256 ];
-    
-    fLabels = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwLabels ) );
-    fUseDiceIcon = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwUseDiceIcon ) );
-    fPermitIllegal = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwPermitIllegal ) );
-    fBeepIllegal = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwBeepIllegal ) );
-    fHigherDieFirst = gtk_toggle_button_get_active(
-	GTK_TOGGLE_BUTTON( pwHigherDieFirst ) );
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ) ) )
-	anim = ANIMATE_BLINK;
-    else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
-	pwAnimateSlide ) ) )
-	anim = ANIMATE_SLIDE;
-    else
-	anim = ANIMATE_NONE;
+static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
-    bd->animate_speed = (int) ( padjSpeed->value + 0.5 );
-    
-    for( i = 0; i < 2; i++ ) {
-	bd->arRefraction[ i ] = apadj[ i ]->value;
-	bd->arCoefficient[ i ] = apadjCoefficient[ i ]->value;
-	bd->arExponent[ i ] = apadjExponent[ i ]->value;
-    }
-    
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 0 ] ), ar );
-    for( i = 0; i < 3; i++ )
-	bd->aarColour[ 0 ][ i ] = ar[ i ];
-    if( fTranslucent )
-	bd->aarColour[ 0 ][ 3 ] = ar[ 3 ];
-
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwColour[ 1 ] ), ar );
-    for( i = 0; i < 3; i++ )
-	bd->aarColour[ 1 ][ i ] = ar[ i ];
-    if( fTranslucent )
-	bd->aarColour[ 1 ][ 3 ] = ar[ 3 ];
-
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwBoard[ 0 ] ),
-				   ar );
-    for( i = 0; i < 3; i++ )
-	bd->aanBoardColour[ 0 ][ i ] = ar[ i ] * 0xFF;
-
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwBoard[ 1 ] ),
-				   ar );
-    for( i = 0; i < 3; i++ )
-	bd->aanBoardColour[ 1 ][ i ] = ar[ i ] * 0xFF;
-
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwPoint[ 0 ] ),
-				   ar );
-    for( i = 0; i < 3; i++ )
-	bd->aanBoardColour[ 2 ][ i ] = ar[ i ] * 0xFF;
-    
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwPoint[ 1 ] ),
-				   ar );
-    for( i = 0; i < 3; i++ )
-	bd->aanBoardColour[ 3 ][ i ] = ar[ i ] * 0xFF;
-
-    bd->aSpeckle[ 0 ] = apadjBoard[ 0 ]->value * 0x80;
-    bd->aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80;
-    bd->aSpeckle[ 2 ] = apadjPoint[ 0 ]->value * 0x80;
-    bd->aSpeckle[ 3 ] = apadjPoint[ 1 ]->value * 0x80;
-    
-    bd->arLight[ 2 ] = sinf( paElevation->value / 180 * M_PI );
-    bd->arLight[ 0 ] = cosf( paAzimuth->value / 180 * M_PI ) *
-	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
-    bd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
-	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
-
-    bd->labels = fLabels;
-    bd->usedicearea = fUseDiceIcon;
-    bd->permit_illegal = fPermitIllegal;
-    bd->beep_illegal = fBeepIllegal;
-    bd->higher_die_first = fHigherDieFirst;
-    bd->animate_computer_moves = anim;
-    
-    /* This is a horrible hack, but we need translucency set to the new
-       value to call BoardPreferencesCommand(), so we get the correct
-       output; but then we reset it to the _old_ value before we change,
-       so the old pixmaps can be deallocated. */
-    fTranslucentSaved = bd->translucent;
-    
-    bd->translucent = fTranslucent;
-    
-//    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
-
-    BoardPreferencesCommand( bd->widget, sz );
-
-    bd->translucent = fTranslucentSaved;
-    
-    UserCommand( sz );
+    BoardPrefsDo( pw, bd, TRUE );
 }
 
 extern void BoardPreferences( GtkWidget *pwBoard ) {
@@ -551,6 +509,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fPermitIllegal = bd->permit_illegal;
     fBeepIllegal = bd->beep_illegal;
     fHigherDieFirst = bd->higher_die_first;
+    fWood = bd->wood;
     anim = bd->animate_computer_moves;
     
     pwDialog = CreateDialog( "GNU Backgammon - Appearance", TRUE,
@@ -562,7 +521,8 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 			GTK_SIGNAL_FUNC( BoardPrefsApply ), bd );
 
     pwNotebook = gtk_notebook_new();
-
+    gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
+    
     gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -575,10 +535,8 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 			      ChequerPrefs( bd, 1 ),
 			      gtk_label_new( "Chequers (1)" ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      BoardPage( bd, 0 ),
-			      gtk_label_new( "Board" ) );
-    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      BoardPage( bd, 1 ),
+			      BoardPage( bd ), gtk_label_new( "Board" ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), BorderPage( bd ),
 			      gtk_label_new( "Border" ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      PointPrefs( bd, 0 ),
@@ -737,6 +695,8 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	bd->beep_illegal = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "highdie", c ) )
 	bd->higher_die_first = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "wood", c ) )
+	bd->wood = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "animate", c ) ) {
 	switch( toupper( *szValue ) ) {
 	case 'B':
@@ -811,7 +771,8 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     sprintf( sz, "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
-	     "beep=%c highdie=%c animate=%s speed=%d light=%0.0f;%0.0f " 
+	     "beep=%c highdie=%c wood=%c "
+	     "animate=%s speed=%d light=%0.0f;%0.0f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "points0=#%02X%02X%02X;%0.2f "
@@ -823,6 +784,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->translucent ? 'y' : 'n', bd->labels ? 'y' : 'n',
 	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
 	     bd->beep_illegal ? 'y' : 'n', bd->higher_die_first ? 'y' : 'n',
+	     bd->wood ? 'y' : 'n',
 	     aszAnim[ bd->animate_computer_moves ], bd->animate_speed,
 	     rAzimuth, rElevation, (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 

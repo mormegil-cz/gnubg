@@ -484,7 +484,7 @@ distcheck: dist
 	GZIP=$(GZIP_ENV) $(TAR) zxf $(distdir).tar.gz
 	mkdir $(distdir)/=build
 	mkdir $(distdir)/=inst
-	dc_install_base=`cd $(distdir)/=inst && pwd`; \
+	dc_install_base=`cd $(distdir)/=inst && pwd`; \	$(MAKE) $(AM_MAKEFLAGS) distcheck-hook
 	cd $(distdir)/=build \
 	  && ../configure --srcdir=.. --prefix=$$dc_install_base \
 	  && $(MAKE) $(AM_MAKEFLAGS) \
@@ -692,6 +692,8 @@ uninstall-am uninstall all-local all-redirect all-am all installdirs-am \
 installdirs mostlyclean-generic distclean-generic clean-generic \
 maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
+distcheck-hook:
+	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 sgfp.h sgfp.c: sgf.y
 	$(BISON) -o $@ -p sgf -d $(srcdir)/sgf.y

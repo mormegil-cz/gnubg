@@ -178,6 +178,8 @@ duplication of effort and to make sure our changes merge easily.
 ** CreateDialog() should use GTK+ 2.0 stock icons instead of the gnu. (gary)
 ** The edges of the board should cast shadows.  Getting shadows on the
   board surface is fairly easy... getting shadows on the chequers is not.
+** Consider using gdk_window_begin_paint_region() under GTK+ 2.0 when drawing
+  dragging chequers, to eliminate flicker.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,

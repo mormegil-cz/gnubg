@@ -62,6 +62,8 @@ makeweights_DEPENDENCIES = lib/libevent.a
 erftest_SOURCES = erftest.c
 
 TESTS = gnubgtest erftest
+distcheck-hook:
+	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	gnubg.gtkrc credits.sh erf.c xboard.c xboard.h xgame.c xgame.h
