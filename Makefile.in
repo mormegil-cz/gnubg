@@ -149,6 +149,9 @@ ACLOCAL_AMFLAGS = -I m4
 @COMPILE_BR1_TRUE@BR1_SOURCES = br1.c
 @COMPILE_BR1_FALSE@BR1_SOURCES = 
 
+@USE_FREETYPE_TRUE@FONT_SOURCES = luxi.c
+@USE_FREETYPE_FALSE@FONT_SOURCES = 
+
 @EXTERNAL_BR1_TRUE@BR1DATA = gnubg_os0.bd
 @EXTERNAL_BR1_FALSE@BR1DATA = 
 
@@ -168,7 +171,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
-	onechequer.c onechequer.h path.c path.h render.c render.h luxi.c
+	onechequer.c onechequer.h path.c path.h render.c render.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -177,9 +180,11 @@ bin_PROGRAMS = gnubg makebearoff
 @USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
 @USE_GTK_TRUE@INCLUDES = $(COMMON_INCS) @GTK_CFLAGS@ $(SOUND_INCS)
-@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(SOUND_SOURCES)
+@USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
+@USE_EXT_FALSE@@USE_GTK_FALSE@	$(FONT_SOURCES)
+
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(SOUND_SOURCES)
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 
 @USE_GTK_TRUE@gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 @USE_GTK_TRUE@	gdkgetrgb.c gdkgetrgb.h gtkprefs.c gtkprefs.h gtk-multiview.c \
@@ -187,7 +192,7 @@ bin_PROGRAMS = gnubg makebearoff
 @USE_GTK_TRUE@	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 @USE_GTK_TRUE@	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
 @USE_GTK_TRUE@	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
-@USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES)
+@USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
@@ -235,7 +240,7 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = intl/Makefile boards/Makefile
+CONFIG_CLEAN_FILES = intl/Makefile
 bin_PROGRAMS = gnubg$(EXEEXT) makebearoff$(EXEEXT)
 check_PROGRAMS = erftest$(EXEEXT)
 noinst_PROGRAMS = makeweights$(EXEEXT) makebearoff1$(EXEEXT)
@@ -257,24 +262,28 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
 	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) record.$(OBJEXT) \
 	osr.$(OBJEXT) bearoffgammon.$(OBJEXT) bearoff.$(OBJEXT) \
-	onechequer.$(OBJEXT) path.$(OBJEXT) render.$(OBJEXT) \
-	luxi.$(OBJEXT)
-@USE_SOUND_TRUE@am__objects_2 = sound.$(OBJEXT)
-@USE_SOUND_FALSE@am__objects_2 =
-@COMPILE_BR1_TRUE@am__objects_3 = br1.$(OBJEXT)
-@COMPILE_BR1_FALSE@am__objects_3 =
+	onechequer.$(OBJEXT) path.$(OBJEXT) render.$(OBJEXT)
+@COMPILE_BR1_TRUE@am__objects_2 = br1.$(OBJEXT)
+@COMPILE_BR1_FALSE@am__objects_2 =
+@USE_SOUND_TRUE@am__objects_3 = sound.$(OBJEXT)
+@USE_SOUND_FALSE@am__objects_3 =
+@USE_FREETYPE_TRUE@am__objects_4 = luxi.$(OBJEXT)
+@USE_FREETYPE_FALSE@am__objects_4 =
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
-@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_2)
+@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_2) $(am__objects_3) \
+@USE_EXT_FALSE@@USE_GTK_FALSE@	$(am__objects_4)
 @USE_EXT_TRUE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
 @USE_EXT_TRUE@@USE_GTK_FALSE@	xboard.$(OBJEXT) xgame.$(OBJEXT) \
-@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_2)
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_2) $(am__objects_3) \
+@USE_EXT_TRUE@@USE_GTK_FALSE@	$(am__objects_4)
 @USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_1) gtkboard.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkgame.$(OBJEXT) gdkgetrgb.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkprefs.$(OBJEXT) gtk-multiview.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktheory.$(OBJEXT) gtktexi.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkexport.$(OBJEXT) gtkcube.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkchequer.$(OBJEXT) gtkrace.$(OBJEXT) \
-@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_2)
+@USE_GTK_TRUE@	$(am__objects_2) $(am__objects_3) \
+@USE_GTK_TRUE@	$(am__objects_4)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -396,8 +405,6 @@ $(srcdir)/config.h.in:  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 distclean-hdr:
 	-rm -f config.h stamp-h1
 intl/Makefile: $(top_builddir)/config.status $(top_srcdir)/intl/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-boards/Makefile: $(top_builddir)/config.status $(top_srcdir)/boards/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 install-binPROGRAMS: $(bin_PROGRAMS)
@@ -756,7 +763,7 @@ distcleancheck_listfiles = find . -type f -print
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/boards $(distdir)/intl $(distdir)/po
+	$(mkinstalldirs) $(distdir)/intl $(distdir)/po
 	@list='$(DISTFILES)'; for file in $$list; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \

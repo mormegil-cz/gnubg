@@ -1,4 +1,7 @@
-Wed Dec 11 17:30:02 2002  Gary Wong  <gtw@gnu.org>
+Wed Dec 11 17:45:44 2002  Gary Wong  <gtw@gnu.org>
+
+	* Makefile.am, luxi.c: Don't bother compiling luxi.c if not using
+	freetype.
 
 	* render.c: Add #defines for deprecated constants, for compatibility
 	with freetype2 before 2.1.3.

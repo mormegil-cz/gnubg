@@ -27,6 +27,12 @@ else
 BR1_SOURCES =
 endif
 
+if USE_FREETYPE
+FONT_SOURCES = luxi.c
+else
+FONT_SOURCES =
+endif
+
 if EXTERNAL_BR1
 BR1DATA = gnubg_os0.bd
 else
@@ -47,7 +53,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
 	export.c sound.h record.c record.h osr.c osr.h \
         bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h \
-	onechequer.c onechequer.h path.c path.h render.c render.h luxi.c
+	onechequer.c onechequer.h path.c path.h render.c render.h
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
 bin_PROGRAMS = gnubg makebearoff
@@ -61,7 +67,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	prevgame.xpm prevmove.xpm gtktheory.c gtktheory.h gtktexi.c gtktexi.h \
 	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
 	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
-	$(BR1_SOURCES) $(SOUND_SOURCES)
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 else
@@ -69,14 +75,15 @@ if USE_EXT
 ## --- EXT
 INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
 gnubg_SOURCES = $(COMMON_SOURCES) xboard.c xboard.h xgame.c xgame.h \
-	$(SOUND_SOURCES)
+	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 gnubg_LDADD = -Lext -lext @X_LIBS@ @X_PRE_LIBS@ -lXmu @X_EXTRA_LIBS@ -lX11 \
 	$(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 else
 ## --- Plain
 INCLUDES = $(COMMON_INCS) $(SOUND_INCS)
-gnubg_SOURCES = $(COMMON_SOURCES) $(SOUND_SOURCES)
+gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
+	$(FONT_SOURCES)
 gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif

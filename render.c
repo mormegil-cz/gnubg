@@ -35,9 +35,6 @@
 
 #include "render.h"
 
-extern unsigned char auchLuxiRB[], auchLuxiSB[], auchLuxiSR[];
-extern unsigned int cbLuxiRB, cbLuxiSB, cbLuxiSR;
-
 static randctx rc;
 #define RAND irand( &rc )
 
@@ -68,6 +65,10 @@ FT_Library ftl;
 #define FT_GLYPH_FORMAT_BITMAP ft_glyph_format_bitmap
 #define FT_PIXEL_MODE_GRAY ft_pixel_mode_grays
 #endif
+
+extern unsigned char auchLuxiRB[], auchLuxiSB[], auchLuxiSR[];
+extern unsigned int cbLuxiRB, cbLuxiSB, cbLuxiSR;
+
 #endif
 
 static inline unsigned char clamp( int n ) {
