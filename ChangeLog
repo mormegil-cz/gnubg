@@ -1,3 +1,8 @@
+Tue Oct 16 18:08:26 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* eval.c (GetCubeActionSz): Cosmetic change: no '+' in output for
+	match equity.
+
 Fri Oct 12 19:17:40 2001  Øystein Johansen <oeysteij@online.no>
 
         * gnubg.c (ExportGameJF): Bugfix / Further improvements for
@@ -19,19 +24,19 @@ Thu Oct 11 23:30:40 2001  Øystein Johansen <oeysteij@online.no>
 
         * gnubg.c (ExportGameJF): Some improvements for resigned games
 
-Thu Oct 11 22:37:49 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
+Thu Oct 11 22:37:49 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* play.c (ComputerTurn): Use GeneralCubedecision instead of the
 	/very/ old EvaluatePositionCubeful for computer players cube
 	decisions. 
 
-Thu Oct 11 22:29:23 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
+Thu Oct 11 22:29:23 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* play.c (ComputerTurn): Updated play when doubled. Now handles
 	all possible responses correctly, including when beavered.
 	(Bug reported by O.M. Riordan <omr10@cam.ac.uk>) 
 
-Thu Oct 11 21:44:07 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
+Thu Oct 11 21:44:07 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (FindBestCubeDecision): New parameter: cubeinfo
 	struct. FindBestCubeDecision now handles beavers and distinguishes

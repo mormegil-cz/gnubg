@@ -3919,7 +3919,7 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
               arDouble[ iBest ],
               arDouble [ iBest ] - arDouble [ iOptimal ] );
   else
-    sprintf ( pc, "%-20s: %+6.2f%%   (%+6.2f%%)\n",
+    sprintf ( pc, "%-20s: %6.2f%%   (%+6.2f%%)\n",
               aszCubeString[ iBest ][ pci->fCubeOwner != -1 ],
               100.0 * eq2mwc ( arDouble[ iBest ], pci ),
               100.0 * eq2mwc ( arDouble[ iBest ], pci ) - 
@@ -3936,7 +3936,7 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
               arDouble[ iWorst ],
               arDouble [ iWorst ] - arDouble [ iOptimal ] );
   else
-    sprintf ( pc, "%-20s: %+6.2f%%   (%+6.2f%%)\n\n",
+    sprintf ( pc, "%-20s: %6.2f%%   (%+6.2f%%)\n\n",
               aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ],
               100.0 * eq2mwc ( arDouble[ iWorst ], pci ),
               100.0 * eq2mwc ( arDouble[ iWorst ], pci ) - 
