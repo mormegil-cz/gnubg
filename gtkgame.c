@@ -6650,6 +6650,8 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_ENGINE ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
 	
 	fAutoCommand = FALSE;
     } else if( p == &ms.fCrawford )

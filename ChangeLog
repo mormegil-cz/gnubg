@@ -1,3 +1,7 @@
+Thu Apr 25 22:33:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (GTKSet): set sensitivity for "Swap PLayers".
+
 Thu Apr 25 20:31:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (ComputerTurn): show move based on board *before*
