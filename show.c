@@ -550,6 +550,22 @@ extern void CommandShowCache( char *sz ) {
     outputc( '\n' );
 }
 
+extern void CommandShowCalibration( char *sz ) {
+
+#if USE_GTK
+    if( fX ) {
+	GTKShowCalibration();
+	return;
+    }
+#endif
+    
+    if( rEvalsPerSec > 0 )
+	outputf( _("Evaluation speed has been set to %.0f evaluations per "
+		   "second.\n"), rEvalsPerSec );
+    else
+	outputl( _("No evaluation speed has been recorded." ) );
+}
+
 extern void CommandShowClockwise( char *sz ) {
 
     if( fClockwise )

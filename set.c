@@ -627,6 +627,28 @@ extern void CommandSetCache( char *sz ) {
 
 }
 
+extern void CommandSetCalibration( char *sz ) {
+
+    float r;
+
+    if( !sz || !*sz ) {
+	rEvalsPerSec = -1.0f;
+	outputl( _("The evaluation speed has been cleared.") );
+	return;
+    }
+    
+    if( ( r = ParseReal( &sz ) ) <= 2.0f ) {
+	outputl( _("If you give a parameter to `set calibration', it must "
+		   "be a legal number of evaluations per second.") );
+	return;
+    }
+
+    rEvalsPerSec = r;
+
+    outputf( _("The speed estimate has been set to %.0f static "
+	       "evaluations per second.\n"), rEvalsPerSec );
+}
+
 extern void CommandSetClockwise( char *sz ) {
 
     SetToggle( "clockwise", &fClockwise, sz, 

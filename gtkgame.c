@@ -164,6 +164,7 @@ typedef enum _gnubgcommand {
     CMD_SET_MESSAGE_ON,
     CMD_SET_TURN_0,
     CMD_SET_TURN_1,
+    CMD_SHOW_CALIBRATION,
     CMD_SHOW_COPYING,
     CMD_SHOW_ENGINE,
     CMD_SHOW_EXPORT,
@@ -236,6 +237,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set message on",
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
+    "show calibration",
     "show copying",
     "show engine",
     "show export",
@@ -321,7 +323,7 @@ static GtkWidget *pwMessage = NULL, *pwMessageText;
 static GtkWidget *pwGame = NULL;
 static moverecord *pmrAnnotation;
 static GtkAccelGroup *pagMain;
-static GtkTooltips *ptt;
+GtkTooltips *ptt;
 static GtkStyle *psGameList, *psCurrent;
 static int yCurrent, xCurrent; /* highlighted row/col in game record */
 static GtkItemFactory *pif;
@@ -847,12 +849,14 @@ static void DeleteAnnotation( void ) {
 
 }
 
-static void DeleteGame( void ) {
+static gboolean DeleteGame( void ) {
 
   getWindowGeometry ( &awg[ WINDOW_GAME ], pwGame );
   gtk_widget_hide ( pwGame );
 
+  return TRUE;
 }
+
 static int fAutoCommentaryChange;
 
 static void CommentaryChanged( GtkWidget *pw, void *p ) {
@@ -1111,11 +1115,6 @@ static void CreateGameWindow( void ) {
 			GTK_SIGNAL_FUNC( GameListSelectRow ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwGame ), "delete_event",
 			GTK_SIGNAL_FUNC( DeleteGame ), NULL );
-
-    /* FIXME gtk_widget_hide is no good -- we want a function that returns
-       TRUE to avoid running the default handler */
-    /* FIXME actually we should unmap the window, and send a synthetic
-       UnmapNotify event to the window manager -- see the ICCCM */
 }
 
 extern void ShowGameWindow( void ) {
@@ -2349,6 +2348,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/Evaluation engine"), NULL, Command,
 	  CMD_SHOW_ENGINE, NULL },
+	{ N_("/_Analyse/Evaluation speed"), NULL, Command,
+	  CMD_SHOW_CALIBRATION, NULL },
 	{ N_("/_Train"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Train/D_ump database"), 
           NULL, Command, CMD_DATABASE_DUMP, NULL },
@@ -7094,6 +7095,8 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_SHOW_CALIBRATION ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_ENGINE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SWAP_PLAYERS ), !ListEmpty( &lMatch ) );
@@ -9486,3 +9489,163 @@ extern void GTKMatchInfo( void ) {
 	outputresume();
     }
 }
+
+static void CalibrationOK( GtkWidget *pw, GtkWidget **ppw ) {
+
+    char sz[ 128 ];
+    GtkAdjustment *padj = gtk_spin_button_get_adjustment(
+	GTK_SPIN_BUTTON( *ppw ) );
+    
+    if( GTK_WIDGET_IS_SENSITIVE( *ppw ) ) {
+	if( padj->value != rEvalsPerSec ) {
+	    sprintf( sz, "set calibration %.0f", padj->value );
+	    UserCommand( sz );
+	}
+    } else if( rEvalsPerSec > 0 )
+	UserCommand( "set calibration" );
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static void CalibrationEnable( GtkWidget *pw, GtkWidget *pwspin ) {
+
+    gtk_widget_set_sensitive( pwspin, gtk_toggle_button_get_active(
+				  GTK_TOGGLE_BUTTON( pw ) ) );
+}
+
+static void CalibrationGo( GtkWidget *pw, GtkWidget *apw[ 2 ] ) {
+
+    UserCommand( "calibrate" );
+
+    fInterrupt = FALSE;
+    
+    if( rEvalsPerSec > 0 ) {
+	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( apw[ 0 ] ), TRUE );
+	gtk_adjustment_set_value( gtk_spin_button_get_adjustment(
+				      GTK_SPIN_BUTTON( apw[ 1 ] ) ),
+				  rEvalsPerSec );
+    }
+}
+
+extern void GTKShowCalibration( void ) {
+
+    GtkAdjustment *padj;
+    GtkWidget *pwDialog, *pwvbox, *pwhbox, *pwenable, *pwspin, *pwbutton,
+	*apw[ 2 ];
+    
+    pwDialog = CreateDialog( _("GNU Backgammon - Speed estimate"),
+			     DT_QUESTION, GTK_SIGNAL_FUNC( CalibrationOK ),
+			     &pwspin );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwvbox = gtk_vbox_new( FALSE, 8 ) );
+    gtk_container_set_border_width( GTK_CONTAINER( pwvbox ), 8 );
+    gtk_container_add( GTK_CONTAINER( pwvbox ),
+		       pwhbox = gtk_hbox_new( FALSE, 8 ) );
+    gtk_container_add( GTK_CONTAINER( pwhbox ),
+		       pwenable = gtk_check_button_new_with_label(
+			   _("Speed recorded:") ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwenable ),
+				  rEvalsPerSec > 0 );
+    
+    padj = GTK_ADJUSTMENT( gtk_adjustment_new( rEvalsPerSec > 0 ?
+					       rEvalsPerSec : 10000,
+					       2, G_MAXDOUBLE, 100,
+					       1000, 0 ) );
+    pwspin = gtk_spin_button_new( padj, 100, 0 );
+    gtk_container_add( GTK_CONTAINER( pwhbox ), pwspin );
+    gtk_widget_set_sensitive( pwspin, rEvalsPerSec > 0 );
+    
+    gtk_container_add( GTK_CONTAINER( pwhbox ), gtk_label_new(
+			   _("static evaluations/second") ) );
+
+    gtk_container_add( GTK_CONTAINER( pwvbox ),
+		       pwbutton = gtk_button_new_with_label(
+			   _("Calibrate") ) );
+    apw[ 0 ] = pwenable;
+    apw[ 1 ] = pwspin;
+    gtk_signal_connect( GTK_OBJECT( pwbutton ), "clicked",
+			GTK_SIGNAL_FUNC( CalibrationGo ), apw );
+
+    gtk_signal_connect( GTK_OBJECT( pwenable ), "toggled",
+			GTK_SIGNAL_FUNC( CalibrationEnable ), pwspin );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+}
+
+static gboolean CalibrationCancel( GtkObject *po, gpointer p ) {
+
+    fInterrupt = TRUE;
+
+    return TRUE;
+}
+
+extern void *GTKCalibrationStart( void ) {
+
+    GtkWidget *pwDialog, *pwhbox, *pwResult;
+    
+    pwDialog = CreateDialog( _("GNU Backgammon - Calibration"), DT_INFO,
+			     GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwhbox = gtk_hbox_new( FALSE, 8 ) );
+    gtk_container_set_border_width( GTK_CONTAINER( pwhbox ), 8 );
+    gtk_container_add( GTK_CONTAINER( pwhbox ),
+		       gtk_label_new( _("Calibrating:") ) );
+    gtk_container_add( GTK_CONTAINER( pwhbox ),
+		       pwResult = gtk_label_new( _("       (n/a)       ") ) );
+    gtk_container_add( GTK_CONTAINER( pwhbox ),
+		       gtk_label_new( _("static evaluations/second") ) );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+
+    pwOldGrab = pwGrab;
+    pwGrab = pwDialog;
+    
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "delete_event",
+			GTK_SIGNAL_FUNC( CalibrationCancel ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    while( gtk_events_pending() )
+        gtk_main_iteration();
+    GTKAllowStdin();
+
+    gtk_widget_ref( pwResult );
+    
+    return pwResult;
+}
+
+extern void GTKCalibrationUpdate( void *context, float rEvalsPerSec ) {
+
+    char sz[ 32 ];
+
+    sprintf( sz, "%.0f", rEvalsPerSec );
+    gtk_label_set_text( GTK_LABEL( context ), sz );
+    
+    GTKDisallowStdin();
+    while( gtk_events_pending() )
+        gtk_main_iteration();
+    GTKAllowStdin();
+}
+
+extern void GTKCalibrationEnd( void *context ) {
+
+    gtk_widget_unref( GTK_WIDGET( context ) );
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( GTK_WIDGET( context ) ) );
+
+    pwGrab = pwOldGrab;
+}
+

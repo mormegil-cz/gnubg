@@ -22,6 +22,8 @@
 #ifndef _GTKGAME_H_
 #define _GTKGAME_H_
 
+#include <stdio.h>
+
 #include "backgammon.h"
 #include "rollout.h"
 
@@ -118,6 +120,10 @@ extern void GTKSet( void *p );
 extern void GTKUpdateAnnotations( void );
 extern int GTKGetManualDice( int an[ 2 ] );
 extern void GTKShowVersion( void );
+extern void GTKShowCalibration( void );
+extern void *GTKCalibrationStart( void ),
+    GTKCalibrationUpdate( void *context, float rEvalsPerSec ),
+    GTKCalibrationEnd( void *context );
 extern void GTKDumpRolloutResults(GtkWidget *widget, gpointer data);
 extern void GTKViewRolloutStatistics(GtkWidget *widget, gpointer data);
 #ifdef WIN32

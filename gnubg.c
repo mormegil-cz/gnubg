@@ -209,7 +209,7 @@ char *aszExtensions [ NUM_PATHS ] = {
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
-float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
+float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f, rEvalsPerSec = -1.0f,
     arLuckLevel[] = {
 	0.6f, /* LUCK_VERYBAD */
 	0.3f, /* LUCK_BAD */
@@ -1324,6 +1324,9 @@ command cER = {
       "position"), szPOSITION, NULL },
     { "cache", CommandSetCache, N_("Set the size of the evaluation cache"),
       szSIZE, NULL },
+    { "calibration", CommandSetCalibration,
+      N_("Specify the evaluation speed to be assumed for time estimates"),
+      szOPTVALUE, NULL },
     { "cheat", CommandSetCheat, 
       N_("Control whether GNU Backgammon is allowed to manipulate the dice"),
       szONOFF, &cOnOff },
@@ -1418,6 +1421,8 @@ command cER = {
       N_("Redisplay the board position"), szOPTPOSITION, NULL },
     { "cache", CommandShowCache, N_("Display statistics on the evaluation "
       "cache"), NULL, NULL },
+    { "calibration", CommandShowCalibration,
+      N_("Show the previously recorded evaluation speed"), NULL, NULL },
     { "clockwise", CommandShowClockwise, N_("Display the board orientation"),
       NULL, NULL },
     { "commands", CommandShowCommands, N_("List all available commands"),
@@ -1532,6 +1537,9 @@ command cER = {
     { "analyze", NULL, NULL, NULL, acAnalyse },
     { "annotate", NULL, N_("Record notes about a game"), NULL, acAnnotate },
     { "beaver", CommandRedouble, N_("Synonym for `redouble'"), NULL, NULL },
+    { "calibrate", CommandCalibrate,
+      N_("Measure evaluation speed, for later time estimates"), szOPTVALUE,
+      NULL },
     { "copy", CommandCopy, N_("Copy current position to clipboard"), 
       NULL, NULL },
     { "database", NULL, N_("Manipulate a database of positions"), NULL,

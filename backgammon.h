@@ -273,7 +273,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
-    arSkillLevel[ SKILL_VERYGOOD + 1 ];
+    arSkillLevel[ SKILL_VERYGOOD + 1 ], rEvalsPerSec;
 extern int nThreadPriority;
 extern int fCheat;
 
@@ -551,6 +551,7 @@ extern void CommandAccept( char * ),
     CommandAnnotateVeryGood( char * ),
     CommandAnnotateVeryLucky( char * ),
     CommandAnnotateVeryUnlucky( char * ),
+    CommandCalibrate( char *sz ),
     CommandCopy ( char * ),
     CommandDatabaseDump( char * ),
     CommandDatabaseExport( char * ),
@@ -655,6 +656,7 @@ extern void CommandAccept( char * ),
     CommandSetBoard( char * ),
     CommandSetBeavers( char * ),
     CommandSetCache( char * ),
+    CommandSetCalibration( char * ),
     CommandSetCheat ( char * ),
     CommandSetClockwise( char * ),
     CommandSetConfirmNew( char * ),
@@ -873,6 +875,7 @@ extern void CommandAccept( char * ),
     CommandShowBoard( char * ),
     CommandShowBeavers( char * ),
     CommandShowCache( char * ),
+    CommandShowCalibration( char * ),
     CommandShowClockwise( char * ),
     CommandShowCommands( char * ),
     CommandShowConfirm( char * ),
