@@ -164,21 +164,92 @@ float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
 
 gamestate gs = GAME_NONE;
 
-evalcontext ecTD = { 0, 8, 0.16, 7, FALSE, 0.0, TRUE };
-evalcontext ecEval = { 1, 8, 0.16, 7, FALSE, 0.0, TRUE };
-evalcontext ecRollout = { 0, 8, 0.16, 7, FALSE, 0.0, TRUE };
+evalcontext ecTD = { 0, 8, 0.16, 0, FALSE, 0.0, TRUE };
+evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE, 0.0, TRUE };
+
+rolloutcontext rcTD = { 
+  {
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 cube decision */
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 cube decision */
+  }, 
+  {
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 chequerplay */
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 chequerplay */
+  }, 
+  FALSE, /* cubeful */
+  FALSE, /* variance reduction */
+  7, /* truncation */
+  36, /* number of trials */
+  RNG_MERSENNE, /* RNG */
+  0 /* seed */
+};
+
+rolloutcontext rcRollout =
+{ 
+  {
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 cube decision */
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 cube decision */
+  }, 
+  {
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 chequerplay */
+    { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 chequerplay */
+  }, 
+  FALSE, /* cubeful */
+  FALSE, /* variance reduction */
+  7, /* truncation */
+  36, /* number of trials */
+  RNG_MERSENNE, /* RNG */
+  0 /* seed */
+};
+
+/* parameters for `eval' and `hint' */
+
+evaltype etEvalChequer = EVAL_EVAL;
+evaltype etEvalCube = EVAL_EVAL;
+evaltype etAnalysisChequer = EVAL_EVAL;
+evaltype etAnalysisCube = EVAL_EVAL;
+
+#define EVALSETUP { \
+  /* evalcontext */ \
+  { 1, 8, 0.16, 0, FALSE, 0.0, TRUE }, \
+  /* rolloutcontext */ \
+  { \
+    { \
+      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 cube decision */ \
+      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 cube decision */ \
+    }, \
+    { \
+      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE }, /* player 0 chequerplay */ \
+      { 0, 8, 0.16, 0, FALSE, 0.0, TRUE } /* player 1 chequerplay */ \
+    }, \
+    FALSE, /* cubeful */ \
+    FALSE, /* variance reduction */ \
+    7, /* truncation */ \
+    36, /* number of trials */ \
+    RNG_MERSENNE, /* RNG */ \
+    0 /* seed */ \
+  } \
+} 
+
+evalsetup esEvalChequer = EVALSETUP;
+evalsetup esEvalCube = EVALSETUP;
+evalsetup esAnalysisChequer = EVALSETUP;
+evalsetup esAnalysisCube = EVALSETUP;
 
 #define DEFAULT_NET_SIZE 128
 
 storedmoves sm; /* sm.ml.amMoves is NULL, sm.anDice is [0,0] */
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 7, FALSE, 0.0, TRUE } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 7, FALSE, 0.0, TRUE } }
+    { "gnubg", PLAYER_GNU, EVAL_EVAL, EVAL_EVAL, 
+      EVALSETUP, EVALSETUP },
+    { "user", PLAYER_HUMAN, EVAL_NONE, EVAL_NONE, 
+      EVALSETUP, EVALSETUP } 
 };
 
 /* Usage strings */
 static char szDICE[] = "<die> <die>",
+    szER[] = "evaluation|rollout", 
     szFILENAME[] = "<filename>",
     szKEYVALUE[] = "[<key>=<value> ...]",
     szLENGTH[] = "<length>",
@@ -336,9 +407,25 @@ command acAnalyse[] = {
     { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, "Specify the "
       "equity loss for a very unlucky roll", szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetEvalParam[] = {
+  { "type", CommandSetEvalParamType,
+    "Specify type (evaluation or rollout)", szER, NULL },
+  { "evaluation", CommandSetEvalParamEvaluation,
+    "Speficy parameters for neural net evaluation", NULL,
+    acSetEvaluation },
+  { "rollout", CommandSetEvalParamRollout,
+    "Speficy parameters for rollout", NULL,
+    acSetRollout },
+  { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysis[] = {
+    { "chequerplay", CommandSetAnalysisChequerplay, "Specify parameters "
+      "for the analysis of chequerplay", NULL, 
+      acSetEvalParam },
     { "cube", CommandSetAnalysisCube, "Select whether cube action will be "
       "analysed", szONOFF, NULL },
+    { "cubedecision", CommandSetAnalysisCubedecision, "Specify parameters "
+      "for the analysis of cube decisions", NULL,
+      acSetEvalParam },
     { "limit", CommandSetAnalysisLimit, "Specify the maximum number of "
       "possible moves analysed", szOPTLIMIT, NULL },
     { "luck", CommandSetAnalysisLuck, "Select whether dice rolls will be "
@@ -401,9 +488,24 @@ command acAnalyse[] = {
     { "user", CommandSetRNGUser, "Specify an external generator", szOPTSEED,
       NULL,},
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetRolloutPlayer[] = {
+    { "chequerplay", CommandSetRolloutPlayerChequerplay, "Specify parameters "
+      "for chequerplay during rollouts", NULL, acSetEvaluation },
+    { "cubedecision", CommandSetRolloutPlayerCubedecision,
+      "Specify parameters for cube decisions during rollouts",
+      NULL, acSetEvaluation },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetRollout[] = {
-    { "evaluation", CommandSetRolloutEvaluation, "Specify parameters "
-      "for evaluation during rollouts", NULL, acSetEvaluation },
+    { "chequerplay", CommandSetRolloutChequerplay, "Specify parameters "
+      "for chequerplay during rollouts", NULL, acSetEvaluation },
+    { "cubedecision", CommandSetRolloutCubedecision, "Specify parameters "
+      "for cube decisions during rollouts", NULL, acSetEvaluation },
+    { "cubeful", CommandSetRolloutCubeful, "Specify whether the "
+      "rollout is cubeful or cubeless", szONOFF, NULL }, 
+    { "player", CommandSetRolloutPlayer, "Control evaluation "
+      "parameters for each side individually", szPLAYER, acSetRolloutPlayer }, 
+    { "rng", CommandSetRolloutRNG, "Specify the random number "
+      "generator algorithm for rollouts", NULL, acSetRNG },
     { "seed", CommandSetRolloutSeed, "Specify the base pseudo-random seed "
       "to use for rollouts", szOPTSEED, NULL },
     { "trials", CommandSetRolloutTrials, "Control how many rollouts to "
@@ -423,6 +525,14 @@ command acAnalyse[] = {
     { "threshold", CommandSetTrainingThreshold, "Require a minimum error in "
       "position database generation", szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
+}, acSetEval[] = {
+  { "chequerplay", CommandSetEvalChequerplay,
+    "Set evaluation parameters for chequer play", NULL,
+    acSetEvalParam },
+  { "cubedecision", CommandSetEvalCubedecision,
+    "Set evaluation parameters for cube decisions", NULL,
+    acSetEvalParam },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
     { "analysis", NULL, "Control parameters used when analysing moves",
       NULL, acSetAnalysis },
@@ -452,8 +562,8 @@ command acAnalyse[] = {
       szDICE, NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
       "the computer's turn", szONOFF, NULL },
-    { "evaluation", CommandSetEvaluation, "Control position evaluation "
-      "parameters", NULL, acSetEvaluation },
+    { "evaluation", NULL, "Control position evaluation "
+      "parameters", NULL, acSetEval },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
       "money games", szONOFF, NULL },
     { "matchequitytable", NULL, "Select match equity table", NULL,
@@ -472,7 +582,8 @@ command acAnalyse[] = {
       "ready for commands", szPROMPT, NULL },
     { "rng", NULL, "Select the random number generator algorithm", NULL,
       acSetRNG },
-    { "rollout", NULL, "Control rollout parameters", NULL, acSetRollout },
+    { "rollout", CommandSetRollout, "Control rollout parameters",
+      NULL, acSetRollout }, 
     { "score", CommandSetScore, "Set the match or session score ",
       szSCORE, NULL },
     { "seed", CommandSetSeed, "Set the dice generator seed", szOPTSEED, NULL },
@@ -1622,8 +1733,8 @@ extern void CommandEval( char *sz ) {
 	SetCubeInfo( &ci, nCube, fCubeOwner, n ? !fMove : fMove, nMatchTo,
 		     anScore, fCrawford, fJacoby, fBeavers );    
     
-    if( !DumpPosition( an, szOutput, &ecEval, &ci, fOutputMWC, fOutputWinPC,
-		       n ) ) {
+    if( !DumpPosition( an, szOutput, &esEvalCube.ec, &ci,
+                       fOutputMWC, fOutputWinPC, n ) ) {
 #if USE_GTK
 	if( fX )
 	    GTKEval( szOutput );
@@ -1896,8 +2007,8 @@ extern void CommandHint( char *sz ) {
         /* Give hint on cube action */
 
         if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput,
-                                       &ci, &ecEval,
-                                       ecEval.nPlies ) < 0 )
+                                       &ci, &esEvalCube.ec,
+                                       esEvalCube.ec.nPlies ) < 0 )
           return;
 
         GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
@@ -1935,8 +2046,9 @@ extern void CommandHint( char *sz ) {
 	SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
 		      fCrawford, fJacoby, fBeavers );
 
-      if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci, &ecEval,
-                                     ecEval.nPlies ) < 0 )
+      if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci, 
+			                               &esEvalCube.ec,
+                                     esEvalCube.ec.nPlies ) < 0 )
         return;
 
 #if USE_GTK
@@ -1988,7 +2100,7 @@ extern void CommandHint( char *sz ) {
 		    fCrawford, fJacoby, fBeavers );
 
       if( FindnSaveBestMoves( &ml, anDice[ 0 ], anDice[ 1 ], anBoard,
-			      NULL, &ci, &ecEval ) < 0 || fInterrupt )
+			      NULL, &ci, &esEvalChequer.ec ) < 0 || fInterrupt )
 	  return;
 
       n = ( ml.cMoves > n ) ? n : ml.cMoves;
@@ -2108,28 +2220,28 @@ CommandRollout( char *sz ) {
     else
 #endif
 	outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
-		 "Equity        Trials" );
+		 "Equity                    Trials" );
 	
     for( i = 0; i < c; i++ ) {
 #if USE_GTK
 	if( fX )
 	    GTKRolloutRow( i );
 #endif
-	if( ( cGames = Rollout( aan[ i ], asz[ i ], ar, arStdDev,
-				nRolloutTruncate, nRollouts, fVarRedn, &ci,
-				&ecRollout, fOpponent ) ) <= 0 )
+	if( ( cGames = RolloutGeneral( aan[ i ], asz[ i ], &ar, &arStdDev,
+                                       &rcRollout, &ci, 1, fOpponent ) ) <= 0 )
 	    return;
 
 #if USE_GTK
 	if( !fX )
 #endif
-	    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)%12d\n"
+	    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
+                     "Cubeful: %6.3f %12d\n"
 		     "              Standard error %5.3f %5.3f %5.3f %5.3f"
-		     " %5.3f (%6.3f)\n\n",
+		     " %5.3f (%6.3f)         %6.3f\n\n",
 		     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
-		     ar[ 5 ], cGames, arStdDev[ 0 ], arStdDev[ 1 ],
+		     ar[ 5 ],ar[ 6 ], cGames, arStdDev[ 0 ], arStdDev[ 1 ],
 		     arStdDev[ 2 ], arStdDev[ 3 ], arStdDev[ 4 ],
-		     arStdDev[ 5 ] ); 
+		     arStdDev[ 5 ], arStdDev[ 6 ] ); 
     }
     
 #if USE_GTK
@@ -2433,7 +2545,39 @@ extern void CommandNewWeights( char *sz ) {
     outputf( "A new neural net with %d hidden nodes has been created.\n", n );
 }
 
-static void SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
+
+static void
+SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
+
+    switch( rngCurrent ) {
+    case RNG_ANSI:
+	fprintf( pf, "%s rng ansi\n", sz );
+	break;
+    case RNG_BSD:
+	fprintf( pf, "%s rng bsd\n", sz );
+	break;
+    case RNG_ISAAC:
+	fprintf( pf, "%s rng isaac\n", sz );
+	break;
+    case RNG_MANUAL:
+	fprintf( pf, "%s rng manual\n", sz );
+	break;
+    case RNG_MD5:
+	fprintf( pf, "%s rng md5\n", sz );
+	break;
+    case RNG_MERSENNE:
+	fprintf( pf, "%s rng mersenne\n", sz );
+	break;
+    case RNG_USER:
+	/* don't save user RNGs */
+	break;
+    }
+
+}
+
+
+static void 
+SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 
     fprintf( pf, "%s plies %d\n"
 	     "%s candidates %d\n"
@@ -2447,6 +2591,75 @@ static void SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 	     sz, pec->fCubeful ? "on" : "off",
 	     sz, pec->rNoise, sz, pec->fDeterministic ? "on" : "off" );
 }
+
+
+static void
+SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
+
+  char *pch;
+  int i;
+
+  /* flags and stuff */
+
+  fprintf ( pf,
+            "%s cubeful %s\n"
+            "%s variancereduction %s\n"
+            "%s truncate %d\n"
+            "%s trials %d\n",
+            sz, prc->fCubeful ? "on" : "off",
+            sz, prc->fVarRedn ? "on" : "off",
+            sz, prc->nTruncate,
+            sz, prc->nTrials );
+
+  SaveRNGSettings ( pf, sz, prc->rngRollout );
+
+  /* chequer play and cube decision evalcontexts */
+
+  pch = malloc ( strlen ( sz ) + 50 );
+
+  strcpy ( pch, sz );
+
+  for ( i = 0; i < 2; i++ ) {
+
+    sprintf ( pch, "%s player %i chequerplay", sz, i );
+    SaveEvalSettings ( pf, pch, &prc->aecChequer[ i ] );
+
+    sprintf ( pch, "%s player %i cubedecision", sz, i );
+    SaveEvalSettings ( pf, pch, &prc->aecCube[ i ] );
+
+  }
+
+  free ( pch );
+
+}
+
+static void 
+SaveEvalSetupSettings( FILE *pf, char *sz, evaltype *pet, evalsetup *pes ) {
+
+  char szTemp[ 1024 ];
+
+  switch ( *pet ) {
+  case EVAL_NONE:
+    fprintf (pf, "%s type none\n", sz );
+    break;
+  case EVAL_EVAL:
+    fprintf (pf, "%s type evaluation\n", sz );
+    break;
+  case EVAL_ROLLOUT:
+    fprintf (pf, "%s type rollout\n", sz );
+    break;
+  default:
+    break;
+  }
+
+  strcpy ( szTemp, sz );
+  SaveEvalSettings (pf, strcat ( szTemp, " evaluation" ), &pes->ec );
+
+  strcpy ( szTemp, sz );
+  SaveRolloutSettings (pf, strcat ( szTemp, " rollout" ), &pes->rc );
+
+}
+
 
 extern void CommandSaveSettings( char *szParam ) {
 
@@ -2493,7 +2706,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     EvalCacheStats( NULL, &cCache, NULL, NULL );
     fprintf( pf, "set cache %d\n", cCache );
-    
+
 #if USE_GTK
     fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
     fputc( '\n', pf );
@@ -2510,7 +2723,18 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif
 	     fDisplay ? "on" : "off" );
 
-    SaveEvalSettings( pf, "set evaluation", &ecEval );
+    sprintf( szTemp, "set evaluation chequerplay", i );
+    SaveEvalSetupSettings ( pf, szTemp, &etEvalChequer, &esEvalChequer );
+
+    sprintf( szTemp, "set evaluation cubedecision", i );
+    SaveEvalSetupSettings ( pf, szTemp, &etEvalCube, &esEvalCube );
+
+    sprintf( szTemp, "set analysis chequerplay", i );
+    SaveEvalSetupSettings ( pf, szTemp, 
+                            &etAnalysisChequer, &esAnalysisChequer );
+
+    sprintf( szTemp, "set analysis cubedecision", i );
+    SaveEvalSetupSettings ( pf, szTemp, &etAnalysisCube, &esAnalysisCube );
 
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 
@@ -2546,8 +2770,12 @@ extern void CommandSaveSettings( char *szParam ) {
 	switch( ap[ i ].pt ) {
 	case PLAYER_GNU:
 	    fprintf( pf, "set player %d gnubg\n", i );
-	    sprintf( szTemp, "set player %d evaluation", i );
-	    SaveEvalSettings( pf, szTemp, &ap[ i ].ec );
+	    sprintf( szTemp, "set player %d chequerplay", i );
+	    SaveEvalSetupSettings( pf, szTemp, 
+                                   &ap[ i ].etChequer, &ap[ i ].esChequer );
+	    sprintf( szTemp, "set player %d cubedecisions", i );
+	    SaveEvalSetupSettings( pf, szTemp, 
+                                   &ap[ i ].etCube, &ap[ i ].esCube );
 	    break;
 	    
 	case PLAYER_HUMAN:
@@ -2566,36 +2794,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf( pf, "set prompt %s\n", szPrompt );
 
-    switch( rngCurrent ) {
-    case RNG_ANSI:
-	fputs( "set rng ansi\n", pf );
-	break;
-    case RNG_BSD:
-	fputs( "set rng bsd\n", pf );
-	break;
-    case RNG_ISAAC:
-	fputs( "set rng isaac\n", pf );
-	break;
-    case RNG_MANUAL:
-	fputs( "set rng manual\n", pf );
-	break;
-    case RNG_MD5:
-	fputs( "set rng md5\n", pf );
-	break;
-    case RNG_MERSENNE:
-	fputs( "set rng mersenne\n", pf );
-	break;
-    case RNG_USER:
-	/* don't save user RNGs */
-	break;
-    }
-    
-    fprintf( pf, "set rollout trials %d\n"
-	     "set rollout truncation %d\n"
-	     "set rollout varredn %s\n",
-	     nRollouts, nRolloutTruncate, fVarRedn ? "on" : "off" );
-
-    SaveEvalSettings( pf, "set rollout evaluation", &ecRollout );
+    SaveRNGSettings ( pf, "set", rngCurrent );
 
     fprintf( pf, "set training alpha %f\n"
 	     "set training anneal %f\n"

@@ -71,7 +71,8 @@ typedef enum _playertype {
 typedef struct _player {
     char szName[ 32 ];
     playertype pt;
-    evalcontext ec; /* PLAYER_GNU */
+		evaltype etChequer, etCube; /* PLAYER_GNU */
+    evalsetup esChequer, esCube; /* PLAYER_GNU */
     int h; /* PLAYER_EXTERNAL */
 } player;
 
@@ -206,7 +207,14 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
-extern evalcontext ecEval, ecRollout, ecTD;
+extern evalcontext ecRollout, ecTD;
+
+extern evaltype etEvalCube, etEvalChequer;
+extern evaltype etAnalysisCube, etAnalysisChequer;
+extern evalsetup esEvalCube, esEvalChequer;
+extern evalsetup esAnalysisCube, esAnalysisChequer;
+
+extern rolloutcontext rcRollout, rcTD;
 
 /* plGame is the list of moverecords representing the current game;
    plLastMove points to a move within it (typically the most recently
@@ -329,7 +337,8 @@ extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
-    acSet[], acShow[], acTrain[], acTop[], acSetMET[];
+    acSet[], acShow[], acTrain[], acTop[], acSetMET[], acSetEvalParam[],
+  acSetRolloutPlayer[];
 
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
@@ -391,7 +400,9 @@ extern void CommandAccept( char * ),
     CommandSaveMatch( char * ),
     CommandSaveSettings( char * ),
     CommandSaveWeights( char * ),
+    CommandSetAnalysisChequerplay( char * ),
     CommandSetAnalysisCube( char * ),
+    CommandSetAnalysisCubedecision( char * ),
     CommandSetAnalysisLimit( char * ),
     CommandSetAnalysisLuck( char * ),
     CommandSetAnalysisMoves( char * ),
@@ -431,6 +442,11 @@ extern void CommandAccept( char * ),
     CommandSetEvalReduced ( char * ),
     CommandSetEvalTolerance( char * ),
     CommandSetEvaluation( char * ),
+    CommandSetEvalParamType( char * ),
+    CommandSetEvalParamRollout( char * ),
+    CommandSetEvalParamEvaluation( char * ),
+    CommandSetEvalChequerplay ( char * ),
+    CommandSetEvalCubedecision ( char * ),
     CommandSetJacoby( char * ),
     CommandSetMETZadeh( char * ),
     CommandSetMETWoolsey( char * ),
@@ -442,7 +458,8 @@ extern void CommandAccept( char * ),
     CommandSetOutputMWC ( char * ),
     CommandSetOutputRawboard( char * ),
     CommandSetOutputWinPC( char * ),
-    CommandSetPlayerEvaluation( char * ),
+    CommandSetPlayerChequerplay( char * ),
+    CommandSetPlayerCubedecision( char * ),
     CommandSetPlayerExternal( char * ),
     CommandSetPlayerGNU( char * ),
     CommandSetPlayerHuman( char * ),
@@ -459,7 +476,14 @@ extern void CommandAccept( char * ),
     CommandSetRNGMD5( char * ),
     CommandSetRNGMersenne( char * ),
     CommandSetRNGUser( char * ),
-    CommandSetRolloutEvaluation( char * ),
+    CommandSetRollout ( char * ),
+    CommandSetRolloutCubedecision ( char * ),
+    CommandSetRolloutCubeful ( char * ),
+    CommandSetRolloutChequerplay ( char * ),
+    CommandSetRolloutPlayer ( char * ),
+    CommandSetRolloutPlayerChequerplay ( char * ),
+    CommandSetRolloutPlayerCubedecision ( char * ),
+    CommandSetRolloutRNG ( char * ),
     CommandSetRolloutSeed( char * ),
     CommandSetRolloutTrials( char * ),
     CommandSetRolloutTruncation( char * ),
