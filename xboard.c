@@ -334,7 +334,7 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 					pgd->anDice[ 0 ] :
 					pgd->anDice[ 1 ] ) * pgd->fDragColour;
 
-	    if( ( nDest < 0 ) || ( nDest > 25 ) )
+	    if( ( nDest <= 0 ) || ( nDest >= 25 ) )
 		/* bearing off */
 		nDest = pgd->fDragColour ? 26 : 27;
 	    

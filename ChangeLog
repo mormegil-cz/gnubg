@@ -1,3 +1,8 @@
+Thu Dec 16 18:11:41 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* xboard.c (BoardPointer): Fixed bug which prevented bearing off
+	with Button2 or Button3 with exactly the right number.
+
 Wed Dec 15 19:48:10 1999  Gary Wong  <gary@cs.arizona.edu>
 
 	* xboard.c (BoardPointer): Allow clicking Button2 or Button3 on
