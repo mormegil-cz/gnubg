@@ -257,6 +257,7 @@ command acDatabase[] = {
     { "winpc", CommandSetOutputWinPC,
       "Show winning chances as percentages (on) or probabilities (off)",
       szONOFF, NULL },
+    { NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
       "congruential) generator", szOPTSEED, NULL },
@@ -438,7 +439,7 @@ command acDatabase[] = {
     { "new", NULL, "Start a new game, match or session", NULL, acNew },
     { "next", CommandNext, "Step ahead within the game", NULL, NULL },
     { "p", CommandPrevious, NULL, NULL, NULL },
-    { "pass", CommandDrop, "Synonum for `drop'", NULL, NULL },
+    { "pass", CommandDrop, "Synonym for `drop'", NULL, NULL },
     { "play", CommandPlay, "Force the computer to move", NULL, NULL },
     { "previous", CommandPrevious, "Step backward within the game", NULL,
       NULL },
@@ -1036,13 +1037,18 @@ extern void ShowBoard( void ) {
 
 #if USE_GTK
     if( fX && !nDelay ) {
+	/* Always let the board widget know about dice rolls, even if the
+	   board update is elided (see below). */
+	if( anDice[ 0 ] )
+	    game_set_old_dice( BOARD( pwBoard ), anDice[ 0 ], anDice[ 1 ] );
+	
 	/* Is the server still processing our last request?  If so, don't
 	   give it more until it's finished what it has.  (Always update
 	   the board immediately if nDelay is set, though -- show the user
 	   something while they're waiting!) */
 	XEventsQueued( GDK_DISPLAY(), QueuedAfterReading );
 	/* Subtract and compare as signed, just in case the request numbers
-	   wrap around */
+	   wrap around. */
 	if( (long) ( LastKnownRequestProcessed( GDK_DISPLAY() ) -
 		     nLastRequest ) < 0 ) {
 	    if( !nUpdate )
@@ -1242,8 +1248,14 @@ extern void CommandEval( char *sz ) {
     SetCubeInfo( &ci, nCube, fCubeOwner, n ? !fMove : fMove, nMatchTo, anScore,
 		 fCrawford, fJacoby, fBeavers );    
     
-    if( !DumpPosition( an, szOutput, &ecEval, &ci, fOutputMWC, n ) )
-	outputl( szOutput );
+    if( !DumpPosition( an, szOutput, &ecEval, &ci, fOutputMWC, n ) ) {
+#if USE_GTK
+	if( fX )
+	    GTKEval( szOutput );
+	else
+#endif
+	    outputl( szOutput );
+    }
 }
 
 static command *FindHelpCommand( command *pcBase, char *sz,
@@ -1288,19 +1300,33 @@ static command *FindHelpCommand( command *pcBase, char *sz,
 
 extern void CommandHelp( char *sz ) {
 
-    command *pc;
-    char szCommand[ 128 ], szUsage[ 128 ];
+    command *pc, *pcFull;
+    char szCommand[ 128 ], szUsage[ 128 ], *szHelp;
     
     if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {
-	outputf( "No help available for topic `%s' -- try `help' for a list of "
-		"topics.\n", sz );
+	outputf( "No help available for topic `%s' -- try `help' for a list "
+		 "of topics.\n", sz );
 
 	return;
     }
 
-    if( pc->szHelp ) {
-	outputf( "%s- %s\n\nUsage: %s", szCommand, pc->szHelp,
-		szUsage );
+    if( pc->szHelp )
+	/* the command has its own help text */
+	szHelp = pc->szHelp;
+    else {
+	/* perhaps the command is an abbreviation; search for the full
+	   version */
+	szHelp = NULL;
+
+	for( pcFull = acTop; pcFull->sz; pcFull++ )
+	    if( pcFull->pf == pc->pf && pcFull->szHelp ) {
+		szHelp = pcFull->szHelp;
+		break;
+	    }
+    }
+	
+    if( szHelp ) {
+	outputf( "%s- %s\n\nUsage: %s", szCommand, szHelp, szUsage );
 
 	if( pc->pc )
 	    outputl( "<subcommand>\n" );
@@ -1309,7 +1335,8 @@ extern void CommandHelp( char *sz ) {
     }
 
     if( pc->pc ) {
-	outputl( pc == &cTop ? "Available commands:" : "Available subcommands:" );
+	outputl( pc == &cTop ? "Available commands:" :
+		 "Available subcommands:" );
 
 	pc = pc->pc;
 	
@@ -1688,7 +1715,7 @@ CommandRollout( char *sz ) {
 
 #if USE_GTK
     if( fX )
-	GTKRollout( c, asz, cGames );
+	GTKRollout( c, asz, nRollouts );
     else
 #endif
 	outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "

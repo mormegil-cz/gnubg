@@ -1,3 +1,33 @@
+Tue Jan 30 10:38:32 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ShowBoard): Always inform the board window about dice
+	rolls.
+	* gtkboard.c (game_set_old_dice): Allow the off-board dice to
+	be modified.
+
+	* gnubg.c (CommandHelp): Fix help for abbreviations (e.g.
+	"help r" now gives the same output as "help roll").
+	
+	* gtkboard.c (board_stop): Add a `stop' button to the board
+	window.
+	* gtkgame.c (InitGTK): The `stop' button is now the grab widget
+	when gnubg is busy.
+	* eval.c: Check fAction in the cubeful evaluation functions.
+	
+	* gtkgame.c (GTKEval): New function.  Show `eval' output in a
+	text widget, so the formatting is correct and output can be copied.
+
+	* gtkgame.c (GTKHint): Show either MWC or gammon-adjusted equity.
+	
+	* gnubgtest: Play the example game from the manual, and make
+	sure it works and gnubg makes the same moves.
+
+	* rollout.c (Rollout): Fix the call to SanityCheck() (make sure the
+	correct player is on roll).
+
+	* sgf.c: Start adding support for SGF setup properties in saved
+	games.
+	
 Fri Jan 19 15:20:24 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (FormatMoveHint): New function.

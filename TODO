@@ -107,9 +107,8 @@ duplication of effort and to make sure our changes merge easily.
   instead of the status bar, or whether all messages are appended to a
   message window.
 ** Disable the reset/edit buttons in the board window when no game is in
-  progress.  (Disable appropriate menu items, too.)
-** Add a "stop" button which sets fInterrupt; this should be the grab
-  widget when gnubg is busy.
+  progress.  (Disable appropriate menu items, too.)  Disable the "stop"
+  button when nothing is happening.
 ** Add optional point number labels on the board.
 ** Add "beavers" in the Set menu.
 ** Have a progress bar along with some text in the main window, which
@@ -143,16 +142,15 @@ duplication of effort and to make sure our changes merge easily.
 ** Show a preview of the chequers in the appearances dialog.
 ** Allow the border colour to be changed, and honour the user's lighting
   angle when rendering the border.
+** Make "next" and "previous" change the off-board dice (see
+  game_set_old_dice()).
 
 ** Dialogs:
-*** Make "eval" show its output in tables in a dialog.  This will need
-  changes in eval.c to give the information in a useful form; probably
-  a "DumpPositionRaw".
 *** Make "help" show its output in a CList (CTree?).  The user must be able
   to recurse through help for subcommands.
 *** Make "show matchequitytable" show output in a table.
-*** Allow selection of data from the rollout and eval dialogs (see the
-  hint dialog for an example). (gary)
+*** Allow selection of data from the rollout dialog (see the hint dialog for
+  an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
 
 * Bugs:
@@ -166,15 +164,12 @@ duplication of effort and to make sure our changes merge easily.
   functions).
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages; "set score -1 -1" gives a bad message too (it
-  should be redefined to set 1-away, 1-away); "help r" doesn't do anything.
+  should be redefined to set 1-away, 1-away).
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
 ** "set player <tab>" gives incorrect completions.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
-** When ShowBoard() postpones an update, the off-board dice are not set.
-  ("next" and "previous" don't change the dice, either -- it would be nice
-  to add an external interface to change them.)
 ** Cosmetic problems when a "set board" is shown in the game list (the
   wrong cell is highlighted).
 ** When using guile and guile isn't using readline, X events are not
@@ -222,6 +217,7 @@ duplication of effort and to make sure our changes merge easily.
   like "set board 0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0".
 ** Do more in CommandSaveSettings.
 ** Handle SGF setup properties when loading games.
+** Make "eval" pay attention to the percentage/probability settings. (gary)
 
 
 Local Variables:
