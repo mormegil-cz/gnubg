@@ -1,3 +1,8 @@
+Thu Apr 29 20:44:24 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* bearoff.c (GetDistCompressed): fix sanity check for huge 
+	databases.
+
 Wed Apr 28 20:28:22 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Add new utility program bearoffdump for inspection

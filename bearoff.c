@@ -2076,7 +2076,7 @@ GetDistCompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
 
   /* Sanity checks */
 
-  if ( iOffset < 0 || iOffset > 64 * nPos || 
+  if ( iOffset < 0 || ( iOffset > 64 * nPos && 64 * nPos > 0 ) || 
        nz > 32 || ioff > 32 || 
        nzg > 32 || ioffg > 32) {
     fprintf( stderr, 
