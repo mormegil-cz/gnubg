@@ -3832,7 +3832,7 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
     */
 
     /* FIXME: equity for double, pass */
-  
+
     fCube = ( ! fCrawford ) &&
       ( anScore[ pci -> fMove ] + pci -> nCube < nMatchTo ) &&
       ( ! ( fPostCrawford && ( anScore[ pci -> fMove ] == nMatchTo - 1
@@ -3843,19 +3843,19 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
     if ( prDPEq ) {
 
       if ( fPostCrawford || fCrawford ) {
-	if ( nMatchTo - anScore[ fMove ]  == 1 )
+	if ( nMatchTo - anScore[ pci -> fMove ]  == 1 )
 	  *prDPEq = 1.0;
 	else
 	  *prDPEq =
-	    GET_Btilde ( nMatchTo - anScore [ fMove ] - 1 - nCube,
+	    GET_Btilde ( nMatchTo - anScore [ pci -> fMove ] - 1 - pci -> nCube,
 			 afBtilde );
       }
       else
 	*prDPEq =
-	  GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube,
-		   nMatchTo - anScore[ !fMove ] - 1, aafA1 );
+	  GET_A1 ( nMatchTo - anScore[ pci -> fMove ] - 1 - pci -> nCube,
+		   nMatchTo - anScore[ ! pci -> fMove ] - 1, aafA1 );
     }
-              
+
     if ( pfCube )
       *pfCube = fCube;
       
