@@ -1173,7 +1173,8 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
 	if( EqualKeys( auch, pml->amMoves[ i ].auch ) ) {
 	    /* update moves, just in case cMoves or cPip has increased */
 	    for( j = 0; j < cMoves * 2; j++ )
-		pml->amMoves[ i ].anMove[ j ] = anMoves[ j ];
+		pml->amMoves[ i ].anMove[ j ] = anMoves[ j ] > -1 ?
+		    anMoves[ j ] : -1;
     
 	    if( cMoves < 4 )
 		pml->amMoves[ i ].anMove[ cMoves * 2 ] = -1;

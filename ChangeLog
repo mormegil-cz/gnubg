@@ -1,3 +1,16 @@
+Sun Dec 19 22:57:49 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (SaveGame, CommandSaveMatch): finished saving.
+	* eval.c (SaveMoves): store all bearoff moves as destination
+	point 0 (previous patch to do this was incomplete).
+	* play.c (FreeGame): New function.
+	* play.c (FreeMatch): New function.
+
+Sun Dec 19 19:52:09 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (HandleCommand): Allow "b" and "ba" as abbreviations
+	for "bar".
+
 Mon Dec 20 16:19:21 1999  Joern Thyssen  <joern@thyssen.nu>
 
 	* xgame.c (StatsSet): nMatchTo == 0 is now money session.

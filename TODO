@@ -1,31 +1,80 @@
-* Check "show" exists for every "set"!
-* Allow setting long seeds for dice generators that support them.  Support
-/dev/random for seed generation where available.
-* Add cube handling for computer player.
-* Add options for Jacoby/cubeless.
-* Finish saving positions and evaluations to databases.
-* Finish matches and money sessions.
-* Finish supervised training, aand allow people to submit training data via
-web.
-* Use Guile if available.
-* Add more completions to help and readline.
-* Allow user to vary parameters for rollouts.
-* Allow timeouts for "train" (and others?).
-* Add a neural net to correct errors in BEAROFF1 class.
-* Load, save and analyse games and matches.
-* Add "set autobearoff".
-* Write a proper input routine which will read a line from stdin under all
-conditions (with or without X, with or without readline, and whether
-stdin is a TTY or not).  Let the user configure the prompt (add escape
-sequences to display information such as the player on roll, pip count,
-match score, etc.).  Also, echo commands input with the mouse as if they
-had been typed.
-* Add Gnome support.  (Better to wait until Gnome is rock solid, I think.)
-Add silly bells and whistles like colour selector for chequer colours,
-angle of light, surface of pieces, transparent background, etc.
-* When getpwnam() or equivalent is available, set the player name to the
-user's name.
-* Allow copy/paste and drag & drop of the board ID in the board window.
-* Perform better move checking in the X window; provide visual feedback
-so the user can tell whether the move is partial, complete, or illegal.
-* Improve the evaluator!
+* Evaluations:
+** Add more evaluation classes.
+*** Add a neural net to correct errors in BEAROFF1 class.
+*** Classes for bearing off against contact, back games, containment
+  positions, prime-vs-prime...
+*** Consider meta-pi scheme for using output from multiple nets.
+** Add partial searching.
+
+* Game play:
+** Add cube handling for computer player.
+** Add options for Jacoby/cubeless.
+** Finish matches and money sessions.
+
+* Command interface:
+** Check "show" exists for every "set"!
+** Allow setting long seeds for dice generators that support them.  Support
+  /dev/random for seed generation where available.
+** Add more completions to help and readline.
+** Add "set autobearoff".
+** Allow user to vary parameters for rollouts.
+** Allow timeouts for "train" (and others?).
+** Load, save and analyse games and matches.
+** Finish saving positions and evaluations to databases.
+** Finish supervised training, and allow people to submit training data via
+  web.
+** Write a proper input routine which will read a line from stdin under all
+  conditions (with or without X, with or without readline, and whether
+  stdin is a TTY or not).  Let the user configure the prompt (add escape
+  sequences to display information such as the player on roll, pip
+  count, match score, etc.).  Also, echo commands input with the mouse
+  as if they had been typed.
+** Be more liberal in the move syntax accepted.
+** Finish "help" -- make it quote sections from the manual (how does gdb
+  do it?)
+** Allow changing the eval cache size.
+** Add undo, reroll, and viewing next/prev moves in game/match.
+
+* X interface:
+** Get rid of Xmu calls in ext (they're not really portable).
+** Allow copy/paste and drag & drop of the board ID in the board window.
+** Make sure the board window behaves properly with ICCCM things.  Maybe
+  some of this should wait for Gnome.
+** Keyboard input (or at least some of it) to the board window could
+  be redirected to $WINDOWID.
+** Allow doubling by clicking the cube in the board window.
+** Perform better move checking in the X window; provide visual feedback
+  so the user can tell whether the move is partial, complete, or illegal.
+** Add Gnome support.
+  Better to wait until Gnome is rock solid, I think.
+*** Add silly bells and whistles.
+  Things like colour selector for chequer colours, angle of light,
+  surface of pieces, transparent background, etc.  This may also allow
+  us to fix the problem of being unresponsive to X events during long
+  computations, which I don't think is worth fixing until then.
+*** Add menus and dialogs so that games can be played without the
+  terminal window at all.
+
+* Bugs:
+** Rolling out a perfect evaluation gives SD NaN, rather than 0.
+** Evaluations bearing off against contact and in back games are poor.
+** Equity SD should be SD(sum(probabilities)), not sum(SD(probabilities)).
+** When more than 5 men are on a point, they can get drawn badly.
+** Think about what should happen with variance reduction in Rollout()
+  and RolloutGame() when a probability turns out <0 or >1.
+** The board window, and NeuralNetCreate() and NeuralNetResize, use
+  random() for their own purposes.  This will disturb the seed for
+  the BSD dice generator.
+
+* Miscellaneous:
+** Add internationalisation (gettext).
+** Use Guile if available.
+** Add a self-test to the distribution.
+** Add more to http://www.gnu.org/software/gnubg/... -- definitely the
+  HTML formatted manual, and perhaps pages to submit training data,
+  an online evaluator like Monte Carlo, maybe even an entire game like
+  Motif.
+** Complete the Texinfo manual, which is barely started.  Perhaps for now,
+  only things that are unlikely to change should be documented.
+** When getpwnam() or equivalent is available, set the player name to the
+  user's name.

@@ -384,7 +384,8 @@ extern void HandleCommand( char *sz, command *ac ) {
 
     cch = strlen( pch );
     
-    if( ac == acTop && ( isdigit( *pch ) || !strncasecmp( pch, "bar", 3 ) ) ) {
+    if( ac == acTop && ( isdigit( *pch ) || !strncasecmp( pch, "bar",
+							  cch ) ) ) {
 	if( pch + cch < sz )
 	    pch[ cch ] = ' ';
 	
@@ -694,15 +695,16 @@ extern void CommandRollout( char *sz ) {
 	    arStdDev[ 4 ], rStdDev );
 }
 
-static void SaveGame( FILE *pf, list *plGame ) {
+static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 
     list *pl;
     moverecord *pmr;
     char sz[ 40 ];
     int i = 0, n, nCube = 1, anBoard[ 2 ][ 25 ];
+
+    fprintf( pf, " Game %d\n", iGame + 1 );
     
-    sprintf( sz, "%s : %d", ap[ 0 ].szName,
-	     anScore[ 0 ] /* FIXME not right */ );
+    sprintf( sz, "%s : %d", ap[ 0 ].szName, anScore[ 0 ] );
     fprintf( pf, " %-33s%s : %d\n", sz, ap[ 1 ].szName, anScore[ 1 ] );
 
     InitBoard( anBoard );
@@ -731,7 +733,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	}
 
 	if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) {
-	    fputs( "  1)                            ", pf );
+	    fputs( "  1)                             ", pf );
 	    i++;
 	}
 
@@ -741,11 +743,14 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	} else
 	    fprintf( pf, "%3d) %-28s", ( i >> 1 ) + 1, sz );
 
-	if( ( n = GameStatus( anBoard ) ) )
-	    fprintf( pf, "%sWins %d point%s%s\n",
+	if( ( n = GameStatus( anBoard ) ) ) {
+	    fprintf( pf, "%sWins %d point%s%s\n\n",
 		   i & 1 ? "                                  " : "\n     ",
 		   n * nCube, n * nCube > 1 ? "s" : "",
 		   "" /* FIXME " and the match" if appropriate */ );
+
+	    anScore[ i & 1 ] += n * nCube;
+	}
 	
 	i++;
     }
@@ -754,8 +759,10 @@ static void SaveGame( FILE *pf, list *plGame ) {
 extern void CommandSaveMatch( char *sz ) {
 
     FILE *pf;
-
-    if( !sz ) {
+    int i, anScore[ 2 ];
+    list *pl;
+    
+    if( !sz || !*sz ) {
 	puts( "You must specify a file to save to (see `help save match')." );
 	return;
     }
@@ -767,12 +774,13 @@ extern void CommandSaveMatch( char *sz ) {
 	return;
     }
 
-    /* FIXME save the whole match -- only saves current game at the moment */
+    fprintf( pf, " %d point match\n\n", nMatchTo );
 
-    fprintf( pf, " %d point match\n\n Game 1\n", nMatchTo );
+    anScore[ 0 ] = anScore[ 1 ] = 0;
     
-    SaveGame( pf, &lGame );
-
+    for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
+	SaveGame( pf, pl->p, i, anScore );
+    
     if( pf != stdout )
 	fclose( pf );
 }
@@ -1106,6 +1114,8 @@ extern int main( int argc, char *argv[] ) {
     if( EvalInitialise( GNUBG_WEIGHTS, GNUBG_BEAROFF ) )
 	return EXIT_FAILURE;
 
+    ListCreate( &lMatch );
+    
     srandom( time( NULL ) );
 
 #if HAVE_SIGACTION

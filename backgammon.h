@@ -62,7 +62,7 @@ extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoGame,
     nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
     fPostCrawford;
 
-extern list lMatch, lGame; /* (list of) list of moverecords */
+extern list lMatch, *plGame; /* (list of) list of moverecords */
 
 extern player ap[ 2 ];
 

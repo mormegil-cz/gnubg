@@ -21,15 +21,16 @@
 
 char *aszGameResult[] = { "single game", "gammon", "backgammon" };
 enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
-list lMatch, lGame;
+list lMatch, *plGame;
 
 static void NewGame( void ) {
 
-    /* FIXME free old game */
-    
     InitBoard( anBoard );
 
-    ListCreate( &lGame );
+    plGame = malloc( sizeof( *plGame ) );
+    ListCreate( plGame );
+
+    ListInsert( &lMatch, plGame );
     
     fResigned = fDoubled = FALSE;
     nCube = 1;
@@ -84,7 +85,7 @@ static int ComputerTurn( void ) {
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
-	    ListInsert( &lGame, pmn );
+	    ListInsert( plGame, pmn );
 	    return FindBestMove( ap[ fTurn ].nPlies, pmn->anMove, anDice[ 0 ],
 				 anDice[ 1 ], anBoard );
 	}
@@ -143,6 +144,9 @@ static void NextTurn( void ) {
 	    anScore[ fWinner ] += n * nCube;
 	    cGames++;
 
+	    fTurn = fMove = -1;
+	    anDice[ 0 ] = anDice[ 1 ] = 0;
+	    
 	    go = GAME_NORMAL;
 	    
 	    printf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
@@ -151,19 +155,18 @@ static void NextTurn( void ) {
 	    
 	    CommandShowScore( NULL );
 
-	    /* FIXME: Check if match is over */
-
-	    if( fAutoGame ) {
-
-		CommandNewGame( NULL );
-
-	    } 
-	    else {
-		fTurn = fMove = -1;
-		anDice[ 0 ] = anDice[ 1 ] = 0;
-
+	    if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
+		printf( "%s has won the match.\n", ap[ fWinner ].szName );
 		break;
 	    }
+
+	    if( fAutoGame ) {
+		NewGame();
+
+		if( ap[ fTurn ].pt == PLAYER_HUMAN )
+		    ShowBoard();
+	    } else
+		break;
 	}
 
 	if( fTurn == fMove )
@@ -221,7 +224,7 @@ extern void CommandAgree( char *sz ) {
     pmr->mt = MOVE_RESIGN;
     pmr->fPlayer = !fTurn;
     pmr->nResigned = fResigned;
-    ListInsert( &lGame, pmr );
+    ListInsert( plGame, pmr );
     
     NextTurn();
 }
@@ -285,7 +288,7 @@ extern void CommandDouble( char *sz ) {
     
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
-    ListInsert( &lGame, pmt );
+    ListInsert( plGame, pmt );
     
     NextTurn();
 }
@@ -312,7 +315,7 @@ extern void CommandDrop( char *sz ) {
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DROP;
-    ListInsert( &lGame, pmt );
+    ListInsert( plGame, pmt );
     
     NextTurn();
 }
@@ -362,7 +365,7 @@ extern void CommandMove( char *sz ) {
 	    pmn->fPlayer = fTurn;
 	    memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
 		    sizeof( pmn->anMove ) );
-	    ListInsert( &lGame, pmn );
+	    ListInsert( plGame, pmn );
 	    
 	    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 
@@ -446,7 +449,7 @@ extern void CommandMove( char *sz ) {
 		pmn->fPlayer = fTurn;
 		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
 			sizeof( pmn->anMove ) );
-		ListInsert( &lGame, pmn );
+		ListInsert( plGame, pmn );
 		
 		memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
 
@@ -460,6 +463,16 @@ extern void CommandMove( char *sz ) {
     puts( "Illegal move." );
 }
 
+static void FreeGame( list *pl ) {
+
+    while( pl->plNext != pl ) {
+	free( pl->plNext->p );
+	ListDelete( pl->plNext );
+    }
+
+    free( pl );
+}
+
 extern void CommandNewGame( char *sz ) {
 
     if( nMatchTo && ( anScore[ 0 ] >= nMatchTo ||
@@ -467,6 +480,21 @@ extern void CommandNewGame( char *sz ) {
 	puts( "The match is already over." );
 
 	return;
+    }
+
+    if( fTurn != -1 ) {
+	/* FIXME ask the user if they're sure?  Perhaps we need a "set confirm"
+	   command to let the user be paranoid about shooting themselves in
+	   the foot. */
+
+	FreeGame( plGame );
+
+	/* The last game of the match should always be the current one. */
+	assert( lMatch.plPrev == plGame );
+
+	ListDelete( lMatch.plPrev );
+	
+	free( plGame );
     }
     
     NewGame();
@@ -481,6 +509,16 @@ extern void CommandNewGame( char *sz ) {
     }
 }
 
+static void FreeMatch( void ) {
+
+    list *plMatch, *plGame;
+
+    while( ( plMatch = lMatch.plNext ) != &lMatch ) {
+	FreeGame( plMatch->p );
+	ListDelete( plMatch );
+    }
+}
+
 extern void CommandNewMatch( char *sz ) {
 
     int n = ParseNumber( &sz );
@@ -490,8 +528,8 @@ extern void CommandNewMatch( char *sz ) {
 
 	return;
     }
-    
-    /* FIXME free old match */
+
+    FreeMatch();
 
     nMatchTo = n;
 
@@ -508,7 +546,7 @@ extern void CommandNewMatch( char *sz ) {
 
 extern void CommandNewSession( char *sz ) {
 
-    /* FIXME free old match */
+    FreeMatch();
 
     nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
@@ -557,7 +595,7 @@ extern void CommandRedouble( char *sz ) {
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
-    ListInsert( &lGame, pmt );
+    ListInsert( plGame, pmt );
     
     NextTurn();
 }
@@ -655,7 +693,7 @@ extern void CommandRoll( char *sz ) {
 	pmn->anRoll[ 1 ] = anDice[ 1 ];
 	pmn->fPlayer = fTurn;
 	pmn->anMove[ 0 ] = -1;
-	ListInsert( &lGame, pmn );
+	ListInsert( plGame, pmn );
 	
 	puts( "No legal moves." );
 
@@ -667,7 +705,7 @@ extern void CommandRoll( char *sz ) {
 	pmn->anRoll[ 1 ] = anDice[ 1 ];
 	pmn->fPlayer = fTurn;
 	memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
-	ListInsert( &lGame, pmn );
+	ListInsert( plGame, pmn );
 	
 	PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 	
@@ -696,7 +734,7 @@ extern void CommandTake( char *sz ) {
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;
-    ListInsert( &lGame, pmt );
+    ListInsert( plGame, pmt );
     
     NextTurn();
 }
