@@ -402,7 +402,7 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
   int i;
   char *asz[ 6 ];
   const char *aszTitle[] = {
-    N_(""),
+    "",
     N_("Win"),
     N_("W g"),
     N_("W bg"),
