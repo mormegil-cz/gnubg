@@ -358,12 +358,15 @@ command acDatabase[] = {
       "self-play", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetMET[] = {
-  {"zadeh", CommandSetMETZadeh, "Use Zadeh's match equity table",
-   NULL, NULL },
-  {"snowie", CommandNotImplemented, "Use Snowie's match equity table",
-   NULL, NULL },
-  {"woolsey", CommandNotImplemented, "Use Woolsey's match equity table",
-   NULL, NULL },
+  {"zadeh", CommandSetMETZadeh, 
+   "Use N. Zadeh's match equity table (match length <= 64)", NULL, NULL },
+  {"snowie", CommandSetMETSnowie, 
+   "Use Snowie's match equity table (match length <= 15)", NULL, NULL },
+  {"woolsey", CommandSetMETWoolsey, 
+   "Use K. Woolsey's match equity table (match length <= 15)", NULL, NULL },
+  {"jacobs", CommandSetMETJacobs, 
+   "Use J. Jacobs and W. Trice's match equity table"
+   "(match length <=25)", NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }
 }, acTop[] = {
     { "accept", CommandAccept, "Accept a cube or resignation",

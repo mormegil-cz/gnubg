@@ -1,3 +1,11 @@
+Wed Oct 18 14:52:47 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* eval.c (EvaluatePositionCubeful1): Correct bugs introduced in
+	1.49.
+	* gnubg.c, eval.c, play.c, set.c, show.c: Rename match equity
+	table from aafA1 to aafMET. Ripped match equity tables from
+	fibs2html. 
+
 Tue Oct 17 11:11:24 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gnubg.c (main): Better support for `-w' option.

@@ -2529,16 +2529,16 @@ mwc2eq ( float rMwc, cubeinfo *ci ) {
   if ( fCrawford || fPostCrawford ) {
     if ( nScore0 == 1 ) {
       rMwcWin = 1.0;
-      rMwcLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
+      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, afMETPostCrawford );
     }
     else {
-      rMwcWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
+      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, afMETPostCrawford );
       rMwcLose = 0.0;
     }
   }
   else {
-    rMwcWin = GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
-    rMwcLose = GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+    rMwcWin = GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
+    rMwcLose = GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
   }
 
   /* 
@@ -2583,16 +2583,16 @@ eq2mwc ( float rEq, cubeinfo *ci ) {
   if ( fCrawford || fPostCrawford ) {
     if ( nScore0 == 1 ) {
       rMwcWin = 1.0;
-      rMwcLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
+      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, afMETPostCrawford );
     }
     else {
-      rMwcWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
+      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, afMETPostCrawford );
       rMwcLose = 0.0;
     }
   }
   else {
-    rMwcWin = GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
-    rMwcLose = GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+    rMwcWin = GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
+    rMwcLose = GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
   }
   
   /*
@@ -3604,11 +3604,11 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 
       if ( nScore0 == 1 ) {
 
-	float rLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
+	float rLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, afMETPostCrawford );
 	float rLoseGammon = 
-	  1.0 - GET_Btilde ( nScore1 - nCube * 2 - 1, afBtilde );
+	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 2 - 1, afMETPostCrawford );
 	float rLoseBG =
-	  1.0 - GET_Btilde ( nScore1 - nCube * 3 - 1, afBtilde );
+	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 3 - 1, afMETPostCrawford );
 
 	float rCenter = ( 1.0 + rLose ) / 2.0;
 
@@ -3625,11 +3625,11 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
       }
       else {
 
-	float rWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
+	float rWin = GET_METPostCrawford ( nScore0 - nCube - 1, afMETPostCrawford );
 	float rWinGammon = 
-	  GET_Btilde ( nScore0 - nCube * 2 - 1, afBtilde );
+	  GET_METPostCrawford ( nScore0 - nCube * 2 - 1, afMETPostCrawford );
 	float rWinBG = 
-	  GET_Btilde ( nScore0 - nCube * 3 - 1, afBtilde );
+	  GET_METPostCrawford ( nScore0 - nCube * 3 - 1, afMETPostCrawford );
 
 	ci->arGammonPrice[ 0 ] =
 	  2.0 * rWinGammon / rWin - 2.0;
@@ -3645,17 +3645,17 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
     }
     else {
       float rWin = 
-	GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
+	GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
       float rLose =
-	GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+	GET_MET ( nScore0 - 1, nScore1 - nCube - 1, aafMET );
       float rWinGammon =
-	GET_A1 ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafA1 );
+	GET_MET ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafMET );
       float rLoseGammon =
-	GET_A1 ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafA1 );
+	GET_MET ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafMET );
       float rWinBG =
-	GET_A1 ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafA1 );
+	GET_MET ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafMET );
       float rLoseBG =
-	GET_A1 ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafA1 );
+	GET_MET ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafMET );
 
       float rCenter = ( rWin + rLose ) / 2.0;
 
@@ -3860,6 +3860,7 @@ fDoCubeful ( cubeinfo *pci ) {
   fNoCF = fNoCF ||
     ( anScore[ ! pci -> fMove ] + pci -> nCube >= nMatchTo );
 
+  return ! fNoCF;
   /* score is -2,-2 */
 
   fNoCF = fNoCF ||
@@ -4044,13 +4045,41 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     float arOutput [ NUM_OUTPUTS ], rEq;
 
+    /* check for automatic redouble */
+
+    if ( nMatchTo ) {
+
+      /* Does the opponent has an automatic (re)double? */
+
+      if ( ( nMatchTo - anScore[ pci -> fMove ] - pci -> nCube <= 0 )
+           && ( nMatchTo - anScore[ ! pci -> fMove ] - pci -> nCube > 0 )
+           && ( pci -> fCubeOwner != pci -> fMove ) ) {
+
+        SetCubeInfo ( pci, pci -> nCube * 2, 
+                      pci -> fMove, pci -> fMove );
+
+      }
+
+      /* Do I have an automatic (re)double? */
+
+      if ( ( nMatchTo - anScore[ ! pci -> fMove ] - pci -> nCube <= 0 )
+           && ( nMatchTo - anScore[ pci -> fMove ] - pci -> nCube > 0 )
+           && ( pci -> fCubeOwner != ! pci -> fMove ) ) {
+
+        SetCubeInfo ( pci, pci -> nCube * 2, 
+                      ! pci -> fMove, pci -> fMove );
+
+      }
+
+    }
+
     EvaluatePosition ( anBoard, arOutput, pci, 0 );
 
     SanityCheck ( anBoard, arOutput );
 
     rEq = Utility ( arOutput, pci );
 
-    if ( pc == CLASS_OVER || ! fDoCubeful( pci ) ) {
+    if ( pc == CLASS_OVER || ( nMatchTo && ! fDoCubeful( pci ) ) ) {
 
       /* if the game is over, there is very little value
          of holding the cube */
@@ -4127,13 +4156,13 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
 	  *prDPEq = 1.0;
 	else
 	  *prDPEq =
-	    GET_Btilde ( nMatchTo - anScore [ pci -> fMove ] - 1 - pci -> nCube,
-			 afBtilde );
+	    GET_METPostCrawford ( nMatchTo - anScore [ pci -> fMove ] - 1 - pci -> nCube,
+			 afMETPostCrawford );
       }
       else
 	*prDPEq =
-	  GET_A1 ( nMatchTo - anScore[ pci -> fMove ] - 1 - pci -> nCube,
-		   nMatchTo - anScore[ ! pci -> fMove ] - 1, aafA1 );
+	  GET_MET ( nMatchTo - anScore[ pci -> fMove ] - 1 - pci -> nCube,
+		   nMatchTo - anScore[ ! pci -> fMove ] - 1, aafMET );
     }
 
     if ( pfCube )
@@ -4444,7 +4473,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, anScore, nMatchTo, pci, arCP );
 
-  rMWCCash = GET_A1 ( nScore0 - pci->nCube - 1, nScore1 - 1, aafA1 );
+  rMWCCash = GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET );
 
   rTG = arCP[ pci->fMove ];
 
@@ -4460,9 +4489,9 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCLose = 
       ( 1.0 - rG1 - rBG1 ) * 
-      GET_A1 ( nScore0 - 1, nScore1 - pci->nCube - 1, aafA1 ) +
-      rG1 * GET_A1 ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafA1 ) +
-      rBG1 * GET_A1 ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafA1 );
+      GET_MET ( nScore0 - 1, nScore1 - pci->nCube - 1, aafMET ) +
+      rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
+      rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
 
     rMWCLive = rMWCLose + 
       ( rMWCCash - rMWCLose ) * arOutput[ 0 ] / rTG;
@@ -4486,9 +4515,9 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCWin = 
       ( 1.0 - rG0 - rBG0 ) * 
-      GET_A1 ( nScore0 - pci->nCube - 1, nScore1 - 1, aafA1 ) +
-      rG0 * GET_A1 ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafA1 ) +
-      rBG0 * GET_A1 ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafA1 );
+      GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
+      rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
+      rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
 
     rMWCLive = rMWCCash + 
       ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
@@ -4546,7 +4575,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   GetPoints ( arOutput, anScore, nMatchTo, pci, arCP );
 
-  rMWCOppCash = GET_A1 ( nScore0 - 1, nScore1 - pci -> nCube - 1, aafA1 );
+  rMWCOppCash = GET_MET ( nScore0 - 1, nScore1 - pci -> nCube - 1, aafMET );
 
   rOppTG = 1.0 - arCP[ ! pci->fMove ];
 
@@ -4564,9 +4593,9 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCLose = 
       ( 1.0 - rG1 - rBG1 ) * 
-      GET_A1 ( nScore0 - 1, nScore1 - pci->nCube - 1, aafA1 ) +
-      rG1 * GET_A1 ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafA1 ) +
-      rBG1 * GET_A1 ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafA1 );
+      GET_MET ( nScore0 - 1, nScore1 - pci->nCube - 1, aafMET ) +
+      rG1 * GET_MET ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafMET ) +
+      rBG1 * GET_MET ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafMET );
 
     rMWCLive = rMWCLose + 
       ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
@@ -4588,9 +4617,9 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
     rMWCWin = 
       ( 1.0 - rG0 - rBG0 ) * 
-      GET_A1 ( nScore0 - pci->nCube - 1, nScore1 - 1, aafA1 ) +
-      rG0 * GET_A1 ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafA1 ) +
-      rBG0 * GET_A1 ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafA1 );
+      GET_MET ( nScore0 - pci->nCube - 1, nScore1 - 1, aafMET ) +
+      rG0 * GET_MET ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafMET ) +
+      rBG0 * GET_MET ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafMET );
 
     rMWCLive = rMWCOppCash + 
       ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 

@@ -1004,7 +1004,7 @@ extern void CommandSetOutputMWC( char *sz ) {
 static void SetMET( met metNew ) {
 
     static char *aszMET[] = {
-	"Zadeh", "Snowie", "Woolsey"
+      "Zadeh", "Snowie", "Woolsey", "Jacobs"
     };
     
     if( metCurrent == metNew ) {
@@ -1017,7 +1017,7 @@ static void SetMET( met metNew ) {
         InitMatchEquity ( metNew );
 
         /* FIXME: add match equity table to GTK menu 
-           UpdateSetting( &rngCurrent ); */
+           UpdateSetting( &metCurrent ); */
     }
 }
 
@@ -1026,6 +1026,30 @@ extern void
 CommandSetMETZadeh ( char *sz ) {
 
   SetMET ( MET_ZADEH );
+
+}
+
+
+extern void
+CommandSetMETWoolsey ( char *sz ) {
+
+  SetMET ( MET_WOOLSEY );
+
+}
+
+
+extern void
+CommandSetMETSnowie ( char *sz ) {
+
+  SetMET ( MET_SNOWIE );
+
+}
+
+
+extern void
+CommandSetMETJacobs ( char *sz ) {
+
+  SetMET ( MET_JACOBS );
 
 }
 

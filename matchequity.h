@@ -18,26 +18,19 @@
 #define G2            0.15
 #define GAMMONRATE    0.25
 
-#define GET_A1(i,j,aafA1) ( ( (i) < 0 ) ? 1.0 : ( ( (j) < 0 ) ? 0.0 : \
-						 (aafA1 [ i ][ j ]) ) )
-#define GET_A2(i,j,aafA2) ( ( (i) < 0 ) ? 0.0 : ( ( (j) < 0 ) ? 1.0 : \
-						 (aafA2 [ i ][ j ]) ) )
-#define GET_Btilde(i,afBtilde) ( (i) < 0 ? 1.0 : afBtilde [ i ] )
+#define GET_MET(i,j,aafMET) ( ( (i) < 0 ) ? 1.0 : ( ( (j) < 0 ) ? 0.0 : \
+						 (aafMET [ i ][ j ]) ) )
+#define GET_METPostCrawford(i,afBtilde) ( (i) < 0 ? 1.0 : afBtilde [ i ] )
 
-/*
- * A1 (A2) is the match equity of player 1 (2)
- * Btilde is the post-crawford match equities.
- */
 
 typedef enum _met {
-  MET_ZADEH, MET_SNOWIE, MET_WOOLSEY
+  MET_ZADEH, MET_SNOWIE, MET_WOOLSEY, MET_JACOBS
 } met;
 
 
-extern float aafA1 [ MAXSCORE ][ MAXSCORE ];
-extern float aafA2 [ MAXSCORE ][ MAXSCORE ];
+extern float aafMET [ MAXSCORE ][ MAXSCORE ];
 
-extern float afBtilde [ MAXSCORE ];
+extern float afMETPostCrawford [ MAXSCORE ];
 
 extern met metCurrent;
 extern int nMaxScore;

@@ -911,6 +911,16 @@ extern void CommandNewMatch( char *sz ) {
 	return;
     }
 
+    /* Check that match equity table is large enough */
+
+    if ( n > nMaxScore ) {
+
+      outputf ( "The current match equity table does not support "
+                "matches of length %i\n"
+                "(see `help set matchequitytable')\n", n );
+      return;
+    }
+
     if( fTurn != -1 && fConfirm ) {
 	if( fInterrupt )
 	    return;
