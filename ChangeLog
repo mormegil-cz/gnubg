@@ -1,3 +1,8 @@
+Mon Jun 28 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgamelist.c: Allow last move to be selected in game list
+	* render.c: Small bug in design dialog
+
 Sun Jun 27 11:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkboard.c: Fixed bug - 2d chequers disappearing if dragged off board

@@ -118,7 +118,7 @@ void GameListSelectRow(GtkCList *pcl, gint y, gint x, GdkEventButton *pev, gpoin
     else
     	pmrPrev = pglr->apmr[(pglr->fCombined) ? 0 : x - 1];
 
-    if (!pmr)
+    if (!pmr && !pmrPrev)
     	return;
 
     for( pl = plGame->plPrev; pl != plGame; pl = pl->plPrev ) {
