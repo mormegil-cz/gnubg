@@ -102,7 +102,7 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 1,
     fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
     nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
-    fConfirm = TRUE;
+    fConfirm = TRUE, fShowProgress;
 
 evalcontext ecTD = { 0, 8, 0.16 }, ecEval = { 1, 8, 0.16 },
     ecRollout = { 0, 8, 0.16 };
@@ -803,6 +803,38 @@ extern void CommandHint( char *sz ) {
     }
 }
 
+/* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
+   etc.  If stdin is not a TTY, this should always exit immediately (to
+   avoid enless loops on EOF).  If stdin is a TTY, and fConfirm is set,
+   and a game is in progress, then we ask the user if they're sure. */
+static void PromptForExit( void ) {
+
+    static int fExiting;
+    char *sz;
+    
+    while( !fExiting && fInteractive && fConfirm && fTurn != -1 ) {
+	fExiting = TRUE;
+
+	sz = GetInput( "Are you sure you want to exit and abort the game in "
+		       "progress? " );
+
+	fExiting = FALSE;
+	
+	if( sz ) {
+	    if( *sz == 'y' || *sz == 'Y' )
+		break;
+	    else if( *sz == 'n' || *sz == 'N' ) {
+		fInterrupt = FALSE;
+		return;
+	    }
+	}
+
+	puts( "Please answer `y' or `n'." );
+    }
+
+    exit( EXIT_SUCCESS );
+}
+
 extern void CommandNotImplemented( char *sz ) {
 
     puts( "That command is not yet implemented." );
@@ -810,7 +842,7 @@ extern void CommandNotImplemented( char *sz ) {
 
 extern void CommandQuit( char *sz ) {
 
-    exit( EXIT_SUCCESS );
+    PromptForExit();
 }
 
 extern void CommandRollout( char *sz ) {
@@ -953,7 +985,7 @@ extern void CommandTrainTD( char *sz ) {
 	InitBoard( anBoardTrain );
 	
 	do {    
-	    if( !( ++c % 100 ) ) {
+	    if( !( ++c % 100 ) && fShowProgress ) {
 		printf( "%6d\r", c );
 		fflush( stdout );
 	    }
@@ -1054,8 +1086,9 @@ static void ProcessInput( char *sz, int fFree ) {
     fReadingCommand = FALSE;
     
     if( !sz ) {
-	StopEvents();
-	return;
+	putchar( '\n' );
+	PromptForExit();
+	sz = "";
     }
     
     fInterrupt = FALSE;
@@ -1089,12 +1122,16 @@ static void HandleInput( char *sz ) {
 }
 
 static char *szInput;
+static int fInputAgain;
 
 void HandleInputRecursive( char *sz ) {
 
     if( !sz ) {
 	putchar( '\n' );
-	exit( EXIT_SUCCESS );
+	PromptForExit();
+	szInput = NULL;
+	fInputAgain = TRUE;
+	return;
     }
 
     szInput = sz;
@@ -1144,9 +1181,7 @@ int StdinReadNotify( event *pev, void *p ) {
     fgets( sz, sizeof( sz ), stdin );
 	
     if( feof( stdin ) ) {
-	if( !sz[ 0 ] )
-	    StopEvents();
-
+	PromptForExit();
 	return 0;
     }	
 
@@ -1311,9 +1346,9 @@ void RunX( void ) {
     
     HandleEvents();
 
-    putchar( '\n' );
-
-    exit( EXIT_SUCCESS );
+    /* Should never return. */
+    
+    abort();
 }
 #endif
 
@@ -1338,26 +1373,27 @@ extern char *GetInput( char *szPrompt ) {
 #if HAVE_LIBREADLINE
 	/* Using readline and X. */
 	char *szOldPrompt, *szOldInput;
-	int nOldEnd, nOldMark, nOldPoint;
+	int nOldEnd, nOldMark, nOldPoint, fWasReadingCommand;
 	
 	if( fInterrupt )
 	    return NULL;
 
 	fReadingOther = TRUE;
 	
-	if( fReadingCommand ) {
+	if( ( fWasReadingCommand = fReadingCommand ) ) {
 	    /* Save old readline context. */
 	    szOldPrompt = rl_prompt;
 	    szOldInput = rl_copy_text( 0, rl_end );
 	    nOldEnd = rl_end;
 	    nOldMark = rl_mark;
 	    nOldPoint = rl_point;
+	    fReadingCommand = FALSE;
 	    /* FIXME this is unnecessary when handling an X command! */
 	    putchar( '\n' );
 	}
-	
-	szInput = NULL;
-	
+
+	szInput = FALSE;
+
 	rl_callback_handler_install( szPrompt, HandleInputRecursive );
 
 	while( !szInput ) {
@@ -1373,14 +1409,21 @@ extern char *GetInput( char *szPrompt ) {
 		break;
 	    }
 	    
-	    if( FD_ISSET( STDIN_FILENO, &fds ) )
+	    if( FD_ISSET( STDIN_FILENO, &fds ) ) {
 		rl_callback_read_char();
+		if( fInputAgain ) {
+		    rl_callback_handler_install( szPrompt,
+						 HandleInputRecursive );
+		    szInput = NULL;
+		    fInputAgain = FALSE;
+		}
+	    }
 
 	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
 		HandleXAction();
 	}
 
-	if( fReadingCommand ) {
+	if( fWasReadingCommand ) {
 	    /* Restore old readline context. */
 	    rl_callback_handler_install( szOldPrompt, HandleInput );
 	    rl_insert_text( szOldInput );
@@ -1389,6 +1432,7 @@ extern char *GetInput( char *szPrompt ) {
 	    rl_mark = nOldMark;
 	    rl_point = nOldPoint;
 	    rl_redisplay();
+	    fReadingCommand = TRUE;
 	} else
 	    rl_callback_handler_remove();	
 
@@ -1430,9 +1474,9 @@ extern char *GetInput( char *szPrompt ) {
     if( fInterrupt )
 	return NULL;
 
-    if( !( sz = readline( szPrompt ) ) ) {
+    while( !( sz = readline( szPrompt ) ) ) {
 	putchar( '\n' );
-	exit( EXIT_SUCCESS );
+	PromptForExit();
     }
     
     if( fInterrupt )
@@ -1448,7 +1492,7 @@ extern char *GetInput( char *szPrompt ) {
     fflush( stdout );
 
  ReadDirect:
-    sz = malloc( 256 );
+    sz = malloc( 256 ); /* FIXME it would be nice to handle longer strings */
     
     fgets( sz, 256, stdin );
     
@@ -1460,9 +1504,9 @@ extern char *GetInput( char *szPrompt ) {
     if( ( pch = strchr( sz, '\n' ) ) )
 	*pch = 0;
     
-    if( feof( stdin ) && !*sz ) {
+    while( feof( stdin ) && !*sz ) {
 	putchar( '\n' );
-	exit( EXIT_SUCCESS );
+	PromptForExit();
     }
     
     return sz;
@@ -1521,6 +1565,7 @@ extern int main( int argc, char *argv[] ) {
 #endif
     
     fInteractive = isatty( STDIN_FILENO );
+    fShowProgress = isatty( STDOUT_FILENO );
     
     while( ( ch = getopt_long( argc, argv, "hntv", ao, NULL ) ) !=
            (char) -1 )
