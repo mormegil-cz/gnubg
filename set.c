@@ -73,9 +73,10 @@ static char szEQUITY[] = "<equity>",
 command acSetEvaluation[] = {
     { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
       "for deep evaluation", szNUMBER, NULL },
-    { "cubeful", CommandSetEvalCubeful, "Cubeful evaluations", szONOFF, NULL },
+    { "cubeful", CommandSetEvalCubeful, "Cubeful evaluations", szONOFF,
+      &cOnOff },
     { "deterministic", CommandSetEvalDeterministic, "Specify whether added "
-      "noise is determined by position", szONOFF, NULL },
+      "noise is determined by position", szONOFF, &cOnOff },
     { "noise", CommandSetEvalNoise, "Distort evaluations with noise",
       szSTDDEV, NULL },
     { "plies", CommandSetEvalPlies, "Choose how many plies to look ahead",
@@ -1714,10 +1715,6 @@ CommandSetEvalParamType ( char *sz ) {
 
   case 'e':
     pesSet->et = EVAL_EVAL;
-    break;
-
-  case 'n':
-    pesSet->et = EVAL_NONE;
     break;
 
   default:
