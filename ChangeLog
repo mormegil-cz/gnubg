@@ -1,4 +1,16 @@
-Fri Oct 20 14:52:22 2000  Gary Wong  <gary@research.att.com>
+Sat Oct 21 01:04:26 2000  Gary Wong  <gary@research.att.com>
+
+	* play.c: Fix stupid bugs to _allow_ the computer to use the
+	"double", "take", "drop" and "resign" commands when it's its
+	turn (see Oct 19 entry), whoops...
+	(CommandMove): When no legal moves can be made, accept "move"
+	with no parameters as giving up the player's turn.
+
+	* eval.c (HeuristicDatabase): New function.  If the bearoff database
+	isn't found, generate an approximate one on the fly using
+	Eric Groleau's method.
+
+Fri Oct 20 14:52:22 2000  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_set_crawford): New function; move the "Crawford"
 	check box from the Game menu to the score table.

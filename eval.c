@@ -391,6 +391,148 @@ static int PathOpen( char *szFile, char *szDir ) {
     return -1;
 }
 
+/* Make a plausible bearoff move (used to create approximate bearoff
+   database). */
+static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
+
+    int i, /* current die being played */
+	c, /* number of dice to play */
+	nMax, /* highest occupied point */
+	anDice[ 4 ],
+	n, /* point to play from */
+	j, iSearch, nTotal;
+
+    if( anRoll[ 0 ] == anRoll[ 1 ] ) {
+	/* doubles */
+	anDice[ 0 ] = anDice[ 1 ] = anDice[ 2 ] = anDice[ 3 ] = anRoll[ 0 ];
+	c = 4;
+    } else {
+	/* non-doubles */
+	assert( anRoll[ 0 ] > anRoll[ 1 ] );
+	
+	anDice[ 0 ] = anRoll[ 0 ];
+	anDice[ 1 ] = anRoll[ 1 ];
+	c = 2;
+    }
+
+    for( i = 0; i < c; i++ ) {
+	for( nMax = 5; nMax >= 0 && !anBoard[ nMax ]; nMax-- )
+	    ;
+
+	if( nMax < 0 )
+	    /* finished bearoff */
+	    break;
+    
+	if( anBoard[ anDice[ i ] - 1 ] ) {
+	    /* bear off exactly */
+	    n = anDice[ i ] - 1;
+	    goto move;
+	}
+
+	if( anDice[ i ] - 1 > nMax ) {
+	    /* bear off highest chequer */
+	    n = nMax;
+	    goto move;
+	}
+	
+	nTotal = anDice[ i ] - 1;
+	for( j = i + 1; j < c; j++ ) {
+	    nTotal += anDice[ j ];
+	    if( nTotal < 6 && anBoard[ nTotal ] ) {
+		/* there's a chequer we can bear off with subsequent dice;
+		   do it */
+		n = nTotal;
+		goto move;
+	    }
+	}
+
+	for( n = -1, iSearch = anDice[ i ]; iSearch <= nMax; iSearch++ )
+	    if( anBoard[ iSearch ] >= 2 && /* at least 2 on source point */
+		!anBoard[ iSearch - anDice[ i ] ] && /* dest empty */
+		( n == -1 || anBoard[ iSearch ] > anBoard[ n ] ) )
+		n = iSearch;
+	if( n >= 0 )
+	    goto move;
+
+	/* find the point with the most on it (or least on dest) */
+	for( iSearch = anDice[ i ]; iSearch <= nMax; iSearch++ )
+	    if( n == -1 || anBoard[ iSearch ] > anBoard[ n ] ||
+		( anBoard[ iSearch ] == anBoard[ n ] &&
+		  anBoard[ iSearch - anDice[ i ] ] <
+		  anBoard[ n - anDice[ i ] ] ) )
+		n = iSearch;
+
+    move:
+	assert( n >= 0 );
+	assert( anBoard[ n ] );
+	anBoard[ n ]--;
+
+	if( n >= anDice[ i ] )
+	    anBoard[ n - anDice[ i ] ]++;
+    }
+
+    return PositionBearoff( anBoard );
+}
+
+static void GenerateBearoff( unsigned char *p, int nId ) {
+
+    int i, iBest, anRoll[ 2 ], anBoard[ 6 ], aProb[ 32 ];
+    unsigned short us;
+
+    for( i = 0; i < 32; i++ )
+	aProb[ i ] = 0;
+    
+    for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
+	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
+	    PositionFromBearoff( anBoard, nId );
+	    iBest = HeuristicBearoff( anBoard, anRoll );
+
+	    assert( iBest >= 0 );
+	    assert( iBest < nId );
+	    
+	    if( anRoll[ 0 ] == anRoll[ 1 ] )
+		for( i = 0; i < 31; i++ )
+		    aProb[ i + 1 ] += p[ ( iBest << 6 ) | ( i << 1 ) ] +
+			( p[ ( iBest << 6 ) | ( i << 1 ) | 1 ] << 8 );
+	    else
+		for( i = 0; i < 31; i++ )
+		    aProb[ i + 1 ] += ( p[ ( iBest << 6 ) | ( i << 1 ) ] +
+			( p[ ( iBest << 6 ) | ( i << 1 ) | 1 ] << 8 ) ) << 1;
+	}
+
+    for( i = 0; i < 32; i++ ) {
+	us = ( aProb[ i ] + 18 ) / 36;
+	p[ ( nId << 6 ) | ( i << 1 ) ] = us & 0xFF;
+	p[ ( nId << 6 ) | ( i << 1 ) | 1 ] = us >> 8;
+    }
+}
+
+static unsigned char *HeuristicDatabase( void ) {
+
+    unsigned char *p = malloc( 54264 * 32 * 2 );
+    int i;
+    
+    if( !p )
+	return NULL;
+
+    p[ 0 ] = p[ 1 ] = 0xFF;
+    for( i = 2; i < 64; i++ )
+	p[ i ] = 0;
+
+    for( i = 1; i < 54264; i++ ) {
+	GenerateBearoff( p, i );
+	if( !( i % 1000 ) ) {
+	    /* FIXME this progress indicator is not very good for GTK
+	       (especially if fTTY is FALSE)... what else could be done? */
+	    putchar( "\\|/-"[ ( i / 1000 ) % 4 ] );
+	    putchar( '\r' );
+	    fflush( stdout );
+	}
+    }
+
+    return p;
+}
+
 extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 			   char *szDatabase, char *szDir ) {
     FILE *pfWeights;
@@ -405,34 +547,41 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	    
 	ComputeTable();
     }
+
+    pBearoff1 = NULL;
     
     if( szDatabase ) {
-	if( ( h = PathOpen( szDatabase, szDir ) ) < 0 ) {
-	    perror( szDatabase );
-	    return -1;
-	}
-
+	if( ( h = PathOpen( szDatabase, szDir ) ) >= 0 ) {
+	    /* FIXME fstat() h, to see what size database is available */
 #if HAVE_MMAP
-	if( !( pBearoff1 = mmap( NULL, 54264 * 32 * 2 + 924 * 924 * 2,
-				 PROT_READ, MAP_SHARED, h, 0 ) ) ) {
+	    if( !( pBearoff1 = mmap( NULL, 54264 * 32 * 2 + 924 * 924 * 2,
+				     PROT_READ, MAP_SHARED, h, 0 ) ) ) {
 #endif
-	    if( !( pBearoff1 = malloc( 54264 * 32 * 2 + 924 * 924 * 2 ) ) ) {
-		perror( "malloc" );
-		return -1;
+		if( !( pBearoff1 = malloc( 54264 * 32 * 2 +
+					   924 * 924 * 2 ) ) ) {
+		    perror( "malloc" );
+		    return -1;
+		}
+
+		/* FIXME check for early EOF */
+		if( read( h, pBearoff1, 54264 * 32 * 2 +
+			  924 * 924 * 2 ) < 0 ) {
+		    perror( szDatabase );
+		    free( pBearoff1 );
+		    pBearoff1 = NULL;
+		}
+#if HAVE_MMAP
 	    }
-
-	    if( read( h, pBearoff1, 54264 * 32 * 2 + 924 * 924 * 2 ) < 0 ) {
-		perror( szDatabase );
-		free( pBearoff1 );
-
-		return -1;
-	    }
-
+#endif
 	    close( h );
-#if HAVE_MMAP
 	}
-#endif
-	pBearoff2 = pBearoff1 + 54264 * 32 * 2;
+
+	if( pBearoff1 )
+	    pBearoff2 = pBearoff1 + 54264 * 32 * 2;
+	else {
+	    pBearoff1 = HeuristicDatabase();
+	    pBearoff2 = NULL;
+	}
     }
 
     if( szWeightsBinary &&
@@ -466,8 +615,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 	if( ( h = PathOpen( szWeights, szDir ) ) < 0 ||
 	    !( pfWeights = fdopen( h, "r" ) ) )
 	    perror( szWeights );
-
-	if( pfWeights ) {
+	else {
 	    if( fscanf( pfWeights, "GNU Backgammon %15s\n",
 			szFileVersion ) != 1 ||
 		strcmp( szFileVersion, WEIGHTS_VERSION ) )
@@ -1562,7 +1710,8 @@ extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
 	return CLASS_RACE;
 
     if( PositionBearoff( anBoard[ 0 ] ) > 923 ||
-	PositionBearoff( anBoard[ 1 ] ) > 923 )
+	PositionBearoff( anBoard[ 1 ] ) > 923 ||
+	!pBearoff2 )
 	return CLASS_BEAROFF1;
 
     return CLASS_BEAROFF2;

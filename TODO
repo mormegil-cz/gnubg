@@ -32,9 +32,14 @@ duplication of effort and to make sure our changes merge easily.
   number of turns on the bar, whether each player is closed out, average
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
-** Joseph notes the 1-sided bearoff database is nearly as good as the
+** Bearoff database changes:
+*** Use a more intelligent encoding in the 1-sided database, to conserve
+  space.
+*** Joseph notes the 1-sided bearoff database is nearly as good as the
   2-sided.  Add an option to omit the 2-sided one, to conserve disk
-  and memory space.
+  and memory space.  (And time to generate them -- on a 330MHz Pentium II,
+  it takes 3 minutes to generate the 1-sided database and 20 for the
+  2-sided.)
 
 * Commands:
 ** Add more completions to readline (player names, filenames for load/save).
@@ -72,15 +77,17 @@ duplication of effort and to make sure our changes merge easily.
 ** Don't flood the server with requests (which can happen if gnubg is
   playing itself at ply 0).  Wait until the server has finished the
   previous ShowBoard before sending a new one; boards in the meantime
-  can be silently discarded.  What does xterm do to implement jump
-  scrolling?  (The Zvt widget in GNOME Terminal is faster and might be
-  a better example.)
+  can be silently discarded.  HandleXAction() should check if the
+  server has caught up (with LastKnownRequestProcessed) and send a
+  ShowBoard update if one was queued.  Note that ShowBoard would be
+  better off calling XFlush() than gdk_flush (GDK is broken and calls
+  XSync() instead). (gary)
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
 
 * GTK interface:
 ** Add a game window, which lists the moves made in the game so far and
-  allows moving back and forth.
+  allows moving back and forth. (gary)
 ** Make sure the board window behaves properly with ICCCM things.
 ** Allow copy/paste and drag & drop of the board ID in the board window.
 ** Add silly bells and whistles.  Things like colour selector for chequer
@@ -115,8 +122,6 @@ duplication of effort and to make sure our changes merge easily.
   checker that cannot be moved with the left die, it should move the 
   checker with the right die if possible [this is analogous to the
   behaviour in Snowie].
-** When a player can't move, it prints (e.g.) "gnubg moves" in the status
-  bar.  It would be better to say "gnubg can't move".
 
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
