@@ -800,6 +800,22 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
     return 0;
 }
 
+
+static int
+isHyperGammon( const bgvariation bgv ) {
+
+  if ( bgv == VARIATION_HYPERGAMMON_1 )
+    return 1;
+  if ( bgv == VARIATION_HYPERGAMMON_2 )
+    return 1;
+  if ( bgv == VARIATION_HYPERGAMMON_3 )
+    return 1;
+
+  return 0;
+
+}
+
+
 extern int
 RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
@@ -975,7 +991,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	  aarSigma[ ici ][ j ] = sqrt( aarVariance[ ici ][ j ] / ( i + 1 ) );
         }
 
-        SanityCheck( anBoardOrig, aarMu[ ici ] );
+        if ( ! isHyperGammon( aci[ ici ].bgv ) )
+          SanityCheck( anBoardOrig, aarMu[ ici ] );
 
       }
       

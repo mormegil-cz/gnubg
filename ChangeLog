@@ -1,3 +1,8 @@
+Fri Apr  4 20:45:16 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* rollout.c (RolloutGeneral): SanityCheck only works for 
+	standard backgammon.
+
 Fri Apr  4 20:21:45 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ImportSnowieTxt): do not strip white space
