@@ -1,3 +1,8 @@
+Thu Apr  3 22:01:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (EvaluatePositionCubeful4): use money game cube efficiency
+	for match play for bearoffs.
+
 Thu Apr  3 21:56:42 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c: reverse the order in which pip counts are reported.

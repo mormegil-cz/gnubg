@@ -2218,7 +2218,7 @@ EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[],
     nLastContext = nContext;
 }
 
-static void
+extern void
 EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
 
     int i, c;
@@ -6102,7 +6102,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                      arOutput, arEquity );
 
     }
-    else if ( pc > CLASS_OVER && pc <= CLASS_PERFECT && ! pciMove->nMatchTo ) {
+    else if ( pc > CLASS_OVER && pc <= CLASS_PERFECT /* && ! pciMove->nMatchTo */ ) {
 
       EvaluatePerfectCubeful ( anBoard, arEquity, pciMove->bgv );
 
@@ -6112,7 +6112,7 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
     }
     else {
 
-      /* Add cube positions to list */
+      /* evaluate with neural net */
       
       EvaluatePosition ( anBoard, arOutput, pciMove, NULL );
       
@@ -6123,12 +6123,12 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
       if ( pc > CLASS_PERFECT )
         SanityCheck( anBoard, arOutput );
       
-      /* Calculate cube efficiency */
-      
-      rCubeX = EvalEfficiency ( anBoard, pc );
-
     }
     
+    /* Calculate cube efficiency */
+      
+    rCubeX = EvalEfficiency ( anBoard, pc );
+
     /* Build all possible cube positions */
     
     MakeCubePos ( aciCubePos, cci, fTop, aci, FALSE );
@@ -6138,17 +6138,114 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
     for ( ici = 0; ici < 2 * cci; ici++ ) 
       if ( aci[ ici ].nCube > 0 ) {
         /* cube available */
-        if ( pc == CLASS_HYPERGAMMON1 || pc == CLASS_HYPERGAMMON2 ||
-             pc == CLASS_HYPERGAMMON3 ) 
-          arCf[ ici ] = CFHYPER( arEquity, &aci[ ici ] );
-        else if ( pciMove->nMatchTo )
-          arCf[ ici ] = Cl2CfMatch ( arOutput, &aci[ ici ] );
-        else if ( pc > CLASS_OVER && pc <= CLASS_PERFECT )
-          arCf[ ici ] = CFMONEY ( arEquity, &aci[ ici ] );
-        else
-          arCf[ ici ] = Cl2CfMoney ( arOutput, &aci[ ici ] );
+
+        if ( ! aci[ ici ].nMatchTo ) {
+
+          /* money play */
+
+          switch ( pc ) {
+          case CLASS_HYPERGAMMON1:
+          case CLASS_HYPERGAMMON2:
+          case CLASS_HYPERGAMMON3:
+            /* exact bearoff equities & contact */
+
+            arCf[ ici ] = CFHYPER( arEquity, &aci[ ici ] );
+            break;
+
+          case CLASS_BEAROFF2:
+          case CLASS_BEAROFF_TS:
+            /* exact bearoff equities */
+
+            arCf[ ici ] = CFMONEY( arEquity, &aci[ ici ] );
+            break;
+
+          case CLASS_OVER:
+          case CLASS_RACE:
+          case CLASS_CRASHED:
+          case CLASS_CONTACT:
+          case CLASS_BEAROFF1:
+          case CLASS_BEAROFF_OS:
+            /* approximate using Janowski's formulae */
+            
+            arCf[ ici ] = Cl2CfMoney ( arOutput, &aci[ ici ] );
+            break;
+
+          }
+
+        }
+        else {
+
+          float rCl, rCf, rCfMoney;
+          float X = rCubeX;
+          cubeinfo ciMoney;
+
+          /* match play */
+
+          switch ( pc ) {
+          case CLASS_HYPERGAMMON1:
+          case CLASS_HYPERGAMMON2:
+          case CLASS_HYPERGAMMON3:
+            /* use exact money equities to guess cube efficiency */
+
+            SetCubeInfoMoney( &ciMoney, 1, aci[ ici ].fCubeOwner,
+                         aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
+
+            rCl = Utility( arOutput, &ciMoney );
+            rCubeX = 1.0;
+            rCf = Cl2CfMoney( arOutput, &ciMoney );
+            rCfMoney = CFHYPER( arEquity, &ciMoney );
+
+            if ( fabs( rCl - rCf ) > 0.0001 )
+              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
+
+            arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ] );
+
+            rCubeX = X;
+
+            break;
+
+          case CLASS_BEAROFF2:
+          case CLASS_BEAROFF_TS:
+            /* use exact money equities to guess cube efficiency */
+
+            SetCubeInfoMoney( &ciMoney, 1, aci[ ici ].fCubeOwner,
+                         aci[ ici ].fMove, FALSE, FALSE, aci[ ici ].bgv );
+
+            rCl = arEquity[ 0 ];
+            rCubeX = 1.0;
+            rCf = Cl2CfMoney( arOutput, &ciMoney );
+            rCfMoney = CFMONEY( arEquity, &ciMoney );
+
+            if ( fabs( rCl - rCf ) > 0.0001 )
+              rCubeX = ( rCfMoney - rCl ) / ( rCf - rCl );
+            else
+              rCubeX = X;
+
+            arCf[ ici ] = Cl2CfMatch( arOutput, &aci[ ici ] );
+
+            rCubeX = X;
+
+            break;
+
+          case CLASS_OVER:
+          case CLASS_RACE:
+          case CLASS_CRASHED:
+          case CLASS_CONTACT:
+          case CLASS_BEAROFF1:
+          case CLASS_BEAROFF_OS:
+            /* approximate using Jørn's generalisation of 
+               Janowski's formulae */
+            
+            arCf[ ici ] = Cl2CfMatch ( arOutput, &aci[ ici ] );
+            break;
+
+          }
+
+        }
+
       }
-    
+
+
     /* find optimal of "no double" and "double" */
     
     GetECF3 ( arCubeful, cci, arCf, aci );
