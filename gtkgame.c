@@ -75,6 +75,7 @@
 #include "i18n.h"
 #include "path.h"
 #include "gtkmovefilter.h"
+#include "gtkmet.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -292,7 +293,6 @@ static void SavePosition( gpointer *p, guint n, GtkWidget *pw );
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SetAdvOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
-static void SetMET( gpointer *p, guint n, GtkWidget *pw );
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
@@ -3232,7 +3232,7 @@ static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
     FileCommand( _("Open commands"), NULL, "load commands", NULL );
 }
 
-static void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
+extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
 
     char *pch = PathSearch( "met/", szDataDirectory );
 
@@ -6337,166 +6337,6 @@ extern void GTKProgressEnd( void ) {
     gtk_progress_set_format_string( GTK_PROGRESS( pwProgress ), " " );
     gtk_statusbar_pop( GTK_STATUSBAR( pwStatus ), idProgress );
 }
-
-static GtkWidget 
-*GTKWriteMET ( float aafMET[ MAXSCORE ][ MAXSCORE ],
-               const int nRows, const int nCols, const int fInvert ) {
-
-    int i, j;
-    char sz[ 16 ];
-    GtkWidget *pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL );
-#if HAVE_LIBGTKEXTRA
-    GtkWidget *pwTable = gtk_sheet_new_browser( nRows, nCols, "" );
-#else
-    GtkWidget *pwTable = gtk_table_new( nRows + 1, nCols + 1, TRUE );
-#endif
-    GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 );
-    
-
-    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( miCurrent.szName ),
-			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwBox ),
-                        gtk_label_new( miCurrent.szFileName ),
-                        FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwBox ),
-                        gtk_label_new( miCurrent.szDescription ),
-                        FALSE, FALSE, 4 );
-
-    gtk_box_pack_start( GTK_BOX( pwBox ), pwScrolledWindow, TRUE, TRUE, 0 );
-
-#if HAVE_LIBGTKEXTRA
-    gtk_container_add( GTK_CONTAINER( pwScrolledWindow ), pwTable );
-#else
-    gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(
-	pwScrolledWindow ), pwTable );
-#endif
-
-    /* header for rows */
-    
-    for( i = 0; i < nCols; i++ ) {
-	sprintf( sz, _("%d-away"), i + 1 );
-#if HAVE_LIBGTKEXTRA
-	gtk_sheet_row_button_add_label( GTK_SHEET( pwTable ), i, sz );
-#else
-	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-				   gtk_label_new( sz ),
-				   i + 1, i + 2, 0, 1 );
-#endif
-    }
-
-    /* header for columns */
-
-    for( i = 0; i < nRows; i++ ) {
-	sprintf( sz, _("%d-away"), i + 1 );
-#if HAVE_LIBGTKEXTRA
-	gtk_sheet_column_button_add_label( GTK_SHEET( pwTable ), i, sz );
-#else
-	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-				   gtk_label_new( sz ),
-				   0, 1, i + 1, i + 2 );
-#endif
-
-    }
-
-    /* fill out table */
-    
-    for( i = 0; i < nRows; i++ )
-	for( j = 0; j < nCols; j++ ) {
-
-          if ( fInvert )
-	    sprintf( sz, "%8.4f", GET_MET( j, i, aafMET ) * 100.0f );
-          else
-	    sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
-
-#if HAVE_LIBGTKEXTRA
-	    gtk_sheet_set_cell( GTK_SHEET( pwTable ), i, j, GTK_JUSTIFY_RIGHT,
-				sz );
-#else
-	    gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-				       gtk_label_new( sz ),
-				       j + 1, j + 2, i + 1, i + 2 );
-#endif
-	}
-
-#if !HAVE_LIBGTKEXTRA
-    gtk_table_set_col_spacings( GTK_TABLE( pwTable ), 4 );
-#endif
-
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
-				    GTK_POLICY_AUTOMATIC,
-				    GTK_POLICY_AUTOMATIC );
-
-    return pwBox;
-
-}
-
-static void invertMETlocal( GtkWidget *pw, gpointer data){
-
-    if(fInvertMET)
-      UserCommand( "set invert met off" );
-    else
-      UserCommand( "set invert met on" );
-}
-
-
-extern void GTKShowMatchEquityTable( int n ) {
-
-    /* FIXME: Widget should update after 'Invert' or 'Load ...' */  
-    int i;
-    char sz[ 50 ];
-    GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Match equity table"),
-                                        DT_INFO, NULL, NULL );
-    GtkWidget *pwNotebook = gtk_notebook_new ();
-    GtkWidget *pwLoad = gtk_button_new_with_label(_("Load table..."));
-    
-    GtkWidget *pwInvertButton = 
-                        gtk_toggle_button_new_with_label(_("Invert table")); 
-    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwInvertButton),
-                        fInvertMET); 
-    
-    gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
-    
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                       pwNotebook );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
-		       pwInvertButton );
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
-		       pwLoad );
-
-    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                               GTKWriteMET ( aafMET, n, n, FALSE ),
-                               gtk_label_new ( _("Pre-Crawford") ) );
-
-    for ( i = 0; i < 2; i++ ) {
-      
-      sprintf ( sz, _("Post-Crawford for player %s"), ap[ i ].szName );
-      
-      gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
-                                 GTKWriteMET ( (float (*)[ MAXSCORE ])
-                                               aafMETPostCrawford[ i ], 
-                                               n, 1, TRUE ),
-                                 gtk_label_new ( sz ) );
-    }
-
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 300 );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwInvertButton ), "toggled",
-			GTK_SIGNAL_FUNC( invertMETlocal ), NULL );
-    gtk_signal_connect( GTK_OBJECT( pwLoad ), "clicked",
-                        GTK_SIGNAL_FUNC ( SetMET ), NULL );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
-    gtk_widget_show_all( pwDialog );
-
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-
-}
-
 
 static void DestroyAbout( gpointer p ) {
 

@@ -1,3 +1,10 @@
+Sun Dec 22 11:57:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Improve widget for showing match equity tables.
+
+	* gtkmet.c, Makefile.am: new file. 
+	* gtkgame.c: move GTKShowMET to gtkmet.c
+
 Sat Dec 21 21:11:12 2002  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (ProgressThrottle): [HAVE_GETTIMEOFDAY] Throttle progress 

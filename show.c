@@ -50,6 +50,7 @@
 #include "gtktheory.h"
 #include "gtkrace.h"
 #include "gtkexport.h"
+#include "gtkmet.h"
 #elif USE_EXT
 #include "xgame.h"
 #endif

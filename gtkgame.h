@@ -136,6 +136,7 @@ extern void GTKMatchInfo( void );
 
 extern void SetEvaluation( gpointer *p, guint n, GtkWidget *pw );
 extern void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
+extern void SetMET( gpointer *p, guint n, GtkWidget *pw );
 
 extern void HintMove( GtkWidget *pw, GtkWidget *pwMoves );
 
