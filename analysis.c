@@ -136,8 +136,10 @@ AnalyzeGame ( list *plGame ) {
     unsigned char auch[ 10 ];
     cubeinfo ci;
     float arOutput [ NUM_OUTPUTS ], rSkill, rChequerSkill, rCost;
-    evaltype etDouble; /* shared between the double and subsequent take/drop */
-    evalsetup esDouble; /* likewise */
+    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    evalsetup esDouble; /* shared between the */
+                        /* double and subsequent take/drop */
     float arDouble[ NUM_CUBEFUL_OUTPUTS ]; /* likewise */
     statcontext *psc;
     matchstate msAnalyse;
@@ -164,16 +166,20 @@ AnalyzeGame ( list *plGame ) {
 	    GetMatchStateCubeInfo( &ci, &msAnalyse );
 	    
 	    /* cube action? */
-	    if ( fAnalyseCube && !fFirstMove && GetDPEq ( NULL, NULL, &ci ) ) {
-		if ( EvaluatePositionCubeful ( msAnalyse.anBoard, arDouble,
-					       arOutput, &ci,
-					       &esAnalysisCube.ec,
-					       esAnalysisCube.ec.nPlies ) < 0 )
-		    return;
+
+	    if ( fAnalyseCube && !fFirstMove &&
+                 GetDPEq ( NULL, NULL, &ci ) ) {
+
+                if ( GeneralCubeDecision ( "",
+                                           aarOutput, aarStdDev,
+                                           msAnalyze.anBoard, &ci,
+					   &esAnalysisCube ) < 0 )
+                  return;
+
+                FindCubeDecision ( arDouble, aarOutput, &ci );
 
 		psc->anTotalCube[ pmr->n.fPlayer ]++;
 		
-		pmr->n.etDouble = etAnalysisCube;
 		pmr->n.esDouble = esAnalysisCube;
 		for ( i = 0; i < 4; i++ ) 
 		    pmr->n.arDouble[ i ] = arDouble[ i ];
@@ -204,7 +210,7 @@ AnalyzeGame ( list *plGame ) {
 		    }
 		}		
 	    } else
-		pmr->n.etDouble = EVAL_NONE;
+		pmr->n.esDouble.et = EVAL_NONE;
 
 	    if( fAnalyseDice ) {
 		pmr->n.rLuck = LuckAnalysis( msAnalyse.anBoard,
@@ -220,9 +226,9 @@ AnalyzeGame ( list *plGame ) {
 		
 		psc->anLuck[ pmr->n.fPlayer ][ pmr->n.lt ]++;
 	    }
-	    
-	    fFirstMove = FALSE;
-	    
+
+	    /* evaluate move */
+
 	    if( fAnalyseMove ) {
 		/* evaluate move */
 	    	    
@@ -302,14 +308,15 @@ AnalyzeGame ( list *plGame ) {
 		GetMatchStateCubeInfo( &ci, &msAnalyse );
 		
 		if ( GetDPEq ( NULL, NULL, &ci ) ) {
-		    if( EvaluatePositionCubeful( msAnalyse.anBoard,
-						 arDouble, arOutput,
-						 &ci, &esAnalysisCube.ec,
-						 esAnalysisCube.ec.nPlies )
-			< 0 ) 
-			return;
 
-		    etDouble = pmr->d.etDouble = etAnalysisCube;
+                    if ( GeneralCubeDecision ( "",
+                                               aarOutput, aarStdDev,
+                                               msAnalyze.anBoard, &ci,
+					       &esAnalysisCube ) < 0 )
+                      return;
+
+                    FindCubeDecision ( arDouble, aarOutput, &ci );
+
 		    esDouble = pmr->d.esDouble = esAnalysisCube;
 
 		    rSkill = arDouble[ OUTPUT_TAKE ] <
@@ -347,16 +354,16 @@ AnalyzeGame ( list *plGame ) {
 			}
 		    }
 		} else
-		    etDouble = EVAL_NONE;
+		    esDouble.et = EVAL_NONE;
 	    }
 	    
 	    break;
 	
 	case MOVE_TAKE:
-	    if( fAnalyseCube && etDouble != EVAL_NONE ) {
+
+	    if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
 		GetMatchStateCubeInfo( &ci, &msAnalyse );
 	    
-		pmr->d.etDouble = etDouble;
 		pmr->d.esDouble = esDouble;
 		memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
 
@@ -380,10 +387,10 @@ AnalyzeGame ( list *plGame ) {
 	    break;
 	
 	case MOVE_DROP:
-	    if( fAnalyseCube && etDouble != EVAL_NONE ) {
+
+	    if( fAnalyseCube && esDouble.et != EVAL_NONE ) {
 		GetMatchStateCubeInfo( &ci, &msAnalyse );
 	    
-		pmr->d.etDouble = etDouble;
 		pmr->d.esDouble = esDouble;
 		memcpy( pmr->d.arDouble, arDouble, sizeof( arDouble ) );
 
