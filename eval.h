@@ -239,6 +239,7 @@ extern bearoffcontext *pbc1;
 extern bearoffcontext *pbc2;
 extern bearoffcontext *pbcOS;
 extern bearoffcontext *pbcTS;
+extern bearoffcontext *apbcHyper[ 3 ];
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -266,6 +267,26 @@ typedef enum _positionclass {
 #define CFMONEY(arEquity,pci) \
    ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
    ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 1 ] : arEquity[ 3 ] ) )
+
+
+/* enumeration of variations of backgammon
+   (starting position and/or special rules) */
+
+typedef enum _bgvariation {
+  VARIATION_STANDARD,      /* standard backgammon */
+  VARIATION_NACKGAMMON,    /* standard backgammon with nackgammon starting
+                            position */
+  VARIATION_HYPERGAMMON_1, /* 1-chequer hypergammon */
+  VARIATION_HYPERGAMMON_2, /* 2-chequer hypergammon */
+  VARIATION_HYPERGAMMON_3, /* 3-chequer hypergammon */
+  NUM_VARIATIONS
+} bgvariation;
+
+extern bgvariation bgv;
+
+extern int anChequers[ NUM_VARIATIONS ];
+extern char *aszVariations[ NUM_VARIATIONS ];
+extern char *aszVariationCommands[ NUM_VARIATIONS ];
 
 
 extern int

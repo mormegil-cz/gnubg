@@ -771,15 +771,6 @@ extern void CommandShowMatchLength( char *sz ) {
 	     _("New matches default to %d points.\n"), nDefaultLength );
 }
 
-extern void CommandShowNackgammon( char *sz ) {
-
-    if( fNackgammon )
-	outputl( _("New games will use the Nackgammon starting position.") );
-    else
-	outputl( _("New games will use the standard backgammon starting "
-	      "position.") );
-}
-
 extern void CommandShowPipCount( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];
@@ -1960,5 +1951,13 @@ CommandShowRolls ( char *sz ) {
 #endif
 
   CommandNotImplemented( NULL );
+
+}
+
+
+extern void
+CommandShowVariation( char *sz ) {
+
+  outputf( _("You are playing: %s\n"), aszVariations[ bgv ] );
 
 }

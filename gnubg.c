@@ -171,7 +171,7 @@ matchinfo mi;
 
 int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
-    fCubeUse = TRUE, fNackgammon = FALSE, 
+    fCubeUse = TRUE, 
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
     nBeavers = 3, fOutputMWC = TRUE, fOutputWinPC = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
@@ -209,6 +209,7 @@ char *aszExtensions [ NUM_PATHS ] = {
   "tmg",
   "bkg"
 };
+
 
 int fNextTurn = FALSE, fComputing = FALSE;
 
@@ -1345,7 +1346,21 @@ command cER = {
   {"medium", CommandSetHighlightMedium,
    N_("choose medium highlight colour"), 
    szCOLOUR, acSetHighlightColour},
-  { NULL, NULL, NULL, NULL, NULL }      
+  { NULL, NULL, NULL, NULL, NULL }  
+}, acSetVariation[] = {
+  { "1-chequer-hypergammon", CommandSetVariation1ChequerHypergammon,
+    N_("Play 1-chequer hypergammon"), NULL, NULL },
+  { "2-chequer-hypergammon", CommandSetVariation2ChequerHypergammon,
+    N_("Play 2-chequer hypergammon"), NULL, NULL },
+  { "3-chequer-hypergammon", CommandSetVariation3ChequerHypergammon,
+    N_("Play 3-chequer hypergammon"), NULL, NULL },
+  { "nackgammon", CommandSetVariationNackgammon,
+    N_("Play standard backgammon with Nackgammon starting position"), 
+    NULL, NULL },
+  { "standard", CommandSetVariationStandard,
+    N_("Play standard backgammon"), 
+    NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }  
 }, acSet[] = {
     { "analysis", NULL, N_("Control parameters used when analysing moves"),
       NULL, acSetAnalysis },
@@ -1408,8 +1423,6 @@ command cER = {
       szONOFF, &cOnOff },
     { "met", CommandSetMET,
       N_("Synonym for `set matchequitytable'"), szFILENAME, &cFilename },
-    { "nackgammon", CommandSetNackgammon, N_("Set the starting position"),
-      szONOFF, &cOnOff },
     { "output", NULL, N_("Modify options for formatting results"), NULL,
       acSetOutput },
     { "path", NULL, N_("Set default path when saving, loading, importing, "
@@ -1440,6 +1453,8 @@ command cER = {
     { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
       &cPlayer },
     { "tutor", NULL, N_("Control tutor setup"), NULL, acSetTutor }, 
+    { "variation", NULL, N_("Set which variation of backgammon is used"), 
+      NULL, acSetVariation }, 
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowStatistics[] = {
     { "game", CommandShowStatisticsGame, 
@@ -1513,8 +1528,6 @@ command cER = {
       N_("Show default match length"), NULL, NULL },
     { "met", CommandShowMatchEquityTable, 
       N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
-    { "nackgammon", CommandShowNackgammon,
-      N_("Display which starting position will be used"), NULL, NULL },
     { "onechequer", CommandShowOneChequer, 
       N_("Show misc race theory"), NULL, NULL },
     { "onesidedrollout", CommandShowOneSidedRollout, 
@@ -1558,6 +1571,9 @@ command cER = {
       N_("Describe this version of GNU Backgammon"), NULL, NULL },
     { "tutor", CommandShowTutor, 
       N_("Give warnings for possible errors in play"), NULL, NULL },
+    { "variation", CommandShowVariation, 
+      N_("Give information about which variation of backgammon is being played"),
+      NULL, NULL },
     { "warranty", CommandShowWarranty, 
       N_("Various kinds of warranty you do not have"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
@@ -2398,18 +2414,43 @@ extern void HandleCommand( char *sz, command *ac ) {
 
 extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
 
-    int i;
-    
-    for( i = 0; i < 25; i++ )
-	anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
+  int i, j;
 
+  for( i = 0; i < 25; i++ )
+    anBoard[ 0 ][ i ] = anBoard[ 1 ][ i ] = 0;
+
+  switch( bgv ) {
+  case VARIATION_STANDARD:
+  case VARIATION_NACKGAMMON:
+    
     anBoard[ 0 ][ 5 ] = anBoard[ 1 ][ 5 ] =
-	anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = fNackgammon ? 4 : 5;
+	anBoard[ 0 ][ 12 ] = anBoard[ 1 ][ 12 ] = 
+      ( bgv == VARIATION_NACKGAMMON ) ? 4 : 5;
     anBoard[ 0 ][ 7 ] = anBoard[ 1 ][ 7 ] = 3;
     anBoard[ 0 ][ 23 ] = anBoard[ 1 ][ 23 ] = 2;
 
-    if( fNackgammon )
+    if( bgv == VARIATION_NACKGAMMON )
 	anBoard[ 0 ][ 22 ] = anBoard[ 1 ][ 22 ] = 2;
+
+    break;
+
+  case VARIATION_HYPERGAMMON_1:
+  case VARIATION_HYPERGAMMON_2:
+  case VARIATION_HYPERGAMMON_3:
+
+    for ( i = 0; i < 2; ++i )
+      for ( j = 0; j < ( bgv - VARIATION_HYPERGAMMON_1 + 1 ); ++j )
+        anBoard[ i ][ 23 - j ] = 1;
+    
+    break;
+    
+  default:
+
+    assert ( FALSE );
+    break;
+
+  }
+
 }
 
 #if USE_GTK && HAVE_GDK_GDKX_H
@@ -4677,7 +4718,7 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf( pf, "set matchequitytable \"%s\"\n", miCurrent.szFileName );
     fprintf( pf, "set matchlength %d\n", nDefaultLength );
     
-    fprintf( pf, "set nackgammon %s\n", fNackgammon ? "on" : "off" );
+    fprintf( pf, "set variation %s\n", aszVariationCommands[ bgv ] );
 
     fprintf( pf, "set output matchpc %s\n"
 	     "set output mwc %s\n"

@@ -1179,19 +1179,6 @@ extern void CommandSetGUIWindowPositions( char *sz ) {
 }
 #endif
 
-extern void CommandSetNackgammon( char *sz ) {
-    
-    SetToggle( "nackgammon", &fNackgammon, sz, _("New games will use the "
-	       "Nackgammon starting position."), _("New games will use the "
-	       "standard backgammon starting position.") );
-
-#if USE_GUI
-    if( fX && ms.gs == GAME_NONE )
-	ShowBoard();
-#endif
-}
-
-
 extern void
 CommandSetPlayerMoveFilter ( char *sz ) {
 
@@ -3956,3 +3943,57 @@ CommandSetExportPNGSize ( char *sz ) {
 
 
 }
+
+
+static void
+SetVariation( const bgvariation bgvx ) {
+
+  bgv = bgvx;
+  CommandShowVariation( NULL );
+
+#if USE_GUI
+    if( fX && ms.gs == GAME_NONE )
+	ShowBoard();
+#endif
+
+}
+
+
+extern void
+CommandSetVariation1ChequerHypergammon( char *sz ) {
+
+  CommandNotImplemented( NULL );
+  SetVariation( VARIATION_HYPERGAMMON_1 );
+
+}
+
+extern void
+CommandSetVariation2ChequerHypergammon( char *sz ) {
+
+  CommandNotImplemented( NULL );
+  SetVariation( VARIATION_HYPERGAMMON_2 );
+
+}
+
+extern void
+CommandSetVariation3ChequerHypergammon( char *sz ) {
+
+  CommandNotImplemented( NULL );
+  SetVariation( VARIATION_HYPERGAMMON_3 );
+
+}
+
+extern void
+CommandSetVariationNackgammon( char *sz ) {
+
+  SetVariation( VARIATION_NACKGAMMON );
+
+}
+
+extern void
+CommandSetVariationStandard( char *sz ) {
+
+  SetVariation( VARIATION_STANDARD );
+
+}
+
