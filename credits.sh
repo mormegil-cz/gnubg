@@ -33,6 +33,7 @@ Tristan Colgate
 Olivier Croisille
 Ned Cross
 Bill Davidson
+Giulio De Marco
 Michael Depreli
 Ian Dunstan
 Max Durbano

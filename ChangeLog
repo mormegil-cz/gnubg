@@ -1,3 +1,9 @@
+Mon Aug 11 14:06:22 GMT 2003 Jim Segrave    <jes@jes-2.demon.nl>
+
+	* credits.sh, po/LINGUAS po/it.po - Italian translations by
+	* Renzo Campagna <renzo.camp@tin.it> & Giulio De Marco
+	* <polietilene@tiscalinet.it>
+
 Sun Aug 10 15:04:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* htmlimages.c (CommandExportHTMLImages): fix bug:
