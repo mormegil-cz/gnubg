@@ -1,3 +1,9 @@
+Sat May  3 10:36:10 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* drawboard.c (ParseMove, CanonicalMoveOrder): fix bug: -1 is used as 
+	terminator, not 0.
+	(reported by Ron Barry)
+
 Sat May  3 10:07:05 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkcube.c (CubeAnalysis, TakeAnalysis), 

@@ -588,7 +588,7 @@ extern void CanonicalMoveOrder( int an[] ) {
 
     int i;
 
-    for( i = 0; i < 4 && an[ 2 * i ] > 0; i++ )
+    for( i = 0; i < 4 && an[ 2 * i ] > -1; i++ )
 	;
     
     qsort( an, i, sizeof( int ) << 1, CompareMoves );
@@ -904,7 +904,7 @@ extern int ParseMove( char *pch, int an[ 8 ] ) {
     }
 
     if( i < 8 )
-	an[ i ] = 0;
+      an[ i ] = -1;
 
     CanonicalMoveOrder( an );
     
