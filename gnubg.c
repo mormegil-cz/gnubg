@@ -292,6 +292,7 @@ rolloutcontext rcRollout =
   TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
   5,  /* late evals start here */
+  TRUE, /* ignore Jacoby for cubeless rollouts */
   RNG_MERSENNE, /* RNG */
   0 /* seed */
 };
@@ -336,6 +337,7 @@ rolloutcontext rcRollout =
     TRUE, /* truncate at BEAROFF2 */ \
     TRUE, /* truncate at BEAROFF2_OS */ \
     5,  /* late evals start here */ \
+    TRUE, /* ignore Jacoby for cubeless rollouts */ \
     RNG_MERSENNE, /* RNG */ \
     0 /* seed */ \
   } \
@@ -2496,7 +2498,7 @@ extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms ) {
 
     return SetCubeInfo( pci, pms->nCube, pms->fCubeOwner, pms->fMove,
 			pms->nMatchTo, pms->anScore, pms->fCrawford,
-			fJacoby, nBeavers );
+			pms->fJacoby, nBeavers );
 }
 
 static void DisplayCubeAnalysis( float arDouble[ 4 ], 
@@ -2905,7 +2907,7 @@ extern void CommandEval( char *sz ) {
 	memcpy( &ci, &ciCubeless, sizeof( ci ) );
     else
 	SetCubeInfo( &ci, ms.nCube, ms.fCubeOwner, n ? !ms.fMove : ms.fMove,
-		     ms.nMatchTo, ms.anScore, ms.fCrawford, fJacoby,
+		     ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
 		     nBeavers );    
 
     ProgressStart( _("Evaluating position...") );
@@ -3692,7 +3694,7 @@ CommandRollout( char *sz ) {
     */
     
     SetCubeInfo ( &ci, ms.nCube, ms.fCubeOwner, fOpponent ? !ms.fMove :
-		  ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, fJacoby,
+		  ms.fMove, ms.nMatchTo, ms.anScore, ms.fCrawford, ms.fJacoby,
                   nBeavers );
 
 #if USE_GTK
@@ -4504,7 +4506,8 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s trials %d\n"
             "%s cube-equal-chequer %s\n"
             "%s players-are-same %s\n"
-            "%s truncate-equal-player0 %s\n",
+            "%s truncate-equal-player0 %s\n"
+            "%s ignore-jacoby-cubeless %s\n" ,
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
@@ -4518,7 +4521,8 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->nTrials,
             sz, fCubeEqualChequer ? "on" : "off",
             sz, fPlayersAreSame ? "on" : "off",
-            sz, fTruncEqualPlayer0 ? "on" : "off"
+            sz, fTruncEqualPlayer0 ? "on" : "off",
+            sz, prc->fIgnoreJacobyCubeless ? "on" : "off"
             );
   
   SaveRNGSettings ( pf, sz, prc->rngRollout );

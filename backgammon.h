@@ -143,6 +143,7 @@ typedef struct _movegameinfo {
 	fResigned, /* the game was ended by resignation */
 	nAutoDoubles; /* how many automatic doubles were rolled */
     bgvariation bgv;
+    int fCubeUse;
     statcontext sc;
 } movegameinfo;
 
@@ -253,6 +254,8 @@ typedef struct _matchstate {
 	fResignationDeclined, fDoubled, cGames, fMove, fCubeOwner, fCrawford,
 	fPostCrawford, nMatchTo, anScore[ 2 ], nCube, cBeavers;
     bgvariation bgv;
+    int fCubeUse;
+    int fJacoby;
     gamestate gs;
 } matchstate;
 
