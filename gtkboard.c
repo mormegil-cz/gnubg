@@ -83,6 +83,8 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 	( x1 + cx1 > x0 ) && ( x1 < x0 + cx0 );
 }
 
+/* comment out unused static functions */
+# if 0
 static inline double ssqrt( double x ) {
 
     return x < 0.0 ? 0.0 : sqrt( x );
@@ -97,6 +99,9 @@ static inline guchar clamp( gint n ) {
     else
 	return n;
 }
+
+#endif
+
 
 static void board_beep( BoardData *bd ) {
 

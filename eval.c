@@ -1986,6 +1986,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv )
 
   }
 
+  return 0;   /* for fussy compilers */
 }
 
 static void
@@ -2116,6 +2117,7 @@ NNevalAction(positionclass p)
 
   /* never reached */
   assert(0);
+  return 0;   /* for the picky compiler */
 }
 
 /* side - side that potentially can win a backgammon */

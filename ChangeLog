@@ -1,3 +1,12 @@
+Thu Jul 7 15:02 GMT 2003 Jim Segrave jes@jes-2.demon.nl
+
+	* openurl.c gtktheory.c gtkboard.c osr.c eval.c gnubg.c
+	  htmlimages.c export.c lib/event.c
+	  fixes for compiler warnings - unused variables removed, 
+	  cast added in gnubg.c, config.h included in event.c (and
+	  fix of call to outputerr()), add explicit returns in eval.c
+	  for reaching end of non-void function
+
 Fri Jun 27 21:20 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
 	* rollout.c - fix results after interupted rollouts

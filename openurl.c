@@ -20,13 +20,13 @@
  * $Id$
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <string.h>
 
 #include <gtk/gtk.h>
 #include <gdk/gdkprivate.h>
-
-#include "config.h"
 
 #include "openurl.h"
 #include "i18n.h"
@@ -36,6 +36,7 @@
 #include "shellapi.h"
 #endif /* WIN32 */
 
+#include "backgammon.h"
 
 extern void
 OpenURL( const char *szURL ) {
@@ -54,7 +55,7 @@ OpenURL( const char *szURL ) {
   pchCommand = g_strdup_printf( "mozilla \"%s\"", szURL );
 
   if ( ! g_spawn_command_line_async( pchCommand, &error ) ) {
-    outputerr( _("Error launching browser: %s\n"), error->message );
+    outputerrf( _("Error launching browser: %s\n"), error->message );
     g_error_free( error );
   }
 

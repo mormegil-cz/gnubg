@@ -42,6 +42,8 @@
 #include "render.h"
 #include "renderprefs.h"
 
+#if HAVE_LIBPNG
+
 static void DrawPips( unsigned char *auchDest, int nStride,
 		      unsigned char *auchPip, int nPipStride,
 		      int nSize, int n ) {
@@ -62,6 +64,8 @@ static void DrawPips( unsigned char *auchDest, int nStride,
 			  ( 1 + 2 * iy ) * nSize * nStride, nStride,
 			  auchPip, nPipStride, nSize, nSize );
 }
+
+#endif
 		      
 extern void CommandExportHTMLImages( char *sz ) {
 

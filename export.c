@@ -753,7 +753,7 @@ CommandExportPositionJF (char *sz)
    */
 
   FILE *fp;
-  int i, anBoardJF[26];
+  int i;
   unsigned char c;
   int anBoard[2][25];
 

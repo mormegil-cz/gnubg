@@ -629,7 +629,6 @@ rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
 
   int anCounts [ nMaxGammonProbs ];
   int an[ 25 ];
-  int antmp[ 6 ];
   unsigned short int anProb[ 32 ];
   int i, n, m;
   int iGame;

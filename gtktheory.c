@@ -256,7 +256,6 @@ TheoryUpdated ( GtkWidget *pw, theorywidget *ptw ) {
   float aaarPoints[ 2 ][ 7 ][ 2 ];
   float aaarPointsMatch[ 2 ][ 4 ][ 2 ];
 
-  char sz[ 255 ];
   int i, j, k;
   int afAutoRedouble[ 2 ];
   int afDead[ 2 ];
@@ -660,7 +659,7 @@ GTKShowTheory ( const int fActivePage ) {
   
   GtkWidget *pw, *pwx, *pwz;
 
-  int i, j, k;
+  int i, j;
   char sz[ 256 ];
   int *pi;
 
