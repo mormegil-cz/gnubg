@@ -731,6 +731,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_TAKE:
 
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+        printf ( "move_Take: %d\n", tt );
         if ( tt != TT_NORMAL )
           break;
       
@@ -759,6 +760,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_DROP:
       
         tt = (taketype) DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
+        printf ( "move_drop: %d\n", tt );
         if ( tt != TT_NORMAL )
           break;
       
