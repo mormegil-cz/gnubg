@@ -326,7 +326,8 @@ static randctx rc;
  */
 
 const char *aszSettings[ NUM_SETTINGS ] = {
-  "beginner", "novice", "intermediate", "advanced", "expert", "world class" };
+  "beginner", "novice", "intermediate", "advanced", "expert", "world class",
+  "world class++" };
 
 evalcontext aecSettings[ NUM_SETTINGS ] = {
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.060 }, /* beginner */
@@ -334,19 +335,21 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.040 }, /* intermediate */
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.015 }, /* advanced */
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.0 },   /* expert */
-  { 8, TRUE, 2, 0, TRUE, FALSE, 0.16, 0.0 }    /* world class */
+  { 8, TRUE, 2, 0, TRUE, FALSE, 0.16, 0.0 },   /* world class */
+  {16, TRUE, 2, 0, TRUE, FALSE, 1.00, 0.0 }    /* world class++ */
 };
 
 
 const char *aszSearchSpaces[ NUM_SEARCHSPACES ] = {
-  "super tiny", "tiny", "small", "medium", "large", "huge" };
+  "super tiny", "tiny", "small", "medium", "large", "huge", 
+   "enormous", "gigantic" };
 
 const int anSearchCandidates[ NUM_SEARCHSPACES ] = {
-  2, 3, 4, 6, 7, 8
+  2, 3, 4, 6, 7, 8, 16, 127
 };
 
 const float arSearchTolerances[ NUM_SEARCHSPACES ] = {
-  0.050, 0.070, 0.090, 0.110, 0.130, 0.160
+  0.050, 0.070, 0.090, 0.110, 0.130, 0.160, 1.00, 5.00
 };
 
 

@@ -1,3 +1,11 @@
+Wed May 29 22:12:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (EvalWidget): move "No 1-ply pruning" from "reduced evaluations"
+	to "search space".
+
+	* eval.c: add a new prefined setting plus an additional two predefined
+	search spaces.
+
 Wed May 29 21:23:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c: include "support of XML match equity files" in

@@ -135,7 +135,8 @@ typedef enum _cubedecision {
  *
  */
 
-#define NUM_SETTINGS            6
+#define NUM_SETTINGS            7
+#define SETTINGS_WORLDCLASSPP   6
 #define SETTINGS_WORLDCLASS     5
 #define SETTINGS_ADVANCED       4
 #define SETTINGS_EXPERT         3
@@ -146,7 +147,7 @@ typedef enum _cubedecision {
 extern evalcontext aecSettings[ NUM_SETTINGS  ];
 extern const char *aszSettings[ NUM_SETTINGS ];
 
-#define NUM_SEARCHSPACES        6
+#define NUM_SEARCHSPACES        8
 
 extern const char *aszSearchSpaces[ NUM_SEARCHSPACES ];
 extern const int anSearchCandidates[ NUM_SEARCHSPACES ];
