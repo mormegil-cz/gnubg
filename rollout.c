@@ -670,8 +670,14 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
         aarOutput[ ici ][ i ] += aarVarRedn[ ici ][ i ];
 
-      /* convert to MWC or normalize against old cube value. */
+    /* multiply money equities */
 
+    if ( ! pci->nMatchTo )
+      aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] *=
+        aci [ ici ].nCube / aci[ 0 ].nCube;
+
+    
+    
 /*        if ( pci->nMatchTo ) */
 /*          aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = */
 /*            eq2mwc ( aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ], pci ); */
