@@ -1,12 +1,12 @@
                          GNU Backgammon was written by:
 
     Joseph Heled            David Montgomery        Gary Wong
-    Oeystein Johansen       Jim Segrave
+    Oystein Johansen        Jim Segrave
     Jonathan Kinsey         Joern Thyssen
  
                                    Support by:
 
-     Oeystein Johansen (Web Pages)   Nardy Pillards (Web Pages)
+     Oystein Johansen (Web Pages)    Nardy Pillards (Web Pages)
      Achim Mueller (Manual)          Albert Silver (Tutorial)
 
                          Contributors of code include:
@@ -28,40 +28,41 @@
 
              Contributors (of bug reports and suggestions) include:
 
-    Elias Kritikos          Nis Jorgensen           Henrik Ravn
-    Misja Alma              Neil Kazaross           James Rech
-    Christian Anthon        Mathias Kegelmann       Jared Riley
-    Kazuaki Asai            Matija Kejzar           Klaus Rindholt
-    Eric Augustine          Bert Van Kerckhove      Oliver Riordan
-    Erik Barfoed            James F. Kibler         Hans-Juergen Schaefer
-    Ron Barry               Johnny Kirk             Steve Schreiber
-    Steve Baedke            Gerhard Knop            Hugh Sconyers
-    Stefan van den Berg     Robert Konigsberg       Martin Schrode
-    Chuck Bower             Martin Krainer          Paul Selick
-    Adrian Bunk             Corrin Lakeland         Sho Sengoku
-    Nick Bratby             Tim Laursen             Ian Shaw
-    Craig Campbell          Eli Liang               Alberta di Silvio
-    John Chuang             Ege Lundgren            Peter Sochovsky
-    Tristan Colgate         Kevin Maguire           Mark Spencer
-    Olivier Croisille       Massimiliano Maini      Scott Steiner
-    Ned Cross               Giulio De Marco         Maik Stiebler
-    Bill Davidson           John Marttila           W. Stroop (Rob)
-    Michael Depreli         Alix Martin             Yoshito Takeuchi
-    Ian Dunstan             William Maslen          Jacques Thiriat
-    Max Durbano             Joachim Matussek        Malene Thyssen
-    Peter Eberhard          Thomas Meyer            Claes Tornberg
-    Robert Eberlein         Daniel Murphy           Sander van Rijnswou
-    Fotis                   Magnar Naustdalslid     Robert-Jan Veldhuizen
-    Kennedy Fraser          Dave Neary              Morten Wang
-    Ric Gerace              Rolf Nielsen            Jeff White
-    Michel Grimminck        Mirori Orange           JP White
-    Eric Groleau            Peter Orum              Mike Whitton
-    Jeff Haferman           Roy Passfield           Chris Wilson
-    Morten Juul Henriksen   Thomas Patrick          Kit Woolsey
-    Alain Henry             Billie Patterson        Frank Worrell
-    Jens Hoefkens           Zvezdan Petkovic        Christopher D. Yep
-    Casey Hopkins           Petri Pitkanen          Anders Zachrison
-    Martin Janke            Sam Pottle              Douglas Zare
+    Elias Kritikos          Nis Jorgensen           James Rech
+    Misja Alma              Neil Kazaross           Jared Riley
+    Christian Anthon        Mathias Kegelmann       Klaus Rindholt
+    Kazuaki Asai            Matija Kejzar           Oliver Riordan
+    Eric Augustine          Bert Van Kerckhove      Hans-Juergen Schaefer
+    Erik Barfoed            James F. Kibler         Steve Schreiber
+    Ron Barry               Johnny Kirk             Hugh Sconyers
+    Steve Baedke            Gerhard Knop            Martin Schrode
+    Stefan van den Berg     Robert Konigsberg       Paul Selick
+    Chuck Bower             Martin Krainer          Sho Sengoku
+    Adrian Bunk             Corrin Lakeland         Ian Shaw
+    Nick Bratby             Tim Laursen             Alberta di Silvio
+    Craig Campbell          Eli Liang               Peter Sochovsky
+    John Chuang             Ege Lundgren            Mark Spencer
+    Tristan Colgate         Kevin Maguire           Scott Steiner
+    Olivier Croisille       Massimiliano Maini      Maik Stiebler
+    Ned Cross               Giulio De Marco         W. Stroop (Rob)
+    Ian Curtis              John Marttila           Yoshito Takeuchi
+    Bill Davidson           Alix Martin             Jacques Thiriat
+    Michael Depreli         William Maslen          Malene Thyssen
+    Ian Dunstan             Joachim Matussek        Claes Tornberg
+    Max Durbano             Thomas Meyer            Sander van Rijnswou
+    Peter Eberhard          Daniel Murphy           Robert-Jan Veldhuizen
+    Robert Eberlein         Magnar Naustdalslid     Morten Wang
+    Fotis                   Dave Neary              Jeff White
+    Kennedy Fraser          Rolf Nielsen            JP White
+    Ric Gerace              Mirori Orange           Mike Whitton
+    Michel Grimminck        Peter Orum              Chris Wilson
+    Eric Groleau            Roy Passfield           Kit Woolsey
+    Jeff Haferman           Thomas Patrick          Frank Worrell
+    Morten Juul Henriksen   Billie Patterson        Christopher D. Yep
+    Alain Henry             Zvezdan Petkovic        Anders Zachrison
+    Jens Hoefkens           Petri Pitkanen          Douglas Zare
+    Casey Hopkins           Sam Pottle
+    Martin Janke            Henrik Ravn
 
 
   Credit is also due to those who have published information about backgammon
