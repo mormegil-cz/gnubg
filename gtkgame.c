@@ -4648,7 +4648,7 @@ GetDefaultFilename ( GtkWidget *pw, filethings *pft ) {
   GtkWidget *pwFileDialog = gtk_widget_get_toplevel(pw);
   char *sz;
   pathformat apf[13] = { PATH_HTML, PATH_HTML, PATH_POS, PATH_MAT, PATH_GAM,
-	  PATH_LATEX, PATH_PDF, PATH_POSTSCRIPT, PATH_EPS, PATH_EPS, PATH_TEXT,
+	  PATH_LATEX, PATH_PDF, PATH_POSTSCRIPT, PATH_EPS, PATH_PNG, PATH_TEXT,
 	  PATH_TEXT, PATH_SNOWIE_TXT };
 	  
   pft->n = gtk_option_menu_get_history(GTK_OPTION_MENU(pft->pwom));
@@ -4865,7 +4865,7 @@ static char *SelectFile( char *szTitle, char *szDefault, char *szPath,
 	/* Get the sensitivities right */
 	ClickedRadioButton( NULL, &ft );
 
-        pwGetDefault = gtk_button_new_with_label(_("Get default filename"));
+	pwGetDefault = gtk_button_new_with_label(_("Get default filename"));
 	gtk_container_set_border_width(GTK_CONTAINER(pwGetDefault), 5);
 	gtk_signal_connect( GTK_OBJECT( pwGetDefault ), "clicked",
 			    GTK_SIGNAL_FUNC( GetDefaultFilename ), &ft );
