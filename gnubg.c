@@ -2422,7 +2422,7 @@ extern void HandleCommand( char *sz, command *ac ) {
 	HandleCommand( sz, pc->pc );
 }
 
-extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
+extern void InitBoard( int anBoard[ 2 ][ 25 ], const bgvariation bgv ) {
 
   int i, j;
 
@@ -2624,7 +2624,7 @@ extern void ShowBoard( void ) {
     if( ms.gs == GAME_NONE ) {
 #if USE_GUI
 	if( fX ) {
-	    InitBoard( anBoardTemp );
+	    InitBoard( anBoardTemp, bgvDefault );
 #if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
@@ -3791,7 +3791,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	fprintf( pf, " %-31s%s\n", ap[ 0 ].szName, ap[ 1 ].szName );
 
     
-    InitBoard( anBoard );
+    InitBoard( anBoard, ms.bgv );
     
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
@@ -4755,7 +4755,7 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf( pf, "set matchequitytable \"%s\"\n", miCurrent.szFileName );
     fprintf( pf, "set matchlength %d\n", nDefaultLength );
     
-    fprintf( pf, "set variation %s\n", aszVariationCommands[ bgv ] );
+    fprintf( pf, "set variation %s\n", aszVariationCommands[ bgvDefault ] );
 
     fprintf( pf, "set output matchpc %s\n"
 	     "set output mwc %s\n"
@@ -5012,7 +5012,7 @@ extern void CommandTrainTD( char *sz ) {
     ProgressStart( _("Training...") );
     
     while( ( !n || c <= n ) && !fInterrupt ) {
-	InitBoard( anBoardTrain );
+	InitBoard( anBoardTrain, bgvDefault );
 	
 	do {    
 	    if( !( ++c % 100 ) )

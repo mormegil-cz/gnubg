@@ -197,7 +197,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
     
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
-	InitBoard( pms->anBoard );
+	InitBoard( pms->anBoard, pmr->g.bgv );
 
 	pms->nMatchTo = pmr->g.nMatch;
 	pms->anScore[ 0 ] = pmr->g.anScore[ 0 ];
@@ -213,6 +213,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	pms->fPostCrawford = !pms->fCrawford &&
 	    ( pms->anScore[ 0 ] == pms->nMatchTo - 1 ||
 	      pms->anScore[ 1 ] == pms->nMatchTo - 1 );
+        pms->bgv = pmr->g.bgv;
 	break;
 	
     case MOVE_DOUBLE:
@@ -619,7 +620,7 @@ static int NewGame( void ) {
 	PopGame( lMatch.plNext->p, TRUE );
     }
     
-    InitBoard( ms.anBoard );
+    InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();
 
@@ -639,6 +640,7 @@ static int NewGame( void ) {
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
+    pmr->g.bgv = ms.bgv;
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
@@ -2414,7 +2416,7 @@ static void DumpGameList(char *szOut, list *plGame) {
     char sz[ 128 ];
     int i = 0, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
 
-    InitBoard( anBoard );
+    InitBoard( anBoard, ms.bgv );
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 
@@ -2889,6 +2891,7 @@ extern void CommandNewMatch( char *sz ) {
     plLastMove = NULL;
 
     ms.nMatchTo = n;
+    ms.bgv = bgvDefault;
 
     SetMatchDate( &mi );
     
@@ -2922,6 +2925,7 @@ extern void CommandNewSession( char *sz ) {
     FreeMatch();
     ClearMatch();
     
+    ms.bgv = bgvDefault;
     plLastMove = NULL;
 
     SetMatchDate( &mi );
@@ -3855,12 +3859,13 @@ SetMatchID ( const char *szMatchID ) {
   ms.fPostCrawford = ! fCrawford && 
     ( ( anScore[ 0 ] == nMatchTo - 1 ) || 
       ( anScore[ 1] == nMatchTo - 1 ) );
+  ms.bgv = bgvDefault; /* FIXME: include bgv in match ID */
   
   /* start new game */
     
   PopGame ( plGame, TRUE );
 
-  InitBoard ( ms.anBoard );
+  InitBoard ( ms.anBoard, ms.bgv );
 
   ClearMoveRecord();
 
@@ -3880,6 +3885,7 @@ SetMatchID ( const char *szMatchID ) {
   pmr->g.nPoints = 0;
   pmr->g.fResigned = FALSE;
   pmr->g.nAutoDoubles = 0;
+  pmr->g.bgv = ms.bgv;
   IniStatcontext( &pmr->g.sc );
   AddMoveRecord( pmr );
 

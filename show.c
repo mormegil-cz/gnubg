@@ -1958,6 +1958,9 @@ CommandShowRolls ( char *sz ) {
 extern void
 CommandShowVariation( char *sz ) {
 
-  outputf( _("You are playing: %s\n"), aszVariations[ bgv ] );
+  if ( ms.gs != GAME_NONE )
+    outputf( _("You are plaing: %s\n"), aszVariations[ ms.bgv ] );
+
+  outputf( _("Default variation is: %s\n"), aszVariations[ bgvDefault ] );
 
 }

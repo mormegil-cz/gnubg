@@ -283,7 +283,7 @@ int fEgyptian = FALSE;
 
 /* variation of backgammon used by gnubg */
 
-bgvariation bgv = VARIATION_STANDARD;
+bgvariation bgvDefault = VARIATION_STANDARD;
 
 /* the number of chequers for the variations */
 

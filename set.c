@@ -3969,7 +3969,7 @@ CommandSetExportPNGSize ( char *sz ) {
 static void
 SetVariation( const bgvariation bgvx ) {
 
-  bgv = bgvx;
+  bgvDefault = bgvx;
   CommandShowVariation( NULL );
 
 #if USE_GUI

@@ -552,7 +552,7 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
 	/* match is already over -- ignore extra games */
 	return 1;
     
-    InitBoard( ms.anBoard );
+    InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();
 
@@ -592,6 +592,7 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
+    pmr->g.bgv = VARIATION_STANDARD; /* always standard backgammon */
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
@@ -941,7 +942,7 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
 
     /* initialise */
 
-    InitBoard( ms.anBoard );
+    InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();
 
@@ -987,6 +988,7 @@ ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
+    pmr->g.bgv = VARIATION_STANDARD; /* only standard bg on FIBS */
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
@@ -1101,7 +1103,7 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			   int fCrawford,
                            int fCrawfordRule, int fAutoDoubles, 
-                           int fJacobyRule ) {
+                           int fJacobyRule, bgvariation bgv ) {
 
 
     char sz[ 1024 ];
@@ -1114,7 +1116,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     int fPlayerOld, nMoveOld; 
     int nMove = -1;
     
-    InitBoard( ms.anBoard );
+    InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();
 
@@ -1134,6 +1136,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     pmgi->g.nPoints = 0;
     pmgi->g.fResigned = FALSE;
     pmgi->g.nAutoDoubles = 0; /* we check for automatic doubles later */
+    pmgi->g.bgv = bgv;
     IniStatcontext( &pmgi->g.sc );
     AddMoveRecord( pmgi );
 
@@ -1532,7 +1535,8 @@ ParseSGGDate ( const char *sz, int *pnDay, int *pnMonth, int *pnYear ) {
 
 static void
 ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
-                  int *pfAutoDoubles, int *pfJacobyRule ) {
+                  int *pfAutoDoubles, int *pfJacobyRule,
+                  bgvariation *pbgv ) {
 
   char szTemp[ 80 ];
   int i;
@@ -1633,6 +1637,22 @@ ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
   case 16:
     
     /* variant */
+
+    if( ( sscanf( sz, "%*s %s", szTemp ) ) != 1 )
+      break;
+
+    if ( ! strcmp( szTemp, "HyperGammon" ) )
+      *pbgv = VARIATION_HYPERGAMMON_3;
+    else if ( ! strcmp( szTemp, "Nackgammon" ) )
+      *pbgv = VARIATION_NACKGAMMON;
+    else if ( ! strcmp( szTemp, "Backgammon" ) )
+      *pbgv = VARIATION_STANDARD;
+    else {
+      outputf ( "Unknown variat in SGG file\n"
+                "Please send the SGG file to bug-gnubg@gnubg.org!\n" );
+      assert ( FALSE );
+    }
+
     break;
 
   default:
@@ -1657,6 +1677,7 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     int fCrawfordRule = TRUE;
     int fJacobyRule = TRUE;
     int fAutoDoubles = 0;
+    bgvariation bgv = VARIATION_STANDARD;
 
     fWarned = FALSE;
     
@@ -1697,13 +1718,13 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
         break;
       
       ParseSGGOptions ( sz, &mi, &fCrawfordRule, 
-                        &fAutoDoubles, &fJacobyRule );
+                        &fAutoDoubles, &fJacobyRule, &bgv );
 
     }
     
     while( !feof( pf ) ) {
 	ImportSGGGame( pf, i, nLength, n0, n1, fCrawford,
-                       fCrawfordRule, fAutoDoubles, fJacobyRule );
+                       fCrawfordRule, fAutoDoubles, fJacobyRule, bgv );
 	
 	while( fgets( sz, 80, pf ) )
 	    if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
@@ -1733,7 +1754,7 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
 static int
 ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
                   int *pfAutoDoubles, int *pfJacobyRule,
-                  int *pnLength ) {
+                  int *pnLength, bgvariation *pbgv ) {
 
   char szTemp[ 80 ];
   int i, j;
@@ -1777,7 +1798,6 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
   case 8: /* AutoDistrib */
   case 13: /* MaxCube */
   case 15: /* MaxGames */
-  case 16: /* Variant */
     /* ignore */
     return 0;
     break;
@@ -1817,6 +1837,25 @@ ParseTMGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
     return 0;
     break;
 
+  case 16: /* Variant */
+
+    if ( ! ( pc = strchr( sz, ':' ) ) )
+      return 0;
+    switch( atoi( pc + 2 ) ) {
+    case 1:
+      *pbgv = VARIATION_STANDARD;
+      break;
+    default:
+      outputf ( "Unknown variation in TMG file\n"
+                "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
+      assert ( FALSE );
+      return -1;
+      break;
+    }
+    
+    return 0;
+    break;
+
   case 17: /* PlayMoney */
     break;
 
@@ -1853,7 +1892,7 @@ ParseTMGGame ( const char *sz,
 static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			   int fCrawford,
                            int fCrawfordRule, int fAutoDoubles, 
-                           int fJacobyRule ) {
+                           int fJacobyRule, bgvariation bgv ) {
 
 
     char sz[ 1024 ];
@@ -1873,10 +1912,11 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
       TMG_WIN_SINGLE = 14,
       TMG_WIN_GAMMON = 15,
       TMG_WIN_BACKGAMMON = 16,
+      TMG_OUT_OF_TIME = 17,
       TMG_TABLE_STAKE = 19 } tmgrecordtype;
     tmgrecordtype trt;
     
-    InitBoard( ms.anBoard );
+    InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();
 
@@ -1896,6 +1936,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
     pmgi->g.nPoints = 0;
     pmgi->g.fResigned = FALSE;
     pmgi->g.nAutoDoubles = 0; /* we check for automatic doubles later */
+    pmgi->g.bgv = bgv;
     IniStatcontext( &pmgi->g.sc );
     AddMoveRecord( pmgi );
 
@@ -2069,6 +2110,11 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
           break;
 
+        case TMG_OUT_OF_TIME:
+
+          /* ignore ??? */
+          break;
+
         default:
 
           outputf ( "Please send the TMG file to bug-gnubg@gnubg.org!\n" );
@@ -2086,7 +2132,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
            disable beavers and auto doubles during play */
 
         ParseTMGOptions ( sz, &mi, &pmgi->g.fCrawford,
-                           &j, &pmgi->g.fJacoby, &j );
+                           &j, &pmgi->g.fJacoby, &j, &bgv );
 
       }
 
@@ -2110,6 +2156,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   int n0, n1;
   int i, j;
   char sz[ 80 ];
+  bgvariation bgv;
 
   FreeMatch();
   ClearMatch();
@@ -2133,7 +2180,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
       break;
       
     ParseTMGOptions ( sz, &mi, &fCrawfordRule, 
-                      &fAutoDoubles, &fJacobyRule, &nLength );
+                      &fAutoDoubles, &fJacobyRule, &nLength, &bgv );
 
   }
 
@@ -2142,7 +2189,7 @@ ImportTMG ( FILE *pf, const char *szFilename ) {
   while( !feof( pf ) ) {
 
     ImportTMGGame( pf, i, nLength, n0, n1, fCrawford,
-                   fCrawfordRule, fAutoDoubles, fJacobyRule );
+                   fCrawfordRule, fAutoDoubles, fJacobyRule, bgv );
 	
     while( fgets( sz, 80, pf ) )
       if( ParseTMGGame( sz, &i, &n0, &n1, &fCrawford, nLength ) )
@@ -2177,7 +2224,7 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
 	    return;
     } while( strncmp( sz, "Black", 5 ) && strncmp( sz, "White", 5 ) );
 
-    InitBoard( ms.anBoard );
+    InitBoard( ms.anBoard, ms.bgv );
 
     ClearMoveRecord();
 
@@ -2197,6 +2244,7 @@ static void ImportBKGGame( FILE *pf, int *pi ) {
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
+    pmr->g.bgv = VARIATION_STANDARD; /* assume standard backgammon */
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
@@ -2533,7 +2581,7 @@ ImportSnowieTxt( FILE *pf ) {
   FreeMatch();
   ClearMatch();
 
-  InitBoard( ms.anBoard );
+  InitBoard( ms.anBoard, ms.bgv );
 
   ClearMoveRecord();
 
@@ -2556,6 +2604,7 @@ ImportSnowieTxt( FILE *pf ) {
   pmgi->nPoints = 0;
   pmgi->fResigned = FALSE;
   pmgi->nAutoDoubles = 0;
+  pmgi->bgv = VARIATION_STANDARD; /* assume standard backgammon */
   IniStatcontext( &pmgi->sc );
   
   AddMoveRecord( pmgi );

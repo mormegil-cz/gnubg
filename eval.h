@@ -282,7 +282,7 @@ typedef enum _bgvariation {
   NUM_VARIATIONS
 } bgvariation;
 
-extern bgvariation bgv;
+extern bgvariation bgvDefault;
 
 extern int anChequers[ NUM_VARIATIONS ];
 extern char *aszVariations[ NUM_VARIATIONS ];

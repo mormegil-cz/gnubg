@@ -8222,7 +8222,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
                           FALSE, FALSE, 0 );
 
       gtk_toggle_button_set_active ( 
-               GTK_TOGGLE_BUTTON ( pow->apwVariations[ i ] ), bgv == i );
+               GTK_TOGGLE_BUTTON ( pow->apwVariations[ i ] ), bgvDefault == i );
 
       gtk_tooltips_set_tip( ptt, pow->apwVariations[ i ],
                             gettext ( aszVariationsTooltips[ i ] ), NULL );
@@ -9100,7 +9100,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   for ( i = 0; i < NUM_VARIATIONS; ++i ) 
     if( gtk_toggle_button_get_active( 
-              GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ) ) && bgv != i ) {
+              GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ) ) && bgvDefault != i ) {
       sprintf( sz, "set variation %s", aszVariationCommands[ i ] );
       UserCommand( sz );
       break;
@@ -9321,7 +9321,7 @@ OptionsSet( optionswidget *pow) {
 
   for ( i = 0; i < NUM_VARIATIONS; ++i )
     gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON( pow->apwVariations[ i ] ),
-                                   bgv == i );
+                                   bgvDefault == i );
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGameEgyptian ),
                                 fEgyptian );

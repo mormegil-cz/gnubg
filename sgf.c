@@ -343,6 +343,44 @@ static void RestoreText( char *sz, char **ppch, const char *szCharset ) {
     *ppch = CopyEscapedString( sz, szCharset );
 }
 
+static void
+RestoreRules( movegameinfo *pmgi, const char *sz ) {
+
+  char *pch;
+  char *pchx;
+
+  /* split string at colons */
+
+  pch = strdup( sz );
+
+  pchx = strtok( pch, ":" );
+  while ( pchx ) {
+
+    if( !strcmp( pchx, "Crawford" ) )
+      pmgi->fCrawford = TRUE;
+    else if( !strcmp( pchx, "CrawfordGame" ) )
+      pmgi->fCrawfordGame = TRUE;
+    else if( !strcmp( pchx, "Jacoby" ) )
+      pmgi->fJacoby = TRUE;
+    else if( !strcmp( pchx, "Nackgammon" ) )
+      pmgi->bgv = VARIATION_NACKGAMMON;
+    else if( !strcmp( pchx, "Hypergammon1" ) )
+      pmgi->bgv = VARIATION_HYPERGAMMON_1;
+    else if( !strcmp( pchx, "Hypergammon2" ) )
+      pmgi->bgv = VARIATION_HYPERGAMMON_2;
+    else if( !strcmp( pchx, "Hypergammon3" ) )
+      pmgi->bgv = VARIATION_HYPERGAMMON_3;
+
+    pchx = strtok( NULL, ":" );
+
+  }
+
+  free( pch );
+
+}
+
+
+
 static void RestoreRootNode( list *pl, char *szCharset ) {
 
     property *pp;
@@ -363,6 +401,7 @@ static void RestoreRootNode( list *pl, char *szCharset ) {
     pmgi->nPoints = 0;
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
+    pmgi->bgv = VARIATION_STANDARD;
     IniStatcontext( &pmgi->sc );
     
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext ) 
@@ -402,15 +441,7 @@ static void RestoreRootNode( list *pl, char *szCharset ) {
 	    pmgi->fResigned = toupper( *pch ) == 'R';
 	} else if( pp->ach[ 0 ] == 'R' && pp->ach[ 1 ] == 'U' ) { 
 	    /* RU - Rules property */
-
-	    pch = pp->pl->plNext->p;
-
-	    if( !strcmp( pch, "Crawford" ) )
-		pmgi->fCrawford = TRUE;
-	    else if( !strcmp( pch, "Crawford:CrawfordGame" ) )
-		pmgi->fCrawford = pmgi->fCrawfordGame = TRUE;
-	    else if( !strcmp( pch, "Jacoby" ) )
-		pmgi->fJacoby = TRUE;
+            RestoreRules( pmgi, (const char *) pp->pl->plNext->p );
 	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
 	    /* CV - Cube value (i.e. automatic doubles) */
 	    for( i = 0; ( 1 << i ) <= MAX_CUBE; i++ )
@@ -1135,7 +1166,7 @@ static void RestoreGame( list *pl, char *szCharset ) {
 
     PushLocale ( "C" );
     
-    InitBoard( ms.anBoard );
+    InitBoard( ms.anBoard, ms.bgv );
 
     /* FIXME should anything be done with the current game? */
     
@@ -1770,14 +1801,27 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	WriteProperty( pf, "AN", mi.pchAnnotator );
 	WriteProperty( pf, "GC", mi.pchComment );
     }
-    
-    if( pmr->g.fCrawford ) {
+
+    if ( pmr->g.fCrawford || pmr->g.fJacoby || 
+         pmr->g.bgv != VARIATION_STANDARD ) {
+
+      static char *aszSGFVariation[ NUM_VARIATIONS ] =
+        { NULL, "Nackgammon", "Hypergammon1", "Hypergammon2", "Hypergammon3" };
+
+      fputs( "RU[", pf );
+      
+      if( pmr->g.fCrawford )
 	fputs( "RU[Crawford", pf );
-	if( pmr->g.fCrawfordGame )
-	    fputs( ":CrawfordGame", pf );
-	putc( ']', pf );
-    } else if( pmr->g.fJacoby )
-	fputs( "RU[Jacoby]", pf );
+      if( pmr->g.fCrawfordGame )
+        fputs( ":CrawfordGame", pf );
+      if( pmr->g.fJacoby )
+        fprintf( pf, "%sJacoby", pmr->g.fCrawford ? ":" : "" );
+      if( pmr->g.bgv != VARIATION_STANDARD )
+        fprintf( pf, "%s%s", ( pmr->g.fCrawford || pmr->g.fJacoby ) ? ":" : "",
+                 aszSGFVariation[ pmr->g.bgv ] );
+
+      fputs( "]", pf );
+    }
 
     if( pmr->g.nAutoDoubles )
 	fprintf( pf, "CV[%d]", 1 << pmr->g.nAutoDoubles );
@@ -2028,6 +2072,7 @@ extern void CommandSavePosition( char *sz ) {
     pmgi->nPoints = 0;
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
+    pmgi->bgv = ms.bgv;
     IniStatcontext( &pmgi->sc );
     ListInsert( &l, pmgi );
 
