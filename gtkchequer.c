@@ -37,6 +37,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "eval.h"
+#include "positionid.h"
 #include "rollout.h"
 #include "gtkgame.h"
 #include "gtkchequer.h"

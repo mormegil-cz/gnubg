@@ -252,7 +252,7 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwColour[ f ] ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_CHEQUERS0 + f );
+			       (GtkObject*) pwPreview + PI_CHEQUERS0 + f );
     
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
@@ -264,7 +264,7 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_signal_connect_object( GTK_OBJECT( apadj[ f ] ),
 			       "value-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_CHEQUERS0 + f );
+			       (GtkObject*) pwPreview + PI_CHEQUERS0 + f );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
@@ -277,7 +277,7 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_signal_connect_object( GTK_OBJECT( apadjCoefficient[ f ] ),
 			       "value-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_CHEQUERS0 + f );
+			       (GtkObject*) pwPreview + PI_CHEQUERS0 + f );
     
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
@@ -290,7 +290,7 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_signal_connect_object( GTK_OBJECT( apadjExponent[ f ] ),
 			       "value-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_CHEQUERS0 + f );
+			       (GtkObject*) pwPreview + PI_CHEQUERS0 + f );
     
     return pwx;
 }
@@ -359,7 +359,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwDiceColour[ f ] ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_DICE0 + f );
+			       (GtkObject*) pwPreview + PI_DICE0 + f );
     
     gtk_box_pack_start( GTK_BOX( apwDiceColourBox[ f ] ), 
                         pwhbox = gtk_hbox_new( FALSE, 0 ),
@@ -384,7 +384,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_signal_connect_object( GTK_OBJECT( apadjDiceCoefficient[ f ] ),
 			       "value-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_DICE0 + f );
+			       (GtkObject*) pwPreview + PI_DICE0 + f );
     
     gtk_box_pack_start( GTK_BOX( apwDiceColourBox[ f ] ), 
                         pwhbox = gtk_hbox_new( FALSE, 0 ),
@@ -400,7 +400,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_signal_connect_object( GTK_OBJECT( apadjDiceExponent[ f ] ),
 			       "value-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_DICE0 + f );
+			       (GtkObject*) pwPreview + PI_DICE0 + f );
 
     gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColourBox[ f ] ),
                                ! bd->rd.afDieColour[ f ] );
@@ -424,7 +424,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
 				   COLOUR_SEL( apwDiceDotColour[ f ] ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_DICE0 + f );
+			       (GtkObject*) pwPreview + PI_DICE0 + f );
 
     /* signals */
 
@@ -433,7 +433,7 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
                          apwDiceColourBox[ f ] );
     gtk_signal_connect_object( GTK_OBJECT( apwDieColour[ f ] ), "toggled",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_DICE0 + f );
+			       (GtkObject*) pwPreview + PI_DICE0 + f );
 
     return pwx;
 }
@@ -463,7 +463,7 @@ static GtkWidget *CubePrefs( BoardData *bd ) {
     gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( pwCubeColour ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_CUBE );
+			       (GtkObject*) pwPreview + PI_CUBE );
 
     /* FIXME add cube text colour settings */
     
@@ -513,7 +513,7 @@ static GtkWidget *BoardPage( BoardData *bd ) {
 	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwBoard[ j ] ) ),
 				   "color-changed",
 				   GTK_SIGNAL_FUNC( UpdatePreview ),
-				   pwPreview + PI_BOARD );
+				   (GtkObject*) pwPreview + PI_BOARD );
 
 	gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			    FALSE, FALSE, 4 );
@@ -526,7 +526,7 @@ static GtkWidget *BoardPage( BoardData *bd ) {
 	gtk_signal_connect_object( GTK_OBJECT( apadjBoard[ j ] ),
 				   "value-changed",
 				   GTK_SIGNAL_FUNC( UpdatePreview ),
-				   pwPreview + PI_BOARD );
+				   (GtkObject*) pwPreview + PI_BOARD );
     }
     
     return pwx;
@@ -592,11 +592,11 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 #if GTK_CHECK_VERSION(2,0,0)
     gtk_signal_connect_object( GTK_OBJECT( pwWoodType ), "changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_BORDER );
+			       (GtkObject*) pwPreview + PI_BORDER );
 #else
     gtk_signal_connect_object( GTK_OBJECT( pwWoodMenu ), "selection-done",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_BORDER );
+			       (GtkObject*) pwPreview + PI_BORDER );
 #endif
     
     gtk_box_pack_start( GTK_BOX( pw ),
@@ -620,7 +620,7 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwBoard[ 1 ] ) ),
 			       "color-changed",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_BORDER );
+			       (GtkObject*) pwPreview + PI_BORDER );
 
 
     pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
@@ -628,13 +628,13 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     gtk_box_pack_start( GTK_BOX( pw ), pwHinges, FALSE, FALSE, 0 );
     gtk_signal_connect_object( GTK_OBJECT( pwHinges ), "toggled",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_BORDER );
+			       (GtkObject*) pwPreview + PI_BORDER );
 
     gtk_signal_connect( GTK_OBJECT( pwWood ), "toggled",
 			GTK_SIGNAL_FUNC( ToggleWood ), bd );
     gtk_signal_connect_object( GTK_OBJECT( pwWood ), "toggled",
 			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       pwPreview + PI_BORDER );
+			       (GtkObject*) pwPreview + PI_BORDER );
     
     gtk_widget_set_sensitive( pwWoodType, bd->rd.wt != WOOD_PAINT );
     gtk_widget_set_sensitive( apwBoard[ 1 ], bd->rd.wt == WOOD_PAINT);

@@ -1,3 +1,15 @@
+Wed Jan  3 00:15:47 2003  Oystein Johansen <oeysteij@online.no>
+
+	* import.h: Declare ImportTMG
+	
+	* gtkprefs.c: Apply Holger's patch with typecasts to GtkObject
+
+	* gtkchequer.c: Add #include "positionid.h"
+
+	* gtkgame.c: Add button to get export settings dialog from the file
+	             dialog. FileCommand() takes a new parameter, all callers
+		     changed.
+
 Thu Jan  2 16:56:57 2003  Gary Wong  <gtw@gnu.org>
 
 	* gtksplash.c (USLEEP): New macro -- use g_usleep() if we can,

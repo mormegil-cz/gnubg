@@ -3237,11 +3237,12 @@ static void SetDefaultPath( GtkWidget *pw, char *sz ) {
     g_free( pch );
 }
 
-static char *SelectFile( char *szTitle, char *szDefault, char *szPath ) {
+static char *SelectFile( char *szTitle, char *szDefault, char *szPath,
+		int fExportSetting ) {
 
     char *pch = NULL;
     GtkWidget *pw = gtk_file_selection_new( szTitle ),
-	*pwButton;
+	*pwButton, *pwExpSet;
 
     if( szPath ) {
 #if USE_GTK2
@@ -3257,6 +3258,21 @@ static char *SelectFile( char *szTitle, char *szDefault, char *szPath ) {
 			   pwButton );
 	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
 			    GTK_SIGNAL_FUNC( SetDefaultPath ), szPath );
+    }
+    
+    if( fExportSetting ) {
+	    
+	pwExpSet = gtk_button_new_with_label( _("Export Settings...") );
+	
+	gtk_container_set_border_width(GTK_CONTAINER(pwExpSet), 5);
+	
+	gtk_widget_show( pwExpSet );
+	gtk_container_add( GTK_CONTAINER(
+			       gtk_widget_get_parent(
+				   GTK_FILE_SELECTION( pw )->ok_button ) ),
+			   pwExpSet );
+	gtk_signal_connect( GTK_OBJECT( pwExpSet ), "clicked",
+			    GTK_SIGNAL_FUNC( CommandShowExport ), szPath );
     }
     
     if( szDefault )
@@ -3284,11 +3300,11 @@ static char *SelectFile( char *szTitle, char *szDefault, char *szPath ) {
 }
 
 static void FileCommand( char *szPrompt, char *szDefault, char *szCommand,
-			 char *szPath ) {
+			 char *szPath, int fExportSetting ) {
 
     char *pch;
     
-    if( ( pch = SelectFile( szPrompt, szDefault, szPath ) ) ) {
+    if( ( pch = SelectFile( szPrompt, szDefault, szPath, fExportSetting ) ) ) {
 #if __GNUC__
 	char sz[ strlen( pch ) + strlen( szCommand ) + 4 ];
 #elif HAVE_ALLOCA
@@ -3305,7 +3321,7 @@ static void FileCommand( char *szPrompt, char *szDefault, char *szCommand,
 
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( _("Open commands"), NULL, "load commands", NULL );
+    FileCommand( _("Open commands"), NULL, "load commands", NULL, 0 );
 }
 
 extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
@@ -3318,7 +3334,7 @@ extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
     }
     
     FileCommand( _("Set match equity table"), pch, "set matchequitytable ",
-		 "met" );
+		 "met", 0 );
 
     if( pch )
 	free( pch );
@@ -3327,7 +3343,7 @@ extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SGF );
-  FileCommand( _("Open game"), sz, "load game", "sgf" );
+  FileCommand( _("Open game"), sz, "load game", "sgf", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3336,7 +3352,7 @@ static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SGF );
-  FileCommand( _("Open match or session"), sz, "load match", "sgf" );
+  FileCommand( _("Open match or session"), sz, "load match", "sgf", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3345,7 +3361,7 @@ static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_MAT );
-  FileCommand( _("Import .mat match"), sz, "import mat", "mat" );
+  FileCommand( _("Import .mat match"), sz, "import mat", "mat", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3354,7 +3370,7 @@ static void ImportMat( gpointer *p, guint n, GtkWidget *pw ) {
 static void ImportPos( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_POS );
-  FileCommand( _("Import .pos position"), sz, "import pos", "pos" );
+  FileCommand( _("Import .pos position"), sz, "import pos", "pos", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3363,7 +3379,7 @@ static void ImportPos( gpointer *p, guint n, GtkWidget *pw ) {
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_OLDMOVES );
-  FileCommand( _("Import FIBS oldmoves"), sz, "import oldmoves", "oldmoves" );
+  FileCommand( _("Import FIBS oldmoves"), sz, "import oldmoves", "oldmoves", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3372,7 +3388,7 @@ static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw ) {
 static void ImportSGG( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_SGG );
-  FileCommand( _("Import .sgg match"), sz, "import sgg", "sgg" );
+  FileCommand( _("Import .sgg match"), sz, "import sgg", "sgg", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3381,7 +3397,7 @@ static void ImportSGG( gpointer *p, guint n, GtkWidget *pw ) {
 static void ImportTMG( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultPath ( PATH_TMG );
-  FileCommand( _("Import .tmg match"), sz, "import tmg", "tmg" );
+  FileCommand( _("Import .tmg match"), sz, "import tmg", "tmg", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3390,7 +3406,7 @@ static void ImportTMG( gpointer *p, guint n, GtkWidget *pw ) {
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_SGF );
-  FileCommand( _("Save game"), sz, "save game", "sgf" );
+  FileCommand( _("Save game"), sz, "save game", "sgf", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3399,7 +3415,7 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_SGF );
-  FileCommand( _("Save match or session"), sz, "save match", "sgf" );
+  FileCommand( _("Save match or session"), sz, "save match", "sgf", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3408,7 +3424,7 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 static void SavePosition( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_SGF );
-  FileCommand( _("Save position"), sz, "save position", "sgf" );
+  FileCommand( _("Save position"), sz, "save position", "sgf", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3417,7 +3433,7 @@ static void SavePosition( gpointer *p, guint n, GtkWidget *pw ) {
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = strdup ( PKGDATADIR "/gnubg.weights" );
-  FileCommand( _("Save weights"), sz, "save weights", NULL );
+  FileCommand( _("Save weights"), sz, "save weights", NULL, 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3426,7 +3442,7 @@ static void SaveWeights( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_GAM );
-  FileCommand( _("Export .gam game"), sz, "export game gam", "gam" );
+  FileCommand( _("Export .gam game"), sz, "export game gam", "gam", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3435,7 +3451,7 @@ static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_HTML );
-  FileCommand( _("Export HTML game"), sz, "export game html", "html" );
+  FileCommand( _("Export HTML game"), sz, "export game html", "html", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3444,7 +3460,7 @@ static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_LATEX );
-  FileCommand( _("Export LaTeX game"), sz, "export game latex", "latex" );
+  FileCommand( _("Export LaTeX game"), sz, "export game latex", "latex", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3453,7 +3469,7 @@ static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_PDF );
-  FileCommand( _("Export PDF game"), sz, "export game pdf", "pdf" );
+  FileCommand( _("Export PDF game"), sz, "export game pdf", "pdf", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3463,7 +3479,7 @@ static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
   FileCommand( _("Export PostScript game"), sz, "export game postscript",
-	       "postscript" );
+	       "postscript", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3472,7 +3488,7 @@ static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportGameText( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_TEXT );
-  FileCommand( _("Export text game"), sz, "export game text", "text" );
+  FileCommand( _("Export text game"), sz, "export game text", "text", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3481,7 +3497,7 @@ static void ExportGameText( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_LATEX );
-  FileCommand( _("Export LaTeX match"), sz, "export match latex", "latex" );
+  FileCommand( _("Export LaTeX match"), sz, "export match latex", "latex", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3490,7 +3506,7 @@ static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_HTML );
-  FileCommand( _("Export HTML match"), sz, "export match html", "html" );
+  FileCommand( _("Export HTML match"), sz, "export match html", "html", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3499,7 +3515,7 @@ static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_MAT );
-  FileCommand( _("Export .mat match"), sz, "export match mat", "mat" );
+  FileCommand( _("Export .mat match"), sz, "export match mat", "mat", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3508,7 +3524,7 @@ static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_PDF );
-  FileCommand( _("Export PDF match"), sz, "export match pdf", "pdf" );
+  FileCommand( _("Export PDF match"), sz, "export match pdf", "pdf", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3518,7 +3534,7 @@ static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
   FileCommand( _("Export PostScript match"), sz, "export match postscript",
-	       "postscript" );
+	       "postscript", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3527,7 +3543,7 @@ static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_TEXT );
-  FileCommand( _("Export text match"), sz, "export match text", "text" );
+  FileCommand( _("Export text match"), sz, "export match text", "text", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3536,7 +3552,7 @@ static void ExportMatchText( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_EPS );
-  FileCommand( _("Export EPS position"), sz, "export position eps", "eps" );
+  FileCommand( _("Export EPS position"), sz, "export position eps", "eps", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3545,7 +3561,7 @@ static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_HTML );
-  FileCommand( _("Export HTML position"), sz, "export position html", "html" );
+  FileCommand( _("Export HTML position"), sz, "export position html", "html", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3555,7 +3571,7 @@ static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_HTML );
   FileCommand( _("Export position to GammOnLine (HTML)"), 
-               sz, "export position gammonline", "html" );
+               sz, "export position gammonline", "html", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3564,7 +3580,7 @@ static void ExportPositionGammOnLine( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_POS );
-  FileCommand( _("Export .pos position"), sz, "export position pos", "pos" );
+  FileCommand( _("Export .pos position"), sz, "export position pos", "pos", 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3573,7 +3589,7 @@ static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportPositionPNG( gpointer *p, guint n, GtkWidget *pw ) {
 
   /* char *sz = getDefaultFileName ( PATH_PNG ); */
-  FileCommand( _("Export PNG position"), NULL, "export position png", "png" );
+  FileCommand( _("Export PNG position"), NULL, "export position png", "png", 1 );
   /* if ( sz ) 
      free ( sz ); */
 
@@ -3582,7 +3598,7 @@ static void ExportPositionPNG( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportPositionText( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_TEXT );
-  FileCommand( _("Export text position"), sz, "export position text", "text" );
+  FileCommand( _("Export text position"), sz, "export position text", "text", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3592,7 +3608,7 @@ static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_LATEX );
   FileCommand( _("Export LaTeX session"), sz, "export session latex",
-	       "latex" );
+	       "latex", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3601,7 +3617,7 @@ static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_PDF );
-  FileCommand( _("Export PDF session"), sz, "export session pdf", "pdf" );
+  FileCommand( _("Export PDF session"), sz, "export session pdf", "pdf", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3610,7 +3626,7 @@ static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_HTML );
-  FileCommand( _("Export HTML session"), sz, "export session html", "html" );
+  FileCommand( _("Export HTML session"), sz, "export session html", "html", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3620,7 +3636,7 @@ static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_POSTSCRIPT );
   FileCommand( _("Export PostScript session"), sz,
-               "export session postscript", "postscript" );
+               "export session postscript", "postscript", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3629,7 +3645,7 @@ static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = getDefaultFileName ( PATH_TEXT );
-  FileCommand( _("Export text session"), sz, "export session text", "text" );
+  FileCommand( _("Export text session"), sz, "export session text", "text", 1 );
   if ( sz ) 
     free ( sz );
 
@@ -3638,7 +3654,7 @@ static void ExportSessionText( gpointer *p, guint n, GtkWidget *pw ) {
 static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw ) {
 
     char *sz = strdup( PKGDATADIR "/html-images" );
-    FileCommand( _("Export HTML images"), sz, "export htmlimages", NULL );
+    FileCommand( _("Export HTML images"), sz, "export htmlimages", NULL, 1 );
     if ( sz ) 
 	free ( sz );
 }
@@ -3646,7 +3662,7 @@ static void ExportHTMLImages( gpointer *p, guint n, GtkWidget *pw ) {
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = strdup ( PKGDATADIR "/gnubg.gdbm" );
-  FileCommand( _("Export database"), sz, "database export", NULL );
+  FileCommand( _("Export database"), sz, "database export", NULL, 0 );
   if ( sz ) 
     free ( sz );
 
@@ -3655,7 +3671,7 @@ static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
   char *sz = strdup ( PKGDATADIR "/gnubg.gdbm" );
-  FileCommand( _("Import database"), sz, "database import", NULL );
+  FileCommand( _("Import database"), sz, "database import", NULL, 0 );
   if ( sz ) 
     free ( sz );
 
