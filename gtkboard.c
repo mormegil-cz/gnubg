@@ -487,9 +487,15 @@ static void update_move( BoardData *bd ) {
 static void Confirm( BoardData *bd ) {
 
     char move[ 40 ];
+    int points[ 2 ][ 25 ];
+    
+    read_board( bd, points );
 
-    if( bd->valid_move && bd->valid_move->cMoves == bd->move_list.cMaxMoves &&
-        bd->valid_move->cPips == bd->move_list.cMaxPips ) {
+    if( !bd->move_list.cMoves && EqualBoards( points, bd->old_board ) )
+	UserCommand( "move" );
+    else if( bd->valid_move &&
+	     bd->valid_move->cMoves == bd->move_list.cMaxMoves &&
+	     bd->valid_move->cPips == bd->move_list.cMaxPips ) {
         FormatMove( move, bd->old_board, bd->valid_move->anMove );
     
         UserCommand( move );
