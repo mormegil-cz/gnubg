@@ -436,4 +436,34 @@
 
    </board-design>
 
+
+   <board-design>
+
+      <about>
+         <title>España</title> 
+         <author>Ian Shaw</author>     
+     </about>
+
+     <design>
+
+        board=#FFD772;0.09 
+        border=#003F00 
+        wood=oak  
+        hinges=y 
+        light=150;50
+        shape=0.5 
+        chequers0=#EBD765;1.00;3.40;0.90;20.50
+        chequers1=#8E211F;1.00;3.00;1.00;20.10 
+        dice0=#F7E26B;0.00;20.50;y
+        dice1=#8E211F;1.00;20.10;y 
+        dot0=#701515 
+        dot1=#EDD3A6 
+        cube=#E5C997
+        points0=#AD2323;0.20 
+        points1=#D4A527;0.09
+
+     </design>
+
+  </board-design>
+
 </board-designs>
