@@ -10,19 +10,6 @@ duplication of effort and to make sure our changes merge easily.
 *** Classes for bearing off against contact, back games, containment
   positions, prime-vs-prime...
 *** Consider meta-pi scheme for using output from multiple nets.
-** See http://www.oasya.com/CubefulAdvantages.html for example of
-  cubeful evaluation. The current money game code can do cubeful
-  evaluations (currently only used for cube action) but it should be
-  easy to write code for cubeful checkerplay (i.e. let FindBestMove call
-  EvaluatePositionCubeful instead of EvaluatePosition). For cubeful
-  checkerplay there should probably be a rScore2 field with the
-  cubeless equity which, when two
-  moves give (exactly) the same equity, is used as score (e.g. when
-  two moves both are so bad that the opponent should double, and we 
-  should pass, both moves have cubeful equity -1. But the opponent
-  might not double, in which case it had been best to choose the
-  move with highest cubeless equity. (thyssen) (this looks like it's done
-  already)
 ** Add another "eval"-like command that show the distribution of
   equities n rolls ahead.  SW does bar graphs of this stuff; Cam Trenor
   suggests alternative output.
