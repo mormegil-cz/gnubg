@@ -1,3 +1,7 @@
+Mon Apr  8 18:10:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (CommandSaveSettings): fix typo.
+
 Sun Apr  7 14:39:23 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (getPercent): new function. Used in CubeAnalysis widget
