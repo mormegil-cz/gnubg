@@ -37,6 +37,9 @@ duplication of effort and to make sure our changes merge easily.
 ** EvaluatePositionCache doesn't currently cache evaluations deeper than
   0-ply for match play.  Update EvalCacheHash so that spurious collisions
   won't occur, and then change EvaluatePositionCache to cache what it can.
+** Merge David's match equity table extension code. (gary, unless Jørn wants
+  to)
+** Merge David's reduced evaluation code. (gary)
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -84,6 +87,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** If a resignation is rejected, don't allow further resignations for
   that amount or below for the rest of the turn.
+** Make "met" a synonym for "matchequitytable".
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -149,6 +153,11 @@ duplication of effort and to make sure our changes merge easily.
   fix that by temporarily modifying pwGrab?
 ** Enable and disable the take/drop/redouble/agree/decline etc. buttons
   and menu items when appropriate.
+** Add an option to turn off the beeps (suggested by Jeremie Petit).
+** Make some of the information below the board optional (suggested by Jeremie 
+  Petit).
+** Optionally merge the game record and annotation windows into one big
+  paned window (suggested by Jeremie Petit).
 ** Use different styles for moves in the game window, depending on the
   annotation.
 ** Add the players' names in the drop-down menu in the game window.  (They

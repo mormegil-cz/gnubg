@@ -38,7 +38,6 @@ Current features:
  - Exporting games and matches to .mat format
  - Scripting ability (if GNU Guile is available)
 
-
 The file `gnubg.bd':
 --------------------
 
@@ -88,6 +87,18 @@ pre-release is available at:
 
 Make sure you decompress the file (with gunzip) and rename it to
 `gnubg.weights' in the same directory as this README file.
+
+Platform-dependent notes:
+-------------------------
+
+ * Alphas running Compaq Tru64 Unix (formerly known as Digital Unix, and
+   DEC OSF/1 before that):
+
+     If you are using Compaq's "cc" compiler, you need to specify the
+     `-ieee' flag.  You can do that by invoking `configure' like this
+     (assuming you are using a Bourne-like shell):
+
+       $ CFLAGS=-ieee ./configure
 
 
 Thanks for trying GNU Backgammon!
