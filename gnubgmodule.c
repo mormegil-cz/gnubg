@@ -1688,8 +1688,8 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 
   assert( g->i == 0 );
 
-  // W,X,0 
-  // B,O,1
+  /* W,X,0 
+     B,O,1 */
   {
     int side;
     for(side = 0; side < 2; ++side) {

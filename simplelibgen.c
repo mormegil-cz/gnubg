@@ -71,8 +71,8 @@ dirname (char *path)
 	  break;
 
       /* The DIR_SEPARATOR is the last character, we have to look further.  */
-      //if (runp != path)
-//	last_slash = __memrchr (path, DIR_SEPARATOR, runp - path);
+      /* if (runp != path)
+	last_slash = __memrchr (path, DIR_SEPARATOR, runp - path); */
     }
 
   if (last_slash != NULL)

@@ -405,8 +405,8 @@ extern void CommandShowAnalysis( char *sz ) {
                ap[ i ].szName, afAnalysePlayers[ i ] ? _("yes") : _("no") );
 
     outputl( _("\nAnalysis thresholds:") );
-    outputf( //"  +%.3f %s\n"
-	     //"  +%.3f %s\n"
+    outputf( /*"  +%.3f %s\n"
+	     "  +%.3f %s\n" */
 	     "  -%.3f %s\n"
 	     "  -%.3f %s\n"
 	     "  -%.3f %s\n"

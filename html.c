@@ -2777,7 +2777,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     fputs ( "</p>\n", pf );
 
-    // HTMLRollAlert ( pf, pms, pmr, szImageDir, szExtension );
+    /* HTMLRollAlert ( pf, pms, pmr, szImageDir, szExtension ); */
 
     if ( exsExport.fIncludeAnalysis ) {
       HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, 

@@ -411,7 +411,7 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 #if USE_TIMECONTROL
 	pms->tvTimeleft[0] = pmr->a.tl[0];
 	pms->tvTimeleft[1] = pmr->a.tl[1];
-        // HitGameClock(pms);
+        /*  HitGameClock(pms); */
 
 #if USE_GTK
     if( fX )

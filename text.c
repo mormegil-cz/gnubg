@@ -692,7 +692,7 @@ TextMatchInfo ( FILE *pf, const matchinfo *pmi ) {
     fprintf ( pf, _("Date: %s\n"), sz ); 
 
   }
-  //else fputs ( _("Date: n/a\n"), pf );
+  /* else fputs ( _("Date: n/a\n"), pf ); */
 
   /* event, round, place and annotator */
 

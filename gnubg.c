@@ -594,11 +594,11 @@ command cER = {
       N_("Remove annotations"), NULL, NULL },
     { "doubtful", CommandAnnotateDoubtful, N_("Mark as doubtful"), NULL, NULL },
     { "good", CommandAnnotateGood, N_("Mark as good"), NULL, NULL },
-    //{ "interesting", CommandAnnotateInteresting, N_("Mark as interesting"),
-    //NULL, NULL },
+    /*{ "interesting", CommandAnnotateInteresting, N_("Mark as interesting"),
+    NULL, NULL }, */
     { "verybad", CommandAnnotateVeryBad, N_("Mark as very bad"), NULL, NULL },
-    //    { "verygood", CommandAnnotateVeryGood, 
-    //N_("Mark as very good"), NULL, NULL },
+    /* { "verygood", CommandAnnotateVeryGood, 
+    N_("Mark as very good"), NULL, NULL }, */
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateRoll[] = {
     { "clear", CommandAnnotateClearLuck, 
@@ -5260,22 +5260,22 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf( pf, "set analysis threshold bad %.3f\n"
 	     "set analysis threshold doubtful %.3f\n"
-	     //"set analysis threshold good %.3f\n"
-	     //"set analysis threshold interesting %.3f\n"
+	     /* "set analysis threshold good %.3f\n"
+	     "set analysis threshold interesting %.3f\n" */
 	     "set analysis threshold lucky %.3f\n"
 	     "set analysis threshold unlucky %.3f\n"
 	     "set analysis threshold verybad %.3f\n"
-	     //"set analysis threshold verygood %.3f\n"
+	     /* "set analysis threshold verygood %.3f\n" */
 	     "set analysis threshold verylucky %.3f\n"
 	     "set analysis threshold veryunlucky %.3f\n",
 	     arSkillLevel[ SKILL_BAD ],
 	     arSkillLevel[ SKILL_DOUBTFUL ],
-	     //arSkillLevel[ SKILL_GOOD ],
-	     //arSkillLevel[ SKILL_INTERESTING ],
+	     /* arSkillLevel[ SKILL_GOOD ], 
+	      arSkillLevel[ SKILL_INTERESTING ], */
 	     arLuckLevel[ LUCK_GOOD ],
 	     arLuckLevel[ LUCK_BAD ],
 	     arSkillLevel[ SKILL_VERYBAD ],
-	     //arSkillLevel[ SKILL_VERYGOOD ],
+	     /* arSkillLevel[ SKILL_VERYGOOD ], */
 	     arLuckLevel[ LUCK_VERYGOOD ],
 	     arLuckLevel[ LUCK_VERYBAD ] );
 
@@ -8331,8 +8331,8 @@ dirname (char *path)
 	  break;
 
       /* The DIR_SEPARATOR is the last character, we have to look further.  */
-      //if (runp != path)
-//	last_slash = __memrchr (path, DIR_SEPARATOR, runp - path);
+      /* if (runp != path)
+	last_slash = __memrchr (path, DIR_SEPARATOR, runp - path); */
     }
 
   if (last_slash != NULL)

@@ -52,6 +52,9 @@
 extern GtkWidget* pwBoard;
 extern int fX, nDelay, fNeedPrompt;
 extern guint nNextTurn; /* GTK idle function */
+#if USE_TIMECONTROL
+extern void GTKUpdateClock(void);
+#endif
 #elif USE_EXT
 #include <ext.h>
 #include <event.h>
@@ -223,7 +226,7 @@ typedef struct _playerclock {
     struct timeval tvStamp; 
     struct timeval tvTimeleft;
     timecontrol tc;
-   //  int nTimeouts;
+   /*  int nTimeouts; */
 } playerclock;
    
 typedef struct _gameclock {

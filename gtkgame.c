@@ -414,7 +414,7 @@ static char *ToUTF8( unsigned char *sz ) {
 #endif
 
 #if USE_TIMECONTROL
-extern void GTKUpdateClock()
+extern void GTKUpdateClock(void)
 {
 char szTime0[20], szTime1[20];
     sprintf(szTime0, (TC_NONE == ms.gc.pc[0].tc.timing) ?  _("n/a") :
@@ -429,7 +429,7 @@ char szTime0[20], szTime1[20];
     board_set_clock(BOARD( pwBoard ),  szTime0, szTime1);
 }
 
-extern void GTKUpdateScores()
+extern void GTKUpdateScores(void)
 {
     board_set_scores(BOARD( pwBoard ),  ms.anScore[0], ms.anScore[1]);
 }
@@ -903,10 +903,10 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 	    break;
 
 	if( pl->p == pmrPrev && pmr != pmrPrev ) {
-	    // pmr = pmrPrev;
+	    /* pmr = pmrPrev; */
 	    break;
 	} else if( pl->plNext->p == pmr ) {
-	    //pmr = pl->p;
+	    /* pmr = pl->p; */
 	    break;
 	}
     }

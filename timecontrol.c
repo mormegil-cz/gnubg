@@ -1,9 +1,31 @@
+/*
+ * timecontrol.c
+ *
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of version 2 of the GNU General Public License as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * $Id$
+ */
+
 
 #include "config.h"
 
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #include "backgammon.h"
 
@@ -16,6 +38,7 @@
 #include "ctype.h"
 #endif
 
+
 #if USE_TIMECONTROL
 
 timecontrol tc=
@@ -27,13 +50,13 @@ static char szTCPLAIN[] = N_("plain")
 	, szTCBRONSTEIN[] = N_("bronstein")
 	, szTCHOURGLASS[] = N_("hourglass")
 	, szTCNONE[] = N_("none")
-//	, szTCLOSS[] = N_("lose")
+     /*	, szTCLOSS[] = N_("lose") */
 	, szTCTIME[] = N_("tctime")
 	, szTCPOINT[] = N_("tcpoint") /* time per point */
 	, szTCMOVE[] = N_("tcmove") /* time per move */
 	, szTCPENALTY[] = N_("tcpenalty")
 	, szTCMULT[] = N_("tcmult") /* time multiplier */
-//	, szTCNEXT[] = N_("tcnext") /* secondary time control */
+     /* , szTCNEXT[] = N_("tcnext") */ /* secondary time control */
 	, szTCOFF[] = "Time control off"
 	;
 
@@ -223,16 +246,14 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
     case TC_HOURGLASS:
 	outputf(_("%*sHourglass timing\n"), 2*level,"");
 	break;
-	case TC_NONE:
-	case TC_UNKNOWN:
-		/* ignore */
-		break;
+    default:
+      /* ignore */
+      break;
     }
     outputf("%*s%-*s (%s) %d: ", 2*level,"",
 		30-strlen(szTCPENALTY),
 		"Penalty points",
-		szTCPENALTY,
-		ptc->nPenalty);
+		szTCPENALTY);
     if (TC_LOSS == ptc->penalty)
 	outputf(_("lose match\n"));
     else
@@ -395,7 +416,7 @@ extern void CommandSetTCNext( char *sz ) {
 }
 
 extern void CommandSetTimeControl( char *sz ) {
-    if (strcasecmp(sz, "off"))
+  if ((strcasecmp(sz, "off")))
     {
 	timecontrol *ptc;
 	if ((ptc = findTimeControl(sz)))
@@ -465,9 +486,11 @@ static int applyPenalty(matchstate *pms)
 		penalty = pgcPlayer->tc.nPenalty;
 		break;
 	case TC_LOSS:
-		timerclear(&pgcPlayer->tvTimeleft); // not to reiterate applyPenalty
+		timerclear(&pgcPlayer->tvTimeleft); /*  not to reiterate applyPenalty */
 		return pms->nMatchTo - pms->anScore[!pms->fTurn];
-		break;
+	default:
+	  assert (1 == 0);
+	  return 0;
 	}
 
 	newtc = findTimeControl(pgcPlayer->tc.szNextB);
@@ -533,7 +556,7 @@ printf("HitGameClock: state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n",
 */
     {
 	if (timercmp(&pms->gc.pc[!pms->fTurn].tvStamp, &pms->gc.pc[pms->fTurn].tvStamp, > ))
-		return; // rehit for same player
+		return; /* rehit for same player */
         pms->gc.pc[!pms->fTurn].tvStamp = pms->gc.pc[pms->fTurn].tvStamp ;
     }
 

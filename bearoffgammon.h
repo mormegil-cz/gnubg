@@ -1,4 +1,4 @@
-// -*- C++ -*-
+/* -*- C++ -*- */
 
 /*
  * bearoffgammon.h
@@ -33,12 +33,12 @@
 #define CONST
 #endif
 
-// pack for space
+/* pack for space */
 struct GammonProbs {
-  unsigned long p1 : 16;  // 0 - 36^2
-  unsigned long p2 : 16;  // 0 - 36^3
-  unsigned long p3 : 24;  // 0 - 36^4
-  unsigned long p0 : 8;   // 0 - 36
+  unsigned long p1 : 16;  /* 0 - 36^2 */
+  unsigned long p2 : 16;  /* 0 - 36^3 */
+  unsigned long p3 : 24;  /* 0 - 36^4 */
+  unsigned long p0 : 8;   /*  0 - 36 */
 };
 
 #if defined( __cplusplus )

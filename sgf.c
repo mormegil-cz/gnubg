@@ -1299,7 +1299,7 @@ static void RestoreNode( list *pl, char *szCharset ) {
     }
 
 #if USE_TIMECONTROL
-// Compensate for mising timestamps
+    /* Compensate for mising timestamps */
     if (pmr && !(fTimeset&1))
 	pmr->a.tl[0]= ((moverecord *) (plLastMove->p))->a.tl[0];
 
