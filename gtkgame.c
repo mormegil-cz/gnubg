@@ -1327,8 +1327,6 @@ TimeAnalysis( const moverecord *pmr, const matchstate *pms ) {
   GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
   GtkWidget *pwLabel;
 
-  float rAfter, rBefore;
-
   char *sz;
 
   if ( pmr->t.es.et == EVAL_NONE ) 

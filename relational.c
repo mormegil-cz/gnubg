@@ -285,7 +285,6 @@ CommandRelationalShowEnvironments( char *sz ) {
   }
   else {
     if ( PySequence_Check( v ) ) {
-      PyObject *e;
       int i;
 
       outputf( ("%-10.10s    %-40.40s\n"

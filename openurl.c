@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <glib.h>
 
 #if USE_GTK
@@ -102,7 +103,7 @@ OpenURL( const char *szURL ) {
 
   ppchCommands = g_strsplit( pchBrowser, ":", -1 );
 
-  for ( i = 0; pchCommand = ppchCommands[ i ]; ++i ) {
+  for ( i = 0; ( pchCommand = ppchCommands[ i ] ); ++i ) {
 
     if ( ! strstr( pchCommand, "%s" ) ) {
       /* no "%s" in string: add %s */
