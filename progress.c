@@ -919,9 +919,11 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                     rolloutprogress *prp ) {
 
     char sz[ 32 ];
-    gchar *gsz;
     int i;
+#if USE_GTK2
+    gchar *gsz;
     double frac;
+#endif
 
     if( !prp ||  !prp->pwRolloutResult )
       return;
@@ -1044,7 +1046,9 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
 static void GTKRolloutProgressEnd( void **pp ) {
     
+#if USE_GTK2
     gchar *gsz;
+#endif
 
     rolloutprogress *prp = *pp;
 

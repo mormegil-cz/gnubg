@@ -54,7 +54,10 @@ extern double erf( double x );
 #include "matchequity.h"
 #include "i18n.h"
 
+
+#if LIBXML_VERSION > 20403
 const static char* XML_PUBLIC_ID = "-//GNU Backgammon//DTD Match Equity Tables//EN";
+#endif
 
 typedef struct _parameter {
 
@@ -1324,6 +1327,8 @@ static void parseInfo ( metdata *pmd, xmlDocPtr doc, xmlNodePtr root ) {
 
 }
 
+#if LIBXML_VERSION > 20403
+
 static void validateWarning ( void *ctx,
                         const char *msg, 
                         ... ) {
@@ -1348,15 +1353,13 @@ static void validateError ( void *ctx,
 
 }
 
+#endif
 
 static int readMET ( metdata *pmd, const char *szFileName,
 		     const char *szDir ) {
 
   xmlDocPtr doc;
   xmlNodePtr root, cur;
-
-  xmlValidCtxtPtr ctxt;
-  xmlDtdPtr dtd;
 
   char *pc, *pch;
 
@@ -1388,6 +1391,9 @@ static int readMET ( metdata *pmd, const char *szFileName,
 /* libxml2 version 2.4.3 introduced xml catalogs, it dates 25th august 2001 ... */
 /* older versions used SGML format catalogs, but it's not clear when the default behaviour changed */
 #if LIBXML_VERSION > 20403
+{
+  xmlValidCtxtPtr ctxt;
+  xmlDtdPtr dtd;
 
   /* load catalog */
 
@@ -1436,7 +1442,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   if (ctxt) xmlFreeValidCtxt(ctxt);
   if (dtd) xmlFreeDtd(dtd);
-
+}
 #endif /* XMLVERSION */
 
   /* initialise data */
