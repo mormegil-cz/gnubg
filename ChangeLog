@@ -1,3 +1,7 @@
+Fri Jan 10 19:48:24 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* boards.xml: add Michael Depreli's designs.
+
 Fri Jan 10 19:42:38 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (EvalCHanged): fix bug when comparing to

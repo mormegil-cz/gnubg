@@ -378,4 +378,62 @@
   
    </board-design>
 
+
+   <board-design>
+
+      <about>
+         <title>Irish Gold</title>
+         <author>Michael Depreli</author>
+      </about>
+
+      <design>
+         board=#FFD872;0.09
+         border=#000100
+         wood=paint
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#FFFFFF;1.00;3.50;1.00;100.00
+         chequers1=#47904B;1.00;3.00;0.90;14.80
+         dice0=#FFFFFF;1.00;100.00;y
+         dice1=#47904B;0.90;14.80;y
+         dot0=#458E49
+         dot1=#EBEDF0
+         cube=#D4D4C4
+         points0=#CC7F00;0.09
+         points1=#7F3F00;0.20
+
+      </design>
+
+   </board-design>
+
+
+   <board-design>
+
+      <about>
+         <title>Union Jack</title>
+         <author>Michael Depreli</author>
+      </about>
+
+      <design>
+         board=#FFFFFF;0.09
+         border=#000100
+         wood=paint
+         hinges=y
+         light=150;50
+         shape=0.5
+         chequers0=#FFFFFF;1.00;3.50;1.00;100.00
+         chequers1=#2917BF;1.00;3.00;0.90;14.80
+         dice0=#FFFFFF;1.00;100.00;y
+         dice1=#2917BF;0.90;14.80;y
+         dot0=#2816BF
+         dot1=#EBEDF0
+         cube=#D4D4C4
+         points0=#010100;0.09
+         points1=#F30A0A;0.20
+
+   </design>
+
+   </board-design>
+
 </board-designs>
