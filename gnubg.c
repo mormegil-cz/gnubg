@@ -277,6 +277,8 @@ exportsetup exsExport = {
   /* display all cube decisions */
   { TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE },
 
+  NULL, /* HTML url to pictures */
+
 };
 
   
@@ -325,7 +327,8 @@ static char szDICE[] = "<die> <die>",
     szSTEP[] = "[game|roll|rolled] [count]",
     szTRIALS[] = "<trials>",
     szVALUE[] = "<value>",
-    szMATCHID[] = "<matchid>";
+    szMATCHID[] = "<matchid>",
+    szURL[] = "<URL>";
 
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
@@ -694,6 +697,10 @@ command cER = {
   { "rollout", CommandSetExportParametersRollout,
     "show detailed parameters for rollouts", szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetExportHTML[] = {
+  { "pictureurl", CommandSetExportHTMLPictureURL,
+    "set URL to pictures used in HTML export", szURL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportMovesDisplay[] = {
   { "verybad", CommandSetExportMovesDisplayVeryBad,
     "show very bad moves", szONOFF, &cOnOff },
@@ -767,6 +774,8 @@ command cER = {
   { "display", NULL, "when to show moves", NULL, acSetExportCubeDisplay },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExport[] = {
+  { "html", NULL,
+    "Set options for HTML export", NULL, acSetExportHTML },
   { "include", NULL,
     "Control which blocks to include in exports", NULL, acSetExportInclude },
   { "show", NULL,
@@ -3644,6 +3653,9 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf ( pf, "set export cube close %s\n", 
               exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
 
+    fprintf ( pf, "set export html pictureurl \"%s\"\n",
+              exsExport.szHTMLPictureURL );
+
     /* invert settings */
 
     fprintf ( pf, 
@@ -4929,6 +4941,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     for ( i = 0; i <= PATH_SGG; i++ )
       for ( j = 0; j < 2; j++ )
         strcpy ( aaszPaths[ i ][ j ], "" );
+
+    /* initalize some html export options */
+
+    exsExport.szHTMLPictureURL = strdup ( "html-images/" );
 
     /* init met */
     

@@ -2022,17 +2022,14 @@ CommandSetExportShowPlayer ( char *sz ) {
     return;
   }
 
-  if ( i == 2 )
-    exsExport.fSide = -1;
-  else
-    exsExport.fSide = i;
+  exsExport.fSide = i + 1;
 
-  if ( i == 2 )
+  if ( i == 3 )
     outputl ( "Analysis, boards etc will be "
               "shown for both players in exports." );
   else
     outputf ( "Analysis, boards etc will only be shown for "
-              "player %s in exports.\n", ap[ i ].szName );
+              "player %s in exports.\n", ap[ i - 1 ].szName );
 
 }
 
@@ -2280,6 +2277,27 @@ CommandSetExportCubeDisplayMissed ( char *sz ) {
                      &exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] );
 
 }
+
+extern void 
+CommandSetExportHTMLPictureURL ( char *sz ) {
+
+  if ( ! sz || ! *sz ) {
+    outputl ( "You must specify a URL. "
+              "See 'help set export html pictureurl'." );
+    return;
+  }
+
+  if ( exsExport.szHTMLPictureURL )
+    free ( exsExport.szHTMLPictureURL );
+
+  exsExport.szHTMLPictureURL = strdup ( sz );
+
+  outputf ( "URL for picture in HTML export is now: \n"
+            "%s\n", 
+            exsExport.szHTMLPictureURL );
+
+}
+
     
      
 extern void
