@@ -819,106 +819,6 @@ CheckHintButtons( hintdata *phd ) {
 }
 
 
-#if USE_OLD_LAYOUT
-extern GtkWidget *
-CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
-                const int fDestroyOnMove, const int fUnused ) {
-
-    static char *aszTitle[] = {
-	N_("Rank"), 
-        N_("Type"), 
-        N_("Win"), 
-        N_("W g"), 
-        N_("W bg"), 
-        N_("Lose"), 
-        N_("L g"), 
-        N_("L bg"),
-       NULL, 
-        N_("Diff."), 
-        N_("Move")
-    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		       NULL, NULL };
-    char *aszTemp[ 11 ];
-    GtkWidget *pwMoves;
-    GtkWidget *pw;
-    GtkWidget *pwHBox;
-    int i;
-
-    hintdata *phd = (hintdata *) malloc ( sizeof ( hintdata ) );
-
-    /* set titles */
-
-    phd->piHighlight = piHighlight;
-    phd->pml = pml;
-    phd->fButtonsValid = fButtonsValid;
-    phd->fDestroyOnMove = fDestroyOnMove;
-    phd->pwMove = NULL;
-
-    for ( i = 0; i < 11; i++ )
-     aszTemp[ i ] = gettext ( aszTitle[ i ] );
-
-    pwMoves = gtk_clist_new_with_titles( 11, aszTemp );
-
-    gtk_widget_ensure_style( GTK_WIDGET( pwMoves ) );
-
-    /* This function should only be called when the game state matches
-       the move list. */
-    assert( ms.fMove == 0 || ms.fMove == 1 );
-    
-    for( i = 0; i < 11; i++ ) {
-	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
-	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
-					    i == 1 || i == 10 ?
-					    GTK_JUSTIFY_LEFT :
-					    GTK_JUSTIFY_RIGHT );
-    }
-    gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
-    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
-				  GTK_SELECTION_MULTIPLE );
-
-    for( i = 0; i < pml->cMoves; i++ )
-      gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
-
-
-    phd->pwMoves = pwMoves;
-    UpdateMoveList ( phd );
-
-    pw = gtk_scrolled_window_new( NULL, NULL );
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pw ),
-                                    GTK_POLICY_NEVER, 
-                                    GTK_POLICY_AUTOMATIC );
-    gtk_container_add( GTK_CONTAINER( pw ),
-                       pwMoves );
-
-    pwHBox = gtk_vbox_new ( FALSE, 0 );  /* Variable name does not match 
-					    actual widget */
-
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
-    gtk_box_pack_end ( GTK_BOX ( pwHBox ),
-                       CreateMoveListTools( phd ),
-                       FALSE, FALSE, 0 );
-    
-    gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
-			      GDK_SELECTION_TYPE_STRING, 0 );
-    
-    gtk_object_set_data_full( GTK_OBJECT( pwHBox ), "user_data", 
-                              phd, free );
-
-    HintSelect( pwMoves, 0, 0, NULL, phd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
-			GTK_SIGNAL_FUNC( HintSelect ), phd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "unselect-row",
-			GTK_SIGNAL_FUNC( HintSelect ), phd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_clear_event",
-			GTK_SIGNAL_FUNC( HintClearSelection ), phd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_get",
-			GTK_SIGNAL_FUNC( HintGetSelection ), phd );
-    
-    return pwHBox;
-
-}
-#else
-
 extern GtkWidget *
 CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
                 const int fDestroyOnMove, const int fDetails ) {
@@ -960,7 +860,11 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     phd->fButtonsValid = fButtonsValid;
     phd->fDestroyOnMove = fDestroyOnMove;
     phd->pwMove = NULL;
+#if USE_OLD_LAYOUT
+    phd->fDetails = TRUE; /* always show details for old layout */
+#else
     phd->fDetails = fDetails;
+#endif
 
     if ( fDetails ) {
       for ( i = 0; i < 11; i++ )
@@ -1031,4 +935,3 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     return pwHBox;
 
 }
-#endif
