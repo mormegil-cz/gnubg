@@ -54,6 +54,8 @@
 
 #include "i18n.h"
 
+#include "sound.h"
+
 static int iPlayerSet;
 
 static char szEQUITY[] = N_ ("<equity>"),
@@ -2734,3 +2736,254 @@ CommandSetGeometryPosY ( char *sz ) {
 
 }
 
+
+/*
+ * Sounds
+ */
+
+#ifdef USE_SOUND
+
+/* enable/disable sounds */
+
+extern void
+CommandSetSoundEnable ( char *sz ) {
+
+  SetToggle( "sound enable", &fSound, sz, 
+             _("Enable sounds."),
+             _("Disable sounds.") );
+
+}
+
+/* sound system */
+
+extern void
+CommandSetSoundSystemArtsc ( char *sz ) {
+
+#ifdef HAVE_ARTSC
+
+  ssSoundSystem = SOUND_SYSTEM_ARTSC;
+  outputl ( _("GNU Backgammon will use the ArtsC sound system" ) );
+
+#else
+
+  outputl ( _("GNU Backgammon was compiled without support for "
+              "the ArtsC sound system" ) );
+
+#endif
+
+}
+
+extern void
+CommandSetSoundSystemCommand ( char *sz ) {
+
+  if ( ! sz || ! *sz ) {
+    outputl ( _("You must specify a command. "
+                "See `help set sound system command'") );
+    return;
+  }
+
+  strncpy ( szSoundCommand, sz, sizeof ( szSoundCommand ) - 1 );
+  szSoundCommand[ sizeof ( szSoundCommand ) - 1 ] = 0;
+
+  ssSoundSystem = SOUND_SYSTEM_COMMAND;
+  outputf ( _("GNU Backgammon will use an external command to play sounds:\n"
+              "%s\n"), sz );
+
+}
+
+extern void
+CommandSetSoundSystemESD ( char *sz ) {
+
+#ifdef HAVE_ESD
+
+  ssSoundSystem = SOUND_SYSTEM_ESD;
+  outputl ( _("GNU Backgammon will use the ESD sound system" ) );
+
+#else
+
+  outputl ( _("GNU Backgammon was compiled without support for "
+              "the ESD sound system" ) );
+
+#endif
+
+}
+
+extern void
+CommandSetSoundSystemNAS ( char *sz ) {
+
+#ifdef HAVE_NAS
+
+  ssSoundSystem = SOUND_SYSTEM_NAS;
+  outputl ( _("GNU Backgammon will use the NAS sound system" ) );
+
+#else
+
+  outputl ( _("GNU Backgammon was compiled without support for "
+              "the NAS sound system" ) );
+
+#endif
+
+}
+
+extern void
+CommandSetSoundSystemNormal ( char *sz ) {
+
+  ssSoundSystem = SOUND_SYSTEM_NORMAL;
+  outputl ( _("GNU Backgammon will play sounds to /dev/audio" ) );
+
+}
+
+extern void
+CommandSetSoundSystemWindows ( char *sz ) {
+
+#ifdef WIN32
+
+  ssSoundSystem = SOUND_SYSTEM_WINDOWS;
+  outputl ( _("GNU Backgammon will use the MS Windows sound system" ) );
+
+#else
+
+  outputl ( _("GNU Backgammon was compiled without support for "
+              "the MS Windows sound system" ) );
+
+#endif
+
+}
+
+static void
+SetSound ( const gnubgsound gs, const char *szFilename ) {
+
+  if ( ! szFilename || ! *szFilename ) {
+
+    strcpy ( aszSound[ gs ], "" );
+    outputf ( _("No sound played for: %s\n"), 
+              gettext ( aszSoundDesc[ gs ] ) );
+
+  }
+  else {
+
+    strncpy ( aszSound[ gs ], szFilename, sizeof ( aszSound[ gs ] ) - 1 );
+    aszSound[ gs ][ sizeof ( aszSound[ gs ] ) - 1 ] = 0;
+    outputf ( _("Sound for: %s: %s\n"), 
+              gettext ( aszSoundDesc[ gs ] ),
+              aszSound[ gs ] );
+
+  }
+
+}
+
+
+extern void
+CommandSetSoundSoundAgree ( char *sz ) {
+
+  SetSound ( SOUND_AGREE, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundBotDance ( char *sz ) {
+
+  SetSound ( SOUND_BOT_DANCE, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundBotWinGame ( char *sz ) {
+
+  SetSound ( SOUND_BOT_WIN_GAME, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundBotWinMatch ( char *sz ) {
+
+  SetSound ( SOUND_BOT_WIN_MATCH, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundDouble ( char *sz ) {
+
+  SetSound ( SOUND_DOUBLE, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundDrop ( char *sz ) {
+
+  SetSound ( SOUND_DROP, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundExit ( char *sz ) {
+
+  SetSound ( SOUND_EXIT, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundHumanDance ( char *sz ) {
+
+  SetSound ( SOUND_HUMAN_DANCE, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundHumanWinGame ( char *sz ) {
+
+  SetSound ( SOUND_HUMAN_WIN_GAME, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundHumanWinMatch ( char *sz ) {
+
+  SetSound ( SOUND_HUMAN_WIN_MATCH, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundMove ( char *sz ) {
+
+  SetSound ( SOUND_MOVE, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundRedouble ( char *sz ) {
+
+  SetSound ( SOUND_REDOUBLE, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundResign ( char *sz ) {
+
+  SetSound ( SOUND_RESIGN, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundRoll ( char *sz ) {
+
+  SetSound ( SOUND_ROLL, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundStart ( char *sz ) {
+
+  SetSound ( SOUND_START, NextToken ( &sz ) );
+
+}
+
+extern void
+CommandSetSoundSoundTake ( char *sz ) {
+
+  SetSound ( SOUND_TAKE, NextToken ( &sz ) );
+
+}
+
+
+#endif

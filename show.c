@@ -40,6 +40,7 @@
 #include "matchequity.h"
 #include "matchid.h"
 #include "i18n.h"
+#include "sound.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -1524,3 +1525,39 @@ CommandShowGeometry ( char *sz ) {
             awg[ WINDOW_MESSAGE ].nPosY );
 
 }
+
+
+#ifdef USE_SOUND
+
+extern void
+CommandShowSound ( char *sz ) {
+
+  int i;
+
+#if USE_GTK
+
+  if ( fX ) {
+    /* GTKSound(); */
+    /* return */;
+  }
+
+#endif /* USE_GTK */
+
+  outputf ( _("Sounds are enabled          : %s\n"
+              "Sound system                : %s\n"),
+            fSound ? _("yes") : _("no"),
+            gettext ( aszSoundSystem[ ssSoundSystem ] ) );
+
+  outputl ( _("Sounds for:") );
+
+  for ( i = 0; i < NUM_SOUNDS; ++i ) 
+    if ( ! *aszSound[ i ] )
+      outputf ( _("   %-30.30s : no sound\n"),
+                gettext ( aszSoundDesc[ i ] ) );
+    else
+      outputf ( _("   %-30.30s : \"%s\"\n"),
+                gettext ( aszSoundDesc[ i ] ),
+                aszSound[ i ] );
+}
+
+#endif /* USE_SOUND */

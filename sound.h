@@ -48,20 +48,26 @@ typedef enum _gnubgsound {
   NUM_SOUNDS
 } gnubgsound;
 
-typedef enum _soundoption {
-  SOUND_OPTION_NONE = 0,
-  SOUND_OPTION_ESD,
-  SOUND_OPTION_ARTSC,
-  SOUND_OPTION_NAS,
-  SOUND_OPTION_NORMAL,
-  SOUND_OPTION_COMMAND,
-  SOUND_OPTION_WINDOWS
-} soundoption;
+typedef enum _soundsystem {
+  SOUND_SYSTEM_ARTSC = 0,
+  SOUND_SYSTEM_COMMAND,
+  SOUND_SYSTEM_ESD,
+  SOUND_SYSTEM_NAS,
+  SOUND_SYSTEM_NORMAL,
+  SOUND_SYSTEM_WINDOWS,
+  NUM_SOUND_SYSTEMS
+} soundsystem;
 
 extern char aszSound[ NUM_SOUNDS ][ 80 ];
+extern char *aszSoundDesc[ NUM_SOUNDS ];
+extern char *aszSoundCommand[ NUM_SOUNDS ];
+
 extern char szSoundCommand[ 80 ];
 
-extern soundoption soSoundOption;
+extern char *aszSoundSystem[ NUM_SOUND_SYSTEMS ];
+extern char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ];
+
+extern soundsystem ssSoundSystem;
 
 extern int fSound;
 

@@ -51,7 +51,46 @@
 
 #include "glib.h"
 
+#include "i18n.h"
 #include "sound.h"
+
+char *aszSoundDesc[ NUM_SOUNDS ] = {
+  N_("Starting GNU Backgammon"),
+  N_("Exiting GNU Backgammon"),
+  N_("Agree"),
+  N_("Doubling"),
+  N_("Drop"),
+  N_("Move"),
+  N_("Redouble"),
+  N_("Resign"),
+  N_("Roll"),
+  N_("Take"),
+  N_("Human fans"),
+  N_("Human wins game"),
+  N_("Human wins match"),
+  N_("Bot fans"),
+  N_("Bot wins game"),
+  N_("Bot wins match")
+};
+
+char *aszSoundCommand[ NUM_SOUNDS ] = {
+  "start",
+  "exit",
+  "agree",
+  "double",
+  "drop",
+  "move",
+  "redouble",
+  "resign",
+  "roll",
+  "take",
+  "humanfans",
+  "humanwinsgame",
+  "humanwinsmatch",
+  "botfans",
+  "botwinsgame",
+  "botwinsmatch"
+};
 
 char aszSound[ NUM_SOUNDS ][ 80 ] = {
   /* start and exit */
@@ -78,16 +117,37 @@ char aszSound[ NUM_SOUNDS ][ 80 ] = {
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";
 
 #  if defined (HAVE_ESD)
-soundoption soSoundOption = SOUND_OPTION_ESD;
+soundsystem ssSoundSystem = SOUND_SYSTEM_ESD;
 #  elif defined (HAVE_ARTSC)
-soundoption soSoundOption = SOUND_OPTION_ARTSC;
+soundsystem ssSoundSystem = SOUND_SYSTEM_ARTSC;
 #  elif defined (HAVE_NAS)
-soundoption soSoundOption = SOUND_OPTION_NAS;
+soundsystem ssSoundSystem = SOUND_SYSTEM_NAS;
+#  elif defined (WIN32)
+soundsystem ssSoundSystem = SOUND_SYSTEM_WINDOWS;
 #  elif 
-soundoption soSoundOption = SOUND_OPTION_NORMAL;
+soundsystem ssSoundSystem = SOUND_SYSTEM_NORMAL;
 #  endif
 
 int fSound = TRUE;
+
+
+char *aszSoundSystem[ NUM_SOUND_SYSTEMS ] = {
+  N_("ArtsC"), 
+  N_("External command"),
+  N_("ESD"),
+  N_("NAS"),
+  N_("/dev/audio"),
+  N_("MS Windows") 
+};
+
+char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ] = {
+  "artsc", 
+  "command",
+  "esd",
+  "nas",
+  "normal",
+  "windows" 
+};
 
 
 
@@ -360,9 +420,9 @@ play_file(const char *filename) {
     /* kill after 30 secs */
     alarm(30);
 	
-    switch ( soSoundOption ) {
+    switch ( ssSoundSystem ) {
 
-    case SOUND_OPTION_COMMAND:
+    case SOUND_SYSTEM_COMMAND:
 
       if ( *szSoundCommand ) {
 	
@@ -381,7 +441,7 @@ play_file(const char *filename) {
 
       break;
 
-    case SOUND_OPTION_ESD:
+    case SOUND_SYSTEM_ESD:
 
 #ifdef HAVE_ESD
 
@@ -394,7 +454,7 @@ play_file(const char *filename) {
 
       break;
 
-    case SOUND_OPTION_ARTSC:
+    case SOUND_SYSTEM_ARTSC:
 
 #ifdef HAVE_ARTSC
 
@@ -404,7 +464,7 @@ play_file(const char *filename) {
       assert ( FALSE );
 #endif
 
-    case SOUND_OPTION_NAS:
+    case SOUND_SYSTEM_NAS:
 
 #ifdef HAVE_NAS
     else if (sound_options & OPT_SOUND_NAS) {
@@ -417,7 +477,7 @@ play_file(const char *filename) {
       
       break;
 
-    case SOUND_OPTION_NORMAL:
+    case SOUND_SYSTEM_NORMAL:
 
       if ( can_play_audio() ) {
         play_audio_file(filename);
@@ -426,7 +486,7 @@ play_file(const char *filename) {
       
       break;
 
-    case SOUND_OPTION_WINDOWS:
+    case SOUND_SYSTEM_WINDOWS:
 
 #ifdef WIN32
       PlaySound ( filename, NULL, SND_FILENAME );

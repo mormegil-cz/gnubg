@@ -324,6 +324,7 @@ windowgeometry awg[ NUM_WINDOWS ] =
 
 /* Usage strings */
 static char szDICE[] = N_("<die> <die>"),
+    szCOMMAND[] = N_("<command>"),
     szER[] = N_("evaluation|rollout"), 
     szFILENAME[] = N_("<filename>"),
     szKEYVALUE[] = N_("[<key>=<value> ...]"),
@@ -938,6 +939,62 @@ command cER = {
     N_("Set default path for loading match equity files"), 
     szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
+#ifdef USE_SOUND
+}, acSetSoundSystem[] = {
+  { "artsc", CommandSetSoundSystemArtsc, 
+    N_("Use ESD sound system"), NULL, NULL },
+  { "command", CommandSetSoundSystemCommand, 
+    N_("Specify external command for playing sounds"), szCOMMAND, NULL },
+  { "esd", CommandSetSoundSystemESD, N_("Use ESD sound system"), NULL, NULL },
+  { "nas", CommandSetSoundSystemNAS, N_("Use NAS sound system"), NULL, NULL },
+  { "normal", CommandSetSoundSystemNormal, 
+    N_("Play sounds to /dev/audio"), NULL, NULL },
+  { "windows", CommandSetSoundSystemWindows, 
+    N_("Use MS Windows API for playing sounds"), NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetSoundSound[] = {
+  { "agree", CommandSetSoundSoundAgree, 
+    N_("Agree"), szOPTFILENAME, &cFilename },
+  { "botfans", CommandSetSoundSoundBotDance, 
+    N_("Bot fans"), szOPTFILENAME, &cFilename },
+  { "botwinsgame", CommandSetSoundSoundBotWinGame, 
+    N_("Bot wins game"), szOPTFILENAME, &cFilename },
+  { "botwinsmatch", CommandSetSoundSoundBotWinMatch, 
+    N_("Bot wins match"), szOPTFILENAME, &cFilename },
+  { "double", CommandSetSoundSoundDouble, 
+    N_("Double"), szOPTFILENAME, &cFilename },
+  { "drop", CommandSetSoundSoundDrop, 
+    N_("Drop"), szOPTFILENAME, &cFilename },
+  { "exit", CommandSetSoundSoundExit, 
+    N_("Exiting of GNU Backgammon"), szOPTFILENAME, &cFilename },
+  { "humanfans", CommandSetSoundSoundHumanDance, 
+    N_("Human fans"), szOPTFILENAME, &cFilename },
+  { "humanwinsgame", CommandSetSoundSoundHumanWinGame, 
+    N_("Human wins game"), szOPTFILENAME, &cFilename },
+  { "humanwinsmatch", CommandSetSoundSoundHumanWinMatch, 
+    N_("Human wins match"), szOPTFILENAME, &cFilename },
+  { "move", CommandSetSoundSoundMove, 
+    N_("Move"), szOPTFILENAME, &cFilename },
+  { "redouble", CommandSetSoundSoundRedouble, 
+    N_("Redouble"), szOPTFILENAME, &cFilename },
+  { "resign", CommandSetSoundSoundResign, 
+    N_("Resign"), szOPTFILENAME, &cFilename },
+  { "roll", CommandSetSoundSoundRoll, 
+    N_("Roll"), szOPTFILENAME, &cFilename },
+  { "start", CommandSetSoundSoundStart, 
+    N_("Starting of GNU Backgammon"), szOPTFILENAME, &cFilename },
+  { "take", CommandSetSoundSoundTake, 
+    N_("Take"), szOPTFILENAME, &cFilename },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetSound[] = {
+  { "sound", NULL, 
+    N_("Set sound files"), NULL, acSetSoundSound }, 
+  { "enable", CommandSetSoundEnable, 
+    N_("Select whether sounds should be played or not"), szONOFF, &cOnOff },
+  { "system", NULL, 
+    N_("Select sound system"), NULL, acSetSoundSystem },
+  { NULL, NULL, NULL, NULL, NULL }    
+#endif /* USE_SOUND */
 }, acSetTutorSkill[] = {
   { "doubtful", CommandSetTutorSkillDoubtful, N_("Warn about `doubtful' play"),
     NULL, NULL },
@@ -1028,6 +1085,10 @@ command cER = {
       szSCORE, NULL },
     { "seed", CommandSetSeed, 
       N_("Set the dice generator seed"), szOPTSEED, NULL },
+#ifdef USE_SOUND
+    { "sound", NULL, 
+      N_("Control audio parameters"), NULL, acSetSound },
+#endif /* USE_SOUND */
     { "training", NULL, 
       N_("Control training parameters"), NULL, acSetTraining },
     { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
@@ -1118,6 +1179,10 @@ command cER = {
       NULL, NULL },
     { "seed", CommandShowSeed, N_("Show the dice generator seed"), 
       NULL, NULL },
+#ifdef USE_SOUND
+    { "sound", CommandShowSound, N_("Show information abount sounds"), 
+      NULL, NULL },
+#endif /* USE_SOUND */
     { "statistics", NULL, N_("Show statistics"), NULL, acShowStatistics },
     { "thorp", CommandShowThorp, N_("Calculate Thorp Count for "
       "position"), szOPTPOSITION, NULL },
@@ -1235,7 +1300,24 @@ char *aszVersion[] = {
 #if HAVE_LIBXML2
     N_("XML match equity files supported."),
 #endif
-    NULL
+#ifdef USE_SOUND
+    N_("Sound systems supported:"),
+#   if HAVE_ARTSC
+    N_("  ArtsC sound system"),
+#   endif
+    N_("  External commands"),
+#   if HAVE_ESD
+    N_("  ESD sound system"),
+#   endif
+#   if HAVE_NAS
+    N_("  NAS sound system"),
+#   endif
+    N_("  /dev/audio"),
+#   ifdef WIN32
+    N_("  MS Windows sound system"),
+#   endif
+#endif /* USE_SOUND */
+    NULL,
 };
 
 char *szHomeDirectory, *szDataDirectory;
@@ -4113,6 +4195,24 @@ extern void CommandSaveSettings( char *szParam ) {
                   aszWindow[ i ], awg[ i ].nHeight,
                   aszWindow[ i ], awg[ i ].nPosX,
                   aszWindow[ i ], awg[ i ].nPosY );
+
+    /* sounds */
+
+#if USE_SOUND
+
+    fprintf ( pf, "set sound enable %s\n", 
+              fSound ? "yes" : "no" );
+    fprintf ( pf, "set sound system %s\n",
+              aszSoundSystemCommand[ ssSoundSystem ] );
+
+    for ( i = 0; i < NUM_SOUNDS; ++i ) 
+      fprintf ( pf, "set sound sound %s \"%s\"\n",
+                aszSoundCommand [ i ],
+                aszSound[ i ] );
+    
+
+#endif /* USE_SOUND */
+
     /* the end */
 
     
