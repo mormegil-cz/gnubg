@@ -239,25 +239,25 @@ GTKShowExport ( exportsetup *pexs ) {
     N_("Legend") };
 
   char *aszMovesDisplay[] = {
-    N_("Show moves marked 'verybad'"),
-    N_("Show moves marked 'bad'"),
-    N_("Show moves marked 'doubtful'"),
-    N_("Show unmarked moves"),
-    N_("Show moves marked 'interesting'"),
-    N_("Show moves marked 'good'"),
-    N_("Show moves marked 'verygood'") };
+    N_("Show for moves marked 'verybad'"),
+    N_("Show for moves marked 'bad'"),
+    N_("Show for moves marked 'doubtful'"),
+    N_("Show for unmarked moves"),
+    N_("Show for moves marked 'interesting'"),
+    N_("Show for moves marked 'good'"),
+    N_("Show for moves marked 'verygood'") };
 
   char *aszCubeDisplay[] = {
-    N_("Show cube decisions marked 'verybad'"),
-    N_("Show cube decisions marked 'bad'"),
-    N_("Show cube decisions marked 'doubtful'"),
-    N_("Show unmarked cube decisions"),
-    N_("Show cube decisions marked 'interesting'"),
-    N_("Show cube decisions marked 'good'"),
-    N_("Show cube decisions marked 'verygood'"),
-    N_("Show actual cube decisions"),
-    N_("Show missed doubles"),
-    N_("Show close cube decisions") };
+    N_("Show for cube decisions marked 'verybad'"),
+    N_("Show for cube decisions marked 'bad'"),
+    N_("Show for cube decisions marked 'doubtful'"),
+    N_("Show for unmarked cube decisions"),
+    N_("Show for cube decisions marked 'interesting'"),
+    N_("Show for cube decisions marked 'good'"),
+    N_("Show for cube decisions marked 'verygood'"),
+    N_("Show for actual cube decisions"),
+    N_("Show for missed doubles"),
+    N_("Show for close cube decisions") };
 
   int i;
 
@@ -371,7 +371,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* moves */
 
-  pwFrame = gtk_frame_new ( _("Output moves") );
+  pwFrame = gtk_frame_new ( _("Output move analysis") );
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
   gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,
@@ -431,7 +431,7 @@ GTKShowExport ( exportsetup *pexs ) {
 
   /* cube */
 
-  pwFrame = gtk_frame_new ( _("Output cube decisions") );
+  pwFrame = gtk_frame_new ( _("Output cube decision analysis") );
 
   gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
   gtk_table_attach ( GTK_TABLE ( pwTable ), pwFrame,

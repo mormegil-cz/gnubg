@@ -1272,21 +1272,21 @@ CommandShowExport ( char *sz ) {
            "Include: \n\n") );
 
   output ( _("- annotations") );
-  outputf ( "\r\t\t\t\t: %s\n",
+  outputf ( "\r\t\t\t\t\t\t: %s\n",
             exsExport.fIncludeAnnotation ? _("yes") : _("no") );
   output ( _("- analysis") );
-  outputf ( "\r\t\t\t\t: %s\n",
+  outputf ( "\r\t\t\t\t\t\t: %s\n",
             exsExport.fIncludeAnalysis ? _("yes") : _("no") );
   output ( _("- statistics") );
-  outputf ( "\r\t\t\t\t: %s\n",
+  outputf ( "\r\t\t\t\t\t\t: %s\n",
             exsExport.fIncludeStatistics ? _("yes") : _("no") );
   output ( _("- legend") );
-  outputf ( "\r\t\t\t\t: %s\n",
+  outputf ( "\r\t\t\t\t\t\t: %s\n\n",
             exsExport.fIncludeLegend ? _("yes") : _("no") );
 
   outputl ( _("Show: \n") );
   output ( _("- board" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   if ( ! exsExport.fDisplayBoard )
     outputl ( _("never") );
   else
@@ -1294,80 +1294,80 @@ CommandShowExport ( char *sz ) {
               exsExport.fDisplayBoard );
 
   output ( _("- players" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   if ( exsExport.fSide == 3 )
     outputl ( _("both") );
   else
     outputf ( "%s\n", 
               ap[ exsExport.fSide - 1 ].szName );
 
-  outputl ( _("\nOutput moves:\n") );
+  outputl ( _("\nOutput move analysis:\n") );
 
   output ( _("- show at most" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputf ( _("%d moves\n"), exsExport.nMoves );
 
   output ( _("- show detailed probabilities" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.fMovesDetailProb ? _("yes") : _("no") );
   
   output ( _("- show evaluation parameters" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afMovesParameters[ 0 ] ? _("yes") : _("no") );
 
   output ( _("- show rollout parameters" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afMovesParameters[ 1 ] ? _("yes") : _("no") );
 
   for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
     if ( i == SKILL_NONE ) 
-      output ( _("- unmarked moves" ) );
+      output ( _("- for unmarked moves" ) );
     else
-      outputf ( _("- marked '%s'" ), gettext ( aszSkillType[ i ] ) );
+      outputf ( _("- for moves marked '%s'" ), gettext ( aszSkillType[ i ] ) );
     
-    output ( "\r\t\t\t\t: " );
+    output ( "\r\t\t\t\t\t\t: " );
     outputl ( exsExport.afMovesDisplay[ i ] ? _("yes") : _("no") );
     
   }
 
-  outputl ( _("\nOutput cube decisions:\n") );
+  outputl ( _("\nOutput cube decision analysis:\n") );
 
   output ( _("- show detailed probabilities" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.fCubeDetailProb ? _("yes") : _("no") );
   
   output ( _("- show evaluation parameters" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afCubeParameters[ 0 ] ? _("yes") : _("no") );
 
   output ( _("- show rollout parameters" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afCubeParameters[ 1 ] ? _("yes") : _("no") );
 
   for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
     if ( i == SKILL_NONE ) 
-      output ( _("- unmarked cube decisions" ) );
+      output ( _("- for unmarked cube decisions" ) );
     else
-      outputf ( _("- cube decisions marked '%s'" ), 
+      outputf ( _("- for cube decisions marked '%s'" ), 
                 gettext ( aszSkillType[ i ] ) );
     
-    output ( "\r\t\t\t\t: " );
+    output ( "\r\t\t\t\t\t\t: " );
     outputl ( exsExport.afCubeDisplay[ i ] ? _("yes") : _("no") );
 
   }
   
   output ( _("- actual cube decisions" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ? 
             _("yes") : _("no") );
 
   output ( _("- missed cube decisions" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? 
             _("yes") : _("no") );
 
   output ( _("- close cube decisions" ) );
-  output ( "\r\t\t\t\t: " );
+  output ( "\r\t\t\t\t\t\t: " );
   outputl ( exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? 
             _("yes") : _("no") );
 
