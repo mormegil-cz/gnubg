@@ -1,3 +1,8 @@
+Tue Mar  7 10:06:32 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* eval.c (TrainPosition): Fix stupid syntax error in yesterday's
+	change.
+
 Mon Mar  6 10:27:44 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* configure.in: Use $datadir (not $pkgdatadir) to find installation

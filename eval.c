@@ -1751,7 +1751,7 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] ) {
   CalculateInputs( anBoard, arInput );
 
   NeuralNetTrain( nn, arInput, arOutput, arDesired,
-		  2.0 / pow( 100.0 + nn.nTrained, 0.25 ) );
+		  2.0 / pow( 100.0 + nn->nTrained, 0.25 ) );
 
   return 0;
 }
