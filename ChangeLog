@@ -1,3 +1,9 @@
+Sat Jan 25 11:05:40 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ExpandMatMove): new function.
+	* import.c (ParseMatMove): expand consolidated moves.
+	(reported by Ron Barry)
+
 Fri Jan 24 14:44:34 2003  Gary Wong  <gtw@gnu.org>
 
 	* set.c (CommandSetHighlightLight): Do not intl'ise command strings.

@@ -297,6 +297,86 @@ ImportJF( FILE * fp, char *szFileName) {
 
 static int fWarned, fPostCrawford;
 
+
+static void
+ExpandMatMove ( int anBoard[ 2 ][ 25 ], int anMove[ 8 ], int *pc,
+             const int anDice[ 2 ] ) {
+
+  int i, j, k;
+  int c = *pc;
+
+  if ( anDice[ 0 ] != anDice[ 1 ] ) {
+    
+    if ( ( anMove[ 0 ] - anMove[ 1 ] ) == ( anDice[ 0 ] + anDice[ 1 ] ) ) {
+
+      int an[ 8 ];
+
+      /* consolidated move */
+
+      for ( i = 0; i < 2; ++i ) {
+
+        an[ 0 ] = anMove[ 0 ];
+        an[ 1 ] = an[ 0 ] - anDice[ i ];
+        
+        an[ 2 ] = an[ 1 ];
+        an[ 3 ] = an[ 2 ] - anDice[ !i ];
+
+        an[ 4 ] = -1;
+        an[ 5 ] = -1;
+
+        if ( IsValidMove ( anBoard, an ) ) {
+          memcpy ( anMove, an, sizeof ( an ) );
+          ++*pc;
+          break;
+        }
+
+      }
+
+    }
+
+  }
+  else {
+  
+    for ( i = 0; i < c; ++i ) {
+
+      /* if this is a consolidated move then "expand" it */
+
+      j = ( anMove[ 2 * i ] - anMove[ 2 * i + 1 ] ) / anDice[ 0 ];
+
+      for ( k = 1; k < j; ++k ) {
+
+        /* new move */
+
+        anMove[ 2 * *pc ] = anMove[ 2 * *pc +1 ] = anMove[ 2 * i ];
+        anMove[ 2 * *pc + 1 ] -= anDice[ 0 ];
+
+        /* fix old move */
+
+        anMove[ 2 * i ] -= anDice[ 0 ];
+
+        ++*pc;
+
+        assert ( *pc <= 4 );
+
+        /* terminator */
+
+        if ( *pc < 4 ) {
+          anMove [ 2 * *pc ] = -1;
+          anMove [ 2 * *pc + 1 ] = -1;
+        }
+
+      }
+
+    }
+
+  }
+
+  if ( c != *pc )
+    /* reorder moves */
+    CanonicalMoveOrder ( anMove );
+
+}
+
 static void ParseMatMove( char *sz, int iPlayer ) {
 
     char *pch;
@@ -349,9 +429,12 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	    if( c < 4 )
 		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
 
-            for ( i = 0; i < c; ++i )
-              printf ( "move= %d/%d\n", pmr->n.anMove[ 2 * i ],
-                       pmr->n.anMove[ 2 * i + 1 ] );
+            /* remove consolidation */
+
+            ExpandMatMove ( ms.anBoard, pmr->n.anMove, &c, 
+                         pmr->n.anRoll );
+
+            /* check if move is valid */
 
             if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) )
               outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"),
