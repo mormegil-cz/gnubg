@@ -1249,6 +1249,8 @@ static void SetMET( met metNew ) {
     static char *aszMET[] = {
       "Zadeh", "Snowie", "Woolsey", "Jacobs"
     };
+
+    int nMaxScore;
     
     if( metCurrent == metNew ) {
 	outputf( "You are already using the %s match equity table.\n",
@@ -1256,6 +1258,20 @@ static void SetMET( met metNew ) {
     } else {
 	outputf( "GNU Backgammon will now use the %s match equity table.\n",
 		aszMET[ metNew ] );
+
+        nMaxScore = GetMaxScore ( metNew );
+
+        if ( nMaxScore < MAXSCORE ) {
+
+          outputf ("\n"
+                   "Note that this match equity table only supports "
+                   "matches of length %i and below.\n"
+                   "For scores above %i-away an extrapolation scheme"
+                   "derived by David Montgomery\n"
+                   "is used.\n",
+                   nMaxScore, nMaxScore );
+
+        }
 
         InitMatchEquity ( metNew );
 
