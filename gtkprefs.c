@@ -744,7 +744,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_widget_set_usize ( GTK_WIDGET ( pwScale ), 100, -1 );
 #endif
     gtk_scale_set_draw_value( GTK_SCALE( pwScale ), FALSE );
-    gtk_scale_set_digits( GTK_SCALE( pwScale ), 0 );
+    gtk_scale_set_digits( GTK_SCALE( pwScale ), 2 );
 
     gtk_box_pack_start( GTK_BOX( pwBox ),
 			gtk_label_new( _("Chequer shape:") ),
