@@ -5028,7 +5028,7 @@ extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
     int i, cCache; 
     char *szFile;
-    char szTemp[ 1024 ];
+    char szTemp[ 4096 ];
     static char *aszWindow[] = {
 	"main", "game", "annotation", "hint", "message"
 #if USE_GTK
