@@ -1,3 +1,13 @@
+Wed Jan 22 18:09:40 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtkchequer.c (UpdateMoveList): Use gtk_rc_get_style(), which
+	works slightly better with themes.
+
+Wed Jan 22 16:20:14 2003  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (acSetExportCubeDisplay): Add missing "set export cube
+	display missing" command.
+
 Wed Jan 22 21:12:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkmet.c (GTKWriteMET): [!USE_GTKEXTRA]: declare pw.
