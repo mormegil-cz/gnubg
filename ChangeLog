@@ -1,3 +1,8 @@
+Sat Apr 12 19:17:23 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (FindnSaveBestMoves): keep track of the max ply used.
+	(reported by Michael Depreli)
+
 Sat Apr 12 14:58:54 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* play.c (SetMatchID): hprmf! CommandSetBoard resets ms.fResigned.

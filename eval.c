@@ -3403,6 +3403,7 @@ FindnSaveBestMoves( movelist *pml,
   int i, j = 0, nMoves, iPly;
   move *pm;
   movefilter* mFilters;
+  int nMaxPly = 0;
     
   /* Find all moves -- note that pml contains internal pointers to static
      data, so we can't call GenerateMoves again (or anything that calls
@@ -3456,7 +3457,9 @@ FindnSaveBestMoves( movelist *pml,
 	  }
 	}
       }
-	
+
+      nMaxPly = iPly;
+
     if ( pml->cMoves == 1 )
       /* if there is only one move to evaluate there is no need to continue */
       goto finished;
@@ -3486,8 +3489,8 @@ FindnSaveBestMoves( movelist *pml,
   if( auchMove )
       for( i = 0; i < pml->cMoves; i++ )
 	  if( EqualKeys( auchMove, pml->amMoves[ i ].auch ) ) {
-	      if( pml->amMoves[ i ].esMove.ec.nPlies < pec->nPlies ) {
-		  ScoreMove( pml->amMoves + i, pci, pec, pec->nPlies );
+	      if( pml->amMoves[ i ].esMove.ec.nPlies < nMaxPly ) {
+		  ScoreMove( pml->amMoves + i, pci, pec, nMaxPly );
 		  
 		  for( j = 0; j < i; j++ )
 		      if( CompareMoves( pml->amMoves + i,
