@@ -1,3 +1,10 @@
+Fri Apr 19 18:32:25 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* jac100.xml: new file. Jacobs & Trice met for players that
+	differ by 100 ELO rating points. 
+	[Credits to CTCampbell for typing in MET]
+
+
 Wed Apr 17 02:41:37 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* jac050.xml: added equity for free drop.s
@@ -5,7 +12,8 @@ Wed Apr 17 02:41:37 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 Tue Apr 16 21:53:38 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* jac050.xml: new file. Jacobs & Trice met for players that
-	differ by 50 ELO rating points.
+	differ by 50 ELO rating points. 
+	[Credits to CTCampbell for typing in MET]
 
 Tue Mar 26 18:06:09 2002  Øystein Johansen <oeysteij@online.no>
 
