@@ -73,6 +73,7 @@
 #include "path.h"
 #include "gtkmovefilter.h"
 #include "gtkmet.h"
+#include "gtksplash.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -2537,7 +2538,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     return TRUE;
 }
 
-extern void RunGTK( void ) {
+extern void RunGTK( GtkWidget *pwSplash ) {
 
     GTKSet( &ms.fCubeOwner );
     GTKSet( &ms.nCube );
@@ -2545,6 +2546,9 @@ extern void RunGTK( void ) {
     GTKSet( &ms.fTurn );
     GTKSet( &ms.gs );
     
+    PushSplash ( pwSplash, 
+                 _("Rendering"), _("Board"), 0 );
+
     ShowBoard();
 
     GTKAllowStdin();
@@ -2580,6 +2584,8 @@ extern void RunGTK( void ) {
     
     gtk_widget_show_all( pwMain );
     
+    DestroySplash ( pwSplash );
+
     gtk_main();
 }
 

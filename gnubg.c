@@ -106,6 +106,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
+#include "gtksplash.h"
 #elif USE_EXT
 #include <ext.h>
 #include <extwin.h>
@@ -6084,6 +6085,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     char ch, *pch, *pchCommands = NULL, *pchScript = NULL;
     int n, nNewWeights = 0, fNoRC = FALSE, fNoBearoff = FALSE, fQuiet = FALSE;
     int i, j;
+    int fSplash = TRUE;
 
 #ifdef WIN32
     char szInvokingDirectory[ BIG_PATH ];  /* current dir when GNUbg was started */
@@ -6096,6 +6098,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	{ "new-weights", optional_argument, NULL, 'n' },
 	{ "quiet", no_argument, NULL, 'q' },
 	{ "window-system-only", no_argument, NULL, 'w' },
+        { "no-splash", no_argument, NULL, 'S' },
 	/* these options must come last -- see below. */
 	{ "datadir", required_argument, NULL, 'd' },
 	{ "commands", required_argument, NULL, 'c' },
@@ -6110,6 +6113,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 #if HAVE_LIBREADLINE
     char *sz;
+#endif
+#if USE_GTK
+    GtkWidget *pwSplash = NULL;
 #endif
 
 #ifdef HAVE_SETLOCALE
@@ -6229,7 +6235,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     }
 #endif
 		
-    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:tvw", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bc:d:hn::qrs:tvwS", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -6280,6 +6286,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    /* silently ignore */
 #endif
 	    break;
+        case 'S': /* no splash screen */
+          fSplash = FALSE;
+          break;
+          
 	default:
 	    usage( argv[ 0 ] );
 	    exit( EXIT_FAILURE );
@@ -6300,6 +6310,17 @@ static void real_main( void *closure, int argc, char *argv[] ) {
                 "Type \"show warranty\" for\n"
                 "details.\n"),
               VERSION );
+
+
+#if USE_GTK
+    if ( fX && fSplash )
+      pwSplash = CreateSplash ();
+#endif
+
+#if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("Random number generator"), 1 );
+#endif    
     
     InitRNG( NULL, TRUE, rngCurrent );
     InitRNG( &rcRollout.nSeed, FALSE, rcRollout.rngRollout );
@@ -6323,8 +6344,18 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     /* init met */
     
+#if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("match equity table"), 1 );
+#endif    
+
     InitMatchEquity ( "met/zadeh.xml", szDataDirectory );
     
+#if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("neural nets"), 1 );
+#endif    
+
     if( ( n = EvalInitialise( nNewWeights ? NULL : GNUBG_WEIGHTS,
 			      nNewWeights ? NULL : GNUBG_WEIGHTS_BINARY,
 			      fNoBearoff,
@@ -6342,8 +6373,17 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	outputx();
     }
 #if USE_GUILE
+#  if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("Guile"), 1 );
+#  endif    
     GuileInitialise( szDataDirectory );
 #endif
+
+#if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Initialising"), _("Board Images"), 1 );
+#endif    
 
     RenderInitialise();
     
@@ -6410,8 +6450,17 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
     /* load rc files */
 
+#if USE_GTK
+    PushSplash ( pwSplash, 
+                 _("Loading"), _("User Settings"), 1 );
+#endif    
     if( !fNoRC )
 	LoadRCFiles();
+
+#if USE_GTK
+      PushSplash ( pwSplash, 
+                   _("Doing"), _("nothing in particular"), 0 );
+#endif    
 
 #if USE_SOUND
     if( fQuiet )
@@ -6428,6 +6477,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 
     if( optind < argc && *argv[ optind ] ) {
+#if USE_GTK
+      PushSplash ( pwSplash, 
+                   _("Loading"), _("Specified Match"), 1 );
+#endif    
 	if( strcspn( argv[ optind ], " \t\n\r\v\f" ) ) {
 	    /* quote filename with whitespace so that function
 	     * NextToken in CommandLoadCommands doesn't split it
@@ -6448,6 +6501,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     fflush( stderr );
 
     if( pchCommands ) {
+        DestroySplash ( pwSplash );
 	CommandLoadCommands( pchCommands );
         EvalShutdown();
 	exit( EXIT_SUCCESS );
@@ -6473,7 +6527,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     
 #if USE_GTK
     if( fX ) {
-	RunGTK();
+      
+	RunGTK( pwSplash );
 
         EvalShutdown();
 	exit( EXIT_SUCCESS );

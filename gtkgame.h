@@ -67,7 +67,7 @@ extern void GTKSuspendInput( monitor *pm );
 extern void GTKResumeInput( monitor *pm );
 
 extern int InitGTK( int *argc, char ***argv );
-extern void RunGTK( void );
+extern void RunGTK( GtkWidget *pwSplash );
 extern void GTKAllowStdin( void );
 extern void GTKDisallowStdin( void );
 extern void GTKDelay( void );
