@@ -32,7 +32,9 @@
 #endif
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

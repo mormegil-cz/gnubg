@@ -23,8 +23,11 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #include <gtk/gtk.h>
+#if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h>
+#endif
 #include <isaac.h>
 #include <math.h>
 #include <stdio.h>
@@ -71,10 +74,13 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 static void draw_bitplane( GdkDrawable *drawable, GdkGC *gc, GdkDrawable *src,
 			   gint xsrc, gint ysrc, gint xdest, gint ydest,
 			   gint width, gint height, gulong plane ) {
-
+#if HAVE_XCOPYPLANE
     XCopyPlane( GDK_WINDOW_XDISPLAY( drawable ), GDK_WINDOW_XWINDOW( src ),
 		GDK_WINDOW_XWINDOW( drawable ), GDK_GC_XGC( gc ), xsrc, ysrc,
 		width, height, xdest, ydest, plane );
+#else
+    /* FIXME once we've eliminated all calls, assert( FALSE ) here */
+#endif
 }
 
 static void copy_rgb( guchar *src, guchar *dest, int xsrc, int ysrc,
@@ -249,6 +255,14 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
     if( bd->board_size <= 0 )
 	return;
 
+#if WIN32
+    /* FIXME Non-translucent drawing is buggy under Windows; always
+       use the translucent code there, even on empty points. */
+    assert( bd->translucent );    
+    board_redraw_translucent( board, bd, n );
+    return;
+#endif
+    
     if( bd->points[ n ] && bd->translucent ) {
 	board_redraw_translucent( board, bd, n );
 	return;
@@ -1092,6 +1106,9 @@ static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
     
     /* First attempt (applies only if cube is not owned by the player at
        the bottom of the screen): try scaled, rotated font. */
+#if !WIN32
+    /* This #if is horribly ugly, but necessary -- the Win32 port of GTK+
+       doesn't support rotated fonts, and not only fails, but crashes! */
     if( orient != -1 ) {
 	sprintf( font_name, orient ?
 		 "-adobe-utopia-bold-r-normal--[~%d 0 0 ~%d]-"
@@ -1105,7 +1122,8 @@ static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
 	    goto done;
 	}
     }
-
+#endif
+    
     /* Second attempt: try scaled font. */
     sprintf( font_name, "-adobe-utopia-bold-r-normal--%d-*-*-*-p-*-"
 	     "iso8859-1", bd->board_size * 5 );
