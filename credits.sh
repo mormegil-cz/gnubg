@@ -70,6 +70,7 @@ EOF
 cat > $credit <<EOF
 Elias Kritikos
 Misja Alma
+Christian Anthon
 Kazuaki Asai
 Eric Augustine
 Erik Barfoed

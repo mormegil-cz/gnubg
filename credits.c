@@ -49,6 +49,7 @@ credEntry ceTranslations[] = {
 credEntry ceCredits[] = {
   {"Fotis", 0},
   {"Misja Alma", 0},
+  {"Christian Anthon", 0},
   {"Kazuaki Asai", 0},
   {"Eric Augustine", 0},
   {"Steve Baedke", 0},
@@ -203,8 +204,9 @@ char aszAUTHORS[] =
 "\n"
 "             Contributors (of bug reports and suggestions) include:\n"
 "\n"
-"    Elias Kritikos          Robert Eberlein         Tim Laursen\n"
-"    Misja Alma              Fotis                   Eli Liang\n"
+"    Elias Kritikos          Peter Eberhard          Corrin Lakeland\n"
+"    Misja Alma              Robert Eberlein         Tim Laursen\n"
+"    Christian Anthon        Fotis                   Eli Liang\n"
 "    Kazuaki Asai            Kennedy Fraser          Ege Lundgren\n"
 "    Eric Augustine          Ric Gerace              Kevin Maguire\n"
 "    Erik Barfoed            Michel Grimminck        Massimiliano Maini\n"
@@ -226,7 +228,6 @@ char aszAUTHORS[] =
 "    Michael Depreli         Gerhard Knop            Mike Petch\n"
 "    Ian Dunstan             Robert Konigsberg       Zvezdan Petkovic\n"
 "    Max Durbano             Martin Krainer          Nardy Pillards\n"
-"    Peter Eberhard          Corrin Lakeland\n"
 "\n"
 "\n"
 "  Credit is also due to those who have published information about backgammon\n"

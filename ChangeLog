@@ -1,3 +1,8 @@
+Thu Mar 25 22:22:57 CET 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am, */Makefile.am: add a few missing files
+	(reported by Christian Anthon)
+
 Thu Mar 25 21:04:54 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* credits.sh, gtkgame.c, show.c, credits.c, credits.h:
