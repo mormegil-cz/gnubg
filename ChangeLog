@@ -20,6 +20,12 @@ Fri Sep 26 2003 19:18:48 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* play.c = missing conditional around call to HitGameClock
 
+Fri Sep 26 2003 08:17:55 Stein Kulseth <steink@opera.com>
+	* backgammon.h gnubg.c gtkgame.[ch] play.c
+	  set.c tctutorial.h timecontrol.[ch]:
+		bugfixes,
+		GUI additions
+
 Tue Sep 23 17:47:55 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
 
 	* sgfp.c sgfl.c - regenerated for users who don't have working
@@ -157,6 +163,13 @@ Fri 12 Sep 1707:54 GMT Jim Segrave <jes@jes-2.demon.nl>
         * text.c show.c simplelibgen.c sgf.c      C style coments 
 	  html.c gtkgame.c gnubgmodule.c gnubg.c  C style coments
           bearoffgammon.h                         C style coments
+
+Fri Sep 12 13:35:24 Stein Kulseth <steink@opera.com>
+	* Makefile.am configure.in 
+	  backgammon.h drawboard.c gnubg.c gtkboard.c gtkboard.h gtkgame.c
+	  gtkgame.h play.c  sgf.c show.c sound.c sound.h
+	  tctutorial.h timecontrol.h timecontrol.c:
+	 	Time control code added on main branch
 	
 Thu Sep 12 10:02:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
