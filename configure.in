@@ -319,7 +319,7 @@ AC_DEFINE([PKGDATADIR],[_DATADIR "/" PACKAGE],
           [The directory where the weights and databases will be stored.])
 
 dnl Set of available languages
-ALL_LINGUAS="da de"
+ALL_LINGUAS="da de ja"
 
 dnl internationalization macros
 AM_GNU_GETTEXT

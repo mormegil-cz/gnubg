@@ -1,3 +1,11 @@
+Fri Dec  6 11:05:07 2002  Gary Wong  <gtw@gnu.org>
+
+	* configure.in: Add "ja" to ALL_LINGUAS (translation provided
+	by Yoshito Takeuchi).
+	
+	* gnubg.c (real_main): Call bind_textdomain_charset(), so that
+	gettext() strings are returned coded correctly.
+
 Thu Dec  5 22:20:56 2002  Gary Wong  <gtw@gnu.org>
 
 	* configure.in: Add --enable-bearoff option to control how the

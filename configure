@@ -9959,7 +9959,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 
-ALL_LINGUAS="da de"
+ALL_LINGUAS="da de ja"
 
 
         MKINSTALLDIRS=

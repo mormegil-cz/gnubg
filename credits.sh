@@ -72,6 +72,7 @@ Mark Spencer
 Scott Steiner
 Maik Stiebler
 W. Stroop (Rob)
+Yoshito Takeuchi
 Jacques Thiriat
 Sander van Rijnswou
 Robert-Jan Veldhuizen

@@ -5899,7 +5899,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
     bindtextdomain (PACKAGE, LOCALEDIR);
     textdomain (PACKAGE);
-
+    bind_textdomain_codeset( PACKAGE, GNUBG_CHARSET );
+			     
     if( !( szHomeDirectory = getenv( "HOME" ) ) )
 	/* FIXME what should non-POSIX systems do? */
 	szHomeDirectory = ".";

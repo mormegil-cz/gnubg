@@ -996,6 +996,7 @@ gnubg.weights:
 @CROSS_COMPILING_TRUE@	@echo ' **   makebearoff -t 6x6 > gnubg_ts0.bd'
 @CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
 @CROSS_COMPILING_FALSE@gnubg_os0.bd: makebearoff
+@CROSS_COMPILING_FALSE@	[ -s $(srcdir)/gnubg_os0.bd ] || \
 @CROSS_COMPILING_FALSE@	./makebearoff -o 6 -s 7999999 -f $(srcdir)/gnubg_os0.bd
 
 @CROSS_COMPILING_FALSE@bearoff-database: makebearoff

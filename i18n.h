@@ -38,6 +38,7 @@
 # define gettext(Text) Text
 #define textdomain(Domain)
 #define bindtextdomain(Package, Directory)
+#define bind_textdomain_codeset(d,c)
 #endif
 #ifdef gettext_noop
 # define N_(String) gettext_noop (String)

@@ -186,6 +186,7 @@ bearoff-database: makebearoff
 	@echo ' ** on the host system.'
 else
 gnubg_os0.bd: makebearoff
+	[ -s $(srcdir)/gnubg_os0.bd ] || \
 	./makebearoff -o 6 -s 7999999 -f $(srcdir)/gnubg_os0.bd
 
 bearoff-database: makebearoff
