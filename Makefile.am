@@ -79,8 +79,18 @@ bd.message:
 	@echo ' ** database of endgame positions.  See the README'
 	@echo ' ** file for details.'
 
+if CROSS_COMPILING
+bearoff-database: makebearoff
+	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
+	@echo ' ** it is not possible to generate the bearoff database'
+	@echo ' ** on the build system.  To create this file manually,'
+	@echo ' ** use a command like:'
+	@echo ' **   makebearoff > gnubg.bd'
+	@echo ' ** on the host system.'
+else
 bearoff-database: makebearoff
 	./makebearoff > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
+endif
 
 .PHONY: bd.message bearoff-database
 
@@ -94,7 +104,17 @@ weights.message:
 gnubg.weights:
 	@[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
 
+if CROSS_COMPILING
+gnubg.wd: gnubg.weights makeweights
+	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
+	@echo ' ** it is not possible to generate the gnubg.wd file'
+	@echo ' ** on the build system.  To create this file manually,'
+	@echo ' ** use a command like:'
+	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
+	@echo ' ** on the host system.'
+else
 gnubg.wd: gnubg.weights makeweights
 	-./makeweights < $< > $@
+endif
 
 .DELETE_ON_ERROR:

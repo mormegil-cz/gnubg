@@ -631,8 +631,15 @@ bd.message:
 	@echo ' ** database of endgame positions.  See the README'
 	@echo ' ** file for details.'
 
-bearoff-database: makebearoff
-	./makebearoff > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
+@CROSS_COMPILING_TRUE@bearoff-database: makebearoff
+@CROSS_COMPILING_TRUE@	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
+@CROSS_COMPILING_TRUE@	@echo ' ** it is not possible to generate the bearoff database'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the build system.  To create this file manually,'
+@CROSS_COMPILING_TRUE@	@echo ' ** use a command like:'
+@CROSS_COMPILING_TRUE@	@echo ' **   makebearoff > gnubg.bd'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
+@CROSS_COMPILING_FALSE@bearoff-database: makebearoff
+@CROSS_COMPILING_FALSE@	./makebearoff > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
 
 .PHONY: bd.message bearoff-database
 
@@ -646,8 +653,15 @@ weights.message:
 gnubg.weights:
 	@[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
 
-gnubg.wd: gnubg.weights makeweights
-	-./makeweights < $< > $@
+@CROSS_COMPILING_TRUE@gnubg.wd: gnubg.weights makeweights
+@CROSS_COMPILING_TRUE@	@echo ' ** NOTE: Since you are cross-compiling GNU Backgammon,'
+@CROSS_COMPILING_TRUE@	@echo ' ** it is not possible to generate the gnubg.wd file'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the build system.  To create this file manually,'
+@CROSS_COMPILING_TRUE@	@echo ' ** use a command like:'
+@CROSS_COMPILING_TRUE@	@echo ' **   makeweights < gnubg.weights > gnubg.wd'
+@CROSS_COMPILING_TRUE@	@echo ' ** on the host system.'
+@CROSS_COMPILING_FALSE@gnubg.wd: gnubg.weights makeweights
+@CROSS_COMPILING_FALSE@	-./makeweights < $< > $@
 
 .DELETE_ON_ERROR:
 

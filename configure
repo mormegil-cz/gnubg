@@ -4161,6 +4161,16 @@ done
 fi
 
 
+
+if test "$cross_compiling" = "yes"; then
+  CROSS_COMPILING_TRUE=
+  CROSS_COMPILING_FALSE='#'
+else
+  CROSS_COMPILING_TRUE='#'
+  CROSS_COMPILING_FALSE=
+fi
+
+
 	ac_expanded=`(
 	    test "x$prefix" = xNONE && prefix="$ac_default_prefix"
 	    test "x$exec_prefix" = xNONE && exec_prefix="${prefix}"
@@ -4340,6 +4350,8 @@ s%@X_LIBS@%$X_LIBS%g
 s%@X_EXTRA_LIBS@%$X_EXTRA_LIBS%g
 s%@USE_EXT_TRUE@%$USE_EXT_TRUE%g
 s%@USE_EXT_FALSE@%$USE_EXT_FALSE%g
+s%@CROSS_COMPILING_TRUE@%$CROSS_COMPILING_TRUE%g
+s%@CROSS_COMPILING_FALSE@%$CROSS_COMPILING_FALSE%g
 
 CEOF
 EOF

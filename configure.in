@@ -124,6 +124,8 @@ else
   LIBS="$ac_save_LIBS"
 fi
 
+AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
+
 dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)
 
