@@ -5235,6 +5235,7 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     gtk_clist_column_titles_passive( GTK_CLIST( pwRolloutResult ) );
     
     pwRolloutProgress = gtk_progress_bar_new();
+    gtk_progress_set_show_text ( GTK_PROGRESS ( pwRolloutProgress ), TRUE );
 
     gtk_box_pack_start( GTK_BOX( pwVbox ), pwRolloutResult, TRUE, TRUE, 0 );
     gtk_box_pack_start( GTK_BOX( pwVbox ), pwRolloutProgress, FALSE, FALSE,
