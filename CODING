@@ -61,4 +61,14 @@ rtag" command is substantially faster when issuing it per file.
 Merge your branch into the main trunk
 -------------------------------------
 
-write me
+Check out a copy of the main trunk and then merge the branch with
+
+cvs update -j branch-xxx
+
+Resolve any conflicts and check in the newly merged files (there shouldn't
+be any confilcts if you first merge the latest main trunk changes as shown above).
+
+It's probably a good idea to mark the branch at this point so that further
+changes to the branch can be merged into the trunk with
+
+cvs update -j branch-xxx-mergedwithtrunk -j branch-xxx

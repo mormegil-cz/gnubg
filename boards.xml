@@ -278,6 +278,26 @@
          cube=#E5E5E5
          points0=#D7DFDF;0.00
          points1=#878E8F;0.00
+         piecetype=0
+         roundededges=n
+         lighttype=p
+         lightposx=-1.100000 lightposy=-1.200000 lightposz=5.000000
+         lightambient=50 lightdiffuse=70 lightspecular=100
+         chequers3d0=#FF1D28;#962125;#F1B1B4;100;100
+         chequers3d1=#6373E0;#4237B9;#FFFFFF;100;100
+         dice3d0=#FF1D28;#962125;#F1B1B4;100;100
+         dice3d1=#6373E0;#4237B9;#FFFFFF;100;100
+         dot3d0=#FDFDFD;#FDFDFD;#FDFDFD;100;100
+         dot3d1=#FFFFFF;#FFFFFF;#FFFFFF;100;100
+         cube3d=#E9E9E9;#C1C1C1;#FFFFFF;100;0
+         cubetext3d=#07095E;#423BA4;#141170;100;100
+         base3d=#BFBFBF;#969696;#E0E0E0;100;0
+         points3d0=#D02A30;#BB3437;#F1A6AD;100;100
+         points3d1=#3A38B9;#6363C8;#3B3F98;100;100
+         border3d=#85581D;#734C16;#3F3113;100;100;base.bmp
+         hinge3d=#DBDC46;#FFFA44;#DADC9F;100;0;hinge.bmp
+         numbers3d=#FFFFFF;#FFFFFF;#FFFFFF;100;100
+         background3d=#DD47FF;#A83097;#EDEDED;100;0;board.bmp
 
    </design>
 

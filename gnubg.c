@@ -3627,7 +3627,9 @@ HintTake( void ) {
 
   static cubeinfo ci;
   static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+#if USE_GTK
   static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+#endif
   static float arDouble[ 4 ];
 
   /* Give hint on take decision */
