@@ -35,10 +35,8 @@ duplication of effort and to make sure our changes merge easily.
   stdin is a TTY or not).  Echo commands input with the mouse as if they had
   been typed (this is nontrivial if a partial TTY command has been entered).
   (gary)
-** Allow abbreviation of multiple moves (e.g. "8/7(2) 6/5(2)") and
-  concatenation of moves (e.g. "24/18*/13").  Make FormatMove() use
-  this "pretty" format.  (If Jellyfish can't understand pretty moves in
-  saved games, then leave a function for saving in the plain format.)
+** Extend FormatMove() and ParseMove() to handle abbreviation of
+  multiple moves (e.g. "8/7(2) 6/5(2)").
 ** Finish "help" -- add detailed help for each command.
 ** Add undo, reroll, and viewing next/prev moves in game/match.
 ** Allow reading commands from scripts.  A .gnubgrc file would contain
@@ -93,12 +91,6 @@ duplication of effort and to make sure our changes merge easily.
   computation (the process is too busy doing other things and never
   notices the key press in the event queue).  This is tricky to fix
   and probably needs better event handling everywhere.
-** CommandRedouble does not work according to international backgammon
-   rules. See <URI:"http://www.bkgm.com/rules.html"> (search for Beaver).
-   If I beaver, I keep the cube and my opponent may drop the beaver 
-   (or even raccoon).
-   However, the program treats the beaver as an ordinary redouble and
-   I don't keep the cube.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

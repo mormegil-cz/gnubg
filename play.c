@@ -241,7 +241,7 @@ extern void NextTurn( void ) {
 		    n * nCube > 1 ? "s" : "" );
 
 #if !X_DISPLAY_MISSING
-	    if( fX )
+	    if( fX && fDisplay )
 		ShowBoard();
 #endif
 	    
@@ -436,8 +436,7 @@ extern void CommandDrop( char *sz ) {
 extern void CommandMove( char *sz ) {
 
     int c, i, j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ],
-	an[ 8 ], fError = FALSE, fDone = FALSE;
-    char *pch;
+	an[ 8 ];
     movelist ml;
     movenormal *pmn;
     
@@ -498,69 +497,34 @@ extern void CommandMove( char *sz ) {
 	return;
     }
     
-    /* FIXME allow abbreviating multiple moves (e.g. "8/7(2) 6/5(2)") */
-	
-    for( i = 0; *sz && i < 8; i++ ) {
-	pch = sz;
-
-	while( *sz && !isspace( *sz ) && *sz != '/' && *sz != '*' )
-	    sz++;
-
-	if( !*sz )
-	    fDone = TRUE;
-	else
-	    *sz++ = 0;
-
-	if( *pch == 'b' || *pch == 'B' )
-	    an[ i ] = 24;
-	else
-	    an[ i ] = atoi( pch ) - 1;
-
-	if( an[ i ] > 24 || an[ i ] < -1 ||
-	    ( an[ i ] < 0 && !( i & 1 ) ) ) {
-	    fError = TRUE;
-	    break;
-	}
-	
-	if( fDone ) {
-	    i++;
-	    break;
-	}
-
-	while( *sz && ( isspace( *sz ) || *sz == '/' || *sz == '*' ) )
-	    sz++;
-    }
-
-    if( !fError && !( i & 1 ) && ( i != 8 || !*sz ) ) {
-	c = i >> 1;
-
+    if( ( c = ParseMove( sz, an ) ) > 0 ) {
 	for( i = 0; i < 25; i++ ) {
 	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
 	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
 	}
 	
 	for( i = 0; i < c; i++ ) {
-	    anBoardNew[ 1 ][ an[ i << 1 ] ]--;
+	    anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
 	    if( an[ ( i << 1 ) | 1 ] >= 0 ) {
-		anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] ]++;
-
+		anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
+		
 		anBoardNew[ 0 ][ 24 ] +=
-		    anBoardNew[ 0 ][ 23 - an[ ( i << 1 ) | 1 ] ];
-	    
-		anBoardNew[ 0 ][ 23 - an[ ( i << 1 ) | 1 ] ] = 0;
+		    anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
+		
+		anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
 	    }
 	}
-
+	
 	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
-
+	
 	for( i = 0; i < ml.cMoves; i++ ) {
 	    PositionFromKey( anBoardTest, ml.amMoves[ i ].auch );
-
+	    
 	    for( j = 0; j < 25; j++ )
 		if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
 		    anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
 		    break;
-
+	    
 	    if( j == 25 ) {
 		/* we have a legal move! */
 		pmn = malloc( sizeof( *pmn ) );
@@ -573,7 +537,7 @@ extern void CommandMove( char *sz ) {
 		ListInsert( plGame, pmn );
 		
 		memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
-
+		
 		NextTurn();
 		
 		return;
@@ -864,7 +828,7 @@ extern void CommandTake( char *sz ) {
     
     fDoubled = FALSE;
 
-    fCubeOwner = fTurn;
+    fCubeOwner = !fMove;
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;

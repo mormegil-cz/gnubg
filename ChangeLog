@@ -1,4 +1,17 @@
-Mon Jan 10 18:13:04 2000  Gary Wong  <gary@cs.arizona.edu>
+Tue Jan 11 21:42:53 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (CommandTake): Fix bug when accepting beavers -- the owner
+	of the cube after an (eventual) take should be the opponent of the
+	_original_ doubler, which is not necessarily the player who finally
+	accepted.
+
+	* drawboard.c (ParseMove): New function.
+	(FormatMove): Generate prettier output (e.g. "24/13" or "24/18*/13"
+	rather than "24/18 18/13").
+
+Mon Jan 10 22:18:55 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* play.c (NextTurn): Don't show the board if fDisplay is not set.
 
 	* rollout.c (RolloutGame): Don't attempt variance reduction when doing
 	0-ply evaluations.
