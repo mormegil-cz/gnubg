@@ -122,8 +122,6 @@ typedef struct _rolloutcontext {
   unsigned int fTruncBearoff2 : 1; /* cubeless rollout: trunc at BEAROFF2 */
   unsigned int fTruncBearoffOS: 1; /* cubeless rollout: trunc at BEAROFF_OS */
   unsigned short nLate; /* switch evaluations on move nLate of game */
-  unsigned short int fIgnoreJacobyCubeless; /* ignore Jacoby rule for cubeless
-                                         money game rollouts */
   rng rngRollout;
   int nSeed;
 
@@ -385,6 +383,9 @@ extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
 
 extern float
 Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
+
+extern float
+UtilityME( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
 
 
 extern int SetCubeInfoMoney( cubeinfo *pci, int nCube, int fCubeOwner,

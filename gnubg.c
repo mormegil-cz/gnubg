@@ -198,6 +198,7 @@ int fTutorAnalysis = FALSE;
 int fMessage = FALSE;
 int nThreadPriority = 0;
 int fCheat = FALSE;
+int afCheatRoll[ 2 ] = { 0, 0 };
 
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
@@ -295,7 +296,6 @@ rolloutcontext rcRollout =
   TRUE, /* truncate at BEAROFF2 for cubeless rollouts */
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
   5,  /* late evals start here */
-  TRUE, /* ignore Jacoby for cubeless rollouts */
   RNG_MERSENNE, /* RNG */
   0 /* seed */
 };
@@ -340,7 +340,6 @@ rolloutcontext rcRollout =
     TRUE, /* truncate at BEAROFF2 */ \
     TRUE, /* truncate at BEAROFF2_OS */ \
     5,  /* late evals start here */ \
-    TRUE, /* ignore Jacoby for cubeless rollouts */ \
     RNG_MERSENNE, /* RNG */ \
     0 /* seed */ \
   } \
@@ -1361,6 +1360,18 @@ command cER = {
   { "skill", NULL, N_("Set level for tutor warnings"), 
     NULL, acSetTutorSkill },
   { NULL, NULL, NULL, NULL, NULL }    
+}, acSetCheat[] = {
+  { "enable", CommandSetCheatEnable,
+   N_("Control whether GNU Backgammon is allowed to manipulate the dice"), 
+    szONOFF, &cOnOff },
+  { "player", CommandSetCheatPlayer,
+   N_("Parameters for the dice manipulation"), szPLAYER, acSetCheatPlayer },
+  { NULL, NULL, NULL, NULL, NULL }    
+}, acSetCheatPlayer[] = {
+  { "roll", CommandSetCheatPlayerRoll,
+   N_("Which roll should GNU Backgammon choose (1=Best and 21=Worst)"), 
+    szVALUE, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetHighlightColour[] = {
   { NULL, CommandSetHighlightColour,
    N_("Set colour for highlighted moves"), szCOLOUR, NULL},
@@ -1409,9 +1420,9 @@ command cER = {
     { "calibration", CommandSetCalibration,
       N_("Specify the evaluation speed to be assumed for time estimates"),
       szOPTVALUE, NULL },
-    { "cheat", CommandSetCheat, 
-      N_("Control whether GNU Backgammon is allowed to manipulate the dice"),
-      szONOFF, &cOnOff },
+    { "cheat", NULL, 
+      N_("Control GNU Backgammon's manipulation of the dice"),
+      NULL, acSetCheat },
     { "clockwise", CommandSetClockwise, N_("Control the board orientation"),
       szONOFF, &cOnOff },
     { "colours", CommandSetAppearance, 
@@ -1507,6 +1518,8 @@ command cER = {
       "cache"), NULL, NULL },
     { "calibration", CommandShowCalibration,
       N_("Show the previously recorded evaluation speed"), NULL, NULL },
+    { "cheat", CommandShowCheat,
+      N_("Show parameters for dice manipulation"), NULL, NULL },
     { "clockwise", CommandShowClockwise, N_("Display the board orientation"),
       NULL, NULL },
     { "commands", CommandShowCommands, N_("List all available commands"),
@@ -4451,7 +4464,7 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
         fprintf( pf, "%s rng file %s\n", sz, szDiceFilename );
 	break;
     default:
-	break;
+        break;
     }
 
 }
@@ -4516,8 +4529,7 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s trials %d\n"
             "%s cube-equal-chequer %s\n"
             "%s players-are-same %s\n"
-            "%s truncate-equal-player0 %s\n"
-            "%s ignore-jacoby-cubeless %s\n" ,
+            "%s truncate-equal-player0 %s\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
@@ -4531,8 +4543,7 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->nTrials,
             sz, fCubeEqualChequer ? "on" : "off",
             sz, fPlayersAreSame ? "on" : "off",
-            sz, fTruncEqualPlayer0 ? "on" : "off",
-            sz, prc->fIgnoreJacobyCubeless ? "on" : "off"
+            sz, fTruncEqualPlayer0 ? "on" : "off"
             );
   
   SaveRNGSettings ( pf, sz, prc->rngRollout );
@@ -4752,7 +4763,10 @@ extern void CommandSaveSettings( char *szParam ) {
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );
     SaveMoveFilterSettings ( pf, "set evaluation movefilter", aamfEval );
 
-    fprintf( pf, "set cheat %s\n", fCheat ? "on" : "off" );
+    fprintf( pf, "set cheat enable %s\n", fCheat ? "on" : "off" );
+    for ( i = 0; i < 2; ++i )
+      fprintf( pf, "set cheat player %d roll %d\n", i, afCheatRoll[ i ] );
+               
 
 #if USE_GTK
     fprintf( pf, "set gui animation %s\n"

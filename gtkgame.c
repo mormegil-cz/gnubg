@@ -8138,6 +8138,8 @@ typedef struct _optionswidget {
       *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide, *pwBeepIllegal,
       *pwHigherDieFirst, *pwSetWindowPos, *pwDragTargetHelp;
   GtkAdjustment *padjSpeed;
+
+  GtkWidget *pwCheat, *pwCheatRollBox, *apwCheatRoll[ 2 ];
 } optionswidget;   
 
 static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
@@ -8152,6 +8154,17 @@ static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
   gtk_widget_set_sensitive( pow->pwAutomaticLabel, n );
   gtk_widget_set_sensitive( pow->pwAutoCrawford, n );
 }
+
+static void
+CheatToggled( GtkWidget *pw, optionswidget *pow ) {
+
+  gint n = 
+     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwCheat ) ); 
+
+  gtk_widget_set_sensitive( pow->pwCheatRollBox, n );
+
+}
+
 
 static void ManualDiceToggled( GtkWidget *pw, optionswidget *pow){
 
@@ -8218,6 +8231,19 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	N_("Doubtful"), N_("Bad"), N_("Very bad")
     };
 
+  static char *aszCheatRoll[] = {
+    N_("best"), N_("second best"), N_("third best"), 
+    N_("4th best"), N_("5th best"), N_("6th best"),
+    N_("7th best"), N_("8th best"), N_("9th best"),
+    N_("10th best"),
+    N_("median"),
+    N_("10th worst"),
+    N_("9th worst"), N_("8th worst"), N_("7th worst"),
+    N_("6th worst"), N_("5th worst"), N_("4th worst"),
+    N_("third worst"), N_("second worst"), N_("worst"), 
+    NULL
+  };
+    
     static char *aszVariationsTooltips[ NUM_VARIATIONS ] = {
       N_("Use standard backgammon starting position"),
       N_("Use Nick \"Nack\" Ballard's Nackgammon starting position "
@@ -9124,6 +9150,91 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "less memory.  Each entry uses around 50 bytes, "
 			    "depending on the platform." ), NULL );
 
+    /* 
+     * dice manipulation 
+     */
+
+    pwev = gtk_event_box_new();
+    gtk_box_pack_start( GTK_BOX( pwvbox ), pwev, FALSE, FALSE, 0 );
+
+    pwFrame = gtk_frame_new( _("Dice manipulation") );
+    gtk_container_add( GTK_CONTAINER( pwev ), pwFrame );
+
+    pwb = gtk_vbox_new (FALSE, 0);
+    gtk_container_add( GTK_CONTAINER ( pwFrame ), pwb );
+
+    /* Enable dice manipulation-widget */
+
+    pow->pwCheat = 
+      gtk_check_button_new_with_label( _("Enable dice manupulation") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON ( pow->pwCheat ),
+                                  fCheat );
+    gtk_box_pack_start( GTK_BOX( pwb ), pow->pwCheat, FALSE, FALSE, 0 );
+
+    gtk_signal_connect( GTK_OBJECT ( pow->pwCheat ), "toggled",
+			GTK_SIGNAL_FUNC( CheatToggled ), pow );
+
+    /* select rolls for player */
+
+    pow->pwCheatRollBox = gtk_vbox_new( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( pwb ), pow->pwCheatRollBox, FALSE, FALSE, 0 );
+
+    CheatToggled( NULL, pow );
+
+    for ( i = 0; i < 2; ++i ) {
+
+      char *sz;
+
+      pwhbox = gtk_hbox_new (FALSE, 4);
+      gtk_box_pack_start( GTK_BOX ( pow->pwCheatRollBox ), 
+                          pwhbox, TRUE, TRUE, 0 );
+
+      gtk_box_pack_start( GTK_BOX ( pwhbox ), 
+                          gtk_label_new( _("Always play the ") ),
+                          FALSE, FALSE, 0);
+
+      pow->apwCheatRoll[ i ] = gtk_option_menu_new ();
+      gtk_box_pack_start( GTK_BOX ( pwhbox ), pow->apwCheatRoll[ i ], 
+                          FALSE, FALSE, 0);
+      gtk_container_set_border_width( GTK_CONTAINER ( pow->apwCheatRoll[ i ]), 
+                                      1);
+
+      pwm = gtk_menu_new ();
+      for( ppch = aszCheatRoll; *ppch; ++ppch )
+	gtk_menu_append( GTK_MENU( pwm ),
+			 pw = gtk_menu_item_new_with_label(
+			     gettext( *ppch ) ) );
+      gtk_widget_show_all( pwm );
+
+      gtk_option_menu_set_menu( GTK_OPTION_MENU ( pow->apwCheatRoll[ i ] ), 
+                                pwm );
+
+      sz = g_strdup_printf( _("roll for player %s."), ap[ i ].szName );
+
+      gtk_box_pack_start( GTK_BOX ( pwhbox ), 
+                          gtk_label_new( sz ),
+                          FALSE, FALSE, 0);
+
+      g_free( sz );
+
+    }
+
+    
+
+    gtk_tooltips_set_tip (ptt, pwev,
+			  _("Now it's proven! GNU Backgammon is able to "
+                            "manipulate the dice. This is meant is a "
+                            "learning tool. Examples of use: (a) learn "
+                            "how to double aggresively after a good opening "
+                            "sequence, (b) learn to control your temper "
+                            "while things are going bad, (c) learn to play "
+                            "very good or very bad rolls, or "
+                            "(d) just have fun. "
+                            "Oh, BTW, don't tell the trolls in "
+                            "rec.games.backgammon :-)" ), NULL );
+
+    /* return notebook */
+
     return pwn;    
 }
 
@@ -9357,6 +9468,24 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   if( ( n = pow->padjSpeed->value ) != nGUIAnimSpeed ) {
       sprintf( sz, "set gui animation speed %d", n );
       UserCommand( sz );
+  }
+
+  /* dice manipulation */
+
+  n = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( pow->pwCheat ) );
+
+  if ( n != fCheat ) {
+    sprintf( sz, "set cheat enable %s", n ? "on" : "off" );
+    UserCommand( sz );
+  }
+
+  for ( i = 0; i < 2; ++i ) {
+    n = 1 + 
+      gtk_option_menu_get_history(GTK_OPTION_MENU( pow->apwCheatRoll[ i ] ));
+    if ( n != afCheatRoll[ i ] ) {
+      sprintf( sz, "set cheat player %d roll %d", i, n );
+      UserCommand( sz );
+    }
   }
       
   /* Destroy widget on exit */

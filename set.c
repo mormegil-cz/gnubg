@@ -3979,11 +3979,96 @@ extern void CommandSetPriorityTimeCritical ( char *sz ) {
 
 
 extern void
-CommandSetCheat ( char *sz ) {
+CommandSetCheatEnable ( char *sz ) {
 
-  SetToggle( "cheat", &fCheat, sz, 
+  SetToggle( "cheat enable", &fCheat, sz, 
              _("Allow GNU Backgammon to manipulate the dice."),
              _("Disallow GNU Backgammon to manipulate the dice.") );
+
+}
+
+
+extern void
+CommandSetCheatPlayer( char *sz ) {
+
+    char *pch = NextToken( &sz ), *pchCopy;
+    int i;
+
+    if( !pch ) {
+	outputl( _("You must specify a player "
+                   "-- try `help set cheat player'.") );
+	return;
+    }
+
+    if( !( i = ParsePlayer( pch ) ) || i == 1 ) {
+	iPlayerSet = i;
+
+	HandleCommand( sz, acSetCheatPlayer );
+	
+	return;
+    }
+
+    if( i == 2 ) {
+	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
+	    outputl( _("Insufficient memory.") );
+		
+	    return;
+	}
+
+	strcpy( pchCopy, sz );
+
+	outputpostpone();
+	
+	iPlayerSet = 0;
+	HandleCommand( sz, acSetCheatPlayer );
+
+	iPlayerSet = 1;
+	HandleCommand( pchCopy, acSetCheatPlayer );
+
+	outputresume();
+	
+	free( pchCopy );
+	
+	return;
+    }
+    
+    outputf( _("Unknown player `%s' -- try\n"
+             "`help set %s player'.\n"), pch, szSetCommand );
+
+}
+
+extern void
+PrintCheatRoll( const int fPlayer, const int n ) {
+
+  static char *aszNumber[ 21 ] = {
+    N_("best"), N_("second best"), N_("third best"), 
+    N_("4th best"), N_("5th best"), N_("6th best"),
+    N_("7th best"), N_("8th best"), N_("9th best"),
+    N_("10th best"),
+    N_("median"),
+    N_("10th worst"),
+    N_("9th worst"), N_("8th worst"), N_("7th worst"),
+    N_("6th worst"), N_("5th worst"), N_("4th worst"),
+    N_("third worst"), N_("second worst"), N_("worst")
+  };
+    
+  outputf( _("%s will get the %s roll on each turn.\n"), 
+           ap[ fPlayer ].szName, gettext ( aszNumber[ n ] ) );
+
+}
+
+extern void
+CommandSetCheatPlayerRoll( char *sz ) {
+
+  int n;
+  if( ( n = ParseNumber( &sz ) ) < 1 || n > 21 ) {
+    outputl( _("You must specify a size between 1 and 21.") );
+    return;
+  }
+  
+  afCheatRoll[ iPlayerSet ] = n - 1;
+
+  PrintCheatRoll( iPlayerSet, afCheatRoll[ iPlayerSet ] );
 
 }
 
@@ -4001,7 +4086,7 @@ CommandSetExportPNGSize ( char *sz ) {
 
     exsExport.nPNGSize = n;
 
-    outputf ( "Size of generated PNG images are %dx%d pixels\n",
+    outputf ( _("Size of generated PNG images are %dx%d pixels\n"),
               n * 108, n * 72 );
 
 

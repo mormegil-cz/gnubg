@@ -1971,3 +1971,13 @@ CommandShowVariation( char *sz ) {
   outputf( _("Default variation is: %s\n"), aszVariations[ bgvDefault ] );
 
 }
+
+extern void
+CommandShowCheat( char *sz ) {
+
+  outputf( _("Manipulation with dice is %s.\n"),
+           fCheat ? _("enabled") : _("disabled") );
+  PrintCheatRoll( 0, afCheatRoll[ 0 ] );
+  PrintCheatRoll( 1, afCheatRoll[ 1 ] );
+
+}

@@ -412,7 +412,7 @@ GenerateImage ( renderimages *pri, renderdata *prd,
   int doubled, color;
   /* FIXME: resignations */
   int anResignPosition[ 2 ];
-  int fResign = 0, nResignOrientation;
+  int fResign = 0, nResignOrientation = 0;
 
   if ( ! fMove )
     SwapSides ( anBoard );

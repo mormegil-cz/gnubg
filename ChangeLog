@@ -1,3 +1,17 @@
+Sat Mar 29 16:02:44 2003  Joern Thyssen  <jth@gnubg.org>
+
+        Enhance dice manipulation :-)
+
+        * gnubg.c, show.c, set.c: new commands "set cheat enable" and
+        "set cheat player xx roll".
+        * gnubg.c (CommandSaveSettings): save new options.
+        * gtkgame.c (OptionPages, OptionsOK): handle new options.
+        * play.c (OptimumRoll): modify logic to handle new options 
+        (changed all callers)
+
+        * play.c (ComputerTurn): slight modification to resign logic.
+	* export.c: pacify fussy compilers.
+
 Sat Mar 29 16:08:43 2003  Oystein Johansen <oystein@gnubg.org>
 
         * gnubg.c, gtkgame.c, html.c: GammOnLine export directly to clipboard.  

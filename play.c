@@ -97,7 +97,7 @@ typedef enum _annotatetype {
 static annotatetype at;
 
 static int
-CheatDice ( int anDice[ 2 ], matchstate *pms );
+CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest );
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -728,7 +728,7 @@ extern int ComputerTurn( void ) {
 
   movenormal *pmn;
   cubeinfo ci;
-  float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
+  float arDouble[ 4 ], arOutput[ NUM_ROLLOUT_OUTPUTS ], rDoublePoint;
 #if HAVE_SOCKETS
   char szBoard[ 256 ], szResponse[ 256 ];
   int i, c, fTurnOrig;
@@ -749,14 +749,14 @@ extern int ComputerTurn( void ) {
       float rEqBefore, rEqAfter;
 
       ProgressStart( _("Considering resignation...") );
-      if( EvaluatePosition( ms.anBoard, arOutput, &ci,
-			    &ap[ ms.fTurn ].esCube.ec ) ) {
+      if ( GeneralEvaluationE( arOutput, ms.anBoard, &ci,
+                               &ap[ ms.fTurn ].esCube.ec ) ) {
 	  ProgressEnd();
 	  return -1;
       }
       ProgressEnd();
 
-      rEqBefore = -Utility ( arOutput, &ci );
+      rEqBefore = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
 
       /* I win 100% if opponent resigns */
       arOutput[ 0 ] = 1.0; 
@@ -773,17 +773,19 @@ extern int ComputerTurn( void ) {
 
       InvertEvaluation ( arOutput );
       
-      rEqAfter = -Utility ( arOutput, &ci );
+      rEqAfter = Utility ( arOutput, &ci );
+      if ( ms.nMatchTo )
+        rEqAfter = eq2mwc( rEqAfter, &ci );
 
       /*
       printf ("equity before resignation: %7.3f\n"
               "equity after resignation : %7.3f\n",
-              rEqBefore, rEqAfter );
-      */
+              rEqBefore, rEqAfter );*/
 
       fComputerDecision = TRUE;
 
-      if( rEqAfter >= rEqBefore )
+      if( rEqAfter <= rEqBefore )
+        /* i.e., opponent gives up equity by resigning */
         CommandAgree( NULL );
       else
         CommandDecline( NULL );
@@ -1110,7 +1112,8 @@ extern int ComputerTurn( void ) {
 
       /* Roll dice and move */
       if ( !ms.anDice[ 0 ] ) {
-        if ( ! fCheat || CheatDice ( ms.anDice, &ms ) )
+        if ( ! fCheat || CheatDice ( ms.anDice, 
+                                     &ms, afCheatRoll[ ms.fMove ] ) )
 	  if( RollDice ( ms.anDice, rngCurrent ) < 0 )
             return -1;
 	  
@@ -1199,7 +1202,7 @@ extern int ComputerTurn( void ) {
       fComputerDecision = FALSE;
       return 0;
     } else if( !ms.anDice[ 0 ] ) {
-      if ( ! fCheat || CheatDice ( ms.anDice, &ms ) )
+      if ( ! fCheat || CheatDice ( ms.anDice, &ms, afCheatRoll[ ms.fMove ] ) )
         if( RollDice ( ms.anDice, rngCurrent ) < 0 )
           return -1;
       
@@ -3675,7 +3678,7 @@ CommandRoll( char *sz ) {
   if ( fTutor && fTutorCube && !GiveAdvice( ShouldDouble() ))
 	  return;
 
-  if ( ! fCheat || CheatDice ( ms.anDice, &ms ) )
+  if ( ! fCheat || CheatDice ( ms.anDice, &ms, afCheatRoll[ ms.fMove ] ) )
     if( RollDice ( ms.anDice, rngCurrent ) < 0 )
       return;
 
@@ -4076,15 +4079,14 @@ getCurrentMoveRecord ( int *pfHistory ) {
 
 
 static int
-CheatDice ( int anDice[ 2 ], matchstate *pms ) {
+CheatDice ( int anDice[ 2 ], matchstate *pms, const int fBest ) {
 
   static evalcontext ec0ply = { FALSE, 0, 0, TRUE, 0.0 };
   static cubeinfo ci;
     
   GetMatchStateCubeInfo( &ci, pms );
   
-  OptimumRoll ( pms->anBoard, &ci, &ec0ply, ap[ ms.fMove ].pt != PLAYER_HUMAN,
-                &anDice[ 0 ], &anDice[ 1 ] );
+  OptimumRoll ( pms->anBoard, &ci, &ec0ply, fBest, anDice );
   
   if ( ! anDice[ 0 ] )
     return -1;
@@ -4098,25 +4100,44 @@ CheatDice ( int anDice[ 2 ], matchstate *pms ) {
  *
  */
 
+typedef struct _rollequity {
+  float r;
+  int anDice[ 2 ];
+} rollequity;
+
+static int
+CompareRollEquity( const void *p1, const void *p2 ) {
+
+  const rollequity *per1 = (rollequity *) p1;
+  const rollequity *per2 = (rollequity *) p2;
+
+  if ( per1->r > per2->r )
+    return -1;
+  else if ( per1->r < per2->r )
+    return +1;
+  else
+    return 0;
+
+}
+
 extern void
 OptimumRoll ( int anBoard[ 2 ][ 25 ], 
               const cubeinfo *pci, const evalcontext *pec,
-              const int fBest, int *pnDice0, int *pnDice1 ) {
+              const int fBest, int anDice[ 2 ] ) {
 
-  int anBoardTemp[ 2 ][ 25 ], i, j;
-  float ar[ NUM_OUTPUTS ];
+  int anBoardTemp[ 2 ][ 25 ], i, j, k;
+  float ar[ NUM_ROLLOUT_OUTPUTS ];
   cubeinfo ciOpp;
-  float rBest = fBest ? -1e99 : 1e99;
+  rollequity are[ 21 ];
   float r;
 
   memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
   ciOpp.fMove = ! pci->fMove;
 
-  *pnDice0 = 0;
-  *pnDice1 = 0;
-  
-  for( i = 0; i < 6; i++ )
-    for( j = 0; j <= i; j++ ) {
+  anDice[ 0 ] = anDice[ 1 ] = -1;
+
+  for( i = 0, k = 0; i < 6; i++ )
+    for( j = 0; j <= i; j++, ++k ) {
       memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
               2 * 25 * sizeof( int ) );
       
@@ -4128,25 +4149,29 @@ OptimumRoll ( int anBoard[ 2 ][ 25 ],
       SwapSides( anBoardTemp );
       
       /* FIXME should we use EvaluatePositionCubeful here? */
-      if( EvaluatePosition( anBoardTemp, ar, &ciOpp, (evalcontext *) pec ) )
+
+      if ( GeneralEvaluationE( ar, anBoardTemp, &ciOpp, 
+                               (evalcontext *) pec ) )
         return;
 
-      r = -Utility ( ar, &ciOpp );
-      if ( fBest && r >= rBest ) {
-        rBest = r;
-        *pnDice0 = i + 1;
-        *pnDice1 = j + 1;
-      }
-      else if ( ! fBest && r <= rBest ) {
-        rBest = r;
-        *pnDice0 = i + 1;
-        *pnDice1 = j + 1;
-      }
-      
+      r = 
+        ( pec->fCubeful ) ? ar[ OUTPUT_CUBEFUL_EQUITY ] : ar[ OUTPUT_EQUITY ];
+
+      if ( pci->nMatchTo )
+        r = 1.0 - r;
+      else
+        r = -r;
+
+      are[ k ].r = r;
+      are[ k ].anDice[ 0 ] = i + 1;
+      are[ k ].anDice[ 1 ] = j + 1;
+
     }
 
-  assert ( *pnDice0 );
-  assert ( *pnDice1 );
+  qsort( are, 21, sizeof ( rollequity ), CompareRollEquity );
+
+  anDice[ 0 ] = are[ fBest ].anDice[ 0 ];
+  anDice[ 1 ] = are[ fBest ].anDice[ 1 ];
 
 }
 
