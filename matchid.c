@@ -256,8 +256,8 @@ MatchFromID ( int anDice[ 2 ],
   unsigned char *pch = ach;
   int i;
 
+  memset(ach, 0, sizeof(ach));
   /* decode base64 into key */
-
   for( i = 0; i < 12 && szMatchID[ i ]; i++ )
     pch[ i ] = Base64( szMatchID[ i ] );
 
