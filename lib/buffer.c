@@ -22,6 +22,8 @@
 #include <unistd.h>
 #endif
 
+#if HAVE_BUFFER
+
 int BufferReadNotify( event *pev, buffer *pb ) {
 
     struct iovec aiov[ 2 ];
@@ -249,3 +251,5 @@ int BufferWritef( buffer *pb, char *szFormat, ... ) {
 
     return cch;
 }
+
+#endif

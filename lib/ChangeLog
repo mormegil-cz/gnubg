@@ -1,3 +1,9 @@
+Thu Jul 27 18:20:58 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* event.c: Define nothing on systems that can't support it.
+	* buffer.c: Define nothing on systems that can't support it.
+	* fifo.c (FifoIOVec): Do not define on systems that can't support it.
+
 Sat Mar 11 20:09:10 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* neuralnet.c (NeuralNetDifferentiate): New function.

@@ -120,6 +120,7 @@ int FifoConsume( fifo *pf, int cch ) {
     return 0;
 }
 
+#if HAVE_FIFOIOVEC
 int FifoIOVec( fifo *pf, struct iovec *aiov, int fIn ) {
 
     if( fIn ) {
@@ -157,4 +158,4 @@ int FifoIOVec( fifo *pf, struct iovec *aiov, int fIn ) {
 	}
     }
 }
-
+#endif

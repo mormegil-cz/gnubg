@@ -14,6 +14,9 @@
 #include <sys/time.h>
 #endif
 
+#if HAVE_SELECT
+#define HAVE_EVENT 1
+
 typedef struct _event event;
 typedef struct _eventhandler eventhandler;
 
@@ -46,5 +49,6 @@ extern int EventPending( event *pev, int fPending );
 extern int InitEvents( void );
 extern int HandleEvents( void );
 extern int StopEvents( void );
+#endif
 
 #endif

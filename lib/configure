@@ -1498,7 +1498,7 @@ fi
 
 fi
 
-for ac_func in alloca getdtablesize gettimeofday select
+for ac_func in alloca getdtablesize gettimeofday readv select
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
 echo "configure:1505: checking for $ac_func" >&5

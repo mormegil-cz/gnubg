@@ -30,6 +30,9 @@ extern int FifoCopyTo( fifo *pf, char *pch, int cch );
 extern int FifoCopyFrom( fifo *pf, char *pch, int cch );
 extern int FifoProduce( fifo *pf, int cch );
 extern int FifoConsume( fifo *pf, int cch );
+#if HAVE_READV
+#define HAVE_FIFOIOVEC 1
 extern int FifoIOVec( fifo *pf, struct iovec *piov, int fIn );
+#endif
 
 #endif

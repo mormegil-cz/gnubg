@@ -27,6 +27,8 @@
 
 #include <event.h>
 
+#if HAVE_EVENT
+
 #define MAXTVSEC 0x7FFFFFFF
 #define MAXTVUSEC 999999
 
@@ -364,3 +366,4 @@ extern int HandleEvents( void ) {
 
     return 0;
 }
+#endif

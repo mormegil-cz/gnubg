@@ -42,7 +42,7 @@ AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(alloca getdtablesize gettimeofday select)
+AC_CHECK_FUNCS(alloca getdtablesize gettimeofday readv select)
 AC_REPLACE_FUNCS(rand_r)
 
 AC_OUTPUT(Makefile)

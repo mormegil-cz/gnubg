@@ -32,6 +32,9 @@
 /* Define if you have the rand_r function.  */
 #undef HAVE_RAND_R
 
+/* Define if you have the readv function.  */
+#undef HAVE_READV
+
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
 
