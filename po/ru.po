@@ -419,17 +419,15 @@ msgstr ""
 
 #: credits.c:34 credits.c:36
 msgid "Web Pages"
-msgstr ""
+msgstr "Веб-страницы"
 
 #: credits.c:35
-#, fuzzy
 msgid "Manual"
-msgstr "руководство"
+msgstr "Руководство"
 
 #: credits.c:37
-#, fuzzy
 msgid "Tutorial"
-msgstr "Обучение"
+msgstr "Учебник"
 
 #: credits.c:42 gtkoptions.c:170
 msgid "Czech"
@@ -464,9 +462,8 @@ msgid "Turkish"
 msgstr "Турецкий"
 
 #: credits.c:50 gtkoptions.c:179
-#, fuzzy
 msgid "Russian"
-msgstr "Сдаться"
+msgstr "Русский"
 
 #: credits.c:167
 msgid "Developers"
@@ -477,15 +474,13 @@ msgid "Code Contributors"
 msgstr ""
 
 #: credits.c:169
-#, fuzzy
 msgid "Translations"
-msgstr "Вариации (варианты)"
+msgstr "Переводы"
 
 # DIG: если глагол в неопределённой форме, то получается *очень* длинно
 #: credits.c:170
-#, fuzzy
 msgid "Support"
-msgstr "Импорт"
+msgstr "Поддержка"
 
 #: database.c:79
 msgid "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials Date"
@@ -2234,7 +2229,6 @@ msgid ""
 msgstr ""
 
 #: gnubg.c:921
-#, fuzzy
 msgid "Show information from the relational database"
 msgstr "Позиции нет в базе данных"
 
@@ -2521,9 +2515,8 @@ msgid "Show target help while dragging a chequer"
 msgstr ""
 
 #: gnubg.c:1147
-#, fuzzy
 msgid "Show statistics in a panel"
-msgstr "Статистика по всем играм"
+msgstr "Показать статистику в отделной панели"
 
 #: gnubg.c:1150
 msgid "Show the higher die on the left"
@@ -3667,9 +3660,8 @@ msgid "Display your language preference"
 msgstr ""
 
 #: gnubg.c:1914
-#, fuzzy
 msgid "Show manual"
-msgstr "руководство"
+msgstr "Показать руководство"
 
 #: gnubg.c:1916
 msgid "show market window for doubles"
@@ -4421,11 +4413,8 @@ msgid "This build of GNU Backgammon does not support Python"
 msgstr ""
 
 #: gnubg.c:4818
-#, fuzzy
 msgid "You must specify a file to load from (see `help load python')."
-msgstr ""
-"Вам следует указать по крайней мере один тип анализа (см. `help set\n"
-"analysis')."
+msgstr "Вам следует указать -- какой файл загружать (см. `help load python')."
 
 #: gnubg.c:4855
 msgid "You must specify a file to load from (see `help load commands')."
@@ -4592,13 +4581,12 @@ msgid "%s: option `-p' requires Python\n"
 msgstr ""
 
 #: gnubg.c:7789
-#, fuzzy, c-format
 msgid "GNU Backgammon %s\n"
-msgstr "GNU Backgammon (Короткие нарды)"
+msgstr "GNU Backgammon (Короткие нарды) %s\n"
 
 # DIG: криво!!!
 #: gnubg.c:7791
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "GNU Backgammon is free software, covered by the GNU General Public License\n"
 "version 2, and you are welcome to change it and/or distribute copies of it\n"
@@ -4607,10 +4595,12 @@ msgid ""
 "for\n"
 "details.\n"
 msgstr ""
-"GNU Backgammon -- это свободное программное обеспечение (ПО), подчиняющееся "
-"Общей Общественной Лицензии (GNU General Public License) второй версии, и вы "
-"свободны изменять это ПО и/или распространять его копии при соблюдении "
-"некоторых условий.  GNU Backgammon не даёт абсолютно никаких гарантий."
+"GNU Backgammon -- это свободное программное обеспечение (ПО), подчиняющееся\n"
+"Общей Общественной Лицензии (GNU General Public License) второй версии, и\n"
+"Вы вольны изменять это ПО и/или распространять его копии при соблюдении\n"
+"некоторых условий.  Напечатайте \"show copying\", чтобы ознакомиться с этими\n"
+"условиями.  GNU Backgammon не даёт абсолютно никаких гарантий. Напечатайте\n"
+"\"show warranty\", чтобы ознакомиться с деталями."
 
 #: gnubg.c:7809 gnubg.c:7860 gnubg.c:7867 gnubg.c:7905 gnubg.c:7924
 #: gnubg.c:7933 gnubg.c:7940
@@ -5299,19 +5289,16 @@ msgid "GNU Backgammon - Cube"
 msgstr ""
 
 #: gtkgame.c:997
-#, fuzzy
 msgid "Messages - GNU Backgammon"
-msgstr "GNU Backgammon (Короткие нарды)"
+msgstr "Сообщения - GNU Backgammon"
 
 #: gtkgame.c:1045
-#, fuzzy
 msgid "Annotation - GNU Backgammon"
-msgstr "Запуск GNU Backgammon"
+msgstr "Аннотации - GNU Backgammon"
 
 #: gtkgame.c:1120
-#, fuzzy
 msgid "Game record - GNU Backgammon"
-msgstr "GNU Backgammon (Короткие нарды)"
+msgstr "Запись игры - GNU Backgammon"
 
 #: gtkgame.c:1140 gtkgame.c:8716
 msgid "Move back to the previous game"
@@ -5898,9 +5885,8 @@ msgid "/_Analyse/Add to player records/Session statistics"
 msgstr ""
 
 #: gtkgame.c:2529
-#, fuzzy
 msgid "/_Analyse/Relational database/Add match or session..."
-msgstr "/_Файл/_Открыть/_Матч или сессию..."
+msgstr "/_Анализ/_Реляционная база данных/_Добавить матч или сессию..."
 
 #: gtkgame.c:2531
 msgid "/_Analyse/Relational database/Test..."
@@ -6103,9 +6089,8 @@ msgid "/_Windows/Hide panels"
 msgstr ""
 
 #: gtkgame.c:2619
-#, fuzzy
 msgid "/_Windows/_Toolbar"
-msgstr "/_Окна"
+msgstr "/_Окна/_Панель интсрументов"
 
 #: gtkgame.c:2620
 msgid "/_Windows/_Toolbar/Text only"
@@ -6253,9 +6238,8 @@ msgid "Shortcut buttons"
 msgstr "\"Горячие\" клавиши"
 
 #: gtkgame.c:3928
-#, fuzzy
 msgid "Start a new money game session"
-msgstr "Начать новую игру, новый матч, новую сессию или позицию"
+msgstr "Начать новую игры на деньги"
 
 #: gtkgame.c:3949
 #, c-format
@@ -6443,9 +6427,8 @@ msgid "Import from format: "
 msgstr "Импорт из формата:"
 
 #: gtkgame.c:4517
-#, fuzzy
 msgid "Go to default path"
-msgstr "Запомнить путь"
+msgstr "Использовать путь по умолчанию"
 
 #: gtkgame.c:4575
 msgid "Open commands"
@@ -7050,9 +7033,8 @@ msgstr[1] ""
 msgstr[2] ""
 
 #: gtkgame.c:7335 show.c:983
-#, fuzzy
 msgid "Money Session"
-msgstr "Сессия"
+msgstr "Сессия игры на деньги"
 
 #: gtkgame.c:7456
 msgid "About GNU Backgammon"
@@ -7075,9 +7057,8 @@ msgid "Warranty"
 msgstr "Гарантии"
 
 #: gtkgame.c:7571
-#, fuzzy
 msgid "GNU Backgammon - Build Info"
-msgstr "GNU Backgammon - Подсказка"
+msgstr "GNU Backgammon - Информация о сборке"
 
 # DIG: криво!!!
 #: gtkgame.c:7603
@@ -7093,12 +7074,10 @@ msgstr ""
 "некоторых условий.  GNU Backgammon не даёт абсолютно никаких гарантий."
 
 #: gtkgame.c:7670
-#, fuzzy
 msgid "GNU Backgammon - Credits"
-msgstr "GNU Backgammon - Подсказка"
+msgstr "GNU Backgammon - Авторы"
 
 #: gtkgame.c:7716
-#, fuzzy
 msgid "Special thanks"
 msgstr "Отдельная благодарность:"
 
@@ -8546,7 +8525,6 @@ msgid "Export of PDF files"
 msgstr ""
 
 #: gtkpath.c:145
-#, fuzzy
 msgid "Export of PNG positions"
 msgstr "Экспортировать позицию в PNG"
 
@@ -8639,9 +8617,8 @@ msgid "GNU Backgammon - Appearance"
 msgstr ""
 
 #: gtkprefs.c:236
-#, fuzzy
 msgid "predefined"
-msgstr "not defined"
+msgstr "заранее определённый"
 
 #: gtkprefs.c:247
 msgid "Custom design"
@@ -8676,7 +8653,6 @@ msgid "Piece will be a flat sided disc"
 msgstr ""
 
 #: gtkprefs.c:436
-#, fuzzy
 msgid "Texture type"
 msgstr "Текстура"
 
@@ -8743,9 +8719,8 @@ msgid ""
 msgstr ""
 
 #: gtkprefs.c:569
-#, fuzzy
 msgid "Rounded points"
-msgstr "2 очка"
+msgstr ""
 
 #: gtkprefs.c:570
 msgid "Display the points with a rounded end"
@@ -8954,7 +8929,6 @@ msgid "Light Source Type"
 msgstr ""
 
 #: gtkprefs.c:1347
-#, fuzzy
 msgid "Positional"
 msgstr "Позиция"
 
@@ -8963,7 +8937,6 @@ msgid "This is a fixed light source, like a lamp"
 msgstr ""
 
 #: gtkprefs.c:1352
-#, fuzzy
 msgid "Directional"
 msgstr "Направление"
 
@@ -8972,9 +8945,8 @@ msgid "This is a light direction, like the sun"
 msgstr ""
 
 #: gtkprefs.c:1358
-#, fuzzy
 msgid "Light Position"
-msgstr "Редактирование позиции"
+msgstr "Позиция источника света"
 
 #: gtkprefs.c:1368
 msgid "Left"
@@ -9195,14 +9167,12 @@ msgid "Author of new design:"
 msgstr ""
 
 #: gtkprefs.c:2387 gtkprefs.c:2460
-#, fuzzy
 msgid "Export Design"
-msgstr "Экспортировать сессию в PDF"
+msgstr ""
 
 #: gtkprefs.c:2413
-#, fuzzy
 msgid "User defined"
-msgstr "not defined"
+msgstr "Определён пользователем"
 
 #: gtkprefs.c:2469
 msgid "File not found or not designs in file."
@@ -9252,14 +9222,12 @@ msgid "Update design"
 msgstr ""
 
 #: gtkprefs.c:2698
-#, fuzzy
 msgid "Export design"
-msgstr "Экспортировать сессию в PDF"
+msgstr ""
 
 #: gtkprefs.c:2706
-#, fuzzy
 msgid "Import design"
-msgstr "Импортировать BKG сессию"
+msgstr ""
 
 #: gtkprefs.c:2887
 msgid "Lighting"
@@ -9809,17 +9777,17 @@ msgid "Move number %d:"
 msgstr ""
 
 #: html.c:1687
-#, fuzzy, c-format
+# c-format
 msgid " %s resigns %d point"
 msgid_plural " %s resigns %d points"
 msgstr[0] ""
-"%s сдаётся %d очков\n"
+"%s сдаётся, %d очко\n"
 "\n"
 msgstr[1] ""
-"%s сдаётся %d очков\n"
+"%s сдаётся, %d очка\n"
 "\n"
 msgstr[2] ""
-"%s сдаётся %d очков\n"
+"%s сдаётся, %d очков\n"
 "\n"
 
 #: html.c:1699
@@ -9973,26 +9941,25 @@ msgid "Annotation"
 msgstr ""
 
 #: html.c:3146
-#, fuzzy, c-format
+# c-format
 msgid "%s's rating"
-msgstr "Рейтинг для %s: %s\n"
+msgstr "Рейтинг для %s"
 
 #: html.c:3159 postscript.c:911 text.c:714
 msgid "%B %d, %Y"
 msgstr ""
 
 #: html.c:3160
-#, fuzzy
 msgid "Date"
-msgstr "Дата:"
+msgstr "Дата"
 
 #: html.c:3165
 msgid "Event"
-msgstr ""
+msgstr "Событие"
 
 #: html.c:3167 relational.c:292
 msgid "Place"
-msgstr ""
+msgstr "Место"
 
 #: html.c:3168
 msgid "Annotator"
@@ -10000,7 +9967,7 @@ msgstr ""
 
 #: html.c:3169
 msgid "Comment"
-msgstr ""
+msgstr "Комментарий"
 
 #: html.c:3206
 msgid "Recorded player statistics"
@@ -10052,11 +10019,8 @@ msgid "gnubg.css is not written since it already exist in \"%s\"\n"
 msgstr ""
 
 #: html.c:3512
-#, fuzzy
 msgid "You must specify a file to export to (see `help export game html')."
-msgstr ""
-"Вам следует указать по крайней мере один тип анализа (см. `help set\n"
-"analysis')."
+msgstr "Вам следует задать файл для экспорта (см. `help export game html')."
 
 #: html.c:3609
 msgid "You must specify a file to export to (see `help export match html')."
@@ -11233,9 +11197,8 @@ msgid "Error calling relational()"
 msgstr ""
 
 #: relational.c:106 relational.c:274
-#, fuzzy
 msgid "Error connecting to database"
-msgstr "Позиции нет в базе данных"
+msgstr "Ошибка при подключении к базе данных"
 
 #: relational.c:126
 msgid "Match succesfully added to database"
@@ -11246,7 +11209,6 @@ msgid "Error adding match to database"
 msgstr ""
 
 #: relational.c:132
-#, fuzzy
 msgid "No match is in progress"
 msgstr "No match is being played."
 
@@ -14563,9 +14525,8 @@ msgid "Warnings are given for '%s' or worse plays.\n"
 msgstr "Предупреждения даются для '%s' или худшей игры.\n"
 
 #: show.c:2044
-#, fuzzy
 msgid "window"
-msgstr "/_Окна"
+msgstr "окно"
 
 #: show.c:2055
 msgid ""
@@ -14940,11 +14901,8 @@ msgstr ""
 "\n"
 
 #: text.c:935
-#, fuzzy
 msgid "You must specify a file to export to (see `help export game text')."
-msgstr ""
-"Вам следует указать по крайней мере один тип анализа (см. `help set\n"
-"analysis')."
+msgstr "Вам следует указать файл для экспорта (см. `help export game text')."
 
 #: text.c:972
 msgid "You must specify a file to export to (see `help export match text')."
