@@ -193,8 +193,6 @@ duplication of effort and to make sure our changes merge easily.
 ** When selecting a cell in the game record window with the mouse, the
   window shouldn't scroll to centre the current record -- checking
   gtk_clist_row_is_visible should fix this. (gary)
-** Reaching the Crawford game doesn't automatically toggle the check
-  button in the board window.
 ** Dithering problems in GDK RGB (gary).
 ** >5 chequers on a point no longer work correctly with translucency. (gary)
 

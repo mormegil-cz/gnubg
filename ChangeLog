@@ -1,3 +1,14 @@
+Wed Nov 29 11:35:41 2000  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (ApplyMove): Added `fCheckLegal' parameter; this is required
+	to handle loading games with abbreviated (or illegal!) moves.  All
+	callers changed.
+
+	* play.c (ApplyMoveRecord): Set fCrawford and fPostCrawford when
+	applying a GAMEINFO record.
+	(NextTurn): If fAutoCrawford is on, then decide whether the end of
+	game triggers the Crawford rule.
+
 Tue Nov 21 12:54:21 2000  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (ShowBoard): Show the player name line correctly in the

@@ -115,7 +115,9 @@ static void ApplyMoveRecord( moverecord *pmr ) {
 	anDice[ 0 ] = anDice[ 1 ] = 0;
 	fResigned = fDoubled = FALSE;
 	nCube = 1 << pmr->g.nAutoDoubles;
-    
+	fCrawford = pmr->g.fCrawfordGame;
+	fPostCrawford = !fCrawford && ( anScore[ 0 ] == nMatchTo - 1 ||
+					anScore[ 1 ] == nMatchTo - 1 );
 	break;
 	
     case MOVE_DOUBLE:
@@ -807,10 +809,10 @@ extern void NextTurn( void ) {
 #endif
 	
 	if( nMatchTo && fAutoCrawford ) {
-	    fPostCrawford = fCrawford && anScore[ pmgi->fWinner ] < nMatchTo;
+	    fPostCrawford |= fCrawford && anScore[ pmgi->fWinner ] < nMatchTo;
 	    fCrawford = !fPostCrawford && !fCrawford &&
 		anScore[ pmgi->fWinner ] == nMatchTo - 1 &&
-		anScore[ !pmgi->fWinner ] == nMatchTo - 1;
+		anScore[ !pmgi->fWinner ] != nMatchTo - 1;
 	}
 	
 	CommandShowScore( NULL );
