@@ -99,8 +99,10 @@ extern int getLuckRating ( const float rLuck );
 extern float
 relativeFibsRating ( const float r, const int n );
 
-extern void
-getMWCFromError ( const statcontext *psc,
-                  float aar[ 2 ][ 2 ] );
+extern float
+absoluteFibsRating ( const float r, const int n );
+
+extern float
+getMWCFromError ( const statcontext *psc, float *ar );
 
 #endif

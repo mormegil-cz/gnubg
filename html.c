@@ -2396,7 +2396,7 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
   ratingtype rt[ 2 ];
   float ar[ 2 ];
   int ai[ 2 ];
-  float aar[ 2 ][ 2 ];
+  float r;
 
   const char *aszLuckRating[] = {
     N_("&quot;Haaa-haaa&quot;"),
@@ -2488,20 +2488,20 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow2 ( pf,
                            _("Error rate (total)"), 
                            "%+6.3f", "%+7.3f%%",
-                           psc->arErrorCheckerplay[ 0 ][ 0 ],
-                           psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
-                           psc->arErrorCheckerplay[ 1 ][ 0 ],
-                           psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f );
+                           -psc->arErrorCheckerplay[ 0 ][ 0 ],
+                           -psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
+                           -psc->arErrorCheckerplay[ 1 ][ 0 ],
+                           -psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f );
       printStatTableRow2 ( pf,
                            _("Error rate (pr. move)"), 
                            "%+6.3f", "%+7.3f%%",
-                           psc->arErrorCheckerplay[ 0 ][ 0 ] /
+                           -psc->arErrorCheckerplay[ 0 ][ 0 ] /
                            psc->anUnforcedMoves[ 0 ],
-                           psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
+                           -psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
                            psc->anUnforcedMoves[ 0 ],
-                           psc->arErrorCheckerplay[ 1 ][ 0 ] /
+                           -psc->arErrorCheckerplay[ 1 ][ 0 ] /
                            psc->anUnforcedMoves[ 1 ],
-                           psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
+                           -psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
                            psc->anUnforcedMoves[ 1 ] );
     }
     else {
@@ -2509,21 +2509,21 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow2 ( pf,
                            _("Error rate (total)"), 
                            "%+6.3f", "%+7.3f%",
-                           psc->arErrorCheckerplay[ 0 ][ 0 ],
-                           psc->arErrorCheckerplay[ 0 ][ 1 ],
-                           psc->arErrorCheckerplay[ 1 ][ 0 ],
-                           psc->arErrorCheckerplay[ 1 ][ 1 ] );
+                           -psc->arErrorCheckerplay[ 0 ][ 0 ],
+                           -psc->arErrorCheckerplay[ 0 ][ 1 ],
+                           -psc->arErrorCheckerplay[ 1 ][ 0 ],
+                           -psc->arErrorCheckerplay[ 1 ][ 1 ] );
 
       printStatTableRow2 ( pf,
                            _("Error rate (pr. move)"), 
                            "%+6.3f", "%+7.3f%",
-                           psc->arErrorCheckerplay[ 0 ][ 0 ] /
+                           -psc->arErrorCheckerplay[ 0 ][ 0 ] /
                            psc->anUnforcedMoves[ 0 ],
-                           psc->arErrorCheckerplay[ 0 ][ 1 ] /
+                           -psc->arErrorCheckerplay[ 0 ][ 1 ] /
                            psc->anUnforcedMoves[ 0 ],
-                           psc->arErrorCheckerplay[ 1 ][ 0 ] /
+                           -psc->arErrorCheckerplay[ 1 ][ 0 ] /
                            psc->anUnforcedMoves[ 1 ],
-                           psc->arErrorCheckerplay[ 1 ][ 1 ] /
+                           -psc->arErrorCheckerplay[ 1 ][ 1 ] /
                            psc->anUnforcedMoves[ 1 ] );
 
     }
@@ -2640,101 +2640,101 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       printStatTableRow3 ( pf, _ ( "Missed doubles around DP" ),
                            "%d", "%+6.3f", "%+7.3f%%",
                            psc->anCubeMissedDoubleDP[ 0 ],
-                           psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-                           psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
+                           -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+                           -psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
                            psc->anCubeMissedDoubleDP[ 1 ],
-                           psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-                           psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f );
+                           -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+                           -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f );
       printStatTableRow3 ( pf, _ ( "Missed doubles around TG" ),
                            "%d", "%+6.3f", "%+7.3f%%",
                            psc->anCubeMissedDoubleTG[ 0 ],
-                           psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-                           psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
+                           -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+                           -psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
                            psc->anCubeMissedDoubleTG[ 1 ],
-                           psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-                           psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f );
+                           -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+                           -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f );
       printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
                            "%d", "%+6.3f", "%+7.3f%%",
                            psc->anCubeWrongDoubleDP[ 0 ],
-                           psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-                           psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
+                           -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+                           -psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
                            psc->anCubeWrongDoubleDP[ 1 ],
-                           psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-                           psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f );
+                           -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+                           -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f );
       printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
                            "%d", "%+6.3f", "%+7.3f%%",
                            psc->anCubeWrongDoubleTG[ 0 ],
-                           psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-                           psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
+                           -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+                           -psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
                            psc->anCubeWrongDoubleTG[ 1 ],
-                           psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-                           psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f );
+                           -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+                           -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f );
       printStatTableRow3 ( pf, _ ( "Wrong takes"),
                            "%d", "%+6.3f", "%+7.3f%%",
                            psc->anCubeWrongTake[ 0 ],
-                           psc->arErrorWrongTake[ 0 ][ 0 ],
-                           psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
+                           -psc->arErrorWrongTake[ 0 ][ 0 ],
+                           -psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
                            psc->anCubeWrongTake[ 1 ],
-                           psc->arErrorWrongTake[ 1 ][ 0 ],
-                           psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f );
+                           -psc->arErrorWrongTake[ 1 ][ 0 ],
+                           -psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f );
       printStatTableRow3 ( pf, _ ( "Wrong passes"),
                            "%d", "%+6.3f", "%+7.3f%%",
                            psc->anCubeWrongPass[ 0 ],
-                           psc->arErrorWrongPass[ 0 ][ 0 ],
-                           psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
+                           -psc->arErrorWrongPass[ 0 ][ 0 ],
+                           -psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
                            psc->anCubeWrongPass[ 1 ],
-                           psc->arErrorWrongPass[ 1 ][ 0 ],
-                           psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
+                           -psc->arErrorWrongPass[ 1 ][ 0 ],
+                           -psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
     }
     else {
       printStatTableRow3 ( pf, _ ( "Missed doubles around DP"),
                            "%d", "%+6.3f", "%+7.3f",
                            psc->anCubeMissedDoubleDP[ 0 ],
-                           psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-                           psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
+                           -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+                           -psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
                            psc->anCubeMissedDoubleDP[ 1 ],
-                           psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-                           psc->arErrorMissedDoubleDP[ 1 ][ 1 ] );
+                           -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+                           -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] );
       printStatTableRow3 ( pf, _ ( "Missed doubles around TG"),
                            "%d", "%+6.3f", "%+7.3f",
                            psc->anCubeMissedDoubleTG[ 0 ],
-                           psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-                           psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
+                           -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+                           -psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
                            psc->anCubeMissedDoubleTG[ 1 ],
-                           psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-                           psc->arErrorMissedDoubleTG[ 1 ][ 1 ] );
+                           -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+                           -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] );
       printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
                            "%d", "%+6.3f", "%+7.3f",
                            psc->anCubeWrongDoubleDP[ 0 ],
-                           psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-                           psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
+                           -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+                           -psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
                            psc->anCubeWrongDoubleDP[ 1 ],
-                           psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-                           psc->arErrorWrongDoubleDP[ 1 ][ 1 ] );
+                           -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+                           -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] );
       printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
                            "%d", "%+6.3f", "%+7.3f",
                            psc->anCubeWrongDoubleTG[ 0 ],
-                           psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-                           psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
+                           -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+                           -psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
                            psc->anCubeWrongDoubleTG[ 1 ],
-                           psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-                           psc->arErrorWrongDoubleTG[ 1 ][ 1 ] );
+                           -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+                           -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] );
       printStatTableRow3 ( pf, _ ( "Wrong takes"),
                            "%d", "%+6.3f", "%+7.3f",
                            psc->anCubeWrongTake[ 0 ],
-                           psc->arErrorWrongTake[ 0 ][ 0 ],
-                           psc->arErrorWrongTake[ 0 ][ 1 ],
+                           -psc->arErrorWrongTake[ 0 ][ 0 ],
+                           -psc->arErrorWrongTake[ 0 ][ 1 ],
                            psc->anCubeWrongTake[ 1 ],
-                           psc->arErrorWrongTake[ 1 ][ 0 ],
-                           psc->arErrorWrongTake[ 1 ][ 1 ] );
+                           -psc->arErrorWrongTake[ 1 ][ 0 ],
+                           -psc->arErrorWrongTake[ 1 ][ 1 ] );
       printStatTableRow3 ( pf, _ ( "Wrong passes"),
                            "%d", "%+6.3f", "%+7.3f",
                            psc->anCubeWrongPass[ 0 ],
-                           psc->arErrorWrongPass[ 0 ][ 0 ],
-                           psc->arErrorWrongPass[ 0 ][ 1 ],
+                           -psc->arErrorWrongPass[ 0 ][ 0 ],
+                           -psc->arErrorWrongPass[ 0 ][ 1 ],
                            psc->anCubeWrongPass[ 1 ],
-                           psc->arErrorWrongPass[ 1 ][ 0 ],
-                           psc->arErrorWrongPass[ 1 ][ 1 ] );
+                           -psc->arErrorWrongPass[ 1 ][ 0 ],
+                           -psc->arErrorWrongPass[ 1 ][ 1 ] );
     }
 
     for ( i = 0 ; i < 2; i++ )
@@ -2795,31 +2795,25 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
       /* skill */
 
-      getMWCFromError ( psc, aar );
+      r = getMWCFromError ( psc, ar );
 
       printStatTableRow ( pf,
                           _( "MWC against current opponent"),
                           "%6.2f%%",
-                          100.0 * aar[ 0 ][ 0 ], 
-                          100.0 * aar[ 1 ][ 0 ] );
+                          100.0 * r, 
+                          100.0 * ( 1.0 - r ) );
 
       printStatTableRow ( pf,
                           _( "Relative rating"),
                           "%6.2f",
-                          relativeFibsRating ( aar[ 0 ][ 0 ], pms->nMatchTo ),
-                          relativeFibsRating ( aar[ 1 ][ 0 ], pms->nMatchTo ) );
+                          relativeFibsRating ( r, pms->nMatchTo ),
+                          relativeFibsRating ( 1.0 - r, pms->nMatchTo ) );
 
       printStatTableRow ( pf,
-                          _( "MWC against perfect opponent"),
-                          "%6.2f%%",
-                          100.0 * aar[ 0 ][ 1 ], 
-                          100.0 * aar[ 1 ][ 1 ] );
-
-      printStatTableRow ( pf,
-                          _( "Relative rating"),
+                          _( "Guestimated abs. rating"),
                           "%6.2f",
-                          relativeFibsRating ( aar[ 0 ][ 1 ], pms->nMatchTo ),
-                          relativeFibsRating ( aar[ 1 ][ 1 ], pms->nMatchTo ) );
+                          absoluteFibsRating ( ar[ 0 ], pms->nMatchTo ),
+                          absoluteFibsRating ( ar[ 1 ], pms->nMatchTo ) );
 
 
     }

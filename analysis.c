@@ -967,41 +967,72 @@ IniStatcontext ( statcontext *psc ) {
 extern float
 relativeFibsRating ( const float r, const int n ) {
 
-  return 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
+  return - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
 
 } 
 
 
-extern void
-getMWCFromError ( const statcontext *psc,
-                  float aar[ 2 ][ 2 ] ) {
+/*
+ * Calculate an estimated rating based on some empirical estimate
+ * using linear interpolation.
+ *
+ * Input
+ *    r: error rate pr. move
+ *    n: match length
+ *
+ */
 
-  float ar[ 2 ];
+extern float
+absoluteFibsRating ( const float r, const int n ) {
+
+  static float arRating[] =
+    {  500, 1500,  1600,  1775,  1850,  2000,  2150, 2300 };
+  static float arErrorRate[] =
+    { 1e38, 0.030, 0.025, 0.020, 0.015, 0.010, 0.05, 0.0 };
   int i;
-  float r1, r2;
+  float a;
+
+  if ( r < 0 )
+    return 2300;
+
+  for ( i = 6; i >= 0; i-- ) {
+
+    if ( r < arErrorRate[ i ] ) {
+
+      a = ( arRating[ i + 1 ] -  arRating[ i ] ) / 
+        ( arErrorRate[ i + 1 ] - arErrorRate[ i ] );
+
+      return arRating[ i ] + a * ( r - arErrorRate[ i ] );
+
+    }
+
+  }
+
+  return 500;
+
+}
 
 
-  for ( i = 0; i < 2; i++ ) 
-    ar[ i ] = psc->arErrorMissedDoubleDP[ i ][ 1 ]
+extern float
+getMWCFromError ( const statcontext *psc, float *ar ) {
+
+  float arx[ 2 ];
+  int i;
+
+  for ( i = 0; i < 2; i++ ) {
+    arx[ i ] = psc->arErrorMissedDoubleDP[ i ][ 1 ]
       + psc->arErrorMissedDoubleTG[ i ][ 1 ]
       + psc->arErrorWrongDoubleDP[ i ][ 1 ]
       + psc->arErrorWrongDoubleTG[ i ][ 1 ]
       + psc->arErrorWrongTake[ i ][ 1 ]
       + psc->arErrorWrongPass[ i ][ 1 ]
       + psc->arErrorCheckerplay[ i ][ 1 ];
+  }
 
-  r1 = 0.5 + ar[ 0 ];
-  r2 = 0.5 + ar[ 1 ];
+  if ( ar )
+    memcpy ( ar, arx, 2 * sizeof ( float ) );
 
-  /* mwc against current opponent */
-
-  aar[ 0 ][ 0 ] = r2 / ( r1 + r2 );
-  aar[ 1 ][ 0 ] = r1 / ( r1 + r2 );
-
-  /* mwc against player with error = 0 */
-
-  aar[ 0 ][ 1 ] = 0.5 / ( r1 + 0.5 );
-  aar[ 1 ][ 1 ] = 0.5 / ( r2 + 0.5 );
+  return 0.50 + arx[ 0 ] - arx[ 1 ];
 
 }
 
@@ -1059,17 +1090,17 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Error rate (pr. move)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
-		  psc->arErrorCheckerplay[ 0 ][ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
-		  psc->arErrorCheckerplay[ 1 ][ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f,
-		  psc->arErrorCheckerplay[ 0 ][ 0 ] /
+		  -psc->arErrorCheckerplay[ 0 ][ 0 ],
+		  -psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
+		  -psc->arErrorCheckerplay[ 1 ][ 0 ],
+		  -psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f,
+		  -psc->arErrorCheckerplay[ 0 ][ 0 ] /
 		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
+		  -psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
 		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 0 ] /
+		  -psc->arErrorCheckerplay[ 1 ][ 0 ] /
 		  psc->anUnforcedMoves[ 1 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
+		  -psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
 		  psc->anUnforcedMoves[ 1 ] );
           strcat ( szOutput, szTemp);
       } else {
@@ -1077,17 +1108,17 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
 		  "Error rate (pr. move)\t\t"
 		  "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n\n"),
-		  psc->arErrorCheckerplay[ 0 ][ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ],
-		  psc->arErrorCheckerplay[ 1 ][ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ],
-		  psc->arErrorCheckerplay[ 0 ][ 0 ] /
+		  -psc->arErrorCheckerplay[ 0 ][ 0 ],
+		  -psc->arErrorCheckerplay[ 0 ][ 1 ],
+		  -psc->arErrorCheckerplay[ 1 ][ 0 ],
+		  -psc->arErrorCheckerplay[ 1 ][ 1 ],
+		  -psc->arErrorCheckerplay[ 0 ][ 0 ] /
 		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ] /
+		  -psc->arErrorCheckerplay[ 0 ][ 1 ] /
 		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 0 ] /
+		  -psc->arErrorCheckerplay[ 1 ][ 0 ] /
 		  psc->anUnforcedMoves[ 1 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ] /
+		  -psc->arErrorCheckerplay[ 1 ][ 1 ] /
 		  psc->anUnforcedMoves[ 1 ] );
           strcat ( szOutput, szTemp);
       }
@@ -1192,7 +1223,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       strcat ( szOutput, szTemp);
       
       if ( ms.nMatchTo ){
-	  sprintf ( szTemp,_("Missed doubles around DP\t"
+        sprintf ( szTemp,_("Missed doubles around DP\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Missed doubles around TG\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
@@ -1204,42 +1235,42 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"
 		  "Wrong passes\t\t\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"),
-		  psc->anCubeMissedDoubleDP[ 0 ],
-		  psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-		  psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
+                  psc->anCubeMissedDoubleDP[ 0 ],
+		  -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+		  -psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
 		  psc->anCubeMissedDoubleDP[ 1 ],
-		  psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-		  psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f,
+		  -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+		  -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f,
 		  psc->anCubeMissedDoubleTG[ 0 ],
-		  psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-		  psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
+		  -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+		  -psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
 		  psc->anCubeMissedDoubleTG[ 1 ],
-		  psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-		  psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f,
+		  -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+		  -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongDoubleDP[ 0 ],
-		  psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-		  psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
+		  -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+		  -psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongDoubleDP[ 1 ],
-		  psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-		  psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f,
+		  -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+		  -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongDoubleTG[ 0 ],
-		  psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-		  psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
+		  -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+		  -psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongDoubleTG[ 1 ],
-		  psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-		  psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f,
+		  -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+		  -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongTake[ 0 ],
-		  psc->arErrorWrongTake[ 0 ][ 0 ],
-		  psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
+		  -psc->arErrorWrongTake[ 0 ][ 0 ],
+		  -psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongTake[ 1 ],
-		  psc->arErrorWrongTake[ 1 ][ 0 ],
-		  psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f,
+		  -psc->arErrorWrongTake[ 1 ][ 0 ],
+		  -psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongPass[ 0 ],
-		  psc->arErrorWrongPass[ 0 ][ 0 ],
-		  psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
+		  -psc->arErrorWrongPass[ 0 ][ 0 ],
+		  -psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
 		  psc->anCubeWrongPass[ 1 ],
-		  psc->arErrorWrongPass[ 1 ][ 0 ],
-		  psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
+		  -psc->arErrorWrongPass[ 1 ][ 0 ],
+		  -psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
           strcat ( szOutput, szTemp);
       } else {
 	  sprintf ( szTemp,_("Missed doubles around DP\t"
@@ -1255,41 +1286,41 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 		  "Wrong passes\t\t\t"
 		  "%3d (%+6.3f (%+7.3f%%)\t%3d (%+6.3f (%+7.3f%%)\n"),
 		  psc->anCubeMissedDoubleDP[ 0 ],
-		  psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-		  psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
+		  -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+		  -psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
 		  psc->anCubeMissedDoubleDP[ 1 ],
-		  psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-		  psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
+		  -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+		  -psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
 		  psc->anCubeMissedDoubleTG[ 0 ],
-		  psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-		  psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
+		  -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+		  -psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
 		  psc->anCubeMissedDoubleTG[ 1 ],
-		  psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-		  psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
+		  -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+		  -psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
 		  psc->anCubeWrongDoubleDP[ 0 ],
-		  psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-		  psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
+		  -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+		  -psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
 		  psc->anCubeWrongDoubleDP[ 1 ],
-		  psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-		  psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
+		  -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+		  -psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
 		  psc->anCubeWrongDoubleTG[ 0 ],
-		  psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-		  psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
+		  -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+		  -psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
 		  psc->anCubeWrongDoubleTG[ 1 ],
-		  psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-		  psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
+		  -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+		  -psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
 		  psc->anCubeWrongTake[ 0 ],
-		  psc->arErrorWrongTake[ 0 ][ 0 ],
-		  psc->arErrorWrongTake[ 0 ][ 1 ],
+		  -psc->arErrorWrongTake[ 0 ][ 0 ],
+		  -psc->arErrorWrongTake[ 0 ][ 1 ],
 		  psc->anCubeWrongTake[ 1 ],
-		  psc->arErrorWrongTake[ 1 ][ 0 ],
-		  psc->arErrorWrongTake[ 1 ][ 1 ],
+		  -psc->arErrorWrongTake[ 1 ][ 0 ],
+		  -psc->arErrorWrongTake[ 1 ][ 1 ],
 		  psc->anCubeWrongPass[ 0 ],
-		  psc->arErrorWrongPass[ 0 ][ 0 ],
-		  psc->arErrorWrongPass[ 0 ][ 1 ],
+		  -psc->arErrorWrongPass[ 0 ][ 0 ],
+		  -psc->arErrorWrongPass[ 0 ][ 1 ],
 		  psc->anCubeWrongPass[ 1 ],
-		  psc->arErrorWrongPass[ 1 ][ 0 ],
-		  psc->arErrorWrongPass[ 1 ][ 1 ] );
+		  -psc->arErrorWrongPass[ 1 ][ 0 ],
+		  -psc->arErrorWrongPass[ 1 ][ 1 ] );
           strcat ( szOutput, szTemp);
       }
       for ( i = 0 ; i < 2; i++ )
@@ -1329,30 +1360,25 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 
   if ( ms.nMatchTo ) {
 
-    float aar[ 2 ][ 2 ];
+    float ar[ 2 ];
+    float r = getMWCFromError ( psc, ar );
 
-    getMWCFromError ( psc, aar );
-
-    sprintf ( szTemp, _("Match winning chance\nagainst opponent:\t\t%7.2f%%\t\t%7.2f%%\n"),
-              100.0 * aar[ 0 ][ 0 ],
-              100.0 * aar[ 1 ][ 0 ] );
+    sprintf ( szTemp, 
+              _("Match winning chance\nagainst opponent"
+                ":\t\t%7.2f%%\t\t%7.2f%%\n"),
+              100.0 * r, 100.0 * ( 1.0 - r ) );
     strcat ( szOutput, szTemp);
 
     sprintf ( szTemp, _("Relative rating:\t\t%+7.2f\t\t\t%+7.2f\n\n"),
-              relativeFibsRating ( aar[ 0 ][ 0 ], ms.nMatchTo ),
-              relativeFibsRating ( aar[ 1 ][ 0 ], ms.nMatchTo ) );
+              relativeFibsRating ( r, ms.nMatchTo ),
+              relativeFibsRating ( 1.0 - r, ms.nMatchTo ) );
     strcat ( szOutput, szTemp);
 
     
 
-    sprintf ( szTemp, _("Match winning chance\nagainst perfect opponent:\t%7.2f%%\t\t%7.2f%%\n"),
-              100.0 * aar[ 0 ][ 1 ],
-              100.0 * aar[ 1 ][ 1 ] );
-    strcat ( szOutput, szTemp);
-
-    sprintf ( szTemp, _("Relative rating:\t\t%+7.2f\t\t\t%+7.2f\n\n"),
-              relativeFibsRating ( aar[ 0 ][ 1 ], ms.nMatchTo ),
-              relativeFibsRating ( aar[ 1 ][ 1 ], ms.nMatchTo ) );
+    sprintf ( szTemp, _("Guestimated abs. rating:\t\t%+7.2f\t\t\t%+7.2f\n\n"),
+              absoluteFibsRating ( ar[ 0 ], ms.nMatchTo ),
+              absoluteFibsRating ( ar[ 1 ], ms.nMatchTo ) );
     strcat ( szOutput, szTemp);
 
 

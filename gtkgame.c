@@ -6999,7 +6999,7 @@ extern void GTKSet( void *p ) {
 }
 
 static void FormatStatEquity( char *sz, float ar[ 2 ], int nDenominator,
-			      int nMatchTo ) {
+			      int nMatchTo, float rMult ) {
 
     if( !nDenominator ) {
 	strcpy( sz, "n/a" );
@@ -7007,20 +7007,20 @@ static void FormatStatEquity( char *sz, float ar[ 2 ], int nDenominator,
     }
 
     if( nMatchTo )
-	sprintf( sz, "%+.3f (%+.3f%%)", ar[ 0 ] / nDenominator,
-		 ar[ 1 ] * 100.0f / nDenominator );
+	sprintf( sz, "%+.3f (%+.3f%%)", rMult * ar[ 0 ] / nDenominator,
+		 rMult * ar[ 1 ] * 100.0f / nDenominator );
     else
-	sprintf( sz, "%+.3f (%+.3f)", ar[ 0 ] / nDenominator,
-		 ar[ 1 ] / nDenominator );
+	sprintf( sz, "%+.3f (%+.3f)", rMult * ar[ 0 ] / nDenominator,
+		 rMult * ar[ 1 ] / nDenominator );
 }
 
 static void FormatStatCubeError( char *sz, int n, float ar[ 2 ],
 				 int nMatchTo ) {
 
     if( nMatchTo )
-	sprintf( sz, "%d (%+.3f, %+.3f%%)", n, ar[ 0 ], ar[ 1 ] * 100.0f );
+	sprintf( sz, "%d (%+.3f, %+.3f%%)", n, -ar[ 0 ], -ar[ 1 ] * 100.0f );
     else
-	sprintf( sz, "%d (%+.3f, %+.3f)", n, ar[ 0 ], ar[ 1 ] );
+	sprintf( sz, "%d (%+.3f, %+.3f)", n, -ar[ 0 ], -ar[ 1 ] );
 }
 
 extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
@@ -7063,8 +7063,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Overall rating"),
          N_("MWC against current opponent"),
          N_("Relative rating"),
-         N_("MWC against perfect opponent"),
-         N_("Relative rating"),
+         N_("Guestimated abs. rating"),
   };
 
   GtkWidget *pwDialog = CreateDialog( szTitle,
@@ -7074,7 +7073,8 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   int i;
   char sz[ 32 ];
   ratingtype rt[ 2 ];
-  float aar[ 2 ][ 2 ];
+  float ar[ 2 ];
+  float r;
 #if WIN32
   char szOutput[4096];
     GtkWidget *pwButtons,
@@ -7100,7 +7100,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
   gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
 
-  for (i = 0; i < (33 + ( pms->nMatchTo != 0 ) * 4 ); i++) {
+  for (i = 0; i < (33 + ( pms->nMatchTo != 0 ) * 3 ); i++) {
     gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
     gtk_clist_set_text( GTK_CLIST( pwStats ), i, 0, gettext ( aszLabels[i] ) );
   }
@@ -7142,16 +7142,16 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 9, 2, sz);
 
-  FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo );
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 1, sz);
-  FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo );
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 10, 2, sz);
   
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ],
-		    psc->anUnforcedMoves[ 0 ], pms->nMatchTo );
+		    psc->anUnforcedMoves[ 0 ], pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 1, sz);
   FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ],
-		    psc->anUnforcedMoves[ 1 ], pms->nMatchTo );
+		    psc->anUnforcedMoves[ 1 ], pms->nMatchTo, -1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 11, 2, sz);
   
   sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYGOOD ]);
@@ -7175,16 +7175,16 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYBAD ]);
   gtk_clist_set_text( GTK_CLIST( pwStats ), 16, 2, sz);
 
-  FormatStatEquity( sz, psc->arLuck[ 0 ], 1, pms->nMatchTo );
+  FormatStatEquity( sz, psc->arLuck[ 0 ], 1, pms->nMatchTo, 1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 1, sz);
-  FormatStatEquity( sz, psc->arLuck[ 1 ], 1, pms->nMatchTo );
+  FormatStatEquity( sz, psc->arLuck[ 1 ], 1, pms->nMatchTo, 1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 17, 2, sz);
   
   FormatStatEquity( sz, psc->arLuck[ 0 ], psc->anTotalMoves[ 0 ],
-		    pms->nMatchTo );
+		    pms->nMatchTo, 1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 1, sz);
   FormatStatEquity( sz, psc->arLuck[ 1 ], psc->anTotalMoves[ 1 ],
-		    pms->nMatchTo );
+		    pms->nMatchTo, 1.0 );
   gtk_clist_set_text( GTK_CLIST( pwStats ), 18, 2, sz);
   
   for ( i = 0 ; i < 2; i++ )
@@ -7287,27 +7287,22 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
   if ( pms->nMatchTo ) {
 
-    getMWCFromError ( psc, aar );
+    r = getMWCFromError ( psc, ar );
 
-    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 0 ][ 0 ] );
+    sprintf ( sz, "%7.2f%%", 100.0 * r );
     gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 1, sz);
-    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 1 ][ 0 ] );
+    sprintf ( sz, "%7.2f%%", 100.0 * (1.0 - r) );
     gtk_clist_set_text( GTK_CLIST( pwStats ), 33, 2, sz);
 
-    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 0 ][ 0 ], ms.nMatchTo ) );
+    sprintf ( sz, "%7.2f", relativeFibsRating ( r, ms.nMatchTo ) );
     gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 1, sz);
-    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 1 ][ 0 ], ms.nMatchTo ) );
+    sprintf ( sz, "%7.2f", relativeFibsRating ( 1.0 - r, ms.nMatchTo ) );
     gtk_clist_set_text( GTK_CLIST( pwStats ), 34, 2, sz);
 
-    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 0 ][ 1 ] );
+    sprintf ( sz, "%7.2f", absoluteFibsRating ( ar[ 0 ], ms.nMatchTo ) );
     gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 1, sz);
-    sprintf ( sz, "%7.2f%%", 100.0 * aar[ 1 ][ 1 ] );
+    sprintf ( sz, "%7.2f", absoluteFibsRating ( ar[ 1 ], ms.nMatchTo ) );
     gtk_clist_set_text( GTK_CLIST( pwStats ), 35, 2, sz);
-
-    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 0 ][ 1 ], ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 1, sz);
-    sprintf ( sz, "%7.2f", relativeFibsRating ( aar[ 1 ][ 1 ], ms.nMatchTo ) );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), 36, 2, sz);
 
   }
 
