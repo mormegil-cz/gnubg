@@ -1,3 +1,7 @@
+Mon Jun  3 21:03:21 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* i18n.c: comment out lisnprintf as vsnprintf is not standard.
+
 Sun Jun  2 20:06:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (InitGTK): translate menu entries.

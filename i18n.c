@@ -185,6 +185,10 @@ lisprintf(char *str, const char *format, ...) {
 
 }
 
+#if 0
+
+vsnprintf is not posix...
+
 extern int 
 lisnprintf(char *str, size_t size, const  char  *format, ...) {
 
@@ -202,3 +206,4 @@ lisnprintf(char *str, size_t size, const  char  *format, ...) {
     return rc;
 
 }
+#endif
