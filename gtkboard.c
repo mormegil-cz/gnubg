@@ -705,6 +705,26 @@ static void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
     gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
 }
 
+
+static void
+update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+
+  int anPip[ 2 ];
+  char *pc;
+
+  PipCount ( points, anPip );
+
+  pc = g_strdup_printf ( "%d", anPip[ 0 ] );
+  gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), pc );
+  g_free ( pc );
+
+  pc = g_strdup_printf ( "%d", anPip[ 1 ] );
+  gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), pc );
+  g_free ( pc );
+
+
+}
+
 /* A chequer has been moved or the board has been updated -- update the
    move and position ID labels. */
 static int update_move( BoardData *bd ) {
@@ -716,6 +736,7 @@ static int update_move( BoardData *bd ) {
     
     read_board( bd, points );
     update_position_id( bd, points );
+    update_pipcount ( bd, points );
 
     bd->valid_move = NULL;
     
@@ -1132,6 +1153,7 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 
 	read_board( bd, points );
 	update_position_id( bd, points );
+        update_pipcount ( bd, points );
 
 	return;
     } else if ( !dragging && ( n == POINT_UNUSED0 || n == POINT_UNUSED1 ) ) {
@@ -1156,6 +1178,7 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 	    
 	read_board( bd, points );
 	update_position_id( bd, points );
+        update_pipcount ( bd, points );
     } else if( !dragging && n == POINT_CUBE ) {
 	GTKSetCube( NULL, 0, NULL );
 	return;
@@ -1241,6 +1264,7 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 
     read_board( bd, points );
     update_position_id( bd, points );
+    update_pipcount ( bd, points );
 }
 
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
@@ -1512,6 +1536,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		
 		read_board( bd, points );
 		update_position_id( bd, points );
+                update_pipcount ( bd, points );
 	    }
 		
 	    bd->drag_point = -1;
@@ -1860,6 +1885,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
 
 	read_board( bd, bd->old_board );
 	update_position_id( bd, bd->old_board );
+        update_pipcount ( bd, bd->old_board );
     }
     
     update_match_id ( bd );
@@ -2285,27 +2311,30 @@ static void update_buttons( BoardData *pbd ) {
 	!pbd->playing )
 	c = C_NONE;
     
-    if( c == C_ROLLDOUBLE )
-	gtk_widget_show_all( pbd->usedicearea ? pbd->dice_area :
-			     pbd->rolldouble );
-    else
-	gtk_widget_hide( pbd->usedicearea ? pbd->dice_area :
-			     pbd->rolldouble );
 
-    if( c == C_TAKEDROP )
-	gtk_widget_show_all( pbd->takedrop );
-    else
-	gtk_widget_hide( pbd->takedrop );
+    if ( pbd->usedicearea ) {
 
-    if( c == C_AGREEDECLINE )
-	gtk_widget_show_all( pbd->agreedecline );
-    else
-	gtk_widget_hide( pbd->agreedecline );
+      if ( c == C_ROLLDOUBLE ) 
+	gtk_widget_show_all( pbd->dice_area );
+      else 
+	gtk_widget_hide( pbd->dice_area );
 
-    if( c == C_PLAY )
-	gtk_widget_show_all( pbd->play );
-    else
-	gtk_widget_hide( pbd->play );
+    } 
+
+    gtk_widget_set_sensitive ( pbd->roll, c == C_ROLLDOUBLE );
+    gtk_widget_set_sensitive ( pbd->doub, c == C_ROLLDOUBLE );
+
+    gtk_widget_set_sensitive ( pbd->play, c == C_PLAY );
+
+    gtk_widget_set_sensitive ( pbd->take, c == C_TAKEDROP );
+    gtk_widget_set_sensitive ( pbd->drop, c == C_TAKEDROP );
+    /* FIXME: max beavers etc */
+    gtk_widget_set_sensitive ( pbd->redouble, 
+                               c == C_TAKEDROP && ! ms.nMatchTo );
+
+    gtk_widget_set_sensitive ( pbd->agree, c == C_AGREEDECLINE );
+    gtk_widget_set_sensitive ( pbd->decline, c == C_AGREEDECLINE );
+
 }
 
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
@@ -2351,6 +2380,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 
     /* FIXME it's overkill to do this every time, but if we don't do it,
        then "set turn <player>" won't redraw the dice in the other colour. */
+
     dice_expose( pbd->dice_area, NULL, pbd );
 
     return 0;
@@ -4101,18 +4131,32 @@ static void board_size_allocate( GtkWidget *board,
     gint old_size = bd->board_size, new_size;
     GtkAllocation child_allocation;
     GtkRequisition requisition;
-    int cy;
+    int cx;
     
     memcpy( &board->allocation, allocation, sizeof( GtkAllocation ) );
+
+    /* toolbar: on top in the allocation */
     
-    gtk_widget_get_child_requisition( bd->hbox_match, &requisition );
+    gtk_widget_get_child_requisition( bd->vbox_toolbar, &requisition );
     allocation->height -= requisition.height;
     child_allocation.x = allocation->x;
-    child_allocation.y = allocation->y + allocation->height;
+    child_allocation.y = allocation->y;
     child_allocation.width = allocation->width;
     child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->hbox_match, &child_allocation );
-    
+    allocation->y += requisition.height;
+    gtk_widget_size_allocate( bd->vbox_toolbar, &child_allocation );
+
+    /* position ID, match ID: just below toolbar */
+
+    gtk_widget_get_child_requisition( bd->vbox_ids, &requisition );
+    allocation->height -= requisition.height;
+    child_allocation.x = allocation->x;
+    child_allocation.y = allocation->y;
+    child_allocation.width = allocation->width;
+    child_allocation.height = requisition.height;
+    allocation->y += requisition.height;
+    gtk_widget_size_allocate( bd->vbox_ids, &child_allocation );
+
     gtk_widget_get_child_requisition( bd->table, &requisition );
     allocation->height -= requisition.height;
     child_allocation.x = allocation->x;
@@ -4121,47 +4165,23 @@ static void board_size_allocate( GtkWidget *board,
     child_allocation.height = requisition.height;
     gtk_widget_size_allocate( bd->table, &child_allocation );
     
-    gtk_widget_get_child_requisition( bd->hbox_pos, &requisition );
-    allocation->height -= requisition.height;
-    child_allocation.x = allocation->x;
-    child_allocation.y = allocation->y + allocation->height;
-    child_allocation.width = allocation->width;
-    child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->hbox_pos, &child_allocation );
 
-    /* find the tallest out of the move widget and the button boxes */
-    gtk_widget_get_child_requisition( bd->move, &requisition );
-    cy = requisition.height;
-    gtk_widget_get_child_requisition( bd->rolldouble, &requisition );
-    if( requisition.height > cy )
-	cy = requisition.height;
-    gtk_widget_get_child_requisition( bd->takedrop, &requisition );
-    if( requisition.height > cy )
-	cy = requisition.height;
-    gtk_widget_get_child_requisition( bd->agreedecline, &requisition );
-    if( requisition.height > cy )
-	cy = requisition.height;
-    gtk_widget_get_child_requisition( bd->play, &requisition );
-    if( requisition.height > cy )
-	cy = requisition.height;
-    
+
     /* ensure there is room for the dice area or the move, whichever is
        bigger */
-    new_size = MIN( allocation->width / 108,
-		    MIN( ( allocation->height - cy - 2 ) / 72,
-			 ( allocation->height - 2 ) / 79 ) );
+    if ( bd->usedicearea ) {
 
-    if( new_size * 7 > cy )
-	cy = new_size * 7;
-    
-    gtk_widget_get_child_requisition( bd->move, &requisition );
-    child_allocation.x = allocation->x;
-    child_allocation.y = allocation->y + allocation->height - cy + 1;
-    child_allocation.width = allocation->width;
-    child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->move, &child_allocation );
+      new_size = MIN( allocation->width / 108,
+                      ( allocation->height - 2 ) / 79 );
 
-    allocation->height -= cy + 2;
+      /* subtract pixels used */
+      allocation->height -= new_size * 7 + 2;
+
+    }
+    else {
+      new_size = MIN( allocation->width / 108,
+                      ( allocation->height - 2 ) / 72 );
+    }
     
     /* FIXME what should we do if new_size < 1?  If the window manager
        honours our minimum size this won't happen, but... */
@@ -4173,46 +4193,23 @@ static void board_size_allocate( GtkWidget *board,
     }
     
     child_allocation.width = 108 * bd->board_size;
-    child_allocation.x = allocation->x + ( ( allocation->width -
+    cx = child_allocation.x = allocation->x + ( ( allocation->width -
 					     child_allocation.width ) >> 1 );
     child_allocation.height = 72 * bd->board_size;
     child_allocation.y = allocation->y + ( ( allocation->height -
 					     72 * bd->board_size ) >> 1 );
     gtk_widget_size_allocate( bd->drawing_area, &child_allocation );
 
-    child_allocation.width = 15 * bd->board_size;
-    child_allocation.x += ( 108 - 15 ) * bd->board_size;
-    child_allocation.height = 7 * bd->board_size;
-    child_allocation.y += 72 * bd->board_size + 1;
-    gtk_widget_size_allocate( bd->dice_area, &child_allocation );
+    /* allocation for dice area */
 
-    gtk_widget_get_child_requisition( bd->rolldouble, &requisition );
-    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
-	54 * bd->board_size - requisition.width );
-    child_allocation.width = requisition.width;
-    child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->rolldouble, &child_allocation );
+    if ( bd->usedicearea ) {
+      child_allocation.width = 15 * bd->board_size;
+      child_allocation.x += ( 108 - 15 ) * bd->board_size;
+      child_allocation.height = 7 * bd->board_size;
+      child_allocation.y += 72 * bd->board_size + 1;
+      gtk_widget_size_allocate( bd->dice_area, &child_allocation );
+    }
 
-    gtk_widget_get_child_requisition( bd->takedrop, &requisition );
-    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
-	54 * bd->board_size - requisition.width );
-    child_allocation.width = requisition.width;
-    child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->takedrop, &child_allocation );
-
-    gtk_widget_get_child_requisition( bd->agreedecline, &requisition );
-    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
-	54 * bd->board_size - requisition.width );
-    child_allocation.width = requisition.width;
-    child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->agreedecline, &child_allocation );
-
-    gtk_widget_get_child_requisition( bd->play, &requisition );
-    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
-	54 * bd->board_size - requisition.width );
-    child_allocation.width = requisition.width;
-    child_allocation.height = requisition.height;
-    gtk_widget_size_allocate( bd->play, &child_allocation );
 }
 
 static void AddChild( GtkWidget *pw, GtkRequisition *pr ) {
@@ -4230,8 +4227,6 @@ static void AddChild( GtkWidget *pw, GtkRequisition *pr ) {
 static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
 
     BoardData *bd;
-    GtkRequisition r;
-    int cy;
     
     if( !pw || !pr )
 	return;
@@ -4240,30 +4235,12 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
 
     bd = BOARD( pw )->board_data;
 
-    AddChild( bd->hbox_pos, pr );
+    AddChild( bd->vbox_toolbar, pr );
+    AddChild( bd->vbox_ids, pr );
     AddChild( bd->table, pr );
-    AddChild( bd->hbox_match, pr );
 
-    gtk_widget_size_request( bd->move, &r );
-    cy = MAX( r.height, 7 ); /* move or dice_area, whichever is taller */
-
-    gtk_widget_size_request( bd->rolldouble, &r );
-    if( r.height > cy )
-	cy = r.height;
-
-    gtk_widget_size_request( bd->takedrop, &r );
-    if( r.height > cy )
-	cy = r.height;
-
-    gtk_widget_size_request( bd->agreedecline, &r );
-    if( r.height > cy )
-	cy = r.height;
-
-    gtk_widget_size_request( bd->play, &r );
-    if( r.height > cy )
-	cy = r.height;
-
-    pr->height += cy;
+    if ( bd->usedicearea )
+      pr->height += 7;
 
     if( pr->width < 108 )
 	pr->width = 108;
@@ -4304,8 +4281,9 @@ static void board_set_matchid( GtkWidget *pw, BoardData *bd ) {
 
 static void board_show_child( GtkWidget *pwChild, BoardData *pbd ) {
 
-    if( pwChild != pbd->dice_area && !GTK_IS_HBUTTON_BOX( pwChild ) )
+  if( pwChild != pbd->dice_area && !GTK_IS_HBUTTON_BOX( pwChild ) ) 
 	gtk_widget_show_all( pwChild );
+
 }
 
 /* Show all children except the dice area; that one hides and shows
@@ -4509,6 +4487,36 @@ static void ButtonClicked( GtkWidget *pw, char *sz ) {
     UserCommand( sz );
 }
 
+
+static GtkWidget *
+image_from_xpm_d ( char **xpm, GtkWidget *pw ) {
+
+    GdkPixmap *ppm;
+
+    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
+            gtk_widget_get_colormap( pw ), NULL, NULL,
+                                               xpm );
+    if ( ! ppm )
+      return NULL;
+
+    return gtk_pixmap_new( ppm, NULL );
+
+}
+
+
+static GtkWidget *
+button_from_image ( GtkWidget *pwImage ) {
+
+  GtkWidget *pw = gtk_button_new ();
+
+  gtk_container_add ( GTK_CONTAINER ( pw ), pwImage );
+
+  return pw;
+
+}
+  
+
+
 static void board_init( Board *board ) {
 
     BoardData *bd = g_malloc( sizeof( *bd ) );
@@ -4516,6 +4524,13 @@ static void board_init( Board *board ) {
     GdkVisual *vis = gtk_widget_get_visual( GTK_WIDGET( board ) );
     GdkGCValues gcval;
     GtkWidget *pw;
+    GtkWidget *pwFrame;
+    GtkWidget *pwvbox;
+
+#ifndef USE_GTK2
+#include "xpm/stock_undo_16.xpm"
+#include "xpm/stock_stop_16.xpm"
+#endif
     
     board->board_data = bd;
     bd->widget = GTK_WIDGET( board );
@@ -4537,7 +4552,7 @@ static void board_init( Board *board ) {
     bd->wood = WOOD_ALDER;
     bd->hinges = TRUE;
     bd->labels = TRUE;
-    bd->usedicearea = TRUE;
+    bd->usedicearea = FALSE;
     bd->permit_illegal = FALSE;
     bd->beep_illegal = TRUE;
     bd->higher_die_first = FALSE;
@@ -4622,6 +4637,199 @@ static void board_init( Board *board ) {
     
     bd->pm_board = NULL;
 
+    /* 
+     * Create tool bar 
+     */
+
+    bd->vbox_toolbar = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( board ), bd->vbox_toolbar );
+    
+
+#if USE_GTK2
+    bd->toolbar = gt_toolbar_new ();
+    gtk_toolbar_set_orientation ( GTK_TOOLBAR ( bd->toolbar ),
+                                  GTK_ORIENTATION_HORIZONTAL );
+    gtk_toolbar_set_style ( GTK_TOOLBAR ( bd->toolbar ),
+                            GTK_TOOLBAR_ICONS );
+#else
+    bd->toolbar = gtk_toolbar_new ( GTK_ORIENTATION_HORIZONTAL,
+                                    GTK_TOOLBAR_ICONS );
+#endif /* ! USE_GTK2 */
+
+
+    gtk_box_pack_start( GTK_BOX( bd->vbox_toolbar ), bd->toolbar, 
+                        FALSE, FALSE, 0 );
+
+    gtk_toolbar_set_tooltips ( GTK_TOOLBAR ( bd->toolbar ), TRUE );
+
+    /* roll button */
+
+    bd->roll = gtk_button_new_with_label( _("Roll") );
+    gtk_signal_connect( GTK_OBJECT( bd->roll ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "roll" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->roll ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->roll,
+                                _("roll dice"),
+                                _("private") );
+
+    /* double button */
+
+    bd->doub = gtk_button_new_with_label( _("Double") );
+    gtk_signal_connect( GTK_OBJECT( bd->doub ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "double" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->doub ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->doub,
+                                _("double"),
+                                _("private") );
+
+    /* take button */
+
+    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
+
+    bd->take = gtk_button_new_with_label( _("Take") );
+    gtk_signal_connect( GTK_OBJECT( bd->take ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "take" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->take ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->take,
+                                _("Take the offered cube"),
+                                _("private") );
+
+    /* drop button */
+
+    bd->drop = gtk_button_new_with_label( _("Drop") );
+    gtk_signal_connect( GTK_OBJECT( bd->drop ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "drop" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->drop ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->drop,
+                                _("Drop the offered cube"),
+                                _("private") );
+
+    /* redouble button */
+
+    bd->redouble = gtk_button_new_with_label( _("Redouble") );
+    gtk_signal_connect( GTK_OBJECT( bd->redouble ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "redouble" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->redouble ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->redouble,
+                                _("Reoduble immediately (beaver)"),
+                                _("private") );
+
+    /* agree button */
+
+    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
+
+    bd->agree = gtk_button_new_with_label ( _("Agree" ) );
+    gtk_signal_connect( GTK_OBJECT( bd->agree ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "agree" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->agree ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->agree,
+                                _("Agree to offered resignation"),
+                                _("private") );
+
+    /* decline button */
+
+    bd->decline = gtk_button_new_with_label ( _("Decline" ) );
+    gtk_signal_connect( GTK_OBJECT( bd->decline ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "decline" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->decline ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->decline,
+                                _("Decline the offered resignation"),
+                                _("private") );
+
+    /* play button */
+
+    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
+
+    bd->play = gtk_button_new_with_label ( _("Play" ) );
+    gtk_signal_connect( GTK_OBJECT( bd->play ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->play ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->play,
+                                _("force computer to play"),
+                                _("private") );
+
+    /* reset button */
+
+    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
+
+#if USE_GTK2
+    bd->reset = 
+      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_UNDO, 16 ) );
+#else
+    bd->reset = 
+      button_from_image ( image_from_xpm_d ( stock_undo_16_xpm, 
+                                             bd->toolbar ) );
+#endif
+    gtk_signal_connect( GTK_OBJECT( bd->reset ), "clicked",
+			GTK_SIGNAL_FUNC( ShowBoard ), NULL );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->play ), FALSE );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->reset,
+                                _("Undo moves"),
+                                _("private") );
+
+    /* edit button */
+
+    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
+
+    bd->edit = gtk_toggle_button_new_with_label ( _("Edit" ) );
+    gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
+			GTK_SIGNAL_FUNC( board_edit ), bd );
+    
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->edit,
+                                _("Edit position"),
+                                _("private") );
+
+    /* stop button */
+
+    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
+
+    bd->stopparent = gtk_hbox_new( 0, FALSE );
+#if USE_GTK2
+    bd->stop =
+      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_STOP, 16 ) );
+#else
+    bd->stop =
+      button_from_image ( image_from_xpm_d ( stock_stop_16_xpm, 
+                                             bd->toolbar ) );
+#endif
+    gtk_container_add( GTK_CONTAINER( bd->stopparent ), bd->stop );
+
+    gtk_signal_connect( GTK_OBJECT( bd->stop ), "clicked",
+			GTK_SIGNAL_FUNC( board_stop ), NULL );
+
+    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
+                                bd->stopparent,
+                                _("Stop the current process"),
+                                _("private") );
+
+    /* horisontal separator */
+
+    pw = gtk_hseparator_new ();
+    gtk_box_pack_start( GTK_BOX( bd->vbox_toolbar ), pw, 
+                        FALSE, FALSE, 0 );
+
+
+    /* board drawing area */
+
     bd->drawing_area = gtk_drawing_area_new();
     gtk_drawing_area_size( GTK_DRAWING_AREA( bd->drawing_area ), 108,
 			   72 );
@@ -4630,165 +4838,233 @@ static void board_init( Board *board ) {
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area );
 
-    gtk_container_add( GTK_CONTAINER( board ),
-		       bd->move = gtk_label_new( NULL ) );
-    gtk_widget_set_name( bd->move, "move" );
 
-    bd->takedrop = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( _("Take") );
-    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "take" );
-    gtk_container_add( GTK_CONTAINER( bd->takedrop ), pw );
-    pw = gtk_button_new_with_label( _("Drop") );
-    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "drop" );
-    gtk_container_add( GTK_CONTAINER( bd->takedrop ), pw );
-    bd->redouble = gtk_button_new_with_label( _("Redouble") );
-    gtk_signal_connect( GTK_OBJECT( bd->redouble ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "redouble" );
-    gtk_container_add( GTK_CONTAINER( bd->takedrop ), bd->redouble );
-    gtk_container_add( GTK_CONTAINER( board ), bd->takedrop );
-    
-    bd->rolldouble = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( _("Roll") );
-    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "roll" );
-    gtk_container_add( GTK_CONTAINER( bd->rolldouble ), pw );
-    bd->doub = gtk_button_new_with_label( _("Double") );
-    gtk_signal_connect( GTK_OBJECT( bd->doub ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "double" );
-    gtk_container_add( GTK_CONTAINER( bd->rolldouble ), bd->doub );
-    gtk_container_add( GTK_CONTAINER( board ), bd->rolldouble );
+    /* Position and match ID */
 
-    bd->agreedecline = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( _("Agree") );
-    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "agree" );
-    gtk_container_add( GTK_CONTAINER( bd->agreedecline ), pw );
-    pw = gtk_button_new_with_label( _("Decline") );
-    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "decline" );
-    gtk_container_add( GTK_CONTAINER( bd->agreedecline ), pw );
-    gtk_container_add( GTK_CONTAINER( board ), bd->agreedecline );
+    bd->vbox_ids = gtk_vbox_new( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( board ), bd->vbox_ids, FALSE, FALSE, 0 );
 
-    bd->play = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( _("Play") );
-    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
-    gtk_container_add( GTK_CONTAINER( bd->play ), pw );
-    gtk_container_add( GTK_CONTAINER( board ), bd->play );
-    
-    bd->dice_area = gtk_drawing_area_new();
-    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );
-    gtk_widget_set_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
-			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
-    gtk_container_add( GTK_CONTAINER( board ), bd->dice_area );
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start( GTK_BOX( bd->vbox_ids ), pw, FALSE, FALSE, 0 );
 
-    bd->hbox_pos = gtk_hbox_new( FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX( board ), bd->hbox_pos, FALSE, FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Position ID: ") ),
+                         FALSE, FALSE, 4 );
 
-    bd->table = gtk_table_new( 3, 4, FALSE );
-    gtk_box_pack_start( GTK_BOX( board ), bd->table, FALSE, FALSE, 0 );
-    
-    bd->hbox_match = gtk_hbox_new( FALSE, 0 );
-    gtk_box_pack_start( GTK_BOX( board ), bd->hbox_match, FALSE, FALSE, 0 );
-
-    gtk_box_pack_start( GTK_BOX( bd->hbox_pos ),
-			pw = gtk_alignment_new( 0.5, 0.5, 0, 0 ),
-			FALSE, FALSE, 8 );
-    gtk_container_add( GTK_CONTAINER( pw ),
-		       bd->stopparent = gtk_hbox_new( 0, FALSE ) );
-    gtk_container_add( GTK_CONTAINER( bd->stopparent ), bd->stop =
-		       gtk_button_new_with_label( _("Stop") ) );
-
-    bd->pos_table = gtk_table_new( 2, 4, FALSE );
-    gtk_box_pack_end( GTK_BOX ( bd->hbox_pos), bd->pos_table, 
-                      FALSE, FALSE, 4 );
-
-    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       pw = gtk_label_new ( _("Position: ") ),
-                       0, 1, 0, 1, GTK_FILL, 0, 4, 0 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    
-    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       pw = gtk_label_new ( _("Match ID: ") ),
-                       0, 1, 1, 2, GTK_FILL, 0, 4, 0 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-
-    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       bd->position_id = gtk_entry_new(),
-                       1, 2, 0, 1, GTK_FILL, 0, 4, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         bd->position_id = gtk_entry_new(),
+                         FALSE, FALSE, 0 );
     gtk_entry_set_max_length( GTK_ENTRY( bd->position_id ), 14 );
 
-    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       bd->match_id = gtk_entry_new(),
-                       1, 2, 1, 2, GTK_FILL, 0, 4, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Match ID: ") ),
+                         FALSE, FALSE, 8 );
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         bd->match_id = gtk_entry_new(),
+                         FALSE, FALSE, 0 );
     gtk_entry_set_max_length( GTK_ENTRY( bd->match_id ), 12 );
 
-    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       bd->edit = gtk_toggle_button_new_with_label( _("Edit") ),
-                       2, 3, 0, 1, GTK_FILL, 0, 4, 0 );
 
-    gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       bd->reset = gtk_button_new_with_label( _("Reset") ),
-                       3, 4, 0, 1, GTK_FILL, 0, 4, 0 );
+    pw = gtk_hseparator_new ();
+    gtk_box_pack_start( GTK_BOX( bd->vbox_ids ), pw, 
+                        FALSE, FALSE, 0 );
 
+    /* the rest */
 
+    bd->table = gtk_hbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( board ), bd->table );
 
-    
-    gtk_table_attach( GTK_TABLE( bd->table ), pw = gtk_label_new( _("Name") ),
-		      1, 2, 0, 1, GTK_FILL, 0, 4, 0 );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( _("Score") ),
-		      2, 3, 0, 1, 0, 0, 8, 0 );
-    
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->mname0 =
-		      gtk_multiview_new(), 1, 2, 1, 2, 0, 0, 4, 0 );
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->mname1 =
-		      gtk_multiview_new(), 1, 2, 2, 3, 0, 0, 4, 0 );
+    /* 
+     * player 0 
+     */
+
+    pwFrame = gtk_frame_new ( NULL );
+    gtk_box_pack_start ( GTK_BOX ( bd->table ), pwFrame,
+                         FALSE, FALSE, 0 );
+
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
+
+    /* first row: picture of chequer + name of player */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* picture of chequer */
+
+    bd->key0 = chequer_key_new( 0, bd );
+    gtk_box_pack_start ( GTK_BOX ( pw ), bd->key0, FALSE, FALSE, 0 );
+
+    /* name of player */
+
+    bd->mname0 = gtk_multiview_new ();
+    gtk_box_pack_start ( GTK_BOX ( pw ), bd->mname0, FALSE, FALSE, 8 );
+
     bd->name0 = gtk_entry_new_with_max_length( 32 );
     bd->lname0 = gtk_label_new( NULL );
     gtk_misc_set_alignment( GTK_MISC( bd->lname0 ), 0, 0.5 );
+    gtk_container_add( GTK_CONTAINER( bd->mname0 ), bd->lname0 );
+    gtk_container_add( GTK_CONTAINER( bd->mname0 ), bd->name0 );
+
+    /* second row: "Score" + score */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* score label */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Score:") ), FALSE, FALSE, 0 );
+
+    /* score */
+
+    bd->mscore0 = gtk_multiview_new();
+    gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore0, FALSE, FALSE, 8 );
+
+    bd->score0 = gtk_spin_button_new( GTK_ADJUSTMENT(
+	gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ), 1, 0 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
+    bd->lscore0 = gtk_label_new( NULL );
+    gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->lscore0 );
+    gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->score0 );
+
+    /* third row: pip count */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* pip count label */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Pips:") ), FALSE, FALSE, 0 );
+
+    /* pip count */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         bd->pipcount0 = gtk_label_new ( NULL ), 
+                         FALSE, FALSE, 0 );
+
+    /* 
+     * move string, match length, crawford flag, dice
+     */
+
+    pwFrame = gtk_frame_new ( NULL );
+    gtk_box_pack_start ( GTK_BOX ( bd->table ), pwFrame,
+                         TRUE, TRUE, 0 );
+
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
+
+    /* move string */
+
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                         bd->move = gtk_label_new( NULL ),
+                         FALSE, FALSE, 0 );
+    gtk_widget_set_name( bd->move, "move" );
+
+    /* match length */
+
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
+                         pw = gtk_hbox_new ( FALSE, 0 ),
+                         FALSE, FALSE, 0 );
+    
+    gtk_box_pack_start( GTK_BOX( pw ),
+			gtk_label_new( _("Match:") ), FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pw ),
+                        bd->match = gtk_label_new( NULL ), 
+                        FALSE, FALSE, 0 );
+
+    /* crawford flag */
+
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ),
+                        bd->crawford =
+                        gtk_check_button_new_with_label( _("Crawford game") ),
+                        FALSE, FALSE, 0 );
+    gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
+			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
+
+
+    /* 
+     * player 1
+     */
+
+    pwFrame = gtk_frame_new ( NULL );
+    gtk_box_pack_end ( GTK_BOX ( bd->table ), pwFrame,
+                       FALSE, FALSE, 0 );
+
+    pwvbox = gtk_vbox_new ( FALSE, 0 );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwvbox );
+
+    /* first row: picture of chequer + name of player */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* picture of chequer */
+
+    bd->key1 = chequer_key_new( 1, bd );
+    gtk_box_pack_start ( GTK_BOX ( pw ), bd->key1, FALSE, FALSE, 0 );
+
+    /* name of player */
+
+    bd->mname1 = gtk_multiview_new ();
+    gtk_box_pack_start ( GTK_BOX ( pw ), bd->mname1, FALSE, FALSE, 8 );
+
     bd->name1 = gtk_entry_new_with_max_length( 32 );
     bd->lname1 = gtk_label_new( NULL );
     gtk_misc_set_alignment( GTK_MISC( bd->lname1 ), 0, 0.5 );
-    gtk_container_add( GTK_CONTAINER( bd->mname0 ), bd->lname0 );
-    gtk_container_add( GTK_CONTAINER( bd->mname0 ), bd->name0 );
     gtk_container_add( GTK_CONTAINER( bd->mname1 ), bd->lname1 );
     gtk_container_add( GTK_CONTAINER( bd->mname1 ), bd->name1 );
 
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->key0 =
-		      chequer_key_new( 0, bd ), 0, 1, 1, 2, 0, 0, 8, 1 );
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->key1 =
-		      chequer_key_new( 1, bd ), 0, 1, 2, 3, 0, 0, 8, 0 );
-    
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->mscore0 =
-		      gtk_multiview_new(), 2, 3, 1, 2, 0, 0, 4, 0 );
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->mscore1 =
-		      gtk_multiview_new(), 2, 3, 2, 3, 0, 0, 4, 0 );
-    bd->score0 = gtk_spin_button_new( GTK_ADJUSTMENT(
-	gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ), 1, 0 );
+    /* second row: "Score" + score */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* score label */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Score:") ), FALSE, FALSE, 0 );
+
+    /* score */
+
+    bd->mscore1 = gtk_multiview_new();
+    gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore1, FALSE, FALSE, 8 );
+
     bd->score1 = gtk_spin_button_new( GTK_ADJUSTMENT(
 	gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ), 1, 0 );
-    bd->lscore0 = gtk_label_new( NULL );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
     bd->lscore1 = gtk_label_new( NULL );
-    gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->lscore0 );
-    gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->score0 );
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->lscore1 );
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->score1 );
-    
-    gtk_table_attach( GTK_TABLE( bd->table ), bd->crawford =
-		      gtk_check_button_new_with_label( _("Crawford game") ),
-		      3, 4, 1, 3, 0, 0, 0, 0 );
-    gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
-			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
-    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
-    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
-    
-    gtk_box_pack_start( GTK_BOX( bd->hbox_match ),
-			gtk_label_new( _("Match:") ), FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( bd->hbox_match ), bd->match =
-			gtk_label_new( NULL ), FALSE, FALSE, 0 );
+
+    /* third row: pip count */
+
+    pw = gtk_hbox_new ( FALSE, 0 );
+    gtk_box_pack_start ( GTK_BOX ( pwvbox ), pw, FALSE, FALSE, 0 );
+
+    /* pip count label */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         gtk_label_new ( _("Pips:") ), FALSE, FALSE, 0 );
+
+    /* pip count */
+
+    gtk_box_pack_start ( GTK_BOX ( pw ), 
+                         bd->pipcount1 = gtk_label_new ( NULL ), 
+                         FALSE, FALSE, 0 );
+
+
+    /* dice drawing area */
+
+    gtk_container_add ( GTK_CONTAINER ( board ),
+                        bd->dice_area = gtk_drawing_area_new() );
+    gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );
+    gtk_widget_set_events( GTK_WIDGET( bd->dice_area ), GDK_EXPOSURE_MASK |
+			   GDK_BUTTON_PRESS_MASK | GDK_STRUCTURE_MASK );
+
+    /* setup initial board */
 
     board_set( board, "board:::1:0:0:"
               "0:-2:0:0:0:0:5:0:3:0:0:0:-5:5:0:0:0:-3:0:-5:0:0:0:0:2:0:"
@@ -4800,15 +5076,7 @@ static void board_init( Board *board ) {
 			GTK_SIGNAL_FUNC( board_set_position ), bd );
     gtk_signal_connect( GTK_OBJECT( bd->match_id ), "activate",
 			GTK_SIGNAL_FUNC( board_set_matchid ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->reset ), "clicked",
-			GTK_SIGNAL_FUNC( ShowBoard ), NULL );
 
-    gtk_signal_connect( GTK_OBJECT( bd->stop ), "clicked",
-			GTK_SIGNAL_FUNC( board_stop ), NULL );
-    
-    gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
-			GTK_SIGNAL_FUNC( board_edit ), bd );
-    
     gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "expose_event",
 			GTK_SIGNAL_FUNC( board_expose ), bd );    
     gtk_signal_connect( GTK_OBJECT( bd->drawing_area ), "button_press_event",
@@ -4822,6 +5090,7 @@ static void board_init( Board *board ) {
 			GTK_SIGNAL_FUNC( dice_expose ), bd );
     gtk_signal_connect( GTK_OBJECT( bd->dice_area ), "button_press_event",
 			GTK_SIGNAL_FUNC( dice_press ), bd );
+
 }
 
 static void board_class_init( BoardClass *c ) {

@@ -594,12 +594,10 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
 
 	if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !bd->usedicearea ) {
 	    gtk_widget_hide( bd->dice_area );
-	    gtk_widget_show_all( bd->rolldouble );
 	}
 
-	if( GTK_WIDGET_VISIBLE( bd->rolldouble ) && bd->usedicearea ) {
+	if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && bd->usedicearea ) {
 	    gtk_widget_show_all( bd->dice_area );
-	    gtk_widget_hide( bd->rolldouble );
 	}
 	
 	gtk_widget_queue_draw( bd->drawing_area );

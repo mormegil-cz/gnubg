@@ -12,3 +12,4 @@ touch met/Makefile.in
 touch intl/Makefile.in
 touch po/Makefile.in
 touch m4/Makefile.in
+touch xpm/Makefile.in
