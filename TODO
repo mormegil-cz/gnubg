@@ -51,12 +51,12 @@ duplication of effort and to make sure our changes merge easily.
 ** Add interactive rollouts.
 ** Analyse games and matches.
 *** Calculate luck/error rates over games and matches. (gary)
-*** Load and save luck analysis. (gary)
 *** Add an "analyse move" command.
 *** Allow re-evaluating analysis with different settings, and rollouts.
 *** Add "set automatic analysis".
 *** Automatically mark moves good/bad and lucky/unlucky. (gary)
-*** Allow user to enable luck/cube/chequer analysis independently. (gary)
+*** Complain if they try to analyse when cube, luck and move analysis are
+  all off. (gary)
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.

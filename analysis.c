@@ -152,14 +152,14 @@ AnalyzeGame ( list *plGame ) {
         if ( ! fPlayer )
           SwapSides( anBoard );
 
+        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+		      anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+
         /* cube action? */
 
-        if ( ! fFirstMove ) {
+        if ( fAnalyseCube && !fFirstMove ) {
 
           float arDouble[ 4 ];
-
-          SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
-			anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
 
           if ( GetDPEq ( NULL, NULL, &ci ) ) {
 
@@ -188,11 +188,9 @@ AnalyzeGame ( list *plGame ) {
 
         }
 
-        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
-		      anScore, fCrawfordLocal, fJacobyLocal, fBeaversLocal );
-
-	pmr->n.rLuck = LuckAnalysis( anBoard, anDice[ 0 ], anDice[ 1 ], &ci,
-				     fFirstMove );
+	if( fAnalyseDice )
+	    pmr->n.rLuck = LuckAnalysis( anBoard, anDice[ 0 ], anDice[ 1 ],
+					 &ci, fFirstMove );
 	
         fFirstMove = 0;
 
@@ -204,16 +202,17 @@ AnalyzeGame ( list *plGame ) {
         ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
         PositionKey ( anBoardMove, auch );
 
-	if( pmr->n.ml.cMoves )
-	    free( pmr->n.ml.amMoves );
+	if( fAnalyseMove ) {
+	    if( pmr->n.ml.cMoves )
+		free( pmr->n.ml.amMoves );
 	
-        /* find best moves */
-
-        FindnSaveBestMoves ( &(pmr->n.ml), anDice[ 0 ], anDice[ 1 ],
-                             anBoard, auch, &ci, &ecEval );
-
-	for( pmr->n.iMove = 0; pmr->n.iMove < pmr->n.ml.cMoves;
-	     pmr->n.iMove++ ) {
+	    /* find best moves */
+	    
+	    FindnSaveBestMoves ( &(pmr->n.ml), anDice[ 0 ], anDice[ 1 ],
+				 anBoard, auch, &ci, &ecEval );
+	    
+	    for( pmr->n.iMove = 0; pmr->n.iMove < pmr->n.ml.cMoves;
+		 pmr->n.iMove++ ) {
 #if DEBUG_ANALYSIS
 		printf( "%i %s %7.3f\n", pmr->n.iMove,
 			FormatMove( sz, anBoard,
@@ -222,27 +221,28 @@ AnalyzeGame ( list *plGame ) {
 #endif
 		if( EqualKeys( auch, pmr->n.ml.amMoves[ pmr->n.iMove ].auch ) )
 		    break;
-	}
-
-	if( cAnalysisMoves >= 2 && pmr->n.ml.cMoves > cAnalysisMoves ) {
-	    /* There are more legal moves than we want; throw some away. */
-	    if( pmr->n.iMove >= cAnalysisMoves ) {
-		/* The move made wasn't in the top n; move it up so it
-		   won't be discarded. */
-		memcpy( pmr->n.ml.amMoves + cAnalysisMoves - 1,
-			pmr->n.ml.amMoves + pmr->n.iMove, sizeof( move ) );
-		pmr->n.iMove = cAnalysisMoves - 1;
 	    }
-	    
-	    realloc( pmr->n.ml.amMoves, cAnalysisMoves * sizeof( move ) );
-	    pmr->n.ml.cMoves = cAnalysisMoves;
-	}
+
+	    if( cAnalysisMoves >= 2 && pmr->n.ml.cMoves > cAnalysisMoves ) {
+		/* There are more legal moves than we want; throw some away. */
+		if( pmr->n.iMove >= cAnalysisMoves ) {
+		    /* The move made wasn't in the top n; move it up so it
+		       won't be discarded. */
+		    memcpy( pmr->n.ml.amMoves + cAnalysisMoves - 1,
+			    pmr->n.ml.amMoves + pmr->n.iMove, sizeof( move ) );
+		    pmr->n.iMove = cAnalysisMoves - 1;
+		}
+		
+		realloc( pmr->n.ml.amMoves, cAnalysisMoves * sizeof( move ) );
+		pmr->n.ml.cMoves = cAnalysisMoves;
+	    }
 	
 #if DEBUG_ANALYSIS
-	if( !pmr->n.ml.cMoves )
-	    printf ("no legal moves..\n" );
+	    if( !pmr->n.ml.cMoves )
+		printf ("no legal moves..\n" );
 #endif
-	  
+	}
+	
         /* copy board back */
         memcpy ( anBoard, anBoardMove, sizeof ( anBoard ) );
         if ( ! fPlayer )
@@ -258,33 +258,36 @@ AnalyzeGame ( list *plGame ) {
 
         /* cube action */
 
-        SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal, anScore,
-		      fCrawfordLocal, fJacobyLocal, fBeaversLocal );
+	if( fAnalyseCube ) {
+	    SetCubeInfo ( &ci, nCube, fCubeOwner, fPlayer, nMatchToLocal,
+			  anScore, fCrawfordLocal, fJacobyLocal,
+			  fBeaversLocal );
 
-        if ( GetDPEq ( NULL, NULL, &ci ) ) {
+	    if ( GetDPEq ( NULL, NULL, &ci ) ) {
+		if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput,
+					       &ci, &ecEval,
+					       ecEval.nPlies ) < 0 ) 
+		    return;
 
-          if ( EvaluatePositionCubeful ( anBoard, arDouble, arOutput, &ci,
-                                         &ecEval, ecEval.nPlies ) < 0 ) 
-            return;
-
-          pmr->d.etDouble = EVAL_EVAL;
-          pmr->d.esDouble.ec = ecEval;
-          for ( j = 0; j < 4; j++ ) 
-            pmr->d.arDouble[ j ] = arDouble[ j ];
+		pmr->d.etDouble = EVAL_EVAL;
+		pmr->d.esDouble.ec = ecEval;
+		for ( j = 0; j < 4; j++ ) 
+		    pmr->d.arDouble[ j ] = arDouble[ j ];
 #if DEBUG_ANALYSIS
-          GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC, FALSE );
-
-          puts ( sz );
+		GetCubeActionSz ( arDouble, sz, &ci, fOutputMWC, FALSE );
+		
+		puts ( sz );
 #endif
-        }
-        
-        if ( ! fPlayer )
-          SwapSides( anBoard );
+	    }
+	}
+	
+	if ( ! fPlayer )
+	    SwapSides( anBoard );
 #if DEBUG_ANALYSIS
-        sprintf( sz, " Doubles => %d", nCube <<= 1 );
+	sprintf( sz, " Doubles => %d", nCube <<= 1 );
 #endif
-        fCubeOwner = ! fPlayer;
-
+	fCubeOwner = ! fPlayer;
+	
         break;
       case MOVE_TAKE:
         /* Don't store evaluation since it's stored in the 
@@ -294,7 +297,7 @@ AnalyzeGame ( list *plGame ) {
 #endif
         break;
       case MOVE_DROP:
-        /* Don't store evaluation since it's stored in the 
+	  /* Don't store evaluation since it's stored in the 
            previous move, which we hope is a MOVE_DOUBLE */
 #if DEBUG_ANALYSIS
         strcpy( sz, " Drops\n" );
@@ -354,9 +357,10 @@ AnalyzeGame ( list *plGame ) {
 	  
 	  if ( ! fPlayer )
 	      SwapSides( anBoard );
-	  
-	  pmr->sd.rLuck = LuckAnalysis( anBoard, anDice[ 0 ], anDice[ 1 ],
-					&ci, fFirstMove );
+
+	  if( fAnalyseDice )
+	      pmr->sd.rLuck = LuckAnalysis( anBoard, anDice[ 0 ], anDice[ 1 ],
+					    &ci, fFirstMove );
 
 	  if ( ! fPlayer )
 	      SwapSides( anBoard );

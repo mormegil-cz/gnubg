@@ -93,6 +93,9 @@ typedef enum _gnubgcommand {
     CMD_ROLL,
     CMD_ROLLOUT,
     CMD_SAVE_SETTINGS,
+    CMD_SET_ANALYSIS_CUBE,
+    CMD_SET_ANALYSIS_LUCK,
+    CMD_SET_ANALYSIS_MOVES,
     CMD_SET_ANNOTATION_ON,
     CMD_SET_APPEARANCE,
     CMD_SET_AUTO_BEAROFF,
@@ -153,6 +156,9 @@ typedef struct _togglecommand {
 } togglecommand;
 
 static togglecommand atc[] = {
+    { &fAnalyseCube, CMD_SET_ANALYSIS_CUBE },
+    { &fAnalyseDice, CMD_SET_ANALYSIS_LUCK },
+    { &fAnalyseMove, CMD_SET_ANALYSIS_MOVES },
     { &fAutoBearoff, CMD_SET_AUTO_BEAROFF },
     { &fAutoCrawford, CMD_SET_AUTO_CRAWFORD },
     { &fAutoGame, CMD_SET_AUTO_GAME },
@@ -199,6 +205,9 @@ static char *aszCommands[ NUM_CMDS ] = {
     "roll",
     "rollout",
     "save settings",
+    "set analysis cube",
+    "set analysis luck",
+    "set analysis moves",
     "set annotation on",
     NULL, /* set appearance */
     "set automatic bearoff",
@@ -1215,6 +1224,12 @@ static void SetAnnotation( moverecord *pmr ) {
 				    0 );
 	    }
 
+	    if( !g_list_first( GTK_BOX( pwAnalysis )->children ) ) {
+		gtk_widget_destroy( pwAnalysis );
+		pwAnalysis = NULL;
+	    }
+		
+	    
 	    fMove = fMoveOld;
 	    fTurn = fTurnOld;
 	    break;
@@ -1520,7 +1535,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  NULL },
 	{ "/_Train/Train with _TD(0)", NULL, Command, CMD_TRAIN_TD, NULL },
 	{ "/_Settings", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/Analysis...", NULL, SetAnalysis, 0, NULL },
+	{ "/_Settings/Analysis", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/Analysis/_Chequer play", NULL, Command,
+	  CMD_SET_ANALYSIS_MOVES, "<CheckItem>" },
+	{ "/_Settings/Analysis/_Cube action", NULL, Command,
+	  CMD_SET_ANALYSIS_CUBE, "<CheckItem>" },
+	{ "/_Settings/Analysis/_Dice rolls", NULL, Command,
+	  CMD_SET_ANALYSIS_LUCK, "<CheckItem>" },
+	{ "/_Settings/Analysis/Move limit...", NULL, SetAnalysis, 0, NULL },
 	{ "/_Settings/Appearance...", NULL, Command, CMD_SET_APPEARANCE,
 	  NULL },
 	{ "/_Settings/_Automatic", NULL, NULL, 0, "<Branch>" },

@@ -216,7 +216,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
     fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC,
     fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard, nRolloutSeed,
-    fAnnotation, cAnalysisMoves;
+    fAnnotation, cAnalysisMoves, fAnalyseCube, fAnalyseDice, fAnalyseMove;
 extern float rAlpha, rAnneal, rThreshold;
 
 extern evalcontext ecEval, ecRollout, ecTD;
@@ -393,7 +393,10 @@ extern void CommandAccept( char * ),
     CommandSaveMatch( char * ),
     CommandSaveSettings( char * ),
     CommandSaveWeights( char * ),
+    CommandSetAnalysisCube( char * ),
     CommandSetAnalysisLimit( char * ),
+    CommandSetAnalysisLuck( char * ),
+    CommandSetAnalysisMoves( char * ),
     CommandSetAnnotation( char * ),
     CommandSetAutoBearoff( char * ),
     CommandSetAutoCrawford( char * ),

@@ -149,6 +149,14 @@ static void SetRNG( rng rngNew, char *szSeed ) {
     }
 }
 
+extern void CommandSetAnalysisCube( char *sz ) {
+
+    if( SetToggle( "analysis cube", &fAnalyseCube, sz,
+		   "Cube action will be analysed.",
+		   "Cube action will not be analysed." ) >= 0 )
+	UpdateSetting( &fAnalyseCube );
+}
+
 extern void CommandSetAnalysisLimit( char *sz ) {
     
     int n;
@@ -164,6 +172,26 @@ extern void CommandSetAnalysisLimit( char *sz ) {
 		 "it must be at least 2." );
 	return;
     }
+
+    if( !fAnalyseMove )
+	outputl( "(Note that no moves will be analysed until enable chequer "
+		 "play analysis -- see\n`help set analysis moves'.)" );
+}
+
+extern void CommandSetAnalysisLuck( char *sz ) {
+
+    if( SetToggle( "analysis luck", &fAnalyseDice, sz,
+		   "Dice rolls will be analysed.",
+		   "Dice rolls will not be analysed." ) >= 0 )
+	UpdateSetting( &fAnalyseDice );
+}
+
+extern void CommandSetAnalysisMoves( char *sz ) {
+
+    if( SetToggle( "analysis moves", &fAnalyseMove, sz,
+		   "Chequer play will be analysed.",
+		   "Chequer play will not be analysed." ) >= 0 )
+	UpdateSetting( &fAnalyseMove );
 }
 
 extern void CommandSetAnnotation( char *sz ) {

@@ -1,3 +1,9 @@
+Fri Apr 13 12:22:17 2001  Gary Wong  <gtw@research.att.com>
+
+	* sgf.c (WriteLuck, RestoreNode): Load and save luck analysis.
+	* set.c (CommandSetAnalysisCube, CommandSetAnalysisLuck, 
+	CommandSetAnalysisMoves): New functions.
+
 Thu Apr 12 13:37:02 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubgtest: Don't use `grep -q' or `<>', which fail on Solaris.

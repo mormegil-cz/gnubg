@@ -143,7 +143,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fCrawford = FALSE, fPostCrawford = FALSE, nMatchTo, anScore[ 2 ],
     fBeavers = 1, nCube, fOutputMWC = TRUE, fOutputWinPC = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, nRolloutSeed,
-    fAnnotation = FALSE, cAnalysisMoves = 20;
+    fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
+    fAnalyseDice = TRUE, fAnalyseMove = TRUE;
 float rAlpha = 0.1, rAnneal = 0.3, rThreshold = 0.1;
 
 gamestate gs = GAME_NONE;
@@ -285,8 +286,14 @@ command acAnalyse[] = {
       szOPTFILENAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysis[] = {
+    { "cube", CommandSetAnalysisCube, "Select whether cube action will be "
+      "analysed", szONOFF, NULL },
     { "limit", CommandSetAnalysisLimit, "Specify the maximum number of "
       "possible moves analysed", szOPTLIMIT, NULL },
+    { "luck", CommandSetAnalysisLuck, "Select whether dice rolls will be "
+      "analysed", szONOFF, NULL },
+    { "moves", CommandSetAnalysisMoves, "Select whether chequer play will be "
+      "analysed", szONOFF, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
