@@ -3672,6 +3672,8 @@ CommandRoll( char *sz ) {
   pmr->sd.lt = LUCK_NONE;
   pmr->sd.rLuck = ERR_VAL;
   AddMoveRecord( pmr );
+
+  InvalidateStoredMoves();
   
   ShowBoard();
 

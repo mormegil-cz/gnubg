@@ -1,3 +1,11 @@
+Thu Jan 30 18:52:34 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (InvalidateStoredMoves): new function.
+	* play.c (CommandRoll): invalidate stored moves otherwise the
+	shown hint may be wrong if the player goes back to a previous
+	move and roll new dice.
+	(reported by Billie Patterson)
+
 Thu Jan 30 17:19:11 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (board_pointer): use board from current matchstate

@@ -508,6 +508,9 @@ UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                    const evalsetup *pes,
                    const matchstate *pms );
 
+extern void
+InvalidateStoredMoves( void );
+
 #ifdef WIN32
 extern void WinCopy( char *szOut );
 #endif
