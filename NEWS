@@ -12,6 +12,11 @@ GNU Backgammon NEWS -- history of user-visible changes.  10 May
 
 ** Support for "skewed" METs, for example, tables from Jacobs and Trice's
    fish book.
+   Also, a new command "set invert met on|off" to specify whether the table
+   should be used as entered, or used inverted. For example, the supplied METs
+   from Jacobs and Trice's book are entered with player 0 being the stronger player. 
+   If the table should be used with player 1 being the stronger player use:
+   "set invert met on".
 
 ** Rollouts:
    - rollout positions as initial position (i.e., no doubles on first roll).
