@@ -6314,6 +6314,81 @@ static void FormatStatCubeError( char *sz, int n, float ar[ 2 ],
 	sprintf( sz, "%d (%+.3f, %+.3f)", n, -ar[ 0 ], -ar[ 1 ] );
 }
 
+
+static void
+StatcontextSelect ( GtkWidget *pw, int y, int x, GdkEventButton *peb,
+                    GtkWidget *pwCopy ) {
+
+  int c;
+  GList *pl;
+
+  for ( c = 0, pl = GTK_CLIST ( pw )->selection; c < 2 && pl; pl = pl->next )
+    c++;
+
+  if ( c && peb )
+    gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, peb->time );
+
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwCopy ), c );
+
+}
+
+static void
+StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
+                          guint n, guint t, statcontext *psc ) {
+
+  GList *pl;
+  int i;
+  static char szOutput[ 4096 ];
+  char *pc;
+  gchar *sz;
+
+
+
+  sprintf ( szOutput, 
+            "%-37.37s %-20.20s %-20.20s\n",
+            "", ap[ 0 ].szName, ap[ 1 ].szName );
+
+  for ( pl = GTK_CLIST ( pw )->selection; pl; pl = pl->next ) {
+
+    i = GPOINTER_TO_INT( pl->data );
+
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-37.37s ", 
+              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 0, &sz ) ) ?
+              sz : "" );
+      
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s ", 
+              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 1, &sz ) ) ?
+              sz : "" );
+      
+    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s ", 
+              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 2, &sz ) ) ?
+              sz : "" );
+      
+  }
+
+  gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
+                          szOutput, strlen( szOutput ) );
+
+}
+
+static gint
+StatcontextClearSelection  ( GtkWidget *pw, GdkEventSelection *pes,
+                             void *unused ) {
+
+  gtk_clist_unselect_all ( GTK_CLIST ( pw ) );
+
+  return TRUE;
+
+}
+
+static void
+StatcontextCopy ( GtkWidget *pw, void *unused ) {
+
+  UserCommand ( "xcopy" );
+
+}
+
+
 extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 				char *szTitle ) {
     
@@ -6373,20 +6448,15 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
   float r = getMWCFromError ( psc, aaaar );
   int irow = 0;
-#if WIN32
-  char szOutput[4096];
-    GtkWidget *pwButtons,
-        *pwCopy = gtk_button_new_with_label( "Copy" );
-#endif
 
-#if WIN32
-    /* FIXME There should be some way to extract the text on Unix as well */
-    pwButtons = DialogArea( pwDialog, DA_BUTTONS );
-    gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
-    DumpStatcontext( szOutput, psc, szTitle);
-    gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
-			GTK_SIGNAL_FUNC( GTKWinCopy ), (gpointer) szOutput );
-#endif
+  GtkWidget *pwButtons,
+    *pwCopy = gtk_button_new_with_label( "Copy" );
+
+  pwButtons = DialogArea( pwDialog, DA_BUTTONS );
+  gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
+  gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
+                      GTK_SIGNAL_FUNC( StatcontextCopy ), NULL );
+  gtk_widget_set_sensitive ( GTK_WIDGET ( pwCopy ), FALSE );
 
   for( i = 0; i < 3; i++ ) {
       gtk_clist_set_column_auto_resize( GTK_CLIST( pwStats ), i, TRUE );
@@ -6707,6 +6777,25 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   gtk_container_add( GTK_CONTAINER( psw ), pwStats );
 
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), psw );
+
+  /* selections */
+
+  gtk_clist_set_selection_mode( GTK_CLIST( pwStats ),
+                                GTK_SELECTION_EXTENDED );
+
+  gtk_selection_add_target( pwStats, GDK_SELECTION_PRIMARY,
+                            GDK_SELECTION_TYPE_STRING, 0 );
+
+  gtk_signal_connect( GTK_OBJECT( pwStats ), "select-row",
+                      GTK_SIGNAL_FUNC( StatcontextSelect ), pwCopy );
+  gtk_signal_connect( GTK_OBJECT( pwStats ), "unselect-row",
+                      GTK_SIGNAL_FUNC( StatcontextSelect ), pwCopy );
+  gtk_signal_connect( GTK_OBJECT( pwStats ), "selection_clear_event",
+                      GTK_SIGNAL_FUNC( StatcontextClearSelection ), pwCopy );
+  gtk_signal_connect( GTK_OBJECT( pwStats ), "selection_get",
+                      GTK_SIGNAL_FUNC( StatcontextGetSelection ), psc );
+
+  /* modality */
 
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
   gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );

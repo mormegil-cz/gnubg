@@ -1,3 +1,13 @@
+Wed Aug  7 22:15:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Implement copy from match/game/session analysis.
+
+	* gtkgame.c (StatcontextGetSelection, StatcontextSelect,
+	StatcontextClearSelection, StatcontextCopy): new
+	functions.
+
+	* gtkgame.c (GTKStatContext): setup signals and stuff.
+
 Wed Aug  7 21:09:12 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkexport.c (GTKExport): fix typos.
