@@ -317,17 +317,17 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 
 	label = gtk_label_new(_("Ambient colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 0, 1);
-	pcpAmbient = gtk_colour_picker_new(UpdateColourPreview, 0);
+	pcpAmbient = gtk_colour_picker_new((ColorPickerFunc)UpdateColourPreview, 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpAmbient, 1, 2, 0, 1);
 
 	label = gtk_label_new(_("Diffuse colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 1, 2);
-	pcpDiffuse = gtk_colour_picker_new(UpdateColourPreview, 0);
+	pcpDiffuse = gtk_colour_picker_new((ColorPickerFunc)UpdateColourPreview, 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpDiffuse, 1, 2, 1, 2);
 
 	label = gtk_label_new(_("Specular colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 0, 1);
-	pcpSpecular = gtk_colour_picker_new(UpdateColourPreview, 0);
+	pcpSpecular = gtk_colour_picker_new((ColorPickerFunc)UpdateColourPreview, 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpSpecular, 3, 4, 0, 1);
 
 	label = gtk_label_new(_("Shine:"));
