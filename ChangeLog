@@ -1,3 +1,9 @@
+Fri Mar  11  19:25:45 2005 Oystein Johansen <oystein@gnubg.org>
+
+	* gtkgame.c (InitGTK): move the 'Go' menu to the right place
+	accoring to HIG. 
+	* gtkgame.c (GTKHelp): Make the command reference window a dialog.
+	
 Sun Mar  06  18:00:45 2005 Oystein Johansen <oystein@gnubg.org>
 
 	* gtkgame.c InitGTK(): Exclude GTK_STOCK_ABOUT when gtkversion < 2.6

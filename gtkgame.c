@@ -2015,55 +2015,6 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "/Game/Set turn/0" },
 	{ N_("/_Game/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Game/Match information..."), NULL, GTKMatchInfo, 0, NULL },
-	{ N_("/_Go"), NULL, NULL, 0, "<Branch>" },
-	{ N_("/_Go/Previous rol_l"), "Page_Up", 
-          Command, CMD_PREV_ROLL,
-#if GTK_CHECK_VERSION(2,0,0)
-		"<StockItem>", GTK_STOCK_GO_BACK
-#else
-		NULL
-#endif
-	},
-	{ N_("/_Go/Next _roll"), "Page_Down",
-	  Command, CMD_NEXT_ROLL, 
-#if GTK_CHECK_VERSION(2,0,0)
-		"<StockItem>", GTK_STOCK_GO_FORWARD
-#else
-		NULL
-#endif
-	},
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/_Previous move"), "<shift>Page_Up", 
-          Command, CMD_PREV, NULL },
-	{ N_("/_Go/Next _move"), "<shift>Page_Down", 
-          Command, CMD_NEXT, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/Previous chequer _play"), "<alt>Page_Up",
-	  Command, CMD_PREV_ROLLED, NULL },
-	{ N_("/_Go/Next _chequer play"), "<alt>Page_Down",
-	  Command, CMD_NEXT_ROLLED, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/Previous marke_d move"), "<control><shift>Page_Up", 
-          Command, CMD_PREV_MARKED, NULL },
-	{ N_("/_Go/Next mar_ked move"), "<control><shift>Page_Down", 
-          Command, CMD_NEXT_MARKED, NULL },
-	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
-	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
-          Command, CMD_PREV_GAME,
-#if GTK_CHECK_VERSION(2,0,0)
-		"<StockItem>", GTK_STOCK_GOTO_FIRST
-#else
-		NULL
-#endif
-	},
-	{ N_("/_Go/Next _game"), "<control>Page_Down",
-	  Command, CMD_NEXT_GAME,
-#if GTK_CHECK_VERSION(2,0,0)
-		"<StockItem>", GTK_STOCK_GOTO_LAST
-#else
-		NULL
-#endif
-	},
 	{ N_("/_Analyse"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Analyse/_Evaluate"), "<control>E", Command, CMD_EVAL, NULL },
 	{ N_("/_Analyse/_Hint"), "<control>H", Command, CMD_HINT,
@@ -2246,6 +2197,55 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Settings/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Settings/Save settings"), 
           NULL, Command, CMD_SAVE_SETTINGS, NULL },
+	{ N_("/_Go"), NULL, NULL, 0, "<Branch>" },
+	{ N_("/_Go/Previous rol_l"), "Page_Up", 
+          Command, CMD_PREV_ROLL,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GO_BACK
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Go/Next _roll"), "Page_Down",
+	  Command, CMD_NEXT_ROLL, 
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GO_FORWARD
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/_Previous move"), "<shift>Page_Up", 
+          Command, CMD_PREV, NULL },
+	{ N_("/_Go/Next _move"), "<shift>Page_Down", 
+          Command, CMD_NEXT, NULL },
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Previous chequer _play"), "<alt>Page_Up",
+	  Command, CMD_PREV_ROLLED, NULL },
+	{ N_("/_Go/Next _chequer play"), "<alt>Page_Down",
+	  Command, CMD_NEXT_ROLLED, NULL },
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Previous marke_d move"), "<control><shift>Page_Up", 
+          Command, CMD_PREV_MARKED, NULL },
+	{ N_("/_Go/Next mar_ked move"), "<control><shift>Page_Down", 
+          Command, CMD_NEXT_MARKED, NULL },
+	{ N_("/_Go/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Go/Pre_vious game"), "<control>Page_Up", 
+          Command, CMD_PREV_GAME,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GOTO_FIRST
+#else
+		NULL
+#endif
+	},
+	{ N_("/_Go/Next _game"), "<control>Page_Down",
+	  Command, CMD_NEXT_GAME,
+#if GTK_CHECK_VERSION(2,0,0)
+		"<StockItem>", GTK_STOCK_GOTO_LAST
+#else
+		NULL
+#endif
+	},
 	{ N_("/_Help"), NULL, NULL, 0, "<Branch>" },
 	{ N_("/_Help/_Commands"), NULL, Command, CMD_HELP,
 #if GTK_CHECK_VERSION(2,0,0)
@@ -7318,12 +7318,19 @@ extern void GTKHelp( char *sz ) {
 
 	GTKHelpAdd( pts, NULL, acTop );
 	
-	pw = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+	pw = gtk_dialog_new();
 	g_object_add_weak_pointer( G_OBJECT( pw ), (gpointer *) &pw );
-	gtk_window_set_title( GTK_WINDOW( pw ), _("GNU Backgammon - Help") );
+	gtk_window_set_title( GTK_WINDOW( pw ), _("Help - command reference") );
 	gtk_window_set_default_size( GTK_WINDOW( pw ), 500, 400 );
+	gtk_dialog_add_button(GTK_DIALOG(pw), GTK_STOCK_CLOSE, 
+			GTK_RESPONSE_CLOSE);
 
-	gtk_container_add( GTK_CONTAINER( pw ), pwPaned = gtk_vpaned_new() );
+	g_signal_connect_swapped (pw, "response",
+			G_CALLBACK (gtk_widget_destroy), pw);
+
+	gtk_container_add( GTK_CONTAINER( GTK_DIALOG(pw)->vbox ),
+			pwPaned = gtk_vpaned_new() );
+
 	gtk_paned_set_position( GTK_PANED( pwPaned ), 300 );
 	
 	gtk_paned_pack1( GTK_PANED( pwPaned ),
