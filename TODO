@@ -65,10 +65,6 @@ duplication of effort and to make sure our changes merge easily.
   does, but without evaluating them.
 ** Also "add move", to add a specific move to the list (e.g.
   "add move 8/5 6/5").
-** Once we have cubeful rollouts, allow the command "rollout =cube"
-  to perform a rollout to judge cube decisions (under GTK, there should
-  be a "Rollout" button in the hint window for cube decisions, and something
-  under the Analyse menu).
 ** Make "show marketwindow" say something for money games.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** Kit suggests that it's more important to get early plays right in
@@ -79,6 +75,8 @@ duplication of effort and to make sure our changes merge easily.
   still finding reasonable plays after that.)
 ** When a resignation has been offered, "hint" should show whether to
   accept or decline the resignation.
+** Allow some way to "activate" the old dice when navigating through
+  recorded moves. (gary)
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -162,6 +160,9 @@ duplication of effort and to make sure our changes merge easily.
   the new evalsetups. (gary)
 ** Make sure copy/paste works correctly everywhere.  See
   <http://www.freedesktop.org/standards/clipboards.txt>. (gary)
+** Add a "Rollout" button in the hint window for cube decisions (which
+  performs a "rollout =cube"), and something under the Analyse menu.  Also
+  add a "cubeful" toggle under Settings/Rollout. (gary)
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -243,6 +244,8 @@ functions:
 ** "set player both gnu" should display the "Play" button, if it's
   now the computer's turn. (gary)
 ** Problems importing .sgg files (see Peter Sochovsky's bug report).
+** ecRollout is obselete; everything should use the relevant parts of
+  rcRollout instead.  Why does rcTD exist?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -322,6 +325,9 @@ functions:
   (suggested by Peter Sochovsky).
 ** Consider making a move selection in the annotation window update the
   chequers to show that move (suggested by Peter Sochovsky).
+** Investigate more sophisticated training techniques, e.g. real
+  simulated annealing (see the GNU Scientific Library, at
+  <http://sources.redhat.com/gsl/>).
 
 * Obselete or problematic ideas (probably better not to implement these):
 ** Save partial input when TTY input is overwritten by an X command.
