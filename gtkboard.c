@@ -45,6 +45,7 @@
 #include "i18n.h"
 #include "boardpos.h"
 #include "matchequity.h"
+#include "gtktoolbar.h"
 
 
 #define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
@@ -514,8 +515,7 @@ static int update_move( BoardData *bd ) {
 
     bd->valid_move = NULL;
     
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
-	bd->playing ) {
+    if( ToolbarIsEditing( pwToolbar ) && bd->playing ) {
 	move = _("(Editing)");
 	fIncomplete = fIllegal = FALSE;
     } else if( EqualBoards( points, bd->old_board ) ) {
@@ -1461,7 +1461,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	/* jsc: In editing mode, clicking on a point or a bar. */
 	if( bd->playing &&
-	    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    ToolbarIsEditing( pwToolbar ) &&
 	    !( event->button.state & GDK_CONTROL_MASK ) ) {
 	    int dragging = 0;
 	    int colour = bd->drag_button == 1 ? 1 : -1;
@@ -1483,7 +1483,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    /* Clicked on cube; double. */
 	    bd->drag_point = -1;
 	    
-	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+	    if( ToolbarIsEditing( pwToolbar ) )
 		GTKSetCube( NULL, 0, NULL );
 	    else if ( bd->doubled )
                 UserCommand ( "take" );
@@ -1497,7 +1497,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
           /* clicked on resignation symbol */
           bd->drag_point = -1;
           if ( bd->resigned && 
-               ! gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
+               ! ToolbarIsEditing( pwToolbar ) )
             UserCommand ( "accept" );
 
           return TRUE;
@@ -1508,7 +1508,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    /* Clicked on dice; end move. */
 	    bd->drag_point = -1;
 	    
-	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
+	    if( ToolbarIsEditing( pwToolbar ) ) {
 	    	int n = board_point_with_border( board, bd, x, y );
 		if ( n == POINT_LEFT && bd->turn != 0 ) {
 			UserCommand( "set turn 0" );
@@ -1544,7 +1544,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( bd->playing && bd->dice[ 0 ] <= 0 &&
 	    ( ( bd->drag_point == POINT_RIGHT && bd->turn == 1 ) ||
 	      ( bd->drag_point == POINT_LEFT  && bd->turn == -1 ) ) ) {
-	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
+	    if( ToolbarIsEditing( pwToolbar ) ) {
 	    	int n = board_point_with_border( board, bd, x, y );
 		if ( n == POINT_LEFT && bd->turn != 0 ) {
 			UserCommand( "set turn 0" );
@@ -1574,8 +1574,8 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
-	if( !bd->playing || ( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
-	    bd->edit ) ) && bd->dice[ 0 ] <= 0 ) ) {
+	if( !bd->playing || 
+            ( ! ToolbarIsEditing( pwToolbar ) && bd->dice[ 0 ] <= 0 ) ) {
 	    /* Don't let them move chequers unless the dice have been
 	       rolled, or they're editing the board. */
 	    board_beep( bd );
@@ -1587,7 +1587,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	/* if the dice are set, and nDragPoint is 26 or 27 (i.e. off),
 	   then bear off as many chequers as possible, and return. */
 
-        if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+        if( !ToolbarIsEditing( pwToolbar ) &&
             bd->drag_point == ( ( 53 - bd->turn ) / 2 ) &&
             bd->dice[ 0 ] ) {
 
@@ -1618,7 +1618,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
         }
 	
-	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	if( !ToolbarIsEditing( pwToolbar ) &&
 	    bd->drag_point > 0 && bd->drag_point <= 24 &&
 	    ( !bd->points[ bd->drag_point ] ||
 	    bd->points[ bd->drag_point ] == -bd->turn ) ) {
@@ -1702,7 +1702,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
-	if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	if( ToolbarIsEditing( pwToolbar ) &&
 	    event->button.button != 1 ) {
 	    /* Button 2 or more in edit mode; modify point directly. */
 	    if( bd->drag_button == 2 ) {
@@ -1768,7 +1768,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	bd->drag_colour = bd->points[ bd->drag_point ] < 0 ? -1 : 1;
 
-	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	if( !ToolbarIsEditing( pwToolbar ) &&
 	    bd->drag_point && bd->drag_point != 25 &&
 	    bd->drag_colour != bd->turn ) {
 	    /* trying to move opponent's chequer (except off the bar, which
@@ -1786,7 +1786,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     case GDK_MOTION_NOTIFY:
 	/* jsc: In quick editing mode, dragging across point, but not a bar. */
 	if( bd->playing && bd->drag_point < 0 &&
-	    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    ToolbarIsEditing( pwToolbar ) &&
 	    !( event->button.state & GDK_CONTROL_MASK ) ) {
 	    int dragging = 1;
 	    int colour = bd->drag_button == 1 ? 1 : -1;
@@ -1859,7 +1859,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	
 	dest = board_point( board, bd, x, y );
 
-	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	if( !ToolbarIsEditing( pwToolbar ) &&
 	    dest == bd->drag_point && gdk_event_get_time( event ) -
 	    bd->click_time < CLICK_TIME ) {
 	    /* Automatically place chequer on destination point
@@ -2033,8 +2033,7 @@ static gint board_set( Board *board, const gchar *board_text,
 #endif
     old_turn = bd->turn;
     
-    editing = bd->playing &&
-	gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) );
+    editing = bd->playing && ToolbarIsEditing( pwToolbar );
 
     if( strncmp( board_text, "board:", 6 ) )
 	return -1;
@@ -2556,55 +2555,24 @@ extern void board_set_playing( Board *board, gboolean f ) {
 
     pbd->playing = f;
     gtk_widget_set_sensitive( pbd->position_id, f );
-    gtk_widget_set_sensitive( pbd->reset, f );
     gtk_widget_set_sensitive( pbd->match_id, f );
 }
 
 static void update_buttons( BoardData *pbd ) {
 
-    enum _control { C_NONE, C_ROLLDOUBLE, C_TAKEDROP, C_AGREEDECLINE,
-		    C_PLAY } c;
-    int fEdit = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) );
+  toolbarcontrol c;
 
-    c = C_NONE;
+  c = ToolbarUpdate( pwToolbar, &ms, pbd->dice, 
+                     pbd->computer_turn, pbd->playing );
 
-    if( !pbd->dice[ 0 ] )
-	c = C_ROLLDOUBLE;
+  if ( fGUIDiceArea ) {
 
-    if( ms.fDoubled )
-	c = C_TAKEDROP;
-
-    if( ms.fResigned )
-	c = C_AGREEDECLINE;
-
-    if( pbd->computer_turn )
-	c = C_PLAY;
+    if ( c == C_ROLLDOUBLE ) 
+      gtk_widget_show_all( pbd->dice_area );
+    else 
+      gtk_widget_hide( pbd->dice_area );
     
-    if( fEdit || !pbd->playing )
-	c = C_NONE;
-    
-
-    if ( fGUIDiceArea ) {
-
-      if ( c == C_ROLLDOUBLE ) 
-	gtk_widget_show_all( pbd->dice_area );
-      else 
-	gtk_widget_hide( pbd->dice_area );
-
-    } 
-
-    gtk_widget_set_sensitive ( pbd->roll, c == C_ROLLDOUBLE );
-    gtk_widget_set_sensitive ( pbd->doub, c == C_ROLLDOUBLE );
-
-    gtk_widget_set_sensitive ( pbd->play, c == C_PLAY );
-
-    gtk_widget_set_sensitive ( pbd->take, 
-                               c == C_TAKEDROP || c == C_AGREEDECLINE );
-    gtk_widget_set_sensitive ( pbd->drop, 
-                               c == C_TAKEDROP || c == C_AGREEDECLINE );
-    /* FIXME: max beavers etc */
-    gtk_widget_set_sensitive ( pbd->redouble, 
-                               c == C_TAKEDROP && ! ms.nMatchTo );
+  } 
 
 }
 
@@ -2618,7 +2586,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     
     /* Treat a reset of the position to old_board as a no-op while
        in edit mode. */
-    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) &&
+    if( ToolbarIsEditing( pwToolbar ) &&
 	pbd->playing && EqualBoards( pbd->old_board, points ) ) {
 	read_board( pbd, old_points );
 	if( pbd->turn < 0 )
@@ -2706,17 +2674,6 @@ static void board_size_allocate( GtkWidget *board,
     int cx;
     
     memcpy( &board->allocation, allocation, sizeof( GtkAllocation ) );
-
-    /* toolbar: on top in the allocation */
-    
-    gtk_widget_get_child_requisition( bd->vbox_toolbar, &requisition );
-    allocation->height -= requisition.height;
-    child_allocation.x = allocation->x;
-    child_allocation.y = allocation->y;
-    child_allocation.width = allocation->width;
-    child_allocation.height = requisition.height;
-    allocation->y += requisition.height;
-    gtk_widget_size_allocate( bd->vbox_toolbar, &child_allocation );
 
     /* position ID, match ID: just below toolbar */
 
@@ -2811,8 +2768,6 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
 
     bd = BOARD( pw )->board_data;
 
-    AddChild( bd->vbox_toolbar, pr );
-
     if ( fGUIShowIDs )
       AddChild( bd->vbox_ids, pr );
 
@@ -2888,14 +2843,10 @@ static void board_set_crawford( GtkWidget *pw, BoardData *bd ) {
     }
 }
 
-static void board_stop( GtkWidget *pw, BoardData *bd ) {
+extern void 
+board_edit( BoardData *bd ) {
 
-    fInterrupt = TRUE;
-}
-
-static void board_edit( GtkWidget *pw, BoardData *bd ) {
-
-    int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
+    int f = ToolbarIsEditing( pwToolbar );
 									
     update_move( bd );
     update_buttons( bd );
@@ -3136,112 +3087,6 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board ) {
     return pw;
 }
 
-static void ButtonClicked( GtkWidget *pw, char *sz ) {
-
-    UserCommand( sz );
-}
-
-
-static void ButtonClickedYesNo( GtkWidget *pw, char *sz ) {
-
-  if ( ms.fResigned ) {
-    UserCommand ( ! strcmp ( sz, "yes" ) ? "accept" : "decline" );
-    return;
-  }
-
-  if ( ms.fDoubled ) {
-    UserCommand ( ! strcmp ( sz, "yes" ) ? "take" : "drop" );
-    return;
-  }
-
-}
-
-
-extern GtkWidget *
-image_from_xpm_d ( char **xpm, GtkWidget *pw ) {
-
-  GdkPixmap *ppm;
-  GdkBitmap *mask;
-
-  ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
-                 gtk_widget_get_colormap( pw ), &mask, NULL,
-                                               xpm );
-  if ( ! ppm )
-    return NULL;
-  
-  return gtk_pixmap_new( ppm, mask );
-
-}
-
-
-static GtkWidget *
-button_from_image ( GtkWidget *pwImage ) {
-
-  GtkWidget *pw = gtk_button_new ();
-
-  gtk_container_add ( GTK_CONTAINER ( pw ), pwImage );
-
-  return pw;
-
-}
-  
-static GtkWidget *
-toggle_button_from_image ( GtkWidget *pwImage ) {
-
-  GtkWidget *pw = gtk_toggle_button_new ();
-
-  gtk_container_add ( GTK_CONTAINER ( pw ), pwImage );
-
-  return pw;
-
-}
-  
-
-static GtkWidget *
-toggle_button_from_images( GtkWidget *pwImageOff,
-                           GtkWidget *pwImageOn ) {
-
-  GtkWidget **aapw;
-  GtkWidget *pwm = gtk_multiview_new();
-  GtkWidget *pw = gtk_toggle_button_new();
-
-  aapw = (GtkWidget **) g_malloc( 3 * sizeof ( GtkWidget *) );
-
-  aapw[ 0 ] = pwImageOff;
-  aapw[ 1 ] = pwImageOn;
-  aapw[ 2 ] = pwm;
-
-  gtk_container_add( GTK_CONTAINER( pw ), pwm );
-
-  gtk_container_add( GTK_CONTAINER( pwm ), pwImageOff );
-  gtk_container_add( GTK_CONTAINER( pwm ), pwImageOn );
-  
-  gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", aapw, g_free );
-
-  return pw;
-  
-}
-
-
-extern void 
-toggle_clockwise( GtkWidget *pw, BoardData *bd ) {
-
-  GtkWidget **aapw = 
-    (GtkWidget **) gtk_object_get_user_data( GTK_OBJECT( pw ) );
-  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
-  
-  gtk_multiview_set_current( GTK_MULTIVIEW( aapw[ 2 ] ), aapw[ f ] );
-
-  if ( fClockwise != f ) {
-    gchar *sz = g_strdup_printf( "set clockwise %s", f ? "on" : "off" );
-    UserCommand( sz );
-    g_free( sz );
-  }
-
-
-}
-
-
 static void board_init( Board *board ) {
 
     BoardData *bd = g_malloc( sizeof( *bd ) );
@@ -3252,18 +3097,6 @@ static void board_init( Board *board ) {
     GtkWidget *pwFrame;
     GtkWidget *pwvbox;
 
-#include "xpm/tb_roll.xpm"
-#include "xpm/tb_double.xpm"
-#include "xpm/tb_redouble.xpm"
-#include "xpm/tb_edit.xpm"
-#include "xpm/tb_anticlockwise.xpm"
-#include "xpm/tb_clockwise.xpm"
-#ifndef USE_GTK2
-#include "xpm/tb_no.xpm"
-#include "xpm/tb_yes.xpm"
-#include "xpm/tb_stop.xpm"
-#include "xpm/tb_undo.xpm"
-#endif
     
     board->board_data = bd;
     bd->widget = GTK_WIDGET( board );
@@ -3291,223 +3124,9 @@ static void board_init( Board *board ) {
     bd->gc_cube = gtk_gc_get( vis->depth, cmap, &gcval, GDK_GC_FOREGROUND );
 
     bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;    
-    
-    /* 
-     * Create tool bar 
-     */
-
-    bd->vbox_toolbar = gtk_vbox_new ( FALSE, 0 );
-    gtk_container_add( GTK_CONTAINER( board ), bd->vbox_toolbar );
-    
-
-#if USE_GTK2
-    bd->toolbar = gtk_toolbar_new ();
-    gtk_toolbar_set_orientation ( GTK_TOOLBAR ( bd->toolbar ),
-                                  GTK_ORIENTATION_HORIZONTAL );
-    gtk_toolbar_set_style ( GTK_TOOLBAR ( bd->toolbar ),
-                            GTK_TOOLBAR_ICONS );
-#else
-    bd->toolbar = gtk_toolbar_new ( GTK_ORIENTATION_HORIZONTAL,
-                                    GTK_TOOLBAR_ICONS );
-#endif /* ! USE_GTK2 */
-
-
-    gtk_box_pack_start( GTK_BOX( bd->vbox_toolbar ), bd->toolbar, 
-                        FALSE, FALSE, 0 );
-
-    gtk_toolbar_set_tooltips ( GTK_TOOLBAR ( bd->toolbar ), TRUE );
-
-    /* roll button */
-
-    bd->roll = button_from_image( image_from_xpm_d ( tb_roll_xpm,
-						     bd->toolbar ) );
-    gtk_signal_connect( GTK_OBJECT( bd->roll ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "roll" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->roll ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->roll,
-                                _("Roll dice"),
-                                _("private") );
-
-    /* double button */
-
-    bd->doub = button_from_image( image_from_xpm_d ( tb_double_xpm,
-						     bd->toolbar ) );
-    gtk_signal_connect( GTK_OBJECT( bd->doub ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "double" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->doub ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->doub,
-                                _("Double"),
-                                _("private") );
-
-    /* take button */
-
-    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
-
-#if USE_GTK2
-    bd->take =
-      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_YES, 
-                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-    bd->take =
-      button_from_image ( image_from_xpm_d ( tb_yes_xpm,
-                                             bd->toolbar ) );
-#endif
-
-    gtk_signal_connect( GTK_OBJECT( bd->take ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClickedYesNo ), "yes" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->take ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->take,
-                                _("Take the offered cube or "
-                                  "accept the offered resignation"),
-                                _("private") );
-
-    /* drop button */
-
-#if USE_GTK2
-    bd->drop =
-      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_NO, 
-                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-    bd->drop =
-      button_from_image ( image_from_xpm_d ( tb_no_xpm,
-                                             bd->toolbar ) );
-#endif
-
-    gtk_signal_connect( GTK_OBJECT( bd->drop ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClickedYesNo ), "no" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->drop ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->drop,
-                                _("Drop the offered cube or "
-                                  "decline offered resignation"),
-                                _("private") );
-
-    /* redouble button */
-
-    bd->redouble = button_from_image( image_from_xpm_d ( tb_redouble_xpm,
-							 bd->toolbar ) );
-    gtk_signal_connect( GTK_OBJECT( bd->redouble ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "redouble" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->redouble ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->redouble,
-                                _("Redouble immediately (beaver)"),
-                                _("private") );
-
-    /* play button */
-
-    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
-
-#if USE_GTK2
-    bd->play = 
-      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_EXECUTE, 
-                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-    bd->play = gtk_button_new_with_label ( _("Play" ) );
-#endif
-    gtk_signal_connect( GTK_OBJECT( bd->play ), "clicked",
-			GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->play ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->play,
-                                _("Force computer to play"),
-                                _("private") );
-
-    /* reset button */
-
-    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
-
-#if USE_GTK2
-    bd->reset = 
-      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_UNDO, 
-                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-    bd->reset = 
-      button_from_image ( image_from_xpm_d ( tb_undo_xpm,
-                                             bd->toolbar ) );
-#endif
-    gtk_signal_connect( GTK_OBJECT( bd->reset ), "clicked",
-			GTK_SIGNAL_FUNC( ShowBoard ), NULL );
-    gtk_widget_set_sensitive ( GTK_WIDGET ( bd->play ), FALSE );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->reset,
-                                _("Undo moves"),
-                                _("private") );
-
-    /* edit button */
-
-    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
-
-    bd->edit =
-      toggle_button_from_image ( image_from_xpm_d ( tb_edit_xpm,
-                                             bd->toolbar ) );
-    gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
-			GTK_SIGNAL_FUNC( board_edit ), bd );
-    
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->edit,
-                                _("Edit position"),
-                                _("private") );
-
-    /* direction of play */
-
-    bd->button_clockwise =
-      toggle_button_from_images( image_from_xpm_d( tb_anticlockwise_xpm,
-                                                   bd->toolbar ),
-                                 image_from_xpm_d( tb_clockwise_xpm,
-                                                   bd->toolbar ) );
-    gtk_signal_connect( GTK_OBJECT( bd->button_clockwise ), "toggled",
-                        GTK_SIGNAL_FUNC( toggle_clockwise ), bd );
-
-    gtk_toolbar_append_widget( GTK_TOOLBAR( bd->toolbar ),
-                               bd->button_clockwise,
-                               _("Reverse direction of play"),
-                               NULL );
-
-    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->button_clockwise ),
-                                  fClockwise );
-                                 
-
-    /* stop button */
-
-    gtk_toolbar_append_space ( GTK_TOOLBAR ( bd->toolbar ) );
-
-    bd->stopparent = gtk_event_box_new();
-#if USE_GTK2
-    bd->stop =
-      button_from_image ( gtk_image_new_from_stock ( GTK_STOCK_STOP, 
-                                                     GTK_ICON_SIZE_SMALL_TOOLBAR ) );
-#else
-    bd->stop =
-      button_from_image ( image_from_xpm_d ( tb_stop_xpm,
-                                             bd->toolbar ) );
-#endif
-    gtk_container_add( GTK_CONTAINER( bd->stopparent ), bd->stop );
-
-    gtk_signal_connect( GTK_OBJECT( bd->stop ), "clicked",
-			GTK_SIGNAL_FUNC( board_stop ), NULL );
-
-    gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
-                                bd->stopparent,
-                                _("Stop the current operation"),
-                                _("private") );
-
     /* horisontal separator */
 
     pw = gtk_hseparator_new ();
-    gtk_box_pack_start( GTK_BOX( bd->vbox_toolbar ), pw, 
-                        FALSE, FALSE, 0 );
-
 
     /* board drawing area */
 

@@ -48,6 +48,7 @@ typedef enum _dialogtype {
 } dialogtype;
 
 extern GtkWidget *pwMain, *pwMenuBar;
+extern GtkWidget *pwToolbar;
 extern GtkTooltips *ptt;
 
 extern GtkWidget *pwGrab;

@@ -58,22 +58,16 @@ extern gint game_set_old_dice( Board *board, gint die0, gint die1 );
 extern void board_set_playing( Board *board, gboolean f );
 extern void board_animate( Board *board, int move[ 8 ], int player );
 
-extern GtkWidget *
-image_from_xpm_d ( char **xpm, GtkWidget *pw );
-
 /* private data */
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *table, *move,
-	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, 
-	*crawford, *widget, *key0, *key1, *stop, *stopparent, 
-	*doub, *lname0, *lname1,
+	*position_id, *name0, *name1, *score0, *score1, 
+	*crawford, *widget, *key0, *key1,
+	*lname0, *lname1,
 	*lscore0, *lscore1, *mname0, *mname1, *mscore0, *mscore1, *play,
         *match_id;
     GtkWidget *mmatch, *lmatch, *match;
     GtkAdjustment *amatch, *ascore0, *ascore1;
-    GtkWidget *toolbar, *vbox_toolbar;
-    GtkWidget *roll;
-    GtkWidget *take, *drop, *redouble;
     GtkWidget *vbox_ids;
     GtkWidget *pipcount0, *pipcount1;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
@@ -114,6 +108,8 @@ typedef struct _BoardData {
     
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd );
 extern void board_free_pixmaps( BoardData *bd );
+extern void 
+board_edit( BoardData *bd );
 
 extern void
 DrawDie( GdkDrawable *pd, 

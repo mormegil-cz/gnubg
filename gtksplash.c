@@ -33,7 +33,7 @@
 #include "backgammon.h"
 #include "eval.h"
 #include "gtksplash.h"
-#include "gtkboard.h"
+#include "gtktoolbar.h"
 #include "i18n.h"
 
 #if GTK_CHECK_VERSION(2,0,0)

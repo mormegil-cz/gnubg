@@ -77,6 +77,7 @@
 #include "record.h"
 #include "sound.h"
 #include "gtkoptions.h"
+#include "gtktoolbar.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -342,6 +343,7 @@ GtkWidget *pwGrab;
 GtkWidget *pwOldGrab;
 
 GtkWidget *pwBoard, *pwMain, *pwMenuBar;
+GtkWidget *pwToolbar;
 static GtkWidget *pwStatus, *pwProgress, *pwGameList, *pom,
     *pwAnalysis, *pwCommentary;
 static GtkWidget *pwHint = NULL;
@@ -2635,8 +2637,11 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	pif, "/Windows/Guile" ), FALSE );
 
+    gtk_box_pack_start( GTK_BOX( pwVbox ),
+                        pwToolbar = ToolbarNew(), FALSE, FALSE, 0 );
+    pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
+
     gtk_container_add( GTK_CONTAINER( pwVbox ), pwBoard = board_new() );
-    pwGrab = ( (BoardData *) BOARD( pwBoard )->board_data )->stopparent;
 
     gtk_box_pack_end( GTK_BOX( pwVbox ), pwHbox = gtk_hbox_new( FALSE, 0 ),
 		      FALSE, FALSE, 0 );
@@ -6696,6 +6701,7 @@ extern void GTKSet( void *p ) {
 	fAutoCommand = TRUE;
 
 	board_set_playing( BOARD( pwBoard ), ms.gs == GAME_PLAYING );
+        ToolbarSetPlaying( pwToolbar, ms.gs == GAME_PLAYING );
 
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/File/Save" ),
 			 plGame != NULL );
