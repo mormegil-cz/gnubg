@@ -921,7 +921,7 @@ static int NewGame( void ) {
 
 	free( plGame );
 	ListDelete( lMatch.plPrev );
-
+	plGame = plLastMove = 0;
 	return -1;
     }
     

@@ -1,3 +1,7 @@
+Fri Aug 13 09:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* play.c: Small bug fix (bug 9926)
+
 Wed Aug 11 23:39:41 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* external_y.y: remove %output to stop ylwrap complaining.
@@ -8,7 +12,7 @@ Thu Aug 12 07:46:18 2004  Joseph Heled  <joseph@gnubg.org>
 	CommandLoadPython, since this IS the place 'gmake install' puts on
 	my Linux box (i.e./usr/local/share/gnubg/scripts/gnubg.py).
 
-Mon Jul 02 09:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Mon Aug 02 09:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* play.c: Fixed 3d quick draw bug
 
