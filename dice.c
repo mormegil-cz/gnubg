@@ -328,33 +328,43 @@ static int BBSInitialSeedFailure( void ) {
 static int BBSCheckInitialSeed( void ) {
 
     mpz_t z, zCycle;
-    int i;
+    int i, iAttempt;
     
     if( mpz_sgn( zSeed ) < 1 )
 	return BBSInitialSeedFailure();
 
-    mpz_init_set( z, zSeed );
-
-    for( i = 0; i < 8; i++ )
-	mpz_powm_ui( z, z, 2, zModulus );
-
-    mpz_init_set( zCycle, z );
+    for( iAttempt = 0; iAttempt < 32; iAttempt++ ) {
+	mpz_init_set( z, zSeed );
     
-    for( i = 0; i < 16; i++ ) {
-	mpz_powm_ui( z, z, 2, zModulus );
-	if( !mpz_cmp( z, zCycle ) ) {
-	    /* short cycle detected */
-	    BBSInitialSeedFailure();
-	    mpz_clear( z );
-	    mpz_clear( zCycle );
-	    return -1;
+	for( i = 0; i < 8; i++ )
+	    mpz_powm_ui( z, z, 2, zModulus );
+
+	mpz_init_set( zCycle, z );
+
+	for( i = 0; i < 16; i++ ) {
+	    mpz_powm_ui( z, z, 2, zModulus );
+	    if( !mpz_cmp( z, zCycle ) )
+		/* short cycle detected */
+		break;
 	}
+
+	if( i == 16 )
+	    /* we found a cycle that meets the minimum length */
+	    break;
+
+	mpz_add_ui( zSeed, zSeed, 1 );
     }
+
+    if( iAttempt == 32 )
+	/* we couldn't find any good seeds */
+	BBSInitialSeedFailure();    
+
+    /* FIXME print some sort of warning if we had to modify the seed */
     
     mpz_clear( z );
     mpz_clear( zCycle );
     
-    return 0;
+    return iAttempt < 32 ? 0 : -1;
 }
 #endif
 
