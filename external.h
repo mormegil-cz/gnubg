@@ -24,15 +24,21 @@
 
 #if HAVE_SOCKETS
 
+#ifndef WIN32
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
-#endif
+#endif /* #if HAVE_SYS_SOCKET_H */
+
+#else /* #ifndef WIN32 */
+#include <winsock.h>
+#endif /* #ifndef WIN32 */
 
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz );
 extern int ExternalRead( int h, char *pch, int cch );
 extern int ExternalWrite( int h, char *pch, int cch );
 
-#endif
+#endif /* #if HAVE_SOCKETS */
 
-#endif
+#endif /* #ifndef _EXTERNAL_H_ */

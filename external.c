@@ -22,11 +22,20 @@
 #include "config.h"
 
 #if HAVE_SOCKETS
+
+#include <signal.h>
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#endif /* #if HAVE_UNISTD_H */
+
+#ifndef WIN32
+
 #include <assert.h>
 #include <errno.h>
-#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -34,11 +43,58 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/un.h>
-#endif
+#endif /* #if HAVE_SYS_SOCKET_H */
+
 #include <stdio.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
+#else /* #ifndef WIN32 */
+#include <winsock.h>
+
+#define EWOULDBLOCK             WSAEWOULDBLOCK
+#define EINPROGRESS             WSAEINPROGRESS
+#define EALREADY                WSAEALREADY
+#define ENOTSOCK                WSAENOTSOCK
+#define EDESTADDRREQ            WSAEDESTADDRREQ
+#define EMSGSIZE                WSAEMSGSIZE
+#define EPROTOTYPE              WSAEPROTOTYPE
+#define ENOPROTOOPT             WSAENOPROTOOPT
+#define EPROTONOSUPPORT         WSAEPROTONOSUPPORT
+#define ESOCKTNOSUPPORT         WSAESOCKTNOSUPPORT
+#define EOPNOTSUPP              WSAEOPNOTSUPP
+#define EPFNOSUPPORT            WSAEPFNOSUPPORT
+#define EAFNOSUPPORT            WSAEAFNOSUPPORT
+#define EADDRINUSE              WSAEADDRINUSE
+#define EADDRNOTAVAIL           WSAEADDRNOTAVAIL
+#define ENETDOWN                WSAENETDOWN
+#define ENETUNREACH             WSAENETUNREACH
+#define ENETRESET               WSAENETRESET
+#define ECONNABORTED            WSAECONNABORTED
+#define ECONNRESET              WSAECONNRESET
+#define ENOBUFS                 WSAENOBUFS
+#define EISCONN                 WSAEISCONN
+#define ENOTCONN                WSAENOTCONN
+#define ESHUTDOWN               WSAESHUTDOWN
+#define ETOOMANYREFS            WSAETOOMANYREFS
+#define ETIMEDOUT               WSAETIMEDOUT
+#define ECONNREFUSED            WSAECONNREFUSED
+#define ELOOP                   WSAELOOP
+#define ENAMETOOLONG            WSAENAMETOOLONG
+#define EHOSTDOWN               WSAEHOSTDOWN
+#define EHOSTUNREACH            WSAEHOSTUNREACH
+#define ENOTEMPTY               WSAENOTEMPTY
+#define EPROCLIM                WSAEPROCLIM
+#define EUSERS                  WSAEUSERS
+#define EDQUOT                  WSAEDQUOT
+#define ESTALE                  WSAESTALE
+#define EREMOTE                 WSAEREMOTE
+#define EINVAL                  WSAEINVAL
+#define EINTR                   WSAEINTR
+
+#define inet_aton(ip,addr)  (addr)->s_addr = inet_addr(ip), 1
+#define inet_pton(fam,ip,addr) (addr)->s_addr = inet_addr(ip), 1
+
+#endif /* #ifndef WIN32 */
+
 #endif /* HAVE_SOCKETS */
 
 #include "backgammon.h"
@@ -67,7 +123,11 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 	    return -1;
 
 	f = TRUE;
+#ifdef WIN32
+	if( setsockopt( (SOCKET) h, SOL_SOCKET, SO_REUSEADDR, (const char*) &f, sizeof f ) )
+#else
 	if( setsockopt( h, SOL_SOCKET, SO_REUSEADDR, &f, sizeof f ) )
+#endif
 	    return -1;
 	
 	psin = malloc( *pcb = sizeof (struct sockaddr_in) );
@@ -79,7 +139,11 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 	if( !*sz )
 	    /* no host specified */
 	    psin->sin_addr.s_addr = htonl( INADDR_ANY );
+#ifdef WIN32
+	else if( !( (psin->sin_addr).s_addr = inet_addr(sz) ) ) {
+#else
 	else if( !inet_aton( sz, &psin->sin_addr ) ) {
+#endif
 	    if( !( phe = gethostbyname( sz ) ) ) {
 		*pch = ':';
 		errno = EINVAL;
@@ -104,8 +168,13 @@ extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 	   sockaddr_un size, but this is a conservative estimate */
 	psun = malloc( *pcb = 16 + strlen( sz ) );
 	
+#ifndef WIN32
 	psun->sun_family = AF_LOCAL;
 	strcpy( psun->sun_path, sz );
+#else /* #ifndef WIN32 */
+	/* FIXME: what will we do on Windows? */
+	return -1;
+#endif /* #ifndef WIN32 */
 
 	*ppsa = (struct sockaddr *) psun;
     }
