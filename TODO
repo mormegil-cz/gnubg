@@ -147,8 +147,7 @@ duplication of effort and to make sure our changes merge easily.
   to the other, that the dice in the board window change colour.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
-** In the Crawford game, "hint" still tries to recommend a doubling action.
-  Also, "eval" gives different MWC for cubeless and cubeful -- why?
+** "eval" gives different MWC for cubeless and cubeful -- why?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
