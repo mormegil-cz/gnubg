@@ -10944,6 +10944,16 @@ _ACEOF
 
 fi
 
+
+
+if test "$have_pthread" != "no" ; then
+  PROCESSING_UNITS_TRUE=
+  PROCESSING_UNITS_FALSE='#'
+else
+  PROCESSING_UNITS_TRUE='#'
+  PROCESSING_UNITS_FALSE=
+fi
+
 if test "$have_pthread" != "no"; then
 
 cat >>confdefs.h <<\_ACEOF
@@ -13585,6 +13595,13 @@ echo "$as_me: error: conditional \"USE_SOUND\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${PROCESSING_UNITS_TRUE}" && test -z "${PROCESSING_UNITS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"PROCESSING_UNITS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"PROCESSING_UNITS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
@@ -14191,6 +14208,8 @@ s,@AUDIOFILE_CFLAGS@,$AUDIOFILE_CFLAGS,;t t
 s,@AUDIOFILE_LIBS@,$AUDIOFILE_LIBS,;t t
 s,@NAS_LIBS@,$NAS_LIBS,;t t
 s,@NAS_CFLAGS@,$NAS_CFLAGS,;t t
+s,@PROCESSING_UNITS_TRUE@,$PROCESSING_UNITS_TRUE,;t t
+s,@PROCESSING_UNITS_FALSE@,$PROCESSING_UNITS_FALSE,;t t
 s,@PNG_LIBS@,$PNG_LIBS,;t t
 s,@MKINSTALLDIRS@,$MKINSTALLDIRS,;t t
 s,@MSGFMT@,$MSGFMT,;t t

@@ -1,3 +1,11 @@
+Sat May 31 13:51:57 2003  Joern Thyssen  <jth@gnubg.org>
+
+	more autoconf magic.
+
+	* Makefile.am: conditional for procunits.
+	* threadglobals.c: new file.
+	* procunits.[ch]: move threadglobal stuff into threadglobals.[ch]
+
 Sat May 31 13:30:36 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Add autoconf magic for multi-processor code.

@@ -73,7 +73,9 @@
 #endif
 #endif
 
+#if PROCESSING_UNITS
 #include "threadglobals.h"
+#endif
 
 
 /* From pub_eval.c: */

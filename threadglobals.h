@@ -65,7 +65,34 @@ typedef struct {
 extern pthread_key_t tlsThreadGlobalsKey;
 
 
+/* --------------------------------------------------
+    THREAD GLOBALS FUNCTIONS
+
+    These functions are used to make globals thread-
+    dependent (common globals AND static locals).
+    All globals that should be thread-dependent must
+    be declared in the threadglobals structure.
+    All globals access (r-value and l-values) must
+    be done through the ThreadGlobal() macro.
+    Each time a new thread is started,
+    CreateThreadGlobalStorage() must be called from
+    that thread before it accesses any thread-
+    dependent globals.
+    In the case where several static locals have been
+    defined with the same name in different functions,
+    those static locals should be renamed using unique
+    names in the program scope.
+   --------------------------------------------------
+*/
+
+
+extern int gDebugDisableCache;
+
+extern int InitThreadGlobalStorage (void);
+extern int CreateThreadGlobalStorage (void);
+
 #endif
+
 
 
 #endif
