@@ -621,7 +621,9 @@ static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
 	anColour[ 2 ] = col.blue >> 8;
 	
 	if( pch ) {
+            PushLocale ( "C" );
 	    *pnSpeckle = atof( pch ) * 128;
+            PopLocale ();
 	    
 	    if( *pnSpeckle < 0 )
 		*pnSpeckle = 0;
