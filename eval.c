@@ -3634,7 +3634,8 @@ static void StatusBearoff1( char *sz ) {
 static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz ) {
 
     sprintf( sz, " * %s neural network evaluator:\n"
-	     "   - %d inputs, %d hidden units, trained on %d positions.\n\n",
+	     "   - version " WEIGHTS_VERSION ", %d inputs, %d hidden units, "
+	     "trained on %d positions.\n\n",
 	     szTitle, pnn->cInput, pnn->cHidden, pnn->nTrained );
 }
 

@@ -1,3 +1,12 @@
+Fri Apr 20 11:31:52 2001  Gary Wong  <gtw@research.att.com>
+
+	* eval.o (StatusNeuralNet): Report weights version.
+	
+	* analysis.c (AnalyzeGame): Record whether moves, cube or dice
+	were analysed.
+	
+	* sgf.c (RestoreGS): New function.
+
 Thu Apr 19 15:43:01 2001  Gary Wong  <gtw@research.att.com>
 
 	* sgf.c (WriteStatContext): New function.

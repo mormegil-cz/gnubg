@@ -167,6 +167,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Add option menus corresponding to the "annotate" commands in the
   annotation window. (gary)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
+** When a long string is displayed in the status bar, the main window
+  grows to accomodate it -- not very pretty.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -174,6 +176,7 @@ duplication of effort and to make sure our changes merge easily.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
+*** Allow copy/paste from the "hint" cube output and statistics dialogs.
 
 ** MS Windows:
 *** The stop button has no effect.  One approach would be to define a
@@ -204,9 +207,6 @@ duplication of effort and to make sure our changes merge easily.
 ** The SGF loading (saving?) routines and CommandLoadCommands use
   stdio, which restarts system calls on signals.  This means TTY interrupts
   and the GTK `stop' button don't work. (gary)
-** Make sure the socket changes for external players work on Solaris.  Things
-  to check: #include <sys/types.h>; don't use the identifier "sun";
-  #define AF_LOCAL AF_UNIX (same with PF_).
 ** The fread() calls in import.c need to be byte-swapped on big-endian
   machines.
 ** The "stop" button (i.e. the grab widget) automatically removes the
@@ -217,9 +217,13 @@ duplication of effort and to make sure our changes merge easily.
 ** There's no way to see the annotation on the opening move using the
   TTY interface.  Changing ShowBoard() to display the starting position
   and then the annotation might work.
-** Jørn: should the "Overall rating" calculated at the end of
-  DumpStatcontext divide the error rate by 2 (i.e. the average of
-  cube and chequer errors, rather than the sum)?
+** The SGF lexer and parser are robust against illegal output, but the
+  game reading functions in sgf.c are very fragile.  They need to be
+  fixed to detect invalid saved games.
+** fPlayer is probably set incorrectly in the MOVE_TAKE and MOVE_DROP
+  cases in AnalyzeGame().
+** The error messages about net weights should mention the file they're
+  complaining about (since several are searched).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
