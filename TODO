@@ -208,7 +208,9 @@ duplication of effort and to make sure our changes merge easily.
   robust to add a parent to it (box or event box?), and give _that_
   the grab.  Unfortunately, grab add/remove calls must nest, and we
   can't guarantee that...
-** gdk_get_rgb_image can generate BadMatch errors (gary).
+** gdk_get_rgb_image won't work if a window is partially off-screen.
+  A possible workaround is to XCopyArea it to a pixmap, and then
+  get the image from that. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

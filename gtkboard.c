@@ -1491,38 +1491,19 @@ extern void board_set_playing( Board *board, gboolean f ) {
 
     BoardData *pbd = board->board_data;
 
+    pbd->playing = f;
     gtk_widget_set_sensitive( pbd->position_id, f );
     gtk_widget_set_sensitive( pbd->reset, f );
     gtk_widget_set_sensitive( pbd->edit, f );
 }
 
-extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
-		      gchar *name, gchar *opp_name, gint match,
-		      gint score, gint opp_score, gint die0, gint die1 ) {
-    gchar board_str[ 256 ];
-    int old_dice;
-    BoardData *pbd = board->board_data;
-    enum _control { C_NONE, C_ROLLDOUBLE, C_TAKEDROP, C_AGREEDECLINE } c;
-    
-    memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
-    old_dice = pbd->dice[ 0 ];
+static void update_buttons( BoardData *pbd ) {
 
-    FIBSBoard( board_str, points, roll, name, opp_name, match, score,
-	       opp_score, die0, die1, nCube, fCubeOwner, fDoubled, fTurn,
-	       fCrawford );
-    
-    board_set( board, board_str );
-    
-    /* FIXME update names, score, match length */
-    if( pbd->board_size <= 0 )
-	return 0;
+    enum _control { C_NONE, C_ROLLDOUBLE, C_TAKEDROP, C_AGREEDECLINE } c;
 
     c = C_NONE;
-    
-    if( die0 ) {
-	pbd->dice_roll[ 0 ] = die0;
-	pbd->dice_roll[ 1 ] = die1;
-    } else
+
+    if( !pbd->dice[ 0 ] )
 	c = C_ROLLDOUBLE;
 
     if( fDoubled )
@@ -1531,7 +1512,11 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     if( fResigned )
 	c = C_AGREEDECLINE;
 
-    if( c == C_ROLLDOUBLE && old_dice )
+    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) ||
+	!pbd->playing )
+	c = C_NONE;
+    
+    if( c == C_ROLLDOUBLE )
 	gtk_widget_show_all( pbd->usedicearea ? pbd->dice_area :
 			     pbd->rolldouble );
     else
@@ -1547,6 +1532,34 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	gtk_widget_show_all( pbd->agreedecline );
     else
 	gtk_widget_hide( pbd->agreedecline );
+}
+
+extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
+		      gchar *name, gchar *opp_name, gint match,
+		      gint score, gint opp_score, gint die0, gint die1 ) {
+    gchar board_str[ 256 ];
+    int old_dice;
+    BoardData *pbd = board->board_data;
+    
+    memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
+    old_dice = pbd->dice[ 0 ];
+
+    FIBSBoard( board_str, points, roll, name, opp_name, match, score,
+	       opp_score, die0, die1, nCube, fCubeOwner, fDoubled, fTurn,
+	       fCrawford );
+    
+    board_set( board, board_str );
+    
+    /* FIXME update names, score, match length */
+    if( pbd->board_size <= 0 )
+	return 0;
+
+    if( die0 ) {
+	pbd->dice_roll[ 0 ] = die0;
+	pbd->dice_roll[ 1 ] = die1;
+    }
+
+    update_buttons( pbd );
 
     /* FIXME it's overkill to do this every time, but if we don't do it,
        then "set turn <player>" won't redraw the dice in the other colour. */
@@ -2706,7 +2719,8 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
     int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
     
     update_move( bd );
-
+    update_buttons( bd );
+    
     if( !f ) {
 	/* Editing complete; set board. */
 	int points[ 2 ][ 25 ];
@@ -2840,6 +2854,7 @@ static void board_init( Board *board ) {
     bd->drag_point = bd->board_size = -1;
     bd->dice_roll[ 0 ] = bd->dice_roll[ 1 ] = 0;
     bd->crawford_game = FALSE;
+    bd->playing = FALSE;
     
     bd->all_moves = NULL;
 
