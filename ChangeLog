@@ -1,3 +1,7 @@
+Sat Nov 29 10:14:33 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (ReportBug): use uname to improve logic.
+
 Thy Nov 27 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 	* htmlimages.c: Fix dice colour
 	* gtkboard.c: Remove previous fix...
