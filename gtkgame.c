@@ -2767,6 +2767,12 @@ extern void GTKOutputErr( char *sz ) {
     sprintf( szMessage, "%s: %s", sz, strerror( errno ) );
     /* FIXME it would be nice to have an error icon in this message box */
     Message( szMessage, FALSE );
+    
+    if( fMessage ) {
+	strcat( szMessage, "\n" );
+	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
+			 szMessage, -1 );
+    }
 }
 
 extern void GTKOutputNew( void ) {
