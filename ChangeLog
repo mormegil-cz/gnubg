@@ -1,3 +1,7 @@
+Mon Oct 06 18:34:47 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* gtktheory.c: fix typo (bg rate value range in theory window)
+
 Sat Oct  4 16:40:25 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkchequer.c (UpdateMoveList): ensure that the selectec
