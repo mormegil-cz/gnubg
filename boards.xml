@@ -46,7 +46,7 @@
 		piecetype=0
 		piecetexturetype=1
 		roundededges=y
-		bgintray=n
+		bgintrays=n
 		roundedpoints=n
 		lighttype=p
 		lightposx=0.200000 lightposy=1.900000 lightposz=3.300000
@@ -97,7 +97,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=y
-         bgintray=y         
+         bgintrays=y         
          roundedpoints=n
          lighttype=p
          lightposx=0.400000 lightposy=1.600000 lightposz=3.400000
@@ -148,7 +148,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=y
-         bgintray=n
+         bgintrays=n
          roundedpoints=y
          lighttype=d
          lightposx=3.000000 lightposy=0.000000 lightposz=3.500000
@@ -199,7 +199,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=n
-         bgintray=y
+         bgintrays=y
          roundedpoints=n
          lighttype=p
          lightposx=-1.100000 lightposy=-1.200000 lightposz=5.000000
@@ -251,7 +251,7 @@
          piecetype=1
          piecetexturetype=1
          roundededges=y
-         bgintray=n
+         bgintrays=n
          roundedpoints=n
          lighttype=p
          lightposx=0.500000 lightposy=2.100000 lightposz=2.500000
@@ -303,7 +303,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=y
-         bgintray=y
+         bgintrays=y
          roundedpoints=n
          lighttype=p
          lightposx=0.100000 lightposy=1.500000 lightposz=3.000000
@@ -355,7 +355,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=y
-         bgintray=n
+         bgintrays=n
          roundedpoints=n
          lighttype=p
          lightposx=1.000000 lightposy=1.000000 lightposz=1.500000
@@ -406,7 +406,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=y
-         bgintray=y
+         bgintrays=y
          roundedpoints=n
          lighttype=p
          lightposx=0.500000 lightposy=1.400000 lightposz=1.500000
@@ -457,7 +457,7 @@
          piecetype=0
          piecetexturetype=0
          roundededges=y
-         bgintray=n
+         bgintrays=n
          roundedpoints=n
          lighttype=p
          lightposx=1.100000 lightposy=2.200000 lightposz=3.300000
@@ -509,7 +509,7 @@
          piecetype=1
          piecetexturetype=1
          roundededges=n
-         bgintray=y
+         bgintrays=y
          roundedpoints=n
          lighttype=p
          lightposx=1.600000 lightposy=1.600000 lightposz=3.400000
@@ -560,7 +560,7 @@
          piecetype=0
          piecetexturetype=0
          roundededges=y
-         bgintray=n
+         bgintrays=n
          roundedpoints=n
          lighttype=p
          lightposx=2.900000 lightposy=1.400000 lightposz=4.500000
@@ -612,7 +612,7 @@
          piecetexturetype=0
          roundededges=n
          roundedpoints=n
-         bgintray=y
+         bgintrays=y
          lighttype=d
          lightposx=-0.700000 lightposy=3.500000 lightposz=4.300000
          lightambient=45 lightdiffuse=60 lightspecular=100
@@ -663,7 +663,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=y
-         bgintray=n
+         bgintrays=n
          roundedpoints=n
          lighttype=p
          lightposx=1.000000 lightposy=1.700000 lightposz=5.000000
@@ -715,7 +715,7 @@
          piecetype=0
          piecetexturetype=0
          roundededges=y
-         bgintray=y
+         bgintrays=y
          roundedpoints=y
          lighttype=p
          lightposx=1.600000 lightposy=1.200000 lightposz=1.500000
@@ -724,10 +724,10 @@
          chequers3d1=#478E49;#4C7C3F;#3F3F3F;98;100
          dice3d0=#F2F2F2;#EAEAEA;#FFFFFF;100;100;y
          dice3d1=#478E49;#4C7C3F;#3F3F3F;98;100;y
-         dot3d0=#2B773B;#5D854B;#323432;128;100
+         dot3d0=#0F2A15;#5D854B;#323432;128;100
          dot3d1=#E8F4EA;#D1D8CE;#1B1B1B;128;100
          cube3d=#D1D6C9;#384058;#CBCCCB;80;0
-         cubetext3d=#7D2A68;#926E58;#00008C;98;100
+         cubetext3d=#CC41C2;#403C6C;#000001;128;100
          base3d=#D0B15D;#D4B935;#334F3F;128;0;suede.png
          points3d0=#CC7F00;#C18408;#49181D;128;100;wavesand01.png
          points3d1=#823A00;#963F00;#47514A;128;100;wavesand01.png
@@ -735,7 +735,7 @@
          hinge3d=#772534;#81342B;#E9C944;115;0;hinge.png
          numbers3d=#A6A847;#E7DCAE;#010101;116;100
          background3d=#82AD61;#62776E;#CA6A6D;116;0;alder.png
-      </design>
+      </design> 
 
    </board-design>
 
@@ -973,7 +973,7 @@
          piecetype=0
          piecetexturetype=1
          roundededges=y
-         bgintray=y
+         bgintrays=y
          roundedpoints=n
          lighttype=d
          lightposx=3.000000 lightposy=0.200000 lightposz=2.600000
