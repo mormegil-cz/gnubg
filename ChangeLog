@@ -1,3 +1,8 @@
+Fri Dec 13 07:05:20 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
+
+	* makeweights.c: add a -f option to avoid problems with 
+	  writing binary files to stdout
+	
 Thu Dec 12 22:59:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Separate movefilters for evaluation, analysis, rollouts, and players.
