@@ -1,3 +1,7 @@
+Mon Sep 01 23:29:12 2003 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkgame.c (SetAnnotation): swap doubling skill and luck widgets
+
 Mon Sep 01 22:55:25 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	first version of better logic for categorization of doubles

@@ -1752,6 +1752,34 @@ static void SetAnnotation( moverecord *pmr ) {
              * Skill and luck
              */
 
+            /* Skill for cube */
+
+            GetMatchStateCubeInfo ( &ci, &ms );
+            if ( GetDPEq ( NULL, NULL, &ci ) ) {
+#if 0
+              gtk_box_pack_start ( GTK_BOX ( pwBox ),
+                                   gtk_label_new ( _("Didn't double") ),
+                                   FALSE, FALSE, 4 );
+              gtk_box_pack_start ( GTK_BOX ( pwBox ),
+                                   SkillMenu ( pmr->n.stCube, "cube" ),
+                                   FALSE, FALSE, 4 );
+
+#endif
+
+              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
+                                   gtk_label_new ( _("Didn't double") ),
+                                   0, 1, 0, 1 );
+#if ANALYSIS_HORIZONTAL
+              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
+                                   SkillMenu ( pmr->n.stCube, "cube" ),
+                                   1, 2, 0, 1 );
+#else
+              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
+                                   SkillMenu ( pmr->n.stCube, "cube" ),
+                                   0, 1, 1, 2 );
+#endif
+            }
+
             /* luck */
 
 	{
@@ -1770,8 +1798,13 @@ static void SetAnnotation( moverecord *pmr ) {
 	} else
 	    pch += sprintf( pch, " (%+0.3f)", pmr->n.rLuck );
     }
+#if ANALYSIS_HORIZONTAL
     gtk_table_attach_defaults( GTK_TABLE( pwBox ),
-				gtk_label_new( sz ), 0, 1, 0, 1 );
+				gtk_label_new( sz ), 0, 1, 1, 2 );
+#else
+    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
+				gtk_label_new( sz ), 1, 2, 0, 1 );
+#endif
 
     pwMenu = gtk_menu_new();
     for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
@@ -1789,40 +1822,9 @@ static void SetAnnotation( moverecord *pmr ) {
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pwOptionMenu ), pwMenu );
     gtk_option_menu_set_history( GTK_OPTION_MENU( pwOptionMenu ), pmr->n.lt );
 
-#if ANALYSIS_HORIZONTAL
-    gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 1, 2, 0, 1 );
-#else
-    gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 0, 1, 1, 2 );
-#endif
+    gtk_table_attach_defaults( GTK_TABLE( pwBox ), pwOptionMenu, 1, 2, 1, 2 );
 
 	}
-            /* Skill for cube */
-
-            GetMatchStateCubeInfo ( &ci, &ms );
-            if ( GetDPEq ( NULL, NULL, &ci ) ) {
-#if 0
-              gtk_box_pack_start ( GTK_BOX ( pwBox ),
-                                   gtk_label_new ( _("Didn't double") ),
-                                   FALSE, FALSE, 4 );
-              gtk_box_pack_start ( GTK_BOX ( pwBox ),
-                                   SkillMenu ( pmr->n.stCube, "cube" ),
-                                   FALSE, FALSE, 4 );
-
-#endif
-
-#if ANALYSIS_HORIZONTAL
-              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
-                                   gtk_label_new ( _("Didn't double") ),
-                                   0, 1, 1, 2 );
-#else
-              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
-                                   gtk_label_new ( _("Didn't double") ),
-                                   1, 2, 0, 1 );
-#endif
-              gtk_table_attach_defaults( GTK_TABLE ( pwBox ),
-                                   SkillMenu ( pmr->n.stCube, "cube" ),
-                                   1, 2, 1, 2 );
-            }
 
             /* chequer play skill */
 #if 0
