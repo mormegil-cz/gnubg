@@ -1965,7 +1965,7 @@ CommandShowPath ( char *sz ) {
   outputl ( _("Default and current paths "
             "for load, save, import, and export: \n") );
 
-  for ( i = 0; i < NUM_PATHS; ++i ) {
+  for ( i = 0; i < sizeof(aszPathNames)/sizeof(aszPathNames[0]); ++i ) {
 
     outputf ( "%s:\n", gettext ( aszPathNames[ i ] ) );
     if ( ! strcmp ( aaszPaths[ i ][ 0 ], "" ) )

@@ -1,3 +1,7 @@
+Mon Sep 6 00:27:04 2004 GMT Jim Segrave <jes@jes-2.demon.nl>
+
+	* show.c = fix for running off array end in show path command
+	
 Wed Sep 1 17:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Small import bug fixed
