@@ -376,6 +376,7 @@ command acAnalyse[] = {
 }, acImport[] = {
     { "database", CommandDatabaseImport, "Merge positions into the database",
       szFILENAME, NULL },
+    { "mat", CommandImportMat, "Import a Jellyfish match", szFILENAME, NULL },
     { "pos", CommandImportJF, "Import a Jellyfish position file", szFILENAME,
       NULL },
     { NULL, NULL, NULL, NULL, NULL }
@@ -1034,6 +1035,17 @@ extern void UpdateSetting( void *p ) {
     if( fX )
 	GTKSet( p );
 #endif
+}
+
+extern void UpdateSettings( void ) {
+
+    UpdateSetting( &ms.nCube );
+    UpdateSetting( &ms.fCubeOwner );
+    UpdateSetting( &ms.fTurn );
+    UpdateSetting( &ms.nMatchTo );
+    UpdateSetting( &ms.fCrawford );
+
+    ShowBoard();
 }
 
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
@@ -2471,8 +2483,8 @@ extern void CommandImportJF( char *sz ) {
     }
 
     if( !sz || !*sz ) {
-	outputl( "You must specify a Jellyfish file to import (see `help "
-		 "import')." );
+	outputl( "You must specify a position file to import (see `help "
+		 "import pos')." );
 	return;
     }
 
@@ -2483,6 +2495,45 @@ extern void CommandImportJF( char *sz ) {
 	perror( sz );
 
     ShowBoard();
+}
+
+extern void CommandImportMat( char *sz ) {
+
+    FILE *pf;
+    
+    if( !sz || !*sz ) {
+	outputl( "You must specify a match file to import (see `help "
+		 "import mat')." );
+	return;
+    }
+
+    if( ms.gs == GAME_PLAYING && fConfirm &&
+	!GetInputYN( "Are you sure you want to load a saved match, "
+		     "and discard the game in progress? " ) )
+	return;
+    
+#if USE_GTK
+	if( fX )
+	    GTKFreeze();
+#endif
+	
+	FreeMatch();
+	ClearMatch();
+	
+	if( ( pf = fopen( sz, "r" ) ) ) {
+	    ImportMat( pf, sz );
+	    fclose( pf );
+	} else
+	    perror( sz );
+
+	UpdateSettings();
+	
+#if USE_GTK
+	if( fX ){
+	    GTKThaw();
+	    GTKSet(ap);
+        }
+#endif
 }
 
 extern void CommandCopy( char *sz ) {
@@ -2516,7 +2567,14 @@ extern void CommandCopy( char *sz ) {
 
 static void LoadRCFiles( void ) {
 
-    char sz[ PATH_MAX ], *pch = getenv( "HOME" );
+    char *pch = getenv( "HOME" );
+#if __GNUC__
+    char sz[ strlen( pch ) + 14 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( pch ) + 14 );
+#else
+    char sz[ 4096 ];
+#endif
     FILE *pf;
 
     outputoff();
@@ -2729,7 +2787,14 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 extern void CommandSaveSettings( char *szParam ) {
 
-    char sz[ PATH_MAX ], *pch = getenv( "HOME" );
+    char *pch = getenv( "HOME" );
+#if __GNUC__
+    char sz[ strlen( pch ) + 14 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( pch ) + 14 );
+#else
+    char sz[ 4096 ];
+#endif
     char szTemp[ 256 ];
     FILE *pf;
     int i, cCache;
@@ -3939,7 +4004,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( optind < argc && *argv[ optind ] )
        CommandLoadMatch( argv[ optind ] );
 
-    fflush( NULL );
+    fflush( stdout );
+    fflush( stderr );
     
 #if USE_GTK
     if( fX ) {

@@ -73,7 +73,6 @@ static void *pvUserRNGHandle;
 
 static char szUserRNGSeed[ 32 ];
 static char szUserRNGRandom[ 32 ];
-static char szUserRNG[ PATH_MAX ];
 #endif
 
 static int GetManualDice( int anDice[ 2 ] ) {
@@ -306,9 +305,6 @@ extern int RollDice( int anDice[ 2 ] ) {
 extern int  UserRNGOpen() {
 
   char *error;
-  char szFileName[ PATH_MAX ];
-
-  strcpy( szUserRNG, "userrng.so" );
 
   /* 
    * (1)
@@ -316,23 +312,14 @@ extern int  UserRNGOpen() {
    * LD_LIBRARY_PATH paths. 
    */
 
-  strcpy( szFileName, szUserRNG );
+  pvUserRNGHandle = dlopen( "userrng.so", RTLD_LAZY );
 
-  pvUserRNGHandle = dlopen( szFileName, RTLD_LAZY );
-
-  if (!pvUserRNGHandle ) {
-    
+  if (!pvUserRNGHandle )
     /*
      * (2)
      * Try opening shared object from current directory
      */
-
-    strcpy( szFileName, "./" );
-    strcat( szFileName, szUserRNG );
-    
-    pvUserRNGHandle = dlopen( szFileName, RTLD_LAZY );
-
-  }
+    pvUserRNGHandle = dlopen( "./userrng.so", RTLD_LAZY );
 
   if (!pvUserRNGHandle ) {
     
@@ -340,10 +327,9 @@ extern int  UserRNGOpen() {
      * Bugger! Can't load shared library
      */
 
-    outputf ( "Could not load shared library %s.\n", szUserRNG );
+    outputl( "Could not load shared library userrng.so." );
     
     return 0;
-
   } 
     
     

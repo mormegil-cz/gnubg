@@ -481,8 +481,6 @@ static void LoadGuile( char *sz ) {
 
 extern int GuileInitialise( char *szDir ) {
 
-    char szPath[ PATH_MAX ];
-
     scm_sysintern( "CLASS_OVER", SCM_MAKINUM( CLASS_OVER ) );
     scm_sysintern( "CLASS_BEAROFF2", SCM_MAKINUM( CLASS_BEAROFF2 ) );
     scm_sysintern( "CLASS_BEAROFF1", SCM_MAKINUM( CLASS_BEAROFF1 ) );
@@ -524,6 +522,14 @@ extern int GuileInitialise( char *szDir ) {
 #endif
     
     if( szDir ) {
+#if __GNUC__
+	char szPath[ strlen( szDir ) + strlen( GNUBG_SCM ) + 2 ];
+#elif HAVE_ALLOCA
+	char *szPath = alloca( strlen( szDir ) + strlen( GNUBG_SCM ) + 2 );
+#else
+	char szPath[ 4096 ];
+#endif
+	
 	sprintf( szPath, "%s/" GNUBG_SCM, szDir );
 	if( !access( szPath, R_OK ) ) {
 	    LoadGuile( szPath );

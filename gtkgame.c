@@ -1888,7 +1888,14 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Help/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Help/_About gnubg", NULL, Command, CMD_SHOW_VERSION, NULL }
     };
-    char sz[ PATH_MAX ], *pch = getenv( "HOME" );
+    char *pch = getenv( "HOME" );
+#if __GNUC__
+    char sz[ strlen( pch ) + 14 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( pch ) + 14 );
+#else
+    char sz[ 4096 ];
+#endif
 
     sprintf( sz, "%s/.gnubg.gtkrc", pch ? pch : "" );
     if( !access( sz, R_OK ) )
@@ -4086,11 +4093,11 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
          "Moves marked very bad",
          "Error rate (total)",
          "Error rate (pr. move)",
-         "Super-jokers",
-         "Jokers",
-         "Average",
-         "Anti-jokers",
-         "Super anti-jokers",
+         "Rolls marked very lucky",
+         "Rolls marked lucky",
+         "Rolls unmarked",
+         "Rolls marked unlucky",
+         "Rolls marked very unlucky",
          "Luck rate (total)",
          "Luck rate (pr. move)",
          "Checker play rating",

@@ -88,7 +88,6 @@ typedef struct _movegameinfo {
 	anScore[ 2 ], /* match score BEFORE the game */
 	fCrawford, /* the Crawford rule applies during this match */
 	fCrawfordGame, /* this is the Crawford game */
-	fEgyptian, /* Limit stacking to 5 per pin */
 	fJacoby,
 	fWinner, /* who won (-1 = unfinished) */
 	nPoints, /* how many points were scored by the winner */
@@ -255,6 +254,7 @@ extern void ChangeGame( list *plGameNew );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern int ComputerTurn( void );
+extern void ClearMatch( void );
 extern void FreeMatch( void );
 extern int GetMatchStateCubeInfo( cubeinfo *pci, matchstate *pms );
 extern int ParseNumber( char **ppch );
@@ -271,6 +271,7 @@ extern char *FormatPrompt( void );
 extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
 			     int i, int fRankKnown );
 extern void UpdateSetting( void *p );
+extern void UpdateSettings( void );
 extern void ResetInterrupt( void );
 extern void PromptForExit( void );
 extern void Prompt( void );
@@ -385,6 +386,7 @@ extern void CommandAccept( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
     CommandImportJF( char * ),
+    CommandImportMat( char * ),
     CommandListGame( char * ),
     CommandListMatch( char * ),
     CommandLoadCommands( char * ),

@@ -37,6 +37,9 @@ duplication of effort and to make sure our changes merge easily.
 ** EvaluatePositionCache doesn't currently cache evaluations deeper than
   0-ply for match play.  Update EvalCacheHash so that spurious collisions
   won't occur, and then change EvaluatePositionCache to cache what it can.
+** Joseph has weights for small (5 hidden nodes) nets, which could be
+  used for the internal evaluations of deep searches for a significant
+  speed increase. (gary)
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -150,7 +153,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Animate the chequers when the computer moves.
 ** Show a preview of the chequers in the appearances dialog.
 ** Allow the border colour to be changed, and honour the user's lighting
-  angle when rendering the border.
+  angle when rendering the border.  Allow the dice pips colour to be
+  changed.
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?
 ** Spin buttons with large values (e.g. the RNG seed settings) behave
@@ -187,6 +191,8 @@ duplication of effort and to make sure our changes merge easily.
   played.
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
   the new evalsetups. (gary)
+** Cosmetic bug with the progress bar (when text is first displayed in it,
+  GTK decides to resize the status bar and progress bar).
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -215,7 +221,8 @@ duplication of effort and to make sure our changes merge easily.
   SIGBUS/SIGSEGV to trap I/O errors.  Unfortunately, the semantics of
   errors on mmap()ed regions are the most unportable that can be imagined...
 ** The erroneous commands "set player both" and "set player both evaluation"
-  give poor error messages.
+  give poor error messages.  Bad "set rollout" commands (e.g.
+  "set rollout chequerplay plies") also give bad errors.
 ** "set player <tab>" gives incorrect completions.
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
@@ -241,10 +248,12 @@ duplication of effort and to make sure our changes merge easily.
   starting position) if no game is being played.
 ** Problems importing JF positions (see David's e-mail).
    (Update: untested bugfix commited)
-** "show score" (and the Guile function current-score) report the
-  number of games _started_, but should probably show the number
-  finished.
+** "show score" (and the Guile function current-score) should show the
+  number of games finished, but seem to report the total number of games
+  started, regardless of the current location within the match.
 ** Importing a position should add MOVE_SETBOARD (etc.) records. (gary)
+** If "set turn" has been used during a game (so a player has two
+  consecutive moves), then export to .mat format saves it incorrectly.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -266,8 +275,13 @@ duplication of effort and to make sure our changes merge easily.
 *** HTML.
 *** ASCII.
 *** LaTeX.
-** Make the LaTeX, PS and PDF formats pay attention to fClockwise when
-  they draw boards.
+** Improve the LaTeX, PS and PDF output:
+*** Make them pay attention to fClockwise when they draw boards.
+*** Add names and scores before each game.
+*** Show who rolled (black or white) before each roll.
+*** Show game and match statistics (if available) at end of game/match.
+*** Allow some option for selecting which boards to print (see the
+  "FG" SGF property).
 ** Think about generating huge databases for CD-ROMs (we can get 1-sided
   databases for all chequers up to the 11 point, or 2-sided databases where
   both players have up to 11 chequers in the home board onto a CD-ROM).
@@ -293,9 +307,10 @@ duplication of effort and to make sure our changes merge easily.
 ** Consider "-s scheme-file" and "-c command-file" options to read scripts.
 ** Replace HUGE_VALF with the more portable FLT_MAX in <float.h>.
 ** Write CommandAnnotateClear in play.c.  Should there be different commands
-  for clearing luck and skill annotations?
+  or parameters for clearing luck and skill annotations?
 ** Make sure the Nackgammon option works properly: record when loading/saving,
-  make sure that InitBoard during analysis gets it right, etc.
+  make sure that InitBoard during analysis gets it right, etc.  Similarly
+  for Egyptian and Jacoby.
 ** Make calls to irandinit() in eval.c and lib/neuralnet.c give the time as
   a seed.
 ** If a MOVE_NORMAL is marked bad, it's not clear whether that means a

@@ -412,7 +412,16 @@ static long EvalCacheHash( evalcache *pec ) {
 static int PathOpen( char *szFile, char *szDir, int f ) {
 
     int h, idFirstError = 0;
-    char szPath[ PATH_MAX ];
+#if __GNUC__
+    char szPath[ strlen( PKGDATADIR ) + ( szDir ? strlen( szDir ) : 0 ) +
+	       strlen( szFile ) + 2 ];
+#elif HAVE_ALLOCA
+    char *szPath = alloca( strlen( PKGDATADIR ) +
+			   ( szDir ? strlen( szDir ) : 0 ) +
+			   strlen( szFile ) + 2 );
+#else
+    char szPath[ 4096 ];
+#endif
     
     if( szDir ) {
 	sprintf( szPath, "%s/%s", szDir, szFile );

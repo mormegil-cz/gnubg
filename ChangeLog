@@ -1,3 +1,21 @@
+Thu Aug 23 10:50:19 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (AddStatcontext): Update the destination fMoves, fDice
+	and fCube.
+	
+	* acconfig.h: Define memmove() in terms of bcopy() if necessary.
+	
+	* analysis.c (DumpStatcontext), gtkgame.c (GTKDumpStatcontext): Show
+	"very lucky" instead of "super jokers", etc. for consistency.
+
+	* dice.c, eval.c, gnubg.c, gtkgame.c, guile.c: Eliminate fixed 
+	PATH_MAX sized arrays.
+
+	* gnubg.c (CommandImportMat), import.c (ImportMat): New functions.
+
+	* set.c (CommandSetPlayerChequerplay, CommandSetPlayerCubedecision):
+	Use outputpostpone() to combine output correctly.
+	
 Thu Jul 26 10:29:41 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (LegalMove): Optionally disallow more than 5 chequers per
