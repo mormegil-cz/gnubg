@@ -8,7 +8,7 @@
 @syncodeindex vr cp
 
 @macro gnubg
-@code{gnubg}
+@t{gnubg}
 @end macro
 
 @ifinfo
@@ -38,6 +38,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Introduction::                  What GNU Backgammon does.
 * How to Play Backgammon::        The rules of the game.
 * Sample Game::                   An example of how to play against gnubg.
+* Invocation::                    Starting and leaving gnubg.
 * Basic Commands::                Fundamental operations in gnubg.
 * Playing::                       gnubg's game playing features.
 * Analysis::                      Using gnubg to evaluate positions.
@@ -46,6 +47,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Frequently Asked Questions::    Brief answers to things you might ask.
 * Concept Index::                 Index of concepts described in this manual.
 @end menu
+
 @end ifinfo
 
 @node Introduction
@@ -69,8 +71,8 @@ of a board on text-only terminals, but will also allow the user to play
 games and manipulate positions with an X11 board window where available.
 
 It currently plays at about the level of a strong intermediate flight
-tournament player (rated in the mid 1700s on FIBS, the First Internet
-Backgammon Server -- around the 90th percentile) and is gradually
+tournament player (rated in the mid 1700s on @dfn{FIBS}, the First Internet
+Backgammon Server --- around the 90th percentile) and is gradually
 improving; it should be somewhat stronger than this when released.  Since
 almost all of the CPU time required during supervised training is spent
 performing rollouts, and rollouts can easily be performed in parallel,
@@ -78,10 +80,10 @@ it is hoped that users will be able to pool rollout results and
 collectively train it to a level stronger than any individual could
 obtain.
 
-If you can tolerate the rough edges, periodic snapshots of and anonymous
-CVS access to the pre-release source are being made available.  You can
-also compete against a recent version of @gnubg on FIBS; it plays there
-under the name "gnu".
+If you can tolerate the rough edges, periodic snapshots of @gnubg and
+anonymous CVS access to the pre-release source are being made available.
+You can also compete against a recent version of @gnubg on FIBS; it
+plays there under the name @samp{gnu}.
 
 FIXME update this section.
 
@@ -367,7 +369,7 @@ decline                 playing
 double                  playing         / cube
 drop                    playing         / cube
 eval                    analysis
-exit                    basic
+exit                    invocation
 help                    basic
 hint                    playing?
 load game               playing         / recording
@@ -378,7 +380,7 @@ new game                playing
 new match               playing         / matches and sessions
 new session             playing         / matches and sessions
 play                    playing         / computer player
-quit                    basic
+quit                    invocation
 redouble                playing         / cube
 reject                  playing
 resign                  playing
@@ -400,11 +402,11 @@ set cube value          playing         / cube
 set dice                playing         / dice
 set display             playing?
 set jacoby              playing         / matches and sessions
-set player gnubg        playing
-set player human        playing
-set player name         playing
-set player plies        playing
-set player pubeval      playing
+set player gnubg        playing         / computer player
+set player human        playing         
+set player name         playing         
+set player plies        playing         / computer player
+set player pubeval      playing         / computer player
 set plies               analysis
 set postcrawford        playing         / matches and sessions
 set prompt              playing?
@@ -436,12 +438,91 @@ train database          databases
 train td                training
 @end ignore
 
+@node Invocation
+@chapter Starting and Leaving @gnubg
+
+This chapter describes how to run @gnubg{}, and how to end it when you
+are finished.
+
+@menu
+* Invoking gnubg::              How to start gnubg.
+* Leaving gnubg::               How to end gnubg.
+* Shell Commands::              How to issue shell commands from within gnubg.
+@end menu
+
+@node Invoking gnubg
+@section Invoking @gnubg
+@cindex invoking @t{gnubg}
+@cindex starting @t{gnubg}
+@cindex running @t{gnubg}
+@cindex command line options
+
+Start GNU Backgammon by running the program @kbd{gnubg}.  Once started, it
+will process commands from the terminal.
+
+You can also instruct @gnubg to read an existing match from a file, to
+play or analyse.  (FIXME actually you can't yet, but you should be able
+to.)  To read the match from @var{filename}, specify
+@kbd{gnubg @var{filename}}.
+
+@gnubg will give you a short summary of how to invoke it if given the
+option @option{--help} (@option{-h} for short), and report its version
+with @option{--version} (@option{-v}).
+
+GNU Backgammon will normally use a graphical board window under the X
+Window System, if possible.  To prevent this behaviour and use standard
+terminal output instead, you can specify the @option{--tty} option (which
+can be abbreviated to @option{-t}).
+
+@node Leaving gnubg
+@section Leaving @gnubg
+@cindex leaving @t{gnubg}
+@cindex exiting @t{gnubg}
+
+@table @code
+@kindex exit
+@kindex quit
+@item exit
+@itemx quit
+To exit @gnubg{}, use the @kbd{exit} or @kbd{quit} commands (they are
+synonymous).  If you are currently playing a game, the match in progress
+will be lost, so @gnubg will ask you if you are sure you want to exit
+in this case.  (FIXME it doesn't yet, but it should.)
+@end table
+
+@gnubg will also exit upon end-of-file; you can therefore exit by typing
+an end-of-file character (usually @kbd{C-d}, i.e. hold the @key{CTRL}
+key and press D).
+
+@cindex interrupting @t{gnubg}
+@cindex cancelling commands
+If you send an interrupt sequence (often by pressing @kbd{C-c}), the
+current @gnubg command (if any) will be terminated.  This can be useful
+if you do not want to wait for a slow command to complete.
+
+@node Shell Commands
+@section Shell Commands
+@cindex shell commands
+@cindex escapes, shell
+
+You can execute shell commands from @gnubg without leaving or suspending it.
+
+@table @code
+@kindex !
+@item !@var{command}
+Invoke a subshell to execute @var{command}.  The environment variable
+@code{SHELL} determines which shell to use (@gnubg defaults to
+@file{/bin/sh} if @code{$SHELL} is not set).  FIXME not implemented yet.
+@end table
+
 @node Basic Commands
 @chapter Basic Commands
 @cindex basic commands
 @cindex commands, basic
 
-FIXME exit, quit, help, ?, show copying, show warranty
+There are a few simple commands...
+
+FIXME help, ?, show copying, show warranty
 
 @node Playing
 @chapter Playing Backgammon with @gnubg
@@ -451,12 +532,33 @@ FIXME exit, quit, help, ?, show copying, show warranty
 FIXME introduction
 
 @menu
+* The Game::                      Commands used during the game.
 * Dice::                          Controlling dice rolls.
 * Computer Player::               Having gnubg make moves.
 * Matches and Sessions::          Playing series of games.
 * Cube::                          Using the doubling cube.
 * Recording::                     Saving games and matches.
 @end menu
+
+@node The Game
+@section Commands Used During the Game
+@cindex game commands
+
+FIXME
+
+agree
+decline
+hint
+move
+new game
+set/show board
+show pipcount
+set player human,set player name, show player
+set/show turn
+reject
+resign
+set autobearoff, set automove
+set display
 
 @node Dice
 @section Controlling Dice Rolls
@@ -468,7 +570,7 @@ FIXME
 @node Computer Player
 @section Having @gnubg Make Moves
 @cindex computer player
-@cindex @code{gnubg}, making moves @comment @gnubg{}, doesn't work here, why?
+@cindex @t{gnubg}, making moves @comment @gnubg{}, doesn't work here, why?
 
 FIXME
 
@@ -536,7 +638,7 @@ FIXME
 
 @node Where can I get GNU Backgammon?
 @section Where can I get GNU Backgammon?
-@cindex obtaining @code{gnubg}
+@cindex obtaining @t{gnubg}
 
 Pre-release snapshots of GNU Backgammon are periodically made available
 for FTP at @url{ftp://alpha.gnu.org/}.  FIXME:complete URL.
@@ -568,7 +670,7 @@ the dice when you have finished.
 @node gnubg.bd errors
 @section I only see @samp{gnubg.bd: No such file or directory}.  What's wrong?
 @vindex gnubg.bd
-@cindex errors starting @code{gnubg}
+@cindex errors starting @t{gnubg}
 
 The file @file{gnubg.bd} is the bearoff database that @gnubg uses to
 evaluate endgame positions.  @gnubg will look for it first in the current
@@ -584,7 +686,7 @@ via FTP from @url{ftp://alpha.gnu.org/}. FIXME:complete URL.
 @node gnubg.weights errors
 @section Now I get @samp{gnubg.weights: No such file or directory}.  What's that?
 @vindex gnubg.weights
-@cindex errors starting @code{gnubg}
+@cindex errors starting @t{gnubg}
 
 The file @file{gnubg.weights} contains the trained neural net weights
 for most of @gnubg{}'s position evaluators.  Like @file{gnubg.bd}, it should

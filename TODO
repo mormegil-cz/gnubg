@@ -24,7 +24,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more completions to help and readline.
 ** Allow user to vary parameters for rollouts.
 ** Allow timeouts for "train" (and others?).
-** Load, save and analyse games and matches.
+** Load, save and analyse games and matches.  Also load matches given
+  as command line parameters.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -36,6 +37,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish "help" -- add detailed help for each command.
 ** Allow changing the eval cache size. (gary)
 ** Add undo, reroll, and viewing next/prev moves in game/match. (gary)
+** Add "!" as a shell escape.
+** Add ":" as a Guile escape, once it's here.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
