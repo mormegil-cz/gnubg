@@ -138,6 +138,11 @@ AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(gmp, mpz_import)
 AC_CHECK_LIB(gmp, __gmpz_import)
 
+dnl check for ATLAS optimised BLAS library
+
+AC_CHECK_HEADER(cblas.h)
+AC_CHECK_LIB(atlas,ATL_buildinfo)
+AC_CHECK_LIB(cblas,cblas_sgemm)
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -233,6 +238,7 @@ AC_SEARCH_LIBS(inet_aton,resolv)
 AC_REPLACE_FUNCS(erf strdup)
 
 dnl Check for GTK
+AM_PATH_GLIB_2_0(2.0.0)
 AC_ARG_WITH(gtk,[  --with-gtk              use GTK+ library and widgets])
 AC_ARG_WITH(gtk2,[  --with-gtk2             use GTK+ 2.0])
 AC_ARG_WITH(gtkextra,[  --with-gtkextra         use GtkExtra widgets])
