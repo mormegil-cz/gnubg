@@ -1,3 +1,16 @@
+Mon Mar 29 09:40:02 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am: target for br1.c not kept up to date with
+	changes in makebearoff	
+	* Makefile.am: FLEX->LEX, BISON->YACC
+	* bearoff.h: declare BearoffAlloc extern
+	* configure.in: add "dynamic" as parameter to --enable-bearoff
+	* makebearoff1.c: update code to match latest version of bearoff.h
+	* play.c (DumpGameList): fix typo, add linebreak
+	(reported by Mike Whitton)
+
+	* gtkgame.c: use correct release_id when reporting bugs.
+
 Sun Mar 28 09:07:48 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* matchequity.c (initMETZadeh): use G1 for calculation
