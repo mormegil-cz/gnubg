@@ -594,15 +594,10 @@ extern void ShowList( char *psz[], char *szTitle ) {
 	*pwScroll = gtk_scrolled_window_new( NULL, NULL ),
 	*pwOK = gtk_button_new_with_label( "OK" );
 
-    /* FIXME this shouldn't be modal -- pop up the window and return
-       immediately.  Improve the look of the dialog, too. */
-    
     while( *psz )
 	gtk_container_add( GTK_CONTAINER( pwList ),
 			   gtk_list_item_new_with_label( *psz++ ) );
     
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     gtk_signal_connect_object( GTK_OBJECT( pwOK ), "clicked",
 			       GTK_SIGNAL_FUNC( gtk_widget_destroy ),
 			       GTK_OBJECT( pwDialog ) );
@@ -617,18 +612,16 @@ extern void ShowList( char *psz[], char *szTitle ) {
 		       pwScroll );
     gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->action_area ),
 		       pwOK );
-
+    
+    GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
+    gtk_widget_grab_default( pwOK );
+    
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 );
     gtk_window_set_title( GTK_WINDOW( pwDialog ), szTitle );
 
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
     gtk_widget_show_all( pwDialog );
-
-    DisallowStdin();
-    gtk_main();
-    AllowStdin();
 }
 
 static void OK( GtkWidget *pw, int *pf ) {
