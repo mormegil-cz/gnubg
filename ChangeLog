@@ -1,3 +1,9 @@
+Sat Aug 31 19:59:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* drawboard.c (CanonicalMoveOrder): fix bug for
+	bear-off moves, which has an[ odd ] = -1.
+	(reported by Nardy Pillards)
+
 Thu Aug 22 19:33:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandHint): forgot fX.

@@ -584,10 +584,10 @@ extern void CanonicalMoveOrder( int an[] ) {
 
     int i;
 
-    for( i = 0; i < 8 && an[ i ] > 0; i++ )
+    for( i = 0; i < 4 && an[ 2 * i ] > 0; i++ )
 	;
     
-    qsort( an, i >> 1, sizeof( int ) << 1, CompareMoves );
+    qsort( an, i, sizeof( int ) << 1, CompareMoves );
 }
 
 extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
