@@ -1,3 +1,9 @@
+Tue May  9 12:10:58 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* gnubg.c (main,StdinReadNotify): Chop the newline returned
+        from the fgets call, otherwise many 'set' commands won't work
+        on machines without libreadline.
+
 Thu May  4 14:05:33 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* eval.c: Changed net inputs. Removed uncontributing ones, added
