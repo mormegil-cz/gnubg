@@ -281,7 +281,7 @@ typedef  unsigned long   ub4;
   c -= a; c -= b; c ^= (b>>15); \
 }
 
-static unsigned long
+extern unsigned long
 keyToLong(char k[10], int np)
 {
   ub4 a = 0x9e3779b9;  /* the golden ratio; an arbitrary value */

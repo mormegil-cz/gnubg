@@ -36,7 +36,7 @@ extern int CacheStats( cache *pc, int *pcLookup, int *pcHit );
 typedef struct _cacheNode {
   unsigned char auchKey[10];
   int nEvalContext;
-  float ar[5 /*NUM_OUTPUTS*/];
+  float ar[7 /*NUM_ROLLOUT_OUTPUTS*/];
 } cacheNode;
 
 /* name used in eval.c */
@@ -66,6 +66,9 @@ void CacheAdd(cache* pc, cacheNode* e, unsigned long l);
 void CacheFlush(cache* pc);
 void CacheDestroy(cache* pc);
 void CacheStats(cache* pc, int* pcLookup, int* pcHit);
+
+extern unsigned long
+keyToLong(char k[10], int np);
 
 #endif
 
