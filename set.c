@@ -495,7 +495,7 @@ extern void CommandSetCubeOwner( char *sz ) {
     if( CheckCubeAllowed() )
 	return;
 
-    switch( i = ParsePlayer( sz ) ) {
+    switch( i = ParsePlayer( NextToken( &sz ) ) ) {
     case 0:
     case 1:
 	break;
@@ -684,7 +684,7 @@ extern void CommandSetEvalCandidates( char *sz ) {
 
     if( n < 2 || n > MAX_SEARCH_CANDIDATES ) {
 	outputf( "You must specify a valid number of moves to consider -- try "
-	      "`help set %sevaluation candidates'.\n", szSetCommand );
+	      "`help set %s candidates'.\n", szSetCommand );
 
 	return;
     }
@@ -704,7 +704,7 @@ CommandSetEvalCubeful( char *sz ) {
     
     sprintf( asz[ 0 ], "%s will use cubeful evaluation.\n", szSet );
     sprintf( asz[ 1 ], "%s will use cubeless evaluation.\n", szSet );
-    sprintf( szCommand, "%sevaluation cubeful", szSetCommand );
+    sprintf( szCommand, "%s cubeful", szSetCommand );
     SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
     pecSet->fCubeful = f;
 }
@@ -716,7 +716,7 @@ extern void CommandSetEvalDeterministic( char *sz ) {
     
     sprintf( asz[ 0 ], "%s will use deterministic noise.\n", szSet );
     sprintf( asz[ 1 ], "%s will use pseudo-random noise.\n", szSet );
-    sprintf( szCommand, "%sevaluation deterministic", szSetCommand );
+    sprintf( szCommand, "%s deterministic", szSetCommand );
     SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
     pecSet->fDeterministic = f;
     
@@ -731,7 +731,7 @@ extern void CommandSetEvalNoise( char *sz ) {
 
     if( r < 0.0 ) {
 	outputf( "You must specify a valid amount of noise to use -- "
-		"try `help set\n%sevaluation noise'.\n", szSetCommand );
+		"try `help set\n%s noise'.\n", szSetCommand );
 
 	return;
     }
@@ -751,7 +751,7 @@ extern void CommandSetEvalPlies( char *sz ) {
 
     if( n < 0 || n > 7 ) {
 	outputf( "You must specify a valid number of plies to look ahead -- "
-		"try `help set %sevaluation plies'.\n", szSetCommand );
+		"try `help set %s plies'.\n", szSetCommand );
 
 	return;
     }
@@ -767,7 +767,7 @@ extern void CommandSetEvalReduced( char *sz ) {
 
     if( ( n < 0 ) || ( n > 21 ) ) {
 	outputf( "You must specify a valid number -- "
-		"try `help set %sevaluation reduced'.\n", szSetCommand );
+		"try `help set %s reduced'.\n", szSetCommand );
 
 	return;
     }
@@ -792,7 +792,7 @@ extern void CommandSetEvalTolerance( char *sz ) {
 
     if( r < 0.0 ) {
 	outputf( "You must specify a valid cubeless equity tolerance to use -- "
-		"try `help set\n%sevaluation tolerance'.\n", szSetCommand );
+		"try `help set\n%s tolerance'.\n", szSetCommand );
 
 	return;
     }
@@ -806,7 +806,7 @@ extern void CommandSetEvalTolerance( char *sz ) {
 extern void CommandSetEvaluation( char *sz ) {
 
     szSet = "`eval' and `hint'";
-    szSetCommand = "";
+    szSetCommand = "evaluation";
     pecSet = &esEvalChequer.ec;
     HandleCommand( sz, acSetEvaluation );
 }
@@ -828,7 +828,7 @@ extern void
 CommandSetPlayerChequerplay( char *sz ) {
 
     szSet = ap[ iPlayerSet ].szName;
-    szSetCommand = "player chequerplay ";
+    szSetCommand = "player chequerplay evaluation";
     pesSet = &ap[ iPlayerSet ].esChequer;
 
     outputpostpone();
@@ -847,7 +847,7 @@ extern void
 CommandSetPlayerCubedecision( char *sz ) {
 
     szSet = ap[ iPlayerSet ].szName;
-    szSetCommand = "player cubedecision ";
+    szSetCommand = "player cubedecision evaluation";
     pesSet = &ap[ iPlayerSet ].esCube;
 
     outputpostpone();
@@ -921,6 +921,12 @@ extern void CommandSetPlayerGNU( char *sz ) {
 
     outputf( "Moves for %s will now be played by GNU Backgammon.\n",
 	    ap[ iPlayerSet ].szName );
+    
+#if USE_GTK
+    if( fX )
+	/* The "play" button might now be required; update the board. */
+	ShowBoard();
+#endif
 }
 
 extern void CommandSetPlayerHuman( char *sz ) {
@@ -936,8 +942,6 @@ extern void CommandSetPlayerHuman( char *sz ) {
 
 extern void CommandSetPlayerName( char *sz ) {
 
-    char *pch;
-    
     if( !sz || !*sz ) {
 	outputl( "You must specify a name to use." );
 
@@ -947,10 +951,6 @@ extern void CommandSetPlayerName( char *sz ) {
     if( strlen( sz ) > 31 )
 	sz[ 31 ] = 0;
 
-    for( pch = sz; *pch; pch++ )
-	if( isspace( *pch ) )
-	    *pch = '_';
-    
     if( ( *sz == '0' || *sz == '1' ) && !sz[ 1 ] ) {
 	outputf( "`%c' is not a valid name.\n", *sz );
 
@@ -964,8 +964,7 @@ extern void CommandSetPlayerName( char *sz ) {
 	return;
     }
 
-    if( !strncasecmp( sz, ap[ !iPlayerSet ].szName,
-		      sizeof( ap[ 0 ].szName ) ) ) {
+    if( !CompareNames( sz, ap[ !iPlayerSet ].szName ) ) {
 	outputl( "That name is already in use by the other player." );
 
 	return;
@@ -1121,9 +1120,6 @@ extern void CommandSetRNGUser( char *sz ) {
 
 extern void CommandSetRollout ( char *sz ) {
 
-  szSet = "Rollouts";
-  szSetCommand = "rollout";
-  
   prcSet = &rcRollout;
   HandleCommand ( sz, acSetRollout );
 
@@ -1145,11 +1141,15 @@ CommandSetRolloutRNG ( char *sz ) {
 extern void
 CommandSetRolloutChequerplay ( char *sz ) {
 
+  szSet = "Chequer play in rollouts";
+  szSetCommand = "rollout chequerplay";
+  
   pecSet = &prcSet->aecChequer[ 0 ];
 
   HandleCommand ( sz, acSetEvaluation );
 
   /* copy to both players */
+  /* FIXME don't copy if there was an error setting player 0 */  
   memcpy ( &prcSet->aecChequer[ 1 ], &prcSet->aecChequer[ 0 ],
            sizeof ( evalcontext ) );  
 
@@ -1159,21 +1159,29 @@ CommandSetRolloutChequerplay ( char *sz ) {
 extern void
 CommandSetRolloutPlayerChequerplay ( char *sz ) {
 
-  pecSet = &prcSet->aecChequer[ iPlayerSet ];
+    szSet = iPlayerSet ? "Chequer play in rollouts (for player 1)" :
+	"Chequer play in rollouts (for player 0)";
+    szSetCommand = iPlayerSet ? "rollout player 1 chequerplay" :
+	"rollout player 0 chequerplay";
+  
+    pecSet = &prcSet->aecChequer[ iPlayerSet ];
 
-  HandleCommand ( sz, acSetEvaluation );
-
+    HandleCommand ( sz, acSetEvaluation );
 }
 
 
 extern void
 CommandSetRolloutCubedecision ( char *sz ) {
 
+  szSet = "Cube decisions in rollouts";
+  szSetCommand = "rollout cubedecision";
+
   pecSet = &prcSet->aecCube[ 0 ];
 
   HandleCommand ( sz, acSetEvaluation );
 
   /* copy to both players */
+  /* FIXME don't copy if there was an error setting player 0 */  
   memcpy ( &prcSet->aecCube[ 1 ], &prcSet->aecCube[ 0 ],
            sizeof ( evalcontext ) );  
 
@@ -1183,10 +1191,14 @@ CommandSetRolloutCubedecision ( char *sz ) {
 extern void
 CommandSetRolloutPlayerCubedecision ( char *sz ) {
 
-  pecSet = &prcSet->aecCube[ iPlayerSet ];
+    szSet = iPlayerSet ? "Cube decisions in rollouts (for player 1)" :
+	"Cube decisions in rollouts (for player 0)";
+    szSetCommand = iPlayerSet ? "rollout player 1 cubedecision" :
+	"rollout player 0 cubedecision";
+  
+    pecSet = &prcSet->aecCube[ iPlayerSet ];
 
-  HandleCommand ( sz, acSetEvaluation );
-
+    HandleCommand ( sz, acSetEvaluation );
 }
 
 
@@ -1273,7 +1285,8 @@ CommandSetRolloutCubeful( char *sz ) {
     int f = prcSet->fCubeful;
     
     SetToggle( "rollout cubeful", &f, sz, 
-               "Cubeful rollout", "Cubeless rollout" );
+               "Cubeful rollouts will be performed.",
+	       "Cubeless rollouts will be performed." );
 
     prcSet->fCubeful = f;
 }
@@ -1740,7 +1753,7 @@ CommandSetEvalParamEvaluation ( char *sz ) {
 
   if ( pesSet->et != EVAL_EVAL )
     outputf ( "(Note that this setting will have no effect until you\n"
-              "`set %s type evaluation'\n",
+              "`set %s type evaluation'.)\n",
               szSetCommand );
 }
 
@@ -1754,7 +1767,7 @@ CommandSetEvalParamRollout ( char *sz ) {
 
   if ( pesSet->et != EVAL_ROLLOUT )
     outputf ( "(Note that this setting will have no effect until you\n"
-              "`set %s type rollout'\n",
+              "`set %s type rollout.)'\n",
               szSetCommand );
 
 }
