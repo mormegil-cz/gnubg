@@ -177,6 +177,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
+				OptimizeForProcessor="3"
 				AdditionalIncludeDirectories="..,../lib"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_CONFIG_H=1"
 				StringPooling="TRUE"

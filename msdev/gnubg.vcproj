@@ -216,7 +216,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				OptimizeForProcessor="2"
+				OptimizeForProcessor="3"
 				AdditionalIncludeDirectories="&quot;$(MINGW)\include\glib-2.0&quot;;&quot;$(MINGW)\lib\glib-2.0\include&quot;;..;..\lib;..\intl;&quot;$(MINGW)\include\msdev&quot;;&quot;$(MINGW)\include\libxml2&quot;;&quot;$(MINGW)\..\Python23\include&quot;;&quot;$(MINGW)\include\freetype2&quot;"
 				PreprocessorDefinitions="NDEBUG;WIN32;HAVE_CONFIG_H;USE_CONSOLE"
 				StringPooling="TRUE"
@@ -242,7 +242,8 @@
 				AdditionalLibraryDirectories="$(MINGW)\lib,$(MINGW)\lib\msdev"
 				ProgramDatabaseFile="$(TEMP)\Intermediate\CmdLine Release/gnubg_msdev.pdb"
 				SubSystem="1"
-				TargetMachine="1"/>
+				TargetMachine="1"
+				FixedBaseAddress="1"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\Intermediate\Release/gnubg.tlb"
