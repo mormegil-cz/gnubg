@@ -1,3 +1,9 @@
+Wed Dec 25 16:52:47 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	* postscript.c (ExportGamePostScript): output header before each move
+	* postscript.c (PrintPostScriptBoard): output position ID, 	
+	match ID, and pip counts.
+
 Wed Dec 25 16:46:19 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	Avoid wrong analysis of beavers and raccoons

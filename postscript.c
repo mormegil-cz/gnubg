@@ -35,6 +35,7 @@
 #include "positionid.h"
 #include "i18n.h"
 #include "export.h"
+#include "matchid.h"
 
 typedef enum _font { 
   FONT_NONE, 
@@ -76,6 +77,11 @@ static char *aszFontName[ NUM_FONTS ] = {
   "Courier-Bold",
   "Courier-Oblique",
   "Courier-Bold-Oblique" 
+};
+
+static char *aszColorName[ 2 ] = {
+  N_("White"),
+  N_("Black")
 };
   
 
@@ -505,6 +511,63 @@ static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
     }
 }
 
+static void
+PostScriptPositionID ( FILE *pf, matchstate *pms ) {
+
+  int anBoard[ 2 ][ 25 ];
+
+  memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
+
+  if ( ! pms->fMove )
+    SwapSides ( anBoard );
+
+  RequestFont ( pf, FONT_RM, 10 );
+  fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (" : "%d %d moveto (", 
+           285 - 200 * nMag / 100, y );
+  fputs ( _("Position ID:"), pf );
+  fputc ( ' ', pf );
+  fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+
+  RequestFont ( pf, FONT_TT, 10 );
+  fputc ( '(', pf );
+  fputs ( PositionID ( anBoard ), pf );
+  fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+
+  RequestFont ( pf, FONT_RM, 10 );
+  fputs ( "( ", pf );
+  fputs ( _("Match ID:"), pf );
+  fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+
+  RequestFont ( pf, FONT_TT, 10 );
+  fputs ( "( ", pf );
+  fputs ( MatchIDFromMatchState ( pms ), pf );
+  fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+
+}
+
+static void
+PostScriptPipCounts ( FILE *pf, int anBoard[ 2 ][ 25 ], int fMove ) {
+
+  int an[ 2 ][ 25 ];
+  int anPips[ 2 ];
+
+  memcpy ( an, anBoard, sizeof ( an ) );
+
+  if ( ! fMove )
+    SwapSides ( an );
+
+  PipCount ( an, anPips );
+
+  Advance ( pf, 10 );
+  RequestFont ( pf, FONT_RM, 10 );
+  fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (" : "%d %d moveto (", 
+           285 - 200 * nMag / 100, y );
+  fprintf ( pf, _("Pip counts: White %d, Black %d"), 
+            anPips[ 0 ], anPips[ 1 ] );
+  fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+
+}
+
 static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 
     int yCube, theta, cos, sin, anOff[ 2 ] = { 15, 15 }, i;
@@ -525,7 +588,7 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 	sin = 0;
 	cos = -1;
     }
-    
+
     Advance( pf, 260 * nMag / 100 );
     ReleaseFont( pf );
     
@@ -590,6 +653,12 @@ static void PrintPostScriptBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 	fputs( "Q\n", pf );
     else
 	fputs( "grestore\n", pf );
+
+    /* FIXME: write position ID, match ID, and pip counts */
+
+    PostScriptPositionID ( pf, pms );
+    PostScriptPipCounts ( pf, pms->anBoard, pms->fMove );
+
 }
 
 static short acxTimesRoman[ 256 ] = {
@@ -803,10 +872,11 @@ PostScriptMatchInfo ( FILE *pf, matchinfo *pmi ) {
   char szx[ 1000 ];
   int i;
   struct tm tmx;
-
-  Consume ( pf, 14 );
+  
+  Ensure ( pf, 100 );
+  Advance ( pf, 14 );
   PrintPostScriptLineFont ( pf, _("Match Information" ), FONT_RM_BOLD, 14 );
-  Consume ( pf, 6 );
+  Advance ( pf, 6 );
 
   /* ratings */
 
@@ -858,6 +928,64 @@ PostScriptMatchInfo ( FILE *pf, matchinfo *pmi ) {
 
 }
 
+static void
+PostScriptBoardHeader ( FILE *pf, matchstate *pms, const int iMove ) {
+
+  /* move number */
+
+  Advance ( pf, 20 );
+  RequestFont ( pf, FONT_RM_BOLD, 10 );
+  fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (" : "0 %d moveto (", y );
+  fprintf ( pf,_("Move number %d:"), iMove + 1 );
+  fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+
+  RequestFont ( pf, FONT_RM, 10 );
+  fputs ( "( ", pf );
+
+  if ( pms->fResigned ) 
+    
+    /* resignation */
+
+    fprintf ( pf,
+              _("%s resigns %d points"), 
+              aszColorName[ pms->fTurn ],
+              pms->fResigned * pms->nCube
+            );
+  
+  else if ( pms->anDice[ 0 ] && pms->anDice[ 1 ] )
+
+    /* chequer play decision */
+
+    fprintf ( pf,
+              _("%s to play %d%d"),
+              aszColorName[ pms->fTurn ],
+              pms->anDice[ 0 ], pms->anDice[ 1 ] 
+            );
+
+  else if ( pms->fDoubled )
+
+    /* take decision */
+
+    fprintf ( pf,
+              _("%s doubles to %d"),
+              aszColorName[ pms->fMove ],
+              pms->nCube * 2
+            );
+
+  else
+
+    /* cube decision */
+
+    fprintf ( pf,
+              _("%s on roll, cube decision?"),
+              aszColorName[ pms->fTurn ]
+            );
+
+  fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+  
+
+}
+
 static void ExportGamePostScript( FILE *pf, list *plGame ) {
 
     list *pl;
@@ -865,6 +993,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
     matchstate msExport;
     int fTook = FALSE, i, cx;
     char sz[ 1024 ], *pch;
+    int iMove = 0;
 
     updateStatisticsGame ( plGame );
 
@@ -913,7 +1042,12 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    break;
 	    
 	case MOVE_NORMAL:
+
 	    msExport.fTurn = msExport.fMove = pmr->n.fPlayer;
+            msExport.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
+            msExport.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+            PostScriptBoardHeader ( pf, &msExport, iMove );
+
 	    if( fTook )
 		/* no need to print board following a double/take */
 		fTook = FALSE;
@@ -977,6 +1111,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
 	    Skip( pf, 6 );
+
+            ++iMove;
 	    
 	    break;
 	    
@@ -1002,6 +1138,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
 	    Skip( pf, 6 );
+
+            ++iMove;
 	    
 	    break;
 	    
@@ -1022,6 +1160,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
 	    Skip( pf, 6 );
+
+            ++iMove;
 	    
 	    break;
 	    
@@ -1040,6 +1180,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
 	    Skip( pf, 6 );
+
+            ++iMove;
 
 	    break;
 	    
@@ -1060,6 +1202,8 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    PrintPostScriptComment( pf, pmr->a.sz );
 
 	    Skip( pf, 6 );
+
+            ++iMove;
 
 	    break;
 	    	    
