@@ -3339,8 +3339,6 @@ FixMatchState ( matchstate *pms, const moverecord *pmr ) {
   switch ( pmr->mt ) {
   case MOVE_NORMAL:
     if ( pms->fTurn != pmr->n.fPlayer ) {
-      printf ( "fix move normal %d %d %d...\n",
-               pms->fMove, pms->fTurn, pmr->n.fPlayer );
       /* previous moverecord is missing */
       SwapSides ( pms->anBoard );
       pms->fMove = pms->fTurn = pmr->n.fPlayer;
@@ -3349,7 +3347,6 @@ FixMatchState ( matchstate *pms, const moverecord *pmr ) {
   case MOVE_DOUBLE:
     if ( pms->fTurn != pmr->d.fPlayer ) {
       /* previous record is missing: this must be an normal double */
-      printf ( "fix move doubloe...\n");
       SwapSides ( pms->anBoard );
       pms->fMove = pms->fTurn = pmr->d.fPlayer;
     }
