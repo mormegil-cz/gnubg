@@ -131,9 +131,10 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <ext.h>
 #include <extwin.h>
 #include "xgame.h"
-
 extwindow ewnd;
 event evNextTurn;
+#else
+#include <glib.h>
 #endif
 
 #if USE_TIMECONTROL

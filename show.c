@@ -60,6 +60,8 @@
 #include "gtkbearoff.h"
 #elif USE_EXT
 #include "xgame.h"
+#else
+#include <glib.h>
 #endif
 
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
