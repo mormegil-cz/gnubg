@@ -67,6 +67,7 @@ duplication of effort and to make sure our changes merge easily.
   "FG" SGF property).
 ** Tutor mode
 *** save evaluation into pmr for doubles
+*** Warn about erroneous resignations.
 ** Make the command functions return an int, instead of void; that way
   commands which use other commands can provide sensible error handling. (gary)
 ** Kit Woolsey suggests adding an option for truncated rollouts: when
@@ -128,7 +129,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Make usage() show the GDK and GTK options, if appropriate.
 ** Allow the cube text colour and the border specular/shiny parameters to be 
   changed.
-** cube values larger than 64 is shown as 64. Scale font for larger cube values?
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?  (Wait for
   GTK+ 2.0.)
@@ -163,7 +163,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow some way to specify long RNG seeds, and RNG parameters besides the
   seed (e.g. BBS modulus, user .so file) in the GUI.
 ** Clean up the board rendering code, so we can: (gary)
-*** Show a preview of the chequers in the appearances dialog.
 *** Perhaps even provide a Mozilla plug-in so that boards in generated HTML
   can be displayed efficiently.
 *** Use a single renderdata struct which is controlled by the

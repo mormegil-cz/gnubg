@@ -29,6 +29,8 @@ gtkboard.c
 gtkboard.h
 gtkchequer.c
 gtkchequer.h
+gtkcolour.c
+gtkcolour.h
 gtkcube.c
 gtkcube.h
 gtkexport.c

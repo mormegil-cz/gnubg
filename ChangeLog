@@ -1,3 +1,11 @@
+Mon Dec 23 12:51:23 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkcolour.c: New file.  Small colour selection widget which pops
+	up a full colour selection dialogue when needed.
+	* gtkprefs.c (append_preview_page): New function.  Show a preview
+	of the board in most notebook pages.
+	
+
 Sun Dec 22 17:02:56 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
 	* play.c - deal with locateMove not finding the move 
