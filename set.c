@@ -3687,3 +3687,13 @@ extern void CommandSetPriorityTimeCritical ( char *sz ) {
 
     SetPriority( -20 );
 }
+
+
+extern void
+CommandSetCheat ( char *sz ) {
+
+  SetToggle( "cheat", &fCheat, sz, 
+             _("Allow GNU Backgammon to manipulate the dice."),
+             _("Disallow GNU Backgammon to manipulate the dice.") );
+
+}

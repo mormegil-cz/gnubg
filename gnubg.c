@@ -178,6 +178,7 @@ int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int fMessage = FALSE;
 int nThreadPriority = 0;
+int fCheat = FALSE;
 
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
@@ -1245,6 +1246,9 @@ command cER = {
       "position"), szPOSITION, NULL },
     { "cache", CommandSetCache, N_("Set the size of the evaluation cache"),
       szSIZE, NULL },
+    { "cheat", CommandSetCheat, 
+      N_("Control whether GNU Backgammon is allowed to manipulate the dice"),
+      szONOFF, &cOnOff },
     { "clockwise", CommandSetClockwise, N_("Control the board orientation"),
       szONOFF, &cOnOff },
     { "colours", CommandSetAppearance, 
@@ -4397,6 +4401,7 @@ extern void CommandSaveSettings( char *szParam ) {
     SaveEvalSetupSettings ( pf, "set evaluation chequerplay", &esEvalChequer );
     SaveEvalSetupSettings ( pf, "set evaluation cubedecision", &esEvalCube );
 
+    fprintf( pf, "set cheat %s\n", fCheat ? "on" : "off" );
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 
     fprintf( pf, "set matchequitytable \"%s\"\n", miCurrent.szFileName );

@@ -96,7 +96,8 @@ typedef enum _annotatetype {
 
 static annotatetype at;
 
-
+static int
+CheatDice ( int anDice[ 2 ], matchstate *pms );
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -1092,8 +1093,9 @@ extern int ComputerTurn( void ) {
 
       /* Roll dice and move */
       if ( !ms.anDice[ 0 ] ) {
+        if ( ! fCheat || CheatDice ( ms.anDice, &ms ) )
 	  if( RollDice ( ms.anDice, rngCurrent ) < 0 )
-	      return -1;
+            return -1;
 	  
 	  playSound ( SOUND_ROLL );
 	  
@@ -1179,8 +1181,9 @@ extern int ComputerTurn( void ) {
       fComputerDecision = FALSE;
       return 0;
     } else if( !ms.anDice[ 0 ] ) {
-      if( RollDice( ms.anDice, rngCurrent ) < 0 )
-	    return -1;
+      if ( ! fCheat || CheatDice ( ms.anDice, &ms ) )
+        if( RollDice ( ms.anDice, rngCurrent ) < 0 )
+          return -1;
       
       playSound ( SOUND_ROLL );
       
@@ -3597,8 +3600,9 @@ CommandRoll( char *sz ) {
   if ( fTutor && fTutorCube && !GiveAdvice( ShouldDouble() ))
 	  return;
 
-  if( RollDice( ms.anDice, rngCurrent ) < 0 )
-    return;
+  if ( ! fCheat || CheatDice ( ms.anDice, &ms ) )
+    if( RollDice ( ms.anDice, rngCurrent ) < 0 )
+      return;
 
   playSound ( SOUND_ROLL );
 
@@ -3998,3 +4002,80 @@ getCurrentMoveRecord ( int *pfHistory ) {
   }
 
 }
+
+
+static int
+CheatDice ( int anDice[ 2 ], matchstate *pms ) {
+
+  static evalcontext ec0ply = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
+  static cubeinfo ci;
+    
+  GetMatchStateCubeInfo( &ci, pms );
+  
+  OptimumRoll ( pms->anBoard, &ci, &ec0ply, ap[ ms.fMove ].pt != PLAYER_HUMAN,
+                &anDice[ 0 ], &anDice[ 1 ] );
+  
+  if ( ! anDice[ 0 ] )
+    return -1;
+
+  return 0;
+
+}
+
+/* 
+ * find best (or worst roll possible)
+ *
+ */
+
+extern void
+OptimumRoll ( int anBoard[ 2 ][ 25 ], 
+              const cubeinfo *pci, const evalcontext *pec,
+              const int fBest, int *pnDice0, int *pnDice1 ) {
+
+  int anBoardTemp[ 2 ][ 25 ], i, j;
+  float ar[ NUM_OUTPUTS ];
+  cubeinfo ciOpp;
+  float rBest = fBest ? -1e99 : 1e99;
+  float r;
+
+  memcpy ( &ciOpp, pci, sizeof ( cubeinfo ) );
+  ciOpp.fMove = ! pci->fMove;
+
+  *pnDice0 = 0;
+  *pnDice1 = 0;
+  
+  for( i = 0; i < 6; i++ )
+    for( j = 0; j <= i; j++ ) {
+      memcpy( &anBoardTemp[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+              2 * 25 * sizeof( int ) );
+      
+      /* Find the best move for each roll at ply 0 only. */
+      if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, 
+                        (cubeinfo *) pci, NULL ) < 0 )
+        return;
+      
+      SwapSides( anBoardTemp );
+      
+      /* FIXME should we use EvaluatePositionCubeful here? */
+      if( EvaluatePosition( anBoardTemp, ar, &ciOpp, (evalcontext *) pec ) )
+        return;
+
+      r = -Utility ( ar, &ciOpp );
+      if ( fBest && r >= rBest ) {
+        rBest = r;
+        *pnDice0 = i + 1;
+        *pnDice1 = j + 1;
+      }
+      else if ( ! fBest && r <= rBest ) {
+        rBest = r;
+        *pnDice0 = i + 1;
+        *pnDice1 = j + 1;
+      }
+      
+    }
+
+  assert ( *pnDice0 );
+  assert ( *pnDice1 );
+
+}
+

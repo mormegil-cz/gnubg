@@ -1,3 +1,13 @@
+Wed Dec  4 21:56:03 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Alrighty folks! Here comes the official gnubg cheat mode!
+
+	* gnubg.c: new command "set cheat on".
+	* gnubg.c (CommandSaveSettings): save new flag.	
+	* set.c (CommandSetCheat): new function.
+	* play.c (ComputerTurn, CommandRoll): add call to CheatDice
+	* play.c (CheatDice, OptimumRoll): new functions.
+
 Wed Dec  4 20:59:50 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (EvaluatePositionCubeful3): fix bug leading to
