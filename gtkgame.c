@@ -7752,499 +7752,177 @@ FormatStatCubeError( char* sz, const int n, const float ar[2],
   }
 }
 
+static char *aszEmpty[] = { NULL, NULL, NULL };
+static float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
+static ratingtype rt[ 2 ];
+static GtkWidget* statLists[4];
 
-static void
-StatcontextSelect ( GtkWidget *pw, int y, int x, GdkEventButton *peb,
-                    GtkWidget *pwCopy ) {
+typedef enum _cdPageType {CD_ALL, CD_OVERALL, CD_CHEQUER, CD_CUBE, CD_LUCK} cdPageType;
 
-  int c;
-  GList *pl;
+static gboolean ContextCopyMenu(GtkWidget *widget, GdkEventButton *event, GtkWidget* copyMenu)
+{
+	if (event->type != GDK_BUTTON_PRESS || event->button != 3)
+		return FALSE;
 
-  for ( c = 0, pl = GTK_CLIST ( pw )->selection; c < 2 && pl; pl = pl->next )
-    c++;
+	gtk_menu_popup (GTK_MENU (copyMenu), NULL, NULL, NULL, NULL, event->button, event->time);
 
-  if ( c && peb )
-    gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, peb->time );
-
-  gtk_widget_set_sensitive ( GTK_WIDGET ( pwCopy ), c );
-
+	return TRUE;
 }
 
+static void AddList(char* pStr, GtkCList* pList, char* pTitle)
+{
+	int i;
+	gchar *sz;
 
-gint 
-compare_func( gconstpointer a, gconstpointer b ) {
+	sprintf ( strchr ( pStr, 0 ), "%s", pTitle);
 
-  gint i = GPOINTER_TO_INT( a );
-  gint j = GPOINTER_TO_INT( b );
+	for (i = 0; i < pList->rows; i++ )
+	{
+		sprintf ( strchr ( pStr, 0 ), "%-37.37s ", 
+			  ( gtk_clist_get_text ( pList, i, 0, &sz ) ) ?
+			  sz : "" );
 
-  if ( i < j )
-    return -1;
-  else if ( i == j )
-    return 0;
-  else
-    return 1;
+		sprintf ( strchr ( pStr, 0 ), "%-20.20s ", 
+			  ( gtk_clist_get_text ( pList, i, 1, &sz ) ) ?
+			  sz : "" );
 
+		sprintf ( strchr ( pStr, 0 ), "%-20.20s\n", 
+			  ( gtk_clist_get_text ( pList, i, 2, &sz ) ) ?
+			  sz : "" );
+	}
+	sprintf ( strchr ( pStr, 0 ), "\n");
 }
 
-static void
-StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
-                          guint n, guint t, statcontext *psc ) {
+static void CopyData(GtkWidget *pwNotebook, cdPageType page)
+{
+	char szOutput[4096];
 
-  GList *pl;
-  GList *plCopy;
-  int i;
-  static char szOutput[ 4096 ];
-  char *pc;
-  gchar *sz;
+	sprintf(szOutput, "%-37.37s %-20.20s %-20.20s\n", "", ap[ 0 ].szName, ap[ 1 ].szName);
 
+	if (page == CD_CHEQUER || page == CD_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[1]), _("Chequer Statistics:\n"));
+	if (page == CD_LUCK || page == CD_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[3]), _("Luck Statistics:\n"));
+	if (page == CD_CUBE || page == CD_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[2]), _("Cube Statistics:\n"));
+	if (page == CD_OVERALL || page == CD_ALL)
+		AddList(szOutput, GTK_CLIST(statLists[0]), _("Overall Statistics:\n"));
 
-
-  sprintf ( szOutput, 
-            "%-37.37s %-20.20s %-20.20s\n",
-            "", ap[ 0 ].szName, ap[ 1 ].szName );
-
-  /* copy list (note that the integers in the list are NOT copied) */
-  plCopy = g_list_copy( GTK_CLIST ( pw )->selection );
-
-  /* sort list; otherwise the lines are returned in whatever order the
-     user clicked the lines (bug #4160) */
-  plCopy = g_list_sort( plCopy, compare_func );
-
-  for ( pl = plCopy; pl; pl = pl->next ) {
-
-    i = GPOINTER_TO_INT( pl->data );
-
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-37.37s ", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 0, &sz ) ) ?
-              sz : "" );
-      
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s ", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 1, &sz ) ) ?
-              sz : "" );
-      
-    sprintf ( pc = strchr ( szOutput, 0 ), "%-20.20s\n", 
-              ( gtk_clist_get_text ( GTK_CLIST ( pw ), i, 2, &sz ) ) ?
-              sz : "" );
-      
-  }
-
-  /* garbage collect */
-  g_list_free( plCopy );
-
-  gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
-                          szOutput, strlen( szOutput ) );
-
+	TextToClipboard(szOutput);
 }
 
-static gint
-StatcontextClearSelection  ( GtkWidget *pw, GdkEventSelection *pes,
-                             void *unused ) {
-
-  gtk_clist_unselect_all ( GTK_CLIST ( pw ) );
-
-  return TRUE;
-
+static void CopyPage( GtkWidget *pwWidget, GtkWidget *pwNotebook )
+{
+	switch(gtk_notebook_get_current_page(GTK_NOTEBOOK(pwNotebook)))
+	{
+	case 0:
+		CopyData(pwNotebook, CD_OVERALL);
+		break;
+	case 1:
+		CopyData(pwNotebook, CD_CHEQUER);
+		break;
+	case 2:
+		CopyData(pwNotebook, CD_CUBE);
+		break;
+	case 3:
+		CopyData(pwNotebook, CD_LUCK);
+		break;
+	}
 }
 
-static void
-StatcontextCopy ( GtkWidget *pw, void *unused ) {
-
-  UserCommand ( "xcopy" );
-
+static void CopyAll( GtkWidget *pwWidget, GtkWidget *pwNotebook )
+{
+	CopyData(pwNotebook, CD_ALL);
 }
 
+static GtkWidget *CreateList()
+{
+	int i;
+	GtkWidget *pwList = gtk_clist_new_with_titles( 3, aszEmpty );
 
-extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
-				const char *szTitle, const int fIsMatch ) {
-    
-  static char *aszEmpty[] = { NULL, NULL, NULL };
-  static char *aszLabels[] = { 
-         N_("Checkerplay statistics:"),
-         N_("Total moves"),
-         N_("Unforced moves"),
-/*          N_("Moves marked very good"), */
-/*          N_("Moves marked good"), */
-/*          N_("Moves marked interesting"), */
-/*          N_("Moves marked good"), */
-         N_("Moves unmarked"),
-         N_("Moves marked good"),
-         N_("Moves marked doubtful"),
-         N_("Moves marked bad"),
-         N_("Moves marked very bad"),
-         N_("Error rate (total)"),
-         N_("Error rate (pr. move)"),
-         N_("Checker play rating"),
-         N_("Rolls marked very lucky"),
-         N_("Rolls marked lucky"),
-         N_("Rolls unmarked"),
-         N_("Rolls marked unlucky"),
-         N_("Rolls marked very unlucky"),
-         N_("Luck rate (total)"),
-         N_("Luck rate (pr. move)"),
-         N_("Luck rating"),
-         N_("Cube decision statistics:"),
-         N_("Total cube decisions"),
-         N_("Actual or close cube decisions"),
-         N_("Doubles"),
-         N_("Takes"),
-         N_("Pass"),
-         N_("Missed doubles around DP"),
-         N_("Missed doubles around TG"),
-         N_("Wrong doubles around DP"),
-         N_("Wrong doubles around TG"),
-         N_("Wrong takes"),
-         N_("Wrong passes"),
-         N_("Error rate (total)"),
-         N_("Error rate (per cube decision)"),
-         N_("Cube decision rating"),
-         N_("Overall"),
-         N_("Overall error rate (total)"),
-         N_("Overall error rate (per decision)"),
-         N_("Equivalent Snowie error rate"),
-         N_("Overall rating"),
-         N_("Actual result"),
-         N_("Luck adjusted result"),
-  };
-
-  static char *aszLabelsMoney[] = {
-    N_("Advantage (actual) in ppg"),
-    N_("95%% confidence interval (ppg)"),
-    N_("Advantage (luck adjusted) in ppg"),
-    N_("95%% confidence interval (ppg)")
-  };
-
-  static char *aszLabelsMatch[] = {
-    N_("FIBS rating difference"),
-    N_("(based on luck adj. result)"),
-    N_("Estimated abs. rating"),
-    N_("(based on error rate per decision)")
-  };
-
-  GtkWidget *pwDialog = GTKCreateDialog( szTitle,
-                                       DT_INFO, NULL, NULL ),
-      *psw = gtk_scrolled_window_new( NULL, NULL ),
-      *pwStats = gtk_clist_new_with_titles( 3, aszEmpty );
-  int i, j;
-  char sz[ 32 ];
-  ratingtype rt[ 2 ];
-  float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-  int irow = 0;
-  int fCalc;
-
-  GtkWidget *pwButtons,
-    *pwCopy = gtk_button_new_with_label( "Copy" );
-
-  getMWCFromError ( psc, aaaar );
-
-  pwButtons = DialogArea( pwDialog, DA_BUTTONS );
-  gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
-  gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
-                      GTK_SIGNAL_FUNC( StatcontextCopy ), NULL );
-  gtk_widget_set_sensitive ( GTK_WIDGET ( pwCopy ), FALSE );
-
-  for( i = 0; i < 3; i++ ) {
-      gtk_clist_set_column_auto_resize( GTK_CLIST( pwStats ), i, TRUE );
-      gtk_clist_set_column_justification( GTK_CLIST( pwStats ), i,
-                                          GTK_JUSTIFY_RIGHT );
-  }
-  gtk_clist_column_titles_passive( GTK_CLIST( pwStats ) );
-      
-  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 1, (ap[0].szName));
-  gtk_clist_set_column_title( GTK_CLIST( pwStats ), 2, (ap[1].szName));
-
-  j = 0;
-  for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
-    gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
-    gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, gettext ( aszLabels[i] ) );
-  }
-
-  if ( fIsMatch ) {
-    if ( pms->nMatchTo ) 
-      for (i = 0; i < ( sizeof( aszLabelsMatch ) / sizeof( *aszLabelsMatch ) ); 
-           ++i, ++j ) {
-        gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
-        gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
-                            gettext ( aszLabelsMatch[i] ) );
-      }
-    else
-      for (i = 0; i < ( sizeof( aszLabelsMoney ) / sizeof( *aszLabelsMoney ) );
-           ++i, ++j ) {
-        gtk_clist_append( GTK_CLIST( pwStats ), aszEmpty );
-        gtk_clist_set_text( GTK_CLIST( pwStats ), j, 0, 
-                            gettext ( aszLabelsMoney[i] ) );
-      }
-  }
-
-        
-  sprintf(sz,"%d", psc->anTotalMoves[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anTotalMoves[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+	for( i = 0; i < 3; i++ )
+	{
+		gtk_clist_set_column_auto_resize( GTK_CLIST( pwList ), i, TRUE );
+		gtk_clist_set_column_justification( GTK_CLIST( pwList ), i, GTK_JUSTIFY_RIGHT );
+	}
+	gtk_clist_column_titles_passive( GTK_CLIST( pwList ) );
   
-  sprintf(sz,"%d", psc->anUnforcedMoves[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anUnforcedMoves[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+	gtk_clist_set_column_title( GTK_CLIST( pwList ), 1, (ap[0].szName));
+	gtk_clist_set_column_title( GTK_CLIST( pwList ), 2, (ap[1].szName));
 
-  {
-    int i[] = {//SKILL_VERYGOOD, SKILL_GOOD, SKILL_INTERESTING,
-	       SKILL_NONE, SKILL_GOOD, SKILL_DOUBTFUL, SKILL_BAD,
-	       SKILL_VERYBAD};
-    unsigned int k;
-    
-    for(k = 0; k < sizeof(i)/sizeof(i[0]); ++k) {
-      ++irow;
-      sprintf(sz,"%d", psc->anMoves[ 0 ][ i[k] ]);
-      gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 1, sz);
-      
-      sprintf(sz,"%d", psc->anMoves[ 1 ][ i[k] ]);
-      gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-    }
-  }
-#if 0      
-  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_INTERESTING ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_INTERESTING ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-	       
-  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_DOUBTFUL ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_DOUBTFUL ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYBAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-#endif
-  
-  FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), GTK_SELECTION_SINGLE);
 
-  for ( i = 0 ; i < 2; i++ )
-    rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
+	return pwList;
+}
 
-  if ( psc->anUnforcedMoves[ 0 ] )
-    FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ],
-                      psc->anUnforcedMoves[ 0 ], pms->nMatchTo, -1.0 );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+static GtkWidget *OverallStats(const statcontext *psc, const matchstate *pms, const int fIsMatch)
+{
+	static char *aszLabels[] = { 
+		N_("Overall error rate (total)"),
+		N_("Overall error rate (per decision)"),
+		N_("Equivalent Snowie error rate"),
+		N_("Overall rating"),
+		N_("Actual result"),
+		N_("Luck adjusted result"),
+	};
+	static char *aszLabelsMoney[] = {
+		N_("Advantage (actual) in ppg"),
+		N_("95%% confidence interval (ppg)"),
+		N_("Advantage (luck adjusted) in ppg"),
+		N_("95%% confidence interval (ppg)")
+	};
 
-  if ( psc->anUnforcedMoves[ 1 ] )
-    FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ],
-                      psc->anUnforcedMoves[ 1 ], pms->nMatchTo, -1.0 );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  if ( psc->anTotalMoves[ 0 ] )
-    sprintf ( sz, "%-15s", 
-              gettext ( aszRating[ rt [ 0 ] ] ) );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+	static char *aszLabelsMatch[] = {
+		N_("FIBS rating difference"),
+		N_("(based on luck adj. result)"),
+		N_("Estimated abs. rating"),
+		N_("(based on error rate per decision)")
+	};
 
-  if ( psc->anTotalMoves[ 1 ] )
-    sprintf ( sz, "%-15s", 
-              gettext ( aszRating[ rt [ 1 ] ] ) );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+	int i, j, fCalc;
+	int irow = 0;
+	char sz[ 32 ];
 
-  /* luck */
+	statLists[0] = CreateList();
 
-  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYGOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_GOOD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_NONE ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_BAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYBAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYBAD ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+	j = 0;
+	for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
+		gtk_clist_append( GTK_CLIST( statLists[0] ), aszEmpty );
+		gtk_clist_set_text( GTK_CLIST( statLists[0] ), j, 0, gettext ( aszLabels[i] ) );
+	}
 
-  FormatStatEquity( sz, psc->arLuck[ 0 ], 1, pms->nMatchTo, 1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatEquity( sz, psc->arLuck[ 1 ], 1, pms->nMatchTo, 1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  if ( psc->anTotalMoves[ 0 ] ) 
-    FormatStatEquity( sz, psc->arLuck[ 0 ], psc->anTotalMoves[ 0 ],
-                      pms->nMatchTo, 1.0 );
-  else
-    strcpy ( sz, _("n/a" ) );
-
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-
-  if ( psc->anTotalMoves[ 1 ] )
-    FormatStatEquity( sz, psc->arLuck[ 1 ], psc->anTotalMoves[ 1 ],
-                      pms->nMatchTo, 1.0 );
-  else
-    strcpy ( sz, _("n/a" ) );
-
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  for ( i = 0; i < 2; i++ ) 
-    rt[ i ] = getLuckRating ( psc->arLuck[ i ][ 0 ] /
-                              psc->anTotalMoves[ i ] );
-
-  if ( psc->anTotalMoves[ 0 ] )
-    sprintf ( sz, "%-15s", gettext ( aszLuckRating[ rt [ 0 ] ] ) );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  if ( psc->anTotalMoves[ 1 ] )
-    sprintf ( sz, "%-15s", gettext ( aszLuckRating[ rt [ 1 ] ] ) );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-
-  /* cube */
- 
-  ++irow;
-
-  sprintf(sz,"%d", psc->anTotalCube[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anTotalCube[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz,"%d", psc->anCloseCube[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anCloseCube[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz,"%d", psc->anDouble[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anDouble[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz,"%d", psc->anTake[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anTake[ 1 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  sprintf(sz,"%d", psc->anPass[ 0 ]);
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf(sz,"%d", psc->anPass[ 1 ] );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-
-  FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 0 ],
-		       psc->arErrorMissedDoubleDP[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 1 ],
-		       psc->arErrorMissedDoubleDP[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 0 ],
-		       psc->arErrorMissedDoubleTG[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 1 ],
-		       psc->arErrorMissedDoubleTG[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 0 ],
-		       psc->arErrorWrongDoubleDP[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 1 ],
-		       psc->arErrorWrongDoubleDP[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 0 ],
-		       psc->arErrorWrongDoubleTG[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 1 ],
-		       psc->arErrorWrongDoubleTG[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  FormatStatCubeError( sz, psc->anCubeWrongTake[ 0 ],
-		       psc->arErrorWrongTake[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatCubeError( sz, psc->anCubeWrongTake[ 1 ],
-		       psc->arErrorWrongTake[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  FormatStatCubeError( sz, psc->anCubeWrongPass[ 0 ],
-		       psc->arErrorWrongPass[ 0 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatCubeError( sz, psc->anCubeWrongPass[ 1 ],
-		       psc->arErrorWrongPass[ 1 ], pms->nMatchTo );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ],
-                    1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ],
-                    1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-
-  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ],
-                    1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ],
-                    1, pms->nMatchTo, -1.0 );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
-  
-  for ( i = 0 ; i < 2; i++ )
-    rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
-
-  if ( psc->anCloseCube[ 0 ] )
-    sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
-  sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
-
-  if ( psc->anCloseCube[ 1 ] )
-    sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
-  else
-    strcpy ( sz, _("n/a" ) );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+	if ( fIsMatch ) {
+		if ( pms->nMatchTo ) 
+		for (i = 0; i < ( sizeof( aszLabelsMatch ) / sizeof( *aszLabelsMatch ) ); 
+			++i, ++j ) {
+			gtk_clist_append( GTK_CLIST( statLists[0] ), aszEmpty );
+			gtk_clist_set_text( GTK_CLIST( statLists[0] ), j, 0, 
+								gettext ( aszLabelsMatch[i] ) );
+		}
+		else
+		for (i = 0; i < ( sizeof( aszLabelsMoney ) / sizeof( *aszLabelsMoney ) );
+			++i, ++j ) {
+			gtk_clist_append( GTK_CLIST( statLists[0] ), aszEmpty );
+			gtk_clist_set_text( GTK_CLIST( statLists[0] ), j, 0, 
+								gettext ( aszLabelsMoney[i] ) );
+		}
+	}
 
   /* overall error rate */
-
-  ++irow;
 
   if ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, 1, sz);
 
   if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, 2, sz);
   
   /* overall error rate per move */
 
@@ -8253,14 +7931,14 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), ++irow, 1, sz);
 
   if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, 2, sz);
 
   /* equivalent Snowie error rate */
 
@@ -8277,7 +7955,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
     strcpy ( sz, _("n/a") );
   }
   
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), ++irow, 1, sz);
 
   if ( psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) {
     float v = -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ] / 
@@ -8291,7 +7969,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
     strcpy ( sz, _("n/a") );
   }
   
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, 2, sz);
 
   /* overall rating */
   
@@ -8302,13 +7980,13 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
     sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), ++irow, 1, sz);
 
   if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
     sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
   else
     strcpy ( sz, _("n/a") );
-  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+  gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, 2, sz);
 
   /* 
    * Luck adjusted result 
@@ -8325,12 +8003,12 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
     if ( pms->nMatchTo )
       for ( i = 0; i < 2; ++i ) {
         sprintf( sz, "%+.2f%%", 100.0 * psc->arActualResult[ i ] );
-        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+        gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, i + 1, sz);
       }
     else
       for ( i = 0; i < 2; ++i ) {
         sprintf( sz, "%.3f", psc->arActualResult[ i ] );
-        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+        gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, i + 1, sz);
       }
 
   }
@@ -8348,7 +8026,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
       for ( i = 0; i < 2; ++i ) {
         sprintf( sz, "%+.2f%%", 
                  100.0 * psc->arLuckAdj[ i ] );
-        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+        gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, i + 1, sz);
       }
 
       if ( fIsMatch ) {
@@ -8361,7 +8039,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
         else
           strcpy( sz, _("n/a") );
 
-        gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, 1, sz);
+        gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow + 1, 1, sz);
 
         /* absolute rating */
 
@@ -8374,7 +8052,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
           else
             strcpy( sz, _("n/a") );
 
-          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 3, i + 1, sz);
+          gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow + 3, i + 1, sz);
 
         }
 
@@ -8384,27 +8062,27 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
     else {
       for ( i = 0; i < 2; ++i ) {
         sprintf( sz, "%+.3f",  psc->arLuckAdj[ i ] );
-        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+        gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow, i + 1, sz);
         
         if( fIsMatch && psc->nGames > 1 ) {
 
           sprintf( sz, "%+.3f",
                    psc->arActualResult[ i ] / psc->nGames );
-          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, i + 1, sz );
+          gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow + 1, i + 1, sz );
 
           sprintf( sz, "%.3f",
                    1.95996f *
                    sqrt( psc->arVarianceActual[ i ] / psc->nGames ) );
-          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 2, i + 1, sz );
+          gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow + 2, i + 1, sz );
 
           sprintf( sz, "%+.3f",
                    psc->arLuckAdj[ i ] / psc->nGames );
-          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 3, i + 1, sz );
+          gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow + 3, i + 1, sz );
           
           sprintf( sz, "%.3f",
                    1.95996f *
                    sqrt( psc->arVarianceLuckAdj[ i ] / psc->nGames ) );
-          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 4, i + 1, sz );
+          gtk_clist_set_text( GTK_CLIST( statLists[0] ), irow + 4, i + 1, sz );
 
         }
          
@@ -8412,48 +8090,410 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
     }
 
   }
+
+return statLists[0];
+}
+
+static GtkWidget *ChequerStats(const statcontext *psc, const matchstate *pms)
+{
+	static char *aszLabels[] = { 
+		N_("Total moves"),
+		N_("Unforced moves"),
+/*          N_("Moves marked very good"), */
+/*          N_("Moves marked good"), */
+/*          N_("Moves marked interesting"), */
+/*          N_("Moves marked good"), */
+		N_("Moves unmarked"),
+		N_("Moves marked good"),
+		N_("Moves marked doubtful"),
+		N_("Moves marked bad"),
+		N_("Moves marked very bad"),
+		N_("Error rate (total)"),
+		N_("Error rate (pr. move)"),
+		N_("Checker play rating"),
+	};
+
+	int i, j;
+	int irow = 0;
+	char sz[ 32 ];
+
+	statLists[1] = CreateList();
+
+j = 0;
+for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
+gtk_clist_append( GTK_CLIST( statLists[1] ), aszEmpty );
+gtk_clist_set_text( GTK_CLIST( statLists[1] ), j, 0, gettext ( aszLabels[i] ) );
+}
+
+
+  sprintf(sz,"%d", psc->anTotalMoves[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 1, sz);
+  sprintf(sz,"%d", psc->anTotalMoves[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
   
-  irow += 4;
+  sprintf(sz,"%d", psc->anUnforcedMoves[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anUnforcedMoves[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+
+  {
+    int i[] = {//SKILL_VERYGOOD, SKILL_GOOD, SKILL_INTERESTING,
+	       SKILL_NONE, SKILL_GOOD, SKILL_DOUBTFUL, SKILL_BAD,
+	       SKILL_VERYBAD};
+    unsigned int k;
     
-  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-                                  GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-  gtk_container_add( GTK_CONTAINER( psw ), pwStats );
+    for(k = 0; k < sizeof(i)/sizeof(i[0]); ++k) {
+      ++irow;
+      sprintf(sz,"%d", psc->anMoves[ 0 ][ i[k] ]);
+      gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 1, sz);
+      
+      sprintf(sz,"%d", psc->anMoves[ 1 ][ i[k] ]);
+      gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+    }
+  }
+#if 0      
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+  
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+  
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_INTERESTING ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_INTERESTING ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+	       
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_DOUBTFUL ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_DOUBTFUL ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anMoves[ 0 ][ SKILL_VERYBAD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+#endif
+  
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ], 1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
+  FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ], 1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
 
-  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), psw );
+  if ( psc->anUnforcedMoves[ 0 ] )
+    FormatStatEquity( sz, psc->arErrorCheckerplay[ 0 ],
+                      psc->anUnforcedMoves[ 0 ], pms->nMatchTo, -1.0 );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
 
-  /* selections */
+  if ( psc->anUnforcedMoves[ 1 ] )
+    FormatStatEquity( sz, psc->arErrorCheckerplay[ 1 ],
+                      psc->anUnforcedMoves[ 1 ], pms->nMatchTo, -1.0 );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
+  
+  if ( psc->anTotalMoves[ 0 ] )
+    sprintf ( sz, "%-15s", 
+              gettext ( aszRating[ rt [ 0 ] ] ) );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), ++irow, 1, sz);
 
-  gtk_clist_set_selection_mode( GTK_CLIST( pwStats ),
-                                GTK_SELECTION_EXTENDED );
+  if ( psc->anTotalMoves[ 1 ] )
+    sprintf ( sz, "%-15s", 
+              gettext ( aszRating[ rt [ 1 ] ] ) );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[1] ), irow, 2, sz);
 
-  gtk_selection_add_target( pwStats, GDK_SELECTION_PRIMARY,
-                            GDK_SELECTION_TYPE_STRING, 0 );
+  return statLists[1];
+}
 
-  gtk_signal_connect( GTK_OBJECT( pwStats ), "select-row",
-                      GTK_SIGNAL_FUNC( StatcontextSelect ), pwCopy );
-  gtk_signal_connect( GTK_OBJECT( pwStats ), "unselect-row",
-                      GTK_SIGNAL_FUNC( StatcontextSelect ), pwCopy );
-  gtk_signal_connect( GTK_OBJECT( pwStats ), "selection_clear_event",
-                      GTK_SIGNAL_FUNC( StatcontextClearSelection ), pwCopy );
-  gtk_signal_connect( GTK_OBJECT( pwStats ), "selection_get",
-                      GTK_SIGNAL_FUNC( StatcontextGetSelection ), 
-                      ( gpointer) psc );
+static GtkWidget *CubeStats(const statcontext *psc, const matchstate *pms)
+{
+	static char *aszLabels[] = { 
+         N_("Total cube decisions"),
+         N_("Actual or close cube decisions"),
+         N_("Doubles"),
+         N_("Takes"),
+         N_("Pass"),
+         N_("Missed doubles around DP"),
+         N_("Missed doubles around TG"),
+         N_("Wrong doubles around DP"),
+         N_("Wrong doubles around TG"),
+         N_("Wrong takes"),
+         N_("Wrong passes"),
+         N_("Error rate (total)"),
+         N_("Error rate (per cube decision)"),
+         N_("Cube decision rating"),
+	};
 
-  /* modality */
+	int i, j;
+	int irow = 0;
+	char sz[ 32 ];
 
-  gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
-  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-                                GTK_WINDOW( pwMain ) );
+statLists[2] = CreateList();
 
-  gtk_widget_show_all( pwDialog );
+j = 0;
+for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
+gtk_clist_append( GTK_CLIST( statLists[2] ), aszEmpty );
+gtk_clist_set_text( GTK_CLIST( statLists[2] ), j, 0, gettext ( aszLabels[i] ) );
+}
 
-  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+  sprintf(sz,"%d", psc->anTotalCube[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 1, sz);
+  sprintf(sz,"%d", psc->anTotalCube[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anCloseCube[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anCloseCube[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anDouble[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anDouble[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anTake[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anTake[ 1 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  sprintf(sz,"%d", psc->anPass[ 0 ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  sprintf(sz,"%d", psc->anPass[ 1 ] );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
 
-  GTKDisallowStdin();
-  gtk_main();
-  GTKAllowStdin();
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 0 ],
+		       psc->arErrorMissedDoubleDP[ 0 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleDP[ 1 ],
+		       psc->arErrorMissedDoubleDP[ 1 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 0 ],
+		       psc->arErrorMissedDoubleTG[ 0 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatCubeError( sz, psc->anCubeMissedDoubleTG[ 1 ],
+		       psc->arErrorMissedDoubleTG[ 1 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 0 ],
+		       psc->arErrorWrongDoubleDP[ 0 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleDP[ 1 ],
+		       psc->arErrorWrongDoubleDP[ 1 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 0 ],
+		       psc->arErrorWrongDoubleTG[ 0 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatCubeError( sz, psc->anCubeWrongDoubleTG[ 1 ],
+		       psc->arErrorWrongDoubleTG[ 1 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongTake[ 0 ],
+		       psc->arErrorWrongTake[ 0 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatCubeError( sz, psc->anCubeWrongTake[ 1 ],
+		       psc->arErrorWrongTake[ 1 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+  FormatStatCubeError( sz, psc->anCubeWrongPass[ 0 ],
+		       psc->arErrorWrongPass[ 0 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatCubeError( sz, psc->anCubeWrongPass[ 1 ],
+		       psc->arErrorWrongPass[ 1 ], pms->nMatchTo );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  FormatStatEquity( sz, aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ],
+                    1, pms->nMatchTo, -1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+  
+  for ( i = 0 ; i < 2; i++ )
+    rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
+
+  if ( psc->anCloseCube[ 0 ] )
+    sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 0 ] ] ) );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), ++irow, 1, sz);
+  sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
+
+  if ( psc->anCloseCube[ 1 ] )
+    sprintf ( sz, "%-15s", gettext ( aszRating[ rt [ 1 ] ] ) );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[2] ), irow, 2, sz);
+
+  return statLists[2];
+}
+
+static GtkWidget *LuckStats(const statcontext *psc, const matchstate *pms)
+{
+	static char *aszLabels[] = { 
+         N_("Rolls marked very lucky"),
+         N_("Rolls marked lucky"),
+         N_("Rolls unmarked"),
+         N_("Rolls marked unlucky"),
+         N_("Rolls marked very unlucky"),
+         N_("Luck rate (total)"),
+         N_("Luck rate (pr. move)"),
+         N_("Luck rating"),
+	};
+
+	int i, j;
+	int irow = 0;
+	char sz[ 32 ];
+
+statLists[3] = CreateList();
+
+j = 0;
+for (i = 0; i < ( sizeof( aszLabels ) / sizeof( *aszLabels ) ); ++i, ++j ) {
+gtk_clist_append( GTK_CLIST( statLists[3] ), aszEmpty );
+gtk_clist_set_text( GTK_CLIST( statLists[3] ), j, 0, gettext ( aszLabels[i] ) );
+}
+
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYGOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), ++irow, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_GOOD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), ++irow, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_NONE ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), ++irow, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_BAD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+  sprintf(sz, "%d", psc->anLuck[ 0 ][ LUCK_VERYBAD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), ++irow, 1, sz);
+  sprintf(sz, "%d", psc->anLuck[ 1 ][ LUCK_VERYBAD ]);
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+
+  FormatStatEquity( sz, psc->arLuck[ 0 ], 1, pms->nMatchTo, 1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), ++irow, 1, sz);
+  FormatStatEquity( sz, psc->arLuck[ 1 ], 1, pms->nMatchTo, 1.0 );
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+  
+  if ( psc->anTotalMoves[ 0 ] ) 
+    FormatStatEquity( sz, psc->arLuck[ 0 ], psc->anTotalMoves[ 0 ],
+                      pms->nMatchTo, 1.0 );
+  else
+    strcpy ( sz, _("n/a" ) );
+
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), ++irow, 1, sz);
+
+  if ( psc->anTotalMoves[ 1 ] )
+    FormatStatEquity( sz, psc->arLuck[ 1 ], psc->anTotalMoves[ 1 ],
+                      pms->nMatchTo, 1.0 );
+  else
+    strcpy ( sz, _("n/a" ) );
+
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+  
+  for ( i = 0; i < 2; i++ ) 
+    rt[ i ] = getLuckRating ( psc->arLuck[ i ][ 0 ] /
+                              psc->anTotalMoves[ i ] );
+
+  if ( psc->anTotalMoves[ 0 ] )
+    sprintf ( sz, "%-15s", gettext ( aszLuckRating[ rt [ 0 ] ] ) );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), ++irow, 1, sz);
+  if ( psc->anTotalMoves[ 1 ] )
+    sprintf ( sz, "%-15s", gettext ( aszLuckRating[ rt [ 1 ] ] ) );
+  else
+    strcpy ( sz, _("n/a" ) );
+  gtk_clist_set_text( GTK_CLIST( statLists[3] ), irow, 2, sz);
+
+  return statLists[3];
+}
+
+extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
+				const char *szTitle, const int fIsMatch ) {
+    
+	GtkWidget *pwDialog, *pwNotebook, *copyMenu, *menu_item;
+	int i;
+
+	pwDialog = GTKCreateDialog( szTitle, DT_INFO, NULL, NULL );
+
+	pwNotebook = gtk_notebook_new();
+	gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
+	gtk_notebook_popup_disable( GTK_NOTEBOOK( pwNotebook ) );
+
+	gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
+
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ), pwNotebook );
+
+	getMWCFromError ( psc, aaaar );
+	for ( i = 0 ; i < 2; i++ )
+		rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
+
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), OverallStats(psc, pms, fIsMatch),
+					  gtk_label_new(_("Overall")));
+
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), ChequerStats(psc, pms),
+					  gtk_label_new(_("Chequer play")));
+
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), CubeStats(psc, pms),
+					  gtk_label_new(_("Cube decisions")));
+
+	gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ), LuckStats(psc, pms),
+					  gtk_label_new(_("Luck")));
+
+	/* modality */
+	gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+								GTK_WINDOW( pwMain ) );
+
+	copyMenu = gtk_menu_new ();
+
+	menu_item = gtk_menu_item_new_with_label ("Copy page");
+	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
+	gtk_widget_show (menu_item);
+	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( CopyPage ), pwNotebook );
+
+	menu_item = gtk_menu_item_new_with_label ("Copy all pages");
+	gtk_menu_shell_append (GTK_MENU_SHELL (copyMenu), menu_item);
+	gtk_widget_show (menu_item);
+	gtk_signal_connect( GTK_OBJECT( menu_item ), "activate", GTK_SIGNAL_FUNC( CopyAll ), pwNotebook );
+
+	gtk_signal_connect( GTK_OBJECT( pwNotebook ), "button-press-event", GTK_SIGNAL_FUNC( ContextCopyMenu ), copyMenu );
+
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+					  GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+
+	gtk_widget_show_all( pwDialog );
+
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
 } 
 
 static void SetOptions( gpointer *p, guint n, GtkWidget *pw ) {
