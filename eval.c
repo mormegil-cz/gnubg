@@ -196,7 +196,7 @@ void ( *fnAction )( void ) = NULL;
 
 static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
 
-static evalcontext ecBasic = { 0, 0, 0, 0, TRUE };
+static evalcontext ecBasic = { 0, 0, 0, 0, FALSE };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -2303,7 +2303,7 @@ static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
 static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
-    int i, n, nOpp, an[ 2 ], f = FALSE;
+    int i, n, nOpp, an[ 2 ], f0 = FALSE, f1 = FALSE;
 
     assert( pBearoff1 );
     
@@ -2319,11 +2319,14 @@ static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 	an[ 1 ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
 	    ( pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) | 1 ] << 8 );
 
-	if( an[ 0 ] || an[ 1 ] )
-	    f = TRUE;
+	if( an[ 0 ] )
+	    f0 = TRUE;
 
-	if( f ) {
-	    if( !an[ 0 ] && !an[ 1 ] )
+	if( an[ 1 ] )
+	    f1 = TRUE;
+
+	if( f0 || f1 ) {
+	    if( f0 && f1 && !an[ 0 ] && !an[ 1 ] )
 		break;
 
 	    szOutput = strchr( szOutput, 0 );
