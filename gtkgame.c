@@ -141,6 +141,9 @@ typedef enum _gnubgcommand {
     CMD_SHOW_MATCHEQUITYTABLE,
     CMD_SHOW_KLEINMAN,
     CMD_SHOW_PIPCOUNT,
+    CMD_SHOW_STATISTICS_GAME,
+    CMD_SHOW_STATISTICS_MATCH,
+    CMD_SHOW_STATISTICS_SESSION,
     CMD_SHOW_THORP,
     CMD_SHOW_VERSION,
     CMD_SHOW_WARRANTY,
@@ -253,6 +256,9 @@ static char *aszCommands[ NUM_CMDS ] = {
     "show matchequitytable",
     "show kleinman",
     "show pipcount",
+    "show statistics game",
+    "show statistics match",
+    "show statistics session",
     "show thorp",
     "show version",
     "show warranty",
@@ -1009,15 +1015,15 @@ extern void GTKAddMoveRecord( moverecord *pmr ) {
 	break;
 	
     case MOVE_TAKE:
-	fPlayer = pmr->t.fPlayer;
+	fPlayer = pmr->d.fPlayer;
 	strcpy( pch = sz, "Take" );
-	strcat( sz, aszSkillTypeAbbr[ pmr->t.st ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
 	break;
 	
     case MOVE_DROP:
-	fPlayer = pmr->t.fPlayer;
+	fPlayer = pmr->d.fPlayer;
 	strcpy( pch = sz, "Drop" );
-	strcat( sz, aszSkillTypeAbbr[ pmr->t.st ] );
+	strcat( sz, aszSkillTypeAbbr[ pmr->d.st ] );
 	break;
 	
     case MOVE_RESIGN:
@@ -1507,6 +1513,13 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Analyse/Analyse match", NULL, Command, CMD_ANALYSE_MATCH, NULL },
 	{ "/_Analyse/Analyse session", NULL, Command, CMD_ANALYSE_SESSION,
 	  NULL },
+	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Analyse/Statistics game", NULL, Command,
+          CMD_SHOW_STATISTICS_GAME, NULL },
+	{ "/_Analyse/Statistics match", NULL, Command,
+          CMD_SHOW_STATISTICS_MATCH, NULL },
+	{ "/_Analyse/Statistics session", NULL, Command,
+          CMD_SHOW_STATISTICS_SESSION, NULL },
 	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Analyse/_Pip count", NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
 	{ "/_Analyse/_Kleinman count", NULL, Command, CMD_SHOW_KLEINMAN,
@@ -3734,6 +3747,12 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_ANALYSE_MATCH ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_ANALYSE_SESSION ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_SHOW_STATISTICS_GAME ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_SHOW_STATISTICS_MATCH ), TRUE );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_SHOW_STATISTICS_SESSION ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_SHOW_MATCHEQUITYTABLE ), TRUE );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
