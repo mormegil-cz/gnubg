@@ -1,3 +1,8 @@
+Mon Jan 13 18:54:09 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (GTKRolloutUpdate): honour fOutputWinPC.
+	(reported by Albert Silver)
+
 Mon Jan 13 18:17:57 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* show.c (CommandShowFullBoard): player names and scores were inverted.

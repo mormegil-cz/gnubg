@@ -6326,8 +6326,12 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
     
       for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
         
-        if ( i < OUTPUT_EQUITY )
-          sprintf( sz, "%6.4f", aarMu[ j ][ i ] );
+        if ( i < OUTPUT_EQUITY ) {
+          if ( fOutputWinPC )
+            sprintf( sz, "%6.2f%%", 100.0f * aarMu[ j ][ i ] );
+          else
+            sprintf( sz, "%6.4f", aarMu[ j ][ i ] );
+        }
         else if ( i == OUTPUT_EQUITY ) {
 
           if ( ! ms.nMatchTo )
