@@ -1,3 +1,9 @@
+Tue Jan 28 11:04:16 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtkrolls.c (GTKShowRolls): Change the spin button to a GTKHScale,
+	to work around various signal and focus problems.
+	(RollsTree): Handle fInterrupt.
+
 Tue Jan 28 06:39:22 GMT   Jim Segrave <jes@jes-2.demon.nl>
 
 	* play.c - ShouldDouble did'nt check if the cube was disabled, 

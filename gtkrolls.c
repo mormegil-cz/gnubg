@@ -45,10 +45,10 @@ typedef struct _rollswidget {
 
   GtkWidget *psw;   /* the scrolled window */
   GtkWidget *ptv;   /* the tree widget */
-
+    
   evalcontext *pec;
   matchstate *pms;
-
+  int nDepth; /* current depth */
 } rollswidget;
 
 
@@ -244,22 +244,33 @@ RollsTree ( const int n, evalcontext *pec, matchstate *pms ) {
                                                   i, NULL );
   }  
 
-
+  if( fInterrupt ) {
+      gtk_widget_destroy( ptv );
+      ptv = NULL;
+      fInterrupt = FALSE;
+  }
+  
   return ptv;
 
 }
 
 
 static void
-DepthChanged ( GtkAdjustment *padj, rollswidget *prw ) {
+DepthChanged ( GtkRange *pr, rollswidget *prw ) {
 
-  int n = padj->value;
+  int n = gtk_range_get_value( pr );
 
+  if( n == prw->nDepth )
+      return;
+  
   if ( prw->ptv )
     gtk_widget_destroy ( GTK_WIDGET ( prw->ptv ) );
-  prw->ptv = RollsTree ( n, prw->pec, prw->pms );
-  gtk_container_add ( GTK_CONTAINER ( prw->psw ), prw->ptv );
-
+  if( ( prw->ptv = RollsTree ( n, prw->pec, prw->pms ) ) ) {
+      gtk_container_add ( GTK_CONTAINER ( prw->psw ), prw->ptv );
+      prw->nDepth = n;
+  } else
+      prw->nDepth = -1;
+  
   gtk_widget_show_all ( GTK_WIDGET ( prw->psw ) );
 
 }
@@ -283,6 +294,7 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
 
   prw->pms = pms;
   prw->pec = pec;
+  prw->nDepth = -1; /* not yet calculated */
   
   /* vbox to hold tree widget and buttons */
 
@@ -314,20 +326,23 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   gtk_box_pack_start ( GTK_BOX ( hbox ), gtk_label_new ( _("Depth") ), 
                        FALSE, FALSE, 4 );
 
-  padj = GTK_ADJUSTMENT ( gtk_adjustment_new ( n, 1, 5, 1, 1, 0 ) );
-  pw = gtk_spin_button_new ( GTK_ADJUSTMENT ( padj ), 1, 0 );
+  pw = gtk_hscale_new_with_range( 1, 5, 1 );
+  gtk_widget_set_size_request( pw, 100, -1 );
   gtk_box_pack_start ( GTK_BOX ( hbox ), pw, FALSE, FALSE, 4 );
-
-  gtk_spin_button_set_numeric ( GTK_SPIN_BUTTON ( pw ), TRUE );
-
-  gtk_signal_connect ( GTK_OBJECT ( padj ), "value-changed",
+  gtk_scale_set_digits( GTK_SCALE( pw ), 0 );
+  gtk_scale_set_draw_value( GTK_SCALE( pw ), TRUE );
+  gtk_range_set_update_policy( GTK_RANGE( pw ), GTK_UPDATE_DISCONTINUOUS );
+      
+  gtk_signal_connect ( GTK_OBJECT ( pw ), "value-changed",
                        GTK_SIGNAL_FUNC ( DepthChanged ), prw );
 
   /* tree  */
 
-  prw->ptv = RollsTree ( n, pec, pms );
-  gtk_container_add ( GTK_CONTAINER ( prw->psw ), prw->ptv );
-
+  if( ( prw->ptv = RollsTree ( n, pec, pms ) ) ) {
+      gtk_container_add ( GTK_CONTAINER ( prw->psw ), prw->ptv );
+      prw->nDepth = n;
+  }
+  
   /* modality */
 
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 560, 400 ); 
