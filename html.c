@@ -1560,7 +1560,7 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
             "<img style=\"border:0;width:88px;height:31px\" "
             "src=\"http://www.w3.org/Icons/valid-xhtml10\" "
             "alt=\"%s\" /></a>\n"
-            "<a href=\"http://jigsaw.w3.org/css-validator/\">"
+            "<a href=\"http://jigsaw.w3.org/css-validator/check/referer\">"
             "<img style=\"border:0;width:88px;height:31px\" "
             "src=\"http://jigsaw.w3.org/css-validator/images/vcss\" "
             "alt=\"%s\" />"

@@ -1,3 +1,7 @@
+Sun Jul 21 21:41:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (HTMLEpilogue): update link to CSS validator.
+
 Sun Jul 21 21:30:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Output rollout resulst in HTML and text export.
