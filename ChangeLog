@@ -1,3 +1,9 @@
+Fri Jul 11 18:55:28 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* postscript.c: changed StartPage and EndPage to 
+	  PSStartPage and PSEndPage, respectively, to avoid name clash
+	  on Windows
+
 Wed Jul 09 20:57:01 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* boardpos.c gtkexport.c gtkgame.c gtkgame.h gtkmet.c 
