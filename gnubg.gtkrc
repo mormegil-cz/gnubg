@@ -17,3 +17,20 @@ style "doubling-window-graph" = "default"
 }
 
 widget "*.gnubg-doubling-window-graph" style "doubling-window-graph"
+
+#
+# Styles for match equity table
+#
+
+style "met-matching-score" = "default"
+{
+  fg[NORMAL] = { 0xffff, 0, 0 }
+}
+
+style "met-the-score" = "met-matching-score"
+{
+  fg[NORMAL] = { 0, 0xffff, 0 }
+}
+
+widget "*.gnubg-met-matching-score" style "met-matching-score"
+widget "*.gnubg-met-the-score" style "met-the-score"

@@ -1,3 +1,13 @@
+Sat Dec 28 14:13:13 2002  Jørn Thyssen  <jth@gnubg.org>
+
+	Highlight current score in match equity table
+	(suggested by Albert Silver)
+
+	* gtkmet.c (GTKWriteMET): highlight current score using GTK
+	resources.
+	* gnubg.gtkrc: new styles for match equity table.
+	* show.c (CommandShowMET): pass score to GTKShowMET.
+
 Fri Dec 27 16:02:28 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (RecordEraseAll): Sort records case-insensitively

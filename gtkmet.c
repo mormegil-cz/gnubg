@@ -47,15 +47,14 @@ typedef struct _mettable {
   GtkWidget *pwName;
   GtkWidget *pwFileName;
   GtkWidget *pwDescription;
-#if !USE_GTKEXTRA
   GtkWidget *aapwLabel[ MAXSCORE ][ MAXSCORE ];
-#endif
 } mettable;
 
 typedef struct _metwidget {
   GtkWidget *apwPostCrawford[ 2 ];
   GtkWidget *pwPreCrawford;
-  int n;
+  int nMatchTo;
+  int anAway[ 2 ];
 } metwidget;
 
 
@@ -84,15 +83,9 @@ UpdateTable ( mettable *pmt,
       else
         sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
 
-#if USE_GTKEXTRA
-      gtk_sheet_set_cell( GTK_SHEET( pmt->pwTable ), i, j, GTK_JUSTIFY_RIGHT,
-                          sz );
-#else
       gtk_label_set_text ( GTK_LABEL ( pmt->aapwLabel[ i ][ j ] ), sz );
-#endif
+
     }
-
-
 
 }
 
@@ -104,13 +97,13 @@ UpdateAllTables ( metwidget *pmw ) {
   int i;
 
   pmt = gtk_object_get_user_data ( GTK_OBJECT ( pmw->pwPreCrawford ) );
-  UpdateTable ( pmt, aafMET, &miCurrent, pmw->n, pmw->n, FALSE );
+  UpdateTable ( pmt, aafMET, &miCurrent, pmw->nMatchTo, pmw->nMatchTo, FALSE );
 
   for ( i = 0; i < 2; ++i ) {
     pmt = 
       gtk_object_get_user_data ( GTK_OBJECT ( pmw->apwPostCrawford[ i ] ) );
     UpdateTable ( pmt, (float (*)[ MAXSCORE ]) aafMETPostCrawford[ i ], 
-                  &miCurrent, pmw->n, 1, TRUE );
+                  &miCurrent, pmw->nMatchTo, 1, TRUE );
   }
 
 
@@ -118,7 +111,8 @@ UpdateAllTables ( metwidget *pmw ) {
 
 
 static GtkWidget 
-*GTKWriteMET ( const int nRows, const int nCols ) {
+*GTKWriteMET ( const int nRows, const int nCols,
+               const int nAway0, const int nAway1 ) {
 
   int i, j;
   char sz[ 16 ];
@@ -130,6 +124,7 @@ static GtkWidget
 #endif
   GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 );
   mettable *pmt;
+  GtkWidget *pw;
 
   pmt = (mettable *) g_malloc ( sizeof ( mettable ) );
   pmt->pwTable = pwTable;
@@ -154,15 +149,19 @@ static GtkWidget
 #endif
 
   /* header for rows */
-    
+
   for( i = 0; i < nCols; i++ ) {
     sprintf( sz, _("%d-away"), i + 1 );
 #if USE_GTKEXTRA
     gtk_sheet_row_button_add_label( GTK_SHEET( pwTable ), i, sz );
 #else
     gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-                               gtk_label_new( sz ),
+                               pw = gtk_label_new( sz ),
                                i + 1, i + 2, 0, 1 );
+    if ( i == nAway1 ) {
+      gtk_widget_set_name ( GTK_WIDGET ( pw ),
+                            "gnubg-met-matching-score" );
+    }
 #endif
   }
 
@@ -174,13 +173,16 @@ static GtkWidget
     gtk_sheet_column_button_add_label( GTK_SHEET( pwTable ), i, sz );
 #else
     gtk_table_attach_defaults( GTK_TABLE( pwTable ),
-                               gtk_label_new( sz ),
+                               pw = gtk_label_new( sz ),
                                0, 1, i + 1, i + 2 );
+    if ( i == nAway0 ) {
+      gtk_widget_set_name ( GTK_WIDGET ( pw ),
+                            "gnubg-met-matching-score" );
+    }
 #endif
 
   }
 
-#if !USE_GTKEXTRA
 
   /* fill out table */
     
@@ -188,13 +190,29 @@ static GtkWidget
     for( j = 0; j < nCols; j++ ) {
 
       pmt->aapwLabel[ i ][ j ] = gtk_label_new( NULL );
+
+#if USE_GTKEXTRA
+      gtk_sheet_attach_default ( GTK_SHEET ( pmt->pwTable ),
+                                 pmt->aapwLabel[ i ][ j ], i, j );
+#else
       gtk_table_attach_defaults( GTK_TABLE( pmt->pwTable ),
                                  pmt->aapwLabel[ i ][ j ],
                                  j + 1, j + 2, i + 1, i + 2 );
+#endif /* USE_GTKEXTRA */
+
+      if ( i == nAway0 && j == nAway1 ) {
+        gtk_widget_set_name ( GTK_WIDGET ( pmt->aapwLabel[ i ][ j ] ),
+                              "gnubg-met-the-score" );
+      }
+      else if ( i == nAway0 || j == nAway1 ) {
+        gtk_widget_set_name ( GTK_WIDGET ( pmt->aapwLabel[ i ][ j ] ),
+                              "gnubg-met-matching-score" );
+      }
     }
 
+#if !USE_GTKEXTRA
   gtk_table_set_col_spacings( GTK_TABLE( pwTable ), 4 );
-#endif /* !USE_GTKEXTRA */
+#endif
 
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
                                   GTK_POLICY_AUTOMATIC,
@@ -227,7 +245,8 @@ static void loadMET ( GtkWidget *pw, metwidget *pmw ) {
 }
 
 
-extern void GTKShowMatchEquityTable( int n ) {
+extern void GTKShowMatchEquityTable( const int nMatchTo,
+                                     const int anScore[ 2 ] ) {
 
   /* FIXME: Widget should update after 'Invert' or 'Load ...' */  
   int i;
@@ -241,7 +260,9 @@ extern void GTKShowMatchEquityTable( int n ) {
     gtk_toggle_button_new_with_label(_("Invert table")); 
   metwidget mw;
 
-  mw.n = n;
+  mw.nMatchTo = nMatchTo;
+  mw.anAway[ 0 ] = nMatchTo - anScore[ 0 ] - 1;
+  mw.anAway[ 1 ] = nMatchTo - anScore[ 1 ] - 1;
 
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwInvertButton),
                                fInvertMET); 
@@ -255,7 +276,8 @@ extern void GTKShowMatchEquityTable( int n ) {
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
                      pwLoad );
 
-  mw.pwPreCrawford = GTKWriteMET ( n, n );
+  mw.pwPreCrawford = GTKWriteMET ( mw.nMatchTo, mw.nMatchTo,
+                                   mw.anAway[ 0 ], mw.anAway[ 1 ] );
   gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                              mw.pwPreCrawford, 
                              gtk_label_new ( _("Pre-Crawford") ) );
@@ -264,12 +286,8 @@ extern void GTKShowMatchEquityTable( int n ) {
       
     sprintf ( sz, _("Post-Crawford for player %s"), ap[ i ].szName );
 
-#if 0      
-    mw.apwPostCrawford[ i ] = GTKWriteMET ( (float (*)[ MAXSCORE ])
-                                            aafMETPostCrawford[ i ], 
-                                            n, 1, TRUE );
-#endif
-    mw.apwPostCrawford[ i ] = GTKWriteMET ( n , 1 );
+    mw.apwPostCrawford[ i ] = GTKWriteMET ( nMatchTo , 1, 
+                                            mw.anAway[ i ], mw.anAway[ !i ] );
     gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
                                mw.apwPostCrawford[ i ],
                                gtk_label_new ( sz ) );

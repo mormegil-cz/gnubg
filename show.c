@@ -1100,6 +1100,7 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
 
   int n = ParseNumber ( &sz );
   int i;
+  int anScore[ 2 ];
 
   /* If n > 0 write n x n match equity table,
      else if match write nMatchTo x nMatchTo table,
@@ -1112,9 +1113,17 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
       n = MAXSCORE;
   }
 
+  if ( ms.nMatchTo && ms.anScore[ 0 ] <= n && ms.anScore[ 1 ] <= n ) {
+     anScore[ 0 ] = ms.anScore[ 0 ];
+     anScore[ 1 ] = ms.anScore[ 1 ];
+  }
+  else 
+     anScore[ 0 ] = anScore[ 1 ] = -1;
+
+
 #if USE_GTK
   if( fX ) {
-      GTKShowMatchEquityTable( n );
+      GTKShowMatchEquityTable( n, anScore );
       return;
   }
 #endif
