@@ -1,3 +1,8 @@
+Sat Dec 21 21:11:12 2002  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (ProgressThrottle): [HAVE_GETTIMEOFDAY] Throttle progress 
+	updates, so we can spend more time progressing and less time updating.
+
 Sat Dec 21 19:12:17 2002  Gary Wong  <gtw@gnu.org>
 
 	* htmlimages.c: #include <unistd.h> (reported by Øystein).
