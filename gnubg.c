@@ -1222,10 +1222,9 @@ extern void CommandHint( char *sz ) {
 
       SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
-      FindBestMoves( &ml, aar, anDice[ 0 ], anDice[ 1 ], anBoard,
-                     ecEval.nSearchCandidates, ecEval.rSearchTolerance,
-                     &ci, &ecEval );
-    
+      FindnSaveBestMoves( &ml, anDice[ 0 ], anDice[ 1 ], anBoard,
+                          NULL, &ci, &ecEval );
+
       if( fInterrupt )
         return;
     
@@ -1240,36 +1239,96 @@ extern void CommandHint( char *sz ) {
 
 	/* output in equity */
     
-	outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
-    
-	for( i = 0; i < ml.cMoves; i++ ) {
-	  float *ar = ml.amMoves[ i ].pEval;
-	  outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
-		   ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
-		   Utility ( ar, &ci ) );
-	  outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove
-			       ) );
+        float *ar, rEq, rEqTop;
 
+        if ( ml.cMoves ) {
+
+	  ar = ml.amMoves[ 0 ].arEvalMove;
+          rEqTop = Utility ( ar, &ci );
+
+          outputf ("    %2i. %5s    %-30s Eq.: %+6.3f\n"
+                   "       %5.1f%% %5.1f%% %5.1f%%  -"
+                   " %5.1f%% %5.1f%% %6.2f%%\n",
+                   1, FormatEval5 ( szTemp, ml.amMoves[ 0 ].etMove,
+                                    ml.amMoves[ 0 ].esMove ), 
+                   FormatMove( szMove, anBoard, 
+                               ml.amMoves[ 0 ].anMove ),
+                   rEqTop, 
+                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+                   100.0 * ar[ 4 ] );
+                   
+        }
+
+	for( i = 1; i <  ml.cMoves; i++ ) {
+
+	  ar = ml.amMoves[ i ].arEvalMove;
+          rEq = Utility ( ar, &ci );
+
+          outputf ("    %2i. %5s    %-30s Eq.: %+6.3f (%+6.3f)\n"
+                   "       %5.1f%% %5.1f%% %5.1f%%  -"
+                   " %5.1f%% %5.1f%% %6.2f%%\n",
+                   i+ 1, FormatEval5 ( szTemp, ml.amMoves[ i ].etMove,
+                                    ml.amMoves[ i ].esMove ), 
+                   FormatMove( szMove, anBoard, 
+                               ml.amMoves[ i ].anMove ),
+                   rEq, rEq - rEqTop,
+                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+                   100.0 * ar[ 4 ] );
+                   
 	}
 
       }
       else {
 
-	/* output in mwc */
+ 	/* output in mwc */
 
-	outputl( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
-		 " Mwc\tMove" );
-    
-	for( i = 0; i < ml.cMoves; i++ ) {
-	  float *ar = ml.amMoves[ i ].pEval;
+        float *ar, rMWC, rMWCTop;
 
-	  outputf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%6.2f%%\t",
-		   ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
-		   100.0 * eq2mwc ( Utility ( ar, &ci ), &ci ) );
-	  outputl( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove
-			       ) );
+        if ( ml.cMoves ) {
+
+	  ar = ml.amMoves[ 0 ].arEvalMove;
+          rMWCTop = 100.0 * eq2mwc ( Utility ( ar, &ci ), &ci );
+
+          outputf ("    %2i. %5s    %-30s Mwc: %7.3f%%\n"
+                   "       %5.1f%% %5.1f%% %5.1f%%  -"
+                   " %5.1f%% %5.1f%% %6.2f%%\n",
+                   1, FormatEval5 ( szTemp, ml.amMoves[ 0 ].etMove,
+                                    ml.amMoves[ 0 ].esMove ), 
+                   FormatMove( szMove, anBoard, 
+                               ml.amMoves[ 0 ].anMove ),
+                   rMWCTop, 
+                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+                   100.0 * ar[ 4 ] );
+                   
+        }
+
+	for( i = 1; i <  ml.cMoves; i++ ) {
+
+	  ar = ml.amMoves[ i ].arEvalMove;
+          rMWC = 100.0 * eq2mwc ( Utility ( ar, &ci ), &ci );
+
+          outputf ("    %2i. %5s    %-30s Mwc: %7.3f%% (%+7.3f%%)\n"
+                   "       %5.1f%% %5.1f%% %5.1f%%  -"
+                   " %5.1f%% %5.1f%% %6.2f%%\n",
+                   i+ 1, FormatEval5 ( szTemp, ml.amMoves[ i ].etMove,
+                                    ml.amMoves[ i ].esMove ), 
+                   FormatMove( szMove, anBoard, 
+                               ml.amMoves[ i ].anMove ),
+                   rMWC, rMWC - rMWCTop,
+                   100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+                   100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+                   100.0 * ar[ 4 ] );
+                   
 	}
       }
+
+      /* dealloc saved moves */
+
+      free ( ml.amMoves );
+
     }
 }
 
@@ -1364,12 +1423,17 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	fprintf( pf, " %-31s%s : %d\n", sz, ap[ 1 ].szName, anScore[ 1 ] );
     } else
 	fprintf( pf, " %-31s%s\n", ap[ 0 ].szName, ap[ 1 ].szName );
+
     
     InitBoard( anBoard );
     
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
+	case MOVE_GAMEINFO:
+	    /* no-op */
+          continue;
+	    break;
 	case MOVE_NORMAL:
 	    sprintf( sz, "%d%d: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
@@ -1383,13 +1447,14 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	    strcpy( sz, " Takes" ); /* FIXME beavers? */
 	    break;
 	case MOVE_DROP:
-	    strcpy( sz, " Drops\n" );
+	    strcpy( sz, " Drops" );
 	    anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
 	case MOVE_RESIGN:
 	    /* FIXME how does JF do it? */
 	    break;
 	default:
+	    printf ("%i\n", pmr->mt );
 	    assert( FALSE );
 	}
 
@@ -1403,6 +1468,12 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	    fputc( '\n', pf );
 	} else
 	    fprintf( pf, "%3d) %-28s", ( i >> 1 ) + 1, sz );
+
+        if ( pmr->mt == MOVE_DROP ) {
+          fputc( '\n', pf );
+          if ( ! ( i & 1 ) )
+            fputc( '\n', pf );
+        }
 
 	if( ( n = GameStatus( anBoard ) ) ) {
 	    fprintf( pf, "%sWins %d point%s%s\n\n",
