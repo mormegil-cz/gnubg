@@ -10130,7 +10130,7 @@ static void GtkRelationalAddMatch( gpointer *p, guint n, GtkWidget *pw )
 		(exists == 1 && !GetInputYN(_("Match exists, overwrite?"))))
 		return;
 
-	if (GtkGetEnv(env) == -1)
+	if (!GtkGetEnv(env))
 		return;
 
 	/* Pass in env id and force addition */

@@ -2013,6 +2013,11 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
 
   PushLocale("C");
 
+  if (g->i != 0)
+  {
+      PyErr_SetString(PyExc_StandardError, "First game missing from match");
+	  return 0;
+  }
   assert( g->i == 0 );
 
   /* W,X,0 
