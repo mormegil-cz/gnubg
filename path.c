@@ -1,4 +1,3 @@
-
 /*
  * path.c
  * routines extracted from eval.c
@@ -83,10 +82,12 @@ extern char *PathSearch( const char *szFile, const char *szDir ) {
     if( !( pch = malloc( cch ) ) )
 	return NULL;
 
-    sprintf( pch, "%s/%s", szDir, szFile );
-    if( !access( pch, R_OK ) )
-	return realloc( pch, strlen( pch ) + 1 );
-
+    if( szDir ) {
+	sprintf( pch, "%s/%s", szDir, szFile );
+	if( !access( pch, R_OK ) )
+	    return realloc( pch, strlen( pch ) + 1 );
+    }
+    
     strcpy( pch, szFile );
     if( !access( pch, R_OK ) )
 	return realloc( pch, strlen( pch ) + 1 );

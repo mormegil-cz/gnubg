@@ -1,3 +1,8 @@
+Fri Jan  3 11:57:24 2003  Gary Wong  <gtw@gnu.org>
+
+	* path.c (PathSearch): Don't use szDir if NULL.  (Suggested by
+	Jørn.)
+
 Wed Jan  3 00:15:47 2003  Oystein Johansen <oeysteij@online.no>
 
 	* import.h: Declare ImportTMG
