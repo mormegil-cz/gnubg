@@ -12,6 +12,12 @@ For instructions on how to build gnubg, please read the file `INSTALL'
 and the other sections in this file; for other information, please see
 the GNU Backgammon manual in the `doc' directory.
 
+There is also an tutorial written by Albert Silver available at 
+    http://www.bkgm.com/gnu/AllAboutGNU.html
+
+The tutorial is also available in Italian
+    http://members.xoom.virgilio.it/free_bgammon/allaboutgnu.htm
+
 Current features:
 -----------------
 

@@ -26,6 +26,7 @@ Steve Baedke
 Holger Bochnig
 Chuck Bower
 Nick Bratby
+Renzo Campagna
 Craig Campbell
 John Chuang
 Tristan Colgate
@@ -57,6 +58,7 @@ Corrin Lakeland
 Tim Laursen
 Eli Liang
 Kevin Maguire
+Giulio De Marco
 William Maslen
 Thomas Meyer
 Achim Mueller
