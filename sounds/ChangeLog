@@ -1,0 +1,5 @@
+Wed Sep 11 22:08:42 2002  Gary Wong  <gtw@research.att.com>
+
+	* double.sco, drop.sco, move.sco, roll.sco, take.sco, gnubg.orc: New
+	files.
+
