@@ -139,22 +139,22 @@
 		piecetype=0
 		lighttype=p
 		roundededges=n
-         lightposx=1.100000 lightposy=-0.300000 lightposz=1.500000
+         lightposx=1.100000 lightposy=-0.300000 lightposz=2.300000
          lightambient=50 lightdiffuse=70 lightspecular=100
-         chequers3d0=#F7F7F7;#E5E5E5;#E5E5E5;100;100
+         chequers3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100
          chequers3d1=#0C0C0C;#262626;#E5E5E5;100;100
-         dice3d0=#F7F7F7;#E5E5E5;#E5E5E5;100;100
+         dice3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100
          dice3d1=#0C0C0C;#262626;#E5E5E5;100;100
          dot3d0=#000000;#000000;#000000;100;100
-         dot3d1=#FFFFFF;#FFFFFF;#FFFFFF;100;100
-         cube3d=#FFFFFF;#E5E5E5;#E5E5E5;100;0
+         dot3d1=#FFFFFF;#E5E5E5;#E5E5E5;100;100
+         cube3d=#FFFFFF;#E0E0E0;#E5E5E5;81;0
          cubetext3d=#000000;#000000;#000000;100;100
-         base3d=#FFD872;#BA9351;#825630;61;0
-         points3d0=#BF7200;#B26600;#995E3F;100;100
-         points3d1=#753B00;#7D4400;#9E510C;100;100
-         border3d=#582D00;#662E03;#703D26;71;100
+         base3d=#FFD872;#F9C46C;#FFDB5E;61;0;aboard2.bmp
+         points3d0=#BF7200;#B26600;#995E3F;100;100;aboard.bmp
+         points3d1=#753B00;#7D4400;#9E510C;100;100;aboard.bmp
+         border3d=#3F2400;#4C2603;#703D26;71;100;aboard2.bmp
          hinge3d=#F9E29B;#FFE599;#EACE8E;100;0
-         numbers3d=#FFFFFF;#FFFFFF;#FFFFFF;100;100
+         numbers3d=#FFFFFF;#FFFFFF;#E5E5E5;100;100
          background3d=#FFFEC4;#FFFFFF;#FFFFFF;100;0
        </design>
 

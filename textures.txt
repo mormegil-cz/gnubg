@@ -39,3 +39,11 @@ hinge.bmp
 bmp
 Test hinge
 Hinge
+aboard.bmp
+bmp
+alb b1
+general
+aboard2.bmp
+bmp
+alb b2
+general
