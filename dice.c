@@ -58,8 +58,6 @@
 #include <errno.h>
 #include <sys/types.h>
 
-#define closesocket close
-
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <netinet/in.h>

@@ -110,6 +110,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "onechequer.h"
 #include "relational.h"
 #include "credits.h"
+#include "external.h"
 
 #ifdef WIN32
 #ifdef HAVE_SOCKETS

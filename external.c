@@ -30,7 +30,6 @@
 #endif /* #if HAVE_UNISTD_H */
 
 #ifndef WIN32
-#define closesocket close
 
 #include <assert.h>
 #include <errno.h>

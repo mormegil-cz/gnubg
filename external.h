@@ -26,6 +26,8 @@
 
 #ifndef WIN32
 
+#define closesocket close
+
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
 #include <sys/socket.h>
