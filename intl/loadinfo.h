@@ -2,25 +2,38 @@
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1996.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU Library General Public License as published
+   by the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU Library General Public
+   License along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
 #ifndef _LOADINFO_H
 #define _LOADINFO_H	1
 
+/* Declarations of locale dependent catalog lookup functions.
+   Implemented in
+
+     localealias.c    Possibly replace a locale name by another.
+     explodename.c    Split a locale name into its various fields.
+     l10nflist.c      Generate a list of filenames of possible message catalogs.
+     finddomain.c     Find and open the relevant message catalogs.
+
+   The main function _nl_find_domain() in finddomain.c is declared
+   in gettextP.h.
+ */
+
 #ifndef PARAMS
-# if __STDC__
+# if __STDC__ || defined __GNUC__ || defined __SUNPRO_C || defined __cplusplus || __PROTOTYPES
 #  define PARAMS(args) args
 # else
 #  define PARAMS(args) ()

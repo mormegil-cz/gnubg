@@ -1,20 +1,21 @@
 /* Header describing internals of libintl library.
-   Copyright (C) 1995-1999, 2000, 2001 Free Software Foundation, Inc.
+   Copyright (C) 1995-1999, 2000-2002 Free Software Foundation, Inc.
    Written by Ulrich Drepper <drepper@cygnus.com>, 1995.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU Library General Public License as published
+   by the Free Software Foundation; either version 2, or (at your option)
    any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Library General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+   You should have received a copy of the GNU Library General Public
+   License along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+   USA.  */
 
 #ifndef _GETTEXTP_H
 #define _GETTEXTP_H
@@ -31,12 +32,12 @@
 
 #include "loadinfo.h"
 
-#include "gettext.h"		/* Get nls_uint32.  */
+#include "gmo.h"		/* Get nls_uint32.  */
 
 /* @@ end of prolog @@ */
 
 #ifndef PARAMS
-# if __STDC__
+# if __STDC__ || defined __GNUC__ || defined __SUNPRO_C || defined __cplusplus || __PROTOTYPES
 #  define PARAMS(args) args
 # else
 #  define PARAMS(args) ()
@@ -45,6 +46,10 @@
 
 #ifndef internal_function
 # define internal_function
+#endif
+
+#ifndef attribute_hidden
+# define attribute_hidden
 #endif
 
 /* Tell the compiler when a conditional or integer expression is
@@ -69,51 +74,6 @@ SWAP (i)
   return (i << 24) | ((i & 0xff00) << 8) | ((i >> 8) & 0xff00) | (i >> 24);
 }
 #endif
-
-
-/* This is the representation of the expressions to determine the
-   plural form.  */
-struct expression
-{
-  int nargs;			/* Number of arguments.  */
-  enum operator
-  {
-    /* Without arguments:  */
-    var,			/* The variable "n".  */
-    num,			/* Decimal number.  */
-    /* Unary operators:  */
-    lnot,			/* Logical NOT.  */
-    /* Binary operators:  */
-    mult,			/* Multiplication.  */
-    divide,			/* Division.  */
-    module,			/* Module operation.  */
-    plus,			/* Addition.  */
-    minus,			/* Subtraction.  */
-    less_than,			/* Comparison.  */
-    greater_than,		/* Comparison.  */
-    less_or_equal,		/* Comparison.  */
-    greater_or_equal,		/* Comparison.  */
-    equal,			/* Comparision for equality.  */
-    not_equal,			/* Comparision for inequality.  */
-    land,			/* Logical AND.  */
-    lor,			/* Logical OR.  */
-    /* Ternary operators:  */
-    qmop			/* Question mark operator.  */
-  } operation;
-  union
-  {
-    unsigned long int num;	/* Number value for `num'.  */
-    struct expression *args[3];	/* Up to three arguments.  */
-  } val;
-};
-
-/* This is the data structure to pass information to the parser and get
-   the result in a thread-safe way.  */
-struct parse_args
-{
-  const char *cp;
-  struct expression *res;
-};
 
 
 /* The representation of an opened message catalog.  */
@@ -165,6 +125,10 @@ struct binding
    become invalid.
    This variable is part of the external ABI of the GNU libintl.  */
 extern int _nl_msg_cat_cntr;
+
+#ifndef _LIBC
+const char *_nl_locale_name PARAMS ((int category, const char *categoryname));
+#endif
 
 struct loaded_l10nfile *_nl_find_domain PARAMS ((const char *__dirname,
 						 char *__locale,
@@ -234,16 +198,6 @@ extern char *bindtextdomain__ PARAMS ((const char *__domainname,
 				       const char *__dirname));
 extern char *bind_textdomain_codeset__ PARAMS ((const char *__domainname,
 						const char *__codeset));
-#endif
-
-#ifdef _LIBC
-extern void __gettext_free_exp PARAMS ((struct expression *exp))
-     internal_function;
-extern int __gettextparse PARAMS ((void *arg));
-#else
-extern void gettext_free_exp__ PARAMS ((struct expression *exp))
-     internal_function;
-extern int gettextparse__ PARAMS ((void *arg));
 #endif
 
 /* @@ begin of epilog @@ */
