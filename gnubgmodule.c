@@ -1978,7 +1978,7 @@ PythonInitialise( const char *argv0, const char *szDir ) {
   FILE *pf;
   char *pch;
   char scriptDir[BIG_PATH];
-  strcpy(scriptDir, szDir);
+  strcpy( scriptDir, ( szDir && *szDir ) ? szDir : "." );
   strcat(scriptDir, "/scripts");
 
   Py_SetProgramName( (char *) argv0 );

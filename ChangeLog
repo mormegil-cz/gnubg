@@ -1,3 +1,8 @@
+Mon Mar 15 07:49:53 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubgmodule.c (PythonInitialise): fix bug for szDir==NULL
+	(reported by Joseph Heled)
+
 Sun Mar 14 08:55:39 2004  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* gtkcolour.h: Change broken type for GtkColourPicker::func and
