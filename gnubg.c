@@ -3029,8 +3029,8 @@ extern int GetMatchStateCubeInfo( cubeinfo* pci, const matchstate* pms ) {
 #if USE_TIMECONTROL
 
 static void
-DisplayTimeAnalysis( const moverecord *pmr, const matchstate *pms ) {
-
+DisplayTimeAnalysis( const moverecord *pmr, const matchstate *pms )
+{
   cubeinfo ci;
   const xmovetime *pmt = &pmr->t;
 
@@ -3040,20 +3040,22 @@ DisplayTimeAnalysis( const moverecord *pmr, const matchstate *pms ) {
 
   GetMatchStateCubeInfo ( &ci, pms );
 
-  outputf( _("Time penalty: %s loses %d points\n"), 
-           ap[ pmr->fPlayer ].szName, pmt->nPoints );
+  outputf( ngettext( "Time penalty: %s loses %d point\n",
+		     "Time penalty: %s loses %d points\n",
+		     pmt->nPoints ),
+	   ap[ pmr->fPlayer ].szName, pmt->nPoints );
 
-  outputf( _("%-30.30s %s\n"), 
+  outputf( _("%-30.30s %s\n"),
            _("Equity before time penalty:"),
            OutputMWC( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], 
                       &ci, TRUE ) );
 
-  outputf( _("%-30.30s %s\n"), 
+  outputf( _("%-30.30s %s\n"),
            _("Equity after time penalty:"),
            OutputMWC( pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], 
                       &ci, TRUE ) );
 
-  outputf( _("%-30.30s %s\n"), 
+  outputf( _("%-30.30s %s\n"),
            _("Lose from penalty:"),
            OutputMWCDiff( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] , 
                           pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], 
@@ -3161,8 +3163,8 @@ static void DisplayAnalysis( moverecord *pmr ) {
     }
 }
 
-extern void ShowBoard( void ) {
-
+extern void ShowBoard( void )
+{
     char szBoard[ 2048 ];
     char sz[ 32 ], szCube[ 32 ], szPlayer0[ MAX_NAME_LEN + 3 ], szPlayer1[ MAX_NAME_LEN + 3 ],
 	szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
@@ -3249,15 +3251,13 @@ extern void ShowBoard( void ) {
 	apch[ 0 ] = szPlayer0;
 	apch[ 6 ] = szPlayer1;
 
-        if ( ms.anScore[ 0 ] == 1 )
-          sprintf( apch[ 1 ] = szScore0, _("%d point"), ms.anScore[ 0 ] );
-        else
-          sprintf( apch[ 1 ] = szScore0, _("%d points"), ms.anScore[ 0 ] );
+	sprintf( apch[ 1 ] = szScore0,
+		 ngettext( "%d point", "%d points", ms.anScore[ 0 ] ),
+		 ms.anScore[ 0 ] );
 
-        if ( ms.anScore[ 1 ] == 1 )
-          sprintf( apch[ 5 ] = szScore1, _("%d point"), ms.anScore[ 1 ] );
-        else
-          sprintf( apch[ 5 ] = szScore1, _("%d points"), ms.anScore[ 1 ] );
+	sprintf( apch[ 5 ] = szScore1,
+		 ngettext( "%d point", "%d points", ms.anScore[ 1 ] ),
+		 ms.anScore[ 1 ] );
 
 	if( ms.fDoubled ) {
 	    apch[ ms.fTurn ? 4 : 2 ] = szCube;
@@ -5058,15 +5058,13 @@ extern void CommandCopy (char *sz)
   aps[0] = szPlayer0;
   aps[6] = szPlayer1;
 
-  if (ms.anScore[0] == 1)
-    sprintf (aps[1] = szScore0, _("%d point"), ms.anScore[0]);
-  else
-    sprintf (aps[1] = szScore0, _("%d points"), ms.anScore[0]);
+  sprintf (aps[1] = szScore0,
+	   ngettext("%d point", "%d points", ms.anScore[0]),
+	   ms.anScore[0]);
 
-  if (ms.anScore[1] == 1)
-    sprintf (aps[5] = szScore1, _("%d point"), ms.anScore[1]);
-  else
-    sprintf (aps[5] = szScore1, _("%d points"), ms.anScore[1]);
+  sprintf (aps[5] = szScore1,
+	   ngettext("%d point", "%d points", ms.anScore[1]),
+	   ms.anScore[1]);
 
   if (ms.fDoubled)
     {

@@ -1733,13 +1733,13 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
  *
  */
 
-static void 
+static void
 HTMLPrologue ( FILE *pf, const matchstate *pms,
-               const int iGame,
-               char *aszLinks[ 4 ],
-               const htmlexporttype het,
-               const htmlexportcss hecss ) {
-
+	       const int iGame,
+	       char *aszLinks[ 4 ],
+	       const htmlexporttype het,
+	       const htmlexportcss hecss )
+{
   char szTitle[ 100 ];
 
   int i;
@@ -1747,21 +1747,22 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
 
   /* DTD */
 
-  sprintf( szTitle, pms->cGames == 1 ? 
-           _("The score (after %d game) is: %s %d, %s %d") :
-           _("The score (after %d games) is: %s %d, %s %d"),
-           pms->cGames, 
-           ap[ 0 ].szName, pms->anScore[ 0 ],
-           ap[ 1 ].szName, pms->anScore[ 1 ] );
+  sprintf( szTitle,
+	   ngettext( "The score (after %d game) is: %s %d, %s %d",
+		     "The score (after %d games) is: %s %d, %s %d",
+		     pms->cGames),
+	     pms->cGames,
+	   ap[ 0 ].szName, pms->anScore[ 0 ],
+	   ap[ 1 ].szName, pms->anScore[ 1 ] );
 
-  if ( pms->nMatchTo > 0 ) 
+  if ( pms->nMatchTo > 0 )
     sprintf( strchr( szTitle, 0 ),
-             pms->nMatchTo == 1 ?
-             _(" (match to %d point%s)") :
-             _(" (match to %d points%s)"),
-             pms->nMatchTo,
-             pms->fCrawford ? 
-             _(", Crawford game") : ( pms->fPostCrawford ?
+	     ngettext( " (match to %d point%s)",
+		       " (match to %d points%s)",
+		       pms->nMatchTo ),
+	     pms->nMatchTo,
+	     pms->fCrawford ?
+	     _(", Crawford game") : ( pms->fPostCrawford ?
 					 _(", post-Crawford play") : ""));
 
   fprintf ( pf,
@@ -2617,7 +2618,7 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         float *ar = pmr->ml.amMoves[ i ].arEvalMove;
 
-        /* percentages */
+	/* percentages */
 
         if ( i == pmr->n.iMove )
           fprintf ( pf, "<tr %s>\n", 
@@ -3267,12 +3268,12 @@ HTMLDumpPlayerRecords ( FILE *pf, const htmlexportcss hecss ) {
  */
 
 static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
-                             const char *szExtension, 
-                             const htmlexporttype het,
-                             const htmlexportcss hecss,
-                             const int iGame, const int fLastGame,
-                             char *aszLinks[ 4 ] ) {
-
+			     const char *szExtension,
+			     const htmlexporttype het,
+			     const htmlexportcss hecss,
+			     const int iGame, const int fLastGame,
+			     char *aszLinks[ 4 ] )
+{
     list *pl;
     moverecord *pmr;
     matchstate msExport;
@@ -3369,13 +3370,13 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
       /* print game result */
 
-      fprintf ( pf, 
-                ( pmgi->nPoints == 1 ) ?
-                _("<p %s>%s wins %d point</p>\n") :
-                _("<p %s>%s wins %d points</p>\n"),
-                GetStyle ( CLASS_RESULT, hecss ),
-                ap[ pmgi->fWinner ].szName, 
-                pmgi->nPoints );
+      fprintf ( pf,
+		ngettext( "<p %s>%s wins %d point</p>\n",
+			  "<p %s>%s wins %d points</p>\n",
+			  pmgi->nPoints ),
+		GetStyle ( CLASS_RESULT, hecss ),
+		ap[ pmgi->fWinner ].szName, 
+		pmgi->nPoints );
     }
 
     if ( psc ) {
@@ -3764,8 +3765,8 @@ extern void CommandExportPositionHtml( char *sz ) {
 
 
 static void
-ExportPositionGammOnLine( FILE *pf ) {
-
+ExportPositionGammOnLine( FILE *pf )
+{
     int fHistory;
     moverecord *pmr = getCurrentMoveRecord ( &fHistory );
     int iMove;
@@ -3774,23 +3775,23 @@ ExportPositionGammOnLine( FILE *pf ) {
 
     fputs( "<strong>", pf );
 
-    fprintf( pf, 
-             ms.cGames == 1 ? 
-             _("The score (after %d game) is: %s %d, %s %d") :
-             _("The score (after %d games) is: %s %d, %s %d"),
-             ms.cGames, 
-             ap[ 0 ].szName, ms.anScore[ 0 ],
-             ap[ 1 ].szName, ms.anScore[ 1 ] );
+    fprintf( pf,
+	     ngettext( "The score (after %d game) is: %s %d, %s %d",
+		       "The score (after %d games) is: %s %d, %s %d",
+		       ms.cGames ),
+	     ms.cGames,
+	     ap[ 0 ].szName, ms.anScore[ 0 ],
+	     ap[ 1 ].szName, ms.anScore[ 1 ] );
 
-    if ( ms.nMatchTo > 0 ) 
+    if ( ms.nMatchTo > 0 )
       fprintf( pf,
-               ms.nMatchTo == 1 ?
-               _(" (match to %d point%s)") :
-               _(" (match to %d points%s)"),
-               ms.nMatchTo,
-               ms.fCrawford ? 
-               _(", Crawford game") : ( ms.fPostCrawford ?
-                                        _(", post-Crawford play") : ""));
+	       ngettext( " (match to %d point%s)",
+			 " (match to %d points%s)",
+			 ms.nMatchTo ),
+	       ms.nMatchTo,
+	       ms.fCrawford ?
+	       _(", Crawford game") : ( ms.fPostCrawford ?
+					_(", post-Crawford play") : ""));
     fputs( "</strong>\n", pf );
 
     fputs ( "\n<!-- End Score -->\n\n", pf );

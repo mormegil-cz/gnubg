@@ -1321,28 +1321,30 @@ SkillMenu(skilltype stSelect, char* szAnno)
  */
 
 static GtkWidget *
-TimeAnalysis( const moverecord *pmr, const matchstate *pms ) {
-
+TimeAnalysis( const moverecord *pmr, const matchstate *pms )
+{
   cubeinfo ci;
   GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
   GtkWidget *pwLabel;
 
   char *sz;
 
-  if ( pmr->t.es.et == EVAL_NONE ) 
+  if ( pmr->t.es.et == EVAL_NONE )
     return NULL;
 
   GetMatchStateCubeInfo ( &ci, pms );
 
-  sz = g_strdup_printf( _("Time penalty: %s loses %d points"), 
-                        ap[ pmr->fPlayer ].szName, pmr->t.nPoints );
+  sz = g_strdup_printf( ngettext("Time penalty: %s loses %d point",
+				 "Time penalty: %s loses %d points",
+				 pmr->t.nPoints),
+			ap[ pmr->fPlayer ].szName, pmr->t.nPoints );
   pwLabel = gtk_label_new ( sz );
   gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
   gtk_table_attach ( GTK_TABLE ( pwTable ),
-                     pwLabel,
-                     0, 2, 0, 1,
-                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
-                     8, 2 );
+		     pwLabel,
+		     0, 2, 0, 1,
+		     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+		     8, 2 );
 
   g_free( sz );
 
@@ -7261,14 +7263,14 @@ extern void
 GTKProgressValue ( int iValue ) {
 
     monitor m;
-        
+
     gtk_progress_set_value( GTK_PROGRESS ( pwProgress ), iValue );
 
     SuspendInput( &m );
-    
+
     while( gtk_events_pending() )
 	gtk_main_iteration();
-    
+
     ResumeInput( &m );
 }
 
@@ -7323,10 +7325,11 @@ extern void GTKShowScoreSheet( void )
 
 	sprintf(title, _("Score Sheet - "));
 	if ( ms.nMatchTo > 0 )
-		sprintf(title + strlen(title), ms.nMatchTo == 1 ? 
-	         _("Match to %d point") :
-	         _("Match to %d points"),
-                 ms.nMatchTo);
+		sprintf(title + strlen(title),
+			ngettext("Match to %d point",
+				 "Match to %d points",
+				 ms.nMatchTo),
+			ms.nMatchTo);
 	else
 		strcat(title, _("Money Session"));
 

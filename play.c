@@ -491,24 +491,26 @@ printf("ApplyMoveRecord(%d, %d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%
 	    pmgi->nPoints = pmr->t.nPoints;
 	    pmgi->fWinner = !pmr->fPlayer;
 	    pmgi->fResigned = FALSE;
-	
-            playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ? 
-                    SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
 
-	    outputf(1 == pmgi->nPoints ? _("%s is out of time\n%s wins %d point and the match.\n")
-		: _("%s is out of time\n%s wins %d points and the match.\n"),
+	    playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ?
+		    SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
+
+	    outputf( ngettext( "%s is out of time\n%s wins %d point and the match.\n",
+			       "%s is out of time\n%s wins %d points and the match.\n",
+			    pmgi->nPoints),
 		ap[ ! pmgi->fWinner ].szName,
 		ap[ pmgi->fWinner ].szName, pmgi->nPoints);
 	    outputx();
 
-    	    fInterrupt=1;
+	    fInterrupt=1;
 	}
 	else
 	{
-            playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ? 
-                    SOUND_HUMAN_TIMEOUT: SOUND_BOT_TIMEOUT);
-	    outputf(1 == pmgi->nPoints ? _("%s is out of time, %s wins %d point.\n")
-		: _("%s is out of time,  %s wins %d points.\n"),
+	    playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ?
+		    SOUND_HUMAN_TIMEOUT: SOUND_BOT_TIMEOUT);
+	    outputf( ngettext( "%s is out of time, %s wins %d point.\n",
+			       "%s is out of time,  %s wins %d points.\n",
+			       pmgi->nPoints ),
 		ap[ pmr->fPlayer].szName,
 		ap[ !pmr->fPlayer].szName, pmr->t.nPoints);
 	    outputx();
@@ -1878,23 +1880,24 @@ extern int NextTurn( int fPlayNext ) {
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
-    
+
     if( ( n = GameStatus( ms.anBoard, ms.bgv ) ) ||
 	( ms.gs == GAME_DROP && ( ( n = 1 ) ) ) ||
 	( ms.gs == GAME_RESIGNED && ( ( n = ms.fResigned ) ) ) ) {
-        moverecord *pmr = (moverecord *) plGame->plNext->p;
+	moverecord *pmr = (moverecord *) plGame->plNext->p;
 	xmovegameinfo *pmgi = &pmr->g;
-	
+
 	if( ms.fJacoby && ms.fCubeOwner == -1 && !ms.nMatchTo )
 	    /* gammons do not count on a centred cube during money
 	       sessions under the Jacoby rule */
 	    n = 1;
-	
-        playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ? 
-                    SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
 
-	outputf((pmgi->nPoints == 1 ? _("%s wins a %s and %d point.\n")
-		 : _("%s wins a %s and %d points.\n")),
+	playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ?
+		    SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
+
+	outputf( ngettext( "%s wins a %s and %d point.\n",
+			   "%s wins a %s and %d points.\n",
+			   pmgi->nPoints ),
 		ap[ pmgi->fWinner ].szName,
 		gettext ( aszGameResult[ n - 1 ] ), pmgi->nPoints);
 

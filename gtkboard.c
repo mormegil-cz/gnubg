@@ -574,7 +574,9 @@ ReturnHits( int anBoard[ 2 ][ 25 ] ) {
       for ( j = 0; j <= i; ++j )
         n += ( aiDiceHit[ i ][ j ] > 0 ) * ( 2 - ( i == j ) );
 
-    sprintf( strchr( pch, 0 ), _("(no hit: %d rolls)"), 36 - n );
+    sprintf( strchr( pch, 0 ),
+	     ngettext("(no hit: %d roll)", "(no hit: %d rolls)", (36 - n) ),
+	     36 - n );
     return pch;
   }
 

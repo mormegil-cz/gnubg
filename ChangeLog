@@ -1,3 +1,13 @@
+Sun Jul 11 07:17:35 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gnubg.c (DisplayTimeAnalysis, ShowBoard, CommandCopy): Use
+	ngettext.  And tabify.
+	* gtkboard.c (ReturnHits): Ditto.
+	* gtkgame.c (TimeAnalysis, GTKShowScoreSheet): Ditto.
+	* html.c (HTMLPrologue, ExportGameHTML): Ditto.
+	* html.c (ExportPositionGammOnLine): Ditto.
+	* play.c (ApplyMoveRecord): Ditto.
+
 Sat Jul 10 14:35:26 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gtkoptions.c (aaszLang): Use ja_JP instead of ja_JA.  Added
