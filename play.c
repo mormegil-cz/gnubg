@@ -519,7 +519,7 @@ extern void CommandMove( char *sz ) {
 	
 	for( i = 0; i < c; i++ ) {
 	    anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
-	    if( an[ ( i << 1 ) | 1 ] >= 0 ) {
+	    if( an[ ( i << 1 ) | 1 ] > 0 ) {
 		anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
 		
 		anBoardNew[ 0 ][ 24 ] +=
