@@ -1,3 +1,12 @@
+Wed Jul 17 14:40:59 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (GTKCubeHint): New function (combining the previously
+	identical GTKDoubleHint and GTKTakeHint).  Give the focus to the OK
+	button.
+	* gtkgame.c (DialogArea): Allow DA_OK parameter.
+
+	* gtkgame.c (GTKRolloutDone): Reset fInterrupt.
+
 Wed Jul 17 13:21:16 2002  Gary Wong  <gtw@gnu.org>
 
 	* play.c (autoAnalyseMove): Show progress bar during automatic

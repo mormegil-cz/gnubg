@@ -2459,6 +2459,13 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
 	g_list_free( pl );
 	return pwChild;
 
+    case DA_OK:
+	pl = gtk_container_children( GTK_CONTAINER(
+					 DialogArea( pw, DA_BUTTONS ) ) );
+	pwChild = pl->data;
+	g_list_free( pl );
+	return pwChild;
+	
     default:
 	abort();
     }
@@ -4512,10 +4519,10 @@ static void HintCubeRollout( GtkWidget *pw, void *p ) {
     UserCommand( "rollout =cube" );
 }
 
-extern void GTKDoubleHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                           float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                           const evalsetup *pes ) {
-
+extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+			  const evalsetup *pes ) {
+    
     evalsetup es;
 
     GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL,
@@ -4539,50 +4546,15 @@ extern void GTKDoubleHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
- 
-    gtk_widget_show_all( pwDialog );
 
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
-}
-
-extern void GTKTakeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                         float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                         const evalsetup *pes ) {
-
-    evalsetup es;
-
-    GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL,
-					NULL ),
-      *pw, *pwRollout = gtk_button_new_with_label( _("Rollout") );
-
-    memcpy ( &es, pes, sizeof ( evalsetup ) );
-    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, NULL, &es, MOVE_NORMAL );
-
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-                       pw );
-
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),
-		       pwRollout );
-    gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
-			GTK_SIGNAL_FUNC( HintCubeRollout ), NULL );
+    gtk_widget_grab_focus( DialogArea( pwDialog, DA_OK ) );
     
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
- 
     gtk_widget_show_all( pwDialog );
 
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
-
 }
-
-
 
 /*
  * Give hints for resignation
@@ -4740,8 +4712,7 @@ static void DestroyHint( gpointer p ) {
 
 extern void GTKHint( movelist *pmlOrig ) {
 
-    GtkWidget  *psw = gtk_scrolled_window_new( NULL, NULL ),
-	*pwButtons,
+    GtkWidget *pwButtons,
 	*pwMove = gtk_button_new_with_label( _("Move") ),
 #ifdef WIN32
   	*pwCopy = gtk_button_new_with_label( _("Copy") ),
@@ -4749,7 +4720,6 @@ extern void GTKHint( movelist *pmlOrig ) {
   	*pwCopy = gtk_button_new_with_label( _("Dump") ),
 #endif
 	*pwMoves;
-    GtkWidget *pwHBox;
     hintdata *phd;
     movelist *pml;
     
@@ -5647,6 +5617,8 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
 
 extern void GTKRolloutDone( void ) {
 
+    fInterrupt = FALSE;
+    
     /* if they cancelled the rollout early, pwRolloutDialog has already been
        destroyed */
     if( !pwRolloutDialog )

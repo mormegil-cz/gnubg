@@ -31,7 +31,8 @@ extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu);
 
 typedef enum _dialogarea {
     DA_MAIN,
-    DA_BUTTONS
+    DA_BUTTONS,
+    DA_OK
 } dialogarea;
 
 extern GtkWidget *pwMain, *pwMenuBar;
@@ -83,13 +84,9 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 				char *szTitle );
 extern void GTKEval( char *szOutput );
 extern void GTKHint( movelist *pml );
-extern void GTKDoubleHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                           float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                           const evalsetup *pes );
-
-extern void GTKTakeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                           float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
-                           const evalsetup *pes );
+extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+			 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
+			 const evalsetup *pes );
 
 extern void
 GTKRollout( int c, char asz[][ 40 ], int cGames,

@@ -2564,7 +2564,7 @@ extern void CommandHint( char *sz ) {
       
 #if USE_GTK
     if ( fX ) {
-      GTKDoubleHint( sc.aarOutput, sc.aarStdDev, &sc.es );
+      GTKCubeHint( sc.aarOutput, sc.aarStdDev, &sc.es );
       return;
     }
 #endif
@@ -2660,7 +2660,7 @@ extern void CommandHint( char *sz ) {
 	
 #if USE_GTK
 	if ( fX ) {
-          GTKTakeHint( aarOutput, aarStdDev, &esEvalCube );
+          GTKCubeHint( aarOutput, aarStdDev, &esEvalCube );
 	    return;
 	}
 #endif
