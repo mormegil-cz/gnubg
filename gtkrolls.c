@@ -284,6 +284,7 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   GtkWidget *pwDialog = GTKCreateDialog( _("Distribution of rolls"),
                                       DT_INFO, NULL, NULL );
   GtkWidget *pw, *vbox, *hbox;
+  GtkAdjustment *padj;
 
   rollswidget *prw = g_malloc ( sizeof ( rollswidget ) );
 
@@ -323,7 +324,9 @@ GTKShowRolls ( const gint nDepth, evalcontext *pec, matchstate *pms ) {
   gtk_box_pack_start ( GTK_BOX ( hbox ), gtk_label_new ( _("Depth") ), 
                        FALSE, FALSE, 4 );
 
-  pw = gtk_hscale_new_with_range( 1, 5, 1 );
+  /* Set page size to 1 */
+  padj = GTK_ADJUSTMENT(gtk_adjustment_new(1, 1, 5, 1, 1, 0));
+  pw = gtk_hscale_new( padj );
   gtk_widget_set_size_request( pw, 100, -1 );
   gtk_box_pack_start ( GTK_BOX ( hbox ), pw, FALSE, FALSE, 4 );
   gtk_scale_set_digits( GTK_SCALE( pw ), 0 );
