@@ -88,6 +88,7 @@ extern void GTKAllowStdin( void );
 extern void GTKDisallowStdin( void );
 extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle );
+extern void GTKUpdateScores();
 
 extern GtkWidget *GTKCreateDialog( const char *szTitle, const dialogtype dt, 
                                    GtkSignalFunc pf, void *p );

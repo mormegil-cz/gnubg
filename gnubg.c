@@ -135,6 +135,10 @@ extwindow ewnd;
 event evNextTurn;
 #endif
 
+#if USE_TIMECONTROL
+#include "timecontrol.h"
+#endif
+
 #ifdef WIN32
 #include<windows.h>
 #endif
@@ -4323,6 +4327,9 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	case MOVE_SETDICE:
 	    /* ignore */
 	    break;
+	case MOVE_TIME:
+	    /* ignore */
+	    break;
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
 	case MOVE_SETCUBEPOS:
@@ -7898,6 +7905,11 @@ swapGame ( list *plGame ) {
       break;
 
     case MOVE_SETCUBEVAL:
+
+      /* no-op */
+      break;
+
+	case MOVE_TIME:
 
       /* no-op */
       break;

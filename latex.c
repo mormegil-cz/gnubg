@@ -504,6 +504,10 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	case MOVE_SETDICE:
 	    /* ignore */
 	    break;
+
+	case MOVE_TIME:
+		/* ignore */
+		break;
 	    
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:

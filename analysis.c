@@ -1039,6 +1039,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_SETBOARD:	  
     case MOVE_SETCUBEVAL:
     case MOVE_SETCUBEPOS:
+    case MOVE_TIME:
 	break;
     }
   

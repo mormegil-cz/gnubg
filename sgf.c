@@ -2111,7 +2111,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 #if USE_TIMECONTROL
     fprintf( pf, "MI[length:%d][game:%d][ws:%d][bs:%d][wtime:%d][btime:%d][wtimeouts:%d][btimeouts:%d]", pmr->g.nMatch,
              pmr->g.i, pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ],
-	     pmr->g.tl[0].tv_sec, pmr->g.tl[1].tv_sec, pmr->g.nTimeouts[0], pmr->g.nTimeouts[1]);
+	     (int)pmr->g.tl[0].tv_sec, (int)pmr->g.tl[1].tv_sec, pmr->g.nTimeouts[0], pmr->g.nTimeouts[1]);
 #else
     fprintf( pf, "MI[length:%d][game:%d][ws:%d][bs:%d]", pmr->g.nMatch,
              pmr->g.i, pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ] );
@@ -2183,7 +2183,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    putc( ']', pf );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", pmr->n.tl[0].tv_sec, pmr->n.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->n.tl[0].tv_sec, (int)pmr->n.tl[1].tv_sec);
 #endif
 	    if( pmr->n.esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
@@ -2205,7 +2205,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    fprintf( pf, "\n;%c[double]", pmr->d.fPlayer ? 'B' : 'W' );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", pmr->d.tl[0].tv_sec, pmr->d.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->d.tl[0].tv_sec, (int)pmr->d.tl[1].tv_sec);
 #endif
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
@@ -2221,7 +2221,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    fprintf( pf, "\n;%c[take]", pmr->d.fPlayer ? 'B' : 'W' );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", pmr->d.tl[0].tv_sec, pmr->d.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->d.tl[0].tv_sec, (int)pmr->d.tl[1].tv_sec);
 #endif
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
@@ -2237,7 +2237,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    fprintf( pf, "\n;%c[drop]", pmr->d.fPlayer ? 'B' : 'W' );
 
 #if USE_TIMECONTROL
-	    fprintf( pf, "WL[%d]BL[%d]", pmr->d.tl[0].tv_sec, pmr->d.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->d.tl[0].tv_sec, (int)pmr->d.tl[1].tv_sec);
 #endif
 	    if( pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE )
 		WriteDoubleAnalysis( pf, 
@@ -2300,7 +2300,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	case MOVE_TIME:
 	    fprintf( pf, "\n;%cX[%d]",  ! pmr->sd.fPlayer ? 'B' : 'W',
 		pmr->t.nPoints);
-	    fprintf( pf, "WL[%d]BL[%d]", pmr->t.tl[0].tv_sec, pmr->t.tl[1].tv_sec);
+	    fprintf( pf, "WL[%d]BL[%d]", (int)pmr->t.tl[0].tv_sec, (int)pmr->t.tl[1].tv_sec);
 	    break;
 #endif
 

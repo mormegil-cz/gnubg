@@ -1225,6 +1225,10 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	    /* ignore */
 	    break;
 	    
+	case MOVE_TIME:
+		/* ignore */
+		break;
+
 	case MOVE_SETBOARD:
 	case MOVE_SETCUBEVAL:
 	case MOVE_SETCUBEPOS:

@@ -3152,7 +3152,7 @@ extern void CommandNewMatch( char *sz ) {
     InitGameClock(&ms.gc, &tc, 2*ms.nMatchTo);
 #if USE_GUI
 #if USE_GTK
-	nClockTimeout = gtk_timeout_add(314 , UpdateClockNotify, 0 );
+	nClockTimeout = gtk_timeout_add(314 , (GtkFunction)UpdateClockNotify, 0 );
 #else
 	/* EventPending( &evNextTurn, TRUE );    */ assert (0);
 #endif
@@ -3200,7 +3200,7 @@ extern void CommandNewSession( char *sz ) {
     InitGameClock(&ms.gc, &tc, 0);
 #if USE_GUI
 #if USE_GTK
-	nClockTimeout = gtk_timeout_add( 314 , UpdateClockNotify, 0 );
+	nClockTimeout = gtk_timeout_add( 314 , (GtkFunction)UpdateClockNotify, 0 );
 #else
 	/* EventPending( &evNextTurn, TRUE );    */ assert (0);
 #endif

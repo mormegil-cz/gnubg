@@ -646,6 +646,9 @@ TextPrintComment ( FILE *pf, const moverecord *pmr ) {
   case MOVE_SETCUBEPOS:
     sz = pmr->scp.sz;
     break;
+  case MOVE_TIME:
+	  /* ignore */
+	  break;
 
   }
 
