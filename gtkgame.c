@@ -904,8 +904,223 @@ UpdateMoveList ( const hintdata *phd ) {
                                     pml->amMoves[ i ].anMove ) );
   }
 
+  /* update storedmoves global struct */
+
+  UpdateStoredMoves ( pml, &ms );
 
 }
+
+
+static void 
+MoveListRollout( GtkWidget *pw, hintdata *phd ) {
+
+
+  GList *pl;
+  GtkWidget *pwMoves = phd->pw;
+  cubeinfo ci;
+#if HAVE_ALLOCA
+  char ( *asz )[ 40 ];
+#else
+  char asz[ 10 ][ 40 ];
+#endif
+  int c;
+  int i;
+
+  if ( !  GTK_CLIST( pwMoves )->selection )
+    return;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+  
+  for(  c = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
+    c++;
+
+  /* setup rollout dialog */
+
+#if HAVE_ALLOCA
+    asz = alloca( 40 * c );
+#else
+    if( c > 10 )
+	c = 10;
+#endif
+
+
+  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
+       pl = pl->next, i++ ) {
+
+    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
+
+    FormatMove ( asz[ i ], ms.anBoard, m->anMove );
+
+  }
+
+#if USE_GTK
+  if( fX )
+    GTKRollout( c, asz, rcRollout.nTrials, NULL ); 
+#endif
+
+  ProgressStartValue( _("Rolling out positions; position:"), c );
+
+  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
+       pl = pl->next, i++ ) {
+
+    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
+
+    GTKRolloutRow ( i );
+
+    if ( ScoreMoveRollout ( m, &ci, &rcRollout ) < 0 ) {
+      GTKRolloutDone ();
+      ProgressEnd ();
+      return;
+    }
+    
+    ProgressValueAdd ( 1 );
+
+    /* Calling RefreshMoveList here requires some extra work, as
+       it may reorder moves */
+
+    UpdateMoveList ( phd );
+
+  }
+
+  GTKRolloutDone ();
+
+  gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
+
+  RefreshMoveList ( phd->pml );
+
+  UpdateMoveList ( phd );
+
+  ProgressEnd ();
+
+}
+
+
+static void
+MoveListMWC ( GtkWidget *pw, hintdata *phd ) {
+
+  char sz[ 80 ];
+
+  sprintf ( sz, "set output mwc %s", fOutputMWC ? "off" : "on" );
+
+  UserCommand ( sz );
+
+  UpdateMoveList ( phd );
+
+}
+
+static void
+MoveListEval ( GtkWidget *pw, hintdata *phd ) {
+
+  GList *pl;
+  GtkWidget *pwMoves = phd->pw;
+  cubeinfo ci;
+
+  if ( !  GTK_CLIST( pwMoves )->selection )
+    return;
+
+  GetMatchStateCubeInfo( &ci, &ms );
+  
+  ProgressStart( _("Evaluating positions...") );
+
+  for(  pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
+
+    if ( ScoreMove ( &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ],
+                     &ci, &esEvalChequer.ec, esEvalChequer.ec.nPlies ) < 0 ) {
+      ProgressEnd ();
+      return;
+    }
+
+    /* Calling RefreshMoveList here requires some extra work, as
+       it may reorder moves */
+
+    UpdateMoveList ( phd );
+
+  }
+
+  gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
+
+  RefreshMoveList ( phd->pml );
+
+  UpdateMoveList ( phd );
+
+  ProgressEnd ();
+
+}
+
+static void
+MoveListEvalSettings ( GtkWidget *pw, void *unused ) {
+
+  SetEvalChequer ( NULL, 0, NULL );
+
+}
+
+static void
+MoveListRolloutSettings ( GtkWidget *pw, void *unused ) {
+
+  SetRollouts ( NULL, 0, NULL );
+
+}
+
+
+
+static GtkWidget *
+CreateMoveListTools ( hintdata *phd ) {
+
+  GtkWidget *pwTools;
+  GtkWidget *pwHBox;
+  GtkWidget *pwEval = gtk_button_new_with_label ( _("Eval") );
+  GtkWidget *pwEvalSettings = gtk_button_new_with_label ( _("...") );
+  GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
+  GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
+  GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
+
+  phd->pwRollout = pwRollout;
+  phd->pwRolloutSettings = pwRolloutSettings;
+  phd->pwEval = pwEval;
+  phd->pwEvalSettings = pwEvalSettings;
+
+  /* toolbox on the left with buttons for eval, rollout and more */
+  
+  pwTools = gtk_vbox_new ( FALSE, 4 );
+  
+  pwHBox = gtk_hbox_new ( FALSE, 4 );
+  gtk_box_pack_start ( GTK_BOX ( pwTools ), pwHBox, FALSE, FALSE, 0 );
+  
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwEval, FALSE, FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwEvalSettings, FALSE, FALSE, 0 );
+  
+  pwHBox = gtk_hbox_new ( FALSE, 4 );
+  gtk_box_pack_start ( GTK_BOX ( pwTools ), pwHBox, FALSE, FALSE, 0 );
+  
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwRollout, FALSE, FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwRolloutSettings, 
+                       FALSE, FALSE, 0 );
+  
+  gtk_box_pack_start ( GTK_BOX ( pwTools ), pwMWC, FALSE, FALSE, 0 );
+  
+  gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
+  
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
+                                 fOutputMWC );
+
+  /* signals */
+
+  gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListRollout ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwEval ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListEval ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwEvalSettings ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListEvalSettings ), NULL );
+  gtk_signal_connect( GTK_OBJECT( pwRolloutSettings ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListRolloutSettings ), NULL );
+  gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
+                      GTK_SIGNAL_FUNC( MoveListMWC ), phd );
+
+
+  return pwTools;
+  
+}
+
 
 static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 
@@ -2153,15 +2368,24 @@ static void SetAnnotation( moverecord *pmr ) {
             /* move */
 			      
 	    if( pmr->n.ml.cMoves ) {
-		hd.pml = &pmr->n.ml;
-		hd.pw = pw = gtk_scrolled_window_new( NULL, NULL );
-		gtk_scrolled_window_set_policy(
-		    GTK_SCROLLED_WINDOW( pw ),
-		    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-		gtk_container_add( GTK_CONTAINER( pw ),
-				   CreateMoveList( &hd, pmr->n.iMove ) );
-		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, TRUE, TRUE,
-				    0 );
+
+              GtkWidget *pwHBox = gtk_hbox_new ( FALSE, 0 );
+
+              hd.pml = &pmr->n.ml;
+              hd.pw = pw = gtk_scrolled_window_new( NULL, NULL );
+              gtk_scrolled_window_set_policy(
+                                GTK_SCROLLED_WINDOW( pw ),
+                                GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
+              gtk_container_add( GTK_CONTAINER( pw ),
+                                 CreateMoveList( &hd, pmr->n.iMove ) );
+
+              gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
+              gtk_box_pack_end ( GTK_BOX ( pwHBox ),
+                                 CreateMoveListTools( &hd ),
+                                 FALSE, FALSE, 0 );
+
+              gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwHBox, TRUE, TRUE,
+                                  0 );
 	    }
 
 	    if( !g_list_first( GTK_BOX( pwAnalysis )->children ) ) {
@@ -5385,73 +5609,6 @@ static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
 }
 
 
-static void
-HintMWC ( GtkWidget *pw, hintdata *phd ) {
-
-  char sz[ 80 ];
-
-  sprintf ( sz, "set output mwc %s", fOutputMWC ? "off" : "on" );
-
-  UserCommand ( sz );
-
-  UpdateMoveList ( phd );
-
-}
-
-static void
-HintEval ( GtkWidget *pw, hintdata *phd ) {
-
-  GList *pl;
-  GtkWidget *pwMoves = phd->pw;
-  cubeinfo ci;
-
-  if ( !  GTK_CLIST( pwMoves )->selection )
-    return;
-
-  GetMatchStateCubeInfo( &ci, &ms );
-  
-  ProgressStart( _("Evaluating positions...") );
-
-  for(  pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
-
-    if ( ScoreMove ( &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ],
-                     &ci, &esEvalChequer.ec, esEvalChequer.ec.nPlies ) < 0 ) {
-      ProgressEnd ();
-      return;
-    }
-
-    /* Calling RefreshMoveList here requires some extra work, as
-       it may reorder moves */
-
-    UpdateMoveList ( phd );
-
-  }
-
-  gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
-
-  RefreshMoveList ( phd->pml );
-
-  UpdateMoveList ( phd );
-
-  ProgressEnd ();
-
-}
-
-static void
-HintEvalSettings ( GtkWidget *pw, void *unused ) {
-
-  SetEvalChequer ( NULL, 0, NULL );
-
-}
-
-static void
-HintRolloutSettings ( GtkWidget *pw, void *unused ) {
-
-  SetRollouts ( NULL, 0, NULL );
-
-}
-
-
 static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
 
     move *pm;
@@ -5467,43 +5624,6 @@ static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
     UserCommand( move );
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pwMoves ) );
-}
-
-static void HintRollout( GtkWidget *pw, GtkWidget *pwMoves ) {
-
-    int c;
-    GList *pl;
-    char *sz, *pch;
-    
-    assert( GTK_CLIST( pwMoves )->selection );
-
-    /* FIXME selection is not in order... should we roll the moves out
-       in the same order they're listed? */
-    
-    for( c = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
-	c++;
-
-#if HAVE_ALLOCA
-    sz = alloca( c * 6 + 9 ); /* "rollout " plus c * "=9999 " plus \0 */
-#else
-    sz = malloc( c * 6 + 9 );
-#endif
-
-    strcpy( sz, "rollout " );
-    pch = sz + 8;
-
-    for( pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
-	sprintf( pch, "=%d ", GPOINTER_TO_INT( pl->data ) + 1 );
-	pch = strchr( pch, 0 );
-    }
-    
-    gtk_widget_destroy( gtk_widget_get_toplevel( pwMoves ) );
-    
-    UserCommand( sz );
-    
-#if !HAVE_ALLOCA
-    free( sz );
-#endif        
 }
 
 static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
@@ -5587,19 +5707,13 @@ extern void GTKHint( movelist *pmlOrig ) {
     GtkWidget  *psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pwButtons,
 	*pwMove = gtk_button_new_with_label( _("Move") ),
-	*pwRollout = gtk_button_new_with_label( _("Rollout") ),
 #ifdef WIN32
   	*pwCopy = gtk_button_new_with_label( _("Copy") ),
 #else 
   	*pwCopy = gtk_button_new_with_label( _("Dump") ),
 #endif
 	*pwMoves;
-    GtkWidget *pwMWC;
     GtkWidget *pwHBox;
-    GtkWidget *pwToolBox;
-    GtkWidget *pwEval = gtk_button_new_with_label ( _("Eval") );
-    GtkWidget *pwEvalSettings = gtk_button_new_with_label ( _("...") );
-    GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
     static hintdata hd;
     movelist *pml;
     
@@ -5613,39 +5727,10 @@ extern void GTKHint( movelist *pmlOrig ) {
     memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
 
     hd.pwMove = pwMove;
-    hd.pwRollout = pwRollout;
-    hd.pwRolloutSettings = pwRolloutSettings;
-    hd.pwEval = pwEval;
-    hd.pwEvalSettings = pwEvalSettings;
-    hd.pml = pml;
     hd.fButtonsValid = TRUE;
+    hd.pml = pml;
     hd.pw = pwMoves = CreateMoveList( &hd, -1 /* FIXME change if they've
 						 already moved */ );
-
-    /* toolbox on the left with buttons for eval, rollout and more */
-
-    pwToolBox = gtk_vbox_new ( FALSE, 4 );
-
-    pwHBox = gtk_hbox_new ( FALSE, 4 );
-    gtk_box_pack_start ( GTK_BOX ( pwToolBox ), pwHBox, FALSE, FALSE, 0 );
-
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwEval, FALSE, FALSE, 0 );
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwEvalSettings, FALSE, FALSE, 0 );
-
-    pwHBox = gtk_hbox_new ( FALSE, 4 );
-    gtk_box_pack_start ( GTK_BOX ( pwToolBox ), pwHBox, FALSE, FALSE, 0 );
-
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwRollout, FALSE, FALSE, 0 );
-    gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwRolloutSettings, 
-                         FALSE, FALSE, 0 );
-
-    pwMWC = gtk_toggle_button_new_with_label( "MWC" );
-    gtk_box_pack_start ( GTK_BOX ( pwToolBox ), pwMWC, FALSE, FALSE, 0 );
-
-    gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
-
-    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
-                                   fOutputMWC );
 
     /* create dialog */
     
@@ -5659,25 +5744,16 @@ extern void GTKHint( movelist *pmlOrig ) {
 
     pwHBox = gtk_hbox_new ( FALSE, 4 );
     gtk_container_add ( GTK_CONTAINER ( pwHBox ), psw );
-    gtk_container_add ( GTK_CONTAINER ( pwHBox ), pwToolBox );
+    gtk_container_add ( GTK_CONTAINER ( pwHBox ), 
+                        CreateMoveListTools ( &hd ) );
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
                        pwHBox );
 
     gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
 			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
-    gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
-			GTK_SIGNAL_FUNC( HintRollout ), pwMoves );
     gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
 			GTK_SIGNAL_FUNC( HintCopy ), pml );
-    gtk_signal_connect( GTK_OBJECT( pwEval ), "clicked",
-			GTK_SIGNAL_FUNC( HintEval ), &hd );
-    gtk_signal_connect( GTK_OBJECT( pwEvalSettings ), "clicked",
-			GTK_SIGNAL_FUNC( HintEvalSettings ), NULL );
-    gtk_signal_connect( GTK_OBJECT( pwRolloutSettings ), "clicked",
-			GTK_SIGNAL_FUNC( HintRolloutSettings ), NULL );
-    gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
-			GTK_SIGNAL_FUNC( HintMWC ), &hd );
 
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
@@ -5748,7 +5824,9 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
 
     pwButtons = DialogArea( pwRolloutDialog, DA_BUTTONS );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
-    gtk_container_add( GTK_CONTAINER( pwButtons ), pwViewStat );
+
+    if ( ars )
+      gtk_container_add( GTK_CONTAINER( pwButtons ), pwViewStat );
 
     /* Setup signals */
 
@@ -6568,7 +6646,7 @@ extern void GTKRolloutDone( void ) {
     gtk_signal_disconnect( GTK_OBJECT( pwRolloutDialog ), nRolloutSignal );
     gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
-    
+
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();

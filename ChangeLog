@@ -1,3 +1,17 @@
+Mon Jul 15 00:44:16 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (UpdateStoredMoves): new function. Updates the global
+	struct storedmoves.
+	* gnubg.c (CopyMoveList): new function. Copied one movelist into
+	another (allocates amMoves if necesary).
+	* gnubg.c (CommandHint): call UpdateStoredMoves.
+
+	* rollout.c (ScoreMoveRollout): new function. 
+	* rollout.c (ScoreMoveGeneral): new function.
+
+	* gtkgame.c: many updates that eventually should lead to the
+	possibility of showing and saving rollouts.
+
 Sun Jul 14 18:27:51 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* play.c (getCurrentMoveRecord): new function.
