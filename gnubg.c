@@ -1130,8 +1130,10 @@ command cER = {
       N_("Player specific options"), szPLAYER, acSetAnalysisPlayer },
     { "threshold", NULL, N_("Specify levels for marking moves"), NULL,
       acSetAnalysisThreshold },
+#if	USE_GTK
     { "window", CommandSetAnalysisWindows, N_("Display window with analysis"),
       szONOFF, &cOnOff },
+#endif
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, N_("Automatically bear off as many "
@@ -1194,6 +1196,7 @@ command cER = {
       N_("Set cube efficiency parameters for race positions"),
       szVALUE, acSetCubeEfficiencyRace },
     { NULL, NULL, NULL, NULL, NULL }
+#if	USE_GTK
 }, acSetGeometryValues[] = {
     { "width", CommandSetGeometryWidth, N_("set width of window"), 
       szVALUE, NULL },
@@ -1220,6 +1223,7 @@ command cER = {
     { "theory", CommandSetGeometryTheory,
       N_("set geometry of theory window"), NULL, acSetGeometryValues },
     { NULL, NULL, NULL, NULL, NULL }
+#endif
 }, acSetGUIAnimation[] = {
     { "blink", CommandSetGUIAnimationBlink,
       N_("Blink chequers being moves"), NULL, NULL },
@@ -1803,8 +1807,10 @@ command cER = {
 }, acSet[] = {
     { "analysis", NULL, N_("Control parameters used when analysing moves"),
       NULL, acSetAnalysis },
+#if	USE_GTK
     { "annotation", CommandSetAnnotation, N_("Select whether move analysis and "
       "commentary are shown"), szONOFF, &cOnOff },
+#endif
     { "appearance", CommandSetAppearance, N_("Modify the look and feel of the "
       "graphical interface"), szKEYVALUE, NULL },
     { "automatic", NULL, N_("Perform certain functions without user input"),
@@ -1828,8 +1834,10 @@ command cER = {
       szONOFF, &cOnOff },
     { "colours", CommandSetAppearance, 
       N_("Synonym for `set appearance'"), NULL, NULL },
+#if USE_GTK
     { "commandwindow", CommandSetCommandWindow, N_("Display command window"),
       szONOFF, &cOnOff },
+#endif
     { "confirm", NULL, N_("Confirmation settings"), NULL, acSetConfirm },
     { "crawford", CommandSetCrawford, 
       N_("Set whether this is the Crawford game"), szONOFF, &cOnOff },
@@ -1843,21 +1851,27 @@ command cER = {
     { "display", CommandSetDisplay, 
       N_("Select whether the board is updated on the computer's turn"), 
       szONOFF, &cOnOff },
+#if USE_GTK
     { "dockpanels", CommandSetDockPanels, N_("Dock or float windows"),
       szONOFF, &cOnOff },
+#endif
     { "evaluation", NULL, N_("Control position evaluation "
       "parameters"), NULL, acSetEval },
     { "egyptian", CommandSetEgyptian, 
       N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
     { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
+#if USE_GTK
     { "gamelist", CommandSetGameList, N_("Display game window with moves"),
       szONOFF, &cOnOff },
     { "geometry", NULL, N_("Set geometry of windows"), NULL, acSetGeometry },
+#endif
     { "gotofirstgame", CommandSetGotoFirstGame, 
       N_("Control whether you want to go to the first or last game "
          "when loading matches or sessions"), NULL, NULL },
+#if USE_GTK
     { "gui", NULL, N_("Control parameters for the graphical interface"), NULL,
       acSetGUI },
+#endif
     { "import", NULL, N_("Set settings for import"), NULL, acSetImport },
     { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
     { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
@@ -1871,15 +1885,19 @@ command cER = {
       acSetMatchInfo },
     { "matchlength", CommandSetMatchLength,
       N_("Specify the default length for new matches"), szLENGTH, NULL },
-    { "message", CommandSetMessage, N_("Display window with messages"),
+#if USE_GTK
+	{ "message", CommandSetMessage, N_("Display window with messages"),
       szONOFF, &cOnOff },
+#endif
     { "met", CommandSetMET,
       N_("Synonym for `set matchequitytable'"), szFILENAME, &cFilename },
     { "output", NULL, N_("Modify options for formatting results"), NULL,
       acSetOutput },
+#if USE_GTK
     { "panels", CommandSetDisplayPanels, 
       N_("Display game list, annotation and message panels/windows"), 
-	 szONOFF, &cOnOff }, 
+	 szONOFF, &cOnOff },
+#endif
     { "panelwidth", CommandSetPanelWidth, N_("Set the width of the docked panels"),
       szVALUE, NULL },
     { "path", NULL, N_("Set default path when saving, loading, importing, "
@@ -1923,8 +1941,10 @@ command cER = {
     { "tctype", CommandSetTCType, N_("Set time control type"), szSETTCTYPE, NULL}, 
     { "tcunname", CommandSetTCUnname, N_("Undefine a named time control setting"), szSETTCUNNAME, NULL}, 
 #endif
+#if USE_GTK
     { "theorywindow", CommandSetTheoryWindow, N_("Display game theory in window"),
       szONOFF, &cOnOff },
+#endif
     { "toolbar", CommandSetToolbar, N_("Change if icons and/or text are shown on toolbar"),
       szVALUE, NULL },
     { "training", NULL, 
@@ -2011,8 +2031,10 @@ command cER = {
       N_("Show Effective Pip Count for position"), szPOSITION, NULL },
     { "export", CommandShowExport, N_("Show current export settings"), 
       NULL, NULL },
+#if USE_GTK
     { "geometry", CommandShowGeometry, N_("Show geometry settings"), 
       NULL, NULL },
+#endif
     { "jacoby", CommandShowJacoby, 
       N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
     { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
@@ -3432,11 +3454,9 @@ extern void ShowBoard( void )
 
 	if (
 #if USE_GTK
-		PanelShowing(WINDOW_ANALYSIS)
-#else
-		PanelShowing(WINDOW_ANNOTATION)
+		PanelShowing(WINDOW_ANALYSIS) &&
 #endif
-		&& plLastMove && ( pmr = plLastMove->plNext->p ) ) {
+		plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
 	    if( pmr->sz )
 		outputl( pmr->sz ); /* FIXME word wrap */
@@ -3711,7 +3731,8 @@ extern void CommandHelp( char *sz ) {
 #if USE_GTK 
 # if GTK_CHECK_VERSION(2,0,0)
     if( fX )
-	return GTKHelp( sz );
+	GTKHelp( sz );
+    return;
 # endif
 #endif
     
@@ -4378,11 +4399,6 @@ extern void PromptForExit( void ) {
 #endif
 #if USE_GTK
     if( fX ) {
-#if USE_GTK2
-	g_list_foreach( gtk_window_list_toplevels(), (GFunc) gtk_widget_hide,
-			NULL );
-#endif
-	
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
     }
@@ -6430,8 +6446,10 @@ static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 
 extern void Prompt( void ) {
 
+#if HAVE_LIBREADLINE
     if( !fInteractive || !isatty( STDIN_FILENO ) )
 	return;
+#endif
 
     ProgressEnd();
     
@@ -8064,6 +8082,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );
     else if( ( pch = getenv( "USER" ) ) )
+	strcpy( ap[ 1 ].szName, pch );
+    else if( ( pch = getenv( "USERNAME" ) ) ) // it's username on Win 2000 / XP ...
 	strcpy( ap[ 1 ].szName, pch );
 #if HAVE_GETLOGIN
     else if( ( pch = getlogin() ) )
