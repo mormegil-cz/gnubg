@@ -3966,7 +3966,6 @@ HintChequer( char *sz ) {
   char szBuf[ 1024 ];
   int n = ParseNumber ( &sz );
   int anMove[ 8 ];
-#endif
   moverecord *pmr;
   unsigned char auch[ 10 ];
   int fHasMoved;
