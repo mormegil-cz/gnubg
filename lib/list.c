@@ -5,6 +5,7 @@
  */
 
 #include <list.h>
+#include <stddef.h>
 #include <stdlib.h>
 
 int ListCreate( list *pl ) {

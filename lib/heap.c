@@ -4,6 +4,7 @@
  * by Gary Wong, 1997
  */
 
+#include <stddef.h>
 #include <stdlib.h>
 
 #include "heap.h"
