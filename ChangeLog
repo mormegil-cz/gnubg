@@ -1,3 +1,7 @@
+Sat Oct 27 21:58:05 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* eval.c (FindBestCubeDecision): fix typo.
+
 Sat Oct 27 18:32:39 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (Cl2CfMatch): return cubeless mwc if cube is dead.
