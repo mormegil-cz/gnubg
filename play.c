@@ -448,7 +448,7 @@ static int ComputerTurn( void ) {
 
       if ( fCubeUse && ! anDice[ 0 ] && GetDPEq ( NULL, NULL, &ci ) ) {
 
-        static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE }; 
+        static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE, FALSE }; 
         
         /* We have access to the cube */
 
