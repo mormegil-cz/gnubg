@@ -325,12 +325,11 @@ static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
 }
 
 static void PrintLaTeXCubeAnalysis( FILE *pf, matchstate *pms, int fPlayer,
-				    float arDouble[ 4 ], evaltype et,
-				    evalsetup *pes ) {
+				    float arDouble[ 4 ], evalsetup *pes ) { 
     cubeinfo ci;
     char sz[ 1024 ];
 
-    if( et == EVAL_NONE )
+    if( pes->et == EVAL_NONE )
 	return;
     
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, fPlayer, pms->nMatchTo,
@@ -372,8 +371,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 		PrintLaTeXBoard( pf, &msExport, pmr->n.fPlayer );
 	    
 	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->n.fPlayer,
-				    pmr->n.arDouble, pmr->n.etDouble,
-				    &pmr->n.esDouble );
+				    pmr->n.arDouble, &pmr->n.esDouble );
 
 	    sprintf( sz, "%d%d%s: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ],
 		     aszLuckTypeLaTeXAbbr[ pmr->n.lt ] );
@@ -404,8 +402,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    PrintLaTeXBoard( pf, &msExport, pmr->d.fPlayer );
 
 	    PrintLaTeXCubeAnalysis( pf, &msExport, pmr->d.fPlayer,
-				    pmr->d.arDouble, pmr->d.etDouble,
-				    &pmr->d.esDouble );
+				    pmr->d.arDouble, &pmr->d.esDouble );
 
 	    fprintf( pf, "\\begin{center}Double%s\\end{center}\n\n",
 		     aszSkillTypeAbbr[ pmr->d.st ] );
