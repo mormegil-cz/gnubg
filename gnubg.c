@@ -112,6 +112,14 @@ event evNextTurn;
 #include<windows.h>
 #endif
 
+#ifdef WIN32
+#define DIR_SEPARATOR  '\\'
+#define DIR_SEPARATOR_S  "\\"
+#else
+#define DIR_SEPARATOR  '/'
+#define DIR_SEPARATOR_S  "/"
+#endif
+
 #if defined(MSDOS) || defined(__MSDOS__) || defined(WIN32)
 #define NO_BACKSLASH_ESCAPES 1
 #endif
@@ -3682,10 +3690,10 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fAutoMove ? "on" : "off",
 	     fAutoRoll ? "on" : "off",
 	     nBeavers );
-//#if 0
+
     EvalCacheStats( NULL, &cCache, NULL, NULL );
     fprintf( pf, "set cache %d\n", cCache );
-//#endif
+
     fprintf( pf, "set clockwise %s\n"
 	     "set confirm new %s\n"
 	     "set confirm save %s\n"
@@ -5557,7 +5565,7 @@ setDefaultPath ( const char *sz, const pathformat f ) {
   /* set path up last slash as 'current path' */
   
   strcpy ( aaszPaths[ f ][ 1 ], sz );
-  pc = strrchr ( aaszPaths[ f ][ 1 ], '/' );
+  pc = strrchr ( aaszPaths[ f ][ 1 ], DIR_SEPARATOR );
   if ( ! pc )
     pc = aaszPaths[ f ][ 1 ];
   *pc = 0;
@@ -5582,7 +5590,7 @@ setDefaultFileName ( const char *sz, const pathformat f ) {
     free ( szCurrentFileName );
 
 
-  if ( ( pc = strrchr ( sz, '/' ) ) ) {
+  if ( ( pc = strrchr ( sz, DIR_SEPARATOR ) ) ) {
     szCurrentFileName = strdup ( pc + 1 );
     if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
       *pcdot = 0; /* remove extension */
@@ -5636,7 +5644,7 @@ getDefaultFileName ( const pathformat f ) {
 
     if ( szPath ) {
       strcpy ( sz, szPath );
-      strcat ( sz, "/" );
+      strcat ( sz, DIR_SEPARATOR_S );
     }
     else
       strcpy ( sz, "" );
@@ -5660,7 +5668,7 @@ getDefaultFileName ( const pathformat f ) {
 
     if ( szPath ) {
       strcpy ( sz, szPath );
-      strcat ( sz, "/" );
+      strcat ( sz, DIR_SEPARATOR_S );
     }
     else
       strcpy ( sz, "" );
@@ -5707,18 +5715,18 @@ getDefaultPath ( const pathformat f ) {
 
   if ( strlen ( aaszPaths[ f ][ 1 ] ) ) {
     pc = strchr ( aaszPaths[ f ][ 1 ], 0 ) - 1;
-    if ( *pc == '/' )
+    if ( *pc == DIR_SEPARATOR )
       return PathSearch ( aaszPaths[ f ][ 1 ], szDataDirectory );
     else
-      return PathSearch ( strcat ( aaszPaths[ f ][ 1 ], "/" ), 
+      return PathSearch ( strcat ( aaszPaths[ f ][ 1 ], DIR_SEPARATOR_S ), 
                           szDataDirectory );
   }
   else if ( strlen ( aaszPaths[ f ][ 0 ] ) ) {
     pc = strchr ( aaszPaths[ f ][ 0 ], 0 ) - 1;
-    if ( *pc == '/' )
+    if ( *pc == DIR_SEPARATOR )
       return PathSearch ( aaszPaths[ f ][ 0 ], szDataDirectory );
     else
-      return PathSearch ( strcat ( aaszPaths[ f ][ 0 ], "/" ), 
+      return PathSearch ( strcat ( aaszPaths[ f ][ 0 ], DIR_SEPARATOR_S ), 
                           szDataDirectory );
   }
   else 
