@@ -2633,7 +2633,7 @@ ParseSnowieTxt( char *sz,
 
   c = 0;
   i = 0;
-  pc = strtok( sz, ";" );
+  pc = strsep( &sz, ";" );
   while ( pc ) {
 
     switch( c ) {
@@ -2654,14 +2654,17 @@ ParseSnowieTxt( char *sz,
       *pfTurn = atoi( pc );
       break;
     case 5:
-      /* player names */
-      memset( aszPlayer[ *pfTurn ], 0, 32 );
-      strncpy( aszPlayer[ *pfTurn ], pc, 31 );
-      break;
     case 6:
       /* player names */
-      memset( aszPlayer[ ! *pfTurn ], 0, 32 );
-      strncpy( aszPlayer[ ! *pfTurn ], pc, 31 );
+      j = *pfTurn;
+      if ( c == 6 )
+        j = ! j;
+
+      memset( aszPlayer[ j ], 0, 32 );
+      if ( *pc )
+        strncpy( aszPlayer[ j ], pc, 31 );
+      else
+        sprintf( aszPlayer[ j ], "Player %d", j );
       break;
     case 7:
       /* Crawford Game */
@@ -2711,7 +2714,8 @@ ParseSnowieTxt( char *sz,
       break;
     }
 
-    pc = strtok( NULL, ";" );
+    pc = 
+    pc = strsep( &sz, ";" );
 
     ++c;
     if ( c == 40 )
