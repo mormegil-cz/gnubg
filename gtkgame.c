@@ -2525,10 +2525,6 @@ static void MainSize( GtkWidget *pw, GtkRequisition *preq, gpointer p ) {
 
 gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 
-  char *pc = gettext ( path );
-
-  printf ( "translate '%s' til '%s'\n", path, pc );
-
   return (gchar *) gettext ( (const char *) path );
 
 }
