@@ -55,10 +55,6 @@
 #define NUM_NONPREVIEW_PAGES 1
 #endif
 
-#define COLOUR_SEL_DIA( pcp ) GTK_COLOR_SELECTION_DIALOG( GTK_COLOUR_PICKER( \
-	pcp )->pwColourSel )
-#define COLOUR_SEL( pcp ) GTK_COLOR_SELECTION( COLOUR_SEL_DIA(pcp)->colorsel )
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -127,8 +123,6 @@ static void AddDesignRow ( gpointer data, gpointer user_data );
 
 #if USE_BOARD3D
 void UpdatePreviewBar(GdkPixmap *pixmap);
-GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind, Material* pMat, int opacity, int texture);
-GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent);
 void ResetPreviews();
 void UpdateColPreviews();
 int GetPreviewId();
@@ -387,7 +381,7 @@ static GtkWidget *ChequerPrefs3d( BoardData *bd)
 			FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-		gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window, 
+		gtk_colour_picker_new3d(pwPreview + PI_CHEQUERS0, bd->drawing_area3d->window,
 				&bd3d.chequerMat[0], DF_VARIABLE_OPACITY, TT_PIECE), TRUE, TRUE, 4 );
 
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
@@ -666,19 +660,14 @@ static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Colour:") ),
 			FALSE, FALSE, 4 );
 
-   gtk_box_pack_start( GTK_BOX( pwhbox ),
-			apwColour[ f ] = gtk_colour_picker_new(), TRUE,
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+			apwColour[ f ] = gtk_colour_picker_new(UpdatePreview, &pwPreview[PI_CHEQUERS0 + f]), TRUE,
 			TRUE, 4 );
     
-    gtk_colour_picker_set_has_opacity_control(
-	GTK_COLOUR_PICKER( apwColour[ f ] ), TRUE );
+    gtk_colour_picker_set_has_opacity_control(GTK_COLOUR_PICKER(apwColour[f]), TRUE);
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwColour[ f ] ),
 				   rdAppearance.aarColour[ f ] );
-    gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwColour[ f ] ) ),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       (GtkObject*) ( pwPreview + PI_CHEQUERS0 + f ) );
-    
+
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ),
@@ -795,18 +784,12 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Die colour:") ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-			apwDiceColour[ f ] = gtk_colour_picker_new(), TRUE,
+			apwDiceColour[ f ] = gtk_colour_picker_new(UpdatePreview, &pwPreview[PI_DICE0 + f]), TRUE,
 			TRUE, 4 );
 
-    gtk_colour_picker_set_has_opacity_control(
-	GTK_COLOUR_PICKER( apwDiceColour[ f ] ), FALSE );
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwDiceColour[ f ] ),
 				   rdAppearance.aarDiceColour[ f ] );
-    gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwDiceColour[ f ] ) ),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       (GtkObject*) ( pwPreview + PI_DICE0 + f ) );
-    
+
     gtk_box_pack_start( GTK_BOX( apwDiceColourBox[ f ] ), 
                         pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
@@ -858,21 +841,12 @@ static GtkWidget *DicePrefs( BoardData *bd, int f ) {
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( _("Pip colour:") ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ),
-			apwDiceDotColour[ f ] = gtk_colour_picker_new(), TRUE,
+			apwDiceDotColour[ f ] = gtk_colour_picker_new(UpdatePreview, &pwPreview[PI_DICE0 + f]), TRUE,
 			TRUE, 4 );
     
-    gtk_colour_picker_set_has_opacity_control(
-	GTK_COLOUR_PICKER( apwDiceDotColour[ f ] ), FALSE );
     gtk_colour_picker_set_colour( 
         GTK_COLOUR_PICKER( apwDiceDotColour[ f ] ),
         rdAppearance.aarDiceDotColour[ f ] );
-    gtk_signal_connect_object( GTK_OBJECT(
-				   COLOUR_SEL( apwDiceDotColour[ f ] ) ),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       (GtkObject*) ( pwPreview + PI_DICE0 + f ) );
-
-    /* signals */
 
     gtk_signal_connect ( GTK_OBJECT( apwDieColour[ f ] ), "toggled",
                          GTK_SIGNAL_FUNC( DieColourChanged ), (void*)f);
@@ -896,19 +870,13 @@ static GtkWidget *CubePrefs( BoardData *bd ) {
 			FALSE, FALSE, 0 );
     
     gtk_box_pack_start ( GTK_BOX ( pwx ), 
-                         pwCubeColour = gtk_colour_picker_new(),
+                         pwCubeColour = gtk_colour_picker_new(UpdatePreview, &pwPreview[PI_CUBE]),
 			 TRUE, TRUE, 0 );
-    gtk_colour_picker_set_has_opacity_control(
-	GTK_COLOUR_PICKER( pwCubeColour ), FALSE );
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( pwCubeColour ),
 				   rdAppearance.arCubeColour );
-    gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( pwCubeColour ) ),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       (GtkObject*) ( pwPreview + PI_CUBE ) );
 
     /* FIXME add cube text colour settings */
-    
+
     return pw;
 
 }
@@ -946,16 +914,10 @@ static GtkWidget *BoardPage( BoardData *bd ) {
 			    gtk_label_new( gettext( asz[ j ] ) ),
 			    FALSE, FALSE, 4 );
 	gtk_box_pack_start( GTK_BOX( pwhbox ),
-			    apwBoard[ j ] = gtk_colour_picker_new(), TRUE,
+			    apwBoard[ j ] = gtk_colour_picker_new(UpdatePreview, &pwPreview[PI_BOARD]), TRUE,
 			    TRUE, 4 );
-	gtk_colour_picker_set_has_opacity_control(
-	    GTK_COLOUR_PICKER( apwBoard[ j ] ), FALSE );
 	gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwBoard[ j ] ),
 				      ar );
-	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwBoard[ j ] ) ),
-				   "color-changed",
-				   GTK_SIGNAL_FUNC( UpdatePreview ),
-				   (GtkObject*) ( pwPreview + PI_BOARD ) );
 
 	gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			    FALSE, FALSE, 4 );
@@ -1054,16 +1016,9 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 	ar[ i ] = rdAppearance.aanBoardColour[ 1 ][ i ] / 255.0;
     
     gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ 1 ] =
-			gtk_colour_picker_new(), FALSE, FALSE, 0 );
-    gtk_colour_picker_set_has_opacity_control(
-                        GTK_COLOUR_PICKER( apwBoard[ 1 ] ), FALSE );
+			gtk_colour_picker_new(UpdatePreview, &pwPreview[PI_BORDER]), FALSE, FALSE, 0 );
     gtk_colour_picker_set_colour( GTK_COLOUR_PICKER( apwBoard[ 1 ] ),
 				   ar );
-    gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( apwBoard[ 1 ] ) ),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdatePreview ),
-			       (GtkObject*) ( pwPreview + PI_BORDER ) );
-
 
     pwHinges = gtk_check_button_new_with_label( _("Show hinges") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHinges ), rdAppearance.fHinges );
@@ -2766,12 +2721,10 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 
 extern void BoardPreferences( GtkWidget *pwBoard ) {
 
-    int i;
     GtkWidget *pwDialog;
     BoardData *bd = BOARD( pwBoard )->board_data;
 
 #if USE_BOARD3D
-	GtkWidget* colourDialog3d;
 	/* Set bd3d to current board settings */
 	CopySettings3d(bd, &bd3d);
 	SetPreviewLightLevel(rdAppearance.lightLevels);
@@ -2784,10 +2737,6 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     pwDialog = GTKCreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
     
-#if USE_BOARD3D
-	colourDialog3d = Create3dColourDialog(bd->drawing_area3d->window, pwDialog);
-#endif
-
     pwNotebook = gtk_notebook_new();
 
     gtk_notebook_set_scrollable( GTK_NOTEBOOK( pwNotebook ), TRUE );
@@ -2833,34 +2782,13 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 #if USE_BOARD3D
 	redrawChange = FALSE;
 
-	if (previewType == DT_2D)
 #endif
-	{
-    /* hack the set_opacity function does not work until widget has been
-       drawn */
-    for ( i = 0; i < 2; i++ ) {
-      gtk_colour_picker_set_has_opacity_control(
-         GTK_COLOUR_PICKER( apwBoard[ i ] ), FALSE );
-      gtk_colour_picker_set_has_opacity_control(
-         GTK_COLOUR_PICKER( apwBoard[ i + 2 ] ), FALSE );
-      gtk_colour_picker_set_has_opacity_control(
-         GTK_COLOUR_PICKER( apwDiceColour[ i ] ), FALSE );
-      gtk_colour_picker_set_has_opacity_control(
-         GTK_COLOUR_PICKER( apwDiceDotColour[ i ] ), FALSE );
-    }
-    gtk_colour_picker_set_has_opacity_control(
-         GTK_COLOUR_PICKER( pwCubeColour ), FALSE );
-	}
 
     gdk_pixmap_unref( ppm );
 
     fUpdate = TRUE;
 
     gtk_main();
-
-#if USE_BOARD3D
-	gtk_widget_destroy(colourDialog3d);
-#endif
 }
 
 #if USE_BOARD3D

@@ -1,3 +1,8 @@
+Mon Mar 8 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkcolor.c, gtkprefs.c: Remove "property delete" gtk warning message
+		when changin colours
+
 Thu Mar 4 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gnubg.c: Replace USE_OLD_LAYOUT compile flag with menu option
