@@ -42,6 +42,7 @@ Max Durbano
 Peter Eberhard
 Robert Eberlein
 Fotis
+Kennedy Fraser
 Ric Gerace
 Michel Grimminck
 Eric Groleau
@@ -53,6 +54,7 @@ Martin Janke
 Nis Jorgensen
 Petr Kadlec
 Neil Kazaross
+Mathias Kegelmann
 Matija Kejzar
 Bert Van Kerckhove
 James F. Kibler
@@ -110,6 +112,7 @@ Kaoru TAKAHASHI
 Yoshito Takeuchi
 Jacques Thiriat
 Malene Thyssen
+Claes Tornberg
 Sander van Rijnswou
 Robert-Jan Veldhuizen
 Morten Wang

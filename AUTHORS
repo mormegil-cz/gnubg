@@ -7,41 +7,29 @@
 
         Contributors (of bug reports, suggestions, and patches) include:
 
-    Elias Kritikos          Matija Kejzar           Jared Riley
-    Kazuaki Asai            Bert Van Kerckhove      Klaus Rindholt
-    Eric Augustine          James F. Kibler         Oliver Riordan
-    Erik Barfoed            Jonathan Kinsey         Rod Roark
-    Ron Barry               Johnny Kirk             Hans-Jürgen Schäfer
-    Steve Baedke            Gerhard Knop            Steve Schreiber
-    Olivier Baur            Robert Konigsberg       Hugh Sconyers
-    Stefan van den Berg     Martin Krainer          Martin Schrode
-    Holger Bochnig          Corrin Lakeland         Paul Selick
-    Chuck Bower             Tim Laursen             Sho Sengoku
-    Nick Bratby             Eli Liang               Ian Shaw
-    Renzo Campagna          Ege Lundgren            Albert Silver
-    Craig Campbell          Kevin Maguire           Alberta di Silvio
-    John Chuang             Massimiliano Maini      Peter Sochovsky
-    Tristan Colgate         Giulio De Marco         Mark Spencer
-    Olivier Croisille       Alix Martin             Scott Steiner
-    Ned Cross               William Maslen          Maik Stiebler
-    Bill Davidson           Thomas Meyer            W. Stroop (Rob)
-    Michael Depreli         Achim Mueller           Kaoru TAKAHASHI
-    Ian Dunstan             Daniel Murphy           Yoshito Takeuchi
-    Max Durbano             Magnar Naustdalslid     Jacques Thiriat
-    Peter Eberhard          Dave Neary              Malene Thyssen
-    Robert Eberlein         Rolf Nielsen            Sander van Rijnswou
-    Fotis                   Mirori Orange           Robert-Jan Veldhuizen
-    Ric Gerace              Peter Orum              Morten Wang
-    Michel Grimminck        Roy Passfield           Jeff White
-    Eric Groleau            Thomas Patrick          JP White
-    Jeff Haferman           Billie Patterson        Chris Wilson
-    Morten Juul Henriksen   Mike Petch              Kit Woolsey
-    Alain Henry             Zvezdan Petkovic        Frank Worrell
-    Jens Hoefkens           Nardy Pillards          Christopher D. Yep
-    Martin Janke            Petri Pitkänen          Anders Zachrison
-    Nis Jorgensen           Sam Pottle              Douglas Zare
-    Petr Kadlec             Henrik Ravn
-    Neil Kazaross           James Rech
+    Elias Kritikos          Fotis                   Tim Laursen
+    Kazuaki Asai            Kennedy Fraser          Eli Liang
+    Eric Augustine          Ric Gerace              Ege Lundgren
+    Erik Barfoed            Michel Grimminck        Kevin Maguire
+    Ron Barry               Eric Groleau            Massimiliano Maini
+    Steve Baedke            Jeff Haferman           Giulio De Marco
+    Olivier Baur            Morten Juul Henriksen   Alix Martin
+    Stefan van den Berg     Alain Henry             William Maslen
+    Holger Bochnig          Jens Hoefkens           Thomas Meyer
+    Chuck Bower             Martin Janke            Achim Mueller
+    Nick Bratby             Nis Jorgensen           Daniel Murphy
+    Renzo Campagna          Petr Kadlec             Magnar Naustdalslid
+    Craig Campbell          Neil Kazaross           Dave Neary
+    John Chuang             Mathias Kegelmann       Rolf Nielsen
+    Tristan Colgate         Matija Kejzar           Mirori Orange
+    Olivier Croisille       Bert Van Kerckhove      Peter Orum
+    Ned Cross               James F. Kibler         Roy Passfield
+    Bill Davidson           Jonathan Kinsey         Thomas Patrick
+    Michael Depreli         Johnny Kirk             Billie Patterson
+    Ian Dunstan             Gerhard Knop            Mike Petch
+    Max Durbano             Robert Konigsberg       Zvezdan Petkovic
+    Peter Eberhard          Martin Krainer          Nardy Pillards
+    Robert Eberlein         Corrin Lakeland
 
 
   Credit is also due to those who have published information about backgammon
