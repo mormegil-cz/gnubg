@@ -810,28 +810,42 @@ static void board_drag( GtkWidget *board, BoardData *bd, int x, int y ) {
 	    bd->ai_refract[ 0 ];
 	
 #if GTK_CHECK_VERSION(2,0,0)
+	GdkRegion *pr;
+	GdkRectangle r;
+	
 	gdk_window_process_updates( board->window, FALSE );
 #endif
 	
-	/* FIXME it would be nice to perform the point update and the drag
-	   start in a begin_paint, but there are many problems (e.g.
-	   board_expose_point can't cope with it, and GDK insists on
-	   clearing the background first, which ruins things for us) */
 	gdk_get_rgb_image( board->window,
 			   gdk_window_get_colormap( board->window ),
 			   x - 3 * bd->board_size, y - 3 * bd->board_size,
 			   6 * bd->board_size, 6 * bd->board_size,
 			   bd->rgb_temp_saved, 6 * bd->board_size * 3 );
 	
+#if GTK_CHECK_VERSION(2,0,0)
+	r.x = x - 3 * bd->board_size;
+	r.y = y - 3 * bd->board_size;
+	r.width = 6 * bd->board_size;
+	r.height = 6 * bd->board_size;
+	
+	pr = gdk_region_rectangle( &r );
+	
+	r.x = bd->x_drag - 3 * bd->board_size;
+	r.y = bd->y_drag - 3 * bd->board_size;
+	
+	gdk_region_union_with_rect( pr, &r );
+	
+	gdk_window_begin_paint_region( board->window, pr );
+
+	gdk_region_destroy( pr );
+#endif
+	
 	copy_rgb( bd->rgb_saved, bd->rgb_temp_saved, 0, 0,
 		  bd->x_drag - x, bd->y_drag - y,
 		  6 * bd->board_size, 6 * bd->board_size,
 		  6 * bd->board_size, 6 * bd->board_size,
 		  6 * bd->board_size * 3, 6 * bd->board_size * 3 );
-	
-	memcpy( bd->rgb_temp, bd->rgb_temp_saved, 6 * bd->board_size *
-		6 * bd->board_size * 3 );
-	
+
 	c = 6 * bd->board_size * 6 * bd->board_size;
 	for( j = 0, psrc = bd->drag_colour > 0 ? bd->rgba_o : bd->rgba_x,
 		 pdest = bd->rgb_temp; j < c; j++ ) {
@@ -852,9 +866,11 @@ static void board_drag( GtkWidget *board, BoardData *bd, int x, int y ) {
 			 bd->y_drag - 3 * bd->board_size,
 			 6 * bd->board_size, 6 * bd->board_size );
 	
+#if !GTK_CHECK_VERSION(2,0,0)
 	gdk_draw_pixmap( bd->pm_saved, bd->gc_copy, board->window,
 			 x - 3 * bd->board_size, y - 3 * bd->board_size,
 			 0, 0, 6 * bd->board_size, 6 * bd->board_size );
+#endif
 	
 	gdk_draw_rgb_image( board->window, bd->gc_copy,
 			    x - 3 * bd->board_size,
@@ -862,6 +878,15 @@ static void board_drag( GtkWidget *board, BoardData *bd, int x, int y ) {
 			    6 * bd->board_size, 6 * bd->board_size,
 			    GDK_RGB_DITHER_MAX, bd->rgb_temp,
 			    6 * bd->board_size * 3 );
+	
+#if GTK_CHECK_VERSION(2,0,0)
+	gdk_draw_rgb_image( bd->pm_saved, bd->gc_copy, 0, 0,
+			    6 * bd->board_size, 6 * bd->board_size,
+			    GDK_RGB_DITHER_MAX, bd->rgb_temp_saved,
+			    6 * bd->board_size * 3 );
+	
+	gdk_window_end_paint( board->window );
+#endif
 	
 	rgb_swap = bd->rgb_saved;
 	bd->rgb_saved = bd->rgb_temp_saved;
@@ -1892,7 +1917,9 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * bd->board_size;
 	else {
 	    /* FIXME different dice for first turn */
-	    /* FIXME avoid cocked dice if possible */
+	    int iAttempt = 0, iPoint, x, y, cx, cy;
+	    
+	cocked:
 	    bd->x_dice[ 0 ] = RAND % 21 + 13;
 	    bd->x_dice[ 1 ] = RAND % ( 34 - bd->x_dice[ 0 ] ) +
 		bd->x_dice[ 0 ] + 8;
@@ -1904,6 +1931,23 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	    
 	    bd->y_dice[ 0 ] = RAND % 10 + 28;
 	    bd->y_dice[ 1 ] = RAND % 10 + 28;
+	    
+	    for( iPoint = 1; iPoint <= 24; iPoint++ )
+		if( abs( bd->points[ iPoint ] ) >= 5 ) {
+		    point_area( bd, iPoint, &x, &y, &cx, &cy );
+		    x /= bd->board_size;
+		    y /= bd->board_size;
+		    cx /= bd->board_size;
+		    cy /= bd->board_size;
+		    
+		    if( ( intersects( bd->x_dice[ 0 ], bd->y_dice[ 0 ],
+				      7, 7, x, y, cx, cy ) ||
+			  intersects( bd->x_dice[ 1 ], bd->y_dice[ 1 ],
+				      7, 7, x, y, cx, cy ) ) &&
+			iAttempt++ < 0x80 )
+			goto cocked;
+		}
+	    
 	    bd->dice_colour[ 0 ] = bd->dice_colour[ 1 ] = bd->turn;
 	}
     }
