@@ -1947,27 +1947,27 @@ static void ScanCharacters( void *pv, const xmlChar *pchIn, int cch ) {
   case STATE_TITLE:
 
     pc = ppc->pbde->szTitle;
-    ppc->pbde->szTitle = g_strdup_printf ( "%s%s", pc, sz );
+    ppc->pbde->szTitle = g_strconcat( pc, sz, NULL );
     g_free ( pc );
     break;
 
   case STATE_AUTHOR:
 
     pc = ppc->pbde->szAuthor;
-    ppc->pbde->szAuthor = g_strdup_printf ( "%s%s", pc, sz );
+    ppc->pbde->szAuthor = g_strconcat( pc, sz, NULL );
     g_free ( pc );
     break;
 
   case STATE_PREVIEW_FILE:
 
     pc = ppc->pbde->szFilePreview;
-    ppc->pbde->szFilePreview = g_strdup_printf ( "%s%s", pc, sz );
+    ppc->pbde->szFilePreview = g_strconcat( pc, sz, NULL );
     g_free ( pc );
     break;
 
   case STATE_DESIGN:
     pc = ppc->pbde->szBoardDesign;
-    ppc->pbde->szBoardDesign = g_strdup_printf ( "%s%s", pc, sz );
+    ppc->pbde->szBoardDesign = g_strconcat( pc, sz, NULL );
     g_free ( pc );
     break;
 
