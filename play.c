@@ -1921,22 +1921,22 @@ extern void CommandAnnotateUnlucky( char *sz ) {
 
 extern void CommandAnnotateVeryBad( char *sz ) {
 
-    AnnotateMove( SKILL_BAD );
+    AnnotateMove( SKILL_VERYBAD );
 }
 
 extern void CommandAnnotateVeryGood( char *sz ) {
 
-    AnnotateMove( SKILL_GOOD );
+    AnnotateMove( SKILL_VERYGOOD );
 }
 
 extern void CommandAnnotateVeryLucky( char *sz ) {
 
-    AnnotateRoll( LUCK_GOOD );
+    AnnotateRoll( LUCK_VERYGOOD );
 }
 
 extern void CommandAnnotateVeryUnlucky( char *sz ) {
 
-    AnnotateRoll( LUCK_BAD );
+    AnnotateRoll( LUCK_VERYBAD );
 }
 
 extern void CommandDecline( char *sz ) {
