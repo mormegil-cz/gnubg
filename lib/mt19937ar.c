@@ -62,18 +62,17 @@
 /* static int mti=N+1; */ /* mti==N+1 means mt[N] is not initialized */
 
 /* initializes mt[N] with a seed */
-void init_genrand(unsigned long s, unsigned long mt[ N ] )
+void init_genrand(unsigned long s, int *mti, unsigned long mt[ N ] )
 {
-    int mti;
     mt[0]= s & 0xffffffffUL;
-    for (mti=1; mti<N; mti++) {
-        mt[mti] = 
-	    (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti); 
+    for (*mti=1; *mti<N; (*mti)++) {
+        mt[*mti] = 
+	    (1812433253UL * (mt[*mti-1] ^ (mt[*mti-1] >> 30)) + *mti); 
         /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
         /* In the previous versions, MSBs of the seed affect   */
         /* only MSBs of the array mt[].                        */
         /* 2002/01/09 modified by Makoto Matsumoto             */
-        mt[mti] &= 0xffffffffUL;
+        mt[*mti] &= 0xffffffffUL;
         /* for >32 bit machines */
     }
 }
@@ -120,7 +119,7 @@ unsigned long genrand_int32(int *mti, unsigned long mt[ N ] )
         int kk;
 
         if (*mti == N+1)   /* if init_genrand() has not been called, */
-            init_genrand(5489UL,mt); /* a default initial seed is used */
+            init_genrand(5489UL,mti,mt); /* a default initial seed is used */
 
         for (kk=0;kk<N-M;kk++) {
             y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);

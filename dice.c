@@ -640,7 +640,7 @@ extern void InitRNGSeed( int n, const rng rngx, void *p ) {
 	break;
     
     case RNG_MERSENNE:
-	init_genrand( n, rngctx->mt );
+	init_genrand( n, &rngctx->mti, rngctx->mt );
 	break;
 
     case RNG_USER:

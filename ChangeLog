@@ -1,3 +1,7 @@
+Mon May  3 15:20:43 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* osr.c, dice.c: add mti as parameter to init_genrand.
+
 Fri Apr 30 18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkboard.c: Change dice and cube selection dialogs to fixed size

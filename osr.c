@@ -860,7 +860,7 @@ raceProbs ( int anBoard[ 2 ][ 25 ], const int nGames,
 
   /* Seed set to ensure that OSR are reproducable */
 
-  init_genrand ( 0, mt );
+  init_genrand ( 0, &mti, mt );
 
   for ( i = 0; i < 5; ++i )
     arOutput[ i ] = 0.0f;
