@@ -26,6 +26,7 @@ Alain Henry
 Jens Hoefkens
 Matija Kejzar
 Corrin Lakeland
+Tim Laursen
 Kevin Maguire
 David Montgomery
 Dave Neary

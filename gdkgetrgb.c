@@ -114,4 +114,6 @@ gdk_get_rgb_image( GdkDrawable *drawable,
 
 	rgb_buf += rowstride;
     }
+
+    gdk_image_destroy( image );
 }
