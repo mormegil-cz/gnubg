@@ -254,6 +254,8 @@ static command acDatabase[] = {
       "during rollouts", NULL },
     { "score", CommandShowScore, "View the match or session score ",
       NULL },
+    { "thorp", CommandShowThorp, "Calculate Thorp Count at current"
+      " position", NULL },
     { "turn", CommandShowTurn, "Show which player is on roll", NULL },
     { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
       "not have", NULL },

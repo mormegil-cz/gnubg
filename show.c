@@ -338,7 +338,7 @@ extern void CommandShowWarranty( char *sz ) {
 extern void CommandShowKleinmann( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];
-    float KC;
+    float fKC;
 
     if( !sz && !*sz && fTurn == -1 ) {
         puts( "No position specified and no game in progress." );
@@ -353,10 +353,83 @@ extern void CommandShowKleinmann( char *sz ) {
      
     PipCount( an, anPips );
  
-    KC = KleinmannCount (anPips[1], anPips[0]);
-    if (KC == -1.0)
+    fKC = KleinmannCount (anPips[1], anPips[0]);
+    if (fKC == -1.0)
         printf ("Pipcount unsuitable for Kleinmann Count.\n");
     else
-        printf ("Cubeless Winning Chance: %f\n", KC);
+        printf ("Cubeless Winning Chance: %.4f\n", fKC);
  }
+extern void CommandShowThorp( char *sz ) {
+
+    int anPips[ 2 ], an[ 2 ][ 25 ];
+    int nLeader, nTrailer, anCovered[2], anMenLeft[2];
+    int x;
+
+    if( !sz && !*sz && fTurn == -1 ) {
+        puts( "No position specified and no game in progress." );
+        return;
+    }
+
+    if( ParsePosition( an, sz ) ) {
+        puts( "Illegal position." );
+
+        return;
+    }
+
+    PipCount( an, anPips );
+
+  anMenLeft[0] = 0;
+  anMenLeft[1] = 0;
+  for (x = 0; x < 25; x++)
+  for (x = 0; x < 25; x++)
+    {
+      anMenLeft[0] += an[0][x];
+      anMenLeft[1] += an[1][x];
+    }
+
+  anCovered[0] = 0;
+  anCovered[1] = 0;
+  for (x = 0; x < 6; x++)
+    {
+      if (an[0][x])
+        anCovered[0]++;
+      if (an[1][x])
+        anCovered[1]++;
+    }
+
+        nLeader = anPips[1];
+        nLeader += 2*anMenLeft[1];
+        nLeader += an[1][0];
+        nLeader -= anCovered[1];
+
+        if (nLeader > 30) {
+         if ((nLeader % 10) > 5)
+        {
+           nLeader *= 1.1;
+           nLeader += 1;
+        }
+         else
+          nLeader *= 1.1;
+        }
+        nTrailer = anPips[0];
+        nTrailer += 2*anMenLeft[0];
+        nTrailer += an[0][0];
+        nTrailer -= anCovered[0];
+
+        printf("L = %d  T = %d  -> ", nLeader, nTrailer);
+        if (nTrailer >= (nLeader - 1))
+          printf("re");
+        if (nTrailer >= (nLeader - 2))
+          printf("double/");
+        if (nTrailer < (nLeader - 2))
+          printf("no double/");
+        if (nTrailer >= (nLeader + 2))
+          printf("drop\n");
+        else
+          printf("take\n");
+
+        printf("Bower's interpolation: %d%% cubeless winning "
+                "chance\n", 74+2*(nTrailer-nLeader));
+}
+
 

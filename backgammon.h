@@ -198,6 +198,7 @@ extern void CommandAccept( char * ),
     CommandShowTurn( char * ),
     CommandShowWarranty( char * ),
     CommandShowKleinmann( char * ),
+    CommandShowThorp( char * ),
     CommandTake( char * ),
     CommandTrainTD( char * );
 #endif
