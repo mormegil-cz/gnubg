@@ -1,3 +1,10 @@
+Sat Aug 23 10:32:33 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ImportTMGGame): handle cases where the TMG file says "wins
+	1 point" but where the cube value is 2 or more. Typically the last game 	of a match.
+	(reported by Albert Silver)
+	* import.c (ImportTMGGame): handle small typo in Jim's commit :-)
+
 Fri Aug 22 15:01:19 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* import.c - add out of time type 22 for .tmg imports

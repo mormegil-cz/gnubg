@@ -2259,7 +2259,7 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
       TMG_WIN_BACKGAMMON = 16,
       TMG_OUT_OF_TIME = 17,
       TMG_TABLE_STAKE = 19,
-      TMG_OUT_OF_TIME_1 } tmgrecordtype;
+      TMG_OUT_OF_TIME_1 = 22 } tmgrecordtype;
     tmgrecordtype trt;
     
     InitBoard( ms.anBoard, ms.bgv );
@@ -2455,6 +2455,12 @@ static void ImportTMGGame( FILE *pf, int i, int nLength, int n0, int n1,
             pmr->r.sz = NULL;
             pmr->r.fPlayer = ! fPlayer;
             pmr->r.nResigned = atoi ( pch ) / ms.nCube;
+            if ( ! pmr->r.nResigned )
+              /* handle cases where the TMG file says "wins 1 point"
+                 but where the cube value is 2 or more. Typically the
+                 last game of a match */
+              pmr->r.nResigned = 1;
+              
             pmr->r.esResign.et = EVAL_NONE;
             
             AddMoveRecord( pmr );
