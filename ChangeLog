@@ -1,3 +1,8 @@
+Sun Dec 22 13:40:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+        * gnubg.c: Remove ProgressThrottle if HAVE_GETTIMEOFDAY is not defined
+	* gtkgame.c: Remove unused variables
+	
 Sun Dec 22 11:57:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Improve widget for showing match equity tables.

@@ -3951,7 +3951,7 @@ SetEvaluation ( gpointer *p, guint n, GtkWidget *pw ) {
 
 
     evalcontext ecChequer, ecCube;
-    GtkWidget *pwDialog, *pwEvalChequer, *pwEvalCube;
+    GtkWidget *pwDialog;
     GtkWidget *pwhbox, *pwFrame;
     GtkWidget *pwvbox;
     int fOK = FALSE;
