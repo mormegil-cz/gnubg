@@ -161,6 +161,7 @@ static char szDICE[] = "<die> <die>",
     szMOVE[] = "<from> <to> ...",
     szONOFF[] = "on|off",
     szOPTCOMMAND[] = "[command]",
+    szOPTFILENAME[] = "[filename]",
     szOPTPOSITION[] = "[position]",
     szOPTSEED[] = "[seed]",
     szOPTSIZE[] = "[size]",
@@ -222,7 +223,8 @@ command acDatabase[] = {
       NULL },
     { "match", CommandLoadMatch, "Read a saved match from a file", szFILENAME,
       NULL },
-    /* FIXME add equivalents to the other save commands here */
+    { "weights", CommandNotImplemented, "Read neural net weights from a file",
+      szOPTFILENAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acNew[] = {
     { "game", CommandNewGame, "Start a new game within the current match or "
@@ -242,7 +244,7 @@ command acDatabase[] = {
     { "settings", CommandSaveSettings, "Use the current settings in future "
       "sessions", NULL, NULL },
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
-      szFILENAME, NULL },
+      szOPTFILENAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetAutomatic[] = {
     { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
@@ -2129,20 +2131,32 @@ extern void CommandSaveSettings( char *szParam ) {
 
 extern void CommandSaveWeights( char *sz ) {
 
-  if( EvalSave( GNUBG_WEIGHTS /* FIXME accept file name parameter */ ) )
-    perror( GNUBG_WEIGHTS );
-  else
-    outputl( "Evaluator weights saved." );
+    if( !sz || !*sz )
+	sz = GNUBG_WEIGHTS;
+
+    if( EvalSave( sz ) )
+	perror( sz );
+    else
+	outputl( "Evaluator weights saved." );
 }
 
 extern void CommandTrainTD( char *sz ) {
 
-    int c = 0;
+    int c = 0, n;
     int anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ];
     int anDiceTrain[ 2 ];
     float ar[ NUM_OUTPUTS ];
     
-    while( !fInterrupt ) {
+    if( sz && *sz ) {
+	if( ( n = ParseNumber( &sz ) ) < 1 ) {
+	    outputl( "If you specify a parameter to `train td', it\n"
+		     "must be a number of positions to train on." );
+	    return;
+	}
+    } else
+	n = 0;
+      
+    while( ( !n || c <= n ) && !fInterrupt ) {
 	InitBoard( anBoardTrain );
 	
 	do {    
@@ -2177,7 +2191,8 @@ extern void CommandTrainTD( char *sz ) {
 		break;
 	    
 	    /* FIXME can stop as soon as perfect */
-	} while( !fInterrupt && !GameStatus( anBoardTrain ) );
+	} while( ( !n || c <= n ) && !fInterrupt &&
+		 !GameStatus( anBoardTrain ) );
     }
 }
 

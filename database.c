@@ -373,63 +373,72 @@ extern void CommandDatabaseGenerate( char *sz ) {
 
 extern void CommandDatabaseTrain( char *sz ) {
 
-  GDBM_FILE pdb;
-  datum dKey, dValue;
-  dbevaluation *pev;
-  int c = 0, i, anBoardTrain[ 2 ][ 25 ];
-  float arDesired[ NUM_OUTPUTS ];
-  void *p;
+    GDBM_FILE pdb;
+    datum dKey, dValue;
+    dbevaluation *pev;
+    int c = 0, n, i, anBoardTrain[ 2 ][ 25 ];
+    float arDesired[ NUM_OUTPUTS ];
+    void *p;
     
-  if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-    fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+    if( sz && *sz ) {
+	if( ( n = ParseNumber( &sz ) ) < 1 ) {
+	    outputl( "If you specify a parameter to `database train', it\n"
+		     "must be a number of positions to train on." );
+	    return;
+	}
+    } else
+	n = 0;
+    
+    if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
+	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
         
-    return;
-  }
-
-  while( !fInterrupt ) {
-    dKey = gdbm_firstkey( pdb );
-
-    while( dKey.dptr ) {
-      dValue = gdbm_fetch( pdb, dKey );
-
-	    pev = (dbevaluation *) dValue.dptr;
-
-	    if( pev->c >= 36 /* FIXME */ ) {
-        if( !( ++c % 100 ) && fShowProgress ) {
-          outputf( "%6d\r", c );
-          fflush( stdout );
-        }
+	return;
+    }
+    
+    while( ( !n || c <= n ) && !fInterrupt ) {
+	dKey = gdbm_firstkey( pdb );
+	
+	while( dKey.dptr ) {
+	    dValue = gdbm_fetch( pdb, dKey );
 	    
-        for( i = 0; i < NUM_OUTPUTS; i++ )
-          arDesired[ i ] = (float) pev->asEq[ i ] / 0xFFFF;
-
-        PositionFromKey( anBoardTrain, (unsigned char *) dKey.dptr );
-
-        TrainPosition( anBoardTrain, arDesired );
+	    pev = (dbevaluation *) dValue.dptr;
+	    
+	    if( pev->c >= 36 /* FIXME */ ) {
+		if( !( ++c % 100 ) && fShowProgress ) {
+		    outputf( "%6d\r", c );
+		    fflush( stdout );
+		}
+		
+		for( i = 0; i < NUM_OUTPUTS; i++ )
+		    arDesired[ i ] = (float) pev->asEq[ i ] / 0xFFFF;
+		
+		PositionFromKey( anBoardTrain, (unsigned char *) dKey.dptr );
+		
+		TrainPosition( anBoardTrain, arDesired );
 	    }
-
+	    
 	    free( pev );
-
+	    
 	    p = dKey.dptr;
-
-	    if( fInterrupt ) {
-        free( p );
-        break;
+	    
+	    if( ( n && c > n ) || fInterrupt ) {
+		free( p );
+		break;
 	    }
-
+	    
 	    dKey = gdbm_nextkey( pdb, dKey );
-
+	    
 	    free( p );
-    }
-
-    if( !c ) {
-	    outputl( "There are no target evaluations in the database to train "
-               "from." );
+	}
+	
+	if( !c ) {
+	    outputl( "There are no target evaluations in the database to "
+		     "train from." );
 	    break;
+	}
     }
-  }
-
-  gdbm_close( pdb );
+    
+    gdbm_close( pdb );
 }
 #else
 static void NoGDBM( void ) {
@@ -438,19 +447,19 @@ static void NoGDBM( void ) {
            "support, and does not implement position database operations." );
 }
 
-extern void CommandDatabaseExport( char *sz ) {
-  NoGDBM();
-}
-
-extern void CommandDatabaseImport( char *sz ) {
-  NoGDBM();
-}
-
 extern void CommandDatabaseDump( char *sz ) {
   NoGDBM();
 }
 
+extern void CommandDatabaseExport( char *sz ) {
+  NoGDBM();
+}
+
 extern void CommandDatabaseGenerate( char *sz ) {
+  NoGDBM();
+}
+
+extern void CommandDatabaseImport( char *sz ) {
   NoGDBM();
 }
 
@@ -462,5 +471,3 @@ extern void CommandDatabaseTrain( char *sz ) {
   NoGDBM();
 }
 #endif
-
-
