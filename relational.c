@@ -625,6 +625,9 @@ extern void CommandRelationalShowRecords(char *sz)
 extern void CommandRelationalSelect(char *sz)
 {
 #if USE_PYTHON
+#if !USE_GTK
+	int i, j;
+#endif
 	RowSet r;
 
 	if (!sz || !*sz)
