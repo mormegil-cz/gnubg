@@ -5397,6 +5397,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
+				/* xgettext: no-c-format */
                           _("Instead of averaging over all 21 possible "
                             "dice rolls it is possible to average over a "
                             "reduced set, for example 7 rolls for the 33% "
