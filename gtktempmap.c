@@ -532,7 +532,9 @@ GTKShowTempMap( const matchstate ams[], const int n,
 
   pwDialog = GTKCreateDialog( _("Sho Sengoku Temperature Map - "
                              "Distribution of rolls"), DT_INFO, NULL, NULL );
-
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                  GTK_WINDOW( pwMain ) );
 
   ptmw = (tempmapwidget *) g_malloc( sizeof ( tempmapwidget ) );
   ptmw->fShowBestMove = FALSE;

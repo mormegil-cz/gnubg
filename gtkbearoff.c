@@ -283,6 +283,10 @@ GTKShowBearoff( const matchstate *pms ) {
   pwDialog = GTKCreateDialog( _("Bearoff Databases"), 
                               DT_INFO, NULL, NULL );
 
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                  GTK_WINDOW( pwMain ) );
+
   pwv = gtk_vbox_new ( FALSE, 8 );
   gtk_container_set_border_width ( GTK_CONTAINER ( pwv ), 8);
   gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
