@@ -1,3 +1,8 @@
+Thu Aug  7 19:45:11 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (HTLMDumpStatcontext): always show Eq. Snowie error rate.
+	(reported by Chris Yep)
+
 Thu Aug  7 19:29:35 2003  Joern Thyssen  <jth@gnubg.org>
 
         * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 

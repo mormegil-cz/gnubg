@@ -3304,23 +3304,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
 
-      {
-        char asz[ 2 ][ 16 ];
-
-        for ( i = 0; i < 2; ++i )
-          if ( ( j = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
-            sprintf( asz[ i ], "%.1f", 1000.0 * 
-                     -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / j );
-          else
-            strcpy( asz[ i ], _("n/a") );
-
-        printStatTableRow ( pf, 
-                            _("Equivalent Snowie error rate"), 
-                            "%s", asz[ 0 ], asz[ 1 ] );
-
-      }
-
-
     }
     else {
 
@@ -3335,6 +3318,23 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
 
     }
+
+    {
+      char asz[ 2 ][ 16 ];
+      
+      for ( i = 0; i < 2; ++i )
+        if ( ( j = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
+            sprintf( asz[ i ], "%.1f", 1000.0 * 
+                     -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / j );
+        else
+          strcpy( asz[ i ], _("n/a") );
+      
+      printStatTableRow ( pf, 
+                          _("Equivalent Snowie error rate"), 
+                          "%s", asz[ 0 ], asz[ 1 ] );
+      
+    }
+
 
     for ( i = 0 ; i < 2; i++ ) 
       rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
