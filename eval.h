@@ -140,7 +140,6 @@ typedef enum _positionclass {
     CLASS_BEAROFF2, /* Two-sided bearoff database */
     CLASS_BEAROFF1, /* One-sided bearoff database */
     CLASS_RACE, /* Race neural network */
-    CLASS_BPG, /* On Bar, Back game, or Prime */
     CLASS_CONTACT /* Contact neural network */
 } positionclass;
 
