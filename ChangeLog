@@ -1,3 +1,10 @@
+Thu May 29 13:28:46 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* external.c (CommandExternal): bug fixes + resignations.
+	* drawboard.c (ParseFIBSBoard): let negative values of "doubled"
+	represent resignations.
+	(contributed by Rod Roark)
+
 Thu May 29 13:11:38 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (outputl, outputerrv): add fflush.

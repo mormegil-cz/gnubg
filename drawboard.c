@@ -1024,7 +1024,8 @@ extern int ParseFIBSBoard( char *pch, int anBoard[ 2 ][ 25 ],
 
     *pfCubeOwner = fCanDouble != fOppCanDouble ? fCanDouble : -1;
 
-    *pfDoubled = *pfDoubled != 0;
+    /* Negative values here show resignations now. -- Rod */
+    /* *pfDoubled = *pfDoubled != 0; */
 
     return 0;
 }
