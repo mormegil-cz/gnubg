@@ -108,7 +108,7 @@ With GNU Backgammon you may choose between the following dice generators
 @item Ansi
 @item Blum, Blum and Shub
 @item BSD
-@item ISAAK
+@item ISAAC
 @item MD5
 @item Mersenne Twister
 @item www.random.org
