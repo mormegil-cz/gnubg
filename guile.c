@@ -124,6 +124,8 @@ static void SCMToCubeInfo( SCM s, cubeinfo *pci ) {
 	SCM_ASSERT( SCM_REALP( sv ), sv, SCM_ARGn, NULL );
 	pci->arGammonPrice[ i ] = SCM_REAL_VALUE( sv );
     }
+
+    pci->bgv = VARIATION_STANDARD; /* FIXME */
 }
 
 static SCM board_to_position_id( SCM sBoard ) {
@@ -139,7 +141,7 @@ static SCM classify_position( SCM sBoard ) {
     int anBoard[ 2 ][ 25 ];
     
     SCMToBoard( sBoard, anBoard );
-    return SCM_MAKINUM( ClassifyPosition( anBoard ) );
+    return SCM_MAKINUM( ClassifyPosition( anBoard, VARIATION_STANDARD /* FIXME */ ) );
 }
 
 static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
@@ -184,7 +186,7 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
 		 sJacoby == SCM_UNDEFINED ? fJacoby :
 		 SCM_NFALSEP( sJacoby ),
 		 sBeavers == SCM_UNDEFINED ? nBeavers :
-		 SCM_INUM( sBeavers ) );
+		 SCM_INUM( sBeavers ), VARIATION_STANDARD );
 
     SCM_ALLOW_INTS;
     
@@ -212,7 +214,7 @@ static SCM cube_info_match( SCM sCube, SCM sCubeOwner, SCM sMove,
     
     SetCubeInfoMatch( &ci, SCM_INUM( sCube ), SCM_INUM( sCubeOwner ),
 		      SCM_INUM( sMove ), SCM_INUM( sMatchTo ), an,
-		      SCM_NFALSEP( sCrawford ) );
+		      SCM_NFALSEP( sCrawford ), VARIATION_STANDARD );
 
     SCM_ALLOW_INTS;
     
@@ -235,7 +237,7 @@ static SCM cube_info_money( SCM sCube, SCM sCubeOwner, SCM sMove,
 		      SCM_INUM( sMove ), sJacoby == SCM_UNDEFINED ?
 		      fJacoby : SCM_NFALSEP( sJacoby ),
 		      sBeavers == SCM_UNDEFINED ? nBeavers :
-		      SCM_INUM( sBeavers ) );
+		      SCM_INUM( sBeavers ), VARIATION_STANDARD );
 
     SCM_ALLOW_INTS;
     
