@@ -32,11 +32,7 @@ extern "C" {
 
 
 #define BOARD_WIDTH		108
-#if USE_BOARD3D /* || USE_OLD_LAYOUT */
-#define BOARD_HEIGHT		 72
-#else
 #define BOARD_HEIGHT		 82
-#endif
 #define BORDER_HEIGHT		  3
 #define BORDER_WIDTH		  3
 #define DIE_WIDTH		  7
