@@ -1,3 +1,7 @@
+Thu Nov 18 23:06:46 2004 GMT  Holger Bochnig <hbgg@gmx.net>
+
+	* bearoffdump.c: allow posids as arguments
+
 Mon Nov  15 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c (and others) : Simplify widget grabbing, hopefully

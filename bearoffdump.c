@@ -25,12 +25,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "getopt.h"
 #include "positionid.h"
 #include "bearoff.h"
 
 /* ugly fixes */
-char *aszRNG[]; 
-char *aszSkillType[ 1 ]; 
+char *aszRNG[];
+char *aszSkillType[ 1 ];
 int exsExport;
 int ap;
 
@@ -46,41 +47,73 @@ BearoffInitBuiltin ( void ) {
 static void
 show_usage( const char *arg0 ) {
 
-  printf( "Usage: %s file id\n"
-          "where file is a bearoff database and id is the number"
-          "of the position to dump\n.", arg0 );
+  printf( "Usage: %s file -n id | -p PosID\n"
+          "where file is a bearoff database and id is the number "
+          "of the position to dump. Alternatively, give a "
+          "position ID.\n", arg0 );
 
 }
 
 
-extern int 
+extern int
 main( int argc, char **argv ) {
 
-  char *filename;
-  int id;
+  char ch, *filename, *szPosID = NULL;
+  int id = 0;
   bearoffcontext *pbc;
   char sz[ 4096 ];
   int n;
   int nUs;
   int nThem;
   int anBoard[ 2 ][ 25 ];
+  int fIsPosID = FALSE;
 
-  if ( argc != 3 ) {
+  const struct option ao[] = {
+    { "index", required_argument, NULL, 'n' },
+    { "posid", required_argument, NULL, 'p' },
+    { "help", no_argument, NULL, 'h' },
+    { NULL, 0, NULL, 0 }
+  };
+
+  if ( argc != 4 ) {
     show_usage( argv[ 0 ] );
-    exit(-1);
+    exit( 1 );
   }
 
   filename = argv[ 1 ];
-  id = atoi( argv[ 2 ] );
 
-  printf( "Bearoff database: %s\n"
-          "Position#       : %d\n", filename, id );
+  while ( ( ch = getopt_long( argc, argv, "n:p:h", ao, NULL ) )
+          != (char) -1 )
+  switch( ch ) {
+  case 'n': /* position index in db */
+    id = atoi( optarg );
+    break;
+  case 'p': /* position index in db */
+    szPosID = optarg;
+    fIsPosID = TRUE;
+    break;
+  case 'h': /* help */
+    show_usage( argv[ 0 ] );
+    exit( 0 );
+    break;
+  default:
+    show_usage( argv[ 0 ] );
+    exit( 1 );
+}
+
+  printf( "Bearoff database: %s\n", filename );
+  if ( fIsPosID ) {
+    printf( "Position ID     : %s\n", szPosID );
+  }
+  else {
+    printf( "Position number : %d\n", id );
+  }
 
   if (  ! ( pbc = BearoffInit ( filename, NULL, BO_NONE, NULL ) ) ) {
     printf( "Failed to initialise bearoff database %s\n", filename );
     exit(-1);
   }
-  
+
   /* information about bearoff database */
 
   printf( "\n"
@@ -90,18 +123,29 @@ main( int argc, char **argv ) {
   BearoffStatus( pbc, sz );
   puts( sz );
 
-  /* dump req. position */
-
-  printf( "\n"
-          "Dump of position#: %d\n\n", id );
+  /* set up board */
 
   memset( anBoard, 0, sizeof anBoard );
 
-  n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-  nUs = id / n;
-  nThem = id % n;
-  PositionFromBearoff( anBoard[ 0 ], nThem, pbc->nPoints, pbc->nChequers );
-  PositionFromBearoff( anBoard[ 1 ], nUs, pbc->nPoints, pbc->nChequers );
+  if ( fIsPosID ) {
+    printf( "\n"
+            "Dump of position ID: %s\n\n", szPosID );
+
+    PositionFromID( anBoard, szPosID );
+  }
+  else {
+    printf( "\n"
+            "Dump of position#: %d\n\n", id );
+
+    n = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+    nUs = id / n;
+    nThem = id % n;
+    PositionFromBearoff( anBoard[ 0 ], nThem, pbc->nPoints, pbc->nChequers );
+    PositionFromBearoff( anBoard[ 1 ], nUs, pbc->nPoints, pbc->nChequers );
+  }
+
+  /* dump req. position */
+
   *sz = 0;
   BearoffDump( pbc, anBoard, sz );
   puts( sz );
@@ -109,5 +153,5 @@ main( int argc, char **argv ) {
   BearoffClose( &pbc );
 
   return 0;
-  
+
 }
