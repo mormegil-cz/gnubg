@@ -192,7 +192,7 @@ check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
-	i18n.c i18n.h
+	i18n.c i18n.h getopt.c getopt.h getopt1.c
 
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
@@ -251,7 +251,8 @@ gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
-	matchid.$(OBJEXT) i18n.$(OBJEXT)
+	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
+	getopt1.$(OBJEXT)
 makebearoff_OBJECTS = $(am_makebearoff_OBJECTS)
 makebearoff_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT)

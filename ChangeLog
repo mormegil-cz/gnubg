@@ -1,3 +1,8 @@
+Thu Oct 10 21:14:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* Makefile.am: getopt.[ch], getopt1.c is now needed by makebearoff 
+	(reported by Jim Segrave)
+
 Wed Oct  9 22:55:46 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Output match info in text and html export.
