@@ -56,6 +56,9 @@ if test "$with_guile" = "no"; then
   no_guile=yes
 else
   AM_GUILE
+  if test "$with_guile" != ""; then
+    GUILE_LDFLAGS="$with_guile"
+  fi
 fi
 if test "$no_guile" != "yes"; then
   AC_DEFINE(USE_GUILE,1,Define if you want to use the Guile extensibility language.)
