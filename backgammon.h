@@ -745,4 +745,12 @@ extern void CommandAccept( char * ),
     CommandSwapPlayers ( char * ),
     CommandTake( char * ),
     CommandTrainTD( char * );
+
+
+extern int fTutor;
+extern void CommandSetTutor( char * ),
+  CommandShowTutor( char * );
+
+extern int GiveAdvice ( skilltype Skill );
+
 #endif

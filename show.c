@@ -1435,3 +1435,14 @@ CommandShowPath ( char *sz ) {
   }
 
 }
+
+extern void CommandShowTutor( char *sz ) {
+
+  if( fTutor )
+	outputl( _("Warnings are given for \'doubtful\', \'bad\', or "
+			   "\'very bad\' moves.") );
+  else
+	outputl( _("No warnings are given for \'doubtful\', \'bad\', or "
+			   "\'very bad\' moves.") );
+}
+

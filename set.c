@@ -2460,3 +2460,11 @@ CommandSetPathText ( char *sz ) {
 }
 
 
+extern void CommandSetTutor( char *sz) {
+
+  SetToggle ("tutor", &fTutor, sz,
+			 _("Warnings are given for \'doubtful\', \'bad\', or "
+			   "\'very bad\' moves."),
+			 _("No warnings are given for \'doubtful\', \'bad\', or "
+			   "\'very bad\' moves.") );
+}

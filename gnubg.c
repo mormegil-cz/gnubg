@@ -176,6 +176,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
 int fAutoAnalysis = FALSE;
 int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
+int fTutor = FALSE;
 
 char aaszPaths[ PATH_MET + 1 ][ 2 ][ 255 ];
 char *szCurrentFileName = NULL;
@@ -972,6 +973,8 @@ command cER = {
       N_("Control training parameters"), NULL, acSetTraining },
     { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
       &cPlayer },
+	{ "tutor", CommandSetTutor, N_("Give Advice on moves and cube play"),
+	  szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowStatistics[] = {
     { "game", CommandShowStatisticsGame, 
@@ -1064,6 +1067,8 @@ command cER = {
       N_("Show which player is on roll"), NULL, NULL },
     { "version", CommandShowVersion, 
       N_("Describe this version of GNU Backgammon"),
+      NULL, NULL },
+	{ "tutor", CommandShowTutor, N_("Give Advice on Moves"),
       NULL, NULL },
     { "warranty", CommandShowWarranty, 
       N_("Various kinds of warranty you do not have"), NULL, NULL },
@@ -3809,6 +3814,7 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf( pf, "set cache %d\n", cCache );
 
     fprintf( pf, "set clockwise %s\n"
+		 "set tutor %s\n"
 	     "set confirm new %s\n"
 	     "set confirm save %s\n"
 	     "set cube use %s\n"
@@ -3818,6 +3824,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set display %s\n"
 	     "set egyptian %s\n",
 	     fClockwise ? "on" : "off", 
+			 fTutor ? "on" : "off",
              fConfirm ? "on" : "off",
              fConfirmSave ? "on" : "off",
 	     fCubeUse ? "on" : "off",
@@ -5733,7 +5740,6 @@ setDefaultFileName ( const char *sz, const pathformat f ) {
   if ( szCurrentFileName )
     free ( szCurrentFileName );
 
-
   if ( ( pc = strrchr ( sz, DIR_SEPARATOR ) ) ) {
     szCurrentFileName = strdup ( pc + 1 );
     if ( ( pcdot = strrchr ( szCurrentFileName, '.' ) ) )
@@ -5909,3 +5915,72 @@ UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   sc.es = *pes;
 
 }
+
+/* ask for confirmation if this is a sub-optimal play 
+ * returns TRUE if player wants to re-think the move
+ */
+
+static int GetAdviceAnswer( char *sz ) {
+
+  char	*pch;
+#if USE_GTK
+  if( fX )
+	return GtkTutor ( sz );
+#endif
+
+    if( fInterrupt )
+    return FALSE;
+
+    while( 1 ) {
+	pch = GetInput( sz );
+
+	if( pch )
+	    switch( *pch ) {
+	    case 'y':
+	    case 'Y':
+		free( pch );
+		return TRUE;
+	    case 'n':
+	    case 'N':
+		free( pch );
+		return FALSE;
+	    default:
+		free( pch );
+	    }
+
+	if( fInterrupt )
+	    return FALSE;
+	
+	outputl( _("Please answer `y' or `n'.") );
+    }
+}
+
+extern int GiveAdvice( skilltype Skill ) {
+
+  char *sz;
+
+  /* should never happen */
+  if ( !fTutor )
+	return FALSE;
+  
+	switch (Skill) {
+
+	case SKILL_VERYBAD:
+	  sz = _( "You may be about to make a very bad play. Are you sure? " );
+	  break;
+
+	case SKILL_BAD:
+	  sz = _( "You may be about to make a bad play. Are you sure? " );
+	  break;
+	  
+	case SKILL_DOUBTFUL:
+	  sz = _( "You may be about to make a doubtful play. Are you sure? " );
+	  break;
+
+	default:
+	  return (TRUE);
+	}
+
+	return GetAdviceAnswer( sz );
+}
+
