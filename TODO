@@ -4,7 +4,7 @@ duplication of effort and to make sure our changes merge easily.
 
 * Evaluations:
 ** Allow different settings (e.g. search ply, candidates, tolerance) for each
-  position class. Also allow different settings for cube action.
+  position class.
 ** Add more evaluation classes.
 *** Add a neural net to correct errors in BEAROFF1 class.
 *** Classes for bearing off against contact, back games, containment
@@ -160,7 +160,7 @@ duplication of effort and to make sure our changes merge easily.
   annotation.
 ** When a long string is displayed in the status bar, the main window
   grows to accomodate it -- not very pretty.  A Layout or Viewport widget
-  might be able to fix this.
+  might be able to fix this.  (Fixed under GTK+ 2.0.)
 ** Make GTKDumpStatcontext check psc->fMoves, psc->fDice and psc->fCube,
   and only output the relevant statistics.
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
@@ -175,7 +175,8 @@ duplication of effort and to make sure our changes merge easily.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
-  or execute it.
+  or execute it.  Also use gtk_label_set_markup style markup in the help
+  window.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
@@ -228,12 +229,11 @@ functions:
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
 ** "help next" (and "next <tab>") are incomplete.
-** ShowManual() should look in the directory given with -d.
 ** GtkTexi should try to load images from the same directory as the XML file.
 ** GTK+ 2.0 wants strings in UTF-8.  Unfortunately SGF files are specified
   to be ISO 8859-1, and the terminal is locale-dependent. (gary)
-** Should InitMatchEquity() look in PKGDATADIR and/or PKGDATADIR/met/ as well
-  as . (and even ./met/) if given a relative file name?
+** "save settings" when using the TTY interface will delete GTK settings
+  (e.g. "set appearance") that were there previously.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

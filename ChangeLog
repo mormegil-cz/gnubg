@@ -1,3 +1,19 @@
+Fri Mar 22 15:27:19 2002  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (PathSearch): New function.
+	* gtkgame.c (SetMET): Use the met/ directory if possible.
+	(ShowManual): Use PathSearch() to find the manual.
+	* matchequity.c (readMET, InitMatchEquity): User PathSearch() to
+	find the MET.
+	* strdup.c (strdup): New file.
+
+	* gnubg.c (real_main): Default to using the current directory if
+	$HOME is not set.
+	
+	* gtkboard.c (board_drag): Use double buffering under GTK+ 2.0.
+
+	* gtkboard.c (board_set): Avoid cocked dice if possible.
+
 Fri Mar 22 10:23:22 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (FormatStatEquity, FormatStatCubeError): New functions.

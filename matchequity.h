@@ -56,7 +56,7 @@ extern metinfo miCurrent;
 /* Initialise match equity table */
 
 void
-InitMatchEquity ( const char *szFileName );
+InitMatchEquity ( const char *szFileName, const char *szDir );
 
 /* Get double points */
 

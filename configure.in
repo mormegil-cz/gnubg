@@ -100,7 +100,7 @@ fi
 AC_SEARCH_LIBS(connect,socket,AC_DEFINE(HAVE_SOCKETS,1,Define if the system supports AC_LOCAL sockets.))
 AC_SEARCH_LIBS(gethostbyname,nsl)
 AC_SEARCH_LIBS(inet_aton,resolv)
-AC_REPLACE_FUNCS(erf)
+AC_REPLACE_FUNCS(erf strdup)
 
 dnl Check for GTK
 AC_ARG_WITH(gtk,[  --with-gtk              use GTK+ library and widgets])

@@ -578,7 +578,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 			      GeneralPage( bd ),
 			      gtk_label_new( "General" ) );
 
-    /* FIXME add settings for ambient light, and border and cube colours */
+    /* FIXME add settings for ambient light, and dice pip and cube colours */
     
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),

@@ -299,7 +299,6 @@ extern void UpdateSettings( void );
 extern void ResetInterrupt( void );
 extern void PromptForExit( void );
 extern void Prompt( void );
-
 extern void PortableSignal( int nSignal, RETSIGTYPE (*p)(int),
 			    psighandler *pOld, int fRestart );
 extern void PortableSignalRestore( int nSignal, psighandler *p );
@@ -364,7 +363,7 @@ extern void WinCopy( char *szOut );
 extern int iProgressMax, iProgressValue;
 extern char *pcProgress;
 
-extern char *aszVersion[], *szHomeDirectory;
+extern char *aszVersion[], *szHomeDirectory, *szDataDirectory;
 
 extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[];

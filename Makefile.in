@@ -184,7 +184,7 @@ DATA =  $(pkgdata_DATA)
 DIST_COMMON =  README ./stamp-h.in AUTHORS COPYING ChangeLog INSTALL \
 Makefile.am Makefile.in NEWS TODO acconfig.h acinclude.m4 aclocal.m4 \
 config.h.in configure configure.in erf.c install-sh missing \
-mkinstalldirs
+mkinstalldirs strdup.c
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
@@ -201,7 +201,7 @@ DEP_FILES =  .deps/analysis.P .deps/copying.P .deps/credits.P \
 .deps/kleinman.P .deps/latex.P .deps/makebearoff.P .deps/makeweights.P \
 .deps/matchequity.P .deps/play.P .deps/positionid.P .deps/postscript.P \
 .deps/pub_eval.P .deps/rollout.P .deps/set.P .deps/sgf.P .deps/sgfl.P \
-.deps/sgfp.P .deps/show.P .deps/xboard.P .deps/xgame.P
+.deps/sgfp.P .deps/show.P .deps/strdup.P .deps/xboard.P .deps/xgame.P
 SOURCES = $(gnubg_SOURCES) $(erftest_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 OBJECTS = $(gnubg_OBJECTS) $(erftest_OBJECTS) $(makebearoff_OBJECTS) $(makeweights_OBJECTS)
 

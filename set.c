@@ -1778,7 +1778,7 @@ extern void CommandSetMET( char *sz ) {
 
   sz = NextToken ( &sz );
 
-  InitMatchEquity ( sz );
+  InitMatchEquity ( sz, szDataDirectory );
 
   outputf( "GNU Backgammon will now use the %s match equity table.\n",
            miCurrent.szName );

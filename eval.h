@@ -208,7 +208,9 @@ typedef enum _positionclass {
 #define N_CLASSES (CLASS_CONTACT + 1)
 
 #define CLASS_PERFECT CLASS_BEAROFF2
-				      
+
+extern char *PathSearch( const char *szFile, const char *szDir );
+			      
 extern int 
 EvalInitialise( char *szWeights, char *szWeightsBinary,
                 char *szDatabase, char *szDir, int nSize,

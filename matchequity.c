@@ -49,6 +49,7 @@ extern double erf( double x );
 #define G2            0.15
 #define GAMMONRATE    0.25
 
+#include "eval.h"
 #include "matchequity.h"
 
 typedef struct _parameter {
@@ -1217,14 +1218,15 @@ void validateError ( void *ctx,
 }
 
 
-extern int readMET ( metdata *pmd, const char *szFileName ) {
+static int readMET ( metdata *pmd, const char *szFileName,
+		     const char *szDir ) {
 
   xmlDocPtr doc;
   xmlNodePtr root, cur;
 
   xmlValidCtxt ctxt;
 
-  char *pc;
+  char *pc, *pch;
 
   int fError;
 
@@ -1232,8 +1234,9 @@ extern int readMET ( metdata *pmd, const char *szFileName ) {
 
   /* parse document */
 
-  doc = xmlParseFile( szFileName );
-
+  doc = xmlParseFile( pch = PathSearch( szFileName, szDir ) );
+  free( pch );
+  
   /* check root */
 
   root = xmlDocGetRootElement ( doc );
@@ -1265,6 +1268,8 @@ extern int readMET ( metdata *pmd, const char *szFileName ) {
 
   /* FIXME: any tweaks needed for win32? */
 
+  xmlLoadCatalog( pch = PathSearch( "met/catalog", szDir ) );
+  free( pch );
   xmlLoadCatalog ( PKGDATADIR "/met/catalog " );
   if ( ( pc = getenv ( "SGML_CATALOG_FILES" ) ) )
     xmlLoadCatalog ( pc );
@@ -1380,7 +1385,7 @@ extern int readMET ( metdata *pmd, const char *szFileName ) {
 #endif
 
 extern void
-InitMatchEquity ( const char *szFileName ) {
+InitMatchEquity ( const char *szFileName, const char *szDir ) {
 
   int i,j;
   metdata md;
@@ -1392,7 +1397,7 @@ InitMatchEquity ( const char *szFileName ) {
    * Read match equity table from XML file
    */
 
-  if ( readMET ( &md, szFileName ) ) {
+  if ( readMET ( &md, szFileName, szDir ) ) {
 
     if ( ! fTableLoaded ) {
 

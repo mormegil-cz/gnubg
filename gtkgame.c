@@ -147,7 +147,6 @@ typedef enum _gnubgcommand {
     CMD_SET_DISPLAY,
     CMD_SET_EGYPTIAN,
     CMD_SET_JACOBY,
-    CMD_SET_MET,
     CMD_SET_NACKGAMMON,
     CMD_SET_OUTPUT_MATCHPC,
     CMD_SET_OUTPUT_MWC,
@@ -258,7 +257,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set display",
     "set egyptian",
     "set jacoby",
-    NULL, /* set matchequitytable */
     "set nackgammon",
     "set output matchpc",
     "set output mwc",
@@ -2127,16 +2125,15 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/Doubling cube", NULL, Command, CMD_SET_CUBE_USE,
 	  "<CheckItem>" },
 	{ "/_Settings/_Evaluation", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Evaluation/Chequer play...", NULL, SetEvalChequer, 0,\
-                   NULL },
-	{ "/_Settings/_Evaluation/Cube decisions...", NULL, SetEvalCube, 0,\
-                   NULL },
+	{ "/_Settings/_Evaluation/Chequer play...", NULL, SetEvalChequer, 0,
+	  NULL },
+	{ "/_Settings/_Evaluation/Cube decisions...", NULL, SetEvalCube, 0,
+	  NULL },
         { "/_Settings/_Egyptian rule", NULL, Command, CMD_SET_EGYPTIAN,
           "<CheckItem>" },
 	{ "/_Settings/_Jacoby rule", NULL, Command, CMD_SET_JACOBY,
 	  "<CheckItem>" },
-	{ "/_Settings/_Match equity table...", NULL, SetMET, 
-          CMD_SET_MET, NULL },
+	{ "/_Settings/_Match equity table...", NULL, SetMET, 0, NULL },
 	{ "/_Settings/_Nackgammon", NULL, Command, CMD_SET_NACKGAMMON,
 	  "<CheckItem>" },
 	{ "/_Settings/_Output", NULL, NULL, 0, "<Branch>" },
@@ -2883,11 +2880,14 @@ static void FileOK( GtkWidget *pw, char **ppch ) {
     gtk_widget_destroy( pwFile );
 }
 
-static char *SelectFile( char *szTitle ) {
+static char *SelectFile( char *szTitle, char *szDefault ) {
 
     char *pch = NULL;
     GtkWidget *pw = gtk_file_selection_new( szTitle );
 
+    if( szDefault )
+	gtk_file_selection_set_filename( GTK_FILE_SELECTION( pw ), szDefault );
+    
     gtk_signal_connect( GTK_OBJECT( GTK_FILE_SELECTION( pw )->ok_button ),
 			"clicked", GTK_SIGNAL_FUNC( FileOK ), &pch );
     gtk_signal_connect_object( GTK_OBJECT( GTK_FILE_SELECTION( pw )->
@@ -2909,11 +2909,11 @@ static char *SelectFile( char *szTitle ) {
     return pch;
 }
 
-static void FileCommand( char *szPrompt, char *szCommand ) {
+static void FileCommand( char *szPrompt, char *szDefault, char *szCommand ) {
 
     char *pch;
     
-    if( ( pch = SelectFile( szPrompt ) ) ) {
+    if( ( pch = SelectFile( szPrompt, szDefault ) ) ) {
 #if __GNUC__
 	char sz[ strlen( pch ) + strlen( szCommand ) + 2 ];
 #elif HAVE_ALLOCA
@@ -2930,152 +2930,163 @@ static void FileCommand( char *szPrompt, char *szCommand ) {
 
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Open commands", "load commands" );
+    FileCommand( "Open commands", NULL, "load commands" );
 }
 
 static void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Set match equity table", "set matchequitytable " );
+    char *pch = PathSearch( "met/", szDataDirectory );
+
+    if( pch && access( pch, R_OK ) ) {
+	free( pch );
+	pch = NULL;
+    }
+    
+    FileCommand( "Set match equity table", pch, "set matchequitytable " );
+
+    if( pch )
+	free( pch );
 }
 
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Open game", "load game" );
+    FileCommand( "Open game", NULL, "load game" );
 }
 
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Open match", "load match" );
+    FileCommand( "Open match", NULL, "load match" );
 }
 
 static void ImportMat( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import .mat match", "import mat" );
+    FileCommand( "Import .mat match", NULL, "import mat" );
 }
 
 static void ImportPos( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import .pos position", "import pos" );
+    FileCommand( "Import .pos position", NULL, "import pos" );
 }
 
 static void ImportOldmoves( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import FIBS oldmoves", "import oldmoves" );
+    FileCommand( "Import FIBS oldmoves", NULL, "import oldmoves" );
 }
 
 static void ImportSGG( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import .sgg match", "import sgg" );
+    FileCommand( "Import .sgg match", NULL, "import sgg" );
 }
 
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Save game", "save game" );
+    FileCommand( "Save game", NULL, "save game" );
 }
 
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Save match", "save match" );
+    FileCommand( "Save match", NULL, "save match" );
 }
 
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Save weights", "save weights" );
+    FileCommand( "Save weights", NULL, "save weights" );
 }
 
 static void ExportGameGam( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export .gam game", "export game gam" );
+    FileCommand( "Export .gam game", NULL, "export game gam" );
 }
 
 static void ExportGameHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML game", "export game html" );
+    FileCommand( "Export HTML game", NULL, "export game html" );
 }
 
 static void ExportGameLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export LaTeX game", "export game latex" );
+    FileCommand( "Export LaTeX game", NULL, "export game latex" );
 }
 
 static void ExportGamePDF( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PDF game", "export game pdf" );
+    FileCommand( "Export PDF game", NULL, "export game pdf" );
 }
 
 static void ExportGamePostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PostScript game", "export game postscript" );
+    FileCommand( "Export PostScript game", NULL, "export game postscript" );
 }
 
 static void ExportMatchLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export LaTeX match", "export match latex" );
+    FileCommand( "Export LaTeX match", NULL, "export match latex" );
 }
 
 static void ExportMatchHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML match", "export match html" );
+    FileCommand( "Export HTML match", NULL, "export match html" );
 }
 
 static void ExportMatchMat( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export .mat match", "export match mat" );
+    FileCommand( "Export .mat match", NULL, "export match mat" );
 }
 
 static void ExportMatchPDF( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PDF match", "export match pdf" );
+    FileCommand( "Export PDF match", NULL, "export match pdf" );
 }
 
 static void ExportMatchPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PostScript match", "export match postscript" );
+    FileCommand( "Export PostScript match", NULL, "export match postscript" );
 }
 
 static void ExportPositionEPS( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export EPS position", "export position eps" );
+    FileCommand( "Export EPS position", NULL, "export position eps" );
 }
 
 static void ExportPositionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML position", "export position html" );
+    FileCommand( "Export HTML position", NULL, "export position html" );
 }
 
 static void ExportPositionPos( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export .pos position", "export position pos" );
+    FileCommand( "Export .pos position", NULL, "export position pos" );
 }
 
 static void ExportSessionLaTeX( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export LaTeX session", "export session latex" );
+    FileCommand( "Export LaTeX session", NULL, "export session latex" );
 }
 
 static void ExportSessionPDF( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PDF session", "export session pdf" );
+    FileCommand( "Export PDF session", NULL, "export session pdf" );
 }
 
 static void ExportSessionHtml( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export HTML session", "export session html" );
+    FileCommand( "Export HTML session", NULL, "export session html" );
 }
 
 static void ExportSessionPostScript( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export PostScript session", "export session postscript" );
+    FileCommand( "Export PostScript session", NULL,
+		 "export session postscript" );
 }
 
 static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Export database", "database export" );
+    FileCommand( "Export database", NULL, "database export" );
 }
 
 static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
 
-    FileCommand( "Import database", "database import" );
+    FileCommand( "Import database", NULL, "database import" );
 }
 
 typedef struct _evalwidget {
@@ -5623,8 +5634,6 @@ static void NoManual( void ) {
 static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
 #if HAVE_GTKTEXI
     static GtkWidget *pw;
-    static char szInstalledManual[] = PKGDATADIR "/gnubg.xml",
-	szUninstalledManual[] = "gnubg.xml";
     char *pch;
     
     if( pw ) {
@@ -5632,12 +5641,12 @@ static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
 	return;
     }
 
-    if( !access( szUninstalledManual, R_OK ) )
-	pch = szUninstalledManual;
-    else if( !access( szInstalledManual, R_OK ) )
-	pch = szInstalledManual;
-    else {
-	perror( szUninstalledManual );
+    if( !( pch = PathSearch( "gnubg.xml", szDataDirectory ) ) ) {
+	NoManual();
+	return;
+    } else if( access( pch, R_OK ) ) {
+	perror( pch );
+	free( pch );
 	NoManual();
 	return;
     }
@@ -5649,6 +5658,7 @@ static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
     gtk_widget_show_all( pw );
 
     gtk_texi_load( GTK_TEXI( pw ), pch );
+    free( pch );
     gtk_texi_render_node( GTK_TEXI( pw ), "Top" );
 #else
     NoManual();

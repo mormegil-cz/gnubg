@@ -440,6 +440,46 @@ static long EvalCacheHash( evalcache *pec ) {
     return l;    
 }
 
+/* Search for a readable file in szDir, ., and PKGDATADIR.  The
+   return string is malloc()ed. */
+extern char *PathSearch( const char *szFile, const char *szDir ) {
+
+    char *pch;
+    size_t cch;
+    
+    if( !szFile )
+	return NULL;
+
+    if( *szFile == '/' )
+	/* Absolute file name specified; don't bother searching. */
+	return strdup( szFile );
+
+    cch = szDir ? strlen( szDir ) : 0;
+    if( cch < strlen( PKGDATADIR ) )
+	cch = strlen( PKGDATADIR );
+
+    cch += strlen( szFile ) + 2;
+
+    if( !( pch = malloc( cch ) ) )
+	return NULL;
+
+    sprintf( pch, "%s/%s", szDir, szFile );
+    if( !access( pch, R_OK ) )
+	return realloc( pch, strlen( pch ) + 1 );
+
+    strcpy( pch, szFile );
+    if( !access( pch, R_OK ) )
+	return realloc( pch, strlen( pch ) + 1 );
+    
+    sprintf( pch, PKGDATADIR "/%s", szFile );
+    if( !access( pch, R_OK ) )
+	return realloc( pch, strlen( pch ) + 1 );
+
+    /* Return sz, so that a sensible error message can be given. */
+    strcpy( pch, szFile );
+    return realloc( pch, strlen( pch ) + 1 );
+}
+
 /* Open a file for reading with the search path "(szDir):.:(PKGDATADIR)". */
 static int PathOpen( char *szFile, char *szDir, int f ) {
 
