@@ -1917,7 +1917,7 @@ extern void HandleCommand( char *sz, command *ac ) {
 		PortableSignal( SIGINT, NULL, &sh, FALSE );
 		GuileStartIntHandler();
 		if( ( sResult = scm_internal_catch( SCM_BOOL_T,
-				    (scm_catch_body_t) scm_eval_0str,
+				    (scm_catch_body_t) scm_c_eval_string,
 				    sz + 1, scm_handle_by_message_noexit,
 				    NULL ) ) != SCM_UNSPECIFIED &&
 		    !cOutputDisabled ) {
@@ -1928,7 +1928,7 @@ extern void HandleCommand( char *sz, command *ac ) {
 		PortableSignalRestore( SIGINT, &sh );
 	    } else
 		/* No command -- start a Scheme shell */
-		scm_eval_0str( "(top-repl)" );
+		scm_c_eval_string( "(top-repl)" );
 #if USE_GTK
 	    if( fX )
 		GTKAllowStdin();
@@ -3323,9 +3323,10 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 #if USE_GUILE
 static SCM LoadCommandsGuileCatch( void *p, SCM sTag, SCM sArgs ) {
 
-    if( SCM_NFALSEP( scm_eq_p( sTag, SCM_CAR( scm_intern0( "quit" ) ) ) ) ||
-	SCM_NFALSEP( scm_eq_p( sTag, SCM_CAR( scm_intern0(
-	    "end-of-file" ) ) ) ) )
+    char *pch;
+    
+    if( SCM_SYMBOLP( sTag ) && ( pch = SCM_SYMBOL_CHARS( sTag ) ) &&
+	( !strcmp( pch, "quit" ) || !strcmp( pch, "end-of-file" ) ) )
 	return SCM_BOOL_T;
     else
 	return scm_handle_by_message_noexit( p, sTag, sArgs ); /* SCM_BOOL_F */

@@ -32,6 +32,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <stdio.h>
 #include <string.h>
 
 #include "backgammon.h"
@@ -472,41 +473,41 @@ static void LoadGuile( char *sz ) {
 
 extern int GuileInitialise( char *szDir ) {
 
-    scm_sysintern( "CLASS_OVER", SCM_MAKINUM( CLASS_OVER ) );
-    scm_sysintern( "CLASS_BEAROFF2", SCM_MAKINUM( CLASS_BEAROFF2 ) );
-    scm_sysintern( "CLASS_BEAROFF1", SCM_MAKINUM( CLASS_BEAROFF1 ) );
-    scm_sysintern( "CLASS_RACE", SCM_MAKINUM( CLASS_RACE ) );
-    scm_sysintern( "CLASS_CRASHED", SCM_MAKINUM( CLASS_CRASHED ) );
-    scm_sysintern( "CLASS_CONTACT", SCM_MAKINUM( CLASS_CONTACT ) );
+    scm_c_define( "CLASS_OVER", SCM_MAKINUM( CLASS_OVER ) );
+    scm_c_define( "CLASS_BEAROFF2", SCM_MAKINUM( CLASS_BEAROFF2 ) );
+    scm_c_define( "CLASS_BEAROFF1", SCM_MAKINUM( CLASS_BEAROFF1 ) );
+    scm_c_define( "CLASS_RACE", SCM_MAKINUM( CLASS_RACE ) );
+    scm_c_define( "CLASS_CRASHED", SCM_MAKINUM( CLASS_CRASHED ) );
+    scm_c_define( "CLASS_CONTACT", SCM_MAKINUM( CLASS_CONTACT ) );
 
-    scm_sysintern( "GAME_NONE", SCM_MAKINUM( GAME_NONE ) );
-    scm_sysintern( "GAME_PLAYING", SCM_MAKINUM( GAME_PLAYING ) );
-    scm_sysintern( "GAME_OVER", SCM_MAKINUM( GAME_OVER ) );
-    scm_sysintern( "GAME_RESIGNED", SCM_MAKINUM( GAME_RESIGNED ) );
-    scm_sysintern( "GAME_DROP", SCM_MAKINUM( GAME_DROP ) );
+    scm_c_define( "GAME_NONE", SCM_MAKINUM( GAME_NONE ) );
+    scm_c_define( "GAME_PLAYING", SCM_MAKINUM( GAME_PLAYING ) );
+    scm_c_define( "GAME_OVER", SCM_MAKINUM( GAME_OVER ) );
+    scm_c_define( "GAME_RESIGNED", SCM_MAKINUM( GAME_RESIGNED ) );
+    scm_c_define( "GAME_DROP", SCM_MAKINUM( GAME_DROP ) );
     
-    scm_make_gsubr( "board->position-id", 1, 0, 0, board_to_position_id );
-    scm_make_gsubr( "classify-position", 1, 0, 0, classify_position );
-    scm_make_gsubr( "cube-info", 0, 8, 0, cube_info );
-    scm_make_gsubr( "cube-info-match", 6, 0, 0, cube_info_match );
-    scm_make_gsubr( "cube-info-money", 3, 2, 0, cube_info_money );
-    scm_make_gsubr( "current-board", 0, 0, 0, current_board );
-    scm_make_gsubr( "current-score", 0, 0, 0, current_score );
-    scm_make_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
-    scm_make_gsubr( "evaluate-position-cubeful", 1, 2, 0,
+    scm_c_define_gsubr( "board->position-id", 1, 0, 0, board_to_position_id );
+    scm_c_define_gsubr( "classify-position", 1, 0, 0, classify_position );
+    scm_c_define_gsubr( "cube-info", 0, 8, 0, cube_info );
+    scm_c_define_gsubr( "cube-info-match", 6, 0, 0, cube_info_match );
+    scm_c_define_gsubr( "cube-info-money", 3, 2, 0, cube_info_money );
+    scm_c_define_gsubr( "current-board", 0, 0, 0, current_board );
+    scm_c_define_gsubr( "current-score", 0, 0, 0, current_score );
+    scm_c_define_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
+    scm_c_define_gsubr( "evaluate-position-cubeful", 1, 2, 0,
 		    evaluate_position_cubeful );
-    scm_make_gsubr( "game-state", 0, 0, 0, game_state );
-    scm_make_gsubr( "gnubg-command", 1, 0, 0, gnubg_command );
-    scm_make_gsubr( "menu-bar", 0, 0, 0, menu_bar );
-    scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
-    scm_make_gsubr( "rollout-position", 1, 3, 0, rollout_position );
+    scm_c_define_gsubr( "game-state", 0, 0, 0, game_state );
+    scm_c_define_gsubr( "gnubg-command", 1, 0, 0, gnubg_command );
+    scm_c_define_gsubr( "menu-bar", 0, 0, 0, menu_bar );
+    scm_c_define_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
+    scm_c_define_gsubr( "rollout-position", 1, 3, 0, rollout_position );
 
     /* This is an ugly way to get something to pass to scm_sigaction,
        but it works. */
-    sInterrupt = scm_eval_0str( "(lambda (sig) "
-				"(scm-error 'signal #f "
-				"\"User interrupt\" #f (list SIGINT)))" );
-    scm_protect_object( sInterrupt );
+    sInterrupt = scm_c_eval_string( "(lambda (sig) "
+				    "(scm-error 'signal #f "
+				    "\"User interrupt\" #f (list SIGINT)))" );
+    scm_gc_protect_object( sInterrupt );
 
 #if USE_GTK && HAVE_LIBGUILEGTK_1_2
     if( fX ) {
@@ -515,8 +516,10 @@ extern int GuileInitialise( char *szDir ) {
     }
 #endif
 
+#if 0
     scm_set_current_module( scm_resolve_module(
 	scm_read_0str( "(guile-user)" ) ) );
+#endif
     
     if( szDir ) {
 #if __GNUC__

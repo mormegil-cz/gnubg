@@ -1,3 +1,9 @@
+Sun Sep  8 17:58:28 2002  Gary Wong  <gtw@research.att.com>
+
+	* acinclude.m4: Check for Guile 1.6.0 or newer (since gnubg has
+	been incompatible with the 1.4.0 module system for some time).
+	* gnubg.c, guile.c: Avoid funcions deprecated in Guile 1.6.0.
+
 Sun Sep  8 22:36:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Add buttons for 0-4 ply in cube and move widgets.
