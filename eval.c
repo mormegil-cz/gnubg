@@ -93,9 +93,9 @@ static int
 EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
-                          cubeinfo aciCubePos[], int cci, 
-                          cubeinfo *pciMove,
-                          evalcontext *pec, 
+                          const cubeinfo aciCubePos[], int cci, 
+                          const cubeinfo* pciMove,
+                          const evalcontext* pec, 
                           int nPlies, int fTop );
 
 static int MaxTurns( int i );
@@ -2429,7 +2429,8 @@ static classevalfunc acef[ N_CLASSES ] = {
     EvalRace, EvalCrashed, EvalContact
 };
 
-static float Noise( evalcontext *pec, int anBoard[ 2 ][ 25 ], int iOutput ) {
+static float Noise( const evalcontext* pec, int anBoard[ 2 ][ 25 ],
+		    int iOutput ) {
 
     float r;
     
@@ -2484,20 +2485,19 @@ static float Noise( evalcontext *pec, int anBoard[ 2 ][ 25 ], int iOutput ) {
 
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
-                       cubeinfo *pci, evalcontext *pecx, int nPlies,
-                       positionclass pc );
+                       const cubeinfo* pci, const evalcontext* pecx,
+		       int nPlies, positionclass pc );
 
 static int 
 FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
-                   int anBoard[ 2 ][ 25 ], cubeinfo *pci,
-                   evalcontext *pec, 
-                   int nPlies,
+                   int anBoard[ 2 ][ 25 ], const cubeinfo* pci,
+                   const evalcontext* pec, int nPlies,
                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 
 static int 
 EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
-                      cubeinfo *pci, evalcontext *pec, int nPlies,
+                      const cubeinfo* pci, const evalcontext* pec, int nPlies,
                       positionclass pc ) {
   int i, n0, n1;
   int fUseReduction;
@@ -2663,8 +2663,8 @@ EvalKey ( const evalcontext *pec, const int nPlies,
 
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
-                       cubeinfo *pci, evalcontext *pecx, int nPlies,
-                       positionclass pc ) {
+                       const cubeinfo* pci, const evalcontext* pecx,
+		       int nPlies, positionclass pc ) {
     evalcache ec, *pec;
     long l;
 
@@ -2759,7 +2759,7 @@ EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
 
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
-		  cubeinfo *pci, evalcontext *pec ) {
+		  const cubeinfo* pci, const evalcontext* pec ) {
     
   positionclass pc = ClassifyPosition( anBoard, pci->bgv );
     
@@ -2887,7 +2887,7 @@ TrainPosition(int anBoard[ 2 ][ 25 ], float arDesired[],
  */
 
 extern float
-Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
+Utility( float ar[ NUM_OUTPUTS ], const cubeinfo* pci ) {
 
   if ( ! pci->nMatchTo ) {
 
@@ -2930,7 +2930,7 @@ Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
  */
 
 extern float
-UtilityME( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
+UtilityME( float ar[ NUM_OUTPUTS ], const cubeinfo* pci ) {
 
   if ( ! pci->nMatchTo )
 
@@ -3302,8 +3302,8 @@ static int CompareMovesGeneral( const move *pm0, const move *pm1 ) {
 }
 
 extern int 
-ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
-
+ScoreMove( move *pm, const cubeinfo *pci, const evalcontext *pec, int nPlies)
+{
     int anBoardTemp[ 2 ][ 25 ];
     float arEval[ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
@@ -3346,7 +3346,8 @@ ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies ) {
 }
 
 static int
-ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
+ScoreMoves( movelist *pml, const cubeinfo* pci, const evalcontext* pec,
+	    int nPlies )
 {
   int i;
   /* return value */
@@ -3417,9 +3418,8 @@ static movefilter NullFilter = {0, 0, 0.0};
 
 static int 
 FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
-                   int anBoard[ 2 ][ 25 ], cubeinfo *pci,
-                   evalcontext *pec, 
-                   int nPlies,
+                   int anBoard[ 2 ][ 25 ],
+		   const cubeinfo* pci, const evalcontext* pec, int nPlies,
                    movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
   evalcontext ec;
@@ -3467,7 +3467,7 @@ extern int
 FindnSaveBestMoves( movelist *pml,
                     int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
                     unsigned char *auchMove, const float rThr,
-                    cubeinfo *pci, evalcontext *pec,
+                    const cubeinfo* pci, const evalcontext* pec,
                     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] ) {
 
   /* Find best moves. 
@@ -5411,7 +5411,7 @@ GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 extern int
 GeneralEvaluationE( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                     int anBoard[ 2 ][ 25 ],
-                    cubeinfo *pci, evalcontext *pec ) {
+                    const cubeinfo* pci, const evalcontext *pec) {
 
   return GeneralEvaluationEPlied ( arOutput, anBoard,
                                    pci, pec, pec->nPlies );
@@ -5422,7 +5422,7 @@ GeneralEvaluationE( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
 extern int 
 GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                  int anBoard[ 2 ][ 25 ],
-                                 cubeinfo *pci, evalcontext *pec,
+                                 const cubeinfo* pci, const evalcontext* pec,
                                  int nPlies ) {
 
   float rCubeful;
@@ -5445,7 +5445,8 @@ GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
 extern int
 GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
-                          cubeinfo *pci, evalcontext *pec, int nPlies ) {
+                          const cubeinfo* pci, const evalcontext* pec,
+			  int nPlies ) {
 
   if ( pec->fCubeful ) {
 
@@ -5528,9 +5529,9 @@ GetECF3 ( float arCubeful[], int cci,
 
 
 static void
-MakeCubePos ( cubeinfo aciCubePos[], const int cci,
-              const int fTop, cubeinfo aci[], const int fInvert ) {
-
+MakeCubePos( const cubeinfo aciCubePos[], const int cci,
+	     const int fTop, cubeinfo aci[], const int fInvert )
+{
   int i, ici;
 
   for ( ici = 0, i = 0; ici < cci; ici++ ) {
@@ -5593,9 +5594,8 @@ extern int
 EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
-                          cubeinfo aciCubePos[], int cci, 
-                          cubeinfo *pciMove,
-                          evalcontext *pec, 
+                          const cubeinfo aciCubePos[], int cci, 
+                          const cubeinfo* pciMove, const evalcontext *pec, 
                           int nPlies, int fTop ) {
 
   int ici;
@@ -5682,9 +5682,8 @@ static int
 EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
-                          cubeinfo aciCubePos[], int cci, 
-                          cubeinfo *pciMove,
-                          evalcontext *pec, 
+                          const cubeinfo aciCubePos[], int cci, 
+                          const cubeinfo* pciMove, const evalcontext* pec, 
                           int nPlies, int fTop ) {
   
   

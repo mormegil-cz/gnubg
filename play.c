@@ -770,10 +770,10 @@ extern int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
       const float epsilon = 1.0e-6;
-
+      const evalcontext* cec = &ap[ ms.fTurn ].esCube.ec;
+      
       ProgressStart( _("Considering resignation...") );
-      if ( GeneralEvaluationE( arOutput, ms.anBoard, &ci,
-                               &ap[ ms.fTurn ].esCube.ec ) ) {
+      if ( GeneralEvaluationE( arOutput, ms.anBoard, &ci, cec) ) {
 	  ProgressEnd();
 	  return -1;
       }
@@ -797,7 +797,7 @@ extern int ComputerTurn( void ) {
       InvertEvaluation ( arOutput );
       
       rEqAfter = Utility ( arOutput, &ci );
-      if ( ms.nMatchTo )
+      if ( ms.nMatchTo && cec->fCubeful )
         rEqAfter = eq2mwc( rEqAfter, &ci );
 
       /* printf ("equity before resignation: %.10f\n"

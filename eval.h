@@ -365,7 +365,7 @@ EvalSave( char *szWeights );
 
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
-                  cubeinfo *pci, evalcontext *pec );
+                  const cubeinfo* pci, const evalcontext* pec );
 
 extern int
 EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[],
@@ -391,7 +391,7 @@ extern int
 FindnSaveBestMoves( movelist *pml,
                     int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
                     unsigned char *auchMove, const float rThr,
-                    cubeinfo *pci, evalcontext *pec,
+                    const cubeinfo* pci, const evalcontext* pec,
                     movefilter aamf[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ] );
 
 extern int 
@@ -444,10 +444,10 @@ extern int EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
                              float arOutput[] );
 
 extern float
-Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
+Utility( float ar[ NUM_OUTPUTS ], const cubeinfo* pci );
 
 extern float
-UtilityME( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
+UtilityME( float ar[ NUM_OUTPUTS ], const cubeinfo *pci );
 
 
 extern int 
@@ -517,25 +517,26 @@ GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 extern int
 GeneralEvaluationE ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                      int anBoard[ 2 ][ 25 ],
-                     cubeinfo *pci, evalcontext *pec );
+                     const cubeinfo* pci, const evalcontext* pec );
 
 extern int
 GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
-                          cubeinfo *pci, evalcontext *pec, int nPlies );
+                          const cubeinfo* pci, const evalcontext* pec,
+			  int nPlies );
 
 extern int 
 EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
                           float arOutput[ NUM_OUTPUTS ],
                           float arCubeful[],
-                          cubeinfo aciCubePos[], int cci, 
-                          cubeinfo *pciMove,
-                          evalcontext *pec, int nPlies, int fTop );
+                          const cubeinfo aciCubePos[], int cci, 
+                          const cubeinfo* pciMove, const evalcontext* pec,
+			  int nPlies, int fTop );
 
 extern int 
 GeneralEvaluationEPliedCubeful ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                                  int anBoard[ 2 ][ 25 ],
-                                 cubeinfo *pci, evalcontext *pec,
+                                 const cubeinfo* pci, const evalcontext* pec,
                                  int nPlies );
 extern int
 cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 );
@@ -587,7 +588,7 @@ extern void
 RefreshMoveList ( movelist *pml, int *ai );
 
 extern int 
-ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies );
+ScoreMove( move *pm, const cubeinfo* pci, const evalcontext* pec, int nPlies );
 
 extern void
 CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );
