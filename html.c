@@ -32,6 +32,7 @@
 #include "export.h"
 #include "eval.h"
 #include "positionid.h"
+#include "matchid.h"
 
 
 #define STYLESHEET \
@@ -429,8 +430,9 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
   /* position ID */
 
   printImage ( pf, szImageDir, "b-indent", szExtension, "" );
-  fprintf ( pf, "PositionID: <tt>%s</tt><br />\n",
-            PositionID ( pms->anBoard ) );
+  fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
 
   /* pip counts */
 
