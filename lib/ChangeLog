@@ -1,3 +1,8 @@
+Tue Jan 16 13:34:39 2001  Gary Wong  <gtw@research.att.com>
+
+	* hash.c (CacheResize): Recreate the original size if the new
+	allocation fails.
+
 Tue Nov 14 13:03:23 2000  Gary Wong  <gtw@research.att.com>
 
 	* isaacs.h: Remove definitions which polluted the namespace

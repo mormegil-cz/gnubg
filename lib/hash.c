@@ -215,12 +215,19 @@ extern int CacheResize( cache *pc, int cNew ) {
 
     /* FIXME would be nice to save old cache entries (by rehashing), but
        it's easier just to throw them out and start again */
-
+    
     cachecomparefunc pccf = pc->pccf;
-
+    int icp = pc->icp;
+    
     CacheDestroy( pc );
 
-    return CacheCreate( pc, cNew, pccf );
+    if( CacheCreate( pc, cNew, pccf ) ) {
+	/* resize failed; try to recreate the original size */
+	CacheCreate( pc, ac[ icp ], pccf );
+	return -1;
+    }
+    
+    return 0;
 }
 
 extern int CacheStats( cache *pc, int *pcLookup, int *pcHit ) {
