@@ -2515,12 +2515,12 @@ extern void CommandTrainTD( char *sz ) {
 #if HAVE_LIBREADLINE
 static command *pcCompleteContext;
 
-static char *NullGenerator( char *sz, int nState ) {
+static char *NullGenerator( const char *sz, int nState ) {
 
   return NULL;
 }
 
-static char *GenerateKeywords( char *sz, int nState ) {
+static char *GenerateKeywords( const char *sz, int nState ) {
 
     static int cch;
     static command *pc;
@@ -2558,8 +2558,13 @@ static char **CompleteKeyword( char *szText, int iStart, int iEnd ) {
 
     if( !pcCompleteContext )
 	return NULL;
-    
+
+#if HAVE_RL_COMPLETION_MATCHES
+    return rl_completion_matches( szText, GenerateKeywords );
+#else
+    /* assume obselete version of readline */
     return completion_matches( szText, GenerateKeywords );
+#endif
 }
 #endif
 
@@ -3413,7 +3418,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     rl_readline_name = "gnubg";
     rl_basic_word_break_characters = szCommandSeparators;
     rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
-    rl_completion_entry_function = (Function *) NullGenerator;
+    rl_completion_entry_function = NullGenerator;
 #endif
 
     if( !fNoRC )

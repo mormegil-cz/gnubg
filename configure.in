@@ -47,6 +47,7 @@ if test "$with_readline" != "no"; then
     AC_CHECK_LIB($lib, tgetent, LIBS="-l$lib $LIBS"; break)
   done
   AC_CHECK_LIB(readline, readline)
+  AC_CHECK_FUNCS(rl_completion_matches)
 fi
 AC_ARG_WITH(gdbm,[  --with-gdbm             use GNU dbm for position databases])
 if test "$with_gdbm" != "no"; then

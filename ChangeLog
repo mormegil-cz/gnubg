@@ -1,3 +1,11 @@
+Wed Apr 11 17:56:10 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (CompleteKeyword): Use rl_completion_matches() instead
+	of the obselete completion_matches(), if available.
+	
+	* erf.c (erf): New function, for systems that don't define erf() in
+	the C library.
+
 Tue Apr 10 16:36:04 2001  Gary Wong  <gtw@research.att.com>
 
 	* database.c (CommandDatabaseGenerate): Fix stupid bug (increment
