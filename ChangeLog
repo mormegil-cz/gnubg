@@ -1,3 +1,13 @@
+Fri Oct  4 21:23:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Initial implementation of huge OSR database.
+
+	* positionid.c (PositionBearoff, PositionFromBearoff):
+	new parameter n, which is the number of points.
+	* gnubg.c: new parameter to EvalInitialise. Call EvalShutdown before
+	exiting.	
+	* eval.c: new evaluation routines for EVAL_BEAROFF_HUGE_OSR
+
 Fri Oct  4 19:37:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix bugs in Export settings widget.  (reported by Ian Shaw)

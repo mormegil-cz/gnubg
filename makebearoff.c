@@ -29,11 +29,10 @@
 #include "positionid.h"
 #include "getopt.h"
 
-static unsigned int ausRolls[ 3268760];
-static unsigned short aaProb[ 3268760 ][ 32 ];
+static unsigned int *ausRolls;
 static double aaEquity[ 924 ][ 924 ];
 
-static void BearOff( int nId, int nPoint ) {
+static void BearOff( int nId, int nPoint, unsigned short aaProb[][ 32 ] ) {
 
     int i, iBest, iMode, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ],
 	anBoardTemp[ 2 ][ 25 ], aProb[ 32 ];
@@ -147,6 +146,7 @@ generate ( const int nTSP, const int nTSC,
 
     int i, j, k;
     int n;
+    unsigned short int *pus;
 #ifdef STDOUT_FILENO 
     FILE *output;
 
@@ -162,16 +162,29 @@ generate ( const int nTSP, const int nTSC,
 
     if ( nOS ) {
 
-      aaProb[ 0 ][ 0 ] = 0xFFFF;
-      for( i = 1; i < 32; i++ )
-	aaProb[ 0 ][ i ] = 0;
+      n = Combination ( nOS + 15, nOS );
+
+      ausRolls = (unsigned int *) malloc ( sizeof ( unsigned int) * n );
+      if ( ! ausRolls ) {
+        fprintf ( stderr, "malloc failed for ausRolls!\n" );
+        exit (3);
+      }
+        
+      pus = (unsigned short int *) malloc ( sizeof ( unsigned short int ) * 
+                                            n * 32 );
+      if ( ! pus ) {
+        fprintf ( stderr, "malloc failed for aaProb!\n" );
+        exit (3);
+      }
+
+      pus[ 0 ] = 0xFFFF;
+      for( i = 1; i < 32; ++i )
+        pus[ i ] = 0;
 
       ausRolls[ 0 ] = 0;
 
-      n = Combination ( nOS + 15, nOS );
-
       for( i = 1; i < n; i++ ) {
-	BearOff( i, nOS );
+	BearOff( i, nOS, pus );
 
 	if( !( i % 100 ) )
           fprintf( stderr, "1:%d/%d        \r", i, n );
@@ -179,14 +192,14 @@ generate ( const int nTSP, const int nTSC,
 
       if ( fMagicBytes ) {
         char sz[ 21 ];
-        sprintf ( sz, "%02dxxxxxxxxxxxxxxxxxxx", nOS );
+        sprintf ( sz, "%02dxxxxxxxxxxxxxxxxxx", nOS );
         puts ( sz );
       }
 
-      for( i = 0; i < n; i++ )
-	for( j = 0; j < 32; j++ ) {
-          putc( aaProb[ i ][ j ] & 0xFF, output );
-          putc( aaProb[ i ][ j ] >> 8, output );
+      for( k = 0, i = 0; i < n; i++ )
+	for( j = 0; j < 32; j++, k++ ) {
+          putc ( pus[ k ] & 0xFF, output );
+          putc ( pus[ k ] >> 8, output );
 	}
 
     }

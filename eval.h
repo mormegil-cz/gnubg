@@ -61,7 +61,7 @@
 #define GNUBG_WEIGHTS "gnubg.weights"
 #define GNUBG_WEIGHTS_BINARY "gnubg.wd"
 #define GNUBG_BEAROFF "gnubg.bd"
-#define GNUBG_BEAROFF_HUGE_OSR "gnubg_huge_osr.bd"
+#define GNUBG_BEAROFF_OS "gnubg_os.bd"
 
 /* A trivial upper bound on the number of (complete or incomplete)
  * legal moves of a single roll: if all 15 chequers are spread out,
@@ -212,7 +212,7 @@ typedef enum _positionclass {
     CLASS_OVER = 0, /* Game already finished */
     CLASS_BEAROFF2, /* Two-sided bearoff database */
     CLASS_BEAROFF1, /* One-sided bearoff database */
-    CLASS_BEAROFF_HUGEOSR, /* huge one-sided bearoff database */
+    CLASS_BEAROFF_OS, /* huge one-sided bearoff database */
     CLASS_RACE,     /* Race neural network */
     CLASS_CRASHED,  /* Contact, one side has less than 7 active checkers */
     CLASS_CONTACT   /* Contact neural network */
@@ -226,7 +226,7 @@ extern char *PathSearch( const char *szFile, const char *szDir );
 			      
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
-		char *szDatabase, char *szHugeDatabase, 
+		char *szDatabase, char *szOSDatabase, 
                 char *szDir, int nSize,
 		void (*pfProgress)( int ) );
 

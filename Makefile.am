@@ -162,29 +162,29 @@ else
 bearoff-database: makebearoff
 	./makebearoff -t 6x6 -o 6 > $(srcdir)/gnubg.bd; $(MAKE) gnubg.bd
 bearoff-database-7: makebearoff
-	./makebearoff -t 0x0 -o 7 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 7 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-8: makebearoff
-	./makebearoff -t 0x0 -o 8 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 8 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-9: makebearoff
-	./makebearoff -t 0x0 -o 9 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 9 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-10: makebearoff
-	./makebearoff -t 0x0 -o 10 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 10 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-11: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-12: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-13: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-14: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-15: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-16: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-17: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 bearoff-database-18: makebearoff
-	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_huge_os.bd; $(MAKE) gnubg_huge_os.bd
+	./makebearoff -t 0x0 -o 11 -m > $(srcdir)/gnubg_os.bd; $(MAKE) gnubg_os.bd
 endif
 
 .PHONY: bearoff-database
