@@ -95,6 +95,11 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 	( x1 + cx1 > x0 ) && ( x1 < x0 + cx0 );
 }
 
+static inline double ssqrt( double x ) {
+
+    return x < 0.0 ? 0.0 : sqrt( x );
+}
+
 static void copy_rgb( guchar *src, guchar *dest, int xsrc, int ysrc,
 		      int xdest, int ydest, int width, int height,
 		      int xdestmax, int ydestmax,
@@ -2726,12 +2731,15 @@ static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
 	
     for( x = 0; x < s; x++ ) {
 	rx = 1.0 - ( (float) x / s );
-	rz = sqrt( 1.001 - rx * rx );
+	rz = ssqrt( 1.0 - rx * rx );
 	arHeight[ x ] = rz * s;
 	    
 	for( i = 0; i < 4; i++ ) {
 	    cos_theta = bd->arLight[ 2 ] * rz + bd->arLight[ i & 1 ] * rx;
+	    if( cos_theta < 0 )
+		cos_theta = 0;
 	    arDiffuse[ i ][ x ] = 0.8 * cos_theta + 0.2;
+	    cos_theta = 2 * rz * cos_theta - bd->arLight[ 2 ];
 	    anSpecular[ i ][ x ] = pow( cos_theta, 20 ) * 0.6 * 0x100;
 
 	    if( !( i & 1 ) )
@@ -3079,11 +3087,14 @@ static void board_draw_frame_painted( BoardData *bd ) {
 
     for( ix = 0; ix < bd->board_size; ix++ ) {
 	x = 1.0 - ( (float) ix / bd->board_size );
-	z = sqrt( 1.001 - x * x );
+	z = ssqrt( 1.0 - x * x );
 
 	for( i = 0; i < 4; i++ ) {
 	    cos_theta = bd->arLight[ 2 ] * z + bd->arLight[ i & 1 ] * x;
+	    if( cos_theta < 0 )
+		cos_theta = 0;
 	    diffuse = 0.8 * cos_theta + 0.2;
+	    cos_theta = 2 * z * cos_theta - bd->arLight[ 2 ];
 	    specular = pow( cos_theta, 20 ) * 0.6;
 
 	    COLOURS( ix, i ).pixel = gdk_rgb_xpixel_from_rgb(
@@ -3122,6 +3133,96 @@ static void board_draw_frame_painted( BoardData *bd ) {
     gdk_gc_unref( gc );
 }
 
+static void hinge_pixel( BoardData *bd, float xNorm, float yNorm,
+			 float xEye, float yEye, unsigned char auch[ 3 ] ) {
+
+    float arReflection[ 3 ], arAuxLight[ 2 ][ 3 ] = {
+	{ 0.6, 0.7, 0.5 },
+	{ 0.5, -0.6, 0.7 } };
+    float *arLight[ 3 ] = { bd->arLight, arAuxLight[ 0 ], arAuxLight[ 1 ] };
+    float zNorm, zEye;
+    float diffuse, specular = 0, cos_theta;
+    float l;
+    int i;
+
+    zNorm = ssqrt( 1.0 - xNorm * xNorm - yNorm * yNorm );
+    
+    if( ( cos_theta = xNorm * arLight[ 0 ][ 0 ] +
+	  yNorm * arLight[ 0 ][ 1 ] +
+	  zNorm * arLight[ 0 ][ 2 ] ) < 0 )
+	diffuse = 0.2;
+    else {
+	diffuse = cos_theta * 0.8 + 0.2;
+
+	for( i = 0; i < 3; i++ ) {
+	    if( ( cos_theta = xNorm * arLight[ i ][ 0 ] +
+		  yNorm * arLight[ i ][ 1 ] +
+		  zNorm * arLight[ i ][ 2 ] ) < 0 )
+		cos_theta = 0;
+	    
+	    arReflection[ 0 ] = arLight[ i ][ 0 ] - 2 * xNorm * cos_theta;
+	    arReflection[ 1 ] = arLight[ i ][ 1 ] - 2 * yNorm * cos_theta;
+	    arReflection[ 2 ] = arLight[ i ][ 2 ] - 2 * zNorm * cos_theta;
+	    
+	    l = sqrt( arReflection[ 0 ] * arReflection[ 0 ] +
+		      arReflection[ 1 ] * arReflection[ 1 ] +
+		      arReflection[ 2 ] * arReflection[ 2 ] );
+	    
+	    arReflection[ 0 ] /= l;
+	    arReflection[ 1 ] /= l;
+	    arReflection[ 2 ] /= l;
+	    
+	    zEye = ssqrt( 1.0 - xEye * xEye - yEye * yEye );
+	    cos_theta = arReflection[ 0 ] * xEye + arReflection[ 1 ] * yEye +
+		arReflection[ 2 ] * zEye;
+	    
+	    specular += pow( cos_theta, 30 ) * 0.7;
+	}
+    }
+    
+    auch[ 0 ] = clamp( 200 * diffuse + specular * 0x100 );
+    auch[ 1 ] = clamp( 230 * diffuse + specular * 0x100 );
+    auch[ 2 ] = clamp( 20 * diffuse + specular * 0x100 );
+}
+
+static void board_draw_hinges( BoardData *bd, GdkGC *gc ) {
+    
+    int x, y, s = bd->board_size;
+    unsigned char top[ s * 12 ][ s * 2 ][ 3 ], bottom[ s * 12 ][ s * 2 ][ 3 ];
+    float xNorm, yNorm;
+    
+    for( y = 0; y < 12 * s; y++ )
+	for( x = 0; x < 2 * s; x++ ) {
+	    if( s < 5 && y && !( y % ( 2 * s ) ) )
+		yNorm = 0.5;
+	    else if( y % ( 2 * s ) < s / 5 )
+		yNorm = ( s / 5 - y % ( 2 * s ) ) * ( 2.5 / s );
+	    else if( y % ( 2 * s ) >= ( 2 * s - s / 5 ) )
+		yNorm = ( y % ( 2 * s ) - ( 2 * s - s / 5 - 1 ) ) *
+		    ( -2.5 / s );
+	    else
+		yNorm = 0;
+
+	    xNorm = ( x - s ) / (float) s * ( 1.0 - yNorm * yNorm );
+		    
+	    hinge_pixel( bd, xNorm, yNorm,
+			 ( s - x ) / ( 40 * s ), ( y - 20 * s ) / ( 40 * s ),
+			 top[ y ][ x ] );
+	    
+	    hinge_pixel( bd, xNorm, yNorm,
+			 ( s - x ) / ( 40 * s ), ( y + 20 * s ) / ( 40 * s ),
+			 bottom[ y ][ x ] );
+	}
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 53 * s, 12 * s, 2 * s,
+			12 * s, GDK_RGB_DITHER_MAX,
+			top[ 0 ][ 0 ], 2 * s * 3 );
+    
+    gdk_draw_rgb_image( bd->pm_board, gc, 53 * s, 48 * s, 2 * s,
+			12 * s, GDK_RGB_DITHER_MAX,
+			bottom[ 0 ][ 0 ], 2 * s * 3 );
+}
+
 static void board_draw( GtkWidget *widget, BoardData *bd ) {
 
     gint ix, iy, antialias;
@@ -3143,11 +3244,11 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     else
 	board_draw_frame_wood( bd, gc );
 
+    board_draw_hinges( bd, gc );
+    
     if( bd->labels )
 	board_draw_labels( bd );
     
-    /* FIXME shade hinges */
-
     if( bd->translucent ) {
 	bd->rgb_bar0 = malloc( 6 * bd->board_size * 20 * bd->board_size * 3 );
 	bd->rgb_bar1 = malloc( 6 * bd->board_size * 20 * bd->board_size * 3 );
@@ -3399,7 +3500,7 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 			int f;
 			
 			r = sqrt( x_loop * x_loop + y_loop * y_loop );
-			s = sqrt( 1 - r * r );
+			s = ssqrt( 1 - r * r );
 
 			theta = atanf( r / s );
 
@@ -3563,12 +3664,12 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			    /* top/bottom edge */
 			    x_norm = 0.0;
 			    y_norm = -7.0 * y - ( y > 0.0 ? -6.0 : 6.0 );
-			    z_norm = sqrt( 1.001 - y_norm * y_norm );
+			    z_norm = ssqrt( 1.0 - y_norm * y_norm );
 			} else if( fabs( y ) < 6.0 / 7.0 ) {
 			    /* left/right edge */
 			    x_norm = 7.0 * x + ( x > 0.0 ? -6.0 : 6.0 );
 			    y_norm = 0.0;
-			    z_norm = sqrt( 1.001 - x_norm * x_norm );
+			    z_norm = ssqrt( 1.0 - x_norm * x_norm );
 			} else {
 			    /* corner */
 			    x_norm = 7.0 * x + ( x > 0.0 ? -6.0 : 6.0 );
@@ -3585,6 +3686,8 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 			      bd->arLight[ 1 ] * y_norm +
 			      bd->arLight[ 2 ] * z_norm ) > 0.0 ) {
 			    diffuse += cos_theta * 0.8;
+			    cos_theta = 2 * z_norm * cos_theta -
+				bd->arLight[ 2 ];
 			    specular_x += pow( cos_theta,
 					       bd->arExponent[ 0 ] ) *
 				bd->arCoefficient[ 0 ];
@@ -3702,10 +3805,12 @@ static void board_draw_pips( GtkWidget *widget, BoardData *bd ) {
 					    bd->arLight[ 2 ] * z ) /
 			      sqrt( x * x + y * y + z * z ) ) > 0 ) {
 			    diffuse += cos_theta * 0.8;
+			    cos_theta = 2 * z / 5 * cos_theta -
+				bd->arLight[ 2 ];
 			    specular_x += pow( cos_theta,
 					       bd->arExponent[ 0 ] ) *
 				bd->arCoefficient[ 0 ];
-			    specular_x += pow( cos_theta,
+			    specular_o += pow( cos_theta,
 					       bd->arExponent[ 1 ] ) *
 				bd->arCoefficient[ 1 ];
 			}
@@ -3790,12 +3895,12 @@ static void board_draw_cube( GtkWidget *widget, BoardData *bd ) {
 			    /* top/bottom edge */
 			    x_norm = 0.0;
 			    y_norm = -7.0 * y - ( y > 0.0 ? -6.0 : 6.0 );
-			    z_norm = sqrt( 1.001 - y_norm * y_norm );
+			    z_norm = ssqrt( 1.0 - y_norm * y_norm );
 			} else if( fabs( y ) < 7.0 / 8.0 ) {
 			    /* left/right edge */
 			    x_norm = 7.0 * x + ( x > 0.0 ? -6.0 : 6.0 );
 			    y_norm = 0.0;
-			    z_norm = sqrt( 1.001 - x_norm * x_norm );
+			    z_norm = ssqrt( 1.0 - x_norm * x_norm );
 			} else {
 			    /* corner */
 			    x_norm = 7.0 * x + ( x > 0.0 ? -6.0 : 6.0 );
@@ -3812,6 +3917,8 @@ static void board_draw_cube( GtkWidget *widget, BoardData *bd ) {
 			      bd->arLight[ 1 ] * y_norm +
 			      bd->arLight[ 2 ] * z_norm ) > 0.0 ) {
 			    diffuse += cos_theta * 0.8;
+			    cos_theta = 2 * z_norm * cos_theta -
+				bd->arLight[ 2 ];
 			    specular += pow( cos_theta, 10 ) * 0.4;
 			}
 		    }

@@ -1,3 +1,9 @@
+Thu Mar 21 13:11:54 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (ssqrt, hinge_pixel, board_draw_hinges): New functions.
+	* gtkboard.c: Use correct reflection vector for Phong illumination
+	in some rendering functions.
+	
 Wed Mar 20 15:34:11 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_point_with_border, board_quick_edit, 
