@@ -3115,24 +3115,10 @@ extern void CommandExportGameHtml( char *sz ) {
 	return;
     }
 
-    /*
-    ExportGameHTML( pf, plGame,
-                    "http://fibs2html.sourceforge.net/images/", "gif", 
-                    "fibs2html", 
-                    aszColorNameF2H,
-                    getGameNumber ( plGame ), FALSE, 
-                    NULL );
-    ExportGameHTML( pf, plGame,
-                    "http://www.dbgf.dk/bbs/images/", "png", 
-                    "bbs", 
-                    aszColorNameBBS,
-                    getGameNumber ( plGame ), FALSE, 
-                    NULL );
-    */
     ExportGameHTML( pf, plGame,
                      exsExport.szHTMLPictureURL, "png", 
                     "gnu", 
-                    aszColorNameBBS,
+                    aszColorNameGNU,
                     getGameNumber ( plGame ), FALSE, 
                     NULL );
     
@@ -3242,15 +3228,6 @@ extern void CommandExportMatchHtml( char *sz ) {
 	return;
       }
 
-#ifdef UNDEF
-      ExportGameHTML ( pf, pl->p, 
-                       "http://fibs2html.sourceforge.net/images/", "gif",
-                       "fibs2html", 
-                       aszColorNameF2H,
-                       i, i == nGames - 1,
-                       aszLinks );
-#endif
-
       ExportGameHTML ( pf, pl->p, 
                        exsExport.szHTMLPictureURL, "png",
                        "gnu", 
@@ -3300,7 +3277,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 
     HTMLPrologue ( pf, &ms, getGameNumber ( plGame ), NULL );
 
-    HTMLBoardHeader ( pf, &ms, aszColorNameF2H,
+    HTMLBoardHeader ( pf, &ms, aszColorNameGNU,
                       getGameNumber ( plGame ),
                       getMoveNumber ( plGame, plLastMove->plNext->p ) - 1 );
 
