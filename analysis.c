@@ -458,11 +458,11 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	    ApplyMove( anBoardMove, pmr->n.anMove, FALSE );
 	    PositionKey ( anBoardMove, auch );
 	  
-	    if( pmr->n.ml.cMoves )
-		free( pmr->n.ml.amMoves );
-	  
             if ( cmp_evalsetup ( &esAnalysisChequer, 
                                  &pmr->n.esChequer ) > 0 ) {
+
+              if( pmr->n.ml.cMoves )
+		free( pmr->n.ml.amMoves );
 	  
               /* find best moves */
 	  
@@ -621,12 +621,12 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 
         GetMatchStateCubeInfo ( &ci, pms );
 
-          if ( cmp_evalsetup ( &esAnalysisCube, &pmr->n.esDouble ) >= 0 ) {
-            nResign =
-              getResignation ( pmr->r.arResign, ms.anBoard, 
-                               &ci, &esAnalysisCube );
-
-          }
+        if ( cmp_evalsetup ( &esAnalysisCube, &pmr->r.esResign ) > 0 ) {
+          nResign =
+            getResignation ( pmr->r.arResign, pms->anBoard, 
+                             &ci, &esAnalysisCube );
+          
+        }
 
         getResignEquities ( pmr->r.arResign, &ci, pmr->r.nResigned,
                             &rBefore, &rAfter );

@@ -1,3 +1,8 @@
+Thu Apr  4 19:58:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* analysis.c (AnalyzeMove): fix a few bugs: move misplaced free(), and
+	fix typo in analysis of resignations (reported by Ian Shaw).
+
 Thu Apr  4 18:00:45 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	 New command "analyse move".
