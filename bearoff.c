@@ -365,7 +365,7 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
 
     /* add to cache */
 
-    if ( ! pbc->fInMemory ) {
+    if ( ! pbc->fInMemory && pbc->ph ) {
       /* add to cache */
       hashentrytwosided *phe = 
         (hashentrytwosided *) malloc ( sizeof ( hashentrytwosided ) );

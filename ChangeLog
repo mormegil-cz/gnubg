@@ -1,3 +1,8 @@
+Wed Jan  8 20:32:37 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* bearoff.c (ReadTwoSidedBearoff): fix typo.
+	(reported by Joseph Heled)
+
 Wed Jan  8 19:46:53 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c, postscript.c: use player names instead of color names.
