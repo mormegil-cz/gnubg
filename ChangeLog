@@ -1,3 +1,9 @@
+Fri Jun 27 20:42:14 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* rollout.c (BasicCubefulRollout): fix bug in variance reduction
+	when rolling out as initial position.
+	(reported on GammOnline).
+
 Fri Jun 27 20:38:00 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktheory.c (TheoryUpdated, GTKShowTheory): use gtk_text for
