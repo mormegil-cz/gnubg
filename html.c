@@ -95,9 +95,9 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "joker", "background-color: red; color: yellow" },
 
   { "stattable", 
-    "text-align: left; width: 40em; background-color: #c7c7c7; "
+    "text-align: left; width: 40em; background-color: #fff2cc; "
     "border: 0px; padding: 0px" },
-  { "stattableheader", "background-color: #787878" },
+  { "stattableheader", "background-color: #d15b34" },
   { "result", 
     "background-color: yellow; font-weight: bold; text-align: center; "
     "color: black; width: 40em; padding: 0.2em" },
@@ -105,9 +105,9 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "cubedecision", "background-color: #ddddee; text-align: left;" },
   { "cubedecisionheader", 
     "background-color: #89d0e2; text-align: center; padding: 0.5em" },
-  { "comment", "background-color: #449911; width: 39.5em; padding: 0.5em" },
+  { "comment", "background-color: ccffcc; width: 39.5em; padding: 0.5em" },
   { "commentheader", 
-    "background-color: #557711; font-weight: bold; text-align: center; "
+    "background-color: #6f9915; font-weight: bold; text-align: center; "
     "width: 40em; padding: 0.25em" },
   { "number", 
     "text-align: center; font-weight: bold; font-size: 60%; "
