@@ -201,13 +201,13 @@ extern void InitRNGSeed( int n ) {
     }
 }
 
-/* Returns TRUE if /dev/random was available, or FALSE if system clock was
+/* Returns TRUE if /dev/urandom was available, or FALSE if system clock was
    used. */
 extern int InitRNG( int *pnSeed, int fSet ) {
 
     int n, h, f = FALSE;
 
-    if( ( h = open( "/dev/random", O_RDONLY ) ) >= 0 ) {
+    if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
 	f = read( h, &n, sizeof n ) == sizeof n;
 	close( h );
     }
