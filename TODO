@@ -37,6 +37,8 @@ duplication of effort and to make sure our changes merge easily.
   stdin is a TTY or not).  Echo commands input with the mouse as if they had
   been typed (this is nontrivial if a partial TTY command has been entered).
   (gary)
+** Try to use some optimisation like XCheckIfEvent() to ignore all but
+  the most recent MotionNotify event in the queue when dragging chequers.
 ** Allow abbreviation of multiple moves (e.g. "8/7(2) 6/5(2)") and
   concatenation of moves (e.g. "24/18*/13").
 ** Finish "help" -- add detailed help for each command.
@@ -61,13 +63,12 @@ duplication of effort and to make sure our changes merge easily.
   so the user can tell whether the move is partial, complete, or illegal.
 ** Add a board edit mode.  What would be the best semantics for the
   interface?
-** Add Gnome support.
-  Better to wait until Gnome is rock solid, I think.
-*** Add silly bells and whistles.
-  Things like colour selector for chequer colours, angle of light,
-  surface of pieces, transparent background, etc.  This may also allow
-  us to fix the problem of being unresponsive to X events during long
-  computations, which I don't think is worth fixing until then.
+** Add Gnome support.  This may also allow us to fix the problem of being
+  unresponsive to X events during long computations, which I don't think
+  is worth fixing until then.  Better to wait until Gnome is rock solid,
+  I think.
+*** Add silly bells and whistles.  Things like colour selector for chequer
+  colours, angle of light, surface of pieces, transparent background, etc.
 *** Add menus and dialogs so that games can be played without the
   terminal window at all.
 
@@ -76,6 +77,17 @@ duplication of effort and to make sure our changes merge easily.
 ** Think about what should happen with variance reduction in Rollout()
   and RolloutGame() when a probability turns out <0 or >1.
 ** Undoing a move that hit a blot in the X window doesn't restore the blot.
+** When X and readline are enabled, using the board window to play while
+  the rng is set to manual really confuses the terminal (readline has
+  left the TTY in a silly state while GetManualDice() is trying to
+  read).  To fix this properly will take far cleverer input handling
+  (we want to be responsive to X events and stdin, which more or less
+  means that while waiting for any kind of input we must be in
+  the top level HandleEvents(); this makes it very difficult for routines
+  like GetManualDice which want to block until input is ready).  Also,
+  what happens when the user types half a command and then moves with
+  the mouse which causes the manual dice prompt?  All this mess can
+  probably wait for Gnome. (gary)
 
 * Miscellaneous:
 ** Add internationalisation (gettext).
