@@ -149,8 +149,12 @@
 /* Define if you can use _imp__gdbm_errno as a workaround. */
 #undef HAVE_IMP_GDBM_ERRNO
 
-/* Define to 1 if you have the <inttypes.h> header file. */
+/* Define if <inttypes.h> exists and doesn't clash with <sys/types.h>. */
 #undef HAVE_INTTYPES_H
+
+/* Define if <inttypes.h> exists, doesn't clash with <sys/types.h>, and
+   declares uintmax_t. */
+#undef HAVE_INTTYPES_H_WITH_UINTMAX
 
 /* Define to 1 if you have the `isatty' function. */
 #undef HAVE_ISATTY
@@ -293,6 +297,10 @@
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
+/* Define if <stdint.h> exists, doesn't clash with <sys/types.h>, and declares
+   uintmax_t. */
+#undef HAVE_STDINT_H_WITH_UINTMAX
+
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
@@ -365,8 +373,14 @@
 /* Define to 1 if you have the `tsearch' function. */
 #undef HAVE_TSEARCH
 
+/* Define if you have the 'uintmax_t' type in <stdint.h> or <inttypes.h>. */
+#undef HAVE_UINTMAX_T
+
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the unsigned long long type. */
+#undef HAVE_UNSIGNED_LONG_LONG
 
 /* Define to 1 if you have the `usleep' function. */
 #undef HAVE_USLEEP
@@ -383,8 +397,14 @@
 /* Define to 1 if you have the `__argz_stringify' function. */
 #undef HAVE___ARGZ_STRINGIFY
 
+/* Define to 1 if you have the `__fsetlocking' function. */
+#undef HAVE___FSETLOCKING
+
 /* Define as const if the declaration of iconv() needs const. */
 #undef ICONV_CONST
+
+/* Define if integer division by zero raises signal SIGFPE. */
+#undef INTDIV0_RAISES_SIGFPE
 
 /* Name of package */
 #undef PACKAGE
@@ -406,6 +426,9 @@
 
 /* The directory where the weights and databases will be stored. */
 #undef PKGDATADIR
+
+/* Define if <inttypes.h> exists and defines unusable PRI* macros. */
+#undef PRI_MACROS_BROKEN
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
@@ -459,11 +482,11 @@
 /* Define if you want to use sounds with GNU Backgammon */
 #undef USE_SOUND
 
+/* Define if you wish to use the Win32 WINMM sound system */
+#undef USE_WINMMSND
+
 /* Version number of package */
 #undef VERSION
-
-/* Define if you use wintendo */
-#undef WIN32
 
 /* Define to 1 if the X Window System is missing or not being used. */
 #undef X_DISPLAY_MISSING
@@ -514,3 +537,7 @@
 
 /* use double version of tanf if float one isn't available */
 #undef tanf
+
+/* Define to unsigned long or unsigned long long if <stdint.h> and
+   <inttypes.h> don't define. */
+#undef uintmax_t

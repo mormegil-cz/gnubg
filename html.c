@@ -77,6 +77,7 @@ typedef enum _stylesheetclass {
   CLASS_CUBE_ACTION,
   CLASS_CUBE_PLY,
   CLASS_CUBE_PROBABILITIES,
+  CLASS_CUBE_CUBELESS_TEXT,
   NUM_CLASSES 
 } stylesheetclass;
 
@@ -94,9 +95,9 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "joker", "background-color: red; color: yellow" },
 
   { "stattable", 
-    "text-align: left; width: 40em; background-color: #c7c7c7; "
+    "text-align: left; width: 40em; background-color: #fff2cc; "
     "border: 0px; padding: 0px" },
-  { "stattableheader", "background-color: #787878" },
+  { "stattableheader", "background-color: #d15b34" },
   { "result", 
     "background-color: yellow; font-weight: bold; text-align: center; "
     "color: black; width: 40em; padding: 0.2em" },
@@ -104,9 +105,9 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "cubedecision", "background-color: #ddddee; text-align: left;" },
   { "cubedecisionheader", 
     "background-color: #89d0e2; text-align: center; padding: 0.5em" },
-  { "comment", "background-color: #449911; width: 39.5em; padding: 0.5em" },
+  { "comment", "background-color: ccffcc; width: 39.5em; padding: 0.5em" },
   { "commentheader", 
-    "background-color: #557711; font-weight: bold; text-align: center; "
+    "background-color: #6f9915; font-weight: bold; text-align: center; "
     "width: 40em; padding: 0.25em" },
   { "number", 
     "text-align: center; font-weight: bold; font-size: 60%; "
@@ -118,7 +119,8 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "cubeequity", "font-weight: bold" },
   { "cubeaction", "color: red" },
   { "cubeply", "font-weight: bold" },
-  { "cubeprobs", "font-weight: bold" }
+  { "cubeprobs", "font-weight: bold" },
+  { "cubecubelesstext", "font-style: italic" }
 };
 
 
@@ -2249,11 +2251,12 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     fprintf ( pf, 
               "</span> %s</td>"
               "<td %s>%s</td>"
-              "<td>(%s: <span %s>%s</span>)</td>\n",
+              "<td %s>(%s: <span %s>%s</span>)</td>\n",
               ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
               _("cubeless equity") : _("cubeless MWC"),
               GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ),
+              GetStyle( CLASS_CUBE_CUBELESS_TEXT, hecss ),
               _("Money"), 
                GetStyle( CLASS_CUBE_EQUITY, hecss ),
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
@@ -3301,23 +3304,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
                            * 100.0f );
 
-      {
-        char asz[ 2 ][ 16 ];
-
-        for ( i = 0; i < 2; ++i )
-          if ( ( j = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
-            sprintf( asz[ i ], "%.1f", 1000.0 * 
-                     -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / j );
-          else
-            strcpy( asz[ i ], _("n/a") );
-
-        printStatTableRow ( pf, 
-                            _("Equivalent Snowie error rate"), 
-                            "%s", asz[ 0 ], asz[ 1 ] );
-
-      }
-
-
     }
     else {
 
@@ -3332,6 +3318,23 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
 
     }
+
+    {
+      char asz[ 2 ][ 16 ];
+      
+      for ( i = 0; i < 2; ++i )
+        if ( ( j = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
+            sprintf( asz[ i ], "%.1f", 1000.0 * 
+                     -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / j );
+        else
+          strcpy( asz[ i ], _("n/a") );
+      
+      printStatTableRow ( pf, 
+                          _("Equivalent Snowie error rate"), 
+                          "%s", asz[ 0 ], asz[ 1 ] );
+      
+    }
+
 
     for ( i = 0 ; i < 2; i++ ) 
       rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
@@ -3355,7 +3358,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
     if ( pms->nMatchTo ) {
       float r = 0.5f + psc->arActualResult[ 0 ] - 
         psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-      float rRating = relativeFibsRating( r, pms->nMatchTo );
 
       printStatTableRow( pf, 
                          _("Actual result"),
@@ -3372,10 +3374,19 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                          100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
                                    psc->arLuck[ 1 ][ 1 ] + 
                                    psc->arLuck[ 0 ][ 1 ] ) );
-      printStatTableRow( pf,
-                         _("Relative FIBS rating"),
-                         "%.2f",
-                         rRating / 2.0f, -rRating / 2.0f );
+
+      if ( r > 0.0f && r < 1.0f ) {
+        float rRating = relativeFibsRating( r, pms->nMatchTo );
+        printStatTableRow( pf,
+                           _("Relative FIBS rating"),
+                           "%.2f",
+                           rRating / 2.0f, -rRating / 2.0f );
+      }
+      else
+        printStatTableRow( pf,
+                           _("Relative FIBS rating"),
+                           "%s", _("n/a"), _("n/a") );
+
     }
     else {
 

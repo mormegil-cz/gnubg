@@ -2236,7 +2236,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 
        *ppch = NULL;
        
-       return CheckPosition ( an );
+       return CheckPosition(an) ? 0 : -1;
     }
 
     if( *pch == '=' ) {
@@ -2266,7 +2266,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	return 1;
     }
 
-    if( PositionFromID( an, pch ) ) {
+    if( !PositionFromID( an, pch ) ) {
 	outputl( _("Illegal position.") );
 	return -1;
     }
@@ -3509,9 +3509,9 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 static void
 HintCube( void ) {
           
-  cubeinfo ci;
-  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  static cubeinfo ci;
+  static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
   GetMatchStateCubeInfo( &ci, &ms );
     
@@ -3559,8 +3559,8 @@ static void
 HintResigned( void ) {
 
   float rEqBefore, rEqAfter;
-  cubeinfo ci;
-  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+  static cubeinfo ci;
+  static float arOutput[ NUM_ROLLOUT_OUTPUTS ];
 
   GetMatchStateCubeInfo( &ci, &ms );
 
@@ -3625,10 +3625,10 @@ HintResigned( void ) {
 static void
 HintTake( void ) {
 
-  cubeinfo ci;
-  float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-  float arDouble[ 4 ];
+  static cubeinfo ci;
+  static float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  static float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  static float arDouble[ 4 ];
 
   /* Give hint on take decision */
   GetMatchStateCubeInfo( &ci, &ms );
@@ -6886,11 +6886,42 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	szHomeDirectory = ".";
 
 #if HAVE_NL_LANGINFO
-    szTerminalCharset = nl_langinfo( CODESET );
+ {
+   char *cs = nl_langinfo( CODESET );
+   char *cset;
+   int	 i = 0;
+
+   if( cs ) {
+     cset  = malloc ( 2 + strlen( cs ) );
+
+     if( !strncmp( cs, "ISO", 3 ) ) {
+       switch ( cs[ 3 ] ) {
+       case '_': /* convert ISO_8859-1 to ISO-8859-1 */
+       case '-': /* no work needed */
+	 i = 4;
+	 break;
+	 
+       default:  /* convert ISO8859-1 to ISO-8859-1 */
+	 i = 3;
+	 break;
+       }
+
+       sprintf( cset, "ISO-%s", cs + i );
+     } else {
+       /* not ISOxxx */
+       strcpy( cset, cs );
+     }
+
+     szTerminalCharset = cset;
+   } else {
+     /* nl_lang_info failed */
+     szTerminalCharset = "ISO-8859-1"; /* best guess */
+   }
+ }
 #else
     szTerminalCharset = "ISO-8859-1"; /* best guess */
 #endif
-    
+
 #if USE_GUI
     /* The GTK interface is fairly grotty; it makes it impossible to
        separate argv handling from attempting to open the display, so
@@ -8094,8 +8125,8 @@ Convert ( const char *sz,
 
   id = iconv_open ( szDestCharset, szSourceCharset );
 
-  if ( id < 0 ) {
-    outputerr ( "iconv_open" );
+  if ( id == (iconv_t) -1 ) {
+    perror ( "iconv_open" );
     return strdup ( sz );
   }
 

@@ -253,7 +253,7 @@ extern void CommandExportHTMLImages( char *sz ) {
     for ( i = 0; i < 2; ++i ) {
 
       memcpy( auchMidlb, auchBoard, 108 * 4 * 72 * 4 * 3 );
-      ArrowPosition( rd.fClockwise, s, &x, &y );
+      ArrowPosition( FALSE /* rd.fClockwise */, s, &x, &y );
 
       AlphaBlendClip2( auchMidlb, nStride,
                        x, y,

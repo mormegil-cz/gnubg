@@ -3,3 +3,4 @@ Makefile.in
 *.gmo
 POTFILES
 remove-potcdate.sed
+stamp-po

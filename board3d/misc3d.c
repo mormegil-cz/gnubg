@@ -271,10 +271,15 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 void LoadTextureInfo()
 {
 	FILE* fp;
+	char *szFile;
 
 	ListInit(&textures, sizeof(TextureInfo));
-	
-	fp = fopen(TEXTURE_FILE, "r");
+
+	/* Open texture file in home directory */
+	szFile = (char*)malloc(strlen(szHomeDirectory) + strlen(TEXTURE_FILE) + 1);
+	sprintf(szFile, "%s/"TEXTURE_FILE, szHomeDirectory); 
+	fp = fopen(szFile, "r");
+	free(szFile);
 	if (!fp)
 	{
 		g_print("Error: Texture file (%s) not found\n", TEXTURE_FILE);

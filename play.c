@@ -169,9 +169,9 @@ static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
     SwapSides( pms->anBoard );    
 }
 
-static void ApplyGameOver( matchstate *pms ) {
+static void ApplyGameOver(matchstate *pms, const list* plGame ) {
 
-    movegameinfo *pmgi = plGame->plNext->p;
+    movegameinfo* pmgi = plGame->plNext->p;
 
     assert( pmgi->mt == MOVE_GAMEINFO );
 
@@ -182,7 +182,7 @@ static void ApplyGameOver( matchstate *pms ) {
     pms->cGames++;
 }
 
-extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
+extern void ApplyMoveRecord( matchstate *pms, const list* plGame, moverecord *pmr ) {
 
     int n;
     movegameinfo *pmgi = plGame->plNext->p;
@@ -261,7 +261,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	pmgi->fWinner = !pmr->d.fPlayer;
 	pmgi->fResigned = FALSE;
 	
-	ApplyGameOver( pms );
+	ApplyGameOver( pms, plGame );
 	break;
 
     case MOVE_NORMAL:
@@ -281,7 +281,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	    pmgi->nPoints = pms->nCube * n;
 	    pmgi->fWinner = pmr->n.fPlayer;
 	    pmgi->fResigned = FALSE;
-	    ApplyGameOver( pms );
+	    ApplyGameOver( pms, plGame );
 	}
 	
 	break;
@@ -292,7 +292,7 @@ extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 	pmgi->fWinner = !pmr->r.fPlayer;
 	pmgi->fResigned = TRUE;
 	
-	ApplyGameOver( pms );
+	ApplyGameOver( pms, plGame );
 	break;
 	
     case MOVE_SETBOARD:

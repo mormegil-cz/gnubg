@@ -3,7 +3,7 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year August, 2002
+@set month-year August, 2003
 
 @syncodeindex vr cp
 
@@ -69,8 +69,10 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Position and match IDs::		A brief technical explanation.
 * Cubeful equities::                    How do @gnubg{} calculate cubeful equities.
 * Training::				How to store databases and train the neural nets.
+* Scripting::                           How to use @gnubg{} python scripting.
 * Bearoff databases::                   How to generate bearoff databases for use with GNU Backgammon
 * Frequently Asked Questions::		A bunch of questions and answers (mostly taken from r.g.b.).
+* Additional documentation::            Links to other documentation regarding backgammon or GNU Backgammon 
 * GNU Free Documentation License::	Your rights regarding this manual.
 * Command Index::                       Index of available commands
 * Concept Index::                       Index
@@ -346,7 +348,7 @@ example, if you use the build by Øystein Johansen you should execute
 The @var{input-file} must be carefully prepared. For example, it
 could look like:
 
-@verbatim
+@example
 import sgg file1.sgg
 analyse match
 save match file1.sgf
@@ -356,16 +358,16 @@ save match file1.sgf
 import mat file3.mat
 analyse match
 save match file3.sgf
-@end verbatim
+@end example
 
 If you wish to adjust your setting for the analysis you can include
 commands like:
 
-@verbatim
+@example
 set analysis chequerplay evaluation plies 2
 set analysis cubedecision evaluation plies 3
 [...]
-@end verbatim
+@end example
 
 See the command reference for further details regarding the commands
 available in @gnubg{}.
@@ -954,13 +956,13 @@ Woolsey's match equity table, hence the actual result is 56%.
 The luck adjusted result is calculated as the @emph{actual result}
 plus the total unnormalised luck rate. This is also called ``variance
 reduction of skill'' as described in Douglas Zare's excellent article
-@url{http://math.columbia.edu/~zare/vrskill.html,Hedging Toward
+@uref{http://math.columbia.edu/~zare/vrskill.html,Hedging Toward
 Skill}. This should give an unbiased measure of the strengths of the
 players. 
 @item @strong{MWC against current opponent}:
 For match play @gnubg{} will calculate your MWC
 against the current opponent. The number is calculated as 50% - your
-total unnormalised error rate + your opponent's total unnormalised
+total unnormaluised error rate + your opponent's total unnormalised
 error rate. If your opponent is really lucky but plays rather bad, this
 number can become larger than 100%, since he due to the extra luck has
 the possibily to give up even more MWC. However, @gnubg{} will
@@ -1251,9 +1253,20 @@ window, or by executing the command @code{set matchid QYkqASAAIAAA}.
 @node Training
 @chapter Training
 
+@include scripting.texi
+
 @include bearoff.texi
 
 @include faq.texi
+
+@node Additional documentation
+@chapter Additional documentation
+
+A tutorial written by Albert Silver is available at Tom Keith's
+Backgammon Galore @uref{http://www.bkgm.com/gnu/AllAboutGNU.html,All
+About GNU}. An Italian translation is available from
+@uref{http://members.xoom.virgilio.it/free_bgammon/,Tutto su GNU} by
+courtesy of Renzo Campagna, Giulio De Marco and Alberta di Silvio.
 
 
 @include fdl.texi

@@ -24,20 +24,21 @@
 
 extern void PositionKey( int anBoard[ 2 ][ 25 ], unsigned char auchKey[ 10 ] );
 extern char *PositionID( int anBoard[ 2 ][ 25 ] );
-extern char *PositionIDFromKey( unsigned char auchKey[ 10 ] );
+extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] );
 
 extern 
 unsigned int PositionBearoff( const int anBoard[],
-                              const int nPoints,
-                              const int nChequers );
+                              int nPoints,
+                              int nChequers );
 
-extern void PositionFromKey( int anBoard[ 2 ][ 25 ],
-                             unsigned char *puch );
-extern int PositionFromID( int anBoard[ 2 ][ 25 ], const char *szID );
+extern void PositionFromKey(int anBoard[ 2 ][ 25 ], const unsigned char* puch);
+
+/* Return 1 for success, 0 for invalid id */
+extern int PositionFromID( int anBoard[ 2 ][ 25 ], const char* szID );
 
 extern void 
-PositionFromBearoff( int anBoard[], const unsigned int usID,
-                                 const int nPoints, const int nChequers );
+PositionFromBearoff(int anBoard[], unsigned int usID,
+		    int nPoints, int nChequers );
 
 extern unsigned short PositionIndex(int g, int anBoard[6]);
 
@@ -45,8 +46,9 @@ extern int
 EqualKeys( const unsigned char auch0[ 10 ], const unsigned char auch1[ 10 ] );
 extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] );
 
-extern int 
-CheckPosition( int anBoard[ 2 ][ 25 ] );
+/* Return 1 for valid position, 0 for not */
+extern int CheckPosition( int anBoard[ 2 ][ 25 ] );
+
 extern void ClosestLegalPosition( int anBoard[ 2 ][ 25 ] );
 
 extern int

@@ -7504,7 +7504,6 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
     if ( pms->nMatchTo ) {
       float r = 0.5f + psc->arActualResult[ 0 ] - 
         psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-      float rRating = relativeFibsRating( r, pms->nMatchTo );
 
       for ( i = 0; i < 2; ++i ) {
         sprintf( sz, "%.2f%%", 
@@ -7514,7 +7513,12 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
       }
 
       for ( i = 0; i < 2; ++i ) {
-        sprintf( sz, "%.2f", ( 1 - 2 * i ) * rRating / 2.0f );
+        if ( r > 0.0f && r < 1.0f )
+          sprintf( sz, "%.2f", ( 1 - 2 * i ) * 
+                   relativeFibsRating( r, pms->nMatchTo ) / 2.0f );
+        else
+          strcpy( sz, _("n/a") );
+
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, i + 1, sz);
       }
 

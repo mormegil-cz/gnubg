@@ -26,6 +26,7 @@ Steve Baedke
 Holger Bochnig
 Chuck Bower
 Nick Bratby
+Renzo Campagna
 Craig Campbell
 John Chuang
 Tristan Colgate
@@ -57,6 +58,7 @@ Corrin Lakeland
 Tim Laursen
 Eli Liang
 Kevin Maguire
+Giulio De Marco
 William Maslen
 Thomas Meyer
 Achim Mueller
@@ -68,6 +70,7 @@ Peter Orum
 Roy Passfield
 Thomas Patrick
 Billie Patterson
+Mike Petch
 Zvezdan Petkovic
 Nardy Pillards
 Petri Pitkänen
@@ -86,6 +89,7 @@ Paul Selick
 Sho Sengoku
 Ian Shaw
 Albert Silver
+Alberta di Silvio
 Peter Sochovsky
 Mark Spencer
 Scott Steiner

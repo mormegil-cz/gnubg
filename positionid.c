@@ -86,9 +86,9 @@ PositionKey(int anBoard[2][25], unsigned char auchKey[10])
   }
 }
 
-extern char *PositionIDFromKey( unsigned char auchKey[ 10 ] ) {
+extern char *PositionIDFromKey( const unsigned char auchKey[ 10 ] ) {
 
-    unsigned char *puch = auchKey;
+    const unsigned char *puch = auchKey;
     static char szID[ 15 ];
     char *pch = szID;
     static char aszBase64[ 64 ] =
@@ -123,8 +123,9 @@ extern char *PositionID( int anBoard[ 2 ][ 25 ] ) {
     return PositionIDFromKey( auch );
 }
 
-extern int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
-
+extern int
+CheckPosition( int anBoard[ 2 ][ 25 ] )
+{
     int ac[ 2 ], i;
 
     /* Check for a point with a negative number of chequers */
@@ -132,7 +133,7 @@ extern int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
 	if( anBoard[ 0 ][ i ] < 0 ||
 	    anBoard[ 1 ][ i ] < 0 ) {
             errno = EINVAL;
-            return -1;
+            return 0;
 	}
     
     /* Check for a player with over 15 chequers */
@@ -140,26 +141,26 @@ extern int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
         if( ( ac[ 0 ] += anBoard[ 0 ][ i ] ) > 15 ||
             ( ac[ 1 ] += anBoard[ 1 ][ i ] ) > 15 ) {
             errno = EINVAL;
-            return -1;
+            return 0;
         }
 
     /* Check for both players having chequers on the same point */
     for( i = 0; i < 24; i++ )
         if( anBoard[ 0 ][ i ] && anBoard[ 1 ][ 23 - i ] ) {
             errno = EINVAL;
-            return -1;
+            return 0;
         }
 
     /* Check for both players on the bar against closed boards */
     for( i = 0; i < 6; i++ )
         if( anBoard[ 0 ][ i ] < 2 || anBoard[ 1 ][ i ] < 2 )
-            return 0;
+            return 1;
 
     if( !anBoard[ 0 ][ 24 ] || !anBoard[ 1 ][ 24 ] )
-        return 0;
+        return 1;
     
     errno = EINVAL;
-    return -1;
+    return 0;
 }
 
 extern void ClosestLegalPosition( int anBoard[ 2 ][ 25 ] ) {
@@ -197,10 +198,10 @@ extern void ClosestLegalPosition( int anBoard[ 2 ][ 25 ] ) {
 }
 
 extern void
-PositionFromKey(int anBoard[2][25], unsigned char* pauch)
+PositionFromKey(int anBoard[2][25], const unsigned char* pauch)
 {
   int i = 0, j  = 0, k;
-  unsigned char* a;
+  const unsigned char* a;
 
   memset(anBoard[0], 0, sizeof(anBoard[0]));
   memset(anBoard[1], 0, sizeof(anBoard[1]));
@@ -240,8 +241,9 @@ Base64( const char ch ) {
     return 63;
 }
 
-extern int PositionFromID( int anBoard[ 2 ][ 25 ], const char *pchEnc ) {
-
+extern int
+PositionFromID(int anBoard[ 2 ][ 25 ], const char* pchEnc)
+{
   unsigned char auchKey[ 10 ], ach[ 15 ], *pch = ach, *puch = auchKey;
   int i;
 

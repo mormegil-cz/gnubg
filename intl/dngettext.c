@@ -37,10 +37,10 @@
    prefix.  So we have to make a difference here.  */
 #ifdef _LIBC
 # define DNGETTEXT __dngettext
-# define DCNGETTEXT INTUSE(__dcngettext)
+# define DCNGETTEXT __dcngettext
 #else
-# define DNGETTEXT dngettext__
-# define DCNGETTEXT dcngettext__
+# define DNGETTEXT libintl_dngettext
+# define DCNGETTEXT libintl_dcngettext
 #endif
 
 /* Look up MSGID in the DOMAINNAME message catalog of the current

@@ -1,3 +1,9 @@
+Mon Aug 11 22:30:11 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* iconv.m4, intdiv0.m4, inttypes_h.m4, inttypes.m4, inttypes-pri.m4,
+	nls.m4, po.m4, stdint_h.m4, uintmax_t.m4, ulonglong.m4, gettext.m4:
+	upgrade to gettext 0.12.2.
+
 Sat May 24 22:10:53 2003  Holger Bochnig  <hbgg@gmx.net>
 
 	* Makefile.am: add libart.m4

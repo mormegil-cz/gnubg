@@ -221,16 +221,15 @@ PyToCubeInfo( PyObject *p, cubeinfo *pci ) {
 }
 
 
-static PyObject *
-EvalContextToPy( const evalcontext *pec ) {
-
+static PyObject*
+EvalContextToPy( const evalcontext* pec)
+{
   return Py_BuildValue( "{s:i,s:i,s:i,s:i,s:f}",
                         "cubeful", pec->fCubeful,
                         "plies", pec->nPlies,
                         "reduced", pec->nReduced,
                         "deterministic", pec->fDeterministic,
                         "noise", pec->rNoise );
-
 }
 
 
@@ -368,7 +367,6 @@ PythonEvalContext( PyObject *self, PyObject *args ) {
   ec.rNoise = rNoise;
                            
   return EvalContextToPy( &ec );
-
 }
 
 static PyObject *
@@ -568,7 +566,7 @@ PythonEq2mwc( PyObject *self, PyObject *args ) {
   if ( pyCubeInfo && PyToCubeInfo( pyCubeInfo, &ci ) )
     return NULL;
 
-  return Py_BuildValue( "f", eq2mwc( r, &ci ) );
+  return PyFloat_FromDouble( eq2mwc( r, &ci ) );
 
 }
 
@@ -587,7 +585,7 @@ PythonMwc2eq( PyObject *self, PyObject *args ) {
   if ( pyCubeInfo && PyToCubeInfo( pyCubeInfo, &ci ) )
     return NULL;
 
-  return Py_BuildValue( "f", mwc2eq( r, &ci ) );
+  return PyFloat_FromDouble( mwc2eq( r, &ci ) );
 }
 
 
@@ -605,29 +603,31 @@ PythonPositionID( PyObject *self, PyObject *args ) {
   if ( pyBoard && !PyToBoard( pyBoard, anBoard ) )
     return NULL;
 
-  return Py_BuildValue( "s", PositionID( anBoard ) );
+  return PyString_FromString( PositionID( anBoard ) );
 
 }
 
 static PyObject *
-PythonPositionFromID( PyObject *self, PyObject *args ) {
-
-  char *sz = NULL;
+PythonPositionFromID( PyObject *self, PyObject *args )
+{
+  char* sz = NULL;
   int anBoard[ 2 ][ 25 ];
 
-  if ( ! PyArg_ParseTuple( args, "|s:positionfromid", &sz ) )
-    return NULL;
-
-  if ( sz && PositionFromID( anBoard, sz ) ) {
-    PyErr_SetString( PyExc_ValueError, 
-                     _("invalid positionid") );
+  if( ! PyArg_ParseTuple( args, "|s:positionfromid", &sz ) ) {
     return NULL;
   }
-  else
+
+  if( sz ) {
+    if( ! PositionFromID(anBoard, sz) ) {
+      PyErr_SetString( PyExc_ValueError, 
+		       _("invalid positionid") );
+      return NULL;
+    }
+  } else {
     memcpy( anBoard, ms.anBoard, sizeof anBoard );
+  }
 
   return BoardToPy( anBoard );
-
 }
 
 
@@ -667,7 +667,7 @@ PythonPositionFromKey( PyObject *self, PyObject *args ) {
   PyObject *py;
   unsigned char auch[ 10 ];
 
-  if ( ! PyArg_ParseTuple( args, "|O!:positionfromkey", &PyList_Type, &pyKey ) )
+  if( ! PyArg_ParseTuple( args, "|O!:positionfromkey", &PyList_Type, &pyKey ) )
     return NULL;
 
   if ( pyKey ) {
@@ -690,7 +690,6 @@ PythonPositionFromKey( PyObject *self, PyObject *args ) {
   PositionFromKey( anBoard, auch );
 
   return BoardToPy( anBoard );
-
 }
 
 
@@ -711,10 +710,8 @@ PythonPositionBearoff( PyObject *self, PyObject *args )
   if ( pyBoard && !PyToBoard1( pyBoard, anBoard ) )
     return NULL;
 
-  return Py_BuildValue( "i", PositionBearoff( anBoard, nPoints, nChequers ) );
-
+  return PyInt_FromLong( PositionBearoff( anBoard, nPoints, nChequers ) );
 }
-
 
 static PyObject *
 PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
@@ -749,6 +746,992 @@ PythonPositionFromBearoff( PyObject *self, PyObject *args ) {
   return Board1ToPy( anBoard );
 }
 
+#if PY_MAJOR_VERSION < 3
+#define PyBool_FromLong PyInt_FromLong
+#endif
+
+static inline void
+DictSetItemSteal(PyObject* dict, const char* key, PyObject* val)
+{
+  int const s = PyDict_SetItemString(dict, key, val);        assert( s == 0 );
+  Py_DECREF(val);
+}
+
+typedef struct {
+  const evalcontext*    ec;
+  const rolloutcontext* rc;
+} PyMatchState;
+
+static PyObject*
+diffContext(const evalcontext* c, PyMatchState* ms)
+{
+  const evalcontext* s = ms->ec;
+  
+  if( !s ) {
+    ms->ec = c;
+    return 0;
+  }
+
+  if( cmp_evalcontext(s, c) == 0 ) {
+    return 0;
+  }
+
+  {
+    PyObject* context = PyDict_New();
+
+    if( c->fCubeful != s->fCubeful ) {
+      DictSetItemSteal(context, "cubeful", PyInt_FromLong(c->fCubeful));
+    }
+
+    if( c->nPlies != s->nPlies ) {
+      DictSetItemSteal(context, "plies", PyInt_FromLong(c->nPlies));
+    }
+
+    if( c->nReduced != s->nReduced ) {
+      DictSetItemSteal(context, "reduced", PyInt_FromLong(c->nReduced));
+    }
+
+    if( c->fDeterministic != s->fDeterministic ) {
+      DictSetItemSteal(context, "deterministic",
+		       PyInt_FromLong(c->fDeterministic));
+    }
+    
+    if( c->rNoise != s->rNoise ) {
+      DictSetItemSteal(context, "noise", PyFloat_FromDouble(c->rNoise));
+    }
+    
+    return context;
+  }
+}
+
+static PyObject*
+diffRolloutContext(const rolloutcontext* c, PyMatchState* ms)
+{
+  const rolloutcontext* s = ms->rc;
+  
+  if( !s ) {
+    ms->rc = c;
+    return 0;
+  }
+
+  {
+    PyObject* context = PyDict_New();
+
+    if( c->fCubeful != s->fCubeful ) {
+      DictSetItemSteal(context, "cubeful", PyInt_FromLong(c->fCubeful));
+    }
+
+    if( c->fVarRedn != s->fVarRedn ) {
+      DictSetItemSteal(context, "variance-reduction",
+		       PyInt_FromLong(c->fVarRedn));
+    }
+
+    if( c->fInitial != s->fInitial ) {
+      DictSetItemSteal(context, "initial-position",
+		       PyInt_FromLong(c->fInitial));
+    }
+
+    if( c->fRotate != s->fRotate ) {
+      DictSetItemSteal(context, "quasi-random-dice",
+		       PyInt_FromLong(c->fRotate));
+    }
+
+    if( c->fLateEvals != s->fLateEvals ) {
+      DictSetItemSteal(context, "late-eval",
+		       PyInt_FromLong(c->fLateEvals));
+    }
+    
+    if( c->fDoTruncate != s->fDoTruncate ) {
+      DictSetItemSteal(context, "truncated-rollouts",
+		       PyInt_FromLong(c->fDoTruncate));
+    }
+    
+    if( c->nTruncate != s->nTruncate ) {
+      DictSetItemSteal(context, "n-truncation", PyInt_FromLong(c->nTruncate));
+    }
+
+    if( c->nTrials != s->nTrials ) {
+      DictSetItemSteal(context, "trials", PyInt_FromLong(c->nTrials));
+    }
+
+    if( PyDict_Size(context) == 0 ) {
+      Py_DECREF(context);
+      context = 0;
+    }
+    
+    return context;
+  }
+}
+
+static PyObject*
+RolloutContextToPy(const rolloutcontext* rc)
+{
+  PyObject* dict =
+    Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i}",
+		  "cubeful", rc->fCubeful,
+		  "variance-reduction", rc->fVarRedn,
+		  "initial-position", rc->fInitial,
+		  "quasi-random-dice", rc->fRotate,
+		  "late-eval", rc->fLateEvals,
+		  "truncated-rollouts", rc->fDoTruncate,
+		  "n-truncation", rc->nTruncate,
+		  "trials", rc->nTrials);
+  return dict;
+}
+
+  
+static PyObject*
+PyMove(const int move[8])
+{
+  /* Lazy. Allocate full move, resize later */
+	    
+  PyObject* moveTuple = PyTuple_New(4);
+  int i;
+	    
+  for(i = 0; i < 4; ++i) {
+    if( move[2*i] < 0 ) {
+      break;
+    }
+    {
+      PyObject* c = Py_BuildValue("(ii)", move[2*i], move[2*i+1]);
+      
+      PyTuple_SET_ITEM(moveTuple, i, c);
+    }
+  }
+
+  if( i < 4 ) {
+    int s = _PyTuple_Resize(&moveTuple, i);                  assert(s != -1);
+  }
+  
+  return moveTuple;
+}
+
+static const char*
+luckString(lucktype const lt)
+{
+  switch( lt ) {
+    case LUCK_VERYBAD: return "verybad";
+    case LUCK_BAD: return "bad";
+    case LUCK_NONE: return "unmarked";
+    case LUCK_GOOD: return "good";
+    case LUCK_VERYGOOD: return "verygood";
+  }
+  assert(0);
+  return 0;
+}
+    
+static const char*
+skillString(skilltype const st, int const ignoreNone)
+{
+  switch( st ) {
+    case SKILL_VERYBAD:     return "very bad";
+    case SKILL_BAD:         return "bad";
+    case SKILL_DOUBTFUL:    return "doubtful";
+    case SKILL_NONE:        return ignoreNone ? 0 : "unmarked";
+    case SKILL_INTERESTING: return "interesting";
+    case SKILL_GOOD:        return "good"; 
+    case SKILL_VERYGOOD:    return "verygood";
+  }
+  assert(0);
+  return 0;
+}
+
+static void
+addSkill(PyObject* dict, skilltype const st, const char* name)
+{
+  if( dict ) {
+    const char* s = skillString(st, 1);
+    if( s ) {
+      if( ! name ) name = "skill";
+      
+      DictSetItemSteal(dict, name, PyString_FromString(s));
+    }
+  }
+}
+
+static void
+addLuck(PyObject* dict, float const rLuck, lucktype const lt)
+{
+  if( dict ) {
+    const char* l = 0;
+    if( rLuck != ERR_VAL ) {
+      DictSetItemSteal(dict, "luck-value", PyFloat_FromDouble(rLuck));
+    }
+    
+    switch( lt ) {
+      case LUCK_VERYBAD:  l = "verybad"; break;
+      case LUCK_BAD:      l = "verybad"; break;
+      case LUCK_NONE:                    break;
+      case LUCK_GOOD:     l = "good";    break;
+      case LUCK_VERYGOOD: l = "verygood"; break;
+    }
+
+    if( l ) {
+      DictSetItemSteal(dict, "luck", PyString_FromString(l));
+    }
+  }
+}
+
+static PyObject*
+PyMoveAnalysis(const movelist* pml, PyMatchState* ms)
+{
+  int i;
+
+  unsigned int n = 0;
+  
+  for(i = 0; i < pml->cMoves; i++) {
+    const move* mi = &pml->amMoves[i] ;
+	
+    switch( mi->esMove.et ) {
+      case EVAL_EVAL:
+      case EVAL_ROLLOUT:
+      {
+	++n;
+	break;
+      }
+      
+      default: break;
+    }
+  }
+
+  if( !n ) {
+    return 0;
+  }
+
+  {
+    PyObject* l = PyTuple_New(n);
+    n = 0;
+    
+    for(i = 0; i < pml->cMoves; i++) {
+      const move* mi = &pml->amMoves[i] ;
+      PyObject* v = 0;;
+      
+      switch( mi->esMove.et ) {
+        case EVAL_EVAL:
+	{
+	  PyObject* m = PyMove(mi->anMove);
+	  v = Py_BuildValue("{s:s,s:O,s:(fffff),s:f}",
+			    "type", "eval",
+			    "move", m,
+			    "probs", mi->arEvalMove[0], mi->arEvalMove[1],
+			    mi->arEvalMove[2], mi->arEvalMove[3],
+			    mi->arEvalMove[4],
+			    "score", mi->rScore);
+	  Py_DECREF(m);
+
+	  {
+	    PyObject* c = diffContext(&mi->esMove.ec, ms);
+	    if( c ) {
+	      DictSetItemSteal(v, "evalcontext", c);
+	    }
+	  }
+
+	  break;
+	}    
+        case EVAL_ROLLOUT:
+	{
+	  PyObject* m = PyMove(mi->anMove);
+	  const evalsetup* pes = &mi->esMove;
+	  const float* p =  mi->arEvalMove;
+	  const float* s =  mi->arEvalStdDev;
+	
+	  v = Py_BuildValue("{s:s,s:O,s:i,s:(fffff),s:f,s:f"
+			    ",s:(fffff),s:f,s:f}",
+			    "type", "rollout",
+			    "move", m,
+			    "trials", pes->rc.nGamesDone,
+
+			    "probs", p[0], p[1], p[2], p[3], p[4],
+			    "match-eq",   p[OUTPUT_EQUITY],
+			    "cubeful-eq", p[OUTPUT_CUBEFUL_EQUITY],
+			    "probs-std", s[0], s[1], s[2], s[3], s[4],
+			    "match-eq-std",   s[OUTPUT_EQUITY],
+			    "cubeful-eq-std", s[OUTPUT_CUBEFUL_EQUITY]);
+	  Py_DECREF(m);
+
+	  {
+	    PyObject* c = diffRolloutContext(&pes->rc, ms);
+	    if( c ) {
+	      DictSetItemSteal(v, "rollout-context", c);
+	    }
+	  }
+	  
+	  break;
+	}
+
+        case EVAL_NONE: break;
+
+        default: assert( 0 );
+      }
+
+      if( v ) {
+	PyTuple_SET_ITEM(l, n++, v);
+      }
+    }
+
+    return l;
+  }
+}
+
+static PyObject*
+PyDoubleAnalysis(const evalsetup* pes,
+		 const float ar[], 
+		 const float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+		 const float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+		 PyMatchState* ms,
+		 int const verbose)
+{
+  PyObject* dict;
+  
+  switch( pes->et ) {
+    case EVAL_EVAL:
+    {
+      const float* p = aarOutput[0];
+      
+      dict =
+	Py_BuildValue("{s:s,s:(fffff),s:f,s:f}",
+		      "type", "eval",
+		      "probs", p[0], p[1], p[2], p[3], p[4],
+		      "nd-cubeful-eq", p[OUTPUT_CUBEFUL_EQUITY],
+		      "dt-cubeful-eq", aarOutput[1][OUTPUT_CUBEFUL_EQUITY]);
+      
+      if( verbose ) {
+	DictSetItemSteal(dict, "nd-match-eq",
+			 PyFloat_FromDouble(p[OUTPUT_EQUITY]));
+	DictSetItemSteal(dict,"dt-match-eq",
+			 PyFloat_FromDouble(aarOutput[1][OUTPUT_EQUITY]));
+      }
+
+      {
+	PyObject* c = diffContext(&pes->ec, ms);
+	if( c ) {
+	  DictSetItemSteal(dict, "eval-context", c);
+	}
+      }
+      break;
+    }
+    case EVAL_ROLLOUT:
+    {
+      const float* nd  = aarOutput[0];
+      const float* nds = aarStdDev[0];
+      const float* dt  = aarOutput[1];
+      const float* dts = aarStdDev[1];
+      
+      dict =
+	Py_BuildValue("{s:s,s:i,"
+		      "s:(fffff),s:f,s:f,"
+		      "s:(fffff),s:f,s:f,"
+		      "s:(fffff),s:f,s:f,"
+		      "s:(fffff),s:f,s:f}",
+
+		      "type", "rollout",
+		      "trials", pes->rc.nGamesDone,
+
+		      "nd-probs", nd[0], nd[1], nd[2], nd[3], nd[4],
+		      "nd-match-eq",   nd[OUTPUT_EQUITY],
+		      "nd-cubeful-eq", nd[OUTPUT_CUBEFUL_EQUITY],
+				  
+		      "nd-probs-std", nds[0], nds[1], nds[2], nds[3], nds[4],
+		      "nd-match-eq-std",   nds[OUTPUT_EQUITY],
+		      "nd-cubeful-eq-std", nds[OUTPUT_CUBEFUL_EQUITY],
+
+		      "dt-probs", dt[0], dt[1], dt[2], dt[3], dt[4],
+		      "dt-match-eq",   dt[OUTPUT_EQUITY],
+		      "dt-cubeful-eq", dt[OUTPUT_CUBEFUL_EQUITY],
+		      
+		      "dt-probs-std", dts[0], dts[1], dts[2], dts[3], dts[4],
+		      "dt-match-eq-std",   dts[OUTPUT_EQUITY],
+		      "dt-cubeful-eq-std", dts[OUTPUT_CUBEFUL_EQUITY]);
+      
+      {
+	PyObject* c = diffRolloutContext(&pes->rc, ms);
+	if( c ) {
+	  DictSetItemSteal(dict, "rollout-context", c);
+	}
+      }
+      break;
+    }
+    default:
+      assert( 0 );
+  }
+
+  return dict;
+}
+
+static PyObject*
+PyGameStats(const statcontext* sc)
+{
+  PyObject* p[2];
+  if( ! (sc->fMoves || sc->fCube || sc->fDice) ) {
+    return 0;
+  }
+
+  p[0] = PyDict_New();
+  p[1] = PyDict_New();
+  
+  if( sc->fMoves ) {
+    int side;
+    for(side = 0; side < 2; ++side) {
+      
+      PyObject* d =
+	Py_BuildValue("{s:i,s:i,s:f,s:f}",
+		      "unforced-moves", sc->anUnforcedMoves[side],
+		      "total-moves", sc->anTotalMoves[side],
+		      "error-skill", sc->arErrorCheckerplay[side][0],
+		      "error-cost", sc->arErrorCheckerplay[side][1]);
+      PyObject* m = PyDict_New();
+
+      {
+	skilltype st;
+	for( st = SKILL_VERYBAD; st <= SKILL_VERYGOOD; st++ ) {
+	  DictSetItemSteal(m, skillString(st, 0),
+			   PyInt_FromLong(sc->anMoves[side][st]));
+	}
+      }
+
+      DictSetItemSteal(d, "marked", m);
+
+      DictSetItemSteal(p[side], "moves", d);
+    }
+  }
+  
+  if( sc->fCube ) {
+    int side;
+    for(side = 0; side < 2; ++side) {
+      PyObject* d =
+	Py_BuildValue("{s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i,s:i"
+		      "s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f,s:f}",
+		      "total-cube",sc->anTotalCube[side],
+		      "n-doubles",sc->anDouble[side],
+		      "n-takes", sc->anTake[side],
+		      "n-drops", sc->anPass[side],
+			
+		      "missed-double-dp",sc->anCubeMissedDoubleDP[side],
+		      "missed-double-tg", sc->anCubeMissedDoubleTG[side],
+		      "wrong-double-dp", sc->anCubeWrongDoubleDP[side],
+		      "wrong-double-tg",sc->anCubeWrongDoubleTG[side],
+		      "wrong-take", sc->anCubeWrongTake[side],
+		      "wrong-drop", sc->anCubeWrongPass[side],
+			
+		      "err-missed-double-dp-skill",
+		      sc->arErrorMissedDoubleDP[side][0],
+		      "err-missed-double-dp-cost",
+		      sc->arErrorMissedDoubleDP[side][1],
+			
+		      "err-missed-double-tg-skill",
+		      sc->arErrorMissedDoubleTG[side][ 0 ],
+		      "err-missed-double-tg-cost",
+		      sc->arErrorMissedDoubleTG[side][ 1 ],
+			
+		      "err-erong-double-dp-skill",
+		      sc->arErrorWrongDoubleDP[side][ 0 ],
+		      "err-erong-double-dp-cost",
+		      sc->arErrorWrongDoubleDP[side][ 1 ],
+			
+		      "err-erong-double-tg-skill",
+		      sc->arErrorWrongDoubleTG[side][ 0 ],
+		      "err-erong-double-tg-cost",
+		      sc->arErrorWrongDoubleTG[side][ 1 ],
+
+		      "err-wrong-take-skill",
+		      sc->arErrorWrongTake[side][ 0 ],
+		      "err-wrong-take-cost",
+		      sc->arErrorWrongTake[side][ 1 ],
+			
+		      "err-wrong-drop-skill",
+		      sc->arErrorWrongPass[side][ 0 ],
+		      "err-wrong-drop-cost",
+		      sc->arErrorWrongPass[side][ 1 ] );
+
+      DictSetItemSteal(p[side], "cube", d);
+    }
+  }
+    
+  if( sc->fDice ) {
+    int side;
+    for(side = 0; side < 2; ++side) {
+      PyObject* d =
+	Py_BuildValue("{s:f,s:f}",
+		      "luck", sc->arLuck[side][0],
+		      "luck-cost", sc->arLuck[side][1]);
+    
+      PyObject* m = PyDict_New();
+
+      {
+	lucktype lt;
+	for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
+	  DictSetItemSteal(m, luckString(lt),
+			   PyInt_FromLong(sc->anLuck[0][lt]));
+	}
+      }
+      
+      DictSetItemSteal(d, "marked-rolls", m);
+
+      DictSetItemSteal(p[side], "dice", d);
+    }
+  }
+
+  {
+    PyObject* d = PyDict_New();
+
+    DictSetItemSteal(d, "X", p[0]);
+    DictSetItemSteal(d, "O", p[1]);
+
+    return d;
+  }
+}
+
+/* plGame: Game as a list of records.
+   doAnalysis: if true, add analysis info.
+   verbose: if true, add derived analysis data.
+   includeStatistics: add game statistics.
+ */
+
+static PyObject*
+PythonGame(const list* plGame,
+	   int const doAnalysis,
+	   int const verbose,
+	   int const includeStatistics,
+	   int const includeBoards,
+	   PyMatchState* ms)
+{
+  const list* pl = plGame->plNext;
+  const moverecord* pmr = pl->p;            assert( pmr->mt == MOVE_GAMEINFO );
+  const movegameinfo* g = &pmr->g;
+
+  PyObject* gameDict = PyDict_New();
+  PyObject* gameInfoDict = PyDict_New();
+
+  if( ! (gameDict && gameInfoDict) ) {
+    PyErr_SetString(PyExc_MemoryError, "");
+    return 0;
+  }
+  
+  DictSetItemSteal(gameInfoDict, "score-X", PyInt_FromLong(g->anScore[0]));
+  DictSetItemSteal(gameInfoDict, "score-O", PyInt_FromLong(g->anScore[1]));
+
+  /* Set Crawford info only if it is relevant, i.e. if any side is 1 point away
+     from winning the match */
+  
+  if( g->anScore[0] + 1 == g->nMatch || g->anScore[1] + 1 == g->nMatch ) {
+    DictSetItemSteal(gameInfoDict, "crawford",
+			 PyBool_FromLong(g->fCrawfordGame));
+  }
+    
+  if( g->fWinner >= 0 ) {
+    DictSetItemSteal(gameInfoDict, "winner",
+			 PyString_FromString(g->fWinner ? "O" : "X"));
+    
+    DictSetItemSteal(gameInfoDict, "points-won",
+			 PyInt_FromLong(g->nPoints));
+    
+    DictSetItemSteal(gameInfoDict, "resigned",
+			 PyBool_FromLong(g->fResigned));
+  } else {
+    Py_INCREF(Py_None);
+    DictSetItemSteal(gameInfoDict, "winner", Py_None);
+  }
+
+  DictSetItemSteal(gameDict, "info", gameInfoDict);
+    
+  if( includeStatistics ) {
+    updateStatisticsGame ( plGame );
+
+    PyObject* s = PyGameStats(&g->sc);
+
+    if( s ) {
+      DictSetItemSteal(gameDict, "stats", s);
+    }
+  }
+  
+  {
+    int nRecords = 0;
+    int anBoard[2][25];
+    
+    {
+      list* t;
+      for( t = pl->plNext; t != plGame; t = t->plNext ) {
+	++nRecords;
+      }
+    }
+
+    PyObject* gameTuple = PyTuple_New(nRecords);
+
+    nRecords = 0;
+
+    if( includeBoards ) {
+      InitBoard(anBoard, g->bgv);
+    }
+
+    for( pl = pl->plNext; pl != plGame; pl = pl->plNext ) {
+      const char* action = 0;
+      int player = -1;
+      PyObject* recordDict = PyDict_New();
+      PyObject* analysis = doAnalysis ? PyDict_New() : 0;
+      
+      pmr = pl->p;
+      
+      switch( pmr->mt ) {
+	case MOVE_NORMAL:
+	{
+	  const movenormal* n = &pmr->n;
+
+	  action = "move";
+	  player = n->fPlayer;
+
+	  {
+	    PyObject* dice = Py_BuildValue("(ii)", n->anRoll[0], n->anRoll[1]);
+	    
+	    DictSetItemSteal(recordDict, "dice", dice);
+	  }
+
+	  DictSetItemSteal(recordDict, "move", PyMove(n->anMove));
+
+	  if( includeBoards ) {
+	    DictSetItemSteal(recordDict, "board",
+			     PyString_FromString(PositionID(anBoard)));
+	    
+	    ApplyMove(anBoard, n->anMove, 0);
+	    SwapSides(anBoard);
+	  }
+	  
+	  if( analysis ) {
+	    if( n->esDouble.et != EVAL_NONE ) {
+	      PyObject* d =
+		PyDoubleAnalysis(&n->esDouble, n->arDouble,  
+				 n->aarOutput, n->aarStdDev,
+				 ms, verbose);
+	      {
+		int s = PyDict_Merge(analysis, d, 1);     assert( s != -1 );
+	      }
+	      Py_DECREF(d);
+	    }
+	  
+	  
+	    if( n->ml.cMoves ) {
+	      PyObject* a = PyMoveAnalysis(&n->ml, ms);
+
+	      if( a ) {
+		DictSetItemSteal(analysis, "moves", a);
+
+		DictSetItemSteal(analysis, "imove", PyInt_FromLong(n->iMove));
+	      }
+	    }
+
+	    addLuck(analysis, n->rLuck, n->lt);
+	    addSkill(analysis, n->stMove, 0);
+	    addSkill(analysis, n->stCube, "cube-skill");
+	  }
+	    
+	  break;
+	}
+	case MOVE_DOUBLE:
+	{
+	  const movedouble* d = &pmr->d;
+	  action = "double";
+	  player = d->fPlayer;
+
+	  if( includeBoards ) {
+	    DictSetItemSteal(recordDict, "board",
+			     PyString_FromString(PositionID(anBoard)));
+	  }
+	    
+	  if( analysis ) {
+	    const cubedecisiondata* c = d->CubeDecPtr;
+	    if( c->esDouble.et != EVAL_NONE ) {
+	      PyObject* d = PyDoubleAnalysis(&c->esDouble, c->arDouble,
+					     c->aarOutput, c->aarStdDev,
+					     ms, verbose);
+	      {
+		int s = PyDict_Merge(analysis, d, 1);     assert( s != -1 );
+	      }
+	      Py_DECREF(d);
+	    }
+	  
+	    addSkill(analysis, d->st, 0);
+	  }
+	    
+	  break;
+	}
+	case MOVE_TAKE:
+	{
+	  const movedouble* d = &pmr->d;
+	  action = "take";
+	  player = d->fPlayer;
+
+	  /* use nAnimals to point to double analysis ? */
+	  
+	  addSkill(analysis, d->st, 0);
+	    
+	  break;
+	}
+	case MOVE_DROP:
+	{
+	  const movedouble* d = &pmr->d;
+	  action = "drop";
+	  player = d->fPlayer;
+	    
+	  addSkill(analysis, d->st, 0);
+	    
+	  break;
+	}
+	case MOVE_RESIGN:
+	{
+	  const moveresign* r = &pmr->r;
+	  action = "resign";
+	  player = r->fPlayer;
+	  break;
+	}
+	
+	case MOVE_SETBOARD:
+	{
+	  const movesetboard* sb = &pmr->sb;
+	  PyObject* id = PyString_FromString(PositionIDFromKey(sb->auchKey));
+
+	  action = "set";
+
+	  DictSetItemSteal(recordDict, "board", id);
+
+	  if( includeBoards ) {
+	    /* (FIXME) what about side? */
+	    PositionFromKey(anBoard, sb->auchKey);
+	  }
+	  
+	  break;
+	}
+	    
+	case MOVE_SETDICE:
+	{
+	  const movesetdice* sd = &pmr->sd;
+
+	  player = sd->fPlayer;
+	  action = "set";
+
+	  PyObject* dice = Py_BuildValue("(ii)", sd->anDice[0], sd->anDice[1]);
+
+	  DictSetItemSteal(recordDict, "dice", dice);
+	    
+	  addLuck(analysis, sd->rLuck, sd->lt);
+	    
+	  break;
+	}
+	    
+	case MOVE_SETCUBEVAL:
+	{
+	  const movesetcubeval* scv = &pmr->scv;
+	  action = "set";
+	  DictSetItemSteal(recordDict, "cube", PyInt_FromLong(scv->nCube));
+	  break;
+	}
+	    
+	case MOVE_SETCUBEPOS:
+	{
+	  const movesetcubepos* scp = &pmr->scp;
+	  const char* s[] = {"centered", "X", "O"};
+	  const char* o = s[scp->fCubeOwner + 1];
+	  
+	  action = "set";
+	  DictSetItemSteal(recordDict, "cube-owner",
+			       PyString_FromString(o));
+	  break;
+	}
+
+	default:
+	{
+	  assert(0);
+	}
+      }
+
+      if( action ) {
+	DictSetItemSteal(recordDict, "action",
+			     PyString_FromString(action));
+      }
+      
+      if( player != -1 ) {
+	DictSetItemSteal(recordDict, "player",
+			     PyString_FromString(player ? "O" : "X"));
+      }
+
+      if( analysis ) {
+	if( PyDict_Size(analysis) > 0 ) {
+	  DictSetItemSteal(recordDict, "analysis", analysis);
+	} else {
+	  Py_DECREF(analysis); analysis = 0;
+	}
+      }
+      
+      if( pmr->a.sz ) {
+	DictSetItemSteal(recordDict, "comment",
+			     PyString_FromString(pmr->a.sz));
+      }
+
+      PyTuple_SET_ITEM(gameTuple, nRecords, recordDict);
+      ++nRecords;
+    }
+
+    DictSetItemSteal(gameDict, "game", gameTuple);
+  }
+
+  return gameDict;
+}
+
+static void
+addProperty(PyObject* dict, const char* name, const char* val)
+{
+  if( ! val ) {
+    return;
+  }
+
+  DictSetItemSteal(dict, name, PyString_FromString(val));
+}
+  
+static PyObject*
+PythonMatch(PyObject* self, PyObject* args, PyObject* keywds)
+{
+  /* take match info from first game */
+  const list* firstGame = lMatch.plNext->p;
+  const moverecord* pmr;
+  const movegameinfo* g;
+  
+  if( ! firstGame ) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  
+  pmr = firstGame->plNext->p;
+  {                                       assert( pmr->mt == MOVE_GAMEINFO ); }
+  g = &pmr->g;
+
+  int includeAnalysis = 1;
+  int verboseAnalysis = 0;
+  int statistics = 0;
+  int boards = 1;
+  
+  static char* kwlist[] = {"analysis", "boards", "statistics", "verbose", 0};
+  
+  if( !PyArg_ParseTupleAndKeywords(args, keywds, "|iiii", kwlist,
+				   &includeAnalysis, &boards, &statistics,
+				   &verboseAnalysis) )
+    return 0;
+
+  
+  PyObject* matchDict = PyDict_New();
+  PyObject* matchInfoDict = PyDict_New();
+
+  if( !matchDict && !matchInfoDict ) {
+    PyErr_SetString(PyExc_MemoryError, "");
+    return 0;
+  }
+
+  PushLocale("C");
+
+  assert( g->i == 0 );
+
+  // W,X,0 
+  // B,O,1
+  {
+    int side;
+    for(side = 0; side < 2; ++side) {
+      PyObject* d = PyDict_New();
+      addProperty(d, "rating", mi.pchRating[side]);
+      addProperty(d, "name", ap[side].szName);
+
+      DictSetItemSteal(matchInfoDict, side == 0 ? "X" : "O", d);
+    }
+  }
+
+  DictSetItemSteal(matchInfoDict, "match-length", PyInt_FromLong(g->nMatch));
+  
+  if( mi.nYear ) {
+    PyObject* date =  Py_BuildValue("(iii)", mi.nDay, mi.nMonth, mi.nYear);
+
+    DictSetItemSteal(matchInfoDict, "date", date);
+  }
+
+  addProperty(matchInfoDict, "event", mi.pchEvent);
+  addProperty(matchInfoDict, "round", mi.pchRound);
+  addProperty(matchInfoDict, "place", mi.pchPlace);
+  addProperty(matchInfoDict, "annotator", mi.pchAnnotator);
+  addProperty(matchInfoDict, "comment", mi.pchComment);
+
+  {
+    char* v[] = { "Standard", "Nackgammon", "Hypergammon1", "Hypergammon2",
+		  "Hypergammon3" };
+
+    addProperty(matchInfoDict, "variation", v[g->bgv]);
+  }
+  
+  {
+    unsigned int n = !g->fCubeUse + !!g->fCrawford + !!g->fJacoby;
+    if( n ) {
+      PyObject* rules = PyTuple_New(n);
+
+      n = 0;
+      if( !g->fCubeUse ) {
+	PyTuple_SET_ITEM(rules, n++, PyString_FromString("NoCube"));
+      }
+      if( g->fCrawford ) {
+	PyTuple_SET_ITEM(rules, n++, PyString_FromString("Crawford"));
+      }
+      if( g->fJacoby ) {
+	PyTuple_SET_ITEM(rules, n++, PyString_FromString("Jacoby"));
+      }
+
+      DictSetItemSteal(matchInfoDict, "rules", rules);
+    }
+  }
+
+  DictSetItemSteal(matchDict, "match-info", matchInfoDict);
+
+  PyMatchState s;
+  s.ec = 0;
+  s.rc = 0;
+  
+  {
+    int nGames = 0;
+    const list* pl;
+    for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
+      ++nGames;
+    }
+
+    PyObject* matchTuple = PyTuple_New(nGames);
+
+    nGames = 0;
+    for(pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext) {
+      PyObject* g = PythonGame(pl->p, includeAnalysis, verboseAnalysis,
+			       statistics, boards, &s);
+
+      if( ! g ) {
+	/* Memory leaked. out of memory anyway */
+	return 0;
+      }
+      
+      PyTuple_SET_ITEM(matchTuple, nGames, g);
+      ++nGames;
+    }
+
+    DictSetItemSteal(matchDict, "games", matchTuple);
+  }
+
+  if( s.ec ) {
+    PyObject* e = EvalContextToPy(s.ec);
+    DictSetItemSteal(matchInfoDict, "default-eval-context", e);
+  }
+  
+  if( s.rc ) {
+    PyObject* e = RolloutContextToPy(s.rc);
+    DictSetItemSteal(matchInfoDict, "default-rollout-context", e);
+
+    DictSetItemSteal(matchInfoDict, "sgf-rollout-version",
+		     PyInt_FromLong(SGF_ROLLOUT_VER));
+
+  }
+
+  PopLocale();
+
+  return matchDict;
+}
+
 
 PyMethodDef gnubgMethods[] = {
 
@@ -780,6 +1763,8 @@ PyMethodDef gnubgMethods[] = {
     "return key for position" },
   { "positionfromkey", PythonPositionFromKey, METH_VARARGS,
     "return position from key" },
+  { "match", (PyCFunction)PythonMatch, METH_VARARGS|METH_KEYWORDS,
+    "Get the current match" },
   { NULL, NULL, 0, NULL }
 
 };
