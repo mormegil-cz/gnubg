@@ -77,6 +77,10 @@
 
 #define GNUBGMENURC ".gnubgmenurc"
 
+#if USE_GTK2
+#define GTK_STOCK_DIALOG_GNU "gtk-dialog-gnu" /* stock gnu head icon */
+#endif
+
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_style_get_font(s) ((s)->font)
 
@@ -620,8 +624,8 @@ static void DestroySetDice( GtkObject *po, GtkWidget *pw ) {
 
 extern int GTKGetManualDice( int an[ 2 ] ) {
 
-    GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Dice"), TRUE,
-					NULL, NULL ),
+    GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Dice"),
+					DT_QUESTION, NULL, NULL ),
 	*pwDice = board_dice_widget( BOARD( pwBoard ) );
 
     an[ 0 ] = 0;
@@ -2227,6 +2231,20 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_widget_set_default_colormap( gdk_rgb_get_cmap() );
     gtk_widget_set_default_visual( gdk_rgb_get_visual() );
 
+#if USE_GTK2
+    {
+#include "gnu.xpm"
+	GtkIconFactory *pif = gtk_icon_factory_new();
+
+	gtk_icon_factory_add_default( pif );
+
+	gtk_icon_factory_add( pif, GTK_STOCK_DIALOG_GNU,
+			      gtk_icon_set_new_from_pixbuf(
+				  gdk_pixbuf_new_from_xpm_data(
+				      (const char **) gnu_xpm ) ) );
+    }
+#endif
+    
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
     setWindowGeometry ( pwMain, &awg[ WINDOW_MAIN ] );
@@ -2438,12 +2456,8 @@ static void OK( GtkWidget *pw, int *pf ) {
 }
 
 
-extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
+extern GtkWidget *CreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
 				void *p ) {
-#include "gnu.xpm"
-#include "question.xpm"
-
-    GdkPixmap *ppm;
     GtkWidget *pwDialog = gtk_dialog_new(),
 	*pwOK = gtk_button_new_with_label( _("OK") ),
 	*pwCancel = gtk_button_new_with_label( _("Cancel") ),
@@ -2451,11 +2465,28 @@ extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 	*pwButtons = gtk_hbutton_box_new(),
 	*pwPixmap;
     GtkAccelGroup *pag = gtk_accel_group_new();
-
+    int fQuestion = dt == DT_QUESTION || dt == DT_AREYOUSURE;
+#if USE_GTK2
+    static char *aszStockItem[ NUM_DIALOG_TYPES ] = {
+	GTK_STOCK_DIALOG_INFO,
+	GTK_STOCK_DIALOG_QUESTION,
+	GTK_STOCK_DIALOG_WARNING,
+	GTK_STOCK_DIALOG_WARNING,
+	GTK_STOCK_DIALOG_ERROR,
+	GTK_STOCK_DIALOG_GNU
+    };
+    pwPixmap = gtk_image_new_from_stock( aszStockItem[ dt ],
+					 GTK_ICON_SIZE_DIALOG );
+#else
+#include "gnu.xpm"
+#include "question.xpm"
+    GdkPixmap *ppm;
+    
     ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
 	 gtk_widget_get_colormap( pwDialog ), NULL, NULL,
 	 fQuestion ? question_xpm : gnu_xpm );
     pwPixmap = gtk_pixmap_new( ppm, NULL );
+#endif
     gtk_misc_set_padding( GTK_MISC( pwPixmap ), 8, 8 );
 
     gtk_button_box_set_layout( GTK_BUTTON_BOX( pwButtons ),
@@ -2483,8 +2514,8 @@ extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 #else
     gtk_accel_group_attach( pag, GTK_OBJECT( pwDialog ) );
 #endif
-    gtk_widget_add_accelerator( fQuestion ? pwCancel : pwOK, "clicked", pag,
-				GDK_Escape, 0, 0 );
+    gtk_widget_add_accelerator( fQuestion ? pwCancel : pwOK,
+				"clicked", pag, GDK_Escape, 0, 0 );
 
     gtk_window_set_title( GTK_WINDOW( pwDialog ), szTitle );
 
@@ -2521,12 +2552,18 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
     }
 }
 
-static int Message( char *sz, int fQuestion ) {
+static int Message( char *sz, dialogtype dt ) {
 
     int f = FALSE, fRestoreNextTurn;
-    GtkWidget *pwDialog = CreateDialog( fQuestion ? _("GNU Backgammon - Question")
-					: _("GNU Backgammon - Message"),
-					fQuestion, NULL, &f ),
+    static char *aszTitle[ NUM_DIALOG_TYPES - 1 ] = {
+	N_("GNU Backgammon - Message"),
+	N_("GNU Backgammon - Question"),
+	N_("GNU Backgammon - Warning"), /* are you sure */
+	N_("GNU Backgammon - Warning"),
+	N_("GNU Backgammon - Error"),
+    };
+    GtkWidget *pwDialog = CreateDialog( gettext( aszTitle[ dt ] ), dt, NULL,
+					&f ),
 	*pwPrompt = gtk_label_new( sz );
 
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
@@ -2561,7 +2598,7 @@ static int Message( char *sz, int fQuestion ) {
 
 extern int GTKGetInputYN( char *szPrompt ) {
 
-    return Message( szPrompt, TRUE );
+    return Message( szPrompt, DT_AREYOUSURE );
 }
 
 /*
@@ -2742,7 +2779,7 @@ extern void GTKOutputX( void ) {
       /* FIXME if fDisplay is false, skip to the last line and display
          in status bar. */
       if ( ! fMessage )
-        Message( sz, FALSE );
+        Message( sz, DT_INFO );
     }
     else
       /* Short message; display in status bar. */
@@ -2765,8 +2802,8 @@ extern void GTKOutputErr( char *sz ) {
     char szMessage[ 4096 ];
 
     sprintf( szMessage, "%s: %s", sz, strerror( errno ) );
-    /* FIXME it would be nice to have an error icon in this message box */
-    Message( szMessage, FALSE );
+
+    Message( szMessage, DT_ERROR );
     
     if( fMessage ) {
 	strcat( szMessage, "\n" );
@@ -2804,7 +2841,7 @@ static int ReadNumber( char *szTitle, char *szPrompt, int nDefault,
     int n = INT_MIN;
     GtkObject *pa = gtk_adjustment_new( nDefault, nMin, nMax, nInc, nInc,
 					0 );
-    GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
+    GtkWidget *pwDialog = CreateDialog( szTitle, DT_QUESTION,
 					GTK_SIGNAL_FUNC( NumberOK ), &n ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
@@ -2845,7 +2882,7 @@ static void StringOK( GtkWidget *pw, char **ppch ) {
 static char *ReadString( char *szTitle, char *szPrompt, char *szDefault ) {
 
     char *sz = NULL;
-    GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
+    GtkWidget *pwDialog = CreateDialog( szTitle, DT_QUESTION,
 					GTK_SIGNAL_FUNC( StringOK ), &sz ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
@@ -2890,7 +2927,7 @@ static float ReadReal( char *szTitle, char *szPrompt, double rDefault,
     float r = ERR_VAL;
     GtkObject *pa = gtk_adjustment_new( rDefault, rMin, rMax, rInc, rInc,
 					0 );
-    GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
+    GtkWidget *pwDialog = CreateDialog( szTitle, DT_QUESTION,
 					GTK_SIGNAL_FUNC( RealOK ), &r ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
@@ -3848,7 +3885,7 @@ extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
 
     pwEval = EvalWidget( &ec, &fOK );
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Chequer play"), TRUE,
+    pwDialog = CreateDialog( _("GNU Backgammon - Chequer play"), DT_QUESTION,
                              GTK_SIGNAL_FUNC( EvalOK ), pwEval );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -3881,7 +3918,7 @@ extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
 
     pwEval = EvalWidget( &ec, &fOK );
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Cube decisions"), TRUE,
+    pwDialog = CreateDialog( _("GNU Backgammon - Cube decisions"), DT_QUESTION,
                              GTK_SIGNAL_FUNC( EvalOK ), pwEval );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -4053,7 +4090,7 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
     plw.ap = apTemp;
     plw.pfOK = &fOK;
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Players"), TRUE,
+    pwDialog = CreateDialog( _("GNU Backgammon - Players"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( PlayersOK ), &plw );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -4398,8 +4435,8 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
   memcpy( &aw.esCube, &esAnalysisCube, sizeof( aw.esCube ) );
   memcpy( &aw.esChequer, &esAnalysisChequer, sizeof( aw.esChequer ) );
 
-  pwDialog = CreateDialog( _("GNU Backgammon - Analysis Settings"), TRUE,
-			     GTK_SIGNAL_FUNC( AnalysisOK ), &aw );
+  pwDialog = CreateDialog( _("GNU Backgammon - Analysis Settings"),
+			   DT_QUESTION, GTK_SIGNAL_FUNC( AnalysisOK ), &aw );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwAnalysis = AnalysisPage( &aw ) );
   gtk_widget_show_all( pwDialog );
@@ -4449,7 +4486,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     memcpy( &rw.ec, &rcRollout.aecChequer[ 0 ], sizeof( rw.ec ) );
     rw.pfOK = &fOK;
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Rollouts"), TRUE,
+    pwDialog = CreateDialog( _("GNU Backgammon - Rollouts"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( SetRolloutsOK ), &rw );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
@@ -4581,7 +4618,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 extern void GTKEval( char *szOutput ) {
 
     GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Evaluation"),
-					FALSE, NULL, NULL ),
+					DT_INFO, NULL, NULL ),
 	*pwText = gtk_text_new( NULL, NULL );
     GdkFont *pf;
 #if WIN32
@@ -4648,7 +4685,7 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     if ( pwHint )
 	gtk_widget_destroy( pwHint );
       
-    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE,
+    pwHint = CreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
 			   GTK_SIGNAL_FUNC( HintOK ), NULL );
 
     memcpy ( &es, pes, sizeof ( evalsetup ) );
@@ -4685,7 +4722,7 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
                cubeinfo *pci, int fMWC ) {
     
     GtkWidget *pwDialog =
-      CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL, NULL );
+	CreateDialog( _("GNU Backgammon - Hint"), DT_INFO, NULL, NULL );
     GtkWidget *pw;
     GtkWidget *pwTable = gtk_table_new( 2, 3, FALSE );
 
@@ -4795,7 +4832,7 @@ GTKHint( movelist *pmlOrig, const int iMove ) {
 
     /* create dialog */
     
-    pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE,
+    pwHint = CreateDialog( _("GNU Backgammon - Hint"), DT_INFO,
 			   GTK_SIGNAL_FUNC( HintOK ), NULL );
     pwButtons = DialogArea( pwHint, DA_BUTTONS );
     
@@ -4838,8 +4875,8 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     GtkWidget *pwButtons,
           *pwViewStat = gtk_button_new_with_label ( _("View statistics") );
 
-    pwRolloutDialog = CreateDialog( _("GNU Backgammon - Rollout"), FALSE, NULL,
-				    NULL );
+    pwRolloutDialog = CreateDialog( _("GNU Backgammon - Rollout"), DT_INFO,
+				    NULL, NULL );
 
     nRolloutSignal = gtk_signal_connect( GTK_OBJECT( pwRolloutDialog ),
 					 "destroy",
@@ -5459,8 +5496,7 @@ GTKViewRolloutStatistics(GtkWidget *widget, gpointer data){
 
   /* Create dialog */
 
-  pwDialog = CreateDialog ( _("Rollout statistics"), FALSE,
-			    NULL, NULL );
+  pwDialog = CreateDialog ( _("Rollout statistics"), DT_INFO, NULL, NULL );
 
   gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 400 );
 
@@ -5813,7 +5849,7 @@ extern void GTKShowMatchEquityTable( int n ) {
     int i;
     char sz[ 50 ];
     GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Match equity table"),
-                                        FALSE, NULL, NULL );
+                                        DT_INFO, NULL, NULL );
     GtkWidget *pwNotebook = gtk_notebook_new ();
     GtkWidget *pwLoad = gtk_button_new_with_label(_("Load table..."));
     
@@ -5890,7 +5926,7 @@ extern void GTKShowVersion( void ) {
     if( pwDialog )
 	gtk_widget_destroy( pwDialog );
     
-    pwDialog = CreateDialog( _("About GNU Backgammon"), FALSE,
+    pwDialog = CreateDialog( _("About GNU Backgammon"), DT_GNU,
 			     NULL, NULL );
     gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyAbout, &pwDialog );
 
@@ -6272,7 +6308,7 @@ extern void GTKBearoffProgress( int i ) {
     static GtkWidget *pwDialog, *pw, *pwAlign;
 
     if( !pwDialog ) {
-	pwDialog = CreateDialog( _("GNU Backgammon"), FALSE, NULL, NULL );
+	pwDialog = CreateDialog( _("GNU Backgammon"), DT_INFO, NULL, NULL );
 	gtk_window_set_wmclass( GTK_WINDOW( pwDialog ), "progress",
 				"Progress" );
 	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
@@ -6607,7 +6643,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   };
 
   GtkWidget *pwDialog = CreateDialog( szTitle,
-                                       FALSE, NULL, NULL ),
+                                       DT_INFO, NULL, NULL ),
       *psw = gtk_scrolled_window_new( NULL, NULL ),
       *pwStats = gtk_clist_new_with_titles( 3, aszEmpty );
   int i;
@@ -6992,7 +7028,8 @@ static GtkWidget* CreateSetCubeDialog ( int *pfOK )
        ;
 
   *pfOK = FALSE;
-  SetCubeWindow = CreateDialog( _("GNU Backgammon - Cube"), TRUE, NULL, pfOK );
+  SetCubeWindow = CreateDialog( _("GNU Backgammon - Cube"), DT_QUESTION, NULL,
+				pfOK );
 
   hbox1 = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (DialogArea( SetCubeWindow, DA_MAIN )),
@@ -7131,7 +7168,7 @@ ModifyPath ( GtkWidget *pw, pathdata *ppd ) {
   */
 
   Message ( _("NOT IMPLEMENTED!\n"
-            "Use the \"set path\" command instead!"), FALSE );
+            "Use the \"set path\" command instead!"), DT_ERROR );
 
 }
 
@@ -7210,7 +7247,7 @@ GTKShowPath ( void ) {
       N_("Match Equity Tables") } };
 
   
-  pwDialog = CreateDialog( _("GNU Backgammon - Paths"), TRUE, 
+  pwDialog = CreateDialog( _("GNU Backgammon - Paths"), DT_QUESTION,
                            GTK_SIGNAL_FUNC ( PathOK ), &pd );
     
   pwApply = gtk_button_new_with_label( _("Apply") );
@@ -7859,7 +7896,7 @@ static void SetOptions( gpointer *p, guint n, GtkWidget *pw ) {
   GtkWidget *pwDialog, *pwOptions;
   optionswidget ow;
 
-  pwDialog = CreateDialog( _("GNU Backgammon - General options"), TRUE,
+  pwDialog = CreateDialog( _("GNU Backgammon - General options"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( OptionsOK ), &ow );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwOptions = OptionsPage( &ow ) );
@@ -8060,7 +8097,7 @@ static void SetAdvOptions( gpointer *p, guint n, GtkWidget *pw ) {
   GtkWidget *pwDialog, *pwAdvOptions;
   advoptionswidget aow;
 
-  pwDialog = CreateDialog( _("GNU Backgammon - Advanced options"), TRUE,
+  pwDialog = CreateDialog( _("GNU Backgammon - Advanced options"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( AdvOptionsOK ), &aow );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		        pwAdvOptions = AdvOptionsPage( &aow ) );
@@ -8125,7 +8162,7 @@ extern void GTKRecordShow( FILE *pfIn, char *szFile, char *szPlayer ) {
     while( !RecordReadItem( pfIn, szFile, &pr ) ) {
 	if( !f ) {
 	    f = TRUE;
-	    pw = CreateDialog( _("GNU Backgammon - Player records"), FALSE,
+	    pw = CreateDialog( _("GNU Backgammon - Player records"), DT_INFO,
 			       NULL, NULL );
 	    for( i = 0; i < 14; i++ )
 		asz[ i ] = gettext( aszTitles[ i ] );

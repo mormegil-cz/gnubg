@@ -1,3 +1,8 @@
+Wed Sep 18 17:10:38 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (CreateDialog): Added "dialogtype" parameter.  All callers
+	changed.
+
 Wed Sep 18 15:07:30 2002  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (outputerr): New function, replacing perror().  Most

@@ -35,6 +35,16 @@ typedef enum _dialogarea {
     DA_OK
 } dialogarea;
 
+typedef enum _dialogtype {
+    DT_INFO,
+    DT_QUESTION,
+    DT_AREYOUSURE,
+    DT_WARNING,
+    DT_ERROR,
+    DT_GNU,
+    NUM_DIALOG_TYPES
+} dialogtype;
+
 extern GtkWidget *pwMain, *pwMenuBar;
 
 extern int fEndDelay;
@@ -63,7 +73,7 @@ extern void GTKDisallowStdin( void );
 extern void GTKDelay( void );
 extern void ShowList( char *asz[], char *szTitle );
 
-extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
+extern GtkWidget *CreateDialog( char *szTitle, dialogtype dt, GtkSignalFunc pf,
 				void *p );
 extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
     

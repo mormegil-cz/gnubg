@@ -1304,7 +1304,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fHinges = bd->hinges;
     anim = bd->animate_computer_moves;
     
-    pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), TRUE,
+    pwDialog = CreateDialog( _("GNU Backgammon - Appearance"), DT_QUESTION,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_BUTTONS ) ),

@@ -549,7 +549,7 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* create dialog */
 
-  pwDialog = CreateDialog ( _("GNU Backgammon - Theory"), FALSE, 
+  pwDialog = CreateDialog ( _("GNU Backgammon - Theory"), DT_INFO,
                             NULL, NULL );
 
   pwVBox = gtk_vbox_new ( FALSE, 8 );
