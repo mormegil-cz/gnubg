@@ -9100,9 +9100,9 @@ else
 fi
 
 
-
-if test "$no_gtk2" != "no"; then
-      # Check whether --enable-glibtest or --disable-glibtest was given.
+if test "$no_gtk2" != "yes"; then
+      echo "look for glib 2"
+   # Check whether --enable-glibtest or --disable-glibtest was given.
 if test "${enable_glibtest+set}" = set; then
   enableval="$enable_glibtest"
 
@@ -9412,7 +9412,8 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
 
   rm -f conf.glibtest
 
-elif test "$no_gtk" != "no"; then
+elif test "$no_gtk" != "yes"; then
+      echo "look for glib 1"
 
 # Check whether --with-glib-prefix or --without-glib-prefix was given.
 if test "${with_glib_prefix+set}" = set; then
@@ -9720,6 +9721,7 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   rm -f conf.glibtest
 
 else
+   echo "fall back"
       # Check whether --enable-glibtest or --disable-glibtest was given.
 if test "${enable_glibtest+set}" = set; then
   enableval="$enable_glibtest"
