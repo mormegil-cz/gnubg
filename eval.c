@@ -223,6 +223,14 @@ enum {
   
   I_BACKBONE,
 
+  I_BACKG, 
+  
+  I_BACKG1,
+  
+  I_FREEPIP,
+  
+  I_BACKRESCAPES,
+  
   HALF_INPUTS };
 
 
@@ -230,6 +238,8 @@ enum {
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
 
 static int anEscapes[ 0x1000 ];
+static int anEscapes1[ 0x1000 ];
+
 static neuralnet nnContact, nnBPG, nnRace;
 static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
 static cache cEval;
@@ -254,21 +264,78 @@ typedef struct _evalcache {
     float ar[ NUM_OUTPUTS ];
 } evalcache;
 
-static void ComputeTable( void ) {
+static void ComputeTable0( void )
+{
+  int i, c, n0, n1;
 
-    int i, c, n0, n1;
+  for( i = 0; i < 0x1000; i++ ) {
+    c = 0;
+	
+    for( n0 = 0; n0 <= 5; n0++ )
+      for( n1 = 0; n1 <= n0; n1++ )
+	if( !( i & ( 1 << ( n0 + n1 + 1 ) ) ) &&
+	    !( ( i & ( 1 << n0 ) ) && ( i & ( 1 << n1 ) ) ) )
+	  c += ( n0 == n1 ) ? 1 : 2;
+	
+    anEscapes[ i ] = c;
+  }
+}
 
-    for( i = 0; i < 0x1000; i++ ) {
-	c = 0;
-	
-	for( n0 = 0; n0 <= 5; n0++ )
-	    for( n1 = 0; n1 <= n0; n1++ )
-		if( !( i & ( 1 << ( n0 + n1 + 1 ) ) ) &&
-		    !( ( i & ( 1 << n0 ) ) && ( i & ( 1 << n1 ) ) ) )
-		    c += ( n0 == n1 ) ? 1 : 2;
-	
-	anEscapes[ i ] = c;
+static int Escapes( int anBoard[ 25 ], int n ) {
+    
+    int i, af = 0;
+    
+    for( i = 0; i < 12 && i < n; i++ )
+	if( anBoard[ 24 - n + i ] > 1 )
+	    af |= ( 1 << i );
+    
+    return anEscapes[ af ];
+}
+
+static void ComputeTable1( void )
+{
+  int i, c, n0, n1, low;
+
+  anEscapes1[ 0 ] = 0;
+  
+  for( i = 1; i < 0x1000; i++ ) {
+    c = 0;
+
+    low = 0;
+    while( ! (i & (1 << low)) ) {
+      ++low;
     }
+    
+    for( n0 = 0; n0 <= 5; n0++ )
+      for( n1 = 0; n1 <= n0; n1++ ) {
+	
+	if( (n0 + n1 + 1 > low) &&
+	    !( i & ( 1 << ( n0 + n1 + 1 ) ) ) &&
+	    !( ( i & ( 1 << n0 ) ) && ( i & ( 1 << n1 ) ) ) ) {
+	  c += ( n0 == n1 ) ? 1 : 2;
+	}
+      }
+	
+    anEscapes1[ i ] = c;
+  }
+}
+
+static int Escapes1( int anBoard[ 25 ], int n ) {
+    
+    int i, af = 0;
+    
+    for( i = 0; i < 12 && i < n; i++ )
+	if( anBoard[ 24 - n + i ] > 1 )
+	    af |= ( 1 << i );
+    
+    return anEscapes1[ af ];
+}
+
+
+static void ComputeTable( void )
+{
+  ComputeTable0();
+  ComputeTable1();
 }
 
 static int EvalCacheCompare( evalcache *p0, evalcache *p1 ) {
@@ -470,20 +537,10 @@ extern int EvalSave( char *szWeights ) {
   return 0;
 }
 
-static int Escapes( int anBoard[ 25 ], int n ) {
-    
-    int i, af = 0;
-    
-    for( i = 0; i < 12 && i < n; i++ )
-	if( anBoard[ 24 - n + i ] > 1 )
-	    af |= ( 1 << i );
-    
-    return anEscapes[ af ];
-}
 
 /* Calculates the inputs for one player only.  Returns 0 for contact
    positions, 1 for races. */
-static int
+static void
 CalculateHalfInputs( int anBoard[ 25 ],
 		     int anBoardOpp[ 25 ],
 		     float afInput[] ) {
@@ -609,7 +666,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
     {  3, 13, 25, -1 }, /* 63 */
     {  6, 13, 28, -1 }, /* 64 */
     { 10, 13, 30, -1 }, /* 65 */
-    { 13, 31, 36, 38 } /* 66 */
+    { 13, 31, 36, 38 }  /* 66 */
   };
 
   /* Points we want to make, in order of importance */
@@ -683,36 +740,46 @@ CalculateHalfInputs( int anBoard[ 25 ],
   if( !n ) {
     /* No contact */
 
-    return 1;
+    exit(1);
   }
     
   afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0);
 
   {
-    /* timing in pips */
+    unsigned int p  = 0;
+    
+    for( i = 0; i < nOppBack; i++ ) {
+      if( anBoard[i] )
+	p += (i+1) * anBoard[i];
+    }
+    
+    afInput[I_FREEPIP] = p / 100.0;
+  }
+  
+  {
     int t = 0;
-
+    
     int no = 0;
       
     t += 24 * anBoard[24];
     no += anBoard[24];
       
-    for( i = 23;  i >= 18; --i ) {
-      if( anBoard[i] != 2 ) {
+    for( i = 23;  i >= 12 && i > nOppBack; --i ) {
+      if( anBoard[i] && anBoard[i] != 2 ) {
 	int n = ((anBoard[i] > 2) ? (anBoard[i] - 2) : 1);
 	no += n;
 	t += i * n;
       }
     }
 
-    for( i = 17;  i >= 6; --i ) {
-      if( anBoard[i] > 2 ) {
-	no += (anBoard[i] - 2);
-	  
-	t += i * (anBoard[i] - 2);
+    for( ; i >= 6; --i ) {
+      if( anBoard[i] ) {
+	int n = anBoard[i];
+	no += n;
+	t += i * n;
       }
     }
-
+    
     for( i = 5;  i >= 0; --i ) {
       if( anBoard[i] > 2 ) {
 	t += i * (anBoard[i] - 2);
@@ -731,7 +798,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
       t = 0;
     }
 
-    afInput[ I_TIMING ] = t / 200.0;
+    afInput[ I_TIMING ] = t / 100.0;
   }
 
 
@@ -1033,6 +1100,8 @@ CalculateHalfInputs( int anBoard[ 25 ],
 
   afInput[ I_BACKESCAPES ] = Escapes( anBoard, 23 - nOppBack ) / 36.0;
 
+  afInput[ I_BACKRESCAPES ] = Escapes1( anBoard, 23 - nOppBack ) / 36.0;
+  
   for( n = 36, i = 15; i < 24 - nOppBack; i++ )
     if( ( j = Escapes( anBoard, i ) ) < n )
       n = j;
@@ -1168,8 +1237,34 @@ CalculateHalfInputs( int anBoard[ 25 ],
       afInput[I_BACKBONE] = 0;
     }
   }
- 
-  return 0;
+
+  {
+    unsigned int nAc = 0;
+    
+    for( i = 18; i < 24; ++i ) {
+      if( anBoard[i] > 1 ) {
+	++nAc;
+      }
+    }
+    
+    afInput[I_BACKG] = 0.0;
+    afInput[I_BACKG1] = 0.0;
+
+    if( nAc >= 1 ) {
+      unsigned int tot = 0;
+      for( i = 18; i < 25; ++i ) {
+	tot += anBoard[i];
+      }
+
+      if( nAc > 1 ) {
+	/* assert( tot >= 4 ); */
+      
+	afInput[I_BACKG] = (tot - 3) / 4.0;
+      } else if( nAc == 1 ) {
+	afInput[I_BACKG1] = tot / 8.0;
+      }
+    }
+  }
 }
 
 static void 
@@ -1370,6 +1465,16 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     
     if( arOutput[ OUTPUT_LOSEBACKGAMMON ] > arOutput[ OUTPUT_LOSEGAMMON ] )
 	arOutput[ OUTPUT_LOSEBACKGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ];
+
+    {
+      float noise = 1/10000.0;
+
+      for(i = OUTPUT_WINGAMMON; i < 5; ++i) {
+	if( arOutput[i] < noise ) {
+	  arOutput[i] = 0.0;
+	}
+      }
+    }
 }
 
 #if 0
@@ -1463,127 +1568,23 @@ extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
     return CLASS_BEAROFF2;
 }
 
-static void EvalRace( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
-    
-    float arInput[ NUM_INPUTS ];
-
-    CalculateInputs( anBoard, arInput );
-    
-    NeuralNetEvaluate( &nnRace, arInput, arOutput );
-}
-
-static void EvalBPG( int anBoard[ 2 ][ 25 ], float arOutput[] )
+static void
+EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] )
 {
-  float arInput[ NUM_INPUTS ];
+  int n, nOpp;
 
-  CalculateInputs(anBoard, arInput);
-
-  /* HACK - if not loaded, use contact */
-  
-  NeuralNetEvaluate(nnBPG.cInput != 0 ? &nnBPG : &nnContact,
-		    arInput, arOutput);
-}
-
-static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+  assert( pBearoff2 );
     
-    float arInput[ NUM_INPUTS ];
+  nOpp = PositionBearoff( anBoard[ 0 ] );
+  n = PositionBearoff( anBoard[ 1 ] );
 
-    CalculateInputs( anBoard, arInput );
-    
-    NeuralNetEvaluate( &nnContact, arInput, arOutput );
-}
+  arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] =
+    arOutput[ OUTPUT_WINBACKGAMMON ] =
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
 
-static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
-
-    int i, c;
-    
-    for( i = 0; i < 25; i++ )
-	if( anBoard[ 0 ][ i ] )
-	    break;
-
-    if( i == 25 ) {
-	/* opponent has no pieces on board; player has lost */
-	arOutput[ OUTPUT_WIN ] = arOutput[ OUTPUT_WINGAMMON ] =
-	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
-
-	for( i = 0, c = 0; i < 25; i++ )
-	    c += anBoard[ 1 ][ i ];
-
-	if( c > 14 ) {
-	    /* player still has all pieces on board; loses gammon */
-	    arOutput[ OUTPUT_LOSEGAMMON ] = 1.0;
-
-	    for( i = 18; i < 25; i++ )
-		if( anBoard[ 1 ][ i ] ) {
-		    /* player still has pieces in opponent's home board;
-		       loses backgammon */
-		    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 1.0;
-
-		    return;
-		}
-	    
-	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-
-	    return;
-	}
-
-	arOutput[ OUTPUT_LOSEGAMMON ] =
-	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-
-	return;
-    }
-    
-    for( i = 0; i < 25; i++ )
-	if( anBoard[ 1 ][ i ] )
-	    break;
-
-    if( i == 25 ) {
-	/* player has no pieces on board; wins */
-	arOutput[ OUTPUT_WIN ] = 1.0;
-	arOutput[ OUTPUT_LOSEGAMMON ] =
-	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-
-	for( i = 0, c = 0; i < 25; i++ )
-	    c += anBoard[ 0 ][ i ];
-
-	if( c > 14 ) {
-	    /* opponent still has all pieces on board; win gammon */
-	    arOutput[ OUTPUT_WINGAMMON ] = 1.0;
-
-	    for( i = 18; i < 25; i++ )
-		if( anBoard[ 0 ][ i ] ) {
-		    /* opponent still has pieces in player's home board;
-		       win backgammon */
-		    arOutput[ OUTPUT_WINBACKGAMMON ] = 1.0;
-
-		    return;
-		}
-	    
-	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
-
-	    return;
-	}
-
-	arOutput[ OUTPUT_WINGAMMON ] =
-	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
-    }
-}
-
-static void EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
-
-    int n, nOpp;
-
-    assert( pBearoff2 );
-    
-    nOpp = PositionBearoff( anBoard[ 0 ] );
-    n = PositionBearoff( anBoard[ 1 ] );
-
-    arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] =
-	arOutput[ OUTPUT_WINBACKGAMMON ] =
-	arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
-
-    arOutput[ OUTPUT_WIN ] = ( pBearoff2[ ( n * 924 + nOpp ) << 1 ] |
-	( pBearoff2[ ( ( n * 924 + nOpp ) << 1 ) | 1 ] << 8 ) ) / 65535.0;
+  arOutput[ OUTPUT_WIN ] =
+    ( pBearoff2[ ( n * 924 + nOpp ) << 1 ] |
+      ( pBearoff2[ ( ( n * 924 + nOpp ) << 1 ) | 1 ] << 8 ) ) / 65535.0;
 }
 
 
@@ -1607,8 +1608,8 @@ getBearoffProbs(int n, int aaProb[32])
 /* For example,                                                   */
 /*   1 1 1 0 0 0  34/36  72/36^2  0/36^2                          */
 /*                                                                */   
-/* Is where the points 1 to 3 are empty, and so a 1-2 would fail  */
-/* to bear in the first turn                                      */
+/* Is where points 1 to 3 are empty, and so a 1-2 would fail      */
+/* to bear in the first turn.                                     */
 
 static float oneCheckerOffTable[63][3] = {
 /* 1 1 1 1 1 1  36/36  0/36^2  0/36^2 */
@@ -1740,23 +1741,32 @@ static float oneCheckerOffTable[63][3] = {
 };
 
 
-/* Set gammon probabilities for bearof position in anBoard, where at least */
+/* Set gammon probabilities for bearoff position in anBoard, where at least */
 /* one side has 15 chequers. bp0 and bp1 are the bearoff indices of sides 0 */
-/* and 1, and g0/g1 are filled with gammon rate for side 0/1 respectivly */
+/* and 1, and g0/g1 are filled with gammon rate for side 0/1 respectivly    */
 
-/* The method used is not perfect, but has very small error */
+/* The method used is not perfect, but has very small error. The error comes */
+/* from the assumption that 3 rolls are always enough to bear one men off,   */
+/* and from considering only which points are empty and which are not.       */
 
 static void
 setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
-	      float* g0, float* g1)
+              float* g0, float* g1)
 {
   int i; float* r;
   int prob[32];
 
+  /* total checkers to side 0/1 */
   int tot0 = 0;
   int tot1 = 0;
+
+  /* index into oneCheckerOffTable for side 0/1 */
   int t0 = 0;
   int t1 = 0;
+
+  /* true when side 0 has 15 checkers left, false when side 1. When both has */
+  /* more than 12 checkers left (at least 3 turns for both), gammon% is 0    */
+	
   int side0;
   
   for(i = 5; i >= 0; --i) {
@@ -1795,54 +1805,287 @@ setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
   }
 }  
 
-extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
-				       float arOutput[] ) {
+extern unsigned long
+EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] )
+{
+  int i, j, n, nOpp, aaProb[ 2 ][ 32 ];
+  unsigned long x;
+
+  assert( pBearoff1 );
     
-    int i, j, n, nOpp, aaProb[ 2 ][ 32 ];
-    unsigned long x;
+  nOpp = PositionBearoff( anBoard[ 0 ] );
+  n = PositionBearoff( anBoard[ 1 ] );
 
-    assert( pBearoff1 );
-    
-    nOpp = PositionBearoff( anBoard[ 0 ] );
-    n = PositionBearoff( anBoard[ 1 ] );
+  if( n > 38760 || nOpp > 38760 ) {
+    /* a player has no chequers off; gammons are possible */
+			
+    setGammonProb(anBoard, nOpp, n,
+		  &arOutput[ OUTPUT_LOSEGAMMON ],
+		  &arOutput[ OUTPUT_WINGAMMON ] );
+  } else {
+    arOutput[ OUTPUT_WINGAMMON ] =
+    arOutput[ OUTPUT_LOSEGAMMON ] =
+    arOutput[ OUTPUT_WINBACKGAMMON ] =
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+  }
 
-    if( n > 38760 || nOpp > 38760 )
-	/* a player has no chequers off; gammons are possible */
-      setGammonProb(anBoard, nOpp, n,
-		    &arOutput[ OUTPUT_LOSEGAMMON ],
-		    &arOutput[ OUTPUT_WINGAMMON ] );
-    else
-	arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] =
-	    arOutput[ OUTPUT_WINBACKGAMMON ] =
-	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+  for( i = 0; i < 32; i++ )
+    aaProb[ 0 ][ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
+      ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
 
-    for( i = 0; i < 32; i++ )
-	aaProb[ 0 ][ i ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
-	    ( pBearoff1[ ( n << 6 ) | ( i << 1 ) | 1 ] << 8 );
+  for( i = 0; i < 32; i++ )
+    aaProb[ 1 ][ i ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
+      ( pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) | 1 ] << 8 );
 
-    for( i = 0; i < 32; i++ )
-	aaProb[ 1 ][ i ] = pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) ] +
-	    ( pBearoff1[ ( nOpp << 6 ) | ( i << 1 ) | 1 ] << 8 );
+  x = 0;
+  for( i = 0; i < 32; i++ )
+    for( j = i; j < 32; j++ )
+      x += aaProb[ 0 ][ i ] * aaProb[ 1 ][ j ];
 
-    x = 0;
-    for( i = 0; i < 32; i++ )
-	for( j = i; j < 32; j++ )
-	    x += aaProb[ 0 ][ i ] * aaProb[ 1 ][ j ];
+  arOutput[ OUTPUT_WIN ] = x / ( 65535.0 * 65535.0 );
 
-    arOutput[ OUTPUT_WIN ] = x / ( 65535.0 * 65535.0 );
+  x = 0;
+  for( i = 0; i < 32; i++ )
+    x += i * aaProb[ 1 ][ i ];
 
-    x = 0;
-    for( i = 0; i < 32; i++ )
-	x += i * aaProb[ 1 ][ i ];
-
-    /* return value is the expected number of rolls for opponent to bear off
-       multiplied by 0xFFFF */
-    return x;
+  /* return value is the expected number of rolls for opponent to bear off
+     multiplied by 0xFFFF */
+  
+  return x;
 }
 
-extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+extern void
+EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] )
+{
+  EvalBearoff1Full( anBoard, arOutput );
+}
 
-    EvalBearoff1Full( anBoard, arOutput );
+enum {
+  /* gammon possible by side on roll */
+  G_POSSIBLE = 0x1,
+  /* backgammon possible by side on roll */
+  BG_POSSIBLE = 0x2,
+  
+  /* gammon possible by side not on roll */
+  OG_POSSIBLE = 0x4,
+  
+  /* backgammon possible by side not on roll */
+  OBG_POSSIBLE = 0x8,
+};
+
+static void
+EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
+{
+  float arInput[ NUM_INPUTS ];
+
+  CalculateRaceInputs( anBoard, arInput );
+    
+  NeuralNetEvaluate( &nnRace, arInput, arOutput );
+
+  /* anBoard[1] is on roll */
+  {
+    /* total men for side not on roll */
+    int totMen0 = 0;
+    
+    /* total men for side on roll */
+    int totMen1 = 0;
+
+    /* a set flag for every possible outcome */
+    int any = 0;
+    
+    int i;
+    
+    for(i = 23; i >= 0; --i) {
+      totMen0 += anBoard[0][i];
+      totMen1 += anBoard[1][i];
+    }
+
+    if( totMen1 == 15 ) {
+      any |= OG_POSSIBLE;
+    }
+    
+    if( totMen0 == 15 ) {
+      any |= G_POSSIBLE;
+    }
+
+    if( any ) {
+      if( any & OG_POSSIBLE ) {
+	for(i = 23; i >= 18; --i) {
+	  if( anBoard[1][i] > 0 ) {
+	    break;
+	  }
+	}
+
+	if( i >= 18 ) {
+	  any |= OBG_POSSIBLE;
+	}
+      }
+
+      if( any & G_POSSIBLE ) {
+	for(i = 23; i >= 18; --i) {
+	  if( anBoard[0][i] > 0 ) {
+	    break;
+	  }
+	}
+
+	if( i >= 18 ) {
+	  any |= BG_POSSIBLE;
+	}
+      }
+    }
+    
+    if( any & (BG_POSSIBLE | OBG_POSSIBLE) ) {
+      /* side that can have the backgammon */
+      
+      int side = (any & BG_POSSIBLE) ? 1 : 0;
+
+      int totMenHome = 0;
+      int totPipsOp = 0;
+
+      for(i = 0; i < 6; ++i) {
+	totMenHome += anBoard[side][i];
+      }
+      
+      for(i = 23; i >= 18; --i) {
+	totPipsOp += anBoard[1-side][i] * (i-17);
+      }
+
+      if( (totMenHome + 3) / 4 - (side == 1 ? 1 : 0) <= (totPipsOp + 2) / 3 ) {
+	int dummy[2][25];
+	float p[5];
+	
+	for(i = 0; i < 25; ++i) {
+	  dummy[side][i] = anBoard[side][i];
+	}
+
+	for(i = 0; i < 6; ++i) {
+	  dummy[1-side][i] = anBoard[1-side][18+i];
+	}
+	for(i = 6; i < 25; ++i) {
+	  dummy[1-side][i] = 0;
+	}
+
+	if( PositionBearoff( dummy[ 0 ] ) > 923 ||
+	    PositionBearoff( dummy[ 1 ] ) > 923 ) {
+	  EvalBearoff1(dummy, p);
+	} else {
+	  EvalBearoff2(dummy, p);
+	}
+
+	if( side == 1 ) {
+	  arOutput[OUTPUT_WINBACKGAMMON] = p[0];
+	} else {
+	  arOutput[OUTPUT_LOSEBACKGAMMON] = 1 - p[0];
+	}
+  
+      } else {
+	if( side == 1 ) {
+	  arOutput[OUTPUT_WINBACKGAMMON] = 0.0;
+	} else {
+	  arOutput[OUTPUT_LOSEBACKGAMMON] = 0.0;
+	}
+      }
+    }  
+  }
+  
+  /* sanity check will take care of rest */
+}
+
+static void EvalBPG( int anBoard[ 2 ][ 25 ], float arOutput[] )
+{
+  float arInput[ NUM_INPUTS ];
+
+  CalculateInputs(anBoard, arInput);
+
+  /* HACK - if not loaded, use contact */
+  
+  NeuralNetEvaluate(nnBPG.cInput != 0 ? &nnBPG : &nnContact,
+		    arInput, arOutput);
+}
+
+static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+    
+    float arInput[ NUM_INPUTS ];
+
+    CalculateInputs( anBoard, arInput );
+    
+    NeuralNetEvaluate( &nnContact, arInput, arOutput );
+}
+
+static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+
+    int i, c;
+    
+    for( i = 0; i < 25; i++ )
+	if( anBoard[ 0 ][ i ] )
+	    break;
+
+    if( i == 25 ) {
+	/* opponent has no pieces on board; player has lost */
+	arOutput[ OUTPUT_WIN ] = arOutput[ OUTPUT_WINGAMMON ] =
+	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
+
+	for( i = 0, c = 0; i < 25; i++ )
+	    c += anBoard[ 1 ][ i ];
+
+	if( c > 14 ) {
+	    /* player still has all pieces on board; loses gammon */
+	    arOutput[ OUTPUT_LOSEGAMMON ] = 1.0;
+
+	    for( i = 18; i < 25; i++ )
+		if( anBoard[ 1 ][ i ] ) {
+		    /* player still has pieces in opponent's home board;
+		       loses backgammon */
+		    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 1.0;
+
+		    return;
+		}
+	    
+	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+
+	    return;
+	}
+
+	arOutput[ OUTPUT_LOSEGAMMON ] =
+	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+
+	return;
+    }
+    
+    for( i = 0; i < 25; i++ )
+	if( anBoard[ 1 ][ i ] )
+	    break;
+
+    if( i == 25 ) {
+	/* player has no pieces on board; wins */
+	arOutput[ OUTPUT_WIN ] = 1.0;
+	arOutput[ OUTPUT_LOSEGAMMON ] =
+	    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+
+	for( i = 0, c = 0; i < 25; i++ )
+	    c += anBoard[ 0 ][ i ];
+
+	if( c > 14 ) {
+	    /* opponent still has all pieces on board; win gammon */
+	    arOutput[ OUTPUT_WINGAMMON ] = 1.0;
+
+	    for( i = 18; i < 25; i++ )
+		if( anBoard[ 0 ][ i ] ) {
+		    /* opponent still has pieces in player's home board;
+		       win backgammon */
+		    arOutput[ OUTPUT_WINBACKGAMMON ] = 1.0;
+
+		    return;
+		}
+	    
+	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
+
+	    return;
+	}
+
+	arOutput[ OUTPUT_WINGAMMON ] =
+	    arOutput[ OUTPUT_WINBACKGAMMON ] = 0.0;
+    }
 }
 
 static classevalfunc acef[ N_CLASSES ] = {
@@ -2916,13 +3159,16 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
            "BACKESCAPES    \t%5.3f (%5.3f/36) \t%6.3f\n"
            "ACONTAIN       \t%5.3f (%5.3f/36) \t%6.3f\n"
            "CONTAIN        \t%5.3f (%5.3f/36) \t%6.3f\n"
-           // "BUILDERS       \t%5.3f (%5.3f/6)  \t%6.3f\n"
-           //"SLOTTED        \t%5.3f (%5.3f/6)  \t%6.3f\n"
            "MOBILITY       \t%5.3f             \t%6.3f\n"
            "MOMENT2        \t%5.3f             \t%6.3f\n"
            "ENTER          \t%5.3f (%5.3f/12) \t%6.3f\n"
-           //"TOP_EVEN       \t%5.3f             \t%6.3f\n"
-           //"TOP2_EVEN      \t%5.3f             \t%6.3f\n"
+					 
+					 "ENTER2         \t%5.3f \n"
+					 "TIMING         \t%5.3f \n"
+					 "BACKBONE       \t%5.3f \n"
+					 "BACKGAME       \t%5.3f \n"
+					 "BACKGAME1      \t%5.3f \n"
+					 "FREEPIP        \t%5.3f \n"
            ,
            arInput[ I_OFF1 << 1 ], ardEdI[ I_OFF1 << 1 ],
            arInput[ I_OFF2 << 1 ], ardEdI[ I_OFF2 << 1 ],
@@ -2944,16 +3190,18 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 	         ardEdI[ I_ACONTAIN << 1 ],
            arInput[ I_CONTAIN << 1 ], arInput[ I_CONTAIN << 1 ] * 36.0,
 	         ardEdI[ I_CONTAIN << 1 ],
-           /*  	     arInput[ I_BUILDERS << 1 ], arInput[ I_BUILDERS << 1 ] * 6.0, */
-           /*  	         ardEdI[ I_BUILDERS << 1 ], */
-           /*  	     arInput[ I_SLOTTED << 1 ], arInput[ I_SLOTTED << 1 ] * 6.0, */
-           /*  	         ardEdI[ I_SLOTTED << 1 ], */
            arInput[ I_MOBILITY << 1 ], ardEdI[ I_MOBILITY << 1 ],
            arInput[ I_MOMENT2 << 1 ], ardEdI[ I_MOMENT2 << 1 ],
            arInput[ I_ENTER << 1 ], arInput[ I_ENTER << 1 ] * 12.0,
-	         ardEdI[ I_ENTER << 1 ]
-           /*  	     ,arInput[ I_TOP_EVEN << 1 ], ardEdI[ I_TOP_EVEN << 1 ], */
-           /*  	     arInput[ I_TOP2_EVEN << 1 ], ardEdI[ I_TOP2_EVEN << 1 ]  */
+	         ardEdI[ I_ENTER << 1 ],
+
+					 arInput[ I_ENTER2 ],
+					 arInput[ I_TIMING ],
+					 arInput[ I_BACKBONE ],
+					 arInput[ I_BACKG ],
+					 arInput[ I_BACKG1 ],
+					 arInput[ I_FREEPIP ]
+
            );
 }
 

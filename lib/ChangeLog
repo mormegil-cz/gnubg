@@ -1,3 +1,7 @@
+Fri Sep 29 14:08:05 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* config.h: undef VERSION and PACKAGE before setting them.
+
 Wed Aug  2 13:26:08 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* neuralnet.c: Improve sigmoid accuracy by using a table lookup for

@@ -1,3 +1,7 @@
+Wed Oct 11 10:46:09 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* redo changes to net 0.10 that were lost after I added them in 1.42.
+
 Sun Oct  8 20:44:00 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* eval.c (DumpPosition): remove unused debug code
@@ -19,6 +23,15 @@ Sun Oct  8 14:15:35 2000  Joern Thyssen  <joern@thyssen.nu>
 	* eval.c: implement cubeless to cubeful formulae for match play.
 	* matchequity.[ch]: new files; match equity tables.
 	* analysis.[ch]: new files; analyze match (not implemented yet!)
+
+Tue Oct  3 20:48:30 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c: Move to inputs version 10.
+
+Tue Oct  3 20:35:45 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c (EvalRace): Add checks for possiblity of backgammon and
+	almost exact evaluation.
 
 Tue Aug 29 20:48:56 2000  Joseph Heled  <pepe@internet.co.nz>
 
