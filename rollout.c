@@ -1159,7 +1159,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
         ajiJSD[ alt ].rJSD = ajiJSD[ alt ].rEquity / denominator;
         
         if ((rcRollout.fStopMoveOnJsd || rcRollout.fStopOnJsd) &&
-            (i >= rcRollout.nMinimumJsdGames)) {
+            (i >= (rcRollout.nMinimumJsdGames - 1))) {
           if (ajiJSD[ alt ].rJSD > rcRollout.rJsdLimit) {
             /* This move is no longer worth rolling out */
 
@@ -1216,7 +1216,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
       }
 
     /* see if we can quit because the answers are good enough */
-    if (rcRollout.fStopOnSTD && ( i >= rcRollout.nMinimumGames)) {
+    if (rcRollout.fStopOnSTD && ( i >= (rcRollout.nMinimumGames - 1))) {
       err_too_big = 0;
 
       for (alt = 0; alt < alternatives; ++alt) {
