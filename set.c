@@ -24,6 +24,13 @@
 #include <errno.h>
 #include <math.h>
 #if HAVE_SYS_SOCKET_H
+#include <sys/types.h>
+
+#if defined(sun)
+#define AF_LOCAL AF_UNIX
+#define PF_LOCAL PF_UNIX
+#endif
+
 #include <sys/socket.h>
 #include <sys/un.h>
 #endif
@@ -669,7 +676,7 @@ extern void CommandSetPlayerExternal( char *sz ) {
 				    here... but we didn't write the broken
 				    interface */
     
-    while( connect( h, (struct sockaddr *) &socsun, SUN_LEN( &socsun ) ) < 0 ) {
+    while( connect( h, (struct sockaddr *) &socsun, sizeof(socsun) ) < 0 ) {
 	if( errno == EINTR ) {
 	    if( fAction )
 		fnAction();

@@ -24,6 +24,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <signal.h>
+#include <string.h>
 #if HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #include <sys/un.h>

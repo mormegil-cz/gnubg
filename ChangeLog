@@ -18,6 +18,12 @@ Thu Mar 22 14:26:44 2001  Gary Wong  <gtw@research.att.com>
 
 	* play.c (ApplyMoveRecord): Update the off-board dice, if using GTK.
 
+Wed Mar 21 18:20:55 2001  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c (CalculateInputs): New net version 11. Slightly faster, since
+	there are more zeros on average in the first 200 inputs. 
+	Should be better as well, aroung 0.6 ppg against pubeval.
+
 Wed Mar 21 10:20:08 2001  Gary Wong  <gtw@research.att.com>
 
 	* credits.sh, credits.sh: New files.

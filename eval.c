@@ -132,7 +132,7 @@ enum {
              0         otherwise
   */
      
-  I_OFF1 = 100, I_OFF2, I_OFF3,
+  I_OFF1, I_OFF2, I_OFF3,
   
   /* Minimum number of pips required to break contact.
 
@@ -244,10 +244,11 @@ enum {
   
   I_BACKRESCAPES,
   
-  HALF_INPUTS };
+  MORE_INPUTS };
 
+#define MINPPERPOINT 4
 
-#define NUM_INPUTS ( HALF_INPUTS * 2 )
+#define NUM_INPUTS ((25 * MINPPERPOINT + MORE_INPUTS) * 2)
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
 
 static int anEscapes[ 0x1000 ];
@@ -735,8 +736,7 @@ extern int EvalSave( char *szWeights ) {
 /* Calculates the inputs for one player only.  Returns 0 for contact
    positions, 1 for races. */
 static void
-CalculateHalfInputs( int anBoard[ 25 ],
-		     int anBoardOpp[ 25 ],
+CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 		     float afInput[] ) {
 
   int i, j, k, l, nOppBack, n, aHit[ 39 ], nBoard;
@@ -863,9 +863,6 @@ CalculateHalfInputs( int anBoard[ 25 ],
     { 13, 31, 36, 38 }  /* 66 */
   };
 
-  /* Points we want to make, in order of importance */
-/*  static int anPoint[ 6 ] = { 5, 4, 3, 6, 2, 7 }; */
-
   /* One roll stat */
   
   struct {
@@ -876,19 +873,6 @@ CalculateHalfInputs( int anBoard[ 25 ],
     int nChequers;
   } aRoll[ 21 ];
     
-  /* Points */
-  for( i = 0; i < 25; i++ ) {
-    int nc = anBoard[ i ];
-      
-    afInput[ i * 4 + 0 ] = nc == 1;
-    afInput[ i * 4 + 1 ] = nc >= 2;
-    afInput[ i * 4 + 2 ] = nc >= 3;
-    afInput[ i * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
-  }
-
-  /* Bar */
-  afInput[ 24 * 4 + 0 ] = anBoard[ 24 ] >= 1;
-
   /* Men off */
   {
     int menOff = 15;
@@ -906,7 +890,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
       afInput[ I_OFF2 ] = ( menOff - 5 ) / 5.0;
       afInput[ I_OFF3 ] = 0.0;
     } else {
-      afInput[ I_OFF1 ] = menOff / 5.0;
+      afInput[ I_OFF1 ] = menOff ? menOff / 5.0 : 0.0;
       afInput[ I_OFF2 ] = 0.0;
       afInput[ I_OFF3 ] = 0.0;
     }
@@ -925,11 +909,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
     if( anBoard[ i ] )
       n += ( i + 1 - nOppBack ) * anBoard[ i ];
 
-  if( !n ) {
-    /* No contact */
-
-    exit(1);
-  }
+  {                                                              assert( n ); }
     
   afInput[ I_BREAK_CONTACT ] = n / (15 + 152.0);
 
@@ -943,7 +923,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
     
     afInput[I_FREEPIP] = p / 100.0;
   }
-  
+
   {
     int t = 0;
     
@@ -988,7 +968,6 @@ CalculateHalfInputs( int anBoard[ 25 ],
 
     afInput[ I_TIMING ] = t / 100.0;
   }
-
 
   /* Back chequer */
 
@@ -1092,8 +1071,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
 	    /* enter this shot as available */
 	      
 	    aHit[ aanCombination[ j - 24 + i ][ n ] ] |= 1 << j;
-	  cannot_hit:
-	    ;
+	    cannot_hit:
 	  }
 
   for( i = 0; i < 21; i++ )
@@ -1456,6 +1434,7 @@ CalculateHalfInputs( int anBoard[ 25 ],
   }
 }
 
+
 static void 
 CalculateRaceInputs(int anBoard[2][25], float inputs[])
 {
@@ -1465,9 +1444,6 @@ CalculateRaceInputs(int anBoard[2][25], float inputs[])
     const int* const board = anBoard[side];
     float* const afInput = inputs + side * HALF_RACE_INPUTS;
     int i;
-    
-    /* assert( board[24] == 0 ); */
-    /* assert( board[23] == 0 ); */
     
     /* Points */
     for(i = 0; i < 23; ++i) {
@@ -1534,58 +1510,50 @@ CalculateRaceInputs(int anBoard[2][25], float inputs[])
   }
 }
 
-static int
-isRace(int anBoard[2][25])
+
+static void
+baseInputs(int anBoard[2][25], float arInput[])
 {
-  int nOppBack;
-  int i;
-  
-  for(nOppBack = 24; nOppBack >= 0; --nOppBack) {
-    if( anBoard[1][nOppBack] ) {
-      break;
-    }
-  }
+  int j, i;
     
-  nOppBack = 23 - nOppBack;
+  for(j = 0; j < 2; ++j ) {
+    float* afInput = arInput + j * 25*4;
+    int* board = anBoard[j];
+    
+    /* Points */
+    for( i = 0; i < 24; i++ ) {
+      int nc = board[ i ];
+      
+      afInput[ i * 4 + 0 ] = nc == 1;
+      afInput[ i * 4 + 1 ] = nc == 2;
+      afInput[ i * 4 + 2 ] = nc >= 3;
+      afInput[ i * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
+    }
 
-  for(i = nOppBack + 1; i < 25; i++ ) {
-    if( anBoard[0][i] ) {
-      return 0;
+    /* Bar */
+    {
+      int nc = board[ 24 ];
+      
+      afInput[ 24 * 4 + 0 ] = nc >= 1;
+      afInput[ 24 * 4 + 1 ] = nc >= 2; /**/
+      afInput[ 24 * 4 + 2 ] = nc >= 3;
+      afInput[ 24 * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
     }
   }
-
-  return 1;
 }
 
 /* Calculates neural net inputs from the board position.
    Returns 0 for contact positions, 1 for races. */
 
-int
+void
 CalculateInputs(int anBoard[2][25], float arInput[])
 {
-  if( isRace(anBoard) ) {
-    CalculateRaceInputs(anBoard, arInput);
-    
-    return 1;
-  } else {
+  baseInputs(anBoard, arInput);
+  
+  CalculateHalfInputs( anBoard[ 1 ], anBoard[ 0 ], arInput + 4 * 25 * 2);
 
-    float ar[ HALF_INPUTS ];
-    int i, l;
-    
-    CalculateHalfInputs( anBoard[ 1 ], anBoard[ 0 ], ar );
-
-    l = HALF_INPUTS - 1;
-     
-    for( i = l; i >= 0; i-- )
-      arInput[ i << 1 ] = ar[ i ];
-
-    CalculateHalfInputs( anBoard[ 0 ], anBoard[ 1 ], ar );
-    
-    for( i = l; i >= 0; i-- )
-      arInput[ ( i << 1 ) | 1 ] = ar[ i ];
-  }
-
-  return 0;
+  CalculateHalfInputs( anBoard[ 0 ], anBoard[ 1 ], arInput +
+		       (4 * 25 * 2 + MORE_INPUTS));
 }
 
 extern void swap( int *p0, int *p1 ) {
@@ -1777,8 +1745,14 @@ EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] )
       ( pBearoff2[ ( ( n * 924 + nOpp ) << 1 ) | 1 ] << 8 ) ) / 65535.0;
 }
 
-/* Fill aaProb with one sided bearoff probabilities for position with id n */
-static inline void
+/* Fill aaProb with one sided bearoff probabilities for position with */
+/* bearoff id n.                                                      */
+
+static 
+#if defined( __GNUC__ )
+inline
+#endif
+void
 getBearoffProbs(int n, int aaProb[32])
 {
   int i;
@@ -1930,9 +1904,14 @@ static float oneCheckerOffTable[63][3] = {
 /* one side has 15 chequers. bp0 and bp1 are the bearoff indices of sides 0 */
 /* and 1, and g0/g1 are filled with gammon rate for side 0/1 respectivly    */
 
-/* The method used is not perfect, but has very small error. The error comes */
-/* from the assumption that 3 rolls are always enough to bear one men off,   */
-/* and from considering only which points are empty and which are not.       */
+/* The method used is not perfect, but has very small error (certainly less */
+/* than anything else we had so far). The error comes from the assumption   */
+/* that 3 rolls are always enough to bear one men off, and from ignoring    */
+/* the exact number of men on each point.                                   */
+
+/* Method: same as mormal bearoff, only using oneCheckerOffTable as the      */
+/* bearoff table for the side trying to get one off, and  full table for the */
+/* other side.                                                               */
 
 static void
 setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
@@ -1949,8 +1928,9 @@ setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
   int t0 = 0;
   int t1 = 0;
 
-  /* true when side 0 has 15 checkers left, false when side 1. When both has */
-  /* more than 12 checkers left (at least 3 turns for both), gammon% is 0    */
+  /* true when side 0 has 15 checkers left, false when side 1 has.           */
+  /* When both has more than 12 checkers left (at least 3 turns for both),   */
+  /* gammon% is 0.                                                           */
 	
   int side0;
   
@@ -2124,7 +2104,11 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
       
       int side = (any & BG_POSSIBLE) ? 1 : 0;
 
+      /* total number of men in side home */
       int totMenHome = 0;
+
+      /* total number of pips needed by opponent to get all his men out of */
+      /* side home board.                                                  */
       int totPipsOp = 0;
 
       for(i = 0; i < 6; ++i) {
@@ -2135,8 +2119,14 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
 	totPipsOp += anBoard[1-side][i] * (i-17);
       }
 
+      /* if you can't get a backgammon rolling double 6's while your op */
+      /* rolls 1-2, there is no chance, is there?                       */
+      
       if( (totMenHome + 3) / 4 - (side == 1 ? 1 : 0) <= (totPipsOp + 2) / 3 ) {
+	/* a dummy board where opponent men as positioned for bearoff. The */
+	/* win percentage for that board is exactly the BG rate.           */
 	int dummy[2][25];
+	
 	float p[5];
 	
 	for(i = 0; i < 25; ++i) {
@@ -2308,7 +2298,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
     float ar[ NUM_OUTPUTS ];
     int anBoardNew[ 2 ][ 25 ];
-    int anMove[ 8 ];
+    /* int anMove[ 8 ]; */
     cubeinfo ciOpp;
 
     for( i = 0; i < NUM_OUTPUTS; i++ )
@@ -2343,7 +2333,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    return -1;
 	  }
 	      
-	  FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
+	  FindBestMovePlied( 0, n0, n1, anBoardNew, pci, pec, 0 );
 	      
 	  SwapSides( anBoardNew );
 
@@ -2416,7 +2406,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    return -1;
 	  }
 	      
-	  FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
+	  FindBestMovePlied( 0, n0, n1, anBoardNew, pci, pec, 0 );
 	      
 	  SwapSides( anBoardNew );
 
@@ -2580,13 +2570,13 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
-									cubeinfo *pci, evalcontext *pec ) {
+		  cubeinfo *pci, evalcontext *pec ) {
     
-	positionclass pc = ClassifyPosition( anBoard );
+  positionclass pc = ClassifyPosition( anBoard );
     
-	return EvaluatePositionCache( anBoard, arOutput, pci, 
-																pec ? pec : &ecBasic,
-																pec ? pec->nPlies : 0, pc );
+  return EvaluatePositionCache( anBoard, arOutput, pci, 
+				pec ? pec : &ecBasic,
+				pec ? pec->nPlies : 0, pc );
 }
 
 extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] ) {		
@@ -2662,8 +2652,6 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[],
 
     SanityCheck( anBoard, arDesired );
     
-    CalculateInputs( anBoard, arInput );
-
     NeuralNetTrain( nn, arInput, arOutput, arDesired, rAlpha /
 		    pow( nn->nTrained / 1000.0 + 1.0, rAnneal ) );
     
