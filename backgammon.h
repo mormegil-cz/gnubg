@@ -63,6 +63,9 @@ extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
     fAutoGame, fAutoMove, fResigned, fMove, fDoubled, nPliesEval, anScore[ 2 ],
     cGames, nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
     fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse;
+#if !X_DISPLAY_MISSING
+extern int nDelay;
+#endif
 
 extern list lMatch, *plGame; /* (list of) list of moverecords */
 
@@ -120,6 +123,7 @@ extern void CommandAccept( char * ),
     CommandSetCubeOwner( char * ),
     CommandSetCubeUse( char * ),
     CommandSetCubeValue( char * ),
+    CommandSetDelay( char * ),
     CommandSetDice( char * ),
     CommandSetDisplay( char * ),
     CommandSetPlayerGNU( char * ),

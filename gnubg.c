@@ -23,7 +23,9 @@
 
 #include <ctype.h>
 #include <errno.h>
+#if HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <math.h>
 #if HAVE_PWD_H
 #include <pwd.h>
@@ -69,9 +71,13 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fResigned = FALSE, fMove = -1, nPliesEval = 1, anScore[ 2 ] = { 0, 0 },
     cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
-    fAutoRoll = TRUE, nMatchTo = 0, fJacoby = TRUE, fCrawford = FALSE,
+    fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
     fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 0,
     fCubeUse = TRUE;
+
+#if !X_DISPLAY_MISSING
+int nDelay = 0;
+#endif
 
 player ap[ 2 ] = {
     { "gnubg", PLAYER_GNU, 0 },
@@ -145,6 +151,8 @@ static command acDatabase[] = {
     { "crawford", CommandSetCrawford, 
       "Set whether this is the Crawford game", NULL },
     { "cube", NULL, "Set the cube owner and/or value", acSetCube },
+    { "delay", CommandSetDelay, "Limit the speed at which moves are made",
+      NULL },
     { "dice", CommandSetDice, "Select the roll for the current move",
       NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
@@ -166,14 +174,19 @@ static command acDatabase[] = {
     { "turn", CommandSetTurn, "Set which player is on roll", NULL },
     { NULL, NULL, NULL, NULL }
 }, acShow[] = {
+    /* FIXME show autobearoff, autocrawford, autodoubles, autogame, automove,
+       autoroll */
     { "board", CommandShowBoard, "Redisplay the board position", NULL },
     { "cache", CommandShowCache, "See statistics on the performance of "
       "the evaluation cache", NULL },
     { "copying", CommandNotImplemented, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
+    /* FIXME show cube */
     { "crawford", CommandShowCrawford, 
       "See if this is the Crawford game", NULL },
+    /* FIXME show delay */
     { "dice", CommandShowDice, "See what the current dice roll is", NULL },
+    /* FIXME show display */
     { "jacoby", CommandShowJacoby, 
       "See if the Jacoby rule is used in money sessions", NULL },
     { "pipcount", CommandShowPipCount, "Count the number of pips each player "
@@ -184,8 +197,6 @@ static command acDatabase[] = {
     { "rng", CommandShowRNG, "Display which random number generator "
       "is being used", NULL },
     { "score", CommandShowScore, "View the match or session score ",
-      NULL },
-    { "seed", CommandNotImplemented, "View the state of the dice generator",
       NULL },
     { "turn", CommandShowTurn, "Show which player is on roll", NULL },
     { "warranty", CommandNotImplemented, "Various kinds of warranty you do "
@@ -302,11 +313,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
 	return 0;
     }
 
-    PositionFromID( an, sz );
-
-    /* FIXME check position is legal! */
-
-    return 0;
+    return PositionFromID( an, sz );
 }
 
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
@@ -609,7 +616,7 @@ extern void CommandEval( char *sz ) {
     int an[ 2 ][ 25 ];
 
     if( !*sz && fTurn == -1 ) {
-	puts( "No position specified." );
+	puts( "No position specified and no game in progress." );
 	return;
     }
     
@@ -813,7 +820,7 @@ extern void CommandSaveMatch( char *sz ) {
 
 extern void CommandSaveWeights( char *sz ) {
 
-    if( EvalSave( GNUBG_WEIGHTS /* FIXME */ ) )
+    if( EvalSave( GNUBG_WEIGHTS /* FIXME accept file name parameter */ ) )
 	perror( GNUBG_WEIGHTS );
     else
 	puts( "Evaluator weights saved." );
@@ -847,7 +854,7 @@ extern void CommandTrainTD( char *sz ) {
 	    SwapSides( anBoardTrain );
 	    
 	    EvaluatePosition( anBoardTrain, ar, 0 );
-	    /* FIXME handle interrupts */
+
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar ) )
 		break;
@@ -989,11 +996,8 @@ void RunX( void ) {
        fallback to TTY), or executes until exit() if successful. */
     Display *pdsp;
     extdisplay edsp;
-    Atom a;
     XrmDatabase rdb;
     XSizeHints xsh;
-    int i;
-    unsigned long n, l;
     unsigned char *pch;
     event ev;
     
@@ -1014,15 +1018,10 @@ void RunX( void ) {
 	return;
     }
 
-    /* FIXME use XResourceManagerString(), XScreenResourceString() */
-    a = XInternAtom( pdsp, "RESOURCE_MANAGER", 0 );
+    /* FIXME check if XResourceManagerString works! */
+    if( !( pch = XResourceManagerString( pdsp ) ) )
+	pch = "";
 
-    XGetWindowProperty( pdsp, DefaultRootWindow( pdsp ), a, 0, 32768, 0,
-                            AnyPropertyType, &a, &i, &n, &l, &pch );
-
-    if( !pch )
-        pch = ""; /* FIXME grotty hack to avoid creating a NULL database */
-    
     rdb = XrmGetStringDatabase( pch );
 
     /* FIXME override with $XENVIRONMENT and ~/.gnubgrc */
@@ -1124,7 +1123,12 @@ extern int main( int argc, char *argv[] ) {
 	    break;
 	case 'v': /* version */
 	    puts( "GNU Backgammon " VERSION );
-	    /* FIXME show optional features installed (Guile, X, etc.) */
+#if !X_DISPLAY_MISSING
+	    puts( "X Window System supported." );
+#endif
+#if HAVE_LIBGDBM
+	    puts( "Position databases supported." );
+#endif
 	    return EXIT_SUCCESS;
 	default:
 	    usage( argv[ 0 ] );
@@ -1200,6 +1204,7 @@ extern int main( int argc, char *argv[] ) {
     rl_basic_word_break_characters = szCommandSeparators;
     rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
     rl_completion_entry_function = (Function *) NullGenerator;
+    atexit( rl_callback_handler_remove );
 #endif
     
 #if !X_DISPLAY_MISSING

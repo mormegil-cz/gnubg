@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 
 #include "backgammon.h"
 #include "dice.h"
@@ -158,7 +161,10 @@ extern void NextTurn( void ) {
 
     int n, fWinner;
     static int fReentered = 0, fShouldRecurse = 0;
-
+#if !X_DISPLAY_MISSING
+    static struct timeval tvLast, tv;
+#endif
+    
     if( fReentered ) {
 	fShouldRecurse++;
 	return;
@@ -177,6 +183,37 @@ extern void NextTurn( void ) {
 	    SwapSides( anBoard );
 	}
 
+#if !X_DISPLAY_MISSING
+	if( fX && nDelay ) {
+	    /* FIXME this is awful... it does delay, but it shouldn't do it by
+	       sleeping here -- it should set a timeout and return to the main
+	       event loop.
+
+	       Another problem with this implementation is that the delay
+	       will not work the first time NextTurn is called, because
+	       tvLast will be initialised to zero and this code will assume
+	       the delay has already elapsed. */
+	    gettimeofday( &tv, NULL );
+	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
+		tvLast.tv_sec += tvLast.tv_usec / 1000000;
+		tvLast.tv_usec %= 1000000;
+	    }
+
+	    if( tvLast.tv_sec > tv.tv_sec || ( tvLast.tv_sec == tv.tv_sec &&
+					 tvLast.tv_usec > tv.tv_usec ) ) {
+		tvLast.tv_sec -= tv.tv_sec;
+		if( ( tvLast.tv_usec -= tv.tv_usec ) < 0 ) {
+		    tvLast.tv_usec += 1000000;
+		    tvLast.tv_sec--;
+		}
+
+		select( 0, NULL, NULL, NULL, &tvLast );
+	    }
+
+	    gettimeofday( &tvLast, NULL );
+	}
+#endif
+	
 	if( go == GAME_NORMAL && ( fDisplay ||
 				   ap[ fTurn ].pt == PLAYER_HUMAN ) )
 	    ShowBoard();
