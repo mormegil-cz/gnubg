@@ -3402,6 +3402,28 @@ extern char *FormatCubePosition ( char *sz, cubeinfo *pci ) {
 
 }
 
+static move *
+GetMove ( int anBoard[ 2 ][ 25 ] ) {
+
+  int i;
+  unsigned char auch[ 10 ];
+  int an[ 2 ][ 25 ];
+
+  if ( memcmp ( &ms, &sm.ms, sizeof ( matchstate ) ) )
+    return NULL;
+
+  memcpy ( an, anBoard, sizeof ( an ) );
+  SwapSides ( an );
+  PositionKey ( an, auch );
+
+  for ( i = 0; i < sm.ml.cMoves; ++i ) 
+    if ( EqualKeys ( auch, sm.ml.amMoves[ i ].auch ) ) 
+      return &sm.ml.amMoves[ i ];
+
+  return NULL;
+
+}
+
 
 extern void 
 CommandRollout( char *sz ) {
@@ -3409,6 +3431,7 @@ CommandRollout( char *sz ) {
     float ar[ NUM_ROLLOUT_OUTPUTS ], arStdDev[ NUM_ROLLOUT_OUTPUTS ];
     int i, c, n, fOpponent = FALSE, cGames, fCubeDecTop = TRUE;
     cubeinfo ci;
+    move *pm;
 #if HAVE_ALLOCA
     int ( *aan )[ 2 ][ 25 ];
     char ( *asz )[ 40 ];
@@ -3523,6 +3546,45 @@ CommandRollout( char *sz ) {
                                        &aars[ i ], &rcRollout, &ci, &fCubeDecTop,
                                        1, fOpponent ) ) <= 0 )
 	    return;
+
+        /* save in current movelist */
+
+        if ( fOpponent ) {
+
+          /* it was the =1 =2 notation */
+
+          if ( ( pm = GetMove ( aan[ i ] ) ) ) {
+
+            memcpy ( pm->arEvalMove, ar, 
+                     NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+            memcpy ( pm->arEvalStdDev, arStdDev, 
+                     NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+            
+            /* Save evaluation setup */
+            pm->esMove.et = EVAL_ROLLOUT;
+            pm->esMove.rc = rcRollout;
+            
+            /* Score for move:
+               rScore is the primary score (cubeful/cubeless)
+               rScore2 is the secondary score (cubeless) */
+            
+            if ( rcRollout.fCubeful ) {
+              if ( ci.nMatchTo )
+                pm->rScore = 
+                  mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &ci );
+              else
+                pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
+  }
+            else
+              pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
+            
+            pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
+
+            
+
+          }
+
+        }
 
 #if USE_GTK
 	if( !fX )

@@ -114,6 +114,16 @@ ec2es ( evalsetup *pes, const evalcontext *pec ) {
 
 }
 
+static int
+cmp_matchstate ( const matchstate *pms1, const matchstate *pms2 ) {
+
+  /* check if the match state is for the same move */
+
+  return memcmp ( pms1, pms2, sizeof ( matchstate ) );
+
+}
+
+
 
 static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
 
@@ -1431,8 +1441,12 @@ static int TryBearoff( void ) {
 		pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 		pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 		pmn->fPlayer = ms.fTurn;
-		pmn->ml.cMoves = 0;
-		pmn->ml.amMoves = NULL;
+                if ( ! cmp_matchstate ( &ms, &sm.ms ) ) 
+                  CopyMoveList ( &pmn->ml, &sm.ml );
+                else {
+                  pmn->ml.cMoves = 0;
+                  pmn->ml.amMoves = NULL;
+                }
                 pmn->esDouble.et = EVAL_NONE;
                 pmn->esChequer.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
@@ -2601,8 +2615,12 @@ CommandMove( char *sz ) {
 	    pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 	    pmn->fPlayer = ms.fTurn;
-	    pmn->ml.cMoves = 0;
-	    pmn->ml.amMoves = NULL;
+            if ( ! cmp_matchstate ( &ms, &sm.ms ) ) 
+              CopyMoveList ( &pmn->ml, &sm.ml );
+            else {
+              pmn->ml.cMoves = 0;
+              pmn->ml.amMoves = NULL;
+            }
 	    pmn->esDouble.et = EVAL_NONE;
 	    pmn->esChequer.et = EVAL_NONE;
 	    pmn->lt = LUCK_NONE;
@@ -2676,8 +2694,12 @@ CommandMove( char *sz ) {
 		pmn->anRoll[ 0 ] = ms.anDice[ 0 ];
 		pmn->anRoll[ 1 ] = ms.anDice[ 1 ];
 		pmn->fPlayer = ms.fTurn;
-		pmn->ml.cMoves = 0;
-		pmn->ml.amMoves = NULL;
+                if ( ! cmp_matchstate ( &ms, &sm.ms ) ) 
+                  CopyMoveList ( &pmn->ml, &sm.ml );
+                else {
+                  pmn->ml.cMoves = 0;
+                  pmn->ml.amMoves = NULL;
+                }
 		pmn->esDouble.et = EVAL_NONE;
 		pmn->esChequer.et = EVAL_NONE;
 		pmn->lt = LUCK_NONE;
@@ -3903,17 +3925,6 @@ FixMatchState ( matchstate *pms, const moverecord *pmr ) {
   }
     
 }
-
-
-static int
-cmp_matchstate ( const matchstate *pms1, const matchstate *pms2 ) {
-
-  /* check if the match state is for the same move */
-
-  return memcmp ( pms1, pms2, sizeof ( matchstate ) );
-
-}
-
 
 
 extern moverecord *
