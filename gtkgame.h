@@ -40,11 +40,7 @@ extern void GTKAddMoveRecord( moverecord *pmr );
 extern void GTKPopMoveRecord( moverecord *pmr );
 extern void GTKSetMoveRecord( moverecord *pmr );
 extern void GTKClearMoveRecord( void );
-#if WIN32
-extern void GTKAddGame( char *sz );
-#else
 extern void GTKAddGame( moverecord *pmr );
-#endif
 extern void GTKPopGame( int c );
 extern void GTKSetGame( int i );
 extern void GTKRegenerateGames( void );
@@ -110,6 +106,7 @@ extern void
 GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
                cubeinfo *pci, int fMWC );
 extern void GTKSaveSettings( void );
+extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw );
 extern void GTKHelp( char *sz );
 
 extern int fTTY;

@@ -506,19 +506,9 @@ static void ResetDelayTimer( void ) {
 
 extern void AddGame( moverecord *pmr ) {
    
-#if WIN32 && USE_GTK
-    char sz[ 32 ];
-    
-    if( fX ) {
-        sprintf( sz, "Game %d: %d-%d", pmr->g.i + 1, pmr->g.anScore[ 0 ],
-                 pmr->g.anScore[ 1 ] );
-        GTKAddGame( sz );
-    }
-#endif
- 
     assert( pmr->mt == MOVE_GAMEINFO );
 
-#if !WIN32 && USE_GTK
+#if USE_GTK
     if( fX )
 	GTKAddGame( pmr );
 #endif

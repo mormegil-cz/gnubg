@@ -347,7 +347,6 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
 static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
-static void SetCube( gpointer *p, guint n, GtkWidget *pw );
 static void SetCubeValue( GtkWidget *wd, int data);
 static void SetCubeOwner( GtkWidget *wd, int i);
 static void SetCubeClickButton( GtkWidget *wd, int i);
@@ -1778,27 +1777,7 @@ static void SelectGame( GtkWidget *pw, void *p ) {
 }
 
 static int fGameMenuUsed;
-#if WIN32
-extern void GTKAddGame( char *sz ) {
 
-    GtkWidget *pw = gtk_menu_item_new_with_label( sz ),
-        *pwMenu = gtk_option_menu_get_menu( GTK_OPTION_MENU( pom ) );
-    
-    if( !ms.cGames )
-        /* Delete the "(no game)" item. */
-        gtk_container_foreach( GTK_CONTAINER( pwMenu ),
-                               (GtkCallback) MenuDelete, pwMenu );
-
-    gtk_signal_connect( GTK_OBJECT( pw ), "activate",
-                        GTK_SIGNAL_FUNC( SelectGame ),
-                        GINT_TO_POINTER( ms.cGames ) );
-    
-    gtk_widget_show( pw );
-    gtk_menu_append( GTK_MENU( pwMenu ), pw );
-    
-    GTKSetGame( ms.cGames );
-}
-#else
 extern void GTKAddGame( moverecord *pmr ) {
 
     GtkWidget *pw,
@@ -1831,7 +1810,7 @@ extern void GTKAddGame( moverecord *pmr ) {
     
     GTKSetGame( c );
 }
-#endif
+
 /* Delete i and subsequent games. */
 extern void GTKPopGame( int i ) {
 
@@ -1860,7 +1839,6 @@ extern void GTKSetGame( int i ) {
    player names change, or the score a game was started at is modified). */
 extern void GTKRegenerateGames( void ) {
 
-#if !WIN32
     list *pl, *plGame;
     int i = gtk_option_menu_get_history( GTK_OPTION_MENU( pom ) );
 
@@ -1875,7 +1853,6 @@ extern void GTKRegenerateGames( void ) {
     }
 
     GTKSetGame( i );
-#endif
 }
 
 /* The annotation for one or more moves has been modified.  We refresh
@@ -2048,7 +2025,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Game/Previous game", "<control>Page_Up", Command, CMD_PREV_GAME,
 	  NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Game/Set cube...", NULL, SetCube, 0, NULL },
+	{ "/_Game/Set cube...", NULL, GTKSetCube, 0, NULL },
 	{ "/_Game/Set _dice...", NULL, SetDice, 0, NULL },
 	{ "/_Game/Set _turn", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/Set turn/0", NULL, Command, CMD_SET_TURN_0, "<RadioItem>" },
@@ -6496,7 +6473,7 @@ static GtkWidget* CreateSetCubeDialog ()
   return SetCubeWindow;
 }
 
-static void SetCube( gpointer *p, guint n, GtkWidget *pw ) {
+extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
 
   pwSetCube = CreateSetCubeDialog();
 
