@@ -33,6 +33,12 @@ extern "C" {
 #define IS_BOARD( obj ) ( GTK_CHECK_TYPE( (obj), TYPE_BOARD ) )
 #define IS_BOARD_CLASS( c ) ( GTK_CHECK_CLASS_TYPE( (c), TYPE_BOARD ) )
 
+typedef enum _BoardWood {
+    WOOD_ALDER, WOOD_ASH, WOOD_BASSWOOD, WOOD_BEECH, WOOD_CEDAR,
+    WOOD_EBONY, WOOD_FIR, WOOD_MAPLE, WOOD_OAK, WOOD_PINE, WOOD_REDWOOD,
+    WOOD_WALNUT, WOOD_WILLOW, WOOD_PAINT
+} BoardWood;
+    
 typedef struct _Board {
     GtkVBox vbox;
     gpointer board_data;
@@ -71,10 +77,11 @@ typedef struct _BoardData {
     GdkBitmap *bm_mask, *bm_dice_mask, *bm_cube_mask, *bm_key_mask;
     guchar *rgba_x, *rgba_o, *rgba_x_key, *rgba_o_key, *rgb_points, *rgb_empty,
 	*rgb_saved, *rgb_temp, *rgb_temp_saved, *rgb_bar0, *rgb_bar1;
+    BoardWood wood;
     short *ai_refract[ 2 ];
     GdkFont *cube_font;
     gboolean translucent, labels, usedicearea, permit_illegal, beep_illegal,
-	higher_die_first, playing, computer_turn, wood;
+	higher_die_first, playing, computer_turn;
     animation animate_computer_moves;
     int animate_speed;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */

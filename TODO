@@ -70,6 +70,7 @@ duplication of effort and to make sure our changes merge easily.
   the initial roll and response, and whatever speeds things along while
   still finding reasonable plays after that.)
 ** Make "save settings" accept a filename parameter.
+** Allow saving positions in SGF. (gary)
 ** Importing and exporting:
 *** Add missing export formats (FIBS, SGG).
 *** Make the .mat format identical to Jellyfish (things to check:
@@ -168,18 +169,12 @@ duplication of effort and to make sure our changes merge easily.
   the new evalsetups. (gary)
 ** Make sure copy/paste works correctly everywhere.  See
   <http://www.freedesktop.org/standards/clipboards.txt>.  (Wait for GTK+ 2.0.)
-** Add some shortcuts to set the cube owner/value in edit mode (e.g.
-  button 1 increases value, button 2+ decreases value, ctrl+button cycles
-  through owners/centred).
 ** Add some kind of GTK interface for viewing rollout statistics.
-** Make the 'Set cube' dialog availble by clicking the cube in edit mode.   
 ** Think about ways to improve event handling while "busy".  We could save
   them somewhere and then use gdk_event_put() when we're ready. (gary)
 ** CreateDialog() should use GTK+ 2.0 stock icons instead of the gnu. (gary)
 ** The edges of the board should cast shadows.  Getting shadows on the
   board surface is fairly easy... getting shadows on the chequers is not.
-** Consider using gdk_window_begin_paint_region() under GTK+ 2.0 when drawing
-  dragging chequers, to eliminate flicker.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -235,8 +230,6 @@ functions:
   many points a resignation was for.  See Little_Sister match
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
-** Issuing some commands (e.g. "set clockwise") while in edit mode
-  destroys the editing changes.
 ** "help next" (and "next <tab>") are incomplete.
 ** Does VarRednRollout use the pci parameter correctly?  It looks like
   it doesn't pay attention to which player is on roll.

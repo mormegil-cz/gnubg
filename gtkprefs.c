@@ -48,7 +48,7 @@ static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
 static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
-    *pwAnimateSlide, *pwSpeed, *pwWood;
+    *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu;
 static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
     fHigherDieFirst, fWood;
 static animation anim;
@@ -171,6 +171,7 @@ static void ToggleWood( GtkWidget *pw, BoardData *bd ) {
     
     fWood = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
     
+    gtk_widget_set_sensitive( pwWoodType, fWood );
     gtk_widget_set_sensitive( apwBoard[ 1 ], !fWood );
 }
 
@@ -179,6 +180,11 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     GtkWidget *pw, *pwWoodF;
     gdouble ar[ 4 ];
     int i;
+    static char *aszWood[] = {
+	"Alder", "Ash", "Basswood", "Beech", "Cedar", "Ebony", "Fir", "Maple",
+	"Oak", "Pine", "Redwood", "Walnut", "Willow"
+    };
+    BoardWood bw;
     
     pw = gtk_vbox_new( FALSE, 0 );
 
@@ -186,6 +192,19 @@ static GtkWidget *BorderPage( BoardData *bd ) {
 			pwWood = gtk_radio_button_new_with_label( NULL,
 								  "Wooden" ),
 			FALSE, FALSE, 0 );
+
+    gtk_box_pack_start( GTK_BOX( pw ), pwWoodType = gtk_option_menu_new(),
+			FALSE, FALSE, 4 );
+
+    pwWoodMenu = gtk_menu_new();
+    for( bw = 0; bw < WOOD_PAINT; bw++ )
+	gtk_menu_shell_append( GTK_MENU_SHELL( pwWoodMenu ),
+			       gtk_menu_item_new_with_label( aszWood[ bw ] ) );
+	
+    gtk_option_menu_set_menu( GTK_OPTION_MENU( pwWoodType ), pwWoodMenu );
+    if( bd->wood != WOOD_PAINT )
+	gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), bd->wood );
+    
     gtk_box_pack_start( GTK_BOX( pw ),
 			pwWoodF = gtk_radio_button_new_with_label_from_widget(
 			    GTK_RADIO_BUTTON( pwWood ), "Painted" ),
@@ -205,7 +224,8 @@ static GtkWidget *BorderPage( BoardData *bd ) {
     gtk_signal_connect( GTK_OBJECT( pwWood ), "toggled",
 			GTK_SIGNAL_FUNC( ToggleWood ), bd );
     
-    gtk_widget_set_sensitive( apwBoard[ 1 ], !bd->wood );
+    gtk_widget_set_sensitive( pwWoodType, bd->wood != WOOD_PAINT );
+    gtk_widget_set_sensitive( apwBoard[ 1 ], bd->wood == WOOD_PAINT);
     
     return pw;
 }
@@ -466,7 +486,8 @@ static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
     bd->permit_illegal = fPermitIllegal;
     bd->beep_illegal = fBeepIllegal;
     bd->higher_die_first = fHigherDieFirst;
-    bd->wood = fWood;
+    bd->wood = fWood ? gtk_option_menu_get_history( GTK_OPTION_MENU(
+	pwWoodType ) ) : WOOD_PAINT;
     bd->animate_computer_moves = anim;
     
     /* This is a horrible hack, but we need translucency set to the new
@@ -660,6 +681,25 @@ static int SetColourARSS( BoardData *bd, char *sz, int i ) {
     return -1;
 }
 
+static char *aszWoodName[] = {
+    "alder", "ash", "basswood", "beech", "cedar", "ebony", "fir", "maple",
+    "oak", "pine", "redwood", "walnut", "willow", "paint"
+};
+
+static int SetWood( char *sz, BoardWood *pbw ) {
+
+    BoardWood bw;
+    int cch = strlen( sz );
+    
+    for( bw = 0; bw <= WOOD_PAINT; bw++ )
+	if( !strncasecmp( sz, aszWoodName[ bw ], cch ) ) {
+	    *pbw = bw;
+	    return 0;
+	}
+
+    return -1;
+}
+
 extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 				   char *szValue ) {
 
@@ -696,7 +736,7 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
     else if( !g_strncasecmp( szParam, "highdie", c ) )
 	bd->higher_die_first = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "wood", c ) )
-	bd->wood = toupper( *szValue ) == 'Y';
+	fValueError = SetWood( szValue, &bd->wood );
     else if( !g_strncasecmp( szParam, "animate", c ) ) {
 	switch( toupper( *szValue ) ) {
 	case 'B':
@@ -771,7 +811,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     sprintf( sz, "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
-	     "beep=%c highdie=%c wood=%c "
+	     "beep=%c highdie=%c wood=%s "
 	     "animate=%s speed=%d light=%0.0f;%0.0f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
@@ -784,7 +824,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->translucent ? 'y' : 'n', bd->labels ? 'y' : 'n',
 	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
 	     bd->beep_illegal ? 'y' : 'n', bd->higher_die_first ? 'y' : 'n',
-	     bd->wood ? 'y' : 'n',
+	     aszWoodName[ bd->wood ],
 	     aszAnim[ bd->animate_computer_moves ], bd->animate_speed,
 	     rAzimuth, rElevation, (int) ( bd->aarColour[ 0 ][ 0 ] * 0xFF ),
 	     (int) ( bd->aarColour[ 0 ][ 1 ] * 0xFF ), 

@@ -981,7 +981,7 @@ static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd,
    0-27 and also allows clicking on a small border and all bearoff trays */
 static int board_point_with_border( GtkWidget *board, BoardData *bd, 
 				    int x0, int y0 ) {
-    int i, x, y, cx, cy;
+    int i, x, y, cx, cy, xCube, yCube;
 
     x0 /= bd->board_size;
     y0 /= bd->board_size;
@@ -1005,6 +1005,11 @@ static int board_point_with_border( GtkWidget *board, BoardData *bd,
 	    return i;
     }
 
+    cube_position( bd, &xCube, &yCube, NULL );
+    
+    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+	return POINT_CUBE;
+    
     /* Could not find an overlapping point */
     return -1;
 }
@@ -1119,6 +1124,9 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 	    
 	read_board( bd, points );
 	update_position_id( bd, points );
+    } else if( !dragging && n == POINT_CUBE ) {
+	GTKSetCube( NULL, 0, NULL );
+	return;
     }
     
     /* Only points or bar allowed */
@@ -1270,7 +1278,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    bd->drag_point = -1;
 	    
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
-		board_beep( bd );
+		GTKSetCube( NULL, 0, NULL );
 	    else
 		UserCommand( "double" );
 	    
@@ -1813,9 +1821,14 @@ static gint board_set( Board *board, const gchar *board_text ) {
     gtk_widget_set_sensitive( bd->crawford, bd->match_to > 1 &&
 			      ( bd->score == bd->match_to - 1 ||
 				bd->score_opponent == bd->match_to - 1 ) );
-				  
-    read_board( bd, bd->old_board );
-    update_position_id( bd, bd->old_board );
+
+    /* Don't touch bd->old_board when in edit mode. */
+    if( !bd->playing ||
+	!gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) ) {
+	read_board( bd, bd->old_board );
+	update_position_id( bd, bd->old_board );
+    }
+    
     update_match_id ( bd );
     update_move( bd );
 
@@ -2258,8 +2271,16 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gint computer_turn ) {
     gchar board_str[ 256 ];
     BoardData *pbd = board->board_data;
+    int old_points[ 2 ][ 25 ];
     
-    memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
+    /* Treat a reset of the position to old_board as a no-op while
+       in edit mode. */
+    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) &&
+	pbd->playing && EqualBoards( pbd->old_board, points ) ) {
+	read_board( pbd, old_points );
+	points = old_points;
+    } else
+	memcpy( pbd->old_board, points, sizeof( pbd->old_board ) );
 
     FIBSBoard( board_str, points, roll, name, opp_name, match, score,
 	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
@@ -2385,22 +2406,306 @@ static guchar board_pixel( BoardData *bd, int i, int antialias, int j ) {
 		    antialias ) * ( bd->arLight[ 2 ] * 0.8 + 0.2 ) / 20 );
 }
 
-static void wood_pixel( float x, float y, float z, unsigned char auch[ 3 ] ) {
+static float wood_hash( float r ) {
+    /* A quick and dirty hash function for floating point numbers; returns
+       a value in the range [0,1). */
+
+    int n;
+    float x;
+
+    if( !r )
+	return 0;
+    
+    x = frexp( r, &n );
+
+    return fabs( frexp( x * 131073.1294427 + n, &n ) ) * 2 - 1;
+}
+
+static void wood_pixel( float x, float y, float z, unsigned char auch[ 3 ],
+			BoardWood wood ) {
 
     float r;
-    int grain;
+    int grain, figure;
 
     r = sqrt( x * x + y * y );
     r -= z / 60;
-    r *= 3;
-    grain = ( (int) r ) % 60;
 
-    if( grain > 40 )
-	grain = 120 - 2 * grain;
-    
-    auch[ 0 ] = 80 + ( grain * 3 / 2 );
-    auch[ 1 ] = 40 + grain;
-    auch[ 2 ] = grain / 2;
+    switch( wood ) {
+    case WOOD_ALDER:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain < 10 ) {
+	    auch[ 0 ] = 230 - grain * 2;
+	    auch[ 1 ] = 100 - grain;
+	    auch[ 2 ] = 20 - grain / 2;
+	} else if( grain < 20 ) {
+	    auch[ 0 ] = 210 + ( grain - 10 ) * 2;
+	    auch[ 1 ] = 90 + ( grain - 10 );
+	    auch[ 2 ] = 15 + ( grain - 10 ) / 2;
+	} else {
+	    auch[ 0 ] = 230 + ( grain % 3 );
+	    auch[ 1 ] = 100 + ( grain % 3 );
+	    auch[ 2 ] = 20 + ( grain % 3 );
+	}
+	
+	figure = r / 29 + x / 15 + y / 17 + z / 29;
+	
+	if( figure % 3 == ( grain / 3 ) % 3 ) {
+	    auch[ 0 ] -= wood_hash( figure + grain ) * 8;
+	    auch[ 1 ] -= wood_hash( figure + grain ) * 4;
+	    auch[ 2 ] -= wood_hash( figure + grain ) * 2;
+	}
+	
+	break;
+	
+    case WOOD_ASH:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain > 40 )
+	    grain = 120 - 2 * grain;
+
+	grain *= wood_hash( (int) r / 60 ) * 0.7 + 0.3;
+	
+	auch[ 0 ] = 230 - grain;
+	auch[ 1 ] = 125 - grain / 2;
+	auch[ 2 ] = 20 - grain / 8;
+
+	figure = r / 53 + x / 5 + y / 7 + z / 50;
+	
+	if( figure % 3 == ( grain / 3 ) % 3 ) {
+	    auch[ 0 ] -= wood_hash( figure + grain ) * 16;
+	    auch[ 1 ] -= wood_hash( figure + grain ) * 8;
+	    auch[ 2 ] -= wood_hash( figure + grain ) * 4;
+	}
+
+	break;
+	
+    case WOOD_BASSWOOD:
+	r *= 5;
+	grain = ( (int) r % 60 );
+
+	if( grain > 50 )
+	    grain = 60 - grain;
+	else if( grain > 40 )
+	    grain = 10;
+	else if( grain > 30 )
+	    grain -= 30;
+	else
+	    grain = 0;
+ 
+	auch[ 0 ] = 230 - grain;
+	auch[ 1 ] = 205 - grain;
+	auch[ 2 ] = 150 - grain;
+	
+	break;
+	
+    case WOOD_BEECH:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain > 40 )
+	    grain = 120 - 2 * grain;
+
+	auch[ 0 ] = 230 - grain;
+	auch[ 1 ] = 125 - grain / 2;
+	auch[ 2 ] = 20 - grain / 8;
+
+	figure = r / 29 + x / 15 + y / 17 + z / 29;
+	
+	if( figure % 3 == ( grain / 3 ) % 3 ) {
+	    auch[ 0 ] -= wood_hash( figure + grain ) * 16;
+	    auch[ 1 ] -= wood_hash( figure + grain ) * 8;
+	    auch[ 2 ] -= wood_hash( figure + grain ) * 4;
+	}
+
+	break;
+	
+    case WOOD_CEDAR:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain < 10 ) {
+	    auch[ 0 ] = 230 + grain;
+	    auch[ 1 ] = 135 + grain;
+	    auch[ 2 ] = 85 + grain / 2;
+	} else if( grain < 20 ) {
+	    auch[ 0 ] = 240 - ( grain - 10 ) * 3;
+	    auch[ 1 ] = 145 - ( grain - 10 ) * 3;
+	    auch[ 2 ] = 90 - ( grain - 10 ) * 3 / 2;
+	} else if( grain < 30 ) {
+	    auch[ 0 ] = 200 + grain;
+	    auch[ 1 ] = 105 + grain;
+	    auch[ 2 ] = 70 + grain / 2;
+	} else {
+	    auch[ 0 ] = 230 + ( grain % 3 );
+	    auch[ 1 ] = 135 + ( grain % 3 );
+	    auch[ 2 ] = 85 + ( grain % 3 );
+	}
+	
+	break;
+	
+    case WOOD_EBONY:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain > 40 )
+	    grain = 120 - 2 * grain;
+
+	auch[ 0 ] = 30 + grain / 4;
+	auch[ 1 ] = 10 + grain / 8;
+	auch[ 2 ] = 0;
+
+	break;
+	
+    case WOOD_FIR:
+	r *= 5;
+	grain = ( (int) r % 60 );
+
+	if( grain < 10 ) {
+	    auch[ 0 ] = 230 - grain * 2 + grain % 3 * 3;
+	    auch[ 1 ] = 100 - grain * 2 + grain % 3 * 3;
+	    auch[ 2 ] = 20 - grain + grain % 3 * 3;
+	} else if( grain < 30 ) {
+	    auch[ 0 ] = 210 + grain % 3 * 3;
+	    auch[ 1 ] = 80 + grain % 3 * 3;
+	    auch[ 2 ] = 10 + grain % 3 * 3;
+	} else if( grain < 40 ) {
+	    auch[ 0 ] = 210 + ( grain - 30 ) * 2 + grain % 3 * 3;
+	    auch[ 1 ] = 80 + ( grain - 30 ) * 2 + grain % 3 * 3;
+	    auch[ 2 ] = 10 + ( grain - 30 ) + grain % 3 * 3;
+	} else {
+	    auch[ 0 ] = 230 + grain % 3 * 5;
+	    auch[ 1 ] = 100 + grain % 3 * 5;
+	    auch[ 2 ] = 20 + grain % 3 * 5;
+	}
+	
+	break;
+	
+    case WOOD_MAPLE:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain < 10 ) {
+	    auch[ 0 ] = 230 - grain * 2 + grain % 3;
+	    auch[ 1 ] = 180 - grain * 2 + grain % 3;
+	    auch[ 2 ] = 50 - grain + grain % 3;
+	} else if( grain < 20 ) {
+	    auch[ 0 ] = 210 + grain % 3;
+	    auch[ 1 ] = 160 + grain % 3;
+	    auch[ 2 ] = 40 + grain % 3;
+	} else if( grain < 30 ) {
+	    auch[ 0 ] = 210 + ( grain - 20 ) * 2 + grain % 3;
+	    auch[ 1 ] = 160 + ( grain - 20 ) * 2 + grain % 3;
+	    auch[ 2 ] = 40 + ( grain - 20 ) + grain % 3;
+	} else {
+	    auch[ 0 ] = 230 + grain % 3;
+	    auch[ 1 ] = 180 + grain % 3;
+	    auch[ 2 ] = 50 + grain % 3;
+	}
+
+	break;
+	    
+    case WOOD_OAK:
+	r *= 4;
+	grain = ( (int) r % 60 );
+
+	if( grain > 40 )
+	    grain = 120 - 2 * grain;
+
+	grain *= wood_hash( (int) r / 60 ) * 0.7 + 0.3;
+	
+	auch[ 0 ] = 230 + grain / 2;
+	auch[ 1 ] = 125 + grain / 3;
+	auch[ 2 ] = 20 + grain / 8;
+
+	figure = r / 53 + x / 5 + y / 7 + z / 30;
+	
+	if( figure % 3 == ( grain / 3 ) % 3 ) {
+	    auch[ 0 ] -= wood_hash( figure + grain ) * 32;
+	    auch[ 1 ] -= wood_hash( figure + grain ) * 16;
+	    auch[ 2 ] -= wood_hash( figure + grain ) * 8;
+	}
+
+	break;
+	
+    case WOOD_PINE:
+	r *= 2;
+	grain = ( (int) r % 60 );
+
+	if( grain < 10 ) {
+	    auch[ 0 ] = 230 + grain * 2 + grain % 3 * 3;
+	    auch[ 1 ] = 160 + grain * 2 + grain % 3 * 3;
+	    auch[ 2 ] = 50 + grain + grain % 3 * 3;
+	} else if( grain < 20 ) {
+	    auch[ 0 ] = 250 + grain % 3;
+	    auch[ 1 ] = 180 + grain % 3;
+	    auch[ 2 ] = 60 + grain % 3;
+	} else if( grain < 30 ) {
+	    auch[ 0 ] = 250 - ( grain - 20 ) * 2 + grain % 3;
+	    auch[ 1 ] = 180 - ( grain - 20 ) * 2 + grain % 3;
+	    auch[ 2 ] = 50 - ( grain - 20 ) + grain % 3;
+	} else {
+	    auch[ 0 ] = 230 + grain % 3 * 3;
+	    auch[ 1 ] = 160 + grain % 3 * 3;
+	    auch[ 2 ] = 50 + grain % 3 * 3;
+	}
+
+	break;
+	
+    case WOOD_REDWOOD:
+	r *= 5;
+	grain = ( (int) r % 60 );
+
+	if( grain > 40 )
+	    grain = 120 - 2 * grain;
+
+	auch[ 0 ] = 220 - grain;
+	auch[ 1 ] = 70 - grain / 2;
+	auch[ 2 ] = 40 - grain / 4;
+
+	break;
+	    
+    case WOOD_WALNUT:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain > 40 )
+	    grain = 120 - 2 * grain;
+
+	grain *= wood_hash( (int) r / 60 ) * 0.7 + 0.3;
+ 
+	auch[ 0 ] = 80 + ( grain * 3 / 2 );
+	auch[ 1 ] = 40 + grain;
+	auch[ 2 ] = grain / 2;
+
+	break;
+	
+    case WOOD_WILLOW:
+	r *= 3;
+	grain = ( (int) r % 60 );
+
+	if( grain > 40 )
+	    grain = 120 - 2 * grain;
+
+	auch[ 0 ] = 230 + grain / 3;
+	auch[ 1 ] = 100 + grain / 5;
+	auch[ 2 ] = 20 + grain / 10;
+
+	figure = r / 60 + z / 30;
+	
+	if( figure % 3 == ( grain / 3 ) % 3 ) {
+	    auch[ 0 ] -= wood_hash( figure + grain ) * 16;
+	    auch[ 1 ] -= wood_hash( figure + grain ) * 8;
+	    auch[ 2 ] -= wood_hash( figure + grain ) * 4;
+	}
+
+	break;
+	
+    default:
+	assert( FALSE );
+    }
 }
 
 static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
@@ -2452,14 +2757,14 @@ static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
 	    }
 	    
 	    wood_pixel( 100 - y * 0.85 + x * 0.1, rHeight - x * 0.11,
-			200 + x * 0.93 + y * 0.16, a );
+			200 + x * 0.93 + y * 0.16, a, bd->wood );
 	    
 	    for( i = 0; i < 3; i++ )
 		top[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
 					     nSpecular );
 	    
 	    wood_pixel( 123 + y * 0.87 - x * 0.08, rHeight + x * 0.06,
-			-100 - x * 0.94 - y * 0.11, a );
+			-100 - x * 0.94 - y * 0.11, a, bd->wood );
 	    
 	    for( i = 0; i < 3; i++ )
 		bottom[ y ][ x ][ i ] =
@@ -2492,14 +2797,14 @@ static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
 	    }
     
 	    wood_pixel( 300 + x * 0.9 + y * 0.1, rHeight + y * 0.06,
-			200 - y * 0.9 + x * 0.1, a );
+			200 - y * 0.9 + x * 0.1, a, bd->wood );
 
 	    for( i = 0; i < 3; i++ )
 		left[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
 					     nSpecular );
 	    
 	    wood_pixel( -100 - x * 0.86 + y * 0.13, rHeight - y * 0.07,
-			300 + y * 0.92 + x * 0.08, a );
+			300 + y * 0.92 + x * 0.08, a, bd->wood );
 
 	    for( i = 0; i < 3; i++ )
 		right[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
@@ -2553,15 +2858,15 @@ static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
 		rHeight = arHeight[ 6 * s - x - 1 ];
 	    }
     
-	    wood_pixel( -100 - x * 0.88 + y * 0.08, rHeight - y * 0.1,
-			-200 + y * 0.99 - x * 0.12, a );
+	    wood_pixel( 100 - x * 0.88 + y * 0.08, 50 + rHeight - y * 0.1,
+			-200 + y * 0.99 - x * 0.12, a, bd->wood );
 
 	    for( i = 0; i < 3; i++ )
 		lbar[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
 					     nSpecular );
 	    
-	    wood_pixel( 100 - x * 0.86 + y * 0.02, rHeight - y * 0.07,
-			-300 - y * 0.92 + x * 0.03, a );
+	    wood_pixel( 100 - x * 0.86 + y * 0.02, 50 + rHeight - y * 0.07,
+			200 - y * 0.92 + x * 0.03, a, bd->wood );
 
 	    for( i = 0; i < 3; i++ )
 		rbar[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
@@ -2607,14 +2912,14 @@ static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
 	    }
     
 	    wood_pixel( -300 - x * 0.91 + y * 0.1, rHeight + y * 0.02,
-			-200 + y * 0.94 - x * 0.06, a );
+			-200 + y * 0.94 - x * 0.06, a, bd->wood );
 
 	    for( i = 0; i < 3; i++ )
 		lsep[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
 					     nSpecular );
 	    
 	    wood_pixel( 100 - x * 0.89 - y * 0.07, rHeight + y * 0.05,
-			300 - y * 0.94 + x * 0.11, a );
+			300 - y * 0.94 + x * 0.11, a, bd->wood );
 
 	    for( i = 0; i < 3; i++ )
 		rsep[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
@@ -2668,14 +2973,14 @@ static void board_draw_frame_wood( BoardData *bd, GdkGC *gc ) {
 	    }
 	    
 	    wood_pixel( -100 - y * 0.85 + x * 0.11, rHeight - x * 0.04,
-			-200 - x * 0.93 + y * 0.08, a );
+			-100 - x * 0.93 + y * 0.08, a, bd->wood );
 	    
 	    for( i = 0; i < 3; i++ )
 		ldiv[ y ][ x ][ i ] = clamp( a[ i ] * rDiffuse +
 					     nSpecular );
 	    
 	    wood_pixel( -123 - y * 0.93 - x * 0.12, rHeight + x * 0.11,
-			100 - x * 0.88 - y * 0.07, a );
+			-150 + x * 0.88 - y * 0.07, a, bd->wood );
 	    
 	    for( i = 0; i < 3; i++ )
 		rdiv[ y ][ x ][ i ] =
@@ -2833,10 +3138,10 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 #define empty( y, x, i ) ( bd->rgb_empty[ ( ( (y) * 6 * bd->board_size + (x) )\
 					    * 3 ) + (i) ] )
 
-    if( bd->wood )
-	board_draw_frame_wood( bd, gc );
-    else
+    if( bd->wood == WOOD_PAINT )
 	board_draw_frame_painted( bd );
+    else
+	board_draw_frame_wood( bd, gc );
 
     if( bd->labels )
 	board_draw_labels( bd );
@@ -3833,7 +4138,7 @@ static void board_stop( GtkWidget *pw, BoardData *bd ) {
 static void board_edit( GtkWidget *pw, BoardData *bd ) {
 
     int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) );
-    
+									
     update_move( bd );
     update_buttons( bd );
     
@@ -3857,7 +4162,7 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
 	anScoreNew[ 0 ] = GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
 	anScoreNew[ 1 ] = GTK_SPIN_BUTTON( bd->score1 )->adjustment->value;
 	read_board( bd, points );
-	
+
 	outputpostpone();
 
 	/* NB: these comparisons are case-sensitive, and do not use
@@ -4020,7 +4325,7 @@ static void board_init( Board *board ) {
     bd->all_moves = NULL;
 
     bd->translucent = TRUE;
-    bd->wood = TRUE;
+    bd->wood = WOOD_ALDER;
     bd->labels = FALSE;
     bd->usedicearea = TRUE;
     bd->permit_illegal = FALSE;
@@ -4150,9 +4455,11 @@ static void board_init( Board *board ) {
     bd->hbox_match = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( board ), bd->hbox_match, FALSE, FALSE, 0 );
 
-    gtk_box_pack_start( GTK_BOX( bd->hbox_pos ), bd->stop =
-			gtk_button_new_with_label( "Stop" ),
+    gtk_box_pack_start( GTK_BOX( bd->hbox_pos ),
+			pw = gtk_alignment_new( 0.5, 0.5, 0, 0 ),
 			FALSE, FALSE, 8 );
+    gtk_container_add( GTK_CONTAINER( pw ), bd->stop =
+		       gtk_button_new_with_label( "Stop" ) );
 
     bd->pos_table = gtk_table_new( 2, 4, FALSE );
     gtk_box_pack_end( GTK_BOX ( bd->hbox_pos), bd->pos_table, 

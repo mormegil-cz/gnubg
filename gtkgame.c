@@ -75,7 +75,7 @@ static void gtk_style_set_font( GtkStyle *ps, GdkFont *pf ) {
 #endif
 
 #if !HAVE_GTK_OPTION_MENU_GET_HISTORY
-static gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
+extern gint gtk_option_menu_get_history (GtkOptionMenu *option_menu) {
     
     GtkWidget *active_widget;
   
@@ -344,7 +344,6 @@ static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
 static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 static void SetCubeValue( GtkWidget *wd, int data);
 static void SetCubeOwner( GtkWidget *wd, int i);
-static void SetCubeClickButton( GtkWidget *wd, int i);
 static void ShowManual( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
@@ -6354,25 +6353,26 @@ extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
   GTKAllowStdin();
 } 
 
-static GtkWidget* CreateSetCubeDialog ()
+static GtkWidget* CreateSetCubeDialog ( int *pfOK )
 {
 
   GtkWidget *SetCubeWindow, *hbox1, *frame1, *vbox1, *vbox2,
-    *pwRBValue[7], *pwRBOwner[3], *pwCancel, *pwOK;
+    *pwRBValue[7], *pwRBOwner[3];
   GSList *value_group = NULL, *owner_group = NULL;
   int i, nCubeTurns;
 
   for( nCubeTurns = 0; ms.nCube >> ( nCubeTurns + 1 ); nCubeTurns++ )
        ;
 
-  SetCubeWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  *pfOK = FALSE;
+  SetCubeWindow = CreateDialog( "GNU Backgammon - Cube", TRUE, NULL, pfOK );
   gtk_object_set_data (GTK_OBJECT (SetCubeWindow), "SetCubeWindow",
                          SetCubeWindow);
-  gtk_window_set_title (GTK_WINDOW (SetCubeWindow), "Set cube");
 
   hbox1 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox1);
-  gtk_container_add (GTK_CONTAINER (SetCubeWindow), hbox1);
+  gtk_container_add (GTK_CONTAINER (DialogArea( SetCubeWindow, DA_MAIN )),
+		     hbox1);
 
   frame1 = gtk_frame_new ("Value");
   gtk_widget_show (frame1);
@@ -6420,21 +6420,6 @@ static GtkWidget* CreateSetCubeDialog ()
   gtk_widget_show (pwRBOwner[2]);
   gtk_box_pack_start (GTK_BOX (vbox2), pwRBOwner[2], FALSE, FALSE, 0);
 
-  pwCancel = gtk_button_new_with_label ("Cancel");
-  gtk_widget_show (pwCancel);
-  gtk_box_pack_start (GTK_BOX (vbox1), pwCancel, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwCancel), 4);
-
-  pwOK = gtk_button_new_with_label ("OK");
-  gtk_widget_show (pwOK);
-  gtk_box_pack_start (GTK_BOX (vbox1), pwOK, FALSE, FALSE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (pwOK), 4);
-
-  gtk_signal_connect (GTK_OBJECT (pwCancel), "clicked",
-                      GTK_SIGNAL_FUNC (SetCubeClickButton), (int *) 0);
-  gtk_signal_connect (GTK_OBJECT (pwOK), "clicked",
-                      GTK_SIGNAL_FUNC (SetCubeClickButton), (int *) 1);
-
   for (i = 0; i < 7 ; i++) {
     gtk_signal_connect (GTK_OBJECT (pwRBValue[i]), "clicked",
                         GTK_SIGNAL_FUNC (SetCubeValue),
@@ -6455,10 +6440,26 @@ static GtkWidget* CreateSetCubeDialog ()
 
 extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
 
-  pwSetCube = CreateSetCubeDialog();
+  int fOK;
+    
+  pwSetCube = CreateSetCubeDialog( &fOK );
 
+  gtk_window_set_modal( GTK_WINDOW( pwSetCube ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwSetCube ),
+				GTK_WINDOW( pwMain ) );
+  gtk_signal_connect( GTK_OBJECT( pwSetCube ), "destroy",
+		      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
   gtk_widget_show_all( pwSetCube );
 
+  GTKDisallowStdin();
+  gtk_main();
+  GTKAllowStdin();
+
+  if( fOK ) {
+      UserCommand(szSetCubeValue);
+      UserCommand(szSetCubeOwner);
+  }
 }
 
 static void SetCubeValue( GtkWidget *wd, int data) {
@@ -6475,15 +6476,3 @@ static void SetCubeOwner( GtkWidget *wd, int i) {
     sprintf(szSetCubeOwner,"set cube owner %d", i);
 
 }
-
-static void SetCubeClickButton( GtkWidget *wd, int i) {
-
-  if ( i ){ 
-     UserCommand(szSetCubeValue);
-     UserCommand(szSetCubeOwner);
-  }
-
-  gtk_widget_destroy( pwSetCube );
-
-}
-

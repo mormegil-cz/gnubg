@@ -1,3 +1,18 @@
+Wed Mar 20 15:34:11 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_point_with_border, board_quick_edit, 
+	board_pointer): Allow clicking on the cube in edit mode.
+	* gtkboard.c (board_set, game_set): Be careful not to discard
+	changes in edit mode.
+
+	* gtkboard.c (wood_hash): New function.
+	* gtkboard.c (wood_pixel), gtkprefs.c: Allow different wood types.
+	
+	* gtkboard.c (board_init): Make the "stop" button smaller.
+
+	* gtkgame.c (CreateSetCubeDialog): Use CreateDialog(), and make
+	the dialog modal.
+
 Tue Mar 19 22:44:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* position.c (MatchFromID, MatchFromKey, MatchID): add fTurn,
