@@ -1,3 +1,10 @@
+Fri Jul 25 16:51:08 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (printHTMLBoardBBS, printHTMLBoardGNU, printHTMLBoardF2H):
+	print pip counts above position ID. Print position ID and match ID with
+	a smaller font.
+	* html.c: finish implementation of external CSS style sheet.
+
 Fri Jul 25 16:35:48 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkbearoff.c: widget did not update when pressing who's

@@ -38,6 +38,7 @@
 #include "positionid.h"
 #include "matchid.h"
 #include "record.h"
+#include "path.h"
 
 #if defined (HAVE_BASENAME) && defined (HAVE_LIBGEN_H)
 #include "libgen.h"
@@ -68,6 +69,7 @@ typedef enum _stylesheetclass {
   CLASS_FONT_FAMILY,
   CLASS_BLOCK,
   CLASS_PERCENT,
+  CLASS_POSITIONID,
   NUM_CLASSES 
 } stylesheetclass;
 
@@ -104,7 +106,8 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
     "font-family: sans-serif" },
   { "fontfamily", "font-family: sans-serif" },
   { "block", "display: block" },
-  { "percent", "text-align: right" }
+  { "percent", "text-align: right" },
+  { "positionid", "font-size: 75%; color: #787878" }
 };
 
 
@@ -139,11 +142,25 @@ static char *aszLinkText[] = {
   N_ ("[Last Game]") };
 
 static void
-WriteStyleSheet ( FILE *pf ) {
+WriteStyleSheet ( FILE *pf, const htmlexportcss hecss ) {
 
   int i;
 
-  fputs ( "<style type=\"text/css\">\n", pf );
+  if ( hecss == HTML_EXPORT_CSS_HEAD )
+    fputs ( "<style type=\"text/css\">\n", pf );
+  else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
+    /* write come comments in the file */
+
+    fputs( _("\n" 
+             "/* CSS Stylesheet for GNU Backgammon " VERSION " */\n"
+             "/* This file is distributed as a part of the "
+             "GNU Backgammon program. */\n"
+             "/* Copying and distribution of verbatim and modified "
+             "versions of this file */\n"
+             "/* is permitted in any medium provided the copyright notice "
+             "and this */\n"
+             "/* permission notice are preserved. */\n\n"),
+           pf );
 
   for ( i = 0; i < NUM_CLASSES; ++i )
     fprintf ( pf, 
@@ -152,7 +169,11 @@ WriteStyleSheet ( FILE *pf ) {
               aaszStyleSheetClasses[ i ][ 1 ] );
 
 
-  fputs ( "</style>\n", pf );
+  if ( hecss == HTML_EXPORT_CSS_HEAD )
+    fputs ( "</style>\n", pf );
+  else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
+    fputs( _("\n"
+             "/* end of file */\n"), pf );
 
 }
 
@@ -719,19 +740,29 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   /* end of bottom row */
 
-  /* position ID */
-
-  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
-            PositionID ( pms->anBoard ),
-            MatchIDFromMatchState ( pms ) );
+  fputs ( "</table>\n\n", pf );
 
   /* pip counts */
+
+  fputs ( "<p>", pf );
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
-  
+
+  /* position ID */
+
+  fprintf( pf, "<span %s>", 
+           GetStyle ( CLASS_POSITIONID, hecss ) );
+
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+
+  fprintf( pf, "</span>" );
+
+  fputs ( "</p>\n", pf );
 
 }
 
@@ -1083,14 +1114,6 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
                hecss, HTML_EXPORT_TYPE_FIBS2HTML );
   fprintf ( pf, "<br />\n" );
 
-  /* position ID */
-
-  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
-               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
-  fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
-            PositionID ( pms->anBoard ),
-            MatchIDFromMatchState ( pms ) );
-
   /* pip counts */
 
   printImage ( pf, szImageDir, "b-indent", szExtension, "", 
@@ -1101,6 +1124,19 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
   
+  /* position ID */
+
+  printImage ( pf, szImageDir, "b-indent", szExtension, "", 
+               hecss, HTML_EXPORT_TYPE_FIBS2HTML );
+  fprintf( pf, "<span %s>", 
+           GetStyle ( CLASS_POSITIONID, hecss ) );
+
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+
+  fprintf( pf, "</span>" );
+
   fprintf ( pf, "</p>\n" );
 
 }
@@ -1590,20 +1626,25 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "</table>\n\n", pf );
 
-  /* position ID */
+  /* pip counts */
 
   fputs ( "<p>", pf );
-
-  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
-            PositionID ( pms->anBoard ),
-            MatchIDFromMatchState ( pms ) );
-
-  /* pip counts */
 
   PipCount ( anBoard, anPips );
   fprintf ( pf, _("Pip counts: %s %d, %s %d<br />\n"),
             ap[ 0 ].szName, anPips[ 1 ], 
             ap[ 1 ].szName, anPips[ 0 ] );
+
+  /* position ID */
+
+  fprintf( pf, "<span %s>", 
+           GetStyle ( CLASS_POSITIONID, hecss ) );
+
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
+            PositionID ( pms->anBoard ),
+            MatchIDFromMatchState ( pms ) );
+
+  fprintf( pf, "</span>" );
 
   fputs ( "</p>\n", pf );
 
@@ -1795,7 +1836,10 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
             szTitle );
 
   if ( hecss == HTML_EXPORT_CSS_HEAD )
-    WriteStyleSheet ( pf );
+    WriteStyleSheet ( pf, hecss );
+  else if ( hecss == HTML_EXPORT_CSS_EXTERNAL )
+    fputs(  "<link title=\"CSS stylesheet\" rel=\"stylesheet\" "
+            "href=\"gnubg.css\" type=\"text/css\">\n", pf );
 
   fprintf ( pf, "</head>\n"
             "\n"
@@ -3814,6 +3858,42 @@ getMoveNumber ( const list *plGame, const void *p ) {
 }
 
 
+/*
+ * Open file gnubg.css with same path as requested html file
+ *
+ * If the gnubg.css file already exists NULL is returned 
+ * (and gnubg.css is NOT overwritten)
+ *
+ */
+
+static FILE *
+OpenCSS( const char *sz ) {
+
+  char *pch = strdup( sz );
+  char *pchBase = dirname( pch );
+  char *pchCSS;
+  FILE *pf;
+  
+  sprintf( pchCSS = (char *) malloc( strlen( pchBase ) + 20 ),
+           "%s%c%s", pchBase, DIR_SEPARATOR, "gnubg.css" );
+
+  if ( !access( pchCSS, R_OK ) ) {
+    /* file exists */
+    pf = NULL;
+  }
+  else if ( ! ( pf = fopen( pchCSS, "w" ) ) ) {
+    outputerr( pchCSS );
+  }
+
+  free( pch );
+  free( pchBase );
+  free( pchCSS );
+
+  return pf;
+
+}
+
+
 extern void CommandExportGameHtml( char *sz ) {
 
     FILE *pf;
@@ -3853,6 +3933,12 @@ extern void CommandExportGameHtml( char *sz ) {
 
     setDefaultFileName ( sz, PATH_HTML );
     
+    /* external stylesheet */
+
+    if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
+      if ( ( pf = OpenCSS( sz ) ) )
+        WriteStyleSheet ( pf, exsExport.hecss );
+
 }
 
 /*
@@ -3990,6 +4076,12 @@ extern void CommandExportMatchHtml( char *sz ) {
         fclose( pf );
 
     }
+
+    /* external stylesheet */
+
+    if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
+      if ( ( pf = OpenCSS( sz ) ) )
+        WriteStyleSheet ( pf, exsExport.hecss );
     
 }
 
@@ -4060,6 +4152,12 @@ extern void CommandExportPositionHtml( char *sz ) {
 	fclose( pf );
 
     setDefaultFileName ( sz, PATH_HTML );
+
+    /* external stylesheet */
+
+    if ( exsExport.hecss == HTML_EXPORT_CSS_EXTERNAL ) 
+      if ( ( pf = OpenCSS( sz ) ) )
+        WriteStyleSheet ( pf, exsExport.hecss );
 
 }
 
