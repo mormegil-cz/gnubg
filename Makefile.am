@@ -43,6 +43,8 @@ endif
 
 pkgdata_DATA = gnubg.bd gnubg.wd gnubg.scm
 
+man_MANS = gnubg.6
+
 noinst_PROGRAMS = makebearoff makeweights
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
@@ -58,7 +60,7 @@ TESTS = gnubgtest
 distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y 
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6
 
 sgfp.h sgfp.c: sgf.y
 	$(BISON) -o $@ -p sgf -d $<

@@ -190,6 +190,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Make sure the socket changes for external players work on Solaris.  Things
   to check: #include <sys/types.h>; don't use the identifier "sun";
   #define AF_LOCAL AF_UNIX (same with PF_).
+** Guile 1.4 is required, but the configure script doesn't check the Guile
+  version.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
