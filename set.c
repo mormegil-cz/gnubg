@@ -1397,6 +1397,21 @@ extern void CommandSetRolloutVarRedn( char *sz ) {
     prcSet->fVarRedn = f;
 }
 
+
+extern void
+CommandSetRolloutRotate ( char *sz ) {
+
+  int f = prcSet->fRotate;
+
+  SetToggle ( "rollout rotate", &f, sz,
+              _("Will rotate first two rolls of rollout"),
+              _("Will not rotate first two rolls of rollout") );
+
+  prcSet->fRotate = f;
+
+}
+  
+
     
 extern void 
 CommandSetRolloutCubeful( char *sz ) {

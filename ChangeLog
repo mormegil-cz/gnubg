@@ -1,3 +1,12 @@
+Sun Sep  8 21:42:30 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Option to rotate first two rolls of rollout. 
+
+	* sgf.c (WriteRolloutContext, RestoreRolloutRolloutContext): 
+	read/write new member of rolloutcontext.
+	* gtkgame.c (SetRollouts, SetRolloutsOK): new flag fRotate.
+	* rollout.c (QuasiRandomDice): new flag fRotate. Change all callers.
+
 Fri Sep  6 19:13:30 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* set.c (CommandSetSoundSystemNormal): #ifndef WIN32.

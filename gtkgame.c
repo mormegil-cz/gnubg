@@ -4377,8 +4377,8 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
 
 typedef struct _rolloutwidget {
     evalcontext ec;
-    int nTrials, nTruncate, fCubeful, fVarRedn, nSeed, fInitial;
-    GtkWidget *pwEval, *pwCubeful, *pwVarRedn, *pwInitial;
+    int nTrials, nTruncate, fCubeful, fVarRedn, nSeed, fInitial, fRotate;
+    GtkWidget *pwEval, *pwCubeful, *pwVarRedn, *pwInitial, *pwRotate;
     GtkAdjustment *padjTrials, *padjTrunc, *padjSeed;
     int *pfOK;
 } rolloutwidget;
@@ -4394,6 +4394,8 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 	GTK_TOGGLE_BUTTON( prw->pwCubeful ) );
     prw->fVarRedn = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( prw->pwVarRedn ) );
+    prw->fRotate = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( prw->pwRotate ) );
     prw->fInitial = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( prw->pwInitial ) );
     
@@ -4451,6 +4453,12 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 				  rcRollout.fVarRedn );
 
     gtk_container_add( GTK_CONTAINER( pwBox ),
+		       rw.pwRotate = gtk_check_button_new_with_label(
+			   _("Rotate first two rolls") ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwRotate ),
+				  rcRollout.fRotate );
+
+    gtk_container_add( GTK_CONTAINER( pwBox ),
 		       rw.pwInitial = gtk_check_button_new_with_label(
 			   _("Rollout as initial position") ) );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwInitial ),
@@ -4504,6 +4512,12 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 	if( rw.fVarRedn != rcRollout.fVarRedn ) {
 	    sprintf( sz, "set rollout varredn %s",
 		     rw.fVarRedn ? "on" : "off" );
+	    UserCommand( sz );
+	}
+
+	if( rw.fRotate != rcRollout.fRotate ) {
+	    sprintf( sz, "set rollout rotate %s",
+		     rw.fRotate ? "on" : "off" );
 	    UserCommand( sz );
 	}
 

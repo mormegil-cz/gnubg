@@ -48,13 +48,14 @@ initRolloutstat ( rolloutstat *prs );
 static int QuasiRandomDice( int iTurn, int iGame, int cGames,
                             int fInitial,
                             int anDice[ 2 ],
-                            const rng rngx ) {
+                            const rng rngx,
+                            const int fRotate ) {
 
   if ( fInitial ) {
 
     /* rollout of initial position: no doubles allowed */
 
-    if( !iTurn && !( cGames % 30 ) ) {
+    if( fRotate && !iTurn && !( cGames % 30 ) ) {
       anDice[ 1 ] = ( ( iGame / 5 ) % 6 ) + 1;
       anDice[ 0 ] = ( iGame % 5 ) + 1;
       if ( anDice[ 0 ] >= anDice[ 1 ] ) 
@@ -62,7 +63,7 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
       
       return 0;
     } 
-    else if( iTurn == 1 && !( cGames % 1080 ) ) {
+    else if( fRotate && iTurn == 1 && !( cGames % 1080 ) ) {
       anDice[ 0 ] = ( ( iGame / 30 ) % 6 ) + 1;
       anDice[ 1 ] = ( ( iGame / 180 ) % 6 ) + 1;
 
@@ -87,11 +88,11 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
 
     /* normal rollout: doubles allow on first roll */
 
-    if( !iTurn && !( cGames % 36 ) ) {
+    if( fRotate && !iTurn && !( cGames % 36 ) ) {
       anDice[ 0 ] = ( iGame % 6 ) + 1;
       anDice[ 1 ] = ( ( iGame / 6 ) % 6 ) + 1;
       return 0;
-    } else if( iTurn == 1 && !( cGames % 1296 ) ) {
+    } else if( fRotate && iTurn == 1 && !( cGames % 1296 ) ) {
       anDice[ 0 ] = ( ( iGame / 36 ) % 6 ) + 1;
       anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
       return 0;
@@ -165,7 +166,7 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
   while( ( !nTruncate || iTurn < nTruncate ) &&
 	 ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
     if( QuasiRandomDice( iTurn, iGame, cGames, FALSE, 
-                         anDice, RNG_MERSENNE ) < 0 )
+                         anDice, RNG_MERSENNE, TRUE ) < 0 )
 	    return -1;
 	
     if( anDice[ 0 ]-- < anDice[ 1 ]-- )
@@ -409,7 +410,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
     /* Chequer play */
 
     if( QuasiRandomDice( iTurn, iGame, cGames, prc->fInitial, anDice,
-                         prc->rngRollout ) < 0 )
+                         prc->rngRollout, prc->fRotate ) < 0 )
       return -1;
 
     if( anDice[ 0 ] < anDice[ 1 ] )

@@ -99,6 +99,9 @@ ShowRollout ( rolloutcontext *prc ) {
   outputl ( prc->fVarRedn ? 
             _("Lookahead variance reduction is enabled.") :
             _("Lookahead variance reduction is disabled.") );
+  outputl ( prc->fRotate ? 
+            _("Rotating of first two rolls is enabled.") :
+            _("Rotating of first two rolls is disabled.") );
   outputl ( prc->fCubeful ?
             _("Cubeful rollout.") :
             _("Cubeless rollout.") );

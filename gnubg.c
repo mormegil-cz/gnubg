@@ -767,6 +767,8 @@ command cER = {
       szPLAYER, acSetRolloutPlayer }, 
     { "rng", CommandSetRolloutRNG, N_("Specify the random number "
       "generator algorithm for rollouts"), NULL, acSetRNG },
+    { "rotate", CommandSetRolloutRotate, 
+      N_("Rotate the first two rolls"), szONOFF, &cOnOff },
     { "seed", CommandSetRolloutSeed, N_("Specify the base pseudo-random seed "
       "to use for rollouts"), szOPTSEED, NULL },
     { "trials", CommandSetRolloutTrials, N_("Control how many rollouts to "
@@ -3832,11 +3834,13 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
   fprintf ( pf,
             "%s cubeful %s\n"
             "%s varredn %s\n"
+            "%s rotate %s\n"
 	    "%s initial %s\n"
             "%s truncation %d\n"
             "%s trials %d\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
+            sz, prc->fRotate ? "on" : "off",
 	    sz, prc->fInitial ? "on" : "off",
             sz, prc->nTruncate,
             sz, prc->nTrials );
