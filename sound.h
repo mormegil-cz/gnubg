@@ -45,6 +45,7 @@ typedef enum _gnubgsound {
   SOUND_BOT_DANCE,
   SOUND_BOT_WIN_GAME,
   SOUND_BOT_WIN_MATCH,
+  SOUND_ANALYSIS_FINISHED,
   /* number of sounds */
   NUM_SOUNDS
 } gnubgsound;
@@ -56,6 +57,7 @@ typedef enum _soundsystem {
   SOUND_SYSTEM_NAS,
   SOUND_SYSTEM_NORMAL,
   SOUND_SYSTEM_WINDOWS,
+
   NUM_SOUND_SYSTEMS
 } soundsystem;
 

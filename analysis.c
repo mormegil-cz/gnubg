@@ -37,6 +37,7 @@
 #include "positionid.h"
 #include "rollout.h"
 #include "analysis.h"
+#include "sound.h"
 
 #include "i18n.h"
 
@@ -1046,6 +1047,9 @@ extern void CommandAnalyseGame( char *sz ) {
   if( fX )
     GTKUpdateAnnotations();
 #endif
+
+  playSound( SOUND_ANALYSIS_FINISHED );
+
 }
 
 
@@ -1086,6 +1090,9 @@ extern void CommandAnalyseMatch( char *sz ) {
   if( fX )
       GTKUpdateAnnotations();
 #endif
+
+  playSound( SOUND_ANALYSIS_FINISHED );
+
 }
 
 extern void CommandAnalyseSession( char *sz ) {

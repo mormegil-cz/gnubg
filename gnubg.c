@@ -1324,6 +1324,8 @@ command cER = {
 }, acSetSoundSound[] = {
   { "agree", CommandSetSoundSoundAgree, 
     N_("Agree"), szOPTFILENAME, &cFilename },
+  { "analysisfinished", CommandSetSoundSoundAnalysisFinished, 
+    N_("Analysis is finished"), szOPTFILENAME, &cFilename },
   { "botfans", CommandSetSoundSoundBotDance, 
     N_("Bot fans"), szOPTFILENAME, &cFilename },
   { "botwinsgame", CommandSetSoundSoundBotWinGame, 

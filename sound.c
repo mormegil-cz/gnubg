@@ -93,7 +93,8 @@ char *aszSoundDesc[ NUM_SOUNDS ] = {
   N_("Human wins match"),
   N_("Bot fans"),
   N_("Bot wins game"),
-  N_("Bot wins match")
+  N_("Bot wins match"),
+  N_("Analysis is finished")
 };
 
 char *aszSoundCommand[ NUM_SOUNDS ] = {
@@ -114,6 +115,7 @@ char *aszSoundCommand[ NUM_SOUNDS ] = {
   "botfans",
   "botwinsgame",
   "botwinsmatch"
+  "analysisfinished"
 };
 
 char aszSound[ NUM_SOUNDS ][ 80 ] = {
@@ -136,7 +138,8 @@ char aszSound[ NUM_SOUNDS ][ 80 ] = {
   "sounds/matchover.wav",
   "sounds/dance.wav",
   "sounds/gameover.wav",
-  "sounds/matchover.wav"
+  "sounds/matchover.wav",
+  "sounds/fanfare.wav"
 };
 
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";

@@ -3867,6 +3867,13 @@ CommandSetSoundSoundAgree ( char *sz ) {
 }
 
 extern void
+CommandSetSoundSoundAnalysisFinished ( char *sz ) {
+
+  SetSound ( SOUND_ANALYSIS_FINISHED, NextToken ( &sz ) );
+
+}
+
+extern void
 CommandSetSoundSoundBotDance ( char *sz ) {
 
   SetSound ( SOUND_BOT_DANCE, NextToken ( &sz ) );
