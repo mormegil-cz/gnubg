@@ -336,6 +336,12 @@ mwc2eq ( float rMwc, cubeinfo *ci );
 extern float
 eq2mwc ( float rEq, cubeinfo *ci );
  
+extern float
+se_mwc2eq ( const float rMwc, const cubeinfo *ci );
+
+extern float
+se_eq2mwc ( const float rEq, const cubeinfo *ci );
+ 
 extern char 
 *FormatEval ( char *sz, evalsetup *pes );
 

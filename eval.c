@@ -3031,6 +3031,67 @@ eq2mwc ( float rEq, cubeinfo *pci ) {
 
 }
 
+/*
+ * Convert standard error MWC to standard error equity
+ *
+ */
+
+extern float 
+se_mwc2eq ( const float rMwc, const cubeinfo *pci ) {
+
+  /* mwc if I win/lose */
+
+  float rMwcWin, rMwcLose;
+
+  rMwcWin = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                    pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+                    aafMET, aafMETPostCrawford );
+
+  rMwcLose = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                     pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+                     aafMET, aafMETPostCrawford );
+
+  return 2.0 / ( rMwcWin - rMwcLose ) * rMwc;
+
+}
+
+/*
+ * Convert standard error equity to standard error mwc
+ *
+ */
+
+extern float 
+se_eq2mwc ( const float rEq, const cubeinfo *pci ) {
+
+  /* mwc if I win/lose */
+
+  float rMwcWin, rMwcLose;
+
+  rMwcWin = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                    pci->fMove, pci->nCube, pci->fMove, pci->fCrawford,
+                    aafMET, aafMETPostCrawford );
+
+  rMwcLose = getME ( pci->anScore[ 0 ], pci->anScore[ 1 ], pci->nMatchTo,
+                     pci->fMove, pci->nCube, ! pci->fMove, pci->fCrawford,
+                     aafMET, aafMETPostCrawford );
+
+  /*
+   * Linear inter- or extrapolation.
+   * Solve the formula in the routine above (mwc2eq):
+   *
+   *        rEq * ( rMwcWin - rMwcLose ) + ( rMwcWin + rMwcLose )
+   * rMwc = -----------------------------------------------------
+   *                                   2
+   */
+
+  return 
+    0.5 * rEq * ( rMwcWin - rMwcLose );
+
+}
+
+
+
+
 
 static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll,
 			 int fCheckLegal ) {
