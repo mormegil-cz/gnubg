@@ -406,6 +406,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
     static float arDouble[ NUM_CUBEFUL_OUTPUTS ]; /* likewise */
 
     /* analyze this move */
+
+    FixMatchState ( pms, pmr );
+
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:
 	fFirstMove = 1;
@@ -986,7 +989,7 @@ extern float
 absoluteFibsRating ( const float r, const int n ) {
 
   static float arRating[] =
-    {  500, 1500,  1600,  1775,  1850,  2000,  2150, 2300 };
+    {  500, 1500,  1600,  1750,  1850,  1950,  2050, 2200 };
   static float arErrorRate[] =
     { 1e38, 0.030, 0.025, 0.020, 0.015, 0.010, 0.05, 0.0 };
   int i;
@@ -1369,13 +1372,6 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
               100.0 * r, 100.0 * ( 1.0 - r ) );
     strcat ( szOutput, szTemp);
 
-    sprintf ( szTemp, _("Relative rating:\t\t%+7.2f\t\t\t%+7.2f\n\n"),
-              relativeFibsRating ( r, ms.nMatchTo ),
-              relativeFibsRating ( 1.0 - r, ms.nMatchTo ) );
-    strcat ( szOutput, szTemp);
-
-    
-
     sprintf ( szTemp, _("Guestimated abs. rating:\t\t%+7.2f\t\t\t%+7.2f\n\n"),
               absoluteFibsRating ( ar[ 0 ], ms.nMatchTo ),
               absoluteFibsRating ( ar[ 1 ], ms.nMatchTo ) );
@@ -1477,6 +1473,7 @@ static void
 updateStatisticsMove ( moverecord *pmr, matchstate *pms, 
                        statcontext *psc ) {
 
+  FixMatchState ( pms, pmr );
 
   switch ( pmr->mt ) {
   case MOVE_GAMEINFO:
