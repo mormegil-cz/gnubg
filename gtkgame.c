@@ -519,19 +519,26 @@ extern void GTKSuspendInput( monitor *pm ) {
 
 extern void GTKResumeInput( monitor *pm ) {
     
-    GTKAllowStdin();
+  int i;
 
-    if (GrabStackPointer > 0) {
-      if ((GrabStack[GrabStackPointer - 1 ].owner == pm) &&
-	  (GrabStack[GrabStackPointer - 1 ].id == pm->idSignal)) {
+  GTKAllowStdin();
 
-	gtk_signal_disconnect( GTK_OBJECT( pwGrab ), pm->idSignal );
-	--GrabStackPointer;
-      }
+  /* go backwards down the stack looking for this signal's entry 
+     if found, disconnect the signal and trim the stack back
+     this should cope with grab owners who disappear without 
+     cleaning up
+     */
+  for (i = GrabStackPointer - 1; i >= 0; --i) {
+    if ((GrabStack[ i ].owner == pm) &&
+	  (GrabStack[ i ].id == pm->idSignal)) {
+
+      gtk_signal_disconnect( GTK_OBJECT( pwGrab ), pm->idSignal );
+      GrabStackPointer = i;
     }
+  }
 
-    if( pm->fGrab )
-      gtk_grab_remove( pwGrab );
+  if( pm->fGrab )
+    gtk_grab_remove( pwGrab );
     
 }
 
