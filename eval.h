@@ -123,9 +123,6 @@ typedef struct _cubeinfo {
     float arGammonPrice[ 4 ];
 } cubeinfo;
 
-#define NORM_SCORE(n) ( nMatchTo - ( n ) ) 
-
-
 extern volatile int fInterrupt, fAction;
 extern void ( *fnAction )( void );
 extern cubeinfo ciCubeless;
@@ -164,10 +161,6 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 
 extern int 
 EvalSave( char *szWeights );
-
-extern void 
-SetGammonPrice( float rGammon, float rLoseGammon,
-                float rBackgammon, float rLoseBackgammon );
 
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],

@@ -253,8 +253,6 @@ static float rCubeX = 2.0/3.0;
 cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
 			      { 1.0, 1.0, 1.0, 1.0 } };
 
-static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
-
 static evalcontext ecBasic = { 0, 0, 0, 0, FALSE };
 
 typedef struct _evalcache {
@@ -2624,16 +2622,6 @@ extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] ) {
   return 0;
 }
 
-extern void SetGammonPrice( float rGammon, float rLoseGammon,
-			    float rBackgammon, float rLoseBackgammon ) {
-    
-    arGammonPrice[ 0 ] = rGammon;
-    arGammonPrice[ 1 ] = rLoseGammon;
-    arGammonPrice[ 2 ] = rBackgammon;
-    arGammonPrice[ 3 ] = rLoseBackgammon;
-}
-
-
 extern float
 Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
 
@@ -3938,8 +3926,8 @@ extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
      * instead of recalculating it again and again, or cache it.
      */
               
-    nScore0 = NORM_SCORE ( anScore[ 0 ] );
-    nScore1 = NORM_SCORE ( anScore[ 1 ] );
+    nScore0 = nMatchTo - anScore[ 0 ];
+    nScore1 = nMatchTo - anScore[ 1 ];
 
     if ( nScore0 == 1 ) {
 	/* after this game will be post-Crawford */
