@@ -224,6 +224,12 @@ MatchFromKey ( int anDice[ 2 ],
     if ( anScore[ 1 ] < 0 || anScore[ 1 ] > *pnMatchTo )
       return -1;
   }
+  else {
+    /* money game */
+    if ( *pfCrawford )
+      /* no Crawford game in money play */
+      return -1;
+  }
 
   return 0;
 
