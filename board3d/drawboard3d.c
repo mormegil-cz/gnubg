@@ -56,6 +56,7 @@ void circle(float radius, float height, int accuracy);
 void circleRev(float radius, float height, int accuracy);
 void circleTex(float radius, float height, int accuracy, Texture* texture);
 void circleRevTex(float radius, float height, int accuracy, Texture* texture);
+void circleOutlineOutward(float radius, float height, int accuracy);
 void circleOutline(float radius, float height, int accuracy);
 void drawBox(boxType type, float x, float y, float z, float w, float h, float d, Texture* texture);
 void drawCube(float size);
@@ -272,6 +273,19 @@ void preDrawPiece0(BoardData* bd)
 		glEnd();
 	}
 
+	/* Anti-alias piece edges */
+	glLineWidth(1);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	circleOutlineOutward(radius, PIECE_DEPTH - lip, bd->curveAccuracy);
+	circleOutlineOutward(radius, lip, bd->curveAccuracy);
+
+	glDisable(GL_BLEND);
+	glDisable(GL_LINE_SMOOTH);
+	glDepthMask(GL_TRUE);
+
 	if (bd->chequerMat[0].pTexture && bd->pieceTextureType == PTT_TOP)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */
 
@@ -296,6 +310,19 @@ void preDrawPiece1(BoardData* bd)
 
 	/* Edge of piece */
 	cylinder(pieceRad, PIECE_DEPTH, bd->curveAccuracy, bd->chequerMat[0].pTexture);
+
+	/* Anti-alias piece edges */
+	glLineWidth(1);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+
+	circleOutlineOutward(pieceRad, PIECE_DEPTH, bd->curveAccuracy);
+	circleOutlineOutward(pieceRad, 0, bd->curveAccuracy);
+
+	glDisable(GL_BLEND);
+	glDisable(GL_LINE_SMOOTH);
+	glDepthMask(GL_TRUE);
 
 	if (bd->chequerMat[0].pTexture && bd->pieceTextureType == PTT_TOP)
 		glEnable(GL_TEXTURE_2D);	/* Re-enable texturing */

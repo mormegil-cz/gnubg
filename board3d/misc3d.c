@@ -567,6 +567,8 @@ void Set3dSettings(BoardData* bd, const renderdata *prd)
 void CopySettings3d(BoardData* from, BoardData* to)
 {	/* Just copy the whole thing */
 	memcpy(to, from, sizeof(BoardData));
+	/* Shallow copy, so reset allocated points */
+	to->boardPoints = 0;
 }
 
 /* Return v position, d distance along path segment */
@@ -793,6 +795,24 @@ void cylinder(float radius, float height, int accuracy, Texture* texture)
 		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
 
 		angle += step;
+	}
+	glEnd();
+}
+
+void circleOutlineOutward(float radius, float height, int accuracy)
+{	/* Draw an ouline of a disc in current z plane with outfacing normals */
+	int i;
+	float angle, step;
+
+	step = (2 * PI) / accuracy;
+	angle = 0;
+	glNormal3f(0, 0, 1);
+	glBegin(GL_LINE_STRIP);
+	for (i = 0; i <= accuracy; i++)
+	{
+		glNormal3f((float)sin(angle), (float)cos(angle), 0);
+		glVertex3f((float)sin(angle) * radius, (float)cos(angle) * radius, height);
+		angle -= step;
 	}
 	glEnd();
 }
