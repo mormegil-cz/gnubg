@@ -73,10 +73,10 @@ typedef struct _statcontext {
 
 typedef enum _ratingtype {
   RAT_BEGINNER, RAT_NOVICE, RAT_INTERMEDIATE, RAT_ADVANCED,
-  RAT_EXPERT, RAT_WORLD_CLASS, RAT_EXTRA_TERRESTRIAL 
+  RAT_EXPERT, RAT_WORLD_CLASS, RAT_EXTRA_TERRESTRIAL, RAT_UNDEFINED
 } ratingtype;
 
-const char *aszRating [ RAT_EXTRA_TERRESTRIAL + 1 ];
+const char *aszRating [ RAT_UNDEFINED + 1 ];
 
 extern ratingtype GetRating ( const float rError );
 extern void IniStatcontext ( statcontext *psc );

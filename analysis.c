@@ -38,12 +38,12 @@
 #include "analysis.h"
 
 #ifndef HUGE_VALF
-#define HUGE_VALF (-1e38)
+#define HUGE_VALF 1e38
 #endif
 
-const char *aszRating [ RAT_EXTRA_TERRESTRIAL + 1 ] = {
+const char *aszRating [ RAT_UNDEFINED + 1 ] = {
   "Beginner", "Novice", "Intermediate", "Advanced", "Expert",
-  "World class", "Extra-terrestrial" };
+  "World class", "Extra-terrestrial", "N/A" };
 
 static const float arThrsRating [ RAT_EXTRA_TERRESTRIAL + 1 ] = {
   1e38, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 };
@@ -54,10 +54,9 @@ GetRating ( const float rError ) {
   int i;
 
   for ( i = RAT_EXTRA_TERRESTRIAL; i >= 0; i-- )
-    if ( rError <= arThrsRating[ i ] ) return i;
+    if ( rError < arThrsRating[ i ] ) return i;
 
-  return RAT_BEGINNER;
-
+  return RAT_UNDEFINED;
 }
 
 static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
