@@ -997,4 +997,107 @@
 
    </board-design>
 
+   <board-design>
+
+      <about>
+         <title>Oak and Maple</title>
+         <author>Ausbilder Schmidt</author>
+      </about>
+
+      <design>
+         board=#FBE19D;0.00
+         border=#D3452F
+         wood=paint
+         hinges=y
+         light=150;50
+         shape=0.3
+         chequers0=#EBEBEB;1.00;3.00;0.80;89.20
+         chequers1=#191919;1.00;3.00;0.70;14.80
+         dice0=#EBEBEB;0.80;89.20;y
+         dice1=#191919;0.70;14.80;y
+         dot0=#000000
+         dot1=#F2F2F2
+         cube=#EFEFEF
+         points0=#CB4F2C;0.00
+         points1=#832100;0.00
+         hinges3d=y
+         piecetype=0
+         piecetexturetype=0
+         roundededges=y
+         bgintrays=n
+         lighttype=d
+         lightposx=3.000000 lightposy=0.000000 lightposz=3.000000
+         lightambient=50 lightdiffuse=70 lightspecular=100
+         chequers3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100
+         chequers3d1=#0C0C0C;#262626;#E5E5E5;100;100
+         dice3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100;y
+         dice3d1=#0C0C0C;#262626;#E5E5E5;100;100;y
+         dot3d0=#000000;#000000;#000000;100;100
+         dot3d1=#FFFFFF;#E5E5E5;#E5E5E5;100;100
+         cube3d=#FFFFFF;#E0E0E0;#E5E5E5;81;0
+         cubetext3d=#000000;#000000;#000000;100;100
+         base3d=#FDFFCE;#F9C46C;#FFEA9B;61;0;maple.png
+         points3d0=#D63B17;#C16442;#A85330;100;100;oak.png
+         points3d1=#8E0000;#794200;#9E510C;100;100;oak.png
+         border3d=#CC2C23;#DA5F3B;#CC5510;79;100;oak.png
+         hinge3d=#895B49;#7D613D;#EACE8E;100;0;hinge.png
+         numbers3d=#FFFFFF;#FFFFFF;#E5E5E5;100;100
+         background3d=#FBFFB5;#FEFFAA;#FEFF7E;100;0;oak.png
+
+   </design>
+
+   </board-design>
+
+   <board-design>
+
+      <about>
+         <title>Alyssum</title>
+         <author>Ruth Schneider</author>
+      </about>
+
+      <design>
+         board=#4B2B1E;0.09
+         border=#8B4630
+         wood=paint
+         hinges=n
+         light=150;50
+         shape=0.5
+         chequers0=#AD5635;1.00;1.50;0.20;3.00
+         chequers1=#F7D7AF;1.00;1.50;0.80;30.00
+         dice0=#633F06;0.10;6.70;y
+         dice1=#EDDCAE;0.30;4.20;n
+         dot0=#C7C7C7
+         dot1=#000000
+         cube=#F7B76A
+         points0=#8E9CB8;0.09
+         points1=#FFD9AD;0.09
+         hinges3d=n
+         piecetype=0
+         piecetexturetype=1
+         roundededges=y
+         bgintrays=n
+         roundedpoints=n
+         lighttype=p
+         lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
+         lightambient=50 lightdiffuse=70 lightspecular=100
+         chequers3d0=#AD5635;#AD5635;#FF0000;60;100
+         chequers3d1=#F7D7AF;#F7D7AF;#3F3F3F;70;100
+         dice3d0=#633F06;#633F06;#FF0000;100;100;y
+         dice3d1=#EDDCAE;#EDDCAE;#3F3F3F;70;100;n
+         dot3d0=#C7C7C7;#C7C7C7;#4C4F4C;128;100
+         dot3d1=#000000;#000000;#1B1B1B;128;100
+         cube3d=#F7B76A;#F7B76A;#CBCCCB;80;100
+         cubetext3d=#000066;#00007F;#00008C;98;100
+         base3d=#4B2B1E;#4B2B1E;#000000;128;100;felt.png
+         points3d0=#8E9CB8;#8E9CB8;#49181D;128;100;felt.png
+         points3d1=#FFD9AD;#FFD9AD;#47514A;128;100;felt.png
+         border3d=#8B4630;#8B4630;#37465C;128;100;alder.png
+         hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.png
+         numbers3d=#AB78CC;#E7E675;#010101;116;100
+         background3d=#D45588;#933E98;#CA41C7;116;0;felt.png
+
+   </design>
+
+   </board-design>
+
 </board-designs>
