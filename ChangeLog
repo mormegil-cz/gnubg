@@ -7,6 +7,15 @@ Fri Oct 13 10:57:09 2000  Jørn Thyssen  <joern@thyssen.nu>
 	* gnubg.c: (CommandHint): Don't give hint on cube action when
 	player is not allowed/able to double. 
 
+Thu Oct 12 22:48:09 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (CommandSaveGame, CommandSaveMatch): Write output in
+	SGF format.  (The old JF .mat format is now written by the
+	"export" command.)
+	
+	* eval.c (FindPubevalMove): Return the move chosen in anMove.
+	play.c (ComputerTurn): Record moves pubeval makes.
+
 Thu Oct 12 18:18:37 2000  Gary Wong  <gtw@research.att.com>
 
 	* play.c (ComputerTurn): Don't consider doubling if !fCubeUse

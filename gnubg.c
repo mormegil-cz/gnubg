@@ -158,6 +158,14 @@ command acDatabase[] = {
     { "train", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acExport[] = {
+    /* FIXME once we have more formats, add another level in the hierarchy
+       specifying the format.  Examples: "export game html foo.html",
+       "export match mat bar.mat" */
+    { "game", CommandExportGame, "Record a log of the game so far to a "
+      "file", szFILENAME, NULL },
+    { "match", CommandExportMatch, "Record a log of the match so far to a "
+      "file", szFILENAME, NULL },
 }, acLoad[] = {
     { "commands", CommandLoadCommands, "Read commands from a script file",
       szFILENAME, NULL },
@@ -357,6 +365,7 @@ command acDatabase[] = {
     { "eval", CommandEval, "Display evaluation of a position", szOPTPOSITION,
       NULL },
     { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
+    { "export", NULL, "Write data for use by other programs", NULL, acExport },
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { "hint", CommandHint, "Show the best evaluations of legal "
       "moves", NULL, NULL },
@@ -1313,7 +1322,7 @@ CommandRollout( char *sz ) {
            arStdDev[ 4 ], arStdDev[ 5 ] );
 }
 
-static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
+static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 
     list *pl;
     moverecord *pmr;
@@ -1450,12 +1459,13 @@ static void LoadRCFiles( void ) {
     outputon();
 }
 
-extern void CommandSaveGame( char *sz ) {
+extern void CommandExportGame( char *sz ) {
     
     FILE *pf;
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to save to (see `help save game')." );
+	outputl( "You must specify a file to export to (see `help export"
+		 "game')." );
 	return;
     }
 
@@ -1466,13 +1476,13 @@ extern void CommandSaveGame( char *sz ) {
 	return;
     }
 
-    SaveGame( pf, plGame, -1, NULL );
+    ExportGame( pf, plGame, -1, NULL );
     
     if( pf != stdout )
 	fclose( pf );
 }
 
-extern void CommandSaveMatch( char *sz ) {
+extern void CommandExportMatch( char *sz ) {
 
     FILE *pf;
     int i, anScore[ 2 ];
@@ -1481,7 +1491,8 @@ extern void CommandSaveMatch( char *sz ) {
     /* FIXME what should be done if nMatchTo == 0? */
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to save to (see `help save match')." );
+	outputl( "You must specify a file to export to (see `help export "
+		 "match')." );
 	return;
     }
 
@@ -1497,7 +1508,182 @@ extern void CommandSaveMatch( char *sz ) {
     anScore[ 0 ] = anScore[ 1 ] = 0;
     
     for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
-	SaveGame( pf, pl->p, i, anScore );
+	ExportGame( pf, pl->p, i, anScore );
+    
+    if( pf != stdout )
+	fclose( pf );
+}
+
+static void WriteEscapedString( FILE *pf, char *pch ) {
+
+    for( ; *pch; pch++ )
+	switch( *pch ) {
+	case '\\':
+	    putc( '\\', pf );
+	    putc( '\\', pf );
+	    break;
+	case ':':
+	    putc( '\\', pf );
+	    putc( ':', pf );
+	    break;
+	case ']':
+	    putc( '\\', pf );
+	    putc( ']', pf );
+	    break;
+	default:
+	    putc( *pch, pf );
+	}
+}
+
+static void WriteMove( FILE *pf, movenormal *pmn ) {
+
+    int i;
+
+    for( i = 0; i < 8; i++ )
+	switch( pmn->anMove[ i ] ) {
+	case 24: /* bar */
+	    putc( 'y', pf );
+	    break;
+	case -1: /* off */
+	    if( !( i & 1 ) )
+		return;
+	    putc( 'z', pf );
+	    break;
+	default:
+	    putc( pmn->fPlayer ? 'x' - pmn->anMove[ i ] :
+		  'a' + pmn->anMove[ i ], pf );
+	}
+}
+
+static void SaveGame( FILE *pf, list *plGame, int nMatch, int anScore[ 2 ] ) {
+
+    list *pl;
+    moverecord *pmr;
+    int nResult = 0, nFileCube = 1, fResigned = FALSE, anBoard[ 2 ][ 25 ];
+    char ch;
+    
+    /* Fixed header */
+    fputs( "(;FF[4]GM[6]AP[GNU Backgammon:" VERSION "]", pf );
+
+    /* Match length, if appropriate */
+    if( nMatch )
+	fprintf( pf, "ML[%d]", nMatch );
+    
+    /* Names */
+    fputs( "PW[", pf );
+    WriteEscapedString( pf, ap[ 0 ].szName );
+    fputs( "]PB[", pf );
+    WriteEscapedString( pf, ap[ 1 ].szName );
+    putc( ']', pf );
+
+    /* Scores, if appropriate */
+    if( anScore )
+	fprintf( pf, "WP[%d]BP[%d]", anScore[ 0 ], anScore[ 1 ] );
+
+    /* FIXME add RE (result) property if the game is complete */
+    
+    putc( '\n', pf );
+
+    InitBoard( anBoard );
+    
+    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
+	pmr = pl->p;
+	switch( pmr->mt ) {
+	case MOVE_NORMAL:
+	    ch = pmr->n.fPlayer ? 'B' : 'W'; /* initialise ch -- the first
+						move should be MOVE_NORMAL */
+	    fprintf( pf, ";%c[%d%d", ch, pmr->n.anRoll[ 0 ],
+		     pmr->n.anRoll[ 1 ] );
+	    WriteMove( pf, &pmr->n );
+	    putc( ']', pf );
+	    ApplyMove( anBoard, pmr->n.anMove );
+	    
+	    nResult = GameStatus( anBoard );
+
+	    SwapSides( anBoard );
+	    break;
+	    
+	case MOVE_DOUBLE:
+	    fprintf( pf, ";%c[double]", ch );
+	    break;
+	    
+	case MOVE_TAKE:
+	    fprintf( pf, ";%c[take]", ch );
+	    nFileCube <<= 1;
+	    break;
+	    
+	case MOVE_DROP:
+	    fprintf( pf, ";%c[drop]", ch );
+	    nResult = 1;
+	    ch ^= 'B' ^ 'W'; /* when dropping, the other player wins */
+	    break;
+	    
+	case MOVE_RESIGN:
+	    fResigned = TRUE;
+	    nResult = pmr->r.nResigned;
+	    ch ^= 'B' ^ 'W'; /* when resigning, the other player wins */
+	    break;
+	}
+
+	if( nResult )
+	    break;
+	
+	ch ^= 'B' ^ 'W'; /* switch B/W each turn */
+    }
+
+    anScore[ ch == 'B' ] += nFileCube * nResult;
+    
+    fputs( ")\n", pf );
+}
+
+extern void CommandSaveGame( char *sz ) {
+
+    FILE *pf;
+    
+    if( !sz || !*sz ) {
+	outputl( "You must specify a file to save to (see `help save"
+		 "game')." );
+	return;
+    }
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	perror( sz );
+	return;
+    }
+
+    SaveGame( pf, plGame, 0, NULL );
+    
+    if( pf != stdout )
+	fclose( pf );
+}
+
+extern void CommandSaveMatch( char *sz ) {
+
+    FILE *pf;
+    int i, anScore[ 2 ];
+    list *pl;
+
+    /* FIXME what should be done if nMatchTo == 0? */
+    
+    if( !sz || !*sz ) {
+	outputl( "You must specify a file to save to (see `help save "
+		 "match')." );
+	return;
+    }
+
+    if( !strcmp( sz, "-" ) )
+	pf = stdout;
+    else if( !( pf = fopen( sz, "w" ) ) ) {
+	perror( sz );
+	return;
+    }
+
+    anScore[ 0 ] = anScore[ 1 ] = 0;
+    
+    for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
+	SaveGame( pf, pl->p, nMatchTo, anScore );
     
     if( pf != stdout )
 	fclose( pf );
