@@ -33,6 +33,7 @@
 #include "backgammon.h"
 #include "gtkbearoff.h"
 #include "gtkgame.h"
+#include "gtktoolbar.h"
 #include "bearoff.h"
 #include "i18n.h"
 
@@ -157,14 +158,17 @@ BearoffSet( bearoffwidget *pbw ) {
 
 static bearoffwidget *
 CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
+#include "xpm/dice.xpm"
 
   GtkWidget *pwv;
   GtkWidget *pwh;
   GtkWidget *pw;
   GtkWidget *pwItem;
+  GtkWidget *pwImage;
   bearoffwidget *pbw;
   int i, j;
-
+  char **aaXpm[6];
+  
   if ( ! ( pbw = (bearoffwidget *) g_malloc( sizeof ( bearoffwidget ) ) ) )
     return NULL;
 
@@ -217,6 +221,13 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
                         GTK_SIGNAL_FUNC( BearoffUpdated ), pbw );
   }
 
+  aaXpm[0] = dice1_xpm;
+  aaXpm[1] = dice2_xpm;
+  aaXpm[2] = dice3_xpm;
+  aaXpm[3] = dice4_xpm;
+  aaXpm[4] = dice5_xpm;
+  aaXpm[5] = dice6_xpm;
+
   for ( i = 0; i < 2; ++i ) {
     char sz[ 2 ];
     int die = pbw->ms.anDice[ i ];
@@ -227,13 +238,16 @@ CreateBearoff( matchstate *pms, bearoffcontext *pbc ) {
     
     for ( j = 0; j < 6; ++j ) {
       sprintf( sz, "%1d", j + 1 );
-      gtk_menu_append( GTK_MENU( pw ), 
-                       pwItem = gtk_menu_item_new_with_label( sz ) );
+      pwItem = gtk_menu_item_new();
+      pwImage = image_from_xpm_d(aaXpm[j], pw);
+      gtk_container_add(GTK_CONTAINER(pwItem), pwImage);
+      gtk_menu_append( GTK_MENU( pw ), pwItem );
       gtk_signal_connect( GTK_OBJECT( pwItem ), "activate",
                           GTK_SIGNAL_FUNC( BearoffUpdated ), pbw );
     }
 
     pbw->apwDice[ i ] = gtk_option_menu_new();
+    gtk_widget_set_usize(pbw->apwDice[ i ], 70, 50 );
 
     gtk_option_menu_set_menu( GTK_OPTION_MENU( pbw->apwDice[ i ] ), pw );
 

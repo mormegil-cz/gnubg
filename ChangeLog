@@ -1,3 +1,8 @@
+Sun Aug 24 17:18:13 2003  Oystein Johansen  <oystein@gnubg.org>
+
+	* gtkbearoff.c: Make pixmaps of the dice in the pulldown menu.
+	* xpm/dice.xpm: New file
+
 Sun Aug 24 11:05:13 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* set.c (SetSkillThreshold): allow setting threshold to zero.
