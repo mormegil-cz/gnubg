@@ -850,8 +850,15 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
     int i, anOff[ 2 ];
     
     /* Names and match length/score */
-    sprintf( sz, "board:%s:%s:%d:%d:%d:", szPlayer, szOpp, nMatchTo, nScore,
-	     nOpponent );
+    strcpy( sz, "board:" );
+    
+    for( sz += 6; *szPlayer; szPlayer++ )
+	*sz++ = ( *szPlayer != ':' ? *szPlayer : '_' );
+    
+    for( *sz++ = ':'; *szOpp; szOpp++ )    
+	*sz++ = ( *szOpp != ':' ? *szOpp : '_' );
+    
+    sprintf( sz, ":%d:%d:%d:", nMatchTo, nScore, nOpponent );
 
     /* Opponent on bar */
     sprintf( strchr( sz, 0 ), "%d:", -anBoard[ 0 ][ 24 ] );
