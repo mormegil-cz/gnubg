@@ -970,8 +970,6 @@ extern void CommandShowMarketWindow ( char * sz ) {
               ap[ i ].szName, rG[ i ] * 100.0, rBG[ i ] * 100.0);
 
 
-  if ( !ms.nMatchTo ) return; /* FIXME */
-
   if ( ms.nMatchTo ) {
 
     for ( i = 0; i < 2; i++ )
@@ -1118,7 +1116,102 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     }
 
+  } /* ms.nMatchTo */
+  else {
+
+    /* money play: use Janowski's formulae */
+
+    /* 
+     * FIXME's: (1) make GTK version
+     *          (2) make output for "current" value of X
+     *          (3) improve layout?
+     */
+
+    float arTPDead[ 2 ], arTPLive[ 2 ]; /* take points */
+    float arBPDead[ 2 ], arBPLive[ 2 ]; /* beaver points */
+    float arRPDead[ 2 ], arRPLive[ 2 ]; /* raccon points */
+    float arDPDead[ 2 ], arDPLive[ 2 ]; /* double points */
+    float arCPDead[ 2 ], arCPLive[ 2 ]; /* cash points */
+    float arTGDead[ 2 ], arTGLive[ 2 ]; /* too good point */
+    float arCLV[ 2 ];/* average cubeless value of games won */
+    float rW, rL;
+    int i;
+
+    for ( i = 0; i < 2; i++ )
+      arCLV[ i ] = 1.0 + rG[ i ] + rBG[ i ];
+
+    GetMatchStateCubeInfo( &ci, &ms );
+    
+    for ( i = 0; i < 2; i++ ) {
+
+      /* Determine rW and rL from Rick's formulae */
+
+      rW = arCLV[ i ];
+      rL = arCLV[ ! i ];
+
+      /* Determine points */
+
+      arTPDead[ i ] = ( rL - 0.5 ) / ( rW + rL );
+      arBPDead[ i ] = rL / ( rW + rL );
+      arRPDead[ i ] = rL / ( rW + rL );
+      
+      arTPLive[ i ] = ( rL - 0.5 ) / ( rW + rL + 0.5 );
+      arBPLive[ i ] = rL / ( rW + rL + 0.5 );
+      arRPLive[ i ] = ( rL + 0.5 ) / ( rW + rL + 0.5 );
+      
+      if ( ci.fCubeOwner == -1 ) {
+        /* initial double point */
+        if ( ! ci.fJacoby ) {
+          /* without Jacoby */
+          arDPDead[ i ] = rL / ( rW + rL );
+        }
+        else {
+          /* with Jacoby */
+          
+          if ( ci.fBeavers )
+            /* with beavers */
+            arDPDead[ i ] = ( rL - 0.25 ) / ( rL + rW - 0.5 );
+          else
+            /* without beavers */
+            arDPDead[ i ] = ( rL - 0.5 ) / ( rL + rW - 1.0 );
+
+        }
+
+      }
+      else {
+        /* redouble point */
+        arDPDead[ i ] = rL / ( rW + rL );
+
+      }
+
+      arDPLive[ i ] = ( rL + 1.0 ) / ( rL + rW + 0.5 );
+
+      arCPDead[ i ] = ( rL + 0.5 ) / ( rW + rL );
+      arCPLive[ i ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
+      
+      arTGDead[ i ] = ( rL + 1.0 ) / ( rW + rL );
+      arTGLive[ i ] = ( rL + 1.0 ) / ( rW + rL + 0.5 );
+      
+      outputf ("\nPlayer %s cube parameters:\n\n", ap[ i ].szName );
+      outputl ( "Cube parameter     Dead Cube   Live Cube\n" );
+
+      outputf ( "Take point, TP     %6.2f%%     %6.2f%%\n",
+                arTPDead[ i ] * 100.0, arTPLive[ i ] * 100.0 );
+      outputf ( "Beaver point, BP   %6.2f%%     %6.2f%%\n",
+                arBPDead[ i ] * 100.0, arBPLive[ i ] * 100.0 );
+      outputf ( "Raccoon point, RP  %6.2f%%     %6.2f%%\n",
+                arRPDead[ i ] * 100.0, arRPLive[ i ] * 100.0 );
+      outputf ( "Double point, DP   %6.2f%%     %6.2f%%\n",
+                arDPDead[ i ] * 100.0, arDPLive[ i ] * 100.0 );
+      outputf ( "Cash point, CP     %6.2f%%     %6.2f%%\n",
+                arCPDead[ i ] * 100.0, arCPLive[ i ] * 100.0 );
+      outputf ( "Too good point, CP %6.2f%%     %6.2f%%\n",
+                arTGDead[ i ] * 100.0, arTGLive[ i ] * 100.0 );
+
+    }
+
   }
 
 }
+
 
