@@ -423,48 +423,70 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	pmr->n.stMove = SKILL_NONE;
 	pmr->n.stCube = SKILL_NONE;
 	
-	if( ( c = ParseMove( sz + 3, pmr->n.anMove ) ) >= 0 ) {
-	    for( i = 0; i < ( c << 1 ); i++ )
-		pmr->n.anMove[ i ]--;
-	    if( c < 4 )
-		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+        c = ParseMove( sz + 3, pmr->n.anMove );
 
+	if( c > 0 ) {
+
+            /* moves found */
+
+            for( i = 0; i < ( c << 1 ); i++ )
+              pmr->n.anMove[ i ]--;
+            if( c < 4 )
+              pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+            
             /* remove consolidation */
-
+            
             ExpandMatMove ( ms.anBoard, pmr->n.anMove, &c, 
-                         pmr->n.anRoll );
-
+                            pmr->n.anRoll );
+            
             /* check if move is valid */
-
+            
             if ( ! IsValidMove ( ms.anBoard, pmr->n.anMove ) )
               outputf ( _("WARNING: Invalid move: \"%s\" encountered\n"),
                         sz + 3 );
-	    
-	    AddMoveRecord( pmr );
+            
+            AddMoveRecord( pmr );
+            
+            return;
+	} 
+        else if ( ! c ) {
 
-	    return;
-	} else {
-	    /* roll but no move found; check for a resignation */
-	    int anDice[ 2 ] = { pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] };
+          /* roll but no move found; if there are legal moves assume
+             a resignation */
+          int anDice[ 2 ] = { pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] };
+          movelist ml;
 	    
-	    free( pmr );
-	    sz += 3;
-	    sz += strspn( sz, " \t" );
-	    
-	    if( !strncasecmp( sz, "win", 3 ) ) {
-		/* the player not on roll resigned -- record the roll */
-		pmr = malloc( sizeof( pmr->sd ) );
-		pmr->sd.mt = MOVE_SETDICE;
-		pmr->sd.sz = NULL;
-		pmr->sd.fPlayer = iPlayer;
-		pmr->sd.anDice[ 0 ] = anDice[ 0 ];
-		pmr->sd.anDice[ 1 ] = anDice[ 1 ];
-		pmr->sd.lt = LUCK_NONE;
-		pmr->sd.rLuck = ERR_VAL;
-		AddMoveRecord( pmr );
-		/* and now fall through and handle the resignation below */
-	    } else
-		return;
+          if ( GenerateMoves( &ml, ms.anBoard, 
+                              pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ], 
+                              FALSE ) ) {
+
+            /* legal moves; just record roll */
+
+            free( pmr ); /* free movenormal from above */
+          
+            pmr = malloc( sizeof( pmr->sd ) );
+            pmr->sd.mt = MOVE_SETDICE;
+            pmr->sd.sz = NULL;
+            pmr->sd.fPlayer = iPlayer;
+            pmr->sd.anDice[ 0 ] = anDice[ 0 ];
+            pmr->sd.anDice[ 1 ] = anDice[ 1 ];
+            pmr->sd.lt = LUCK_NONE;
+            pmr->sd.rLuck = ERR_VAL;
+            AddMoveRecord( pmr );
+
+            return;
+
+          } else {
+
+            /* no legal moves; record the movenormal */
+
+            pmr->n.anMove[ 0 ] = pmr->n.anMove[ 1 ] = -1;
+            AddMoveRecord( pmr );
+
+            return;
+
+          }
+
 	}
     }
 	

@@ -1,3 +1,9 @@
+Sat Mar  8 11:03:05 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* import.c (ParseMatMove): fix .mat import to handle
+	resignations by player on roll after she rolled.
+	(reported by Scott Steiner)
+
 Sat Mar  8 08:56:38 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (Convert): define Convert as strdup if libiconv
