@@ -65,7 +65,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Opening files::			How to open saved positions, games, matches and sessions.
 * Import and export::			Opening and saving from and into different formats.
 * Settings::				Changing settings in GNU Backgammon.
-* Analysing and rollouts::		How to analyse positions, games, matches or sessions.
+* Analysis and rollouts::		How to analyse positions, games, matches or sessions.
 * Position and match IDs::		A brief technical explanation.
 * Training::				How to store databases and train the neural nets.
 * Bearoff databases::                   How to generate bearoff databases for use with GNU Backgammon
@@ -511,13 +511,15 @@ writeme
 @node Rollouts
 @section Rollouts
 
+
+
 @node Export
 @section Export
 
 (Joern Thyssen)
 
 
-@node Analysing and rollouts
+@node Analysis and rollouts
 @chapter Analysing and rollouts
 @menu
 * Evaluating a position::
@@ -525,6 +527,7 @@ writeme
 * Rollout of moves::
 * Rollout of cube decisions::
 * Analysing a saved game or match or session::
+* Output of an analysis::
 @end menu
 
 @node Evaluating a position
@@ -536,11 +539,220 @@ writeme
 @node Rollout of moves
 @section Rollout of moves
 
+
 @node Rollout of cube decisions
 @section Rollout of cube decisions
 
 @node Analysing a saved game or match or session
 @section Analysing a saved game or match or session
+
+@gnubg{} allows 
+
+@node Output of an analysis
+@section Output of an analysis
+
+@subsection Chequer play analysis
+
+@subsection Cube decision analysis
+
+@subsection Game, match, or session statistics
+
+You can get a summary of the analysis from the game, match, or
+session analysis. The game analysis is a summary for the current game
+whereas the match or session statistics is a summary of all the games
+in the match or session. The match analysis is available in the GUI from
+@code{Analysis->Match Statistics} or at the botton of exported files.
+
+@subsubsection Chequer play statistics
+
+This section provides a summary of the chequer play statistics. The
+following information is available
+
+@itemize @bullet
+@item @strong{ Total moves          }:
+The total number of moves in the match.
+@item @strong{ Unforced moves       }:
+The number of unforced moves, i.e., all chequer play decisions
+which had more than one legal move. 
+@item @strong{ Moves marked xxx}:
+The number of moves marked @emph{very good}, @emph{very bad}
+etc. The analysis will mark moves @emph{very bad}, @emph{bad}
+etc. based on the threshold you've defined in the analysis
+settings. @gnubg{} can currently not automatically mark moves, e.g.,
+@emph{good}, but you can mark moves @emph{good} yourself.
+@item @strong{ Error rate (total)}:
+The first number is the total amount of normalised equity that
+the player gave up during this game or match. The number in
+parenthesis is the un-normalised counterpart; for money play the
+all errors are multiplied with the value of the cube, and for match play
+the total match winning chance given up by the player is reported. 
+@item @strong{ Error rate (per move)}:
+The error rate per move is the total error rate divided by the number of
+@emph{unforced moves}. Note that is different from Snowie 4 that
+defines the error rate per move as the total error rate divided by the
+total number of decisions, i.e., the sum of the @emph{total} number of
+moves and the @emph{total} number of cube decisions. In general, your
+error rate per move will be lower in Snowie than in @gnubg{}. 
+@item @strong{ Chequer play rating}:
+@gnubg{} will assign a rating for your chequer play ranging from
+@emph{Awful!} to @emph{Supernatural}. See the description for the
+@emph{overall rating} below.
+@end itemize
+
+
+@subsubsection Luck analysis
+
+This section provides information about how Ms. Fortuna distributed
+her luck. The following information is available:
+
+@itemize @bullet
+@item @strong{ Rolls marked xxx}:
+The number of moves marked @emph{very lucky}, @emph{lucky}
+etc. Moves marked @emph{very lucky} are huge jokers that improve your
+equity with more the +0.6 relative to the average equity. @gnubg{}
+normally uses cubeful 0-ply evaluations to calculate the luck, but you
+can change that under the analysis settings. See below for a complete
+overview of what is considered @emph{very lucky}, @emph{lucky},etc.
+@item @strong{ Luck rate (total)}:
+The total luck for this game or match reported both normalised
+and unnormalised. 
+@item @strong{ Luck rate (per move)}:
+The luck rate per move reported both normalised and unnormalised.
+@item @strong{ Luck rating}:
+Based on the luck rate per move @gnubg{} will assign you a
+humerous luck rating. See below for the possible ratings.
+@end itemize
+
+Thresholds for marking of rolls:
+
+@multitable @columnfractions 0.4 0.4
+@item @strong{Deviation of equity from average}
+@tab @strong{Roll is marked}
+@item >0.6         @tab @emph{very lucky}
+@item 0.3 - 0.6    @tab @emph{lucky}
+@item -0.3 - 0.3   @tab unmarked
+@item -0.6 - -0.3  @tab @emph{unlucky}
+@item < -0.6       @tab @emph{very unlucky}
+@end multitable
+
+Luck ratings:
+
+@multitable @columnfractions 0.4 0.4
+@item @strong{Normalised luck rate per move} 
+@tab @strong{Luck rating}
+@item > 0.10         @tab Cheater :-)
+@item 0.06 - 0.10    @tab Go to Las Vegas immediately
+@item 0.02 - 0.06    @tab Good dice, man! 
+@item -0.02 - 0.02   @tab none
+@item -0.06 - -0.02  @tab Better luck next time
+@item -0.06 - -0.10  @tab Go to bed
+@item < -0.10        @tab Haaa-haaa
+@end multitable
+
+
+@subsubsection Cube statistics
+
+This section provides a summary of the cube decision statistics: the
+number of cube decisions, missed doubles, etc.
+
+@itemize @bullet
+@item @strong{ Total cube decisions}:
+The total number of cube decisions, i.e., the sum of no-doubles,
+doubles, takes, and passes. 
+@item @strong{ Close or actual cube decisions}:
+Similar to ``Total cube decisions'', except that no-doubles are
+only included if they're considered ``close''. @gnubg{} considers a
+cube decision close if the relavant equities are within 0.25 from
+eachother or if the position is too good. 
+@item @strong{ Doubles, Takes, Passes}:
+The total number of doubles, takes, and passes in the game or
+match.
+@item @strong{ Missed doubles around DP, Missed doubles around TG}:
+The number of missed doubles around the double point and too good
+point respectively. If the
+equity is below 0.95 the position is considered to be around the
+double point else it considered to be around the too good point. If
+you miss doubles around the double point, it usually means that you
+double to late, whereas missed doubles around the too good point means
+that you're too greedy and play on for gammon when the position is
+@emph{not} too good.
+@item @strong{ Wrong doubles around DP, Wrong doubles around TG}:
+The number of wrong doubles around the double point and too good
+point, respectively. If you have missed doubles around the double
+point that generally means that you double too early where you really
+should hold the cube, whereas missed doubles around the too good point
+means that you double positions where you really should play on for a
+gammon or backgammon.
+@item @strong{ Wrong takes, Wrong passes}:
+The total number of wrong takes and passes, respectively.
+@item @strong{ Error rate (total)}:
+The accumulated cube errors for this game or match reported both
+normalised and unnormalised. 
+@item @strong{ Error rate (per cube decision)}:
+The error rate per cube decision is the total error rate divided
+by the number of @emph{close or actual cube decisions}. Note that is
+different from Snowie 4 that  defines the error rate per cube decision
+as the total error rate divided by the  total number of decisions,
+i.e., the sum of the @emph{total} number of moves and the @emph{total}
+number of cube decisions. In general, your error rate per cube
+decision  will be lower in Snowie than in @gnubg{}.
+@item @strong{ Cube decision rating}:
+@gnubg{} will assign a rating for your cube decisions ranging from
+@emph{Awful!} to @emph{Supernatural}. See the description for the
+@emph{overall rating} below.
+@end itemize
+
+
+@subsubsection Overall rating
+
+The last section is the overall summary.
+
+@itemize @bullet
+@item @strong{Error rate (total)}:
+The accumulated chequer play and cube decision errors reported by
+normalised and unnormalised.
+@item @strong{Error rate (per decision)}:
+The error rate per decision is the total error rate divided
+by the number of non-trivial decisions (i.e., the sum of @emph{unforced
+moves} and @emph{close or actual cube decisions}). Again, please note that is
+different from Snowie 4 that  defines the total error rate per decision
+as the total error rate divided by the  total number of decisions.
+An investigation of approximately 300 matches showed the on average
+the @gnubg{} error rate with be 1.4 times higher than your Snowie 4
+error rate. 
+@item @strong{Equivalent Snowie error rate}:
+For easy comparison @gnubg{} will also print the total error rate
+calculated by the same formulae as Snowie 4. 
+@item @strong{Overall rating}:
+Based on your normalised error rate per move @gnubg{} will assign
+you a rating ranging from @emph{Awful!} to @emph{Supernatural}. See
+the table below for the thresholds.
+@item @strong{MWC against current opponent}:
+For match play @gnubg{} will calculate your luck-adjusted MWC
+against the current opponent. The number is calculated as 50% - your
+total unnormalised error rate + your opponent's total unnormalised
+error rate. If your opponent is really lucky but plays rather bad, this
+number can become larger than 100%, since he due to the extra luck has
+the possibily to give up even more MWC. However, @gnubg{} will
+report this number as 100%, and 0% for the opposite situation.
+@item @strong{Guestimated abs. rating}:
+change formulas...
+@end itemize
+
+Threshold for ratings:
+
+@multitable @columnfractions 0.4 0.4
+@item @strong{Normalised total error rate per move} 
+@tab @strong{Rating}
+@item 0.000 - 0.002   @tab Supernatural
+@item 0.002 - 0.005   @tab World Class
+@item 0.005 - 0.008   @tab Expert
+@item 0.008 - 0.012   @tab Advanced
+@item 0.012 - 0.018   @tab Intermediate
+@item 0.018 - 0.026   @tab Casual Player
+@item 0.026 - 0.035   @tab Beginner
+@item > 0.035         @tab Awful!
+@end multitable
 
 
 
