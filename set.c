@@ -2903,6 +2903,15 @@ extern void CommandSetOutputWinPC( char *sz ) {
 	       _("Game winning chances will be shown as probabilities.") );
 }
 
+static void SetInvertMET()
+{
+    invertMET();
+    /* Clear any stored results to stop previous table causing problems */
+    EvalCacheFlush();
+    InvalidateStoredMoves();
+    InvalidateStoredCube();
+}
+
 extern void CommandSetMET( char *sz ) {
 
   sz = NextToken ( &sz );
@@ -2936,7 +2945,7 @@ extern void CommandSetMET( char *sz ) {
 
   }
   if (fInvertMET)
-    invertMET();
+    SetInvertMET();
 }
 
 
@@ -3703,8 +3712,7 @@ CommandSetInvertMatchEquityTable ( char *sz ) {
     UpdateSetting( &fInvertMET );
 
   if ( fOldInvertMET != fInvertMET )
-    invertMET ();
-
+    SetInvertMET();
 }
 
 

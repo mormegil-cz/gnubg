@@ -33,7 +33,6 @@
 #include "list.h"
 #include "path.h"
 #include "mec.h"
-#include "backgammon.h"
 
 #if HAVE_LIBXML2
 #include <libxml/tree.h>
@@ -1989,10 +1988,6 @@ invertMET ( void ) {
 
     }
   }
-  /* Clear any stored results to stop previous table causing problems */
-  EvalCacheFlush();
-  InvalidateStoredMoves();
-  InvalidateStoredCube();
 }
 
 /* given a match score, return a pair of arrays with the METs for
