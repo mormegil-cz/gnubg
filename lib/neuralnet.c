@@ -787,7 +787,7 @@ extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 #else
     float ar[ 1024 ], arOutputError[ 128 ], arHiddenError[ 1024 ];
 #endif
-#endif;
+#endif
     
     Evaluate( pnn, arInput, ar, arOutput, 0 );
 
