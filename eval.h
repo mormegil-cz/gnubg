@@ -435,5 +435,10 @@ ScoreMove( move *pm, cubeinfo *pci, evalcontext *pec, int nPlies );
 extern void
 CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );
 
+extern int
+isCloseCubedecision ( const float arDouble[] );
+
+extern int
+isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci );
 
 #endif

@@ -6961,3 +6961,77 @@ CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
     pmlDest->amMoves = NULL;
 
 }
+
+
+
+/*
+ * is this a close cubedecision?
+ *
+ * Input:
+ *   arDouble: equities for cube decisions
+ *
+ */
+
+extern int
+isCloseCubedecision ( const float arDouble[] ) {
+  
+  const float rThr = 0.10;
+
+  /* too good positions */
+
+  if ( arDouble[ OUTPUT_NODOUBLE ] > 1.0 ) return 1;
+
+  /* almost a double */
+
+  if ( fabs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ] ) < rThr )
+    return 1;
+
+  /* almost a pass */
+
+  if ( fabs ( arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ] ) < rThr )
+    return 1;
+
+  return 0;
+
+}
+
+
+/*
+ * is this a missed double?
+ *
+ * Input:
+ *   arDouble: equities for cube decisions
+ *   fDouble: did the player double
+ *   pci: cubeinfo
+ *
+ */
+
+extern int
+isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci ) {
+
+  cubedecision cd = FindBestCubeDecision ( arDouble, pci );
+
+  switch ( cd ) {
+    
+  case DOUBLE_TAKE:
+  case DOUBLE_PASS:
+  case DOUBLE_BEAVER:
+  case REDOUBLE_TAKE:
+  case REDOUBLE_PASS:
+
+    return ! fDouble;
+    break;
+
+  default:
+
+    return 0;
+    break;
+
+
+  }
+
+}
+                 
+
+
+

@@ -190,6 +190,10 @@ updateStatcontext ( statcontext *psc,
       float *arDouble = pmr->n.arDouble;
 
       psc->anTotalCube[ pmr->n.fPlayer ]++;
+
+      if ( isCloseCubedecision ( arDouble ) || 
+           isMissedDouble ( arDouble, FALSE, &ci ) )
+        psc->anCloseCube[ pmr->n.fPlayer ]++;
 	  
       if( arDouble[ OUTPUT_NODOUBLE ] <
           arDouble[ OUTPUT_OPTIMAL ] ) {
@@ -295,6 +299,7 @@ updateStatcontext ( statcontext *psc,
 	      
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anDouble[ pmr->d.fPlayer ]++;
+      psc->anCloseCube[ pmr->d.fPlayer ]++;
 	      
       if( rSkill < 0.0f ) {
         /* it was not a double */
@@ -330,6 +335,7 @@ updateStatcontext ( statcontext *psc,
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anTake[ pmr->d.fPlayer ]++;
+      psc->anCloseCube[ pmr->d.fPlayer ]++;
 	  
       if( -arDouble[ OUTPUT_TAKE ] < -arDouble[ OUTPUT_DROP ] ) {
 
@@ -358,6 +364,7 @@ updateStatcontext ( statcontext *psc,
 
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anPass[ pmr->d.fPlayer ]++;
+      psc->anCloseCube[ pmr->d.fPlayer ]++;
 	  
       if( -arDouble[ OUTPUT_DROP ] < -arDouble[ OUTPUT_TAKE ] ) {
 
@@ -765,6 +772,7 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
     pscB->anTotalMoves[ i ] += pscA->anTotalMoves[ i ];
     
     pscB->anTotalCube[ i ] += pscA->anTotalCube[ i ];
+    pscB->anCloseCube[ i ] += pscA->anCloseCube[ i ];
     pscB->anDouble[ i ] += pscA->anDouble[ i ];
     pscB->anTake[ i ] += pscA->anTake[ i ];
     pscB->anPass[ i ] += pscA->anPass[ i ];
@@ -934,6 +942,7 @@ IniStatcontext ( statcontext *psc ) {
     psc->anTotalMoves[ i ] = 0;
     
     psc->anTotalCube[ i ] = 0;
+    psc->anCloseCube[ i ] = 0;
     psc->anDouble[ i ] = 0;
     psc->anTake[ i ] = 0;
     psc->anPass[ i ] = 0;
@@ -1047,9 +1056,9 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
         + psc->arErrorWrongTake[ i ][ j ]
         + psc->arErrorWrongPass[ i ][ j ];
       
-      if ( psc->anTotalCube[ i ] )
+      if ( psc->anCloseCube[ i ] )
         aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ j ] =
-          aaaar[ CUBEDECISION ][ TOTAL ][ i ][ j ] / psc->anTotalCube[ i ];
+          aaaar[ CUBEDECISION ][ TOTAL ][ i ][ j ] / psc->anCloseCube[ i ];
       else
         aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ j ] = 0.0f;
 
@@ -1060,10 +1069,10 @@ getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] ) {
         aaaar[ CHEQUERPLAY ][ TOTAL ][ i ][ j ] + aaaar[ CUBEDECISION ][ TOTAL ][ i ][ j ];
 
 
-      if ( psc->anUnforcedMoves[ i ] + psc->anTotalCube[ i ] )
+      if ( psc->anUnforcedMoves[ i ] + psc->anCloseCube[ i ] )
         aaaar[ COMBINED ][ PERMOVE ][ i ][ j ] =
           aaaar[ COMBINED ][ TOTAL ][ i ][ j ] / 
-          ( psc->anUnforcedMoves[ i ] + psc->anTotalCube[ i ] );
+          ( psc->anUnforcedMoves[ i ] + psc->anCloseCube[ i ] );
       else
         aaaar[ COMBINED ][ PERMOVE ][ i ][ j ] = 0.0f;
 
@@ -1293,18 +1302,22 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       sprintf ( szTemp, _("\nCube decisions statistics:\n\n") );
       strcat ( szOutput, szTemp);
 
-      sprintf ( szTemp, _("Total cube decisions\t\t%3d\t\t\t%3d\n"
-	       "Doubles\t\t\t\t%3d\t\t\t%3d\n"
-	       "Takes\t\t\t\t%3d\t\t\t%3d\n"
-	       "Pass\t\t\t\t%3d\t\t\t%3d\n\n"),
-	       psc->anTotalCube[ 0 ],
-	       psc->anTotalCube[ 1 ],
-	       psc->anDouble[ 0 ], 
-	       psc->anDouble[ 1 ], 
-	       psc->anTake[ 0 ],
-	       psc->anTake[ 1 ],
-	       psc->anPass[ 0 ], 
-	       psc->anPass[ 1 ] );
+      sprintf ( szTemp, 
+                _("Total cube decisions\t\t%3d\t\t\t%3d\n"
+                  "Close or actual cube decisions\t%3d\t\t\t%3d\n"
+                  "Doubles\t\t\t\t%3d\t\t\t%3d\n"
+                  "Takes\t\t\t\t%3d\t\t\t%3d\n"
+                  "Pass\t\t\t\t%3d\t\t\t%3d\n\n"),
+                psc->anTotalCube[ 0 ],
+                psc->anTotalCube[ 1 ],
+                psc->anCloseCube[ 0 ],
+                psc->anCloseCube[ 1 ],
+                psc->anDouble[ 0 ], 
+                psc->anDouble[ 1 ], 
+                psc->anTake[ 0 ],
+                psc->anTake[ 1 ],
+                psc->anPass[ 0 ], 
+                psc->anPass[ 1 ] );
       strcat ( szOutput, szTemp);
       
       if ( ms.nMatchTo ){
@@ -1423,7 +1436,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
           
           strcat ( szOutput, _("Error rate (per cube decision)\t") );
 
-          if ( psc->anTotalCube[ 0 ] ) {
+          if ( psc->anCloseCube[ 0 ] ) {
 
             sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
@@ -1435,7 +1448,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
             strcat ( szOutput, "\t\t\t" );
           }
 
-          if ( psc->anTotalCube[ 1 ] ) {
+          if ( psc->anCloseCube[ 1 ] ) {
 
             sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
@@ -1460,7 +1473,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 
           strcat ( szOutput, _("Error rate (per cube decision)\t") );
 
-          if ( psc->anTotalCube[ 0 ] ) {
+          if ( psc->anCloseCube[ 0 ] ) {
 
             sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
@@ -1472,7 +1485,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
             strcat ( szOutput, "\t\t\t" );
           }
 
-          if ( psc->anTotalCube[ 1 ] ) {
+          if ( psc->anCloseCube[ 1 ] ) {
 
             sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
@@ -1491,9 +1504,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
       
       sprintf ( szTemp, _("\nCube decision rating:\t\t%-23.23s\t%-23.23s\n\n"),
-                psc->anTotalCube[ 0 ] ?
+                psc->anCloseCube[ 0 ] ?
                 gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
-                psc->anTotalCube[ 1 ] ?
+                psc->anCloseCube[ 1 ] ?
                 gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
       strcat ( szOutput, szTemp);
 
@@ -1521,7 +1534,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
           
       strcat ( szOutput, _("Error rate (per decision)\t") );
 
-      if ( psc->anTotalCube[ 0 ] ) {
+      if ( psc->anCloseCube[ 0 ] ) {
 
         sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
                   -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
@@ -1533,7 +1546,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         strcat ( szOutput, "\t\t\t" );
       }
 
-      if ( psc->anTotalCube[ 1 ] ) {
+      if ( psc->anCloseCube[ 1 ] ) {
 
         sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
                   -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
@@ -1558,7 +1571,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
 
       strcat ( szOutput, _("Error rate (per decision)\t") );
 
-      if ( psc->anTotalCube[ 0 ] ) {
+      if ( psc->anCloseCube[ 0 ]  + psc->anUnforcedMoves[ 0 ] ) {
 
         sprintf ( szTemp, "%+6.3f (%+7.3f%%)\t",
                   -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
@@ -1570,7 +1583,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         strcat ( szOutput, "\t\t\t" );
       }
 
-      if ( psc->anTotalCube[ 1 ] ) {
+      if ( psc->anCloseCube[ 1 ]  + psc->anUnforcedMoves[ 1 ] ) {
 
         sprintf ( szTemp, "%+6.3f (%+7.3f%%)\n",
                   -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
@@ -1591,9 +1604,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
     rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
       
   sprintf ( szTemp, _("Overall rating:\t\t\t%-23.23s\t%-23.23s\n\n"),
-            ( psc->anUnforcedMoves[ 0 ] + psc->anTotalCube[ 0 ] ) ?
+            ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) ?
             gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
-            ( psc->anUnforcedMoves[ 1 ] + psc->anTotalCube[ 1 ] ) ?
+            ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) ?
             gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
   strcat ( szOutput, szTemp);
   
@@ -1823,5 +1836,3 @@ extern int getLuckRating ( const float rLuck ) {
     return 5;
 
 }
-
-

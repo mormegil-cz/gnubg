@@ -40,6 +40,7 @@ typedef struct _statcontext {
   int anTotalMoves[ 2 ];
 
   int anTotalCube[ 2 ];
+  int anCloseCube[ 2 ];
   int anDouble[ 2 ];
   int anTake[ 2 ];
   int anPass[ 2 ];
