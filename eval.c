@@ -3036,7 +3036,6 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
         arCfOutput[ 2 ] *= 2.0;
 
     }
-        
 
     /* Find optimal cube action */
 
@@ -3089,7 +3088,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     float rND, rDT, rDP, r;
     int fCube, n0, n1, i, fDoubleBranch;
-    cubeinfo ciD, *pciE, ciND;
+    cubeinfo ciD, *pciE, ciND, ciR;
 
     GetDPEq ( &fCube, &rDP, pci );
 
@@ -3117,19 +3116,44 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
         rDT *= 2.0;
 
       if ( ( rDT >= rND ) && ( rDP >= rND ) ) {
+
         /* we have a double */
-        pciE = &ciD;
-        fDoubleBranch = 1;
+
+	if ( rDT > rDP ) {
+
+	  /* Double, pass */
+
+	  *prOutput = rDP;
+	  return 0;
+
+	}
+	else {
+
+	  /* Double, take */
+
+	  pciE = &ciD;
+	  SetCubeInfo ( &ciR, 2 * pci -> nCube, 
+			! pci -> fMove, ! pci -> fMove );
+	  fDoubleBranch = 1;
+
+	}
       }
       else {
         /* no double */
         pciE = &ciND;
+        SetCubeInfo ( &ciR, pci -> nCube, 
+                      pci -> fCubeOwner, ! pci -> fMove );
         fDoubleBranch = 0;
       }
 
     } 
-    else
+    else {
       pciE = &ciND;
+      SetCubeInfo ( &ciR, pci -> nCube, 
+                    pci -> fCubeOwner, ! pci -> fMove );
+    }
+
+    *prOutput = 0.0;
 
     for ( n0 = 1; n0 <= 6; n0++ ) 
       for ( n1 = 1; n1 <= n0; n1++ ) {
@@ -3149,7 +3173,7 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
         SwapSides ( anBoardNew );
 
-        if ( EvaluatePositionCubeful1 ( anBoardNew, &r, pciE, pec,
+        if ( EvaluatePositionCubeful1 ( anBoardNew, &r, &ciR, pec,
                                         nPlies - 1 ) < 0 )
           return -1;
 

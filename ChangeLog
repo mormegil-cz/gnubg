@@ -1,3 +1,7 @@
+Thu Aug 17 14:11:44 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* eval.c (EvaluatePositionCubeful1): Misc. bugfixes.
+
 Mon Aug 14 15:29:57 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* eval.c (EvaluatePositionCubeful): Bugfix: corrected some typos,
