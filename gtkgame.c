@@ -601,7 +601,7 @@ extern void GTKSuspendInput( monitor *pm ) {
     gtk_grab_add( pwGrab );
     GrabStack[GrabStackPointer].owner = pm;
     GrabStack[GrabStackPointer++].id =
-      pm->idSignal = gtk_signal_connect_after( GTK_OBJECT( gtk_widget_get_toplevel(pwGrab) ),
+      pm->idSignal = gtk_signal_connect_after( GTK_OBJECT( pwGrab ),
 					       "key-press-event",
 					       GTK_SIGNAL_FUNC( gtk_true ),
 					       NULL );
