@@ -544,6 +544,11 @@ void Set3dSettings(BoardData* bd, const renderdata *prd)
 	memcpy(&bd->diceMat[1], prd->afDieColour[1] ? &prd->rdChequerMat[1] : &prd->rdDiceMat[1], sizeof(Material));
 	bd->diceMat[0].textureInfo = bd->diceMat[1].textureInfo = 0;
 	bd->diceMat[0].pTexture = bd->diceMat[1].pTexture = 0;
+	/* Set alpha values of dice (if opaque) - .5 value used for anti-aliasing dice */
+	if (!bd->diceMat[0].alphaBlend)
+		bd->diceMat[0].ambientColour[3] = bd->diceMat[0].diffuseColour[3] = bd->diceMat[0].specularColour[3] = 0.5f;
+	if (!bd->diceMat[1].alphaBlend)
+		bd->diceMat[1].ambientColour[3] = bd->diceMat[1].diffuseColour[3] = bd->diceMat[1].specularColour[3] = 0.5f;
 
 	memcpy(bd->diceDotMat, prd->rdDiceDotMat, sizeof(Material[2]));
 

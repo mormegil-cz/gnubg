@@ -1,3 +1,7 @@
+Fri Oct 17 16:31:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c, misc3d.c: Make 3d dice look smoother
+
 Thu Oct 16 11:58:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkcolour3d.c: Small fix to insure opacity set at right time
