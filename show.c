@@ -773,7 +773,9 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
 #endif
 
   output ( "Match equity table: " );
-  outputl( szMET[ metCurrent ] );
+  outputl( miCurrent.szName );
+  outputf( "(%s)\n", miCurrent.szFileName );
+  outputl( miCurrent.szDescription );
   outputl( "" );
   
   /* Write column headers */

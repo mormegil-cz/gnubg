@@ -4767,8 +4767,14 @@ extern void GTKShowMatchEquityTable( int n ) {
     
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwBox );
-    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( szMET[ metCurrent ] ),
+    gtk_box_pack_start( GTK_BOX( pwBox ), gtk_label_new( miCurrent.szName ),
 			FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwBox ),
+                        gtk_label_new( miCurrent.szFileName ),
+                        FALSE, FALSE, 4 );
+    gtk_box_pack_start( GTK_BOX( pwBox ),
+                        gtk_label_new( miCurrent.szDescription ),
+                        FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwBox ), pwScrolledWindow, TRUE, TRUE, 0 );
     
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
