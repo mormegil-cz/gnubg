@@ -179,6 +179,8 @@ details.
 ** The sound setting options page isn't complete yet.
 ** Show player on roll on board, e.g., dice cup, arrow, or whatever
 ** Optionally show numbers based on who's on roll
+** Show resignations on board. Currently we show a white cube with a number.
+  Change this to showing, e.g., R1, or change to a white flag.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
