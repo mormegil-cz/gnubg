@@ -1990,7 +1990,7 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 static void
 HTMLPrintComment ( FILE *pf, const moverecord *pmr ) {
 
-  char *sz;
+  char *sz = NULL;
 
   switch ( pmr->mt ) {
 
