@@ -6343,6 +6343,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
 #ifdef WIN32
     char szInvokingDirectory[ BIG_PATH ];  /* current dir when GNUbg was started */
+    char *pc;
 #endif
 	char szQuoted[ BIG_PATH ];
 
@@ -6588,6 +6589,22 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     for ( i = 0; i < NUM_PATHS; i++ )
       for ( j = 0; j < 2; j++ )
         strcpy ( aaszPaths[ i ][ j ], "" );
+
+    /* special setup for a few paths */
+
+#if WIN32
+
+    if ( pc = getenv( "ProgramFiles" ) ) {
+
+      strcpy( aaszPaths[ PATH_SGG ][ 0 ], pc );
+      strcat( aaszPaths[ PATH_SGG ][ 0 ], "\\GamesGrid\\SaveGame\\" );
+
+      strcpy( aaszPaths[ PATH_TMG ][ 0 ], pc );
+      strcat( aaszPaths[ PATH_TMG ][ 0 ], "\\TMG\\SavedGames\\" );
+
+    }
+
+#endif
 
     /* initalize some html export options */
 
