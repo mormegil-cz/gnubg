@@ -92,7 +92,8 @@ EvalEfficiency( int anBoard[2][25], positionclass pc );
 
 static int MaxTurns( int i );
 
-typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
+typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[],
+		int nm);
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
 typedef void ( *classstatusfunc )( char *szOutput );
 typedef int ( *cfunc )( const void *, const void * );
@@ -1991,7 +1992,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ] )
 }
 
 static void
-EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] )
+EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[], int ignore )
 {
   int n, nOpp;
 
@@ -2303,7 +2304,7 @@ EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] )
 }
 
 extern void
-EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] )
+EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], int ignore )
 {
   EvalBearoff1Full( anBoard, arOutput );
 }
@@ -2322,13 +2323,16 @@ enum {
 };
 
 static void
-EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
+EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], int nm )
 {
   float arInput[ NUM_INPUTS ];
 
+  NNEvalType t = ((nm > 0) ? NNEVAL_FROMBASE :
+                   ((nm == 0) ? NNEVAL_SAVE : NNEVAL_NONE));
+
   CalculateRaceInputs( anBoard, arInput );
     
-  NeuralNetEvaluate( &nnRace, arInput, arOutput );
+  NeuralNetEvaluate( &nnRace, arInput, arOutput, t );
 
   /* anBoard[1] is on roll */
   {
@@ -2425,11 +2429,11 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
 
 	if( pBearoff2 && PositionBearoff( dummy[ 0 ] ) < 924 &&
 	    PositionBearoff( dummy[ 1 ] ) < 924 )
-	    EvalBearoff2( dummy, p );
+	    EvalBearoff2( dummy, p, 0 );
 	else if( pBearoff1 )
-	    EvalBearoff1( dummy, p );
+	    EvalBearoff1( dummy, p, 0 );
 	else
-	    EvalRace( dummy, p );
+	    EvalRace( dummy, p, 0 );
 
 	if( side == 1 ) {
 	  arOutput[OUTPUT_WINBACKGAMMON] = p[0];
@@ -2451,25 +2455,31 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[])
 }
 
 
-static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+static void EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[], int nm ) {
     
     float arInput[ NUM_INPUTS ];
+    
+    NNEvalType t = ((nm > 0) ? NNEVAL_FROMBASE :
+                   ((nm == 0) ? NNEVAL_SAVE : NNEVAL_NONE));
 
     CalculateInputs( anBoard, arInput );
     
-    NeuralNetEvaluate( &nnContact, arInput, arOutput );
+    NeuralNetEvaluate( &nnContact, arInput, arOutput, t );
 }
 
-static void EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+static void EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[], int nm ) {
     
     float arInput[ NUM_INPUTS ];
+    
+    NNEvalType t = ((nm > 0) ? NNEVAL_FROMBASE :
+                   ((nm == 0) ? NNEVAL_SAVE : NNEVAL_NONE));
 
     CalculateInputs( anBoard, arInput );
     
-    NeuralNetEvaluate( &nnCrashed, arInput, arOutput );
+    NeuralNetEvaluate( &nnCrashed, arInput, arOutput, t );
 }
 
-static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+static void EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], int nm ) {
 
     int i, c;
     
@@ -2760,7 +2770,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
   } else {
     /* at leaf node; use static evaluation */
       
-    acef[ pc ]( anBoard, arOutput );
+    acef[ pc ]( anBoard, arOutput, -1 );
 
     if( pec->rNoise )
 	for( i = 0; i < NUM_OUTPUTS; i++ )
@@ -2895,7 +2905,7 @@ extern int GameStatus( int anBoard[ 2 ][ 25 ] ) {
 	if( ClassifyPosition( anBoard ) != CLASS_OVER )
 		return 0;
 
-	EvalOver( anBoard, ar );
+	EvalOver( anBoard, ar, 0 );
 
 	if( ar[ OUTPUT_WINBACKGAMMON ] || ar[ OUTPUT_LOSEBACKGAMMON ] )
 		return 3;
@@ -3598,7 +3608,7 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 
     float ar[ NUM_OUTPUTS ];
     
-    EvalOver( anBoard, ar );
+    EvalOver( anBoard, ar, 0 );
 
     if( ar[ OUTPUT_WIN ] > 0.0 )
 	strcpy( pchOutput, "Win " );

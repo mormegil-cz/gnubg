@@ -143,7 +143,7 @@ FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
 
   SwapSides( anBoardTemp );
     
-  EvalBearoff1( anBoardTemp, ar );
+  EvalBearoff1( anBoardTemp, ar, 0 );
     
   return 0;
 }

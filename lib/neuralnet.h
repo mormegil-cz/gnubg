@@ -13,16 +13,25 @@ typedef struct _neuralnet {
     int cInput, cHidden, cOutput, nTrained, fDirect;
     float rBetaHidden, rBetaOutput, *arHiddenWeight, *arOutputWeight,
 	*arHiddenThreshold, *arOutputThreshold;
+    float *savedBase, *savedIBase;
 } neuralnet;
 
 extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 			    int cOutput, float rBetaHidden,
 			    float rBetaOutput );
+
 extern void *NeuralNetCreateDirect( neuralnet *pnn, void *p );
+
 extern int NeuralNetDestroy( neuralnet *pnn );
 
+typedef enum  {
+  NNEVAL_NONE,
+  NNEVAL_SAVE,
+  NNEVAL_FROMBASE,
+} NNEvalType;
+
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
-			      float arOutput[] );
+			      float arOutput[], NNEvalType t);
 extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
 				   float arOutput[], float arDerivative[] );
 extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],

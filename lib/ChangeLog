@@ -1,3 +1,7 @@
+Fri Apr 26 19:23:53 2002  Øystein Johansen <oeysteij@online.no>
+
+        * neuralnet.c: Add neural net speedup from fibs2html
+ 
 Wed Feb  6 10:03:53 2002  Gary Wong  <gtw@research.att.com>
 
 	* neuralnet.c (CheckRC): Use time() as a seed for irandinit().
