@@ -3390,6 +3390,35 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
           printStatTableRow( pf,
                              _("FIBS rating difference"),
                              "%s", _("n/a"), _("n/a") );
+
+        fprintf( pf, "<tr><td colspan=\"3\">%s</td></tr>\n",
+                 _("(based on luck. adj. result)") );
+
+        /* absolute fibs rating */
+
+        fprintf( pf, "<tr><td>%s</td>", _("Estimated abs. rating") );
+
+        for ( i = 0; i < 2; ++i ) {
+
+          fputs( "<td>", pf );
+
+          if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
+            fprintf( pf, "%6.1f", 
+                     absoluteFibsRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ], 
+                                         pms->nMatchTo, rRatingOffset ) );
+          else
+            fputs( _("n/a"), pf );
+
+          fputs( "</td>", pf );
+
+        }
+
+        fputs( "</tr>\n", pf );
+
+        fprintf( pf, "<tr><td colspan=\"3\">%s</td></tr>\n",
+                 _("(based on error rate per decision)") );
+
+
       }
 
     }

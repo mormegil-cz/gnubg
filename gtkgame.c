@@ -7086,7 +7086,10 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
   };
 
   static char *aszLabelsMatch[] = {
-    N_("FIBS rating difference")
+    N_("FIBS rating difference"),
+    N_("(based on luck adj. result)"),
+    N_("Estimated abs. rating"),
+    N_("(based on error rate per decision)")
   };
 
   GtkWidget *pwDialog = GTKCreateDialog( szTitle,
@@ -7521,6 +7524,9 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
       }
 
       if ( fIsMatch ) {
+
+        /* relative rating */
+
         if ( r > 0.0f && r < 1.0f )
           sprintf( sz, "%.2f", 
                    relativeFibsRating( r, pms->nMatchTo ) );
@@ -7528,6 +7534,21 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
           strcpy( sz, _("n/a") );
 
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 1, 1, sz);
+
+        /* absolute rating */
+
+        for ( i = 0; i < 2; ++i ) {
+        
+          if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
+            sprintf( sz, "%.1f", 
+                     absoluteFibsRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ], 
+                                         pms->nMatchTo, rRatingOffset ) );
+          else
+            strcpy( sz, _("n/a") );
+
+          gtk_clist_set_text( GTK_CLIST( pwStats ), irow + 3, i + 1, sz);
+
+        }
 
       }
 
@@ -7564,7 +7585,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
 
   }
   
-  irow += 5;
+  irow += 4;
     
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );

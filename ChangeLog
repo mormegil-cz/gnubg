@@ -1,3 +1,15 @@
+Wed Aug 20 19:20:51 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Restore abs. ratings using the formulae provided by
+	Kees van den Doel.
+
+	* gnubg.c: new command "set ratingoffset .."
+	* gnubg.c (CommandSaveSettings): save rating offset.
+	* set.c (CommandSetRatingOffset): new function.
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): show abs. rating.
+	* analysis (absoluteFIBSRating): use formulae provided by Kees.
+
 Mon Aug 18 19:41:07 2003  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkrace.c: bug fix: race theory window didn't even fit on 1024x768

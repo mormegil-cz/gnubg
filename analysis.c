@@ -1299,48 +1299,17 @@ relativeFibsRating ( const float r, const int n )
 
 
 /*
- * Calculate an estimated rating based on some empirical estimate
- * using linear interpolation.
+ * Calculate an estimated rating based Kees van den Doels work.
+ * (see manual for details)
  *
- * Input
- *    r: error rate pr. move
- *    n: match length
+ * absolute rating = R0 + (11971 + 23681/n) * error rate per move
  *
  */
 
 extern float
-absoluteFibsRating ( const float r, const int n ) {
+absoluteFibsRating ( const float r, const int n, const float rOffset ) {
 
-  static float arRating[] =
-    {  500, 1500,  1600,  1750,  1850,  1950,  2050, 2200 };
-  static float arErrorRate[] =
-    { 1e38, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005, 0.0 };
-  int i;
-  float a;
-
-  if ( r < 0 )
-    return 2200;
-
-  /* use linear interpolation between 
-     (0.030,1500) and (0.0,2200) */
-
-  for ( i = 6; i >= 1; i-- ) {
-
-    if ( r < arErrorRate[ i ] ) {
-
-      a = ( arRating[ i + 1 ] -  arRating[ i ] ) / 
-        ( arErrorRate[ i + 1 ] - arErrorRate[ i ] );
-
-      return arRating[ i ] + a * ( r - arErrorRate[ i ] );
-
-    }
-
-  }
-
-  /* error rate above 0.030 */
-  /* use exponential interpolation */
-
-  return 500.0f + 1000.0f * exp ( 0.30f - 10.0 * r );
+  return rOffset - (11971.0f + 23681.0f/n) * r;
 
 }
 
@@ -1862,12 +1831,40 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
         sprintf ( strchr ( szOutput, 0 ),
                   "%-31s %7.2f\n",
                   _("FIBS rating difference"), rRating );
-        
       }
       else
         sprintf ( strchr ( szOutput, 0 ),
                   "%-31s %-7s\n",
                   _("FIBS rating difference"), _("n/a") );
+
+      strcat( szOutput, _("(based on luck adj. result)\n") );
+
+      /* estimated abs. rating */
+
+      sprintf ( strchr ( szOutput, 0 ),
+                "%-31s ", 
+                _("Estimated abs. rating") );
+
+      for ( i = 0; i < 2; ++i ) 
+        if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] ) {
+          sprintf ( strchr ( szOutput, 0 ),
+                    "%6.1f",
+                    absoluteFibsRating( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ], 
+                                        ms.nMatchTo, rRatingOffset ) );
+
+          if ( ! i ) 
+            strcat ( szOutput, "                  " );
+        }
+        else
+          sprintf ( strchr ( szOutput, 0 ),
+                    "%-23.23s ", _("n/a") );
+
+      strcat ( szOutput, "\n" );
+      strcat( szOutput, _("(based on error rate per decision)\n") );
+      
+
+      
+        
     }
 
   }

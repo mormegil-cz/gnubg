@@ -4557,3 +4557,21 @@ CommandSetBearoffSconyers15x15DiskPath( char *sz ) {
            szPathSconyers15x15Disk );
   
 }
+
+
+extern void
+CommandSetRatingOffset( char *sz ) {
+
+  float r = ParseReal( &sz );
+
+  if ( r < 0 ) {
+    outputl( _("Please provide a positive rating offset\n" ) );
+    return;
+  }
+
+  rRatingOffset = r;
+
+  outputf( _("The rating offset for estimating absolute ratings is: %.1f\n"),
+           rRatingOffset );
+
+}

@@ -616,6 +616,8 @@ extern command acSetExportParameters[];
 extern command acSetGeometryValues[];
 extern command acSetHighlightIntensity[];
 
+extern float rRatingOffset;
+
 
 extern int
 InternalCommandNext(int fMarkedMoves, int n);
@@ -926,6 +928,7 @@ extern void CommandAccept( char * ),
     CommandSetPriorityNormal ( char * ),
     CommandSetPriorityTimeCritical ( char * ),
     CommandSetPrompt( char * ),
+    CommandSetRatingOffset( char * ),
     CommandSetRecord( char * ),
     CommandSetRNG( char * ),
     CommandSetRNGAnsi( char * ),
