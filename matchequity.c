@@ -35,6 +35,7 @@
 #if HAVE_LIBXML2
 #include <libxml/tree.h>
 #include <libxml/parser.h>
+#include <libxml/catalog.h>
 #endif
 
 #if !HAVE_ERF
@@ -1400,8 +1401,13 @@ extern int readMET ( metdata *pmd, const char *szFileName ) {
     xmlLoadCatalog ( pc );
   xmlLoadCatalog ( "./met/catalog" );
   xmlLoadCatalog ( "./catalog" );
-       
-  if ( ! xmlCatalogGetSystem ( "met.dtd" ) ) {
+
+  pc = xmlCatalogResolve ( doc->intSubset->ExternalID, 
+                           doc->intSubset->SystemID );
+  fError = ! pc;
+  free ( pc );
+
+  if ( fError ) {
 
     printf ( "met DTD not found\n" );
     fError = 1;

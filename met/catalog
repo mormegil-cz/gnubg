@@ -14,4 +14,5 @@
 
 --
 
-SYSTEM "met.dtd" "met.dtd"
+PUBLIC "-//GNU Backgammon//DTD Match Equity Tables//EN" "met.dtd"
+

@@ -1,3 +1,8 @@
+Fri Mar 15 21:08:04 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* matchequity.c (readMET): update to libxml2 2.4.16, and resolve
+	some DTD/catalog problems.
+
 Fri Mar 15 13:04:01 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkprefs.c: Make the border colour customisable.
