@@ -170,6 +170,7 @@ float ***Alloc3d(int x, int y, int z);
 void Free3d(float ***array, int x, int y);
 int LoadTexture(Texture* texture, const char* Filename, TextureFormat format);
 void CheckOpenglError();
+void freeEigthPoints(float ****boardPoints, int accuracy);
 
 typedef int idleFunc(BoardData* bd);
 void setIdleFunc(BoardData* bd, idleFunc* pFun);

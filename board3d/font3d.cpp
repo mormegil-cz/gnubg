@@ -30,6 +30,8 @@
 #include "inc3d.h"
 
 #if HAVE_FTGL
+/* Using ftgl in a static libaray */
+#define FTGL_LIBRARY_STATIC
 
 #include "FTGLPolygonFont.h"
 #include "FTGLOutlineFont.h"

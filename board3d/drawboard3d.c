@@ -68,7 +68,6 @@ void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* text
 void QuarterCylinderSplayedRev(float radius, float len, int accuracy, Texture* texture);
 void drawCornerEigth(float ***boardPoints, float radius, int accuracy);
 void calculateEigthPoints(float ****boardPoints, float radius, int accuracy);
-void freeEigthPoints(float ***boardPoints, int accuracy);
 
 /* Other functions */
 void initPath(Path* p, float start[3]);
@@ -163,10 +162,7 @@ void Tidy3dObjects(BoardData* bd, int glValid)
 	}
 
 	if (bd->boardPoints)
-	{
-		freeEigthPoints(bd->boardPoints, bd->curveAccuracy);
-		bd->boardPoints = 0;
-	}
+		freeEigthPoints(&bd->boardPoints, bd->curveAccuracy);
 
 	TidyShadows(bd);
 
@@ -526,7 +522,7 @@ void renderCube(BoardData* bd, float size)
 	}
 	glPopMatrix();
 
-	freeEigthPoints(corner_points, bd->curveAccuracy);
+	freeEigthPoints(&corner_points, bd->curveAccuracy);
 }
 
 void preDrawDice(BoardData* bd)
@@ -3512,7 +3508,7 @@ void preDraw3d(BoardData* bd)
 	}
 
 	if (bd->boardPoints)
-		freeEigthPoints(bd->boardPoints, bd->curveAccuracy);
+		freeEigthPoints(&bd->boardPoints, bd->curveAccuracy);
 	calculateEigthPoints(&bd->boardPoints, BOARD_FILLET, bd->curveAccuracy);
 
 	preDrawPiece(bd);
