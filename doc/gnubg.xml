@@ -124,6 +124,13 @@ backgammon games and matches.  It corresponds to version 0.12
  Your rights regarding this manual.
       </para></menucomment></menuentry>
     <menuentry>
+     <menunode>Appendices</menunode>
+     <menutitle>Appendices</menutitle>
+     <menucomment>
+      <para>
+                     Technical stuff
+      </para></menucomment></menuentry>
+    <menuentry>
      <menunode>Command Index</menunode>
      <menutitle>Command Index</menutitle>
      <menucomment>
@@ -1275,7 +1282,30 @@ chequers to the starting position, use the command
 
       <para>
 FIXME reference =n notation and describe the GTK edit mode
-<indexterm index="ky">show board</indexterm>      </para></item></tableitem>
+      </para>
+
+      <para><indexterm index="ky">set matchid</indexterm>      </para></item></tableitem>
+    <tableitem>
+     <tableterm><code>set matchid <var>id</var></code></tableterm>
+     <item>
+      <para>
+The <code>set matchid</code> commands is a convienient way of settings the
+match length, match score, cube owner and value, player on roll
+etc. etc. For example, <code>set matchid QYk5ASAAIAAA</code> will start a new
+9 point match where the score is set to 2-4, player 0 owns a 2-cube, and
+player 1 has rolled 6-3 (<xref><xrefnodename>Detailed description of the match ID</xrefnodename></xref>
+for a detailed description).
+      </para>
+
+      <para>
+The match ID is shown on the board, both in text mode and
+graphical mode.
+      </para>
+
+      <para>
+      </para>
+
+      <para><indexterm index="ky">show board</indexterm>      </para></item></tableitem>
     <tableitem>
      <tableterm><code>show board [<var>id</var>|=<var>number</var>]</code></tableterm>
      <item>
@@ -1994,7 +2024,7 @@ shades of grey), then there's not much you can do!
    </para></section></node>
  <node>
   <nodename>GNU Free Documentation License</nodename>
-  <nodenext>Command Index</nodenext>
+  <nodenext>Appendices</nodenext>
   <nodeprev>Frequently Asked Questions</nodeprev>
   <nodeup>Top</nodeup>
   <unnumbered>
@@ -2441,9 +2471,192 @@ free software license, such as the GNU General Public License,
 to permit their use in free software.
     </para></unnumberedsec></unnumbered></node>
  <node>
+  <nodename>Appendices</nodename>
+  <nodenext>Command Index</nodenext>
+  <nodeprev>GNU Free Documentation License</nodeprev>
+  <nodeup>Top</nodeup>
+
+  <chapter>
+   <title>Appendices</title>
+   <para><indexterm index="cp">appendix</indexterm>
+   </para>
+   <menu>
+    <para>
+    </para>
+
+    <menuentry>
+     <menunode>Detailed description of the position ID</menunode>
+     <menutitle>Detailed description of the position ID</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry>
+    <menuentry>
+     <menunode>Detailed description of the match ID</menunode>
+     <menutitle>Detailed description of the match ID</menutitle>
+     <menucomment>
+      <para>
+
+      </para></menucomment></menuentry></menu>   </chapter></node>
+ <node>
+  <nodename>Detailed description of the position ID</nodename>
+  <nodenext>Detailed description of the match ID</nodenext>
+  <nodeup>Appendices</nodeup>
+
+  <section>
+   <title>Detailed description of the position ID</title>
+   <para><indexterm index="cp">position ID</indexterm>
+[insert the contents of
+http://www.cs.arizona.edu/~gary/backgammon/positionid.html here]
+   </para></section></node>
+ <node>
+  <nodename>Detailed description of the match ID</nodename>
+  <nodeprev>Detailed description of the position ID</nodeprev>
+  <nodeup>Appendices</nodeup>
+  <section>
+   <title>Detailed description of the match ID</title>
+   <para><indexterm index="cp">match ID</indexterm>
+   </para>
+   <subsection>
+    <title>Introduction</title>
+    <para>
+This section describes how the match ID is calculated. The match ID  can
+be used for easy exchange of positions for <tt>gnubg</tt> users in
+conjuction with the position ID. The match key is a 9 byte
+representation of the match score, match length, value of cube, owner of
+cube, Crawford game flag, player on roll, player to make a decision,
+doubled flag, resigned flag, and the dice rolled. The match ID is the 12
+character Base64 encoding of the match key.
+    </para></subsection>
+   <subsection>
+    <title>Match key</title>
+    <para>
+The match key is a bit string of length 66:
+    </para>
+    <enumerate first="1">
+     <item>
+      <para>
+Bit 1-4 contains the 2-logarithm of the cube value. For example, a
+8-cube is encoded as 0011 binary (or 3), since 2 to the power of 3 is
+8. The maximum value of the cube in with this encoding is 2 to the power
+of 15, i.e., a 32768-cube.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 5-6 contains the cube owner. 00 if player 0 owns the cube, 01 if
+player 1 owns the cube, or 11 for a centered cube.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 7 is the player on roll or the player who did roll (0 and 1 for
+player 0 and 1, respectively).
+      </para>
+</item>
+     <item>
+      <para>
+Bit 8 is the Crawford flag: 1 if this game is the Crawford game, 0
+otherwise.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 9-11 is the game state: 000 for no game started, 001 for playing a game,
+010 if the game is over, 011 if the game was resigned, or 100 if the
+game was ended by dropping a cube.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 12 indicates whose turn it is. For example, suppose player 0 is on
+roll then bit 7 above will be 0. Player 0 now decides to double, this
+will make bit 12 equal to 1, since it is now player 1's turn to decide
+whether she takes or passes the cube.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 13 indicates whether an doubled is being offered. 0 if no double is
+being offered and 1 if a double is being offered.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 14-15 indicates whether an resignation was offered. 00 for no
+resignation, 01 for resign of a sigle game, 10 for resign of a gammon,
+or 11 for resign of a backgammon. The player offering the resignation is
+the inverse of bit 12, e.g., if player 0 resigns a gammon then bit 12
+will be 1 (as it is now player 1 now has to decide whether to accept or
+reject the resignation) and bit 13-14 will be 10 for resign of a gammon.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 16-18 and bit 19-21 is the first and second die, respectively. 0 if
+the dice has not yet be rolled, otherwise the binary encoding of the
+dice, e.g., if 5-2 was rolled bit 16-21 will be 101-010.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 22 to 36 is the match length. The maximum value for the match length
+is 32767. A matchscore of zero indicates that the game is a money game.
+      </para>
+</item>
+     <item>
+      <para>
+Bit 37-51 and bit 52-66 is the score for player 0 and player 1
+respectively. The maximum value of the match score is 32767.
+      </para>
+</item></enumerate>        
+    <para>
+For example, assume the score is 2-4 in a 9 point match with player 0
+holding a 2-cube, and player 1 has just rolled 52. The match key for
+this will be (note that the bit order is reversed below for readability)
+    </para>
+    <para>
+1000 00 1 0  100 1 0 00 101 010 100100000000000 010000000000000 001000000000000
+    </para>
+    <para>
+In little endian the bytes looks like:
+    </para>
+    <para>
+01000001 10001001 00101010 00000001 00100000 00000000 00100000 00000000 00
+    </para>
+    <para>
+0x41     0x89     0x2A     0x01     0x20     0x00     0x20     0x00     0x00
+    </para></subsection>
+   <subsection>
+    <title>Match ID</title>
+    <para>
+Analogous to the position ID from the previous section the match ID
+format is simply the Base64 encoding of the key.
+    </para>
+    <para>
+To continue the example above, the 9 8-bit bytes are grouped into 12
+6-bits groups:
+    </para>
+    <para>
+010000 011000 100100 101010 000000 010010 000000 000000 001000 000000
+000000 000000
+    </para>
+    <para>
+In Base64 encoding, the groups are represented as:
+    </para>
+    <para>
+Q Y k q A U A A I A A A
+    </para>
+    <para>
+So, the match id is simply:
+    </para>
+    <para>
+QYkqAUAAIAAA
+    </para></subsection></section></node>
+ <node>
   <nodename>Command Index</nodename>
   <nodenext>Concept Index</nodenext>
-  <nodeprev>GNU Free Documentation License</nodeprev>
+  <nodeprev>Appendices</nodeprev>
   <nodeup>Top</nodeup>
 
   <unnumbered>
