@@ -67,8 +67,11 @@ duplication of effort and to make sure our changes merge easily.
   terminal window at all.
 
 * Bugs:
-** Evaluations bearing off against contact and in back games are poor.
-  Joseph Heled has improved performance here.
+** Rollout(), CommandTrainTD(), CommandDatabaseGenerate() and
+  CommandDatabaseTrain() shouldn't output progress reports to stdout
+  if it isn't a TTY.
+** RolloutGame()'s variance reduction in the non-race instance seems
+  to be inefficient (and possibly wrong). (gary)
 ** Think about what should happen with variance reduction in Rollout()
   and RolloutGame() when a probability turns out <0 or >1.
 ** When X and readline are enabled, using the board window to play
