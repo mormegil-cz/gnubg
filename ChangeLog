@@ -1,3 +1,20 @@
+Sun Mar  5 14:56:42 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c: Disable BPG net until I figure if there is a way to get rid
+	of the discontinuities between the two nets. Evaluation is less
+	accurate in absolute terms, but generates less incorrect moves.
+	
+	With the latest weights, gnu vs. pub is 0.66 ppg.
+	
+	'The score (after 4000 games) is: gnubg 4430, pubeval 1790
+	(money session (without Jacoby rule))'
+
+Mon Feb 28 17:41:54 2000  Joseph Heled  <pepe@internet.co.nz>
+
+	* eval.c (CalculateHalfInputs): changed evaluation inputs. see
+	comments in code. New net is required, so I changed weights version
+	as well.
+
 Sun Feb 20 17:39:07 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* rollout.c (Rollout): Correct standard error calculation; use

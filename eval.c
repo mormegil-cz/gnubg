@@ -55,16 +55,153 @@ extern float pubeval( int race, int pos[] );
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
 
-/* Race and contact inputs -- commented in more detail in
-   CalculateHalfInputs(). */
-enum { I_OFF1 = 100, I_OFF2, I_OFF3, HALF_RACE_INPUTS };
+/* Race and contact inputs */
+enum {
+  /* n - number of checkers off
+     
+     off1 -  1         n >= 5
+             n/5       otherwise
+	     
+     off2 -  1         n >= 10
+             (n-5)/5   n < 5 < 10
+	     0         otherwise
+	     
+     off3 -  (n-10)/5  n > 10
+             0         otherwise
+  */
+     
+  I_OFF1 = 100, I_OFF2, I_OFF3,
 
-/* Contact inputs -- see CalculateHalfInputs() again. */
-enum { I_BREAK_CONTACT = HALF_RACE_INPUTS, I_BACK_CHEQUER, I_BACK_ANCHOR,
-       I_FORWARD_ANCHOR, I_PIPLOSS, I_P1, I_P2, I_BACKESCAPES, I_ACONTAIN,
-       I_ACONTAIN2, I_CONTAIN, I_CONTAIN2, I_BUILDERS, I_SLOTTED,
-       I_MOBILITY, I_MOMENT2, I_ENTER, I_ENTER2, I_TOP_EVEN, I_TOP2_EVEN,
-       HALF_INPUTS };
+  HALF_RACE_INPUTS };
+
+/* Contact inputs -- see Berliner for most of these */
+enum {
+  /* Minimum number of pips required to break contact.
+
+     For each checker x, N(x) is checker location,
+     C(x) is max({forall o : N(x) - N(o)}, 0)
+
+     Break Contact : (sum over x of C(x)) / 152
+
+     152 is dgree of contact of start position.
+  */
+  I_BREAK_CONTACT = HALF_RACE_INPUTS,
+
+  /* Location of back checker (Normalized to [01])
+   */
+  I_BACK_CHEQUER,
+
+  /* Location of most backward anchor.  (Normalized to [01])
+   */
+  I_BACK_ANCHOR,
+
+  /* Forward anchor in opponents home.
+
+     Normalized in the following way:  If there is an anchor in opponents
+     home at point k (1 <= k <= 6), value is k/6. Otherwise, if there is an
+     anchor in points (7 <= k <= 12), take k/6 as well. Otherwise set to 2.
+     
+     This is an attempt for some continuity, since a 0 would be the "same" as
+     a forward anchor at the bar.
+   */
+  I_FORWARD_ANCHOR,
+
+  /* Average number of pips opponent loses from hits.
+     
+     Some heuristics are required to estimate it, since we have no idea what
+     the best move actually is.
+
+     1. If board is weak (less than 3 anchors), don't consider hitting on
+        points 22 and 23.
+     2. Dont break anchors inside home to hit.
+   */
+  I_PIPLOSS,
+
+  /* Number of rolls that hit at least one checker.
+   */
+  I_P1,
+
+  /* Number of rolls that hit at least two checkers.
+   */
+  I_P2,
+
+  /* How many rolls permit the back checker to escape (Normalized to [01])
+   */
+  I_BACKESCAPES,
+
+  /* Maximum containment of opponent checkers, from our points 9 to op back 
+     checker.
+     
+     Value is (1 - n/36), where n is number of rolls to escape.
+   */
+  I_ACONTAIN,
+  
+  /* Above squared */
+  I_ACONTAIN2,
+
+  /* Maximum containment, from our point 9 to home.
+     Value is (1 - n/36), where n is number of rolls to escape.
+   */
+  I_CONTAIN,
+
+  /* Above squared */
+  I_CONTAIN2,
+
+  /* Number of builders for the next empty slot in importance.
+     Order of importance (in anPoint) is (5, 4, 3, 6, 2, 7).
+     Normailed to [01]
+  */
+  I_BUILDERS,
+
+  /* Next empty slot in importance (see above) is slotted.
+     value (6-k)/6 if k is the ordinal number, so 1 for most impotant, 5/6
+     for next etc.
+  */
+  I_SLOTTED,
+
+  /* For all checkers out of home, 
+     sum (Number of rolls that let x escape * distance from home)
+
+     Normalized by dividing by 3600.
+  */
+  I_MOBILITY,
+
+  /* One sided moment.
+     Let A be the point of weighted average: 
+     A = sum of N(x) for all x) / nCheckers.
+     
+     Then for all x : A < N(x), M = (average (N(X) - A)^2)
+
+     Diveded by 400 to normalize. 
+   */
+  I_MOMENT2,
+
+  /* Average number of pips lost when on the bar.
+     Normalized to [01]
+  */
+  I_ENTER,
+
+  /* Probablity of one checker not entering from bar.
+     1 - (1 - n/6)^2, where n is number of closed points in op home.
+   */
+  I_ENTER2,
+
+  /* 1 if last location has an even number of checkers (0,2 ...), 0 otherwise
+   */
+  I_TOP_EVEN,
+  
+  /* 1 if total of last 2 location has an even number of checkers (0,2 ...),
+     0 otherwise
+   */
+  I_TOP2_EVEN,
+
+  /* Number of rolls that create at least 1 new anchor somewhere. */
+  I_COVER,
+
+  /* Number of rolls that create at least 2 new anchors. */
+  I_COVER2,
+
+  HALF_INPUTS };
 
 #define NUM_INPUTS ( HALF_INPUTS * 2 )
 #define NUM_RACE_INPUTS ( HALF_RACE_INPUTS * 2 )
@@ -312,61 +449,65 @@ static int Escapes( int anBoard[ 25 ], int n ) {
 
 /* Calculates the inputs for one player only.  Returns 0 for contact
    positions, 1 for races. */
-static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
-			  float afInput[] ) {
+static int
+CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
+		     float afInput[] ) {
 
-    int i, j, k, l, nOppBack, n, aHit[ 39 ], nBoard;
+  int i, j, k, l, nOppBack, n, aHit[ 39 ], nBoard;
     
-    /* aanCombination[n] -
-       How many ways to hit from a distance of n pips.
-       Each number is an index into aIntermediate below. 
+  /* aanCombination[n] -
+     How many ways to hit from a distance of n pips.
+     Each number is an index into aIntermediate below. 
+  */
+  static int aanCombination[ 24 ][ 5 ] = {
+    {  0, -1, -1, -1, -1 }, /*  1 */
+    {  1,  2, -1, -1, -1 }, /*  2 */
+    {  3,  4,  5, -1, -1 }, /*  3 */
+    {  6,  7,  8,  9, -1 }, /*  4 */
+    { 10, 11, 12, -1, -1 }, /*  5 */
+    { 13, 14, 15, 16, 17 }, /*  6 */
+    { 18, 19, 20, -1, -1 }, /*  7 */
+    { 21, 22, 23, 24, -1 }, /*  8 */
+    { 25, 26, 27, -1, -1 }, /*  9 */
+    { 28, 29, -1, -1, -1 }, /* 10 */
+    { 30, -1, -1, -1, -1 }, /* 11 */
+    { 31, 32, 33, -1, -1 }, /* 12 */
+    { -1, -1, -1, -1, -1 }, /* 13 */
+    { -1, -1, -1, -1, -1 }, /* 14 */
+    { 34, -1, -1, -1, -1 }, /* 15 */
+    { 35, -1, -1, -1, -1 }, /* 16 */
+    { -1, -1, -1, -1, -1 }, /* 17 */
+    { 36, -1, -1, -1, -1 }, /* 18 */
+    { -1, -1, -1, -1, -1 }, /* 19 */
+    { 37, -1, -1, -1, -1 }, /* 20 */
+    { -1, -1, -1, -1, -1 }, /* 21 */
+    { -1, -1, -1, -1, -1 }, /* 22 */
+    { -1, -1, -1, -1, -1 }, /* 23 */
+    { 38, -1, -1, -1, -1 } /* 24 */
+  };
+    
+  /* One way to hit */ 
+  static struct {
+    /* if true, all intermediate points (if any) are required;
+       if false, one of two intermediate points are required.
+       Set to true for a direct hit, but that can be checked with
+       nFaces == 1,
     */
-    static int aanCombination[ 24 ][ 5 ] = {
-	{  0, -1, -1, -1, -1 }, /*  1 */
-	{  1,  2, -1, -1, -1 }, /*  2 */
-	{  3,  4,  5, -1, -1 }, /*  3 */
-	{  6,  7,  8,  9, -1 }, /*  4 */
-	{ 10, 11, 12, -1, -1 }, /*  5 */
-	{ 13, 14, 15, 16, 17 }, /*  6 */
-	{ 18, 19, 20, -1, -1 }, /*  7 */
-	{ 21, 22, 23, 24, -1 }, /*  8 */
-	{ 25, 26, 27, -1, -1 }, /*  9 */
-	{ 28, 29, -1, -1, -1 }, /* 10 */
-	{ 30, -1, -1, -1, -1 }, /* 11 */
-	{ 31, 32, 33, -1, -1 }, /* 12 */
-	{ -1, -1, -1, -1, -1 }, /* 13 */
-	{ -1, -1, -1, -1, -1 }, /* 14 */
-	{ 34, -1, -1, -1, -1 }, /* 15 */
-	{ 35, -1, -1, -1, -1 }, /* 16 */
-	{ -1, -1, -1, -1, -1 }, /* 17 */
-	{ 36, -1, -1, -1, -1 }, /* 18 */
-	{ -1, -1, -1, -1, -1 }, /* 19 */
-	{ 37, -1, -1, -1, -1 }, /* 20 */
-	{ -1, -1, -1, -1, -1 }, /* 21 */
-	{ -1, -1, -1, -1, -1 }, /* 22 */
-	{ -1, -1, -1, -1, -1 }, /* 23 */
-	{ 38, -1, -1, -1, -1 } /* 24 */
-    };
-    
-    /* One way to hit */ 
-    static struct {
-      /* if true, all intermediate points (if any) are required;
-	 if false, one of two intermediate points are required */
-      int fAll;
+    int fAll;
 
-      /* intermediate points required */
-      int anIntermediate[ 3 ];
+    /* Intermediate points required */
+    int anIntermediate[ 3 ];
 
-      /* Number of faces used in hit (1 to 4) */
-      int nFaces;
+    /* Number of faces used in hit (1 to 4) */
+    int nFaces;
 
-      /* Number of pips used to hit */
-      int nPips;
-    } *pi,
+    /* Number of pips used to hit */
+    int nPips;
+  } *pi,
 
-	/* All ways to hit */
+      /* All ways to hit */
 	
-	aIntermediate[ 39 ] = {
+      aIntermediate[ 39 ] = {
 	{ 1, { 0, 0, 0 }, 1, 1 }, /*  0: 1x hits 1 */
 	{ 1, { 0, 0, 0 }, 1, 2 }, /*  1: 2x hits 2 */
 	{ 1, { 1, 0, 0 }, 2, 2 }, /*  2: 11 hits 2 */
@@ -406,530 +547,702 @@ static int CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 	{ 1, { 6, 12, 0 }, 3, 18 }, /* 36: 66 hits 18 */
 	{ 1, { 5, 10, 15 }, 4, 20 }, /* 37: 55 hits 20 */
 	{ 1, { 6, 12, 18 }, 4, 24 }  /* 38: 66 hits 24 */
-    };
+      };
 
-    /* aaRoll[n] - All ways to hit with the n'th roll
-       Each entry is an index into aIntermediate above.
-    */
+  /* aaRoll[n] - All ways to hit with the n'th roll
+     Each entry is an index into aIntermediate above.
+  */
     
-    static int aaRoll[ 21 ][ 4 ] = {
-	{  0,  2,  5,  9 }, /* 11 */
-	{  0,  1,  4, -1 }, /* 21 */
-	{  1,  8, 17, 24 }, /* 22 */
-	{  0,  3,  7, -1 }, /* 31 */
-	{  1,  3, 12, -1 }, /* 32 */
-	{  3, 16, 27, 33 }, /* 33 */
-	{  0,  6, 11, -1 }, /* 41 */
-	{  1,  6, 15, -1 }, /* 42 */
-	{  3,  6, 20, -1 }, /* 43 */
-	{  6, 23, 32, 35 }, /* 44 */
-	{  0, 10, 14, -1 }, /* 51 */
-	{  1, 10, 19, -1 }, /* 52 */
-	{  3, 10, 22, -1 }, /* 53 */
-	{  6, 10, 26, -1 }, /* 54 */
-	{ 10, 29, 34, 37 }, /* 55 */
-	{  0, 13, 18, -1 }, /* 61 */
-	{  1, 13, 21, -1 }, /* 62 */
-	{  3, 13, 25, -1 }, /* 63 */
-	{  6, 13, 28, -1 }, /* 64 */
-	{ 10, 13, 30, -1 }, /* 65 */
-	{ 13, 31, 36, 38 } /* 66 */
-    };
+  static int aaRoll[ 21 ][ 4 ] = {
+    {  0,  2,  5,  9 }, /* 11 */
+    {  0,  1,  4, -1 }, /* 21 */
+    {  1,  8, 17, 24 }, /* 22 */
+    {  0,  3,  7, -1 }, /* 31 */
+    {  1,  3, 12, -1 }, /* 32 */
+    {  3, 16, 27, 33 }, /* 33 */
+    {  0,  6, 11, -1 }, /* 41 */
+    {  1,  6, 15, -1 }, /* 42 */
+    {  3,  6, 20, -1 }, /* 43 */
+    {  6, 23, 32, 35 }, /* 44 */
+    {  0, 10, 14, -1 }, /* 51 */
+    {  1, 10, 19, -1 }, /* 52 */
+    {  3, 10, 22, -1 }, /* 53 */
+    {  6, 10, 26, -1 }, /* 54 */
+    { 10, 29, 34, 37 }, /* 55 */
+    {  0, 13, 18, -1 }, /* 61 */
+    {  1, 13, 21, -1 }, /* 62 */
+    {  3, 13, 25, -1 }, /* 63 */
+    {  6, 13, 28, -1 }, /* 64 */
+    { 10, 13, 30, -1 }, /* 65 */
+    { 13, 31, 36, 38 } /* 66 */
+  };
 
-    /* Points we want to make, in order of importance */
+  /* Points we want to make, in order of importance */
     
-    static int anPoint[ 6 ] = { 5, 4, 3, 6, 2, 7 };
+  static int anPoint[ 6 ] = { 5, 4, 3, 6, 2, 7 };
+
+  /* One roll stat */
+  
+  struct {
+    /* count of pips this roll hits */
+    int nPips;
+      
+    /* number of chequers this roll hits */
+    int nChequers;
+  } aRoll[ 21 ];
     
-    struct {
-	int nPips; /* count of pips this roll hits */
-	int nChequers; /* number of chequers this roll hits */
-    } aRoll[ 21 ];
-    
-    /* FIXME consider -1.0 instead of 0.0, since null inputs do not
+  /* FIXME consider -1.0 instead of 0.0, since null inputs do not
        contribute to learning! */
     
-    /* Points */
-    for( i = 0; i < 25; i++ ) {
-      int nc = anBoard[ i ];
+  /* Points */
+  for( i = 0; i < 25; i++ ) {
+    int nc = anBoard[ i ];
       
-      afInput[ i * 4 + 0 ] = nc == 1;
-      afInput[ i * 4 + 1 ] = nc >= 2;
-      afInput[ i * 4 + 2 ] = nc >= 3;
-      afInput[ i * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
+    afInput[ i * 4 + 0 ] = nc == 1;
+    afInput[ i * 4 + 1 ] = nc >= 2;
+    afInput[ i * 4 + 2 ] = nc >= 3;
+    afInput[ i * 4 + 3 ] = nc > 3 ? ( nc - 3 ) / 2.0 : 0.0;
+  }
+
+  /* Bar */
+  afInput[ 24 * 4 + 0 ] = anBoard[ 24 ] >= 1;
+
+  /* Men off */
+  {
+    int menOff = 15;
+      
+    for(i = 0; i < 25; i++ ) {
+      menOff -= anBoard[i];
     }
 
-    /* Bar */
-    afInput[ 24 * 4 + 0 ] = anBoard[ 24 ] >= 1;
-
-    /* Men off */
-    {
-      int menOff = 15;
-      
-      for(i = 0; i < 25; i++ ) {
-	menOff -= anBoard[i];
-      }
-
-      if( menOff > 10 ) {
-	afInput[ I_OFF1 ] = 1.0;
-	afInput[ I_OFF2 ] = 1.0;
-	afInput[ I_OFF3 ] = ( menOff - 10 ) / 5.0;
-      } else if( menOff > 5 ) {
-	afInput[ I_OFF1 ] = 1.0;
-	afInput[ I_OFF2 ] = ( menOff - 5 ) / 5.0;
-	afInput[ I_OFF3 ] = 0.0;
-      } else {
-	afInput[ I_OFF1 ] = menOff / 5.0;
-	afInput[ I_OFF2 ] = 0.0;
-	afInput[ I_OFF3 ] = 0.0;
-      }
+    if( menOff > 10 ) {
+      afInput[ I_OFF1 ] = 1.0;
+      afInput[ I_OFF2 ] = 1.0;
+      afInput[ I_OFF3 ] = ( menOff - 10 ) / 5.0;
+    } else if( menOff > 5 ) {
+      afInput[ I_OFF1 ] = 1.0;
+      afInput[ I_OFF2 ] = ( menOff - 5 ) / 5.0;
+      afInput[ I_OFF3 ] = 0.0;
+    } else {
+      afInput[ I_OFF1 ] = menOff / 5.0;
+      afInput[ I_OFF2 ] = 0.0;
+      afInput[ I_OFF3 ] = 0.0;
     }
+  }
     
-    for(nOppBack = 24; nOppBack >= 0; --nOppBack) {
-      if( anBoardOpp[nOppBack] ) {
+  for(nOppBack = 24; nOppBack >= 0; --nOppBack) {
+    if( anBoardOpp[nOppBack] ) {
+      break;
+    }
+
+  }
+    
+  nOppBack = 23 - nOppBack;
+
+  n = 0;
+  for( i = nOppBack + 1; i < 25; i++ )
+    if( anBoard[ i ] )
+      n += ( i - nOppBack ) * anBoard[ i ];
+
+  if( !n ) {
+    /* No contact */
+
+    return 1;
+  }
+    
+  afInput[ I_BREAK_CONTACT ] = n / 152.0;
+
+  /* Back chequer */
+
+  {
+    int nBack;
+    
+    for( nBack = 24; nBack >= 0; --nBack ) {
+      if( anBoard[nBack] ) {
 	break;
       }
-
     }
     
-    nOppBack = 23 - nOppBack;
+    afInput[ I_BACK_CHEQUER ] = nBack / 24.0;
+
+    afInput[ I_TOP_EVEN ] = ( anBoard[ nBack ] & 1 ) ? 0.0 : 1.0;
+
+    for( i = nBack - 1; i >= 0; i-- ) {
+      if( anBoard[ i ] ) {
+	afInput[ I_TOP2_EVEN ] = ( ( anBoard[ nBack ] +
+				     anBoard[ i ] ) & 1 ) ? 0.0 : 1.0;
+	break;
+      }
+    }
+
+    if( i < 0 ) {
+      afInput[ I_TOP2_EVEN ] = afInput[ I_TOP_EVEN ];
+    }
+    
+    /* Back anchor */
+
+    for( i = nBack == 24 ? 23 : nBack; i >= 0; --i ) {
+      if( anBoard[i] >= 2 ) {
+	break;
+      }
+    }
+    
+    afInput[ I_BACK_ANCHOR ] = i / 24.0;
+    
+    /* Forward anchor */
 
     n = 0;
-    for( i = nOppBack + 1; i < 25; i++ )
-	if( anBoard[ i ] )
-	    n += ( i - nOppBack ) * anBoard[ i ];
-
-    if( !n ) {
-      /* No contact */
-
-      if( 0 ) {
-      for( i = 0; i < 6; i++ ) {
-	afInput[ i * 4 + 0 ] = anBoard[ i ] > 0 ? 1.0 : 0.0;
-	afInput[ i * 4 + 1 ] = 0.0;
-	afInput[ i * 4 + 2 ] = 0.0;
-	afInput[ i * 4 + 3 ] = 0.0;
+    for( j = 18; j <= i; ++j ) {
+      if( anBoard[j] >= 2 ) {
+	n = 24 - j;
+	break;
       }
-
-      for(i = 3; i > 0; --i) {
-	int o = 6*i;
-	int p = 0;
-	
-	for(k = 0; k < 6; ++k) {
-	  p += anBoard[k+o] * (k+1);
-	}
-	afInput[ HALF_RACE_INPUTS + (i-1)] = p / 36.0;
-      }
-      }
-      
-      return 1;
     }
-    
-    afInput[ I_BREAK_CONTACT ] = n / 152.0;
 
-    /* Back chequer */
-
-    {
-      int nBack;
-    
-      for( nBack = 24; nBack >= 0; --nBack ) {
-	if( anBoard[nBack] ) {
-	  break;
-	}
-      }
-    
-      afInput[ I_BACK_CHEQUER ] = nBack / 24.0;
-
-      afInput[ I_TOP_EVEN ] = ( anBoard[ nBack ] & 1 ) ? 0.0 : 1.0;
-
-      for( i = nBack - 1; i >= 0; i-- ) {
-	if( anBoard[ i ] ) {
-	  afInput[ I_TOP2_EVEN ] = ( ( anBoard[ nBack ] +
-				       anBoard[ i ] ) & 1 ) ? 0.0 : 1.0;
-	  break;
-	}
-      }
-
-      if( i < 0 ) {
-	afInput[ I_TOP2_EVEN ] = afInput[ I_TOP_EVEN ];
-      }
-    
-      /* Back anchor */
-
-      for( i = nBack == 24 ? 23 : nBack; i >= 0; --i ) {
-	if( anBoard[i] >= 2 ) {
-	  break;
-	}
-      }
-    
-      afInput[ I_BACK_ANCHOR ] = i / 24.0;
-    
-      /* Forward anchor */
-
-      n = 0;
-      for( j = 18; j <= i; ++j ) {
+    if( n == 0 ) {
+      for( j = 17; j >= 12 ; --j ) {
 	if( anBoard[j] >= 2 ) {
 	  n = 24 - j;
 	  break;
 	}
       }
-
-      if( n == 0 ) {
-	for( j = 17; j >= 12 ; --j ) {
-	  if( anBoard[j] >= 2 ) {
-	    n = 24 - j;
-	    break;
-	  }
-	}
-      }
-	
-      afInput[ I_FORWARD_ANCHOR ] = n == 0 ? 2.0 : n / 6.0;
     }
+	
+    afInput[ I_FORWARD_ANCHOR ] = n == 0 ? 2.0 : n / 6.0;
+  }
     
 
-    /* Piploss */
+  /* Piploss */
     
-    nBoard = 0;
-    for( i = 0; i < 6; i++ )
-      if( anBoard[ i ] )
-	nBoard++;
+  nBoard = 0;
+  for( i = 0; i < 6; i++ )
+    if( anBoard[ i ] )
+      nBoard++;
 
-    for( i = 0; i < 39; i++ )
-	aHit[ i ] = 0;
+  for( i = 0; i < 39; i++ )
+    aHit[ i ] = 0;
     
     /* for every point we'd consider hitting a blot on, */
-    for( i = ( nBoard > 2 ) ? 23 : 21; i >= 0; i-- )
-      /* if there's a blot there, then */
+    
+  for( i = ( nBoard > 2 ) ? 23 : 21; i >= 0; i-- )
+    /* if there's a blot there, then */
       
-      if( anBoardOpp[ i ] == 1 )
-	/* for every point beyond */
-	for( j = 24 - i; j < 25; j++ )
-	  /* if we have a hitter and are willing to hit */
-	  if( anBoard[ j ] && !( j < 6 && anBoard[ j ] == 2 ) )
-	    /* for every roll that can hit from that point */
-	    for( n = 0; n < 5; n++ ) {
-	      if( aanCombination[ j - 24 + i ][ n ] == -1 )
-		break;
-	      /* find the intermediate points required to play */
-	      pi = aIntermediate + aanCombination[ j - 24 + i ][ n ];
+    if( anBoardOpp[ i ] == 1 )
+      /* for every point beyond */
+	
+      for( j = 24 - i; j < 25; j++ )
+	/* if we have a hitter and are willing to hit */
+	  
+	if( anBoard[ j ] && !( j < 6 && anBoard[ j ] == 2 ) )
+	  /* for every roll that can hit from that point */
+	    
+	  for( n = 0; n < 5; n++ ) {
+	    if( aanCombination[ j - 24 + i ][ n ] == -1 )
+	      break;
 
-	      if( pi->fAll ) {
+	    /* find the intermediate points required to play */
+	      
+	    pi = aIntermediate + aanCombination[ j - 24 + i ][ n ];
+
+	    if( pi->fAll ) {
+	      /* if nFaces is 1, there are no intermediate points */
+		
+	      if( pi->nFaces > 1 ) {
 		/* all the intermediate points are required */
-		for( k = 0; k < 3; k++ )
+		  
+		for( k = 0; k < 3 && pi->anIntermediate[k] > 0; k++ )
 		  if( anBoardOpp[ i - pi->anIntermediate[ k ] ] > 1 )
 		    /* point is blocked; look for other hits */
 		    goto cannot_hit;
-	      } else
-		/* either of two points are required */
-		if( anBoardOpp[ i - pi->anIntermediate[ 0 ] ] > 1
-		    && anBoardOpp[ i - pi->anIntermediate[ 1 ] ] > 1 )
-				/* both are blocked; look for other hits */
-		  goto cannot_hit;
-	      /* enter this shot as available */
-	      aHit[ aanCombination[ j - 24 + i ][ n ] ] |= 1 << j;
-	      cannot_hit:
-	    }
-
-    for( i = 0; i < 21; i++ )
-	aRoll[ i ].nPips = aRoll[ i ].nChequers = 0;
-    
-    if( !anBoard[ 24 ] ) {
-      /* we're not on the bar; for each roll, */
-      
-      for( i = 0; i < 21; i++ ) {
-	n = -1; /* (hitter used) */
-	
-	/* for each way that roll hits, */
-	for( j = 0; j < 4; j++ ) {
-	  if( aaRoll[ i ][ j ] < 0 )
-	    break;
-
-	  if( !aHit[ aaRoll[ i ][ j ] ] )
-	    continue;
-
-	  pi = aIntermediate + aaRoll[ i ][ j ];
-		
-	  if( pi->nFaces == 1 ) {
-	    /* direct shot */
-	    for( k = 23; k > 0; k-- ) {
-	      if( aHit[ aaRoll[ i ][ j ] ] & ( 1 << k ) ) {
-		/* select the most advanced blot; if we still have
-		   a chequer that can hit there */
-		      
-		if( n != k || anBoard[ k ] > 1 )
-		  aRoll[ i ].nChequers++;
-
-		n = k;
-
-		if( k - pi->nPips + 1 > aRoll[ i ].nPips )
-		  aRoll[ i ].nPips = k - pi->nPips + 1;
-		
-		/* if rolling doubles, check for multiple
-		   direct shots */
-		      
-		if( aaRoll[ i ][ 3 ] >= 0 &&
-		    aHit[ aaRoll[ i ][ j ] ] & ~( 1 << k ) )
-		  aRoll[ i ].nChequers++;
-			    
-		break;
 	      }
-	    }
-	  } else {
-	    /* indirect shot */
-	    if( !aRoll[ i ].nChequers )
-	      aRoll[ i ].nChequers = 1;
-
-	    /* find the most advanced hitter */
-	    for( k = 23; k >= 0; k-- )
-	      if( aHit[ aaRoll[ i ][ j ] ] & ( 1 << k ) )
-		break;
-
-	    if( k - pi->nPips + 1 > aRoll[ i ].nPips )
-	      aRoll[ i ].nPips = k - pi->nPips + 1;
-
-		  /* check for blots hit on intermediate points */
-		    
-	    for( l = 0; l < 3 && pi->anIntermediate[ l ] >= 0; l++ )
-	      if( anBoardOpp[ 23 - k + pi->anIntermediate[ l ] ] == 1 ) {
-		aRoll[ i ].nChequers++;
-		break;
-	      }
-	  }
-	}
-      }
-    } else if( anBoard[ 24 ] == 1 ) {
-      /* we have one on the bar; for each roll, */
-      
-      for( i = 0; i < 21; i++ ) {
-	n = 0; /* (free to use either die to enter) */
-	
-	for( j = 0; j < 4; j++ ) {
-	  if( aaRoll[ i ][ j ] < 0 )
-	    break;
-		
-	  if( !aHit[ aaRoll[ i ][ j ] ] )
-	    continue;
-
-	  pi = aIntermediate + aaRoll[ i ][ j ];
-		
-	  if( pi->nFaces == 1 ) {
-	    /* direct shot */
-	    for( k = 24; k > 0; k-- )
-	      if( aHit[ aaRoll[ i ][ j ] ] & ( 1 << k ) ) {
-		/* if we need this die to enter, we can't
-		   hit elsewhere */
-		if( n && k != 24 )
-		  break;
-			    
-		/* if this isn't a shot from the bar, the
-		   other die must be used to enter */
-		if( k != 24 ) {
-		  if( anBoardOpp[ aIntermediate[
-		    aaRoll[ i ][ 1 - j ] ].nPips - 1 ] > 1 )
-		    break;
-				
-		  n = 1;
-		}
-
-		aRoll[ i ].nChequers++;
-
-		if( k - pi->nPips + 1 > aRoll[ i ].nPips )
-		  aRoll[ i ].nPips = k - pi->nPips + 1;
-	      }
-	  } else {
-	    /* indirect shot -- consider from the bar only */
-	    if( !( aHit[ aaRoll[ i ][ j ] ] & ( 1 << 24 ) ) )
-	      continue;
-		    
-	    if( !aRoll[ i ].nChequers )
-	      aRoll[ i ].nChequers = 1;
-		    
-	    if( 25 - pi->nPips > aRoll[ i ].nPips )
-	      aRoll[ i ].nPips = 25 - pi->nPips;
-		    
-	    /* check for blots hit on intermediate points */
-	    for( k = 0; k < 3 && pi->anIntermediate[ k ] >= 0; k++ )
-	      if( anBoardOpp[ pi->anIntermediate[ k ] + 1 ] == 1 ) {
-		aRoll[ i ].nChequers++;
-		break;
-	      }
-	  }
-	}
-      }
-    } else {
-      /* we have more than one on the bar -- count only direct shots from
-	 point 24 */
-      
-      for( i = 0; i < 21; i++ )
-	/* for the first two ways that hit from the bar */
-	
-	for( j = 0; j < 2; j++ ) {
-	  if( !( aHit[ aaRoll[ i ][ j ] ] & ( 1 << 24 ) ) )
-	    continue;
-
-	  pi = aIntermediate + aaRoll[ i ][ j ];
-
-	  /* only consider direct shots */
-	  if( pi->nFaces != 1 )
-	    continue;
-
-	  aRoll[ i ].nChequers++;
-
-	  if( 25 - pi->nPips > aRoll[ i ].nPips )
-	    aRoll[ i ].nPips = 25 - pi->nPips;
-	}
-    }
-
-    {
-      int np = 0;
-      int n1 = 0;
-      int n2 = 0;
-      
-      for(i = 0; i < 21; i++) {
-	int w = aaRoll[i][3] > 0 ? 1 : 2;
-	int nc = aRoll[i].nChequers;
-	
-	np += aRoll[i].nPips * w;
-	
-	if( nc > 0 ) {
-	  n1 += w;
-
-	  if( nc > 1 ) {
-	    n2 += w;
-	  }
-	}
-      }
-
-      afInput[ I_PIPLOSS ] = np / ( 12.0 * 36.0 );
-      
-      afInput[ I_P1 ] = n1 / 36.0;
-      afInput[ I_P2 ] = n2 / 36.0;
-    }
-
-    afInput[ I_BACKESCAPES ] = Escapes( anBoard, 23 - nOppBack ) / 36.0;
-
-    for( n = 36, i = 15; i < 24 - nOppBack; i++ )
-	if( ( j = Escapes( anBoard, i ) ) < n )
-	    n = j;
-
-    afInput[ I_ACONTAIN ] = ( 36 - n ) / 36.0;
-    afInput[ I_ACONTAIN2 ] = afInput[ I_ACONTAIN ] * afInput[ I_ACONTAIN ];
-
-    if( nOppBack < 0 ) {
-      /* restart loop, point 24 should not be included */
-      i = 15;
-      n = 36;
-    }
-    
-    for( ; i < 24; i++ )
-	if( ( j = Escapes( anBoard, i ) ) < n )
-	    n = j;
-
-    
-    afInput[ I_CONTAIN ] = ( 36 - n ) / 36.0;
-    afInput[ I_CONTAIN2 ] = afInput[ I_CONTAIN ] * afInput[ I_CONTAIN ];
-    
-    for( n = 0, i = 0; i < 6; i++ ) {
-      j = anPoint[i];
-      
-      if( anBoard[j] < 2 && anBoardOpp[ 23 - j ] < 2 ) {
-	/* we want to make point j */
-	
-	for( k = 1; k < 7; k++ ) {
-	  int nkj = anBoard[ j + k ];
-	  
-	  if( nkj == 1 || nkj > 2 || (j + k > 7 && nkj == 2) ) {
-	    n++;
-	  }
-	}
-	    
-	break;
-      }
-    }
-    
-    afInput[ I_BUILDERS ] = n / 6.0;
-
-    afInput[ I_SLOTTED ] =
-      ( i < 6 && anBoard[ j ] == 1 ) ? ( 6 - i ) / 6.0 : 0.0;
-    
-    for( n = 0, i = 6; i < 25; i++ )
-	if( anBoard[ i ] )
-	    n += ( i - 5 ) * anBoard[ i ] * Escapes( anBoardOpp, i );
-
-    afInput[ I_MOBILITY ] = n / 3600.00;
-
-    j = 0;
-    n = 0; 
-    for(i = 0; i < 25; i++ ) {
-      int ni = anBoard[ i ];
-      
-      if( ni ) {
-	j += ni;
-	n += i * ni;
-      }
-    }
-
-    /* n /= 15; */
-    if( j ) {
-      n = (n + j - 1) / j;
-    }
-
-    for(k = 0, i = n + 1; i < 25; i++ ) {
-      int ni = anBoard[ i ];
-
-      if( ni ) {
-	k += ni * ( i - n ) * ( i - n );
-      }
-    }
-
-    if( j ) {
-      k = (k + j - 1) / j;
-    }
-
-    afInput[ I_MOMENT2 ] = k / 400.0;
-
-    if( anBoard[ 24 ] > 0 ) {
-      int loss = 0;
-      int two = anBoard[ 24 ] > 1;
-      
-      for(i = 0; i < 6; ++i) {
-	if( anBoardOpp[ i ] > 1 ) {
-	  /* any double loses */
-	  
-	  loss += 4*(i+1);
-
-	  for(j = i+1; j < 6; ++j) {
-	    if( anBoardOpp[ j ] > 1 ) {
-	      loss += 2*(i+j+2);
 	    } else {
-	      if( two ) {
-		loss += 2*(i+1);
+	      /* either of two points are required */
+		
+	      if( anBoardOpp[ i - pi->anIntermediate[ 0 ] ] > 1
+		  && anBoardOpp[ i - pi->anIntermediate[ 1 ] ] > 1 ) {
+				/* both are blocked; look for other hits */
+		goto cannot_hit;
 	      }
+	    }
+	      
+	    /* enter this shot as available */
+	      
+	    aHit[ aanCombination[ j - 24 + i ][ n ] ] |= 1 << j;
+	    cannot_hit:
+	  }
+
+  for( i = 0; i < 21; i++ )
+    aRoll[ i ].nPips = aRoll[ i ].nChequers = 0;
+    
+  if( !anBoard[ 24 ] ) {
+    /* we're not on the bar; for each roll, */
+      
+    for( i = 0; i < 21; i++ ) {
+      n = -1; /* (hitter used) */
+	
+      /* for each way that roll hits, */
+      for( j = 0; j < 4; j++ ) {
+	int r = aaRoll[ i ][ j ];
+	
+	if( r < 0 )
+	  break;
+
+	if( !aHit[ r ] )
+	  continue;
+
+	pi = aIntermediate + r;
+		
+	if( pi->nFaces == 1 ) {
+	  /* direct shot */
+	  for( k = 23; k > 0; k-- ) {
+	    if( aHit[ r ] & ( 1 << k ) ) {
+	      /* select the most advanced blot; if we still have
+		 a chequer that can hit there */
+		      
+	      if( n != k || anBoard[ k ] > 1 )
+		aRoll[ i ].nChequers++;
+
+	      n = k;
+
+	      if( k - pi->nPips + 1 > aRoll[ i ].nPips )
+		aRoll[ i ].nPips = k - pi->nPips + 1;
+		
+	      /* if rolling doubles, check for multiple
+		 direct shots */
+		      
+	      if( aaRoll[ i ][ 3 ] >= 0 &&
+		  aHit[ r ] & ~( 1 << k ) )
+		aRoll[ i ].nChequers++;
+			    
+	      break;
 	    }
 	  }
 	} else {
-	  if( two ) {
-	    for(j = i+1; j < 6; ++j) {
-	      if( anBoardOpp[ j ] > 1 ) {
-		loss += 2*(j+1);
+	  /* indirect shot */
+	  if( !aRoll[ i ].nChequers )
+	    aRoll[ i ].nChequers = 1;
+
+	  /* find the most advanced hitter */
+	    
+	  for( k = 23; k >= 0; k-- )
+	    if( aHit[ r ] & ( 1 << k ) )
+	      break;
+
+	  if( k - pi->nPips + 1 > aRoll[ i ].nPips )
+	    aRoll[ i ].nPips = k - pi->nPips + 1;
+
+	  /* check for blots hit on intermediate points */
+		    
+	  for( l = 0; l < 3 && pi->anIntermediate[ l ] > 0; l++ )
+	    if( anBoardOpp[ 23 - k + pi->anIntermediate[ l ] ] == 1 ) {
+		
+	      aRoll[ i ].nChequers++;
+	      break;
+	    }
+	}
+      }
+    }
+  } else if( anBoard[ 24 ] == 1 ) {
+    /* we have one on the bar; for each roll, */
+      
+    for( i = 0; i < 21; i++ ) {
+      n = 0; /* (free to use either die to enter) */
+	
+      for( j = 0; j < 4; j++ ) {
+	int r = aaRoll[ i ][ j ];
+	
+	if( r < 0 )
+	  break;
+		
+	if( !aHit[ r ] )
+	  continue;
+
+	pi = aIntermediate + r;
+		
+	if( pi->nFaces == 1 ) {
+	  /* direct shot */
+	  
+	  for( k = 24; k > 0; k-- ) {
+	    if( aHit[ r ] & ( 1 << k ) ) {
+	      /* if we need this die to enter, we can't hit elsewhere */
+	      
+	      if( n && k != 24 )
+		break;
+			    
+	      /* if this isn't a shot from the bar, the
+		 other die must be used to enter */
+	      
+	      if( k != 24 ) {
+		int npip = aIntermediate[aaRoll[ i ][ 1 - j ] ].nPips;
+		
+		if( anBoardOpp[npip - 1] > 1 )
+		  break;
+				
+		n = 1;
+	      }
+
+	      aRoll[ i ].nChequers++;
+
+	      if( k - pi->nPips + 1 > aRoll[ i ].nPips )
+		aRoll[ i ].nPips = k - pi->nPips + 1;
+	    }
+	  }
+	} else {
+	  /* indirect shot -- consider from the bar only */
+	  if( !( aHit[ r ] & ( 1 << 24 ) ) )
+	    continue;
+		    
+	  if( !aRoll[ i ].nChequers )
+	    aRoll[ i ].nChequers = 1;
+		    
+	  if( 25 - pi->nPips > aRoll[ i ].nPips )
+	    aRoll[ i ].nPips = 25 - pi->nPips;
+		    
+	  /* check for blots hit on intermediate points */
+	  for( k = 0; k < 3 && pi->anIntermediate[ k ] > 0; k++ )
+	    if( anBoardOpp[ pi->anIntermediate[ k ] + 1 ] == 1 ) {
+		
+	      aRoll[ i ].nChequers++;
+	      break;
+	    }
+	}
+      }
+    }
+  } else {
+    /* we have more than one on the bar --
+       count only direct shots from point 24 */
+      
+    for( i = 0; i < 21; i++ ) {
+      /* for the first two ways that hit from the bar */
+	
+      for( j = 0; j < 2; j++ ) {
+	int r = aaRoll[ i ][ j ];
+	
+	if( !( aHit[r] & ( 1 << 24 ) ) )
+	  continue;
+
+	pi = aIntermediate + r;
+
+	/* only consider direct shots */
+	
+	if( pi->nFaces != 1 )
+	  continue;
+
+	aRoll[ i ].nChequers++;
+
+	if( 25 - pi->nPips > aRoll[ i ].nPips )
+	  aRoll[ i ].nPips = 25 - pi->nPips;
+      }
+    }
+  }
+
+  {
+    int np = 0;
+    int n1 = 0;
+    int n2 = 0;
+      
+    for(i = 0; i < 21; i++) {
+      int w = aaRoll[i][3] > 0 ? 1 : 2;
+      int nc = aRoll[i].nChequers;
+	
+      np += aRoll[i].nPips * w;
+	
+      if( nc > 0 ) {
+	n1 += w;
+
+	if( nc > 1 ) {
+	  n2 += w;
+	}
+      }
+    }
+
+    afInput[ I_PIPLOSS ] = np / ( 12.0 * 36.0 );
+      
+    afInput[ I_P1 ] = n1 / 36.0;
+    afInput[ I_P2 ] = n2 / 36.0;
+  }
+
+  afInput[ I_BACKESCAPES ] = Escapes( anBoard, 23 - nOppBack ) / 36.0;
+
+  for( n = 36, i = 15; i < 24 - nOppBack; i++ )
+    if( ( j = Escapes( anBoard, i ) ) < n )
+      n = j;
+
+  afInput[ I_ACONTAIN ] = ( 36 - n ) / 36.0;
+  afInput[ I_ACONTAIN2 ] = afInput[ I_ACONTAIN ] * afInput[ I_ACONTAIN ];
+
+  if( nOppBack < 0 ) {
+    /* restart loop, point 24 should not be included */
+    i = 15;
+    n = 36;
+  }
+    
+  for( ; i < 24; i++ )
+    if( ( j = Escapes( anBoard, i ) ) < n )
+      n = j;
+
+    
+  afInput[ I_CONTAIN ] = ( 36 - n ) / 36.0;
+  afInput[ I_CONTAIN2 ] = afInput[ I_CONTAIN ] * afInput[ I_CONTAIN ];
+    
+  for( n = 0, i = 0; i < 6; i++ ) {
+    j = anPoint[i];
+      
+    if( anBoard[j] < 2 && anBoardOpp[ 23 - j ] < 2 ) {
+      /* we want to make point j */
+	
+      for( k = 1; k < 7; k++ ) {
+	int nkj = anBoard[ j + k ];
+	  
+	if( nkj == 1 || nkj > 2 || (j + k > 7 && nkj == 2) ) {
+	  n++;
+	}
+      }
+	    
+      break;
+    }
+  }
+    
+  afInput[ I_BUILDERS ] = n / 6.0;
+
+  afInput[ I_SLOTTED ] =
+    ( i < 6 && anBoard[ j ] == 1 ) ? ( 6 - i ) / 6.0 : 0.0;
+    
+  for( n = 0, i = 6; i < 25; i++ )
+    if( anBoard[ i ] )
+      n += ( i - 5 ) * anBoard[ i ] * Escapes( anBoardOpp, i );
+
+  afInput[ I_MOBILITY ] = n / 3600.00;
+
+  j = 0;
+  n = 0; 
+  for(i = 0; i < 25; i++ ) {
+    int ni = anBoard[ i ];
+      
+    if( ni ) {
+      j += ni;
+      n += i * ni;
+    }
+  }
+
+  if( j ) {
+    n = (n + j - 1) / j;
+  }
+
+  for(k = 0, i = n + 1; i < 25; i++ ) {
+    int ni = anBoard[ i ];
+
+    if( ni ) {
+      k += ni * ( i - n ) * ( i - n );
+    }
+  }
+
+  if( j ) {
+    k = (k + j - 1) / j;
+  }
+
+  afInput[ I_MOMENT2 ] = k / 400.0;
+
+  if( anBoard[ 24 ] > 0 ) {
+    int loss = 0;
+    int two = anBoard[ 24 ] > 1;
+      
+    for(i = 0; i < 6; ++i) {
+      if( anBoardOpp[ i ] > 1 ) {
+	/* any double loses */
+	  
+	loss += 4*(i+1);
+
+	for(j = i+1; j < 6; ++j) {
+	  if( anBoardOpp[ j ] > 1 ) {
+	    loss += 2*(i+j+2);
+	  } else {
+	    if( two ) {
+	      loss += 2*(i+1);
+	    }
+	  }
+	}
+      } else {
+	if( two ) {
+	  for(j = i+1; j < 6; ++j) {
+	    if( anBoardOpp[ j ] > 1 ) {
+	      loss += 2*(j+1);
+	    }
+	  }
+	}
+      }
+    }
+      
+    afInput[ I_ENTER ] = loss / (36.0 * (49.0/6.0));
+  } else {
+    afInput[ I_ENTER ] = 0.0;
+  }
+
+  n = 0;
+  for(i = 0; i < 6; i++ ) {
+    n += anBoardOpp[ i ] > 1;
+  }
+    
+  afInput[ I_ENTER2 ] = ( 36 - ( n - 6 ) * ( n - 6 ) ) / 36.0; 
+
+  {
+    int aCover[25];
+    memset(aCover, 0, sizeof(aCover));
+
+    for(i = 0; i < 24; ++i) {
+      if( anBoard[i] == 1 ) {
+	for(j = i+1; j < 25; ++j) {
+	  if( anBoard[j] == 1 || anBoard[j] > 2 ) {
+	    aCover[j-i] |= (0x1 << i);
+	  }
+	}
+      }
+    }
+
+    n = 0;
+
+    for(i = 0; i < 21; ++i) {
+      int* ar = aaRoll[i];
+
+      int has = 0;
+	
+      for(j = 0; j < 4; ++j) {
+	if( ar[j] >= 0 ) {
+	  pi = aIntermediate + ar[j];
+
+	  {
+	    int c = aCover[pi->nPips];
+	    
+	    if( c ) {
+	      if( pi->nFaces == 1 ) {
+		has = 1;
+		break;
+	      } else {
+		int b;
+		for(b = 1; c != 0 && b < 25; ++b) {
+		  if( c & (0x1 << b) ) {
+		    for(k = 0; k < 3 && pi->anIntermediate[k] > 0; ++k) {
+		      int it = 23 - (b + pi->anIntermediate[k]);
+		      assert( it >= 0 );
+			
+		      if( anBoardOpp[it] < 2 ) {
+			if( ! pi->fAll ) {
+			  has = 1;
+			  c = 0;
+			  break;
+			}
+		      } else {
+			if( pi->fAll ) {
+			  /* all intermediates needed, one blocked */
+
+			  c = 0;
+			  break;
+			}
+		      }
+		    }
+
+		    /* c == 0 means unsuccessful break */
+		      
+		    if( c && pi->fAll ) {
+		      has = 1;
+		      c = 0;
+		      break;
+		    }
+
+		    c &= ~(0x1 << b);
+		  }
+		}
+		  
+		if( has ) {
+		  break;
+		}
 	      }
 	    }
 	  }
 	}
       }
-      
-      afInput[ I_ENTER ] = loss / (36.0 * (49.0/6.0));
-    } else {
-      afInput[ I_ENTER ] = 0.0;
+
+      if( has ) {
+	n += ar[3] > 0 ? 1 : 2;
+      }
     }
+
+    afInput[ I_COVER ] = n / 36.0;
 
     n = 0;
-    for(i = 0; i < 6; i++ ) {
-      n += anBoardOpp[ i ] > 1;
+      
+    for(i = 1; i < 7; ++i) {
+      if( aCover[i] ) {
+	for(j = i+1; j < 7; ++j) {
+	  if( aCover[j] ) {
+	    int b = aCover[i] | aCover[j];
+	      
+	    if( (b & (b-1)) != 0 ) {
+	      /* more than 1 */
+	      n += 2;
+	    }
+	  }
+	}
+      }
     }
-    
-    afInput[ I_ENTER2 ] = ( 36 - ( n - 6 ) * ( n - 6 ) ) / 36.0; 
 
-    return 0;
+    for(i = 1; i < 7; ++i) {
+      static int p[] = {1, 1, 1, 2, 1, 3, 2, 2};
+
+      int has = 0;
+	
+      for(j = 0; j < 4; ++j) {
+	int i1 = i * p[2*j];
+	int i2 = i * p[2*j+1];
+	  
+	if( aCover[i1] && aCover[i2] ) {
+	  if( i1 == i2 ) {
+	    if( (aCover[i1] & (aCover[i1] - 1)) != 0 ) {
+	      has = 1;
+	      break;
+	    }
+	  } else {
+	    int c = aCover[i2];
+	    int b;
+
+	    for(b = 1; c != 0 && b < 25; ++b) {
+	      if( c & (0x1 << b) ) {
+		has = 1;
+		  
+		for(k = i; k < i2; k += i) {
+		  int it = 23 - (b + k);
+		  assert( it >= 0 );
+		    
+		  if( anBoardOpp[it] >= 2 ) {
+		    has = 0;
+		    break;
+		  }
+		}
+
+		if( has ) {
+		  c = 0;
+		  break;
+		}
+
+		c &= ~(0x1 << b);
+	      }
+	    }
+	  }
+	}
+
+	if( has ) {
+	  n += 1;
+	  break;
+	}
+      }
+    }
+
+    afInput[ I_COVER2 ] = n / 36.0;
+  }
+    
+  return 0;
 }
+
 
 /* Calculates neural net inputs from the board position.  Returns 0 for contact
    positions, 1 for races. */
@@ -1090,9 +1403,11 @@ extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] ) {
 	return CLASS_OVER;
 
     if( nBack + nOppBack > 22 ) {
-      if( barPrimeBackGame(anBoard) ) {
-	return CLASS_BPG;
-      }
+      /* Disable BPG */
+      
+/*        if( barPrimeBackGame(anBoard) ) { */
+/*  	return CLASS_BPG; */
+/*        } */
 
       return CLASS_CONTACT;
     }
