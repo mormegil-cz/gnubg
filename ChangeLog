@@ -1,3 +1,11 @@
+Tue Nov  5 21:44:05 2002  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c (setGammonProb): Change from heuristic to almost perfect
+	evaluation of gammons in bearoff, using a one sided database for
+	probablities of bearing off just one chequer.
+	The "database" is a bit of a misnomer, since the source file size is
+	only 29K and the compiled one around 17K.
+
 Sat Nov  2 19:44:19 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (DumpStatcontext): substitute tabs with spaces.

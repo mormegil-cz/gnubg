@@ -383,3 +383,22 @@ extern void PositionFromBearoff( int anBoard[], const unsigned int usID,
             anBoard[ j ]++;
     }
 }
+
+extern unsigned short
+PositionIndex(int g, int anBoard[6])
+{
+  int i, fBits;
+  int j = g - 1;
+
+  for(i = 0; i < g; i++ )
+    j += anBoard[ i ];
+
+  fBits = 1 << j;
+    
+  for(i = 0; i < g; i++) {
+    j -= anBoard[ i ] + 1;
+    fBits |= ( 1 << j );
+  }
+
+  return PositionF( fBits, 15, g );
+}

@@ -154,7 +154,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
-	export.c sound.h record.c record.h osr.c osr.h
+	export.c sound.h record.c record.h osr.c osr.h bearoffgammon.c bearoffgammon.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -234,7 +234,8 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	external.$(OBJEXT) credits.$(OBJEXT) latex.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
 	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) record.$(OBJEXT) \
-	osr.$(OBJEXT)
+	osr.$(OBJEXT) bearoffgammon.$(OBJEXT)
+
 @USE_SOUND_TRUE@am__objects_2 = sound.$(OBJEXT)
 @USE_SOUND_FALSE@am__objects_2 =
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
@@ -253,7 +254,8 @@ gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
-	getopt1.$(OBJEXT)
+	getopt1.$(OBJEXT) bearoffgammon.$(OBJEXT)
+
 makebearoff_OBJECTS = $(am_makebearoff_OBJECTS)
 makebearoff_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT)
