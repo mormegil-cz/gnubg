@@ -3363,3 +3363,15 @@ FixMatchState ( matchstate *pms, const moverecord *pmr ) {
 }
 
 
+
+extern moverecord *
+getCurrentMoveRecord ( void ) {
+
+  /* FIXME: introduce a mrHint that "Hint" and "Eval" fills */
+
+  if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p )
+    return plLastMove->plNext->p;
+  else
+    return NULL;
+
+}

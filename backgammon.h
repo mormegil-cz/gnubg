@@ -411,6 +411,9 @@ getDefaultPath ( const pathformat f );
 
 extern char *GetLuckAnalysis( matchstate *pms, float rLuck );
 
+extern moverecord *
+getCurrentMoveRecord ( void );
+
 #ifdef WIN32
 extern void WinCopy( char *szOut );
 #endif
