@@ -1,4 +1,6 @@
-Fri Nov 10 13:42:37 2000  Gary Wong  <gtw@research.att.com>
+Fri Nov 10 14:14:35 2000  Gary Wong  <gtw@research.att.com>
+
+	* Makefile.am (gnubg.wd): Ignore errors from makeweights.
 
 	* md5.c, isaac.c, mt19937int.c: Moved to lib/.
 	

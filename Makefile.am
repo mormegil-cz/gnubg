@@ -93,6 +93,6 @@ gnubg.weights:
 	@[ -s $(srcdir)/gnubg.weights ] || $(MAKE) weights.message
 
 gnubg.wd: gnubg.weights makeweights
-	./makeweights < $< > $@
+	-./makeweights < $< > $@
 
 .DELETE_ON_ERROR:
