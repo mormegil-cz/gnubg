@@ -624,7 +624,7 @@ msgstr "バックギャモン"
 
 #: eval.c:299
 msgid "Standard backgammon with Nackgammon starting position"
-msgstr "ナックギャモン初期配置でバックギャモン"
+msgstr "ナックギャモン"
 
 #: eval.c:300
 msgid "1-chequer hypergammon"
@@ -3820,7 +3820,7 @@ msgstr "MatchID: %s\n"
 
 #: gnubg.c:3095 gnubg.c:3107
 msgid "No game"
-msgstr "無効試合"
+msgstr "ゲーム無し"
 
 #: gnubg.c:3117
 msgid "Game over"
@@ -6063,11 +6063,11 @@ msgstr ""
 
 #: gtkgame.c:4919
 msgid "Predefined settings"
-msgstr "あらかじめ定義した設定"
+msgstr "定義済みの設定"
 
 #: gtkgame.c:4929
 msgid "Select a predefined setting:"
-msgstr "あらかじめ定義した設定の選択"
+msgstr "定義済みの設定から選択:"
 
 #: gtkgame.c:4932
 msgid ""
@@ -6166,7 +6166,7 @@ msgstr ""
 #: gtkgame.c:5285 gtkgame.c:5394 gtkgame.c:5632 gtkgame.c:5735 gtkgame.c:6056
 #: gtkgame.c:8201
 msgid "Cube decisions"
-msgstr "キューブ決定"
+msgstr "キューブアクション"
 
 #: gtkgame.c:5291
 msgid "GNU Backgammon - Evaluation settings"
@@ -6255,11 +6255,11 @@ msgstr "ムーブ制限："
 
 #: gtkgame.c:5668
 msgid "Skill thresholds"
-msgstr "スキルの限界"
+msgstr "スキルの評価の閾値"
 
 #: gtkgame.c:5697
 msgid "Luck thresholds"
-msgstr "運の限界"
+msgstr "運の評価の閾値"
 
 #: gtkgame.c:5865
 msgid "GNU Backgammon - Analysis Settings"
@@ -6283,7 +6283,7 @@ msgstr ""
 
 #: gtkgame.c:6218 gtkrace.c:547
 msgid "Trials:"
-msgstr "試行"
+msgstr "試行回数:"
 
 #: gtkgame.c:6222
 msgid "Truncation"
@@ -6371,7 +6371,7 @@ msgstr "シード"
 
 #: gtkgame.c:6427
 msgid "Cube decisions use same settings as Chequer play"
-msgstr ""
+msgstr "キューアブアクションにもチェッカープレイと同じ設定を使用する"
 
 #: gtkgame.c:6435
 msgid "Use same settings for both players"
@@ -7026,7 +7026,7 @@ msgstr ""
 
 #: gtkoptions.c:276
 msgid "Play bearoff moves automatically"
-msgstr ""
+msgstr "ベアオフのムーブを自動的に行う"
 
 #: gtkoptions.c:279
 msgid ""
@@ -7037,7 +7037,7 @@ msgstr ""
 
 #: gtkoptions.c:285
 msgid "Allow dragging to illegal points"
-msgstr "不正な場所にドラッキング出来るようにする"
+msgstr "不正な場所にドラッグ出来るようにする"
 
 #: gtkoptions.c:290
 msgid ""
@@ -7053,7 +7053,7 @@ msgstr "バリエーション"
 
 #: gtkoptions.c:334
 msgid "Forbid more than five chequers on a point"
-msgstr ""
+msgstr "ひとつのポイントに6個以上のチェッカーを置くことを禁止する"
 
 #: gtkoptions.c:338
 msgid ""
@@ -7140,7 +7140,7 @@ msgstr "ムーブに関して指導してもらう"
 
 #: gtkoptions.c:461
 msgid "Tutor decisions"
-msgstr "教師の決断"
+msgstr "指導者の判断基準"
 
 #: gtkoptions.c:468
 msgid "Same as Evaluation"
@@ -7149,7 +7149,7 @@ msgstr "評価と同様"
 #: gtkoptions.c:472
 msgid ""
 "The tutor will consider your decisions using the \"Evaluation\" settings."
-msgstr ""
+msgstr "指導者は \"評価\" と同じ設定で考慮します。"
 
 #: gtkoptions.c:476
 msgid "Same as Analysis"
@@ -7157,7 +7157,7 @@ msgstr "解析と同様"
 
 #: gtkoptions.c:480
 msgid "The tutor will consider your decisions using the \"Analysis\" settings."
-msgstr ""
+msgstr "指導者は \"解析\" の同じ設定で考慮します。"
 
 #: gtkoptions.c:488
 msgid "Warning level:"
@@ -7171,7 +7171,7 @@ msgstr ""
 
 #: gtkoptions.c:515
 msgid "Display"
-msgstr ""
+msgstr "表示"
 
 #: gtkoptions.c:520
 msgid "Clockwise movement"
@@ -7190,7 +7190,7 @@ msgstr "ムーブの遅延:"
 
 #: gtkoptions.c:542
 msgid "ms"
-msgstr ""
+msgstr "ミリ秒(ms)"
 
 #: gtkoptions.c:545
 msgid ""
@@ -7275,7 +7275,7 @@ msgstr ""
 
 #: gtkoptions.c:657
 msgid "Show target help when dragging a chequer"
-msgstr ""
+msgstr "チェッカーのドラッグ時に移動先を表示"
 
 #: gtkoptions.c:662
 msgid ""
@@ -7337,7 +7337,7 @@ msgstr ""
 
 #: gtkoptions.c:729
 msgid "Number of digits in output:"
-msgstr ""
+msgstr "出力の桁数:"
 
 #: gtkoptions.c:739
 msgid ""
@@ -7354,7 +7354,7 @@ msgstr ""
 
 #: gtkoptions.c:772
 msgid "Default match length:"
-msgstr ""
+msgstr "マッチのポイント数の初期設定:"
 
 #: gtkoptions.c:781
 msgid "points"
@@ -7388,7 +7388,7 @@ msgstr ""
 
 #: gtkoptions.c:827
 msgid "Sound"
-msgstr ""
+msgstr "音声"
 
 #: gtkoptions.c:832
 msgid "Beep on invalid input"
@@ -7436,7 +7436,7 @@ msgstr "ESD を使用して音声を再生"
 
 #: gtkoptions.c:924 sound.c:170
 msgid "NAS"
-msgstr "NAX"
+msgstr "NAS"
 
 #: gtkoptions.c:938
 msgid "Use the Network Audio System."
@@ -7474,7 +7474,7 @@ msgstr "ダイス"
 
 #: gtkoptions.c:1001
 msgid "Show higher die on left"
-msgstr "大きな目のダイスを左側にする"
+msgstr "大きな目のダイスを左側に表示する"
 
 #: gtkoptions.c:1007
 msgid "Force the higher of the two dice to be shown on the left."
@@ -7510,12 +7510,12 @@ msgstr "ダイス操作"
 
 #: gtkoptions.c:1102
 msgid "Always roll the "
-msgstr ""
+msgstr "常に"
 
 #: gtkoptions.c:1121
 #, c-format
 msgid "roll for player %s."
-msgstr "プレイヤー %s のロール"
+msgstr "の出目をプレイヤー %s に与える"
 
 #: gtkoptions.c:1134
 msgid ""
@@ -7529,11 +7529,11 @@ msgstr ""
 
 #: gtkoptions.c:1151
 msgid "Training"
-msgstr "学習中"
+msgstr "学習"
 
 #: gtkoptions.c:1161
 msgid "Learning rate:"
-msgstr "学習率"
+msgstr "学習率:"
 
 #: gtkoptions.c:1169
 msgid ""
@@ -7623,11 +7623,11 @@ msgstr ""
 
 #: gtkoptions.c:1358
 msgid "Other"
-msgstr ""
+msgstr "その他"
 
 #: gtkoptions.c:1363
 msgid "Confirm when aborting game"
-msgstr ""
+msgstr "ゲームを中断するときに確認する"
 
 #: gtkoptions.c:1367
 msgid ""
@@ -7950,19 +7950,19 @@ msgstr "背景色:"
 
 #: gtkprefs.c:863
 msgid "First point colour:"
-msgstr ""
+msgstr "1ポイントの色:"
 
 #: gtkprefs.c:864
 msgid "Second point colour:"
-msgstr ""
+msgstr "2ポイントの色:
 
 #: gtkprefs.c:900
 msgid "Smooth"
-msgstr ""
+msgstr "模様無し"
 
 #: gtkprefs.c:904
 msgid "Speckled"
-msgstr ""
+msgstr "斑点模様"
 
 #: gtkprefs.c:931
 msgid "Alder"
@@ -8018,11 +8018,11 @@ msgstr ""
 
 #: gtkprefs.c:955
 msgid "Wooden"
-msgstr ""
+msgstr "木製"
 
 #: gtkprefs.c:984
 msgid "Painted"
-msgstr ""
+msgstr "塗装"
 
 #: gtkprefs.c:1141
 msgid "Save settings and test 3d performance for 3 seconds?"
@@ -8030,11 +8030,11 @@ msgstr ""
 
 #: gtkprefs.c:1180
 msgid "Light azimuth"
-msgstr ""
+msgstr "光源の方位角"
 
 #: gtkprefs.c:1182
 msgid "Light elevation"
-msgstr ""
+msgstr "光源の高度"
 
 #: gtkprefs.c:1377
 msgid "Display Type"
@@ -8058,7 +8058,7 @@ msgstr ""
 
 #: gtkprefs.c:1399
 msgid "Dynamic labels"
-msgstr ""
+msgstr "ポイントの数字を手番によって変化"
 
 #: gtkprefs.c:1412
 msgid "Update the labels so they are correct for the player on roll"
@@ -8066,7 +8066,7 @@ msgstr ""
 
 #: gtkprefs.c:1415
 msgid "Show move indicator"
-msgstr ""
+msgstr "手番の表示"
 
 #: gtkprefs.c:1416
 msgid "Show or hide arrow indicating who is moving"
@@ -8074,7 +8074,7 @@ msgstr ""
 
 #: gtkprefs.c:1423
 msgid "3d Options"
-msgstr ""
+msgstr "3D オプション"
 
 #: gtkprefs.c:1430
 msgid "Show shadows"
