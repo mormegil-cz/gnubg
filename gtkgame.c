@@ -52,6 +52,7 @@
 #include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkprefs.h"
+#include "matchequity.h"
 #include "positionid.h"
 
 /* Enumeration to be used as index to the table of command strings below
@@ -79,8 +80,6 @@ typedef enum _gnubgcommand {
     CMD_RESIGN_B,
     CMD_ROLL,
     CMD_ROLLOUT,
-    CMD_SAVE_GAME,
-    CMD_SAVE_MATCH,
     CMD_SAVE_SETTINGS,
     CMD_SAVE_WEIGHTS,
     CMD_SET_AUTO_BEAROFF,
@@ -103,6 +102,10 @@ typedef enum _gnubgcommand {
     CMD_SET_CUBE_VALUE_64,
     CMD_SET_DISPLAY,
     CMD_SET_JACOBY,
+    CMD_SET_MET_JACOBS,
+    CMD_SET_MET_SNOWIE,
+    CMD_SET_MET_WOOLSEY,
+    CMD_SET_MET_ZADEH,
     CMD_SET_NACKGAMMON,
     CMD_SET_RNG_ANSI,
     CMD_SET_RNG_BSD,
@@ -114,6 +117,9 @@ typedef enum _gnubgcommand {
     CMD_SET_TURN_0,
     CMD_SET_TURN_1,
     CMD_SHOW_COPYING,
+    CMD_SHOW_GAMMONPRICE,
+    CMD_SHOW_MARKETWINDOW,
+    CMD_SHOW_MATCHEQUITYTABLE,
     CMD_SHOW_KLEINMAN,
     CMD_SHOW_PIPCOUNT,
     CMD_SHOW_THORP,
@@ -164,8 +170,6 @@ static char *aszCommands[ NUM_CMDS ] = {
     "resign backgammon",
     "roll",
     "rollout",
-    "save game",
-    "save match",
     "save settings",
     "save weights",
     "set automatic bearoff",
@@ -188,6 +192,10 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set cube value 64",
     "set display",
     "set jacoby",
+    "set matchequitytable jacobs",
+    "set matchequitytable snowie",
+    "set matchequitytable woolsey",
+    "set matchequitytable zadeh",
     "set nackgammon",
     "set rng ansi",
     "set rng bsd",
@@ -199,6 +207,9 @@ static char *aszCommands[ NUM_CMDS ] = {
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
     "show copying",
+    "show gammonprice",
+    "show marketwindow",
+    "show matchequitytable",
     "show kleinman",
     "show pipcount",
     "show thorp",
@@ -208,11 +219,19 @@ static char *aszCommands[ NUM_CMDS ] = {
     "train td"
 };
 
-static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
+static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw );
+static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw );
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw );
 static void LoadMatch( gpointer *p, guint n, GtkWidget *pw );
+static void NewMatch( gpointer *p, guint n, GtkWidget *pw );
+static void NewWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SaveGame( gpointer *p, guint n, GtkWidget *pw );
 static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
+static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
+static void SetCache( gpointer *p, guint n, GtkWidget *pw );
+static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
+static void SetEval( gpointer *p, guint n, GtkWidget *pw );
+static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
@@ -904,6 +923,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_New/_Game", "<control>N", Command, CMD_NEW_GAME, NULL },
 	{ "/_File/_New/_Match...", NULL, NewMatch, 0, NULL },
 	{ "/_File/_New/_Session", NULL, Command, CMD_NEW_SESSION, NULL },
+	{ "/_File/_New/_Weights...", NULL, NewWeights, 0, NULL },
 	{ "/_File/_Open", NULL, NULL, 0, "<Branch>" },
 	{ "/_File/_Open/_Game...", NULL, LoadGame, 0, NULL },
 	{ "/_File/_Open/_Match...", NULL, LoadMatch, 0, NULL },
@@ -978,12 +998,21 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Analyse/_Kleinman count", NULL, Command, CMD_SHOW_KLEINMAN,
 	  NULL },
 	{ "/_Analyse/_Thorp count", NULL, Command, CMD_SHOW_THORP, NULL },
+	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Analyse/_Gammon price", NULL, Command, CMD_SHOW_GAMMONPRICE,
+	  NULL },
+	{ "/_Analyse/_Market window", NULL, Command, CMD_SHOW_MARKETWINDOW,
+	  NULL },
+	{ "/_Analyse/M_atch equity table", NULL, Command,
+	  CMD_SHOW_MATCHEQUITYTABLE, NULL },
 	{ "/_Train", NULL, NULL, 0, "<Branch>" },
-	{ "/_Train/_Dump database", NULL, Command, CMD_DATABASE_DUMP, NULL },
+	{ "/_Train/D_ump database", NULL, Command, CMD_DATABASE_DUMP, NULL },
 	{ "/_Train/_Generate database", NULL, Command, CMD_DATABASE_GENERATE,
 	  NULL },
 	{ "/_Train/_Rollout database", NULL, Command, CMD_DATABASE_ROLLOUT,
 	  NULL },
+	{ "/_Train/_Import database", NULL, DatabaseImport, 0, NULL },
+	{ "/_Train/_Export database", NULL, DatabaseExport, 0, NULL },
 	{ "/_Train/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Train/Train from _database", NULL, Command, CMD_TRAIN_DATABASE,
 	  NULL },
@@ -994,17 +1023,18 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SET_AUTO_BEAROFF, "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Crawford", NULL, Command,
 	  CMD_SET_AUTO_CRAWFORD, "<CheckItem>" },
+	{ "/_Settings/_Automatic/_Doubles", NULL, SetAutoDoubles, 0, NULL },
 	{ "/_Settings/_Automatic/_Game", NULL, Command, CMD_SET_AUTO_GAME,
 	  "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Move", NULL, Command, CMD_SET_AUTO_MOVE,
 	  "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Roll", NULL, Command, CMD_SET_AUTO_ROLL,
 	  "<CheckItem>" },
-	{ "/_Settings/Cache...", NULL, NULL, 0, NULL },
+	{ "/_Settings/Cache...", NULL, SetCache, 0, NULL },
 	{ "/_Settings/Colours...", NULL, Command, CMD_SET_COLOURS, NULL },
 	{ "/_Settings/_Confirmation", NULL, Command, CMD_SET_CONFIRM,
 	  "<CheckItem>" },
-	{ "/_Settings/De_lay...", NULL, NULL, 0, NULL },
+	{ "/_Settings/De_lay...", NULL, SetDelay, 0, NULL },
 	{ "/_Settings/_Dice generation", NULL, NULL, 0, "<Branch>" },
 	{ "/_Settings/_Dice generation/_ANSI", NULL, Command, CMD_SET_RNG_ANSI,
 	  "<RadioItem>" },
@@ -1020,10 +1050,21 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SET_RNG_MERSENNE, "/Settings/Dice generation/ANSI" },
 	{ "/_Settings/_Dice generation/_User", NULL, Command, CMD_SET_RNG_USER,
 	  "/Settings/Dice generation/ANSI" },
+	{ "/_Settings/_Dice generation/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Settings/_Dice generation/_Seed", NULL, SetSeed, 0, NULL },
 	{ "/_Settings/Di_splay", NULL, Command, CMD_SET_DISPLAY,
 	  "<CheckItem>" },
-	{ "/_Settings/_Evaluation...", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Evaluation...", NULL, SetEval, 0, NULL },
 	{ "/_Settings/_Jacoby", NULL, Command, CMD_SET_JACOBY, "<CheckItem>" },
+	{ "/_Settings/_Match equity table", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Match equity table/_Jacobs", NULL, Command,
+	  CMD_SET_MET_JACOBS, "<RadioItem>" },
+	{ "/_Settings/_Match equity table/_Snowie", NULL, Command,
+	  CMD_SET_MET_SNOWIE, "/Settings/Match equity table/Jacobs" },
+	{ "/_Settings/_Match equity table/_Woolsey", NULL, Command,
+	  CMD_SET_MET_WOOLSEY, "/Settings/Match equity table/Jacobs" },
+	{ "/_Settings/_Match equity table/_Zadeh", NULL, Command,
+	  CMD_SET_MET_ZADEH, "/Settings/Match equity table/Jacobs" },
 	{ "/_Settings/_Nackgammon", NULL, Command, CMD_SET_NACKGAMMON,
 	  "<CheckItem>" },
 	{ "/_Settings/_Players...", NULL, NULL, 0, NULL },
@@ -1105,6 +1146,7 @@ extern void RunGTK( void ) {
     GTKSet( &nCube );
     GTKSet( ap );
     GTKSet( &fTurn );
+    GTKSet( &metCurrent );
     
     ShowBoard();
 
@@ -1355,38 +1397,41 @@ extern void GTKOutputNew( void ) {
     while( !fFinishedPopping );
 }
 
-static GtkWidget *pwLength;
+static GtkWidget *pwNumber;
 
-static void NewMatchOK( GtkWidget *pw, int *pf ) {
+static void NumberOK( GtkWidget *pw, int *pf ) {
 
-    *pf = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( pwLength ) );
+    *pf = gtk_spin_button_get_value_as_int( GTK_SPIN_BUTTON( pwNumber ) );
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
+static int ReadNumber( char *szTitle, char *szPrompt, int nDefault,
+		       int nMin, int nMax, int nInc ) {
 
-    int nLength = 0;
-    GtkObject *pa = gtk_adjustment_new( 1, 1, 99, 1, 1, 1 );
-    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - New Match", TRUE,
-					GTK_SIGNAL_FUNC( NewMatchOK ),
-					&nLength ),
-	*pwPrompt = gtk_label_new( "Match length:" );
-    
-    pwLength = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), 1, 0 );
-    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwLength ), TRUE );
-    
+    int n = INT_MIN;
+    GtkObject *pa = gtk_adjustment_new( nDefault, nMin, nMax, nInc, nInc,
+					nInc );
+    GtkWidget *pwDialog = CreateDialog( szTitle, TRUE,
+					GTK_SIGNAL_FUNC( NumberOK ), &n ),
+	*pwPrompt = gtk_label_new( szPrompt );
+
+    pwNumber = gtk_spin_button_new( GTK_ADJUSTMENT( pa ), nInc, 0 );
+    gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( pwNumber ), TRUE );
+
     gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwPrompt );
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwLength );
+		       pwNumber );
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
 				  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    gtk_signal_connect_after( GTK_OBJECT( pwNumber ), "activate",
+			GTK_SIGNAL_FUNC( NumberOK ), &n );
     
     gtk_widget_show_all( pwDialog );
 
@@ -1394,10 +1439,87 @@ static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
     gtk_main();
     AllowStdin();
 
-    if( nLength ) {
+    return n;
+}
+
+static void NewMatch( gpointer *p, guint n, GtkWidget *pw ) {
+
+    int nLength = ReadNumber( "GNU Backgammon - New Match",
+			      "Match length:", 7, 1, 99, 1 );
+    
+    if( nLength > 0 ) {
 	char sz[ 32 ];
 
 	sprintf( sz, "new match %d", nLength );
+	UserCommand( sz );
+    }
+}
+
+static void NewWeights( gpointer *p, guint n, GtkWidget *pw ) {
+
+    int nSize = ReadNumber( "GNU Backgammon - New Weights",
+			      "Number of hidden nodes:", 128, 1, 1024, 1 );
+    
+    if( nSize > 0 ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "new weights %d", nSize );
+	UserCommand( sz );
+    }
+}
+
+static void SetAutoDoubles( gpointer *p, guint k, GtkWidget *pw ) {
+
+    int n = ReadNumber( "GNU Backgammon - Automatic doubles",
+			"Number of automatic doubles permitted:",
+			cAutoDoubles, 0, 6, 1 );
+
+    if( n >= 0 ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set automatic doubles %d", n );
+	UserCommand( sz );
+    }
+}
+
+static void SetCache( gpointer *p, guint k, GtkWidget *pw ) {
+
+    int n = ReadNumber( "GNU Backgammon - Position cache",
+			"Cache size (entries):", 8192, 0, 1048576, 1 );
+
+    if( n >= 0 ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set cache %d", n );
+	UserCommand( sz );
+    }
+}
+
+static void SetDelay( gpointer *p, guint k, GtkWidget *pw ) {
+    
+    int n = ReadNumber( "GNU Backgammon - Delay",
+			"Delay (ms):", nDelay, 0, 10000, 100 );
+
+    if( n >= 0 ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set delay %d", n );
+	UserCommand( sz );
+    }
+}
+
+static void SetSeed( gpointer *p, guint k, GtkWidget *pw ) {
+
+    int nRandom, n;
+
+    InitRNG( &nRandom, FALSE );
+    n = ReadNumber( "GNU Backgammon - Seed", "Seed:", abs( nRandom ), 0,
+		    INT_MAX, 1 );
+
+    if( n >= 0 ) {
+	char sz[ 32 ];
+
+	sprintf( sz, "set seed %d", n );
 	UserCommand( sz );
     }
 }
@@ -1442,6 +1564,7 @@ static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
     char *pch;
     
     if( ( pch = SelectFile( "Open game" ) ) ) {
+	/* FIXME use UserCommand, so it's entered in the history */
 	CommandLoadGame( pch );
 	g_free( pch );
     }
@@ -1452,6 +1575,7 @@ static void LoadMatch( gpointer *p, guint n, GtkWidget *pw ) {
     char *pch;
     
     if( ( pch = SelectFile( "Open match" ) ) ) {
+	/* FIXME use UserCommand, so it's entered in the history */
 	CommandLoadMatch( pch );
 	g_free( pch );
     }
@@ -1468,6 +1592,7 @@ static void SaveGame( gpointer *p, guint n, GtkWidget *pw ) {
     }
     
     if( ( pch = SelectFile( "Save game" ) ) ) {
+	/* FIXME use UserCommand, so it's entered in the history */
 	CommandSaveGame( pch );
 	g_free( pch );
     }
@@ -1486,9 +1611,91 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw ) {
     /* FIXME what if nMatch == 0? */
     
     if( ( pch = SelectFile( "Save match" ) ) ) {
+	/* FIXME use UserCommand, so it's entered in the history */
 	CommandSaveMatch( pch );
 	g_free( pch );
     }
+}
+
+static void DatabaseExport( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( ( pch = SelectFile( "Export database" ) ) ) {
+	/* FIXME use UserCommand, so it's entered in the history */
+	CommandDatabaseExport( pch );
+	g_free( pch );
+    }
+}
+
+static void DatabaseImport( gpointer *p, guint n, GtkWidget *pw ) {
+
+    char *pch;
+    
+    if( ( pch = SelectFile( "Import database" ) ) ) {
+	/* FIXME use UserCommand, so it's entered in the history */
+	CommandDatabaseImport( pch );
+	g_free( pch );
+    }
+}
+
+typedef struct _evalwidget {
+    evalcontext *pec;
+    GtkWidget *pwPlies, *pwSearchCandidates, *pwSearchTolerance, *pwReduced,
+	*pwCubeful;
+} evalwidget;
+
+static GtkWidget *EvalWidget( evalcontext *pec ) {
+
+    evalwidget *pew;
+    GtkWidget *pw;
+
+    pw = gtk_vbox_new( FALSE, 0 );
+    pew = malloc( sizeof *pew );
+
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "FIXME: evaluation settings "
+				      "would go here" ) );
+
+    gtk_object_set_user_data( GTK_OBJECT( pw ), pew );
+
+    /* FIXME set destroy handler to free pew */
+    
+    return pw;
+}
+
+static void EvalOK( GtkWidget *pw, void *p ) {
+
+    /* FIXME */
+    
+    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
+
+    evalcontext ec;
+    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Evaluations", TRUE,
+					GTK_SIGNAL_FUNC( EvalOK ), NULL ),
+	*pwEval;
+
+    memcpy( &ec, &ecEval, sizeof ec );
+
+    pwEval = EvalWidget( &ec );
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwEval );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
 }
 
 extern void GTKEval( char *szOutput ) {
@@ -1949,6 +2156,18 @@ extern void GTKSet( void *p ) {
 	    gtk_item_factory_get_widget_by_action( pif, CMD_SET_RNG_ANSI +
 						   rngCurrent - RNG_ANSI ) ),
 	    TRUE );
+	fAutoCommand = FALSE;
+    } else if( p == &metCurrent ) {
+	/* Handle the MET radio items. */
+	static gnubgcommand agc[] = { CMD_SET_MET_ZADEH,
+				      CMD_SET_MET_SNOWIE,
+				      CMD_SET_MET_WOOLSEY,
+				      CMD_SET_MET_JACOBS };
+	fAutoCommand = TRUE;
+	
+	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
+	    gtk_item_factory_get_widget_by_action( pif, agc[ metCurrent ] ) ),
+					TRUE );
 	fAutoCommand = FALSE;
     } else if( p == &fCubeOwner ) {
 	/* Handle the cube owner radio items. */

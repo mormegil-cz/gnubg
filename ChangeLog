@@ -1,3 +1,14 @@
+Fri Feb 23 13:09:48 2001  Gary Wong  <gtw@research.att.com>
+
+	* Makefile.am: Don't run makebearoff or makeweights if cross-compiling.
+
+	* dice.c (InitRNG): Return the seed used.  All callers changed.
+
+	* gnubg.c (CommandNewWeights): Output a message confirming the
+	new net.
+
+	* gtkgame.c: GUI equivalents to more commands added.
+
 Thu Feb 22 11:36:18 2001  Gary Wong  <gtw@research.att.com>
 
 	* configure.in: Test fork(), the *f float math functions, and whether
