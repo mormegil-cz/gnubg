@@ -307,7 +307,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE CPP EGREP LN_S RANLIB ac_ct_RANLIB BISON CSOUND FLEX GNUPLOT PNGTOPNM PNMSCALE PNMTOPNG PNMTOPS PSTOPNM SRCONV TR ALLOCA LIBOBJS PKG_CONFIG GTK_CFLAGS GTK_LIBS GTK_CONFIG USE_GTK_TRUE USE_GTK_FALSE X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS USE_EXT_TRUE USE_EXT_FALSE GTKEXTRA_CFLAGS GTKEXTRA_LIBS GTKDATA LIBART_CONFIG LIBART_CFLAGS LIBART_LIBS GUILE_CONFIG GUILE_CFLAGS GUILE_LIBS GUILEDATA LIBXML2_CFLAGS LIBXML2_LIBS EXTERNAL_BR1_TRUE EXTERNAL_BR1_FALSE COMPILE_BR1_TRUE COMPILE_BR1_FALSE CROSS_COMPILING_TRUE CROSS_COMPILING_FALSE XML_MANUAL_TRUE XML_MANUAL_FALSE FT2_CONFIG FT2_CFLAGS FT2_LIBS USE_FREETYPE_TRUE USE_FREETYPE_FALSE USE_SOUND_TRUE USE_SOUND_FALSE ESD_CONFIG ESD_CFLAGS ESD_LIBS ARTSC_CONFIG ARTSC_CFLAGS ARTSC_LIBS AUDIOFILE_CONFIG AUDIOFILE_CFLAGS AUDIOFILE_LIBS NAS_LIBS NAS_CFLAGS PROCESSING_UNITS_TRUE PROCESSING_UNITS_FALSE PNG_LIBS MKINSTALLDIRS MSGFMT GMSGFMT XGETTEXT MSGMERGE build build_cpu build_vendor build_os host host_cpu host_vendor host_os GLIBC21 LIBICONV LTLIBICONV INTLBISON USE_NLS BUILD_INCLUDED_LIBINTL USE_INCLUDED_LIBINTL CATOBJEXT INTLOBJS DATADIRNAME INSTOBJEXT GENCAT INTL_LIBTOOL_SUFFIX_PREFIX INTLLIBS LIBINTL LTLIBINTL POSUB LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO AMTAR install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM AWK SET_MAKE CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE CPP EGREP LN_S RANLIB ac_ct_RANLIB BISON CSOUND FLEX GNUPLOT PNGTOPNM PNMSCALE PNMTOPNG PNMTOPS PSTOPNM SRCONV TR ALLOCA LIBOBJS PROCESSING_UNITS_TRUE PROCESSING_UNITS_FALSE PKG_CONFIG GTK_CFLAGS GTK_LIBS GTK_CONFIG USE_GTK_TRUE USE_GTK_FALSE X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS USE_EXT_TRUE USE_EXT_FALSE GTKEXTRA_CFLAGS GTKEXTRA_LIBS GTKDATA LIBART_CONFIG LIBART_CFLAGS LIBART_LIBS GTHREAD_CFLAGS GTHREAD_LIBS GUILE_CONFIG GUILE_CFLAGS GUILE_LIBS GUILEDATA LIBXML2_CFLAGS LIBXML2_LIBS EXTERNAL_BR1_TRUE EXTERNAL_BR1_FALSE COMPILE_BR1_TRUE COMPILE_BR1_FALSE CROSS_COMPILING_TRUE CROSS_COMPILING_FALSE XML_MANUAL_TRUE XML_MANUAL_FALSE FT2_CONFIG FT2_CFLAGS FT2_LIBS USE_FREETYPE_TRUE USE_FREETYPE_FALSE USE_SOUND_TRUE USE_SOUND_FALSE ESD_CONFIG ESD_CFLAGS ESD_LIBS ARTSC_CONFIG ARTSC_CFLAGS ARTSC_LIBS AUDIOFILE_CONFIG AUDIOFILE_CFLAGS AUDIOFILE_LIBS NAS_LIBS NAS_CFLAGS PNG_LIBS MKINSTALLDIRS MSGFMT GMSGFMT XGETTEXT MSGMERGE build build_cpu build_vendor build_os host host_cpu host_vendor host_os GLIBC21 LIBICONV LTLIBICONV INTLBISON USE_NLS BUILD_INCLUDED_LIBINTL USE_INCLUDED_LIBINTL CATOBJEXT INTLOBJS DATADIRNAME INSTOBJEXT GENCAT INTL_LIBTOOL_SUFFIX_PREFIX INTLLIBS LIBINTL LTLIBINTL POSUB LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -6756,12 +6756,6 @@ extern "C"
 /* We use char because int might match the return type of a gcc2
    builtin and then its argument prototype would still apply.  */
 char pthread_create ();
-#ifdef F77_DUMMY_MAIN
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int F77_DUMMY_MAIN() { return 1; }
-#endif
 int
 main ()
 {
@@ -10711,84 +10705,6 @@ fi
 
 
 
-
-
-
-echo "$as_me:$LINENO: checking for pthread_create in -lpthread" >&5
-echo $ECHO_N "checking for pthread_create in -lpthread... $ECHO_C" >&6
-if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpthread  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char pthread_create ();
-int
-main ()
-{
-pthread_create ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_pthread_pthread_create=yes
-else
-  echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-ac_cv_lib_pthread_pthread_create=no
-fi
-rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_pthread_pthread_create" >&5
-echo "${ECHO_T}$ac_cv_lib_pthread_pthread_create" >&6
-if test $ac_cv_lib_pthread_pthread_create = yes; then
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBPTHREAD 1
-_ACEOF
-
-  LIBS="-lpthread $LIBS"
-
-fi
-
-
-
-if test "$have_pthread" != "no" ; then
-  PROCESSING_UNITS_TRUE=
-  PROCESSING_UNITS_FALSE='#'
-else
-  PROCESSING_UNITS_TRUE='#'
-  PROCESSING_UNITS_FALSE=
-fi
-
-if test "$have_pthread" != "no"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define PROCESSING_UNITS 1
-_ACEOF
-
-fi
 
 
 

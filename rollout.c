@@ -1010,6 +1010,11 @@ void * Threaded_BasicCubefulRollout (void *data)
     /*if (PU_DEBUG) fprintf (stderr, "# (0x%x) Starting rollout...\n", 
                            (int) pthread_self ());*/
 
+    sigset_t	sig;
+    sigemptyset (&sig);
+    sigaddset (&sig, SIGIO);
+    assert (pthread_sigmask (SIG_BLOCK, &sig, NULL) == 0);
+
     CreateThreadGlobalStorage ();
 
     if( prd->rc.fRotate )

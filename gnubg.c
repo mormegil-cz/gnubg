@@ -461,8 +461,10 @@ static char szDICE[] = N_("<die> <die>"),
     szURL[] = N_("<URL>"),
     szPROCUNITID[] = N_("<procunit-id>"),
     szPROCUNITIDVALUE[] = N_("<procunit-id> <value>"),
-    szADDRESS[] = N_("<address>"),
+    szADDRESS[] = N_("<ip-address>|<hostname>[:tcp-port]"),
+    szOPTADDRESS[] = N_("[<ip-address>|<hostname>[:tcp-port]]"),
     szSLAVEMASTER[] = N_("slave | master"),
+    szOPTADDRESSBR[] = N_("[<ip-address>|<hostname>|*[:tcp-port]]"),
     szOPTN[] = N_("[n]");
 
 command cER = {
@@ -767,7 +769,7 @@ command cER = {
     { "master", CommandProcunitsMaster, N_("Set host in master mode (default) for remote processing"), 
       NULL, NULL },
     { "slave", CommandProcunitsSlave, N_("Set host in slave mode for remote processing"), 
-      NULL, NULL },
+      szOPTADDRESSBR, NULL },
     { "add", NULL, N_("Add a processing unit"), 
       NULL, acProcunitsAdd },
     { "remove", CommandProcunitsRemove, N_("Remove a processing unit"), 
@@ -7001,6 +7003,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
    
     /* start-up sound */
     playSound ( SOUND_START );
+    
+#if PROCESSSING_UNITS
+    StartNotificationListener ();
+#endif
     
 #if USE_GTK
     if( fX ) {

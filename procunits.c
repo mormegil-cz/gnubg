@@ -69,6 +69,7 @@
 /* set to activate debugging */
 #define RPU_DEBUG 0
 #define RPU_DEBUG_PACK 0
+#define RPU_DEBUG_NOTIF 1
 #define PU_DEBUG_FREE 0
 
 /* default TCP port and IP address mask for remote processing */
@@ -124,6 +125,9 @@ static procunit *gpulist = NULL;
 /* this mutex to guarantee exclusive access to the task list */
 pthread_mutex_t		mutexTaskListAccess;
 
+/* this mutex to guarantee exclusive access to the procunit list */
+pthread_mutex_t		mutexProcunitAccess;
+
 /* this mutex for debugging purposes only */
 pthread_mutex_t		mutexCPUAccess;
 
@@ -160,14 +164,31 @@ static const char asSlaveStatus[][20] = { "N/A", "Waiting for cx...", "Idle",
                         "Processing..." };
 
 /* mode of the local host: master or slave */
-static pu_mode gProcunitsMode = pu_mode_master;
+static 			pu_mode gProcunitsMode = pu_mode_master;
 
 /* state of the local host when running in slave mode */
 typedef enum { rpu_stat_na, rpu_stat_waiting, rpu_stat_idle, rpu_stat_processing } rpu_slavestatus;
-static rpu_slavestatus gSlaveStatus = rpu_stat_na;
+static 			rpu_slavestatus gSlaveStatus = rpu_stat_na;
 
 /* stats for the local host when running in slave mode */
-rpu_slavestats gSlaveStats;
+rpu_slavestats 		gSlaveStats;
+
+/* variables for slave availability notification */
+int			gfRPU_Notification = FALSE;
+int			gfRPU_NotificationBroadcast = FALSE;
+struct sockaddr_in	ginRPU_NotificationAddr;
+int			giRPU_NotificationDelay = 10; /* seconds */
+pthread_mutex_t		mutexRPU_Notification;
+pthread_cond_t		condRPU_Notification;
+
+typedef struct {
+    struct sockaddr_in	inAddress;
+    int			port;
+    char		hostName[MAX_HOSTNAME];
+} rpuNotificationMsg;
+
+
+
 
 
 static int GetProcessorCount (void)
@@ -227,6 +248,7 @@ extern void InitProcessingUnits (void)
     int nProcs = GetProcessorCount ();
     struct sigaction act;
     
+    
     if (gfProcessingUnitsInitialised) return;
     gfProcessingUnitsInitialised = TRUE;
     
@@ -245,9 +267,13 @@ extern void InitProcessingUnits (void)
     pthread_mutex_init (&mutexTaskListAccess, NULL);
     pthread_mutex_init (&mutexResultsAvailable, NULL);
     pthread_cond_init (&condResultsAvailable, NULL);
+    pthread_mutex_init (&mutexRPU_Notification, NULL);
+    pthread_cond_init (&condRPU_Notification, NULL);
     //pthread_mutex_init (&mutexTasksAvailableForRPU, NULL);
     //pthread_cond_init (&condTasksAvailableForRPU, NULL);
 
+    pthread_mutex_init (&mutexProcunitAccess, NULL);
+    
     pthread_mutex_init (&mutexCPUAccess, NULL);
 
     /* create local processing unit: each will execute one rollout thread;
@@ -260,6 +286,8 @@ extern void InitProcessingUnits (void)
     
     /* create remote processing units: according to the information returned
         by the gnubg remote processing units manager */
+    
+    
 }
 
 
@@ -271,14 +299,19 @@ extern pu_mode GetProcessingUnitsMode (void)
 
 static int GetProcessingUnitsCount (void)
 {
-    procunit 	*ppu = gpulist;
+    procunit 	*ppu;
     int		n = 0;
     
+    pthread_mutex_lock (&mutexProcunitAccess);
+    
+    ppu = gpulist;
     while (ppu != NULL) {
         n ++;
         ppu = ppu->next;
     }
     
+    pthread_mutex_unlock (&mutexProcunitAccess);
+
     return n;
 }
 
@@ -293,6 +326,8 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
 {
     procunit **pppu = &gpulist;
     
+    pthread_mutex_lock (&mutexProcunitAccess);
+
     if (maxTasks < 0) maxTasks = 0;
     if (maxTasks > MAX_MAXTASKS) maxTasks = MAX_MAXTASKS;
 
@@ -329,6 +364,8 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
         pthread_cond_init (&ppu->condStatusChanged, NULL);
     }
 
+    pthread_mutex_unlock (&mutexProcunitAccess);
+
     return *pppu;
 }
 
@@ -364,6 +401,8 @@ static void DestroyProcessingUnit (int procunit_id)
     
     StopProcessingUnit (ppu);
 
+    pthread_mutex_lock (&mutexProcunitAccess);
+
     /* remove ppu from list and free ppu */
     while (*plpu != NULL) {
         PrintProcessingUnitInfo (*plpu);
@@ -376,6 +415,7 @@ static void DestroyProcessingUnit (int procunit_id)
         plpu = &((*plpu)->next);
     }
     
+    pthread_mutex_unlock (&mutexProcunitAccess);
 }
 
 
@@ -407,16 +447,20 @@ static void PrintProcessingUnitInfo (procunit *ppu)
 
 extern void PrintProcessingUnitList (void)
 {
-    procunit *ppu = gpulist;
+    procunit *ppu;
     
     outputf ("  Id  Type    Status     Queue  Tasks               "
              "  Address  \n");
     
+    pthread_mutex_lock (&mutexProcunitAccess);
+    
+    ppu = gpulist;
     while (ppu != NULL) {
         PrintProcessingUnitInfo (ppu);
         ppu = ppu->next;
     }
-
+    
+    pthread_mutex_unlock (&mutexProcunitAccess);
 }
 
 
@@ -477,6 +521,8 @@ static void PrintProcessingUnitStats (int procunit_id)
 */
 static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status status, pu_task_type taskType, int procunit_id)
 {
+    pthread_mutex_lock (&mutexProcunitAccess);
+
     if (ppu == NULL) ppu = gpulist;
     
     while (ppu != NULL) {
@@ -484,12 +530,14 @@ static procunit *FindProcessingUnit (procunit *ppu, pu_type type, pu_status stat
         &&  (status == pu_stat_none || status == ppu->status)
         &&  (taskType == pu_task_none || taskType & ppu->taskMask)
         &&  (procunit_id == 0 || procunit_id == ppu->procunit_id))
-            return ppu;
+            break;
             
         ppu = ppu->next;
     }
     
-    return NULL;
+    pthread_mutex_unlock (&mutexProcunitAccess);
+
+    return ppu;
 }
 
 
@@ -1934,6 +1982,24 @@ static int RPU_AcceptConnection (struct sockaddr_in localAddr, struct sockaddr_i
 }
 
 
+static int RPU_CheckClose (int s)
+{
+    rpu_message msg;;
+    
+    if (RPU_DEBUG_NOTIF) fprintf (stderr, "[checking close]");
+    
+    int n = recv (s, &msg, sizeof (msg), MSG_PEEK);
+    
+    if (n > 0 && msg.type == mmClose) {
+        if (RPU_DEBUG_NOTIF) fprintf (stderr, ">>> Connection closed by slave.\n");
+        return 1;
+    }
+        
+    return 0;
+}
+
+
+
 static int RPU_ReadInternetAddress (struct sockaddr_in *inAddress, char *sz)
 {
     char 		*szPort;
@@ -2135,7 +2201,7 @@ extern void Slave_UpdateStatus (void)
     int cInProgress = GetTaskCount (pu_task_inprogress, 0);
     int cDone = GetTaskCount (pu_task_done, 0);
     
-    if (gSlaveStatus != rpu_stat_waiting) {
+    if (gSlaveStatus != rpu_stat_waiting && gSlaveStatus != rpu_stat_na) {
         if (cInTaskList == 0) gSlaveStatus = rpu_stat_idle;
         else if (cInProgress > 0) gSlaveStatus = rpu_stat_processing;
     }
@@ -2193,10 +2259,13 @@ static void Slave_PrintStatus (void)
                              and expects responses)
 */
 
+extern void *Thread_NotificationSender (void *data);
+
 static void Slave (void)
 {
-    int	done = FALSE;
-    int	listenSocket;
+    int			done = FALSE;
+    int			listenSocket;
+    pthread_t		notifier;
     
     if (RPU_DEBUG) fprintf (stderr, "RPU Local Half started.\n");
     
@@ -2206,6 +2275,16 @@ static void Slave (void)
     Slave_PrintStatus ();
     Slave_UpdateStatus ();
     
+    /* start notifications */
+    if (gfRPU_Notification) {
+        if (pthread_create (&notifier, 0L, Thread_NotificationSender, NULL) == 0) {
+            pthread_detach (notifier);
+        }
+        else {
+            fprintf (stderr, "*** Could not start notifier.\n");
+            gfRPU_Notification = FALSE;
+        }
+    }
     
     /* create socket */
     listenSocket = socket (AF_INET, SOCK_STREAM, 0);
@@ -2218,9 +2297,9 @@ static void Slave (void)
         /* bind local address to socket */
         struct sockaddr_in listenAddress;
         bzero((char *) &listenAddress, sizeof (struct sockaddr_in));
-        listenAddress.sin_family= AF_INET;
-        listenAddress.sin_addr.s_addr = htonl(INADDR_ANY);
-        listenAddress.sin_port = htons(gRPU_TCPPort);
+        listenAddress.sin_family	= AF_INET;
+        listenAddress.sin_addr.s_addr 	= htonl(INADDR_ANY);
+        listenAddress.sin_port 		= htons(gRPU_TCPPort);
         RPU_SetSocketOptions (listenSocket);
 	if (bind (listenSocket,  (struct sockaddr *) &listenAddress, sizeof(listenAddress)) < 0) {
             fprintf (stderr, "*** RPU could not bind slave socket address(err=%d).\n", errno);
@@ -2231,7 +2310,7 @@ static void Slave (void)
             while (!fInterrupt) {
             
                 TaskEngine_Init ();
-    
+                
                 /* listen for incoming connect from master */
                 gSlaveStatus = rpu_stat_waiting;
                 Slave_UpdateStatus ();
@@ -2314,7 +2393,17 @@ static void Slave (void)
                         } /* while (!done && !fInterrupt) */
                         
                         if (fInterrupt) {
-                        
+                            /* send close message to master */
+                            rpu_close 		msgClose = {};
+                            rpu_message 	*msg;
+                            
+                            msg = RPU_MakeMessage (mmClose, &msgClose, sizeof (msgClose));
+                            assert (msg != NULL);
+                            if (msg != NULL) {
+                                if (RPU_DEBUG_NOTIF) fprintf (stderr, ">>> Sending close message.\n");
+                                RPU_SendMessage (rpuSocket, msg, NULL);
+                                free ((char *) msg);
+                            }
                         }
                         
                         /* close connection */
@@ -2328,6 +2417,7 @@ static void Slave (void)
                 TaskEngine_Shutdown ();
                                 
             } /* while (!fInterrupt) */
+            
             
         } /* bind() */
         
@@ -2344,6 +2434,14 @@ static void Slave (void)
 
     TaskEngine_Shutdown ();
 
+    /* stop notifications */
+    if (gfRPU_Notification) {
+        pthread_mutex_lock (&mutexRPU_Notification);
+        gfRPU_Notification = FALSE;
+        pthread_cond_broadcast (&condRPU_Notification);
+        pthread_mutex_unlock (&mutexRPU_Notification);
+    }
+                        
     if (RPU_DEBUG) fprintf (stderr, "RPU Local Half stopped.\n");    
 }
 
@@ -2393,9 +2491,14 @@ static void Thread_RPU_Loop (procunit *ppu, int rpuSocket)
             when it assigns us a task to perform) */
         pthread_mutex_lock (&ppu->info.remote.mutexTasksAvailable);
         if (!ppu->info.remote.fTasksAvailable) {
-            while (!ppu->info.remote.fTasksAvailable && !ppu->info.remote.fInterrupt) 
+            while (!ppu->info.remote.fTasksAvailable && !ppu->info.remote.fInterrupt) {
                 WaitForCondition (&ppu->info.remote.condTasksAvailable, 
-                                    &ppu->info.remote.mutexTasksAvailable, NULL, NULL);
+                                    &ppu->info.remote.mutexTasksAvailable, "", NULL);
+                if (RPU_CheckClose (rpuSocket)) {
+                    ppu->info.remote.fInterrupt = TRUE;
+                    ppu->info.remote.fStop = TRUE;
+                }
+            }
             if (RPU_DEBUG) {
                 if (ppu->info.remote.fTasksAvailable)
                     fprintf (stderr, "\n# (0x%x) RPU woken up to perform assigned "
@@ -2706,18 +2809,239 @@ extern void * Thread_RemoteProcessingUnit (void *data)
 }
 
 
+extern void *Thread_NotificationSender (void *data)
+{
+    int		notifySocket;
+    int		option;
+    
+    notifySocket = socket (AF_INET, SOCK_DGRAM, 0);
+
+    if (notifySocket < 0) {
+        fprintf (stderr, "*** Could not create notification socket.\n");
+        perror ("socket");
+        return;
+    }
+    
+    option = 1;
+    if (gfRPU_NotificationBroadcast
+    &&	setsockopt (notifySocket, SOL_SOCKET, SO_BROADCAST, &option, sizeof(option)) == -1) {
+        fprintf (stderr, "*** Could not set socket to broadcast mode.\n");        
+        perror("setsockopt"); 
+    }
+    
+    else {
+        struct sockaddr_in localAddress;
+        localAddress.sin_family        = AF_INET;
+        localAddress.sin_addr.s_addr   = INADDR_ANY;
+        localAddress.sin_port          = htons (0);        
+        if (bind (notifySocket, (struct sockaddr *) &localAddress, sizeof (localAddress)) == -1) {
+            fprintf (stderr, "*** Could not bind socket.\n");        
+            perror("bind"); 
+        }
+        else {
+            int 		done = FALSE;
+            rpuNotificationMsg	msg;
+            struct hostent 	*phe;
+            
+            if (RPU_DEBUG_NOTIF) fprintf (stderr, "# (0x%x) Notification sender started.\n", 
+                                                (int) pthread_self());
+            msg.inAddress = localAddress;
+            msg.port = gRPU_TCPPort;
+            phe = gethostent ();
+            if (phe != NULL) {
+                sprintf (msg.hostName, "%s:%d", phe->h_name, gRPU_TCPPort);
+            }
+            
+            while (!done && !fInterrupt && gfRPU_Notification) {
+                int step = - giRPU_NotificationDelay;
+                switch (gSlaveStatus) {
+                    case rpu_stat_waiting:
+                        if (sendto (notifySocket, (char *) &msg, sizeof (msg), 0, 
+                                    (struct sockaddr *) &ginRPU_NotificationAddr, 
+                                    sizeof (ginRPU_NotificationAddr)) == -1) {
+                            fprintf (stderr, "*** Notification failure.\n");
+                            perror ("sendto");
+                            done = TRUE;
+                            break;
+                        }
+                        if (RPU_DEBUG_NOTIF) fprintf (stderr, "[Notification sent]");
+                        break;
+                    case rpu_stat_na:
+                        step = -1; /* retry as soon as possible, slave is starting up */
+                        if (RPU_DEBUG_NOTIF) fprintf (stderr, "[slave not available]");
+                        break;
+                    default:
+                        if (RPU_DEBUG_NOTIF) fprintf (stderr, "[already active]");
+                        break;
+                }
+                
+                while (step < 0 && !fInterrupt && gfRPU_Notification)
+                    WaitForCondition (&condRPU_Notification, &mutexRPU_Notification, "", &step);
+            }
+            if (RPU_DEBUG_NOTIF) fprintf (stderr, "# (0x%x) Notification sender stopped.\n", 
+                                            (int) pthread_self());    
+        }
+    }
+
+    close (notifySocket);
+}
+
+
+extern void *Thread_NotificationListener (void *data)
+{
+    int		notifySocket;
+    int		option;
+    
+    notifySocket = socket (AF_INET, SOCK_DGRAM, 0);
+
+    if (notifySocket < 0) {
+        fprintf (stderr, "*** Could not create notification socket.\n");
+        perror ("socket");
+    }
+    
+    else {
+
+        struct sockaddr_in localAddress;
+        localAddress.sin_family        = AF_INET;
+        localAddress.sin_addr.s_addr   = INADDR_ANY;
+        localAddress.sin_port          = htons (gRPU_TCPPort);        
+        if (bind (notifySocket, (struct sockaddr *) &localAddress, sizeof (localAddress)) == -1) {
+            fprintf (stderr, "*** Could not bind socket.\n");        
+            perror("bind"); 
+        }
+        else {
+            int done = FALSE;
+            if (RPU_DEBUG_NOTIF) fprintf (stderr, "# (0x%x) Notification listener started.\n", 
+                                            (int) pthread_self());
+                                            
+            while (!done && !fInterrupt && gProcunitsMode == pu_mode_master) {
+                rpuNotificationMsg 	msg;
+                struct sockaddr_in 	inOrgAddress;
+                int 			n, len = sizeof (inOrgAddress);
+
+                n = recvfrom (notifySocket, &msg, sizeof (msg), 0,
+                                (struct sockaddr *) &inOrgAddress, &len);
+                if (n == -1) {
+                    fprintf (stderr, "*** Notification failure.\n");
+                    perror ("recvfrom");
+                    done = TRUE;
+                    break;
+                }
+                else if (n > 0) {
+                    char 	szSlaveAddress[MAX_HOSTNAME];
+                    procunit	*ppu;
+                    if (RPU_DEBUG_NOTIF) 
+                        fprintf (stderr, "[Notification received! (%d bytes from %s:%d) -- %s \"%s\"]\n", 
+                                    n, 
+                                    inet_ntoa (inOrgAddress.sin_addr), 
+                                    ntohs (inOrgAddress.sin_port),
+                                    inet_ntoa (msg.inAddress.sin_addr), msg.hostName);
+                    sprintf (szSlaveAddress, "%s:%d", inet_ntoa (inOrgAddress.sin_addr), msg.port);
+                    ppu = CreateRemoteProcessingUnit (szSlaveAddress, TRUE);
+                    if (ppu == NULL || ppu->status == pu_stat_deactivated) {
+                        fprintf (stderr, "*** New slave could not join!\n");
+                        if (RPU_DEBUG_NOTIF) PrintProcessingUnitList ();
+                    }
+                    else {
+                        fprintf (stderr, ">>> New slave has joined!\n");
+                        if (RPU_DEBUG_NOTIF) PrintProcessingUnitList ();
+                    }
+                }
+                else {
+                    if (RPU_DEBUG_NOTIF) fprintf (stderr, "[nothing]");
+                }
+            }
+            
+            if (RPU_DEBUG_NOTIF) fprintf (stderr, "# (0x%x) Notification listener stopped.\n", 
+                                            (int) pthread_self());    
+        }
+
+        close (notifySocket);
+    }
+    
+}
+
+
+int StartNotificationListener (void)
+{
+    int err;
+    pthread_t	notificationListener;
+    
+    if (RPU_DEBUG_NOTIF) fprintf (stderr, "Starting notification listener...\n");
+    
+    err = pthread_create (&notificationListener, 0L, Thread_NotificationListener, NULL);
+    if (err == 0) pthread_detach (notificationListener);
+    
+    return err;
+}
+
+
 extern void CommandProcunitsMaster ( char *sz ) 
 {
     gProcunitsMode = pu_mode_master;
     outputl ( "Host set to MASTER mode.\n" );
+    
+    StartNotificationListener ();
 }
 
 
 extern void CommandProcunitsSlave ( char *sz ) 
 {
     gProcunitsMode = pu_mode_slave;
-    outputf ( "Host set to SLAVE mode.\n"
-                "Hit ^C to kill pending tasks and return to MASTER mode.\n\n");
+    
+    gfRPU_Notification = FALSE;
+    
+    if (sz != NULL && sz[0] != 0) {
+        /* read notification parameters */
+        int	port = gRPU_TCPPort;
+        
+        if (sz[0] == '*') {
+            /* broadcast notification, eg "pu slave *:100" */
+            char *szPort;
+            szPort = strchr (sz + 1, ':');
+            if (szPort != NULL) {
+                if (sscanf (szPort + 1, "%d", &port) != 1)
+                    port = -1;
+            }
+            if (port < 1 || port > 65535) {
+                fprintf (stderr, "Invalid TCP port number.\n");
+                return;
+            }
+            else 
+                gRPU_TCPPort = port;
+            bzero (&ginRPU_NotificationAddr, sizeof (ginRPU_NotificationAddr));
+            ginRPU_NotificationAddr.sin_family 		= AF_INET;
+            ginRPU_NotificationAddr.sin_addr.s_addr 	= htonl(INADDR_BROADCAST);
+            ginRPU_NotificationAddr.sin_port 		= htons(gRPU_TCPPort);
+            gfRPU_NotificationBroadcast = TRUE;
+            gfRPU_Notification 		= TRUE; 
+        }
+        
+        else {
+            /* single host notification, eg "pu slave friendly.gnu.org:100" */
+            if (RPU_ReadInternetAddress (&ginRPU_NotificationAddr, sz) < 0) {
+                fprintf (stderr, "Could not resolve address \"%s\".\n", sz);
+                return;
+            }
+            gfRPU_NotificationBroadcast = FALSE;
+            gfRPU_Notification 		= TRUE; 
+        }
+        
+    } /* if (sz != NULL) */
+    
+    outputf ( "Host set to SLAVE mode.\n");
+    if (gfRPU_Notification) {
+        if (gfRPU_NotificationBroadcast)
+            outputf ("  Will broadcast availability to listening masters "
+                    "on TCP port %d every %d secs.\n",
+                ntohs (ginRPU_NotificationAddr.sin_port), giRPU_NotificationDelay);
+        else
+            outputf ("  Will notify availability to %s (%s:%d) every %d secs.\n",
+                sz, inet_ntoa (ginRPU_NotificationAddr.sin_addr), 
+                ntohs (ginRPU_NotificationAddr.sin_port), giRPU_NotificationDelay);
+    }
+    outputf ("  Hit ^C to kill pending tasks and return to MASTER mode.\n\n");
+
     outputf ("Available processing units:\n");
     PrintProcessingUnitList ();
     outputf ("\n");

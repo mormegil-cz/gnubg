@@ -604,6 +604,8 @@ extern void HandleXAction( void ) {
        that will cause this function to be executed again, so we will
        still process its I/O. */
     fAction = FALSE;
+    
+    gdk_threads_enter ();
 
     SuspendInput( &m );
     
@@ -614,6 +616,8 @@ extern void HandleXAction( void ) {
 	gtk_main_iteration();
 
     ResumeInput( &m );
+
+    gdk_threads_leave ();
 }
 
 /* TRUE if gnubg is automatically setting the state of a menu item. */
