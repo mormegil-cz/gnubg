@@ -1,3 +1,7 @@
+Fri Aug 15 19:56:24 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
+
+	* po/it.po more translations from Renzo Campagna
+	
 Fri Aug 15 21:01:48 2003  Oystein Johansen  <oystein@gnubg.org>
 
 	* gtkoptions.c: Set seed with a spinbox directly, instead of

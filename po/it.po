@@ -12092,13 +12092,7 @@ msgstr ""
 msgid "/_Edit/Copy as/Position as ASCII"
 msgstr ""
 
-msgid "/_Navigate"
-msgstr ""
-
 msgid "/_Navigate/-"
-msgstr ""
-
-msgid "/_Navigate/Next _chequer play"
 msgstr ""
 
 msgid "/_Analyse/Distribution of rolls"
@@ -12831,3 +12825,37 @@ msgid ""
 "(Text Export version %d.%d)\n"
 "\n"
 msgstr ""
+
+msgid "/_Navigate"
+msgstr ""
+
+msgid "/_Navigate/Previous rol_l"
+msgstr "/_Navigate/_Lancio precedente"
+
+msgid "/_Navigate/Next _roll"
+msgstr "/_Navigate/L_ancio successivo"
+
+msgid "/_Navigate/_Previous move"
+msgstr "/_Navigate/_Mossa precedente"
+
+msgid "/_Navigate/Next _move"
+msgstr "/_Navigate/M_ossa successiva"
+
+msgid "/_Navigate/Previous chequer _play"
+msgstr "/_Navigate/_Gioco di pedina precedente"
+
+msgid "/_Navigate/Next _chequer play"
+msgstr "/_Navigate/G_ioco di pedina successivo"
+
+msgid "/_Navigate/Previous marke_d move"
+msgstr "/_Navigate/Mossa segnata _precedente"
+
+msgid "/_Navigate/Next mar_ked move"
+msgstr "/_Navigate/Mossa segnata _successiva"
+
+msgid "/_Navigate/Pre_vious game"
+msgstr "/_Navigate/Game p_recedente"
+
+msgid "/_Navigate/Next _game"
+msgstr "/_Navigate/Game s_uccessivo"
+
