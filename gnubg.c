@@ -8984,6 +8984,15 @@ EPC( int anBoard[ 2 ][ 25 ], float arEPC[ 2 ], int *pfSource ) {
 }
 
 
+static float
+LinearInterpolation( const float x0, const float y0,
+                     const float x1, const float y1,
+                     const float x ) {
+
+  return ( x - x0 ) * ( y1 - y0 ) / ( x1 - x0 ) + y0;
+
+}
+
 
 
 
@@ -8998,9 +9007,11 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
   char *szy;
   char *szz;
 
-  float aarDist[ 2 ][ 32 ];
   float r;
   int i, j;
+  float aar[ 2 ][ 2 ];
+  float ar[ 2 ];
+  int an[ 2 ];
 
   if ( EPC( anBoard, arEPC, &f ) ) {
     sz = g_strdup( _("Sorry, EPCs cannot be calculated for this position") );
@@ -9027,14 +9038,32 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
   /* estimate gwc */
 
   for ( i = 0; i < 2; ++i )
-    DistFromEPC( arEPC[ i ], aarDist[ i ] );
+    for ( j = 0; j < 2; ++j ) {
+      an[ 0 ] = arEPC[ 0 ] + i;
+      an[ 1 ] = arEPC[ 1 ] + j;
+      aar[ i ][ j ] = GWCFromPipCount( an, NULL, NULL );
+    }
 
-  r = 0;
-  for ( i = 0; i < 32; ++i )
-    for ( j = i; j < 32; ++j )
-      r += aarDist[ 1 ][ i ] * aarDist[ 0 ][ j ];
-  
-  szz = g_strdup_printf( _("Estimated gwc: %8.4f\n\n"), r );
+  /* Some spiffy linear interpolation in two dimensions. This is 
+     probably not correct, but it's the best we can do for now. */
+
+  an[ 0 ] = arEPC[ 0 ];
+  an[ 1 ] = arEPC[ 0 ] + 1;
+
+  ar[ 0 ] = LinearInterpolation( an[ 0 ], aar[ 0 ][ 0 ], 
+                                 an[ 1 ], aar[ 1 ][ 0 ], 
+                                 arEPC[ 0 ] );
+
+  ar[ 1 ] = LinearInterpolation( an[ 0 ], aar[ 0 ][ 1 ], 
+                                 an[ 1 ], aar[ 1 ][ 1 ], 
+                                 arEPC[ 0 ] );
+
+  an[ 0 ] = arEPC[ 1 ];
+  an[ 1 ] = arEPC[ 1 ] + 1;
+
+  r = LinearInterpolation( an[ 0 ], ar[ 0 ], an[ 1 ], ar[ 1 ], arEPC[ 1 ] );
+
+  szz = g_strdup_printf( _("Estimated gwc: %8.4f (WARNING: this is work in progress)\n\n"), r );
 
 
   sz = g_strconcat( szx, szy, szz, _("EPC = 8.167 * Average rolls\n"

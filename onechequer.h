@@ -22,10 +22,7 @@
 #ifndef _ONECHEQUER_H_
 #define _ONECHEQUER_H_
 
-extern int
-OneChequer ( const int nPips, float *prMu, float *prSigma );
-
-extern void
-DistFromEPC( const float rEPC, float arDist[ 32 ] );
+extern float
+GWCFromPipCount( const int anPips[ 2 ], float *arMu, float *arSigma );
 
 #endif /* _ONECHEQUER_H_ */

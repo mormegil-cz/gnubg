@@ -29,16 +29,38 @@
 #include <stdio.h>
 #endif
 #include <math.h>
+#include <assert.h>
 
 #include "onechequer.h"
 #include "bearoff.h"
 
 
-static float 
-onecheck ( const int npips, float *prSigma, float arMu[], float arSigma[] ) {
+static void 
+AverageRolls ( const float arProb[ 32 ], float *ar ) {
 
-  float rSigma, rMean, r;
+  float sx;
+  float sx2;
+  int i;
 
+  sx = sx2 = 0.0f;
+
+  for ( i = 0; i < 32; ++i ) {
+    sx += ( i + 1 ) * arProb[ i ];
+    sx2 += ( i + 1 ) * ( i + 1  ) * arProb[ i ];
+  }
+
+
+  ar[ 0 ] = sx;
+  ar[ 1 ] = sqrt ( sx2 - sx *sx );
+
+}
+
+
+static float
+getDist( const int nPips, const int nRoll, float *table ) {
+
+  float r;
+  int i;
   const int aai[ 13 ][ 2 ] = {
      { 2,  3 },
      { 3,  4 },
@@ -54,104 +76,135 @@ onecheck ( const int npips, float *prSigma, float arMu[], float arSigma[] ) {
      { 1, 20 },
      { 1, 24 }
    };
-  int i;
 
-  if ( npips <= 0 ) {
-     *prSigma = 0.0f;
-     return 0.0f;
-  }
-  else if ( arMu[ npips ] >= 0.0f ) {
-     *prSigma = arSigma[ npips ];
-     return arMu[ npips ];
+  if ( nPips <= 0 )
+    return 0.0f;
+
+  if ( table[ nPips * 32 + nRoll ] >= 0.0f ) 
+    /* cache hit */
+    return table[ nPips * 32 + nRoll ];
+
+  /* calculate value */
+
+  if ( !nRoll ) {
+
+    /*
+     * The chance of bearing the chequer off in 1 roll with x pips
+     * to go is simply the probability of rolling more than x pips.
+     *
+     * f(y) = aai[ i ][ 0 ] / 36, where i is found where y = aai[ i ][ 1 ]
+     *
+     * P(x,1) = \sum_{y=x}^{y=24} f(y)
+     *
+     */
+
+    r = 0.0f;
+    for ( i = 0; i < 13; ++i )
+      if ( nPips <= aai[ i ][ 1 ] )
+        r += ( 1.0f * aai[ i ][ 0 ] ) / 36.0f;
+    return ( table[ nPips * 32 + nRoll ] = r );
   }
   else {
 
-    rMean = *prSigma = 0.0f;
+    /*
+     * Use recursion formulae as the distribution for n rolls
+     * can be calculated from n-1 rolls, i.e.,
+     *
+     * P(x,k+1) = \sum_{y=3}^{y=24} f(y) P( x - y, k )
+     *
+     */
 
-    for ( i = 0; i < 13; ++i ) {
+    r = 0.0f;
+    for ( i = 0; i < 13; ++i )
+      r += ( 1.0f * aai[ i ][ 0 ] ) / 36.0f * 
+        getDist( nPips - aai[ i ][ 1 ], nRoll - 1, table );
 
-       r = 1.0f + onecheck ( npips - aai[ i ][ 1 ], &rSigma, arMu, arSigma );
-
-       rMean += aai[ i ][ 0 ] * r;
-       *prSigma += aai[ i ][ 0 ] * ( rSigma * rSigma + r * r );
-
-
-    }
-
-    arMu[ npips ] = rMean /= 36.0f;
-    arSigma[ npips ] = *prSigma = sqrt ( *prSigma / 36.0f - rMean * rMean );
-    
-    return rMean;
-
+    return ( table[ nPips * 32 + nRoll ] = r );
   }
 
-}
-
-
-extern int
-OneChequer ( const int nPips, float *prMu, float *prSigma ) {
-
-   float *arMu, *arSigma;
-   int i;
-
-   if ( ! ( arMu = (float *) malloc ( ( nPips + 1 ) * sizeof ( float ) ) ) )
-      return -1;
-   if ( ! ( arSigma = (float *) malloc ( ( nPips + 1 ) * sizeof ( float ) ) ) )
-      return -1;
-
-   for ( i = 0; i < nPips + 1; ++i )
-      arMu[ i ] = arSigma[ i ] = -1.0f;
-
-   *prMu = onecheck ( nPips, prSigma, arMu, arSigma );
-
-   free ( arMu );
-   free ( arSigma );
-
-   return 0;
+  assert( FALSE );
 
 }
 
+static void
+DistFromPipCount( const int nPips, float arDist[ 32 ], float *table ) {
 
-extern void
-DistFromEPC( const float rEPC, float arDist[ 32 ] ) {
-
-  float rSigma, rMu;
   int i;
-  int nPips = rEPC + 1;
-
-  OneChequer( nPips, &rMu, &rSigma );
 
   for ( i = 0; i < 32; ++i ) 
-    arDist[ i ] = fnd ( 1.0f * i, rMu, rSigma );
+    arDist[ i ] = getDist( nPips, i, table );
+
+}
+
+/*
+ * Calculate the cubeless GWC based on pip counts
+ *
+ * Player 1 is on roll
+ *
+ */
+
+extern float
+GWCFromPipCount( const int anPips[ 2 ], float *arMu, float *arSigma ) {
+
+  float *table;
+  float aarDist[ 2 ][ 32 ];
+  int i;
+  int j;
+  float r = 0.0f;
+  int nMaxPips;
+  float ar[ 2 ];
+
+  /* initialise table */
+
+  nMaxPips = anPips[ 0 ] > anPips[ 1 ] ? anPips[ 0 ] : anPips[ 1 ];
+
+  table = (float *) malloc( ( nMaxPips + 1 ) * 32 * sizeof( float ) );
+
+  for ( i = 0; i < nMaxPips + 1; ++i )
+    for ( j = 0; j < 32; ++j )
+      table[ i * 32 + j ] = -1.0f;
+
+  /* Calculate distributions.
+   * 
+   * Use formulae from Zadeh and Kobliska, "On optimal doubling in
+   * backgammon", Management Science, 853-858, vol 23, 1977.
+   *
+   */
+
+  for ( i = 0; i < 2; ++i ) {
+    DistFromPipCount( anPips[ i ], aarDist[ i ], table );
+  }
+
+  /*
+   * The usual formulae for calculating gwc:
+   *
+   * x_A = pip count for player on roll (anPips[1])
+   * x_B = pip count for opponent (anPips[0])
+   *
+   * p = \sum_{i=1}^{i=\infty} 
+   *          \left( P(x_A,i) \cdot \sum_{j=i}^{j=\infty} P(x_B,j) \right)
+   *
+   */
   
-}
+  r = 0.0f;
+  for ( i = 0; i < 32; ++i )
+    for ( j = i; j < 32; ++j )
+      r += aarDist[ 1 ][ i ] * aarDist[ 0 ][ j ];
 
+  /* garbage collect */
 
-#ifdef STANDALONE
+  free( table );
 
+  /* calculate mu and sigma */
 
-extern int
-main ( int argc, char **argv ) {
+  for ( i = 0; i < 2; ++i ) {
+    AverageRolls( aarDist[ i ], ar );
+    if ( arMu )
+      arMu[ i ] = ar[ 0 ];
+    if ( arSigma )
+      arSigma[ i ] = ar[ 1 ];
+  }
 
-   int npips;
-   int i;
-   float rSigma, rMu;
-
-   if ( argc != 2 ) {
-      printf ( "Usage: %s number-of-pips\n", argv[ 0 ] );
-      return 1;
-   }
-
-   npips =  atoi ( argv[ 1 ] );
-
-   printf ( "Average number of rolls to bearoff %d pips\n", npips );   
-
-   OneChequer ( npips, &rMu, &rSigma );
-
-   printf ( "%7.4f\n", rMu );
-   printf ( "%7.4f\n", rSigma );
-
-   return 0;
+  return r;
 
 }
-#endif
