@@ -85,6 +85,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "import.h"
 #include "export.h"
 #include "i18n.h"
+#include "sound.h"
 
 #if USE_GUILE
 #include <libguile.h>
@@ -2943,6 +2944,8 @@ extern void PromptForExit( void ) {
 	}
     }
 
+    playSound ( SOUND_EXIT );
+
     exit( EXIT_SUCCESS );
 }
 
@@ -5524,6 +5527,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	exit( EXIT_SUCCESS );
     }
 #endif
+
+    /* start-up sound */
+    playSound ( SOUND_START );
     
 #if USE_GTK
     if( fX ) {

@@ -60,6 +60,7 @@ Hans-Jürgen Schäfer
 Jim Segrave
 Ian Shaw
 Peter Sochovsky
+Mark Spencer
 Maik Stiebler
 W. Stroop (Rob)
 Jacques Thiriat

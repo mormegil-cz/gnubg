@@ -135,7 +135,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
         guile.h import.c import.h external.c external.h credits.c latex.c \
 	postscript.c html.c export.h matchid.c matchid.h i18n.c i18n.h text.c \
-	export.c
+	export.c sound.c sound.h
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
@@ -211,7 +211,7 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	sgfp.$(OBJEXT) sgfl.$(OBJEXT) guile.$(OBJEXT) import.$(OBJEXT) \
 	external.$(OBJEXT) credits.$(OBJEXT) latex.$(OBJEXT) \
 	postscript.$(OBJEXT) html.$(OBJEXT) matchid.$(OBJEXT) \
-	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT)
+	i18n.$(OBJEXT) text.$(OBJEXT) export.$(OBJEXT) sound.$(OBJEXT)
 @USE_EXT_FALSE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1)
 @USE_EXT_TRUE@@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_1) \
 @USE_EXT_TRUE@@USE_GTK_FALSE@	xboard.$(OBJEXT) xgame.$(OBJEXT)
@@ -263,8 +263,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/rollout.Po ./$(DEPDIR)/set.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sgf.Po ./$(DEPDIR)/sgfl.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/text.Po ./$(DEPDIR)/xboard.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/xgame.Po
+@AMDEP_TRUE@	./$(DEPDIR)/sound.Po ./$(DEPDIR)/text.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/xboard.Po ./$(DEPDIR)/xgame.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -424,6 +424,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sgfl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sgfp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/show.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sound.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xboard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xgame.Po@am__quote@

@@ -46,6 +46,7 @@
 #include "matchequity.h"
 #include "rollout.h"
 #include "i18n.h"
+#include "sound.h"
 
 char *aszGameResult[] = { 
   N_ ("single game"), 
@@ -430,7 +431,6 @@ static int PopMoveRecord( list *plDelete ) {
 
     return 0;
 }
-
 extern void AddMoveRecord( void *pv ) {
 
     moverecord *pmr = pv, *pmrOld;
@@ -1144,6 +1144,8 @@ extern int ComputerTurn( void ) {
 	  outputx ();
       }
 #endif
+
+      /* FIXME: if dance: playSound ( SOUND_BOT_DANCE ); */
       
       AddMoveRecord( pmn );      
       
@@ -1530,6 +1532,9 @@ extern int NextTurn( int fPlayNext ) {
 	       sessions under the Jacoby rule */
 	    n = 1;
 	
+        playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ? 
+                    SOUND_HUMAN_WIN_GAME : SOUND_BOT_WIN_GAME );
+
 	outputf( _("%s wins a %s and %d point%s.\n"), ap[ pmgi->fWinner ].szName,
 		 gettext ( aszGameResult[ n - 1 ] ), pmgi->nPoints,
 		 pmgi->nPoints > 1 ? "s" : "" );
@@ -1557,6 +1562,11 @@ extern int NextTurn( int fPlayNext ) {
 	    CommandShowScore( NULL );
 	
 	if( ms.nMatchTo && ms.anScore[ pmgi->fWinner ] >= ms.nMatchTo ) {
+
+            playSound ( ap[ pmgi->fWinner ].pt == PLAYER_HUMAN ? 
+                        SOUND_HUMAN_WIN_MATCH : SOUND_BOT_WIN_MATCH );
+          
+
 	    outputf( _("%s has won the match.\n"), ap[ pmgi->fWinner ].szName );
 	    outputx();
 	    fComputing = FALSE;
@@ -1685,6 +1695,8 @@ extern void CommandAgree( char *sz ) {
     if( fDisplay )
 	outputf( _("%s accepts and wins a %s.\n"), ap[ ms.fTurn ].szName,
 		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
+
+    playSound ( SOUND_AGREE );
 
     pmr = malloc( sizeof( *pmr ) );
     pmr->mt = MOVE_RESIGN;
@@ -2162,6 +2174,8 @@ extern void CommandDouble( char *sz ) {
                  MAX_CUBE );
 	return;
     }
+
+    playSound ( SOUND_DOUBLE );
     
     pmr = malloc( sizeof( pmr->d ) );
     pmr->d.mt = MOVE_DOUBLE;
@@ -2316,6 +2330,8 @@ extern void CommandDrop( char *sz ) {
 		 "move immediately.") );
 	return;
     }
+
+    playSound ( SOUND_DROP );
 
     pmr = malloc( sizeof( pmr->d ) );
     pmr->d.mt = MOVE_DROP;
@@ -2542,6 +2558,14 @@ CommandMove( char *sz ) {
 		       FALSE );
 	
 	if( ml.cMoves <= 1 ) {
+
+            if ( ! ml.cMoves )
+              playSound ( ap[ ms.fTurn ].pt == PLAYER_HUMAN ? 
+                          SOUND_HUMAN_DANCE : SOUND_BOT_DANCE );
+            else 
+              playSound ( SOUND_MOVE );
+
+
 	    pmn = malloc( sizeof( *pmn ) );
 	    pmn->mt = MOVE_NORMAL;
 	    pmn->sz = NULL;
@@ -2615,6 +2639,8 @@ CommandMove( char *sz ) {
 	    
 	    if( j == 25 ) {
 		/* we have a legal move! */
+                playSound ( SOUND_MOVE );
+
 		pmn = malloc( sizeof( *pmn ) );
 		pmn->mt = MOVE_NORMAL;
 		pmn->sz = NULL;
@@ -2953,7 +2979,7 @@ static void CommandNextRolled( char *sz ) {
 
 }
 
-static int MoveIsMarked (moverecord *pmr)
+extern int MoveIsMarked (moverecord *pmr)
 {
   if (pmr == 0)
 	return FALSE;
@@ -3290,6 +3316,8 @@ extern void CommandRedouble( char *sz ) {
       return;
 #endif
 
+    playSound ( SOUND_REDOUBLE );
+
     if( fDisplay )
 	outputf( _("%s accepts and immediately redoubles to %d.\n"),
 		ap[ ms.fTurn ].szName, ms.nCube << 2 );
@@ -3376,6 +3404,8 @@ extern void CommandResign( char *sz ) {
 		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 
     ms.fTurn = !ms.fTurn;
+
+    playSound ( SOUND_RESIGN );
     
     TurnDone();
 }
@@ -3502,6 +3532,8 @@ CommandRoll( char *sz ) {
   if( RollDice( ms.anDice, rngCurrent ) < 0 )
     return;
 
+  playSound ( SOUND_ROLL );
+
   pmr = malloc( sizeof( pmr->sd ) );
   pmr->mt = MOVE_SETDICE;
   pmr->sd.sz = NULL;
@@ -3529,6 +3561,10 @@ CommandRoll( char *sz ) {
     
   if( !GenerateMoves( &ml, ms.anBoard, ms.anDice[ 0 ], ms.anDice[ 1 ],
 		      FALSE ) ) {
+
+    playSound ( ap[ ms.fTurn ].pt == PLAYER_HUMAN ? 
+                SOUND_HUMAN_DANCE : SOUND_BOT_DANCE );
+
     pmn = malloc( sizeof( *pmn ) );
     pmn->mt = MOVE_NORMAL;
     pmn->sz = NULL;
@@ -3548,10 +3584,14 @@ CommandRoll( char *sz ) {
     ShowAutoMove( ms.anBoard, pmn->anMove );
 
     AddMoveRecord( pmn );
+
     TurnDone();
   } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( ms.anBoard )
                                                 <= CLASS_BEAROFF1 &&
                                                 fAutoBearoff ) ) ) {
+
+    playSound ( SOUND_MOVE );
+
     pmn = malloc( sizeof( *pmn ) );
     pmn->mt = MOVE_NORMAL;
     pmn->sz = NULL;
@@ -3594,6 +3634,8 @@ extern void CommandTake( char *sz ) {
 		 "move immediately.") );
 	return;
     }
+
+    playSound ( SOUND_TAKE );
 
     pmr = malloc( sizeof( pmr->d ) );
     pmr->d.mt = MOVE_TAKE;
