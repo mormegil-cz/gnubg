@@ -85,6 +85,12 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include <gnubgmodule.h>
 #endif
 
+#if HAVE_LIBGEN_H
+#include <libgen.h>
+#elif ! defined(HAVE_BASENAME) && ! defined (HAVE_DIRNAME )
+#include "simplelibgen.h"
+#endif
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -7969,9 +7975,9 @@ extern int GiveAdvice( skilltype Skill ) {
 
 	return GetAdviceAnswer( sz );
 }
-
-#if ! defined(HAVE_BASENAME) && ! defined (HAVE_LIBGEN_H)
-
+#if 0
+/* Hopefully this code won't be compiled anyway */
+#if ! defined(HAVE_BASENAME) && ! defined(HAVE_LIBGEN_H ) && defined (HAVE_DIRNAME )
 /*
  * Basename copied from glibc-2.2. for users without glibc.
  */
@@ -7979,13 +7985,13 @@ extern int GiveAdvice( skilltype Skill ) {
 extern char *
 basename (const char *filename) 
 { 
-  char *p1 = strrchr (filename, DIR_SEPARATOR); 
-  return p1 ? p1 + 1 : (char *) filename;
+	  char *p1 = strrchr (filename, DIR_SEPARATOR); 
+	    return p1 ? p1 + 1 : (char *) filename;
 } 
 
-#endif /* ! HAVE_BASENAME */
+#endif /* ! HAVE_BASENAME etc... */
 
-#if ! defined(HAVE_DIRNAME) && ! defined(HAVE_LIBGEN_H)
+#if ! defined(HAVE_DIRNAME) && ! defined(HAVE_LIBGEN_H) && defined ( HAVE_BASENAME )
 
 /*
  * This code is taken from glibc-2.2, and modified for Windows systems.
@@ -8047,7 +8053,8 @@ dirname (char *path)
   return path;
 }
 
-#endif /* ! HAVE_DIRNAME */
+#endif /* ! HAVE_DIRNAME, but defined HAVE_BASENAME */
+#endif /* 0 */
 
 extern char *
 Convert ( const char *sz, 

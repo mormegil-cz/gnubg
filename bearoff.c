@@ -41,6 +41,8 @@
 #endif
 #if HAVE_LIBGEN_H
 #include <libgen.h>
+#elif ! defined(HAVE_BASENAME) && ! defined (HAVE_DIRNAME )
+#include "simplelibgen.h"
 #endif
 
 #include "positionid.h"
@@ -54,11 +56,6 @@
 #define BINARY O_BINARY
 #else
 #define BINARY 0
-#endif
-
-#ifndef HAVE_DIRNAME
-extern char *
-dirname ( const char *filename );
 #endif
 
 typedef struct _hashentryonesided {

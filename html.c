@@ -41,8 +41,10 @@
 #include "record.h"
 #include "path.h"
 
-#if defined (HAVE_BASENAME) && defined (HAVE_LIBGEN_H)
-#include "libgen.h"
+#if HAVE_LIBGEN_H
+#include <libgen.h>
+#elif ! defined(HAVE_BASENAME) && ! defined (HAVE_DIRNAME )
+#include "simplelibgen.h"
 #endif
 
 #include "i18n.h"
