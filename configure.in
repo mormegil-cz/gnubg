@@ -195,7 +195,7 @@ dnl Record installation paths.
 AC_DEFINE_DIR(DATADIR, datadir)
 
 dnl Set of available languages
-ALL_LINGUAS=""
+ALL_LINGUAS="da"
 
 dnl internationalization macros
 AM_GNU_GETTEXT
