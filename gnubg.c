@@ -328,6 +328,8 @@ command cER = {
       NULL, NULL },
     { "match", CommandAnalyseMatch, "Compute analysis and annotate every game "
       "in the match", NULL, NULL },
+    { "move", CommandAnalyseMove, "Compute analysis and annotate the current "
+      "move", NULL, NULL },
     { "session", CommandAnalyseSession, "Compute analysis and annotate every "
       "game in the session", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }

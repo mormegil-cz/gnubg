@@ -1340,3 +1340,29 @@ CommandShowStatisticsGame ( char *sz ) {
     DumpStatcontext ( szOutput, &pmgi->sc, "Statistics for current game");
     outputl( szOutput );
 }
+
+
+extern void CommandAnalyseMove ( char *sz ) {
+
+  matchstate msx;
+
+  if( ms.gs == GAME_NONE ) {
+    outputl( "No game in progress (type `new game' to start one)." );
+    return;
+  }
+    
+
+  if ( plLastMove && plLastMove->plNext && plLastMove->plNext->p ) {
+
+    /* analyse move */
+
+    memcpy ( &msx, &ms, sizeof ( matchstate ) );
+    AnalyzeMove ( plLastMove->plNext->p, &msx, NULL, FALSE );
+
+    GTKUpdateAnnotations();
+
+  }
+  else
+    outputl ( "Sorry, cannot analyse move!" );
+
+}
