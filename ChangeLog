@@ -1,3 +1,8 @@
+Thu Sep 12 10:02:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkboard.c: Edit clear chequers empty fix.
+	* gtkgame.c: Manual dice in new dialog state fix
+
 Thu Sep 11 18:51:28 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseMatMove): don't add illegal moves to plGame.
