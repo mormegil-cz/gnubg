@@ -175,9 +175,13 @@ extern int EventPending( event *pev, int fPending ) {
 
 extern int InitEvents( void ) {
 
+#if HAVE_GETDTABLESIZE
     if( ( cDescriptors = getdtablesize() ) > FD_SETSIZE )
 	cDescriptors = FD_SETSIZE;
-
+#else
+    cDescriptors = OPEN_MAX > FD_SETSIZE ? FD_SETSIZE : OPEN_MAX;
+#endif
+    
     if( !( aapev = calloc( cDescriptors, sizeof( eventpair ) ) ) )
 	return -1;
     

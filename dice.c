@@ -52,7 +52,15 @@
 
 rng rngCurrent = RNG_MERSENNE;
 
-randctx rc;
+static randctx rc;
+
+static void (*pfUserRNGSeed) (unsigned long int);
+static long int (*pfUserRNGRandom) (void);
+static void *pvUserRNGHandle;
+
+static char szUserRNGSeed[ 32 ];
+static char szUserRNGRandom[ 32 ];
+static char szUserRNG[ MAXPATHLEN ];
 
 extern void InitRNGSeed( int n ) {
     
@@ -277,7 +285,8 @@ extern int  UserRNGOpen() {
   strcpy( szUserRNGSeed , "setseed" );
   strcpy( szUserRNGRandom , "getrandom" );
 
-  (void *) pfUserRNGSeed = dlsym( pvUserRNGHandle, szUserRNGSeed );
+  pfUserRNGSeed = (void (*)(unsigned long int))
+      dlsym( pvUserRNGHandle, szUserRNGSeed );
 
   if ((error = dlerror()) != NULL)  {
     
@@ -287,7 +296,8 @@ extern int  UserRNGOpen() {
 
   }
   
-  (void *) pfUserRNGRandom = dlsym( pvUserRNGHandle, szUserRNGRandom );
+  pfUserRNGRandom = (long int (*)(void)) dlsym( pvUserRNGHandle,
+						szUserRNGRandom );
 
   if ((error = dlerror()) != NULL)  {
     

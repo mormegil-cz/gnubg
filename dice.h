@@ -35,14 +35,6 @@ extern void InitRNGSeed( int n );
 extern void RollDice( int anDice[ 2 ] );
 extern void GetManualDice( int anDice[ 2 ] );
 
-void (*pfUserRNGSeed) (unsigned long int);
-long int (*pfUserRNGRandom) (void);
-void *pvUserRNGHandle;
-
-char szUserRNGSeed[ 32 ];
-char szUserRNGRandom[ 32 ];
-char szUserRNG[ MAXPATHLEN ];
-
 extern void UserRNGClose();
 extern int UserRNGOpen();
 
