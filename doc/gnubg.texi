@@ -230,8 +230,7 @@ matches, and sessions with @gnubg{}.
 @uref{http://jelly.effect.no/,Jellyfish}
 .pos format. To import a position
 file using the GUI select a file from @code{File->Import->.pos
-position}. Note that you must have started a game before it's
-possible to import a position file!
+position}. 
 
 The .pos position format is documented at
 @uref{http://jelly.effect.no/fspec.htm,The Jellyfish Position File
@@ -264,7 +263,9 @@ matches.
 
 @gnubg{} can import matches and money sessions played on GamesGrid if
 saved in the SGG format. Currently, @gnubg{} doesn't support import of
-the native undocumented .cbg format.
+the native undocumented .cbg format. Also note
+that @gnubg{} does not analyse table stakes, so imported money
+sessions will be analysed as a normal money session.
 
 To import an SGG file using the GUI select a file using the menu entry
 @code{File->Import->.sgg match}. 
@@ -284,6 +285,47 @@ entry @code{File->Import->FIBS oldmoves}.
 Note that @gnubg{} will only read the first match in the file. If you
 wish to import all matches from a file containing more than more game,
 you'll manually have to split it.
+
+@subsection TrueMoneyGames .tmg
+@cindex TrueMoneyGames
+@cindex .tmg
+@cindex tmg
+
+@gnubg{} can also import matches and money sessions played on
+TrueMoneyGames saved in the TMG format (file suffix .tmg). Please note
+that @gnubg{} does not analyse table stakes, so imported money
+sessions will be analysed as a normal money session.
+
+To import an TMG file using the GUI select a file using the menu entry
+@code{File->Import->TrueMoneyGames .tmg match}. 
+
+@subsection Hans Berliner BKG format
+@cindex Hans Berliner
+@cindex .bkg
+@cindex bkg
+
+Matches written in the Hans Berliner BKG format can be imported into
+@gnubg{}. To import an BKG file using the GUI select a file using the
+menu entry @code{File->Import->BKG session}.
+
+
+@subsection Snowie .txt position format
+@cindex Snowie
+@cindex Snowie .txt position format
+
+@gnubg{} can import positions written in the Snowie .txt position
+format. Please note that very important distinction between
+@emph{Snowie .txt position} and @emph{Snowie Standard Text}. The
+former is used for position and the latter is an extension of the
+Jellyfish .mat format, and can be imported in @gnubg{} using the .mat
+importer. 
+
+@gnubg{} can also export positions to Snowie .txt format for easy
+exchange of positions with Snowie users.
+
+To import an Snowie .txt position file using the GUI select a file
+using the menu entry @code{File->Import->Snowie .txt position file}.
+
 
 @subsection Batch import
 @cindex import, batch
@@ -329,6 +371,12 @@ available in @gnubg{}.
 
 
 @subsection Other formats
+@cindex MSN Gaming Zone
+@cindex .cbg
+@cindex cbg
+@cindex FIBS/W
+@cindex MacFIBS
+
 
 There are a number of utilities written that can read and write
 positions, matches, and money sessions in other formats than the ones
@@ -467,6 +515,11 @@ writeme
 @subsection Export position in Jellyfish .pos
 @cindex Jellyfish 
 @cindex .pos
+writeme
+
+@subsection Export position in Snowie .txt position format
+@cindex Snowie
+@cindex Snowie .txt position format
 writeme
 
 @subsection Export positions, games, matches, and sessions in plain text
