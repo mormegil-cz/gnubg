@@ -1977,6 +1977,9 @@ PythonInitialise( const char *argv0, const char *szDir ) {
 
   FILE *pf;
   char *pch;
+  char scriptDir[_MAX_PATH];
+  strcpy(scriptDir, szDir);
+  strcat(scriptDir, "/scripts");
 
   Py_SetProgramName( (char *) argv0 );
   Py_Initialize();
@@ -1994,7 +1997,7 @@ PythonInitialise( const char *argv0, const char *szDir ) {
 
   /* run gnubg.py start up script */
 
-  if ( ( pch = PathSearch( "gnubg.py", szDir ) ) &&
+  if ( ( pch = PathSearch( "gnubg.py", scriptDir ) ) &&
        ( pf = fopen( pch, "r" ) ) ) {
     PyRun_AnyFile( pf, pch );
   }

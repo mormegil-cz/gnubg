@@ -1,3 +1,7 @@
+Thu Feb 19 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* scripts: Added new directory to cvs for python scripts
+
 Wed Feb 18 11:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Remove maximum column size of text copied to
