@@ -339,14 +339,14 @@ board_invalidate_labels( BoardData *bd ) {
   x = 0;
   y = 0;
   cx = BOARD_WIDTH * rdAppearance.nSize;
-  cy = POINTLABEL_HEIGHT * rdAppearance.nSize;
+  cy = BORDER_HEIGHT * rdAppearance.nSize;
 
   board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
 
   x = 0;
-  y = ( BOARD_HEIGHT - POINTLABEL_HEIGHT ) * rdAppearance.nSize;
+  y = ( BOARD_HEIGHT - BORDER_HEIGHT ) * rdAppearance.nSize;
   cx = BOARD_WIDTH * rdAppearance.nSize;
-  cy = POINTLABEL_HEIGHT * rdAppearance.nSize;
+  cy = BORDER_HEIGHT * rdAppearance.nSize;
 
   board_invalidate_rect( bd->drawing_area, x, y, cx, cy, bd );
 

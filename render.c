@@ -2756,7 +2756,7 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     pri->auchArrow[1] = NULL;
 #endif /* HAVE_LIBART */
     for ( i = 0; i < 2; ++i )
-      pri->achLabels[ i ] = malloc( nSize * nSize * BOARD_WIDTH * POINTLABEL_HEIGHT * 4 );
+      pri->achLabels[ i ] = malloc( nSize * nSize * BOARD_WIDTH * BORDER_HEIGHT * 4 );
     
     RenderBoard( prd, pri->ach, BOARD_WIDTH * nSize * 3 );
     RenderChequers( prd, pri->achChequer[ 0 ], pri->achChequer[ 1 ],
