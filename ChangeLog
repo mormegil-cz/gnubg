@@ -1,3 +1,7 @@
+Mon 20 Jul 09:49:08 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
+
+	* progress.c - neater display of rank/jsds, better column label
+	
 Sun 19 Jul 22:01:18 GMT 2003 Jim Segrave <jes@jes-2.nl.demon.net>
 
 	* rollout.c - called SanityCheck with reversed board, so
