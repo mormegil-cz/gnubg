@@ -4792,7 +4792,7 @@ CubefulToggled ( GtkWidget *pw, rolloutwidget *prw ) {
                                                             prw->prwGeneral->pwCubeful ) );
   
   gtk_widget_set_sensitive ( GTK_WIDGET ( 
-                                         prw->prwGeneral->pwTruncBearoffOpts ), ! f );
+                                         prw->prwGeneral->pwTruncBearoffOS ), ! f );
 
 }
 
@@ -4898,14 +4898,14 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_signal_connect( GTK_OBJECT( prpw->pwCubeful ), "toggled",
                       GTK_SIGNAL_FUNC( CubefulToggled ), prw );
 
-  pwFrame = gtk_frame_new ( _("Cubeless Truncation") );
+  pwFrame = gtk_frame_new ( _("Bearoff Truncation") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
   prpw->pwTruncBearoffOpts = pw = gtk_vbox_new( FALSE, 8 );
   gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
 
   prpw->pwTruncBearoff2 = gtk_check_button_new_with_label (
-                                                           _( "Truncate cubeless at exact bearoff database" ) );
+                                                           _( "Truncate cubeless (and cubeful money) at exact bearoff database" ) );
 
   gtk_container_add( GTK_CONTAINER( pw ), prpw->pwTruncBearoff2 );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prpw->pwTruncBearoff2 ),

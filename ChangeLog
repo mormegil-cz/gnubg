@@ -1,3 +1,14 @@
+Sun Dec  1 18:28:47 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Use cubeful bearoff equities for truncation of rollouts.
+
+	* show.c (ShowRollout): add text for fTruncBearoff2.
+	* gtkgame.c (CubefulToggled): set sensitiveness of
+	pwTruncBearoffOS instead of pwTruncBearoffOpts.
+	* gtkgame.c (RolloutPageGeneral): update some texts.
+	* rollout.c (BasicCubefulRollout): use cubeful bearoff equities
+	for truncation of rollouts.
+
 Sun Dec  1 16:38:03 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Use cubeful bearoff equities in bearoff evaluations.

@@ -195,6 +195,12 @@ ShowRollout ( rolloutcontext *prc ) {
       outputl( _("No truncation.") );
 
   outputl ( prc->fTruncBearoff2 ?
+            _("Will truncate cubeful money game rollouts when reaching "
+              "exact bearoff database.") :
+            _("Will not truncate cubeful money game rollouts when reaching "
+              "exact bearoff database.") );
+
+  outputl ( prc->fTruncBearoff2 ?
             _("Will truncate *cubeless* rollouts when reaching "
               "exact bearoff database.") :
             _("Will not truncate *cubeless* rollouts when reaching "

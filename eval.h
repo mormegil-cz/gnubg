@@ -245,6 +245,11 @@ typedef enum _positionclass {
 
 #define CLASS_PERFECT CLASS_BEAROFF_TS
 
+#define CFMONEY(arEquity,pci) \
+   ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
+   ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 1 ] : arEquity[ 3 ] ) )
+
+
 extern char *PathSearch( const char *szFile, const char *szDir );
 			      
 extern int
@@ -266,6 +271,9 @@ EvalSave( char *szWeights );
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
                   cubeinfo *pci, evalcontext *pec );
+
+extern int
+EvaluatePerfectCubeful ( int anBoard[ 2 ][ 25 ], float arEquity[] );
 
 extern void
 InvertEvaluationR ( float ar[ NUM_ROLLOUT_OUTPUTS],

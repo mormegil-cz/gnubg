@@ -67,10 +67,6 @@
 #endif
 
 
-#define CFMONEY(arEquity,pci) \
-   ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
-   ( ( (pci)->fCubeOwner == (pci)->fMove ) ? arEquity[ 1 ] : arEquity[ 3 ] ) )
-
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
 
