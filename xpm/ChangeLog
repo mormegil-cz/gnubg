@@ -1,3 +1,8 @@
+Fri Dec 27 16:14:35 2002  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am: add new file
+	* gnubg-big.xpm: new picture for the splash screen.
+
 Fri Dec 13 15:11:54 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am (EXTRA_DIST): Remove no_picture.xpm.
