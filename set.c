@@ -1536,7 +1536,7 @@ extern void CommandSetRolloutTrials( char *sz ) {
 extern void CommandSetRolloutTruncationEnable ( char *sz ) {
 
   SetToggle( "truncated rollouts", &prcSet->fDoTruncate, sz,
-		 _("Games in rollouts will be stop after a fixed number of moves."),
+		 _("Games in rollouts will be stopped after a fixed number of moves."),
 		 _("Games in rollouts will be played out until the end.") );
 }
 
