@@ -314,7 +314,6 @@ TextPrintCubeAnalysisTable ( FILE *pf,
   /* check if cube analysis should be printed */
 
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
-  if ( ! GetDPEq ( NULL, NULL, pci ) ) return; /* cube not available */
 
   FindCubeDecision ( arDouble, GCCCONSTAHACK aarOutput, pci );
 

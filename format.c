@@ -777,7 +777,6 @@ OutputCubeAnalysisFull ( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   /* check if cube analysis should be printed */
 
   if ( pes->et == EVAL_NONE ) return NULL; /* no evaluation */
-  if ( ! GetDPEq ( NULL, NULL, pci ) ) return NULL; /* cube not available */
 
   FindCubeDecision ( arDouble, aarOutput, pci );
 

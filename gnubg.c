@@ -3158,10 +3158,6 @@ DisplayCubeAnalysis( const float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
     GetMatchStateCubeInfo( &ci, &ms );
     
-    if( !GetDPEq( NULL, NULL, &ci ) )
-	/* No cube action possible */
-	return;
-
     outputl( OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci ) );
 }
 

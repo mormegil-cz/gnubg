@@ -1,4 +1,9 @@
-Tue Oct 21 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Oct 22 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* html.c, and others : Fix exports to display cube analysis whenever
+	analysis available
+
+Thu Oct 21 15:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* matchequity.c, set.c : Bug fix while inverting met
 

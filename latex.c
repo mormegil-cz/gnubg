@@ -364,11 +364,6 @@ PrintLaTeXCubeAnalysis( FILE *pf, const matchstate* pms, int fPlayer,
 		 pms->anScore, pms->fCrawford, pms->fJacoby, nBeavers,
                  pms->bgv );
     
-    if( !GetDPEq( NULL, NULL, &ci ) )
-	/* No cube action possible */
-	return;
-    
-    
     /* FIXME use center and tabular environment instead of verbatim */
     fputs( "{\\begin{quote}\\footnotesize\\begin{verbatim}\n", pf );
     fputs( OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci ), pf );

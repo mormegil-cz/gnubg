@@ -839,10 +839,6 @@ PrintPostScriptCubeAnalysis( FILE *pf, const matchstate *pms,
 		 pms->anScore, pms->fCrawford, pms->fJacoby, nBeavers,
                  pms->bgv );
     
-    if( !GetDPEq( NULL, NULL, &ci ) )
-	/* No cube action possible */
-	return;
-    
     sz = OutputCubeAnalysis( aarOutput, aarStdDev, pes, &ci );
 
     Skip( pf, 4 );
