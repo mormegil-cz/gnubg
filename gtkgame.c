@@ -1745,12 +1745,13 @@ static GtkWidget *TakeAnalysis( const movetype mt,
       if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
         sz = g_strdup_printf ( _("Cubeless %d-ply equity: %+7.3f"), 
                                pes->ec.nPlies, 
-                               Utility ( aarOutput[ 0 ], &ci ) );
+                               - Utility ( aarOutput[ 0 ], &ci ) );
       else
         sz = g_strdup_printf ( _("Cubeless %d-ply MWC: %7.3f%%"), 
                                pes->ec.nPlies,
-                               100.0f * eq2mwc ( Utility ( aarOutput[ 0 ], 
-                                                           &ci ), &ci ) );
+                               100.0f * 
+                               ( 1.0 - eq2mwc ( Utility ( aarOutput[ 0 ], 
+                                                          &ci ), &ci ) ) );
 
       pw = gtk_label_new ( sz );
       gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
@@ -1767,12 +1768,13 @@ static GtkWidget *TakeAnalysis( const movetype mt,
 
       sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
                              "%6.2f%% %6.2f%% %6.2f%%",
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
-                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
+                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ],
                              100.0f * aarOutput[ 0 ][ OUTPUT_LOSEGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ] );
+                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ] );
+
       pw = gtk_label_new ( sz );
       gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
       g_free ( sz );
@@ -1841,8 +1843,9 @@ static GtkWidget *TakeAnalysis( const movetype mt,
       if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
         sz = g_strdup_printf ( "%+7.3f", -arDouble[ ai [ i ] ] );
       else
-        sz = g_strdup_printf ( "%+7.3f%%", 
-                               100.0f * eq2mwc( -arDouble[ ai[ i ] ], &ci ) );
+        sz = g_strdup_printf ( "%7.3f%%", 
+                               100.0f * ( 1.0 - eq2mwc( arDouble[ ai[ i ] ], 
+                                                        &ci ) ) );
 
       pw = gtk_label_new ( sz );
       gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
@@ -1860,13 +1863,13 @@ static GtkWidget *TakeAnalysis( const movetype mt,
         
         if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
           sz = g_strdup_printf ( "(%+7.3f)", 
-                                 arDouble[ ai [ i ] ] - 
-                                 arDouble[ OUTPUT_OPTIMAL ] );
+                                 arDouble[ ai [ 0 ] ] - 
+                                 arDouble[ ai [ i ] ] );
         else
           sz = g_strdup_printf ( "(%+7.3f%%)", 
-                                 100.0f * eq2mwc( -arDouble[ ai[ i ] ], &ci ) -
-                                 100.0f * eq2mwc( -arDouble[ OUTPUT_OPTIMAL ], 
-                                                  &ci ) );
+                                 100.0f * eq2mwc( arDouble[ ai[ 0 ] ], 
+                                                  &ci )-
+                                 100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) );
 
         pw = gtk_label_new ( sz );
         gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
