@@ -653,7 +653,6 @@ static evalcontext *pecSet;
 static char *szSet, *szSetCommand;
 static rolloutcontext *prcSet;
 
-static evaltype *petSet;
 static evalsetup *pesSet;
 
 static rng *rngSet;
@@ -806,7 +805,6 @@ CommandSetPlayerChequerplay( char *sz ) {
     szSet = ap[ iPlayerSet ].szName;
     szSetCommand = "player chequerplay ";
     pesSet = &ap[ iPlayerSet ].esChequer;
-    petSet = &ap[ iPlayerSet ].etChequer;
 
     HandleCommand( sz, acSetEvalParam );
 
@@ -823,7 +821,6 @@ CommandSetPlayerCubedecision( char *sz ) {
     szSet = ap[ iPlayerSet ].szName;
     szSetCommand = "player cubedecision ";
     pesSet = &ap[ iPlayerSet ].esCube;
-    petSet = &ap[ iPlayerSet ].etCube;
 
     HandleCommand( sz, acSetEvalParam );
 
@@ -1238,10 +1235,6 @@ CommandSetRolloutCubeful( char *sz ) {
     SetToggle( "rollout cubeful", &prcSet->fCubeful, sz, 
                "Cubeful rollout", "Cubeless rollout" );
 
-    if ( prcSet->fCubeful )
-      outputl ( "Note that cubeful rollouts "
-                "are not implemented yet!" ); 
-
 }
 
 
@@ -1630,15 +1623,15 @@ CommandSetEvalParamType ( char *sz ) {
   switch ( sz[ 0 ] ) {
     
   case 'r':
-    *petSet = EVAL_ROLLOUT;
+    pesSet->et = EVAL_ROLLOUT;
     break;
 
   case 'e':
-    *petSet = EVAL_EVAL;
+    pesSet->et = EVAL_EVAL;
     break;
 
   case 'n':
-    *petSet = EVAL_NONE;
+    pesSet->et = EVAL_NONE;
     break;
 
   default:
@@ -1650,7 +1643,7 @@ CommandSetEvalParamType ( char *sz ) {
   }
 
   outputf ( "%s will now use %s.\n",
-            szSet, aszEvalType[ *petSet ] );
+            szSet, aszEvalType[ pesSet->et ] );
 
 }
 
@@ -1662,7 +1655,7 @@ CommandSetEvalParamEvaluation ( char *sz ) {
 
   HandleCommand ( sz, acSetEvaluation );
 
-  if ( *petSet != EVAL_EVAL )
+  if ( pesSet->et != EVAL_EVAL )
     outputf ( "(Note that this setting will have no effect until you\n"
               "`set %s type evaluation'\n",
               szSetCommand );
@@ -1676,7 +1669,7 @@ CommandSetEvalParamRollout ( char *sz ) {
 
   HandleCommand (sz, acSetRollout );
 
-  if ( *petSet != EVAL_ROLLOUT )
+  if ( pesSet->et != EVAL_ROLLOUT )
     outputf ( "(Note that this setting will have no effect until you\n"
               "`set %s type rollout'\n",
               szSetCommand );
@@ -1687,7 +1680,6 @@ CommandSetEvalParamRollout ( char *sz ) {
 extern void
 CommandSetAnalysisChequerplay ( char *sz ) {
 
-  petSet = &etAnalysisChequer;
   pesSet = &esAnalysisChequer;
 
   szSet = "Analysis chequerplay";
@@ -1701,7 +1693,6 @@ extern void
 CommandSetAnalysisCubedecision ( char *sz ) {
 
 
-  petSet = &etAnalysisCube;
   pesSet = &esAnalysisCube;
 
   szSet = "Analysis cubedecision";
@@ -1715,7 +1706,6 @@ CommandSetAnalysisCubedecision ( char *sz ) {
 extern void
 CommandSetEvalChequerplay ( char *sz ) {
 
-  petSet = &etEvalChequer;
   pesSet = &esEvalChequer;
 
   szSet = "`eval' and `hint' chequerplay";
@@ -1729,7 +1719,6 @@ extern void
 CommandSetEvalCubedecision ( char *sz ) {
 
 
-  petSet = &etEvalCube;
   pesSet = &esEvalCube;
 
   szSet = "`eval' and `hint' cube decisions";

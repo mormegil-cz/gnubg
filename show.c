@@ -110,9 +110,9 @@ ShowRollout ( rolloutcontext *prc ) {
 
 
 extern void
-ShowEvalSetup ( evaltype *pet, evalsetup *pes ) {
+ShowEvalSetup ( evalsetup *pes ) {
 
-  switch ( *pet ) {
+  switch ( pes->et ) {
 
   case EVAL_NONE:
     outputl ( "      No evaluation." );
@@ -213,9 +213,9 @@ extern void CommandShowAnalysis( char *sz ) {
              "The analysis will be perform with the "
              "following evaluation paremters:" );
     outputl( "    Chequer play:" );
-    ShowEvalSetup ( &etAnalysisChequer, &esAnalysisChequer );
+    ShowEvalSetup ( &esAnalysisChequer );
     outputl( "    Cube decisions:" );
-    ShowEvalSetup ( &etAnalysisCube, &esAnalysisCube );
+    ShowEvalSetup ( &esAnalysisCube );
 
     
 
@@ -422,9 +422,9 @@ extern void CommandShowEvaluation( char *sz ) {
 
     outputl( "`eval' and `hint' will use:" );
     outputl( "    Chequer play:" );
-    ShowEvalSetup ( &etEvalChequer, &esEvalChequer );
+    ShowEvalSetup ( &esEvalChequer );
     outputl( "    Cube decisions:" );
-    ShowEvalSetup ( &etEvalCube, &esEvalCube );
+    ShowEvalSetup ( &esEvalCube );
 
 }
 
@@ -481,9 +481,9 @@ extern void CommandShowPlayer( char *sz ) {
 	case PLAYER_GNU:
 	    outputf( "gnubg:\n" );
             outputl( "    Checker play:" );
-            ShowEvalSetup ( &ap[ i ].etChequer, &ap[ i ].esChequer );
+            ShowEvalSetup ( &ap[ i ].esChequer );
             outputl( "    Cube decisions:" );
-            ShowEvalSetup ( &ap[ i ].etCube, &ap[ i ].esCube );
+            ShowEvalSetup ( &ap[ i ].esCube );
 	    break;
 	case PLAYER_PUBEVAL:
 	    outputl( "pubeval\n" );
