@@ -30,14 +30,22 @@
 #include "dice.h"
 #include "eval.h"
 
-static command acSetPlayer[] = {
+static command acSetEvaluation[] = {
+    { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
+      "for deep evaluation", NULL },
+    { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
+      "`hint' commands look ahead", NULL },
+    { "tolerance", CommandSetEvalTolerance, "Control the equity range "
+      "of moves for deep evaluation", NULL },
+    { NULL, NULL, NULL, NULL }
+}, acSetPlayer[] = {
+    { "evaluation", CommandSetPlayerEvaluation, "Control evaluation "
+      "parameters when gnubg plays", NULL },
     { "gnubg", CommandSetPlayerGNU, "Have gnubg make all moves for a player",
       NULL },
     { "human", CommandSetPlayerHuman, "Have a human make all moves for a "
       "player", NULL },
     { "name", CommandSetPlayerName, "Change a player's name", NULL },
-    { "plies", CommandSetPlayerPlies, "Set the lookahead depth when gnubg "
-      "plays", NULL },
     { "pubeval", CommandSetPlayerPubeval, "Have pubeval make all moves for a "
       "player", NULL },
     { NULL, NULL, NULL, NULL }
@@ -194,6 +202,23 @@ static int CheckCubeAllowed( void ) {
     }
 
     return 0;
+}
+
+extern void CommandSetCache( char *sz ) {
+
+    int n;
+
+    if( ( n = ParseNumber( &sz ) ) < 0 ) {
+	puts( "You must specify the number of cache entries to use." );
+
+	return;
+    }
+
+    if( EvalCacheResize( n ) )
+	perror( "EvalCacheResize" );
+    else
+	printf( "The position cache has been sized to %d entr%s.\n", n,
+		n == 1 ? "y" : "ies" );
 }
 
 extern void CommandSetCubeCentre( char *sz ) {
@@ -371,38 +396,25 @@ extern void CommandSetDisplay( char *sz ) {
 	       "moves.", "Will not display boards for computer moves." );
 }
 
-extern void CommandSetEvalCache( char *sz ) {
-
-    int n;
-
-    if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	puts( "You must specify the number of cache entries to use." );
-
-	return;
-    }
-
-    if( EvalCacheResize( n ) )
-	perror( "EvalCacheResize" );
-    else
-	printf( "The position cache has been sized to %d entr%s.\n", n,
-		n == 1 ? "y" : "ies" );
-}
+static evalcontext *pecSet;
+static char *szSet, *szSetCommand;
 
 extern void CommandSetEvalCandidates( char *sz ) {
 
     int n = ParseNumber( &sz );
 
     if( n < 0 || n > MAX_SEARCH_CANDIDATES ) {
-	puts( "You must specify a valid number of moves to consider -- try "
-	      "`help set evaluation candidates'." );
+	printf( "You must specify a valid number of moves to consider -- try "
+	      "`help set %sevaluation candidates'.\n", szSetCommand );
 
 	return;
     }
 
-    nSearchCandidates = n;
+    pecSet->nSearchCandidates = n;
 
-    printf( "gnubg will consider up to %d move%s for evaluation at deeper "
-	    "plies.\n", nSearchCandidates, nSearchCandidates == 1 ? "" : "s" );
+    printf( "%s will consider up to %d move%s for evaluation at deeper "
+	    "plies.\n", szSet, pecSet->nSearchCandidates,
+	    pecSet->nSearchCandidates == 1 ? "" : "s" );
 }
 
 extern void CommandSetEvalPlies( char *sz ) {
@@ -410,15 +422,15 @@ extern void CommandSetEvalPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	puts( "You must specify a valid number of plies to look ahead -- try "
-	      "`help set evaluation plies'." );
+	printf( "You must specify a valid number of plies to look ahead -- "
+		"try `help set %sevaluation plies'.\n", szSetCommand );
 
 	return;
     }
 
-    nPliesEval = n;
+    pecSet->nPlies = n;
 
-    printf( "`eval' and `hint' will use %d ply evaluation.\n", nPliesEval );
+    printf( "%s will use %d ply evaluation.\n", szSet, pecSet->nPlies );
 }
 
 extern void CommandSetEvalTolerance( char *sz ) {
@@ -426,16 +438,24 @@ extern void CommandSetEvalTolerance( char *sz ) {
     double r = ParseReal( &sz );
 
     if( r < 0.0 ) {
-	puts( "You must specify a valid cubeless equity tolerance to use -- "
-	      "try `help set\nevaluation tolerance'." );
+	printf( "You must specify a valid cubeless equity tolerance to use -- "
+		"try `help set\n%sevaluation tolerance'.", szSetCommand );
 
 	return;
     }
 
-    rSearchTolerance = r;
+    pecSet->rSearchTolerance = r;
 
-    printf( "gnubg will select moves within %0.3g cubeless equity for\n"
-	    "evaluation at deeper plies.\n", rSearchTolerance );
+    printf( "%s will select moves within %0.3g cubeless equity for\n"
+	    "evaluation at deeper plies.\n", szSet, pecSet->rSearchTolerance );
+}
+
+extern void CommandSetEvaluation( char *sz ) {
+
+    szSet = "`eval' and `hint'";
+    szSetCommand = "";
+    pecSet = &ecEval;
+    HandleCommand( sz, acSetEvaluation );
 }
 
 extern void CommandSetNackgammon( char *sz ) {
@@ -451,6 +471,19 @@ extern void CommandSetNackgammon( char *sz ) {
 }
 
 static int iPlayerSet;
+
+extern void CommandSetPlayerEvaluation( char *sz ) {
+
+    szSet = ap[ iPlayerSet ].szName;
+    szSetCommand = "player ";
+    pecSet = &ap[ iPlayerSet ].ec;
+
+    HandleCommand( sz, acSetEvaluation );
+
+    if( ap[ iPlayerSet ].pt != PLAYER_GNU )
+	printf( "(Note that this setting will have no effect until you "
+		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
+}
 
 extern void CommandSetPlayerGNU( char *sz ) {
 
@@ -516,7 +549,7 @@ extern void CommandSetPlayerPlies( char *sz ) {
 	return;
     }
 
-    ap[ iPlayerSet ].nPlies = n;
+    ap[ iPlayerSet ].ec.nPlies = n;
     
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
 	printf( "Moves for %s will be played with %d ply lookahead (note that "
@@ -627,6 +660,55 @@ extern void CommandSetRNGUser( char *sz ) {
 
 }
 
+extern void CommandSetRolloutEvaluation( char *sz ) {
+
+    szSet = "Rollouts";
+    szSetCommand = "rollout ";
+    pecSet = &ecRollout;
+    HandleCommand( sz, acSetEvaluation );
+}
+
+extern void CommandSetRolloutTrials( char *sz ) {
+    
+    int n = ParseNumber( &sz );
+
+    if( n < 1 ) {
+	puts( "You must specify a valid number of trials to make -- "
+		"try `help set rollout trials'." );
+
+	return;
+    }
+
+    nRollouts = n;
+
+    printf( "%d game%s will be played per rollout.\n", nRollouts,
+	    nRollouts == 1 ? "" : "s" );
+}
+
+extern void CommandSetRolloutTruncation( char *sz ) {
+    
+    int n = ParseNumber( &sz );
+
+    if( n < 1 ) {
+	puts( "You must specify a valid ply at which to truncate  -- "
+		"try `help set rollout truncation'." );
+
+	return;
+    }
+
+    nRolloutTruncate = n;
+
+    printf( "Rollouts will be truncated after %d pl%s.\n", nRolloutTruncate,
+	    nRolloutTruncate == 1 ? "y" : "ies" );
+}
+
+extern void CommandSetRolloutVarRedn( char *sz ) {
+    
+    SetToggle( "rollout varredn", &fVarRedn, sz, "Will lookahead during "
+	       "rollouts to reduce variance.", "Will not use lookahead "
+	       "variance reduction during rollouts." );
+}
+    
 extern void CommandSetScore( char *sz ) {
 
     int n0, n1;

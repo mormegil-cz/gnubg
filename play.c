@@ -87,7 +87,7 @@ static int ComputerTurn( void ) {
 	if( fResigned ) {
 	    float ar[ NUM_OUTPUTS ];
 
-	    EvaluatePosition( anBoard, ar, ap[ fTurn ].nPlies );
+	    EvaluatePosition( anBoard, ar, &ap[ fTurn ].ec );
 
 	    if( -fResigned <= Utility ( ar ) ) {
 		CommandAgree( NULL );
@@ -107,8 +107,8 @@ static int ComputerTurn( void ) {
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
 	    ListInsert( plGame, pmn );
-	    return FindBestMove( ap[ fTurn ].nPlies, pmn->anMove, anDice[ 0 ],
-				 anDice[ 1 ], anBoard );
+	    return FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
+				 anBoard, &ap[ fTurn ].ec );
 	}
 
     case PLAYER_PUBEVAL:

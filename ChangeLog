@@ -1,3 +1,16 @@
+Fri Jan 14 21:18:37 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* set.c, show.c: Added commands to control rollout parameters.
+
+	* database.c: Renamed CommandDatabaseEvaluate to
+	CommandDatabaseRollout.
+
+	* set.c, gnubg.c, eval.c: Added "evalcontext" parameter to
+	several evaluation calls.  The settings for each kind of evaluation
+	(per player, for rollouts, for "eval" and "hint", etc.) are now
+	maintained separately -- e.g. "set player 0 evaluation plies 1",
+	"set rollout evaluation tolerance 0.2", "set evaluation candidates 6".
+
 Thu Jan 13 22:20:11 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* drawboard.c (ParseMove): Fixed off-by-one bug in bit mask fl,

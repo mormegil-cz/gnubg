@@ -4,6 +4,8 @@ duplication of effort and to make sure our changes merge easily.
 
 * Evaluations:
 ** Add more evaluation classes.
+** Allow different settings (e.g. search ply, candidates, tolerance) for each
+  position class.
 *** Add a neural net to correct errors in BEAROFF1 class.
 *** Classes for bearing off against contact, back games, containment
   positions, prime-vs-prime...
@@ -20,9 +22,6 @@ duplication of effort and to make sure our changes merge easily.
 * Command interface:
 ** Check "show" exists for every "set"!
 ** Add more completions to help and readline.
-** Allow user to vary parameters for rollouts (trials, truncation,
-  duplicate dice, quasi-random dice, variance reduction, plies,
-  cubeful, settlements...) in a "set rollout" command.
 ** Allow timeouts for "train" (and others?).
 ** Load, save and analyse games and matches.  Also load matches given
   as command line parameters.

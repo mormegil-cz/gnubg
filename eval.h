@@ -71,6 +71,14 @@
 #define MAX_SEARCH_CANDIDATES 64
 #endif
 
+typedef struct _evalcontext {
+    /* FIXME expand this... e.g. different settings for different position
+       classes */
+    int nPlies;
+    int nSearchCandidates;
+    float rSearchTolerance;
+} evalcontext;
+
 typedef struct _move {
     int anMove[ 8 ];
     unsigned char auch[ 10 ];
@@ -79,8 +87,6 @@ typedef struct _move {
 } move;
 
 extern volatile int fInterrupt;
-extern int nSearchCandidates;
-extern float rSearchTolerance;
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -110,17 +116,18 @@ extern int EvalSave( char *szWeights );
 extern void SetGammonPrice( float rGammon, float rLoseGammon,
 			    float rBackgammon, float rLoseBackgammon );
 extern int EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
-			     int nPlies );
+			     evalcontext *pec );
 extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] );
-extern int FindBestMove( int nPlies, int anMove[ 8 ], int nDice0, int nDice1,
-			 int anBoard[ 2 ][ 25 ] );
+extern int FindBestMove( int anMove[ 8 ], int nDice0, int nDice1,
+			 int anBoard[ 2 ][ 25 ], evalcontext *pec );
 extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] );
 
 extern int TrainPosition( int anBoard[ 2 ][ 25 ], float arDesired[] );
 
 extern int PipCount( int anBoard[ 2 ][ 25 ], int anPips[ 2 ] );
 
-extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput, int nPlies );
+extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
+			 evalcontext *pec );
 
 extern void SwapSides( int anBoard[ 2 ][ 25 ] );
 extern int GameStatus( int anBoard[ 2 ][ 25 ] );
@@ -130,10 +137,11 @@ extern int EvalCacheStats( int *pc, int *pcLookup, int *pcHit );
 
 extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 			  int n0, int n1, int fPartial );
-extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ], int nPlies,
+extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
 			  int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
-			  int c, float d );
+			  int c, float d, evalcontext *pec );
 extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
+extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] );
 
 /* internal use only */
 extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
@@ -142,6 +150,5 @@ extern float Utility( float ar[ NUM_OUTPUTS ] );
 extern void swap( int *p0, int *p1 );
 extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] );
-extern positionclass ClassifyPosition( int anBoard[ 2 ][ 25 ] );
 
 #endif

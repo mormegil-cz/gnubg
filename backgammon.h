@@ -25,8 +25,10 @@
 #if !X_DISPLAY_MISSING
 #include <ext.h>
 extern extwindow ewnd;
-extern int fX;
+extern int fX, nDelay;
 #endif
+
+#include "eval.h"
 
 #define MAX_CUBE ( 1 << 12 )
 
@@ -44,7 +46,7 @@ typedef enum _playertype {
 typedef struct _player {
     char szName[ 32 ];
     playertype pt;
-    int nPlies;
+    evalcontext ec;
 } player;
 
 typedef enum _movetype {
@@ -73,12 +75,12 @@ typedef union _moverecord {
 extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
 
 extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
-    fAutoGame, fAutoMove, fResigned, fMove, fDoubled, nPliesEval, anScore[ 2 ],
+    fAutoGame, fAutoMove, fResigned, fMove, fDoubled, anScore[ 2 ],
     cGames, nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
-    fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse, fNackgammon;
-#if !X_DISPLAY_MISSING
-extern int nDelay;
-#endif
+    fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse, fNackgammon,
+    fVarRedn, nRollouts, nRolloutTruncate;
+
+extern evalcontext ecEval, ecRollout, ecTD;
 
 extern list lMatch, *plGame; /* (list of) list of moverecords */
 
@@ -99,7 +101,7 @@ extern void ShowBoard( void );
 extern void CommandAccept( char * ),
     CommandAgree( char * ),
     CommandDatabaseDump( char * ),
-    CommandDatabaseEvaluate( char * ),
+    CommandDatabaseRollout( char * ),
     CommandDatabaseGenerate( char * ),
     CommandDatabaseTrain( char * ),
     CommandDecline( char * ),
@@ -132,6 +134,7 @@ extern void CommandAccept( char * ),
     CommandSetCrawford( char * ),
     CommandSetPostCrawford( char * ),
     CommandSetBoard( char * ),
+    CommandSetCache( char * ),
     CommandSetCubeCentre( char * ),
     CommandSetCubeOwner( char * ),
     CommandSetCubeUse( char * ),
@@ -139,11 +142,12 @@ extern void CommandAccept( char * ),
     CommandSetDelay( char * ),
     CommandSetDice( char * ),
     CommandSetDisplay( char * ),
-    CommandSetEvalCache( char * ),
     CommandSetEvalCandidates( char * ),
     CommandSetEvalPlies( char * ),
     CommandSetEvalTolerance( char * ),
+    CommandSetEvaluation( char * ),
     CommandSetNackgammon( char * ),
+    CommandSetPlayerEvaluation( char * ),
     CommandSetPlayerGNU( char * ),
     CommandSetPlayerHuman( char * ),
     CommandSetPlayerName( char * ),
@@ -157,11 +161,16 @@ extern void CommandAccept( char * ),
     CommandSetRNGManual( char * ),
     CommandSetRNGMersenne( char * ),
     CommandSetRNGUser( char * ),
+    CommandSetRolloutEvaluation( char * ),
+    CommandSetRolloutTrials( char * ),
+    CommandSetRolloutTruncation( char * ),
+    CommandSetRolloutVarRedn( char * ),
     CommandSetScore( char * ),
     CommandSetSeed( char * ),
     CommandSetTurn( char * ),
     CommandShowAutomatic( char * ),
     CommandShowBoard( char * ),
+    CommandShowCache( char * ),
     CommandShowCopying( char * ),
     CommandShowCrawford( char * ),
     CommandShowDice( char * ),
@@ -171,6 +180,7 @@ extern void CommandAccept( char * ),
     CommandShowPostCrawford( char * ),
     CommandShowPlayer( char * ),
     CommandShowRNG( char * ),
+    CommandShowRollout( char * ),
     CommandShowScore( char * ),
     CommandShowTurn( char * ),
     CommandShowWarranty( char * ),

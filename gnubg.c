@@ -73,21 +73,25 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
     fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
     fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 1,
-    fCubeUse = TRUE, fNackgammon = FALSE;
+    fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
+    nRollouts = 1296, nRolloutTruncate = 7;
+
+evalcontext ecTD = { 0, 8, 0.16 }, ecEval = { 1, 8, 0.16 },
+    ecRollout = { 0, 8, 0.16 };
 
 #if !X_DISPLAY_MISSING
 int nDelay = 0;
 #endif
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, 0 },
-    { "user", PLAYER_HUMAN, 0 }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16 } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16 } }
 };
 
 static command acDatabase[] = {
     { "dump", CommandDatabaseDump, "List the positions in the database",
       NULL },
-    { "evaluate", CommandDatabaseEvaluate, "Evaluate positions in database "
+    { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
       "for future training", NULL },
     { "generate", CommandDatabaseGenerate, "Generate database positions by "
       "self-play", NULL },
@@ -134,16 +138,6 @@ static command acDatabase[] = {
     { "value", CommandSetCubeValue, "Fix what the cube has been set to",
       NULL },
     { NULL, NULL, NULL, NULL }
-}, acSetEvaluation[] = {
-    { "cache", CommandSetEvalCache, "Set the size of the evaluation "
-      "cache", NULL },
-    { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
-      "for deep evaluation", NULL },
-    { "plies", CommandSetEvalPlies, "Choose how many plies the `eval' and "
-      "`hint' commands look ahead", NULL },
-    { "tolerance", CommandSetEvalTolerance, "Control the equity range "
-      "of moves for deep evaluation", NULL },
-    { NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
       "congruential) generator", NULL },
@@ -155,11 +149,26 @@ static command acDatabase[] = {
       NULL },
     { "user", CommandSetRNGUser, "Specify an external generator", NULL },
     { NULL, NULL, NULL, NULL }
+}, acSetRollout[] = {
+    { "evaluation", CommandSetRolloutEvaluation, "Specify parameters "
+      "for evaluation during rollouts", NULL },
+    { "seed", CommandNotImplemented, "Specify the base pseudo-random seed "
+      "to use for rollouts", NULL },
+    { "trials", CommandSetRolloutTrials, "Control how many rollouts to "
+      "perform", NULL },
+    { "truncation", CommandSetRolloutTruncation, "End rollouts at a "
+      "particular depth", NULL },
+    { "varredn", CommandSetRolloutVarRedn, "Use lookahead during rollouts "
+      "to reduce variance", NULL },
+    /* FIXME add commands for cubeful rollouts, cube variance reduction,
+       quasi-random dice, settlements... */
+    { NULL, NULL, NULL, NULL }
 }, acSet[] = {
     { "automatic", NULL, "Perform certain functions without user input",
       acSetAutomatic },
     { "board", CommandSetBoard, "Set up the board in a particular "
       "position", NULL },
+    { "cache", CommandSetCache, "Set the size of the evaluation cache", NULL },
     { "crawford", CommandSetCrawford, 
       "Set whether this is the Crawford game", NULL },
     { "cube", NULL, "Set the cube owner and/or value", acSetCube },
@@ -169,8 +178,8 @@ static command acDatabase[] = {
       NULL },
     { "display", CommandSetDisplay, "Select whether the board is updated on "
       "the computer's turn", NULL },
-    { "evaluation", NULL, "Control position evaluation parameters",
-      acSetEvaluation },
+    { "evaluation", CommandSetEvaluation, "Control position evaluation "
+      "parameters", NULL },
     { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in"
       "money game", NULL },
     { "nackgammon", CommandSetNackgammon, "Set the starting position", NULL },
@@ -181,6 +190,7 @@ static command acDatabase[] = {
     { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
       "ready for commands", NULL },
     { "rng", NULL, "Select the random number generator algorithm", acSetRNG },
+    { "rollout", NULL, "Control rollout parameters", acSetRollout },
     { "score", CommandSetScore, "Set the match or session score ",
       NULL },
     { "seed", CommandSetSeed, "Set the dice generator seed", NULL },
@@ -190,6 +200,8 @@ static command acDatabase[] = {
     { "automatic", CommandShowAutomatic, "List which functions will be "
       "performed without user input", NULL },
     { "board", CommandShowBoard, "Redisplay the board position", NULL },
+    { "cache", CommandShowCache, "Display statistics on the evaluation "
+      "cache", NULL },
     { "copying", CommandShowCopying, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
     /* FIXME show cube */
@@ -209,6 +221,8 @@ static command acDatabase[] = {
       "See if this is post-Crawford play", NULL },
     { "rng", CommandShowRNG, "Display which random number generator "
       "is being used", NULL },
+    { "rollout", CommandShowRollout, "Display the evaluation settings used "
+      "during rollouts", NULL },
     { "score", CommandShowScore, "View the match or session score ",
       NULL },
     { "turn", CommandShowTurn, "Show which player is on roll", NULL },
@@ -655,7 +669,7 @@ extern void CommandEval( char *sz ) {
 	return;
     }
 
-    if( !DumpPosition( an, szOutput, nPliesEval ) )
+    if( !DumpPosition( an, szOutput, &ecEval ) )
 	puts( szOutput );
 }
 
@@ -699,8 +713,9 @@ extern void CommandHint( char *sz ) {
 	return;
     }
 
-    FindBestMoves( &ml, aar, nPliesEval, anDice[ 0 ], anDice[ 1 ], anBoard,
-		   10, 0.2 );
+    FindBestMoves( &ml, aar, anDice[ 0 ], anDice[ 1 ], anBoard,
+		   ecEval.nSearchCandidates, ecEval.rSearchTolerance,
+		   &ecEval );
 
     if( fInterrupt )
 	return;
@@ -742,7 +757,8 @@ extern void CommandRollout( char *sz ) {
 	return;
     }
 
-    if( ( c = Rollout( an, ar, arStdDev, 0, 7, 72, TRUE ) ) < 0 )
+    if( ( c = Rollout( an, ar, arStdDev, nRolloutTruncate, nRollouts,
+		       fVarRedn, &ecRollout ) ) < 0 )
 	return;
 
     printf( "Result (after %d trials):\n\n"
@@ -874,15 +890,15 @@ extern void CommandTrainTD( char *sz ) {
 
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
 	    
-	    FindBestMove( 0, NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-			  anBoardTrain );
+	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
+			  anBoardTrain, &ecTD );
 
 	    if( fInterrupt )
 		return;
 	    
 	    SwapSides( anBoardTrain );
 	    
-	    EvaluatePosition( anBoardTrain, ar, 0 );
+	    EvaluatePosition( anBoardTrain, ar, &ecTD );
 
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar ) )

@@ -41,6 +41,15 @@
 
 extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
+static void ShowEvaluation( evalcontext *pec ) {
+    
+    printf( "    %d-ply evaluation.\n"
+	    "    %d move search candidate%s.\n"
+	    "    %0.3g cubeless search tolerance.\n\n",
+	    pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
+	    "" : "s", pec->rSearchTolerance );
+}
+
 static void ShowPaged( char **ppch ) {
 
     int i, nRows = 0, ch;
@@ -136,6 +145,23 @@ extern void CommandShowBoard( char *sz ) {
 	puts( DrawBoard( szOut, an, TRUE, ap ) );
 }
 
+extern void CommandShowCache( char *sz ) {
+
+    int c, cLookup, cHit;
+
+    EvalCacheStats( &c, &cLookup, &cHit );
+
+    printf( "%d cache entries have been used.  %d lookups, %d hits",
+	    c, cLookup, cHit );
+
+    if( cLookup )
+	printf( " (%d%%).", ( cHit * 100 + cLookup / 2 ) / cLookup );
+    else
+	putchar( '.' );
+
+    putchar( '\n' );
+}
+
 extern void CommandShowCopying( char *sz ) {
 
     ShowPaged( aszCopying );
@@ -171,23 +197,8 @@ extern void CommandShowDice( char *sz ) {
 
 extern void CommandShowEvaluation( char *sz ) {
 
-    int c, cLookup, cHit;
-    
-    EvalCacheStats( &c, &cLookup, &cHit );
-
-    printf( "%d cache entries have been used.  %d lookups, %d hits",
-	    c, cLookup, cHit );
-
-    if( cLookup )
-	printf( " (%d%%).", ( cHit * 100 + cLookup / 2 ) / cLookup );
-    else
-	putchar( '.' );
-
-    printf( "\n\nThe `eval' and `hint' commands will use %d-ply evaluation.\n"
-	    "\nUp to %d move%s (with a base cubeless evaluation difference of "
-	    "%0.3g) will be\nselected for lookahead evaluation.\n",
-	    nPliesEval, nSearchCandidates, nSearchCandidates == 1 ? "" : "s",
-	    rSearchTolerance );
+    puts( "`eval' and `hint' will use:" );
+    ShowEvaluation( &ecEval );
 }
 
 extern void CommandShowJacoby( char *sz ) {
@@ -231,7 +242,8 @@ extern void CommandShowPlayer( char *sz ) {
 
 	switch( ap[ i ].pt ) {
 	case PLAYER_GNU:
-	    printf( "gnubg (%d ply)\n\n", ap[ i ].nPlies );
+	    printf( "gnubg:\n" );
+	    ShowEvaluation( &ap[ i ].ec );
 	    break;
 	case PLAYER_PUBEVAL:
 	    puts( "pubeval\n" );
@@ -266,6 +278,17 @@ extern void CommandShowRNG( char *sz ) {
   printf( "You are using the %s generator.\n",
 	  aszRNG[ rngCurrent ] );
     
+}
+
+extern void CommandShowRollout( char *sz ) {
+
+    puts( "Rollouts will use:" );
+    ShowEvaluation( &ecRollout );
+
+    printf( "%d game%s will be played per rollout, truncating after %d "
+	    "pl%s.\nLookahead variance reduction is %sabled.\n",
+	    nRollouts, nRollouts == 1 ? "" : "s", nRolloutTruncate,
+	    nRolloutTruncate == 1 ? "y" : "ies", fVarRedn ? "en" : "dis" );
 }
 
 extern void CommandShowScore( char *sz ) {
