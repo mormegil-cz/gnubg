@@ -440,8 +440,8 @@ static void SetSkillThreshold( skilltype lt, char *sz ) {
     double r = ParseReal( &sz );
     char *szCommand = gettext ( aszSkillTypeCommand[ lt ] );
 
-    if( r <= 0.0 ) {
-	outputf( _("You must specify a positive number for the threshold (see "
+    if( r < 0.0 ) {
+	outputf( _("You must specify a semi-positive number for the threshold (see "
 		 "`help set analysis\nthreshold %s').\n"), szCommand );
 	return;
     }

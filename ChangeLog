@@ -1,3 +1,8 @@
+Sun Aug 24 11:05:13 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* set.c (SetSkillThreshold): allow setting threshold to zero.
+	(suggested by Michael Depreli)
+
 Sat Aug 23 17:31:30 Jim Segrave <jes@jes-2.demon.nl>
 
 	* backgammon.h, gnubg.c add dicerolls nnn command to output list
