@@ -432,8 +432,12 @@ static void
 TempMapPlyToggled( GtkWidget *pw, tempmapwidget *ptmw ) {
 
   int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
+#if defined(REDUCTION_CODE)
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
-
+#else
+  evalcontext ec = { TRUE, 0, FALSE, TRUE, 0.0 };
+#endif
+  
   if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) ) ) {
 
     /* recalculate equities */
@@ -504,7 +508,12 @@ extern void
 GTKShowTempMap( const matchstate ams[], const int n,
                 const gchar *aszTitle[], const int fInvert ) {
 
+#if defined(REDUCTION_CODE)
   evalcontext ec = { TRUE, 0, 0, TRUE, 0.0 };
+#else
+  evalcontext ec = { TRUE, 0, FALSE, TRUE, 0.0 };
+#endif
+
   tempmapwidget *ptmw;
   int *pi;
   int i, j;
