@@ -9,3 +9,6 @@ touch doc/Makefile.in
 touch ext/Makefile.in
 touch lib/Makefile.in
 touch met/Makefile.in
+touch intl/Makefile.in
+touch po/Makefile.in
+touch m4/Makefile.in
