@@ -28,7 +28,7 @@ endif
 
 ## timecontrol
 if USE_TIMECONTROL
-TIME_SOURCES = timecontrol.h timecontrol.c
+TIME_SOURCES = timecontrol.h timecontrol.c tctutorial.h
 else
 TIME_SOURCES =
 endif
