@@ -806,9 +806,10 @@ Backgammon will drop this double:
 
 @example
 (user) double
-O refuses the cube and gives up 1 point.
-X wins a single game and 1 points.
-The score (after 1 game) is: O 0, X 1.
+gnubg refuses the cube and gives up 1 point.
+user wins a single game and 1 points.
+The score (after 1 game) is: gnubg 0, user 1 (money session,
+without Jacoby rule).
 @end example
 
 That concludes the example game.  You have seen most of the commands
