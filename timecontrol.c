@@ -10,6 +10,11 @@
 #include "i18n.h"
 #include "sound.h"
 #include "timecontrol.h"
+#include "gtkgame.h"
+
+#if WIN32
+#include "ctype.h"
+#endif
 
 #if USE_TIMECONTROL
 
@@ -22,13 +27,13 @@ static char szTCPLAIN[] = N_("plain")
 	, szTCBRONSTEIN[] = N_("bronstein")
 	, szTCHOURGLASS[] = N_("hourglass")
 	, szTCNONE[] = N_("none")
-	, szTCLOSS[] = N_("lose")
+//	, szTCLOSS[] = N_("lose")
 	, szTCTIME[] = N_("tctime")
 	, szTCPOINT[] = N_("tcpoint") /* time per point */
 	, szTCMOVE[] = N_("tcmove") /* time per move */
 	, szTCPENALTY[] = N_("tcpenalty")
 	, szTCMULT[] = N_("tcmult") /* time multiplier */
-	, szTCNEXT[] = N_("tcnext") /* secondary time control */
+//	, szTCNEXT[] = N_("tcnext") /* secondary time control */
 	, szTCOFF[] = "Time control off"
 	;
 
@@ -37,7 +42,6 @@ static tcnode *tcHead = 0;
 static int str2time( char *sz ) {
 
     int t=0;
-    int f=1;
     char *pch=sz;
 
     if( !sz  )
@@ -97,9 +101,10 @@ static void tcCopy(timecontrol *dst, timecontrol *src)
 
 static timecontrol *findOrDeleteTimeControl( char *sz, int del )
 {
+	tcnode **ppNode, **ppRefNode;
     if (!sz || !*sz ) return 0;
-    tcnode **ppNode=&tcHead;
-    tcnode **ppRefNode=0;
+    ppNode=&tcHead;
+    ppRefNode=0;
     while (*ppNode)
     {
 	if (0 == strcasecmp(sz, (*ppNode)->ptc->szName) )
@@ -123,6 +128,7 @@ static timecontrol *findOrDeleteTimeControl( char *sz, int del )
     free((*ppRefNode)->ptc);
     free(*ppRefNode);
     *ppRefNode = next;
+	return 0;
     }
     else
 	return (*ppRefNode)->ptc;
@@ -140,11 +146,12 @@ static void unnameTimeControl( char *sz )
 
 static void setNameModified( )
 {
+	char *p;
     if (!tc.szName) return;
     if (0 == strcmp(tc.szName+strlen(tc.szName) - strlen(_("(modified)")),
 	_("(modified)")) ) 
 	return;
-    char *p = malloc(strlen(tc.szName)+12);
+    p = malloc(strlen(tc.szName)+12);
     sprintf(p, "%s %s", tc.szName, _("(modified)"));
     free (tc.szName);
     tc.szName = p;
@@ -193,8 +200,12 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
     case TC_HOURGLASS:
 	outputf(_("%*sHourglass timing\n"), 2*level,"");
 	break;
+	case TC_NONE:
+	case TC_UNKNOWN:
+		/* ignore */
+		break;
     }
-    outputf("%*s%-*s (%s): ", 2*level,"",
+    outputf("%*s%-*s (%s) %d: ", 2*level,"",
 		30-strlen(szTCPENALTY),
 		"Penalty points",
 		szTCPENALTY,
@@ -225,11 +236,12 @@ static void showTimeControl( timecontrol *ptc, int level, int levels )
 		szTCMOVE,
 		time2str(ptc->nMoveAllowance, 0));
     if (ptc->dMultiplier != 1.0) 
-	outputf("%*s%-*s (%s): %9.2f\n", 2*level,"",
+	outputf("%*s%-*s (%s): %9s\n", 2*level,"",
 		30-strlen(szTCMULT),
 		"Scale old time by:",
 		szTCMULT,
-		time2str(ptc->dMultiplier, 0));
+		time2str(ptc->dMultiplier, 0)
+		);
 
 
     if (ptc->szNext) {
@@ -363,7 +375,7 @@ extern void CommandSetTimeControl( char *sz ) {
     if (strcasecmp(sz, "off"))
     {
 	timecontrol *ptc;
-	if (ptc = findTimeControl(sz))
+	if ((ptc = findTimeControl(sz)))
 	{
 	    outputf(_("Time control set to %s\n"), ptc->szName);
 	    tcCopy( &tc, ptc);
@@ -387,10 +399,11 @@ extern void CommandSetTimeControl( char *sz ) {
 
 
 extern void CommandShowTimeControl( char *sz ) {
+	timecontrol *ptc;
      char *name = NextToken ( &sz );
      int level = ParseNumber ( &sz );
      if (INT_MIN == level) level=1;
-     timecontrol *ptc = findTimeControl(name);
+     ptc = findTimeControl(name);
      if (ptc)
 	showTimeControl(ptc, 1, level);
      else
@@ -398,10 +411,11 @@ extern void CommandShowTimeControl( char *sz ) {
 }
 
 extern void CommandShowTCList( char *sz ) {
+	tcnode *node;
    char *arg= NextToken ( &sz );
    int all = arg && ! strncasecmp(arg, "all", strlen(arg));
    outputf(_("Defined time controls:\n"));
-   tcnode *node=tcHead;
+   node=tcHead;
    while (node)
    {
 	if (all || '.' != *(node->ptc->szName))
@@ -421,7 +435,7 @@ static int applyPenalty(matchstate *pms)
 	timecontrol *newtc;
 	playerclock *pgcPlayer=&pms->gc.pc[pms->fTurn],
 	    *pgcOpp=&pms->gc.pc[!pms->fTurn];
-	int penalty;
+	int penalty = 0;
 
 	switch (pgcPlayer->tc.penalty ) {
 	case TC_POINT:
@@ -524,7 +538,9 @@ extern int CheckGameClock(matchstate *pms, struct timeval *tvp)
     if (0 == tvp)
     {
 	tvp = &ts;
+#if !WIN32
 	gettimeofday(tvp,0);
+#endif
     }
 
 #ifdef TCDEBUG
@@ -576,7 +592,9 @@ printf("CheckGameClock (%d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n
 	assert (timerisset(&pgcPlayer->tvStamp) &&  
 	   ! timercmp(&pgcOpp->tvStamp, &pgcPlayer->tvStamp, <) );
 
+#if !WIN32
     timersub(tvp, & pgcOpp->tvStamp, &used);
+#endif
     switch ( pgcPlayer->tc.timing ) {
     case TC_BRONSTEIN:
 	{
@@ -585,20 +603,25 @@ printf("CheckGameClock (%d.%d): state:%d, turn: %d, ts0: (%d.%d), ts1: (%d.%d)\n
 	if ( timercmp(tvp, &ref, <) ) {
 		timerclear(&used);
 	} else if ( timercmp(&pgcOpp->tvStamp, &ref, <) ) {
+#if !WIN32
 	    timersub(tvp, &ref, &used);
+#endif
 	}
 	}
 	break;
     case TC_HOURGLASS:
+#if !WIN32
 	timeradd(&pgcOpp->tvTimeleft, &used, &pgcOpp->tvTimeleft);
+#endif
 	break;
     case TC_FISCHER:
     case TC_PLAIN:
     default:
 	break;
     }
+#if !WIN32
     timersub(&pgcPlayer->tvTimeleft, &used, &pgcPlayer->tvTimeleft);
-
+#endif
     while ( pgcPlayer->tvTimeleft.tv_sec < 0 )
 	pen += applyPenalty(pms);
 
@@ -628,7 +651,7 @@ static char staticBuf[20];
     long sec=ptl->tv_sec;
     int h,m,s;
     int neg;
-    if (neg=(sec<0)) sec = -sec;
+    if ((neg=(sec<0))) sec = -sec;
     s = sec%60;
     sec/=60;
     m = sec%60;
@@ -650,9 +673,9 @@ extern int UpdateClockNotify(void *p)
 {
  /* I think, ie. not last move */
     if (!plLastMove || plLastMove->plNext != plGame)
-	return;
+	return 0;
 
-    if ( GAME_PLAYING != ms.gs ) return;
+    if ( GAME_PLAYING != ms.gs ) return 0;
 
     CheckGameClock(&ms, 0);
 
@@ -660,14 +683,16 @@ extern int UpdateClockNotify(void *p)
     if (fX)
 	GTKUpdateClock();
 #endif
+	return 1;
 }
 
 extern void SaveTimeControlSettings( FILE *pf )
 {
+	tcnode *pNode;
    if ( NULL == pf ) 
 	return;
 
-   tcnode *pNode=tcHead;
+   pNode=tcHead;
     while (pNode)
     {
 	if (TC_LOSS == pNode->ptc->penalty)
