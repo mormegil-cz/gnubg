@@ -122,7 +122,7 @@ extern char *PositionID( int anBoard[ 2 ][ 25 ] ) {
 }
 
 
-static int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
+extern int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
 
     int ac[ 2 ], i;
 
