@@ -63,7 +63,7 @@ typedef struct _racewidget {
 static GtkWidget *
 KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
 
-  GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
+  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
@@ -175,19 +175,16 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     g_free ( sz );
 
-
   }
-
 
   return pwp;
 
 }
 
-
 static GtkWidget *
 ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
 
-  GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
+  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
@@ -263,25 +260,22 @@ ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
   gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
   g_free ( sz );
 
-  
-
   return pwp;
 
 }
-
 
 static GtkWidget *
 EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
                    epcwidget *pepcw ) {
 
   GtkWidget *pwTable = gtk_table_new( 3, 4, FALSE );
-  GtkWidget *pwvbox = gtk_vbox_new( 0, FALSE );
+  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 0 );
   GtkWidget *pw;
   GtkWidget *pwFrame;
   gchar *sz;
   int i;
 
-  pwFrame = gtk_frame_new( _("Effective pip count" ) );
+  pwFrame = gtk_frame_new( _( "Effective pip count" ) );
 
   gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
   gtk_container_set_border_width( GTK_CONTAINER( pwvbox ), 4 );
@@ -340,18 +334,14 @@ EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
                        FALSE, FALSE, 0 );
   gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
 
-
   return pwFrame;
 
 }
 
-
-
-
 static GtkWidget *
 OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
 
-  GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
+  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pwTable = gtk_table_new ( 3, 4, FALSE );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
@@ -480,7 +470,6 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
 
 }
 
-
 static void
 PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
@@ -510,7 +499,7 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
   }
 
   for ( i = 0; i < 5; ++i )
-    gtk_clist_set_text ( GTK_CLIST ( pwOutput ), 1, i + 1, _("n/a" ) );
+    gtk_clist_set_text ( GTK_CLIST ( pwOutput ), 1, i + 1, _( "n/a" ) );
 
   /* effective pip count */
 
@@ -526,15 +515,12 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
 
   }
 
-  
-
 }
-
 
 static GtkWidget *
 OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
 
-  GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
+  GtkWidget *pwvbox = gtk_vbox_new( FALSE, 4 );
   GtkWidget *pw;
   GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
   int i;
@@ -556,22 +542,24 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
                                                       1296 * 1296, 36, 36, 0 ));
   pw = gtk_hbox_new( FALSE, 0 );
   gtk_box_pack_start( GTK_BOX( pwvbox), pw, FALSE, FALSE, 4 );
-  gtk_container_add( GTK_CONTAINER( pw ),
-                     gtk_label_new( _("Trials:") ) );
-  gtk_container_add( GTK_CONTAINER( pw ),
-                     gtk_spin_button_new( prw->padjTrials, 36, 0 ) );
 
-  gtk_container_add( GTK_CONTAINER ( pw ),
-                     prw->pwRollout = 
-                     gtk_button_new_with_label ( _("Roll out" ) ) );
+  gtk_box_pack_start( GTK_BOX( pw ),
+                      gtk_label_new( _("Trials:") ), FALSE, FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pw ),
+                      gtk_spin_button_new( prw->padjTrials, 36, 0 ),
+                      TRUE, TRUE, 4 );
+  gtk_box_pack_start( GTK_BOX( pw ),
+                      prw->pwRollout = 
+				gtk_button_new_with_label( _( "Roll out" ) ),
+                      TRUE, TRUE, 4 );
 
   gtk_signal_connect( GTK_OBJECT( prw->pwRollout ), "clicked", 
                       GTK_SIGNAL_FUNC( PerformOSR ), prw );
 
   /* separator */
 
-  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                       gtk_hseparator_new() , FALSE, FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pwvbox ),
+                      gtk_hseparator_new() , FALSE, FALSE, 4 );
 
   /* result */
 
@@ -597,8 +585,8 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
 
   gtk_clist_append ( GTK_CLIST ( prw->pwOutput ), asz );
   gtk_clist_append ( GTK_CLIST ( prw->pwOutput ), asz );
-  gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 0, 0, _("Rollout" ) );
-  gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 1, 0, _("Std.dev." ) );
+  gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 0, 0, _( "Rollout" ) );
+  gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 1, 0, _( "Std.dev." ) );
 
   /* effective pip count */
 
@@ -608,8 +596,6 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
   gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
                        EffectivePipCount( ar0, ar0, &prw->epcwOSR ),
                        FALSE, FALSE, 4 );
-
-  
 
   return pwp;
 
@@ -695,4 +681,3 @@ GTKShowRace ( const int fActivePage, int anBoard[ 2 ][ 25 ] ) {
   GTKAllowStdin();
 
 }
-

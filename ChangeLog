@@ -1,3 +1,7 @@
+Mon Aug 18 19:41:07 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* gtkrace.c: bug fix: race theory window didn't even fit on 1024x768
+
 Mon Aug 18 18:54:36 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkbearoff.c (ToggleWho, BearoffSet): remove debug printf.
