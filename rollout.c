@@ -990,6 +990,9 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
   /* print statistics */
 
+#if 0
+  /* FIXME: make output prettier -- and move to GTKRollout*. */
+
   for ( ici = 0; ici < cci; ici++ ) {
     outputf ( "\n\n rollout no %d\n", ici );
     for ( i = 0; i < 2; i++ ) {
@@ -1000,6 +1003,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
     }
 
   }
+#endif
 
   return cGames;
 }
