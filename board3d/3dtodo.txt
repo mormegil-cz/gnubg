@@ -2,13 +2,8 @@
 Todo
 ====
 
-Fillet top edge of board?
-	* Try just 4 outside corners to start with
-		+ Reduce size slightly and round resulting gap
-		+ Look at texturing this
-		+ Look at shadow... (just make smaller?)
-		+ Ignore (don't fillet) hinge gap
-	* Then six inside rectangles...
+* Fillet top edge of board
+	+ Look at textures
 
 Bugs
 ====
