@@ -54,6 +54,18 @@
 #endif
 
 
+typedef struct _hashentryonesided {
+  unsigned int nPosID;
+  unsigned short int aus[ 64 ];
+} hashentryonesided;
+
+typedef struct _hashentrytwosided {
+  unsigned int nPosID;
+  unsigned char auch[ 8 ];
+} hashentrytwosided;
+
+
+
 char *aszBearoffGenerator[ NUM_BEAROFFS ] = {
   N_("GNU Backgammon"),
   N_("ExactBearoff"),
@@ -110,6 +122,40 @@ setGammonProb(int anBoard[2][25], int bp0, int bp1, float* g0, float* g1)
 	   + (prob[3]/65535.0) * (1-make[2]));
   }
 }  
+
+
+static int
+hcmpOneSided( void *p1, void *p2 ) {
+
+  hashentryonesided *ph1 = p1;
+  hashentryonesided *ph2 = p2;
+
+  if ( ph1->nPosID < ph2->nPosID )
+    return -1;
+  else if ( ph1->nPosID == ph2->nPosID )
+    return 0;
+  else
+    return 1;
+
+}
+
+static int
+hcmpTwoSided( void *p1, void *p2 ) {
+
+
+  hashentryonesided *ph1 = p1;
+  hashentryonesided *ph2 = p2;
+
+  if ( ph1->nPosID < ph2->nPosID )
+    return -1;
+  else if ( ph1->nPosID == ph2->nPosID )
+    return 0;
+  else
+    return 1;
+
+}
+
+
 
 
 
@@ -271,6 +317,13 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
 }
 
 
+static unsigned long
+HashTwoSided ( const unsigned int nPosID ) {
+  return nPosID;
+}
+
+
+
 /*
  * BEAROFF_GNUBG: read two sided bearoff database
  *
@@ -284,15 +337,46 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
   int k = ( pbc->fCubeful ) ? 4 : 1;
   int i;
   unsigned char ac[ 8 ];
-  unsigned char *pc;
+  unsigned char *pc = NULL;
   unsigned short int us;
 
-  if ( pbc->fInMemory )
-    pc = ((char *) pbc->p)+ 40 + 2 * iPos * k;
-  else {
-    lseek ( pbc->h, 40 + 2 * iPos * k, SEEK_SET );
-    read ( pbc->h, ac, k * 2 );
-    pc = ac;
+  /* look up in cache */
+
+  if ( ! pbc->fInMemory && pbc->ph ) {
+
+    hashentrytwosided *phe;
+    hashentrytwosided he;
+    
+    he.nPosID = iPos;
+    if ( ( phe = HashLookup ( pbc->ph, HashTwoSided ( iPos ), &he ) ) ) 
+      pc = phe->auch;
+      
+  }
+
+  if ( ! pc ) {
+
+    if ( pbc->fInMemory )
+      pc = ((char *) pbc->p)+ 40 + 2 * iPos * k;
+    else {
+      lseek ( pbc->h, 40 + 2 * iPos * k, SEEK_SET );
+      read ( pbc->h, ac, k * 2 );
+      pc = ac;
+    }
+
+    /* add to cache */
+
+    if ( ! pbc->fInMemory ) {
+      /* add to cache */
+      hashentrytwosided *phe = 
+        (hashentrytwosided *) malloc ( sizeof ( hashentrytwosided ) );
+      if ( phe ) {
+        phe->nPosID = iPos;
+        memcpy ( phe->auch, pc, sizeof ( phe->auch ) );
+        HashAdd ( pbc->ph, HashTwoSided ( iPos ), phe );
+      }
+      
+    }
+    
   }
 
   for ( i = 0; i < k; ++i ) {
@@ -655,6 +739,13 @@ BearoffStatus ( bearoffcontext *pbc, char *sz ) {
               pbc->nReads );
     
   }
+
+  if ( pbc->ph )
+    sprintf ( strchr ( sz, 0 ),
+              _("   - cache: size %lu entries, %lu look-ups "
+                "(%lu hits, and %lu misses)\n"),
+              pbc->ph->cSize, pbc->ph->cLookups, 
+              pbc->ph->cHits, pbc->ph->cMisses );
   
 }
 
@@ -957,6 +1048,7 @@ BearoffInit ( const char *szFilename, const char *szDir,
     pbc->fHeuristic = TRUE;
     pbc->fMalloc = TRUE;
     pbc->p = HeuristicDatabase ( pfProgress );
+    pbc->ph = NULL;
 
     return pbc;
     
@@ -1182,6 +1274,18 @@ BearoffInit ( const char *szFilename, const char *szDir,
     pbc->h = -1;
     
   }
+
+
+  /* create cache */
+
+  if ( ! pbc->fInMemory ) {
+    if ( ! ( pbc->ph = (hash *) malloc ( sizeof ( hash ) ) ) ||
+         HashCreate ( pbc->ph, ( pbc->fTwoSided ? 100000 : 10000 ), 
+                      ( pbc->fTwoSided ? hcmpTwoSided : hcmpOneSided ) ) < 0 )
+      pbc->ph = NULL;
+  }
+  else
+    pbc->ph = NULL;
   
   pbc->nReads = 0;
   
@@ -1267,6 +1371,191 @@ ReadBearoffOneSidedND ( bearoffcontext *pbc,
 }
 
 
+static unsigned long
+HashOneSided ( const unsigned int nPosID ) {
+  return nPosID;
+}
+
+
+static void
+AssignOneSided ( float arProb[ 32 ], float arGammonProb[ 32 ],
+                 float ar[ 4 ],
+                 unsigned short int ausProb[ 32 ], 
+                 unsigned short int ausGammonProb[ 32 ],
+                 const unsigned short int ausProbx[ 32 ],
+                 const unsigned short int ausGammonProbx[ 32 ] ) {
+
+  int i;
+  float arx[ 64 ];
+
+  if ( ausProb )
+    memcpy ( ausProb, ausProbx, sizeof ( ausProb ) );
+
+  if ( ausGammonProb )
+    memcpy ( ausGammonProb, ausGammonProbx, sizeof ( ausGammonProbx ) );
+
+  if ( ar || arProb || arGammonProb ) {
+    for ( i = 0; i < 32; ++i ) 
+      arx[ i ] = ausProbx[ i ] / 65535.0f;
+    
+    for ( i = 0; i < 32; ++i ) 
+      arx[ 32 + i ] = ausGammonProbx[ i ] / 65535.0f;
+  }
+
+  if ( arProb )
+    memcpy ( arProb, arx, 32 * sizeof ( float ) );
+  if ( arGammonProb )
+    memcpy ( arGammonProb, arx + 32, 32 * sizeof ( float ) );
+
+  if ( ar ) {
+    AverageRolls ( arx, ar );
+    AverageRolls ( arx + 32, ar + 2 );
+  }
+
+}
+
+
+static void
+CopyBytes ( unsigned short int aus[ 64 ],
+            const unsigned char ac[ 128 ],
+            const unsigned int nz,
+            const unsigned int ioff,
+            const unsigned int nzg,
+            const unsigned int ioffg ) {
+
+  int i, j;
+
+  i = 0;
+  memset ( aus, 0, 64 * sizeof ( unsigned short int ) );
+  for ( j = 0; j < nz; ++j, i += 2 )
+    aus[ ioff + j ] = ac[ i ] | ac[ i + 1 ] << 8;
+
+  for ( j = 0; j < nzg; ++j, i += 2 ) 
+    aus[ 32 + ioffg + j ] = ac[ i ] | ac[ i + 1 ] << 8;
+
+}
+
+
+static unsigned short int *
+GetDistCompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
+
+  unsigned char *puch;
+  unsigned char ac[ 128 ];
+  off_t iOffset;
+  int nBytes;
+  int nPos = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+  static unsigned short int aus[ 64 ];
+      
+  unsigned int ioff, nz, ioffg, nzg;
+
+  /* find offsets and no. of non-zero elements */
+  
+  if ( pbc->fInMemory )
+    /* database is in memory */
+    puch = ( (unsigned char *) pbc->p ) + 40 + nPosID * 8;
+  else {
+    /* read from disk */
+    if ( lseek ( pbc->h, 40 + nPosID * 8, SEEK_SET ) < 0 ) {
+      perror ( "OS bearoff database" );
+      return NULL;
+    }
+    
+    if ( read ( pbc->h, ac, 8 ) < 8 ) {
+      if ( errno )
+        perror ( "OS bearoff database" );
+      else
+        fprintf ( stderr, "error reading OS bearoff database" );
+      return NULL;
+    }
+
+    puch = ac;
+  }
+    
+  /* find offset */
+  
+  iOffset = 
+    puch[ 0 ] | 
+    puch[ 1 ] << 8 |
+    puch[ 2 ] << 16 |
+    puch[ 3 ] << 24;
+  
+  nz = puch[ 4 ];
+  ioff = puch[ 5 ];
+  nzg = puch[ 6 ];
+  ioffg = puch[ 7 ];
+
+  /* read prob + gammon probs */
+  
+  iOffset = 40     /* the header */
+    + nPos * 8     /* the offset data */
+    + 2 * iOffset; /* offset to current position */
+  
+  /* read values */
+  
+  nBytes = 2 * ( nz + nzg );
+  
+  /* get distribution */
+  
+  if ( pbc->fInMemory )
+    /* from memory */
+    puch = ( ( unsigned char *) pbc->p ) + iOffset;
+  else {
+    /* from disk */
+    if ( lseek ( pbc->h, iOffset, SEEK_SET ) < 0 ) {
+      perror ( "OS bearoff database" );
+      return NULL;
+    }
+    
+    if ( read ( pbc->h, ac, nBytes ) < nBytes ) {
+      if ( errno )
+        perror ( "OS bearoff database" );
+      else
+        fprintf ( stderr, "error reading OS bearoff database" );
+      return NULL;
+    }
+
+    puch = ac;
+
+  }
+    
+  CopyBytes ( aus, puch, nz, ioff, nzg, ioffg );
+
+  return aus;
+
+}
+
+
+static unsigned short int *
+GetDistUncompressed ( bearoffcontext *pbc, const unsigned int nPosID ) {
+
+  unsigned char ac[ 128 ];
+  static unsigned short int aus[ 64 ];
+  unsigned char *puch;
+  int iOffset;
+
+  /* read from file */
+
+  iOffset = 40 + 64 * nPosID * ( pbc->fGammon ? 2 : 1 );
+
+  if ( pbc->fInMemory )
+    /* from memory */
+    puch = 
+      ( ( unsigned char *) pbc->p ) + iOffset;
+  else {
+    /* from disk */
+
+    lseek ( pbc->h, iOffset, SEEK_SET );
+    read ( pbc->h, ac, pbc->fGammon ? 128 : 64 );
+    puch = ac;
+  }
+
+  CopyBytes ( aus, puch, 32, 0, 32, 0 );
+
+  return aus;
+
+}
+
+
 static void
 ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
                            float arProb[ 32 ], float arGammonProb[ 32 ],
@@ -1274,275 +1563,53 @@ ReadBearoffOneSidedExact ( bearoffcontext *pbc, const unsigned int nPosID,
                            unsigned short int ausProb[ 32 ], 
                            unsigned short int ausGammonProb[ 32 ] ) {
 
-  if ( pbc->fInMemory ) {
+  unsigned short int *pus = NULL;
 
-    if ( ! pbc->fCompressed ) {
+  /* look in cache */
 
-      int i, j;
-      float arP[ 32 ], arGP[ 32 ];
-      unsigned short int us;
-      unsigned char *ac = (unsigned char *) pbc->p;
- 
-      i = 64 * nPosID * ( pbc->fGammon  ? 2 : 1 );
-      for ( j = 0; j < 32; ++j, i += 2 ) {
-        us = ac[ i ] | ac[ i + 1 ] << 8;
-        arP[ j ] = us / 65535.0f;
-        if ( ausProb )
-          ausProb[ j ] = us;
-      }
+  if ( ! pbc->fInMemory && pbc->ph ) {
+    
+    hashentryonesided *phe;
+    hashentryonesided he;
+    
+    he.nPosID = nPosID;
+    if ( ( phe = HashLookup ( pbc->ph, HashOneSided ( nPosID ), &he ) ) ) 
+      pus = phe->aus;
 
-      memset ( arGP, 0, 32 * sizeof ( float ) );
-      if ( pbc->fGammon ) {
-        for ( j = 0; j < 32; ++j, i += 2 ) {
-          us = ac[ i ] | ac[ i+1 ] << 8;
-          arGP[ j ] = us / 65535.0f;
-          if ( ausGammonProb )
-            ausGammonProb[ j ] = us;
-        }
-      }
-      else if ( ausGammonProb )
-        memset ( ausGammonProb, 0, 64 );
-        
+  }
 
-      if ( arProb )
-        memcpy ( arProb, arP, sizeof ( float ) * 32 );
+  /* get distribution */
+  if ( ! pus ) {
+    if ( pbc->fCompressed )
+      pus = GetDistCompressed ( pbc, nPosID );
+    else
+      pus = GetDistUncompressed ( pbc, nPosID );
 
-      if ( arGammonProb )
-        memcpy ( arGammonProb, arGP, sizeof ( float ) * 32 );
-
-      if ( ar ) {
-        AverageRolls ( arP, ar );
-        AverageRolls ( arGP, ar + 2 );
-      }
-
-
+    if ( ! pus ) {
+      printf ( "argh!\n" );
+      return;
     }
-    else {
-      unsigned char *puch;
-      int i, j;
-      off_t iOffset;
-      int nBytes;
-      int nPos = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-      float arP[ 32 ], arGP[ 32 ];
-      
-      unsigned int ioff, nz, ioffg, nzg;
 
-      unsigned short int us;
-
-      /* find offsets and no. of non-zero elements */
-
-      puch = ( (unsigned char *) pbc->p ) + 40 + nPosID * 8;
-
-      iOffset = 
-        puch[ 0 ] | 
-        puch[ 1 ] << 8 |
-        puch[ 2 ] << 16 |
-        puch[ 3 ] << 24;
-    
-      nz = puch[ 4 ];
-      ioff = puch[ 5 ];
-      nzg = puch[ 6 ];
-      ioffg = puch[ 7 ];
-    
-      /* read prob + gammon probs */
-    
-      iOffset = 40     /* the header */
-        + nPos * 8     /* the offset data */
-        + 2 * iOffset; /* offset to current position */
-    
-      /* read values */
-    
-      nBytes = 2 * ( nz + nzg );
-
-      puch = ( ( unsigned char *) pbc->p ) + iOffset;
-    
-      i = 0;
-      memset ( arP, 0, 32 * sizeof ( float ) );
-      if ( ausProb )
-        memset ( ausProb, 0, 64 );
-      for ( j = 0; j < nz; ++j, i += 2 ) {
-        us = puch[ i ] | puch[ i + 1 ] << 8;
-        arP[ ioff + j ] = us / 65535.0f;
-        if ( ausProb )
-          ausProb[ ioff + j ] = us;
-      }
-
-
-      memset ( arGP, 0, 32 * sizeof ( float ) );
-      if ( ausGammonProb )
-        memset ( ausGammonProb, 0, 64 );
-      for ( j = 0; j < nzg; ++j, i += 2 ) {
-        us = puch[ i ] | puch[ i+1 ] << 8;
-        arGP[ ioffg + j ] = us / 65535.0f;
-        if ( ausGammonProb )
-          ausGammonProb[ ioffg + j ] = us;
-      }
-    
-      if ( arProb )
-        memcpy ( arProb, arP, sizeof ( float ) * 32 );
-
-      if ( arGammonProb )
-        memcpy ( arGammonProb, arGP, sizeof ( float ) * 32 );
-
-      if ( ar ) {
-        AverageRolls ( arP, ar );
-        AverageRolls ( arGP, ar + 2 );
+    if ( ! pbc->fInMemory ) {
+      /* add to cache */
+      hashentryonesided *phe = 
+        (hashentryonesided *) malloc ( sizeof ( hashentryonesided ) );
+      if ( phe ) {
+        phe->nPosID = nPosID;
+        memcpy ( phe->aus, pus, sizeof ( phe->aus ) );
+        HashAdd ( pbc->ph, HashOneSided ( nPosID ), phe );
       }
 
     }
 
   }
-  else {
 
-    /* read from disk */
-
-    if ( pbc->fCompressed ) {
-
-      unsigned char ac[ 128 ];
-      int i, j;
-      off_t iOffset;
-      int nBytes;
-      int nPos = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-      float arP[ 32 ], arGP[ 32 ];
-      
-      unsigned int ioff, nz, ioffg, nzg;
-
-      unsigned short int us;
-
-      /* find offsets and no. of non-zero elements */
-
-      if ( lseek ( pbc->h, 40 + nPosID * 8, SEEK_SET ) < 0 ) {
-        perror ( "OS bearoff database" );
-        return;
-      }
-
-      if ( read ( pbc->h, ac, 8 ) < 8 ) {
-        if ( errno )
-          perror ( "OS bearoff database" );
-        else
-          fprintf ( stderr, "error reading OS bearoff database" );
-        return;
-      }
-    
-      iOffset = 
-        ac[ 0 ] | 
-        ac[ 1 ] << 8 |
-        ac[ 2 ] << 16 |
-        ac[ 3 ] << 24;
-    
-      nz = ac[ 4 ];
-      ioff = ac[ 5 ];
-      nzg = ac[ 6 ];
-      ioffg = ac[ 7 ];
-    
-      /* read prob + gammon probs */
-    
-      iOffset = 40     /* the header */
-        + nPos * 8     /* the offset data */
-        + 2 * iOffset; /* offset to current position */
-    
-      /* read values */
-    
-      nBytes = 2 * ( nz + nzg );
-    
-      if ( lseek ( pbc->h, iOffset, SEEK_SET ) < 0 ) {
-        perror ( "OS bearoff database" );
-        return;
-      }
-    
-      if ( read ( pbc->h, ac, nBytes ) < nBytes ) {
-        if ( errno )
-          perror ( "OS bearoff database" );
-        else
-          fprintf ( stderr, "error reading OS bearoff database" );
-        return;
-      }
-    
-      i = 0;
-      memset ( arP, 0, 32 * sizeof ( float ) );
-      if ( ausProb )
-        memset ( ausProb, 0, 64 );
-      for ( j = 0; j < nz; ++j, i += 2 ) {
-        us = ac[ i ] | ac[ i + 1 ] << 8;
-        arP[ ioff + j ] = us / 65535.0f;
-        if ( ausProb )
-          ausProb[ ioff + j ] = us;
-      }
-
-
-      memset ( arGP, 0, 32 * sizeof ( float ) );
-      if ( ausGammonProb )
-        memset ( ausGammonProb, 0, 64 );
-      for ( j = 0; j < nzg; ++j, i += 2 ) {
-        us = ac[ i ] | ac[ i+1 ] << 8;
-        arGP[ ioffg + j ] = us / 65535.0f;
-        if ( ausGammonProb )
-          ausGammonProb[ ioffg + j ] = us;
-      }
-    
-      if ( arProb )
-        memcpy ( arProb, arP, sizeof ( float ) * 32 );
-
-      if ( arGammonProb )
-        memcpy ( arGammonProb, arGP, sizeof ( float ) * 32 );
-
-      if ( ar ) {
-        AverageRolls ( arP, ar );
-        AverageRolls ( arGP, ar + 2 );
-      }
-
-    }
-    else {
-
-      unsigned char ac[ 128 ];
-      int i, j;
-      float arP[ 32 ], arGP[ 32 ];
-      unsigned int us;
-
-      lseek ( pbc->h, 40 + nPosID * ( pbc->fGammon ? 128 : 64 ), SEEK_SET );
-
-      read ( pbc->h, ac, pbc->fGammon ? 128 : 64 );
-
-      i = 0;
-      memset ( arP, 0, 32 * sizeof ( float ) );
-      if ( ausProb )
-        memset ( ausProb, 0, 64 );
-      for ( j = 0; j < 32; ++j, i += 2 ) {
-        us = ac[ i ] | ac[ i + 1 ] << 8;
-        arP[ j ] = us / 65535.0f;
-        if ( ausProb )
-          ausProb[ j ] = us;
-      }
-
-
-      if ( ausGammonProb )
-        memset ( ausGammonProb, 0, 64 );
-      for ( j = 0; j < 32; ++j, i += 2 ) {
-        us = ac[ i ] | ac[ i+1 ] << 8;
-        arGP[ j ] = us / 65535.0f;
-        if ( ausGammonProb )
-          ausGammonProb[ j ] = us;
-      }
-
-      if ( arProb )
-        memcpy ( arProb, arP, sizeof ( float ) * 32 );
-
-      if ( arGammonProb )
-        memcpy ( arGammonProb, arGP, sizeof ( float ) * 32 );
-
-      if ( ar ) {
-        AverageRolls ( arP, ar );
-        AverageRolls ( arGP, ar + 2 );
-      }
-
-    }
-      
-  }
+  AssignOneSided ( arProb, arGammonProb, ar, ausProb, ausGammonProb,
+                   pus, pus+32 );
 
   ++pbc->nReads;
 
 }
-
 
 extern void
 BearoffDist ( bearoffcontext *pbc, const unsigned int nPosID,

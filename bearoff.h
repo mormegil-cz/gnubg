@@ -22,6 +22,7 @@
 #ifndef _BEAROFF_H_
 #define _BEAROFF_H_
 
+#include <hash.h>
 
 typedef enum _bearofftype {
   BEAROFF_GNUBG,
@@ -49,6 +50,8 @@ typedef struct _bearoffcontext {
   int fCubeful;    /* cubeful equities included */
 
   void *p;        /* pointer to data */
+
+  hash *ph;        /* cache */
 
   unsigned long int nReads; /* number of reads */
 

@@ -1,3 +1,17 @@
+Thu Dec 19 22:48:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Cache reads from bearoff databases on disk.
+	The cache size is fixed to 10k entries for one-sided (~1.2MB)
+	and 100k entries for two-sided (~0.8MB)
+
+	* makebearoff.c: rename hash to xhash to avoid namespace
+	overlap with lib/hash.h
+
+	* bearoff.c (ReadTwoSidedBearoff): cache reads form bearoff databases.
+	* bearoff.c (ReadBearoffOneSidedExact): total rewrite to avoid
+	duplicate code.
+	
+
 Thu Dec 19 20:58:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* set.c (CommandSetAnalysisMovefilter): fix typo
