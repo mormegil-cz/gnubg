@@ -1093,10 +1093,10 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 
        if( pchDesc )
           strcpy( pchDesc, *ppch );
-	
 
+       *ppch = NULL;
+       
        return CheckPosition ( an );
-
     }
 
     if( *pch == '=' ) {
@@ -2492,7 +2492,7 @@ CommandRollout( char *sz ) {
 	c = 10;
 #endif
     
-    for( i = 0; i < c; i++ )
+    for( i = 0; i < c; i++ ) {
 	if( ( n = ParsePosition( aan[ i ], &sz, asz[ i ] ) ) < 0 )
 	    return;
 	else if( n ) {
@@ -2501,6 +2501,13 @@ CommandRollout( char *sz ) {
 	    
 	    fOpponent = TRUE;
 	}
+
+	if( !sz ) {
+	    /* that was the last parameter */
+	    c = i + 1;
+	    break;
+	}
+    }
 
     /*
     if( fOpponent ) {
