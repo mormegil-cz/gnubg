@@ -1365,7 +1365,6 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 
     int i;
     char *pch;
-    unsigned char auchKey[ 10 ];
     
     /* FIXME allow more formats, e.g. FIBS "boardstyle 3" */
 
@@ -1433,13 +1432,9 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	    return -1;
 	}
 
-	PositionKey( ms.anBoard, auchKey );
-	
-	if( !ms.anDice[ 0 ] || !EqualKeys( auchKey, sm.auchKey ) || 
-	    ms.anDice[ 0 ] != sm.anDice[ 0 ] ||
-	    ms.anDice[ 1 ] != sm.anDice[ 1 ] ) {
-	    outputl( _("There is no valid move list.") );
-	    return -1;
+        if ( memcmp ( &ms, &sm.ms, sizeof ( matchstate ) ) ) {
+            outputl( _("There is no valid move list.") );
+            return -1;
 	}
 
 	if( i > sm.ml.cMoves ) {
@@ -2686,7 +2681,7 @@ extern void CommandHint( char *sz ) {
     }
     
     if ( ms.anDice[ 0 ] ) {
-	
+
 	/* Give hints on move */
 	
 	if ( n <= 0 )
@@ -2694,39 +2689,40 @@ extern void CommandHint( char *sz ) {
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
-	ProgressStart( _("Considering moves...") );
-	if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
-				ms.anBoard, NULL, &ci,
-				&esEvalChequer.ec ) < 0 || fInterrupt ) {
+        if ( memcmp ( &sm.ms, &ms, sizeof ( matchstate ) ) ) {
+
+          ProgressStart( _("Considering moves...") );
+          if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
+                                  ms.anBoard, NULL, &ci,
+                                  &esEvalChequer.ec ) < 0 || fInterrupt ) {
 	    ProgressEnd();
 	    return;
-	}
-	ProgressEnd();
+          }
+          ProgressEnd();
 	
-	n = ( ml.cMoves > n ) ? n : ml.cMoves;
+          UpdateStoredMoves ( &ml, &ms );
 
-	if( !ml.cMoves ) {
+          if ( ml.amMoves )
+            free ( ml.amMoves );
+
+        }
+
+        n = ( sm.ml.cMoves > n ) ? n : sm.ml.cMoves;
+
+	if( !sm.ml.cMoves ) {
 	    outputl( _("There are no legal moves.") );
 	    return;
 	}
-	
-	if( sm.ml.amMoves )
-	    free( sm.ml.amMoves );
-	
-	memcpy( &sm.ml, &ml, sizeof( ml ) );
-	PositionKey( ms.anBoard, sm.auchKey );
-	sm.anDice[ 0 ] = ms.anDice[ 0 ];
-	sm.anDice[ 1 ] = ms.anDice[ 1 ];
-      
+
 #if USE_GTK
 	if( fX ) {
-	    GTKHint( &ml );
+	    GTKHint( &sm.ml );
 	    return;
 	}
 #endif
 	
 	for( i = 0; i < n; i++ )
-	    output( FormatMoveHint( szBuf, &ms, &ml, i, TRUE ) );
+	    output( FormatMoveHint( szBuf, &ms, &sm.ml, i, TRUE ) );
     }
 }
 
@@ -2862,7 +2858,7 @@ CommandRollout( char *sz ) {
     /*
     if( fOpponent ) {
 	an[ 0 ] = ms.anScore[ 1 ];
-	an[ 1 ] = ms.anScore[ 0 ];
+ 	an[ 1 ] = ms.anScore[ 0 ];
     } else {
 	an[ 0 ] = ms.anScore[ 0 ];
 	an[ 1 ] = ms.anScore[ 1 ];
@@ -5738,3 +5734,37 @@ getDefaultPath ( const pathformat f ) {
 }
 
 
+
+extern void
+UpdateStoredMoves ( const movelist *pml, const matchstate *pms ) {
+
+  if( sm.ml.amMoves )
+    free( sm.ml.amMoves );
+
+  CopyMoveList ( &sm.ml, pml );
+
+  sm.ms = *pms;
+
+}
+
+extern void
+CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc ) {
+
+  if ( pmlDest == pmlSrc )
+    return;
+
+  pmlDest->cMoves = pmlSrc->cMoves;
+  pmlDest->cMaxMoves = pmlSrc->cMaxMoves;
+  pmlDest->cMaxPips = pmlSrc->cMaxPips;
+  pmlDest->iMoveBest = pmlSrc->iMoveBest;
+  pmlDest->rBestScore = pmlSrc->rBestScore;
+
+  if ( pmlSrc->cMoves ) {
+    pmlDest->amMoves = (move *) malloc ( pmlSrc->cMoves * sizeof ( move ) );
+    memcpy ( pmlDest->amMoves, pmlSrc->amMoves, 
+             pmlSrc->cMoves * sizeof ( move ) );
+  }
+  else
+    pmlDest->amMoves = NULL;
+	
+}

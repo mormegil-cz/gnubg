@@ -285,8 +285,7 @@ extern statcontext scMatch;
    current dice). */
 typedef struct _storedmoves {
     movelist ml;
-    unsigned char auchKey[ 10 ];
-    int anDice[ 2 ];
+    matchstate ms;
 } storedmoves;
 extern storedmoves sm;
 
@@ -413,6 +412,12 @@ extern char *GetLuckAnalysis( matchstate *pms, float rLuck );
 
 extern moverecord *
 getCurrentMoveRecord ( void );
+
+extern void
+UpdateStoredMoves ( const movelist *pml, const matchstate *pms );
+
+extern void
+CopyMoveList ( movelist *pmlDest, const movelist *pmlSrc );
 
 #ifdef WIN32
 extern void WinCopy( char *szOut );
