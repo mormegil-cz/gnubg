@@ -1,3 +1,11 @@
+Fri Jan 10 19:18:59 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c: new command "show fullboard" that also shows
+	the cube, dice etc.
+	* show.c (CommandShowFullBoard): new function.
+
+	* gtkchequer.c (ShowMove, MoveListMove): use new command.
+
 Fri Jan 10 19:12:01 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (EvaluatePositionCubeful3): cache cubeful evaluations

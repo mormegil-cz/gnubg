@@ -480,6 +480,43 @@ extern void CommandShowBoard( char *sz ) {
                             MatchIDFromMatchState ( &ms ) ) );
 }
 
+extern 
+void CommandShowFullBoard( char *sz ) {
+
+    int an[ 2 ][ 25 ];
+    char szOut[ 2048 ];
+    char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+    
+    if( !*sz ) {
+	if( ms.gs == GAME_NONE )
+	    outputl( _("No position specified and no game in progress.") );
+	else
+	    ShowBoard();
+	
+	return;
+    }
+
+    /* FIXME handle =n notation */
+    if( ParsePosition( an, &sz, NULL ) < 0 )
+	return;
+
+#if USE_GUI
+    if( fX )
+#if USE_GTK
+	game_set( BOARD( pwBoard ), an, TRUE, 
+                  ap[ 0 ].szName, ap[ 1 ].szName , ms.nMatchTo, 
+                  ms.anScore[ 0 ], ms.anScore[ 1 ], 
+                  ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE );
+#else
+        GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    
+#endif
+    else
+#endif
+        outputl( DrawBoard( szOut, an, TRUE, apch, 
+                            MatchIDFromMatchState ( &ms ) ) );
+}
+
+
 extern void CommandShowDelay( char *sz ) {
 #if USE_GUI
     if( nDelay )

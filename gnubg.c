@@ -1438,6 +1438,8 @@ command cER = {
       "engine"), NULL, NULL },
     { "evaluation", CommandShowEvaluation, N_("Display evaluation settings "
       "and statistics"), NULL, NULL },
+    { "fullboard", CommandShowFullBoard, 
+      N_("Redisplay the board position"), szOPTPOSITION, NULL },
     { "gammonvalues", CommandShowGammonValues, N_("Show gammon values"),
       NULL, NULL },
     { "egyptian", CommandShowEgyptian,

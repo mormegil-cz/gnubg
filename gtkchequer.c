@@ -293,18 +293,14 @@ ShowMove ( hintdata *phd, const int f ) {
     if ( ! ms.fMove )
       SwapSides ( anBoard );
 
-    sz = g_strdup_printf ( "show board %s", PositionID ( anBoard ) );
+    sz = g_strdup_printf ( "show fullboard %s", PositionID ( anBoard ) );
     UserCommand( sz );
     g_free ( sz );
 
   }
   else {
-    
-    memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
-    if ( ! ms.fMove )
-      SwapSides ( anBoard );
 
-    sz = g_strdup_printf ( "show board %s", PositionID ( anBoard ) );
+    sz = g_strdup ( "show board" );
     UserCommand( sz );
     g_free ( sz );
 
@@ -497,7 +493,7 @@ MoveListMove ( GtkWidget *pw, hintdata *phd ) {
   if ( ! ms.fMove )
     SwapSides ( anBoard );
 
-  sprintf ( szMove, "show board %s", PositionID ( anBoard ) );
+  sprintf ( szMove, "show fullboard %s", PositionID ( anBoard ) );
   UserCommand ( szMove );
   
   if ( phd->fDestroyOnMove )
