@@ -72,9 +72,7 @@ static int ComputerTurn( void ) {
 
 	    EvaluatePosition( anBoard, ar, ap[ fTurn ].nPlies );
 
-	    if( -fResigned <= ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
-		ar[ OUTPUT_WINGAMMON ] + ar[ OUTPUT_WINBACKGAMMON ] -
-		ar[ OUTPUT_LOSEGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON ] ) {
+	    if( -fResigned <= Utility ( ar ) ) {
 		CommandAgree( NULL );
 		return 0;
 	    } else {

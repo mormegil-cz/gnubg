@@ -1,5 +1,10 @@
 2000-01-09  Joern Thyssen  <jth@localhost.localdomain>
 
+	* play.c (ComputerTurn): Call Utility for calculation of equity
+	when determining whether to accept resignation or not.
+
+2000-01-09  Joern Thyssen  <jth@localhost.localdomain>
+
 	* eval.c (DumpPosition): Call Utility for calculation of equity. 
 
 Sat Jan  8 14:16:08 2000  Gary Wong  <gary@cs.arizona.edu>
