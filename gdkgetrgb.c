@@ -73,9 +73,12 @@ gdk_get_rgb_image( GdkDrawable *drawable,
 	g = visual->green_shift + visual->green_prec - 8;
 	b = visual->blue_shift + visual->blue_prec - 8;
     }
-    
-    image = gdk_image_get( drawable, x, y, width, height );
 
+    gdk_error_trap_push();
+    image = gdk_image_get( drawable, x, y, width, height );
+    if( gdk_error_trap_pop() )
+	return;
+    
     for( ypix = 0; ypix < height; ypix++ ) {
 	p = rgb_buf;
 	
