@@ -388,7 +388,7 @@ extern void GTKFileCommand24( char *szPrompt, char *szDefault, char *szCommand,
 			char sz[ 1024 ];
 #endif
 			/* and actually do the requested IO */
-			sprintf( sz, "%s %s", szCommand, filename );
+			sprintf( sz, "%s \"%s\"", szCommand, filename );
 			UserCommand( sz );
 			g_free (filename);
 		}
