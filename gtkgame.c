@@ -312,6 +312,7 @@ static GtkWidget *pwMessage = NULL, *pwMessageText;
 static GtkWidget *pwGame = NULL;
 static moverecord *pmrAnnotation;
 static GtkAccelGroup *pagMain;
+static GtkTooltips *ptt;
 static GtkStyle *psGameList, *psCurrent;
 static int yCurrent, xCurrent; /* highlighted row/col in game record */
 static GtkItemFactory *pif;
@@ -919,7 +920,8 @@ static void CreateGameWindow( void ) {
     GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pvbox = gtk_vbox_new( FALSE, 0 ),
 	*phbox = gtk_hbox_new( FALSE, 0 ),
-	*pm = gtk_menu_new();
+	*pm = gtk_menu_new(),
+	*pw;
     GtkStyle *ps;
     GdkColormap *pcmap;
     gint nMaxWidth; 
@@ -946,24 +948,38 @@ static void CreateGameWindow( void ) {
     gtk_box_pack_start( GTK_BOX( pvbox ), phbox, FALSE, FALSE, 4 );
 
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, prevgame_xpm, "previous game" ),
+			pw = PixmapButton( pcmap, prevgame_xpm,
+					   "previous game" ),
 			FALSE, FALSE, 4 );
+    gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous game"), "" );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, prevmove_xpm, "previous roll" ),
+			pw = PixmapButton( pcmap, prevmove_xpm,
+					   "previous roll" ),
 			FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous roll"), "" );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, nextmove_xpm, "next roll" ),
+			pw = PixmapButton( pcmap, nextmove_xpm,
+					   "next roll" ),
 			FALSE, FALSE, 4 );
+    gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next roll"), "" );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, nextgame_xpm, "next game" ),
+			pw = PixmapButton( pcmap, nextgame_xpm,
+				      "next game" ),
 			FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next game"), "" );
 
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, prevmarked_xpm, "previous marked" ),
+			pw = PixmapButton( pcmap, prevmarked_xpm,
+					   "previous marked" ),
 			FALSE, FALSE, 4 );
+    gtk_tooltips_set_tip( ptt, pw, _("Move back to the previous marked "
+				     "decision" ), "" );
     gtk_box_pack_start( GTK_BOX( phbox ),
-			PixmapButton( pcmap, nextmarked_xpm, "next marked" ),
+			pw = PixmapButton( pcmap, nextmarked_xpm,
+					   "next marked" ),
 			FALSE, FALSE, 0 );
+    gtk_tooltips_set_tip( ptt, pw, _("Move ahead to the next marked "
+				     "decision" ), "" );
         
     gtk_menu_append( GTK_MENU( pm ), gtk_menu_item_new_with_label(
 	_("(no game)") ) );
@@ -972,7 +988,6 @@ static void CreateGameWindow( void ) {
 			      pm );
     gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), 0 );
     gtk_box_pack_start( GTK_BOX( phbox ), pom, TRUE, TRUE, 4 );
-/*    gtk_box_pack_start( GTK_BOX( phbox ), pwButton, FALSE, FALSE, 4 ); */
     
     gtk_container_add( GTK_CONTAINER( pvbox ), psw );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
@@ -2292,6 +2307,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 				      (const char **) gnu_xpm ) ) );
     }
 #endif
+
+    ptt = gtk_tooltips_new();
     
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
