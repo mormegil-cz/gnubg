@@ -1048,16 +1048,16 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
 	for (ii = 0; ii < NUM_ROLLOUT_OUTPUTS; ii++) {
 	  if ( ii < OUTPUT_EQUITY ) {
-	    v = abs (aarMu[ jj ][ ii ]);
-	    s = abs (aarSigma[ jj ][ ii ]);
+	    v = fabs (aarMu[ jj ][ ii ]);
+	    s = fabs (aarSigma[ jj ][ ii ]);
 	  } else if ( ii == OUTPUT_EQUITY ) {
 	    if ( ! ms.nMatchTo ) { /* money game */
-	      v = abs (aarMu[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube );
-	      s = abs (aarSigma[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube);
+	      v = fabs (aarMu[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube );
+	      s = fabs (aarSigma[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube);
 	    } else { /* match play */
-	      v = abs (mwc2eq ( eq2mwc ( aarMu[ jj ][ ii ], &aci[ jj ] ), 
+	      v = fabs (mwc2eq ( eq2mwc ( aarMu[ jj ][ ii ], &aci[ jj ] ), 
 				&aci[ 0 ] ));
-	      s = abs (se_mwc2eq ( se_eq2mwc ( aarSigma[ jj ][ ii ], 
+	      s = fabs (se_mwc2eq ( se_eq2mwc ( aarSigma[ jj ][ ii ], 
 					       &aci[ jj ] ), &aci[ 0 ] ));
 	    }
 	  }	else {
@@ -1065,11 +1065,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	      continue;
 
 	    if ( ! ms.nMatchTo ) { /* money game */
-	      v = abs (aarMu[ jj ][ ii ]);
-	      s = abs (aarSigma[ jj ][ ii ]); 
+	      v = fabs (aarMu[ jj ][ ii ]);
+	      s = fabs (aarSigma[ jj ][ ii ]); 
 	    } else {
-	      v = abs (mwc2eq ( aarMu[ jj ][ ii ], &aci[ 0 ] ));
-	      s = abs (se_mwc2eq ( aarSigma[ jj ][ ii ], &aci[ 0 ] ) );
+	      v = fabs (mwc2eq ( aarMu[ jj ][ ii ], &aci[ 0 ] ));
+	      s = fabs (se_mwc2eq ( aarSigma[ jj ][ ii ], &aci[ 0 ] ) );
 	    }
 	  } /* else if ( ii == OUTPUT_EQUITY) ... else ) */
 
