@@ -1,3 +1,21 @@
+Wed Oct  9 22:55:46 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Output match info in text and html export.
+	(reported by Ian Shaw)
+
+	* html.c (HTMLMatchInfo): new function.
+	* html.c (COmmandExportPositionHTML, ExportGameHTML): write
+	match information.
+	* text.c (TextMatchInfo): new function.
+	* text.c (COmmandExportPositionText, ExportGameText): write
+	match information.
+
+Wed Oct  9 22:26:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (InitGTK): add some keyboard accels.
+	* configure.in: exit if NLS is enabled but msgfmt is not 
+	present.
+
 Wed Oct  9 21:43:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkboard.c (update_pipcount): show relative pip counts as well.

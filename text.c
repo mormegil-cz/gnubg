@@ -1322,6 +1322,52 @@ TextPrintComment ( FILE *pf, const moverecord *pmr ) {
 
 }
 
+static void
+TextMatchInfo ( FILE *pf, const matchinfo *pmi ) {
+
+  int i;
+  char sz[ 80 ];
+  struct tm tmx;
+
+  fputs ( _("Match Information:\n\n"), pf );
+
+  /* ratings */
+
+  for ( i = 0; i < 2; ++i )
+      fprintf ( pf, _("%s's rating: %s\n"), 
+                ap[ i ].szName, 
+                pmi->pchRating[ i ] ? pmi->pchRating[ i ] : _("n/a") );
+
+  /* date */
+
+  if ( pmi->nYear ) {
+
+    tmx.tm_year = pmi->nYear - 1900;
+    tmx.tm_mon = pmi->nMonth - 1;
+    tmx.tm_mday = pmi->nDay;
+    strftime ( sz, sizeof ( sz ), _("%B %d, %Y"), &tmx );
+    fprintf ( pf, _("Date: %s\n"), sz ); 
+
+  }
+  else
+    fputs ( _("Date: n/a\n"), pf );
+
+  /* event, round, place and annotator */
+
+  fprintf ( pf, _("Event: %s\n"),
+            pmi->pchEvent ? pmi->pchEvent : _("n/a") );
+  fprintf ( pf, _("Round: %s\n"),
+            pmi->pchRound ? pmi->pchRound : _("n/a") );
+  fprintf ( pf, _("Place: %s\n"),
+            pmi->pchPlace ? pmi->pchPlace : _("n/a") );
+  fprintf ( pf, _("Annotator: %s\n"),
+            pmi->pchAnnotator ? pmi->pchAnnotator : _("n/a") );
+  fprintf ( pf, _("Comments: %s\n"),
+            pmi->pchComment ? pmi->pchComment : _("n/a") );
+
+}
+
+
 
 
 /*
@@ -1363,6 +1409,8 @@ static void ExportGameText ( FILE *pf, list *plGame,
         ApplyMoveRecord ( &msExport, pmr );
 
         TextPrologue( pf, &msExport, iGame );
+
+        TextMatchInfo ( pf, &mi );
 
         msOrig = msExport;
         pmgi = &pmr->g;
@@ -1578,6 +1626,8 @@ extern void CommandExportPositionText( char *sz ) {
     }
 
     TextPrologue ( pf, &ms, getGameNumber ( plGame ) );
+
+    TextMatchInfo ( pf, &mi );
 
     TextBoardHeader ( pf, &ms, 
                       getGameNumber ( plGame ),
