@@ -111,6 +111,8 @@ extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ], int nPlies,
 			  int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
 			  int c, float d );
 extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
+extern int
+EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] );
 
 /* internal use only */
 extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],

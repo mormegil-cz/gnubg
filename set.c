@@ -281,6 +281,7 @@ extern void CommandSetCubeUse( char *sz ) {
 	   centred. */
 	nCube = 1;
 	fCubeOwner = -1;
+	CalcGammonPrice ();
 	
 #if !X_DISPLAY_MISSING
 	if( fX )
@@ -308,6 +309,7 @@ extern void CommandSetCubeValue( char *sz ) {
     for( i = fDoubled ? MAX_CUBE >> 1 : MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
 	    printf( "The cube has been set to %d.\n", nCube = n );
+	    CalcGammonPrice ();
 	    
 #if !X_DISPLAY_MISSING
 	    if( fX )

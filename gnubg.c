@@ -214,6 +214,7 @@ static command acDatabase[] = {
     { "load", CommandNotImplemented, "Read data from a file", NULL },
     { "move", CommandMove, "Make a backgammon move", NULL },
     { "new", NULL, "Start a new game", acNew },
+    { "pass", CommandDrop, "Synonym for `drop'", NULL },
     { "play", CommandPlay, "Force the computer to move", NULL },
     { "quit", CommandQuit, "Leave GNU Backgammon", NULL },
     { "r", CommandRoll, "Abbreviation for `roll'", NULL },
@@ -472,14 +473,14 @@ extern void ShowBoard( void ) {
 #if !X_DISPLAY_MISSING
     if( !fX ) {
 #endif
+        sprintf( szPlayer0, "O: %s", ap[ 0 ].szName ); 
+	sprintf( szPlayer1, "X: %s", ap[ 1 ].szName ); 
+
 	if( fDoubled ) {
 	    apch[ fTurn ? 5 : 1 ] = szCube;
 
 	    sprintf( szCube, "Cube offered at %d", nCube << 1 );
 	} else {
-	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
-	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
-
 	    apch[ fMove ? 5 : 1 ] = sz;
 	
 	    if( anDice[ 0 ] )
@@ -499,7 +500,8 @@ extern void ShowBoard( void ) {
 		if( cch > 20 )
 		    cch = 20;
 		
-		sprintf( szCube, "%*s (Cube: %d)", cch,
+		sprintf( szCube, "%1s: %*s (Cube: %d)", 
+			 ( ! fCubeOwner ) ? "O" : "X", cch,
 			 ap[ fCubeOwner ].szName, nCube );
 
 		apch[ fCubeOwner ? 6 : 0 ] = szCube;
@@ -621,6 +623,7 @@ extern void CommandEval( char *sz ) {
 
     if( !DumpPosition( an, szOutput, nPliesEval ) )
 	puts( szOutput );
+
 }
 
 extern void CommandHelp( char *sz ) {
@@ -650,6 +653,7 @@ extern void CommandHint( char *sz ) {
     int i;
     char szMove[ 32 ];
     float aar[ 32 ][ NUM_OUTPUTS ];
+    float arDouble[ 4 ];
     
     if( fTurn < 0 ) {
 	puts( "You must set up a board first." );
@@ -657,26 +661,52 @@ extern void CommandHint( char *sz ) {
 	return;
     }
 
-    if( !anDice[ 0 ] ) {
-	puts( "You must roll (or set) the dice first." );
+    if( !anDice[ 0 ] && !fDoubled ) {
+	puts( "You haven't rolled yet or you are not doubled." );
 
 	return;
     }
 
-    FindBestMoves( &ml, aar, nPliesEval, anDice[ 0 ], anDice[ 1 ], anBoard,
-		   10, 0.2 );
+    if ( fDoubled ) {
 
-    if( fInterrupt )
+      /* give hints on cube action */
+
+      EvaluateDouble ( nPliesEval, anBoard, arDouble );
+
+      if ( fInterrupt )
 	return;
-    
-    puts( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
-    
-    for( i = 0; i < ml.cMoves; i++ ) {
+      
+      puts ( "Take decision:\n" );
+      printf ( "Equity for take: %+6.3f\n", -arDouble[ 1 ] );
+      printf ( "Equity for pass: %+6.3f\n\n", -1.0 );
+
+      if ( ( arDouble[ 1 ] < 0 ) && ( ! nMatchTo ) )
+	puts ( "Proper cube action: Beaver\n" );
+      else if ( arDouble[ 1 ] <= 1.0 )
+	puts ( "Proper cube action: Take\n" );
+      else
+	puts ( "Proper cube action: Pass\n" );
+
+    }
+    else {
+
+      /* give hints on moves */
+
+      FindBestMoves( &ml, aar, nPliesEval, anDice[ 0 ], anDice[ 1 ], anBoard,
+		     10, 0.2 );
+
+      if( fInterrupt )
+	return;
+      
+      puts( "Win  \tW(g) \tW(bg)\tL(g) \tL(bg)\tEquity  \tMove" );
+      
+      for( i = 0; i < ml.cMoves; i++ ) {
 	float *ar = ml.amMoves[ i ].pEval;
 	printf( "%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f)\t",
 		ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], ar[ 4 ],
 		ar[ 0 ] * 2.0 + ar[ 1 ] + ar[ 2 ] - ar[ 3 ] - ar[ 4 ] - 1.0 );
 	puts( FormatMove( szMove, anBoard, ml.amMoves[ i ].anMove ) );
+      }
     }
 }
 

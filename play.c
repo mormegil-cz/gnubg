@@ -51,18 +51,13 @@ static void NewGame( void ) {
     }
 
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
+    CalcGammonPrice ();
 }
 
 static int ComputerTurn( void ) {
 
     movenormal *pmn;
-    
-    if( !fResigned && !anDice[ 0 ] ) {
-	RollDice( anDice );
-
-	if( fDisplay )
-	    ShowBoard();
-    }
+    float arDouble[ 4 ];
     
     switch( ap[ fTurn ].pt ) {
     case PLAYER_GNU:
@@ -80,18 +75,53 @@ static int ComputerTurn( void ) {
 		return 0;
 	    }
 	} else if( fDoubled ) {
-	    /* FIXME consider cube action */
+	  /* consider cube action */
+	  
+	  EvaluateDouble ( ap [ fTurn ].nPlies, anBoard, arDouble );
+
+	  /* debug printf */
+	  printf ( "equity for take decision %+6.3f\n", arDouble[ 1 ]);
+	  
+	  if ( ( arDouble[ 0 ] < 0.0 ) && ( ! nMatchTo ) )
+	    CommandRedouble ( NULL );
+	  else if ( arDouble[ 1 ] <= 1.0 )
 	    CommandTake( NULL );
+	  else
+	    CommandReject ( NULL );
+
 	    return 0;
 	} else {
-	    pmn = malloc( sizeof( *pmn ) );
-	    pmn->mt = MOVE_NORMAL;
-	    pmn->anRoll[ 0 ] = anDice[ 0 ];
-	    pmn->anRoll[ 1 ] = anDice[ 1 ];
-	    pmn->fPlayer = fTurn;
-	    ListInsert( plGame, pmn );
-	    return FindBestMove( ap[ fTurn ].nPlies, pmn->anMove, anDice[ 0 ],
-				 anDice[ 1 ], anBoard );
+
+	  /* consider doubling */
+	  
+	  if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
+	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) ) {
+
+            EvaluateDouble ( ap [ fTurn ].nPlies, anBoard, arDouble );
+
+	    printf ( "equity for double decision %+6.3f and %+6.3f\n",
+		     arDouble[ 0 ], arDouble[ 1 ]);
+
+	    if ( ( arDouble[ 0 ] <= 1.0 ) && 
+		 ( arDouble[ 1 ] > arDouble[ 0 ] ) ) {
+	      CommandDouble ( NULL );
+	      return 0;
+	    }
+	  }
+	  
+	  RollDice( anDice );
+
+	  if( fDisplay )
+	    ShowBoard();
+
+	  pmn = malloc( sizeof( *pmn ) );
+	  pmn->mt = MOVE_NORMAL;
+	  pmn->anRoll[ 0 ] = anDice[ 0 ];
+	  pmn->anRoll[ 1 ] = anDice[ 1 ];
+	  pmn->fPlayer = fTurn;
+	  ListInsert( plGame, pmn );
+	  return FindBestMove( ap[ fTurn ].nPlies, pmn->anMove, anDice[ 0 ],
+			       anDice[ 1 ], anBoard );
 	}
 
     case PLAYER_PUBEVAL:
@@ -106,6 +136,12 @@ static int ComputerTurn( void ) {
 	    return 0;
 	}
 	/* FIXME save move */
+	
+	RollDice( anDice );
+
+	if( fDisplay )
+	  ShowBoard();
+
 	return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
 
     default:
@@ -686,12 +722,14 @@ extern void CommandRedouble( char *sz ) {
 		ap[ fTurn ].szName, nCube << 1 );
     
     fCubeOwner = !fMove;
+    CalcGammonPrice ();
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
     ListInsert( plGame, pmt );
     
     NextTurn();
+
 }
 
 extern void CommandReject( char *sz ) {
@@ -828,10 +866,53 @@ extern void CommandTake( char *sz ) {
     fDoubled = FALSE;
 
     fCubeOwner = fTurn;
+    CalcGammonPrice ();
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;
     ListInsert( plGame, pmt );
     
     NextTurn();
+}
+
+extern void 
+SetCube ( int nNewCube, int fNewCubeOwner ) {
+
+  nCube = nNewCube;
+  fCubeOwner = fNewCubeOwner;
+
+  CalcGammonPrice ();
+
+}
+
+
+extern void
+CalcGammonPrice ( void ) {
+
+  if ( ! nMatchTo ) {
+
+    /*
+     * Money game:
+     * If Jacoby rule then gammon price is 0 if cube is
+     * not turned.
+     */
+
+    if ( fJacoby && ( fCubeOwner < 0 ) ) {
+      SetGammonPrice ( 0.0, 0.0, 0.0, 0.0 );
+    }
+    else {
+      SetGammonPrice ( 1.0, 1.0, 1.0, 1.0 );
+    }
+  }
+  else {
+
+    /*
+     * Match play.
+     * FIXME: calculate gammon price based on score and cube value.
+     */
+
+    SetGammonPrice ( 1.0, 1.0, 1.0, 1.0 );
+
+  }
+
 }

@@ -43,6 +43,7 @@
 #include "dice.h"
 #include "eval.h"
 #include "positionid.h"
+#include "backgammon.h"
 
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
@@ -1154,6 +1155,7 @@ extern void SetGammonPrice( float rGammon, float rLoseGammon,
     arGammonPrice[ 1 ] = rLoseGammon;
     arGammonPrice[ 2 ] = rBackgammon;
     arGammonPrice[ 3 ] = rLoseBackgammon;
+
 }
 
 extern float Utility( float ar[ NUM_OUTPUTS ] ) {
@@ -1644,6 +1646,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     float arOutput[ NUM_OUTPUTS ];
     positionclass pc = ClassifyPosition( anBoard );
     int i;
+    float arDouble[ 4 ];
     
     strcpy( szOutput, "Evaluator: \t" );
     
@@ -1697,6 +1700,48 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	     arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ], arOutput[ 3 ],
 	     arOutput[ 4 ], Utility ( arOutput ) );
     }
+
+    /*
+     * Get cube action
+     */
+
+    if ( (fCubeOwner != -1) && (fCubeOwner != fMove) ) return 0;
+    szOutput = strchr( szOutput, 0 );
+
+    if ( ! nPlies )
+      strcpy ( szOutput, "\nCube action (static):\n\n" );
+    else if ( nPlies == 1 )
+      sprintf ( szOutput, "\nCube action (%1d ply):\n\n", nPlies );
+    else
+      sprintf ( szOutput, "\nCube action (%2d plies):\n\n", nPlies );
+    szOutput = strchr( szOutput, 0 );
+
+    EvaluateDouble( nPlies, anBoard, arDouble );
+
+    sprintf ( szOutput, 
+	      "(1) No double         %+6.3f\n"
+	      "(2) Double, take      %+6.3f\n" 
+	      "(3) Double, pass      %+6.3f\n\n",
+	      arDouble[ 0 ], arDouble[ 1 ], -1.0 );
+    szOutput = strchr( szOutput, 0 );
+    
+    sprintf ( szOutput,
+	      "# of market loosers   %4.0f/1296\n"
+	      "# of redouble/pass    %4.0f/1296\n\n",
+	      arDouble[ 2 ], arDouble[ 3 ] );
+    szOutput = strchr( szOutput, 0 );
+
+    strcpy ( szOutput, "Proper cube action: "  );
+    szOutput = strchr( szOutput, 0 );
+
+    strcpy ( szOutput,
+	     ( arDouble[ 0 ] > 1.0 ) ? "Too good to double, " :
+	     ( arDouble[ 1 ] > arDouble[ 0 ] ) ? "Double, " : 
+	     "No double, " );
+    szOutput = strchr( szOutput, 0 );
+
+    strcpy ( szOutput,
+	     ( arDouble[ 1 ] <= 1.0 ) ? "take.\n" : "pass.\n" );
 
     return 0;
 }
@@ -1761,4 +1806,258 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] ) {
     PositionFromKey( anBoard, ml.amMoves[ ml.iMoveBest ].auch );
 
     return 0;
+}
+
+
+extern int
+EvaluateDouble ( int nPlies, int anBoard[ 2 ][ 25 ], float arDouble[ 4 ] ) {
+
+  int anBoardNew0[ 2 ][ 25 ], anBoardNew1[ 2 ][ 25 ];
+  int anMove[ 8 ];
+  int i;
+  int nSaveCube;
+  int nDice0, nDice1, nDice2, nDice3;
+  int nMarketLoosers, nDoubledOut;
+
+  int fOldCubeOwner;
+
+  float rDropPoint, rEqDouble, rEqNoDouble;
+  float rDoubleLate, rDoubleEarly;
+  float rMyDropPoint, rMyDropPointRecube;
+  float arOutput[ NUM_OUTPUTS ];
+  float rEq, rFactor, rEqD, rEqND, rEqCubeless;
+
+  char auch[ 10 ];
+    char szMove[100];
+
+  /* Get drop point */
+
+  if ( ! nMatchTo ) {
+
+    /*
+     * Money game:
+     * - centered cube: drop point is 25%
+     * - recube: drop point is 20%
+     * FIXME: is this too simplified?
+     */
+
+    if ( fCubeOwner < 0 ) {
+      rDropPoint = 0.5;
+      rMyDropPointRecube = -0.6;
+      rMyDropPoint = -0.5;
+    }
+    else {
+      rDropPoint = 0.6;
+      rMyDropPointRecube = -0.6;
+      rMyDropPoint = -0.6;
+    }
+
+  }
+  else {
+
+    /*
+     * Match play:
+     * FIXME: calculate or get drop point
+     * from match equity table.
+     */
+
+  }
+
+
+
+  /* 
+   * Get equity assuming I double next turn
+   *
+   * Loop over my dice rolls
+   *    Find my best move
+   *    Loop over opp dice rolls
+   *       Find his best move
+   *       If eq > opp drop point
+   *          new-eq += 1
+   *       else if eq < my drop point
+   *          new-eq -= 1
+   *       else [too-good-to-double or take]
+   *          neq-eq += eq
+   *       endif
+   *    endloop
+   * endloop
+   *
+   */
+
+  rEqNoDouble = 0.0;
+  rEqDouble = 0.0;
+
+  nMarketLoosers = nDoubledOut = 0;
+
+  for ( nDice0 = 1; nDice0 <= 6; nDice0++ ) {
+    for ( nDice1 = 1; nDice1 <= nDice0; nDice1++ ) {
+
+      /*
+	printf ("dice0,dice1 = %1i %1i\n",nDice0,nDice1);
+      */
+
+      memcpy( anBoardNew0, anBoard, sizeof ( anBoardNew0 ) );
+
+      FindBestMove ( 0, anMove, nDice0, nDice1, anBoardNew0 );
+
+      SwapSides ( anBoardNew0 );
+
+      EvaluatePosition ( anBoardNew0, arOutput, 
+			 (nPlies > 0) ? nPlies-1 : 0 );
+
+      InvertEvaluation ( arOutput );
+
+      rEq = Utility ( arOutput );
+
+      if ( ClassifyPosition ( anBoardNew0 ) == CLASS_OVER ) {
+
+	/*
+	 * Yahoo, I won the game!
+	 * Add equity for winning game
+	 */
+
+	if ( nDice0 == nDice1 ) {
+	  rEqDouble += 72.0 * rEq;
+	  rEqNoDouble += 36.0 * rEq;
+	  nMarketLoosers += 36;
+	}
+	else {
+	  rEqDouble += 144.0 * rEq;
+	  rEqNoDouble += 72.0 * rEq;
+	  nMarketLoosers += 72;
+	}
+
+	/* next die */
+	continue;
+
+      }
+
+      if ( rEq < rMyDropPoint ) {
+
+	/* 
+	 * If opponent can double me out subtract an
+	 * equity of -1.
+	 */
+
+    	if ( nDice0 == nDice1 ) {
+    	  rEqDouble -= 72.0;
+    	  rEqNoDouble -= 36.0;
+	  nDoubledOut += 36;
+    	}
+    	else {
+    	  rEqDouble -= 144.0;
+    	  rEqNoDouble -= 72.0;
+	  nDoubledOut += 72;
+    	}
+
+    	continue; /* next die */ 
+
+          } 
+
+          /* otherwise continue with opponents roll */
+
+      for ( nDice2 = 1; nDice2 <= 6; nDice2++ ) { 
+    	for ( nDice3 = 1; nDice3 <= nDice2; nDice3++ ) { 
+	    
+    	  memcpy( anBoardNew1, anBoardNew0, sizeof ( anBoardNew1 ) );
+	  
+	  FindBestMove ( 0,
+			 anMove, nDice2, nDice3, anBoardNew1 );
+	  
+	  rFactor = ( ( nDice0 == nDice1 ) ? 1.0 : 2.0 ) *
+	            ( ( nDice2 == nDice3 ) ? 1.0 : 2.0 );
+
+	  SwapSides ( anBoardNew1 );
+
+	  EvaluatePosition( anBoardNew1, arOutput, 
+			    (nPlies > 1) ? nPlies-2 : 0 );
+	  
+	  rEqND = Utility( arOutput );
+	  
+	  /* remember gammon price is changed after doubling */
+
+	  /* FIXME: don't recalculate gammon price every turn */
+
+	  fOldCubeOwner = fCubeOwner;
+	  SetCube ( nCube << 1, !fMove );
+	  rEqD = Utility( arOutput );
+	  SetCube ( nCube >> 1, fOldCubeOwner );
+	  
+	  /*
+	   * Assume I don't double.
+	   * Add equity + equity for holding cube
+	   */
+	  
+	  if ( fCubeOwner == -1 ) {
+	    /* 
+	     * Centered cube
+	     * - if this is a market looser I can turn the 
+	     *   cube and claim 1 point
+	     * - if below my own drop point the value of owning
+	     *   the cube is 0
+	     * - else we interpolate 0.5 * rEq
+	     * FIXME: 0.25 is for money game only...
+	     * FIMXE: this needs some further explanation...
+	     */
+	      
+	    if ( rEqND >= rDropPoint ) {
+	      rEqNoDouble += rFactor * 1.0;
+	      nMarketLoosers += rFactor;
+	    }
+	    else if ( rEqND < rMyDropPoint )
+	      rEqNoDouble += rFactor * rEqND;
+	    else
+	      rEqNoDouble += rFactor * ( rEqND + 0.5 * rEqND );
+	    
+	  } 
+	  else if ( fCubeOwner == fMove ) {
+	      
+	    /* 
+	     * I own the cube...
+	     * - if this is a market looser I can turn the 
+	     *   cube and claim 1 point
+	     * - else the value of the cube is 0.25 * rEq + 0.25
+	     * FIXME: 0.25 is for money game only...
+	     */
+	    
+	    if ( rEqND >= rDropPoint ) {
+	      rEqNoDouble += rFactor * 1.0;
+	      nMarketLoosers += rFactor;
+	    }
+	    else
+	      rEqNoDouble += rFactor * ( rEqND + 0.25 * rEqND + 0.25 );
+	    
+	  }
+	  else {
+	    printf("aarggh...shouldn't be here...\n");
+	    exit(-1);
+	  }
+
+	  /* 
+	   * Bugger, see what happens if I turn the damn cube...
+	   * Subtract the value of your opponent now
+	   * holding the cube
+	   */
+
+	  if ( rEqD < rMyDropPointRecube )
+	    rEqDouble -= rFactor * 2;
+	  else 
+	    rEqDouble += rFactor * ( 2.0 * rEqD - ( 0.5 * ( -rEqD ) +
+						    0.5  ) );
+
+	  /*
+	  printf("%1i %1i %+6.3f  %+6.3f  %+6.3f\n",
+		 nDice2,nDice3,rEqD,rEqNoDouble,rEqDouble);
+	  */
+
+	} /* nDice3 */
+      } /* nDice2 */
+    } /* nDice1 */
+  } /* nDice0 */
+
+  arDouble[ 0 ] = rEqNoDouble / 1296.0;
+  arDouble[ 1 ] = rEqDouble / 1296.0;
+  arDouble[ 2 ] = nMarketLoosers;
+  arDouble[ 3 ] = nDoubledOut;
+
 }
