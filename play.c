@@ -586,7 +586,7 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
     char sz[ 40 ];
 
     if( anMove[ 0 ] == -1 )
-	outputf( "%s cannot move.", ap[ fTurn ].szName );
+	outputf( "%s cannot move.\n", ap[ fTurn ].szName );
     else
 	outputf( "%s moves %s.\n", ap[ fTurn ].szName,
 		 FormatMove( sz, anBoard, anMove ) );

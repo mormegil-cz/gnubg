@@ -254,6 +254,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow printing positions/games/matches/etc.
 ** Keep statistics of won/lost games/matches.
 ** Consider "-s scheme-file" and "-c command-file" options to read scripts.
+** Replace HUGE_VALF with the more portable FLT_MAX in <float.h>.
 ** Finish the annotation commands in play.c.
 ** Load and save take/drop errors in sgf.c.
 ** Make sure the Nackgammon option works properly: record when loading/saving,
