@@ -1,3 +1,10 @@
+Fri Oct 11 21:20:35 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Accept double by clicking on it.
+
+	* gtkboard.c (board_pointer): accept double by clicking on it.
+	* gtkboard.c (board_point): look for cube before dice area.
+
 Fri Oct 11 20:08:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkboard.c (board_set): don't show negative relative scores.

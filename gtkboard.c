@@ -619,12 +619,17 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 
     int i, x, y, cx, cy, xCube, yCube;
 
+
     x0 /= bd->board_size;
     y0 /= bd->board_size;
 
     if( intersects( x0, y0, 0, 0, bd->x_dice[ 0 ], bd->y_dice[ 0 ], 7, 7 ) ||
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
 	return POINT_DICE;
+    
+    cube_position( bd, &xCube, &yCube, NULL );
+    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
+	return POINT_CUBE;
     
     /* jsc: support for faster rolling of dice by clicking board
       *
@@ -636,11 +641,7 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
     else if( intersects( x0, y0, 0, 0, 12, 33, 36, 6 ) )
 	return POINT_LEFT;
 
-    cube_position( bd, &xCube, &yCube, NULL );
-    
-    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
-	return POINT_CUBE;
-    
+
     for( i = 0; i < 28; i++ ) {
 	point_area( bd, i, &x, &y, &cx, &cy );
 
@@ -1325,6 +1326,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     
     switch( event->type ) {
     case GDK_BUTTON_PRESS:
+
 	if( bd->drag_point >= 0 )
 	    /* Ignore subsequent button presses once we're dragging. */
 	    break;
@@ -1365,12 +1367,14 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    
 	    if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) )
 		GTKSetCube( NULL, 0, NULL );
-	    else
+	    else if ( bd->doubled )
+                UserCommand ( "take" );
+            else
 		UserCommand( "double" );
 	    
 	    return TRUE;
 	}
-	
+
 	if( bd->drag_point == POINT_DICE ) {
 	    /* Clicked on dice; end move. */
 	    bd->drag_point = -1;
