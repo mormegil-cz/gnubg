@@ -1163,7 +1163,7 @@ extern void CommandHint( char *sz ) {
     movelist ml;
     int i;
     char szMove[ 32 ], szTemp[ 1024 ];
-    float aar[ 32 ][ NUM_OUTPUTS ], arDouble[ 4 ];
+    float arDouble[ 4 ];
     cubeinfo ci;
     
     if( fTurn < 0 ) {
@@ -1266,12 +1266,15 @@ extern void CommandHint( char *sz ) {
 
       SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
-      FindnSaveBestMoves( &ml, anDice[ 0 ], anDice[ 1 ], anBoard,
-                          NULL, &ci, &ecEval );
+      if( FindnSaveBestMoves( &ml, anDice[ 0 ], anDice[ 1 ], anBoard,
+			      NULL, &ci, &ecEval ) < 0 || fInterrupt )
+	  return;
 
-      if( fInterrupt )
-        return;
-    
+      if( !ml.cMoves ) {
+	  outputl( "There are no legal moves." );
+	  return;
+      }
+      
 #if USE_GTK
       if( fX ) {
         GTKHint( &ml );

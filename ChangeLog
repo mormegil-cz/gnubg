@@ -1,3 +1,19 @@
+Tue Oct 24 10:16:22 2000  Gary Wong  <gtw@research.att.com>
+
+	* eval.c (FindnSaveBestMoves): Free the move list on error (e.g.
+	interrupt), and don't allocate anything if there are no legal moves.
+	* gnubg.c (CommandHint): If there are no legal moves, say so.
+
+	* gnubgtest: Add a resignation test.
+
+	* gtkgame.c (GameListSelectRow): New function.  Allow the user
+	to select a move in the list.
+
+	* play.c: Fixed resignation bug (resignations had no effect).
+
+	* set.c (CommandSetPlayerName): Allow the names "b", "bo" and "bot",
+	even though they're prefixes of "both".
+
 Tue Oct 24 13:42:37 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* eval.c (SetCubeInfo): bugfix: reset negative(!) gammon price to 
