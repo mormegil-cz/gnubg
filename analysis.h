@@ -71,7 +71,11 @@ typedef struct _statcontext {
   float arErrorWrongTake [ 2 ][ 2 ];
   float arErrorWrongPass [ 2 ][ 2 ];
   float arLuck[ 2 ][ 2 ];
-  
+
+  /* luck adjusted result */
+
+  float arActualResult[ 2 ];
+
 } statcontext;
 
 typedef enum _ratingtype {

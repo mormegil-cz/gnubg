@@ -1,3 +1,15 @@
+Wed Jun 25 21:13:29 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Implement luck adjusted results.
+	(bug #4012, suggested by Magnar Naustdalslid)
+
+	* analysis.c (updateStatContext): calculate values needed for
+	luck adjusted results.
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): show luck adjusted results.
+
+	* matchequity.c (getMEAtScore): new function.
+
 Mon Jun 24 00:03 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
 	* Use deprecated gtk_spin_button_get_value_as_float, for gtk1.2

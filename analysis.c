@@ -38,6 +38,7 @@
 #include "rollout.h"
 #include "analysis.h"
 #include "sound.h"
+#include "matchequity.h"
 
 #include "i18n.h"
 
@@ -301,12 +302,38 @@ updateStatcontext ( statcontext *psc,
   int i;
   int anBoardMove[ 2 ][ 25 ];
 
-  GetMatchStateCubeInfo ( &ci, pms );
-
   switch ( pmr->mt ) {
 
   case MOVE_GAMEINFO:
-    /* no-op */
+    /* update luck adjusted result */
+
+    psc->arActualResult[ 0 ] = psc->arActualResult[ 1 ] = 0.0f;
+
+    if ( pmr->g.fWinner != -1 ) {
+
+      if ( pmr->g.nMatch ) {
+
+        psc->arActualResult[ pmr->g.fWinner ] = 
+          getME( pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ], pmr->g.nMatch,
+                 pmr->g.fWinner, pmr->g.nPoints, pmr->g.fWinner,
+                 pmr->g.fCrawfordGame,
+                 aafMET, aafMETPostCrawford ) - 
+          getMEAtScore( pmr->g.anScore[ 0 ], pmr->g.anScore[ 1 ], 
+                        pmr->g.nMatch,
+                        pmr->g.fWinner, 
+                        pmr->g.fCrawfordGame,
+                        aafMET, aafMETPostCrawford );
+
+        psc->arActualResult[ ! pmr->g.fWinner ] =
+          - psc->arActualResult[ pmr->g.fWinner ];
+      }
+      else {
+        psc->arActualResult[ pmr->g.fWinner ] = pmr->g.nPoints;
+        psc->arActualResult[ ! pmr->g.fWinner ] = -pmr->g.nPoints;
+      }
+
+    }
+
     break;
 
   case MOVE_NORMAL:
@@ -316,6 +343,8 @@ updateStatcontext ( statcontext *psc,
      *   - missed doubles
      */
 
+    GetMatchStateCubeInfo ( &ci, pms );
+      
     if ( pmr->n.esDouble.et != EVAL_NONE && fAnalyseCube ) {
 
       float *arDouble = pmr->n.arDouble;
@@ -423,6 +452,7 @@ updateStatcontext ( statcontext *psc,
   case MOVE_DOUBLE:
  
 
+    GetMatchStateCubeInfo ( &ci, pms );
     if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
 
       float *arDouble = pmr->d.arDouble;
@@ -464,6 +494,7 @@ updateStatcontext ( statcontext *psc,
 
   case MOVE_TAKE:
 
+    GetMatchStateCubeInfo ( &ci, pms );
     if ( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
 
       float *arDouble = pmr->d.arDouble;
@@ -493,6 +524,7 @@ updateStatcontext ( statcontext *psc,
 
   case MOVE_DROP:
 
+    GetMatchStateCubeInfo ( &ci, pms );
     if( fAnalyseCube && pmr->d.esDouble.et != EVAL_NONE ) {
 	  
       float *arDouble = pmr->d.arDouble;
@@ -558,9 +590,11 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
     case MOVE_GAMEINFO:
 	fFirstMove = 1;
 
-        if ( fUpdateStatistics )
+        if ( fUpdateStatistics ) {
           IniStatcontext( psc );
-      
+          updateStatcontext ( psc, pmr, pms );
+        }
+
 	break;
       
     case MOVE_NORMAL:
@@ -984,6 +1018,8 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
 
     }
 
+    pscB->arActualResult[ i ] += pscA->arActualResult[ i ];
+
   }
 
 }
@@ -1153,6 +1189,8 @@ IniStatcontext ( statcontext *psc ) {
       psc->arLuck[ i ][ j ] = 0.0;
 
     }
+
+    psc->arActualResult[ i ] = 0.0f;
 
   }
 
@@ -1677,6 +1715,36 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
             ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) ?
             gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
   
+  /* luck adjusted results */
+
+  if ( psc->fDice ) {
+    
+    if ( ms.nMatchTo )
+      sprintf ( strchr ( szOutput, 0 ),
+                "%-31s %7.2f%%                %7.2f%%\n"
+                "%-31s %7.2f%%                %7.2f%%\n",
+                _("Actual result"),
+                100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
+                100.0 * ( 0.5f + psc->arActualResult[ 1 ] ),
+                _("Luck adjusted result"),
+                100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
+                          psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ),
+                100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
+                          psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) );
+    else
+      sprintf ( strchr ( szOutput, 0 ),
+                "%-31s %+7.3f                 %+7.3f\n"
+                "%-31s %+7.3f                 %+7.3f\n",
+                _("Actual result"),
+                psc->arActualResult[ 0 ],
+                psc->arActualResult[ 1 ],
+                _("Luck adjusted result"),
+                psc->arActualResult[ 0 ] - 
+                psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
+                psc->arActualResult[ 1 ] - 
+                psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+
+  }
   
   /* calculate total error */
   
@@ -1805,6 +1873,7 @@ updateStatisticsMove ( moverecord *pmr, matchstate *pms, list *plGame,
   switch ( pmr->mt ) {
   case MOVE_GAMEINFO:
     IniStatcontext ( psc );
+    updateStatcontext( psc, pmr, pms );
     break;
 
   case MOVE_NORMAL:

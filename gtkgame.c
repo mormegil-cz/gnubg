@@ -7666,8 +7666,10 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Overall error rate (per decision)"),
          N_("Equivalent Snowie error rate"),
          N_("Overall rating"),
+         N_("Actual result"),
+         N_("Luck adjusted result"),
          N_("MWC against current opponent"),
-         N_("Guestimated abs. rating"),
+         N_("Guestimated abs. rating")
   };
 
   GtkWidget *pwDialog = CreateDialog( szTitle,
@@ -8003,6 +8005,54 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   else
     strcpy ( sz, _("n/a") );
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+
+  /* 
+   * Luck adjusted result 
+   */
+
+  /* actual result */
+
+  ++irow;
+
+  if ( psc->fDice ) {
+
+    if ( pms->nMatchTo )
+      for ( i = 0; i < 2; ++i ) {
+        sprintf( sz, "%.2f%%", 100.0 * ( 0.5f + psc->arActualResult[ i ] ) );
+        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+      }
+    else
+      for ( i = 0; i < 2; ++i ) {
+        sprintf( sz, "%.3f", psc->arActualResult[ i ] );
+        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+      }
+
+  }
+  
+  /* luck adjusted result */
+
+  ++irow;
+
+  if ( psc->fDice ) {
+
+    if ( pms->nMatchTo )
+      for ( i = 0; i < 2; ++i ) {
+        sprintf( sz, "%.2f%%", 
+                 100.0 * ( 0.5f + psc->arActualResult[ i ] - 
+                           psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] ) );
+        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+      }
+    else
+      for ( i = 0; i < 2; ++i ) {
+        sprintf( sz, "%.3f", 
+                 psc->arActualResult[ i ] - 
+                 psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] );
+        gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
+      }
+
+  }
+  
+  /* Guestimated FIBS rating */
 
   if ( pms->nMatchTo ) {
 

@@ -3352,6 +3352,44 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                  pms->nMatchTo, pms->anScore, pms->fCrawford,
                  pms->fJacoby, nBeavers, pms->bgv );
 
+    if ( psc->fDice ) {
+
+      if ( pms->nMatchTo ) {
+        printStatTableRow( pf, 
+                           _("Actual result"),
+                           "%.2f%%",
+                           100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
+                           100.0 * ( 0.5f + psc->arActualResult[ 1 ] ) );
+
+        printStatTableRow( pf, 
+                           _("Luck adjusted result"),
+                           "%.2f%%",
+                           100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
+                                     psc->arLuck[ 0 ][ 1 ] + 
+                                     psc->arLuck[ 1 ][ 1 ] ),
+                           100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
+                                     psc->arLuck[ 1 ][ 1 ] + 
+                                     psc->arLuck[ 0 ][ 1 ] ) );
+      }
+      else {
+
+        printStatTableRow( pf,
+                           _("Actual result"),
+                           "%+.3f",
+                           psc->arActualResult[ 0 ],
+                           psc->arActualResult[ 1 ] );
+        printStatTableRow( pf,
+                           _("Luck adjusted result"),
+                           "%+.3f",
+                           psc->arActualResult[ 0 ] - 
+                           psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ],
+                           psc->arActualResult[ 1 ] - 
+                           psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] );
+
+      }
+
+    }
+
     if ( pms->nMatchTo ) {
 
       /* skill */
