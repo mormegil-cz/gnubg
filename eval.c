@@ -2012,7 +2012,7 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ] )
 	    }
 	  }
 	} else {
-	  if( ((int)tot - (1 + board[1])) <= (int)N ) {
+	  if( ((int)tot - (board[1] - 1)) <= (int)N ) {
 	    return CLASS_CRASHED;
 	  }
 	}
