@@ -3672,6 +3672,9 @@ CommandNext( char* sz )
     return;
   }
     
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
   n = 1;
 
   if( ( pch = NextToken( &sz ) ) ) {
@@ -3827,6 +3830,10 @@ extern void CommandPrevious( char *sz ) {
 	return;
     }
     
+#if USE_BOARD3D
+	RestrictiveRedraw();
+#endif
+
 	n = 1;
 
     if( ( pch = NextToken( &sz ) ) ) {
