@@ -69,7 +69,7 @@ gnubg_SOURCES = $(COMMON_SOURCES) gtkboard.c gtkboard.h gtkgame.c gtkgame.h \
 	gtkexport.c gtkexport.h gtkcube.c gtkcube.h gtkchequer.c gtkchequer.h \
 	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
 	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
-	gtkcolour.h \
+	gtkcolour.h gtksplash.c gtksplash.h \
 	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 gnubg_LDADD = @GTK_LIBS@ $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
 gnubg_DEPENDENCIES = $(COMMON_DEPS)
