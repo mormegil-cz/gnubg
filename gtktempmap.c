@@ -82,6 +82,8 @@ typedef struct _tempmapwidget {
   tempmap *atm;
   int n;
 
+  int nSizeDie;
+
 } tempmapwidget;
 
 
@@ -361,18 +363,50 @@ ExposeQuadrant( GtkWidget *pw, GdkEventExpose *pev, tempmapwidget *ptmw ) {
 
 }
 
+
 static void
 ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
            tempmapwidget *ptmw ) {
 
   int *pi = (int *) gtk_object_get_user_data( GTK_OBJECT( pw ) );
   GdkGC *gc = ( ( BoardData *) ( BOARD( pwBoard ) )->board_data )->gc_copy;
-  int x = ( pw->allocation.width - SIZE_DIE * 7 ) / 2;
-  int y = ( pw->allocation.height - SIZE_DIE * 7 ) / 2;
+  int x, y;
+  int nSizeDie;
+
+  nSizeDie = ( pw->allocation.width - 4 ) / 7;
+  if ( nSizeDie > ( ( pw->allocation.height - 4 ) / 7 ) )
+    nSizeDie = ( pw->allocation.height - 4 )/ 7;
+
+  if ( ptmw->nSizeDie != nSizeDie ) {
+
+    int i;
+    renderdata rd;
+
+    /* render die */
+
+    memcpy( &rd, &rdAppearance, sizeof rd );
+    rd.nSize = ptmw->nSizeDie = nSizeDie;
+
+    
+    for (  i = 0; i < 2; ++i ) {
+      g_free( ptmw->achDice[ i ] );
+      g_free( ptmw->achPips[ i ] );
+
+      ptmw->achDice[ i ] = g_malloc ( nSizeDie * nSizeDie * 7 * 7 * 4 );
+      ptmw->achPips[ i ] = malloc ( nSizeDie * nSizeDie * 3 );
+    }
+
+    RenderDice( &rd, ptmw->achDice[ 0 ], ptmw->achDice[ 1 ], nSizeDie * 7 * 4 );
+    RenderPips( &rd, ptmw->achPips[ 0 ], ptmw->achPips[ 1 ], nSizeDie * 3 );
+
+  }
+
+  x = ( pw->allocation.width - ptmw->nSizeDie * 7 ) / 2;
+  y = ( pw->allocation.height - ptmw->nSizeDie * 7 ) / 2;
 
   gdk_window_clear_area( pw->window, pev->area.x, pev->area.y,
 			 pev->area.width, pev->area.height);
-  DrawDie( pw->window, ptmw->achDice, ptmw->achPips, SIZE_DIE,
+  DrawDie( pw->window, ptmw->achDice, ptmw->achPips, ptmw->nSizeDie,
            gc, x, y, ptmw->atm[ 0 ].pms->fMove, *pi + 1 );
 
 }
@@ -458,7 +492,6 @@ GTKShowTempMap( const matchstate ams[], const int n,
   tempmapwidget *ptmw;
   int *pi;
   int i, j;
-  renderdata rd;
 
   GtkWidget *pwDialog;
   GtkWidget *pwTable = NULL;
@@ -481,6 +514,9 @@ GTKShowTempMap( const matchstate ams[], const int n,
   ptmw->fShowEquity = FALSE;
   ptmw->fInvert = fInvert;
   ptmw->n = n;
+  ptmw->nSizeDie = -1;
+  ptmw->achDice[ 0 ] = ptmw->achDice[ 1 ] = NULL;
+  ptmw->achPips[ 0 ] = ptmw->achPips[ 1 ] = NULL;
 
   ptmw->atm = (tempmap *) g_malloc( n * sizeof ( tempmap ) );
   for ( i = 0; i < n; ++i ) {
@@ -494,19 +530,6 @@ GTKShowTempMap( const matchstate ams[], const int n,
   gtk_container_set_border_width ( GTK_CONTAINER ( pwv ), 8);
   gtk_container_add ( GTK_CONTAINER (DialogArea( pwDialog, DA_MAIN ) ), pwv );
 
-
-  /* render die */
-
-  memcpy( &rd, &rdAppearance, sizeof rd );
-  rd.nSize = SIZE_DIE;
-
-  ptmw->achDice[ 0 ] = malloc ( SIZE_DIE * SIZE_DIE * 7 * 7 * 4 );
-  ptmw->achDice[ 1 ] = malloc ( SIZE_DIE * SIZE_DIE * 7 * 7 * 4 );
-  ptmw->achPips[ 0 ] = malloc ( SIZE_DIE * SIZE_DIE * 3 );
-  ptmw->achPips[ 1 ] = malloc ( SIZE_DIE * SIZE_DIE * 3 );
-
-  RenderDice( &rd, ptmw->achDice[ 0 ], ptmw->achDice[ 1 ], SIZE_DIE * 7 * 4 );
-  RenderPips( &rd, ptmw->achPips[ 0 ], ptmw->achPips[ 1 ], SIZE_DIE * 3 );
 
   /* calculate number of rows and columns */
 

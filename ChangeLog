@@ -1,3 +1,8 @@
+Mon Jun  2 22:32:28 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktempmap.c (ExposeDie, GTKShowTempMap): dynamic resizing of
+	dice.
+
 Mon Jun 02 17:11:48 2003  Holger Bochnig <hbgg@gmx.net>
 
         * gtktempmap.c (ExposeDie): bug fix: after a resize artefacts
