@@ -2789,12 +2789,6 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                           100.0 * ( 1.0 - r ) );
 
       printStatTableRow ( pf,
-                          _( "Relative rating"),
-                          "%6.2f",
-                          relativeFibsRating ( r, pms->nMatchTo ),
-                          relativeFibsRating ( 1.0 - r, pms->nMatchTo ) );
-
-      printStatTableRow ( pf,
                           _( "Guestimated abs. rating"),
                           "%6.2f",
                           absoluteFibsRating ( ar[ 0 ], pms->nMatchTo ),
@@ -2910,6 +2904,8 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 
       pmr = pl->p;
+
+      FixMatchState ( &msExport, pmr );
 
       switch( pmr->mt ) {
 
