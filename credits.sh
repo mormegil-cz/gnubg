@@ -1,5 +1,6 @@
 #!/bin/sh
-# $Id$
+
+column < /dev/null || exit
 
 contributors=/tmp/cont.$$
 credit=/tmp/cred.$$
