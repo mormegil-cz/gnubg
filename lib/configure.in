@@ -42,5 +42,6 @@ AC_HEADER_TIME
 dnl Checks for library functions.
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(gettimeofday select)
+AC_REPLACE_FUNCS(rand_r)
 
 AC_OUTPUT(Makefile)

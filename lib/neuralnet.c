@@ -1,8 +1,10 @@
 /*
  * neuralnet.c
  *
- * by Gary Wong, 1998
+ * by Gary Wong, 1998-2000
  */
+
+#include "config.h"
 
 #include <errno.h>
 #include <math.h>
@@ -10,10 +12,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef HAVE_RAND_R
+#include "rand_r.h"
+#endif
+
 #define sigmoid( x ) ( (x) > 0.0f ? \
 		       1.0f / ( 2.0f + (x) + 77.0f / 60.0f * (x) * (x) ) : \
 		       1.0f - 1.0f / ( 2.0f + -(x) + \
 				       77.0f / 60.0f * (x) * (x) ) )
+
+static unsigned int nSeed = 1; /* for rand_r */
 
 extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
 			    int cOutput, float rBetaHidden,
@@ -52,16 +60,16 @@ extern int NeuralNetCreate( neuralnet *pnn, int cInput, int cHidden,
     }
 
     for( i = cHidden * cInput, pf = pnn->arHiddenWeight; i; i-- )
-	*pf++ = ( ( random() & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cOutput * cHidden, pf = pnn->arOutputWeight; i; i-- )
-	*pf++ = ( ( random() & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cHidden, pf = pnn->arHiddenThreshold; i; i-- )
-	*pf++ = ( ( random() & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
     
     for( i = cOutput, pf = pnn->arOutputThreshold; i; i-- )
-	*pf++ = ( ( random() & 0xFFFF ) - 0x8000 ) / 131072.0;
+	*pf++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) / 131072.0;
 
     return 0;
 }
@@ -185,8 +193,8 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	    return -1;
 
 	for( i = pnn->cHidden; i < cHidden; i++ )
-	    pnn->arHiddenThreshold[ i ] = ( ( random() & 0xFFFF ) - 0x8000 ) /
-		131072.0;
+	    pnn->arHiddenThreshold[ i ] = ( ( rand_r( &nSeed ) & 0xFFFF ) -
+					    0x8000 ) / 131072.0;
     }
     
     if( cHidden != pnn->cHidden || cInput != pnn->cInput ) {
@@ -198,9 +206,11 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	for( i = 0; i < cInput; i++ )
 	    for( j = 0; j < cHidden; j++ )
 		if( j >= pnn->cHidden )
-		    *prNew++ = ( ( random() & 0xFFFF ) - 0x8000 ) / 131072.0;
+		    *prNew++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) /
+			131072.0;
 		else if( i >= pnn->cInput )
-		    *prNew++ = ( ( random() & 0x0FFF ) - 0x0800 ) / 131072.0;
+		    *prNew++ = ( ( rand_r( &nSeed ) & 0x0FFF ) - 0x0800 ) /
+			131072.0;
 		else
 		    *prNew++ = pnn->arHiddenWeight[ i * pnn->cHidden + j ];
 		    
@@ -215,8 +225,8 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	    return -1;
 
 	for( i = pnn->cOutput; i < cOutput; i++ )
-	    pnn->arOutputThreshold[ i ] = ( ( random() & 0xFFFF ) - 0x8000 ) /
-		131072.0;
+	    pnn->arOutputThreshold[ i ] = ( ( rand_r( &nSeed ) & 0xFFFF ) -
+					    0x8000 ) / 131072.0;
     }
     
     if( cOutput != pnn->cOutput || cHidden != pnn->cHidden ) {
@@ -228,12 +238,14 @@ extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,
 	for( i = 0; i < cHidden; i++ )
 	    for( j = 0; j < cOutput; j++ )
 		if( j >= pnn->cOutput )
-		    *prNew++ = ( ( random() & 0xFFFF ) - 0x8000 ) / 131072.0;
+		    *prNew++ = ( ( rand_r( &nSeed ) & 0xFFFF ) - 0x8000 ) /
+			131072.0;
 		else if( i >= pnn->cHidden )
-		    *prNew++ = ( ( random() & 0x0FFF ) - 0x0800 ) / 131072.0;
+		    *prNew++ = ( ( rand_r( &nSeed ) & 0x0FFF ) - 0x0800 ) /
+			131072.0;
 		else
 		    *prNew++ = pnn->arOutputWeight[ i * pnn->cOutput + j ];
-		    
+
 	free( pnn->arOutputWeight );
 
 	pnn->arOutputWeight = pr;

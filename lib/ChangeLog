@@ -1,3 +1,7 @@
+Mon Jan  3 03:40:48 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* rand_r.c (rand_r): New function.
+
 Sun Jan  2 11:33:58 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* hash.c (CacheResize): New function.
