@@ -3,6 +3,9 @@ Sun May 26 12:47:27 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	* html.c (ExportGameHTML): fix bugs in HTML export reported by 
 	Olivier Croisille: cube shown on wrong side, no cube analysis shown.
 
+	* html.c (HTMLPrintMoveAnalysis): fix bug: html export did not honour
+	"set export moves parameters evaluation off".
+
 Sun May 26 12:27:12 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (GTKRolloutUpdate): add one digit to SE for money games.
