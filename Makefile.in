@@ -725,7 +725,7 @@ distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
 sgfp.c sgfp.h: sgf.y
-	$(BISON) -o $@ -p sgf -d $(srcdir)/sgf.y
+	$(BISON) -o sgfp.c -p sgf -d $(srcdir)/sgf.y
 
 sgfl.c: sgf.l
 	$(FLEX) -o$@ -Psgf $(srcdir)/sgf.l

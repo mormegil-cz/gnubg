@@ -1,3 +1,8 @@
+Tue Jun 11 11:58:52 2002  Gary Wong  <gtw@gnu.org>
+
+	* Makefile.am: Write sgfp.c explicitly, instead of using $@ (which
+	sometimes expanded to sgfp.h).
+
 Tue Jun 11 16:50:03 2002  Øystein Johansen  <oeysteij@online.no>
 
         * gnubg.c (CommandCopy): Add match information

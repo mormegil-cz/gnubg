@@ -75,7 +75,7 @@ EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
 	ABOUT-NLS
 
 sgfp.c sgfp.h: sgf.y
-	$(BISON) -o $@ -p sgf -d $(srcdir)/sgf.y
+	$(BISON) -o sgfp.c -p sgf -d $(srcdir)/sgf.y
 
 sgfl.c: sgf.l
 	$(FLEX) -o$@ -Psgf $(srcdir)/sgf.l
