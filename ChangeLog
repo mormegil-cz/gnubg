@@ -1,3 +1,7 @@
+Thu Feb 21 18:42:26 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c: output cube decisions.
+
 Wed Feb 20 19:36:09 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (GTKUpdateAnnotations): New function (dumps menu
