@@ -161,6 +161,7 @@ extern void CommandExportHTMLImages( char *sz ) {
     RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_SIZE * 4 );
 #endif /* HAVE_LIBART */
 
+    /* cubes and dices are rendered a bit smaller */
 
     rd.nSize = ss;
 
