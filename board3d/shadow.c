@@ -131,7 +131,7 @@ void shadowDisplay(void (*drawScene)(BoardData*), BoardData* bd)
 {
 	/* Pass 1: Draw model, ambient light only (some diffuse to vary shadow darkness) */
 	float zero[4] = {0,0,0,0};
-	float d1[4] = {bd->dim, bd->dim, bd->dim, bd->dim};
+	float d1[4] = {bd->rd->dimness, bd->rd->dimness, bd->rd->dimness, bd->rd->dimness};
 	float specular[4];
 	float diffuse[4];
 

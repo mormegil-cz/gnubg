@@ -115,13 +115,19 @@ typedef struct _renderdata {
     int fHinges; /* TRUE if hinges should be drawn */
     int fLabels; /* TRUE if point numbers should be drawn */
     int fClockwise; /* orientation for board point numbers */
+    int fShowIDs; /* Position + match ids */
+    int fDiceArea; /* Show dice below board */
+    int fShowGameInfo;
     int fDynamicLabels; /* TRUE if the point numbers are dynamic, i.e.,
                            they adjust depending on the player on roll */
 	int showMoveIndicator;
 #if USE_BOARD3D
 	displaytype fDisplayType;	/* 2d or 3d display */
+	int fHinges3d; /* TRUE if hinges should be drawn */
 	int showShadows;	/* Show 3d shadows */
 	int shadowDarkness;	/* How dark are shadows */
+	float dimness;	/* Darnkess as percentage of ambient light */
+
 	int animateRoll;	/* Animate dice rolls */
 	int animateFlag;	/* Animate resignation flag */
 	int closeBoardOnExit;	/* Animate board close on quit */
@@ -131,21 +137,22 @@ typedef struct _renderdata {
 	float lightPos[3];	/* x,y,z pos of light source */
 	int lightLevels[3];	/* amibient/diffuse/specular light levels */
 	int boardAngle;	/* Angle board is tilted at */
-	int testSkewFactor;	/* Debug FOV adjustment */
+	int skewFactor;	/* FOV adjustment */
 	int planView;	/* Ortho view? */
 	float diceSize;	/* How big are the dice */
 	int roundedEdges;	/* Rounded board edges? */
 	int bgInTrays;	/* Rounded board edges? */
 	PieceType pieceType;	/* Different piece models */
 	PieceTextureType pieceTextureType;	/* Different piece texture types */
+	int afDieColour3d[ 2 ]; /* TRUE means same colour as chequers */
 
-	Material rdChequerMat[2];	/* Chequer colours */
-	Material rdDiceMat[2], rdDiceDotMat[2];
-	Material rdCubeMat, rdCubeNumberMat;
-	Material rdBaseMat, rdPointMat[2];
-	Material rdBoxMat, rdHingeMat;
-	Material rdPointNumberMat;
-	Material rdBackGroundMat;
+	Material ChequerMat[2];	/* Chequer colours */
+	Material DiceMat[2], DiceDotMat[2];
+	Material CubeMat, CubeNumberMat;
+	Material BaseMat, PointMat[2];
+	Material BoxMat, HingeMat;
+	Material PointNumberMat;
+	Material BackGroundMat;
 #endif
 } renderdata;
 
@@ -159,10 +166,10 @@ typedef struct _renderimages {
     unsigned char *achLabels[ 2 ];
 } renderimages;
 
-extern renderdata rdDefault;
-    
 extern void RenderInitialise( void );
-    
+
+extern int PreferenceCompare(renderdata *prd1, renderdata *prd2);
+
 extern void CopyArea( unsigned char *puchDest, int nDestStride,
 		      unsigned char *puchSrc, int nSrcStride,
 		      int cx, int cy );
@@ -238,7 +245,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
                            int anArrowPosition[ 2 ],
 			   int fPlaying, int nPlayer,
 			   int x, int y, int cx, int cy );
-    
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -85,7 +85,6 @@ typedef struct _diceTest
 
 /* Setup functions */
 void InitBoard3d(BoardData *bd);
-void InitBoardPreview(BoardData *bd);
 void InitGL(BoardData *bd);
 
 /* font functions */
@@ -143,7 +142,9 @@ void AddGameData(GraphData* pgd, int game, statcontext *psc);
 void TidyGraphData(GraphData* pgd);
 
 /* Misc functions */
+void SetupVisual();
 void SetTexture(BoardData* bd, Material* pMat, const char* filename, TextureFormat format);
+void GetTexture(BoardData* bd, Material* pMat);
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
 void SetupSimpleMat(Material* pMat, float r, float g, float b);
 void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a);

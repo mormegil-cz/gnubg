@@ -44,7 +44,7 @@ GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular;
 GtkWidget *pwColourDialog3d;
 GtkAdjustment *padjShine, *padjOpacity;
 GtkWidget *psOpacity, *pOpacitylabel, *pTexturelabel, *pwPreview, *textureCombo;
-Material *col3d;
+Material col3d;
 Material cancelValue;
 GdkPixmap *xppm = 0;
 int useOpacity, useTexture;
@@ -52,6 +52,8 @@ float opacityValue;
 int bUpdate = TRUE;
 GLUquadricObj *qobj;
 char lastTextureStr[NAME_SIZE + 1];
+GtkWidget* dialogParent;
+GdkWindow* refWind;
 
 /* Store the previews details here */
 #define MAX_DETAILS 15
@@ -72,8 +74,9 @@ extern void InitGL(BoardData *bd);
 extern void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a);
 extern void setMaterial(Material* pMat);
 extern void UpdatePreview(GtkWidget **ppw);
-extern void RenderPreview(Material* pMat, unsigned char* buf);
-extern BoardData bd3d;
+static void RenderPreview(Material* pMat, unsigned char* buf);
+
+extern GtkWidget *pwPrevBoard;
 
 int previewLightLevels[3];
 
@@ -164,12 +167,13 @@ static void Draw(Material* pMat)
 		glDisable(GL_BLEND);
 }
 
-void UpdatePreviewBar(Material* pMat, GdkPixmap *pixmap)
+static void UpdatePreviewBar(Material* pMat, GdkPixmap *pixmap)
 {
 #if !LINUX
 	GdkGC *gc;
+	Material Copy = *pMat;
 
-	RenderPreview(pMat, auch);
+	RenderPreview(&Copy, auch);
 
 	gc = gdk_gc_new(pixmap);
 	gdk_draw_rgb_image(pixmap, gc, 0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GDK_RGB_DITHER_MAX,
@@ -192,12 +196,12 @@ void UpdateColourPreview(void *arg)
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpDiffuse), diffuse);
 	gtk_colour_picker_get_colour(GTK_COLOUR_PICKER(pcpSpecular), specular);
 
-	SetupMat(col3d, (float)ambient[0], (float)ambient[1], (float)ambient[2],
+	SetupMat(&col3d, (float)ambient[0], (float)ambient[1], (float)ambient[2],
 		(float)diffuse[0], (float)diffuse[1], (float)diffuse[2],
 		(float)specular[0], (float)specular[1], (float)specular[2],
 		(int)padjShine->value, opacityValue);
 
-	UpdatePreviewBar(col3d, xppm);
+	UpdatePreviewBar(&col3d, xppm);
 
 	gtk_widget_queue_draw(pwPreview);
 }
@@ -241,7 +245,7 @@ void CreatePreview()
 	gdk_gl_drawable_gl_end (gldrawable);
 }
 
-void RenderPreview(Material* pMat, unsigned char* buf)
+static void RenderPreview(Material* pMat, unsigned char* buf)
 {
 	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = GDK_GL_DRAWABLE(glpixmap);
@@ -261,14 +265,13 @@ void RenderPreview(Material* pMat, unsigned char* buf)
 #else
 
 extern GdkVisual *visual;
-void SetupVisual();
 
 void CreatePreview()
 {
 	SetupVisual();
 }
 
-void RenderPreview(Material* pMat, unsigned char* buf)
+static void RenderPreview(Material* pMat, unsigned char* buf)
 {
 	GdkGLPixmap *glpixmap;
 	GdkGLContext *glPixmapContext;
@@ -287,7 +290,8 @@ void RenderPreview(Material* pMat, unsigned char* buf)
 	glReadPixels(0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, buf);
 
 	gdk_gl_pixmap_unref(glpixmap);
-	gdk_gl_context_unref(glPixmapContext);
+	/* Removed next line as causes OpenGL errors, (hope it's not needed...)
+	gdk_gl_context_unref(glPixmapContext);	*/
 }
 
 #endif
@@ -301,9 +305,9 @@ void TextureChange(GtkList *list, gpointer user_data)
 		strcpy(lastTextureStr, current);
 
 		if (!strcmp(current, NO_TEXTURE_STRING))
-			col3d->textureInfo = 0;
+			col3d.textureInfo = 0;
 		else
-			FindNamedTexture(&col3d->textureInfo, current);
+			FindNamedTexture(&col3d.textureInfo, current);
 
 		UpdateColourPreview(0);
 	}
@@ -371,9 +375,6 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 
 static gboolean CancelClicked( GtkWidget *pw, GdkEvent *pev, void* arg )
 {
-	/* Restore to original colour */
-	memcpy(col3d, &cancelValue, sizeof(Material));
-
 	gtk_window_set_modal( GTK_WINDOW( pwColourDialog3d ), FALSE );
 	gtk_widget_destroy( pwColourDialog3d );
 
@@ -388,14 +389,21 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 		char* texStr;
 		GdkGC *gc;
 
+		/* Copy new settings to preview material */
+		*pDetails->pMat = col3d;
+
 		if (useTexture)
 		{
 			texStr = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
 
 			if (!strcmp(texStr, NO_TEXTURE_STRING))
-				col3d->textureInfo = 0;
+				col3d.textureInfo = 0;
 			else
-				FindNamedTexture(&col3d->textureInfo, texStr);
+			{
+				BoardData *bd = BOARD(pwPrevBoard)->board_data;
+				ClearTextures(bd);
+				GetTextures(bd);
+			}
 		}
 		gc = gdk_gc_new(pDetails->pixmap);
 		gdk_draw_rgb_image(pDetails->pixmap, gc, 0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GDK_RGB_DITHER_MAX,
@@ -403,7 +411,7 @@ static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 		gdk_gc_unref( gc );
 
 		gtk_widget_queue_draw(pDetails->preview);
-		UpdatePreview(pDetails->parentPreview);
+		UpdatePreview(0);
 	}
 	gtk_widget_destroy( pwColourDialog3d );
 	gtk_main_quit();
@@ -463,7 +471,7 @@ void setCol(GtkColourPicker* pCP, float val[4])
 
 void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 {
-	col3d = pDetails->pMat;
+	col3d = *pDetails->pMat;
 
 	/* Avoid updating preview */
 	bUpdate = FALSE;
@@ -471,16 +479,16 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	Create3dColourDialog(pDetails);
 
 	/* Setup widgets */
-	setCol(GTK_COLOUR_PICKER(pcpAmbient), col3d->ambientColour);
-	setCol(GTK_COLOUR_PICKER(pcpDiffuse), col3d->diffuseColour);
-	setCol(GTK_COLOUR_PICKER(pcpSpecular), col3d->specularColour);
+	setCol(GTK_COLOUR_PICKER(pcpAmbient), col3d.ambientColour);
+	setCol(GTK_COLOUR_PICKER(pcpDiffuse), col3d.diffuseColour);
+	setCol(GTK_COLOUR_PICKER(pcpSpecular), col3d.specularColour);
 
-	gtk_adjustment_set_value (padjShine, (float)col3d->shine);
+	gtk_adjustment_set_value (padjShine, (float)col3d.shine);
 	if (IsSet(pDetails->opacity, DF_VARIABLE_OPACITY))
 	{
 		useOpacity = 1;
 		gtk_adjustment_set_value(padjOpacity, 
-			col3d->alphaBlend ? (col3d->ambientColour[3] + .001f) * 100 : 100);
+			col3d.alphaBlend ? (col3d.ambientColour[3] + .001f) * 100 : 100);
 	}
 	else
 	{
@@ -500,10 +508,10 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 		gtk_combo_set_popdown_strings(GTK_COMBO(textureCombo), glist);
 		g_list_free(glist);
 
-		if (pDetails->pMat->textureInfo)
+		if (col3d.textureInfo)
 		{
-			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry), pDetails->pMat->textureInfo->name);
-			strcpy(lastTextureStr, pDetails->pMat->textureInfo->name);
+			gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry), col3d.textureInfo->name);
+			strcpy(lastTextureStr, col3d.textureInfo->name);
 		}
 		else
 			strcpy(lastTextureStr, NO_TEXTURE_STRING);
@@ -513,12 +521,11 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	}
 
 	/* Copy material - to reset if cancel pressed */
-	memcpy(&cancelValue, col3d, sizeof(Material));
+	memcpy(&cancelValue, &col3d, sizeof(Material));
 
 	/* show dialog */
 	gtk_window_set_modal( GTK_WINDOW( pwColourDialog3d ), TRUE );
-	gtk_window_set_transient_for( GTK_WINDOW( pwColourDialog3d ),
-                                GTK_WINDOW( gtk_widget_get_toplevel(*pDetails->parentPreview) ) );
+	gtk_window_set_transient_for(GTK_WINDOW(pwColourDialog3d), GTK_WINDOW(dialogParent));
 	gtk_widget_show_all( pwColourDialog3d );
 
 	if (!useOpacity)
@@ -562,14 +569,20 @@ void UpdateColPreviews()
 		UpdatePreviewBar(details[i].pMat, details[i].pixmap);
 }
 
-GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind, Material* pMat, int opacity, int texture)
+extern void Setup3dColourPicker(GtkWidget* parent, GdkWindow* wind)
+{
+	dialogParent = parent;
+	refWind = wind;
+}
+
+GtkWidget* gtk_colour_picker_new3d(Material* pMat, int opacity, int texture)
 {
 	GtkWidget *pixmapwid, *button;
 	GdkPixmap *pixmap;
-	pixmap = gdk_pixmap_new(pixWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
+	pixmap = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
 
 	if (!xppm)
-		xppm = gdk_pixmap_new(pixWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
+		xppm = gdk_pixmap_new(refWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
 
 	button = gtk_button_new();
 	pixmapwid = gtk_pixmap_new(pixmap, NULL);
@@ -583,7 +596,6 @@ GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind
 	details[curDetail].pMat = pMat;
 	details[curDetail].pixmap = pixmap;
 	details[curDetail].preview = button;
-	details[curDetail].parentPreview = parentPreview;
 	details[curDetail].opacity = opacity;
 	details[curDetail].texture = texture;
 

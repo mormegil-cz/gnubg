@@ -92,7 +92,7 @@ void setIdleFunc(BoardData* bd, idleFunc* pFun)
 
 void Draw(BoardData* bd)
 {	/* Render board - need multiple passes for shadows */
-	if (bd->showShadows)
+	if (bd->rd->showShadows)
 		shadowDisplay(drawBoard, bd);
 	else
 		drawBoard(bd);
@@ -116,7 +116,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, B
 	height = widget->allocation.height;
 
 	glViewport(0, 0, width, height);
-	SetupViewingVolume3d(bd, &rdAppearance);
+	SetupViewingVolume3d(bd);
 
 	RestrictiveRedraw();
 
@@ -142,8 +142,7 @@ void realize(GtkWidget *widget, BoardData* bd)
 #endif
 
 	InitGL(bd);
-	Set3dSettings(bd, &rdAppearance);
-	SetupViewingVolume3d(bd, &rdAppearance);
+	SetupViewingVolume3d(bd);
 	GetTextures(bd);
 	preDraw3d(bd);
 
@@ -181,7 +180,7 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 #endif
 	CheckOpenglError();
 
-	if (!bd->quickDraw)
+	if (!bd->rd->quickDraw)
 		Draw(bd);
 	else
 	{	/* Quick drawing mode */
@@ -208,37 +207,34 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, BoardData
 	return TRUE;
 }
 
-void CreateGLWidget(BoardData* bd, GtkWidget **drawing_area)
+extern GtkWidget* CreateGLWidget(BoardData* bd)
 {
+	GtkWidget* drawing_area;
 #if HAVE_GTKGLEXT
 	/* Drawing area for OpenGL */
-	*drawing_area = gtk_drawing_area_new();
+	drawing_area = gtk_drawing_area_new();
 	/* Set OpenGL-capability to the widget - no list sharing */
-	gtk_widget_set_gl_capability(*drawing_area, glconfig, NULL, TRUE, GDK_GL_RGBA_TYPE);
+	gtk_widget_set_gl_capability(drawing_area, glconfig, NULL, TRUE, GDK_GL_RGBA_TYPE);
 #else
-	*drawing_area = gtk_gl_area_new_vargs(NULL, /* no sharing of lists */
+	drawing_area = gtk_gl_area_new_vargs(NULL, /* no sharing of lists */
 			 GDK_GL_RGBA, GDK_GL_DOUBLEBUFFER, GDK_GL_DEPTH_SIZE, 1, GDK_GL_STENCIL_SIZE, 1, GDK_GL_NONE);
 #endif
-	if (*drawing_area == NULL)
+	if (drawing_area == NULL)
 	{
 		g_print("Can't create opengl drawing widget\n");
-		return;
+		return NULL;
 	}
 
-	gtk_widget_set_events(*drawing_area, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
+	gtk_widget_set_events(drawing_area, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK | 
 			GDK_BUTTON_RELEASE_MASK | GDK_BUTTON_MOTION_MASK);
-	gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), bd);
-	gtk_signal_connect(GTK_OBJECT(*drawing_area), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), bd);
-	gtk_signal_connect(GTK_OBJECT(*drawing_area), "motion_notify_event", GTK_SIGNAL_FUNC(motion_notify_event), bd);
-	gtk_signal_connect(GTK_OBJECT(*drawing_area), "realize", GTK_SIGNAL_FUNC(realize), bd);
-	gtk_signal_connect(GTK_OBJECT(*drawing_area), "configure_event", GTK_SIGNAL_FUNC(configure_event), bd);
-	gtk_signal_connect(GTK_OBJECT(*drawing_area), "expose_event", GTK_SIGNAL_FUNC(expose_event), bd);
-}
+	gtk_signal_connect(GTK_OBJECT(drawing_area), "button_press_event", GTK_SIGNAL_FUNC(button_press_event), bd);
+	gtk_signal_connect(GTK_OBJECT(drawing_area), "button_release_event", GTK_SIGNAL_FUNC(button_release_event), bd);
+	gtk_signal_connect(GTK_OBJECT(drawing_area), "motion_notify_event", GTK_SIGNAL_FUNC(motion_notify_event), bd);
+	gtk_signal_connect(GTK_OBJECT(drawing_area), "realize", GTK_SIGNAL_FUNC(realize), bd);
+	gtk_signal_connect(GTK_OBJECT(drawing_area), "configure_event", GTK_SIGNAL_FUNC(configure_event), bd);
+	gtk_signal_connect(GTK_OBJECT(drawing_area), "expose_event", GTK_SIGNAL_FUNC(expose_event), bd);
 
-void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area)
-{
-	CreateGLWidget(bd, drawing_area);
-	InitBoard3d(bd);
+	return drawing_area;
 }
 
 void InitGTK3d(int *argc, char ***argv)
@@ -395,9 +391,9 @@ GdkGLContext *glPixmapContext = NULL;
 
 void SetupPreview(BoardData* bd, renderdata* prd)
 {
-	ClearTextures(bd, TRUE);
+	ClearTextures(bd);
 	GetTextures(bd);
-	SetupViewingVolume3d(bd, prd);
+	SetupViewingVolume3d(bd);
 	preDraw3d(bd);
 }
 

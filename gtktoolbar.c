@@ -184,12 +184,14 @@ ToolbarStop( GtkWidget *pw, gpointer unused ) {
 
 	fInterrupt = TRUE;
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
+{
+	BoardData *bd = BOARD( pwBoard )->board_data;
+	if (bd->rd->fDisplayType == DT_3D)
 	{
-		BoardData *bd = BOARD( pwBoard )->board_data;
 		StopIdle3d(bd);
 		RestrictiveRedraw();
 	}
+}
 #endif
 }
 

@@ -27,7 +27,8 @@
 #endif
 
 extern char *aszWoodName[];
-extern renderdata rdAppearance;
+extern renderdata* GetMainAppearance();
+extern void CopyAppearance(renderdata* prd);
 
 extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 				   char *szValue );

@@ -624,7 +624,7 @@ static void RenderObjects()
 {
 	int clockwise;
 	renderdata rd;
-	memcpy( &rd, &rdAppearance, sizeof( renderdata ) );
+	CopyAppearance(&rd);
 
 	rd.fLabels = TRUE; 
 	rd.nSize = s;

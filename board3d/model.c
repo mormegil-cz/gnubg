@@ -51,9 +51,9 @@ typedef struct _winged_edge
 void initOccluder(Occluder* pOcc)
 {
 	pOcc->handle = (OccModel*)malloc(sizeof(OccModel));
-	ListInit(&pOcc->handle->planes, sizeof(plane));
-	ListInit(&pOcc->handle->edges, sizeof(winged_edge));
-	ListInit(&pOcc->handle->points, sizeof(position));
+	VectorInit(&pOcc->handle->planes, sizeof(plane));
+	VectorInit(&pOcc->handle->edges, sizeof(winged_edge));
+	VectorInit(&pOcc->handle->points, sizeof(position));
 
 	pOcc->rotator = 0;
 	pOcc->show = 1;
@@ -63,9 +63,9 @@ void freeOccluder(Occluder* pOcc)
 {
 	if (pOcc->handle)
 	{
-		ListClear(&pOcc->handle->planes);
-		ListClear(&pOcc->handle->edges);
-		ListClear(&pOcc->handle->points);
+		VectorClear(&pOcc->handle->planes);
+		VectorClear(&pOcc->handle->edges);
+		VectorClear(&pOcc->handle->points);
 		free(pOcc->handle);
 		pOcc->handle = 0;
 	}
@@ -86,11 +86,11 @@ int AddPos(OccModel* pMod, float a, float b, float c)
 	pos.y = b;
 	pos.z = c;
 
-	index = ListFind(&pMod->points, &pos);
+	index = VectorFind(&pMod->points, &pos);
 	if (index == -1)
 	{
-		ListAdd(&pMod->points, &pos);
-		return ListSize(&pMod->points) - 1;
+		VectorAdd(&pMod->points, &pos);
+		return VectorSize(&pMod->points) - 1;
 	}
 	else
 		return index;
@@ -134,11 +134,11 @@ int AddPlane(OccModel* pMod, position* a, position* b, position* c)
 	int pos;
 	plane p;
 	CreatePlane(&p, a, b, c);
-	pos = ListFind(&pMod->planes, &p);
+	pos = VectorFind(&pMod->planes, &p);
 	if (pos == -1)
 	{
-		ListAdd(&pMod->planes, &p);
-		return ListSize(&pMod->planes) - 1;
+		VectorAdd(&pMod->planes, &p);
+		return VectorSize(&pMod->planes) - 1;
 	}
 	else
 		return pos;
@@ -147,12 +147,12 @@ int AddPlane(OccModel* pMod, position* a, position* b, position* c)
 void GenerateShadowEdges(Occluder* pOcc)
 {	/* For testing */
 	int i;
-	int numEdges = ListSize(&pOcc->handle->edges);
+	int numEdges = VectorSize(&pOcc->handle->edges);
 	for (i = 0; i < numEdges; i++)
 	{
-		winged_edge *we = (winged_edge*)ListGet(&pOcc->handle->edges, i);
-		position *pn0 = (position*)ListGet(&pOcc->handle->points, we->e[0]);
-		position *pn1 = (position*)ListGet(&pOcc->handle->points, we->e[1]);
+		winged_edge *we = (winged_edge*)VectorGet(&pOcc->handle->edges, i);
+		position *pn0 = (position*)VectorGet(&pOcc->handle->points, we->e[0]);
+		position *pn1 = (position*)VectorGet(&pOcc->handle->points, we->e[1]);
 
 		glBegin(GL_LINES);
 			glVertex3f(pn0->x, pn0->y, pn0->z);
@@ -185,7 +185,7 @@ void GenerateShadowEdges(Occluder* pOcc)
 
 float sqdDist(OccModel* pMod, int pIndex, float point[4])
 {
-	plane* p = (plane*)ListGet(&pMod->planes, pIndex);
+	plane* p = (plane*)VectorGet(&pMod->planes, pIndex);
 	return (p->a * point[0] + p->b * point[1] + p->c * point[2] + p->d * point[3]);
 }
 
@@ -193,11 +193,11 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 {
 	int edgeOrder[2];
 	int i;
-	int numEdges = ListSize(&pOcc->handle->edges);
+	int numEdges = VectorSize(&pOcc->handle->edges);
 
 	for (i = 0; i < numEdges; i++)
 	{
-		winged_edge *we = (winged_edge*)ListGet(&pOcc->handle->edges, i);
+		winged_edge *we = (winged_edge*)VectorGet(&pOcc->handle->edges, i);
 
 		float f0 = sqdDist(pOcc->handle, we->w[0], olight);
 		float f1;
@@ -226,8 +226,8 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 		}
 
 		{
-			position *pn0 = (position*)ListGet(&pOcc->handle->points, edgeOrder[0]);
-			position *pn1 = (position*)ListGet(&pOcc->handle->points, edgeOrder[1]);
+			position *pn0 = (position*)VectorGet(&pOcc->handle->points, edgeOrder[0]);
+			position *pn1 = (position*)VectorGet(&pOcc->handle->points, edgeOrder[1]);
 
 			/* local segment */
 			glVertex3f(pn0->x, pn0->y, pn0->z);
@@ -250,10 +250,10 @@ void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 void AddEdge(OccModel* pMod, winged_edge* we)
 {
 	int i;
-	int numEdges = ListSize(&pMod->edges);
+	int numEdges = VectorSize(&pMod->edges);
 	for (i = 0; i < numEdges; i++)
 	{
-		winged_edge *we0 = (winged_edge*)ListGet(&pMod->edges, i);
+		winged_edge *we0 = (winged_edge*)VectorGet(&pMod->edges, i);
 		/* facingness different between polys on edge! */
 		assert((we0->e[0] != we->e[0] || we0->e[1] != we->e[1]) && "facingness different between polys on edge!");
 
@@ -265,7 +265,7 @@ void AddEdge(OccModel* pMod, winged_edge* we)
 			return;
 		}
 	}
-	ListAdd(&pMod->edges, we);  /* otherwise, add the new edge */
+	VectorAdd(&pMod->edges, we);  /* otherwise, add the new edge */
 }
 
 void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, float z2, float x3, float y3, float z3, int otherEdge)
@@ -280,7 +280,7 @@ void addALine(Occluder* pOcc, float x, float y, float z, float x2, float y2, flo
 	pn3.y = y3;
 	pn3.z = z3;
 
-	plane = AddPlane(pOcc->handle, (position*)ListGet(&pOcc->handle->points, p1), (position*)ListGet(&pOcc->handle->points, p2), &pn3);
+	plane = AddPlane(pOcc->handle, (position*)VectorGet(&pOcc->handle->points, p1), (position*)VectorGet(&pOcc->handle->points, p2), &pn3);
 
 	we.e[0] = p1;
 	we.e[1] = p2;

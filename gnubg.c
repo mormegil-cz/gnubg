@@ -4247,8 +4247,7 @@ extern void PromptForExit( void ) {
     }
 
 #if USE_BOARD3D
-    
-    if ((rdAppearance.fDisplayType == DT_3D) && fX)
+    if ((bd->rd->fDisplayType == DT_3D) && fX)
 	{	/* Stop any 3d animations */
 		StopIdle3d(bd);
 	}
@@ -4257,8 +4256,8 @@ extern void PromptForExit( void ) {
     playSound ( SOUND_EXIT );
 
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D && rdAppearance.closeBoardOnExit
-		&& rdAppearance.fHinges && fX)
+	if (bd->rd->fDisplayType == DT_3D && bd->rd->closeBoardOnExit
+		&& bd->rd->fHinges3d && fX)
 		CloseBoard3d(bd);
 #endif
 #if USE_GTK
@@ -4280,7 +4279,7 @@ extern void PromptForExit( void ) {
 
 #if USE_BOARD3D
 	if (fX)
-		Tidy3dObjects(bd, TRUE);
+		Tidy3dObjects(bd);
 #endif
 
 #if HAVE_LIBREADLINE
@@ -5644,7 +5643,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     /* Render preferences */
 
-    fputs( RenderPreferencesCommand( &rdAppearance, szTemp ), pf );
+    fputs( RenderPreferencesCommand( GetMainAppearance(), szTemp ), pf );
     fputc( '\n', pf );
     
     fprintf( pf, 
@@ -5717,10 +5716,10 @@ extern void CommandSaveSettings( char *szParam ) {
 		 "set gui usestatspanel %s\n",
 	     aszAnimation[ animGUI ], nGUIAnimSpeed,
 	     fGUIBeep ? "on" : "off",
-	     fGUIDiceArea ? "on" : "off",
+	     GetMainAppearance()->fDiceArea ? "on" : "off",
 	     fGUIHighDieFirst ? "on" : "off",
 	     fGUIIllegal ? "on" : "off",
-	     fGUIShowIDs ? "on" : "off",
+	     GetMainAppearance()->fShowIDs ? "on" : "off",
 	     fGUIShowPips ? "on" : "off",
 	     fGUIDragTargetHelp ? "on" : "off",
 		 fGUIUseStatsPanel ? "on" : "off");
@@ -7963,7 +7962,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif    
 
     RenderInitialise();
-    memcpy( &rdAppearance, &rdDefault, sizeof rdAppearance );
 
     if( ( pch = getenv( "LOGNAME" ) ) )
 	strcpy( ap[ 1 ].szName, pch );
@@ -8062,11 +8060,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     SetDefaultTC();
 #endif
 #if USE_BOARD3D
+{
+	BoardData* bd = BOARD(pwBoard)->board_data;
 	/* If using 3d board initilize 3d widget */
-	if (rdAppearance.fDisplayType == DT_3D)
+	if (bd->rd->fDisplayType == DT_3D)
 		Init3d();
 	/* If no 3d settings loaded, set appearance to first design */
-	Default3dSettings();
+	Default3dSettings(bd);
+}
 #endif
 
 #if USE_GTK

@@ -44,6 +44,7 @@ extern int convert_point( int i, int player );
 extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
 extern void waveFlag(BoardData* bd, float wag);
+extern float getDiceSize(BoardData* bd);
 
 /* Test function to show normal direction */
 void CheckNormal()
@@ -186,14 +187,13 @@ void InitGL(BoardData *bd)
 		BuildFont(bd);
 		setupFlag(bd);
 		shadowInit(bd);
-	}
-
 #if GL_VERSION_1_2
-	glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
+		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR);
 #else
-	if (extensionSupported("GL_EXT_separate_specular_color"))
-		glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
+		if (extensionSupported("GL_EXT_separate_specular_color"))
+			glLightModeli(GL_LIGHT_MODEL_COLOR_CONTROL_EXT, GL_SEPARATE_SPECULAR_COLOR_EXT);
 #endif
+	}
 }
 
 void setMaterial(Material* pMat)
@@ -230,19 +230,20 @@ int IsSet(int flags, int bit)
 
 /* Texture functions */
 
-myList textures;
+list textures;
 
 char* TextureTypeStrs[TT_COUNT] = {"general", "piece", "hinge"};
 char* TextureFormatStrs[TF_COUNT] = {"bmp", "png"};
 
 GList *GetTextureList(int type)
 {
-	int i;
 	GList *glist = NULL;
+	list *pl;
 	glist = g_list_append(glist, NO_TEXTURE_STRING);
-	for (i = 0; i < ListSize(&textures); i++)
+
+	for (pl = textures.plNext; pl->p; pl = pl->plNext)
 	{
-		TextureInfo* text = (TextureInfo*)ListGet(&textures, i);
+		TextureInfo* text = (TextureInfo*)pl->p;
 		if (IsSet(type, text->type))
 			glist = g_list_append(glist, text->name);
 	}
@@ -251,10 +252,10 @@ GList *GetTextureList(int type)
 
 void FindNamedTexture(TextureInfo** textureInfo, char* name)
 {
-	int i;
-	for (i = 0; i < ListSize(&textures); i++)
+	list *pl;
+	for (pl = textures.plNext; pl->p; pl = pl->plNext)
 	{
-		TextureInfo* text = (TextureInfo*)ListGet(&textures, i);
+		TextureInfo* text = (TextureInfo*)pl->p;
 		if (!strcasecmp(text->name, name))
 		{
 			*textureInfo = text;
@@ -263,16 +264,16 @@ void FindNamedTexture(TextureInfo** textureInfo, char* name)
 	}
 	*textureInfo = 0;
 	/* Only warn user if textures.txt file has been loaded */
-	if (ListSize(&textures) > 0)
+	if (!ListEmpty(&textures))
 		g_print("Texture %s not in texture info file\n", name);
 }
 
 void FindTexture(TextureInfo** textureInfo, char* file)
 {
-	int i;
-	for (i = 0; i < ListSize(&textures); i++)
+	list *pl;
+	for (pl = textures.plNext; pl->p; pl = pl->plNext)
 	{
-		TextureInfo* text = (TextureInfo*)ListGet(&textures, i);
+		TextureInfo* text = (TextureInfo*)pl->p;
 		if (!strcasecmp(text->file, file))
 		{
 			*textureInfo = text;
@@ -294,8 +295,9 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 			strcpy(text.name, file);
 			text.type = TT_NONE;	/* Don't show in lists */
 
-			ListAdd(&textures, &text);
-			*textureInfo = (TextureInfo*)ListGet(&textures, ListSize(&textures) - 1);
+			*textureInfo = malloc(sizeof(TextureInfo));
+			**textureInfo = text;
+			ListInsert(&textures, *textureInfo);
 
 			free( szFile );
 			return;
@@ -304,7 +306,7 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 
 	*textureInfo = 0;
 	/* Only warn user if textures.txt file has been loaded */
-	if (ListSize(&textures) > 0)
+	if (!ListEmpty(&textures))
 		g_print("Texture %s not in texture info file\n", file);
 }
 
@@ -318,12 +320,13 @@ void LoadTextureInfo(int FirstPass)
 	#define BUF_SIZE 100
 	char buf[BUF_SIZE];
 
-	if (!FirstPass && ListSize(&textures) > 0)
+	if (FirstPass)
+		ListCreate(&textures);
+	else if (!ListEmpty(&textures))
 		return;	/* Ignore multiple calls after a successful load */
 
-	ListInit(&textures, sizeof(TextureInfo));
-
-	if ( ! ( szFile = PathSearch( TEXTURE_FILE, szDataDirectory ) ) ) {
+	if (!(szFile = PathSearch( TEXTURE_FILE, szDataDirectory)))
+	{
 		if (!FirstPass)
 			g_print( "PathSearch failed!\n" );
 		return;
@@ -355,6 +358,7 @@ void LoadTextureInfo(int FirstPass)
 		/* filename */
 		if (!fgets(buf, BUF_SIZE, fp))
 			break;	/* finished */
+
 		len = strlen(buf);
 		if (len > 0 && buf[len - 1] == '\n')
 		{
@@ -451,7 +455,9 @@ void LoadTextureInfo(int FirstPass)
 
 		if (!err)
 		{	/* Add texture type */
-			ListAdd(&textures, &text);
+			TextureInfo* pNewText = malloc(sizeof(TextureInfo));
+			*pNewText = text;
+			ListInsert(&textures, pNewText);
 		}
 	} while (!feof(fp));
 }
@@ -471,10 +477,10 @@ int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 	char *szFile = PathSearch( filename, szDataDirectory );
 	FILE *fp;
 
-	if ( ! szFile )
+	if (!szFile)
 		return 0;
 
-	if ( ! ( fp = fopen( szFile, "rb") ) ) {
+	if (!(fp = fopen( szFile, "rb"))) {
 		g_print("Failed to open texture: %s\n", szFile );
 		free( szFile );
 		return 0;	/* failed to load file */
@@ -546,60 +552,50 @@ void GetTexture(BoardData* bd, Material* pMat)
 
 void GetTextures(BoardData* bd)
 {
-	GetTexture(bd, &bd->chequerMat[0]);
-	GetTexture(bd, &bd->chequerMat[1]);
-	GetTexture(bd, &bd->baseMat);
-	GetTexture(bd, &bd->pointMat[0]);
-	GetTexture(bd, &bd->pointMat[1]);
-	GetTexture(bd, &bd->boxMat);
-	GetTexture(bd, &bd->hingeMat);
-	GetTexture(bd, &bd->backGroundMat);
+	GetTexture(bd, &bd->rd->ChequerMat[0]);
+	GetTexture(bd, &bd->rd->ChequerMat[1]);
+	GetTexture(bd, &bd->rd->BaseMat);
+	GetTexture(bd, &bd->rd->PointMat[0]);
+	GetTexture(bd, &bd->rd->PointMat[1]);
+	GetTexture(bd, &bd->rd->BoxMat);
+	GetTexture(bd, &bd->rd->HingeMat);
+	GetTexture(bd, &bd->rd->BackGroundMat);
 }
 
-void Set3dSettings(BoardData* bd, const renderdata *prd)
+void Set3dSettings(renderdata *prdnew, const renderdata *prd)
 {
-	bd->pieceType = prd->pieceType;
-	bd->pieceTextureType = prd->pieceTextureType;
-	bd->showHinges = prd->fHinges;
-	bd->showMoveIndicator = prd->showMoveIndicator;
-	bd->showShadows = prd->showShadows;
-	bd->quickDraw = prd->quickDraw;
-	bd->roundedEdges = prd->roundedEdges;
-	bd->bgInTrays = prd->bgInTrays;
-	bd->shadowDarkness = prd->shadowDarkness;
-	SetShadowDimness3d(bd);
-	if (prd->curveAccuracy != bd->curveAccuracy && bd->boardPoints)
-		/* Clear data as accuracy is changing */
-		freeEigthPoints(&bd->boardPoints, bd->curveAccuracy);
-	bd->curveAccuracy = prd->curveAccuracy;
-	bd->testSkewFactor = prd->testSkewFactor;
-	bd->boardAngle = prd->boardAngle;
-	bd->diceSize = prd->diceSize * base_unit;
-	bd->planView = prd->planView;
+	prdnew->pieceType = prd->pieceType;
+	prdnew->pieceTextureType = prd->pieceTextureType;
+	prdnew->fHinges3d = prd->fHinges3d;
+	prdnew->showMoveIndicator = prd->showMoveIndicator;
+	prdnew->showShadows = prd->showShadows;
+	prdnew->quickDraw = prd->quickDraw;
+	prdnew->roundedEdges = prd->roundedEdges;
+	prdnew->bgInTrays = prd->bgInTrays;
+	prdnew->shadowDarkness = prd->shadowDarkness;
+	prdnew->curveAccuracy = prd->curveAccuracy;
+	prdnew->skewFactor = prd->skewFactor;
+	prdnew->boardAngle = prd->boardAngle;
+	prdnew->diceSize = prd->diceSize;
+	prdnew->planView = prd->planView;
 
-	memcpy(bd->chequerMat, prd->rdChequerMat, sizeof(Material[2]));
-	memcpy(&bd->diceMat[0], prd->afDieColour[0] ? &prd->rdChequerMat[0] : &prd->rdDiceMat[0], sizeof(Material));
-	memcpy(&bd->diceMat[1], prd->afDieColour[1] ? &prd->rdChequerMat[1] : &prd->rdDiceMat[1], sizeof(Material));
-	bd->diceMat[0].textureInfo = bd->diceMat[1].textureInfo = 0;
-	bd->diceMat[0].pTexture = bd->diceMat[1].pTexture = 0;
-	/* Set alpha values of dice (if opaque) - .5 value used for anti-aliasing dice */
-	if (!bd->diceMat[0].alphaBlend)
-		bd->diceMat[0].ambientColour[3] = bd->diceMat[0].diffuseColour[3] = bd->diceMat[0].specularColour[3] = 0.5f;
-	if (!bd->diceMat[1].alphaBlend)
-		bd->diceMat[1].ambientColour[3] = bd->diceMat[1].diffuseColour[3] = bd->diceMat[1].specularColour[3] = 0.5f;
+	memcpy(prdnew->ChequerMat, prd->ChequerMat, sizeof(Material[2]));
+	memcpy(&prdnew->DiceMat[0], prd->afDieColour3d[0] ? &prd->ChequerMat[0] : &prd->DiceMat[0], sizeof(Material));
+	memcpy(&prdnew->DiceMat[1], prd->afDieColour3d[1] ? &prd->ChequerMat[1] : &prd->DiceMat[1], sizeof(Material));
+	prdnew->DiceMat[0].textureInfo = prdnew->DiceMat[1].textureInfo = 0;
+	prdnew->DiceMat[0].pTexture = prdnew->DiceMat[1].pTexture = 0;
+	memcpy(prdnew->DiceDotMat, prd->DiceDotMat, sizeof(Material[2]));
 
-	memcpy(bd->diceDotMat, prd->rdDiceDotMat, sizeof(Material[2]));
+	memcpy(&prdnew->CubeMat, &prd->CubeMat, sizeof(Material));
+	memcpy(&prdnew->CubeNumberMat, &prd->CubeNumberMat, sizeof(Material));
 
-	memcpy(&bd->cubeMat, &prd->rdCubeMat, sizeof(Material));
-	memcpy(&bd->cubeNumberMat, &prd->rdCubeNumberMat, sizeof(Material));
+	memcpy(&prdnew->BaseMat, &prd->BaseMat, sizeof(Material));
+	memcpy(prdnew->PointMat, prd->PointMat, sizeof(Material[2]));
 
-	memcpy(&bd->baseMat, &prd->rdBaseMat, sizeof(Material));
-	memcpy(bd->pointMat, prd->rdPointMat, sizeof(Material[2]));
-
-	memcpy(&bd->boxMat, &prd->rdBoxMat, sizeof(Material));
-	memcpy(&bd->hingeMat, &prd->rdHingeMat, sizeof(Material));
-	memcpy(&bd->pointNumberMat, &prd->rdPointNumberMat, sizeof(Material));
-	memcpy(&bd->backGroundMat, &prd->rdBackGroundMat, sizeof(Material));
+	memcpy(&prdnew->BoxMat, &prd->BoxMat, sizeof(Material));
+	memcpy(&prdnew->HingeMat, &prd->HingeMat, sizeof(Material));
+	memcpy(&prdnew->PointNumberMat, &prd->PointNumberMat, sizeof(Material));
+	memcpy(&prdnew->BackGroundMat, &prd->BackGroundMat, sizeof(Material));
 }
 
 void CopySettings3d(BoardData* from, BoardData* to)
@@ -1496,7 +1492,8 @@ void calculateEigthPoints(float ****boardPoints, float radius, int accuracy)
 void freeEigthPoints(float ****boardPoints, int accuracy)
 {
 	int corner_steps = (accuracy / 4) + 1;
-	Free3d(*boardPoints, corner_steps, corner_steps);
+	if (*boardPoints)
+		Free3d(*boardPoints, corner_steps, corner_steps);
 	*boardPoints = 0;
 }
 
@@ -1681,7 +1678,7 @@ void RestrictiveRender(BoardData *bd)
 			BoxWidth(&cb[numRestrictFrames]), BoxHeight(&cb[numRestrictFrames]), viewport);
 
 		/* Setup projection matrix - using saved values */
-		if (bd->planView)
+		if (bd->rd->planView)
 			glOrtho(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, 0, 5);
 		else
 			glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
@@ -1721,7 +1718,7 @@ int MouseMove3d(BoardData *bd, int x, int y)
 		getProjectedPieceDragPos(x, y, bd->dragPos);
 		updateMovingPieceOccPos(bd);
 
-		if(bd->quickDraw && numRestrictFrames != -1)
+		if(bd->rd->quickDraw && numRestrictFrames != -1)
 		{
 			if (!freezeRestrict)
 				CopyBox(&eraseCb, &lastCb);
@@ -1852,7 +1849,7 @@ int idleAnimate(BoardData* bd)
 				bd->points[bar] -= bd->turn;
 				bd->points[moveDest] = 0;
 
-				if (bd->quickDraw)
+				if (bd->rd->quickDraw)
 					RestrictiveDrawPiece(bar, abs(bd->points[bar]));
 			}
 
@@ -1864,7 +1861,7 @@ int idleAnimate(BoardData* bd)
 
 			PlaceMovingPieceRotation(bd, moveDest, moveStart);
 
-			if (bd->quickDraw && numRestrictFrames != -1)
+			if (bd->rd->quickDraw && numRestrictFrames != -1)
 			{
 				float new_pos[3];
 				getPiecePos(moveDest, abs(bd->points[moveDest]), fClockwise, new_pos);
@@ -1895,10 +1892,10 @@ int idleAnimate(BoardData* bd)
 		else
 		{
 			updateMovingPieceOccPos(bd);
-			if (bd->quickDraw && numRestrictFrames != -1)
+			if (bd->rd->quickDraw && numRestrictFrames != -1)
 				RestrictiveDraw(&temp, bd->movingPos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 		}
-		if (bd->quickDraw && numRestrictFrames != -1)
+		if (bd->rd->quickDraw && numRestrictFrames != -1)
 		{
 			RestrictiveDrawFrame(old_pos, PIECE_HOLE, PIECE_HOLE, PIECE_DEPTH);
 			EnlargeCurrentToBox(&temp);
@@ -1919,19 +1916,19 @@ int idleAnimate(BoardData* bd)
 		}
 		updateDiceOccPos(bd);
 
-		if (bd->quickDraw && numRestrictFrames != -1)
+		if (bd->rd->quickDraw && numRestrictFrames != -1)
 		{
 			float pos[3];
 			float overSize;
 			ClipBox temp;
 
-			overSize = bd->diceSize * 1.5f;
+			overSize = getDiceSize(bd) * 1.5f;
 			copyPoint(pos, bd->diceMovingPos[0]);
-			pos[2] -= bd->diceSize / 2.0f;
+			pos[2] -= getDiceSize(bd) / 2.0f;
 			RestrictiveDrawFrame(pos, overSize, overSize, overSize);
 
 			copyPoint(pos, bd->diceMovingPos[1]);
-			pos[2] -= bd->diceSize / 2.0f;
+			pos[2] -= getDiceSize(bd) / 2.0f;
 			RestrictiveDraw(&temp, pos, overSize, overSize, overSize);
 			EnlargeCurrentToBox(&temp);
 
@@ -1954,7 +1951,7 @@ void RollDice3d(BoardData *bd)
 {	/* animate the dice roll if not below board */
 	setDicePos(bd);
 
-	if (rdAppearance.animateRoll)
+	if (bd->rd->animateRoll)
 	{
 		monitor m;
 		SuspendInput( &m );
@@ -1967,7 +1964,7 @@ void RollDice3d(BoardData *bd)
 		setupDicePaths(bd, bd->dicePaths);
 		/* Make sure shadows are in correct place */
 		updateOccPos(bd);
-		if (bd->quickDraw)
+		if (bd->rd->quickDraw)
 		{	/* Mark this as the first frame (or -1 to indicate full draw in progress) */
 			if (numRestrictFrames == -1)
 				firstFrame = -1;
@@ -2007,7 +2004,7 @@ void ShowFlag3d(BoardData *bd)
 {
 	bd->flagWaved = 0;
 
-	if (rdAppearance.animateFlag && bd->resigned && ms.gs == GAME_PLAYING && bd->playing &&
+	if (bd->rd->animateFlag && bd->resigned && ms.gs == GAME_PLAYING && bd->playing &&
 		(ap[bd->turn == 1 ? 0 : 1].pt == PLAYER_HUMAN))		/* not for computer turn */
 	{
 		animStartTime = get_time();
@@ -2074,13 +2071,6 @@ int TestPerformance3d(BoardData* bd)
 	return (int)(numFrames / (elapsedTime / 1000.0f));
 }
 
-void InitialPos(BoardData *bd)
-{	/* Set up initial board position */
-	int ip[] = {0,-2,0,0,0,0,5,0,3,0,0,0,-5,5,0,0,0,-3,0,-5,0,0,0,0,2,0,0,0};
-	memcpy(bd->points, ip, sizeof(bd->points));
-	updatePieceOccPos(bd);
-}
-
 void EmptyPos(BoardData *bd)
 {	/* All checkers home */
 	int ip[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,-15};
@@ -2099,9 +2089,9 @@ void CloseBoard3d(BoardData* bd)
 	bd->resigned = 0;
 	fClockwise = 0;
 
-	bd->showShadows = 0;
-	bd->showMoveIndicator = 0;
-	rdAppearance.fLabels = 0;
+	bd->rd->showShadows = 0;
+	bd->rd->showMoveIndicator = 0;
+	bd->rd->fLabels = 0;
 	bd->diceShown = DICE_NOT_SHOWN;
 	bd->State = BOARD_CLOSING;
 
@@ -2120,7 +2110,7 @@ void CloseBoard3d(BoardData* bd)
 	gtk_main();
 }
 
-void SetupViewingVolume3d(BoardData *bd, renderdata* prd)
+void SetupViewingVolume3d(BoardData *bd)
 {
 	GLint viewport[4];
 	float tempMatrix[16];
@@ -2132,7 +2122,7 @@ void SetupViewingVolume3d(BoardData *bd, renderdata* prd)
 	glLoadIdentity();
 	SetupPerspVolume(bd, viewport);
 
-	SetupLight3d(bd, prd);
+	SetupLight3d(bd, bd->rd);
 	calculateBackgroundSize(bd, viewport);
 	if (memcmp(tempMatrix, bd->modelMatrix, sizeof(float[16])))
 		RestrictiveRedraw();
@@ -2240,14 +2230,14 @@ void RemoveTexture(Material* pMat)
 }
 */
 
-void ClearTextures(BoardData* bd, int glValid)
+void ClearTextures(BoardData* bd)
 {
 	int i;
+	MakeCurrent3d(bd->drawing_area3d);
 
 	for (i = 0; i < bd->numTextures; i++)
 	{
-		if (glValid)
-			DeleteTexture(&bd->textureList[i]);
+		DeleteTexture(&bd->textureList[i]);
 		free(bd->textureName[i]);
 	}
 	bd->numTextures = 0;
@@ -2268,7 +2258,7 @@ void InitBoard3d(BoardData *bd)
 	bd->DragTargetHelp = 0;
 	setDicePos(bd);
 
-	SetupSimpleMat(&bd->gap, 0, 0, 0);
+	SetupSimpleMat(&bd->gapColour, 0, 0, 0);
 	SetupSimpleMat(&bd->logoMat, 1, 1, 1);
 	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
 	SetupMat(&bd->flagNumberMat, 0, 0, .4f, 0, 0, .4f, 1, 1, 1, 100, 0);
@@ -2280,19 +2270,4 @@ void InitBoard3d(BoardData *bd)
 	bd->numTextures = 0;
 
 	bd->boardPoints = NULL;
-}
-
-void InitBoardPreview(BoardData *bd)
-{
-	InitBoard3d(bd);
-	/* Show set position */
-	InitialPos(bd);
-	bd->cube_use = 1;
-	bd->crawford_game = 0;
-	bd->doubled = bd->cube_owner = bd->cube = 0;
-	bd->resigned = 0;
-	bd->diceShown = DICE_ON_BOARD;
-	bd->diceRoll[0] = 4;
-	bd->diceRoll[1] = 3;
-	bd->turn = 1;
 }

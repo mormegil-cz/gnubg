@@ -50,6 +50,7 @@
 #endif
 
 #include "render.h"
+#include "renderprefs.h"
 #include "boarddim.h"
 
 static randctx rc;
@@ -154,12 +155,17 @@ renderdata rdDefault = {
     TRUE, /* fHinges */
     TRUE, /* fLabels */
     FALSE, /* fClockwise */
+    TRUE, /* position+match ids */
+    FALSE, /* Dice area */
+    TRUE, /* Show game info */
     TRUE,  /* dynamic labels */
 	1	/* Show move indicator */
 #if USE_BOARD3D
 	, DT_2D,	/* Display type */
+	TRUE, /* fHinges3d */
 	FALSE,	/* Show shadows */
 	50,	/* Shadow darkness */
+	0, /* Darnkess as percentage of ambient light */
 	0,	/* Animate roll */
 	0,	/* Animate flag */
 	0,	/* Close board on exit */
@@ -176,6 +182,7 @@ renderdata rdDefault = {
 	1,	/* Background in trays */
 	PT_ROUNDED,	/* Piece type */
 	PTT_ALL,	/* Piece texture type */
+    { TRUE, TRUE }, /* afDieColour3d */
 	/* Default 3d colours - black+white, should never be used -
 		if no 3d settings the first design will be used */
     {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},
@@ -2808,7 +2815,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
     /* draw arrow for direction of play */
 
 #if HAVE_LIBART
-    if( fPlaying && prd->showMoveIndicator &&
+    if( prd->showMoveIndicator &&
 			intersects( x, y, cx, cy,
                     anArrowPosition[ 0 ], anArrowPosition[ 1 ],
                     ARROW_WIDTH * prd->nSize, ARROW_HEIGHT * prd->nSize ) ) {
@@ -2945,10 +2952,127 @@ extern void FreeImages( renderimages *pri ) {
 }
 
 extern void RenderInitialise( void ) {
-    
+
+    memcpy( (void*)GetMainAppearance(), &rdDefault, sizeof(rdDefault) );
+
     irandinit( &rc, FALSE );
 
 #if HAVE_FREETYPE
     FT_Init_FreeType( &ftl );
 #endif
+}
+
+int TolComp(double f1, double f2)
+{
+	return fabs(f1 - f2) < .005;
+}
+
+int ColourCompare(double c1[4], double c2[4])
+{
+	return TolComp(c1[0], c2[0]) &&
+		TolComp(c1[1], c2[1]) &&
+		TolComp(c1[2], c2[2]) &&
+		TolComp(c1[3], c2[3]);
+}
+
+#if USE_BOARD3D
+
+int MaterialCompare(Material* pMat1, Material* pMat2)
+{
+	return TolComp(pMat1->ambientColour[0], pMat2->ambientColour[0]) &&
+		TolComp(pMat1->ambientColour[1], pMat2->ambientColour[1]) &&
+		TolComp(pMat1->ambientColour[2], pMat2->ambientColour[2]) &&
+		TolComp(pMat1->ambientColour[3], pMat2->ambientColour[3]) &&
+		TolComp(pMat1->diffuseColour[0], pMat2->diffuseColour[0]) &&
+		TolComp(pMat1->diffuseColour[1], pMat2->diffuseColour[1]) &&
+		TolComp(pMat1->diffuseColour[2], pMat2->diffuseColour[2]) &&
+		TolComp(pMat1->diffuseColour[3], pMat2->diffuseColour[3]) &&
+		TolComp(pMat1->specularColour[0], pMat2->specularColour[0]) &&
+		TolComp(pMat1->specularColour[1], pMat2->specularColour[1]) &&
+		TolComp(pMat1->specularColour[2], pMat2->specularColour[2]) &&
+		TolComp(pMat1->specularColour[3], pMat2->specularColour[3]) &&
+		pMat1->shine == pMat2->shine &&
+		pMat1->alphaBlend == pMat2->alphaBlend;
+}
+
+int MaterialTextCompare(Material* pMat1, Material* pMat2)
+{
+	return MaterialCompare(pMat1, pMat2) &&
+		((!pMat1->textureInfo && !pMat2->textureInfo) ||
+			(pMat1->textureInfo && pMat2->textureInfo &&
+			!strcmp(pMat1->textureInfo->name, pMat2->textureInfo->name)));
+}
+#endif
+
+extern int PreferenceCompare(renderdata *prd1, renderdata *prd2)
+{
+#if USE_BOARD3D
+	if (prd1->fDisplayType == DT_3D)
+	{	/* 3d settings */
+		return (prd1->pieceType == prd2->pieceType &&
+			prd1->fHinges3d == prd2->fHinges3d &&
+			prd1->pieceTextureType == prd2->pieceTextureType &&
+			prd1->roundedEdges == prd2->roundedEdges &&
+			prd1->bgInTrays == prd2->bgInTrays &&
+			prd1->lightType == prd2->lightType &&
+			(prd1->lightPos[0] == prd2->lightPos[0] &&
+			prd1->lightPos[1] == prd2->lightPos[1] &&
+			prd1->lightPos[2] == prd2->lightPos[2]) &&
+			(prd1->lightLevels[0] == prd2->lightLevels[0] &&
+			prd1->lightLevels[1] == prd2->lightLevels[1] &&
+			prd1->lightLevels[2] == prd2->lightLevels[2]) &&
+			!memcmp(prd1->afDieColour3d, prd2->afDieColour3d, sizeof(prd1->afDieColour3d)) &&
+			MaterialTextCompare(&prd1->ChequerMat[0], &prd2->ChequerMat[0]) &&
+			MaterialCompare(&prd1->ChequerMat[1], &prd2->ChequerMat[1]) &&
+			MaterialCompare(&prd1->DiceMat[0], &prd2->DiceMat[0]) &&
+			MaterialCompare(&prd1->DiceMat[1], &prd2->DiceMat[1]) &&
+			MaterialCompare(&prd1->DiceDotMat[0], &prd2->DiceDotMat[0]) &&
+			MaterialCompare(&prd1->DiceDotMat[1], &prd2->DiceDotMat[1]) &&
+			MaterialCompare(&prd1->CubeMat, &prd2->CubeMat) &&
+			MaterialCompare(&prd1->CubeNumberMat, &prd2->CubeNumberMat) &&
+			MaterialCompare(&prd1->PointNumberMat, &prd2->PointNumberMat) &&
+			MaterialTextCompare(&prd1->BaseMat, &prd2->BaseMat) &&
+			MaterialTextCompare(&prd1->PointMat[0], &prd2->PointMat[0]) &&
+			MaterialTextCompare(&prd1->PointMat[1], &prd2->PointMat[1]) &&
+			MaterialTextCompare(&prd1->BoxMat, &prd2->BoxMat) &&
+			MaterialTextCompare(&prd1->HingeMat, &prd2->HingeMat) &&
+			MaterialTextCompare(&prd1->BackGroundMat, &prd2->BackGroundMat)
+			);
+	}
+	else
+#endif
+	{	/* 2d settings */
+		return (prd1->wt == prd2->wt && prd1->fHinges == prd2->fHinges &&
+			prd1->rRound == prd2->rRound && 
+			ColourCompare(prd1->aarColour[0], prd2->aarColour[0]) &&
+			ColourCompare(prd1->aarColour[1], prd2->aarColour[1]) &&
+			!memcmp(prd1->afDieColour, prd2->afDieColour, sizeof(prd1->afDieColour)) &&
+			(prd1->afDieColour[0] ||
+				(ColourCompare(prd1->aarDiceColour[0], prd2->aarDiceColour[0]) &&
+				prd1->arDiceCoefficient[0] == prd2->arDiceCoefficient[0] &&
+				prd1->arDiceExponent[0] == prd2->arDiceExponent[0])) &&
+			(prd1->afDieColour[1] ||
+				(ColourCompare(prd1->aarDiceColour[1], prd2->aarDiceColour[1]) &&
+				prd1->arDiceCoefficient[1] == prd2->arDiceCoefficient[1] &&
+				prd1->arDiceExponent[1] == prd2->arDiceExponent[1])) &&
+			ColourCompare(prd1->aarDiceDotColour[0], prd2->aarDiceDotColour[0]) &&
+			ColourCompare(prd1->aarDiceDotColour[1], prd2->aarDiceDotColour[1]) &&
+			ColourCompare(prd1->arCubeColour, prd2->arCubeColour) &&
+			(prd1->arLight[0] == prd2->arLight[0] &&
+			prd1->arLight[1] == prd2->arLight[1] &&
+			prd1->arLight[2] == prd2->arLight[2]) &&
+			!memcmp(prd1->aanBoardColour[0], prd2->aanBoardColour[0], sizeof(prd1->aanBoardColour[0])) &&
+			!memcmp(prd1->aanBoardColour[1], prd2->aanBoardColour[1], sizeof(prd1->aanBoardColour[1])) &&
+			!memcmp(prd1->aanBoardColour[2], prd2->aanBoardColour[2], sizeof(prd1->aanBoardColour[2])) &&
+			!memcmp(prd1->aanBoardColour[3], prd2->aanBoardColour[3], sizeof(prd1->aanBoardColour[3])) &&
+			prd1->arRefraction[0] == prd2->arRefraction[0] &&
+			prd1->arRefraction[1] == prd2->arRefraction[1] &&
+			prd1->arExponent[0] == prd2->arExponent[0] &&
+			prd1->arExponent[1] == prd2->arExponent[1] &&
+			prd1->aSpeckle[0] == prd2->aSpeckle[0] &&
+			prd1->aSpeckle[1] == prd2->aSpeckle[1] &&
+			prd1->aSpeckle[2] == prd2->aSpeckle[2] &&
+			prd1->aSpeckle[3] == prd2->aSpeckle[3]
+			);
+	}
 }

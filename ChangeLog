@@ -1,3 +1,7 @@
+Wed Mar 31 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkprefs.c and other files: Moved preview in preferences
+
 Mon Mar 29 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Fixed small bug to allow both names to be swapped

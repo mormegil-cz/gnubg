@@ -398,7 +398,7 @@ ExposeDie( GtkWidget *pw, GdkEventExpose *pev,
 
     /* render die */
 
-    memcpy( &rd, &rdAppearance, sizeof rd );
+    CopyAppearance(&rd);
     rd.nSize = ptmw->nSizeDie = nSizeDie;
 
     

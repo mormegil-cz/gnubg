@@ -942,7 +942,7 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
        ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
    }
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
+	if (bd->rd->fDisplayType == DT_3D)
 	{	/* Make sure dice are shown (and not rolled) */
 		bd->diceShown = DICE_ON_BOARD;
 		bd->diceRoll[0] = !ms.anDice[0];
@@ -3162,7 +3162,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     
    pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
    gtk_container_add( GTK_CONTAINER( pwVbox ), pwHbox = gtk_hbox_new(FALSE, 0));
-   gtk_box_pack_start( GTK_BOX(pwHbox), pwBoard = board_new(), TRUE, TRUE, 0 );
+   gtk_box_pack_start( GTK_BOX(pwHbox), pwBoard = board_new(GetMainAppearance()), TRUE, TRUE, 0 );
    gtk_box_pack_start( GTK_BOX(pwHbox), pwPanelHbox = gtk_hbox_new(FALSE, 0),
 		    FALSE, TRUE, 0);
 
@@ -3307,7 +3307,7 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	SetToolbarStyle(nToolbarStyle);
 
 #if USE_BOARD3D
-	DisplayCorrectBoardType();
+	DisplayCorrectBoardType(BOARD(pwBoard)->board_data);
 #endif
 
 	DestroySplash ( pwSplash );
@@ -8661,31 +8661,31 @@ extern void GTKSet( void *p ) {
 		DeleteMessage();
     } else if (p == &fDockPanels)
 		DockPanels();
-	else if( p == &fGUIDiceArea ) {
+	else if( p == &bd->rd->fDiceArea ) {
 	if( GTK_WIDGET_REALIZED( pwBoard ) )
 	{
 #if USE_BOARD3D
 		/* If in 3d mode may need to update sizes */
-		if (rdAppearance.fDisplayType == DT_3D)
-			SetupViewingVolume3d(bd, &rdAppearance);
+		if (bd->rd->fDisplayType == DT_3D)
+			SetupViewingVolume3d(bd);
 		else
 #endif
 		{    
 			if( GTK_WIDGET_REALIZED( pwBoard ) ) {
-			    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !fGUIDiceArea )
+			    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !bd->rd->fDiceArea )
 				gtk_widget_hide( bd->dice_area );
-			    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
+			    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && bd->rd->fDiceArea )
 				gtk_widget_show_all( bd->dice_area );
 			}
 		}}
-    } else if( p == &fGUIShowIDs ) {
-	BoardData *bd = BOARD( pwBoard )->board_data;
-    
+    } else if( p == &bd->rd->fShowIDs ) {
+
 	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
-	    if( GTK_WIDGET_VISIBLE( bd->vbox_ids ) && !fGUIShowIDs )
+	    if( GTK_WIDGET_VISIBLE( bd->vbox_ids ) && !bd->rd->fShowIDs )
 		gtk_widget_hide( bd->vbox_ids );
-	    else if( !GTK_WIDGET_VISIBLE( bd->vbox_ids ) && fGUIShowIDs )
+	    else if( !GTK_WIDGET_VISIBLE( bd->vbox_ids ) && bd->rd->fShowIDs )
 		gtk_widget_show_all( bd->vbox_ids );
+		gtk_widget_queue_resize(pwBoard);
 	}
     } else if( p == &fGUIShowPips )
 	ShowBoard(); /* this is overkill, but it works */
@@ -10312,7 +10312,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	static int showingPanels;
 	static int showIDs;
 
-	fGUIShowGameInfo = n;
+	bd->rd->fShowGameInfo = n;
 
 	if (!n)
 	{
@@ -10332,8 +10332,8 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		if (fDockPanels)
 			gtk_widget_hide(pwArrowVBox);
 
-		showIDs = fGUIShowIDs;
-		fGUIShowIDs = 0;
+		showIDs = bd->rd->fShowIDs;
+		bd->rd->fShowIDs = 0;
 
 /* How can I maximize the window ?? */
 #if USE_GTK2
@@ -10353,7 +10353,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_show(GTK_WIDGET(bd->table));
 #if USE_BOARD3D
 	/* Only show 2d dice below board if in 2d */
-  	if (rdAppearance.fDisplayType == DT_2D)
+  	if (bd->rd->fDisplayType == DT_2D)
 #endif
 		  gtk_widget_show(GTK_WIDGET(bd->dice_area));
 		gtk_widget_show(pwStatus);
@@ -10364,7 +10364,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		if (fDockPanels)
 			gtk_widget_show(pwArrowVBox);
 
-		fGUIShowIDs = showIDs;
+		bd->rd->fShowIDs = showIDs;
 
 		gtk_signal_disconnect(GTK_OBJECT(ptl), id);
 
@@ -10378,7 +10378,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		*/
 #endif
 	}
-	UpdateSetting(&fGUIShowIDs);
+	UpdateSetting(&bd->rd->fShowIDs);
 }
 
 extern void Undo()

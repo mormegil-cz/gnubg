@@ -2,7 +2,7 @@
 * mylist.h
 * by Jon Kinsey, 2003
 *
-* Simple list
+* Simple vector
 *
 *
 * This program is free software; you can redistribute it and/or modify
@@ -21,17 +21,17 @@
 * $Id$
 */
 
-typedef struct _myList
+typedef struct _vector
 {
 	int eleSize;
 	int numElements;
 	void* data;
 	int curAllocated;
-} myList;
+} vector;
 
-extern void ListInit(myList* l, int eleSize);
-extern void ListAdd(myList* l, void* ele);
-extern int ListSize(myList* l);
-extern void* ListGet(myList* l, int pos);
-extern int ListFind(myList* l, void* ele);
-extern void ListClear(myList* l);
+extern void VectorInit(vector* l, int eleSize);
+extern void VectorAdd(vector* l, void* ele);
+extern int VectorSize(vector* l);
+extern void* VectorGet(vector* l, int pos);
+extern int VectorFind(vector* l, void* ele);
+extern void VectorClear(vector* l);

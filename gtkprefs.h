@@ -27,6 +27,6 @@
 extern void BoardPreferences( GtkWidget *pwBoard );
 extern void BoardPreferencesStart( GtkWidget *pwBoard );
 extern void BoardPreferencesDone( GtkWidget *pwBoard );
-extern void Default3dSettings();
+extern void Default3dSettings(BoardData* bd);
 
 #endif

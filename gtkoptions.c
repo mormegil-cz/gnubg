@@ -238,6 +238,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     int cCache;
     int i, nRandom;
 
+    BoardData *bd = BOARD( pwBoard )->board_data;
+
     InitRNG( &nRandom, FALSE, rngCurrent );
     
     pwn = gtk_notebook_new();
@@ -553,7 +555,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	gtk_check_button_new_with_label( _("Show dice below board when human "
 					   "player on roll") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwUseDiceIcon ),
-				  fGUIDiceArea );
+				  bd->rd->fDiceArea );
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwUseDiceIcon, FALSE, FALSE,
 			0 );
     gtk_tooltips_set_tip( ptt, pow->pwUseDiceIcon,
@@ -567,7 +569,7 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     pow->pwShowIDs = gtk_check_button_new_with_label(
 	_("Show Position ID and Match ID above board") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwShowIDs ),
-				  fGUIShowIDs );
+				  bd->rd->fShowIDs);
     gtk_box_pack_start( GTK_BOX( pwvbox ), pow->pwShowIDs, FALSE, FALSE, 0 );
     gtk_tooltips_set_tip( ptt, pow->pwShowIDs,
 			  _("Two entry fields will be shown above the board, "
@@ -1480,6 +1482,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   int n, cCache;
   int i;
   char *pch;
+  BoardData *bd = BOARD( pwBoard )->board_data;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
 
@@ -1721,8 +1724,8 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 #endif
 
   CHECKUPDATE( pow->pwIllegal, fGUIIllegal, "set gui illegal %s" )
-  CHECKUPDATE( pow->pwUseDiceIcon, fGUIDiceArea, "set gui dicearea %s" )
-  CHECKUPDATE( pow->pwShowIDs, fGUIShowIDs, "set gui showids %s" )
+  CHECKUPDATE( pow->pwUseDiceIcon, bd->rd->fDiceArea, "set gui dicearea %s" )
+  CHECKUPDATE( pow->pwShowIDs, bd->rd->fShowIDs, "set gui showids %s" )
   CHECKUPDATE( pow->pwShowPips, fGUIShowPips, "set gui showpips %s" )
   CHECKUPDATE( pow->pwBeepIllegal, fGUIBeep, "set gui beep %s" )
   CHECKUPDATE( pow->pwHigherDieFirst, fGUIHighDieFirst,
@@ -1732,18 +1735,18 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE( pow->pwDragTargetHelp, fGUIDragTargetHelp,
 	       "set gui dragtargethelp %s" )
 
+{
 #if USE_BOARD3D
-	if (rdAppearance.fDisplayType == DT_3D)
-		updateDiceOccPos(BOARD( pwBoard )->board_data);
+	if (bd->rd->fDisplayType == DT_3D)
+		updateDiceOccPos(bd);
 	else
 #endif
 	if( GTK_WIDGET_REALIZED( pwBoard ) )
 	{
-		BoardData* bd = BOARD( pwBoard )->board_data;
 		board_create_pixmaps( pwBoard, bd );
 		gtk_widget_queue_draw( bd->drawing_area );
 	}
-
+}
   if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAnimateNone ) )
       && animGUI != ANIMATE_NONE )
       UserCommand( "set gui animation none" );
