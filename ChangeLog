@@ -1,3 +1,7 @@
+Fri Aug  9 20:52:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* config.h.in, configure.in: search for strchr.
+
 Fri Aug  9 20:46:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Highlight selected move in GTKHint.
