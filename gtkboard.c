@@ -530,7 +530,8 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    return TRUE;
 	}
 
-	if( bd->drag_point > 0 && bd->drag_point < 25 &&
+	if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
+	    bd->drag_point > 0 && bd->drag_point < 25 &&
 	    ( !bd->points[ bd->drag_point ] ||
 	    bd->points[ bd->drag_point ] == -bd->turn ) ) {
 	    /* Click on an empty point or opponent blot; try to make the
@@ -637,6 +638,9 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	if( event->button.button != 1 ) {
 	    /* Automatically place chequer on destination point
 	       (as opposed to starting a drag). */
+
+	    /* FIXME handle edit mode differently */
+	    
 	    dest = bd->drag_point - ( event->button.button == 2 ?
 					bd->dice[ 0 ] :
 					bd->dice[ 1 ] ) * bd->drag_colour;
@@ -1797,8 +1801,17 @@ static void board_set_position( GtkWidget *pw, BoardData *bd ) {
 static void board_edit( GtkWidget *pw, BoardData *bd ) {
 
     update_move( bd );
+
+    if( !gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pw ) ) ) {
+	/* Editing complete; set board. */
+	int points[ 2 ][ 25 ];
+	char sz[ 25 ]; /* "set board XXXXXXXXXXXXXX" */
+	
+	read_board( bd, points );
+	sprintf( sz, "set board %s", PositionID( points ) );
     
-    /* FIXME */
+	UserCommand( sz );
+    }
 }
 
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
