@@ -176,7 +176,7 @@ int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
-int fMessage = TRUE;
+int fMessage = FALSE;
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
