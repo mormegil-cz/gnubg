@@ -26,7 +26,9 @@
 #include <string.h>
 
 #include "backgammon.h"
+#include "drawboard.h"
 #include "eval.h"
+#include "positionid.h"
 #include "analysis.h"
 
 
@@ -66,12 +68,12 @@ AnalyzeGame ( list *plGame, int iGame ) {
     list *pl;
     moverecord *pmr;
     char sz[ 2048 ];
-    int i = 0, n, nCube = 1, anBoard[ 2 ][ 25 ];
+    int i = 0, nCube = 1, anBoard[ 2 ][ 25 ];
     int anBoardMove[ 2 ][ 25 ];
     int fCubeOwner = -1, fPlayer;
     char *apch [ 7 ], szPlayer0[ 32 ], szPlayer1[ 32 ], szText[ 32 ];
     char szCube[ 32 ];
-    int anDice[ 2 ], k, l, j;
+    int anDice[ 2 ], j;
     int fFirstMove = 1;
     unsigned char auch[ 10 ];
     evalcontext ecDouble = { 1, 0, 0, 0, TRUE };  
@@ -292,6 +294,12 @@ AnalyzeGame ( list *plGame, int iGame ) {
           
     
         break;
+	
+      case MOVE_SETBOARD:
+      case MOVE_SETDICE:
+      case MOVE_SETCUBEVAL:
+      case MOVE_SETCUBEPOS:
+	  /* FIXME apply these records */
       }
 
       if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) i++;
