@@ -1,3 +1,8 @@
+Fri Nov  1 20:23:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* text.c (printTextBoard): add pip counts to text export
+	(requested by several people)
+
 Fri Nov  1 19:54:47 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* external.c: add #include <sys/types.h>

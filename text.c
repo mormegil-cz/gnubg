@@ -469,6 +469,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
   char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ],
     szScore0[ 35 ], szScore1[ 35 ], szMatch[ 35 ];
   char *apch[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+  int anPips[ 2 ];
 
   memcpy ( anBoard, pms->anBoard, sizeof ( anBoard ) );
 
@@ -542,7 +543,11 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
   fputs ( DrawBoard( szBoard, anBoard, pms->fMove, apch,
                      MatchIDFromMatchState ( pms ) ),
           pf);
-  fputs ( "\n", pf );
+
+  PipCount ( anBoard, anPips );
+
+  fprintf ( pf, "Pip counts: O %d, X %d\n\n",
+            anPips[ 0 ], anPips[ 1 ] );
 
 }
 
