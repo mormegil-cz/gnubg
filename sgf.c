@@ -382,60 +382,6 @@ static int Point( char ch, int f ) {
 	return -1; /* off */
 }
 
-static void RestoreDoubleAnalysis( property *pp,
-				   float ar[], 
-                                   float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                                   float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-                                   evalsetup *pes ) {
-    
-    char *pch = pp->pl->plNext->p, ch;
-    int nPlies, nReduced, fDeterministic;
-    
-    switch( *pch ) {
-    case 'E':
-	/* EVAL_EVAL */
-	pes->et = EVAL_EVAL;
-	pes->ec.nSearchCandidates = 0;
-	pes->ec.rSearchTolerance = 0;
-	nReduced = 0;
-        pes->ec.rNoise = 0.0f;
-        fDeterministic = TRUE;
-        memset ( aarOutput[ 0 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        memset ( aarOutput[ 1 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
-        aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
-        aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
-	
-	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f"
-                "%f %f %f %f %f %f %f" 
-                "%f %f %f %f %f %f %f", 
-                &ar[ 0 ], &ar[ 1 ], &ar[ 2 ], &ar[ 3 ], 
-                &nPlies, &ch,
-                &nReduced, 
-                &fDeterministic,
-                &pes->ec.rNoise,
-                &aarOutput[ 0 ][ 0 ], &aarOutput[ 0 ][ 1 ], 
-                &aarOutput[ 0 ][ 2 ], &aarOutput[ 0 ][ 3 ], 
-                &aarOutput[ 0 ][ 4 ], &aarOutput[ 0 ][ 5 ], 
-                &aarOutput[ 0 ][ 6 ],
-                &aarOutput[ 1 ][ 0 ], &aarOutput[ 1 ][ 1 ], 
-                &aarOutput[ 1 ][ 2 ], &aarOutput[ 1 ][ 3 ], 
-                &aarOutput[ 1 ][ 4 ], &aarOutput[ 1 ][ 5 ], 
-                &aarOutput[ 1 ][ 6 ] );
-
-	pes->ec.nPlies = nPlies;
-        pes->ec.nReduced = nReduced;
-        pes->ec.fDeterministic = fDeterministic;
-	pes->ec.fCubeful = ch == 'C';
-
-	break;
-
-    default:
-	/* FIXME */
-	break;
-    }
-}
-
-
 static void
 RestoreRolloutScore ( move *pm, const char *sz ) {
 
@@ -453,18 +399,16 @@ RestoreRolloutScore ( move *pm, const char *sz ) {
 }
 
 static void
-RestoreRolloutTrials ( move *pm, const char *sz ) {
+RestoreRolloutTrials ( int *piTrials, const char *sz ) {
 
   char *pc = strstr ( sz, "Trials" );
 
-  /* pm->nTrials = 0; */
+  *piTrials = 0;
 
   if ( ! pc )
     return;
 
-  sscanf ( pc, "Trials %*d" );
-
-  /* printf ( "ntrials %d\n", pm->nTrials ); */
+  sscanf ( pc, "Trials %d", piTrials );
 
 }
 
@@ -543,19 +487,19 @@ RestoreRolloutContextEvalContext ( evalcontext *pec, const char *sz,
 
 
 static void
-RestoreRolloutRolloutContext ( move *pm, const char *sz ) {
+RestoreRolloutRolloutContext ( rolloutcontext *prc, const char *sz ) {
 
   char *pc = strstr ( sz, "RC" );
   char szTemp[ 1024 ];
   int fCubeful, fVarRedn, fInitial;
 
-  pm->esMove.rc.fCubeful = FALSE;
-  pm->esMove.rc.fVarRedn = FALSE;
-  pm->esMove.rc.fInitial = FALSE;
-  pm->esMove.rc.nTruncate = 0;
-  pm->esMove.rc.nTrials = 0;
-  pm->esMove.rc.rngRollout = RNG_MERSENNE;
-  pm->esMove.rc.nSeed = 0;
+  prc->fCubeful = FALSE;
+  prc->fVarRedn = FALSE;
+  prc->fInitial = FALSE;
+  prc->nTruncate = 0;
+  prc->nTrials = 0;
+  prc->rngRollout = RNG_MERSENNE;
+  prc->nSeed = 0;
 
   if ( ! pc )
     return;
@@ -564,22 +508,22 @@ RestoreRolloutRolloutContext ( move *pm, const char *sz ) {
            &fCubeful,
            &fVarRedn,
            &fInitial,
-           &pm->esMove.rc.nTruncate,
-           &pm->esMove.rc.nTrials,
+           &prc->nTruncate,
+           &prc->nTrials,
            szTemp,
-           &pm->esMove.rc.nSeed );
+           &prc->nSeed );
 
-  pm->esMove.rc.fCubeful = fCubeful;
-  pm->esMove.rc.fVarRedn = fVarRedn;
-  pm->esMove.rc.fInitial = fInitial;
+  prc->fCubeful = fCubeful;
+  prc->fVarRedn = fVarRedn;
+  prc->fInitial = fInitial;
 
-  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecCube[ 0 ],
+  RestoreRolloutContextEvalContext ( &prc->aecCube[ 0 ],
                                      sz, "cube0" );
-  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecCube[ 1 ],
+  RestoreRolloutContextEvalContext ( &prc->aecCube[ 1 ],
                                      sz, "cube1" );
-  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecChequer[ 0 ],
+  RestoreRolloutContextEvalContext ( &prc->aecChequer[ 0 ],
                                      sz, "cheq0" );
-  RestoreRolloutContextEvalContext ( &pm->esMove.rc.aecChequer[ 1 ],
+  RestoreRolloutContextEvalContext ( &prc->aecChequer[ 1 ],
                                      sz, "cheq1" );
 
 }
@@ -587,14 +531,132 @@ RestoreRolloutRolloutContext ( move *pm, const char *sz ) {
 
 static void
 RestoreRollout ( move *pm, const char *sz ) {
+  
+  int n;
 
   pm->esMove.et = EVAL_ROLLOUT;
   RestoreRolloutScore ( pm, sz );
-  RestoreRolloutTrials ( pm, sz ); 
+  RestoreRolloutTrials ( &n, sz ); 
   RestoreRolloutOutput ( pm->arEvalMove, sz, "Output" ); 
   RestoreRolloutOutput ( pm->arEvalStdDev, sz, "StdDev" ); 
-  RestoreRolloutRolloutContext ( pm, sz ); 
+  RestoreRolloutRolloutContext ( &pm->esMove.rc, sz ); 
 
+}
+
+
+static void
+RestoreCubeRolloutEquities ( float ar[], const char *sz ) {
+
+  char *pc = strstr ( sz, "Eq" );
+
+  ar[ 0 ] = 0.0;
+  ar[ 1 ] = 0.0;
+  ar[ 2 ] = 0.0;
+  ar[ 3 ] = 0.0;
+
+  if ( ! pc )
+    return;
+
+  sscanf ( pc, "Eq %f %f %f %f",
+           ar, ar + 1, ar + 2, ar + 3 );
+
+}
+
+
+static void
+RestoreCubeRolloutOutput ( float arOutput[], float arStdDev[],
+                           const char *sz, const char *szKeyword ) {
+
+  char *pc = strstr ( sz, szKeyword );
+
+  memset ( arOutput, 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+  memset ( arStdDev, 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+
+  if ( ! pc )
+    return;
+
+  RestoreRolloutOutput ( arOutput, pc, "Output" );
+  RestoreRolloutOutput ( arStdDev, pc, "StdDev" );
+
+}
+
+
+static void
+RestoreCubeRollout ( const char *sz,
+                     float ar[],
+                     float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                     float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                     evalsetup *pes ) {
+
+  int n;
+
+  RestoreCubeRolloutEquities ( ar, sz );
+  RestoreRolloutTrials ( &n, sz );
+  RestoreCubeRolloutOutput ( aarOutput[ 0 ], aarStdDev[ 0 ], sz, "NoDouble" );
+  RestoreCubeRolloutOutput ( aarOutput[ 1 ], aarStdDev[ 1 ], 
+                             sz, "DoubleTake" );
+  RestoreRolloutRolloutContext ( &pes->rc, sz );
+
+}
+
+
+static void RestoreDoubleAnalysis( property *pp,
+				   float ar[], 
+                                   float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                                   float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                                   evalsetup *pes ) {
+    
+    char *pch = pp->pl->plNext->p, ch;
+    int nPlies, nReduced, fDeterministic;
+    
+    switch( *pch ) {
+    case 'E':
+	/* EVAL_EVAL */
+	pes->et = EVAL_EVAL;
+	pes->ec.nSearchCandidates = 0;
+	pes->ec.rSearchTolerance = 0;
+	nReduced = 0;
+        pes->ec.rNoise = 0.0f;
+        fDeterministic = TRUE;
+        memset ( aarOutput[ 0 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        memset ( aarOutput[ 1 ], 0, NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
+        aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
+	
+	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f"
+                "%f %f %f %f %f %f %f" 
+                "%f %f %f %f %f %f %f", 
+                &ar[ 0 ], &ar[ 1 ], &ar[ 2 ], &ar[ 3 ], 
+                &nPlies, &ch,
+                &nReduced, 
+                &fDeterministic,
+                &pes->ec.rNoise,
+                &aarOutput[ 0 ][ 0 ], &aarOutput[ 0 ][ 1 ], 
+                &aarOutput[ 0 ][ 2 ], &aarOutput[ 0 ][ 3 ], 
+                &aarOutput[ 0 ][ 4 ], &aarOutput[ 0 ][ 5 ], 
+                &aarOutput[ 0 ][ 6 ],
+                &aarOutput[ 1 ][ 0 ], &aarOutput[ 1 ][ 1 ], 
+                &aarOutput[ 1 ][ 2 ], &aarOutput[ 1 ][ 3 ], 
+                &aarOutput[ 1 ][ 4 ], &aarOutput[ 1 ][ 5 ], 
+                &aarOutput[ 1 ][ 6 ] );
+
+	pes->ec.nPlies = nPlies;
+        pes->ec.nReduced = nReduced;
+        pes->ec.fDeterministic = fDeterministic;
+	pes->ec.fCubeful = ch == 'C';
+
+	break;
+
+    case 'R':
+
+      pes->et = EVAL_ROLLOUT;
+      RestoreCubeRollout ( pch + 1, ar, aarOutput, aarStdDev, pes );
+      break;
+
+    default:
+	/* FIXME */
+	break;
+    }
 }
 
 
@@ -1176,59 +1238,6 @@ static void WriteEscapedString( FILE *pf, char *pch, int fEscapeColons ) {
 	}
 }
 
-static void WriteDoubleAnalysis( FILE *pf, float ar[], 
-                                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                                 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-				 evalsetup *pes ) {
-    switch( pes->et ) {
-    case EVAL_EVAL:
-	fprintf( pf, "DA[E %.4f %.4f %.4f %.4f %d%s %d %d %.4f "
-                 "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-                 "%.4f %.4f %.4f %.4f %.4f %.4f %.4f]", 
-                 ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], 
-                 pes->ec.nPlies,
-		 pes->ec.fCubeful ? "C" : "",
-                 pes->ec.nReduced,
-                 pes->ec.fDeterministic,
-                 pes->ec.rNoise,
-                 aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
-                 aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
-                 aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
-                 aarOutput[ 0 ][ 6 ],
-                 aarOutput[ 1 ][ 0 ], aarOutput[ 1 ][ 1 ], 
-                 aarOutput[ 1 ][ 2 ], aarOutput[ 1 ][ 3 ], 
-                 aarOutput[ 1 ][ 4 ], aarOutput[ 1 ][ 5 ], 
-                 aarOutput[ 1 ][ 6 ] );
-	break;
-
-    case EVAL_ROLLOUT:
-	/* FIXME save rollout analysis */
-
-    default:
-	assert( FALSE );
-    }
-}
-
-static void WriteMove( FILE *pf, int fPlayer, int anMove[] ) {
-
-    int i;
-
-    for( i = 0; i < 8; i++ )
-	switch( anMove[ i ] ) {
-	case 24: /* bar */
-	    putc( 'y', pf );
-	    break;
-	case -1: /* off */
-	    if( !( i & 1 ) )
-		return;
-	    putc( 'z', pf );
-	    break;
-	default:
-	    putc( fPlayer ? 'x' - anMove[ i ] : 'a' + anMove[ i ], pf );
-	}
-}
-
-
 static void
 WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
 
@@ -1271,6 +1280,112 @@ WriteRolloutContext ( FILE *pf, const rolloutcontext *prc ) {
   }
 
 }
+
+
+static void WriteDoubleAnalysis( FILE *pf, float ar[], 
+                                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                                 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+				 evalsetup *pes ) {
+
+  fputs ( "DA[", pf );
+
+  switch( pes->et ) {
+  case EVAL_EVAL:
+    fprintf( pf, "E %.4f %.4f %.4f %.4f %d%s %d %d %.4f "
+             "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+             "%.4f %.4f %.4f %.4f %.4f %.4f %.4f", 
+             ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ], 
+             pes->ec.nPlies,
+             pes->ec.fCubeful ? "C" : "",
+             pes->ec.nReduced,
+             pes->ec.fDeterministic,
+             pes->ec.rNoise,
+             aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
+             aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
+             aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
+             aarOutput[ 0 ][ 6 ],
+             aarOutput[ 1 ][ 0 ], aarOutput[ 1 ][ 1 ], 
+             aarOutput[ 1 ][ 2 ], aarOutput[ 1 ][ 3 ], 
+             aarOutput[ 1 ][ 4 ], aarOutput[ 1 ][ 5 ], 
+             aarOutput[ 1 ][ 6 ] );
+    break;
+    
+  case EVAL_ROLLOUT:
+
+    fprintf ( pf, 
+              "R "
+              "Eq %.4f %.4f %.4f %.4f "
+              "Trials %d "
+              "NoDouble "
+              "Output %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+              "StdDev %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+              "DoubleTake "
+              "Output %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+              "StdDev %.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+              "RC ",
+              ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
+              0, /* FIXME */
+              aarOutput[ 0 ][ 0 ],
+              aarOutput[ 0 ][ 1 ],
+              aarOutput[ 0 ][ 2 ],
+              aarOutput[ 0 ][ 3 ],
+              aarOutput[ 0 ][ 4 ],
+              aarOutput[ 0 ][ 5 ],
+              aarOutput[ 0 ][ 6 ],
+              aarStdDev[ 0 ][ 0 ],
+              aarStdDev[ 0 ][ 1 ],
+              aarStdDev[ 0 ][ 2 ],
+              aarStdDev[ 0 ][ 3 ],
+              aarStdDev[ 0 ][ 4 ],
+              aarStdDev[ 0 ][ 5 ],
+              aarStdDev[ 0 ][ 6 ],
+              aarOutput[ 1 ][ 0 ],
+              aarOutput[ 1 ][ 1 ],
+              aarOutput[ 1 ][ 2 ],
+              aarOutput[ 1 ][ 3 ],
+              aarOutput[ 1 ][ 4 ],
+              aarOutput[ 1 ][ 5 ],
+              aarOutput[ 1 ][ 6 ],
+              aarStdDev[ 1 ][ 0 ],
+              aarStdDev[ 1 ][ 1 ],
+              aarStdDev[ 1 ][ 2 ],
+              aarStdDev[ 1 ][ 3 ],
+              aarStdDev[ 1 ][ 4 ],
+              aarStdDev[ 1 ][ 5 ],
+              aarStdDev[ 1 ][ 6 ]
+              );
+
+    WriteRolloutContext ( pf, &pes->rc );
+
+    break;
+    
+  default:
+    assert( FALSE );
+  }
+  
+  fputc ( ']', pf );
+
+}
+
+static void WriteMove( FILE *pf, int fPlayer, int anMove[] ) {
+
+    int i;
+
+    for( i = 0; i < 8; i++ )
+	switch( anMove[ i ] ) {
+	case 24: /* bar */
+	    putc( 'y', pf );
+	    break;
+	case -1: /* off */
+	    if( !( i & 1 ) )
+		return;
+	    putc( 'z', pf );
+	    break;
+	default:
+	    putc( fPlayer ? 'x' - anMove[ i ] : 'a' + anMove[ i ], pf );
+	}
+}
+
 
 static void WriteMoveAnalysis( FILE *pf, int fPlayer, movelist *pml,
 			       int iMove ) {
