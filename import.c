@@ -946,7 +946,10 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 }
 
 static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
-			   int fCrawford ) {
+			   int fCrawford,
+                           int fCrawfordRule, int fAutoDoubles, 
+                           int fJacobyRule ) {
+
 
     char sz[ 1024 ];
     char *pch;
@@ -967,9 +970,9 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     pmgi->g.nMatch = nLength;
     pmgi->g.anScore[ 0 ] = n0;
     pmgi->g.anScore[ 1 ] = n1;
-    pmgi->g.fCrawford = nLength != 0; /* FIXME */
+    pmgi->g.fCrawford = fCrawfordRule && nLength;
     pmgi->g.fCrawfordGame = fCrawford;
-    pmgi->g.fJacoby = !nLength; /* FIXME */
+    pmgi->g.fJacoby = fJacobyRule && ! nLength;
     pmgi->g.fWinner = -1;
     pmgi->g.nPoints = 0;
     pmgi->g.fResigned = FALSE;
@@ -1204,10 +1207,166 @@ static int ParseSGGGame( char *pch, int *pi, int *pn0, int *pn1,
     return 0;
 }
 
+
+static void
+ParseSGGDate ( const char *sz, int *pnDay, int *pnMonth, int *pnYear ) {
+
+  static char *aszMonths[] = {
+    "January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December" };
+  int i;
+  char szMonth[ 80 ];
+  int nDay, nYear;
+  int n;
+  
+
+  *pnDay = 1;
+  *pnMonth = 1;
+  *pnYear = 1900;
+
+  if ( ( n = sscanf ( sz, "%*s %s %d, %d", szMonth, &nDay, &nYear ) ) != 3 ) 
+    return;
+
+  *pnDay = nDay;
+  *pnYear = nYear;
+
+  for ( i = 0; i < 12; ++i ) {
+    if ( ! strcmp ( szMonth, aszMonths[ i ] ) ) {
+      *pnMonth = i + 1;
+      break;
+    }
+  }
+
+}
+
+
+static void
+ParseSGGOptions ( const char *sz, matchinfo *pmi, int *pfCrawfordRule,
+                  int *pfAutoDoubles, int *pfJacobyRule ) {
+
+  char szTemp[ 80 ];
+  int i;
+  static char *aszOptions[] = {
+    "Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+    "Saturday", "Sunday",
+    "ELO:", "Jacoby:", "Automatic Doubles:", "Crawford:", "Beavers:",
+    "Raccoons:", "Doubling Cube:", "Rated:", "Match Length:",
+    "Variant:", NULL };
+  double arRating[ 2 ];
+  int anExp[ 2 ];
+  char *pc;
+  
+  for ( i = 0, pc = aszOptions[ i ]; pc; ++i, pc = aszOptions[ i ] ) 
+    if ( ! strncmp ( sz, pc, strlen ( pc ) ) )
+      break;
+  
+  switch ( i ) {
+  case 0:
+  case 1:
+  case 2:
+  case 3:
+  case 4:
+  case 5:
+  case 6:
+    
+    /* date */
+    ParseSGGDate ( sz, &pmi->nDay, &pmi->nMonth, &pmi->nYear );
+    break;
+  case 7:
+
+    /* ratings */
+    if ( ( sscanf ( sz, "%*s %lf %d %lf %d", &arRating[ 1 ], &anExp[ 1 ], 
+                    &arRating[ 0 ], &anExp[ 0 ] ) ) != 4 )
+      break;
+
+    for ( i = 0; i < 2; ++i ) {
+      if ( pmi->pchRating[ i ] )
+        free ( pmi->pchRating[ i ] );
+      sprintf ( szTemp, "%.6g (Exp %d)", arRating[ i ], anExp[ i ] );
+      pmi->pchRating[ i ] = strdup ( szTemp );
+    }
+    break;
+
+  case 8:
+
+    /* Jacoby rule */
+
+    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+      break;
+    
+    *pfJacobyRule = ! strcmp ( szTemp, "Yes" );
+    break;
+
+  case 9:
+
+    /* automatic doubles */
+
+    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+      break;
+    
+    *pfAutoDoubles = ! strcmp ( szTemp, "Yes" );
+    break;
+
+  case 10:
+
+    /* crawford rule */
+
+    if ( ( sscanf ( sz, "%*s %s", szTemp ) ) != 1 )
+      break;
+
+    *pfCrawfordRule = ! strcmp ( szTemp, "Yes" );
+    break;
+
+  case 11:
+  case 12:
+
+    /* beavers & raccons*/
+
+    /* ignored as they are not used internally in gnubg */
+    break;
+
+  case 13:
+
+    /* doubling cube */
+    break;
+
+  case 14:
+
+    /* rated */
+    break;
+
+  case 15:
+
+    /* match length */
+    break;
+
+  case 16:
+    
+    /* variant */
+    break;
+
+  default:
+
+    /* most likely "place" */
+    if ( pmi->pchPlace )
+      free ( pmi->pchPlace );
+
+    pmi->pchPlace = strdup ( sz );
+    if ( ( pc = strchr ( sz, '\n' ) ) )
+      *pc = 0;
+
+  }
+
+}
+
+
 extern void ImportSGG( FILE *pf, char *szFilename ) {
 
     char sz[ 80 ], sz0[ 32 ], sz1[ 32 ];
     int n, n0, n1, nLength, i, fCrawford;
+    int fCrawfordRule = TRUE;
+    int fJacobyRule = TRUE;
+    int fAutoDoubles = 0;
 
     fWarned = FALSE;
     
@@ -1242,16 +1401,19 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
 
     strcpy( ap[ 0 ].szName, sz0 );
     strcpy( ap[ 1 ].szName, sz1 );
-    
-    while( fgets( sz, 80, pf ) ) {
-	if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
-	    break;
 
-	/* FIXME check for options -- Jacoby, Crawford, etc. */
+    while ( fgets ( sz, 80, pf ) ) {
+      if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
+        break;
+      
+      ParseSGGOptions ( sz, &mi, &fCrawfordRule, 
+                        &fAutoDoubles, &fJacobyRule );
+
     }
     
     while( !feof( pf ) ) {
-	ImportSGGGame( pf, i, nLength, n0, n1, fCrawford );
+	ImportSGGGame( pf, i, nLength, n0, n1, fCrawford,
+                       fCrawfordRule, fAutoDoubles, fJacobyRule );
 	
 	while( fgets( sz, 80, pf ) )
 	    if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
