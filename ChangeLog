@@ -1,3 +1,7 @@
+Mon Aug 18 13:12:05 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* play.c: fix resignation bug.
+
 Sun Aug 17 17:41:58 GMT 2003  Jim Segrave    <jes@jes-2.demon.nl>
 
 	* rollout.c - ensure the eval context stored with a rollut has
