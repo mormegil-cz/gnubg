@@ -1360,8 +1360,10 @@ extern void CommandAnalyseMove ( char *sz ) {
     memcpy ( &msx, &ms, sizeof ( matchstate ) );
     AnalyzeMove ( plLastMove->plNext->p, &msx, NULL, FALSE );
 
+#if USE_GTK
+  if( fX )
     GTKUpdateAnnotations();
-
+#endif
   }
   else
     outputl ( "Sorry, cannot analyse move!" );

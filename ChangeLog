@@ -1,3 +1,9 @@
+Fri Apr  5 19:01:49 2002  Øystein Johansen <oeysteij@online.no>
+
+        gnubg.c (CommandSaveSettings) Fix typo.
+
+        analysis.c (CommandAnalyseMove) #ifdef USE_GTK for GTKUpdateAnnotation 
+ 
 Thu Apr  4 21:01:49 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Support for the analysis of a dead cube being doubled.

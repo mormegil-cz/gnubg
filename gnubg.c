@@ -3374,7 +3374,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set analysis threshold verybad %.3f\n"
 	     "set analysis threshold verygood %.3f\n"
 	     "set analysis threshold verylucky %.3f\n"
-	     "set analysis threshold veryunlucky %.4893f\n",
+	     "set analysis threshold veryunlucky %.3f\n",
 	     arSkillLevel[ SKILL_BAD ],
 	     arSkillLevel[ SKILL_DOUBTFUL ],
 	     arSkillLevel[ SKILL_GOOD ],
