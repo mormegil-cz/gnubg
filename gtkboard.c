@@ -677,14 +677,19 @@ static void update_match_id( BoardData *bd ) {
     fCubeOwner = 0;
 
   gtk_entry_set_text( GTK_ENTRY( bd->match_id ), 
-                      MatchID( bd->cube, 
-                               fCubeOwner, 
-                               ( bd->turn == 1 ) ? 1 : 0, 
+                      MatchID( ( bd->turn == 1 ) ? bd->dice :
+                               bd->dice_opponent,
+                               ms.fTurn,
+                               ms.fResigned,
+                               ms.fDoubled,
+                               ms.fMove,
+                               fCubeOwner,
+                               bd->crawford_game,
                                bd->match_to,
                                anScore,
-                               bd->crawford_game, 
-                               ( bd->turn == 1 ) ? bd->dice : 
-                               bd->dice_opponent ) );
+                               bd->cube,
+                               ms.gs ) );
+
 }
 
 
@@ -4171,7 +4176,7 @@ static void board_init( Board *board ) {
     gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
                        bd->match_id = gtk_entry_new(),
                        1, 2, 1, 2, GTK_FILL, 0, 4, 0 );
-    gtk_entry_set_max_length( GTK_ENTRY( bd->match_id ), 10 );
+    gtk_entry_set_max_length( GTK_ENTRY( bd->match_id ), 12 );
 
     gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
                        bd->edit = gtk_toggle_button_new_with_label( "Edit" ),

@@ -40,23 +40,48 @@ extern int
 LogCube ( const int n );
 
 extern char*
-MatchID ( const int nCube, const int fCubeOwner, const int fMove,
-          const int nMatchTo, const int anScore[ 2 ], 
-          const int fCrawford, const int anDice[ 2 ] );
+MatchID ( const int anDice[ 2 ],
+          const int fTurn,
+          const int fResigned,
+          const int fDoubled,
+          const int fMove,
+          const int fCubeOwner,
+          const int fCrawford,
+          const int nMatchTo,
+          const int anScore[ 2 ],
+          const int nCube,
+          const int gs );
 
 extern char*
 MatchIDFromKey( unsigned char auchKey[ 8 ] );
 
 extern int
-MatchFromID ( int *pnCube, int *pfCubeOwner, int *pfMove,
-              int *pnMatchTo, int anScore[ 2 ], 
-              int *pfCrawford, int anDice[ 2 ],
-              char *szMatchID );
+MatchFromID ( int anDice[ 2 ],
+              int *pfTurn,
+              int *pfResigned,
+              int *pfDoubled,
+              int *pfMove,
+              int *pfCubeOwner,
+              int *pfCrawford,
+              int *pnMatchTo,
+              int anScore[ 2 ],
+              int *pnCube,
+              int *pgs,
+              const char *szMatchID );
 
 extern int
-MatchFromKey ( int *pnCube, int *pfCubeOwner, int *pfMove,
-               int *pnMatchTo, int anScore[ 2 ], 
-               int *pfCrawford, int anDice[ 2 ],
-               unsigned char *auchKey );
+MatchFromKey ( int anDice[ 2 ],
+               int *pfTurn,
+               int *pfResigned,
+               int *pfDoubled,
+               int *pfMove,
+               int *pfCubeOwner,
+               int *pfCrawford,
+               int *pnMatchTo,
+               int anScore[ 2 ],
+               int *pnCube,
+               int *pgs,
+               const unsigned char *auchKey );
+
 
 #endif

@@ -2862,10 +2862,12 @@ extern void CommandTake( char *sz ) {
 }
 
 extern void
-SetMatchID ( char *szMatchID ) {
+SetMatchID ( const char *szMatchID ) {
 
   int anScore[ 2 ], anDice[ 2 ];
   int nMatchTo, fCubeOwner, fMove, fCrawford, nCube;
+  int fTurn, fDoubled, fResigned;
+  gamestate gs;
 
   char szID[ 15 ];
 
@@ -2887,9 +2889,10 @@ SetMatchID ( char *szMatchID ) {
   else
     strcpy ( szID, "" );
 
-  if ( MatchFromID ( &nCube, &fCubeOwner, &fMove,
-                     &nMatchTo, anScore, &fCrawford, 
-                     anDice, szMatchID ) < 0 ) {
+  if ( MatchFromID ( anDice, &fTurn, &fResigned, &fDoubled, &fMove,
+                     &fCubeOwner, &fCrawford, 
+                     &nMatchTo, anScore, &nCube, (int *) &gs, 
+                     szMatchID ) < 0 ) {
 
     outputf( "Illegal match ID '%s'\n", szMatchID );
     outputx();
@@ -2943,9 +2946,11 @@ SetMatchID ( char *szMatchID ) {
   IniStatcontext( &pmr->g.sc );
   AddMoveRecord( pmr );
 
-  ms.gs = GAME_PLAYING;
+  ms.gs = gs;
   ms.fMove = fMove;
-  ms.fTurn = fMove;
+  ms.fTurn = fTurn;
+  ms.fResigned = fResigned;
+  ms.fDoubled = fDoubled;
   
   UpdateSetting( &ms.gs );
   UpdateSetting( &ms.nCube );

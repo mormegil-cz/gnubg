@@ -390,7 +390,8 @@ SetBits ( unsigned char *pc, int bitPos, int nBits, int iContent ) {
 
 
 static int
-GetBits ( unsigned char *pc, int bitPos, int nBits, int *piContent ) {
+GetBits ( const unsigned char *pc, const int bitPos, 
+          const int nBits, int *piContent ) {
 
 
   int i, j;
@@ -419,16 +420,16 @@ GetBits ( unsigned char *pc, int bitPos, int nBits, int *piContent ) {
 
 
 extern char 
-*MatchIDFromKey( unsigned char auchKey[ 8 ] ) {
+*MatchIDFromKey( unsigned char auchKey[ 9 ] ) {
 
     unsigned char *puch = auchKey;
-    static char szID[ 10 ];
+    static char szID[ 12 ];
     char *pch = szID;
     static char aszBase64[ 64 ] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     int i;
     
-    for( i = 0; i < 2; i++ ) {
+    for( i = 0; i < 3; i++ ) {
         *pch++ = aszBase64[ puch[ 0 ] >> 2 ];
         *pch++ = aszBase64[ ( ( puch[ 0 ] & 0x03 ) << 4 ) |
                           ( puch[ 1 ] >> 4 ) ];
@@ -439,9 +440,6 @@ extern char
         puch += 3;
     }
 
-    *pch++ = aszBase64[ *puch >> 2 ];
-    *pch++ = aszBase64[ ( *puch & 0x03 ) << 4 ];
-
     *pch = 0;
 
     return szID;
@@ -449,23 +447,35 @@ extern char
 
 
 extern char*
-MatchID ( const int nCube, const int fCubeOwner, const int fMove,
-          const int nMatchTo, const int anScore[ 2 ], 
-          const int fCrawford, const int anDice[ 2 ] ) {
+MatchID ( const int anDice[ 2 ],
+          const int fTurn,
+          const int fResigned,
+          const int fDoubled,
+          const int fMove,
+          const int fCubeOwner,
+          const int fCrawford,
+          const int nMatchTo,
+          const int anScore[ 2 ],
+          const int nCube, 
+          const int gs ) {
 
-  unsigned char auchKey[ 8 ];
+  unsigned char auchKey[ 9 ];
 
-  memset ( auchKey, 0, 8 );
+  memset ( auchKey, 0, 9 );
 
   SetBits ( auchKey, 0, 4, LogCube ( nCube ) );
   SetBits ( auchKey, 4, 2, fCubeOwner & 0x3 );
   SetBits ( auchKey, 6, 1, fMove );
   SetBits ( auchKey, 7, 1, fCrawford );
-  SetBits ( auchKey, 8, 3, anDice[ 0 ] & 0x7 );
-  SetBits ( auchKey, 11, 3, anDice[ 1 ] & 0x7 );
-  SetBits ( auchKey, 14, 15, nMatchTo & 0x8FFF );
-  SetBits ( auchKey, 29, 15, anScore[ 0 ] & 0x8FFF );
-  SetBits ( auchKey, 44, 15, anScore[ 1 ] & 0x8FFF );
+  SetBits ( auchKey, 8, 3, gs );
+  SetBits ( auchKey, 11, 1, fTurn );
+  SetBits ( auchKey, 12, 1, fDoubled );
+  SetBits ( auchKey, 13, 2, fResigned );
+  SetBits ( auchKey, 15, 3, anDice[ 0 ] & 0x7 );
+  SetBits ( auchKey, 18, 3, anDice[ 1 ] & 0x7 );
+  SetBits ( auchKey, 21, 15, nMatchTo & 0x8FFF );
+  SetBits ( auchKey, 36, 15, anScore[ 0 ] & 0x8FFF );
+  SetBits ( auchKey, 51, 15, anScore[ 1 ] & 0x8FFF );
 
   return MatchIDFromKey ( auchKey );
 
@@ -473,10 +483,18 @@ MatchID ( const int nCube, const int fCubeOwner, const int fMove,
 }
 
 extern int
-MatchFromKey ( int *pnCube, int *pfCubeOwner, int *pfMove,
-               int *pnMatchTo, int anScore[ 2 ], 
-               int *pfCrawford, int anDice[ 2 ],
-               unsigned char *auchKey ) {
+MatchFromKey ( int anDice[ 2 ],
+               int *pfTurn,
+               int *pfResigned,
+               int *pfDoubled,
+               int *pfMove,
+               int *pfCubeOwner,
+               int *pfCrawford,
+               int *pnMatchTo,
+               int anScore[ 2 ],
+               int *pnCube,
+               int *pgs,
+               const unsigned char *auchKey ) {
 
   GetBits ( auchKey, 0, 4, pnCube );
   *pnCube = 0x1 << *pnCube;
@@ -487,11 +505,15 @@ MatchFromKey ( int *pnCube, int *pfCubeOwner, int *pfMove,
 
   GetBits ( auchKey, 6, 1, pfMove );
   GetBits ( auchKey, 7, 1, pfCrawford );
-  GetBits ( auchKey, 8, 3, &anDice[ 0 ] );
-  GetBits ( auchKey, 11, 3, &anDice[ 1 ] );
-  GetBits ( auchKey, 14, 15, pnMatchTo );
-  GetBits ( auchKey, 29, 15, &anScore[ 0 ] );
-  GetBits ( auchKey, 44, 15, &anScore[ 1 ] );
+  GetBits ( auchKey, 8, 3, pgs );
+  GetBits ( auchKey, 11, 1, pfTurn );
+  GetBits ( auchKey, 12, 1, pfDoubled );
+  GetBits ( auchKey, 13, 2, pfResigned );
+  GetBits ( auchKey, 15, 3, &anDice[ 0 ] );
+  GetBits ( auchKey, 18, 3, &anDice[ 1 ] );
+  GetBits ( auchKey, 21, 15, pnMatchTo );
+  GetBits ( auchKey, 36, 15, &anScore[ 0 ] );
+  GetBits ( auchKey, 51, 15, &anScore[ 1 ] );
 
   /* FIXME: implement a consistency check */
 
@@ -500,28 +522,34 @@ MatchFromKey ( int *pnCube, int *pfCubeOwner, int *pfMove,
 }
 
 
-
-
 extern int
-MatchFromID ( int *pnCube, int *pfCubeOwner, int *pfMove,
-              int *pnMatchTo, int anScore[ 2 ], 
-              int *pfCrawford, int anDice[ 2 ],
-              char *szMatchID ) {
+MatchFromID ( int anDice[ 2 ],
+              int *pfTurn,
+              int *pfResigned,
+              int *pfDoubled,
+              int *pfMove,
+              int *pfCubeOwner,
+              int *pfCrawford,
+              int *pnMatchTo,
+              int anScore[ 2 ],
+              int *pnCube,
+              int *pgs,
+              const char *szMatchID ) {
 
-  unsigned char auchKey[ 8 ];
+  unsigned char auchKey[ 9 ];
   unsigned char *puch = auchKey;
-  unsigned char ach[ 10 ];
+  unsigned char ach[ 12 ];
   unsigned char *pch = ach;
   int i;
 
   /* decode base64 into key */
 
-  for( i = 0; i < 10 && szMatchID[ i ]; i++ )
+  for( i = 0; i < 12 && szMatchID[ i ]; i++ )
     pch[ i ] = Base64( szMatchID[ i ] );
 
   pch[ i ] = 0;
 
-  for( i = 0; i < 2; i++ ) {
+  for( i = 0; i < 3; i++ ) {
     *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
     *puch++ = ( pch[ 1 ] << 4 ) | ( pch[ 2 ] >> 2 );
     *puch++ = ( pch[ 2 ] << 6 ) | pch[ 3 ];
@@ -529,14 +557,11 @@ MatchFromID ( int *pnCube, int *pfCubeOwner, int *pfMove,
     pch += 4;
   }
 
-  *puch++ = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
-  *puch = pch[ 1 ] << 4;
-
   /* get matchstate info from the key */
 
-  return MatchFromKey ( pnCube, pfCubeOwner, pfMove,
-                        pnMatchTo, anScore, pfCrawford,
-                        anDice, auchKey );
+  return MatchFromKey ( anDice, pfTurn, pfResigned, pfDoubled,
+                        pfMove, pfCubeOwner, pfCrawford, pnMatchTo,  
+                        anScore, pnCube, pgs, auchKey );
 
 }
 
