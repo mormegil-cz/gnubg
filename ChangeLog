@@ -1,3 +1,8 @@
+Sun Apr 13 12:41:40 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* eval.c (ScoreMoves): Restore incremental eval of NN by keeping a
+	separate state for each net.
+
 Sat Apr 12 19:17:23 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (FindnSaveBestMoves): keep track of the max ply used.

@@ -1207,8 +1207,7 @@ CalculateHalfInputs( int anBoard[ 25 ], int anBoardOpp[ 25 ],
 	    /* enter this shot as available */
 	      
 	    aHit[ aanCombination[ j - 24 + i ][ n ] ] |= 1 << j;
-	  cannot_hit:
-	    ;
+	  cannot_hit: ;
 	  }
 
   for( i = 0; i < 21; i++ )
@@ -2010,20 +2009,41 @@ enum {
   OBG_POSSIBLE = 0x8
 };
 
-static int nContext = -1;
+/* separate context for race, crashed, contact
+   -1: regulare eval
+    0: save base
+    1: from base
+ */
+static int nContext[3] = {-1, -1, -1};
 
 static inline NNEvalType
-NNevalAction( int nLastContext )
+NNevalAction(positionclass p)
 {
-    if( nContext < 0 )
-	/* incremental evaluation not useful */
-	return NNEVAL_NONE;
-    else if( nContext != nLastContext )
-	/* starting a new context; save base in the hope it will be useful */
-	return NNEVAL_SAVE;
-    else
-	/* context hit!  use the previously computed base */
-	return NNEVAL_FROMBASE;
+  {                     assert( 0 <= p - CLASS_RACE && p - CLASS_RACE < 3 ); }
+  
+  switch( nContext[p - CLASS_RACE] ) {
+    case -1:
+    {
+      /* incremental evaluation not useful */
+      return NNEVAL_NONE;
+    }
+    case 0:
+    {
+      /* next call should return FROMBASE */
+      nContext[p - CLASS_RACE] = 1;
+      
+      /* starting a new context; save base in the hope it will be useful */
+      return NNEVAL_SAVE;
+    }
+    case 1:
+    {
+      /* context hit!  use the previously computed base */
+      return NNEVAL_FROMBASE;
+    }
+  }
+
+  /* never reached */
+  assert(0);
 }
 
 /* side - side that potentially can win a backgammon */
@@ -2107,13 +2127,10 @@ static void
 EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
 
   float arInput[ NUM_INPUTS ];
-  static int nLastContext;
 
   CalculateRaceInputs( anBoard, arInput );
     
-  NeuralNetEvaluate( &nnRace, arInput, arOutput,
-		     NNevalAction( nLastContext ) );
-  nLastContext = nContext;
+  NeuralNetEvaluate( &nnRace, arInput, arOutput, NNevalAction( CLASS_RACE ) );
   
   /* anBoard[1] is on roll */
   {
@@ -2203,31 +2220,25 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv ) {
 
 
 static void
-EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[], 
-             const bgvariation bgv ) {
+EvalContact(int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv)
+{
+  float arInput[ NUM_INPUTS ];
     
-    float arInput[ NUM_INPUTS ];
-    static int nLastContext;
+  CalculateInputs( anBoard, arInput );
     
-    CalculateInputs( anBoard, arInput );
-    
-    NeuralNetEvaluate( &nnContact, arInput, arOutput,
-		       NNevalAction( nLastContext ) );
-    nLastContext = nContext;
+  NeuralNetEvaluate(&nnContact, arInput, arOutput,
+		    NNevalAction( CLASS_CONTACT ) );
 }
 
 static void
-EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[],
-             const bgvariation bgv ) {
+EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv )
+{
+  float arInput[ NUM_INPUTS ];
     
-    float arInput[ NUM_INPUTS ];
-    static int nLastContext;
+  CalculateInputs( anBoard, arInput );
     
-    CalculateInputs( anBoard, arInput );
-    
-    NeuralNetEvaluate( &nnCrashed, arInput, arOutput,
-		       NNevalAction( nLastContext ) );
-    nLastContext = nContext;
+  NeuralNetEvaluate( &nnCrashed, arInput, arOutput,
+		     NNevalAction( CLASS_CRASHED ) );
 }
 
 extern void
@@ -3213,14 +3224,13 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
   int i;
   /* return value */
   int r = 0;
-  int nSavedContext = nContext;
-  static int nNextContext;
   
   pml->rBestScore = -99999.9;
 
-  if( nPlies == 0 )
-      /* start incremental evaluations */
-      nContext = ++nNextContext;
+  if( nPlies == 0 ) {
+    /* start incremental evaluations */
+    nContext[0] = nContext[1] = nContext[2] = 0;
+  }
     
   for( i = 0; i < pml->cMoves; i++ ) {
     if( ScoreMove( pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
@@ -3237,9 +3247,10 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
     }
   }
 
-  if( nPlies == 0 )
-      /* restore old evaluation context */
-      nContext = nSavedContext;
+  if( nPlies == 0 ) {
+    /* reset to none */
+    nContext[0] = nContext[1] = nContext[2] = -1;
+  }
     
   return 0;
 }
