@@ -4046,68 +4046,94 @@ static GtkWidget *AnalysisPage( analysiswidget *paw ) {
   return pwPage;
 }
 
+#define CHECKUPDATE(button,flag,string) \
+   n = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( (button) ) ); \
+   if ( n != (flag)){ \
+           sprintf(sz, (string), n ? "on" : "off"); \
+           UserCommand(sz); \
+   }
+
 static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
 
   /* FIXME: Don't send the commands that does not change a setting */
 	
   char sz[128]; 
+  int n;
+  float rCompare;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
-  
-  sprintf(sz, "set analysis moves %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwMoves ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
 
-  sprintf(sz, "set analysis cube %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwCube ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
+  CHECKUPDATE(paw->pwMoves,fAnalyseMove, "set analysis moves %s")
+  CHECKUPDATE(paw->pwCube,fAnalyseCube, "set analysis cube %s")
+  CHECKUPDATE(paw->pwLuck,fAnalyseDice, "set analysis dice %s")
 
-  sprintf(sz, "set analysis luck %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( paw->pwLuck ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
+  if((n = paw->padjMoves->value) != cAnalysisMoves) {
+    sprintf(sz, "set analysis limit %d", n );
+    UserCommand(sz); 
+  }
 
-  sprintf(sz, "set analysis limit %.0f", paw->padjMoves->value );
-  UserCommand(sz); 
-  
-  lisprintf(sz, "set analysis threshold verygood %.3f",
-		  paw->apadjSkill[0]->value );
-  UserCommand(sz); 
-    
-  lisprintf(sz, "set analysis threshold good %.3f",
-		  paw->apadjSkill[1]->value );
-  UserCommand(sz); 
-    
-  lisprintf(sz, "set analysis threshold doubtful %.3f",
-		  paw->apadjSkill[2]->value );
-  UserCommand(sz); 
-    
-  lisprintf(sz, "set analysis threshold bad %.3f",
-		  paw->apadjSkill[3]->value );
-  UserCommand(sz); 
-    
-  lisprintf(sz, "set analysis threshold verybad %.3f",
-		  paw->apadjSkill[4]->value );
-  UserCommand(sz); 
+  /* FIXME I'm trying to send commands only for vidget that changes,
+     no matter what I try this fuck wonæt work!! Please, someone else fix! */  
 
-  lisprintf(sz, "set analysis threshold verylucky %.3f",
-		  paw->apadjLuck[0]->value );
-  UserCommand(sz); 
+  rCompare = paw->apadjSkill[0]->value;
+  if(fabs( rCompare - arSkillLevel[SKILL_VERYGOOD]) > 0.0001 );
+  {
+     lisprintf(sz, "set analysis threshold verygood %.3f", rCompare );
+     UserCommand(sz); 
+  }
     
-  lisprintf(sz, "set analysis threshold lucky %.3f",
-		  paw->apadjLuck[1]->value );
-  UserCommand(sz); 
-    
-  lisprintf(sz, "set analysis threshold unlucky %.3f",
-		  paw->apadjLuck[2]->value );
-  UserCommand(sz); 
-    
-  lisprintf(sz, "set analysis threshold veryunlucky %.3f",
-		  paw->apadjLuck[3]->value );
-  UserCommand(sz); 
-    
+  rCompare = paw->apadjSkill[1]->value;
+  if(fabs( rCompare - arSkillLevel[SKILL_GOOD] ) > 0.0001 );
+  {
+     lisprintf(sz, "set analysis threshold good %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
+  rCompare = paw->apadjSkill[2]->value;
+  if(fabs( rCompare - arSkillLevel[SKILL_DOUBTFUL] ) > 0.0001 );
+  {
+     lisprintf(sz, "set analysis threshold doubtful %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
+  rCompare = paw->apadjSkill[3]->value;
+  if(fabs( rCompare - arSkillLevel[SKILL_BAD] ) > 0.0001 );
+  {
+     lisprintf(sz, "set analysis threshold bad %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
+  rCompare = paw->apadjSkill[4]->value;
+  if(fabs( rCompare - arSkillLevel[SKILL_VERYBAD] ) > 0.0001 );
+  {
+     lisprintf(sz, "set analysis threshold verybad %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
+  if(( rCompare = paw->apadjLuck[0]->value ) != arLuckLevel[LUCK_VERYGOOD] );
+  {
+     lisprintf(sz, "set analysis threshold verylucky %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
+  if(( rCompare = paw->apadjLuck[1]->value ) != arLuckLevel[LUCK_GOOD] );
+  {
+     lisprintf(sz, "set analysis threshold lucky %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
+  if(( rCompare = paw->apadjLuck[2]->value ) != arLuckLevel[LUCK_BAD] );
+  {
+     lisprintf(sz, "set analysis threshold unlucky %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
+  if(( rCompare = paw->apadjLuck[3]->value ) != arLuckLevel[LUCK_VERYBAD] );
+  {
+     lisprintf(sz, "set analysis threshold veryunlucky %.3f", rCompare );
+     UserCommand(sz); 
+  }
+
   EvalOK( paw->pwEvalChequer, paw->pwEvalChequer );
   EvalOK( paw->pwEvalCube, paw->pwEvalCube );
   
@@ -4119,9 +4145,9 @@ static void AnalysisOK( GtkWidget *pw, analysiswidget *paw ) {
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
 }
+#undef CHECKUPDATE
 
-static void 
-AnalysisSet( analysiswidget *paw) {
+static void AnalysisSet( analysiswidget *paw) {
 
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( paw->pwMoves ),
                                 fAnalyseMove );
@@ -7418,129 +7444,84 @@ create_window2 ()
   return window2;
 }
 #endif
+#define CHECKUPDATE(button,flag,string) \
+   n = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( (button) ) ); \
+   if ( n != (flag)){ \
+           sprintf(sz, (string), n ? "on" : "off"); \
+           UserCommand(sz); \
+   }
 
 static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 
   /* FIXME: Don't send the commands that does not change a setting */
 
-  char sz[128]; 
+  char sz[128];
+  int n;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
 
-  sprintf(sz, "set automatic bearoff %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAutoBearoff ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
+  CHECKUPDATE(pow->pwAutoBearoff,fAutoBearoff, "set automatic bearoff %s")
+  CHECKUPDATE(pow->pwAutoCrawford,fAutoCrawford, "set automatic crawford %s")
+  CHECKUPDATE(pow->pwAutoGame,fAutoGame, "set automatic game %s")
+  CHECKUPDATE(pow->pwAutoRoll,fAutoRoll, "set automatic roll %s")
+  CHECKUPDATE(pow->pwAutoMove,fAutoMove, "set automatic move %s")
+  CHECKUPDATE(pow->pwAutoAnalyse,fAutoAnalysis, "set automatic analysis %s")
   
-  sprintf(sz, "set automatic crawford %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAutoCrawford ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set automatic game %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAutoGame ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set automatic move %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAutoMove ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set automatic roll %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAutoRoll ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set automatic analysis %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwAutoAnalyse ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set cube use %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwCubeUsecube ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set jacoby %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwCubeJacoby ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
+  CHECKUPDATE(pow->pwCubeUsecube,fCubeUse, "set cube use %s")
+  CHECKUPDATE(pow->pwCubeJacoby,fJacoby, "set jacoby %s")
+  CHECKUPDATE(pow->pwCubeInvert,fInvertMET, "set invert met %s")
 
-  sprintf(sz, "set invert matchequitytable %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwCubeInvert ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
+  CHECKUPDATE(pow->pwGameClockwise,fClockwise, "set clockwise %s")
+  CHECKUPDATE(pow->pwGameEgyptian,fEgyptian, "set egyptian %s")
+  CHECKUPDATE(pow->pwGameNackgammon,fNackgammon, "set nackgammon %s")
+  
+  CHECKUPDATE(pow->pwOutputMWC,fOutputMWC, "set output mwc %s")
+  CHECKUPDATE(pow->pwOutputGWC,fOutputWinPC, "set output winpc %s")
+  CHECKUPDATE(pow->pwOutputMWCpst,fOutputMatchPC, "set output matchpc %s")
+  
+  CHECKUPDATE(pow->pwConfStart,fConfirm, "set confirm new %s")
+  CHECKUPDATE(pow->pwConfOverwrite,fConfirmSave, "set confirm save %s")
+  
+  if(( n = pow->padjCubeAutomatic->value ) != cAutoDoubles){
+    sprintf(sz, "set automatic doubles %d", n );
+    UserCommand(sz); 
+  }
 
-  sprintf(sz, "set clockwise %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwGameClockwise ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set egyptian %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwGameEgyptian ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
+  if(( n = pow->padjCubeBeaver->value ) != nBeavers){
+    sprintf(sz, "set beavers %d", n );
+    UserCommand(sz); 
+  }
+  if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwDiceManual))) {
+    if (rngCurrent != RNG_MANUAL)
+      UserCommand("set rng manual");  
+  } else {
 
-  sprintf(sz, "set nackgammon %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwGameNackgammon) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set output mwc %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwOutputMWC ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set output winpc %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwOutputGWC ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set output matchpc %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwOutputMWCpst ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set confirm new %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwConfStart ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set confirm save %s",
-    gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwConfOverwrite ) ) ?
-       "on" : "off" );
-  UserCommand(sz); 
-  
-  sprintf(sz, "set automatic doubles %.0f", pow->padjCubeAutomatic->value );
-  UserCommand(sz); 
-
-  sprintf(sz, "set beavers %.0f", pow->padjCubeBeaver->value );
-  UserCommand(sz); 
-  
-  if(gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pow->pwDiceManual))) 
-    UserCommand("set rng manual");  
-  else {
-    gint n = gtk_option_menu_get_history(GTK_OPTION_MENU( pow->pwPRNGMenu ));
+    n = gtk_option_menu_get_history(GTK_OPTION_MENU( pow->pwPRNGMenu ));
 
     switch ( n ) {
     case 0:
-      UserCommand("set rng ansi");
+      if (rngCurrent != RNG_ANSI)
+        UserCommand("set rng ansi");
       break;
     case 1:
-      UserCommand("set rng bsd");
+      if (rngCurrent != RNG_BSD)
+        UserCommand("set rng bsd");
       break;
     case 2:
-      UserCommand("set rng isaac");
+      if (rngCurrent != RNG_ISAAC)
+        UserCommand("set rng isaac");
       break;
     case 3:
-      UserCommand("set rng md5");
+      if (rngCurrent != RNG_MD5)
+        UserCommand("set rng md5");
       break;
     case 4:
-      UserCommand("set rng mersenne");
+      if (rngCurrent != RNG_MERSENNE)
+        UserCommand("set rng mersenne");
       break;
     case 5:
-      UserCommand("set rng user");
+      if (rngCurrent != RNG_USER)
+        UserCommand("set rng user");
       break;
     default:
       break;
@@ -7552,6 +7533,8 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
   
 }
+
+#undef CHECKUPDATE
 
 static void 
 OptionsSet( optionswidget *pow) {

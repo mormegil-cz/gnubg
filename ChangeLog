@@ -1,3 +1,7 @@
+Fri Jul 19 19:45:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c: Don't send unchanged parameter in the options widget.
+
 Fri Jul 19 09:33:22 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (HTMLDumpStatContext), analysis.c (DumpStatContext),
