@@ -1978,7 +1978,7 @@ extern void CommandDecline( char *sz ) {
     TurnDone();
 }
 
-static skilltype GoodDouble (int fisRedouble) {
+static skilltype GoodDouble (int fisRedouble, moverecord *pmr ) {
 
     float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
@@ -2037,6 +2037,18 @@ static skilltype GoodDouble (int fisRedouble) {
 
         ResumeInput ( &m );
 	    
+        /* store cube decision for annotation */
+
+        ec2es ( &pmr->d.esDouble, pec );
+        memcpy ( pmr->d.aarOutput, aarOutput, 
+                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        memset ( pmr->d.aarStdDev, 0,
+                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        memcpy ( pmr->d.arDouble, arDouble, 4 * sizeof ( float ) );
+        pmr->d.st = SKILL_NONE;
+
+        /* find skill */
+
 	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
 
 	switch ( cd ) {
@@ -2055,7 +2067,7 @@ static skilltype GoodDouble (int fisRedouble) {
 	  return (SKILL_NONE);
 	}
 
-	return Skill (rDeltaEquity);
+	return ( pmr->d.st = Skill ( rDeltaEquity ) );
 }
 
 extern void CommandDouble( char *sz ) {
@@ -2121,8 +2133,15 @@ extern void CommandDouble( char *sz ) {
 	return;
     }
     
-  if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( FALSE ) ))
-	  return;
+    pmr = malloc( sizeof( pmr->d ) );
+    pmr->d.mt = MOVE_DOUBLE;
+    pmr->d.sz = NULL;
+    pmr->d.fPlayer = ms.fTurn;
+    pmr->d.esDouble.et = EVAL_NONE;
+    pmr->d.st = SKILL_NONE;
+
+    if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( FALSE, pmr ) ))
+      return;
 
     if( fDisplay )
 	outputf( _("%s doubles.\n"), ap[ ms.fTurn ].szName );
@@ -2135,18 +2154,12 @@ extern void CommandDouble( char *sz ) {
     }
 #endif
     
-    pmr = malloc( sizeof( pmr->d ) );
-    pmr->d.mt = MOVE_DOUBLE;
-    pmr->d.sz = NULL;
-    pmr->d.fPlayer = ms.fTurn;
-    pmr->d.esDouble.et = EVAL_NONE;
-    pmr->d.st = SKILL_NONE;
     AddMoveRecord( pmr );
     
     TurnDone();
 }
 
-static skilltype ShouldDrop (int fIsDrop) {
+static skilltype ShouldDrop (int fIsDrop, moverecord *pmr) {
 
     float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
@@ -2185,7 +2198,7 @@ static skilltype ShouldDrop (int fIsDrop) {
         SuspendInput ( &m );
 	ProgressStart( _("Considering cube action...") );
 	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
-								pec ) < 0 ) {
+                                    pec ) < 0 ) {
 	  ProgressEnd();
           ResumeInput ( &m );
 	  fAnalyseCube = fAnalyseCubeSave;
@@ -2199,9 +2212,19 @@ static skilltype ShouldDrop (int fIsDrop) {
                            aarOutput, /* whatever */
                            &es, &ms );
 
-	    
 	ProgressEnd();
         ResumeInput ( &m );
+	    
+        /* store cube decision for annotation */
+
+        ec2es ( &pmr->d.esDouble, pec );
+        memcpy ( pmr->d.aarOutput, aarOutput, 
+                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        memset ( pmr->d.aarStdDev, 0,
+                 2 * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
+        memcpy ( pmr->d.arDouble, arDouble, 4 * sizeof ( float ) );
+        pmr->d.st = SKILL_NONE;
+
 	    
 	cd = FindCubeDecision ( arDouble, aarOutput, &ci );  
 
@@ -2239,7 +2262,7 @@ static skilltype ShouldDrop (int fIsDrop) {
 	}
 
 	/* equity is for doubling player, invert for response */
-	return Skill (-rDeltaEquity);
+	return ( pmr->d.st = Skill (-rDeltaEquity) );
 }
 
 
@@ -2266,7 +2289,7 @@ extern void CommandDrop( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
-    if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( TRUE ) )) {
+    if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( TRUE, pmr ) )) {
       free ( pmr ); /* garbage collect */
       return;
     }
@@ -3137,8 +3160,15 @@ extern void CommandRedouble( char *sz ) {
 	return;
     }
     
-	if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( TRUE ) ))
-	  return;
+    pmr = malloc( sizeof( pmr->d ) );
+
+#if 0
+
+    removed until gnubg/GoodDouble handles beavers and raccoons correctly.
+
+    if ( fTutor && fTutorCube && !GiveAdvice( GoodDouble( TRUE, pmr ) ))
+      return;
+#endif
 
     if( fDisplay )
 	outputf( _("%s accepts and immediately redoubles to %d.\n"),
@@ -3147,7 +3177,6 @@ extern void CommandRedouble( char *sz ) {
     ms.fCubeOwner = !ms.fMove;
     UpdateSetting( &ms.fCubeOwner );
     
-    pmr = malloc( sizeof( pmr->d ) );
     pmr->mt = MOVE_DOUBLE;
     pmr->d.sz = NULL;
     pmr->d.fPlayer = ms.fTurn;
@@ -3233,7 +3262,7 @@ extern void CommandResign( char *sz ) {
 
 /* evaluate wisdom of not having doubled/redoubled */
 
-static skilltype ShouldDouble (void) {
+static skilltype ShouldDouble ( void ) {
 
     float arDouble[ 4 ], aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
     cubeinfo ci;
@@ -3306,6 +3335,7 @@ static skilltype ShouldDouble (void) {
 	}
 
 	return Skill (rDeltaEquity);
+
 }
 
 extern void 
@@ -3452,7 +3482,7 @@ extern void CommandTake( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
-    if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( FALSE ) )) {
+    if ( fTutor && fTutorCube && !GiveAdvice ( ShouldDrop ( FALSE, pmr ) )) {
         free ( pmr ); /* garbage collect */
         return;
     }

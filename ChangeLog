@@ -1,3 +1,13 @@
+Fri Aug  2 18:06:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Make tutor mode save cube decisions in game list.
+
+	* play.c (GoodDouble, ShouldDrop): add a moverecord to
+	parameters, and save evaluations into it.
+
+	* play.c (CommandRedouble): don't tutor on redoubles until
+	redoubles are supported.
+
 Thu Aug  1 21:22:37 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix problem with rollouts and manual rng.
