@@ -271,6 +271,12 @@ player ap[ 2 ] = {
     { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP } 
 };
 
+
+windowgeometry wgMain = { 0, 0, -1, -1 };
+windowgeometry wgAnnotation = { 250, 200, -1, -1 };
+windowgeometry wgGame = { 0, 400, -1, -1 };
+
+
 /* Usage strings */
 static char szDICE[] = "<die> <die>",
     szER[] = "evaluation|rollout", 

@@ -66,6 +66,16 @@ typedef RETSIGTYPE (*psighandler)( int );
 #define MAX_CUBE ( 1 << 12 )
 #define MAX_CUBE_STR "4096"
 
+/* position of windows: main window, game list, and annotation */
+
+typedef struct _windowgeometry {
+  gint nWidth, nHeight;
+  gint nPosX, nPosY;
+} windowgeometry;
+
+extern windowgeometry wgMain, wgGame, wgAnnotation;
+
+
 typedef struct _command {
     char *sz; /* Command name (NULL indicates end of list) */
     void ( *pf )( char * ); /* Command handler; NULL to use default

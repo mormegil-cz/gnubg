@@ -64,6 +64,8 @@
 #include "matchequity.h"
 #include "positionid.h"
 
+
+
 #define GNUBGMENURC ".gnubgmenurc"
 
 #if !GTK_CHECK_VERSION(1,3,10)
@@ -394,6 +396,32 @@ static char *ToUTF8( unsigned char *sz ) {
 #define TRANS(x) (x)
 #endif
 
+
+static void
+setWindowGeometry ( GtkWidget *pw, const windowgeometry *pwg ) {
+
+  gtk_window_set_default_size( GTK_WINDOW( pw ), 
+                               ( pwg->nWidth >= 0 ) ? pwg->nWidth : 0,
+                               ( pwg->nHeight >= 0 ) ? pwg->nHeight : 0 );
+  
+  gtk_widget_set_uposition ( pw, 
+                             ( pwg->nPosX >= 0 ) ? pwg->nPosX : 0, 
+                             ( pwg->nPosY >= 0 ) ? pwg->nPosY : 0 );
+
+}
+
+static void
+getWindowGeometry ( windowgeometry *pwg, GtkWidget *pw ) {
+
+  gdk_window_get_position ( pw->window,
+                            &pwg->nPosX, &pwg->nPosY );
+
+  gdk_window_get_size ( pw->window,
+                        &pwg->nWidth, &pwg->nHeight );
+
+}
+
+
 static void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
     
     char sz[ 2048 ], *pch;
@@ -718,8 +746,17 @@ static GtkWidget *PixmapButton( GdkColormap *pcmap, char **xpm,
 
 static void DeleteAnnotation( void ) {
 
-    fAnnotation = FALSE;
-    UpdateSetting( &fAnnotation );
+  getWindowGeometry ( &wgAnnotation, pwAnnotation );
+  fAnnotation = FALSE;
+  UpdateSetting( &fAnnotation );
+
+}
+
+static void DeleteGame( void ) {
+
+  getWindowGeometry ( &wgGame, pwGame );
+  gtk_widget_hide ( pwGame );
+
 }
 
 typedef struct _hintdata {
@@ -913,11 +950,13 @@ static void CreateAnnotationWindow( void ) {
 
     pwAnnotation = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 
+
     gtk_window_set_title( GTK_WINDOW( pwAnnotation ),
 			  "GNU Backgammon - Annotation" );
     gtk_window_set_wmclass( GTK_WINDOW( pwAnnotation ), "annotation",
 			    "Annotation" );
-    gtk_window_set_default_size( GTK_WINDOW( pwAnnotation ), 250, 200 );
+
+    setWindowGeometry ( pwAnnotation, &wgAnnotation );
 
     gtk_container_add( GTK_CONTAINER( pwAnnotation ),
 		       pwPaned = gtk_vpaned_new() );
@@ -944,6 +983,7 @@ static void CreateAnnotationWindow( void ) {
     
     gtk_signal_connect( GTK_OBJECT( pwAnnotation ), "delete_event",
 			GTK_SIGNAL_FUNC( DeleteAnnotation ), NULL );
+
 }
 
 static void CreateGameWindow( void ) {
@@ -969,7 +1009,8 @@ static void CreateGameWindow( void ) {
 			  "Game record" );
     gtk_window_set_wmclass( GTK_WINDOW( pwGame ), "gamerecord",
 			    "GameRecord" );
-    gtk_window_set_default_size( GTK_WINDOW( pwGame ), 0, 400 );
+
+    setWindowGeometry ( pwGame, &wgGame );
     
     gtk_container_add( GTK_CONTAINER( pwGame ), pvbox );
 
@@ -1054,7 +1095,8 @@ static void CreateGameWindow( void ) {
     gtk_signal_connect( GTK_OBJECT( pwGameList ), "select-row",
 			GTK_SIGNAL_FUNC( GameListSelectRow ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwGame ), "delete_event",
-			GTK_SIGNAL_FUNC( gtk_widget_hide ), NULL );
+			GTK_SIGNAL_FUNC( DeleteGame ), NULL );
+
     /* FIXME gtk_widget_hide is no good -- we want a function that returns
        TRUE to avoid running the default handler */
     /* FIXME actually we should unmap the window, and send a synthetic
@@ -1063,6 +1105,7 @@ static void CreateGameWindow( void ) {
 
 extern void ShowGameWindow( void ) {
 
+  setWindowGeometry ( pwGame, &wgGame );
     gtk_widget_show_all( pwGame );
     if( pwGame->window )
 	gdk_window_raise( pwGame->window );
@@ -2348,6 +2391,8 @@ extern void GTKSaveSettings( void ) {
 }
 
 static gboolean main_delete( GtkWidget *pw ) {
+
+  getWindowGeometry ( &wgMain, pw );
     
     UserCommand( "quit" );
     
@@ -2655,6 +2700,9 @@ extern int InitGTK( int *argc, char ***argv ) {
     gtk_widget_set_default_visual( gdk_rgb_get_visual() );
 
     pwMain = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+
+    setWindowGeometry ( pwMain, &wgMain );
+
     gtk_window_set_title( GTK_WINDOW( pwMain ), "GNU Backgammon" );
     /* FIXME add an icon */
     gtk_container_add( GTK_CONTAINER( pwMain ),
@@ -6556,13 +6604,16 @@ extern void GTKSet( void *p ) {
 	ShowBoard(); /* this is overkill, but it works */
     else if( p == &fAnnotation ) {
 	if( fAnnotation ) {
+          setWindowGeometry ( pwAnnotation, &wgAnnotation );
 	    gtk_widget_show_all( pwAnnotation );
 	    if( pwAnnotation->window )
 		gdk_window_raise( pwAnnotation->window );
-	} else
+	} else {
 	    /* FIXME actually we should unmap the window, and send a synthetic
 	       UnmapNotify event to the window manager -- see the ICCCM */
-	    gtk_widget_hide( pwAnnotation );
+          getWindowGeometry ( &wgAnnotation, pwAnnotation );
+          gtk_widget_hide( pwAnnotation );
+        }
     }
 }
 
@@ -6991,3 +7042,4 @@ static void SetCubeOwner( GtkWidget *wd, int i) {
     sprintf(szSetCubeOwner,"set cube owner %d", i);
 
 }
+

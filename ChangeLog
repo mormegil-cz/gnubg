@@ -1,3 +1,29 @@
+Sat Apr 20 19:37:12 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Save geometry of windows.
+
+	* gtkgame.c (setWindowGeometry, getWindowGeometry): set and get
+	geometry of windows.
+	* gtkgame.c (DeleteAnnotation): call getWindowGeometry
+	* gtkgame.c (DeleteGame): new function. Called on "delete_event"
+	on Game list window.
+	* gtkgame.c (CreateGameWindow, CreateAnnotation, InitGTK): call
+	setWindowGeometry. 
+	* gtkgame.c (GTKSet): call setWindowGeometry/getWindowGeometry
+	when fAnnotation is toggled.
+
+Sat Apr 20 17:08:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c (AddMoveRecord): remove call to autoAnalyseMove as it'll
+	do auto-analysis when importing/loading files.
+	* play.c (many functions): insert call to autoAnalyseMove.
+
+Sat Apr 20 15:56:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (RolloutGeneral): finish implementation of 
+	"rollout as initial position".
+	* rollout.c (QuasiRandomDice): adjust to new algorithm.
+
 Sat Apr 20 15:51:49 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c (GTKShowMatchEquityTable): Add button to invert table.
