@@ -35,9 +35,11 @@
 #include "backgammon.h"
 #include "path.h"
 
-double animStartTime = 0;
 int stopNextTime;
 int slide_move;
+double animStartTime = 0;
+
+extern double get_time();
 extern int convert_point( int i, int player );
 extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);

@@ -132,7 +132,6 @@ void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromP
 int movePath(Path* p, float d, float* pRotate, float v[3]);
 int finishedPath(Path* p);
 void updateHingeOccPos(BoardData* bd);
-double get_time();
 void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(BoardData* bd);
 void LoadTextureInfo();

@@ -577,21 +577,16 @@ extern void PauseGameClock(matchstate *pms)
 }
 
 #if WIN32
+double get_time();
+
 int gettimeofday (struct timeval *tv, void * arg)
 {
-    FILETIME file_time;
-	ULARGE_INTEGER _100ns;
-    GetSystemTimeAsFileTime (&file_time);
+	double ms = get_time();
 
-    _100ns.QuadPart = file_time.dwLowDateTime +
-			(((__int64)file_time.dwHighDateTime) << 32);
+	tv->tv_sec = (long) ms / 1000;
+	tv->tv_usec = (long) ms - (tv->tv_sec * 1000);
 
-    _100ns.QuadPart -= 0x19db1ded53e8000;
-
-    tv->tv_sec = (long) (_100ns.QuadPart / (10000 * 1000));
-    tv->tv_usec = (long) ((_100ns.LowPart % (DWORD) (10000 * 1000)) / 10);
-
-    return 0;
+	return 0;
 }
 #endif
 
