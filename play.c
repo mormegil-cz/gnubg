@@ -236,6 +236,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 	break;
 	
     case MOVE_DOUBLE:
+
 	if( pms->fMove < 0 )
 	    pms->fMove = pmr->d.fPlayer;
 	
@@ -250,6 +251,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 	    pms->fDoubled = TRUE;
 	
 	pms->fTurn = !pmr->d.fPlayer;
+
 	break;
 
     case MOVE_TAKE:
@@ -279,6 +281,7 @@ extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
 
     case MOVE_NORMAL:
 	pms->fDoubled = FALSE;
+
 #if USE_GTK
 	if( fX )
 	    game_set_old_dice( BOARD( pwBoard ), pmr->n.anRoll[ 0 ],
@@ -355,7 +358,15 @@ extern void CalculateBoard( void ) {
 	assert( pl->p );
 
 	ApplyMoveRecord( &ms, pl->p );
+
+        if ( pl->plNext && pl->plNext->p )
+          FixMatchState ( &ms, pl->plNext->p );
+
+        
     } while( pl != plLastMove );
+
+
+
 }
 
 static void FreeMoveRecord( moverecord *pmr ) {
@@ -529,6 +540,8 @@ extern void AddMoveRecord( void *pv ) {
     if( fX )
 	GTKAddMoveRecord( pmr );
 #endif
+
+    FixMatchState ( &ms, pmr );
     
     ApplyMoveRecord( &ms, pmr );
     
@@ -2135,6 +2148,7 @@ static void DumpGameList(char *szOut, list *plGame) {
     InitBoard( anBoard );
     for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
+
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
 	    /* FIXME */
@@ -2591,6 +2605,7 @@ extern void ChangeGame( list *plGameNew ) {
 
 	for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
 	    GTKAddMoveRecord( pl->p );
+            FixMatchState ( &ms, pl->p );
 	    ApplyMoveRecord( &ms, pl->p );
 	}
 
@@ -2715,6 +2730,7 @@ extern void CommandNext( char *sz ) {
     
     while( n-- && plLastMove->plNext->p ) {
 	plLastMove = plLastMove->plNext;
+        FixMatchState ( &ms, plLastMove->p );
 	ApplyMoveRecord( &ms, plLastMove->p );
     }
     
@@ -3315,3 +3331,34 @@ SetMatchID ( const char *szMatchID ) {
 
 
 }
+
+
+extern void
+FixMatchState ( matchstate *pms, const moverecord *pmr ) {
+
+  switch ( pmr->mt ) {
+  case MOVE_NORMAL:
+    if ( pms->fTurn != pmr->n.fPlayer ) {
+      printf ( "fix move normal %d %d %d...\n",
+               pms->fMove, pms->fTurn, pmr->n.fPlayer );
+      /* previous moverecord is missing */
+      SwapSides ( pms->anBoard );
+      pms->fMove = pms->fTurn = pmr->n.fPlayer;
+    }
+    break;
+  case MOVE_DOUBLE:
+    if ( pms->fTurn != pmr->d.fPlayer ) {
+      /* previous record is missing: this must be an normal double */
+      printf ( "fix move doubloe...\n");
+      SwapSides ( pms->anBoard );
+      pms->fMove = pms->fTurn = pmr->d.fPlayer;
+    }
+    break;
+  default:
+    /* no-op */
+    break;
+  }
+    
+}
+
+
