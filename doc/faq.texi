@@ -199,29 +199,9 @@ file @file{INSTALL}.
 @node What software do I need for compiling under @emph{MS Windows}?
 @subsection  What software do I need for compiling under @emph{MS Windows}?
 
-Download the following files:
-
-@itemize
-@item @uref{ftp://alpha.gnu.org/gnu/gnubg/snapshots/,, GNU Backgammon snapshots}
-@item
-@uref{ftp://ftp.xraylith.wisc.edu/pub/khan/gnu-win32/mingw32/gcc-2.95.2/gcc-2.95.2-msvcrt.exe,,
-The GNU-Compiler for @emph{MS Windows}}
-@item @uref{http://www.gimp.org/~tml/gimp/win32/downloads.html,, The
-following files can be found here:}
-@itemize
-@item (glib-*.zip)
-@item glib-dev-*.zip
-@item (libiconv-*.zip)
-@item libiconv-dev-*.zip
-@item (gtk+-*.zip)
-@item gtk+-dev-*.zip
-@end itemize
-@item @uref{http://home.online.no/~oeysteij/Makefile,, Makefile}
-@end itemize
-
-Install everything and put @file{Makefile} into the source tree of GNU
-Backgammon. At last run your compiler.
-
+Nardy Pillards has published a fine instruction guide at
+@uref{http://users.skynet.be/bk228456/gnubg_new_build.html,, Windows-Build}.
+Go to this page and follow the steps shown there.
 
 @node It does not compile.
 @subsection It does not compile.
