@@ -763,9 +763,8 @@ GetContent ( cubehintdata *pchd ) {
                             pchd->aarStdDev,
                             pchd->pes,
                             &ci,
-                            FALSE, FALSE,
-                            SKILL_NONE, SKILL_NONE,
-                            FALSE );
+                            -1, -1,
+                            SKILL_NONE, SKILL_NONE );
 
   return pc;
 

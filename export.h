@@ -143,8 +143,7 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      evalsetup *pes, cubeinfo *pci,
                      int fDouble, int fTake,
                      skilltype stDouble,
-                     skilltype stTake,
-                     const int fPrintAlerts );
+                     skilltype stTake );
 
 extern char *
 OutputMoneyEquity ( const float ar[], const int f );

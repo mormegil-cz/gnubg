@@ -2010,9 +2010,10 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   if ( pes->et == EVAL_NONE ) return; /* no evaluation */
   if ( ! GetDPEq ( NULL, NULL, pci ) ) return; /* cube not available */
 
-  fActual = fDouble;
+  fActual = fDouble > 0;
   fClose = isCloseCubedecision ( arDouble ); 
-  fMissed = isMissedDouble ( arDouble, aarOutput, fDouble, pci );
+  fMissed = 
+    fDouble > -1 && isMissedDouble ( arDouble, aarOutput, fDouble, pci );
 
   fDisplay = 
     ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
@@ -2054,7 +2055,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
 
-  if ( fTake && r > 0.0f ) {
+  if ( fTake > 0 && r > 0.0f ) {
 
     fAnno = TRUE;
 
@@ -2076,7 +2077,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
 
-  if ( fDouble && ! fTake && r > 0.0f ) {
+  if ( fDouble > 0 && ! fTake && r > 0.0f ) {
 
     fAnno = TRUE;
 
@@ -2102,7 +2103,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   else
     r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ];
 
-  if ( fDouble && r > 0.0f ) {
+  if ( fDouble > 0 && r > 0.0f ) {
 
     fAnno = TRUE;
 
@@ -2357,7 +2358,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     HTMLPrintCubeAnalysisTable ( pf, pmr->n.arDouble, 
                                  pmr->n.aarOutput, pmr->n.aarStdDev,
                                  pmr->n.fPlayer,
-                                 &pmr->n.esDouble, &ci, FALSE, FALSE,
+                                 &pmr->n.esDouble, &ci, FALSE, -1,
                                  pmr->n.stCube, SKILL_NONE, hecss );
 
     break;
@@ -2367,7 +2368,7 @@ HTMLPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     HTMLPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
                                  pmr->d.aarOutput, pmr->d.aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, FALSE,
+                                 &pmr->d.esDouble, &ci, TRUE, -1,
                                  pmr->d.st, SKILL_NONE, hecss );
 
     break;

@@ -699,8 +699,7 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                      evalsetup *pes, cubeinfo *pci,
                      int fDouble, int fTake,
                      skilltype stDouble,
-                     skilltype stTake,
-                     const int fPrintAlerts ) {
+                     skilltype stTake ) {
 
   const char *aszCube[] = {
     NULL, 
@@ -732,120 +731,117 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   FindCubeDecision ( arDouble, aarOutput, pci );
 
-  if ( fPrintAlerts ) {
+  /* print alerts */
 
-    /* print alerts */
+  fClose = isCloseCubedecision ( arDouble ); 
+  fMissed = 
+    fDouble > -1 && isMissedDouble ( arDouble, aarOutput, fDouble, pci );
 
-    fClose = isCloseCubedecision ( arDouble ); 
-    fMissed = isMissedDouble ( arDouble, aarOutput, fDouble, pci );
+  /* print alerts */
 
-    /* print alerts */
+  if ( fMissed ) {
 
-    if ( fMissed ) {
+    fAnno = TRUE;
 
-      fAnno = TRUE;
+    /* missed double */
 
-      /* missed double */
-
-      sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
-                _("Alert: missed double"),
-                OutputEquityDiff ( arDouble[ OUTPUT_NODOUBLE ], 
-                                   ( arDouble[ OUTPUT_TAKE ] > 
-                                     arDouble[ OUTPUT_DROP ] ) ? 
-                                   arDouble[ OUTPUT_DROP ] : 
-                                   arDouble[ OUTPUT_TAKE ],
-                                   pci ) );
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+              _("Alert: missed double"),
+              OutputEquityDiff ( arDouble[ OUTPUT_NODOUBLE ], 
+                                 ( arDouble[ OUTPUT_TAKE ] > 
+                                   arDouble[ OUTPUT_DROP ] ) ? 
+                                 arDouble[ OUTPUT_DROP ] : 
+                                 arDouble[ OUTPUT_TAKE ],
+                                 pci ) );
     
-      if ( stDouble != SKILL_NONE )
-        sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
-                  gettext ( aszSkillType[ stDouble ] ) );
+    if ( stDouble != SKILL_NONE )
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stDouble ] ) );
     
+  }
+
+  r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
+
+  if ( fTake > 0 && r > 0.0f ) {
+
+    fAnno = TRUE;
+
+    /* wrong take */
+
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+              _("Alert: wrong take"),
+              OutputEquityDiff ( arDouble[ OUTPUT_DROP ],
+                                 arDouble[ OUTPUT_TAKE ],
+                                 pci ) );
+
+    if ( stTake != SKILL_NONE )
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stTake ] ) );
+    
+  }
+
+  r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
+
+  if ( fDouble > 0 && ! fTake && r > 0.0f ) {
+
+    fAnno = TRUE;
+
+    /* wrong pass */
+
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+              _("Alert: wrong pass"),
+              OutputEquityDiff ( arDouble[ OUTPUT_TAKE ],
+                                 arDouble[ OUTPUT_DROP ],
+                                 pci ) );
+
+    if ( stTake != SKILL_NONE )
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stTake ] ) );
+    
+  }
+
+
+  if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
+    r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ];
+  else
+    r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ];
+
+  if ( fDouble > 0 && r > 0.0f ) {
+
+    fAnno = TRUE;
+
+    /* wrong double */
+
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
+              _("Alert: wrong double"),
+              OutputEquityDiff ( ( arDouble[ OUTPUT_TAKE ] > 
+                                   arDouble[ OUTPUT_DROP ] ) ? 
+                                 arDouble[ OUTPUT_DROP ] : 
+                                 arDouble[ OUTPUT_TAKE ],
+                                 arDouble[ OUTPUT_NODOUBLE ], 
+                                 pci ) );
+
+    if ( stDouble != SKILL_NONE )
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stDouble ] ) );
+
+  }
+
+  if ( ( stDouble != SKILL_NONE || stTake != SKILL_NONE ) && ! fAnno ) {
+    
+    if ( stDouble != SKILL_NONE ) {
+      sprintf ( pc = strchr ( sz, 0 ), _("Alert: double decision marked %s"),
+                gettext ( aszSkillType[ stDouble ] ) );
+      strcat ( sz, "\n" );
     }
 
-    r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
-
-    if ( fTake && r > 0.0f ) {
-
-      fAnno = TRUE;
-
-      /* wrong take */
-
-      sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
-                _("Alert: wrong take"),
-                OutputEquityDiff ( arDouble[ OUTPUT_DROP ],
-                                   arDouble[ OUTPUT_TAKE ],
-                                   pci ) );
-
-      if ( stTake != SKILL_NONE )
-        sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
-                  gettext ( aszSkillType[ stTake ] ) );
-    
+    if ( stTake != SKILL_NONE ) {
+      sprintf ( pc = strchr ( sz, 0 ), _("Alert: take decision marked %s"),
+                gettext ( aszSkillType[ stTake ] ) );
+      strcat ( sz, "\n" );
     }
 
-    r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
-
-    if ( fDouble && ! fTake && r > 0.0f ) {
-
-      fAnno = TRUE;
-
-      /* wrong pass */
-
-      sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
-                _("Alert: wrong pass"),
-                OutputEquityDiff ( arDouble[ OUTPUT_TAKE ],
-                                   arDouble[ OUTPUT_DROP ],
-                                   pci ) );
-
-      if ( stTake != SKILL_NONE )
-        sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
-                  gettext ( aszSkillType[ stTake ] ) );
-    
-    }
-
-
-    if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-      r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_DROP ];
-    else
-      r = arDouble[ OUTPUT_NODOUBLE ] - arDouble[ OUTPUT_TAKE ];
-
-    if ( fDouble && r > 0.0f ) {
-
-      fAnno = TRUE;
-
-      /* wrong double */
-
-      sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
-                _("Alert: wrong double"),
-                OutputEquityDiff ( ( arDouble[ OUTPUT_TAKE ] > 
-                                     arDouble[ OUTPUT_DROP ] ) ? 
-                                   arDouble[ OUTPUT_DROP ] : 
-                                   arDouble[ OUTPUT_TAKE ],
-                                   arDouble[ OUTPUT_NODOUBLE ], 
-                                   pci ) );
-
-      if ( stDouble != SKILL_NONE )
-        sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
-                  gettext ( aszSkillType[ stDouble ] ) );
-
-    }
-
-    if ( ( stDouble != SKILL_NONE || stTake != SKILL_NONE ) && ! fAnno ) {
-    
-      if ( stDouble != SKILL_NONE ) {
-        sprintf ( pc = strchr ( sz, 0 ), _("Alert: double decision marked %s"),
-                  gettext ( aszSkillType[ stDouble ] ) );
-        strcat ( sz, "\n" );
-      }
-
-      if ( stTake != SKILL_NONE ) {
-        sprintf ( pc = strchr ( sz, 0 ), _("Alert: take decision marked %s"),
-                  gettext ( aszSkillType[ stTake ] ) );
-        strcat ( sz, "\n" );
-      }
-
-    }
-
-  } /* fPrintAlerts */
+  }
 
   /* header */
 
@@ -1022,8 +1018,7 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                                pes,
                                pci,
                                fDouble, fTake, 
-                               stDouble, stTake,
-                               TRUE ), 
+                               stDouble, stTake ),
           pf );
 
 }
@@ -1059,7 +1054,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     TextPrintCubeAnalysisTable ( pf, pmr->n.arDouble, 
                                  pmr->n.aarOutput, pmr->n.aarStdDev,
                                  pmr->n.fPlayer,
-                                 &pmr->n.esDouble, &ci, FALSE, FALSE,
+                                 &pmr->n.esDouble, &ci, FALSE, -1,
                                  pmr->n.stCube, SKILL_NONE );
 
     break;
@@ -1069,7 +1064,7 @@ TextPrintCubeAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
     TextPrintCubeAnalysisTable ( pf, pmr->d.arDouble, 
                                  pmr->d.aarOutput, pmr->d.aarStdDev,
                                  pmr->d.fPlayer,
-                                 &pmr->d.esDouble, &ci, TRUE, FALSE,
+                                 &pmr->d.esDouble, &ci, TRUE, -1,
                                  pmr->d.st, SKILL_NONE );
 
     break;
