@@ -716,18 +716,21 @@ update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
   int anPip[ 2 ];
   char *pc;
+  int f;
 
   if ( bd->show_pips ) {
 
     /* show pip count */
 
     PipCount ( points, anPip );
+
+    f = ( bd->turn > 0 );
     
-    pc = g_strdup_printf ( "%d", anPip[ 0 ] );
+    pc = g_strdup_printf ( "%d", anPip[ !f ] );
     gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), pc );
     g_free ( pc );
     
-    pc = g_strdup_printf ( "%d", anPip[ 1 ] );
+    pc = g_strdup_printf ( "%d", anPip[ f ] );
     gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), pc );
     g_free ( pc );
 

@@ -1,3 +1,8 @@
+Sun Sep 22 21:37:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkboard.c (update_pipcount): pip count was swapped.
+	(reported by Øystein)
+
 Sun Sep 22 20:45:02 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtktheory.c (TheoryUpdated): show live cube take point
