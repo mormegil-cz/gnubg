@@ -185,9 +185,9 @@ int fCheat = FALSE;
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
 
-char aaszPaths[ PATH_MET + 1 ][ 2 ][ 255 ];
+char aaszPaths[ NUM_PATHS ][ 2 ][ 255 ];
 char *szCurrentFileName = NULL;
-char *aszExtensions [ PATH_MET + 1 ] = {
+char *aszExtensions [ NUM_PATHS ] = {
   "eps",
   "gam",
   "html",
@@ -200,7 +200,8 @@ char *aszExtensions [ PATH_MET + 1 ] = {
   "sgf",
   "sgg",
   "txt",
-  "xml"
+  "xml",
+  "tmg"
 };
 
 int fNextTurn = FALSE, fComputing = FALSE;
@@ -662,6 +663,8 @@ command cER = {
       &cFilename },
     { "sgg", CommandImportSGG, 
       N_("Import an SGG match"), szFILENAME, &cFilename },
+    { "tmg", CommandImportTMG, 
+      N_("Import an TMG match"), szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acList[] = {
     { "game", CommandListGame, N_("Show the moves made in this game"), NULL,
@@ -1186,6 +1189,9 @@ command cER = {
     szFILENAME, &cFilename },
   { "met", CommandSetPathMET,
     N_("Set default path for loading match equity files"), 
+    szFILENAME, &cFilename },
+  { "tmg", CommandSetPathTMG,
+    N_("Set default path for loading TrueMoneyGames .tmg files"), 
     szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetPriority[] = {
@@ -3950,6 +3956,7 @@ extern void CommandImportOldmoves( char *sz ) {
 	outputerr( sz );
 }
 
+
 extern void CommandImportSGG( char *sz ) {
 
     FILE *pf;
@@ -3958,7 +3965,7 @@ extern void CommandImportSGG( char *sz ) {
     
     if( !sz || !*sz ) {
 	outputl( _("You must specify an SGG file to import (see `help "
-		 "import oldmoves').") );
+		 "import sgg').") );
 	return;
     }
 
@@ -3966,6 +3973,26 @@ extern void CommandImportSGG( char *sz ) {
 	ImportSGG( pf, sz );
 	fclose( pf );
         setDefaultFileName ( sz, PATH_SGG );
+    } else
+	outputerr( sz );
+}
+
+extern void CommandImportTMG( char *sz ) {
+
+    FILE *pf;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify an TMG file to import (see `help "
+		 "import tmg').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	ImportTMG( pf, sz );
+	fclose( pf );
+        //setDefaultFileName ( sz, PATH_SGG );
     } else
 	outputerr( sz );
 }
@@ -4682,7 +4709,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     /* paths */
 
-    for ( i = 0; i <= PATH_MET; i++ )
+    for ( i = 0; i < NUM_PATHS; i++ )
       if ( strlen ( aaszPaths[ i ][ 0 ] ) )
         fprintf ( pf,
                   "set path %s \"%s\"\n",
@@ -6331,7 +6358,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 
     /* initialise paths */
 
-    for ( i = 0; i <= PATH_MET; i++ )
+    for ( i = 0; i < NUM_PATHS; i++ )
       for ( j = 0; j < 2; j++ )
         strcpy ( aaszPaths[ i ][ j ], "" );
 
