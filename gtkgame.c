@@ -305,11 +305,14 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
 static void SaveWeights( gpointer *p, guint n, GtkWidget *pw );
 static void SetAlpha( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw );
+static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw );
+static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw );
 static void SetAnneal( gpointer *p, guint n, GtkWidget *pw );
 static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
 static void SetCache( gpointer *p, guint n, GtkWidget *pw );
 static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
-static void SetEval( gpointer *p, guint n, GtkWidget *pw );
+static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw );
+static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
@@ -1841,6 +1844,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/Analysis/_Dice rolls", NULL, Command,
 	  CMD_SET_ANALYSIS_LUCK, "<CheckItem>" },
 	{ "/_Settings/Analysis/Move limit...", NULL, SetAnalysis, 0, NULL },
+	{ "/_Settings/Analysis/Evaluation", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/Analysis/Evaluation/Chequer play...", NULL, 
+          SetAnalysisEvalChequer, 0, NULL },
+	{ "/_Settings/Analysis/Evaluation/Cube decisions...", NULL, 
+          SetAnalysisEvalCube, 0, NULL },
 	{ "/_Settings/Appearance...", NULL, Command, CMD_SET_APPEARANCE,
 	  NULL },
 	{ "/_Settings/_Automatic", NULL, NULL, 0, "<Branch>" },
@@ -1884,7 +1892,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "<CheckItem>" },
 	{ "/_Settings/Doubling cube", NULL, Command, CMD_SET_CUBE_USE,
 	  "<CheckItem>" },
-	{ "/_Settings/_Evaluation...", NULL, SetEval, 0, NULL },
+	{ "/_Settings/_Evaluation", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Evaluation/Chequer play...", NULL, SetEvalChequer, 0,\
+                   NULL },
+	{ "/_Settings/_Evaluation/Cube decisions...", NULL, SetEvalCube, 0,\
+                   NULL },
         { "/_Settings/_Egyptian rule", NULL, Command, CMD_SET_EGYPTIAN,
           "<CheckItem>" },
 	{ "/_Settings/_Jacoby rule", NULL, Command, CMD_SET_JACOBY,
@@ -3000,7 +3012,10 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     outputresume();
 }
 
-static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
+static void SetAnalysisEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
+
+    /* FIXME Consider this code as a temporary hack, we should later
+       make a better dialog box for setting all analysis options */
 
     evalcontext ec;
     GtkWidget *pwDialog, *pwEval;
@@ -3010,17 +3025,17 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
 
     pwEval = EvalWidget( &ec, &fOK );
     
-    pwDialog = CreateDialog( "GNU Backgammon - Evaluations", TRUE,
-			     GTK_SIGNAL_FUNC( EvalOK ), pwEval );
+    pwDialog = CreateDialog( "GNU Backgammon - Analysis cube decisions", TRUE,
+                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwEval );
+                       pwEval );
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
+                                  GTK_WINDOW( pwMain ) );
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
-			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
     gtk_widget_show_all( pwDialog );
 
@@ -3029,16 +3044,135 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
     GTKAllowStdin();
 
     if( fOK ) {
-	/* FIXME this is a temporary hack for compatibility with the
-	   old evalsetup... the interface should be extended to allow
-	   different settings for chequer and cube evaluations, and
-	   rollouts. */
-	SetEvalCommands( "set evaluation chequer eval", &ec,
-			 &esEvalChequer.ec );
-	SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );
+        /* FIXME this is a temporary hack for compatibility with the
+           old evalsetup... the interface should be extended to allow
+           different settings for chequer and cube evaluations, and
+           rollouts. */
+        SetEvalCommands( "set analysis cubedecision eval", &ec,
+                         &esEvalChequer.ec );
+    /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
     }
 }
 
+static void SetAnalysisEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
+
+    /* FIXME Consider this code as a temporary hack, we should later
+       make a better dialog box for setting all analysis options */
+
+    evalcontext ec;
+    GtkWidget *pwDialog, *pwEval;
+    int fOK;
+    
+    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+
+    pwEval = EvalWidget( &ec, &fOK );
+    
+    pwDialog = CreateDialog( "GNU Backgammon - Analysis chequer play", TRUE,
+                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                       pwEval );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    if( fOK ) {
+        /* FIXME this is a temporary hack for compatibility with the
+           old evalsetup... the interface should be extended to allow
+           different settings for chequer and cube evaluations, and
+           rollouts. */
+        SetEvalCommands( "set analysis chequer eval", &ec,
+                         &esEvalChequer.ec );
+    /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
+    }
+}
+
+static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
+
+    evalcontext ec;
+    GtkWidget *pwDialog, *pwEval;
+    int fOK;
+    
+    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+
+    pwEval = EvalWidget( &ec, &fOK );
+    
+    pwDialog = CreateDialog( "GNU Backgammon - Chequer play", TRUE,
+                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                       pwEval );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    if( fOK ) {
+        /* FIXME this is a temporary hack for compatibility with the
+           old evalsetup... the interface should be extended to allow
+           different settings for chequer and cube evaluations, and
+           rollouts. */
+        SetEvalCommands( "set evaluation chequer eval", &ec,
+                         &esEvalChequer.ec );
+    /*  SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );*/
+    }
+}
+
+static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
+
+    evalcontext ec;
+    GtkWidget *pwDialog, *pwEval;
+    int fOK;
+    
+    memcpy( &ec, &esEvalChequer.ec, sizeof ec );
+
+    pwEval = EvalWidget( &ec, &fOK );
+    
+    pwDialog = CreateDialog( "GNU Backgammon - Cube decisions", TRUE,
+                             GTK_SIGNAL_FUNC( EvalOK ), pwEval );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                       pwEval );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                        GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+
+    if( fOK ) {
+        /* FIXME this is a temporary hack for compatibility with the
+           old evalsetup... the interface should be extended to allow
+           different settings for chequer and cube evaluations, and
+           rollouts. */
+     /*   SetEvalCommands( "set evaluation chequer eval", &ec,
+                         &esEvalChequer.ec ); */
+        SetEvalCommands( "set evaluation cube eval", &ec, &esEvalCube.ec );
+    }
+}
 typedef struct _playerswidget {
     int *pfOK;
     player *ap;
