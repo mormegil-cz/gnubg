@@ -1,7 +1,12 @@
+Wed Jan 21 21:17:12 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* bearoff.c (GetDistCompressed): fix stupid stupid stupid bug. 
+	(reported by several users)
+
 Tue Jan 20 00:22:21 CET 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Prerelease 0.14.1
-	
+
 	* configure.in: bump to 0.14.1-devel
 
 Tue Jan 20 00:02:30 CET 2004  Joern Thyssen  <jth@gnubg.org>
