@@ -51,7 +51,10 @@
 #include <unistd.h>
 #endif
 #ifdef SIGIO
-#include <stropts.h>
+  #ifdef HAVE_STROPTS_H
+  #include <stropts.h>
+#endif
+
 #endif
 
 #if HAVE_ESD
