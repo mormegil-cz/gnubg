@@ -22,9 +22,14 @@
 #ifndef _PYTHONMODULE_H_
 #define _PYTHONMODULE_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #if USE_PYTHON
 
 #include <Python.h>
+
 extern PyMethodDef gnubgMethods[];
 
 extern void
@@ -36,4 +41,3 @@ PythonShutdown();
 #endif /* USE_PYTHON */
 
 #endif /* _PYTHONMODULE_H_ */
-
