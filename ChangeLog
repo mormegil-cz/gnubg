@@ -1,3 +1,10 @@
+Sun Sep 22 22:47:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* import.c (ImportSGG, ImportSGGGame): swap players
+	when reading SGG files as the GG client has ourselves
+	as player 0 instead of player 1. 
+	(reported by Albert Silver)
+
 Sun Sep 22 21:37:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkboard.c (update_pipcount): pip count was swapped.

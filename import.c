@@ -1024,7 +1024,12 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
                     szComment = NULL;
 
 		} else {
-		    if( ( fPlayer = *pch == '\t' ) )
+
+                  /* The GamesGrid client usually saves the opponent as
+                     player 1. Since we generally want ourselves to
+                     be player 1 we negate ( *pch == '\t' ) */
+
+                    if( ! ( fPlayer = ! ( *pch == '\t' ) ) )
 			pch++;
 
 		    if( *pch >= '1' && *pch <= '6' && pch[ 1 ] >= '1' &&
@@ -1240,8 +1245,11 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     FreeMatch();
     ClearMatch();
 
-    strcpy( ap[ 0 ].szName, sz0 );
-    strcpy( ap[ 1 ].szName, sz1 );
+    /* Swap player names as the GamesGrid clients have ourselves as
+       player 0 and we want ourselves as player 1 */
+
+    strcpy( ap[ 0 ].szName, sz1 );
+    strcpy( ap[ 1 ].szName, sz0 );
     
     while( fgets( sz, 80, pf ) ) {
 	if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
