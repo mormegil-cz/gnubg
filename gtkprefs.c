@@ -388,8 +388,6 @@ void HingeChanged (GtkWidget *pw)
 static GtkWidget *ChequerPrefs3d( BoardData *bd)
 {
     GtkWidget *pw, *pwx, *vbox, *pwhbox, *dtPieceTypeFrame;
-	GList *glist;
-	int i;
 
     pwx = gtk_hbox_new ( FALSE, 0 );
 
