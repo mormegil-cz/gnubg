@@ -263,6 +263,8 @@ static int anEscapes1[ 0x1000 ];
 
 static neuralnet nnContact, nnRace, nnCrashed;
 static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
+static int fBearoffHugeOSR = -1;
+static int nBearoffHugeOSRPoints = -1;
 static int fBearoffHeuristic;
 static cache cEval;
 static int cCache;
@@ -624,7 +626,7 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 	    anBoard[ n - anDice[ i ] ]++;
     }
 
-    return PositionBearoff( anBoard );
+    return PositionBearoff( anBoard, 6 );
 }
 
 static void GenerateBearoff( unsigned char *p, int nId ) {
@@ -637,7 +639,7 @@ static void GenerateBearoff( unsigned char *p, int nId ) {
     
     for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
 	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
-	    PositionFromBearoff( anBoard, nId );
+	    PositionFromBearoff( anBoard, nId, 6 );
 	    iBest = HeuristicBearoff( anBoard, anRoll );
 
 	    assert( iBest >= 0 );
@@ -711,9 +713,27 @@ EvalNewWeights(int nSize)
   return 0;
 }
 
+
+extern int
+EvalShutdown ( void ) {
+
+  /* close bearoff databases */
+
+  if ( fBearoffHugeOSR >= 0 ) {
+
+    if ( close ( fBearoffHugeOSR ) < 0 ) 
+      perror ( "huge bearoff database" );
+
+  }
+
+  return 0;
+
+}
+
 extern int
 EvalInitialise( char *szWeights, char *szWeightsBinary,
-		char *szDatabase, char *szDir, int nSize,
+		char *szDatabase, char *szHugeOSRDatabase, 
+                char *szDir, int nSize,
 		void (*pfProgress)( int ) )
 {
     FILE *pfWeights;
@@ -747,6 +767,39 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
     pBearoff1 = NULL;
     
     if( szDatabase ) {
+
+        /* open huge bearoff database */
+
+      if ( ( fBearoffHugeOSR = PathOpen ( szHugeOSRDatabase, 
+                                       szDir, BINARY ) ) >= 0 ) {
+
+        char sz[ 21 ];
+
+        if ( read ( fBearoffHugeOSR, sz, 21 ) < 21 ) {
+          if ( errno )
+            perror ( szHugeOSRDatabase );
+          else {
+            fprintf ( stderr, _("%s: incomplete bearoff database\n"),
+                      szHugeOSRDatabase );
+            close ( fBearoffHugeOSR );
+            fBearoffHugeOSR = -1;
+          }
+        }
+        else {
+          nBearoffHugeOSRPoints = atoi ( sz );
+          if ( nBearoffHugeOSRPoints <= 6 || nBearoffHugeOSRPoints >= 24 ) {
+            fprintf ( stderr, _("%s: incomplete bearoff database\n"),
+                      szHugeOSRDatabase );
+            close ( fBearoffHugeOSR );
+            fBearoffHugeOSR = -1;
+          }
+        }
+
+
+      }
+
+      /* open "small" bearoff databases */
+
 	if( ( h = PathOpen( szDatabase, szDir, BINARY ) ) >= 0 ) {
 #if HAVE_MMAP
 	    struct stat st;
@@ -1813,7 +1866,7 @@ extern void SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
     if( !fContact ) {
         for( i = 0; i < 2; i++ ) 
             if( anBack[ i ] < 6 && pBearoff1 )
-		anMaxTurns[ i ] = MaxTurns( PositionBearoff( anBoard[ i ] ) );
+		anMaxTurns[ i ] = MaxTurns( PositionBearoff( anBoard[ i ], 6 ) );
 	    else
 		anMaxTurns[ i ] = anCross[ i ] * 2;
       
@@ -1956,15 +2009,33 @@ ClassifyPosition( int anBoard[ 2 ][ 25 ] )
 
     return CLASS_CONTACT;
   }
-  else if( nBack > 5 || nOppBack > 5 || !pBearoff1 )
-    return CLASS_RACE;
+  else {
 
-  if( PositionBearoff( anBoard[ 0 ] ) > 923 ||
-      PositionBearoff( anBoard[ 1 ] ) > 923 ||
-      !pBearoff2 )
+    if ( fBearoffHugeOSR >= 0 ) {
+      if ( nBack > nBearoffHugeOSRPoints - 1 ||
+           nOppBack > nBearoffHugeOSRPoints - 1 )
+        return CLASS_RACE;
+    }
+    else if( nBack > 5 || nOppBack > 5 || !pBearoff1 )
+      return CLASS_RACE;
+
+  }
+
+
+  if ( ( nBack < 5 && nOppBack < 5 ) || ( fBearoffHugeOSR < 0 ) ) {
+    /* small bear off database */
+
+    if( PositionBearoff( anBoard[ 0 ], 6 ) > 923 ||
+        PositionBearoff( anBoard[ 1 ], 6 ) > 923 ||
+        !pBearoff2 )
+      return CLASS_BEAROFF1;
+    
     return CLASS_BEAROFF1;
+    //return CLASS_BEAROFF2;
+  }
+  else
+    return CLASS_BEAROFF_HUGEOSR;
 
-  return CLASS_BEAROFF2;
 }
 
 static void
@@ -1974,8 +2045,8 @@ EvalBearoff2( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int ignore*/ )
 
   {                                                      assert( pBearoff2 ); }
   
-  nOpp = PositionBearoff( anBoard[ 0 ] );
-  n = PositionBearoff( anBoard[ 1 ] );
+  nOpp = PositionBearoff( anBoard[ 0 ], 6 );
+  n = PositionBearoff( anBoard[ 1 ], 6 );
   
   arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] =
     arOutput[ OUTPUT_WINBACKGAMMON ] =
@@ -2229,6 +2300,78 @@ setGammonProb(int anBoard[ 2 ][ 25 ], int bp0, int bp1,
   }
 }  
 
+
+static void
+HugeOSR ( const int n, unsigned short int aProb[ 32 ] ) {
+
+  unsigned char ac[ 64 ];
+  int i;
+  off_t iOffset = 21 + n * 64;
+
+  if ( lseek ( fBearoffHugeOSR, iOffset, SEEK_SET ) < 0 ) {
+    perror ( "huge OSR bearoff database" );
+    return;
+  }
+
+  if ( read ( fBearoffHugeOSR, ac, 64 ) < 64 ) {
+    if ( errno )
+      perror ( "huge OSR bearoff database" );
+    else
+      fprintf ( stderr, "error reading huge OSR bearoff database" );
+    return;
+  }
+
+  for ( i = 0; i < 32; ++i )
+    aProb[ i ] = ac[ 2 * i ] | ac[ 2 * i + 1 ] << 8;
+
+}
+
+
+extern unsigned long
+EvalBearoffHugeOSRFull ( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
+
+  int n, nOpp;
+  int i, j;
+  unsigned short int aaProb[ 2 ][ 32 ];
+  unsigned long x;
+
+  assert ( fBearoffHugeOSR >= 0 );
+
+  nOpp = PositionBearoff ( anBoard[ 0 ], nBearoffHugeOSRPoints );
+  n = PositionBearoff ( anBoard[ 1 ], nBearoffHugeOSRPoints );
+
+  arOutput[ OUTPUT_WINGAMMON ] =
+    arOutput[ OUTPUT_LOSEGAMMON ] =
+    arOutput[ OUTPUT_WINBACKGAMMON ] =
+    arOutput[ OUTPUT_LOSEBACKGAMMON ] = 0.0;
+
+  HugeOSR ( n, aaProb[ 0 ] );
+  HugeOSR ( nOpp, aaProb[ 1 ] );
+
+  x = 0;
+  for( i = 0; i < 32; i++ )
+    for( j = i; j < 32; j++ )
+      x += aaProb[ 0 ][ i ] * aaProb[ 1 ][ j ];
+
+  arOutput[ OUTPUT_WIN ] = x / ( 65535.0 * 65535.0 );
+
+  x = 0;
+  for( i = 0; i < 32; i++ )
+    x += i * aaProb[ 1 ][ i ];
+
+  return 0;
+
+}
+
+extern void
+EvalBearoffHugeOSR( int anBoard[ 2 ][ 25 ], 
+                    float arOutput[] /*, int ignore */ )
+{
+  EvalBearoffHugeOSRFull( anBoard, arOutput );
+}
+
+
+
 extern unsigned long
 EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] )
 {
@@ -2238,8 +2381,8 @@ EvalBearoff1Full( int anBoard[ 2 ][ 25 ], float arOutput[] )
 
   assert( pBearoff1 );
     
-  nOpp = PositionBearoff( anBoard[ 0 ] );
-  n = PositionBearoff( anBoard[ 1 ] );
+  nOpp = PositionBearoff( anBoard[ 0 ], 6 );
+  n = PositionBearoff( anBoard[ 1 ], 6 );
 
   if( n > 38760 || nOpp > 38760 ) {
     /* a player has no chequers off; gammons are possible */
@@ -2430,8 +2573,8 @@ EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
 	  dummy[1-side][i] = 0;
 	}
 
-	if( pBearoff2 && PositionBearoff( dummy[ 0 ] ) < 924 &&
-	    PositionBearoff( dummy[ 1 ] ) < 924 )
+	if( pBearoff2 && PositionBearoff( dummy[ 0 ], 6 ) < 924 &&
+	    PositionBearoff( dummy[ 1 ], 6 ) < 924 )
 	    EvalBearoff2( dummy, p );
 	else if( pBearoff1 )
 	    EvalBearoff1( dummy, p );
@@ -2556,7 +2699,8 @@ EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm*/ ) {
 }
 
 static classevalfunc acef[ N_CLASSES ] = {
-    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalCrashed, EvalContact
+    EvalOver, EvalBearoff2, EvalBearoff1, EvalBearoffHugeOSR, 
+    EvalRace, EvalCrashed, EvalContact
 };
 
 static float Noise( evalcontext *pec, int anBoard[ 2 ][ 25 ], int iOutput ) {
@@ -2771,7 +2915,7 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     }
   } else {
     /* at leaf node; use static evaluation */
-      
+    
     acef[ pc ]( anBoard, arOutput );
 
     if( pec->rNoise )
@@ -3728,21 +3872,14 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
 	strcat( pchOutput, _("(single)\n") );
 }
 
-static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
-
-    assert( pBearoff2 );
-    
-    /* no-op -- nothing much we can say */
-}
-
 static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
     int i, n, nOpp, an[ 2 ], f0 = FALSE, f1 = FALSE;
 
     assert( pBearoff1 );
     
-    nOpp = PositionBearoff( anBoard[ 0 ] );
-    n = PositionBearoff( anBoard[ 1 ] );
+    nOpp = PositionBearoff( anBoard[ 0 ], 6 );
+    n = PositionBearoff( anBoard[ 1 ], 6 );
 
     strcpy( szOutput, _("Rolls\tPlayer\tOpponent\n") );
     
@@ -3770,6 +3907,56 @@ static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 	}
     }
 }
+
+static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
+
+    assert( pBearoff2 );
+
+    if ( pBearoff1 )
+      DumpBearoff1 ( anBoard, szOutput );
+    
+    /* no-op -- nothing much we can say */
+}
+
+static void DumpBearoffHugeOSR ( int anBoard[ 2 ][ 25 ], 
+                                 char *szOutput ) {
+
+
+    int i, n, nOpp, f0 = FALSE, f1 = FALSE;
+    unsigned short int aaProb[ 2 ][ 32 ];
+
+    assert( fBearoffHugeOSR >= 0 );
+    
+    nOpp = PositionBearoff( anBoard[ 0 ], nBearoffHugeOSRPoints );
+    n = PositionBearoff( anBoard[ 1 ], nBearoffHugeOSRPoints );
+
+    HugeOSR ( nOpp, aaProb[ 1 ] );
+    HugeOSR ( n, aaProb[ 0 ] );
+
+    strcpy( szOutput, _("Rolls\tPlayer\tOpponent\n") );
+    
+    for( i = 0; i < 32; i++ ) {
+
+	if( aaProb[ 0 ][ i ] )
+	    f0 = TRUE;
+
+	if( aaProb[ 1 ][ i ] )
+	    f1 = TRUE;
+
+	if( f0 || f1 ) {
+          if( f0 && f1 && !aaProb[ 0 ][ i ] && !aaProb[ 1 ][ i ] )
+            break;
+
+    szOutput = strchr( szOutput, 0 );
+	
+    sprintf( szOutput, "%5d\t%6.3f\t%8.3f\n", i, 
+             aaProb[ 0 ][ i ] / 655.35,
+             aaProb[ 1 ][ i ] / 655.35 );
+	}
+    }
+
+}
+
 
 static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
@@ -3853,7 +4040,8 @@ static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 }
 
 static classdumpfunc acdf[ N_CLASSES ] = {
-  DumpOver, DumpBearoff2, DumpBearoff1, DumpRace, DumpContact, DumpContact
+  DumpOver, DumpBearoff2, DumpBearoff1, DumpBearoffHugeOSR,
+  DumpRace, DumpContact, DumpContact
 };
 
 extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
@@ -3879,6 +4067,10 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
   case CLASS_BEAROFF1: /* One-sided bearoff database */
     strcat( szOutput, "BEAROFF1" );
+    break;
+
+  case CLASS_BEAROFF_HUGEOSR: /* huge one-sided bearoff database */
+    strcat ( szOutput, "BEAROFF-HUGE-OSR" );
     break;
 
   case CLASS_RACE: /* Race neural network */
@@ -5486,7 +5678,7 @@ EvalEfficiency( int anBoard[2][25], positionclass pc ){
 
     return 0.60;
 
-  if (pc == CLASS_BEAROFF2)
+  if (pc == CLASS_BEAROFF2 || pc == CLASS_BEAROFF_HUGEOSR )
 
     /* FIXME: use linear interpolation based on pip count */
 

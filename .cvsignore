@@ -8,6 +8,7 @@ config.status
 erftest
 gnubg
 gnubg.bd
+gnubg_huge_osr.bd
 gnubg.wd
 gnubg.weights
 makebearoff
