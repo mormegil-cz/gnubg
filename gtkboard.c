@@ -1066,7 +1066,7 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 	
 	bd->points[ 1 ] = -2;
 	bd->points[ 6 ] = 5;
-	bd->points[ 8 ] = 2;
+	bd->points[ 8 ] = 3;
 	bd->points[ 12 ] = -5;
 	bd->points[ 13 ] = 5;
 	bd->points[ 17 ] = -3;

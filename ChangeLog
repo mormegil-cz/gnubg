@@ -1,3 +1,8 @@
+Thu Jan 31 12:33:01 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (board_quick_edit): Correct resetting to starting
+	position (reported by Øystein).
+
 Mon Jan 28 13:36:03 2002  Gary Wong  <gtw@research.att.com>
 
 	* play.c (ComputerTurn): Declare arResign as length
