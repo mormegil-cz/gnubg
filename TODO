@@ -176,11 +176,16 @@ duplication of effort and to make sure our changes merge easily.
   handled while in the REPL.  When using guile and guile _is_ using
   readline, its readline state and ours get completely confused...
   see what the REPL in guile-gtk does.
-** Loading can't be interrupted (e.g. "load game /dev/zero" hangs).
 ** "set eval cubeful" gives a poor error message.
 ** Cosmetic bug when using the rollout button in the hint window (the
   commands echoed to stdout and the prompts are in the wrong order).
 ** "show marketwindow" tries to give output when no game is active.
+** Changing a player's name doesn't affect the names in the drop-down
+  menu in the game window.
+** The SGF loading (saving?) routines don't abort on interrupt.
+  "load commands /dev/zero" aborts on a TTY interrupt, but not the
+  GTK `stop' button.
+** Evaluation outside a game (e.g. "eval u3cAAIDNhjkQCA") crashes.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -195,6 +200,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow loading and saving weights to specify binary or ASCII format.
 ** Allow annotating moves in matches (both human commentary and automatic
   analysis).
+** Import FIBS `oldmoves' games and matches.
 ** Export games, matches and analysis to ASCII, HTML, PostScript, etc.
   Examples: "export game html foo.html", "export match mat bar.mat".
   Make the .mat format identical to Jellyfish (things to check:
@@ -219,6 +225,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Do more in CommandSaveSettings.
 ** Handle SGF setup properties when loading games.
 ** Make "eval" pay attention to the percentage/probability settings. (gary)
+** Add an "external" player (writes boards/reads moves to/from a Unix
+  domain socket).
 
 
 Local Variables:
