@@ -129,7 +129,8 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-boardfiles = boards.xml default.xpm silver1.xpm silver2.xpm silver3.xpm
+boardfiles = boards.xml dailygammon.xpm default.xpm ggclassic.xpm gol.xpm ian.xpm jellyfish.xpm nardy.xpm silver1.xpm silver2.xpm silver3.xpm
+
 boarddir = $(pkgdatadir)/boards
 board_DATA = $(boardfiles)
 EXTRA_DIST = $(boardfiles)
@@ -140,7 +141,7 @@ CONFIG_CLEAN_FILES =
 DIST_SOURCES =
 DATA = $(board_DATA)
 
-DIST_COMMON = Makefile.am Makefile.in
+DIST_COMMON = ChangeLog Makefile.am Makefile.in
 all: all-am
 
 .SUFFIXES:

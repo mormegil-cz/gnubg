@@ -1,3 +1,7 @@
+Sat Dec  7 22:50:34 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* Makefile.am: add new files.
+
 Sat Dec  7 13:29:35 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* jellyfish.xpm, boards.xml: new design.
