@@ -1,7 +1,7 @@
 /*
  * rollout.c
  *
- * by Gary Wong <gary@cs.arizona.edu>, 1999.
+ * by Gary Wong <gary@cs.arizona.edu>, 1999, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -113,7 +113,8 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
   for( i = 0; i < NUM_OUTPUTS; i++ )
     arOutput[ i ] = 0.0f;
 
-  while( iTurn < nTruncate && ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
+  while( ( !nTruncate || iTurn < nTruncate ) &&
+	 ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
     if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
 	    return -1;
 	
@@ -167,8 +168,8 @@ BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
   positionclass pc;
   int anDice[ 2 ];
     
-  while( iTurn < nTruncate && ( pc = ClassifyPosition( anBoard ) ) >
-         CLASS_BEAROFF1 ) {
+  while( ( !nTruncate || iTurn < nTruncate ) &&
+	 ( pc = ClassifyPosition( anBoard ) ) > CLASS_BEAROFF1 ) {
     if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
 	    return -1;
 
@@ -185,7 +186,7 @@ BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     iTurn++;
   }
 
-  if( iTurn < nTruncate && pc == CLASS_BEAROFF1 )
+  if( ( !nTruncate || iTurn < nTruncate ) && pc == CLASS_BEAROFF1 )
     return BearoffRollout( anBoard, arOutput, nTruncate, iTurn, iGame,
                            cGames );
 
@@ -220,8 +221,8 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
   for( i = 0; i < NUM_OUTPUTS; i++ )
     arOutput[ i ] = 0.0f;
 
-  while( iTurn < nTruncate && ( pc = ClassifyPosition( anBoard ) ) >
-         CLASS_BEAROFF1 ) {
+  while( ( !nTruncate || iTurn < nTruncate ) &&
+	 ( pc = ClassifyPosition( anBoard ) ) > CLASS_BEAROFF1 ) {
     if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
 	    return -1;
 	
@@ -290,7 +291,7 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
   }
 
   /* Evaluate the resulting position accordingly. */
-  if( iTurn < nTruncate && pc == CLASS_BEAROFF1 ) {
+  if( ( !nTruncate || iTurn < nTruncate ) && pc == CLASS_BEAROFF1 ) {
     if( BearoffRollout( anBoard, ar, nTruncate, iTurn,
                         iGame, cGames ) )
 	    return -1;
@@ -343,7 +344,7 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
   
   for( i = 0; i < cGames; i++ ) {
       if( rngCurrent != RNG_MANUAL )
-	  InitRNGSeed( nRolloutSeed + ( i << 8 ) );
+	  InitRNGSeed( rcRollout.nSeed + ( i << 8 ) );
       
       memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
 	      sizeof( anBoardEval ) );
@@ -478,7 +479,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
   memcpy ( pciLocal, aci, cci * sizeof (cubeinfo) );
 
-  while ( iTurn < nTruncate ) {
+  while ( !nTruncate || iTurn < nTruncate ) {
 
     /* Cube decision */
 
@@ -737,7 +738,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   
   for( i = 0; i < cGames; i++ ) {
       if( rngCurrent != RNG_MANUAL )
-	  InitRNGSeed( nRolloutSeed + ( i << 8 ) );
+	  InitRNGSeed( rcRollout.nSeed + ( i << 8 ) );
       
       for ( ici = 0; ici < cci; ici++ )
         memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
