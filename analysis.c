@@ -344,7 +344,7 @@ AnalyzeGame ( list *plGame ) {
 		
 		if( pmr->n.ml.cMoves > 1 ) {
 		    psc->anUnforcedMoves[ fPlayer ]++;
-		    psc->arErrorCheckerplay[ fPlayer ][ 0 ] -= rSkill;
+		    psc->arErrorCheckerplay[ fPlayer ][ 0 ] -= rChequerSkill;
 		    psc->arErrorCheckerplay[ fPlayer ][ 1 ] -= rCost;
 		}
 		
@@ -508,6 +508,8 @@ AnalyzeGame ( list *plGame ) {
 	
 	case MOVE_GAMEINFO:
 	    psc = &pmr->g.sc;
+	    IniStatcontext( psc );
+				      
 	    fWinner = pmr->g.fWinner;
 	    nPoints = pmr->g.nPoints;
 
