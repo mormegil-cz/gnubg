@@ -1,3 +1,11 @@
+Tue Sep 24 12:47:34 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkprefs.c (GeneralPage): add 2 decimal places to the chequer
+	shape slider (reported by Øystein).
+
+	* gnubg.c: add `rotate' field to rcRollout and EVALSETUP (reported
+	by Øystein).
+
 Mon Sep 23 22:39:55 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (printHTMLBoardBBS): use c_center.gif and c_blank.gif

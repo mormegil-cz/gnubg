@@ -234,6 +234,7 @@ rolloutcontext rcRollout =
   FALSE, /* cubeful */
   FALSE, /* variance reduction */
   FALSE, /* initial position */
+  TRUE, /* rotate */
   7, /* truncation */
   36, /* number of trials */
   RNG_MERSENNE, /* RNG */
@@ -260,6 +261,7 @@ rolloutcontext rcRollout =
     FALSE, /* cubeful */ \
     FALSE, /* variance reduction */ \
     FALSE, /* initial position */ \
+    TRUE, /* rotate */ \
     7, /* truncation */ \
     36, /* number of trials */ \
     RNG_MERSENNE, /* RNG */ \
@@ -5106,11 +5108,14 @@ extern void outputv( char *sz, va_list val ) {
 /* Write an error message, perror() style */
 extern void outputerr( char *sz ) {
 
+#if USE_GTK
+    char *pchError = strerror( errno );
+#endif
     perror( sz );
     
 #if USE_GTK
     if( fX ) {
-	char *pch = g_strdup_printf( "%s: %s", sz, strerror( errno ) );
+	char *pch = g_strdup_printf( "%s: %s", sz, pchError );
 	GTKOutputErr( pch );
 	g_free( pch );
     }
