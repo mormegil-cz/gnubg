@@ -344,7 +344,7 @@ extern char *NextToken( char **ppch );
 extern int NextTurn( int fPlayNext );
 extern void TurnDone( void );
 extern void AddMoveRecord( void *pmr );
-extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr );
+extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr );
 extern void SetMoveRecord( void *pmr );
 extern void ClearMoveRecord( void );
 extern void AddGame( moverecord *pmr );
@@ -459,10 +459,9 @@ extern int fReadline;
 #endif
 
 extern int
-AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
-              evalsetup *pesChequer,
-              evalsetup *pesCube,
-              int fUpdateStatistics );
+AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
+              evalsetup *pesChequer, evalsetup *pesCube,
+	      int fUpdateStatistics );
 
 extern int
 confirmOverwrite ( const char *sz, const int f );

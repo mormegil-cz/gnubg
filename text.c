@@ -1440,7 +1440,7 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
       case MOVE_GAMEINFO:
 
-        ApplyMoveRecord ( &msExport, pmr );
+        ApplyMoveRecord ( &msExport, plGame, pmr );
 
         TextPrologue( pf, &msExport, iGame );
 
@@ -1499,7 +1499,7 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
       TextPrintComment ( pf, pmr );
 
-      ApplyMoveRecord ( &msExport, pmr );
+      ApplyMoveRecord ( &msExport, plGame, pmr );
 
     }
 

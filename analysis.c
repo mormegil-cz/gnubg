@@ -470,10 +470,9 @@ updateStatcontext ( statcontext *psc,
 
 
 extern int
-AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
-              evalsetup *pesChequer,
-              evalsetup *pesCube,
-              int fUpdateStatistics ) {
+AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
+              evalsetup *pesChequer, evalsetup *pesCube,
+	      int fUpdateStatistics ) {
 
     static int anBoardMove[ 2 ][ 25 ];
     static int fFirstMove;
@@ -789,7 +788,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, statcontext *psc,
 	break;
     }
   
-    ApplyMoveRecord( pms, pmr );
+    ApplyMoveRecord( pms, plGame, pmr );
   
     if ( fUpdateStatistics ) {
       psc->fMoves = fAnalyseMove;
@@ -816,7 +815,7 @@ AnalyzeGame ( list *plGame ) {
 
 	ProgressValueAdd( 1 );
 
-        if( AnalyzeMove ( pmr, &msAnalyse, &pmgi->sc, 
+        if( AnalyzeMove ( pmr, &msAnalyse, plGame, &pmgi->sc, 
                           &esAnalysisChequer,
                           &esAnalysisCube, TRUE ) < 0 ) {
 	    /* analysis incomplete; erase partial summary */
@@ -1623,7 +1622,7 @@ extern void CommandAnalyseMove ( char *sz ) {
     /* analyse move */
 
     memcpy ( &msx, &ms, sizeof ( matchstate ) );
-    AnalyzeMove ( plLastMove->plNext->p, &msx, NULL, 
+    AnalyzeMove ( plLastMove->plNext->p, &msx, plGame, NULL, 
                   &esAnalysisChequer, &esAnalysisCube, FALSE );
 
 #if USE_GTK
@@ -1638,7 +1637,7 @@ extern void CommandAnalyseMove ( char *sz ) {
 
 
 static void
-updateStatisticsMove ( moverecord *pmr, matchstate *pms, 
+updateStatisticsMove ( moverecord *pmr, matchstate *pms, list *plGame,
                        statcontext *psc ) {
 
   FixMatchState ( pms, pmr );
@@ -1678,7 +1677,7 @@ updateStatisticsMove ( moverecord *pmr, matchstate *pms,
 
   }
 
-  ApplyMoveRecord( pms, pmr );
+  ApplyMoveRecord( pms, plGame, pmr );
   
   psc->fMoves = fAnalyseMove;
   psc->fCube = fAnalyseCube;
@@ -1702,7 +1701,7 @@ updateStatisticsGame ( list *plGame ) {
     
     pmr = pl->p;
     
-    updateStatisticsMove ( pmr, &msAnalyse, &pmgi->sc );
+    updateStatisticsMove ( pmr, &msAnalyse, plGame, &pmgi->sc );
 
   }
     

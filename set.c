@@ -117,8 +117,6 @@ command acSetEvaluation[] = {
 static void
 SetSeed ( const rng rngx, char *sz ) {
     
-    int n;
-
     if( rngx == RNG_MANUAL || rngx == RNG_RANDOM_DOT_ORG ) {
 	outputl( _("You can't set a seed "
                    "if you're using manual dice generation or random.org") );
@@ -133,6 +131,8 @@ SetSeed ( const rng rngx, char *sz ) {
 	else
 	    outputf( _("Seed set to %s.\n"), sz );
 #else
+	int n;
+
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {

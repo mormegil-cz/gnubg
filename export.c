@@ -248,7 +248,7 @@ ExportGameEquityEvolution ( FILE *pf, list *plGame,
 
     }
 
-    ApplyMoveRecord ( &msEE, pmr );
+    ApplyMoveRecord ( &msEE, plGame, pmr );
 
   }
   

@@ -1923,7 +1923,7 @@ extern void GTKUpdateAnnotations( void ) {
     for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
 	GTKAddMoveRecord( pl->p );
         FixMatchState ( &ms, pl->p );
-	ApplyMoveRecord( &ms, pl->p );
+	ApplyMoveRecord( &ms, plGame, pl->p );
     }
 
     CalculateBoard();

@@ -2537,6 +2537,7 @@ extern void ShowBoard( void ) {
 	}
     
 	if( ms.fResigned )
+	    /* FIXME it's not necessarily the player on roll that resigned */
 	    sprintf( strchr( sz, 0 ), _(", resigns %s"),
 		     gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 	

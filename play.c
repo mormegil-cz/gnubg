@@ -169,10 +169,11 @@ static void ApplyGameOver( matchstate *pms ) {
     pms->cGames++;
 }
 
-extern void ApplyMoveRecord( matchstate *pms, moverecord *pmr ) {
+extern void ApplyMoveRecord( matchstate *pms, list *plGame, moverecord *pmr ) {
 
     int n;
     movegameinfo *pmgi = plGame->plNext->p;
+    /* FIXME this is wrong -- plGame is not necessarily the right game */
 
     assert( pmr->mt == MOVE_GAMEINFO || pmgi->mt == MOVE_GAMEINFO );
     
@@ -333,7 +334,7 @@ extern void CalculateBoard( void ) {
 
 	assert( pl->p );
 
-	ApplyMoveRecord( &ms, pl->p );
+	ApplyMoveRecord( &ms, plGame, pl->p );
 
         if ( pl->plNext && pl->plNext->p )
           FixMatchState ( &ms, pl->plNext->p );
@@ -518,7 +519,7 @@ extern void AddMoveRecord( void *pv ) {
 
     FixMatchState ( &ms, pmr );
     
-    ApplyMoveRecord( &ms, pmr );
+    ApplyMoveRecord( &ms, plGame, pmr );
     
     plLastMove = ListInsert( plGame, pmr );
 
@@ -2517,7 +2518,8 @@ static skilltype GoodMove (movenormal *p) {
 
   SuspendInput ( &m );
   ProgressStart( _("Considering move...") );
-  if (AnalyzeMove ( pmr, &msx, NULL, pesChequer, pesChequer, FALSE ) < 0) {
+  if (AnalyzeMove ( pmr, &msx, plGame, NULL, pesChequer, pesChequer,
+		    FALSE ) < 0) {
     fAnalyseMove = fAnalyseMoveSaved;
     ProgressEnd();
     ResumeInput ( &m );
@@ -2928,7 +2930,7 @@ extern void ChangeGame( list *plGameNew ) {
 	for( pl = plGame->plNext; pl->p; pl = pl->plNext ) {
 	    GTKAddMoveRecord( pl->p );
             FixMatchState ( &ms, pl->p );
-	    ApplyMoveRecord( &ms, pl->p );
+	    ApplyMoveRecord( &ms, plGame, pl->p );
 	}
 
 	GTKSetGame( GameIndex( plGame ) );
@@ -3109,7 +3111,7 @@ extern void CommandNext( char *sz ) {
 	    p = p->plNext;
 	    pmr = (moverecord *) p->p;
 	    FixMatchState ( &ms, pmr);
-	    ApplyMoveRecord( &ms, pmr);
+	    ApplyMoveRecord( &ms, plGame, pmr);
 	    if( MoveIsMarked (pmr) && ( --n <= 0 ) )
 		break;
 	}
@@ -3118,7 +3120,7 @@ extern void CommandNext( char *sz ) {
 	    /* didn't find the requested move, put things back */
 	    memcpy( &ms, &SaveMs, sizeof( matchstate ) );
 	    FixMatchState ( &ms, plLastMove->p );
-	    ApplyMoveRecord( &ms, plLastMove->p );
+	    ApplyMoveRecord( &ms, plGame, plLastMove->p );
 	    return;
 	}
 	
@@ -3129,7 +3131,7 @@ extern void CommandNext( char *sz ) {
 	while( n-- && plLastMove->plNext->p ) {
 	    plLastMove = plLastMove->plNext;
 	    FixMatchState ( &ms, plLastMove->p );
-	    ApplyMoveRecord( &ms, plLastMove->p );
+	    ApplyMoveRecord( &ms, plGame, plLastMove->p );
 	}
     }
     

@@ -509,7 +509,7 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	    break;
 	}
 
-	ApplyMoveRecord( &msExport, pmr );
+	ApplyMoveRecord( &msExport, plGame, pmr );
     }
     
     if( ( GameStatus( msExport.anBoard ) ) )

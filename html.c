@@ -3531,7 +3531,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
       case MOVE_GAMEINFO:
 
-        ApplyMoveRecord ( &msExport, pmr );
+        ApplyMoveRecord ( &msExport, plGame, pmr );
 
         HTMLPrologue( pf, &msExport, iGame, aszLinks, het, hecss );
 
@@ -3594,7 +3594,7 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
       HTMLPrintComment ( pf, pmr, hecss );
 
-      ApplyMoveRecord ( &msExport, pmr );
+      ApplyMoveRecord ( &msExport, plGame, pmr );
 
     }
 
