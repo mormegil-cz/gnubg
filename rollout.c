@@ -69,6 +69,18 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
 
       return 0;
     } 
+    else if( fRotate && iTurn == 2 && !( cGames % 38880 ) ) {
+      anDice[ 0 ] = ( ( iGame / 1080 ) % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 6480 ) % 6 ) + 1;
+
+      return 0;
+    } 
+    else if( fRotate && iTurn == 3 && !( cGames % 1399680 ) ) {
+      anDice[ 0 ] = ( ( iGame / 38880 ) % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 233280 ) % 6 ) + 1;
+
+      return 0;
+    } 
     else {
 
       int n;
@@ -95,6 +107,14 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
     } else if( fRotate && iTurn == 1 && !( cGames % 1296 ) ) {
       anDice[ 0 ] = ( ( iGame / 36 ) % 6 ) + 1;
       anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
+      return 0;
+    } else if( fRotate && iTurn == 2 && !( cGames % 46656 ) ) {
+      anDice[ 0 ] = ( ( iGame / 1296 ) % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 7776 ) % 6 ) + 1;
+      return 0;
+    } else if( fRotate && iTurn == 3 && !( cGames % 1679616 ) ) {
+      anDice[ 0 ] = ( ( iGame / 46656 ) % 6 ) + 1;
+      anDice[ 1 ] = ( ( iGame / 279936 ) % 6 ) + 1;
       return 0;
     } else
       return RollDice( anDice, rngx );
