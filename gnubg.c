@@ -674,6 +674,8 @@ command cER = {
       &cFilename },
     { "sgg", CommandImportSGG, 
       N_("Import an SGG match"), szFILENAME, &cFilename },
+    { "snowietxt", CommandImportSnowieTxt, 
+      N_("Import a Snowie .txt match"), szFILENAME, &cFilename },
     { "tmg", CommandImportTMG, 
       N_("Import an TMG match"), szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
@@ -4127,6 +4129,27 @@ extern void CommandImportTMG( char *sz ) {
 	outputerr( sz );
 }
 
+extern void CommandImportSnowieTxt( char *sz ) {
+
+    FILE *pf;
+    
+    sz = NextToken( &sz );
+    
+    if( !sz || !*sz ) {
+	outputl( _("You must specify a Snowie Text file to import (see `help "
+		 "import snowietxt').") );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	ImportSnowieTxt( pf );
+	fclose( pf );
+        //setDefaultFileName ( sz, PATH_SGG );
+    } else
+	outputerr( sz );
+}
+
+
 extern void CommandCopy (char *sz)
 {
   char *aps[7] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
@@ -7482,7 +7505,6 @@ TextToClipboard( const char *sz ) {
 
 #if USE_GTK
   if ( fX ) {
-    printf ( "pyf\n" );
     GTKTextToClipboard( sz );
     return;
   }

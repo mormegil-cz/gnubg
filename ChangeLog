@@ -5,6 +5,9 @@ Sun Mar  9 09:24:49 2003  Joern Thyssen  <jth@gnubg.org>
 	* gnubg.c: new command "import snowietxt ..."
 	* gnubg.c (CommandImportSnowieTxt): new function.
 	* import.c (ImportSnowieTxt, ParseSnowieTxt): new functions.
+	* gtkgame.c: new menu entry.
+
+	* AUTHORS: some reshuffling.
 
 Sat Mar  8 13:38:44 2003  Joern Thyssen  <jth@gnubg.org>
 

@@ -2335,3 +2335,288 @@ extern void ImportBKG( FILE *pf, const char *szFilename ) {
     }
 #endif
 }
+
+
+static int
+ParseSnowieTxt( char *sz,  
+                int *pnMatchTo, int *pfJacoby, int *pfUnused1, int *pfUnused2,
+                int *pfTurn, char aszPlayer[ 2 ][ 32 ], int *pfCrawfordGame,
+                int anScore[ 2 ], int *pnCube, int *pfCubeOwner, 
+                int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+
+  int c;
+  char *pc;
+  int i, j;
+
+  memset( anBoard, 0, 2 * 25 * sizeof ( int ) );
+
+  c = 0;
+  i = 0;
+  pc = strtok( sz, ";" );
+  while ( pc ) {
+
+    switch( c ) {
+    case 0:
+      /* match length */
+      *pnMatchTo = atoi( pc );
+      break;
+    case 1:
+      /* Jacoby rule */
+      *pfJacoby = atoi ( pc );
+      break;
+    case 2:
+    case 3:
+      /* unknown??? */
+      break;
+    case 4:
+      /* player on roll */
+      *pfTurn = atoi( pc );
+      break;
+    case 5:
+      /* player names */
+      memset( aszPlayer[ *pfTurn ], 0, 32 );
+      strncpy( aszPlayer[ *pfTurn ], pc, 31 );
+      break;
+    case 6:
+      /* player names */
+      memset( aszPlayer[ ! *pfTurn ], 0, 32 );
+      strncpy( aszPlayer[ ! *pfTurn ], pc, 31 );
+      break;
+    case 7:
+      /* Crawford Game */
+      *pfCrawfordGame = atoi( pc );
+      break;
+    case 8:
+      /* Score */
+      anScore[ *pfTurn ] = atoi( pc );
+      break;
+    case 9:
+      /* Score */
+      anScore[ ! *pfTurn ] = atoi( pc );
+      break;
+    case 10:
+      /* cube value */
+      *pnCube = atoi( pc );
+      break;
+    case 11:
+      /* cube owner */
+      j = atoi( pc );
+      if ( j == 1 )
+        *pfCubeOwner = *pfTurn;
+      else if ( j == -1 )
+        *pfCubeOwner = ! *pfTurn;
+      else
+        *pfCubeOwner = -1;
+      break;
+    case 12:
+      /* chequers on bar for player on roll */
+      anBoard[ 1 ][ 24 ] = abs( atoi( pc ) );
+      break;
+    case 37:
+      /* chequers on bar for player opponent */
+      anBoard[ 0 ][ 24 ] = abs( atoi( pc ) );
+      break;
+    case 38:
+    case 39:
+      /* dice rolled */
+      anDice[ c - 38 ] = atoi( pc );
+      break;
+    default:
+      /* points */
+      j = atoi( pc );
+      anBoard[ j < 0 ][ ( j < 0 ) ? 23 - i : i ] = abs( j );
+      ++i;
+
+      break;
+    }
+
+    pc = strtok( NULL, ";" );
+
+    ++c;
+    if ( c == 40 )
+      break;
+
+  }
+
+  if ( c != 40 ) 
+    return -1;
+
+  return 0;
+
+}
+
+
+
+/*
+ * Snowie .txt files
+ *
+ * The files are a single line with fields separated by
+ * semicolons. Fields are numeric, except for player names.
+ *
+ * Field no    meaning
+ * 0           length of match (0 in money games)
+ * 1           1 if Jacoby enabled, 0 in match play or disabled
+ * 2           Don't know, all samples had 0. Maybe it's Nack gammon or
+ *            some other variant?
+ * 3           Don't know. It was one in all money game samples, 0 in
+ *            match samples
+ * 4           Player on roll 0 = 1st player
+ * 5,6         Player names
+ * 7           1 = Crawford game
+ * 8,9         Scores for player 0, 1
+ * 10          Cube value
+ * 11          Cube owner 1 = player on roll, 2 = centred, -1 opponent
+ * 12          Chequers on bar for player on roll
+ * 13..36      Points 1..24 from player on roll's point of view
+ *            0 = empty, positive nos. for player on roll, negative
+ *            for opponent
+ * 37          Chequers on bar for opponent
+ * 38.39       Current roll (0,0 if not rolled)
+ *
+ */
+
+extern void
+ImportSnowieTxt( FILE *pf ) {
+
+  char sz[ 2048 ];
+  char *pc;
+  char ch;
+  int c;
+  moverecord *pmr;
+  movegameinfo *pmgi;
+
+  int nMatchTo, fJacoby, fUnused1, fUnused2, fTurn, fCrawfordGame;
+  int fCubeOwner, nCube;
+  int anScore[ 2 ], anDice[ 2 ], anBoard[ 2 ][ 25 ];
+  char aszPlayer[ 2 ][ 32 ];
+
+  if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( fInterrupt )
+      return;
+    
+    if( !GetInputYN( _("Are you sure you want to import a saved match, "
+                       "and discard the game in progress? ") ) )
+      return;
+  }
+  
+#if USE_GTK
+  if( fX )
+    GTKFreeze();
+#endif
+  
+  /* 
+   * Import Snowie .txt file 
+   */
+
+  /* read file into string */
+
+  pc = sz;
+  while ( ( c = fgetc ( pf ) ) > -1 ) {
+    if ( ! isspace ( ( ch = (char) c ) ) )
+      *pc++ = ch;
+    if ( ( pc - sz ) == ( sizeof ( sz ) - 2 ) )
+      break;
+  }
+
+  *pc++ = 0;
+
+  printf ( "Line read:-\n%s\n-\n", sz );
+
+  /* parse string */
+
+  if ( ParseSnowieTxt( sz,
+                       &nMatchTo, &fJacoby, &fUnused1, &fUnused2,
+                       &fTurn, aszPlayer, &fCrawfordGame, anScore,
+                       &nCube, &fCubeOwner, anBoard, anDice ) < 0 ) {
+    outputl( "This file is not a valid Snowie .txt file!" );
+    return;
+  }
+
+  FreeMatch();
+  ClearMatch();
+
+  InitBoard( ms.anBoard );
+
+  ClearMoveRecord();
+
+  ListInsert( &lMatch, plGame );
+
+  /* Game info */
+
+  pmgi = (movegameinfo *) malloc( sizeof ( movegameinfo ) );
+
+  pmgi->mt = MOVE_GAMEINFO;
+  pmgi->sz = NULL;
+  pmgi->i = 0;
+  pmgi->nMatch = nMatchTo;
+  pmgi->anScore[ 0 ] = anScore[ 0 ];
+  pmgi->anScore[ 1 ] = anScore[ 1 ];
+  pmgi->fCrawford = TRUE;
+  pmgi->fCrawfordGame = fCrawfordGame;
+  pmgi->fJacoby = fJacoby;
+  pmgi->fWinner = -1;
+  pmgi->nPoints = 0;
+  pmgi->fResigned = FALSE;
+  pmgi->nAutoDoubles = 0;
+  IniStatcontext( &pmgi->sc );
+  
+  AddMoveRecord( pmgi );
+
+  ms.fTurn = ms.fMove = fTurn;
+
+  for ( c = 0; c < 2; ++c )
+    strcpy( ap[ c ].szName, aszPlayer[ c ] );
+
+  /* dice */
+
+  if( anDice[ 0 ] ) {
+      pmr = (moverecord *) malloc( sizeof( moverecord ) );
+      pmr->sd.mt = MOVE_SETDICE;
+      pmr->sd.sz = NULL;
+      pmr->sd.fPlayer = fTurn;
+      pmr->sd.anDice[ 0 ] = anDice[ 0 ];
+      pmr->sd.anDice[ 1 ] = anDice[ 1 ];
+      pmr->sd.lt = LUCK_NONE;
+      pmr->sd.rLuck = ERR_VAL;
+      AddMoveRecord( pmr );
+  }
+
+  /* board */
+
+  pmr = (moverecord *) malloc( sizeof( moverecord ) );
+  pmr->sb.mt = MOVE_SETBOARD;
+  pmr->sb.sz = NULL;
+  if( ! fTurn )
+      SwapSides( anBoard );
+  PositionKey( anBoard, pmr->sb.auchKey );
+  AddMoveRecord( pmr );
+
+  /* cube value */
+
+  pmr = (moverecord *) malloc( sizeof( moverecord ) );
+  pmr->scv.mt = MOVE_SETCUBEVAL;
+  pmr->scv.sz = NULL;
+  pmr->scv.nCube = nCube;
+  AddMoveRecord( pmr );
+
+  /* cube position */
+
+  pmr = (moverecord *) malloc( sizeof( moverecord ) );
+  pmr->scp.mt = MOVE_SETCUBEPOS;
+  pmr->scp.sz = NULL;
+  pmr->scp.fCubeOwner = fCubeOwner;
+  AddMoveRecord( pmr );
+
+                  
+  /* update menus etc */
+
+  UpdateSettings();
+  
+#if USE_GTK
+  if( fX ){
+    GTKThaw();
+    GTKSet(ap);
+  }
+#endif
+
+}

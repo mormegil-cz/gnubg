@@ -8,7 +8,8 @@ credit=/tmp/cred.$$
 cat > AUTHORS <<'EOF'
                          GNU Backgammon was written by:
 
- Joseph Heled   Øystein Johansen   David Montgomery   Jørn Thyssen   Gary Wong
+               Joseph Heled     Øystein Johansen     David Montgomery   
+                  Jim Segrave     Jørn Thyssen     Gary Wong
 
 
 
@@ -69,7 +70,6 @@ Oliver Riordan
 Hans-Jürgen Schäfer
 Steve Schreiber
 Martin Schrode
-Jim Segrave
 Paul Selick
 Ian Shaw
 Albert Silver
