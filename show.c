@@ -34,6 +34,7 @@
 #include "drawboard.h"
 #include "eval.h"
 #include "dice.h"
+#include "matchequity.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -540,6 +541,77 @@ extern void CommandShowBeavers( char *sz ) {
   else
     puts( "Beavers, racoons, and other critters are not allowed in"
           " money sessions.." );
+
+}
+
+
+extern void CommandShowGammonPrice ( char *sz ) {
+
+  cubeinfo ci;
+  int i;
+
+  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
+  output ( "Player        Gammon price    Backgammon price\n" );
+
+  for ( i = 0; i < 2; i++ ) {
+
+    outputf ("%12s     %7.5f         %7.5f\n",
+	     ap[ 0 ].szName,
+	     ci.arGammonPrice[ i ], ci.arGammonPrice[ 1 + 2 * i ] );
+  }
+
+}
+
+
+extern void CommandShowMatchEquityTable ( char *sz ) {
+
+  /* Read a number n. */
+
+  int n = ParseNumber ( &sz );
+  int i, j;
+
+  /* If n > 0 write n x n match equity table,
+     else if match write nMatchTo x nMatchTo table,
+     else write full table (may be HUGE!) */
+
+  if ( ( n <= 0 ) || ( n > MAXSCORE ) ) {
+    if ( nMatchTo )
+      n = nMatchTo;
+    else
+      n = MAXSCORE;
+  }
+
+  /* FIXME: for GTK write out to table */
+
+  /* Write column headers */
+
+  output ( "          " );
+  for ( j = 0; j < n; j++ )
+    outputf ( " %3i-away ", j + 1 );
+  output ( "\n" );
+
+  for ( i = 0; i < n; i++ ) {
+    
+    outputf ( " %3i-away ", i + 1 );
+    
+    for ( j = 0; j < n; j++ )
+      outputf ( " %8.4f ", GET_A1 ( i, j, aafA1 ) * 100.0 );
+    output ( "\n" );
+  }
+  output ( "\n" );
+
+}
+
+
+extern void CommandShowOutputMWC( char *sz ) {
+
+  if ( fOutputMWC )
+    puts( "Output shown in MWC (match winning chance) "
+	  "(match play only)." ); 
+  else
+    puts( "Output shown in EMG (normalized money game equity) "
+	  "(match play only)." ); 
 
 }
 
