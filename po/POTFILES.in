@@ -5,7 +5,6 @@ bearoff.c
 bearoff.h
 bearoffgammon.c
 bearoffgammon.h
-br1.c
 copying.c
 credits.c
 database.c
@@ -38,6 +37,8 @@ gtkexport.c
 gtkexport.h
 gtkgame.c
 gtkgame.h
+gtkmovefilter.c
+gtkprefs.c
 gtkrace.c
 gtkrace.h
 gtk-multiview.c
