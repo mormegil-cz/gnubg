@@ -111,180 +111,149 @@ static int ComputerTurn( void ) {
     
     switch( ap[ fTurn ].pt ) {
     case PLAYER_GNU:
-	if( fResigned ) {
-	    float ar[ NUM_OUTPUTS ];
-	    cubeinfo ci;
+			if( fResigned ) {
+				float ar[ NUM_OUTPUTS ];
+				cubeinfo ci;
 
-	    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+				SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
-	    /* FIXME: use EvaluatePositionCubeful instead */
+				/* FIXME: use EvaluatePositionCubeful instead */
 
-	    if( EvaluatePosition( anBoard, ar, &ci, &ap[ fTurn ].ec ) )
-		return -1;
+				if( EvaluatePosition( anBoard, ar, &ci, &ap[ fTurn ].ec ) )
+					return -1;
 
-	    if( -fResigned <= Utility ( ar, &ci ) ) {
-		CommandAgree( NULL );
-		return 0;
-	    } else {
-		CommandDecline( NULL );
-		return 0;
-	    }
-	} else if( fDoubled ) {
-	  /* consider cube action */
-	  cubeinfo ci;
+				if( -fResigned <= Utility ( ar, &ci ) ) {
+					CommandAgree( NULL );
+					return 0;
+				} else {
+					CommandDecline( NULL );
+					return 0;
+				}
+			} else if( fDoubled ) {
+				/* consider cube action */
+				cubeinfo ci;
+				
+				SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 	  
-	  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+				if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, 
+																			&ap [ fTurn ].ec,
+																			ap [ fTurn ].ec.nPlies,
+																			EVAL_DOUBLE ) < 0 )
+					return -1;
+
+				if ( ( arDouble[ 2 ] < 0.0 ) && ( ! nMatchTo ) ) {
+
+					/* Beaver... */
+					/* FIXME: proper code should evaluate position 
+						 with opponent owning cube */
+
+					CommandRedouble ( NULL );
+				}
+				else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
+					CommandTake( NULL );
+				else
+					CommandReject ( NULL );
+
+				return 0;
+			} else {
 	  
-	  gettimeofday ( &tv0, NULL );
-	  if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, 
-					&ap [ fTurn ].ec,
-					ap [ fTurn ].ec.nPlies,
-					EVAL_DOUBLE ) < 0 )
-	    return -1;
-	  gettimeofday ( &tv1, NULL );
-	  printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
-		  1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
-		  (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
-	  printf ( "equity(new code) for take decision"
-		   " %+6.3f %+6.3f %+6.3f %+6.3f\n",  
-		   arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ],
-		   arDouble[ 3 ]);
+				int anBoardMove[ 2 ][ 25 ];
+				cubeinfo ci;
 	  
-	  if ( ( arDouble[ 2 ] < 0.0 ) && ( ! nMatchTo ) ) {
+				SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
-	    /* FIXME: proper code should evaluate position 
-	       with opponent owning cube */
+				/* Don't use the global board for this call, to avoid
+					 race conditions with updating the board and aborting the
+					 move with an interrupt. */
+				memcpy( anBoardMove, anBoard, sizeof( anBoardMove ) );
 
-	    CommandRedouble ( NULL );
-	  }
-	  else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
-	    CommandTake( NULL );
-	  else
-	    CommandReject ( NULL );
-
-	    return 0;
-	} else {
+				/* consider doubling */
 	  
-	  int anBoardMove[ 2 ][ 25 ];
-	  cubeinfo ci;
-	  
-	  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+				/* First decide whether we can double or not */
 
-	  /* Don't use the global board for this call, to avoid
-	     race conditions with updating the board and aborting the
-	     move with an interrupt. */
-	  memcpy( anBoardMove, anBoard, sizeof( anBoardMove ) );
+				if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
+						 && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) 
+						 && ( nMatchTo - anScore [ fTurn ] > nCube ) ) {
 
-	  /* consider doubling */
-	  
-	  /* First decide whether we can double or not */
+					float arOutput [ NUM_OUTPUTS ];
+					float rDoublePoint;
+					int fOptionalRedouble;
+					evalcontext ecDH = {1, 8, 0.16 };
 
-	  if ( ( ( fCubeOwner == fTurn ) || ( fCubeOwner < 0 ) )
-	       && ( ! fCrawford ) && ( fCubeUse ) && ( ! anDice[0] ) 
-	       && ( nMatchTo - anScore [ fTurn ] > nCube ) ) {
+					fOptionalRedouble =
+						( ( nMatchTo - anScore [ ! fTurn ] <= nCube ) &&
+							( nMatchTo - anScore [ fTurn ] > nCube ) );
 
-	    float arOutput [ NUM_OUTPUTS ];
-	    float rDoublePoint;
-	    int fOptionalRedouble;
-	    evalcontext ecDH = {1, 8, 0.16 };
+					if ( ! fOptionalRedouble ) {
 
-	    fOptionalRedouble =
-	      ( ( nMatchTo - anScore [ ! fTurn ] <= nCube ) &&
-		( nMatchTo - anScore [ fTurn ] > nCube ) );
+						/* Determine market window */
+						
+						if( EvaluatePosition( anBoard, arOutput, &ci, &ecDH ) )
+							return -1;
 
-	    if ( ! fOptionalRedouble ) {
-
-	      /* Quick heuristics: only double if we are in top
-		 33% of market window */
-
-	      /* Determine market window */
-
-	      if( EvaluatePosition( anBoard, arOutput, 
-				  &ci, &ecDH ) )
-		return -1;
-
-	      printf ( "My winning chance: %7.4f %7.4f %7.4f %7.4f %7.4f\n", 
-		       arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
-		       arOutput[ 3 ], arOutput[ 4 ] );
-	      GetDoublePointDeadCube ( arOutput, anScore, 
-				       nMatchTo, &ci, &rDoublePoint );
+						GetDoublePointDeadCube ( arOutput, anScore, 
+																		 nMatchTo, &ci, &rDoublePoint );
 	      
-	      printf ( "double point: %7.4f\n", rDoublePoint );
-
-	    }
+					}
 	      
-	    /* If we have an optional/mandatory (re)double or
-	       we're in upper third and not
-	       too good to double then check cube action */
+					/* If we have an optional/mandatory (re)double or
+						 we're above doubling point */
 
-	    if ( fOptionalRedouble || ( arOutput[ 0 ] > rDoublePoint ) ) {
+					if ( fOptionalRedouble || ( arOutput[ 0 ] > rDoublePoint ) ) {
 
-	      int fEvalFlag;
+						int fEvalFlag;
 
-	      gettimeofday ( &tv0, NULL );
+						/* If it's too good we know opponent is going
+							 to pass, so don't calculate DOUBLE branch
+							 in EvalCubeful */
 
-	      /* If it's too good we know opponent is going
-		 to pass, so don't calculate DOUBLE branch
-		 in EvalCubeful */
+						if ( Utility ( arOutput, &ci ) > 1.05 )
+							fEvalFlag = EVAL_NODOUBLE;
+						else
+							fEvalFlag = EVAL_BOTH;
 
-	      if ( Utility ( arOutput, &ci ) > 1.05 )
-		fEvalFlag = EVAL_NODOUBLE;
-	      else
-		fEvalFlag = EVAL_BOTH;
+						if ( EvaluatePositionCubeful( anBoardMove,
+																					arDouble, &ci, 
+																					&ap [ fTurn ].ec,
+																					ap [ fTurn ].ec.nPlies,
+																					fEvalFlag ) < 0 )  
+							return -1;
 
-	      printf ("fEvalFlag = %1i\n", fEvalFlag );
-
-	      if ( EvaluatePositionCubeful( anBoardMove,
-					    arDouble, &ci, 
-					    &ap [ fTurn ].ec,
-					    ap [ fTurn ].ec.nPlies,
-					    fEvalFlag ) < 0 )  
-		return -1;
-
-	      gettimeofday ( &tv1, NULL );
-	      printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
-		      1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
-		      (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
-	      printf ( "equity(new code) for take decision"
-		       " %+6.3f %+6.3f %+6.3f %+6.3f\n",  
-		       arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ],
-		       arDouble[ 3 ]);
-
-	      if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) && 
-		   ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
-		CommandDouble ( NULL );
-		return 0;
-	      }
-
-	    }
-	  }
-
-	  /* roll dice and move */
+						if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) && 
+								 ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
+							CommandDouble ( NULL );
+							return 0;
+						}
+						
+					}
+				}
+				
+				/* roll dice and move */
 	  
-	  if ( ! anDice[ 0 ] )
-	    RollDice( anDice );
+				if ( ! anDice[ 0 ] )
+					RollDice( anDice );
 
-	  if( fDisplay )
-	    ShowBoard();
+				if( fDisplay )
+					ShowBoard();
 
-	  pmn = malloc( sizeof( *pmn ) );
-	  pmn->mt = MOVE_NORMAL;
-	  pmn->anRoll[ 0 ] = anDice[ 0 ];
-	  pmn->anRoll[ 1 ] = anDice[ 1 ];
-	  pmn->fPlayer = fTurn;
-	  ListInsert( plGame, pmn );
+				pmn = malloc( sizeof( *pmn ) );
+				pmn->mt = MOVE_NORMAL;
+				pmn->anRoll[ 0 ] = anDice[ 0 ];
+				pmn->anRoll[ 1 ] = anDice[ 1 ];
+				pmn->fPlayer = fTurn;
+				ListInsert( plGame, pmn );
 
-	  gettimeofday ( &tv0, NULL );
-	  if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-			    anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 )
-	    return -1;
-	  gettimeofday ( &tv1, NULL );
+				gettimeofday ( &tv0, NULL );
+				if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
+													anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 )
+					return -1;
+				gettimeofday ( &tv1, NULL );
 
-	  printf ("Time for FindBestMove: %10.6f seconds\n",
-		  1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
-		  (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
+				printf ("Time for FindBestMove: %10.6f seconds\n",
+								1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
+								(1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
 	  
-	  /* The move has been determined without an interrupt.  It's
+				/* The move has been determined without an interrupt.  It's
 	     too late to go back now; go ahead and update the board, and
 	     block SIGINTs, to make sure that the rest of the move
 	     processing proceeds atomically.  On POSIX systems, use
@@ -294,47 +263,47 @@ static int ComputerTurn( void ) {
 	     race condition. */
 	  
 #if HAVE_SIGPROCMASK
-	  {
-	    sigset_t ss;
+				{
+					sigset_t ss;
 	    
-	    sigemptyset( &ss );
-	    sigaddset( &ss, SIGINT );
-	    sigprocmask( SIG_BLOCK, &ss, NULL );
-	  }
+					sigemptyset( &ss );
+					sigaddset( &ss, SIGINT );
+					sigprocmask( SIG_BLOCK, &ss, NULL );
+				}
 #elif HAVE_SIGBLOCK
-	  sigblock( sigmask( SIGINT ) );
+				sigblock( sigmask( SIGINT ) );
 #endif
-	  fInterrupt = FALSE;
+				fInterrupt = FALSE;
 	  
-	  memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
+				memcpy( anBoard, anBoardMove, sizeof( anBoardMove ) );
 	  
-	  return 0;
+				return 0;
 	  
-	}
+			}
 
     case PLAYER_PUBEVAL:
-	if( fResigned == 3 ) {
-	    CommandAgree( NULL );
-	    return 0;
-	} else if( fResigned ) {
-	    CommandDecline( NULL );
-	    return 0;
-	} else if( fDoubled ) {
-	    CommandTake( NULL );
-	    return 0;
-	}
-	/* FIXME save move */
+			if( fResigned == 3 ) {
+				CommandAgree( NULL );
+				return 0;
+			} else if( fResigned ) {
+				CommandDecline( NULL );
+				return 0;
+			} else if( fDoubled ) {
+				CommandTake( NULL );
+				return 0;
+			}
+			/* FIXME save move */
 	
-	if ( ! anDice[ 0 ] )
-	  RollDice( anDice );
+			if ( ! anDice[ 0 ] )
+				RollDice( anDice );
 
-	if( fDisplay )
-	  ShowBoard();
+			if( fDisplay )
+				ShowBoard();
 
-	return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
+			return FindPubevalMove( anDice[ 0 ], anDice[ 1 ], anBoard );
 
     default:
-	assert( FALSE );
+			assert( FALSE );
     }
 }
 
@@ -343,166 +312,166 @@ static int ComputerTurn( void ) {
    a chequer. */
 static int TryBearoff( void ) {
 
-    movelist ml;
-    int i, iMove, cMoves;
-    movenormal *pmn;
+	movelist ml;
+	int i, iMove, cMoves;
+	movenormal *pmn;
     
-    if( ClassifyPosition( anBoard ) > CLASS_RACE )
-	/* It's a contact position; don't automatically bear off */
-	return -1;
+	if( ClassifyPosition( anBoard ) > CLASS_RACE )
+		/* It's a contact position; don't automatically bear off */
+		return -1;
     
-    GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
-    cMoves = ( anDice[ 0 ] == anDice[ 1 ] ) ? 4 : 2;
+	cMoves = ( anDice[ 0 ] == anDice[ 1 ] ) ? 4 : 2;
     
-    for( i = 0; i < ml.cMoves; i++ )
-	for( iMove = 0; iMove < cMoves; iMove++ )
+	for( i = 0; i < ml.cMoves; i++ )
+		for( iMove = 0; iMove < cMoves; iMove++ )
 	    if( ( ml.amMoves[ i ].anMove[ iMove << 1 ] < 0 ) ||
-		( ml.amMoves[ i ].anMove[ ( iMove << 1 ) + 1 ] != -1 ) )
-		break;
+					( ml.amMoves[ i ].anMove[ ( iMove << 1 ) + 1 ] != -1 ) )
+				break;
 	    else if( iMove == cMoves - 1 ) {
-		/* All dice bear off */
-		pmn = malloc( sizeof( *pmn ) );
-		pmn->mt = MOVE_NORMAL;
-		pmn->anRoll[ 0 ] = anDice[ 0 ];
-		pmn->anRoll[ 1 ] = anDice[ 1 ];
-		pmn->fPlayer = fTurn;
-		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
-			sizeof( pmn->anMove ) );
-		ListInsert( plGame, pmn );
+				/* All dice bear off */
+				pmn = malloc( sizeof( *pmn ) );
+				pmn->mt = MOVE_NORMAL;
+				pmn->anRoll[ 0 ] = anDice[ 0 ];
+				pmn->anRoll[ 1 ] = anDice[ 1 ];
+				pmn->fPlayer = fTurn;
+				memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
+								sizeof( pmn->anMove ) );
+				ListInsert( plGame, pmn );
 		
-		PositionFromKey( anBoard, ml.amMoves[ i ].auch );
+				PositionFromKey( anBoard, ml.amMoves[ i ].auch );
 		
-		return 0;
+				return 0;
 	    }
 
-    return -1;
+	return -1;
 }
 
 extern void NextTurn( void ) {
 
-    int n, fWinner;
+	int n, fWinner;
 #if !X_DISPLAY_MISSING
-    static struct timeval tvLast, tv;
+	static struct timeval tvLast, tv;
 #endif
     
 #if !X_DISPLAY_MISSING
-    if( fX )
-	EventPending( &evNextTurn, FALSE );
-    else
+	if( fX )
+		EventPending( &evNextTurn, FALSE );
+	else
 #endif
-	fNextTurn = FALSE;
+		fNextTurn = FALSE;
     
-    fTurn = !fTurn;
+	fTurn = !fTurn;
 	
-    if( go == GAME_NORMAL && !fResigned && !fDoubled && fTurn != fMove ) {
-	fMove = !fMove;
-	anDice[ 0 ] = anDice[ 1 ] = 0;
+	if( go == GAME_NORMAL && !fResigned && !fDoubled && fTurn != fMove ) {
+		fMove = !fMove;
+		anDice[ 0 ] = anDice[ 1 ] = 0;
 	    
-	SwapSides( anBoard );
-    }
+		SwapSides( anBoard );
+	}
 
 #if !X_DISPLAY_MISSING
-    if( fX && nDelay ) {
-	/* FIXME this is awful... it does delay, but it shouldn't do it by
-	   sleeping here -- it should set a timeout and return to the main
-	   event loop.
+	if( fX && nDelay ) {
+		/* FIXME this is awful... it does delay, but it shouldn't do it by
+			 sleeping here -- it should set a timeout and return to the main
+			 event loop.
 
-	   Another problem with this implementation is that the delay
-	   will not work the first time NextTurn is called, because
-	   tvLast will be initialised to zero and this code will assume
-	   the delay has already elapsed. */
-	gettimeofday( &tv, NULL );
-	if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
+			 Another problem with this implementation is that the delay
+			 will not work the first time NextTurn is called, because
+			 tvLast will be initialised to zero and this code will assume
+			 the delay has already elapsed. */
+		gettimeofday( &tv, NULL );
+		if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
 	    tvLast.tv_sec += tvLast.tv_usec / 1000000;
 	    tvLast.tv_usec %= 1000000;
-	}
+		}
 	
-	if( tvLast.tv_sec > tv.tv_sec || ( tvLast.tv_sec == tv.tv_sec &&
-					   tvLast.tv_usec > tv.tv_usec ) ) {
+		if( tvLast.tv_sec > tv.tv_sec || ( tvLast.tv_sec == tv.tv_sec &&
+																			 tvLast.tv_usec > tv.tv_usec ) ) {
 	    tvLast.tv_sec -= tv.tv_sec;
 	    if( ( tvLast.tv_usec -= tv.tv_usec ) < 0 ) {
-		tvLast.tv_usec += 1000000;
-		tvLast.tv_sec--;
+				tvLast.tv_usec += 1000000;
+				tvLast.tv_sec--;
 	    }
 	    
 	    select( 0, NULL, NULL, NULL, &tvLast );
-	}
+		}
 	
-	gettimeofday( &tvLast, NULL );
-    }
+		gettimeofday( &tvLast, NULL );
+	}
 #endif
     
-    if( go == GAME_NORMAL && ( fDisplay ||
-			       ap[ fTurn ].pt == PLAYER_HUMAN ) )
-	ShowBoard();
+	if( go == GAME_NORMAL && ( fDisplay ||
+														 ap[ fTurn ].pt == PLAYER_HUMAN ) )
+		ShowBoard();
     
-    if( ( n = GameStatus( anBoard ) ) ||
-	( go == GAME_DROP && ( n = 1 ) ) ||
-	( go == GAME_RESIGNED && ( n = fResigned ) ) ) {
-	fWinner = !fTurn;
+	if( ( n = GameStatus( anBoard ) ) ||
+			( go == GAME_DROP && ( n = 1 ) ) ||
+			( go == GAME_RESIGNED && ( n = fResigned ) ) ) {
+		fWinner = !fTurn;
 	
-	if( fJacoby && fCubeOwner == -1 && !nMatchTo )
+		if( fJacoby && fCubeOwner == -1 && !nMatchTo )
 	    /* gammons do not count on a centred cube during money
 	       sessions under the Jacoby rule */
 	    n = 1;
 	
-	anScore[ fWinner ] += n * nCube;
-	cGames++;
+		anScore[ fWinner ] += n * nCube;
+		cGames++;
 	
-	fTurn = fMove = -1;
-	anDice[ 0 ] = anDice[ 1 ] = 0;
+		fTurn = fMove = -1;
+		anDice[ 0 ] = anDice[ 1 ] = 0;
 	
-	go = GAME_NORMAL;
+		go = GAME_NORMAL;
 	
-	printf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
-		aszGameResult[ n - 1 ], n * nCube,
-		n * nCube > 1 ? "s" : "" );
+		printf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
+						aszGameResult[ n - 1 ], n * nCube,
+						n * nCube > 1 ? "s" : "" );
 	
 #if !X_DISPLAY_MISSING
-	if( fX && fDisplay )
+		if( fX && fDisplay )
 	    ShowBoard();
 #endif
 	
-	if( nMatchTo && fAutoCrawford ) {
+		if( nMatchTo && fAutoCrawford ) {
 	    fCrawford = anScore[ fWinner ] == nMatchTo - 1 &&
-		anScore[ !fWinner ] < nMatchTo - 1;
+				anScore[ !fWinner ] < nMatchTo - 1;
 	    fPostCrawford = anScore[ !fWinner ] == nMatchTo - 1;
-	}
+		}
 	
-	CommandShowScore( NULL );
+		CommandShowScore( NULL );
 	
-	if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
+		if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
 	    printf( "%s has won the match.\n", ap[ fWinner ].szName );
 	    return;
-	}
+		}
 	
-	if( fAutoGame ) {
+		if( fAutoGame ) {
 	    NewGame();
 	    
 	    if( ap[ fTurn ].pt == PLAYER_HUMAN )
-		ShowBoard();
-	} else
+				ShowBoard();
+		} else
 	    return;
-    }
+	}
     
-    if( fTurn == fMove )
-	fResigned = 0;
+	if( fTurn == fMove )
+		fResigned = 0;
     
-    if( fInterrupt )
-	return;
+	if( fInterrupt )
+		return;
     
-    if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
-	if( fAutoRoll && !anDice[ 0 ] &&
-	    ( !fCubeUse || ( fCubeOwner >= 0 && fCubeOwner != fTurn &&
-			     !fDoubled ) ) )
+	if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
+		if( fAutoRoll && !anDice[ 0 ] &&
+				( !fCubeUse || ( fCubeOwner >= 0 && fCubeOwner != fTurn &&
+												 !fDoubled ) ) )
 	    CommandRoll( NULL );
-	return;
-    } else
+		return;
+	} else
 #if !X_DISPLAY_MISSING
-	if( fX )
+		if( fX )
 	    EventPending( &evNextTurn, !ComputerTurn() );
-	else
+		else
 #endif
 	    fNextTurn = !ComputerTurn();
 }
@@ -510,195 +479,195 @@ extern void NextTurn( void ) {
 
 extern void CommandAccept( char *sz ) {
 
-    if( fResigned )
-	CommandAgree( sz );
-    else if( fDoubled )
-	CommandTake( sz );
-    else
-	puts( "You can only accept if the cube or a resignation has been "
-	      "offered." );
+	if( fResigned )
+		CommandAgree( sz );
+	else if( fDoubled )
+		CommandTake( sz );
+	else
+		puts( "You can only accept if the cube or a resignation has been "
+					"offered." );
 }
 
 extern void CommandAgree( char *sz ) {
 
-    moveresign *pmr;
+	moveresign *pmr;
     
-    if( !fResigned ) {
-	puts( "No resignation was offered." );
+	if( !fResigned ) {
+		puts( "No resignation was offered." );
 
-	return;
-    }
+		return;
+	}
 
-    if( fDisplay )
-	printf( "%s accepts and wins a %s.\n", ap[ fTurn ].szName,
-		aszGameResult[ fResigned - 1 ] );
+	if( fDisplay )
+		printf( "%s accepts and wins a %s.\n", ap[ fTurn ].szName,
+						aszGameResult[ fResigned - 1 ] );
 
-    go = GAME_RESIGNED;
+	go = GAME_RESIGNED;
 
-    pmr = malloc( sizeof( *pmr ) );
-    pmr->mt = MOVE_RESIGN;
-    pmr->fPlayer = !fTurn;
-    pmr->nResigned = fResigned;
-    ListInsert( plGame, pmr );
+	pmr = malloc( sizeof( *pmr ) );
+	pmr->mt = MOVE_RESIGN;
+	pmr->fPlayer = !fTurn;
+	pmr->nResigned = fResigned;
+	ListInsert( plGame, pmr );
 
-    TurnDone();
+	TurnDone();
 }
 
 extern void CommandDecline( char *sz ) {
 
-    if( !fResigned ) {
-	puts( "No resignation was offered." );
+	if( !fResigned ) {
+		puts( "No resignation was offered." );
 
-	return;
-    }
+		return;
+	}
 
-    if( fDisplay )
-	printf( "%s declines the %s.\n", ap[ fTurn ].szName,
-		aszGameResult[ fResigned - 1 ] );
+	if( fDisplay )
+		printf( "%s declines the %s.\n", ap[ fTurn ].szName,
+						aszGameResult[ fResigned - 1 ] );
 
-    TurnDone();
+	TurnDone();
 }
 
 extern void CommandDouble( char *sz ) {
 
-    movetype *pmt;
+	movetype *pmt;
     
-    if( fTurn < 0 ) {
-	puts( "No game in progress (type `new game' to start one)." );
+	if( fTurn < 0 ) {
+		puts( "No game in progress (type `new game' to start one)." );
 
-	return;
-    }
+		return;
+	}
 
-    if( fCrawford ) {
-	puts( "Doubling is forbidden by the Crawford rule (see `help set "
-	      "crawford')." );
+	if( fCrawford ) {
+		puts( "Doubling is forbidden by the Crawford rule (see `help set "
+					"crawford')." );
 
-	return;
-    }
+		return;
+	}
 
-    if( !fCubeUse ) {
-	puts( "The doubling cube has been disabled (see `help set cube "
-	      "use')." );
+	if( !fCubeUse ) {
+		puts( "The doubling cube has been disabled (see `help set cube "
+					"use')." );
 
-	return;
-    }
+		return;
+	}
 
-    if( fDoubled ) {
-	puts( "The `double' command is for offering the cube, not accepting "
-	      "it.  Use\n`redouble' to immediately offer the cube back at a "
-	      "higher value." );
+	if( fDoubled ) {
+		puts( "The `double' command is for offering the cube, not accepting "
+					"it.  Use\n`redouble' to immediately offer the cube back at a "
+					"higher value." );
 
-	return;
-    }
+		return;
+	}
     
-    if( fTurn != fMove ) {
-	puts( "You are only allowed to double if you are on roll." );
+	if( fTurn != fMove ) {
+		puts( "You are only allowed to double if you are on roll." );
 
-	return;
-    }
+		return;
+	}
     
-    if( anDice[ 0 ] ) {
-	puts( "You can't double after rolling the dice -- wait until your "
-	      "next turn." );
+	if( anDice[ 0 ] ) {
+		puts( "You can't double after rolling the dice -- wait until your "
+					"next turn." );
 
-	return;
-    }
+		return;
+	}
 
-    if( fCubeOwner >= 0 && fCubeOwner != fTurn ) {
-	puts( "You do not own the cube." );
+	if( fCubeOwner >= 0 && fCubeOwner != fTurn ) {
+		puts( "You do not own the cube." );
 
-	return;
-    }
+		return;
+	}
     
-    fDoubled = 1;
+	fDoubled = 1;
 
-    if( fDisplay )
-	printf( "%s doubles.\n", ap[ fTurn ].szName );
+	if( fDisplay )
+		printf( "%s doubles.\n", ap[ fTurn ].szName );
     
-    pmt = malloc( sizeof( *pmt ) );
-    *pmt = MOVE_DOUBLE;
-    ListInsert( plGame, pmt );
+	pmt = malloc( sizeof( *pmt ) );
+	*pmt = MOVE_DOUBLE;
+	ListInsert( plGame, pmt );
     
-    TurnDone();
+	TurnDone();
 }
 
 extern void CommandDrop( char *sz ) {
 
-    movetype *pmt;
+	movetype *pmt;
     
-    if( fTurn < 0 || !fDoubled ) {
-	puts( "The cube must have been offered before you can drop it." );
+	if( fTurn < 0 || !fDoubled ) {
+		puts( "The cube must have been offered before you can drop it." );
 
-	return;
-    }
+		return;
+	}
 
-    if( fDisplay )
-	printf( "%s refuses the cube and gives up %d points.\n",
-		ap[ fTurn ].szName, nCube );
+	if( fDisplay )
+		printf( "%s refuses the cube and gives up %d points.\n",
+						ap[ fTurn ].szName, nCube );
     
-    fDoubled = FALSE;
+	fDoubled = FALSE;
 
-    go = GAME_DROP;
+	go = GAME_DROP;
 
-    fTurn = !fTurn;
+	fTurn = !fTurn;
 
-    pmt = malloc( sizeof( *pmt ) );
-    *pmt = MOVE_DROP;
-    ListInsert( plGame, pmt );
+	pmt = malloc( sizeof( *pmt ) );
+	*pmt = MOVE_DROP;
+	ListInsert( plGame, pmt );
     
-    TurnDone();
+	TurnDone();
 }
 
 extern void CommandMove( char *sz ) {
 
-    int c, i, j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ],
-	an[ 8 ];
-    movelist ml;
-    movenormal *pmn;
+	int c, i, j, anBoardNew[ 2 ][ 25 ], anBoardTest[ 2 ][ 25 ],
+		an[ 8 ];
+	movelist ml;
+	movenormal *pmn;
     
-    if( fTurn < 0 ) {
-	puts( "No game in progress (type `new' to start one)." );
+	if( fTurn < 0 ) {
+		puts( "No game in progress (type `new' to start one)." );
 
-	return;
-    }
+		return;
+	}
 
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
-	puts( "It is the computer's turn -- type `play' to force it to "
-	      "move immediately." );
-	return;
-    }
+	if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+		puts( "It is the computer's turn -- type `play' to force it to "
+					"move immediately." );
+		return;
+	}
 
-    if( !anDice[ 0 ] ) {
-	puts( "You must roll the dice before you can move." );
+	if( !anDice[ 0 ] ) {
+		puts( "You must roll the dice before you can move." );
 
-	return;
-    }
+		return;
+	}
 
-    if( fResigned ) {
-	printf( "Please wait for %s to consider the resignation before "
-		"moving.\n", ap[ fTurn ].szName );
+	if( fResigned ) {
+		printf( "Please wait for %s to consider the resignation before "
+						"moving.\n", ap[ fTurn ].szName );
 
-	return;
-    }
+		return;
+	}
 
-    if( fDoubled ) {
-	printf( "Please wait for %s to consider the cube before "
-		"moving.\n", ap[ fTurn ].szName );
+	if( fDoubled ) {
+		printf( "Please wait for %s to consider the cube before "
+						"moving.\n", ap[ fTurn ].szName );
 
-	return;
-    }
+		return;
+	}
     
-    if( !*sz ) {
-	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+	if( !*sz ) {
+		GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
-	if( ml.cMoves == 1 ) {
+		if( ml.cMoves == 1 ) {
 	    pmn = malloc( sizeof( *pmn ) );
 	    pmn->mt = MOVE_NORMAL;
 	    pmn->anRoll[ 0 ] = anDice[ 0 ];
 	    pmn->anRoll[ 1 ] = anDice[ 1 ];
 	    pmn->fPlayer = fTurn;
 	    memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove,
-		    sizeof( pmn->anMove ) );
+							sizeof( pmn->anMove ) );
 	    ListInsert( plGame, pmn );
 	    
 	    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
@@ -706,381 +675,381 @@ extern void CommandMove( char *sz ) {
 	    TurnDone();
 
 	    return;
-	}
+		}
 
-	if( fAutoBearoff && !TryBearoff() ) {
+		if( fAutoBearoff && !TryBearoff() ) {
 	    TurnDone();
 
 	    return;
-	}
+		}
 	
-	puts( "You must specify a move (type `help move' for instructions)." );
+		puts( "You must specify a move (type `help move' for instructions)." );
 
-	return;
-    }
+		return;
+	}
     
-    if( ( c = ParseMove( sz, an ) ) > 0 ) {
-	for( i = 0; i < 25; i++ ) {
+	if( ( c = ParseMove( sz, an ) ) > 0 ) {
+		for( i = 0; i < 25; i++ ) {
 	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
 	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-	}
+		}
 	
-	for( i = 0; i < c; i++ ) {
+		for( i = 0; i < c; i++ ) {
 	    anBoardNew[ 1 ][ an[ i << 1 ] - 1 ]--;
 	    if( an[ ( i << 1 ) | 1 ] > 0 ) {
-		anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
+				anBoardNew[ 1 ][ an[ ( i << 1 ) | 1 ] - 1 ]++;
 		
-		anBoardNew[ 0 ][ 24 ] +=
-		    anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
+				anBoardNew[ 0 ][ 24 ] +=
+					anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ];
 		
-		anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
+				anBoardNew[ 0 ][ 24 - an[ ( i << 1 ) | 1 ] ] = 0;
 	    }
-	}
+		}
 	
-	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
+		GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 	
-	for( i = 0; i < ml.cMoves; i++ ) {
+		for( i = 0; i < ml.cMoves; i++ ) {
 	    PositionFromKey( anBoardTest, ml.amMoves[ i ].auch );
 	    
 	    for( j = 0; j < 25; j++ )
-		if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
-		    anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
-		    break;
+				if( anBoardTest[ 0 ][ j ] != anBoardNew[ 0 ][ j ] ||
+						anBoardTest[ 1 ][ j ] != anBoardNew[ 1 ][ j ] )
+					break;
 	    
 	    if( j == 25 ) {
-		/* we have a legal move! */
-		pmn = malloc( sizeof( *pmn ) );
-		pmn->mt = MOVE_NORMAL;
-		pmn->anRoll[ 0 ] = anDice[ 0 ];
-		pmn->anRoll[ 1 ] = anDice[ 1 ];
-		pmn->fPlayer = fTurn;
-		memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
-			sizeof( pmn->anMove ) );
-		ListInsert( plGame, pmn );
+				/* we have a legal move! */
+				pmn = malloc( sizeof( *pmn ) );
+				pmn->mt = MOVE_NORMAL;
+				pmn->anRoll[ 0 ] = anDice[ 0 ];
+				pmn->anRoll[ 1 ] = anDice[ 1 ];
+				pmn->fPlayer = fTurn;
+				memcpy( pmn->anMove, ml.amMoves[ i ].anMove,
+								sizeof( pmn->anMove ) );
+				ListInsert( plGame, pmn );
 		
-		memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
+				memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
 		
-		TurnDone();
+				TurnDone();
 		
-		return;
+				return;
 	    }
+		}
 	}
-    }
 
-    puts( "Illegal move." );
+	puts( "Illegal move." );
 }
 
 static void FreeGame( list *pl ) {
 
-    while( pl->plNext != pl ) {
-	free( pl->plNext->p );
-	ListDelete( pl->plNext );
-    }
+	while( pl->plNext != pl ) {
+		free( pl->plNext->p );
+		ListDelete( pl->plNext );
+	}
 
-    free( pl );
+	free( pl );
 }
 
 extern void CommandNewGame( char *sz ) {
 
-    char *pch;
+	char *pch;
     
-    if( nMatchTo && ( anScore[ 0 ] >= nMatchTo ||
-		      anScore[ 1 ] >= nMatchTo ) ) {
-	puts( "The match is already over." );
+	if( nMatchTo && ( anScore[ 0 ] >= nMatchTo ||
+										anScore[ 1 ] >= nMatchTo ) ) {
+		puts( "The match is already over." );
 
-	return;
-    }
-
-    if( fTurn != -1 ) {
-	while( fConfirm ) {
-	    if( fInterrupt )
 		return;
-	    
-	    pch = GetInput( "Are you sure you want to start a new game, "
-			    "and discard the one in progress? " );
-
-	    if( fInterrupt )
-		return;
-
-	    if( pch && ( *pch == 'y' || *pch == 'Y' ) )
-		break;
-
-	    if( pch && ( *pch == 'n' || *pch == 'N' ) )
-		return;
-
-	    puts( "Please answer 'y' or 'n'." );
 	}
 
-	/* The last game of the match should always be the current one. */
-	assert( lMatch.plPrev->p == plGame );
+	if( fTurn != -1 ) {
+		while( fConfirm ) {
+	    if( fInterrupt )
+				return;
+	    
+	    pch = GetInput( "Are you sure you want to start a new game, "
+											"and discard the one in progress? " );
 
-	ListDelete( lMatch.plPrev );
+	    if( fInterrupt )
+				return;
+
+	    if( pch && ( *pch == 'y' || *pch == 'Y' ) )
+				break;
+
+	    if( pch && ( *pch == 'n' || *pch == 'N' ) )
+				return;
+
+	    puts( "Please answer 'y' or 'n'." );
+		}
+
+		/* The last game of the match should always be the current one. */
+		assert( lMatch.plPrev->p == plGame );
+
+		ListDelete( lMatch.plPrev );
 	
-	FreeGame( plGame );
-    }
+		FreeGame( plGame );
+	}
     
-    NewGame();
+	NewGame();
 
-    if( fInterrupt )
-	return;
+	if( fInterrupt )
+		return;
     
-    if( ap[ fTurn ].pt == PLAYER_HUMAN )
-	ShowBoard();
-    else
-	if( !ComputerTurn() )
+	if( ap[ fTurn ].pt == PLAYER_HUMAN )
+		ShowBoard();
+	else
+		if( !ComputerTurn() )
 	    TurnDone();
 }
 
 static void FreeMatch( void ) {
 
-    list *plMatch;
+	list *plMatch;
 
-    while( ( plMatch = lMatch.plNext ) != &lMatch ) {
-	FreeGame( plMatch->p );
-	ListDelete( plMatch );
-    }
+	while( ( plMatch = lMatch.plNext ) != &lMatch ) {
+		FreeGame( plMatch->p );
+		ListDelete( plMatch );
+	}
 }
 
 extern void CommandNewMatch( char *sz ) {
 
-    int n = ParseNumber( &sz );
+	int n = ParseNumber( &sz );
 
-    if( n < 1 ) {
-	puts( "You must specify a valid match length (1 or longer)." );
+	if( n < 1 ) {
+		puts( "You must specify a valid match length (1 or longer)." );
 
-	return;
-    }
+		return;
+	}
 
-    FreeMatch();
+	FreeMatch();
 
-    nMatchTo = n;
+	nMatchTo = n;
 
-    cGames = anScore[ 0 ] = anScore[ 1 ] = 0;
-    fTurn = -1;
-    fCrawford = 0;
-    fPostCrawford = 0;
+	cGames = anScore[ 0 ] = anScore[ 1 ] = 0;
+	fTurn = -1;
+	fCrawford = 0;
+	fPostCrawford = 0;
 
-    printf( "A new %d point match has been started.\n", n );
+	printf( "A new %d point match has been started.\n", n );
 
 #if !X_DISPLAY_MISSING
-    if( fX )
-	ShowBoard();
+	if( fX )
+		ShowBoard();
 #endif
 }
 
 extern void CommandNewSession( char *sz ) {
 
-    FreeMatch();
+	FreeMatch();
 
-    cGames = nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
-    fTurn = -1;
-    fCrawford = 0;
-    fPostCrawford = 0;
+	cGames = nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
+	fTurn = -1;
+	fCrawford = 0;
+	fPostCrawford = 0;
 
-    puts( "A new session has been started." );
+	puts( "A new session has been started." );
     
 #if !X_DISPLAY_MISSING
-    if( fX )
-	ShowBoard();
+	if( fX )
+		ShowBoard();
 #endif
 }
 
 extern void CommandPlay( char *sz ) {
 
-    if( fTurn < 0 ) {
-	puts( "No game in progress (type `new' to start one)." );
+	if( fTurn < 0 ) {
+		puts( "No game in progress (type `new' to start one)." );
 
-	return;
-    }
+		return;
+	}
 
-    if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
-	puts( "It's not the computer's turn to play." );
+	if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
+		puts( "It's not the computer's turn to play." );
 
-	return;
-    }
+		return;
+	}
 
-    if( !ComputerTurn() )
-	TurnDone();
+	if( !ComputerTurn() )
+		TurnDone();
 }
 
 extern void CommandRedouble( char *sz ) {
 
-    movetype *pmt;
+	movetype *pmt;
 
-    if( nMatchTo > 0 ) {
-	puts( "Redoubles are not permitted during match play." );
+	if( nMatchTo > 0 ) {
+		puts( "Redoubles are not permitted during match play." );
 
-	return;
-    }
+		return;
+	}
     
-    if( fTurn < 0 || !fDoubled ) {
-	puts( "The cube must have been offered before you can redouble it." );
+	if( fTurn < 0 || !fDoubled ) {
+		puts( "The cube must have been offered before you can redouble it." );
 
-	return;
-    }
+		return;
+	}
     
-    nCube <<= 1;
+	nCube <<= 1;
 
-    if( fDisplay )
-	printf( "%s accepts and immediately redoubles to %d.\n",
-		ap[ fTurn ].szName, nCube << 1 );
+	if( fDisplay )
+		printf( "%s accepts and immediately redoubles to %d.\n",
+						ap[ fTurn ].szName, nCube << 1 );
     
-    fCubeOwner = !fMove;
+	fCubeOwner = !fMove;
 
-    pmt = malloc( sizeof( *pmt ) );
-    *pmt = MOVE_DOUBLE;
-    ListInsert( plGame, pmt );
+	pmt = malloc( sizeof( *pmt ) );
+	*pmt = MOVE_DOUBLE;
+	ListInsert( plGame, pmt );
     
-    TurnDone();
+	TurnDone();
 
 }
 
 extern void CommandReject( char *sz ) {
 
-    if( fResigned )
-	CommandDecline( sz );
-    else if( fDoubled )
-	CommandDrop( sz );
-    else
-	puts( "You can only reject if the cube or a resignation has been "
-	      "offered." );
+	if( fResigned )
+		CommandDecline( sz );
+	else if( fDoubled )
+		CommandDrop( sz );
+	else
+		puts( "You can only reject if the cube or a resignation has been "
+					"offered." );
 }
 
 extern void CommandResign( char *sz ) {
 
-    char *pch;
-    int cch;
+	char *pch;
+	int cch;
     
-    if( fTurn < 0 ) {
-	puts( "You must be playing a game if you want to resign it." );
+	if( fTurn < 0 ) {
+		puts( "You must be playing a game if you want to resign it." );
 
-	return;
-    }
+		return;
+	}
 
-    if( ( pch = NextToken( &sz ) ) ) {
-	cch = strlen( pch );
+	if( ( pch = NextToken( &sz ) ) ) {
+		cch = strlen( pch );
 
-	if( !strncasecmp( "single", pch, cch ) ||
-	    !strncasecmp( "normal", pch, cch ) )
+		if( !strncasecmp( "single", pch, cch ) ||
+				!strncasecmp( "normal", pch, cch ) )
 	    fResigned = 1;
-	else if( !strncasecmp( "gammon", pch, cch ) )
+		else if( !strncasecmp( "gammon", pch, cch ) )
 	    fResigned = 2;
-	else if( !strncasecmp( "backgammon", pch, cch ) )
+		else if( !strncasecmp( "backgammon", pch, cch ) )
 	    fResigned = 3;
-	else
+		else
 	    fResigned = atoi( pch );
-    } else
-	fResigned = 1;
+	} else
+		fResigned = 1;
 
-    if( fResigned < 1 || fResigned > 3 ) {
-	fResigned = 0;
+	if( fResigned < 1 || fResigned > 3 ) {
+		fResigned = 0;
 
-	printf( "Unknown keyword `%s' -- try `help resign'.\n", pch );
+		printf( "Unknown keyword `%s' -- try `help resign'.\n", pch );
 	
-	return;
-    }
+		return;
+	}
     
-    if( fDisplay )
-	printf( "%s offers to resign a %s.\n", ap[ fTurn ].szName,
-		aszGameResult[ fResigned - 1 ] );
+	if( fDisplay )
+		printf( "%s offers to resign a %s.\n", ap[ fTurn ].szName,
+						aszGameResult[ fResigned - 1 ] );
 
-    TurnDone();
+	TurnDone();
 }
 
 extern void CommandRoll( char *sz ) {
 
-    movelist ml;
-    movenormal *pmn;
+	movelist ml;
+	movenormal *pmn;
     
-    if( fTurn < 0 ) {
-	puts( "No game in progress (type `new' to start one)." );
+	if( fTurn < 0 ) {
+		puts( "No game in progress (type `new' to start one)." );
 
-	return;
-    }
+		return;
+	}
     
-    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
-	puts( "It is the computer's turn -- type `play' to force it to "
-	      "move immediately." );
-	return;
-    }
+	if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+		puts( "It is the computer's turn -- type `play' to force it to "
+					"move immediately." );
+		return;
+	}
 
-    if( fDoubled ) {
-	printf( "Please wait for %s to consider the cube before "
-		"moving.\n", ap[ fTurn ].szName );
+	if( fDoubled ) {
+		printf( "Please wait for %s to consider the cube before "
+						"moving.\n", ap[ fTurn ].szName );
 
-	return;
-    }    
+		return;
+	}    
 
-    if( fResigned ) {
-	puts( "Please resolve the resignation first." );
+	if( fResigned ) {
+		puts( "Please resolve the resignation first." );
 
-	return;
-    }
+		return;
+	}
 
-    if( anDice[ 0 ] ) {
-	puts( "You already did roll the dice." );
+	if( anDice[ 0 ] ) {
+		puts( "You already did roll the dice." );
 
-	return;
-    }
+		return;
+	}
     
-    if( RollDice( anDice ) < 0 )
-	return;
+	if( RollDice( anDice ) < 0 )
+		return;
 
-    ShowBoard();
+	ShowBoard();
 
-    if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE ) ) {
-	pmn = malloc( sizeof( *pmn ) );
-	pmn->mt = MOVE_NORMAL;
-	pmn->anRoll[ 0 ] = anDice[ 0 ];
-	pmn->anRoll[ 1 ] = anDice[ 1 ];
-	pmn->fPlayer = fTurn;
-	pmn->anMove[ 0 ] = -1;
-	ListInsert( plGame, pmn );
+	if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE ) ) {
+		pmn = malloc( sizeof( *pmn ) );
+		pmn->mt = MOVE_NORMAL;
+		pmn->anRoll[ 0 ] = anDice[ 0 ];
+		pmn->anRoll[ 1 ] = anDice[ 1 ];
+		pmn->fPlayer = fTurn;
+		pmn->anMove[ 0 ] = -1;
+		ListInsert( plGame, pmn );
 	
-	puts( "No legal moves." );
+		puts( "No legal moves." );
 
-	TurnDone();
-    } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
-						  <= CLASS_BEAROFF1 &&
-						  fAutoBearoff ) ) ) {
-	pmn = malloc( sizeof( *pmn ) );
-	pmn->mt = MOVE_NORMAL;
-	pmn->anRoll[ 0 ] = anDice[ 0 ];
-	pmn->anRoll[ 1 ] = anDice[ 1 ];
-	pmn->fPlayer = fTurn;
-	memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
-	ListInsert( plGame, pmn );
+		TurnDone();
+	} else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
+																								<= CLASS_BEAROFF1 &&
+																								fAutoBearoff ) ) ) {
+		pmn = malloc( sizeof( *pmn ) );
+		pmn->mt = MOVE_NORMAL;
+		pmn->anRoll[ 0 ] = anDice[ 0 ];
+		pmn->anRoll[ 1 ] = anDice[ 1 ];
+		pmn->fPlayer = fTurn;
+		memcpy( pmn->anMove, ml.amMoves[ 0 ].anMove, sizeof( pmn->anMove ) );
+		ListInsert( plGame, pmn );
 	
-	PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
+		PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 	
-	TurnDone();
-    } else
-	if( fAutoBearoff && !TryBearoff() )
+		TurnDone();
+	} else
+		if( fAutoBearoff && !TryBearoff() )
 	    TurnDone();
 }
 
 extern void CommandTake( char *sz ) {
 
-    movetype *pmt;
+	movetype *pmt;
     
-    if( fTurn < 0 || !fDoubled ) {
-	puts( "The cube must have been offered before you can take it." );
+	if( fTurn < 0 || !fDoubled ) {
+		puts( "The cube must have been offered before you can take it." );
 
-	return;
-    }
+		return;
+	}
 
-    nCube <<= 1;
+	nCube <<= 1;
 
-    if( fDisplay )
-	printf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName, nCube );
+	if( fDisplay )
+		printf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName, nCube );
     
-    fDoubled = FALSE;
+	fDoubled = FALSE;
 
-    fCubeOwner = !fMove;
+	fCubeOwner = !fMove;
 
-    pmt = malloc( sizeof( *pmt ) );
-    *pmt = MOVE_TAKE;
-    ListInsert( plGame, pmt );
+	pmt = malloc( sizeof( *pmt ) );
+	*pmt = MOVE_TAKE;
+	ListInsert( plGame, pmt );
     
-    TurnDone();
+	TurnDone();
 }

@@ -35,10 +35,10 @@ extern float aafA2 [ MAXSCORE ][ MAXSCORE ];
 extern float afBtilde [ MAXSCORE ];
 
 /*
+ * D1bar (D2bar) is the equity of player 1 (2) at the drop point
+ * of player 2 (1) assuming perfectly efficient recubes.
  * D1 (D2) is the equity of player 1 (2) at the drop point
- * of player 2 (1) assuming only you have access to the cube.
- * D1bar is the same except that both players have access to
- * the cube.
+ * of player 2 (1) assuming semiefficient recubes.
  */
 
 extern float aaafD1 [ MAXSCORE ][ MAXSCORE ][ MAXCUBELEVEL ];

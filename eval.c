@@ -2075,46 +2075,46 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
     
     for( i = 0; i <= nPlies; i++ ) {
-	szOutput = strchr( szOutput, 0 );
+			szOutput = strchr( szOutput, 0 );
 	
-	if( EvaluatePositionCache( anBoard, arOutput, &ci, pec, i ) < 0 )
-	    return -1;
-	if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, pec, i ,
-				      EVAL_BOTH ) < 0 )
-	  return -1;
-
-	if( !i )
-	    strcpy( szOutput, "static" );
-	else
-	    sprintf( szOutput, "%2d ply", i );
-
-	szOutput = strchr( szOutput, 0 );
-	
-	if ( ! nMatchTo )
-	  sprintf( szOutput,
-		   ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f (%+6.3f))\n",
-		   arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
-		   arOutput[ 3 ], arOutput[ 4 ], Utility ( arOutput, &ci ),
-		   arDouble[ 0 ] ); 
-	else
-	  sprintf( szOutput,
-		   ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
-		   "%+6.3f (%6.2f%%) (%+6.3f (%6.2f%%))\n",
-		   arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
-		   arOutput[ 3 ], arOutput[ 4 ], 
-		   Utility ( arOutput, &ci ), 
-		   UtilityMwc ( arOutput, &ci ) * 100.,
-		   mwc2eq ( arDouble[ 0 ], &ci ), 
-		   arDouble[ 0 ] * 100.); 
-
+			if( EvaluatePositionCache( anBoard, arOutput, &ci, pec, i ) < 0 )
+				return -1;
+			if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, pec, i ,
+																		EVAL_BOTH ) < 0 )
+				return -1;
+			
+			if( !i )
+				strcpy( szOutput, "static" );
+			else
+				sprintf( szOutput, "%2d ply", i );
+			
+			szOutput = strchr( szOutput, 0 );
+			
+			if ( ! nMatchTo )
+				sprintf( szOutput,
+								 ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f (%+6.3f))\n",
+								 arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
+								 arOutput[ 3 ], arOutput[ 4 ], Utility ( arOutput, &ci ),
+								 arDouble[ 0 ] ); 
+			else
+				sprintf( szOutput,
+								 ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+								 "%+6.3f (%6.2f%%) (%+6.3f (%6.2f%%))\n",
+								 arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
+								 arOutput[ 3 ], arOutput[ 4 ], 
+								 Utility ( arOutput, &ci ), 
+								 UtilityMwc ( arOutput, &ci ) * 100.,
+								 mwc2eq ( arDouble[ 0 ], &ci ), 
+								 arDouble[ 0 ] * 100.); 
+			
     }
 
     /*
      * Get cube action
      */
-
+		
     if ( ! nMatchTo ) {
-
+			
       szOutput = strchr( szOutput, 0 );
     
       sprintf ( szOutput, "No double      %+6.3f\n", arDouble[ 1 ] );
@@ -2132,71 +2132,75 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
       int an[ 3 ];
       int i;
       char *aszDoubleStr[ 3 ] = 
-	{ "No Double, take", "Double, take   ", "Double, pass   " };
+			{ "No double, take", "Double, take   ", 
+				"Double, pass   ", "Too good, pass " };
       
 
       if ( ( arDouble[ 2 ] >= arDouble[ 1 ] ) &&
-	   ( arDouble[ 3 ] >= arDouble[ 1 ] ) ) {
-
-	an[ 2 ] = 1;
-
-	if ( arDouble[ 2 ] < arDouble[ 3 ] ) {
-	  an[ 0 ] = 2; an[ 1 ] = 3;
-	}
-	else {
-	  an[ 0 ] = 3; an[ 1 ] = 2;
-	}
+					 ( arDouble[ 3 ] >= arDouble[ 1 ] ) ) {
+				
+				an[ 2 ] = 1;
+				
+				if ( arDouble[ 2 ] < arDouble[ 3 ] ) {
+					an[ 0 ] = 2; an[ 1 ] = 3;
+				}
+				else {
+					an[ 0 ] = 3; an[ 1 ] = 2;
+				}
       }
       else {
-
-	an[ 0 ] = 1;
-
-	if ( arDouble[ 2 ] > arDouble[ 3 ] ) {
-	  an[ 1 ] = 2; an[ 2 ] = 3;
-	}
-	else {
-	  an[ 1 ] = 3; an[ 2 ] = 2;
-	}
-
+				
+				if ( arDouble[ 1 ] > arDouble[ 3 ] )
+					an[ 0 ] = 4;
+				else
+					an[ 0 ] = 1;
+				
+				if ( arDouble[ 2 ] > arDouble[ 3 ] ) {
+					an[ 1 ] = 2; an[ 2 ] = 3;
+				}
+				else {
+					an[ 1 ] = 3; an[ 2 ] = 2;
+				}
+				
       }
-
+			
       szOutput = strchr ( szOutput, 0 );
       sprintf ( szOutput, 
-		"\n"
-		"Action\t\t\tmwc\t\t\tequity\n\n");
+								"\n"
+								"Action\t\t\tmwc\t\t\tequity\n\n");
       szOutput = strchr ( szOutput, 0 );
-
+			
       for ( i = 0; i < 3; i++ ) {
-	
-	if ( ! i ) {
-
-	  sprintf ( szOutput,
-		    "%s\t\t%6.2f%%\t\t\t%+6.4f\n",
-		    aszDoubleStr[ an[ i ] - 1 ], 
-		    arDouble[ an[ i ] ] * 100.0, 
-		    mwc2eq( arDouble[ an[ i ] ], &ci ) );
-
-	} else {
-
-	  sprintf ( szOutput,
-		    "%s\t\t%6.2f%%\t(%+6.2f%%)\t%+6.4f\t(%+6.4f)\n",
-		    aszDoubleStr[ an[ i ] - 1 ], 
-		    arDouble[ an[ i ] ] * 100.0, 
-		    ( arDouble[ an [ i ] ] - arDouble[ an [ 0 ] ] ) * 100.0,
-		    mwc2eq( arDouble[ an[ i ] ], &ci ), 
-		    mwc2eq( arDouble[ an[ i ] ], &ci ) -
-		    mwc2eq( arDouble[ an[ 0 ] ], &ci ) );
-
-	}
-
-	szOutput = strchr ( szOutput, 0 );
-
+				
+				if ( ! i ) {
+					
+					sprintf ( szOutput,
+										"%s\t\t%6.2f%%\t\t\t%+6.4f\n",
+										aszDoubleStr[ an[ i ] - 1 ], 
+										arDouble[ an[ i ] ] * 100.0, 
+										mwc2eq( arDouble[ an[ i ] ], &ci ) );
+					
+				} else {
+					
+					sprintf ( szOutput,
+										"%s\t\t%6.2f%%\t(%+6.2f%%)\t%+6.4f\t(%+6.4f)\n",
+										aszDoubleStr[ an[ i ] - 1 ], 
+										arDouble[ an[ i ] ] * 100.0, 
+										( arDouble[ an [ i ] ] - arDouble[ an [ 0 ] ] ) * 100.0,
+										mwc2eq( arDouble[ an[ i ] ], &ci ), 
+										mwc2eq( arDouble[ an[ i ] ], &ci ) -
+										mwc2eq( arDouble[ an[ 0 ] ], &ci ) );
+					
+				}
+				
+				szOutput = strchr ( szOutput, 0 );
+				
       }
-
+			
     }
 
     return 0;
-
+		
 }
 
 extern int EvalCacheResize( int cNew ) {
@@ -2316,20 +2320,18 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
     if ( fPostCrawford ) {
       if ( nMatchTo - anScore[ fMove ]  == 1 )
-	prOutput[ 3 ] = rDoublePass = 1.0;
+				prOutput[ 3 ] = rDoublePass = 1.0;
       else {
-	prOutput[ 3 ] = rDoublePass =
-	  GET_Btilde ( nMatchTo - anScore [ fMove ] - 1 - nCube, 
-		       afBtilde );
+				prOutput[ 3 ] = rDoublePass =
+					GET_Btilde ( nMatchTo - anScore [ fMove ] - 1 - nCube, 
+											 afBtilde );
 	
-	//printf ( "EvalCubeful (fPostCrawford): %2i %2i %2i %7.4f\n",
-	//	 nMatchTo, anScore[ fMove ], nCube, rDoublePass );
       }
     }
     else
       prOutput[ 3 ] = rDoublePass = 
-	GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube, 
-		 nMatchTo - anScore[ !fMove ] - 1, aafA1 );
+				GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube, 
+								 nMatchTo - anScore[ !fMove ] - 1, aafA1 );
     
     /* 
      * I can/will use cube:
@@ -2342,11 +2344,9 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
     fCube = ( ! fCrawford ) &&
       ( anScore[ fMove ] + nCube < nMatchTo ) &&
       ( ! ( fPostCrawford && ( anScore[ fMove ] == nMatchTo - 1
-			       ) ) ) &&
+															 ) ) ) &&
       ( ( fCubeOwner == -1 ) || (fCubeOwner == fMove ) );
 
-    //printf ("fCube = %i\n", fCube );
-      
   }
  
 
@@ -2379,60 +2379,54 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       prOutput[ 1 ] = 0.0;
 
       for( n0 = 1; n0 <= 6; n0++ )
-	for( n1 = 1; n1 <= n0; n1++ ) {
+				for( n1 = 1; n1 <= n0; n1++ ) {
 
-	  for( i = 0; i < 25; i++ ) {
-	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-	  }
+					for( i = 0; i < 25; i++ ) {
+						anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+						anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+					}
+					
+					if( fInterrupt ) {
+						errno = EINTR;
+						return -1;
+					}
+					
+					FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
+					
+					SwapSides( anBoardNew );
+					
+					/* Check if we're in double window, i.e.
+					 * our winning chance are higher than our
+					 * dead-cube doubling point.
+					 */
+					
+					/* do 0-ply evaluation of current position */
+					
+					if( EvaluatePosition( anBoardNew, arDH,  &cix, &ecDH ) )
+						return -1;
 
-	  if( fInterrupt ) {
-	    errno = EINTR;
-	    return -1;
-	  }
-	
-	  FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
-	
-	  SwapSides( anBoardNew );
+					/* find dead-cube doubling point */
 
-	  /* 
-	   * check if were in double window 
-	   */
-
-	  /* do 0-ply evaluations */
-
-	  if( EvaluatePosition( anBoardNew, arDH,  &cix, 
-				&ecDH ) )
-	    return -1;
-
-	  /*
-	  printf ( "My winning chance: %7.4f %7.4f %7.4f %7.4f %7.4f\n", 
-		   arDH[ 0 ], arDH[ 1 ], arDH[ 2 ],
-		   arDH[ 3 ], arDH[ 4 ] );
-	  */
-
-	  /* find dead-cube doubling point */
-
-	  GetDoublePointDeadCube ( arDH, anScore, 
-				   nMatchTo, &cix, &rDoublePoint );
+					GetDoublePointDeadCube ( arDH, anScore, 
+																	 nMatchTo, &cix, &rDoublePoint );
 	  
-	  if ( arDH[ 0 ] > rDoublePoint )
-	    fTempEvalFlag = EVAL_BOTH; /* we might double */
-	  else
-	    fTempEvalFlag = EVAL_NODOUBLE; /* we'll never double */
+					if ( arDH[ 0 ] > rDoublePoint )
+						fTempEvalFlag = EVAL_BOTH; /* we might double */
+					else
+						fTempEvalFlag = EVAL_NODOUBLE; /* we'll never double */
 
-	  if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec, 
-				       nPlies - 1, fTempEvalFlag ) ) 
-	    return -1;
+					if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec, 
+																			 nPlies - 1, fTempEvalFlag ) ) 
+						return -1;
 
-	  prOutput[ 1 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
+					prOutput[ 1 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
 
-	}
-    
+				}
+			
       if ( ! nMatchTo )
-	prOutput[ 1 ] /= -36.0;
+				prOutput[ 1 ] /= -36.0;
       else
-	prOutput[ 1 ] = 1.0 - prOutput[ 1 ] / 36.0;
+				prOutput[ 1 ] = 1.0 - prOutput[ 1 ] / 36.0;
       
     }
 
@@ -2447,9 +2441,6 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
     prOutput[ 2 ] = 0.0;
 
-
-    //printf ("Cubeful: use cube? %1i\n", fCube );
-
     if ( fCube && ( fEvalFlag & EVAL_DOUBLE ) ) {
 
       /*
@@ -2463,34 +2454,34 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       SetCubeInfo ( &cix, nCube * 2, ! fMove, ! fMove );
 
       for( n0 = 1; n0 <= 6; n0++ )
-	for( n1 = 1; n1 <= n0; n1++ ) {
+				for( n1 = 1; n1 <= n0; n1++ ) {
 
-	  for( i = 0; i < 25; i++ ) {
-	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-	  }
+					for( i = 0; i < 25; i++ ) {
+						anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+						anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+					}
 	  
-	  if( fInterrupt ) {
-	    errno = EINTR;
-	    return -1;
-	  }
+					if( fInterrupt ) {
+						errno = EINTR;
+						return -1;
+					}
 	
-	  FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
+					FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
 	
-	  SwapSides( anBoardNew );
+					SwapSides( anBoardNew );
 
-	  if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec,
-				       nPlies - 1, EVAL_BOTH ) ) 
-	    return -1;
+					if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec,
+																			 nPlies - 1, EVAL_BOTH ) ) 
+						return -1;
 
-	  prOutput[ 2 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
+					prOutput[ 2 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
 
-	}
+				}
 
       if ( ! nMatchTo )
-	prOutput[ 2 ] /= -18.0; /* multiply by cube value of 2 */
+				prOutput[ 2 ] /= -18.0; /* multiply by cube value of 2 */
       else
-	prOutput[ 2 ] = 1.0 - prOutput[ 2 ] / 36.0;
+				prOutput[ 2 ] = 1.0 - prOutput[ 2 ] / 36.0;
 
       /*
        * If
@@ -2498,28 +2489,22 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
        *    equity(double, pass) > equity(no double)
        * we have a double.
        */
-
+			
       if ( ( prOutput[ 2 ] >= prOutput[ 1 ] ) && 
-	   ( rDoublePass >= prOutput[ 1 ] ) ) {
-
-	if ( prOutput[ 2 ] < rDoublePass ) 
-	  prOutput[ 0 ] = prOutput[ 2 ];
-	else
-	  prOutput[ 0 ] = rDoublePass;
-	
+					 ( rDoublePass >= prOutput[ 1 ] ) ) {
+				
+				if ( prOutput[ 2 ] < rDoublePass ) 
+					prOutput[ 0 ] = prOutput[ 2 ];
+				else
+					prOutput[ 0 ] = rDoublePass;
+				
       }
       else
-	prOutput[ 0 ] = prOutput[ 1 ];
+				prOutput[ 0 ] = prOutput[ 1 ];
       
     }
     else
       prOutput[ 0 ] = prOutput[ 1 ];
-
-#ifdef VERBOSE
-       printf ( "%1i-ply: %+6.3f %+6.3f %+6.3f %+6.3f\n",
-       nPlies, prOutput[ 0 ], prOutput[ 1 ], prOutput[ 2 ],
-       prOutput[ 3 ] );
-#endif
 
   } else {
 
@@ -2529,24 +2514,10 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
      * call is cached.
      */
 
-    /* 
-     * rTakePoint0: my equity at my take point,
-     * rTakePoint1: my equity at opp take point.
-     */
-
-    float rTakePoint0, rTakePoint1;
-
-    
     EvaluatePosition ( anBoard, arOutput, ci, 0 );
     
     SanityCheck( anBoard, arOutput );
 
-#ifdef VERBOSE
-    printf ( "arOutput: %5.3f %5.3f %5.3f %5.3f %5.3f %s\n",
-    	     arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
-         arOutput[ 3 ], arOutput[ 4 ], PositionID ( anBoard ) );
-#endif
-    
     /* calculate cubeful equity */
 
     if ( pc == CLASS_OVER ) {
@@ -2554,18 +2525,18 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       /* no value of holding the cube */
 
       if ( ! nMatchTo )
-	prOutput[ 0 ] = Utility ( arOutput, ci );
+				prOutput[ 0 ] = Utility ( arOutput, ci );
       else
-	prOutput[ 0 ] = UtilityMwc ( arOutput, ci );
+				prOutput[ 0 ] = UtilityMwc ( arOutput, ci );
 			
       /* no double: */
       prOutput[ 1 ] = prOutput[ 0 ];
 			
       /* double: */
       if ( fCube ) 
-	prOutput[ 3 ] = prOutput[ 0 ];
+				prOutput[ 3 ] = prOutput[ 0 ];
       else 
-	prOutput[ 3 ] = 0.0;
+				prOutput[ 3 ] = 0.0;
 			
     } 
     else {
@@ -2579,191 +2550,152 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       fNoCube = ( anScore[ fMove ] + nCube >= nMatchTo );
       fNoCube = fNoCube || ( anScore[ ! fMove ] + nCube >= nMatchTo );
       fNoCube = fNoCube ||  
-	( ( anScore[ fMove ] == nMatchTo - 2 ) &&
-	  ( anScore[ ! fMove ] == nMatchTo - 2 ) );
+				( ( anScore[ fMove ] == nMatchTo - 2 ) &&
+					( anScore[ ! fMove ] == nMatchTo - 2 ) );
       fNoCube = fNoCube || fCrawford;
-
+			
       /*
        * No double.
        */
 
       rEq = prOutput[ 1 ] = Utility ( arOutput, ci );
-      //      printf ( "no double, rEq, fNoCube %7.4f %i\n", prOutput[ 1 ], fNoCube );
 
       if ( ! ( nMatchTo && fNoCube ) ) {
 
 
-	float arTakePoint[ 4 ], rEq0, rEq1, rEqC;
-	float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
-	float r0,r1;              
-	int i;	                  
-	float rPoint0, rPoint1, rPoint2, rPoint3;
-		                  
-	for ( i = 0; i < NUM_OUTPUTS; i++ )
-	  arTemp[ i ] = arOutput[ i ];
-	if ( fMove )              
-	  InvertEvaluation ( arTemp );
+				float arTakePoint[ 4 ], rEq0, rEq1, rEqC;
+				float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
+				float r0,r1;              
+				int i;	                  
+				float rPoint0, rPoint1, rPoint2, rPoint3;
+				
+				for ( i = 0; i < NUM_OUTPUTS; i++ )
+					arTemp[ i ] = arOutput[ i ];
+				if ( fMove )              
+					InvertEvaluation ( arTemp );
 	
-	/* Get the take point using current gammon ratios. */
+				/* Get the take point using current gammon ratios. */
+				
+				GetTakePoint ( arTemp, anScore, nMatchTo, ci->nCube,
+											 arTakePoint );
 
-	GetTakePoint ( arTemp, anScore, nMatchTo, ci->nCube,
-		       arTakePoint );
+				/* calculate my equity at opp takepoint */
 
-
-#ifdef VERBOSE
-	printf ("arOutput: %7.4f %7.4f %7.4f %7.4f %7.4f\n",
-		arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
-		arOutput[ 3 ], arOutput[ 4 ] );
-
-	printf ("arTakePoint: %+1i %7.4f %7.4f %7.4f %7.4f\n",
-		ci->fMove, arTakePoint[ 0 ], arTakePoint[ 1 ],
-		arTakePoint[ 2 ], arTakePoint[ 3 ] );
-
-	printf ("mwc before cubeful %8.4f\n", UtilityMwc ( arOutput,
-							   ci ) );
-#endif
-
-
-	/* calculate my equity at opp takepoint */
-
-	arTemp[ 0 ] = arTakePoint[ ci->fMove ];
+				arTemp[ 0 ] = arTakePoint[ ci->fMove ];
         arTemp[ 1 ] = 
-	  arOutput[ 1 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
+					arOutput[ 1 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
         arTemp[ 2 ] = 
-	  arOutput[ 2 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
-	arTemp[ 3 ] = 
-	  ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	  ( 1.0 - arTakePoint[ ci->fMove ] );
-	arTemp[ 4 ] = 
-	  ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	  ( 1.0 - arTakePoint[ ci->fMove ] );
+					arOutput[ 2 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
+				arTemp[ 3 ] = 
+					( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+					( 1.0 - arTakePoint[ ci->fMove ] );
+				arTemp[ 4 ] = 
+					( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+					( 1.0 - arTakePoint[ ci->fMove ] );
 
-	rEq0 = Utility ( arTemp, ci );
+				rEq0 = Utility ( arTemp, ci );
 
-#ifdef VERBOSE
+				/* calculate my equity at opp takepoint */
 
-	printf (" cubeless equity: %+7.4f\n", rEq );
-
-	printf ("opp take point: %7.4f %7.4f %7.4f %7.4f %7.4f\n",
-		arTemp[ 0 ], arTemp[ 1 ], arTemp[ 2 ],
-		arTemp[ 3 ], arTemp[ 4 ] );
-
-	printf ("equity at take point: %+7.4f\n", rEq0 );
-#endif
-
-	/* calculate my equity at opp takepoint */
-
-	arTemp[ 0 ] = 1.0 - arTakePoint[ ! ci->fMove ];
+				arTemp[ 0 ] = 1.0 - arTakePoint[ ! ci->fMove ];
         arTemp[ 1 ] = 
-	  arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
+					arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
         arTemp[ 2 ] = 
-	  arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
-	arTemp[ 3 ] = 
-	  ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	  arTakePoint[ ! ci->fMove ];
-	arTemp[ 4 ] = 
-	  ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	  arTakePoint[ ! ci->fMove ];
+					arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
+				arTemp[ 3 ] = 
+					( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+					arTakePoint[ ! ci->fMove ];
+				arTemp[ 4 ] = 
+					( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+					arTakePoint[ ! ci->fMove ];
 
-	rEq1 = Utility ( arTemp, ci );
+				rEq1 = Utility ( arTemp, ci );
 
-#ifdef VERBOSE
-	printf ("my take point: %7.4f %7.4f %7.4f %7.4f %7.4f\n",
-		arTemp[ 0 ], arTemp[ 1 ], arTemp[ 2 ],
-		arTemp[ 3 ], arTemp[ 4 ] );
-	printf ("equity at drop point: %+7.4f\n", rEq1 );
-#endif
+				/*
 
-	/*
-
-	  eq_cubeful( rEq0 ) = +1
-	  eq_cubeful( rEq1 ) = -1
+					eq_cubeful( rEq0 ) = +1
+					eq_cubeful( rEq1 ) = -1
 
 
-	  eq_cubeful ( x ) = a * x + b
+					eq_cubeful ( x ) = a * x + b
 
-	  =>
-	           2
-	  a = -----------
-	      rEq0 - rEq1
+					=>
+				         	2
+       	  a = -----------
+              rEq0 - rEq1
 
 
-	      rEq0 + rEq1
-	  b = -----------
-	      rEq1 - rEq0
+       	      rEq0 + rEq1
+       	  b = -----------
+	            rEq1 - rEq0
 
-	*/
+				*/
 
-	//printf ( "cubeless new code: %+7.4f\n", rEq );
+				if ( ci->fCubeOwner == -1 ) {
 
-	if ( ci->fCubeOwner == -1 ) {
+					/* centered cube */
+					
+					if ( rEq < -1.0 ) {
 
-	  /* centered cube */
+						// no-op
 
-	  if ( rEq < -1.0 ) {
+					} else if ( rEq < rEq1 ) {
 
-	    // no-op
+						rEq = -1.0; /* opp double, I pass */
 
-	  } else if ( rEq < rEq1 ) {
+					} else if ( rEq < rEq0 ) {
 
-	    rEq = -1.0; /* opp double, I pass */
+						/* calculate cubeful equity as interpolation */
 
-	  } else if ( rEq < rEq0 ) {
+						rEq = ( 2.0 * rEq - ( rEq0 + rEq1 ) ) / ( rEq0 - rEq1 );
 
-	    /* calculate cubeful equity as interpolation */
+					} else if ( rEq < 1.0 ) {
 
-	    rEq = ( 2.0 * rEq - ( rEq0 + rEq1 ) ) / ( rEq0 - rEq1 );
+						rEq = 1.0; /* I double, opp pass */
 
-	  } else if ( rEq < 1.0 ) {
+					}
 
-	    rEq = 1.0; /* I double, opp pass */
+				} else if ( ci->fCubeOwner == ci->fMove ) {
 
-	  }
+					/* I own cube */
 
-	} else if ( ci->fCubeOwner == ci->fMove ) {
+					if ( rEq < -1.0 ) {
+			
+						// no-op
 
-	  /* I own cube */
+					} else if ( rEq < rEq0 ) {
 
-	  if ( rEq < -1.0 ) {
+						/* calculate cubeful equity as interpolation */
 
-	    // no-op
+						rEq = ( 2.0 * rEq - ( rEq0 - 1.0 ) ) / ( rEq0 +1.0 );
 
-	  } else if ( rEq < rEq0 ) {
+					} else if ( rEq < 1.0 ) {
 
-	    /* calculate cubeful equity as interpolation */
+						rEq = 1.0; /* I double, opp pass */
 
-	    rEq = ( 2.0 * rEq - ( rEq0 - 1.0 ) ) / ( rEq0 +1.0 );
+					}
 
-	  } else if ( rEq < 1.0 ) {
+				} else {
 
-	    rEq = 1.0; /* I double, opp pass */
+					/* Opp own cube */
 
-	  }
+					if ( rEq < -1.0 ) {
 
-	} else {
+						// no-op
 
-	  /* Opp own cube */
+					} else if ( rEq < rEq1 ) {
 
-	  if ( rEq < -1.0 ) {
+						rEq = -1.0; /* opp double, I pass */
 
-	    // no-op
+					} else if ( rEq < 1.0 ) {
 
-	  } else if ( rEq < rEq1 ) {
+						/* calculate cubeful equity as interpolation */
 
-	    rEq = -1.0; /* opp double, I pass */
+						rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
 
-	  } else if ( rEq < 1.0 ) {
+					}
 
-	    /* calculate cubeful equity as interpolation */
-
-	    rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
-
-	  }
-
-	}
-
-	
-	//printf ( "cubeful new code: %+7.4f\n", rEq );
+				}
 
       }
 
@@ -2785,145 +2717,73 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 	
       if ( fCube ) {
 
-	/* fNoCube: calculate cubeful equity? */
+				/* fNoCube: calculate cubeful equity? */
 	
-	fNoCube = ( anScore[ fMove ] + 2 * nCube >= nMatchTo );
-	fNoCube = fNoCube || ( anScore[ ! fMove ] + 2 * nCube >= nMatchTo );
-	fNoCube = fNoCube ||  
-	  ( ( anScore[ fMove ] == nMatchTo - 2 ) &&
-	    ( anScore[ ! fMove ] == nMatchTo - 2 ) );
-	fNoCube = fNoCube || fCrawford;
+				fNoCube = ( anScore[ fMove ] + 2 * nCube >= nMatchTo );
+				fNoCube = fNoCube || ( anScore[ ! fMove ] + 2 * nCube >= nMatchTo );
+				fNoCube = fNoCube ||  
+					( ( anScore[ fMove ] == nMatchTo - 2 ) &&
+						( anScore[ ! fMove ] == nMatchTo - 2 ) );
+				fNoCube = fNoCube || fCrawford;
 
-	if ( ! ( nMatchTo && fNoCube ) ) {
+				if ( ! ( nMatchTo && fNoCube ) ) {
 
-	  float arTakePoint[ 4 ], rEq0, rEq1;
-	  float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
-	  float r0,r1;
-	  int i;
-	  float rPoint0, rPoint1, rPoint2, rPoint3;
+					float arTakePoint[ 4 ], rEq0, rEq1;
+					float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
+					float r0,r1;
+					int i;
+					float rPoint0, rPoint1, rPoint2, rPoint3;
 
-	  for ( i = 0; i < NUM_OUTPUTS; i++ )
-	    arTemp[ i ] = arOutput[ i ];
-	  if ( fMove )
-	    InvertEvaluation ( arTemp );
+					for ( i = 0; i < NUM_OUTPUTS; i++ )
+						arTemp[ i ] = arOutput[ i ];
+					if ( fMove )
+						InvertEvaluation ( arTemp );
 	
-	  /* Get the take point using current gammon ratios. */
+					/* Get the take point using current gammon ratios. */
 
-	  GetTakePoint ( arTemp, anScore, nMatchTo, cix.nCube,
-			 arTakePoint );
+					GetTakePoint ( arTemp, anScore, nMatchTo, cix.nCube,
+												 arTakePoint );
 
+					/* calculate my equity at opp takepoint */
 
-#ifdef VERBOSE
-	  printf ("arOutput: %7.4f %7.4f %7.4f %7.4f %7.4f\n",
-		  arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ],
-		  arOutput[ 3 ], arOutput[ 4 ] );
+					arTemp[ 0 ] = 1.0 - arTakePoint[ ! cix.fMove ];
+					arTemp[ 1 ] = 
+						arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
+					arTemp[ 2 ] = 
+						arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
+					arTemp[ 3 ] = 
+						( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+						arTakePoint[ ! cix.fMove ];
+					arTemp[ 4 ] = 
+						( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+						arTakePoint[ ! cix.fMove ];
+					
+					rEq1 = Utility ( arTemp, &cix );
 
-	  printf ("arTakePoint: %+1i %7.4f %7.4f %7.4f %7.4f\n",
-		  cix.fMove, arTakePoint[ 0 ], arTakePoint[ 1 ],
-		  arTakePoint[ 2 ], arTakePoint[ 3 ] );
+					/* Opp own cube */
 
-	  printf ("mwc before cubeful %8.4f\n", UtilityMwc ( arOutput,
-							   &cix ) );
-#endif
+					if ( rEq < -1.0 ) {
 
+						// no-op
 
-	  /* calculate my equity at opp takepoint */
+					} else if ( rEq < rEq1 ) {
 
-	  arTemp[ 0 ] = arTakePoint[ cix.fMove ];
-	  arTemp[ 1 ] = 
-	    arOutput[ 1 ] / arOutput[ 0 ] * arTakePoint[ cix.fMove ];
-	  arTemp[ 2 ] = 
-	    arOutput[ 2 ] / arOutput[ 0 ] * arTakePoint[ cix.fMove ];
-	  arTemp[ 3 ] = 
-	    ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	    ( 1.0 - arTakePoint[ cix.fMove ] );
-	  arTemp[ 4 ] = 
-	    ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	    ( 1.0 - arTakePoint[ cix.fMove ] );
+						rEq = -1.0; /* opp double, I pass */
+						
+					} else if ( rEq < 1.0 ) {
+						
+						/* calculate cubeful equity as interpolation */
+						
+						rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
 
-	  rEq0 = Utility ( arTemp, &cix );
-
-#ifdef VERBOSE
-
-	  printf (" cubeless equity: %+7.4f\n", rEq );
-
-	  printf ("opp take point: %7.4f %7.4f %7.4f %7.4f %7.4f\n",
-		  arTemp[ 0 ], arTemp[ 1 ], arTemp[ 2 ],
-		  arTemp[ 3 ], arTemp[ 4 ] );
-
-	  printf ("equity at take point: %+7.4f\n", rEq0 );
-#endif
-
-	  /* calculate my equity at opp takepoint */
-
-	  arTemp[ 0 ] = 1.0 - arTakePoint[ ! cix.fMove ];
-	  arTemp[ 1 ] = 
-	    arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
-	  arTemp[ 2 ] = 
-	    arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
-	  arTemp[ 3 ] = 
-	    ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	    arTakePoint[ ! cix.fMove ];
-	  arTemp[ 4 ] = 
-	    ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-	    arTakePoint[ ! cix.fMove ];
-
-	  rEq1 = Utility ( arTemp, &cix );
-
-#ifdef VERBOSE
-	  printf ("my take point: %7.4f %7.4f %7.4f %7.4f %7.4f\n",
-		  arTemp[ 0 ], arTemp[ 1 ], arTemp[ 2 ],
-		  arTemp[ 3 ], arTemp[ 4 ] );
-	  printf ("equity at drop point: %+7.4f\n", rEq1 );
-#endif
-
-	  /*
-
-	  eq_cubeful( rEq0 ) = +1
-	  eq_cubeful( rEq1 ) = -1
-
-
-	  eq_cubeful ( x ) = a * x + b
-
-	  =>
-	           2
-	  a = -----------
-	      rEq0 - rEq1
-
-
-	      rEq0 + rEq1
-	  b = -----------
-	      rEq1 - rEq0
-
-	*/
-
-	  //	  printf ( "cubeless new code: %+7.4f\n", rEq );
-
-	  /* Opp own cube */
-
-	  if ( rEq < -1.0 ) {
-
-	    // no-op
-
-	  } else if ( rEq < rEq1 ) {
-
-	    rEq = -1.0; /* opp double, I pass */
-
-	  } else if ( rEq < 1.0 ) {
-
-	    /* calculate cubeful equity as interpolation */
-
-	    rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
-
-	  }
+					}
 	
-	  //printf ( "cubeful new code: %+7.4f\n", rEq );
 
-	}
-	
-	prOutput[ 2 ] = eq2mwc ( rEq, &cix );
+				}
+				
+				prOutput[ 2 ] = eq2mwc ( rEq, &cix );
 
-
+				
       } /* fCube */
 
 
@@ -2955,215 +2815,9 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
   } /* endif for leaf-node */
 
-
-
-#ifdef VERBOSE
-  printf ( "%1i-ply: %7.4f %7.4f %7.4f %7.4f (%2i)\n",
-	   nPlies, prOutput[ 0 ], prOutput[ 1 ], prOutput[ 2 ],
-	   prOutput[ 3 ], nCube );
-#endif
-
-
-
   return 0;
 
 }
-
-
-extern float eq2ceq ( float rEq, 
-		      float rTakePoint0, float rTakePoint1,
-		      int fCenteredCube ) {
-
-  /*
-   * My value of holding the cube in case
-   * the cube is centered or I own it.
-   *
-   * If match play check for automatic redoubles
-   * and dead cubes etc.
-   *
-   * Cube ownership values:
-   *
-   * (1) rEq > 1.0: too good to double
-   *     My ownership: nil
-   * (2) opp take point < rEq <= 1.0: double, pass
-   *     My ownership  : 1 - rEq;
-   * (3) rEq > -1: 
-   *     My ownership  : 
-   *     (1-opp take point)/(1+opp take point) * ( 1 + rEq )
-   * (4) rEq <= -1:
-   *     My ownership  : 0
-   */
-
-  //  printf ( "eq2ceq: %7.4f %7.4f %7.4f\n",
-  //   rEq, rTakePoint0, rTakePoint1 );
-
-  if ( rEq > -1.0 ) {
-
-    if ( rEq < rTakePoint0 ) { 
-
-      /* value of holding the cube at my take point */
-
-      if ( fCenteredCube )
-
-	/* Since my opponent will double me out, I have no
-	   value of holding the cube */
-
-	return 0.0;
-
-      else {
-
-	float r0 = 
-	  2.0 * ( rTakePoint0 + 1.0 ) / ( rTakePoint1 + 1.0 ) 
-	  - 1.0 - rTakePoint0; 
-
-	/* linear interpolation to zero */
-
-	return r0 / ( 1.0 - rTakePoint0 ) * ( rEq + 1.0 );
-
-      }
-
-    } else if ( rEq < rTakePoint1 ) {
-
-      /* value of holding the cube at my take point */
-
-      float r0 = 
-	2.0 * ( rTakePoint0 + 1.0 ) / ( rTakePoint1 + 1.0 ) 
-	- 1.0 - rTakePoint0; 
-
-      /* value of holding the cube at opp take point */
-
-      float r1 = 1.0 - rTakePoint1;
-
-      /* linear interpolation between r0 and r1 */
-
-      float a = ( r0 - r1 ) / ( rTakePoint0 - rTakePoint1 );
-      float b = r0 - a * rTakePoint0;
-
-      return a * rEq + b;
-
-    } else if ( rEq < 1.0 ) {
-
-      /* double opponent out */
-
-      if ( fCenteredCube )
-	return 0.0;
-      else
-	return 1.0 - rEq;
-
-    }
-    else
-      return 0.0; /* too good to double */
-
-  }
-  else 
-    /* I'm dead, no value of holding the cube */
-    
-    return 0.0;
-    
-
-}
-	  
-
-#if 0
-
-	/* check if there is an automatic/optional redouble */
-
-	int fAuto0 =
-	  ( ( fCubeOwner == -1 ) || ( fCubeOwner == fMove ) ) &&
-	  ( anScore[ fMove ] + nCube < nMatchTo ) && 
-	  ( anScore[ !fMove ] + nCube >= nMatchTo );
-	int fAuto1 =
-	  ( ( fCubeOwner == -1 ) || ( fCubeOwner == !fMove ) ) &&
-	  ( anScore[ !fMove ] + nCube < nMatchTo ) &&
-	  ( anScore[ fMove ] + nCube >= nMatchTo );
-
-	/* check also if opponent takes the automatic redouble */
-
-	printf ( "fMove: %+1i %1i %1i\n" ,fMove, fAuto0, fAuto1 );
-
-	//if ( ( fAuto0 || fAuto1 ) && ! fCrawford ) {
-	if ( fAuto0 && ! fCrawford ) {
-
-	  cubeinfo cix;
-
-	  //	  printf ( " opponent's take point: %+7.4f",
-	  //   -ci->arTakePoint[ !fMove ] );
-	  //	  printf ( " my take point: %+7.4f",
-	  //   -ci->arTakePoint[ fMove ] );
-
-	  if ( fAuto0 ) {
-
-	    //	    printf ("player 0 automatic redouble\n" );
-
-	    /* 
-	     * player on roll has automatic redouble. 
-	     * The cube efficiency is 100%.
-	     */
-	    
-
-	    if ( 0 /* rEq >= -ci->arTakePoint[ !fMove ] */ ) {
-	      /* opponent will pass */
-	      rEq = eq2mwc ( 1.0, ci );
-	      printf ("opponent passes %7.4f\n", rEq );
-	    }
-	    else {
-
-	      SetCubeInfo ( &cix, nCube * 2, 0, fMove );
-
-	      //printf ("automatic double...\n");
-	      //printf ("ci->nCube: %1i\n", cix.nCube );
-	      //printf ("ci->fCubeOwner: %1i\n", cix.fCubeOwner );
-	      //printf ("ci->fMove: %1i\n", cix.fMove );
-	  
-	      rEq = UtilityMwc ( arOutput, &cix );
-	      //printf ("opp take %7.4f\n", rEq );
-	    }
-	  */
-	  }
-	  else { /* fAuto1 */
-
-	    /* 
-	     * opponent has automatic redouble 
-	     * Assume cube efficiency is lower than 100%,
-	     * since I might have a drop next turn:
-	     * assume it is 80%.
-	     */
-	    
-	    if ( 0 /* rEq <= -ci->arTakePoint[ fMove ] */ ) {
-	      /* I will pass */
-	      //rEq = eq2mwc ( 0.2 + 0.2 * ci->arTakePoint[ fMove ], ci );
-	      printf ("I pass %7.4f\n", rEq );
-	    }
-	    else {
-
-	      SetCubeInfo ( &cix, nCube * 2, 0, fMove );
-
- 	      /*
-	      printf ("automatic double...\n");
-	      printf ("ci->nCube: %1i\n", cix.nCube );
-	      printf ("ci->fCubeOwner: %1i\n", cix.fCubeOwner );
-	      printf ("ci->fMove: %1i\n", cix.fMove );
-	      printf ("rEq  %7.4f\n"
-		      "UMWC %7.4f\n",
-		      eq2mwc( rEq, ci) , UtilityMwc ( arOutput, &cix )
-		      );
-	      */
-		      	  
-	      rEq = 1.0 - 0.2 * eq2mwc ( rEq, ci ) 
-		- 0.8 * UtilityMwc ( arOutput, &cix );
-
-	      //printf ("I take %7.4f\n", rEq );
-	    }
-	       
-	  }
-
-	}
-	else
-	  rEq = eq2mwc ( rEq, ci );
-
-
-      }
-#endif
 
 
 extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner, 
@@ -3200,7 +2854,7 @@ extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
     /*
      * Match play.
      * FIXME: calculate gammon price when initializing program
-     * instead of recalculating it again and again.
+     * instead of recalculating it again and again, or cache it.
      */
     
     int nScore0 = NORM_SCORE ( anScore[ 0 ] );
@@ -3208,98 +2862,77 @@ extern int SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
 
     if ( fCrawford || fPostCrawford ) {
 
-      //printf ( "in crawford code...\n" );
-
       if ( nScore0 == 1 ) {
 
-	float rLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
-	float rLoseGammon = 
-	  1.0 - GET_Btilde ( nScore1 - nCube * 2 - 1, afBtilde );
-	float rLoseBG =
-	  1.0 - GET_Btilde ( nScore1 - nCube * 3 - 1, afBtilde );
+				float rLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
+				float rLoseGammon = 
+					1.0 - GET_Btilde ( nScore1 - nCube * 2 - 1, afBtilde );
+				float rLoseBG =
+					1.0 - GET_Btilde ( nScore1 - nCube * 3 - 1, afBtilde );
 
-	float rCenter = ( 1.0 + rLose ) / 2.0;
+				float rCenter = ( 1.0 + rLose ) / 2.0;
 
-	ci->arGammonPrice[ 0 ] = 0.0; 
-	ci->arGammonPrice[ 2 ] = 0.0;
+				ci->arGammonPrice[ 0 ] = 0.0; 
+				ci->arGammonPrice[ 2 ] = 0.0;
 
-	ci->arGammonPrice[ 1 ] = 
-	  ( rCenter - rLoseGammon ) / ( 1.0 - rCenter ) - 1.0;
+				ci->arGammonPrice[ 1 ] = 
+					( rCenter - rLoseGammon ) / ( 1.0 - rCenter ) - 1.0;
 
-	ci->arGammonPrice[ 3 ] = 
-	  ( rCenter - rLoseBG ) / ( 1.0 - rCenter ) - 
-	  ( ci->arGammonPrice[ 1 ] + 1.0 );
+				ci->arGammonPrice[ 3 ] = 
+					( rCenter - rLoseBG ) / ( 1.0 - rCenter ) - 
+					( ci->arGammonPrice[ 1 ] + 1.0 );
 
       }
       else {
 
-	float rWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
-	float rWinGammon = 
-	  GET_Btilde ( nScore0 - nCube * 2 - 1, afBtilde );
-	float rWinBG = 
-	  GET_Btilde ( nScore0 - nCube * 3 - 1, afBtilde );
+				float rWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
+				float rWinGammon = 
+					GET_Btilde ( nScore0 - nCube * 2 - 1, afBtilde );
+				float rWinBG = 
+					GET_Btilde ( nScore0 - nCube * 3 - 1, afBtilde );
 
-	ci->arGammonPrice[ 0 ] =
-	  2.0 * rWinGammon / rWin - 2.0;
+				ci->arGammonPrice[ 0 ] =
+					2.0 * rWinGammon / rWin - 2.0;
 
-	ci->arGammonPrice[ 2 ] =
-	  2.0 * rWinBG / rWin - ( ci->arGammonPrice[ 0 ] + 2.0 );
+				ci->arGammonPrice[ 2 ] =
+					2.0 * rWinBG / rWin - ( ci->arGammonPrice[ 0 ] + 2.0 );
 
-	ci->arGammonPrice[ 1 ] = 0.0;
-	ci->arGammonPrice[ 3 ] = 0.0;
+				ci->arGammonPrice[ 1 ] = 0.0;
+				ci->arGammonPrice[ 3 ] = 0.0;
 	
       }
 
     }
     else {
       float rWin = 
-	GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
+				GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
       float rLose =
-	GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+				GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
       float rWinGammon =
-	GET_A1 ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafA1 );
+				GET_A1 ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafA1 );
       float rLoseGammon =
-	GET_A1 ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafA1 );
+				GET_A1 ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafA1 );
       float rWinBG =
-	GET_A1 ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafA1 );
+				GET_A1 ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafA1 );
       float rLoseBG =
-	GET_A1 ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafA1 );
+				GET_A1 ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafA1 );
 
       float rCenter = ( rWin + rLose ) / 2.0;
 
-      /*
-      printf ( "in non-crawford code...\n" );
-      printf ("rWin    = %10.7f\n", rWin );
-      printf ("rWinG   = %10.7f\n", rWinGammon );
-      printf ("rWinBG  = %10.7f\n", rWinBG );
-      printf ("rLose   = %10.7f\n", rLose );
-      printf ("rLoseG  = %10.7f\n", rLoseGammon );
-      printf ("rLoseBG = %10.7f\n", rLoseBG );
-      */
-
       ci->arGammonPrice[ 0 ] = 
-	( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+				( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
       ci->arGammonPrice[ 1 ] = 
-	( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
+				( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
       ci->arGammonPrice[ 2 ] = 
-	( rWinBG - rCenter ) / ( rWin - rCenter ) - 
-	( ci->arGammonPrice[ 0 ] + 1.0 );
+				( rWinBG - rCenter ) / ( rWin - rCenter ) - 
+				( ci->arGammonPrice[ 0 ] + 1.0 );
       ci->arGammonPrice[ 3 ] = 
-	( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
-	( ci->arGammonPrice[ 1 ] + 1.0 );
+				( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
+				( ci->arGammonPrice[ 1 ] + 1.0 );
 
     }
 
   }
-
-  /*
-  printf ("SetCubeInfo: GammonPrice: %7.4f %7.4f %7.4f %7.4f\n",
-	  ci->arGammonPrice[ 0 ], ci->arGammonPrice[ 1 ],
-	  ci->arGammonPrice[ 2 ], ci->arGammonPrice[ 3 ] );
-
-  printf ("SetCubeInfo: TakePoint: %7.4f %7.4f\n",
-	  ci->arTakePoint[ 0 ], ci->arTakePoint[ 1 ] );
-  */
 
 }
 
