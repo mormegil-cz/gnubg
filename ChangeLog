@@ -1,3 +1,12 @@
+Sun Oct  8 20:44:00 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* eval.c (DumpPosition): remove unused debug code
+	* eval.c (EvaluatePositionCache): only cache 0-ply evaluations for
+	match play, as `deeper' moves might have been played wrong
+	at current matchscore.
+	* eval.c (EvalEfficiency): add basic code for calculating cube
+	efficiency.
+
 Sun Oct  8 14:15:35 2000  Joern Thyssen  <joern@thyssen.nu>
 
 	* show.c (CommandShowGammonPrice, CommandShowMatchEquityTable,

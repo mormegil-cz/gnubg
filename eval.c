@@ -71,6 +71,9 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 extern float
 Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
+extern float
+EvalEfficiency( int anBoard[2][25], positionclass pc );
+
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
 typedef int ( *cfunc )( const void *, const void * );
@@ -2104,34 +2107,44 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
-											 cubeinfo *pci, evalcontext *pecx, int nPlies,
-											 positionclass pc ) {
+                       cubeinfo *pci, evalcontext *pecx, int nPlies,
+                       positionclass pc ) {
 
-	evalcache ec, *pec;
-	long l;
+  evalcache ec, *pec;
+  long l;
 	
-	PositionKey( anBoard, ec.auchKey );
-	ec.nEvalContext = nPlies ^ ( pecx->nSearchCandidates << 2 ) ^
-		( ( (int) ( pecx->rSearchTolerance * 100 ) ) << 6 ) ^
-		( pecx->nReduced << 12 ) ^
-		( pecx->fRelativeAccuracy << 17 );
-	ec.pc = pc;
+  PositionKey( anBoard, ec.auchKey );
+  ec.nEvalContext = nPlies ^ ( pecx->nSearchCandidates << 2 ) ^
+    ( ( (int) ( pecx->rSearchTolerance * 100 ) ) << 6 ) ^
+    ( pecx->nReduced << 12 ) ^
+    ( pecx->fRelativeAccuracy << 17 );
+  ec.pc = pc;
 
-	l = EvalCacheHash( &ec );
-    
-	if( ( pec = CacheLookup( &cEval, l, &ec ) ) ) {
-		memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
+  if ( ! ( nMatchTo && nPlies ) ) {
 
-		return 0;
-	}
-    
-	if( EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies, pc ) )
-		return -1;
+    /* only cache 0-ply evals for match play */
+    /* FIXME: cache 0+ ply evals for match play */
 
-	memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
+    l = EvalCacheHash( &ec );
     
-	return CacheAdd( &cEval, l, &ec, sizeof ec );
+    if( ( pec = CacheLookup( &cEval, l, &ec ) ) ) {
+      memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
+
+      return 0;
+    }
+  }
+    
+  if( EvaluatePositionFull( anBoard, arOutput, pci, pecx, nPlies, pc ) )
+    return -1;
+
+  memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
+
+  if ( ! ( nMatchTo && nPlies ) ) 
+    return CacheAdd( &cEval, l, &ec, sizeof ec );
+  else
+    return 0;
 }
+
 
 extern int 
 EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
@@ -2984,25 +2997,6 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     break;
   }
 
-#ifdef UNDEF
-  /* debug code */
-
-  {
-
-    float ar[ 5 ] = { 0.5, 0.0, 0.0, 0.0, 0.0 };
-
-    ci.nCube = nCube;
-    ci.fMove = fMove;
-    
-    GetPoints ( ar, anScore, nMatchTo, &ci, NULL );
-
-    exit(-1);
-
-  }
-
-  /* end debug */
-#endif
-    
   strcat( szOutput, "\n\n" );
 
   acdf[ pc ]( anBoard, strchr( szOutput, 0 ) );
@@ -3781,10 +3775,15 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
       /* if the game is over, there is very little value
          of holding the cube */
 
-      *prOutput = rEq;
+      if ( ! nMatchTo )
+        *prOutput = rEq;
+      else
+        *prOutput = eq2mwc ( rEq, pci );
 
     }
     else {
+
+      rCubeX = EvalEfficiency ( anBoard, pc );
 
       if ( ! nMatchTo )
 	*prOutput = Cl2CfMoney ( arOutput, pci );
@@ -4326,3 +4325,104 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 }
 
 
+#define RACEFACTOR 0.00125
+#define RACECOEFF 0.55
+#define RACE_MAX_EFF 0.7
+#define RACE_MIN_EFF 0.6
+
+extern float
+EvalEfficiency( int anBoard[2][25], positionclass pc ){
+
+  /* Since it's somewhat costly to call CalcInputs, the 
+     inputs should preferebly be cached to same time. */
+
+  if (pc == CLASS_OVER)
+    return -1.0;
+
+  if (pc == CLASS_BEAROFF1)
+
+    /* FIXME: calculate based on #rolls to get off.
+       For example, 15 rolls probably have cube eff. of
+       0.7, and 1.25 rolls have cube eff. of 1.0.
+
+       It's not so important to have cube eff. correct here as an
+       n-ply evaluation will take care of last-roll and 2nd-last-roll
+       situations. */
+
+    return 0.60;
+
+  if (pc == CLASS_BEAROFF2)
+
+    /* FIXME: use linear interpolation based on pip count */
+
+    return 0.60;
+
+  if (pc == CLASS_RACE)
+    {
+      int anPips[2];
+
+      float rEff;
+
+      PipCount(anBoard, anPips);
+
+      rEff = anPips[1]*RACEFACTOR + RACECOEFF;
+      if (rEff > RACE_MAX_EFF)
+        return RACE_MAX_EFF;
+      else
+       {
+        if (rEff < RACE_MIN_EFF)
+          return RACE_MIN_EFF;
+        else
+          return rEff;
+       }
+     }
+  if (pc == CLASS_CONTACT)
+    {
+      
+      /* FIXME: use Øystein's values published in rec.games.backgammon,
+         or work some other semiempirical values */
+
+      /* FIXME: very important: use opponents inputs as well */
+
+      float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ];
+
+      return 0.68;
+
+      CalculateInputs( anBoard, arInput );
+
+      if ( arInput [ I_BREAK_CONTACT ] < 0.05 ) {
+        /* less than 8 pips to break contact, i.e. it must
+           be close to a race */
+        return 0.65;
+      } else if ( arInput[ I_FORWARD_ANCHOR ] >= 0.5 &&
+                  arInput[ I_FORWARD_ANCHOR ] <= 1.5 ) {
+        /* I have a forward anchor, i.e. it's a holding game */
+        return 0.5;
+      } else {
+        
+        int side, i, n;
+
+        for(side = 0; side < 2; ++side) {
+          n = 0;
+          for(i = 18; i < 24; ++i) {
+            if( anBoard[side][i] > 1 ) {
+              ++n;
+            }
+          }
+        }
+
+        if ( n >= 2 ) {
+          /* backgame */
+          return 0.4;
+        }
+
+        /* FIXME: if attack position */
+
+        /* else, ... use `typical' value of: */
+
+        return 0.68;
+
+      }
+    
+    }
+}
