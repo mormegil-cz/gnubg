@@ -25,10 +25,11 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <sys/io.h>
 #include <memory.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
+#else
+#include <io.h>
 #endif
 #include <GL/gl.h>
 #include <GL/glu.h>
