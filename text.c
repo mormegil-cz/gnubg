@@ -714,6 +714,7 @@ isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci ) {
                  
 
 
+
 /*
  * Print cube analysis
  *
@@ -728,15 +729,14 @@ isMissedDouble ( float arDouble[], int fDouble, cubeinfo *pci ) {
  *
  */
 
-extern void
-TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
-                             float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                             float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                             int fPlayer,
-                             evalsetup *pes, cubeinfo *pci,
-                             int fDouble, int fTake,
-                             skilltype stDouble,
-                             skilltype stTake ) {
+extern char *
+OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                     float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                     evalsetup *pes, cubeinfo *pci,
+                     int fDouble, int fTake,
+                     skilltype stDouble,
+                     skilltype stTake ) {
+
   const char *aszCube[] = {
     NULL, 
     N_("No double"), 
@@ -752,24 +752,23 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   int fDisplay;
   int fAnno = FALSE;
 
+  float arDouble[ 4 ];
+
+  static char sz[ 4096 ];
+  char *pc;
+
+  strcpy ( sz, "" );
+
   /* check if cube analysis should be printed */
 
-  if ( pes->et == EVAL_NONE ) return; /* no evaluation */
-  if ( ! GetDPEq ( NULL, NULL, pci ) ) return; /* cube not available */
+  if ( pes->et == EVAL_NONE ) return NULL; /* no evaluation */
+  if ( ! GetDPEq ( NULL, NULL, pci ) ) return NULL; /* cube not available */
+
+  FindCubeDecision ( arDouble, aarOutput, pci );
 
   fActual = fDouble;
   fClose = isCloseCubedecision ( arDouble ); 
   fMissed = isMissedDouble ( arDouble, fDouble, pci );
-
-  fDisplay = 
-    ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
-    ( fClose && exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ) ||
-    ( fMissed && exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ) ||
-    ( exsExport.afCubeDisplay[ stDouble ] ) ||
-    ( exsExport.afCubeDisplay[ stTake ] );
-
-  if ( ! fDisplay )
-    return;
 
   /* print alerts */
 
@@ -779,7 +778,7 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* missed double */
 
-    fprintf ( pf, "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
               _("Alert: missed double"),
               OutputEquityDiff ( arDouble[ OUTPUT_NODOUBLE ], 
                                 ( arDouble[ OUTPUT_TAKE ] > 
@@ -789,7 +788,8 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                                  pci ) );
     
     if ( stDouble != SKILL_NONE )
-      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stDouble ] ) );
     
   }
 
@@ -801,14 +801,15 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong take */
 
-    fprintf ( pf, "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
               _("Alert: wrong take"),
               OutputEquityDiff ( arDouble[ OUTPUT_DROP ],
                                  arDouble[ OUTPUT_TAKE ],
                                  pci ) );
 
     if ( stTake != SKILL_NONE )
-      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stTake ] ) );
     
   }
 
@@ -820,14 +821,15 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong pass */
 
-    fprintf ( pf, "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
               _("Alert: wrong pass"),
               OutputEquityDiff ( arDouble[ OUTPUT_TAKE ],
                                  arDouble[ OUTPUT_DROP ],
                                  pci ) );
 
     if ( stTake != SKILL_NONE )
-      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stTake ] ) );
     
   }
 
@@ -843,7 +845,7 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong double */
 
-    fprintf ( pf, "%s (%s)!",
+    sprintf ( pc = strchr ( sz, 0 ), "%s (%s)!",
               _("Alert: wrong double"),
               OutputEquityDiff ( ( arDouble[ OUTPUT_TAKE ] > 
                                    arDouble[ OUTPUT_DROP ] ) ? 
@@ -853,47 +855,48 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                                  pci ) );
 
     if ( stDouble != SKILL_NONE )
-      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
+      sprintf ( pc = strchr ( sz, 0 ), " [%s]", 
+                gettext ( aszSkillType[ stDouble ] ) );
 
   }
 
   if ( ( stDouble != SKILL_NONE || stTake != SKILL_NONE ) && ! fAnno ) {
     
     if ( stDouble != SKILL_NONE ) {
-      fprintf ( pf, _("Alert: double decision marked %s"),
+      sprintf ( pc = strchr ( sz, 0 ), _("Alert: double decision marked %s"),
                 gettext ( aszSkillType[ stDouble ] ) );
-      fputs ( "\n", pf );
+      strcat ( sz, "\n" );
     }
 
     if ( stTake != SKILL_NONE ) {
-      fprintf ( pf, _("Alert: take decision marked %s"),
+      sprintf ( pc = strchr ( sz, 0 ), _("Alert: take decision marked %s"),
                 gettext ( aszSkillType[ stTake ] ) );
-      fputs ( "\n", pf );
+      strcat ( sz, "\n" );
     }
 
   }
 
   /* header */
 
-  fputs ( _("\nCube analysis\n"), pf );
+  strcat ( sz, _("\nCube analysis\n") );
 
   /* ply & cubeless equity */
 
   switch ( pes->et ) {
   case EVAL_NONE:
-    fputs ( _("n/a"), pf );
+    strcat ( sz, _("n/a") );
     break;
   case EVAL_EVAL:
-    fprintf ( pf, 
+    sprintf ( pc = strchr ( sz, 0 ), 
               _("%d-ply"), 
               pes->ec.nPlies );
     break;
   case EVAL_ROLLOUT:
-    fputs ( _("Rollout"), pf );
+    strcat ( sz, _("Rollout") );
     break;
   }
 
-  fprintf ( pf, " %s %s\n",
+  sprintf ( pc = strchr ( sz, 0 ), " %s %s\n",
             ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
             _("cubeless equity") : _("cubeless MWC"),
             OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ) );
@@ -903,12 +906,12 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( exsExport.fCubeDetailProb && pes->et == EVAL_EVAL ) {
 
-    fputs ( "  ", pf );
-    fputs ( OutputPercents ( aarOutput[ 0 ], TRUE ), pf );
+    strcat ( sz, "  " );
+    strcat ( sz, OutputPercents ( aarOutput[ 0 ], TRUE ) );
 
   }
 
-  fputs( "\n", pf );
+  strcat( sz, "\n" );
 
   /* equities */
 
@@ -916,39 +919,39 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   for ( i = 0; i < 3; i++ ) {
 
-    fprintf ( pf,
+    sprintf ( pc = strchr ( sz, 0 ),
               "%d. %-20s", i + 1, 
               gettext ( aszCube[ ai[ i ] ] ) );
 
-    fputs ( OutputEquity ( arDouble[ ai [ i ] ], pci, TRUE ), pf );
+    strcat ( sz, OutputEquity ( arDouble[ ai [ i ] ], pci, TRUE ) );
 
     if ( i )
-      fputs ( OutputEquityDiff ( arDouble[ ai [ i ] ], 
-                                 arDouble[ OUTPUT_OPTIMAL ], pci ), pf );
-
-    fputs ( "\n", pf );
+      sprintf ( pc = strchr ( sz, 0 ),
+                "  (%s)",
+                OutputEquityDiff ( arDouble[ ai [ i ] ], 
+                                   arDouble[ OUTPUT_OPTIMAL ], pci ) );
+    strcat ( sz, "\n" );
 
   }
 
   /* cube decision */
 
-  fprintf ( pf,
+  sprintf ( pc = strchr ( sz, 0 ),
             "%s %s",
             _("Proper cube action:"),
             GetCubeRecommendation ( FindBestCubeDecision ( arDouble, pci ) ) );
 
   if ( ( r = getPercent ( FindBestCubeDecision ( arDouble, pci ), 
                           arDouble ) ) >= 0.0 )
-    fprintf ( pf, " (%.1f%%)", 100.0f * r );
+    sprintf ( pc = strchr ( sz, 0 ), " (%.1f%%)", 100.0f * r );
 
-  fputs ( "\n\n", pf );
+  strcat ( sz, "n\n" );
 
   /* dump rollout */
 
   if ( pes->et == EVAL_ROLLOUT && exsExport.fCubeDetailProb ) {
 
     char asz[ 2 ][ 1024 ];
-    char sz[ 1024 ];
     cubeinfo aci[ 2 ];
 
     for ( i = 0; i < 2; i++ ) {
@@ -964,25 +967,81 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     }
 
-    fputs ( _("Rollout details:\n"), pf );
+    strcat ( sz, _("Rollout details:\n") );
 
-    fputs ( OutputRolloutResult ( NULL,
-                                asz,
-                                aarOutput, aarStdDev,
-                                aci, 2, pes->rc.fCubeful ),
-            pf );
-
-  }
-
-  if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] ) {
-
-    fputs ( "\n", pf );
-    fputs ( OutputRolloutContext ( NULL, &pes->rc ), pf );
+    strcat ( sz, 
+             OutputRolloutResult ( NULL,
+                                   asz,
+                                   aarOutput, aarStdDev,
+                                   aci, 2, pes->rc.fCubeful ) );
+             
 
   }
+
+  if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] )
+    strcat ( sz, OutputRolloutContext ( NULL, &pes->rc ) );
     
+  return sz;
 
 
+}
+
+
+/*
+ * Print cube analysis
+ *
+ * Input:
+ *  pf: output file
+ *  arDouble: equitites for cube decisions
+ *  fPlayer: player who doubled
+ *  esDouble: eval setup
+ *  pci: cubeinfo
+ *  fDouble: double/no double
+ *  fTake: take/drop
+ *
+ */
+
+static void
+TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
+                             float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                             float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                             int fPlayer,
+                             evalsetup *pes, cubeinfo *pci,
+                             int fDouble, int fTake,
+                             skilltype stDouble,
+                             skilltype stTake ) {
+
+  int fActual, fClose, fMissed;
+  int fDisplay;
+
+  /* check if cube analysis should be printed */
+
+  if ( pes->et == EVAL_NONE ) return; /* no evaluation */
+  if ( ! GetDPEq ( NULL, NULL, pci ) ) return; /* cube not available */
+
+  FindCubeDecision ( arDouble, aarOutput, pci );
+
+  fActual = fDouble;
+  fClose = isCloseCubedecision ( arDouble ); 
+  fMissed = isMissedDouble ( arDouble, fDouble, pci );
+
+  fDisplay = 
+    ( fActual && exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ) ||
+    ( fClose && exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ) ||
+    ( fMissed && exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ) ||
+    ( exsExport.afCubeDisplay[ stDouble ] ) ||
+    ( exsExport.afCubeDisplay[ stTake ] );
+
+  if ( ! fDisplay )
+    return;
+
+  fputs ( OutputCubeAnalysis ( aarOutput,
+                               aarStdDev,
+                               pes,
+                               pci,
+                               fDouble, fTake, 
+                               stDouble, stTake ), 
+          pf );
 
 }
 

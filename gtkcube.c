@@ -53,6 +53,7 @@ typedef struct _cubehintdata {
   float *arDouble;
   evalsetup *pes;
   movetype mt;
+  matchstate ms;
 } cubehintdata;
 
 
@@ -60,7 +61,8 @@ typedef struct _cubehintdata {
 static GtkWidget *TakeAnalysis( const movetype mt, 
                                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                                 float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-				const evalsetup *pes ) {
+				const evalsetup *pes,
+                                matchstate *pms ) {
 
     cubeinfo ci;
 
@@ -85,7 +87,7 @@ static GtkWidget *TakeAnalysis( const movetype mt,
     if( pes->et == EVAL_NONE )
 	return NULL;
 
-    GetMatchStateCubeInfo( &ci, &ms );
+    GetMatchStateCubeInfo( &ci, pms );
 
     cd = FindCubeDecision ( arDouble, aarOutput, &ci );
     
@@ -312,6 +314,7 @@ static GtkWidget *TakeAnalysis( const movetype mt,
 static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                                 float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                                 const evalsetup *pes,
+                                matchstate *pms,
                                 const int fDouble ) {
 
     cubeinfo ci;
@@ -340,7 +343,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     if( pes->et == EVAL_NONE )
 	return NULL;
 
-    GetMatchStateCubeInfo( &ci, &ms );
+    GetMatchStateCubeInfo( &ci, pms );
 
     cd = FindCubeDecision ( arDouble, aarOutput, &ci );
     
@@ -535,6 +538,7 @@ UpdateCubeAnalysis ( cubehintdata *pchd ) {
     pw = CubeAnalysis ( pchd->aarOutput,
                         pchd->aarStdDev,
                         pchd->pes,
+                        &pchd->ms,
                         pchd->mt );
     break;
 
@@ -543,7 +547,8 @@ UpdateCubeAnalysis ( cubehintdata *pchd ) {
     pw = TakeAnalysis ( pchd->mt,
                         pchd->aarOutput,
                         pchd->aarStdDev,
-                        pchd->pes );
+                        pchd->pes,
+                        &pchd->ms );
     break;
 
   default:
@@ -555,7 +560,7 @@ UpdateCubeAnalysis ( cubehintdata *pchd ) {
 
   /* update cache */
 
-  UpdateStoredCube ( pchd->aarOutput, pchd->aarStdDev, pchd->pes, &ms );
+  UpdateStoredCube ( pchd->aarOutput, pchd->aarStdDev, pchd->pes, &pchd->ms ),
 
   /* destroy current analysis */
 
@@ -584,10 +589,10 @@ CubeAnalysisRollout ( GtkWidget *pw, cubehintdata *pchd ) {
   float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
   rolloutstat aarsStatistics[ 2 ][ 2 ];
 
-  GetMatchStateCubeInfo( &ci, &ms );
+  GetMatchStateCubeInfo( &ci, &pchd->ms );
 
   if ( GeneralCubeDecisionR ( "", aarOutput, aarStdDev, aarsStatistics,
-                              ms.anBoard, &ci, &rcRollout ) < 0 ) {
+                              pchd->ms.anBoard, &ci, &rcRollout ) < 0 ) {
     return;
   }
   
@@ -612,11 +617,11 @@ CubeAnalysisEval ( GtkWidget *pw, cubehintdata *pchd ) {
   cubeinfo ci;
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
-  GetMatchStateCubeInfo( &ci, &ms );
+  GetMatchStateCubeInfo( &ci, &pchd->ms );
   
   ProgressStart( _("Considering cube action...") );
 
-  if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
+  if ( GeneralCubeDecisionE ( aarOutput, pchd->ms.anBoard, &ci, 
                               &esEvalCube.ec ) < 0 ) {
     ProgressEnd();
     return;
@@ -673,24 +678,32 @@ CubeAnalysisMWC ( GtkWidget *pw, cubehintdata *pchd ) {
 static void
 CubeAnalysisCopy ( GtkWidget *pw, cubehintdata *pchd ) {
 
+  gtk_selection_owner_set ( pw, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME );
+
+}
+
+static void
+CubeAnalysisGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
+                           guint n, guint t, cubehintdata *pchd ) {
+
   float arDouble[ 4 ];
   cubeinfo ci;
 
-  printf ( "WORK IN PROGRESS\n" );
+  char *pc;
 
-  GetMatchStateCubeInfo ( &ci, &ms );
 
-  FindCubeDecision ( arDouble, pchd->aarOutput, &ci );
+  GetMatchStateCubeInfo ( &ci, &pchd->ms );
 
-  TextPrintCubeAnalysisTable ( stdout, 
-                               arDouble,
-                               pchd->aarOutput,
-                               pchd->aarStdDev,
-                               ms.fMove,
-                               pchd->pes,
-                               &ci,
-                               FALSE, FALSE,
-                               SKILL_NONE, SKILL_NONE );
+  pc = OutputCubeAnalysis ( pchd->aarOutput,
+                            pchd->aarStdDev,
+                            pchd->pes,
+                            &ci,
+                            FALSE, FALSE,
+                            SKILL_NONE, SKILL_NONE );
+
+  if ( pc )
+    gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
+                            pc, strlen ( pc ) );
 
 }
 
@@ -737,10 +750,15 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
-  gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
+  gtk_widget_set_sensitive( pwMWC, pchd->ms.nMatchTo );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
                                  fOutputMWC );
+
+  /* selection */
+
+  gtk_selection_add_target( pwCopy, GDK_SELECTION_PRIMARY,
+                            GDK_SELECTION_TYPE_STRING, 0 );
 
   /* signals */
 
@@ -756,6 +774,8 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                       GTK_SIGNAL_FUNC( CubeAnalysisMWC ), pchd );
   gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
                       GTK_SIGNAL_FUNC( CubeAnalysisCopy ), pchd );
+  gtk_signal_connect( GTK_OBJECT( pwCopy ), "selection_get",
+                      GTK_SIGNAL_FUNC( CubeAnalysisGetSelection ), pchd );
 
   /* tool tips */
 
@@ -784,7 +804,7 @@ CreateCubeAnalysisTools ( cubehintdata *pchd ) {
                          _("Copy") );
 
   /* FIXME: work in progress */
-  gtk_widget_set_sensitive ( pwCopy, FALSE );
+  // gtk_widget_set_sensitive ( pwCopy, FALSE );
 
   return pwTools;
   
@@ -808,6 +828,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   pchd->arDouble = arDouble;
   pchd->pes = pes;
   pchd->mt = mt;
+  pchd->ms = ms;
 
   pchd->pw = pw = gtk_hbox_new ( 4, FALSE );
 
@@ -817,6 +838,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   case MOVE_DOUBLE:
 
     pchd->pwFrame = CubeAnalysis ( aarOutput, aarStdDev, pes, 
+                                   &pchd->ms,
                                    mt == MOVE_DOUBLE );
     break;
 
@@ -826,7 +848,8 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     pchd->pwFrame = TakeAnalysis ( mt, 
                                    aarOutput,
                                    aarStdDev,
-                                   pes );
+                                   pes,
+                                   &pchd->ms );
     break;
 
   default:

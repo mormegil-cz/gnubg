@@ -1,3 +1,15 @@
+Mon Jul 22 20:24:34 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Implement a "Copy" button in the cube widget.
+
+	* text.c (OutputCubeAnalysis): new function. Basically a copy
+	of TextCubeAnalysisTable, but writes to a string instead of a
+	stream.
+	* text.c (TextPrintCubeAnalysisTable): use OutputCubeAnalysis.
+
+	* gtkcube.c (CubeAnalysisGetSelection, CubeAnalysisCopy):
+	new functions.
+
 Mon Jul 22 18:27:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Try to fix the "double prompt" bug.
