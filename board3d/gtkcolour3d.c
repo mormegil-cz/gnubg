@@ -41,13 +41,12 @@
 #define COLOUR_SEL( pcp ) GTK_COLOR_SELECTION( COLOUR_SEL_DIA(pcp)->colorsel )
 
 GtkWidget *pcpAmbient, *pcpDiffuse, *pcpSpecular;
-GtkWidget *pwColourDialog3d, *pwParent;
+GtkWidget *pwColourDialog3d;
 GtkAdjustment *padjShine, *padjOpacity;
 GtkWidget *psOpacity, *pOpacitylabel, *pTexturelabel, *pwPreview, *textureCombo;
 Material *col3d;
 Material cancelValue;
-int okPressed;
-GdkPixmap *xppm;
+GdkPixmap *xppm = 0;
 int useOpacity, useTexture;
 float opacityValue;
 int bUpdate = TRUE;
@@ -318,29 +317,17 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 
 	label = gtk_label_new(_("Ambient colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 0, 1);
-	pcpAmbient = gtk_colour_picker_new();
-	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL(pcpAmbient) ),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdateColourPreview ),
-			       0 );
+	pcpAmbient = gtk_colour_picker_new(UpdateColourPreview, 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpAmbient, 1, 2, 0, 1);
 
 	label = gtk_label_new(_("Diffuse colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 1, 2);
-	pcpDiffuse = gtk_colour_picker_new();
-	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL(pcpDiffuse) ),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdateColourPreview ),
-			       0 );
+	pcpDiffuse = gtk_colour_picker_new(UpdateColourPreview, 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpDiffuse, 1, 2, 1, 2);
 
 	label = gtk_label_new(_("Specular colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 0, 1);
-	pcpSpecular = gtk_colour_picker_new();
-	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( pcpSpecular )),
-			       "color-changed",
-			       GTK_SIGNAL_FUNC( UpdateColourPreview ),
-			       0 );
+	pcpSpecular = gtk_colour_picker_new(UpdateColourPreview, 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpSpecular, 3, 4, 0, 1);
 
 	label = gtk_label_new(_("Shine:"));
@@ -377,39 +364,56 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 	label = gtk_label_new(_("Preview:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 3, 4);
 
-	xppm = gdk_pixmap_new(pixWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
 	CreatePreview();
 	pwPreview = gtk_pixmap_new(xppm, NULL);
 	gtk_table_attach_defaults(GTK_TABLE (table), pwPreview, 0, 2, 4, 5);
 }
 
-static gboolean cancel( GtkWidget *pw, GdkEvent *pev, void* arg )
+static gboolean CancelClicked( GtkWidget *pw, GdkEvent *pev, void* arg )
 {
 	/* Restore to original colour */
 	memcpy(col3d, &cancelValue, sizeof(Material));
 
 	gtk_window_set_modal( GTK_WINDOW( pwColourDialog3d ), FALSE );
-	gtk_widget_hide( pwColourDialog3d );
+	gtk_widget_destroy( pwColourDialog3d );
 
 	gtk_main_quit();
 	return TRUE;
 }
 
-static gboolean ok(GtkWidget *pw, GdkEvent *pev, void* arg)
+static gboolean OkClicked(GtkWidget *pw, UpdateDetails* pDetails)
 {
 	gtk_window_set_modal( GTK_WINDOW( pwColourDialog3d ), FALSE );
-	gtk_widget_hide( pwColourDialog3d );
+	{	/* Apply new settings */
+		char* texStr;
+		GdkGC *gc;
+
+		if (useTexture)
+		{
+			texStr = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
+
+			if (!strcmp(texStr, NO_TEXTURE_STRING))
+				col3d->textureInfo = 0;
+			else
+				FindNamedTexture(&col3d->textureInfo, texStr);
+		}
+		gc = gdk_gc_new(pDetails->pixmap);
+		gdk_draw_rgb_image(pDetails->pixmap, gc, 0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GDK_RGB_DITHER_MAX,
+						  auch, PREVIEW_WIDTH * 3 );
+		gdk_gc_unref( gc );
+
+		gtk_widget_queue_draw(pDetails->preview);
+		UpdatePreview(pDetails->parentPreview);
+	}
+	gtk_widget_destroy( pwColourDialog3d );
 	gtk_main_quit();
-	okPressed = TRUE;
 	return TRUE;
 }
 
-GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent)
+GtkWidget* Create3dColourDialog(UpdateDetails* pDetails)
 {
 	GtkWidget *pwOK, *pwCancel, *pwButtons;
 	GtkAccelGroup *pag = gtk_accel_group_new();
-
-	pwParent = pParent;	
 
 	pwColourDialog3d = gtk_dialog_new();
 
@@ -423,28 +427,28 @@ GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent)
 	pwCancel = gtk_button_new_with_label( _("Cancel") ),
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
 
-	gtk_signal_connect(GTK_OBJECT(pwOK), "clicked", GTK_SIGNAL_FUNC(ok), 0);
-	gtk_signal_connect(GTK_OBJECT(pwCancel), "clicked", GTK_SIGNAL_FUNC(cancel), 0);	
+	gtk_signal_connect(GTK_OBJECT(pwOK), "clicked", GTK_SIGNAL_FUNC(OkClicked), pDetails);
+	gtk_signal_connect(GTK_OBJECT(pwCancel), "clicked", GTK_SIGNAL_FUNC(CancelClicked), 0);	
 	gtk_signal_connect(GTK_OBJECT(pwColourDialog3d), "delete-event",
-			GTK_SIGNAL_FUNC(cancel), 0 );
+			GTK_SIGNAL_FUNC(CancelClicked), 0 );
 	gtk_signal_connect(GTK_OBJECT(pwColourDialog3d), "realize",
 			GTK_SIGNAL_FUNC(UpdateColourPreview), 0 );
 
 #if GTK_CHECK_VERSION(1,3,15)
-    gtk_window_add_accel_group( GTK_WINDOW( pwColourDialog3d ), pag );
+	gtk_window_add_accel_group( GTK_WINDOW( pwColourDialog3d ), pag );
 #else
-    gtk_accel_group_attach( pag, GTK_OBJECT( pwColourDialog3d ) );
+	gtk_accel_group_attach( pag, GTK_OBJECT( pwColourDialog3d ) );
 #endif
-    gtk_widget_add_accelerator( pwCancel, "clicked", pag, GDK_Escape, 0, 0 );
+	gtk_widget_add_accelerator( pwCancel, "clicked", pag, GDK_Escape, 0, 0 );
 
-    gtk_window_set_title( GTK_WINDOW( pwColourDialog3d ), _("3d Colour selection") );
+	gtk_window_set_title( GTK_WINDOW( pwColourDialog3d ), _("3d Colour selection") );
 
-    GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
-    gtk_widget_grab_default( pwOK );
+	GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
+	gtk_widget_grab_default( pwOK );
 
-	AddWidgets(pixWind, GTK_DIALOG(pwColourDialog3d)->vbox);
+	AddWidgets(pDetails->preview->window, GTK_DIALOG(pwColourDialog3d)->vbox);
 
-return pwColourDialog3d;
+	return pwColourDialog3d;
 }
 
 void setCol(GtkColourPicker* pCP, float val[4])
@@ -463,6 +467,8 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 
 	/* Avoid updating preview */
 	bUpdate = FALSE;
+
+	Create3dColourDialog(pDetails);
 
 	/* Setup widgets */
 	setCol(GTK_COLOUR_PICKER(pcpAmbient), col3d->ambientColour);
@@ -512,7 +518,7 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	/* show dialog */
 	gtk_window_set_modal( GTK_WINDOW( pwColourDialog3d ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pwColourDialog3d ),
-                                GTK_WINDOW( pwParent ) );
+                                GTK_WINDOW( gtk_widget_get_toplevel(*pDetails->parentPreview) ) );
 	gtk_widget_show_all( pwColourDialog3d );
 
 	if (!useOpacity)
@@ -530,32 +536,7 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	bUpdate = TRUE;
 	UpdateColourPreview(0);
 
-	okPressed = FALSE;
-
 	gtk_main();
-
-	if (okPressed)
-	{	/* Apply new settings */
-		char* texStr;
-		GdkGC *gc;
-	
-		if (useTexture)
-		{
-			texStr = (char *)gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(textureCombo)->entry));
-
-			if (!strcmp(texStr, NO_TEXTURE_STRING))
-				col3d->textureInfo = 0;
-			else
-				FindNamedTexture(&col3d->textureInfo, texStr);
-		}
-		gc = gdk_gc_new(pDetails->pixmap);
-		gdk_draw_rgb_image(pDetails->pixmap, gc, 0, 0, PREVIEW_WIDTH, PREVIEW_HEIGHT, GDK_RGB_DITHER_MAX,
-						  auch, PREVIEW_WIDTH * 3 );
-		gdk_gc_unref( gc );
-
-		gtk_widget_queue_draw(pDetails->preview);
-		UpdatePreview(pDetails->parentPreview);
-	}
 }
 
 void ResetPreviews()
@@ -586,6 +567,9 @@ GtkWidget* gtk_colour_picker_new3d(GtkWidget** parentPreview, GdkWindow* pixWind
 	GtkWidget *pixmapwid, *button;
 	GdkPixmap *pixmap;
 	pixmap = gdk_pixmap_new(pixWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
+
+	if (!xppm)
+		xppm = gdk_pixmap_new(pixWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
 
 	button = gtk_button_new();
 	pixmapwid = gtk_pixmap_new(pixmap, NULL);
