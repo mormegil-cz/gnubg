@@ -114,7 +114,7 @@ enum {
   /* 23*4 (92) are needed */
 
   /* (0 <= k < 14), RI_OFF + k = */
-  /*                       1 if exactly k checkers are off, 0 otherwise */
+  /*                       1 if exactly k+1 checkers are off, 0 otherwise */
 
   RI_OFF = 92,
 
