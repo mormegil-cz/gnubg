@@ -3084,6 +3084,8 @@ GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
 #define min(x,y)   (((x) > (y)) ? (y) : (x))
 #endif
 
+static movefilter NullFilter = {0, 0, 0.0};
+
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], cubeinfo *pci,
 			      evalcontext *pec, int nPlies ) {
@@ -3129,7 +3131,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 
     for( iPly = 0; iPly < nPlies; ++iPly ) {
       movefilter* mFilter =
-	(iPly < MAX_FILTER_PLIES) ? &mFilters[iPly] : &(movefilter){0,0,0.0};
+	(iPly < MAX_FILTER_PLIES) ? &mFilters[iPly] : &NullFilter;
 	 
       unsigned int k;
 

@@ -1,3 +1,8 @@
+Wed Dec 4 23:47:15 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
+
+	* eval.c - fix use of gcc non ANSI C construct so other
+	  compilers won't complain
+	
 Wed Dec  4 23:23:02 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c (BoardPrefsDestroy): add missing #if
