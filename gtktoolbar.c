@@ -345,7 +345,7 @@ ToolbarNew ( void ) {
 #else
   ptw->pwTake =
     button_from_image ( image_from_xpm_d ( tb_yes_xpm,
-                                           toolbar ) );
+                                           pwToolbar ) );
 #endif
 
   gtk_signal_connect( GTK_OBJECT( ptw->pwTake ), "clicked",
@@ -366,7 +366,7 @@ ToolbarNew ( void ) {
 #else
   ptw->pwDrop =
     button_from_image ( image_from_xpm_d ( tb_no_xpm,
-                                           toolbar ) );
+                                           pwToolbar ) );
 #endif
 
   gtk_signal_connect( GTK_OBJECT( ptw->pwDrop ), "clicked",
@@ -475,7 +475,7 @@ ToolbarNew ( void ) {
 #else
   ptw->pwStop =
     button_from_image ( image_from_xpm_d ( tb_stop_xpm,
-                                           toolbar ) );
+                                           pwToolbar ) );
 #endif
   gtk_container_add( GTK_CONTAINER( ptw->pwStopParent ), ptw->pwStop );
 
