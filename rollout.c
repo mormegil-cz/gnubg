@@ -481,6 +481,24 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[],
 }
 
 
+static void
+ClosedBoard ( int afClosedBoard[ 2 ], int anBoard[ 2 ][ 25 ] ) {
+
+  int i, j, n;
+
+  for ( i = 0; i < 2; i++ ) {
+
+    n = 0;
+    for( j = 0; j < 6; j++ )
+      n += anBoard[ i ][ j ] > 1;
+
+    afClosedBoard[ i ] = ( n == 6 );
+
+  }
+
+}
+
+
 static int
 BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], 
@@ -495,10 +513,17 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   int *pf, ici, i;
   evalcontext ec;
 
+  positionclass pc, pcBefore;
+  int nPipsBefore, nPipsAfter, nPipsDice;
+  int anPips [ 2 ];
+  int afClosedBoard[ 2 ];
+
   float arDouble[ NUM_CUBEFUL_OUTPUTS ];
   float aar[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
   int aiBar[ 2 ];
+
+  int afClosedOut[ 2 ] = { FALSE, FALSE };
 
   float rDP;
 
@@ -622,7 +647,15 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         /* Save number of chequers on bar */
 
         for ( i = 0; i < 2; i++ )
-          aiBar[ i ] = aanBoard[ ici ][ i ][ 25 ];
+          aiBar[ i ] = aanBoard[ ici ][ i ][ 24 ];
+
+	/* Save number of pips (for bearoff only) */
+
+	pcBefore = ClassifyPosition ( aanBoard[ ici ] );
+	if ( aarsStatistics && pcBefore <= CLASS_BEAROFF1 ) {
+	  PipCount ( aanBoard[ ici ], anPips );
+	  nPipsBefore = anPips[ 1 ];
+	}
 
         /* Find best move :-) */
 
@@ -636,8 +669,9 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
 	if( aarsStatistics )
 	    for ( i = 0; i < 2; i++ )
-		aarsStatistics[ ici ][ i ].acHit[ (iTurn < MAXHIT ) ? iTurn : MAXHIT ] +=
-		    aiBar[ ! i ] != aanBoard[ ici][ ! i ][ 25 ]; 
+		aarsStatistics[ ici ][ i ].
+		  acHit[ (iTurn < MAXHIT ) ? iTurn : MAXHIT ] +=
+		  aiBar[ ! i ] != aanBoard[ ici][ ! i ][ 24 ];  
           
 
         if( fAction )
@@ -646,9 +680,46 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
         if( fInterrupt )
           return -1;
 
+	/* Calculate number of wasted pips */
+
+	pc = ClassifyPosition ( aanBoard[ ici ] );
+
+	if ( aarsStatistics &&
+	     pc <= CLASS_BEAROFF1 && pcBefore <= CLASS_BEAROFF1 ) {
+
+	  PipCount ( aanBoard[ ici ], anPips );
+	  nPipsAfter = anPips[ 1 ];
+	  nPipsDice = anDice[ 0 ] + anDice[ 1 ];
+	  if ( anDice[ 0 ] == anDice[ 1 ] ) nPipsDice *= 2;
+
+	  aarsStatistics[ ici ][ pci->fMove ].nBearoffMoves++;
+	  aarsStatistics[ ici ][ pci->fMove ].nBearoffPipsLost +=
+	    nPipsDice - ( nPipsBefore - nPipsAfter );
+
+	}
+
+	/* Opponent closed out */
+
+	if ( aarsStatistics && ! afClosedOut[ pci->fMove ] 
+	     && aanBoard[ ici ][ 0 ][ 24 ] ) {
+
+	  /* opponent is on bar */
+
+	  ClosedBoard ( afClosedBoard, aanBoard[ ici ] );
+
+	  if ( afClosedBoard[ pci->fMove ] ) {
+	    aarsStatistics[ ici ][ pci->fMove ].nOpponentClosedOut++;
+	    aarsStatistics[ ici ]
+	      [ pci->fMove ].nOpponentClosedOutMove += iTurn;
+	    afClosedOut[ pci->fMove ] = TRUE;
+	  }
+
+	}
+
+
         /* check if game is over */
 
-        if ( ClassifyPosition ( aanBoard[ ici ] ) == CLASS_OVER ) {
+        if ( pc == CLASS_OVER ) {
 
           GeneralEvaluationE ( aarOutput[ ici ],
                                aanBoard[ ici ],
@@ -1167,7 +1238,7 @@ GeneralCubeDecisionR ( char *sz,
 
 #if USE_GTK
   if( fX )
-    GTKRollout( 2, aach, prc->nTrials );
+    GTKRollout( 2, aach, prc->nTrials, aarsStatistics );
   else
 #endif
     outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "

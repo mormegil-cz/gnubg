@@ -29,21 +29,34 @@
 #endif
 
 #define MAXHIT 50 /* for statistics */
+#define STAT_MAXCUBE 10
 
 typedef struct _rolloutstat {
 
   /* Regular win statistics (dimension is cube turns) */
 
-  int acWin[ 10 ], acWinGammon[ 10 ], acWinBackgammon[ 10 ]; 
+  int acWin[ STAT_MAXCUBE ];
+  int acWinGammon[ STAT_MAXCUBE ];
+  int acWinBackgammon[ STAT_MAXCUBE ]; 
 
   /* Cube statistics (dimension is cube turns) */
 
-  int acDoubleDrop[ 10 ]; /* # of Double, drop */
-  int acDoubleTake[ 10 ]; /* # of Double, takes */
+  int acDoubleDrop[ STAT_MAXCUBE ]; /* # of Double, drop */
+  int acDoubleTake[ STAT_MAXCUBE ]; /* # of Double, takes */
 
   /* Chequer hit statistics (dimension is move number) */
   
   int acHit[ MAXHIT ]; /* number of hits */
+
+  /* Average loss of pips in bear-off */
+
+  int nBearoffMoves; /* number of moves with bearoff */
+  int nBearoffPipsLost; /* number of pips lost in these moves */
+
+  /* Opponent closed out */
+
+  int nOpponentClosedOut;
+  int nOpponentClosedOutMove;
 
   /* FIXME: add more stuff */
 
