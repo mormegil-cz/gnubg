@@ -100,7 +100,6 @@ extern long int getrandom ( void ) {
    * Return random number
    */
 
-  printf("anCurrent %i\n",anCurrent);
   if ( (anCurrent >= 0) && (anCurrent < BUFLENGTH) ) {
      i = anCurrent;
      anCurrent++;
