@@ -53,6 +53,7 @@
 
 #include "eval.h"
 #include "positionid.h"
+#include "matchid.h"
 #include "matchequity.h"
 
 #if WIN32

@@ -78,6 +78,7 @@ static char szCommandSeparators[] = " \t\n\r\v\f";
 #include "eval.h"
 #include "getopt.h"
 #include "positionid.h"
+#include "matchid.h"
 #include "rollout.h"
 #include "matchequity.h"
 #include "analysis.h"

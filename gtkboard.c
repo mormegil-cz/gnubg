@@ -40,6 +40,7 @@
 #include "gtk-multiview.h"
 #include "gtkprefs.h"
 #include "positionid.h"
+#include "matchid.h"
 
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_style_get_font(s) ((s)->font)
