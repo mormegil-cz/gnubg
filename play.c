@@ -171,10 +171,6 @@ static int ComputerTurn( void ) {
 
       /* Consider doubling */
 
-      printf ( "cube access %2i %2i %2i %2i\n", 
-               ci.nCube, ci.fCubeOwner, ci.fMove,
-               GetDPEq ( NULL, NULL, &ci ) );
-
       if ( ! anDice[ 0 ] && GetDPEq ( NULL, NULL, &ci ) ) {
 
         static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE }; 
@@ -189,9 +185,6 @@ static int ComputerTurn( void ) {
         rDoublePoint = 
           GetDoublePointDeadCube ( arOutput, anScore, nMatchTo, &ci );
 
-        printf ( "In market window? %6.3f > %6.3f?\n",
-                 arOutput[ 0 ], rDoublePoint );
-
         if ( arOutput[ 0 ] >= rDoublePoint ) {
 
           /* We're in market window */
@@ -200,9 +193,6 @@ static int ComputerTurn( void ) {
                                          &ap [ fTurn ].ec,
                                          ap [ fTurn ].ec.nPlies ) < 0 )
             return -1;
-
-          printf ( "DOuble? %+6.3f %+6.3f %+6.3f...\n",
-                   arDouble[ 1 ], arDouble[2 ], arDouble[ 3 ] );
 
           if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) &&
                ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {

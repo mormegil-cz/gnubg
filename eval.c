@@ -3143,8 +3143,6 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
                 ( rW + rL ) * ( rL - 0.5 * ( 1.0 - rCubeX ) ) /
                 ( rL * ( rW + rL - ( 1.0 - rCubeX ) ) );
 
-              printf ( "!beaver: %6.3f %6.3f\n", rOppk, rk );
-
             }
             else {
 
@@ -3157,8 +3155,6 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
               rk =
                 ( rW + rL ) * ( rL - 0.25 * ( 1.0 - rCubeX ) ) /
                 ( rL * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
-
-              printf ( "beaver: %6.3f %6.3f\n", rOppk, rk );
 
             }
           }
