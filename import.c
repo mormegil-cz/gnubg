@@ -928,6 +928,9 @@ extern int ImportMat( FILE *fp, char *szFilename ) {
 					break;  /* match is over; avoid multiple matches in same .mat file */
 			}
 		}
+		else 
+		  szLine = GetMatLine(fp);
+
     }
 
     UpdateSettings();
