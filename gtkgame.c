@@ -5332,8 +5332,8 @@ static void PlayersSameToggled( GtkWidget *pw, rolloutwidget *prw) {
 
 static GtkWidget *
 RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
-  GtkWidget *pwPage, *pw;
-  GtkWidget *pwHBox;
+  GtkWidget *pwPage, *pw, *pwv;
+  GtkWidget *pwHBox, *pwVBox;
   GtkWidget *pwFrame;
 
   pwPage = gtk_vbox_new( FALSE, 0 );
@@ -5364,14 +5364,14 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_signal_connect( GTK_OBJECT( prpw->pwDoTrunc ), "toggled",
                       GTK_SIGNAL_FUNC (TruncEnableToggled), prw);
 
-  prpw->pwAdjTruncPlies = pwHBox = gtk_vbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
-  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+  prpw->pwAdjTruncPlies = pwVBox = gtk_vbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwVBox);
+  gtk_container_add( GTK_CONTAINER( pwVBox ), 
                      gtk_label_new( _("Truncate at ply:" ) ) );
 
   prpw->padjTruncPlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
                                                             prw->rcRollout.nTruncate, 0, 1000, 1, 1, 0 ) );
-  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
+  gtk_container_add( GTK_CONTAINER( pwVBox ), gtk_spin_button_new( 
                                                                   prpw->padjTruncPlies, 1, 0 ) );
 
 
@@ -5391,19 +5391,20 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwDoLate ), 
                       "toggled", GTK_SIGNAL_FUNC (LateEvalToggled), prw);
 
-  prpw->pwAdjLatePlies = pwHBox = gtk_vbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
-  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+  prpw->pwAdjLatePlies = pwVBox = gtk_vbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwVBox);
+  gtk_container_add( GTK_CONTAINER( pwVBox ), 
                      gtk_label_new( _("Change eval after ply:" ) ) );
 
   prpw->padjLatePlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
                                        prw->rcRollout.nLate, 0, 1000, 1, 1, 0 ) );
-  gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
+  gtk_container_add( GTK_CONTAINER( pwVBox ), gtk_spin_button_new( 
                                                 prpw->padjLatePlies, 1, 0 ) );
 
   pwFrame = gtk_frame_new ( _("Stop when result is accurate") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
 
+  /* an hbox for the pane */
   pw = gtk_hbox_new( FALSE, 8 );
   gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
@@ -5417,8 +5418,13 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwDoSTDStop ), 
                       "toggled", GTK_SIGNAL_FUNC (STDStopToggled), prw);
 
-  prpw->pwAdjMinGames = pwHBox = gtk_vbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  /* a vbox for the adjusters */
+  pwv = gtk_vbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwv);
+
+  
+  prpw->pwAdjMinGames = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwv ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
                      gtk_label_new( _("Minimum Trials:" ) ) );
 
@@ -5429,8 +5435,8 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
 
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwMinGames);
 
-  prpw->pwAdjMaxError = pwHBox = gtk_vbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  prpw->pwAdjMaxError = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pwv ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
                    gtk_label_new( _("Ratio |Standard Deviation/Value|:" ) ) );
 
@@ -5441,25 +5447,35 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
 
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwMaxError);
 
+
   pwFrame = gtk_frame_new ( _("Stop Rollouts of multiple moves based on j.s.d.") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
 
-  pw = gtk_vbox_new( FALSE, 8 );
+  /* an hbox for the frame */
+  pw = gtk_hbox_new( FALSE, 8 );
   gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
-   
+  
+  /* a vbox for the check boxes */
+  pwv = gtk_vbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwv);
+
   prpw->pwJsdDoStop = gtk_check_button_new_with_label (_( "Stop rollout when one move appears to be best " ) );
-  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwJsdDoStop );
+  gtk_container_add( GTK_CONTAINER( pwv ), prpw->pwJsdDoStop );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoStop ), prw->rcRollout.fStopOnJsd);
   gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwJsdDoStop ), "toggled", GTK_SIGNAL_FUNC (JsdStopToggled), prw);
 
   prpw->pwJsdDoMoveStop = gtk_check_button_new_with_label (_( "Stop rollout of move when best move j.s.d. appears better " ) );
-  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwJsdDoMoveStop );
+  gtk_container_add( GTK_CONTAINER( pwv ), prpw->pwJsdDoMoveStop );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( prw->prwGeneral->pwJsdDoMoveStop ), prw->rcRollout.fStopMoveOnJsd);
   gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwJsdDoMoveStop ), "toggled", GTK_SIGNAL_FUNC (JsdStopToggled), prw);
 
+  /* a vbox for the adjusters */
+  pwv = gtk_vbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwv);
+
   prpw->pwJsdAdjMinGames = pwHBox = gtk_hbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwv ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_label_new( _("Minimum Trials:" ) ) );
 
   prpw->padjJsdMinGames = GTK_ADJUSTMENT( gtk_adjustment_new( prw->rcRollout.nMinimumJsdGames, 1, 1296 * 1296, 36, 36, 0 ) );
@@ -5469,7 +5485,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwJsdMinGames);
 
   prpw->pwJsdAdjLimit = pwHBox = gtk_hbox_new( FALSE, 0 );
-  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwv ), pwHBox);
   gtk_container_add( GTK_CONTAINER( pwHBox ), 
                    gtk_label_new( _("No of j.s.d.s from best move" ) ) );
 

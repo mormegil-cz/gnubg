@@ -1485,7 +1485,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwOutputMWCpst,fOutputMatchPC, "set output matchpc %s")
 
   if(( n = pow->padjDigits->value ) != fOutputDigits ){
-    sprintf(sz, "set output digits %d", fOutputDigits );
+    sprintf(sz, "set output digits %d", n );
     UserCommand(sz); 
   }
   
