@@ -1752,9 +1752,17 @@ extern void SwapBoardToPanel(int ToPanel)
 {	/* Show/Hide panel on right of screen */
 	if (ToPanel)
 	{
-		gtk_widget_hide(pwGameBox);
-		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
 		gtk_widget_show(hpaned);
+#if USE_GTK2
+		while(gtk_events_pending())
+			gtk_main_iteration();
+#endif
+		gtk_widget_reparent(pwEventBox, pwPanelGameBox);
+#if USE_GTK2
+		while(gtk_events_pending())
+			gtk_main_iteration();
+#endif
+		gtk_widget_hide(pwGameBox);
 		SetPanelWidth(panelSize);
 	}
 	else
@@ -1762,7 +1770,7 @@ extern void SwapBoardToPanel(int ToPanel)
 		gtk_widget_show(pwGameBox);
 #if USE_GTK2
 		while(gtk_events_pending())
-		gtk_main_iteration();
+			gtk_main_iteration();
 #endif
 		panelSize = GetPanelSize();
 		gtk_widget_reparent(pwEventBox, pwGameBox);
@@ -5807,6 +5815,9 @@ static void SetAnalysis( gpointer *p, guint n, GtkWidget *pw ) {
 
   pwDialog = GTKCreateDialog( _("GNU Backgammon - Analysis Settings"),
 			   DT_QUESTION, GTK_SIGNAL_FUNC( AnalysisOK ), &aw );
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                  GTK_WINDOW( pwMain ) );
   gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
  		         AnalysisPage( &aw ) );
   gtk_widget_show_all( pwDialog );
