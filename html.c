@@ -2189,9 +2189,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
               _("Money"), 
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
   else
-    fprintf ( pf, " %s</td><td>%s</td><td>&nbsp;</td>\n",
-              ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
-              _("cubeless equity") : _("cubeless MWC"),
+    fprintf ( pf, " cubeless equity</td><td>%s</td><td>&nbsp;</td>\n",
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
 

@@ -1,3 +1,10 @@
+Sat May  3 10:07:05 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkcube.c (CubeAnalysis, TakeAnalysis), 
+	html.c (HTMLPrintCubeAnalysisTake), text.c (OutputCubeAnalysis): 
+	fix problem with MWC being shown in money game.
+	(reported by Ian Shaw)
+
 Fri May  2 19:25:12 2003  Oystein Johansen  <oystein@gnubg.org>
 
         * import.c (ParseJF): fix bugs!

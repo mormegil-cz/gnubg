@@ -871,9 +871,7 @@ OutputCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
               _("Money"), 
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
   else
-    sprintf ( pc = strchr ( sz, 0 ), " %s %s\n",
-              ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
-              _("cubeless equity") : _("cubeless MWC"),
+    sprintf ( pc = strchr ( sz, 0 ), " cubeless equity %s\n",
               OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
 

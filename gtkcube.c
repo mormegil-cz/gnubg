@@ -112,9 +112,8 @@ static GtkWidget *TakeAnalysis( const movetype mt,
                                               &ci, TRUE ),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
       else
-        sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s"),
+        sz = g_strdup_printf ( _("Cubeless %d-ply equity: %s"),
                                pes->ec.nPlies,
-                               fOutputMWC ? _("MWC") : _("equity"),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
       break;
@@ -127,8 +126,7 @@ static GtkWidget *TakeAnalysis( const movetype mt,
                                               &ci, TRUE ),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
       else
-        sz = g_strdup_printf ( _("Cubeless rollout %s: %s"),
-                               fOutputMWC ? _("MWC") : _("equity"),
+        sz = g_strdup_printf ( _("Cubeless rollout equity: %s"),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
       break;
@@ -405,9 +403,8 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                                               &ci, TRUE ),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
       else
-        sz = g_strdup_printf ( _("Cubeless %d-ply %s: %s"),
+        sz = g_strdup_printf ( _("Cubeless %d-ply equity: %s"),
                                pes->ec.nPlies,
-                               fOutputMWC ? _("MWC") : _("equity"),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
       break;
@@ -420,8 +417,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                                               &ci, TRUE ),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
       else
-        sz = g_strdup_printf ( _("Cubeless rollout %s: %s"),
-                               fOutputMWC ? _("MWC") : _("equity"),
+        sz = g_strdup_printf ( _("Cubeless rollout equity: %s"),
                                OutputMoneyEquity ( aarOutput[ 0 ], TRUE ) );
 
       break;
