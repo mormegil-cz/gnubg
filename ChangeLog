@@ -1,3 +1,8 @@
+Wed Oct 16 19:32:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c, set.c: more updates to the priority-stuff
+	(reported by Nardy Pillards)
+
 Tue Oct 15 17:49:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c: change default settings for rollout.

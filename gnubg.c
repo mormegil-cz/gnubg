@@ -998,19 +998,19 @@ command cER = {
   { NULL, NULL, NULL, NULL, NULL }    
 #ifdef WIN32
 }, acSetPriority[] = {
-  { "idle", CommandSetPriorityIdle, 
+  { "idle", CommandSetPriorityIdle,
     N_("Set priority to IDLE_PRIORITY_CLASS"), NULL, NULL },
-  { "belownormal", CommandSetPriorityBelowNormal, 
+  { "belownormal", CommandSetPriorityBelowNormal,
     N_("Set priority to BELOW_NORMAL_PRIORITY_CLASS"), NULL, NULL },
-  { "normal", CommandSetPriorityNormal, 
+  { "normal", CommandSetPriorityNormal,
     N_("Set priority to NORMAL_PRIORITY_CLASS"), NULL, NULL },
-  { "abovenormal", CommandSetPriorityAboveNormal, 
+  { "abovenormal", CommandSetPriorityAboveNormal,
     N_("Set priority to ABOVE_NORMAL_PRIORITY_CLASS"), NULL, NULL },
-  { "high", CommandSetPriorityHigh, 
-    N_("Set priority to HIGH_PRIORITY_CLASS"), NULL, NULL },
-  { "realtime", CommandSetPriorityRealtime, 
-    N_("Set priority to REALTIME_PRIORITY_CLASS"), NULL, NULL },
-  { NULL, NULL, NULL, NULL, NULL }    
+  { "high", CommandSetPriorityHighest, 
+    N_("Set priority to HIGHEST_PRIORITY_CLASS"), NULL, NULL },
+  { "realtime", CommandSetPriorityTimeCritical,
+    N_("Set priority to TIME_CRITICAL_PRIORITY_CLASS"), NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }
 #endif /* WIN32 */
 #ifdef USE_SOUND
 }, acSetSoundSystem[] = {
@@ -4331,9 +4331,9 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif /* USE_SOUND */
 
 #ifdef WIN32
-
+  
     switch ( fThreadPriority ) {
-    case THREAD_PRIORITY_ABOVE_NORMAL:
+    case THREAD_PRIORITY_ABOVE_NORMAL: 
       fprintf ( pf, "set priority abovenormal\n" );
       break;
     case THREAD_PRIORITY_BELOW_NORMAL:
@@ -4346,15 +4346,15 @@ extern void CommandSaveSettings( char *szParam ) {
       fprintf ( pf, "set priority idle\n" );
       break;
     case THREAD_PRIORITY_HIGHEST:
-      fprintf ( pf, "set priority high\n" );
+      fprintf ( pf, "set priority highest\n" );
       break;
     case THREAD_PRIORITY_TIME_CRITICAL:
-      fprintf ( pf, "set priority realtime\n" );
+      fprintf ( pf, "set priority timecritical\n" ); 
       break;
     default:
       break;
     }
-      
+  
 #endif /* WIN32 */
 
     /* the end */

@@ -3164,19 +3164,19 @@ CommandSetPriorityAboveNormal ( char *sz ) {
 }
 
 extern void
-CommandSetPriorityHigh ( char *sz ) {
+CommandSetPriorityHighest ( char *sz ) {
 
   Win32SetPriority ( THREAD_PRIORITY_HIGHEST, 
                      "highest priority" );
 
 }
 
-extern void
-CommandSetPriorityRealtime ( char *sz ) {
+extern void 
+CommandSetPriorityTimeCritical ( char *sz ) {
 
-  Win32SetPriority ( THREAD_PRIORITY_TIME_CRITIAL, 
+  Win32SetPriority ( THREAD_PRIORITY_TIME_CRITICAL,
                      "time critical" );
-
-}
+      
+}     
 
 #endif
