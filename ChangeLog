@@ -1,3 +1,18 @@
+Thu Jan 13 22:20:11 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* drawboard.c (ParseMove): Fixed off-by-one bug in bit mask fl,
+	which caused moves like 13/12*/11 to fail (reported by Jared
+	Riley).
+
+	* rollout.c (Rollout): Added parameter fVarRedn.
+	(BearoffRollout, BasicRollout, VarRednRollout): Old function
+	RolloutGame split into 3.
+
+	* show.c (CommandShowAutomatic, CommandShowEvaluation): Show
+	current settings.
+	* drawboard.c (FormatMovePlain): Reinstate the ugly FormatMove,
+	for saving `.mat' files.
+
 Wed Jan 12 23:29:59 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* eval.c, eval.h: Added another net for special contact positions.

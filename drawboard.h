@@ -25,6 +25,8 @@
 extern char *DrawBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
 			char *asz[] );
 extern char *FormatMove( char *pch, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] );
+extern char *FormatMovePlain( char *pch, int anBoard[ 2 ][ 25 ],
+			      int anMove[ 8 ] );
 extern int ParseMove( char *pch, int an[ 8 ] );
 
 #endif

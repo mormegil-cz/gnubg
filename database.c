@@ -123,8 +123,8 @@ extern void CommandDatabaseEvaluate( char *sz ) {
 	    /* FIXME if position has some existing rollouts, merge them */
 	    
 	    /* FIXME allow user to change these parameters */
-	    if( ( pev->c = Rollout( anBoardEval, arOutput, NULL, 0, 7, 144 ) )
-		> 0 ) {
+	    if( ( pev->c = Rollout( anBoardEval, arOutput, NULL, 0, 7, 144,
+				    FALSE ) ) > 0 ) {
 		for( i = 0; i < NUM_OUTPUTS; i++ )
 		    pev->asEq[ i ] = arOutput[ i ] * 0xFFFF;
 

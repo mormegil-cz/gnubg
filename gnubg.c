@@ -72,7 +72,7 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fResigned = FALSE, fMove = -1, nPliesEval = 1, anScore[ 2 ] = { 0, 0 },
     cGames = 0, fDoubled = FALSE, nCube = 1, fCubeOwner = -1,
     fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
-    fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 0,
+    fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 1,
     fCubeUse = TRUE, fNackgammon = FALSE;
 
 #if !X_DISPLAY_MISSING
@@ -187,7 +187,8 @@ static command acDatabase[] = {
     { "turn", CommandSetTurn, "Set which player is on roll", NULL },
     { NULL, NULL, NULL, NULL }
 }, acShow[] = {
-    { "automatic", CommandNotImplemented, "FIXME", NULL },
+    { "automatic", CommandShowAutomatic, "List which functions will be "
+      "performed without user input", NULL },
     { "board", CommandShowBoard, "Redisplay the board position", NULL },
     { "copying", CommandShowCopying, "Conditions for redistributing copies "
       "of GNU Backgammon", NULL },
@@ -741,7 +742,7 @@ extern void CommandRollout( char *sz ) {
 	return;
     }
 
-    if( ( c = Rollout( an, ar, arStdDev, 0, 7, 1296 ) ) < 0 )
+    if( ( c = Rollout( an, ar, arStdDev, 0, 7, 72, TRUE ) ) < 0 )
 	return;
 
     printf( "Result (after %d trials):\n\n"
@@ -775,7 +776,7 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
 	    sprintf( sz, "%d%d: ", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
-	    FormatMove( sz + 4, anBoard, pmr->n.anMove );
+	    FormatMovePlain( sz + 4, anBoard, pmr->n.anMove );
 	    ApplyMove( anBoard, pmr->n.anMove );
 	    SwapSides( anBoard );
 	    break;

@@ -89,6 +89,24 @@ static void ShowPaged( char **ppch ) {
 	    puts( *ppch++ );
 }
 
+extern void CommandShowAutomatic( char *sz ) {
+
+    static char *szOn = "On", *szOff = "Off";
+    
+    printf( "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
+	    "crawford\t(Enable the Crawford rule as appropriate):     \t%s\n"
+	    "doubles \t(Turn the cube when opening roll is a double): \t%d\n"
+	    "game    \t(Start a new game after each one is completed):\t%s\n"
+	    "move    \t(Play the forced move when there is no choice):\t%s\n"
+	    "roll    \t(Roll the dice if no double is possible):      \t%s\n",
+	    fAutoBearoff ? szOn : szOff,
+	    fAutoCrawford ? szOn : szOff,
+	    cAutoDoubles,
+	    fAutoGame ? szOn : szOff,
+	    fAutoMove ? szOn : szOff,
+	    fAutoRoll ? szOn : szOff );
+}
+
 extern void CommandShowBoard( char *sz ) {
 
     int an[ 2 ][ 25 ];
@@ -165,9 +183,11 @@ extern void CommandShowEvaluation( char *sz ) {
     else
 	putchar( '.' );
 
-    putchar( '\n' );
-
-    /* FIXME show other things besides cache */
+    printf( "\n\nThe `eval' and `hint' commands will use %d-ply evaluation.\n"
+	    "\nUp to %d move%s (with a base cubeless evaluation difference of "
+	    "%0.3g) will be\nselected for lookahead evaluation.\n",
+	    nPliesEval, nSearchCandidates, nSearchCandidates == 1 ? "" : "s",
+	    rSearchTolerance );
 }
 
 extern void CommandShowJacoby( char *sz ) {

@@ -1,5 +1,5 @@
 /*
- * rollout.h
+ * rollout.c
  *
  * by Gary Wong <gary@cs.arizona.edu>, 1999.
  *
@@ -30,6 +30,24 @@
 #include "positionid.h"
 #include "rollout.h"
 
+static void QuasiRandomDice( int iTurn, int iGame, int cGames,
+			    int anDice[ 2 ] ) {
+    if( !iTurn && !( cGames % 36 ) ) {
+	anDice[ 0 ] = ( iGame % 6 ) + 1;
+	anDice[ 1 ] = ( ( iGame / 6 ) % 6 ) + 1;
+    } else if( iTurn == 1 && !( cGames % 1296 ) ) {
+	anDice[ 0 ] = ( ( iGame / 36 ) % 6 ) + 1;
+	anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
+    } else
+	RollDice( anDice );
+}
+
+/* Upon return, anBoard contains the board position after making the best
+   play considering BOTH players' positions.  The evaluation of the play
+   considering ONLY the position of the player in roll is stored in ar.
+   The move used for anBoard and ar will usually (but not always) be the
+   same.  Returning both values is necessary for performing variance
+   reduction. */
 static int FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
 			    float ar[ NUM_OUTPUTS ] ) {
 
@@ -70,101 +88,44 @@ static int FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
     return 0;
 }
 
-static int RolloutGame( int anBoard[ 2 ][ 25 ], float arOutput[],
-			int nPlies, int nTruncate, int iGame, int cGames ) {
-
-    int anBoardEval[ 2 ][ 25 ], aaanBoard[ 6 ][ 6 ][ 2 ][ 25 ],	anDice[ 2 ],
-	i, j, n, iTurn;
-    float ar[ NUM_OUTPUTS ], arMean[ NUM_OUTPUTS ],
-	aaar[ 6 ][ 6 ][ NUM_OUTPUTS ];
-    positionclass pc;
+/* Rollouts of bearoff positions, with race database variance reduction and no
+   lookahead. */
+static int BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
+			   int nTruncate, int iTurn, int iGame, int cGames ) {
+    int anDice[ 2 ], i;
+    float ar[ NUM_OUTPUTS ], arMean[ NUM_OUTPUTS ], arMin[ NUM_OUTPUTS ];
 
     for( i = 0; i < NUM_OUTPUTS; i++ )
-	arOutput[ i ] = 0.0;
+	arOutput[ i ] = 0.0f;
 
-    memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-	    sizeof( anBoardEval ) );
-    
-    for( iTurn = 0; iTurn < nTruncate &&
-	     ( pc = ClassifyPosition( anBoardEval ) ) > CLASS_PERFECT;
-	 iTurn++ ) {
-	if( !iTurn && !( cGames % 36 ) ) {
-	    anDice[ 0 ] = ( iGame % 6 ) + 1;
-	    anDice[ 1 ] = ( ( iGame / 6 ) % 6 ) + 1;
-	} else if( iTurn == 1 && !( cGames % 1296 ) ) {
-	    anDice[ 0 ] = ( ( iGame / 36 ) % 6 ) + 1;
-	    anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
-	} else
-	    RollDice( anDice );
+    while( iTurn < nTruncate && ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
+	QuasiRandomDice( iTurn, iGame, cGames, anDice );
 	
 	if( anDice[ 0 ]-- < anDice[ 1 ]-- )
 	    swap( anDice, anDice + 1 );
 
-	if( nPlies ) {
-	    /* Lookahead evaluation; apply variance reduction. */
-	    if( pc == CLASS_BEAROFF1 ) {
-		EvaluatePosition( anBoardEval, arMean, 0 );
-		if( iTurn & 1 )
-		    InvertEvaluation( arMean );
+	EvaluatePosition( anBoard, arMean, 0 );
+	if( iTurn & 1 )
+	    InvertEvaluation( arMean );
 	    
-		FindBestBearoff( anBoardEval, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-				 aaar[ anDice[ 0 ] ][ anDice[ 1 ] ] );
+	FindBestBearoff( anBoard, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
+			 arMin );
 
-		if( !( iTurn & 1 ) )
-		    InvertEvaluation( aaar[ anDice[ 0 ] ][ anDice[ 1 ] ] );
-	    } else {
-		for( n = 0; n < NUM_OUTPUTS; n++ )
-		    arMean[ n ] = 0.0;
-		
-		for( i = 0; i < 6; i++ )
-		    for( j = 0; j <= i; j++ ) {
-			memcpy( aaanBoard[ i ][ j ], anBoardEval,
-				sizeof( anBoardEval ) );
-			
-			if( FindBestMove( nPlies - 1, NULL, i + 1, j + 1,
-					  aaanBoard[ i ][ j ] ) < 0 )
-			    return -1;
-			
-			SwapSides( aaanBoard[ i ][ j ] );
-			
-			EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
-					  nPlies - 1 ); /* probably cached */
-			/* FIXME probably _NOT_ cached!  add param to FBM */
-			
-			if( !( iTurn & 1 ) )
-			    InvertEvaluation( aaar[ i ][ j ] );
-			
-			for( n = 0; n < NUM_OUTPUTS; n++ )
-			    arMean[ n ] += ( ( i == j ) ? aaar[ i ][ j ][ n ] :
-					     ( aaar[ i ][ j ][ n ] * 2.0 ) );
-		    }
-		
-		for( n = 0; n < NUM_OUTPUTS; n++ )
-		    arMean[ n ] /= 36.0;
-		
-		if( FindBestMove( nPlies, NULL, anDice[ 0 ] + 1,
-				  anDice[ 1 ] + 1, anBoardEval ) < 0 )
-		    return -1;
-	    }
-	} else
-	    /* 0 plies; cannot perform variance reduction. */
-	    if( FindBestMove( nPlies, NULL, anDice[ 0 ] + 1,
-			      anDice[ 1 ] + 1, anBoardEval ) < 0 )
-		return -1;
+	if( !( iTurn & 1 ) )
+	    InvertEvaluation( arMin );
 	
-	SwapSides( anBoardEval );
+	SwapSides( anBoard );
 
-	if( nPlies )
-	    /* Add variance reduction term. */
-	    for( i = 0; i < NUM_OUTPUTS; i++ )
-		arOutput[ i ] += arMean[ i ] -
-		    aaar[ anDice[ 0 ] ][ anDice[ 1 ] ][ i ];
+	for( i = 0; i < NUM_OUTPUTS; i++ )
+	    arOutput[ i ] += arMean[ i ] - arMin[ i ];
 
 	if( fInterrupt )
 	    return -1;
+	
+	 iTurn++;
     }
 
-    if( EvaluatePosition( anBoardEval, ar, nPlies ) )
+    if( EvaluatePosition( anBoard, ar, 0 ) )
 	return -1;
 
     if( iTurn & 1 )
@@ -173,33 +134,178 @@ static int RolloutGame( int anBoard[ 2 ][ 25 ], float arOutput[],
     for( i = 0; i < NUM_OUTPUTS; i++ )
 	arOutput[ i ] += ar[ i ];
 
-    SanityCheck( anBoard, arOutput );
+    return 0;
+}
+
+/* Basic rollout, with no lookahead and no variance reduction, until
+   a bearoff position is reached. */
+static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
+			int nTruncate, int iTurn, int iGame, int cGames ) {
+    positionclass pc;
+    int anDice[ 2 ];
+    
+    while( iTurn < nTruncate && ( pc = ClassifyPosition( anBoard ) ) >
+	   CLASS_BEAROFF1 ) {
+	QuasiRandomDice( iTurn, iGame, cGames, anDice );
+	
+	if( FindBestMove( 0, NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
+			  anBoard ) < 0 )
+	    return -1;
+	
+	SwapSides( anBoard );
+
+	iTurn++;
+    }
+
+    if( iTurn < nTruncate && pc == CLASS_BEAROFF1 )
+	return BearoffRollout( anBoard, arOutput, nTruncate, iTurn, iGame,
+			       cGames );
+
+    if( EvaluatePosition( anBoard, arOutput, 0 ) )
+	return -1;
+
+    if( iTurn & 1 )
+	InvertEvaluation( arOutput );
+
+    return 0;
+}
+
+/* Variance reduction rollout with lookahead. */
+static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
+			   int nPlies, int nTruncate, int iTurn, int iGame,
+			   int cGames ) {
+
+    int aaanBoard[ 6 ][ 6 ][ 2 ][ 25 ],	anDice[ 2 ], i, j, n;
+    float ar[ NUM_OUTPUTS ], arMean[ NUM_OUTPUTS ],
+	aaar[ 6 ][ 6 ][ NUM_OUTPUTS ];
+    positionclass pc;
+
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+	arOutput[ i ] = 0.0f;
+
+    while( iTurn < nTruncate && ( pc = ClassifyPosition( anBoard ) ) >
+	   CLASS_BEAROFF1 ) {
+	QuasiRandomDice( iTurn, iGame, cGames, anDice );
+	
+	if( anDice[ 0 ]-- < anDice[ 1 ]-- )
+	    swap( anDice, anDice + 1 );
+
+	for( n = 0; n < NUM_OUTPUTS; n++ )
+	    arMean[ n ] = 0.0f;
+		
+	for( i = 0; i < 6; i++ )
+	    for( j = 0; j <= i; j++ ) {
+		memcpy( &aaanBoard[ i ][ j ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+			2 * 25 * sizeof( int ) );
+			
+		if( FindBestMove( 0, NULL, i + 1, j + 1,
+				  aaanBoard[ i ][ j ] ) < 0 )
+		    return -1;
+		
+		SwapSides( aaanBoard[ i ][ j ] );
+
+		/* FIXME this evaluation is hopefully cached from the Find
+		   BestMove call above, but it would be nice to have saved
+		   it at the same time (i.e. add a parameter to FindBestMove
+		   to evaluate the move immediately). */
+		EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
+				  nPlies ? nPlies - 1 : 0 );
+			
+		if( !( iTurn & 1 ) )
+		    InvertEvaluation( aaar[ i ][ j ] );
+			
+		for( n = 0; n < NUM_OUTPUTS; n++ )
+		    arMean[ n ] += ( ( i == j ) ? aaar[ i ][ j ][ n ] :
+				     ( aaar[ i ][ j ][ n ] * 2.0 ) );
+	    }
+		
+	for( n = 0; n < NUM_OUTPUTS; n++ )
+	    arMean[ n ] /= 36.0;
+		
+	if( nPlies ) {
+	    if( FindBestMove( nPlies, NULL, anDice[ 0 ] + 1,
+			      anDice[ 1 ] + 1, anBoard ) < 0 )
+		return -1;
+	    
+	    SwapSides( anBoard );
+	} else
+	    memcpy( &anBoard[ 0 ][ 0 ], &aaanBoard[ anDice[ 0 ] ]
+		    [ anDice[ 1 ]  ][ 0 ][ 0 ], 2 * 25 * sizeof( int ) );
+
+	/* Add variance reduction term. */
+	for( i = 0; i < NUM_OUTPUTS; i++ )
+	    arOutput[ i ] += arMean[ i ] -
+		aaar[ anDice[ 0 ] ][ anDice[ 1 ] ][ i ];
+	
+	if( fInterrupt )
+	    return -1;
+
+	iTurn++;
+    }
+
+    if( iTurn < nTruncate && pc == CLASS_BEAROFF1 ) {
+	if( BearoffRollout( anBoard, ar, nTruncate, iTurn, iGame, cGames ) )
+	    return -1;
+    } else
+	if( EvaluatePosition( anBoard, ar, nPlies ) )
+	    return -1;
+
+    if( iTurn & 1 )
+	InvertEvaluation( ar );
+
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+	arOutput[ i ] += ar[ i ];
     
     return 0;
 }
 
 extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
-		    int nPlies, int nTruncate, int cGames ) {
-    int i, j;
+		    int nPlies, int nTruncate, int cGames, int fVarRedn ) {
+    int i, j, f, anBoardEval[ 2 ][ 25 ];
     float ar[ NUM_ROLLOUT_OUTPUTS ];
     double arResult[ NUM_ROLLOUT_OUTPUTS ], arVariance[ NUM_ROLLOUT_OUTPUTS ];
-
+    enum _rollouttype { BEAROFF, BASIC, VARREDN } rt;
+    
     if( cGames < 1 ) {
 	errno = EINVAL;
 	return -1;
     }
-	
+
+    if( ClassifyPosition( anBoard ) == CLASS_BEAROFF1 )
+	rt = BEAROFF;
+    else if( fVarRedn )
+	rt = VARREDN;
+    else
+	rt = BASIC;
+    
     for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
-	arResult[ i ] = arVariance[ i ] = 0.0;
+	arResult[ i ] = arVariance[ i ] = 0.0f;
     
     for( i = 0; i < cGames; i++ ) {
-	if( RolloutGame( anBoard, ar, nPlies, nTruncate, i, cGames ) )
+	memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+		sizeof( anBoardEval ) );
+
+	switch( rt ) {
+	case BEAROFF:
+	    f = BearoffRollout( anBoardEval, ar, nTruncate, 0, i, cGames );
+	    break;
+	case BASIC:
+	    f = BasicRollout( anBoardEval, ar, nTruncate, 0, i, cGames );
+	    break;
+	case VARREDN:
+	    f = VarRednRollout( anBoardEval, ar, nPlies, nTruncate, 0, i,
+				cGames );
+	    break;
+	}
+
+	if( f )
 	    break;
 
+	SanityCheck( anBoard, ar ); /* FIXME think about this... */
+	
 	printf( "%6d\r", i + 1 );
 	fflush( stdout );
 
-	/* ar[ NUM_OUTPUTS ] is used to store cubeless equity */
 	ar[ OUTPUT_EQUITY ] = ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
 	    ar[ OUTPUT_WINGAMMON ] +
 	    ar[ OUTPUT_WINBACKGAMMON ] -
@@ -220,20 +326,20 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 	    arOutput[ i ] = arResult[ i ] / cGames;
 
 	    if( i < OUTPUT_EQUITY ) {
-		if( arOutput[ i ] < 0.0 )
-		    arOutput[ i ] = 0.0;
-		else if( arOutput[ i ] > 1.0 )
-		    arOutput[ i ] = 1.0;
+		if( arOutput[ i ] < 0.0f )
+		    arOutput[ i ] = 0.0f;
+		else if( arOutput[ i ] > 1.0f )
+		    arOutput[ i ] = 1.0f;
 	    }
 	}
 	
 	if( arStdDev ) {
 	    if( cGames == 1 )
-		arStdDev[ i ] = 0.0;
+		arStdDev[ i ] = 0.0f;
 	    else {
 		arVariance[ i ] -= cGames * arOutput[ i ] * arOutput[ i ];
-		if( arVariance[ i ] < 0.0 )
-		    arVariance[ i ] = 0.0;
+		if( arVariance[ i ] < 0.0f )
+		    arVariance[ i ] = 0.0f;
 		arStdDev[ i ] = sqrt( arVariance[ i ] ) / ( cGames - 1 );
 	    }
 	}
