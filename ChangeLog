@@ -1,3 +1,8 @@
+Sat Sep 13 04:59:01 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gtkgame.c (SetAnnotation): Use strlen gettext string instead
+	of magic number.
+
 Fri 12 Sep 23:26:21 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkgame.c gnubg.c play.c  - move panels flag out to 

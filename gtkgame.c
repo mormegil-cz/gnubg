@@ -1864,14 +1864,13 @@ static void SetAnnotation( moverecord *pmr ) {
                               SkillMenu( pmr->n.stMove, "move" ),
 			      FALSE, FALSE, 4 );
 	    strcpy( sz, _("Moved ") );
-	    FormatMove( sz + 6, ms.anBoard, pmr->n.anMove );
+	    FormatMove( sz + strlen(_("Moved ")), ms.anBoard, pmr->n.anMove );
 	    gtk_box_pack_end( GTK_BOX( pwBox ),
 			      gtk_label_new( sz ), FALSE, FALSE, 0 );
 
 #endif
-
 	    strcpy( sz, _("Moved ") );
-	    FormatMove( sz + 6, ms.anBoard, pmr->n.anMove );
+	    FormatMove( sz + strlen(_("Moved ")), ms.anBoard, pmr->n.anMove );
 
 #if ANALYSIS_HORIZONTAL
 	    gtk_table_attach_defaults( GTK_TABLE( pwBox ),
