@@ -596,6 +596,40 @@ writeme
 @node Rollout of cube decisions
 @section Rollout of cube decisions
 
+@subsection Quasi-Random Dice
+
+Quasi-Random Dice are used to reduce the element of luck in
+rollouts. Instead of selecting purely random dice, @gnubg{} will
+ensure a uniform distribution of the first roll of the rollout.  If 36
+trials is requested, one game will start with 11, two games with 21,
+two games with 31, etc. In general, if n * 36 games is requested, n
+games will start with 11, 2*n games with 21 etc. This is called
+@emph{rotation} of the first roll. Similarly, if n*1296 trials is
+requested, the second roll will be rotated, such that n games will
+start with 11-11, 2*n games with 11-21, 4*n games with 21-21, etc. The
+third roll be also be rotated if the number of trials is proportional
+to 46656. 
+
+Suppose a user stops a 1296 trial rollout after 36 games. The 36 games
+would have had the following rolls for the first two rolls of each
+game: 11-11, 21-11, 12-11, 31-11, 13-11, ..., 66-11 Obviously such a
+rollout will give skewed results since the second roll was 11 for all
+games! To avoid this problem @gnubg{} will randomise the sequence of
+rolls such that it is guaranteed that for any sample of 36 games you
+have exactly one game with first roll 11, exactly one game with
+second roll 11, etc. This is called @emph{stratification}.
+
+@gnubg{} will actually also rotate and stratify rollouts where the
+number of trials are not multiples of 36, 1296, etc. The distribution of
+rolls is obviously not uniform any longer in this case, but it will
+still provide some reduction of the luck, i.e., no 37 trial rollout
+will have 3 games with a initial 66. 
+
+
+
+
+
+
 @node Analysing a saved game or match or session
 @section Analysing a saved game or match or session
 
