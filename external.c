@@ -399,9 +399,6 @@ extern void CommandExternal( char *sz ) {
 	outputl( _("Warning: badly formed board from external controller.") );
       else {
 
-	if ( ! fTurn )
-	  SwapSides( anBoard );
-
 	SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
 		      fCrawford, fJacoby, nBeavers, bgvDefault ); 
 
@@ -482,7 +479,7 @@ extern void CommandExternal( char *sz ) {
 	}
 	    
 	strcat( szResponse, "\n" );
-	    
+
 	if( ExternalWrite( hPeer, szResponse, strlen( szResponse ) ) )
 	  break;
       }
