@@ -363,7 +363,7 @@ extern void AddMoveRecord( void *pv ) {
 		pmr->n.etDouble <= EVAL_ROLLOUT );
 	assert( pmr->n.ml.cMoves >= 0 && pmr->n.ml.cMoves < MAX_MOVES );
 	if( pmr->n.ml.cMoves )
-	    assert( pmr->n.iMove >= 0 && pmr->n.iMove < pmr->n.ml.cMoves );
+	    assert( pmr->n.iMove >= 0 && pmr->n.iMove <= pmr->n.ml.cMoves );
 	assert( pmr->n.lt >= LUCK_VERYBAD && pmr->n.lt <= LUCK_VERYGOOD );
 	assert( pmr->n.st >= SKILL_VERYBAD && pmr->n.st <= SKILL_VERYGOOD );
 	break;
@@ -686,8 +686,10 @@ static int ComputerTurn( void ) {
 
       if ( fCubeUse && ! anDice[ 0 ] && nCube < MAX_CUBE &&
 	   GetDPEq ( NULL, NULL, &ci ) ) {
+	  evalcontext ecDH;
 
-        static evalcontext ecDH = { 1, 8, 0.16, 0, FALSE }; 
+	  memcpy( &ecDH, &ap[ fTurn ].ec, sizeof ecDH );
+	  ecDH.fCubeful = FALSE;
         
         /* We have access to the cube */
 

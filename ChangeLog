@@ -1,3 +1,17 @@
+Mon Apr  9 13:31:51 2001  Gary Wong  <gtw@research.att.com>
+
+	* set.c (CommandSetAnalysisLimit): New function.
+	* show.c (CommandShowAnalysis): New function.
+	* analysis.c (CommandAnalyseGame, CommandAnalyseMatch): New functions.
+	(AnalyzeGame): Don't modify global state.  Apply a limit to the number
+	of moves to record.
+
+	* gnubg.c (ProgressStart, Progress, ProgressEnd): New functions.
+	* gtkgame.c (GTKProgressStart, GTKProgress, GTKProgressEnd): New
+	functions.
+	
+	* gnubg.c (ShowBoard): Display move annotations.
+
 Fri Apr  6 10:31:39 2001  Gary Wong  <gtw@research.att.com>
 
 	* guile.c (menu_bar): New function.

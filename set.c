@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <ctype.h>
 #include <errno.h>
 #include <math.h>
 #if HAVE_SYS_SOCKET_H
@@ -136,6 +137,23 @@ static void SetRNG( rng rngNew, char *szSeed ) {
 	    CommandSetSeed( szSeed );
 	
 	UpdateSetting( &rngCurrent );
+    }
+}
+
+extern void CommandSetAnalysisLimit( char *sz ) {
+    
+    int n;
+    
+    if( ( n = ParseNumber( &sz ) ) <= 0 ) {
+	cAnalysisMoves = -1;
+	outputl( "Every legal move will be analysed." );
+    } else if( n >= 2 ) {
+	cAnalysisMoves = n;
+	outputf( "Up to %d moves will be analysed.\n", n );
+    } else {
+	outputl( "If you specify a limit on the number of moves to analyse, "
+		 "it must be at least 2." );
+	return;
     }
 }
 
@@ -578,28 +596,17 @@ extern void CommandSetEvalReduced( char *sz ) {
 	return;
     }
 
-    if ( pecSet->nPlies < 2 ) {
-
-	outputl( "Command has no effect for 0 and 1 ply evaluations.\n" );
-      return;
-
-    }
-
     if ( n == 0 || n == 21 )
       pecSet->nReduced = 0;
-    else if ( n <= 7 )
-      pecSet->nReduced = 7;
-    else if ( n <= 11 )
-      pecSet->nReduced = 11;
     else
-      pecSet->nReduced = 14;
+      pecSet->nReduced = 7;
 
-    outputf( "%s will use %.0f%% speed %d ply evaluation.\n", 
-	    szSet, 
-	    (pecSet->nReduced) ? 100. * pecSet->nReduced / 21.0 : 100.,
-	    pecSet->nPlies );
+    outputf( "%s will use %d%% speed 2 ply evaluation.\n", 
+	     szSet, pecSet->nReduced ? 33 : 100 );
 
-
+    if( pecSet->nPlies != 2 )
+	outputl( "(Note that this setting will have no effect until you "
+		 "choose 2 ply evaluation.)" );
 }
 
 extern void CommandSetEvalTolerance( char *sz ) {
@@ -728,40 +735,46 @@ extern void CommandSetPlayerHuman( char *sz ) {
 
 extern void CommandSetPlayerName( char *sz ) {
 
-    char *pch = NextToken( &sz );
+    char *pch;
     
-    if( !pch ) {
+    if( !sz || !*sz ) {
 	outputl( "You must specify a name to use." );
 
 	return;
     }
 
-    if( strlen( pch ) > 31 )
-	pch[ 31 ] = 0;
+    if( strlen( sz ) > 31 )
+	sz[ 31 ] = 0;
+
+    for( pch = sz; *pch; pch++ )
+	if( isspace( *pch ) ) {
+	    outputl( "Player names must not include spaces." );
+	    return;
+	}
     
-    if( ( *pch == '0' || *pch == '1' ) && !pch[ 1 ] ) {
-	outputf( "`%c' is not a legal name.\n", *pch );
+    if( ( *sz == '0' || *sz == '1' ) && !sz[ 1 ] ) {
+	outputf( "`%c' is not a valid name.\n", *sz );
 
 	return;
     }
 
-    if( !strcasecmp( pch, "both" ) ) {
+    if( !strcasecmp( sz, "both" ) ) {
 	outputl( "`both' is a reserved word; you can't call a player "
 		 "that.\n" );
 
 	return;
     }
 
-    if( !strncasecmp( pch, ap[ !iPlayerSet ].szName,
+    if( !strncasecmp( sz, ap[ !iPlayerSet ].szName,
 		      sizeof( ap[ 0 ].szName ) ) ) {
 	outputl( "That name is already in use by the other player." );
 
 	return;
     }
 
-    strcpy( ap[ iPlayerSet ].szName, pch );
+    strcpy( ap[ iPlayerSet ].szName, sz );
 
-    outputf( "Player %d is now known as `%s'.\n", iPlayerSet, pch );
+    outputf( "Player %d is now known as `%s'.\n", iPlayerSet, sz );
 
 #if USE_GUI
     if( fX )

@@ -37,7 +37,6 @@ duplication of effort and to make sure our changes merge easily.
 ** EvaluatePositionCache doesn't currently cache evaluations deeper than
   0-ply for match play.  Update EvalCacheHash so that spurious collisions
   won't occur, and then change EvaluatePositionCache to cache what it can.
-** Merge David's reduced evaluation code. (gary)
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -51,10 +50,15 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more completions to readline (player names, filenames for load/save).
 ** Add interactive rollouts.
 ** Analyse games and matches.
-*** Add luck analysis/variance reduction, error rates, etc.
+*** Add luck analysis/variance reduction, error rates, etc.  Luck analysis
+  should be done a lot like variance reduction: 21 n-ply evaluations are
+  done before the roll is considered, and averaged; the evaluation of the
+  actual roll is then compared with the mean.
+*** Add an "analyse move" command.
 *** Allow re-evaluating analysis with different settings, and rollouts.
 *** Add "set automatic analysis".
 *** Automatically mark moves good/bad and lucky/unlucky.
+*** Allow a limit on the number of moves saved.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -96,7 +100,7 @@ duplication of effort and to make sure our changes merge easily.
 * TTY interface:
 ** Display the score and match length in ShowBoard().
 ** Handle "list game" and "list match".
-** Handle annotations.
+** Allow setting/editing commentary.
 
 * X interface:
 ** Does anybody still use the old Xlib (Ext) interface any more?  If so,
@@ -109,7 +113,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Finish menus.  Make sure there is a GUI equivalent for every command.
   Currently missing:
 *** set beavers
-*** set * evaluation reduced
 ** Add a prompt and entry field to allow commands to be entered (replacing
   stdin).
 ** Allow the user to decide whether short messages appear in dialogs
@@ -128,8 +131,6 @@ duplication of effort and to make sure our changes merge easily.
   checker that cannot be moved with the left die, it should move the 
   checker with the right die if possible [this is analogous to the
   behaviour in Snowie].
-** Add progress indicators for everything that checks fShowProgress.
-  A function that generates a progress bar/ASCII to stdout would help.
 ** Make sure we apply GTK styles correctly: create a GtkRcStyle; set the
   background colour in the style and the flag indicating the background is
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
@@ -152,7 +153,10 @@ duplication of effort and to make sure our changes merge easily.
   and menu items when appropriate.
 ** Add an option to turn off the beeps (suggested by Jeremie Petit).
 ** Make some of the information below the board optional (suggested by Jeremie 
-  Petit).
+  Petit).  This might be possible with a vertical pane widget, but it would
+  be nice if there was a way to forbid children from being given _more_ than
+  their requested size.  This might require a subclass which overrides
+  gtk_vpaned_motion and sets paned->min_position.
 ** Optionally merge the game record and annotation windows into one big
   paned window (suggested by Jeremie Petit).
 ** Use different styles for moves in the game window, depending on the
@@ -206,6 +210,8 @@ duplication of effort and to make sure our changes merge easily.
   robust to add a parent to it (box or event box?), and give _that_
   the grab.  Unfortunately, grab add/remove calls must nest, and we
   can't guarantee that...
+** There's no way to see the annotation on the opening move using the
+  TTY interface.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

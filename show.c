@@ -104,6 +104,14 @@ static void ShowPaged( char **ppch ) {
 	    outputl( *ppch++ );
 }
 
+extern void CommandShowAnalysis( char *sz ) {
+    
+    if( cAnalysisMoves < 0 )
+	outputl( "Every legal move will be analysed." );
+    else
+	outputf( "Up to %d moves will be analysed.\n", cAnalysisMoves );
+}
+
 extern void CommandShowAutomatic( char *sz ) {
 
     static char *szOn = "On", *szOff = "Off";
