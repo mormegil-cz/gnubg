@@ -1388,9 +1388,8 @@ extern void GTKPopMoveRecord( moverecord *pmr ) {
 
 static void SkillMenuActivate( GtkWidget *pw, skilltype st ) {
 
-    static char *aszSkillCmd[ N_SKILLS ] = {
-	"verybad", "bad", "doubtful", "clear skill",
-	//"interesting", "good",	"verygood"
+    static char* aszSkillCmd[ N_SKILLS ] = {
+      "verybad", "bad", "doubtful", "clear skill", "good",
     };
     char sz[ 64 ];
 
