@@ -248,8 +248,6 @@ functions:
   rollouts and do the averaging.
 ** When 'Allow dragging to illegal input' is selected, Two consecutive Button 1
 click will both use the 'first' dice.
-** The menu entries Save and Load Session are inoperant. Should they be removed
-or should they just be linked to Save and Load Match?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
