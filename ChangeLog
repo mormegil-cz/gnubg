@@ -1,5 +1,9 @@
 Wed Jul 31 16:32:13 2002  Øystein Johansen  <oeysteij@online.no>
 
+        * gnubg.c: Add terminating NULL pointers. (Thanks Jim)
+
+Wed Jul 31 16:32:13 2002  Øystein Johansen  <oeysteij@online.no>
+
         * gtkexport.c (ExportOK): Fix bug from yesterday.
         * gtkexport.c (GTKShowExport): Add label to HTML board type menu.
 

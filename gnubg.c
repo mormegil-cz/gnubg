@@ -918,6 +918,7 @@ command cER = {
     NULL, NULL },
   { "verybad", CommandSetTutorSkillVeryBad, N_("Warn about `very bad' play"),
     NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }    
 }, acSetTutor[] = {
   { "mode", CommandSetTutorMode, N_("Give advice on possible errors"),
     szONOFF, &cOnOff },
