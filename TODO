@@ -52,6 +52,8 @@ duplication of effort and to make sure our changes merge easily.
 ** When "set board" is given with no parameters under X, set it to the
   current position displayed in the board window.  (Perhaps a button in
   the board window would be better.)
+** Show rollout results while in progress, and allow resuming interrupted
+  rollouts.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)

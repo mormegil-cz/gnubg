@@ -1,9 +1,9 @@
 This is a pre-release version of GNU Backgammon (gnubg), a backgammon
 player and analysis tool.  Please send comments and suggestions to
-<gnubg@sourceforge.net>.
+<gtw@gnu.org>.
 
 Look for news and upcoming releases of GNU Backgammon at:
-    http://gnubg.sourceforge.net/
+    http://www.gnu.org/software/gnubg/gnubg.html
 
 It is still unfinished, but we hope some people may find it useful.
 These features are currently implemented:
@@ -37,13 +37,12 @@ The distribution is still messier than it should be, I'm afraid; we intend
 to fix this in future.  One of the difficulties is in constructing the
 bearoff database and neural net weights -- these files are several
 megabytes large and can take hours to generate.  For the meantime, they
-are available on the WWW:
+are available by FTP:
 
-    http://gnubg.sourceforge.net/development/
+    ftp://alpha.gnu.org/gnu/gnubg/
 
 The weights file should be named `gnubg.weights' and the bearoff database
-`gnubg.bd'; both files are stored in gzip (.gz) format on the development
-server.
+`gnubg.bd'; both files are stored in gzip (.gz) format on the FTP server.
 
 The Makefile will automatically generate the bearoff database during
 compilation.  However, this is a slow process, so if you have a fast

@@ -1219,7 +1219,7 @@ static void usage( char *argv0 ) {
 "  -v, --version             Show version information and exit\n"
 "\n"
 "For more information, type `help' from within gnubg.\n"
-"Please report bugs to <gnubg@sourceforge.net>.\n", argv0 );
+"Please report bugs to <gtw@gnu.org>.\n", argv0 );
 }
 
 extern int main( int argc, char *argv[] ) {

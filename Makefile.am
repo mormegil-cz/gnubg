@@ -56,7 +56,7 @@ gnubg.weights:
 	@echo ' ** a "gnubg.weights" file containing neural net'
 	@echo ' ** parameters.  This file is not included in the'
 	@echo ' ** distribution, but you can obtain it from the GNU'
-	@echo ' ** Backgammon home page <http://gnubg.sourceforge.net/>'
+	@echo ' ** Backgammon home page <http://www.gnu.org/software/gnubg/>'
 	@echo ' ** or generate one by training a neural net yourself.'
 
 gnubg.wd: gnubg.weights
