@@ -1,3 +1,7 @@
+Thu Dec 19 20:30:12 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* import.c (ImportSGGGame): import beavers and raccoons correctly.
+
 Thu Dec 19 11:31:32 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkgame.c (InitGTK): Add a gratuitous call to

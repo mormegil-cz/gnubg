@@ -998,6 +998,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
     int c, fPlayer = 0, anRoll[ 2 ];
     moverecord *pmgi, *pmr;
     char *szComment = NULL;
+    int fBeaver = FALSE;
     
     InitBoard( ms.anBoard );
 
@@ -1048,7 +1049,20 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
                     if ( *(pch+4) == '\n' || !*(pch+4) )
                        continue;
-                  
+
+                    /* when beavered there is not explicit "take" */
+                    if ( fBeaver ) {
+                      pmr = malloc( sizeof( pmr->d ) );
+                      pmr->d.mt = MOVE_TAKE;
+                      pmr->d.sz = szComment;
+                      pmr->d.fPlayer = fPlayer;
+                      pmr->d.esDouble.et = EVAL_NONE;
+                      pmr->d.st = SKILL_NONE;
+                      
+                      AddMoveRecord( pmr );
+                      szComment = NULL;
+                      fBeaver = FALSE;
+                    }
                 
 		    pmr = malloc( sizeof( pmr->n ) );
 		    pmr->n.mt = MOVE_NORMAL;
@@ -1090,9 +1104,24 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			anRoll[ 1 ] = pch[ 1 ] - '0';
 
 			if( strstr( pch, "O-O" ) ) {
-			    pmr = malloc( sizeof( pmr->n ) );
-			    pmr->n.mt = MOVE_NORMAL;
-			    pmr->n.sz = szComment;
+
+                            /* when beavered there is not explicit "take" */
+                            if ( fBeaver ) {
+                              pmr = malloc( sizeof( pmr->d ) );
+                              pmr->d.mt = MOVE_TAKE;
+                              pmr->d.sz = szComment;
+                              pmr->d.fPlayer = fPlayer;
+                              pmr->d.esDouble.et = EVAL_NONE;
+                              pmr->d.st = SKILL_NONE;
+                              
+                              AddMoveRecord( pmr );
+                              szComment = NULL;
+                              fBeaver = FALSE;
+                            }
+                            
+                            pmr = malloc( sizeof( pmr->n ) );
+                            pmr->n.mt = MOVE_NORMAL;
+                            pmr->n.sz = szComment;
 			    pmr->n.anRoll[ 0 ] = anRoll[ 0 ];
 			    pmr->n.anRoll[ 1 ] = anRoll[ 1 ];
 			    pmr->n.fPlayer = fPlayer;
@@ -1109,6 +1138,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 			    anRoll[ 0 ] = 0;
                             szComment = NULL;
+                            fBeaver = FALSE;
 
 			} else {
 			    for( pch += 3; *pch; pch++ )
@@ -1128,7 +1158,21 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 				anRoll[ 0 ] = 0;
 				continue;
 			    }
-			
+
+                            /* when beavered there is not explicit "take" */
+                            if ( fBeaver ) {
+                              pmr = malloc( sizeof( pmr->d ) );
+                              pmr->d.mt = MOVE_TAKE;
+                              pmr->d.sz = szComment;
+                              pmr->d.fPlayer = fPlayer;
+                              pmr->d.esDouble.et = EVAL_NONE;
+                              pmr->d.st = SKILL_NONE;
+                              
+                              AddMoveRecord( pmr );
+                              szComment = NULL;
+                              fBeaver = FALSE;
+                            }
+
 			    pmr = malloc( sizeof( pmr->sd ) );
 			    pmr->sd.mt = MOVE_SETDICE;
                             /* we do not want comments on MOVE_SETDICE */
@@ -1140,6 +1184,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->sd.rLuck = ERR_VAL;
 
 			    AddMoveRecord( pmr );
+                            fBeaver = FALSE;
 
 			}
 		    } else {
@@ -1157,7 +1202,42 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 			    pmr->d.st = SKILL_NONE;
 
 			    AddMoveRecord( pmr );
+                            fBeaver = FALSE;
                             szComment = NULL;
+                        } else if( !strncasecmp (pch, "beaver", 6 ) ) {
+                          /* Beaver to 4 */
+                          if ( ms.fDoubled && ms.fTurn != fPlayer )
+				/* Presumably a duplicated move in the
+				   SGG file -- ignore */
+				continue;
+			    
+			    pmr = malloc( sizeof( pmr->d ) );
+			    pmr->d.mt = MOVE_DOUBLE;
+			    pmr->d.sz = szComment;
+			    pmr->d.fPlayer = fPlayer;
+			    pmr->d.esDouble.et = EVAL_NONE;
+			    pmr->d.st = SKILL_NONE;
+
+			    AddMoveRecord( pmr );
+                            szComment = NULL;
+                            fBeaver = TRUE;
+                        } else if( !strncasecmp (pch, "raccoon", 7 ) ) {
+                            /* Raccoon to 8 */
+                            if ( ms.fDoubled && ms.fTurn != fPlayer )
+                              /* Presumably a duplicated move in the
+                                 SGG file -- ignore */
+                              continue;
+			    
+			    pmr = malloc( sizeof( pmr->d ) );
+			    pmr->d.mt = MOVE_DOUBLE;
+			    pmr->d.sz = szComment;
+			    pmr->d.fPlayer = fPlayer;
+			    pmr->d.esDouble.et = EVAL_NONE;
+			    pmr->d.st = SKILL_NONE;
+
+			    AddMoveRecord( pmr );
+                            szComment = NULL;
+                            fBeaver = TRUE;
 			} else if( !strncasecmp( pch, "accept", 6 ) ) {
 			    if( !ms.fDoubled )
 				continue;
@@ -1171,6 +1251,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
+                            fBeaver = FALSE;
 			} else if( !strncasecmp( pch, "pass", 4 ) ) {
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_DROP;
@@ -1181,6 +1262,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
 			    AddMoveRecord( pmr );
                             szComment = NULL;
+                            fBeaver = FALSE;
 			}
 		    }
 		}
