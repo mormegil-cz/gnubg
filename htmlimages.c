@@ -56,6 +56,7 @@
 #include "render.h"
 #include "renderprefs.h"
 #include "boardpos.h"
+#include "boarddim.h"
 
 
 #if HAVE_LIBPNG
@@ -94,29 +95,29 @@ extern void CommandExportHTMLImages( char *sz ) {
 #endif
     char *pchFile;
     renderdata rd;
-    int nStride = 108 * 4 * 3, s = 4, ss = s * 3 / 4, i, j, k;
+    int nStride = BOARD_WIDTH * 4 * 3, s = 4, ss = s * 3 / 4, i, j, k;
     /* indices are: g/r, d/u, x/o */
-    unsigned char auchPoint[ 2 ][ 2 ][ 2 ][ 6 * 4 * 3 * 30 * 4 ],
-	auchOff[ 2 ][ 12 * 4 * 3 * 30 * 4 ],
-	auchBar[ 2 ][ 12 * 4 * 3 * 22 * 4 ],
-	auchBoard[ 108 * 4 * 72 * 4 * 3 ],
-	auchChequer[ 2 ][ 6 * 4 * 6 * 4 * 4 ],
+    unsigned char auchPoint[ 2 ][ 2 ][ 2 ][ POINT_WIDTH * 4 * 3 * POINT_HEIGHT * 4 ],
+	auchOff[ 2 ][ BEAROFF_WIDTH * 4 * 3 * BEAROFF_HEIGHT * 4 ],
+	auchBar[ 2 ][ BAR_WIDTH * 4 * 3 * ( 3 * CHEQUER_HEIGHT + 4 ) * 4 ],
+	auchBoard[ BOARD_WIDTH * 4 * BOARD_HEIGHT * 4 * 3 ],
+	auchChequer[ 2 ][ CHEQUER_WIDTH * 4 * CHEQUER_HEIGHT * 4 * 4 ],
 	auchChequerLabels[ 12 * 4 * 4 * 4 * 4 * 3 ],
-	auchCube[ 8 * 3 * 8 * 3 * 4 ],
-	auchCubeFaces[ 12 * 6 * 3 * 6 * 3 * 3 ],
-	auchDice[ 2 ][ 7 * 3 * 7 * 3 * 4 ],
+	auchCube[ CUBE_WIDTH * 3 * CUBE_HEIGHT * 3 * 4 ],
+	auchCubeFaces[ 12 * CUBE_LABEL_WIDTH * 3 * CUBE_LABEL_HEIGHT * 3 * 3 ],
+	auchDice[ 2 ][ DIE_WIDTH * 3 * DIE_HEIGHT * 3 * 4 ],
 	auchPips[ 2 ][ 3 * 3 * 3 ],
-	auchMidBoard[ 36 * 4 * 3 * 6 * 4 ];
-    unsigned short asRefract[ 2 ][ 6 * 4 * 6 * 4 ];
+	auchMidBoard[ BOARD_CENTER_WIDTH * 4 * 3 * BOARD_CENTER_HEIGHT * 4 ];
+    unsigned short asRefract[ 2 ][ CHEQUER_WIDTH * 4 * CHEQUER_HEIGHT * 4 ];
     static char *aszCube[ 3 ] = { "ct", "midc", "cb" };
 #if HAVE_LIBART
     unsigned char *auchArrow[ 2 ];
-    unsigned char auchMidlb[ 108 * 4 * 72 * 4 * 3 ];
+    unsigned char auchMidlb[ BOARD_WIDTH * 4 * BOARD_HEIGHT * 4 * 3 ];
     int x, y;
 #endif
-    unsigned char auchLo[ 108 * 4 * 3 * 4 * 4 ];
-    unsigned char auchHi[ 108 * 4 * 3 * 4 * 4 ];
-    unsigned char auchLabel[ 108 * 4 * 3 * 4 * 3 ];
+    unsigned char auchLo[ BOARD_WIDTH * 4 * BORDER_HEIGHT * 4 * 4 ];
+    unsigned char auchHi[ BOARD_WIDTH * 4 * BORDER_HEIGHT * 4 * 4 ];
+    unsigned char auchLabel[ BOARD_WIDTH * 4 * BORDER_HEIGHT * 4 * 3 ];
 	
     sz = NextToken( &sz );
     
@@ -150,29 +151,28 @@ extern void CommandExportHTMLImages( char *sz ) {
     rd.fLabels = TRUE; 
     rd.nSize = s;
 
-    RenderBoard( &rd, auchBoard, 108 * 4 * 3 );
+    RenderBoard( &rd, auchBoard, BOARD_WIDTH * 4 * 3 );
     RenderChequers( &rd, auchChequer[ 0 ], auchChequer[ 1 ], asRefract[ 0 ],
-		    asRefract[ 1 ], 6 * 4 * 4 );
-    RenderChequerLabels( &rd, auchChequerLabels, 4 * 4 * 3 );
+		    asRefract[ 1 ], CHEQUER_WIDTH * 4 * 4 );
+    RenderChequerLabels( &rd, auchChequerLabels, CHEQUER_LABEL_WIDTH * 4 * 3 );
 
 #if HAVE_LIBART
-#define ARROW_SIZE 5
     for ( i = 0; i < 2; ++i )
       auchArrow[ i ] = 
-        art_new( art_u8, s * s * ARROW_SIZE * ARROW_SIZE * 4 );
+        art_new( art_u8, s * ARROW_WIDTH * 4 * s * ARROW_HEIGHT );
 
-    RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_SIZE * 4 );
+    RenderArrows( &rd, auchArrow[0], auchArrow[1], s * ARROW_WIDTH * 4 );
 #endif /* HAVE_LIBART */
 
-    RenderBoardLabels( &rd, auchLo, auchHi, 108 * 4 * 4 );
+    RenderBoardLabels( &rd, auchLo, auchHi, BOARD_WIDTH * 4 * 4 );
 
     /* cubes and dices are rendered a bit smaller */
 
     rd.nSize = ss;
 
-    RenderCube( &rd, auchCube, 8 * ss * 4 );
-    RenderCubeFaces( &rd, auchCubeFaces, 6 * ss * 3, auchCube, 8 * ss * 4 );
-    RenderDice( &rd, auchDice[ 0 ], auchDice[ 1 ], 7 * ss * 4 );
+    RenderCube( &rd, auchCube, CUBE_WIDTH * ss * 4 );
+    RenderCubeFaces( &rd, auchCubeFaces, CUBE_LABEL_WIDTH * ss * 3, auchCube, CUBE_WIDTH * ss * 4 );
+    RenderDice( &rd, auchDice[ 0 ], auchDice[ 1 ], DIE_WIDTH * ss * 4 );
     RenderPips( &rd, auchPips[ 0 ], auchPips[ 1 ], ss * 3 );
 
     
@@ -186,63 +186,64 @@ extern void CommandExportHTMLImages( char *sz ) {
 
     /* top border */
     
-    CopyArea( auchLabel, 108 * s * 3,
-              auchBoard, 108 * s * 3,
-              108 * s, 3 * s );
+    CopyArea( auchLabel, BOARD_WIDTH * s * 3,
+              auchBoard, BOARD_WIDTH * s * 3,
+              BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
-    AlphaBlendClip( auchLabel, 108 * s * 3,
+    AlphaBlendClip( auchLabel, BOARD_WIDTH * s * 3,
                     0, 0, 
-                    108 * s, 3 * s,
-                    auchLabel, 108 * s * 3,
+                    BOARD_WIDTH * s, BORDER_HEIGHT * s,
+                    auchLabel, BOARD_WIDTH * s * 3,
                     0, 0,
                     auchHi,
-                    108 * s * 4,
-                    0, 0, 108 * s, 3 * s );
+                    BOARD_WIDTH * s * 4,
+                    0, 0, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
     strcpy( pchFile, "b-hitop.png" );
-    WRITE( auchLabel, nStride, 108 * s, 3 * s );
-    
-    CopyArea( auchLabel, 108 * s * 3,
-              auchBoard, 108 * s * 3,
-              108 * s, 3 * s );
+    WRITE( auchLabel, nStride, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
-    AlphaBlendClip( auchLabel, 108 * s * 3,
+    CopyArea( auchLabel, BOARD_WIDTH * s * 3,
+              auchBoard, BOARD_WIDTH * s * 3,
+              BOARD_WIDTH * s, BORDER_HEIGHT * s );
+
+    AlphaBlendClip( auchLabel, BOARD_WIDTH * s * 3,
                     0, 0, 
-                    108 * s, 3 * s,
-                    auchLabel, 108 * s * 3,
+                    BOARD_WIDTH * s, BORDER_HEIGHT * s,
+                    auchLabel, BOARD_WIDTH * s * 3,
                     0, 0,
                     auchLo,
-                    108 * s * 4,
-                    0, 0, 108 * s, 3 * s );
+                    BOARD_WIDTH * s * 4,
+                    0, 0, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
     strcpy( pchFile, "b-lotop.png" );
-    WRITE( auchLabel, nStride, 108 * s, 3 * s );
+    WRITE( auchLabel, nStride, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
     /* empty points */
     strcpy( pchFile, "b-gd.png" );
-    WRITE( auchBoard + s * nStride * 3 + 12 * s * 3, nStride,
-	   6 * s, 30 * s );
+    WRITE( auchBoard + s * nStride * 3 + BEAROFF_WIDTH * s * 3, nStride,
+	   POINT_WIDTH * s, POINT_HEIGHT * s );
     
     strcpy( pchFile, "b-rd.png" );
-    WRITE( auchBoard + s * nStride * 3 + 18 * s * 3, nStride,
-	   6 * s, 30 * s );
+    WRITE( auchBoard + s * nStride * 3 + ( BEAROFF_WIDTH + POINT_WIDTH ) * s * 3, nStride,
+	   POINT_WIDTH * s, POINT_HEIGHT * s );
     
     strcpy( pchFile, "b-ru.png" );
-    WRITE( auchBoard + s * nStride * 39 + 12 * s * 3, nStride,
-	   6 * s, 30 * s );
+    WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT / 2 + BEAROFF_DIVIDER_HEIGHT / 2 ) + BEAROFF_WIDTH * s * 3, nStride,
+	   POINT_WIDTH * s, POINT_HEIGHT * s );
     
     strcpy( pchFile, "b-gu.png" );
-    WRITE( auchBoard + s * nStride * 39 + 18 * s * 3, nStride,
-	   6 * s, 30 * s );
+    WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT / 2 + BEAROFF_DIVIDER_HEIGHT / 2 ) + ( BEAROFF_WIDTH + POINT_WIDTH ) * s * 3, nStride,
+	   POINT_WIDTH * s, POINT_HEIGHT * s );
 
     /* bearoff tray */
     strcpy( pchFile, "b-roff.png" );
-    WRITE( auchBoard + s * nStride * 3, nStride, 12 * s, 30 * s );
+    WRITE( auchBoard + s * nStride * 3, nStride,
+	   BEAROFF_WIDTH * s, BEAROFF_HEIGHT * s );
     
     /* bar top */
     strcpy( pchFile, "b-ct.png" );
-    WRITE( auchBoard + s * nStride * 3 + 48 * s * 3, nStride,
-	   12 * s, 8 * s );
+    WRITE( auchBoard + s * nStride * 3 + ( BOARD_WIDTH / 2 - BAR_WIDTH / 2 ) * s * 3, nStride,
+	   BAR_WIDTH * s, CUBE_HEIGHT * s );
 
     /* bearoff tray dividers */
 
@@ -252,300 +253,332 @@ extern void CommandExportHTMLImages( char *sz ) {
 
     for ( i = 0; i < 2; ++i ) {
 
-      memcpy( auchMidlb, auchBoard, 108 * 4 * 72 * 4 * 3 );
+      memcpy( auchMidlb, auchBoard, BOARD_WIDTH * 4 * BOARD_HEIGHT * 4 * 3 );
       ArrowPosition( FALSE /* rd.fClockwise */, s, &x, &y );
 
       AlphaBlendClip2( auchMidlb, nStride,
                        x, y,
-                       108 * s, 72 * s, 
+                       BOARD_WIDTH * s, BOARD_HEIGHT * s, 
                        auchMidlb, nStride,
                        x, y, 
                        auchArrow[ i ],
-                       s * ARROW_SIZE * 4,
+                       s * ARROW_WIDTH * 4,
                        0, 0,
-                       s * ARROW_SIZE,
-                       s * ARROW_SIZE );
+                       s * ARROW_WIDTH,
+                       s * ARROW_HEIGHT );
 
       sprintf( pchFile, "b-midlb-%c.png", i ? 'o' : 'x' );
-      WRITE( auchMidlb + s * nStride * 33, nStride, 12 * s, 6 * s );
+      WRITE( auchMidlb + s * nStride * ( BOARD_HEIGHT / 2 - BEAROFF_DIVIDER_HEIGHT / 2 ),
+	     nStride, BEAROFF_WIDTH * s, BEAROFF_DIVIDER_HEIGHT * s );
 
     }
 
 #else
     for ( i = 0; i < 2; ++i ) {
       sprintf( pchFile, "b-midlb-%c.png", i ? 'x' : 'o' );
-      WRITE( auchBoard + s * nStride * 33, nStride, 12 * s, 6 * s );
+      WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT / 2 - BEAROFF_DIVIDER_HEIGHT / 2 ),
+	     nStride, BEAROFF_WIDTH * s, BEAROFF_DIVIDER_HEIGHT * s );
     }
 #endif
 
     strcpy( pchFile, "b-midlb.png" );
-    WRITE( auchBoard + s * nStride * 33, nStride, 12 * s, 6 * s );
+    WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT / 2 - BEAROFF_DIVIDER_HEIGHT / 2 ),
+	   nStride, BEAROFF_WIDTH * s, BEAROFF_DIVIDER_HEIGHT * s );
 
     /* left board centre */
     strcpy( pchFile, "b-midl.png" );
-    WRITE( auchBoard + s * nStride * 33 + s * 12 * 3, nStride,
-	   36 * s, 6 * s );
+    WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT / 2 - BOARD_CENTER_HEIGHT / 2 ) + s * BEAROFF_WIDTH * 3,
+	   nStride, BOARD_CENTER_WIDTH * s, BOARD_CENTER_HEIGHT * s );
 
     /* bar centre */
     strcpy( pchFile, "b-midc.png" );
-    WRITE( auchBoard + s * nStride * 33 + s * 48 * 3, nStride,
-	   12 * s, 6 * s );
+    WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT / 2 - BOARD_CENTER_HEIGHT / 2 ) + s * ( BOARD_WIDTH / 2 - BAR_WIDTH / 2 ) * 3, nStride,
+	   BEAROFF_WIDTH * s, 6 * s );
 
     /* right board centre */
     strcpy( pchFile, "b-midr.png" );
-    WRITE( auchBoard + s * nStride * 33 + s * 60 * 3, nStride,
-	   36 * s, 6 * s );
+    WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT / 2 - BOARD_CENTER_HEIGHT / 2 ) + s * ( BOARD_WIDTH / 2 + BAR_WIDTH / 2 ) * 3, nStride,
+	   BOARD_CENTER_WIDTH * s, BOARD_CENTER_HEIGHT * s );
 
     /* bar bottom */
     strcpy( pchFile, "b-cb.png" );
-    WRITE( auchBoard + s * nStride * 61 + 48 * s * 3, nStride,
-	   12 * s, 8 * s );
+    WRITE( auchBoard + s * nStride * ( BOARD_HEIGHT - 1 - CUBE_HEIGHT )/*61*/ + ( BOARD_WIDTH / 2 - BAR_WIDTH / 2 ) * s * 3, nStride,
+	   BAR_WIDTH * s, CUBE_HEIGHT * s );
 
     /* bottom border */
-    CopyArea( auchLabel, 108 * s * 3,
-              auchBoard + s * nStride * 69 , 108 * s * 3,
-              108 * s, 3 * s );
+    CopyArea( auchLabel, BOARD_WIDTH * s * 3,
+              auchBoard + s * nStride * ( BOARD_HEIGHT - BORDER_HEIGHT ),
+	      BOARD_WIDTH * s * 3, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
-    AlphaBlendClip( auchLabel, 108 * s * 3,
+    AlphaBlendClip( auchLabel, BOARD_WIDTH * s * 3,
                     0, 0, 
-                    108 * s, 3 * s,
-                    auchLabel, 108 * s * 3,
+                    BOARD_WIDTH * s, BORDER_HEIGHT * s,
+                    auchLabel, BOARD_WIDTH * s * 3,
                     0, 0,
                     auchHi,
-                    108 * s * 4,
-                    0, 0, 108 * s, 3 * s );
+                    BOARD_WIDTH * s * 4,
+                    0, 0, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
     strcpy( pchFile, "b-hibot.png" );
-    WRITE( auchLabel, nStride, 108 * s, 3 * s );
+    WRITE( auchLabel, nStride, BOARD_WIDTH * s, BORDER_HEIGHT * s );
     
-    CopyArea( auchLabel, 108 * s * 3,
-              auchBoard + s * nStride * 69 , 108 * s * 3,
-              108 * s, 3 * s );
+    CopyArea( auchLabel, BOARD_WIDTH * s * 3,
+              auchBoard + s * nStride * ( BOARD_HEIGHT - BORDER_HEIGHT ),
+	      BOARD_WIDTH * s * 3, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
-    AlphaBlendClip( auchLabel, 108 * s * 3,
+    AlphaBlendClip( auchLabel, BOARD_WIDTH * s * 3,
                     0, 0, 
-                    108 * s, 3 * s,
-                    auchLabel, 108 * s * 3,
+                    BOARD_WIDTH * s, BORDER_HEIGHT * s,
+                    auchLabel, BOARD_WIDTH * s * 3,
                     0, 0,
                     auchLo,
-                    108 * s * 4,
-                    0, 0, 108 * s, 3 * s );
+                    BOARD_WIDTH * s * 4,
+                    0, 0, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
     strcpy( pchFile, "b-lobot.png" );
-    WRITE( auchLabel, nStride, 108 * s, 3 * s );
+    WRITE( auchLabel, nStride, BOARD_WIDTH * s, BORDER_HEIGHT * s );
 
 
-    CopyArea( auchPoint[ 0 ][ 0 ][ 0 ], 6 * 4 * 3, auchBoard +
-	      3 * s * nStride + 12 * s * 3, nStride, 6 * s, 30 * s );
-    CopyArea( auchPoint[ 0 ][ 0 ][ 1 ], 6 * 4 * 3, auchBoard +
-	      3 * s * nStride + 12 * s * 3, nStride, 6 * s, 30 * s );
-    CopyArea( auchPoint[ 0 ][ 1 ][ 0 ], 6 * 4 * 3, auchBoard +
-	      39 * s * nStride + 18 * s * 3, nStride, 6 * s, 30 * s );
-    CopyArea( auchPoint[ 0 ][ 1 ][ 1 ], 6 * 4 * 3, auchBoard +
-	      39 * s * nStride + 18 * s * 3, nStride, 6 * s, 30 * s );
-    CopyArea( auchPoint[ 1 ][ 0 ][ 0 ], 6 * 4 * 3, auchBoard +
-	      3 * s * nStride + 18 * s * 3, nStride, 6 * s, 30 * s );
-    CopyArea( auchPoint[ 1 ][ 0 ][ 1 ], 6 * 4 * 3, auchBoard +
-	      3 * s * nStride + 18 * s * 3, nStride, 6 * s, 30 * s );
-    CopyArea( auchPoint[ 1 ][ 1 ][ 0 ], 6 * 4 * 3, auchBoard +
-	      39 * s * nStride + 12 * s * 3, nStride, 6 * s, 30 * s );
-    CopyArea( auchPoint[ 1 ][ 1 ][ 1 ], 6 * 4 * 3, auchBoard +
-	      39 * s * nStride + 12 * s * 3, nStride, 6 * s, 30 * s );
+    CopyArea( auchPoint[ 0 ][ 0 ][ 0 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + BORDER_HEIGHT * s * nStride + BEAROFF_WIDTH * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
+    CopyArea( auchPoint[ 0 ][ 0 ][ 1 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + BORDER_HEIGHT * s * nStride + BEAROFF_WIDTH * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
+    CopyArea( auchPoint[ 0 ][ 1 ][ 0 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + ( BOARD_HEIGHT / 2 + BOARD_CENTER_HEIGHT / 2 ) * s * nStride + ( BEAROFF_WIDTH + POINT_WIDTH ) * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
+    CopyArea( auchPoint[ 0 ][ 1 ][ 1 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + ( BOARD_HEIGHT / 2 + BOARD_CENTER_HEIGHT / 2 ) * s * nStride + ( BEAROFF_WIDTH + POINT_WIDTH ) * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
+    CopyArea( auchPoint[ 1 ][ 0 ][ 0 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + BORDER_HEIGHT * s * nStride + ( BEAROFF_WIDTH + POINT_WIDTH ) * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
+    CopyArea( auchPoint[ 1 ][ 0 ][ 1 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + BORDER_HEIGHT * s * nStride + ( BEAROFF_WIDTH + POINT_WIDTH ) * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
+    CopyArea( auchPoint[ 1 ][ 1 ][ 0 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + ( BOARD_HEIGHT / 2 + BOARD_CENTER_HEIGHT / 2 ) * s * nStride + BEAROFF_WIDTH * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
+    CopyArea( auchPoint[ 1 ][ 1 ][ 1 ], POINT_WIDTH * 4 * 3,
+	      auchBoard + ( BOARD_HEIGHT / 2 + BOARD_CENTER_HEIGHT / 2 ) * s * nStride + BEAROFF_WIDTH * s * 3, nStride,
+	      POINT_WIDTH * s, POINT_HEIGHT * s );
 
-    CopyArea( auchOff[ 0 ], 12 * 4 * 3, auchBoard +
-	      3 * s * nStride + 96 * s * 3, nStride, 12 * s, 30 * s );
-    CopyArea( auchOff[ 1 ], 12 * 4 * 3,
-	      auchBoard + 39 * s * nStride + 96 * s * 3, nStride, 12 * s,
-	      30 * s );
-    
-    CopyArea( auchBar[ 0 ], 12 * 4 * 3,
-	      auchBoard + 11 * s * nStride + 48 * s * 3, nStride,
-	      12 * s, 22 * s );
-    CopyArea( auchBar[ 1 ], 12 * 4 * 3,
-	      auchBoard + 39 * s * nStride + 48 * s * 3, nStride,
-	      12 * s, 22 * s );
-    
+    CopyArea( auchOff[ 0 ], BEAROFF_WIDTH * 4 * 3,
+	      auchBoard + BORDER_HEIGHT * s * nStride +
+	      ( BOARD_WIDTH - BEAROFF_WIDTH ) * s * 3, nStride,
+	      BEAROFF_WIDTH * s, BEAROFF_HEIGHT * s );
+    CopyArea( auchOff[ 1 ], BEAROFF_WIDTH * 4 * 3,
+	      auchBoard + ( BOARD_HEIGHT / 2 + BOARD_CENTER_HEIGHT / 2 ) * s * nStride +
+	      ( BOARD_WIDTH - BEAROFF_WIDTH ) * s * 3, nStride,
+	      BEAROFF_WIDTH * s, BEAROFF_HEIGHT * s );
+
+    CopyArea( auchBar[ 0 ], BAR_WIDTH * 4 * 3,
+	      auchBoard + ( BORDER_HEIGHT + 8 ) * s * nStride +
+	      ( BOARD_WIDTH / 2 - BAR_WIDTH / 2 ) * s * 3, nStride,
+	      BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
+    CopyArea( auchBar[ 1 ], BAR_WIDTH * 4 * 3,
+	      auchBoard + ( BOARD_HEIGHT / 2 + BEAROFF_DIVIDER_HEIGHT / 2 ) * s * nStride +
+	      ( BOARD_WIDTH / 2 - BAR_WIDTH / 2 ) * s * 3, nStride,
+	      BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
+
     for( i = 1; i <= 5; i++ ) {
 	for( j = 0; j < 2; j++ ) {
 	    /* gd */
 	    sprintf( pchFile, "b-gd-%c%d.png", j ? 'o' : 'x', i );
-	    RefractBlend( auchPoint[ 0 ][ 0 ][ j ] + 6 * 4 * ( i - 1 ) *
-			  6 * 4 * 3, 6 * 4 * 3,
-			  auchBoard + ( 3 + 6 * ( i - 1 ) ) * s * nStride +
-			  12 * s * 3, nStride,
-			  auchChequer[ j ], 6 * 4 * 4,
-			  asRefract[ j ], 6 * 4, 6 * 4, 6 * 4 );
-	    WRITE( auchPoint[ 0 ][ 0 ][ j ], 6 * 4 * 3,
-		   6 * s, 30 * s );
+	    RefractBlend( auchPoint[ 0 ][ 0 ][ j ] + CHEQUER_HEIGHT * 4 * ( i - 1 ) *
+			  CHEQUER_WIDTH * 4 * 3, CHEQUER_WIDTH * 4 * 3,
+			  auchBoard + ( BORDER_HEIGHT + CHEQUER_HEIGHT * ( i - 1 ) ) * s * nStride +
+			  BEAROFF_WIDTH * s * 3, nStride,
+			  auchChequer[ j ], CHEQUER_WIDTH * 4 * 4,
+			  asRefract[ j ], CHEQUER_WIDTH * 4,
+			  CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	    WRITE( auchPoint[ 0 ][ 0 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
-	
+
 	for( j = 0; j < 2; j++ ) {
 	    /* rd */
 	    sprintf( pchFile, "b-rd-%c%d.png", j ? 'o' : 'x', i );
-	    RefractBlend( auchPoint[ 1 ][ 0 ][ j ] + 6 * 4 * ( i - 1 ) *
-			  6 * 4 * 3, 6 * 4 * 3,
-			  auchBoard + ( 3 + 6 * ( i - 1 ) ) * s * nStride +
-			  18 * s * 3, nStride,
-			  auchChequer[ j ], 6 * 4 * 4,
-			  asRefract[ j ], 6 * 4, 6 * 4, 6 * 4 );
-	    WRITE( auchPoint[ 1 ][ 0 ][ j ], 6 * 4 * 3,
-		   6 * s, 30 * s );
+	    RefractBlend( auchPoint[ 1 ][ 0 ][ j ] + CHEQUER_HEIGHT * 4 * ( i - 1 ) *
+			  CHEQUER_WIDTH * 4 * 3, CHEQUER_WIDTH * 4 * 3,
+			  auchBoard + ( BORDER_HEIGHT + CHEQUER_HEIGHT * ( i - 1 ) ) * s * nStride +
+			  ( BEAROFF_WIDTH + CHEQUER_WIDTH ) * s * 3, nStride,
+			  auchChequer[ j ], CHEQUER_WIDTH * 4 * 4,
+			  asRefract[ j ], CHEQUER_WIDTH * 4,
+			  CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	    WRITE( auchPoint[ 1 ][ 0 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
-	
+
 	for( j = 0; j < 2; j++ ) {
 	    /* gu */
 	    sprintf( pchFile, "b-gu-%c%d.png", j ? 'o' : 'x', i );
-	    RefractBlend( auchPoint[ 0 ][ 1 ][ j ] + 6 * 4 * ( 5 - i ) *
-			  6 * 4 * 3, 6 * 4 * 3,
-			  auchBoard + ( 39 + 6 * ( 5 - i ) ) * s * nStride +
-			  18 * s * 3, nStride,
-			  auchChequer[ j ], 6 * 4 * 4,
-			  asRefract[ j ], 6 * 4, 6 * 4, 6 * 4 );
-	    WRITE( auchPoint[ 0 ][ 1 ][ j ], 6 * 4 * 3,
-		   6 * s, 30 * s );
+	    RefractBlend( auchPoint[ 0 ][ 1 ][ j ] + CHEQUER_HEIGHT * 4 * ( 5 - i ) *
+			  CHEQUER_WIDTH * 4 * 3, CHEQUER_WIDTH * 4 * 3,
+			  auchBoard + ( ( BOARD_HEIGHT / 2 + BEAROFF_DIVIDER_HEIGHT / 2 ) + CHEQUER_HEIGHT * ( 5 - i ) ) * s * nStride +
+			  ( BEAROFF_WIDTH + CHEQUER_WIDTH ) * s * 3, nStride,
+			  auchChequer[ j ], CHEQUER_WIDTH * 4 * 4,
+			  asRefract[ j ], CHEQUER_WIDTH * 4,
+			  CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	    WRITE( auchPoint[ 0 ][ 1 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
-	
+
 	for( j = 0; j < 2; j++ ) {
 	    /* ru */
 	    sprintf( pchFile, "b-ru-%c%d.png", j ? 'o' : 'x', i );
-	    RefractBlend( auchPoint[ 1 ][ 1 ][ j ] + 6 * 4 * ( 5 - i ) *
-			  6 * 4 * 3, 6 * 4 * 3,
-			  auchBoard + ( 39 + 6 * ( 5 - i ) ) * s * nStride +
-			  12 * s * 3, nStride,
-			  auchChequer[ j ], 6 * 4 * 4,
-			  asRefract[ j ], 6 * 4, 6 * 4, 6 * 4 );
-	    WRITE( auchPoint[ 1 ][ 1 ][ j ], 6 * 4 * 3,
-		   6 * s, 30 * s );
+	    RefractBlend( auchPoint[ 1 ][ 1 ][ j ] + CHEQUER_HEIGHT * 4 * ( 5 - i ) *
+			  CHEQUER_WIDTH * 4 * 3, CHEQUER_WIDTH * 4 * 3,
+			  auchBoard + ( ( BOARD_HEIGHT / 2 + BEAROFF_DIVIDER_HEIGHT / 2 ) + CHEQUER_HEIGHT * ( 5 - i ) ) * s * nStride +
+			  BEAROFF_WIDTH * s * 3, nStride,
+			  auchChequer[ j ], CHEQUER_WIDTH * 4 * 4,
+			  asRefract[ j ], CHEQUER_WIDTH * 4,
+			  CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	    WRITE( auchPoint[ 1 ][ 1 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
-	
+
 	/* off */
 	sprintf( pchFile, "b-roff-x%d.png", i );
-	RefractBlend( auchOff[ 0 ] + 3 * 4 * 3 + 6 * 4 * ( i - 1 ) *
-		      12 * 4 * 3, 12 * 4 * 3,
-		      auchBoard + ( 3 + 6 * ( i - 1 ) ) * s * nStride +
-		      99 * s * 3, nStride,
-		      auchChequer[ 0 ], 6 * 4 * 4,
-		      asRefract[ 0 ], 6 * 4, 6 * 4, 6 * 4 );
-	WRITE( auchOff[ 0 ], 12 * 4 * 3, 12 * s, 30 * s );
+	RefractBlend( auchOff[ 0 ] + BORDER_WIDTH * 4 * 3 + CHEQUER_HEIGHT * 4 * ( i - 1 ) *
+		      BEAROFF_WIDTH * 4 * 3, BEAROFF_WIDTH * 4 * 3,
+		      auchBoard + ( BORDER_WIDTH + CHEQUER_HEIGHT * ( i - 1 ) ) * s * nStride +
+		      ( BOARD_WIDTH - BORDER_WIDTH - CHEQUER_WIDTH ) * s * 3, nStride,
+		      auchChequer[ 0 ], CHEQUER_WIDTH * 4 * 4,
+		      asRefract[ 0 ], CHEQUER_WIDTH * 4, CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	WRITE( auchOff[ 0 ], BEAROFF_WIDTH * 4 * 3, BEAROFF_WIDTH * s, BEAROFF_HEIGHT * s );
 
 	sprintf( pchFile, "b-roff-o%d.png", i );
-	RefractBlend( auchOff[ 1 ] + 3 * 4 * 3 + 6 * 4 * ( 5 - i ) *
-		      12 * 4 * 3, 12 * 4 * 3,
-		      auchBoard + ( 39 + 6 * ( 5 - i ) ) * s * nStride +
-		      99 * s * 3, nStride,
-		      auchChequer[ 1 ], 6 * 4 * 4,
-		      asRefract[ 1 ], 6 * 4, 6 * 4, 6 * 4 );
-	WRITE( auchOff[ 1 ], 12 * 4 * 3, 12 * s, 30 * s );
+	RefractBlend( auchOff[ 1 ] + BORDER_WIDTH * 4 * 3 + CHEQUER_HEIGHT * 4 * ( 5 - i ) *
+		      BEAROFF_WIDTH * 4 * 3, BEAROFF_WIDTH * 4 * 3,
+		      auchBoard + ( ( BOARD_HEIGHT / 2 + BEAROFF_DIVIDER_HEIGHT / 2 ) + CHEQUER_WIDTH * ( 5 - i ) ) * s * nStride +
+		      ( BOARD_WIDTH - BORDER_WIDTH - CHEQUER_WIDTH ) * s * 3, nStride,
+		      auchChequer[ 1 ], CHEQUER_WIDTH * 4 * 4,
+		      asRefract[ 1 ], CHEQUER_WIDTH * 4, CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	WRITE( auchOff[ 1 ], BEAROFF_WIDTH * 4 * 3, BEAROFF_WIDTH * s, BEAROFF_HEIGHT * s );
     }
 
     for( i = 6; i <= 15; i++ ) {
 	for( j = 0; j < 2; j++ ) {
 	    /* gd */
 	    sprintf( pchFile, "b-gd-%c%d.png", j ? 'o' : 'x', i );
-	    CopyArea( auchPoint[ 0 ][ 0 ][ j ] + 6 * 4 * s * 6 * s * 3 +
-		      s * 3 + s * 6 * s * 3, 6 * s * 3,
-		      auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		      4 * s * 3, 4 * s, 4 * s );
-	    WRITE( auchPoint[ 0 ][ 0 ][ j ], 6 * 4 * 3, 6 * s, 30 * s );
+	    CopyArea( auchPoint[ 0 ][ 0 ][ j ] + CHEQUER_HEIGHT * 4 * s * POINT_WIDTH * s * 3 +
+		      s * 3 + s * POINT_WIDTH * s * 3, POINT_WIDTH * s * 3,
+		      auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s * CHEQUER_LABEL_WIDTH * s * 3,
+		      CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s, CHEQUER_LABEL_HEIGHT * s );
+	    WRITE( auchPoint[ 0 ][ 0 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
 	
 	for( j = 0; j < 2; j++ ) {
 	    /* rd */
 	    sprintf( pchFile, "b-rd-%c%d.png", j ? 'o' : 'x', i );
-	    CopyArea( auchPoint[ 1 ][ 0 ][ j ] + 6 * 4 * s * 6 * s * 3 +
-		      s * 3 + s * 6 * s * 3, 6 * s * 3,
-		      auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		      4 * s * 3, 4 * s, 4 * s );
-	    WRITE( auchPoint[ 1 ][ 0 ][ j ], 6 * 4 * 3, 6 * s, 30 * s );
+	    CopyArea( auchPoint[ 1 ][ 0 ][ j ] + CHEQUER_HEIGHT * 4 * s * POINT_WIDTH * s * 3 +
+		      s * 3 + s * POINT_WIDTH * s * 3, POINT_WIDTH * s * 3,
+		      auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s * CHEQUER_LABEL_WIDTH * s * 3,
+		      CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s, 4 * s );
+	    WRITE( auchPoint[ 1 ][ 0 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
 	
 	for( j = 0; j < 2; j++ ) {
 	    /* gu */
 	    sprintf( pchFile, "b-gu-%c%d.png", j ? 'o' : 'x', i );
 	    CopyArea( auchPoint[ 0 ][ 1 ][ j ] +
-		      s * 3 + s * 6 * s * 3, 6 * s * 3,
-		      auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		      4 * s * 3, 4 * s, 4 * s );
-	    WRITE( auchPoint[ 0 ][ 1 ][ j ], 6 * 4 * 3, 6 * s, 30 * s );
+		      s * 3 + s * POINT_WIDTH * s * 3, POINT_WIDTH * s * 3,
+		      auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s * CHEQUER_LABEL_WIDTH * s * 3,
+		      CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s, CHEQUER_LABEL_HEIGHT * s );
+	    WRITE( auchPoint[ 0 ][ 1 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
 	
 	for( j = 0; j < 2; j++ ) {
 	    /* ru */
 	    sprintf( pchFile, "b-ru-%c%d.png", j ? 'o' : 'x', i );
 	    CopyArea( auchPoint[ 1 ][ 1 ][ j ] +
-		      s * 3 + s * 6 * s * 3, 6 * s * 3,
-		      auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		      4 * s * 3, 4 * s, 4 * s );
-	    WRITE( auchPoint[ 1 ][ 1 ][ j ], 6 * 4 * 3, 6 * s, 30 * s );
+		      s * 3 + s * POINT_WIDTH * s * 3, POINT_WIDTH * s * 3,
+		      auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s * CHEQUER_LABEL_WIDTH * s * 3,
+		      CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s, CHEQUER_LABEL_HEIGHT * s );
+	    WRITE( auchPoint[ 1 ][ 1 ][ j ], POINT_WIDTH * 4 * 3,
+		   POINT_WIDTH * s, POINT_HEIGHT * s );
 	}
 	
 	/* off */
 	sprintf( pchFile, "b-roff-x%d.png", i );
-	CopyArea( auchOff[ 0 ] + 6 * 4 * s * 12 * s * 3 +
-		  4 * s * 3 + s * 12 * s * 3, 12 * s * 3,
-		  auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		  4 * s * 3, 4 * s, 4 * s );
-	WRITE( auchOff[ 0 ], 12 * 4 * 3, 12 * s, 30 * s );
+	CopyArea( auchOff[ 0 ] + CHEQUER_HEIGHT * 4 * s * BEAROFF_WIDTH * s * 3 +
+		  CHEQUER_LABEL_WIDTH * s * 3 + s * BEAROFF_WIDTH * s * 3, BEAROFF_WIDTH * s * 3,
+		  auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s * CHEQUER_LABEL_WIDTH * s * 3,
+		  CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s, CHEQUER_LABEL_HEIGHT * s );
+	WRITE( auchOff[ 0 ], BEAROFF_WIDTH * 4 * 3, BEAROFF_WIDTH * s, BEAROFF_HEIGHT * s );
 
 	sprintf( pchFile, "b-roff-o%d.png", i );
 	CopyArea( auchOff[ 1 ] +
-		  4 * s * 3 + s * 12 * s * 3, 12 * s * 3,
-		  auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		  4 * s * 3, 4 * s, 4 * s );
-	WRITE( auchOff[ 1 ], 12 * 4 * 3, 12 * s, 30 * s );
+		  CHEQUER_LABEL_WIDTH * s * 3 + s * BEAROFF_WIDTH * s * 3, BEAROFF_WIDTH * s * 3,
+		  auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s * CHEQUER_LABEL_WIDTH * s * 3,
+		  CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s, CHEQUER_LABEL_HEIGHT * s );
+	WRITE( auchOff[ 1 ], BEAROFF_WIDTH * 4 * 3, BEAROFF_WIDTH * s, BEAROFF_HEIGHT * s );
     }
 
     /* chequers on bar */
     strcpy( pchFile, "b-bar-o0.png" );
-    WRITE( auchBar[ 0 ], 12 * s * 3, 12 * s, 22 * s );
-    
+    WRITE( auchBar[ 0 ], BAR_WIDTH * s * 3, BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
+
     strcpy( pchFile, "b-bar-x0.png" );
-    WRITE( auchBar[ 1 ], 12 * s * 3, 12 * s, 22 * s );
-    
+    WRITE( auchBar[ 1 ], BAR_WIDTH * s * 3, BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
+
     for( i = 1; i <= 3; i++ ) {
 	sprintf( pchFile, "b-bar-o%d.png", i );
-	RefractBlend( auchBar[ 0 ] + 3 * 4 * 3 + 7 * 4 * ( 3 - i ) *
-		      12 * 4 * 3 + 12 * 4 * 3 * 4, 12 * 4 * 3,
-		      auchBoard + ( 12 + 7 * ( 3 - i ) ) * s * nStride +
-		      51 * s * 3, nStride,
-		      auchChequer[ 0 ], 6 * 4 * 4,
-		      asRefract[ 0 ], 6 * 4, 6 * 4, 6 * 4 );
-	WRITE( auchBar[ 0 ], 12 * 4 * 3, 12 * s, 22 * s );
+	RefractBlend( auchBar[ 0 ] + ( BAR_WIDTH / 2 - CHEQUER_WIDTH / 2 ) * 4 * 3 + ( CHEQUER_HEIGHT + 1 ) * 4 * ( 3 - i ) *
+		      BAR_WIDTH * 4 * 3 + BAR_WIDTH * 4 * 3 * 4, BAR_WIDTH * 4 * 3,
+		      auchBoard + ( 12 + ( CHEQUER_HEIGHT + 1 ) * ( 3 - i ) ) * s * nStride +
+		      ( BOARD_WIDTH / 2 - CHEQUER_WIDTH / 2 ) * s * 3, nStride,
+		      auchChequer[ 0 ], CHEQUER_WIDTH * 4 * 4,
+		      asRefract[ 0 ], CHEQUER_WIDTH * 4,
+		      CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	WRITE( auchBar[ 0 ], BAR_WIDTH * 4 * 3, BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
 
 	sprintf( pchFile, "b-bar-x%d.png", i );
-	RefractBlend( auchBar[ 1 ] + 3 * 4 * 3 + 7 * 4 * ( i - 1 ) *
-		      12 * 4 * 3 + 12 * 4 * 3 * 4, 12 * 4 * 3,
-		      auchBoard + ( 40 + 7 * ( i - 1 ) ) * s * nStride +
-		      51 * s * 3, nStride,
-		      auchChequer[ 1 ], 6 * 4 * 4,
-		      asRefract[ 1 ], 6 * 4, 6 * 4, 6 * 4 );
-	WRITE( auchBar[ 1 ], 12 * 4 * 3, 12 * s, 22 * s );
+	RefractBlend( auchBar[ 1 ] + ( BAR_WIDTH / 2 - CHEQUER_WIDTH / 2 ) * 4 * 3 + ( CHEQUER_HEIGHT + 1 ) * 4 * ( i - 1 ) *
+		      BAR_WIDTH * 4 * 3 + BAR_WIDTH * 4 * 3 * 4, BAR_WIDTH * 4 * 3,
+		      auchBoard + ( 40 + ( CHEQUER_HEIGHT + 1 ) * ( i - 1 ) ) * s * nStride +
+		      ( BOARD_WIDTH / 2 - CHEQUER_WIDTH / 2 ) * s * 3, nStride,
+		      auchChequer[ 1 ], CHEQUER_WIDTH * 4 * 4,
+		      asRefract[ 1 ], CHEQUER_WIDTH * 4,
+		      CHEQUER_WIDTH * 4, CHEQUER_HEIGHT * 4 );
+	WRITE( auchBar[ 1 ], BAR_WIDTH * 4 * 3, BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
     }
     
     for( i = 4; i <= 15; i++ ) {
 	sprintf( pchFile, "b-bar-o%d.png", i );
-	CopyArea( auchBar[ 0 ] + 4 * s * 3 + 2 * s * 12 * s * 3, 12 * s * 3,
-		  auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		  4 * s * 3, 4 * s, 4 * s );
-	WRITE( auchBar[ 0 ], 12 * 4 * 3, 12 * s, 22 * s );
+	CopyArea( auchBar[ 0 ] + 4 * s * 3 + 2 * s * BAR_WIDTH * s * 3, BAR_WIDTH * s * 3,
+		  auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s *
+		  CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s * 3,
+		  CHEQUER_LABEL_WIDTH * s, CHEQUER_LABEL_HEIGHT * s );
+	WRITE( auchBar[ 0 ], BAR_WIDTH * 4 * 3, BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
 
 	sprintf( pchFile, "b-bar-x%d.png", i );
-	CopyArea( auchBar[ 1 ] + 4 * s * 3 + 16 * s * 12 * s * 3, 12 * s * 3,
-		  auchChequerLabels + ( i - 4 ) * 4 * s * 4 * s * 3,
-		  4 * s * 3, 4 * s, 4 * s );
-	WRITE( auchBar[ 1 ], 12 * 4 * 3, 12 * s, 22 * s );
+	CopyArea( auchBar[ 1 ] + 4 * s * 3 + 16 * s * BAR_WIDTH * s * 3, BAR_WIDTH * s * 3,
+		  auchChequerLabels + ( i - 4 ) * CHEQUER_LABEL_HEIGHT * s *
+		  CHEQUER_LABEL_WIDTH * s * 3, CHEQUER_LABEL_WIDTH * s * 3,
+		  CHEQUER_LABEL_WIDTH * s, CHEQUER_LABEL_HEIGHT * s );
+	WRITE( auchBar[ 1 ], BAR_WIDTH * 4 * 3, BAR_WIDTH * s, ( 3 * CHEQUER_HEIGHT + 4 ) * s );
     }
 
     /* cube */
     for( i = 0; i < 3; i++ ) {
 	AlphaBlend( auchBoard + 51 * s * 3 + ( 4 + 29 * i ) * s * nStride,
 		    nStride, auchBoard + 51 * s * 3 + ( 4 + 29 * i ) * s *
-		    nStride, nStride, auchCube, 8 * ss * 4, 8 * ss, 8 * ss );
+		    nStride, nStride, auchCube, CUBE_WIDTH * ss * 4,
+		    CUBE_WIDTH * ss, CUBE_HEIGHT * ss );
 	for( j = 0; j < 12; j++ ) {
 	    CopyAreaRotateClip( auchBoard, nStride, 51 * s + ss,
-				( 4 + 29 * i ) * s + ss, 108 * s, 72 * s,
-				auchCubeFaces, ss * 6 * 3, 0, ss * 6 * j,
-				ss * 6, ss * 6, 2 - i );
+				( 4 + 29 * i ) * s + ss,
+				BOARD_WIDTH * s, BOARD_HEIGHT * s,
+				auchCubeFaces, ss * CUBE_LABEL_WIDTH * 3,
+				0, ss * CUBE_LABEL_WIDTH * j,
+				ss * CUBE_LABEL_WIDTH, ss * CUBE_LABEL_HEIGHT,
+				2 - i );
 	    
 	    sprintf( pchFile, "b-%s-%d.png", aszCube[ i ], 2 << j );
 	    WRITE( auchBoard + 48 * s * 3 + ( 3 + 29 * i + ( i == 1 ) ) *
@@ -565,12 +598,16 @@ extern void CommandExportHTMLImages( char *sz ) {
 		  s + 33 * s * nStride, nStride, 36 * s, 6 * s );
 	AlphaBlend( auchMidBoard + ( 18 * s - 4 * ss ) * 3, 36 * s * 3,
 		    auchMidBoard + ( 18 * s - 4 * ss ) * 3, 36 * s * 3,
-		    auchCube, 8 * ss * 4, 8 * ss, 8 * ss );
+		    auchCube, CUBE_WIDTH * ss * 4,
+		    CUBE_WIDTH * ss, CUBE_HEIGHT * ss );
 	
 	for( j = 0; j < 12; j++ ) {
 	    CopyAreaRotateClip( auchMidBoard, 36 * s * 3, 18 * s - 3 * ss,
-				ss, 36 * s, 6 * s, auchCubeFaces, ss * 6 * 3,
-				0, ss * 6 * j, ss * 6, ss * 6, i << 1 );
+				ss, 36 * s, 6 * s,
+				auchCubeFaces, ss * CUBE_LABEL_WIDTH * 3,
+				0, ss * CUBE_LABEL_WIDTH * j,
+				ss * CUBE_LABEL_WIDTH, ss * CUBE_LABEL_HEIGHT,
+				i << 1 );
 	    
 	    sprintf( pchFile, "b-mid%c-c%d.png", i ? 'r' : 'l', 2 << j );
 	    WRITE( auchMidBoard, 36 * s * 3, 36 * s, 6 * s );
@@ -582,13 +619,13 @@ extern void CommandExportHTMLImages( char *sz ) {
 	AlphaBlend( auchBoard + ( 30 + 48 * i ) * 3 * s - 8 * ss * 3 +
 		    ( 33 * s + 1 ) * nStride, nStride, auchBoard +
 		    ( 30 + 48 * i ) * 3 * s - 8 * ss * 3 + ( 33 * s + 1 ) *
-		    nStride, nStride, auchDice[ i ], 7 * ss * 4, 7 * ss,
-		    7 * ss );
+		    nStride, nStride, auchDice[ i ], DIE_WIDTH * ss * 4,
+		    DIE_WIDTH * ss, DIE_HEIGHT * ss );
 	AlphaBlend( auchBoard + ( 30 + 48 * i ) * 3 * s + ss * 3 +
 		    ( 33 * s + 1 ) * nStride, nStride, auchBoard +
 		    ( 30 + 48 * i ) * 3 * s + ss * 3 + ( 33 * s + 1 ) *
-		    nStride, nStride, auchDice[ i ], 7 * ss * 4, 7 * ss,
-		    7 * ss );
+		    nStride, nStride, auchDice[ i ], DIE_WIDTH * ss * 4,
+		    DIE_WIDTH * ss, DIE_HEIGHT * ss );
 	for( j = 0; j < 6; j++ )
 	    for( k = 0; k < 6; k++ ) {
 		CopyArea( auchMidBoard, 36 * s * 3, auchBoard +

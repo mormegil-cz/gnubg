@@ -43,9 +43,7 @@
 #include "matchid.h"
 #include "i18n.h"
 #include "boardpos.h"
-
-/* size of html images in steps of 108x72 */
-
+#include "boarddim.h"
 
 
 extern void
@@ -67,6 +65,9 @@ CommandExportMatchEquityEvolution (char *sz)
 
 #if HAVE_LIBPNG
 
+
+/* size of html images in steps of BOARD_WIDTH x BOARD_HEIGHT
+   as defined in boarddim.h */
 
 extern int
 WritePNG (const char *sz, unsigned char *puch, int nStride,
@@ -209,7 +210,8 @@ GenerateImage (renderimages * pri, renderdata * prd,
 
   /* allocate memory for board */
 
-  if (!(puch = (unsigned char *) malloc (108 * 72 * nSize * nSize * 3)))
+  if (!( puch = (unsigned char *) malloc ( BOARD_WIDTH * BOARD_HEIGHT *
+					   nSize * nSize * 3 ) ))
     {
       outputerr ("malloc");
       return -1;
@@ -259,30 +261,30 @@ GenerateImage (renderimages * pri, renderdata * prd,
 
   color = fMove;
 
-  CalculateArea( prd, puch, 108 * nSize * 3, pri, anBoard, NULL,
+  CalculateArea( prd, puch, BOARD_WIDTH * nSize * 3, pri, anBoard, NULL,
 		 (int *) anDice, anDicePosition,
 		 color, anCubePosition,
 		 LogCube( nCube ) + ( doubled != 0 ),
 		 nOrient,
 		 anResignPosition, fResign, nResignOrientation,
 		 anArrowPosition, ms.gs != GAME_NONE, fMove == 1,
-		 0, 0, 108 * nSize, 72 * nSize);
+		 0, 0, BOARD_WIDTH * nSize, BOARD_HEIGHT * nSize);
 
   /* crop */
 
-  if (nSizeX < 108 || nSizeY < 72)
+  if ( nSizeX < BOARD_WIDTH || nSizeY < BOARD_HEIGHT )
     {
       int i, j, k;
 
       j = 0;
-      k = nOffsetY * nSize * 108 + nOffsetX;
+      k = nOffsetY * nSize * BOARD_WIDTH + nOffsetX;
       for (i = 0; i < nSizeY * nSize; ++i)
 	{
 	  /* loop over each row */
 	  memmove (puch + j, puch + k, nSizeX * nSize * 3);
 
 	  j += nSizeX * nSize * 3;
-	  k += 108 * nSize;
+	  k += BOARD_WIDTH * nSize;
 
 	}
 
@@ -329,7 +331,8 @@ CommandExportPositionPNG (char *sz)
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
 	{
-		GenerateImage3d(&rdAppearance, sz, exsExport.nPNGSize, 108, 72);
+		GenerateImage3d( &rdAppearance, sz, exsExport.nPNGSize,
+				 BOARD_WIDTH, BOARD_HEIGHT );
 	}
 	else
 #endif
@@ -343,7 +346,7 @@ CommandExportPositionPNG (char *sz)
   RenderImages (&rd, &ri);
 
   GenerateImage (&ri, &rd, ms.anBoard, sz,
-		 exsExport.nPNGSize, 108, 72, 0, 0,
+		 exsExport.nPNGSize, BOARD_WIDTH, BOARD_HEIGHT, 0, 0,
 		 ms.fMove, ms.fTurn, fCubeUse, ms.anDice, ms.nCube,
 		 ms.fDoubled, ms.fCubeOwner);
 

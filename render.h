@@ -106,7 +106,7 @@ typedef struct _renderdata {
     float rRound; /* shape of chequers */
     int nSize; /* basic unit of board size, in pixels -- a chequer's
 		  diameter is 6 of these units (and is 2 units thick).
-		  The board is 108x72 units, the dice 7x7 and cube 8x8. */
+		  The board is 108x82(old:72) units, the dice 7x7 and cube 8x8. */
     int fHinges; /* TRUE if hinges should be drawn */
     int fLabels; /* TRUE if point numbers should be drawn */
     int fClockwise; /* orientation for board point numbers */

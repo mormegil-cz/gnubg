@@ -50,6 +50,7 @@
 #endif
 
 #include "render.h"
+#include "boarddim.h"
 
 static randctx rc;
 #define RAND irand( &rc )
@@ -610,7 +611,7 @@ static void RenderFramePainted( renderdata *prd, unsigned char *puch,
     diffuse = 0.8 * prd->arLight[ 2 ] + 0.2;
     specular = pow( prd->arLight[ 2 ], 20 ) * 0.6;
 
-    FillArea( puch, nStride, prd->nSize * 108, prd->nSize * 81,
+    FillArea( puch, nStride, prd->nSize * BOARD_WIDTH, prd->nSize * BOARD_HEIGHT /*81?*/,
 	      clamp( specular * 0x100 +
 		     diffuse * prd->aanBoardColour[ 1 ][ 0 ] ),
 	      clamp( specular * 0x100 +
@@ -643,13 +644,15 @@ static void RenderFramePainted( renderdata *prd, unsigned char *puch,
     }
 #undef COLOURS
 
-    RenderBorder( puch, nStride, 0, 0, 54, 82, prd->nSize, colours, FALSE );
-    RenderBorder( puch, nStride, 54, 0, 108, 82, prd->nSize, colours, FALSE );
+    RenderBorder( puch, nStride, 0, 0, BOARD_WIDTH / 2, BOARD_HEIGHT,
+		  prd->nSize, colours, FALSE );
+    RenderBorder( puch, nStride, BOARD_WIDTH / 2, 0, BOARD_WIDTH, BOARD_HEIGHT,
+		  prd->nSize, colours, FALSE );
     
     RenderBorder( puch, nStride, 2, 2, 10, 39, prd->nSize, colours, TRUE );
     RenderBorder( puch, nStride, 2, 43, 10, 80, prd->nSize, colours, TRUE );
-    RenderBorder( puch, nStride, 98, 2, 106, 39, prd->nSize, colours, TRUE );
-    RenderBorder( puch, nStride, 98, 43, 106, 80, prd->nSize, colours, TRUE );
+    RenderBorder( puch, nStride, 98, 2, BOARD_WIDTH - 2, 39, prd->nSize, colours, TRUE );
+    RenderBorder( puch, nStride, 98, 43, BOARD_WIDTH - 2, 80, prd->nSize, colours, TRUE );
 		  
     RenderBorder( puch, nStride, 11, 2, 49, 80, prd->nSize, colours, TRUE );
     RenderBorder( puch, nStride, 59, 2, 97, 80, prd->nSize, colours, TRUE );
@@ -990,7 +993,7 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 
     /* Top and bottom edges */
     for( y = 0; y < s * 3; y++ )
-	for( x = 0; x < s * 108; x++ ) {
+	for( x = 0; x < s * BOARD_WIDTH; x++ ) {
 	    if( y < s ) {
 		rDiffuse = arDiffuse[ 3 ][ y ];
 		nSpecular = anSpecular[ 3 ][ y ];
@@ -1021,7 +1024,7 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 	}
 
     /* Left and right edges */
-    for( y = 0; y < s * 82; y++ )
+    for( y = 0; y < s * BOARD_HEIGHT; y++ )
 	for( x = 0; x < s * 3; x++ ) {
 	    if( x < s ) {
 		rDiffuse = arDiffuse[ 2 ][ x ];
@@ -1054,17 +1057,18 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 	}
 
     /* Bar */
-    for( y = 0; y < s * 82; y++ )
+    for( y = 0; y < s * BOARD_HEIGHT; y++ )
 	for( x = 0; x < s * 6; x++ ) {
 	    if( y < s && y < x && y < s * 6 - x - 1 ) {
 		rDiffuse = arDiffuse[ 3 ][ y ];
 		nSpecular = anSpecular[ 3 ][ y ];
 		rHeight = arHeight[ y ];
-	    } else if( y > 81 * s && s * 82 - y - 1 < x &&
-		       s * 82 - y - 1 < s * 6 - x - 1 ) {
-		rDiffuse = arDiffuse[ 1 ][ 82 * s - y - 1 ];
-		nSpecular = anSpecular[ 1 ][ 82 * s - y - 1 ];
-		rHeight = arHeight[ 82 * s - y - 1 ];
+	    } else if( y > ( BOARD_HEIGHT - 1 ) * s &&
+		       s * BOARD_HEIGHT - y - 1 < x &&
+		       s * BOARD_HEIGHT - y - 1 < s * 6 - x - 1 ) {
+		rDiffuse = arDiffuse[ 1 ][ BOARD_HEIGHT * s - y - 1 ];
+		nSpecular = anSpecular[ 1 ][ BOARD_HEIGHT * s - y - 1 ];
+		rHeight = arHeight[ BOARD_HEIGHT * s - y - 1 ];
 	    } else if( x < s ) {
 		rDiffuse = arDiffuse[ 2 ][ x ];
 		nSpecular = anSpecular[ 2 ][ x ];
@@ -1097,10 +1101,10 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 	}
     
     /* Left and right separators (between board and bearoff tray) */
-    for( y = 0; y < s * 78; y++ )
+    for( y = 0; y < s * ( BOARD_HEIGHT - 4 ); y++ )
 	for( x = 0; x < s * 3; x++ )
-	    if( x + y >= s && y - x <= s * 77 &&
-		y + s * 3 - x >= s && x + y <= s * 80 ) {
+	    if( x + y >= s && y - x <= s * ( BOARD_HEIGHT - 5 ) &&
+		y + s * 3 - x >= s && x + y <= s * ( BOARD_HEIGHT - 2 ) ) {
 		if( x < s ) {
 		    rDiffuse = arDiffuse[ 2 ][ x ];
 		    nSpecular = anSpecular[ 2 ][ x ];
@@ -1565,8 +1569,8 @@ extern void RenderBoard( renderdata *prd, unsigned char *puch, int nStride ) {
 extern void RenderChequers( renderdata *prd, unsigned char *puch0,
 			    unsigned char *puch1, unsigned short *psRefract0,
 			    unsigned short *psRefract1, int nStride ) {
-    
-    int size = 6 * prd->nSize;
+
+    int size = CHEQUER_WIDTH * prd->nSize;
     int ix, iy, in, fx, fy, i;
     float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
 	r, x1, y1, len;
@@ -1723,10 +1727,10 @@ extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
 #endif
 
     for( i = 0; i < 12; i++ ) {
-	FillArea( puch, nStride, 4 * prd->nSize, 4 * prd->nSize,
-		  0xC0, 0xC0, 0xC0 );
+	FillArea( puch, nStride, CHEQUER_LABEL_WIDTH * prd->nSize,
+		  CHEQUER_LABEL_HEIGHT * prd->nSize, 0xC0, 0xC0, 0xC0 );
 
-	for( ip = 0; ip < 4 * prd->nSize; ip++ ) {
+	for( ip = 0; ip < CHEQUER_LABEL_WIDTH * prd->nSize; ip++ ) {
 	    puch[ 3 * ip + nStride + 0 ] = 0xE0;
 	    puch[ 3 * ip + nStride + 1 ] = 0xE0;
 	    puch[ 3 * ip + nStride + 2 ] = 0xE0;
@@ -1744,7 +1748,7 @@ extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
 	    puch[ ip * nStride + ( 4 * prd->nSize - 2 ) * 3 + 2 ] = 0x80;
 	}
 	
-	for( ip = 0; ip < 4 * prd->nSize; ip++ ) {
+	for( ip = 0; ip < CHEQUER_LABEL_WIDTH * prd->nSize; ip++ ) {
 	    puch[ 3 * ip + 0 ] = 0xFF;
 	    puch[ 3 * ip + 1 ] = 0xFF;
 	    puch[ 3 * ip + 2 ] = 0xFF;
@@ -1771,7 +1775,7 @@ extern void RenderChequerLabels( renderdata *prd, unsigned char *puch,
 	    RenderBasicNumber( puch, nStride, 2 * prd->nSize, i + 4,
 			       2 * prd->nSize, 3 * prd->nSize, 0, 0, 0 );
 	    
-	puch += 4 * prd->nSize * nStride;
+	puch += CHEQUER_LABEL_WIDTH * prd->nSize * nStride;
     }
 
 #if HAVE_FREETYPE
@@ -1790,10 +1794,10 @@ RenderBasicCube ( const float arLight[ 3 ], const int nSize,
     float x, y, x_loop, y_loop, diffuse, specular, cos_theta,
 	x_norm, y_norm, z_norm;
 
-    nStride -= 8 * nSize * 4;
+    nStride -= CUBE_WIDTH * nSize * 4;
     
-    for( iy = 0, y_loop = -1.0; iy < 8 * nSize; iy++ ) {
-	for( ix = 0, x_loop = -1.0; ix < 8 * nSize; ix++ ) {
+    for( iy = 0, y_loop = -1.0; iy < CUBE_HEIGHT * nSize; iy++ ) {
+	for( ix = 0, x_loop = -1.0; ix < CUBE_WIDTH * nSize; ix++ ) {
 	    in = 0;
 	    diffuse = specular = 0.0;
 	    fy = 0;
@@ -1841,9 +1845,9 @@ RenderBasicCube ( const float arLight[ 3 ], const int nSize,
 			}
 		    }
 		missed:		    
-		    x += 1.0 / ( 8 * nSize );
+		    x += 1.0 / ( CUBE_WIDTH * nSize );
 		} while( !fx++ );
-		y += 1.0 / ( 8 * nSize );
+		y += 1.0 / ( CUBE_HEIGHT * nSize );
 	    } while( !fy++ );
 
 	    for( i = 0; i < 3; i++ )
@@ -1852,9 +1856,9 @@ RenderBasicCube ( const float arLight[ 3 ], const int nSize,
 
 	    *puch++ = 255 * ( 4 - in ) / 4; /* alpha channel */
 
-	    x_loop += 2.0 / ( 8 * nSize );
+	    x_loop += 2.0 / ( CUBE_WIDTH * nSize );
 	}
-	y_loop += 2.0 / ( 8 * nSize );
+	y_loop += 2.0 / ( CUBE_HEIGHT * nSize );
 	puch += nStride;
     }
 }
@@ -1909,8 +1913,8 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     
     for( i = 0; i < 6; i++ ) {
 	AlphaBlend( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
-		    prd->nSize * nStrideCube, nStrideCube, 6 * prd->nSize,
-		    6 * prd->nSize );
+		    prd->nSize * nStrideCube, nStrideCube,
+		    CUBE_LABEL_WIDTH * prd->nSize, CUBE_LABEL_HEIGHT * prd->nSize );
 
 #if HAVE_FREETYPE
 	if( fFreetype )
@@ -1921,13 +1925,13 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 	    RenderBasicNumber( puch, nStride, 4 * prd->nSize, 2 << i,
 			       3 * prd->nSize, 5 * prd->nSize, 0, 0, 0x80 );
 	
-	puch += 6 * prd->nSize * nStride;
+	puch += CUBE_LABEL_WIDTH * prd->nSize * nStride;
     }
     
     for( ; i < 12; i++ ) {
 	AlphaBlend( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
-		    prd->nSize * nStrideCube, nStrideCube, 6 * prd->nSize,
-		    6 * prd->nSize );
+		    prd->nSize * nStrideCube, nStrideCube,
+		    CUBE_LABEL_WIDTH * prd->nSize, CUBE_LABEL_HEIGHT * prd->nSize );
 
 #if HAVE_FREETYPE
 	if( fFreetype )
@@ -1938,7 +1942,7 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 	    RenderBasicNumber( puch, nStride, 3 * prd->nSize, 2 << i,
 			       3 * prd->nSize, 4 * prd->nSize, 0, 0, 0x80 );
 
-	puch += 6 * prd->nSize * nStride;
+	puch += CUBE_LABEL_WIDTH * prd->nSize * nStride;
     }
 
 #if HAVE_FREETYPE
@@ -1983,8 +1987,8 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
     
     for( i = 0; i < 3; i++ ) {
 	AlphaBlend( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
-		    prd->nSize * nStrideCube, nStrideCube, 6 * prd->nSize,
-		    6 * prd->nSize );
+		    prd->nSize * nStrideCube, nStrideCube,
+		    RESIGN_LABEL_WIDTH * prd->nSize, RESIGN_LABEL_HEIGHT * prd->nSize );
 
 #if HAVE_FREETYPE
 	if( fFreetype )
@@ -1997,7 +2001,7 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
                                i + 1, 
                                3 * prd->nSize, 5 * prd->nSize, 0, 0, 0x80 );
 	
-	puch += 6 * prd->nSize * nStride;
+	puch += RESIGN_LABEL_WIDTH * prd->nSize * nStride;
     }
     
 #if HAVE_FREETYPE
@@ -2017,7 +2021,7 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
     double *aarDiceColour[ 2 ];
     float arDiceCoefficient[ 2 ], arDiceExponent[ 2 ];
 
-    nStride -= 4 * 7 * prd->nSize;
+    nStride -= 4 * DIE_WIDTH * prd->nSize;
     
     for( i = 0; i < 2; i++ )
 	if( prd->afDieColour[ i ] ) {
@@ -2032,8 +2036,8 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 	    arDiceExponent[ i ] = prd->arDiceExponent[ i ];
 	}
 
-    for( iy = 0, y_loop = -1.0; iy < 7 * prd->nSize; iy++ ) {
-	for( ix = 0, x_loop = -1.0; ix < 7 * prd->nSize; ix++ ) {
+    for( iy = 0, y_loop = -1.0; iy < DIE_HEIGHT * prd->nSize; iy++ ) {
+	for( ix = 0, x_loop = -1.0; ix < DIE_WIDTH * prd->nSize; ix++ ) {
 	    in = 0;
 	    diffuse = specular_x = specular_o = 0.0;
 	    fy = 0;
@@ -2092,9 +2096,9 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 			}
 		    }
 		missed:		    
-		    x += 1.0 / ( 7 * prd->nSize );
+		    x += 1.0 / ( DIE_WIDTH * prd->nSize );
 		} while( !fx++ );
-		y += 1.0 / ( 7 * prd->nSize );
+		y += 1.0 / ( DIE_HEIGHT * prd->nSize );
 	    } while( !fy++ );
 
 	    for( i = 0; i < 3; i++ )
@@ -2107,9 +2111,9 @@ extern void RenderDice( renderdata *prd, unsigned char *puch0,
 				    specular_o ) * 64.0 );
 	    *puch1++ = 255 * ( 4 - in ) / 4; /* alpha channel */
 	    
-	    x_loop += 2.0 / ( 7 * prd->nSize );
+	    x_loop += 2.0 / ( DIE_WIDTH * prd->nSize );
 	}
-	y_loop += 2.0 / ( 7 * prd->nSize );
+	y_loop += 2.0 / ( DIE_HEIGHT * prd->nSize );
 	puch0 += nStride;
 	puch1 += nStride;
     }
@@ -2371,7 +2375,6 @@ static void Render_Path( art_u8 *puchRGBAbuf, const ArtBpath* bpPath,
 #endif /* HAVE_LIBART */
 
 #if HAVE_LIBART
-#define ARROW_SIZE 5
 extern void RenderArrows( renderdata *prd, unsigned char* puch0,
 			  unsigned char* puch1, int nStride ) {
 /* render arrows for direction of play and player on turn */
@@ -2388,8 +2391,8 @@ extern void RenderArrows( renderdata *prd, unsigned char* puch0,
     bpArrow = Make_Path_Arrow();
 
     /* player 0 */
-    Render_Path( (art_u8 *) puch0, bpArrow, prd->nSize * ARROW_SIZE, prd->nSize * ARROW_SIZE,
-			 fg_colour, bg_colour );
+    Render_Path( (art_u8 *) puch0, bpArrow, prd->nSize * ARROW_WIDTH,
+		 prd->nSize * ARROW_HEIGHT, fg_colour, bg_colour );
 
     /* set up a 180° rotation around (5,5) */
     adAffine[0] = -1.;
@@ -2407,8 +2410,8 @@ extern void RenderArrows( renderdata *prd, unsigned char* puch0,
 		( (art_u8) ( prd->aarColour[ 1 ][ 2 ] * 0xFF ) );	/* AARRGGBB */
 
     /* player 1 */
-    Render_Path( (art_u8 *) puch1, bpTmp, prd->nSize * ARROW_SIZE, prd->nSize * ARROW_SIZE,
-			 fg_colour, bg_colour );
+    Render_Path( (art_u8 *) puch1, bpTmp, prd->nSize * ARROW_WIDTH,
+		 prd->nSize * ARROW_HEIGHT, fg_colour, bg_colour );
 
     art_free( bpTmp );
 }
@@ -2676,7 +2679,7 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
     if( fPlaying && prd->showMoveIndicator &&
 			intersects( x, y, cx, cy,
                     anArrowPosition[ 0 ], anArrowPosition[ 1 ],
-                    ARROW_SIZE * prd->nSize, ARROW_SIZE * prd->nSize ) ) {
+                    ARROW_WIDTH * prd->nSize, ARROW_HEIGHT * prd->nSize ) ) {
 
 	assert( anArrowPosition );
 
@@ -2686,10 +2689,9 @@ extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			 puch, nStride,
 			 anArrowPosition[ 0 ] - x, anArrowPosition[ 1 ] - y,
 			 (unsigned char *) pri->auchArrow[ nPlayer ],
-			 prd->nSize * ARROW_SIZE * 4,
+			 prd->nSize * ARROW_WIDTH * 4,
 			 0, 0,
-			 prd->nSize * ARROW_SIZE,
-			 prd->nSize * ARROW_SIZE );
+			 prd->nSize * ARROW_WIDTH, prd->nSize * ARROW_HEIGHT );
     }
 #endif /* HAVE_LIBART */
 
@@ -2728,52 +2730,53 @@ extern void RenderImages( renderdata *prd, renderimages *pri ) {
     int i;
     int nSize = prd->nSize;
 
-    pri->ach = malloc( nSize * nSize * 108 * 82 * 3 );
-    pri->achChequer[ 0 ] = malloc( nSize * nSize * 6 * 6 * 4 );
-    pri->achChequer[ 1 ] = malloc( nSize * nSize * 6 * 6 * 4 );
-    pri->achChequerLabels = malloc( nSize * nSize * 4 * 4 * 3 * 12 );
-    pri->achDice[ 0 ] = malloc( nSize * nSize * 7 * 7 * 4 );
-    pri->achDice[ 1 ] = malloc( nSize * nSize * 7 * 7 * 4 );
+    pri->ach = malloc( nSize * nSize * BOARD_WIDTH * BOARD_HEIGHT * 3 );
+    pri->achChequer[ 0 ] = malloc( nSize * nSize * CHEQUER_WIDTH * CHEQUER_HEIGHT * 4 );
+    pri->achChequer[ 1 ] = malloc( nSize * nSize * CHEQUER_WIDTH * CHEQUER_HEIGHT * 4 );
+    pri->achChequerLabels = malloc( nSize * nSize * CHEQUER_LABEL_WIDTH *
+				    CHEQUER_LABEL_HEIGHT * 3 * 12 );
+    pri->achDice[ 0 ] = malloc( nSize * nSize * DIE_WIDTH * DIE_HEIGHT * 4 );
+    pri->achDice[ 1 ] = malloc( nSize * nSize * DIE_WIDTH * DIE_HEIGHT * 4 );
     pri->achPip[ 0 ] = malloc( nSize * nSize * 3 );
     pri->achPip[ 1 ] = malloc( nSize * nSize * 3 );
-    pri->achCube = malloc( nSize * nSize * 8 * 8 * 4 );
-    pri->achCubeFaces = malloc( nSize * nSize * 6 * 6 * 3 * 12 );
-    pri->asRefract[ 0 ] = malloc( nSize * nSize * 6 * 6 *
+    pri->achCube = malloc( nSize * nSize * CUBE_WIDTH * CUBE_HEIGHT * 4 );
+    pri->achCubeFaces = malloc( nSize * nSize * CUBE_LABEL_WIDTH *
+				CUBE_LABEL_HEIGHT * 3 * 12 );
+    pri->asRefract[ 0 ] = malloc( nSize * nSize * CHEQUER_WIDTH * CHEQUER_HEIGHT *
 				  sizeof (unsigned short) );
-    pri->asRefract[ 1 ] = malloc( nSize * nSize * 6 * 6 *
+    pri->asRefract[ 1 ] = malloc( nSize * nSize * CHEQUER_WIDTH * CHEQUER_HEIGHT *
 				  sizeof (unsigned short) );
-    pri->achResign = malloc ( nSize * nSize * 8 * 8 * 4 );
-    pri->achResignFaces = malloc ( nSize * nSize * 6 * 6 * 3 * 3 );
+    pri->achResign = malloc ( nSize * nSize * RESIGN_WIDTH * RESIGN_HEIGHT * 4 );
+    pri->achResignFaces = malloc ( nSize * nSize * RESIGN_LABEL_WIDTH * RESIGN_LABEL_HEIGHT * 3 * 3 );
 #if HAVE_LIBART
-    pri->auchArrow[0] = art_new( art_u8, nSize * nSize * ARROW_SIZE * ARROW_SIZE * 4 );
-    pri->auchArrow[1] = art_new( art_u8, nSize * nSize * ARROW_SIZE * ARROW_SIZE * 4 );
+    pri->auchArrow[0] = art_new( art_u8, nSize * nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
+    pri->auchArrow[1] = art_new( art_u8, nSize * nSize * ARROW_WIDTH * ARROW_HEIGHT * 4 );
 #else
     pri->auchArrow[0] = NULL;
     pri->auchArrow[1] = NULL;
 #endif /* HAVE_LIBART */
     for ( i = 0; i < 2; ++i )
-      pri->achLabels[ i ] = malloc( nSize * nSize * 108 * 3 * 4 );
+      pri->achLabels[ i ] = malloc( nSize * nSize * BOARD_WIDTH * POINTLABEL_HEIGHT * 4 );
     
-    RenderBoard( prd, pri->ach, 108 * nSize * 3 );
+    RenderBoard( prd, pri->ach, BOARD_WIDTH * nSize * 3 );
     RenderChequers( prd, pri->achChequer[ 0 ], pri->achChequer[ 1 ],
-		    pri->asRefract[ 0 ], pri->asRefract[ 1 ], nSize * 6 * 4 );
-    RenderChequerLabels( prd, pri->achChequerLabels, nSize * 4 * 3 );
-    RenderDice( prd, pri->achDice[ 0 ], pri->achDice[ 1 ], nSize * 7 * 4 );
+		    pri->asRefract[ 0 ], pri->asRefract[ 1 ], nSize * CHEQUER_WIDTH * 4 );
+    RenderChequerLabels( prd, pri->achChequerLabels, nSize * CHEQUER_LABEL_WIDTH * 3 );
+    RenderDice( prd, pri->achDice[ 0 ], pri->achDice[ 1 ], nSize * DIE_WIDTH * 4 );
     RenderPips( prd, pri->achPip[ 0 ], pri->achPip[ 1 ], nSize * 3 );
-    RenderCube( prd, pri->achCube, nSize * 8 * 4 );
-    RenderCubeFaces( prd, pri->achCubeFaces, nSize * 6 * 3, pri->achCube,
-		     nSize * 8 * 4 );
-    RenderResign( prd, pri->achResign, nSize * 8 * 4 );
-    RenderResignFaces( prd, pri->achResignFaces, nSize * 6 * 3, pri->achResign,
-                       nSize * 8 * 4 );
+    RenderCube( prd, pri->achCube, nSize * CUBE_WIDTH * 4 );
+    RenderCubeFaces( prd, pri->achCubeFaces, nSize * CUBE_LABEL_WIDTH * 3,
+		     pri->achCube, nSize * CUBE_WIDTH * 4 );
+    RenderResign( prd, pri->achResign, nSize * RESIGN_WIDTH * 4 );
+    RenderResignFaces( prd, pri->achResignFaces, nSize * RESIGN_LABEL_WIDTH * 3,
+		       pri->achResign, nSize * RESIGN_WIDTH * 4 );
 #if HAVE_LIBART
 	if (prd->showMoveIndicator)
-		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_SIZE * 4 );
-#undef ARROW_SIZE
+		RenderArrows( prd, pri->auchArrow[0], pri->auchArrow[1], nSize * ARROW_WIDTH * 4 );
 #endif /* HAVE_LIBART */
 
     RenderBoardLabels( prd, pri->achLabels[ 0 ], pri->achLabels[ 1 ],
-                       108 * nSize * 4 );
+                       BOARD_WIDTH * nSize * 4 );
 
 }
 

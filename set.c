@@ -72,6 +72,7 @@
 #include "export.h"
 #include "drawboard.h"
 #include "format.h"
+#include "boarddim.h"
 
 #include "i18n.h"
 
@@ -4352,7 +4353,7 @@ CommandSetExportPNGSize ( char *sz ) {
     exsExport.nPNGSize = n;
 
     outputf ( _("Size of generated PNG images are %dx%d pixels\n"),
-              n * 108, n * 72 );
+              n * BOARD_WIDTH, n * BOARD_HEIGHT );
 
 
 }

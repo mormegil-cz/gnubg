@@ -45,6 +45,7 @@
 #include "backgammon.h"
 #include "drawboard.h"
 #include "positionid.h"
+#include "boarddim.h"
 
 typedef enum _statsid {
     STATS_LNAME, STATS_XNAME, STATS_ONAME,
@@ -444,15 +445,15 @@ static int GamePositionBoard( extwindow *pewnd, int *px, int *py,
 
     int nBoardSize;
 
-    nBoardSize = ( pewnd->cx - 16 ) / 108;
+    nBoardSize = ( pewnd->cx - 16 ) / BOARD_WIDTH;
     if( ( pewnd->cy - 12 /* FIXME */ ) / 102 < nBoardSize )
 	nBoardSize = ( pewnd->cy - 12 /* FIXME */ ) / 102;
 
     if( !nBoardSize )
 	return -1;
     
-    *pcx = nBoardSize * 108;
-    *pcy = nBoardSize * 72;
+    *pcx = nBoardSize * BOARD_WIDTH;
+    *pcy = nBoardSize * BOARD_HEIGHT;
     *px = ( pewnd->cx - *pcx ) / 2;
     *py = nBoardSize * 6;
     
@@ -470,11 +471,11 @@ static int GameConfigure( extwindow *pewnd, gamedata *pgd,
 	XMapWindow( pewnd->pdsp, pgd->ewndBoard.wnd );
 
 	XMoveResizeWindow( pewnd->pdsp, pgd->ewndDice.wnd,
-			   x + cx - cx / 108 * 15, y + cy / 72 * 73,
-			   cx / 108 * 15, cy / 72 * 7 );
+			   x + cx - cx / BOARD_WIDTH * 15, y + cy / BOARD_HEIGHT * 73,
+			   cx / BOARD_WIDTH * 15, cy / BOARD_HEIGHT * 7 );
 	
 	XMoveResizeWindow( pewnd->pdsp, pgd->ewndStats.wnd,
-			   y, y + cy / 72 * 81, pewnd->cx - y * 2,
+			   y, y + cy / BOARD_HEIGHT * 81, pewnd->cx - y * 2,
 			   cy / 6 + 54 );
     } else
 	XUnmapWindow( pewnd->pdsp, pgd->ewndBoard.wnd );
@@ -815,7 +816,7 @@ extern void RunExt( void ) {
     xsh.flags = PMinSize | PAspect;
     xsh.min_width = 124;
     xsh.min_height = 132;
-    xsh.min_aspect.x = 108;
+    xsh.min_aspect.x = BOARD_WIDTH;
     xsh.min_aspect.y = 102;
     xsh.max_aspect.x = 162;
     xsh.max_aspect.y = 102;

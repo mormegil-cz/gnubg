@@ -45,6 +45,7 @@
 #include "onechequer.h"
 #include "osr.h"
 #include "positionid.h"
+#include "boarddim.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -1812,7 +1813,7 @@ CommandShowExport ( char *sz ) {
   outputl ( _("PNG options:\n") );
 
   outputf ( _("- size of exported PNG pictures: %dx%d\n"),
-            exsExport.nPNGSize * 108, exsExport.nPNGSize * 72 );
+            exsExport.nPNGSize * BOARD_WIDTH, exsExport.nPNGSize * BOARD_HEIGHT );
 
   outputl ( "\n" );
 

@@ -32,6 +32,7 @@
 #include "backgammon.h"
 #include "xboard.h"
 #include "xgame.h"
+#include "boarddim.h"
 
 static extquark eq_cubeFont = { "cubeFont", 0 };
 
@@ -845,8 +846,8 @@ static void BoardDraw( extwindow *pewnd, gamedata *pgd ) {
     pxim->data = malloc( 66 * pgd->nBoardSize * pxim->bytes_per_line );
 
     pgd->pmBoard = XCreatePixmap( pewnd->pdsp, pewnd->wnd,
-				  pgd->nBoardSize * 108,
-				  pgd->nBoardSize * 72, pewnd->nDepth );
+				  pgd->nBoardSize * BOARD_WIDTH,
+				  pgd->nBoardSize * BOARD_HEIGHT, pewnd->nDepth );
 
     anCurrent[ 0 ] = 0x09; /* 0.9^30 x 0.8 */
     anCurrent[ 1 ] = 0x35; /* 0.92 x 0x30 + 0.9^30 x 0.8 */
@@ -857,8 +858,8 @@ static void BoardDraw( extwindow *pewnd, gamedata *pgd ) {
     
     gc = XCreateGC( pewnd->pdsp, pgd->pmBoard, GCForeground, &xgcv );
     
-    XFillRectangle( pewnd->pdsp, pgd->pmBoard, gc, 0, 0, pgd->nBoardSize * 108,
-		    pgd->nBoardSize * 72 );
+    XFillRectangle( pewnd->pdsp, pgd->pmBoard, gc, 0, 0, pgd->nBoardSize * BOARD_WIDTH,
+		    pgd->nBoardSize * BOARD_HEIGHT );
 
     for( ix = 0; ix < pgd->nBoardSize; ix++ ) {
 	x = 1.0 - ( (float) ix / pgd->nBoardSize );
@@ -893,9 +894,9 @@ static void BoardDraw( extwindow *pewnd, gamedata *pgd ) {
 	XDrawLine( pewnd->pdsp, pgd->pmBoard, gc, ix, ix, ix, ix + 100 );
     }
 
-    BoardDrawBorder( pewnd->pdsp, pgd->pmBoard, gc, 0, 0, 54, 72,
+    BoardDrawBorder( pewnd->pdsp, pgd->pmBoard, gc, 0, 0, 54, BOARD_HEIGHT,
 		     pgd->nBoardSize, apix, 0 );
-    BoardDrawBorder( pewnd->pdsp, pgd->pmBoard, gc, 54, 0, 108, 72,
+    BoardDrawBorder( pewnd->pdsp, pgd->pmBoard, gc, 54, 0, BOARD_WIDTH, BOARD_HEIGHT,
 		     pgd->nBoardSize, apix, 0 );
     
     BoardDrawBorder( pewnd->pdsp, pgd->pmBoard, gc, 2, 2, 10, 34,
@@ -1636,8 +1637,8 @@ static void BoardConfigure( extwindow *pewnd, gamedata *pgd,
 
     int nOldSize = pgd->nBoardSize;
     
-    if( ( pgd->nBoardSize = pxcev->width / 108 < pxcev->height / 72 ?
-	  pxcev->width / 108 : pxcev->height / 72 ) != nOldSize ) {
+    if( ( pgd->nBoardSize = pxcev->width / BOARD_WIDTH < pxcev->height / BOARD_HEIGHT ?
+	  pxcev->width / BOARD_WIDTH : pxcev->height / BOARD_HEIGHT ) != nOldSize ) {
 
 	BoardFreePixmaps( pewnd, pgd );
 	
@@ -1672,8 +1673,8 @@ static void BoardCreate( extwindow *pewnd, gamedata *pgd ) {
     int anBlue[] = { 0, 0, 128 };
     pgd->nDragPoint = -1;
     
-    pgd->nBoardSize = pewnd->cx / 108 < pewnd->cy / 72 ?
-	pewnd->cx / 108 : pewnd->cy / 72;
+    pgd->nBoardSize = pewnd->cx / BOARD_WIDTH < pewnd->cy / BOARD_HEIGHT ?
+	pewnd->cx / BOARD_WIDTH : pewnd->cy / BOARD_HEIGHT;
 
     /* FIXME this should be done before the window is created, so a
        different colourmap can be chosen if necessary */
@@ -1752,7 +1753,7 @@ static int BoardHandler( extwindow *pewnd, XEvent *pxev ) {
 extwindowclass ewcBoard = {
     ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask |
     Button1MotionMask | PointerMotionHintMask,
-    108, 72, 0, 0,
+    BOARD_WIDTH, BOARD_HEIGHT, 0, 0,
     BoardHandler,
     "Board",
     NULL
