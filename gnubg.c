@@ -3634,6 +3634,14 @@ extern void CommandSaveSettings( char *szParam ) {
 	     arLuckLevel[ LUCK_VERYGOOD ],
 	     arLuckLevel[ LUCK_VERYBAD ] );
     
+    fprintf ( pf,
+              "set analysis cube %s\n"
+              "set analysis luck %s\n"
+              "set analysis moves %s\n",
+              fAnalyseCube ? "on" : "off",
+              fAnalyseDice ? "on" : "off",
+              fAnalyseMove ? "on" : "off" );
+
 #if USE_GTK
     if ( fX ) {
         fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
