@@ -99,7 +99,7 @@ AC_FUNC_MMAP
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(sigaction sigvec,break)
 AC_CHECK_FUNCS(sigprocmask sigblock,break)
-AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpid getpwuid gettimeofday isatty memmove random readv select setvbuf basename strchr setpriority nl_langinfo usleep)
+AC_CHECK_FUNCS(fork fstat getdtablesize getlogin getpid getpwuid gettimeofday isatty memmove random readv select setvbuf basename strchr setpriority nl_langinfo usleep dirname)
 
 AH_VERBATIM([signbit],
 [#ifndef HAVE_MEMMOVE
@@ -107,10 +107,16 @@ AH_VERBATIM([signbit],
 #define memmove(p0,p1,c) ( bcopy( (p1), (p0), (c) ) )
 #endif])
 
-dnl check if libgen.h should be included for basename
+dnl check if libgen.h should be included for basename/dirname
 if test "$ac_cv_func_basename" = yes; then
    AC_CHECK_DECL(basename)
    if test "$ac_cv_have_decl_basename" = no; then
+      AC_CHECK_HEADERS(libgen.h)
+   fi
+fi
+if test "$ac_cv_func_dirname" = yes; then
+   AC_CHECK_DECL(dirname)
+   if test "$ac_cv_have_decl_dirname" = no; then
       AC_CHECK_HEADERS(libgen.h)
    fi
 fi

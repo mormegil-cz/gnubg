@@ -53,6 +53,9 @@
    */
 #undef HAVE_DCGETTEXT
 
+/* Define to 1 if you have the `dirname' function. */
+#undef HAVE_DIRNAME
+
 /* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
 #undef HAVE_DOPRNT
 

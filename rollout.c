@@ -165,6 +165,8 @@ FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
 
     SwapSides( anBoardTemp );
 
+    assert( FALSE ); /* EvalBearoff1Full doesn't return number of rolls
+                        anymore */
     if( ( j = EvalBearoff1Full( anBoardTemp, ar ) ) < cBestRolls ) {
 	    iMinRolls = i;
 	    cBestRolls = j;

@@ -187,7 +187,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
-bin_PROGRAMS = gnubg makebearoff makehyper
+bin_PROGRAMS = gnubg makebearoff makehyper bt random
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) $(SOUND_INCS) $(PNG_LIBS)
 @USE_EXT_TRUE@@USE_GTK_FALSE@INCLUDES = $(COMMON_INCS) -I$(srcdir)/ext @X_CFLAGS@  $(SOUND_INCS)
@@ -207,6 +207,7 @@ bin_PROGRAMS = gnubg makebearoff makehyper
 @USE_GTK_TRUE@	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
 @USE_GTK_TRUE@	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
 @USE_GTK_TRUE@        openurl.c openurl.h gtktempmap.c gtktempmap.h \
+@USE_GTK_TRUE@	gtkbearoff.c gtkbearoff.h \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
@@ -224,7 +225,7 @@ pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ @GUILEDATA@ \
 
 man_MANS = gnubg.6
 
-noinst_PROGRAMS = makeweights makebearoff1
+noinst_PROGRAMS = makeweights makebearoff1 bt random
 check_PROGRAMS = erftest
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
@@ -234,6 +235,22 @@ makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
 
 makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
+
+bt_SOURCES = bt.c eval.h eval.c positionid.h positionid.c \
+	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
+	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h
+
+bt_LDADD = -Llib -levent $(COMMON_LIBS)
+bt_DEPENDENCIES = lib/libevent.a
+
+random_SOURCES = random.c eval.h eval.c positionid.h positionid.c \
+	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
+	i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h
+
+random_LDADD = -Llib -levent $(COMMON_LIBS)
+random_DEPENDENCIES = lib/libevent.a
 
 makebearoff1_SOURCES = makebearoff1.c getopt.c getopt.h getopt1.c
 makebearoff1_LDADD = 
@@ -267,11 +284,19 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = intl/Makefile
-bin_PROGRAMS = gnubg$(EXEEXT) makebearoff$(EXEEXT) makehyper$(EXEEXT)
+bin_PROGRAMS = gnubg$(EXEEXT) makebearoff$(EXEEXT) makehyper$(EXEEXT) \
+	bt$(EXEEXT) random$(EXEEXT)
 check_PROGRAMS = erftest$(EXEEXT)
-noinst_PROGRAMS = makeweights$(EXEEXT) makebearoff1$(EXEEXT)
+noinst_PROGRAMS = makeweights$(EXEEXT) makebearoff1$(EXEEXT) bt$(EXEEXT) \
+	random$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
+am_bt_OBJECTS = bt.$(OBJEXT) eval.$(OBJEXT) positionid.$(OBJEXT) \
+	pub_eval.$(OBJEXT) matchequity.$(OBJEXT) matchid.$(OBJEXT) \
+	i18n.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) osr.$(OBJEXT) \
+	bearoffgammon.$(OBJEXT) bearoff.$(OBJEXT) path.$(OBJEXT)
+bt_OBJECTS = $(am_bt_OBJECTS)
+bt_LDFLAGS =
 am_erftest_OBJECTS = erftest.$(OBJEXT)
 erftest_OBJECTS = $(am_erftest_OBJECTS)
 erftest_LDADD = $(LDADD)
@@ -313,8 +338,8 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkmet.$(OBJEXT) gtkcolour.$(OBJEXT) \
 @USE_GTK_TRUE@	gtksplash.$(OBJEXT) gtkrolls.$(OBJEXT) \
 @USE_GTK_TRUE@	openurl.$(OBJEXT) gtktempmap.$(OBJEXT) \
-@USE_GTK_TRUE@	$(am__objects_2) $(am__objects_3) \
-@USE_GTK_TRUE@	$(am__objects_4)
+@USE_GTK_TRUE@	gtkbearoff.$(OBJEXT) $(am__objects_2) \
+@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -338,6 +363,12 @@ makehyper_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT)
 makeweights_OBJECTS = $(am_makeweights_OBJECTS)
 makeweights_LDFLAGS =
+am_random_OBJECTS = random.$(OBJEXT) eval.$(OBJEXT) positionid.$(OBJEXT) \
+	pub_eval.$(OBJEXT) matchequity.$(OBJEXT) matchid.$(OBJEXT) \
+	i18n.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) osr.$(OBJEXT) \
+	bearoffgammon.$(OBJEXT) bearoff.$(OBJEXT) path.$(OBJEXT)
+random_OBJECTS = $(am_random_OBJECTS)
+random_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I.
@@ -350,17 +381,18 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/analysis.Po ./$(DEPDIR)/bearoff.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/bearoffgammon.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/boardpos.Po ./$(DEPDIR)/br1.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/copying.Po ./$(DEPDIR)/credits.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/database.Po ./$(DEPDIR)/dice.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/drawboard.Po ./$(DEPDIR)/erftest.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/eval.Po ./$(DEPDIR)/export.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/external.Po ./$(DEPDIR)/getopt.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/getopt1.Po ./$(DEPDIR)/gnubg.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtk-multiview.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkboard.Po ./$(DEPDIR)/gtkchequer.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkcolour.Po ./$(DEPDIR)/gtkcube.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkexport.Po ./$(DEPDIR)/gtkgame.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkmet.Po ./$(DEPDIR)/gtkmovefilter.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bt.Po ./$(DEPDIR)/copying.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/credits.Po ./$(DEPDIR)/database.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/dice.Po ./$(DEPDIR)/drawboard.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/erftest.Po ./$(DEPDIR)/eval.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/export.Po ./$(DEPDIR)/external.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/getopt.Po ./$(DEPDIR)/getopt1.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gnubg.Po ./$(DEPDIR)/gtk-multiview.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkbearoff.Po ./$(DEPDIR)/gtkboard.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkchequer.Po ./$(DEPDIR)/gtkcolour.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkcube.Po ./$(DEPDIR)/gtkexport.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkmet.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkmovefilter.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkprefs.Po ./$(DEPDIR)/gtkrace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkrolls.Po ./$(DEPDIR)/gtksplash.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtktempmap.Po ./$(DEPDIR)/gtktexi.Po \
@@ -376,21 +408,22 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/osr.Po ./$(DEPDIR)/path.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/play.Po ./$(DEPDIR)/positionid.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/postscript.Po ./$(DEPDIR)/pub_eval.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/record.Po ./$(DEPDIR)/render.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/renderprefs.Po ./$(DEPDIR)/rollout.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/set.Po ./$(DEPDIR)/sgf.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/sgfl.Po ./$(DEPDIR)/sgfp.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/show.Po ./$(DEPDIR)/sound.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/speed.Po ./$(DEPDIR)/text.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/xboard.Po ./$(DEPDIR)/xgame.Po
+@AMDEP_TRUE@	./$(DEPDIR)/random.Po ./$(DEPDIR)/record.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/render.Po ./$(DEPDIR)/renderprefs.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/rollout.Po ./$(DEPDIR)/set.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgf.Po ./$(DEPDIR)/sgfl.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sgfp.Po ./$(DEPDIR)/show.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/sound.Po ./$(DEPDIR)/speed.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/text.Po ./$(DEPDIR)/xboard.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/xgame.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
-DIST_SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) \
+DIST_SOURCES = $(bt_SOURCES) $(erftest_SOURCES) $(gnubg_SOURCES) \
 	$(makebearoff_SOURCES) $(makebearoff1_SOURCES) \
-	$(makehyper_SOURCES) $(makeweights_SOURCES)
+	$(makehyper_SOURCES) $(makeweights_SOURCES) $(random_SOURCES)
 
 NROFF = nroff
 MANS = $(man_MANS)
@@ -407,7 +440,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	strdup.c
 DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds
-SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
+SOURCES = $(bt_SOURCES) $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES) $(random_SOURCES)
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -479,6 +512,9 @@ clean-checkPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+bt$(EXEEXT): $(bt_OBJECTS) $(bt_DEPENDENCIES) 
+	@rm -f bt$(EXEEXT)
+	$(LINK) $(bt_LDFLAGS) $(bt_OBJECTS) $(bt_LDADD) $(LIBS)
 erftest$(EXEEXT): $(erftest_OBJECTS) $(erftest_DEPENDENCIES) 
 	@rm -f erftest$(EXEEXT)
 	$(LINK) $(erftest_LDFLAGS) $(erftest_OBJECTS) $(erftest_LDADD) $(LIBS)
@@ -497,6 +533,9 @@ makehyper$(EXEEXT): $(makehyper_OBJECTS) $(makehyper_DEPENDENCIES)
 makeweights$(EXEEXT): $(makeweights_OBJECTS) $(makeweights_DEPENDENCIES) 
 	@rm -f makeweights$(EXEEXT)
 	$(LINK) $(makeweights_LDFLAGS) $(makeweights_OBJECTS) $(makeweights_LDADD) $(LIBS)
+random$(EXEEXT): $(random_OBJECTS) $(random_DEPENDENCIES) 
+	@rm -f random$(EXEEXT)
+	$(LINK) $(random_LDFLAGS) $(random_OBJECTS) $(random_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -511,6 +550,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bearoffgammon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boardpos.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/br1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copying.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/credits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/database.Po@am__quote@
@@ -524,6 +564,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/getopt1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gnubg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtk-multiview.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkbearoff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkboard.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkchequer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkcolour.Po@am__quote@
@@ -561,6 +602,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/positionid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postscript.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pub_eval.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/record.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/render.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/renderprefs.Po@am__quote@

@@ -1,3 +1,43 @@
+Thu Jul 10 10:35:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Initial experimental support of Hugh Sconyers' full 15x15
+	bearoff database.
+
+	* gnubg.c: new command "show bearoff", 	
+	"set bearoff sconyers 15x15 [dvd|disk] [enable|path]".
+	* gnubg.c (ChangeDisk): new function.
+	* gnubg.c (real_main): init sconyers' bearoff databases.
+	* gnubg.c (CommandSaveSettings): save setup for Sconyers' databases.
+
+	* set.c (CommandSetBearoffSconyers15x15DVDEnable,
+	CommandSetBearoffSconyers15x15DiskEnable
+	CommandSetBearoffSconyers15x15DVDPath,
+	CommandSetBearoffSconyers15x15DiskPath): new functions.
+	* show.c (CommandShowVariation): fix typo.
+	* show.c (CommandShowBearoff, ShowBearoff): new functions.
+
+	* eval.h: new class CLASS_BEAROFF_15x15 (NOT ENABLED YET!)
+	* eval.c: make sure that all evaluations routines return
+	values to indicate errors or interrupt.
+
+	* bearoff.c (BearoffClose): modify prototype; free pbc
+	* bearoff.h: new options.
+	* bearoff.c: make sure that all bearoff routines return
+	values to indicate errors or interrupt.
+	* bearoff.c (BearoffDumpSconyers15x15, ReadSconyers15x15,
+	BearoffEvalSconyers): new functions.
+
+	* gtkbearoff.c: new file (GTK equivalent of "show bearoff")
+
+	* gtkgame.c (GTKChangeDisk): new function.
+	* gtkgame.c: new meny entry: Analyse->Bearoff
+	* gtkgame.c (OptionPages): new page for bearoff setup.
+
+	* rollout.c (BearoffRollout): add fixme...
+
+	* configure.in, config.h.in: search for dirname.
+	* Makefile.am: new files gtkbearoff.[ch]
+
 Wed Jul  9 10:32:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* text.c (OutputEquity, OutputMoneyEquity, OutputEquityScale,
