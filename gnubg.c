@@ -7298,6 +7298,52 @@ getInstallDir( void ) {
 
 }
 
+/* expand any environment variables in str into ret */
+void explode(char* str, char* ret)
+{
+	char *start, *end;
+	if (!str)
+		return;
+	/* Find start of variable */
+	while ((start = strchr(str, '%')))
+	{
+		if (start)
+		{
+			int len;
+			char *ptoken;
+			/* Copy first part of string */
+			len = strlen(ret);
+			strncpy(ret + len, str, start - str);
+			ret[len + start - str] = '\0';
+
+			/* Find end of variable marker */
+			end = strchr(start + 1, '%');
+			if (!end)
+				break;
+			len = ((int)(end - start)) - 1;
+
+			/* Get token and expand */
+			ptoken = (char*)malloc(len + 1);
+			strncpy(ptoken, start + 1, len);
+			ptoken[len] = '\0';
+			explode(getenv(ptoken), ret);
+			free(ptoken);
+
+			str = end + 1;
+		}
+	}
+	strcat(ret, str);
+}
+
+/* Expand (possibly recursive) enviornment variable */
+char* getenvvalue(char* str)
+{
+	static char ret[1024];
+	*ret = '\0';
+	explode(str, ret);
+	return ret;
+}
+
 #endif /* WIN32 */
 
 
@@ -7343,7 +7389,12 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     GtkWidget *pwSplash = NULL;
 #endif
 
-	if( !( szHomeDirectory = getenv( "HOME" ) ) )
+#if !WIN32
+	szHomeDirectory = getenv( "HOME" );
+#else
+	szHomeDirectory = getenvvalue( "HOME" );
+#endif
+	if (!szHomeDirectory)
 		szHomeDirectory = ".";
 
 #if WIN32
