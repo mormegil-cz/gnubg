@@ -1,3 +1,9 @@
+Fri Jun 28 23:30:05 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* sgf.c (WriteSkillCube): new function.
+	* sgf.c (SaveGame): write cube skill as BC, DC, IC, TC.
+	* sgf.c (RestoreNode): parse new cube skill SGF properties.
+
 Fri Jun 28 22:06:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c: new command "export session text".

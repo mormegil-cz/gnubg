@@ -577,7 +577,6 @@ static void RestoreNode( list *pl ) {
     char *pch;
     int i, fPlayer = 0, fSetBoard = FALSE, an[ 25 ];
     skilltype ast[ 2 ] = { SKILL_NONE, SKILL_NONE };
-    int iSkill = 0;
     lucktype lt = LUCK_NONE;
     float rLuck = ERR_VAL;
     
@@ -721,15 +720,27 @@ static void RestoreNode( list *pl ) {
 	    /* comment */
 	    ppC = pp;
 	else if( pp->ach[ 0 ] == 'B' && pp->ach[ 1 ] == 'M' )
-	    ast[ iSkill++] 
+	    ast[ 0 ] 
               = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYBAD :
 	    SKILL_BAD;
 	else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'O' )
-	    ast[ iSkill++] = SKILL_DOUBTFUL;
+	    ast[ 0 ] = SKILL_DOUBTFUL;
 	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'T' )
-	    ast[ iSkill++] = SKILL_INTERESTING;
+	    ast[ 0 ] = SKILL_INTERESTING;
 	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'E' )
-	    ast[ iSkill++] 
+	    ast[ 0 ] 
+              = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
+	    SKILL_GOOD;
+	else if( pp->ach[ 0 ] == 'B' && pp->ach[ 1 ] == 'C' )
+	    ast[ 1 ] 
+              = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYBAD :
+	    SKILL_BAD;
+	else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'C' )
+	    ast[ 1 ] = SKILL_DOUBTFUL;
+	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'C' )
+	    ast[ 1 ] = SKILL_INTERESTING;
+	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'C' )
+	    ast[ 1 ] 
               = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
 	    SKILL_GOOD;
 	else if( pp->ach[ 0 ] == 'L' && pp->ach[ 1 ] == 'U' )
@@ -1120,7 +1131,8 @@ static void WriteLuck( FILE *pf, int fPlayer, float rLuck, lucktype lt ) {
     }
 }
 
-static void WriteSkill( FILE *pf, skilltype st ) {
+static void
+WriteSkill ( FILE *pf, const skilltype st ) {
 
     switch( st ) {
     case SKILL_VERYBAD:
@@ -1148,6 +1160,39 @@ static void WriteSkill( FILE *pf, skilltype st ) {
 	
     case SKILL_VERYGOOD:
 	fputs( "TE[2]", pf );
+	break;
+    }
+}
+
+static void
+WriteSkillCube ( FILE *pf, const skilltype st ) {
+
+    switch( st ) {
+    case SKILL_VERYBAD:
+	fputs( "BC[2]", pf );
+	break;
+	
+    case SKILL_BAD:
+	fputs( "BC[1]", pf );
+	break;
+	
+    case SKILL_DOUBTFUL:
+	fputs( "DC[]", pf );
+	break;
+	
+    case SKILL_NONE:
+	break;
+	
+    case SKILL_INTERESTING:
+	fputs( "IC[]", pf );
+	break;
+	
+    case SKILL_GOOD:
+	fputs( "TC[1]", pf );
+	break;
+	
+    case SKILL_VERYGOOD:
+	fputs( "TC[2]", pf );
 	break;
     }
 }
@@ -1295,7 +1340,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    WriteLuck( pf, pmr->n.fPlayer, pmr->n.rLuck, pmr->n.lt );
             /* FIXME: separate skill for cube and move */
 	    WriteSkill( pf, pmr->n.stMove );
-	    WriteSkill( pf, pmr->n.stCube );
+	    WriteSkillCube( pf, pmr->n.stCube );
 	    
 	    break;
 	    
