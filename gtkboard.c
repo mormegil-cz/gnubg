@@ -1983,8 +1983,8 @@ static gint board_set( Board *board, const gchar *board_text,
     old_dice[ 1 ] = bd->dice[ 1 ];
     old_dice[ 2 ] = bd->dice_opponent[ 0 ];
     old_dice[ 3 ] = bd->dice_opponent[ 1 ];
-    old_turn = bd->turn;
 #endif
+    old_turn = bd->turn;
     
     editing = bd->playing &&
 	gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) );
