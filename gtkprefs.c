@@ -1892,21 +1892,6 @@ DesignAddChanged ( GtkWidget *pw, GtkWidget *pwDialog ) {
 }
 
 static void
-BoardPrefsDestroy ( GtkWidget *pw, void * arg) {
-
-#if HAVE_LIBXML2
-	free_board_designs ( plBoardDesigns );
-#endif /* HAVE_LIBXML2 */
-
-#if USE_BOARD3D
-	if (previewType == DT_3D)
-		Tidy3dObjects(&bd3d, FALSE);
-#endif
-
-	gtk_main_quit();
-}
-
-static void
 DesignAddTitle ( boarddesign *pbde ) {
 
   GtkWidget *pwDialog;
@@ -2351,6 +2336,21 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
 }
 
 #endif /* HAVE_LIBXML2 */
+
+static void
+BoardPrefsDestroy ( GtkWidget *pw, void * arg) {
+
+#if HAVE_LIBXML2
+	free_board_designs ( plBoardDesigns );
+#endif /* HAVE_LIBXML2 */
+
+#if USE_BOARD3D
+	if (previewType == DT_3D)
+		Tidy3dObjects(&bd3d, FALSE);
+#endif
+
+	gtk_main_quit();
+}
 
 extern void BoardPreferencesDone( GtkWidget *pwBoard )
 {

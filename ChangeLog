@@ -1,3 +1,8 @@
+Fri Aug 29 21:34:21 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gtkprefs.c (BoardPrefsDestroy): Move to outside of HAVE_LIBXML2
+	#ifdef (functions for board design zone).
+
 Fri Aug 30 22:53:25 2003  Oystein Johansene <oystein@gnubg.org>
 
 	* gtkgame.c, gtkchequer.c: Make the old layout available through
