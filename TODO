@@ -187,10 +187,6 @@ duplication of effort and to make sure our changes merge easily.
   this macro before testing fAction.  (This might also allow screen refreshes
   while evaluations are in progress.)
 
-** GTK+ 1.3/2.0:
-*** We need to do something in gtk_multiview_expose in gtk-multiview.c (the
-  labels for the names and scores don't get displayed).
-
 ** Deprecated functions:
   Once GTK+ 2.0 is released, remove references to the following deprecated
 functions:
