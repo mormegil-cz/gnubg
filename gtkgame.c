@@ -6790,6 +6790,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     RPTrunc;
   char sz[ 256 ];
   int  i;
+  const float epsilon = 1.0e-6;
 
   memcpy (&rw.rcRollout, &rcRollout, sizeof (rcRollout));
   rw.prwGeneral = &RPGeneral;
@@ -7008,7 +7009,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
       UserCommand( sz );
     }
 
-    if( rw.rcRollout.rStdLimit != rcRollout.rStdLimit ) {
+    if( fabs( rw.rcRollout.rStdLimit - rcRollout.rStdLimit ) > epsilon ) {
       lisprintf( sz, "set rollout limit maxerr %5.4f", rw.rcRollout.rStdLimit );
       UserCommand( sz );
     }
@@ -7030,7 +7031,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
       UserCommand( sz );
     }
 
-    if( rw.rcRollout.rJsdLimit != rcRollout.rJsdLimit ) {
+    if( fabs( rw.rcRollout.rJsdLimit - rcRollout.rJsdLimit ) > epsilon ) {
       lisprintf( sz, "set rollout jsd limit %5.4f", rw.rcRollout.rJsdLimit );
       UserCommand( sz );
     }

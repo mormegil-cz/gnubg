@@ -1,3 +1,9 @@
+Sun Oct 12 11:49:33 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (SetRollouts): change tests "a != b" to
+	"fabs(a-b)>epsilon" for floats.
+	(bug #4408 item 3, reported by Ian Dunstan)
+
 Sun Oct 12 10:43:18 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (swapGame): swap player for MOVE_TIME.
