@@ -3343,6 +3343,8 @@ static void LoadCommands( FILE *pf, char *szFile ) {
     
     char sz[ 2048 ], *pch;
 
+    outputpostpone();
+    
 #if USE_GUILE
     /* We have to be conservative with input buffering, because if there
        is a Guile escape in the file, we will want Guile to take over
@@ -3361,14 +3363,17 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 
 	if( ferror( pf ) ) {
 	    perror( szFile );
+	    outputresume();
 	    return;
 	}
 	
 	if( fAction )
 	    fnAction();
 	
-	if( feof( pf ) || fInterrupt )
+	if( feof( pf ) || fInterrupt ) {
+	    outputresume();
 	    return;
+	}
 
 	if( *sz == '#' ) /* Comment */
 	    continue;
@@ -3411,6 +3416,8 @@ static void LoadCommands( FILE *pf, char *szFile ) {
 
 	/* FIXME handle NextTurn events? */
     }
+    
+    outputresume();
 }
 
 extern void CommandLoadCommands( char *sz ) {

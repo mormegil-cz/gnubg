@@ -1,6 +1,8 @@
 Wed Sep 11 22:25:20 2002  Gary Wong  <gtw@research.att.com>
 
 	* sound.c, Makefile.am, configure.in: Add synthesised sound effects.
+	
+	* gnubg.c (LoadCommands): Postpone output until loading complete.
 
 	* INSTALL: Update to latest FSF version.
 
