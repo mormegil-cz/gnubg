@@ -2568,7 +2568,7 @@ static void DestroyList( gpointer p ) {
     *( (void **) p ) = NULL;
 }
 
-extern void ShowList( char *psz[], char *szTitle ) {
+extern void ShowList( char *psz[], char *szTitle, GtkWidget *pwParent ) {
 
     static GtkWidget *pwDialog;
     GtkWidget *pwList = gtk_list_new(),
@@ -2579,8 +2579,14 @@ extern void ShowList( char *psz[], char *szTitle ) {
 	gtk_widget_destroy( pwDialog );
 
     pwDialog = gtk_dialog_new();
+	if (pwParent)
+	{	/* Modal */
+		gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+		gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+						GTK_WINDOW( pwParent ) );
+	}
     gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyList, &pwDialog );
-    
+
     while( *psz )
 	gtk_container_add( GTK_CONTAINER( pwList ),
 			   gtk_list_item_new_with_label( *psz++ ) );
@@ -2714,6 +2720,19 @@ extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
     }
 }
 
+/* Use to temporarily set the parent dialog for nested dialogs */
+GtkWidget *pwCurrentParent = NULL;
+void GTKSetCurrentParent(GtkWidget *parent)
+{
+	pwCurrentParent = parent;
+}
+GtkWidget *GTKGetCurrentParent()
+{
+	GtkWidget *current = pwCurrentParent ? pwCurrentParent : pwMain;
+	pwCurrentParent = NULL;
+	return current;
+}
+
 extern int 
 GTKMessage( char *sz, dialogtype dt ) {
 
@@ -2757,7 +2776,7 @@ GTKMessage( char *sz, dialogtype dt ) {
 
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
+		GTK_WINDOW(GTKGetCurrentParent()));
     gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
     
@@ -7129,15 +7148,22 @@ extern void GTKShowScoreSheet( void )
 	gtk_main();
 }
 
-static void DestroyAbout( gpointer p ) {
+extern char *aszCopying[], *aszWarranty[];
 
-    *( (void **) p ) = NULL;
+void GtkShowCopying(GtkWidget *pwWidget)
+{
+	ShowList( aszCopying, _("Copying"), gtk_widget_get_toplevel(pwWidget) );
+}
+
+void GtkShowWarranty(GtkWidget *pwWidget)
+{
+	ShowList( aszWarranty, _("Warranty"), gtk_widget_get_toplevel(pwWidget) );
 }
 
 extern void GTKShowVersion( void ) {
 
 #include "xpm/gnubg-big.xpm"
-	static GtkWidget *pwDialog;
+	GtkWidget *pwDialog;
 	GtkWidget *pwTopHBox = gtk_hbox_new( FALSE, -8 ),
 		*pwImageVBox = gtk_vbox_new( FALSE, 0 ),
 		*pwButtonBox = gtk_vbox_new( FALSE, 0 ),
@@ -7146,12 +7172,11 @@ extern void GTKShowVersion( void ) {
 	char PromptStr[255];
 	GtkAccelGroup *pag = gtk_accel_group_new();
 
-	if( pwDialog )
-		gtk_widget_destroy( pwDialog );
-
 	pwDialog = gtk_dialog_new();
 	gtk_window_set_title( GTK_WINDOW( pwDialog ), _("About GNU Backgammon") );
-	gtk_object_weakref( GTK_OBJECT( pwDialog ), DestroyAbout, &pwDialog );
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
 
 	gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwDialog )->vbox ), pwTopHBox );
 
@@ -7196,25 +7221,25 @@ extern void GTKShowVersion( void ) {
 	pwButton = gtk_button_new_with_label(_("Credits") ),
 	FALSE, FALSE, 8 );
 	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-		GTK_SIGNAL_FUNC( CommandShowCredits ), NULL );
+		GTK_SIGNAL_FUNC( GTKCommandShowCredits ), NULL );
 	
 	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
 	pwButton = gtk_button_new_with_label(_("Build Info") ),
 	FALSE, FALSE, 8 );
 	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-		GTK_SIGNAL_FUNC( CommandShowBuildInfo ), NULL );
+		GTK_SIGNAL_FUNC( GTKShowBuildInfo ), NULL );
 	
 	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
 	pwButton = gtk_button_new_with_label(_("Copying conditions") ),
 	FALSE, FALSE, 8 );
 	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-		GTK_SIGNAL_FUNC( CommandShowCopying ), NULL );
+		GTK_SIGNAL_FUNC( GtkShowCopying ), NULL );
 	
 	gtk_box_pack_start( GTK_BOX( pwButtonBox ), 
 	pwButton = gtk_button_new_with_label(_("Warranty") ),
 	FALSE, FALSE, 8 );
 	gtk_signal_connect( GTK_OBJECT( pwButton ), "clicked",
-		GTK_SIGNAL_FUNC( CommandShowWarranty ), NULL );
+		GTK_SIGNAL_FUNC( GtkShowWarranty ), NULL );
 
 	gtk_widget_show_all( pwDialog );
 }
@@ -7260,7 +7285,7 @@ GtkWidget* SelectableLabel(GtkWidget* reference, char* text)
 }
 #endif
 
-extern void GTKShowBuildInfo(void)
+extern void GTKShowBuildInfo(GtkWidget *pwParent)
 {
 	GtkWidget *pwDialog, *pwBox, *pwPrompt;
 	int i;
@@ -7274,7 +7299,7 @@ extern void GTKShowBuildInfo(void)
 
 	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
+					GTK_WINDOW( gtk_widget_get_toplevel(pwParent) ) );
 	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
@@ -7353,7 +7378,7 @@ static int FindName(list* pList, char* name)
 	return FALSE;
 }
 
-extern void GTKCommandShowCredits(void)
+extern void GTKCommandShowCredits(GtkWidget *pwParent)
 {
 	GtkWidget *pwDialog, *pwBox, *pwMainHBox, *pwHBox = 0, *pwVBox,
 		*pwList = gtk_list_new(),
@@ -7373,7 +7398,7 @@ extern void GTKCommandShowCredits(void)
 
 	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
 	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-					GTK_WINDOW( pwMain ) );
+					GTK_WINDOW( gtk_widget_get_toplevel(pwParent) ) );
 	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
@@ -9250,6 +9275,7 @@ static void CalibrationEnable( GtkWidget *pw, GtkWidget *pwspin ) {
 
 static void CalibrationGo( GtkWidget *pw, GtkWidget *apw[ 2 ] ) {
 
+	GTKSetCurrentParent(gtk_widget_get_toplevel(pw));
     UserCommand( "calibrate" );
 
     fInterrupt = FALSE;
@@ -9342,7 +9368,7 @@ extern void *GTKCalibrationStart( void ) {
     
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
+				  GTK_WINDOW( GTKGetCurrentParent() ) );
 
     pwOldGrab = pwGrab;
     pwGrab = pwDialog;

@@ -1237,6 +1237,7 @@ void DoTestPerformance(GtkWidget *pw, GtkWidget* board)
 	char *msg;
 	float fps;
 
+	GTKSetCurrentParent(gtk_widget_get_toplevel(pw));
 	if (!GetInputYN(_("Save settings and test 3d performance for 3 seconds?")))
 		return;
 
