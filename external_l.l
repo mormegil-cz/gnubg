@@ -25,6 +25,8 @@
 
 #include "external_y.h"
 
+extern int extparse();
+
 int prc_lineno = 1;
 void escapes(const char *cp, char *tp);
 
@@ -32,7 +34,7 @@ void escapes(const char *cp, char *tp);
 
 %option noyywrap
 %option prefix="ext"
-%option outfile="external_l.c"
+%option nounput
 
 NUMSTR -?[0-9]+
 

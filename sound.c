@@ -80,6 +80,8 @@
 #include <mmsystem.h>
 #endif
 
+#include <glib.h>
+
 #include "backgammon.h"
 #include "eval.h"
 #include "i18n.h"

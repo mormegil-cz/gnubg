@@ -30,6 +30,9 @@
 
 #include "external.h"
 
+extern int extlex();
+extern int exterror(const char *s);
+
 extcmd ec; 
 
 static void reset_command();
@@ -131,6 +134,8 @@ exterror( const char *s ) {
   else
     fprintf( stderr, "Error: %s at %s\n", 
              s, exttext && exttext[ 0 ] ? exttext : "<EOT>" );
+
+  return 0;
 }
 
 static void

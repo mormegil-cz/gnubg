@@ -58,6 +58,8 @@
 #include <libart_lgpl/art_rgb_svp.h>
 #endif
 
+#include <glib.h>
+
 #include "backgammon.h"
 #include "export.h"
 #include "i18n.h"

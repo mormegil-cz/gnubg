@@ -840,11 +840,6 @@ extern void GTKSetCube( gpointer *p, guint n, GtkWidget *pw ) {
     outputresume();
 }
 
-static void ButtonEventCommand( GtkWidget *pw, GdkEvent *event, char *szCommand ) {
-
-      UserCommand( szCommand );
-}
-
 static int fAutoCommentaryChange;
 
 extern void CommentaryChanged( GtkWidget *pw, void *p ) {
@@ -1988,12 +1983,7 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *eCon, void
 
 extern int InitGTK( int *argc, char ***argv ) {
     
-    GtkWidget *pwVbox, *pwHbox, *pwHandle;
-
-    GdkPixmap *ppm;
-    GdkBitmap *pbm;
-    GdkColormap *pcmap;
-    GtkWidget *pwPanelHbox, *pwEvent;
+    GtkWidget *pwVbox, *pwHbox, *pwHandle, *pwPanelHbox;
 
     static GtkItemFactoryEntry aife[] = {
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
