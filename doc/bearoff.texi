@@ -52,7 +52,7 @@ v|                  |BAR|                  |     (Cube: 1)
 
 Using a two-sided bearoff database will yield that player X has 67.1%
 cubeless chance of winning. The database also gives cubeful money
-equities of +0.3441, +0.3210, and +0.1605 for X owning cube, centered
+equities of +0.3441, +0.3210, and +0.1605 for X owning cube, centred
 cube, and O owning cube, respectively. So it's an initial 
 double since +0.3210 >= 2 * +0.1605. However it's not a redouble since
 +0.3441 >= 2 * 0.1605. 
@@ -253,20 +253,42 @@ databases. Currently, it works with up to four databases; two of each
 kind. Two of the databases are read into memory for fast access, but
 of course these are limited to very small databases.
 
-The one sided database kept in memory is built-in, since it must be
-present as it's used for backgammon probabilities for the race net and
-other various things. The size of the database is determined at
-compile time. The standard is 15 chequers on 6 points, but you may
-choose a larger one my modifying the @file{Makefile}.
+The one sided database kept in memory is either built-in or stored on
+disk as @file{gnubg_os0.bd} depending on the compile time option
+@code{USE_BUILTIN_BEAROFF}, which is most easily controlled by passing
+the option @code{--enable-bearoff=TYPE} where @code{type} is either
+@code{no}, @code{static}, or @code{external}. @gnubg{} can also work
+without this database, but will generate a heuristic version every
+time the program starts. This can take up to several minutes,
+depending on the speed of your computer.
+
+We recommend using an external file as the executable will be smallest
+possible, and several running instances of gnubg will share the memory
+if your system has mmap (memory mapping of files). 
+
+The standard size is 15 chequers on 6 points, but you may
+generate a larger one, but remember that the @gnubg{} will read the
+file into memory. The default size should be adequate for all
+purposes.
 
 The two sided database kept in memory (@file{gnubg_ts0.bd}) is
 optional and you may generate or download your own (see next section
-for details). 
+for details). @gnubg{} will use the exact cubeful equities in the
+databases for cubeful money game evaluations and for truncation in
+money game rollouts (see (insert ref to rollout chapter)). @gnubg{}
+cannot use the equities for match play as the equities, in general,
+depend on the match score, cube value, and cube ownership.
 
-The remaining two databases (@file{gnubg_os.bd} and
+The two databases (@file{gnubg_os.bd} and
 @file{gnubg_ts.bd}) are kept on disk and accessed when
 needed. See next section for details on how to generate or download
 your own.
+
+A few words of caution: the race neural net in @gnubg{} is believed to
+be quite good, so it may not be worthwhile to generate large one sided
+database. A comparison study between the race neural net, rollouts,
+and the one sided bearoff databases is in progress. 
+
 
 @node Obtaining bearoff databases
 @section Obtaining bearoff databases
@@ -279,7 +301,7 @@ generate bearoff databases.
 To generate one sided database issue
 
 @example
-makebearoff -o 10 > gnubg_os.bd
+makebearoff -o 10 -f gnubg_os.bd
 @end example
 
 to generate the one sided 10 point database. The program
@@ -288,7 +310,7 @@ positions. You may set the cache size with the @command{-s size}
 option, e.g.,
 
 @example
-makebearoff -o 10 -s 123456789 > gnubg_os.bd
+makebearoff -o 10 -s 123456789 -f gnubg_os.bd
 @end example
 
 to use 123,456,789 bytes of memory for cache size. In general, if the
@@ -301,7 +323,7 @@ if you already had generated the 9 point database you can reuse it:
 
 @example
 mv gnubg_os.bd gnubg_os9.bd
-makebearoff -o 10 -O gnubg_os9.bd > gnubg_os.bd
+makebearoff -o 10 -O gnubg_os9.bd -f gnubg_os.bd
 @end example
 
 Note that @file{makebearoff} requires temporary disk space to generate
@@ -312,7 +334,7 @@ space of the database to be generated is needed.
 To generate a two sided database issue
 
 @example
-makebearoff -t 6x8 > gnubg_ts.bd
+makebearoff -t 6x8 -f gnubg_ts.bd
 @end example
 
 This example will generate the 8 chequers on 6 points database. Again,
@@ -340,12 +362,13 @@ distributed with the source for @gnubg{}.
 
 @subsection Download
 
-Currently, the only database available for download is the 6 chequers
-on 6 points two sided database which can be downloaded from
-@uref{ftp://alpha.gnu.org/gnu/gnubg/gnubg_ts0.bd.gz}.
+You may download the two sided database with 6 chequers on 6 points from
+@uref{ftp://alpha.gnu.org/gnu/gnubg/gnubg_ts0.bd.gz} and the one sided
+database with 15 chequers 6 points from
+@uref{ftp://alpha.gnu.org/gnu/gnubg/gnubg_os0.bd.gz}.
 
 Later, other databases may be available for download or it may be
-possible to purchase these on CDROM or DVD for a nomial fee. 
+possible to purchase these on CDROM or DVD for a nominal fee. 
 
 @subsection Verification of databases
 
