@@ -1,0 +1,150 @@
+@c{written by Achim Mueller <ace@gnubg.org>}
+
+GNU Backgammon works on
+
+@itemize @bullet
+@item MS Windows operating systems
+@item Linux
+@item FreeBSD
+@item Solaris
+@item MacOS 10
+@end itemize
+
+@sp 1
+GNU Backgammon is available in different languages
+
+@itemize @bullet
+@item English
+@item German (nearly finished)
+@item Italian (3/4 finished)
+@item Japanese (2/3 finished)
+@item Danish (1/4 finished)
+@item Turkish (1/4 finished)
+@item Icelandic (1/4 finished)
+@item French (not ready yet)
+@end itemize
+
+@sp 1
+GNU Backgammon comes with 
+
+@itemize @bullet
+@item A Graphical User Interface (GUI) with 2D- or 3D-Animation
+@item Including a selection of board designs to choose from
+@item Powerful but simple tools to change or create your own design
+@item You can choose colours, lighting, textures and even the perspective of the 3D board
+@item A command line modus (CLI) with support of the script language python
+@end itemize
+
+@sp 1
+With GNU Backgammon you may play
+
+@itemize @bullet
+@item backgammon, nackgammon or hypergammon
+@item games, matches or sessions (@gnubg{} adjusts its play always to the match score)
+@end itemize
+
+@sp 1
+Gnubgs analysing functions allow you to
+
+@itemize @bullet
+@item get hints during the game
+@item evaluate positions
+@item use a tutor during the game
+@item use a "temperature map" which gives a graphical simple overview of the possible 
+results of the next dice roll
+@item analyse or rollout positions, games, matches or sessions (with probably the most
+extensive controls to set speed and accuracy of any backgammon software)
+@end itemize
+
+
+@sp 1
+You can
+
+@itemize @bullet
+@item setup, edit and save positions, games, matches and sessions
+@item replay games, matches and sessions
+@item record annotations
+@item explore doubling windows, gammon prices and similar cube theory, valuable
+for money games and essential for match play
+@item store error rates for different players
+@end itemize
+
+
+@sp 1
+GNU Backgammon imports matches and sessions from
+
+@itemize @bullet
+@item Fibs
+@item Gamesgrid
+@item TrueMoneygame
+@item Netgammon
+@item Snowie
+@item Jellyfish
+@end itemize
+
+
+@sp 1
+GNU Backgammon exports positions, games, matches and sessions into
+
+@itemize @bullet
+@item *.pos
+@item *.mat
+@item plain text
+@item different html formats
+@item png
+@item LaTeX
+@item (Encapsulated) Postscript
+@item PDF
+@end itemize
+
+
+@sp 1
+With GNU Backgammon you may choose between the following dice generators
+
+@itemize @bullet
+@item Manual dice settings
+@item from a file
+@item a dice generator created by the user
+@item Ansi
+@item Blum, Blum and Shub
+@item BSD
+@item ISAAK
+@item MD5
+@item Mersenne Twister
+@item www.random.org
+@end itemize
+
+
+@sp 1
+GNU Backgammon comes with several databases for handling bearoffs and
+match equities, i.e.
+
+@itemize @bullet
+@item larger bearoff databases (to be generated)
+@item databases for 1/2/3-chequer hypergammon (to be generated)
+@item a selection of several Match Equity Tables (METs)
+@item an interface to Hugh Sconyers huge databases for races and bearoffs
+@end itemize
+
+
+@sp 1
+But don't forget ... GNU Backgammon is work in progress. Don't blame us if
+
+@itemize @bullet
+@item a feature isn't implemented yet
+@item a feature doesn't work correctly
+@item @gnubg{} crashes
+@item your system suffers after gnubg is installed
+@end itemize
+
+
+@sp 1
+Don't forget also ...
+
+@itemize @bullet
+@item it's free software (free as in "free speech", not in "free beer")
+@item we are all volunteers
+@item we need feedback and bug reports
+@item we need your help
+@end itemize
+

@@ -1,0 +1,36 @@
+@menu
+* Player::
+* Appearance::
+* Options::
+* Advanced options::
+* Evaluation::
+* Analysis::
+* Rollouts::
+* Export::
+@end menu
+
+@node Player
+@section Player
+
+@node Appearance
+@section Appearance
+
+@node Options
+@section Options
+
+@node Advanced options
+@section Advanced options
+
+@node Evaluation
+@section Evaluation
+@include movefilters.texi
+
+@node Analysis
+@section Analysis
+
+@node Rollouts
+@section Rollouts
+
+@node Export
+@section Export
+

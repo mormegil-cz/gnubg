@@ -1,0 +1,16 @@
+
+@menu
+* Starting a game or match or session::
+* Moving the checkers::
+* Using the doubling cube::
+@end menu
+
+@node Starting a game or match or session
+@section Starting a game or match or session
+
+@node Moving the checkers
+@section Moving the checkers
+
+@node Using the doubling cube
+@section Using the doubling cube
+

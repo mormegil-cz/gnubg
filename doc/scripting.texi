@@ -1,6 +1,3 @@
-@node Scripting
-@chapter Scripting
-
 @section Accessing @gnubg{} Python shell 
 
 To access the Python shell, either type @samp{>} from the command line

@@ -1,3 +1,4 @@
+@author Achim Mueller <ace@gnubg.org>
 @macro gnubg
 @t{gnubg}
 @end macro

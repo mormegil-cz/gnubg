@@ -1,6 +1,3 @@
-@node Absolute ratings
-@chapter Absolute ratings
-
 @uref{mailto:kvandoel@@xs4all.nl,Kees van den Doel}
 
 

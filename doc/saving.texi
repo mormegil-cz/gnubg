@@ -1,0 +1,21 @@
+
+@menu
+* Saving a game::
+* Saving a match::
+* Saving a session::
+* Saving a position::
+@end menu
+
+@node Saving a game
+@section Saving a game
+
+@node Saving a match
+@section Saving a match
+
+@node Saving a session
+@section Saving a session
+
+@node Saving a position
+@section Saving a position
+
+

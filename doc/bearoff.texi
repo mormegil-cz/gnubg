@@ -1,7 +1,3 @@
-
-@node Bearoff databases
-@chapter Bearoff databases
-
 This section describes what kind of bearoff databases you can use with
 @gnubg{} as well as how you may obtain these.
 

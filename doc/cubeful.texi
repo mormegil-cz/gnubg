@@ -1,6 +1,4 @@
-@node Cubeful equities
-@chapter Cubeful equities
-
+	  
 This chapter is a brief description of how @gnubg{} calculates cubeful
 equities. The formulae build directly on the work by Rick Janowski 
 @uref{http://www.msoworld.com/mindzine/news/classic/bg/cubeformulae.html,Take-Points

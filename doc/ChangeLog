@@ -1,3 +1,13 @@
+Sun Nov 16 20:05:38 2003  Oystein Johansen  <oystein@gnubg.org>
+
+        * New files from Achim:
+	absrating.texi    faq.texi          install.texi      saving.texi
+	additional.texi   fdl.texi          intro.texi        scripting.texi
+	analyse.texi      gnubg.texi        movefilters.texi  settings.texi
+	bearoff.texi      id.texi           opening.texi      starting.texi
+	cubeful.texi      impatient.texi    playing.texi      training.texi
+	export.texi       import.texi       rules.texi        version.texi
+
 Thu Sep 25 22:45:38 2003  Oystein Johansen  <oystein@gnubg.org>
 
         * faq.texi: Moved the Mailing list guidelined to 

@@ -1,0 +1,14 @@
+
+@menu
+* The graphical interface::
+* Using a terminal::
+@end menu
+
+@node The graphical interface
+@section The graphical interface
+
+@node Using a terminal
+@section Using a terminal
+
+
+		  
