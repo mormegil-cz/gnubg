@@ -1,3 +1,10 @@
+Fri Sep 13 23:13:02 2002  Gary Wong  <gtw@gnu.org>
+
+	* Makefile.am: Compute the sound effects at 44kHz, and then convert
+	them to 22kHz, to minimise size while reducing aliasing.
+
+	* chequer.sco: New file.
+	
 Wed Sep 11 22:08:42 2002  Gary Wong  <gtw@research.att.com>
 
 	* dance.sco, double.sco, drop.sco, fanfare.sco, gameover.sco,
