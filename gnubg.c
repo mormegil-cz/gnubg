@@ -105,12 +105,12 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
     fConfirm = TRUE, fShowProgress;
 
-evalcontext ecTD = { 0, 8, 0.16 }, ecEval = { 1, 8, 0.16 },
-    ecRollout = { 0, 8, 0.16 };
+evalcontext ecTD = { 0, 8, 0.16, 0, TRUE }, ecEval = { 1, 8, 0.16, 0, TRUE },
+    ecRollout = { 0, 8, 0.16, 0, TRUE };
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16 } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16 } }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, TRUE } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, TRUE } }
 };
 
 static command acDatabase[] = {

@@ -77,7 +77,10 @@ typedef struct _evalcontext {
     int nPlies;
     int nSearchCandidates;
     float rSearchTolerance;
-  int nReduced;
+    int nReduced;
+    int fRelativeAccuracy; /* evaluate all positions according to the most
+			      general positionclass, to decrease relative
+			      error */
 } evalcontext;
 
 typedef struct _move {
@@ -102,24 +105,23 @@ typedef enum _positionclass {
     CLASS_OVER = 0, /* Game already finished */
     CLASS_BEAROFF2, /* Two-sided bearoff database */
     CLASS_BEAROFF1, /* One-sided bearoff database */
-    CLASS_RACE,     /* Race neural network */
-    CLASS_CONTACT,  /* Contact neural network */
-    CLASS_BPG       /* On Bar, Back game, or Prime */
+    CLASS_RACE, /* Race neural network */
+    CLASS_BPG, /* On Bar, Back game, or Prime */
+    CLASS_CONTACT /* Contact neural network */
 } positionclass;
 
+#define N_CLASSES (CLASS_CONTACT + 1)
 
+#define CLASS_PERFECT CLASS_BEAROFF2
+#define CLASS_ANY CLASS_OVER /* no class restrictions (for rel. accuracy) */
+#define CLASS_GLOBAL CLASS_CONTACT /* class containing all positions */
+				      
 typedef struct _redevaldata {
   float arOutput[ NUM_OUTPUTS ];
   float rScore;
   float rWeight;
   unsigned char auch[ 10 ];
 } RedEvalData;
-
-
-
-#define N_CLASSES (CLASS_BPG + 1)
-
-#define CLASS_PERFECT CLASS_BEAROFF2
 
 extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 			   char *szDatabase, char *szDir );

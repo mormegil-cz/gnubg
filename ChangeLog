@@ -1,3 +1,9 @@
+Thu Jun 29 19:03:57 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* eval.c: Added positionclass parameter to evaluation functions to
+	allow consistent evaluations across different moves.
+	* set.c (CommandSetEvalConsistency): New function.
+
 Mon Jun 26 12:21:17 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* show.c (CommandShowDelay): new function (patch supplied

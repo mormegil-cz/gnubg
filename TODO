@@ -10,7 +10,6 @@ duplication of effort and to make sure our changes merge easily.
 *** Classes for bearing off against contact, back games, containment
   positions, prime-vs-prime...
 *** Consider meta-pi scheme for using output from multiple nets.
-** Add partial searching.
 ** See http://www.oasya.com/CubefulAdvantages.html for example of
   cubeful evaluation.
 ** Improve quasi-random dice generation for rollouts. (gary)
@@ -67,7 +66,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow clicking on a point to make that point.
 ** Use the MBX (multi buffering) and SHM (shared memory) extensions in the
   board window, if available.
-** Add Gnome support.  Better to wait until Gnome is rock solid, I think.
+** Add GTK support.
 *** Make sure the board window behaves properly with ICCCM things.
 *** Allow copy/paste and drag & drop of the board ID in the board window.
 *** Add silly bells and whistles.  Things like colour selector for chequer

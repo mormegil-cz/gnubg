@@ -201,6 +201,7 @@ static evalcontext ecBasic = { 0, 0, 0, 0 };
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
     int nEvalContext;
+    positionclass pc;
     float ar[ NUM_OUTPUTS ];
 } evalcache;
 
@@ -224,7 +225,8 @@ static void ComputeTable( void ) {
 static int EvalCacheCompare( evalcache *p0, evalcache *p1 ) {
 
     return !EqualKeys( p0->auchKey, p1->auchKey ) ||
-	p0->nEvalContext != p1->nEvalContext;
+	p0->nEvalContext != p1->nEvalContext ||
+	p0->pc != p1->pc;
 }
 
 static long EvalCacheHash( evalcache *pec ) {
@@ -232,7 +234,7 @@ static long EvalCacheHash( evalcache *pec ) {
     long l = 0;
     int i;
     
-    l = pec->nEvalContext << 9;
+    l = ( pec->nEvalContext << 9 ) ^ ( pec->pc << 4 );
 
     for( i = 0; i < 10; i++ )
 	l = ( ( l << 8 ) % 8388593 ) ^ pec->auchKey[ i ];
@@ -1464,7 +1466,7 @@ extern void EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[] ) {
 }
 
 static classevalfunc acef[ N_CLASSES ] = {
-    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalContact, EvalBPG
+    EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalBPG, EvalContact
 };
 
 static int CompareRedEvalData( const void *p0, const void *p1 ) {
@@ -1478,18 +1480,18 @@ static int CompareRedEvalData( const void *p0, const void *p1 ) {
 
 
 static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
-				  evalcontext *pecx, int nPlies );
+				  evalcontext *pecx, int nPlies,
+				  positionclass pc );
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], evalcontext *pec,
 			      int nPlies );
 
 static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
-				 evalcontext *pec, int nPlies ) {
+				 evalcontext *pec, int nPlies,
+				 positionclass pc ) {
     int i, n0, n1;
-    positionclass pc;
 
-    if( ( pc = ClassifyPosition( anBoard ) ) > CLASS_PERFECT &&
-	nPlies > 0 ) {
+    if( pc > CLASS_PERFECT && nPlies > 0 ) {
 	/* internal node; recurse */
 
 	float ar[ NUM_OUTPUTS ];
@@ -1530,7 +1532,8 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	      
 	      SwapSides( anBoardNew );
 	      
-	      if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1 ) )
+	      if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1,
+					 pc ) )
 		return -1;
 	      
 	      if( n0 == n1 )
@@ -1599,7 +1602,7 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 	      /* Evaluate at 0-ply */
 	      
 	      if( EvaluatePositionCache( anBoardNew, ad0ply[ k ].arOutput, 
-					 pec, 0 ) )
+					 pec, 0, pc ) )
 		return -1;
 
 	      ad0ply[ k ].rScore = Utility ( ad0ply[ k ].arOutput );
@@ -1662,7 +1665,7 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 	    PositionFromKey ( anBoardNew, ad0ply[ *pnRed ].auch );
 
-	    if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1 ) )
+	    if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1, pc ) )
 	      return -1;
 
 	    for ( i = 0; i < NUM_OUTPUTS; i++ ) {
@@ -1708,12 +1711,14 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 }
 
 static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
-				  evalcontext *pecx, int nPlies ) {
+				  evalcontext *pecx, int nPlies,
+				  positionclass pc ) {
     evalcache ec, *pec;
     long l;
 	
     PositionKey( anBoard, ec.auchKey );
     ec.nEvalContext = nPlies; /* FIXME consider pecx as well */
+    ec.pc = pc;
 
     l = EvalCacheHash( &ec );
     
@@ -1723,7 +1728,7 @@ static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
       return 0;
     }
     
-    if( EvaluatePositionFull( anBoard, arOutput, pecx, nPlies ) )
+    if( EvaluatePositionFull( anBoard, arOutput, pecx, nPlies, pc ) )
 	return -1;
 
 
@@ -1736,8 +1741,10 @@ static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 extern int EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
 			     evalcontext *pec ) {
     
+    positionclass pc = ClassifyPosition( anBoard );
+    
     return EvaluatePositionCache( anBoard, arOutput, pec ? pec : &ecBasic,
-				  pec ? pec->nPlies : 0 );
+				  pec ? pec->nPlies : 0, pc );
 }
 
 extern void InvertEvaluation( float ar[ NUM_OUTPUTS ] ) {		
@@ -2013,19 +2020,35 @@ static int CompareMoves( const move *pm0, const move *pm1 ) {
     return pm1->rScore > pm0->rScore ? 1 : -1;
 }
 
-static int ScoreMoves( movelist *pml, evalcontext *pec, int nPlies ) {
+static positionclass ScoreMoves( movelist *pml, evalcontext *pec, int nPlies,
+				 positionclass pcGeneral ) {
 
     int i, anBoardTemp[ 2 ][ 25 ];
     float arEval[ NUM_OUTPUTS ];
     
     pml->rBestScore = -99999.9;
 
+    if( pec->fRelativeAccuracy && pcGeneral == CLASS_ANY ) {
+	positionclass pc;
+
+	/* Search for the most general class containing all positions */
+	for( i = 0; i < pml->cMoves; i++ ) {
+	    PositionFromKey( anBoardTemp, pml->amMoves[ i ].auch );
+
+	    if( ( pc = ClassifyPosition( anBoardTemp ) ) > pcGeneral )
+		if( ( pcGeneral = pc ) == CLASS_GLOBAL )
+		    break;
+	}
+    }
+    
     for( i = 0; i < pml->cMoves; i++ ) {
 	PositionFromKey( anBoardTemp, pml->amMoves[ i ].auch );
 
 	SwapSides( anBoardTemp );
-	
-	if( EvaluatePositionCache( anBoardTemp, arEval, pec, nPlies ) )
+
+	if( EvaluatePositionCache( anBoardTemp, arEval, pec, nPlies,
+				   pec->fRelativeAccuracy ? pcGeneral :
+	    ClassifyPosition( anBoardTemp ) ) )
 	    return -1;
 	
 	InvertEvaluation( arEval );
@@ -2040,7 +2063,7 @@ static int ScoreMoves( movelist *pml, evalcontext *pec, int nPlies ) {
 	}
     }
 
-    return 0;
+    return pcGeneral;
 }
 
 extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
@@ -2072,6 +2095,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 			      int anBoard[ 2 ][ 25 ], evalcontext *pec,
 			      int nPlies ) {
   int i, j, iPly;
+  positionclass pc;
   movelist ml;
 #if __GNUC__
   move amCandidates[ pec->nSearchCandidates ];
@@ -2097,7 +2121,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
     ml.iMoveBest = 0;
   else {
     /* choice of moves */
-    if( ScoreMoves( &ml, pec, 0 ) )
+    if( ( pc = ScoreMoves( &ml, pec, 0, CLASS_ANY ) ) < 0 )
       return -1;
 
     for( iPly = 0; iPly < nPlies; iPly++ ) {
@@ -2140,7 +2164,7 @@ static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
 	ml.amMoves = amCandidates;
       }
 
-      if( ScoreMoves( &ml, pec, iPly + 1 ) )
+      if( ScoreMoves( &ml, pec, iPly + 1, pc ) < 0 )
 	return -1;
     }
   }
@@ -2168,7 +2192,8 @@ extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
 			  int c, float d, evalcontext *pec ) {
     int i, j;
     static move amCandidates[ 32 ];
-
+    positionclass pc;
+    
     /* amCandidates is only 32 elements long, so we silently truncate any
        request for more moves to 32 */
     if( c > 32 )
@@ -2180,7 +2205,7 @@ extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
        the moves we want to keep in amCandidates. */
     GenerateMoves( pml, anBoard, nDice0, nDice1, FALSE );
 
-    if( ScoreMoves( pml, pec, 0 ) )
+    if( ( pc = ScoreMoves( pml, pec, 0, CLASS_ANY ) ) < 0 )
 	return -1;
 
     /* Eliminate moves whose scores are below the threshold from the best */
@@ -2211,7 +2236,7 @@ extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ],
 	amCandidates[ i ].pEval = ar[ i ];
 
     /* Calculate the full evaluations at the search depth requested */
-    if( ScoreMoves( pml, pec, pec->nPlies ) )
+    if( ScoreMoves( pml, pec, pec->nPlies, pc ) < 0 )
 	return -1;
 
     /* Using a deeper search might change the order of the evaluations;
@@ -2429,7 +2454,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     for( i = 0; i <= nPlies; i++ ) {
 	szOutput = strchr( szOutput, 0 );
 	
-	if( EvaluatePositionCache( anBoard, arOutput, pec, i ) < 0 )
+	if( EvaluatePositionCache( anBoard, arOutput, pec, i, pc ) < 0 )
 	    return -1;
 
 	if( !i )

@@ -46,10 +46,13 @@ static void ShowEvaluation( evalcontext *pec ) {
     printf( "    %d-ply evaluation.\n"
 	    "    %d move search candidate%s.\n"
 	    "    %0.3g cubeless search tolerance.\n"
-	    "    %.0f%% speed.\n\n",
+	    "    %.0f%% speed.\n"
+	    "    %s.\n\n",
 	    pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
 	    "" : "s", pec->rSearchTolerance,
-	    (pec->nReduced) ? 100. * pec->nReduced / 21.0 : 100. );
+	    (pec->nReduced) ? 100. * pec->nReduced / 21.0 : 100.,
+	    pec->fRelativeAccuracy ? "Consistent evaluations",
+	    "Variable evaluations" );
 }
 
 static void ShowPaged( char **ppch ) {
