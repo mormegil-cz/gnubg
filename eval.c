@@ -196,7 +196,7 @@ void ( *fnAction )( void ) = NULL;
 
 static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
 
-static evalcontext ecBasic = { 0, 0, 0, 0 };
+static evalcontext ecBasic = { 0, 0, 0, 0, TRUE };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
