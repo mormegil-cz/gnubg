@@ -176,7 +176,6 @@ duplication of effort and to make sure our changes merge easily.
   button 1 increases value, button 2+ decreases value, ctrl+button cycles
   through owners/centred).
 ** Add some kind of GTK interface for viewing rollout statistics.
-** Make GTK widget for "show marketwindow"
 ** Make the 'Set cube' dialog availble by clicking the cube in edit mode.   
 
 ** Dialogs:
