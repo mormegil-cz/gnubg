@@ -63,7 +63,7 @@ typedef struct _optionswidget {
   GtkWidget *pwMETFrame, *pwLoadMET, *pwSeed;
 
   GtkWidget *pwRecordGames, *pwDisplay;
-  GtkAdjustment *padjCache, *padjDelay;
+  GtkAdjustment *padjCache, *padjDelay, *padjSeed;
   GtkAdjustment *padjLearning, *padjAnnealing, *padjThreshold;
 
   GtkWidget *pwSound, *pwSoundArtsC, *pwSoundCommand, *pwSoundESD,
@@ -87,25 +87,14 @@ typedef struct _optionswidget {
 
   GtkAdjustment *padjDigits;
   GtkWidget *pwDigits;
-
+  int fChanged;
 } optionswidget;   
 
 
 static void
-SetSeed( void ) {
-  
-  int nRandom, n;
+SeedChanged( GtkWidget *pw, int *pf ) {
 
-  InitRNG( &nRandom, FALSE, rngCurrent );
-  n = GTKReadNumber( _("GNU Backgammon - Seed"), _("Seed:"), abs( nRandom ), 0,
-                     INT_MAX, 1 );
-
-  if( n >= 0 ) {
-    char sz[ 32 ];
-    
-    sprintf( sz, "set seed %d", n );
-    UserCommand( sz );
-  }
+	*pf = 1;  
 }
 
 static void
@@ -231,7 +220,9 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	*pwAnimBox, *pwFrame, *pwBox, *pwSpeed, *pwScale, *pwhoriz,
 	*pwLabelFile;
     int cCache;
-    int i;
+    int i, nRandom;
+
+    InitRNG( &nRandom, FALSE, rngCurrent );
     
     pwn = gtk_notebook_new();
     gtk_container_set_border_width( GTK_CONTAINER( pwn ), 8 );
@@ -1044,9 +1035,20 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_widget_show_all( pwm );
     gtk_option_menu_set_menu (GTK_OPTION_MENU (pow->pwPRNGMenu), pwm );
 
-    pow->pwSeed = gtk_button_new_with_label (_("Seed..."));
-    gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwSeed, FALSE, FALSE, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (pow->pwSeed), 3);
+    pow->pwSeed = gtk_hbox_new(FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (pwhbox), pow->pwSeed, TRUE,TRUE, 0);
+    gtk_box_pack_start (GTK_BOX(pow->pwSeed), gtk_label_new(_("Seed: ")),FALSE,FALSE, 1);
+
+    pow->padjSeed = GTK_ADJUSTMENT (gtk_adjustment_new (nRandom, 0, 16000000,
+		    1, 1, 0));
+    
+    /* a bug in gtk? The adjustment does not work if I choose 
+     * maxvalues above 16e6, INT_MAX does not work!  (GTK-1.3 Win32) */
+    
+    pw = gtk_spin_button_new(GTK_ADJUSTMENT(pow->padjSeed), 1, 0);
+    gtk_box_pack_start (GTK_BOX (pow->pwSeed), pw, TRUE, TRUE, 0);
+    gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (pw), TRUE);
+		    
     gtk_tooltips_set_tip( ptt, pow->pwSeed,
 			  _("Specify the \"seed\" (generator state), which "
 			    "can be useful in some circumstances to provide "
@@ -1054,12 +1056,13 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 
     gtk_widget_set_sensitive( pow->pwPRNGMenu, (rngCurrent != RNG_MANUAL));
     gtk_widget_set_sensitive( pow->pwSeed,  (rngCurrent != RNG_MANUAL));
-
-    gtk_signal_connect ( GTK_OBJECT ( pow->pwSeed ), "clicked",
-			 GTK_SIGNAL_FUNC ( SetSeed ), NULL );
+    pow->fChanged = 0;
+    gtk_signal_connect ( GTK_OBJECT ( pw ), "changed",
+			 GTK_SIGNAL_FUNC ( SeedChanged ), &pow->fChanged );   
     
 
     /* dice manipulation */
+    
 
     /* Enable dice manipulation-widget */
 
@@ -1622,6 +1625,13 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   if( pow->padjThreshold->value != rThreshold ) 
   { 
      lisprintf(sz, "set training threshold %0.3f", pow->padjThreshold->value); 
+     UserCommand(sz); 
+  }
+  
+  if( pow->fChanged == 1 ) 
+  { 
+     n = pow->padjSeed->value;
+     sprintf(sz, "set seed %d", n); 
      UserCommand(sz); 
   }
   
