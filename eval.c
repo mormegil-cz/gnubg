@@ -83,7 +83,7 @@ enum {
 
      Break Contact : (sum over x of C(x)) / 152
 
-     152 is dgree of contact of start position.
+     152 is degree of contact of start position.
   */
   I_BREAK_CONTACT = HALF_RACE_INPUTS,
 
@@ -2258,47 +2258,77 @@ static void DumpRace( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
 static void DumpContact( int anBoard[ 2 ][ 25 ], char *szOutput ) {
 
-    float arInput[ HALF_INPUTS ];
+    float arInput[ NUM_INPUTS ], arOutput[ NUM_OUTPUTS ],
+	arDerivative[ NUM_INPUTS * NUM_OUTPUTS ],
+	ardEdI[ NUM_INPUTS ], *p;
+    int i, j;
     
-    CalculateHalfInputs( anBoard[ 1 ], anBoard[ 0 ], arInput );
+    CalculateInputs( anBoard, arInput );
+    
+    NeuralNetDifferentiate( &nnContact, arInput, arOutput, arDerivative );
+
+    for( i = 0; i < NUM_INPUTS; i++ ) {
+	for( j = 0, p = arDerivative + i; j < NUM_OUTPUTS; p += NUM_INPUTS )
+	    arOutput[ j++ ] = *p;
+
+	ardEdI[ i ] = Utility( arOutput ) + 1.0f; /* FIXME this is a bit
+						     grotty -- need to
+						     eliminate the constant
+						     1 added by Utility */
+    }
     
     sprintf( szOutput,
-	     "OFF1           \t%5.3f\n"
-	     "OFF2           \t%5.3f\n"
-	     "OFF3           \t%5.3f\n"
-	     "BREAK_CONTACT  \t%5.3f\n"
-	     "BACK_CHEQUER   \t%5.3f\n"
-	     "BACK_ANCHOR    \t%5.3f\n"
-	     "FORWARD_ANCHOR \t%5.3f\n"
-	     "PIPLOSS        \t%5.3f (%5.3f avg)\n"
-	     "P1             \t%5.3f (%5.3f/36)\n"
-	     "P2             \t%5.3f (%5.3f/36)\n"
-	     "BACKESCAPES    \t%5.3f (%5.3f/36)\n"
-	     "ACONTAIN       \t%5.3f (%5.3f/36)\n"
-	     "CONTAIN        \t%5.3f (%5.3f/36)\n"
-	     "BUILDERS       \t%5.3f (%5.3f/6)\n"
-	     "SLOTTED        \t%5.3f (%5.3f/6)\n"
-	     "MOBILITY       \t%5.3f\n"
-	     "MOMENT2        \t%5.3f\n"
-	     "ENTER          \t%5.3f (%5.3f/12)\n"
-	     "TOP_EVEN       \t%5.3f\n"
-	     "TOP2_EVEN      \t%5.3f\n",
-	     arInput[ I_OFF1 ], arInput[ I_OFF2 ], arInput[ I_OFF3 ],
-	     arInput[ I_BREAK_CONTACT ], arInput[ I_BACK_CHEQUER ],
-	     arInput[ I_BACK_ANCHOR ], arInput[ I_FORWARD_ANCHOR ],
-	     arInput[ I_PIPLOSS ],
-	     arInput[ I_P1 ] ? arInput[ I_PIPLOSS ] / arInput[ I_P1 ] * 12.0 :
-		0.0,
-	     arInput[ I_P1 ], arInput[ I_P1 ] * 36.0,
-	     arInput[ I_P2 ], arInput[ I_P2 ] * 36.0,
-	     arInput[ I_BACKESCAPES ], arInput[ I_BACKESCAPES ] * 36.0,
-	     arInput[ I_ACONTAIN ], arInput[ I_ACONTAIN ] * 36.0,
-	     arInput[ I_CONTAIN ], arInput[ I_CONTAIN ] * 36.0,
-	     arInput[ I_BUILDERS ], arInput[ I_BUILDERS ] * 6.0,
-	     arInput[ I_SLOTTED ], arInput[ I_SLOTTED ] * 6.0,
-	     arInput[ I_MOBILITY ], arInput[ I_MOMENT2 ],
-	     arInput[ I_ENTER ], arInput[ I_ENTER ] * 12.0,
-	     arInput[ I_TOP_EVEN ], arInput[ I_TOP2_EVEN ] );
+	     "Input          \tValue             \t dE/dI\n"
+	     "OFF1           \t%5.3f             \t%6.3f\n"
+	     "OFF2           \t%5.3f             \t%6.3f\n"
+	     "OFF3           \t%5.3f             \t%6.3f\n"
+	     "BREAK_CONTACT  \t%5.3f             \t%6.3f\n"
+	     "BACK_CHEQUER   \t%5.3f             \t%6.3f\n"
+	     "BACK_ANCHOR    \t%5.3f             \t%6.3f\n"
+	     "FORWARD_ANCHOR \t%5.3f             \t%6.3f\n"
+	     "PIPLOSS        \t%5.3f (%5.3f avg)\t%6.3f\n"
+	     "P1             \t%5.3f (%5.3f/36) \t%6.3f\n"
+	     "P2             \t%5.3f (%5.3f/36) \t%6.3f\n"
+	     "BACKESCAPES    \t%5.3f (%5.3f/36) \t%6.3f\n"
+	     "ACONTAIN       \t%5.3f (%5.3f/36) \t%6.3f\n"
+	     "CONTAIN        \t%5.3f (%5.3f/36) \t%6.3f\n"
+	     "BUILDERS       \t%5.3f (%5.3f/6)  \t%6.3f\n"
+	     "SLOTTED        \t%5.3f (%5.3f/6)  \t%6.3f\n"
+	     "MOBILITY       \t%5.3f             \t%6.3f\n"
+	     "MOMENT2        \t%5.3f             \t%6.3f\n"
+	     "ENTER          \t%5.3f (%5.3f/12) \t%6.3f\n"
+	     "TOP_EVEN       \t%5.3f             \t%6.3f\n"
+	     "TOP2_EVEN      \t%5.3f             \t%6.3f\n",
+	     arInput[ I_OFF1 << 1 ], ardEdI[ I_OFF1 << 1 ],
+	     arInput[ I_OFF2 << 1 ], ardEdI[ I_OFF2 << 1 ],
+	     arInput[ I_OFF3 << 1 ], ardEdI[ I_OFF3 << 1 ],
+	     arInput[ I_BREAK_CONTACT << 1 ], ardEdI[ I_BREAK_CONTACT << 1 ],
+	     arInput[ I_BACK_CHEQUER << 1 ], ardEdI[ I_BACK_CHEQUER << 1 ],
+	     arInput[ I_BACK_ANCHOR << 1 ], ardEdI[ I_BACK_ANCHOR << 1 ],
+	     arInput[ I_FORWARD_ANCHOR << 1 ], ardEdI[ I_FORWARD_ANCHOR << 1 ],
+	     arInput[ I_PIPLOSS << 1 ], 
+	     arInput[ I_P1 << 1 ] ? arInput[ I_PIPLOSS << 1 ] /
+	         arInput[ I_P1 << 1 ] * 12.0 : 0.0, ardEdI[ I_PIPLOSS << 1 ],
+	     arInput[ I_P1 << 1 ], arInput[ I_P1 << 1 ] * 36.0,
+	         ardEdI[ I_P1 << 1 ],
+	     arInput[ I_P2 << 1 ], arInput[ I_P2 << 1 ] * 36.0,
+	         ardEdI[ I_P2 << 1 ],
+	     arInput[ I_BACKESCAPES << 1 ], arInput[ I_BACKESCAPES << 1 ] *
+	         36.0, ardEdI[ I_BACKESCAPES << 1 ],
+	     arInput[ I_ACONTAIN << 1 ], arInput[ I_ACONTAIN << 1 ] * 36.0,
+	         ardEdI[ I_ACONTAIN << 1 ],
+	     arInput[ I_CONTAIN << 1 ], arInput[ I_CONTAIN << 1 ] * 36.0,
+	         ardEdI[ I_CONTAIN << 1 ],
+	     arInput[ I_BUILDERS << 1 ], arInput[ I_BUILDERS << 1 ] * 6.0,
+	         ardEdI[ I_BUILDERS << 1 ],
+	     arInput[ I_SLOTTED << 1 ], arInput[ I_SLOTTED << 1 ] * 6.0,
+	         ardEdI[ I_SLOTTED << 1 ],
+	     arInput[ I_MOBILITY << 1 ], ardEdI[ I_MOBILITY << 1 ],
+	     arInput[ I_MOMENT2 << 1 ], ardEdI[ I_MOMENT2 << 1 ],
+	     arInput[ I_ENTER << 1 ], arInput[ I_ENTER << 1 ] * 12.0,
+	         ardEdI[ I_ENTER << 1 ],
+	     arInput[ I_TOP_EVEN << 1 ], ardEdI[ I_TOP_EVEN << 1 ],
+	     arInput[ I_TOP2_EVEN << 1 ], ardEdI[ I_TOP2_EVEN << 1 ] );
 }
 
 static classdumpfunc acdf[ N_CLASSES ] = {

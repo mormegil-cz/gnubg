@@ -22,6 +22,8 @@ extern int NeuralNetDestroy( neuralnet *pnn );
 
 extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
 			      float arOutput[] );
+extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
+				   float arOutput[], float arDerivative[] );
 extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 			   float arDesired[], float rAlpha );
 extern int NeuralNetResize( neuralnet *pnn, int cInput, int cHidden,

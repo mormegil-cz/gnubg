@@ -145,6 +145,112 @@ extern int NeuralNetEvaluate( neuralnet *pnn, float arInput[],
     return Evaluate( pnn, arInput, ar, arOutput );
 }
 
+/*
+ * Calculate the partial derivate of the output neurons with respect to
+ * each of the inputs.
+ *
+ * Note: this is a numerical approximation to the derivative.  There is
+ * an analytical solution below, with an explanation of why it is not used.
+ */
+extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
+				   float arOutput[], float arDerivative[] ) {
+#if __GNUC__
+    float ar[ pnn->cHidden ], arIDelta[ pnn->cInput ],
+	arODelta[ pnn->cOutput ];
+#elif HAVE_ALLOCA
+    float *ar = alloca( pnn->cHidden * sizeof( float ) ),
+	*arIDelta = alloca( pnn->cInput * sizeof( float ) ),
+	*arODelta = alloca( pnn->cOutput * sizeof( float ) );
+#else
+    float ar[ 1024 ], arIDelta[ 1024 ], arODelta[ 1024 ];
+#endif
+    int i, j;
+
+    Evaluate( pnn, arInput, ar, arOutput );
+
+    memcpy( arIDelta, arInput, sizeof( arIDelta ) );
+    
+    for( i = 0; i < pnn->cInput; i++ ) {
+	arIDelta[ i ] = arInput[ i ] + 0.001f;
+	if( i )
+	    arIDelta[ i - 1 ] = arInput[ i - 1 ];
+	
+	Evaluate( pnn, arIDelta, ar, arODelta );
+
+	for( j = 0; j < pnn->cOutput; j++ )
+	    arDerivative[ j * pnn->cInput + i ] =
+		( arODelta[ j ] - arOutput[ j ] ) * 1000.0f;
+    }
+
+    return 0;
+}
+
+/*
+ * Here is an analytical solution to the partial derivative.  Normally this
+ * algorithm would be preferable (for its efficiency and numerical stability),
+ * but unfortunately it relies on the relation:
+ *
+ *  d sigmoid(x)
+ *  ------------ = sigmoid( x ) . sigmoid( -x )
+ *       dx
+ *                                                              x  -1
+ * This relation is true for the function sigmoid( x ) = ( 1 + e  ), but
+ * the inaccuracy of the polynomial approximation to the exponential
+ * function used here leads to significant error near x=0.  There
+ * are numerous possible solutions, but in the meantime the numerical
+ * algorithm above will do.
+ */
+#if 0
+extern int NeuralNetDifferentiate( neuralnet *pnn, float arInput[],
+				   float arOutput[], float arDerivative[] ) {
+#if __GNUC__
+    float ar[ pnn->cHidden ], ardOdSigmaI[ pnn->cHidden * pnn->cOutput ];
+#elif HAVE_ALLOCA
+    float *ar = alloca( pnn->cHidden * sizeof( float ) ),
+	*ardOdSigmaI = alloca( pnn->cHidden * pnn->cOutput * sizeof( float ) );
+#else
+    float ar[ 1024 ], *ardOdSigmaI = malloc( pnn->cHidden * pnn->cOutput *
+					sizeof( float ) );
+#endif
+    int i, j, k;
+    float rdOdSigmaH, *prWeight, *prdOdSigmaI, *prdOdI;
+    
+    Evaluate( pnn, arInput, ar, arOutput );
+
+    for( i = 0; i < pnn->cHidden; i++ )
+	ar[ i ] = ar[ i ] * ( 1.0f - ar[ i ] ) * pnn->rBetaHidden;
+
+    prWeight = pnn->arOutputWeight;
+    prdOdSigmaI = ardOdSigmaI;
+    
+    for( i = 0; i < pnn->cOutput; i++ ) {
+	rdOdSigmaH = arOutput[ i ] * ( 1.0f - arOutput[ i ] ) *
+	    pnn->rBetaOutput;
+	for( j = 0; j < pnn->cHidden; j++ )
+	    *prdOdSigmaI++ = rdOdSigmaH * ar[ j ] * *prWeight++;
+    }
+
+    prdOdI = arDerivative;
+    
+    for( i = 0; i < pnn->cOutput; i++ ) {
+	prWeight = pnn->arHiddenWeight;
+	for( j = 0; j < pnn->cInput; j++ ) {
+	    *prdOdI = 0.0f;
+	    prdOdSigmaI = ardOdSigmaI + i * pnn->cHidden;
+	    for( k = 0; k < pnn->cHidden; k++ )
+		*prdOdI += *prdOdSigmaI++ * *prWeight++;
+	    prdOdI++;
+	}
+    }
+    
+#if !__GNUC__ && !HAVE_ALLOCA
+    free( ardOdSigmaI );
+#endif
+
+    return 0;
+}
+#endif
+
 extern int NeuralNetTrain( neuralnet *pnn, float arInput[], float arOutput[],
 			   float arDesired[], float rAlpha ) {
     int i, j;    

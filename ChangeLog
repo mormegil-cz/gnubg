@@ -1,3 +1,8 @@
+Sat Mar 11 20:10:36 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* eval.c (DumpContact): Show the partial derivates of the
+	equity with respect to the inputs shown.
+
 Tue Mar  7 10:06:32 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* xboard.c (BoardPointer): Use PointerMotionHintMask to make sure

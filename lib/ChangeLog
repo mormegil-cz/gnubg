@@ -1,3 +1,7 @@
+Sat Mar 11 20:09:10 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* neuralnet.c (NeuralNetDifferentiate): New function.
+	
 Fri Jan 14 09:34:52 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* fifo.c: replaced bcopy with memcpy.
