@@ -74,8 +74,8 @@ AnalyzeGame ( list *plGame, int iGame ) {
     int anDice[ 2 ], k, l, j;
     int fFirstMove = 1;
     unsigned char auch[ 10 ];
-    evalcontext ecDouble = { 1, 0, 0, 0, FALSE };  
-    evalcontext ecMove   = { 1, 8, 0.16, 0, FALSE };  
+    evalcontext ecDouble = { 1, 0, 0, 0, FALSE, TRUE };  
+    evalcontext ecMove   = { 1, 8, 0.16, 0, FALSE, FALSE };  
     cubeinfo ci;
     float arDouble[ 4 ];
     int fWinner, nPoints;
