@@ -163,7 +163,7 @@ extern void
 GTKNew ( void );
 
 extern void
-UpdateGeometry ( const gnubgwindow gw );
+setWindowGeometry(windowobject* pwo);
 
 extern void
 RefreshGeometries ( void );

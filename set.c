@@ -508,42 +508,42 @@ extern void CommandSetAnalysisThresholdVeryUnlucky( char *sz ) {
 
 extern void CommandSetAnnotation( char *sz ) {
 
-    if( SetToggle( "annotation", &fAnnotation, sz,
+    if( SetToggle( "annotation", &woPanel[WINDOW_ANNOTATION].showing, sz,
 		   _("Move analysis and commentary will be displayed."),
 		   _("Move analysis and commentary will not be displayed.") )
 	>= 0 )
 	/* Force an update, even if the setting has not changed. */
-	UpdateSetting( &fAnnotation );
+	UpdateSetting(&woPanel[WINDOW_ANNOTATION].showing);
 }
 
 extern void CommandSetMessage( char *sz ) {
 
-    if( SetToggle( "message", &fMessage, sz,
+    if( SetToggle( "message", &woPanel[WINDOW_MESSAGE].showing, sz,
 		   _("Show window with messages"),
 		   _("Do not show window with message.") )
 	>= 0 )
 	/* Force an update, even if the setting has not changed. */
-	UpdateSetting( &fMessage );
+	UpdateSetting(&woPanel[WINDOW_MESSAGE].showing);
 }
 
 extern void CommandSetGameList( char *sz ) {
 
-    if( SetToggle( "gamelist", &fGameList, sz,
+    if( SetToggle( "gamelist", &woPanel[WINDOW_GAME].showing, sz,
 		   _("Show game window with moves"),
 		   _("Do not show game window with moves.") )
 	>= 0 )
 	/* Force an update, even if the setting has not changed. */
-	UpdateSetting( &fMessage );
+	UpdateSetting(&woPanel[WINDOW_GAME].showing);
 }
 
 extern void CommandSetAnalysisWindows( char *sz ) {
 
-    if( SetToggle( "analysis window", &fAnalysis, sz,
+    if( SetToggle( "analysis window", &woPanel[WINDOW_ANALYSIS].showing, sz,
 		   _("Show window with analysis"),
 		   _("Do not show window with analysis.") )
 	>= 0 )
 	/* Force an update, even if the setting has not changed. */
-	UpdateSetting( &fMessage );
+	UpdateSetting(&woPanel[WINDOW_ANALYSIS].showing);
 }
 
 extern void CommandSetAutoBearoff( char *sz ) {
@@ -975,6 +975,12 @@ extern void CommandSetDice( char *sz ) {
     if( fX )
 	ShowBoard();
 #endif
+}
+
+extern void CommandSetDockPanels( char *sz ) {
+
+    SetToggle( "dockdisplay", &fDockPanels, sz, _("Windows will be docked."),
+		_("Windows will be detached.") );
 }
 
 extern void CommandSetDisplay( char *sz ) {
@@ -2504,7 +2510,9 @@ extern void CommandSetToolbar( char *sz )
 		outputl(_("You must specify either 0, 1 or 2"));
 		return;
 	}
+#if USE_GUI
 	SetToolbarStyle(n);
+#endif
 }
 
 extern void CommandSetTurn( char *sz ) {
@@ -3812,67 +3820,52 @@ extern void CommandSetTutorSkillVeryBad( char * sz) {
 }
 
 
-static gnubgwindow gwSet;
+static windowobject* pwoSet;
 
 extern void
-CommandSetGeometryAnnotation ( char *sz ) {
+CommandSetGeometryAnalysis ( char *sz )
+{
+	pwoSet = &woPanel[WINDOW_ANALYSIS];
+	szSet = "analysis";
 
-  gwSet = WINDOW_ANNOTATION;
-  szSet = "annotation";
-  szSetCommand = "annotation";
-
-  HandleCommand ( sz, acSetGeometryValues );
-
+	HandleCommand ( sz, acSetGeometryValues );
 }
-
 
 extern void
-CommandSetGeometryHint ( char *sz ) {
+CommandSetGeometryHint ( char *sz )
+{
+	pwoSet = &woPanel[WINDOW_HINT];
+	szSet = "hint";
 
-  gwSet = WINDOW_HINT;
-  szSet = "hint";
-  szSetCommand = "hint";
-
-  HandleCommand ( sz, acSetGeometryValues );
-
+	HandleCommand ( sz, acSetGeometryValues );
 }
-
 
 extern void
-CommandSetGeometryGame ( char *sz ) {
+CommandSetGeometryGame ( char *sz )
+{
+	pwoSet = &woPanel[WINDOW_GAME];
+	szSet = "game-list";
 
-  gwSet = WINDOW_GAME;
-  szSet = "game-list";
-  szSetCommand = "game";
-
-  HandleCommand ( sz, acSetGeometryValues );
-
+	HandleCommand ( sz, acSetGeometryValues );
 }
-
 
 extern void
-CommandSetGeometryMain ( char *sz ) {
+CommandSetGeometryMain ( char *sz )
+{
+	pwoSet = &woPanel[WINDOW_MAIN];
+	szSet = "main";
 
-  gwSet = WINDOW_MAIN;
-  szSet = "main";
-  szSetCommand = "main";
-
-  HandleCommand ( sz, acSetGeometryValues );
-
+	HandleCommand ( sz, acSetGeometryValues );
 }
-
 
 extern void
-CommandSetGeometryMessage ( char *sz ) {
+CommandSetGeometryMessage ( char *sz )
+{
+	pwoSet = &woPanel[WINDOW_MESSAGE];
+	szSet = "message";
 
-  gwSet = WINDOW_MESSAGE;
-  szSet = "message";
-  szSetCommand = "message";
-
-  HandleCommand ( sz, acSetGeometryValues );
-
+	HandleCommand ( sz, acSetGeometryValues );
 }
-
 
 extern void
 CommandSetGeometryWidth ( char *sz ) {
@@ -3881,16 +3874,16 @@ CommandSetGeometryWidth ( char *sz ) {
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
     outputf ( "Illegal value. "
-              "See 'help set geometry %s width'.\n", szSetCommand );
+              "See 'help set geometry %s width'.\n", pwoSet->winName );
   else {
 
-    awg[ gwSet ].nWidth = n;
+    pwoSet->wg.nWidth = n;
     outputf ( "Width of %s window set to %d.\n", szSet, n );
 
 #if USE_GTK
     if ( fX )
-      UpdateGeometry ( gwSet );
-#endif /* USE_GTK */
+		setWindowGeometry(pwoSet);
+#endif
 
   }
 
@@ -3903,16 +3896,16 @@ CommandSetGeometryHeight ( char *sz ) {
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
     outputf ( "Illegal value. "
-              "See 'help set geometry %s height'.\n", szSetCommand );
+              "See 'help set geometry %s height'.\n", pwoSet->winName );
   else {
 
-    awg[ gwSet ].nHeight = n;
+    pwoSet->wg.nHeight = n;
     outputf ( "Height of %s window set to %d.\n", szSet, n );
 
 #if USE_GTK
     if ( fX )
-      UpdateGeometry ( gwSet );
-#endif /* USE_GTK */
+		setWindowGeometry(pwoSet);
+#endif
 
   }
 
@@ -3925,16 +3918,16 @@ CommandSetGeometryPosX ( char *sz ) {
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
     outputf ( "Illegal value. "
-              "See 'help set geometry %s xpos'.\n", szSetCommand );
+              "See 'help set geometry %s xpos'.\n", pwoSet->winName );
   else {
 
-    awg[ gwSet ].nPosX = n;
+    pwoSet->wg.nPosX = n;
     outputf ( "X-position of %s window set to %d.\n", szSet, n );
 
 #if USE_GTK
     if ( fX )
-      UpdateGeometry ( gwSet );
-#endif /* USE_GTK */
+		setWindowGeometry(pwoSet);
+#endif
 
   }
 
@@ -3947,16 +3940,16 @@ CommandSetGeometryPosY ( char *sz ) {
 
   if ( ( n = ParseNumber( &sz ) ) == INT_MIN )
     outputf ( "Illegal value. "
-              "See 'help set geometry %s ypos'.\n", szSetCommand );
+              "See 'help set geometry %s ypos'.\n", pwoSet->winName );
   else {
 
-    awg[ gwSet ].nPosY = n;
+    pwoSet->wg.nPosY = n;
     outputf ( "Y-position of %s window set to %d.\n", szSet, n );
 
 #if USE_GTK
     if ( fX )
-      UpdateGeometry ( gwSet );
-#endif /* USE_GTK */
+		setWindowGeometry(pwoSet);
+#endif
 
   }
 

@@ -31,6 +31,7 @@
 #include <unistd.h>
 #endif
 #include <assert.h>
+#include <ctype.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -1922,38 +1923,28 @@ outputl(_("Tutor mode evaluates moves using the same settings as Analysis.") );
 
 }
 
-extern void
-CommandShowGeometry ( char *sz ) {
+static void GetGeometryString(char* buf, windowobject* pwo)
+{
+	char dispName[50];
+	sprintf(dispName, "%c%s %s", toupper(pwo->winName[0]), &pwo->winName[1], _("window"));
 
-  outputf ( _("Default geometries:\n\n"
-              "Main window       : size %dx%d, position (%d,%d)\n"
-              "Annotation window : size %dx%d, position (%d,%d)\n"
-              "Game list window  : size %dx%d, position (%d,%d)\n"
-              "Hint window       : size %dx%d, position (%d,%d)\n"
-              "Message window    : size %dx%d, position (%d,%d)\n" ),
-            awg[ WINDOW_MAIN ].nWidth,
-            awg[ WINDOW_MAIN ].nHeight,
-            awg[ WINDOW_MAIN ].nPosX,
-            awg[ WINDOW_MAIN ].nPosY,
-            awg[ WINDOW_ANNOTATION ].nWidth,
-            awg[ WINDOW_ANNOTATION ].nHeight,
-            awg[ WINDOW_ANNOTATION ].nPosX,
-            awg[ WINDOW_ANNOTATION ].nPosY,
-            awg[ WINDOW_GAME ].nWidth,
-            awg[ WINDOW_GAME ].nHeight,
-            awg[ WINDOW_GAME ].nPosX,
-            awg[ WINDOW_GAME ].nPosY,
-            awg[ WINDOW_HINT ].nWidth,
-            awg[ WINDOW_HINT ].nHeight,
-            awg[ WINDOW_HINT ].nPosX,
-            awg[ WINDOW_HINT ].nPosY,
-            awg[ WINDOW_MESSAGE ].nWidth,
-            awg[ WINDOW_MESSAGE ].nHeight,
-            awg[ WINDOW_MESSAGE ].nPosX,
-            awg[ WINDOW_MESSAGE ].nPosY );
-
+	sprintf(buf, "%-17s : size %dx%d, position (%d,%d)\n",
+		dispName, pwo->wg.nWidth, pwo->wg.nHeight, pwo->wg.nPosX, pwo->wg.nPosY);
 }
 
+extern void
+CommandShowGeometry ( char *sz )
+{
+	int i;
+	char szBuf[1024];
+	output(_("Default geometries:\n\n"));
+
+	for (i = 0; i < NUM_WINDOWS; i++)
+	{
+		GetGeometryString(szBuf, &woPanel[i]);
+		output(szBuf);
+	}
+}
 
 extern void CommandShowHighlightColour ( char *sz ) {
 

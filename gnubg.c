@@ -213,7 +213,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fCubeUse = TRUE, 
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
     nBeavers = 3, fOutputRawboard = FALSE, 
-    fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
+    cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
     nDefaultLength = 7, nToolbarStyle = 2;
 int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
@@ -223,9 +223,7 @@ int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
 int fDisplayPanels = TRUE;
-int fMessage = FALSE;
-int fAnalysis = FALSE;
-int fGameList = FALSE;
+int fDockPanels = TRUE;
 int nThreadPriority = 0;
 int fCheat = FALSE;
 int afCheatRoll[ 2 ] = { 0, 0 };
@@ -453,17 +451,64 @@ player ap[ 2 ] = {
     { "user", PLAYER_HUMAN, EVALSETUP, EVALSETUP, MOVEFILTER } 
 };
 
-
-windowgeometry awg[ NUM_WINDOWS ] =
-  { 
-    { 0, 0, 20, 20 },        /* main */
-    { 250, 200, 20, 20 },    /* game list */
-    { 0, 400, 20, 20 },      /* annotation */
-    { 0, 0, 20, 20 },        /* hint */
-    { 0, 0, 20, 20 }         /* message */
-  };
-
-
+/* Set up window and panel details */
+windowobject woPanel[NUM_WINDOWS] =
+{
+	/* main window */
+	{
+		"main",
+		TRUE, FALSE, FALSE, FALSE,
+#if USE_GTK
+		0,
+#endif
+		{0, 0, 20, 20}
+	},
+	/* game list */
+	{
+		"game",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		0,
+#endif
+		{ 250, 200, 20, 20 }
+	},
+	/* analysis */
+	{
+		"analysis",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		0,
+#endif
+		{ 0, 400, 20, 20 }
+	},
+	/* annotation */
+	{
+		"annotation",
+		FALSE, TRUE, TRUE, FALSE,
+#if USE_GTK
+		0,
+#endif
+		{ 0, 400, 20, 20 }
+	},
+	/* hint */
+	{
+		"hint",
+		FALSE, FALSE, FALSE, FALSE,
+#if USE_GTK
+		0,
+#endif
+		{ 0, 0, 20, 20 }
+	},
+	/* message */
+	{
+		"message",
+		FALSE, TRUE, TRUE, TRUE,
+#if USE_GTK
+		0,
+#endif
+		{ 0, 0, 20, 20 }
+	}
+};
 
 /* Usage strings */
 static char szDICE[] = N_("<die> <die>"),
@@ -1035,8 +1080,8 @@ command cER = {
       szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetGeometry[] = {
-    { "annotation", CommandSetGeometryAnnotation,
-      N_("set geometry of annotation window"), NULL, acSetGeometryValues },
+    { "analysis", CommandSetGeometryAnalysis,
+      N_("set geometry of analysis window"), NULL, acSetGeometryValues },
     { "game", CommandSetGeometryGame,
       N_("set geometry of game-list window"), NULL, acSetGeometryValues },
     { "hint", CommandSetGeometryHint,
@@ -1670,6 +1715,8 @@ command cER = {
       szDICE, NULL },
     { "display", CommandSetDisplay, 
       N_("Select whether the board is updated on the computer's turn"), 
+      szONOFF, &cOnOff },
+    { "dockpanels", CommandSetDockPanels, N_("Dock or float windows"),
       szONOFF, &cOnOff },
     { "evaluation", NULL, N_("Control position evaluation "
       "parameters"), NULL, acSetEval },
@@ -2573,7 +2620,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 
     if( !strcasecmp( "off", pch ) || !strncasecmp( "no", pch, cch ) ||
 	!strncasecmp( "false", pch, cch ) ) {
-	if( pf ) {
+	if( *pf ) {
 	    *pf = FALSE;
 	    UpdateSetting( pf );
 	}
@@ -3282,7 +3329,7 @@ extern void ShowBoard( void ) {
                             MatchIDFromMatchState ( &ms ), 
                             anChequers[ ms.bgv ] ) );
 
-	if( fAnnotation && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
+	if (woPanel[WINDOW_ANALYSIS].showing && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
 	    if( pmr->a.sz )
 		outputl( pmr->a.sz ); /* FIXME word wrap */
@@ -5463,19 +5510,26 @@ SaveEvalSetupSettings( FILE *pf, char *sz, evalsetup *pes ) {
 
 }
 
+static void GetGeometryString(char* buf, windowobject* pwo)
+{
+	sprintf(buf, "set geometry %s width %d\n"
+                  "set geometry %s height %d\n"
+                  "set geometry %s xpos %d\n" 
+                  "set geometry %s ypos %d\n", 
+                  pwo->winName, pwo->wg.nWidth,
+                  pwo->winName, pwo->wg.nHeight,
+                  pwo->winName, pwo->wg.nPosX,
+                  pwo->winName, pwo->wg.nPosY );
+}
 
 extern void CommandSaveSettings( char *szParam ) {
     FILE *pf;
     int i, cCache; 
     char *szFile;
     char szTemp[ 4096 ];
-    static char *aszWindow[] = {
-	"main", "game", "annotation", "hint", "message"
 #if USE_GTK
-    }, *aszAnimation[] = {
-	"none", "blink", "slide"
+    char *aszAnimation[] = {"none", "blink", "slide"};
 #endif
-    };
 
     szParam = NextToken ( &szParam );
     
@@ -5830,26 +5884,25 @@ extern void CommandSaveSettings( char *szParam ) {
     if ( fX )
        RefreshGeometries ();
 #endif
-    if (fAnnotation)
+    if (woPanel[WINDOW_ANNOTATION].showing)
       fputs("set annotation yes\n", pf);
-    if (fMessage)
+    if (woPanel[WINDOW_MESSAGE].showing)
       fputs("set message yes\n", pf);
-    if (fGameList)
+    if (woPanel[WINDOW_GAME].showing)
       fputs("set gamelist yes\n", pf);
-    if (fAnalysis)
+    if (woPanel[WINDOW_ANALYSIS].showing)
       fputs("set analysis window yes\n", pf);
 
     fprintf( pf, "set panels %s\n", fDisplayPanels ? "yes" : "no");
-    for ( i = 0; i < NUM_WINDOWS; ++i )
-        fprintf ( pf, 
-                  "set geometry %s width %d\n"
-                  "set geometry %s height %d\n"
-                  "set geometry %s xpos %d\n" 
-                  "set geometry %s ypos %d\n", 
-                  aszWindow[ i ], awg[ i ].nWidth,
-                  aszWindow[ i ], awg[ i ].nHeight,
-                  aszWindow[ i ], awg[ i ].nPosX,
-                  aszWindow[ i ], awg[ i ].nPosY );
+
+	for ( i = 0; i < NUM_WINDOWS; ++i )
+	{
+		if (i != WINDOW_ANNOTATION)
+		{
+			GetGeometryString(szTemp, &woPanel[i]);
+			fputs(szTemp, pf);
+		}
+	}
 
     /* sounds */
 
@@ -5899,7 +5952,12 @@ extern void CommandSaveSettings( char *szParam ) {
 			fprintf(pf, "set warning %s off\n", warningNames[i]);
 	}
 #endif
+	/* Save toolbar style */
 	fprintf(pf, "set toolbar %d\n", nToolbarStyle);
+
+	/* Save panel dock state (if not docked - default is docked) */
+	if (!fDockPanels)
+		fputs("set dockpanels off\n", pf);
 
     /* the end */
 

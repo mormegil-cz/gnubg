@@ -88,6 +88,7 @@ typedef RETSIGTYPE (*psighandler)( int );
 typedef enum _gnubgwindow {
   WINDOW_MAIN = 0,
   WINDOW_GAME,
+  WINDOW_ANALYSIS,
   WINDOW_ANNOTATION,
   WINDOW_HINT,
   WINDOW_MESSAGE,
@@ -95,19 +96,23 @@ typedef enum _gnubgwindow {
 } gnubgwindow;
 
 typedef struct _windowgeometry {
-#if USE_GTK
-  gint nWidth, nHeight;
-  gint nPosX, nPosY;
-#else
   int nWidth, nHeight;
   int nPosX, nPosY;
-#endif
 } windowgeometry;
 
-/* predefined board designs */
+typedef struct _windowobject {
+	char* winName;
+	int showing;
+	int docked;
+	int dockable;
+	int undockable;
+#if USE_GTK
+	GtkWidget* pwWin;
+#endif
+	windowgeometry wg;
+} windowobject;
 
-extern windowgeometry awg[ NUM_WINDOWS ];
-
+extern windowobject woPanel[NUM_WINDOWS];
 
 typedef struct _monitor {
 #if USE_GTK
@@ -497,10 +502,10 @@ extern int fNextTurn, fComputing;
 
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
-    fCubeUse, fDisplay, fAutoBearoff, fShowProgress,
+    fCubeUse, fDisplay, fDockPanels, fAutoBearoff, fShowProgress,
     nBeavers, fJacoby,
-    fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
-    fAnalyseDice, fAnalyseMove, fRecord, fMessage, fAnalysis, fGameList,
+    fOutputRawboard, cAnalysisMoves, fAnalyseCube,
+    fAnalyseDice, fAnalyseMove, fRecord,
 	nDefaultLength, nToolbarStyle;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
@@ -964,6 +969,7 @@ extern void CommandAccept( char * ),
     CommandSetDice( char * ),
     CommandSetDisplay( char * ),
     CommandSetDisplayPanels( char *),
+    CommandSetDockPanels( char *),
     CommandSetEvalCandidates( char * ),
     CommandSetEvalCubeful( char * ),
     CommandSetEvalDeterministic( char * ),
@@ -1021,7 +1027,7 @@ extern void CommandAccept( char * ),
     CommandSetExportPNGSize ( char *),
     CommandSetExportHtmlSize ( char *),
     CommandSetGameList ( char * ),
-    CommandSetGeometryAnnotation ( char * ),
+    CommandSetGeometryAnalysis( char * ),
     CommandSetGeometryGame ( char * ),
     CommandSetGeometryHint ( char * ),
     CommandSetGeometryMain ( char * ),

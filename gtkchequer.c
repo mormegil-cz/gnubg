@@ -868,11 +868,7 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid,
     phd->fButtonsValid = fButtonsValid;
     phd->fDestroyOnMove = fDestroyOnMove;
     phd->pwMove = NULL;
-#if USE_OLD_LAYOUT
-    phd->fDetails = TRUE; /* always show details for old layout */
-#else
     phd->fDetails = fDetails;
-#endif
 
     if ( fDetails ) {
       for ( i = 0; i < 11; i++ )

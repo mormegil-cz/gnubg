@@ -1,3 +1,8 @@
+Thu Mar 4 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gnubg.c: Replace USE_OLD_LAYOUT compile flag with menu option
+	* gtkboard.c: Crawford flag only changeable when editing
+
 Sun Feb 29 18:17:14 2004  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.c: #include <winsock.h> only if WIN32 defined.
