@@ -3696,7 +3696,7 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->nTruncate,
             sz, prc->nTrials );
 
-  /* SaveRNGSettings ( pf, sz, prc->rngRollout ); */
+  SaveRNGSettings ( pf, sz, prc->rngRollout );
 
   /* chequer play and cube decision evalcontexts */
 
@@ -4096,7 +4096,7 @@ extern void CommandTrainTD( char *sz ) {
 	    if( !( ++c % 100 ) )
 		Progress();
 	    
-	    RollDice( anDiceTrain );
+	    RollDice( anDiceTrain, rngCurrent );
 	    
 	    if( fInterrupt )
 		break;
@@ -5337,8 +5337,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
                 "details.\n"),
               VERSION );
     
-    InitRNG( NULL, TRUE );
-    InitRNG( &rcRollout.nSeed, FALSE );
+    InitRNG( NULL, TRUE, rngCurrent );
+    InitRNG( &rcRollout.nSeed, FALSE, rcRollout.rngRollout );
     /* we don't want rollouts to use the same seed as normal dice (which
        could happen if InitRNG had to use the current time as a seed) -- mix
        it up a little bit */

@@ -1,3 +1,14 @@
+Thu Aug  1 21:22:37 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix problem with rollouts and manual rng.
+ 	(reported by Nardy Pillards)
+
+	* dice.c: all routines take an rng instead of using
+	global var. It should now be possible to do a rollout
+	even though the play-rng it set to RNG_MANUAL. Of course,
+	if the user is stupid enough to "set rollout rng manual", well...
+	Oh, by the way: all callers changed...
+
 Thu Aug  1 21:08:40 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (DumpStatcontext): specify max width of

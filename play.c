@@ -626,7 +626,7 @@ static int NewGame( void ) {
     UpdateSetting( &ms.fTurn );
     
  reroll:
-    RollDice( ms.anDice );
+    RollDice( ms.anDice, rngCurrent );
 
     if( fInterrupt ) {
 	PopMoveRecord( plGame->plNext );
@@ -1055,7 +1055,7 @@ extern int ComputerTurn( void ) {
 
       /* Roll dice and move */
       if ( !ms.anDice[ 0 ] ) {
-	  if( RollDice ( ms.anDice ) < 0 )
+	  if( RollDice ( ms.anDice, rngCurrent ) < 0 )
 	      return -1;
 	  
 	  ResetDelayTimer(); /* Start the timer again -- otherwise the time
@@ -1137,7 +1137,7 @@ extern int ComputerTurn( void ) {
       fComputerDecision = FALSE;
       return 0;
     } else if( !ms.anDice[ 0 ] ) {
-      if( RollDice( ms.anDice ) < 0 )
+      if( RollDice( ms.anDice, rngCurrent ) < 0 )
 	    return -1;
       
       if( fDisplay )
@@ -1187,7 +1187,7 @@ extern int ComputerTurn( void ) {
       if( !ms.anDice[ 0 ] && !ms.fDoubled && !ms.fResigned &&
 	  ( !fCubeUse || ms.nCube >= MAX_CUBE ||
 	    !GetDPEq( NULL, NULL, &ci ) ) ) {
-	  if( RollDice( ms.anDice ) < 0 )
+	  if( RollDice( ms.anDice, rngCurrent ) < 0 )
 	      return -1;
 	      
 	  if( fDisplay )
@@ -1266,7 +1266,7 @@ extern int ComputerTurn( void ) {
 	return ms.fTurn == fTurnOrig ? -1 : 0;
       } else if( !ms.anDice[ 0 ] ) {
 	  if( tolower( *szResponse ) == 'r' ) { /* roll */
-	      if( RollDice( ms.anDice ) < 0 )
+	      if( RollDice( ms.anDice, rngCurrent ) < 0 )
 		  return -1;
 	      
 	      if( fDisplay )
@@ -3349,7 +3349,7 @@ CommandRoll( char *sz ) {
   if ( fTutor && fTutorCube && !GiveAdvice( ShouldDouble() ))
 	  return;
 
-  if( RollDice( ms.anDice ) < 0 )
+  if( RollDice( ms.anDice, rngCurrent ) < 0 )
     return;
 
   pmr = malloc( sizeof( pmr->sd ) );

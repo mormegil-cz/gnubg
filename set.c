@@ -1293,7 +1293,7 @@ extern void CommandSetRolloutSeed( char *sz ) {
 	prcSet->nSeed = n;
 	outputf( _("Rollout seed set to %d.\n"), n );
     } else
-	outputl( InitRNG( &prcSet->nSeed, FALSE ) ?
+        outputl( InitRNG( &prcSet->nSeed, FALSE, prcSet->rngRollout ) ?
 		 _("Rollout seed initialised from system random data.") :
 		 _("Rollout seed initialised by system clock.") );    
 }
@@ -1586,10 +1586,10 @@ extern void CommandSetSeed( char *sz ) {
 	    return;
 	}
 
-	InitRNGSeed( n );
+	InitRNGSeed( n, rngCurrent );
 	outputf( _("Seed set to %d.\n"), n );
     } else
-	outputl( InitRNG( NULL, TRUE ) ?
+	outputl( InitRNG( NULL, TRUE, rngCurrent ) ?
 		 _("Seed initialised from system random data.") :
 		 _("Seed initialised by system clock.") );
 }

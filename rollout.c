@@ -47,7 +47,8 @@ initRolloutstat ( rolloutstat *prs );
 
 static int QuasiRandomDice( int iTurn, int iGame, int cGames,
                             int fInitial,
-                            int anDice[ 2 ] ) {
+                            int anDice[ 2 ],
+                            const rng rngx ) {
 
   if ( fInitial ) {
 
@@ -72,7 +73,7 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
       int n;
      
     reroll:
-      n = RollDice( anDice );
+      n = RollDice( anDice, rngx );
 
       if ( fInitial && ! iTurn && anDice[ 0 ] == anDice[ 1 ] )
         goto reroll;
@@ -95,7 +96,7 @@ static int QuasiRandomDice( int iTurn, int iGame, int cGames,
       anDice[ 1 ] = ( ( iGame / 216 ) % 6 ) + 1;
       return 0;
     } else
-      return RollDice( anDice );
+      return RollDice( anDice, rngx );
 
   }
 
@@ -163,7 +164,8 @@ BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 
   while( ( !nTruncate || iTurn < nTruncate ) &&
 	 ClassifyPosition( anBoard ) > CLASS_PERFECT ) {
-    if( QuasiRandomDice( iTurn, iGame, cGames, FALSE, anDice ) < 0 )
+    if( QuasiRandomDice( iTurn, iGame, cGames, FALSE, 
+                         anDice, RNG_MERSENNE ) < 0 )
 	    return -1;
 	
     if( anDice[ 0 ]-- < anDice[ 1 ]-- )
@@ -401,7 +403,8 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
     /* Chequer play */
 
-    if( QuasiRandomDice( iTurn, iGame, cGames, prc->fInitial, anDice ) < 0 )
+    if( QuasiRandomDice( iTurn, iGame, cGames, prc->fInitial, anDice,
+                         prc->rngRollout ) < 0 )
       return -1;
 
     if( anDice[ 0 ] < anDice[ 1 ] )
@@ -792,8 +795,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
   
   for( i = 0; i < cGames; i++ ) {
-      if( rngCurrent != RNG_MANUAL )
-	  InitRNGSeed( rcRollout.nSeed + ( i << 8 ) );
+      if( prc->rngRollout != RNG_MANUAL )
+	  InitRNGSeed( rcRollout.nSeed + ( i << 8 ), prc->rngRollout );
       
       for ( ici = 0; ici < cci; ici++ )
         memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],

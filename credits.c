@@ -34,6 +34,7 @@ char *aszCredits[] = {
     "Roy Passfield",
     "Thomas Patrick",
     "Zvezdan Petkovic",
+    "Nardy Pillards",
     "Petri Pitkänen",
     "Sam Pottle",
     "Jared Riley",

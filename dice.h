@@ -31,10 +31,12 @@ extern char *aszRNG[];
 
 extern rng rngCurrent;
 
-extern int InitRNG( int *pnSeed, int fSet );
-extern void PrintRNGSeed( void );
-extern void InitRNGSeed( int n );
-extern int RollDice( int anDice[ 2 ] );
+extern int InitRNG( int *pnSeed, int fSet, const rng rngx );
+extern void PrintRNGSeed( const rng rngx );
+extern void InitRNGSeed( int n, const rng rngx );
+
+extern int 
+RollDice( int anDice[ 2 ], const rng rngx );
 
 extern void UserRNGClose();
 extern int UserRNGOpen();

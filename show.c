@@ -613,7 +613,7 @@ extern void CommandShowScore( char *sz ) {
 
 extern void CommandShowSeed( char *sz ) {
 
-    PrintRNGSeed();
+    PrintRNGSeed( rngCurrent );
 }
 
 extern void CommandShowTurn( char *sz ) {

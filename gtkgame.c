@@ -2774,7 +2774,7 @@ static void SetSeed( gpointer *p, guint k, GtkWidget *pw ) {
 
     int nRandom, n;
 
-    InitRNG( &nRandom, FALSE );
+    InitRNG( &nRandom, FALSE, rngCurrent );
     n = ReadNumber( _("GNU Backgammon - Seed"), _("Seed:"), abs( nRandom ), 0,
 		    INT_MAX, 1 );
 
