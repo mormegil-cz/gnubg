@@ -6246,7 +6246,7 @@ getMoneyPoints ( float aaarPoints[ 2 ][ 7 ][ 2 ],
   /* calculate average cubeless value of games won */
 
   for ( i = 0; i < 2; i++ )
-    arCLV[ i ] = 1.0 + aarRates[ i ][ 0 ] + aarRates[ i ][ 1 ];
+    arCLV[ i ] = 1.0 + aarRates[ i ][ 0 ] + 2.0f * aarRates[ i ][ 1 ];
 
     /* calculate points */
     

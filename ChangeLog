@@ -1,3 +1,8 @@
+Sun Sep 21 18:31:55 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (getMoneyPoints): fix bug in calculation of W and L.
+	(reported by Massimiliano.Maini)
+
 Mon Sep 22 11:50:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Add option to cover all of 3d chequer with texture
