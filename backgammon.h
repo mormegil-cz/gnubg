@@ -74,6 +74,7 @@ typedef enum _gnubgwindow {
   WINDOW_GAME,
   WINDOW_ANNOTATION,
   WINDOW_HINT,
+  WINDOW_MESSAGE,
   NUM_WINDOWS 
 } gnubgwindow;
 
@@ -258,7 +259,7 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fNackgammon, fDisplay, fAutoBearoff, fShowProgress,
     nBeavers, fOutputMWC, fEgyptian, fOutputWinPC, fOutputMatchPC, fJacoby,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
-    fAnalyseDice, fAnalyseMove, fRecord;
+    fAnalyseDice, fAnalyseMove, fRecord, fMessage;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
@@ -657,6 +658,7 @@ extern void CommandAccept( char * ),
     CommandSetGeometryGame ( char * ),
     CommandSetGeometryHint ( char * ),
     CommandSetGeometryMain ( char * ),
+    CommandSetGeometryMessage ( char * ),
     CommandSetGeometryWidth ( char * ),
     CommandSetGeometryHeight ( char * ),
     CommandSetGeometryPosX ( char * ),
@@ -664,6 +666,7 @@ extern void CommandAccept( char * ),
     CommandSetInvertMatchEquityTable( char * ),
     CommandSetJacoby( char * ),
     CommandSetMatchID ( char * ),
+    CommandSetMessage ( char * ),
     CommandSetMET( char * ),
     CommandSetJacoby( char * ),
     CommandSetNackgammon( char * ),

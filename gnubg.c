@@ -176,6 +176,7 @@ int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 int fTutor = FALSE, fTutorCube = TRUE, fTutorChequer = TRUE;
 int fTutorAnalysis = FALSE;
+int fMessage = TRUE;
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
@@ -311,10 +312,11 @@ player ap[ 2 ] = {
 
 windowgeometry awg[ NUM_WINDOWS ] =
   { 
-    { 0, 0, 20, 20 },  /* main */
+    { 0, 0, 20, 20 },        /* main */
     { 250, 200, 20, 20 },    /* game list */
     { 0, 400, 20, 20 },      /* annotation */
-    { 0, 0, 20, 20 }         /* hint */
+    { 0, 0, 20, 20 },        /* hint */
+    { 0, 0, 20, 20 }         /* message */
   };
 
 
@@ -706,6 +708,8 @@ command cER = {
       N_("set geometry of game-list window"), NULL, acSetGeometryValues },
     { "main", CommandSetGeometryMain,
       N_("set geometry of main window"), NULL, acSetGeometryValues },
+    { "message", CommandSetGeometryMessage,
+      N_("set geometry of message window"), NULL, acSetGeometryValues },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
@@ -997,6 +1001,8 @@ command cER = {
     { "matchequitytable", CommandSetMET,
       N_("Read match equity table from XML file"), szFILENAME, &cFilename },
     { "matchid", CommandSetMatchID, N_("set Match ID"), szMATCHID, NULL },
+    { "message", CommandSetMessage, N_("Display window with messages"),
+      szONOFF, &cOnOff },
     { "met", CommandSetMET,
       N_("Synonym for `set matchequitytable'"), szFILENAME, &cFilename },
     { "nackgammon", CommandSetNackgammon, N_("Set the starting position"),
@@ -3792,7 +3798,7 @@ extern void CommandSaveSettings( char *szParam ) {
     int i, cCache; 
     char *szFile;
     static char *aszWindow[] =
-      { "main", "game", "annotation", "hint" };
+      { "main", "game", "annotation", "hint", "message" };
 
     szParam = NextToken ( &szParam );
     
