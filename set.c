@@ -741,10 +741,11 @@ extern void CommandSetEvalReduced( char *sz ) {
     if ( n == 0 || n == 21 )
       pecSet->nReduced = 0;
     else
-      pecSet->nReduced = 7;
+      pecSet->nReduced = 3;
 
     outputf( "%s will use %d%% speed 2 ply evaluation.\n", 
-	     szSet, pecSet->nReduced ? 33 : 100 );
+	     szSet, 
+	     pecSet->nReduced ? 100.0f / pecSet->nReduced : 100 );
 
     if( pecSet->nPlies != 2 )
 	outputl( "(Note that this setting will have no effect until you "

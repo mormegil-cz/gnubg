@@ -1,3 +1,8 @@
+Fri Apr 27 11:40:58 2001  Jørn Thyssen  <joern@thyssen.nu>
+
+	* set.c (CommandSetEvalReduced), show.c (ShowEvaluation): 
+	use the new defintions of reduced evaluations.	
+
 Tue Apr 24 15:31:42 2001  Jørn Thyssen  <joern@thyssen.nu>
 
 	* gnubg.c (ParsePosition): allow human-typable board input.

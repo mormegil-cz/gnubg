@@ -56,7 +56,7 @@ static void ShowEvaluation( evalcontext *pec ) {
              "    %s evaluations.\n",
              pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
              "" : "s", pec->rSearchTolerance,
-             (pec->nReduced) ? 100. * pec->nReduced / 21.0 : 100.,
+             (pec->nReduced) ? 100. / pec->nReduced : 100.,
              pec->fCubeful ? "Cubeful" : "Cubeless" );
 
     if( pec->rNoise )
