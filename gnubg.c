@@ -142,6 +142,7 @@ player ap[ 2 ] = {
 /* Usage strings */
 static char szDICE[] = "<die> <die>",
     szFILENAME[] = "<filename>",
+    szKEYVALUE[] = "[<key>=<value> ...]",
     szLENGTH[] = "<length>",
     szLIMIT[] = "<limit>",
     szMILLISECONDS[] = "<milliseconds>",
@@ -283,6 +284,8 @@ command acDatabase[] = {
       szONOFF, NULL },
     { "cache", CommandSetCache, "Set the size of the evaluation cache",
       szSIZE, NULL },
+    { "colours", CommandSetColours, "Modify the appearance of the board",
+      szKEYVALUE, NULL },
     { "confirm", CommandSetConfirm, "Ask for confirmation before aborting "
       "a game in progress", szONOFF, NULL },
     { "crawford", CommandSetCrawford, 

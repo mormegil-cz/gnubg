@@ -31,6 +31,7 @@
 #include <fcntl.h>
 #endif
 #include <gtk/gtk.h>
+#include <gdk/gdkkeysyms.h>
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #include <stdio.h>
 #include <stdlib.h>
@@ -211,8 +212,8 @@ static void SaveMatch( gpointer *p, guint n, GtkWidget *pw );
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
 
-GtkWidget *pwBoard;
-static GtkWidget *pwStatus, *pwMain, *pwGame, *pwGameList, *pom;
+GtkWidget *pwBoard, *pwMain;
+static GtkWidget *pwStatus, *pwGame, *pwGameList, *pom;
 static GtkStyle *psGameList, *psCurrent;
 static int yCurrent, xCurrent; /* highlighted row/col in game record */
 static GtkItemFactory *pif;
@@ -1103,7 +1104,7 @@ static void OK( GtkWidget *pw, int *pf ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
+extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 				void *p ) {
 
 #include "gnu.xpm"
@@ -1116,6 +1117,7 @@ static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 	*pwHbox = gtk_hbox_new( FALSE, 0 ),
 	*pwButtons = gtk_hbutton_box_new(),
 	*pwPixmap;
+    GtkAccelGroup *pag = gtk_accel_group_new();
 
     /* realise the dialog immediately, so the colourmap is available for the
        pixmap */
@@ -1147,6 +1149,10 @@ static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 				   GTK_OBJECT( pwDialog ) );
     }
     
+    gtk_accel_group_attach( pag, GTK_OBJECT( pwDialog ) );
+    gtk_widget_add_accelerator( fQuestion ? pwCancel : pwOK, "clicked", pag,
+				GDK_Escape, 0, 0 );
+
     gtk_window_set_title( GTK_WINDOW( pwDialog ), szTitle );
 
     GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
@@ -1155,12 +1161,7 @@ static GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
     return pwDialog;
 }
 
-typedef enum _dialogarea {
-    DA_MAIN,
-    DA_BUTTONS
-} dialogarea;
-
-static GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
+extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da ) {
 
     GList *pl;
     GtkWidget *pwChild;

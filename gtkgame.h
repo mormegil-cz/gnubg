@@ -24,6 +24,13 @@
 
 #include "backgammon.h"
 
+typedef enum _dialogarea {
+    DA_MAIN,
+    DA_BUTTONS
+} dialogarea;
+
+extern GtkWidget *pwMain;
+
 extern void ShowGameWindow( void );
 
 extern void GTKAddMoveRecord( moverecord *pmr );
@@ -38,6 +45,11 @@ extern void GTKSetGame( int i );
 extern int InitGTK( int *argc, char ***argv );
 extern void RunGTK( void );
 extern void ShowList( char *asz[], char *szTitle );
+
+extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
+				void *p );
+extern GtkWidget *DialogArea( GtkWidget *pw, dialogarea da );
+    
 extern int GTKGetInputYN( char *szPrompt );
 extern void GTKOutput( char *sz );
 extern void GTKOutputX( void );

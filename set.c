@@ -250,6 +250,16 @@ extern void CommandSetCache( char *sz ) {
 		n == 1 ? "y" : "ies" );
 }
 
+extern void CommandSetColours( char *sz ) {
+#if USE_GTK
+    if( fX ) {
+	/* FIXME */
+    } else
+#endif    
+	outputl( "The colours may not be changed when using this user "
+		 "interface." );
+}
+
 extern void CommandSetConfirm( char *sz ) {
     
     SetToggle( "confirm", &fConfirm, sz, "Will ask for confirmation before "
