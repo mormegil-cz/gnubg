@@ -1,3 +1,8 @@
+Tue Nov 21 12:54:21 2000  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ShowBoard): Show the player name line correctly in the
+	board output when the cube is owned.
+
 Fri Nov 17 10:38:37 2000  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (DumpContact): Added remaining partial derivative outputs.

@@ -142,6 +142,8 @@ duplication of effort and to make sure our changes merge easily.
   with a pop-up window with 21 buttons).
 ** Try gdk_pixmap_colormap_create_from_xpm and gtk_widget_get_colormap,
   to avoid realising windows just to create pixmaps.
+** Make load/save and prev game/next game freeze and thaw the game list;
+  load match shouldn't update the score between games, either. (gary)
 ** When the user is moving, show _complete_ moves differently from
   incomplete ones.
 ** Add commands to _hide_ the game window ("list game" shows it).
@@ -189,7 +191,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Cosmetic bug when using the rollout button in the hint window (the
   commands echoed to stdout and the prompts are in the wrong order).
 ** When selecting a cell in the game record window with the mouse, the
-  window shouldn't scroll to centre the current record.
+  window shouldn't scroll to centre the current record -- checking
+  gtk_clist_row_is_visible should fix this. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

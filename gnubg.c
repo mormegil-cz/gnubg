@@ -1065,8 +1065,8 @@ extern void ShowBoard( void ) {
 		if( cch > 20 )
 		    cch = 20;
 		
-		sprintf( szCube, "%*s (Cube: %d)", cch,
-			 ap[ fCubeOwner ].szName, nCube );
+		sprintf( szCube, "%c: %*s (Cube: %d)", fCubeOwner ? 'X' : 'O',
+			 cch, ap[ fCubeOwner ].szName, nCube );
 
 		apch[ fCubeOwner ? 6 : 0 ] = szCube;
 	    }
