@@ -4918,7 +4918,8 @@ extern void outputresume( void ) {
 extern void SuspendInput( monitor *pm ) {
 
 #if USE_GTK
-    GTKSuspendInput( pm );
+    if ( fX )
+       GTKSuspendInput( pm );
 #endif
 }
 
@@ -4926,7 +4927,8 @@ extern void SuspendInput( monitor *pm ) {
 extern void ResumeInput( monitor *pm ) {
 
 #if USE_GTK
-    GTKResumeInput( pm );
+    if ( fX )
+       GTKResumeInput( pm );
 #endif
 }
 

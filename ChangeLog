@@ -1,3 +1,8 @@
+Thu Aug  1 19:29:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (SuspendInput, ResumeInput): only call 
+	GTKSuspendInput if fX.
+
 Wed Jul 31 20:11:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Prevent hint from doing re-calculation in tutor mode.
