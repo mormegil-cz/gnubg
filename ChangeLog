@@ -1,7 +1,7 @@
 Tue Oct 7 12:06:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
-	gtkcube.c, gtkgame.c: Make sure hint window is correct size in new layout.
-	gtkprefs.c, drawboard3d.c: Small memory fix
+	* gtkcube.c, gtkgame.c: Make sure hint window is correct size in new layout.
+	* gtkprefs.c, drawboard3d.c: Small memory fix.
 
 Mon Oct 06 20:42:21 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
