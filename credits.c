@@ -48,6 +48,7 @@ char *aszCredits[] = {
     "Jim Segrave",
     "Ian Shaw",
     "Brian Sheppard",
+    "Albert Silver",
     "Peter Sochovsky",
     "Mark Spencer",
     "Maik Stiebler",

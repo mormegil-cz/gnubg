@@ -54,17 +54,18 @@ Nardy Pillards
 Petri Pitkänen
 Sam Pottle
 James Rech
-Sander van Rijnswou
 Jared Riley
 Oliver Riordan
 Hans-Jürgen Schäfer
 Jim Segrave
 Ian Shaw
+Albert Silver
 Peter Sochovsky
 Mark Spencer
 Maik Stiebler
 W. Stroop (Rob)
 Jacques Thiriat
+Sander van Rijnswou
 Robert-Jan Veldhuizen
 JP White
 Kit Woolsey
@@ -120,8 +121,8 @@ cat > credits.c <<'EOF'
 char *aszCredits[] = {
 EOF
 
-cat $contributors $credit - <<'EOF' | sort -k 2 | uniq | sed 's/.*/    "&",/' \
-    >> credits.c
+cat $contributors $credit - <<'EOF' | sort -f -k 2 | uniq | \
+    sed 's/.*/    "&",/' >> credits.c
 Tom Keith
 EOF
 
