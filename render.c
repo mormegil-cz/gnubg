@@ -93,7 +93,7 @@ static inline double ssqrt( double x ) {
     return x < 0.0 ? 0.0 : sqrt( x );
 }
 
-static void CopyArea( unsigned char *puchDest, int nDestStride,
+extern void CopyArea( unsigned char *puchDest, int nDestStride,
 		      unsigned char *puchSrc, int nSrcStride,
 		      int cx, int cy ) {
     int x;
@@ -352,7 +352,7 @@ extern void RefractBlend( unsigned char *puchDest, int nDestStride,
     }
 }
 
-static void RefractBlendClip( unsigned char *puchDest, int nDestStride,
+extern void RefractBlendClip( unsigned char *puchDest, int nDestStride,
 			      int xDest, int yDest, int cxDest, int cyDest,
 			      unsigned char *puchBack, int nBackStride,
 			      int xBack, int yBack,
@@ -363,27 +363,23 @@ static void RefractBlendClip( unsigned char *puchDest, int nDestStride,
     if( xFore < 0 ) {
 	cx += xFore;
 	xDest -= xFore;
-	xBack -= xFore;
 	xFore = 0;
     }
 
     if( yFore < 0 ) {
 	cy += yFore;
 	yDest -= yFore;
-	yBack -= yFore;
 	yFore = 0;
     }
 
     if( xDest < 0 ) {
 	cx += xDest;
-	xBack -= xDest;
 	xFore -= xDest;
 	xDest = 0;
     }
     
     if( yDest < 0 ) {
 	cy += yDest;
-	yBack -= yDest;
 	yFore -= yDest;
 	yDest = 0;
     }
@@ -1252,7 +1248,7 @@ static void RenderLabels( renderdata *prd, unsigned char *puch, int nStride ) {
     if( FT_New_Memory_Face( ftl, auchLuxiSB, cbLuxiSB, 0, &ftf ) )
 	return RenderBasicLabels( prd, puch, nStride );
     
-    if( FT_Set_Pixel_Sizes( ftf, 0, prd->nSize ) )
+    if( FT_Set_Pixel_Sizes( ftf, 0, prd->nSize * 5 / 2 ) )
 	return RenderBasicLabels( prd, puch, nStride );
 
     for( i = 0; i < 10; i++ ) {
@@ -1265,7 +1261,7 @@ static void RenderLabels( renderdata *prd, unsigned char *puch, int nStride ) {
     for( i = 1; i <= 24; i++ )
 	RenderNumber( puch, nStride, aftg, i,
 		      ( aaanPositions[ prd->fClockwise ][ i ][ 0 ] + 3 ) *
-		      prd->nSize, ( i > 12 ? 2 : 71 ) * prd->nSize,
+		      prd->nSize, ( i > 12 ? 7 : 214 ) * prd->nSize / 3,
 		      0xFF, 0xFF, 0xFF );
     
     for( i = 0; i < 10; i++ )
@@ -2005,23 +2001,48 @@ static void DrawChequers( renderdata *prd, unsigned char *puch, int nStride,
 
 extern void CalculateArea( renderdata *prd, unsigned char *puch, int nStride,
 			   renderimages *pri, int anBoard[ 2 ][ 25 ],
-			   int anDice[ 2 ], int anDicePosition[ 2 ][ 2 ],
+			   int *anOff, int anDice[ 2 ],
+			   int anDicePosition[ 2 ][ 2 ],
 			   int fDiceColour, int anCubePosition[ 2 ],
 			   int nLogCube, int nCubeOrientation,
 			   int x, int y, int cx, int cy ) {
     
     int i, xPoint, yPoint, cxPoint, cyPoint, n;
-    int anOff[ 2 ];
+    int anOffCalc[ 2 ];
     
+    if( x < 0 ) {
+	puch -= x * 3;
+	cx += x;
+	x = 0;
+    }
+    
+    if( y < 0 ) {
+	puch -= y * nStride;
+	cy += y;
+	y = 0;
+    }
+
+    if( x + cx > 108 * prd->nSize )
+	cx = 108 * prd->nSize - x;
+    
+    if( y + cy > 72 * prd->nSize )
+	cy = 72 * prd->nSize - y;    
+    
+    if( cx <= 0 || cy <= 0 )
+	return;
+
     /* draw board */
     CopyArea( puch, nStride, pri->ach + x * 3 + y * 108 * prd->nSize * 3,
 	      108 * prd->nSize * 3, cx, cy );
 
-    anOff[ 0 ] = anOff[ 1 ] = 15;
-    for( i = 0; i < 25; i++ ) {
-	anOff[ 0 ] -= anBoard[ 0 ][ i ];
-	anOff[ 1 ] -= anBoard[ 1 ][ i ];
-    }    
+    if( !anOff ) {
+	anOff = anOffCalc;
+	anOff[ 0 ] = anOff[ 1 ] = 15;
+	for( i = 0; i < 25; i++ ) {
+	    anOff[ 0 ] -= anBoard[ 0 ][ i ];
+	    anOff[ 1 ] -= anBoard[ 1 ][ i ];
+	}
+    }
 
     for( i = 0; i < 28; i++ ) {
 	PointArea( prd, i, &xPoint, &yPoint, &cxPoint, &cyPoint );

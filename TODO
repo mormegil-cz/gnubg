@@ -25,14 +25,6 @@ duplication of effort and to make sure our changes merge easily.
   used for the internal evaluations of deep searches for a significant
   speed increase.  See FindBestMoveInEval() in eval.c from fibs2html.
 ** Consider making EvalEfficiency() more sophisticated.
-** Bearoff database changes:
-*** Use a more intelligent encoding in the 1-sided database, to conserve
-  space.
-*** Joseph notes the 1-sided bearoff database is nearly as good as the
-  2-sided.  Add an option to omit the 2-sided one, to conserve disk
-  and memory space.  (And time to generate them -- on a 330MHz Pentium II,
-  it takes 3 minutes to generate the 1-sided database and 20 for the
-  2-sided.)
 
 * Commands:
 ** Add interactive rollouts.
@@ -75,6 +67,8 @@ duplication of effort and to make sure our changes merge easily.
   "FG" SGF property).
 ** Tutor mode
 *** save evaluation into pmr for doubles
+** Make the command functions return an int, instead of void; that way
+  commands which use other commands can provide sensible error handling. (gary)
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.

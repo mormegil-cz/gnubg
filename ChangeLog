@@ -1,3 +1,11 @@
+Fri Dec 13 14:35:41 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c, gtkprefs.c: Major changes to use the render.c board
+	drawing code instead of the old gtkboard.c equivalents.
+
+	* gtkprefs.c (DesignPage): Default to a preview of the current board.
+	* gtkprefs.c (Preview): New function.
+
 Fri Dec 13 07:05:20 GMT 2002 jsegrave <jsegrave@jes2.demon.nl>
 
 	* makeweights.c: add a -f option to avoid problems with 

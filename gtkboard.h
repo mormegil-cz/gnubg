@@ -22,7 +22,9 @@
 #ifndef _GTKBOARD_H_
 #define _GTKBOARD_H_
 
+#ifndef _RENDER_H_
 #include "render.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,48 +78,25 @@ typedef struct _BoardData {
     GtkWidget *vbox_ids;
     GtkWidget *pipcount0, *pipcount1;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
-    GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
-	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
-	*pm_x_key, *pm_o_key;
-    GdkBitmap *bm_mask, *bm_dice_mask, *bm_cube_mask, *bm_key_mask;
-    guchar *rgba_x, *rgba_o, *rgba_x_key, *rgba_o_key, *rgb_points, *rgb_empty,
-	*rgb_saved, *rgb_temp, *rgb_temp_saved, *rgb_bar0, *rgb_bar1;
-    woodtype wood;
-    short *ai_refract[ 2 ];
-#if !USE_GTK2
-    GdkFont *cube_font;
-#endif
-    gboolean translucent, labels, usedicearea, permit_illegal, beep_illegal,
-	higher_die_first, playing, computer_turn, hinges;
+    GdkPixmap *appmKey[ 2 ];
+    
+    gboolean usedicearea, permit_illegal, beep_illegal, higher_die_first,
+	playing, computer_turn;
     gboolean show_ids;
     gboolean show_pips;
     animation animate_computer_moves;
     int animate_speed;
-    gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */
-    gdouble aarDiceColour[ 2 ][ 4 ]; /* color of dice for each player */
-    int afDieColor[ 2 ];
-    gdouble aarDiceDotColour[ 2 ][ 4 ]; /* color of dice dot for each player */
-    gdouble arCubeColour[ 4 ]; /* color of cube */
-    guchar aanBoardColour[ 4 ][ 4 ]; /* RGB(A) for background, border, pts */
-    int aSpeckle[ 4 ]; /* speckle for background, border, pts */
-    gfloat arRefraction[ 2 ], arCoefficient[ 2 ], arExponent[ 2 ];
-    gfloat arDiceCoefficient[ 2 ], arDiceExponent[ 2 ];
-    gfloat arLight[ 3 ];
-    gfloat round;
-    gint board_size; /* basic unit of board size, in pixels -- a chequer's
-			diameter is 6 of these units (and is 2 units thick) */
     gint drag_point, drag_colour, x_drag, y_drag, x_dice[ 2 ], y_dice[ 2 ],
-	dice_colour[ 2 ], old_board[ 2 ][ 25 ], drag_button, click_time,
+	old_board[ 2 ][ 25 ], drag_button, click_time,
 	cube_use, dice_roll[ 2 ]; /* roll showing on the off-board dice */
-#if !USE_GTK2
-    gint cube_font_rotated;
-#endif
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
-    gint clockwise; /* last drawn orientation */
     gint qedit_point; /* used to remember last point in quick edit mode */
     move *all_moves, *valid_move;
     movelist move_list;
 
+    renderdata rd;
+    renderimages ri;
+    
     /* remainder is from FIBS board: data */
     char name[ 32 ], name_opponent[ 32 ];
     gint match_to, score, score_opponent;
