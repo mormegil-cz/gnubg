@@ -8504,12 +8504,12 @@ static GtkWidget *CreateList()
 	gtk_clist_set_selection_mode( GTK_CLIST( pwList ), 
                                       GTK_SELECTION_EXTENDED );
         
-        gtk_selection_add_target( pwList, GDK_SELECTION_PRIMARY,
+	gtk_selection_add_target( pwList, GDK_SELECTION_PRIMARY,
                                   GDK_SELECTION_TYPE_STRING, 0 );
 
-        gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
+	gtk_signal_connect( GTK_OBJECT( pwList ), "select-row",
                             GTK_SIGNAL_FUNC( StatcontextSelect ), pwList );
-        gtk_signal_connect( GTK_OBJECT( pwList ), "unselect-row",
+	gtk_signal_connect( GTK_OBJECT( pwList ), "unselect-row",
                             GTK_SIGNAL_FUNC( StatcontextSelect ), pwList );
 	gtk_signal_connect( GTK_OBJECT( pwList ), "selection_clear_event",
                             GTK_SIGNAL_FUNC( StatcontextClearSelection ), 0 );
@@ -9064,6 +9064,15 @@ static void MatchInfoOK( GtkWidget *pw, int *pf ) {
     gtk_main_quit();
 }
 
+static void AddToTable(GtkWidget* pwTable, char* str, int x, int y)
+{
+	GtkWidget* pw = gtk_label_new(str);
+	/* Right align */
+	gtk_misc_set_alignment(GTK_MISC(pw), 1, .5);
+	gtk_table_attach(GTK_TABLE(pwTable), pw, x, x + 1, y, y + 1,
+		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 0, 0);
+}
+
 extern void GTKMatchInfo( void ) {
 
     int fOK = FALSE;
@@ -9087,26 +9096,17 @@ extern void GTKMatchInfo( void ) {
 		       pwTable );
 
     sprintf( sz, _("%s's rating:"), ap[ 0 ].szName );
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( sz ),
-		      0, 1, 0, 1, 0, 0, 0, 0 );
+	AddToTable(pwTable, sz, 0, 0);
+
     sprintf( sz, _("%s's rating:"), ap[ 1 ].szName );
-    gtk_table_attach( GTK_TABLE( pwTable ), gtk_label_new( sz ),
-		      0, 1, 1, 2, 0, 0, 0, 0 );    
-    gtk_table_attach( GTK_TABLE( pwTable ),
-		      gtk_label_new( _("Date:") ),
-		      0, 1, 2, 3, 0, 0, 0, 0 );
-    gtk_table_attach( GTK_TABLE( pwTable ),
-		      gtk_label_new( _("Event:") ),
-		      0, 1, 3, 4, 0, 0, 0, 0 );
-    gtk_table_attach( GTK_TABLE( pwTable ),
-		      gtk_label_new( _("Round:") ),
-		      0, 1, 4, 5, 0, 0, 0, 0 );
-    gtk_table_attach( GTK_TABLE( pwTable ),
-		      gtk_label_new( _("Place:") ),
-		      0, 1, 5, 6, 0, 0, 0, 0 );
-    gtk_table_attach( GTK_TABLE( pwTable ),
-		      gtk_label_new( _("Annotator:") ),
-		      0, 1, 6, 7, 0, 0, 0, 0 );
+	AddToTable(pwTable, sz, 0, 1);
+
+	AddToTable(pwTable, _("Date:"), 0, 2);
+	AddToTable(pwTable, _("Event:"), 0, 3);
+	AddToTable(pwTable, _("Round:"), 0, 4);
+	AddToTable(pwTable, _("Place:"), 0, 5);
+	AddToTable(pwTable, _("Annotator:"), 0, 6);
+
     gtk_table_attach( GTK_TABLE( pwTable ),
 		      gtk_label_new( _("Comments:") ),
 		      2, 3, 0, 1, 0, 0, 0, 0 );
@@ -9613,17 +9613,15 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
 	static gulong id;
 	static int showingPanels;
-
-	if (!n)
-		GTKShowWarning(WARN_FULLSCREEN_EXIT);
-
-	fGUIShowIDs = n;
-	UpdateSetting(&fGUIShowIDs);
+	static int showIDs;
 
 	fGUIShowGameInfo = n;
 
 	if (!n)
 	{
+		GTKShowWarning(WARN_FULLSCREEN_EXIT);
+		id = gtk_signal_connect(GTK_OBJECT(ptl), "key-press-event", GTK_SIGNAL_FUNC(EndFullScreen), 0);
+
 		gtk_widget_hide(pwMenuBar);
 		gtk_widget_hide(pwToolbar);
 		gtk_widget_hide(pwHandle);
@@ -9631,9 +9629,12 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_hide(GTK_WIDGET(bd->dice_area));
 		gtk_widget_hide(pwStatus);
 		gtk_widget_hide(pwProgress);
+
 		showingPanels = fDisplayPanels;
 		HideAllPanels(NULL, 0, NULL);
-		id = gtk_signal_connect(GTK_OBJECT(ptl), "key-press-event", GTK_SIGNAL_FUNC(EndFullScreen), 0);
+
+		showIDs = fGUIShowIDs;
+		fGUIShowIDs = 0;
 
 /* How can I maximize the window ?? */
 #if USE_GTK2
@@ -9654,8 +9655,12 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_show(GTK_WIDGET(bd->dice_area));
 		gtk_widget_show(pwStatus);
 		gtk_widget_show(pwProgress);
+
 		if (showingPanels)
 			ShowAllPanels(NULL, 0, NULL);
+
+		fGUIShowIDs = showIDs;
+
 		gtk_signal_disconnect(GTK_OBJECT(ptl), id);
 
 /* How can I (un)maximize the window ?? */
@@ -9668,6 +9673,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		*/
 #endif
 	}
+	UpdateSetting(&fGUIShowIDs);
 }
 
 #if USE_TIMECONTROL
