@@ -1,3 +1,8 @@
+Wed Sep 11 17:14:13 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkboard.c (board_init): gtk_image_new_from_stock requires enums for
+	the icon sizes, not pixel counts. (Jim Segrave)
+
 Mon Sep  9 15:38:11 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c (board_init): Correct typo.
