@@ -113,7 +113,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    ppr->szName[ i++ ] = ch;
     } while( i < 31 && !isspace( ch = getc( pf ) ) );
     ppr->szName[ i ] = 0;
-    
+
     if( nVersion > 1 )
 	PushLocale( "C" );
     
@@ -567,4 +567,33 @@ extern void CommandRecordShow( char *szPlayer ) {
     }
     
     fclose( pfIn );
+}
+
+extern playerrecord *
+GetPlayerRecord( char *szPlayer ) {
+
+    FILE *pfIn;
+    static playerrecord pr;
+#if __GNUC__
+    char sz[ strlen( szHomeDirectory ) + 10 ];
+#elif HAVE_ALLOCA
+    char *sz = alloca( strlen( szHomeDirectory ) + 10 );
+#else
+    char sz[ 4096 ];
+#endif
+    
+    sprintf( sz, "%s/.gnubgpr", szHomeDirectory );
+    if( !( pfIn = fopen( sz, "r" ) ) ) 
+      return NULL;
+
+    while( !RecordReadItem( pfIn, sz, &pr ) )
+      if( !CompareNames( szPlayer, pr.szName ) ) {
+        fclose ( pfIn );
+        nVersion = 0;
+        return &pr;
+      }
+    
+    fclose( pfIn );
+
+    return NULL;
 }

@@ -35,6 +35,7 @@
 #include "eval.h"
 #include "positionid.h"
 #include "matchid.h"
+#include "record.h"
 
 #if defined (HAVE_BASENAME) && defined (HAVE_LIBGEN_H)
 #include "libgen.h"
@@ -3490,6 +3491,91 @@ HTMLMatchInfo ( FILE *pf, const matchinfo *pmi,
 
 }
 
+static void
+HTMLDumpPlayerRecords ( FILE *pf, const htmlexportcss hecss ) {
+
+  /* dump the player records from file */
+ 
+  playerrecord apr[ 2 ];
+  playerrecord *pr;
+  int i;
+  int f = FALSE;
+  int af[ 2 ] = { FALSE, FALSE };
+  
+  for ( i = 0; i < 2; ++i ) 
+    if ( ( pr = GetPlayerRecord ( ap[ i ].szName ) ) ) {
+      f = TRUE;
+      af[ i ] = TRUE;
+      memcpy ( &apr[ i ], pr, sizeof ( playerrecord ) );
+    }
+    else
+      memset ( &apr[ i ], 0, sizeof ( playerrecord ) );
+
+  if ( ! f )
+    return;
+
+  fputs ( "\n<!-- Player records -->\n\n", pf );
+
+  fprintf ( pf,
+            "<table %s>\n",
+            GetStyle ( CLASS_STATTABLE, hecss ) );
+
+  printStatTableHeader ( pf, hecss, _("Recorded player statistics") );
+  
+  fprintf ( pf,
+            "<tr %s>\n"
+            "<th>%s</th><th>%s</th><th>%s</th>\n"
+            "</tr>\n",
+            GetStyle ( CLASS_STATTABLEHEADER, hecss ),
+            _("Player"), 
+            ap[ 0 ].szName, ap[ 1 ].szName );
+
+  printStatTableRow ( pf,
+                      _("Chequer (Long-term error rate)"), "%5.3f",
+                      -apr[ 0 ].arErrorChequerplay[ EXPAVG_100 ],
+                      -apr[ 1 ].arErrorChequerplay[ EXPAVG_100 ] );
+
+  printStatTableRow ( pf,
+                      _("Cube (Long-term error rate)"), "%5.3f",
+                      -apr[ 0 ].arErrorCube[ EXPAVG_100 ],
+                      -apr[ 1 ].arErrorCube[ EXPAVG_100 ] );
+
+  printStatTableRow ( pf,
+                      _("Chequer (Short-term error rate)"), "%5.3f",
+                      -apr[ 0 ].arErrorChequerplay[ EXPAVG_20 ],
+                      -apr[ 1 ].arErrorChequerplay[ EXPAVG_20 ] );
+
+  printStatTableRow ( pf,
+                      _("Cube (Short-term error rate)"), "%5.3f",
+                      -apr[ 0 ].arErrorCube[ EXPAVG_20 ],
+                      -apr[ 1 ].arErrorCube[ EXPAVG_20 ] );
+
+  printStatTableRow ( pf,
+                      _("Chequer (total)"), "%5.3f",
+                      -apr[ 0 ].arErrorChequerplay[ TOTAL ],
+                      -apr[ 1 ].arErrorChequerplay[ TOTAL ] );
+
+  printStatTableRow ( pf,
+                      _("Cube (total)"), "%5.3f",
+                      -apr[ 0 ].arErrorCube[ TOTAL ],
+                      -apr[ 1 ].arErrorCube[ TOTAL ] );
+
+  printStatTableRow ( pf,
+                      _("Luck (total)"), "%5.3f",
+                      apr[ 0 ].arLuck[ TOTAL ],
+                      apr[ 1 ].arLuck[ TOTAL ] );
+
+  printStatTableRow ( pf,
+                      _("Games (total)"), "%d",
+                      apr[ 0 ].cGames,
+                      apr[ 1 ].cGames );
+
+  fprintf ( pf, "</table>\n" );
+
+  fprintf ( pf, "\n<!-- End Player Records -->\n\n" );
+
+}
+
 
 /*
  * Export a game in HTML
@@ -3611,8 +3697,10 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
                 pmgi->nPoints );
     }
 
-    if ( psc )
+    if ( psc ) {
       HTMLDumpStatcontext ( pf, psc, &msOrig, iGame, hecss );
+      HTMLDumpPlayerRecords ( pf, hecss );
+    }
 
 
     if ( fLastGame ) {

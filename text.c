@@ -34,6 +34,7 @@
 #include "eval.h"
 #include "positionid.h"
 #include "matchid.h"
+#include "record.h"
 
 #include "i18n.h"
 
@@ -1407,6 +1408,53 @@ TextMatchInfo ( FILE *pf, const matchinfo *pmi ) {
 
 
 
+static void
+TextDumpPlayerRecords ( FILE *pf ) {
+
+  /* dump the player records from file */
+ 
+  playerrecord apr[ 2 ];
+  playerrecord *pr;
+  int i;
+  int f = FALSE;
+  int af[ 2 ] = { FALSE, FALSE };
+  
+  for ( i = 0; i < 2; ++i ) 
+    if ( ( pr = GetPlayerRecord ( ap[ i ].szName ) ) ) {
+      f = TRUE;
+      af[ i ] = TRUE;
+      memcpy ( &apr[ i ], pr, sizeof ( playerrecord ) );
+    }
+
+  if ( ! f )
+    return;
+
+  fputs ( _("Statistics from player records:\n\n" ), pf );
+  
+  fputs ( _("                                Short-term  "
+            "Long-term   Total        Total\n"
+            "                                error rate  "
+            "error rate  error rate   luck\n"
+            "Name                            Cheq. Cube  "
+            "Cheq. Cube  Cheq. Cube   rate Games\n"), pf );
+
+  for ( i = 0; i < 2; ++i ) 
+    if ( af[ i ] ) 
+      fprintf( pf, 
+               "%-31s %5.3f %5.3f %5.3f %5.3f %5.3f %5.3f %6.3f %4d\n",
+               apr[ i ].szName, apr[ i ].arErrorChequerplay[ EXPAVG_20 ],
+               apr[ i ].arErrorCube[ EXPAVG_20 ],
+               apr[ i ].arErrorChequerplay[ EXPAVG_100 ],
+               apr[ i ].arErrorCube[ EXPAVG_100 ],
+               apr[ i ].arErrorChequerplay[ EXPAVG_TOTAL ],
+               apr[ i ].arErrorCube[ EXPAVG_TOTAL ],
+               apr[ i ].arLuck[ EXPAVG_TOTAL ], apr[ i ].cGames );
+
+  fputs ( "\n", pf );
+
+
+}
+
 
 /*
  * Export a game in HTML
@@ -1524,8 +1572,10 @@ static void ExportGameText ( FILE *pf, list *plGame,
 
     }
 
-    if ( psc )
+    if ( psc ) {
       TextDumpStatcontext ( pf, psc, &msOrig, iGame );
+      TextDumpPlayerRecords ( pf );
+    }
 
 
     if ( fLastGame ) {

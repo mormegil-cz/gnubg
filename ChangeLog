@@ -1,3 +1,13 @@
+Mon Dec 16 23:37:56 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Output player records in html and text export.
+
+	* record.c (GetPlayerRecord): new function
+	* html.c (HTMLDumpPLayerRecords): new function.
+	* html.c (ExportGameHTML): call HTMLDumpPlayerRecords.
+	* text.c (TextDumpPLayerRecords): new function.
+	* text.c (ExportGameHTML): call HTMLDumpPlayerRecords.
+
 Mon Dec 16 22:52:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (LuckFirst, LuckNormal): pass luck analysis evalcontext to

@@ -37,4 +37,7 @@ typedef struct _playerrecord {
 
 extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr );
 
+extern playerrecord *
+GetPlayerRecord( char *szPlayer );
+
 #endif
