@@ -101,6 +101,10 @@ extern void GTKViewRolloutStatistics(GtkWidget *widget, gpointer data);
 #ifdef WIN32
 extern void GTKWinCopy( GtkWidget *widget, gpointer data);
 #endif
+extern void
+GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
+               cubeinfo *pci, int fMWC );
+    
 extern int fTTY;
 
 #endif

@@ -3875,10 +3875,12 @@ extern void GTKTakeHint( float arDouble[], int fMWC, int fBeaver,
 		      GTK_EXPAND | GTK_FILL, 4, 0 );
     gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
 
+    /*
     gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new(
 	fMWC ? "MWC for take" : "Equity for take" ), 0, 1, 0, 1,
 		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 4, 0 );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    */
 
     gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new(
 	fMWC ? "MWC for pass" : "Equity for pass" ), 0, 1, 1, 2,
@@ -3929,6 +3931,96 @@ extern void GTKTakeHint( float arDouble[], int fMWC, int fBeaver,
     gtk_main();
     GTKAllowStdin();
 }
+
+
+
+/*
+ * Give hints for resignation
+ *
+ * Input:
+ *    rEqBefore: equity before resignation
+ *    rEqAfter: equity after resignation
+ *    pci: cubeinfo
+ *    fOUtputMWC: output in MWC or equity
+ *
+ * FIXME: include arOutput in the dialog, so the the user
+ *        can see how many gammons/backgammons she'll win.
+ */
+
+extern void
+GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
+               cubeinfo *pci, int fMWC ) {
+    
+    GtkWidget *pwDialog =
+      CreateDialog( "GNU Backgammon - Hint", FALSE, NULL, NULL );
+    GtkWidget *pw;
+    GtkWidget *pwTable = gtk_table_new( 2, 3, FALSE );
+
+    char *pch, sz[ 16 ];
+
+    /* equity before resignation */
+    
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new(
+	fMWC ? "MWC before resignation" : "Equity before resignation" ), 0, 1, 0, 1,
+		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+    if( fMWC )
+      sprintf( sz, "%6.2f%%", 100.0 * ( eq2mwc ( - rEqBefore, pci ) ) );
+    else
+      sprintf( sz, "%+6.3f", -rEqBefore );
+
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new( sz ),
+		      1, 2, 0, 1, GTK_EXPAND | GTK_FILL,
+		      GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+
+    /* equity after resignation */
+
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new(
+	fMWC ? "MWC after resignation" : "Equity after resignation" ), 0, 1, 1, 2,
+		      GTK_EXPAND | GTK_FILL, GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    
+    if( fMWC )
+      sprintf( sz, "%6.2f%%",
+               100.0 * eq2mwc ( - rEqAfter, pci ) );
+    else
+      sprintf( sz, "%+6.3f", - rEqAfter );
+
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new( sz ),
+		      1, 2, 1, 2, GTK_EXPAND | GTK_FILL,
+		      GTK_EXPAND | GTK_FILL, 4, 0 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+
+    if ( -rEqAfter >= -rEqBefore )
+	pch = "Your should accept the resignation!";
+    else
+	pch = "Your should reject the resignation!";
+    
+    gtk_table_attach( GTK_TABLE( pwTable ), pw = gtk_label_new( pch ),
+		      0, 2, 2, 3, GTK_EXPAND | GTK_FILL,
+		      GTK_EXPAND | GTK_FILL, 0, 8 );
+
+    gtk_container_set_border_width( GTK_CONTAINER( pwTable ), 8 );
+    
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwTable );
+
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+ 
+    gtk_widget_show_all( pwDialog );
+
+    GTKDisallowStdin();
+    gtk_main();
+    GTKAllowStdin();
+}
+
+
 
 #if WIN32
 extern void GTKWinCopy( GtkWidget *widget, gpointer data) {

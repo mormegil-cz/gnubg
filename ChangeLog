@@ -1,3 +1,11 @@
+Sun Feb  3 10:58:51 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (CommandHint): give hints for resignations.
+
+	* gtkgame.c (GTKResignHint) new subroutine. Display GTK dialog 
+	for resignations.
+
+
 Fri Feb  1 10:48:10 2002  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (EvalInitialise): Use mmap() on the neural net weights,

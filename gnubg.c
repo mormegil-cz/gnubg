@@ -2139,7 +2139,7 @@ extern void CommandHint( char *sz ) {
       return;
     }
 
-    if( !ms.anDice[ 0 ] && !ms.fDoubled ) {
+    if( !ms.anDice[ 0 ] && !ms.fDoubled && ! ms.fResigned ) {
 	GetMatchStateCubeInfo( &ci, &ms );
 
 	if ( GetDPEq ( NULL, NULL, &ci ) ) {
@@ -2171,6 +2171,67 @@ extern void CommandHint( char *sz ) {
 	    
 	}
 	
+    }
+
+    /* Give hints on resignation */
+
+    if ( ms.fResigned ) {
+
+      float rEqBefore, rEqAfter;
+
+      GetMatchStateCubeInfo( &ci, &ms );
+
+      /* evaluate current position */
+
+      if ( GeneralEvaluationE ( aarOutput[ 0 ],
+                                ms.anBoard,
+                                &ci, &esEvalCube.ec ) < 0 )
+        return;
+
+      getResignEquities ( aarOutput[ 0 ], &ci, ms.fResigned, 
+                          &rEqBefore, &rEqAfter );
+
+#if USE_GTK
+      if ( fX ) {
+        
+        GTKResignHint ( aarOutput[ 0 ], rEqBefore, rEqAfter, &ci, 
+                        ms.nMatchTo && fOutputMWC );
+
+        return;
+
+      }
+#endif
+
+      if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
+
+        outputf ( "Equity before resignation: %+6.3f\n",
+                  - rEqBefore );
+        outputf ( "Equity after resignation : %+6.3f (%+6.3f)\n\n",
+                  - rEqAfter, rEqBefore - rEqAfter );
+        outputf ( "Correct resign decision  : %s\n\n",
+                  ( rEqBefore - rEqAfter >= 0 ) ?
+                  "Accept" : "Reject" );
+
+      }
+      else {
+        
+        rEqBefore = eq2mwc ( - rEqBefore, &ci );
+        rEqAfter  = eq2mwc ( - rEqAfter, &ci );
+
+        outputf ( "Equity before resignation: %6.2f%%\n",
+                  rEqBefore * 100.0f );
+        outputf ( "Equity after resignation : %6.2f%% (%6.2f%%)\n\n",
+                  rEqAfter * 100.0f,
+                  100.0f * ( rEqAfter - rEqBefore ) );
+        outputf ( "Correct resign decision  : %s\n\n",
+                  ( rEqAfter - rEqBefore >= 0 ) ?
+                  "Accept" : "Reject" );
+
+      }
+
+      return;
+
+
     }
 
     if ( ms.fDoubled ) {
