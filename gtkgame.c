@@ -7862,7 +7862,7 @@ extern void GTKShowBuildInfo(void)
 	gtk_box_pack_start(GTK_BOX(pwBox), gtk_hseparator_new(), FALSE, FALSE, 4);
 
 	gtk_box_pack_start( GTK_BOX( pwBox ),
-			gtk_label_new( "Copyright 1999-2004 Gary Wong" ), FALSE, FALSE, 4 );
+			gtk_label_new( _(aszCOPYRIGHT) ), FALSE, FALSE, 4 );
 
 	gtk_box_pack_start( GTK_BOX( pwBox ), pwPrompt = gtk_label_new(
 	_("GNU Backgammon is free software, covered by the GNU General Public "

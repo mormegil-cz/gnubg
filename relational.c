@@ -31,7 +31,9 @@
 #include "backgammon.h"
 
 
+#if HAVE_PYTHON
 static int fPyLoaded = FALSE;
+#endif
 
 static void
 LoadDatabasePy( void ) {

@@ -1,3 +1,7 @@
+Mon Apr 26 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, credits.* : Moved copyright string to credits.sh
+
 Sun Apr 25 08:46:27 CEST 2004  Dmitri I GOULIAEV  <dmitri.gouliaev@telkel.net>
 
 	* credits.sh: add Dmitri I GOULIAEV
@@ -13,7 +17,7 @@ Fri Apr 23 22:12:51 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 	* relational.c: add code for most functions.
 	* scripts/database.py: adapt code to relational.c
 
-Mon Apr 23 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Apr 23 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c: Change year to 2004 for command line build
 

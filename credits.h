@@ -23,3 +23,5 @@ extern credits creditList[];
 
 extern char aszAUTHORS[];
 
+extern char aszCOPYRIGHT[];
+

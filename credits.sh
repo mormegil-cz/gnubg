@@ -212,6 +212,8 @@ extern credits creditList[];
 
 extern char aszAUTHORS[];
 
+extern char aszCOPYRIGHT[];
+
 EOF
 
 cat > credits.c <<EOF
@@ -220,6 +222,9 @@ cat > credits.c <<EOF
 
 #include "i18n.h"
 #include "credits.h"
+
+char aszCOPYRIGHT[] = N_("Copyright 1999, 2000, 2001, 2002, 2003, 2004 "
+			"by Gary Wong.");
 
 credEntry ceAuthors[] = {
 EOF
