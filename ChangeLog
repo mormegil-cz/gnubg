@@ -12,6 +12,22 @@ Tue Jul 08 22:58:59 2003  Holger Bochnig <hbgg@gmx.net>
 	  gtktempmap.c, gtktheory.c: rename CreateDialog to GTKCreateDialog
 	  to avoid name clash with the Windows function
 
+Tue Jul 8 21:00 CET 2003 Olivier Baur <olivier.baur@noos.fr>
+
+        Implement sound support on Mac OS X, using QuickTime; add a new
+        "sound system" called "QuickTime", a new command "set sound system
+        quicktime", and a new sound system radio button in the Options >
+        Sound settings dialog.
+        
+        * sound.h: define new sound system SOUND_SYSTEM_QUICKTIME
+        * sound.c: modify play_file() and play_file_child(); add functions 
+            PlaySound_QuickTime() and Thread_PlaySound_QuickTime();
+        * set.c: add new function CommandSetSoundSystemQuickTime()
+	* backgammon.h: add prototype to CommandSetSoundSystemQuickTime()
+        * gnubg.c: add command "set sound system quicktime"
+        * gtkgame.c: OptionPages(), OptionsOK'): add new "pwSoundQuickTime"
+            radio button widget
+
 Tue Jul 8 19:05 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
         * undo change to rollout.c - it was a fix for a problem which
@@ -35,6 +51,20 @@ Mon Jul  7 12:33:17 2003  Joern Thyssen  <jth@gnubg.org>
 
         * rollout.c (RolloutDice): fix bug in generated dice for
         rollout as initial position.
+
+Mon Jul  7 11:38 CET 2003  Olivier Baur  <olivier.baur@noos.fr>
+
+        Fix bug: when playing against gnubg, you would sometimes
+        get several games in a row with identical dice sequences
+        (reported by Peter O Lura <polura@online.no>); the issue
+        actually arises when a new game is started after having
+        performed a rollout, which "resets" the RNG to the
+        "rollout seed".
+
+	* rollout.c (RolloutGeneral): add call to InitRNG at end of
+            rollout to make sure that next game played against gnubg
+            won't get dice rolls based on the seed of a rollout that
+            has just been performed.
 
 Sun Jul  6 18:01:08 2003  Joern Thyssen  <jth@gnubg.org>
 
