@@ -3511,7 +3511,10 @@ static void CommandNextRoll( char *sz ) {
 	/* to skip over the "dice roll" for anything other than a normal
 	   move, or if the dice are already rolled, just skip the entire
 	   move */
-	return CommandNext( NULL );
+	{
+		CommandNext( NULL );
+		return;
+	}
 
     CalculateBoard();
 
@@ -3599,44 +3602,28 @@ static void ShowMark( moverecord *pmr ) {
 }
 
 int
-InternalCommandNext(int const fMarkedMoves, int n)
+InternalCommandNext(int fMarkedMoves, int n)
 {
   int done = 0;
   
   if( fMarkedMoves ) {
-    list* p = plLastMove;
-    list* orig_p = p;
-    matchstate SaveMs;
-    moverecord* pmr = 0;
-      
-    memcpy( &SaveMs, &ms, sizeof( matchstate ) );
-    /* we need to increment the count if we're pointing to a marked
-       move */
-    if ( p->plNext->p && MoveIsMarked( (moverecord *) p->plNext->p ) )
-      ++n;
-	
-    while( p->plNext->p ) {
-      p = p->plNext;
-      pmr = (moverecord*) p->p;
-      FixMatchState ( &ms, pmr);
-      ApplyMoveRecord( &ms, plGame, pmr);
-      if( MoveIsMarked (pmr) && ( --n <= 0 ) )
-	break;
-    }
+	list* p =  plLastMove;
+	moverecord* pmr = 0;
+	/* we need to increment the count if we're pointing to a marked move */
+	if ( p->plNext->p && MoveIsMarked( (moverecord *) p->plNext->p ) )
+	  ++n;
 
-    if ((p->plNext->p == 0)  /* ran out of moves to examine */
-	&& (!MoveIsMarked (pmr) /* last move is not an error */
-	    || (p == orig_p)    /* or there were no moves to look at on */
-            || (p == orig_p->plNext))) /* or we were on the last move */   
-      {
-	/* didn't find the requested move, put things back */
-	memcpy( &ms, &SaveMs, sizeof( matchstate ) );
-	plLastMove = orig_p;
-	FixMatchState ( &ms, plLastMove->p );
-	ApplyMoveRecord( &ms, plGame, plLastMove->p );
-	return 0;
-      }
-	
+	while(p->p) {
+		pmr = (moverecord *) p->p;
+		if (MoveIsMarked(pmr) && (--n <= 0))
+		break;
+		
+		p = p->plNext;
+	}
+
+	if (p->p == 0)
+		return 0;
+	  
     plLastMove = p->plPrev;
     CalculateBoard();
     ShowMark( pmr );		
