@@ -493,10 +493,6 @@ extern void AddMoveRecord( void *pv ) {
 	pmrOld->sd.fPlayer == pmr->n.fPlayer )
 	PopMoveRecord( plLastMove );
 
-    /* automatic analysis (tutor mode) */
-
-    autoAnalyseMove ( pmr, &ms );
-    
     /* FIXME perform other elision (e.g. consecutive "set" records) */
 
 #if USE_GTK
@@ -613,7 +609,9 @@ static int NewGame( void ) {
     pmr->g.fResigned = FALSE;
     pmr->g.nAutoDoubles = 0;
     IniStatcontext( &pmr->g.sc );
+    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
+    
 
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
@@ -660,6 +658,7 @@ static int NewGame( void ) {
     pmr->sd.fPlayer = ms.anDice[ 1 ] > ms.anDice[ 0 ];
     pmr->sd.lt = LUCK_NONE;
     pmr->sd.rLuck = ERR_VAL;
+    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     UpdateSetting( &ms.fTurn );
     UpdateSetting( &ms.gs );
@@ -1107,6 +1106,7 @@ extern int ComputerTurn( void ) {
       }
 #endif
       
+      autoAnalyseMove ( pmn, &ms );
       AddMoveRecord( pmn );      
       
       return 0;
@@ -1153,6 +1153,7 @@ extern int ComputerTurn( void ) {
     
     FindPubevalMove( ms.anDice[ 0 ], ms.anDice[ 1 ], ms.anBoard, pmn->anMove );
     
+    autoAnalyseMove ( pmn, &ms );
     AddMoveRecord( pmn );
     return 0;
 
@@ -1303,6 +1304,7 @@ extern int ComputerTurn( void ) {
 		      pmn->anMove[ ( i << 1 ) + 1 ] = -1;
 		  }
       
+          autoAnalyseMove ( pmn, &ms );
 	  AddMoveRecord( pmn );
 	  return 0;
       }
@@ -1379,6 +1381,7 @@ static int TryBearoff( void ) {
 		
 		ShowAutoMove( ms.anBoard, pmn->anMove );
 		
+                autoAnalyseMove ( pmn, &ms );
 		AddMoveRecord( pmn );
 
 		return 0;
@@ -1655,6 +1658,7 @@ extern void CommandAgree( char *sz ) {
     pmr->nResigned = ms.fResigned;
     pmr->esResign.et = EVAL_NONE;
     
+    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
 
     TurnDone();
@@ -2050,6 +2054,7 @@ extern void CommandDouble( char *sz ) {
     pmr->d.fPlayer = ms.fTurn;
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
+    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2082,6 +2087,7 @@ extern void CommandDrop( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
+    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2263,6 +2269,7 @@ CommandMove( char *sz ) {
 	    
 	    ShowAutoMove( ms.anBoard, pmn->anMove );
 	    
+            autoAnalyseMove ( pmn, &ms );
 	    AddMoveRecord( pmn );
 
 	    TurnDone();
@@ -2344,6 +2351,7 @@ CommandMove( char *sz ) {
 		}
 #endif
 		
+                autoAnalyseMove ( pmn, &ms );
 		AddMoveRecord( pmn );
 #if USE_GTK
 		/* Don't animate this move. */
@@ -2845,6 +2853,7 @@ extern void CommandRedouble( char *sz ) {
     pmr->d.fPlayer = ms.fTurn;
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
+    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
     
     TurnDone();
@@ -2973,6 +2982,7 @@ CommandRoll( char *sz ) {
   pmr->sd.fPlayer = ms.fTurn;
   pmr->sd.lt = LUCK_NONE;
   pmr->sd.rLuck = ERR_VAL;
+  autoAnalyseMove ( pmr, &ms );
   AddMoveRecord( pmr );
   
   ShowBoard();
@@ -3010,6 +3020,7 @@ CommandRoll( char *sz ) {
     
     ShowAutoMove( ms.anBoard, pmn->anMove );
 
+    autoAnalyseMove ( pmn, &ms );
     AddMoveRecord( pmn );
     TurnDone();
   } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( ms.anBoard )
@@ -3033,6 +3044,7 @@ CommandRoll( char *sz ) {
 
     ShowAutoMove( ms.anBoard, pmn->anMove );
 	
+    autoAnalyseMove ( pmn, &ms );
     AddMoveRecord( pmn );
     TurnDone();
   } else
@@ -3068,6 +3080,7 @@ extern void CommandTake( char *sz ) {
     pmr->d.esDouble.et = EVAL_NONE;
     pmr->d.st = SKILL_NONE;
 
+    autoAnalyseMove ( pmr, &ms );
     AddMoveRecord( pmr );
 
     UpdateSetting( &ms.nCube );
@@ -3159,6 +3172,7 @@ SetMatchID ( const char *szMatchID ) {
   pmr->g.fResigned = FALSE;
   pmr->g.nAutoDoubles = 0;
   IniStatcontext( &pmr->g.sc );
+  autoAnalyseMove ( pmr, &ms );
   AddMoveRecord( pmr );
 
   ms.gs = gs;
@@ -3195,6 +3209,7 @@ SetMatchID ( const char *szMatchID ) {
     pmscp->sz = NULL;
     pmscp->fCubeOwner = fCubeOwner;
     
+    autoAnalyseMove ( pmscp, &ms );
     AddMoveRecord( pmscp );
 
   }
