@@ -728,7 +728,7 @@ extern void ClearMoveRecord( void ) {
 static guint nTimeout, fDelaying;
 
 #if USE_TIMECONTROL
-static guint nClockTimeout;
+static guint nClockTimeout = 0;
 #endif
 
 
@@ -745,8 +745,8 @@ static gint DelayTimeout( gpointer p ) {
 static void ResetDelayTimer( void ) {
 
     if( fX && nDelay && fDisplay ) {
-	if( nTimeout )
-	    gtk_timeout_remove( nTimeout );
+      if( nTimeout ) {
+        gtk_timeout_remove( nTimeout );
 
 	nTimeout = gtk_timeout_add( nDelay, DelayTimeout, NULL );
     }
@@ -1890,7 +1890,11 @@ extern int NextTurn( int fPlayNext ) {
 #if USE_TIMECONTROL
 #if USE_GUI
 #if USE_GTK
-	gtk_timeout_remove(nClockTimeout);
+            if ( nClockTimeout ) {
+              /* ugly hack, jth */
+              gtk_timeout_remove(nClockTimeout);
+              nClockTimeout = 0;
+            }
 #else
 	/* EventPending( &evNextTurn, TRUE );    */ assert (0);
 #endif
@@ -3289,7 +3293,7 @@ extern void CommandNewMatch( char *sz ) {
     InitGameClock(&ms.gc, &tc, 2*ms.nMatchTo);
 #if USE_GUI
 #if USE_GTK
-	nClockTimeout = gtk_timeout_add(314 , (GtkFunction)UpdateClockNotify, 0 );
+    nClockTimeout = gtk_timeout_add(314 , (GtkFunction)UpdateClockNotify, 0 );
 #else
 	/* EventPending( &evNextTurn, TRUE );    */ assert (0);
 #endif

@@ -1,3 +1,9 @@
+Sat Oct 11 23:22:37 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* play.c (NextTurn): protect call to gtk_timeout_remove.
+	(FIXME: implement general solution?)
+	(bug reported by Scott Steiner)
+
 Sat Oct 11 18:00:03 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* text.c (TextPrologue, ExportPositionGammOnLine, HTMLPrologue):
