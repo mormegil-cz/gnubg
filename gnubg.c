@@ -1149,6 +1149,8 @@ command cER = {
     { "take", CommandTake, N_("Agree to an offered double"), NULL, NULL },
     { "train", NULL, N_("Update gnubg's weights from training data"), NULL,
       acTrain },
+    { "xcopy", CommandXCopy, 
+      N_("Copy the primary selection to the clipboard"), NULL, NULL },
     { "?", CommandHelp, N_("Describe commands"), szOPTCOMMAND, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, cTop = { NULL, NULL, NULL, NULL, acTop };
@@ -3427,6 +3429,16 @@ extern void CommandCopy (char *sz)
 #else
   puts (DrawBoard (szOut, ms.anBoard, ms.fMove, aps,
 			  MatchIDFromMatchState (&ms)));
+#endif
+
+}
+
+extern void
+CommandXCopy ( char *sz ) {
+
+#ifdef USE_GTK
+  if ( fX )
+    GTKCopy ();
 #endif
 
 }

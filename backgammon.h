@@ -746,7 +746,8 @@ extern void CommandAccept( char * ),
     CommandShowWarranty( char * ),
     CommandSwapPlayers ( char * ),
     CommandTake( char * ),
-    CommandTrainTD( char * );
+    CommandTrainTD( char * ),
+    CommandXCopy ( char * );
 
 
 extern int fTutor;
