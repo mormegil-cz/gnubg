@@ -118,12 +118,13 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
   nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
   fConfirm = TRUE, fShowProgress;
 
-evalcontext ecTD = { 0, 8, 0.16, 0, FALSE }, ecEval = { 1, 8, 0.16, 0, FALSE },
-    ecRollout = { 0, 8, 0.16, 0, FALSE };
+evalcontext ecTD = { 0, 8, 0.16, 0, FALSE, FALSE };
+evalcontext ecEval = { 1, 8, 0.16, 0, FALSE, FALSE };
+evalcontext ecRollout = { 0, 8, 0.16, 0, FALSE, FALSE };
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE } }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE, FALSE } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE, FALSE } }
 };
 
 /* Usage strings */
@@ -1287,12 +1288,12 @@ extern void CommandHint( char *sz ) {
         if ( ml.cMoves ) {
 
 	  ar = ml.amMoves[ 0 ].arEvalMove;
-          rEqTop = Utility ( ar, &ci );
+          rEqTop = ml.amMoves[ 0 ].rScore;
 
-          outputf ("    %2i. %5s    %-30s Eq.: %+6.3f\n"
+          outputf ("    %2i. %-14s    %-24s Eq.: %+6.3f\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
-                   1, FormatEval5 ( szTemp, ml.amMoves[ 0 ].etMove,
+                   1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
                                     ml.amMoves[ 0 ].esMove ), 
                    FormatMove( szMove, anBoard, 
                                ml.amMoves[ 0 ].anMove ),
@@ -1306,12 +1307,12 @@ extern void CommandHint( char *sz ) {
 	for( i = 1; i <  ml.cMoves; i++ ) {
 
 	  ar = ml.amMoves[ i ].arEvalMove;
-          rEq = Utility ( ar, &ci );
+          rEq = ml.amMoves[ i ].rScore;
 
-          outputf ("    %2i. %5s    %-30s Eq.: %+6.3f (%+6.3f)\n"
+          outputf ("    %2i. %-14s    %-24s Eq.: %+6.3f (%+6.3f)\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
-                   i+ 1, FormatEval5 ( szTemp, ml.amMoves[ i ].etMove,
+                   i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
                                     ml.amMoves[ i ].esMove ), 
                    FormatMove( szMove, anBoard, 
                                ml.amMoves[ i ].anMove ),
@@ -1332,12 +1333,12 @@ extern void CommandHint( char *sz ) {
         if ( ml.cMoves ) {
 
 	  ar = ml.amMoves[ 0 ].arEvalMove;
-          rMWCTop = 100.0 * eq2mwc ( Utility ( ar, &ci ), &ci );
+          rMWCTop = 100.0 * eq2mwc ( ml.amMoves[ 0 ].rScore, &ci );
 
-          outputf ("    %2i. %5s    %-30s Mwc: %7.3f%%\n"
+          outputf ("    %2i. %-14s    %-24s Mwc: %7.3f%%\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
-                   1, FormatEval5 ( szTemp, ml.amMoves[ 0 ].etMove,
+                   1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
                                     ml.amMoves[ 0 ].esMove ), 
                    FormatMove( szMove, anBoard, 
                                ml.amMoves[ 0 ].anMove ),
@@ -1351,12 +1352,12 @@ extern void CommandHint( char *sz ) {
 	for( i = 1; i <  ml.cMoves; i++ ) {
 
 	  ar = ml.amMoves[ i ].arEvalMove;
-          rMWC = 100.0 * eq2mwc ( Utility ( ar, &ci ), &ci );
+          rMWC = 100.0 * eq2mwc ( ml.amMoves[ i ].rScore, &ci );
 
-          outputf ("    %2i. %5s    %-30s Mwc: %7.3f%% (%+7.3f%%)\n"
+          outputf ("    %2i. %-14s    %-24s Mwc: %7.3f%% (%+7.3f%%)\n"
                    "       %5.1f%% %5.1f%% %5.1f%%  -"
                    " %5.1f%% %5.1f%% %6.2f%%\n",
-                   i+ 1, FormatEval5 ( szTemp, ml.amMoves[ i ].etMove,
+                   i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
                                     ml.amMoves[ i ].esMove ), 
                    FormatMove( szMove, anBoard, 
                                ml.amMoves[ i ].anMove ),
