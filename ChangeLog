@@ -1,3 +1,11 @@
+Tue Sep 17 10:40:39 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_init): Correct typo in previous revision.
+
+Mon Sep 16 16:23:45 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkboard.c (board_init): Added a few toolbar icons.
+
 Mon Sep 16 15:12:47 2002  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (CallbackProgress): SuspendInput() while handling GTK events.

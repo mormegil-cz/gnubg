@@ -4842,7 +4842,6 @@ static void board_init( Board *board ) {
                                                      GTK_ICON_SIZE_SMALL_TOOLBAR ) );
 #else
     bd->play = gtk_button_new_with_label ( _("Play" ) );
-                                             bd->toolbar ) );
 #endif
     gtk_signal_connect( GTK_OBJECT( bd->play ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
