@@ -3148,10 +3148,10 @@ CommandSetExportParametersRollout ( char *sz ) {
 extern void
 CommandSetExportMovesDisplayVeryBad ( char *sz ) {
   
-  SetToggle( "export moves display verybad", 
+  SetToggle( "export moves display very bad", 
              &exsExport.afMovesDisplay[ SKILL_VERYBAD ], sz,
-             _("Export moves marked 'verybad'."),
-             _("Do not export moves marked 'verybad'.") );
+             _("Export moves marked 'very bad'."),
+             _("Do not export moves marked 'very bad'.") );
 
 }
     
@@ -3208,10 +3208,10 @@ CommandSetExportMovesDisplayGood ( char *sz ) {
 extern void
 CommandSetExportMovesDisplayVeryGood ( char *sz ) {
   
-  SetToggle( "export moves display verygood", 
+  SetToggle( "export moves display very good", 
              &exsExport.afMovesDisplay[ SKILL_VERYGOOD ], sz,
-             _("Export moves marked 'verygood'."),
-             _("Do not export moves marked 'verygood'.") );
+             _("Export moves marked 'very good'."),
+             _("Do not export moves marked 'very good'.") );
   
 }
     
@@ -3219,10 +3219,10 @@ CommandSetExportMovesDisplayVeryGood ( char *sz ) {
 extern void
 CommandSetExportCubeDisplayVeryBad ( char *sz ) {
   
-  SetToggle( "export cube display verybad", 
+  SetToggle( "export cube display very bad", 
              &exsExport.afCubeDisplay[ SKILL_VERYBAD ], sz,
-             _("Export cube decisions marked 'verybad'."),
-             _("Do not export cube decisions marked 'verybad'.") );
+             _("Export cube decisions marked 'very bad'."),
+             _("Do not export cube decisions marked 'very bad'.") );
 
 }
     
@@ -3279,10 +3279,10 @@ CommandSetExportCubeDisplayGood ( char *sz ) {
 extern void
 CommandSetExportCubeDisplayVeryGood ( char *sz ) {
   
-  SetToggle( "export cube display verygood", 
+  SetToggle( "export cube display very good", 
              &exsExport.afCubeDisplay[ SKILL_VERYGOOD ], sz,
-             _("Export cube decisions marked 'verygood'."),
-             _("Do not export cube decisions marked 'verygood'.") );
+             _("Export cube decisions marked 'very good'."),
+             _("Do not export cube decisions marked 'very good'.") );
 
 }
     
@@ -3398,7 +3398,7 @@ CommandSetExportHTMLPictureURL ( char *sz ) {
 
   if ( ! sz || ! *sz ) {
     outputl ( _("You must specify a URL. "
-              "See 'help set export html pictureurl'.") );
+              "See `help set export html pictureurl'.") );
     return;
   }
 

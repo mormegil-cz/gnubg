@@ -4122,7 +4122,7 @@ static GtkWidget *EvalWidget( evalcontext *pec, movefilter *pmf,
     gtk_container_add ( GTK_CONTAINER ( pw2 ), pwev );
 
     gtk_tooltips_set_tip( ptt, pwev,
-                          _("Specify how rolls GNU Backgammon should "
+                          _("Specify how many rolls GNU Backgammon should "
                             "lookahead. Each ply costs approximately a factor "
                             "of 21 in computational time. Also note that "
                             "2-ply is equivalent to Snowie's 3-ply setting."),
@@ -7035,9 +7035,9 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
   static char *aszLabelsMoney[] = {
     N_("Advantage (actual) in ppg"),
-    N_("95% confidence interval (ppg)"),
+    N_("95%% confidence interval (ppg)"),
     N_("Advantage (luck adjusted) in ppg"),
-    N_("95% confidence interval (ppg)")
+    N_("95%% confidence interval (ppg)")
   };
 
   static char *aszLabelsMatch[] = {

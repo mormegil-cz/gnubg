@@ -3447,7 +3447,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 
 	if( !i ) {
 	    if( fOutputWinPC )
-		sprintf( sz, _(" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		sprintf( sz, _(" %4i. %-14s   %-28s MWC: %7.3f%%\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n"),
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
@@ -3458,7 +3458,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz, _(" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		sprintf( sz, _(" %4i. %-14s   %-28s MWC: %7.3f%%\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n"),
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
@@ -3478,7 +3478,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 		strcpy( sz, "   ?? " );
 	    
 	    if( fOutputWinPC )
-		sprintf( sz + 6, _(" %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, _(" %-14s   %-28s MWC: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
 			 " %5.1f%% %5.1f%% %5.1f%%\n"),
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
@@ -3489,7 +3489,7 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz + 6, _(" %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, _(" %-14s   %-28s MWC: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.3f %5.3f %5.3f  -"
 			 " %5.3f %5.3f %5.3f\n"),
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 

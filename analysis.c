@@ -1801,7 +1801,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                  _("Advantage (actual) in ppg"),
                  psc->arActualResult[ 0 ] / psc->nGames,
                  psc->arActualResult[ 1 ] / psc->nGames,
-                 _("95% confidence interval (ppg)"),
+                 _("95%% confidence interval (ppg)"),
                  1.95996f *
                  sqrt( psc->arVarianceActual[ 0 ] / psc->nGames ),
                  1.95996f *
@@ -1813,7 +1813,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                  ( psc->arActualResult[ 1 ] - 
                    psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) /
                  psc->nGames,
-                 _("95% confidence interval (ppg)"),
+                 _("95%% confidence interval (ppg)"),
                  1.95996f *
                  sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),
                  1.95996f *
