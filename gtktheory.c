@@ -913,9 +913,6 @@ GTKShowTheory ( const int fActivePage ) {
 
   /* show dialog */
 
-  gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ),
-                          fActivePage ? 2 /* prices */ : 0 /* market */ );
-
   gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
   gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
                                 GTK_WINDOW( pwMain ) );
@@ -928,6 +925,9 @@ GTKShowTheory ( const int fActivePage ) {
   
   TheoryUpdated ( NULL, ptw );
   
+  gtk_notebook_set_page ( GTK_NOTEBOOK ( pwNotebook ),
+                          fActivePage ? 2 /* prices */ : 0 /* market */ );
+
   GTKDisallowStdin();
   gtk_main();
   GTKAllowStdin();

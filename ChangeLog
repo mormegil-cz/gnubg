@@ -1,3 +1,9 @@
+Mon Aug 12 19:13:44 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Make theory widget show correct notebook page.
+
+	* gtktheory.c (GTKShowTheory): move code around...
+
 Mon Aug 12 18:13:34 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (EvalWidget, AnalysisPage): add a few missing gettexts.
