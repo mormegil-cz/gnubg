@@ -35,6 +35,7 @@
 # define _(Text) gettext (Text)
 #else
 # define _(Text) Text
+# define gettext(Text) Text
 #define textdomain(Domain)
 #define bindtextdomain(Package, Directory)
 #endif

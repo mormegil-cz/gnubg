@@ -1,3 +1,7 @@
+Wed Jun 12 10:46:27 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* i18n.h: define gettext as macro #ifndef ENABLE_NLS
+
 Tue Jun 11 11:58:52 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am: Write sgfp.c explicitly, instead of using $@ (which
