@@ -3792,7 +3792,7 @@ extern void CommandSaveSettings( char *szParam ) {
     int i, cCache; 
     char *szFile;
     static char *aszWindow[] =
-      { "main", "annotation", "game", "hint" };
+      { "main", "game", "annotation", "hint" };
 
     szParam = NextToken ( &szParam );
     

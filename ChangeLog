@@ -1,3 +1,8 @@
+Fri Aug 16 21:21:31 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (CommandSaveSettings): fix typo that lead to
+	swapping of annotation window and game list window geometries
+
 Fri Aug 16 21:05:47 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (absoluteRating): fix stupid bug. Use exponential	
