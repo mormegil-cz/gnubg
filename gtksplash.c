@@ -36,6 +36,13 @@
 #include "gtkboard.h"
 #include "i18n.h"
 
+#if GTK_CHECK_VERSION(2,0,0)
+#define USLEEP(x) g_usleep(x)
+#elif HAVE_USLEEP
+#define USLEEP(x) usleep(x)
+#else
+#define USLEEP(x)
+#endif
 
 typedef struct _gtksplash {
   GtkWidget *pwWindow;
@@ -103,7 +110,7 @@ DestroySplash ( GtkWidget *pwSplash ) {
   if ( ! pwSplash )
     return;
   
-  g_usleep ( 1000 );
+  USLEEP( 1000 );
 
   gtk_widget_destroy ( pwSplash );
 
@@ -129,6 +136,6 @@ PushSplash ( GtkWidget *pwSplash,
   while( gtk_events_pending() )
     gtk_main_iteration();
 
-  g_usleep ( nMuSec );
+  USLEEP( nMuSec );
 
 }

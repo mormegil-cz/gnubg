@@ -1,3 +1,8 @@
+Thu Jan  2 16:56:57 2003  Gary Wong  <gtw@gnu.org>
+
+	* gtksplash.c (USLEEP): New macro -- use g_usleep() if we can,
+	otherwise use usleep() if we can, otherwise stay awake.
+
 Thu Jan  2 22:51:47 2003  Joern Thyssen  <jth@gnubg.org>
 
 	First iteration of .tmg (TrueMoneyGames) import.
