@@ -719,4 +719,36 @@
 
    </board-design>
 
+   <board-design>
+
+      <about>
+         <title>Nature (3d)</title>
+         <author>Albert Silver</author>
+      </about>
+
+      <design>
+         piecetype=0
+         roundededges=y
+         lighttype=d
+         lightposx=3.000000 lightposy=0.000000 lightposz=3.600000
+         lightambient=50 lightdiffuse=70 lightspecular=100
+         chequers3d0=#FFDFBC;#FBD8B6;#FFFFFF;81;100
+         chequers3d1=#C55909;#AD4D0F;#E0E0E0;100;100
+         dice3d0=#FFDFBC;#FBD8B6;#FFFFFF;81;100;y
+         dice3d1=#C55909;#AD4D0F;#E0E0E0;100;100;y
+         dot3d0=#000000;#000000;#000000;100;100
+         dot3d1=#FFFFFF;#E5E5E5;#E5E5E5;100;100
+         cube3d=#E5E5E5;#E0E0E0;#E5E5E5;81;0
+         cubetext3d=#000000;#000000;#000000;100;100
+         base3d=#FFFFFF;#FFFFFF;#FFFFFF;61;0;Water01.png
+         points3d0=#7DDC7D;#59D267;#C5C5C5;100;100;Grass01.png
+         points3d1=#1E661E;#106A13;#C5C5C5;100;100;Grass01.png
+         border3d=#FFFFFF;#FFFFFF;#FFFFFF;71;100;EarthSand01.png
+         hinge3d=#CC975B;#DAB056;#FFE09A;100;0;Hinge2.bmp
+         numbers3d=#FFFFFF;#FFFFFF;#E5E5E5;100;100
+         background3d=#FFFFFF;#FFFFFF;#FFFFFF;100;0;wavesand01.png
+      </design>
+
+   </board-design>
+
 </board-designs>

@@ -1,3 +1,8 @@
+Thu Sep 04 11:12:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gnubg.c: Added CR/LF for copy to clipboard under windows
+	* boards.xml: Added new 3d design (nature)
+
 Wed Sep 03 22:04:45 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkmet.c (UpdateTable): avoid buffer overflow

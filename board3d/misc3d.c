@@ -192,7 +192,7 @@ void setMaterial(Material* pMat)
 	glMaterialfv(GL_FRONT, GL_AMBIENT, pMat->ambientColour);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, pMat->diffuseColour);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, pMat->specularColour);
-	glMateriali(GL_FRONT, GL_SHININESS, pMat->shininess);
+	glMateriali(GL_FRONT, GL_SHININESS, pMat->shine);
 
 	if (pMat->pTexture)
 	{
@@ -1622,7 +1622,7 @@ void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, flo
 	pMat->specularColour[1] = sg;
 	pMat->specularColour[2] = sb;
 	pMat->specularColour[3] = a;
-	pMat->shininess = shin;
+	pMat->shine = shin;
 
 	pMat->alphaBlend = (a != 1) && (a != 0);
 

@@ -169,9 +169,9 @@ static int SetMaterial(Material* pMat, char *sz)
 		*pch = 0;
 
 	if (sz)
-		pMat->shininess = atoi(sz);
+		pMat->shine = atoi(sz);
 	else
-		pMat->shininess = 128;
+		pMat->shine = 128;
 
 	if (sz)
 		sz += strlen(sz) + 1;
@@ -225,9 +225,9 @@ static int SetMaterialDice(Material* pMat, char *sz, int* flag)
 		*pch = 0;
 
 	if (sz)
-		pMat->shininess = atoi(sz);
+		pMat->shine = atoi(sz);
 	else
-		pMat->shininess = 128;
+		pMat->shine = 128;
 
 	if (sz)
 		sz += strlen(sz) + 1;
@@ -626,7 +626,7 @@ char *WriteMaterial(Material* pMat)
 		(int)(pMat->specularColour[0] * 0xFF),
 		(int)(pMat->specularColour[1] * 0xFF),
 		(int)(pMat->specularColour[2] * 0xFF),
-		pMat->shininess,
+		pMat->shine,
 		(int)((pMat->ambientColour[3] + .001f) * 100));
 	if (pMat->textureInfo)
 	{

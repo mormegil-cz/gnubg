@@ -74,7 +74,7 @@ typedef struct _Material
 	float ambientColour[4];
 	float diffuseColour[4];
 	float specularColour[4];
-	int shininess;
+	int shine;
 	int alphaBlend;
 	TextureInfo* textureInfo;
 	Texture* pTexture;

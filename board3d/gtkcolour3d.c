@@ -105,10 +105,10 @@ void SetupLight()
 static void Draw(Material* pMat)
 {
 	Texture texture;
-	int tempShin = pMat->shininess;
+	int tempShin = pMat->shine;
 	float edge = (1 / (float)PREVIEW_HEIGHT) * STRIP_HEIGHT;
 	/* Accentuate shiness - so visible in preview */
-	pMat->shininess = tempShin / 3;
+	pMat->shine = tempShin / 3;
 
 	if (pMat->textureInfo)
 	{
@@ -141,7 +141,7 @@ static void Draw(Material* pMat)
 	}
 
 	setMaterial(pMat);
-	pMat->shininess = tempShin;
+	pMat->shine = tempShin;
 
 	if (pMat->alphaBlend)
 		glEnable(GL_BLEND);
@@ -315,7 +315,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 	table = gtk_table_new(5, 4, TRUE);
 	gtk_container_add(GTK_CONTAINER(window), table);
 
-	label = gtk_label_new("Ambient colour:");
+	label = gtk_label_new(_("Ambient colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 0, 1);
 	pcpAmbient = gtk_colour_picker_new();
 	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL(pcpAmbient) ),
@@ -324,7 +324,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 			       0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpAmbient, 1, 2, 0, 1);
 
-	label = gtk_label_new("Diffuse colour:");
+	label = gtk_label_new(_("Diffuse colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 1, 2);
 	pcpDiffuse = gtk_colour_picker_new();
 	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL(pcpDiffuse) ),
@@ -333,7 +333,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 			       0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpDiffuse, 1, 2, 1, 2);
 
-	label = gtk_label_new("Specular colour:");
+	label = gtk_label_new(_("Specular colour:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 0, 1);
 	pcpSpecular = gtk_colour_picker_new();
 	gtk_signal_connect_object( GTK_OBJECT( COLOUR_SEL( pcpSpecular )),
@@ -342,7 +342,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 			       0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpSpecular, 3, 4, 0, 1);
 
-	label = gtk_label_new("Shininess:");
+	label = gtk_label_new(_("Shine:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 1, 2);
 	padjShine = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 128, 1, 10, 0));
 	gtk_signal_connect_object( GTK_OBJECT( padjShine ),
@@ -353,7 +353,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 	gtk_scale_set_digits( GTK_SCALE( scale ), 0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), scale, 3, 4, 1, 2);
 
-	pOpacitylabel = gtk_label_new("Opacity:");
+	pOpacitylabel = gtk_label_new(_("Opacity:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), pOpacitylabel, 0, 1, 2, 3);
 	padjOpacity = GTK_ADJUSTMENT(gtk_adjustment_new(0, 1, 100, 1, 10, 0));
 	gtk_signal_connect_object( GTK_OBJECT( padjOpacity ),
@@ -364,7 +364,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 	gtk_scale_set_digits( GTK_SCALE( psOpacity ), 0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), psOpacity, 1, 2, 2, 3);
 
-	pTexturelabel = gtk_label_new("Texture:");
+	pTexturelabel = gtk_label_new(_("Texture:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), pTexturelabel, 2, 3, 2, 3);
 	textureCombo = gtk_combo_new();
 	gtk_combo_set_value_in_list(GTK_COMBO(textureCombo), TRUE, FALSE);
@@ -373,7 +373,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 							GTK_SIGNAL_FUNC(TextureChange), 0);
 	gtk_table_attach_defaults(GTK_TABLE (table), textureCombo, 2, 4, 3, 4);
 
-	label = gtk_label_new("Preview:");
+	label = gtk_label_new(_("Preview:"));
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 0, 1, 3, 4);
 
 	xppm = gdk_pixmap_new(pixWind, PREVIEW_WIDTH, PREVIEW_HEIGHT, -1);
@@ -417,9 +417,9 @@ GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent)
 			       GTK_BUTTONBOX_SPREAD );
 	gtk_container_add( GTK_CONTAINER( GTK_DIALOG( pwColourDialog3d )->action_area ),
 		       pwButtons );
-	pwOK = gtk_button_new_with_label( "OK" ),
+	pwOK = gtk_button_new_with_label( _("OK") ),
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwOK );
-	pwCancel = gtk_button_new_with_label( "Cancel" ),
+	pwCancel = gtk_button_new_with_label( _("Cancel") ),
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
 
 	gtk_signal_connect(GTK_OBJECT(pwOK), "clicked", GTK_SIGNAL_FUNC(ok), 0);
@@ -436,7 +436,7 @@ GtkWidget* Create3dColourDialog(GdkWindow* pixWind, GtkWidget* pParent)
 #endif
     gtk_widget_add_accelerator( pwCancel, "clicked", pag, GDK_Escape, 0, 0 );
 
-    gtk_window_set_title( GTK_WINDOW( pwColourDialog3d ), "3d Colour selection" );
+    gtk_window_set_title( GTK_WINDOW( pwColourDialog3d ), _("3d Colour selection") );
 
     GTK_WIDGET_SET_FLAGS( pwOK, GTK_CAN_DEFAULT );
     gtk_widget_grab_default( pwOK );
@@ -468,7 +468,7 @@ void SetColour3d(GtkWidget *pw, UpdateDetails* pDetails)
 	setCol(GTK_COLOUR_PICKER(pcpDiffuse), col3d->diffuseColour);
 	setCol(GTK_COLOUR_PICKER(pcpSpecular), col3d->specularColour);
 
-	gtk_adjustment_set_value (padjShine, col3d->shininess);
+	gtk_adjustment_set_value (padjShine, col3d->shine);
 	if (IsSet(pDetails->opacity, DF_VARIABLE_OPACITY))
 	{
 		useOpacity = 1;

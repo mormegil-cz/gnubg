@@ -39,6 +39,10 @@ hinge.bmp
 bmp
 Test hinge
 Hinge
+hinge2.bmp
+bmp
+Test hinge 2
+Hinge
 aboard.bmp
 bmp
 alb b1
@@ -46,4 +50,20 @@ general
 aboard2.bmp
 bmp
 alb b2
+general
+EarthSand01.png
+png
+Earth
+general
+Water01.png
+png
+Water
+general
+Grass01.png
+png
+Grass
+general
+wavesand01.png
+png
+Sand
 general
