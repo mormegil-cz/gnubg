@@ -30,6 +30,15 @@
 extern double erf( double x );
 #endif
 
+#define MAXCUBELEVEL  7
+#define DELTA         0.08
+#define DELTABAR      0.06
+#define G1            0.25
+#define G2            0.15
+#define GAMMONRATE    0.25
+
+
+
 #include "matchequity.h"
 
 char *szMET[ MET_JACOBS + 1 ] = {
@@ -51,11 +60,9 @@ float afMETPostCrawford [ MAXSCORE ];
 
 met metCurrent = MET_ZADEH;
 
+#ifdef UNDEF
 int 
 GetCubePrimeValue ( int i, int j, int nCubeValue );
-
-void
-InitMETZadeh ();
 
 void
 InitPostCrawfordMET ();
@@ -65,6 +72,8 @@ ExtendMET ( int nMaxScore );
 
 extern float
 NormalDistArea ( float rMin, float rMax, float rMu, float rSigma );
+
+#endif
 
 /*
  * Match equity table from Kit Woolsey: "How to Play Tournament
@@ -281,80 +290,40 @@ GetMaxScore ( met metx ) {
 }
 
 
-void
-InitMatchEquity ( met metInit ) {
+/*
+ * Calculate area under normal distribution curve (with mean rMu and 
+ * std.dev rSigma) from rMax to rMin.
+ * 
+ * Input:
+ *   rMin, rMax: upper and lower integral limits
+ *   rMu, rSigma: normal distribution parameters.
+ *
+ * Returns:
+ *  area
+ *
+ */
 
-  int i,j;
-  int nMaxScore;
+static float
+NormalDistArea ( float rMin, float rMax, float rMu, float rSigma ) {
 
-  metCurrent = metInit;
+  float rtMin, rtMax;
+  float rInt1, rInt2;
 
-  /* zero current MET */
+  rtMin = ( rMin - rMu ) / rSigma;
+  rtMax = ( rMax - rMu ) / rSigma;
 
-  for ( i = 0; i < MAXSCORE; i++ ) 
-    for ( j = 0; j < MAXSCORE; j++ ) 
-      aafMET[ i ][ j ] = 0.0;
+  rInt1 = ( erf( rtMin / sqrt(2) ) + 1.0f ) / 2.0f;
+  rInt2 = ( erf( rtMax / sqrt(2) ) + 1.0f ) / 2.0f;
 
-  /* calc. or init MET */
-
-  nMaxScore = GetMaxScore ( metInit );
-
-  switch ( metInit ) {
-
-  case MET_ZADEH:
-
-    InitMETZadeh ();
-    
-    break;
-
-  case MET_WOOLSEY:
-
-    for ( i = 0; i < 15; i++ ) 
-      for ( j = 0; j < 15; j++ ) 
-        aafMET[ i ][ j ] = aafMETWoolsey[ i ][ j ];
-
-    InitPostCrawfordMET ();
-  
-    break;
-
-  case MET_JACOBS:
-
-    for ( i = 0; i < 25; i++ ) 
-      for ( j = 0; j < 25; j++ ) 
-        aafMET[ i ][ j ] = aafMETJacobs[ i ][ j ];
-
-    InitPostCrawfordMET ();
-
-    break;
-
-  case MET_SNOWIE:
-
-    for ( i = 0; i < 15; i++ ) 
-      for ( j = 0; j < 15; j++ ) 
-        aafMET[ i ][ j ] = aafMETSnowie[ i ][ j ];
-
-    InitPostCrawfordMET ();
-
-    break;
-
-
-  default:
-    break;
-  }
-
-
-  /* 
-   * Extend match equity table to MAXSCORE using
-   * David Montgomery's extrapolation algorithm.
-   */
-
-  ExtendMET ( nMaxScore );
+  return rInt2 - rInt1;
 
 }
 
 
+
 void 
-InitPostCrawfordMET () {
+initPostCrawfordMET ( float afMETPostCrawford[],
+                      const float rG ) {
 
   int i;
   
@@ -363,9 +332,9 @@ InitPostCrawfordMET () {
   for ( i = 0; i < MAXSCORE; i++ ) {
 
     afMETPostCrawford[ i ] = 
-      GAMMONRATE * 0.5 * 
+      rG * 0.5 * 
       ( (i-4 >=0) ? afMETPostCrawford[ i-4 ] : 1.0 )
-      + (1.0 - GAMMONRATE) * 0.5 * 
+      + (1.0 - rG ) * 0.5 * 
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 );
 
     /*
@@ -384,8 +353,29 @@ InitPostCrawfordMET () {
 }
 
 
+/*
+ * Calculate match equity table from Zadeh's formula published
+ * in Management Science xx.xx,xx.
+ *
+ * Input:
+ *    rG1: gammon rate for leader of match
+ *    rG2: gammon rate for trailer of match
+ *    rDelta, rDeltaBar: parameters in the Zadeh model
+ *      (something to do with cube efficiencies)
+ *    rG3: post-Crawford gammon rate for trailer of match
+ *
+ * Output:
+ *    aafMET: match equity table
+ *    afMETPostCrawford: post-Crawford match equity table
+ *
+ */
+
 void
-InitMETZadeh () {
+initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ], 
+               float afMETPostCrawford[ MAXSCORE ],
+               const float rG1, const float rG2, 
+               const float rDelta, const float rDeltaBar,
+               const float rG3 ) {
 
   int i,j,k;
   int nCube;
@@ -410,9 +400,9 @@ InitMETZadeh () {
   for ( i = 0; i < MAXSCORE; i++ ) {
 
     afMETPostCrawford[ i ] = 
-      GAMMONRATE * 0.5 * 
+      rG3 * 0.5 * 
       ( (i-4 >=0) ? afMETPostCrawford[ i-4 ] : 1.0 )
-      + (1.0 - GAMMONRATE) * 0.5 * 
+      + (1.0 - rG3) * 0.5 * 
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 );
 
     /*
@@ -435,9 +425,9 @@ InitMETZadeh () {
   for ( i = 0; i < MAXSCORE; i++ ) {
 
     aafMET[ i ][ 0 ] = 
-      GAMMONRATE * 0.5 *
+      rG3 * 0.5 *
       ( (i-2 >=0) ? afMETPostCrawford[ i-2 ] : 1.0 )
-      + (1.0 - GAMMONRATE) * 0.5 * 
+      + (1.0 - rG3) * 0.5 * 
       ( (i-1 >=0) ? afMETPostCrawford[ i-1 ] : 1.0 );
     aafMET[ 0 ][ i ] = 1.0 - aafMET[ i ][ 0 ];
 
@@ -459,13 +449,13 @@ InitMETZadeh () {
 
 	aaafD1bar[ i ][ j ][ nCube ] = 
 	  ( GET_MET ( i - nCubeValue, j, aafMET )
-	    - G2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-G2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
+	    - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+	    - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
 	  /
-	  ( G1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
-	    + (1.0-G1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
-	    - G2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-G2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
+	  ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
+	    + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
+	    - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+	    - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
 
 
 
@@ -475,13 +465,13 @@ InitMETZadeh () {
 
 	  aaafD1bar[ j ][ i ][ nCube ] = 
 	    ( GET_MET ( j - nCubeValue, i, aafMET )
-	      - G2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-G2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
+	      - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+	      - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
 	    /
-	    ( G1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
-	      + (1.0-G1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
-	      - G2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-G2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
+	    ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
+	      + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
+	      - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+	      - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
 
 
 	  
@@ -493,13 +483,13 @@ InitMETZadeh () {
 	
 	aaafD2bar[ i ][ j ][ nCube ] = 
 	  ( GET_MET ( j - nCubeValue, i, aafMET )
-	    - G2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-G2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
+	    - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+	    - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) )
 	  /
-	  ( G1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
-	    + (1.0-G1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
-	    - G2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
-	    - (1.0-G2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
+	  ( rG1 * GET_MET( j - 4 * nCubePrimeValue, i, aafMET )
+	    + (1.0-rG1) * GET_MET ( j - 2 * nCubePrimeValue, i, aafMET )
+	    - rG2 * GET_MET ( j, i - 4 * nCubePrimeValue, aafMET )
+	    - (1.0-rG2) * GET_MET ( j, i - 2 * nCubePrimeValue, aafMET ) );
 
 
 	if ( i != j ) {
@@ -508,13 +498,13 @@ InitMETZadeh () {
 	  
 	  aaafD2bar[ j ][ i ][ nCube ] = 
 	    ( GET_MET ( i - nCubeValue, j, aafMET )
-	      - G2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-G2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
+	      - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+	      - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) )
 	    /
-	    ( G1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
-	      + (1.0-G1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
-	      - G2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
-	      - (1.0-G2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
+	    ( rG1 * GET_MET( i - 4 * nCubePrimeValue, j, aafMET )
+	      + (1.0-rG1) * GET_MET ( i - 2 * nCubePrimeValue, j, aafMET )
+	      - rG2 * GET_MET ( i, j - 4 * nCubePrimeValue, aafMET )
+	      - (1.0-rG2) * GET_MET ( i, j - 2 * nCubePrimeValue, aafMET ) );
 	  
 
 
@@ -533,12 +523,12 @@ InitMETZadeh () {
 	  
 	  aaafD1[ i ][ j ][ nCube ] = 
 	    1.0 + 
-	    ( aaafD2[ i ][ j ][ nCube+1 ] + DELTA )
+	    ( aaafD2[ i ][ j ][ nCube+1 ] + rDelta )
 	    * ( aaafD1bar[ i ][ j ][ nCube ] - 1.0 );
 	  if ( i != j )
 	    aaafD1[ j ][ i ][ nCube ] = 
 	      1.0 + 
-	      ( aaafD2[ j ][ i ][ nCube+1 ] + DELTA )
+	      ( aaafD2[ j ][ i ][ nCube+1 ] + rDelta )
 	      * ( aaafD1bar[ j ][ i ][ nCube ] - 1.0 );
 	  
 	}
@@ -557,13 +547,13 @@ InitMETZadeh () {
 	  
 	  aaafD2[ i ][ j ][ nCube ] = 
 	    1.0 + 
-	    ( aaafD1[ i ][ j ][ nCube+1 ] + DELTA )
+	    ( aaafD1[ i ][ j ][ nCube+1 ] + rDelta )
 	    * ( aaafD2bar[ i ][ j ][ nCube ] - 1.0 );
 	
 	  if ( i != j ) 
 	    aaafD2[ j ][ i ][ nCube ] = 
 	      1.0 + 
-	      ( aaafD1[ j ][ i ][ nCube+1 ] + DELTA )
+	      ( aaafD1[ j ][ i ][ nCube+1 ] + rDelta )
 	      * ( aaafD2bar[ j ][ i ][ nCube ] - 1.0 );
 	}
 
@@ -574,14 +564,14 @@ InitMETZadeh () {
 
 	  aafMET[ i ][ j ] = 
 	    ( 
-	     ( aaafD2[ i ][ j ][ 0 ] + DELTABAR - 0.5 )
+	     ( aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
 	     * GET_MET( i - 1, j, aafMET ) 
-	     + ( aaafD1[ i ][ j ][ 0 ] + DELTABAR - 0.5 )
+	     + ( aaafD1[ i ][ j ][ 0 ] + rDeltaBar - 0.5 )
 	     * GET_MET( i, j - 1, aafMET ) )
 	    /
 	    (
-	     aaafD1[ i ][ j ][ 0 ] + DELTABAR +
-	     aaafD2[ i ][ j ][ 0 ] + DELTABAR - 1.0 );
+	     aaafD1[ i ][ j ][ 0 ] + rDeltaBar +
+	     aaafD2[ i ][ j ][ 0 ] + rDeltaBar - 1.0 );
 
 
 	  if ( i != j )
@@ -957,8 +947,9 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
 }
 
 
-void
-ExtendMET ( int nMaxScore ) {
+static void
+ExtendMET ( float aarMET[ MAXSCORE ][ MAXSCORE ],
+            const int nMaxScore ) {
 
   static const float arStddevTable[] =
      { 0, 1.24, 1.27, 1.47, 1.50, 1.60, 1.61, 1.66, 1.68, 1.70, 1.72, 1.77 };
@@ -1011,18 +1002,74 @@ ExtendMET ( int nMaxScore ) {
 }
 
 
-extern float
-NormalDistArea ( float rMin, float rMax, float rMu, float rSigma ) {
+void
+InitMatchEquity ( met metInit ) {
 
-  float rtMin, rtMax;
-  float rInt1, rInt2;
+  int i,j;
+  int nMaxScore;
 
-  rtMin = ( rMin - rMu ) / rSigma;
-  rtMax = ( rMax - rMu ) / rSigma;
+  metCurrent = metInit;
 
-  rInt1 = ( erf( rtMin / sqrt(2) ) + 1.0f ) / 2.0f;
-  rInt2 = ( erf( rtMax / sqrt(2) ) + 1.0f ) / 2.0f;
+  /* zero current MET */
 
-  return rInt2 - rInt1;
+  for ( i = 0; i < MAXSCORE; i++ ) 
+    for ( j = 0; j < MAXSCORE; j++ ) 
+      aafMET[ i ][ j ] = 0.0;
+
+  /* calc. or init MET */
+
+  nMaxScore = GetMaxScore ( metInit );
+
+  switch ( metInit ) {
+
+  case MET_ZADEH:
+
+    initMETZadeh ( aafMET, afMETPostCrawford,
+                   G1, G2, DELTA, DELTABAR, GAMMONRATE );
+    
+    break;
+
+  case MET_WOOLSEY:
+
+    for ( i = 0; i < 15; i++ ) 
+      for ( j = 0; j < 15; j++ ) 
+        aafMET[ i ][ j ] = aafMETWoolsey[ i ][ j ];
+
+    initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
+  
+    break;
+
+  case MET_JACOBS:
+
+    for ( i = 0; i < 25; i++ ) 
+      for ( j = 0; j < 25; j++ ) 
+        aafMET[ i ][ j ] = aafMETJacobs[ i ][ j ];
+
+    initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
+
+    break;
+
+  case MET_SNOWIE:
+
+    for ( i = 0; i < 15; i++ ) 
+      for ( j = 0; j < 15; j++ ) 
+        aafMET[ i ][ j ] = aafMETSnowie[ i ][ j ];
+
+    initPostCrawfordMET ( afMETPostCrawford, GAMMONRATE );
+
+    break;
+
+
+  default:
+    break;
+  }
+
+
+  /* 
+   * Extend match equity table to MAXSCORE using
+   * David Montgomery's extrapolation algorithm.
+   */
+
+  ExtendMET ( aafMET, nMaxScore );
 
 }

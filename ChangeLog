@@ -1,3 +1,9 @@
+Sat Jan 12 17:00:47 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* matchequity.c (ExtendMET, initPostCrawfordMET, initMETZadeh):
+	add parameters, instead of using global variables.
+	(shuffle functions around to avoid have to write prototypes).
+
 Thu Jan 10 11:43:20 2002  Gary Wong  <gtw@research.att.com>
 
 	* drawboard.c (FormatMove): Add line I omitted when merging
