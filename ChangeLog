@@ -1,3 +1,7 @@
+Mon Jun  2 23:11:02 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktempmap.c (UpdateMapEquities): show best move in tool tip.
+
 Mon Jun  2 22:32:28 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktempmap.c (ExposeDie, GTKShowTempMap): dynamic resizing of

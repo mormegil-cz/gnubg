@@ -241,6 +241,7 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
   float rMax, rMin, r;
   cubeinfo ci;
   int m;
+  char szMove[ 100 ];
 
   /* calc. min, max and average */
 
@@ -271,14 +272,22 @@ UpdateTempMapEquities( tempmapwidget *ptmw ) {
   for ( m = 0; m < ptmw->n; ++m ) {
     for ( i = 0; i < 6; ++i )
       for ( j = 0; j < 6; ++j ) {
+
+        gchar *sz = 
+          g_strdup_printf( "%s [%s]", 
+                           GetEquityString( ptmw->atm[ m ].aarEquity[ i ][ j ],
+                                            &ci, ptmw->fInvert ), 
+                           FormatMove( szMove, ptmw->atm[ m ].pms->anBoard, 
+                                       ptmw->atm[ m ].aaanMove[ i ][ j ] ) );
+                           
+
         SetStyle( ptmw->atm[ m ].aapwDA[ i ][ j ],
                   ptmw->atm[ m ].aarEquity[ i ][ j ], rMin, rMax, 
                   ptmw->fInvert );
 
-        gtk_tooltips_set_tip( ptt, ptmw->atm[ m ].aapwe[ i ][ j ], 
-                              GetEquityString( ptmw->atm[ m ].aarEquity[ i ][ j ],
-                                               &ci, ptmw->fInvert ), 
+        gtk_tooltips_set_tip( ptt, ptmw->atm[ m ].aapwe[ i ][ j ], sz,
                               "" );
+        g_free( sz );
         gtk_widget_queue_draw( ptmw->atm[ m ].aapwDA[ i ][ j ] ); 
 
       }
@@ -656,7 +665,7 @@ GTKShowTempMap( const matchstate ams[], const int n,
                           GTK_SIGNAL_FUNC( ExposeQuadrant ),
                           ptmw );
 
-    }
+     }
 
   /* separator */
 
