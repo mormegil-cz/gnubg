@@ -5696,8 +5696,10 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( !fNoRC )
 	LoadRCFiles();
 
+#if USE_SOUND
     if( fQuiet )
 	fSound = FALSE;
+#endif
     
     if( optind < argc && *argv[ optind ] )
        CommandLoadMatch( argv[ optind ] );
