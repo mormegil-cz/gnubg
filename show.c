@@ -386,14 +386,14 @@ extern void CommandShowScore( char *sz ) {
 	         " (match to %d points%s)\n",
                  nMatchTo,
 		 fCrawford ? 
-		 ", (Crawford game)" : ( fPostCrawford ?
-					 ", (post-Crawford play)" : ""));
+		 ", Crawford game" : ( fPostCrawford ?
+					 ", post-Crawford play" : ""));
     } 
     else {
         if ( fJacoby )
-	    outputl ( " (money session (with Jacoby rule))\n" );
+	    outputl ( " (money session, with Jacoby rule)\n" );
         else
-	    outputl ( " (money session (without Jacoby rule))\n" );
+	    outputl ( " (money session, without Jacoby rule)\n" );
     }
 
 }

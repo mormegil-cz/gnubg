@@ -30,7 +30,8 @@ duplication of effort and to make sure our changes merge easily.
   web.
 ** Make sure input behaves correctly when stdin is not a TTY. (gary)
 ** Make output*() functions wrap words, and pause before scrolling (as in
-  gdb).  Make sure output to stderr is available when using GTK.
+  gdb).  Make sure output to stderr is available when using GTK -- perror
+  calls will have to be replaced, for instance.
 ** Extend FormatMove() and ParseMove() to handle abbreviation of
   multiple moves (e.g. "8/7(2) 6/5(2)").
 ** Add undo, reroll, and viewing next/prev moves in game/match.  (Reroll
@@ -40,13 +41,12 @@ duplication of effort and to make sure our changes merge easily.
   startup commands.  This needs some thought to make sure it works well
   with Guile scripts.
 ** Add ":" as a Guile escape, once it's here.
-** When "set board" is given with no parameters under X, set it to the
-  current position displayed in the board window.  (Perhaps a button in
-  the board window would be better.)
 ** Allow resuming interrupted rollouts.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
   with push/pop semantics for readline state. (gary)
+** Allow comments in command files, and add a "this file is automatically
+  generated" warning comment to .gnubgautorc.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -59,27 +59,36 @@ duplication of effort and to make sure our changes merge easily.
   board window, if available.
 
 * GTK interface:
-** Add a board edit mode (button 1 drags chequers, button 2 adds
-  player 0/removes player 1, button 3 adds player 1/removes player 0). (gary)
 ** Add a game window, which lists the moves made in the game so far and
   allows moving back and forth.
 ** Make sure the board window behaves properly with ICCCM things.
 ** Allow copy/paste and drag & drop of the board ID in the board window.
 ** Add silly bells and whistles.  Things like colour selector for chequer
   colours, angle of light, surface of pieces, transparent background, etc.
-** Finish menus (settings, in particular).
+** Finish menus (settings, in particular).  Make sure there is a GUI
+  equivalent for every command.
 ** Add a prompt and entry field to allow commands to be entered (replacing
   stdin).
 ** Allow the user to decide whether short messages appear in dialogs
-  instead of the status bar.
+  instead of the status bar, or whether all messages are appended to a
+  message window.
 ** Disable the set/edit buttons in the board window when no game is in
-  progress.
+  progress.  (Disable appropriate menu items, too.)
+** Add a "stop" button which sets fInterrupt; this should be the grab
+  widget when gnubg is busy.
+** Add optional point number labels on the board.
+** Position the "move" widget (that displays the move in progress) higher
+  up, to the left of the "roll dice" widget.
+** Check that extra whitespace is removed from player names entered in the
+  board window.
+** Move the Crawford menu item to the name/score table.
+
 ** Dialogs:
 *** Make "eval" show its output in tables in a dialog.  This will need
   changes in eval.c to give the information in a useful form; probably
   a "DumpPositionRaw".
-*** Make "rollout" (and other slow commands which currently use carriage
-  returns to update their status) use a progress bar in a dialog. (gary)
+*** Make slow commands which currently use carriage returns to update
+  their status use a progress bar in a dialog (like rollouts).
 *** Make "help" show its output in a CList.  There must be a button in
   the dialog to allow the user to recurse through help for subcommands.
 
@@ -96,9 +105,12 @@ duplication of effort and to make sure our changes merge easily.
   dice, the point will be redrawn -- but sometimes that will overwrite
   the dice, which then need updating.
 ** The erroneous commands "set player both" and "set player both evaluation"
-  give poor error messages; "help r" doesn't do anything.
+  give poor error messages; "set score -1 -1" gives a bad message too (it
+  should be redefined to set 1-away, 1-away); "help r" doesn't do anything.
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
+** "eval 4P8PAAADAAAAAA" only finds 3.7% gammons at 1-ply -- why doesn't
+  it see 100%?
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

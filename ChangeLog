@@ -1,3 +1,28 @@
+Mon Jul 31 10:49:18 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* rollout.c (Rollout) [USE_GTK]: Added graphical rollout output.
+	
+	* gtkboard.c: Finished edit mode; added entry fields for player
+	names and scores.
+
+	* gtkgame.c: Added more menu commands.
+	
+	* eval.c (DumpBearoff1): Show from the first to the last non-zero
+	probability, even if there are zeroes in between.
+
+	* gnubg.c (UpdateSetting): New function.  Anybody that changes the
+	global settings (e.g. fConfirm) or game/match state (e.g. nMatchTo)
+	should call this function afterwards so that other code can update
+	things as necessary -- a sort of minimalist MVC arrangement.
+
+	* gnubg.c (outputnew, outputoff, outputon): New functions.
+
+	* gnubg.c (CommandLoadCommands, CommandSaveSettings): New functions.
+	Loading and saving settings is now implemented.
+
+	* gnubg.c: Set fRelativeAccuracy to FALSE in all the default
+	evalcontexts (gnubg seems to play better without it).
+	
 Fri Jul 28 10:08:49 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gtkboard.c (board_pointer, board_edit): More work on board

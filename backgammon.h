@@ -26,6 +26,10 @@
 #include <list.h>
 #include "eval.h"
 
+#if !defined (__GNUC__) && !defined (__attribute__)
+#define __attribute__(X)
+#endif
+
 #if USE_GTK
 #include <gtk/gtk.h>
 extern GtkWidget *pwMain, *pwBoard;
@@ -114,6 +118,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
 extern char *FormatPrompt( void );
+extern void UpdateSetting( void *p );
 
 /* Write a string to stdout/status bar/popup window */
 extern void output( char *sz );
@@ -122,11 +127,18 @@ extern void outputl( char *sz );
 /* Write a character to stdout/status bar/popup window */
 extern void outputc( char ch );
 /* Write a string to stdout/status bar/popup window, printf style */
-extern void outputf( char *sz, ... );
+extern void outputf( char *sz, ... ) __attribute__((format(printf,1,2)));
 /* Write a string to stdout/status bar/popup window, vprintf style */
-extern void outputv( char *sz, va_list val );
+extern void outputv( char *sz, va_list val )
+    __attribute__((format(printf,1,0)));
 /* Signifies that all output for the current command is complete */
 extern void outputx( void );
+/* Signifies that subsequent output is for a new command */
+extern void outputnew( void );
+/* Disable output */
+extern void outputoff( void );
+/* Enable output */
+extern void outputon( void );
 
 #if USE_GUI
 #if USE_GTK
@@ -158,6 +170,7 @@ extern void CommandAccept( char * ),
     CommandEval( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),
+    CommandLoadCommands( char * ),
     CommandMove( char * ),
     CommandNewGame( char * ),
     CommandNewMatch( char * ),
@@ -172,6 +185,7 @@ extern void CommandAccept( char * ),
     CommandRollout( char * ),
     CommandSaveGame( char * ),
     CommandSaveMatch( char * ),
+    CommandSaveSettings( char * ),
     CommandSaveWeights( char * ),
     CommandSetAutoBearoff( char * ),
     CommandSetAutoCrawford( char * ),

@@ -69,6 +69,9 @@ static void NewGame( void ) {
     fResigned = fDoubled = FALSE;
     nCube = 1;
     fCubeOwner = -1;
+    UpdateSetting( &nCube );
+    UpdateSetting( &fCubeOwner );
+    
     go = GAME_NORMAL;
     
  reroll:
@@ -78,6 +81,8 @@ static void NewGame( void ) {
 	free( plGame );
 	ListDelete( lMatch.plPrev );
 	fMove = fTurn = -1;
+	UpdateSetting( &fTurn );
+
 	return;
     }
     
@@ -86,13 +91,16 @@ static void NewGame( void ) {
 		ap[ 1 ].szName, anDice[ 1 ] );
 
     if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
-	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse )
+	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse ) {
 	    outputf( "The cube is now at %d.\n", nCube <<= 1 );
-
+	    UpdateSetting( &nCube );
+	}
+	
 	goto reroll;
     }
 	
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
+    UpdateSetting( &fTurn );
     
 #if USE_GUI
     if( fX && fDisplay )
@@ -253,6 +261,7 @@ extern void NextTurn( void ) {
 	fNextTurn = FALSE;
     
     fTurn = !fTurn;
+    UpdateSetting( &fTurn );
 	
     if( go == GAME_NORMAL && !fResigned && !fDoubled && fTurn != fMove ) {
 	fMove = !fMove;
@@ -322,6 +331,8 @@ extern void NextTurn( void ) {
 	fTurn = fMove = -1;
 	anDice[ 0 ] = anDice[ 1 ] = 0;
 	
+	UpdateSetting( &fTurn );
+
 	go = GAME_NORMAL;
 	
 	outputf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
@@ -334,21 +345,22 @@ extern void NextTurn( void ) {
 #endif
 	
 	if( nMatchTo && fAutoCrawford ) {
-	    fCrawford = anScore[ fWinner ] == nMatchTo - 1 &&
-		anScore[ !fWinner ] < nMatchTo - 1;
-	    fPostCrawford = anScore[ !fWinner ] == nMatchTo - 1;
+	    fPostCrawford = fCrawford && anScore[ fWinner ] < nMatchTo;
+	    fCrawford = !fPostCrawford && !fCrawford &&
+		anScore[ fWinner ] == nMatchTo - 1;
 	}
 	
 	CommandShowScore( NULL );
 	
 	if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
 	    outputf( "%s has won the match.\n", ap[ fWinner ].szName );
+	    outputx();
 	    return;
 	}
 
-	if( fAutoGame ) {
-	    outputx();
+	outputx();
 	
+	if( fAutoGame ) {
 	    NewGame();
 	    
 	    if( ap[ fTurn ].pt == PLAYER_HUMAN )
@@ -534,6 +546,7 @@ extern void CommandDrop( char *sz ) {
     go = GAME_DROP;
 
     fTurn = !fTurn;
+    UpdateSetting( &fTurn );
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DROP;
@@ -735,25 +748,50 @@ extern void CommandNewMatch( char *sz ) {
 	return;
     }
 
+    if( fTurn != -1 && fConfirm ) {
+	if( fInterrupt )
+	    return;
+	    
+	if( !GetInputYN( "Are you sure you want to start a new match, "
+			 "and discard the game in progress? " ) )
+	    return;
+    }
+    
     FreeMatch();
 
     nMatchTo = n;
 
     cGames = anScore[ 0 ] = anScore[ 1 ] = 0;
     fTurn = -1;
-    fCrawford = 0;
-    fPostCrawford = 0;
+    fCrawford = FALSE;
+    fPostCrawford = TRUE;
 
+    UpdateSetting( &nMatchTo );
+    UpdateSetting( &fTurn );
+    UpdateSetting( &fCrawford );
+    
     outputf( "A new %d point match has been started.\n", n );
 
 #if USE_GUI
     if( fX )
 	ShowBoard();
 #endif
+
+    if( fAutoGame )
+	CommandNewGame( NULL );
 }
 
 extern void CommandNewSession( char *sz ) {
 
+    if( fTurn != -1 && fConfirm ) {
+	if( fInterrupt )
+	    return;
+	    
+	if( !GetInputYN( "Are you sure you want to start a new session, "
+			 "and discard the game in progress? " ) )
+	    return;
+    }
+    
     FreeMatch();
 
     cGames = nMatchTo = anScore[ 0 ] = anScore[ 1 ] = 0;
@@ -761,12 +799,19 @@ extern void CommandNewSession( char *sz ) {
     fCrawford = 0;
     fPostCrawford = 0;
 
+    UpdateSetting( &nMatchTo );
+    UpdateSetting( &fTurn );
+    UpdateSetting( &fCrawford );
+    
     outputl( "A new session has been started." );
     
 #if USE_GUI
     if( fX )
 	ShowBoard();
 #endif
+    
+    if( fAutoGame )
+	CommandNewGame( NULL );
 }
 
 extern void CommandPlay( char *sz ) {
@@ -805,13 +850,15 @@ extern void CommandRedouble( char *sz ) {
     }
     
     nCube <<= 1;
+    UpdateSetting( &nCube );    
 
     if( fDisplay )
 	outputf( "%s accepts and immediately redoubles to %d.\n",
 		ap[ fTurn ].szName, nCube << 1 );
     
     fCubeOwner = !fMove;
-
+    UpdateSetting( &fCubeOwner );
+    
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
     ListInsert( plGame, pmt );
@@ -959,14 +1006,16 @@ extern void CommandTake( char *sz ) {
     }
 
     nCube <<= 1;
-
+    UpdateSetting( &nCube );
+    
     if( fDisplay )
 	outputf( "%s accepts the cube at %d.\n", ap[ fTurn ].szName, nCube );
     
     fDoubled = FALSE;
 
     fCubeOwner = !fMove;
-
+    UpdateSetting( &fCubeOwner );
+    
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;
     ListInsert( plGame, pmt );

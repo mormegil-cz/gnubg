@@ -105,6 +105,8 @@ static void SetRNG( rng rngNew, char *szSeed ) {
 	    
 	if( ( rngCurrent = rngNew ) != RNG_MANUAL )
 	    CommandSetSeed( szSeed );
+	
+	UpdateSetting( &rngCurrent );
     }
 }
 
@@ -144,7 +146,9 @@ extern void CommandSetAutoDoubles( char *sz ) {
 	outputl( "A single automatic double will be permitted." );
     else
 	outputl( "Automatic doubles will not be used." );
-	
+
+    UpdateSetting( &cAutoDoubles );
+    
     if( cAutoDoubles ) {
 	if( nMatchTo > 0 )
 	    outputl( "(Note that automatic doubles will have no effect until you "
@@ -252,6 +256,8 @@ extern void CommandSetCubeCentre( char *sz ) {
     
     fCubeOwner = -1;
 
+    UpdateSetting( &fCubeOwner );
+    
     outputl( "The cube has been centred (either player may double)." );
     
 #if USE_GUI
@@ -277,6 +283,8 @@ extern void CommandSetCubeOwner( char *sz ) {
     case 0:
     case 1:
 	fCubeOwner = i;
+	UpdateSetting( &fCubeOwner );
+	
 	break;
 	
     case 2:
@@ -324,6 +332,8 @@ extern void CommandSetCubeUse( char *sz ) {
 	   centred. */
 	nCube = 1;
 	fCubeOwner = -1;
+	UpdateSetting( &nCube );
+	UpdateSetting( &fCubeOwner );
 	
 #if USE_GUI
 	if( fX )
@@ -351,6 +361,7 @@ extern void CommandSetCubeValue( char *sz ) {
     for( i = fDoubled ? MAX_CUBE >> 1 : MAX_CUBE; i; i >>= 1 )
 	if( n == i ) {
 	    outputf( "The cube has been set to %d.\n", nCube = n );
+	    UpdateSetting( &nCube );
 	    
 #if USE_GUI
 	    if( fX )
@@ -385,6 +396,7 @@ extern void CommandSetDelay( char *sz ) {
 	    outputl( "Moves will not be delayed." );
 	
 	nDelay = n;
+	UpdateSetting( &nDelay );
     } else
 #endif
 	outputl( "The `set delay' command applies only when using a window "
@@ -597,7 +609,8 @@ extern void CommandSetPlayerName( char *sz ) {
     }
 
     if( !strncasecmp( pch, "both", strlen( pch ) ) ) {
-	outputl( "`both' is a reserved word; you can't call a player that.\n" );
+	outputl( "`both' is a reserved word; you can't call a player "
+		 "that.\n" );
 
 	return;
     }
@@ -614,7 +627,12 @@ extern void CommandSetPlayerName( char *sz ) {
     
     strcpy( ap[ iPlayerSet ].szName, pch );
 
-    outputf( "Player %d is now knwon as `%s'.\n", iPlayerSet, pch );
+    outputf( "Player %d is now known as `%s'.\n", iPlayerSet, pch );
+
+#if USE_GUI
+    if( fX )
+	ShowBoard();
+#endif
 }
 
 extern void CommandSetPlayerPlies( char *sz ) {
@@ -622,8 +640,8 @@ extern void CommandSetPlayerPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	outputl( "You must specify a vaid ply depth to look ahead -- try `help "
-	      "set player plies'." );
+	outputl( "You must specify a vaid ply depth to look ahead -- try "
+		 "`help set player plies'." );
 
 	return;
     }
@@ -662,6 +680,7 @@ extern void CommandSetPlayer( char *sz ) {
 	iPlayerSet = i;
 
 	HandleCommand( sz, acSetPlayer );
+	UpdateSetting( ap );
 	
 	return;
     }
@@ -681,6 +700,8 @@ extern void CommandSetPlayer( char *sz ) {
 	iPlayerSet = 1;
 	HandleCommand( pchCopy, acSetPlayer );
 
+	UpdateSetting( ap );
+	
 	free( pchCopy );
 	
 	return;
@@ -799,12 +820,12 @@ extern void CommandSetScore( char *sz ) {
 
     /* FIXME allow setting the score in `n-away' notation, e.g.
      "set score -3 -4".  Also allow specifying Crawford here, e.g.
-    "set score crawford -3". */
+    "set score crawford -3" or "set score 4C 3". */
     
     if( ( n0 = ParseNumber( &sz ) ) < 0 ||
 	( n1 = ParseNumber( &sz ) ) < 0 ) {
-	outputl( "You must specify the score for both players -- try `help set "
-	      "score'." );
+	outputl( "You must specify the score for both players -- try `help "
+		 "set score'." );
 	return;
     }
 
@@ -817,10 +838,15 @@ extern void CommandSetScore( char *sz ) {
     anScore[ 0 ] = n0;
     anScore[ 1 ] = n1;
 
-    fCrawford = ( n0 == nMatchTo - 1 ) || ( n1 == nMatchTo - 1 );
-    fPostCrawford = FALSE;
+    fCrawford = ( n0 == nMatchTo - 1 ) != ( n1 == nMatchTo - 1 );
+    fPostCrawford = ( n0 == nMatchTo - 1 ) && ( n1 == nMatchTo - 1 );
     
     CommandShowScore( NULL );
+
+#if USE_GUI
+    if( fX )
+	ShowBoard();
+#endif
 }
 
 extern void CommandSetSeed( char *sz ) {
@@ -853,6 +879,12 @@ extern void CommandSetTurn( char *sz ) {
     char *pch = NextToken( &sz );
     int i;
 
+    if( fTurn < 0 ) {
+	outputl( "There must be a game in progress to set a player on roll." );
+
+	return;
+    }
+    
     if( fResigned ) {
 	outputl( "Please resolve the resignation first." );
 
@@ -885,6 +917,8 @@ extern void CommandSetTurn( char *sz ) {
 
     anDice[ 0 ] = anDice[ 1 ] = 0;
 
+    UpdateSetting( &fTurn );
+
 #if USE_GUI
     if( fX )
 	ShowBoard();
@@ -892,7 +926,6 @@ extern void CommandSetTurn( char *sz ) {
     
     outputf( "`%s' is now on roll.\n", ap[ i ].szName );
 }
-
 
 extern void CommandSetJacoby( char *sz ) {
 
@@ -902,10 +935,10 @@ extern void CommandSetJacoby( char *sz ) {
 	return;
 
     if( fJacoby && !fCubeUse )
-	outputl( "(Note that you'll have to enable the cube if you want gammons "
-	      "and backgammons\nto be scored -- see `help set cube use'.)" );
+	outputl( "(Note that you'll have to enable the cube if you want "
+		 "gammons and backgammons\nto be scored -- see `help set "
+		 "cube use'.)" );
 }
-
 
 extern void CommandSetCrawford( char *sz ) {
 
@@ -919,12 +952,7 @@ extern void CommandSetCrawford( char *sz ) {
 	  return;
 
       /* sanity check */
-
-      if ( fCrawford && fPostCrawford )
-	CommandSetPostCrawford ( "off" );
-
-      if ( !fCrawford && !fPostCrawford )
-	CommandSetPostCrawford ( "on" );
+      fPostCrawford = !fCrawford;
 
       if( fCrawford && fDoubled ) {
 	  outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
@@ -954,13 +982,13 @@ extern void CommandSetPostCrawford( char *sz ) {
 		 "This is not post-Crawford play." );
 
       /* sanity check */
+      fCrawford = !fPostCrawford;
 
-      if ( fPostCrawford && fCrawford )
-	CommandSetCrawford ( "off" );
-
-      if ( !fPostCrawford && !fCrawford )
-	CommandSetCrawford ( "on" );
-
+      if( fCrawford && fDoubled ) {
+	  outputf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
+	  fDoubled = FALSE;
+	  fNextTurn = TRUE;
+      }
     }
     else {
       outputl( "Cannot set whether this is post-Crawford play\n"

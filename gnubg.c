@@ -24,6 +24,7 @@
 #if HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #if HAVE_SYS_FILE_H
@@ -101,7 +102,7 @@ int fReadingCommand;
 
 char szDefaultPrompt[] = "(\\p) ",
     *szPrompt = szDefaultPrompt;
-static int fInteractive;
+static int fInteractive, cOutputDisabled;
 
 int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
@@ -113,12 +114,12 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE,
     fConfirm = TRUE, fShowProgress;
 
-evalcontext ecTD = { 0, 8, 0.16, 0, TRUE }, ecEval = { 1, 8, 0.16, 0, TRUE },
-    ecRollout = { 0, 8, 0.16, 0, TRUE };
+evalcontext ecTD = { 0, 8, 0.16, 0, FALSE }, ecEval = { 1, 8, 0.16, 0, FALSE },
+    ecRollout = { 0, 8, 0.16, 0, FALSE };
 
 player ap[ 2 ] = {
-    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, TRUE } },
-    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, TRUE } }
+    { "gnubg", PLAYER_GNU, { 0, 8, 0.16, 0, FALSE } },
+    { "user", PLAYER_HUMAN, { 0, 8, 0.16, 0, FALSE } }
 };
 
 /* Usage strings */
@@ -152,6 +153,11 @@ command acDatabase[] = {
     { "train", CommandDatabaseTrain, "Train the network from a database of "
       "positions", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acLoad[] = {
+    { "commands", CommandLoadCommands, "Read commands from a script file",
+      szFILENAME, NULL },
+    /* FIXME add equivalents to the other save commands here */
+    { NULL, NULL, NULL, NULL, NULL }
 }, acNew[] = {
     { "game", CommandNewGame, "Start a new game within the current match or "
       "session", NULL, NULL },
@@ -165,6 +171,8 @@ command acDatabase[] = {
       "file", szFILENAME, NULL },
     { "match", CommandSaveMatch, "Record a log of the match so far to a file",
       szFILENAME, NULL },
+    { "settings", CommandSaveSettings, "Use the current settings in future "
+      "sessions", NULL, NULL },
     { "weights", CommandSaveWeights, "Write the neural net weights to a file",
       szFILENAME, NULL },
     { NULL, NULL, NULL, NULL, NULL }
@@ -332,7 +340,7 @@ command acDatabase[] = {
     { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
     { "hint", CommandHint, "Show the best evaluations of legal "
       "moves", NULL, NULL },
-    { "load", CommandNotImplemented, "Read data from a file", NULL, NULL },
+    { "load", NULL, "Read data from a file", NULL, acLoad },
     { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
     { "new", NULL, "Start a new game, match or session", NULL, acNew },
     { "play", CommandPlay, "Force the computer to move", NULL, NULL },
@@ -444,6 +452,13 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
     return PositionFromID( an, sz );
 }
 
+extern void UpdateSetting( void *p ) {
+#if USE_GTK
+    if( fX )
+	GTKSet( p );
+#endif
+}
+
 extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff ) {
 
@@ -461,8 +476,11 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
     
     if( !strcasecmp( "on", pch ) || !strncasecmp( "yes", pch, cch ) ||
 	!strncasecmp( "true", pch, cch ) ) {
-	*pf = TRUE;
-
+	if( !*pf ) {
+	    *pf = TRUE;
+	    UpdateSetting( pf );
+	}
+	
 	outputl( szOn );
 
 	return TRUE;
@@ -470,8 +488,11 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 
     if( !strcasecmp( "off", pch ) || !strncasecmp( "no", pch, cch ) ||
 	!strncasecmp( "false", pch, cch ) ) {
-	*pf = FALSE;
-
+	if( pf ) {
+	    *pf = FALSE;
+	    UpdateSetting( pf );
+	}
+	
 	outputl( szOff );
 
 	return FALSE;
@@ -574,7 +595,8 @@ static void ResetInterrupt( void ) {
     
     if( fInterrupt ) {
 	outputl( "(Interrupted)" );
-
+	outputx();
+	
 	fInterrupt = FALSE;
 	
 #if USE_GTK
@@ -702,6 +724,8 @@ extern void HandleCommand( char *sz, command *ac ) {
     int cch;
     
     if( ac == acTop ) {
+	outputnew();
+    
 	if( *sz == '!' ) {
 	    /* Shell escape */
 	    for( pch = sz + 1; isspace( *pch ); pch++ )
@@ -781,6 +805,9 @@ extern void ShowBoard( void ) {
     char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ];
     char *apch[ 7 ] = { szPlayer0, NULL, NULL, NULL, NULL, NULL, szPlayer1 };
 
+    if( cOutputDisabled )
+	return;
+    
     if( fTurn == -1 ) {
 #if USE_GUI
 	if( fX ) {
@@ -1142,7 +1169,7 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
     list *pl;
     moverecord *pmr;
     char sz[ 40 ];
-    int i = 0, n, nCube = 1, anBoard[ 2 ][ 25 ];
+    int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ];
 
     if( iGame >= 0 )
 	fprintf( pf, " Game %d\n", iGame + 1 );
@@ -1165,7 +1192,7 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	    SwapSides( anBoard );
 	    break;
 	case MOVE_DOUBLE:
-	    sprintf( sz, " Doubles => %d", nCube <<= 1 );
+	    sprintf( sz, " Doubles => %d", nFileCube <<= 1 );
 	    break;
 	case MOVE_TAKE:
 	    strcpy( sz, " Takes" ); /* FIXME beavers? */
@@ -1192,19 +1219,82 @@ static void SaveGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	if( ( n = GameStatus( anBoard ) ) ) {
 	    fprintf( pf, "%sWins %d point%s%s\n\n",
 		   i & 1 ? "                                  " : "\n     ",
-		   n * nCube, n * nCube > 1 ? "s" : "",
+		   n * nFileCube, n * nFileCube > 1 ? "s" : "",
 		   "" /* FIXME " and the match" if appropriate */ );
 
-	    anScore[ i & 1 ] += n * nCube;
+	    anScore[ i & 1 ] += n * nFileCube;
 	}
 	
 	i++;
     }
 }
 
-extern void CommandLoad( char *sz ) {
+static void LoadCommands( FILE *pf, char *szFile ) {
+    
+    char sz[ 2048 ], *pch;
 
-    outputl( "Loading is not yet implemented." );
+    for(;;) {
+	sz[ 0 ] = 0;
+	
+	/* FIXME shouldn't restart sys calls on signals during this fgets */
+	fgets( sz, sizeof( sz ), pf );
+
+	if( ( pch = strchr( sz, '\n' ) ) )
+	    *pch = 0;
+
+	if( ferror( pf ) ) {
+	    perror( szFile );
+	    return;
+	}
+	
+	if( feof( pf ) || fInterrupt )
+	    return;
+	
+	HandleCommand( sz, acTop );
+
+	/* FIXME handle NextTurn events? */
+    }
+}
+
+extern void CommandLoadCommands( char *sz ) {
+
+    FILE *pf;
+
+    if( !sz || !*sz ) {
+	outputl( "You must specify a file to load from (see `help load "
+		 "commands')." );
+	return;
+    }
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	LoadCommands( pf, sz );
+	fclose( pf );
+    } else
+	perror( sz );
+}
+
+static void LoadRCFiles( void ) {
+
+    char sz[ PATH_MAX ], *pch = getenv( "HOME" );
+    FILE *pf;
+
+    outputoff();
+    
+    sprintf( sz, "%s/.gnubgautorc", pch ? pch : "" );
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	LoadCommands( pf, sz );
+	fclose( pf );
+    }
+    
+    sprintf( sz, "%s/.gnubgrc", pch ? pch : "" );
+
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	LoadCommands( pf, sz );
+	fclose( pf );
+    }
+
+    outputon();
 }
 
 extern void CommandSaveGame( char *sz ) {
@@ -1234,6 +1324,8 @@ extern void CommandSaveMatch( char *sz ) {
     FILE *pf;
     int i, anScore[ 2 ];
     list *pl;
+
+    /* FIXME what should be done if nMatchTo == 0? */
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to save to (see `help save match')." );
@@ -1256,6 +1348,54 @@ extern void CommandSaveMatch( char *sz ) {
     
     if( pf != stdout )
 	fclose( pf );
+}
+
+extern void CommandSaveSettings( char *szParam ) {
+
+    char sz[ PATH_MAX ], *pch = getenv( "HOME" );
+    FILE *pf;
+    
+    sprintf( sz, "%s/.gnubgautorc", pch ? pch : "" ); /* FIXME accept param */
+
+    if( !( pf = fopen( sz, "w" ) ) ) {
+	perror( sz );
+	return;
+    }
+
+    errno = 0;
+    
+    fprintf( pf, "set automatic bearoff %s\n"
+	     "set automatic crawford %s\n"
+	     "set automatic game %s\n"
+	     "set automatic move %s\n"
+	     "set automatic roll %s\n",
+	     fAutoBearoff ? "on" : "off",
+	     fAutoCrawford ? "on" : "off",
+	     fAutoGame ? "on" : "off",
+	     fAutoMove ? "on" : "off",
+	     fAutoRoll ? "on" : "off" );
+    /* FIXME save cache settings */
+    fprintf( pf, "set confirm %s\n"
+	     "set delay %d\n"
+	     "set display %s\n",
+	     fConfirm ? "on" : "off",
+	     nDelay,
+	     fDisplay ? "on" : "off" );
+    /* FIXME save eval settings */
+    fprintf( pf, "set jacoby %s\n"
+	     "set nackgammon %s\n",
+	     fJacoby ? "on" : "off",
+	     fNackgammon ? "on" : "off" );
+    /* FIXME save player settings */
+    fprintf( pf, "set prompt %s\n", szPrompt );
+    /* FIXME save rollout settings */
+
+    fclose( pf );
+    
+    if( errno )
+	perror( sz );
+    else
+	outputl( "Settings saved." );
 }
 
 extern void CommandSaveWeights( char *sz ) {
@@ -1727,6 +1867,9 @@ extern int GetInputYN( char *szPrompt ) {
 /* Write a string to stdout/status bar/popup window */
 extern void output( char *sz ) {
 
+    if( cOutputDisabled )
+	return;
+    
 #if USE_GTK
     if( fX && fGTKOutput) {
 	GTKOutput( g_strdup( sz ) );
@@ -1739,6 +1882,9 @@ extern void output( char *sz ) {
 /* Write a string to stdout/status bar/popup window, and append \n */
 extern void outputl( char *sz ) {
 
+    if( cOutputDisabled )
+	return;
+    
 #if USE_GTK
     if( fX && fGTKOutput ) {
 	int cch;
@@ -1759,6 +1905,9 @@ extern void outputl( char *sz ) {
 /* Write a character to stdout/status bar/popup window */
 extern void outputc( char ch ) {
 
+    if( cOutputDisabled )
+	return;
+    
 #if USE_GTK
     if( fX && fGTKOutput ) {
 	char *pch;
@@ -1786,6 +1935,9 @@ extern void outputf( char *sz, ... ) {
 /* Write a string to stdout/status bar/popup window, vprintf style */
 extern void outputv( char *sz, va_list val ) {
 
+    if( cOutputDisabled )
+	return;
+    
 #if USE_GTK
     if( fX && fGTKOutput ) {
 	GTKOutput( g_strdup_vprintf( sz, val ));
@@ -1798,10 +1950,39 @@ extern void outputv( char *sz, va_list val ) {
 /* Signifies that all output for the current command is complete */
 extern void outputx( void ) {
     
+    if( cOutputDisabled )
+	return;
+    
 #if USE_GTK
     if( fX && fGTKOutput )
 	GTKOutputX();
 #endif
+}
+
+/* Signifies that subsequent output is for a new command */
+extern void outputnew( void ) {
+    
+    if( cOutputDisabled )
+	return;
+    
+#if USE_GTK
+    if( fX && fGTKOutput )
+	GTKOutputNew();
+#endif
+}
+
+/* Disable output */
+extern void outputoff( void ) {
+
+    cOutputDisabled++;
+}
+
+/* Enable output */
+extern void outputon( void ) {
+
+    assert( cOutputDisabled );
+
+    cOutputDisabled--;
 }
 
 static RETSIGTYPE HandleInterrupt( int idSignal ) {
@@ -1972,8 +2153,10 @@ extern int main( int argc, char *argv[] ) {
     rl_completion_entry_function = (Function *) NullGenerator;
 #endif
 
-    if( optind < argc )
-	CommandLoad( argv[ optind ] );
+    /* FIXME if( optind < argc )
+       CommandLoad( argv[ optind ] ); */
+
+    LoadRCFiles();
     
 #if USE_GTK
     if( fX ) {
