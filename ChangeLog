@@ -1,3 +1,8 @@
+Thu Mar 20 14:17:22 2003  Gary Wong  <gtw@gnu.org>
+
+	* configure.in: Add --enable-train-menu option, so the GTK+ train
+	menu can be turned on at configure time.
+
 Wed Mar 19 19:07:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* sgf.c (SaveGame): fix typo.
