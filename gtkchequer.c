@@ -38,6 +38,7 @@
 #include "eval.h"
 #include "positionid.h"
 #include "rollout.h"
+#include "gtkboard.h"
 #include "gtkgame.h"
 #include "gtkchequer.h"
 #include "i18n.h"
@@ -284,9 +285,7 @@ ShowMove ( hintdata *phd, const int f ) {
     if ( ! ms.fMove )
       SwapSides ( anBoard );
 
-    sz = g_strdup_printf ( "show fullboard %s", PositionID ( anBoard ) );
-    UserCommand( sz );
-    g_free ( sz );
+    UpdateMove( ( BOARD( pwBoard ) )->board_data, anBoard );
 
   }
   else {

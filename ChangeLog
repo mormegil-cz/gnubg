@@ -1,3 +1,9 @@
+Fri May 30 12:58:27 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (ShowMove): fix bug #3809
+	* gtkboard.c (UpdateMove): new function.
+	(bug #3809 reported by Henrik Ravn)
+
 Thu May 29 21:10:47 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Implement Sho Sengoku Equity Temperature Map

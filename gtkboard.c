@@ -1379,6 +1379,36 @@ GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
 
 
+extern int
+UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
+
+  int old_points[ 28 ];
+  int i, j;
+  int an[ 28 ];
+  int rc;
+
+  memcpy( old_points, bd->points, sizeof old_points );
+
+  write_board ( bd, anBoard );
+
+  for ( i = 0, j = 0; i < 28; ++i )
+    if ( old_points[ i ] != bd->points[ i ] )
+      an[ j++ ] = i;
+
+  if ( ( rc = update_move ( bd ) ) )
+    /* illegal move */
+    memcpy( bd->points, old_points, sizeof old_points );
+
+  /* redraw points */
+
+  for ( i = 0; i < j; ++i )
+    board_invalidate_point( bd, an[ i ] );
+
+  return rc;
+
+}
+
+
 
 static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			       BoardData *bd ) {
@@ -1570,35 +1600,12 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
             /* we've found a move: update board  */
 
-            int old_points[ 28 ];
-            int i, j;
-            int an[ 28 ];
-
-	    memcpy( old_points, bd->points, sizeof old_points );
-
-            write_board ( bd, anBoard );
-
-            for ( i = 0, j = 0; i < 28; ++i )
-              if ( old_points[ i ] != bd->points[ i ] )
-                an[ j++ ] = i;
-
-            if ( !update_move ( bd ) ) {
-
-              /* redraw points */
-
-              for ( i = 0; i < j; ++i )
-                board_invalidate_point( bd, an[ i ] );
-
-            }
-            else {
-
-              /* whoops: this should not happen as ForcedMove and GreadyBearoff
-                 only returns legal moves */
-
+            if ( UpdateMove( bd, anBoard ) ) {
+              /* should not happen as ForcedMove and GreadyBearoff
+                 always return legal moves */
               assert ( FALSE );
-
             }
-            
+
           }
 
           return TRUE;
