@@ -1,3 +1,9 @@
+Tue Jan 28 06:39:22 GMT   Jim Segrave <jes@jes-2.demon.nl>
+
+	* play.c - ShouldDouble did'nt check if the cube was disabled, 
+	  so you could get tutor warnings for missed doubles when they
+	  weren't possible.
+
 Mon Jan 27 20:04:23 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkboard.c (ForcedMove, GreadyBearoff): new functions.

@@ -3554,6 +3554,7 @@ static skilltype ShouldDouble ( void ) {
 		ms.anDice[ 0 ]         || 
 		ms.fDoubled || 
 		ms.fResigned ||
+                ! fCubeUse ||
 		(ap[ ms.fTurn ].pt != PLAYER_HUMAN )) {
 
       return (SKILL_NONE);
