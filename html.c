@@ -3366,17 +3366,17 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
       printStatTableRow( pf, 
                          _("Actual result"),
-                         "%.2f%%",
-                         100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
-                         100.0 * ( 0.5f + psc->arActualResult[ 1 ] ) );
+                         "%+.2f%%",
+                         100.0 * psc->arActualResult[ 0 ],
+                         100.0 * psc->arActualResult[ 1 ] );
 
       printStatTableRow( pf, 
                          _("Luck adjusted result"),
-                         "%.2f%%",
-                         100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
+                         "%+.2f%%",
+                         100.0 * ( psc->arActualResult[ 0 ] - 
                                    psc->arLuck[ 0 ][ 1 ] + 
                                    psc->arLuck[ 1 ][ 1 ] ),
-                         100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
+                         100.0 * ( psc->arActualResult[ 1 ] - 
                                    psc->arLuck[ 1 ][ 1 ] + 
                                    psc->arLuck[ 0 ][ 1 ] ) );
 

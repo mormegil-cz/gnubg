@@ -1767,15 +1767,15 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
     
     if ( ms.nMatchTo )
       sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %7.2f%%                %7.2f%%\n"
-                "%-31s %7.2f%%                %7.2f%%\n",
+                "%-31s %+7.2f%%               %+7.2f%%\n"
+                "%-31s %+7.2f%%               %+7.2f%%\n",
                 _("Actual result"),
-                100.0 * ( 0.5f + psc->arActualResult[ 0 ] ),
-                100.0 * ( 0.5f + psc->arActualResult[ 1 ] ),
+                100.0 * psc->arActualResult[ 0 ],
+                100.0 * psc->arActualResult[ 1 ],
                 _("Luck adjusted result"),
-                100.0 * ( 0.5f + psc->arActualResult[ 0 ] - 
+                100.0 * ( psc->arActualResult[ 0 ] - 
                           psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ] ),
-                100.0 * ( 0.5f + psc->arActualResult[ 1 ] - 
+                100.0 * ( psc->arActualResult[ 1 ] - 
                           psc->arLuck[ 1 ][ 1 ] + psc->arLuck[ 0 ][ 1 ] ) );
     else {
       sprintf ( strchr ( szOutput, 0 ), 

@@ -7493,7 +7493,7 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
 
     if ( pms->nMatchTo )
       for ( i = 0; i < 2; ++i ) {
-        sprintf( sz, "%.2f%%", 100.0 * ( 0.5f + psc->arActualResult[ i ] ) );
+        sprintf( sz, "%+.2f%%", 100.0 * psc->arActualResult[ i ] );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
       }
     else
@@ -7515,8 +7515,8 @@ extern void GTKDumpStatcontext( const statcontext *psc, const matchstate *pms,
         psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
 
       for ( i = 0; i < 2; ++i ) {
-        sprintf( sz, "%.2f%%", 
-                 100.0 * ( 0.5f + psc->arActualResult[ i ] - 
+        sprintf( sz, "%+.2f%%", 
+                 100.0 * ( psc->arActualResult[ i ] - 
                            psc->arLuck[ i ][ 1 ] + psc->arLuck[ !i ][ 1 ] ) );
         gtk_clist_set_text( GTK_CLIST( pwStats ), irow, i + 1, sz);
       }
