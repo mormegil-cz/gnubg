@@ -1061,21 +1061,27 @@ AddStatcontext ( statcontext *pscA, statcontext *pscB ) {
 
   }
 
-  for ( i = 0; i < 2; ++i ) {
-    /* separate loop, else arLuck[ 1 ] is not calculated for i=0 */
+  if ( pscA->arActualResult[ 0 ] >= 0.0f || 
+       pscA->arActualResult[ 1 ] >= 0.0f ) {
+    /* actual result is calculated */
 
-    pscB->arActualResult[ i ] += pscA->arActualResult[ i ];
-    UpdateVariance( &pscB->arVarianceActual[ i ], 
-                    pscB->arActualResult[ i ],
-                    pscA->arActualResult[ i ],
-                    pscB->nGames );
-    UpdateVariance( &pscB->arVarianceLuckAdj[ i ], 
-                    pscB->arActualResult[ i ] - 
-                    pscB->arLuck[ i ][ 1 ] + pscB->arLuck[ !i ][ 1 ],
-                    pscA->arActualResult[ i ] -
-                    pscA->arLuck[ i ][ 1 ] + pscA->arLuck[ !i ][ 1 ],
-                    pscB->nGames );
-
+    for ( i = 0; i < 2; ++i ) {
+      /* separate loop, else arLuck[ 1 ] is not calculated for i=0 */
+      
+      pscB->arActualResult[ i ] += pscA->arActualResult[ i ];
+      UpdateVariance( &pscB->arVarianceActual[ i ], 
+                      pscB->arActualResult[ i ],
+                      pscA->arActualResult[ i ],
+                      pscB->nGames );
+      UpdateVariance( &pscB->arVarianceLuckAdj[ i ], 
+                      pscB->arActualResult[ i ] - 
+                      pscB->arLuck[ i ][ 1 ] + pscB->arLuck[ !i ][ 1 ],
+                      pscA->arActualResult[ i ] -
+                      pscA->arLuck[ i ][ 1 ] + pscA->arLuck[ !i ][ 1 ],
+                      pscB->nGames );
+      
+      
+    }
 
   }
 
@@ -1403,7 +1409,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
   float rFac = ms.nMatchTo ? 100.0f : 1.0f;
   int n;
-
+  int fCalc;
 
   getMWCFromError ( psc, aaaar );
   /* nice human readable dump */
@@ -1774,7 +1780,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
   
   /* luck adjusted results */
 
-  if ( psc->fDice ) {
+  fCalc = psc->arActualResult[ 0 ] > 0.0f || psc->arActualResult[ 1 ] > 0.0f;
+  if ( psc->fDice && fCalc ) {
     
     if ( ms.nMatchTo )
       sprintf ( strchr ( szOutput, 0 ),

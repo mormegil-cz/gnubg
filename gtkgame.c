@@ -7028,6 +7028,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   ratingtype rt[ 2 ];
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
   int irow = 0;
+  int fCalc;
 
   GtkWidget *pwButtons,
     *pwCopy = gtk_button_new_with_label( "Copy" );
@@ -7379,7 +7380,9 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
   ++irow;
 
-  if ( psc->fDice ) {
+  fCalc = psc->arActualResult[ 0 ] > 0.0f || psc->arActualResult[ 1 ] > 0.0f;
+
+  if ( psc->fDice && fCalc ) {
 
     if ( pms->nMatchTo )
       for ( i = 0; i < 2; ++i ) {
@@ -7398,7 +7401,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
 
   ++irow;
 
-  if ( psc->fDice ) {
+  if ( psc->fDice && fCalc ) {
 
     if ( pms->nMatchTo ) {
       float r = 0.5f + psc->arActualResult[ 0 ] - 
@@ -7452,10 +7455,10 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
       }
     }
 
-    irow += 5;
-    
   }
   
+  irow += 5;
+    
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
                                   GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
   gtk_container_add( GTK_CONTAINER( psw ), pwStats );

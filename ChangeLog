@@ -2,6 +2,9 @@ Thu Jul 24 19:29:36 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ImportSGGGame): better support for resignations
 	in SGG files.
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): show only luck adj. results
+	when calculated.
 
 Wed Jul 22 16:34:15 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
