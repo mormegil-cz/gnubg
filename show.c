@@ -43,6 +43,7 @@
 #include "sound.h"
 #include "onechequer.h"
 #include "osr.h"
+#include "positionid.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -53,6 +54,7 @@
 #include "gtkmet.h"
 #include "gtkrolls.h"
 #include "gtktempmap.h"
+#include "gtkbearoff.h"
 #elif USE_EXT
 #include "xgame.h"
 #endif
@@ -2077,7 +2079,7 @@ extern void
 CommandShowVariation( char *sz ) {
 
   if ( ms.gs != GAME_NONE )
-    outputf( _("You are plaing: %s\n"), aszVariations[ ms.bgv ] );
+    outputf( _("You are playing: %s\n"), aszVariations[ ms.bgv ] );
 
   outputf( _("Default variation is: %s\n"), aszVariations[ bgvDefault ] );
 
@@ -2106,5 +2108,159 @@ CommandShowCubeEfficiency( char *sz ) {
              "(min value %.4f, max value %.4f)\n"),
            rCrashedX, rContactX, rOSCubeX,
            rRaceFactorX, rRaceCoefficientX, rRaceMin, rRaceMax );
+
+}
+
+
+extern void
+CommandShowBearoff( char *sz ) {
+
+  char szTemp[ 2048 ];
+
+#if USE_GTK
+  if ( fX ) {
+    GTKShowBearoff( &ms );
+    return;
+  }
+
+#endif  
+
+
+  switch( ms.bgv ) {
+  case VARIATION_STANDARD:
+  case VARIATION_NACKGAMMON:
+    
+    /* Sconyer's huge database */
+    if ( isBearoff( pbc15x15_dvd, ms.anBoard ) ) {
+      strcpy( szTemp, "" );
+      ShowBearoff( szTemp, &ms, pbc15x15_dvd );
+      outputl( szTemp );
+    } 
+    
+    /* gnubg's own databases */
+    if ( isBearoff( pbcTS, ms.anBoard ) ) {
+      strcpy( szTemp, "" );
+      ShowBearoff( szTemp, &ms, pbcTS );
+      outputl( szTemp );
+    } 
+    else if ( isBearoff( pbc2, ms.anBoard ) ) {
+      strcpy( szTemp, "" );
+      ShowBearoff( szTemp, &ms, pbc2 );
+      outputl( szTemp );
+    }
+
+    break;
+
+  case VARIATION_HYPERGAMMON_1:
+  case VARIATION_HYPERGAMMON_2:
+  case VARIATION_HYPERGAMMON_3:
+
+    if ( isBearoff( apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ], 
+                    ms.anBoard ) ) {
+      strcpy( szTemp, "" );
+      ShowBearoff( szTemp, &ms, 
+                    apbcHyper[ ms.bgv - VARIATION_HYPERGAMMON_1 ] );
+      outputl( szTemp );
+    }
+
+    break;
+
+  default:
+
+    assert( FALSE );
+
+  }
+    
+}
+
+extern void
+ShowBearoff( char *sz, matchstate *pms, bearoffcontext *pbc ) {
+
+  if ( pms->anDice[ 0 ] <= 0 ) {
+    /* no dice rolled */
+    if ( isBearoff( pbc, pms->anBoard ) )
+      BearoffDump( pbc, pms->anBoard, sz );
+    else
+      sprintf( sz, _("Position not in database") );
+  }
+  else {
+    /* dice rolled */
+    movelist ml;
+    int aiBest[ 4 ];
+    float arBest[ 4 ];
+    float arEquity[ 4 ];
+    int anBoard[ 2 ][ 25 ];
+    int i, j;
+    static char *aszCube[] = {
+      N_("No cube"),
+      N_("Owned cube"),
+      N_("Centered cube"),
+      N_("Opponent owns cube")
+    };
+    char szMove[ 33 ];
+    static int aiPerm[ 4 ] = { 0, 3, 2, 1 };
+
+    assert ( pms->bgv <= VARIATION_NACKGAMMON );
+    
+    GenerateMoves ( &ml, pms->anBoard, 
+                    pms->anDice[ 0 ], pms->anDice[ 1 ], FALSE );
+
+    if ( ! ml.cMoves ) {
+      sprintf( sz, _("No legal moves!") );
+      return;
+    }
+
+    /* find best move */
+
+    for ( i = 0; i < 4; ++i ) {
+      aiBest[ i ] = -1;
+      arBest[ i ] = -9999.0f;
+    }
+    
+    for ( i = 0; i < ml.cMoves; ++i ) {
+
+      PositionFromKey( anBoard, ml.amMoves[ i ].auch );
+      SwapSides( anBoard );
+
+      if ( isBearoff( pbc, anBoard ) ) {
+        if ( PerfectCubeful( pbc, anBoard, arEquity ) ) {
+          sprintf( sz, _("Interrupted!") );
+          return;
+        }
+      }
+      else {
+        /* whoops, the resulting position is not in the bearoff database */
+        sprintf( sz, _("The position %s is not in the bearoff database"),
+                 PositionID( anBoard ) );
+        return;
+      }
+
+      for ( j = 0; j < 4; ++j )
+        if ( -arEquity[ j ] > arBest[ j ] ) {
+          arBest[ j ] = - arEquity[ j ];
+          aiBest[ j ] = i;
+        }
+    }
+
+    /* output */
+
+    sprintf( sz, _("Equities after rolling %d%d:\n\n"),
+             pms->anDice[ 0 ], pms->anDice[ 1 ] );
+    sprintf( strchr( sz, 0 ),
+             "%-20.20s %-10.10s %-32.32s\n",
+             _("Cube Position"), _("Equity"), _("Best Move") );
+
+    for ( i = 0; i < 4; ++i ) {
+
+      j = aiPerm[ i ];
+      sprintf( strchr( sz, 0 ), "%-20.20s %+7.4f    %-32.32s\n",
+               gettext( aszCube[ i ] ),
+               arBest[ j ],
+               FormatMove( szMove, pms->anBoard, 
+                           ml.amMoves[ aiBest[ j ] ].anMove ) );
+
+    }
+
+  }
 
 }

@@ -76,6 +76,7 @@ Oliver Riordan
 Rod Roark
 Hans-Jürgen Schäfer
 Steve Schreiber
+Hugh Sconyers
 Martin Schrode
 Paul Selick
 Sho Sengoku

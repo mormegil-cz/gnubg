@@ -1,3 +1,4 @@
+
 /*
  * gtkgame.c
  *
@@ -169,6 +170,7 @@ typedef enum _gnubgcommand {
     CMD_SET_MESSAGE_ON,
     CMD_SET_TURN_0,
     CMD_SET_TURN_1,
+    CMD_SHOW_BEAROFF,
     CMD_SHOW_CALIBRATION,
     CMD_SHOW_COPYING,
     CMD_SHOW_ENGINE,
@@ -249,6 +251,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set message on",
     NULL, /* set turn 0 */
     NULL, /* set turn 1 */
+    "show bearoff",
     "show calibration",
     "show copying",
     "show engine",
@@ -2429,6 +2432,9 @@ extern int InitGTK( int *argc, char ***argv ) {
           CMD_SHOW_TEMPERATURE_MAP, NULL },
 	{ N_("/_Analyse/Temperature Map (cube decision)"), NULL, Command, 
           CMD_SHOW_TEMPERATURE_MAP_CUBE, NULL },
+	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Analyse/Bearoff Databases"), NULL, Command, 
+          CMD_SHOW_BEAROFF, NULL },
 	{ N_("/_Analyse/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Analyse/_Gammon values"), NULL, Command, CMD_SHOW_GAMMONVALUES,
 	  NULL },
@@ -8411,7 +8417,29 @@ typedef struct _optionswidget {
 
   GtkWidget *pwCheat, *pwCheatRollBox, *apwCheatRoll[ 2 ];
   GtkWidget *pwGotoFirstGame;
+
+  GtkWidget *pwSconyers15x15DVD;
+  GtkWidget *pwSconyers15x15Disk;
+  GtkWidget *pwPathSconyers15x15DVD;
+  GtkWidget *pwPathSconyers15x15Disk;
+  GtkWidget *pwPathSconyers15x15DVDModify;
+  GtkWidget *pwPathSconyers15x15DiskModify;
+
 } optionswidget;   
+
+static void
+PathSconyersModify( GtkWidget *pw, optionswidget *pow ) {
+  
+  gchar *sz = gtk_object_get_user_data( GTK_OBJECT( pw ) );
+  gchar *pch = g_strdup_printf( _("NOT IMPLEMENTED!\n"
+                                  "Please use the command "
+                                  "\"%s\" instead"), sz ? sz : "oops" );
+
+  Message( pch, DT_ERROR );
+
+  g_free( pch );
+  
+}
 
 static void UseCubeToggled(GtkWidget *pw, optionswidget *pow){
 
@@ -9442,6 +9470,139 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 			    "the database.  Lower values will admit more "
 			    "positions."), NULL );
 
+    /* Bearoff options */
+
+    pwp = gtk_alignment_new( 0, 0, 0, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwn ), pwp,
+			      gtk_label_new( _("Bearoff") ) );
+
+    pwvbox = gtk_vbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
+
+    /* 
+     * Sconyers 15x15 (browse only) 
+     */
+
+    /* enable */
+
+    pwf = gtk_frame_new( _("Sconyers' Bearoff 15x15 (browse only)") );
+    gtk_box_pack_start( GTK_BOX ( pwvbox ), pwf, FALSE, FALSE, 0 );
+    gtk_container_set_border_width (GTK_CONTAINER (pwf), 4);
+    pwb = gtk_vbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (pwf), pwb);
+
+    pow->pwSconyers15x15DVD = 
+      gtk_check_button_new_with_label( _("Enable browsing") );
+    gtk_box_pack_start (GTK_BOX (pwb), pow->pwSconyers15x15DVD,
+			FALSE, FALSE, 0);
+    gtk_tooltips_set_tip( ptt, pow->pwSconyers15x15DVD,
+			  _("Enable use of Hugh Sconyers' full 15x15 bearoff "
+                            "database via Analyse->Bearoff. This requires "
+                            "that you have the disks available on DVD or on "
+                            "your harddisk. "), NULL );
+
+    /* path */
+    
+    pwev = gtk_event_box_new();
+    gtk_box_pack_start( GTK_BOX( pwb ), pwev, FALSE, FALSE, 0 );
+    pwhbox = gtk_hbox_new( FALSE, 4 );
+    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+                        gtk_label_new( _("Path to files:") ),
+                        FALSE, FALSE, 0 );
+    
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+                        pow->pwPathSconyers15x15DVD = gtk_label_new( "" ),
+                        FALSE, FALSE, 0 );
+
+    gtk_box_pack_end( GTK_BOX( pwhbox ),
+                      pow->pwPathSconyers15x15DVDModify = 
+                      gtk_button_new_with_label( _("Modify") ),
+                      FALSE, FALSE, 0 );
+
+    gtk_object_set_data( GTK_OBJECT( pow->pwPathSconyers15x15DVDModify ),
+                         "user_data", "set bearoff sconyers 15x15 dvd path" );
+
+    gtk_signal_connect( GTK_OBJECT( pow->pwPathSconyers15x15DVDModify ), 
+                        "clicked",
+			GTK_SIGNAL_FUNC( PathSconyersModify ), pow );
+
+#if WIN32
+    gtk_tooltips_set_tip( ptt, pwev,
+			  _("Set path to the bearoff files, e.g., 'D:\\'"), 
+                          NULL );
+#else
+    gtk_tooltips_set_tip( ptt, pwev,
+			  _("Set path to the bearoff files, "
+                            "e.g., '/mnt/cdrom'"),
+                          NULL );
+#endif
+    
+    /* 
+     * Sconyers 15x15 (eval + analysis) 
+     */
+
+    /* enable */
+
+    pwf = gtk_frame_new( _("Sconyers' Bearoff 15x15 "
+                           "(analysis and evaluations)") );
+    gtk_box_pack_start( GTK_BOX ( pwvbox ), pwf, FALSE, FALSE, 0 );
+    gtk_container_set_border_width (GTK_CONTAINER (pwf), 4);
+    pwb = gtk_vbox_new (FALSE, 0);
+    gtk_container_add (GTK_CONTAINER (pwf), pwb);
+
+    pow->pwSconyers15x15Disk = 
+      gtk_check_button_new_with_label( _("Enable use") );
+    gtk_box_pack_start (GTK_BOX (pwb), pow->pwSconyers15x15Disk,
+			FALSE, FALSE, 0);
+    gtk_tooltips_set_tip( ptt, pow->pwSconyers15x15Disk,
+			  _("Enable use of Hugh Sconyers' full 15x15 bearoff "
+                            "database in play, analisys, and evaluations. "
+                            "This requires that you've copied the 44 files "
+                            "onto your harddisk."), NULL );
+    
+    /* path */
+    
+    pwev = gtk_event_box_new();
+    gtk_box_pack_start( GTK_BOX( pwb ), pwev, FALSE, FALSE, 0 );
+    pwhbox = gtk_hbox_new( FALSE, 4 );
+    gtk_container_add( GTK_CONTAINER( pwev ), pwhbox );
+
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+                        gtk_label_new( _("Path to files:") ),
+                        FALSE, FALSE, 0 );
+    
+    gtk_box_pack_start( GTK_BOX( pwhbox ),
+                        pow->pwPathSconyers15x15Disk = gtk_label_new( "" ),
+                        FALSE, FALSE, 0 );
+
+    gtk_box_pack_end( GTK_BOX( pwhbox ),
+                      pow->pwPathSconyers15x15DiskModify = 
+                      gtk_button_new_with_label( _("Modify") ),
+                      FALSE, FALSE, 0 );
+
+    gtk_object_set_data( GTK_OBJECT( pow->pwPathSconyers15x15DiskModify ),
+                         "user_data", "set bearoff sconyers 15x15 disk path" );
+
+    gtk_signal_connect( GTK_OBJECT( pow->pwPathSconyers15x15DiskModify ), 
+                        "clicked",
+			GTK_SIGNAL_FUNC( PathSconyersModify ), pow );
+
+#if WIN32
+    gtk_tooltips_set_tip( ptt, pwev,
+			  _("Set path to the bearoff files, e.g., "
+                            "'C:\\Sconyers Bearoff Files\\'"), 
+                          NULL );
+#else
+    gtk_tooltips_set_tip( ptt, pwev,
+			  _("Set path to the bearoff files, "
+                            "e.g., '/huge/disk/sconyers/'"),
+                          NULL );
+#endif
+    
+
     /* Other options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
@@ -9533,6 +9694,7 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   char sz[128];
   int n, cCache;
   int i;
+  char *pch;
 
   gtk_widget_hide( gtk_widget_get_toplevel( pw ) );
 
@@ -9592,6 +9754,37 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
   CHECKUPDATE(pow->pwOutputMWC,fOutputMWC, "set output mwc %s")
   CHECKUPDATE(pow->pwOutputGWC,fOutputWinPC, "set output winpc %s")
   CHECKUPDATE(pow->pwOutputMWCpst,fOutputMatchPC, "set output matchpc %s")
+
+  /* bearoff options */
+
+  CHECKUPDATE( pow->pwSconyers15x15DVD, fSconyers15x15DVD,
+               "set bearoff sconyers 15x15 dvd enable %s")
+
+
+  CHECKUPDATE( pow->pwSconyers15x15Disk, fSconyers15x15Disk,
+               "set bearoff sconyers 15x15 disk enable %s")
+
+  gtk_label_get( GTK_LABEL( pow->pwPathSconyers15x15Disk ), &pch );
+  if ( pch && *pch ) {
+    if ( ! szPathSconyers15x15Disk || 
+         strcmp( pch, szPathSconyers15x15Disk ) ) {
+      sprintf( sz, "set bearoff sconyers 15x15 disk path \"%s\"",
+               pch );
+      UserCommand( sz );
+    }
+  }
+
+  gtk_label_get( GTK_LABEL( pow->pwPathSconyers15x15DVD ), &pch );
+  if ( pch && *pch ) {
+    if ( ! szPathSconyers15x15DVD || 
+         strcmp( pch, szPathSconyers15x15DVD ) ) {
+      sprintf( sz, "set bearoff sconyers 15x15 dvd path \"%s\"",
+               pch );
+      UserCommand( sz );
+    }
+  }
+
+  /* ... */
   
   CHECKUPDATE(pow->pwConfStart,fConfirm, "set confirm new %s")
   CHECKUPDATE(pow->pwConfOverwrite,fConfirmSave, "set confirm save %s")
@@ -9866,6 +10059,20 @@ OptionsSet( optionswidget *pow) {
                                 fConfirmSave );
   gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwGotoFirstGame ),
                                 fGotoFirstGame );
+
+  /* bearoff options */
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwSconyers15x15DVD ),
+                                fSconyers15x15DVD );
+
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwSconyers15x15Disk ),
+                                fSconyers15x15Disk );
+
+  gtk_label_set( GTK_LABEL( pow->pwPathSconyers15x15DVD ),
+                 szPathSconyers15x15DVD ? szPathSconyers15x15DVD : "" );
+
+  gtk_label_set( GTK_LABEL( pow->pwPathSconyers15x15Disk ),
+                 szPathSconyers15x15Disk ? szPathSconyers15x15Disk : "" );
 
 
 }
@@ -10591,3 +10798,39 @@ extern void GTKCalibrationEnd( void *context ) {
     pwGrab = pwOldGrab;
 }
 
+extern char *
+GTKChangeDisk( const char *szMsg, const int fChange, 
+               const char *szMissingFile ) {
+
+  GtkWidget *pwDialog;
+  gchar *pch;
+  int f = FALSE;
+
+  pwDialog = GTKCreateDialog( _("Change Disk"), DT_QUESTION, NULL, &f );
+
+  pch = g_strdup_printf( szMsg, szMissingFile );
+  gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+                     gtk_label_new( pch ) );
+  g_free( pch );
+
+  /* FIXME: add call to a file dialog for change of paths */
+  /* FIXME: handle interrupt */
+
+  gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+  gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+                                GTK_WINDOW( pwMain ) );
+  gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+                      GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+  
+  gtk_widget_show_all( pwDialog );
+
+  GTKDisallowStdin();
+  gtk_main();
+  GTKAllowStdin();
+  
+  if ( !f )
+    fInterrupt = TRUE;
+  
+  return NULL;
+
+}

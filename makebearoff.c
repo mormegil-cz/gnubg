@@ -1467,7 +1467,7 @@ extern int main( int argc, char **argv ) {
     if ( pbc ) {
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
-      BearoffClose ( pbc );
+      BearoffClose ( &pbc );
     }
 
     fprintf ( stderr, "Number of re-reads while generating: %ld\n", 
@@ -1532,7 +1532,7 @@ extern int main( int argc, char **argv ) {
     if ( pbc ) {
       fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
-      BearoffClose ( pbc );
+      BearoffClose ( &pbc );
     }
 
     fprintf ( stderr, "Number of re-reads while generating: %ld\n", 

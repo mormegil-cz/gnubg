@@ -166,4 +166,8 @@ extern void GTKRecordShow( FILE *pfIn, char *sz, char *szPlayer );
 extern void
 GTKTextToClipboard( const char *sz );
 
+extern char *
+GTKChangeDisk( const char *szMsg, const int fChange, 
+               const char *szMissingFile );
+
 #endif

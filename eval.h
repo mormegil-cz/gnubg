@@ -264,12 +264,15 @@ extern void ( *fnTick )( void );
 extern cubeinfo ciCubeless;
 extern char *aszEvalType[ EVAL_ROLLOUT + 1 ];
 extern int fEgyptian;
+extern int fUse15x15;
 
 extern bearoffcontext *pbc1;
 extern bearoffcontext *pbc2;
 extern bearoffcontext *pbcOS;
 extern bearoffcontext *pbcTS;
 extern bearoffcontext *apbcHyper[ 3 ];
+extern bearoffcontext *pbc15x15;
+extern bearoffcontext *pbc15x15_dvd;
 
 typedef struct _movelist {
     int cMoves; /* and current move when building list */
@@ -298,6 +301,7 @@ typedef enum _positionclass {
     CLASS_HYPERGAMMON3, /* hypergammon with 3 chequers */
     CLASS_BEAROFF2,     /* Two-sided bearoff database (in memory) */
     CLASS_BEAROFF_TS,   /* Two-sided bearoff database (on disk) */
+    CLASS_BEAROFF_15x15,/* Hugh Sconyers complete bearoff database */
     CLASS_BEAROFF1,     /* One-sided bearoff database (in memory) */
     CLASS_BEAROFF_OS,   /* One-sided bearoff database /on disk) */
     CLASS_RACE,         /* Race neural network */
@@ -307,7 +311,7 @@ typedef enum _positionclass {
 
 #define N_CLASSES (CLASS_CONTACT + 1)
 
-#define CLASS_PERFECT CLASS_BEAROFF_TS
+#define CLASS_PERFECT CLASS_BEAROFF_15x15 
 
 #define CFMONEY(arEquity,pci) \
    ( ( (pci)->fCubeOwner == -1 ) ? arEquity[ 2 ] : \
@@ -408,8 +412,8 @@ extern positionclass
 ClassifyPosition( int anBoard[ 2 ][ 25 ], const bgvariation bgv );
 
 /* internal use only */
-extern unsigned long EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
-                                       float arOutput[] );
+extern int EvalBearoff1Full( int anBoard[ 2 ][ 25 ],
+                             float arOutput[] );
 
 extern float
 Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci );
@@ -440,11 +444,11 @@ swap( int *p0, int *p1 );
 extern void 
 SanityCheck( int anBoard[ 2 ][ 25 ], float arOutput[] );
 
-extern void 
+extern int
 EvalBearoff1( int anBoard[ 2 ][ 25 ], float arOutput[], 
               const bgvariation bgv );
 
-extern void
+extern int
 EvalOver( int anBoard[ 2 ][ 25 ], float arOutput[], const bgvariation bgv );
 
 extern float 
@@ -595,5 +599,15 @@ equal_movefilters ( movefilter aamf1[ MAX_FILTER_PLIES ][ MAX_FILTER_PLIES ],
 
 extern doubletype
 DoubleType ( const int fDoubled, const int fMove, const int fTurn );
+
+extern int
+PerfectCubeful ( bearoffcontext *pbc, 
+                 int anBoard[ 2 ][ 25 ], float arEquity[] );
+
+extern void
+baseInputs(int anBoard[2][25], float arInput[]);
+
+extern void 
+CalculateRaceInputs(int anBoard[2][25], float inputs[]);
 
 #endif

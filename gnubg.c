@@ -201,6 +201,19 @@ int fCheat = FALSE;
 int afCheatRoll[ 2 ] = { 0, 0 };
 int fGotoFirstGame = FALSE;
 
+/* Setup for Hugh Sconyers 15x15 full bearoff */
+
+/* The DVD variables are used for the "show bearoff" command */
+
+int fSconyers15x15DVD = TRUE;            /* TRUE if you have Hugh's dvds */
+char szPathSconyers15x15DVD[ BIG_PATH ]; /* Path to Sconyers' databases */
+
+int fSconyers15x15Disk = FALSE;          /* TRUE if you have copied Hugh's
+                                            bearoff database to disk and
+                                            want to use it for evaluations and
+                                            analysis */
+char szPathSconyers15x15Disk[ BIG_PATH ];/* Path to Sconyers's databases */
+
 
 skilltype TutorSkill = SKILL_DOUBTFUL;
 int nTutorSkillCurrent = 0;
@@ -442,7 +455,7 @@ static char szDICE[] = N_("<die> <die>"),
     szOPTSEED[] = N_("[seed]"),
     szOPTSIZE[] = N_("[size]"),
     szOPTVALUE[] = N_("[value]"),
-    /* szPATH[] = N_("<path>"), */
+    szPATH[] = N_("<path>"),
     szPLAYER[] = N_("<player>"),
     szPLAYEROPTRATING[] = N_("<player> [rating]"),
     szPLIES[] = N_("<plies>"),
@@ -809,6 +822,40 @@ command cER = {
     { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, N_("Specify the "
       "equity loss for a very unlucky roll"), szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers15x15Disk[] = {
+  { "enable", CommandSetBearoffSconyers15x15DiskEnable, 
+    N_("Enable use of Hugh Sconyers' full bearoff database in evaluations"),
+    szONOFF, &cOnOff },
+  { "path", CommandSetBearoffSconyers15x15DiskPath, 
+    N_("Set path to Hugh Sconyers' bearoff databases"),
+    szPATH, NULL },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers15x15DVD[] = {
+  { "enable", CommandSetBearoffSconyers15x15DVDEnable, 
+    N_("Enable use of Hugh Sconyers' full bearoff database (browse only)"),
+    szONOFF, &cOnOff },
+  { "path", CommandSetBearoffSconyers15x15DVDPath, 
+    N_("Set path to Hugh Sconyers' bearoff databases"),
+    szPATH, NULL },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers15x15[] = {
+  { "disk", NULL, 
+    N_("Usage of Hugh Sconyer's full bearoff database for analysis "
+       "and evaluations"), NULL, acSetBearoffSconyers15x15Disk },
+  { "dvd", NULL, 
+    N_("Usage of Hugh Sconyer's full bearoff database (browse only) "),
+    NULL, acSetBearoffSconyers15x15DVD },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoffSconyers[] = {
+  { "15x15", NULL, 
+    N_("Parameters for Hugh Sconyer's full bearoff database"),
+    NULL, acSetBearoffSconyers15x15 },
+  { NULL, NULL, NULL, NULL, NULL }
+}, acSetBearoff[] = {
+  { "sconyers", NULL, N_("Control parameters for gnubg's use of "
+                         "Hugh Sconyers' bearoff databases"),
+    NULL, acSetBearoffSconyers },
+  { NULL, NULL, NULL, NULL, NULL }
 }, acSetEvalParam[] = {
   { "type", CommandSetEvalParamType,
     N_("Specify type (evaluation or rollout)"), szER, &cER },
@@ -1487,6 +1534,8 @@ command cER = {
       "graphical interface"), szKEYVALUE, NULL },
     { "automatic", NULL, N_("Perform certain functions without user input"),
       NULL, acSetAutomatic },
+    { "bearoff", NULL, N_("Control parameters for bearoff databases"),
+      NULL, acSetBearoff },
     { "beavers", CommandSetBeavers, 
       N_("Set whether beavers are allowed in money game or not"), 
       szONOFF, &cOnOff },
@@ -1594,6 +1643,8 @@ command cER = {
     { "beavers", CommandShowBeavers, 
       N_("Show whether beavers are allowed in money game or not"), 
       NULL, NULL },
+    { "bearoff", CommandShowBearoff, 
+      N_("Lookup data in various bearoff databases "), NULL, NULL },
     { "board", CommandShowBoard, 
       N_("Redisplay the board position"), szOPTPOSITION, NULL },
     { "cache", CommandShowCache, N_("Display statistics on the evaluation "
@@ -4829,6 +4880,20 @@ extern void CommandSaveSettings( char *szParam ) {
       fprintf( pf, "set analysis player %d analyse %s\n",
                i, afAnalysePlayers[ i ] ? "yes" : "no" );
 
+    /* Bearoff Settings */
+
+    fprintf( pf,
+             "set bearoff sconyers 15x15 dvd enable %s\n"
+             "set bearoff sconyers 15x15 dvd path \"%s\"\n",
+             fSconyers15x15DVD ? "yes" : "no",
+             szPathSconyers15x15DVD ? szPathSconyers15x15DVD : "" );
+
+    fprintf( pf,
+             "set bearoff sconyers 15x15 disk enable %s\n"
+             "set bearoff sconyers 15x15 disk path \"%s\"\n",
+             fSconyers15x15Disk ? "yes" : "no",
+             szPathSconyers15x15Disk ? szPathSconyers15x15Disk : "" );
+
     /* Render preferences */
 
     fputs( RenderPreferencesCommand( &rdAppearance, szTemp ), pf );
@@ -6495,6 +6560,41 @@ static RETSIGTYPE SoundChild ( int n ) {
 
 #endif /* HAVE_FORK */
 
+
+static char *
+ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
+
+  int implement_me = 0;
+  char *pch;
+  char *pchToken;
+
+#if USE_GTK
+  if ( fX )
+    return GTKChangeDisk( szMsg, fChange, szMissingFile );
+
+#endif
+
+  outputf( szMsg, szMissingFile );
+  outputl( "" );
+
+  if ( ( pch = GetInput( _("Enter new path or press "
+                           "[enter] if unchanged") ) ) ) {
+    printf( "path returned: '%s'\n", pch );
+    pchToken = pch;
+    if ( NextToken( &pchToken ) ) {
+      pchToken = strdup( pchToken );
+      free( pch );
+      printf( "return '%s'\n", pchToken );
+      return pchToken;
+    }
+    free( pch );
+  }
+
+  printf( "nada...\n");
+  return NULL;
+
+}
+
 static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchCommands = NULL, *pchScript = NULL;
@@ -6804,6 +6904,24 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		 "directions for obtaining a pre-trained network.") );
 	outputx();
     }
+
+    /* extra bearoff databases */
+
+    /* Hugh Sconyers 15x15 bearoff database */
+
+    if ( fSconyers15x15Disk )
+      pbc15x15 = BearoffInit( NULL, szPathSconyers15x15Disk, 
+                              BO_SCONYERS_15x15 | BO_ON_DISK, NULL );
+
+    if( fSconyers15x15DVD )
+      pbc15x15_dvd = BearoffInit( NULL, szPathSconyers15x15DVD, 
+                                  BO_SCONYERS_15x15 | BO_ON_DVDS, 
+                                  (void *) ChangeDisk );
+
+
+
+
+
 #if USE_GUILE
 #  if USE_GTK
     PushSplash ( pwSplash, 

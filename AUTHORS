@@ -7,33 +7,34 @@
 
         Contributors (of bug reports, suggestions, and patches) include:
 
-    Kazuaki Asai            James F. Kibler         Oliver Riordan
-    Eric Augustine          Jonathan Kinsey         Rod Roark
-    Ron Barry               Johnny Kirk             Hans-Jürgen Schäfer
-    Steve Baedke            Gerhard Knop            Steve Schreiber
-    Holger Bochnig          Robert Konigsberg       Martin Schrode
-    Chuck Bower             Corrin Lakeland         Paul Selick
-    Nick Bratby             Tim Laursen             Sho Sengoku
-    Craig Campbell          Eli Liang               Ian Shaw
-    John Chuang             Kevin Maguire           Albert Silver
-    Tristan Colgate         Thomas Meyer            Peter Sochovsky
-    Olivier Croisille       Achim Mueller           Mark Spencer
-    Ned Cross               Magnar Naustdalslid     Scott Steiner
-    Bill Davidson           Dave Neary              Maik Stiebler
-    Michael Depreli         Rolf Nielsen            W. Stroop (Rob)
-    Ian Dunstan             Mirori Orange           Kaoru Takahasi
-    Max Durbano             Peter Orum              Yoshito Takeuchi
-    Robert Eberlein         Roy Passfield           Jacques Thiriat
-    Fotis                   Thomas Patrick          Malene Thyssen
-    Ric Gerace              Billie Patterson        Sander van Rijnswou
-    Michel Grimminck        Zvezdan Petkovic        Robert-Jan Veldhuizen
-    Eric Groleau            Nardy Pillards          Morten Wang
-    Jeff Haferman           Petri Pitkänen          JP White
-    Alain Henry             Sam Pottle              Chris Wilson
-    Jens Hoefkens           Henrik Ravn             Kit Woolsey
-    Martin Janke            James Rech              Frank Worrell
-    Nis Jorgensen           Jared Riley             Christopher D. Yep
-    Matija Kejzar           Klaus Rindholt          Anders Zachrison
+    Kazuaki Asai            Jonathan Kinsey         Hans-Jürgen Schäfer
+    Eric Augustine          Johnny Kirk             Steve Schreiber
+    Ron Barry               Gerhard Knop            Hugh Sconyers
+    Steve Baedke            Robert Konigsberg       Martin Schrode
+    Holger Bochnig          Corrin Lakeland         Paul Selick
+    Chuck Bower             Tim Laursen             Sho Sengoku
+    Nick Bratby             Eli Liang               Ian Shaw
+    Craig Campbell          Kevin Maguire           Albert Silver
+    John Chuang             Thomas Meyer            Peter Sochovsky
+    Tristan Colgate         Achim Mueller           Mark Spencer
+    Olivier Croisille       Magnar Naustdalslid     Scott Steiner
+    Ned Cross               Dave Neary              Maik Stiebler
+    Bill Davidson           Rolf Nielsen            W. Stroop (Rob)
+    Michael Depreli         Mirori Orange           Kaoru Takahasi
+    Ian Dunstan             Peter Orum              Yoshito Takeuchi
+    Max Durbano             Roy Passfield           Jacques Thiriat
+    Robert Eberlein         Thomas Patrick          Malene Thyssen
+    Fotis                   Billie Patterson        Sander van Rijnswou
+    Ric Gerace              Zvezdan Petkovic        Robert-Jan Veldhuizen
+    Michel Grimminck        Nardy Pillards          Morten Wang
+    Eric Groleau            Petri Pitkänen          JP White
+    Jeff Haferman           Sam Pottle              Chris Wilson
+    Alain Henry             Henrik Ravn             Kit Woolsey
+    Jens Hoefkens           James Rech              Frank Worrell
+    Martin Janke            Jared Riley             Christopher D. Yep
+    Nis Jorgensen           Klaus Rindholt          Anders Zachrison
+    Matija Kejzar           Oliver Riordan
+    James F. Kibler         Rod Roark
 
 
   Credit is also due to those who have published information about backgammon
