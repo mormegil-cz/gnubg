@@ -3017,8 +3017,11 @@ extern void CommandSaveSettings( char *szParam ) {
 	     arLuckLevel[ LUCK_VERYBAD ] );
     
 #if USE_GTK
-    fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
-    fputc( '\n', pf );
+    if ( fX ) {
+        fputs( BoardPreferencesCommand( pwBoard, szTemp ), pf );
+        fputc( '\n', pf );
+    }  /* FIXME This will overwrite the gtk-preferences if you
+                save the settings in tty mode  */
 #endif
     
     fprintf( pf, "set automatic bearoff %s\n"

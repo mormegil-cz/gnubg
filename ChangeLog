@@ -1,3 +1,8 @@
+Mon Nov 12 18:25:25 2001  Øystein Johansen <oeysteij@online.no>
+
+        * gnubg.c (CommandSaveSettings): Avoid crash when saving settings
+        in tty mode. (Reported by Ian Shaw)
+
 Fri Nov  9 13:23:52 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (update_buttons): Add a "play" button when it's the
