@@ -1,3 +1,7 @@
+People's names next to entries in this file mean they intend to work on that
+item soon.  Please contact them before working on related areas, to avoid
+duplication of effort and to make sure our changes merge easily.
+
 * Evaluations:
 ** Add more evaluation classes.
 *** Add a neural net to correct errors in BEAROFF1 class.
@@ -29,21 +33,21 @@
   stdin is a TTY or not).  Let the user configure the prompt (add escape
   sequences to display information such as the player on roll, pip
   count, match score, etc.).  Also, echo commands input with the mouse
-  as if they had been typed.
-** Be more liberal in the move syntax accepted.
+  as if they had been typed. (gary)
+** Be more liberal in the move syntax accepted. (gary)
 ** Finish "help" -- make it quote sections from the manual (how does gdb
   do it?)
-** Allow changing the eval cache size.
-** Add undo, reroll, and viewing next/prev moves in game/match.
+** Allow changing the eval cache size. (gary)
+** Add undo, reroll, and viewing next/prev moves in game/match. (gary)
 
 * X interface:
-** Get rid of Xmu calls in ext (they're not really portable).
-** Allow copy/paste and drag & drop of the board ID in the board window.
+** Get rid of Xmu calls in ext (they're not really portable). (gary)
+** Allow copy/paste and drag & drop of the board ID in the board window. (gary)
 ** Make sure the board window behaves properly with ICCCM things.  Maybe
   some of this should wait for Gnome.
 ** Keyboard input (or at least some of it) to the board window could
-  be redirected to $WINDOWID.
-** Allow doubling by clicking the cube in the board window.
+  be redirected to $WINDOWID. (gary)
+** Allow doubling by clicking the cube in the board window.  (gary)
 ** Add an option to slow down display if moves happen too quickly (e.g.
   computer move, unable to move, auto bearoff, etc.)
 ** Perform better move checking in the X window; provide visual feedback
@@ -61,14 +65,15 @@
   terminal window at all.
 
 * Bugs:
-** Rolling out a perfect evaluation gives SD NaN, rather than 0.
+** Rolling out a perfect evaluation gives SD NaN, rather than 0. (gary)
 ** Evaluations bearing off against contact and in back games are poor.
 ** Equity SD should be SD(sum(probabilities)), not sum(SD(probabilities)).
+  (gary)
 ** Think about what should happen with variance reduction in Rollout()
   and RolloutGame() when a probability turns out <0 or >1.
 ** The board window, and NeuralNetCreate() and NeuralNetResize, use
   random() for their own purposes.  This will disturb the seed for
-  the BSD dice generator.
+  the BSD dice generator. (gary)
 
 * Miscellaneous:
 ** Add internationalisation (gettext).
