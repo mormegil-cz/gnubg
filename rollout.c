@@ -360,7 +360,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   cubeinfo *pciLocal = alloca( cci * sizeof ( cubeinfo ) );
   int *pfFinished = alloca( cci * sizeof( int ) );
   float (*aarVarRedn)[ NUM_ROLLOUT_OUTPUTS ] =
-    alloca ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );;
+    alloca ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );
 #else
   cubeinfo pciLocal[ MAX_ROLLOUT_CUBEINFO ];
   int pfFinished[ MAX_ROLLOUT_CUBEINFO ];

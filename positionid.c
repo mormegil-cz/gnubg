@@ -35,6 +35,7 @@
  * $Id$
  */
 
+#include "config.h"
 #include <assert.h>
 #include <stdio.h>
 #include <errno.h>

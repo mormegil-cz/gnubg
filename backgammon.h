@@ -32,7 +32,7 @@
 #include "eval.h"
 
 #if USE_TIMECONTROL && WIN32
-#include <winsock2.h>
+#include <winsock.h>
 #endif
 
 #if !defined (__GNUC__) && !defined (__attribute__)

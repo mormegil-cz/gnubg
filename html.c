@@ -27,7 +27,9 @@
 #include <time.h>
 #include <assert.h>
 #include <stdarg.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <stdlib.h>
 
 #define USES_badSkill

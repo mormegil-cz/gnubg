@@ -32,7 +32,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #if HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
@@ -197,13 +199,13 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 	if( anBoard[ anDice[ i ] - 1 ] ) {
 	    /* bear off exactly */
 	    n = anDice[ i ] - 1;
-	    goto move;
+	    goto lbl_move;
 	}
 
 	if( anDice[ i ] - 1 > nMax ) {
 	    /* bear off highest chequer */
 	    n = nMax;
-	    goto move;
+	    goto lbl_move;
 	}
 	
 	nTotal = anDice[ i ] - 1;
@@ -213,7 +215,7 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 		/* there's a chequer we can bear off with subsequent dice;
 		   do it */
 		n = nTotal;
-		goto move;
+		goto lbl_move;
 	    }
 	}
 
@@ -223,7 +225,7 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 		( n == -1 || anBoard[ iSearch ] > anBoard[ n ] ) )
 		n = iSearch;
 	if( n >= 0 )
-	    goto move;
+	    goto lbl_move;
 
 	/* find the point with the most on it (or least on dest) */
 	for( iSearch = anDice[ i ]; iSearch <= nMax; iSearch++ )
@@ -233,7 +235,7 @@ static int HeuristicBearoff( int anBoard[ 6 ], int anRoll[ 2 ] ) {
 		  anBoard[ n - anDice[ i ] ] ) )
 		n = iSearch;
 
-    move:
+    lbl_move:
 	assert( n >= 0 );
 	assert( anBoard[ n ] );
 	anBoard[ n ]--;

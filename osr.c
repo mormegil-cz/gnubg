@@ -627,13 +627,18 @@ rollOSR ( const int nGames, const int anBoard[ 25 ], const int nOut,
           float arProbs[], const int nMaxProbs,
           float arGammonProbs[], const int nMaxGammonProbs ) {
 
-  int anCounts [ nMaxGammonProbs ];
   int an[ 25 ];
   unsigned short int anProb[ 32 ];
   int i, n, m;
   int iGame;
   
-  memset ( anCounts, 0, sizeof ( anCounts ) );
+#if __GNUC__ || !HAVE_ALLOCA
+  int anCounts[nMaxGammonProbs];
+#else
+  int *anCounts = (int*)alloca(sizeof(int) * nMaxGammonProbs);
+#endif
+
+  memset(anCounts, 0, sizeof(int) * nMaxGammonProbs);
 
   for ( i = 0; i < nMaxProbs; ++i ) 
     arProbs[ i ] = 0.0f;

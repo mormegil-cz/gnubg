@@ -48,7 +48,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #if TIME_WITH_SYS_TIME
 #include <sys/time.h>
 #include <time.h>
@@ -61,9 +63,6 @@
 #endif
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-#if HAVE_UNISTD_H
-#include <unistd.h>
 #endif
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -181,8 +180,8 @@ char szDefaultPrompt[] = "(\\p) ",
 static int fInteractive, cOutputDisabled, cOutputPostponed;
 
 matchstate ms = {
-    {}, /* anBoard */
-    {}, /* anDice */
+    {{0}, {0}}, /* anBoard */
+    {0}, /* anDice */
     -1, /* fTurn */
     0, /* fResigned */
     0, /* fResignationDeclined */
@@ -201,7 +200,7 @@ matchstate ms = {
     TRUE, /* fJacoby */
     GAME_NONE /* gs */
 #if USE_TIMECONTROL
-    , { } /* gc */
+    , {0} /* gc */
 #endif
 };
 matchinfo mi;
@@ -7343,14 +7342,15 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     GtkWidget *pwSplash = NULL;
 #endif
 
-    if( !( szHomeDirectory = getenv( "HOME" ) ) )
-	/* FIXME what should non-POSIX systems do? */
-	szHomeDirectory = ".";
+	if( !( szHomeDirectory = getenv( "HOME" ) ) )
+		szHomeDirectory = ".";
 
 #if WIN32
 
-    /* data directory: initialise to the path where gnubg is installed */
-    szDataDirectory = getInstallDir();
+	/* data directory: initialise to the path where gnubg is installed */
+	szDataDirectory = getInstallDir();
+	if (!strcmp(szHomeDirectory, "."))
+		szHomeDirectory = szDataDirectory;
 
 #endif /* WIN32 */
 

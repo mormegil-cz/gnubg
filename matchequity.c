@@ -1571,13 +1571,11 @@ getGammonPrice ( float arGammonPrice[ 4 ],
   if ( arGammonPrice[ 3 ] <= 0 )
     arGammonPrice[ 3 ] = 0.0;
 
-#define NDEBUG
   assert( arGammonPrice[ 0 ] >= 0 );
   assert( arGammonPrice[ 1 ] >= 0 );
   assert( arGammonPrice[ 2 ] >= 0 );
   assert( arGammonPrice[ 3 ] >= 0 );
-#undef NDEBUG
-  
+
 }
 
 /*

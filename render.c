@@ -654,8 +654,12 @@ static void RenderFramePainted( renderdata *prd, unsigned char *puch,
 				int nStride ) {
     int i, ix;
     float x, z, cos_theta, diffuse, specular;
-    unsigned char colours[ 4 * 3 * prd->nSize ];
-    
+#if __GNUC__ || !HAVE_ALLOCA
+	unsigned char colours[ 4 * 3 * prd->nSize ];
+#else
+	unsigned char *colours = (unsigned char*)alloca( 4 * 3 * prd->nSize * sizeof(unsigned char) );
+#endif
+
     diffuse = 0.8 * prd->arLight[ 2 ] + 0.2;
     specular = pow( prd->arLight[ 2 ], 20 ) * 0.6;
 
@@ -1030,11 +1034,22 @@ static void RenderFrameWood( renderdata *prd, unsigned char *puch,
 
 #define BUF( y, x, i ) ( puch[ (y) * nStride + (x) * 3 + (i) ] )
     
-    int i, x, y, nSpecularTop, anSpecular[ 4 ][ prd->nSize ], nSpecular,
+    int i, x, y, nSpecularTop, nSpecular,
 	s = prd->nSize;
     unsigned char a[ 3 ];
-    float rx, rz, arDiffuse[ 4 ][ s ], cos_theta, rDiffuseTop,
-	arHeight[ s ], rHeight, rDiffuse;
+    float rx, rz, cos_theta, rDiffuseTop, rHeight, rDiffuse;
+#if __GNUC__ || !HAVE_ALLOCA
+	int anSpecular[4][s];
+	float arDiffuse[4][s];
+	float arHeight[s];
+#else
+	int *anSpecularData = alloca( 4 * s * sizeof( int ) );
+	int *anSpecular[4] = { anSpecularData, anSpecularData + s, anSpecularData + 2 * s, anSpecularData + 3 * s };
+	float *arDiffuseData = alloca( 4 * s * sizeof( float ) );
+	float *arDiffuse[4] = { arDiffuseData, arDiffuseData + s, arDiffuseData + 2 * s, arDiffuseData + 3 * s };
+	float *arHeight = alloca( s * sizeof( float ) );
+#endif
+
 
     nSpecularTop = pow( prd->arLight[ 2 ], 20 ) * 0.6 * 0x100;
     rDiffuseTop = 0.8 * prd->arLight[ 2 ] + 0.2;

@@ -131,7 +131,11 @@ WritePNG (const char *sz, unsigned char *puch, int nStride,
   png_write_info (ppng, pinfo);
 
   {
+#if __GNUC__ || !HAVE_ALLOCA
     png_bytep aprow[nSizeY];
+#else
+    png_bytep *aprow = (png_bytep *)alloca(nSizeY * sizeof(png_bytep));
+#endif
     for (i = 0; i < nSizeY; ++i)
       aprow[i] = puch + nStride * i;
 

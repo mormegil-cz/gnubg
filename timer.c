@@ -22,7 +22,9 @@
 */
 
 #include <time.h>
+#if HAVE_SYS_TIME
 #include <sys/time.h>
+#endif
 
 #ifdef WIN32
 #include "windows.h"
