@@ -346,7 +346,8 @@ extern char*
 FormatCubePosition ( char *sz, cubeinfo *pci );
 extern char *FormatPrompt( void );
 extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
-			     int i, int fRankKnown );
+			     int i, int fRankKnown,
+                             int fDetailProb, int fShowParameters );
 extern void UpdateSetting( void *p );
 extern void UpdateSettings( void );
 extern void ResetInterrupt( void );

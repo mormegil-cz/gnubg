@@ -1,3 +1,14 @@
+Sun Jul 21 21:30:38 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Output rollout resulst in HTML and text export.
+
+	* gnubg.c (FormatMoveHint): output rollout results (all callers
+	changed). 
+	* text.c (OutputPercents, OutputPercent, OutputMWC, OutputEquity,
+	OutputRolloutContext, OutputEvalContext, OutputEquityDiff,
+	OutputEquityScale, OutputRolloutResult): new functions.
+	* html.c, text.c: output rollout results.
+
 Sun Jul 21 12:39:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (AnalysisOK). fix typos :-)

@@ -43,6 +43,402 @@
 static char *aszColorName[] = { "O", "X" };
 
 
+extern char *
+OutputRolloutResult ( const char *szIndent,
+                    char asz[][ 1024 ],
+                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                    float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                    const cubeinfo aci[],
+                    const int cci,
+                    const int fCubeful ) {
+
+  static char sz[ 1024 ];
+  int ici;
+  char *pc;
+
+  strcpy ( sz, "" );
+
+  for ( ici = 0; ici < cci; ici++ ) {
+
+    /* header */
+
+    if ( asz && *asz[ ici ] ) {
+      if ( szIndent && *szIndent )
+        strcat ( sz, szIndent );
+      sprintf ( pc = strchr ( sz, 0 ), "%s:\n", asz[ ici ] );
+    }
+
+    /* output */
+
+    if ( szIndent && *szIndent )
+      strcat ( sz, szIndent );
+
+    strcat ( sz, "  " );
+    strcat ( sz, OutputPercents ( aarOutput[ ici ], TRUE ) );
+    strcat ( sz, " CL " );
+    strcat ( sz, OutputEquityScale ( aarOutput[ ici ][ OUTPUT_EQUITY ], 
+                                     &aci[ ici ], &aci[ 0 ], TRUE ) );
+
+    if ( fCubeful ) {
+      strcat ( sz, " CF " );
+      strcat ( sz, OutputMWC ( aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ], 
+                               &aci[ 0 ], TRUE ) );
+    }
+
+    strcat ( sz, "\n" );
+
+    /* std dev */
+
+    if ( szIndent && *szIndent )
+      strcat ( sz, szIndent );
+
+    strcat ( sz, " [" );
+    strcat ( sz, OutputPercents ( aarStdDev[ ici ], FALSE ) );
+    strcat ( sz, " CL " );
+    strcat ( sz, OutputEquityScale ( aarStdDev[ ici ][ OUTPUT_EQUITY ], 
+                                     &aci[ ici ], &aci[ 0 ], FALSE ) );
+
+    if ( fCubeful ) {
+      strcat ( sz, " CF " );
+      strcat ( sz, OutputMWC ( aarStdDev[ ici ][ OUTPUT_CUBEFUL_EQUITY ], 
+                               &aci[ 0 ], FALSE ) );
+    }
+
+    strcat ( sz, "]\n" );
+
+  }
+
+  return sz;
+
+}
+
+
+extern char *
+OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
+
+  static char sz[ 1024 ];
+  char *pc;
+  int i;
+  
+  sprintf ( sz, _("%d-ply %s"), 
+            pec->nPlies, 
+            pec->fCubeful ? _("cubeful") : _("cubeless") );
+
+  if ( pec->nPlies == 2 ) 
+    sprintf ( pc = strchr ( sz, 0 ),
+              " %d%% speed",
+              (pec->nReduced) ? 100 / pec->nReduced : 100 );
+
+  if ( fChequer && pec->nPlies ) 
+    sprintf ( pc = strchr ( sz, 0 ),
+              ", %d cand., %0.3g tol.",
+              pec->nSearchCandidates,
+              pec->rSearchTolerance );
+
+  if ( pec->rNoise > 0.0f )
+    sprintf ( pc = strchr ( sz, 0 ),
+              ", noise %0.3g (%s)",
+              pec->rNoise,
+              pec->fDeterministic ? "d" : "nd" );
+
+  for ( i = 0; i < NUM_SETTINGS; i++ )
+
+    if ( ! cmp_evalcontext ( &aecSettings[ i ], pec ) ) {
+      sprintf ( pc = strchr ( sz, 0 ),
+                " [%s]",
+                gettext ( aszSettings[ i ] ) );
+      break;
+    }
+
+  return sz;
+
+}
+
+
+
+extern char *
+OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
+
+  static char sz[ 1024 ];
+  char *pc;
+
+  int fCube = 
+    ! cmp_evalcontext ( &prc->aecCube[ 0 ], &prc->aecCube[ 1 ] );
+  int fChequer = 
+    ! cmp_evalcontext ( &prc->aecChequer[ 0 ], &prc->aecChequer[ 1 ] );
+
+  int fIdentical = fCube && fChequer;
+
+  int i;
+
+  strcpy ( sz, "" );
+
+  if ( szIndent && *szIndent )
+    strcat ( sz, szIndent );
+
+  if ( prc->nTruncate )
+    sprintf ( pc = strchr ( sz, 0 ),
+              prc->fCubeful ?
+              _("Truncated cubeful rollout (depth %d)") :
+              _("Truncated cubeless rollout (depth %d)"), 
+              prc->nTruncate );
+  else
+    sprintf ( pc = strchr ( sz, 0 ),
+              prc->fCubeful ? 
+              _("Full cubeful rollout") :
+              _("Full cubeless rollout"), 
+              prc->nTruncate );
+
+  sprintf ( pc = strchr ( sz, 0 ),
+            prc->fVarRedn ? _(" with var.redn.") : _(" without var.redn.") );
+
+  strcat ( sz, "\n" );
+  
+  if ( szIndent && *szIndent )
+    strcat ( sz, szIndent );
+
+  sprintf ( pc = strchr ( sz, 0 ),
+            "%d games",
+            prc->nTrials );
+
+  if ( prc->fInitial )
+    strcat ( sz, ", rollout as initial position" );
+
+  sprintf ( pc = strchr ( sz, 0 ),
+            ", seed %d using %s\n",
+            prc->nSeed,
+            gettext ( aszRNG[ prc->rngRollout ] ) );
+
+  for ( i = 0; i < 1 + ! fIdentical; i++ ) {
+
+    if ( ! fIdentical ) {
+
+      if ( szIndent && *szIndent )
+        strcat ( sz, szIndent );
+
+      sprintf ( pc = strchr ( sz, 0 ), _("Player %d:\n" ), i );
+    }
+
+    if ( ! cmp_evalcontext ( &prc->aecChequer[ i ], &prc->aecCube[ i ] ) ) {
+
+      if ( szIndent && *szIndent )
+        strcat ( sz, szIndent );
+
+      strcat ( sz, _("Play and cube: ") );
+      strcat ( sz, OutputEvalContext ( &prc->aecChequer[ i ], TRUE ) );
+      strcat ( sz, "\n" );
+
+    }
+    else {
+
+      if ( szIndent && *szIndent )
+        strcat ( sz, szIndent );
+
+      strcat ( sz, _("Play: ") );
+      strcat ( sz, OutputEvalContext ( &prc->aecChequer[ i ], TRUE ) );
+      strcat ( sz, "\n" );
+
+      if ( szIndent && *szIndent )
+        strcat ( sz, szIndent );
+
+      strcat ( sz, _("Cube: ") );
+      strcat ( sz, OutputEvalContext ( &prc->aecCube[ i ], FALSE ) );
+      strcat ( sz, "\n" );
+
+    }
+
+  }
+
+  return sz;
+
+}
+
+/*
+ * Return formatted string with equity or MWC.
+ *
+ * Input:
+ *    r: equity (either money equity for normalised money eq. for match play
+ *    pci: cubeinfo
+ *    f: indicates equity (TRUE) or std. error (FALSE)
+ *    
+ *
+ * Important: function is not re-entrant. Caller must save output
+ * if needed.
+ */
+
+extern char *
+OutputEquity ( const float r, const cubeinfo *pci, const int f ) {
+
+  static char sz[ 9 ];
+
+  if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
+    sprintf ( sz, f ? "%+7.3f" : "%7.3f", r );
+  else {
+    if ( fOutputMatchPC )
+      sprintf ( sz, "%6.2f%%", 
+                100.0f * ( f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) ) );
+    else
+      sprintf ( sz, "%6.4f", 
+                f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) );
+  }
+
+  return sz;
+
+}
+
+
+
+/*
+ * Return formatted string with equity or MWC.
+ *
+ * Input:
+ *    r: equity (either money equity for normalised money eq. for match play
+ *    pci: cubeinfo
+ *    f: indicates equity (TRUE) or std. error (FALSE)
+ *    
+ *
+ * Important: function is not re-entrant. Caller must save output
+ * if needed.
+ */
+
+extern char *
+OutputEquityScale ( const float r, const cubeinfo *pci, 
+                    const cubeinfo *pciBase, const int f ) {
+
+  static char sz[ 9 ];
+
+  if ( ! pci->nMatchTo ) 
+    sprintf ( sz, f ? "%+7.3f" : "%7.3f", pci->nCube / pciBase->nCube * r );
+  else {
+
+    if ( fOutputMWC ) {
+
+      if ( fOutputMatchPC )
+        sprintf ( sz, "%6.2f%%", 
+                  100.0f * ( f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) ) );
+      else
+        sprintf ( sz, "%6.4f", 
+                  f ? eq2mwc ( r, pci ) : se_eq2mwc ( r, pci ) );
+
+    }
+    else
+      sprintf ( sz, f ? "%+7.3f" : "%7.3f", 
+                mwc2eq ( eq2mwc ( r, pci ), pciBase ) );
+
+
+  }
+
+  return sz;
+
+}
+
+
+/*
+ * Return formatted string with equity or MWC for an equity difference.
+ *
+ * Input:
+ *    r: equity (either money equity for normalised money eq. for match play
+ *    pci: cubeinfo
+ *    f: indicates equity (TRUE) or std. error (FALSE)
+ *    
+ *
+ * Important: function is not re-entrant. Caller must save output
+ * if needed.
+ */
+
+extern char *
+OutputEquityDiff ( const float r1, const float r2, const cubeinfo *pci ) {
+
+  static char sz[ 9 ];
+
+  if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
+    sprintf ( sz, "%+7.3f", r1 - r2 );
+  else {
+    if ( fOutputMatchPC )
+      sprintf ( sz, "%+6.2f%%", 
+                100.0f * eq2mwc ( r1, pci ) - 100.0f * eq2mwc ( r2, pci ) );
+    else
+      sprintf ( sz, "%+6.4f", 
+                eq2mwc ( r1, pci ) - eq2mwc ( r2, pci ) );
+  }
+
+  return sz;
+
+}
+
+/*
+ * Return formatted string with equity or MWC.
+ *
+ * Input is: equity for money game/MWC for match play.
+ *
+ * Important: function is not re-entrant. Caller must save output
+ * if needed.
+ */
+
+
+extern char *
+OutputMWC ( const float r, const cubeinfo *pci, const int f ) {
+
+  static char sz[ 9 ];
+
+  if ( ! pci->nMatchTo ) 
+    sprintf ( sz, "%+7.3f", r );
+  else {
+    
+    if ( ! fOutputMWC ) 
+      sprintf ( sz, "%+7.3f", 
+                f ? mwc2eq ( r, pci ) : se_mwc2eq ( r, pci ) );
+    else if ( fOutputMatchPC )
+      sprintf ( sz, "%6.2f%%", 100.0f * r );
+    else
+      sprintf ( sz, "%6.4f%%", r );
+  }
+
+  return sz;
+
+}
+
+
+extern char *
+OutputPercent ( const float r ) {
+
+  static char sz[ 9 ];
+
+  if ( fOutputWinPC )
+    sprintf ( sz, "%5.1f%%", 100.0 * r );
+  else
+    sprintf ( sz, "%5.3f", r );
+
+  return sz;
+
+}
+
+extern char *
+OutputPercents ( const float ar[], const int f ) {
+
+  static char sz[ 80 ];
+
+  strcpy ( sz, "" );
+
+  strcat ( sz, OutputPercent ( ar [ OUTPUT_WIN ] ) );
+  strcat ( sz, " " );
+  strcat ( sz, OutputPercent ( ar [ OUTPUT_WINGAMMON ] ) );
+  strcat ( sz, " " );
+  strcat ( sz, OutputPercent ( ar [ OUTPUT_WINBACKGAMMON ] ) );
+  strcat ( sz, " - " );
+  if ( f )
+    strcat ( sz, OutputPercent ( 1.0f - ar [ OUTPUT_WIN ] ) );
+  else
+    strcat ( sz, OutputPercent ( ar [ OUTPUT_WIN ] ) );
+  strcat ( sz, " " );
+  strcat ( sz, OutputPercent ( ar [ OUTPUT_LOSEGAMMON ] ) );
+  strcat ( sz, " " );
+  strcat ( sz, OutputPercent ( ar [ OUTPUT_LOSEBACKGAMMON ] ) );
+
+  return sz;
+
+}
+
 static void
 printTextBoard ( FILE *pf, const matchstate *pms ) {
 
@@ -383,42 +779,18 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* missed double */
 
-    fprintf ( pf, "%s", _("Alert: missed double") );
-
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_NODOUBLE ];
-      else
-        r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fputs ( "\n", pf );
-
-    }
-    else {
-
-
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = eq2mwc( arDouble[ OUTPUT_DROP ], pci ) -
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-      else
-        r = eq2mwc( arDouble[ OUTPUT_TAKE ], pci ) -
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fputs ( "\n", pf );
-
-    }
-
+    fprintf ( pf, "%s (%s)!",
+              _("Alert: missed double"),
+              OutputEquityDiff ( arDouble[ OUTPUT_NODOUBLE ], 
+                                ( arDouble[ OUTPUT_TAKE ] > 
+                                   arDouble[ OUTPUT_DROP ] ) ? 
+                                 arDouble[ OUTPUT_DROP ] : 
+                                 arDouble[ OUTPUT_TAKE ],
+                                 pci ) );
+    
+    if ( stDouble != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
+    
   }
 
   r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
@@ -429,34 +801,15 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong take */
 
-    fprintf ( pf, _("Alert: wrong take") );
+    fprintf ( pf, "%s (%s)!",
+              _("Alert: wrong take"),
+              OutputEquityDiff ( arDouble[ OUTPUT_DROP ],
+                                 arDouble[ OUTPUT_TAKE ],
+                                 pci ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-
-      r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fputs ( "\n", pf );
-
-    }
-    else {
-
-      r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
-        eq2mwc ( arDouble[ OUTPUT_DROP ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fputs ( "\n", pf );
-
-    }
-
+    if ( stTake != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
+    
   }
 
   r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
@@ -467,34 +820,15 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong pass */
 
-    fprintf ( pf, _("Alert: wrong pass") );
+    fprintf ( pf, "%s (%s)!",
+              _("Alert: wrong pass"),
+              OutputEquityDiff ( arDouble[ OUTPUT_TAKE ],
+                                 arDouble[ OUTPUT_DROP ],
+                                 pci ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-
-      r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fputs ( "\n", pf );
-
-    }
-    else {
-
-      r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_TAKE ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fputs ( "\n", pf );
-
-    }
-
+    if ( stTake != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
+    
   }
 
 
@@ -509,33 +843,17 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong double */
 
-    fprintf ( pf, _("Alert: wrong double") );
+    fprintf ( pf, "%s (%s)!",
+              _("Alert: wrong double"),
+              OutputEquityDiff ( ( arDouble[ OUTPUT_TAKE ] > 
+                                   arDouble[ OUTPUT_DROP ] ) ? 
+                                 arDouble[ OUTPUT_DROP ] : 
+                                 arDouble[ OUTPUT_TAKE ],
+                                 arDouble[ OUTPUT_NODOUBLE ], 
+                                 pci ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-
-      r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fputs ( "\n", pf );
-
-    }
-    else {
-
-      r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
-        eq2mwc ( arDouble[ OUTPUT_DROP ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fputs ( "\n", pf );
-
-    }
+    if ( stDouble != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
 
   }
 
@@ -567,51 +885,30 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     break;
   case EVAL_EVAL:
     fprintf ( pf, 
-              _("%s %d-ply equity: "), 
-              pes->ec.fCubeful ? _("Cubeful") : _("Cubeless"), pes->ec.nPlies );
+              _("%d-ply"), 
+              pes->ec.nPlies );
     break;
   case EVAL_ROLLOUT:
-    fprintf ( pf, 
-              _("%s rollout equity: "), 
-              pes->rc.fCubeful ? _("Cubeful") : _("Cubeless") );
+    fputs ( _("Rollout"), pf );
     break;
   }
 
-  /* cubeless equity */
-  
-  if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    fprintf ( pf, "%+7.3f\n",
-              aarOutput[ 0 ][ OUTPUT_EQUITY ] );
-  else
-    fprintf ( pf, "%+7.3f\n",
-              eq2mwc ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci ) );
-              
-  /* percentages */
+  fprintf ( pf, " %s %s\n",
+            ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
+            _("cubeless equity") : _("cubeless MWC"),
+            OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ) );
 
-  if ( exsExport.fCubeDetailProb ) {
 
-    /* FIXME: include in movenormal and movedouble */
+  /* Output percentags for evaluations */
 
-    float *ar = aarOutput[ 0 ];
+  if ( exsExport.fCubeDetailProb && pes->et == EVAL_EVAL ) {
 
-    fprintf ( pf,
-              "  "
-              " %6.2f%% "
-              " %6.2f%% "
-              " %6.2f%% "
-              "-"
-              " %6.2f%% "
-              " %6.2f%% "
-              " %6.2f%% "
-              "\n",
-              100.0 * ar[ OUTPUT_WINBACKGAMMON ],
-              100.0 * ar[ OUTPUT_WINGAMMON ],
-              100.0 * ar[ OUTPUT_WIN ],
-              100.0 * ( 1.0  - ar[ OUTPUT_WIN ] ),
-              100.0 * ar [ OUTPUT_LOSEGAMMON ],
-              100.0 * ar [ OUTPUT_LOSEBACKGAMMON ] );
+    fputs ( "  ", pf );
+    fputs ( OutputPercents ( aarOutput[ 0 ], TRUE ), pf );
 
   }
+
+  fputs( "\n", pf );
 
   /* equities */
 
@@ -623,30 +920,13 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
               "%d. %-20s", i + 1, 
               gettext ( aszCube[ ai[ i ] ] ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-      if ( i ) 
-        fprintf ( pf,
-                  "%+7.3f  %+7.3f\n",
-                  arDouble[ ai[ i ] ],
-                  arDouble[ ai[ i ] ] - arDouble[ OUTPUT_OPTIMAL ] );
-      else
-        fprintf ( pf,
-                  "%+7.3f\n",
-                  arDouble [ ai[ i ] ] );
+    fputs ( OutputEquity ( arDouble[ ai [ i ] ], pci, TRUE ), pf );
 
-    }
-    else {
-      if ( i )
-        fprintf ( pf,
-                  "%7.3f%%  %+7.3f%%\n",
-                  100.0f * eq2mwc( arDouble[ ai[ i ] ], pci ), 
-                  100.0f * eq2mwc( arDouble[ ai[ i ] ], pci ) -
-                  100.0f * eq2mwc( arDouble[ OUTPUT_OPTIMAL ], pci ) );
-      else
-        fprintf ( pf,
-                  "%7.3f%%\n",
-                  100.0f * eq2mwc( arDouble[ ai[ i ] ], pci ) );
-    }
+    if ( i )
+      fputs ( OutputEquityDiff ( arDouble[ ai [ i ] ], 
+                                 arDouble[ OUTPUT_OPTIMAL ], pci ), pf );
+
+    fputs ( "\n", pf );
 
   }
 
@@ -661,8 +941,47 @@ TextPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                           arDouble ) ) >= 0.0 )
     fprintf ( pf, " (%.1f%%)", 100.0f * r );
 
-
   fputs ( "\n\n", pf );
+
+  /* dump rollout */
+
+  if ( pes->et == EVAL_ROLLOUT && exsExport.fCubeDetailProb ) {
+
+    char asz[ 2 ][ 1024 ];
+    char sz[ 1024 ];
+    cubeinfo aci[ 2 ];
+
+    for ( i = 0; i < 2; i++ ) {
+
+      memcpy ( &aci[ i ], pci, sizeof ( cubeinfo ) );
+
+      if ( i ) {
+        aci[ i ].fCubeOwner = ! pci->fMove;
+        aci[ i ].nCube *= 2;
+      }
+
+      FormatCubePosition ( asz[ i ], &aci[ i ] );
+
+    }
+
+    fputs ( _("Rollout details:\n"), pf );
+
+    fputs ( OutputRolloutResult ( NULL,
+                                asz,
+                                aarOutput, aarStdDev,
+                                aci, 2, pes->rc.fCubeful ),
+            pf );
+
+  }
+
+  if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] ) {
+
+    fputs ( "\n", pf );
+    fputs ( OutputRolloutContext ( NULL, &pes->rc ), pf );
+
+  }
+    
+
 
 
 }
@@ -820,50 +1139,17 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
   if ( pmr->n.ml.cMoves ) {
 	
     for( i = 0; i < pmr->n.ml.cMoves; i++ ) {
-      if( i >= exsExport.nMoves /* FIXME allow user to choose limit */ &&
-          i != pmr->n.iMove )
+      if( i >= exsExport.nMoves && i != pmr->n.iMove )
         continue;
 
       fputc( i == pmr->n.iMove ? '*' : ' ', pf );
       fputs( FormatMoveHint( szBuf, pms, &pmr->n.ml, i,
                              i != pmr->n.iMove ||
-                             i != pmr->n.ml.cMoves - 1 ), pf );
-
-      /*
-       * Write row with move parameters 
-       */
-      
-      if ( exsExport.afMovesParameters 
-           [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ) {
-
-        evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
-
-        switch ( pes->et ) {
-        case EVAL_EVAL: 
-
-          fprintf ( pf, 
-                    _("%d-ply %s "
-                    "(%d%% speed, %d cand., %0.3g tol., noise %0.3g )\n"),
-                    pes->ec.nPlies,
-                    pes->ec.fCubeful ? _("cubeful") : _("cubeless"),
-                    (pes->ec.nReduced) ? 100 / pes->ec.nReduced : 100,
-                    pes->ec.nSearchCandidates,
-                    pes->ec.rSearchTolerance,
-                    pes->ec.rNoise );
-          break;
-
-        case EVAL_ROLLOUT:
-
-          fprintf ( pf, "write me" );
-          break;
-
-        default:
-
-          break;
-
-        }
-
-      }
+                             i != pmr->n.ml.cMoves - 1,
+                             exsExport.fMovesDetailProb,
+                             exsExport.afMovesParameters 
+                             [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ), 
+             pf );
 
 
     }

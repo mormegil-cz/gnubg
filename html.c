@@ -60,8 +60,9 @@
 ".comment { background-color: #449911; width: 39.5em; padding: 0.5em } \n" \
 ".commentheader { background-color: #557711; font-weight: bold; text-align: center; width: 40em; padding: 0.25em } \n" \
 "td img {display: block;}\n" \
-".number { text-align: center; font-weight: bold; font-size: 60%% " \
-"          text-family: sans-serif } \n" \
+".number { text-align: center; font-weight: bold; font-size: 60%%; " \
+"font-family: sans-serif } \n" \
+".percent { text-align: right } \n" \
 "</style>\n" 
 
 #define FORMATHTMLPROB(f) \
@@ -85,6 +86,129 @@ static char *aszLinkText[] = {
 /* static char *aszColorNameBBS[] = { N_ ("white"), N_ ("blue") }; */
 /* static char *aszColorNameF2H[] = { N_ ("white"), N_ ("red") }; */
 static char *aszColorNameGNU[] = { N_ ("red"), N_ ("black") };
+
+
+
+static void
+printRolloutTable ( FILE *pf, 
+                    char asz[][ 1024 ],
+                    float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                    float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
+                    const cubeinfo aci[],
+                    const int cci,
+                    const int fCubeful,
+                    const int fHeader ) {
+
+  int ici;
+
+  fputs ( "<table>\n", pf );
+
+  if ( fHeader ) {
+
+    fputs ( "<tr>", pf );
+
+    if ( asz )
+      fputs ( "<td>&nbsp;</td>", pf );
+
+    fprintf ( pf,
+              "<td>%s</td>"
+              "<td>%s</td>"
+              "<td>%s</td>"
+              "<td>&nbsp;</td>"
+              "<td>%s</td>"
+              "<td>%s</td>"
+              "<td>%s</td>"
+              "<td>%s</td>",
+              _("Win"),
+              _("W g"),
+              _("W bg"),
+              _("Lose"),
+              _("L g"),
+              _("L bg"),
+              _("Cubeless") );
+
+    if ( fCubeful )
+      fprintf ( pf, "<td>%s</td>", _("Cubeful") );
+
+    fputs ( "</tr>\n", pf );
+
+  }
+
+  for ( ici = 0; ici < cci; ici++ ) {
+
+    fputs ( "<tr>", pf );
+
+    /* output */
+
+    if ( asz )
+      fprintf ( pf, "<td>%s</td>", asz[ ici ] );
+
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarOutput[ ici ][ OUTPUT_WIN ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarOutput[ ici ][ OUTPUT_WINGAMMON ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarOutput[ ici ][ OUTPUT_WINBACKGAMMON ] ) );
+    
+    fputs ( "<td>-</td>", pf );
+    
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( 1.0f - aarOutput[ ici ][ OUTPUT_WIN ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarOutput[ ici ][ OUTPUT_LOSEGAMMON ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarOutput[ ici ][ OUTPUT_LOSEBACKGAMMON ] ) );
+    
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputEquityScale ( aarOutput[ ici ][ OUTPUT_EQUITY ], 
+                             &aci[ ici ], &aci[ 0 ], TRUE ) );
+
+    if ( fCubeful )
+      fprintf ( pf, "<td class=\"percent\">%s</td>", 
+                OutputMWC ( aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ], 
+                            &aci[ 0 ], TRUE ) );
+
+    fputs ( "</tr>\n", pf );
+
+    /* stddev */
+
+    fputs ( "<tr>", pf );
+
+    if ( asz )
+      fprintf ( pf, "<td>%s</td>", _("Standard error") );
+
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarStdDev[ ici ][ OUTPUT_WIN ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarStdDev[ ici ][ OUTPUT_WINGAMMON ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarStdDev[ ici ][ OUTPUT_WINBACKGAMMON ] ) );
+    
+    fputs ( "<td>-</td>", pf );
+    
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarStdDev[ ici ][ OUTPUT_WIN ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarStdDev[ ici ][ OUTPUT_LOSEGAMMON ] ) );
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputPercent ( aarStdDev[ ici ][ OUTPUT_LOSEBACKGAMMON ] ) );
+    
+    fprintf ( pf, "<td class=\"percent\">%s</td>", 
+              OutputEquityScale ( aarStdDev[ ici ][ OUTPUT_EQUITY ], 
+                             &aci[ ici ], &aci[ 0 ], FALSE ) );
+    
+    if ( fCubeful )
+      fprintf ( pf, "<td class=\"percent\">%s</td>", 
+                OutputMWC ( aarStdDev[ ici ][ OUTPUT_CUBEFUL_EQUITY ], 
+                            &aci[ 0 ], FALSE ) );
+
+    fputs ( "</tr>\n", pf );
+
+  }
+
+  fputs ( "</table>\n", pf );
+
+}
 
 
 static void
@@ -878,10 +1002,9 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<table cellpadding=\"0\" border=\"0\" cellspacing=\"0\""
           " style=\"margin: 0; padding: 0; border: 0\">\n", pf );
-  fputs ( "<tr>", pf );
-
   printNumbers ( pf, fTurn );
 
+  fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
   printImage ( pf, szImageDir, fTurn ? "b-hitop" : "b-lotop", szExtension,
                fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
@@ -1148,10 +1271,9 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
                "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" );
   fputs ( "</td>", pf );
+  fputs ( "</tr>", pf );
 
   printNumbers ( pf, ! fTurn );
-
-  fputs ( "</tr>", pf );
 
   /* position ID */
 
@@ -1587,42 +1709,19 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* missed double */
 
-    fprintf ( pf, "<p><span class=\"blunder\">%s ",
-              _("Alert: missed double") );
-
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_NODOUBLE ];
-      else
-        r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
-    else {
-
-
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = eq2mwc( arDouble[ OUTPUT_DROP ], pci ) -
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-      else
-        r = eq2mwc( arDouble[ OUTPUT_TAKE ], pci ) -
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
+    fprintf ( pf, "<p><span class=\"blunder\">%s (%s)!",
+              _("Alert: missed double"),
+              OutputEquityDiff ( arDouble[ OUTPUT_NODOUBLE ], 
+                                ( arDouble[ OUTPUT_TAKE ] > 
+                                   arDouble[ OUTPUT_DROP ] ) ? 
+                                 arDouble[ OUTPUT_DROP ] : 
+                                 arDouble[ OUTPUT_TAKE ],
+                                 pci ) );
+    
+    if ( stDouble != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
+    
+    fprintf ( pf, "</span></p>\n" );
 
   }
 
@@ -1634,34 +1733,16 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong take */
 
-    fprintf ( pf, "<p><span class=\"blunder\">%s ",
-              _("Alert: wrong take") );
+    fprintf ( pf, "<p><span class=\"blunder\">%s (%s)!",
+              _("Alert: wrong take"),
+              OutputEquityDiff ( arDouble[ OUTPUT_DROP ],
+                                 arDouble[ OUTPUT_TAKE ],
+                                 pci ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-
-      r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_DROP ];
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
-    else {
-
-      r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
-        eq2mwc ( arDouble[ OUTPUT_DROP ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
+    if ( stTake != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
+    
+    fprintf ( pf, "</span></p>\n" );
 
   }
 
@@ -1673,34 +1754,16 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong pass */
 
-    fprintf ( pf, "<p><span class=\"blunder\">%s ",
-              _("Alert: wrong pass") );
+    fprintf ( pf, "<p><span class=\"blunder\">%s (%s)!",
+              _("Alert: wrong pass"),
+              OutputEquityDiff ( arDouble[ OUTPUT_TAKE ],
+                                 arDouble[ OUTPUT_DROP ],
+                                 pci ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-
-      r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_TAKE ];
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
-    else {
-
-      r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_TAKE ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
+    if ( stTake != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
+    
+    fprintf ( pf, "</span></p>\n" );
 
   }
 
@@ -1716,41 +1779,19 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong double */
 
-    fprintf ( pf, "<p><span class=\"blunder\">%s ",
-              _("Alert: wrong double") );
+    fprintf ( pf, "<p><span class=\"blunder\">%s (%s)!",
+              _("Alert: wrong double"),
+              OutputEquityDiff ( ( arDouble[ OUTPUT_TAKE ] > 
+                                   arDouble[ OUTPUT_DROP ] ) ? 
+                                 arDouble[ OUTPUT_DROP ] : 
+                                 arDouble[ OUTPUT_TAKE ],
+                                 arDouble[ OUTPUT_NODOUBLE ], 
+                                 pci ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
+    if ( stDouble != SKILL_NONE )
+      fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
 
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = arDouble[ OUTPUT_DROP ] - arDouble[ OUTPUT_NODOUBLE ];
-      else
-        r = arDouble[ OUTPUT_TAKE ] - arDouble[ OUTPUT_NODOUBLE ];    
-
-      fprintf ( pf, " (%+7.3f)!", r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
-    else {
-
-      if ( arDouble[ OUTPUT_TAKE ] > arDouble[ OUTPUT_DROP ] )
-        r = eq2mwc ( arDouble[ OUTPUT_DROP ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-      else
-        r = eq2mwc ( arDouble[ OUTPUT_TAKE ], pci ) - 
-          eq2mwc ( arDouble[ OUTPUT_NODOUBLE ], pci );
-
-      fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
-      
-      if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
-
-      fprintf ( pf, "</span></p>\n" );
-
-    }
+    fprintf ( pf, "</span></p>\n" );
 
   }
 
@@ -1791,7 +1832,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   /* ply */
 
-  fputs ( "<td>", pf );
+  fputs ( "<td colspan=\"2\">", pf );
   
   switch ( pes->et ) {
   case EVAL_NONE:
@@ -1807,46 +1848,26 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
     break;
   }
 
-  fputs ( "</td>\n", pf );
-
   /* cubeless equity */
   
-  if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    fprintf ( pf, "<td>%s</td><td>%+7.3f</td><td>&nbsp;</td>\n",
-              _("Cubeless equity"),
-              aarOutput[ 0 ][ OUTPUT_EQUITY ] );
-  else
-    fprintf ( pf, "<td>%s</td><td>%+7.3f</td><td>&nbsp;</td>\n",
-              _("Cubeless equity"),
-              eq2mwc ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci ) );
-              
+  fprintf ( pf, " %s</td><td>%s</td><td>&nbsp;</td>\n",
+            ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) ?
+            _("cubeless equity") : _("cubeless MWC"),
+            OutputEquity ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci, TRUE ) );
+
 
   fprintf ( pf, "</tr>\n" );
 
   /* percentages */
 
-  if ( exsExport.fCubeDetailProb ) {
+  if ( exsExport.fCubeDetailProb && pes->et == EVAL_EVAL ) {
 
-    /* FIXME: include in movenormal and movedouble */
+    fputs ( "<tr><td>&nbsp;</td>"
+            "<td colspan=\"3\">", pf );
 
-    float *ar = aarOutput[ 0 ];
+    fputs ( OutputPercents ( aarOutput[ 0 ], TRUE ), pf );
 
-    fprintf ( pf,
-              "<tr><td>&nbsp;</td>"
-              "<td colspan=\"3\">"
-              "%s%s%6.2f%% "
-              "%s%s%6.2f%% "
-              "%s%s%6.2f%% "
-              "%s%s%6.2f%% "
-              "%s%s%6.2f%% "
-              "%s%s%6.2f%% "
-              "</td></tr>\n",
-              FORMATHTMLPROB ( ar[ OUTPUT_WINBACKGAMMON ] ),
-              FORMATHTMLPROB ( ar[ OUTPUT_WINGAMMON ] ),
-              FORMATHTMLPROB ( ar[ OUTPUT_WIN ] ),
-              FORMATHTMLPROB ( 1.0 - ar[ OUTPUT_WIN ] ),
-              FORMATHTMLPROB ( ar [ OUTPUT_LOSEGAMMON ] ),
-              FORMATHTMLPROB ( ar [ OUTPUT_LOSEBACKGAMMON ]) );
+    fputs ( "</td></tr>\n", pf );
 
   }
 
@@ -1860,31 +1881,20 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
               "<tr><td>%d.</td><td>%s</td>", i + 1, 
               gettext ( aszCube[ ai[ i ] ] ) );
 
-    if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
-      if ( i ) 
-        fprintf ( pf,
-                  "<td>%+7.3f</td><td>%+7.3f</td></tr>\n",
-                  arDouble[ ai[ i ] ],
-                  arDouble[ ai[ i ] ] - arDouble[ OUTPUT_OPTIMAL ] );
-      else
-        fprintf ( pf,
-                  "<td>%+7.3f</td><td>&nbsp;</td></tr>\n",
-                  arDouble [ ai[ i ] ] );
+    fprintf ( pf,
+              "<td>%s</td>",
+              OutputEquity ( arDouble[ ai [ i ] ], pci, TRUE ) );
 
-    }
-    else {
-      if ( i )
-        fprintf ( pf,
-                  "<td>%7.3f%%</td><td>%+7.3f%%</td></tr>\n",
-                  100.0f * eq2mwc( arDouble[ ai[ i ] ], pci ), 
-                  100.0f * eq2mwc( arDouble[ ai[ i ] ], pci ) -
-                  100.0f * eq2mwc( arDouble[ OUTPUT_OPTIMAL ], pci ) );
-      else
-        fprintf ( pf,
-                  "<td>%7.3f%%</td><td>&nbsp;</td></tr>\n",
-                  100.0f * eq2mwc( arDouble[ ai[ i ] ], pci ) );
-    }
+    if ( i )
+      fprintf ( pf,
+                "<td>%s</td>",
+                OutputEquityDiff ( arDouble[ ai [ i ] ], 
+                                   arDouble[ OUTPUT_OPTIMAL ], pci ) );
+    else
+      fputs ( "<td>&nbsp;</td>", pf );
 
+    fputs ( "</tr>\n", pf );
+      
   }
 
   /* cube decision */
@@ -1902,6 +1912,66 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
 
   fprintf ( pf, "</td></tr>\n" );
+
+  /* rollout details */
+
+  if ( pes->et == EVAL_ROLLOUT && 
+       ( exsExport.fCubeDetailProb || exsExport.afCubeParameters [ 1 ] ) ) {
+
+    fprintf ( pf, 
+              "<tr><th colspan=\"4\">%s</th></tr>\n",
+              _("Rollout details") );
+
+  }
+
+  if ( pes->et == EVAL_ROLLOUT && exsExport.fCubeDetailProb ) {
+
+    char asz[ 2 ][ 1024 ];
+    char sz[ 1024 ];
+    cubeinfo aci[ 2 ];
+
+    for ( i = 0; i < 2; i++ ) {
+
+      memcpy ( &aci[ i ], pci, sizeof ( cubeinfo ) );
+
+      if ( i ) {
+        aci[ i ].fCubeOwner = ! pci->fMove;
+        aci[ i ].nCube *= 2;
+      }
+
+      FormatCubePosition ( asz[ i ], &aci[ i ] );
+
+    }
+
+    fputs ( "<tr>"
+            "<td colspan=\"4\">", pf );
+    
+    printRolloutTable ( pf, asz, aarOutput, aarStdDev, aci, 2, 
+                        pes->rc.fCubeful, TRUE );
+
+    fputs ( "</td></tr>\n", pf );
+
+  }
+
+  if ( pes->et == EVAL_ROLLOUT && exsExport.afCubeParameters[ 1 ] ) {
+
+    char *sz = strdup ( OutputRolloutContext ( NULL, &pes->rc ) );
+    char *pcS = sz, *pcE;
+
+    while ( ( pcE = strstr ( pcS, "\n" ) ) ) {
+
+      *pcE = 0;
+      fprintf ( pf, 
+                "<tr><td colspan=\"4\">%s</td></tr>\n",
+                pcS );
+      pcS = pcE + 1;
+
+    }
+
+    free ( sz );
+
+
+  }
 
   fprintf ( pf,
             "</table>\n" );
@@ -2172,6 +2242,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         float *ar = pmr->n.ml.amMoves[ i ].arEvalMove;
 
+        /* percentages */
+
         if ( i == pmr->n.iMove )
           fputs ( "<tr class=\"movethemove\">\n", pf );
         else if ( i % 2 )
@@ -2179,26 +2251,34 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
         else
           fputs ( "<tr>\n", pf );
 
-        fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
+        fputs ( "<td colspan=\"3\">&nbsp;</td>\n", pf );
 
-        fprintf ( pf,
-                  "<td colspan=\"2\">"
-                  "%s%s%6.2f%% "
-                  "%s%s%6.2f%% "
-                  "%s%s%6.2f%% "
-                  "%s%s%6.2f%% "
-                  "%s%s%6.2f%% "
-                  "%s%s%6.2f%% "
-                  "</td>\n",
-                  FORMATHTMLPROB ( ar[ OUTPUT_WINBACKGAMMON ] ),
-                  FORMATHTMLPROB ( ar[ OUTPUT_WINGAMMON ] ),
-                  FORMATHTMLPROB ( ar[ OUTPUT_WIN ] ),
-                  FORMATHTMLPROB ( 1.0 - ar[ OUTPUT_WIN ] ),
-                  FORMATHTMLPROB ( ar [ OUTPUT_LOSEGAMMON ] ),
-                  FORMATHTMLPROB ( ar [ OUTPUT_LOSEBACKGAMMON ]) );
 
-        fprintf ( pf, "</tr>\n" );
+        fputs ( "<td colspan=\"2\">", pf );
 
+
+        switch ( pmr->n.ml.amMoves[ i ].esMove.et ) {
+        case EVAL_EVAL:
+          fputs ( OutputPercents ( ar, TRUE ), pf );
+          break;
+        case EVAL_ROLLOUT:
+          printRolloutTable ( pf, NULL,
+                              ( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) 
+                              pmr->n.ml.amMoves[ i ].arEvalMove,
+                              ( float (*)[ NUM_ROLLOUT_OUTPUTS ] ) 
+                              pmr->n.ml.amMoves[ i ].arEvalStdDev,
+                              &ci,
+                              1,
+                              pmr->n.ml.amMoves[ i ].esMove.rc.fCubeful,
+                              FALSE );
+          break;
+        default:
+          break;
+        }
+
+        fputs ( "</td>\n", pf );
+
+        fputs ( "</tr>\n", pf );
       }
 
       /*
@@ -2210,45 +2290,64 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
         evalsetup *pes = &pmr->n.ml.amMoves[ i ].esMove;
 
-        if ( i == pmr->n.iMove )
-          fputs ( "<tr class=\"movethemove\">\n", pf );
-        else if ( i % 2 )
-          fputs ( "<tr class=\"moveodd\">\n", pf );
-        else
-          fputs ( "<tr>\n", pf );
-
-        fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
-
-
         switch ( pes->et ) {
         case EVAL_EVAL: 
 
+          if ( i == pmr->n.iMove )
+            fputs ( "<tr class=\"movethemove\">\n", pf );
+          else if ( i % 2 )
+            fputs ( "<tr class=\"moveodd\">\n", pf );
+          else
+            fputs ( "<tr>\n", pf );
+          
+          fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
+
           fputs ( "<td colspan=\"2\">", pf );
-          fprintf ( pf, 
-                    _("%d-ply %s "
-                    "(%d%% speed, %d cand., %0.3g tol., noise %0.3g )"),
-                    pes->ec.nPlies,
-                    pes->ec.fCubeful ? _("cubeful") : _("cubeless"),
-                    (pes->ec.nReduced) ? 100 / pes->ec.nReduced : 100,
-                    pes->ec.nSearchCandidates,
-                    pes->ec.rSearchTolerance,
-                    pes->ec.rNoise );
+          fputs ( OutputEvalContext ( &pes->ec, TRUE ), pf );
           fputs ( "</td>\n", pf );
+
+          fputs ( "</tr>\n", pf );
+
           break;
 
-        case EVAL_ROLLOUT:
+        case EVAL_ROLLOUT: {
 
-          fprintf ( pf, "<td colspan=\"2\">write me</td>\n" );
+          char *sz = strdup ( OutputRolloutContext ( NULL, &pes->rc ) );
+          char *pcS = sz, *pcE;
+          
+          while ( ( pcE = strstr ( pcS, "\n" ) ) ) {
+            
+            *pcE = 0;
+
+            if ( i == pmr->n.iMove )
+              fputs ( "<tr class=\"movethemove\">\n", pf );
+            else if ( i % 2 )
+              fputs ( "<tr class=\"moveodd\">\n", pf );
+            else
+              fputs ( "<tr>\n", pf );
+            
+            fprintf ( pf, "<td colspan=\"3\">&nbsp;</td>\n" );
+            
+            fputs ( "<td colspan=\"2\">", pf );
+            fputs ( pcS, pf );
+            fputs ( "</td>\n", pf );
+            
+            fputs ( "</tr>\n", pf );
+            
+            pcS = pcE + 1;
+            
+          }
+
+          free ( sz );
+
           break;
 
+        }
         default:
 
           break;
 
         }
-
-
-        fprintf ( pf, "</tr>\n" );
 
       }
 
