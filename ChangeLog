@@ -1,3 +1,8 @@
+Fri Oct 13 10:57:09 2000  Jørn Thyssen  <joern@thyssen.nu>
+
+	* gnubg.c: (CommandHint): Don't give hint on cube action when
+	player is not allowed/able to double. 
+
 Thu Oct 12 18:18:37 2000  Gary Wong  <gtw@research.att.com>
 
 	* play.c (ComputerTurn): Don't consider doubling if !fCubeUse
