@@ -1917,6 +1917,17 @@ static void SetAnnotation( moverecord *pmr ) {
 
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 
+	    pwBox = gtk_hbox_new( FALSE, 0 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), 
+                                gtk_label_new( 
+                                   gettext ( aszDoubleTypes[ dt ] ) ),
+				FALSE, FALSE, 2 );
+	    gtk_box_pack_start( GTK_BOX( pwBox ), 
+                                SkillMenu( pmr->d.st, "double" ),
+				FALSE, FALSE, 2 );
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
+				0 );
+
             if ( dt == DT_NORMAL ) {
 	    
               if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
@@ -1934,22 +1945,6 @@ static void SetAnnotation( moverecord *pmr ) {
                                                      "nor raccoons yet") ),
                                    FALSE, FALSE, 0 );
 
-	    pwBox = gtk_hbox_new( FALSE, 0 );
-
-	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                gtk_label_new( 
-                                   gettext ( aszDoubleTypes[ dt ] ) ),
-				FALSE, FALSE, 2 );
-	    gtk_box_pack_start( GTK_BOX( pwBox ), 
-                                SkillMenu( pmr->d.st, "double" ),
-				FALSE, FALSE, 2 );
-
-	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
-	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
-				0 );
-
-	    gtk_container_add( GTK_CONTAINER( pwAlign ), pwBox );
-	    
 	    break;
 
 	case MOVE_TAKE:
@@ -1958,23 +1953,6 @@ static void SetAnnotation( moverecord *pmr ) {
             tt = (taketype) DoubleType ( ms.fDoubled, ms.fMove, ms.fTurn );
 
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
-
-            if ( tt == TT_NORMAL ) {
-
-              if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
-                                               pmr->d.CubeDecPtr->aarStdDev,
-                                               &pmr->d.CubeDecPtr->esDouble,
-                                               pmr->mt ) ) )
-		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
-				    FALSE, 0 );
-
-            }
-            else
-              gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
-                                   gtk_label_new ( _("GNU Backgammon cannot "
-                                                     "analyse neither beavers "
-                                                     "nor raccoons yet") ),
-                                   FALSE, FALSE, 0 );
 
 	    pwBox = gtk_hbox_new( FALSE, 0 );
 	    gtk_box_pack_start( GTK_BOX( pwBox ),
@@ -1986,13 +1964,24 @@ static void SetAnnotation( moverecord *pmr ) {
                                            ( pmr->d.mt == MOVE_TAKE ) ?
                                            "take" : "drop" ),
 				FALSE, FALSE, 2 );
-
-	    pwAlign = gtk_alignment_new( 0.5f, 0.5f, 0.0f, 0.0f );
-	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwAlign, FALSE, FALSE,
+	    gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwBox, FALSE, FALSE,
 				0 );
 
-	    gtk_container_add( GTK_CONTAINER( pwAlign ), pwBox );
-	    
+            if ( tt == TT_NORMAL ) {
+              if ( ( pw = CreateCubeAnalysis ( pmr->d.CubeDecPtr->aarOutput,
+                                               pmr->d.CubeDecPtr->aarStdDev,
+                                               &pmr->d.CubeDecPtr->esDouble,
+                                               pmr->mt ) ) )
+		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
+				    FALSE, 0 );
+            }
+            else
+              gtk_box_pack_start ( GTK_BOX ( pwAnalysis ),
+                                   gtk_label_new ( _("GNU Backgammon cannot "
+                                                     "analyse neither beavers "
+                                                     "nor raccoons yet") ),
+                                   FALSE, FALSE, 0 );
+
 	    break;
 	    
 	case MOVE_RESIGN:
