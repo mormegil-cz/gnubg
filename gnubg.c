@@ -7548,7 +7548,11 @@ Convert ( const char *sz,
 
   iconv_t id;
   int lIn, lOut, l, rc, nUsed;
+#if WIN32
   const char *pchIn;
+#else
+  char *pchIn;
+#endif
   char *pchOut, *pchDest;
   int fError = FALSE;
 
@@ -7565,14 +7569,18 @@ Convert ( const char *sz,
 
   
   lIn = strlen ( sz );
-  pchIn = sz;
+  pchIn = (char *) sz;
 
   l = lOut = lIn + 1;
   pchOut = pchDest = (char *) malloc ( lOut );
 
   while ( lIn && ! fError ) {
 
-    rc = iconv ( id, (const char **) &pchIn, &lIn, &pchOut, &l );
+#if WIN32
+    rc = iconv ( id, &pchIn, &lIn, &pchOut, &l );
+#else
+    rc = iconv ( id, &pchIn, &lIn, &pchOut, &l );
+#endif
 
     if ( rc == -1 ) 
       switch ( errno ) {
