@@ -32,6 +32,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <errno.h>
 
 #include "backgammon.h"
 #if USE_GTK
@@ -222,7 +223,8 @@ static int RecordWrite( FILE *pfOut, char *pchOut, playerrecord apr[ 2 ] ) {
 
 #ifdef WIN32
     /* experiment */
-    if ( unlink ( sz ) ) {
+    if ( unlink ( sz ) && errno != ENOENT ) {
+      /* do not complain if file is not found */
       outputerr ( sz );
       free ( pchOut );
       return -1;

@@ -1,3 +1,9 @@
+Sat Oct 26 15:57:06 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* record.c (WriteRecord): do not complain if .gnubgpr is not
+	found.
+	(reported by Steve Schreiber)
+
 Sat Oct 26 15:42:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix some in LuckAnalysis for match play with asymmetric scores.
