@@ -1,7 +1,7 @@
 if USE_EXT
-SUBDIRS = lib doc ext met html-images
+SUBDIRS = lib doc ext met
 else
-SUBDIRS = lib doc met html-images
+SUBDIRS = lib doc met
 endif
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@ @LIBXML2_CFLAGS@
