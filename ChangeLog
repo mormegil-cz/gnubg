@@ -1,3 +1,8 @@
+Thu Sep 9 12:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkboard.c, render.*, gnubg.c: Small memory leaks, uninitialized
+	memory reads and tidy up code added.  May fix import .mat bugs
+
 Mon Sep 6 00:27:04 2004 GMT Jim Segrave <jes@jes-2.demon.nl>
 
 	* show.c = fix for running off array end in show path command

@@ -2055,6 +2055,9 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
 #endif
     
     for( i = 0; i < 6; i++ ) {
+	// Clear destination buffer (no blending at present - so all overwriten anyway)
+	memset(puch, 0, nStride * CUBE_LABEL_HEIGHT * prd->nSize);
+
 	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
 		    prd->nSize * nStrideCube, nStrideCube,
 		    CUBE_LABEL_WIDTH * prd->nSize, CUBE_LABEL_HEIGHT * prd->nSize );
@@ -2072,6 +2075,9 @@ extern void RenderCubeFaces( renderdata *prd, unsigned char *puch,
     }
     
     for( ; i < 12; i++ ) {
+	// Clear destination buffer (no blending at present - so all overwriten anyway)
+	memset(puch, 0, nStride * CUBE_LABEL_HEIGHT * prd->nSize);
+
 	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
  		    prd->nSize * nStrideCube, nStrideCube,
 		    CUBE_LABEL_WIDTH * prd->nSize, CUBE_LABEL_HEIGHT * prd->nSize );
@@ -2129,6 +2135,9 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
 #endif
     
     for( i = 0; i < 3; i++ ) {
+	// Clear destination buffer (no blending at present - so all overwriten anyway)
+	memset(puch, 0, nStride * RESIGN_LABEL_HEIGHT * prd->nSize);
+
 	AlphaBlendBase( puch, nStride, puch, nStride, puchCube + prd->nSize * 4 +
 		    prd->nSize * nStrideCube, nStrideCube,
 		    RESIGN_LABEL_WIDTH * prd->nSize, RESIGN_LABEL_HEIGHT * prd->nSize );
@@ -2149,8 +2158,10 @@ extern void RenderResignFaces( renderdata *prd, unsigned char *puch,
     
 #if HAVE_FREETYPE
     if( fFreetype )
-	for( i = 0; i < 10; i++ ) 
+	for( i = 0; i < 10; i++ ) {
 	    FT_Done_Glyph( aftg[ i ] );
+	    FT_Done_Glyph( aftgSmall[ i ] );
+	}
 #endif
 }
 
@@ -2477,6 +2488,7 @@ static void Render_Path( art_u8 *puchRGBAbuf, const ArtBpath* bpPath,
     vpTransformed = art_bez_path_to_vec( bpTransformed, 0. );
     svp = art_svp_from_vpath( vpTransformed );
     art_free( vpTransformed );
+    art_free( bpTransformed );
 
     puchRGBbuf = art_new( art_u8, iWidth*iHeight*3 );	/* 24 packed rgb bits */
     assert( puchRGBbuf );
@@ -2498,7 +2510,7 @@ static void Render_Path( art_u8 *puchRGBAbuf, const ArtBpath* bpPath,
     InsertAlpha( puchRGBAbuf, iWidth*4,
 		 puchAlphabuf, iWidth*1, iWidth, iHeight );
     art_free( puchAlphabuf );
-    art_free( svp );
+    art_svp_free(svp);
 }
 #endif /* HAVE_LIBART */
 
@@ -2961,6 +2973,13 @@ extern void RenderInitialise( void ) {
 
 #if HAVE_FREETYPE
     FT_Init_FreeType( &ftl );
+#endif
+}
+
+extern void RenderFinalise( void )
+{
+#if HAVE_FREETYPE
+    FT_Done_FreeType( ftl );
 #endif
 }
 

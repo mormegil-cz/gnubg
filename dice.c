@@ -760,7 +760,6 @@ CloseRNG( const rng rngx, void *p ) {
     ;
 
   }
-
 }
 
 

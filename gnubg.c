@@ -782,7 +782,7 @@ command cER = {
     { "html", CommandExportPositionHtml,
       N_("Save the current position in .html format"), 
       szFILENAME, &cFilename },
-#if HAVE_LIBPNG && USE_GTK
+#if HAVE_LIBPNG
     { "png", CommandExportPositionPNG, N_("Save the current position in "
       "Portable Network Graphics (PNG) format"), szFILENAME, &cFilename },
 #endif /* HAVE_LIBPNG */
@@ -3326,7 +3326,13 @@ extern void ShowBoard( void )
                             MatchIDFromMatchState ( &ms ), 
                             anChequers[ ms.bgv ] ) );
 
-	if (woPanel[WINDOW_ANALYSIS].showing && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
+	if (
+#if USE_GTK
+		woPanel[WINDOW_ANALYSIS].showing
+#else
+		woPanel[WINDOW_ANNOTATION].showing
+#endif
+		&& plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
 	    if( pmr->sz )
 		outputl( pmr->sz ); /* FIXME word wrap */
@@ -4196,18 +4202,27 @@ extern void CommandHint( char *sz ) {
 static void
 Shutdown( void ) {
 
+  RenderFinalise();
+
+  free(rngctxCurrent);
+  free(rngctxRollout);
+
+  FreeMatch();
+  ClearMatch();
+
   EvalShutdown();
 
 #if USE_PYTHON
   PythonShutdown();
 #endif
 
-#ifdef WIN32
 #ifdef HAVE_SOCKETS
-    WSACleanup();
+#ifdef WIN32
+  WSACleanup();
 #endif
 #endif
 
+  SoundWait();
 }
 
 /* Called on various exit commands -- e.g. EOF on stdin, "quit" command,
@@ -4272,11 +4287,12 @@ extern void PromptForExit( void ) {
     if( fInteractive )
 	PortableSignalRestore( SIGINT, &shInterruptOld );
     
-    SoundWait();
-
+#if USE_GTK
+	board_free_pixmaps(bd);
 #if USE_BOARD3D
 	if (fX)
 		Tidy3dObjects(bd);
+#endif
 #endif
 
 #if HAVE_LIBREADLINE
@@ -4295,7 +4311,10 @@ extern void PromptForExit( void ) {
 		gtk_main_quit();
 	else
 #endif
+	{
+		Shutdown();
 		exit( EXIT_SUCCESS );
+	}
 }
 
 extern void CommandNotImplemented( char *sz ) {
@@ -4828,6 +4847,7 @@ CommandLoadPython( char * sz ) {
     /* Couldn't find file, have a look in the scripts dir */
     char scriptDir[BIG_PATH];
     scriptDir[0] = 0;
+    free(pch);
     pch = 0;
     
     if( szDataDirectory && *szDataDirectory ) {
@@ -4836,7 +4856,8 @@ CommandLoadPython( char * sz ) {
       pch = PathSearch(sz, scriptDir);
       pf = fopen( pch, "r" );
       if( ! pf ) {
-	pch = 0;
+        free(pch);
+      	pch = 0;
       }
     }
     /* Look in scripts/file, same as met */
@@ -5066,7 +5087,11 @@ extern void CommandImportSnowieTxt( char *sz ) {
 
 extern void CommandCopy (char *sz)
 {
-  char *aps[7] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#if USE_TIMECONTROL
+    char *aps[ 9 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#else
+    char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+#endif
   char szOut[2048];
   char szCube[32], szPlayer0[MAX_NAME_LEN + 3], szPlayer1[MAX_NAME_LEN + 3],
     szScore0[35], szScore1[35], szMatch[35];
@@ -5917,6 +5942,7 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fGUISetWindowPos ? "on" : "off" );
     if ( fX )
        RefreshGeometries ();
+
 #endif
     if (woPanel[WINDOW_ANNOTATION].showing)
       fputs("set annotation yes\n", pf);
@@ -8158,8 +8184,8 @@ static void real_main( void *closure, int argc, char *argv[] ) {
       
 	RunGTK( pwSplash );
 
-        Shutdown();
-	exit( EXIT_SUCCESS );
+	Shutdown();
+	gtk_exit ( EXIT_SUCCESS );
     }
 #elif USE_EXT
     if( fX ) {

@@ -170,6 +170,7 @@ typedef struct _renderimages {
 } renderimages;
 
 extern void RenderInitialise( void );
+extern void RenderFinalise( void );
 
 extern int PreferenceCompare(renderdata *prd1, renderdata *prd2);
 

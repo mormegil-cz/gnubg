@@ -80,22 +80,33 @@ static gint board_set( Board *board, const gchar *board_text,
 
 extern GtkWidget *board_new(renderdata* prd) {
 
-    /* Create widget */
-    GtkWidget* board = GTK_WIDGET( gtk_type_new( board_get_type() ) );
-    /* Initialize board data members */
-    BoardData *bd = BOARD(board)->board_data;
-    bd->rd = prd;
-    bd->rd->nSize = -1;
-    /* setup initial board */
-    board_set(BOARD(board), "board:::1:0:0:"
+	/* Create widget */
+	GtkWidget* board = GTK_WIDGET( gtk_type_new( board_get_type() ) );
+	/* Initialize board data members */
+	BoardData *bd = BOARD(board)->board_data;
+	bd->rd = prd;
+	bd->rd->nSize = -1;
+
+	bd->crawford_game = 0;
+	bd->cube_use = 0;
+	bd->doubled = 0;
+	bd->cube_owner = 0;
+	bd->resigned = 0;
+	bd->diceShown = DICE_NOT_SHOWN;
+
+	bd->x_dice[ 0 ] = bd->y_dice[ 0 ] = 0;
+	bd->x_dice[ 1 ] = bd->y_dice[ 1 ] = 0;
+
+	/* setup initial board */
+	board_set(BOARD(board), "board:::1:0:0:"
               "0:-2:0:0:0:0:5:0:3:0:0:0:-5:5:0:0:0:-3:0:-5:0:0:0:0:2:0:"
               "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0", 0, TRUE );
 
 #if USE_BOARD3D
-    InitBoard3d(bd);
+	InitBoard3d(bd);
 #endif
 
-    return board;
+	return board;
 }
 
 void InitialPos(BoardData *bd)
@@ -3813,7 +3824,6 @@ static void board_init( Board *board ) {
     GtkWidget *pwFrame;
     GtkWidget *pwvbox;
     GtkWidget *pwt;
-
     
     board->board_data = bd;
     bd->widget = GTK_WIDGET( board );
