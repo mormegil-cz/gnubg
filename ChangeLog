@@ -1,3 +1,9 @@
+Thu Feb 28 21:13:36 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (GeneralRollout, BasicCubefulRollout): implement
+	variance reduction for cubeful rollouts
+	(modeled after VarRednRollout).
+
 Mon Feb 25 14:33:38 2002  Gary Wong  <gtw@research.att.com>
 
 	* gtktexi.c, gtktexi.h: New files.  For use in a future manual

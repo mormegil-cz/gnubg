@@ -510,7 +510,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   int anDice [ 2 ], cUnfinished = cci;
   cubeinfo *pci;
   cubedecision cd;
-  int *pf, ici, i;
+  int *pf, ici, i, j, k;
   evalcontext ec;
 
   positionclass pc, pcBefore;
@@ -535,15 +535,54 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 #if __GNUC__
   cubeinfo pciLocal[ cci ];
   int pfFinished[ cci ];
+  float aarVarRedn[ cci ][ NUM_ROLLOUT_OUTPUTS ];
 #elif HAVE_ALLOCA
   cubeinfo *pciLocal = alloca( cci * sizeof ( cubeinfo ) );
   int *pfFinished = alloca( cci * sizeof( int ) );
+  float (*aarVarRedn)[ NUM_ROLLOUT_OUTPUTS ] =
+    alloca ( cci * NUM_ROLLOUT_OUTPUTS * sizeof ( float ) );;
 #else
   cubeinfo pciLocal[ MAX_ROLLOUT_CUBEINFO ];
   int pfFinished[ MAX_ROLLOUT_CUBEINFO ];
+  float aarVarRedn[ MAX_ROLLOUT_CUBEINFO ][ NUM_ROLLOUT_OUTPUTS ];
 #endif
 
-  
+  /* variables for variance reduction */
+
+  evalcontext aecVarRedn[ 2 ];
+  float arMean[ NUM_ROLLOUT_OUTPUTS ];
+  int aaanBoard[ 6 ][ 6 ][ 2 ][ 25 ];
+  float aaar[ 6 ][ 6 ][ NUM_ROLLOUT_OUTPUTS ];
+
+  if ( prc->fVarRedn ) {
+
+    /*
+     * Create evaluation context one ply deep
+     */
+
+    for ( ici = 0; ici < cci; ici++ )
+      for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+        aarVarRedn[ ici ][ i ] = 0.0f;
+    
+    for ( i = 0; i < 2; i++ ) {
+      
+      memcpy ( &aecVarRedn[ i ], &prc->aecChequer[ i ],
+               sizeof ( evalcontext ) );
+
+      if ( prc->fCubeful )
+        /* other no var. redn. on cubeful equities */
+        aecVarRedn[ i ].fCubeful = TRUE;
+
+      if ( aecVarRedn[ i ].nPlies ) {
+        aecVarRedn[ i ].nPlies--;
+        ec.nSearchCandidates >>= 1;
+        ec.rSearchTolerance /= 2.0;
+      }
+
+    }
+
+  }
+
   for ( ici = 0; ici < cci; ici++ )
     pfFinished[ ici ] = TRUE;
 
@@ -638,6 +677,10 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
     if( QuasiRandomDice( iTurn, iGame, cGames, anDice ) < 0 )
       return -1;
 
+    if( anDice[ 0 ] < anDice[ 1 ] )
+	    swap( anDice, anDice + 1 );
+
+
     for ( ici = 0, pci = pciLocal, pf = pfFinished;
           ici < cci; ici++, pci++, pf++ ) {
 
@@ -658,9 +701,88 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
 
         /* Find best move :-) */
 
-        FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
-                      aanBoard[ ici ], pci,
-                      &prc->aecChequer [ pci->fMove ] );
+        if ( prc->fVarRedn ) {
+
+          /* Variance reduction */
+
+          for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+            arMean[ i ] = 0.0f;
+
+          for ( i = 0; i < 6; i++ )
+            for ( j = 0; j <= i; j++ ) {
+
+              memcpy ( &aaanBoard[ i ][ j ][ 0 ][ 0 ], 
+                       &aanBoard[ ici ][ 0 ][ 0 ],
+                       2 * 25 * sizeof ( int )  );
+
+              /* Find the best move for each roll on ply 0 only */
+
+              if ( FindBestMove ( NULL, i + 1, j + 1, aaanBoard[ i ][ j ],
+                                  pci, NULL ) < 0 )
+                return -1;
+
+              SwapSides ( aaanBoard[ i ][ j ] );
+
+              /* re-evaluate the chosen move at ply n-1 */
+
+              GeneralEvaluationE ( aaar[ i ][ j ],
+                                   aaanBoard[ i ][ j ],
+                                   pci, &aecVarRedn[ pci->fMove ] );
+
+              if ( ! ( iTurn & 1 ) ) InvertEvaluationR ( aaar[ i ][ j ], pci );
+
+              /* Calculate arMean: the n-ply evaluation of the position */
+
+              for ( k = 0; k < NUM_ROLLOUT_OUTPUTS; k++ )
+                arMean[ k ] += ( ( i == j ) ? aaar[ i ][ j ][ k ] :
+                                 ( aaar[ i ][ j ][ k ] * 2.0 ) );
+
+            }
+
+          for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+            arMean[ i ] /= 36.0f;
+
+          /* Find best move */
+
+          if ( prc->aecChequer[ pci->fMove ].nPlies &&
+               prc->fCubeful == prc->aecChequer[ pci->fMove ].fCubeful )
+
+            /* the user requested n-ply (n>0). Another call to
+               FindBestMove is required */
+
+            FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
+                          aanBoard[ ici ], pci,
+                          &prc->aecChequer [ pci->fMove ] );
+
+          else {
+
+            /* 0-ply play: best move is already recorded */
+
+            memcpy ( &aanBoard[ ici ][ 0 ][ 0 ], 
+                     &aaanBoard[ anDice[ 0 ] - 1 ][ anDice[ 1 ] - 1 ][0][0],
+                     2 * 25 * sizeof ( int ) );
+
+            SwapSides ( aanBoard[ ici ] );
+
+          }
+
+
+          /* Accumulate variance reduction terms */
+
+          for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+            aarVarRedn[ ici ][ i ] += arMean[ i ] -
+              aaar[ anDice[ 0 ] - 1 ][ anDice[ 1 ] - 1 ][ i ];
+
+        }
+        else {
+
+          /* no variance reduction */
+              
+          FindBestMove( NULL, anDice[ 0 ], anDice[ 1 ],
+                        aanBoard[ ici ], pci,
+                        &prc->aecChequer [ pci->fMove ] );
+
+        }
 
         /* Save hit statistics */
 
@@ -795,6 +917,13 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
           
     }
+
+    /* the final output is the sum of the resulting evaluation and
+       all variance reduction terms */
+
+    if ( prc->fVarRedn )
+      for ( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
+        aarOutput[ ici ][ i ] += aarVarRedn[ ici ][ i ];
 
       /* convert to MWC or normalize against old cube value. */
 
@@ -967,10 +1096,9 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                           0, i, cGames, &aci[ 0 ],
                           &prc->aecChequer[ 0 ] );
         else
-        /* FIXME: write me
-           VarRednCubefulRollout( aanBoardEval, aar, 
-                                  0, i, pci, prc ); */
-          printf ( "not implemented yet...\n" );
+	  BasicCubefulRollout( aanBoardEval, aar, 
+                               0, i, aci, afCubeDecTop, cci, prc,
+                               aarsStatistics );
         break;
       }
       
