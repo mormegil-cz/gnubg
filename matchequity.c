@@ -1518,6 +1518,8 @@ getGammonPrice ( float arGammonPrice[ 4 ],
                  float aafMET[ MAXSCORE ][ MAXSCORE ],
                  float aafMETPostCrawford[ 2 ][ MAXSCORE ] ) {
 
+  const float epsilon = 1.0E-7;
+
   float rWin = 
     getME ( nScore0, nScore1, nMatchTo,
             0, nCube, 0, fCrawford,
@@ -1558,7 +1560,7 @@ getGammonPrice ( float arGammonPrice[ 4 ],
   
   /* avoid division by zero */
       
-  if ( rWin != rCenter ) {
+  if ( abs ( rWin - rCenter ) > epsilon ) {
 
     arGammonPrice[ 0 ] = 
       ( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
@@ -1578,20 +1580,21 @@ getGammonPrice ( float arGammonPrice[ 4 ],
 
   
   /* Correct numerical problems */
-  if ( arGammonPrice[ 0 ] < 0 )
+  if ( arGammonPrice[ 0 ] <= 0 )
     arGammonPrice[ 0 ] = 0.0;
-  if ( arGammonPrice[ 1 ] < 0 )
+  if ( arGammonPrice[ 1 ] <= 0 )
     arGammonPrice[ 1 ] = 0.0;
-  if ( arGammonPrice[ 2 ] < 0 )
+  if ( arGammonPrice[ 2 ] <= 0 )
     arGammonPrice[ 2 ] = 0.0;
-  if ( arGammonPrice[ 3 ] < 0 )
+  if ( arGammonPrice[ 3 ] <= 0 )
     arGammonPrice[ 3 ] = 0.0;
-  
+
+#define NDEBUG
   assert( arGammonPrice[ 0 ] >= 0 );
   assert( arGammonPrice[ 1 ] >= 0 );
   assert( arGammonPrice[ 2 ] >= 0 );
   assert( arGammonPrice[ 3 ] >= 0 );
-  
+#undef NDEBUG
   
 }
 

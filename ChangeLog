@@ -1,3 +1,8 @@
+Sun May 12 12:13:02 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* matchequity.c (getGammonPrice): hopefully the asserts shouldn't
+	fail now. (Reported by Achim Mueller).
+
 Sun May  5 14:25:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* sgf.c (RestoreMoveAnalysis): restore auch (otherwise updateStatcontext will 
