@@ -25,6 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <glib.h>
+#include <math.h>
 
 #if USE_GTK
 #include <gtk/gtk.h>
@@ -37,6 +38,7 @@
 #include "backgammon.h"
 #include "i18n.h"
 #include "format.h"
+#include "time.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -50,6 +52,7 @@ typedef struct _rolloutprogress {
   char **ppch;
   int iNextAlternative;
   int iNextGame;
+  time_t tStart;
 
 #if USE_GTK
   rolloutstat *prs;
@@ -60,6 +63,9 @@ typedef struct _rolloutprogress {
   GtkWidget *pwRolloutStop;
   GtkWidget *pwRolloutViewStat;
   guint nRolloutSignal;
+  GtkWidget *pwElapsed;
+  GtkWidget *pwLeft;
+  GtkWidget *pwSE;
 #endif
 
 } rolloutprogress;
@@ -73,6 +79,59 @@ typedef struct _rolloutprogress {
 /*
  *
  */
+
+static time_t
+estimatedTimeLeft( const time_t tStart, const int iGame, const int nTrials,
+                   const int iAlt, const int nAlt ) {
+
+  time_t t;
+  time_t delta;
+  float tpert;
+
+  time( &t );
+
+  delta = t - tStart;
+
+  /* time per trial so far */
+
+  tpert = 1.0f * delta / ( 1.0f * ( iGame * nAlt + iAlt + 1 ) );
+
+  /* estimate time left */
+
+  return ( ( nAlt - iAlt - 1 ) + ( nTrials - iGame - 1 ) * nAlt ) * tpert;
+
+}
+
+
+static char *
+formatDelta( const time_t t ) {
+
+  static char sz[ 128 ];
+
+  if ( t < 60 ) 
+    sprintf( sz, "%ds", t );
+  else if ( t < 60 * 60 )
+    sprintf( sz, "%dm%02ds", t / 60, t % 60 );
+  else if ( t < 60 * 60 * 60 )
+    sprintf( sz, "%dh%02dm%02ds", t / 3600, ( t % 3600 ) / 60, t % 60 );
+  else 
+    sprintf( sz, "%dd%02dh%02dm%02ds", 
+             t / 216000, ( t % 216000 ) / 3600, ( t % 3600 ) / 60,
+             t % 60 );
+
+  return sz;
+
+}
+
+
+static float
+estimatedSE( const float rSE, const int iGame, const int nTrials ) {
+
+  return rSE * sqrt( ( 1.0f * iGame ) / ( 1.0f * ( nTrials - 1 ) ) );
+
+
+}
+
 
 /*
  * Make pages with statistics.
@@ -698,14 +757,17 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
 	N_("Rank/no. JSDs")
   }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
   char *aszTemp[ 9 ];
+  gchar *sz;
   int i;
   GtkWidget *pwVbox;
   GtkWidget *pwButtons;
+  GtkWidget *pwhbox;
   rolloutprogress *prp = 
     (rolloutprogress *) g_malloc( sizeof ( rolloutprogress ) );
   int nColumns = sizeof (aszTitle) / sizeof (aszTitle[0]);
   *pp = prp;
   prp->prs = (rolloutstat *) aars;
+  prp->n = n;
     
   prp->pwRolloutDialog = 
     GTKCreateDialog( _("GNU Backgammon - Rollout"), DT_INFO,
@@ -778,6 +840,40 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
                           prc->nTrials );
   gtk_progress_set_format_string( GTK_PROGRESS( prp->pwRolloutProgress ),
                                   "%v/%u (%p%%)" );
+
+  /* time elapsed and left */
+
+  pwhbox = gtk_hbox_new( FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pwVbox ), pwhbox, FALSE, FALSE, 0 );
+
+  gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                      gtk_label_new( _("Time elapsed" ) ),
+                      FALSE, FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                      prp->pwElapsed = gtk_label_new( _("n/a") ),
+                      FALSE, FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                      gtk_label_new( _("Estimated time left" ) ),
+                      FALSE, FALSE, 4 );
+  gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                      prp->pwLeft = gtk_label_new( _("n/a") ),
+                      FALSE, FALSE, 4 );
+  if ( asz && asz[ 0 ] && *asz[ 0 ] ) 
+    sz = g_strdup_printf( _("Estimated SE for \"%s\" after %d trials " ),
+                          asz[ 0 ], prc->nTrials );
+  else
+    sz = g_strdup_printf( _("Estimated SE after %d trials " ),
+                          prc->nTrials );
+                        
+  gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                      gtk_label_new( sz ),
+                      FALSE, FALSE, 4 );
+  g_free( sz );
+  gtk_box_pack_start( GTK_BOX( pwhbox ), 
+                      prp->pwSE = gtk_label_new( _("n/a") ),
+                      FALSE, FALSE, 4 );
+
+  
     
   gtk_container_add( GTK_CONTAINER( DialogArea( prp->pwRolloutDialog, DA_MAIN ) ),
                      pwVbox );
@@ -787,6 +883,9 @@ GTKRolloutProgressStart( const cubeinfo *pci, const int n,
                                 GTK_WINDOW( pwMain ) );
     
   gtk_widget_show_all( prp->pwRolloutDialog );
+
+  /* record start time */
+  time( &prp->tStart );
 
 #if 0
   GTKDisallowStdin();
@@ -872,6 +971,46 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 	  
     gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ),
                             iGame + 1, 0, prc->nTrials );
+
+    /* calculate estimate time left */
+
+    if ( iAlternative == ( prp->n - 1 ) ) {
+      /* The code in estimatedTimeLeft allows that it's called on every
+         iAlternative, but it gives a lot of updates on the gui. If someone
+         thinks otherwise, we can consider removing the if-condition above */
+      time_t t = estimatedTimeLeft( prp->tStart, iGame, prc->nTrials,
+                                    iAlternative, prp->n );
+
+      gtk_label_set_text( GTK_LABEL( prp->pwElapsed ), 
+                          formatDelta( time( NULL ) - prp->tStart ) );
+      gtk_label_set_text( GTK_LABEL( prp->pwLeft ), 
+                          formatDelta( t ) );
+
+    }
+
+    /* calculate estimated SE */
+
+    if ( !iAlternative && iGame > 10 ) {
+
+      float r;
+
+      if ( prc->fCubeful ) {
+        r = estimatedSE( aarStdDev[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], 
+                         iGame, prc->nTrials );
+        gtk_label_set_text( GTK_LABEL( prp->pwSE ), 
+                            OutputMWC( r, &aci[ 0 ], FALSE ) );
+      }
+      else {
+        r = estimatedSE( aarStdDev[ 0 ][ OUTPUT_EQUITY ],
+                         iGame, prc->nTrials );
+        gtk_label_set_text( GTK_LABEL( prp->pwSE ),
+                            OutputEquityScale( r, &aci[ 0 ], 
+                                               &aci[ 0 ], FALSE ) );
+      }
+
+    }
+      
+
 #if 0
     GTKDisallowStdin();
     while( gtk_events_pending() )
@@ -939,6 +1078,9 @@ TextRolloutProgressStart( const cubeinfo *pci, const int n,
   prp->iNextAlternative = 0;
   prp->iNextGame = prc->nTrials/10;
 
+  /* record start time */
+  time( &prp->tStart );
+
 }
 
 static void
@@ -969,6 +1111,7 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                      rolloutprogress *prp ) {
 
   char *pch, *pc;
+  time_t t;
 
   /* write progress 1/10th trial */
 
@@ -1003,6 +1146,44 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
       prp->iNextGame += prc->nTrials/10;
 
     output( pch );
+
+    if ( ! iAlternative ) {
+
+      /* time elapsed and time left */
+
+      t = estimatedTimeLeft( prp->tStart, iGame, prc->nTrials,
+                             iAlternative, prp->n );
+      
+      outputf( _("Time elapsed %s"), 
+               formatDelta( time( NULL ) - prp->tStart ) );
+      outputf( _(" Estimated time left %s\n"), 
+               formatDelta( t ) );
+
+      /* estimated SE */
+
+      /* calculate estimated SE */
+      
+      if ( iGame > 10 ) {
+
+        if ( prc->fCubeful )
+          pc = OutputMWC( estimatedSE( aarStdDev[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], 
+                                       iGame, prc->nTrials ), 
+                          &aci[ 0 ], FALSE );
+        else
+          pc = OutputEquityScale( estimatedSE( aarStdDev[ 0 ][ OUTPUT_EQUITY ],
+                                               iGame, prc->nTrials ),
+                                  &aci[ 0 ], &aci[ 0 ], FALSE );
+
+        if ( prp->ppch && prp->ppch[ 0 ] && *prp->ppch[ 0 ] ) 
+          outputf( _("Estimated SE for \"%s\" after %d trials %s\n" ),
+                   prp->ppch[ 0 ], prc->nTrials, pc );
+        else
+          outputf( _("Estimated SE after %d trials %s\n" ),
+                   prc->nTrials, pc );
+        
+      }
+
+    }
 
   }
   else {
