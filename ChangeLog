@@ -54,15 +54,14 @@ Thu Jul 31 17:59:08 2003  Joern Thyssen  <jth@gnubg.org>
 
 Thu Jul 31 11:36:53 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
-	* rollout.c - prevent division by zero when jsds are small. This
+	* rollout.c: prevent division by zero when jsds are small. This
           time it actually should do something
-	* set.c - missing space in option description
+	* set.c:  missing space in option description
 	
 Wed Jul 30 09:36:07 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
-	* rollout.c - prevent division by zero when jsds are small
+	* rollout.c: prevent division by zero when jsds are small
 	
->>>>>>> 1.1240
 Mon Jul 28 21:31:19 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (InitGTK): new menu entry for IDLE (Python).
