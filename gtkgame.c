@@ -1081,22 +1081,27 @@ CreateMoveListTools ( hintdata *phd ) {
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pwTools = gtk_vbox_new ( FALSE, 4 );
+  pwTools = gtk_table_new (3, 2, FALSE);
   
-  pwHBox = gtk_hbox_new ( FALSE, 4 );
-  gtk_box_pack_start ( GTK_BOX ( pwTools ), pwHBox, FALSE, FALSE, 0 );
+  gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwEvalSettings, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
   
-  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwEval, FALSE, FALSE, 0 );
-  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwEvalSettings, FALSE, FALSE, 0 );
+  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
   
-  pwHBox = gtk_hbox_new ( FALSE, 4 );
-  gtk_box_pack_start ( GTK_BOX ( pwTools ), pwHBox, FALSE, FALSE, 0 );
-  
-  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwRollout, FALSE, FALSE, 0 );
-  gtk_box_pack_start ( GTK_BOX ( pwHBox ), pwRolloutSettings, 
-                       FALSE, FALSE, 0 );
-  
-  gtk_box_pack_start ( GTK_BOX ( pwTools ), pwMWC, FALSE, FALSE, 0 );
+  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 2, 3,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
   
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
   

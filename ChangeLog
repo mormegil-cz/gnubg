@@ -1,3 +1,7 @@
+Mon Jul 15 16:35:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c (CreateMoveListTools): Put buttons in a table
+ 
 Mon Jul 15 12:47:00 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* show.c (CommandShowExport): minor updates to text.
