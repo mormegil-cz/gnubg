@@ -1,4 +1,4 @@
-Thu Mar 21 20:45:19 2002  Øystein Johansen <oeysteij@online.no>
+Sun Mar 24 18:30:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * external.c: Move preprocessor conditions outside functions.
 
