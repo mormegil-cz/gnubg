@@ -7563,7 +7563,7 @@ static GtkWidget* AdvOptionsPage (advoptionswidget *paow )
                     (GtkAttachOptions) (0),
                     (GtkAttachOptions) (0), 0, 0);
 
-  pwLabel = gtk_label_new (_("(enteries)"));
+  pwLabel = gtk_label_new (_("(entries)"));
   gtk_table_attach (GTK_TABLE (pwTable), pwLabel, 2, 3, 0, 1,
                     (GtkAttachOptions) (0),
                     (GtkAttachOptions) (0), 0, 0);
