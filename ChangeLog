@@ -1,3 +1,21 @@
+Fri Mar 29 21:17:19 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	New command "set automatic analysis". When activated it'll
+	analyse human players moves on the fly. Should be combined 
+	with some GTK magic to let the user know he has made a bad move,
+	cube decision, or whatever.
+
+	* gtkgame.c: menu entries for automatic analysis.
+	* play.c (autoAnalyseMove): new function.
+	* play.c (AddMoveRecord): call autoAnalyseMove.
+	* set.c (CommandSetAutoAnalysis): new function.
+	* show.c (CommandShowAutomatic): show automatic analysis.
+	* gnubg.c (CommandSaveSettings): save automatic analysis.
+	
+	* analysis.c (AnalyzeMove): do analysis only if not analysed
+	already on the same or higher settings.
+	
+
 Thu Mar 28 22:11:41 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	Cache gammon prices for performance.
