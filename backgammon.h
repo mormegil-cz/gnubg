@@ -261,7 +261,8 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
 extern char *FormatPrompt( void );
-extern char *FormatMoveHint( char *sz, movelist *pml, int i, int fRankKnown );
+extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
+			     int i, int fRankKnown );
 extern void UpdateSetting( void *p );
 extern void ResetInterrupt( void );
 extern void PromptForExit( void );
@@ -323,7 +324,8 @@ extern int fReadline;
 
 extern char *aszVersion[];
 
-extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[];
+extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
+    *aszLuckTypeAbbr[];
 
 extern command acDatabase[], acNew[], acSave[], acSetAutomatic[],
     acSetCube[], acSetEvaluation[], acSetPlayer[], acSetRNG[], acSetRollout[],
@@ -357,8 +359,10 @@ extern void CommandAccept( char * ),
     CommandDouble( char * ),
     CommandDrop( char * ),
     CommandEval( char * ),
-    CommandExportGame( char * ),
-    CommandExportMatch( char * ),
+    CommandExportGameGam( char * ),
+    CommandExportGameLaTeX( char * ),
+    CommandExportMatchMat( char * ),
+    CommandExportMatchLaTeX( char * ),
     CommandExternal( char * ),
     CommandHelp( char * ),
     CommandHint( char * ),

@@ -247,17 +247,32 @@ command acAnalyse[] = {
     { "verify", CommandDatabaseVerify, "Measure the current network error "
       "against the database", NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
+}, acExportGame[] = {
+    { "gam", CommandExportGameGam, "Records a log of the game in .gam "
+      "format", szFILENAME, NULL },
+    { "latex", CommandExportGameLaTeX, "Records a log of the game in LaTeX "
+      "format", szFILENAME, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acExportMatch[] = {
+    { "mat", CommandExportMatchMat, "Records a log of the match in .mat "
+      "format", szFILENAME, NULL },
+    { "latex", CommandExportMatchLaTeX, "Records a log of the match in LaTeX "
+      "format", szFILENAME, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
+}, acExportSession[] = {
+    { "latex", CommandExportMatchLaTeX, "Records a log of the session in "
+      "LaTeX format", szFILENAME, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acExport[] = {
-    /* FIXME once we have more formats, add another level in the hierarchy
-       specifying the format.  Examples: "export game html foo.html",
-       "export match mat bar.mat" */
     { "database", CommandDatabaseExport, "Write the positions in the database "
       "to a portable format", NULL, NULL },
-    { "game", CommandExportGame, "Record a log of the game so far to a "
-      "file", szFILENAME, NULL },
-    { "match", CommandExportMatch, "Record a log of the match so far to a "
-      "file", szFILENAME, NULL },
+    { "game", NULL, "Record a log of the game so far to a file", NULL,
+      acExportGame },
+    { "match", NULL, "Record a log of the match so far to a file", NULL,
+      acExportMatch },
     /* FIXME export position */
+    { "session", NULL, "Record a log of the session so far to a file", NULL,
+      acExportSession },
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
     { "database", CommandDatabaseImport, "Merge positions into the database",
@@ -1320,8 +1335,9 @@ static void DisplayAnalysis( moverecord *pmr ) {
 		i != pmr->n.iMove )
 		continue;
 	    outputc( i == pmr->n.iMove ? '*' : ' ' );
-	    output( FormatMoveHint( szBuf, &pmr->n.ml, i, i != pmr->n.iMove ||
-		i != pmr->n.ml.cMoves - 1 ) );
+	    output( FormatMoveHint( szBuf, anBoard, &pmr->n.ml, i,
+				    i != pmr->n.iMove ||
+				    i != pmr->n.ml.cMoves - 1 ) );
 	}
 	
 	break;
@@ -1331,6 +1347,11 @@ static void DisplayAnalysis( moverecord *pmr ) {
 			     &pmr->n.esDouble );
 	break;
 
+    case MOVE_TAKE:
+    case MOVE_DROP:
+	/* FIXME */
+	break;
+	
     case MOVE_SETDICE:
 	if( pmr->n.rLuck != -HUGE_VALF )
 	    outputf( "Rolled %d%d (%s):\n", pmr->sd.anDice[ 0 ],
@@ -1703,7 +1724,8 @@ extern void CommandHelp( char *sz ) {
     }
 }
 
-extern char *FormatMoveHint( char *sz, movelist *pml, int i, int fRankKnown ) {
+extern char *FormatMoveHint( char *sz, int anBoard[ 2 ][ 25 ], movelist *pml,
+			     int i, int fRankKnown ) {
     
     cubeinfo ci;
     char szTemp[ 1024 ], szMove[ 32 ];
@@ -1992,7 +2014,7 @@ extern void CommandHint( char *sz ) {
 #endif
 
       for( i = 0; i < n; i++ )
-	  output( FormatMoveHint( szBuf, &ml, i, TRUE ) );
+	  output( FormatMoveHint( szBuf, anBoard, &ml, i, TRUE ) );
     }
 }
 
@@ -2116,8 +2138,8 @@ CommandRollout( char *sz ) {
 #endif	
 }
 
-static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
-
+static void ExportGameJF( FILE *pf, list *plGame, int iGame,
+			  int anScore[ 2 ] ) {
     list *pl;
     moverecord *pmr;
     char sz[ 40 ];
@@ -2140,6 +2162,7 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
 	    /* no-op */
+	    /* FIXME what about automatic doubles? */
           continue;
 	    break;
 	case MOVE_NORMAL:
@@ -2156,10 +2179,12 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	    break;
 	case MOVE_DROP:
 	    strcpy( sz, " Drops" );
-	    anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
+	    if( anScore )
+		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2;
 	    break;
 	case MOVE_RESIGN:
 	    /* FIXME how does JF do it? */
+	    /* FIXME adjust score */	    
 	    break;
 	case MOVE_SETDICE:
 	    /* ignore */
@@ -2198,7 +2223,8 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 		   n * nFileCube, n * nFileCube > 1 ? "s" : "",
 		   "" /* FIXME " and the match" if appropriate */ );
 
-	    anScore[ i & 1 ] += n * nFileCube;
+	    if( anScore )
+		anScore[ i & 1 ] += n * nFileCube;
 	}
 	
 	i++;
@@ -2334,13 +2360,13 @@ static void LoadRCFiles( void ) {
     outputon();
 }
 
-extern void CommandExportGame( char *sz ) {
+extern void CommandExportGameGam( char *sz ) {
     
     FILE *pf;
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export"
-		 "game')." );
+		 "game gam')." );
 	return;
     }
 
@@ -2351,13 +2377,13 @@ extern void CommandExportGame( char *sz ) {
 	return;
     }
 
-    ExportGame( pf, plGame, -1, NULL );
+    ExportGameJF( pf, plGame, -1, NULL );
     
     if( pf != stdout )
 	fclose( pf );
 }
 
-extern void CommandExportMatch( char *sz ) {
+extern void CommandExportMatchMat( char *sz ) {
 
     FILE *pf;
     int i, anScore[ 2 ];
@@ -2367,7 +2393,7 @@ extern void CommandExportMatch( char *sz ) {
     
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export "
-		 "match')." );
+		 "match mat')." );
 	return;
     }
 
@@ -2383,7 +2409,7 @@ extern void CommandExportMatch( char *sz ) {
     anScore[ 0 ] = anScore[ 1 ] = 0;
     
     for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
-	ExportGame( pf, pl->p, i, anScore );
+	ExportGameJF( pf, pl->p, i, anScore );
     
     if( pf != stdout )
 	fclose( pf );

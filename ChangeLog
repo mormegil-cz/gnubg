@@ -1,3 +1,18 @@
+Mon May 14 11:10:57 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (FormatMoveHint): Added anBoard parameter (so the move
+	can be formatted correctly if chequers are hit).  All callers changed.
+	(ExportGameJF, CommandExportGameGam, CommandExportMatchMat): renamed
+	from ExportGame, CommandExportGame and CommandExportMatch.
+	* latex.c: New file.
+
+	* set.c (CommandSetPlayerName): Silently convert spaces to
+	underscores.
+
+	* sgf.c (RestoreNode): Handle GB and GW properties.
+	
+	* analysis.c (AnalyzeGame): Account for automatic doubles.
+
 Fri May 11 10:29:44 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (AnalyzeGame): Use rChequerSkill instead of rSkill when

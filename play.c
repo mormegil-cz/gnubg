@@ -53,7 +53,8 @@ char *aszGameResult[] = { "single game", "gammon", "backgammon" },
 			"interesting", "good", "very good" },
     *aszSkillTypeAbbr[] = { "??", "?", "?!", "", "!?", "!", "!!" },
     *aszLuckType[] = { "very unlucky", "unlucky", NULL, "lucky",
-		       "very lucky" };
+		       "very lucky" },
+    *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
 list lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
