@@ -1,3 +1,10 @@
+Fri Apr  4 22:02:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c (printHTMLBoardGNU): fix bug: dice were printed
+	on the wrong side of the board when fClockwise=1.
+	(reported by Ian Shaw and Achim Mueller)
+	
+
 Fri Apr  4 20:45:16 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* rollout.c (RolloutGeneral): SanityCheck only works for 

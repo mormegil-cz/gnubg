@@ -1379,13 +1379,11 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<td colspan=\"6\">", pf );
 
-  if ( pms->fMove == fClockwise && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
+  if ( ! pms->fMove && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
 
     /* player has rolled the dice */
     
-    sprintf ( sz, "b-mid%c-%c%d%d", 
-              pms->fMove ? 'r' : 'l',
-              pms->fMove ? 'o' : 'x',
+    sprintf ( sz, "b-midl-x%d%d", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
     sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
@@ -1394,12 +1392,11 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                  hecss, HTML_EXPORT_TYPE_GNU );
     
   }
-  else if ( pms->fMove == fClockwise && pms->fDoubled ) {
+  else if ( ! pms->fMove && pms->fDoubled ) {
     
     /* player 0 has doubled */
     
-    sprintf ( sz, "b-mid%c-c%d", 
-              pms->fMove ? 'r' : 'l',
+    sprintf ( sz, "b-midl-c%d", 
               2 * pms->nCube );
     sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
     
@@ -1435,13 +1432,11 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<td colspan=\"6\">", pf );
 
-  if ( pms->fMove == ! fClockwise && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
+  if ( pms->fMove && pms->anDice[ 0 ] && pms->anDice[ 1 ] ) {
 
     /* player 1 has rolled the dice */
 
-    sprintf ( sz, "b-mid%c-%c%d%d", 
-              pms->fMove ? 'r' : 'l',
-              pms->fMove ? 'o' : 'x',
+    sprintf ( sz, "b-midr-o%d%d", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
     sprintf ( szAlt, "&nbsp;&nbsp;%d%d&nbsp;&nbsp;", 
               pms->anDice[ 0 ], pms->anDice[ 1 ] );
@@ -1450,12 +1445,11 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
                  hecss, HTML_EXPORT_TYPE_GNU );
     
   }
-  else if ( pms->fMove == ! fClockwise && pms->fDoubled ) {
+  else if ( pms->fMove && pms->fDoubled ) {
     
     /* player 1 has doubled */
     
-    sprintf ( sz, "b-mid%c-c%d", 
-              pms->fMove ? 'r' : 'l',
+    sprintf ( sz, "b-midr-c%d", 
               2 * pms->nCube );
     sprintf ( szAlt, "&nbsp;[%d]&nbsp;&nbsp;", 2 * pms->nCube );
     
