@@ -42,6 +42,7 @@
 static char *szFile;
 static int fError;
 
+static int CheckSGFVersion ( const char **sz );
 static void ErrorHandler( char *sz, int fParseError ) {
 
     if( !fError ) {
@@ -587,29 +588,27 @@ InitEvalContext ( evalcontext *pec ) {
 static void
 RestoreEvalContext ( evalcontext *pec, const char *sz ) {
 
-  int nPlies, nReduced, fUsePrune = 0, fDeterministic;
+  int nPlies, fUsePrune = 0, fDeterministic;
   char ch;
+  int ver = CheckSGFVersion( &sz );
+  int red = 0;
 
   InitEvalContext ( pec );
+  /* Still need to read reduced */
+  if( ver < 3 ) {
+    sscanf ( sz, "%d%c %d %d %f",
+          &nPlies, &ch, &red, &fDeterministic, &pec->rNoise );
+  }
+  else {
+    sscanf ( sz, "%d%c %d %f %d",
+	     &nPlies, &ch, &fDeterministic, &pec->rNoise, &fUsePrune ); 
+  }
 
-  // Still need to read reduced
-  sscanf ( sz, "%d%c"
-//#if defined( REDUCTION_CODE )
-	   " %d"
-//#endif
-	   " %d %f %d",
-           &nPlies, &ch,
-//#if defined( REDUCTION_CODE )
-	   &nReduced,
-//#endif
-	   &fDeterministic, &pec->rNoise,
-	   &fUsePrune);
-
+#if defined( REDUCTION_CODE )
+    pec->nReduced = red;
+#endif
   pec->nPlies = nPlies;
   pec->fCubeful = ch == 'C';
-#if defined( REDUCTION_CODE )
-  pec->nReduced = nReduced;
-#endif
   pec->fUsePrune = fUsePrune;
   pec->fDeterministic = fDeterministic;
 
@@ -752,14 +751,17 @@ RestoreRolloutInternals ( evalsetup *pes, const char *sz) {
 }
 
 static int 
-CheckExtendedRolloutVersion ( const char *sz ) {
+CheckSGFVersion ( const char **sz ) {
 
   int	n;
-  char  *pch = strstr (sz, "ver");
+  char  *pch = strstr (*sz, "ver");
   if ((pch == 0) || (sscanf (pch, "ver %d", &n) != 1))
     return 0;
-
-  return (n == SGF_ROLLOUT_VER);
+  /* skip over version info */
+  pch += 4;
+  while( *pch != ' ' ) { ++pch; }
+  *sz = pch;
+  return n;
 }
 
 static void
@@ -858,7 +860,7 @@ RestoreExtendedCubeRollout ( const char *sz,
   /* we assume new versions will still begin with Eq 4 floats
      Trials int 
      */
-  is_current = CheckExtendedRolloutVersion (sz);
+  is_current = CheckSGFVersion( &sz );
 
   RestoreRolloutTrials ( &pes->rc.nGamesDone, sz );
   RestoreCubeRolloutOutput ( aarOutput[ 0 ], aarStdDev[ 0 ], sz, "NoDouble" );
@@ -879,7 +881,7 @@ RestoreExtendedRollout ( move *pm, const char *sz) {
   /* we assume new versions will still begin with Score 2 floats
      Trials int 
      */
-  is_current = CheckExtendedRolloutVersion (sz);
+  is_current = CheckSGFVersion( &sz );
   pes->et = EVAL_ROLLOUT;
   RestoreRolloutScore ( pm, sz );
   RestoreRolloutTrials ( &pes->rc.nGamesDone, sz );
@@ -898,13 +900,16 @@ static void RestoreDoubleAnalysis( property *pp,
     
     char *pch = pp->pl->plNext->p, ch;
     int nPlies, nReduced, fUsePrune = 0, fDeterministic;
-    /* FIXME: removing arUnued will break existing SGF files */
+    /* leftovers from earlier formats */
     float arUnused[ 4 ];
+    int  ver;
     
     switch( *pch ) {
     case 'E':
 	/* EVAL_EVAL */
+        ++pch;
 	pes->et = EVAL_EVAL;
+	ver = CheckSGFVersion( (const char **) &pch );
 	nReduced = 0;
         pes->ec.rNoise = 0.0f;
         fDeterministic = TRUE;
@@ -913,11 +918,28 @@ static void RestoreDoubleAnalysis( property *pp,
         aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
         aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ] = -20000.0;
 	
-	sscanf( pch + 1, "%f %f %f %f %d%c %d %d %f %d"
+	if( ver < 2 ) {
+	  sscanf( pch, "%f %f %f %f %d%c %d %d %f"
                 "%f %f %f %f %f %f %f" 
                 "%f %f %f %f %f %f %f", 
                 &arUnused[ 0 ], &arUnused[ 1 ], 
                 &arUnused[ 2 ], &arUnused[ 3 ], 
+                &nPlies, &ch,
+                &nReduced, 
+                &fDeterministic,
+                &pes->ec.rNoise,
+                &aarOutput[ 0 ][ 0 ], &aarOutput[ 0 ][ 1 ], 
+                &aarOutput[ 0 ][ 2 ], &aarOutput[ 0 ][ 3 ], 
+                &aarOutput[ 0 ][ 4 ], &aarOutput[ 0 ][ 5 ], 
+                &aarOutput[ 0 ][ 6 ],
+                &aarOutput[ 1 ][ 0 ], &aarOutput[ 1 ][ 1 ], 
+                &aarOutput[ 1 ][ 2 ], &aarOutput[ 1 ][ 3 ], 
+                &aarOutput[ 1 ][ 4 ], &aarOutput[ 1 ][ 5 ], 
+                &aarOutput[ 1 ][ 6 ] );
+	} else if( ver == 2 ) {
+	  sscanf( pch, "%d%c %d %d %f %d"
+                "%f %f %f %f %f %f %f" 
+                "%f %f %f %f %f %f %f", 
                 &nPlies, &ch,
                 &nReduced, 
                 &fDeterministic,
@@ -931,7 +953,23 @@ static void RestoreDoubleAnalysis( property *pp,
                 &aarOutput[ 1 ][ 2 ], &aarOutput[ 1 ][ 3 ], 
                 &aarOutput[ 1 ][ 4 ], &aarOutput[ 1 ][ 5 ], 
                 &aarOutput[ 1 ][ 6 ] );
-
+	} else {
+	  sscanf( pch, "%d%c %d %f %d"
+                "%f %f %f %f %f %f %f" 
+                "%f %f %f %f %f %f %f", 
+                &nPlies, &ch,
+                &fDeterministic,
+                &pes->ec.rNoise,
+                &fUsePrune, 
+                &aarOutput[ 0 ][ 0 ], &aarOutput[ 0 ][ 1 ], 
+                &aarOutput[ 0 ][ 2 ], &aarOutput[ 0 ][ 3 ], 
+                &aarOutput[ 0 ][ 4 ], &aarOutput[ 0 ][ 5 ], 
+                &aarOutput[ 0 ][ 6 ],
+                &aarOutput[ 1 ][ 0 ], &aarOutput[ 1 ][ 1 ], 
+                &aarOutput[ 1 ][ 2 ], &aarOutput[ 1 ][ 3 ], 
+                &aarOutput[ 1 ][ 4 ], &aarOutput[ 1 ][ 5 ], 
+                &aarOutput[ 1 ][ 6 ] );
+	}
 	pes->ec.nPlies = nPlies;
 #if defined( REDUCTION_CODE )
         pes->ec.nReduced = nReduced;
@@ -966,11 +1004,12 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
                                  evalsetup *pesChequer,
                                  const matchstate *pms ) {
     list *pl = pp->pl->plNext;
-    char *pch, ch;
+    const char *pch;
+    char ch;
     move *pm;
     int i, nPlies, fDeterministic, nReduced, fUsePrune = 0;
     int anBoardMove[ 2 ][ 25 ];
-    
+    int ver;
     *piMove = atoi( pl->p );
 
     for( pml->cMoves = 0, pl = pl->plNext; pl->p; pl = pl->plNext )
@@ -1011,21 +1050,42 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 	switch( ch ) {
 	case 'E':
 	    /* EVAL_EVAL */
+	  ver = CheckSGFVersion( &pch );
 	    pm->esMove.et = EVAL_EVAL;
 	    nReduced = 0;
             fDeterministic = 0;
-
-	    sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f %d",
-		    &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
-		    &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
-		    &pm->arEvalMove[ 4 ], &pm->rScore,
-		    &nPlies, 
-                    &ch, 
-                    &nReduced,
-                    &fDeterministic, 
-                    &pm->esMove.ec.rNoise,
-		    &fUsePrune);
-
+	    if( ver <  2 ) {
+	      sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f",
+		      &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
+		      &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
+		      &pm->arEvalMove[ 4 ], &pm->rScore,
+		      &nPlies, 
+		      &ch, 
+		      &nReduced,
+		      &fDeterministic, 
+		      &pm->esMove.ec.rNoise);
+	    } else if( ver == 2 ) {
+	      sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %d %f %d",
+		      &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
+		      &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
+		      &pm->arEvalMove[ 4 ], &pm->rScore,
+		      &nPlies, 
+		      &ch, 
+		      &nReduced,
+		      &fDeterministic, 
+		      &pm->esMove.ec.rNoise,
+		      &fUsePrune);
+	    } else {
+	      sscanf( pch, " %*c %f %f %f %f %f %f %d%c %d %f %d",
+		      &pm->arEvalMove[ 0 ], &pm->arEvalMove[ 1 ],
+		      &pm->arEvalMove[ 2 ], &pm->arEvalMove[ 3 ],
+		      &pm->arEvalMove[ 4 ], &pm->rScore,
+		      &nPlies, 
+		      &ch, 
+		      &fDeterministic, 
+		      &pm->esMove.ec.rNoise,
+		      &fUsePrune);
+	    }
 
 	    pm->esMove.ec.fCubeful = ch == 'C';
 	    pm->esMove.ec.nPlies = nPlies;
@@ -1669,17 +1729,24 @@ static void WriteEscapedString( FILE *pf, char *pch, int fEscapeColons ) {
 static void
 WriteEvalContext ( FILE *pf, const evalcontext *pec ) {
 
-  fprintf( pf, "%d%s %d %d %.4f %d",
-           pec->nPlies,
-           pec->fCubeful ? "C" : "",
 #if defined( REDUCTION_CODE )
-           pec->nReduced,
-#else
-	   0,
-#endif
-           pec->fDeterministic, 
-           pec->rNoise,
+  fprintf( pf, "ver %d %d%s %d %d %.4f %d",
+	   SGF_FORMAT_VER,
+	   pec->nPlies,
+	   pec->fCubeful ? "C" : "",
+	   pec->nReduced,
+	   pec->fDeterministic, 
+	   pec->rNoise,
 	   pec->fUsePrune);
+#else
+  fprintf( pf, "ver %d %d%s %d %.4f %d",
+	   SGF_FORMAT_VER,
+	   pec->nPlies,
+	   pec->fCubeful ? "C" : "",
+	   pec->fDeterministic, 
+	   pec->rNoise,
+	   pec->fUsePrune);
+#endif
 
 }
 
@@ -1766,10 +1833,10 @@ static void WriteRolloutAnalysis( FILE *pf, int fIsMove,
      the version is defined in eval.h
      */
   if (fIsMove) {
-    fprintf ( pf, "X ver %d Score %.10g %.10g ", SGF_ROLLOUT_VER,
+    fprintf ( pf, "X ver %d Score %.10g %.10g ", SGF_FORMAT_VER,
 	      rScore, rScore2);
   } else {
-    fprintf ( pf, "X ver %d Eq ", SGF_ROLLOUT_VER);
+    fprintf ( pf, "X ver %d Eq ", SGF_FORMAT_VER);
   }
 
   fprintf ( pf, "Trials %d ", pes->rc.nGamesDone);
@@ -1809,28 +1876,45 @@ static void WriteDoubleAnalysis( FILE *pf,
 
   switch( pes->et ) {
   case EVAL_EVAL:
-    fprintf( pf, "E %.4f %.4f %.4f %.4f %d%s %d %d %.4f %d "
-             "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
-             "%.4f %.4f %.4f %.4f %.4f %.4f %.4f", 
-             0.0f, 0.0f, 0.0f, 0.0f,
-             pes->ec.nPlies,
-             pes->ec.fCubeful ? "C" : "",
 #if defined( REDUCTION_CODE )
-             pes->ec.nReduced,
-#else
-	     0,
-#endif
-             pes->ec.fDeterministic,
-             pes->ec.rNoise,
+    fprintf( pf, "E ver %d %d%s %d %d %.4f %d "
+	     "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+	     "%.4f %.4f %.4f %.4f %.4f %.4f %.4f", 
+	     SGF_FORMAT_VER,
+	     pes->ec.nPlies,
+	     pes->ec.fCubeful ? "C" : "",
+	     pes->ec.nReduced,
+	     pes->ec.fDeterministic,
+	     pes->ec.rNoise,
 	     pes->ec.fUsePrune,
-             aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
-             aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
-             aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
-             aarOutput[ 0 ][ 6 ],
-             aarOutput[ 1 ][ 0 ], aarOutput[ 1 ][ 1 ], 
-             aarOutput[ 1 ][ 2 ], aarOutput[ 1 ][ 3 ], 
-             aarOutput[ 1 ][ 4 ], aarOutput[ 1 ][ 5 ], 
-             aarOutput[ 1 ][ 6 ] );
+	     aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
+	     aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
+	     aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
+	     aarOutput[ 0 ][ 6 ],
+	     aarOutput[ 1 ][ 0 ], aarOutput[ 1 ][ 1 ], 
+	     aarOutput[ 1 ][ 2 ], aarOutput[ 1 ][ 3 ], 
+	     aarOutput[ 1 ][ 4 ], aarOutput[ 1 ][ 5 ], 
+	     aarOutput[ 1 ][ 6 ] );
+#else
+    fprintf( pf, "E ver %d %d%s %d %.4f %d "
+	     "%.4f %.4f %.4f %.4f %.4f %.4f %.4f "
+	     "%.4f %.4f %.4f %.4f %.4f %.4f %.4f", 
+	     SGF_FORMAT_VER,
+	     pes->ec.nPlies,
+	     pes->ec.fCubeful ? "C" : "",
+	     pes->ec.fDeterministic,
+	     pes->ec.rNoise,
+	     pes->ec.fUsePrune,
+	     aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ], 
+	     aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ], 
+	     aarOutput[ 0 ][ 4 ], aarOutput[ 0 ][ 5 ], 
+	     aarOutput[ 0 ][ 6 ],
+	     aarOutput[ 1 ][ 0 ], aarOutput[ 1 ][ 1 ], 
+	     aarOutput[ 1 ][ 2 ], aarOutput[ 1 ][ 3 ], 
+	     aarOutput[ 1 ][ 4 ], aarOutput[ 1 ][ 5 ], 
+	     aarOutput[ 1 ][ 6 ] );
+#endif
+
     break;
     
   case EVAL_ROLLOUT:

@@ -1,3 +1,12 @@
+Sun Oct 17 22:14:00 2004 UTC Jim Segrave <jes@jes-2.demon.nl>
+
+	* Makefile.in - missing gtkpanels.*
+	* sgf.c - versioning for pruning
+	* gnubg.c - move reduction variables inside ifdef
+	* eval.c - cosmetic fix for compiler warnings
+	* xpm/x.xpm - missing final line of bmp
+	* eval.h - add version numbers for pruning in .sgf files
+	
 Sat Oct 16 23:36:45 2004  Oystein Johansen <oystein@gnubg.org>
 
 	* gnubgmodule.c: Fix dice option handling

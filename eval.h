@@ -113,12 +113,21 @@ typedef struct {
     float        rNoise;       /* standard deviation */
 } evalcontext;
 
-/* identifies the Rollout Context being written in sgf files. This should
-   be changed if the rollout context changes such that previous .sgf files
-   can't have their rollouts extended
+/* identifies the format of evaluation info in .sgf files
+   early (pre extending rollouts) had no version numbers
+   extendable rollouts have a version number of 1
+   with pruning nets, we have two possibilities - reduction could still
+   be enabled (version = 2) or, given the speedup and performance 
+   improvements, I assume we will drop reduction entirely. (ver = 3 or more)
+   When presented with an .sgf file, gnubg will attempt to work out what
+   data is present in the file based on the version number
 */
 
-#define SGF_ROLLOUT_VER 1
+#if defined( REDUCTION_CODE )
+#define SGF_FORMAT_VER 2
+#else
+#define SGF_FORMAT_VER 3
+#endif
 
 typedef struct {
 

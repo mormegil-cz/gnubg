@@ -9363,7 +9363,6 @@ ShowEPC( int anBoard[ 2 ][ 25 ] ) {
 
 extern void CommandSetExportFileType(char *sz)
 {
-	int type;
 	int num = 0;
 
 	if (!sz || !*sz)
@@ -9387,7 +9386,6 @@ extern void CommandSetExportFileType(char *sz)
 
 extern void CommandSetImportFileType(char *sz)
 {
-	int type;
 	int num = 0;
 
 	if (!sz || !*sz)
