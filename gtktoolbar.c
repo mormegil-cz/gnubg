@@ -549,6 +549,9 @@ ToolbarNew ( void ) {
   /* stop button */
   
   ptw->pwStopParent = gtk_event_box_new();
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(ptw->pwStopParent), FALSE);
+#endif
   ptw->pwStop = gtk_button_new(),
   gtk_container_add( GTK_CONTAINER( ptw->pwStopParent ), ptw->pwStop );
 

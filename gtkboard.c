@@ -3792,7 +3792,10 @@ static GtkWidget *chequer_key_new( int iPlayer, Board *board ) {
     BoardData *bd = board->board_data;
     GdkPixmap *ppm;
     char sz[ 128 ];
-    
+
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pw), FALSE);
+#endif
     ppm = bd->appmKey[ iPlayer ] = gdk_pixmap_new(
 	NULL, 20, 20, gtk_widget_get_visual( GTK_WIDGET( board ) )->depth );
 

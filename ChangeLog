@@ -1,3 +1,7 @@
+Fri Feb  25  11:56:45 2005 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtk(some).c : Make event boxes transparent (By Ingo Macherius)
+
 Tue Feb 23   18:26:45 2005 Oystein Johansen <oystein@gnubg.org>
 
 	* gtkgame.c, progress.c: Make all progress bars with gtk_progress_bar

@@ -1600,6 +1600,9 @@ static GtkWidget *GeneralPage( BoardData *bd, GtkWidget* bdMain ) {
 	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwCloseBoard), bd->rd->closeBoardOnExit );
 
 	pwev = gtk_event_box_new();
+#if GTK_CHECK_VERSION(2,4,0)
+	gtk_event_box_set_visible_window(GTK_EVENT_BOX(pwev), FALSE);
+#endif
 	gtk_box_pack_start(GTK_BOX(pw), pwev, FALSE, FALSE, 0);
 	pwhbox = gtk_hbox_new(FALSE, 4);
 	gtk_container_add(GTK_CONTAINER(pwev), pwhbox);
