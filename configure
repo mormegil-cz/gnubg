@@ -3163,6 +3163,7 @@ fi
 
 
 
+
 cat >>confdefs.h <<\_ACEOF
 #define _GNU_SOURCE 1
 _ACEOF
@@ -12014,6 +12015,18 @@ _ACEOF
 
 
 
+
+
+
+if test "$USE_NLS" = "yes"; then
+   if test -z "$MSGFMT"; then
+      echo "You do not have msgfmt and other gettext utilities installed"
+      echo "on your system. Please install the gettext package, or add"
+      echo "the option --disable-nls to configure, e.g.:"
+      echo "./configure --disable-nls"
+      exit
+   fi
+fi
 
 
 

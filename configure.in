@@ -42,6 +42,7 @@ AC_CHECK_PROG(PNMTOPS, pnmtops, pnmtops)
 AC_CHECK_PROG(SRCONV, srconv, srconv, true)
 AC_CHECK_PROG(TR, tr, tr)
 
+
 AC_DEFINE(_GNU_SOURCE,1,Enable GNU extensions on systems that have them.)
 
 dnl Checks for libraries.
@@ -291,6 +292,18 @@ ALL_LINGUAS="da de"
 
 dnl internationalization macros
 AM_GNU_GETTEXT
+
+if test "$USE_NLS" = "yes"; then
+   if test -z "$MSGFMT"; then
+      echo "You do not have msgfmt and other gettext utilities installed"
+      echo "on your system. Please install the gettext package, or add"
+      echo "the option --disable-nls to configure, e.g.:"
+      echo "./configure --disable-nls"
+      exit
+   fi
+fi
+
+
 
 dnl check for TRUE/FALSE
 AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))
