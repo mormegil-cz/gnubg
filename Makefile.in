@@ -114,10 +114,11 @@ X_EXTRA_LIBS = @X_EXTRA_LIBS@
 X_PRE_LIBS = @X_PRE_LIBS@
 @NOX_TRUE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @NOX_TRUE@positionid.o drawboard.o pub_eval.o set.o show.o database.o \
-@NOX_TRUE@mt19937int.o dice.o rollout.o isaac.o
+@NOX_TRUE@mt19937int.o dice.o rollout.o isaac.o matchequity.o
 @NOX_FALSE@gnubg_OBJECTS =  gnubg.o getopt.o getopt1.o eval.o play.o \
 @NOX_FALSE@positionid.o drawboard.o pub_eval.o set.o show.o database.o \
-@NOX_FALSE@mt19937int.o dice.o rollout.o isaac.o xboard.o xgame.o
+@NOX_FALSE@mt19937int.o dice.o rollout.o isaac.o xboard.o xgame.o \
+@NOX_FALSE@matchequity.o
 gnubg_LDFLAGS = 
 makebearoff_OBJECTS =  makebearoff.o eval.o positionid.o pub_eval.o
 makebearoff_LDFLAGS = 
