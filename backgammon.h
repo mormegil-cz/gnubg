@@ -84,11 +84,27 @@ typedef struct _movegameinfo {
 	nAutoDoubles; /* how many automatic doubles were rolled */
 } movegameinfo;
 
+typedef struct _movedouble {
+  movetype mt;
+  int fPlayer;
+  /* evaluation of cube action */
+  float arDouble[ 4 ];
+  evaltype etDouble;
+  evalsetup esDouble;
+} movedouble;
+
+
 typedef struct _movenormal {
-    movetype mt;
-    int fPlayer;
-    int anRoll[ 2 ];
-    int anMove[ 8 ];
+  movetype mt;
+  int fPlayer;
+  int anRoll[ 2 ];
+  int anMove[ 8 ];
+  /* evaluation of cube action before this move */
+  float arDouble[ 4 ];
+  evaltype etDouble;
+  evalsetup esDouble;
+  /* evaluation of the moves */
+  movelist ml;
 } movenormal;
 
 typedef struct _moveresign {
@@ -120,6 +136,7 @@ typedef union _moverecord {
     movesetboard sb;
     movesetcubeval scv;
     movesetcubepos scp;
+    movedouble d;
 } moverecord;
 
 extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
