@@ -34,6 +34,8 @@ char *aszCredits[] = {
     "Oliver Riordan",
     "Ian Shaw",
     "Brian Sheppard",
+    "Peter Sochovsky",
+    "Maik Stiebler",
     "Gerry Tesauro",
     "Jacques Thiriat",
     "Robert-Jan Veldhuizen",

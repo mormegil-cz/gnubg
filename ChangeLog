@@ -1,3 +1,9 @@
+Thu Dec 13 15:30:45 2001  Gary Wong  <gtw@research.att.com>
+
+	* import.c (ParseSGGGame): New function.  Parse an SGG "Game ..."
+	header (to fix import bug reported by Maik Stiebler and Peter
+	Sochovsky).
+	
 Mon Dec 10 21:49:00 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* analysis.c: bug fix for wrong values of equity loss for wrong takes and

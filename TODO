@@ -147,7 +147,7 @@ duplication of effort and to make sure our changes merge easily.
   floats, which have less precision than ints).  (Fixed in GTK+ 2.0.)
 ** During a rollout, the OK button should be the grab widget.  Can we
   fix that by temporarily modifying pwGrab?  (Or maybe we should allow
-  the entire the whole rollout dialog to be active, for copy/paste.)
+  the entire rollout dialog to be active, for copy/paste.)
 ** Enable and disable the take/drop/redouble/agree/decline etc. buttons
   and menu items when appropriate.
 ** Make some of the information below the board optional (suggested by Jeremie 

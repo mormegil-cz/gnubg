@@ -753,7 +753,8 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
 #endif
 }
 
-static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
+static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
+			   int fCrawford ) {
 
     char sz[ 1024 ];
     char *pch;
@@ -774,9 +775,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
     pmgi->g.anScore[ 0 ] = n0;
     pmgi->g.anScore[ 1 ] = n1;
     pmgi->g.fCrawford = TRUE; /* FIXME */
-    if( ( pmgi->g.fCrawfordGame = !fPostCrawford &&
-	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
-	fPostCrawford = TRUE;
+    pmgi->g.fCrawfordGame = fCrawford;
     pmgi->g.fJacoby = FALSE; /* FIXME */
     pmgi->g.fWinner = -1;
     pmgi->g.nPoints = 0;
@@ -922,12 +921,58 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
     AddGame( pmgi );
 }
 
+static int ParseSGGGame( char *pch, int *pi, int *pn0, int *pn1,
+			 int *pfCrawford, int *pnLength ) {
+
+    *pfCrawford = FALSE;
+    
+    if( strncmp( pch, "Game ", 5 ) )
+	return -1;
+
+    pch += 5;
+
+    *pi = strtol( pch, &pch, 10 );
+
+    if( *pch != '.' )
+	return -1;
+
+    pch++;
+
+    *pn0 = strtol( pch, &pch, 10 );
+    
+    if( *pch == '*' ) {
+	pch++;
+	*pfCrawford = TRUE;
+    }
+
+    if( *pch != '-' )
+	return -1;
+
+    pch++;
+    
+    *pn1 = strtol( pch, &pch, 10 );
+    
+    if( *pch == '*' ) {
+	pch++;
+	*pfCrawford = TRUE;
+    }
+
+    if( *pch != '/' )
+	return -1;
+
+    pch++;
+    
+    *pnLength = strtol( pch, &pch, 10 );
+
+    return 0;
+}
+
 extern void ImportSGG( FILE *pf, char *szFilename ) {
 
     char sz[ 80 ], sz0[ 32 ], sz1[ 32 ];
-    int n, n0, n1, nLength, i;
+    int n, n0, n1, nLength, i, fCrawford;
 
-    fWarned = fPostCrawford = FALSE;
+    fWarned = FALSE;
     
     while( 1 ) {
 	if( ( n = fscanf( pf, "%32s vs. %32s\n", sz0, sz1 ) ) == EOF ) {
@@ -962,18 +1007,17 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     strcpy( ap[ 1 ].szName, sz1 );
     
     while( fgets( sz, 80, pf ) ) {
-	if( sscanf( sz, "Game %d. %d-%d/%d\n", &i, &n0, &n1, &nLength ) == 4 )
+	if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
 	    break;
 
 	/* FIXME check for options -- Jacoby, Crawford, etc. */
     }
     
     while( !feof( pf ) ) {
-	ImportSGGGame( pf, i, nLength, n0, n1 );
+	ImportSGGGame( pf, i, nLength, n0, n1, fCrawford );
 	
 	while( fgets( sz, 80, pf ) )
-	    if( sscanf( sz, "Game %d. %d-%d/%d\n", &i, &n0, &n1,
-			&nLength ) == 4 )
+	    if( !ParseSGGGame( sz, &i, &n0, &n1, &fCrawford, &nLength ) )
 		break;
     }
 	

@@ -45,6 +45,8 @@ Sam Pottle
 Jared Riley
 Oliver Riordan
 Ian Shaw
+Peter Sochovsky
+Maik Stiebler
 Jacques Thiriat
 Robert-Jan Veldhuizen
 JP White
