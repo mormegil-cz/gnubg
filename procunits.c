@@ -639,10 +639,16 @@ static procunit * CreateProcessingUnit (pu_type type, pu_status status, pu_task_
 #if USE_GTK2
         if (fX) {
             GtkTreeIter iter;
-            if (!IsMainThread ()) gdk_threads_enter ();
+#if PROCESSING_UNITS
+            if ( !IsMainThread() )
+                gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
             gtk_list_store_append (gplsProcunits, &iter);
             gtk_list_store_set (gplsProcunits, &iter, 0, ppu, -1);
-            if (!IsMainThread ()) gdk_threads_leave ();
+#if PROCESSING_UNITS
+            if ( !IsMainThread() )
+                gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
         }
 #endif /* USE_GTK2 */
 
@@ -726,7 +732,10 @@ static void DestroyProcessingUnit (int procunit_id)
 #if USE_GTK2
                 if (fX) {
                     GtkTreeIter iter;      
-                    if (!IsMainThread ()) gdk_threads_enter ();
+#if PROCESSING_UNITS
+                    if ( !IsMainThread() )
+                        gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
                     if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL(gplsProcunits), &iter)) 
                         do {
                             procunit *ppu2;
@@ -736,7 +745,10 @@ static void DestroyProcessingUnit (int procunit_id)
                                 break;
                             }
                         } while (gtk_tree_model_iter_next (GTK_TREE_MODEL(gplsProcunits), &iter));
-                    if (!IsMainThread ()) gdk_threads_leave ();
+#if PROCESSING_UNITS
+                    if ( !IsMainThread() )
+                        gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
                 }
 #endif /* USE_GTK2 */
                 procunit *next = ppu->next;
@@ -976,20 +988,25 @@ static int StartProcessingUnit (procunit *ppu, int fWait)
         case pu_type_remote:
             if (fWait) {
                 StartRemoteProcessingUnit (ppu);
-#if USE_GTK
+
                 /* when running GTK, we get here called by gtk_main(), so
                     the GDK lock is already acquired and we must release it
                     to let the new thread update its state in the master window */
-                gdk_threads_leave ();
-#endif /* #if USE_GTK */
+#if USE_GTK
+#if PROCESSING_UNITS
+                gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
                 pthread_mutex_lock (&ppu->mutexStatusChanged);
                 if (ppu->status == pu_stat_connecting)
                     pthread_cond_wait (&ppu->condStatusChanged, 
                                         &ppu->mutexStatusChanged);
                 pthread_mutex_unlock (&ppu->mutexStatusChanged);
 #if USE_GTK
-                gdk_threads_enter ();
-#endif /* #if USE_GTK */
+#if PROCESSING_UNITS
+                gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
                 if (ppu->status != pu_stat_deactivated) 
                     return 0;
             }
@@ -1107,10 +1124,14 @@ static int WaitForAllProcessingUnits (void)
     procunit *ppu = gpulist;
     
     if (RPU_DEBUG) PrintProcessingUnitList ();
-    
+
 #if USE_GTK
-    if (IsMainThread ()) gdk_threads_leave ();
-#endif /* #if USE_GTK */
+#if PROCESSING_UNITS
+    if ( IsMainThread() )
+	gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
+
     while (ppu != NULL) {
         pthread_mutex_lock (&ppu->mutexStatusChanged);
         if (ppu->status != pu_stat_ready && ppu->status != pu_stat_deactivated) {
@@ -1128,11 +1149,14 @@ static int WaitForAllProcessingUnits (void)
         }
         pthread_mutex_unlock (&ppu->mutexStatusChanged);
         ppu = ppu->next;
-    } 
+    }
+
 #if USE_GTK
-    if (IsMainThread ()) gdk_threads_enter ();
-#endif /* #if USE_GTK */
-    
+#if PROCESSING_UNITS
+    if ( IsMainThread() )
+	gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
 
     if (RPU_DEBUG) outputerrf ("### All procunits ready or deactivated.\n");
     if (RPU_DEBUG) PrintProcessingUnitList ();
@@ -1159,8 +1183,14 @@ static void CancelProcessingUnitTasks (procunit *ppu)
     int procunit_id = ppu->procunit_id;
     
     if (taskList == NULL) return;
-    
-    if (IsMainThread ()) gdk_threads_leave ();
+
+#if USE_GTK
+#if PROCESSING_UNITS
+    if ( IsMainThread() )
+        gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
+
     pthread_mutex_lock (&mutexTaskListAccess);
 
     for (i = 0; i < taskListMax; i ++) {
@@ -1180,7 +1210,14 @@ static void CancelProcessingUnitTasks (procunit *ppu)
     }
 
     pthread_mutex_unlock (&mutexTaskListAccess);
-    if (IsMainThread ()) gdk_threads_enter ();
+
+#if USE_GTK
+#if PROCESSING_UNITS
+    if ( IsMainThread() )
+        gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
+
 }
 
 
@@ -1945,25 +1982,34 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
     
     if (TaskEngine_Empty ()) return NULL;
     
-#if USE_GTK
         /* when we get here in the main thread, we are performing
         an analysis/rollout/eval triggered from a menu/button,
         and thus we are called from gtk_main() in RunGTK(), which
         means we already have acquired the GDK lock; we release it
         now that we are idle and waiting, to give other threads a
         chance to use GTK */
-        if (IsMainThread ()) gdk_threads_leave ();
-#endif /* #if USE_GTK */
+#if PROCESSING_UNITS
+#if USE_GTK
+	if ( IsMainThread() )
+	    gdk_threads_leave();
+#endif /* USE_GTK */
+#endif /* PROCESSING_UNITS */
 
     while (!done) {
         
 #if PROCESSING_UNITS
-        gdk_threads_enter ();
-#endif /* #if PROCESSING_UNITS */
+#if USE_GTK
+        gdk_threads_enter();
+#endif /* USE_GTK */
+#endif /* PROCESSING_UNITS */
+
         GTK_YIELDTIME;
+
 #if PROCESSING_UNITS
-        gdk_threads_leave ();
-#endif /* #if PROCESSING_UNITS */
+#if USE_GTK
+        gdk_threads_leave();
+#endif /* USE_GTK */
+#endif /* PROCESSING_UNITS */
 
         pthread_mutex_lock (&mutexTaskListAccess);
         
@@ -1972,13 +2018,19 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
         /* FIXME: add sanity check (RPU timeouts) */
         
         /* assign procunits to todo tasks */
+#if USE_GTK
 #if PROCESSING_UNITS
-        gdk_threads_enter ();
-#endif /* #if PROCESSING_UNITS */
+        gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
+
         AssignTasksToProcessingUnits ();
+
+#if USE_GTK
 #if PROCESSING_UNITS
-        gdk_threads_leave ();
-#endif /* #if PROCESSING_UNITS */
+        gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
         
         /* look for available results */
         pt = FindTask (pu_task_done, 0, 0, 0);
@@ -2023,10 +2075,13 @@ extern pu_task * TaskEngine_GetCompletedTask (void)
         pthread_mutex_unlock (&mutexResultsAvailable);
 
     }
-    
+
 #if USE_GTK
-        if (IsMainThread ()) gdk_threads_enter ();
-#endif /* #if USE_GTK */
+#if PROCESSING_UNITS
+        if ( IsMainThread() )
+            gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
 
     return pt;
 }
@@ -4011,11 +4066,19 @@ extern void * Thread_RemoteProcessingUnit (void *data)
             /* connect to remote host */
             if (connect (rpuSocket, (const struct sockaddr *) &ppu->info.remote.inAddress, 
                             sizeof(ppu->info.remote.inAddress)) < 0) {
-                gdk_threads_enter ();
+#if USE_GTK
+#if PROCESSING_UNITS
+                gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
                 outputerrf ("# (0x%x) RPU could not connect socket (err=%d).\n", 
                     (int) pthread_self (), errno);
                 outputerr ("connect");
-                gdk_threads_leave ();
+#if USE_GTK
+#if PROCESSING_UNITS
+                gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
+#endif /* USE_GTK */
                 ppu->info.remote.fStop = TRUE;
             }
             else {
@@ -5433,9 +5496,11 @@ static void GTK_TouchProcunit (procunit *ppu)
 #if USE_GTK2
     GtkTreeIter 	iter;
     GtkTreePath		*pPath;
-    
-    
-    if (!IsMainThread ()) gdk_threads_enter ();
+
+#if PROCESSING_UNITS
+    if ( !IsMainThread() )
+	gdk_threads_enter();
+#endif /* PROCESSING_UNITS */
 
     if (Tree_Find_Procunit (ppu->procunit_id, &pPath, &iter)) {
         gtk_tree_model_row_changed (GTK_TREE_MODEL(gplsProcunits), pPath, &iter);
@@ -5444,8 +5509,11 @@ static void GTK_TouchProcunit (procunit *ppu)
             GTK_Master_SelectionChanged (gtk_tree_view_get_selection (GTK_TREE_VIEW(gpwTree)), NULL);
         GTK_YIELDTIME; /* FIXME: necessary? */
     }
-    
-    if (!IsMainThread ()) gdk_threads_leave ();
+
+#if PROCESSING_UNITS
+    if ( !IsMainThread() )
+	gdk_threads_leave();
+#endif /* PROCESSING_UNITS */
 
 #endif /* #if USE_GTK2 */
 }
