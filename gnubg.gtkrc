@@ -80,40 +80,64 @@ style "doubling-window-graph" = "default"
   bg[SELECTED] = { 0, 0, 0xffff }
 }
 
+widget "*Board.*move" style "movelabel"
+widget "*.gnubg-doubling-window-graph" style "doubling-window-graph"
+widget_class "*Ruler*" style "ruler"
+widget_class "*" style "default"
+
 #
 # Styles for moves in game list
+#
+# Each gamelist style can have a foreground (fg[NORMAL]),
+# background (base[NORMAL]) and font specified.
+# Note that multiple styles will be applied (E.g. if a move is
+# lucky and an error), if more than one style specifies the same
+# attribute then they will be shown in this order cube, chequer and luck
+# e.g. a fg luck setting will get overwritten by a fg chequer setting
+#
+# Examples:
+#
+# 1. To mark chequer blunders as blue on a red background
+# with a large italic font:
+#
+#	style "gamelist-chequer-blunder" = "default"
+#	{
+#	  fg[ NORMAL ] = { 0, 0, 0xffff }
+#	  base[ NORMAL ] = { 0xffff, 0, 0 }
+#	  font = "-*-tahoma-normal-i-normal-*-*-120-*-*-*-*-*-*"
+#	}
+#
+# 2. To not mark doubtful cube decisions:
+#
+#	style "gamelist-cube-doubtful" = "default"
+#	{
+#	}
 #
 
 style "gamelist-chequer-blunder" = "default"
 {
   fg[ NORMAL ] = { 0xffff, 0, 0 }
-  bg[ NORMAL ] = { 0, 0xffff, 0 }
 }
 style "gamelist-chequer-error" = "default"
 {
-  fg[ NORMAL ] = { 0xffff, 0xffff, 0 }
-  bg[ NORMAL ] = { 0, 0xffff, 0 }
+  fg[ NORMAL ] = { 0, 0, 0xffff }
 }
 style "gamelist-chequer-doubtful" = "default"
 {
-  fg[ NORMAL ] = { 0, 0, 0xffff }
-  bg[ NORMAL ] = { 0, 0xffff, 0 }
+  fg[ NORMAL ] = { 0x1100, 0xa000, 0x1100 }
 }
 
 style "gamelist-cube-blunder" = "default"
 {
-  fg[ NORMAL ] = { 0xffff, 0, 0 }
-  bg[ NORMAL ] = { 0, 0, 0xffff }
+  base[ NORMAL ] = { 0xffff, 0xffff, 0 }
 }
 style "gamelist-cube-error" = "default"
 {
-  fg[ NORMAL ] = { 0xffff, 0xffff, 0 }
-  bg[ NORMAL ] = { 0, 0, 0xffff }
+  base[ NORMAL ] = { 0xff00, 0x8000, 0xff00 }
 }
 style "gamelist-cube-doubtful" = "default"
 {
-  fg[ NORMAL ] = { 0, 0xffff, 0 }
-  bg[ NORMAL ] = { 0, 0, 0xffff }
+  base[ NORMAL ] = { 0xc000, 0xc000, 0xc000 }
 }
 
 style "gamelist-luck-bad" = "default"
@@ -122,7 +146,6 @@ style "gamelist-luck-bad" = "default"
 }
 style "gamelist-luck-good" = "default"
 {
-  fg[ NORMAL ] = { 0x1100, 0x5500, 0x1100 }
   font = "-*-tahoma-bold-r-normal-*-*-100-*-*-*-*-*-*"
 }
 
@@ -136,11 +159,6 @@ widget "*.gnubg-gamelist-cube-doubtful" style "gamelist-cube-doubtful"
 
 widget "*.gnubg-gamelist-luck-good" style "gamelist-luck-good"
 widget "*.gnubg-gamelist-luck-bad" style "gamelist-luck-bad"
-
-widget "*Board.*move" style "movelabel"
-widget "*.gnubg-doubling-window-graph" style "doubling-window-graph"
-widget_class "*Ruler*" style "ruler"
-widget_class "*" style "default"
 
 #
 # Styles for match equity table

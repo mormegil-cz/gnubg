@@ -164,8 +164,6 @@ details.
   gtk_vpaned_motion and sets paned->min_position.
 ** Optionally merge the game record and annotation windows into one big
   paned window (suggested by Jeremie Petit).
-** Use different styles for moves in the game window, depending on the
-  annotation.
 ** When a long string is displayed in the status bar, the main window
   grows to accomodate it -- not very pretty.  A Layout or Viewport widget
   might be able to fix this.  (Fixed under GTK+ 2.0.)

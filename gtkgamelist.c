@@ -25,6 +25,7 @@
 #include <gtk/gtk.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include "i18n.h"
 #include "backgammon.h"
 #include "gtkboard.h"
@@ -164,6 +165,17 @@ void SetColourIfDifferent(GdkColor cOrg[5], GdkColor cNew[5], GdkColor cDefault[
 	}
 }
 
+void UpdateStyle(GtkStyle *psStyle, GtkStyle *psNew, GtkStyle *psDefault)
+{
+	/* Only set changed attributes */
+	SetColourIfDifferent(psStyle->fg, psNew->fg, psDefault->fg);
+	SetColourIfDifferent(psStyle->bg, psNew->bg, psDefault->bg);
+	SetColourIfDifferent(psStyle->base, psNew->base, psDefault->base);
+
+	if (!gdk_font_equal(gtk_style_get_font(psNew), gtk_style_get_font(psDefault)))
+		gtk_style_set_font(psStyle, gtk_style_get_font(psNew));
+}
+
 void GetStyleFromRCFile(GtkStyle** ppStyle, char* name)
 {	/* Note gtk 1.3 doesn't seem to have a nice way to do this... */
 	BoardData *bd = BOARD(pwBoard)->board_data;
@@ -187,14 +199,15 @@ void GetStyleFromRCFile(GtkStyle** ppStyle, char* name)
 
 	/* Base new style on default for game list */
 	*ppStyle = gtk_style_copy(psGameList);
-	/* Only set specified attributes */
-	SetColourIfDifferent((*ppStyle)->bg, psNew->bg, psDefault->bg);
-	SetColourIfDifferent((*ppStyle)->fg, psNew->fg, psDefault->fg);
-	/* Copy some settings, used when row is selected */
+	/* Make changes to fg+bg and copy to selected states */
+	if (memcmp(&psNew->fg[GTK_STATE_NORMAL], &psDefault->fg[GTK_STATE_NORMAL], sizeof(GdkColor)))
+		memcpy(&(*ppStyle)->fg[GTK_STATE_NORMAL], &psNew->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
 	memcpy(&(*ppStyle)->fg[GTK_STATE_SELECTED], &(*ppStyle)->fg[GTK_STATE_NORMAL], sizeof(GdkColor));
-	memcpy(&(*ppStyle)->bg[GTK_STATE_SELECTED], &(*ppStyle)->bg[GTK_STATE_NORMAL], sizeof(GdkColor));
-	memcpy(&(*ppStyle)->base[GTK_STATE_NORMAL], &(*ppStyle)->bg[GTK_STATE_NORMAL], sizeof(GdkColor));
 
+	if (memcmp(&psNew->base[GTK_STATE_NORMAL], &psDefault->base[GTK_STATE_NORMAL], sizeof(GdkColor)))
+		memcpy(&(*ppStyle)->base[GTK_STATE_NORMAL], &psNew->base[GTK_STATE_NORMAL], sizeof(GdkColor));
+	memcpy(&(*ppStyle)->bg[GTK_STATE_SELECTED], &(*ppStyle)->base[GTK_STATE_NORMAL], sizeof(GdkColor));
+	/* Update the font if different */
 	if (!gdk_font_equal(gtk_style_get_font(psNew), gtk_style_get_font(psDefault)))
 		gtk_style_set_font(*ppStyle, gtk_style_get_font(psNew));
 
@@ -290,29 +303,44 @@ static int AddMoveRecordRow( void )
     return row;
 }
 
+void AddStyle(GtkStyle **ppsComb, GtkStyle *psNew)
+{
+	if (!*ppsComb)
+		*ppsComb = psNew;
+	else
+	{
+		*ppsComb = gtk_style_copy(*ppsComb);
+		UpdateStyle(*ppsComb, psNew, psGameList);
+	}
+}
+
 void SetCellColour(int row, int col, moverecord *pmr)
 {
-	GtkStyle *pStyle;
+	GtkStyle *pStyle = NULL;
 
-	if (!fStyledGamelist)
-		pStyle = psGameList;
-	else if (pmr->n.stMove == SKILL_VERYBAD)
-		pStyle = psChequerErrors[SKILL_VERYBAD];
-	else if (pmr->stCube == SKILL_VERYBAD)
-		pStyle = psCubeErrors[SKILL_VERYBAD];
-	else if (pmr->n.stMove == SKILL_BAD)
-		pStyle = psChequerErrors[SKILL_BAD];
-	else if (pmr->stCube == SKILL_BAD)
-		pStyle = psCubeErrors[SKILL_BAD];
-	else if (pmr->n.stMove == SKILL_DOUBTFUL)
-		pStyle = psChequerErrors[SKILL_DOUBTFUL];
-	else if (pmr->stCube == SKILL_DOUBTFUL)
-		pStyle = psCubeErrors[SKILL_DOUBTFUL];
-	else if (pmr->lt == LUCK_VERYGOOD)
-		pStyle = psLucky[LUCK_VERYGOOD];
-	else if (pmr->lt == LUCK_VERYBAD)
-		pStyle = psLucky[LUCK_VERYBAD];
-	else
+	if (fStyledGamelist)
+	{
+		if (pmr->lt == LUCK_VERYGOOD)
+			pStyle = psLucky[LUCK_VERYGOOD];
+		if (pmr->lt == LUCK_VERYBAD)
+			pStyle = psLucky[LUCK_VERYBAD];
+
+		if (pmr->n.stMove == SKILL_VERYBAD)
+			AddStyle(&pStyle, psChequerErrors[SKILL_VERYBAD]);
+		else if (pmr->n.stMove == SKILL_BAD)
+			AddStyle(&pStyle, psChequerErrors[SKILL_BAD]);
+		else if (pmr->n.stMove == SKILL_DOUBTFUL)
+			AddStyle(&pStyle, psChequerErrors[SKILL_DOUBTFUL]);
+
+		if (pmr->stCube == SKILL_VERYBAD)
+			AddStyle(&pStyle, psCubeErrors[SKILL_VERYBAD]);
+		else if (pmr->stCube == SKILL_BAD)
+			AddStyle(&pStyle, psCubeErrors[SKILL_BAD]);
+		else if (pmr->stCube == SKILL_DOUBTFUL)
+			AddStyle(&pStyle, psCubeErrors[SKILL_DOUBTFUL]);
+	}
+
+	if (!pStyle)
 		pStyle = psGameList;
 
 	gtk_clist_set_cell_style(GTK_CLIST(pwGameList), row, col, pStyle);
