@@ -416,8 +416,48 @@ AnalyzeMove ( moverecord *pmr ) {
 	break;
       
     case MOVE_RESIGN:
-	/* FIXME: evaluate if resignation is OK */
-	break;
+
+      /* swap board if player not on roll resigned */
+
+      if( pmr->r.fPlayer != msAnalyse.fMove ) {
+        SwapSides( msAnalyse.anBoard );
+        msAnalyse.fMove = pmr->n.fPlayer;
+      }
+      
+      if ( esAnalysisCube.et != EVAL_NONE ) {
+        
+        int nResign;
+        float rBefore, rAfter;
+        float ar[ NUM_OUTPUTS ] = { 0, 0, 0, 0, 0 };
+
+        GetMatchStateCubeInfo ( &ci, &msAnalyse );
+
+        nResign =
+          getResignation ( pmr->r.arResign, ms.anBoard, &ci, &esAnalysisCube );
+
+        getResignEquities ( pmr->r.arResign, &ci, pmr->r.nResigned,
+                            &rBefore, &rAfter );
+
+        pmr->r.esResign = esAnalysisCube;
+
+        pmr->r.stResign = pmr->r.stAccept = SKILL_NONE;
+
+        if ( rAfter < rBefore ) {
+          /* wrong resign */
+          pmr->r.stResign = Skill ( rAfter - rBefore );
+          pmr->r.stAccept = SKILL_VERYGOOD;
+        }
+
+        if ( rBefore < rAfter ) {
+          /* wrong accept */
+          pmr->r.stAccept = Skill ( rBefore - rAfter );
+          pmr->r.stResign = SKILL_VERYGOOD;
+        }
+
+
+      }
+
+      break;
       
     case MOVE_SETDICE:
 	if( pmr->sd.fPlayer != msAnalyse.fMove ) {
