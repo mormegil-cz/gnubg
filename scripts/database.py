@@ -36,7 +36,7 @@ DB_SQLITE = 1
 DB_POSTGRESQL = 2
 
 # Change this line to set the database type
-DB_TYPE = DB_SQLITE
+DB_TYPE = DB_POSTGRESQL
 
 class relational:
 
@@ -204,7 +204,7 @@ class relational:
              cus[ 'n-takes' ], \
              cus[ 'n-drops' ], \
              cus[ 'missed-double-below-cp' ], \
-             cus[ 'missed-double-below-cp' ], \
+             cus[ 'missed-double-above-cp' ], \
              cus[ 'wrong-double-below-dp' ], \
              cus[ 'wrong-double-above-tg' ], \
              cus[ 'wrong-take' ], \
@@ -221,30 +221,36 @@ class relational:
              cus[ 'err-wrong-double-above-tg-cost' ], \
              cus[ 'err-wrong-take-cost' ], \
              cus[ 'err-wrong-drop-cost' ], \
+             # gnubg is giving per-move, not totals here
+             cus[ 'error-skill' ] * cus[ 'close-cube' ], \
+             cus[ 'error-cost' ] * cus[ 'close-cube' ], \
              cus[ 'error-skill' ], \
              cus[ 'error-cost' ], \
-             self.__calc_rate( cus[ 'error-skill' ], cus[ 'close-cube' ] ), \
-             self.__calc_rate( cus[ 'error-cost' ], cus[ 'close-cube' ] ), \
-             gnubg.errorrating( self.__calc_rate( cus[ 'error-skill' ],
-                                             cus[ 'close-cube' ] ) ) ) 
+             gnubg.errorrating( cus[ 'error-skill' ] ) )
       
       # overall
       
       s5 = "%f,%f,%f,%f,%d,%f,%f,%f," % \
-           ( cus[ 'error-skill' ] + chs[ 'error-skill' ], \
-             cus[ 'error-cost' ] + chs[ 'error-cost' ], \
-             self.__calc_rate( cus[ 'error-skill' ] + chs[ 'error-skill' ], \
+           ( cus[ 'error-skill' ] * cus[ 'close-cube' ] +
+             chs[ 'error-skill' ], \
+             cus[ 'error-cost' ]  * cus[ 'close-cube' ] +
+             chs[ 'error-cost' ], \
+             self.__calc_rate( cus[ 'error-skill' ]  * cus[ 'close-cube' ] \
+                               + chs[ 'error-skill' ], \
                           cus[ 'close-cube' ] + chs[ 'unforced-moves' ] ),
-             self.__calc_rate( cus[ 'error-cost' ] + chs[ 'error-cost' ], \
+             self.__calc_rate( cus[ 'error-cost' ]  * cus[ 'close-cube' ] + \
+                                chs[ 'error-cost' ], \
                           cus[ 'close-cube' ] + chs[ 'unforced-moves' ] ),
              
-             gnubg.errorrating( self.__calc_rate( cus[ 'error-skill' ] +
+             gnubg.errorrating( self.__calc_rate( cus[ 'error-skill' ] * \
+                                                  cus[ 'close-cube' ] + \
                                              chs[ 'error-skill' ], \
                                              cus[ 'close-cube' ] +
                                              chs[ 'unforced-moves' ] ) ),
              lus[ 'actual-result' ],
              lus[ 'luck-adjusted-result' ],
-             self.__calc_rate( cus[ 'error-skill' ] + chs[ 'error-skill' ], \
+             self.__calc_rate( cus[ 'error-skill' ]  * cus[ 'close-cube' ] + \
+                               chs[ 'error-skill' ], \
                           chs[ 'total-moves' ] +
                           gs_other[ 'moves' ][ 'total-moves' ] ) )
 
@@ -327,7 +333,7 @@ class relational:
       if DB_TYPE == DB_SQLITE:
          CURRENT_TIME = "datetime('now', 'localtime')"
       elif DB_TYPE == DB_POSTGRESQL:
-         CURRENT_TIME = CURRENT_TIMESTAMP
+         CURRENT_TIME = 'CURRENT_TIMESTAMP'
 
       query = ("INSERT INTO match(match_id, checksum, nick_id0, nick_id1, " \
               "result, length, added, rating0, rating1, event, round, place, annotator, comment, date) " \

@@ -1,3 +1,7 @@
+Sun 12 Dec 13:27:54 gmt 2004 Jim Segrave <jes@jes-2.demon.nl>
+
+	* fix some bugs in scripts/database.py
+	
 Sun 28 Nov 01:04:30 GMT 2004 Jim Segrave <jes@jes-2.demon.nl>
 
 	* import.c - patch Fibs code to ignore non-game lines in input
