@@ -1260,8 +1260,6 @@ window, or by executing the command @code{set matchid QYkqASAAIAAA}.
 
 @include absrating.texi
 
-@include faq.texi
-
 @node Additional documentation
 @chapter Additional documentation
 

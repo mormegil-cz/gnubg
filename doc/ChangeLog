@@ -1,3 +1,8 @@
+Thu Sep 18 21:02:38 2003  Oystein Johansen  <oystein@gnubg.org>
+
+        * faq.texi: Commit Achim's file
+	* gnubg.texi: Don't include FAQ in main manual
+
 Sat Sep  6 17:04:13 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* absrating.texi, *.png: add Kees' chapter on abs. ratings.
