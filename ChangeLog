@@ -1,3 +1,7 @@
+Sat Apr 17 20:01:07 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* set.c (CommandSetMet): call "clear hint".
+
 Sat Apr 17 10:58:18 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Save leading comment lines in the match information when 

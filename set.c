@@ -2871,6 +2871,9 @@ extern void CommandSetMET( char *sz ) {
 
   /* Cubeful evaluation get confused withh entries from another table */
   EvalCacheFlush();
+
+  /* clear hint */
+  CommandClearHint( NULL );
   
   outputf( _("GNU Backgammon will now use the %s match equity table.\n"),
            miCurrent.szName );
