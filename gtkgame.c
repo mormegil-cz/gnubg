@@ -23,6 +23,7 @@
 #include <config.h>
 #endif
 
+#include <assert.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -341,6 +342,44 @@ static void Command( gpointer *p, guint iCommand, GtkWidget *widget ) {
     }
 }
 
+typedef struct _gamelistrow {
+    moverecord *apmr[ 2 ]; /* moverecord entries for each column */
+    int fCombined; /* this message's row is combined across both columns */
+} gamelistrow;
+
+static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
+			       GdkEventButton *pev, gpointer p ) {
+    gamelistrow *pglr;
+    moverecord *pmr;
+    list *pl;
+    
+    if( x < 1 || x > 2 || !( pglr = gtk_clist_get_row_data( pcl, y ) ) ||
+	!( pmr = pglr->apmr[ x - 1 ] ) )
+	return;
+
+    if( pmr->mt == MOVE_SETDICE )
+	/* For "set dice" records, we want to set plLastMove _there_... */
+	for( pl = plGame->plNext; pl->p != pmr; pl = pl->plNext )
+	    assert( pl->p );
+    else
+	/* ...for everything else, we want the move _before_. */
+	for( pl = plGame->plNext; pl->plNext->p != pmr; pl = pl->plNext )
+	    assert( pl->plNext->p );
+
+    plLastMove = pl;
+    pmr = pl->p;
+    
+    SetMoveRecord( pmr );
+    
+    CalculateBoard();
+
+    UpdateSetting( &nCube );
+    UpdateSetting( &fCubeOwner );
+    UpdateSetting( &fTurn );
+
+    ShowBoard();
+}
+
 static void CreateGameWindow( void ) {
 
     static char *asz[] = { "Move", NULL, NULL };
@@ -400,6 +439,8 @@ static void CreateGameWindow( void ) {
 
     gtk_container_add( GTK_CONTAINER( phbox ), psb );
     
+    gtk_signal_connect( GTK_OBJECT( pwGameList ), "select-row",
+			GTK_SIGNAL_FUNC( GameListSelectRow ), NULL );
     gtk_signal_connect( GTK_OBJECT( pwGame ), "delete_event",
 			GTK_SIGNAL_FUNC( gtk_widget_hide ), NULL );
 }
@@ -408,11 +449,6 @@ extern void ShowGameWindow( void ) {
 
     gtk_widget_show_all( pwGame );
 }
-
-typedef struct _gamelistrow {
-    moverecord *apmr[ 2 ]; /* moverecord entries for each column */
-    int fCombined; /* this message's row is combined across both columns */
-} gamelistrow;
 
 static int AddMoveRecordRow( void ) {
 
