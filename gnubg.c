@@ -641,6 +641,10 @@ command cER = {
     { "take", CommandAnnotateAccept, N_("Mark a take decision"), 
       NULL, acAnnotateMove },
     { NULL, NULL, NULL, NULL, NULL }
+}, acClear[] = {
+  { "hint", CommandClearHint, 
+    N_("Clear analysis used for `hint'"), NULL, NULL },
+  { NULL, NULL, NULL, NULL, NULL }
 }, acDatabase[] = {
     { "dump", CommandDatabaseDump, N_("List the positions in the database"),
       NULL, NULL },
@@ -1913,6 +1917,7 @@ command cER = {
     { "calibrate", CommandCalibrate,
       N_("Measure evaluation speed, for later time estimates"), szOPTVALUE,
       NULL },
+    { "clear", NULL, N_("Clear information"), NULL, acClear },
     { "copy", CommandCopy, N_("Copy current position to clipboard"), 
       NULL, NULL },
     { "database", NULL, N_("Manipulate a database of positions"), NULL,
@@ -3821,7 +3826,7 @@ HintCube( void ) {
 
   outputl( OutputCubeAnalysis( GCCCONSTAHACK sc.aarOutput,
 			       GCCCONSTAHACK sc.aarStdDev,
-                               &esEvalCube, &ci ) );
+                               &sc.es, &ci ) );
 }
     
 
@@ -8446,6 +8451,14 @@ InvalidateStoredMoves ( void ) {
 
 
 extern void
+InvalidateStoredCube ( void ) {
+
+  sc.ms.nMatchTo = -1;
+
+}
+
+
+extern void
 UpdateStoredMoves ( const movelist *pml, const matchstate *pms ) {
 
   if( sm.ml.amMoves )
@@ -8793,3 +8806,13 @@ CommandHistory( char *sz ) {
 }
 
 #endif /* HAVE_LIBREADLINE */
+
+extern void
+CommandClearHint( char *sz ) {
+
+  InvalidateStoredMoves();
+  InvalidateStoredCube();
+
+  outputl( _("Analysis used for `hint' has been cleared") );
+
+}

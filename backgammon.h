@@ -749,6 +749,9 @@ UpdateStoredCube ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 extern void
 InvalidateStoredMoves( void );
 
+extern void
+InvalidateStoredCube( void );
+
 extern char* aszVersion[], *szHomeDirectory, *szDataDirectory,
     *szTerminalCharset;
 
@@ -806,6 +809,7 @@ extern void CommandAccept( char * ),
     CommandAnnotateVeryLucky( char * ),
     CommandAnnotateVeryUnlucky( char * ),
     CommandCalibrate( char* sz ),
+    CommandClearHint( char * ),
     CommandCopy ( char * ),
     CommandDatabaseDump( char * ),
     CommandDatabaseExport( char * ),

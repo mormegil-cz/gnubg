@@ -1,3 +1,13 @@
+Sun Nov 30 08:47:01 2003  Joern Thyssen  <jth@gnubg.org>
+
+	New command "clear hint" to allow CLI users to force
+	re-evaluation of "hint" after changing settings.
+	(suggested by Achim)
+
+	* gnubg.c (CommandClearHint): new command "clear hint".
+	* gnubg.c (InvalidateStoredCube): new function.
+	* gnubg.c (HintCube): fix typo
+
 Sat Nov 29 21:22:13 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Implement history
