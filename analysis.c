@@ -283,6 +283,51 @@ Skill( float const r )
 }
 
 /*
+ * get middle of doubling window
+ */
+
+void
+getMarketWindowDividerMWC( float rMarketWindowDividerMWC, const matchstate* pms )
+{
+    cubeinfo ci;
+    evalcontext ec = { FALSE, 0, 0, TRUE, 0.0 };
+    float aarRates[ 2 ][ 2 ];
+    float arOutput[ NUM_OUTPUTS ];
+    int afAutoRedouble[ 2 ];
+    int afDead[ 2 ];
+
+    GetMatchStateCubeInfo ( &ci, pms );
+
+    getCurrentGammonRates( aarRates, arOutput, pms->anBoard,
+			   &ci, &ec );
+
+    if( ci.nMatchTo ) {
+    	/* Match play */
+	float aaarPointsMatch[ 2 ][ 4 ][ 2 ];
+
+	getMatchPoints( aaarPointsMatch, afAutoRedouble, afDead,
+		    &ci, aarRates );
+
+	/* calculate middle of double window in MWC: DP+(TG-DP)/2 */
+	rMarketWindowDividerMWC = aaarPointsMatch[ 1 ][ 1 ][ 0 ] +
+				  ( aaarPointsMatch[ 1 ][ 3 ][ 0 ] -
+				    aaarPointsMatch[ 1 ][ 1 ][ 0 ] ) / 2;
+    }
+    else {
+    	/* Money play */
+    	float aaarPointsMoney[ 2 ][ 7 ][ 2 ];
+
+	getMoneyPoints( aaarPointsMoney, ci.fJacoby, ci.fBeavers, aarRates );
+
+	/* calculate middle of double window in MWC: DP+(TG-DP)/2 */
+	rMarketWindowDividerMWC = aaarPointsMoney[ 1 ][ 3 ][ 0 ] +
+				  ( aaarPointsMoney[ 1 ][ 6 ][ 0 ] -
+				    aaarPointsMoney[ 1 ][ 3 ][ 0 ] ) / 2;
+    }
+}
+
+
+/*
  * update statcontext for given move
  *
  * Input:
@@ -367,13 +412,19 @@ updateStatcontext(statcontext*       psc,
       if( arDouble[ OUTPUT_NODOUBLE ] <
           arDouble[ OUTPUT_OPTIMAL ] ) {
         /* it was a double */
+
+	float rMarketWindowDividerMWC;
+
         rSkill = arDouble[ OUTPUT_NODOUBLE ] -
           arDouble[ OUTPUT_OPTIMAL ];
 	      
         rCost = pms->nMatchTo ? eq2mwc( rSkill, &ci ) -
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
-	      
-        if( arDouble[ OUTPUT_NODOUBLE ] >= 0.95 ) {
+
+	getMarketWindowDividerMWC( rMarketWindowDividerMWC, pms );
+
+        if ( eq2mwc( arDouble[ OUTPUT_NODOUBLE ], &ci ) >
+	     rMarketWindowDividerMWC ) {
           /* around too good point */
           psc->anCubeMissedDoubleTG[ pmr->n.fPlayer ]++;
           psc->arErrorMissedDoubleTG[ pmr->n.fPlayer ][ 0 ] -=
@@ -470,7 +521,6 @@ updateStatcontext(statcontext*       psc,
     break;
 
   case MOVE_DOUBLE:
- 
 
     GetMatchStateCubeInfo ( &ci, pms );
     if ( fAnalyseCube && pmr->d.CubeDecPtr->esDouble.et != EVAL_NONE ) {
@@ -486,13 +536,19 @@ updateStatcontext(statcontext*       psc,
       psc->anTotalCube[ pmr->d.fPlayer ]++;
       psc->anDouble[ pmr->d.fPlayer ]++;
       psc->anCloseCube[ pmr->d.fPlayer ]++;
-	      
-      if( rSkill < 0.0f ) {
+
+      if ( rSkill < 0.0f ) {
         /* it was not a double */
+
+	float rMarketWindowDividerMWC;
+
         rCost = pms->nMatchTo ? eq2mwc( rSkill, &ci ) -
           eq2mwc( 0.0f, &ci ) : pms->nCube * rSkill;
-		  
-        if( arDouble[ OUTPUT_NODOUBLE ] >= 0.95f ) {
+
+	getMarketWindowDividerMWC( rMarketWindowDividerMWC, pms );
+
+        if ( eq2mwc( arDouble[ OUTPUT_NODOUBLE ], &ci ) >
+	     rMarketWindowDividerMWC ) {
           /* around too good point */
           psc->anCubeWrongDoubleTG[ pmr->d.fPlayer ]++;
           psc->arErrorWrongDoubleTG[ pmr->d.fPlayer ][ 0 ] -= rSkill;
