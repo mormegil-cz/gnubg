@@ -65,7 +65,6 @@ fg[PRELIGHT] = { 0.2, 0.1, 0.0 }
 
 }
 
-
 #
 # Style for the move list (e.g. the hint window) for highlighting the actual
 # move made.
@@ -87,7 +86,7 @@ style "movelabel" = "default"
 {
   fg[ACTIVE] = { 0xffff, 0, 0 }
 }
-
+   
 widget "*.gnubg-move-current" style "movelabel"
 
 
