@@ -67,7 +67,7 @@
 char *szFile, *pchFile;
 int imagesWritten;
 
-#define NUM_IMAGES 346
+#define NUM_IMAGES 344
 
 /* Overall board size */
 int s;
