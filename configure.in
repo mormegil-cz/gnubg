@@ -19,7 +19,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 AC_INIT(gnubg.c)
-AM_INIT_AUTOMAKE(gnubg,0.11)
+AM_INIT_AUTOMAKE(gnubg,0.12)
 AM_CONFIG_HEADER(config.h)
 
 if test -f config.options

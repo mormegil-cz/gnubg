@@ -1,4 +1,4 @@
-GNU Backgammon 0.11
+GNU Backgammon 0.12
 ===================
 
 This is a pre-release version of GNU Backgammon (gnubg), a backgammon
@@ -35,7 +35,8 @@ Current features:
  - Position databases for supervised training (if GNU dbm is available)
  - Loading and saving .sgf games and matches (.sgf files are in the
    Smart Game Format)
- - Exporting games and matches to .mat format
+ - Exporting games and matches to .mat, LaTeX, PostScript and PDF formats
+ - Importing .pos, .mat, .sgg and FIBS "oldmoves" files
  - Scripting ability (if GNU Guile is available)
  - Automatic and manual annotation (analysis and commentary) of games and
    matches
