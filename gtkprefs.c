@@ -107,7 +107,7 @@ static boarddesign *pbdeSelected = NULL;
 extern GList *
 read_board_designs ( void ) {
 
-  return ParseBoardDesigns ( "boards/boards.xml" );
+  return ParseBoardDesigns ( "boards.xml" );
 }
 
 static void

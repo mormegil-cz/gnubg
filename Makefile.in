@@ -132,8 +132,8 @@ X_PRE_LIBS = @X_PRE_LIBS@
 am__include = @am__include@
 am__quote = @am__quote@
 install_sh = @install_sh@
-@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4 xpm sounds boards
-@USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4 xpm sounds boards
+@USE_EXT_TRUE@SUBDIRS = intl lib doc ext met po m4 xpm sounds
+@USE_EXT_FALSE@SUBDIRS = intl lib doc met po m4 xpm sounds
 
 localedir = $(datadir)/locale
 
@@ -198,7 +198,9 @@ bin_PROGRAMS = gnubg makebearoff
 @USE_EXT_TRUE@@USE_GTK_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 @USE_GTK_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
-pkgdata_DATA = gnubg_ts0.bd gnubg.wd @GTKDATA@ @GUILEDATA@ $(BR1DATA)
+pkgdata_DATA = gnubg_ts0.bd gnubg.wd boards.xml @GTKDATA@ @GUILEDATA@ \
+	$(BR1DATA)
+
 
 man_MANS = gnubg.6
 
@@ -233,7 +235,7 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = intl/Makefile
+CONFIG_CLEAN_FILES = intl/Makefile boards/Makefile
 bin_PROGRAMS = gnubg$(EXEEXT) makebearoff$(EXEEXT)
 check_PROGRAMS = erftest$(EXEEXT)
 noinst_PROGRAMS = makeweights$(EXEEXT) makebearoff1$(EXEEXT)
@@ -350,7 +352,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	config.guess config.h.in config.rpath config.sub configure \
 	configure.in depcomp erf.c install-sh missing mkinstalldirs \
 	strdup.c
-DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds boards
+DIST_SUBDIRS = intl lib doc ext met po m4 xpm sounds
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makeweights_SOURCES)
 
 all: config.h
@@ -392,6 +394,8 @@ $(srcdir)/config.h.in:  $(top_srcdir)/configure.in $(ACLOCAL_M4)
 distclean-hdr:
 	-rm -f config.h stamp-h1
 intl/Makefile: $(top_builddir)/config.status $(top_srcdir)/intl/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+boards/Makefile: $(top_builddir)/config.status $(top_srcdir)/boards/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 install-binPROGRAMS: $(bin_PROGRAMS)
@@ -749,7 +753,7 @@ distcleancheck_listfiles = find . -type f -print
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkinstalldirs) $(distdir)/intl $(distdir)/po
+	$(mkinstalldirs) $(distdir)/boards $(distdir)/intl $(distdir)/po
 	@list='$(DISTFILES)'; for file in $$list; do \
 	  if test -f $$file || test -d $$file; then d=.; else d=$(srcdir); fi; \
 	  dir=`echo "$$file" | sed -e 's,/[^/]*$$,,'`; \

@@ -1,9 +1,11 @@
-Tue Dec 10 21:09:18 2002  Gary Wong  <gtw@gnu.org>
+Tue Dec 10 21:30:38 2002  Gary Wong  <gtw@gnu.org>
 
 	* render.c, render.h: New files.  GTK+ independent replacement for the
 	rendering functions in gtkboard.c.
 	* gtkprefs.c (DesignActivate): Render preview instead of reading
 	file.
+
+	* boards.xml: New file (formerly in the boards directory).
 
 Mon Dec  9 21:24:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
