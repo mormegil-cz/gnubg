@@ -238,7 +238,7 @@ extern void CommandSetCubeCentre( char *sz ) {
     if( fDoubled ) {
 	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	fDoubled = FALSE;
-	NextTurn();
+	fNextTurn = TRUE;
     }
 }
 
@@ -276,7 +276,7 @@ extern void CommandSetCubeOwner( char *sz ) {
     if( fDoubled ) {
 	printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	fDoubled = FALSE;
-	NextTurn();
+	fNextTurn = TRUE;
     }
 }
 
@@ -310,7 +310,7 @@ extern void CommandSetCubeUse( char *sz ) {
 	    printf( "(%s's double has been cancelled.)\n",
 		    ap[ fMove ].szName );
 	    fDoubled = FALSE;
-	    NextTurn();
+	    fNextTurn = TRUE;
 	}
     }
 }
@@ -843,8 +843,9 @@ extern void CommandSetCrawford( char *sz ) {
 	CommandSetPostCrawford ( "on" );
 
       if( fCrawford && fDoubled ) {
+	  printf( "(%s's double has been cancelled.)\n", ap[ fMove ].szName );
 	  fDoubled = FALSE;
-	  NextTurn();
+	  fNextTurn = TRUE;
       }
     }
     else {

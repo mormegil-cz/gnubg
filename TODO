@@ -17,7 +17,7 @@ duplication of effort and to make sure our changes merge easily.
 * Game play:
 ** Add cube handling for computer player.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
-  progress.  To do it properly requires improved input routines.
+  progress.  To do it properly requires improved input routines. (gary)
 
 * Command interface:
 ** Check "show" exists for every "set"!
@@ -94,8 +94,8 @@ duplication of effort and to make sure our changes merge easily.
   computation (the process is too busy doing other things and never
   notices the key press in the event queue).  This is tricky to fix
   and probably needs better event handling everywhere.
-** When CommandSetTurn calls ShowBoard, the dice shown in the board
-   window can be the wrong colour.
+** When the interrupt key is pressed during processing in response to
+  a board window event, "(Interrupted)" is not shown.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

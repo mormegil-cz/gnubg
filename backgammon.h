@@ -24,8 +24,10 @@
 
 #if !X_DISPLAY_MISSING
 #include <ext.h>
+#include <event.h>
 extern extwindow ewnd;
 extern int fX, nDelay;
+extern event evNextTurn;
 #endif
 
 #include "eval.h"
@@ -78,7 +80,7 @@ extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoBearoff,
     fAutoGame, fAutoMove, fResigned, fMove, fDoubled, anScore[ 2 ],
     cGames, nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
     fPostCrawford, fAutoCrawford, cAutoDoubles, fCubeUse, fNackgammon,
-    fVarRedn, nRollouts, nRolloutTruncate;
+    fVarRedn, nRollouts, nRolloutTruncate, fNextTurn;
 
 extern evalcontext ecEval, ecRollout, ecTD;
 
@@ -90,6 +92,7 @@ extern void HandleCommand( char *sz, command *ac );
 extern void InitBoard( int anBoard[ 2 ][ 25 ] );
 extern char *NextToken( char **ppch );
 extern void NextTurn( void );
+extern void TurnDone( void );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char *sz );

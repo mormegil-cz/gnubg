@@ -67,6 +67,11 @@ static void NewGame( void ) {
 	goto reroll;
     }
 
+#if !X_DISPLAY_MISSING
+	if( fX && fDisplay )
+	    ShowBoard();
+#endif
+	
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
 }
 
@@ -74,7 +79,8 @@ static int ComputerTurn( void ) {
 
     movenormal *pmn;
     
-    if( !fResigned && !anDice[ 0 ] ) {
+    if( !fDoubled && !fResigned && !anDice[ 0 ] ) {
+	/* FIXME if on roll, consider doubling/resigning */
 	RollDice( anDice );
 
 	if( fDisplay )
@@ -83,11 +89,11 @@ static int ComputerTurn( void ) {
     
     switch( ap[ fTurn ].pt ) {
     case PLAYER_GNU:
-	/* FIXME if on roll, consider doubling/resigning */
 	if( fResigned ) {
 	    float ar[ NUM_OUTPUTS ];
 
-	    EvaluatePosition( anBoard, ar, &ap[ fTurn ].ec );
+	    if( EvaluatePosition( anBoard, ar, &ap[ fTurn ].ec ) )
+		return -1;
 
 	    if( -fResigned <= Utility ( ar ) ) {
 		CommandAgree( NULL );
@@ -108,7 +114,7 @@ static int ComputerTurn( void ) {
 	    pmn->fPlayer = fTurn;
 	    ListInsert( plGame, pmn );
 	    return FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-				 anBoard, &ap[ fTurn ].ec );
+				 anBoard, &ap[ fTurn ].ec ) < 0 ? -1 : 0;
 	}
 
     case PLAYER_PUBEVAL:
@@ -174,136 +180,139 @@ static int TryBearoff( void ) {
 extern void NextTurn( void ) {
 
     int n, fWinner;
-    static int fReentered = 0, fShouldRecurse = 0;
 #if !X_DISPLAY_MISSING
     static struct timeval tvLast, tv;
 #endif
     
-    if( fReentered ) {
-	fShouldRecurse++;
-	return;
+#if !X_DISPLAY_MISSING
+    if( fX )
+	EventPending( &evNextTurn, FALSE );
+    else
+#endif
+	fNextTurn = FALSE;
+    
+    fTurn = !fTurn;
+	
+    if( go == GAME_NORMAL && !fResigned && !fDoubled && fTurn != fMove ) {
+	fMove = !fMove;
+	anDice[ 0 ] = anDice[ 1 ] = 0;
+	    
+	SwapSides( anBoard );
     }
 
-    fReentered++;
+#if !X_DISPLAY_MISSING
+    if( fX && nDelay ) {
+	/* FIXME this is awful... it does delay, but it shouldn't do it by
+	   sleeping here -- it should set a timeout and return to the main
+	   event loop.
+
+	   Another problem with this implementation is that the delay
+	   will not work the first time NextTurn is called, because
+	   tvLast will be initialised to zero and this code will assume
+	   the delay has already elapsed. */
+	gettimeofday( &tv, NULL );
+	if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
+	    tvLast.tv_sec += tvLast.tv_usec / 1000000;
+	    tvLast.tv_usec %= 1000000;
+	}
+	
+	if( tvLast.tv_sec > tv.tv_sec || ( tvLast.tv_sec == tv.tv_sec &&
+					   tvLast.tv_usec > tv.tv_usec ) ) {
+	    tvLast.tv_sec -= tv.tv_sec;
+	    if( ( tvLast.tv_usec -= tv.tv_usec ) < 0 ) {
+		tvLast.tv_usec += 1000000;
+		tvLast.tv_sec--;
+	    }
+	    
+	    select( 0, NULL, NULL, NULL, &tvLast );
+	}
+	
+	gettimeofday( &tvLast, NULL );
+    }
+#endif
     
-    for(;;) {
-	fShouldRecurse = 0;
-	fTurn = !fTurn;
+    if( go == GAME_NORMAL && ( fDisplay ||
+			       ap[ fTurn ].pt == PLAYER_HUMAN ) )
+	ShowBoard();
+    
+    if( ( n = GameStatus( anBoard ) ) ||
+	( go == GAME_DROP && ( n = 1 ) ) ||
+	( go == GAME_RESIGNED && ( n = fResigned ) ) ) {
+	fWinner = !fTurn;
 	
-	if( go == GAME_NORMAL && !fResigned && !fDoubled && fTurn != fMove ) {
-	    fMove = !fMove;
-	    anDice[ 0 ] = anDice[ 1 ] = 0;
-	    
-	    SwapSides( anBoard );
-	}
-
+	if( fJacoby && fCubeOwner == -1 && !nMatchTo )
+	    /* gammons do not count on a centred cube during money
+	       sessions under the Jacoby rule */
+	    n = 1;
+	
+	anScore[ fWinner ] += n * nCube;
+	cGames++;
+	
+	fTurn = fMove = -1;
+	anDice[ 0 ] = anDice[ 1 ] = 0;
+	
+	go = GAME_NORMAL;
+	
+	printf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
+		aszGameResult[ n - 1 ], n * nCube,
+		n * nCube > 1 ? "s" : "" );
+	
 #if !X_DISPLAY_MISSING
-	if( fX && nDelay ) {
-	    /* FIXME this is awful... it does delay, but it shouldn't do it by
-	       sleeping here -- it should set a timeout and return to the main
-	       event loop.
-
-	       Another problem with this implementation is that the delay
-	       will not work the first time NextTurn is called, because
-	       tvLast will be initialised to zero and this code will assume
-	       the delay has already elapsed. */
-	    gettimeofday( &tv, NULL );
-	    if( ( tvLast.tv_usec += 1000 * nDelay ) >= 1000000 ) {
-		tvLast.tv_sec += tvLast.tv_usec / 1000000;
-		tvLast.tv_usec %= 1000000;
-	    }
-
-	    if( tvLast.tv_sec > tv.tv_sec || ( tvLast.tv_sec == tv.tv_sec &&
-					 tvLast.tv_usec > tv.tv_usec ) ) {
-		tvLast.tv_sec -= tv.tv_sec;
-		if( ( tvLast.tv_usec -= tv.tv_usec ) < 0 ) {
-		    tvLast.tv_usec += 1000000;
-		    tvLast.tv_sec--;
-		}
-
-		select( 0, NULL, NULL, NULL, &tvLast );
-	    }
-
-	    gettimeofday( &tvLast, NULL );
-	}
-#endif
-	
-	if( go == GAME_NORMAL && ( fDisplay ||
-				   ap[ fTurn ].pt == PLAYER_HUMAN ) )
+	if( fX && fDisplay )
 	    ShowBoard();
-
-	if( ( n = GameStatus( anBoard ) ) ||
-	    ( go == GAME_DROP && ( n = 1 ) ) ||
-	    ( go == GAME_RESIGNED && ( n = fResigned ) ) ) {
-	    fWinner = !fTurn;
-
-	    if( fJacoby && fCubeOwner == -1 && !nMatchTo )
-		/* gammons do not count on a centred cube during money
-		   sessions under the Jacoby rule */
-		n = 1;
-	    
-	    anScore[ fWinner ] += n * nCube;
-	    cGames++;
-
-	    fTurn = fMove = -1;
-	    anDice[ 0 ] = anDice[ 1 ] = 0;
-	    
-	    go = GAME_NORMAL;
-	    
-	    printf( "%s wins a %s and %d point%s.\n", ap[ fWinner ].szName,
-		    aszGameResult[ n - 1 ], n * nCube,
-		    n * nCube > 1 ? "s" : "" );
-
-#if !X_DISPLAY_MISSING
-	    if( fX && fDisplay )
-		ShowBoard();
 #endif
-	    
-	    if( nMatchTo && fAutoCrawford ) {
-		fCrawford = anScore[ fWinner ] == nMatchTo - 1 &&
-		    anScore[ !fWinner ] < nMatchTo - 1;
-		fPostCrawford = anScore[ !fWinner ] == nMatchTo - 1;
-	    }
-
-	    CommandShowScore( NULL );
-
-	    if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
-		printf( "%s has won the match.\n", ap[ fWinner ].szName );
-		break;
-	    }
-
-	    if( fAutoGame ) {
-		NewGame();
-
-		if( ap[ fTurn ].pt == PLAYER_HUMAN )
-		    ShowBoard();
-	    } else
-		break;
+	
+	if( nMatchTo && fAutoCrawford ) {
+	    fCrawford = anScore[ fWinner ] == nMatchTo - 1 &&
+		anScore[ !fWinner ] < nMatchTo - 1;
+	    fPostCrawford = anScore[ !fWinner ] == nMatchTo - 1;
 	}
-
-	if( fTurn == fMove )
-	    fResigned = 0;
-
-	if( fInterrupt )
-	    break;
-
+	
+	CommandShowScore( NULL );
+	
+	if( nMatchTo && anScore[ fWinner ] >= nMatchTo ) {
+	    printf( "%s has won the match.\n", ap[ fWinner ].szName );
+	    return;
+	}
+	
+	if( fAutoGame ) {
+	    NewGame();
+	    
+	    if( ap[ fTurn ].pt == PLAYER_HUMAN )
+		ShowBoard();
+	} else
+	    return;
+    }
+    
+    if( fTurn == fMove )
+	fResigned = 0;
+    
+    if( fInterrupt )
+	return;
+    
+    if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
 	if( fAutoRoll && !anDice[ 0 ] &&
 	    ( !fCubeUse || ( fCubeOwner >= 0 && fCubeOwner != fTurn &&
-			     !fDoubled ) ) ) {
+			     !fDoubled ) ) )
 	    CommandRoll( NULL );
+	return;
+    } else
+#if !X_DISPLAY_MISSING
+	if( fX )
+	    EventPending( &evNextTurn, !ComputerTurn() );
+	else
+#endif
+	    fNextTurn = !ComputerTurn();
+}
 
-	    if( fShouldRecurse )
-		continue;
-	}
-	
-	if( ap[ fTurn ].pt == PLAYER_HUMAN )
-	    break;
-	
-	if( ComputerTurn() < 0 )
-	    break;
-    }
+extern void TurnDone( void ) {
 
-    fReentered = 0;
+#if !X_DISPLAY_MISSING
+    if( fX )
+	EventPending( &evNextTurn, TRUE );
+    else
+#endif
+	fNextTurn = TRUE;	
 }
 
 extern void CommandAccept( char *sz ) {
@@ -338,8 +347,8 @@ extern void CommandAgree( char *sz ) {
     pmr->fPlayer = !fTurn;
     pmr->nResigned = fResigned;
     ListInsert( plGame, pmr );
-    
-    NextTurn();
+
+    TurnDone();
 }
 
 extern void CommandDecline( char *sz ) {
@@ -354,7 +363,7 @@ extern void CommandDecline( char *sz ) {
 	printf( "%s declines the %s.\n", ap[ fTurn ].szName,
 		aszGameResult[ fResigned - 1 ] );
 
-    NextTurn();
+    TurnDone();
 }
 
 extern void CommandDouble( char *sz ) {
@@ -417,7 +426,7 @@ extern void CommandDouble( char *sz ) {
     *pmt = MOVE_DOUBLE;
     ListInsert( plGame, pmt );
     
-    NextTurn();
+    TurnDone();
 }
 
 extern void CommandDrop( char *sz ) {
@@ -444,7 +453,7 @@ extern void CommandDrop( char *sz ) {
     *pmt = MOVE_DROP;
     ListInsert( plGame, pmt );
     
-    NextTurn();
+    TurnDone();
 }
 
 extern void CommandMove( char *sz ) {
@@ -457,6 +466,12 @@ extern void CommandMove( char *sz ) {
     if( fTurn < 0 ) {
 	puts( "No game in progress (type `new' to start one)." );
 
+	return;
+    }
+
+    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+	puts( "It is the computer's turn -- type `play' to force it to "
+	      "move immediately." );
 	return;
     }
 
@@ -495,13 +510,13 @@ extern void CommandMove( char *sz ) {
 	    
 	    PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 
-	    NextTurn();
+	    TurnDone();
 
 	    return;
 	}
 
 	if( fAutoBearoff && !TryBearoff() ) {
-	    NextTurn();
+	    TurnDone();
 
 	    return;
 	}
@@ -552,7 +567,7 @@ extern void CommandMove( char *sz ) {
 		
 		memcpy( anBoard, anBoardNew, sizeof( anBoard ) );
 		
-		NextTurn();
+		TurnDone();
 		
 		return;
 	    }
@@ -598,12 +613,9 @@ extern void CommandNewGame( char *sz ) {
     
     if( ap[ fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
-    else {
-	if( ComputerTurn() < 0 )
-	    return;
-	
-	NextTurn();
-    }
+    else
+	if( !ComputerTurn() )
+	    TurnDone();
 }
 
 static void FreeMatch( void ) {
@@ -673,9 +685,9 @@ extern void CommandPlay( char *sz ) {
 
 	return;
     }
-    
-    if( ComputerTurn() >= 0 )
-	NextTurn();
+
+    if( !ComputerTurn() )
+	TurnDone();
 }
 
 extern void CommandRedouble( char *sz ) {
@@ -706,7 +718,7 @@ extern void CommandRedouble( char *sz ) {
     *pmt = MOVE_DOUBLE;
     ListInsert( plGame, pmt );
     
-    NextTurn();
+    TurnDone();
 }
 
 extern void CommandReject( char *sz ) {
@@ -758,7 +770,7 @@ extern void CommandResign( char *sz ) {
 	printf( "%s offers to resign a %s.\n", ap[ fTurn ].szName,
 		aszGameResult[ fResigned - 1 ] );
 
-    NextTurn();
+    TurnDone();
 }
 
 extern void CommandRoll( char *sz ) {
@@ -772,6 +784,12 @@ extern void CommandRoll( char *sz ) {
 	return;
     }
     
+    if( ap[ fTurn ].pt != PLAYER_HUMAN ) {
+	puts( "It is the computer's turn -- type `play' to force it to "
+	      "move immediately." );
+	return;
+    }
+
     if( fDoubled ) {
 	printf( "Please wait for %s to consider the cube before "
 		"moving.\n", ap[ fTurn ].szName );
@@ -806,7 +824,7 @@ extern void CommandRoll( char *sz ) {
 	
 	puts( "No legal moves." );
 
-	NextTurn();
+	TurnDone();
     } else if( ml.cMoves == 1 && ( fAutoMove || ( ClassifyPosition( anBoard )
 						  <= CLASS_BEAROFF1 &&
 						  fAutoBearoff ) ) ) {
@@ -820,9 +838,10 @@ extern void CommandRoll( char *sz ) {
 	
 	PositionFromKey( anBoard, ml.amMoves[ 0 ].auch );
 	
-	NextTurn();
-    } else if( fAutoBearoff && !TryBearoff() )
-	NextTurn();
+	TurnDone();
+    } else
+	if( fAutoBearoff && !TryBearoff() )
+	    TurnDone();
 }
 
 extern void CommandTake( char *sz ) {
@@ -848,5 +867,5 @@ extern void CommandTake( char *sz ) {
     *pmt = MOVE_TAKE;
     ListInsert( plGame, pmt );
     
-    NextTurn();
+    TurnDone();
 }

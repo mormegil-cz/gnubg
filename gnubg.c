@@ -61,6 +61,8 @@
 
 extwindow ewnd;
 int fX = TRUE; /* use X display */
+int nDelay = 0, fNeedPrompt = FALSE;
+event evNextTurn;
 #endif
 
 char szDefaultPrompt[] = "(\\p) ",
@@ -74,14 +76,10 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fAutoRoll = TRUE, nMatchTo = 0, fJacoby = FALSE, fCrawford = FALSE,
     fPostCrawford = FALSE, fAutoCrawford = TRUE, cAutoDoubles = 1,
     fCubeUse = TRUE, fNackgammon = FALSE, fVarRedn = FALSE,
-    nRollouts = 1296, nRolloutTruncate = 7;
+    nRollouts = 1296, nRolloutTruncate = 7, fNextTurn = FALSE;
 
 evalcontext ecTD = { 0, 8, 0.16 }, ecEval = { 1, 8, 0.16 },
     ecRollout = { 0, 8, 0.16 };
-
-#if !X_DISPLAY_MISSING
-int nDelay = 0;
-#endif
 
 player ap[ 2 ] = {
     { "gnubg", PLAYER_GNU, { 0, 8, 0.16 } },
@@ -254,7 +252,7 @@ static command acDatabase[] = {
     { "new", NULL, "Start a new game", acNew },
     { "play", CommandPlay, "Force the computer to move", NULL },
     { "quit", CommandQuit, "Leave GNU Backgammon", NULL },
-    { "r", CommandRoll, "Abbreviation for `roll'", NULL },
+    { "r", CommandRoll, NULL, NULL },
     { "redouble", CommandRedouble, "Accept the cube one level higher "
       "than it was offered", NULL },
     { "reject", CommandReject, "Reject a cube or resignation", NULL },
@@ -691,7 +689,8 @@ extern void CommandHelp( char *sz ) {
     }
     
     for( ; pc->sz; pc++ )
-	printf( "%-15s\t%s\n", pc->sz, pc->szHelp );
+	if( pc->szHelp )
+	    printf( "%-15s\t%s\n", pc->sz, pc->szHelp );
 }
 
 extern void CommandHint( char *sz ) {
@@ -930,7 +929,7 @@ static char *GenerateKeywords( char *sz, int nState ) {
     }
 
     while( pc && pc->sz ) {
-	if( !strncasecmp( sz, pc->sz, cch ) ) {
+	if( !strncasecmp( sz, pc->sz, cch ) && pc->szHelp ) {
 	    if( !( szDup = malloc( strlen( pc->sz ) + 1 ) ) )
 		return NULL;
 
@@ -988,12 +987,21 @@ void HandleInput( char *sz ) {
 	puts( "(Interrupted)" );
 
 	fInterrupt = FALSE;
+	EventPending( &evNextTurn, FALSE );
     }
     
     free( sz );
 
-    /* Need to reinstall handler in case the prompt has changed */
-    rl_callback_handler_install( FormatPrompt(), HandleInput );
+    /* Recalculate prompt -- if we call nothing, then readline will
+       redisplay the old prompt.  This isn't what we want: we either
+       want no prompt at all, yet (if NextTurn is going to be called),
+       or if we do want to prompt immediately, we recalculate it in
+       case the information in the old one is out of date. */
+    if( evNextTurn.fPending ) {
+	rl_callback_handler_remove();
+	fNeedPrompt = TRUE;
+    } else
+	rl_callback_handler_install( FormatPrompt(), HandleInput );
 }
 #endif
 
@@ -1016,24 +1024,53 @@ int StdinReadNotify( event *pev, void *p ) {
 
     fInterrupt = FALSE;
 
+    HandleCommand( sz, acTop );
+
     if( fInterrupt ) {
 	puts( "(Interrupted)" );
 
 	fInterrupt = FALSE;
+	EventPending( &evNextTurn, FALSE );
     }
-	
-    HandleCommand( sz, acTop );
 
-    Prompt();
+    if( evNextTurn.fPending )
+	fNeedPrompt = TRUE;
+    else
+	Prompt();
 #endif
 
-    EventPending( pev, FALSE );
+    EventPending( pev, FALSE ); /* FIXME is this necessary? */
 
     return 0;
 }
 
+int NextTurnNotify( event *pev, void *p ) {
+
+    EventPending( pev, FALSE );
+    
+    if( fInterrupt ) {
+	puts( "(Interrupted)" );
+
+	fInterrupt = FALSE;
+    } else
+	NextTurn();
+
+    if( !pev->fPending && fNeedPrompt ) {
+	fNeedPrompt = FALSE;
+#if HAVE_LIBREADLINE
+	rl_callback_handler_install( FormatPrompt(), HandleInput );
+#else
+	Prompt();
+#endif
+    }
+    
+    return 0;
+}
+
 static eventhandler StdinReadHandler = {
-    (eventhandlerfunc) StdinReadNotify, NULL
+    StdinReadNotify, NULL
+}, NextTurnHandler = {
+    NextTurnNotify, NULL
 };
 
 void RunX( void ) {
@@ -1097,9 +1134,14 @@ void RunX( void ) {
     ev.h = STDIN_FILENO;
     ev.fWrite = FALSE;
     EventHandlerReady( &ev, TRUE, -1 );
+
+    EventCreate( &evNextTurn, &NextTurnHandler, NULL );
+    evNextTurn.h = -1;
+    EventHandlerReady( &evNextTurn, TRUE, -1 );
     
 #if HAVE_LIBREADLINE
     rl_callback_handler_install( FormatPrompt(), HandleInput );
+    atexit( rl_callback_handler_remove );
 #else
     Prompt();
 #endif
@@ -1146,6 +1188,9 @@ extern int main( int argc, char *argv[] ) {
     };
 #if HAVE_GETPWUID
     struct passwd *ppwd;
+#endif
+#if HAVE_LIBREADLINE
+    char *sz;
 #endif
     
     fInteractive = isatty( STDIN_FILENO );
@@ -1249,7 +1294,6 @@ extern int main( int argc, char *argv[] ) {
     rl_basic_word_break_characters = szCommandSeparators;
     rl_attempted_completion_function = (CPPFunction *) CompleteKeyword;
     rl_completion_entry_function = (Function *) NullGenerator;
-    atexit( rl_callback_handler_remove );
 #endif
     
 #if !X_DISPLAY_MISSING
@@ -1263,8 +1307,6 @@ extern int main( int argc, char *argv[] ) {
     
     for(;;) {
 #if HAVE_LIBREADLINE
-	char *sz;
-	
 	if( !( sz = readline( FormatPrompt() ) ) )
 	    return EXIT_SUCCESS;
 	
@@ -1295,9 +1337,14 @@ extern int main( int argc, char *argv[] ) {
 	    continue;
 	}	
 
+	fInterrupt = FALSE;
+	
 	HandleCommand( sz, acTop );
 #endif
 
+	while( !fInterrupt && fNextTurn )
+	    NextTurn();
+	
 	if( fInterrupt ) {
 	    puts( "(Interrupted)" );
 	    

@@ -181,10 +181,13 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     positionclass pc;
     evalcontext ec;
 
+    /* Create an evaluation context for evaluating positions one ply deep. */
     memcpy( &ec, pec, sizeof( ec ) );
-    ec.nPlies--;
-    ec.nSearchCandidates >>= 1;
-    ec.rSearchTolerance /= 2.0;
+    if( ec.nPlies ) {
+	ec.nPlies--;
+	ec.nSearchCandidates >>= 1;
+	ec.rSearchTolerance /= 2.0;
+    }
     
     for( i = 0; i < NUM_OUTPUTS; i++ )
 	arOutput[ i ] = 0.0f;
@@ -203,23 +206,23 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    for( j = 0; j <= i; j++ ) {
 		memcpy( &aaanBoard[ i ][ j ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
 			2 * 25 * sizeof( int ) );
-			
+
+		/* Find the best move for each roll at ply 0 only. */
 		if( FindBestMove( NULL, i + 1, j + 1, aaanBoard[ i ][ j ],
 				  NULL ) < 0 )
 		    return -1;
 		
 		SwapSides( aaanBoard[ i ][ j ] );
 
-		/* FIXME this evaluation is hopefully cached from the Find
-		   BestMove call above, but it would be nice to have saved
-		   it at the same time (i.e. add a parameter to FindBestMove
-		   to evaluate the move immediately). */
+		/* Re-evaluate the chosen move at ply n-1. */
 		EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
 				  &ec );
 			
 		if( !( iTurn & 1 ) )
 		    InvertEvaluation( aaar[ i ][ j ] );
-			
+
+		/* Calculate arMean; it will be the evaluation of the
+		   current position at ply n. */
 		for( n = 0; n < NUM_OUTPUTS; n++ )
 		    arMean[ n ] += ( ( i == j ) ? aaar[ i ][ j ][ n ] :
 				     ( aaar[ i ][ j ][ n ] * 2.0 ) );
@@ -227,18 +230,22 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 		
 	for( n = 0; n < NUM_OUTPUTS; n++ )
 	    arMean[ n ] /= 36.0;
-		
+
+	/* Chose which move to play for the given roll. */
 	if( pec->nPlies ) {
+	    /* User requested n-ply play.  Another call to FindBestMove
+	       is required. */
 	    if( FindBestMove( NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
 			      anBoard, pec ) < 0 )
 		return -1;
 	    
 	    SwapSides( anBoard );
 	} else
+	    /* 0-ply play; best move is already recorded. */
 	    memcpy( &anBoard[ 0 ][ 0 ], &aaanBoard[ anDice[ 0 ] ]
 		    [ anDice[ 1 ]  ][ 0 ][ 0 ], 2 * 25 * sizeof( int ) );
 
-	/* Add variance reduction term. */
+	/* Accumulate variance reduction term. */
 	for( i = 0; i < NUM_OUTPUTS; i++ )
 	    arOutput[ i ] += arMean[ i ] -
 		aaar[ anDice[ 0 ] ][ anDice[ 1 ] ][ i ];
@@ -249,6 +256,7 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	iTurn++;
     }
 
+    /* Evaluate the resulting position accordingly. */
     if( iTurn < nTruncate && pc == CLASS_BEAROFF1 ) {
 	if( BearoffRollout( anBoard, ar, nTruncate, iTurn, iGame, cGames ) )
 	    return -1;
@@ -259,6 +267,8 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
     if( iTurn & 1 )
 	InvertEvaluation( ar );
 
+    /* The final output is the sum of the resulting evaluation and all
+       variance reduction terms. */
     for( i = 0; i < NUM_OUTPUTS; i++ )
 	arOutput[ i ] += ar[ i ];
     
