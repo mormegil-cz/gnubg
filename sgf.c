@@ -560,13 +560,13 @@ RestoreRolloutRolloutContext ( move *pm, const char *sz ) {
   if ( ! pc )
     return;
 
-  sscanf ( pc, "RC %d %d %d %d %d \"%s\" %d",
+  sscanf ( pc, "RC %d %d %d %hd %hd \"%1023s\" %d",
            &fCubeful,
            &fVarRedn,
            &fInitial,
            &pm->esMove.rc.nTruncate,
            &pm->esMove.rc.nTrials,
-           &szTemp,
+           szTemp,
            &pm->esMove.rc.nSeed );
 
   pm->esMove.rc.fCubeful = fCubeful;
