@@ -77,6 +77,10 @@
 #include "record.h"
 #include "sound.h"
 
+#if PROCESSING_UNITS
+#include "procunits.h"
+#endif
+
 #define GNUBGMENURC ".gnubgmenurc"
 
 #if USE_GTK2
@@ -85,10 +89,6 @@
 
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_widget_get_parent(w) ((w)->parent)
-
-#if PROCESSING_UNITS
-#include "procunits.h"
-#endif
 
 #define gtk_style_get_font(s) ((s)->font)
 
