@@ -30,6 +30,9 @@
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
+#if HAVE_LANGINFO_H
+#include <langinfo.h>
+#endif
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -1559,7 +1562,7 @@ highlightcolour HighlightColourTable[] = {
 highlightcolour *HighlightColour = &HighlightColourTable[12]; /* default red */
 int HighlightIntensity = 0;
 
-char *szHomeDirectory, *szDataDirectory;
+char *szHomeDirectory, *szDataDirectory, *szTerminalCharset;
 
 extern char *NextToken( char **ppch ) {
 
@@ -2647,6 +2650,20 @@ extern char *FormatPrompt( void ) {
 
     return sz;
 }
+
+#if HAVE_LIBREADLINE
+static char *FormatPromptConvert( void ) {
+
+    static char sz[ 128 ];
+    char *pch;
+
+    pch = Convert( FormatPrompt(), szTerminalCharset, GNUBG_CHARSET );
+    strcpy( sz, pch );
+    free( pch );
+    
+    return sz;
+}
+#endif
 
 extern void CommandEval( char *sz ) {
 
@@ -4935,6 +4952,8 @@ extern void Prompt( void ) {
 #if USE_GUI
 #if HAVE_LIBREADLINE
 static void ProcessInput( char *sz, int fFree ) {
+
+    char *szConverted;
     
     rl_callback_handler_remove();
     fReadingCommand = FALSE;
@@ -4954,8 +4973,10 @@ static void ProcessInput( char *sz, int fFree ) {
     if( fX )
 	GTKDisallowStdin();
 #endif
-	    
-    HandleCommand( sz, acTop );
+
+    szConverted = Convert( sz, GNUBG_CHARSET, szTerminalCharset );
+    HandleCommand( szConverted, acTop );
+    free( szConverted );
     
 #if USE_GTK
     if( fX )
@@ -4980,7 +5001,7 @@ static void ProcessInput( char *sz, int fFree ) {
 	fNeedPrompt = TRUE;
     else {
 	ProgressEnd();
-	rl_callback_handler_install( FormatPrompt(), HandleInput );
+	rl_callback_handler_install( FormatPromptConvert(), HandleInput );
 	fReadingCommand = TRUE;
     }
 }
@@ -5016,6 +5037,7 @@ extern void UserCommand( char *szCommand ) {
     int nOldEnd;
 #endif
     int cch = strlen( szCommand ) + 1;
+    char *pchTranslated;
 #if __GNUC__
     char sz[ cch ];
 #elif HAVE_ALLOCA
@@ -5046,7 +5068,9 @@ extern void UserCommand( char *szCommand ) {
 	nOldEnd = rl_end;
 	rl_end = 0;
 	rl_redisplay();
-	puts( sz );
+	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+	puts( pchTranslated );
+	free( pchTranslated );
 	ProcessInput( sz, FALSE );
 	return;
     }
@@ -5055,7 +5079,9 @@ extern void UserCommand( char *szCommand ) {
     if( fInteractive ) {
 	putchar( '\n' );
 	Prompt();
-	puts( sz );
+	pchTranslated = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+	puts( pchTranslated );
+	free( pchTranslated );
     }
     
     fInterrupt = FALSE;
@@ -5094,7 +5120,7 @@ extern int NextTurnNotify( event *pev, void *p )
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
 	    ProgressEnd();
-	    rl_callback_handler_install( FormatPrompt(), HandleInput );
+	    rl_callback_handler_install( FormatPromptConvert(), HandleInput );
 	    fReadingCommand = TRUE;
 	} else
 #endif
@@ -5120,7 +5146,8 @@ extern char *GetInput( char *szPrompt ) {
     
     char *sz;
     char *pch;
-
+    char *pchConverted;
+    
 #if USE_GTK
     assert( fTTY && !fX );
 #endif
@@ -5197,8 +5224,11 @@ extern char *GetInput( char *szPrompt ) {
 		rl_callback_handler_remove();	
 	    
 	    fReadingOther = FALSE;
-	    
-	    return szInput;
+
+	    pchConverted = Convert( szInput, GNUBG_CHARSET,
+				    szTerminalCharset );
+	    free( szInput );
+	    return pchConverted;
 	}
 #endif
 	/* Using X, but not readline. */
@@ -5247,7 +5277,9 @@ extern char *GetInput( char *szPrompt ) {
 	if( fInterrupt )
 	    return NULL;
 	
-	return sz;
+	pchConverted = Convert( sz, GNUBG_CHARSET, szTerminalCharset );
+	free( sz );
+	return pchConverted;
     }
 #endif
     /* Not using readline or X. */
@@ -5281,7 +5313,9 @@ extern char *GetInput( char *szPrompt ) {
     if( ( pch = strchr( sz, '\n' ) ) )
 	*pch = 0;
     
-    return sz;
+    pchConverted = Convert( sz, GNUBG_CHARSET, szTerminalCharset );
+    free( sz );
+    return pchConverted;
 }
 
 /* Ask a yes/no question.  Interrupting the question is considered a "no"
@@ -5343,6 +5377,8 @@ extern char *strcpyn( char *szDest, const char *szSrc, int cch ) {
 /* Write a string to stdout/status bar/popup window */
 extern void output( char *sz ) {
 
+    char *pch;
+    
     if( cOutputDisabled )
 	return;
     
@@ -5352,12 +5388,16 @@ extern void output( char *sz ) {
 	return;
     }
 #endif
-    fputs( sz, stdout );
+    pch = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+    fputs( pch, stdout );
+    free( pch );
 }
 
 /* Write a string to stdout/status bar/popup window, and append \n */
 extern void outputl( char *sz ) {
 
+    char *pch;
+    
     if( cOutputDisabled )
 	return;
     
@@ -5375,27 +5415,17 @@ extern void outputl( char *sz ) {
 	return;
     }
 #endif
-    puts( sz );
+    pch = Convert( sz, szTerminalCharset, GNUBG_CHARSET );
+    puts( pch );
+    free( pch );
 }
     
 /* Write a character to stdout/status bar/popup window */
 extern void outputc( char ch ) {
 
-    if( cOutputDisabled )
-	return;
+    char sz[ 2 ] = { ch, 0 };
     
-#if USE_GTK
-    if( fX ) {
-	char *pch;
-
-	pch = g_malloc( 2 );
-	*pch = ch;
-	pch[ 1 ] = 0;
-	GTKOutput( pch );
-	return;
-    }
-#endif
-    putchar( ch );
+    output( sz );
 }
     
 /* Write a string to stdout/status bar/popup window, printf style */
@@ -5411,33 +5441,38 @@ extern void outputf( char *sz, ... ) {
 /* Write a string to stdout/status bar/popup window, vprintf style */
 extern void outputv( char *sz, va_list val ) {
 
+#if USE_GTK || __GLIBC__
+    char *szFormatted;
+#else
+    char szFormatted[ 8192 ];
+#endif
+    
     if( cOutputDisabled )
 	return;
     
-#if USE_GTK
-    if( fX ) {
-	GTKOutput( g_strdup_vprintf( sz, val ));
-	return;
-    }
+#if __GLIBC__
+    vasprintf( &szFormatted, sz, val );
+#elif USE_GTK
+    szFormatted = g_strdup_vprintf( sz, val );
+#else
+    sprintf( szFormatted, sz, val );
 #endif
-    vprintf( sz, val );
+
+    output( szFormatted );
+
+#if __GLIBC__
+    free( szFormatted );
+#elif USE_GTK
+    g_free( szFormatted );
+#endif
 }
 
 /* Write an error message, perror() style */
 extern void outputerr( char *sz ) {
 
-#if USE_GTK
-    char *pchError = strerror( errno );
-#endif
-    perror( sz );
+    /* FIXME we probably shouldn't convert the charset of strerror() - yuck! */
     
-#if USE_GTK
-    if( fX ) {
-	char *pch = g_strdup_printf( "%s: %s", sz, pchError );
-	GTKOutputErr( pch );
-	g_free( pch );
-    }
-#endif
+    outputerrf( "%s: %s", sz, strerror( errno ) );
 }
 
 /* Write an error message, fprintf() style */
@@ -5453,16 +5488,37 @@ extern void outputerrf( char *sz, ... ) {
 /* Write an error message, vfprintf() style */
 extern void outputerrv( char *sz, va_list val ) {
 
-    vfprintf( stderr, sz, val );
-    putc( '\n', stderr );
-    
-#if USE_GTK
-    if( fX ) {
-	char *pch = g_strdup_vprintf( sz, val );
-	GTKOutputErr( pch );
-	g_free( pch );
-    }
+    char *pch;
+#if USE_GTK || __GLIBC__
+    char *szFormatted;
+#else
+    char szFormatted[ 8192 ];
 #endif
+        
+#if __GLIBC__
+    vasprintf( &szFormatted, sz, val );
+#elif USE_GTK
+    szFormatted = g_strdup_vprintf( sz, val );
+#else
+    sprintf( szFormatted, sz, val );
+#endif
+
+    pch = Convert( szFormatted, szTerminalCharset, GNUBG_CHARSET );
+    fputs( pch, stderr );
+    free( pch );
+    putc( '\n', stderr );
+
+#if USE_GTK
+    if( fX )
+	GTKOutputErr( szFormatted );
+#endif
+    
+#if __GLIBC__
+    free( szFormatted );
+#elif USE_GTK
+    g_free( szFormatted );
+#endif
+    
 }
 
 /* Signifies that all output for the current command is complete */
@@ -5813,6 +5869,12 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( !( szHomeDirectory = getenv( "HOME" ) ) )
 	/* FIXME what should non-POSIX systems do? */
 	szHomeDirectory = ".";
+
+#if HAVE_NL_LANGINFO
+    szTerminalCharset = nl_langinfo( CODESET );
+#else
+    szTerminalCharset = "ISO-8859-1"; /* best guess */
+#endif
     
 #if USE_GUI
     /* The GTK interface is fairly grotty; it makes it impossible to
@@ -6141,7 +6203,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     for(;;) {
 #if HAVE_LIBREADLINE
 	if( fReadline ) {
-	    while( !( sz = readline( FormatPrompt() ) ) ) {
+	    while( !( sz = readline( FormatPromptConvert() ) ) ) {
 		outputc( '\n' );
 		PromptForExit();
 	    }
@@ -6786,7 +6848,7 @@ Convert ( const char *sz,
         /* incomplete text, do not report an error */
         break;
       case E2BIG:
-        /* output buffer to small */
+        /* output buffer too small */
         nUsed = pchOut - pchDest;
 
         lOut *= 2;
@@ -6796,8 +6858,15 @@ Convert ( const char *sz,
         l = lOut - nUsed - 1;
         continue;
 
-        break;
-
+      case EILSEQ:
+	  /* Officially this should be an illegal byte sequence in the
+	     input, but glibc 2.2 also gives this error when the character
+	     is legal but does not exist in the destination character set,
+	     so we'll try to cope as well as we can. */
+	  pchIn++;
+	  lIn--;
+	  continue;
+	
       default:
         outputerr ( "iconv" );
         fError = TRUE;

@@ -500,7 +500,8 @@ extern void WinCopy( char *szOut );
 extern int iProgressMax, iProgressValue;
 extern char *pcProgress;
 
-extern char *aszVersion[], *szHomeDirectory, *szDataDirectory;
+extern char *aszVersion[], *szHomeDirectory, *szDataDirectory,
+    *szTerminalCharset;
 
 extern char *aszSkillType[], *aszSkillTypeAbbr[], *aszLuckType[],
     *aszLuckTypeAbbr[], *aszSkillTypeCommand[], *aszLuckTypeCommand[];

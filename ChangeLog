@@ -1,3 +1,16 @@
+Fri Nov 22 18:18:44 2002  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (output*, GetInput): Convert() terminal I/O to/from
+	GNUBG_CHARSET.
+
+Fri Nov 22 15:05:33 2002  Gary Wong  <gtw@gnu.org>
+
+	* guile.c: Remove excess parameter in evalcontext.
+	
+	* configure.in: Check for <sys/resource.h> and setpriority().
+	* backgammon.h, gnubg.c, set.c: Generalise "set priority" to POSIX 
+	systems.
+
 Wed Nov 20 20:07:00 2002 Jim Segrave <jes@jes-2.demon.nl>
 
 	* change highlight setting to 
