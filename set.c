@@ -1343,33 +1343,135 @@ CommandSetRolloutPlayer ( char *sz ) {
 
 extern void CommandSetScore( char *sz ) {
 
-    int n0, n1;
+    long int n0, n1;
     movegameinfo *pmgi;
+    char *pch0, *pch1, *pchEnd0, *pchEnd1;
+    int fCrawford0, fCrawford1, fPostCrawford0, fPostCrawford1;
+
+    if( !( pch0 = NextToken( &sz ) ) )
+	pch0 = "";
     
-    /* FIXME Allow specifying Crawford here, e.g. "set score crawford -3" or
-       "set score 4C 3". */
+    if( !( pch1 = NextToken( &sz ) ) )
+	pch1 = "";
+    
+    n0 = strtol( pch0, &pchEnd0, 10 );
+    if( pch0 == pchEnd0 )
+	n0 = INT_MIN;
+    
+    n1 = strtol( pch1, &pchEnd1, 10 );
+    if( pch1 == pchEnd1 )
+	n1 = INT_MIN;
 
-    n0 = ParseNumber( &sz );
-    n1 = ParseNumber( &sz );
+    if( ( ( fCrawford0 = *pchEnd0 == '*' ||
+	    ( *pchEnd0 && !strncasecmp( pchEnd0, "crawford",
+					strlen( pchEnd0 ) ) ) ) &&
+	  n0 != INT_MIN && n0 != -1 && n0 != ms.nMatchTo - 1 ) ||
+	( ( fCrawford1 = *pchEnd1 == '*' ||
+	    ( *pchEnd1 && !strncasecmp( pchEnd1, "crawford",
+					strlen( pchEnd1 ) ) ) ) &&
+	  n1 != INT_MIN && n1 != -1 && n1 != ms.nMatchTo - 1 ) ) {
+	outputl( "The Crawford rule applies only in match play when a "
+		 "player's score is 1-away." );
+	return;
+    }
 
+    if( ( ( fPostCrawford0 = ( *pchEnd0 && !strncasecmp(
+	pchEnd0,"postcrawford", strlen( pchEnd0 ) ) ) ) &&
+	  n0 != INT_MIN && n0 != -1 && n0 != ms.nMatchTo - 1 ) ||
+	( ( fPostCrawford1 = ( *pchEnd1 && !strncasecmp(
+	pchEnd1, "postcrawford", strlen( pchEnd1 ) ) ) ) &&
+	  n1 != INT_MIN && n1 != -1 && n1 != ms.nMatchTo - 1 ) ) {
+	outputl( "The Crawford rule applies only in match play when a "
+		 "player's score is 1-away." );
+	return;
+    }
+
+    if( !ms.nMatchTo && ( fCrawford0 || fCrawford1 || fPostCrawford0 ||
+			  fPostCrawford1 ) ) {
+	outputl( "The Crawford rule applies only in match play when a "
+		 "player's score is 1-away." );
+	return;
+    }
+    
+    if( fCrawford0 && fCrawford1 ) {
+	outputl( "You cannot set the Crawford rule when both players' scores "
+		 "are 1-away." );
+	return;
+    }
+
+    if( ( fCrawford0 && fPostCrawford1 ) ||
+	( fCrawford1 && fPostCrawford0 ) ) {
+	outputl( "You cannot set both Crawford and post-Crawford "
+		 "simultaneously." );
+	return;
+    }
+    
+    /* silently ignore the case where both players are set post-Crawford;
+       assume that is unambiguous and means double match point */
+
+    if( fCrawford0 || fPostCrawford0 )
+	n0 = -1;
+    
+    if( fCrawford1 || fPostCrawford1 )
+	n1 = -1;
+    
     if( n0 < 0 ) /* -n means n-away */
 	n0 += ms.nMatchTo;
 
     if( n1 < 0 )
 	n1 += ms.nMatchTo;
+
+    if( ( fPostCrawford0 && !n1 ) || ( fPostCrawford1 && !n0 ) ) {
+	outputl( "You cannot set post-Crawford play if the trailer has yet "
+		 "to score." );
+	return;
+    }
     
     if( n0 < 0 || n1 < 0 ) {
-	outputf( "You must specify two scores between 0 and %d.\n",
-		 ms.nMatchTo );
+	outputl( "You must specify two valid scores." );
 	return;
     }
 
+    if( ms.nMatchTo && n0 >= ms.nMatchTo && n1 >= ms.nMatchTo ) {
+	outputl( "Only one player may win the match." );
+	return;
+    }
+
+    if( ( fCrawford0 || fCrawford1 ) &&
+	( n0 >= ms.nMatchTo || n1 >= ms.nMatchTo ) ) {
+	outputl( "You cannot play the Crawford game once the match is "
+		 "already over." );
+	return;
+    }
+    
+    /* allow scores above the match length, since that doesn't really
+       hurt anything */
+
+    CancelCubeAction();
+    
     ms.anScore[ 0 ] = n0;
     ms.anScore[ 1 ] = n1;
 
-    ms.fCrawford = ( n0 == ms.nMatchTo - 1 ) != ( n1 == ms.nMatchTo - 1 );
-    ms.fPostCrawford = ( n0 == ms.nMatchTo - 1 ) && ( n1 == ms.nMatchTo - 1 );
-
+    if( ms.nMatchTo ) {
+	if( n0 != ms.nMatchTo - 1 && n1 != ms.nMatchTo - 1 )
+	    /* must be pre-Crawford */
+	    ms.fCrawford = ms.fPostCrawford = FALSE;
+	else if( ( n0 == ms.nMatchTo - 1 && n1 == ms.nMatchTo - 1 ) ||
+		 fPostCrawford0 || fPostCrawford1 ) {
+	    /* must be post-Crawford */
+	    ms.fCrawford = FALSE;
+	    ms.fPostCrawford = ms.nMatchTo > 1;
+	} else {
+	    /* possibly the Crawford game */
+	    if( n0 >= ms.nMatchTo || n1 >= ms.nMatchTo )
+		ms.fCrawford = FALSE;
+	    else if( fCrawford0 || fCrawford1 || !n0 || !n1 )
+		ms.fCrawford = TRUE;
+	    
+	    ms.fPostCrawford = !ms.fCrawford;
+	}
+    }
+	     
     if( plGame && ( pmgi = plGame->plNext->p ) ) {
 	assert( pmgi->mt == MOVE_GAMEINFO );
 	pmgi->anScore[ 0 ] = ms.anScore[ 0 ];

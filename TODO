@@ -68,7 +68,6 @@ duplication of effort and to make sure our changes merge easily.
   "add move 8/5 6/5").
 ** Make "show marketwindow" say something for money games.  (This looks like
   it's done already.)
-** Make "set score" handle "set score crawford -3" or "set score 4C 3".
 ** Kit suggests that it's more important to get early plays right in
   rollouts.  Should we consider options that allow larger search space/
   search depth/etc. for early moves in rollouts than later ones?  (Kit's

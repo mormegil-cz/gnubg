@@ -1,3 +1,8 @@
+Thu Dec 20 15:01:51 2001  Gary Wong  <gtw@research.att.com>
+
+	* set.c (CommandSetScore): Make "set score" handle
+	"set score crawford -3" or "set score 4C 3".
+
 Wed Dec 19 17:15:56 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (GTKDoubleHint, GTKTakeHint): New functions.
