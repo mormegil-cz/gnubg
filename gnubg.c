@@ -339,6 +339,8 @@ command acDatabase[] = {
       "See if the Jacoby rule is used in money sessions", NULL, NULL },
     { "kleinman", CommandShowKleinman, "Calculate Kleinman count for "
       "position", szOPTPOSITION, NULL },
+    { "marketwindow", CommandShowMarketWindow, 
+      "show market window for doubles", NULL, NULL },
     { "matchequitytable", CommandShowMatchEquityTable, 
       "Show match equity table", szOPTVALUE, NULL },
     { "nackgammon", CommandShowNackgammon, "Display which starting position "

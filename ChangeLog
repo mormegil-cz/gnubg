@@ -1,3 +1,13 @@
+Thu Nov  2 09:34:52 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* eval.c (Cl2CfMatchCentered): correct small problem that could lead to
+        numerical problems.
+
+	* backgammon.h, gnubg.c, show.c (CommandShowMarketWindow): new function
+  	that shows market window for doubles. Uses evaluate to get (back)gammon
+	rates, and calculates initial double points and cash points for 
+	dead and fully live cube, and much more :-)
+
 Wed Nov  1 10:08:44 2000  Gary Wong  <gtw@research.att.com>
 
 	* guile.c (cube_info, cube_info_match, cube_info_money): New functions.

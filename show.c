@@ -637,3 +637,197 @@ extern void CommandShowOutputMWC( char *sz ) {
 }
 
 
+extern void CommandShowMarketWindow ( char * sz ) {
+
+  cubeinfo ci;
+
+  float arOutput[ NUM_OUTPUTS ];
+  float rG[ 2 ], rBG[ 2 ];
+  float arDP1[ 2 ], arDP2[ 2 ],arCP1[ 2 ], arCP2[ 2 ];
+  float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain;
+
+  int i, fAutoRedouble[ 2 ], afDead[ 2 ], anNormScore[ 2 ];
+
+  /* Show market window */
+
+  /* First, get gammon and backgammon percentages */
+
+  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
+  if( EvaluatePosition( anBoard, arOutput, &ci, &ecEval ) < 0 )
+    return;
+
+  
+  if ( arOutput[ 0 ] > 0.0 ) {
+    rG [ fMove ] = arOutput[ 1 ] / arOutput[ 0 ];
+    rBG [ fMove ] = arOutput[ 2 ] / arOutput[ 0 ];
+  }
+  else {
+    rG [fMove ] = 0.0;
+    rBG [ fMove ] = 0.0;
+  }
+
+  if ( arOutput[ 0 ] < 1.0 ) {
+    rG [ ! fMove ] = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    rBG [ ! fMove ] = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+  }
+  else {
+    rG [ ! fMove ] = 0.0;
+    rBG [ ! fMove ] = 0.0;
+  }
+
+  for ( i = 0; i < 2; i++ ) 
+    outputf ( "Player %-25s: gammon rate %6.2f%%, bg rate %6.2f%%\n",
+              ap[ i ].szName, rG[ i ] * 100.0, rBG[ i ] * 100.0);
+
+
+  if ( ! nMatchTo ) return; /* FIXME */
+
+  if ( nMatchTo ) {
+
+    for ( i = 0; i < 2; i++ )
+      anNormScore[ i ] = nMatchTo - anScore[ i ];
+
+    GetPoints ( arOutput, anScore, nMatchTo, &ci, arCP2 );
+
+    for ( i = 0; i < 2; i++ ) {
+
+      fAutoRedouble [ i ] =
+        ( anNormScore[ i ] - 2 * nCube <= 0 ) &&
+        ( anNormScore[ ! i ] - 2 * nCube > 0 );
+
+      afDead[ i ] =
+        ( anNormScore[ ! i ] - 2 * nCube <=0 );
+
+      /* MWC for "double, take; win" */
+
+      rDTW =
+        (1.0 - rG[ i ] - rBG[ i ]) *
+        GET_MET ( anNormScore[ i ] - 2 * nCube - 1,
+                  anNormScore[ !i ] - 1, aafMET )
+        + rG[ i ] * GET_MET ( anNormScore[ i ] - 4 * nCube - 1,
+                              anNormScore[ ! i ] - 1, aafMET )
+        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 6 * nCube - 1,
+                               anNormScore[ ! i ] - 1, aafMET );
+
+      /* MWC for "no double, take; win" */
+
+      rNDW =
+        (1.0 - rG[ i ] - rBG[ i ]) *
+        GET_MET ( anNormScore[ i ] - nCube - 1,
+                  anNormScore[ !i ] - 1, aafMET )
+        + rG[ i ] * GET_MET ( anNormScore[ i ] - 2 * nCube - 1,
+                              anNormScore[ ! i ] - 1, aafMET )
+        + rBG[ i ] * GET_MET ( anNormScore[ i ] - 3 * nCube - 1,
+                               anNormScore[ ! i ] - 1, aafMET );
+
+      /* MWC for "Double, take; lose" */
+
+      rDTL =
+        (1.0 - rG[ ! i ] - rBG[ ! i ]) *
+        GET_MET ( anNormScore[ i ] - 1,
+                  anNormScore[ !i ] - 2 * nCube - 1, aafMET )
+        + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+                              anNormScore[ ! i ] - 4 * nCube - 1, aafMET )
+        + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+                               anNormScore[ ! i ] - 6 * nCube - 1, aafMET );
+
+      /* MWC for "No double; lose" */
+
+      rNDL =
+        (1.0 - rG[ ! i ] - rBG[ ! i ]) *
+        GET_MET ( anNormScore[ i ] - 1,
+                  anNormScore[ !i ] - 1 * nCube - 1, aafMET )
+        + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+                              anNormScore[ ! i ] - 2 * nCube - 1, aafMET )
+        + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+                               anNormScore[ ! i ] - 3 * nCube - 1, aafMET );
+
+      /* MWC for "Double, pass" */
+
+      rDP = GET_MET( anNormScore[ i ] - nCube - 1,
+                     anNormScore[ ! i ] - 1, aafMET );
+
+      /* Double point */
+
+      rRisk = rNDL - rDTL;
+      rGain = rDTW - rNDW;
+
+      arDP1 [ i ] = rRisk / ( rRisk + rGain );
+      arDP2 [ i ] = arDP1 [ i ];
+
+      /* Dead cube take point without redouble */
+
+      rRisk = rDTW - rDP;
+      rGain = rDP - rDTL;
+
+      arCP1 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+
+      if ( fAutoRedouble[ i ] ) {
+
+        /* With redouble */
+
+        rDTW =
+          (1.0 - rG[ i ] - rBG[ i ]) *
+          GET_MET ( anNormScore[ i ] - 4 * nCube - 1,
+                    anNormScore[ !i ] - 1, aafMET )
+          + rG[ i ] * GET_MET ( anNormScore[ i ] - 8 * nCube - 1,
+                                anNormScore[ ! i ] - 1, aafMET )
+          + rBG[ i ] * GET_MET ( anNormScore[ i ] - 12 * nCube - 1,
+                                 anNormScore[ ! i ] - 1, aafMET );
+
+        rDTL =
+          (1.0 - rG[ ! i ] - rBG[ ! i ]) *
+          GET_MET ( anNormScore[ i ] - 1,
+                    anNormScore[ !i ] - 4 * nCube - 1, aafMET )
+          + rG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+                                  anNormScore[ ! i ] - 8 * nCube - 1, aafMET )
+          + rBG[ ! i ] * GET_MET ( anNormScore[ i ] - 1,
+                                   anNormScore[ ! i ] - 12 * nCube - 1, aafMET );
+
+        rRisk = rDTW - rDP;
+        rGain = rDP - rDTL;
+
+        arCP2 [ i ] = 1.0 - rRisk / ( rRisk + rGain );
+
+        /* Double point */
+
+        rRisk = rNDL - rDTL;
+        rGain = rDTW - rNDW;
+      
+        arDP2 [ i ] = rRisk / ( rRisk + rGain );
+
+      }
+    }
+
+    /* output */
+
+    output ( "\n\n" );
+
+    for ( i = 0; i < 2; i++ ) {
+
+      outputf ("Player %s market window:\n\n", ap[ i ].szName );
+
+      if ( fAutoRedouble[ i ] )
+        output ("Dead cube (opponent doesn't redouble): ");
+      else
+        output ("Dead cube: ");
+
+      outputf ("%6.2f%% - %6.2f%%\n", 100. * arDP1[ i ], 100. * arCP1[
+                                                                      i ] );
+
+      if ( fAutoRedouble[ i ] ) 
+        outputf ("Dead cube (opponent redoubles):"
+                 "%6.2f%% - %6.2f%%\n\n",
+                 100. * arDP2[ i ], 100. * arCP2[ i ] );
+      else if ( ! afDead[ i ] )
+        outputf ("Live cube:"
+                 "%6.2f%% - %6.2f%%\n\n",
+                 100. * arDP2[ i ], 100. * arCP2[ i ] );
+
+    }
+
+  }
+
+}
+
