@@ -41,7 +41,7 @@
 
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *hbox_pos, *table, *hbox_match, *move,
-	*position_id, *set, *edit, *name0, *name1, *score0, *score1, *match,
+	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
 	*crawford;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
@@ -174,7 +174,7 @@ static void board_redraw_die( GtkWidget *board, BoardData *bd, gint x, gint y,
     int pip[ 9 ];
     int ix, iy;
     
-    if( bd->board_size <= 0 || !n )
+    if( bd->board_size <= 0 || !n || !GTK_WIDGET_MAPPED( board ) )
 	return;
 
     draw_bitplane( board->window, bd->gc_and, bd->bm_dice_mask,
@@ -534,6 +534,13 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     
     switch( event->type ) {
     case GDK_BUTTON_PRESS:
+	/* We don't need the focus ourselves, but we want to steal it
+	   from any other widgets (e.g. the player name entry fields)
+	   so that those other widgets won't intercept global
+	   accelerator keys. */
+	gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( board ) ),
+			      NULL );
+	
 	bd->drag_point = board_point( board, bd, x, y );
 
 	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
@@ -1255,10 +1262,10 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	/* dice have been rolled; hide off-board dice */
 	pbd->dice_roll[ 0 ] = die0;
 	pbd->dice_roll[ 1 ] = die1;
-	gtk_widget_unmap( pbd->dice_area );
+	gtk_widget_hide( pbd->dice_area );
     } else if( old_dice )
 	/* dice have been removed from board; show dice ready to roll */
-	gtk_widget_map( pbd->dice_area );
+	gtk_widget_show( pbd->dice_area );
     else
 	;
 
@@ -1973,6 +1980,44 @@ static void board_size_allocate( GtkWidget *board,
     gtk_widget_size_allocate( bd->dice_area, &child_allocation );
 }
 
+static void AddChild( GtkWidget *pw, GtkRequisition *pr ) {
+
+    GtkRequisition r;
+
+    gtk_widget_size_request( pw, &r );
+
+    if( r.width > pr->width )
+	pr->width = r.width;
+
+    pr->height += r.height;
+}
+
+static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
+
+    BoardData *bd;
+    GtkRequisition r;
+
+    if( !pw || !pr )
+	return;
+
+    pr->width = pr->height = 0;
+
+    bd = BOARD( pw )->board_data;
+
+    AddChild( bd->hbox_pos, pr );
+    AddChild( bd->table, pr );
+    AddChild( bd->hbox_match, pr );
+    
+    gtk_widget_size_request( bd->move, &r );
+    pr->height += MAX( r.height, 7 ); /* move or dice_area, whichever is
+					 taller */
+
+    if( pr->width < 108 )
+	pr->width = 108;
+
+    pr->height += 74;
+}
+
 static void board_realize( GtkWidget *board ) {
 
     BoardData *bd = BOARD( board )->board_data;
@@ -1992,6 +2037,23 @@ static void board_set_position( GtkWidget *pw, BoardData *bd ) {
 	bd->position_id ) ) );
     
     UserCommand( sz );
+}
+
+static void board_show_child( GtkWidget *pwChild, BoardData *pbd ) {
+
+    if( pwChild != pbd->dice_area )
+	gtk_widget_show_all( pwChild );
+}
+
+/* Show all children except the dice area; that one hides and shows
+   itself. */
+static void board_show_all( GtkWidget *pw ) {
+    
+    BoardData *bd = BOARD( pw )->board_data;
+
+    gtk_container_foreach( GTK_CONTAINER( pw ), (GtkCallback) board_show_child,
+			   bd );
+    gtk_widget_show( pw );
 }
 
 static void board_set_crawford( GtkWidget *pw, BoardData *bd ) {
@@ -2152,8 +2214,8 @@ static void board_init( Board *board ) {
     gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->edit =
 		      gtk_toggle_button_new_with_label( "Edit" ),
 		      FALSE, FALSE, 8 );
-    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->set =
-		      gtk_button_new_with_label( "Set" ),
+    gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->reset =
+		      gtk_button_new_with_label( "Reset" ),
 		      FALSE, FALSE, 0 );
     gtk_box_pack_end( GTK_BOX( bd->hbox_pos ), bd->position_id =
 		      gtk_entry_new(), FALSE, FALSE, 8 );
@@ -2214,11 +2276,11 @@ static void board_init( Board *board ) {
               "0:0:0:0:0:1:1:1:0:1:-1:0:25:0:0:0:0:0:0:0:0" );
     
     gtk_widget_show_all( GTK_WIDGET( board ) );
-
+	
     gtk_signal_connect( GTK_OBJECT( bd->position_id ), "activate",
 			GTK_SIGNAL_FUNC( board_set_position ), bd );
-    gtk_signal_connect( GTK_OBJECT( bd->set ), "clicked",
-			GTK_SIGNAL_FUNC( board_set_position ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->reset ), "clicked",
+			GTK_SIGNAL_FUNC( ShowBoard ), NULL );
 
     gtk_signal_connect( GTK_OBJECT( bd->edit ), "toggled",
 			GTK_SIGNAL_FUNC( board_edit ), bd );
@@ -2245,7 +2307,9 @@ static void board_class_init( BoardClass *c ) {
     parent_class = gtk_type_class( GTK_TYPE_VBOX );
     
     ( (GtkWidgetClass *) c )->size_allocate = board_size_allocate;
+    ( (GtkWidgetClass *) c )->size_request = board_size_request;
     ( (GtkWidgetClass *) c )->realize = board_realize;
+    ( (GtkWidgetClass *) c )->show_all = board_show_all;
 }
 
 extern GtkType board_get_type( void ) {
