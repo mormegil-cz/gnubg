@@ -1,3 +1,8 @@
+Sun Jul  6 13:48:46 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (StatcontextGetSelection): order lines before copying.
+	(bug #4160 reported by Holger Bochnig)
+
 Sat Jul  5 20:53:42 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* gnubg.c: replace 'const' with ICONV_CONST to get rid of compiler

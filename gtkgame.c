@@ -7563,11 +7563,28 @@ StatcontextSelect ( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 
 }
 
+
+gint 
+compare_func( gconstpointer a, gconstpointer b ) {
+
+  gint i = GPOINTER_TO_INT( a );
+  gint j = GPOINTER_TO_INT( b );
+
+  if ( i < j )
+    return -1;
+  else if ( i == j )
+    return 0;
+  else
+    return 1;
+
+}
+
 static void
 StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
                           guint n, guint t, statcontext *psc ) {
 
   GList *pl;
+  GList *plCopy;
   int i;
   static char szOutput[ 4096 ];
   char *pc;
@@ -7579,7 +7596,14 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
             "%-37.37s %-20.20s %-20.20s\n",
             "", ap[ 0 ].szName, ap[ 1 ].szName );
 
-  for ( pl = GTK_CLIST ( pw )->selection; pl; pl = pl->next ) {
+  /* copy list (note that the integers in the list are NOT copied) */
+  plCopy = g_list_copy( GTK_CLIST ( pw )->selection );
+
+  /* sort list; otherwise the lines are returned in whatever order the
+     user clicked the lines (bug #4160) */
+  plCopy = g_list_sort( plCopy, compare_func );
+
+  for ( pl = plCopy; pl; pl = pl->next ) {
 
     i = GPOINTER_TO_INT( pl->data );
 
@@ -7596,6 +7620,9 @@ StatcontextGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
               sz : "" );
       
   }
+
+  /* garbage collect */
+  g_list_free( plCopy );
 
   gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
                           szOutput, strlen( szOutput ) );
