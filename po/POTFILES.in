@@ -68,6 +68,7 @@ sgfp.h
 sgf.y
 show.c
 strdup.c
+text.c
 userrng.c
 xboard.c
 xboard.h
