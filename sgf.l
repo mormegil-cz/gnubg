@@ -26,6 +26,7 @@
 
 #include "sgf.h"
 #include "sgfp.h"
+#include "i18n.h"
 
 extern int _SGFWarning( char * );
 
@@ -84,7 +85,7 @@ static int error( char *s ) {
 			}
 [[:lower:]]+		/* ignore -- this rule avoids making flex back up */
 "["			BEGIN(value); return '[';
-.			{ error( "illegal character in SGF file" ); }
+.			{ error( _("illegal character in SGF file" )); }
 
 <value>\0		/* ignore -- we want value strings null-terminated */
 <value>"\\]"		{ sgflval.pch = strdup( "]" ); return VALUETEXT; }

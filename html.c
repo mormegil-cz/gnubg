@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #include "backgammon.h"
 #include "drawboard.h"
@@ -34,6 +35,7 @@
 #include "positionid.h"
 #include "matchid.h"
 
+#include "i18n.h"
 
 #define STYLESHEET \
 "<style type=\"text/css\">\n" \
@@ -63,44 +65,123 @@
 ( ( f ) < 0.1f ) ? "&nbsp;" : "", \
 ( f ) * 100.0f
    
-#define STATTABLEHEADER(a) \
-"<tr class=\"stattableheader\">\n" \
-"<th colspan=\"3\" style=\"text-align: center\">" \
-a "</th>\n" \
-"</tr>\n"
-
-#define STATTABLEROW(a,b) \
-"<tr>\n" \
-"<td>" a "</td>\n" \
-"<td>" b "</td>\n" \
-"<td>" b "</td>\n" \
-"</tr>\n"
-
-#define STATTABLEROW2(a,b,c) \
-"<tr>\n" \
-"<td>" a "</td>\n" \
-"<td>" b " (" c ") </td>\n" \
-"<td>" b " (" c ") </td>\n" \
-"</tr>\n"
 
 
-#define STATTABLEROW3(a,b,c,d) \
-"<tr>\n" \
-"<td>" a "</td>\n" \
-"<td>" b " (" c "(" d ")) </td>\n" \
-"<td>" b " (" c "(" d ")) </td>\n" \
-"</tr>\n"
 
 /* text for links on html page */
 
 static char *aszLinkText[] = {
-  "[First Game]", "[Previous Game]", "[Next Game]", "[Last Game]" };
+  N_ ("[First Game]"), 
+  N_ ("[Previous Game]"), 
+  N_ ("[Next Game]"), 
+  N_ ("[Last Game]") };
 
 /* Color of chequers */
 
-static char *aszColorNameBBS[] = { "white", "blue" };
-static char *aszColorNameF2H[] = { "white", "red" };
-static char *aszColorNameGNU[] = { "red", "black" };
+static char *aszColorNameBBS[] = { N_ ("white"), N_ ("blue") };
+static char *aszColorNameF2H[] = { N_ ("white"), N_ ("red") };
+static char *aszColorNameGNU[] = { N_ ("red"), N_ ("black") };
+
+
+static void
+printStatTableHeader ( FILE *pf, const char *format, ... ) {
+
+  va_list val;
+
+  va_start( val, format );
+
+  fputs ( "<tr class=\"stattableheader\">\n" 
+          "<th colspan=\"3\" style=\"text-align: center\">", pf );
+  vfprintf ( pf, format, val );
+  fputs ( "</th>\n</tr>\n", pf );
+
+  va_end( val );
+
+}
+
+
+static void
+printStatTableRow ( FILE *pf, const char *format1, const char *format2,
+                    ... ) {
+
+  va_list val;
+  char *sz;
+  int l = 100 + strlen ( format1 ) + 2 * strlen ( format2 );
+
+  va_start( val, format2 );
+
+  sprintf ( sz = (char *) malloc ( l ),
+             "<tr>\n" 
+             "<td>%s</td>\n" 
+             "<td>%s</td>\n" 
+             "<td>%s</td>\n" 
+             "</tr>\n", format1, format2, format2 );
+
+  vfprintf ( pf, sz, val );
+
+  free ( sz );
+
+  va_end( val );
+
+}
+
+
+static void
+printStatTableRow2 ( FILE *pf, const char *format1, const char *format2,
+                     const char *format3, ... ) {
+
+  va_list val;
+  char *sz;
+  int l = 100 + strlen ( format1 ) 
+    + 2 * strlen ( format2 ) + 2 * strlen ( format3 );
+
+  va_start( val, format3 );
+
+  sprintf ( sz = (char *) malloc ( l ),
+             "<tr>\n" 
+             "<td>%s</td>\n" 
+             "<td>%s (%s) </td>\n" 
+             "<td>%s (%s) </td>\n" 
+             "</tr>\n",
+             format1, format2, format3, format2, format3 );
+  
+  vfprintf ( pf, sz, val );
+
+  free ( sz );
+
+  va_end( val );
+
+}
+
+
+static void
+printStatTableRow3 ( FILE *pf, const char *format1, const char *format2,
+                     const char *format3, const char *format4, ... ) {
+
+  va_list val;
+  char *sz;
+  int l = 100 + strlen ( format1 ) 
+    + 2 * strlen ( format2 ) + 2 * strlen ( format3 ) + 2 * strlen (format4 );
+
+  va_start( val, format4 );
+
+  sprintf ( sz = (char *) malloc ( l ),
+             "<tr>\n" 
+             "<td>%s</td>\n" 
+             "<td>%s (%s (%s)) </td>\n" 
+             "<td>%s (%s (%s)) </td>\n" 
+             "</tr>\n",
+             format1, 
+             format2, format3, format4, 
+             format2, format3, format4 );
+  
+  vfprintf ( pf, sz, val );
+
+  free ( sz );
+
+  va_end( val );
+
+}
 
 
 /*
@@ -332,14 +413,14 @@ printHTMLBoardBBS ( FILE *pf, matchstate *pms, int fTurn,
 
   /* position ID */
 
-  fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
             PositionID ( pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
 
   /* pip counts */
 
   PipCount ( anBoard, anPips );
-  fprintf ( pf, "Pip counts: Blue %d, White %d<br />\n",
+  fprintf ( pf, _("Pip counts: Blue %d, White %d<br />\n"),
             anPips[ 0 ], anPips[ 1 ] );
   
 
@@ -671,7 +752,7 @@ printHTMLBoardF2H ( FILE *pf, matchstate *pms, int fTurn,
   printImage ( pf, szImageDir, "b-indent", szExtension, "" );
 
   PipCount ( anBoard, anPips );
-  fprintf ( pf, "Pip counts: Red %d, White %d<br />\n",
+  fprintf ( pf, _("Pip counts: Red %d, White %d<br />\n"),
             anPips[ 0 ], anPips[ 1 ] );
   
   fprintf ( pf, "</p>\n" );
@@ -1036,7 +1117,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
-  fprintf ( pf, "Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n",
+  fprintf ( pf, _("Position ID: <tt>%s</tt> Match ID: <tt>%s</tt><br />\n"),
             PositionID ( pms->anBoard ),
             MatchIDFromMatchState ( pms ) );
   fputs ( "</td>", pf );
@@ -1047,7 +1128,7 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   PipCount ( anBoard, anPips );
   fputs ( "<tr>", pf );
   fputs ( "<td colspan=\"15\">", pf );
-  fprintf ( pf, "Pip counts: Black %d, Red %d<br />\n",
+  fprintf ( pf, _("Pip counts: Black %d, Red %d<br />\n"),
             anPips[ 0 ], anPips[ 1 ] );
   fputs ( "</td>", pf );
   fputs ( "</tr>\n", pf );
@@ -1070,7 +1151,7 @@ printHTMLBoard ( FILE *pf, matchstate *pms, int fTurn,
   else if ( ! strcmp ( szType, "gnu" ) )
     printHTMLBoardGNU ( pf, pms, fTurn, szImageDir, szExtension, szType );
   else
-    printf ( "unknown board type\n" );
+    printf ( _("unknown board type\n") );
 
 
 }
@@ -1091,18 +1172,21 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
                   char *aszColorName[],
                   const int iGame, const int iMove ) {
 
+  fprintf ( pf,
+            "<hr />\n"
+            "<p><b>"
+            "<a name=\"game%d.move%d\">",
+            iGame + 1, iMove + 1 );
+  fprintf ( pf, _("Move number %d:"), iMove + 1 );
+  fputs ( "</a></b>", pf );
+
   if ( pms->fResigned ) 
     
     /* resignation */
 
     fprintf ( pf,
-              "<hr />\n"
-              "<p><b>"
-              "<a name=\"game%d.move%d\">Move number %d:</a>"
-              "</b>"
-              " %s resigns %d points</p>\n",
-              iGame + 1, iMove + 1, iMove + 1,
-              aszColorName[ pms->fTurn ],
+              _(" %s resigns %d points"), 
+              gettext ( aszColorName[ pms->fTurn ] ),
               pms->fResigned * pms->nCube
             );
   
@@ -1111,13 +1195,8 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
     /* chequer play decision */
 
     fprintf ( pf,
-              "<hr />\n"
-              "<p><b>"
-              "<a name=\"game%d.move%d\">Move number %d:</a>"
-              "</b>"
-              " %s to play %d%d</p>\n",
-              iGame + 1, iMove + 1, iMove + 1,
-              aszColorName[ pms->fTurn ],
+              _(" %s to play %d%d"),
+              gettext ( aszColorName[ pms->fTurn ] ),
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
 
@@ -1126,13 +1205,8 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
     /* take decision */
 
     fprintf ( pf,
-              "<hr />\n"
-              "<p><b>"
-              "<a name=\"game%d.move%d\">Move number %d:</a>"
-              "</b>"
-              " %s doubles to %d</p>\n",
-              iGame + 1, iMove + 1, iMove + 1,
-              aszColorName[ ! pms->fMove ],
+              _(" %s doubles to %d"),
+              gettext ( aszColorName[ ! pms->fMove ] ),
               pms->nCube * 2
             );
 
@@ -1141,16 +1215,12 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
     /* cube decision */
 
     fprintf ( pf,
-              "<hr />\n"
-              "<p><b>"
-              "<a name=\"game%d.move%d\">Move number %d:</a>"
-              "</b>"
-              " %s onroll, cube decision?</p>\n",
-              iGame + 1, iMove + 1, iMove + 1,
-              aszColorName[ pms->fTurn ]
+              _(" %s onroll, cube decision?"),
+              gettext ( aszColorName[ pms->fTurn ] )
             );
 
 
+  fputs ( "</p>\n", pf );
 
 }
 
@@ -1179,26 +1249,26 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
 
   if ( pms->nMatchTo )
     sprintf ( szTitle,
-              "%s versus %s, score is %d-%d in %d points match (game %d)",
+              _("%s versus %s, score is %d-%d in %d points match (game %d)"),
               ap [ 1 ].szName, ap[ 0 ].szName,
               pms->anScore[ 1 ], pms->anScore[ 0 ], pms->nMatchTo,
               iGame + 1 );
   else
     sprintf ( szTitle,
-              "%s versus %s, score is %d-%d in money game (game %d)",
+              _("%s versus %s, score is %d-%d in money game (game %d)"),
               ap [ 1 ].szName, ap[ 0 ].szName,
               pms->anScore[ 1 ], pms->anScore[ 0 ], 
               iGame + 1 );
 
   if ( pms->nMatchTo )
     sprintf ( szHeader,
-              "%s (white, %d pts) vs. %s (red, %d pts) (Match to %d)",
+              _("%s (white, %d pts) vs. %s (red, %d pts) (Match to %d)"),
               ap [ 0 ].szName, pms->anScore[ 0 ],
               ap [ 1 ].szName, pms->anScore[ 1 ],
               pms->nMatchTo );
   else
     sprintf ( szHeader,
-              "%s (white, %d pts) vs. %s (red, %d pts) (money game)",
+              _("%s (white, %d pts) vs. %s (red, %d pts) (money game)"),
               ap [ 0 ].szName, pms->anScore[ 0 ],
               ap [ 1 ].szName, pms->anScore[ 1 ] );
 
@@ -1214,21 +1284,34 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
             "content=\"text/html; charset=ISO-8859-1\" />\n" 
             "<meta name=\"keywords\" content=\"%s, %s, %s\" />\n"
             "<meta name=\"description\" "
-            "content=\"%s (analysed by GNU Backgammon %s)\" />\n"
+            "content=\"",
+            VERSION,
+            ap[ 0 ].szName, ap[ 1 ].szName,
+            ( pms->nMatchTo ) ? _("match play") : _("money game") );
+
+  fprintf ( pf, 
+            _("%s (analysed by GNU Backgammon %s)"),
+            szTitle, VERSION );
+
+  fprintf ( pf,
+            "\" />\n"
             "<title>%s</title>\n"
             STYLESHEET
             "</head>\n"
             "\n"
             "<body>\n"
-            "<h1>Game number %d</h1>\n"
+            "<h1>",
+            szTitle );
+
+  fprintf ( pf,
+            _("Game number %d"),
+            iGame + 1 );
+
+  fprintf ( pf, 
+            "</h1>\n"
             "<h2>%s</h2>\n"
             ,
-            VERSION,
-            ap[ 0 ].szName, ap[ 1 ].szName,
-            ( pms->nMatchTo ) ? "match play" : "money game",
-            szTitle, 
-            VERSION,
-            szTitle, iGame + 1, szHeader );
+            szHeader );
 
   /* add links to other games */
 
@@ -1242,7 +1325,7 @@ HTMLPrologue ( FILE *pf, const matchstate *pms,
         fFirst = FALSE;
       }
       fprintf ( pf, "<a href=\"%s\">%s</a>\n",
-                aszLinks[ i ], aszLinkText[ i ] );
+                aszLinks[ i ], gettext ( aszLinkText[ i ] ) );
     }
 
   if ( ! fFirst )
@@ -1293,29 +1376,37 @@ HTMLEpilogue ( FILE *pf, const matchstate *pms, char *aszLinks[ 4 ] ) {
 
   time ( &t );
 
+  fputs ( "<hr />\n"
+          "<address>", pf );
+
+  fprintf ( pf, 
+            _("Output generated %s by "
+              "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
+              "%s</a>") ,
+            ctime ( &t ), VERSION );
+            
   fprintf ( pf,
-            "<hr />\n"
-            "<address>Output generated %s by "
-            "<a href=\"http://www.gnu.org/software/gnubg/\">GNU Backgammon " 
-            VERSION "</a> (HTML Export version %d.%d)</address>\n"
+            _("(HTML Export version %d.%d)"),
+            iMajor, iMinor );
+
+  fprintf ( pf,
+            "</address>\n"
             "<p>\n"
             "<a href=\"http://validator.w3.org/check/referer\">"
             "<img style=\"border:0;width:88px;height:31px\" "
             "src=\"http://www.w3.org/Icons/valid-xhtml10\" "
-            "alt=\"Valid XHTML 1.0!\" /></a>\n"
+            "alt=\"%s\" /></a>\n"
             "<a href=\"http://jigsaw.w3.org/css-validator/\">"
             "<img style=\"border:0;width:88px;height:31px\" "
             "src=\"http://jigsaw.w3.org/css-validator/images/vcss\" "
-            "alt=\"Valid CSS!\" />"
+            "alt=\"%s\" />"
             "</a>\n"
             "</p>\n"
             "</body>\n"
             "</html>\n",
-            ctime ( &t ),
-            iMajor, iMinor );
-#ifdef UNDEF
-#endif
-
+            _("Valid XHTML 1.0!"),
+            _("Valid CSS!") );
+         
 
 }
 
@@ -1413,7 +1504,12 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
                              skilltype stDouble,
                              skilltype stTake ) {
   const char *aszCube[] = {
-    NULL, "No double", "Double, take", "Double, pass" };
+    NULL, 
+    N_("No double"), 
+    N_("Double, take"), 
+    N_("Double, pass") 
+  };
+
   int i;
   int ai[ 3 ];
   float r;
@@ -1449,7 +1545,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* missed double */
 
-    fprintf ( pf, "<p><span class=\"blunder\">Alert: missed double " );
+    fprintf ( pf, "<p><span class=\"blunder\">%s ",
+              _("Alert: missed double") );
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
 
@@ -1461,7 +1558,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+7.3f)!", r );
       
       if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1479,7 +1576,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
       
       if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1495,7 +1592,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong take */
 
-    fprintf ( pf, "<p><span class=\"blunder\">Alert: wrong take " );
+    fprintf ( pf, "<p><span class=\"blunder\">%s ",
+              _("Alert: wrong take") );
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
 
@@ -1507,7 +1605,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+7.3f)!", r );
       
       if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1524,7 +1622,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
       
       if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1540,7 +1638,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong pass */
 
-    fprintf ( pf, "<p><span class=\"blunder\">Alert: wrong pass " );
+    fprintf ( pf, "<p><span class=\"blunder\">%s ",
+              _("Alert: wrong pass") );
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
 
@@ -1552,7 +1651,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+7.3f)!", r );
       
       if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1569,7 +1668,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
       
       if ( stTake != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stTake ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stTake ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1589,7 +1688,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
     /* wrong double */
 
-    fprintf ( pf, "<p><span class=\"blunder\">Alert: wrong double " );
+    fprintf ( pf, "<p><span class=\"blunder\">%s ",
+              _("Alert: wrong double") );
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
 
@@ -1601,7 +1701,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+7.3f)!", r );
       
       if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1618,7 +1718,7 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
       fprintf ( pf, " (%+6.3f%%)!", 100.0f * r );
       
       if ( stDouble != SKILL_NONE )
-        fprintf ( pf, " [%s]", aszSkillType[ stDouble ] );
+        fprintf ( pf, " [%s]", gettext ( aszSkillType[ stDouble ] ) );
 
       fprintf ( pf, "</span></p>\n" );
 
@@ -1628,15 +1728,19 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
 
   if ( ( stDouble != SKILL_NONE || stTake != SKILL_NONE ) && ! fAnno ) {
     
-    if ( stDouble != SKILL_NONE )
-      fprintf ( pf, 
-                "<p><span class=\"blunder\">Alert: double decision marked %s"
-                "</span></p>\n", aszSkillType[ stDouble ] );
+    if ( stDouble != SKILL_NONE ) {
+      fputs ( "<p><span class=\"blunder\">", pf );
+      fprintf ( pf, _("Alert: double decision marked %s"),
+                gettext ( aszSkillType[ stDouble ] ) );
+      fputs ( "</span></p>\n", pf );
+    }
 
-    if ( stTake != SKILL_NONE )
-      fprintf ( pf, 
-                "<p><span class=\"blunder\">Alert: take decision marked %s"
-                "</span></p>\n", aszSkillType[ stTake ] );
+    if ( stTake != SKILL_NONE ) {
+      fputs ( "<p><span class=\"blunder\">", pf );
+      fprintf ( pf, _("Alert: take decision marked %s"),
+                gettext ( aszSkillType[ stTake ] ) );
+      fputs ( "</span></p>\n", pf );
+    }
 
   }
 
@@ -1648,7 +1752,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   /* header */
 
   fprintf ( pf, 
-            "<tr><th colspan=\"4\">Cube decision</th></tr>\n" );
+            "<tr><th colspan=\"4\">%s</th></tr>\n",
+            _("Cube decision") );
 
   /* ply & cubeless equity */
 
@@ -1657,30 +1762,34 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   fprintf ( pf, "<tr>" );
 
   /* ply */
+
+  fputs ( "<td>", pf );
   
   switch ( pes->et ) {
   case EVAL_NONE:
-    fprintf ( pf,
-              "<td>n/a</td>\n" );
+    fputs ( _("n/a"), pf );
     break;
   case EVAL_EVAL:
-    fprintf ( pf,
-              "<td>%d-ply</td>\n", 
+    fprintf ( pf, 
+              _("%d-ply"), 
               pes->ec.nPlies );
     break;
   case EVAL_ROLLOUT:
-    fprintf ( pf,
-              "<td>Rollout</td>\n" );
+    fputs ( _("Rollout"), pf );
     break;
   }
+
+  fputs ( "</td>\n", pf );
 
   /* cubeless equity */
   
   if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    fprintf ( pf, "<td>Cubeless equity</td><td>%+7.3f</td><td>&nbsp;</td>\n",
+    fprintf ( pf, "<td>%s</td><td>%+7.3f</td><td>&nbsp;</td>\n",
+              _("Cubeless equity"),
               aarOutput[ 0 ][ OUTPUT_EQUITY ] );
   else
-    fprintf ( pf, "<td>Cubeless equity</td><td>%+7.3f</td><td>&nbsp;</td>\n",
+    fprintf ( pf, "<td>%s</td><td>%+7.3f</td><td>&nbsp;</td>\n",
+              _("Cubeless equity"),
               eq2mwc ( aarOutput[ 0 ][ OUTPUT_EQUITY ], pci ) );
               
 
@@ -1720,7 +1829,8 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   for ( i = 0; i < 3; i++ ) {
 
     fprintf ( pf,
-              "<tr><td>%d.</td><td>%s</td>", i + 1, aszCube[ ai[ i ] ] );
+              "<tr><td>%d.</td><td>%s</td>", i + 1, 
+              gettext ( aszCube[ ai[ i ] ] ) );
 
     if ( !pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) ) {
       if ( i ) 
@@ -1752,8 +1862,9 @@ HTMLPrintCubeAnalysisTable ( FILE *pf, float arDouble[],
   /* cube decision */
 
   fprintf ( pf,
-            "<tr><td colspan=\"2\">Proper cube action:</td>"
+            "<tr><td colspan=\"2\">%s</td>"
             "<td colspan=\"2\">%s",
+            _("Proper cube action:"),
             GetCubeRecommendation ( FindBestCubeDecision ( arDouble, pci ) ) );
 
   if ( ( r = getPercent ( FindBestCubeDecision ( arDouble, pci ), 
@@ -1880,8 +1991,10 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* blunder or error */
 
-    fprintf ( pf, "<p><span class=\"blunder\">Alert: %s move",
-              aszSkillType[ pmr->n.stMove ] );
+    fputs ( "<p><span class=\"blunder\">", pf );
+    fprintf ( pf, 
+              _("Alert: %s move"),
+              gettext ( aszSkillType[ pmr->n.stMove ] ) );
     
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
       fprintf ( pf, " (%+7.3f)</span></p>\n",
@@ -1900,9 +2013,11 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     /* joker */
 
-    fprintf ( pf, "<p><span class=\"joker\">Alert: %s roll!",
-              aszLuckType[ pmr->n.lt ] );
-
+    fputs ( "<p><span class=\"joker\">", pf );
+    fprintf ( pf, 
+              _("Alert: %s roll!"),
+              gettext ( aszLuckType[ pmr->n.lt ] ) );
+    
     if ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) )
       fprintf ( pf, " (%+7.3f)</span></p>\n", pmr->n.rLuck );
     else
@@ -1919,13 +2034,16 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
             "<table border=\"0\" cellspacing=\"0\" cellpadding=\"0\""
             " class=\"movetable\">\n"
             "<tr class=\"moveheader\">\n"
-            "<th class=\"movenumber\" colspan=\"2\">#</th>\n"
-            "<th class=\"moveply\">Ply</th>\n"
-            "<th class=\"movemove\">Move</th>\n"
+            "<th class=\"movenumber\" colspan=\"2\">%s</th>\n"
+            "<th class=\"moveply\">%s</th>\n"
+            "<th class=\"movemove\">%s</th>\n"
             "<th class=\"moveequity\">%s</th>\n"
             "</tr>\n",
+            _("#"),
+            _("Ply"),
+            _("Move"),
             ( !pms->nMatchTo || ( pms->nMatchTo && ! fOutputMWC ) ) ?
-            "Equity" : "MWC" );
+            _("Equity") : _("MWC") );
             
 
   if ( pmr->n.ml.cMoves ) {
@@ -2063,16 +2181,19 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
 
         switch ( pes->et ) {
-        case EVAL_EVAL:
-          fprintf ( pf,
-                    "<td colspan=\"2\">%d-ply %s "
-                    "(%d%% speed, %d cand., %0.3g tol., noise %0.3g )</td>\n",
+        case EVAL_EVAL: 
+
+          fputs ( "<td colspan=\"2\">", pf );
+          fprintf ( pf, 
+                    _("%d-ply %s "
+                    "(%d%% speed, %d cand., %0.3g tol., noise %0.3g )"),
                     pes->ec.nPlies,
-                    pes->ec.fCubeful ? "cubeful" : "cubeless",
+                    pes->ec.fCubeful ? _("cubeful") : _("cubeless"),
                     (pes->ec.nReduced) ? 100 / pes->ec.nReduced : 100,
                     pes->ec.nSearchCandidates,
                     pes->ec.rSearchTolerance,
                     pes->ec.rNoise );
+          fputs ( "</td>\n", pf );
           break;
 
         case EVAL_ROLLOUT:
@@ -2108,7 +2229,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
       /* FIXME: output equity?? */
       fprintf ( pf,
                 "<tr class=\"movethemove\"><td>&nbsp;</td><td>&nbsp;</td>"
-                "<td>&nbsp;</td><td>Cannot move</td><td>&nbsp;</td></tr>\n" );
+                "<td>&nbsp;</td><td>%s</td><td>&nbsp;</td></tr>\n",
+                _("Cannot move") );
 
   }
 
@@ -2154,13 +2276,15 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
     if ( pmr->n.anMove[ 0 ] >= 0 )
       fprintf ( pf,
-                "*%s moves %s</p>\n",
+                _("*%s moves %s"),
                 ap[ pmr->n.fPlayer ].szName,
                 FormatMove ( sz, pms->anBoard, pmr->n.anMove ) );
     else
       fprintf ( pf,
-                "*%s cannot move</p>\n",
+                _("*%s cannot move"),
                 ap[ pmr->n.fPlayer ].szName );
+
+    fputs ( "</p>\n", pf );
 
     // HTMLRollAlert ( pf, pms, pmr, szImageDir, szExtension );
 
@@ -2187,7 +2311,7 @@ HTMLAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
     fprintf ( pf,
               "*%s %s</p>\n",
               ap[ pmr->d.fPlayer ].szName,
-              ( pmr->mt == MOVE_TAKE ) ? "accepts" : "rejects" );
+              ( pmr->mt == MOVE_TAKE ) ? _("accepts") : _("rejects") );
 
     HTMLPrintCubeAnalysis ( pf, pms, pmr, szImageDir, szExtension, szType );
 
@@ -2235,173 +2359,221 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
   int ai[ 2 ];
 
   const char *aszLuckRating[] = {
-    "&quot;Haaa-haaa&quot;",
-    "Go to bed", 
-    "Better luck next time",
-    "None",
-    "Good dice, man!",
-    "Go to Las Vegas immediately",
-    "Cheater :-)" };
+    N_("&quot;Haaa-haaa&quot;"),
+    N_("Go to bed"), 
+    N_("Better luck next time"),
+    N_("None"),
+    N_("Good dice, man!"),
+    N_("Go to Las Vegas immediately"),
+    N_("Cheater :-)")
+  };
 
-  if ( iGame >= 0 )
+  if ( iGame >= 0 ) {
     fprintf ( pf,
-              "<table class=\"stattable\">\n"
-              STATTABLEHEADER ( "Game statistics for game %d" )
+              "<table class=\"stattable\">\n" );
+    printStatTableHeader ( pf,
+                           _("Game statistics for game %d"),
+                           iGame );
+    fprintf ( pf,
               "<tr class=\"stattableheader\">\n"
-              "<th>Player</th><th>%s</th><th>%s</th>\n"
+              "<th>%s</th><th>%s</th><th>%s</th>\n"
               "</tr>\n",
+              _("Player"), 
               iGame,
               ap[ 0 ].szName, ap[ 1 ].szName );
-  else
+  }
+  else {
+    
+    fputs ( "<table class=\"stattable\">\n", pf );
+
+    if ( pms->nMatchTo )
+      printStatTableHeader ( pf,
+                             _( "Match statistics" ) );
+    else
+      printStatTableHeader ( pf,
+                             _( "Session statistics" ) );
+
     fprintf ( pf,
-              "<table class=\"stattable\">\n"
-              STATTABLEHEADER ( "%s statistics" )
               "<tr class=\"stattableheader\">\n"
-              "<th>Player</th><th>%s</th><th>%s</th>\n"
+              "<th>%s</th><th>%s</th><th>%s</th>\n"
               "</tr>\n",
-              pms->nMatchTo ? "Match" : "Session",
+              _("Player"),
               ap[ 0 ].szName, ap[ 1 ].szName );
+  }
 
   /* checker play */
 
   if( psc->fMoves ) {
-      fprintf( pf,
-               STATTABLEHEADER ( "Checker play statistics" )
-               STATTABLEROW ( "Total moves", "%d" )
-               STATTABLEROW ( "Unforced moves", "%d" )
-	       STATTABLEROW ( "Moves marked very good", "%d" )
-               STATTABLEROW ( "Moves marked good", "%d" )
-               STATTABLEROW ( "Moves marked interesting", "%d" )
-               STATTABLEROW ( "Moves unmarked", "%d" )
-               STATTABLEROW ( "Moves marked doubtful", "%d" )
-               STATTABLEROW ( "Moves marked bad", "%d" )
-               STATTABLEROW ( "Moves marked very bad", "%d" ), 
-               psc->anTotalMoves[ 0 ], psc->anTotalMoves[ 1 ],
-               psc->anUnforcedMoves[ 0 ], psc->anUnforcedMoves[ 1 ],
-               psc->anMoves[ 0 ][ SKILL_VERYGOOD ],
-               psc->anMoves[ 1 ][ SKILL_VERYGOOD ],
-               psc->anMoves[ 0 ][ SKILL_GOOD ],
-               psc->anMoves[ 1 ][ SKILL_GOOD ],
-               psc->anMoves[ 0 ][ SKILL_INTERESTING ],
-               psc->anMoves[ 1 ][ SKILL_INTERESTING ],
-               psc->anMoves[ 0 ][ SKILL_NONE ],
-               psc->anMoves[ 1 ][ SKILL_NONE ],
-               psc->anMoves[ 0 ][ SKILL_DOUBTFUL ],
-               psc->anMoves[ 1 ][ SKILL_DOUBTFUL ],
-               psc->anMoves[ 0 ][ SKILL_BAD ],
-               psc->anMoves[ 1 ][ SKILL_BAD ],
-               psc->anMoves[ 0 ][ SKILL_VERYBAD ],
-               psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
 
-      if ( pms->nMatchTo )
-        fprintf ( pf, 
-                  STATTABLEROW2 ( "Error rate (total)", "%+6.3f",
-                                  "%+7.3f%%" )
-                  STATTABLEROW2 ( "Error rate (pr. move)", "%+6.3f",
-                                  "%+7.3f%%" ),
-		  psc->arErrorCheckerplay[ 0 ][ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
-		  psc->arErrorCheckerplay[ 1 ][ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f,
-		  psc->arErrorCheckerplay[ 0 ][ 0 ] /
-		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
-		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 0 ] /
-		  psc->anUnforcedMoves[ 1 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
-		  psc->anUnforcedMoves[ 1 ] );
-      else
-        fprintf ( pf, 
-                  STATTABLEROW2 ( "Error rate (total)", "%+6.3f", "%+7.3f" )
-                  STATTABLEROW2 ( "Error rate (pr. move)", "%+6.3f", "%+7.3f" )
-                  ,
-		  psc->arErrorCheckerplay[ 0 ][ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ],
-		  psc->arErrorCheckerplay[ 1 ][ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ],
-		  psc->arErrorCheckerplay[ 0 ][ 0 ] /
-		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 0 ][ 1 ] /
-		  psc->anUnforcedMoves[ 0 ],
-		  psc->arErrorCheckerplay[ 1 ][ 0 ] /
-		  psc->anUnforcedMoves[ 1 ],
-		  psc->arErrorCheckerplay[ 1 ][ 1 ] /
-		  psc->anUnforcedMoves[ 1 ] );
+    printStatTableHeader ( pf, _("Checker play statistics") );
 
-      for ( i = 0 ; i < 2; i++ )
-	  rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
-				psc->anUnforcedMoves[ i ] );
+    printStatTableRow ( pf, 
+                        _("Total moves"), "%d",
+                        psc->anTotalMoves[ 0 ],
+                        psc->anTotalMoves[ 1 ] );
+    printStatTableRow ( pf, 
+                        _("Unforced moves"), "%d",
+                        psc->anUnforcedMoves[ 0 ], 
+                        psc->anUnforcedMoves[ 1 ] );
+    printStatTableRow ( pf, 
+                        _("Moves marked very good"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_VERYGOOD ],
+                        psc->anMoves[ 1 ][ SKILL_VERYGOOD ] );
+    printStatTableRow ( pf, 
+                        _("Moves marked good"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_GOOD ],
+                        psc->anMoves[ 1 ][ SKILL_GOOD ] );
+    printStatTableRow ( pf, 
+                        _("Moves marked interesting"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_INTERESTING ],
+                        psc->anMoves[ 1 ][ SKILL_INTERESTING ] );
+    printStatTableRow ( pf, 
+                        _("Moves unmarked"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_NONE ],
+                        psc->anMoves[ 1 ][ SKILL_NONE ] );
+    printStatTableRow ( pf, 
+                        _("Moves marked doubtful"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_DOUBTFUL ],
+                        psc->anMoves[ 1 ][ SKILL_DOUBTFUL ] );
+    printStatTableRow ( pf, 
+                        _("Moves marked bad"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_BAD ],
+                        psc->anMoves[ 1 ][ SKILL_BAD ] );
+    printStatTableRow ( pf, 
+                        _("Moves marked very bad"), "%d",
+                        psc->anMoves[ 0 ][ SKILL_VERYBAD ],
+                        psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
 
-      fprintf ( pf,
-                STATTABLEROW ( "Checker play rating", "%s" ),
-                aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+    if ( pms->nMatchTo ) {
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (total)"), 
+                           "%+6.3f", "%+7.3f%%",
+                           psc->arErrorCheckerplay[ 0 ][ 0 ],
+                           psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f,
+                           psc->arErrorCheckerplay[ 1 ][ 0 ],
+                           psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f );
+      printStatTableRow2 ( pf,
+                           _("Error rate (pr. move)"), 
+                           "%+6.3f", "%+7.3f%%",
+                           psc->arErrorCheckerplay[ 0 ][ 0 ] /
+                           psc->anUnforcedMoves[ 0 ],
+                           psc->arErrorCheckerplay[ 0 ][ 1 ] * 100.0f /
+                           psc->anUnforcedMoves[ 0 ],
+                           psc->arErrorCheckerplay[ 1 ][ 0 ] /
+                           psc->anUnforcedMoves[ 1 ],
+                           psc->arErrorCheckerplay[ 1 ][ 1 ] * 100.0f /
+                           psc->anUnforcedMoves[ 1 ] );
+    }
+    else {
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (total)"), 
+                           "%+6.3f", "%+7.3f%",
+                           psc->arErrorCheckerplay[ 0 ][ 0 ],
+                           psc->arErrorCheckerplay[ 0 ][ 1 ],
+                           psc->arErrorCheckerplay[ 1 ][ 0 ],
+                           psc->arErrorCheckerplay[ 1 ][ 1 ] );
+
+      printStatTableRow2 ( pf,
+                           _("Error rate (pr. move)"), 
+                           "%+6.3f", "%+7.3f%",
+                           psc->arErrorCheckerplay[ 0 ][ 0 ] /
+                           psc->anUnforcedMoves[ 0 ],
+                           psc->arErrorCheckerplay[ 0 ][ 1 ] /
+                           psc->anUnforcedMoves[ 0 ],
+                           psc->arErrorCheckerplay[ 1 ][ 0 ] /
+                           psc->anUnforcedMoves[ 1 ],
+                           psc->arErrorCheckerplay[ 1 ][ 1 ] /
+                           psc->anUnforcedMoves[ 1 ] );
+
+    }
+
+    for ( i = 0 ; i < 2; i++ )
+      rt[ i ] = GetRating ( psc->arErrorCheckerplay[ i ][ 0 ] /
+                            psc->anUnforcedMoves[ i ] );
+    
+    printStatTableHeader ( pf,
+                           _("Checker play rating"), "%s",
+                           gettext ( aszRating[ rt [ 0 ] ] ), 
+                           gettext ( aszRating[ rt [ 1 ] ] ) );
+
   }
 
   /* dice stat */
 
   if( psc->fDice ) {
-      fprintf( pf,
-               STATTABLEHEADER ( "Luck statistics" )
-               STATTABLEROW ( "Rolls marked very lucky", "%d" )
-               STATTABLEROW ( "Rolls marked lucky", "%d" )
-               STATTABLEROW ( "Rolls unmarked", "%d" )
-               STATTABLEROW ( "Rolls marked unlucky", "%d" )
-               STATTABLEROW ( "Rolls marked very unlucky", "%d" )
-               ,
-	       psc->anLuck[ 0 ][ LUCK_VERYGOOD ],
-	       psc->anLuck[ 1 ][ LUCK_VERYGOOD ],
-	       psc->anLuck[ 0 ][ LUCK_GOOD ],
-	       psc->anLuck[ 1 ][ LUCK_GOOD ],
-	       psc->anLuck[ 0 ][ LUCK_NONE ],
-	       psc->anLuck[ 1 ][ LUCK_NONE ],
-	       psc->anLuck[ 0 ][ LUCK_BAD ],
-	       psc->anLuck[ 1 ][ LUCK_BAD ],
-	       psc->anLuck[ 0 ][ LUCK_VERYBAD ],
-	       psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
+
+    printStatTableHeader ( pf, 
+                           _( "Luck statistics" ) );
+
+    printStatTableRow ( pf,
+                        _("Rolls marked very lucky"), "%d",
+                        psc->anLuck[ 0 ][ LUCK_VERYGOOD ],
+                        psc->anLuck[ 1 ][ LUCK_VERYGOOD ] );
+    printStatTableRow ( pf, _( "Rolls marked lucky" ), "%d",
+                        psc->anLuck[ 0 ][ LUCK_GOOD ],
+                        psc->anLuck[ 1 ][ LUCK_GOOD ] );
+    printStatTableRow ( pf, _( "Rolls unmarked" ), "%d",
+                        psc->anLuck[ 0 ][ LUCK_NONE ],
+                        psc->anLuck[ 1 ][ LUCK_NONE ] );
+    printStatTableRow ( pf, _( "Rolls marked unlucky" ), "%d",
+                        psc->anLuck[ 0 ][ LUCK_BAD ],
+                        psc->anLuck[ 1 ][ LUCK_BAD ] );
+    printStatTableRow ( pf, _( "Rolls marked very unlucky" ), "%d",
+                        psc->anLuck[ 0 ][ LUCK_VERYBAD ],
+                        psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
        
-      if ( pms->nMatchTo )
-        fprintf( pf,
-                 STATTABLEROW2 ( "Luck rate (total)", "%+6.3f", "%+7.3f%%" )
-                 STATTABLEROW2 ( "Luck rate (pr. move)", "%+6.3f", "%+7.3f%%" )
-                 ,
-                 psc->arLuck[ 0 ][ 0 ],
-                 psc->arLuck[ 0 ][ 1 ] * 100.0f,
-                 psc->arLuck[ 1 ][ 0 ],
-                 psc->arLuck[ 1 ][ 1 ] * 100.0f,
-                 psc->arLuck[ 0 ][ 0 ] /
-                 psc->anTotalMoves[ 0 ],
-                 psc->arLuck[ 0 ][ 1 ] * 100.0f /
-                 psc->anTotalMoves[ 0 ],
-                 psc->arLuck[ 1 ][ 0 ] /
-                 psc->anTotalMoves[ 1 ],
-                 psc->arLuck[ 1 ][ 1 ] * 100.0f /
-                 psc->anTotalMoves[ 1 ] );
-      else
-        fprintf( pf,
-                 STATTABLEROW2 ( "Luck rate (total)", "%+6.3f", "%+7.3f" )
-                 STATTABLEROW2 ( "Luck rate (pr. move)", "%+6.3f", "%+7.3f" )
-                 ,
-                 psc->arLuck[ 0 ][ 0 ],
-                 psc->arLuck[ 0 ][ 1 ],
-                 psc->arLuck[ 1 ][ 0 ],
-                 psc->arLuck[ 1 ][ 1 ],
-                 psc->arLuck[ 0 ][ 0 ] /
-                 psc->anTotalMoves[ 0 ],
-                 psc->arLuck[ 0 ][ 1 ] /
-                 psc->anTotalMoves[ 0 ],
-                 psc->arLuck[ 1 ][ 0 ] /
-                 psc->anTotalMoves[ 1 ],
-                 psc->arLuck[ 1 ][ 1 ] /
-                 psc->anTotalMoves[ 1 ] );
+    if ( pms->nMatchTo ) {
 
-      for ( i = 0; i < 2; i++ ) 
-        ai[ i ] = getLuckRating ( psc->arLuck[ i ][ 0 ] /
-                                  psc->anTotalMoves[ i ] );
+      printStatTableRow2 ( pf, 
+                           _( "Luck rate (total)"), 
+                           "%+6.3f", "%+7.3f%%",
+                           psc->arLuck[ 0 ][ 0 ],
+                           psc->arLuck[ 0 ][ 1 ] * 100.0f,
+                           psc->arLuck[ 1 ][ 0 ],
+                           psc->arLuck[ 1 ][ 1 ] * 100.0f );
+      printStatTableRow2 ( pf, 
+                           _( "Luck rate (pr. move)"), 
+                           "%+6.3f", "%+7.3f%%",
+                           psc->arLuck[ 0 ][ 0 ] /
+                           psc->anTotalMoves[ 0 ],
+                           psc->arLuck[ 0 ][ 1 ] * 100.0f /
+                           psc->anTotalMoves[ 0 ],
+                           psc->arLuck[ 1 ][ 0 ] /
+                           psc->anTotalMoves[ 1 ],
+                           psc->arLuck[ 1 ][ 1 ] * 100.0f /
+                           psc->anTotalMoves[ 1 ] );
+    }
+    else {
+      printStatTableRow2 ( pf, 
+                           _( "Luck rate (total)"), 
+                           "%+6.3f", "%+7.3f",
+                           psc->arLuck[ 0 ][ 0 ],
+                           psc->arLuck[ 0 ][ 1 ],
+                           psc->arLuck[ 1 ][ 0 ],
+                           psc->arLuck[ 1 ][ 1 ] );
+      printStatTableRow2 ( pf, 
+                           _( "Luck rate (pr. move)"), 
+                           "%+6.3f", "%+7.3f",
+                           psc->arLuck[ 0 ][ 0 ] /
+                           psc->anTotalMoves[ 0 ],
+                           psc->arLuck[ 0 ][ 1 ] /
+                           psc->anTotalMoves[ 0 ],
+                           psc->arLuck[ 1 ][ 0 ] /
+                           psc->anTotalMoves[ 1 ],
+                           psc->arLuck[ 1 ][ 1 ] /
+                           psc->anTotalMoves[ 1 ] );
+    }
 
-    fprintf ( pf,
-              STATTABLEROW ( "Luck rating", "%s" ),
-              aszLuckRating[ ai[ 0 ] ], aszLuckRating[ ai[ 1 ] ] );
+    for ( i = 0; i < 2; i++ ) 
+      ai[ i ] = getLuckRating ( psc->arLuck[ i ][ 0 ] /
+                                psc->anTotalMoves[ i ] );
+
+    printStatTableRow ( pf, 
+                        _( "Luck rating"), "%s",
+                        gettext ( aszLuckRating[ ai[ 0 ] ] ), 
+                        gettext ( aszLuckRating[ ai[ 1 ] ] ) );
 
   }
 
@@ -2409,142 +2581,140 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fCube ) {
 
-
-      fprintf( pf,
-               STATTABLEHEADER ( "Cube statistics" )
-               STATTABLEROW ( "Total cube decisions", "%d" )
-               STATTABLEROW ( "Doubles", "%d" )
-               STATTABLEROW ( "Takes", "%d" )
-               STATTABLEROW ( "Passes", "%d" )
-               ,
-	       psc->anTotalCube[ 0 ],
-	       psc->anTotalCube[ 1 ],
-	       psc->anDouble[ 0 ], 
-	       psc->anDouble[ 1 ], 
-	       psc->anTake[ 0 ],
-	       psc->anTake[ 1 ],
-	       psc->anPass[ 0 ], 
-	       psc->anPass[ 1 ] );
+    printStatTableHeader ( pf,
+                           _( "Cube statistics" ) );
+    printStatTableRow ( pf, _ ( "Total cube decisions"), "%d",
+                        psc->anTotalCube[ 0 ],
+                        psc->anTotalCube[ 1 ] );
+    printStatTableRow ( pf, _ ( "Doubles"), "%d",
+                        psc->anDouble[ 0 ], 
+                        psc->anDouble[ 1 ] );
+    printStatTableRow ( pf, _( "Takes"), "%d",
+                        psc->anTake[ 0 ],
+                        psc->anTake[ 1 ] );
+    printStatTableRow ( pf, _( "Passes"), "%d",
+                        psc->anPass[ 0 ], 
+                        psc->anPass[ 1 ] );
       
-      if ( pms->nMatchTo )
-        fprintf( pf,
-                 STATTABLEROW3 ( "Missed doubles around DP",
-                                 "%d", "%+6.3f", "%+7.3f%%" )
-                 STATTABLEROW3 ( "Missed doubles around TG",
-                                 "%d", "%+6.3f", "%+7.3f%%" )
-                 STATTABLEROW3 ( "Wrong doubles around DP",
-                                 "%d", "%+6.3f", "%+7.3f%%" )
-                 STATTABLEROW3 ( "Wrong doubles around TG",
-                                 "%d", "%+6.3f", "%+7.3f%%" )
-                 STATTABLEROW3 ( "Wrong takes",
-                                 "%d", "%+6.3f", "%+7.3f%%" )
-                 STATTABLEROW3 ( "Wrong passes",
-                                 "%d", "%+6.3f", "%+7.3f%%" )
-                 ,
-                 psc->anCubeMissedDoubleDP[ 0 ],
-                 psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-                 psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
-                 psc->anCubeMissedDoubleDP[ 1 ],
-                 psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-                 psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f,
-                 psc->anCubeMissedDoubleTG[ 0 ],
-                 psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-                 psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
-                 psc->anCubeMissedDoubleTG[ 1 ],
-                 psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-                 psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongDoubleDP[ 0 ],
-                 psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-                 psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongDoubleDP[ 1 ],
-                 psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-                 psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongDoubleTG[ 0 ],
-                 psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-                 psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongDoubleTG[ 1 ],
-                 psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-                 psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongTake[ 0 ],
-                 psc->arErrorWrongTake[ 0 ][ 0 ],
-                 psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongTake[ 1 ],
-                 psc->arErrorWrongTake[ 1 ][ 0 ],
-                 psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongPass[ 0 ],
-                 psc->arErrorWrongPass[ 0 ][ 0 ],
-                 psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
-                 psc->anCubeWrongPass[ 1 ],
-                 psc->arErrorWrongPass[ 1 ][ 0 ],
-                 psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
-      else
-        fprintf( pf,
-                 STATTABLEROW3 ( "Missed doubles around DP",
-                                 "%d", "%+6.3f", "%+7.3f" )
-                 STATTABLEROW3 ( "Missed doubles around TG",
-                                 "%d", "%+6.3f", "%+7.3f" )
-                 STATTABLEROW3 ( "Wrong doubles around DP",
-                                 "%d", "%+6.3f", "%+7.3f" )
-                 STATTABLEROW3 ( "Wrong doubles around TG",
-                                 "%d", "%+6.3f", "%+7.3f" )
-                 STATTABLEROW3 ( "Wrong tales",
-                                 "%d", "%+6.3f", "%+7.3f" )
-                 STATTABLEROW3 ( "Wrong passes",
-                                 "%d", "%+6.3f", "%+7.3f" )
-                 ,
-                 psc->anCubeMissedDoubleDP[ 0 ],
-                 psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-                 psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
-                 psc->anCubeMissedDoubleDP[ 1 ],
-                 psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-                 psc->arErrorMissedDoubleDP[ 1 ][ 1 ],
-                 psc->anCubeMissedDoubleTG[ 0 ],
-                 psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-                 psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
-                 psc->anCubeMissedDoubleTG[ 1 ],
-                 psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-                 psc->arErrorMissedDoubleTG[ 1 ][ 1 ],
-                 psc->anCubeWrongDoubleDP[ 0 ],
-                 psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-                 psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
-                 psc->anCubeWrongDoubleDP[ 1 ],
-                 psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-                 psc->arErrorWrongDoubleDP[ 1 ][ 1 ],
-                 psc->anCubeWrongDoubleTG[ 0 ],
-                 psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-                 psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
-                 psc->anCubeWrongDoubleTG[ 1 ],
-                 psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-                 psc->arErrorWrongDoubleTG[ 1 ][ 1 ],
-                 psc->anCubeWrongTake[ 0 ],
-                 psc->arErrorWrongTake[ 0 ][ 0 ],
-                 psc->arErrorWrongTake[ 0 ][ 1 ],
-                 psc->anCubeWrongTake[ 1 ],
-                 psc->arErrorWrongTake[ 1 ][ 0 ],
-                 psc->arErrorWrongTake[ 1 ][ 1 ],
-                 psc->anCubeWrongPass[ 0 ],
-                 psc->arErrorWrongPass[ 0 ][ 0 ],
-                 psc->arErrorWrongPass[ 0 ][ 1 ],
-                 psc->anCubeWrongPass[ 1 ],
-                 psc->arErrorWrongPass[ 1 ][ 0 ],
-                 psc->arErrorWrongPass[ 1 ][ 1 ] );
+    if ( pms->nMatchTo ) {
 
-      for ( i = 0 ; i < 2; i++ )
-        rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
-                                + psc->arErrorMissedDoubleTG[ i ][ 0 ]
-                                + psc->arErrorWrongDoubleDP[ i ][ 0 ]
-                                + psc->arErrorWrongDoubleTG[ i ][ 0 ]
-                                + psc->arErrorWrongTake[ i ][ 0 ]
-                                + psc->arErrorWrongPass[ i ][ 0 ] ) /
-                              psc->anTotalCube[ i ] );
+      printStatTableRow3 ( pf, _ ( "Missed doubles around DP" ),
+                           "%d", "%+6.3f", "%+7.3f%%",
+                           psc->anCubeMissedDoubleDP[ 0 ],
+                           psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+                           psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * 100.0f,
+                           psc->anCubeMissedDoubleDP[ 1 ],
+                           psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+                           psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * 100.0f );
+      printStatTableRow3 ( pf, _ ( "Missed doubles around TG" ),
+                           "%d", "%+6.3f", "%+7.3f%%",
+                           psc->anCubeMissedDoubleTG[ 0 ],
+                           psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+                           psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * 100.0f,
+                           psc->anCubeMissedDoubleTG[ 1 ],
+                           psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+                           psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * 100.0f );
+      printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
+                           "%d", "%+6.3f", "%+7.3f%%",
+                           psc->anCubeWrongDoubleDP[ 0 ],
+                           psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+                           psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * 100.0f,
+                           psc->anCubeWrongDoubleDP[ 1 ],
+                           psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+                           psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * 100.0f );
+      printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
+                           "%d", "%+6.3f", "%+7.3f%%",
+                           psc->anCubeWrongDoubleTG[ 0 ],
+                           psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+                           psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * 100.0f,
+                           psc->anCubeWrongDoubleTG[ 1 ],
+                           psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+                           psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * 100.0f );
+      printStatTableRow3 ( pf, _ ( "Wrong takes"),
+                           "%d", "%+6.3f", "%+7.3f%%",
+                           psc->anCubeWrongTake[ 0 ],
+                           psc->arErrorWrongTake[ 0 ][ 0 ],
+                           psc->arErrorWrongTake[ 0 ][ 1 ] * 100.0f,
+                           psc->anCubeWrongTake[ 1 ],
+                           psc->arErrorWrongTake[ 1 ][ 0 ],
+                           psc->arErrorWrongTake[ 1 ][ 1 ] * 100.0f );
+      printStatTableRow3 ( pf, _ ( "Wrong passes"),
+                           "%d", "%+6.3f", "%+7.3f%%",
+                           psc->anCubeWrongPass[ 0 ],
+                           psc->arErrorWrongPass[ 0 ][ 0 ],
+                           psc->arErrorWrongPass[ 0 ][ 1 ] * 100.0f,
+                           psc->anCubeWrongPass[ 1 ],
+                           psc->arErrorWrongPass[ 1 ][ 0 ],
+                           psc->arErrorWrongPass[ 1 ][ 1 ] * 100.0f );
+    }
+    else {
+      printStatTableRow3 ( pf, _ ( "Missed doubles around DP"),
+                           "%d", "%+6.3f", "%+7.3f",
+                           psc->anCubeMissedDoubleDP[ 0 ],
+                           psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
+                           psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
+                           psc->anCubeMissedDoubleDP[ 1 ],
+                           psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
+                           psc->arErrorMissedDoubleDP[ 1 ][ 1 ] );
+      printStatTableRow3 ( pf, _ ( "Missed doubles around TG"),
+                           "%d", "%+6.3f", "%+7.3f",
+                           psc->anCubeMissedDoubleTG[ 0 ],
+                           psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
+                           psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
+                           psc->anCubeMissedDoubleTG[ 1 ],
+                           psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
+                           psc->arErrorMissedDoubleTG[ 1 ][ 1 ] );
+      printStatTableRow3 ( pf, _ ( "Wrong doubles around DP"),
+                           "%d", "%+6.3f", "%+7.3f",
+                           psc->anCubeWrongDoubleDP[ 0 ],
+                           psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
+                           psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
+                           psc->anCubeWrongDoubleDP[ 1 ],
+                           psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
+                           psc->arErrorWrongDoubleDP[ 1 ][ 1 ] );
+      printStatTableRow3 ( pf, _ ( "Wrong doubles around TG"),
+                           "%d", "%+6.3f", "%+7.3f",
+                           psc->anCubeWrongDoubleTG[ 0 ],
+                           psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
+                           psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
+                           psc->anCubeWrongDoubleTG[ 1 ],
+                           psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
+                           psc->arErrorWrongDoubleTG[ 1 ][ 1 ] );
+      printStatTableRow3 ( pf, _ ( "Wrong tales"),
+                           "%d", "%+6.3f", "%+7.3f",
+                           psc->anCubeWrongTake[ 0 ],
+                           psc->arErrorWrongTake[ 0 ][ 0 ],
+                           psc->arErrorWrongTake[ 0 ][ 1 ],
+                           psc->anCubeWrongTake[ 1 ],
+                           psc->arErrorWrongTake[ 1 ][ 0 ],
+                           psc->arErrorWrongTake[ 1 ][ 1 ] );
+      printStatTableRow3 ( pf, _ ( "Wrong passes"),
+                           "%d", "%+6.3f", "%+7.3f",
+                           psc->anCubeWrongPass[ 0 ],
+                           psc->arErrorWrongPass[ 0 ][ 0 ],
+                           psc->arErrorWrongPass[ 0 ][ 1 ],
+                           psc->anCubeWrongPass[ 1 ],
+                           psc->arErrorWrongPass[ 1 ][ 0 ],
+                           psc->arErrorWrongPass[ 1 ][ 1 ] );
+    }
+
+    for ( i = 0 ; i < 2; i++ )
+      rt[ i ] = GetRating ( ( psc->arErrorMissedDoubleDP[ i ][ 0 ]
+                              + psc->arErrorMissedDoubleTG[ i ][ 0 ]
+                              + psc->arErrorWrongDoubleDP[ i ][ 0 ]
+                              + psc->arErrorWrongDoubleTG[ i ][ 0 ]
+                              + psc->arErrorWrongTake[ i ][ 0 ]
+                              + psc->arErrorWrongPass[ i ][ 0 ] ) /
+                            psc->anTotalCube[ i ] );
       
-      fprintf ( pf,
-                STATTABLEROW ( "Cube decision rating", "%s" ),
-                aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+    printStatTableRow ( pf, 
+                        _( "Cube decision rating"), "%s",
+                        gettext ( aszRating[ rt [ 0 ] ] ), 
+                        gettext ( aszRating[ rt [ 1 ] ] ) );
   }
-
+    
   /* overall rating */
-
+    
   if( psc->fMoves && psc->fCube ) {
 
     cubeinfo ci;
@@ -2569,11 +2739,14 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
         + psc->arErrorCheckerplay[ i ][ 1 ];
 
     }
-                                 
-    fprintf ( pf,
-              STATTABLEHEADER ( "Overall rating" )
-              STATTABLEROW ( "Overall rating", "%s" ),
-              aszRating[ rt [ 0 ] ], aszRating[ rt [ 1 ] ] );
+     
+    printStatTableHeader ( pf,
+                           _("Overall rating" ) );
+                            
+    printStatTableRow ( pf, 
+                        _("Overall rating"), "%s",
+                        gettext ( aszRating[ rt [ 0 ] ] ), 
+                        gettext ( aszRating[ rt [ 1 ] ] ) );
 
     SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, 0,
                  pms->nMatchTo, pms->anScore, pms->fCrawford,
@@ -2601,10 +2774,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       else
         r = ( r0 - rm ) / rd;
 
-      fprintf ( pf,
-                STATTABLEROW ( "Game winning chance with same skill",
-                               "%6.2f%%" ),
-                100.0f * r, 100.0f * ( 1.0 - r ) );
+      printStatTableRow ( pf,
+                          _( "Game winning chance with same skill"),
+                          "%6.2f%%",
+                          100.0f * r, 100.0f * ( 1.0 - r ) );
 
 
       /* luck */
@@ -2625,10 +2798,10 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
       else
         r = ( r0 - rm ) / rd;
 
-      fprintf ( pf,
-                STATTABLEROW ( "Game winning chance with same luck",
-                               "%6.2f%%" ),
-                100.0f * r, 100.0f * ( 1.0 - r ) );
+      printStatTableRow ( pf,
+                          _( "Game winning chance with same luck"),
+                          "%6.2f%%",
+                          100.0f * r, 100.0f * ( 1.0 - r ) );
 
     }
   
@@ -2680,7 +2853,9 @@ HTMLPrintComment ( FILE *pf, const moverecord *pmr ) {
   if ( sz ) {
 
     fputs ( "<br />\n"
-            "<div class=\"commentheader\">Annotation</div>\n", pf );
+            "<div class=\"commentheader\">", pf );
+    fputs ( _("Annotation"), pf );
+    fputs ( "</div>\n", pf );
 
     fputs ( "<div class=\"comment\">", pf );
 
@@ -2808,11 +2983,20 @@ static void ExportGameHTML ( FILE *pf, list *plGame, const char *szImageDir,
 
       /* print game result */
 
-      fprintf ( pf, 
-                "<p class=\"result\">%s wins %d point%s</p>\n",
-                ap[ pmgi->fWinner ].szName, 
-                pmgi->nPoints,
-                pmgi->nPoints > 1 ? "s" : "" );
+      if ( pmgi->nPoints > 1 )
+        fprintf ( pf, 
+                  _("%s%s wins %d points%s"),
+                  "<p class=\"result\">",
+                  ap[ pmgi->fWinner ].szName, 
+                  pmgi->nPoints,
+                  "</p>\n");
+      else
+        fprintf ( pf, 
+                  _("%s%s wins %d point%s"),
+                  "<p class=\"result\">",
+                  ap[ pmgi->fWinner ].szName, 
+                  pmgi->nPoints,
+                  "</p>\n");
 
     }
 
@@ -2892,13 +3076,13 @@ extern void CommandExportGameHtml( char *sz ) {
     sz = NextToken( &sz );
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export"
-		 "game html')." );
+	outputl( _("You must specify a file to export to (see `help export"
+		 "game html').") );
 	return;
     }
 
@@ -3003,8 +3187,8 @@ extern void CommandExportMatchHtml( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export "
-		 "match html')." );
+	outputl( _("You must specify a file to export to (see `help export "
+		 "match html').") );
 	return;
     }
 
@@ -3075,13 +3259,13 @@ extern void CommandExportPositionHtml( char *sz ) {
     sz = NextToken( &sz );
     
     if( ms.gs == GAME_NONE ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export "
-		 "position html')." );
+	outputl( _("You must specify a file to export to (see `help export "
+		 "position html').") );
 	return;
     }
 

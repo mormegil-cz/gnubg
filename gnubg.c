@@ -302,34 +302,34 @@ windowgeometry wgGame = { 0, 400, -1, -1 };
 
 
 /* Usage strings */
-static char szDICE[] = "<die> <die>",
-    szER[] = "evaluation|rollout", 
-    szFILENAME[] = "<filename>",
-    szKEYVALUE[] = "[<key>=<value> ...]",
-    szLENGTH[] = "<length>",
-    szLIMIT[] = "<limit>",
-    szMILLISECONDS[] = "<milliseconds>",
-    szMOVE[] = "<from> <to> ...",
-    szONOFF[] = "on|off",
-    szOPTCOMMAND[] = "[command]",
-    szOPTFILENAME[] = "[filename]",
-    szOPTLIMIT[] = "[limit]",
-    szOPTPOSITION[] = "[position]",
-    szOPTSEED[] = "[seed]",
-    szOPTSIZE[] = "[size]",
-    szOPTVALUE[] = "[value]",
-    szPLAYER[] = "<player>",
-    szPLIES[] = "<plies>",
-    szPOSITION[] = "<position>",
-    szPROMPT[] = "<prompt>",
-    szRATE[] = "<rate>",
-    szSCORE[] = "<score>",
-    szSIZE[] = "<size>",
-    szSTEP[] = "[game|roll|rolled] [count]",
-    szTRIALS[] = "<trials>",
-    szVALUE[] = "<value>",
-    szMATCHID[] = "<matchid>",
-    szURL[] = "<URL>";
+static char szDICE[] = N_("<die> <die>"),
+    szER[] = N_("evaluation|rollout"), 
+    szFILENAME[] = N_("<filename>"),
+    szKEYVALUE[] = N_("[<key>=<value> ...]"),
+    szLENGTH[] = N_("<length>"),
+    szLIMIT[] = N_("<limit>"),
+    szMILLISECONDS[] = N_("<milliseconds>"),
+    szMOVE[] = N_("<from> <to> ..."),
+    szONOFF[] = N_("on|off"),
+    szOPTCOMMAND[] = N_("[command]"),
+    szOPTFILENAME[] = N_("[filename]"),
+    szOPTLIMIT[] = N_("[limit]"),
+    szOPTPOSITION[] = N_("[position]"),
+    szOPTSEED[] = N_("[seed]"),
+    szOPTSIZE[] = N_("[size]"),
+    szOPTVALUE[] = N_("[value]"),
+    szPLAYER[] = N_("<player>"),
+    szPLIES[] = N_("<plies>"),
+    szPOSITION[] = N_("<position>"),
+    szPROMPT[] = N_("<prompt>"),
+    szRATE[] = N_("<rate>"),
+    szSCORE[] = N_("<score>"),
+    szSIZE[] = N_("<size>"),
+    szSTEP[] = N_("[game|roll|rolled] [count]"),
+    szTRIALS[] = N_("<trials>"),
+    szVALUE[] = N_("<value>"),
+    szMATCHID[] = N_("<matchid>"),
+    szURL[] = N_("<URL>");
 
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
@@ -356,707 +356,765 @@ command cER = {
     /* dummy command used for player cube to display */
     NULL, NULL, NULL, NULL, &cExportCubeDisplay
 }, acAnalyse[] = {
-    { "game", CommandAnalyseGame, "Compute analysis and annotate current game",
+    { "game", CommandAnalyseGame, 
+      N_("Compute analysis and annotate current game"),
       NULL, NULL },
-    { "match", CommandAnalyseMatch, "Compute analysis and annotate every game "
-      "in the match", NULL, NULL },
-    { "move", CommandAnalyseMove, "Compute analysis and annotate the current "
-      "move", NULL, NULL },
-    { "session", CommandAnalyseSession, "Compute analysis and annotate every "
-      "game in the session", NULL, NULL },
+    { "match", CommandAnalyseMatch, 
+      N_("Compute analysis and annotate every game "
+      "in the match"), NULL, NULL },
+    { "move", CommandAnalyseMove, 
+      N_("Compute analysis and annotate the current "
+      "move"), NULL, NULL },
+    { "session", CommandAnalyseSession, 
+      N_("Compute analysis and annotate every "
+      "game in the session"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateClear[] = {
-    { "comment", CommandAnnotateClearComment, "Erase commentary about a move",
+    { "comment", CommandAnnotateClearComment, 
+      N_("Erase commentary about a move"),
       NULL, NULL },
-    { "luck", CommandAnnotateClearLuck, "Erase annotations for a dice roll",
+    { "luck", CommandAnnotateClearLuck, 
+      N_("Erase annotations for a dice roll"),
       NULL, NULL },
-    { "skill", CommandAnnotateClearSkill, "Erase skill annotations for a move",
+    { "skill", CommandAnnotateClearSkill, 
+      N_("Erase skill annotations for a move"),
       NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateMove[] = {
-    { "bad", CommandAnnotateBad, "Mark as bad", NULL, NULL },
-    { "clear", CommandAnnotateClearSkill, "Remove annotations", NULL, NULL },
-    { "doubtful", CommandAnnotateDoubtful, "Mark as doubtful", NULL, NULL },
-    { "good", CommandAnnotateGood, "Mark as good", NULL, NULL },
-    { "interesting", CommandAnnotateInteresting, "Mark as interesting",
+    { "bad", CommandAnnotateBad, N_("Mark as bad"), NULL, NULL },
+    { "clear", CommandAnnotateClearSkill, 
+      N_("Remove annotations"), NULL, NULL },
+    { "doubtful", CommandAnnotateDoubtful, N_("Mark as doubtful"), NULL, NULL },
+    { "good", CommandAnnotateGood, N_("Mark as good"), NULL, NULL },
+    { "interesting", CommandAnnotateInteresting, N_("Mark as interesting"),
       NULL, NULL },
-    { "verybad", CommandAnnotateVeryBad, "Mark as very bad", NULL, NULL },
-    { "verygood", CommandAnnotateVeryGood, "Mark as very good", NULL, NULL },
+    { "verybad", CommandAnnotateVeryBad, N_("Mark as very bad"), NULL, NULL },
+    { "verygood", CommandAnnotateVeryGood, 
+      N_("Mark as very good"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotateRoll[] = {
-    { "clear", CommandAnnotateClearLuck, "Remove annotations", NULL, NULL },
-    { "lucky", CommandAnnotateLucky, "Mark a lucky dice roll", NULL, NULL },
-    { "unlucky", CommandAnnotateUnlucky, "Mark an unlucky dice roll",
+    { "clear", CommandAnnotateClearLuck, 
+      N_("Remove annotations"), NULL, NULL },
+    { "lucky", CommandAnnotateLucky, 
+      N_("Mark a lucky dice roll"), NULL, NULL },
+    { "unlucky", CommandAnnotateUnlucky, N_("Mark an unlucky dice roll"),
       NULL, NULL },
-    { "verylucky", CommandAnnotateVeryLucky, "Mark a very lucky dice roll",
+    { "verylucky", CommandAnnotateVeryLucky, N_("Mark a very lucky dice roll"),
       NULL, NULL },
-    { "veryunlucky", CommandAnnotateVeryUnlucky, "Mark an very unlucky dice "
-      "roll", NULL, NULL },
+    { "veryunlucky", CommandAnnotateVeryUnlucky, 
+      N_("Mark an very unlucky dice roll"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acAnnotate[] = {
-    { "clear", NULL, "Clear annotation", NULL, acAnnotateClear },
-    { "move", CommandAnnotateMove, "Mark a move", NULL, acAnnotateMove },
-    { "roll", NULL, "Mark a roll", NULL, acAnnotateRoll },
-    { "cube", CommandAnnotateCube, "Mark a cube decision", 
+    { "clear", NULL, N_("Clear annotation"), NULL, acAnnotateClear },
+    { "move", CommandAnnotateMove, N_("Mark a move"), NULL, acAnnotateMove },
+    { "roll", NULL, N_("Mark a roll"), NULL, acAnnotateRoll },
+    { "cube", CommandAnnotateCube, N_("Mark a cube decision"), 
       NULL, acAnnotateMove },
-    { "double", CommandAnnotateDouble, "Mark a double", NULL, acAnnotateMove },
-    { "accept", CommandAnnotateAccept, "Mark an accept decision", 
+    { "double", CommandAnnotateDouble, 
+      N_("Mark a double"), NULL, acAnnotateMove },
+    { "accept", CommandAnnotateAccept, N_("Mark an accept decision"), 
       NULL, acAnnotateMove },
-    { "drop", CommandAnnotateDrop, "Mark a drop decision", 
+    { "drop", CommandAnnotateDrop, N_("Mark a drop decision"), 
       NULL, acAnnotateMove },
-    { "pass", CommandAnnotateDrop, "Mark a pass decision", 
+    { "pass", CommandAnnotateDrop, N_("Mark a pass decision"), 
       NULL, acAnnotateMove },
-    { "reject", CommandAnnotateReject, "Mark a reject decision", 
+    { "reject", CommandAnnotateReject, N_("Mark a reject decision"), 
       NULL, acAnnotateMove },
-    { "resign", CommandAnnotateResign, "Mark a resign decision", 
+    { "resign", CommandAnnotateResign, N_("Mark a resign decision"), 
       NULL, acAnnotateMove },
-    { "take", CommandAnnotateAccept, "Mark a take decision", 
+    { "take", CommandAnnotateAccept, N_("Mark a take decision"), 
       NULL, acAnnotateMove },
     { NULL, NULL, NULL, NULL, NULL }
 }, acDatabase[] = {
-    { "dump", CommandDatabaseDump, "List the positions in the database",
+    { "dump", CommandDatabaseDump, N_("List the positions in the database"),
       NULL, NULL },
-    { "export", CommandDatabaseExport, "Write the positions in the database "
-      "to a portable format", szFILENAME, &cFilename },
-    { "generate", CommandDatabaseGenerate, "Generate database positions by "
-      "self-play", szOPTVALUE, NULL },
-    { "import", CommandDatabaseImport, "Merge positions into the database",
+    { "export", CommandDatabaseExport, 
+      N_("Write the positions in the database "
+      "to a portable format"), szFILENAME, &cFilename },
+    { "generate", CommandDatabaseGenerate, N_("Generate database positions by "
+      "self-play"), szOPTVALUE, NULL },
+    { "import", CommandDatabaseImport, 
+      N_("Merge positions into the database"),
       szFILENAME, &cFilename },
-    { "rollout", CommandDatabaseRollout, "Evaluate positions in database "
-      "for future training", NULL, NULL },
-    { "train", CommandDatabaseTrain, "Train the network from a database of "
-      "positions", NULL, NULL },
-    { "verify", CommandDatabaseVerify, "Measure the current network error "
-      "against the database", NULL, NULL },
+    { "rollout", CommandDatabaseRollout, N_("Evaluate positions in database "
+      "for future training"), NULL, NULL },
+    { "train", CommandDatabaseTrain, N_("Train the network from a database of "
+      "positions"), NULL, NULL },
+    { "verify", CommandDatabaseVerify, N_("Measure the current network error "
+      "against the database"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
-    { "gam", CommandExportGameGam, "Records a log of the game in .gam "
-      "format", szFILENAME, &cFilename },
+    { "gam", CommandExportGameGam, N_("Records a log of the game in .gam "
+      "format"), szFILENAME, &cFilename },
     { "html", CommandExportGameHtml,
-      "Records a log of the game in .html format", szFILENAME,
+      N_("Records a log of the game in .html format"), szFILENAME,
       &cFilename },
-    { "latex", CommandExportGameLaTeX, "Records a log of the game in LaTeX "
-      "format", szFILENAME, &cFilename },
-    { "pdf", CommandExportGamePDF, "Records a log of the game in the "
-      "Portable Document Format", szFILENAME, &cFilename },
-    { "postscript", CommandExportGamePostScript, "Records a log of the game "
-      "in PostScript format", szFILENAME, &cFilename },
+    { "latex", CommandExportGameLaTeX, N_("Records a log of the game in LaTeX "
+      "format"), szFILENAME, &cFilename },
+    { "pdf", CommandExportGamePDF, N_("Records a log of the game in the "
+      "Portable Document Format"), szFILENAME, &cFilename },
+    { "postscript", CommandExportGamePostScript, 
+      N_("Records a log of the game "
+      "in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportGamePostScript, NULL, szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
-    { "mat", CommandExportMatchMat, "Records a log of the match in .mat "
-      "format", szFILENAME, &cFilename },
+    { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
+      "format"), szFILENAME, &cFilename },
     { "html", CommandExportMatchHtml,
-      "Records a log of the match in .html format", szFILENAME,
+      N_("Records a log of the match in .html format"), szFILENAME,
       &cFilename },
-    { "latex", CommandExportMatchLaTeX, "Records a log of the match in LaTeX "
-      "format", szFILENAME, &cFilename },
-    { "pdf", CommandExportMatchPDF, "Records a log of the match in the "
-      "Portable Document Format", szFILENAME, &cFilename },
-    { "postscript", CommandExportMatchPostScript, "Records a log of the match "
-      "in PostScript format", szFILENAME, &cFilename },
+    { "latex", CommandExportMatchLaTeX, 
+      N_("Records a log of the match in LaTeX "
+      "format"), szFILENAME, &cFilename },
+    { "pdf", CommandExportMatchPDF, N_("Records a log of the match in the "
+      "Portable Document Format"), szFILENAME, &cFilename },
+    { "postscript", CommandExportMatchPostScript, 
+      N_("Records a log of the match "
+      "in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportMatchPostScript, NULL, szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportPosition[] = {
-    { "eps", CommandExportPositionEPS, "Save the current position in "
-      "Encapsulated PostScript format", szFILENAME, &cFilename },
+    { "eps", CommandExportPositionEPS, N_("Save the current position in "
+      "Encapsulated PostScript format"), szFILENAME, &cFilename },
     { "html", CommandExportPositionHtml,
-      "Save the current position in .html format", szFILENAME, &cFilename },
-    { "pos", CommandNotImplemented, "Save the current position in .pos "
-      "format", szFILENAME, &cFilename },
+      N_("Save the current position in .html format"), 
+      szFILENAME, &cFilename },
+    { "pos", CommandNotImplemented, N_("Save the current position in .pos "
+      "format"), szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportSession[] = {
-    { "latex", CommandExportMatchLaTeX, "Records a log of the session in "
-      "LaTeX format", szFILENAME, &cFilename },
-    { "pdf", CommandExportMatchPDF, "Records a log of the session in the "
-      "Portable Document Format", szFILENAME, &cFilename },
-    { "postscript", CommandExportMatchPostScript, "Records a log of the "
-      "session in PostScript format", szFILENAME, &cFilename },
+    { "latex", CommandExportMatchLaTeX, N_("Records a log of the session in "
+      "LaTeX format"), szFILENAME, &cFilename },
+    { "pdf", CommandExportMatchPDF, N_("Records a log of the session in the "
+      "Portable Document Format"), szFILENAME, &cFilename },
+    { "postscript", CommandExportMatchPostScript, N_("Records a log of the "
+      "session in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportMatchPostScript, NULL, szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExport[] = {
-    { "database", CommandDatabaseExport, "Write the positions in the database "
-      "to a portable format", szFILENAME, &cFilename },
-    { "game", NULL, "Record a log of the game so far to a file", NULL,
+    { "database", CommandDatabaseExport, 
+      N_("Write the positions in the database "
+      "to a portable format"), szFILENAME, &cFilename },
+    { "game", NULL, N_("Record a log of the game so far to a file"), NULL,
       acExportGame },
-    { "match", NULL, "Record a log of the match so far to a file", NULL,
+    { "match", NULL, N_("Record a log of the match so far to a file"), NULL,
       acExportMatch },
-    { "position", NULL, "Write the current position to a file", NULL,
+    { "position", NULL, N_("Write the current position to a file"), NULL,
       acExportPosition },
-    { "session", NULL, "Record a log of the session so far to a file", NULL,
-      acExportSession },
+    { "session", NULL, N_("Record a log of the session so far to a file"), 
+      NULL, acExportSession },
     { NULL, NULL, NULL, NULL, NULL }
 }, acImport[] = {
-    { "database", CommandDatabaseImport, "Merge positions into the database",
+    { "database", CommandDatabaseImport, 
+      N_("Merge positions into the database"),
       szFILENAME, &cFilename },
-    { "mat", CommandImportMat, "Import a Jellyfish match", szFILENAME,
+    { "mat", CommandImportMat, N_("Import a Jellyfish match"), szFILENAME,
       &cFilename },
-    { "oldmoves", CommandImportOldmoves, "Import a FIBS oldmoves file",
+    { "oldmoves", CommandImportOldmoves, N_("Import a FIBS oldmoves file"),
       szFILENAME, &cFilename },
-    { "pos", CommandImportJF, "Import a Jellyfish position file", szFILENAME,
+    { "pos", CommandImportJF, 
+      N_("Import a Jellyfish position file"), szFILENAME,
       &cFilename },
-    { "sgg", CommandImportSGG, "Import an SGG match", szFILENAME, &cFilename },
+    { "sgg", CommandImportSGG, 
+      N_("Import an SGG match"), szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acList[] = {
-    { "game", CommandListGame, "Show the moves made in this game", NULL,
+    { "game", CommandListGame, N_("Show the moves made in this game"), NULL,
       NULL },
-    { "match", CommandListMatch, "Show the games played in this match", NULL,
+    { "match", CommandListMatch, 
+      N_("Show the games played in this match"), NULL,
       NULL },
-    { "session", CommandListMatch, "Show the games played in this session",
+    { "session", CommandListMatch, N_("Show the games played in this session"),
       NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acLoad[] = {
-    { "commands", CommandLoadCommands, "Read commands from a script file",
+    { "commands", CommandLoadCommands, N_("Read commands from a script file"),
       szFILENAME, &cFilename },
-    { "game", CommandLoadGame, "Read a saved game from a file", szFILENAME,
+    { "game", CommandLoadGame, N_("Read a saved game from a file"), szFILENAME,
       &cFilename },
-    { "match", CommandLoadMatch, "Read a saved match from a file", szFILENAME,
+    { "match", CommandLoadMatch, 
+      N_("Read a saved match from a file"), szFILENAME,
       &cFilename },
-    { "weights", CommandNotImplemented, "Read neural net weights from a file",
+    { "weights", CommandNotImplemented, 
+      N_("Read neural net weights from a file"),
       szOPTFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acNew[] = {
-    { "game", CommandNewGame, "Start a new game within the current match or "
-      "session", NULL, NULL },
-    { "match", CommandNewMatch, "Play a new match to some number of points",
-      szLENGTH, NULL },
-    { "session", CommandNewSession, "Start a new (money) session", NULL,
+    { "game", CommandNewGame, 
+      N_("Start a new game within the current match or session"), NULL, NULL },
+    { "match", CommandNewMatch, 
+      N_("Play a new match to some number of points"), szLENGTH, NULL },
+    { "session", CommandNewSession, N_("Start a new (money) session"), NULL,
       NULL },
-    { "weights", CommandNewWeights, "Create new (random) neural net "
-      "weights", szOPTSIZE, NULL },
+    { "weights", CommandNewWeights, N_("Create new (random) neural net "
+      "weights"), szOPTSIZE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSave[] = {
-    { "game", CommandSaveGame, "Record a log of the game so far to a "
-      "file", szFILENAME, &cFilename },
-    { "match", CommandSaveMatch, "Record a log of the match so far to a file",
+    { "game", CommandSaveGame, N_("Record a log of the game so far to a "
+      "file"), szFILENAME, &cFilename },
+    { "match", CommandSaveMatch, 
+      N_("Record a log of the match so far to a file"),
       szFILENAME, &cFilename },
-    { "settings", CommandSaveSettings, "Use the current settings in future "
-      "sessions", NULL, NULL },
-    { "weights", CommandSaveWeights, "Write the neural net weights to a file",
+    { "settings", CommandSaveSettings, N_("Use the current settings in future "
+      "sessions"), NULL, NULL },
+    { "weights", CommandSaveWeights, 
+      N_("Write the neural net weights to a file"),
       szOPTFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysisThreshold[] = {
-    { "bad", CommandSetAnalysisThresholdBad, "Specify the equity loss for a "
-      "bad move", szVALUE, NULL },
+    { "bad", CommandSetAnalysisThresholdBad, 
+      N_("Specify the equity loss for a bad move"), szVALUE, NULL },
     { "doubtful", CommandSetAnalysisThresholdDoubtful, 
-      "Specify the equity loss for a doubtful move", szVALUE, NULL },
-    { "good", CommandSetAnalysisThresholdGood, "Specify the equity gain for a "
-      "good move", szVALUE, NULL },
-    { "interesting", CommandSetAnalysisThresholdInteresting, "Specify the "
-      "equity gain for an interesting move", szVALUE, NULL },
-    { "lucky", CommandSetAnalysisThresholdLucky, "Specify the equity gain for "
-      "a lucky roll", szVALUE, NULL },
-    { "unlucky", CommandSetAnalysisThresholdUnlucky, "Specify the equity loss "
-      "for an unlucky roll", szVALUE, NULL },
-    { "verybad", CommandSetAnalysisThresholdVeryBad, "Specify the equity loss "
-      "for a very bad move", szVALUE, NULL },
-    { "verygood", CommandSetAnalysisThresholdVeryGood, "Specify the equity "
-      "gain for a very good move", szVALUE, NULL },
-    { "verylucky", CommandSetAnalysisThresholdVeryLucky, "Specify the equity "
-      "gain for a very lucky roll", szVALUE, NULL },
-    { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, "Specify the "
-      "equity loss for a very unlucky roll", szVALUE, NULL },
+      N_("Specify the equity loss for a doubtful move"), szVALUE, NULL },
+    { "good", CommandSetAnalysisThresholdGood, 
+      N_("Specify the equity gain for a "
+      "good move"), szVALUE, NULL },
+    { "interesting", CommandSetAnalysisThresholdInteresting, N_("Specify the "
+      "equity gain for an interesting move"), szVALUE, NULL },
+    { "lucky", CommandSetAnalysisThresholdLucky, 
+      N_("Specify the equity gain for "
+      "a lucky roll"), szVALUE, NULL },
+    { "unlucky", CommandSetAnalysisThresholdUnlucky, 
+      N_("Specify the equity loss "
+      "for an unlucky roll"), szVALUE, NULL },
+    { "verybad", CommandSetAnalysisThresholdVeryBad, 
+      N_("Specify the equity loss "
+      "for a very bad move"), szVALUE, NULL },
+    { "verygood", CommandSetAnalysisThresholdVeryGood, 
+      N_("Specify the equity "
+      "gain for a very good move"), szVALUE, NULL },
+    { "verylucky", CommandSetAnalysisThresholdVeryLucky, 
+      N_("Specify the equity "
+      "gain for a very lucky roll"), szVALUE, NULL },
+    { "veryunlucky", CommandSetAnalysisThresholdVeryUnlucky, N_("Specify the "
+      "equity loss for a very unlucky roll"), szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetEvalParam[] = {
   { "type", CommandSetEvalParamType,
-    "Specify type (evaluation or rollout)", szER, &cER },
+    N_("Specify type (evaluation or rollout)"), szER, &cER },
   { "evaluation", CommandSetEvalParamEvaluation,
-    "Speficy parameters for neural net evaluation", NULL,
+    N_("Speficy parameters for neural net evaluation"), NULL,
     acSetEvaluation },
   { "rollout", CommandSetEvalParamRollout,
-    "Speficy parameters for rollout", NULL,
+    N_("Speficy parameters for rollout"), NULL,
     acSetRollout },
   { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysis[] = {
-    { "chequerplay", CommandSetAnalysisChequerplay, "Specify parameters "
-      "for the analysis of chequerplay", NULL, acSetEvalParam },
-    { "cube", CommandSetAnalysisCube, "Select whether cube action will be "
-      "analysed", szONOFF, &cOnOff },
-    { "cubedecision", CommandSetAnalysisCubedecision, "Specify parameters "
-      "for the analysis of cube decisions", NULL,
+    { "chequerplay", CommandSetAnalysisChequerplay, N_("Specify parameters "
+      "for the analysis of chequerplay"), NULL, acSetEvalParam },
+    { "cube", CommandSetAnalysisCube, N_("Select whether cube action will be "
+      "analysed"), szONOFF, &cOnOff },
+    { "cubedecision", CommandSetAnalysisCubedecision, N_("Specify parameters "
+      "for the analysis of cube decisions"), NULL,
       acSetEvalParam },
-    { "limit", CommandSetAnalysisLimit, "Specify the maximum number of "
-      "possible moves analysed", szOPTLIMIT, NULL },
-    { "luck", CommandSetAnalysisLuck, "Select whether dice rolls will be "
-      "analysed", szONOFF, &cOnOff },
-    { "moves", CommandSetAnalysisMoves, "Select whether chequer play will be "
-      "analysed", szONOFF, &cOnOff },
-    { "threshold", NULL, "Specify levels for marking moves", NULL,
+    { "limit", CommandSetAnalysisLimit, N_("Specify the maximum number of "
+      "possible moves analysed"), szOPTLIMIT, NULL },
+    { "luck", CommandSetAnalysisLuck, N_("Select whether dice rolls will be "
+      "analysed"), szONOFF, &cOnOff },
+    { "moves", CommandSetAnalysisMoves, 
+      N_("Select whether chequer play will be "
+      "analysed"), szONOFF, &cOnOff },
+    { "threshold", NULL, N_("Specify levels for marking moves"), NULL,
       acSetAnalysisThreshold },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
-    { "analysis", CommandSetAutoAnalysis, "Analyse moves during match -- "
-      "a.k.a. tutor-mode", szONOFF, &cOnOff },
-    { "bearoff", CommandSetAutoBearoff, "Automatically bear off as many "
-      "chequers as possible", szONOFF, &cOnOff },
-    { "crawford", CommandSetAutoCrawford, "Enable the Crawford game "
-      "based on match score", szONOFF, &cOnOff },
-    { "doubles", CommandSetAutoDoubles, "Control automatic doubles "
-      "during (money) session play", szLIMIT, NULL },
-    { "game", CommandSetAutoGame, "Select whether to start new games "
-      "after wins", szONOFF, &cOnOff },
-    { "move", CommandSetAutoMove, "Select whether forced moves will be "
-      "made automatically", szONOFF, &cOnOff },
-    { "roll", CommandSetAutoRoll, "Control whether dice will be rolled "
-      "automatically", szONOFF, &cOnOff },
+    { "analysis", CommandSetAutoAnalysis, N_("Analyse moves during match -- "
+      "a.k.a. tutor-mode"), szONOFF, &cOnOff },
+    { "bearoff", CommandSetAutoBearoff, N_("Automatically bear off as many "
+      "chequers as possible"), szONOFF, &cOnOff },
+    { "crawford", CommandSetAutoCrawford, N_("Enable the Crawford game "
+      "based on match score"), szONOFF, &cOnOff },
+    { "doubles", CommandSetAutoDoubles, N_("Control automatic doubles "
+      "during (money) session play"), szLIMIT, NULL },
+    { "game", CommandSetAutoGame, N_("Select whether to start new games "
+      "after wins"), szONOFF, &cOnOff },
+    { "move", CommandSetAutoMove, N_("Select whether forced moves will be "
+      "made automatically"), szONOFF, &cOnOff },
+    { "roll", CommandSetAutoRoll, N_("Control whether dice will be rolled "
+      "automatically"), szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetConfirm[] = {
-    { "new", CommandSetConfirmNew, "Ask for confirmation before aborting "
-      "a game in progress", szONOFF, &cOnOff },
-    { "save", CommandSetConfirmSave, "Ask for confirmation before "
-      "overwriting existing files", szONOFF, &cOnOff },
+    { "new", CommandSetConfirmNew, N_("Ask for confirmation before aborting "
+      "a game in progress"), szONOFF, &cOnOff },
+    { "save", CommandSetConfirmSave, N_("Ask for confirmation before "
+      "overwriting existing files"), szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetCube[] = {
-    { "center", CommandSetCubeCentre, "The U.S.A. spelling of `centre'",
+    { "center", CommandSetCubeCentre, N_("The U.S.A. spelling of `centre'"),
       NULL, NULL },
-    { "centre", CommandSetCubeCentre, "Allow both players access to the "
-      "cube", NULL, NULL },
-    { "owner", CommandSetCubeOwner, "Allow only one player to double",
+    { "centre", CommandSetCubeCentre, N_("Allow both players access to the "
+      "cube"), NULL, NULL },
+    { "owner", CommandSetCubeOwner, N_("Allow only one player to double"),
       szPLAYER, &cPlayerBoth },
-    { "use", CommandSetCubeUse, "Control use of the doubling cube", szONOFF,
-      &cOnOff },
-    { "value", CommandSetCubeValue, "Fix what the cube stake has been set to",
+    { "use", CommandSetCubeUse, 
+      N_("Control use of the doubling cube"), szONOFF, &cOnOff },
+    { "value", CommandSetCubeValue, 
+      N_("Fix what the cube stake has been set to"),
       szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetOutput[] = {
     { "matchpc", CommandSetOutputMatchPC,
-      "Show match equities as percentages (on) or probabilities (off)",
+      N_("Show match equities as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
-    { "mwc", CommandSetOutputMWC, "Show output in MWC (on) or "
-      "equity (off) (match play only)", szONOFF, &cOnOff },
-    { "rawboard", CommandSetOutputRawboard, "Give FIBS \"boardstyle 3\" "
-      "output (on), or an ASCII board (off)", szONOFF, &cOnOff },
+    { "mwc", CommandSetOutputMWC, N_("Show output in MWC (on) or "
+      "equity (off) (match play only)"), szONOFF, &cOnOff },
+    { "rawboard", CommandSetOutputRawboard, N_("Give FIBS \"boardstyle 3\" "
+      "output (on), or an ASCII board (off)"), szONOFF, &cOnOff },
     { "winpc", CommandSetOutputWinPC,
-      "Show winning chances as percentages (on) or probabilities (off)",
+      N_("Show winning chances as percentages (on) or probabilities (off)"),
       szONOFF, &cOnOff },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
-    { "ansi", CommandSetRNGAnsi, "Use the ANSI C rand() (usually linear "
-      "congruential) generator", szOPTSEED, NULL },
-    { "bsd", CommandSetRNGBsd, "Use the BSD random() non-linear additive "
-      "feedback generator", szOPTSEED, NULL },
-    { "isaac", CommandSetRNGIsaac, "Use the I.S.A.A.C. generator", szOPTSEED,
-      NULL },
-    { "manual", CommandSetRNGManual, "Enter all dice rolls manually", NULL,
-      NULL },
-    { "md5", CommandSetRNGMD5, "Use the MD5 generator", szOPTSEED, NULL },
-    { "mersenne", CommandSetRNGMersenne, "Use the Mersenne Twister generator",
+    { "ansi", CommandSetRNGAnsi, N_("Use the ANSI C rand() (usually linear "
+      "congruential) generator"), szOPTSEED, NULL },
+    { "bsd", CommandSetRNGBsd, N_("Use the BSD random() non-linear additive "
+      "feedback generator"), szOPTSEED, NULL },
+    { "isaac", CommandSetRNGIsaac, N_("Use the I.S.A.A.C. generator"), 
       szOPTSEED, NULL },
-    { "user", CommandSetRNGUser, "Specify an external generator", szOPTSEED,
-      NULL,},
+    { "manual", CommandSetRNGManual, 
+      N_("Enter all dice rolls manually"), NULL, NULL },
+    { "md5", CommandSetRNGMD5, N_("Use the MD5 generator"), szOPTSEED, NULL },
+    { "mersenne", CommandSetRNGMersenne, 
+      N_("Use the Mersenne Twister generator"),
+      szOPTSEED, NULL },
+    { "user", CommandSetRNGUser, 
+      N_("Specify an external generator"), szOPTSEED, NULL,},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutPlayer[] = {
-    { "chequerplay", CommandSetRolloutPlayerChequerplay, "Specify parameters "
-      "for chequerplay during rollouts", NULL, acSetEvaluation },
+    { "chequerplay", CommandSetRolloutPlayerChequerplay, 
+      N_("Specify parameters "
+      "for chequerplay during rollouts"), NULL, acSetEvaluation },
     { "cubedecision", CommandSetRolloutPlayerCubedecision,
-      "Specify parameters for cube decisions during rollouts",
+      N_("Specify parameters for cube decisions during rollouts"),
       NULL, acSetEvaluation },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRollout[] = {
-    { "chequerplay", CommandSetRolloutChequerplay, "Specify parameters "
-      "for chequerplay during rollouts", NULL, acSetEvaluation },
-    { "cubedecision", CommandSetRolloutCubedecision, "Specify parameters "
-      "for cube decisions during rollouts", NULL, acSetEvaluation },
-    { "cubeful", CommandSetRolloutCubeful, "Specify whether the "
-      "rollout is cubeful or cubeless", szONOFF, &cOnOff },
-    { "initial", CommandSetRolloutInitial, "Roll out as the initial position "
-      "of a game", szONOFF, &cOnOff },
-    { "player", CommandSetRolloutPlayer, "Control evaluation "
-      "parameters for each side individually", szPLAYER, acSetRolloutPlayer }, 
-    { "rng", CommandSetRolloutRNG, "Specify the random number "
-      "generator algorithm for rollouts", NULL, acSetRNG },
-    { "seed", CommandSetRolloutSeed, "Specify the base pseudo-random seed "
-      "to use for rollouts", szOPTSEED, NULL },
-    { "trials", CommandSetRolloutTrials, "Control how many rollouts to "
-      "perform", szTRIALS, NULL },
-    { "truncation", CommandSetRolloutTruncation, "End rollouts at a "
-      "particular depth", szPLIES, NULL },
-    { "varredn", CommandSetRolloutVarRedn, "Use lookahead during rollouts "
-      "to reduce variance", szONOFF, &cOnOff },
+    { "chequerplay", CommandSetRolloutChequerplay, N_("Specify parameters "
+      "for chequerplay during rollouts"), NULL, acSetEvaluation },
+    { "cubedecision", CommandSetRolloutCubedecision, N_("Specify parameters "
+      "for cube decisions during rollouts"), NULL, acSetEvaluation },
+    { "cubeful", CommandSetRolloutCubeful, N_("Specify whether the "
+      "rollout is cubeful or cubeless"), szONOFF, &cOnOff },
+    { "initial", CommandSetRolloutInitial, 
+      N_("Roll out as the initial position "
+      "of a game"), szONOFF, &cOnOff },
+    { "player", CommandSetRolloutPlayer, 
+      N_("Control evaluation parameters for each side individually"), 
+      szPLAYER, acSetRolloutPlayer }, 
+    { "rng", CommandSetRolloutRNG, N_("Specify the random number "
+      "generator algorithm for rollouts"), NULL, acSetRNG },
+    { "seed", CommandSetRolloutSeed, N_("Specify the base pseudo-random seed "
+      "to use for rollouts"), szOPTSEED, NULL },
+    { "trials", CommandSetRolloutTrials, N_("Control how many rollouts to "
+      "perform"), szTRIALS, NULL },
+    { "truncation", CommandSetRolloutTruncation, N_("End rollouts at a "
+      "particular depth"), szPLIES, NULL },
+    { "varredn", CommandSetRolloutVarRedn, N_("Use lookahead during rollouts "
+      "to reduce variance"), szONOFF, &cOnOff },
     /* FIXME add commands for cubeful rollouts, cube variance reduction,
        quasi-random dice, settlements... */
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetTraining[] = {
-    { "alpha", CommandSetTrainingAlpha, "Control magnitude of backpropagation "
-      "of errors", szVALUE, NULL },
-    { "anneal", CommandSetTrainingAnneal, "Decrease alpha as training "
-      "progresses", szRATE, NULL },
-    { "threshold", CommandSetTrainingThreshold, "Require a minimum error in "
-      "position database generation", szVALUE, NULL },
+    { "alpha", CommandSetTrainingAlpha, 
+      N_ ("Control magnitude of backpropagation of errors"), szVALUE, NULL },
+    { "anneal", CommandSetTrainingAnneal, N_("Decrease alpha as training "
+      "progresses"), szRATE, NULL },
+    { "threshold", CommandSetTrainingThreshold, 
+      N_("Require a minimum error in "
+      "position database generation"), szVALUE, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetEval[] = {
   { "chequerplay", CommandSetEvalChequerplay,
-    "Set evaluation parameters for chequer play", NULL,
+    N_("Set evaluation parameters for chequer play"), NULL,
     acSetEvalParam },
   { "cubedecision", CommandSetEvalCubedecision,
-    "Set evaluation parameters for cube decisions", NULL,
+    N_("Set evaluation parameters for cube decisions"), NULL,
     acSetEvalParam },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportParameters[] = {
   { "evaluation", CommandSetExportParametersEvaluation,
-    "show detailed parameters for evaluations", szONOFF, &cOnOff },
+    N_("show detailed parameters for evaluations"), szONOFF, &cOnOff },
   { "rollout", CommandSetExportParametersRollout,
-    "show detailed parameters for rollouts", szONOFF, &cOnOff },
+    N_("show detailed parameters for rollouts"), szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportHTML[] = {
   { "pictureurl", CommandSetExportHTMLPictureURL,
-    "set URL to pictures used in HTML export", szURL, NULL },
+    N_("set URL to pictures used in HTML export"), szURL, NULL },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportMovesDisplay[] = {
   { "verybad", CommandSetExportMovesDisplayVeryBad,
-    "show very bad moves", szONOFF, &cOnOff },
+    N_("show very bad moves"), szONOFF, &cOnOff },
   { "bad", CommandSetExportMovesDisplayBad,
-    "show bad moves", szONOFF, &cOnOff },
+    N_("show bad moves"), szONOFF, &cOnOff },
   { "doubtful", CommandSetExportMovesDisplayDoubtful,
-    "show doubtful moves", szONOFF, &cOnOff },
+    N_("show doubtful moves"), szONOFF, &cOnOff },
   { "unmarked", CommandSetExportMovesDisplayUnmarked,
-    "show unmarked moves", szONOFF, &cOnOff },
+    N_("show unmarked moves"), szONOFF, &cOnOff },
   { "interesting", CommandSetExportMovesDisplayInteresting,
-    "show interesting moves", szONOFF, &cOnOff },
+    N_("show interesting moves"), szONOFF, &cOnOff },
   { "good", CommandSetExportMovesDisplayGood,
-    "show good moves", szONOFF, &cOnOff },
+    N_("show good moves"), szONOFF, &cOnOff },
   { "verygood", CommandSetExportMovesDisplayVeryGood,
-    "show very good moves", szONOFF, &cOnOff },
+    N_("show very good moves"), szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportCubeDisplay[] = {
   { "verybad", CommandSetExportCubeDisplayVeryBad,
-    "show very bad moves", szONOFF, &cOnOff },
+    N_("show very bad moves"), szONOFF, &cOnOff },
   { "bad", CommandSetExportCubeDisplayBad,
-    "show bad moves", szONOFF, &cOnOff },
+    N_("show bad moves"), szONOFF, &cOnOff },
   { "doubtful", CommandSetExportCubeDisplayDoubtful,
-    "show doubtful moves", szONOFF, &cOnOff },
+    N_("show doubtful moves"), szONOFF, &cOnOff },
   { "unmarked", CommandSetExportCubeDisplayUnmarked,
-    "show unmarked moves", szONOFF, &cOnOff },
+    N_("show unmarked moves"), szONOFF, &cOnOff },
   { "interesting", CommandSetExportCubeDisplayInteresting,
-    "show interesting moves", szONOFF, &cOnOff },
+    N_("show interesting moves"), szONOFF, &cOnOff },
   { "good", CommandSetExportCubeDisplayGood,
-    "show good moves", szONOFF, &cOnOff },
+    N_("show good moves"), szONOFF, &cOnOff },
   { "verygood", CommandSetExportCubeDisplayVeryGood,
-    "show very good moves", szONOFF, &cOnOff },
+    N_("show very good moves"), szONOFF, &cOnOff },
   { "actual", CommandSetExportCubeDisplayActual,
-    "show very good moves", szONOFF, &cOnOff },
+    N_("show very good moves"), szONOFF, &cOnOff },
   { "close", CommandSetExportCubeDisplayClose,
-    "show very good moves", szONOFF, &cOnOff },
+    N_("show very good moves"), szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportInclude[] = {
   { "annotations", CommandSetExportIncludeAnnotations,
-    "include annotations", szONOFF, &cOnOff },
+    N_("include annotations"), szONOFF, &cOnOff },
   { "analysis", CommandSetExportIncludeAnalysis,
-    "include analysis (evaluations/rollouts)", szONOFF, &cOnOff },
+    N_("include analysis (evaluations/rollouts)"), szONOFF, &cOnOff },
   { "statistics", CommandSetExportIncludeStatistics,
-    "include statistics (# of bad moves, # of jokers, etc)", 
+    N_("include statistics (# of bad moves, # of jokers, etc)"), 
     szONOFF, &cOnOff },
   { "legend", CommandSetExportIncludeLegend,
-    "include a legend that describes the output of the export", 
+    N_("include a legend that describes the output of the export"), 
     szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportShow[] = {
   { "board", CommandSetExportShowBoard,
-    "show board every [value] move (0 for never)", szVALUE, NULL },
+    N_("show board every [value] move (0 for never)"), szVALUE, NULL },
   { "player", CommandSetExportShowPlayer,
-    "which player(s) to show", szPLAYER, &cPlayerBoth },
+    N_("which player(s) to show"), szPLAYER, &cPlayerBoth },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportMoves[] = {
   { "number", CommandSetExportMovesNumber,
-    "show at most [value] moves", szVALUE, NULL },
+    N_("show at most [value] moves"), szVALUE, NULL },
   { "probabilities", CommandSetExportMovesProb,
-    "show detailed probabilities", szONOFF, &cOnOff },
+    N_("show detailed probabilities"), szONOFF, &cOnOff },
   { "parameters", CommandSetExportMovesParameters,
-    "show detailed rollout/evaluation parameters", NULL, 
+    N_("show detailed rollout/evaluation parameters"), NULL, 
     acSetExportParameters },
-  { "display", NULL, "when to show moves", NULL, acSetExportMovesDisplay },
+  { "display", NULL, N_("when to show moves"), NULL, acSetExportMovesDisplay },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExportCube[] = {
   { "probabilities", CommandSetExportCubeProb,
-    "show detailed probabilities", szONOFF, &cOnOff },
+    N_("show detailed probabilities"), szONOFF, &cOnOff },
   { "parameters", CommandSetExportCubeParameters,
-    "show detailed rollout/evaluation parameters", NULL, 
+    N_("show detailed rollout/evaluation parameters"), NULL, 
     acSetExportParameters },
-  { "display", NULL, "when to show moves", NULL, acSetExportCubeDisplay },
+  { "display", NULL, N_("when to show moves"), NULL, acSetExportCubeDisplay },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetExport[] = {
   { "html", NULL,
-    "Set options for HTML export", NULL, acSetExportHTML },
+    N_("Set options for HTML export"), NULL, acSetExportHTML },
   { "include", NULL,
-    "Control which blocks to include in exports", NULL, acSetExportInclude },
+    N_("Control which blocks to include in exports"), 
+    NULL, acSetExportInclude },
   { "show", NULL,
-    "Control display of boards/players in exports", NULL, acSetExportShow },
+    N_("Control display of boards/players in exports"), NULL, acSetExportShow },
   { "moves", NULL,
-    "Control display of moves in exports", NULL, acSetExportMoves },
+    N_("Control display of moves in exports"), NULL, acSetExportMoves },
   { "cube", NULL,
-    "Control display of cube in exports", NULL, acSetExportCube },
+    N_("Control display of cube in exports"), NULL, acSetExportCube },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetInvert[] = {
   { "matchequitytable", CommandSetInvertMatchEquityTable,
-    "invert match equity table", szONOFF, &cOnOff },
+    N_("invert match equity table"), szONOFF, &cOnOff },
   { "met", CommandSetInvertMatchEquityTable,
-    "alias for 'set invert matchequitytable'", szONOFF, &cOnOff },
+    N_("alias for 'set invert matchequitytable'"), szONOFF, &cOnOff },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetPath[] = {
   { "eps", CommandSetPathEPS,
-    "Set default path for exporting Encapsulated PostScript files", 
+    N_("Set default path for exporting Encapsulated PostScript files"), 
     szFILENAME, &cFilename },
   { "gam", CommandSetPathGam,
-    "Set default path for importing or exporting Jellyfish .gam files", 
+    N_("Set default path for importing or exporting Jellyfish .gam files"), 
     szFILENAME, &cFilename },
   { "html", CommandSetPathHTML,
-    "Set default path for exporting HTML files", 
+    N_("Set default path for exporting HTML files"), 
     szFILENAME, &cFilename },
   { "latex", CommandSetPathLaTeX,
-    "Set default path for exporting LaTeX files", 
+    N_("Set default path for exporting LaTeX files"), 
     szFILENAME, &cFilename },
   { "mat", CommandSetPathMat,
-    "Set default path for importing or exporting Jellyfish .mat files", 
+    N_("Set default path for importing or exporting Jellyfish .mat files"), 
     szFILENAME, &cFilename },
   { "oldmoves", CommandSetPathOldMoves,
-    "Set default path for importing FIBS oldmoves files", 
+    N_("Set default path for importing FIBS oldmoves files"), 
     szFILENAME, &cFilename },
   { "pdf", CommandSetPathPDF,
-    "Set default path for exporting PDF files", 
+    N_("Set default path for exporting PDF files"), 
     szFILENAME, &cFilename },
   { "pos", CommandSetPathPos,
-    "Set default path for importing Jellyfish .pos files", 
+    N_("Set default path for importing Jellyfish .pos files"), 
     szFILENAME, &cFilename },
   { "postscript", CommandSetPathPostScript,
-    "Set default path for exporting PostScript files", 
+    N_("Set default path for exporting PostScript files"), 
     szFILENAME, &cFilename },
   { "sgf", CommandSetPathSGF,
-    "Set default path for loading and saving SGF files", 
+    N_("Set default path for loading and saving SGF files"), 
     szFILENAME, &cFilename },
   { "sgg", CommandSetPathSGG,
-    "Set default path for importing GamesGrid SGG files", 
+    N_("Set default path for importing GamesGrid SGG files"), 
     szFILENAME, &cFilename },
   { "met", CommandSetPathMET,
-    "Set default path for loading match equity files", 
+    N_("Set default path for loading match equity files"), 
     szFILENAME, &cFilename },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSet[] = {
-    { "analysis", NULL, "Control parameters used when analysing moves",
+    { "analysis", NULL, N_("Control parameters used when analysing moves"),
       NULL, acSetAnalysis },
-    { "annotation", CommandSetAnnotation, "Select whether move analysis and "
-      "commentary are shown", szONOFF, &cOnOff },
-    { "appearance", CommandSetAppearance, "Modify the look and feel of the "
-      "graphical interface", szKEYVALUE, NULL },
-    { "automatic", NULL, "Perform certain functions without user input",
+    { "annotation", CommandSetAnnotation, N_("Select whether move analysis and "
+      "commentary are shown"), szONOFF, &cOnOff },
+    { "appearance", CommandSetAppearance, N_("Modify the look and feel of the "
+      "graphical interface"), szKEYVALUE, NULL },
+    { "automatic", NULL, N_("Perform certain functions without user input"),
       NULL, acSetAutomatic },
     { "beavers", CommandSetBeavers, 
-      "Set whether beavers are allowed in money game or not", 
+      N_("Set whether beavers are allowed in money game or not"), 
       szONOFF, &cOnOff },
-    { "board", CommandSetBoard, "Set up the board in a particular "
-      "position", szPOSITION, NULL },
-    { "cache", CommandSetCache, "Set the size of the evaluation cache",
+    { "board", CommandSetBoard, N_("Set up the board in a particular "
+      "position"), szPOSITION, NULL },
+    { "cache", CommandSetCache, N_("Set the size of the evaluation cache"),
       szSIZE, NULL },
-    { "clockwise", CommandSetClockwise, "Control the board orientation",
+    { "clockwise", CommandSetClockwise, N_("Control the board orientation"),
       szONOFF, &cOnOff },
-    { "colours", CommandSetAppearance, "Synonym for `set appearance'", NULL,
-      NULL },
-    { "confirm", NULL, "Confirmation settings", NULL, acSetConfirm },
+    { "colours", CommandSetAppearance, 
+      N_("Synonym for `set appearance'"), NULL, NULL },
+    { "confirm", NULL, N_("Confirmation settings"), NULL, acSetConfirm },
     { "crawford", CommandSetCrawford, 
-      "Set whether this is the Crawford game", szONOFF, &cOnOff },
-    { "cube", NULL, "Set the cube owner and/or value", NULL, acSetCube },
-    { "delay", CommandSetDelay, "Limit the speed at which moves are made",
+      N_("Set whether this is the Crawford game"), szONOFF, &cOnOff },
+    { "cube", NULL, N_("Set the cube owner and/or value"), NULL, acSetCube },
+    { "delay", CommandSetDelay, N_("Limit the speed at which moves are made"),
       szMILLISECONDS, NULL },
-    { "dice", CommandSetDice, "Select the roll for the current move",
+    { "dice", CommandSetDice, N_("Select the roll for the current move"),
       szDICE, NULL },
-    { "display", CommandSetDisplay, "Select whether the board is updated on "
-      "the computer's turn", szONOFF, &cOnOff },
-    { "evaluation", NULL, "Control position evaluation "
-      "parameters", NULL, acSetEval },
-    { "egyptian", CommandSetEgyptian, "Set whether to use the Egyptian rule in "      "games", szONOFF, &cOnOff },
-    { "export", NULL, "Set settings for export", NULL, acSetExport },
-    { "invert", NULL, "Invert match equity table", NULL, acSetInvert },
-    { "jacoby", CommandSetJacoby, "Set whether to use the Jacoby rule in "
-      "money games", szONOFF, &cOnOff },
-    { "matchequitytable", CommandSetMET,
-      "Read match equity table from XML file", szFILENAME, &cFilename },
-    { "matchid", CommandSetMatchID, "set Match ID", szMATCHID, NULL },
-    { "met", CommandSetMET,
-      "Synonym for `set matchequitytable'", szFILENAME, &cFilename },
-    { "nackgammon", CommandSetNackgammon, "Set the starting position",
+    { "display", CommandSetDisplay, 
+      N_("Select whether the board is updated on the computer's turn"), 
       szONOFF, &cOnOff },
-    { "output", NULL, "Modify options for formatting results", NULL,
+    { "evaluation", NULL, N_("Control position evaluation "
+      "parameters"), NULL, acSetEval },
+    { "egyptian", CommandSetEgyptian, 
+      N_("Set whether to use the Egyptian rule in games"), szONOFF, &cOnOff },
+    { "export", NULL, N_("Set settings for export"), NULL, acSetExport },
+    { "invert", NULL, N_("Invert match equity table"), NULL, acSetInvert },
+    { "jacoby", CommandSetJacoby, N_("Set whether to use the Jacoby rule in "
+      "money games"), szONOFF, &cOnOff },
+    { "matchequitytable", CommandSetMET,
+      N_("Read match equity table from XML file"), szFILENAME, &cFilename },
+    { "matchid", CommandSetMatchID, N_("set Match ID"), szMATCHID, NULL },
+    { "met", CommandSetMET,
+      N_("Synonym for `set matchequitytable'"), szFILENAME, &cFilename },
+    { "nackgammon", CommandSetNackgammon, N_("Set the starting position"),
+      szONOFF, &cOnOff },
+    { "output", NULL, N_("Modify options for formatting results"), NULL,
       acSetOutput },
-    { "path", NULL, "Set default path when saving, loading, importing, "
-      "and exporting files.", NULL, acSetPath },
-    { "player", CommandSetPlayer, "Change options for one or both "
-      "players", szPLAYER, acSetPlayer },
+    { "path", NULL, N_("Set default path when saving, loading, importing, "
+      "and exporting files."), NULL, acSetPath },
+    { "player", CommandSetPlayer, N_("Change options for one or both "
+      "players"), szPLAYER, acSetPlayer },
     { "postcrawford", CommandSetPostCrawford, 
-      "Set whether this is a post-Crawford game", szONOFF, &cOnOff },
-    { "prompt", CommandSetPrompt, "Customise the prompt gnubg prints when "
-      "ready for commands", szPROMPT, NULL },
-    { "record", CommandSetRecord, "Set whether all games in a session are "
-      "recorded", szONOFF, &cOnOff },
-    { "rng", NULL, "Select the random number generator algorithm", NULL,
+      N_("Set whether this is a post-Crawford game"), szONOFF, &cOnOff },
+    { "prompt", CommandSetPrompt, N_("Customise the prompt gnubg prints when "
+      "ready for commands"), szPROMPT, NULL },
+    { "record", CommandSetRecord, N_("Set whether all games in a session are "
+      "recorded"), szONOFF, &cOnOff },
+    { "rng", NULL, N_("Select the random number generator algorithm"), NULL,
       acSetRNG },
-    { "rollout", CommandSetRollout, "Control rollout parameters",
+    { "rollout", CommandSetRollout, N_("Control rollout parameters"),
       NULL, acSetRollout }, 
-    { "score", CommandSetScore, "Set the match or session score ",
+    { "score", CommandSetScore, N_("Set the match or session score "),
       szSCORE, NULL },
-    { "seed", CommandSetSeed, "Set the dice generator seed", szOPTSEED, NULL },
-    { "training", NULL, "Control training parameters", NULL, acSetTraining },
-    { "turn", CommandSetTurn, "Set which player is on roll", szPLAYER,
+    { "seed", CommandSetSeed, 
+      N_("Set the dice generator seed"), szOPTSEED, NULL },
+    { "training", NULL, 
+      N_("Control training parameters"), NULL, acSetTraining },
+    { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
       &cPlayer },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowStatistics[] = {
-    { "game", CommandShowStatisticsGame, "Compute statistics for current game",
-      NULL, NULL },
-    { "match", CommandShowStatisticsMatch, "Compute statistics for every game "
-      "in the match", NULL, NULL },
-    { "session", CommandShowStatisticsSession, "Compute statistics for every "
-      "game in the session", NULL, NULL },
+    { "game", CommandShowStatisticsGame, 
+      N_("Compute statistics for current game"), NULL, NULL },
+    { "match", CommandShowStatisticsMatch, 
+      N_("Compute statistics for every game in the match"), NULL, NULL },
+    { "session", CommandShowStatisticsSession, 
+      N_("Compute statistics for every game in the session"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShow[] = {
-    { "analysis", CommandShowAnalysis, "Show parameters used for analysing "
-      "moves", NULL, NULL },
-    { "automatic", CommandShowAutomatic, "List which functions will be "
-      "performed without user input", NULL, NULL },
+    { "analysis", CommandShowAnalysis, N_("Show parameters used for analysing "
+      "moves"), NULL, NULL },
+    { "automatic", CommandShowAutomatic, N_("List which functions will be "
+      "performed without user input"), NULL, NULL },
     { "beavers", CommandShowBeavers, 
-      "Show whether beavers are allowed in money game or not", 
+      N_("Show whether beavers are allowed in money game or not"), 
       NULL, NULL },
-    { "board", CommandShowBoard, "Redisplay the board position", szOPTPOSITION,
-      NULL },
-    { "cache", CommandShowCache, "Display statistics on the evaluation "
-      "cache", NULL, NULL },
-    { "clockwise", CommandShowClockwise, "Display the board orientation",
+    { "board", CommandShowBoard, 
+      N_("Redisplay the board position"), szOPTPOSITION, NULL },
+    { "cache", CommandShowCache, N_("Display statistics on the evaluation "
+      "cache"), NULL, NULL },
+    { "clockwise", CommandShowClockwise, N_("Display the board orientation"),
       NULL, NULL },
-    { "commands", CommandShowCommands, "List all available commands",
+    { "commands", CommandShowCommands, N_("List all available commands"),
       NULL, NULL },
-    { "confirm", CommandShowConfirm, "Show whether confirmation is required "
-      "before aborting a game", NULL, NULL },
-    { "copying", CommandShowCopying, "Conditions for redistributing copies "
-      "of GNU Backgammon", NULL, NULL },
+    { "confirm", CommandShowConfirm, 
+      N_("Show whether confirmation is required before aborting a game"), 
+      NULL, NULL },
+    { "copying", CommandShowCopying, N_("Conditions for redistributing copies "
+      "of GNU Backgammon"), NULL, NULL },
     { "crawford", CommandShowCrawford, 
-      "See if this is the Crawford game", NULL, NULL },
-    { "cube", CommandShowCube, "Display the current cube value and owner",
+      N_("See if this is the Crawford game"), NULL, NULL },
+    { "cube", CommandShowCube, N_("Display the current cube value and owner"),
       NULL, NULL },
-    { "delay", CommandShowDelay, "See what the current delay setting is", 
+    { "delay", CommandShowDelay, N_("See what the current delay setting is"), 
       NULL, NULL },
-    { "dice", CommandShowDice, "See what the current dice roll is", NULL,
+    { "dice", CommandShowDice, N_("See what the current dice roll is"), NULL,
       NULL },
-    { "display", CommandShowDisplay, "Show whether the board will be updated "
-      "on the computer's turn", NULL, NULL },
-    { "engine", CommandShowEngine, "Display the status of the evaluation "
-      "engine", NULL, NULL },
-    { "evaluation", CommandShowEvaluation, "Display evaluation settings "
-      "and statistics", NULL, NULL },
-    { "gammonvalues", CommandShowGammonValues, "Show gammon values",
+    { "display", CommandShowDisplay, 
+      N_("Show whether the board will be updated on the computer's turn"), 
+      NULL, NULL },
+    { "engine", CommandShowEngine, N_("Display the status of the evaluation "
+      "engine"), NULL, NULL },
+    { "evaluation", CommandShowEvaluation, N_("Display evaluation settings "
+      "and statistics"), NULL, NULL },
+    { "gammonvalues", CommandShowGammonValues, N_("Show gammon values"),
       NULL, NULL },
     { "egyptian", CommandShowEgyptian,
-      "See if the Egyptian rule is used in sessions", NULL, NULL },
-    { "export", CommandShowExport, "Show current export settings", 
+      N_("See if the Egyptian rule is used in sessions"), NULL, NULL },
+    { "export", CommandShowExport, N_("Show current export settings"), 
       NULL, NULL },
     { "jacoby", CommandShowJacoby, 
-      "See if the Jacoby rule is used in money sessions", NULL, NULL },
-    { "kleinman", CommandShowKleinman, "Calculate Kleinman count for "
-      "position", szOPTPOSITION, NULL },
+      N_("See if the Jacoby rule is used in money sessions"), NULL, NULL },
+    { "kleinman", CommandShowKleinman, N_("Calculate Kleinman count for "
+      "position"), szOPTPOSITION, NULL },
     { "marketwindow", CommandShowMarketWindow, 
-      "show market window for doubles", NULL, NULL },
+      N_("show market window for doubles"), NULL, NULL },
     { "matchequitytable", CommandShowMatchEquityTable, 
-      "Show match equity table", szOPTVALUE, NULL },
+      N_("Show match equity table"), szOPTVALUE, NULL },
     { "met", CommandShowMatchEquityTable, 
-      "Synonym for `show matchequitytable'", szOPTVALUE, NULL },
-    { "nackgammon", CommandShowNackgammon, "Display which starting position "
-      "will be used", NULL, NULL },
-    { "output", CommandShowOutput, "Show how results will be formatted",
+      N_("Synonym for `show matchequitytable'"), szOPTVALUE, NULL },
+    { "nackgammon", CommandShowNackgammon,
+      N_("Display which starting position will be used"), NULL, NULL },
+    { "output", CommandShowOutput, N_("Show how results will be formatted"),
       NULL, NULL },
-    { "path", CommandShowPath, "Show default paths for save, load, export, "
-      "and import", NULL, NULL },
-    { "pipcount", CommandShowPipCount, "Count the number of pips each player "
-      "must move to bear off", szOPTPOSITION, NULL },
-    { "player", CommandShowPlayer, "View per-player options", NULL, NULL },
+    { "path", CommandShowPath, N_("Show default paths for save, load, export, "
+      "and import"), NULL, NULL },
+    { "pipcount", CommandShowPipCount, 
+      N_("Count the number of pips each player must move to bear off"), 
+      szOPTPOSITION, NULL },
+    { "player", CommandShowPlayer, N_("View per-player options"), NULL, NULL },
     { "postcrawford", CommandShowCrawford, 
-      "See if this is post-Crawford play", NULL, NULL },
-    { "prompt", CommandShowPrompt, "Show the prompt that will be printed "
-      "when ready for commands", NULL, NULL },
-    { "rng", CommandShowRNG, "Display which random number generator "
-      "is being used", NULL, NULL },
-    { "rollout", CommandShowRollout, "Display the evaluation settings used "
-      "during rollouts", NULL, NULL },
-    { "score", CommandShowScore, "View the match or session score ",
+      N_("See if this is post-Crawford play"), NULL, NULL },
+    { "prompt", CommandShowPrompt, N_("Show the prompt that will be printed "
+      "when ready for commands"), NULL, NULL },
+    { "rng", CommandShowRNG, N_("Display which random number generator "
+      "is being used"), NULL, NULL },
+    { "rollout", CommandShowRollout, N_("Display the evaluation settings used "
+      "during rollouts"), NULL, NULL },
+    { "score", CommandShowScore, N_("View the match or session score "),
       NULL, NULL },
-    { "seed", CommandShowSeed, "Show the dice generator seed", NULL, NULL },
-    { "statistics", NULL, "Show statistics", NULL, acShowStatistics },
-    { "thorp", CommandShowThorp, "Calculate Thorp Count for "
-      "position", szOPTPOSITION, NULL },
-    { "training", CommandShowTraining, "Display the training parameters",
+    { "seed", CommandShowSeed, N_("Show the dice generator seed"), 
       NULL, NULL },
-    { "turn", CommandShowTurn, "Show which player is on roll", NULL, NULL },
-    { "version", CommandShowVersion, "Describe this version of GNU Backgammon",
+    { "statistics", NULL, N_("Show statistics"), NULL, acShowStatistics },
+    { "thorp", CommandShowThorp, N_("Calculate Thorp Count for "
+      "position"), szOPTPOSITION, NULL },
+    { "training", CommandShowTraining, N_("Display the training parameters"),
       NULL, NULL },
-    { "warranty", CommandShowWarranty, "Various kinds of warranty you do "
-      "not have", NULL, NULL },
+    { "turn", CommandShowTurn, 
+      N_("Show which player is on roll"), NULL, NULL },
+    { "version", CommandShowVersion, 
+      N_("Describe this version of GNU Backgammon"),
+      NULL, NULL },
+    { "warranty", CommandShowWarranty, 
+      N_("Various kinds of warranty you do not have"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSwap[] = {
-    { "players", CommandSwapPlayers, "Swap players", NULL, NULL },
+    { "players", CommandSwapPlayers, N_("Swap players"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acTrain[] = {
-    { "database", CommandDatabaseTrain, "Train the network from a database of "
-      "positions", NULL, NULL },
-    { "td", CommandTrainTD, "Train the network by TD(0) zero-knowledge "
-      "self-play", NULL, NULL },
+    { "database", CommandDatabaseTrain, 
+      N_("Train the network from a database of positions"), NULL, NULL },
+    { "td", CommandTrainTD, N_("Train the network by TD(0) zero-knowledge "
+      "self-play"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acTop[] = {
-    { "accept", CommandAccept, "Accept a cube or resignation",
+    { "accept", CommandAccept, N_("Accept a cube or resignation"),
       NULL, NULL },
-    { "agree", CommandAgree, "Agree to a resignation", NULL, NULL },
-    { "analyse", NULL, "Run analysis", NULL, acAnalyse },
+    { "agree", CommandAgree, N_("Agree to a resignation"), NULL, NULL },
+    { "analyse", NULL, N_("Run analysis"), NULL, acAnalyse },
     { "analysis", NULL, NULL, NULL, acAnalyse },
     { "analyze", NULL, NULL, NULL, acAnalyse },
-    { "annotate", NULL, "Record notes about a game", NULL, acAnnotate },
-    { "beaver", CommandRedouble, "Synonym for `redouble'", NULL, NULL },
-    { "copy", CommandCopy, "Copy current position to clipboard", NULL, NULL },
-    { "database", NULL, "Manipulate a database of positions", NULL,
+    { "annotate", NULL, N_("Record notes about a game"), NULL, acAnnotate },
+    { "beaver", CommandRedouble, N_("Synonym for `redouble'"), NULL, NULL },
+    { "copy", CommandCopy, N_("Copy current position to clipboard"), 
+      NULL, NULL },
+    { "database", NULL, N_("Manipulate a database of positions"), NULL,
       acDatabase },
-    { "decline", CommandDecline, "Decline a resignation", NULL, NULL },
-    { "double", CommandDouble, "Offer a double", NULL, NULL },
-    { "drop", CommandDrop, "Decline an offered double", NULL, NULL },
+    { "decline", CommandDecline, N_("Decline a resignation"), NULL, NULL },
+    { "double", CommandDouble, N_("Offer a double"), NULL, NULL },
+    { "drop", CommandDrop, N_("Decline an offered double"), NULL, NULL },
     { "eq2mwc", CommandEq2MWC,
-      "Convert normalised money equity to match winning chance",
+      N_("Convert normalised money equity to match winning chance"),
       szVALUE, NULL },
-    { "eval", CommandEval, "Display evaluation of a position", szOPTPOSITION,
-      NULL },
-    { "exit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
-    { "export", NULL, "Write data for use by other programs", NULL, acExport },
-    { "external", CommandExternal, "Make moves for an external controller",
+    { "eval", CommandEval, N_("Display evaluation of a position"), 
+      szOPTPOSITION, NULL },
+    { "exit", CommandQuit, N_("Leave GNU Backgammon"), NULL, NULL },
+    { "export", NULL, N_("Write data for use by other programs"), 
+      NULL, acExport },
+    { "external", CommandExternal, N_("Make moves for an external controller"),
       szFILENAME, &cFilename },
-    { "help", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
-    { "hint", CommandHint,  "Give hints on cube action or best legal moves", 
+    { "help", CommandHelp, N_("Describe commands"), szOPTCOMMAND, NULL },
+    { "hint", CommandHint,  
+      N_("Give hints on cube action or best legal moves"), 
       szOPTVALUE, NULL }, 
-    { "invert", NULL, "invert match equity tables, etc.", NULL, acSetInvert },
-    { "import", NULL, "Import matches, games or positions from other programs",
+    { "invert", NULL, N_("invert match equity tables, etc."), 
+      NULL, acSetInvert },
+    { "import", NULL, 
+      N_("Import matches, games or positions from other programs"),
       NULL, acImport },
-    { "list", NULL, "Show a list of games or moves", NULL, acList },
-    { "load", NULL, "Read data from a file", NULL, acLoad },
-    { "move", CommandMove, "Make a backgammon move", szMOVE, NULL },
+    { "list", NULL, N_("Show a list of games or moves"), NULL, acList },
+    { "load", NULL, N_("Read data from a file"), NULL, acLoad },
+    { "move", CommandMove, N_("Make a backgammon move"), szMOVE, NULL },
     { "mwc2eq", CommandMWC2Eq,
-      "Convert match winning chance to normalised money equity",
+      N_("Convert match winning chance to normalised money equity"),
       szVALUE, NULL },
     { "n", CommandNext, NULL, szSTEP, NULL },
-    { "new", NULL, "Start a new game, match or session", NULL, acNew },
-    { "next", CommandNext, "Step ahead within the game", szSTEP, NULL },
+    { "new", NULL, N_("Start a new game, match or session"), NULL, acNew },
+    { "next", CommandNext, N_("Step ahead within the game"), szSTEP, NULL },
     { "p", CommandPrevious, NULL, szSTEP, NULL },
-    { "pass", CommandDrop, "Synonym for `drop'", NULL, NULL },
-    { "play", CommandPlay, "Force the computer to move", NULL, NULL },
-    { "previous", CommandPrevious, "Step backward within the game", szSTEP,
+    { "pass", CommandDrop, N_("Synonym for `drop'"), NULL, NULL },
+    { "play", CommandPlay, N_("Force the computer to move"), NULL, NULL },
+    { "previous", CommandPrevious, N_("Step backward within the game"), szSTEP,
       NULL },
-    { "quit", CommandQuit, "Leave GNU Backgammon", NULL, NULL },
+    { "quit", CommandQuit, N_("Leave GNU Backgammon"), NULL, NULL },
     { "r", CommandRoll, NULL, NULL, NULL },
-    { "redouble", CommandRedouble, "Accept the cube one level higher "
-      "than it was offered", NULL, NULL },
-    { "reject", CommandReject, "Reject a cube or resignation", NULL, NULL },
-    { "resign", CommandResign, "Offer to end the current game", szVALUE,
+    { "redouble", CommandRedouble, N_("Accept the cube one level higher "
+      "than it was offered"), NULL, NULL },
+    { "reject", CommandReject, N_("Reject a cube or resignation"), 
+      NULL, NULL },
+    { "resign", CommandResign, N_("Offer to end the current game"), szVALUE,
       NULL },
-    { "roll", CommandRoll, "Roll the dice", NULL, NULL },
-    { "rollout", CommandRollout, "Have gnubg perform rollouts of a position",
+    { "roll", CommandRoll, N_("Roll the dice"), NULL, NULL },
+    { "rollout", CommandRollout, 
+      N_("Have gnubg perform rollouts of a position"),
       szOPTPOSITION, NULL },
-    { "save", NULL, "Write data to a file", NULL, acSave },
-    { "set", NULL, "Modify program parameters", NULL, acSet },
-    { "show", NULL, "View program parameters", NULL, acShow },
-    { "swap", NULL, "Swap players", NULL, acSwap },
-    { "take", CommandTake, "Agree to an offered double", NULL, NULL },
-    { "train", NULL, "Update gnubg's weights from training data", NULL,
+    { "save", NULL, N_("Write data to a file"), NULL, acSave },
+    { "set", NULL, N_("Modify program parameters"), NULL, acSet },
+    { "show", NULL, N_("View program parameters"), NULL, acShow },
+    { "swap", NULL, N_("Swap players"), NULL, acSwap },
+    { "take", CommandTake, N_("Agree to an offered double"), NULL, NULL },
+    { "train", NULL, N_("Update gnubg's weights from training data"), NULL,
       acTrain },
-    { "?", CommandHelp, "Describe commands", szOPTCOMMAND, NULL },
+    { "?", CommandHelp, N_("Describe commands"), szOPTCOMMAND, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, cTop = { NULL, NULL, NULL, NULL, acTop };
 
@@ -1066,19 +1124,19 @@ static char *pcProgress;
 char *aszVersion[] = {
     "GNU Backgammon " VERSION,
 #if USE_GUILE
-    "Guile supported.",
+    N_ ("Guile supported."),
 #endif
 #if HAVE_LIBGDBM
-    "Position databases supported.",
+    N_ ("Position databases supported."),
 #endif
 #if USE_GUI
-    "Window system supported.",
+    N_ ("Window system supported."),
 #endif
 #if HAVE_SOCKETS
-    "External players supported.",
+    N_("External players supported."),
 #endif
 #if HAVE_LIBXML2
-    "XML match equity files supported.",
+    N_("XML match equity files supported."),
 #endif
     NULL
 };
@@ -1280,7 +1338,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	memcpy( an, ms.anBoard, sizeof( ms.anBoard ) );
 
 	if( pchDesc )
-	    strcpy( pchDesc, "Current position" );
+	    strcpy( pchDesc, _("Current position") );
 	
 	return 0;
     }
@@ -1300,8 +1358,8 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
        for ( i = 0; i < 26; i++ ) {
 
           if ( ( n = ParseNumber ( ppch ) ) == INT_MIN ) {
-             outputf ("`simple' must be followed by 26 integers; "
-                      "found only %d\n", i );
+             outputf (_("`simple' must be followed by 26 integers; "
+                      "found only %d\n"), i );
              return -1;
           }
 
@@ -1336,7 +1394,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 
     if( *pch == '=' ) {
 	if( !( i = atoi( pch + 1 ) ) ) {
-	    outputl( "You must specify the number of the move to apply." );
+	    outputl( _("You must specify the number of the move to apply.") );
 	    return -1;
 	}
 
@@ -1345,12 +1403,12 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
 	if( !ms.anDice[ 0 ] || !EqualKeys( auchKey, sm.auchKey ) || 
 	    ms.anDice[ 0 ] != sm.anDice[ 0 ] ||
 	    ms.anDice[ 1 ] != sm.anDice[ 1 ] ) {
-	    outputl( "There is no valid move list." );
+	    outputl( _("There is no valid move list.") );
 	    return -1;
 	}
 
 	if( i > sm.ml.cMoves ) {
-	    outputf( "Move =%d is out of range.\n", i );
+	    outputf( _("Move =%d is out of range.\n"), i );
 	    return -1;
 	}
 
@@ -1366,7 +1424,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc ) {
     }
 
     if( PositionFromID( an, pch ) ) {
-	outputl( "Illegal position." );
+	outputl( _("Illegal position.") );
 	return -1;
     }
 
@@ -1434,8 +1492,8 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
     int cch;
     
     if( !pch ) {
-	outputf( "You must specify whether to set %s on or off (see `help set "
-		"%s').\n", szName, szName );
+	outputf( _("You must specify whether to set %s on or off (see `help set "
+		"%s').\n"), szName, szName );
 
 	return -1;
     }
@@ -1466,7 +1524,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 	return FALSE;
     }
 
-    outputf( "Illegal keyword `%s' -- try `help set %s'.\n", pch, szName );
+    outputf( _("Illegal keyword `%s' -- try `help set %s'.\n"), pch, szName );
 
     return -1;
 }
@@ -1518,7 +1576,7 @@ extern void PortableSignalRestore( int nSignal, psighandler *p ) {
 extern void ResetInterrupt( void ) {
     
     if( fInterrupt ) {
-	outputl( "(Interrupted)" );
+	outputl( _("(Interrupted)") );
 	outputx();
 	
 	fInterrupt = FALSE;
@@ -1638,7 +1696,7 @@ void ShellEscape( char *pch ) {
 
     PortableSignalRestore( SIGCHLD, &shQuit );
 #else
-    outputl( "This system does not support shell escapes." );
+    outputl( _("This system does not support shell escapes.") );
 #endif
 }
 
@@ -1698,8 +1756,8 @@ extern void HandleCommand( char *sz, command *ac ) {
 		GTKAllowStdin();
 #endif
 #else
-	    outputl( "This installation of GNU Backgammon was compiled "
-		     "without Guile support." );
+	    outputl( _("This installation of GNU Backgammon was compiled "
+		     "without Guile support.") );
 	    outputx();
 #endif
 	    return;
@@ -1708,7 +1766,7 @@ extern void HandleCommand( char *sz, command *ac ) {
     
     if( !( pch = NextToken( &sz ) ) ) {
 	if( ac != acTop )
-	    outputl( "Incomplete command -- try `help'." );
+	    outputl( _("Incomplete command -- try `help'.") );
 
 	outputx();
 	return;
@@ -1732,7 +1790,7 @@ extern void HandleCommand( char *sz, command *ac ) {
 	    break;
 
     if( !pc->sz ) {
-	outputf( "Unknown keyword `%s' -- try `help'.\n", pch );
+	outputf( _("Unknown keyword `%s' -- try `help'.\n"), pch );
 
 	outputx();
 	return;
@@ -1830,7 +1888,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
     case MOVE_NORMAL:
 	DisplayCubeAnalysis( pmr->n.arDouble, &pmr->n.esDouble );
 
-	outputf( "Rolled %d%d", pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
+	outputf( _("Rolled %d%d"), pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 
 	if( pmr->n.rLuck != ERR_VAL )
 	    outputf( " (%s):\n", GetLuckAnalysis( &ms, pmr->n.rLuck ) );
@@ -1860,7 +1918,7 @@ static void DisplayAnalysis( moverecord *pmr ) {
 	
     case MOVE_SETDICE:
 	if( pmr->n.rLuck != ERR_VAL )
-	    outputf( "Rolled %d%d (%s):\n", pmr->sd.anDice[ 0 ],
+	    outputf( _("Rolled %d%d (%s):\n"), pmr->sd.anDice[ 0 ],
 		     pmr->sd.anDice[ 1 ], GetLuckAnalysis( &ms,
 							   pmr->sd.rLuck ) );
 	break;
@@ -1933,7 +1991,8 @@ extern void ShowBoard( void ) {
 #endif
 	} else
 #endif
-	    outputl( "No game in progress." );
+
+	    outputl( _("No game in progress.") );
 	
 	return;
     }
@@ -1959,17 +2018,23 @@ extern void ShowBoard( void ) {
 	
 	apch[ 0 ] = szPlayer0;
 	apch[ 6 ] = szPlayer1;
-	sprintf( apch[ 1 ] = szScore0, "%d point%c", ms.anScore[ 0 ],
-		 ms.anScore[ 0 ] != 1 ? 's' : 0 );
-	sprintf( apch[ 5 ] = szScore1, "%d point%c", ms.anScore[ 1 ],
-		 ms.anScore[ 1 ] != 1 ? 's' : 0 );
+
+        if ( ms.anScore[ 0 ] == 1 )
+          sprintf( apch[ 1 ] = szScore0, _("%d point"), ms.anScore[ 0 ] );
+        else
+          sprintf( apch[ 1 ] = szScore0, _("%d points"), ms.anScore[ 0 ] );
+
+        if ( ms.anScore[ 1 ] == 1 )
+          sprintf( apch[ 5 ] = szScore0, _("%d point"), ms.anScore[ 1 ] );
+        else
+          sprintf( apch[ 5 ] = szScore0, _("%d points"), ms.anScore[ 1 ] );
 
 	if( ms.fDoubled ) {
 	    apch[ ms.fTurn ? 4 : 2 ] = szCube;
 
 	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
 	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
-	    sprintf( szCube, "Cube offered at %d", ms.nCube << 1 );
+	    sprintf( szCube, _("Cube offered at %d"), ms.nCube << 1 );
 	} else {
 	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
 	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
@@ -1977,9 +2042,10 @@ extern void ShowBoard( void ) {
 	    apch[ ms.fMove ? 4 : 2 ] = sz;
 	
 	    if( ms.anDice[ 0 ] )
-		sprintf( sz, "Rolled %d%d", ms.anDice[ 0 ], ms.anDice[ 1 ] );
+		sprintf( sz, 
+                         _("Rolled %d%d"), ms.anDice[ 0 ], ms.anDice[ 1 ] );
 	    else if( !GameStatus( ms.anBoard ) )
-		strcpy( sz, "On roll" );
+		strcpy( sz, _("On roll") );
 	    else
 		sz[ 0 ] = 0;
 	    
@@ -1987,30 +2053,31 @@ extern void ShowBoard( void ) {
 		apch[ 3 ] = szCube;
 
 		if( ms.nMatchTo )
-		    sprintf( szCube, "%d point match (Cube: %d)", ms.nMatchTo,
+		    sprintf( szCube, 
+                             _("%d point match (Cube: %d)"), ms.nMatchTo,
 			     ms.nCube );
 		else
-		    sprintf( szCube, "(Cube: %d)", ms.nCube );
+		    sprintf( szCube, _("(Cube: %d)"), ms.nCube );
 	    } else {
 		int cch = strlen( ap[ ms.fCubeOwner ].szName );
 		
 		if( cch > 20 )
 		    cch = 20;
 		
-		sprintf( szCube, "%c: %*s (Cube: %d)", ms.fCubeOwner ? 'X' :
+		sprintf( szCube, _("%c: %*s (Cube: %d)"), ms.fCubeOwner ? 'X' :
 			 'O', cch, ap[ ms.fCubeOwner ].szName, ms.nCube );
 
 		apch[ ms.fCubeOwner ? 6 : 0 ] = szCube;
 
 		if( ms.nMatchTo )
-		    sprintf( apch[ 3 ] = szMatch, "%d point match",
+		    sprintf( apch[ 3 ] = szMatch, _("%d point match"),
 			     ms.nMatchTo );
 	    }
 	}
     
 	if( ms.fResigned )
-	    sprintf( strchr( sz, 0 ), ", resigns %s",
-		     aszGameResult[ ms.fResigned - 1 ] );
+	    sprintf( strchr( sz, 0 ), _(", resigns %s"),
+		     gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 	
 	if( !ms.fMove )
 	    SwapSides( ms.anBoard );
@@ -2061,7 +2128,7 @@ extern void ShowBoard( void ) {
     {
       char *pc;
 
-      printf ( "MatchID: %s\n", pc = MatchIDFromMatchState ( &ms ) );
+      printf ( _("MatchID: %s\n"), pc = MatchIDFromMatchState ( &ms ) );
 
       MatchStateFromID ( &ms, pc );
 
@@ -2087,7 +2154,7 @@ extern char *FormatPrompt( void ) {
 	    case 'C':
 		/* Pip count */
 		if( ms.gs == GAME_NONE )
-		    strcpy( pchDest, "No game" );
+		    strcpy( pchDest, _("No game") );
 		else {
 		    PipCount( ms.anBoard, anPips );
 		    sprintf( pchDest, "%d:%d", anPips[ 1 ], anPips[ 0 ] );
@@ -2099,7 +2166,7 @@ extern char *FormatPrompt( void ) {
 		/* Player on roll */
 		switch( ms.gs ) {
 		case GAME_NONE:
-		    strcpy( pchDest, "No game" );
+		    strcpy( pchDest, _("No game") );
 		    break;
 
 		case GAME_PLAYING:
@@ -2109,7 +2176,7 @@ extern char *FormatPrompt( void ) {
 		case GAME_OVER:
 		case GAME_RESIGNED:
 		case GAME_DROP:
-		    strcpy( pchDest, "Game over" );
+		    strcpy( pchDest, _("Game over") );
 		    break;
 		}
 		break;
@@ -2149,7 +2216,7 @@ extern void CommandEval( char *sz ) {
     cubeinfo ci;
     
     if( !*sz && ms.gs == GAME_NONE ) {
-	outputl( "No position specified and no game in progress." );
+	outputl( _("No position specified and no game in progress.") );
 	return;
     }
 
@@ -2167,7 +2234,7 @@ extern void CommandEval( char *sz ) {
 		     ms.nMatchTo, ms.anScore, ms.fCrawford, fJacoby,
 		     nBeavers );    
 
-    ProgressStart( "Evaluating position..." );
+    ProgressStart( _("Evaluating position...") );
     if( !DumpPosition( an, szOutput, &esEvalCube.ec, &ci,
                        fOutputMWC, fOutputWinPC, n ) ) {
 	ProgressEnd();
@@ -2207,7 +2274,7 @@ static command *FindHelpCommand( command *pcBase, char *sz,
     *pchUsage++ = ' '; *pchUsage = 0;
 
     if( pc->szUsage ) {
-	pch = pc->szUsage;
+	pch = gettext ( pc->szUsage );
 	while( *pch )
 	    *pchUsage++ = *pch++;
 	*pchUsage++ = ' '; *pchUsage = 0;	
@@ -2234,15 +2301,15 @@ extern void CommandHelp( char *sz ) {
 #endif
     
     if( !( pc = FindHelpCommand( &cTop, sz, szCommand, szUsage ) ) ) {
-	outputf( "No help available for topic `%s' -- try `help' for a list "
-		 "of topics.\n", sz );
+	outputf( _("No help available for topic `%s' -- try `help' for a list "
+		 "of topics.\n"), sz );
 
 	return;
     }
 
     if( pc->szHelp )
 	/* the command has its own help text */
-	szHelp = pc->szHelp;
+	szHelp = gettext ( pc->szHelp );
     else if( pc == &cTop )
 	/* top-level help isn't for any command */
 	szHelp = NULL;
@@ -2253,29 +2320,29 @@ extern void CommandHelp( char *sz ) {
 
 	for( pcFull = acTop; pcFull->sz; pcFull++ )
 	    if( pcFull->pf == pc->pf && pcFull->szHelp ) {
-		szHelp = pcFull->szHelp;
+		szHelp = gettext ( pcFull->szHelp );
 		break;
 	    }
     }
 
     if( szHelp ) {
-	outputf( "%s- %s\n\nUsage: %s", szCommand, szHelp, szUsage );
+	outputf( _("%s- %s\n\nUsage: %s"), szCommand, szHelp, szUsage );
 
 	if( pc->pc && pc->pc->sz )
-	    outputl( "<subcommand>\n" );
+	    outputl( _("<subcommand>\n") );
 	else
 	    outputc( '\n' );
     }
 
     if( pc->pc && pc->pc->sz ) {
-	outputl( pc == &cTop ? "Available commands:" :
-		 "Available subcommands:" );
+	outputl( pc == &cTop ? _("Available commands:") :
+		 _("Available subcommands:") );
 
 	pc = pc->pc;
 	
 	for( ; pc->sz; pc++ )
 	    if( pc->szHelp )
-		outputf( "%-15s\t%s\n", pc->sz, pc->szHelp );
+		outputf( "%-15s\t%s\n", pc->sz, gettext ( pc->szHelp ) );
     }
 }
 
@@ -2359,9 +2426,9 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 
 	if( !i ) {
 	    if( fOutputWinPC )
-		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		sprintf( sz, _(" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
-			 " %5.1f%% %5.1f%% %5.1f%%\n",
+			 " %5.1f%% %5.1f%% %5.1f%%\n"),
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
 			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
@@ -2370,9 +2437,9 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+		sprintf( sz, _(" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
 			 "       %5.3f %5.3f %5.3f  -"
-			 " %5.3f %5.3f %5.3f\n",
+			 " %5.3f %5.3f %5.3f\n"),
 			 1, FormatEval ( szTemp, &pml->amMoves[ 0 ].esMove ), 
 			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ 0 ].anMove ),
@@ -2390,9 +2457,9 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 		strcpy( sz, "   ?? " );
 	    
 	    if( fOutputWinPC )
-		sprintf( sz + 6, " %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, _(" %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.1f%% %5.1f%% %5.1f%%  -"
-			 " %5.1f%% %5.1f%% %5.1f%%\n",
+			 " %5.1f%% %5.1f%% %5.1f%%\n"),
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ i ].anMove ),
@@ -2401,9 +2468,9 @@ extern char *FormatMoveHint( char *sz, matchstate *pms, movelist *pml,
 			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
 			 100.0 * ar[ 4 ] );
 	    else
-		sprintf( sz + 6, " %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+		sprintf( sz + 6, _(" %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
 			 "       %5.3f %5.3f %5.3f  -"
-			 " %5.3f %5.3f %5.3f\n",
+			 " %5.3f %5.3f %5.3f\n"),
 			 FormatEval ( szTemp, &pml->amMoves[ i ].esMove ), 
 			 FormatMove( szMove, pms->anBoard, 
 				     pml->amMoves[ i ].anMove ),
@@ -2428,7 +2495,7 @@ extern void CommandHint( char *sz ) {
     int n = ParseNumber ( &sz );
     
     if( ms.gs != GAME_PLAYING ) {
-      outputl( "You must set up a board first." );
+      outputl( _("You must set up a board first.") );
       
       return;
     }
@@ -2439,7 +2506,7 @@ extern void CommandHint( char *sz ) {
 	if ( GetDPEq ( NULL, NULL, &ci ) ) {
 	    /* Give hint on cube action */
 
-	    ProgressStart( "Considering cube action..." );
+	    ProgressStart( _("Considering cube action...") );
 	    if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
 					&esEvalCube.ec ) < 0 ) {
 		ProgressEnd();
@@ -2463,7 +2530,7 @@ extern void CommandHint( char *sz ) {
 	    
 	} else {
 	    
-	    outputl( "You cannot double." );
+	    outputl( _("You cannot double.") );
 	    
 	    return;
 	    
@@ -2481,7 +2548,7 @@ extern void CommandHint( char *sz ) {
 
       /* evaluate current position */
 
-      ProgressStart( "Considering resignation..." );
+      ProgressStart( _("Considering resignation...") );
       if ( GeneralEvaluationE ( aarOutput[ 0 ],
                                 ms.anBoard,
                                 &ci, &esEvalCube.ec ) < 0 ) {
@@ -2506,13 +2573,13 @@ extern void CommandHint( char *sz ) {
 
       if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
 
-        outputf ( "Equity before resignation: %+6.3f\n",
+        outputf ( _("Equity before resignation: %+6.3f\n"),
                   - rEqBefore );
-        outputf ( "Equity after resignation : %+6.3f (%+6.3f)\n\n",
+        outputf ( _("Equity after resignation : %+6.3f (%+6.3f)\n\n"),
                   - rEqAfter, rEqBefore - rEqAfter );
-        outputf ( "Correct resign decision  : %s\n\n",
+        outputf ( _("Correct resign decision  : %s\n\n"),
                   ( rEqBefore - rEqAfter >= 0 ) ?
-                  "Accept" : "Reject" );
+                  _("Accept") : _("Reject") );
 
       }
       else {
@@ -2520,14 +2587,14 @@ extern void CommandHint( char *sz ) {
         rEqBefore = eq2mwc ( - rEqBefore, &ci );
         rEqAfter  = eq2mwc ( - rEqAfter, &ci );
 
-        outputf ( "Equity before resignation: %6.2f%%\n",
+        outputf ( _("Equity before resignation: %6.2f%%\n"),
                   rEqBefore * 100.0f );
-        outputf ( "Equity after resignation : %6.2f%% (%6.2f%%)\n\n",
+        outputf ( _("Equity after resignation : %6.2f%% (%6.2f%%)\n\n"),
                   rEqAfter * 100.0f,
                   100.0f * ( rEqAfter - rEqBefore ) );
-        outputf ( "Correct resign decision  : %s\n\n",
+        outputf ( _("Correct resign decision  : %s\n\n"),
                   ( rEqAfter - rEqBefore >= 0 ) ?
-                  "Accept" : "Reject" );
+                  _("Accept") : _("Reject") );
 
       }
 
@@ -2540,7 +2607,7 @@ extern void CommandHint( char *sz ) {
 	/* Give hint on take decision */
 	GetMatchStateCubeInfo( &ci, &ms );
 
-	ProgressStart( "Considering cube action..." );
+	ProgressStart( _("Considering cube action...") );
 	if ( GeneralCubeDecisionE ( aarOutput, ms.anBoard, &ci, 
 				    &esEvalCube.ec ) < 0 ) {
 	    ProgressEnd();
@@ -2557,27 +2624,27 @@ extern void CommandHint( char *sz ) {
 	}
 #endif
 	
-	outputl ( "Take decision:\n" );
+	outputl ( _("Take decision:\n") );
 	
 	if ( ! ms.nMatchTo || ( ms.nMatchTo && ! fOutputMWC ) ) {
 	    
-	    outputf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
-	    outputf ( "Equity for pass: %+6.3f\n\n", -arDouble[ 3 ] );
+	    outputf ( _("Equity for take: %+6.3f\n"), -arDouble[ 2 ] );
+	    outputf ( _("Equity for pass: %+6.3f\n\n"), -arDouble[ 3 ] );
 	    
 	}
 	else {
-	    outputf ( "Mwc for take: %6.2f%%\n", 
+	    outputf ( _("Mwc for take: %6.2f%%\n"), 
 		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 2 ], &ci ) ) );
-	    outputf ( "Mwc for pass: %6.2f%%\n", 
+	    outputf ( _("Mwc for pass: %6.2f%%\n"), 
 		      100.0 * ( 1.0 - eq2mwc ( arDouble[ 3 ], &ci ) ) );
 	}
 	
 	if ( arDouble[ 2 ] < 0 && !ms.nMatchTo && ms.cBeavers < nBeavers )
-	    outputl ( "Your proper cube action: Beaver!\n" );
+	    outputl ( _("Your proper cube action: Beaver!\n") );
 	else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
-	    outputl ( "Your proper cube action: Take.\n" );
+	    outputl ( _("Your proper cube action: Take.\n") );
 	else
-	    outputl ( "Your proper cube action: Pass.\n" );
+	    outputl ( _("Your proper cube action: Pass.\n") );
 	
 	return;
 	
@@ -2592,7 +2659,7 @@ extern void CommandHint( char *sz ) {
 
 	GetMatchStateCubeInfo( &ci, &ms );
 
-	ProgressStart( "Considering moves..." );
+	ProgressStart( _("Considering moves...") );
 	if( FindnSaveBestMoves( &ml, ms.anDice[ 0 ], ms.anDice[ 1 ],
 				ms.anBoard, NULL, &ci,
 				&esEvalChequer.ec ) < 0 || fInterrupt ) {
@@ -2604,7 +2671,7 @@ extern void CommandHint( char *sz ) {
 	n = ( ml.cMoves > n ) ? n : ml.cMoves;
 
 	if( !ml.cMoves ) {
-	    outputl( "There are no legal moves." );
+	    outputl( _("There are no legal moves.") );
 	    return;
 	}
 	
@@ -2640,8 +2707,8 @@ extern void PromptForExit( void ) {
 	fExiting = TRUE;
 	fInterrupt = FALSE;
 	
-	if( !GetInputYN( "Are you sure you want to exit and abort the game in "
-			 "progress? " ) ) {
+	if( !GetInputYN( _("Are you sure you want to exit and abort the game in "
+			 "progress? ") ) ) {
 	    fInterrupt = FALSE;
 	    fExiting = FALSE;
 	    return;
@@ -2653,7 +2720,7 @@ extern void PromptForExit( void ) {
 
 extern void CommandNotImplemented( char *sz ) {
 
-    outputl( "That command is not yet implemented." );
+    outputl( _("That command is not yet implemented.") );
 }
 
 extern void CommandQuit( char *sz ) {
@@ -2665,9 +2732,9 @@ extern void CommandQuit( char *sz ) {
 extern char *FormatCubePosition ( char *sz, cubeinfo *pci ) {
 
   if ( pci->fCubeOwner == -1 )
-    sprintf ( sz, "Centered %d-cube", pci->nCube );
+    sprintf ( sz, _("Centered %d-cube"), pci->nCube );
   else 
-    sprintf ( sz, "Player %s owns %d-cube",
+    sprintf ( sz, _("Player %s owns %d-cube"),
               ap[ pci->fCubeOwner ].szName, pci->nCube );
 
   return sz;
@@ -2693,20 +2760,20 @@ CommandRollout( char *sz ) {
 
     if( !( c = CountTokens( sz ) ) ) {
 	if( ms.gs != GAME_PLAYING ) {
-	    outputl( "No position specified and no game in progress." );
+	    outputl( _("No position specified and no game in progress.") );
 	    return;
 	} else
 	    c = 1; /* current position */
     }
     else if ( rcRollout.fInitial ) {
 
-      if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) )
-        outputl ( "You cannot do a cube decision rollout for the initial"
+      if ( c == 1 && ! strncmp ( sz, _("=cube"), 5 ) )
+        outputl ( _("You cannot do a cube decision rollout for the initial"
                   " position.\n"
-                  "Please 'set rollout initial off'." );
+                  "Please 'set rollout initial off'.") );
       else
-        outputl ( "You cannot rollout moves as initial position.\n"
-                  "Please 'set rollout initial off'." );
+        outputl ( _("You cannot rollout moves as initial position.\n"
+                  "Please 'set rollout initial off'.") );
       
       return;
     }
@@ -2718,7 +2785,7 @@ CommandRollout( char *sz ) {
       rolloutstat aarsStatistics[ 2 ][ 2 ];
 
       if( ms.gs != GAME_PLAYING ) {
-	  outputl( "No game in progress." );
+	  outputl( _("No game in progress.") );
 	  return;
       }
 
@@ -2776,8 +2843,8 @@ CommandRollout( char *sz ) {
 	GTKRollout( c, asz, rcRollout.nTrials, aars );
     else
 #endif
-	outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
-		 "Equity   Cube E    n" );
+      outputl( _("                               Win  W(g) W(bg)  L(g) L(bg) "
+		 "Equity   Cube E    n" ) );
 	
     for( i = 0; i < c; i++ ) {
 #if USE_GTK
@@ -2794,23 +2861,24 @@ CommandRollout( char *sz ) {
 #endif
 	    {
 		if( rcRollout.fCubeful )
-		    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
+		    outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
 			     "%6.3f %4d\n"
 			     "              Standard error %5.3f %5.3f %5.3f "
-			     "%5.3f %5.3f (%6.3f) %6.3f\n\n",
+			     "%5.3f %5.3f (%6.3f) %6.3f\n\n"),
 			     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
 			     ar[ 4 ], ar[ 5 ],ar[ 6 ], cGames, arStdDev[ 0 ],
 			     arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
 			     arStdDev[ 4 ], arStdDev[ 5 ], arStdDev[ 6 ] );
 		else
-		    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    "
+		    outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f)    "
 			     "n/a %4d\n"
 			     "              Standard error %5.3f %5.3f %5.3f "
-			     "%5.3f %5.3f (%6.3f)    n/a\n\n",
+			     "%5.3f %5.3f (%6.3f)    n/a\n\n" ),
 			     asz[ i ], ar[ 0 ], ar[ 1 ], ar[ 2 ], ar[ 3 ],
 			     ar[ 4 ], ar[ 5 ], cGames, arStdDev[ 0 ],
 			     arStdDev[ 1 ], arStdDev[ 2 ], arStdDev[ 3 ],
 			     arStdDev[ 4 ], arStdDev[ 5 ] );
+
 	    }
     }
     
@@ -2832,7 +2900,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
        it's not broken, so I won't fix it. */
     
     if( iGame >= 0 )
-	fprintf( pf, " Game %d\n", iGame + 1 );
+	fprintf( pf, _(" Game %d\n"), iGame + 1 );
 
     if( anScore ) {
 	sprintf( sz, "%s : %d", ap[ 0 ].szName, anScore[ 0 ] );
@@ -2893,8 +2961,8 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 	case MOVE_SETCUBEPOS:
 	    if( !fWarned ) {
 		fWarned = TRUE;
-		outputl( "Warning: this game was edited during play, and "
-			 "cannot be recorded in this format." );
+		outputl( _("Warning: this game was edited during play, and "
+			 "cannot be recorded in this format.") );
 	    }
 	    break;
 	}
@@ -3029,8 +3097,8 @@ extern void CommandLoadCommands( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to load from (see `help load "
-		 "commands')." );
+	outputl( _("You must specify a file to load from (see `help load "
+		 "commands').") );
 	return;
     }
 
@@ -3048,15 +3116,15 @@ extern void CommandImportJF( char *sz ) {
     sz = NextToken( &sz );
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "There must be a game in progress to import a Jellyfish "
-                 "position." );
+	outputl( _("There must be a game in progress to import a Jellyfish "
+                 "position.") );
 
 	return;
     }
 
     if( !sz || !*sz ) {
-	outputl( "You must specify a position file to import (see `help "
-		 "import pos')." );
+	outputl( _("You must specify a position file to import (see `help "
+		 "import pos').") );
 	return;
     }
 
@@ -3077,8 +3145,8 @@ extern void CommandImportMat( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a match file to import (see `help "
-		 "import mat')." );
+	outputl( _("You must specify a match file to import (see `help "
+		 "import mat').") );
 	return;
     }
 
@@ -3097,8 +3165,8 @@ extern void CommandImportOldmoves( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify an oldmoves file to import (see `help "
-		 "import oldmoves')." );
+	outputl( _("You must specify an oldmoves file to import (see `help "
+		 "import oldmoves').") );
 	return;
     }
 
@@ -3117,8 +3185,8 @@ extern void CommandImportSGG( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify an SGG file to import (see `help "
-		 "import oldmoves')." );
+	outputl( _("You must specify an SGG file to import (see `help "
+		 "import oldmoves').") );
 	return;
     }
 
@@ -3155,7 +3223,7 @@ extern void CommandCopy( char *sz ) {
 
     } else {
 
-    outputl( "Can't open clipboard" ); 
+    outputl( _("Can't open clipboard") ); 
   }
 #else
   puts( DrawBoard( szOut, ms.anBoard, 1, aps, 
@@ -3181,7 +3249,7 @@ extern void WinCopy( char *szOut ){
 
     } else {
 
-    outputl( "Can't open clipboard" ); 
+    outputl( _("Can't open clipboard") ); 
   }
 }
 #endif
@@ -3223,13 +3291,13 @@ extern void CommandExportGameGam( char *sz ) {
     sz = NextToken( &sz );
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export"
-		 "game gam')." );
+	outputl( _("You must specify a file to export to (see `help export"
+		 "game gam').") );
 	return;
     }
 
@@ -3263,13 +3331,13 @@ extern void CommandExportMatchMat( char *sz ) {
     sz = NextToken( &sz );
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help export "
-		 "match mat')." );
+	outputl( _("You must specify a file to export to (see `help export "
+		 "match mat').") );
 	return;
     }
 
@@ -3303,8 +3371,8 @@ extern void CommandNewWeights( char *sz ) {
     
     if( sz && *sz ) {
 	if( ( n = ParseNumber( &sz ) ) < 1 ) {
-	    outputl( "You must specify a valid number of hidden nodes "
-		     "(try `help new weights').\n" );
+	    outputl( _("You must specify a valid number of hidden nodes "
+		     "(try `help new weights').\n") );
 	    return;
 	}
     } else
@@ -3312,7 +3380,7 @@ extern void CommandNewWeights( char *sz ) {
 
     EvalNewWeights( n );
 
-    outputf( "A new neural net with %d hidden nodes has been created.\n", n );
+    outputf( _("A new neural net with %d hidden nodes has been created.\n"), n );
 }
 
 
@@ -3465,18 +3533,20 @@ extern void CommandSaveSettings( char *szParam ) {
 
     PushLocale ( "C" );
 
-    fputs( "#\n"
-	   "# GNU Backgammon command file\n"
-	   "#   generated by GNU Backgammon " VERSION "\n"
-	   "#\n"
-	   "# WARNING: The file `.gnubgautorc' is automatically generated "
-	   "by the\n"
-	   "# `save settings' command, and will be overwritten the next "
-	   "time settings\n"
-	   "# are saved.  If you want to add startup commands manually, "
-	   "you should\n"
-	   "# use `.gnubgrc' instead.\n"
-	   "\n", pf );
+    fprintf ( pf, 
+              _( "#\n"
+                 "# GNU Backgammon command file\n"
+                 "#   generated by GNU Backgammon %s\n"
+                 "#\n"
+                 "# WARNING: The file `.gnubgautorc' is automatically "
+                 "generated by the\n"
+                 "# `save settings' command, and will be overwritten the next "
+                 "time settings\n"
+                 "# are saved.  If you want to add startup commands manually, "
+                 "you should\n"
+                 "# use `.gnubgrc' instead.\n"
+                 "\n"), 
+              VERSION );
 
     SaveEvalSetupSettings ( pf, "set analysis chequerplay",
 			    &esAnalysisChequer );
@@ -3635,7 +3705,7 @@ extern void CommandSaveSettings( char *szParam ) {
                   exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
       else
         fprintf ( pf, "set export move %s %s\n", 
-                  aszSkillType[ i ], 
+                  aszSkillTypeCommand[ i ], 
                   exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
     }
 
@@ -3645,7 +3715,7 @@ extern void CommandSaveSettings( char *szParam ) {
                   exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
       else
         fprintf ( pf, "set export cube %s %s\n", 
-                  aszSkillType[ i ], 
+                  aszSkillTypeCommand[ i ], 
                   exsExport.afCubeDisplay[ i ] ? "yes" : "no" );
     }
     
@@ -3682,8 +3752,8 @@ extern void CommandSaveSettings( char *szParam ) {
     if( errno )
       perror( szFile );
     else
-      outputf( "Settings saved to %s.\n",
-               ( ! strcmp ( szFile, "-" ) ) ? "standard output stream" :
+      outputf( _("Settings saved to %s.\n"),
+               ( ! strcmp ( szFile, "-" ) ) ? _("standard output stream") :
                szFile );
     free ( szFile );
 
@@ -3709,7 +3779,7 @@ extern void CommandSaveWeights( char *sz ) {
     if( EvalSave( sz ) )
 	perror( sz );
     else
-	outputf( "Evaluator weights saved to %s.\n", sz );
+	outputf( _("Evaluator weights saved to %s.\n"), sz );
 }
 
 extern void CommandTrainTD( char *sz ) {
@@ -3721,14 +3791,14 @@ extern void CommandTrainTD( char *sz ) {
     
     if( sz && *sz ) {
 	if( ( n = ParseNumber( &sz ) ) < 1 ) {
-	    outputl( "If you specify a parameter to `train td', it\n"
-		     "must be a number of positions to train on." );
+	    outputl( _("If you specify a parameter to `train td', it\n"
+		     "must be a number of positions to train on.") );
 	    return;
 	}
     } else
 	n = 0;
 
-    ProgressStart( "Training..." );
+    ProgressStart( _("Training...") );
     
     while( ( !n || c <= n ) && !fInterrupt ) {
 	InitBoard( anBoardTrain );
@@ -4387,7 +4457,7 @@ extern int GetInputYN( char *szPrompt ) {
 	if( fInterrupt )
 	    return FALSE;
 	
-	outputl( "Please answer `y' or `n'." );
+	outputl( _("Please answer `y' or `n'.") );
     }
 }
 
@@ -4712,7 +4782,7 @@ static void usage( char *argv0 ) {
 #if USE_GUI
 
     printf(
-"Usage: %s [options] [saved-game-file]\n"
+_("Usage: %s [options] [saved-game-file]\n"
 "Options:\n"
 "  -b, --no-bearoff          Do not use bearoff database\n"
 "  -c FILE, --commands FILE  Read commands from FILE and exit\n"
@@ -4727,11 +4797,11 @@ static void usage( char *argv0 ) {
 "  -w, --window-system-only  Ignore tty input when using window system\n"
 "\n"
 "For more information, type `help' from within gnubg.\n"
-"Please report bugs to <bug-gnubg@gnu.org>.\n", argv0 );
+"Please report bugs to <bug-gnubg@gnu.org>.\n"), argv0 );
 #else
 
     printf(
-"Usage: %s [options] [saved-game-file]\n"
+_("Usage: %s [options] [saved-game-file]\n"
 "Options:\n"
 "  -b, --no-bearoff          Do not use bearoff database\n"
 "  -d DIR, --datadir DIR     Read database and weight files from directory "
@@ -4742,7 +4812,7 @@ static void usage( char *argv0 ) {
 "  -v, --version             Show version information and exit\n"
 "\n"
 "For more information, type `help' from within gnubg.\n"
-"Please report bugs to <bug-gnubg@gnu.org>.\n", argv0 );
+"Please report bugs to <bug-gnubg@gnu.org>.\n"), argv0 );
 #endif
 
 }
@@ -4901,7 +4971,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	    break;
 	case 's': /* script */
 #if !USE_GUILE
-	    fprintf( stderr, "%s: option `-s' requires Guile\n", argv[ 0 ] );
+	    fprintf( stderr, _("%s: option `-s' requires Guile\n"), argv[ 0 ] );
 	    exit( EXIT_FAILURE );
 #endif
 	    pchScript = optarg;
@@ -4929,17 +4999,18 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #if USE_GTK
     if( fTTY )
 #endif
-	puts( "GNU Backgammon " VERSION "  Copyright 1999, 2000, 2001, 2002 "
-	      "Gary Wong.\n"
-	      "GNU Backgammon is free software, covered by the GNU "
-	      "General Public License\n"
-	      "version 2, and you are welcome to change it and/or "
-	      "distribute copies of it\n"
-	      "under certain conditions.  Type \"show copying\" to see "
-	      "the conditions.\n"
-	      "There is absolutely no warranty for GNU Backgammon.  "
-	      "Type \"show warranty\" for\n"
-	      "details." );
+      printf( _("GNU Backgammon %s  Copyright 1999, 2000, 2001, 2002 "
+                "Gary Wong.\n"
+                "GNU Backgammon is free software, covered by the GNU "
+                "General Public License\n"
+                "version 2, and you are welcome to change it and/or "
+                "distribute copies of it\n"
+                "under certain conditions.  Type \"show copying\" to see "
+                "the conditions.\n"
+                "There is absolutely no warranty for GNU Backgammon.  "
+                "Type \"show warranty\" for\n"
+                "details.\n"),
+              VERSION );
     
     InitRNG( NULL, TRUE );
     InitRNG( &rcRollout.nSeed, FALSE );
@@ -4969,13 +5040,13 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 			      fShowProgress ? BearoffProgress : NULL ) ) < 0 )
 	exit( EXIT_FAILURE );
     else if( n > 0 && !nNewWeights ) {
-	outputl( "WARNING: No neural net weights were found.  GNU Backgammon "
-		 "will create an\n"
+      outputl( _("WARNING: No neural net weights were found.  "
+                 "GNU Backgammon will create an\n"
 		 "initial random network, but this will be unsuitable for "
 		 "use until training\n"
 		 "is complete.  Please consult the manual for information "
 		 "about training, or\n"
-		 "directions for obtaining a pre-trained network." );
+		 "directions for obtaining a pre-trained network.") );
 	outputx();
     }
 #if USE_GUILE
@@ -5059,7 +5130,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( fX ) {
         RunExt();
 
-	fputs( "Could not open X display.  Continuing on TTY.\n", stderr );
+	fputs( _("Could not open X display.  Continuing on TTY.\n"), stderr );
         fX = FALSE;
     }
 #endif
@@ -5155,7 +5226,7 @@ extern void CommandEq2MWC ( char *sz ) {
   cubeinfo ci;
 
   if ( ! ms.nMatchTo ) {
-    outputl ( "Command only valid in match play" );
+    outputl ( _("Command only valid in match play") );
     return;
   }
 
@@ -5166,12 +5237,12 @@ extern void CommandEq2MWC ( char *sz ) {
 
   GetMatchStateCubeInfo( &ci, &ms );
 
-  outputf ( "MWC for equity = %+6.3f: %6.2f%%\n",
+  outputf ( _("MWC for equity = %+6.3f: %6.2f%%\n"),
             -1.0, 100.0 * eq2mwc ( -1.0, &ci ) );
-  outputf ( "MWC for equity = %+6.3f: %6.2f%%\n",
+  outputf ( _("MWC for equity = %+6.3f: %6.2f%%\n"),
             +1.0, 100.0 * eq2mwc ( +1.0, &ci ) );
-  outputf ( "By linear interpolation:\n" );
-  outputf ( "MWC for equity = %+6.3f: %6.2f%%\n",
+  outputf ( _("By linear interpolation:\n") );
+  outputf ( _("MWC for equity = %+6.3f: %6.2f%%\n"),
             rEq, 100.0 * eq2mwc ( rEq, &ci ) );
 
 }
@@ -5198,7 +5269,7 @@ extern void CommandMWC2Eq ( char *sz ) {
   cubeinfo ci;
 
   if ( ! ms.nMatchTo ) {
-    outputl ( "Command only valid in match play" );
+    outputl ( _("Command only valid in match play") );
     return;
   }
 
@@ -5210,12 +5281,12 @@ extern void CommandMWC2Eq ( char *sz ) {
 
   if ( rMwc > 1.0 ) rMwc /= 100.0;
 
-  outputf ( "Equity for MWC = %6.2f%%: %+6.3f\n",
+  outputf ( _("Equity for MWC = %6.2f%%: %+6.3f\n"),
             100.0 * eq2mwc ( -1.0, &ci ), -1.0 );
-  outputf ( "Equity for MWC = %6.2f%%: %+6.3f\n",
+  outputf ( _("Equity for MWC = %6.2f%%: %+6.3f\n"),
             100.0 * eq2mwc ( +1.0, &ci ), +1.0 );
-  outputf ( "By linear interpolation:\n" );
-  outputf ( "Equity for MWC = %6.2f%%: %+6.3f\n",
+  outputf ( _("By linear interpolation:\n") );
+  outputf ( _("Equity for MWC = %6.2f%%: %+6.3f\n"),
             100.0 * rMwc, mwc2eq ( rMwc, &ci ) );
 
 
@@ -5357,7 +5428,7 @@ confirmOverwrite ( const char *sz, const int f ) {
   if ( f && ! access ( sz, F_OK ) ) {
 
     szPrompt = (char *) malloc ( 50 + strlen ( sz ) );
-    sprintf ( szPrompt, "File \"%s\" exists. Overwrite? ", sz );
+    sprintf ( szPrompt, _("File \"%s\" exists. Overwrite? "), sz );
     i = GetInputYN ( szPrompt );
     free ( szPrompt );
     return i;
@@ -5489,7 +5560,7 @@ getDefaultFileName ( const pathformat f ) {
 
     pc = strchr ( sz, 0 );
     time ( &t );
-    strftime ( pc, l, "%Y-%m-%d-%H%M", localtime ( &t ) );
+    strftime ( pc, l, _("%Y-%m-%d-%H%M"), localtime ( &t ) );
   
     pc = strchr ( pc, 0 );
     strcat ( pc, "-" );

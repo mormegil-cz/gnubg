@@ -39,6 +39,7 @@
 #include "dice.h"
 #include "matchequity.h"
 #include "matchid.h"
+#include "i18n.h"
 
 #if USE_GTK
 #include "gtkboard.h"
@@ -53,70 +54,72 @@ extern char *aszCopying[], *aszWarranty[]; /* from copying.c */
 
 static void ShowEvaluation( evalcontext *pec ) {
     
-    outputf( "        %d-ply evaluation.\n"
+    outputf( _("        %d-ply evaluation.\n"
              "        %d move search candidate%s.\n"
              "        %0.3g cubeless search tolerance.\n"
              "        %d%% speed.\n"
              "        %s pruning at 1-ply for moves.\n"
-             "        %s evaluations.\n",
+             "        %s evaluations.\n"),
              pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
              "" : "s", pec->rSearchTolerance,
              (pec->nReduced) ? 100 / pec->nReduced : 100,
-             pec->fNoOnePlyPrune ? "No" : "Normal",
-             pec->fCubeful ? "Cubeful" : "Cubeless" );
+             pec->fNoOnePlyPrune ? _("No") : _("Normal"),
+             pec->fCubeful ? _("Cubeful") : _("Cubeless") );
 
     if( pec->rNoise )
-	outputf( "    Noise standard deviation %5.3f", pec->rNoise );
+	outputf( _("    Noise standard deviation %5.3f"), pec->rNoise );
     else
-	output( "    Noiseless evaluations" );
+	output( _("    Noiseless evaluations") );
 
-    outputl( pec->fDeterministic ? " (deterministic noise).\n" :
-	     " (pseudo-random noise).\n" );
+    outputl( pec->fDeterministic ? _(" (deterministic noise).\n") :
+	     _(" (pseudo-random noise).\n") );
 }
 
 
 extern void
 ShowRollout ( rolloutcontext *prc ) {
 
-  static char *aszRNG[] = {
-    "ANSI", "BSD", "ISAAC", "manual", "MD5", "Mersenne Twister",
-    "user supplied"
-  };
-
   int i;
 
-  outputf( "%d game%s will be played per rollout.\n", prc->nTrials,
-	   prc->nTrials > 1 ? "s" : "" );
+  if ( prc->nTrials == 1 )
+    outputf ( _("%d game will be played per rollout.\n"),
+              prc->nTrials );
+  else
+    outputf ( _("%d games will be played per rollout.\n"),
+              prc->nTrials );
 
   if( prc->nTruncate > 1 )
-      outputf( "Truncation after %d plies.\n", prc->nTruncate );
+      outputf( _("Truncation after %d plies.\n"), prc->nTruncate );
   else if( prc->nTruncate == 1 )
-      outputl( "Truncation after 1 ply." );
+      outputl( _("Truncation after 1 ply.") );
   else
-      outputl( "No truncation." );
+      outputl( _("No truncation.") );
 
-  outputf( "Lookahead variance reduction is %sabled.\n"
-           "Cube%s rollout.\n"
-	   "Rollout as opening move %sabled.\n"
-           "%s dice generator with seed %u.\n",
-           prc->fVarRedn ? "en" : "dis",
-           prc->fCubeful ? "ful" : "less",
-	   prc->fInitial ? "en" : "dis",
-           aszRNG[ prc->rngRollout ], prc->nSeed );
-
+  outputl ( prc->fVarRedn ? 
+            _("Lookahead variance reduction is enabled.") :
+            _("Lookahead variance reduction is disabled.") );
+  outputl ( prc->fCubeful ?
+            _("Cubeful rollout.") :
+            _("Cubeless rollout.") );
+  outputl ( prc->fInitial ?
+            _("Rollout as opening move enabled.") :
+            _("Rollout as opening move disabled.") );
+  outputf ( _("%s dice generator with seed %u.\n"),
+            gettext ( aszRNG[ prc->rngRollout ] ), prc->nSeed );
+            
   /* FIXME: more compact notation when aecCube = aecChequer etc. */
 
-  outputl ("Chequer play parameters:");
+  outputl (_("Chequer play parameters:"));
 
   for ( i = 0; i < 2; i++ ) {
-    outputf ( "  Player %d:\n", i );
+    outputf ( _("  Player %d:\n"), i );
     ShowEvaluation ( &prc->aecChequer[ i ] );
   }
 
-  outputl ("Cube decision parameters:");
+  outputl (_("Cube decision parameters:"));
 
   for ( i = 0; i < 2; i++ ) {
-    outputf ( "  Player %d:\n", i );
+    outputf ( _("  Player %d:\n"), i );
     ShowEvaluation ( &prc->aecCube[ i ] );
   }
 
@@ -129,14 +132,14 @@ ShowEvalSetup ( evalsetup *pes ) {
   switch ( pes->et ) {
 
   case EVAL_NONE:
-    outputl ( "      No evaluation." );
+    outputl ( _("      No evaluation.") );
     break;
   case EVAL_EVAL:
-    outputl ( "      Neural net evaluation:" );
+    outputl ( _("      Neural net evaluation:") );
     ShowEvaluation ( &pes->ec );
     break;
   case EVAL_ROLLOUT:
-    outputl ( "      Rollout:" );
+    outputl ( _("      Rollout:") );
     ShowRollout ( &pes->rc );
     break;
   default:
@@ -176,7 +179,7 @@ static void ShowPaged( char **ppch ) {
 	while( *ppch ) {
 	    outputl( *ppch++ );
 	    if( ++i >= nRows - 1 ) {
-		GetInput( "-- Press <return> to continue --" );
+		GetInput( _("-- Press <return> to continue --") );
 		
 		if( fInterrupt )
 		    return;
@@ -193,44 +196,59 @@ static void ShowPaged( char **ppch ) {
 
 extern void CommandShowAnalysis( char *sz ) {
 
-    outputl( fAnalyseCube ? "Cube action will be analysed." :
-	     "Cube action will not be analysed." );
+    int i;
 
-    outputl( fAnalyseDice ? "Dice rolls will be analysed." :
-	     "Dice rolls will not be analysed." );
+    outputl( fAnalyseCube ? _("Cube action will be analysed.") :
+	     _("Cube action will not be analysed.") );
+
+    outputl( fAnalyseDice ? _("Dice rolls will be analysed.") :
+	     _("Dice rolls will not be analysed.") );
 
     if( fAnalyseMove ) {
-	outputl( "Chequer play will be analysed." );
+	outputl( _("Chequer play will be analysed.") );
 	if( cAnalysisMoves < 0 )
-	    outputl( "Every legal move will be analysed." );
+	    outputl( _("Every legal move will be analysed.") );
 	else
-	    outputf( "Up to %d moves will be analysed.\n", cAnalysisMoves );
+	    outputf( _("Up to %d moves will be analysed.\n"), cAnalysisMoves );
     } else
-	outputl( "Chequer play will not be analysed." );
+	outputl( _("Chequer play will not be analysed.") );
 
-    outputf( "\nAnalysis thresholds:\n"
-	     "  +%.3f very good\n"
-	     "  +%.3f good\n"
-	     "  -%.3f doubtful\n"
-	     "  -%.3f bad\n"
-	     "  -%.3f very bad\n"
+    outputl( _("\nAnalysis thresholds:") );
+    outputf( "  +%.3f %s\n"
+	     "  +%.3f %s\n"
+	     "  -%.3f %s\n"
+	     "  -%.3f %s\n"
+	     "  -%.3f %s\n"
 	     "\n"
-	     "  +%.3f very lucky\n"
-	     "  +%.3f lucky\n"
-	     "  -%.3f unlucky\n"
-	     "  -%.3f very unlucky\n",
-	     arSkillLevel[ SKILL_VERYGOOD ], arSkillLevel[ SKILL_GOOD ],
+	     "  +%.3f %s\n"
+	     "  +%.3f %s\n"
+	     "  -%.3f %s\n"
+	     "  -%.3f %s\n",
+	     arSkillLevel[ SKILL_VERYGOOD ], 
+             gettext ( aszSkillType[ SKILL_VERYGOOD ] ),
+             arSkillLevel[ SKILL_GOOD ], 
+             gettext ( aszSkillType[ SKILL_GOOD ] ),
 	     arSkillLevel[ SKILL_DOUBTFUL ], 
-	     arSkillLevel[ SKILL_BAD ], arSkillLevel[ SKILL_VERYBAD ],
-	     arLuckLevel[ LUCK_VERYGOOD ], arLuckLevel[ LUCK_GOOD ],
-	     arLuckLevel[ LUCK_BAD ], arLuckLevel[ LUCK_VERYBAD ] );
+             gettext ( aszSkillType[ SKILL_DOUBTFUL ] ),
+	     arSkillLevel[ SKILL_BAD ], 
+             gettext ( aszSkillType[ SKILL_BAD ] ),
+             arSkillLevel[ SKILL_VERYBAD ],
+             gettext ( aszSkillType[ SKILL_VERYBAD ] ),
+	     arLuckLevel[ LUCK_VERYGOOD ], 
+             gettext ( aszLuckType[ LUCK_VERYGOOD ] ),
+             arLuckLevel[ LUCK_GOOD ],
+             gettext ( aszLuckType[ LUCK_GOOD ] ),
+	     arLuckLevel[ LUCK_BAD ], 
+             gettext ( aszLuckType[ LUCK_BAD ] ),
+             arLuckLevel[ LUCK_VERYBAD ],
+             gettext ( aszLuckType[ LUCK_VERYBAD ] ) );
 
-    outputl( "\n"
+    outputl( _("\n"
                "Analysis will be performed with the "
-             "following evaluation parameters:" );
-  outputl( "    Chequer play:" );
+             "following evaluation parameters:") );
+  outputl( _("    Chequer play:") );
     ShowEvalSetup ( &esAnalysisChequer );
-    outputl( "    Cube decisions:" );
+    outputl( _("    Cube decisions:") );
     ShowEvalSetup ( &esAnalysisCube );
 
     
@@ -239,23 +257,23 @@ extern void CommandShowAnalysis( char *sz ) {
 
 extern void CommandShowAutomatic( char *sz ) {
 
-    static char *szOn = "On", *szOff = "Off";
+    static char *szOn = N_("On"), *szOff = N_("Off");
     
     outputf( 
-            "analysis \t(Analyse game during play (tutor-mode)):      \t%s\n"
-            "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
-	    "crawford\t(Enable the Crawford rule as appropriate):     \t%s\n"
-	    "doubles \t(Turn the cube when opening roll is a double): \t%d\n"
-	    "game    \t(Start a new game after each one is completed):\t%s\n"
-	    "move    \t(Play the forced move when there is no choice):\t%s\n"
-	    "roll    \t(Roll the dice if no double is possible):      \t%s\n",
-	    fAutoAnalysis ? szOn : szOff,
-	    fAutoBearoff ? szOn : szOff,
-	    fAutoCrawford ? szOn : szOff,
+            _("analysis \t(Analyse game during play (tutor-mode)):      \t%s\n"
+              "bearoff \t(Play certain non-contact bearoff moves):      \t%s\n"
+              "crawford\t(Enable the Crawford rule as appropriate):     \t%s\n"
+              "doubles \t(Turn the cube when opening roll is a double): \t%d\n"
+              "game    \t(Start a new game after each one is completed):\t%s\n"
+              "move    \t(Play the forced move when there is no choice):\t%s\n"
+              "roll    \t(Roll the dice if no double is possible):      \t%s\n"),
+	    fAutoAnalysis ? gettext ( szOn ) : gettext ( szOff ),
+	    fAutoBearoff ? gettext ( szOn ) : gettext ( szOff ),
+	    fAutoCrawford ? gettext ( szOn ) : gettext ( szOff ),
 	    cAutoDoubles,
-	    fAutoGame ? szOn : szOff,
-	    fAutoMove ? szOn : szOff,
-	    fAutoRoll ? szOn : szOff );
+	    fAutoGame ? gettext ( szOn ) : gettext ( szOff ),
+	    fAutoMove ? gettext ( szOn ) : gettext ( szOff ),
+	    fAutoRoll ? gettext ( szOn ) : gettext ( szOff ) );
 }
 
 extern void CommandShowBoard( char *sz ) {
@@ -266,7 +284,7 @@ extern void CommandShowBoard( char *sz ) {
     
     if( !*sz ) {
 	if( ms.gs == GAME_NONE )
-	    outputl( "No position specified and no game in progress." );
+	    outputl( _("No position specified and no game in progress.") );
 	else
 	    ShowBoard();
 	
@@ -293,12 +311,12 @@ extern void CommandShowBoard( char *sz ) {
 extern void CommandShowDelay( char *sz ) {
 #if USE_GUI
     if( nDelay )
-	outputf( "The delay is set to %d ms.\n",nDelay);
+	outputf( _("The delay is set to %d ms.\n"),nDelay);
     else
-	outputl( "No delay is being used." );
+	outputl( _("No delay is being used.") );
 #else
-    outputl( "The `show delay' command applies only when using a window "
-	  "system." );
+    outputl( _("The `show delay' command applies only when using a window "
+	  "system.") );
 #endif
 }
 
@@ -308,7 +326,7 @@ extern void CommandShowCache( char *sz ) {
 
     EvalCacheStats( &c, NULL, &cLookup, &cHit );
 
-    outputf( "%d cache entries have been used.  %d lookups, %d hits",
+    outputf( _("%d cache entries have been used.  %d lookups, %d hits"),
 	    c, cLookup, cHit );
 
     if( cLookup > 0x01000000 ) /* calculate carefully to avoid overflow */
@@ -325,11 +343,11 @@ extern void CommandShowCache( char *sz ) {
 extern void CommandShowClockwise( char *sz ) {
 
     if( fClockwise )
-	outputl( "Player 1 moves clockwise (and player 0 moves "
-		 "anticlockwise)." );
+	outputl( _("Player 1 moves clockwise (and player 0 moves "
+		 "anticlockwise).") );
     else
-	outputl( "Player 1 moves anticlockwise (and player 0 moves "
-		 "clockwise)." );
+	outputl( _("Player 1 moves anticlockwise (and player 0 moves "
+		 "clockwise).") );
 }
 
 static void ShowCommands( command *pc, char *szPrefix ) {
@@ -361,18 +379,18 @@ extern void CommandShowCommands( char *sz ) {
 extern void CommandShowConfirm( char *sz ) {
 
     if( fConfirm )
-	outputl( "GNU Backgammon will ask for confirmation before "
-	       "aborting games in progress." );
+	outputl( _("GNU Backgammon will ask for confirmation before "
+	       "aborting games in progress.") );
     else
-	outputl( "GNU Backgammon will not ask for confirmation "
-	       "before aborting games in progress." );
+	outputl( _("GNU Backgammon will not ask for confirmation "
+	       "before aborting games in progress.") );
 
     if( fConfirmSave )
-	outputl( "GNU Backgammon will ask for confirmation before "
-	       "overwriting existing files." );
+	outputl( _("GNU Backgammon will ask for confirmation before "
+	       "overwriting existing files.") );
     else
-	outputl( "GNU Backgammon will not ask for confirmation "
-	       "overwriting existing files." );
+	outputl( _("GNU Backgammon will not ask for confirmation "
+	       "overwriting existing files.") );
 
 }
 
@@ -380,7 +398,7 @@ extern void CommandShowCopying( char *sz ) {
 
 #if USE_GTK
     if( fX )
-	ShowList( aszCopying, "Copying" );
+	ShowList( aszCopying, _("Copying") );
     else
 #endif
 	ShowPaged( aszCopying );
@@ -390,61 +408,60 @@ extern void CommandShowCrawford( char *sz ) {
 
   if( ms.nMatchTo > 0 ) 
     outputl( ms.fCrawford ?
-	  "This game is the Crawford game." :
-	  "This game is not the Crawford game" );
+	  _("This game is the Crawford game.") :
+	  _("This game is not the Crawford game") );
   else if ( !ms.nMatchTo )
-    outputl( "Crawford rule is not used in money sessions." );
+    outputl( _("Crawford rule is not used in money sessions.") );
   else
-    outputl( "No match is being played." );
+    outputl( _("No match is being played.") );
 
 }
 
 extern void CommandShowCube( char *sz ) {
 
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "There is no game in progress." );
+	outputl( _("There is no game in progress.") );
 	return;
     }
 
     if( ms.fCrawford ) {
-	outputl( "The cube is disabled during the Crawford game." );
+	outputl( _("The cube is disabled during the Crawford game.") );
 	return;
     }
     
     if( !fCubeUse ) {
-	outputl( "The doubling cube is disabled." );
+	outputl( _("The doubling cube is disabled.") );
 	return;
     }
 	
-    outputf( "The cube is at %d, ", ms.nCube );
-
     if( ms.fCubeOwner == -1 )
-	outputl( "and is centred." );
+	outputf( _("The cube is at %d, and is centred."), ms.nCube );
     else
-	outputf( "and is owned by %s.", ap[ ms.fCubeOwner ].szName );
+	outputf( _("The cube is at %d, and is owned by %s."), 
+                 ap[ ms.fCubeOwner ].szName, ms.nCube );
 }
 
 extern void CommandShowDice( char *sz ) {
 
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "The dice will not be rolled until a game is started." );
+	outputl( _("The dice will not be rolled until a game is started.") );
 
 	return;
     }
 
     if( ms.anDice[ 0 ] < 1 )
-	outputf( "%s has not yet rolled the dice.\n", ap[ ms.fMove ].szName );
+	outputf( _("%s has not yet rolled the dice.\n"), ap[ ms.fMove ].szName );
     else
-	outputf( "%s has rolled %d and %d.\n", ap[ ms.fMove ].szName,
+	outputf( _("%s has rolled %d and %d.\n"), ap[ ms.fMove ].szName,
 		 ms.anDice[ 0 ], ms.anDice[ 1 ] );
 }
 
 extern void CommandShowDisplay( char *sz ) {
 
     if( fDisplay )
-	outputl( "GNU Backgammon will display boards for computer moves." );
+	outputl( _("GNU Backgammon will display boards for computer moves.") );
     else
-	outputl( "GNU Backgammon will not display boards for computer moves." );
+	outputl( _("GNU Backgammon will not display boards for computer moves.") );
 }
 
 extern void CommandShowEngine( char *sz ) {
@@ -458,10 +475,10 @@ extern void CommandShowEngine( char *sz ) {
 
 extern void CommandShowEvaluation( char *sz ) {
 
-    outputl( "`eval' and `hint' will use:" );
-    outputl( "    Chequer play:" );
+    outputl( _("`eval' and `hint' will use:") );
+    outputl( _("    Chequer play:") );
     ShowEvalSetup ( &esEvalChequer );
-    outputl( "    Cube decisions:" );
+    outputl( _("    Cube decisions:") );
     ShowEvalSetup ( &esEvalCube );
 
 }
@@ -469,28 +486,28 @@ extern void CommandShowEvaluation( char *sz ) {
 extern void CommandShowEgyptian( char *sz ) {
 
     if ( fEgyptian )
-      outputl( "Sessions are played with the Egyptian rule." );
+      outputl( _("Sessions are played with the Egyptian rule.") );
     else
-      outputl( "Sessions are played without the Egyptian rule." );
+      outputl( _("Sessions are played without the Egyptian rule.") );
 
 }
 
 extern void CommandShowJacoby( char *sz ) {
 
     if ( fJacoby ) 
-      outputl( "Money sessions are played with the Jacoby rule." );
+      outputl( _("Money sessions are played with the Jacoby rule.") );
     else
-      outputl( "Money sessions are played without the Jacoby rule." );
+      outputl( _("Money sessions are played without the Jacoby rule.") );
 
 }
 
 extern void CommandShowNackgammon( char *sz ) {
 
     if( fNackgammon )
-	outputl( "New games will use the Nackgammon starting position." );
+	outputl( _("New games will use the Nackgammon starting position.") );
     else
-	outputl( "New games will use the standard backgammon starting "
-	      "position." );
+	outputl( _("New games will use the standard backgammon starting "
+	      "position.") );
 }
 
 extern void CommandShowPipCount( char *sz ) {
@@ -498,7 +515,7 @@ extern void CommandShowPipCount( char *sz ) {
     int anPips[ 2 ], an[ 2 ][ 25 ];
 
     if( !*sz && ms.gs == GAME_NONE ) {
-	outputl( "No position specified and no game in progress." );
+	outputl( _("No position specified and no game in progress.") );
 	return;
     }
     
@@ -507,7 +524,7 @@ extern void CommandShowPipCount( char *sz ) {
     
     PipCount( an, anPips );
     
-    outputf( "The pip counts are: %s %d, %s %d.\n", ap[ ms.fMove ].szName,
+    outputf( _("The pip counts are: %s %d, %s %d.\n"), ap[ ms.fMove ].szName,
 	    anPips[ 1 ], ap[ !ms.fMove ].szName, anPips[ 0 ] );
 }
 
@@ -516,26 +533,26 @@ extern void CommandShowPlayer( char *sz ) {
     int i;
 
     for( i = 0; i < 2; i++ ) {
-	outputf( "Player %d:\n"
+	outputf( _("Player %d:\n"
 		"  Name: %s\n"
-		"  Type: ", i, ap[ i ].szName );
+		"  Type: "), i, ap[ i ].szName );
 
 	switch( ap[ i ].pt ) {
 	case PLAYER_EXTERNAL:
-	    outputf( "external: %s\n\n", ap[ i ].szSocket );
+	    outputf( _("external: %s\n\n"), ap[ i ].szSocket );
 	    break;
 	case PLAYER_GNU:
-	    outputf( "gnubg:\n" );
-            outputl( "    Checker play:" );
+	    outputf( _("gnubg:\n") );
+            outputl( _("    Checker play:") );
             ShowEvalSetup ( &ap[ i ].esChequer );
-            outputl( "    Cube decisions:" );
+            outputl( _("    Cube decisions:") );
             ShowEvalSetup ( &ap[ i ].esCube );
 	    break;
 	case PLAYER_PUBEVAL:
-	    outputl( "pubeval\n" );
+	    outputl( _("pubeval\n") );
 	    break;
 	case PLAYER_HUMAN:
-	    outputl( "human\n" );
+	    outputl( _("human\n") );
 	    break;
 	}
     }
@@ -545,60 +562,55 @@ extern void CommandShowPostCrawford( char *sz ) {
 
   if( ms.nMatchTo > 0 ) 
     outputl( ms.fPostCrawford ?
-	  "This is post-Crawford play." :
-	  "This is not post-Crawford play." );
+	  _("This is post-Crawford play.") :
+	  _("This is not post-Crawford play.") );
   else if ( !ms.nMatchTo )
-    outputl( "Crawford rule is not used in money sessions." );
+    outputl( _("Crawford rule is not used in money sessions.") );
   else
-    outputl( "No match is being played." );
+    outputl( _("No match is being played.") );
 
 }
 
 extern void CommandShowPrompt( char *sz ) {
 
-    outputf( "The prompt is set to `%s'.\n", szPrompt );
+    outputf( _("The prompt is set to `%s'.\n"), szPrompt );
 }
 
 extern void CommandShowRNG( char *sz ) {
 
-  static char *aszRNG[] = {
-    "ANSI", "BSD", "ISAAC", "manual", "MD5", "Mersenne Twister",
-    "user supplied"
-  };
-
-  outputf( "You are using the %s generator.\n",
-	  aszRNG[ rngCurrent ] );
+  outputf( _("You are using the %s generator.\n"),
+	  gettext ( aszRNG[ rngCurrent ] ) );
     
 }
 
 extern void CommandShowRollout( char *sz ) {
 
-  outputl( "`rollout' will use:" );
+  outputl( _("`rollout' will use:") );
   ShowRollout ( &rcRollout );
 
 }
 
 extern void CommandShowScore( char *sz ) {
 
-    outputf( "The score (after %d game%s) is: %s %d, %s %d",
+    outputf( _("The score (after %d game%s) is: %s %d, %s %d"),
 	    ms.cGames, ms.cGames == 1 ? "" : "s",
 	    ap[ 0 ].szName, ms.anScore[ 0 ],
 	    ap[ 1 ].szName, ms.anScore[ 1 ] );
 
     if ( ms.nMatchTo > 0 ) {
         outputf ( ms.nMatchTo == 1 ? 
-	         " (match to %d point%s).\n" :
-	         " (match to %d points%s).\n",
+	         _(" (match to %d point%s).\n") :
+	         _(" (match to %d points%s).\n"),
                  ms.nMatchTo,
 		 ms.fCrawford ? 
-		 ", Crawford game" : ( ms.fPostCrawford ?
-					 ", post-Crawford play" : ""));
+		 _(", Crawford game") : ( ms.fPostCrawford ?
+					 _(", post-Crawford play") : ""));
     } 
     else {
         if ( fJacoby )
-	    outputl ( " (money session,\nwith Jacoby rule)." );
+	    outputl ( _(" (money session,\nwith Jacoby rule).") );
         else
-	    outputl ( " (money session,\nwithout Jacoby rule)." );
+	    outputl ( _(" (money session,\nwithout Jacoby rule).") );
     }
 
 }
@@ -611,24 +623,28 @@ extern void CommandShowSeed( char *sz ) {
 extern void CommandShowTurn( char *sz ) {
 
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "No game is being played." );
+	outputl( _("No game is being played.") );
 
 	return;
     }
     
-    outputf( "%s is on %s.\n", ap[ ms.fMove ].szName,
-	    ms.anDice[ 0 ] ? "move" : "roll" );
+    if ( ms.anDice[ 0 ] )
+      outputf ( _("%s in on move.\n"),
+                ap[ ms.fMove ].szName );
+    else
+      outputf ( _("%s in on roll.\n"),
+                ap[ ms.fMove ].szName );
 
     if( ms.fResigned )
-	outputf( "%s has offered to resign a %s.\n", ap[ ms.fMove ].szName,
-		aszGameResult[ ms.fResigned - 1 ] );
+	outputf( _("%s has offered to resign a %s.\n"), ap[ ms.fMove ].szName,
+		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 }
 
 extern void CommandShowWarranty( char *sz ) {
 
 #if USE_GTK
     if( fX )
-	ShowList( aszWarranty, "Warranty" );
+	ShowList( aszWarranty, _("Warranty") );
     else
 #endif
 	ShowPaged( aszWarranty );
@@ -640,7 +656,7 @@ extern void CommandShowKleinman( char *sz ) {
     float fKC;
 
     if( !*sz && ms.gs == GAME_NONE ) {
-        outputl( "No position specified and no game in progress." );
+        outputl( _("No position specified and no game in progress.") );
         return;
     }
  
@@ -651,9 +667,9 @@ extern void CommandShowKleinman( char *sz ) {
  
     fKC = KleinmanCount (anPips[1], anPips[0]);
     if (fKC == -1.0)
-        outputf ("Pipcount unsuitable for Kleinman Count.\n");
+        outputf (_("Pipcount unsuitable for Kleinman Count.\n"));
     else
-        outputf ("Cubeless Winning Chance: %.4f\n", fKC);
+        outputf (_("Cubeless Winning Chance: %.4f\n"), fKC);
  }
 
 extern void CommandShowThorp( char *sz ) {
@@ -663,7 +679,7 @@ extern void CommandShowThorp( char *sz ) {
     int x;
 
     if( !*sz && ms.gs == GAME_NONE ) {
-        outputl( "No position specified and no game in progress." );
+        outputl( _("No position specified and no game in progress.") );
         return;
     }
 
@@ -710,34 +726,36 @@ extern void CommandShowThorp( char *sz ) {
         nTrailer -= anCovered[0];
 
         outputf("L = %d  T = %d  -> ", nLeader, nTrailer);
+
         if (nTrailer >= (nLeader - 1))
-          output("re");
-        if (nTrailer >= (nLeader - 2))
-          output("double/");
-        if (nTrailer < (nLeader - 2))
-          output("no double/");
-        if (nTrailer >= (nLeader + 2))
-          outputl("drop");
+          output(_("Redouble, "));
+        else if (nTrailer >= (nLeader - 2))
+          output(_("Double, "));
         else
-          outputl("take");
+          output(_("No double, "));
+
+        if (nTrailer >= (nLeader + 2))
+          outputl(_("drop"));
+        else
+          outputl(_("take"));
 
 	if( ( nDiff = nTrailer - nLeader ) > 13 )
 	    nDiff = 13;
 	else if( nDiff < -37 )
 	    nDiff = -37;
 	
-        outputf("Bower's interpolation: %d%% cubeless winning "
-                "chance\n", 74 + 2 * nDiff );
+        outputf(_("Bower's interpolation: %d%% cubeless winning "
+                "chance\n"), 74 + 2 * nDiff );
 }
 
 extern void CommandShowBeavers( char *sz ) {
 
     if( nBeavers > 1 )
-	outputf( "%d beavers/racoons allowed in money sessions.\n", nBeavers );
+	outputf( _("%d beavers/racoons allowed in money sessions.\n"), nBeavers );
     else if( nBeavers == 1 )
-	outputl( "1 beaver allowed in money sessions." );
+	outputl( _("1 beaver allowed in money sessions.") );
     else
-	outputl( "No beavers allowed in money sessions." );
+	outputl( _("No beavers allowed in money sessions.") );
 }
 
 extern void CommandShowGammonValues ( char *sz ) {
@@ -746,7 +764,7 @@ extern void CommandShowGammonValues ( char *sz ) {
   int i;
 
   if( ms.gs != GAME_PLAYING ) {
-    outputl( "No game in progress (type `new game' to start one)." );
+    outputl( _("No game in progress (type `new game' to start one).") );
 
     return;
   }
@@ -760,7 +778,7 @@ extern void CommandShowGammonValues ( char *sz ) {
 
   GetMatchStateCubeInfo( &ci, &ms );
 
-  output ( "Player        Gammon value    Backgammon value\n" );
+  output ( _("Player        Gammon value    Backgammon value\n") );
 
   for ( i = 0; i < 2; i++ ) {
 
@@ -779,12 +797,12 @@ writeMET ( float aafMET[][ MAXSCORE ],
 
   output ( "          " );
   for ( j = 0; j < nCols; j++ )
-    outputf ( " %3i-away ", j + 1 );
+    outputf ( _(" %3i-away "), j + 1 );
   output ( "\n" );
 
   for ( i = 0; i < nRows; i++ ) {
     
-    outputf ( " %3i-away ", i + 1 );
+    outputf ( _(" %3i-away "), i + 1 );
     
     for ( j = 0; j < nCols; j++ )
       outputf ( " %8.4f ", 
@@ -822,7 +840,7 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   }
 #endif
 
-  output ( "Match equity table: " );
+  output ( _("Match equity table: ") );
   outputl( miCurrent.szName );
   outputf( "(%s)\n", miCurrent.szFileName );
   outputl( miCurrent.szDescription );
@@ -830,11 +848,11 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
   
   /* write tables */
 
-  output ( "Pre-Crawford table:\n\n" );
+  output ( _("Pre-Crawford table:\n\n") );
   writeMET ( aafMET, n, n, FALSE );
 
   for ( i = 0; i < 2; i++ ) {
-    outputf ( "Post-Crawford table for player %d (%s):\n\n",
+    outputf ( _("Post-Crawford table for player %d (%s):\n\n"),
               i, ap[ i ].szName );
   writeMET ( (float (*)[MAXSCORE] ) aafMETPostCrawford[ i ], 1, n, TRUE );
   }
@@ -843,39 +861,42 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
 
 extern void CommandShowOutput( char *sz ) {
 
-    outputf( "Match winning chances will be shown as %s.\n", fOutputMatchPC ?
-	     "percentages" : "probabilities" );
+    outputf( fOutputMatchPC ? 
+             _("Match winning chances will be shown as percentages.\n") :
+             _("Match winning chances will be shown as probabilities.\n") );
 
     if ( fOutputMWC )
-	outputl( "Match equities shown in MWC (match winning chance) "
-	      "(match play only)." ); 
+	outputl( _("Match equities shown in MWC (match winning chance) "
+	      "(match play only).") ); 
     else
-	outputl( "Match equities shown in EMG (normalized money game equity) "
-	      "(match play only)." ); 
+	outputl( _("Match equities shown in EMG (normalized money game equity) "
+	      "(match play only).") ); 
 
-    outputf( "Game winning chances will be shown as %s.\n", fOutputWinPC ?
-	     "percentages" : "probabilities" );
+    outputf( fOutputWinPC ? 
+             _("Game winning chances will be shown as percentages.\n") :
+             _("Game winning chances will be shown as probabilities.\n") );
 
 #if USE_GUI
     if( !fX )
 #endif
-	outputf( "Boards will be shown in %s.\n", fOutputRawboard ?
-		 "raw format" : "ASCII" );
+      outputf( fOutputRawboard ? 
+               _("Boards will be shown in raw format.\n") :
+               _("Boards will be shown in ASCII.\n") );
 }
 
 extern void CommandShowTraining( char *sz ) {
 
-    outputf( "Learning rate (alpha) %f,\n", rAlpha );
+    outputf( _("Learning rate (alpha) %f,\n"), rAlpha );
 
     if( rAnneal )
-	outputf( "Annealing rate %f,\n", rAnneal );
+	outputf( _("Annealing rate %f,\n"), rAnneal );
     else
-	outputl( "Annealing disabled," );
+	outputl( _("Annealing disabled,") );
 
     if( rThreshold )
-	outputf( "Error threshold %f.\n", rThreshold );
+	outputf( _("Error threshold %f.\n"), rThreshold );
     else
-	outputl( "Error threshold disabled." );
+	outputl( _("Error threshold disabled.") );
 }
 
 extern void CommandShowVersion( char *sz ) {
@@ -892,13 +913,13 @@ extern void CommandShowVersion( char *sz ) {
 #endif
 
     while( *ppch )
-	outputl( *ppch++ );
+	outputl( gettext ( *ppch++ ) );
 
     outputc( '\n' );
 
-    outputl( "GNU Backgammon was written by Joseph Heled, Øystein Johansen, "
+    outputl( _("GNU Backgammon was written by Joseph Heled, Øystein Johansen, "
 	     "David Montgomery,\nJørn Thyssen and Gary Wong.\n\n"
-	     "Special thanks to:" );
+	     "Special thanks to:") );
 
     cCol = 80;
 
@@ -928,7 +949,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
   int i, fAutoRedouble[ 2 ], afDead[ 2 ], anNormScore[ 2 ];
 
   if( ms.gs != GAME_PLAYING ) {
-    outputl( "No game in progress (type `new game' to start one)." );
+    outputl( _("No game in progress (type `new game' to start one).") );
 
     return;
   }
@@ -973,12 +994,12 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     for ( i = 0; i < 2; i++ ) {
       if ( aarRates[ i ][ 0 ] > 1.0 ) {
-        outputf ( "illegal gammon ratio for player %i: %f\n",
+        outputf ( _("illegal gammon ratio for player %i: %f\n"),
                   i, aarRates[ i ][ 0 ] );
         return ;
       }
       if ( aarRates[ i ][ 1 ] > 1.0 ) {
-        outputf ( "illegal backgammon ratio for player %i: %f\n",
+        outputf ( _("illegal backgammon ratio for player %i: %f\n"),
                   i, aarRates[ i ][ 1 ] );
         return ;
       }
@@ -1008,7 +1029,7 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
 
   for ( i = 0; i < 2; i++ ) 
-    outputf ( "Player %-25s: gammon rate %6.2f%%, bg rate %6.2f%%\n",
+    outputf ( _("Player %-25s: gammon rate %6.2f%%, bg rate %6.2f%%\n"),
               ap[ i ].szName, 
               aarRates[ i ][ 0 ] * 100.0, aarRates[ i ][ 1 ] * 100.0);
 
@@ -1168,23 +1189,23 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     for ( i = 0; i < 2; i++ ) {
 
-      outputf ("Player %s market window:\n\n", ap[ i ].szName );
+      outputf (_("Player %s market window:\n\n"), ap[ i ].szName );
 
       if ( fAutoRedouble[ i ] )
-        output ("Dead cube (opponent doesn't redouble): ");
+        output (_("Dead cube (opponent doesn't redouble): "));
       else
-        output ("Dead cube: ");
+        output (_("Dead cube: "));
 
       outputf ("%6.2f%% - %6.2f%%\n", 100. * arDP1[ i ], 100. * arCP1[
                                                                       i ] );
 
       if ( fAutoRedouble[ i ] ) 
-        outputf ("Dead cube (opponent redoubles):"
-                 "%6.2f%% - %6.2f%%\n\n",
+        outputf (_("Dead cube (opponent redoubles):"
+                 "%6.2f%% - %6.2f%%\n\n"),
                  100. * arDP2[ i ], 100. * arCP2[ i ] );
       else if ( ! afDead[ i ] )
-        outputf ("Live cube:"
-                 "%6.2f%% - %6.2f%%\n\n",
+        outputf (_("Live cube:"
+                 "%6.2f%% - %6.2f%%\n\n"),
                  100. * arDP2[ i ], 100. * arCP2[ i ] );
 
     }
@@ -1201,13 +1222,14 @@ extern void CommandShowMarketWindow ( char * sz ) {
      */
 
     const char *aszMoneyPointLabel[] = {
-      "Take Point (TP)",
-      "Beaver Point (BP)",
-      "Raccoon Point (RP)",
-      "Initial Double Point (IDP)",
-      "Redouble Point (RDP)",
-      "Cash Point (CP)",
-      "Too good Point (TP)" };
+      N_("Take Point (TP)"),
+      N_("Beaver Point (BP)"),
+      N_("Raccoon Point (RP)"),
+      N_("Initial Double Point (IDP)"),
+      N_("Redouble Point (RDP)"),
+      N_("Cash Point (CP)"),
+      N_("Too good Point (TP)")
+    };
 
     float aaarPoints[ 2 ][ 7 ][ 2 ];
 
@@ -1217,12 +1239,12 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
     for ( i = 0; i < 2; i++ ) {
 
-      outputf ("\nPlayer %s cube parameters:\n\n", ap[ i ].szName );
-      outputl ( "Cube parameter               Dead Cube    Live Cube\n" );
+      outputf (_("\nPlayer %s cube parameters:\n\n"), ap[ i ].szName );
+      outputl ( _("Cube parameter               Dead Cube    Live Cube\n") );
 
       for ( j = 0; j < 7; j++ ) 
         outputf ( "%-27s  %7.3f%%     %7.3f%%\n",
-                  aszMoneyPointLabel[ j ],
+                  gettext ( aszMoneyPointLabel[ j ] ),
                   aaarPoints[ i ][ j ][ 0 ] * 100.0f,
                   aaarPoints[ i ][ j ][ 1 ] * 100.0f );
 
@@ -1245,7 +1267,7 @@ CommandShowExport ( char *sz ) {
   }
 #endif
 
-  outputf ( "\n" 
+  outputf ( _("\n" 
             "Export settings: \n\n"
             "WARNING: not all settings are honoured in the export!\n"
             "         Do not expect to much!\n\n"
@@ -1253,78 +1275,78 @@ CommandShowExport ( char *sz ) {
             "- annotations\r\t\t\t\t: %s\n" 
             "- analysis   \r\t\t\t\t: %s\n"
             "- statistics \r\t\t\t\t: %s\n"
-            "- legend     \r\t\t\t\t: %s\n\n",
-            exsExport.fIncludeAnnotation ? "yes" : "no",
-            exsExport.fIncludeAnalysis ? "yes" : "no",
-            exsExport.fIncludeStatistics ? "yes" : "no",
-            exsExport.fIncludeLegend ? "yes" : "no" );
+            "- legend     \r\t\t\t\t: %s\n\n"),
+            exsExport.fIncludeAnnotation ? _("yes") : _("no"),
+            exsExport.fIncludeAnalysis ? _("yes") : _("no"),
+            exsExport.fIncludeStatistics ? _("yes") : _("no"),
+            exsExport.fIncludeLegend ? _("yes") : _("no") );
 
-  outputl ( "Show: \n" );
+  outputl ( _("Show: \n") );
   if ( ! exsExport.fDisplayBoard )
-    outputl ( "- board\r\t\t\t\t: never" );
+    outputl ( _("- board\r\t\t\t\t: never") );
   else
-    outputf ( "- board\r\t\t\t\t: on every %d move\n", 
+    outputf ( _("- board\r\t\t\t\t: on every %d move\n"), 
               exsExport.fDisplayBoard );
 
   if ( exsExport.fSide == 3 )
-    outputl ( "- players\r\t\t\t\t: both" );
+    outputl ( _("- players\r\t\t\t\t: both") );
   else
-    outputf ( "- player\r\t\t\t\t: %s\n", 
+    outputf ( _("- player\r\t\t\t\t: %s\n"), 
               ap[ exsExport.fSide - 1 ].szName );
 
-  outputl ( "\nOutput moves:\n" );
+  outputl ( _("\nOutput moves:\n") );
 
-  outputf ( "- show at most\r\t\t\t\t: %d moves\n", 
+  outputf ( _("- show at most\r\t\t\t\t: %d moves\n"), 
             exsExport.nMoves );
-  outputf ( "- show detailed probabilities\r\t\t\t\t: %s\n", 
-            exsExport.fMovesDetailProb ? "yes" : "no" );
-  outputf ( "- show evaluation parameters\r\t\t\t\t: %s\n", 
-            exsExport.afMovesParameters[ 0 ] ? "yes" : "no" );
-  outputf ( "- show rollout parameters\r\t\t\t\t: %s\n", 
-            exsExport.afMovesParameters[ 1 ] ? "yes" : "no" );
+  outputf ( _("- show detailed probabilities\r\t\t\t\t: %s\n"), 
+            exsExport.fMovesDetailProb ? _("yes") : _("no") );
+  outputf ( _("- show evaluation parameters\r\t\t\t\t: %s\n"), 
+            exsExport.afMovesParameters[ 0 ] ? _("yes") : _("no") );
+  outputf ( _("- show rollout parameters\r\t\t\t\t: %s\n"), 
+            exsExport.afMovesParameters[ 1 ] ? _("yes") : _("no") );
 
   for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
     if ( i == SKILL_NONE ) 
-      outputf ( "- unmarked moves\r\t\t\t\t: %s\n",
-                exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+      outputf ( _("- unmarked moves\r\t\t\t\t: %s\n"),
+                exsExport.afMovesDisplay[ i ] ? _("yes") : _("no") );
     else
-      outputf ( "- marked '%s'\r\t\t\t\t: %s\n",
-                aszSkillType[ i ], 
-                exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+      outputf ( _("- marked '%s'\r\t\t\t\t: %s\n"),
+                gettext ( aszSkillType[ i ] ), 
+                exsExport.afMovesDisplay[ i ] ? _("yes") : _("no") );
   }
 
-  outputl ( "\nOutput cube decisions:\n" );
+  outputl ( _("\nOutput cube decisions:\n") );
 
-  outputf ( "- show detailed probabilities\r\t\t\t\t: %s\n", 
-            exsExport.fCubeDetailProb ? "yes" : "no" );
-  outputf ( "- show evaluation parameters\r\t\t\t\t: %s\n", 
-            exsExport.afCubeParameters[ 0 ] ? "yes" : "no" );
-  outputf ( "- show rollout parameters\r\t\t\t\t: %s\n", 
-            exsExport.afCubeParameters[ 1 ] ? "yes" : "no" );
+  outputf ( _("- show detailed probabilities\r\t\t\t\t: %s\n"), 
+            exsExport.fCubeDetailProb ? _("yes") : _("no") );
+  outputf ( _("- show evaluation parameters\r\t\t\t\t: %s\n"), 
+            exsExport.afCubeParameters[ 0 ] ? _("yes") : _("no") );
+  outputf ( _("- show rollout parameters\r\t\t\t\t: %s\n"), 
+            exsExport.afCubeParameters[ 1 ] ? _("yes") : _("no") );
 
   for ( i = 0; i <= SKILL_VERYGOOD; i++ ) {
     if ( i == SKILL_NONE )
-      outputf ( "- unmarked cube decisions\r\t\t\t\t: %s\n",
-                exsExport.afMovesDisplay[ i ] ? "yes" : "no" );
+      outputf ( _("- unmarked cube decisions\r\t\t\t\t: %s\n"),
+                exsExport.afMovesDisplay[ i ] ? _("yes") : _("no") );
     else
-      outputf ( "- marked '%s'\r\t\t\t\t: %s\n",
-                aszSkillType[ i ], 
-                exsExport.afCubeDisplay[ i ] ? "yes" : "no" );
+      outputf ( _("- marked '%s'\r\t\t\t\t: %s\n"),
+                gettext ( aszSkillType[ i ] ), 
+                exsExport.afCubeDisplay[ i ] ? _("yes") : _("no") );
   }
   
-  outputf ( "- actual cube decisions\r\t\t\t\t: %s\n",
-            exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ? "yes" : "no" );
-  outputf ( "- missed doubles\r\t\t\t\t: %s\n",
-            exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? "yes" : "no" );
-  outputf ( "- close cube decisions\r\t\t\t\t: %s\n",
-            exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
+  outputf ( _("- actual cube decisions\r\t\t\t\t: %s\n"),
+            exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] ? _("yes") : _("no") );
+  outputf ( _("- missed doubles\r\t\t\t\t: %s\n"),
+            exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] ? _("yes") : _("no") );
+  outputf ( _("- close cube decisions\r\t\t\t\t: %s\n"),
+            exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? _("yes") : _("no") );
 
-  outputl ( "\nHTML options:\n" );
+  outputl ( _("\nHTML options:\n") );
 
-  outputf ( "- URL to pictures used in export\n"
-            "\t%s\n",
+  outputf ( _("- URL to pictures used in export\n"
+            "\t%s\n"),
             exsExport.szHTMLPictureURL ? exsExport.szHTMLPictureURL :
-            "not defined" );
+            _("not defined") );
 
 
   outputl ( "\n" );
@@ -1338,18 +1360,19 @@ CommandShowPath ( char *sz ) {
   int i;
 
   char *aszPathNames[] = {
-    "Export of Encapsulated PostScript .eps files",
-    "Import or export of Jellyfish .gam files",
-    "Export of HTML files",
-    "Export of LaTeX files",
-    "Import or export of Jellyfish .mat files",
-    "Import of FIBS oldmoves files",
-    "Export of PDF files",
-    "Import of Jellyfish .pos files",
-    "Export of PostScript files",
-    "Load and save of SGF files",
-    "Import of GamesGrid SGG files",
-    "Loading of match equity files (.xml)" };
+    N_("Export of Encapsulated PostScript .eps files"),
+    N_("Import or export of Jellyfish .gam files"),
+    N_("Export of HTML files"),
+    N_("Export of LaTeX files"),
+    N_("Import or export of Jellyfish .mat files"),
+    N_("Import of FIBS oldmoves files"),
+    N_("Export of PDF files"),
+    N_("Import of Jellyfish .pos files"),
+    N_("Export of PostScript files"),
+    N_("Load and save of SGF files"),
+    N_("Import of GamesGrid SGG files"),
+    N_("Loading of match equity files (.xml)")
+  };
 
   /* make GTK widget that allows editing of paths */
 
@@ -1360,21 +1383,21 @@ CommandShowPath ( char *sz ) {
   }
 #endif
 
-  outputl ( "Default and current paths "
-            "for load, save, import, and export: \n" );
+  outputl ( _("Default and current paths "
+            "for load, save, import, and export: \n") );
 
   for ( i = 0; i <= PATH_SGG; ++i ) {
 
-    outputf ( "%s:\n", aszPathNames[ i ] );
+    outputf ( "%s:\n", gettext ( aszPathNames[ i ] ) );
     if ( ! strcmp ( aaszPaths[ i ][ 0 ], "" ) )
-      outputl ( "   Default : not defined" );
+      outputl ( _("   Default : not defined") );
     else
-      outputf ( "   Default : \"%s\"\n", aaszPaths[ i ][ 0 ] );
+      outputf ( _("   Default : \"%s\"\n"), aaszPaths[ i ][ 0 ] );
 
     if ( ! strcmp ( aaszPaths[ i ][ 1 ], "" ) )
-      outputl ( "   Current : not defined" );
+      outputl ( _("   Current : not defined") );
     else
-      outputf ( "   Current : \"%s\"\n", aaszPaths[ i ][ 1 ] );
+      outputf ( _("   Current : \"%s\"\n"), aaszPaths[ i ][ 1 ] );
 
 
 

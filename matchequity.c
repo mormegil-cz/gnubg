@@ -1322,7 +1322,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   if ( ! root ) {
 
-    printf ( "Error reading XML file (%s): no document root!\n", szFileName );
+    printf ( _("Error reading XML file (%s): no document root!\n"), szFileName );
     fError = 1;
     goto finish;
 
@@ -1332,7 +1332,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   if ( xmlStrcmp ( root->name, (const xmlChar *) "met" ) ) {
 
-    printf ( "Error reading XML file (%s): wrong DTD (%s)\n", 
+    printf ( _("Error reading XML file (%s): wrong DTD (%s)\n"), 
              szFileName, root->name );
     fError = 1;
     goto finish;
@@ -1362,7 +1362,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   if ( fError ) {
 
-    printf ( "met DTD not found\n" );
+    printf ( _("met DTD not found\n") );
     fError = 1;
     goto finish;
 
@@ -1373,7 +1373,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
 
   if ( ! xmlValidateDocument ( &ctxt, doc ) ) {
 
-    printf ( "XML does not validate!\n" );
+    printf ( _("XML does not validate!\n") );
     fError = 1;
     goto finish;
 
@@ -1418,7 +1418,7 @@ static int readMET ( metdata *pmd, const char *szFileName,
           fPlayer = atoi ( pc );
 
         if ( fPlayer < -1 || fPlayer > 1 ) {
-          printf ( "Illegal value for attribute player: '%s'\n", pc );
+          printf ( _("Illegal value for attribute player: '%s'\n"), pc );
           fError = 1;
           goto finish;
         }
@@ -1672,7 +1672,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
     }
     else {
 
-      fprintf ( stderr, "Error reading MET\n" );
+      fprintf ( stderr, _("Error reading MET\n") );
       return;
 
     }
@@ -1683,9 +1683,9 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
 
 #else
 
-  printf ( "Your version of GNU Backgammon does not support\n"
+  printf ( _("Your version of GNU Backgammon does not support\n"
            "reading match equity files.\n"
-           "Fallback to default Zadeh table.\n" );
+           "Fallback to default Zadeh table.\n") );
 
   getDefaultMET ( &md );
 
@@ -1721,7 +1721,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
                                                md.mi.nLength,
                                                &md.ampPostCrawford[ j ] ) < 0 ) {
 
-        fprintf ( stderr, "Error generating post-Crawford MET\n" );
+        fprintf ( stderr, _("Error generating post-Crawford MET\n") );
         return;
 
       }
@@ -1749,7 +1749,7 @@ InitMatchEquity ( const char *szFileName, const char *szDir ) {
                                  md.mi.nLength,
                                  &md.mpPreCrawford ) < 0 ) {
 
-      fprintf ( stderr, "Error generating pre-Crawford MET\n" );
+      fprintf ( stderr, _("Error generating pre-Crawford MET\n") );
       return;
 
     }

@@ -52,69 +52,69 @@
 #include "positionid.h"
 #include "drawboard.h"
 
+#include "i18n.h"
+
 static int iPlayerSet;
 
-static char szEQUITY[] = "<equity>",
-    szFILENAME[] = "<filename>",
-    szNAME[] = "<name>",
-    szNUMBER[] = "<number>",
-    szONOFF[] = "on|off",
-    szPLIES[] = "<plies>",
-    szSTDDEV[] = "<std dev>";
+static char szEQUITY[] = N_ ("<equity>"),
+    szFILENAME[] = N_ ("<filename>"),
+    szNAME[] = N_ ("<name>"),
+    szNUMBER[] = N_ ("<number>"),
+    szONOFF[] = N_ ("on|off"),
+    szPLIES[] = N_ ("<plies>"),
+    szSTDDEV[] = N_ ("<std dev>");
     
 command acSetEvaluation[] = {
-    { "candidates", CommandSetEvalCandidates, "Limit the number of moves "
-      "for deep evaluation", szNUMBER, NULL },
-    { "cubeful", CommandSetEvalCubeful, "Cubeful evaluations", szONOFF,
+    { "candidates", CommandSetEvalCandidates, N_("Limit the number of moves "
+      "for deep evaluation"), szNUMBER, NULL },
+    { "cubeful", CommandSetEvalCubeful, N_("Cubeful evaluations"), szONOFF,
       &cOnOff },
-    { "deterministic", CommandSetEvalDeterministic, "Specify whether added "
-      "noise is determined by position", szONOFF, &cOnOff },
-    { "noise", CommandSetEvalNoise, "Distort evaluations with noise",
+    { "deterministic", CommandSetEvalDeterministic, N_("Specify whether added "
+      "noise is determined by position"), szONOFF, &cOnOff },
+    { "noise", CommandSetEvalNoise, N_("Distort evaluations with noise"),
       szSTDDEV, NULL },
-    { "plies", CommandSetEvalPlies, "Choose how many plies to look ahead",
+    { "plies", CommandSetEvalPlies, N_("Choose how many plies to look ahead"),
       szPLIES, NULL },
     { "nooneplyprune", CommandSetEvalNoOnePlyPrune,
-      "Control pruning of candidates at deep plied searches",
+      N_("Control pruning of candidates at deep plied searches"),
       szONOFF, &cOnOff },
     { "reduced", CommandSetEvalReduced,
-      "Control how thoroughly deep plies are searched", szNUMBER, NULL },
-    { "tolerance", CommandSetEvalTolerance, "Control the equity range "
-      "of moves for deep evaluation", szEQUITY, NULL },
+      N_("Control how thoroughly deep plies are searched"), szNUMBER, NULL },
+    { "tolerance", CommandSetEvalTolerance, N_("Control the equity range "
+      "of moves for deep evaluation"), szEQUITY, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetPlayer[] = {
-    { "chequerplay", CommandSetPlayerChequerplay, "Control chequerplay "
-      "parameters when gnubg plays", NULL, acSetEvalParam },
-    { "cubedecision", CommandSetPlayerCubedecision, "Control cube decision "
-      "parameters when gnubg plays", NULL, acSetEvalParam },
-    { "external", CommandSetPlayerExternal, "Have another process make all "
-      "moves for a player", szFILENAME, &cFilename },
-    { "gnubg", CommandSetPlayerGNU, "Have gnubg make all moves for a player",
+    { "chequerplay", CommandSetPlayerChequerplay, N_("Control chequerplay "
+      "parameters when gnubg plays"), NULL, acSetEvalParam },
+    { "cubedecision", CommandSetPlayerCubedecision, N_("Control cube decision "
+      "parameters when gnubg plays"), NULL, acSetEvalParam },
+    { "external", CommandSetPlayerExternal, N_("Have another process make all "
+      "moves for a player"), szFILENAME, &cFilename },
+    { "gnubg", CommandSetPlayerGNU, 
+      N_("Have gnubg make all moves for a player"),
       NULL, NULL },
-    { "human", CommandSetPlayerHuman, "Have a human make all moves for a "
-      "player", NULL, NULL },
-    { "name", CommandSetPlayerName, "Change a player's name", szNAME, NULL },
-    { "pubeval", CommandSetPlayerPubeval, "Have pubeval make all moves for a "
-      "player", NULL, NULL },
+    { "human", CommandSetPlayerHuman, N_("Have a human make all moves for a "
+      "player"), NULL, NULL },
+    { "name", CommandSetPlayerName, 
+      N_("Change a player's name"), szNAME, NULL },
+    { "pubeval", CommandSetPlayerPubeval, 
+      N_("Have pubeval make all moves for a "
+      "player"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 };
 
 static void SetRNG( rng rngNew, char *szSeed ) {
 
-    static char *aszRNG[] = {
-	"ANSI", "BSD", "ISAAC", "manual", "MD5", "Mersenne Twister",
-	"user supplied"
-    };
-    
     /* FIXME: read name of file with user RNG */
 
     if( rngCurrent == rngNew ) {
-	outputf( "You are already using the %s generator.\n",
-		aszRNG[ rngNew ] );
+	outputf( _("You are already using the %s generator.\n"),
+		gettext ( aszRNG[ rngNew ] ) );
 	if( szSeed )
 	    CommandSetSeed( szSeed );
     } else {
-	outputf( "GNU Backgammon will now use the %s generator.\n",
-		aszRNG[ rngNew ] );
+	outputf( _("GNU Backgammon will now use the %s generator.\n"),
+                 gettext ( aszRNG[ rngNew ] ) );
 
         /* Dispose dynamically linked user module if necesary */
 
@@ -130,9 +130,9 @@ static void SetRNG( rng rngNew, char *szSeed ) {
         if ( rngNew == RNG_USER ) {
 #if HAVE_LIBDL
 	  if ( !UserRNGOpen() ) {
-	      outputl( "Error loading shared library." );
-	      outputf( "You are still using the %s generator.\n",
-		     aszRNG[ rngCurrent ] );
+	      outputl( _("Error loading shared library.") );
+	      outputf( _("You are still using the %s generator.\n"),
+		     gettext ( aszRNG[ rngCurrent ] ) );
             return;
 	  }
 #else
@@ -150,8 +150,8 @@ static void SetRNG( rng rngNew, char *szSeed ) {
 extern void CommandSetAnalysisCube( char *sz ) {
 
     if( SetToggle( "analysis cube", &fAnalyseCube, sz,
-		   "Cube action will be analysed.",
-		   "Cube action will not be analysed." ) >= 0 )
+		   _("Cube action will be analysed."),
+		   _("Cube action will not be analysed.") ) >= 0 )
 	UpdateSetting( &fAnalyseCube );
 }
 
@@ -161,122 +161,124 @@ extern void CommandSetAnalysisLimit( char *sz ) {
     
     if( ( n = ParseNumber( &sz ) ) <= 0 ) {
 	cAnalysisMoves = -1;
-	outputl( "Every legal move will be analysed." );
+	outputl( _("Every legal move will be analysed.") );
     } else if( n >= 2 ) {
 	cAnalysisMoves = n;
-	outputf( "Up to %d moves will be analysed.\n", n );
+	outputf( _("Up to %d moves will be analysed.\n"), n );
     } else {
-	outputl( "If you specify a limit on the number of moves to analyse, "
-		 "it must be at least 2." );
+	outputl( _("If you specify a limit on the number of moves to analyse, "
+		 "it must be at least 2.") );
 	return;
     }
 
     if( !fAnalyseMove )
-	outputl( "(Note that no moves will be analysed until enable chequer "
-		 "play analysis -- see\n`help set analysis moves'.)" );
+	outputl( _("(Note that no moves will be analysed until enable chequer "
+		 "play analysis -- see\n`help set analysis moves'.)") );
 }
 
 extern void CommandSetAnalysisLuck( char *sz ) {
 
     if( SetToggle( "analysis luck", &fAnalyseDice, sz,
-		   "Dice rolls will be analysed.",
-		   "Dice rolls will not be analysed." ) >= 0 )
+		   _("Dice rolls will be analysed."),
+		   _("Dice rolls will not be analysed.") ) >= 0 )
 	UpdateSetting( &fAnalyseDice );
 }
 
 extern void CommandSetAnalysisMoves( char *sz ) {
 
     if( SetToggle( "analysis moves", &fAnalyseMove, sz,
-		   "Chequer play will be analysed.",
-		   "Chequer play will not be analysed." ) >= 0 )
+		   _("Chequer play will be analysed."),
+		   _("Chequer play will not be analysed.") ) >= 0 )
 	UpdateSetting( &fAnalyseMove );
 }
 
-static void SetLuckThreshold( char *szCommand, lucktype lt, char *sz ) {
+static void SetLuckThreshold( lucktype lt, char *sz ) {
 
     double r = ParseReal( &sz );
+    char *szCommand = gettext ( aszLuckTypeCommand[ lt ] );
 
     if( r <= 0.0 ) {
-	outputf( "You must specify a positive number for the threshold (see "
-		 "`help set analysis\nthreshold %s').\n", szCommand );
+	outputf( _("You must specify a positive number for the threshold (see "
+		 "`help set analysis\nthreshold %s').\n"), szCommand );
 	return;
     }
 
     arLuckLevel[ lt ] = r;
 
-    outputf( "`%s' threshold set to %.3f.\n", szCommand, r );
+    outputf( _("`%s' threshold set to %.3f.\n"), szCommand, r );
 }
 
-static void SetSkillThreshold( char *szCommand, skilltype lt, char *sz ) {
+static void SetSkillThreshold( skilltype lt, char *sz ) {
 
     double r = ParseReal( &sz );
+    char *szCommand = gettext ( aszSkillTypeCommand[ lt ] );
 
     if( r <= 0.0 ) {
-	outputf( "You must specify a positive number for the threshold (see "
-		 "`help set analysis\nthreshold %s').\n", szCommand );
+	outputf( _("You must specify a positive number for the threshold (see "
+		 "`help set analysis\nthreshold %s').\n"), szCommand );
 	return;
     }
 
     arSkillLevel[ lt ] = r;
 
-    outputf( "`%s' threshold set to %.3f.\n", szCommand, r );
+    outputf( _("`%s' threshold set to %.3f.\n"), szCommand, r );
 }
 
 extern void CommandSetAnalysisThresholdBad( char *sz ) {
 
-    SetSkillThreshold( "bad", SKILL_BAD, sz );
+    SetSkillThreshold( SKILL_BAD, sz );
 }
 
 extern void CommandSetAnalysisThresholdGood( char *sz ) {
 
-    SetSkillThreshold( "good", SKILL_GOOD, sz );
+    SetSkillThreshold( SKILL_GOOD, sz );
 }
 
 extern void CommandSetAnalysisThresholdDoubtful( char *sz ) {
 
-    SetSkillThreshold( "doubtful", SKILL_DOUBTFUL, sz );
+    SetSkillThreshold( SKILL_DOUBTFUL, sz );
 }
 
 extern void CommandSetAnalysisThresholdInteresting( char *sz ) {
 
-    SetSkillThreshold( "interesting", SKILL_INTERESTING, sz );
+    SetSkillThreshold( SKILL_INTERESTING, sz );
 }
 
 extern void CommandSetAnalysisThresholdLucky( char *sz ) {
 
-    SetLuckThreshold( "lucky", LUCK_GOOD, sz );
+    SetLuckThreshold( LUCK_GOOD, sz );
 }
 
 extern void CommandSetAnalysisThresholdUnlucky( char *sz ) {
 
-    SetLuckThreshold( "unlucky", LUCK_BAD, sz );
+    SetLuckThreshold( LUCK_BAD, sz );
 }
 
 extern void CommandSetAnalysisThresholdVeryBad( char *sz ) {
 
-    SetSkillThreshold( "very bad", SKILL_VERYBAD, sz );
+    SetSkillThreshold( SKILL_VERYBAD, sz );
 }
 
 extern void CommandSetAnalysisThresholdVeryGood( char *sz ) {
 
-    SetSkillThreshold( "very good", SKILL_VERYGOOD, sz );
+    SetSkillThreshold( SKILL_VERYGOOD, sz );
 }
 
 extern void CommandSetAnalysisThresholdVeryLucky( char *sz ) {
 
-    SetLuckThreshold( "very lucky", LUCK_VERYGOOD, sz );
+    SetLuckThreshold( LUCK_VERYGOOD, sz );
 }
 
 extern void CommandSetAnalysisThresholdVeryUnlucky( char *sz ) {
 
-    SetLuckThreshold( "very unlucky", LUCK_VERYBAD, sz );
+    SetLuckThreshold( LUCK_VERYBAD, sz );
 }
 
 extern void CommandSetAnnotation( char *sz ) {
 
     if( SetToggle( "annotation", &fAnnotation, sz,
-		   "Move analysis and commentary will be displayed.",
-		   "Move analysis and commentary will not be displayed." )
+		   _("Move analysis and commentary will be displayed."),
+		   _("Move analysis and commentary will not be displayed.") )
 	>= 0 )
 	/* Force an update, even if the setting has not changed. */
 	UpdateSetting( &fAnnotation );
@@ -284,23 +286,23 @@ extern void CommandSetAnnotation( char *sz ) {
 
 extern void CommandSetAutoBearoff( char *sz ) {
 
-    SetToggle( "automatic bearoff", &fAutoBearoff, sz, "Will automatically "
-	       "bear off as many chequers as possible.", "Will not "
-	       "automatically bear off chequers." );
+    SetToggle( "automatic bearoff", &fAutoBearoff, sz, _("Will automatically "
+	       "bear off as many chequers as possible."), _("Will not "
+	       "automatically bear off chequers.") );
 }
 
 extern void CommandSetAutoAnalysis( char *sz ) {
 
     SetToggle( "automatic analysis", &fAutoAnalysis, sz, 
-               "Will analyse match during play", 
-               "Will not analyse match during play" );
+               _("Will analyse match during play"), 
+               _("Will not analyse match during play") );
 }
 
 extern void CommandSetAutoCrawford( char *sz ) {
 
-    SetToggle( "automatic crawford", &fAutoCrawford, sz, "Will enable the "
-	       "Crawford game according to match score.", "Will not "
-	       "enable the Crawford game according to match score." );
+    SetToggle( "automatic crawford", &fAutoCrawford, sz, _("Will enable the "
+	       "Crawford game according to match score."), _("Will not "
+	       "enable the Crawford game according to match score.") );
 }
 
 extern void CommandSetAutoDoubles( char *sz ) {
@@ -308,54 +310,59 @@ extern void CommandSetAutoDoubles( char *sz ) {
     int n;
     
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	outputl( "You must specify how many automatic doubles to use "
-	      "(try `help set automatic double')." );
+	outputl( _("You must specify how many automatic doubles to use "
+	      "(try `help set automatic double').") );
 	return;
     }
 
     if( n > 12 ) {
-	outputl( "Please specify a smaller limit (up to 12 automatic "
-	      "doubles." );
+	outputl( _("Please specify a smaller limit (up to 12 automatic "
+	      "doubles.") );
 	return;
     }
 	
     if( ( cAutoDoubles = n ) > 1 )
-	outputf( "Automatic doubles will be used (up to a limit of %d).\n", n );
+	outputf( _("Automatic doubles will be used "
+                   "(up to a limit of %d).\n"), n );
     else if( cAutoDoubles )
-	outputl( "A single automatic double will be permitted." );
+	outputl( _("A single automatic double will be permitted.") );
     else
-	outputl( "Automatic doubles will not be used." );
+	outputl( _("Automatic doubles will not be used.") );
 
     UpdateSetting( &cAutoDoubles );
     
     if( cAutoDoubles ) {
 	if( ms.nMatchTo > 0 )
-	    outputl( "(Note that automatic doubles will have no effect until you "
-		  "start session play.)" );
+	    outputl( _("(Note that automatic doubles will have "
+                       "no effect until you "
+                       "start session play.)") );
 	else if( !fCubeUse )
-	    outputl( "(Note that automatic doubles will have no effect until you "
-		  "enable cube use --\nsee `help set cube use'.)" );
+	    outputl( _("(Note that automatic doubles will have no effect "
+                       "until you "
+                       "enable cube use --\nsee `help set cube use'.)") );
     }
 }
 
 extern void CommandSetAutoGame( char *sz ) {
 
-    SetToggle( "automatic game", &fAutoGame, sz, "Will automatically start "
-	       "games after wins.", "Will not automatically start games." );
+    SetToggle( "automatic game", &fAutoGame, sz, 
+               _("Will automatically start games after wins."), 
+               _("Will not automatically start games.") );
 }
 
 extern void CommandSetAutoMove( char *sz ) {
 
-    SetToggle( "automatic move", &fAutoMove, sz, "Forced moves will be made "
-	       "automatically.", "Forced moves will not be made "
-	       "automatically." );
+    SetToggle( "automatic move", &fAutoMove, sz, 
+               _("Forced moves will be made automatically."), 
+               _("Forced moves will not be made automatically.") );
 }
 
 extern void CommandSetAutoRoll( char *sz ) {
 
-    SetToggle( "automatic roll", &fAutoRoll, sz, "Will automatically roll the "
-	       "dice when no cube action is possible.", "Will not "
-	       "automatically roll the dice." );
+    SetToggle( "automatic roll", &fAutoRoll, sz, 
+               _("Will automatically roll the "
+                 "dice when no cube action is possible."), 
+               _("Will not automatically roll the dice.") );
 }
 
 extern void CommandSetBoard( char *sz ) {
@@ -364,13 +371,13 @@ extern void CommandSetBoard( char *sz ) {
     movesetboard *pmsb;
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "There must be a game in progress to set the board." );
+	outputl( _("There must be a game in progress to set the board.") );
 
 	return;
     }
 
     if( !*sz ) {
-	outputl( "You must specify a position -- see `help set board'." );
+	outputl( _("You must specify a position -- see `help set board'.") );
 
 	return;
     }
@@ -395,17 +402,17 @@ extern void CommandSetBoard( char *sz ) {
 static int CheckCubeAllowed( void ) {
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "There must be a game in progress to set the cube." );
+	outputl( _("There must be a game in progress to set the cube.") );
 	return -1;
     }
 
     if( ms.fCrawford ) {
-	outputl( "The cube is disabled during the Crawford game." );
+	outputl( _("The cube is disabled during the Crawford game.") );
 	return -1;
     }
     
     if( !fCubeUse ) {
-	outputl( "The cube is disabled (see `help set cube use')." );
+	outputl( _("The cube is disabled (see `help set cube use').") );
 	return -1;
     }
 
@@ -417,23 +424,29 @@ extern void CommandSetCache( char *sz ) {
     int n;
 
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	outputl( "You must specify the number of cache entries to use." );
+	outputl( _("You must specify the number of cache entries to use.") );
 
 	return;
     }
 
     if( EvalCacheResize( n ) )
 	perror( "EvalCacheResize" );
-    else
-	outputf( "The position cache has been sized to %d entr%s.\n", n,
-		n == 1 ? "y" : "ies" );
+    else {
+      if ( n == 1 )
+	outputf( _("The position cache has been sized to %d entry.\n"), n );
+      else
+	outputf( _("The position cache has been sized to %d entries.\n"), n );
+    }
+
 }
 
 extern void CommandSetClockwise( char *sz ) {
 
-    SetToggle( "clockwise", &fClockwise, sz, "Player 1 moves clockwise (and "
-	"player 0 moves anticlockwise).", "Player 1 moves anticlockwise (and "
-	"player 0 moves clockwise)." );
+    SetToggle( "clockwise", &fClockwise, sz, 
+               _("Player 1 moves clockwise (and "
+                 "player 0 moves anticlockwise)."), 
+               _("Player 1 moves anticlockwise (and "
+                 "player 0 moves clockwise).") );
     
 #if USE_GUI
     if( fX )
@@ -455,25 +468,26 @@ extern void CommandSetAppearance( char *sz ) {
 	BoardPreferencesDone( pwBoard );	    
     } else
 #endif
-	outputl( "The appearance may not be changed when using this user "
-		 "interface." );
+	outputl( _("The appearance may not be changed when using this user "
+		 "interface.") );
 }
 
 extern void CommandSetConfirmNew( char *sz ) {
     
     SetToggle( "confirm new", &fConfirm, sz, 
-               "Will ask for confirmation before "
-	       "aborting games in progress.", "Will not ask for confirmation "
-	       "before aborting games in progress." );
+               _("Will ask for confirmation before "
+                 "aborting games in progress."), 
+               _("Will not ask for confirmation "
+	       "before aborting games in progress.") );
 }
 
 extern void CommandSetConfirmSave( char *sz ) {
     
     SetToggle( "confirm save", &fConfirmSave, sz, 
-               "Will ask for confirmation before "
-	       "overwriting existing files.", 
-               "Will not ask for confirmation "
-	       "overwriting existing files." );
+               _("Will ask for confirmation before "
+	       "overwriting existing files."), 
+               _("Will not ask for confirmation "
+	       "overwriting existing files.") );
 }
 
 extern void CommandSetCubeCentre( char *sz ) {
@@ -490,7 +504,7 @@ extern void CommandSetCubeCentre( char *sz ) {
     
     AddMoveRecord( pmscp );
     
-    outputl( "The cube has been centred (either player may double)." );
+    outputl( _("The cube has been centred (either player may double).") );
     
 #if USE_GUI
     if( fX )
@@ -518,8 +532,8 @@ extern void CommandSetCubeOwner( char *sz ) {
 	return;
 
     default:
-	outputl( "You must specify which player owns the cube (see `help set "
-	      "cube owner')." );
+	outputl( _("You must specify which player owns the cube "
+                   "(see `help set cube owner').") );
 	return;
     }
 
@@ -530,7 +544,7 @@ extern void CommandSetCubeOwner( char *sz ) {
     
     AddMoveRecord( pmscp );
     
-    outputf( "%s now owns the cube.\n", ap[ ms.fCubeOwner ].szName );
+    outputf( _("%s now owns the cube.\n"), ap[ ms.fCubeOwner ].szName );
     
 #if USE_GUI
     if( fX )
@@ -540,19 +554,19 @@ extern void CommandSetCubeOwner( char *sz ) {
 
 extern void CommandSetCubeUse( char *sz ) {
 
-    if( SetToggle( "cube use", &fCubeUse, sz, "Use of the doubling cube is "
-		   "permitted.",
-		   "Use of the doubling cube is disabled." ) < 0 )
+    if( SetToggle( "cube use", &fCubeUse, sz, 
+                   _("Use of the doubling cube is permitted."),
+		   _("Use of the doubling cube is disabled.") ) < 0 )
 	return;
 
     if( !ms.nMatchTo && fJacoby && !fCubeUse )
-	outputl( "(Note that you'll have to disable the Jacoby rule if you want "
-	      "gammons and\nbackgammons to be scored -- see `help set "
-	      "jacoby')." );
+	outputl( _("(Note that you'll have to disable the Jacoby rule "
+                   "if you want gammons and\nbackgammons to be scored "
+                   "-- see `help set jacoby').") );
     
     if( ms.fCrawford && fCubeUse )
-	outputl( "(But the Crawford rule is in effect, so you won't be able to "
-	      "use it during\nthis game.)" );
+	outputl( _("(But the Crawford rule is in effect, "
+                   "so you won't be able to use it during\nthis game.)") );
     else if( ms.gs == GAME_PLAYING && !fCubeUse ) {
 	/* The cube was being used and now it isn't; reset it to 1,
 	   centred. */
@@ -588,7 +602,7 @@ extern void CommandSetCubeValue( char *sz ) {
 
 	    AddMoveRecord( pmscv );
 	    
-	    outputf( "The cube has been set to %d.\n", n );
+	    outputf( _("The cube has been set to %d.\n"), n );
 	    
 #if USE_GUI
 	    if( fX )
@@ -597,8 +611,8 @@ extern void CommandSetCubeValue( char *sz ) {
 	    return;
 	}
 
-    outputl( "You must specify a legal cube value (see `help set cube "
-	     "value')." );
+    outputl( _("You must specify a legal cube value (see `help set cube "
+	     "value').") );
 }
 
 extern void CommandSetDelay( char *sz ) {
@@ -609,26 +623,26 @@ extern void CommandSetDelay( char *sz ) {
 	if( *sz && !strncasecmp( sz, "none", strlen( sz ) ) )
 	    n = 0;
 	else if( ( n = ParseNumber( &sz ) ) < 0 || n > 10000 ) {
-	    outputl( "You must specify a legal move delay (see `help set "
-		  "delay')." );
+	    outputl( _("You must specify a legal move delay (see `help set "
+		  "delay').") );
 	    return;
 	}
 
 	if( n ) {
-	    outputf( "All moves will be shown for at least %d millisecond%s.\n",
+	    outputf( _("All moves will be shown for at least %d millisecond%s.\n"),
 		    n, n > 1 ? "s" : "" );
 	    if( !fDisplay )
-		outputl( "(You will also need to use `set display' to turn "
-		      "board updates on -- see `help set display'.)" );
+		outputl( _("(You will also need to use `set display' to turn "
+		      "board updates on -- see `help set display'.)") );
 	} else
-	    outputl( "Moves will not be delayed." );
+	    outputl( _("Moves will not be delayed.") );
 	
 	nDelay = n;
 	UpdateSetting( &nDelay );
     } else
 #endif
-	outputl( "The `set delay' command applies only when using a window "
-	      "system." );
+	outputl( _("The `set delay' command applies only when using a window "
+	      "system.") );
 }
 
 extern void CommandSetDice( char *sz ) {
@@ -637,7 +651,7 @@ extern void CommandSetDice( char *sz ) {
     movesetdice *pmsd;
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "There must be a game in progress to set the dice." );
+	outputl( _("There must be a game in progress to set the dice.") );
 
 	return;
     }
@@ -652,7 +666,7 @@ extern void CommandSetDice( char *sz ) {
 	n1 = ParseNumber( &sz );
     
     if( n0  < 1 || n0 > 6 || n1 < 1 || n1 > 6 ) {
-	outputl( "You must specify two numbers from 1 to 6 for the dice." );
+	outputl( _("You must specify two numbers from 1 to 6 for the dice.") );
 
 	return;
     }
@@ -668,7 +682,7 @@ extern void CommandSetDice( char *sz ) {
     
     AddMoveRecord( pmsd );
 
-    outputf( "The dice have been set to %d and %d.\n", n0, n1 );
+    outputf( _("The dice have been set to %d and %d.\n"), n0, n1 );
 
 #if USE_GUI
     if( fX )
@@ -678,8 +692,8 @@ extern void CommandSetDice( char *sz ) {
 
 extern void CommandSetDisplay( char *sz ) {
 
-    SetToggle( "display", &fDisplay, sz, "Will display boards for computer "
-	       "moves.", "Will not display boards for computer moves." );
+    SetToggle( "display", &fDisplay, sz, _("Will display boards for computer "
+	       "moves."), _("Will not display boards for computer moves.") );
 }
 
 static evalcontext *pecSet;
@@ -695,16 +709,16 @@ extern void CommandSetEvalCandidates( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 2 || n > MAX_SEARCH_CANDIDATES ) {
-	outputf( "You must specify a valid number of moves to consider -- try "
-	      "`help set %s candidates'.\n", szSetCommand );
+	outputf( _("You must specify a valid number of moves to consider -- try "
+	      "`help set %s candidates'.\n"), szSetCommand );
 
 	return;
     }
 
     pecSet->nSearchCandidates = n;
 
-    outputf( "%s will consider up to %d moves for evaluation at deeper "
-	     "plies.\n", szSet, pecSet->nSearchCandidates );
+    outputf( _("%s will consider up to %d moves for evaluation at deeper "
+	     "plies.\n"), szSet, pecSet->nSearchCandidates );
 }
 
 
@@ -714,8 +728,8 @@ CommandSetEvalCubeful( char *sz ) {
     char asz[ 2 ][ 128 ], szCommand[ 64 ];
     int f = pecSet->fCubeful;
     
-    sprintf( asz[ 0 ], "%s will use cubeful evaluation.\n", szSet );
-    sprintf( asz[ 1 ], "%s will use cubeless evaluation.\n", szSet );
+    sprintf( asz[ 0 ], _("%s will use cubeful evaluation.\n"), szSet );
+    sprintf( asz[ 1 ], _("%s will use cubeless evaluation.\n"), szSet );
     sprintf( szCommand, "%s cubeful", szSetCommand );
     SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
     pecSet->fCubeful = f;
@@ -726,15 +740,15 @@ extern void CommandSetEvalDeterministic( char *sz ) {
     char asz[ 2 ][ 128 ], szCommand[ 64 ];
     int f = pecSet->fDeterministic;
     
-    sprintf( asz[ 0 ], "%s will use deterministic noise.\n", szSet );
-    sprintf( asz[ 1 ], "%s will use pseudo-random noise.\n", szSet );
+    sprintf( asz[ 0 ], _("%s will use deterministic noise.\n"), szSet );
+    sprintf( asz[ 1 ], _("%s will use pseudo-random noise.\n"), szSet );
     sprintf( szCommand, "%s deterministic", szSetCommand );
     SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
     pecSet->fDeterministic = f;
     
     if( !pecSet->rNoise )
-	outputl( "(Note that this setting will have no effect unless you "
-		 "set noise to some non-zero value.)" );
+	outputl( _("(Note that this setting will have no effect unless you "
+		 "set noise to some non-zero value.)") );
 }
 
 extern void CommandSetEvalNoOnePlyPrune( char *sz ) {
@@ -742,8 +756,8 @@ extern void CommandSetEvalNoOnePlyPrune( char *sz ) {
     char asz[ 2 ][ 128 ], szCommand[ 64 ];
     int f = pecSet->fNoOnePlyPrune;
     
-    sprintf( asz[ 0 ], "%s will not prune candidates at 1-ply.\n", szSet );
-    sprintf( asz[ 1 ], "%s will prune candidates at 1-ply.\n", szSet );
+    sprintf( asz[ 0 ], _("%s will not prune candidates at 1-ply.\n"), szSet );
+    sprintf( asz[ 1 ], _("%s will prune candidates at 1-ply.\n"), szSet );
     sprintf( szCommand, "%s nooneplyprune", szSetCommand );
     SetToggle( szCommand, &f, sz, asz[ 0 ], asz[ 1 ] );
     pecSet->fNoOnePlyPrune = f;
@@ -754,8 +768,8 @@ extern void CommandSetEvalNoise( char *sz ) {
     double r = ParseReal( &sz );
 
     if( r < 0.0 ) {
-	outputf( "You must specify a valid amount of noise to use -- "
-		"try `help set\n%s noise'.\n", szSetCommand );
+	outputf( _("You must specify a valid amount of noise to use -- "
+		"try `help set\n%s noise'.\n"), szSetCommand );
 
 	return;
     }
@@ -763,10 +777,10 @@ extern void CommandSetEvalNoise( char *sz ) {
     pecSet->rNoise = r;
 
     if( pecSet->rNoise )
-	outputf( "%s will use noise with standard deviation %5.3f.\n",
+	outputf( _("%s will use noise with standard deviation %5.3f.\n"),
 		 szSet, pecSet->rNoise );
     else
-	outputf( "%s will use noiseless evaluations.\n", szSet );
+	outputf( _("%s will use noiseless evaluations.\n"), szSet );
 }
 
 extern void CommandSetEvalPlies( char *sz ) {
@@ -774,15 +788,15 @@ extern void CommandSetEvalPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 || n > 7 ) {
-	outputf( "You must specify a valid number of plies to look ahead -- "
-		"try `help set %s plies'.\n", szSetCommand );
+	outputf( _("You must specify a valid number of plies to look ahead -- "
+		"try `help set %s plies'.\n"), szSetCommand );
 
 	return;
     }
 
     pecSet->nPlies = n;
 
-    outputf( "%s will use %d ply evaluation.\n", szSet, pecSet->nPlies );
+    outputf( _("%s will use %d ply evaluation.\n"), szSet, pecSet->nPlies );
 }
 
 extern void CommandSetEvalReduced( char *sz ) {
@@ -790,8 +804,8 @@ extern void CommandSetEvalReduced( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( ( n < 0 ) || ( n > 21 ) ) {
-	outputf( "You must specify a valid number -- "
-		"try `help set %s reduced'.\n", szSetCommand );
+	outputf( _("You must specify a valid number -- "
+		"try `help set %s reduced'.\n"), szSetCommand );
 
 	return;
     }
@@ -801,13 +815,13 @@ extern void CommandSetEvalReduced( char *sz ) {
     else
       pecSet->nReduced = 3;
 
-    outputf( "%s will use %d%% speed 2 ply evaluation.\n", 
+    outputf( _("%s will use %d%% speed 2 ply evaluation.\n"), 
 	     szSet, 
 	     pecSet->nReduced ? 100 / pecSet->nReduced : 100 );
 
     if( pecSet->nPlies != 2 )
-	outputl( "(Note that this setting will have no effect until you "
-		 "choose 2 ply evaluation.)" );
+	outputl( _("(Note that this setting will have no effect until you "
+		 "choose 2 ply evaluation.)") );
 }
 
 extern void CommandSetEvalTolerance( char *sz ) {
@@ -815,21 +829,21 @@ extern void CommandSetEvalTolerance( char *sz ) {
     double r = ParseReal( &sz );
 
     if( r < 0.0 ) {
-	outputf( "You must specify a valid cubeless equity tolerance to use -- "
-		"try `help set\n%s tolerance'.\n", szSetCommand );
+	outputf( _("You must specify a valid cubeless equity tolerance to use -- "
+		"try `help set\n%s tolerance'.\n"), szSetCommand );
 
 	return;
     }
 
     pecSet->rSearchTolerance = r;
 
-    outputf( "%s will select moves within %0.3g cubeless equity for\n"
-	    "evaluation at deeper plies.\n", szSet, pecSet->rSearchTolerance );
+    outputf( _("%s will select moves within %0.3g cubeless equity for\n"
+	    "evaluation at deeper plies.\n"), szSet, pecSet->rSearchTolerance );
 }
 
 extern void CommandSetEvaluation( char *sz ) {
 
-    szSet = "`eval' and `hint'";
+    szSet = _("`eval' and `hint'");
     szSetCommand = "evaluation";
     pecSet = &esEvalChequer.ec;
     HandleCommand( sz, acSetEvaluation );
@@ -837,9 +851,9 @@ extern void CommandSetEvaluation( char *sz ) {
 
 extern void CommandSetNackgammon( char *sz ) {
     
-    SetToggle( "nackgammon", &fNackgammon, sz, "New games will use the "
-	       "Nackgammon starting position.", "New games will use the "
-	       "standard backgammon starting position." );
+    SetToggle( "nackgammon", &fNackgammon, sz, _("New games will use the "
+	       "Nackgammon starting position."), _("New games will use the "
+	       "standard backgammon starting position.") );
 
 #if USE_GUI
     if( fX && ms.gs == GAME_NONE )
@@ -860,8 +874,8 @@ CommandSetPlayerChequerplay( char *sz ) {
     HandleCommand( sz, acSetEvalParam );
 
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
-	outputf( "(Note that this setting will have no effect until you "
-		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
+	outputf( _("(Note that this setting will have no effect until you "
+		"`set player %s gnu'.)\n"), ap[ iPlayerSet ].szName );
 
     outputresume();
 }
@@ -879,8 +893,8 @@ CommandSetPlayerCubedecision( char *sz ) {
     HandleCommand( sz, acSetEvalParam );
 
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
-	outputf( "(Note that this setting will have no effect until you "
-		"`set player %s gnu'.)\n", ap[ iPlayerSet ].szName );
+	outputf( _("(Note that this setting will have no effect until you "
+		"`set player %s gnu'.)\n"), ap[ iPlayerSet ].szName );
 
     outputresume();
 }
@@ -889,8 +903,8 @@ CommandSetPlayerCubedecision( char *sz ) {
 extern void CommandSetPlayerExternal( char *sz ) {
 
 #if !HAVE_SOCKETS
-    outputl( "This installation of GNU Backgammon was compiled without\n"
-	     "socket support, and does not implement external players." );
+    outputl( _("This installation of GNU Backgammon was compiled without\n"
+	     "socket support, and does not implement external players.") );
 #else
     int h, cb;
     struct sockaddr *psa;
@@ -899,8 +913,8 @@ extern void CommandSetPlayerExternal( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify the name of the socket to the external\n"
-		 "player -- try `help set player external'." );
+	outputl( _("You must specify the name of the socket to the external\n"
+		 "player -- try `help set player external'.") );
 	return;
     }
 
@@ -951,7 +965,7 @@ extern void CommandSetPlayerGNU( char *sz ) {
     
     ap[ iPlayerSet ].pt = PLAYER_GNU;
 
-    outputf( "Moves for %s will now be played by GNU Backgammon.\n",
+    outputf( _("Moves for %s will now be played by GNU Backgammon.\n"),
 	    ap[ iPlayerSet ].szName );
     
 #if USE_GTK
@@ -968,14 +982,14 @@ extern void CommandSetPlayerHuman( char *sz ) {
     
     ap[ iPlayerSet ].pt = PLAYER_HUMAN;
 
-    outputf( "Moves for %s must now be entered manually.\n",
+    outputf( _("Moves for %s must now be entered manually.\n"),
 	    ap[ iPlayerSet ].szName );
 }
 
 extern void CommandSetPlayerName( char *sz ) {
 
     if( !sz || !*sz ) {
-	outputl( "You must specify a name to use." );
+	outputl( _("You must specify a name to use.") );
 
 	return;
     }
@@ -984,27 +998,27 @@ extern void CommandSetPlayerName( char *sz ) {
 	sz[ 31 ] = 0;
 
     if( ( *sz == '0' || *sz == '1' ) && !sz[ 1 ] ) {
-	outputf( "`%c' is not a valid name.\n", *sz );
+	outputf( _("`%c' is not a valid name.\n"), *sz );
 
 	return;
     }
 
     if( !strcasecmp( sz, "both" ) ) {
-	outputl( "`both' is a reserved word; you can't call a player "
-		 "that.\n" );
+	outputl( _("`both' is a reserved word; you can't call a player "
+		 "that.\n") );
 
 	return;
     }
 
     if( !CompareNames( sz, ap[ !iPlayerSet ].szName ) ) {
-	outputl( "That name is already in use by the other player." );
+	outputl( _("That name is already in use by the other player.") );
 
 	return;
     }
 
     strcpy( ap[ iPlayerSet ].szName, sz );
 
-    outputf( "Player %d is now known as `%s'.\n", iPlayerSet, sz );
+    outputf( _("Player %d is now known as `%s'.\n"), iPlayerSet, sz );
 
 #if USE_GUI
     if( fX )
@@ -1017,8 +1031,8 @@ extern void CommandSetPlayerPlies( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	outputl( "You must specify a vaid ply depth to look ahead -- try "
-		 "`help set player plies'." );
+	outputl( _("You must specify a vaid ply depth to look ahead -- try "
+		 "`help set player plies'.") );
 
 	return;
     }
@@ -1026,11 +1040,11 @@ extern void CommandSetPlayerPlies( char *sz ) {
     ap[ iPlayerSet ].esChequer.ec.nPlies = n;
     
     if( ap[ iPlayerSet ].pt != PLAYER_GNU )
-	outputf( "Moves for %s will be played with %d ply lookahead (note that "
+	outputf( _("Moves for %s will be played with %d ply lookahead (note that "
 		"this will\nhave no effect yet, because gnubg is not moving "
-		"for this player).\n", ap[ iPlayerSet ].szName, n );
+		"for this player).\n"), ap[ iPlayerSet ].szName, n );
     else
-	outputf( "Moves for %s will be played with %d ply lookahead.\n",
+	outputf( _("Moves for %s will be played with %d ply lookahead.\n"),
 		ap[ iPlayerSet ].szName, n );
 }
 
@@ -1041,7 +1055,7 @@ extern void CommandSetPlayerPubeval( char *sz ) {
     
     ap[ iPlayerSet ].pt = PLAYER_PUBEVAL;
 
-    outputf( "Moves for %s will now be played by pubeval.\n",
+    outputf( _("Moves for %s will now be played by pubeval.\n"),
 	    ap[ iPlayerSet ].szName );
 }
 
@@ -1051,7 +1065,7 @@ extern void CommandSetPlayer( char *sz ) {
     int i;
 
     if( !pch ) {
-	outputl( "You must specify a player -- try `help set player'." );
+	outputl( _("You must specify a player -- try `help set player'.") );
 	
 	return;
     }
@@ -1067,7 +1081,7 @@ extern void CommandSetPlayer( char *sz ) {
 
     if( i == 2 ) {
 	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
-	    outputl( "Insufficient memory." );
+	    outputl( _("Insufficient memory.") );
 		
 	    return;
 	}
@@ -1091,7 +1105,7 @@ extern void CommandSetPlayer( char *sz ) {
 	return;
     }
     
-    outputf( "Unknown player `%s' -- try `help set player'.\n", pch );
+    outputf( _("Unknown player `%s' -- try `help set player'.\n"), pch );
 }
 
 extern void CommandSetPrompt( char *szParam ) {
@@ -1101,14 +1115,14 @@ extern void CommandSetPrompt( char *szParam ) {
     szPrompt = ( szParam && *szParam ) ? strcpy( sz, szParam ) :
 	szDefaultPrompt;
     
-    outputf( "The prompt has been set to `%s'.\n", szPrompt );
+    outputf( _("The prompt has been set to `%s'.\n"), szPrompt );
 }
 
 extern void CommandSetRecord( char *sz ) {
 
     SetToggle( "record", &fRecord, sz,
-	       "All games in a session will be recorded.",
-	       "Only the active game in a session will be recorded." );
+	       _("All games in a session will be recorded."),
+	       _("Only the active game in a session will be recorded.") );
 }
 
 extern void CommandSetRNGAnsi( char *sz ) {
@@ -1120,8 +1134,8 @@ extern void CommandSetRNGBsd( char *sz ) {
 #if HAVE_RANDOM
     SetRNG( RNG_BSD, sz );
 #else
-    outputl( "This installation of GNU Backgammon was compiled without the" );
-    outputl( "BSD generator." );
+    outputl( _("This installation of GNU Backgammon was compiled without the"
+               "BSD generator.") );
 #endif
 }
 
@@ -1150,8 +1164,8 @@ extern void CommandSetRNGUser( char *sz ) {
 #if HAVE_LIBDL
     SetRNG( RNG_USER, sz );
 #else
-    outputl( "This installation of GNU Backgammon was compiled without the" );
-    outputl( "dynamic linking library needed for user RNG's." );
+    outputl( _("This installation of GNU Backgammon was compiled without the"
+               "dynamic linking library needed for user RNG's.") );
 #endif
 
 }
@@ -1180,7 +1194,7 @@ CommandSetRolloutRNG ( char *sz ) {
 extern void
 CommandSetRolloutChequerplay ( char *sz ) {
 
-  szSet = "Chequer play in rollouts";
+  szSet = _("Chequer play in rollouts");
   szSetCommand = "rollout chequerplay";
   
   pecSet = &prcSet->aecChequer[ 0 ];
@@ -1198,10 +1212,10 @@ CommandSetRolloutChequerplay ( char *sz ) {
 extern void
 CommandSetRolloutPlayerChequerplay ( char *sz ) {
 
-    szSet = iPlayerSet ? "Chequer play in rollouts (for player 1)" :
-	"Chequer play in rollouts (for player 0)";
-    szSetCommand = iPlayerSet ? "rollout player 1 chequerplay" :
-	"rollout player 0 chequerplay";
+    szSet = iPlayerSet ? _("Chequer play in rollouts (for player 1)") :
+	_("Chequer play in rollouts (for player 0)");
+    szSetCommand = iPlayerSet ? _("rollout player 1 chequerplay") :
+	_("rollout player 0 chequerplay");
   
     pecSet = &prcSet->aecChequer[ iPlayerSet ];
 
@@ -1212,7 +1226,7 @@ CommandSetRolloutPlayerChequerplay ( char *sz ) {
 extern void
 CommandSetRolloutCubedecision ( char *sz ) {
 
-  szSet = "Cube decisions in rollouts";
+  szSet = _("Cube decisions in rollouts");
   szSetCommand = "rollout cubedecision";
 
   pecSet = &prcSet->aecCube[ 0 ];
@@ -1230,8 +1244,8 @@ CommandSetRolloutCubedecision ( char *sz ) {
 extern void
 CommandSetRolloutPlayerCubedecision ( char *sz ) {
 
-    szSet = iPlayerSet ? "Cube decisions in rollouts (for player 1)" :
-	"Cube decisions in rollouts (for player 0)";
+    szSet = iPlayerSet ? _("Cube decisions in rollouts (for player 1)") :
+	_("Cube decisions in rollouts (for player 0)");
     szSetCommand = iPlayerSet ? "rollout player 1 cubedecision" :
 	"rollout player 0 cubedecision";
   
@@ -1245,8 +1259,8 @@ extern void CommandSetRolloutInitial( char *sz ) {
     int f = prcSet->fCubeful;
     
     SetToggle( "rollout initial", &f, sz, 
-               "Rollouts will be made as the initial position of a game.",
-	       "Rollouts will be made for normal (non-opening) positions." );
+               _("Rollouts will be made as the initial position of a game."),
+	       _("Rollouts will be made for normal (non-opening) positions.") );
 
     prcSet->fInitial = f;
 }
@@ -1256,8 +1270,8 @@ extern void CommandSetRolloutSeed( char *sz ) {
     int n;
     
     if( prcSet->rngRollout == RNG_MANUAL ) {
-	outputl( "You can't set a seed if you're using manual dice "
-		 "generation." );
+	outputl( _("You can't set a seed if you're using manual dice "
+		 "generation.") );
 	return;
     }
 
@@ -1265,17 +1279,17 @@ extern void CommandSetRolloutSeed( char *sz ) {
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
-	    outputl( "You must specify a vaid seed -- try `help set seed'." );
+	    outputl( _("You must specify a vaid seed -- try `help set seed'.") );
 
 	    return;
 	}
 
 	prcSet->nSeed = n;
-	outputf( "Rollout seed set to %d.\n", n );
+	outputf( _("Rollout seed set to %d.\n"), n );
     } else
 	outputl( InitRNG( &prcSet->nSeed, FALSE ) ?
-		 "Rollout seed initialised from system random data." :
-		 "Rollout seed initialised by system clock." );    
+		 _("Rollout seed initialised from system random data.") :
+		 _("Rollout seed initialised by system clock.") );    
 }
 
 extern void CommandSetRolloutTrials( char *sz ) {
@@ -1283,16 +1297,19 @@ extern void CommandSetRolloutTrials( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 1 ) {
-	outputl( "You must specify a valid number of trials to make -- "
-		"try `help set rollout trials'." );
+	outputl( _("You must specify a valid number of trials to make -- "
+		"try `help set rollout trials'.") );
 
 	return;
     }
 
     prcSet->nTrials = n;
 
-    outputf( "%d game%s will be played per rollout.\n", n,
-	    n == 1 ? "" : "s" );
+    if ( n == 1 )
+      outputf( _("%d game will be played per rollout.\n"), n );
+    else
+      outputf( _("%d games will be played per rollout.\n"), n );
+
 }
 
 extern void CommandSetRolloutTruncation( char *sz ) {
@@ -1300,8 +1317,8 @@ extern void CommandSetRolloutTruncation( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 0 ) {
-	outputl( "You must specify a valid ply at which to truncate  -- "
-		"try `help set rollout truncation'." );
+	outputl( _("You must specify a valid ply at which to truncate  -- "
+		"try `help set rollout truncation'.") );
 
 	return;
     }
@@ -1309,10 +1326,12 @@ extern void CommandSetRolloutTruncation( char *sz ) {
     prcSet->nTruncate = n;
 
     if( !n )
-	outputl( "Rollouts will not be truncated." );
+	outputl( _("Rollouts will not be truncated.") );
+    else if ( n == 1 )
+      outputf( _("Rollouts will be truncated after %d ply.\n"), n );
     else
-	outputf( "Rollouts will be truncated after %d pl%s.\n", n,
-		 n == 1 ? "y" : "ies" );
+      outputf( _("Rollouts will be truncated after %d plies.\n"), n );
+
 }
 
 extern void CommandSetRolloutVarRedn( char *sz ) {
@@ -1320,9 +1339,9 @@ extern void CommandSetRolloutVarRedn( char *sz ) {
     int f = prcSet->fVarRedn;
     
     SetToggle( "rollout varredn", &f, sz,
-               "Will lookahead during rollouts to reduce variance.",
-               "Will not use lookahead variance "
-               "reduction during rollouts." );
+               _("Will lookahead during rollouts to reduce variance."),
+               _("Will not use lookahead variance "
+               "reduction during rollouts.") );
 
     prcSet->fVarRedn = f;
 }
@@ -1334,8 +1353,8 @@ CommandSetRolloutCubeful( char *sz ) {
     int f = prcSet->fCubeful;
     
     SetToggle( "rollout cubeful", &f, sz, 
-               "Cubeful rollouts will be performed.",
-	       "Cubeless rollouts will be performed." );
+               _("Cubeful rollouts will be performed."),
+	       _("Cubeless rollouts will be performed.") );
 
     prcSet->fCubeful = f;
 }
@@ -1348,7 +1367,7 @@ CommandSetRolloutPlayer ( char *sz ) {
     int i;
 
     if( !pch ) {
-	outputf( "You must specify a player -- try `help set %s player'.\n",
+	outputf( _("You must specify a player -- try `help set %s player'.\n"),
 		 szSetCommand );
 	
 	return;
@@ -1364,7 +1383,7 @@ CommandSetRolloutPlayer ( char *sz ) {
 
     if( i == 2 ) {
 	if( !( pchCopy = malloc( strlen( sz ) + 1 ) ) ) {
-	    outputl( "Insufficient memory." );
+	    outputl( _("Insufficient memory.") );
 		
 	    return;
 	}
@@ -1386,8 +1405,8 @@ CommandSetRolloutPlayer ( char *sz ) {
 	return;
     }
     
-    outputf( "Unknown player `%s' -- try\n"
-             "`help set %s player'.\n", pch, szSetCommand );
+    outputf( _("Unknown player `%s' -- try\n"
+             "`help set %s player'.\n"), pch, szSetCommand );
 }
 
 extern void CommandSetScore( char *sz ) {
@@ -1419,8 +1438,8 @@ extern void CommandSetScore( char *sz ) {
 	    ( *pchEnd1 && !strncasecmp( pchEnd1, "crawford",
 					strlen( pchEnd1 ) ) ) ) &&
 	  n1 != INT_MIN && n1 != -1 && n1 != ms.nMatchTo - 1 ) ) {
-	outputl( "The Crawford rule applies only in match play when a "
-		 "player's score is 1-away." );
+	outputl( _("The Crawford rule applies only in match play when a "
+		 "player's score is 1-away.") );
 	return;
     }
 
@@ -1430,28 +1449,28 @@ extern void CommandSetScore( char *sz ) {
 	( ( fPostCrawford1 = ( *pchEnd1 && !strncasecmp(
 	pchEnd1, "postcrawford", strlen( pchEnd1 ) ) ) ) &&
 	  n1 != INT_MIN && n1 != -1 && n1 != ms.nMatchTo - 1 ) ) {
-	outputl( "The Crawford rule applies only in match play when a "
-		 "player's score is 1-away." );
+	outputl( _("The Crawford rule applies only in match play when a "
+		 "player's score is 1-away.") );
 	return;
     }
 
     if( !ms.nMatchTo && ( fCrawford0 || fCrawford1 || fPostCrawford0 ||
 			  fPostCrawford1 ) ) {
-	outputl( "The Crawford rule applies only in match play when a "
-		 "player's score is 1-away." );
+	outputl( _("The Crawford rule applies only in match play when a "
+		 "player's score is 1-away.") );
 	return;
     }
     
     if( fCrawford0 && fCrawford1 ) {
-	outputl( "You cannot set the Crawford rule when both players' scores "
-		 "are 1-away." );
+	outputl( _("You cannot set the Crawford rule when both players' scores "
+		 "are 1-away.") );
 	return;
     }
 
     if( ( fCrawford0 && fPostCrawford1 ) ||
 	( fCrawford1 && fPostCrawford0 ) ) {
-	outputl( "You cannot set both Crawford and post-Crawford "
-		 "simultaneously." );
+	outputl( _("You cannot set both Crawford and post-Crawford "
+		 "simultaneously.") );
 	return;
     }
     
@@ -1471,25 +1490,25 @@ extern void CommandSetScore( char *sz ) {
 	n1 += ms.nMatchTo;
 
     if( ( fPostCrawford0 && !n1 ) || ( fPostCrawford1 && !n0 ) ) {
-	outputl( "You cannot set post-Crawford play if the trailer has yet "
-		 "to score." );
+	outputl( _("You cannot set post-Crawford play if the trailer has yet "
+		 "to score.") );
 	return;
     }
     
     if( n0 < 0 || n1 < 0 ) {
-	outputl( "You must specify two valid scores." );
+	outputl( _("You must specify two valid scores.") );
 	return;
     }
 
     if( ms.nMatchTo && n0 >= ms.nMatchTo && n1 >= ms.nMatchTo ) {
-	outputl( "Only one player may win the match." );
+	outputl( _("Only one player may win the match.") );
 	return;
     }
 
     if( ( fCrawford0 || fCrawford1 ) &&
 	( n0 >= ms.nMatchTo || n1 >= ms.nMatchTo ) ) {
-	outputl( "You cannot play the Crawford game once the match is "
-		 "already over." );
+	outputl( _("You cannot play the Crawford game once the match is "
+		 "already over.") );
 	return;
     }
     
@@ -1547,7 +1566,7 @@ extern void CommandSetSeed( char *sz ) {
     int n;
     
     if( rngCurrent == RNG_MANUAL ) {
-	outputl( "You can't set a seed if you're using manual dice generation." );
+	outputl( _("You can't set a seed if you're using manual dice generation.") );
 	return;
     }
 
@@ -1555,17 +1574,17 @@ extern void CommandSetSeed( char *sz ) {
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
-	    outputl( "You must specify a vaid seed -- try `help set seed'." );
+	    outputl( _("You must specify a vaid seed -- try `help set seed'.") );
 
 	    return;
 	}
 
 	InitRNGSeed( n );
-	outputf( "Seed set to %d.\n", n );
+	outputf( _("Seed set to %d.\n"), n );
     } else
 	outputl( InitRNG( NULL, TRUE ) ?
-		 "Seed initialised from system random data." :
-		 "Seed initialised by system clock." );
+		 _("Seed initialised from system random data.") :
+		 _("Seed initialised by system clock.") );
 }
 
 extern void CommandSetTrainingAlpha( char *sz ) {
@@ -1573,13 +1592,13 @@ extern void CommandSetTrainingAlpha( char *sz ) {
     float r = ParseReal( &sz );
 
     if( r <= 0.0f || r > 1.0f ) {
-	outputl( "You must specify a value for alpha which is greater than\n"
-		 "zero, and no more than one." );
+	outputl( _("You must specify a value for alpha which is greater than\n"
+		 "zero, and no more than one.") );
 	return;
     }
 
     rAlpha = r;
-    outputf( "Alpha set to %f.\n", r );
+    outputf( _("Alpha set to %f.\n"), r );
 }
 
 extern void CommandSetTrainingAnneal( char *sz ) {
@@ -1587,12 +1606,12 @@ extern void CommandSetTrainingAnneal( char *sz ) {
     double r = ParseReal( &sz );
 
     if( r == ERR_VAL ) {
-	outputl( "You must specify a valid annealing rate." );
+	outputl( _("You must specify a valid annealing rate.") );
 	return;
     }
 
     rAnneal = r;
-    outputf( "Annealing rate set to %f.\n", r );
+    outputf( _("Annealing rate set to %f.\n"), r );
 }
 
 extern void CommandSetTrainingThreshold( char *sz ) {
@@ -1600,16 +1619,16 @@ extern void CommandSetTrainingThreshold( char *sz ) {
     float r = ParseReal( &sz );
 
     if( r < 0.0f ) {
-	outputl( "You must specify a valid error threshold." );
+	outputl( _("You must specify a valid error threshold.") );
 	return;
     }
 
     rThreshold = r;
 
     if( rThreshold )
-	outputf( "Error threshold set to %f.\n", r );
+	outputf( _("Error threshold set to %f.\n"), r );
     else
-	outputl( "Error threshold disabled." );
+	outputl( _("Error threshold disabled.") );
 }
 
 extern void CommandSetTurn( char *sz ) {
@@ -1618,31 +1637,31 @@ extern void CommandSetTurn( char *sz ) {
     int i;
 
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "There must be a game in progress to set a player on roll." );
+	outputl( _("There must be a game in progress to set a player on roll.") );
 
 	return;
     }
     
     if( ms.fResigned ) {
-	outputl( "Please resolve the resignation first." );
+	outputl( _("Please resolve the resignation first.") );
 
 	return;
     }
     
     if( !pch ) {
-	outputl( "Which player do you want to set on roll?" );
+	outputl( _("Which player do you want to set on roll?") );
 
 	return;
     }
 
     if( ( i = ParsePlayer( pch ) ) < 0 ) {
-	outputf( "Unknown player `%s' -- try `help set turn'.\n", pch );
+	outputf( _("Unknown player `%s' -- try `help set turn'.\n"), pch );
 
 	return;
     }
 
     if( i == 2 ) {
-	outputl( "You can't set both players on roll." );
+	outputl( _("You can't set both players on roll.") );
 
 	return;
     }
@@ -1662,17 +1681,17 @@ extern void CommandSetTurn( char *sz ) {
 	ShowBoard();
 #endif
     
-    outputf( "`%s' is now on roll.\n", ap[ i ].szName );
+    outputf( _("`%s' is now on roll.\n"), ap[ i ].szName );
 }
 
 extern void CommandSetEgyptian( char *sz ) {
 
     if( SetToggle( "egyptian", &fEgyptian, sz,
-                   "Will use the Egyptian rule.",
-                   "Will not use the Egyptian rule." ) ) {
-        outputl( "Note: most likely the database and weights are not "
+                   _("Will use the Egyptian rule."),
+                   _("Will not use the Egyptian rule.") ) ) {
+        outputl( _("Note: most likely the database and weights are not "
                  "tuned for Egyptian play.\nRegenerating them with "
-                 "the rule set may give better results." );
+                 "the rule set may give better results.") );
         return;
     } ;
 }
@@ -1680,14 +1699,14 @@ extern void CommandSetEgyptian( char *sz ) {
 extern void CommandSetJacoby( char *sz ) {
 
     if( SetToggle( "jacoby", &fJacoby, sz, 
-		   "Will use the Jacoby rule for money sessions.",
-		   "Will not use the Jacoby rule for money sessions." ) )
+		   _("Will use the Jacoby rule for money sessions."),
+		   _("Will not use the Jacoby rule for money sessions.") ) )
 	return;
 
     if( fJacoby && !fCubeUse )
-	outputl( "(Note that you'll have to enable the cube if you want "
+	outputl( _("(Note that you'll have to enable the cube if you want "
 		 "gammons and backgammons\nto be scored -- see `help set "
-		 "cube use'.)" );
+		 "cube use'.)") );
 }
 
 extern void CommandSetCrawford( char *sz ) {
@@ -1699,8 +1718,8 @@ extern void CommandSetCrawford( char *sz ) {
 	 ( ms.nMatchTo - ms.anScore[ 1 ] == 1 ) ) {
 
       if( SetToggle( "crawford", &ms.fCrawford, sz, 
-		 "This game is the Crawford game (no doubling allowed).",
-		 "This game is not the Crawford game." ) < 0 )
+		 _("This game is the Crawford game (no doubling allowed)."),
+		 _("This game is not the Crawford game.") ) < 0 )
 	  return;
 
       /* sanity check */
@@ -1714,14 +1733,14 @@ extern void CommandSetCrawford( char *sz ) {
 	  pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {
-      outputl( "Cannot set whether this is the Crawford game\n"
-	    "as none of the players are 1-away from winning." );
+      outputl( _("Cannot set whether this is the Crawford game\n"
+	    "as none of the players are 1-away from winning.") );
     }
   }
   else if ( !ms.nMatchTo ) 
-      outputl( "Cannot set Crawford play for money sessions." );
+      outputl( _("Cannot set Crawford play for money sessions.") );
   else
-      outputl( "No match in progress (type `new match n' to start one)." );
+      outputl( _("No match in progress (type `new match n' to start one).") );
 }
 
 extern void CommandSetPostCrawford( char *sz ) {
@@ -1733,8 +1752,8 @@ extern void CommandSetPostCrawford( char *sz ) {
 	 ( ms.nMatchTo - ms.anScore[ 1 ] == 1 ) ) {
 
       SetToggle( "postcrawford", &ms.fPostCrawford, sz, 
-		 "This is post-Crawford play (doubling allowed).",
-		 "This is not post-Crawford play." );
+		 _("This is post-Crawford play (doubling allowed)."),
+		 _("This is not post-Crawford play.") );
 
       /* sanity check */
       ms.fCrawford = !ms.fPostCrawford;
@@ -1747,14 +1766,14 @@ extern void CommandSetPostCrawford( char *sz ) {
 	  pmgi->fCrawfordGame = ms.fCrawford;
       }
     } else {
-      outputl( "Cannot set whether this is post-Crawford play\n"
-	    "as none of the players are 1-away from winning." );
+      outputl( _("Cannot set whether this is post-Crawford play\n"
+	    "as none of the players are 1-away from winning.") );
     }
   }
   else if ( !ms.nMatchTo ) 
-      outputl( "Cannot set post-Crawford play for money sessions." );
+      outputl( _("Cannot set post-Crawford play for money sessions.") );
   else
-      outputl( "No match in progress (type `new match n' to start one)." );
+      outputl( _("No match in progress (type `new match n' to start one).") );
 
 }
 
@@ -1764,7 +1783,7 @@ extern void CommandSetBeavers( char *sz ) {
     int n;
 
     if( ( n = ParseNumber( &sz ) ) < 0 ) {
-	outputl( "You must specify the number of beavers to allow." );
+	outputl( _("You must specify the number of beavers to allow.") );
 
 	return;
     }
@@ -1772,39 +1791,39 @@ extern void CommandSetBeavers( char *sz ) {
     nBeavers = n;
 
     if( nBeavers > 1 )
-	outputf( "%d beavers/racoons allowed in money sessions.\n", nBeavers );
+	outputf( _("%d beavers/racoons allowed in money sessions.\n"), nBeavers );
     else if( nBeavers == 1 )
-	outputl( "1 beaver allowed in money sessions." );
+	outputl( _("1 beaver allowed in money sessions.") );
     else
-	outputl( "No beavers allowed in money sessions." );
+	outputl( _("No beavers allowed in money sessions.") );
 }
 
 extern void CommandSetOutputMatchPC( char *sz ) {
 
     SetToggle( "output matchpc", &fOutputMatchPC, sz,
-	       "Match winning chances will be shown as percentages.",
-	       "Match winning chances will be shown as probabilities." );
+	       _("Match winning chances will be shown as percentages."),
+	       _("Match winning chances will be shown as probabilities.") );
 }
 
 extern void CommandSetOutputMWC( char *sz ) {
 
     SetToggle( "output mwc", &fOutputMWC, sz,
-	       "Match evaluations will be shown as match winning chances.",
-	       "Match evaluations will be shown as equivalent money equity." );
+	       _("Match evaluations will be shown as match winning chances."),
+	       _("Match evaluations will be shown as equivalent money equity.") );
 }
 
 extern void CommandSetOutputRawboard( char *sz ) {
 
     SetToggle( "output rawboard", &fOutputRawboard, sz,
-	       "TTY boards will be given in raw format.",
-	       "TTY boards will be given in ASCII." );
+	       _("TTY boards will be given in raw format."),
+	       _("TTY boards will be given in ASCII.") );
 }
 
 extern void CommandSetOutputWinPC( char *sz ) {
 
     SetToggle( "output winpc", &fOutputWinPC, sz,
-	       "Game winning chances will be shown as percentages.",
-	       "Game winning chances will be shown as probabilities." );
+	       _("Game winning chances will be shown as percentages."),
+	       _("Game winning chances will be shown as probabilities.") );
 }
 
 extern void CommandSetMET( char *sz ) {
@@ -1812,24 +1831,24 @@ extern void CommandSetMET( char *sz ) {
   sz = NextToken ( &sz );
 
   if ( !sz || !*sz ) {
-    outputl ( "You must specify a filename. "
-              "See \"help set met\". " );
+    outputl ( _("You must specify a filename. "
+              "See \"help set met\". ") );
     return;
   }
 
   InitMatchEquity ( sz, szDataDirectory );
   setDefaultPath ( sz, PATH_MET );
 
-  outputf( "GNU Backgammon will now use the %s match equity table.\n",
+  outputf( _("GNU Backgammon will now use the %s match equity table.\n"),
            miCurrent.szName );
 
   if ( miCurrent.nLength < MAXSCORE ) {
     
-    outputf ("\n"
+    outputf (_("\n"
              "Note that this match equity table only supports "
              "matches of length %i and below.\n"
              "For scores above %i-away an extrapolation "
-             "scheme is used.\n",
+             "scheme is used.\n"),
              miCurrent.nLength, miCurrent.nLength );
 
   }
@@ -1852,15 +1871,15 @@ CommandSetEvalParamType ( char *sz ) {
     break;
 
   default:
-    outputf ("Unknown evaluation type: %s -- see\n"
-             "`help set %s type'\n", sz, szSetCommand );
+    outputf (_("Unknown evaluation type: %s -- see\n"
+             "`help set %s type'\n"), sz, szSetCommand );
     return;
     break;
 
   }
 
-  outputf ( "%s will now use %s.\n",
-            szSet, aszEvalType[ pesSet->et ] );
+  outputf ( _("%s will now use %s.\n"),
+            szSet, gettext ( aszEvalType[ pesSet->et ] ) );
 
 }
 
@@ -1873,8 +1892,8 @@ CommandSetEvalParamEvaluation ( char *sz ) {
   HandleCommand ( sz, acSetEvaluation );
 
   if ( pesSet->et != EVAL_EVAL )
-    outputf ( "(Note that this setting will have no effect until you\n"
-              "`set %s type evaluation'.)\n",
+    outputf ( _("(Note that this setting will have no effect until you\n"
+              "`set %s type evaluation'.)\n"),
               szSetCommand );
 }
 
@@ -1887,8 +1906,8 @@ CommandSetEvalParamRollout ( char *sz ) {
   HandleCommand (sz, acSetRollout );
 
   if ( pesSet->et != EVAL_ROLLOUT )
-    outputf ( "(Note that this setting will have no effect until you\n"
-              "`set %s type rollout.)'\n",
+    outputf ( _("(Note that this setting will have no effect until you\n"
+              "`set %s type rollout.)'\n"),
               szSetCommand );
 
 }
@@ -1899,7 +1918,7 @@ CommandSetAnalysisChequerplay ( char *sz ) {
 
   pesSet = &esAnalysisChequer;
 
-  szSet = "Analysis chequerplay";
+  szSet = _("Analysis chequerplay");
   szSetCommand = "analysis chequerplay";
 
   HandleCommand( sz, acSetEvalParam );
@@ -1912,7 +1931,7 @@ CommandSetAnalysisCubedecision ( char *sz ) {
 
   pesSet = &esAnalysisCube;
 
-  szSet = "Analysis cubedecision";
+  szSet = _("Analysis cubedecision");
   szSetCommand = "analysis cubedecision";
 
   HandleCommand( sz, acSetEvalParam );
@@ -1925,7 +1944,7 @@ CommandSetEvalChequerplay ( char *sz ) {
 
   pesSet = &esEvalChequer;
 
-  szSet = "`eval' and `hint' chequerplay";
+  szSet = _("`eval' and `hint' chequerplay");
   szSetCommand = "evaluation chequerplay ";
 
   HandleCommand( sz, acSetEvalParam );
@@ -1938,7 +1957,7 @@ CommandSetEvalCubedecision ( char *sz ) {
 
   pesSet = &esEvalCube;
 
-  szSet = "`eval' and `hint' cube decisions";
+  szSet = _("`eval' and `hint' cube decisions");
   szSetCommand = "evaluation cubedecision ";
 
   HandleCommand( sz, acSetEvalParam );
@@ -1958,8 +1977,8 @@ extern void
 CommandSetExportIncludeAnnotations ( char *sz ) {
 
   SetToggle( "annotations", &exsExport.fIncludeAnnotation, sz,
-             "Include annotations in exports",
-             "Do not include annotations in exports" );
+             _("Include annotations in exports"),
+             _("Do not include annotations in exports") );
 
 }
 
@@ -1967,8 +1986,8 @@ extern void
 CommandSetExportIncludeAnalysis ( char *sz ) {
 
   SetToggle( "analysis", &exsExport.fIncludeAnalysis, sz,
-             "Include analysis in exports",
-             "Do not include analysis in exports" );
+             _("Include analysis in exports"),
+             _("Do not include analysis in exports") );
 
 }
 
@@ -1976,8 +1995,8 @@ extern void
 CommandSetExportIncludeStatistics ( char *sz ) {
 
   SetToggle( "statistics", &exsExport.fIncludeStatistics, sz,
-             "Include statistics in exports",
-             "Do not include statistics in exports" );
+             _("Include statistics in exports"),
+             _("Do not include statistics in exports") );
 
 }
 
@@ -1985,8 +2004,8 @@ extern void
 CommandSetExportIncludeLegend ( char *sz ) {
 
   SetToggle( "annotations", &exsExport.fIncludeLegend, sz,
-             "Include legend in exports",
-             "Do not include legend in exports" );
+             _("Include legend in exports"),
+             _("Do not include legend in exports") );
 
 }
 
@@ -1996,7 +2015,7 @@ CommandSetExportShowBoard ( char *sz ) {
   int n;
 
   if( ( n = ParseNumber( &sz ) ) < 0 ) {
-    outputl( "You must specify a semi-positive number." );
+    outputl( _("You must specify a semi-positive number.") );
 
     return;
   }
@@ -2004,9 +2023,9 @@ CommandSetExportShowBoard ( char *sz ) {
   exsExport.fDisplayBoard = n;
 
   if ( ! n )
-    output ( "The board will never been shown in exports." );
+    output ( _("The board will never been shown in exports.") );
   else
-    outputf ( "The board will be shown every %d. move in exports.", n );
+    outputf ( _("The board will be shown every %d. move in exports."), n );
 
 }
 
@@ -2017,19 +2036,19 @@ CommandSetExportShowPlayer ( char *sz ) {
   int i;
 
   if( ( i = ParsePlayer( sz ) ) < 0 ) {
-    outputf( "Unknown player `%s' "
-             "-- try `help set export show player'.\n", sz );
+    outputf( _("Unknown player `%s' "
+             "-- try `help set export show player'.\n"), sz );
     return;
   }
 
   exsExport.fSide = i + 1;
 
   if ( i == 3 )
-    outputl ( "Analysis, boards etc will be "
-              "shown for both players in exports." );
+    outputl ( _("Analysis, boards etc will be "
+              "shown for both players in exports.") );
   else
-    outputf ( "Analysis, boards etc will only be shown for "
-              "player %s in exports.\n", ap[ i - 1 ].szName );
+    outputf ( _("Analysis, boards etc will only be shown for "
+              "player %s in exports.\n"), ap[ i - 1 ].szName );
 
 }
 
@@ -2040,14 +2059,14 @@ CommandSetExportMovesNumber ( char *sz ) {
   int n;
 
   if( ( n = ParseNumber( &sz ) ) < 0 ) {
-    outputl( "You must specify a semi-positive number." );
+    outputl( _("You must specify a semi-positive number.") );
 
     return;
   }
 
   exsExport.nMoves = n;
 
-  outputf ( "Show at most %d moves in exports.\n", n );
+  outputf ( _("Show at most %d moves in exports.\n"), n );
 
 }
 
@@ -2055,8 +2074,8 @@ extern void
 CommandSetExportMovesProb ( char *sz ) {
 
   SetToggle( "probabilities", &exsExport.fMovesDetailProb, sz,
-             "Show detailed probabilities for moves",
-             "Do not show detailed probabilities for moves" );
+             _("Show detailed probabilities for moves"),
+             _("Do not show detailed probabilities for moves") );
 
 }
 
@@ -2076,8 +2095,8 @@ extern void
 CommandSetExportCubeProb ( char *sz ) {
 
   SetToggle( "probabilities", &exsExport.fCubeDetailProb, sz,
-             "Show detailed probabilities for cube decisions",
-             "Do not show detailed probabilities for cube decisions" );
+             _("Show detailed probabilities for cube decisions"),
+             _("Do not show detailed probabilities for cube decisions") );
 
 }
 
@@ -2096,8 +2115,8 @@ extern void
 CommandSetExportParametersEvaluation ( char *sz ) {
 
   SetToggle( "evaluation", &pParameter[ 0 ], sz,
-             "Show detailed parameters for evaluations",
-             "Do not show detailed parameters for evaluations" );
+             _("Show detailed parameters for evaluations"),
+             _("Do not show detailed parameters for evaluations") );
 
 }
 
@@ -2105,176 +2124,180 @@ extern void
 CommandSetExportParametersRollout ( char *sz ) {
 
   SetToggle( "rollout", &pParameter[ 1 ], sz,
-             "Show detailed parameters for rollouts",
-             "Do not show detailed parameters for rollouts" );
+             _("Show detailed parameters for rollouts"),
+             _("Do not show detailed parameters for rollouts") );
 
-}
-
-
-static void
-SetExportDisplay ( char *szSkill, char *szText, char *sz, int *pf ) {
-
-  char sz1[ 100 ], sz2[ 100 ];
-
-  sprintf ( sz1, "Show %s", szText );
-  sprintf ( sz2, "Do not show %s", szText );
-
-  SetToggle ( szSkill, pf, sz, sz1, sz2 );
-    
 }
 
 
 extern void
 CommandSetExportMovesDisplayVeryBad ( char *sz ) {
   
-  SetExportDisplay ( "verybad", "moves marked very bad", 
-                     sz, 
-                     &exsExport.afMovesDisplay[ SKILL_VERYBAD ] );
+  SetToggle( "export moves display verybad", 
+             &exsExport.afMovesDisplay[ SKILL_VERYBAD ], sz,
+             _("Export moves marked 'verybad'."),
+             _("Do not export moves marked 'verybad'.") );
 
 }
     
 extern void
 CommandSetExportMovesDisplayBad ( char *sz ) {
   
-  SetExportDisplay ( "bad", "moves marked bad", 
-                     sz, 
-                     &exsExport.afMovesDisplay[ SKILL_BAD ] );
+  SetToggle( "export moves display bad", 
+             &exsExport.afMovesDisplay[ SKILL_BAD ], sz,
+             _("Export moves marked 'bad'."),
+             _("Do not export moves marked 'bad'.") );
 
 }
     
 extern void
 CommandSetExportMovesDisplayDoubtful ( char *sz ) {
   
-  SetExportDisplay ( "doubtful", "moves marked doubtful", 
-                     sz, 
-                     &exsExport.afMovesDisplay[ SKILL_DOUBTFUL ] );
+  SetToggle( "export moves display doubtful", 
+             &exsExport.afMovesDisplay[ SKILL_DOUBTFUL ], sz,
+             _("Export moves marked 'doubtful'."),
+             _("Do not export moves marked 'doubtful'.") );
 
 }
     
 extern void
 CommandSetExportMovesDisplayUnmarked ( char *sz ) {
   
-  SetExportDisplay ( "unmarked", "unmarked moves", 
-                     sz, 
-                     &exsExport.afMovesDisplay[ SKILL_NONE ] );
+  SetToggle( "export moves display unmarked", 
+             &exsExport.afMovesDisplay[ SKILL_NONE ], sz,
+             _("Export unmarked moves."),
+             _("Do not export unmarked.") );
 
 }
     
 extern void
 CommandSetExportMovesDisplayInteresting ( char *sz ) {
-  
-  SetExportDisplay ( "interesting", "moves marked interesting", 
-                     sz, 
-                     &exsExport.afMovesDisplay[ SKILL_INTERESTING ] );
 
+  SetToggle( "export moves display interesting", 
+             &exsExport.afMovesDisplay[ SKILL_INTERESTING ], sz,
+             _("Export moves marked 'interesting'."),
+             _("Do not export moves marked 'interesting'.") );
+  
 }
     
 extern void
 CommandSetExportMovesDisplayGood ( char *sz ) {
   
-  SetExportDisplay ( "good", "moves marked good", 
-                     sz, 
-                     &exsExport.afMovesDisplay[ SKILL_GOOD ] );
-
+  SetToggle( "export moves display good", 
+             &exsExport.afMovesDisplay[ SKILL_GOOD ], sz,
+             _("Export moves marked 'good'."),
+             _("Do not export moves marked 'good'.") );
+  
 }
     
 extern void
 CommandSetExportMovesDisplayVeryGood ( char *sz ) {
   
-  SetExportDisplay ( "verygood", "moves marked very good", 
-                     sz, 
-                     &exsExport.afMovesDisplay[ SKILL_VERYGOOD ] );
-
+  SetToggle( "export moves display verygood", 
+             &exsExport.afMovesDisplay[ SKILL_VERYGOOD ], sz,
+             _("Export moves marked 'verygood'."),
+             _("Do not export moves marked 'verygood'.") );
+  
 }
     
 
 extern void
 CommandSetExportCubeDisplayVeryBad ( char *sz ) {
   
-  SetExportDisplay ( "verybad", "cube decisions marked very bad", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ SKILL_VERYBAD ] );
+  SetToggle( "export cube display verybad", 
+             &exsExport.afCubeDisplay[ SKILL_VERYBAD ], sz,
+             _("Export cube decisions marked 'verybad'."),
+             _("Do not export cube decisions marked 'verybad'.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayBad ( char *sz ) {
   
-  SetExportDisplay ( "bad", "cube decisions marked bad", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ SKILL_BAD ] );
+  SetToggle( "export cube display bad", 
+             &exsExport.afCubeDisplay[ SKILL_BAD ], sz,
+             _("Export cube decisions marked 'bad'."),
+             _("Do not export cube decisions marked 'bad'.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayDoubtful ( char *sz ) {
   
-  SetExportDisplay ( "doubtful", "cube decisions marked doubtful", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ SKILL_DOUBTFUL ] );
+  SetToggle( "export cube display doubtful", 
+             &exsExport.afCubeDisplay[ SKILL_DOUBTFUL ], sz,
+             _("Export cube decisions marked 'doubtful'."),
+             _("Do not export cube decisions marked 'doubtful'.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayUnmarked ( char *sz ) {
   
-  SetExportDisplay ( "unmarked", "unmarked cube decisions", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ SKILL_NONE ] );
+  SetToggle( "export cube display unmarked", 
+             &exsExport.afCubeDisplay[ SKILL_NONE ], sz,
+             _("Export unmarked cube decisions."),
+             _("Do not export unmarked cube decisions.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayInteresting ( char *sz ) {
   
-  SetExportDisplay ( "interesting", "cube decisions marked interesting", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ SKILL_INTERESTING ] );
+  SetToggle( "export cube display interesting", 
+             &exsExport.afCubeDisplay[ SKILL_INTERESTING ], sz,
+             _("Export cube decisions marked 'interesting'."),
+             _("Do not export cube decisions marked 'interesting'.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayGood ( char *sz ) {
   
-  SetExportDisplay ( "good", "cube decisions marked good", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ SKILL_GOOD ] );
+  SetToggle( "export cube display good", 
+             &exsExport.afCubeDisplay[ SKILL_GOOD ], sz,
+             _("Export cube decisions marked 'good'."),
+             _("Do not export cube decisions marked 'good'.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayVeryGood ( char *sz ) {
   
-  SetExportDisplay ( "verygood", "cube decisions marked very good", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ SKILL_VERYGOOD ] );
+  SetToggle( "export cube display verygood", 
+             &exsExport.afCubeDisplay[ SKILL_VERYGOOD ], sz,
+             _("Export cube decisions marked 'verygood'."),
+             _("Do not export cube decisions marked 'verygood'.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayActual ( char *sz ) {
   
-  SetExportDisplay ( "actual", "actual cube actions", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] );
+  SetToggle( "export cube display actual", 
+             &exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ], sz,
+             _("Export actual cube decisions."),
+             _("Do not export actual cube decisions.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayClose ( char *sz ) {
   
-  SetExportDisplay ( "close", "close cube decision", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ EXPORT_CUBE_ACTUAL ] );
+  SetToggle( "export cube display close", 
+             &exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ], sz,
+             _("Export close cube decisions."),
+             _("Do not export close cube decisions.") );
 
 }
     
 extern void
 CommandSetExportCubeDisplayMissed ( char *sz ) {
   
-  SetExportDisplay ( "missed", "missed doubles", 
-                     sz, 
-                     &exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ] );
+  SetToggle( "export cube display missed", 
+             &exsExport.afCubeDisplay[ EXPORT_CUBE_MISSED ], sz,
+             _("Export missed cube decisions."),
+             _("Do not export missed cube decisions.") );
 
 }
 
@@ -2282,8 +2305,8 @@ extern void
 CommandSetExportHTMLPictureURL ( char *sz ) {
 
   if ( ! sz || ! *sz ) {
-    outputl ( "You must specify a URL. "
-              "See 'help set export html pictureurl'." );
+    outputl ( _("You must specify a URL. "
+              "See 'help set export html pictureurl'.") );
     return;
   }
 
@@ -2292,8 +2315,8 @@ CommandSetExportHTMLPictureURL ( char *sz ) {
 
   exsExport.szHTMLPictureURL = strdup ( sz );
 
-  outputf ( "URL for picture in HTML export is now: \n"
-            "%s\n", 
+  outputf ( _("URL for picture in HTML export is now: \n"
+            "%s\n"), 
             exsExport.szHTMLPictureURL );
 
 }
@@ -2306,8 +2329,8 @@ CommandSetInvertMatchEquityTable ( char *sz ) {
   int fOldInvertMET = fInvertMET;
 
   if( SetToggle( "invert matchequitytable", &fInvertMET, sz,
-                 "Match equity table will be used inverted.",
-                 "Match equity table will not be use inverted." ) >= 0 )
+                 _("Match equity table will be used inverted."),
+                 _("Match equity table will not be use inverted.") ) >= 0 )
     UpdateSetting( &fInvertMET );
 
   if ( fOldInvertMET != fInvertMET )
@@ -2323,7 +2346,7 @@ SetPath ( char *sz, pathformat f ) {
   sz = NextToken ( &sz );
 
   if ( ! sz || ! *sz ) {
-    outputl ( "You must specify a path." );
+    outputl ( _("You must specify a path.") );
     return;
   }
 

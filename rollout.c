@@ -39,6 +39,7 @@
 #include "matchid.h"
 #include "positionid.h"
 #include "rollout.h"
+#include "i18n.h"
 
 
 static void
@@ -1051,12 +1052,12 @@ GeneralCubeDecisionR ( char *sz,
   FormatCubePosition ( aach[ 1 ], &aci[ 1 ] );
 
   if ( ! GetDPEq ( NULL, NULL, &aci[ 0 ] ) ) {
-    outputl ( "Cube not available!" );
+    outputl ( _("Cube not available!") );
     return -1;
   }
 
   if ( ! prc->fCubeful ) {
-    outputl ( "Setting cubeful on" );
+    outputl ( _("Setting cubeful on") );
     prc->fCubeful = TRUE;
   }
 
@@ -1066,8 +1067,8 @@ GeneralCubeDecisionR ( char *sz,
     GTKRollout( 2, aach, prc->nTrials, aarsStatistics );
   else
 #endif
-    outputl( "                               Win  W(g) W(bg)  L(g) L(bg) "
-             "Equity                    Trials" );
+    outputl( _("                               Win  W(g) W(bg)  L(g) L(bg) "
+             "Equity                    Trials") );
 	
 #if USE_GTK
   if( fX )
@@ -1081,10 +1082,10 @@ GeneralCubeDecisionR ( char *sz,
 	if( !fX )
 #endif
           for ( i = 0; i < 2; i++ )
-	    outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
+	    outputf( _("%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) "
                      "Cubeful: %6.3f %12d\n"
 		     "              Standard error %5.3f %5.3f %5.3f %5.3f"
-		     " %5.3f (%6.3f)         %6.3f\n\n",
+		     " %5.3f (%6.3f)         %6.3f\n\n"),
 		     aach[ i ],
                      aarOutput[ i ][ 0 ], aarOutput[ i ][ 1 ],
                      aarOutput[ i ][ 2 ], aarOutput[ i ][ 3 ],
@@ -1160,7 +1161,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   nSumPoint = 0;
 
-  sprintf ( pc, "Points won:\n\n" );
+  sprintf ( pc, _("Points won:\n\n") );
   pc = strchr ( pc, 0 );
   
   /* single win statistics */
@@ -1171,7 +1172,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of wins %4d-cube          %8d   %7.3f%%     %8d\n",
+    sprintf ( pc, _("Number of wins %4d-cube          %8d   %7.3f%%     %8d\n"),
               nCube,
               prs->acWin[ i ],
               100.0f * prs->acWin[ i ] / cGames,
@@ -1186,9 +1187,9 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
 
   sprintf ( pc,
-            "------------------------------------------------------------------\n"
+            _("------------------------------------------------------------------\n"
             "Total number of wins              %8d   %7.3f%%     %8ld\n"
-            "------------------------------------------------------------------\n\n",
+            "------------------------------------------------------------------\n\n"),
             nSum, 100.0f * nSum / cGames, nSumPartial  );
   pc = strchr ( pc, 0 );
 
@@ -1202,7 +1203,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of gammon wins %4d-cube   %8d   %7.3f%%     %8d\n",
+    sprintf ( pc, _("Number of gammon wins %4d-cube   %8d   %7.3f%%     %8d\n"),
               nCube,
               prs->acWinGammon[ i ],
               100.0f * prs->acWinGammon[ i ] / cGames,
@@ -1216,9 +1217,9 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
   }
 
   sprintf ( pc,
-            "------------------------------------------------------------------\n"
+            _("------------------------------------------------------------------\n"
             "Total number of gammon wins       %8d   %7.3f%%     %8ld\n"
-            "------------------------------------------------------------------\n\n",
+            "------------------------------------------------------------------\n\n"),
             nSum, 100.0f * nSum / cGames, nSumPartial  );
   pc = strchr ( pc, 0 );
 
@@ -1231,7 +1232,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of bg wins %4d-cube       %8d   %7.3f%%     %8d\n",
+    sprintf ( pc, _("Number of bg wins %4d-cube       %8d   %7.3f%%     %8d\n"),
               nCube,
               prs->acWinBackgammon[ i ],
               100.0f * prs->acWinBackgammon[ i ] / cGames,
@@ -1244,9 +1245,9 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
   }
 
   sprintf ( pc,
-            "------------------------------------------------------------------\n"
+            _("------------------------------------------------------------------\n"
             "Total number of bg wins           %8d   %7.3f%%     %8ld\n"
-            "------------------------------------------------------------------\n\n",
+            "------------------------------------------------------------------\n\n"),
             nSum, 100.0f * nSum / cGames, nSumPartial  );
   pc = strchr ( pc, 0 );
 
@@ -1260,7 +1261,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of %4d-cube double, drop  %8d   %7.3f%%    %8d\n",
+    sprintf ( pc, _("Number of %4d-cube double, drop  %8d   %7.3f%%    %8d\n"),
               nCube,
               prs->acDoubleDrop[ i ],
               100.0f * prs->acDoubleDrop[ i ] / cGames,
@@ -1274,25 +1275,25 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
   }
 
   sprintf ( pc,
-            "------------------------------------------------------------------\n"
+            _("------------------------------------------------------------------\n"
             "Total number of double, drop      %8d   %7.3f%%     %8ld\n"
-            "------------------------------------------------------------------\n\n",
+            "------------------------------------------------------------------\n\n"),
             nSum, 100.0f * nSum / cGames, nSumPartial  );
   pc = strchr ( pc, 0 );
 
   nSumPoint += nSumPartial;
 
   sprintf ( pc,
-            "==================================================================\n"
+            _("==================================================================\n"
             "Total number of wins              %8d   %7.3f%%     %8ld\n"
-            "==================================================================\n\n",
+            "==================================================================\n\n"),
             0, 100.0f * 0 / cGames, nSumPoint  );
   pc = strchr ( pc, 0 );
 
 
   /* double take statistics */
 
-  sprintf ( pc, "\n\nOther statistics:\n\n" );
+  sprintf ( pc, _("\n\nOther statistics:\n\n") );
   pc = strchr ( pc, 0 );
   
 
@@ -1301,7 +1302,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < 10; i++ ) {
 
-    sprintf ( pc, "Number of %4d-cube double, take  %8d   %7.3f%%\n",
+    sprintf ( pc, _("Number of %4d-cube double, take  %8d   %7.3f%%\n"),
               nCube,
               prs->acDoubleTake[ i ],
               100.0f * prs->acDoubleTake[ i ] / cGames  );
@@ -1324,7 +1325,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   for ( i = 0; i < MAXHIT; i++ ) {
 
-    sprintf ( pc, "Number of hits move %4d          %8d   %7.3f%%\n",
+    sprintf ( pc, _("Number of hits move %4d          %8d   %7.3f%%\n"),
               i + 1, 
               prs->acHit[ i ],
               100.0f * prs->acHit[ i ] / cGames  );
@@ -1334,7 +1335,7 @@ printRolloutstat ( char *sz, const rolloutstat *prs, const int cGames ) {
 
   }
 
-  sprintf ( pc, "Total number of hits              %8d   %7.3f%%\n\n",
+  sprintf ( pc, _("Total number of hits              %8d   %7.3f%%\n\n"),
             nSum, 100.0f * nSum / cGames  );
   pc = strchr ( pc, 0 );
 

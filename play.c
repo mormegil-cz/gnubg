@@ -45,14 +45,44 @@
 #include "matchid.h"
 #include "matchequity.h"
 #include "rollout.h"
+#include "i18n.h"
 
-char *aszGameResult[] = { "single game", "gammon", "backgammon" },
-    *aszSkillType[] = { "very bad", "bad", "doubtful", NULL,
-			"interesting", "good", "very good" },
-    *aszSkillTypeAbbr[] = { "??", "?", "?!", "", "!?", "!", "!!" },
-    *aszLuckType[] = { "very unlucky", "unlucky", NULL, "lucky",
-		       "very lucky" },
-    *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
+char *aszGameResult[] = { 
+  N_ ("single game"), 
+  N_ ("gammon"), 
+  N_ ("backgammon") 
+};
+char *aszSkillType[] = { 
+  N_("very bad"), 
+  N_("bad"), 
+  N_("doubtful"), 
+  NULL,
+  N_("interesting"), 
+  N_("good"), 
+  N_("very good") };
+char *aszSkillTypeCommand[] = { 
+  "verybad", 
+  "bad", 
+  "doubtful", 
+  "none",
+  "interesting", 
+  "good", 
+  "verygood"
+ };
+char *aszSkillTypeAbbr[] = { "??", "?", "?!", "", "!?", "!", "!!" };
+char *aszLuckTypeCommand[] = { 
+  "veryunlucky", 
+  "unlucky", 
+  "none",
+  "lucky",
+  "verylucky" };
+char *aszLuckType[] = { 
+  N_("very unlucky"), 
+  N_("unlucky"), 
+  NULL, 
+  N_("lucky"),
+  N_("very lucky") };
+char *aszLuckTypeAbbr[] = { "--", "-", "", "+", "++" };
 list lMatch, *plGame, *plLastMove;
 statcontext scMatch;
 static int fComputerDecision = FALSE;
@@ -580,8 +610,8 @@ static int NewGame( void ) {
 	    if( fInterrupt )
 		return -1;
 	    
-	    if( !GetInputYN( "Are you sure you want to start a new game, "
-			     "and discard the one in progress? " ) )
+	    if( !GetInputYN( _("Are you sure you want to start a new game, "
+			     "and discard the one in progress? ") ) )
 		return -1;
 	}
 
@@ -633,7 +663,7 @@ static int NewGame( void ) {
     
     if( fDisplay ) {
       outputnew();
-      outputf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, ms.anDice[ 0 ],
+      outputf( _("%s rolls %d, %s rolls %d.\n"), ap[ 0 ].szName, ms.anDice[ 0 ],
                ap[ 1 ].szName, ms.anDice[ 1 ] );
     }
 
@@ -641,7 +671,7 @@ static int NewGame( void ) {
 	if( !ms.nMatchTo && ms.nCube < ( 1 << cAutoDoubles ) && fCubeUse ) {
 	    pmr->g.nAutoDoubles++;
 	    if( fDisplay )
-		outputf( "The cube is now at %d.\n", ms.nCube <<= 1 );
+		outputf( _("The cube is now at %d.\n"), ms.nCube <<= 1 );
 	    UpdateSetting( &ms.nCube );
 	}
 	
@@ -680,9 +710,9 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
     char sz[ 40 ];
 
     if( anMove[ 0 ] == -1 )
-	outputf( "%s cannot move.\n", ap[ ms.fTurn ].szName );
+	outputf( _("%s cannot move.\n"), ap[ ms.fTurn ].szName );
     else
-	outputf( "%s moves %s.\n", ap[ ms.fTurn ].szName,
+	outputf( _("%s moves %s.\n"), ap[ ms.fTurn ].szName,
 		 FormatMove( sz, anBoard, anMove ) );
 }
 
@@ -710,7 +740,7 @@ extern int ComputerTurn( void ) {
 
       float rEqBefore, rEqAfter;
 
-      ProgressStart( "Considering resignation..." );
+      ProgressStart( _("Considering resignation...") );
       if( EvaluatePosition( ms.anBoard, arOutput, &ci,
 			    &ap[ ms.fTurn ].esCube.ec ) ) {
 	  ProgressEnd();
@@ -796,8 +826,8 @@ extern int ComputerTurn( void ) {
       }
 
       /* Evaluate cube decision */
-      ProgressStart( "Considering cube action..." );
-      if ( GeneralCubeDecision ( "Computer player",
+      ProgressStart( _("Considering cube action...") );
+      if ( GeneralCubeDecision ( _("Computer player"),
                                  aarOutput, aarStdDev, aarsStatistics,
                                  ms.anBoard,
                                  &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
@@ -995,8 +1025,8 @@ extern int ComputerTurn( void ) {
           cubedecision cd;
 
           /* Consider cube action */
-	  ProgressStart( "Considering cube action..." );
-          if ( GeneralCubeDecision ( "Computer player",
+	  ProgressStart( _("Considering cube action...") );
+          if ( GeneralCubeDecision ( _("Computer player"),
                                      aarOutput, aarStdDev, aarsStatistics,
                                      ms.anBoard,
                                      &ci, &ap [ ms.fTurn ].esCube ) < 0 ) {
@@ -1060,7 +1090,7 @@ extern int ComputerTurn( void ) {
 	  if ( fX ) {
 
 	      outputnew ();
-	      outputf ( "%s rolls %1i and %1i.\n",
+	      outputf ( _("%s rolls %1i and %1i.\n"),
 			ap [ ms.fTurn ].szName, ms.anDice[ 0 ],
 			ms.anDice[ 1 ] );
 	      outputx ();
@@ -1088,7 +1118,7 @@ extern int ComputerTurn( void ) {
       pmn->stMove = SKILL_NONE;
       pmn->stCube = SKILL_NONE;
 
-      ProgressStart( "Considering move..." );
+      ProgressStart( _("Considering move...") );
       if( FindBestMove( pmn->anMove, ms.anDice[ 0 ], ms.anDice[ 1 ],
                         anBoardMove, &ci,
 			&ap[ ms.fTurn ].esChequer.ec ) < 0 ) {
@@ -1214,8 +1244,8 @@ extern int ComputerTurn( void ) {
 		   tolower( *szResponse ) == 'r' ) /* decline or reject */
 	      CommandDecline( NULL );
 	  else {
-	      outputl( "Warning: badly formed resignation response from "
-		       "external player" );
+	      outputl( _("Warning: badly formed resignation response from "
+		       "external player") );
 	      fComputerDecision = FALSE;
 	      return -1;
 	  }
@@ -1240,8 +1270,8 @@ extern int ComputerTurn( void ) {
 		   !strncasecmp( szResponse, "red", 3 ) ) /* redouble */
 	      CommandRedouble( NULL );
 	  else {
-	      outputl( "Warning: badly formed cube response from "
-		       "external player" );
+	      outputl( _("Warning: badly formed cube response from "
+		       "external player") );
 	      fComputerDecision = FALSE;
 	      return -1;
 	  }	      
@@ -1294,7 +1324,7 @@ extern int ComputerTurn( void ) {
 	  
 	  if( ( c = ParseMove( szResponse, pmn->anMove ) ) < 0 ) {
 	      pmn->anMove[ 0 ] = 0;
-	      outputl( "Warning: badly formed move from external player" );
+	      outputl( _("Warning: badly formed move from external player") );
 	      return -1;
 	  } else
 	      for( i = 0; i < 4; i++ )
@@ -1326,7 +1356,7 @@ extern int ComputerTurn( void ) {
 extern void CancelCubeAction( void ) {
     
     if( ms.fDoubled ) {
-	outputf( "(%s's double has been cancelled.)\n",
+	outputf( _("(%s's double has been cancelled.)\n"),
 		 ap[ ms.fMove ].szName );
 	ms.fDoubled = FALSE;
 
@@ -1497,8 +1527,8 @@ extern int NextTurn( int fPlayNext ) {
 	       sessions under the Jacoby rule */
 	    n = 1;
 	
-	outputf( "%s wins a %s and %d point%s.\n", ap[ pmgi->fWinner ].szName,
-		 aszGameResult[ n - 1 ], pmgi->nPoints,
+	outputf( _("%s wins a %s and %d point%s.\n"), ap[ pmgi->fWinner ].szName,
+		 gettext ( aszGameResult[ n - 1 ] ), pmgi->nPoints,
 		 pmgi->nPoints > 1 ? "s" : "" );
 
 #if USE_GUI
@@ -1524,7 +1554,7 @@ extern int NextTurn( int fPlayNext ) {
 	    CommandShowScore( NULL );
 	
 	if( ms.nMatchTo && ms.anScore[ pmgi->fWinner ] >= ms.nMatchTo ) {
-	    outputf( "%s has won the match.\n", ap[ pmgi->fWinner ].szName );
+	    outputf( _("%s has won the match.\n"), ap[ pmgi->fWinner ].szName );
 	    outputx();
 	    fComputing = FALSE;
 	    return -1;
@@ -1623,8 +1653,8 @@ extern void CommandAccept( char *sz ) {
     else if( ms.fDoubled )
 	CommandTake( sz );
     else
-	outputl( "You can only accept if the cube or a resignation has been "
-		 "offered." );
+	outputl( _("You can only accept if the cube or a resignation has been "
+		 "offered.") );
 }
 
 extern void CommandAgree( char *sz ) {
@@ -1632,26 +1662,26 @@ extern void CommandAgree( char *sz ) {
     moveresign *pmr;
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 
 	return;
     }
 
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
 
     if( !ms.fResigned ) {
-	outputl( "No resignation was offered." );
+	outputl( _("No resignation was offered.") );
 
 	return;
     }
 
     if( fDisplay )
-	outputf( "%s accepts and wins a %s.\n", ap[ ms.fTurn ].szName,
-		aszGameResult[ ms.fResigned - 1 ] );
+	outputf( _("%s accepts and wins a %s.\n"), ap[ ms.fTurn ].szName,
+		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 
     pmr = malloc( sizeof( *pmr ) );
     pmr->mt = MOVE_RESIGN;
@@ -1671,7 +1701,7 @@ static void AnnotateMove( skilltype st ) {
     moverecord *pmr;
 
     if( !( pmr = plLastMove->plNext->p ) ) {
-	outputl( "You must select a move to annotate first." );
+	outputl( _("You must select a move to annotate first.") );
 	return;
     }
 
@@ -1687,7 +1717,7 @@ static void AnnotateMove( skilltype st ) {
         pmr->n.stCube = st; /* fixme */
         break;
       default:
-        outputl ( "Invalid annotation." );
+        outputl ( _("Invalid annotation.") );
         break;
       }
 
@@ -1701,7 +1731,7 @@ static void AnnotateMove( skilltype st ) {
         pmr->d.st = st;
         break;
       default:
-        outputl ( "Invalid annotation" );
+        outputl ( _("Invalid annotation") );
         break;
       }
 
@@ -1715,7 +1745,7 @@ static void AnnotateMove( skilltype st ) {
         pmr->d.st = st;
         break;
       default:
-        outputl ( "Invalid annotation" );
+        outputl ( _("Invalid annotation") );
         break;
       }
 
@@ -1730,7 +1760,7 @@ static void AnnotateMove( skilltype st ) {
         pmr->d.st = st;
         break;
       default:
-        outputl ( "Invalid annotation" );
+        outputl ( _("Invalid annotation") );
         break;
       }
 
@@ -1747,21 +1777,21 @@ static void AnnotateMove( skilltype st ) {
         pmr->r.stAccept = st;
         break;
       default:
-        outputl ( "Invalid annotation" );
+        outputl ( _("Invalid annotation") );
         break;
       }
 
       break;
 
     default:
-	outputl( "You cannot annotate this move." );
+	outputl( _("You cannot annotate this move.") );
 	return;
     }
 
     if( st == SKILL_NONE )
-	outputl( "Skill annotation cleared." );
+	outputl( _("Skill annotation cleared.") );
     else
-	outputf( "Move marked as %s.\n", aszSkillType[ st ] );
+	outputf( _("Move marked as %s.\n"), gettext ( aszSkillType[ st ] ) );
     
 #if USE_GTK
   if( fX )
@@ -1775,7 +1805,7 @@ static void AnnotateRoll( lucktype lt ) {
     moverecord *pmr;
 
     if( !( pmr = plLastMove->plNext->p ) ) {
-	outputl( "You must select a move to annotate first." );
+	outputl( _("You must select a move to annotate first.") );
 	return;
     }
 
@@ -1789,14 +1819,14 @@ static void AnnotateRoll( lucktype lt ) {
 	break;
 	
     default:
-	outputl( "You cannot annotate this move." );
+	outputl( _("You cannot annotate this move.") );
 	return;
     }
 
     if( lt == LUCK_NONE )
-	outputl( "Luck annotation cleared." );
+	outputl( _("Luck annotation cleared.") );
     else
-	outputf( "Roll marked as %s.\n", aszLuckType[ lt ] );
+	outputf( _("Roll marked as %s.\n"), gettext ( aszLuckType[ lt ] ) );
 
 #if USE_GTK
   if( fX )
@@ -1872,7 +1902,7 @@ extern void CommandAnnotateClearComment( char *sz ) {
     moverecord *pmr;
 
     if( !( pmr = plLastMove->plNext->p ) ) {
-	outputl( "You must select a move to clear the comment from." );
+	outputl( _("You must select a move to clear the comment from.") );
 	return;
     }
 
@@ -1881,7 +1911,7 @@ extern void CommandAnnotateClearComment( char *sz ) {
 
     pmr->a.sz = NULL;
     
-    outputl( "Commentary for this move cleared." );
+    outputl( _("Commentary for this move cleared.") );
 
 #if USE_GTK
   if( fX )
@@ -1948,26 +1978,26 @@ extern void CommandAnnotateVeryUnlucky( char *sz ) {
 extern void CommandDecline( char *sz ) {
 
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 
 	return;
     }
 
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
 
     if( !ms.fResigned ) {
-	outputl( "No resignation was offered." );
+	outputl( _("No resignation was offered.") );
 
 	return;
     }
 
     if( fDisplay )
-	outputf( "%s declines the %s.\n", ap[ ms.fTurn ].szName,
-		aszGameResult[ ms.fResigned - 1 ] );
+	outputf( _("%s declines the %s.\n"), ap[ ms.fTurn ].szName,
+		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 
     ms.fResignationDeclined = ms.fResigned;
     ms.fResigned = FALSE;
@@ -1981,66 +2011,66 @@ extern void CommandDouble( char *sz ) {
     moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 
 	return;
     }
 
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
 
     if( ms.fCrawford ) {
-	outputl( "Doubling is forbidden by the Crawford rule (see `help set "
-	      "crawford')." );
+	outputl( _("Doubling is forbidden by the Crawford rule (see `help set "
+	      "crawford').") );
 
 	return;
     }
 
     if( !fCubeUse ) {
-	outputl( "The doubling cube has been disabled (see `help set cube "
-	      "use')." );
+	outputl( _("The doubling cube has been disabled (see `help set cube "
+	      "use').") );
 
 	return;
     }
 
     if( ms.fDoubled ) {
-	outputl( "The `double' command is for offering the cube, not "
+	outputl( _("The `double' command is for offering the cube, not "
 		 "accepting it.  Use\n`redouble' to immediately offer the "
-		 "cube back at a higher value." );
+		 "cube back at a higher value.") );
 
 	return;
     }
     
     if( ms.fTurn != ms.fMove ) {
-	outputl( "You are only allowed to double if you are on roll." );
+	outputl( _("You are only allowed to double if you are on roll.") );
 
 	return;
     }
     
     if( ms.anDice[ 0 ] ) {
-	outputl( "You can't double after rolling the dice -- wait until your "
-	      "next turn." );
+	outputl( _("You can't double after rolling the dice -- wait until your "
+	      "next turn.") );
 
 	return;
     }
 
     if( ms.fCubeOwner >= 0 && ms.fCubeOwner != ms.fTurn ) {
-	outputl( "You do not own the cube." );
+	outputl( _("You do not own the cube.") );
 
 	return;
     }
 
     if( ms.nCube >= MAX_CUBE ) {
-	outputl( "The cube is already at " MAX_CUBE_STR "; you can't double "
-		 "any more." );
+	outputf( _("The cube is already at %d; you can't double any more.\n"), 
+                 MAX_CUBE );
 	return;
     }
     
     if( fDisplay )
-	outputf( "%s doubles.\n", ap[ ms.fTurn ].szName );
+	outputf( _("%s doubles.\n"), ap[ ms.fTurn ].szName );
 
 #if USE_GTK
     /* There's no point delaying here. */
@@ -2067,19 +2097,19 @@ extern void CommandDrop( char *sz ) {
     moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
-	outputl( "The cube must have been offered before you can drop it." );
+	outputl( _("The cube must have been offered before you can drop it.") );
 
 	return;
     }
 
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
 
     if( fDisplay )
-	outputf( "%s refuses the cube and gives up %d point%s.\n",
+	outputf( _("%s refuses the cube and gives up %d point%s.\n"),
 		ap[ ms.fTurn ].szName, ms.nCube, ms.nCube == 1 ? "" : "s" );
     
     pmr = malloc( sizeof( pmr->d ) );
@@ -2124,18 +2154,18 @@ static void DumpGameList(char *szOut, list *plGame) {
               sz[ strlen(sz) - 1 ] = 0;  Don't need this..  */
 	    break;
 	case MOVE_DOUBLE:
-	    sprintf( sz, "      Doubles to %d", nFileCube <<= 1 );
+	    sprintf( sz, _("      Doubles to %d"), nFileCube <<= 1 );
 	    break;
 	case MOVE_TAKE:
-	    strcpy( sz, "      Takes" ); /* FIXME beavers? */
+	    strcpy( sz, _("      Takes") ); /* FIXME beavers? */
 	    break;
 	case MOVE_DROP:
-            sprintf( sz, "      Drop" );
+            sprintf( sz, _("      Drop") );
 	  /*  if( anScore )
 		anScore[ ( i + 1 ) & 1 ] += nFileCube / 2; */
 	    break;
         case MOVE_RESIGN:
-            sprintf( sz, "      Resigns" );
+            sprintf( sz, _("      Resigns") );
             break;
 	case MOVE_SETDICE:
 	    /* ignore */
@@ -2183,7 +2213,7 @@ extern void CommandListGame( char *sz ) {
 #endif
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	
 	return;
     }
@@ -2212,33 +2242,33 @@ CommandMove( char *sz ) {
     movenormal *pmn;
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	
 	return;
     }
     
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
     
     if( !ms.anDice[ 0 ] ) {
-	outputl( "You must roll the dice before you can move." );
+	outputl( _("You must roll the dice before you can move.") );
 	
 	return;
     }
     
     if( ms.fResigned ) {
-	outputf( "Please wait for %s to consider the resignation before "
-		 "moving.\n", ap[ ms.fTurn ].szName );
+	outputf( _("Please wait for %s to consider the resignation before "
+		 "moving.\n"), ap[ ms.fTurn ].szName );
 	
 	return;
     }
     
     if( ms.fDoubled ) {
-	outputf( "Please wait for %s to consider the cube before "
-		 "moving.\n", ap[ ms.fTurn ].szName );
+	outputf( _("Please wait for %s to consider the cube before "
+		 "moving.\n"), ap[ ms.fTurn ].szName );
 	
 	return;
     }
@@ -2285,8 +2315,8 @@ CommandMove( char *sz ) {
 	    return;
 	}
 	
-	outputl( "You must specify a move (type `help move' for "
-		 "instructions)." );
+	outputl( _("You must specify a move (type `help move' for "
+		 "instructions).") );
 	
 	return;
     }
@@ -2366,14 +2396,14 @@ CommandMove( char *sz ) {
 	}
     }
     
-    outputl( "Illegal move." );
+    outputl( _("Illegal move.") );
 }
 
 extern void CommandNewGame( char *sz ) {
 
     if( ms.nMatchTo && ( ms.anScore[ 0 ] >= ms.nMatchTo ||
 			 ms.anScore[ 1 ] >= ms.nMatchTo ) ) {
-	outputl( "The match is already over." );
+	outputl( _("The match is already over.") );
 
 	return;
     }
@@ -2383,8 +2413,8 @@ extern void CommandNewGame( char *sz ) {
 	    if( fInterrupt )
 		return;
 	    
-	    if( !GetInputYN( "Are you sure you want to start a new game, "
-			     "and discard the one in progress? " ) )
+	    if( !GetInputYN( _("Are you sure you want to start a new game, "
+			     "and discard the one in progress? ") ) )
 		return;
 	}
     }
@@ -2430,7 +2460,7 @@ extern void CommandNewMatch( char *sz ) {
     int n = ParseNumber( &sz );
 
     if( n < 1 ) {
-	outputl( "You must specify a valid match length (1 or longer)." );
+	outputl( _("You must specify a valid match length (1 or longer).") );
 
 	return;
     }
@@ -2438,9 +2468,9 @@ extern void CommandNewMatch( char *sz ) {
     /* Check that match equity table is large enough */
 
     if ( n > MAXSCORE ) {
-       outputf ( "GNU Backgammon is compiled with support only for "
+       outputf ( _("GNU Backgammon is compiled with support only for "
                  "matches of length %i\n"
-                 "and below\n",
+                 "and below\n"),
                  MAXSCORE );
        return;
     }
@@ -2449,8 +2479,8 @@ extern void CommandNewMatch( char *sz ) {
 	if( fInterrupt )
 	    return;
 	    
-	if( !GetInputYN( "Are you sure you want to start a new match, "
-			 "and discard the game in progress? " ) )
+	if( !GetInputYN( _("Are you sure you want to start a new match, "
+			 "and discard the game in progress? ") ) )
 	    return;
     }
     
@@ -2469,7 +2499,7 @@ extern void CommandNewMatch( char *sz ) {
     UpdateSetting( &ms.fCrawford );
     UpdateSetting( &ms.gs );
     
-    outputf( "A new %d point match has been started.\n", n );
+    outputf( _("A new %d point match has been started.\n"), n );
 
 #if USE_GUI
     if( fX )
@@ -2486,8 +2516,8 @@ extern void CommandNewSession( char *sz ) {
 	if( fInterrupt )
 	    return;
 	    
-	if( !GetInputYN( "Are you sure you want to start a new session, "
-			 "and discard the game in progress? " ) )
+	if( !GetInputYN( _("Are you sure you want to start a new session, "
+			 "and discard the game in progress? ") ) )
 	    return;
     }
     
@@ -2504,7 +2534,7 @@ extern void CommandNewSession( char *sz ) {
     UpdateSetting( &ms.fCrawford );
     UpdateSetting( &ms.gs );
     
-    outputl( "A new session has been started." );
+    outputl( _("A new session has been started.") );
     
 #if USE_GUI
     if( fX )
@@ -2588,9 +2618,9 @@ static void CommandNextGame( char *sz ) {
 	n = 1;
 
     if( n < 1 ) {
-	outputl( "If you specify a parameter to the `next game' command, it "
+	outputl( _("If you specify a parameter to the `next game' command, it "
 		 "must be a positive number (the count of games to step "
-		 "ahead)." );
+		 "ahead).") );
 	return;
     }
 
@@ -2658,7 +2688,7 @@ extern void CommandNext( char *sz ) {
     char *pch;
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
@@ -2678,8 +2708,8 @@ extern void CommandNext( char *sz ) {
 	n = 1;
     
     if( n < 1 ) {
-	outputl( "If you specify a parameter to the `next' command, it must "
-		 "be a positive number (the count of moves to step ahead)." );
+	outputl( _("If you specify a parameter to the `next' command, it must "
+		 "be a positive number (the count of moves to step ahead).") );
 	return;
     }
     
@@ -2696,13 +2726,13 @@ extern void CommandNext( char *sz ) {
 extern void CommandPlay( char *sz ) {
 
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 
 	return;
     }
 
     if( ap[ ms.fTurn ].pt == PLAYER_HUMAN ) {
-	outputl( "It's not the computer's turn to play." );
+	outputl( _("It's not the computer's turn to play.") );
 
 	return;
     }
@@ -2727,9 +2757,9 @@ static void CommandPreviousGame( char *sz ) {
 	n = 1;
 
     if( n < 1 ) {
-	outputl( "If you specify a parameter to the `previous game' command, "
+	outputl( _("If you specify a parameter to the `previous game' command, "
 		 "it must be a positive number (the count of games to step "
-		 "back)." );
+		 "back).") );
 	return;
     }
     
@@ -2810,7 +2840,7 @@ extern void CommandPrevious( char *sz ) {
     char *pch;
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
@@ -2830,9 +2860,9 @@ extern void CommandPrevious( char *sz ) {
 	n = 1;
     
     if( n < 1 ) {
-	outputl( "If you specify a parameter to the `previous' command, it "
+	outputl( _("If you specify a parameter to the `previous' command, it "
 		 "must be a positive number (the count of moves to step "
-		 "back)." );
+		 "back).") );
 	return;
     }
 
@@ -2851,49 +2881,49 @@ extern void CommandRedouble( char *sz ) {
     moverecord *pmr;
 
     if( ms.nMatchTo > 0 ) {
-	outputl( "Redoubles are not permitted during match play." );
+	outputl( _("Redoubles are not permitted during match play.") );
 
 	return;
     }
 
     if( !nBeavers ) {
-	outputl( "Beavers are disabled (see `help set beavers')." );
+	outputl( _("Beavers are disabled (see `help set beavers').") );
 
 	return;
     }
 
     if( ms.cBeavers >= nBeavers ) {
 	if( nBeavers == 1 )
-	    outputl( "Only one beaver is permitted (see `help set "
-		     "beavers')." );
+	    outputl( _("Only one beaver is permitted (see `help set "
+		     "beavers').") );
 	else
-	    outputf( "Only %d beavers are permitted (see `help set "
-		     "beavers').\n", nBeavers );
+	    outputf( _("Only %d beavers are permitted (see `help set "
+		     "beavers').\n"), nBeavers );
 
 	return;
     }
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
-	outputl( "The cube must have been offered before you can redouble "
-		 "it." );
+	outputl( _("The cube must have been offered before you can redouble "
+		 "it.") );
 
 	return;
     }
     
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
 
     if( ms.nCube >= ( MAX_CUBE >> 1 ) ) {
-	outputl( "The cube is already at " MAX_CUBE_STR "; you can't double "
-		 "any more." );
+	outputf( _("The cube is already at %d; you can't double any more.\n"),
+                 MAX_CUBE );
 	return;
     }
     
     if( fDisplay )
-	outputf( "%s accepts and immediately redoubles to %d.\n",
+	outputf( _("%s accepts and immediately redoubles to %d.\n"),
 		ap[ ms.fTurn ].szName, ms.nCube << 2 );
     
     ms.fCubeOwner = !ms.fMove;
@@ -2918,8 +2948,8 @@ extern void CommandReject( char *sz ) {
     else if( ms.fDoubled )
 	CommandDrop( sz );
     else
-	outputl( "You can only reject if the cube or a resignation has been "
-	      "offered." );
+	outputl( _("You can only reject if the cube or a resignation has been "
+	      "offered.") );
 }
 
 extern void CommandResign( char *sz ) {
@@ -2928,14 +2958,14 @@ extern void CommandResign( char *sz ) {
     int cch;
     
     if( ms.gs != GAME_PLAYING ) {
-	outputl( "You must be playing a game if you want to resign it." );
+	outputl( _("You must be playing a game if you want to resign it.") );
 
 	return;
     }
 
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
 
@@ -2960,7 +2990,7 @@ extern void CommandResign( char *sz ) {
     if( ms.fResigned < 1 || ms.fResigned > 3 ) {
 	ms.fResigned = 0;
 
-	outputf( "Unknown keyword `%s' -- try `help resign'.\n", pch );
+	outputf( _("Unknown keyword `%s' -- try `help resign'.\n"), pch );
 	
 	return;
     }
@@ -2968,16 +2998,16 @@ extern void CommandResign( char *sz ) {
     if( ms.fResigned <= ms.fResignationDeclined ) {
 	ms.fResigned = 0;
 	
-	outputf( "%s has already declined your offer of a %s.\n",
+	outputf( _("%s has already declined your offer of a %s.\n"),
 		 ap[ !ms.fTurn ].szName,
-		 aszGameResult[ ms.fResignationDeclined - 1 ] );
+		 gettext ( aszGameResult[ ms.fResignationDeclined - 1 ] ) );
 
 	return;
     }
     
     if( fDisplay )
-	outputf( "%s offers to resign a %s.\n", ap[ ms.fTurn ].szName,
-		aszGameResult[ ms.fResigned - 1 ] );
+	outputf( _("%s offers to resign a %s.\n"), ap[ ms.fTurn ].szName,
+		gettext ( aszGameResult[ ms.fResigned - 1 ] ) );
 
     ms.fTurn = !ms.fTurn;
     
@@ -2993,32 +3023,32 @@ CommandRoll( char *sz ) {
   moverecord *pmr;
   
   if( ms.gs != GAME_PLAYING ) {
-    outputl( "No game in progress (type `new game' to start one)." );
+    outputl( _("No game in progress (type `new game' to start one).") );
 
     return;
   }
     
   if( ap[ ms.fTurn ].pt != PLAYER_HUMAN ) {
-    outputl( "It is the computer's turn -- type `play' to force it to "
-             "move immediately." );
+    outputl( _("It is the computer's turn -- type `play' to force it to "
+             "move immediately.") );
     return;
   }
 
   if( ms.fDoubled ) {
-    outputf( "Please wait for %s to consider the cube before "
-             "moving.\n", ap[ ms.fTurn ].szName );
+    outputf( _("Please wait for %s to consider the cube before "
+             "moving.\n"), ap[ ms.fTurn ].szName );
 
     return;
   }    
 
   if( ms.fResigned ) {
-    outputl( "Please resolve the resignation first." );
+    outputl( _("Please resolve the resignation first.") );
 
     return;
   }
 
   if( ms.anDice[ 0 ] ) {
-    outputl( "You already did roll the dice." );
+    outputl( _("You already did roll the dice.") );
 
     return;
   }
@@ -3043,7 +3073,7 @@ CommandRoll( char *sz ) {
   if ( fX ) {
 
     outputnew ();
-    outputf ( "%s rolls %1i and %1i.\n",
+    outputf ( _("%s rolls %1i and %1i.\n"),
               ap [ ms.fTurn ].szName, ms.anDice[ 0 ], ms.anDice[ 1 ] );
     outputx ();
 
@@ -3110,19 +3140,19 @@ extern void CommandTake( char *sz ) {
     moverecord *pmr;
     
     if( ms.gs != GAME_PLAYING || !ms.fDoubled ) {
-	outputl( "The cube must have been offered before you can take it." );
+	outputl( _("The cube must have been offered before you can take it.") );
 
 	return;
     }
 
     if( ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputerDecision ) {
-	outputl( "It is the computer's turn -- type `play' to force it to "
-		 "move immediately." );
+	outputl( _("It is the computer's turn -- type `play' to force it to "
+		 "move immediately.") );
 	return;
     }
 
     if( fDisplay )
-	outputf( "%s accepts the cube at %d.\n", ap[ ms.fTurn ].szName,
+	outputf( _("%s accepts the cube at %d.\n"), ap[ ms.fTurn ].szName,
 		 ms.nCube << 1 );
     
     pmr = malloc( sizeof( pmr->d ) );
@@ -3160,8 +3190,8 @@ SetMatchID ( const char *szMatchID ) {
     if( fInterrupt )
       return;
 	    
-    if( !GetInputYN( "Are you sure you want to setup a new match id, "
-			 "and discard the game in progress? " ) )
+    if( !GetInputYN( _("Are you sure you want to setup a new match id, "
+			 "and discard the game in progress? ") ) )
       return;
   }
     
@@ -3176,7 +3206,7 @@ SetMatchID ( const char *szMatchID ) {
                      &nMatchTo, anScore, &nCube, (int *) &gs, 
                      szMatchID ) < 0 ) {
 
-    outputf( "Illegal match ID '%s'\n", szMatchID );
+    outputf( _("Illegal match ID '%s'\n"), szMatchID );
     outputx();
     return;
 

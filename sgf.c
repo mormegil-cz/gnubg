@@ -142,7 +142,7 @@ static list *LoadCollection( char *sz ) {
 	    
 	if( ListEmpty( plCollection ) ) {
 	    fError = FALSE; /* we always want to see this one */
-	    ErrorHandler( "warning: no backgammon games in SGF file", TRUE );
+	    ErrorHandler( _("warning: no backgammon games in SGF file"), TRUE );
 	    free( plCollection );
             PopLocale ();
 	    return NULL;
@@ -875,8 +875,8 @@ extern void CommandLoadGame( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to load from (see `help load "
-		 "game')." );
+	outputl( _("You must specify a file to load from (see `help load "
+		 "game').") );
 	return;
     }
 
@@ -885,8 +885,8 @@ extern void CommandLoadGame( char *sz ) {
 	    if( fInterrupt )
 		return;
 	    
-	    if( !GetInputYN( "Are you sure you want to load a saved game, "
-			     "and discard the one in progress? " ) )
+	    if( !GetInputYN( _("Are you sure you want to load a saved game, "
+			     "and discard the one in progress? ") ) )
 		return;
 	}
 
@@ -925,8 +925,8 @@ extern void CommandLoadMatch( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to load from (see `help load "
-		 "match')." );
+	outputl( _("You must specify a file to load from (see `help load "
+		 "match').") );
 	return;
     }
 
@@ -937,8 +937,8 @@ extern void CommandLoadMatch( char *sz ) {
 	    if( fInterrupt )
 		return;
 	    
-	    if( !GetInputYN( "Are you sure you want to load a saved match, "
-			     "and discard the game in progress? " ) )
+	    if( !GetInputYN( _("Are you sure you want to load a saved match, "
+			     "and discard the game in progress? ") ) )
 		return;
 	}
 
@@ -1390,13 +1390,13 @@ extern void CommandSaveGame( char *sz ) {
     sz = NextToken( &sz );
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to save to (see `help save "
-		 "game')." );
+	outputl( _("You must specify a file to save to (see `help save "
+		 "game').") );
 	return;
     }
 
@@ -1427,15 +1427,15 @@ extern void CommandSaveMatch( char *sz ) {
     sz = NextToken( &sz );
     
     if( !plGame ) {
-	outputl( "No game in progress (type `new game' to start one)." );
+	outputl( _("No game in progress (type `new game' to start one).") );
 	return;
     }
     
     /* FIXME what should be done if nMatchTo == 0? */
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to save to (see `help save "
-		 "match')." );
+	outputl( _("You must specify a file to save to (see `help save "
+		 "match').") );
 	return;
     }
 

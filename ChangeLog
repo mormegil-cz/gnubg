@@ -1,3 +1,39 @@
+Sat Jun  1 20:37:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Mark strings for i18n. 
+
+	* analysis.c
+	* database.c
+	* dice.c
+	* drawboard.c
+	* eval.c
+	* external.c
+	* gnubg.c
+	* gtkboard.c
+	* gtkexport.c
+	* gtkgame.c
+	* gtkprefs.c
+	* gtktheory.c
+	* gtktexi.c
+	* gnubg.c
+	* import.c
+	* html.c
+	* latex.c
+	* matchequity.c
+	* play.c
+	* postscript.c
+	* set.c
+	* sgf.l
+	* sgf.y
+	* show.c
+
+	* gtkpref.c (SetColourSpeckle): locale independency.
+
+	* i18n.c (PopLocale, PushLocale): fix bugs.
+
+	* dice.c: added aszSkillTypeCommand, aszLuckTypeCommand
+	* dice.c: added aszRNG 
+
 Sat Jun  1 19:33:06 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Prepare gnubg for i18n.

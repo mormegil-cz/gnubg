@@ -1,5 +1,5 @@
 
-/*  A Bison parser, made from sgf.y
+/*  A Bison parser, made from ./sgf.y
     by GNU Bison version 1.28  */
 
 #define YYBISON 1  /* Identify Bison output.  */
@@ -14,7 +14,7 @@
 #define	PROPERTY	257
 #define	VALUETEXT	258
 
-#line 24 "sgf.y"
+#line 24 "./sgf.y"
 
 #include <list.h>
 #include <stdio.h>
@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "sgf.h"
+#include "i18n.h"
 
 static list *plCollection;    
     
@@ -73,7 +74,7 @@ static char *Concatenate( list *pl ) {
 }
  
 
-#line 88 "sgf.y"
+#line 89 "./sgf.y"
 typedef union {
     char ach[ 2 ]; /* property identifier */
     char *pch; /* property value */
@@ -143,8 +144,8 @@ static const short yyrhs[] = {    11,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-   105,   108,   110,   112,   115,   119,   121,   123,   126,   130,
-   132,   136,   139,   147,   149,   153,   157,   159
+   106,   109,   111,   113,   116,   120,   122,   124,   127,   131,
+   133,   137,   140,   148,   150,   154,   158,   160
 };
 #endif
 
@@ -746,43 +747,43 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 106 "sgf.y"
+#line 107 "./sgf.y"
 { yyval.pl = plCollection = yyvsp[0].pl; ;
     break;}
 case 2:
-#line 109 "sgf.y"
+#line 110 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 3:
-#line 111 "sgf.y"
+#line 112 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 5:
-#line 116 "sgf.y"
+#line 117 "./sgf.y"
 { ListInsert( yyvsp[-1].pl->plNext, yyvsp[-2].pl ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 6:
-#line 120 "sgf.y"
+#line 121 "./sgf.y"
 { yyval.pl = NewList(); ListInsert( yyval.pl, yyvsp[0].pl ); ;
     break;}
 case 7:
-#line 122 "sgf.y"
+#line 123 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 9:
-#line 127 "sgf.y"
+#line 128 "./sgf.y"
 { yyval.pl = yyvsp[0].pl; ;
     break;}
 case 10:
-#line 131 "sgf.y"
+#line 132 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 11:
-#line 133 "sgf.y"
+#line 134 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pp ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 13:
-#line 140 "sgf.y"
+#line 141 "./sgf.y"
 { 
 		    ListInsert( yyvsp[-1].pl, yyvsp[0].pch );
 		    yyval.pp = malloc( sizeof(property) ); yyval.pp->pl = yyvsp[-1].pl;
@@ -790,23 +791,23 @@ case 13:
 		;
     break;}
 case 14:
-#line 148 "sgf.y"
+#line 149 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 15:
-#line 150 "sgf.y"
+#line 151 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 16:
-#line 154 "sgf.y"
+#line 155 "./sgf.y"
 { yyval.pch = Concatenate( yyvsp[-1].pl ); ;
     break;}
 case 17:
-#line 158 "sgf.y"
+#line 159 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 18:
-#line 160 "sgf.y"
+#line 161 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 }
@@ -1031,7 +1032,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 163 "sgf.y"
+#line 164 "./sgf.y"
 
 
 extern list *SGFParse( FILE *pf ) {
@@ -1103,7 +1104,7 @@ static void PrintGameTreeSeq( list *pl, int n ) {
 
 void Error( char *s, int f ) {
 
-    fprintf( stderr, "sgf error: %s\n", s );
+    fprintf( stderr, _("sgf error: %s\n"), s );
 }
 
 int main( int argc, char *argv[] ) {
@@ -1124,7 +1125,7 @@ int main( int argc, char *argv[] ) {
     if( ( pl = SGFParse( pf ? pf : stdin ) ) )
 	PrintGameTreeSeq( pl, 0 );
     else {
-	puts( "Fatal error; can't print collection." );
+	puts( _("Fatal error; can't print collection.") );
 	return 2;
     }
     

@@ -27,6 +27,7 @@
 #define YY_FLEX_MINOR_VERSION 5
 
 #include <stdio.h>
+#include <unistd.h>
 
 
 /* cfront 1.2 defines "c_plusplus" instead of "__cplusplus" */
@@ -40,7 +41,6 @@
 #ifdef __cplusplus
 
 #include <stdlib.h>
-#include <unistd.h>
 
 /* Use prototypes in function declarations. */
 #define YY_USE_PROTOS
@@ -902,7 +902,7 @@ static yyconst struct yy_trans_info *yy_start_state_list[5] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "sgf.l"
+#line 1 "./sgf.l"
 #define INITIAL 0
 /*
  * sgf.l
@@ -924,13 +924,14 @@ char *yytext;
  *
  * $Id$
  */
-#line 23 "sgf.l"
+#line 23 "./sgf.l"
 #include <ctype.h>
 #include <list.h>
 #include <string.h>
 
 #include "sgf.h"
 #include "sgfp.h"
+#include "i18n.h"
 
 extern int _SGFWarning( char * );
 
@@ -955,7 +956,7 @@ static int error( char *s ) {
 #define YY_NO_SCAN_STRING 1
 #define value 1
 
-#line 959 "sgfl.c"
+#line 960 "sgfl.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1106,9 +1107,9 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 63 "sgf.l"
+#line 64 "./sgf.l"
 
-#line 1112 "sgfl.c"
+#line 1113 "sgfl.c"
 
 	if ( yy_init )
 		{
@@ -1173,17 +1174,17 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 64 "sgf.l"
+#line 65 "./sgf.l"
 /* ignore */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 65 "sgf.l"
+#line 66 "./sgf.l"
 return *yytext;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 66 "sgf.l"
+#line 67 "./sgf.l"
 {
 			    char *pch;
 
@@ -1206,55 +1207,55 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 85 "sgf.l"
+#line 86 "./sgf.l"
 /* ignore -- this rule avoids making flex back up */
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 86 "sgf.l"
+#line 87 "./sgf.l"
 BEGIN(value); return '[';
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 87 "sgf.l"
-{ error( "illegal character in SGF file" ); }
+#line 88 "./sgf.l"
+{ error( _("illegal character in SGF file" )); }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 89 "sgf.l"
+#line 90 "./sgf.l"
 /* ignore -- we want value strings null-terminated */
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 90 "sgf.l"
+#line 91 "./sgf.l"
 { sgflval.pch = strdup( "]" ); return VALUETEXT; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 91 "sgf.l"
+#line 92 "./sgf.l"
 /* ignore */
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 92 "sgf.l"
+#line 93 "./sgf.l"
 BEGIN(INITIAL); return ']';
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 93 "sgf.l"
+#line 94 "./sgf.l"
 { sgflval.pch = strdup( yytext ); return VALUETEXT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 94 "sgf.l"
+#line 95 "./sgf.l"
 { sgflval.pch = strdup( yytext ); return VALUETEXT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 96 "sgf.l"
+#line 97 "./sgf.l"
 YY_FATAL_ERROR( "flex scanner jammed" );
 	YY_BREAK
-#line 1258 "sgfl.c"
+#line 1259 "sgfl.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(value):
 				yyterminate();
@@ -1798,11 +1799,6 @@ YY_BUFFER_STATE b;
 	}
 
 
-#ifndef YY_ALWAYS_INTERACTIVE
-#ifndef YY_NEVER_INTERACTIVE
-extern int isatty YY_PROTO(( int ));
-#endif
-#endif
 
 #ifdef YY_USE_PROTOS
 void yy_init_buffer( YY_BUFFER_STATE b, FILE *file )
@@ -2120,5 +2116,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 96 "sgf.l"
+#line 97 "./sgf.l"
 

@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "sgf.h"
+#include "i18n.h"
 
 static list *plCollection;    
     
@@ -231,7 +232,7 @@ static void PrintGameTreeSeq( list *pl, int n ) {
 
 void Error( char *s, int f ) {
 
-    fprintf( stderr, "sgf error: %s\n", s );
+    fprintf( stderr, _("sgf error: %s\n"), s );
 }
 
 int main( int argc, char *argv[] ) {
@@ -252,7 +253,7 @@ int main( int argc, char *argv[] ) {
     if( ( pl = SGFParse( pf ? pf : stdin ) ) )
 	PrintGameTreeSeq( pl, 0 );
     else {
-	puts( "Fatal error; can't print collection." );
+	puts( _("Fatal error; can't print collection.") );
 	return 2;
     }
     

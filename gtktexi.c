@@ -38,6 +38,7 @@
 #include <string.h>
 
 #include "gtktexi.h"
+#include "i18n.h"
 
 #define BLOCK_SIZE 1024
 #define MAX_ITEM_DEPTH 8
@@ -80,7 +81,7 @@ struct _gtktexicontext {
 static GtkTextTagTable *pttt;
 static GtkTextTag *apttItem[ MAX_ITEM_DEPTH ], *pttDefault;
 static hash hIgnore, hPreFormat;
-static char *aszNavLabel[ 3 ] = { "Next:", "Prev:", "Up:" };
+static char *aszNavLabel[ 3 ] = { N_("Next:"), N_("Prev:"), N_("Up:") };
 static GtkWindowClass *pcParent;
 
 static gboolean TagEvent( GtkTextTag *ptt, GtkWidget *pwView, GdkEvent *pev,
@@ -420,7 +421,7 @@ static void ClearBuffer( GtkTexi *pw ) {
 	    pw->ptic->aszNavTarget[ i ] = NULL;
 	}
 	gtk_label_set_text( GTK_LABEL( pw->apwLabel[ i ] ),
-			    aszNavLabel[ i ] );
+			    gettext ( aszNavLabel[ i ] ) );
 	gtk_widget_set_sensitive( gtk_widget_get_parent( pw->apwLabel[ i ] ),
 				  FALSE );
 	gtk_widget_set_sensitive( pw->apwNavMenu[ i ], FALSE );
@@ -853,7 +854,8 @@ static void EndElement( void *pv, const xmlChar *pchName ) {
 		malloc( strlen( pch ) + 1 ),
 		pch );
 	
-	pchLabel = g_strdup_printf( "%s %s", aszNavLabel[ iNavLabel ], pch );
+	pchLabel = g_strdup_printf( "%s %s", 
+                                    gettext ( aszNavLabel[ iNavLabel ] ), pch );
 
 	gtk_label_set_text( GTK_LABEL( pw->apwLabel[ iNavLabel ] ), pchLabel );
 	gtk_widget_set_sensitive( gtk_widget_get_parent(
@@ -1306,7 +1308,7 @@ static void gtk_texi_init( GtkTexi *pw ) {
 
     for( i = 0; i < 3; i++ ) {
 	pw->ptic->aszNavTarget[ i ] = NULL;
-	pw->apwLabel[ i ] = gtk_label_new( aszNavLabel[ i ] );
+	pw->apwLabel[ i ] = gtk_label_new( gettext ( aszNavLabel[ i ] ) );
 	gtk_misc_set_alignment( GTK_MISC( pw->apwLabel[ i ] ), 0.0, 0.5 );
 
 	pwButton = gtk_button_new();
