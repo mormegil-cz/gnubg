@@ -73,7 +73,7 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "moveheader", "background-color: #787878" },
   { "movenumber", "width: 2em; text-align: right" },
   { "moveply", "width: 5em; text-align: center" },
-  { "movemove", "width: 20em; text-align: left }" },
+  { "movemove", "width: 20em; text-align: left" },
 
   { "moveequity", "width: 10em; text-align: left" },
   { "movethemove", "background-color: #ffffcc" },
@@ -88,10 +88,10 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "result", 
     "background-color: yellow; font-weight: bold; text-align: center; "
     "color: black; width: 40em; padding: 0.2em" },
-  { "tiny", "font-size: 25%%" },
+  { "tiny", "font-size: 25%" },
   { "cubedecision", "background-color: #ddddee; text-align: left" },
 
-  { "cubedecisionheader", "background-color: #89d0e2; text-align: center} " },
+  { "cubedecisionheader", "background-color: #89d0e2; text-align: center" },
   { "comment", "background-color: #449911; width: 39.5em; padding: 0.5em" },
   { "commentheader", 
     "background-color: #557711; font-weight: bold; text-align: center; "
