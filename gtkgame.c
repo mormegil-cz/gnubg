@@ -104,6 +104,9 @@
 #define KEY_ESCAPE -229
 #define KEY_TAB -247
 
+/* Offset action to avoid predefined values */
+#define TOOLBAR_ACTION_OFFSET 10000
+
 #define GNUBGMENURC ".gnubgmenurc"
 
 #if USE_GTK2
@@ -2576,6 +2579,59 @@ static gchar *GTKTranslate ( const gchar *path, gpointer func_data ) {
 
 }
 
+GtkWidget* firstChild(GtkWidget* widget)
+{
+	return g_list_nth_data(gtk_container_children(GTK_CONTAINER(widget)), 0);
+}
+
+static void SetToolbarItemStyle(GtkWidget* widget, gpointer data)
+{
+	int style = (int)data;
+	/* Find icon and text widgets from parent object */
+	GList* buttonParts;
+	GtkWidget *icon, *text;
+	GtkWidget* buttonParent;
+	/* Stop button has event box parent - skip */
+	if (GTK_IS_EVENT_BOX(widget))
+		widget = firstChild(widget);
+	buttonParent = firstChild(widget);
+	buttonParts = gtk_container_children(GTK_CONTAINER(buttonParent));
+	icon = g_list_nth_data(buttonParts, 0);
+	text = g_list_nth_data(buttonParts, 1);
+
+	if (!icon || !text)
+		return;	/* Didn't find them */
+
+	/* Hide correct parts dependent on style value */
+	if (style == GTK_TOOLBAR_ICONS || style == GTK_TOOLBAR_BOTH)
+		gtk_widget_show(icon);
+	else
+		gtk_widget_hide(icon);
+	if (style == GTK_TOOLBAR_TEXT || style == GTK_TOOLBAR_BOTH)
+		gtk_widget_show(text);
+	else
+		gtk_widget_hide(text);
+}
+
+extern void SetToolbarStyle(int value)
+{
+	GtkWidget* pwMainToolbar = firstChild(pwToolbar);
+	gtk_container_foreach(GTK_CONTAINER(pwMainToolbar), SetToolbarItemStyle, (gpointer)value);
+	/* Resize handle box parent */
+	gtk_widget_queue_resize(gtk_widget_get_parent(pwToolbar));
+	nToolbarStyle = value;
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(gtk_item_factory_get_widget_by_action(pif, value + TOOLBAR_ACTION_OFFSET)), TRUE);
+}
+
+static void ToolbarStyle(gpointer    callback_data,
+                       guint       callback_action,
+                       GtkWidget  *widget)
+{
+	if(GTK_CHECK_MENU_ITEM(widget)->active)
+	{	/* If radio button has been selected set style */
+		SetToolbarStyle(callback_action - TOOLBAR_ACTION_OFFSET);
+	}
+}
 
 static void
 MainGetSelection ( GtkWidget *pw, GtkSelectionData *psd,
@@ -2957,6 +3013,13 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ N_("/_Windows/Hide panels"), NULL, HideAllPanels, 0, NULL },
 #endif
 	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
+	{ N_("/_Windows/_Toolbar"), NULL, NULL, 0, "<Branch>"},
+	{ N_("/_Windows/_Toolbar/Text only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_TEXT,
+	  "<RadioItem>" },
+	{ N_("/_Windows/_Toolbar/Icons only"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_ICONS,
+	  "/Windows/Toolbar/Text only" },
+	{ N_("/_Windows/_Toolbar/Both"), NULL, ToolbarStyle, TOOLBAR_ACTION_OFFSET + GTK_TOOLBAR_BOTH,
+	  "/Windows/Toolbar/Text only" },
 	{ N_("/_Windows/Full screen"), NULL, FullScreenMode, 0, NULL },
 	{ N_("/_Windows/-"), NULL, NULL, 0, "<Separator>" },
 	{ N_("/_Windows/Gu_ile"), NULL, NULL, 0, NULL },
@@ -3263,6 +3326,9 @@ extern void RunGTK( GtkWidget *pwSplash ) {
     }
     
     gtk_widget_show_all( pwMain );
+
+	/* Make sure toolbar looks correct */
+	SetToolbarStyle(nToolbarStyle);
 
 #if USE_BOARD3D
 	DisplayCorrectBoardType();

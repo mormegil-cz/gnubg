@@ -2495,6 +2495,18 @@ extern void CommandSetTrainingThreshold( char *sz ) {
 	outputl( _("Error threshold disabled.") );
 }
 
+extern void CommandSetToolbar( char *sz )
+{
+	int n = ParseNumber( &sz );
+
+	if (n != 0 && n != 1 && n != 2)
+	{
+		outputl(_("You must specify either 0, 1 or 2"));
+		return;
+	}
+	SetToolbarStyle(n);
+}
+
 extern void CommandSetTurn( char *sz ) {
 
     char *pch = NextToken( &sz );

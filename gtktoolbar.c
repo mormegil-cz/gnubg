@@ -339,11 +339,6 @@ ToolbarNew ( void ) {
 	 *
 	 * For GTK 2.0 there should be _real_ stock icons, so the 
 	 * the user cab change the theme
-	 *
-	 * The toolbar style should be user optional. Icons only or Text
-	 * only or both text and icons.
-	 * 
-	 * Several other bugs.....
 	 * 
 	 */
 

@@ -213,7 +213,7 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     nBeavers = 3, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE,
-    nDefaultLength = 7;
+    nDefaultLength = 7, nToolbarStyle = 2;
 int fCubeEqualChequer = TRUE, fPlayersAreSame = TRUE, 
 	fTruncEqualPlayer0 =TRUE;
 int fInvertMET = FALSE;
@@ -1746,6 +1746,8 @@ command cER = {
     { "tcunname", CommandSetTCUnname, N_("Undefine a named time control setting"), szSETTCUNNAME, NULL}, 
     
 #endif
+    { "toolbar", CommandSetToolbar, N_("Change if icons and/or text are shown on toolbar"),
+      szVALUE, NULL },
     { "training", NULL, 
       N_("Control training parameters"), NULL, acSetTraining },
     { "turn", CommandSetTurn, N_("Set which player is on roll"), szPLAYER,
@@ -5895,6 +5897,7 @@ extern void CommandSaveSettings( char *szParam ) {
 			fprintf(pf, "set warning %s off\n", warningNames[i]);
 	}
 #endif
+	fprintf(pf, "set toolbar %d\n", nToolbarStyle);
 
     /* the end */
 

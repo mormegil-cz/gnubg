@@ -1,4 +1,8 @@
-Thu Feb 26 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Feb 25 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkgame.c: Add option so toolbar can show text, icon or both
+
+Wed Feb 25 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gnubg.c, gtkgame.c, set.c: Save shown panels
 	* gnubg.c : Fixed small show epc bug

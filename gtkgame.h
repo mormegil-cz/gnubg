@@ -198,4 +198,6 @@ extern void GTKRemoveTimeControl( char *szName) ;
 extern void GTKCheckTimeControl( char *szName) ;
 #endif
 
+extern void SetToolbarStyle(int value);
+
 #endif
