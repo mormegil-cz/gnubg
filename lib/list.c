@@ -43,3 +43,11 @@ int ListDelete( list *pl ) {
 
     return 0;
 }
+
+int ListDeleteAll( list *pl ) {
+
+    while( pl->plNext->p )
+	ListDelete( pl->plNext );
+
+	return 0;
+}

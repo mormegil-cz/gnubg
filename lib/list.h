@@ -19,5 +19,6 @@ extern int ListCreate( list *pl );
 #define ListEmpty( pl ) ( (pl)->plNext == (pl) )
 extern list* ListInsert( list* pl, void* p );
 extern int ListDelete( list* pl );
+extern int ListDeleteAll( list *pl );
 
 #endif
