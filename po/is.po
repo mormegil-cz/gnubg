@@ -3,9 +3,8 @@
 # This file is distributed under the same license as the PACKAGE package.
 # Hlynur Sigurgislason <hsi@here.is>, 2003.
 # utf-8 coding
-# cubeful meÃ° tvÃ¶fÃ¶ldunarteningi?
-# cubeless Ã¡n tvÃ¶fÃ¶ldunartenings?
-# bar = slÃ¡?
+# Rollout = fjölkesti? sbr. hlutkesti
+
 msgid ""
 msgstr ""
 "Project-Id-Version: GNU Backgammon 0.14-devel\n"
@@ -20,7 +19,7 @@ msgstr ""
 
 #: analysis.c:48
 msgid "Awful!"
-msgstr "HrÃ¦Ã°ilegt!"
+msgstr "Hræğilegt!"
 
 #: analysis.c:49
 msgid "Beginner"
@@ -28,11 +27,11 @@ msgstr "Byrjandi"
 
 #: analysis.c:50
 msgid "Casual player"
-msgstr "FrÃ­stundaspilari"
+msgstr "Frístundaspilari"
 
 #: analysis.c:51
 msgid "Intermediate"
-msgstr "MiÃ°lungsspilari"
+msgstr "Miğlungsspilari"
 
 #: analysis.c:52
 msgid "Advanced"
@@ -44,11 +43,11 @@ msgstr ""
 
 #: analysis.c:54
 msgid "World class"
-msgstr "Ã Heimsklassa"
+msgstr "Í Heimsklassa"
 
 #: analysis.c:55
 msgid "Supernatural"
-msgstr "YfirnÃ¡ttÃºrulegt"
+msgstr "Yfirnáttúrulegt"
 
 #: analysis.c:56
 msgid "N/A"
@@ -60,11 +59,11 @@ msgstr ""
 
 #: analysis.c:60
 msgid "Go to bed"
-msgstr "FarÃ°u aÃ° sofa"
+msgstr "Farğu ağ sofa"
 
 #: analysis.c:61
 msgid "Better luck next time"
-msgstr "Gangi Ã¾Ã©r betur nÃ¦st"
+msgstr "Gangi şér betur næst"
 
 #: analysis.c:62 gtkgame.c:9733 gtkoptions.c:595
 msgid "None"
@@ -73,11 +72,11 @@ msgstr ""
 # Fuzzy
 #: analysis.c:63
 msgid "Good dice, man!"
-msgstr "Vel kastaÃ°!"
+msgstr "Vel kastağ!"
 
 #: analysis.c:64
 msgid "Go to Las Vegas immediately"
-msgstr "DrÃ­fÃ°u Ã¾ig til Vegas"
+msgstr "Drífğu şig til Vegas"
 
 #: analysis.c:65
 msgid "Cheater :-)"
@@ -91,7 +90,7 @@ msgstr ""
 
 #: analysis.c:1197 analysis.c:1613 analysis.c:1874 record.c:393 show.c:926
 msgid "No game is being played."
-msgstr ""
+msgstr "Şağ er enginn leikur í gangi."
 
 #: analysis.c:1206
 msgid "Analysing game; move:"
@@ -99,7 +98,7 @@ msgstr "Greini spil; leik:"
 
 #: analysis.c:1229 analysis.c:1893 record.c:419 show.c:665 show.c:868
 msgid "No match is being played."
-msgstr "Engin keppni er Ã­ gangi."
+msgstr "Engin keppni er í gangi."
 
 #: analysis.c:1238
 msgid "Analysing match; move:"
@@ -107,31 +106,31 @@ msgstr "Greini keppni: leik:"
 
 #: analysis.c:1478 html.c:2871 html.c:3153
 msgid "Player"
-msgstr "LeikmaÃ°ur"
+msgstr "Leikmağur"
 
 #: analysis.c:1484
 msgid "Chequerplay statistics"
-msgstr ""
+msgstr "Töfluleikni-tölfræği"
 
 #: analysis.c:1508 html.c:2904
 msgid "Luck statistics"
-msgstr ""
+msgstr "Heppni-tölfræği"
 
 #: analysis.c:1532 html.c:2927 progress.c:197
 msgid "Cube statistics"
-msgstr ""
+msgstr "Tvöföldunar-tölfræği"
 
 #: analysis.c:1555 html.c:2950
 msgid "Overall statistics"
-msgstr ""
+msgstr "Tölfræği samantekt"
 
 #: analysis.c:1592 gtkgame.c:8238
 msgid "Statistics for all games"
-msgstr ""
+msgstr "Tölfræği fyrir öll spil"
 
 #: analysis.c:1631
 msgid "Statistics for current game"
-msgstr ""
+msgstr "Tölfræği fyrir şetta spil"
 
 #: analysis.c:1642 export.c:315 export.c:467 export.c:542 gnubg.c:4940
 #: gnubg.c:4980 html.c:3440 html.c:3635 html.c:3775 html.c:3811 latex.c:534
@@ -148,16 +147,16 @@ msgstr "Greini leik..."
 
 #: analysis.c:1664
 msgid "Sorry, cannot analyse move!"
-msgstr "AfsakiÃ°, get ekki greint leik!"
+msgstr "Afsakiğ, get ekki greint leik!"
 
 #: analysis.c:1866
 msgid "Cannot clear analysis on this move"
-msgstr "Get ekki hreinsaÃ° greiningu fyrir Ã¾ennan leik"
+msgstr "Get ekki hreinsağ greiningu fyrir şennan leik"
 
 #: bearoff.c:83 gtkexport.c:718 gtkgame.c:2840 gtkgame.c:5708 gtkgame.c:7394
 #: gtkgame.c:7807
 msgid "GNU Backgammon"
-msgstr ""
+msgstr "GNU Backgammon"
 
 #: bearoff.c:84
 msgid "ExactBearoff"
@@ -169,12 +168,12 @@ msgstr ""
 
 #: bearoff.c:86
 msgid "Unknown program"
-msgstr "Ã“Ã¾ekkt forrit"
+msgstr "Óşekkt forrit"
 
 #: bearoff.c:806
 #, c-format
 msgid "Please insert disk with file %s"
-msgstr "Vinsamlegast setjiÃ° inn disk meÃ° skrÃ¡ %s"
+msgstr "Vinsamlegast setjiğ inn disk meğ skrá %s"
 
 #: bearoff.c:1023
 #, c-format
@@ -222,7 +221,7 @@ msgstr ""
 
 #: bearoff.c:1058
 msgid "   - distributions are approximated with a normal distribution\n"
-msgstr "   - dreifingar eru nÃ¡lgaÃ°ar meÃ° normaldreifingu\n"
+msgstr "   - dreifingar eru nálgağar meğ normaldreifingu\n"
 
 #: bearoff.c:1061
 msgid "   - with heuristic moves "
@@ -273,7 +272,7 @@ msgstr ""
 
 #: bearoff.c:1115 bearoff.c:1289 bearoff.c:1324 show.c:2216
 msgid "Opponent owns cube"
-msgstr "AndstÃ¦Ã°ingur Ã¡ tvÃ¶fÃ¶ldunarteninginn"
+msgstr "Andstæğingur á tvöföldunarteninginn"
 
 #: bearoff.c:1170
 msgid "Bearing off\t\t\t\tBearing at least one chequer off\n"
@@ -507,7 +506,7 @@ msgstr ""
 
 #: dice.c:199
 msgid "You must enter two numbers between 1 and 6."
-msgstr "ÃÃº verÃ°ur aÃ° slÃ¡ inn tvÃ¦r tÃ¶lur milli 1 og 6."
+msgstr "Şú verğur ağ slá inn tvær tölur milli 1 og 6."
 
 #: dice.c:287 dice.c:299
 #, c-format
@@ -571,15 +570,15 @@ msgstr ""
 
 #: drawboard.c:70
 msgid " GNU Backgammon  Position ID: "
-msgstr ""
+msgstr " GNU Backgammon     Stöğu kt: "
 
 #: drawboard.c:91
 #, c-format
 msgid "                 Match ID   : %s\n"
-msgstr ""
+msgstr "                 Keppni kt. : %s\n"
 
 #: drawboard.c:182
-msgid "|                  |BAR|                  |     "
+msgid "|                  |SLÁ|                  |     "
 msgstr ""
 
 #: drawboard.c:315
@@ -592,29 +591,29 @@ msgid "                    Match ID   : %s\n"
 msgstr ""
 
 #: drawboard.c:421
-msgid "    |                  |BAR|                  |"
+msgid "    |                  |SLÁ|                  |"
 msgstr ""
 
 # Fuzzy
 #: drawboard.c:532
 msgid "off"
-msgstr "Ãºt"
+msgstr "út"
 
 #: drawboard.c:535
 msgid "bar"
-msgstr ""
+msgstr "slá"
 
 #: eval.c:298
 msgid "Standard backgammon"
-msgstr "HefÃ°bundiÃ° backgammon"
+msgstr "Hefğbundiğ backgammon"
 
 #: eval.c:299
 msgid "Standard backgammon with Nackgammon starting position"
-msgstr "HefÃ°bundiÃ° backgammon meÃ° Nackgammon upphafsstÃ¶Ã°u"
+msgstr "Hefğbundiğ backgammon meğ Nackgammon upphafsstöğu"
 
 #: eval.c:300
 msgid "1-chequer hypergammon"
-msgstr "1-tÃ¶flu hypergammon"
+msgstr "1-töflu hypergammon"
 
 #: eval.c:301
 msgid "2-chequer hypergammon"
@@ -643,11 +642,11 @@ msgstr "byrjandi"
 
 #: eval.c:441
 msgid "casual play"
-msgstr "frÃ­stundaspilari"
+msgstr "frístundaspilari"
 
 #: eval.c:442
 msgid "intermediate"
-msgstr "miÃ°lungsspilari"
+msgstr "miğlungsspilari"
 
 #: eval.c:443
 msgid "advanced"
@@ -659,7 +658,7 @@ msgstr ""
 
 #: eval.c:445
 msgid "world class"
-msgstr "Ã­ heimsklassa"
+msgstr "í heimsklassa"
 
 #: eval.c:446
 msgid "supremo"
@@ -667,7 +666,7 @@ msgstr ""
 
 #: eval.c:447
 msgid "grandmaster"
-msgstr ""
+msgstr "stórmeistari"
 
 #: eval.c:478
 msgid "Tiny"
@@ -728,7 +727,7 @@ msgstr "Sigrar "
 # Fuzzy
 #: eval.c:3696
 msgid "Loss "
-msgstr "TÃ¶p "
+msgstr "Töp "
 
 #: eval.c:3700
 msgid "(backgammon)\n"
@@ -740,7 +739,7 @@ msgstr ""
 
 #: eval.c:3705
 msgid "(single)\n"
-msgstr ""
+msgstr "(stök)\n"
 
 #: eval.c:3920
 msgid "OVER"
@@ -805,7 +804,7 @@ msgstr ""
 #: eval.c:3955 gtkchequer.c:836 gtkcube.c:66 gtkrace.c:543 html.c:327
 #: progress.c:687
 msgid "Win"
-msgstr ""
+msgstr "Vinnur"
 
 #: eval.c:3955 gtkcube.c:66
 msgid "W(g)"
@@ -1224,8 +1223,9 @@ msgid "Error rate (per move)"
 msgstr ""
 
 #: formatgs.c:207
+#Fuzzy
 msgid "Chequerplay rating"
-msgstr "TÃ¶fluleikni einkunn"
+msgstr "Töfluleikni"
 
 #: formatgs.c:225
 msgid "Total cube decisions"
@@ -1644,7 +1644,7 @@ msgstr ""
 # Fuzzy
 #: gnubg.c:561
 msgid "Clear analysis for this game"
-msgstr "Hreinsa greiningu fyrir Ã¾etta spil"
+msgstr "Hreinsa greiningu fyrir şetta spil"
 
 # Fuzzy
 #: gnubg.c:563
@@ -1659,7 +1659,7 @@ msgstr "Hreinsa greiningu fyrir alla lotuna"
 # Fuzzy
 #: gnubg.c:567
 msgid "Clear analysis for this move"
-msgstr "Hreinsa greiningu fyrir Ã¾ennan leik"
+msgstr "Hreinsa greiningu fyrir şennan leik"
 
 # Fuzzy
 #: gnubg.c:571
@@ -1808,27 +1808,27 @@ msgstr ""
 
 #: gnubg.c:663
 msgid "Records a log of the game in .gam format"
-msgstr "SkrÃ¡setur spiliÃ° Ã¡ .gam sniÃ°i"
+msgstr "Skrásetur spiliğ á .gam sniği"
 
 #: gnubg.c:666
 msgid "Records a log of the game in .html format"
-msgstr "SkrÃ¡setur spiliÃ° Ã¡ .html sniÃ°i"
+msgstr "Skrásetur spiliğ á .html sniği"
 
 #: gnubg.c:668
 msgid "Records a log of the game in LaTeX format"
-msgstr "SkrÃ¡setur spiliÃ° Ã¡ LaTeX sniÃ°i"
+msgstr "Skrásetur spiliğ á LaTeX sniği"
 
 #: gnubg.c:670
 msgid "Records a log of the game in the Portable Document Format"
-msgstr "SkrÃ¡setur spiliÃ° Ã¡ PDF sniÃ°i"
+msgstr "Skrásetur spiliğ á PDF sniği"
 
 #: gnubg.c:673
 msgid "Records a log of the game in PostScript format"
-msgstr "SkrÃ¡setur spiliÃ° Ã¡ PostScript sniÃ°i"
+msgstr "Skrásetur spiliğ á PostScript sniği"
 
 #: gnubg.c:676
 msgid "Export a log of the game in text format"
-msgstr "SkrÃ¡setur spiliÃ° Ã¡ textasniÃ°i"
+msgstr "Flytja út skrá yfir spiliğ á textasniği"
 
 #: gnubg.c:681
 msgid ""
@@ -1837,117 +1837,117 @@ msgstr ""
 
 #: gnubg.c:683
 msgid "Records a log of the match in .mat format"
-msgstr "SkrÃ¡setur keppnina Ã¡ .mat sniÃ°i"
+msgstr "Skrásetur keppnina á .mat sniği"
 
 #: gnubg.c:686
 msgid "Records a log of the match in .html format"
-msgstr "SkrÃ¡setur keppnina Ã¡ .html sniÃ°i"
+msgstr "Skrásetur keppnina á .html sniği"
 
 #: gnubg.c:689
 msgid "Records a log of the match in LaTeX format"
-msgstr "SkrÃ¡setur keppnina Ã¡ LaTeX sniÃ°i"
+msgstr "Skrásetur keppnina á LaTeX sniği"
 
 #: gnubg.c:691
 msgid "Records a log of the match in the Portable Document Format"
-msgstr "SkrÃ¡setur keppnina Ã¡ PDF sniÃ°i"
+msgstr "Skrásetur keppnina á PDF sniği"
 
 #: gnubg.c:694
 msgid "Records a log of the match in PostScript format"
-msgstr "SkrÃ¡setur keppnina Ã¡ PostScript sniÃ°i"
+msgstr "Skrásetur keppnina á PostScript sniği"
 
 #: gnubg.c:698
 msgid "Records a log of the match in text format"
-msgstr "SkrÃ¡setur keppnina Ã¡ textasniÃ°i"
+msgstr "Skrásetur keppnina á textasniği"
 
 # Fuzzy
 #: gnubg.c:703
 msgid "Save the current position in .html format (special for GammOnLine)"
-msgstr "Vista nÃºverandi stÃ¶Ã°u Ã¡ .html sniÃ°i (GammOnLine)"
+msgstr "Vista núverandi stöğu á .html sniği (GammOnLine)"
 
 # Fuzzy
 #: gnubg.c:707
 msgid ""
 "Copy the current position in .html format to clipboard(special for "
 "GammOnLine)"
-msgstr "Afrita nÃºverandi stÃ¶Ã°u Ã¡ .html sniÃ°i Ã¡ klippiborÃ° (GammOnLine)"
+msgstr "Afrita núverandi stöğu á .html sniği á klippiborğ (GammOnLine)"
 
 #: gnubg.c:710
 msgid "Save the current position in Encapsulated PostScript format"
-msgstr "Vista nÃºverandi stÃ¶Ã°u Ã¡ Encapsulated Postscript sniÃ°i"
+msgstr "Vista núverandi stöğu á Encapsulated Postscript sniği"
 
 #: gnubg.c:713
 msgid "Save the current position in .html format"
-msgstr "Vista nÃºverandi stÃ¶Ã°u Ã¡ .html sniÃ°i"
+msgstr "Vista núverandi stöğu á .html sniği"
 
 #: gnubg.c:716
 msgid "Save the current position in Portable Network Graphics (PNG) format"
-msgstr "Vista nÃºverandi stÃ¶Ã°u Ã¡ PNG sniÃ°i"
+msgstr "Vista núverandi stöğu á PNG sniği"
 
 #: gnubg.c:719
 msgid "Save the current position in .pos format"
-msgstr "Vista nÃºverandi stÃ¶Ã°u Ã¡ .pos sniÃ°i"
+msgstr "Vista núverandi stöğu á .pos sniği"
 
 #: gnubg.c:722
 msgid "Save the current position in Snowie .txt format"
-msgstr "Vista nÃºverandi stÃ¶Ã°u Ã¡ Snowie .txt sniÃ°i"
+msgstr "Vista núverandi stöğu á Snowie .txt sniği"
 
 #: gnubg.c:725
 msgid "Save the current position in text format"
-msgstr "Vista nÃºverandi stÃ¶Ã°u Ã¡ textasniÃ°i"
+msgstr "Vista núverandi stöğu á textasniği"
 
 #: gnubg.c:730
 msgid "Records a log of the session in .html format"
-msgstr "SkrÃ¡setur lotuna Ã¡ .html sniÃ°i"
+msgstr "Skrásetur lotuna á .html sniği"
 
 #: gnubg.c:732
 msgid "Records a log of the session in LaTeX format"
-msgstr "SkrÃ¡setur lotuna Ã¡ LaTeX sniÃ°i"
+msgstr "Skrásetur lotuna á LaTeX sniği"
 
 #: gnubg.c:734
 msgid "Records a log of the session in the Portable Document Format"
-msgstr "SkrÃ¡setur lotuna Ã¡ Ã¡ PDF sniÃ°i"
+msgstr "Skrásetur lotuna á á PDF sniği"
 
 #: gnubg.c:736
 msgid "Records a log of the session in PostScript format"
-msgstr "SkrÃ¡setur lotuna Ã¡ PostScript sniÃ°i"
+msgstr "Skrásetur lotuna á PostScript sniği"
 
 #: gnubg.c:740
 msgid "Records a log of the session in text format"
-msgstr "SkrÃ¡setur lotuna Ã¡ textasniÃ°i"
+msgstr "Skrásetur lotuna á textasniği"
 
 #: gnubg.c:747 gnubg.c:836
 msgid "Record a log of the game so far to a file"
-msgstr "SkrÃ¡setja spiliÃ° fram aÃ° Ã¾essu Ã­ skrÃ¡"
+msgstr "Skrásetja spiliğ fram ağ şessu í skrá"
 
 # Fuzzy
 #: gnubg.c:749
 msgid "Generate images to be used by the HTML export commands"
-msgstr "BÃºa til myndir sem notaÃ°ar eru af HTML Ãºtflutningsskipunum"
+msgstr "Búa til myndir sem notağar eru af HTML útflutningsskipunum"
 
 #: gnubg.c:751 gnubg.c:839
 msgid "Record a log of the match so far to a file"
-msgstr "SkrÃ¡setja keppnina fram aÃ° Ã¾essu Ã­ skrÃ¡"
+msgstr "Skrásetja keppnina fram ağ şessu í skrá"
 
 #: gnubg.c:753
 msgid "Write the current position to a file"
-msgstr "Skrifa nÃºverandi stÃ¶Ã°u Ã­ skrÃ¡"
+msgstr "Skrifa núverandi stöğu í skrá"
 
 #: gnubg.c:755
 msgid "Record a log of the session so far to a file"
-msgstr "SkrÃ¡setja lotuna fram aÃ° Ã¾essu Ã­ skrÃ¡"
+msgstr "Skrásetja lotuna fram ağ şessu í skrá"
 
 #: gnubg.c:760
 msgid "Goto first game of the match or session"
-msgstr "Fara aÃ° fyrsta spili keppninnar eÃ°a lotunnar"
+msgstr "Fara ağ fyrsta spili keppninnar eğa lotunnar"
 
 #: gnubg.c:762
 #, fuzzy
 msgid "Goto first move of the current game"
-msgstr "Fara aÃ° fyrsta spili keppninnar eÃ°a lotunnar"
+msgstr "Fara ağ fyrsta spili keppninnar eğa lotunnar"
 
 #: gnubg.c:765
 msgid "Import from Hans Berliner's BKG format"
-msgstr "Flytja inn Ãºr BKG sniÃ°i Hans Berliner"
+msgstr "Flytja inn úr BKG sniği Hans Berliner"
 
 #: gnubg.c:770
 msgid "Import a Jellyfish match"
@@ -1955,11 +1955,11 @@ msgstr "Flytja inn Jellyfish keppni"
 
 #: gnubg.c:772
 msgid "Import a FIBS oldmoves file"
-msgstr "Flytja inn FIBS oldmoves skrÃ¡"
+msgstr "Flytja inn FIBS oldmoves skrá"
 
 #: gnubg.c:775
 msgid "Import a Jellyfish position file"
-msgstr "Flytja inn Jellyfish stÃ¶Ã°uskrÃ¡"
+msgstr "Flytja inn Jellyfish stöğuskrá"
 
 #: gnubg.c:778
 msgid "Import an SGG match"
@@ -1975,15 +1975,15 @@ msgstr "Flytja inn TMG keppni"
 
 #: gnubg.c:785
 msgid "Show the moves made in this game"
-msgstr "SÃ½na leiki Ã¾essa spils"
+msgstr "Sına leiki şessa spils"
 
 #: gnubg.c:788
 msgid "Show the games played in this match"
-msgstr "SÃ½na spil Ã¾essarar keppni"
+msgstr "Sına spil şessarar keppni"
 
 #: gnubg.c:790
 msgid "Show the games played in this session"
-msgstr "SÃ½na spil Ã¾essarar lotu"
+msgstr "Sına spil şessarar lotu"
 
 #: gnubg.c:794
 msgid "Read commands from a script file"
@@ -1991,36 +1991,36 @@ msgstr ""
 
 #: gnubg.c:796
 msgid "Read a saved game from a file"
-msgstr "Lesa vistaÃ° spil Ãºr skrÃ¡"
+msgstr "Lesa vistağ spil úr skrá"
 
 #: gnubg.c:799
 msgid "Read a saved match from a file"
-msgstr "Lesa vistaÃ°a keppni Ãºr skrÃ¡"
+msgstr "Lesa vistağa keppni úr skrá"
 
 #: gnubg.c:802
 msgid "Read a saved position from a file"
-msgstr "Lesa vistaÃ°a stÃ¶Ã°u Ãºr skrÃ¡"
+msgstr "Lesa vistağa stöğu úr skrá"
 
 #: gnubg.c:804
 msgid "Read neural net weights from a file"
-msgstr "Lesa vogtÃ¶lur tauganets Ãºr skrÃ¡"
+msgstr "Lesa vogtölur tauganets úr skrá"
 
 #: gnubg.c:809
 msgid "Start a new game within the current match or session"
-msgstr "Hefja nÃ½tt spil Ã­ nÃºverandi keppni eÃ°a lotu"
+msgstr "Hefja nıtt spil í núverandi keppni eğa lotu"
 
 #: gnubg.c:811
 msgid "Play a new match to some number of points"
-msgstr "Spila nÃ½ja keppni aÃ° einhverjum fjÃ¶lda stiga"
+msgstr "Spila nıja keppni ağ einhverjum fjölda stiga"
 
 #: gnubg.c:812
 msgid "Start a new (money) session"
-msgstr "Hefja nÃ½ja (peninga) lotu"
+msgstr "Hefja nıja (peninga) lotu"
 
 # Fuzzy
 #: gnubg.c:814
 msgid "Create new (random) neural net weights"
-msgstr "BÃºa til nÃ½jar (slembi) vogtÃ¶lur tauganets"
+msgstr "Búa til nıjar (slembi) vogtölur tauganets"
 
 #: gnubg.c:819
 msgid "Log the game statistics to the player records"
@@ -2048,23 +2048,23 @@ msgstr ""
 
 #: gnubg.c:832 gnubg.c:1833
 msgid "View the player records"
-msgstr "SkoÃ°a leikskrÃ¡r"
+msgstr "Skoğa leikskrár"
 
 #: gnubg.c:841
 msgid "Record the current board position to a file"
-msgstr "SkrÃ¡ nÃºverandi uppstillingu Ã­ skrÃ¡"
+msgstr "Skrá núverandi uppstillingu í skrá"
 
 #: gnubg.c:843
 msgid "Use the current settings in future sessions"
-msgstr "Nota nÃºverandi stililngar Ã­ nÃ¦stu lotum"
+msgstr "Nota núverandi stililngar í næstu lotum"
 
 #: gnubg.c:846
 msgid "Write the neural net weights to a file"
-msgstr "Skrifa vogtolur tauganets Ã­ skrÃ¡"
+msgstr "Skrifa vogtolur tauganets í skrá"
 
 #: gnubg.c:851
 msgid "Specify if this player is to be analysed"
-msgstr "Tilgreina ef Ã¡ aÃ° greina Ã¾ennan leikmann"
+msgstr "Tilgreina ef á ağ greina şennan leikmann"
 
 #: gnubg.c:855
 msgid "Specify the equity loss for a bad move"
@@ -2944,7 +2944,7 @@ msgstr ""
 
 #: gnubg.c:1529 gtkgame.c:2064 gtkgame.c:9462 gtktoolbar.c:503 sound.c:88
 msgid "Resign"
-msgstr "UppgjÃ¶f"
+msgstr "Uppgjöf"
 
 #: gnubg.c:1531 gtkrolls.c:223 sound.c:89
 msgid "Roll"
@@ -2961,15 +2961,15 @@ msgstr ""
 
 #: gnubg.c:1539
 msgid "Set sound files"
-msgstr "Stilla hljÃ³Ã°skrÃ¡r"
+msgstr "Stilla hljóğskrár"
 
 #: gnubg.c:1541
 msgid "Select whether sounds should be played or not"
-msgstr "Velja hvort spila eigi hljÃ³Ã° eÃ°a ekki"
+msgstr "Velja hvort spila eigi hljóğ eğa ekki"
 
 #: gnubg.c:1543
 msgid "Select sound system"
-msgstr "Velja hljÃ³Ã°kerfi"
+msgstr "Velja hljóğkerfi"
 
 #: gnubg.c:1547
 msgid "Warn about `doubtful' play"
@@ -3557,7 +3557,7 @@ msgstr ""
 #: gnubg.c:1875
 #, fuzzy
 msgid "Show warning settings"
-msgstr "SÃ½na hjarir"
+msgstr "Sına hjarir"
 
 #: gnubg.c:1878
 msgid "Various kinds of warranty you do not have"
@@ -3565,7 +3565,7 @@ msgstr ""
 
 #: gnubg.c:1881 gnubg.c:1967
 msgid "Swap players"
-msgstr "Vixla leikmÃ¶nnum"
+msgstr "Vixla leikmönnum"
 
 #: gnubg.c:1886
 msgid "Train the network by TD(0) zero-knowledge self-play"
@@ -3609,7 +3609,7 @@ msgstr ""
 
 #: gnubg.c:1910
 msgid "Decline a resignation"
-msgstr ""
+msgstr "Hafna uppgjöf"
 
 #: gnubg.c:1911
 msgid "Generate a list of rolls"
@@ -3617,7 +3617,7 @@ msgstr ""
 
 #: gnubg.c:1913
 msgid "Offer a double"
-msgstr ""
+msgstr "Bjóğa tvöföldun"
 
 #: gnubg.c:1914
 msgid "Decline an offered double"
@@ -3681,7 +3681,7 @@ msgstr ""
 
 #: gnubg.c:1943
 msgid "Start a new game, match or session"
-msgstr "Hefja nÃ½tt spil, keppni eÃ°a lotu"
+msgstr "Hefja nıtt spil, keppni eğa lotu"
 
 #: gnubg.c:1944
 msgid "Step ahead within the game"
@@ -3717,7 +3717,7 @@ msgstr ""
 
 #: gnubg.c:1960
 msgid "Roll the dice"
-msgstr ""
+msgstr "Kasta teningunum"
 
 #: gnubg.c:1962
 msgid "Have gnubg perform rollouts of a position"
@@ -3749,11 +3749,11 @@ msgstr ""
 
 #: gnubg.c:1984
 msgid "Guile supported."
-msgstr ""
+msgstr "Guile stutt."
 
 #: gnubg.c:1987
 msgid "Python supported."
-msgstr ""
+msgstr "Phyton stutt."
 
 #: gnubg.c:1990
 msgid "Position databases supported."
@@ -3761,7 +3761,7 @@ msgstr ""
 
 #: gnubg.c:1993
 msgid "Window system supported."
-msgstr ""
+msgstr "Gluggakerfi stutt"
 
 #: gnubg.c:1996
 msgid "External players supported."
@@ -3777,11 +3777,11 @@ msgstr ""
 
 #: gnubg.c:2005
 msgid "Sound systems supported."
-msgstr "Studd hljÃ³Ã°kerfi"
+msgstr "Studd hljóğkerfi"
 
 #: gnubg.c:2007
 msgid "  ArtsC sound system"
-msgstr "  ArtsC hljÃ³Ã°kerfi"
+msgstr "  ArtsC hljóğkerfi"
 
 #: gnubg.c:2009
 msgid "  External commands"
@@ -3789,11 +3789,11 @@ msgstr ""
 
 #: gnubg.c:2011
 msgid "  ESD sound system"
-msgstr "  ESD hljÃ³Ã°kerfi"
+msgstr "  ESD hljóğkerfi"
 
 #: gnubg.c:2014
 msgid "  NAS sound system"
-msgstr "  NAS hljÃ³Ã°kerfi"
+msgstr "  NAS hljóğkerfi"
 
 #: gnubg.c:2016
 msgid "  /dev/dsp"
@@ -3801,7 +3801,7 @@ msgstr ""
 
 #: gnubg.c:2018
 msgid "  MS Windows sound system"
-msgstr "  MS Windows hljÃ³Ã°kerfi"
+msgstr "  MS Windows hljóğkerfi"
 
 #: gnubg.c:2274
 msgid "Current position"
@@ -3869,16 +3869,16 @@ msgstr ""
 #: text.c:94 text.c:485
 #, c-format
 msgid "Rolled %d%d"
-msgstr "KastaÃ°i %d%d"
+msgstr "Kastaği %d%d"
 
 #: gnubg.c:2934
 #, c-format
 msgid "Rolled %d%d (%s):\n"
-msgstr "KastaÃ°i %d%d (%s):\n"
+msgstr "Kastaği %d%d (%s):\n"
 
 #: gnubg.c:3007 gnubg.c:4125
 msgid "No game in progress."
-msgstr "Ekkert spil Ã­ gangi"
+msgstr "Ekkert spil í gangi"
 
 #: gnubg.c:3035 gnubg.c:3040 gnubg.c:4764 gnubg.c:4769 text.c:71 text.c:76
 #, c-format
@@ -3920,9 +3920,10 @@ msgid "%d point match"
 msgstr "%d stiga keppni"
 
 #: gnubg.c:3099 text.c:136
+#Fuzzy
 #, c-format
 msgid ", resigns %s"
-msgstr ""
+msgstr ", gefur %s"
 
 # Fuzzy
 #: gnubg.c:3152
@@ -3936,16 +3937,16 @@ msgstr "Ekkert spil"
 
 #: gnubg.c:3203 gnubg.c:3226
 msgid "Game over"
-msgstr "Spili lokiÃ°"
+msgstr "Spili lokiğ"
 
 #: gnubg.c:3278 gnubg.c:4096 show.c:479 show.c:514 show.c:814 show.c:959
 #: show.c:990 show.c:1137 show.c:1199
 msgid "No position specified and no game in progress."
-msgstr "Engin staÃ°a tilgreind og ekkert spil Ã­ gangi."
+msgstr "Engin stağa tilgreind og ekkert spil í gangi."
 
 #: gnubg.c:3296
 msgid "Evaluating position..."
-msgstr "Met stÃ¶Ã°u..."
+msgstr "Met stöğu..."
 
 #: gnubg.c:3389
 #, c-format
@@ -3966,11 +3967,11 @@ msgstr ""
 
 #: gnubg.c:3423
 msgid "Available commands:"
-msgstr "TiltÃ¦kar skipanir:"
+msgstr "Tiltækar skipanir:"
 
 #: gnubg.c:3424
 msgid "Available subcommands:"
-msgstr "TiltÃ¦kar undirskipanir:"
+msgstr "Tiltækar undirskipanir:"
 
 #: gnubg.c:3465
 msgid "Eq."
@@ -4039,7 +4040,7 @@ msgstr ""
 # Fuzzy
 #: gnubg.c:3766 gnubg.c:3781 gtkgame.c:2080 gtktoolbar.c:485
 msgid "Accept"
-msgstr "Ãiggja"
+msgstr "Şiggja"
 
 # Fuzzy
 #: gnubg.c:3766 gnubg.c:3781
@@ -4098,24 +4099,24 @@ msgstr ""
 
 #: gnubg.c:3881 play.c:1354 play.c:2889
 msgid "Considering move..."
-msgstr "HugleiÃ°i leik..."
+msgstr "Hugleiği leik..."
 
 #: gnubg.c:3903
 msgid "There are no legal moves."
-msgstr "ÃaÃ° eru engir lÃ¶glegir leikir mÃ¶gulegir."
+msgstr "Şağ eru engir löglegir leikir mögulegir."
 
 #: gnubg.c:3926
 msgid "You must set up a board first."
-msgstr "ÃÃº verÃ°ur aÃ° stilla upp fyrst."
+msgstr "Şú verğur ağ stilla upp fyrst."
 
 #: gnubg.c:3996
 msgid "Are you sure you want to exit and abort the game in progress? "
 msgstr ""
-"Ertu viss um aÃ° Ã¾Ãº viljir hÃ¦tta og stÃ¶Ã°va leikinn Ã¡Ã°ur en honum er lokiÃ°"
+"Ertu viss um ağ şú viljir hætta og stöğva leikinn áğur en honum er lokiğ"
 
 #: gnubg.c:4047
 msgid "That command is not yet implemented."
-msgstr "Ãessi skipun er ekki enn framkvÃ¦manleg"
+msgstr "Şessi skipun er ekki enn framkvæmanleg"
 
 #: gnubg.c:4103
 msgid "=cube"
@@ -4217,7 +4218,7 @@ msgstr ""
 #: gnubg.c:5668
 #, c-format
 msgid "Settings saved to %s.\n"
-msgstr "Stillingar vistaÃ°ar Ã­ %s.\n"
+msgstr "Stillingar vistağar í %s.\n"
 
 #: gnubg.c:5669
 msgid "standard output stream"
@@ -4332,7 +4333,7 @@ msgstr ""
 #: gnubg.c:7470
 #Fuzzy
 msgid "match equity table"
-msgstr "match equity tÃ¶flu"
+msgstr "match equity töflu"
 
 #: gnubg.c:7477
 msgid "neural nets"
@@ -4348,7 +4349,7 @@ msgstr ""
 
 #: gnubg.c:7515
 msgid "Windows sockets"
-msgstr "Windows sÃ¶kkla"
+msgstr "Windows sökkla"
 
 #: gnubg.c:7534
 msgid "Guile"
@@ -4360,11 +4361,11 @@ msgstr ""
 
 #: gnubg.c:7550
 msgid "Board Images"
-msgstr "Myndir af borÃ°um"
+msgstr "Myndir af borğum"
 
 #: gnubg.c:7629 gnubg.c:7664
 msgid "Loading"
-msgstr "HleÃ° inn"
+msgstr "Hleğ inn"
 
 #: gnubg.c:7629
 msgid "User Settings"
@@ -4372,15 +4373,15 @@ msgstr "Notendastillingar"
 
 #: gnubg.c:7644
 msgid "Doing"
-msgstr "FramkvÃ¦mi"
+msgstr "Geri"
 
 #: gnubg.c:7644
 msgid "nothing in particular"
-msgstr "ekkert sÃ©rstakt"
+msgstr "ekkert sérstakt"
 
 #: gnubg.c:7664
 msgid "Specified Match"
-msgstr ""
+msgstr "Tilgreinda Keppni"
 
 #: gnubg.c:7738
 msgid "Could not open X display.  Continuing on TTY.\n"
@@ -4407,7 +4408,7 @@ msgstr ""
 #: gnubg.c:8072
 #, c-format
 msgid "File \"%s\" exists. Overwrite? "
-msgstr "SkrÃ¡in \"%s\" er til.  Skrifa yfir?"
+msgstr "Skráin \"%s\" er til.  Skrifa yfir?"
 
 #: gnubg.c:8207
 msgid "%Y-%m-%d-%H%M"
@@ -4415,15 +4416,15 @@ msgstr ""
 
 #: gnubg.c:8353
 msgid "You may be about to make a very bad play. Are you sure? "
-msgstr "ÃÃº ert e.t.v. aÃ° fara aÃ° leika illa af Ã¾Ã©r.  Ertu viss?"
+msgstr "Şú ert e.t.v. ağ fara ağ leika illa af şér.  Ertu viss?"
 
 #: gnubg.c:8357
 msgid "You may be about to make a bad play. Are you sure? "
-msgstr "ÃÃº ert e.t.v. aÃ° fara aÃ° leika af Ã¾Ã©r.  Ertu viss?"
+msgstr "Şú ert e.t.v. ağ fara ağ leika af şér.  Ertu viss?"
 
 #: gnubg.c:8361
 msgid "You may be about to make a doubtful play. Are you sure? "
-msgstr "ÃÃº ert e.t.v. aÃ° fara aÃ° leika vafasaman leik.  Ertu viss?"
+msgstr "Şú ert e.t.v. ağ fara ağ leika vafasaman leik.  Ertu viss?"
 
 #: gnubgmodule.c:177
 msgid "invalid dict value in cubeinfo (see gnubg.setcubeinfo() for an example)"
@@ -4472,7 +4473,7 @@ msgstr ""
 
 #: gtkbearoff.c:214 play.c:2794
 msgid "Rolled"
-msgstr "KastaÃ°"
+msgstr "Kastağ"
 
 #: gtkbearoff.c:283
 msgid "Bearoff Databases"
@@ -4493,7 +4494,7 @@ msgstr ""
 #: gtkboard.c:534
 #, c-format
 msgid "(no hit: %d rolls)"
-msgstr "(hittir ekki: %d kÃ¶st)"
+msgstr "(hittir ekki: %d köst)"
 
 #: gtkboard.c:615
 msgid "Illegal move"
@@ -4512,7 +4513,7 @@ msgstr "Gefin skot: %s\n"
 # Fuzzy
 #: gtkboard.c:2352
 msgid "unlimited"
-msgstr "Ã³takmÃ¶rkuÃ°"
+msgstr "ótakmörkuğ"
 
 #: gtkboard.c:3436
 #, c-format
@@ -4522,7 +4523,7 @@ msgstr ""
 # Fuzzy
 #: gtkboard.c:3510
 msgid "Position ID: "
-msgstr "StÃ¶Ã°u kt:"
+msgstr "Stöğu kt:"
 
 # Fuzzy
 #: gtkboard.c:3519
@@ -4736,7 +4737,7 @@ msgstr ""
 
 #: gtkexport.c:49 html.c:3079 postscript.c:891
 msgid "Match Information"
-msgstr "UpplÃ½singar um keppni"
+msgstr "Upplısingar um keppni"
 
 #: gtkexport.c:54
 msgid "Show for moves marked 'very bad'"
@@ -4789,7 +4790,7 @@ msgstr ""
 
 #: gtkexport.c:482
 msgid "GNU Backgammon - Export Settings"
-msgstr "GNU Backgammon - Ãštflutningsstillingar"
+msgstr "GNU Backgammon - Útflutningsstillingar"
 
 #: gtkexport.c:491
 msgid "Include"
@@ -4798,12 +4799,12 @@ msgstr "Innihald"
 #: gtkexport.c:514 gtkexport.c:529 gtkgame.c:3003 gtkprefs.c:2626
 #: gtkprefs.c:2643
 msgid "Board"
-msgstr "BorÃ°"
+msgstr "Borğ"
 
 # Fuzzy
 #: gtkexport.c:547
 msgid "move(s) between board shown"
-msgstr "leikir milli borÃ°a sem sÃ½nd eru"
+msgstr "leikir milli borğa sem sınd eru"
 
 #: gtkexport.c:559
 msgid "Players"
@@ -4812,11 +4813,11 @@ msgstr "Leikmenn"
 # Fuzzy
 #: gtkexport.c:584
 msgid "Output move analysis"
-msgstr "Ãšttak greiningar Ã¡ leikjum"
+msgstr "Úttak greiningar á leikjum"
 
 #: gtkexport.c:600
 msgid "Show at most"
-msgstr "SÃ½na mest"
+msgstr "Sına mest"
 
 #: gtkexport.c:612
 msgid "move(s)"
@@ -4824,12 +4825,12 @@ msgstr "leik(i)"
 
 #: gtkexport.c:618 gtkexport.c:658
 msgid "Show detailed probabilities"
-msgstr "SÃ½na nÃ¡kvÃ¦mar lÃ­kur"
+msgstr "Sına nákvæmar líkur"
 
 # Fuzzy
 #: gtkexport.c:624 gtkexport.c:664
 msgid "Show evaluation parameters"
-msgstr "SÃ½na parametra mats"
+msgstr "Sına parametra mats"
 
 #: gtkexport.c:629 gtkexport.c:670
 msgid "Show rollout parameters"
@@ -4841,7 +4842,7 @@ msgstr ""
 
 #: gtkexport.c:686
 msgid "HTML export options"
-msgstr "HTML Ãºtflutningsstillingar"
+msgstr "HTML útflutningsstillingar"
 
 #: gtkexport.c:701
 msgid "URL to pictures"
@@ -4877,11 +4878,11 @@ msgstr ""
 
 #: gtkexport.c:760
 msgid "PNG export options"
-msgstr "PNG Ãºtflutningsstillingar"
+msgstr "PNG útflutningsstillingar"
 
 #: gtkexport.c:778
 msgid "Size of PNG images:"
-msgstr "StÃ¦rÃ° PNG mynda:"
+msgstr "Stærğ PNG mynda:"
 
 #: gtkgame.c:137
 msgid "Press escape to exit full screen mode"
@@ -4974,7 +4975,7 @@ msgstr ""
 
 #: gtkgame.c:1443
 msgid " Resigns"
-msgstr ""
+msgstr " Gefst upp"
 
 #: gtkgame.c:1608
 msgid "Equity before resignation: "
@@ -4990,17 +4991,17 @@ msgstr ""
 
 #: gtkgame.c:1824 gtkgame.c:1833
 msgid "Didn't double"
-msgstr "TvÃ¶faldaÃ°i ekki"
+msgstr "Tvöfaldaği ekki"
 
 #: gtkgame.c:1897 gtkgame.c:1898 gtkgame.c:1903 gtkgame.c:1904
 msgid "Moved "
-msgstr "LÃ©k "
+msgstr "Lék "
 
 # Fuzzy
 #: gtkgame.c:1951 gtkgame.c:5611 gtkgame.c:5713 gtkgame.c:5959 gtkgame.c:6056
 #: gtkgame.c:6374 gtkgame.c:8551 gtkoptions.c:454
 msgid "Chequer play"
-msgstr "TÃ¶fluleikni"
+msgstr "Töfluleikni"
 
 #: gtkgame.c:1955 html.c:2119
 msgid "Cube decision"
@@ -5012,7 +5013,7 @@ msgstr ""
 
 #: gtkgame.c:2106
 msgid "No analysis available."
-msgstr "Engin greining tiltÃ¦k"
+msgstr "Engin greining tiltæk"
 
 #: gtkgame.c:2243 gtkgame.c:8364
 #, c-format
@@ -5021,11 +5022,11 @@ msgstr "Spil %d: %s %d, %s %d"
 
 #: gtkgame.c:2472
 msgid "/_File"
-msgstr "/_SkrÃ¡"
+msgstr "/_Skrá"
 
 #: gtkgame.c:2473
 msgid "/_File/_New"
-msgstr "/S_krÃ¡/_NÃ½tt"
+msgstr "/S_krá/_Nıtt"
 
 #: gtkgame.c:2475
 msgid "/_File/_New/_Game"
@@ -5045,63 +5046,63 @@ msgstr ""
 
 #: gtkgame.c:2480
 msgid "/_File/_Open"
-msgstr "/S_krÃ¡/_Opna"
+msgstr "/S_krá/_Opna"
 
 #: gtkgame.c:2481
 msgid "/_File/_Open/_Commands..."
-msgstr "/S_krÃ¡/_Opna/S_kipanir..."
+msgstr "/S_krá/_Opna/S_kipanir..."
 
 #: gtkgame.c:2482
 msgid "/_File/_Open/_Game..."
-msgstr "/S_krÃ¡/_Opna/S_pil..."
+msgstr "/S_krá/_Opna/S_pil..."
 
 #: gtkgame.c:2483
 msgid "/_File/_Open/_Match or session..."
-msgstr "/S_krÃ¡/_Opna/_Keppni eÃ°a lotu..."
+msgstr "/S_krá/_Opna/_Keppni eğa lotu..."
 
 #: gtkgame.c:2485
 msgid "/_File/_Open/_Position..."
-msgstr "/S_krÃ¡/_Opna/_StÃ¶Ã°u..."
+msgstr "/S_krá/_Opna/_Stöğu..."
 
 #: gtkgame.c:2486
 msgid "/_File/_Save"
-msgstr "/S_krÃ¡/_Vista"
+msgstr "/S_krá/_Vista"
 
 #: gtkgame.c:2487
 msgid "/_File/_Save/_Game..."
-msgstr "/S_krÃ¡/_Vista/_Leik..."
+msgstr "/S_krá/_Vista/_Leik..."
 
 #: gtkgame.c:2488
 msgid "/_File/_Save/_Match or session..."
-msgstr "/S_krÃ¡/_Vista/_Keppni eÃ°a lotu..."
+msgstr "/S_krá/_Vista/_Keppni eğa lotu..."
 
 #: gtkgame.c:2490
 msgid "/_File/_Save/_Position..."
-msgstr "/S_krÃ¡/_Vista/_StÃ¶Ã°u"
+msgstr "/S_krá/_Vista/_Stöğu"
 
 #: gtkgame.c:2491
 msgid "/_File/_Save/_Weights..."
-msgstr "/S_krÃ¡/_Vista/_VogtÃ¶lur..."
+msgstr "/S_krá/_Vista/_Vogtölur..."
 
 #: gtkgame.c:2492 gtkgame.c:2557
 msgid "/_File/-"
-msgstr "/S_krÃ¡/-"
+msgstr "/S_krá/-"
 
 #: gtkgame.c:2493
 msgid "/_File/_Import"
-msgstr "/S_krÃ¡/_Flytja inn"
+msgstr "/S_krá/_Flytja inn"
 
 #: gtkgame.c:2494
 msgid "/_File/_Import/BKG session..."
-msgstr "/S_krÃ¡/_Flytja inn/BKG lotu..."
+msgstr "/S_krá/_Flytja inn/BKG lotu..."
 
 #: gtkgame.c:2495
 msgid "/_File/_Import/._mat match..."
-msgstr "/S_krÃ¡/_Flytja inn/._mat keppni..."
+msgstr "/S_krá/_Flytja inn/._mat keppni..."
 
 #: gtkgame.c:2496
 msgid "/_File/_Import/._pos position..."
-msgstr "/S_krÃ¡/_Flytja inn/._pos stÃ¶Ã°u..."
+msgstr "/S_krá/_Flytja inn/._pos stöğu..."
 
 #: gtkgame.c:2497
 msgid "/_File/_Import/FIBS _oldmoves..."
@@ -5109,27 +5110,27 @@ msgstr ""
 
 #: gtkgame.c:2499
 msgid "/_File/_Import/._GamesGrid .sgg match..."
-msgstr "/S_krÃ¡/_Flytja inn/._GamesGrid .sgg keppni..."
+msgstr "/S_krá/_Flytja inn/._GamesGrid .sgg keppni..."
 
 #: gtkgame.c:2501
 msgid "/_File/_Import/._TrueMoneyGames .tmg match..."
-msgstr "/S_krÃ¡/_Flytja inn/._TrueMoneyGames .tmg keppni..."
+msgstr "/S_krá/_Flytja inn/._TrueMoneyGames .tmg keppni..."
 
 #: gtkgame.c:2503
 msgid "/_File/_Import/._Snowie standard text format..."
-msgstr "/S_krÃ¡/_Flytja inn/._Snowie staÃ°laÃ° textasniÃ°..."
+msgstr "/S_krá/_Flytja inn/._Snowie stağlağ textasniğ..."
 
 #: gtkgame.c:2505
 msgid "/_File/_Import/._Snowie .txt position file..."
-msgstr "/S_krÃ¡/_Flytja inn/._Snowie .txt stÃ¶Ã°uskrÃ¡..."
+msgstr "/S_krá/_Flytja inn/._Snowie .txt stöğuskrá..."
 
 #: gtkgame.c:2507
 msgid "/_File/_Export"
-msgstr "/S_krÃ¡/_Flytja Ãºt"
+msgstr "/S_krá/_Flytja út"
 
 #: gtkgame.c:2508
 msgid "/_File/_Export/_Game"
-msgstr "/S_krÃ¡/_Flytja Ãºt/S_pil"
+msgstr "/S_krá/_Flytja út/S_pil"
 
 #: gtkgame.c:2509
 msgid "/_File/_Export/_Game/.gam..."
@@ -5153,11 +5154,11 @@ msgstr ""
 
 #: gtkgame.c:2515
 msgid "/_File/_Export/_Game/Text..."
-msgstr "/S_krÃ¡/_Flytja Ãºt/S_pil/Texti..."
+msgstr "/S_krá/_Flytja út/S_pil/Texti..."
 
 #: gtkgame.c:2517
 msgid "/_File/_Export/_Match"
-msgstr "/S_krÃ¡/_Flytja Ãºt/_Keppni"
+msgstr "/S_krá/_Flytja út/_Keppni"
 
 #: gtkgame.c:2518
 msgid "/_File/_Export/_Match/HTML..."
@@ -5181,11 +5182,11 @@ msgstr ""
 
 #: gtkgame.c:2526
 msgid "/_File/_Export/_Match/Text..."
-msgstr "/S_krÃ¡/_Flytja Ãºt/_Keppni/Texti..."
+msgstr "/S_krá/_Flytja út/_Keppni/Texti..."
 
 #: gtkgame.c:2528
 msgid "/_File/_Export/_Position"
-msgstr "/S_krÃ¡/_Flytja Ãºt/_StÃ¶Ã°u"
+msgstr "/S_krá/_Flytja út/_Stöğu"
 
 #: gtkgame.c:2529
 msgid "/_File/_Export/_Position/HTML..."
@@ -5213,11 +5214,11 @@ msgstr ""
 
 #: gtkgame.c:2542
 msgid "/_File/_Export/_Position/Text..."
-msgstr "/S_krÃ¡/_Flytja Ãºt/_StÃ¶Ã°u/Texti..."
+msgstr "/S_krá/_Flytja út/_Stöğu/Texti..."
 
 #: gtkgame.c:2544
 msgid "/_File/_Export/_Session"
-msgstr "/S_krÃ¡/_Flytja Ãºt/_Lotu"
+msgstr "/S_krá/_Flytja út/_Lotu"
 
 #: gtkgame.c:2545
 msgid "/_File/_Export/_Session/HTML..."
@@ -5237,39 +5238,39 @@ msgstr ""
 
 #: gtkgame.c:2553
 msgid "/_File/_Export/_Session/Text..."
-msgstr "/S_krÃ¡/_Flytja Ãºt/_Lotu/Texti..."
+msgstr "/S_krá/_Flytja út/_Lotu/Texti..."
 
 #: gtkgame.c:2555
 msgid "/_File/_Export/_HTML Images..."
-msgstr "/S_krÃ¡/_Flytja Ãºt/HTML _Myndir..."
+msgstr "/S_krá/_Flytja út/HTML _Myndir..."
 
 #: gtkgame.c:2558
 msgid "/_File/_Quit"
-msgstr "/S_krÃ¡/_HÃ¦tta"
+msgstr "/S_krá/_Hætta"
 
 #: gtkgame.c:2559
 msgid "/_Edit"
-msgstr "/SÃ½s_l"
+msgstr "/Sıs_l"
 
 #: gtkgame.c:2560
 msgid "/_Edit/_Undo"
-msgstr "/SÃ½s_l/Aftur_kalla"
+msgstr "/Sıs_l/Aftur_kalla"
 
 #: gtkgame.c:2561 gtkgame.c:2569
 msgid "/_Edit/-"
-msgstr "/SÃ½s_l/-"
+msgstr "/Sıs_l/-"
 
 #: gtkgame.c:2562
 msgid "/_Edit/_Copy"
-msgstr "/SÃ½s_l/_Afrita"
+msgstr "/Sıs_l/_Afrita"
 
 #: gtkgame.c:2563
 msgid "/_Edit/Copy as"
-msgstr "/SÃ½s_l/Afrita sem"
+msgstr "/Sıs_l/Afrita sem"
 
 #: gtkgame.c:2564
 msgid "/_Edit/Copy as/Position as ASCII"
-msgstr "/SÃ½s_l/Afrita sem/StÃ¶Ã°u Ã¡ ASCII formi"
+msgstr "/Sıs_l/Afrita sem/Stöğu á ASCII formi"
 
 #: gtkgame.c:2566
 msgid "/_Edit/Copy as/GammOnLine (HTML)"
@@ -5277,11 +5278,11 @@ msgstr ""
 
 #: gtkgame.c:2568
 msgid "/_Edit/_Paste"
-msgstr "/SÃ½s_l/_LÃ­ma"
+msgstr "/Sıs_l/_Líma"
 
 #: gtkgame.c:2570
 msgid "/_Edit/_Enter command..."
-msgstr "/SÃ½s_l/_SlÃ¡ inn skipun..."
+msgstr "/Sıs_l/_Slá inn skipun..."
 
 #: gtkgame.c:2571
 msgid "/_Game"
@@ -5293,7 +5294,7 @@ msgstr "/S_pil/_Kasta"
 
 #: gtkgame.c:2573
 msgid "/_Game/_Finish move"
-msgstr "/S_pil/_LjÃºka leik"
+msgstr "/S_pil/_Ljúka leik"
 
 #: gtkgame.c:2574 gtkgame.c:2579 gtkgame.c:2590 gtkgame.c:2592 gtkgame.c:2594
 #: gtkgame.c:2602
@@ -5302,15 +5303,15 @@ msgstr "/S_pil/-"
 
 #: gtkgame.c:2575
 msgid "/_Game/_Double"
-msgstr "/S_pil/_TvÃ¶falda"
+msgstr "/S_pil/_Tvöfalda"
 
 #: gtkgame.c:2576
 msgid "/_Game/_Take"
-msgstr "/S_pil/_Ãiggja tvÃ¶fÃ¶ldun"
+msgstr "/S_pil/_Şiggja tvöföldun"
 
 #: gtkgame.c:2577
 msgid "/_Game/Dro_p"
-msgstr "/S_pil/_Hafna tvÃ¶fÃ¶ldun"
+msgstr "/S_pil/_Hafna tvöföldun"
 
 #: gtkgame.c:2578
 msgid "/_Game/R_edouble"
@@ -5318,40 +5319,40 @@ msgstr ""
 
 #: gtkgame.c:2580
 msgid "/_Game/Re_sign"
-msgstr "/S_pil/UppgjÃ¶f"
+msgstr "/S_pil/Uppgjöf"
 
 #: gtkgame.c:2582
 msgid "/_Game/Re_sign/_Normal"
-msgstr ""
+msgstr "/S_pil/Uppgjöf/_Stakt spil"
 
 #: gtkgame.c:2583
 msgid "/_Game/Re_sign/_Gammon"
-msgstr "/S_pil/UppgjÃ¶f/_Gammon"
+msgstr "/S_pil/Uppgjöf/_Gammon"
 
 #: gtkgame.c:2584
 msgid "/_Game/Re_sign/_Backgammon"
-msgstr "/S_pil/UppgjÃ¶f/_Backgammon"
+msgstr "/S_pil/Uppgjöf/_Backgammon"
 
 #: gtkgame.c:2587
 msgid "/_Game/_Agree to resignation"
-msgstr "/S_pil/_SamÃ¾ykkja uppgjÃ¶f"
+msgstr "/S_pil/_Samşykkja uppgjöf"
 
 #: gtkgame.c:2588
 msgid "/_Game/De_cline resignation"
-msgstr "/S_pil/Ha_fna uppgjÃ¶f"
+msgstr "/S_pil/Ha_fna uppgjöf"
 
 # Fuzzy
 #: gtkgame.c:2591
 msgid "/_Game/Play computer turn"
-msgstr "/S_pil/Spila kast tÃ¶lvunnar"
+msgstr "/S_pil/Spila kast tölvunnar"
 
 #: gtkgame.c:2593
 msgid "/_Game/Swap players"
-msgstr "/S_pil/VÃ­xla leikmÃ¶nnum"
+msgstr "/S_pil/Víxla leikmönnum"
 
 #: gtkgame.c:2595
 msgid "/_Game/Set cube..."
-msgstr "/S_pil/Stilla tvÃ¶fÃ¶ldunartening..."
+msgstr "/S_pil/Stilla tvöföldunartening..."
 
 #: gtkgame.c:2596
 msgid "/_Game/Set _dice..."
@@ -5372,37 +5373,37 @@ msgstr "/S_pil/Stilla kast/1"
 
 #: gtkgame.c:2603
 msgid "/_Game/Match information..."
-msgstr "/S_pil/UpplÃ½singar um keppni..."
+msgstr "/S_pil/Upplısingar um keppni..."
 
 # Fuzzy
 #: gtkgame.c:2604
 msgid "/_Navigate"
-msgstr "/_TilfÃ¦rsla"
+msgstr "/_Tilfærsla"
 
 # Fuzzy
 #: gtkgame.c:2605
 msgid "/_Navigate/Previous rol_l"
-msgstr "/_TilfÃ¦rsla/Fyrra _kast"
+msgstr "/_Tilfærsla/Fyrra _kast"
 
 # Fuzzy
 #: gtkgame.c:2607
 msgid "/_Navigate/Next _roll"
-msgstr "/_TilfÃ¦rsla/NÃ¦sta kas_t"
+msgstr "/_Tilfærsla/Næsta kas_t"
 
 # Fuzzy
 #: gtkgame.c:2609 gtkgame.c:2614 gtkgame.c:2619 gtkgame.c:2624
 msgid "/_Navigate/-"
-msgstr "/_TilfÃ¦rlsa/-"
+msgstr "/_Tilfærlsa/-"
 
 # Fuzzy
 #: gtkgame.c:2610
 msgid "/_Navigate/_Previous move"
-msgstr "/_TilfÃ¦rsla/Fyrri _leikur"
+msgstr "/_Tilfærsla/Fyrri _leikur"
 
 # Fuzzy
 #: gtkgame.c:2612
 msgid "/_Navigate/Next _move"
-msgstr "/_TilfÃ¦rsla/NÃ¦sti lei_kur"
+msgstr "/_Tilfærsla/Næsti lei_kur"
 
 #: gtkgame.c:2615
 msgid "/_Navigate/Previous chequer _play"
@@ -5422,11 +5423,11 @@ msgstr ""
 
 #: gtkgame.c:2625
 msgid "/_Navigate/Pre_vious game"
-msgstr "/_TilfÃ¦rsla/Fyrra _spil"
+msgstr "/_Tilfærsla/Fyrra _spil"
 
 #: gtkgame.c:2627
 msgid "/_Navigate/Next _game"
-msgstr "/_TilfÃ¦rsla/NÃ¦sta s_pil"
+msgstr "/_Tilfærsla/Næsta s_pil"
 
 #: gtkgame.c:2629
 msgid "/_Analyse"
@@ -5434,11 +5435,11 @@ msgstr "/_Greining"
 
 #: gtkgame.c:2630
 msgid "/_Analyse/_Evaluate"
-msgstr "/_Greining/_StÃ¶Ã°umat"
+msgstr "/_Greining/_Stöğumat"
 
 #: gtkgame.c:2631
 msgid "/_Analyse/_Hint"
-msgstr "/_Greining/_VÃ­sbending"
+msgstr "/_Greining/_Vísbending"
 
 #: gtkgame.c:2632
 msgid "/_Analyse/_Rollout"
@@ -5509,12 +5510,12 @@ msgstr ""
 # Fuzzy
 #: gtkgame.c:2661
 msgid "/_Analyse/Player records"
-msgstr "/_Greining/LeikskrÃ¡"
+msgstr "/_Greining/Leikskrá"
 
 # Fuzzy
 #: gtkgame.c:2663
 msgid "/_Analyse/Add to player records"
-msgstr "/_Greining/BÃ¦ta viÃ° leikskrÃ¡"
+msgstr "/_Greining/Bæta viğ leikskrá"
 
 #: gtkgame.c:2664
 msgid "/_Analyse/Add to player records/Game statistics"
@@ -5630,15 +5631,15 @@ msgstr "/S_tillingar/Greining"
 
 #: gtkgame.c:2719
 msgid "/_Settings/Appearance..."
-msgstr "/S_tillingar/Ãš_tlit..."
+msgstr "/S_tillingar/Ú_tlit..."
 
 #: gtkgame.c:2721
 msgid "/_Settings/_Evaluation..."
-msgstr "/S_tillingar/StÃ¶Ã°u_mat.."
+msgstr "/S_tillingar/Stöğu_mat.."
 
 #: gtkgame.c:2722
 msgid "/_Settings/E_xport..."
-msgstr "/S_tillingar/Ãšt_flutningur..."
+msgstr "/S_tillingar/Út_flutningur..."
 
 #: gtkgame.c:2724
 msgid "/_Settings/_Players..."
@@ -5677,7 +5678,7 @@ msgstr "/S_tillingar/Valkostir..."
 
 #: gtkgame.c:2734
 msgid "/_Settings/Paths..."
-msgstr "/S_tillingar/SlÃ³Ã°ir..."
+msgstr "/S_tillingar/Slóğir..."
 
 #: gtkgame.c:2736
 msgid "/_Settings/Save settings"
@@ -5689,7 +5690,7 @@ msgstr "/_Gluggar"
 
 #: gtkgame.c:2740 gtkgame.c:2746
 msgid "/_Windows/_Game record"
-msgstr "/_Gluggar/_LeikskrÃ¡"
+msgstr "/_Gluggar/_Leikskrá"
 
 #: gtkgame.c:2741 gtkgame.c:2748
 msgid "/_Windows/_Annotation"
@@ -5697,7 +5698,7 @@ msgstr "/_Gluggar/_Athugasemdir"
 
 #: gtkgame.c:2743 gtkgame.c:2750
 msgid "/_Windows/_Message"
-msgstr "/_Gluggar/_SkilaboÃ°"
+msgstr "/_Gluggar/_Skilaboğ"
 
 #: gtkgame.c:2753 gtkgame.c:2756 gtkgame.c:2758
 msgid "/_Windows/-"
@@ -5705,16 +5706,16 @@ msgstr "/_Gluggar/-"
 
 #: gtkgame.c:2754
 msgid "/_Windows/Show all panels"
-msgstr "/_Gluggar/SÃ½na Ã¶ll Ã¾il"
+msgstr "/_Gluggar/Sına öll şil"
 
 #: gtkgame.c:2755
 msgid "/_Windows/Hide all panels"
-msgstr "/_Gluggar/Fela Ã¶ll Ã¾il"
+msgstr "/_Gluggar/Fela öll şil"
 
 #: gtkgame.c:2757
 #, fuzzy
 msgid "/_Windows/Full screen"
-msgstr "/_Gluggar/Fylla skjÃ¡"
+msgstr "/_Gluggar/Fylla skjá"
 
 #: gtkgame.c:2759
 msgid "/_Windows/Gu_ile"
@@ -5726,51 +5727,51 @@ msgstr ""
 
 #: gtkgame.c:2762
 msgid "/_Help"
-msgstr "/_HjÃ¡lp"
+msgstr "/_Hjálp"
 
 #: gtkgame.c:2763
 msgid "/_Help/_Commands"
-msgstr "/_HjÃ¡lp/_Skipanir"
+msgstr "/_Hjálp/_Skipanir"
 
 # Fuzzy
 #: gtkgame.c:2764
 msgid "/_Help/gnubg _Manual"
-msgstr "/_HjÃ¡lp/gnubg _LeiÃ°beiningar"
+msgstr "/_Hjálp/gnubg _Leiğbeiningar"
 
 # Fuzzy
 #: gtkgame.c:2765
 msgid "/_Help/gnubg M_anual (web)"
-msgstr "/_HjÃ¡lp/gnubg L_eiÃ°beiningar (Ã¡ vefnum)"
+msgstr "/_Hjálp/gnubg L_eiğbeiningar (á vefnum)"
 
 # Fuzzy
 #: gtkgame.c:2766
 msgid "/_Help/_Frequently Asked Questions"
-msgstr "/_HjÃ¡lp/Algengar s_purningar"
+msgstr "/_Hjálp/Algengar s_purningar"
 
 #: gtkgame.c:2767
 msgid "/_Help/Co_pying gnubg"
-msgstr "/_HjÃ¡lp/_Afritun Ã¡ gnubg"
+msgstr "/_Hjálp/_Afritun á gnubg"
 
 #: gtkgame.c:2768
 msgid "/_Help/gnubg _Warranty"
-msgstr "/_HjÃ¡lp/gnubg Ã¡_byrgÃ°"
+msgstr "/_Hjálp/gnubg á_byrgğ"
 
 #: gtkgame.c:2770 gtkgame.c:2772
 msgid "/_Help/-"
-msgstr "/_HjÃ¡lp/-"
+msgstr "/_Hjálp/-"
 
 # Fuzzy
 #: gtkgame.c:2771
 msgid "/_Help/_Report bug"
-msgstr "/_HjÃ¡lp/_Tilkynna villu"
+msgstr "/_Hjálp/_Tilkynna villu"
 
 #: gtkgame.c:2773
 msgid "/_Help/_About gnubg"
-msgstr "/_HjÃ¡lp/_Um gnubg"
+msgstr "/_Hjálp/_Um gnubg"
 
 #: gtkgame.c:3003
 msgid "Rendering"
-msgstr "MÃ¡la"
+msgstr "Mála"
 
 #: board3d/gtkcolour3d.c:420 gtkgame.c:3068 gtkgame.c:3116
 msgid "OK"
@@ -5778,11 +5779,11 @@ msgstr ""
 
 #: board3d/gtkcolour3d.c:422 gtkgame.c:3117 gtkgame.c:9478
 msgid "Cancel"
-msgstr "HÃ¦tta viÃ°"
+msgstr "Hætta viğ"
 
 #: gtkgame.c:3214
 msgid "GNU Backgammon - Message"
-msgstr "GNU Backgammon - SkilaboÃ°"
+msgstr "GNU Backgammon - Skilaboğ"
 
 #: gtkgame.c:3215
 msgid "GNU Backgammon - Question"
@@ -5790,7 +5791,7 @@ msgstr "GNU Backgammon - Spurning"
 
 #: gtkgame.c:3216 gtkgame.c:3217 gtkgame.c:9574
 msgid "GNU Backgammon - Warning"
-msgstr "GNU Backgammon - ViÃ°vÃ¶run"
+msgstr "GNU Backgammon - Viğvörun"
 
 #: gtkgame.c:3218
 msgid "GNU Backgammon - Error"
@@ -5798,7 +5799,7 @@ msgstr "GNU Backgammon - Villa"
 
 #: gtkgame.c:3323
 msgid "Play Anyway"
-msgstr "Spila Ã¡fram"
+msgstr "Spila áfram"
 
 #: gtkgame.c:3324
 msgid "Rethink"
@@ -5806,46 +5807,46 @@ msgstr "Hugsa mig um"
 
 #: gtkgame.c:3325
 msgid "End Tutor Mode"
-msgstr "Loka leiÃ°beinanda"
+msgstr "Loka leiğbeinanda"
 
 #: gtkgame.c:3326 gtktoolbar.c:521
 msgid "Hint"
-msgstr "VÃ­sbending"
+msgstr "Vísbending"
 
 #: gtkgame.c:3372
 msgid "GNU Backgammon - Tutor"
-msgstr "GNU Backgammon - LeiÃ°beinandi"
+msgstr "GNU Backgammon - Leiğbeinandi"
 
 #: gtkgame.c:3585
 #, c-format
 msgid "Unknown keyword: %s\n"
-msgstr "Ã“Ã¾ekkt lykilorÃ°: %s\n"
+msgstr "Óşekkt lykilorğ: %s\n"
 
 #: gtkgame.c:3596
 msgid "Available commands:\n"
-msgstr "TiltÃ¦kar skipanir:\n"
+msgstr "Tiltækar skipanir:\n"
 
 #: gtkgame.c:3625
 msgid "Available subcommands:\n"
-msgstr "TiltÃ¦kar undirskipanir:\n"
+msgstr "Tiltækar undirskipanir:\n"
 
 # Fuzzy
 #: gtkgame.c:3822
 msgid "Show Help"
-msgstr "Birta HjÃ¡lp"
+msgstr "Birta Hjálp"
 
 #: gtkgame.c:3898
 msgid "GNU Backgammon - Enter command"
-msgstr "GNU Backgammon - SlÃ¡Ã°u inn skipun"
+msgstr "GNU Backgammon - Sláğu inn skipun"
 
 #: gtkgame.c:4005
 msgid "Shortcut buttons"
-msgstr "FlÃ½tihnappar"
+msgstr "Flıtihnappar"
 
 #: gtkgame.c:4034
 #, c-format
 msgid "Start a new %d point match"
-msgstr "Hefja nÃ½ja keppni upp Ã¡ %d stig"
+msgstr "Hefja nıja keppni upp á %d stig"
 
 #: gtkgame.c:4048 gtkgame.c:4478 gtkgame.c:4514 gtkoptions.c:247
 msgid "Game"
@@ -5861,7 +5862,7 @@ msgstr ""
 
 #: gtkgame.c:4057 gtkgame.c:4479 gtkgame.c:4515
 msgid "Position"
-msgstr "StaÃ°a"
+msgstr "Stağa"
 
 #: gtkgame.c:4065
 msgid "Match length:"
@@ -5884,11 +5885,11 @@ msgid "GNU Backgammon vs. Human"
 msgstr "GNU Backgammon gegn Manneskju"
 
 # Fuzzy
-# (mannlegir andstÃ¦Ã°ingar)
+# (mannlegir andstæğingar)
 # Manneskja gegn manneskju
 #: gtkgame.c:4119
 msgid "Human vs. Human"
-msgstr "MaÃ°ur Ã¡ Mann"
+msgstr "Mağur á Mann"
 
 #: gtkgame.c:4125
 msgid "Modify player settings..."
@@ -5904,7 +5905,7 @@ msgstr ""
 
 #: gtkgame.c:4194
 msgid "GNU Backgammon - New"
-msgstr "GNU Backgammon - NÃ½tt"
+msgstr "GNU Backgammon - Nıtt"
 
 #: gtkgame.c:4218
 msgid "GNU Backgammon - New Weights"
@@ -5916,23 +5917,23 @@ msgstr ""
 
 #: gtkgame.c:4436
 msgid "Set Default _Path"
-msgstr "Stilla SjÃ¡lfgefna slÃ³Ã°"
+msgstr "Stilla Sjálfgefna slóğ"
 
 #: gtkgame.c:4438
 msgid "Set Default Path"
-msgstr "Stilla SjÃ¡lfgefna SlÃ³Ã°"
+msgstr "Stilla Sjálfgefna Slóğ"
 
 #: gtkgame.c:4458
 msgid "Export settings..."
-msgstr "Ãštflutningsstillingar..."
+msgstr "Útflutningsstillingar..."
 
 #: gtkgame.c:4474 gtkgame.c:4510
 msgid "Save match, game or position"
-msgstr "Vista keppni, spil eÃ°a stÃ¶Ã°u"
+msgstr "Vista keppni, spil eğa stöğu"
 
 #: gtkgame.c:4475 gtkgame.c:4511
 msgid "Save session, game or position"
-msgstr "Vista lotu, spil eÃ°a stÃ¶Ã°u"
+msgstr "Vista lotu, spil eğa stöğu"
 
 #: gtkgame.c:4477 gtkgame.c:4513
 msgid "Session"
@@ -5988,11 +5989,11 @@ msgstr ""
 
 #: gtkgame.c:4505 gtkgame.c:4581
 msgid "Snowie .txt position file"
-msgstr "Snowie .txt stÃ¶Ã°uskjal"
+msgstr "Snowie .txt stöğuskjal"
 
 #: gtkgame.c:4537
 msgid "Export to format: "
-msgstr "Flytja Ãºt Ã­ sniÃ°:"
+msgstr "Flytja út í sniğ:"
 
 #: gtkgame.c:4559
 msgid "Get default filename"
@@ -6008,7 +6009,7 @@ msgstr ".mat keppni"
 
 #: gtkgame.c:4577
 msgid ".pos position"
-msgstr ".pos staÃ°a"
+msgstr ".pos stağa"
 
 #: gtkgame.c:4578 gtkpath.c:142
 msgid "FIBS oldmoves"
@@ -6029,7 +6030,7 @@ msgstr ""
 # Fuzzy
 #: gtkgame.c:4586
 msgid "Import from format: "
-msgstr "Flytja inn Ãºr sniÃ°i:"
+msgstr "Flytja inn úr sniği:"
 
 # Fuzzy
 #: gtkgame.c:4660
@@ -6046,11 +6047,11 @@ msgstr "Opna spil"
 
 #: gtkgame.c:4703
 msgid "Open match or session"
-msgstr "Opna spil eÃ°a lotu"
+msgstr "Opna spil eğa lotu"
 
 #: gtkgame.c:4712
 msgid "Open position"
-msgstr "Opna stÃ¶Ã°u"
+msgstr "Opna stöğu"
 
 #: gtkgame.c:4721
 msgid "Import BKG session"
@@ -6062,7 +6063,7 @@ msgstr "Flyja inn .mat keppni"
 
 #: gtkgame.c:4739
 msgid "Import .pos position"
-msgstr "Flytja inn .pos stÃ¶Ã°r"
+msgstr "Flytja inn .pos stöğr"
 
 #: gtkgame.c:4748
 msgid "Import FIBS oldmoves"
@@ -6078,7 +6079,7 @@ msgstr "Flytja inn .tmg keppni"
 
 #: gtkgame.c:4775
 msgid "Import Snowie .txt position"
-msgstr "Flytja inn Snowie .txt stÃ¶Ã°u"
+msgstr "Flytja inn Snowie .txt stöğu"
 
 #: gtkgame.c:4785
 msgid "Save game"
@@ -6086,119 +6087,119 @@ msgstr "Vista leik"
 
 #: gtkgame.c:4794
 msgid "Save match or session"
-msgstr "Vista keppni eÃ°a lotu"
+msgstr "Vista keppni eğa lotu"
 
 #: gtkgame.c:4803
 msgid "Save position"
-msgstr "Vista stÃ¶Ã°u"
+msgstr "Vista stöğu"
 
 #: gtkgame.c:4812
 msgid "Save weights"
-msgstr "Vista vogtÃ¶lur"
+msgstr "Vista vogtölur"
 
 #: gtkgame.c:4821
 msgid "Export .gam game"
-msgstr "Flytja Ãºt .gam spil"
+msgstr "Flytja út .gam spil"
 
 #: gtkgame.c:4830
 msgid "Export HTML game"
-msgstr "Flytja Ãºt HTML spil"
+msgstr "Flytja út HTML spil"
 
 #: gtkgame.c:4839
 msgid "Export LaTeX game"
-msgstr "Flytja Ãºt LaTeX spil"
+msgstr "Flytja út LaTeX spil"
 
 #: gtkgame.c:4848
 msgid "Export PDF game"
-msgstr "Flytja Ãºt PDF spil"
+msgstr "Flytja út PDF spil"
 
 #: gtkgame.c:4857
 msgid "Export PostScript game"
-msgstr "Flytja Ãºt PostScript spil"
+msgstr "Flytja út PostScript spil"
 
 #: gtkgame.c:4868
 msgid "Export text game"
-msgstr "Flytja Ãºt texta spil"
+msgstr "Flytja út texta spil"
 
 #: gtkgame.c:4876
 msgid "Export LaTeX match"
-msgstr "Flytja Ãºt LaTeX keppni"
+msgstr "Flytja út LaTeX keppni"
 
 #: gtkgame.c:4885
 msgid "Export HTML match"
-msgstr "Flytja Ãºt HTML keppni"
+msgstr "Flytja út HTML keppni"
 
 #: gtkgame.c:4894
 msgid "Export .mat match"
-msgstr "Flytja Ãºt .mat keppni"
+msgstr "Flytja út .mat keppni"
 
 #: gtkgame.c:4903
 msgid "Export PDF match"
-msgstr "Flytja Ãºt PDF keppni"
+msgstr "Flytja út PDF keppni"
 
 #: gtkgame.c:4912
 msgid "Export PostScript match"
-msgstr "Flytja Ãºt PostScript keppni"
+msgstr "Flytja út PostScript keppni"
 
 #: gtkgame.c:4922
 msgid "Export text match"
-msgstr "Flytja Ãºt texta keppni"
+msgstr "Flytja út texta keppni"
 
 #: gtkgame.c:4931
 msgid "Export EPS position"
-msgstr "Flytja Ãºt EPS stÃ¶Ã°u"
+msgstr "Flytja út EPS stöğu"
 
 #: gtkgame.c:4940
 msgid "Export HTML position"
-msgstr "Flytja Ãºt HTML stÃ¶Ã°u"
+msgstr "Flytja út HTML stöğu"
 
 #: gtkgame.c:4949
 msgid "Export position to GammOnLine (HTML)"
-msgstr "Flytja Ãºt stÃ¶Ã°u Ã­ GammOnLine (HTML)"
+msgstr "Flytja út stöğu í GammOnLine (HTML)"
 
 #: gtkgame.c:4964
 msgid "Export .pos position"
-msgstr "Flytja Ãºt .pos stÃ¶Ã°u"
+msgstr "Flytja út .pos stöğu"
 
 #: gtkgame.c:4973
 msgid "Export PNG position"
-msgstr "Flytja Ãºt PNG stÃ¶Ã°u"
+msgstr "Flytja út PNG stöğu"
 
 #: gtkgame.c:4982
 msgid "Export text position"
-msgstr "Flytja Ãºt texta stÃ¶Ã°u"
+msgstr "Flytja út texta stöğu"
 
 #: gtkgame.c:4991
 msgid "Export Snowie .txt position"
-msgstr "Flytja Ãºt Snowie .txt stÃ¶Ã°u"
+msgstr "Flytja út Snowie .txt stöğu"
 
 #: gtkgame.c:5001
 msgid "Export LaTeX session"
-msgstr "Flytja Ãºt LaTeX lotu"
+msgstr "Flytja út LaTeX lotu"
 
 #: gtkgame.c:5011
 msgid "Export PDF session"
-msgstr "Flytja Ãºt PDF lotu"
+msgstr "Flytja út PDF lotu"
 
 #: gtkgame.c:5020
 msgid "Export HTML session"
-msgstr "Flytja Ãºt HTML lotu"
+msgstr "Flytja út HTML lotu"
 
 #: gtkgame.c:5029
 msgid "Export PostScript session"
-msgstr "Flytja Ãºt PostScript lotu"
+msgstr "Flytja út PostScript lotu"
 
 #: gtkgame.c:5039
 msgid "Export text session"
-msgstr "Flytja Ãºt texta lotu"
+msgstr "Flytja út texta lotu"
 
 #: gtkgame.c:5048
 msgid "Export HTML images"
-msgstr "Flytja Ãºt HTML myndir"
+msgstr "Flytja út HTML myndir"
 
 #: gtkgame.c:5058
 msgid "Export database"
-msgstr "Flytja Ãºt gagnagrunn"
+msgstr "Flytja út gagnagrunn"
 
 #: gtkgame.c:5067
 msgid "Import database"
@@ -6211,17 +6212,17 @@ msgstr ""
 #: gtkgame.c:5225
 #, c-format
 msgid "50%% speed"
-msgstr "50%% hraÃ°i"
+msgstr "50%% hraği"
 
 #: gtkgame.c:5226
 #, c-format
 msgid "33%% speed"
-msgstr "33%% hraÃ°i"
+msgstr "33%% hraği"
 
 #: gtkgame.c:5227
 #, c-format
 msgid "25%% speed"
-msgstr "25%% hraÃ°i"
+msgstr "25%% hraği"
 
 #: gtkgame.c:5249
 msgid "Predefined settings"
@@ -6237,8 +6238,8 @@ msgid ""
 "Select a predefined setting, ranging from beginner's play to the grandmaster "
 "setting that will test your patience"
 msgstr ""
-"Veldu fyrirframgefna stillingu, allt frÃ¡ byrjanda aÃ° stÃ³rmeistara"
-"sem mun virkilega reyna Ã¡ Ã¾ig"
+"Veldu fyrirframgefna stillingu, allt frá byrjanda ağ stórmeistara"
+"sem mun virkilega reyna á şig"
 
 #: gtkgame.c:5277 gtkmovefilter.c:359 gtkmovefilter.c:564
 msgid "user defined"
@@ -6257,12 +6258,12 @@ msgstr ""
 
 #: gtkgame.c:5321
 msgid "Lookahead"
-msgstr "FramsÃ½ni"
+msgstr "Framsıni"
 
 # Fuzzy
 #: gtkgame.c:5330
 msgid "Plies:"
-msgstr "Falin lÃ¶g:"
+msgstr "Falin lög:"
 
 #: gtkgame.c:5343
 #, c-format
@@ -6356,7 +6357,7 @@ msgstr ""
 
 #: gtkgame.c:5755
 msgid "Socket:"
-msgstr "SÃ¶kkull:"
+msgstr "Sökkull:"
 
 #: gtkgame.c:5814
 msgid "GNU Backgammon - Players"
@@ -6364,15 +6365,15 @@ msgstr "GNU Backgammon - Leikmenn"
 
 #: gtkgame.c:5822
 msgid "Player 0"
-msgstr "LeikmaÃ°ur 0"
+msgstr "Leikmağur 0"
 
 #: gtkgame.c:5825
 msgid "Player 1"
-msgstr "LeikmaÃ°ur 1"
+msgstr "Leikmağur 1"
 
 #: gtkgame.c:5933
 msgid "Very good:"
-msgstr "MjÃ¶g gott:"
+msgstr "Mjög gott:"
 
 #: gtkgame.c:5933
 msgid "Good:"
@@ -6384,11 +6385,11 @@ msgstr "Vafasamt:"
 
 #: gtkgame.c:5934
 msgid "Bad:"
-msgstr "SlÃ¦mt:"
+msgstr "Slæmt:"
 
 #: gtkgame.c:5934
 msgid "Very bad:"
-msgstr "MjÃ¶g slÃ¦mt:"
+msgstr "Mjög slæmt:"
 
 #: gtkgame.c:5935
 msgid "Very lucky:"
@@ -6400,11 +6401,11 @@ msgstr "Heppni:"
 
 #: gtkgame.c:5936
 msgid "Unlucky:"
-msgstr "Ã“heppni:"
+msgstr "Óheppni:"
 
 #: gtkgame.c:5936
 msgid "Very unlucky:"
-msgstr "Mikil Ã³heppni:"
+msgstr "Mikil óheppni:"
 
 #: gtkgame.c:5965 gtkgame.c:8557 gtkgame.c:8846
 msgid "Luck"
@@ -6421,11 +6422,11 @@ msgstr ""
 
 #: gtkgame.c:5998
 msgid "Skill thresholds"
-msgstr "HÃ¦fnisÃ¾rÃ¶skuldar"
+msgstr "Hæfnisşröskuldar"
 
 #: gtkgame.c:6027
 msgid "Luck thresholds"
-msgstr "HeppnisÃ¾rÃ¶skuldar"
+msgstr "Heppnisşröskuldar"
 
 #: gtkgame.c:6195
 msgid "GNU Backgammon - Analysis Settings"
@@ -6573,7 +6574,7 @@ msgstr ""
 
 #: gtkgame.c:7167 gtkgame.c:7208 gtkgame.c:7301
 msgid "GNU Backgammon - Hint"
-msgstr "GNU Backgammon - VÃ­sbending"
+msgstr "GNU Backgammon - Vísbending"
 
 #: gtkgame.c:7217
 msgid "MWC before resignation"
@@ -6593,11 +6594,11 @@ msgstr ""
 
 #: gtkgame.c:7250
 msgid "You should accept the resignation!"
-msgstr "ÃÃº Ã¦ttir aÃ° taka uppgjÃ¶finni!"
+msgstr "Şú ættir ağ taka uppgjöfinni!"
 
 #: gtkgame.c:7252
 msgid "You should reject the resignation!"
-msgstr "ÃÃº Ã¦ttir aÃ° hafna uppgjÃ¶finni!"
+msgstr "Şú ættir ağ hafna uppgjöfinni!"
 
 #: gtkgame.c:7409
 msgid "About GNU Backgammon"
@@ -6605,11 +6606,11 @@ msgstr "Um GNU Backgammon"
 
 #: gtkgame.c:7459
 msgid "GNU Backgammon was written by:"
-msgstr "GNU Backgammon var skrifaÃ° af:"
+msgstr "GNU Backgammon var skrifağ af:"
 
 #: gtkgame.c:7469
 msgid "With special thanks to:"
-msgstr "MeÃ° sÃ©rstÃ¶kum Ã¾Ã¶kkum til:"
+msgstr "Meğ sérstökum şökkum til:"
 
 #: gtkgame.c:7489
 msgid ""
@@ -6621,11 +6622,11 @@ msgstr ""
 
 #: gtkgame.c:7499
 msgid "Copying conditions"
-msgstr "AfritunarskilmÃ¡lar"
+msgstr "Afritunarskilmálar"
 
 #: gtkgame.c:7505 show.c:947
 msgid "Warranty"
-msgstr "ÃbyrgÃ°"
+msgstr "Ábyrgğ"
 
 # Fuzzy
 #: gtkgame.c:7548
@@ -6635,8 +6636,8 @@ msgid ""
 "\n"
 "    http://www.gnu.org/manual/gnubg/"
 msgstr ""
-"LeiÃ°beiningar af vefnum eru ekki tiltÃ¦kar Ã­ Ã¾essari uppsetningu afGNU "
-"Backgammon.  ÃÃº getur lesiÃ° leiÃ°beiningarnar Ã¡ vefnum Ã¡ slÃ³Ã°inni:\n"
+"Leiğbeiningar af vefnum eru ekki tiltækar í şessari uppsetningu afGNU "
+"Backgammon.  Şú getur lesiğ leiğbeiningarnar á vefnum á slóğinni:\n"
 "\n"
 "    http://www.gnu.org/manual/gnubg/"
 
@@ -6648,14 +6649,14 @@ msgid ""
 "\n"
 "    http://mole.dnsalias.org/~acepoint/GnuBG/gnubg-faq/"
 msgstr ""
-"Algengar spurningar eru ekki tiltÃ¦kar Ã­ Ã¾essari uppsetningu afGNU "
-"Backgammon.  ÃÃº getur lesiÃ° Ã¾Ã¦r Ã¡ vefnum Ã¡ slÃ³Ã°inni:\n"
+"Algengar spurningar eru ekki tiltækar í şessari uppsetningu afGNU "
+"Backgammon.  Şú getur lesiğ şær á vefnum á slóğinni:\n"
 "\n"
 "    http://mole.dnsalias.org/~acepoint/GnuBG/gnubg-faq/"
 
 #: gtkgame.c:7569
 msgid "GNU Backgammon - Manual"
-msgstr "GNU Backgammon - LeiÃ°beiningar"
+msgstr "GNU Backgammon - Leiğbeiningar"
 
 #: gtkgame.c:7594
 msgid "GNU Backgammon - Frequently Asked Questions"
@@ -6671,7 +6672,7 @@ msgstr ""
 
 #: gtkgame.c:7695
 msgid "GNU Backgammon - Help"
-msgstr "GNU Backgammon - HjÃ¡lp"
+msgstr "GNU Backgammon - Hjálp"
 
 #: gtkgame.c:7825
 #, c-format
@@ -6700,25 +6701,25 @@ msgstr ""
 
 #: gtkgame.c:8320
 msgid "Show all games"
-msgstr "SÃ½na Ã¶ll spil"
+msgstr "Sına öll spil"
 
 #: gtkgame.c:8324
 msgid "Move to first game"
-msgstr "Fara aÃ° fyrsta spili"
+msgstr "Fara ağ fyrsta spili"
 
 #: gtkgame.c:8336
 msgid "Move ahead to last game"
-msgstr "Fara Ã¡fram aÃ° seinasta spili"
+msgstr "Fara áfram ağ seinasta spili"
 
 #: gtkgame.c:8344
 #, c-format
 msgid "All games: %s %d, %s %d"
-msgstr "Ã–ll spil: %s %d, %s %d"
+msgstr "Öll spil: %s %d, %s %d"
 
 #: gtkgame.c:8347
 #, c-format
 msgid "All games: %s, %s"
-msgstr "Ã–ll spil: %s, %s"
+msgstr "Öll spil: %s, %s"
 
 #: gtkgame.c:8548 gtkgame.c:8844
 msgid "Overall"
@@ -6742,7 +6743,7 @@ msgstr ""
 # Fuzzy
 #: gtkgame.c:8816
 msgid "GNU Backgammon - Player records"
-msgstr "GNU Backgammon - LeikskrÃ¡r"
+msgstr "GNU Backgammon - Leikskrár"
 
 #: gtkgame.c:8836
 msgid "Name"
@@ -6797,22 +6798,22 @@ msgstr ""
 msgid "Total"
 msgstr ""
 
-# Fuzzy afmÃ¡?
+# Fuzzy afmá?
 #: gtkgame.c:8902
 msgid "Erase"
-msgstr "EyÃ°a"
+msgstr "Eyğa"
 
 #: gtkgame.c:8907
 msgid "Erase All"
-msgstr "EyÃ°a Ã¶llu"
+msgstr "Eyğa öllu"
 
 #: gtkgame.c:9027 record.c:532 record.c:570
 msgid "No player records found."
-msgstr "Engar leikskrÃ¡r fundust"
+msgstr "Engar leikskrár fundust"
 
 #: gtkgame.c:9081
 msgid "GNU Backgammon - Match information"
-msgstr "GNU Backgammon - UpplÃ½singar um keppni"
+msgstr "GNU Backgammon - Upplısingar um keppni"
 
 # Fuzzy
 #: gtkgame.c:9100 gtkgame.c:9103
@@ -6827,21 +6828,21 @@ msgstr "Dags:"
 # Fuzzy
 #: gtkgame.c:9107
 msgid "Event:"
-msgstr "AtburÃ°ur:"
+msgstr "Atburğur:"
 
 #: gtkgame.c:9108
 msgid "Round:"
-msgstr "UmferÃ°:"
+msgstr "Umferğ:"
 
 # Fuzzy
 #: gtkgame.c:9109
 msgid "Place:"
-msgstr "StaÃ°ur:"
+msgstr "Stağur:"
 
 # Fuzzy
 #: gtkgame.c:9110
 msgid "Annotator:"
-msgstr "SkrÃ¡setjari:"
+msgstr "Skrásetjari:"
 
 #: gtkgame.c:9113
 msgid "Comments:"
@@ -6880,24 +6881,27 @@ msgid "Change Disk"
 msgstr ""
 
 #: gtkgame.c:9451
+#Fuzzy
 msgid "Resign normal"
-msgstr ""
+msgstr "Stakt spil"
 
 #: gtkgame.c:9452
+#Fuzzy
 msgid "Resign gammon"
-msgstr ""
+msgstr "Gammon"
 
 #: gtkgame.c:9453
+#Fuzzy
 msgid "Resign backgammon"
-msgstr ""
+msgstr "Backgammon"
 
 #: gtkgame.c:9583
 msgid "Don't show this again"
-msgstr ""
+msgstr "Ekki sına şetta aftur"
 
 #: gtkgame.c:9584
 msgid "If set, this message won't appear again"
-msgstr ""
+msgstr "Ef virkjağ şá munu şessi skilaboğ ekki birtast framar"
 
 #: gtkgame.c:9685 gtkgame.c:9693 gtkgame.c:9702
 msgid "/Settings/Time Control/"
@@ -6906,7 +6910,7 @@ msgstr ""
 #: gtkgame.c:9720
 #, fuzzy
 msgid "Not implemented - work in progress"
-msgstr "Ekkert spil Ã­ gangi"
+msgstr "Ekkert spil í gangi"
 
 #: gtkgame.c:9727
 msgid "Time control name (tcname):"
@@ -6927,7 +6931,7 @@ msgstr ""
 
 #: gtkgame.c:9737
 msgid "Hourglass"
-msgstr ""
+msgstr "Stundarglas"
 
 #: gtkgame.c:9745
 msgid "Time control type (tctype):"
@@ -6994,7 +6998,7 @@ msgstr "GNU Backgammon - Almennar stillingar"
 #: gtkmet.c:160 gtkmet.c:177
 #, c-format
 msgid "%d-away"
-msgstr "%d-frÃ¡ sigri"
+msgstr "%d-frá sigri"
 
 #: gtkmet.c:260
 msgid "GNU Backgammon - Match equity table"
@@ -7082,11 +7086,11 @@ msgstr "Franska"
 
 #: gtkoptions.c:174
 msgid "German"
-msgstr "ÃÃ½ska"
+msgstr "Şıska"
 
 #: gtkoptions.c:175
 msgid "Italian"
-msgstr "Ãtalska"
+msgstr "Ítalska"
 
 #: gtkoptions.c:176
 msgid "Japanese"
@@ -7102,7 +7106,7 @@ msgstr "Notandi"
 
 #: gtkoptions.c:185
 msgid "File"
-msgstr "SkrÃ¡"
+msgstr "Skrá"
 
 #: gtkoptions.c:187
 msgid ""
@@ -7152,11 +7156,11 @@ msgstr "Vafasamt"
 
 #: gtkoptions.c:205
 msgid "Bad"
-msgstr "SlÃ¦mt"
+msgstr "Slæmt"
 
 #: gtkoptions.c:205
 msgid "Very bad"
-msgstr "MjÃ¶g slÃ¦mt"
+msgstr "Mjög slæmt"
 
 #: gtkoptions.c:209 set.c:4412
 msgid "best"
@@ -7244,13 +7248,13 @@ msgstr ""
 
 #: gtkoptions.c:222
 msgid "Use standard backgammon starting position"
-msgstr "Nota hefÃ°bundna backgammon uppstillingu"
+msgstr "Nota hefğbundna backgammon uppstillingu"
 
 #: gtkoptions.c:223
 msgid ""
 "Use Nick \"Nack\" Ballard's Nackgammon starting position with standard rules."
 msgstr ""
-"Nota Nackgammon uppstillingu Nick \"Nack\" Ballards meÃ° hefÃ°bundnum reglum"
+"Nota Nackgammon uppstillingu Nick \"Nack\" Ballards meğ hefğbundnum reglum"
 
 #: gtkoptions.c:225
 msgid "Play 1-chequer hypergammon (i.e., gammon and backgammons possible)"
@@ -7266,43 +7270,43 @@ msgstr ""
 
 #: gtkoptions.c:252
 msgid "Start new games immediately"
-msgstr "Hefja nÃ½ja leiki samstundis"
+msgstr "Hefja nıja leiki samstundis"
 
 #: gtkoptions.c:255
 msgid ""
 "Whenever a game is complete, automatically start another one in the same "
 "match or session."
 msgstr ""
-"Um leiÃ° og leik er lokiÃ° hefst sjÃ¡lfkrafa nÃ½r leikur Ã­ sÃ¶mu keppni eÃ°a lotu."
+"Um leiğ og leik er lokiğ hefst sjálfkrafa nır leikur í sömu keppni eğa lotu."
 
 #: gtkoptions.c:260
 msgid "Roll the dice automatically"
-msgstr "Kasta teningunum sjÃ¡lfvirkt"
+msgstr "Kasta teningunum sjálfvirkt"
 
 #: gtkoptions.c:263
 msgid ""
 "On a human player's turn, if they are not permitted to double, then roll the "
 "dice immediately."
 msgstr ""
-"Teningum er kastaÃ° sjÃ¡lfkrafa Ã¾egar mannlegur leikmaÃ°ur Ã¡ leik og hann mÃ¡ "
-"ekki tvÃ¶falda."
+"Teningum er kastağ sjálfkrafa şegar mannlegur leikmağur á leik og hann má "
+"ekki tvöfalda."
 
 #: gtkoptions.c:268
 msgid "Play forced moves automatically"
-msgstr "Leika tilneyddum leikjum sjÃ¡lfkrafa"
+msgstr "Leika tilneyddum leikjum sjálfkrafa"
 
 #: gtkoptions.c:271
 msgid ""
 "On a human player's turn, if there are no legal moves or only one legal "
 "move, then finish their turn for them."
 msgstr ""
-"Teningarnir ganga sjÃ¡lfvirkt til mÃ³tspilara ef engir lÃ¶glegir leikir eru "
-"mÃ¶gulegir, eÃ°a ef aÃ°eins einn lÃ¶glegur leikur er mÃ¶gulegur."
+"Teningarnir ganga sjálfvirkt til mótspilara ef engir löglegir leikir eru "
+"mögulegir, eğa ef ağeins einn löglegur leikur er mögulegur."
 
 # Fuzzy
 #: gtkoptions.c:276
 msgid "Play bearoff moves automatically"
-msgstr "Taka Ãºt sjÃ¡lfvirkt"
+msgstr "Taka út sjálfvirkt"
 
 # Fuzzy
 #: gtkoptions.c:279
@@ -7311,13 +7315,13 @@ msgid ""
 "unambiguous move which bears off as many chequers as possible, then choose "
 "that move automatically."
 msgstr ""
-"TÃ¶flum er leikiÃ° sjÃ¡lfvirkt Ãºt af borÃ°inu ef mannlegur leikmaÃ°ur er byrjaÃ°ur "
-"aÃ° taka Ãºt tÃ¶flur og Ã¾aÃ° er einn Ã³umdeilanlegur leikur sem tekur Ãºt eins "
-"margar tÃ¶flur og mÃ¶gulegt er."
+"Töflum er leikiğ sjálfvirkt út af borğinu ef mannlegur leikmağur er byrjağur "
+"ağ taka út töflur og şağ er einn óumdeilanlegur leikur sem tekur út eins "
+"margar töflur og mögulegt er."
 
 #: gtkoptions.c:285
 msgid "Allow dragging to illegal points"
-msgstr "Leyfa aÃ° flytja tÃ¶flur Ã­ Ã³lÃ¶glegar stÃ¶Ã°ur"
+msgstr "Leyfa ağ flytja töflur í ólöglegar stöğur"
 
 #: gtkoptions.c:290
 msgid ""
@@ -7326,29 +7330,29 @@ msgid ""
 "may move chequers only onto legal points.  Either way, the resulting move "
 "must be legal when you pick up the dice, or it will not be accepted."
 msgstr ""
-"SÃ© Ã¾essi stilling virk Ã¾Ã¡ er leyfilegt aÃ° flytja tÃ¶flur tÃ­mabundiÃ° Ã¡ reiti "
-"sem ekki er hÃ¦gt aÃ° nÃ¡ til meÃ° gefnu kasti.  AÃ° lokum Ã¾egar teningarnir eru "
-"teknir upp verÃ°ur leikurinn aÃ° vera lÃ¶glegur, annars er hann ekki samÃ¾ykktur."
+"Sé şessi stilling virk şá er leyfilegt ağ flytja töflur tímabundiğ á reiti "
+"sem ekki er hægt ağ ná til meğ gefnu kasti.  Ağ lokum şegar teningarnir eru "
+"teknir upp verğur leikurinn ağ vera löglegur, annars er hann ekki samşykktur."
 
 #: gtkoptions.c:298
 msgid "Variations"
-msgstr "AfbrigÃ°i"
+msgstr "Afbrigği"
 
 #: gtkoptions.c:334
 msgid "Forbid more than five chequers on a point"
-msgstr "BannaÃ° aÃ° stilla fleiri en fimm tÃ¶flum Ã¡ reit"
+msgstr "Bannağ ağ stilla fleiri en fimm töflum á reit"
 
 #: gtkoptions.c:338
 msgid ""
 "Don't allow players to place more than five chequers on a point.  This is "
 "sometimes known as the Egyptian rule."
 msgstr ""
-"Ekki er leyft aÃ° setja fleiri en fimm tÃ¶flur Ã¡ hvern reit.  Ãetta er stundum "
+"Ekki er leyft ağ setja fleiri en fimm töflur á hvern reit.  Şetta er stundum "
 "nefnt egyfska reglan."
 
 #: gtkoptions.c:351
 msgid "Use doubling cube"
-msgstr "Nota tvÃ¶fÃ¶ldunartening"
+msgstr "Nota tvöföldunartening"
 
 #: gtkoptions.c:355
 msgid ""
@@ -7403,15 +7407,15 @@ msgstr ""
 
 #: gtkoptions.c:434
 msgid "Tutor"
-msgstr "LeiÃ°beinandi"
+msgstr "Leiğbeinandi"
 
 #: gtkoptions.c:441
 msgid ""
 "When using the tutor, GNU Backgammon will analyse your decisions during play "
 "and prompt you if it thinks you are making a mistake."
 msgstr ""
-"Ãegar Ã¾Ãº notar leiÃ°beinandann greinir GNU Backgammon Ã¡kvarÃ°anir Ã¾Ã­nar Ã­ "
-"spilinu og varar Ã¾ig viÃ° ef forritiÃ° telur Ã¾ig vera aÃ° gera mistÃ¶k."
+"Şegar şú notar leiğbeinandann greinir GNU Backgammon ákvarğanir şínar í "
+"spilinu og varar şig viğ ef forritiğ telur şig vera ağ gera mistök."
 
 #: gtkoptions.c:449
 msgid "Cube Decisions"
@@ -7448,7 +7452,7 @@ msgstr ""
 
 #: gtkoptions.c:488
 msgid "Warning level:"
-msgstr "ViÃ°vÃ¶runarstig:"
+msgstr "Viğvörunarstig:"
 
 # Fuzzy
 #: gtkoptions.c:501
@@ -7456,16 +7460,16 @@ msgid ""
 "Specify how bad GNU Backgammon must think a decision is before questioning "
 "you about a possible mistake."
 msgstr ""
-"Tilgreindu viÃ° hversu slÃ¦m mistÃ¶k Ã¾Ãº fÃ¦rÃ° Ã¡bendingu frÃ¡ GNU Backgammon um "
-"mÃ¶gulega skyssu"
+"Tilgreindu viğ hversu slæm mistök şú færğ ábendingu frá GNU Backgammon um "
+"mögulega skyssu"
 
 #: gtkoptions.c:515
 msgid "Display"
-msgstr "SÃ½n"
+msgstr "Sın"
 
 #: gtkoptions.c:520
 msgid "Clockwise movement"
-msgstr "RÃ©ttsÃ¦lis hreyfingar"
+msgstr "Réttsælis hreyfingar"
 
 #: gtkoptions.c:524
 msgid ""
@@ -7476,7 +7480,7 @@ msgstr ""
 
 #: gtkoptions.c:535
 msgid "Move delay:"
-msgstr "TÃ¶f Ã¡ hreyfingu:"
+msgstr "Töf á hreyfingu:"
 
 #: gtkoptions.c:542
 msgid "ms"
@@ -7487,12 +7491,12 @@ msgid ""
 "Set a delay so that GNU Backgammon will pause between each move, to give you "
 "a chance to see it."
 msgstr ""
-"Stilla tÃ¶f svo GNU Backgammon geri hlÃ© milli leikja til aÃ° gefa Ã¾Ã©r fÃ¦ri Ã¡ "
-"aÃ° sjÃ¡ hreyfingarnar."
+"Stilla töf svo GNU Backgammon geri hlé milli leikja til ağ gefa şér færi á "
+"ağ sjá hreyfingarnar."
 
 #: gtkoptions.c:550
 msgid "Show dice below board when human player on roll"
-msgstr "SÃ½na teninga fyrir neÃ°an borÃ°iÃ° Ã¾egar mannlegur leikmaÃ°ur Ã¡ kast"
+msgstr "Sına teninga fyrir neğan borğiğ şegar mannlegur leikmağur á kast"
 
 #: gtkoptions.c:557
 msgid ""
@@ -7504,7 +7508,7 @@ msgstr ""
 
 #: gtkoptions.c:565
 msgid "Show Position ID and Match ID above board"
-msgstr "SÃ½na stÃ¶Ã°u- og keppni kennitÃ¶lur fyrir ofan borÃ°"
+msgstr "Sına stöğu- og keppni kennitölur fyrir ofan borğ"
 
 #: gtkoptions.c:570
 msgid ""
@@ -7551,11 +7555,11 @@ msgstr ""
 
 #: gtkoptions.c:641
 msgid "Speed:"
-msgstr "HraÃ°i"
+msgstr "Hraği"
 
 #: gtkoptions.c:643
 msgid "Slow"
-msgstr "HÃ¦gt"
+msgstr "Hægt"
 
 #: gtkoptions.c:646
 msgid "Fast"
@@ -7577,7 +7581,7 @@ msgstr ""
 
 #: gtkoptions.c:667
 msgid "Display computer moves"
-msgstr "SÃ½na hreyfingar tÃ¶lvunnar"
+msgstr "Sına hreyfingar tölvunnar"
 
 #: gtkoptions.c:673
 msgid ""
@@ -7650,7 +7654,7 @@ msgstr ""
 
 #: gtkoptions.c:781
 msgid "points"
-msgstr ""
+msgstr "stig"
 
 #: gtkoptions.c:785
 msgid "Specify the default length to use when starting new matches."
@@ -7662,7 +7666,7 @@ msgstr ""
 
 #: gtkoptions.c:797
 msgid "Current:"
-msgstr "NÃºverandi:"
+msgstr "Núverandi:"
 
 #: gtkoptions.c:802
 msgid "Load..."
@@ -7680,27 +7684,28 @@ msgstr ""
 
 #: gtkoptions.c:827
 msgid "Sound"
-msgstr "HljÃ³Ã°"
+msgstr "Hljóğ"
 
 #: gtkoptions.c:832
+#Fuzzy
 msgid "Beep on invalid input"
-msgstr ""
+msgstr "Viğvörunarhljóğ"
 
 #: gtkoptions.c:838
 msgid "Emit a warning beep if invalid moves are attempted."
-msgstr "Gefa frÃ¡ sÃ©r viÃ°vÃ¶runarhljÃ³Ã° Ã¾egar reynt er aÃ° gera Ã³leyfilega leiki"
+msgstr "Gefa frá sér viğvörunarhljóğ şegar reynt er ağ gera óleyfilega leiki"
 
 #: gtkoptions.c:842
 msgid "Enable sound effects"
-msgstr "Virkja hljÃ³Ã°"
+msgstr "Virkja hljóğ"
 
 #: gtkoptions.c:851
 msgid "Have GNU Backgammon make sound effects when various events occur."
-msgstr "LÃ¡ta GNU Backgammon spila hljÃ³Ã° Ã¾egar Ã½msir atburÃ°ir gerast."
+msgstr "Láta GNU Backgammon spila hljóğ şegar ımsir atburğir gerast."
 
 #: gtkoptions.c:866
 msgid "Sound system"
-msgstr "HljÃ³Ã°kerfi"
+msgstr "Hljóğkerfi"
 
 #: gtkoptions.c:872 sound.c:179
 msgid "ArtsC"
@@ -7708,7 +7713,7 @@ msgstr ""
 
 #: gtkoptions.c:886
 msgid "Use the ArtsC sound system."
-msgstr "Nota ArtsC hljÃ³Ã°kerfi."
+msgstr "Nota ArtsC hljóğkerfi."
 
 #: gtkoptions.c:889 sound.c:180
 msgid "External command"
@@ -7716,7 +7721,7 @@ msgstr ""
 
 #: gtkoptions.c:903
 msgid "Use an external program to play sounds."
-msgstr "Nota ÃºtvÃ¦rt forrit til aÃ° spila hljÃ³Ã°."
+msgstr "Nota útvært forrit til ağ spila hljóğ."
 
 #: gtkoptions.c:906 sound.c:181
 msgid "ESD"
@@ -7758,7 +7763,7 @@ msgstr ""
 
 #: gtkoptions.c:990
 msgid "Play sounds using QuickTime."
-msgstr "Spila hljÃ³Ã° meÃ° QuickTime"
+msgstr "Spila hljóğ meğ QuickTime"
 
 #: gtkoptions.c:996
 msgid "Dice"
@@ -7766,7 +7771,7 @@ msgstr "Teningar"
 
 #: gtkoptions.c:1001
 msgid "Show higher die on left"
-msgstr "SÃ½na hÃ¦rri teninginn til vinstri"
+msgstr "Sına hærri teninginn til vinstri"
 
 #: gtkoptions.c:1007
 msgid "Force the higher of the two dice to be shown on the left."
@@ -7821,11 +7826,11 @@ msgstr ""
 
 #: gtkoptions.c:1151
 msgid "Training"
-msgstr "ÃjÃ¡lfun"
+msgstr "Şjálfun"
 
 #: gtkoptions.c:1161
 msgid "Learning rate:"
-msgstr "NÃ¡mshraÃ°i:"
+msgstr "Námshraği:"
 
 #: gtkoptions.c:1169
 msgid ""
@@ -7837,7 +7842,7 @@ msgstr ""
 # Fuzzy
 #: gtkoptions.c:1180
 msgid "Annealing rate:"
-msgstr "AÃ°felluhraÃ°i"
+msgstr "Ağfelluhraği"
 
 #: gtkoptions.c:1189
 msgid ""
@@ -7848,7 +7853,7 @@ msgstr ""
 
 #: gtkoptions.c:1201
 msgid "Threshold:"
-msgstr "ÃrÃ¶skuldur:"
+msgstr "Şröskuldur:"
 
 #: gtkoptions.c:1210
 msgid ""
@@ -7916,11 +7921,11 @@ msgstr ""
 
 #: gtkoptions.c:1358
 msgid "Other"
-msgstr "AnnaÃ°"
+msgstr "Annağ"
 
 #: gtkoptions.c:1363
 msgid "Confirm when aborting game"
-msgstr "StaÃ°festa Ã¾egar hÃ¦tt er Ã­ spili"
+msgstr "Stağfesta şegar hætt er í spili"
 
 #: gtkoptions.c:1367
 msgid ""
@@ -7930,7 +7935,7 @@ msgstr ""
 
 #: gtkoptions.c:1372
 msgid "Confirm when overwriting existing files"
-msgstr "StaÃ°festa Ã¾egar skrifaÃ° er yfir skrÃ¡r sem til eru"
+msgstr "Stağfesta şegar skrifağ er yfir skrár sem til eru"
 
 #: gtkoptions.c:1376
 msgid ""
@@ -7940,7 +7945,7 @@ msgstr ""
 
 #: gtkoptions.c:1381
 msgid "Record all games"
-msgstr ""
+msgstr "Skrásetja öll spil"
 
 #: gtkoptions.c:1387
 msgid ""
@@ -7955,7 +7960,7 @@ msgstr ""
 
 #: gtkoptions.c:1405
 msgid "entries"
-msgstr ""
+msgstr "færslur"
 
 #: gtkoptions.c:1408
 msgid ""
@@ -7978,7 +7983,7 @@ msgstr ""
 
 #: gtkoptions.c:1432
 msgid "Language:"
-msgstr "TungumÃ¡l"
+msgstr "Tungumál"
 
 #: gtkoptions.c:1451
 #, c-format
@@ -8001,11 +8006,11 @@ msgstr ""
 
 #: gtkpath.c:131 show.c:1829
 msgid "Export of Encapsulated PostScript .eps files"
-msgstr "Ãštflutningur Ã¡ Encapsulated PostScript .eps skrÃ¡m"
+msgstr "Útflutningur á Encapsulated PostScript .eps skrám"
 
 #: gtkpath.c:133 show.c:1830
 msgid "Import or export of Jellyfish .gam files"
-msgstr "Innflutningur eÃ°a Ãºtflutningur Ã¡ Jellyfish .gam skrÃ¡m"
+msgstr "Innflutningur eğa útflutningur á Jellyfish .gam skrám"
 
 #: gtkpath.c:134
 msgid "Jellyfish .gam"
@@ -8013,15 +8018,15 @@ msgstr ""
 
 #: gtkpath.c:135 show.c:1831
 msgid "Export of HTML files"
-msgstr "Ãštflutningur Ã¡ HTML skrÃ¡m"
+msgstr "Útflutningur á HTML skrám"
 
 #: gtkpath.c:137 show.c:1832
 msgid "Export of LaTeX files"
-msgstr "Ãštflutningur Ã¡ LaTeX skrÃ¡m"
+msgstr "Útflutningur á LaTeX skrám"
 
 #: gtkpath.c:139 show.c:1833
 msgid "Import or export of Jellyfish .mat files"
-msgstr "Innflutningur eÃ°a Ãºtflutningur Ã¡ Jellyfish .mat skrÃ¡m"
+msgstr "Innflutningur eğa útflutningur á Jellyfish .mat skrám"
 
 #: gtkpath.c:140
 msgid "Jellyfish .mat"
@@ -8029,15 +8034,15 @@ msgstr ""
 
 #: gtkpath.c:141 show.c:1834
 msgid "Import of FIBS oldmoves files"
-msgstr "Innflutningur Ã¡ FIBS oldmoves skrÃ¡m"
+msgstr "Innflutningur á FIBS oldmoves skrám"
 
 #: gtkpath.c:143 show.c:1835
 msgid "Export of PDF files"
-msgstr "Ãštflutningur Ã¡ PDF skrÃ¡m"
+msgstr "Útflutningur á PDF skrám"
 
 #: gtkpath.c:145 show.c:1836
 msgid "Import of Jellyfish .pos files"
-msgstr "Innflutningur Ã¡ Jellyfish .pos skrÃ¡m"
+msgstr "Innflutningur á Jellyfish .pos skrám"
 
 #: gtkpath.c:146
 msgid "Jellyfish .pos"
@@ -8045,7 +8050,7 @@ msgstr ""
 
 #: gtkpath.c:147 show.c:1837
 msgid "Export of PostScript files"
-msgstr "Ãštflutningur Ã¡ PostScript skrÃ¡m"
+msgstr "Útflutningur á PostScript skrám"
 
 #: gtkpath.c:149 show.c:1838
 msgid "Load and save of SGF files"
@@ -8057,7 +8062,7 @@ msgstr ""
 
 #: gtkpath.c:151 show.c:1839
 msgid "Import of GamesGrid SGG files"
-msgstr "Innflutningur Ã¡ GamesGrid SGG skrÃ¡m"
+msgstr "Innflutningur á GamesGrid SGG skrám"
 
 #: gtkpath.c:152
 msgid "GamesGrid SGG"
@@ -8065,7 +8070,7 @@ msgstr ""
 
 #: gtkpath.c:153 show.c:1840
 msgid "Export of text files"
-msgstr "Ãštflutningur Ã¡ textaskrÃ¡m"
+msgstr "Útflutningur á textaskrám"
 
 #: gtkpath.c:155 show.c:1841
 msgid "Loading of match equity files (.xml)"
@@ -8074,7 +8079,7 @@ msgstr ""
 # Fuzzy
 #: gtkpath.c:156
 msgid "Match Equity Tables"
-msgstr "Match Equity TÃ¶flur"
+msgstr "Match Equity Töflur"
 
 #: gtkpath.c:157
 msgid "Loading of TrueMoneyGames files (.tmg)"
@@ -8102,7 +8107,7 @@ msgstr ""
 
 #: gtkpath.c:166
 msgid "GNU Backgammon - Paths"
-msgstr "GNU Backgammon - SlÃ³Ã°ir"
+msgstr "GNU Backgammon - Slóğir"
 
 #: gtkpath.c:169
 msgid "Apply"
@@ -8114,7 +8119,7 @@ msgstr "Grunnstilling"
 
 #: gtkpath.c:221
 msgid "Current: "
-msgstr "NÃºverandi: "
+msgstr "Núverandi: "
 
 #: gtkpath.c:229
 msgid "Set as default"
@@ -8123,12 +8128,12 @@ msgstr "Setja sem grunnstillingu"
 # Fuzzy
 #: gtkprefs.c:93
 msgid "Rounded disc"
-msgstr "RÃºnnaÃ°ar tÃ¶flur"
+msgstr "Rúnnağar töflur"
 
 # Fuzzy
 #: gtkprefs.c:93
 msgid "Flat edged disc"
-msgstr "Hornhvassar tÃ¶flur"
+msgstr "Hornhvassar töflur"
 
 #: gtkprefs.c:94
 msgid "Top only"
@@ -8140,11 +8145,11 @@ msgstr ""
 
 #: gtkprefs.c:381
 msgid "Chequer 0:"
-msgstr "TÃ¶flur 0"
+msgstr "Töflur 0"
 
 #: gtkprefs.c:390
 msgid "Chequer 1:"
-msgstr "TÃ¶flur 1"
+msgstr "Töflur 1"
 
 #: gtkprefs.c:400
 msgid "Piece type:"
@@ -8153,7 +8158,7 @@ msgstr ""
 #: gtkprefs.c:422
 #, fuzzy
 msgid "Texture type:"
-msgstr "ÃferÃ°:"
+msgstr "Áferğ:"
 
 #: gtkprefs.c:456 gtkprefs.c:765
 msgid "Die colour same as chequer colour"
@@ -8169,7 +8174,7 @@ msgstr ""
 
 #: gtkprefs.c:500 gtkprefs.c:884
 msgid "Cube colour:"
-msgstr "Litur tvÃ¶fÃ¶ldunartenings"
+msgstr "Litur tvöföldunartenings"
 
 #: gtkprefs.c:509
 msgid "Text colour:"
@@ -8201,15 +8206,15 @@ msgstr ""
 
 #: gtkprefs.c:584
 msgid "Border colour:"
-msgstr "Litur Ã¡ borÃ°brÃºnum"
+msgstr "Litur á borğbrúnum"
 
 #: gtkprefs.c:597 gtkprefs.c:1057
 msgid "Show hinges"
-msgstr "SÃ½na hjarir"
+msgstr "Sına hjarir"
 
 #: gtkprefs.c:605
 msgid "Hinge colour:"
-msgstr "Litur Ã¡ hjÃ¶rum:"
+msgstr "Litur á hjörum:"
 
 #: gtkprefs.c:615
 #Fuzzy
@@ -8217,7 +8222,7 @@ msgid ""
 "Point number\n"
 "colour:"
 msgstr ""
-"NÃºmer reita\n"
+"Númer reita\n"
 "litur:"
 
 #: gtkprefs.c:655
@@ -8226,7 +8231,7 @@ msgstr "Litur:"
 
 #: gtkprefs.c:674
 msgid "Refractive Index:"
-msgstr "LjÃ³sbrotsstuÃ°ull:"
+msgstr "Ljósbrotsstuğull:"
 
 # Fuzzy
 #: gtkprefs.c:685 gtkprefs.c:813
@@ -8248,7 +8253,7 @@ msgstr "Speglandi"
 
 #: gtkprefs.c:726
 msgid "Chequer shape:"
-msgstr "LÃ¶gun tafla:"
+msgstr "Lögun tafla:"
 
 #: gtkprefs.c:731
 msgid "Flat"
@@ -8257,7 +8262,7 @@ msgstr "Flatar"
 # Fuzzy
 #: gtkprefs.c:734 html.c:3106
 msgid "Round"
-msgstr "RÃºnnaÃ°ar"
+msgstr "Rúnnağar"
 
 #: gtkprefs.c:757
 msgid "Die colour"
@@ -8277,11 +8282,11 @@ msgstr "Litur annars reits:"
 
 #: gtkprefs.c:951
 msgid "Smooth"
-msgstr "SlÃ©tt"
+msgstr "Slétt"
 
 #: gtkprefs.c:955
 msgid "Speckled"
-msgstr "KornÃ³tt"
+msgstr "Kornótt"
 
 #: gtkprefs.c:982
 msgid "Alder"
@@ -8305,11 +8310,11 @@ msgstr "Sedrus"
 
 #: gtkprefs.c:987
 msgid "Ebony"
-msgstr "Ãbenholt"
+msgstr "Íbenholt"
 
 #: gtkprefs.c:988
 msgid "Fir"
-msgstr "Ãinur"
+msgstr "Şinur"
 
 #: gtkprefs.c:989
 msgid "Maple"
@@ -8333,19 +8338,19 @@ msgstr "Valhnota"
 
 #: gtkprefs.c:994
 msgid "Willow"
-msgstr "PÃ­lviÃ°ur"
+msgstr "Pílviğur"
 
 #: gtkprefs.c:1006
 msgid "Wooden"
-msgstr "Ãšr viÃ°i"
+msgstr "Úr viği"
 
 #: gtkprefs.c:1035
 msgid "Painted"
-msgstr "MÃ¡laÃ°"
+msgstr "Málağ"
 
 #: gtkprefs.c:1192
 msgid "Save settings and test 3d performance for 3 seconds?"
-msgstr "Vista stillingar og prÃ³fa 3-vÃ­ddar frammistÃ¶Ã°u Ã­ 3 sekÃºndur"
+msgstr "Vista stillingar og prófa 3-víddar frammistöğu í 3 sekúndur"
 
 #: gtkprefs.c:1231
 msgid "Light azimuth"
@@ -8361,20 +8366,20 @@ msgstr ""
 
 #: gtkprefs.c:1440
 msgid "2d Board"
-msgstr "2-vÃ­tt BorÃ°"
+msgstr "2-vítt Borğ"
 
 #: gtkprefs.c:1444
 msgid "3d Board"
-msgstr "3-vÃ­ddar BorÃ°"
+msgstr "3-víddar Borğ"
 
 # Fuzzy
 #: gtkprefs.c:1450
 msgid "Numbered point labels"
-msgstr "NÃºmeraÃ°ir reitir"
+msgstr "Númerağir reitir"
 
 #: gtkprefs.c:1453
 msgid "Show or hide point numbers"
-msgstr "SÃ½na eÃ°a fela nÃºmer Ã¡ reitum"
+msgstr "Sına eğa fela númer á reitum"
 
 #: gtkprefs.c:1455
 msgid "Dynamic labels"
@@ -8390,23 +8395,23 @@ msgstr ""
 
 #: gtkprefs.c:1472
 msgid "Show or hide arrow indicating who is moving"
-msgstr "SÃ½na eÃ°a fela Ã¶r sem sÃ½nir hver Ã¡ leik"
+msgstr "Sına eğa fela ör sem sınir hver á leik"
 
 #: gtkprefs.c:1479
 msgid "3d Options"
-msgstr "3-vÃ­ddar stillingar"
+msgstr "3-víddar stillingar"
 
 #: gtkprefs.c:1486
 msgid "Show shadows"
-msgstr "SÃ½na skugga"
+msgstr "Sına skugga"
 
 #: gtkprefs.c:1487
 msgid "Display shadows, this option requires a fast graphics card"
-msgstr "SÃ½na skugga, Ã¾essi stilling krefst hraÃ°virks skjÃ¡korts"
+msgstr "Sına skugga, şessi stilling krefst hrağvirks skjákorts"
 
 #: gtkprefs.c:1495
 msgid "light"
-msgstr "ljÃ³s"
+msgstr "ljós"
 
 # Fuzzy
 #: gtkprefs.c:1503
@@ -8415,7 +8420,7 @@ msgstr "Breyta hversu dimmir skuggarnir eru"
 
 #: gtkprefs.c:1507
 msgid "dark"
-msgstr "dÃ¶kkur"
+msgstr "dökkur"
 
 #: gtkprefs.c:1512
 msgid "Animate dice rolls"
@@ -8435,20 +8440,20 @@ msgstr ""
 
 #: gtkprefs.c:1522
 msgid "Close board on exit"
-msgstr "Loka borÃ°i Ã¾egar hÃ¦tt er"
+msgstr "Loka borği şegar hætt er"
 
 #: gtkprefs.c:1523
 msgid "When you quit gnubg, the board will close"
-msgstr "Ãegar Ã¾Ãº hÃ¦ttir Ã­ gnubg mun borÃ°iÃ° lokast"
+msgstr "Şegar şú hættir í gnubg mun borğiğ lokast"
 
 #: gtkprefs.c:1536
 msgid "Board angle: "
-msgstr "SjÃ³narhorn Ã¡ borÃ°:"
+msgstr "Sjónarhorn á borğ:"
 
 #: gtkprefs.c:1544
 #Fuzzy
 msgid "Vary the angle the board is tilted at"
-msgstr "Breyta horninu sem borÃ°inu er hallaÃ° um"
+msgstr "Breyta horninu sem borğinu er hallağ um"
 
 #: gtkprefs.c:1573
 msgid "Plan view"
@@ -8585,7 +8590,7 @@ msgstr ""
 #: gtkrace.c:92 gtkrace.c:216 gtkrace.c:305 gtkrace.c:424
 #, c-format
 msgid "Player %s"
-msgstr "LeikmaÃ°ur %s"
+msgstr "Leikmağur %s"
 
 #: gtkrace.c:100 gtkrace.c:224 gtkrace.c:432
 #, c-format
@@ -8703,11 +8708,11 @@ msgstr "Dreifing kasta"
 
 #: gtkrolls.c:324
 msgid "Depth"
-msgstr "DÃ½pt"
+msgstr "Dıpt"
 
 #: gtksplash.c:74
 msgid "Starting GNU Backgammon "
-msgstr "RÃ¦si GNU Backgammon"
+msgstr "Ræsi GNU Backgammon"
 
 #: gtktempmap.c:109
 #, c-format
@@ -8839,7 +8844,7 @@ msgstr ""
 
 #: gtktheory.c:758
 msgid "-away"
-msgstr "-frÃ¡ sigri"
+msgstr "-frá sigri"
 
 #: gtktheory.c:832
 msgid "Money play"
@@ -8889,28 +8894,28 @@ msgstr ""
 
 #: gtktoolbar.c:200
 msgid "Open match, session, game or position"
-msgstr "Opna keppni, lotu, spil eÃ°a stÃ¶Ã°u"
+msgstr "Opna keppni, lotu, spil eğa stöğu"
 
 #: gtktoolbar.c:210 gtktoolbar.c:467
 msgid "Save match, session, game or position"
-msgstr "Vista keppni, lotu, spil eÃ°a stÃ¶Ã°u"
+msgstr "Vista keppni, lotu, spil eğa stöğu"
 
 #: gtktoolbar.c:227
 msgid "Import match, session, game or position"
-msgstr "Flytja inn keppni, lotu, spil eÃ°a stÃ¶Ã°u"
+msgstr "Flytja inn keppni, lotu, spil eğa stöğu"
 
 #: gtktoolbar.c:245
 msgid "Export match, session, game or position"
-msgstr "Flytja Ãºt keppni, lotu, spil eÃ°a stÃ¶Ã°u"
+msgstr "Flytja út keppni, lotu, spil eğa stöğu"
 
 #: gtktoolbar.c:413
 msgid "New"
-msgstr "NÃ½tt"
+msgstr "Nıtt"
 
 # Fuzzy
 #: gtktoolbar.c:414
 msgid "Start new game, match, session or position"
-msgstr "Hefja nÃ½tt spil, keppni, lotu eÃ°a stÃ¶Ã°u"
+msgstr "Hefja nıtt spil, keppni, lotu eğa stöğu"
 
 #: gtktoolbar.c:420
 msgid "Open"
@@ -8918,7 +8923,7 @@ msgstr "Opna"
 
 #: gtktoolbar.c:421
 msgid "Open game, match, session or position"
-msgstr "Opna spil, keppni, lotu eÃ°a stÃ¶Ã°u"
+msgstr "Opna spil, keppni, lotu eğa stöğu"
 
 #: gtktoolbar.c:428
 msgid "Import"
@@ -8926,7 +8931,7 @@ msgstr "Flytja inn"
 
 #: gtktoolbar.c:429
 msgid "Import game, match or position"
-msgstr "Flytja inn spil, keppni eÃ°a stÃ¶Ã°u"
+msgstr "Flytja inn spil, keppni eğa stöğu"
 
 #: gtktoolbar.c:465
 msgid "Save"
@@ -8934,11 +8939,11 @@ msgstr "Vista"
 
 #: gtktoolbar.c:472
 msgid "Export"
-msgstr "Flytja Ãºt"
+msgstr "Flytja út"
 
 #: gtktoolbar.c:474
 msgid "Export to another format"
-msgstr "Flytja Ãºt Ã­ annaÃ° sniÃ°"
+msgstr "Flytja út í annağ sniğ"
 
 #: gtktoolbar.c:487
 msgid "Take the offered cube or accept the offered resignation"
@@ -8974,11 +8979,11 @@ msgstr ""
 
 #: gtktoolbar.c:527
 msgid "Edit"
-msgstr "SÃ½sl"
+msgstr "Sısl"
 
 #: gtktoolbar.c:530
 msgid "Edit position"
-msgstr "SÃ½sla meÃ° stÃ¶Ã°u"
+msgstr "Sısla meğ stöğu"
 
 #: gtktoolbar.c:537
 msgid "Direction"
@@ -8986,15 +8991,15 @@ msgstr "Stefna"
 
 #: gtktoolbar.c:543
 msgid "Reverse direction of play"
-msgstr "SnÃºa viÃ° spilastefnu"
+msgstr "Snúa viğ spilastefnu"
 
 #: gtktoolbar.c:559 progress.c:711
 msgid "Stop"
-msgstr "StÃ¶Ã°va"
+msgstr "Stöğva"
 
 #: gtktoolbar.c:564
 msgid "Stop the current operation"
-msgstr "StÃ¶Ã°va aÃ°gerÃ°"
+msgstr "Stöğva ağgerğ"
 
 #: html.c:141
 msgid "in <head>"
@@ -9183,11 +9188,11 @@ msgstr "%s%s leikur %s"
 #: html.c:2775
 #, c-format
 msgid "%s%s cannot move"
-msgstr "%s%s getur ekki leikiÃ°"
+msgstr "%s%s getur ekki leikiğ"
 
 #: html.c:2809 text.c:590
 msgid "accepts"
-msgstr "Ã¾iggur"
+msgstr "şiggur"
 
 #: html.c:2809 text.c:590
 msgid "rejects"
@@ -9705,7 +9710,7 @@ msgstr ""
 
 #: play.c:61
 msgid "single game"
-msgstr ""
+msgstr "stakt spil"
 
 #: play.c:62
 msgid "gammon"
@@ -9717,11 +9722,11 @@ msgstr ""
 
 #: play.c:66 set.c:3754 show.c:1920
 msgid "very bad"
-msgstr "mjÃ¶g slÃ¦mt"
+msgstr "mjög slæmt"
 
 #: play.c:67 set.c:3749 show.c:1916
 msgid "bad"
-msgstr "slÃ¦mt"
+msgstr "slæmt"
 
 #: play.c:68 set.c:3744 show.c:1912
 msgid "doubtful"
@@ -9733,11 +9738,11 @@ msgstr "gott"
 
 #: play.c:94
 msgid "very unlucky"
-msgstr "mikil Ã³heppni"
+msgstr "mikil óheppni"
 
 #: play.c:95
 msgid "unlucky"
-msgstr "Ã³heppni"
+msgstr "óheppni"
 
 #: play.c:97
 msgid "lucky"
@@ -9789,7 +9794,7 @@ msgstr ""
 #: play.c:933
 #, c-format
 msgid "%s cannot move.\n"
-msgstr "%s getur ekki leikiÃ°.\n"
+msgstr "%s getur ekki leikiğ.\n"
 
 #: play.c:935
 #, c-format
@@ -9841,7 +9846,7 @@ msgstr ""
 #: play.c:3985 play.c:4135 play.c:4289
 msgid ""
 "It is the computer's turn -- type `play' to force it to move immediately."
-msgstr ""
+msgstr "Tölvan á leik -- sláğu inn `play' til ağ láta hana leika strax."
 
 #: play.c:2027 play.c:2355
 msgid "No resignation was offered."
@@ -9850,7 +9855,7 @@ msgstr ""
 #: play.c:2033
 #, c-format
 msgid "%s accepts and wins a %s.\n"
-msgstr "%s Ã¾iggur og vinnur %s.\n"
+msgstr "%s şiggur og vinnur %s.\n"
 
 #: play.c:2064 play.c:2169
 msgid "You must select a move to annotate first."
@@ -9902,7 +9907,7 @@ msgstr ""
 #: play.c:2486
 msgid "Doubling is forbidden by the Crawford rule (see `help set crawford')."
 msgstr ""
-"ÃaÃ° er bannaÃ° aÃ° tvÃ¶falda samkvÃ¦mt Crawford reglu (sjÃ¡ `help set crawford')."
+"Şağ er bannağ ağ tvöfalda samkvæmt Crawford reglu (sjá `help set crawford')."
 
 #: play.c:2493
 msgid "The doubling cube has been disabled (see `help set cube use')."
@@ -9916,27 +9921,27 @@ msgstr ""
 
 #: play.c:2508
 msgid "You are only allowed to double if you are on roll."
-msgstr "ÃÃº mÃ¡tt aÃ°eins tvÃ¶falda ef Ã¾Ãº Ã¡tt kast."
+msgstr "Şú mátt ağeins tvöfalda ef şú átt kast."
 
 #: play.c:2514
 msgid "You can't double after rolling the dice -- wait until your next turn."
 msgstr ""
-"ÃÃº getur ekki tvÃ¶faldaÃ° eftir aÃ° Ã¾Ãº hefur kastaÃ° -- bÃ­ddu Ã¾ar til Ã¾Ãº Ã¡tt "
+"Şú getur ekki tvöfaldağ eftir ağ şú hefur kastağ -- bíddu şar til şú átt "
 "aftur kast."
 
 #: play.c:2521
 msgid "You do not own the cube."
-msgstr "ÃÃº Ã¡tt ekki tvÃ¶fÃ¶ldunarteninginn."
+msgstr "Şú átt ekki tvöföldunarteninginn."
 
 #: play.c:2527 play.c:3916
 #, c-format
 msgid "The cube is already at %d; you can't double any more.\n"
-msgstr "TvÃ¶fÃ¶ldunarteningurin er kominn Ã­ %d; Ã¾Ãº getur ekki tvÃ¶faldaÃ° meira.\n"
+msgstr "Tvöföldunarteningurin er kominn í %d; şú getur ekki tvöfaldağ meira.\n"
 
 #: play.c:2558
 #, c-format
 msgid "%s doubles.\n"
-msgstr "%s tvÃ¶faldar.\n"
+msgstr "%s tvöfaldar.\n"
 
 #: play.c:2698
 msgid "The cube must have been offered before you can drop it."
@@ -9945,12 +9950,12 @@ msgstr ""
 #: play.c:2729
 #, c-format
 msgid "%s refuses the cube and gives up %d point.\n"
-msgstr "%s hafnar tvÃ¶fÃ¶ldun og gefur %d stig.\n"
+msgstr "%s hafnar tvöföldun og gefur %d stig.\n"
 
 #: play.c:2730
 #, c-format
 msgid "%s refuses the cube and gives up %d points.\n"
-msgstr "%s hafnar tvÃ¶fÃ¶ldun og gefur %d stig.\n"
+msgstr "%s hafnar tvöföldun og gefur %d stig.\n"
 
 #: play.c:2776
 #, c-format
@@ -9993,11 +9998,11 @@ msgstr ""
 
 #: play.c:3157
 msgid "The match is already over."
-msgstr ""
+msgstr "Keppninni er lokiğ."
 
 #: play.c:3247 set.c:3068
 msgid "You must specify a valid match length (1 or longer)."
-msgstr ""
+msgstr "Şú verğur ağ tilgreina leyfilega keppnislengd (1 eğa lengri)."
 
 #: play.c:3255
 #, c-format
@@ -10007,25 +10012,26 @@ msgid ""
 msgstr ""
 
 #: play.c:3266
+#Fuzzy
 msgid ""
 "Are you sure you want to start a new match, and discard the game in "
 "progress? "
-msgstr ""
-
+msgstr "Ertu viss um ağ şú viljir hefja nıja keppni og fórna spilinu sem er í gangi"
 #: play.c:3299
 #, c-format
 msgid "A new %d point match has been started.\n"
-msgstr "Hafin er nÃ½ %d stiga keppni.\n"
+msgstr "Hafin er nı %d stiga keppni.\n"
 
 #: play.c:3316
+#Fuzzy
 msgid ""
 "Are you sure you want to start a new session, and discard the game in "
 "progress? "
-msgstr ""
+msgstr "Ertu viss um ağ şú viljir hefja nıja lotu og fórna spilinu sem er í gangi"
 
 #: play.c:3347
 msgid "A new session has been started."
-msgstr "Hafin er nÃ½ lota"
+msgstr "Hafin er nı lota"
 
 #: play.c:3440
 msgid ""
@@ -10041,7 +10047,7 @@ msgstr ""
 
 #: play.c:3699
 msgid "It's not the computer's turn to play."
-msgstr "TÃ¶lvan Ã¡ ekki leik."
+msgstr "Tölvan á ekki leik."
 
 #: play.c:3724
 msgid ""
@@ -10083,11 +10089,11 @@ msgstr ""
 
 #: play.c:3969
 msgid "You can only reject if the cube or a resignation has been offered."
-msgstr "ÃÃº getur bara hafnaÃ° ef Ã¾Ã©r hefur veriÃ° boÃ°in tvÃ¶fÃ¶ldun eÃ°a uppgjÃ¶f."
+msgstr "Şú getur bara hafnağ ef şér hefur veriğ boğin tvöföldun eğa uppgjöf."
 
 #: play.c:3979
 msgid "You must be playing a game if you want to resign it."
-msgstr "ÃÃº verÃ°ur aÃ° vera Ã­ spili til aÃ° geta gefist upp."
+msgstr "Şú verğur ağ vera í spili til ağ geta gefist upp."
 
 #: play.c:4011
 #, c-format
@@ -10097,12 +10103,12 @@ msgstr ""
 #: play.c:4019
 #, c-format
 msgid "%s has already declined your offer of a %s.\n"
-msgstr "%s hefur Ã¾egar hafnaÃ° boÃ°i Ã¾Ã­nu um %s.\n"
+msgstr "%s hefur şegar hafnağ boği şínu um %s.\n"
 
 #: play.c:4027
 #, c-format
 msgid "%s offers to resign a %s.\n"
-msgstr ""
+msgstr "%s bığur uppgjöf upp á %s.\n"
 
 #: play.c:4148 set.c:2465
 msgid "Please resolve the resignation first."
@@ -10111,16 +10117,16 @@ msgstr ""
 #: play.c:4154
 #Fuzzy
 msgid "You have already rolled the dice."
-msgstr "ÃÃº ert nÃº Ã¾egar bÃºin(n) aÃ° kasta teningunum"
+msgstr "Şú ert nú şegar búin(n) ağ kasta teningunum"
 
 #: play.c:4283
 msgid "The cube must have been offered before you can take it."
-msgstr ""
+msgstr "Şağ verğur ağ bjóğa şér tvöföldunarteninginn áğur en şú şiggur hann"
 
 #: play.c:4313
 #, c-format
 msgid "%s accepts the cube at %d.\n"
-msgstr ""
+msgstr "%s şiggur tvöföldunarteninginn á %d.\n"
 
 #: play.c:4351
 msgid ""
@@ -10144,7 +10150,7 @@ msgstr ""
 # Fuzzy
 #: postscript.c:528
 msgid "Position ID:"
-msgstr "StÃ¶Ã°u kt:"
+msgstr "Stöğu kt:"
 
 # Fuzzy
 #: postscript.c:541
@@ -10249,18 +10255,21 @@ msgstr ""
 #: postscript.c:1443
 #, c-format
 msgid "Position %s"
-msgstr "StaÃ°a %s"
+msgstr "Stağa %s"
 
 #: progress.c:92
 msgid "Win statistics"
 msgstr ""
 
 #: progress.c:101
+#Fuzzy
 #, c-format
 msgid ""
 "Win Single\n"
 "%s"
 msgstr ""
+"Vinnur stakt\n"
+"%s"
 
 #: progress.c:103
 #, c-format
@@ -10268,6 +10277,8 @@ msgid ""
 "Win Gammon\n"
 "%s"
 msgstr ""
+"Vinnur Gammon\n"
+"%s"
 
 #: progress.c:105
 #, c-format
@@ -10275,6 +10286,8 @@ msgid ""
 "Win BG\n"
 "%s"
 msgstr ""
+"Vinnur BG\n"
+"%s"
 
 #: progress.c:131 progress.c:225
 #, c-format
@@ -10433,15 +10446,15 @@ msgstr ""
 #: record.c:488
 #, c-format
 msgid "Record for player %s erased.\n"
-msgstr ""
+msgstr "Leikskrá fyrir leikmann %s hefur veriğ eytt.\n"
 
 #: record.c:501
 msgid "Are you sure you want to erase all player records?"
-msgstr "Ertu viss um aÃ° Ã¾Ãº viljir eyÃ°a Ã¶llum leikskrÃ¡m?"
+msgstr "Ertu viss um ağ şú viljir eyğa öllum leikskrám?"
 
 #: record.c:513
 msgid "All player records erased."
-msgstr "Ã–llum leikskrÃ¡m eytt."
+msgstr "Öllum leikskrám eytt."
 
 #: record.c:546 text.c:759
 msgid ""
@@ -10454,12 +10467,12 @@ msgstr ""
 #: record.c:568
 #, c-format
 msgid "No record for player `%s' found.\n"
-msgstr ""
+msgstr "Engar leikskrár fyrir leikmann `%s' fundust.\n"
 
 #: renderprefs.c:601
 #, c-format
 msgid "Unknown setting `%s'.\n"
-msgstr "Ã“Ã¾ekkt stilling `%s'.\n"
+msgstr "Óşekkt stilling `%s'.\n"
 
 #: renderprefs.c:604
 #, c-format
@@ -10616,7 +10629,7 @@ msgstr ""
 
 #: set.c:126
 msgid "Have gnubg make all moves for a player"
-msgstr ""
+msgstr "Láta gnubg leika alla leiki fyrir leikmann"
 
 #: set.c:128
 msgid "Have a human make all moves for a player"
@@ -10624,7 +10637,7 @@ msgstr ""
 
 #: set.c:134
 msgid "Change a player's name"
-msgstr ""
+msgstr "Breyta nafni leikmanns"
 
 #: set.c:136
 msgid "Have pubeval make all moves for a player"
@@ -10677,12 +10690,12 @@ msgstr ""
 
 #: set.c:276
 msgid "Please enter filename!"
-msgstr ""
+msgstr "Vinsamlega sláğu inn skráarnafn!"
 
 #: set.c:281
 #, c-format
 msgid "File %s does not exist or is not readable"
-msgstr ""
+msgstr "Skrá %s er annağhvort ekki til eğa ólæsileg"
 
 #: set.c:293
 #, c-format
@@ -10782,7 +10795,7 @@ msgstr ""
 #: set.c:440 set.c:456
 #, c-format
 msgid "`%s' threshold set to %.3f.\n"
-msgstr ""
+msgstr "`%s' şröskuldur stilltur á %.3f.\n"
 
 #: set.c:449
 #, c-format
@@ -10802,11 +10815,11 @@ msgstr ""
 
 #: set.c:522
 msgid "Show window with messages"
-msgstr ""
+msgstr "Sına glugga meğ skilaboğum"
 
 #: set.c:523
 msgid "Do not show window with message."
-msgstr ""
+msgstr "Ekki sına glugga meğ skilaboğum"
 
 #: set.c:531
 msgid "Will automatically bear off as many chequers as possible."
@@ -10936,27 +10949,27 @@ msgstr ""
 
 #: set.c:703 show.c:595
 msgid "Player 1 moves clockwise (and player 0 moves anticlockwise)."
-msgstr "LeikmaÃ°ur 1 leikur rÃ©ttsÃ¦lis (og leikmaÃ°ur 0 leikur rangsÃ¦lis)."
+msgstr "Leikmağur 1 leikur réttsælis (og leikmağur 0 leikur rangsælis)."
 
 #: set.c:705 show.c:598
 msgid "Player 1 moves anticlockwise (and player 0 moves clockwise)."
-msgstr "LeikmaÃ°ur 1 leikur rangsÃ¦lis (og leikmaÃ°ur 0 leikur rÃ©ttsÃ¦lis)."
+msgstr "Leikmağur 1 leikur rangsælis (og leikmağur 0 leikur réttsælis)."
 
 #: set.c:735
 msgid "Will ask for confirmation before aborting games in progress."
-msgstr ""
+msgstr "Mun leita stağfestingar ef leik er hætt áğur en honum lıkur."
 
 #: set.c:737
 msgid "Will not ask for confirmation before aborting games in progress."
-msgstr ""
+msgstr "Mun ekki leita stağfestingar ef leik er hætt áğur en honum lıkur."
 
 #: set.c:744
 msgid "Will ask for confirmation before overwriting existing files."
-msgstr ""
+msgstr "Mun leita stağfestingar áğur en skrifağ er yfir skrár."
 
 #: set.c:746
 msgid "Will not ask for confirmation overwriting existing files."
-msgstr ""
+msgstr "Mun ekki leita stağfestingar áğur en skrifağ er yfir skrár."
 
 #: set.c:764
 msgid "The cube has been centred (either player may double)."
@@ -10970,15 +10983,15 @@ msgstr ""
 #: set.c:804
 #, c-format
 msgid "%s now owns the cube.\n"
-msgstr ""
+msgstr "%s á teninginn núna.\n"
 
 #: set.c:815
 msgid "Use of the doubling cube is permitted."
-msgstr ""
+msgstr "Leyfilegt er ağ nota tvöföldunarteninginn"
 
 #: set.c:816
 msgid "Use of the doubling cube is disabled."
-msgstr ""
+msgstr "Ekki er hægt ağ nota tvöföldunarteninginn"
 
 #: set.c:820
 msgid ""
@@ -10995,7 +11008,7 @@ msgstr ""
 #: set.c:864
 #, c-format
 msgid "The cube has been set to %d.\n"
-msgstr ""
+msgstr "Tvöföldunarteningurinn hefur veriğ settur í %d.\n"
 
 #: set.c:873
 msgid "You must specify a legal cube value (see `help set cube value')."
@@ -11170,12 +11183,12 @@ msgstr ""
 # Fuzzy
 #: set.c:1137
 msgid "The position and match IDs will be shown above the board."
-msgstr "StÃ¶Ã°u- og keppni kennitÃ¶lur munu sjÃ¡st fyrir ofan borÃ°iÃ°"
+msgstr "Stöğu- og keppni kennitölur munu sjást fyrir ofan borğiğ"
 
 # Fuzzy
 #: set.c:1139
 msgid "The position and match IDs will not be shown."
-msgstr "StÃ¶Ã°u- og keppni kennitÃ¶lur munu ekki sjÃ¡st"
+msgstr "Stöğu- og keppni kennitölur munu ekki sjást"
 
 #: set.c:1146
 msgid "The target help while dragging a chequer will be shown."
@@ -11796,12 +11809,12 @@ msgstr ""
 #: set.c:2640 set.c:2692
 #, fuzzy, c-format
 msgid "Unknown warning %s."
-msgstr "Ã“Ã¾ekkt stilling `%s'.\n"
+msgstr "Óşekkt stilling `%s'.\n"
 
 #: set.c:2658
 #, fuzzy, c-format
 msgid "Unknown value %s."
-msgstr "Ã“Ã¾ekkt stilling `%s'.\n"
+msgstr "Óşekkt stilling `%s'.\n"
 
 #: set.c:2662
 #, c-format
@@ -11832,7 +11845,7 @@ msgstr ""
 
 #: set.c:2727
 msgid "You must specify a number between 1 and 6.\n"
-msgstr "ÃÃº verÃ°ur aÃ° tilgreina tÃ¶lu milli 1 og 6.\n"
+msgstr "Şú verğur ağ tilgreina tölu milli 1 og 6.\n"
 
 #: set.c:2733
 #, c-format
@@ -11843,11 +11856,11 @@ msgstr ""
 
 #: set.c:2742
 msgid "Match winning chances will be shown as percentages."
-msgstr "SigurlÃ­kur Ã­ keppni verÃ°a sÃ½ndar sem prÃ³sentur."
+msgstr "Sigurlíkur í keppni verğa sındar sem prósentur."
 
 #: set.c:2743
 msgid "Match winning chances will be shown as probabilities."
-msgstr "SigurlÃ­kur Ã­ keppni verÃ°a sÃ½ndar sem lÃ­kur."
+msgstr "Sigurlíkur í keppni verğa sındar sem líkur."
 
 #: set.c:2749
 msgid "Match evaluations will be shown as match winning chances."
@@ -12241,7 +12254,7 @@ msgid ""
 "URL for picture in HTML export is now: \n"
 "%s\n"
 msgstr ""
-"URL fyrir myndir Ã­ HTML Ãºtflutningi er nÃº: \n"
+"URL fyrir myndir í HTML útflutningi er nú: \n"
 "%s\n"
 
 #: set.c:3556
@@ -12254,7 +12267,7 @@ msgstr ""
 
 #: set.c:3573 set.c:4620 set.c:4660
 msgid "You must specify a path."
-msgstr "ÃÃº verÃ°ur aÃ° tilgreina slÃ³Ã°"
+msgstr "Şú verğur ağ tilgreina slóğ"
 
 #: set.c:3710
 msgid "Warn about possibly bad play."
@@ -12305,19 +12318,19 @@ msgstr ""
 
 #: set.c:3990
 msgid "Enable sounds."
-msgstr "Virkja hljÃ³Ã°"
+msgstr "Virkja hljóğ"
 
 #: set.c:3991
 msgid "Disable sounds."
-msgstr "Afvirkja hljÃ³Ã°"
+msgstr "Afvirkja hljóğ"
 
 #: set.c:4003
 msgid "GNU Backgammon will use the ArtsC sound system"
-msgstr "BNU Backgammon mun nota ArtsC hljÃ³Ã°kerfiÃ°"
+msgstr "BNU Backgammon mun nota ArtsC hljóğkerfiğ"
 
 #: set.c:4007
 msgid "GNU Backgammon was compiled without support for the ArtsC sound system"
-msgstr "GNU Backgammon var Ã¾Ã½tt Ã¡n stuÃ°nings viÃ° ArtsC hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon var şıtt án stuğnings viğ ArtsC hljóğkerfiğ"
 
 #: set.c:4018
 msgid "You must specify a command. See `help set sound system command'"
@@ -12332,47 +12345,47 @@ msgstr ""
 
 #: set.c:4038
 msgid "GNU Backgammon will use the ESD sound system"
-msgstr "GNU Backgammon mun nota ESD hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon mun nota ESD hljóğkerfiğ"
 
 #: set.c:4042
 msgid "GNU Backgammon was compiled without support for the ESD sound system"
-msgstr "GNU Backgammon var Ã¾Ã½tt Ã¡n stuÃ°nings viÃ° ESD hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon var şıtt án stuğnings viğ ESD hljóğkerfiğ"
 
 #: set.c:4055
 msgid "GNU Backgammon will use the NAS sound system"
-msgstr "GNU Backgammon mun nota NAS hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon mun nota NAS hljóğkerfiğ"
 
 #: set.c:4059
 msgid "GNU Backgammon was compiled without support for the NAS sound system"
-msgstr "GNU Backgammon var Ã¾Ã½tt Ã¡n stuÃ°nings viÃ° NAS hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon var şıtt án stuğnings viğ NAS hljóğkerfiğ"
 
 #: set.c:4072
 msgid "GNU Backgammon will play sounds to /dev/dsp"
-msgstr "GNU Backgammon mun spila hljÃ³Ã° Ã¡ /dev/dsp"
+msgstr "GNU Backgammon mun spila hljóğ á /dev/dsp"
 
 #: set.c:4076
 msgid ""
 "GNU Backgammon was compiled without support for playing sounds to /dev/dsp"
-msgstr "GNU Backgammon var Ã¾Ã½tt Ã¡n stuÃ°nings til aÃ° spila hljÃ³Ã° Ã¡ /dev/dsp"
+msgstr "GNU Backgammon var şıtt án stuğnings til ağ spila hljóğ á /dev/dsp"
 
 #: set.c:4089
 msgid "GNU Backgammon will use the MS Windows sound system"
-msgstr "GNU Backgammon mun nota MS Windows hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon mun nota MS Windows hljóğkerfiğ"
 
 #: set.c:4093
 msgid ""
 "GNU Backgammon was compiled without support for the MS Windows sound system"
-msgstr "GNU Backgammon var Ã¾Ã½tt Ã¡n stuÃ°nings fyrir MS Windows hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon var şıtt án stuğnings fyrir MS Windows hljóğkerfiğ"
 
 #: set.c:4106
 msgid "GNU Backgammon will use the Apple QuickTime sound system"
-msgstr "GNU Backgammon mun nota Apple QuickTime hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon mun nota Apple QuickTime hljóğkerfiğ"
 
 #: set.c:4110
 msgid ""
 "GNU Backgammon was compiled without support for the Apple QuickTime sound "
 "system"
-msgstr "GNU Backgammon var Ã¾Ã½tt Ã¡n stuÃ°nings fyrir Apple QuickTime hljÃ³Ã°kerfiÃ°"
+msgstr "GNU Backgammon var şıtt án stuğnings fyrir Apple QuickTime hljóğkerfiğ"
 
 #: set.c:4125
 #, c-format
@@ -12416,7 +12429,7 @@ msgstr ""
 #: set.c:4296
 #, c-format
 msgid "Priority of program set to: %s\n"
-msgstr "Forgangur forrits stilltur Ã¡: %s\n"
+msgstr "Forgangur forrits stilltur á: %s\n"
 
 #: set.c:4299
 #, c-format
@@ -12450,11 +12463,11 @@ msgstr ""
 
 #: set.c:4433
 msgid "You must specify a size between 1 and 21."
-msgstr "ÃÃº verÃ°ur aÃ° tilgreina stÃ¦rÃ° milli 1 og 21."
+msgstr "Şú verğur ağ tilgreina stærğ milli 1 og 21."
 
 #: set.c:4451
 msgid "You must specify a size between 1 and 20."
-msgstr "ÃÃº verÃ°ur aÃ° tilgreina stÃ¦rÃ° milli 1 og 20."
+msgstr "Şú verğur ağ tilgreina stærğ milli 1 og 20."
 
 #: set.c:4457
 #, c-format
@@ -12557,7 +12570,7 @@ msgstr ""
 #: set.c:4701
 #, c-format
 msgid "The current language preference is already set to %s."
-msgstr "TungumÃ¡l er nÃº Ã¾egar stillt Ã¡ %s."
+msgstr "Tungumál er nú şegar stillt á %s."
 
 #: set.c:4708
 #, c-format
@@ -12566,9 +12579,9 @@ msgid ""
 "Please remember to save settings.\n"
 "The new setting will only take effect on the next start of gnubg."
 msgstr ""
-"TungumÃ¡l hefur veriÃ° stillt Ã¡ `%s'.\n"
-"Vinsamlegast muniÃ° eftir aÃ° vista stillingar.\n"
-"NÃ½jar stillingar taka ekki gildi fyrr en gnubg hefur veriÃ° endurrÃ¦st."
+"Tungumál hefur veriğ stillt á `%s'.\n"
+"Vinsamlegast muniğ eftir ağ vista stillingar.\n"
+"Nıjar stillingar taka ekki gildi fyrr en gnubg hefur veriğ endurræst."
 
 #: set.c:4718
 msgid "Game list, Annotation and Message panels/windows will be displayed."
@@ -13079,7 +13092,7 @@ msgstr ""
 
 #: show.c:842
 msgid "    Checker play:"
-msgstr "    TÃ¶fluleikni:"
+msgstr "    Töfluleikni:"
 
 #: show.c:850
 msgid "pubeval\n"
@@ -13110,22 +13123,22 @@ msgstr ""
 #: show.c:894
 #, c-format
 msgid "The score (after %d game) is: %s %d, %s %d"
-msgstr "StaÃ°an (eftir %d spil) er: %s %d, %s %d"
+msgstr "Stağan (eftir %d spil) er: %s %d, %s %d"
 
 #: show.c:895
 #, c-format
 msgid "The score (after %d games) is: %s %d, %s %d"
-msgstr "StaÃ°an (eftir %d spil) er: %s %d, %s %d"
+msgstr "Stağan (eftir %d spil) er: %s %d, %s %d"
 
 #: show.c:902
 #, c-format
 msgid " (match to %d point%s).\n"
-msgstr " (keppni aÃ° %d stigi%s).\n"
+msgstr " (keppni ağ %d stigi%s).\n"
 
 #: show.c:903
 #, c-format
 msgid " (match to %d points%s).\n"
-msgstr " (keppni aÃ° %d stigum%s).\n"
+msgstr " (keppni ağ %d stigum%s).\n"
 
 #: show.c:906
 msgid ", Crawford game"
@@ -13195,7 +13208,7 @@ msgstr ""
 #: show.c:1081 show.c:1086
 #, c-format
 msgid " %3i-away "
-msgstr " %3i-frÃ¡ sigri "
+msgstr " %3i-frá sigri "
 
 #: show.c:1108
 msgid "Effective pip count:"
@@ -13263,11 +13276,11 @@ msgstr ""
 
 #: show.c:1282
 msgid "Match winning chances will be shown as percentages.\n"
-msgstr "SigurlÃ­kur Ã­ keppni verÃ°a sÃ½ndar sem prÃ³sentur.\n"
+msgstr "Sigurlíkur í keppni verğa sındar sem prósentur.\n"
 
 #: show.c:1283
 msgid "Match winning chances will be shown as probabilities.\n"
-msgstr "SigurlÃ­kur Ã­ keppni verÃ°a sÃ½ndar sem lÃ­kur.\n"
+msgstr "Sigurlíkur í keppni verğa sındar sem líkur.\n"
 
 #: show.c:1286
 msgid "Match equities shown in MWC (match winning chance) (match play only)."
@@ -13280,11 +13293,11 @@ msgstr ""
 
 #: show.c:1293
 msgid "Game winning chances will be shown as percentages.\n"
-msgstr "SigurlÃ­kur Ã­ spili verÃ°a sÃ½ndar sem prÃ³sentur.\n"
+msgstr "Sigurlíkur í spili verğa sındar sem prósentur.\n"
 
 #: show.c:1294
 msgid "Game winning chances will be shown as probabilities.\n"
-msgstr "SigurlÃ­kur Ã­ spili verÃ°a sÃ½ndar sem lÃ­kur.\n"
+msgstr "Sigurlíkur í spili verğa sındar sem líkur.\n"
 
 #: show.c:1300
 msgid "Boards will be shown in raw format.\n"
@@ -13320,13 +13333,13 @@ msgid ""
 "%s, %s and %s.\n"
 "\n"
 msgstr ""
-"GNU Backgammon var skrifaÃ° af %s, %s, %s\n"
+"GNU Backgammon var skrifağ af %s, %s, %s\n"
 "%s, %s og %s.\n"
 "\n"
 
 #: show.c:1342
 msgid "Special thanks to:"
-msgstr "SÃ©rstakar Ã¾akkir til:"
+msgstr "Sérstakar şakkir til:"
 
 #: show.c:1417
 #, c-format
@@ -13448,7 +13461,7 @@ msgid ""
 "Output move analysis:\n"
 msgstr ""
 "\n"
-"Ãšttak greiningar Ã¡ leikjum:\n"
+"Úttak greiningar á leikjum:\n"
 
 #: show.c:1731
 msgid "- show at most"
@@ -13773,7 +13786,7 @@ msgstr ""
 
 #: sound.c:80
 msgid "Starting GNU Backgammon"
-msgstr "RÃ¦si GNU Backgammon"
+msgstr "Ræsi GNU Backgammon"
 
 # Fuzzy
 #: sound.c:81
@@ -13783,7 +13796,7 @@ msgstr "Loka GNU Backgammon"
 # Fuzzy
 #: sound.c:83
 msgid "Doubling"
-msgstr "TvÃ¶falda"
+msgstr "Tvöfalda"
 
 #: sound.c:85
 msgid "Chequer movement"
@@ -14085,16 +14098,16 @@ msgstr ""
 
 #: board3d/gtkcolour3d.c:367
 msgid "Texture:"
-msgstr "ÃferÃ°:"
+msgstr "Áferğ:"
 
 #: board3d/gtkcolour3d.c:376
 msgid "Preview:"
-msgstr "ForsÃ½n:"
+msgstr "Forsın:"
 
 #: board3d/gtkcolour3d.c:439
 msgid "3d Colour selection"
-msgstr "3-vÃ­ddar litaval"
+msgstr "3-víddar litaval"
 
 #: board3d/inc3d.h:70
 msgid "No texture"
-msgstr "Engin Ã¡ferÃ°"
+msgstr "Engin áferğ"
