@@ -1,0 +1,69 @@
+dnl  Autoconf script for gnubg, the backgammon player.
+dnl To rebuild the `configure' script from this, execute the command
+dnl     autoconf
+dnl in the directory containing this script.
+dnl
+dnl by Gary Wong, 1999.
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, version 2.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+dnl
+dnl $Id$
+
+AC_INIT(gnubg.c)
+AM_INIT_AUTOMAKE(gnubg,0.02)
+AM_CONFIG_HEADER(config.h)
+
+if test -f config.options
+then
+  . ./config.options
+fi
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+
+dnl Checks for libraries.
+AC_CHECK_LIB(m, sqrt)
+AC_CHECK_LIB(readline, readline)
+AC_CHECK_LIB(gdbm, gdbm_open)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_TIME
+AC_CHECK_HEADERS(fcntl.h sys/mman.h sys/time.h unistd.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+
+dnl Checks for library functions.
+AC_FUNC_MMAP
+AC_CHECK_FUNCS(sigaction sigvec,break)
+AC_CHECK_FUNCS(gettimeofday)
+AC_CHECK_FUNCS(random)
+AC_TYPE_SIGNAL
+
+dnl Check for the X Window System.
+AC_PATH_XTRA
+AM_CONDITIONAL(NOX, test "$no_x" = "yes" )
+
+dnl Record installation paths.
+AC_DEFINE_DIR(PKGDATADIR, pkgdatadir)
+
+if test "$no_x" != "yes"; then
+  conf_ext=ext
+fi
+AC_CONFIG_SUBDIRS(lib $conf_ext)
+
+AC_OUTPUT(Makefile)
+

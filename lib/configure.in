@@ -1,0 +1,46 @@
+dnl  Autoconf script for libevent, the event handling library.
+dnl To rebuild the `configure' script from this, execute the command
+dnl     autoconf
+dnl in the directory containing this script.
+dnl
+dnl by Gary Wong, 1996.
+dnl
+dnl This program is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published by
+dnl the Free Software Foundation, version 2.
+dnl
+dnl This program is distributed in the hope that it will be useful,
+dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+dnl GNU General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with this program; if not, write to the Free Software
+dnl Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+AC_INIT(event.c)
+AM_INIT_AUTOMAKE(event,0.0)
+AM_CONFIG_HEADER(config.h)
+
+if test -f config.options
+then
+  . ./config.options
+fi
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(limits.h syslog.h sys/time.h sys/types.h sys/uio.h unistd.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_TIME
+
+dnl Checks for library functions.
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(gettimeofday select)
+
+AC_OUTPUT(Makefile)

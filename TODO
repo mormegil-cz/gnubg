@@ -1,0 +1,16 @@
+* Check "show" exists for every "set"!
+* Add cube handling for computer player.
+* Add options for Jacoby/cubeless.
+* Save positions and evaluations to databases.
+* Add matches and money sessions.
+* Add supervised training.
+* Use Guile if available.
+* Use X (prime interface) if available.
+* Add more completions to help and readline.
+* Allow user to vary parameters for rollouts.
+* Allow timeouts for "train" (and others?).
+* Add a neural net to correct errors in BEAROFF1 class.
+* Clean up the search paths for weights and database.
+* Load, save and analyse games and matches.
+* Add different dice generators.
+* Improve the evaluator!

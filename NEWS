@@ -1,0 +1,26 @@
+GNU Backgammon NEWS -- history of user-visible changes.  9 Dec 1999
+
+** Added support for other dice generators ("set rng").
+
+* Changes in GNU Backgammon 0.02
+
+** Bug fixes (10225, 10227).
+
+** Added --tty option to disable X operation, and made
+everything fall back to TTY if X fails.
+
+** Now reads weights and bearoff database from $pkgdatadir (defaults to
+/usr/local/share/gnubg/) if not found in current directory.
+
+** Started implementation of supervised training (only enabled if gdbm is
+available).  See "help database".
+
+* Changes in GNU Backgammon 0.01
+
+** Bug fixes (100110, 100113, 100114, 100115, 100118, 100122, 100150).
+
+** Rudimentary X window system support.
+
+* GNU Backgammon 0.0
+
+** Initial release.

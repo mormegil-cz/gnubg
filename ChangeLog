@@ -1,0 +1,73 @@
+Fri Dec 10 18:19:16 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c: Added lMatch and lGame data structures, and started
+	implementing CommandSaveMatch, etc.
+
+Thu Dec  9 17:24:14 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* isaac.c: New file.  Added support for ISAAC dice generator.
+	
+	* dice.c: Added support for ISAAC.
+
+Fri Dec  3 17:07:35 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* dice.c: New file.  Adding support for other dice generators
+	(ANSI, BSD and Mersenne Twister supported so far).
+
+	* xgame.c (StatsMove): handle O's moves correctly (bug 100225).
+
+	* set.c (CommandSetBoard): Display new board once it's set.
+
+Thu Dec  2 18:16:21 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* xgame.c (GameSetBoard): Fixed the display of player 0's pieces.
+	Still some smaller cosmetic problems, but it works well enough to
+	see.
+
+Wed Dec  1 18:05:19 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* database.c: New file.
+
+Tue Nov 30 17:03:43 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c: added --tty option to disable X operation, and made
+	everything fall back to TTY if X fails.
+
+	* eval.c (RolloutGame): added SanityCheck() so that variance
+	reduction doesn't lead to illegal output.
+
+Wed Nov 24 13:58:30 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* eval.c (EvalInitialise): read weights and bearoff database from
+	$pkgdatadir (defaults to /usr/local/share/gnubg/) if not found in
+	current directory.
+
+Tue Nov 23 15:58:39 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c (usage): updated e-mail address.
+
+	* eval.c (EvalInitialise): fall back to malloc() and read() if
+ 	mmap() fails.
+
+Mon Nov 22 18:56:35 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* gnubg.c: added global definition for (gnubg) prompt.
+	[!HAVE_LIBREADLINE] Only display prompt if stdin is a TTY.
+
+	* Added rudimentary X window system support.
+	
+	* pub_eval.c: Eliminated rdwts() and hard-coded wr[] and wc[] in
+ 	pub_eval.c.
+
+	* set.c (CommandSetDice): Fixed setting dice for both players (bug
+ 	100122).
+
+	* eval.c (EvalInitialise): now gives decent error messages (bug
+ 	100110).
+	(FindBestMoves): fixed array overflow (bug 100114).
+	(SaveMoves): store all bear off moves as destination point 0,
+	even if the roll to bear off was more than necessary (bug 100150.)
+
+Sat Jan 30 12:35:04 1999  Gary Wong  <gary@cs.arizona.edu>
+
+	* Version 0.0 released.

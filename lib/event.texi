@@ -1,0 +1,100 @@
+\input texinfo
+@setfilename event.info
+@settitle libevent: A library for event handling
+@include version.texi
+
+@set month-year September, 1996
+
+@ifinfo
+This file documents the libevent library for event handling.
+
+By Gary Wong, 1996.
+@end ifinfo
+
+@titlepage
+@sp 10
+@title The libevent library
+@subtitle version @value{VERSION}
+@subtitle @value{month-year}
+@author Gary Wong
+
+@end titlepage
+
+@ifinfo
+@node Top
+@top libevent library
+
+This manual documents how to use the libevent library for asynchronous
+event handling.  It corresponds to version @value{VERSION} (updated
+in @value{month-year}).
+
+@menu
+* Introduction::
+* Generators::
+* Handlers::
+* Timeouts::
+* Concept Index::		  Index of concepts described in this manual.
+* Function and Variable Index::	  Index of externally visible functions
+				  and variables.
+@end menu
+@end ifinfo
+
+@syncodeindex fn vr
+
+@node Introduction
+@chapter Introduction
+@cindex introduction
+
+FIXME general introduction.
+
+Every event has a generator and a handler.  Only the generator may
+signal that the event has occurred, and only the handler can mark
+handling as completed.
+
+Each event is handled either synchronously or asynchronously (FIXME
+the generator decides?) ---
+when a generator signals a synchronous event, it is handled immediately
+and the result from the handler is available on completion; but when
+an asynchronous event is handled the generator retains control, and
+the handler is invoked at some later stage.  The generator cannot
+directly obtain the result of the handler in this case.
+
+In general, an event handler cannot know in advance whether it can handle
+a message immediately or not.
+
+All events can have timeouts (which are normally set by the handler).  If it
+has not occurred within the timeout period, the timeout handler is
+called instead of the normal handler.
+
+@node Generators
+@chapter Generators
+@cindex generator
+
+Generator can:
+ - signal event as occurred
+ - close generation of further events
+
+@node Handlers
+@chapter Handlers
+@cindex handler
+
+Handler can:
+ - mark handling as complete
+ - set, clear or change timeout
+
+@node Timeouts
+@chapter Timeouts
+@cindex timeout
+
+Blah blah.
+
+@node Concept Index
+@appendix Concept Index
+@printindex cp
+
+@node Function and Variable Index
+@appendix Function and Variable Index
+@printindex vr
+
+@contents
+@bye
