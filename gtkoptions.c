@@ -1463,9 +1463,8 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
 	if (rdAppearance.fDisplayType == DT_3D)
 	{
 		if (rdAppearance.quickDraw)
-		{	/* Target help and dice below board disabled in quick draw mode */
+		{	/* Dice below board disabled in quick draw mode - for now */
 			gtk_widget_set_sensitive(pow->pwUseDiceIcon, 0);
-			gtk_widget_set_sensitive(pow->pwDragTargetHelp, 0);
 		}
 	}
 #endif

@@ -1093,8 +1093,7 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 	if (rdAppearance.fDisplayType == DT_3D)
 	{	/* Make sure main drawing area's context is current */
 		if (rdAppearance.quickDraw)
-		{	/* Disable drag help and dice below board too */
-			fGUIDragTargetHelp = 0;
+		{	/* Disable dice below board - for now */
 			fGUIDiceArea = 0;
 		}
 		MakeCurrent3d(bd->drawing_area3d);

@@ -1665,8 +1665,13 @@ void RestrictiveRender(BoardData *bd)
 			numRestrictFrames--;
 		else
 		{
-			freezeRestrict = 0;
-			break;
+			if (numRestrictFrames > 1)
+				numRestrictFrames--;
+			else
+			{
+				freezeRestrict = 0;
+				break;
+			}
 		}
 	}
 }
@@ -1723,9 +1728,6 @@ void RestrictiveEndMouseMove(BoardData *bd, int pos, int depth)
 		EnlargeCurrentToBox(&lastCb);
 
 	freezeRestrict = 0;
-
-	if (numRestrictFrames > 1)
-		numRestrictFrames = -1;
 }
 
 void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])

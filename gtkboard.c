@@ -1558,7 +1558,17 @@ static int GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
 }
 
-
+#if USE_BOARD3D
+static void RestrictiveDrawTargetHelp(BoardData* bd)
+{
+	int i;
+	for (i = 0; i < 4; i++)
+	{
+		if (bd->iTargetHelpPoints[i] != -1)
+			RestrictiveDrawPiece(bd, bd->iTargetHelpPoints[i], abs(bd->points[bd->iTargetHelpPoints[i]]) + 1);
+	}
+}
+#endif
 
 extern int
 UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
@@ -1985,28 +1995,13 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)
-	{
 		dest = BoardPoint3d(bd, x, y, -1);
-	}
 	else
 #endif
 	{
 		board_end_drag( board, bd );
-
-		/* undo drag target help */
-		if (fGUIDragTargetHelp && bd->DragTargetHelp)
-		{
-			int i;
-			for ( i = 0; i <= 3; ++i )
-			{
-				if (bd->iTargetHelpPoints[i] != -1)
-					board_invalidate_point(bd, bd->iTargetHelpPoints[i]);
-			}
-		}
-
 		dest = board_point(board, bd, x, y);
 	}
-	bd->DragTargetHelp = 0;
 
 	if (!editing && dest == bd->drag_point &&
 		gdk_event_get_time( (GdkEvent*)event ) - bd->click_time < CLICK_TIME)
@@ -2097,9 +2092,26 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 		/* Update 3d Display */
 		updatePieceOccPos(bd);
 		gtk_widget_queue_draw(board);
-	}
-#endif
 
+		/* undo drag target help if quick drawing */
+		if (rdAppearance.quickDraw && fGUIDragTargetHelp && bd->DragTargetHelp)
+			RestrictiveDrawTargetHelp(bd);
+	}
+	else
+#endif
+	{
+		/* undo drag target help */
+		if (fGUIDragTargetHelp && bd->DragTargetHelp)
+		{
+			int i;
+			for ( i = 0; i <= 3; ++i )
+			{
+				if (bd->iTargetHelpPoints[i] != -1)
+					board_invalidate_point(bd, bd->iTargetHelpPoints[i]);
+			}
+		}
+	}
+	bd->DragTargetHelp = 0;
 	bd->drag_point = -1;
 
 	return TRUE;
@@ -2128,12 +2140,19 @@ gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData*
 	if (bd->drag_point < 0)
 		return TRUE;
 
+	board_drag(board, bd, x, y);
+
 	if (fGUIDragTargetHelp && !bd->DragTargetHelp && !editing)
 	{	/* Decide if drag targets should be shown (shown after small pause) */
 		if ((ap[bd->drag_colour == -1 ? 0 : 1].pt == PLAYER_HUMAN)		/* not for computer turn */
 			&& gdk_event_get_time((GdkEvent*)event) - bd->click_time > HINT_TIME)
 		{
 			bd->DragTargetHelp = LegalDestPoints(bd, bd->iTargetHelpPoints);
+
+#if USE_BOARD3D
+			if (rdAppearance.quickDraw && fGUIDragTargetHelp && bd->DragTargetHelp)
+				RestrictiveDrawTargetHelp(bd);
+#endif
 		}
 	}
 #if USE_BOARD3D
@@ -2170,8 +2189,6 @@ gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData*
 			free( TargetHelpColor );
 		}
 	}
-
-	board_drag(board, bd, x, y);
 
 	return TRUE;
 }
