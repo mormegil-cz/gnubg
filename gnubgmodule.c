@@ -953,12 +953,12 @@ PyMove(const int move[8])
 }
 
 static const char*
-luckString(lucktype const lt)
+luckString(lucktype const lt, int const ignoreNone)
 {
   switch( lt ) {
     case LUCK_VERYBAD: return "verybad";
     case LUCK_BAD: return "bad";
-    case LUCK_NONE: return "unmarked";
+    case LUCK_NONE: return ignoreNone ? 0 : "unmarked";
     case LUCK_GOOD: return "good";
     case LUCK_VERYGOOD: return "verygood";
   }
@@ -997,17 +997,10 @@ static void
 addLuck(PyObject* dict, float const rLuck, lucktype const lt)
 {
   if( dict ) {
-    const char* l = 0;
+    const char* l = luckString(lt, 1);
+
     if( rLuck != ERR_VAL ) {
       DictSetItemSteal(dict, "luck-value", PyFloat_FromDouble(rLuck));
-    }
-    
-    switch( lt ) {
-      case LUCK_VERYBAD:  l = "verybad"; break;
-      case LUCK_BAD:      l = "verybad"; break;
-      case LUCK_NONE:                    break;
-      case LUCK_GOOD:     l = "good";    break;
-      case LUCK_VERYGOOD: l = "verygood"; break;
     }
 
     if( l ) {
@@ -1303,7 +1296,7 @@ PyGameStats(const statcontext* sc)
       {
 	lucktype lt;
 	for( lt = LUCK_VERYBAD; lt <= LUCK_VERYGOOD; lt++ ) {
-	  DictSetItemSteal(m, luckString(lt),
+	  DictSetItemSteal(m, luckString(lt, 0),
 			   PyInt_FromLong(sc->anLuck[0][lt]));
 	}
       }
@@ -1327,14 +1320,14 @@ PyGameStats(const statcontext* sc)
 /* plGame: Game as a list of records.
    doAnalysis: if true, add analysis info.
    verbose: if true, add derived analysis data.
-   includeStatistics: add game statistics.
+   scMatch: if non-0, add game & match statistics.
  */
 
 static PyObject*
 PythonGame(const list*    plGame,
 	   int const      doAnalysis,
 	   int const      verbose,
-	   int const      includeStatistics,
+	   statcontext*   scMatch,
 	   int const      includeBoards,
 	   PyMatchState*  ms)
 {
@@ -1384,9 +1377,11 @@ PythonGame(const list*    plGame,
 
   DictSetItemSteal(gameDict, "info", gameInfoDict);
     
-  if( includeStatistics ) {
-    
+  if( scMatch ) {
     updateStatisticsGame( plGame );
+    
+    AddStatcontext(&g->sc, scMatch);
+    
     {
       PyObject* s = PyGameStats(&g->sc);
 
@@ -1744,17 +1739,22 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
     int nGames = 0;
     const list* pl;
     PyObject *matchTuple;
+    statcontext scMatch;
 
     for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
       ++nGames;
     }
 
+    if( statistics ) {
+      IniStatcontext(&scMatch);
+    }
+    
     matchTuple = PyTuple_New(nGames);
 
     nGames = 0;
     for(pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext) {
       PyObject* g = PythonGame(pl->p, includeAnalysis, verboseAnalysis,
-			       statistics, boards, &s);
+			       statistics ? &scMatch : 0 , boards, &s);
 
       if( ! g ) {
 	/* Memory leaked. out of memory anyway */
@@ -1766,6 +1766,14 @@ PythonMatch(PyObject* self IGNORE, PyObject* args, PyObject* keywds)
     }
 
     DictSetItemSteal(matchDict, "games", matchTuple);
+
+    if( statistics ) {
+      PyObject* s = PyGameStats(&scMatch);
+
+      if( s ) {
+	DictSetItemSteal(matchDict, "stats", s);
+      }
+    }
   }
 
   if( s.ec ) {

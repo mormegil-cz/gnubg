@@ -1,3 +1,7 @@
+Mon Sep  1 12:39:20 2003  Joseph Heled  <pepster@users.sourceforge.net>
+
+	* gnubgmodule.c (PythonMatch): Add match statistics to gnubg.match().
+
 Sun Aug 31 22:53:12 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gnubg.c conditionals around StartPythonHandleX/StopPythonHandleX
