@@ -47,6 +47,8 @@ duplication of effort and to make sure our changes merge easily.
 *** Make sure analysis works with resignations.
 *** Consider a way for analysis to mark _good_ moves (e.g. moves which are
   flagged as errors at 0-ply but turn out to be correct at higher plies).
+*** Option "[X] update annotations if re-evaluated or rolled out", and
+  update annotations if option is selected.
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
