@@ -31,7 +31,7 @@ extra=/tmp/extra.$$
 
 cat > $authors <<EOF
 Joseph Heled
-Oeystein Johansen
+Oystein Johansen
 Jonathan Kinsey
 David Montgomery
 Jim Segrave
@@ -51,7 +51,7 @@ Rod Roark
 EOF
 
 cat > $support <<EOF
-Oeystein Johansen,Web Pages
+Oystein Johansen,Web Pages
 Achim Mueller,Manual
 Nardy Pillards,Web Pages
 Albert Silver,Tutorial
@@ -87,6 +87,7 @@ John Chuang
 Tristan Colgate
 Olivier Croisille
 Ned Cross
+Ian Curtis
 Bill Davidson
 Michael Depreli
 Ian Dunstan

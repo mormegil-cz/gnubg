@@ -9,7 +9,7 @@ char aszCOPYRIGHT[] = N_("Copyright 1999, 2000, 2001, 2002, 2003, 2004 "
 
 credEntry ceAuthors[] = {
   {"Joseph Heled", 0},
-  {"Oeystein Johansen", 0},
+  {"Oystein Johansen", 0},
   {"Jonathan Kinsey", 0},
   {"David Montgomery", 0},
   {"Jim Segrave", 0},
@@ -31,7 +31,7 @@ credEntry ceContrib[] = {
 };
 
 credEntry ceSupport[] = {
-  {"Oeystein Johansen", N_("Web Pages") },
+  {"Oystein Johansen", N_("Web Pages") },
   {"Achim Mueller", N_("Manual") },
   {"Nardy Pillards", N_("Web Pages") },
   {"Albert Silver", N_("Tutorial") },
@@ -69,13 +69,14 @@ credEntry ceCredits[] = {
   {"Tristan Colgate", 0},
   {"Olivier Croisille", 0},
   {"Ned Cross", 0},
-  {"Christopher D. Yep", 0},
+  {"Ian Curtis", 0},
   {"Bill Davidson", 0},
   {"Giulio De Marco", 0},
   {"Michael Depreli", 0},
   {"Alberta di Silvio", 0},
   {"Ian Dunstan", 0},
   {"Max Durbano", 0},
+  {"Christopher D. Yep", 0},
   {"Peter Eberhard", 0},
   {"Robert Eberlein", 0},
   {"James F. Kibler", 0},
@@ -150,8 +151,8 @@ credEntry ceCredits[] = {
   {"Sander van Rijnswou", 0},
   {"Robert-Jan Veldhuizen", 0},
   {"Morten Wang", 0},
-  {"JP White", 0},
   {"Jeff White", 0},
+  {"JP White", 0},
   {"Mike Whitton", 0},
   {"Chris Wilson", 0},
   {"Kit Woolsey", 0},
@@ -175,12 +176,12 @@ char aszAUTHORS[] =
 "                         GNU Backgammon was written by:\n"
 "\n"
 "    Joseph Heled            David Montgomery        Gary Wong\n"
-"    Oeystein Johansen       Jim Segrave\n"
+"    Oystein Johansen        Jim Segrave\n"
 "    Jonathan Kinsey         Joern Thyssen\n"
 " \n"
 "                                   Support by:\n"
 "\n"
-"     Oeystein Johansen (Web Pages)   Nardy Pillards (Web Pages)\n"
+"     Oystein Johansen (Web Pages)    Nardy Pillards (Web Pages)\n"
 "     Achim Mueller (Manual)          Albert Silver (Tutorial)\n"
 "\n"
 "                         Contributors of code include:\n"
@@ -202,40 +203,41 @@ char aszAUTHORS[] =
 "\n"
 "             Contributors (of bug reports and suggestions) include:\n"
 "\n"
-"    Elias Kritikos          Nis Jorgensen           Henrik Ravn\n"
-"    Misja Alma              Neil Kazaross           James Rech\n"
-"    Christian Anthon        Mathias Kegelmann       Jared Riley\n"
-"    Kazuaki Asai            Matija Kejzar           Klaus Rindholt\n"
-"    Eric Augustine          Bert Van Kerckhove      Oliver Riordan\n"
-"    Erik Barfoed            James F. Kibler         Hans-Juergen Schaefer\n"
-"    Ron Barry               Johnny Kirk             Steve Schreiber\n"
-"    Steve Baedke            Gerhard Knop            Hugh Sconyers\n"
-"    Stefan van den Berg     Robert Konigsberg       Martin Schrode\n"
-"    Chuck Bower             Martin Krainer          Paul Selick\n"
-"    Adrian Bunk             Corrin Lakeland         Sho Sengoku\n"
-"    Nick Bratby             Tim Laursen             Ian Shaw\n"
-"    Craig Campbell          Eli Liang               Alberta di Silvio\n"
-"    John Chuang             Ege Lundgren            Peter Sochovsky\n"
-"    Tristan Colgate         Kevin Maguire           Mark Spencer\n"
-"    Olivier Croisille       Massimiliano Maini      Scott Steiner\n"
-"    Ned Cross               Giulio De Marco         Maik Stiebler\n"
-"    Bill Davidson           John Marttila           W. Stroop (Rob)\n"
-"    Michael Depreli         Alix Martin             Yoshito Takeuchi\n"
-"    Ian Dunstan             William Maslen          Jacques Thiriat\n"
-"    Max Durbano             Joachim Matussek        Malene Thyssen\n"
-"    Peter Eberhard          Thomas Meyer            Claes Tornberg\n"
-"    Robert Eberlein         Daniel Murphy           Sander van Rijnswou\n"
-"    Fotis                   Magnar Naustdalslid     Robert-Jan Veldhuizen\n"
-"    Kennedy Fraser          Dave Neary              Morten Wang\n"
-"    Ric Gerace              Rolf Nielsen            Jeff White\n"
-"    Michel Grimminck        Mirori Orange           JP White\n"
-"    Eric Groleau            Peter Orum              Mike Whitton\n"
-"    Jeff Haferman           Roy Passfield           Chris Wilson\n"
-"    Morten Juul Henriksen   Thomas Patrick          Kit Woolsey\n"
-"    Alain Henry             Billie Patterson        Frank Worrell\n"
-"    Jens Hoefkens           Zvezdan Petkovic        Christopher D. Yep\n"
-"    Casey Hopkins           Petri Pitkanen          Anders Zachrison\n"
-"    Martin Janke            Sam Pottle              Douglas Zare\n"
+"    Elias Kritikos          Nis Jorgensen           James Rech\n"
+"    Misja Alma              Neil Kazaross           Jared Riley\n"
+"    Christian Anthon        Mathias Kegelmann       Klaus Rindholt\n"
+"    Kazuaki Asai            Matija Kejzar           Oliver Riordan\n"
+"    Eric Augustine          Bert Van Kerckhove      Hans-Juergen Schaefer\n"
+"    Erik Barfoed            James F. Kibler         Steve Schreiber\n"
+"    Ron Barry               Johnny Kirk             Hugh Sconyers\n"
+"    Steve Baedke            Gerhard Knop            Martin Schrode\n"
+"    Stefan van den Berg     Robert Konigsberg       Paul Selick\n"
+"    Chuck Bower             Martin Krainer          Sho Sengoku\n"
+"    Adrian Bunk             Corrin Lakeland         Ian Shaw\n"
+"    Nick Bratby             Tim Laursen             Alberta di Silvio\n"
+"    Craig Campbell          Eli Liang               Peter Sochovsky\n"
+"    John Chuang             Ege Lundgren            Mark Spencer\n"
+"    Tristan Colgate         Kevin Maguire           Scott Steiner\n"
+"    Olivier Croisille       Massimiliano Maini      Maik Stiebler\n"
+"    Ned Cross               Giulio De Marco         W. Stroop (Rob)\n"
+"    Ian Curtis              John Marttila           Yoshito Takeuchi\n"
+"    Bill Davidson           Alix Martin             Jacques Thiriat\n"
+"    Michael Depreli         William Maslen          Malene Thyssen\n"
+"    Ian Dunstan             Joachim Matussek        Claes Tornberg\n"
+"    Max Durbano             Thomas Meyer            Sander van Rijnswou\n"
+"    Peter Eberhard          Daniel Murphy           Robert-Jan Veldhuizen\n"
+"    Robert Eberlein         Magnar Naustdalslid     Morten Wang\n"
+"    Fotis                   Dave Neary              Jeff White\n"
+"    Kennedy Fraser          Rolf Nielsen            JP White\n"
+"    Ric Gerace              Mirori Orange           Mike Whitton\n"
+"    Michel Grimminck        Peter Orum              Chris Wilson\n"
+"    Eric Groleau            Roy Passfield           Kit Woolsey\n"
+"    Jeff Haferman           Thomas Patrick          Frank Worrell\n"
+"    Morten Juul Henriksen   Billie Patterson        Christopher D. Yep\n"
+"    Alain Henry             Zvezdan Petkovic        Anders Zachrison\n"
+"    Jens Hoefkens           Petri Pitkanen          Douglas Zare\n"
+"    Casey Hopkins           Sam Pottle\n"
+"    Martin Janke            Henrik Ravn\n"
 "\n"
 "\n"
 "  Credit is also due to those who have published information about backgammon\n"

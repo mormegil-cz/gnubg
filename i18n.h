@@ -22,6 +22,10 @@
 #ifndef _I18N_H_
 #define _I18N_H_
 
+#if HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <stdio.h>
 
 #if HAVE_LOCALE_H
