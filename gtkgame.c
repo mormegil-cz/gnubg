@@ -5098,7 +5098,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
     if( rw.rcRollout.fInitial != rcRollout.fInitial ) {
       sprintf( sz, "set rollout initial %s",
-               rw.rcRollout.fVarRedn ? "on" : "off" );
+               rw.rcRollout.fInitial ? "on" : "off" );
       UserCommand( sz );
     }
 

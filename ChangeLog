@@ -1,3 +1,10 @@
+Sun Nov 24 22:17:28 2002  Gary Wong  <gtw@gnu.org>
+
+	* gtkgame.c (SetRollouts): Correct typo in check of rcRollout.fInitial.
+
+	* rollout.c (QuasiRandomDice): Handle failure of RollDice() on initial
+	roll.
+
 Sun Nov 24 22:24:17 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* osr.c (osp): remove debug printf.
