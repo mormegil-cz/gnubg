@@ -33,6 +33,10 @@ Tue Oct  3 20:35:45 2000  Joseph Heled  <pepe@internet.co.nz>
 	* eval.c (EvalRace): Add checks for possiblity of backgammon and
 	almost exact evaluation.
 
+Fri Sep 29 18:12:48 2000  Gary Wong  <gtw@research.att.com>
+
+	* play.c (ComputerTurn): Bug fix (pubeval wouldn't roll dice).
+
 Tue Aug 29 20:48:56 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* eval.c (EvalBearoff1Full): Fix evaluation of bearoff positions
