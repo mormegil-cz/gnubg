@@ -53,7 +53,7 @@ Jim Segrave
 Ian Shaw
 Peter Sochovsky
 Maik Stiebler
-RobStroop (KingKruk)
+W. Stroop (Rob)
 Jacques Thiriat
 Robert-Jan Veldhuizen
 JP White
