@@ -25,6 +25,9 @@
 #include <errno.h>
 #include <limits.h>
 #include <math.h>
+#if HAVE_PWD_H
+#include <pwd.h>
+#endif
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,8 +74,8 @@ int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn = -1, fDisplay = TRUE,
     fCubeUse = TRUE;
 
 player ap[ 2 ] = {
-    { "O", PLAYER_GNU, 0 },
-    { "X", PLAYER_HUMAN, 0 }
+    { "gnubg", PLAYER_GNU, 0 },
+    { "user", PLAYER_HUMAN, 0 }
 };
 
 static command acDatabase[] = {
@@ -101,14 +104,14 @@ static command acDatabase[] = {
       NULL },
     { NULL, NULL, NULL, NULL }
 }, acSetCube[] = {
-    { "center", CommandNotImplemented, "The U.S.A. spelling of `centre'",
+    { "center", CommandSetCubeCentre, "The U.S.A. spelling of `centre'",
       NULL },
-    { "centre", CommandNotImplemented, "Allow both players access to the "
+    { "centre", CommandSetCubeCentre, "Allow both players access to the "
       "cube", NULL },
-    { "owner", CommandNotImplemented, "Allow only one player to double",
+    { "owner", CommandSetCubeOwner, "Allow only one player to double",
       NULL },
     { "use", CommandSetCubeUse, "Enable use of the doubling cube", NULL },
-    { "value", CommandNotImplemented, "Fix what the cube has been set to",
+    { "value", CommandSetCubeValue, "Fix what the cube has been set to",
       NULL },
     { NULL, NULL, NULL, NULL }
 }, acSetRNG[] = {
@@ -306,7 +309,7 @@ extern int ParsePosition( int an[ 2 ][ 25 ], char *sz ) {
     return 0;
 }
 
-extern void SetToggle( char *szName, int *pf, char *sz, char *szOn,
+extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff ) {
 
     char *pch = NextToken( &sz );
@@ -316,7 +319,7 @@ extern void SetToggle( char *szName, int *pf, char *sz, char *szOn,
 	printf( "You must specify whether to set %s on or off (see `help set "
 		"%s').\n", szName, szName );
 
-	return;
+	return -1;
     }
 
     cch = strlen( pch );
@@ -327,7 +330,7 @@ extern void SetToggle( char *szName, int *pf, char *sz, char *szOn,
 
 	puts( szOn );
 
-	return;
+	return TRUE;
     }
 
     if( !strcasecmp( "off", pch ) || !strncasecmp( "no", pch, cch ) ||
@@ -336,10 +339,12 @@ extern void SetToggle( char *szName, int *pf, char *sz, char *szOn,
 
 	puts( szOff );
 
-	return;
+	return FALSE;
     }
 
     printf( "Illegal keyword `%s' -- try `help set %s'.\n", pch, szName );
+
+    return -1;
 }
 
 static command *FindContext( command *pc, char *sz, int ich, int fDeep ) {
@@ -448,16 +453,15 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
 extern void ShowBoard( void ) {
 
     char szBoard[ 2048 ];
-    char sz[ 32 ], szCube[ 32 ];
-    char *apch[ 7 ] = { ap[ 0 ].szName, NULL, NULL, NULL, NULL, NULL,
-			ap[ 1 ].szName };
+    char sz[ 32 ], szCube[ 32 ], szPlayer0[ 35 ], szPlayer1[ 35 ];
+    char *apch[ 7 ] = { szPlayer0, NULL, NULL, NULL, NULL, NULL, szPlayer1 };
 
     if( fTurn == -1 ) {
 #if !X_DISPLAY_MISSING
 	if( fX ) {
 	    InitBoard( anBoard );
-	    GameSetBoard( &ewnd, anBoard, 0, ap[ 1 ].szName, ap[ 0 ].szName,
-			  nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
+	    GameSet( &ewnd, anBoard, 0, ap[ 1 ].szName, ap[ 0 ].szName,
+		     nMatchTo, anScore[ 1 ], anScore[ 0 ], -1, -1 );
 	} else
 #endif
 	    puts( "No game in progress." );
@@ -473,6 +477,9 @@ extern void ShowBoard( void ) {
 
 	    sprintf( szCube, "Cube offered at %d", nCube << 1 );
 	} else {
+	    sprintf( szPlayer0, "O: %s", ap[ 0 ].szName );
+	    sprintf( szPlayer1, "X: %s", ap[ 1 ].szName );
+
 	    apch[ fMove ? 5 : 1 ] = sz;
 	
 	    if( anDice[ 0 ] )
@@ -515,9 +522,9 @@ extern void ShowBoard( void ) {
 	if( !fMove )
 	    SwapSides( anBoard );
     
-	GameSetBoard( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
-		      nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
-		      anDice[ 1 ] );
+	GameSet( &ewnd, anBoard, fMove, ap[ 1 ].szName, ap[ 0 ].szName,
+		 nMatchTo, anScore[ 1 ], anScore[ 0 ], anDice[ 0 ],
+		 anDice[ 1 ] );
 	
 	if( !fMove )
 	    SwapSides( anBoard );
@@ -1084,7 +1091,7 @@ static void usage( char *argv0 ) {
 
 extern int main( int argc, char *argv[] ) {
 
-    char ch;
+    char ch, *pch;
     static int fNoWeights = FALSE;
     static struct option ao[] = {
         { "help", no_argument, NULL, 'h' },
@@ -1093,7 +1100,10 @@ extern int main( int argc, char *argv[] ) {
         { "version", no_argument, NULL, 'v' },
         { NULL, 0, NULL, 0 }
     };
-
+#if HAVE_GETPWUID
+    struct passwd *ppwd;
+#endif
+    
     fInteractive = isatty( STDIN_FILENO );
     
     while( ( ch = getopt_long( argc, argv, "hntv", ao, NULL ) ) !=
@@ -1139,6 +1149,19 @@ extern int main( int argc, char *argv[] ) {
 			GNUBG_BEAROFF ) )
 	return EXIT_FAILURE;
 
+    if( ( pch = getenv( "LOGNAME" ) ) )
+	strcpy( ap[ 1 ].szName, pch );
+    else if( ( pch = getenv( "USER" ) ) )
+	strcpy( ap[ 1 ].szName, pch );
+#if HAVE_GETLOGIN
+    else if( ( pch = getlogin() ) )
+	strcpy( ap[ 1 ].szName, pch );
+#endif
+#if HAVE_GETPWUID
+    else if( ( ppwd = getpwuid( getuid() ) ) )
+	strcpy( ap[ 1 ].szName, ppwd->pw_name );
+#endif
+    
     ListCreate( &lMatch );
     
     srandom( time( NULL ) );
