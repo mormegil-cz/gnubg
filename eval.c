@@ -2320,18 +2320,18 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
     if ( fPostCrawford ) {
       if ( nMatchTo - anScore[ fMove ]  == 1 )
-				prOutput[ 3 ] = rDoublePass = 1.0;
+	prOutput[ 3 ] = rDoublePass = 1.0;
       else {
-				prOutput[ 3 ] = rDoublePass =
-					GET_Btilde ( nMatchTo - anScore [ fMove ] - 1 - nCube, 
-											 afBtilde );
+	prOutput[ 3 ] = rDoublePass =
+	  GET_Btilde ( nMatchTo - anScore [ fMove ] - 1 - nCube, 
+		       afBtilde );
 	
       }
     }
     else
       prOutput[ 3 ] = rDoublePass = 
-				GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube, 
-								 nMatchTo - anScore[ !fMove ] - 1, aafA1 );
+	GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube, 
+		 nMatchTo - anScore[ !fMove ] - 1, aafA1 );
     
     /* 
      * I can/will use cube:
@@ -2344,7 +2344,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
     fCube = ( ! fCrawford ) &&
       ( anScore[ fMove ] + nCube < nMatchTo ) &&
       ( ! ( fPostCrawford && ( anScore[ fMove ] == nMatchTo - 1
-															 ) ) ) &&
+			       ) ) ) &&
       ( ( fCubeOwner == -1 ) || (fCubeOwner == fMove ) );
 
   }
@@ -2379,54 +2379,54 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       prOutput[ 1 ] = 0.0;
 
       for( n0 = 1; n0 <= 6; n0++ )
-				for( n1 = 1; n1 <= n0; n1++ ) {
+	for( n1 = 1; n1 <= n0; n1++ ) {
 
-					for( i = 0; i < 25; i++ ) {
-						anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-						anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-					}
+	  for( i = 0; i < 25; i++ ) {
+	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	  }
 					
-					if( fInterrupt ) {
-						errno = EINTR;
-						return -1;
-					}
+	  if( fInterrupt ) {
+	    errno = EINTR;
+	    return -1;
+	  }
 					
-					FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
+	  FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
 					
-					SwapSides( anBoardNew );
+	  SwapSides( anBoardNew );
 					
-					/* Check if we're in double window, i.e.
-					 * our winning chance are higher than our
-					 * dead-cube doubling point.
-					 */
+	  /* Check if we're in double window, i.e.
+	   * our winning chance are higher than our
+	   * dead-cube doubling point.
+	   */
 					
-					/* do 0-ply evaluation of current position */
+	  /* do 0-ply evaluation of current position */
 					
-					if( EvaluatePosition( anBoardNew, arDH,  &cix, &ecDH ) )
-						return -1;
+	  if( EvaluatePosition( anBoardNew, arDH,  &cix, &ecDH ) )
+	    return -1;
 
-					/* find dead-cube doubling point */
+	  /* find dead-cube doubling point */
 
-					GetDoublePointDeadCube ( arDH, anScore, 
-																	 nMatchTo, &cix, &rDoublePoint );
+	  GetDoublePointDeadCube ( arDH, anScore, 
+				   nMatchTo, &cix, &rDoublePoint );
 	  
-					if ( arDH[ 0 ] > rDoublePoint )
-						fTempEvalFlag = EVAL_BOTH; /* we might double */
-					else
-						fTempEvalFlag = EVAL_NODOUBLE; /* we'll never double */
+	  if ( arDH[ 0 ] > rDoublePoint )
+	    fTempEvalFlag = EVAL_BOTH; /* we might double */
+	  else
+	    fTempEvalFlag = EVAL_NODOUBLE; /* we'll never double */
 
-					if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec, 
-																			 nPlies - 1, fTempEvalFlag ) ) 
-						return -1;
+	  if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec, 
+				       nPlies - 1, fTempEvalFlag ) ) 
+	    return -1;
 
-					prOutput[ 1 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
+	  prOutput[ 1 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
 
-				}
+	}
 			
       if ( ! nMatchTo )
-				prOutput[ 1 ] /= -36.0;
+	prOutput[ 1 ] /= -36.0;
       else
-				prOutput[ 1 ] = 1.0 - prOutput[ 1 ] / 36.0;
+	prOutput[ 1 ] = 1.0 - prOutput[ 1 ] / 36.0;
       
     }
 
@@ -2454,34 +2454,34 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       SetCubeInfo ( &cix, nCube * 2, ! fMove, ! fMove );
 
       for( n0 = 1; n0 <= 6; n0++ )
-				for( n1 = 1; n1 <= n0; n1++ ) {
+	for( n1 = 1; n1 <= n0; n1++ ) {
 
-					for( i = 0; i < 25; i++ ) {
-						anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-						anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-					}
+	  for( i = 0; i < 25; i++ ) {
+	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	  }
 	  
-					if( fInterrupt ) {
-						errno = EINTR;
-						return -1;
-					}
+	  if( fInterrupt ) {
+	    errno = EINTR;
+	    return -1;
+	  }
 	
-					FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
+	  FindBestMovePlied( anMove, n0, n1, anBoardNew, &cix, pec, 0 );
 	
-					SwapSides( anBoardNew );
+	  SwapSides( anBoardNew );
 
-					if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec,
-																			 nPlies - 1, EVAL_BOTH ) ) 
-						return -1;
+	  if( EvaluatePositionCubeful( anBoardNew, pr, &cix, pec,
+				       nPlies - 1, EVAL_BOTH ) ) 
+	    return -1;
 
-					prOutput[ 2 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
+	  prOutput[ 2 ] += ( n0 == n1 ) ? pr[ 0 ] : 2.0 * pr[ 0 ];
 
-				}
+	}
 
       if ( ! nMatchTo )
-				prOutput[ 2 ] /= -18.0; /* multiply by cube value of 2 */
+	prOutput[ 2 ] /= -18.0; /* multiply by cube value of 2 */
       else
-				prOutput[ 2 ] = 1.0 - prOutput[ 2 ] / 36.0;
+	prOutput[ 2 ] = 1.0 - prOutput[ 2 ] / 36.0;
 
       /*
        * If
@@ -2491,16 +2491,16 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
        */
 			
       if ( ( prOutput[ 2 ] >= prOutput[ 1 ] ) && 
-					 ( rDoublePass >= prOutput[ 1 ] ) ) {
+	   ( rDoublePass >= prOutput[ 1 ] ) ) {
 				
-				if ( prOutput[ 2 ] < rDoublePass ) 
-					prOutput[ 0 ] = prOutput[ 2 ];
-				else
-					prOutput[ 0 ] = rDoublePass;
+	if ( prOutput[ 2 ] < rDoublePass ) 
+	  prOutput[ 0 ] = prOutput[ 2 ];
+	else
+	  prOutput[ 0 ] = rDoublePass;
 				
       }
       else
-				prOutput[ 0 ] = prOutput[ 1 ];
+	prOutput[ 0 ] = prOutput[ 1 ];
       
     }
     else
@@ -2525,18 +2525,18 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       /* no value of holding the cube */
 
       if ( ! nMatchTo )
-				prOutput[ 0 ] = Utility ( arOutput, ci );
+	prOutput[ 0 ] = Utility ( arOutput, ci );
       else
-				prOutput[ 0 ] = UtilityMwc ( arOutput, ci );
+	prOutput[ 0 ] = UtilityMwc ( arOutput, ci );
 			
       /* no double: */
       prOutput[ 1 ] = prOutput[ 0 ];
 			
       /* double: */
       if ( fCube ) 
-				prOutput[ 3 ] = prOutput[ 0 ];
+	prOutput[ 3 ] = prOutput[ 0 ];
       else 
-				prOutput[ 3 ] = 0.0;
+	prOutput[ 3 ] = 0.0;
 			
     } 
     else {
@@ -2550,8 +2550,8 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       fNoCube = ( anScore[ fMove ] + nCube >= nMatchTo );
       fNoCube = fNoCube || ( anScore[ ! fMove ] + nCube >= nMatchTo );
       fNoCube = fNoCube ||  
-				( ( anScore[ fMove ] == nMatchTo - 2 ) &&
-					( anScore[ ! fMove ] == nMatchTo - 2 ) );
+	( ( anScore[ fMove ] == nMatchTo - 2 ) &&
+	  ( anScore[ ! fMove ] == nMatchTo - 2 ) );
       fNoCube = fNoCube || fCrawford;
 			
       /*
@@ -2563,139 +2563,148 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
       if ( ! ( nMatchTo && fNoCube ) ) {
 
 
-				float arTakePoint[ 4 ], rEq0, rEq1, rEqC;
-				float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
-				float r0,r1;              
-				int i;	                  
-				float rPoint0, rPoint1, rPoint2, rPoint3;
+	float arTakePoint[ 4 ], rEq0, rEq1, rEqC;
+	float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
+	float r0,r1;              
+	int i;	                  
+	float rPoint0, rPoint1, rPoint2, rPoint3;
+	float rDelta = 0.9;
+	  
 				
-				for ( i = 0; i < NUM_OUTPUTS; i++ )
-					arTemp[ i ] = arOutput[ i ];
-				if ( fMove )              
-					InvertEvaluation ( arTemp );
+	for ( i = 0; i < NUM_OUTPUTS; i++ )
+	  arTemp[ i ] = arOutput[ i ];
+	if ( fMove )              
+	  InvertEvaluation ( arTemp );
 	
 				/* Get the take point using current gammon ratios. */
 				
-				GetTakePoint ( arTemp, anScore, nMatchTo, ci->nCube,
-											 arTakePoint );
+	GetTakePoint ( arTemp, anScore, nMatchTo, ci->nCube,
+		       arTakePoint );
 
 				/* calculate my equity at opp takepoint */
 
-				arTemp[ 0 ] = arTakePoint[ ci->fMove ];
+	arTemp[ 0 ] = arTakePoint[ ci->fMove ];
         arTemp[ 1 ] = 
-					arOutput[ 1 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
+	  arOutput[ 1 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
         arTemp[ 2 ] = 
-					arOutput[ 2 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
-				arTemp[ 3 ] = 
-					( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-					( 1.0 - arTakePoint[ ci->fMove ] );
-				arTemp[ 4 ] = 
-					( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-					( 1.0 - arTakePoint[ ci->fMove ] );
+	  arOutput[ 2 ] / arOutput[ 0 ] * arTakePoint[ ci->fMove ];
+	arTemp[ 3 ] = 
+	  ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+	  ( 1.0 - arTakePoint[ ci->fMove ] );
+	arTemp[ 4 ] = 
+	  ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+	  ( 1.0 - arTakePoint[ ci->fMove ] );
 
-				rEq0 = Utility ( arTemp, ci );
+	rEq0 = Utility ( arTemp, ci );
 
 				/* calculate my equity at opp takepoint */
 
-				arTemp[ 0 ] = 1.0 - arTakePoint[ ! ci->fMove ];
+	arTemp[ 0 ] = 1.0 - arTakePoint[ ! ci->fMove ];
         arTemp[ 1 ] = 
-					arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
+	  arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
         arTemp[ 2 ] = 
-					arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
-				arTemp[ 3 ] = 
-					( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-					arTakePoint[ ! ci->fMove ];
-				arTemp[ 4 ] = 
-					( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-					arTakePoint[ ! ci->fMove ];
+	  arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! ci->fMove ] );
+	arTemp[ 3 ] = 
+	  ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+	  arTakePoint[ ! ci->fMove ];
+	arTemp[ 4 ] = 
+	  ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+	  arTakePoint[ ! ci->fMove ];
 
-				rEq1 = Utility ( arTemp, ci );
+	rEq1 = Utility ( arTemp, ci );
 
 				/*
 
-					eq_cubeful( rEq0 ) = +1
-					eq_cubeful( rEq1 ) = -1
+				  eq_cubeful( rEq0 ) = +1
+				  eq_cubeful( rEq1 ) = -1
 
 
-					eq_cubeful ( x ) = a * x + b
+				  eq_cubeful ( x ) = a * x + b
 
-					=>
-				         	2
-       	  a = -----------
-              rEq0 - rEq1
+				  =>
+				  2
+				  a = -----------
+				  rEq0 - rEq1
 
 
-       	      rEq0 + rEq1
-       	  b = -----------
-	            rEq1 - rEq0
+				  rEq0 + rEq1
+				  b = -----------
+				  rEq1 - rEq0
 
 				*/
 
-				if ( ci->fCubeOwner == -1 ) {
+	if ( ci->fCubeOwner == -1 ) {
 
-					/* centered cube */
+	  /* centered cube */
 					
-					if ( rEq < -1.0 ) {
+	  if ( rEq < -1.0 ) {
 
-						// no-op
+	    // no-op
 
-					} else if ( rEq < rEq1 ) {
+	  } else if ( rEq < rEq1 ) {
 
-						rEq = -1.0; /* opp double, I pass */
+	    rEq = -1.0; /* opp double, I pass */
 
-					} else if ( rEq < rEq0 ) {
+	  } else if ( rEq < rEq0 ) {
 
-						/* calculate cubeful equity as interpolation */
+	    /* calculate cubeful equity as interpolation */
 
-						rEq = ( 2.0 * rEq - ( rEq0 + rEq1 ) ) / ( rEq0 - rEq1 );
+	    /* since I didn't double, we will not give the full equity
+	       according to the formulas. Instead we'll use an second
+	       order interpolation between the points (rEq1, -1.0),
+	       (rEq2, +1.0 * (1 - delta) ), (1.0, 1.0). */
 
-					} else if ( rEq < 1.0 ) {
+	    rEq = ( (1.0 + rDelta) * rEq - ( rEq0 + rDelta * rEq1 ) ) / ( rEq0 - rEq1 );
 
-						rEq = 1.0; /* I double, opp pass */
+	  } else if ( rEq < 1.0 ) {
 
-					}
+	    rEq = ( ( rDelta - 1.0 ) * rEq + ( rEq0 - rDelta ) ) / ( rEq0 - 1.0 );
 
-				} else if ( ci->fCubeOwner == ci->fMove ) {
+	  }
 
-					/* I own cube */
+	} else if ( ci->fCubeOwner == ci->fMove ) {
 
-					if ( rEq < -1.0 ) {
+	  /* I own cube */
+
+	  if ( rEq < -1.0 ) {
 			
-						// no-op
+	    // no-op
 
-					} else if ( rEq < rEq0 ) {
+	  } else if ( rEq < rEq0 ) {
 
-						/* calculate cubeful equity as interpolation */
+	    /* calculate cubeful equity as interpolation */
 
-						rEq = ( 2.0 * rEq - ( rEq0 - 1.0 ) ) / ( rEq0 +1.0 );
+	    rEq = ( (1.0 + rDelta) * rEq - ( rDelta * rEq0 - 1.0 ) ) /
+	      ( rEq0 + 1.0 );
 
-					} else if ( rEq < 1.0 ) {
+	  } else if ( rEq < 1.0 ) {
 
-						rEq = 1.0; /* I double, opp pass */
+	    rEq = ( ( rDelta - 1.0 ) * rEq + ( rEq0 - rDelta ) ) / 
+	      (	rEq0 - 1.0 );
 
-					}
+	  }
 
-				} else {
+	} else {
 
-					/* Opp own cube */
+	  /* Opp own cube */
 
-					if ( rEq < -1.0 ) {
+	  if ( rEq < -1.0 ) {
 
-						// no-op
+	    // no-op
 
-					} else if ( rEq < rEq1 ) {
+	  } else if ( rEq < rEq1 ) {
 
-						rEq = -1.0; /* opp double, I pass */
+	    rEq = -1.0; /* opp double, I pass */
 
-					} else if ( rEq < 1.0 ) {
+	  } else if ( rEq < 1.0 ) {
 
-						/* calculate cubeful equity as interpolation */
+	    /* calculate cubeful equity as interpolation */
 
-						rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
+	    rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
 
-					}
+	  }
 
-				}
+	}
 
       }
 
@@ -2719,69 +2728,69 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ],
 
 				/* fNoCube: calculate cubeful equity? */
 	
-				fNoCube = ( anScore[ fMove ] + 2 * nCube >= nMatchTo );
-				fNoCube = fNoCube || ( anScore[ ! fMove ] + 2 * nCube >= nMatchTo );
-				fNoCube = fNoCube ||  
-					( ( anScore[ fMove ] == nMatchTo - 2 ) &&
-						( anScore[ ! fMove ] == nMatchTo - 2 ) );
-				fNoCube = fNoCube || fCrawford;
+	fNoCube = ( anScore[ fMove ] + 2 * nCube >= nMatchTo );
+	fNoCube = fNoCube || ( anScore[ ! fMove ] + 2 * nCube >= nMatchTo );
+	fNoCube = fNoCube ||  
+	  ( ( anScore[ fMove ] == nMatchTo - 2 ) &&
+	    ( anScore[ ! fMove ] == nMatchTo - 2 ) );
+	fNoCube = fNoCube || fCrawford;
 
-				if ( ! ( nMatchTo && fNoCube ) ) {
+	if ( ! ( nMatchTo && fNoCube ) ) {
 
-					float arTakePoint[ 4 ], rEq0, rEq1;
-					float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
-					float r0,r1;
-					int i;
-					float rPoint0, rPoint1, rPoint2, rPoint3;
+	  float arTakePoint[ 4 ], rEq0, rEq1;
+	  float arTemp[ NUM_OUTPUTS ], arCubeful [ NUM_OUTPUTS ];
+	  float r0,r1;
+	  int i;
+	  float rPoint0, rPoint1, rPoint2, rPoint3;
 
-					for ( i = 0; i < NUM_OUTPUTS; i++ )
-						arTemp[ i ] = arOutput[ i ];
-					if ( fMove )
-						InvertEvaluation ( arTemp );
+	  for ( i = 0; i < NUM_OUTPUTS; i++ )
+	    arTemp[ i ] = arOutput[ i ];
+	  if ( fMove )
+	    InvertEvaluation ( arTemp );
 	
-					/* Get the take point using current gammon ratios. */
+	  /* Get the take point using current gammon ratios. */
 
-					GetTakePoint ( arTemp, anScore, nMatchTo, cix.nCube,
-												 arTakePoint );
+	  GetTakePoint ( arTemp, anScore, nMatchTo, cix.nCube,
+			 arTakePoint );
 
-					/* calculate my equity at opp takepoint */
+	  /* calculate my equity at opp takepoint */
 
-					arTemp[ 0 ] = 1.0 - arTakePoint[ ! cix.fMove ];
-					arTemp[ 1 ] = 
-						arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
-					arTemp[ 2 ] = 
-						arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
-					arTemp[ 3 ] = 
-						( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-						arTakePoint[ ! cix.fMove ];
-					arTemp[ 4 ] = 
-						( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
-						arTakePoint[ ! cix.fMove ];
+	  arTemp[ 0 ] = 1.0 - arTakePoint[ ! cix.fMove ];
+	  arTemp[ 1 ] = 
+	    arOutput[ 1 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
+	  arTemp[ 2 ] = 
+	    arOutput[ 2 ] / arOutput[ 0 ] * ( 1.0 - arTakePoint[ ! cix.fMove ] );
+	  arTemp[ 3 ] = 
+	    ( arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+	    arTakePoint[ ! cix.fMove ];
+	  arTemp[ 4 ] = 
+	    ( arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] ) ) *
+	    arTakePoint[ ! cix.fMove ];
 					
-					rEq1 = Utility ( arTemp, &cix );
+	  rEq1 = Utility ( arTemp, &cix );
 
-					/* Opp own cube */
+	  /* Opp own cube */
 
-					if ( rEq < -1.0 ) {
+	  if ( rEq < -1.0 ) {
 
-						// no-op
+	    // no-op
 
-					} else if ( rEq < rEq1 ) {
+	  } else if ( rEq < rEq1 ) {
 
-						rEq = -1.0; /* opp double, I pass */
+	    rEq = -1.0; /* opp double, I pass */
 						
-					} else if ( rEq < 1.0 ) {
+	  } else if ( rEq < 1.0 ) {
 						
-						/* calculate cubeful equity as interpolation */
+	    /* calculate cubeful equity as interpolation */
 						
-						rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
+	    rEq = ( 2.0 * rEq - ( 1.0 + rEq1 ) ) / ( 1.0 - rEq1 );
 
-					}
+	  }
 	
 
-				}
+	}
 				
-				prOutput[ 2 ] = eq2mwc ( rEq, &cix );
+	prOutput[ 2 ] = eq2mwc ( rEq, &cix );
 
 				
       } /* fCube */
