@@ -6987,7 +6987,7 @@ ShowManualWeb( gpointer *p, guint n, GtkWidget *pwEvent ) {
 static void
 ReportBug( gpointer *p, guint n, GtkWidget *pwEvent ) {
 
-  OpenURL( "http://savannah.gnu.org/bugs/?group=gnubg" );
+  OpenURL( "http://savannah.gnu.org/bugs/?func=addbug&group=gnubg" );
 
 }
 
