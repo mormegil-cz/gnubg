@@ -105,6 +105,7 @@ static char *Concatenate( list *pl ) {
 		   we'll try to be accomodating. */
 Collection:	GameTreeSeq
 		{ $$ = plCollection = $1; }
+	;
 
 GameTreeSeq:	/* empty */
 		{ $$ = NewList(); }
