@@ -1534,6 +1534,9 @@ char *aszVersion[] = {
 #if HAVE_LIBXML2
     N_("XML match equity files supported."),
 #endif
+#if HAVE_LIBGMP
+    N_("Long RNG seeds supported."),
+#endif
 #ifdef USE_SOUND
     N_("Sound systems supported:"),
 #   if HAVE_ARTSC
