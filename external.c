@@ -441,34 +441,13 @@ extern void CommandExternal( char *sz ) {
 	  float rEqBefore, rEqAfter;
 	  const float epsilon = 1.0e-6;
 
-	  if ( GeneralEvaluationE( arOutput, anBoard, &ci,
-				   &esEvalCube.ec ) )
-	    break;
+          getResignation( arOutput, anBoard, &ci, &esEvalCube );
 
-	  rEqBefore = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
-
-	  /* I win 100% if opponent resigns */
-	  arOutput[ 0 ] = 1.0; 
-	  arOutput[ 1 ] = arOutput[ 2 ] =
-	    arOutput[ 3 ] = arOutput[ 4 ] = 0.0;
-
-	  /* resigned at least a gammon */
-	  if( fDoubled <= -2 ) arOutput[ 1 ] = 1.0;
-
-	  /* resigned a backgammon */
-	  if( fDoubled == -3 ) arOutput[ 2 ] = 1.0;
-
-	  InvertEvaluation ( arOutput );
-	  rEqAfter = Utility ( arOutput, &ci );
-	  if ( nMatchTo ) rEqAfter = eq2mwc( rEqAfter, &ci );
-
-	  /* comment this out when debugging is done 
-	     printf ("# equity before resignation: %.10f\n"
-	     "# equity after resignation : %.10f\n",
-	     rEqBefore, rEqAfter );*/
+          getResignEquities ( arOutput, &ci, -fDoubled,
+                              &rEqBefore, &rEqAfter );
 
 	  /* if opponent gives up equity by resigning */
-	  if( ( rEqBefore - rEqAfter ) >= epsilon )
+          if( rEqAfter <= ( rEqBefore - epsilon ) )
 	    strcpy( szResponse, "accept" );
 	  else
 	    strcpy( szResponse, "reject" );
