@@ -30,9 +30,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Add interactive rollouts.
 ** Analyse games and matches.
 *** Allow re-evaluating analysis with different settings, and rollouts.
-*** Add "set automatic analysis".
 *** Make sure cube analysis works for beavers.
-*** Should luck be evaluated cubefully?  (An option, perhaps?)
 *** Use the fComputed field in statcontext (make "show statistics ..."
   complain if not computed, disable the GTK menu items if not available).
 *** Make sure analysis works with resignations.
@@ -230,9 +228,6 @@ functions:
   two rollouts (one with player 0 on roll, and another with player 1 on roll)
   and average the two results. Instead gnubg should automagically perform both 
   rollouts and do the averaging.
-** The board should be updated before automatic analysis starts.  (Currently,
-  if you interrupt the automatic analysis, the move will go into effect, but
-  the board shown will be out of date.)
 ** the move number shown when exporting positions to text or html is -1
 ** the rollout window is a bit to small
 ** try to eliminate dependency on pstopng and friends
@@ -254,6 +249,7 @@ functions:
   regret the hit; e.g., play one chequer to but the opponent on the bar. 
   After this it's neither possible to drag the opponent's chequer back
   nor to drag your own chequer back.
+  [2003-04-05: it's now possible to drag your own chequer back]
 ** when there is both a missed double and a chequer play error, gnubg skips 
   the chequer play error when browsing for marked decisions only
 
@@ -312,8 +308,6 @@ functions:
   standard error of rollouts in advance (see Chuck's work). (gary)
 ** Allow the caller of the Rollout* functions to specify a callback function
   (to replace the current hard-coded GTKRollout()/output* calls).
-** Consider making a move selection in the annotation window update the
-  chequers to show that move (suggested by Peter Sochovsky).
 ** Investigate more sophisticated training techniques, e.g. real
   simulated annealing (see the GNU Scientific Library, at
   <http://sources.redhat.com/gsl/>).
