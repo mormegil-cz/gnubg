@@ -3744,7 +3744,7 @@ extern void CommandExportPositionHtml( char *sz ) {
 
 
 extern void
-CommandExportPositionBBSHtml ( char *sz ) {
+CommandExportPositionGammOnline ( char *sz ) {
 
 
     FILE *pf;
@@ -3784,7 +3784,7 @@ CommandExportPositionBBSHtml ( char *sz ) {
 
     if( pmr )
       HTMLAnalysis ( pf, &ms, pmr,
-                     "http://www.gammonline.com/demo/Images/",
+                     "../Images/",
                      "gif", HTML_EXPORT_TYPE_BBS, 
                      HTML_EXPORT_CSS_INLINE );
     
