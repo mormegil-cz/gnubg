@@ -40,6 +40,9 @@ CheckPosition( int anBoard[ 2 ][ 25 ] );
 extern void ClosestLegalPosition( int anBoard[ 2 ][ 25 ] );
 
 extern int
+Combination ( int n, int r );
+
+extern int
 Base64( const char ch );
 
 #endif

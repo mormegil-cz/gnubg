@@ -289,20 +289,20 @@ extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] ) {
     return 1;
 }
 
-static int anCombination[ 27 ][ 12 ], fCalculated = 0;
+static int anCombination[ 33 ][ 18 ], fCalculated = 0;
 
 static int InitCombination( void ) {
 
     int i, j;
 
-    for( i = 0; i < 27; i++ )
+    for( i = 0; i < 33; i++ )
         anCombination[ i ][ 0 ] = i + 1;
     
-    for( j = 1; j < 12; j++ )
+    for( j = 1; j < 18; j++ )
         anCombination[ 0 ][ j ] = 0;
 
-    for( i = 1; i < 27; i++ )
-        for( j = 1; j < 12; j++ )
+    for( i = 1; i < 33; i++ )
+        for( j = 1; j < 18; j++ )
             anCombination[ i ][ j ] = anCombination[ i - 1 ][ j - 1 ] +
                 anCombination[ i - 1 ][ j ];
 
@@ -311,12 +311,12 @@ static int InitCombination( void ) {
     return 0;
 }
 
-static int Combination( int n, int r ) {
+extern int Combination( int n, int r ) {
 
     assert( n > 0 );
     assert( r > 0 );
-    assert( n <= 27 );
-    assert( r <= 12 );
+    assert( n <= 33 );
+    assert( r <= 18 );
 
     if( !fCalculated )
         InitCombination();
