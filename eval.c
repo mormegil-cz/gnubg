@@ -3322,6 +3322,8 @@ FindnSaveBestMoves( movelist *pml,
   /* Evaluate all moves at 0-ply */
   if( ScoreMoves( pml, pci, pec, 0 ) < 0 ) {
       free( pm );
+      pml->cMoves = 0;
+      pml->amMoves = NULL;
       return -1;
   }
   
@@ -3360,6 +3362,8 @@ FindnSaveBestMoves( movelist *pml,
     /* Calculate the full evaluations at the search depth requested */
     if( ScoreMoves( pml, pci, pec, iPly + 1 ) < 0 ) {
 	free( pm );
+	pml->cMoves = 0;
+	pml->amMoves = NULL;
 	return -1;
     }
 
