@@ -1786,7 +1786,9 @@ static void UpdateGame( void ) {
 
 extern void ChangeGame( list *plGameNew ) {
 
+#if USE_GTK
     list *pl;
+#endif
     
     plLastMove = ( plGame = plGameNew )->plNext;
     
