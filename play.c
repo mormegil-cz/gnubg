@@ -2795,15 +2795,9 @@ extern void CommandNewGame( char *sz ) {
 			     "and discard the one in progress? ") ) )
 		return;
 	}
-<<<<<<< play.c
-        
-        PopGame( plGame, TRUE );
-    
-=======
     
         PopGame( plGame, TRUE );
     
->>>>>>> 1.170.2.4
     }
     
     fComputing = TRUE;
