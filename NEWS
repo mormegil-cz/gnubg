@@ -1,5 +1,7 @@
 GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 
+* Changes in GNU Backgammon 0.14.4
+
 * Changes in GNU Backgammon 0.14.3
 
 ** fix "bug" in Zadeh match equity table
@@ -15,71 +17,71 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 * Changes in GNU Backgammon 0.14.2
 
 ** Translations
- - added Czech
- - several languages updates. See README for status.
+*** added Czech
+*** several languages updates. See README for status.
 
 ** 3D boards
- - new quick draw option for computers without accelerated drivers
+*** new quick draw option for computers without accelerated drivers
 
 ** Several bug fixes
 
 * Changes in GNU Backgammon 0.14.1
 
 ** Rollouts
- - extendable rollouts
+*** extendable rollouts
 
 ** Bearoff
- - support for Hugh Sconyers' 15x15 full bearoff database
+*** support for Hugh Sconyers' 15x15 full bearoff database
 
 ** 3D boards
 
 ** Time controls
 
 ** Translations to
- - English (US) (complete)
- - German (95% finished)
- - Italian (90% finished)
- - Japanese (60% finished)
- - French (60% finished)
- - Islandic (25% finished)
- - Tyrkish (25% finished)
- - Danish (20% finished)
+*** English (US) (complete)
+*** German (95% finished)
+*** Italian (90% finished)
+*** Japanese (60% finished)
+*** French (60% finished)
+*** Islandic (25% finished)
+*** Tyrkish (25% finished)
+*** Danish (20% finished)
 
 * Changes in GNU Backgammon 0.14
 
 ** general
- - improved support for Jacoby rule and variants (Nackgammon, Hypergammon, 
+*** improved support for Jacoby rule and variants (Nackgammon, Hypergammon, 
    and cubeless)
- - new program to generate databases for Hypergammon.
+*** new program to generate databases for Hypergammon.
 
 ** New dice generator:
- - read dice from file (similar to Jellyfish)
- - dice manipulation, e.g., roll the best roll for computer player
+*** read dice from file (similar to Jellyfish)
+*** dice manipulation, e.g., roll the best roll for computer player
 
 ** Import
- - import position files in Snowie .txt format
+*** import position files in Snowie .txt format
    (illegal moves will be imported correctly)
 
 ** Export
- - export positions in Snowie .txt format
+*** export positions in Snowie .txt format
 
 ** Analysis
- - option to analyse one side only 
+*** option to analyse one side only 
    (e.g., skip analysis of GNU Backgammons moves)
- - Sho Sengoku temperature map
+*** Sho Sengoku temperature map
 
 
 * Changes in GNU Backgammon 0.13
 
 ** swap players
- - new command "swap players" (also available from the menu Game->Swap Players)
+*** new command "swap players" (also available from the menu Game->Swap Players)
    that swaps the players. Useful when your match imported from, e.g., 
    GamesGrid is "upside-down".
 
 ** analysis
- - new command "analyse move" (Analyse->Analyse Move)
- - analysis of resignations
- - tutor mode added
+*** new command "analyse move" (Analyse->Analyse Move)
+*** analysis of resignations
+*** tutor mode added
 
 ** match equity tables are now read from XML files. Allows the user to specify
    her own favorite MET. 
@@ -93,22 +95,22 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
    stronger player use: "set invert met on".
 
 ** Rollouts:
- - rollout positions as initial position (i.e., no doubles on first roll).
- - quasi-random dice added.
- - simple variance reduction for cubeful rollouts.
- - statistics (e.g, number of times closed out, cube efficiency etc).
- - fixed bug in calculations of standard errors.
- - standard errors are now shown in equity or mwc according to user
+*** rollout positions as initial position (i.e., no doubles on first roll).
+*** quasi-random dice added.
+*** simple variance reduction for cubeful rollouts.
+*** statistics (e.g, number of times closed out, cube efficiency etc).
+*** fixed bug in calculations of standard errors.
+*** standard errors are now shown in equity or mwc according to user
    settings.
 
 ** Evaluations
- - "crashed" neural net added.
- - much more flexible rollout databases added.
- - movefilter commands added, to allow user customisation of move pruning.
- - hint dialog improved.
+*** "crashed" neural net added.
+*** much more flexible rollout databases added.
+*** movefilter commands added, to allow user customisation of move pruning.
+*** hint dialog improved.
 
 ** Save, Load, Export, and Import
- - it is now possible to set-up default paths for saving, loading, 
+*** it is now possible to set-up default paths for saving, loading, 
    export, and import of matches and games.
 
 ** A set of predefined settings for evaluations.
@@ -118,12 +120,12 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 ** Import from BKG and TMG formats.
 
 ** Export in PDF, (Encapsulated) PostScript, LaTeX, HTML, plain text and PNG.
- - export settings dialog avaiable from Settings->Export
+*** export settings dialog avaiable from Settings->Export
    (warning: only html export uses some of the options).
 
 ** New dice generators:
- - random.org
- - Blum, Blum and Shub
+*** random.org
+*** Blum, Blum and Shub
 
 ** Manual browser added (requires GTK+ 2.0 or newer).
 
@@ -282,3 +284,7 @@ available).  See "help database".
 * GNU Backgammon 0.0
 
 ** Initial release.
+
+Local Variables:
+mode: outline
+End:
