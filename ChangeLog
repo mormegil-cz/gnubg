@@ -1,3 +1,8 @@
+Sat Apr 12 09:19:02 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* autogen.sh: touch sounds/Makefile.in
+	(contributed by TAKAHASHI Kaoru)
+
 Sat Apr 12 09:10:26 2003  Joern Thyssen  <jth@gnubg.org>
 
         * eval.c (EvaluatePositionCubeful3): fTop *must* be a part
