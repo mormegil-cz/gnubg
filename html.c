@@ -2733,7 +2733,7 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            * 100.0f );
 
       printStatTableRow2 ( pf,
-                           _("Error rate (pr. cube decision)"), 
+                           _("Error rate (per cube decision)"), 
                            "%+6.3f", "%+7.3f%",
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
@@ -2754,7 +2754,7 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow2 ( pf,
-                           _("Error rate (pr. cube decision)"), 
+                           _("Error rate (per cube decision)"), 
                            "%+6.3f", "%+7.3f%",
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
@@ -2795,7 +2795,7 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            * 100.0f );
 
       printStatTableRow2 ( pf,
-                           _("Error rate (pr. decision)"), 
+                           _("Error rate (per decision)"), 
                            "%+6.3f", "%+7.3f%",
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
@@ -2816,7 +2816,7 @@ extern void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                            -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
 
       printStatTableRow2 ( pf,
-                           _("Error rate (pr. decision)"), 
+                           _("Error rate (per decision)"), 
                            "%+6.3f", "%+7.3f%",
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
                            -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],

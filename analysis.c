@@ -1354,7 +1354,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       if ( ms.nMatchTo ){
 	  sprintf ( szTemp,_("Error rate (total)\t\t"
                              "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                             "Error rate (pr. cubedecision)\t"
+                             "Error rate (per cube decision)\t"
                              "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f,
@@ -1372,7 +1372,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       } else {
 	  sprintf ( szTemp,_("Error rate (total)\t\t"
                              "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                             "Error rate (pr. cubedecision)\t"
+                             "Error rate (per cube decision)\t"
                              "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                     -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
@@ -1411,7 +1411,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
     if ( ms.nMatchTo ){
       sprintf ( szTemp,_("Error rate (total)\t\t"
                          "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                         "Error rate (pr. cubedecision)\t"
+                         "Error rate (per decision)\t"
                          "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * 100.0f,
@@ -1429,7 +1429,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
     } else {
       sprintf ( szTemp,_("Error rate (total)\t\t"
                          "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"
-                         "Error rate (pr. cubedecision)\t"
+                         "Error rate (per decision)\t"
                          "%+6.3f (%+7.3f%%)\t%+6.3f (%+7.3f%%)\n"),
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
                 -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
