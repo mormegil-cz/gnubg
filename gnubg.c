@@ -6963,9 +6963,9 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	free (szFile);
 
 	if ( szLang && *szLang && strcmp( "system", szLang ) ) {
-          char *lang = malloc (1 + strlen ("LANG=") + strlen (optarg));
+          char *lang = malloc (1 + strlen ("LANG=") + strlen (szLang));
           assert (lang != 0);
-          sprintf (lang, "LANG=%s", optarg);
+          sprintf (lang, "LANG=%s", szLang);
           putenv (lang);
 	}
 

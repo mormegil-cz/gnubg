@@ -1,3 +1,7 @@
+Wed Aug 27 21:51:22 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gnubg.c - fix careless cut&paste for language setting
+
 Wed Aug 27 17:43:38 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* gtkgame.c - fix rollout settings problems - onesidedbearoff
