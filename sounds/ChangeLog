@@ -1,3 +1,10 @@
+Mon Mar 15 17:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* chequer.wav, dance.wav, double.wav, drop.wav, move.wav, take.wav:
+	Remove blank sound from end
+	* roll.wav: Removed second halve of sound
+	* gameover.wav: Note: this file appears distorted
+
 Fri Dec 13 16:08:57 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am (EXTRA_DIST): Add some necessary files.
