@@ -1,3 +1,8 @@
+Fri Mar 21 11:12:58 2003  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c: Initialise new members in matchstate struct (otherwise
+	"make check" fails).
+
 Thu Mar 20 21:09:15 2003  Joern Thyssen  <jth@gnubg.org>
 
         Improve support for Jacoby and cube use.

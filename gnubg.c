@@ -173,6 +173,9 @@ matchstate ms = {
     { 0, 0 }, /* anScore */
     1, /* nCube */
     0, /* cBeavers */
+    VARIATION_STANDARD, /*bgv */
+    TRUE, /* fCubeUse */
+    TRUE, /* fJacoby */
     GAME_NONE /* gs */
 };
 matchinfo mi;
