@@ -1,3 +1,8 @@
+Mon Oct 13 18:12:37 2003  Joern Thyssen  <jth@gnubg.org>
+
+	gnubg.c (real_main): attempt to read install directory
+	from windows registry.
+
 Mon Oct 13 12:40:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkboard.c: Add _() translations to a few strings.

@@ -7071,6 +7071,37 @@ ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
 }
 
 
+#if WIN32
+
+static char *
+getInstallDir( void ) {
+
+  char *pc;
+  char buf[_MAX_PATH];
+  DWORD buflen = _MAX_PATH;
+  HKEY key;
+  LONG res = RegOpenKeyEx(HKEY_LOCAL_MACHINE, "SOFTWARE\\gnubg",
+                          0, KEY_READ, &key);
+  if (res == ERROR_SUCCESS) {
+    res = RegQueryValueEx(key, "Install_dir", 0, 0,
+                          (LPBYTE)buf, &buflen);
+    if (res == ERROR_SUCCESS) 
+      pc = strdup( buf );
+    else
+      pc = NULL;
+
+    RegCloseKey(key);
+    
+  }
+
+  return pc;
+
+
+}
+
+#endif /* WIN32 */
+
+
 static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchCommands = NULL, *pchGuileScript = NULL;
@@ -7116,6 +7147,14 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     if( !( szHomeDirectory = getenv( "HOME" ) ) )
 	/* FIXME what should non-POSIX systems do? */
 	szHomeDirectory = ".";
+
+
+#if WIN32
+
+    /* data directory: initialise to the path where gnubg is installed */
+    szDataDirectory = getInstallDir();
+
+#endif /* WIN32 */
 
 
     {
