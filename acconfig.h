@@ -11,6 +11,9 @@
 /* Define if you have the gtkextra library (-lgtkextra).  */
 #undef HAVE_LIBGTKEXTRA
 
+/* Define if you have the guilegtk-1.2 library (-lguilegtk-1.2).  */
+#undef HAVE_LIBGUILEGTK_1_2
+
 @BOTTOM@
 /* Are we using either GUI (ext or GTK)? */
 #if USE_EXT || USE_GTK

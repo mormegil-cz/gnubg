@@ -24,6 +24,9 @@
 #if USE_GUILE
 
 #include <errno.h>
+#if HAVE_GUILE_GTK_H
+#include <guile-gtk.h>
+#endif
 #include <libguile.h>
 #include <signal.h>
 #if HAVE_UNISTD_H
@@ -32,6 +35,9 @@
 
 #include "backgammon.h"
 #include "eval.h"
+#if USE_GTK
+#include "gtkgame.h"
+#endif
 #include "guile.h"
 #include "positionid.h"
 #include "rollout.h"
@@ -265,7 +271,7 @@ static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
 
     SCMToCubeInfo( sCube, &ci );
 
-    PortableSignal( SIGINT, HandleInterrupt, &sh );
+    PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
     n = EvaluatePosition( anBoard, ar, &ci, NULL );
     PortableSignalRestore( SIGINT, &sh );
     if( fInterrupt ) {
@@ -296,7 +302,7 @@ static SCM gnubg_command( SCM sCommand ) {
     /* FIXME use alloca if we can */    
     strcpy( sz = malloc( cch + 1 ), SCM_ROCHARS( sCommand ) );
 
-    PortableSignal( SIGINT, HandleInterrupt, &sh );
+    PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
     HandleCommand( sz, acTop );
     free( sz );
     PortableSignalRestore( SIGINT, &sh );
@@ -306,6 +312,15 @@ static SCM gnubg_command( SCM sCommand ) {
     }
     
     return SCM_UNSPECIFIED;
+}
+
+static SCM menu_bar( void ) {
+#if USE_GTK && HAVE_LIBGUILEGTK_1_2
+    if( fX && pwMenuBar )
+	return sgtk_wrap_gtkobj( GTK_OBJECT( pwMenuBar ) );
+    else
+#endif
+	return SCM_BOOL_F;
 }
 
 static SCM play_game( void ) {
@@ -365,7 +380,7 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
 
     SCMToCubeInfo( sCube, &ci );
 
-    PortableSignal( SIGINT, HandleInterrupt, &sh );    
+    PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );    
     n = Rollout( anBoard, sDesc == SCM_UNDEFINED ?
 		 PositionID( anBoard ) : SCM_CHARS( sDesc ),
 		 ar, arStdDev, sTruncate == SCM_UNDEFINED ?
@@ -448,6 +463,7 @@ extern int GuileInitialise( char *szDir ) {
     scm_make_gsubr( "current-score", 0, 0, 0, current_score );
     scm_make_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
     scm_make_gsubr( "gnubg-command", 1, 0, 0, gnubg_command );
+    scm_make_gsubr( "menu-bar", 0, 0, 0, menu_bar );
     scm_make_gsubr( "play-game", 0, 0, 0, play_game );
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
     scm_make_gsubr( "rollout-position", 1, 7, 0, rollout_position );
@@ -458,6 +474,11 @@ extern int GuileInitialise( char *szDir ) {
 				"(scm-error 'signal #f "
 				"\"User interrupt\" #f (list SIGINT)))" );
     scm_protect_object( sInterrupt );
+
+#if USE_GTK && HAVE_LIBGUILEGTK_1_2
+    if( fX )
+	sgtk_init();
+#endif
     
     if( szDir ) {
 	sprintf( szPath, "%s/" GNUBG_SCM, szDir );

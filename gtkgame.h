@@ -29,7 +29,7 @@ typedef enum _dialogarea {
     DA_BUTTONS
 } dialogarea;
 
-extern GtkWidget *pwMain;
+extern GtkWidget *pwMain, *pwMenuBar;
 
 extern int fEndDelay;
 

@@ -271,7 +271,7 @@ static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 /* A dummy widget that can grab events when others shouldn't see them. */
 static GtkWidget *pwGrab;
 
-GtkWidget *pwBoard, *pwMain;
+GtkWidget *pwBoard, *pwMain, *pwMenuBar;
 static GtkWidget *pwStatus, *pwGame, *pwGameList, *pom, *pwAnnotation,
     *pwAnalysis, *pwCommentary, *pwHint;
 static moverecord *pmrAnnotation;
@@ -1571,7 +1571,8 @@ extern int InitGTK( int *argc, char ***argv ) {
 				   aife, NULL );
     gtk_window_add_accel_group( GTK_WINDOW( pwMain ), pagMain );
     gtk_box_pack_start( GTK_BOX( pwVbox ),
-			gtk_item_factory_get_widget( pif, "<main>" ),
+			pwMenuBar = gtk_item_factory_get_widget( pif,
+								 "<main>" ),
 			FALSE, FALSE, 0 );
 
 #if !HAVE_LIBGDBM

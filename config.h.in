@@ -58,6 +58,9 @@
 /* Define if you have the gtkextra library (-lgtkextra).  */
 #undef HAVE_LIBGTKEXTRA
 
+/* Define if you have the guilegtk-1.2 library (-lguilegtk-1.2).  */
+#undef HAVE_LIBGUILEGTK_1_2
+
 /* Define if you have the XCopyPlane function.  */
 #undef HAVE_XCOPYPLANE
 
@@ -139,6 +142,9 @@
 /* Define if you have the <gtkextra/gtksheet.h> header file.  */
 #undef HAVE_GTKEXTRA_GTKSHEET_H
 
+/* Define if you have the <guile-gtk.h> header file.  */
+#undef HAVE_GUILE_GTK_H
+
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H
 
@@ -196,9 +202,6 @@
 /* Version number of package */
 #undef VERSION
 
-/* Define if you want to use the Guile extensibility language. */
-#undef USE_GUILE
-
 /* Define if you have a signbit() macro faster than a compare to 0.0. */
 #undef HAVE_SIGNBIT
 
@@ -210,6 +213,9 @@
 
 /* Define if you want to use the GTK toolkit and widgets. */
 #undef USE_GTK
+
+/* Define if you want to use the Guile extensibility language. */
+#undef USE_GUILE
 
 /* Are we using either GUI (ext or GTK)? */
 #if USE_EXT || USE_GTK
