@@ -113,14 +113,6 @@ event evNextTurn;
 #include<windows.h>
 #endif
 
-#ifdef WIN32
-#define DIR_SEPARATOR  '\\'
-#define DIR_SEPARATOR_S  "\\"
-#else
-#define DIR_SEPARATOR  '/'
-#define DIR_SEPARATOR_S  "/"
-#endif
-
 #if defined(MSDOS) || defined(__MSDOS__) || defined(WIN32)
 #define NO_BACKSLASH_ESCAPES 1
 #endif
