@@ -1,3 +1,15 @@
+Fri Nov  2 13:10:45 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (CommandRollout): Make sure a game is being played for
+	"rollout =cube".
+
+	* gnubg.c (PlayerCompletion): New function.  Implement completion
+	for player name parameters (not yet finished).
+
+	* gnubgtest: Added more tests.
+
+	* show.c (ShowCommands): Increase buffer size.
+
 Thu Nov  1 14:25:39 2001  Gary Wong  <gtw@research.att.com>
 
 	* rollout.c (BasicCubefulRollout): Keep track of unfinished games;

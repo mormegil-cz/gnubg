@@ -287,6 +287,9 @@ static char szDICE[] = "<die> <die>",
 command cFilename = {
     /* dummy command used for filename parameters */
     NULL, NULL, NULL, NULL, &cFilename
+}, cPlayer = {
+    /* dummy command used for player parameters */
+    NULL, NULL, NULL, NULL, &cPlayer
 }, acAnalyse[] = {
     { "game", CommandAnalyseGame, "Compute analysis and annotate current game",
       NULL, NULL },
@@ -468,8 +471,7 @@ command cFilename = {
   { NULL, NULL, NULL, NULL, NULL }
 }, acSetAnalysis[] = {
     { "chequerplay", CommandSetAnalysisChequerplay, "Specify parameters "
-      "for the analysis of chequerplay", NULL, 
-      acSetEvalParam },
+      "for the analysis of chequerplay", NULL, acSetEvalParam },
     { "cube", CommandSetAnalysisCube, "Select whether cube action will be "
       "analysed", szONOFF, NULL },
     { "cubedecision", CommandSetAnalysisCubedecision, "Specify parameters "
@@ -504,7 +506,7 @@ command cFilename = {
     { "centre", CommandSetCubeCentre, "Allow both players access to the "
       "cube", NULL, NULL },
     { "owner", CommandSetCubeOwner, "Allow only one player to double",
-      szPLAYER, NULL },
+      szPLAYER, &cPlayer },
     { "use", CommandSetCubeUse, "Control use of the doubling cube", szONOFF,
       NULL },
     { "value", CommandSetCubeValue, "Fix what the cube stake has been set to",
@@ -640,7 +642,8 @@ command cFilename = {
       szSCORE, NULL },
     { "seed", CommandSetSeed, "Set the dice generator seed", szOPTSEED, NULL },
     { "training", NULL, "Control training parameters", NULL, acSetTraining },
-    { "turn", CommandSetTurn, "Set which player is on roll", szPLAYER, NULL },
+    { "turn", CommandSetTurn, "Set which player is on roll", szPLAYER,
+      &cPlayer },
     { NULL, NULL, NULL, NULL, NULL }
 }, acShowStatistics[] = {
     { "game", CommandShowStatisticsGame, "Compute statistics for current game",
@@ -2312,20 +2315,23 @@ CommandRollout( char *sz ) {
 #endif
 
     if( !( c = CountTokens( sz ) ) ) {
-	if( ms.gs == GAME_NONE ) {
+	if( ms.gs != GAME_PLAYING ) {
 	    outputl( "No position specified and no game in progress." );
 	    return;
 	} else
 	    c = 1; /* current position */
     }
 
-    /* check for `rollout =cube' */
-    
+    /* check for `rollout =cube' */    
     if ( c == 1 && ! strncmp ( sz, "=cube", 5 ) ) {
-
       float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
       float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
 
+      if( ms.gs != GAME_PLAYING ) {
+	  outputl( "No game in progress." );
+	  return;
+      }
+      
       GetMatchStateCubeInfo( &ci, &ms );
 
       GeneralCubeDecisionR ( "", aarOutput, aarStdDev, ms.anBoard, &ci,
@@ -3175,9 +3181,6 @@ static char *GenerateKeywords( const char *sz, int nState ) {
     static command *pc;
     char *szDup;
 
-    if( fReadingOther )
-      return NULL;
-    
     if( !nState ) {
       cch = strlen( sz );
       pc = pcCompleteContext;
@@ -3196,6 +3199,51 @@ static char *GenerateKeywords( const char *sz, int nState ) {
       }
 	
       pc++;
+    }
+    
+    return NULL;
+}
+
+static char *PlayerCompletion( const char *sz, int nState ) {
+
+    static int i, cch;
+    char *pch, *szDup;
+    
+    if( !nState ) {
+	cch = strlen( sz );
+	i = 0;
+    }
+
+    while( i < 5 ) {
+	switch( i ) {
+	case 0:
+	    pch = "0";
+	    break;
+	case 1:
+	    pch = "1";
+	    break;
+	case 2:
+	    pch = ap[ 0 ].szName;
+	    break;
+	case 3:
+	    pch = ap[ 1 ].szName;
+	    break;
+	case 4:
+	    /* FIXME not all commands allow "both" */
+	    pch = "both";
+	    break;
+	default:
+	    abort();
+	}
+
+	i++;
+
+	if( !strncasecmp( sz, pch, cch ) ) {
+	    if( !( szDup = malloc( strlen( pch ) + 1 ) ) )
+		return NULL;
+
+	    return strcpy( szDup, pch );
+	}
     }
     
     return NULL;
@@ -3243,6 +3291,13 @@ static command *FindContext( command *pc, char *sz, int ich ) {
 
 static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 
+    if( fReadingOther )
+#if HAVE_RL_COMPLETION_MATCHES
+	return rl_completion_matches( szText, NullGenerator );
+#else
+        return completion_matches( (char *) szText, NullGenerator );
+#endif
+    
     pcCompleteContext = FindContext( acTop, rl_line_buffer, iStart );
 
     if( !pcCompleteContext )
@@ -3253,13 +3308,17 @@ static char **CompleteKeyword( const char *szText, int iStart, int iEnd ) {
 	rl_filename_completion_desired = TRUE;
 	return rl_completion_matches( szText,
 				      rl_filename_completion_function );
-    } else
+    } else if( pcCompleteContext == &cPlayer )
+	return rl_completion_matches( szText, PlayerCompletion );
+    else
 	return rl_completion_matches( szText, GenerateKeywords );
 #else
     /* assume obselete version of readline */
     if( pcCompleteContext == &cFilename )
 	return completion_matches( (char *) szText,
 				   filename_completion_function );
+    else if( pcCompleteContext == &cPlayer )
+	return completion_matches( (char *) szText, PlayerCompletion );
     else
 	return completion_matches( (char *) szText, GenerateKeywords );
 #endif

@@ -23,7 +23,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Add a cache for cubeful evaluations.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
-  speed increase.
+  speed increase.  See FindBestMoveInEval() in eval.c from fibs2html.
 ** The cubedecision REDOUBLE_BEAVER should never occur -- should it be
   removed?  We could add a "too good to beaver" cubedecision.  This is
   not as silly as it sounds: you can currently take advantage of gnubg
@@ -60,9 +60,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Extend FormatMove() to handle abbreviation of multiple moves (e.g.
   "8/7(2) 6/5(2)").
 ** Allow resuming interrupted rollouts, and extending completed rollouts.
-** Save partial input when TTY input is overwritten by an X command.
-  The best way would be to unify what GetInput does and ProcessInput,
-  with push/pop semantics for readline state. (gary)
 ** Add a "set record" command; when "record" is off, no moves are
   recorded (which implies that "save", "list" and the game list window
   won't work, but it will save memory for situations like playing
@@ -125,11 +122,8 @@ duplication of effort and to make sure our changes merge easily.
    gnubg is in the process. This could/should be implemented for
    "evaluation", "hint", when gnubg is considering cube action,
    when gnubg is searching for it's best move etc.
-** Left mouse moves checker left-die, the two dice then interchanges,
-  and the user can now move the other die. If the user clicks a
-  checker that cannot be moved with the left die, it should move the 
-  checker with the right die if possible [this is analogous to the
-  behaviour in Snowie].
+** Add option to exchange the dice after a single click move has been
+  made.
 ** Make sure we apply GTK styles correctly: create a GtkRcStyle; set the
   background colour in the style and the flag indicating the background is
   set; call gtk_widget_modify_style; unref the style.  This makes sure the
@@ -193,14 +187,6 @@ functions:
 *** GtkText
 
 * Bugs:
-** Nothing handles running out of memory gracefully.  A solution
-  could be to write a malloc() wrapper that (if malloc fails) first
-  tries to free memory (e.g. flush the eval cache); if malloc still
-  doesn't succeed, then print an error message and longjmp() to the
-  main loop.  When using the GNU C library, __malloc_hook can be used
-  too (so we can intercept calls coming from Xlib, for instance).  We
-  shouldn't longjmp() out of the hook, though (it might confuse library
-  functions).
 ** When using mmap()ed bearoff databases, add a signal handler for
   SIGBUS/SIGSEGV to trap I/O errors.  Unfortunately, the semantics of
   errors on mmap()ed regions are the most unportable that can be imagined...
@@ -252,9 +238,14 @@ functions:
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
 ** When a match is over, the prev game/prev move menu items are disabled.
-** "rollout =cube" when no game in progress dumps core.
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
+** FindContext() doesn't understand quoting.  That means that
+  a command like "\set <tab>" (including the backslash) won't handle
+  completion.  FindContext() probably needs to duplicate its parameter
+  and call NextToken(). (gary)
+** The command "set turn 0 <tab>" incorrectly allows completion for
+  additional parameters. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -327,9 +318,19 @@ functions:
 ** Allow very large (128 bit+) seeds. (gary)
 ** Allow the caller of the Rollout* functions to specify a callback function
   (to replace the current hard-coded GTKRollout()/output* calls).
-** The size of evalsetup means that movenormal structs are now very big.
-  Changing some members of evalcontext to bit fields, and perhaps making
-  some members of evalsetup a union might help. (gary)
+
+* Obselete or problematic ideas (probably better not to implement these):
+** Save partial input when TTY input is overwritten by an X command.
+  The best way would be to unify what GetInput does and ProcessInput,
+  with push/pop semantics for readline state.
+** Nothing handles running out of memory gracefully.  A solution
+  could be to write a malloc() wrapper that (if malloc fails) first
+  tries to free memory (e.g. flush the eval cache); if malloc still
+  doesn't succeed, then print an error message and longjmp() to the
+  main loop.  When using the GNU C library, __malloc_hook can be used
+  too (so we can intercept calls coming from Xlib, for instance).  We
+  shouldn't longjmp() out of the hook, though (it might confuse library
+  functions).
 
 
 Local Variables:
