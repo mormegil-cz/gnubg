@@ -1,3 +1,9 @@
+Mon Jul 19 09:53:10 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (real_main): initialise random seed for rollout
+	RNG.
+	(bug reported by Chuck Bower, fix suggested by Jim)
+
 Mon Jul 12 22:48:32 CEST 2004  Petr Kadlec  <mormegil@centrum.cz>
 
         * gtkprefs.c (ImportDesign): Use ngettext.

@@ -7814,7 +7814,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
       exit( EXIT_FAILURE );
     }
     if ( ! ( rngctxRollout = InitRNG( &rcRollout.nSeed, NULL, 
-                                      FALSE, rcRollout.rngRollout ) ) ) {
+                                      TRUE, rcRollout.rngRollout ) ) ) {
       printf( _("Failure setting up RNG for rollout.\n" ) );
       exit( EXIT_FAILURE );
     }
