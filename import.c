@@ -514,6 +514,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
     int iPlayer, i, c;
     moverecord *pmr;
     char *pch;
+    int anMoveLocal[8];
     
     switch( *sz ) {
     case 'X':
@@ -559,10 +560,26 @@ static void ParseOldmove( char *sz, int fInvert ) {
 		    pmr->n.anMove[ i ] <= 23 )
 		    pmr->n.anMove[ i ] = 23 - pmr->n.anMove[ i ];
 	    }
-		    
+ 
 	    if( c < 4 )
 		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
-	    
+
+            /* We have to order the moves before calling AddMoveRecord
+               Think about the opening roll of 6 5, and the legal move
+               18/13 24/18 is entered. AddMoveRecord will then silently
+               fail in the sub-call to PlayMove(). This problem should
+               maybe be fixed in PlayMove (drawboard.c). Opinions? */
+
+            for( i = 0; i < 8 ; i++ )
+                anMoveLocal[i] = pmr->n.anMove[i] + 1 ;
+
+            CanonicalMoveOrder( anMoveLocal );
+
+	    for( i = 0; i < 8 ; i++ )
+                pmr->n.anMove[i] = anMoveLocal[i] - 1 ;
+
+            /* Now we're ready */
+
 	    AddMoveRecord( pmr );
 	} else
 	    free( pmr );
@@ -646,8 +663,8 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     pmr->g.sz = NULL;
     pmr->g.i = iGame;
     pmr->g.nMatch = nLength;
-    pmr->g.anScore[ 0 ] = n0;
-    pmr->g.anScore[ 1 ] = n1;
+    pmr->g.anScore[ 0 ] = n1;
+    pmr->g.anScore[ 1 ] = n0;
     pmr->g.fCrawford = nLength != 0; /* assume matches use Crawford rule */
     if( ( pmr->g.fCrawfordGame = !fPostCrawford &&
 	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
@@ -668,6 +685,8 @@ static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
     while( strspn( sz, " \n\r\t" ) == strlen( sz ) );
 
     do {
+        /* FIXME This requires that the games are separated with a
+                 line shift */
 	if( ( pch = strpbrk( sz, "\n\r" ) ) )
 	    *pch = 0;
 
