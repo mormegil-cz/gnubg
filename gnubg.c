@@ -1368,6 +1368,8 @@ command cER = {
     N_("Play sounds to /dev/dsp or /dev/audio"), NULL, NULL },
   { "windows", CommandSetSoundSystemWindows, 
     N_("Use MS Windows API for playing sounds"), NULL, NULL },
+  { "quicktime", CommandSetSoundSystemQuickTime, 
+    N_("Use Apple QuickTime API for playing sounds"), NULL, NULL },
   { NULL, NULL, NULL, NULL, NULL }    
 }, acSetSoundSound[] = {
   { "agree", CommandSetSoundSoundAgree, 

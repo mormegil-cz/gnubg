@@ -8401,7 +8401,8 @@ typedef struct _optionswidget {
   GtkAdjustment *padjLearning, *padjAnnealing, *padjThreshold;
 
   GtkWidget *pwSound, *pwSoundArtsC, *pwSoundCommand, *pwSoundESD,
-      *pwSoundNAS, *pwSoundNormal, *pwSoundWindows, *pwSoundSettings;
+      *pwSoundNAS, *pwSoundNormal, *pwSoundWindows, *pwSoundQuickTime,
+      *pwSoundSettings;
 
   GtkWidget *pwIllegal, *pwUseDiceIcon, *pwShowIDs, *pwShowPips,
       *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide, *pwBeepIllegal,
@@ -9213,6 +9214,23 @@ static GtkWidget *OptionsPages( optionswidget *pow ) {
     gtk_tooltips_set_tip( ptt, pow->pwSoundWindows,
 			  _("Play sounds on the MS Windows platform."), NULL );
 						         
+    pow->pwSoundQuickTime = gtk_radio_button_new_with_label_from_widget(
+	GTK_RADIO_BUTTON( pow->pwSoundArtsC ), _("QuickTime") );
+    gtk_box_pack_start( GTK_BOX( pwb ), pow->pwSoundQuickTime, FALSE, FALSE, 0 );
+    gtk_widget_set_sensitive( pow->pwSoundQuickTime,
+#ifdef __APPLE__
+			      TRUE
+#else
+			      FALSE
+#endif
+	);
+#if USE_SOUND
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pow->pwSoundQuickTime ),
+				  ssSoundSystem == SOUND_SYSTEM_QUICKTIME );
+#endif
+    gtk_tooltips_set_tip( ptt, pow->pwSoundQuickTime,
+			  _("Play sounds using QuickTime."), NULL );
+						         
     /* Dice options */
     pwp = gtk_alignment_new( 0, 0, 0, 0 );
     gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
@@ -9703,6 +9721,10 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
 						 pow->pwSoundWindows ) ) &&
 	       ssSoundSystem != SOUND_SYSTEM_WINDOWS )
 	  UserCommand( "set sound system windows" );
+      else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+						 pow->pwSoundQuickTime ) ) &&
+	       ssSoundSystem != SOUND_SYSTEM_QUICKTIME )
+	  UserCommand( "set sound system quicktime" );
   }
 #endif
 

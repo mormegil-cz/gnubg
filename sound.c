@@ -144,7 +144,9 @@ char aszSound[ NUM_SOUNDS ][ 80 ] = {
 
 char szSoundCommand[ 80 ] = "/usr/bin/sox %s -t ossdsp /dev/dsp";
 
-#  if defined (SIGIO)
+#  if defined (__APPLE__)
+soundsystem ssSoundSystem = SOUND_SYSTEM_QUICKTIME;
+#  elif defined (SIGIO)
 soundsystem ssSoundSystem = SOUND_SYSTEM_NORMAL;
 #  elif defined (HAVE_ESD)
 soundsystem ssSoundSystem = SOUND_SYSTEM_ESD;
@@ -167,7 +169,8 @@ char *aszSoundSystem[ NUM_SOUND_SYSTEMS ] = {
   N_("ESD"),
   N_("NAS"),
   N_("/dev/dsp"), /* with fallback to /dev/audio */
-  N_("MS Windows") 
+  N_("MS Windows"),
+  N_("Apple QuickTime")
 };
 
 char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ] = {
@@ -176,7 +179,8 @@ char *aszSoundSystemCommand[ NUM_SOUND_SYSTEMS ] = {
   "esd",
   "nas",
   "normal",
-  "windows" 
+  "windows",
+  "quicktime"
 };
 
 typedef struct _soundcache {
@@ -190,7 +194,8 @@ static soundcache asc[ NUM_SOUNDS ];
 #ifdef SIGIO
 
 static int hSound = -1; /* file descriptor of dsp/audio device */
-static char *pSound, *pSoundCurrent;
+/* olivier: pSound renamed pSound_; symbol conflicts with QuickTime */
+static char *pSound_, *pSoundCurrent;
 static size_t cbSound; /* bytes remaining */
 
 #ifdef ITIMER_REAL
@@ -569,7 +574,7 @@ static void play_audio_file(soundcache *psc, const char *file,
     sigaddset( &ss, SIGALRM );
     sigprocmask( SIG_BLOCK, &ss, &ssOld );
     
-    pSound = pSoundCurrent = psc->pch;
+    pSound_ = pSoundCurrent = psc->pch;
     cbSound = psc->cb;
     hSound = fd;
     
@@ -853,6 +858,134 @@ static int play_nas_file(char *file)
 
 #endif /* HAVE_NAS */
 
+#ifdef __APPLE__
+
+#include <QuickTime/QuickTime.h>
+#include <pthread.h>
+#include "lib/list.h"
+
+static int		fQTInitialised = FALSE;
+static int 		fQTPlaying = FALSE;
+list			movielist;
+static pthread_mutex_t 	mutexQTAccess;
+
+
+void * Thread_PlaySound_QuickTime (void *data)
+{
+    int done = FALSE;
+    
+    fQTPlaying = TRUE;
+    
+    do {
+        list	*pl; 
+        
+        pthread_mutex_lock (&mutexQTAccess);
+        
+        /* give CPU time to QT to process all running movies */
+        MoviesTask (NULL, 0);
+        
+        /* check if there are any running movie left */
+        pl = &movielist;
+        done = TRUE;
+        do {
+            list *next = pl->plNext;
+            if (pl->p != NULL) {
+                Movie *movie = (Movie *) pl->p;
+                if (IsMovieDone (*movie)) {
+                    DisposeMovie (*movie);
+                    free (movie);
+                    ListDelete (pl);
+                }
+                else
+                    done = FALSE;
+            }
+            pl = next;
+        } while (pl != &movielist);
+        
+        pthread_mutex_unlock (&mutexQTAccess);
+    } while (!done && fQTPlaying);
+    
+    fQTPlaying = FALSE;
+    
+    return NULL;
+}
+
+
+void PlaySound_QuickTime (const char *cSoundFilename)
+{
+    int 	err;
+    Str255	pSoundFilename; 	/* file pathname in Pascal-string format */
+    FSSpec	fsSoundFile;		/* movie file location descriptor */
+    short	resRefNum;		/* open movie file reference */
+    
+    if (!fQTInitialised) {
+        pthread_mutex_init (&mutexQTAccess, NULL);
+        ListCreate (&movielist);
+        fQTInitialised = TRUE;
+    }
+    
+    /* QuickTime is NOT reentrant in Mac OS (it is in MS Windows!) */
+    pthread_mutex_lock (&mutexQTAccess);
+
+    EnterMovies ();	/* can be called multiple times */
+
+    /* create FSSpec from file pathname */
+    fsSoundFile.vRefNum = 0;
+    fsSoundFile.parID = 0;
+    {
+        char *c;
+        while (c = strchr (cSoundFilename, '/')) *c = ':';
+    }
+    sprintf (pSoundFilename, "%c:%s", (unsigned char) (strlen (cSoundFilename) + 1), cSoundFilename);
+    err = FSMakeFSSpec (0, 0, pSoundFilename, &fsSoundFile);
+    
+    if (err != 0) {
+        fprintf (stderr, "PlaySound_QuickTime: error #%d, can't find %s.\n", err, cSoundFilename);
+    }
+    else {
+        /* open movie (WAV or whatever) file */
+        err = OpenMovieFile (&fsSoundFile, &resRefNum, fsRdPerm);
+        if (err != 0) {
+            fprintf (stderr, "PlaySound_QuickTime: error #%d opening %s.\n", err, cSoundFilename);
+        }
+        else {
+            /* create movie from movie file */
+            Movie	*movie = (Movie *) malloc (sizeof (Movie));
+            err = NewMovieFromFile (movie, resRefNum, NULL, NULL, 0, NULL);  
+            CloseMovieFile (resRefNum);
+            if (err != 0) {
+                fprintf (stderr, "PlaySound_QuickTime: error #%d reading %s.\n", err, cSoundFilename);
+            } 
+            else {
+                /* reset movie timebase */
+                TimeRecord t = { 0 };
+                t.base = GetMovieTimeBase (*movie);
+                SetMovieTime (*movie, &t);
+                /* add movie to list of running movies */
+                ListInsert (&movielist, movie);
+                /* run movie */
+                StartMovie (*movie);  
+            }
+        }
+    }
+
+    pthread_mutex_unlock (&mutexQTAccess);
+
+    if (!fQTPlaying) {
+        /* launch playing thread if necessary */
+        int err;
+        pthread_t qtthread;
+        fQTPlaying = TRUE;
+        err = pthread_create (&qtthread, 0L, Thread_PlaySound_QuickTime, NULL);
+        if (err == 0) pthread_detach (qtthread);
+        else fQTPlaying = FALSE;
+    }
+}
+
+
+#endif /* __APPLE__ */
+
+
 static void 
 play_file_child(soundcache *psc, const char *filename) {
 
@@ -943,6 +1076,17 @@ play_file_child(soundcache *psc, const char *filename) {
       assert ( FALSE );
 #endif
       break;
+    
+    case SOUND_SYSTEM_QUICKTIME:
+#if defined(__APPLE__)
+        PlaySound_QuickTime (filename);
+#elif defined(WIN32)
+        /* add Quicktime For Windows code here */
+        assert (FALSE);
+#else
+        assert (FALSE);
+#endif
+        break;
 
     default:
 
@@ -958,6 +1102,17 @@ play_file(soundcache *psc, const char *filename) {
 #ifndef WIN32
 
   int pid;
+
+#ifdef __APPLE__
+  if( ssSoundSystem == SOUND_SYSTEM_QUICKTIME) {
+        /* we don't need to fork, but launch a thread that will
+        give time to QuickTime to play the sound to completion
+        (in a regular Mac OS application, this should be done 
+        in the event loop, which we obviously don't have here) */
+      play_file_child( psc, filename );
+      return;
+  }
+#endif
 
 #ifdef SIGIO
   if( ssSoundSystem == SOUND_SYSTEM_NORMAL) {

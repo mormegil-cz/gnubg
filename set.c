@@ -3882,6 +3882,23 @@ CommandSetSoundSystemWindows ( char *sz ) {
 
 }
 
+extern void
+CommandSetSoundSystemQuickTime ( char *sz ) {
+
+#ifdef __APPLE__
+
+  ssSoundSystem = SOUND_SYSTEM_QUICKTIME;
+  outputl ( _("GNU Backgammon will use the Apple QuickTime sound system" ) );
+
+#else
+
+  outputl ( _("GNU Backgammon was compiled without support for "
+              "the Apple QuickTime sound system" ) );
+
+#endif
+
+}
+
 static void
 SetSound ( const gnubgsound gs, const char *szFilename ) {
 

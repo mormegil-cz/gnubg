@@ -57,6 +57,7 @@ typedef enum _soundsystem {
   SOUND_SYSTEM_NAS,
   SOUND_SYSTEM_NORMAL,
   SOUND_SYSTEM_WINDOWS,
+  SOUND_SYSTEM_QUICKTIME,
 
   NUM_SOUND_SYSTEMS
 } soundsystem;
