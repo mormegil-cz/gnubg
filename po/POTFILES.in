@@ -71,6 +71,7 @@ sgfp.c
 sgfp.h
 sgf.y
 show.c
+sound.c
 strdup.c
 text.c
 userrng.c
