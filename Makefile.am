@@ -11,7 +11,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	pub_eval.c set.c show.c database.h database.c dice.c dice.h \
 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h \
 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c \
-        guile.h import.c import.h external.c external.h credits.c latex.c
+        guile.h import.c import.h external.c external.h credits.c latex.c \
+	postscript.c
 COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg

@@ -282,7 +282,8 @@ duplication of effort and to make sure our changes merge easily.
   connection via TCP/IP.
 ** Allow an option for illegal moves to be entered.
 ** Allow ~ and $ escapes in filenames (use wordexp()).
-** Allow printing positions/games/matches/etc.
+** Allow printing positions/games/matches/etc.  (More or less the same
+  as exporting to PostScript, but piped to a printing process.) (gary)
 ** Keep statistics of won/lost games/matches.
 ** Consider "-s scheme-file" and "-c command-file" options to read scripts.
 ** Replace HUGE_VALF with the more portable FLT_MAX in <float.h>.
