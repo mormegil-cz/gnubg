@@ -47,7 +47,8 @@ extern GtkWidget *board_new( void );
 extern GtkWidget *board_dice_widget( Board *board );
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
-		      gint score, gint opp_score, gint die0, gint die1 );
+		      gint score, gint opp_score, gint die0, gint die1,
+		      gint computer_turn );
 extern gint game_set_old_dice( Board *board, gint die0, gint die1 );
 extern void board_set_playing( Board *board, gboolean f );
 extern void board_animate( Board *board, int move[ 8 ], int player );
@@ -62,7 +63,7 @@ typedef struct _BoardData {
 	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
 	*crawford, *widget, *key0, *key1, *stop, *takedrop, *rolldouble,
 	*agreedecline, *redouble, *doub, *lname0, *lname1, *lscore0, *lscore1,
-	*mname0, *mname1, *mscore0, *mscore1;
+	*mname0, *mname1, *mscore0, *mscore1, *play;
     GdkGC *gc_and, *gc_or, *gc_copy, *gc_cube;
     GdkPixmap *pm_board, *pm_x, *pm_o, *pm_x_dice, *pm_o_dice, *pm_x_pip,
 	*pm_o_pip, *pm_cube, *pm_saved, *pm_temp, *pm_temp_saved, *pm_point,
@@ -73,7 +74,7 @@ typedef struct _BoardData {
     short *ai_refract[ 2 ];
     GdkFont *cube_font;
     gboolean translucent, labels, usedicearea, permit_illegal, beep_illegal,
-	higher_die_first, playing;
+	higher_die_first, playing, computer_turn;
     animation animate_computer_moves;
     int animate_speed;
     gdouble aarColour[ 2 ][ 4 ]; /* RGBA for each player */

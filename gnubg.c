@@ -155,12 +155,14 @@ matchstate ms = {
 
 int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fAutoCrawford = 1, fAutoRoll = TRUE, cAutoDoubles = 0,
-    fCubeUse = TRUE, fNackgammon = FALSE, fNextTurn = FALSE,
+    fCubeUse = TRUE, fNackgammon = FALSE, 
     fConfirm = TRUE, fShowProgress, fJacoby = TRUE,
     nBeavers = 3, fOutputMWC = TRUE, fOutputWinPC = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE;
+
+int fNextTurn = FALSE, fComputing = FALSE;
 
 float rAlpha = 0.1f, rAnneal = 0.3f, rThreshold = 0.1f,
     arLuckLevel[] = {
@@ -1667,7 +1669,7 @@ extern void ShowBoard( void ) {
 #if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
-		      ms.anScore[ 0 ], -1, -1 );
+		      ms.anScore[ 0 ], -1, -1, FALSE );
 #if HAVE_GDK_GDKX_H
 	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #endif
@@ -1762,7 +1764,9 @@ extern void ShowBoard( void ) {
 #if USE_GTK
 	game_set( BOARD( pwBoard ), ms.anBoard, ms.fMove, ap[ 1 ].szName,
 		  ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
-		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ] );
+		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ],
+		  ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputing &&
+		  !nNextTurn );
 #if HAVE_GDK_GDKX_H
 	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #endif

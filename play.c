@@ -1239,7 +1239,9 @@ extern int NextTurn( int fPlayNext ) {
     struct timeval tv;
     fd_set fds;
 #endif
-    
+
+    assert( !fComputing );
+	
 #if USE_GUI
     if( fX ) {
 #if USE_GTK
@@ -1260,6 +1262,8 @@ extern int NextTurn( int fPlayNext ) {
 	    fNextTurn = FALSE;
 	else
 	    return -1;
+
+    fComputing = TRUE;
     
 #if USE_GTK
     if( fX && fDisplay ) {
@@ -1362,19 +1366,24 @@ extern int NextTurn( int fPlayNext ) {
 	if( ms.nMatchTo && ms.anScore[ pmgi->fWinner ] >= ms.nMatchTo ) {
 	    outputf( "%s has won the match.\n", ap[ pmgi->fWinner ].szName );
 	    outputx();
+	    fComputing = FALSE;
 	    return -1;
 	}
 
 	outputx();
 	
 	if( fAutoGame ) {
-	    if( NewGame() < 0 )
+	    if( NewGame() < 0 ) {
+		fComputing = FALSE;
 		return -1;
+	    }
 	    
 	    if( ap[ ms.fTurn ].pt == PLAYER_HUMAN )
 		ShowBoard();
-	} else
+	} else {
+	    fComputing = FALSE;
 	    return -1;
+	}
     }
 
     assert( ms.gs == GAME_PLAYING );
@@ -1387,8 +1396,10 @@ extern int NextTurn( int fPlayNext ) {
     if( fAction )
 	fnAction();
 	
-    if( fInterrupt || !fPlayNext )
+    if( fInterrupt || !fPlayNext ) {
+	fComputing = FALSE;
 	return -1;
+    }
     
     if( ap[ ms.fTurn ].pt == PLAYER_HUMAN ) {
 	/* Roll for them, if:
@@ -1407,6 +1418,8 @@ extern int NextTurn( int fPlayNext ) {
 	      ( ms.nMatchTo > 0 && ms.anScore[ ms.fTurn ] +
 		ms.nCube >= ms.nMatchTo ) ) )
 	    CommandRoll( NULL );
+
+	fComputing = FALSE;
 	return -1;
     }
     
@@ -1422,6 +1435,7 @@ extern int NextTurn( int fPlayNext ) {
 #endif
 	fNextTurn = !ComputerTurn();
 
+    fComputing = FALSE;
     return 0;
 }
 
@@ -2074,16 +2088,20 @@ extern void CommandNewGame( char *sz ) {
 	} while( pl != plGame );
     }
     
+    fComputing = TRUE;
+    
     NewGame();
 
     if( fInterrupt )
 	return;
-    
+
     if( ap[ ms.fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
     else
 	if( !ComputerTurn() )
 	    TurnDone();
+
+    fComputing = FALSE;
 }
 
 extern void ClearMatch( void ) {
@@ -2317,8 +2335,12 @@ extern void CommandPlay( char *sz ) {
 	return;
     }
 
+    fComputing = TRUE;
+    
     if( !ComputerTurn() )
 	TurnDone();
+
+    fComputing = FALSE;
 }
 
 static void CommandPreviousGame( char *sz ) {

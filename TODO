@@ -148,7 +148,10 @@ duplication of effort and to make sure our changes merge easily.
 ** Use different styles for moves in the game window, depending on the
   annotation.
 ** Add the players' names in the drop-down menu in the game window.  (They
-  used to be there, but weren't updated if the names were changed.)
+  used to be there, but weren't updated if the names were changed.)  Note
+  that in the worst case, the option menu can be rebuilt by calling
+  gtk_option_set_menu() again; the old menu should automatically be 
+  unref()ed. (gary)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
 ** When a long string is displayed in the status bar, the main window
   grows to accomodate it -- not very pretty.  A Layout or Viewport widget
@@ -157,8 +160,6 @@ duplication of effort and to make sure our changes merge easily.
   and only output the relevant statistics.
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
   the new evalsetups. (gary)
-** update_buttons() should be able to detect when it's the computer's
-  turn, and show a "play" button (suggested by Olivier Croisille). (gary)
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -225,6 +226,7 @@ functions:
 ** If "set turn" has been used during a game (so a player has two
   consecutive moves), then export to .mat format saves it incorrectly.
 ** "set score" does not update the score in the GTK game window option menu.
+  (See item about adding player names to the menu above.) (gary)
 ** TTY rollout output is wider than 80 columns.
 ** Analysis with rollouts crashes under GTK.  (There are problems with the
   rollout window -- do we really want a window in this case?)

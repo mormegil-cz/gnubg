@@ -1,3 +1,9 @@
+Fri Nov  9 13:23:52 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkboard.c (update_buttons): Add a "play" button when it's the
+	computer's turn (suggested by Olivier Croisille).
+	(game_set): Added computer_turn parameter.  All callers changed.
+
 Wed Nov  7 11:29:36 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (SanityCheck): Detect some certain or impossible wins,

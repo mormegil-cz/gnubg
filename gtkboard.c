@@ -2167,7 +2167,8 @@ extern void board_set_playing( Board *board, gboolean f ) {
 
 static void update_buttons( BoardData *pbd ) {
 
-    enum _control { C_NONE, C_ROLLDOUBLE, C_TAKEDROP, C_AGREEDECLINE } c;
+    enum _control { C_NONE, C_ROLLDOUBLE, C_TAKEDROP, C_AGREEDECLINE,
+		    C_PLAY } c;
 
     c = C_NONE;
 
@@ -2180,6 +2181,9 @@ static void update_buttons( BoardData *pbd ) {
     if( ms.fResigned )
 	c = C_AGREEDECLINE;
 
+    if( pbd->computer_turn )
+	c = C_PLAY;
+    
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pbd->edit ) ) ||
 	!pbd->playing )
 	c = C_NONE;
@@ -2200,11 +2204,17 @@ static void update_buttons( BoardData *pbd ) {
 	gtk_widget_show_all( pbd->agreedecline );
     else
 	gtk_widget_hide( pbd->agreedecline );
+
+    if( c == C_PLAY )
+	gtk_widget_show_all( pbd->play );
+    else
+	gtk_widget_hide( pbd->play );
 }
 
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
-		      gint score, gint opp_score, gint die0, gint die1 ) {
+		      gint score, gint opp_score, gint die0, gint die1,
+		      gint computer_turn ) {
     gchar board_str[ 256 ];
     BoardData *pbd = board->board_data;
     
@@ -2220,6 +2230,8 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     if( pbd->board_size <= 0 )
 	return 0;
 
+    pbd->computer_turn = computer_turn;
+    
     if( die0 ) {
 	if( pbd->higher_die_first && die0 < die1 )
 	    swap( &die0, &die1 );
@@ -3194,6 +3206,9 @@ static void board_size_allocate( GtkWidget *board,
     gtk_widget_get_child_requisition( bd->agreedecline, &requisition );
     if( requisition.height > cy )
 	cy = requisition.height;
+    gtk_widget_get_child_requisition( bd->play, &requisition );
+    if( requisition.height > cy )
+	cy = requisition.height;
     
     /* ensure there is room for the dice area or the move, whichever is
        bigger */
@@ -3256,6 +3271,13 @@ static void board_size_allocate( GtkWidget *board,
     child_allocation.width = requisition.width;
     child_allocation.height = requisition.height;
     gtk_widget_size_allocate( bd->agreedecline, &child_allocation );
+
+    gtk_widget_get_child_requisition( bd->play, &requisition );
+    child_allocation.x = MAX( 0, allocation->x + allocation->width / 2 +
+	54 * bd->board_size - requisition.width );
+    child_allocation.width = requisition.width;
+    child_allocation.height = requisition.height;
+    gtk_widget_size_allocate( bd->play, &child_allocation );
 }
 
 static void AddChild( GtkWidget *pw, GtkRequisition *pr ) {
@@ -3299,6 +3321,10 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
 	cy = r.height;
 
     gtk_widget_size_request( bd->agreedecline, &r );
+    if( r.height > cy )
+	cy = r.height;
+
+    gtk_widget_size_request( bd->play, &r );
     if( r.height > cy )
 	cy = r.height;
 
@@ -3657,6 +3683,13 @@ static void board_init( Board *board ) {
 			GTK_SIGNAL_FUNC( ButtonClicked ), "decline" );
     gtk_container_add( GTK_CONTAINER( bd->agreedecline ), pw );
     gtk_container_add( GTK_CONTAINER( board ), bd->agreedecline );
+
+    bd->play = gtk_hbutton_box_new();
+    pw = gtk_button_new_with_label( "Play" );
+    gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
+			GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
+    gtk_container_add( GTK_CONTAINER( bd->play ), pw );
+    gtk_container_add( GTK_CONTAINER( board ), bd->play );
     
     bd->dice_area = gtk_drawing_area_new();
     gtk_drawing_area_size( GTK_DRAWING_AREA( bd->dice_area ), 15, 8 );

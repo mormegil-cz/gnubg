@@ -205,7 +205,7 @@ typedef struct _matchstate {
 } matchstate;
 
 extern matchstate ms;
-extern int fNextTurn;
+extern int fNextTurn, fComputing;
 
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,

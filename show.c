@@ -269,7 +269,7 @@ extern void CommandShowBoard( char *sz ) {
 #if USE_GUI
     if( fX )
 #if USE_GTK
-	game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1 );
+	game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1, FALSE );
 #else
         GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    
 #endif
