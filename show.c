@@ -274,7 +274,7 @@ extern void CommandShowPipCount( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];
 
-    if( !sz && !*sz && fTurn == -1 ) {
+    if( !*sz && fTurn == -1 ) {
 	puts( "No position specified and no game in progress." );
 	return;
     }
@@ -407,7 +407,7 @@ extern void CommandShowKleinman( char *sz ) {
     int anPips[ 2 ], an[ 2 ][ 25 ];
     float fKC;
 
-    if( !sz && !*sz && fTurn == -1 ) {
+    if( !*sz && fTurn == -1 ) {
         puts( "No position specified and no game in progress." );
         return;
     }
@@ -433,7 +433,7 @@ extern void CommandShowThorp( char *sz ) {
     int nLeader, nTrailer, anCovered[2], anMenLeft[2];
     int x;
 
-    if( !sz && !*sz && fTurn == -1 ) {
+    if( !*sz && fTurn == -1 ) {
         puts( "No position specified and no game in progress." );
         return;
     }

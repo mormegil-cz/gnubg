@@ -1,3 +1,9 @@
+Wed Jul 12 10:27:11 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkgame.c (HandleXAction): Recursive event handling is now
+	implemented again.  More GTK changes.  The GTK port should now
+	be more functional than the old X one.
+
 Tue Jul 11 13:44:49 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* gtkgame.c: New file.  More extensive changes elsewhere.

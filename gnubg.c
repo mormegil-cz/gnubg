@@ -26,9 +26,6 @@
 #endif
 #include <ctype.h>
 #include <errno.h>
-#if HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 #if HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
@@ -79,6 +76,7 @@ static int fReadingOther;
 
 #if !X_DISPLAY_MISSING
 #include <gtk/gtk.h>
+#include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
 #include "gtkboard.h"
 #include "gtkgame.h"
 
@@ -632,9 +630,8 @@ void ShellEscape( char *pch ) {
 	
 	while( !fChildDied ) {
 	    sigsuspend( &ssOld );
-	    /* GTK-FIXME
 	    if( fAction )
-	    HandleXAction(); */
+	    HandleXAction();
 	}
 
 	fChildDied = FALSE;
@@ -1461,32 +1458,6 @@ extern gint NextTurnNotify( gpointer p ) {
     
     return FALSE; /* remove idle handler */
 }
-
-#if 0
-extern void HandleXAction( void ) {
-    /* It is safe to execute this function with SIGIO unblocked, because
-       if a SIGIO occurs before fAction is reset, then the I/O it alerts
-       us to will be processed anyway.  If one occurs after fAction is reset,
-       that will cause this function to be executed again, so we will
-       still process its I/O. */
-    fAction = FALSE;
-
-    /* Set flag so that the board window knows this is a re-entrant
-       call, and won't allow commands like roll, move or double. */
-    fBusy = TRUE;
-
-    /* Process incoming X events.  It's important to handle all of them,
-       because we won't get another SIGIO for events that are buffered
-       but not processed. */
-    while( XEventsQueued( edsp.pdsp, QueuedAfterReading ) )
-	EventProcess( &edsp.ev );
-
-    /* Now we need to commit (the timeout will call ExtDspCommit). */
-    EventTimeout( &edsp.ev );
-
-    fBusy = FALSE;
-}
-#endif
 #endif
 
 /* Read a line from stdin, and handle X and readline input if
@@ -1536,9 +1507,9 @@ extern char *GetInput( char *szPrompt ) {
 	while( !szInput ) {
 	    FD_ZERO( &fds );
 	    FD_SET( STDIN_FILENO, &fds );
-/*	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds ); */
+	    FD_SET( ConnectionNumber( GDK_DISPLAY() ), &fds );
 
-	    select( /* ConnectionNumber( ewnd.pdsp ) + */ 1, &fds, NULL, NULL,
+	    select( ConnectionNumber( GDK_DISPLAY() ) + 1, &fds, NULL, NULL,
 		    NULL );
 
 	    if( fInterrupt ) {
@@ -1555,10 +1526,9 @@ extern char *GetInput( char *szPrompt ) {
 		    fInputAgain = FALSE;
 		}
 	    }
-/*
-	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
+
+	    if( FD_ISSET( ConnectionNumber( GDK_DISPLAY() ), &fds ) )
 		HandleXAction();
-*/
 	}
 
 	if( fWasReadingCommand ) {
@@ -1589,9 +1559,9 @@ extern char *GetInput( char *szPrompt ) {
 	do {
 	    FD_ZERO( &fds );
 	    FD_SET( STDIN_FILENO, &fds );
-	    FD_SET( ConnectionNumber( ewnd.pdsp ), &fds );
+	    FD_SET( ConnectionNumber( GDK_DISPLAY() ), &fds );
 
-	    select( ConnectionNumber( ewnd.pdsp ) + 1, &fds, NULL, NULL,
+	    select( ConnectionNumber( GDK_DISPLAY() ) + 1, &fds, NULL, NULL,
 		    NULL );
 
 	    if( fInterrupt ) {
@@ -1599,7 +1569,7 @@ extern char *GetInput( char *szPrompt ) {
 		return NULL;
 	    }
 	    
-	    if( FD_ISSET( ConnectionNumber( ewnd.pdsp ), &fds ) )
+	    if( FD_ISSET( ConnectionNumber( GDK_DISPLAY() ), &fds ) )
 		HandleXAction();
 	} while( !FD_ISSET( STDIN_FILENO, &fds ) );
 

@@ -42,6 +42,8 @@ enum _gameover { GAME_NORMAL, GAME_RESIGNED, GAME_DROP } go;
 list lMatch, *plGame;
 
 #if !X_DISPLAY_MISSING
+#include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
+
 static struct timeval tvLast;
 
 void ResetDelayTimer( void ) {
@@ -274,11 +276,11 @@ extern void NextTurn( void ) {
 		}
 		
 		FD_ZERO( &fds );
-/*		FD_SET( ConnectionNumber( ewnd.pdsp ), &fds ); */
+		FD_SET( ConnectionNumber( GDK_DISPLAY() ), &fds );
 		/* GTK-FIXME: use timeout */
-		if( select( /* ConnectionNumber( ewnd.pdsp ) + */ 1, &fds, NULL,
+		if( select( ConnectionNumber( GDK_DISPLAY() ) + 1, &fds, NULL,
 			    NULL, &tv ) > 0 ) {
-/*		    HandleXAction(); */
+		    HandleXAction();
 		    if( !fInterrupt )
 			goto restart;
 		}

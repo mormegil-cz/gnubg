@@ -55,7 +55,7 @@ typedef struct _BoardData {
 	dice_colour[ 2 ], cube_font_rotated, old_board[ 2 ][ 25 ],
 	dice_roll[ 2 ]; /* roll showing on the off-board dice */
     gint cube_owner; /* -1 = bottom, 0 = centred, 1 = top */
-    move *valid_move;
+    move *all_moves, *valid_move;
     movelist move_list;
     
     /* remainder is from FIBS board: data */
@@ -823,6 +823,8 @@ extern gint board_set( Board *board, const gchar *board_text ) {
 	bd->points[ 27 ] = bd->off;
     }
 
+    /* FIXME update names, score, match length, etc. */
+    
     read_board( bd, bd->old_board );
     update_position_id( bd, bd->old_board );
 
@@ -831,6 +833,13 @@ extern gint board_set( Board *board, const gchar *board_text ) {
 		       bd->dice[ 0 ] | bd->dice_opponent[ 0 ],
 		       bd->dice[ 1 ] | bd->dice_opponent[ 1 ], TRUE );
 
+	/* bd->move_list contains pointers to static data, so we need to
+	   copy the actual moves into private storage. */
+	if( bd->all_moves )
+	    free( bd->all_moves );
+	bd->all_moves = malloc( bd->move_list.cMoves * sizeof( move ) );
+	bd->move_list.amMoves = memcpy( bd->all_moves, bd->move_list.amMoves,
+				 bd->move_list.cMoves * sizeof( move ) );
 	bd->valid_move = NULL;
     }
 	
