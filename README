@@ -48,7 +48,7 @@ Bearoff databases:
 of endgame positions, to evaluate moves and cube decisions during the bearoff.  These files may be several megabytes large, and are generally slow to generate,
 so they are not included in the distribution.
 
-The "make" process will warn you if do not have "gnubg_ts1.bd", which is the
+The "make" process will warn you if do not have "gnubg_ts0.bd", which is the
 2-sided database that is read into memory when GNU Backgammon starts.
 If you see this warning, you have three options:
 
@@ -62,7 +62,7 @@ If you see this warning, you have three options:
   3) Obtain a copy of the database from the Internet.  It is available
      by FTP from:
 
-        ftp://alpha.gnu.org/gnu/gnubg/gnubg_ts1.bd.gz
+        ftp://alpha.gnu.org/gnu/gnubg/gnubg_ts0.bd.gz
 
      Make sure you decompress the file (with gunzip) once you have
      retrieved it, and move it to the directory containing this README

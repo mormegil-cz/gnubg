@@ -1,3 +1,13 @@
+Sun Dec  1 16:38:03 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Use cubeful bearoff equities in bearoff evaluations.
+
+	* makebearoff.c (BearOff2): fix bug in calculation of cubeful
+	equities.
+	* eval.c (EvaluatePerfectCubeful, PerfectCubeful): new functions.
+	* eval.c (EvaluatePositionCubeful3): use cubeful bearoff equities.
+	* bearoff.h (BearoffCubeful): declare extern.
+
 Sun Dec  1 10:45:34 2002   Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkprefs.c (ScanCharacters): fix bug: characters must be appended 
