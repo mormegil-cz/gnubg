@@ -38,6 +38,7 @@ Petri Pitkänen
 Sam Pottle
 Jared Riley
 Ian Shaw
+JP White
 Kit Woolsey
 Frank Worrell
 EOF

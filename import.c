@@ -891,7 +891,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 			    pmr->d.esDouble.et = EVAL_NONE;
 			    pmr->d.st = SKILL_NONE;
 			    AddMoveRecord( pmr );
-			} else if( !strncasecmp( pch, "reject", 6 ) ) {
+			} else if( !strncasecmp( pch, "pass", 4 ) ) {
 			    pmr = malloc( sizeof( pmr->d ) );
 			    pmr->d.mt = MOVE_DROP;
 			    pmr->d.sz = NULL;

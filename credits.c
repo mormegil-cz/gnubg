@@ -28,6 +28,7 @@ char *aszCredits[] = {
     "Ian Shaw",
     "Brian Sheppard",
     "Gerry Tesauro",
+    "JP White",
     "Kit Woolsey",
     "Frank Worrell",
     "Michael Zehr",
