@@ -1,3 +1,25 @@
+Thu Jul  4 20:53:54 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkexport.c (ExportOK): fix typo.
+	* gnubg.c (CommandSaveSettings): fix typos.
+
+	* analysis (absoluteFibsRating): adjust interpolation parameters.
+	* analysis.c (DumpStatcontext): remove relative rating.
+	* html.c (HTMLDumpStatcontext): remove relative rating.
+	* gtkgame.c (GTKDumpStatcontext): remove relative rating.
+
+	* play.c (FixMatchState): new function. Correct errors in matchstate
+	due to missing moves.
+	* analysis.c (updateStatMove, AnalyzeMove): call FixMatchState.
+	* text.c (ExportGameText): call FixMatchState
+	* html.c (ExportGameHTML): call FixMatchState
+	* postscript.c (ExportGame): call FixMatchState
+	* latex.c (ExportGameLaTeX): call FixMatchState
+	* gtkgame.c (GTKUpdateAnnotations): call FixMatchState
+	* play.c (CalculateBoard, AddMoveRecord, ChangeGame, CommandNext):
+	call FixMatchState.
+	
+
 Thu Jul  4 19:52:25 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (printHTMLBoardGNU): fix typo.
