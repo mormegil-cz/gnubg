@@ -4332,9 +4332,13 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
   if ( ( arDouble[ OUTPUT_TAKE ] >= arDouble[ OUTPUT_NODOUBLE ] ) &&
        ( arDouble[ OUTPUT_DROP ] >= arDouble[ OUTPUT_NODOUBLE ] ) ) {
 
+    /* DT > ND and DP > ND */
+
     /* we have a double */
 
-    if ( arDouble[ OUTPUT_TAKE ] < arDouble[ OUTPUT_DROP ] ) {
+    if ( arDouble[ OUTPUT_DROP ] > arDouble[ OUTPUT_TAKE ] ) {
+
+      /* 6. DP > DT > ND: Double, take */
 
       arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_TAKE ];
 
@@ -4350,7 +4354,9 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
       
     }
     else {
-      /* ...pass */
+
+      /* 4. DT > DP > ND: Double, pass */
+
       arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_DROP ];
       return ( pci->fCubeOwner == -1 ) ? DOUBLE_PASS : REDOUBLE_PASS;
     }
@@ -4359,22 +4365,46 @@ FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
     
     /* no double */
 
+    /* ND > DT or ND > DP */
+
     arDouble [ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_NODOUBLE ];
 
     if ( arDouble [ OUTPUT_NODOUBLE ] > arDouble [ OUTPUT_TAKE ] ) {
-      
-      if ( arDouble [ OUTPUT_NODOUBLE ] > arDouble [ OUTPUT_DROP ] )
-        return ( pci->fCubeOwner == -1 ) ? TOOGOOD_TAKE : TOOGOODRE_TAKE;
-      else if ( arDouble[ OUTPUT_TAKE ] >= -2.0 &&
-                arDouble[ OUTPUT_TAKE ] <= 0.0 && ! pci->nMatchTo 
-                && pci->fBeavers )
-        return ( pci->fCubeOwner == -1 ) ?
-          NODOUBLE_BEAVER : NO_REDOUBLE_BEAVER; 
-      else
-        return ( pci->fCubeOwner == -1 ) ?
-          NODOUBLE_TAKE : NO_REDOUBLE_TAKE; 
 
-    } else
+      /* ND > DT */
+
+      if ( arDouble [ OUTPUT_TAKE ] > arDouble [ OUTPUT_DROP ] )
+
+        /* 1. ND > DT > DP: Too good, pass */
+
+        return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
+
+      else if ( arDouble[ OUTPUT_NODOUBLE ] > arDouble[ OUTPUT_DROP ] )
+
+        /* 2. ND > DP > DT: Too good, take */
+
+        return ( pci->fCubeOwner == -1 ) ? TOOGOOD_TAKE : TOOGOODRE_TAKE;
+
+      else {
+
+        /* 5. DP > ND > DT: No double, {take, beaver} */
+      
+        if ( arDouble[ OUTPUT_TAKE ] >= -2.0 &&
+             arDouble[ OUTPUT_TAKE ] <= 0.0 && ! pci->nMatchTo 
+             && pci->fBeavers )
+          return ( pci->fCubeOwner == -1 ) ?
+            NODOUBLE_BEAVER : NO_REDOUBLE_BEAVER; 
+        else
+          return ( pci->fCubeOwner == -1 ) ?
+            NODOUBLE_TAKE : NO_REDOUBLE_TAKE; 
+
+      }
+
+    } 
+    else
+
+      /* 3. DT > ND > DP: Too good, pass */
+      
       return ( pci->fCubeOwner == -1 ) ? TOOGOOD_PASS : TOOGOODRE_PASS;
   }
 }

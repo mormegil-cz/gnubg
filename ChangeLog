@@ -1,3 +1,9 @@
+Sun Dec 16 16:49:38 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* eval.c (FindBestCubeDecision): fix logic. Old logic would return "too
+	good, take" for position ID 2M7EAGism4MDIA in money game without
+	Jacoby.  
+
 Sun Dec 16 12:45:04 2001  Joern Thyssen  <jthyssen@dk.ibm.com>
 
 	* rollout.c (printRolloutstat, initRolloutstat): new functions:
