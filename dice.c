@@ -27,6 +27,9 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#if HAVE_GMP_H
+#include <gmp.h>
+#endif
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -75,6 +78,7 @@
 
 char *aszRNG[] = {
    N_ ("ANSI"),
+   N_ ("Blum, Blum and Shub"),
    N_ ("BSD"),
    N_ ("ISAAC"),
    N_ ("manual"),
@@ -153,9 +157,174 @@ static int GetManualDice( int anDice[ 2 ] ) {
   }
 }
 
+#if HAVE_LIBGMP
+
+static mpz_t zModulus, zSeed;
+static int fZInit;
+
+extern int InitRNGBBSModulus( char *sz ) {
+
+    if( !sz )
+	return -1;
+    
+    if( !fZInit ) {
+	mpz_init( zModulus );
+	mpz_init( zSeed );
+	fZInit = TRUE;
+    }
+    
+    if( mpz_set_str( zModulus, sz, 10 ) || mpz_sgn( zModulus ) < 1 )
+	return -1;
+
+    /* FIXME check for short cycles */
+    
+    return 0;
+}
+
+int BBSGood( mpz_t x ) {
+
+    return ( ( mpz_get_ui( x ) & 3 ) == 3 ) && mpz_probab_prime_p( x, 10 );
+}
+
+int BBSFindGood( mpz_t x ) {
+
+    do
+	mpz_add_ui( x, x, 1 );
+    while( !BBSGood( x ) );
+
+    return 0;
+}
+
+extern int InitRNGBBSFactors( char *sz0, char *sz1 ) {
+
+    mpz_t p, q;
+    char *pch;
+    
+    if( !sz0 || !sz1 )
+	return -1;
+    
+    if( mpz_init_set_str( p, sz0, 10 ) || mpz_sgn( p ) < 1 ) {
+	mpz_clear( p );
+	return -1;
+    }
+    
+    if( mpz_init_set_str( q, sz1, 10 ) || mpz_sgn( p ) < 1 ) {
+	mpz_clear( p );
+	mpz_clear( q );
+	return -1;
+    }
+    
+    if( !BBSGood( p ) ) {
+	BBSFindGood( p );
+
+	pch = mpz_get_str( NULL, 10, p );
+	outputf( _("%s is an invalid Blum factor; using %s instead.\n"),
+		 sz0, pch );
+	free( pch );
+    }
+	
+    if( !BBSGood( q ) || !mpz_cmp( p, q ) ) {
+	BBSFindGood( q );
+
+	if( !mpz_cmp( p, q ) )
+	    BBSFindGood( q );
+	
+	pch = mpz_get_str( NULL, 10, q );
+	outputf( _("%s is an invalid Blum factor; using %s instead.\n"),
+		 sz1, pch );
+	free( pch );
+    }
+	
+    if( !fZInit ) {
+	mpz_init( zModulus );
+	mpz_init( zSeed );
+	fZInit = TRUE;
+    }
+    
+    mpz_mul( zModulus, p, q );
+
+    mpz_clear( p );
+    mpz_clear( q );
+    
+    /* FIXME check for short cycles */
+    
+    return 0;
+}
+
+int BBSGetBit( void ) {
+
+    mpz_powm_ui( zSeed, zSeed, 2, zModulus );
+    return ( mpz_get_ui( zSeed ) & 1 );
+}
+
+int BBSGetTrit( void ) {
+
+    /* Return a trinary digit from a uniform distribution, given binary
+       digits as inputs.  This function is perfectly distributed and
+       uses the fewest number of bits on average. */
+
+    int state = 0;
+
+    while( 1 ) {
+	switch( state ) {
+	case 0:
+	    state = BBSGetBit() + 1;
+	    break;
+	    
+	case 1:
+	    if( BBSGetBit() )
+		state = 3;
+	    else
+		return 0;
+	    break;
+	    
+	case 2:
+	    if( BBSGetBit() )
+		return 2;
+	    else
+		state = 4;
+	    break;
+	    
+	case 3:
+	    if( BBSGetBit() )
+		return 1;
+	    else
+		state = 1;
+	    break;
+	    
+	case 4:
+	    if( BBSGetBit() )
+		state = 2;
+	    else
+		return 1;
+	    break;
+	}
+    }
+}
+#endif
+
 extern void PrintRNGSeed( const rng rngx ) {
 
     switch( rngx ) {
+    case RNG_BBS:
+#if HAVE_LIBGMP
+    {
+	char *pch;
+
+	pch = mpz_get_str( NULL, 10, zSeed );
+	outputf( _("The current seed is %s, "), pch );
+	free( pch );
+	
+	pch = mpz_get_str( NULL, 10, zModulus );
+	outputf( _("and the modulus is %s.\n"), pch );
+	free( pch );
+	
+	return;
+    }
+#else
+	abort();
+#endif
+	
     case RNG_MD5:
 	outputf( _("The current seed is %u.\n"), nMD5 );
 	break;
@@ -164,17 +333,18 @@ extern void PrintRNGSeed( const rng rngx ) {
 #if HAVE_LIBDL
 	if( pfUserRNGShowSeed ) {
 	    (*pfUserRNGShowSeed)();
-	    break;
+	    return;
 	}
 
-	/* otherwise fall through */
+	break;
 #else
 	abort();
 #endif
     default:
-	outputl( _("You cannot show the seed with this random number "
-		 "generator.") );
     }
+
+    outputl( _("You cannot show the seed with this random number "
+	       "generator.") );
 }
 
 extern void InitRNGSeed( int n, const rng rngx ) {
@@ -184,6 +354,15 @@ extern void InitRNGSeed( int n, const rng rngx ) {
 	srand( n );
 	break;
 
+    case RNG_BBS:
+#if HAVE_LIBGMP
+	assert( fZInit );
+	mpz_set_ui( zSeed, n < 2 ? 2 : n );
+	break;
+#else
+	abort();
+#endif
+	
     case RNG_BSD:
 #if HAVE_RANDOM
 	srandom( n );
@@ -227,12 +406,97 @@ extern void InitRNGSeed( int n, const rng rngx ) {
     }
 }
 
+#if HAVE_LIBGMP
+static void InitRNGSeedMP( mpz_t n, rng rng ) {
+
+    switch( rng ) {
+    case RNG_ANSI:
+    case RNG_BSD:
+    case RNG_MERSENNE:
+    case RNG_MD5: /* FIXME MD5 seed can be extended to 128 bits */
+    case RNG_USER: /* FIXME add a pfUserRNGSeedMP */
+	InitRNGSeed( mpz_get_ui( n ), rng );
+	break;
+	    
+    case RNG_BBS:
+	assert( fZInit );
+	mpz_set( zSeed, n );
+	break;
+	
+    case RNG_ISAAC: {
+	ub4 *achState;
+	size_t cb;
+	int i;
+
+	achState = mpz_export( NULL, &cb, -1, sizeof( ub4 ), 0, 0, n );
+	
+	for( i = 0; i < RANDSIZ && i < cb; i++ )
+	    rc.randrsl[ i ] = achState[ i ];
+
+	for( ; i < RANDSIZ; i++ )
+	    rc.randrsl[ i ] = 0;
+	
+	irandinit( &rc, TRUE );
+
+	free( achState );
+	
+	break;
+    }
+    
+    case RNG_MANUAL:
+    case RNG_RANDOM_DOT_ORG:
+	/* no-op */
+	break;
+    }
+}
+    
+extern int InitRNGSeedLong( char *sz, rng rng ) {
+
+    mpz_t n;
+    
+    if( mpz_init_set_str( n, sz, 10 ) || mpz_sgn( n ) < 1 ) {
+	mpz_clear( n );
+	return -1;
+    }
+
+    InitRNGSeedMP( n, rng );
+
+    mpz_clear( n );
+    
+    return 0;
+}
+#endif
+
 /* Returns TRUE if /dev/urandom was available, or FALSE if system clock was
    used. */
 extern int InitRNG( int *pnSeed, int fSet, const rng rngx ) {
 
     int n, h, f = FALSE;
 
+#if HAVE_LIBGMP
+    if( !pnSeed && fSet ) {
+	/* We can use long seeds and don't have to save the seed anywhere,
+	   so try 512 bits of state instead of 32. */
+	if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
+	    char achState[ 64 ];
+
+	    if( read( h, achState, 64 ) == 64 ) {
+		mpz_t n;
+		
+		close( h );
+
+		mpz_init( n );
+		mpz_import( n, 16, -1, 4, 0, 0, achState );
+		InitRNGSeedMP( n, rngx );
+		mpz_clear( n );
+		
+		return TRUE;
+	    } else
+		close( h );
+	}
+    }
+#endif
+    
     if( ( h = open( "/dev/urandom", O_RDONLY ) ) >= 0 ) {
 	f = read( h, &n, sizeof n ) == sizeof n;
 	close( h );
@@ -374,6 +638,15 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
 	anDice[ 1 ] = ( rand() % 6 ) + 1;
 	return 0;
 	
+    case RNG_BBS:
+#if HAVE_LIBGMP
+	anDice[ 0 ] = BBSGetTrit() + BBSGetBit() * 3 + 1;
+	anDice[ 1 ] = BBSGetTrit() + BBSGetBit() * 3 + 1;
+	return 0;
+#else
+	abort();
+#endif
+	
     case RNG_BSD:
 #if HAVE_RANDOM
 	anDice[ 0 ] = ( random() % 6 ) + 1;
@@ -454,9 +727,16 @@ extern int RollDice( int anDice[ 2 ], const rng rngx ) {
  *   from user input
  */
 
-extern int  UserRNGOpen() {
+extern int UserRNGOpen( char *sz ) {
 
   char *error;
+#if __GNUC__
+  char szCWD[ strlen( sz ) + 3 ];
+#elif HAVE_ALLOCA
+  char *szCWD = alloca( strlen( szOrig ) + 3 );
+#else
+  char szCWD[ 4096 ];
+#endif
 
   /* 
    * (1)
@@ -464,23 +744,25 @@ extern int  UserRNGOpen() {
    * LD_LIBRARY_PATH paths. 
    */
 
-  pvUserRNGHandle = dlopen( "userrng.so", RTLD_LAZY );
+  pvUserRNGHandle = dlopen( sz, RTLD_LAZY );
 
-  if (!pvUserRNGHandle )
+  if (!pvUserRNGHandle ) {
     /*
      * (2)
      * Try opening shared object from current directory
      */
-    pvUserRNGHandle = dlopen( "./userrng.so", RTLD_LAZY );
-
+      sprintf( szCWD, "./%s", sz );
+      pvUserRNGHandle = dlopen( szCWD, RTLD_LAZY );
+  }
+  
   if (!pvUserRNGHandle ) {
       /* 
        * Bugger! Can't load shared library
        */
       if( ( error = dlerror() ) )
-	  outputerrf( "userrng.so: %s", error );
+	  outputerrf( "%s", error );
       else
-	  outputerrf( _("Could not load shared library userrng.so.") );
+	  outputerrf( _("Could not load shared object %s."), sz );
     
       return 0;
   } 
@@ -522,7 +804,7 @@ extern int  UserRNGOpen() {
   
 }
 
-extern void UserRNGClose() {
+extern void UserRNGClose( void ) {
 
   dlclose(pvUserRNGHandle);
 

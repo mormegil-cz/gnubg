@@ -74,11 +74,13 @@ if test "$with_gdbm" != "no"; then
   fi
 fi
 AC_CHECK_LIB(dl, dlopen)
+AC_CHECK_LIB(gmp, mpz_init)
+AC_CHECK_LIB(gmp, __gmpz_init)
 
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
-AC_CHECK_HEADERS(sys/audioio.h fcntl.h sys/file.h sys/ioctl.h langinfo.h limits.h sys/mman.h pwd.h sys/resource.h stropts.h sys/socket.h sys/soundcard.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h)
+AC_CHECK_HEADERS(sys/audioio.h fcntl.h sys/file.h gmp.h sys/ioctl.h langinfo.h limits.h sys/mman.h pwd.h sys/resource.h stropts.h sys/socket.h sys/soundcard.h sys/stat.h sys/time.h sys/types.h sys/uio.h unistd.h sys/wait.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

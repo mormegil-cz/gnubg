@@ -23,7 +23,7 @@
 #define _DICE_H_
 
 typedef enum _rng {
-    RNG_ANSI, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MD5, RNG_MERSENNE, 
+    RNG_ANSI, RNG_BBS, RNG_BSD, RNG_ISAAC, RNG_MANUAL, RNG_MD5, RNG_MERSENNE, 
     RNG_RANDOM_DOT_ORG, RNG_USER
 } rng;
 
@@ -38,7 +38,15 @@ extern void InitRNGSeed( int n, const rng rngx );
 extern int 
 RollDice( int anDice[ 2 ], const rng rngx );
 
-extern void UserRNGClose();
-extern int UserRNGOpen();
+#if HAVE_LIBGMP
+extern int InitRNGSeedLong( char *sz, rng rng );
+extern int InitRNGBBSModulus( char *sz );
+extern int InitRNGBBSFactors( char *sz0, char *sz1 );
+#endif
+
+#if HAVE_LIBDL
+extern int UserRNGOpen( char * );
+extern void UserRNGClose( void );
+#endif
 
 #endif

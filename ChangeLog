@@ -1,3 +1,15 @@
+Tue Nov 26 19:04:59 2002  Gary Wong  <gtw@gnu.org>
+
+	* set.c (CommandSetRNGBBS): New function.
+	* dice.c (InitRNGBBSModulus, InitRNGBBSFactors): New functions.
+
+	* set.c (CommandSetSeed): [HAVE_LIBGMP] Allow long seeds (>32 bits).
+	* dice.c (InitRNG): [HAVE_LIBGMP] Use more than 32 bits to seed RNGs.
+
+	* set.c (SetRNG): Allow parameters in "set rng ..." commands beside
+	the seed.
+	* dice.c (UserRNGOpen): Accept the .so file name as a parameter.
+	
 Tue Nov 26 11:09:52 2002  Gary Wong  <gtw@gnu.org>
 
 	* rollout.c (RolloutDice): Implement quasi-random dice using

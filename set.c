@@ -126,6 +126,13 @@ SetSeed ( const rng rngx, char *sz ) {
     }
 
     if( *sz ) {
+#if HAVE_LIBGMP
+	if( InitRNGSeedLong( sz, rngx ) )
+	    outputl( _("You must specify a vaid seed -- try `help set "
+		       "seed'.") );
+	else
+	    outputf( _("Seed set to %s.\n"), sz );
+#else
 	n = ParseNumber( &sz );
 
 	if( n < 0 ) {
@@ -136,6 +143,7 @@ SetSeed ( const rng rngx, char *sz ) {
 
 	InitRNGSeed( n, rngx );
 	outputf( _("Seed set to %d.\n"), n );
+#endif	
     } else
 	outputl( InitRNG( NULL, TRUE, rngx ) ?
 		 _("Seed initialised from system random data.") :
@@ -144,46 +152,99 @@ SetSeed ( const rng rngx, char *sz ) {
 
 static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 
-    /* FIXME: read name of file with user RNG */
-
-    if( *prng == rngNew ) {
+    char *sz, *sz1;
+    int fInit;
+    
+    if( *prng == rngNew && !*szSeed ) {
 	outputf( _("You are already using the %s generator.\n"),
 		gettext ( aszRNG[ rngNew ] ) );
-	if( szSeed ) {
-	    SetSeed( *prng, szSeed );
-        }
-    } else {
-	outputf( _("GNU Backgammon will now use the %s generator.\n"),
-                 gettext ( aszRNG[ rngNew ] ) );
-
-        /* Dispose dynamically linked user module if necesary */
-
-        if ( *prng == RNG_USER )
-#if HAVE_LIBDL
-	  UserRNGClose();
-#else
-	  abort();
-#endif
-	  
-	/* Load dynamic library with user RNG */
-
-        if ( rngNew == RNG_USER ) {
-#if HAVE_LIBDL
-	  if ( !UserRNGOpen() ) {
-	      outputl( _("Error loading shared library.") );
-	      outputf( _("You are still using the %s generator.\n"),
-		     gettext ( aszRNG[ *prng ] ) );
-            return;
-	  }
-#else
-	  abort();
-#endif
-	}
-	    
-	if( ( *prng = rngNew ) != RNG_MANUAL )
-	    SetSeed( *prng, szSeed );
-	
+	return;
     }
+    
+    /* Dispose dynamically linked user module if necesary */
+    if ( *prng == RNG_USER )
+#if HAVE_LIBDL
+	UserRNGClose();
+#else
+        abort();
+#endif
+
+    /* check for RNG-dependent pre-initialisation */
+    switch( rngNew ) {
+    case RNG_BBS:
+#if HAVE_LIBGMP
+	fInit = FALSE;
+	
+	if( *szSeed ) {
+	    if( !strncasecmp( szSeed, "modulus", strcspn( szSeed,
+							  " \t\n\r\v\f" ) ) ) {
+		NextToken( &szSeed ); /* skip "modulus" keyword */
+		if( InitRNGBBSModulus( NextToken( &szSeed ) ) ) {
+		    outputf( _("You must specify a valid modulus (see `help "
+			       "set rng bbs').") );
+		    return;
+		}
+		fInit = TRUE;
+	    } else if( !strncasecmp( szSeed, "factors",
+				     strcspn( szSeed, " \t\n\r\v\f" ) ) ) {
+		NextToken( &szSeed ); /* skip "modulus" keyword */
+		sz = NextToken( &szSeed );
+		sz1 = NextToken( &szSeed );
+		if( InitRNGBBSFactors( sz, sz1 ) ) {
+		    outputf( _("You must specify two valid factors (see `help "
+			       "set rng bbs').") );
+		    return;
+		}
+		fInit = TRUE;
+	    }
+	}
+	
+	if( !fInit )
+	    /* use default modulus, with factors
+	       148028650191182616877187862194899201391 and
+	       315270837425234199477225845240496832591. */
+	    InitRNGBBSModulus( "46669116508701198206463178178218347698370"
+			       "262771368237383789001446050921334081" );
+	break;
+#else
+	abort();
+#endif
+	
+    case RNG_USER:
+	/* Load dynamic library with user RNG */
+#if HAVE_LIBDL
+	sz = NULL;
+	
+	if( *szSeed ) {
+	    char *pch;
+	    
+	    for( pch = szSeed; isdigit( *pch ); pch++ )
+		;
+	    
+	    if( *pch && !isspace( *pch ) )
+		/* non-numeric char found; assume it's the user RNG file */
+		sz = NextToken( &szSeed );
+	}
+	
+	if ( !UserRNGOpen( sz ? sz : "userrng.so" ) ) {
+	    outputf( _("You are still using the %s generator.\n"),
+		     gettext ( aszRNG[ *prng ] ) );
+	    return;
+	}
+#else
+	abort();
+#endif
+	break;
+
+    default:
+	;
+    }
+	    
+    outputf( _("GNU Backgammon will now use the %s generator.\n"),
+	     gettext ( aszRNG[ rngNew ] ) );
+    
+    if( ( *prng = rngNew ) != RNG_MANUAL )
+	SetSeed( *prng, szSeed );
 }
 
 extern void CommandSetAnalysisCube( char *sz ) {
@@ -1178,6 +1239,15 @@ extern void CommandSetRNG ( char *sz ) {
 extern void CommandSetRNGAnsi( char *sz ) {
 
     SetRNG( rngSet, RNG_ANSI, sz );
+}
+
+extern void CommandSetRNGBBS( char *sz ) {
+#if HAVE_LIBGMP
+    SetRNG( rngSet, RNG_BBS, sz );
+#else
+    outputl( _("This installation of GNU Backgammon was compiled without the"
+               "Blum, Blum and Shub generator.") );
+#endif
 }
 
 extern void CommandSetRNGBsd( char *sz ) {

@@ -116,6 +116,9 @@
 /* Define to 1 if you have the `getuid' function. */
 #undef HAVE_GETUID
 
+/* Define to 1 if you have the <gmp.h> header file. */
+#undef HAVE_GMP_H
+
 /* Define to 1 if you have the <gtkextra/gtksheet.h> header file. */
 #undef HAVE_GTKEXTRA_GTKSHEET_H
 
@@ -154,6 +157,9 @@
 
 /* Define to 1 if you have the <libgen.h> header file. */
 #undef HAVE_LIBGEN_H
+
+/* Define to 1 if you have the `gmp' library (-lgmp). */
+#undef HAVE_LIBGMP
 
 /* Define if you have the gtkextra library (-lgtkextra). */
 #undef HAVE_LIBGTKEXTRA

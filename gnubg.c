@@ -380,7 +380,10 @@ static char szDICE[] = N_("<die> <die>"),
     szONOFF[] = N_("on|off"),
     szOPTCOMMAND[] = N_("[command]"),
     szOPTFILENAME[] = N_("[filename]"),
+    szOPTGENERATOROPTSEED[] = N_("[generator] [seed]"),
     szOPTLIMIT[] = N_("[limit]"),
+    szOPTMODULUSOPTSEED[] = N_("[modulus <modulus>|factors <factor> <factor>] "
+			       "[seed]"),
     szOPTNAME[] = N_("[name]"),
     szOPTPOSITION[] = N_("[position]"),
     szOPTSEED[] = N_("[seed]"),
@@ -824,6 +827,8 @@ command cER = {
 }, acSetRNG[] = {
     { "ansi", CommandSetRNGAnsi, N_("Use the ANSI C rand() (usually linear "
       "congruential) generator"), szOPTSEED, NULL },
+    { "bbs", CommandSetRNGBBS, N_("Use the Blum, Blum and Shub generator"),
+      szOPTMODULUSOPTSEED, NULL },
     { "bsd", CommandSetRNGBsd, N_("Use the BSD random() non-linear additive "
       "feedback generator"), szOPTSEED, NULL },
     { "isaac", CommandSetRNGIsaac, N_("Use the I.S.A.A.C. generator"), 
@@ -835,10 +840,10 @@ command cER = {
       N_("Use the Mersenne Twister generator"),
       szOPTSEED, NULL },
     { "random.org", CommandSetRNGRandomDotOrg, 
-      N_("Use random numbers fetched fromk <www.random.org>"),
+      N_("Use random numbers fetched from <www.random.org>"),
       NULL, NULL },
     { "user", CommandSetRNGUser, 
-      N_("Specify an external generator"), szOPTSEED, NULL,},
+      N_("Specify an external generator"), szOPTGENERATOROPTSEED, NULL,},
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutLatePlayer[] = {
     { "chequerplay", CommandSetRolloutPlayerLateChequerplay, 
@@ -918,8 +923,7 @@ command cER = {
       "truncating rollouts"), NULL, acSetTruncation },
     { "varredn", CommandSetRolloutVarRedn, N_("Use lookahead during rollouts "
       "to reduce variance"), szONOFF, &cOnOff },
-    /* FIXME add commands for cubeful rollouts, cube variance reduction,
-       quasi-random dice, settlements... */
+    /* FIXME add commands for cube variance reduction, settlements... */
     { NULL, NULL, NULL, NULL, NULL }
 }, acSetTruncation[] = {
     { "chequerplay", CommandSetRolloutTruncationChequer,
@@ -4093,6 +4097,9 @@ SaveRNGSettings ( FILE *pf, char *sz, rng rngCurrent ) {
     switch( rngCurrent ) {
     case RNG_ANSI:
 	fprintf( pf, "%s rng ansi\n", sz );
+	break;
+    case RNG_BBS:
+	fprintf( pf, "%s rng bbs\n", sz ); /* FIXME save modulus */
 	break;
     case RNG_BSD:
 	fprintf( pf, "%s rng bsd\n", sz );

@@ -8196,6 +8196,9 @@ static GtkWidget* OptionsPage( optionswidget *pow)
   glade_menuitem = gtk_menu_item_new_with_label (_("ANSI"));
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwPRNG_menu), glade_menuitem);
+  glade_menuitem = gtk_menu_item_new_with_label (_("Blum, Blum and Shub"));
+  gtk_widget_show (glade_menuitem);
+  gtk_menu_append (GTK_MENU (pwPRNG_menu), glade_menuitem);
   glade_menuitem = gtk_menu_item_new_with_label (_("BSD"));
   gtk_widget_show (glade_menuitem);
   gtk_menu_append (GTK_MENU (pwPRNG_menu), glade_menuitem);
@@ -8357,26 +8360,30 @@ static void OptionsOK( GtkWidget *pw, optionswidget *pow ){
         UserCommand("set rng ansi");
       break;
     case 1:
+      if (rngCurrent != RNG_BBS)
+        UserCommand("set rng bbs");
+      break;
+    case 2:
       if (rngCurrent != RNG_BSD)
         UserCommand("set rng bsd");
       break;
-    case 2:
+    case 3:
       if (rngCurrent != RNG_ISAAC)
         UserCommand("set rng isaac");
       break;
-    case 3:
+    case 4:
       if (rngCurrent != RNG_MD5)
         UserCommand("set rng md5");
       break;
-    case 4:
+    case 5:
       if (rngCurrent != RNG_MERSENNE)
         UserCommand("set rng mersenne");
       break;
-    case 5:
+    case 6:
       if (rngCurrent != RNG_RANDOM_DOT_ORG)
         UserCommand("set rng random.org");
       break;
-    case 6:
+    case 7:
       if (rngCurrent != RNG_USER)
         UserCommand("set rng user");
       break;
