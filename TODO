@@ -61,6 +61,9 @@ duplication of effort and to make sure our changes merge easily.
 *** Make "hint" label the moves it lists, and allow you to roll out
   a choice of alternatives.
 
+* TTY interface:
+** Display the score and match length in ShowBoard().
+
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
 ** Don't flood the server with requests (which can happen if gnubg is

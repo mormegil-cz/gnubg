@@ -891,7 +891,7 @@ extern void CommandNewGame( char *sz ) {
 	    TurnDone();
 }
 
-static void FreeMatch( void ) {
+extern void FreeMatch( void ) {
 
     list *plMatch;
 

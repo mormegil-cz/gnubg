@@ -854,6 +854,11 @@ extern void ShowBoard( void ) {
 
     if( cOutputDisabled )
 	return;
+
+#if USE_GTK
+    if( fX && !fGTKOutput )
+	return;
+#endif
     
     if( fTurn == -1 ) {
 #if USE_GUI
@@ -2398,10 +2403,10 @@ extern int main( int argc, char *argv[] ) {
     rl_completion_entry_function = (Function *) NullGenerator;
 #endif
 
+    LoadRCFiles();
+    
     if( optind < argc )
        CommandLoadMatch( argv[ optind ] );
-
-    LoadRCFiles();
     
 #if USE_GTK
     if( fX ) {

@@ -1,3 +1,9 @@
+Wed Oct 18 11:43:00 2000  Gary Wong  <gary@research.att.com>
+
+	* gnubg.c (ShowBoard): Don't display GTK board if !fGTKOutput
+	(this could occur when loading a match given on command line).
+	* sgf.c: More work parsing SGF input.  Loading partially works, now.
+
 Wed Oct 18 14:52:47 2000  Jørn Thyssen  <joern@thyssen.nu>
 
 	* eval.c (EvaluatePositionCubeful1): Correct bugs introduced in

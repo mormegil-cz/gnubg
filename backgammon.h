@@ -145,6 +145,7 @@ extern char *NextToken( char **ppch );
 extern void NextTurn( void );
 extern void TurnDone( void );
 extern void CancelCubeAction( void );
+extern void FreeMatch( void );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char *sz );
