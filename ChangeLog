@@ -1,3 +1,7 @@
+Sun Jul 11 14:47:30 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
+
+	* gtkgame.c: include <ctype.h> for isspace().
+
 Sun Jul 11 14:42:51 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* dice.h: Added extern UserRNGOpen();
