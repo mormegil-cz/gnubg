@@ -97,6 +97,13 @@ typedef struct {
   float arVarianceLuckAdj[ 2 ];
   int nGames;
 
+#if USE_TIMECONTROL
+  /* time control */
+
+  int anTimePenalties[ 2 ];
+  float aarTimeLoss[ 2 ][ 2 ];
+#endif /* USE_TIMECONTROL */
+
 } statcontext;
 
 typedef enum {

@@ -423,6 +423,11 @@ typedef struct _movetime {
     struct timeval tl[2];
     int fPlayer;
     int nPoints;
+
+    /* evaluation of loss */
+    float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+    evalsetup es;
 } movetime;
 #endif
 
