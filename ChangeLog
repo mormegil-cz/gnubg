@@ -1,3 +1,10 @@
+Sat Apr 12 09:10:26 2003  Joern Thyssen  <jth@gnubg.org>
+
+        * eval.c (EvaluatePositionCubeful3): fTop *must* be a part
+        of EvalKey... unfortunately we're out of bits...
+        This is just a quick'n'dirty fix!
+        (bug reported by Achim)
+
 Wed Apr  9 17:36:41 2003  Holger Bochnig  <hbgg@gmx.net>
 
 	* gtkgame.c (GTKDumpStatcontext): bug fix

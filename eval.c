@@ -5896,6 +5896,9 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   PositionKey ( anBoard, ec.auchKey );
 
   /* check cache for existence for earlier calculation */
+
+  fAll = ! fTop; /* FIXME: fTop should be a part of EvalKey */
+
   for ( ici = 0; ici < cci && fAll; ++ici ) {
 
       if ( aciCubePos[ ici ].nCube < 0 )
@@ -5912,7 +5915,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
       else
         fAll = FALSE;
   }
-  
+
   /* get equities */
   
   if ( ! fAll ) {
@@ -5923,18 +5926,22 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
       return -1;
     
     /* add to cache */
-    for ( ici = 0; ici < cci; ++ici ) {
-      if ( aciCubePos[ ici ].nCube < 0 )
-        continue;
+    
+    if ( ! fTop ) {
 
-      ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
-      l = keyToLong ( ec.auchKey, ec.nEvalContext );
-      l = (l & ((cEval.size >> 1)-1)) << 1;
-      memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
-      ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
-      
-      CacheAdd ( &cEval, &ec, l );
-      
+      for ( ici = 0; ici < cci; ++ici ) {
+        if ( aciCubePos[ ici ].nCube < 0 )
+          continue;
+        
+        ec.nEvalContext = EvalKey ( pec, nPlies, &aciCubePos[ ici ], TRUE );
+        l = keyToLong ( ec.auchKey, ec.nEvalContext );
+        l = (l & ((cEval.size >> 1)-1)) << 1;
+        memcpy ( ec.ar, arOutput, sizeof ( float ) * NUM_OUTPUTS );
+        ec.ar[ OUTPUT_CUBEFUL_EQUITY ] = arCubeful[ ici ];
+        
+        CacheAdd ( &cEval, &ec, l );
+
+      }
     }
   }
 
