@@ -172,7 +172,6 @@ int fDisplay = TRUE, fAutoBearoff = FALSE, fAutoGame = TRUE, fAutoMove = FALSE,
     fOutputMatchPC = TRUE, fOutputRawboard = FALSE, 
     fAnnotation = FALSE, cAnalysisMoves = 20, fAnalyseCube = TRUE,
     fAnalyseDice = TRUE, fAnalyseMove = TRUE, fRecord = TRUE;
-int fAutoAnalysis = FALSE;
 int fInvertMET = FALSE;
 int fConfirmSave = TRUE;
 int fTutor = FALSE;
@@ -647,8 +646,6 @@ command cER = {
       acSetAnalysisThreshold },
     { NULL, NULL, NULL, NULL, NULL }    
 }, acSetAutomatic[] = {
-    { "analysis", CommandSetAutoAnalysis, N_("Analyse moves during match -- "
-      "a.k.a. tutor-mode"), szONOFF, &cOnOff },
     { "bearoff", CommandSetAutoBearoff, N_("Automatically bear off as many "
       "chequers as possible"), szONOFF, &cOnOff },
     { "crawford", CommandSetAutoCrawford, N_("Enable the Crawford game "
@@ -3792,7 +3789,6 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif
     
     fprintf( pf, 
-             "set automatic analysis %s\n"
              "set automatic bearoff %s\n"
 	     "set automatic crawford %s\n"
 	     "set automatic doubles %d\n"
@@ -3800,7 +3796,6 @@ extern void CommandSaveSettings( char *szParam ) {
 	     "set automatic move %s\n"
 	     "set automatic roll %s\n"
 	     "set beavers %d\n",
-	     fAutoAnalysis ? "on" : "off",
 	     fAutoBearoff ? "on" : "off",
 	     fAutoCrawford ? "on" : "off",
 	     cAutoDoubles,

@@ -248,7 +248,6 @@ extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     nBeavers, fOutputMWC, fEgyptian, fOutputWinPC, fOutputMatchPC, fJacoby,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord;
-extern int fAutoAnalysis;
 extern int fInvertMET;
 extern int fConfirm, fConfirmSave;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
