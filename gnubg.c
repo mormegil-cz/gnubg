@@ -299,7 +299,10 @@ rolloutcontext rcRollout =
   TRUE, /* truncate at BEAROFF2_OS for cubeless rollouts */
   5,  /* late evals start here */
   RNG_MERSENNE, /* RNG */
-  0 /* seed */
+  0,  /* seed */
+  FALSE,  /* no stop on STD */
+  144,    /* minimum games  */
+  0.1	  /* stop when std's are under 10% of value */
 };
 
 /* parameters for `eval' and `hint' */
@@ -453,8 +456,9 @@ static char szDICE[] = N_("<die> <die>"),
     szTRIALS[] = N_("<trials>"),
     szVALUE[] = N_("<value>"),
     szMATCHID[] = N_("<matchid>"),
-    szURL[] = N_("<URL>");
-
+    szURL[] = N_("<URL>"),
+    szMAXERR[] = N_("<fraction>"),
+    szMINGAMES[] = N_("<minimum games to rollout>");
 command cER = {
     /* dummy command used for evaluation/rollout parameters */
     NULL, NULL, NULL, NULL, &cER
@@ -1019,6 +1023,17 @@ command cER = {
       N_("Set parameters for choosing moves to evaluate"), 
       szFILTER, NULL},
     { NULL, NULL, NULL, NULL, NULL }
+}, acSetRolloutLimit[] = {
+    { "enable", CommandSetRolloutLimitEnable,
+      N_("Stop rollouts when STD's are small enough"),
+      szONOFF, &cOnOff },
+    { "minimumgames", CommandSetRolloutLimitMinGames, 
+      N_("Always rollout at least this many games"),
+      szMINGAMES, NULL},
+    { "maxerror", CommandSetRolloutMaxError,
+      N_("Stop when all ratios |std/value| are less than this "),
+      szMAXERR, NULL},
+    { NULL, NULL, NULL, NULL, NULL }
 }, acSetRolloutPlayer[] = {
     { "chequerplay", CommandSetRolloutPlayerChequerplay, 
       N_("Specify parameters "
@@ -1078,6 +1093,9 @@ command cER = {
     {"later", CommandSetRolloutLate,
      N_("Control evaluation parameters for later plies of rollout"),
      NULL, acSetRolloutLate },
+    {"limit", CommandSetRolloutLimit,
+     N_("Stop rollouts based on Standard Deviations"),
+     NULL, acSetRolloutLimit },
     { "movefilter", CommandSetRolloutMoveFilter, 
       N_("Set parameters for choosing moves to evaluate"), 
       szFILTER, NULL},
@@ -4618,7 +4636,10 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s trials %d\n"
             "%s cube-equal-chequer %s\n"
             "%s players-are-same %s\n"
-            "%s truncate-equal-player0 %s\n",
+            "%s truncate-equal-player0 %s\n"
+            "%s limit enable %s\n"
+            "%s limit minimumgames %d\n"
+            "%s limit maxerror %05.4f\n",
             sz, prc->fCubeful ? "on" : "off",
             sz, prc->fVarRedn ? "on" : "off",
             sz, prc->fRotate ? "on" : "off",
@@ -4632,7 +4653,10 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             sz, prc->nTrials,
             sz, fCubeEqualChequer ? "on" : "off",
             sz, fPlayersAreSame ? "on" : "off",
-            sz, fTruncEqualPlayer0 ? "on" : "off"
+            sz, fTruncEqualPlayer0 ? "on" : "off",
+	    sz, prc->fStopOnSTD ? "on" : "off",
+	    sz, prc->nMinimumGames,
+	    sz, prc->rStdLimit
             );
   
   SaveRNGSettings ( pf, sz, prc->rngRollout );

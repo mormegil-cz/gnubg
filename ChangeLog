@@ -1,3 +1,9 @@
+Mon Jun 23 21:31 GMT 2003 Jim Segrave jes@jes-2.demon.nl
+
+	* allow terminating rollouts early if all the standard errors are
+	  below a user set fraction of the value
+	  gnubg.c set.c gtkgame.c show.c rollout.c eval.h backgammon.h
+
 Mon Jun 23 09:07:38 2003  Joseph Heled  <pepster@users.sourceforge.net>
 
 u	* eval.c (DumpAnyContact): Fix incorrect indexing into inputs vector. (Broken for

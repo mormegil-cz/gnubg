@@ -301,6 +301,11 @@ ShowRollout ( const rolloutcontext *prc ) {
                 &prc->aecCubeTrunc, 0, 1, 0, 0 );
   }
 
+  if (prc->fStopOnSTD) {
+    outputf ( _("Rollouts may stop after %d games if the ratios |value/STD|\n"
+		"are all less than< %5.4f\n"), prc->nMinimumGames, 
+		prc->rStdLimit);
+  }
 }
 
 static void

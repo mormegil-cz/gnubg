@@ -124,6 +124,9 @@ typedef struct _rolloutcontext {
   unsigned short nLate; /* switch evaluations on move nLate of game */
   rng rngRollout;
   int nSeed;
+  unsigned int fStopOnSTD;    /* stop when std's are small enough */
+  unsigned int nMinimumGames; /* but always do at least this many */
+  double       rStdLimit;     /* stop when abs( value / std ) < this */
 
 } rolloutcontext;
 

@@ -4979,11 +4979,12 @@ typedef struct _rolloutpagegeneral {
   int *pfOK;
   GtkWidget *pwCubeful, *pwVarRedn, *pwInitial, *pwRotate, *pwDoLate;
   GtkWidget *pwDoTrunc, *pwCubeEqualChequer, *pwPlayersAreSame;
-  GtkWidget *pwTruncEqualPlayer0;
+  GtkWidget *pwTruncEqualPlayer0, *pwDoSTDStop;
   GtkWidget *pwTruncBearoff2, *pwTruncBearoffOS, *pwTruncBearoffOpts;
-  GtkWidget *pwAdjLatePlies, *pwAdjTruncPlies;
-  GtkAdjustment *padjTrials, *padjTruncPlies, *padjLatePlies, *padjSeed;
+  GtkWidget *pwAdjLatePlies, *pwAdjTruncPlies, *pwAdjMinGames, *pwAdjMaxError;
+  GtkAdjustment *padjTrials, *padjTruncPlies, *padjLatePlies, *padjSeed, *padjMinGames, *padjMaxError;
   GtkWidget *arpwGeneral;
+  GtkWidget *pwMinGames, *pwMaxError;
 } rolloutpagegeneral;
 
 typedef struct _rolloutwidget {
@@ -5047,6 +5048,10 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
     gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( 
                                                     prw->prwGeneral->pwPlayersAreSame ) );
 
+  prw->rcRollout.fStopOnSTD = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
+                                            prw->prwGeneral->pwDoSTDStop));
+  prw->rcRollout.nMinimumGames = (unsigned int) gtk_spin_button_get_value (GTK_SPIN_BUTTON (prw->prwGeneral->pwMinGames));
+  prw->rcRollout.rStdLimit = gtk_spin_button_get_value (GTK_SPIN_BUTTON (prw->prwGeneral->pwMaxError));
 
   /* get all the evaluations out of the widgets */
   for (i = 0; i < 4; ++i) {
@@ -5144,19 +5149,31 @@ typedef enum _rolloutpages {
 static void LateEvalToggled( GtkWidget *pw, rolloutwidget *prw) {
 
   int do_late = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
-                                                                  prw->prwGeneral->pwDoLate ) );
+                                                 prw->prwGeneral->pwDoLate ) );
   int   are_same = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
                                                                      prw->prwGeneral->pwPlayersAreSame ) );
 
   /* turn on/off the late pages */
   gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK 
-                                                        (prw->RolloutNotebook), ROLL_P0_LATE), do_late);
+                            (prw->RolloutNotebook), ROLL_P0_LATE), do_late);
   gtk_widget_set_sensitive ( gtk_notebook_get_nth_page (GTK_NOTEBOOK 
-                                                        (prw->RolloutNotebook), ROLL_P1_LATE), do_late && !are_same);
+                             (prw->RolloutNotebook), ROLL_P1_LATE), 
+                             do_late && !are_same);
 
   /* turn on/off the ply setting in the general page */
   gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjLatePlies),
                             do_late);
+}
+
+static void STDStopToggled( GtkWidget *pw, rolloutwidget *prw) {
+
+  int do_std_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (
+                       prw->prwGeneral->pwDoSTDStop ) );
+
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjMinGames),
+                            do_std_stop);
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwAdjMaxError),
+                            do_std_stop);
 }
 
 static void TruncEnableToggled( GtkWidget *pw, rolloutwidget *prw) {
@@ -5273,10 +5290,11 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
    
   prpw->pwDoLate = gtk_check_button_new_with_label (
-                                                    _( "Enable separate evaluations " ) );
+                                        _( "Enable separate evaluations " ) );
   gtk_container_add( GTK_CONTAINER( pw ), prpw->pwDoLate );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( 
-                                                    prw->prwGeneral->pwDoLate ), prw->rcRollout.fLateEvals);
+                                      prw->prwGeneral->pwDoLate ), 
+                                 prw->rcRollout.fLateEvals);
   gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwDoLate ), 
                       "toggled", GTK_SIGNAL_FUNC (LateEvalToggled), prw);
 
@@ -5286,9 +5304,49 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
                      gtk_label_new( _("Change eval after ply:" ) ) );
 
   prpw->padjLatePlies = GTK_ADJUSTMENT( gtk_adjustment_new( 
-                                                           prw->rcRollout.nLate, 0, 1000, 1, 1, 0 ) );
+                                       prw->rcRollout.nLate, 0, 1000, 1, 1, 0 ) );
   gtk_container_add( GTK_CONTAINER( pwHBox ), gtk_spin_button_new( 
-                                                                  prpw->padjLatePlies, 1, 0 ) );
+                                                prpw->padjLatePlies, 1, 0 ) );
+
+  pwFrame = gtk_frame_new ( _("Stop when result is accurate") );
+  gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
+
+  pw = gtk_vbox_new( FALSE, 8 );
+  gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pw);
+   
+  prpw->pwDoSTDStop = gtk_check_button_new_with_label (
+                               _( "Stop when STDs are small enough " ) );
+  gtk_container_add( GTK_CONTAINER( pw ), prpw->pwDoSTDStop );
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( 
+                                      prw->prwGeneral->pwDoSTDStop ), 
+                                 prw->rcRollout.fStopOnSTD);
+  gtk_signal_connect( GTK_OBJECT( prw->prwGeneral->pwDoSTDStop ), 
+                      "toggled", GTK_SIGNAL_FUNC (STDStopToggled), prw);
+
+  prpw->pwAdjMinGames = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+                     gtk_label_new( _("Minimum Games:" ) ) );
+
+  prpw->padjMinGames = GTK_ADJUSTMENT( gtk_adjustment_new( 
+                                       prw->rcRollout.nMinimumGames, 1, 1296 * 1296, 36, 26, 0 ) );
+
+  prpw->pwMinGames = gtk_spin_button_new(prpw->padjMinGames, 1, 0 ) ;
+
+  gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwMinGames);
+
+  prpw->pwAdjMaxError = pwHBox = gtk_hbox_new( FALSE, 0 );
+  gtk_container_add( GTK_CONTAINER( pw ), pwHBox);
+  gtk_container_add( GTK_CONTAINER( pwHBox ), 
+                   gtk_label_new( _("Ratio |Value/Standard Deviation|:" ) ) );
+
+  prpw->padjMaxError = GTK_ADJUSTMENT( gtk_adjustment_new( 
+                       prw->rcRollout.rStdLimit, 0, 1, .0001, .0001, 0.001 ) );
+
+  prpw->pwMaxError = gtk_spin_button_new(prpw->padjMaxError, .0001, 4 );
+
+  gtk_container_add( GTK_CONTAINER( pwHBox ), prpw->pwMaxError);
 
   pwFrame = gtk_frame_new ( _("Truncation") );
   gtk_container_add ( GTK_CONTAINER (pwPage ), pwFrame );
@@ -5484,6 +5542,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
   /* cheap and nasty way to get things set correctly */
   LateEvalToggled (NULL, &rw);
+  STDStopToggled (NULL, &rw);
   TruncEnableToggled (NULL, &rw);
   CubeEqCheqToggled (NULL, &rw);
   PlayersSameToggled (NULL, &rw);
@@ -5591,6 +5650,21 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
     if( rw.rcRollout.nTrials != rcRollout.nTrials ) {
       sprintf( sz, "set rollout trials %d", rw.rcRollout.nTrials );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.fStopOnSTD != rcRollout.fStopOnSTD ) {
+      sprintf( sz, "set rollout limit enable %s", rw.rcRollout.fStopOnSTD ? "on" : "off" );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.nMinimumGames != rcRollout.nMinimumGames ) {
+      sprintf( sz, "set rollout limit minimumgames %d", rw.rcRollout.nMinimumGames );
+      UserCommand( sz );
+    }
+
+    if( rw.rcRollout.rStdLimit != rcRollout.rStdLimit ) {
+      sprintf( sz, "set rollout limit maxerr %5.4f", rw.rcRollout.rStdLimit );
       UserCommand( sz );
     }
 

@@ -61,7 +61,7 @@ static void QuasiRandomSeed( int n ) {
     randctx rc;
     
     if( nPermutationSeed == n )
-	return;
+      return;
 
     for( i = 0; i < RANDSIZ; i++ )
 	rc.randrsl[ i ] = n;
@@ -824,7 +824,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 rolloutcontext *prc,
                 cubeinfo aci[], 
                 int afCubeDecTop[], int cci, int fInvert ) {
-
+  
 #if __GNUC__
   int aanBoardEval[ cci ][ 2 ][ 25 ];
   float aar[ cci ][ NUM_ROLLOUT_OUTPUTS ];
@@ -846,7 +846,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 							 NUM_ROLLOUT_OUTPUTS *
 							 sizeof double );
   double ( *aarVariance )[ NUM_ROLLOUT_OUTPUTS ] = alloca(
-      cci * NUM_ROLLOUT_OUTPUTS * sizeof double );
+							  cci * NUM_ROLLOUT_OUTPUTS * sizeof double );
   cubeinfo *aciLocal = alloca ( cci * sizeof ( cubeinfo ) );
 #else
   int aanBoardEval[ MAX_ROLLOUT_CUBEINFO ][ 2 ][ 25 ];
@@ -860,6 +860,10 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   
   int i, j, ici;
   int anBoardOrig[ 2 ][ 25 ];
+  int stopped_early = 0;
+  int		ii, jj;
+  int     err_too_big;
+  double	v, s;
 
   enum _rollouttype { BEAROFF, BASIC, VARREDN } rt;
 
@@ -895,8 +899,8 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
     /* Initialise statistics */
 
     if( aarsStatistics ) {
-	initRolloutstat ( &aarsStatistics[ ici ][ 0 ] );
-	initRolloutstat ( &aarsStatistics[ ici ][ 1 ] );
+      initRolloutstat ( &aarsStatistics[ ici ][ 0 ] );
+      initRolloutstat ( &aarsStatistics[ ici ][ 1 ] );
     }
 
     /* save input cubeinfo */
@@ -915,116 +919,165 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
 
   if( fInvert )
-      SwapSides( anBoardOrig );
+    SwapSides( anBoardOrig );
 
   if( prc->fRotate )
-      QuasiRandomSeed( rcRollout.nSeed );
+    QuasiRandomSeed( rcRollout.nSeed );
   
   for( i = 0; i < cGames; i++ ) {
-      if( prc->rngRollout != RNG_MANUAL )
-	  InitRNGSeed( rcRollout.nSeed + ( i << 8 ), prc->rngRollout );
-      
-      for ( ici = 0; ici < cci; ici++ )
-        memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-                 sizeof ( anBoardOrig ) );
-      /*  memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoardOrig[ 0 ][ 0 ],
-          sizeof ( anBoardOrig ) ); */
 
-      /* FIXME: old code was:
+    if( prc->rngRollout != RNG_MANUAL )
+      InitRNGSeed( rcRollout.nSeed + ( i << 8 ), prc->rngRollout );
+      
+    for ( ici = 0; ici < cci; ici++ )
+      memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+	       sizeof ( anBoardOrig ) );
+    /*  memcpy ( &aanBoardEval[ ici ][ 0 ][ 0 ], &anBoardOrig[ 0 ][ 0 ],
+	sizeof ( anBoardOrig ) ); */
+
+    /* FIXME: old code was:
          
-         memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
-         sizeof( anBoardEval ) );
+       memcpy( &anBoardEval[ 0 ][ 0 ], &anBoard[ 0 ][ 0 ],
+       sizeof( anBoardEval ) );
 
-         should it be anBoardOrig? */
+       should it be anBoardOrig? */
 
-      switch( rt ) {
-      case BEAROFF:
-        if ( ! prc->fCubeful )
-	  BearoffRollout( *aanBoardEval, *aar, prc->nTruncate,
-                          0, i, prc->nTrials, aci[ 0 ].bgv );
-        else
-	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aci, afCubeDecTop, cci, prc, 
-                               aarsStatistics );
-        break;
-      case BASIC:
-      case VARREDN:
-	  BasicCubefulRollout( aanBoardEval, aar, 
-                               0, i, aci, afCubeDecTop, cci, prc, 
-                               aarsStatistics );
-	  break;
+    switch( rt ) {
+    case BEAROFF:
+      if ( ! prc->fCubeful )
+	BearoffRollout( *aanBoardEval, *aar, prc->nTruncate,
+			0, i, prc->nTrials, aci[ 0 ].bgv );
+      else
+	BasicCubefulRollout( aanBoardEval, aar, 
+			     0, i, aci, afCubeDecTop, cci, prc, 
+			     aarsStatistics );
+      break;
+    case BASIC:
+    case VARREDN:
+      BasicCubefulRollout( aanBoardEval, aar, 
+			   0, i, aci, afCubeDecTop, cci, prc, 
+			   aarsStatistics );
+      break;
+    }
+      
+    if( fInterrupt )
+      break;
+      
+    for ( ici = 0; ici < cci ; ici++ ) {
+      if( fInvert ) InvertEvaluationR( aar[ ici ], &aci[ ici ] );
+
+      
+      for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
+	float rMuNew, rDelta;
+	  
+	aarResult[ ici ][ j ] += aar[ ici ][ j ];
+	rMuNew = aarResult[ ici ][ j ] / ( i + 1 );
+	  
+	if ( i ) {
+
+	  /* for i=0 aarVariance is not defined */
+
+	  rDelta = rMuNew - aarMu[ ici ][ j ];
+	  
+	  aarVariance[ ici ][ j ] =
+	    aarVariance[ ici ][ j ] * ( 1.0 - 1.0 / i ) +
+	    ( i + 1 ) * rDelta * rDelta;
+	}
+	  
+	aarMu[ ici ][ j ] = rMuNew;
+	  
+	if( j < OUTPUT_EQUITY ) {
+	  if( aarMu[ ici ][ j ] < 0.0f )
+	    aarMu[ ici ][ j ] = 0.0f;
+	  else if( aarMu[ ici ][ j ] > 1.0f )
+	    aarMu[ ici ][ j ] = 1.0f;
+	}
+	  
+	aarSigma[ ici ][ j ] = sqrt( aarVariance[ ici ][ j ] / ( i + 1 ) );
       }
+
+      if ( ! isHyperGammon( aci[ ici ].bgv ) )
+	SanityCheck( anBoardOrig, aarMu[ ici ] );
+
+    }
       
-      if( fInterrupt )
-	  break;
-      
-      for ( ici = 0; ici < cci ; ici++ ) {
-        if( fInvert ) InvertEvaluationR( aar[ ici ], &aci[ ici ] );
-
-      
-        for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
-	  float rMuNew, rDelta;
-	  
-	  aarResult[ ici ][ j ] += aar[ ici ][ j ];
-	  rMuNew = aarResult[ ici ][ j ] / ( i + 1 );
-	  
-          if ( i ) {
-
-             /* for i=0 aarVariance is not defined */
-
-	     rDelta = rMuNew - aarMu[ ici ][ j ];
-	  
-      	     aarVariance[ ici ][ j ] =
-               aarVariance[ ici ][ j ] * ( 1.0 - 1.0 / i ) +
-	         ( i + 1 ) * rDelta * rDelta;
-          }
-	  
-	  aarMu[ ici ][ j ] = rMuNew;
-	  
-	  if( j < OUTPUT_EQUITY ) {
-	      if( aarMu[ ici ][ j ] < 0.0f )
-		  aarMu[ ici ][ j ] = 0.0f;
-	      else if( aarMu[ ici ][ j ] > 1.0f )
-		  aarMu[ ici ][ j ] = 1.0f;
-	  }
-	  
-	  aarSigma[ ici ][ j ] = sqrt( aarVariance[ ici ][ j ] / ( i + 1 ) );
-        }
-
-        if ( ! isHyperGammon( aci[ ici ].bgv ) )
-          SanityCheck( anBoardOrig, aarMu[ ici ] );
-
-      }
-      
-      if( fShowProgress ) {
+    if( fShowProgress ) {
 #if USE_GTK
-	if( fX ) 
-	      GTKRolloutUpdate( aarMu, aarSigma, i, cGames,
-                                prc->fCubeful, cci, aciLocal );
-	  else
+      if( fX ) 
+	GTKRolloutUpdate( aarMu, aarSigma, i, cGames,
+			  prc->fCubeful, cci, aciLocal );
+      else
 #endif
-	      {
+	{
 #if 0
-		  /* FIXME this output is too wide to fit in 80 columns */
-		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-			   "Cubeful: %6.3f %5.3f %5d\r", asz[ 0 ],
-                           aarMu[ 0 ][ 0 ], aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
-			   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ], aarMu[ 0 ][ 5 ],
-                           aarSigma[ 0 ][ 5 ],
-                           aarMu[ 0 ][ 6 ], aarSigma[ 0 ][ 6 ],
-			   i + 1 );
+	  /* FIXME this output is too wide to fit in 80 columns */
+	  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
+		   "Cubeful: %6.3f %5.3f %5d\r", asz[ 0 ],
+		   aarMu[ 0 ][ 0 ], aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
+		   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ], aarMu[ 0 ][ 5 ],
+		   aarSigma[ 0 ][ 5 ],
+		   aarMu[ 0 ][ 6 ], aarSigma[ 0 ][ 6 ],
+		   i + 1 );
 #endif
-		  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
-			   "%5d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
-			   aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
-			   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ],
-			   aarMu[ 0 ][ 5 ], aarSigma[ 0 ][ 5 ], i + 1 );
-		  fflush( stdout );
-	      }
+	  outputf( "%28s %5.3f %5.3f %5.3f %5.3f %5.3f (%6.3f) %5.3f "
+		   "%5d\r", asz[ 0 ], aarMu[ 0 ][ 0 ],
+		   aarMu[ 0 ][ 1 ], aarMu[ 0 ][ 2 ],
+		   aarMu[ 0 ][ 3 ], aarMu[ 0 ][ 4 ],
+		   aarMu[ 0 ][ 5 ], aarSigma[ 0 ][ 5 ], i + 1 );
+	  fflush( stdout );
+	}
+
+    }
+
+    /* see if we can quit because the answers are good enough */
+    if (prc->fStopOnSTD && (i >= prc->nMinimumGames)) {
+      err_too_big = 0;
+
+      for (jj = 0; jj < cci; jj++) {
+	if (err_too_big)
+	  break;
+
+	for (ii = 0; ii < NUM_ROLLOUT_OUTPUTS; ii++) {
+	  if ( ii < OUTPUT_EQUITY ) {
+	    v = abs (aarMu[ jj ][ ii ]);
+	    s = abs (aarSigma[ jj ][ ii ]);
+	  } else if ( ii == OUTPUT_EQUITY ) {
+	    if ( ! ms.nMatchTo ) { /* money game */
+	      v = abs (aarMu[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube );
+	      s = abs (aarSigma[ jj ][ ii ] * aci[ jj ].nCube / aci[ 0 ].nCube);
+	    } else { /* match play */
+	      v = abs (mwc2eq ( eq2mwc ( aarMu[ jj ][ ii ], &aci[ jj ] ), 
+				&aci[ 0 ] ));
+	      s = abs (se_mwc2eq ( se_eq2mwc ( aarSigma[ jj ][ ii ], 
+					       &aci[ jj ] ), &aci[ 0 ] ));
+	    }
+	  }	else {
+	    if (!prc->fCubeful) 
+	      continue;
+
+	    if ( ! ms.nMatchTo ) { /* money game */
+	      v = abs (aarMu[ jj ][ ii ]);
+	      s = abs (aarSigma[ jj ][ ii ]); 
+	    } else {
+	      v = abs (mwc2eq ( aarMu[ jj ][ ii ], &aci[ 0 ] ));
+	      s = abs (se_mwc2eq ( aarSigma[ jj ][ ii ], &aci[ 0 ] ) );
+	    }
+	  } /* else if ( ii == OUTPUT_EQUITY) ... else ) */
+
+	  if ((v >= .0001) && (v * prc->rStdLimit < s)) {
+	    err_too_big = 1;
+	    break;
+	  }
+	} /* for (ii = 0; ii < NUM_ROLLOUT_OUTPUTS; ii++) */
+      } /* for (jj = 0; jj < cci; jj++) */
+      if (!err_too_big) {
+	stopped_early = 1;
+	break;
       }
+    } /* if (prc->fStopOnSTD && (i >= prc->nMinimumGames)) */
   }
 
-  if( !( cGames = i ) )
+  if( ( cGames != i ) && !stopped_early )
     return -1;
 
   if( aarOutput )
@@ -1042,11 +1095,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
       && !fX
 #endif
       ) {
-      for( i = 0; i < 79; i++ )
-	  outputc( ' ' );
+    for( i = 0; i < 79; i++ )
+      outputc( ' ' );
 
-      outputc( '\r' );
-      fflush( stdout );
+    outputc( '\r' );
+    fflush( stdout );
   }
 
   /* print statistics */
@@ -1055,16 +1108,16 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
   /* FIXME: make output prettier -- and move to GTKRollout*. */
 
   if( aarsStatistics )
-      for ( ici = 0; ici < cci; ici++ ) {
-	  outputf ( "\n\n rollout no %d\n", ici );
-	  for ( i = 0; i < 2; i++ ) {
-	      outputf ( "\n\nplayer %d\n\n", i );
+    for ( ici = 0; ici < cci; ici++ ) {
+      outputf ( "\n\n rollout no %d\n", ici );
+      for ( i = 0; i < 2; i++ ) {
+	outputf ( "\n\nplayer %d\n\n", i );
 	      
-	      printRolloutstat ( NULL, &aarsStatistics[ ici ][ i ], cGames );
+	printRolloutstat ( NULL, &aarsStatistics[ ici ][ i ], cGames );
 	      
-	  }
-	  
       }
+	  
+    }
 #endif
 
   return cGames;
