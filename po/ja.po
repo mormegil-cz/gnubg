@@ -8490,7 +8490,7 @@ msgstr ""
 
 #: import.c:301
 msgid "This file is not a valid Jellyfish .pos file!\n"
-msgstr "このファイルは有効な Jellyfish .pos ファイルではありません!"
+msgstr "このファイルは有効な Jellyfish .pos ファイルではありません!\n"
 
 #: import.c:516
 msgid "No '(' following text 'Illegal play'"
@@ -9394,7 +9394,7 @@ msgstr "プレイヤー %s の記録がありません。\n"
 #: record.c:488
 #, c-format
 msgid "Record for player %s erased.\n"
-msgstr "プレイヤー %s の記録を消去しました。"
+msgstr "プレイヤー %s の記録を消去しました。\n"
 
 #: record.c:501
 msgid "Are you sure you want to erase all player records?"
