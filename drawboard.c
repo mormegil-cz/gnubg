@@ -54,10 +54,11 @@ int fClockwise = FALSE; /* Player 1 moves clockwise */
  */
 
 static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
-                           char *asz[], char *szMatchID ) {
+                           char *asz[], char *szMatchID, 
+                           int nChequers ) {
 
     char *pch = sz, *pchIn;
-    int x, y, an[ 2 ][ 25 ], cOffO = 15, cOffX = 15;
+    int x, y, an[ 2 ][ 25 ], cOffO = nChequers, cOffX = nChequers;
     static char achX[ 16 ] = "     X6789ABCDEF",
         achO[ 16 ] = "     O6789ABCDEF";
 
@@ -288,10 +289,11 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
  */
 
 static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
-                           char *asz[], char *szMatchID ) {
+                           char *asz[], char *szMatchID,
+                           int nChequers) {
 
     char *pch = sz, *pchIn;
-    int x, y, an[ 2 ][ 25 ], cOffO = 15, cOffX = 15;
+    int x, y, an[ 2 ][ 25 ], cOffO = nChequers, cOffX = nChequers;
     static char achX[ 16 ] = "     X6789ABCDEF",
         achO[ 16 ] = "     O6789ABCDEF";
 
@@ -503,11 +505,13 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 }
 
 extern char *DrawBoard( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
-                        char *asz[], char *szMatchID ) {
+                        char *asz[], char *szMatchID, int nChequers ) {
     if( fClockwise == FALSE ) 
-        return ( DrawBoardStd( sz, anBoard, fRoll, asz, szMatchID ) ) ;
+        return ( DrawBoardStd( sz, anBoard, fRoll, asz, 
+                               szMatchID, nChequers  ) ) ;
 
-    return ( DrawBoardCls( sz, anBoard, fRoll, asz, szMatchID ) ) ;   
+    return ( DrawBoardCls( sz, anBoard, fRoll, asz, 
+                           szMatchID, nChequers ) ) ;   
 };
 
 static char *FormatPoint( char *pch, int n ) {
@@ -911,7 +915,7 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
 			char *szPlayer, char *szOpp, int nMatchTo,
 			int nScore, int nOpponent, int nDice0, int nDice1,
 			int nCube, int fCubeOwner, int fDoubled, int fTurn,
-			int fCrawford ) {
+			int fCrawford, int nChequers ) {
     char *sz = pch;
     int i, anOff[ 2 ];
     
@@ -940,7 +944,7 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
     /* Whose turn */
     strcat( strchr( sz, 0 ), fRoll ? "1:" : "-1:" );
 
-    anOff[ 0 ] = anOff[ 1 ] = 15;
+    anOff[ 0 ] = anOff[ 1 ] = nChequers ? nChequers : 15;
     for( i = 0; i < 25; i++ ) {
 	anOff[ 0 ] -= anBoard[ 0 ][ i ];
 	anOff[ 1 ] -= anBoard[ 1 ][ i ];

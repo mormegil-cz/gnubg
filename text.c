@@ -544,7 +544,7 @@ printTextBoard ( FILE *pf, const matchstate *pms ) {
 	
 
   fputs ( DrawBoard( szBoard, anBoard, pms->fMove, apch,
-                     MatchIDFromMatchState ( pms ) ),
+                     MatchIDFromMatchState ( pms ), anChequers[ ms.bgv ] ),
           pf);
 
   PipCount ( anBoard, anPips );

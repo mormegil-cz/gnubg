@@ -25,7 +25,7 @@
 extern int fClockwise; /* Player 1 moves clockwise */
 
 extern char *DrawBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
-                        char *asz[], char *szMatchID );
+                        char *asz[], char *szMatchID, int nChequers );
 /* Fill the buffer pch with a representation of the move anMove, assuming
    the board looks like anBoard.  pch must have room for 28 characters plus
    a trailing 0 (consider the move `bar/24* 23/22* 21/20* 19/18*'). */
@@ -39,7 +39,7 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
 			char *szPlayer, char *szOpp, int nMatchTo,
 			int nScore, int nOpponent, int nDice0, int nDice1,
 			int nCube, int fCubeOwner, int fDoubled, int fTurn,
-			int fCrawford );
+			int fCrawford, int nChequers );
 /* Read a FIBS "boardstyle 3" description from pch. */
 extern int ParseFIBSBoard( char *pch, int anBoard[ 2 ][ 25 ],
 			   char *szPlayer, char *szOpp, int *pnMatchTo,

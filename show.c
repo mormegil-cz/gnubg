@@ -472,14 +472,16 @@ extern void CommandShowBoard( char *sz ) {
 #if USE_GUI
     if( fX )
 #if USE_GTK
-	game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1, FALSE );
+      game_set( BOARD( pwBoard ), an, TRUE, "", "", 0, 0, 0, -1, -1, FALSE,
+                anChequers[ ms.bgv ] );
 #else
         GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    
 #endif
     else
 #endif
         outputl( DrawBoard( szOut, an, TRUE, ap, 
-                            MatchIDFromMatchState ( &ms ) ) );
+                            MatchIDFromMatchState ( &ms ),
+                            anChequers[ ms.bgv ] ) );
 }
 
 extern 
@@ -508,14 +510,16 @@ void CommandShowFullBoard( char *sz ) {
 	game_set( BOARD( pwBoard ), an, ms.fTurn, 
                   ap[ 1 ].szName, ap[ 0 ].szName , ms.nMatchTo, 
                   ms.anScore[ 1 ], ms.anScore[ 0 ], 
-                  ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE );
+                  ms.anDice[ 0 ], ms.anDice[ 1 ], FALSE,
+                  anChequers[ ms.bgv ] );
 #else
         GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );    
 #endif
     else
 #endif
         outputl( DrawBoard( szOut, an, TRUE, apch, 
-                            MatchIDFromMatchState ( &ms ) ) );
+                            MatchIDFromMatchState ( &ms ), 
+                            anChequers[ ms.bgv ] ) );
 }
 
 

@@ -2674,7 +2674,7 @@ extern void ShowBoard( void ) {
 #if USE_GTK
 	    game_set( BOARD( pwBoard ), anBoardTemp, 0, ap[ 1 ].szName,
 		      ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
-		      ms.anScore[ 0 ], -1, -1, FALSE );
+		      ms.anScore[ 0 ], -1, -1, FALSE, anChequers[ ms.bgv ] );
 #if HAVE_GDK_GDKX_H
 	    nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #endif
@@ -2702,7 +2702,7 @@ extern void ShowBoard( void ) {
 				ms.anScore[ 0 ], ms.anDice[ 0 ],
 				ms.anDice[ 1 ], ms.nCube,
 				ms.fCubeOwner, ms.fDoubled, ms.fTurn,
-				ms.fCrawford ) );
+				ms.fCrawford, anChequers[ ms.bgv ] ) );
 	    if( !ms.fMove )
 		SwapSides( ms.anBoard );
 	    
@@ -2777,7 +2777,8 @@ extern void ShowBoard( void ) {
 	    SwapSides( ms.anBoard );
 	
 	outputl( DrawBoard( szBoard, ms.anBoard, ms.fMove, apch,
-                            MatchIDFromMatchState ( &ms ) ) );
+                            MatchIDFromMatchState ( &ms ), 
+                            anChequers[ ms.bgv ] ) );
 
 	if( fAnnotation && plLastMove && ( pmr = plLastMove->plNext->p ) ) {
 	    DisplayAnalysis( pmr );
@@ -2797,7 +2798,7 @@ extern void ShowBoard( void ) {
 		  ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		  ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ],
 		  ap[ ms.fTurn ].pt != PLAYER_HUMAN && !fComputing &&
-		  !nNextTurn );
+		  !nNextTurn, anChequers[ ms.bgv ] );
 #if HAVE_GDK_GDKX_H
 	nLastRequest = NextRequest( GDK_DISPLAY() ) - 1;
 #endif
@@ -4274,7 +4275,8 @@ extern void CommandCopy (char *sz)
   if ( ! ms.fMove )
     SwapSides ( anBoardTemp );
 
-  DrawBoard (szOut, anBoardTemp, ms.fMove, aps, MatchIDFromMatchState (&ms));
+  DrawBoard (szOut, anBoardTemp, ms.fMove, aps, MatchIDFromMatchState (&ms),
+             anChequers[ ms.bgv ] );
   strcat (szOut, "\n");
   TextToClipboard (szOut);
 
@@ -4536,8 +4538,8 @@ SaveRolloutSettings ( FILE *pf, char *sz, rolloutcontext *prc ) {
             "%s initial %s\n"
             "%s truncation enable %s\n"
             "%s truncation plies %d\n"
-            "%s truncatebearoff exact %s\n"
-            "%s truncatebearoff onesided %s\n"
+            "%s bearofftruncation exact %s\n"
+            "%s bearofftruncation onesided %s\n"
             "%s later enable %s\n"
             "%s later plies %d\n"
             "%s trials %d\n"

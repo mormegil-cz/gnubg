@@ -1271,7 +1271,8 @@ extern int ComputerTurn( void ) {
       FIBSBoard( szBoard, ms.anBoard, ms.fMove, ap[ 1 ].szName,
 		 ap[ 0 ].szName, ms.nMatchTo, ms.anScore[ 1 ],
 		 ms.anScore[ 0 ], ms.anDice[ 0 ], ms.anDice[ 1 ], ms.nCube,
-		 ms.fCubeOwner, ms.fDoubled, ms.fTurn, ms.fCrawford );
+		 ms.fCubeOwner, ms.fDoubled, ms.fTurn, ms.fCrawford,
+                 anChequers [ ms.bgv ] );
       strcat( szBoard, "\n" );
       
       if( ExternalWrite( ap[ ms.fTurn ].h, szBoard,

@@ -168,7 +168,7 @@ write_board ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
   /* Player on bar */
   bd->points[ 25 ] = points[ 1 ][ 24 ];
 
-  anOff[ 0 ] = anOff[ 1 ] = 15;
+  anOff[ 0 ] = anOff[ 1 ] = bd->nchequers;
   for( i = 0; i < 25; i++ ) {
     anOff[ 0 ] -= points[ 0 ][ i ];
     anOff[ 1 ] -= points[ 1 ][ i ];
@@ -1207,8 +1207,8 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 	    board_invalidate_point( bd, i );
 	}
 	
-	bd->points[ 26 ] = 15;
-	bd->points[ 27 ] = -15;
+	bd->points[ 26 ] = bd->nchequers;
+	bd->points[ 27 ] = -bd->nchequers;
 	board_invalidate_point( bd, 26 );
 	board_invalidate_point( bd, 27 );
 
@@ -1220,19 +1220,11 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
     } else if ( !dragging && ( n == POINT_UNUSED0 || n == POINT_UNUSED1 ) ) {
 	/* click on unused bearoff tray in edit mode -- reset to starting
 	   position */
-	for( i = 0; i < 28; i++ )
-	    bd->points[ i ] = 0;
 
-	/* FIXME use appropriate position if playing nackgammon */
-	
-	bd->points[ 1 ] = -2;
-	bd->points[ 6 ] = 5;
-	bd->points[ 8 ] = 3;
-	bd->points[ 12 ] = -5;
-	bd->points[ 13 ] = 5;
-	bd->points[ 17 ] = -3;
-	bd->points[ 19 ] = -5;
-	bd->points[ 24 ] = 2;
+        int anBoard[ 2 ][ 25 ];
+
+        InitBoard( anBoard, ms.bgv );
+        write_board( bd, anBoard );
 	
 	for( i = 0; i < 28; i++ )
 	    board_invalidate_point( bd, i );
@@ -2013,6 +2005,15 @@ static gint board_set( Board *board, const gchar *board_text,
     old_board[ 26 ] = bd->points[ 26 ];
     old_board[ 27 ] = bd->points[ 27 ];
 
+    /* calculate number of chequers */
+    
+    bd->nchequers = 0;
+    for ( i = 0; i < 28; ++i )
+      if ( bd->points[ i ] > 0 )
+        bd->nchequers += bd->points[ i ];
+    
+
+
     old_cube = bd->cube;
     old_doubled = bd->doubled;
     old_crawford = bd->crawford_game;
@@ -2560,7 +2561,7 @@ static void update_buttons( BoardData *pbd ) {
 extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 		      gchar *name, gchar *opp_name, gint match,
 		      gint score, gint opp_score, gint die0, gint die1,
-		      gint computer_turn ) {
+		      gint computer_turn, gint nchequers ) {
     gchar board_str[ 256 ];
     BoardData *pbd = board->board_data;
     int old_points[ 2 ][ 25 ];
@@ -2578,7 +2579,7 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 
     FIBSBoard( board_str, points, roll, name, opp_name, match, score,
 	       opp_score, die0, die1, ms.nCube, ms.fCubeOwner, ms.fDoubled,
-	       ms.fTurn, ms.fCrawford);
+	       ms.fTurn, ms.fCrawford, nchequers );
 
     board_set( board, board_str, -pbd->turn * ms.fResigned, ms.fCubeUse );
     
