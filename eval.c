@@ -38,6 +38,9 @@
 #include <sys/mman.h>
 #endif
 #include <neuralnet.h>
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,32 +52,38 @@
 #include "positionid.h"
 #include "matchequity.h"
 
+#if WIN32
+#define BINARY O_BINARY
+#else
+#define BINARY 0
+#endif
+
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
 static int CompareRedEvalData( const void *p0, const void *p1 );
 
-extern int
+static int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
                           float arClOutput[ NUM_OUTPUTS ],
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies, int fCheckAutoRedoubles);
 
-extern float
+static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
-extern float
+static float
 Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
-extern float
+static float
 Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
-extern float
+static float
 Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
-extern float
+static float
 Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
-extern float
+static float
 EvalEfficiency( int anBoard[2][25], positionclass pc );
 
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
@@ -246,6 +255,7 @@ static int anEscapes1[ 0x1000 ];
 static neuralnet nnContact, nnBPG, nnRace;
 static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
 static cache cEval;
+static int cCache;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL;
 static float rCubeX = 2.0/3.0;
@@ -357,14 +367,14 @@ static long EvalCacheHash( evalcache *pec ) {
 }
 
 /* Open a file for reading with the search path "(szDir):.:(PKGDATADIR)". */
-static int PathOpen( char *szFile, char *szDir ) {
+static int PathOpen( char *szFile, char *szDir, int f ) {
 
     int h, idFirstError = 0;
     char szPath[ PATH_MAX ];
     
     if( szDir ) {
 	sprintf( szPath, "%s/%s", szDir, szFile );
-	if( ( h = open( szPath, O_RDONLY ) ) >= 0 )
+	if( ( h = open( szPath, O_RDONLY | f ) ) >= 0 )
 	    return h;
 
 	/* Try to report the more serious error (ENOENT is less
@@ -373,14 +383,14 @@ static int PathOpen( char *szFile, char *szDir ) {
 	    idFirstError = errno;
     }
 
-    if( ( h = open( szFile, O_RDONLY ) ) >= 0 )
+    if( ( h = open( szFile, O_RDONLY | f ) ) >= 0 )
 	return h;
 
     if( !idFirstError && errno != ENOENT )
 	idFirstError = errno;
 
     sprintf( szPath, PKGDATADIR "/%s", szFile );
-    if( ( h = open( szPath, O_RDONLY ) ) >= 0 )
+    if( ( h = open( szPath, O_RDONLY | f ) ) >= 0 )
 	return h;
 
     if( idFirstError )
@@ -568,7 +578,8 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
     static int fInitialised = FALSE;
 
     if( !fInitialised ) {
-	if( CacheCreate( &cEval, 8192, (cachecomparefunc) EvalCacheCompare ) )
+	if( CacheCreate( &cEval, cCache = 8192,
+			 (cachecomparefunc) EvalCacheCompare ) )
 	    return -1;
 	    
 	ComputeTable();
@@ -577,10 +588,13 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
     pBearoff1 = NULL;
     
     if( szDatabase ) {
-	if( ( h = PathOpen( szDatabase, szDir ) ) >= 0 ) {
-	    /* FIXME fstat() h, to see what size database is available */
+	if( ( h = PathOpen( szDatabase, szDir, BINARY ) ) >= 0 ) {
 #if HAVE_MMAP
-	    if( !( pBearoff1 = mmap( NULL, 54264 * 32 * 2 + 924 * 924 * 2,
+	    struct stat st;
+	    
+	    if( fstat( h, &st ) ||
+		st.st_size != 54264 * 32 * 2 + 924 * 924 * 2 ||
+		!( pBearoff1 = mmap( NULL, 54264 * 32 * 2 + 924 * 924 * 2,
 				     PROT_READ, MAP_SHARED, h, 0 ) ) ) {
 #endif
 		if( !( pBearoff1 = malloc( 54264 * 32 * 2 +
@@ -589,10 +603,15 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
 		    return -1;
 		}
 
-		/* FIXME check for early EOF */
+		errno = 0;
 		if( read( h, pBearoff1, 54264 * 32 * 2 +
-			  924 * 924 * 2 ) < 0 ) {
-		    perror( szDatabase );
+			  924 * 924 * 2 ) < 54264 * 32 * 2 + 924 * 924 * 2 ) {
+		    if( errno )
+			perror( szDatabase );
+		    else
+			fprintf( stderr, "%s: incomplete bearoff database\n",
+				 szDatabase );
+		    
 		    free( pBearoff1 );
 		    pBearoff1 = NULL;
 		}
@@ -611,7 +630,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
     }
 
     if( szWeightsBinary &&
-	( h = PathOpen( szWeightsBinary, szDir ) ) >= 0 &&
+	( h = PathOpen( szWeightsBinary, szDir, BINARY ) ) >= 0 &&
 	( pfWeights = fdopen( h, "rb" ) ) ) {
 	if( fread( &r, sizeof r, 1, pfWeights ) < 1 )
 	    perror( szWeightsBinary );
@@ -642,7 +661,7 @@ extern int EvalInitialise( char *szWeights, char *szWeightsBinary,
     }
 
     if( !fReadWeights && szWeights ) {
-	if( ( h = PathOpen( szWeights, szDir ) ) < 0 ||
+	if( ( h = PathOpen( szWeights, szDir, 0 ) ) < 0 ||
 	    !( pfWeights = fdopen( h, "r" ) ) )
 	    perror( szWeights );
 	else {
@@ -3866,14 +3885,20 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
 extern int EvalCacheResize( int cNew ) {
 
-  return CacheResize( &cEval, cNew );
+    cCache = cNew;
+    
+    return CacheResize( &cEval, cNew );
 }
 
-extern int EvalCacheStats( int *pc, int *pcLookup, int *pcHit ) {
+extern int EvalCacheStats( int *pcUsed, int *pcSize, int *pcLookup,
+			   int *pcHit ) {
+    if( pcUsed )
+	*pcUsed = cEval.c;
 
-  *pc = cEval.c;
-    
-  return CacheStats( &cEval, pcLookup, pcHit );
+    if( pcSize )
+	*pcSize = cCache;
+	    
+    return CacheStats( &cEval, pcLookup, pcHit );
 }
 
 extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
@@ -4673,7 +4698,7 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
 }
 
 
-extern float
+static float
 Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   float rW, rL;
@@ -4921,7 +4946,7 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 }  
 
 
-extern float
+static float
 Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   if ( pci->fCubeOwner == -1 ) {
@@ -4941,7 +4966,7 @@ Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 }
   
 
-extern float
+static float
 Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   /* normalized score */
@@ -5050,7 +5075,7 @@ Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 }
 
 
-extern float
+static float
 Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   /* normalized score */
@@ -5160,7 +5185,7 @@ Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 }
 
 
-extern float
+static float
 Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
   /* normalized score */
@@ -5272,7 +5297,7 @@ Cl2CfMatchCentered ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 #define RACE_MAX_EFF 0.7
 #define RACE_MIN_EFF 0.6
 
-extern float
+static float
 EvalEfficiency( int anBoard[2][25], positionclass pc ){
 
   /* Since it's somewhat costly to call CalcInputs, the 

@@ -210,7 +210,7 @@ extern int
 EvalCacheResize( int cNew );
 
 extern int 
-EvalCacheStats( int *pc, int *pcLookup, int *pcHit );
+EvalCacheStats( int *pcUsed, int *pcSize, int *pcLookup, int *pcHit );
 
 extern int 
 GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
