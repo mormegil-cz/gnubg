@@ -1380,6 +1380,9 @@ extern void CommandSaveGame( char *sz ) {
 	return;
     }
 
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
@@ -1412,6 +1415,9 @@ extern void CommandSaveMatch( char *sz ) {
 		 "match')." );
 	return;
     }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;

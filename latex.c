@@ -513,6 +513,9 @@ extern void CommandExportGameLaTeX( char *sz ) {
 	return;
     }
     
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
     if( !sz || !*sz ) {
 	outputl( "You must specify a file to export to (see `help export"
 		 "game latex')." );
@@ -548,6 +551,9 @@ extern void CommandExportMatchLaTeX( char *sz ) {
 		 "match latex')." );
 	return;
     }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;

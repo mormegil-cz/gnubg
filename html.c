@@ -2906,6 +2906,9 @@ extern void CommandExportGameHtml( char *sz ) {
 	return;
     }
 
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
     else if( !( pf = fopen( sz, "w" ) ) ) {
@@ -3021,6 +3024,9 @@ extern void CommandExportMatchHtml( char *sz ) {
       aszLinks[ 2 ] = ( i < nGames - 1 ) ? HTMLFilename ( sz, i + 1 ) : NULL;
       aszLinks[ 3 ] = HTMLFilename ( sz, nGames - 1 );
 
+      if ( !i && ! confirmOverwrite ( sz, fConfirmSave ) )
+        return;
+
       if( !strcmp( szCurrent, "-" ) )
 	pf = stdout;
       else if( !( pf = fopen( szCurrent, "w" ) ) ) {
@@ -3073,6 +3079,9 @@ extern void CommandExportPositionHtml( char *sz ) {
 		 "position html')." );
 	return;
     }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;

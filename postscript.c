@@ -990,6 +990,9 @@ static void ExportGameGeneral( int f, char *sz ) {
 	return;
     }
 
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
+
     if( !strcmp( sz, "-" ) ) {
 	if( f ) {
 	    outputl( "PDF files may not be written to standard output ("
@@ -1043,6 +1046,9 @@ static void ExportMatchGeneral( int f, char *sz ) {
 		 "match %s').\n", f ? "pdf" : "postscript" );
 	return;
     }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
 
     if( !strcmp( sz, "-" ) ) {
 	if( f ) {
@@ -1099,6 +1105,9 @@ extern void CommandExportPositionEPS( char *sz ) {
 		 "position eps')." );
 	return;
     }
+
+    if ( ! confirmOverwrite ( sz, fConfirmSave ) )
+      return;
 
     if( !strcmp( sz, "-" ) )
 	pf = stdout;
