@@ -28,6 +28,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <math.h>
+#include <errno.h>
 
 #include "eval.h"
 #include "positionid.h"
@@ -151,6 +152,146 @@ HashLookup ( hash *ph, const unsigned int iKey,
 }
 
 
+static int
+OSLookup ( const unsigned int iPos,
+           const int nPoints,
+           unsigned short int aProb[ 64 ],
+           const int fGammon, const int fCompress,
+           FILE *pfOutput, FILE *pfTmp ) {
+
+  int i, j;
+  unsigned char ac[ 128 ];
+
+  assert ( pfOutput != stdin );
+
+  if ( fCompress ) {
+
+    unsigned char ac[ 128 ];
+    int i, j;
+    off_t iOffset;
+    int nBytes;
+    int nPos = Combination ( nPoints + 15, nPoints );
+    unsigned int ioff, nz, ioffg, nzg;
+    unsigned short int us;
+
+    /* find offsets and no. of non-zero elements */
+
+    if ( fseek ( pfOutput, 40 + iPos * 8, SEEK_SET ) < 0 ) {
+      perror ( "output file" );
+      exit(-1);
+    }
+
+    if ( fread ( ac, 1, 8, pfOutput ) < 8 ) {
+      if ( errno )
+        perror ( "output file" );
+      else
+        fprintf ( stderr, "error reading output file\n" );
+      exit(-1);
+    }
+
+    iOffset = 
+      ac[ 0 ] | 
+      ac[ 1 ] << 8 |
+      ac[ 2 ] << 16 |
+      ac[ 3 ] << 24;
+    
+    nz = ac[ 4 ];
+    ioff = ac[ 5 ];
+    nzg = ac[ 6 ];
+    ioffg = ac[ 7 ];
+
+    /* re-position at EOF */
+
+    if ( fseek ( pfOutput, 0L, SEEK_END ) < 0 ) {
+      perror ( "output file" );
+      exit(-1);
+    }
+      
+    /* read distributions */
+
+    iOffset = 2 * iOffset;
+
+    nBytes = 2 * ( nz + nzg );
+
+    if ( fseek ( pfTmp, iOffset, SEEK_SET ) < 0 ) {
+      perror ( "fseek'ing temp file" );
+      exit(-1);
+    }
+
+    /* read data */
+
+    if ( fread ( ac, 1, nBytes, pfTmp ) < nBytes ) {
+      if ( errno )
+        perror ( "reading temp file" );
+      else
+        fprintf ( stderr, "error reading temp file" );
+      exit(-1);
+    }
+    
+    memset ( aProb, 0, 128 );
+
+    i = 0;
+    for ( j = 0; j < nz; ++j, i += 2 ) {
+      us = ac[ i ] | ac[ i + 1 ] << 8;
+      aProb[ ioff + j ] = us;
+    }
+
+    if ( fGammon ) 
+      for ( j = 0; j < nzg; ++j, i += 2 ) {
+        us = ac[ i ] | ac[ i+1 ] << 8;
+        aProb[ 32 + ioffg + j ] = us;
+      }
+
+    /* re-position at EOF */
+
+    if ( fseek ( pfTmp, 0L, SEEK_END ) < 0 ) {
+      perror ( "fseek'ing to EOF on temp file" );
+      exit(-1);
+    }
+
+  }
+  else {
+
+    /* look up position by seeking */
+
+    if ( fseek ( pfOutput, 
+                 40 + iPos * ( fGammon ? 128 : 64 ), SEEK_SET ) < 0 ) {
+      fprintf ( stderr, "error seeking in pfOutput\n" );
+      exit(-1);
+    }
+
+    /* read distribution */
+
+    if ( fread ( ac, 1, fGammon ? 128 : 64, pfOutput ) < 
+         ( fGammon ? 128 : 64 ) ) {
+      fprintf ( stderr, "error readung from pfOutput\n" );
+      exit(-1);
+    }
+
+    /* save distribution */
+
+    i = 0;
+    for ( j = 0; j < 32; ++j, i+=2 )
+      aProb[ j ] = ac[ i ] | ac[ i + 1 ] << 8;
+
+    if ( fGammon )
+      for ( j = 0; j < 32; ++j, i+=2 )
+        aProb[ j + 32 ] = ac[ i ] | ac[ i + 1 ] << 8;
+
+    /* position cursor at end of file */
+
+    if ( fseek ( pfOutput, 0L, SEEK_END ) < 0 ) {
+      fprintf ( stderr, "error seeking to end!\n" );
+      exit(-1);
+    }
+
+  }
+
+  return 0;
+
+}
+
+
 static void
 CalcIndex ( const unsigned short int aProb[ 32 ],
             unsigned int *piIdx, unsigned int *pnNonZero ) {
@@ -198,7 +339,9 @@ RollsOS ( const unsigned short int aus[ 32 ] ) {
 static void BearOff( int nId, int nPoints, 
                      unsigned short int aOutProb[ 64 ],
                      const int fGammon,
-                     hash *ph, bearoffcontext *pbc ) {
+                     hash *ph, bearoffcontext *pbc,
+                     const int fCompress, 
+                     FILE *pfOutput, FILE *pfTmp ) {
 
     int i, iBest, iMode, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ],
       anBoardTemp[ 2 ][ 25 ], aProb[ 64 ];
@@ -274,9 +417,20 @@ static void BearOff( int nId, int nPoints,
 
 		assert( j >= 0 );
 		assert( j < nId );
-		
-                if ( ! HashLookup ( ph, j, (void **) &pusj ) ) {
-                  BearOff ( j, nPoints, pusj = ausj, fGammon, ph, pbc );
+
+
+                if ( ! j ) {
+
+                  memset ( pusj = ausj, 0, fGammon ? 128 : 64 );
+                  pusj[  0 ] = 0xFFFF;
+                  pusj[ 32 ] = 0xFFFF;
+
+                }
+                else if ( ! HashLookup ( ph, j, (void **) &pusj ) ) {
+                  /* look up in file generated so far */
+                  OSLookup ( j, nPoints, pusj = ausj, fGammon, fCompress,
+                             pfOutput, pfTmp );
+
                   HashAdd ( ph, j, pusj, fGammon ? 128 : 64 );
                 }
 
@@ -441,7 +595,7 @@ generate_os ( const int nOS, const int fHeader,
   int n;
   unsigned short int aus[ 64 ];
   hash h;
-  FILE *fTmp = NULL;
+  FILE *pfTmp = NULL;
   time_t t;
   unsigned int npos;
   char szTmp[ 11 ];
@@ -468,7 +622,7 @@ generate_os ( const int nOS, const int fHeader,
   if ( fCompress ) {
     time ( &t );
     sprintf ( szTmp, "t%06ld.bd", t % 100000 );
-    if ( ! ( fTmp = fopen ( szTmp, "w+b" ) ) ) {
+    if ( ! ( pfTmp = fopen ( szTmp, "w+b" ) ) ) {
       perror ( szTmp );
       exit ( 2 );
     }
@@ -484,7 +638,7 @@ generate_os ( const int nOS, const int fHeader,
   for ( i = 0; i < n; ++i ) {
     
     if ( i )
-      BearOff ( i, nOS, aus, fGammon, &h, pbc );
+      BearOff ( i, nOS, aus, fGammon, &h, pbc, fCompress, output, pfTmp );
     else {
       memset ( aus, 0, 128 );
       aus[  0 ] = 0xFFFF;
@@ -494,9 +648,9 @@ generate_os ( const int nOS, const int fHeader,
     if( !( i % 100 ) )
       fprintf( stderr, "1:%d/%d        \r", i, n );
 
-    WriteOS ( aus, fCompress, fCompress ? fTmp : output );
+    WriteOS ( aus, fCompress, fCompress ? pfTmp : output );
     if ( fGammon )
-      WriteOS ( aus + 32, fCompress, fCompress ? fTmp : output );
+      WriteOS ( aus + 32, fCompress, fCompress ? pfTmp : output );
 
     HashAdd ( &h, i, aus, fGammon ? 128 : 64 );
 
@@ -510,16 +664,14 @@ generate_os ( const int nOS, const int fHeader,
     char ac[ 256 ];
     int n;
 
-    /* write contents of fTmp to output */
+    /* write contents of pfTmp to output */
 
-    rewind ( fTmp );
+    rewind ( pfTmp );
 
-    while ( ! feof ( fTmp ) && ( n = fread ( ac, 1, sizeof ( ac ), fTmp ) ) )
+    while ( ! feof ( pfTmp ) && ( n = fread ( ac, 1, sizeof ( ac ), pfTmp ) ) )
       fwrite ( ac, 1, n, output );
 
-    /* FIXME */
-
-    fclose ( fTmp );
+    fclose ( pfTmp );
 
     unlink ( szTmp );
 
@@ -783,28 +935,36 @@ static void BearOff2( int nUs, int nThem,
 
     /* look for position in bearoff file */
 
-#if 0
-    WRITE ME
     if ( pbc ) {
-      assert ( FALSE );
-      for ( i = 24; i >= 0 && ! anBoard[ 1 ][ i ]; --i )
+
+      for ( j = 24; j >= 0 && ! anBoard[ 1 ][ j ]; --j )
         ;
-      if ( i < pbc->nPoints && k <= pbc->nChequers ) {
-        unsigned short int nUsL = 
-          PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
-        unsigned short int nThemL = 
-          PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
-        int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-        unsigned int iPos = nUsL * nL + nThemL;
+      for ( i = 0, k = 0; i < 25; ++i )
+        k += anBoard[ 1 ][ i ];
+
+      if ( j < pbc->nPoints && k <= pbc->nChequers ) {
+
+        for ( j = 24; j >= 0 && ! anBoard[ 0 ][ j ]; --j )
+          ;
+        for ( i = 0, k = 0; i < 25; ++i )
+          k += anBoard[ 0 ][ i ];
+        
+        if ( j < pbc->nPoints && k <= pbc->nChequers ) {
+          unsigned short int nUsL = 
+            PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+          unsigned short int nThemL = 
+            PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+          int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+          unsigned int iPos = nUsL * nL + nThemL;
           
-        BearoffCubeful ( pbc, iPos, arEquity );
+          BearoffCubeful ( pbc, iPos, arEquity );
           
-        return;
+          return;
+        }
+
       }
       
     }
-#endif
-
 
     arTotal[ 0 ] = arTotal[ 1 ] = arTotal[ 2 ] = arTotal[ 3 ] = 0.0f;
     
@@ -821,10 +981,9 @@ static void BearOff2( int nUs, int nThem,
 		j = PositionBearoff( anBoardTemp[ 1 ], nTSP );
 
 		assert( j >= 0 );
-		assert( j < nUs );
+		assert( j < nUs ); 
 
                 if ( ! HashLookup ( ph, n * nThem + j, (void **) &prj ) ) {
-                  assert ( FALSE );
                   BearOff2 ( nThem, j, nTSP, nTSC, prj = arj, n,
                              fCubeful, ph, pbc );
                   HashAdd ( ph, n * nThem + j, prj, 
@@ -1020,13 +1179,12 @@ generate_ts ( const int nTSP, const int nTSC,
       fprintf( stderr, "%d/%d     \r", iPos, n * n );
       
     }
-    
+
     putc ( '\n', stderr );
     
     HashStatus ( &h );
     
     HashDestroy ( &h );
-    
     
     /* sort file from ordering:
 
@@ -1054,7 +1212,7 @@ generate_ts ( const int nTSP, const int nTSC,
 
     fclose ( pfTmp );
 
-    unlink ( szTmp );
+    unlink ( szTmp ); 
 
 }
 
@@ -1171,7 +1329,7 @@ extern int main( int argc, char **argv ) {
       break;
     case 'f':
 #define ERROR_TEXT "Can't open output file \'"        
-	  if( !( output = fopen( optarg, "wb" ) ) ) {
+	  if( !( output = fopen( optarg, "w+b" ) ) ) {
 		char *buf = malloc (1 + strlen (optarg) + strlen (ERROR_TEXT) + 1);
 		sprintf (buf, "%s%s\'", ERROR_TEXT, optarg);
 		perror (buf);

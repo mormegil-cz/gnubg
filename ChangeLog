@@ -1,3 +1,17 @@
+Sat Dec  7 14:59:18 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	New strategy for cache misses in makebearoff; this should
+	make it possible to generated databases larger than the
+	memory available on the box.
+	(So far only implemented for one sided bearoff databases)
+
+	* makebearoff.c (OSLookup): new function.
+	* makebearoff.c (BearOff): use OSLookup instead of re-generating
+	bearoff distrubution.
+	* makebearoff.c (BearOff2): implement reuse of existing bearoff DB.
+
+	* gtkrace.c (OSRPAge): fix typo.
+
 Fri Dec  6 21:10:11 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	New commands for specifying the evalcontext for luck
