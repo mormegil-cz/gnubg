@@ -5243,9 +5243,16 @@ extern void Progress( void ) {
 static void CallbackProgress( void ) {
 
 #if USE_GTK
-    if( fX )
+    if( fX ) {
+	monitor m;
+    
+	SuspendInput( &m );
+    
 	while( gtk_events_pending() )
 	    gtk_main_iteration();
+	
+	ResumeInput( &m );
+    }
 #endif
     
     if( fInProgress && !iProgressMax )
@@ -5671,13 +5678,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
 	}
     
-#if ( USE_GUI || USE_SOUND ) && defined(SIGIO)
-    if( fX )
-	PortableSignal( SIGIO, HandleIO, NULL, TRUE );
-
-#endif
-
-
 #ifdef SIGIO
 # if USE_GUI
     if( fX )

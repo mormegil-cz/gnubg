@@ -5635,25 +5635,32 @@ GTKProgressStartValue( char *sz, int iMax ) {
 extern void
 GTKProgressValue ( int iValue ) {
 
+    monitor m;
+        
     gtk_progress_set_value( GTK_PROGRESS ( pwProgress ), iValue );
 
-    GTKDisallowStdin();
+    SuspendInput( &m );
+    
     while( gtk_events_pending() )
 	gtk_main_iteration();
-    GTKAllowStdin();    
+    
+    ResumeInput( &m );
 }
 
 
 extern void GTKProgress( void ) {
 
     static int i;
+    monitor m;
 
     gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i ^= 1 );
 
-    GTKDisallowStdin();
+    SuspendInput( &m );
+
     while( gtk_events_pending() )
         gtk_main_iteration();
-    GTKAllowStdin();    
+
+    ResumeInput( &m );
 }
 
 extern void GTKProgressEnd( void ) {
