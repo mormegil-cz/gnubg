@@ -588,7 +588,7 @@ static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 static void
 UpdateCubeAnalysis ( cubehintdata *pchd ) {
 
-  GtkWidget *pw;
+  GtkWidget *pw = 0;
 
   switch ( pchd->mt ) {
   case MOVE_NORMAL:

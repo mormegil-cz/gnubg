@@ -396,6 +396,7 @@ extern void PrintRNGSeed( const rng rngx ) {
 	abort();
 #endif
     default:
+	break;
     }
 
     outputl( _("You cannot show the seed with this random number "

@@ -5974,6 +5974,7 @@ cmp_evalsetup ( const evalsetup *pes1, const evalsetup *pes2 ) {
     assert ( FALSE );
   }
 
+  return 0;
 }
 
 
@@ -6594,6 +6595,7 @@ getPercent ( const cubedecision cd,
 
   }
 
+  return -1.0;
 }
 
 

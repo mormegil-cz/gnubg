@@ -409,7 +409,7 @@ getWindowGeometry ( windowgeometry *pwg, GtkWidget *pw ) {
 extern void
 UpdateGeometry ( const gnubgwindow gw ) {
 
-  GtkWidget *pw;
+  GtkWidget *pw = 0;
 
   switch ( gw ) {
   case WINDOW_MAIN:
@@ -1072,8 +1072,9 @@ static int AddMoveRecordRow( void ) {
 extern void GTKAddMoveRecord( moverecord *pmr ) {
 
     gamelistrow *pglr;
-    int i, fPlayer;
-    char *pch, sz[ 40 ];
+    int i, fPlayer = 0;
+    char *pch = 0;
+	char sz[ 40 ];
     
     switch( pmr->mt ) {
     case MOVE_GAMEINFO:

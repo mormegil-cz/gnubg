@@ -152,8 +152,11 @@ SetSeed ( const rng rngx, char *sz ) {
 
 static void SetRNG( rng *prng, rng rngNew, char *szSeed ) {
 
+#if HAVE_LIBGMP
+
     char *sz, *sz1;
     int fInit;
+#endif
     
     if( *prng == rngNew && !*szSeed ) {
 	outputf( _("You are already using the %s generator.\n"),
@@ -3268,7 +3271,7 @@ int *Highlightrgb = HighlightColourTable[13].rgbs[0];
 extern void
 CommandSetHighlightColour ( char *sz ) {
 
-    char *pch = NextToken( &sz ), *pchCopy;
+    char *pch = NextToken( &sz );
     int i, j, n;
 
     if( !pch ) {
@@ -3308,7 +3311,7 @@ CommandSetHighlight ( char *sz ) {
 extern void
 CommandSetHighlightLight ( char *sz ) {
 
-    char *szCommand = _("highlightcolour light");
+    szSetCommand = _("highlightcolour light");
 
 	HighlightIntensity = 0;
 	CommandSetHighlightColour ( sz );
@@ -3318,7 +3321,7 @@ CommandSetHighlightLight ( char *sz ) {
 extern void
 CommandSetHighlightMedium ( char *sz ) {
 
-    char *szCommand = _("highlightcolour medium");
+    szSetCommand = _("highlightcolour medium");
 	HighlightIntensity = 1;
 	CommandSetHighlightColour ( sz );
 
@@ -3328,7 +3331,7 @@ CommandSetHighlightMedium ( char *sz ) {
 extern void
 CommandSetHighlightDark ( char *sz ) {
 
-    char *szCommand = _("highlightcolour dark");
+    szSetCommand = _("highlightcolour dark");
 	HighlightIntensity = 2;
 	CommandSetHighlightColour ( sz );
 

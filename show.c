@@ -112,7 +112,7 @@ static void ShowEvaluation( evalcontext *pec ) {
 extern int
 EvalCmp (evalcontext *E1, evalcontext *E2, int nElements) {
 
-  int  i, cmp;
+  int  i, cmp = 0;
  
   if (nElements < 1)
     return 0;
