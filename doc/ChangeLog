@@ -1,3 +1,8 @@
+Fri Apr 30 19:10:03 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* bearoff.texi: add MD5 checksum for 13pt one-sided database
+	and add warning about 2 GB limit.
+
 Sun Nov 16 20:05:38 2003  Oystein Johansen  <oystein@gnubg.org>
 
         * New files from Achim:

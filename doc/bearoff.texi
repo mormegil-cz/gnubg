@@ -215,7 +215,7 @@ bearoff and gammon distributions):
 @item 15        @tab 10       @tab 112
 @item 15        @tab 11       @tab 284
 @item 15        @tab 12       @tab 682
-@item 15        @tab 13       @tab approx 1,700 
+@item 15        @tab 13       @tab 1,543
 @item 15        @tab 14       @tab approx 4,300
 @item 15        @tab 15       @tab approx 10,700
 @item 15        @tab 16       @tab approx 26,700
@@ -397,7 +397,11 @@ below shows the size of the Hypergammon databases.
 @subsection Generate your own
 
 @gnubg{} is supplied with a program @file{makebearoff} that is used to
-generate bearoff databases. 
+generate bearoff databases. Due to various limitations it is only
+possible to generate bearoff databases with a size less than 2GB,
+i.e., the 13pt one-sided database and the 11 chequer two-sided
+database are the largest databases that can be generated with
+@file{makebearoff}. 
 
 To generate one sided database issue
 
@@ -520,7 +524,7 @@ sided bearoff databases, i.e., databases generated with default options.
 @item 15        @tab 10       @tab @code{81b3898f06bbd08ee8295a839251a10a}
 @item 15        @tab 11       @tab @code{78ecb4be86dab6af8755ea4063d50fb6}
 @item 15        @tab 12       @tab @code{770fcff48894a96ebb2249343ef94866}
-@item 15        @tab 13       @tab not available
+@item 15        @tab 13       @tab @code{cc74b69a62f6e648936f533838a527a8}
 @item 15        @tab 14       @tab not available
 @item 15        @tab 15       @tab not available
 @item 15        @tab 16       @tab not available
