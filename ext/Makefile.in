@@ -99,7 +99,7 @@ configure configure.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 SOURCES = $(libext_a_SOURCES)
 OBJECTS = $(libext_a_OBJECTS)

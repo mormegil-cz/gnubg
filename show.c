@@ -62,14 +62,14 @@ static void ShowPaged( char **ppch ) {
 
     int i, nRows = 0;
     char *pchLines;
-#if TIOCGWINSZ
+#ifdef TIOCGWINSZ
     struct winsize ws;
 #endif
 
 #if HAVE_ISATTY
     if( isatty( STDIN_FILENO ) ) {
 #endif
-#if TIOCGWINSZ
+#ifdef TIOCGWINSZ
 	if( !( ioctl( STDIN_FILENO, TIOCGWINSZ, &ws ) ) )
 	    nRows = ws.ws_row;
 #endif

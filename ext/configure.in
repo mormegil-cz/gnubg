@@ -37,4 +37,6 @@ AC_PATH_XTRA
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/time.h)
 
+AC_CHECK_FUNCS(select)
+
 AC_OUTPUT(Makefile)

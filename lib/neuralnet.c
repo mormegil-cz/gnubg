@@ -14,6 +14,7 @@
 #include <neuralnet.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef HAVE_RAND_R
 #include "rand_r.h"
