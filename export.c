@@ -683,3 +683,179 @@ CommandExportPositionSnowieTxt( char *sz ) {
     setDefaultFileName ( sz, PATH_SNOWIE_TXT );
 
 }
+
+
+static void
+WriteInt16 (FILE * pf, int n)
+{
+
+  /* Write a little-endian, signed (2's complement) 16-bit integer.
+     This is inefficient on hardware which is already little-endian
+     or 2's complement, but at least it's portable. */
+
+  /*  Let's just make things simple right now! */
+
+  /* FIXME what about error handling? */
+
+  fwrite (&n, 2, 1, pf);
+  return;
+#if 0
+
+  fread (auch, 2, 1, pf);
+  n = auch[0] | (auch[1] << 8);
+
+  if (n >= 0x8000)
+    n -= 0x10000;
+
+  return n;
+#endif
+}
+
+extern void
+CommandExportPositionJF (char *sz)
+{
+
+  FILE *fp;
+  int i, anBoardJF[26];
+  unsigned char c;
+  int anBoard[ 2 ][ 25 ];
+
+  sz = NextToken (&sz);
+
+  if (ms.gs == GAME_NONE)
+    {
+      outputl (_("No game in progress (type `new game' to start one)."));
+      return;
+    }
+
+  if (!sz || !*sz)
+    {
+      outputl (_("You must specify a file to export to (see `help export "
+                 "position pos')."));
+      return;
+    }
+
+
+  if (!confirmOverwrite (sz, fConfirmSave))
+    return;
+
+  if (!strcmp (sz, "-"))
+    fp = stdout;
+  else if (!(fp = fopen (sz, "wb")))
+    {
+      outputerr (sz);
+      return;
+    }
+
+
+
+  WriteInt16 (fp, 126);       /* Always write in JellyFish 3.0 format */
+  WriteInt16 (fp, 0);         /* Never save with Caution */
+  WriteInt16 (fp, 0);         /* This is unused */
+
+  WriteInt16 (fp, fCubeUse);
+  WriteInt16 (fp, fJacoby);
+  WriteInt16 (fp, (nBeavers != 0));
+
+  WriteInt16 (fp, ms.nCube);
+  WriteInt16 (fp, ms.fCubeOwner + 1);
+
+  if ((ms.gs == GAME_OVER) || (ms.gs == GAME_NONE))
+    {
+      WriteInt16 (fp, 0);
+    }
+  else
+    {
+      ms.anDice[ 0 ] > 0 ? WriteInt16 (fp, ms.fTurn + 1) : WriteInt16 (fp,
+                                                              ms.fTurn + 3);
+    }
+  /* 0 means starting position.
+     If you add 2 to the player (to get 3 or 4)   Sure?
+     it means that the player is on roll
+     but the dice have not been rolled yet. */
+
+  WriteInt16 (fp, 1);
+  WriteInt16 (fp, 1);         /* FIXME Test this! */
+  /* These two variables are used when you use movement #1,
+     (two buttons) and tells how many moves you have left
+     to play with the left and the right die, respectively.
+     Initialized to 1 (if you roll a double, left = 4 and
+     right = 0). If movement #2 (one button), only the first
+     one (left) is used to store both dice.  */
+
+  WriteInt16 (fp, 0);         /* Not in use */
+
+  ms.nMatchTo ? WriteInt16 (fp, 1) : WriteInt16 (fp, 3);
+  /* 1 = match, 3 = game */
+
+  WriteInt16 (fp, 2);         /* FIXME */
+  /* 1 = 2 players, 2 = JF plays one side */
+
+  WriteInt16 (fp, 7);         /* Use level 7 */
+
+  WriteInt16 (fp, ms.nMatchTo);
+  /* 0 if single game  */
+
+  WriteInt16 (fp, ms.anScore[0]);
+  WriteInt16 (fp, ms.anScore[1]);
+
+  c = strlen (ap[0].szName);
+  fwrite (&c, 1, 1, fp);
+  for (i = 0; i < c; i++)
+    fwrite (&ap[0].szName[i], 1, 1, fp);
+
+  c = strlen (ap[1].szName);
+  fwrite (&c, 1, 1, fp);
+  for (i = 0; i < c; i++)
+    fwrite (&ap[1].szName[i], 1, 1, fp);
+
+
+  WriteInt16 (fp, 0);         /* FIXME Check gnubg setting */
+  /* TRUE if lower die is to be drawn to the left  */
+
+  if ((ms.fPostCrawford == FALSE) && (ms.fCrawford == TRUE))
+    WriteInt16 (fp, 2);
+  else if ((ms.fPostCrawford == TRUE) && (ms.fCrawford == FALSE))
+    WriteInt16 (fp, 3);
+  else
+    WriteInt16 (fp, 1);
+
+  WriteInt16 (fp, 0);         /* JF played last. Must be FALSE */
+
+  c = 0;
+  fwrite (&c, 1, 1, fp); /* Length of "last move" string */
+
+  WriteInt16 (fp, ms.anDice[0]);
+  WriteInt16 (fp, ms.anDice[1]);
+
+  /* The Jellyfish format saves the current board and the board
+   * before the move was done, such that undo should be possible. It's
+   * possible to save just the current board twice as done below. */
+
+  memcpy( anBoard, ms.anBoard, 2 * 25 * sizeof ( int ) );
+  if ( ms.fMove )
+    SwapSides( anBoard );
+
+  /* Player 0 on bar */
+  WriteInt16 (fp, -anBoard[0][24] + 20);
+  WriteInt16 (fp, -anBoard[0][24] + 20);
+
+  /* Board */
+  for (i = 24; i > 0; i--)
+    {
+      WriteInt16 (fp, anBoard[0][24 - i] ?
+                  -anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
+      WriteInt16 (fp, anBoard[0][24 - i] ?
+                  -anBoard[0][24 - i] + 20 : anBoard[1][i - 1] + 20);
+    }
+  /* Player on bar */
+  WriteInt16 (fp, anBoard[1][24] + 20);
+  WriteInt16 (fp, anBoard[1][24] + 20);
+
+  fclose (fp);
+
+  setDefaultFileName ( sz, PATH_POS );
+
+  return;
+}
+

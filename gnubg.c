@@ -645,7 +645,7 @@ command cER = {
     { "png", CommandExportPositionPNG, N_("Save the current position in "
       "Portable Network Graphics (PNG) format"), szFILENAME, &cFilename },
 #endif /* HAVE_LIBPNG */
-    { "pos", CommandNotImplemented, N_("Save the current position in .pos "
+    { "pos", CommandExportPositionJF, N_("Save the current position in .pos "
       "format"), szFILENAME, &cFilename },
     { "snowietxt", CommandExportPositionSnowieTxt,
       N_("Save the current position in Snowie .txt format"), 
@@ -4094,13 +4094,6 @@ extern void CommandImportJF( char *sz ) {
 
     sz = NextToken( &sz );
     
-    if( ms.gs != GAME_PLAYING ) {
-	outputl( _("There must be a game in progress to import a Jellyfish "
-                 "position.") );
-
-	return;
-    }
-
     if( !sz || !*sz ) {
 	outputl( _("You must specify a position file to import (see `help "
 		 "import pos').") );

@@ -74,25 +74,27 @@ static int ReadInt16( FILE *pf ) {
     return n;
 }
 
-extern void
-ImportJF( FILE * fp, char *szFileName) {
+static int
+ParseJF( FILE *fp,
+         int *pnMatchTo, int *pfJacoby, 
+         int *pfTurn, char aszPlayer[ 2 ][ 32 ], int *pfCrawfordGame,
+         int *pfPostCrawford, int anScore[ 2 ], int *pnCube, int *pfCubeOwner, 
+         int anBoard[ 2 ][ 25 ], int anDice[ 2 ], int *pfCubeUse,
+         int *pfBeavers ) {
 
   int nVersion, nCubeOwner, nOnRoll, nMovesLeft, nMovesRight;
   int nGameOrMatch, nOpponent, nLevel, nScore1, nScore2;
   int nDie1, nDie2; 
-  int fCaution, fCubeUse, fJacoby, fBeavers, fSwapDice, fJFplayedLast;
+  int fCaution, fSwapDice, fJFplayedLast;
   int i, idx, anNew[26], anOld[26];
-  char szPlayer1[40];
-  char szPlayer2[40];
   char szLastMove[25];
   unsigned char c;
-  moverecord *pmr;
-  
+
   nVersion = ReadInt16( fp );
 
   if ( nVersion < 124 || nVersion > 126 ){
     outputl(_("File not recognised as Jellyfish file."));
-    return;
+    return -1;
   }
   if ( nVersion == 126 ){
     /* 3.0 */
@@ -103,9 +105,9 @@ ImportJF( FILE * fp, char *szFileName) {
   if ( nVersion == 125 || nVersion == 126 ){
     /* 1.6 or newer */
     /* 3 variables not used by older version */
-      fCubeUse = ReadInt16( fp );
-      fJacoby = ReadInt16( fp );
-      fBeavers = ReadInt16( fp );
+      *pfCubeUse = ReadInt16( fp );
+      *pfJacoby = ReadInt16( fp );
+      *pfBeavers = ReadInt16( fp );
 
       if ( nVersion == 125 ){
 	  /* If reading, caution can be set here
@@ -123,12 +125,12 @@ ImportJF( FILE * fp, char *szFileName) {
     */
   }
 
-  ms.nCube = ReadInt16( fp );
+  *pnCube = ReadInt16( fp );
   nCubeOwner = ReadInt16( fp );
   /* Owner: 1 or 2 is player 1 or 2, 
      respectively, 0 means cube in the middle */
 
-  ms.fCubeOwner = nCubeOwner - 1;
+  *pfCubeOwner = nCubeOwner - 1;
 
   nOnRoll = ReadInt16( fp );
   /* 0 means starting position. 
@@ -155,49 +157,49 @@ ImportJF( FILE * fp, char *szFileName) {
 
   nLevel = ReadInt16( fp );
 
-  ms.nMatchTo = ReadInt16( fp );
+  *pnMatchTo = ReadInt16( fp );
   /* 0 if single game  */
 
   if(nGameOrMatch == 3)
-      ms.nMatchTo = 0;
+    *pnMatchTo = 0;
 
   nScore1 = ReadInt16( fp );
   nScore2 = ReadInt16( fp );
   /* Can be whatever if match length = 0  */
 
-  ms.anScore[0] = nScore1;
-  ms.anScore[1] = nScore2;
+  anScore[0] = nScore1;
+  anScore[1] = nScore2;
 
   fread(&c, 1, 1 , fp);
-  for (i = 0 ; i < c; i++) fread(&szPlayer1[i], 1, 1, fp);
-  szPlayer1[c]='\0';
+  for (i = 0 ; i < c; i++) fread(&aszPlayer[0][i], 1, 1, fp);
+  aszPlayer[0][c]='\0';
  
-  if (nOpponent == 2) strcpy(szPlayer1, "Jellyfish");
+  if (nOpponent == 2) strcpy(aszPlayer[0], "Jellyfish");
 
   fread(&c, 1, 1 , fp);
-  for (i = 0 ; i < c; i++) fread(&szPlayer2[i], 1, 1, fp);
-  szPlayer2[c]='\0';
+  for (i = 0 ; i < c; i++) fread(&aszPlayer[1][i], 1, 1, fp);
+  aszPlayer[1][c]='\0';
 
   fSwapDice = ReadInt16( fp );
   /* TRUE if lower die is to be drawn to the left  */
 
   switch( ReadInt16( fp ) ) {
   case 2: /* Crawford */
-      ms.fPostCrawford = FALSE;
-      ms.fCrawford = TRUE;
+      *pfPostCrawford = FALSE;
+      *pfCrawfordGame = TRUE;
       break;
       
   case 3: /* post-Crawford  */
-      ms.fPostCrawford = TRUE;
-      ms.fCrawford = FALSE;
+      *pfPostCrawford = TRUE;
+      *pfCrawfordGame = FALSE;
       break;
 
   default:
-      ms.fCrawford = ms.fPostCrawford = FALSE;
+      *pfCrawfordGame = *pfPostCrawford = FALSE;
       break;
   }
   
-  if(nGameOrMatch == 3) ms.fCrawford = ms.fPostCrawford = FALSE;
+  if(nGameOrMatch == 3) *pfCrawfordGame = *pfPostCrawford = FALSE;
 
   fJFplayedLast = ReadInt16( fp );
 
@@ -237,62 +239,151 @@ ImportJF( FILE * fp, char *szFileName) {
   else
     idx = 1;
   
-  ms.fTurn = idx;
+  *pfTurn = idx;
  
-  if (nOnRoll == 0) ms.fTurn = -1; 
+  if (nOnRoll == 0) *pfTurn = -1; 
 
   if (nMovesLeft + nMovesRight > 1) {
-    ms.anDice[0] = nDie1;
-    ms.anDice[1] = nDie2;
+    anDice[0] = nDie1;
+    anDice[1] = nDie2;
   } else {
-    ms.anDice[0] = 0;
-    ms.anDice[1] = 0;
+    anDice[0] = 0;
+    anDice[1] = 0;
   } 
 
   for( i = 0; i < 25; i++ ) {
-    ms.anBoard[ idx ][ i ] = ( anNew[ i + 1 ]  < 0 ) ?  -anNew[ i + 1 ]  : 0;
-    ms.anBoard[ ! idx ][ i ] = ( anNew[ 24 - i ]  > 0 ) ?
+    anBoard[ idx ][ i ] = ( anNew[ i + 1 ]  < 0 ) ?  -anNew[ i + 1 ]  : 0;
+    anBoard[ ! idx ][ i ] = ( anNew[ 24 - i ]  > 0 ) ?
 	anNew[ 24 - i ]  : 0;
   }
 
-  ms.anBoard[ ! idx ][ 24 ] =  anNew[0];
-  ms.anBoard[ idx ][ 24 ] =  -anNew[25];
+  anBoard[ ! idx ][ 24 ] =  anNew[0];
+  anBoard[ idx ][ 24 ] =  -anNew[25];
 
-  if( ms.anDice[ 0 ] ) {
-      pmr = malloc( sizeof( pmr->sd ) );
+  return 0;
+
+}
+
+extern void
+ImportJF( FILE * fp, char *szFileName) {
+
+  moverecord *pmr;
+  movegameinfo *pmgi;
+  int nMatchTo, fJacoby, fTurn, fCrawfordGame, fPostCrawford;
+  int anScore[ 2 ], nCube, fCubeOwner, anBoard[ 2 ][ 25 ], anDice[ 2 ];
+  int fCubeUse, fBeavers;
+  char aszPlayer[ 2 ][ 32 ];
+  int i;
+  
+  if( ms.gs == GAME_PLAYING && fConfirm ) {
+    if( fInterrupt )
+      return;
+    
+    if( !GetInputYN( _("Are you sure you want to import a saved match, "
+                       "and discard the game in progress? ") ) )
+      return;
+  }
+  
+#if USE_GTK
+  if( fX )
+    GTKFreeze();
+#endif
+
+  if ( ParseJF( fp, &nMatchTo, &fJacoby, &fTurn, aszPlayer,
+                &fCrawfordGame, &fPostCrawford, anScore, &nCube, &fCubeOwner, 
+                anBoard, anDice, &fCubeUse, &fBeavers ) < 0 ) {
+    outputl( _("This file is not a valid Jellyfish .pos file!\n") );
+    return;
+  }
+
+  FreeMatch();
+  ClearMatch();
+
+  InitBoard( ms.anBoard, ms.bgv );
+
+  ClearMoveRecord();
+
+  ListInsert( &lMatch, plGame );
+
+  /* game info */
+
+  pmgi = (movegameinfo *) malloc( sizeof ( movegameinfo ) );
+
+  pmgi->mt = MOVE_GAMEINFO;
+  pmgi->sz = NULL;
+  pmgi->i = 0;
+  pmgi->nMatch = nMatchTo;
+  pmgi->anScore[ 0 ] = anScore[ 0 ];
+  pmgi->anScore[ 1 ] = anScore[ 1 ];
+  pmgi->fCrawford = TRUE;
+  pmgi->fCrawfordGame = fCrawfordGame;
+  pmgi->fJacoby = fJacoby;
+  pmgi->fWinner = -1;
+  pmgi->nPoints = 0;
+  pmgi->fResigned = FALSE;
+  pmgi->nAutoDoubles = 0;
+  pmgi->bgv = VARIATION_STANDARD; /* assume standard backgammon */
+  pmgi->fCubeUse = fCubeUse;          /* assume use of cube */
+  IniStatcontext( &pmgi->sc );
+  
+  AddMoveRecord( pmgi );
+
+  ms.fTurn = ms.fMove = fTurn;
+
+  for ( i = 0; i < 2; ++i )
+    strcpy( ap[ i ].szName, aszPlayer[ i ] );
+
+  /* dice */
+
+  if( anDice[ 0 ] ) {
+      pmr = (moverecord *) malloc( sizeof( moverecord ) );
       pmr->sd.mt = MOVE_SETDICE;
       pmr->sd.sz = NULL;
-      pmr->sd.fPlayer = ms.fTurn;
-      pmr->sd.anDice[ 0 ] = ms.anDice[ 0 ];
-      pmr->sd.anDice[ 1 ] = ms.anDice[ 1 ];
+      pmr->sd.fPlayer = fTurn;
+      pmr->sd.anDice[ 0 ] = anDice[ 0 ];
+      pmr->sd.anDice[ 1 ] = anDice[ 1 ];
       pmr->sd.lt = LUCK_NONE;
       pmr->sd.rLuck = ERR_VAL;
       AddMoveRecord( pmr );
   }
 
-  pmr = malloc( sizeof( pmr->sb ) );
+  /* board */
+
+  pmr = (moverecord *) malloc( sizeof( moverecord ) );
   pmr->sb.mt = MOVE_SETBOARD;
   pmr->sb.sz = NULL;
-  if( ms.fTurn )
-      SwapSides( ms.anBoard );
-  PositionKey( ms.anBoard, pmr->sb.auchKey );
-  if( ms.fTurn )
-      SwapSides( ms.anBoard );
+  if( fTurn )
+    SwapSides( anBoard );
+  PositionKey( anBoard, pmr->sb.auchKey );
   AddMoveRecord( pmr );
 
-  pmr = malloc( sizeof( pmr->scv ) );
+  /* cube value */
+
+  pmr = (moverecord *) malloc( sizeof( moverecord ) );
   pmr->scv.mt = MOVE_SETCUBEVAL;
   pmr->scv.sz = NULL;
-  pmr->scv.nCube = ms.nCube;
+  pmr->scv.nCube = nCube;
   AddMoveRecord( pmr );
 
-  pmr = malloc( sizeof( pmr->scp ) );
+  /* cube position */
+
+  pmr = (moverecord *) malloc( sizeof( moverecord ) );
   pmr->scp.mt = MOVE_SETCUBEPOS;
   pmr->scp.sz = NULL;
-  pmr->scp.fCubeOwner = ms.fCubeOwner;
+  pmr->scp.fCubeOwner = fCubeOwner;
   AddMoveRecord( pmr );
+
+  /* update menus etc */
+
+  UpdateSettings();
   
-  return;
+#if USE_GTK
+  if( fX ){
+    GTKThaw();
+    GTKSet(ap);
+  }
+#endif
+
 }  
 
 static int fWarned, fPostCrawford;
@@ -2723,7 +2814,6 @@ ImportSnowieTxt( FILE *pf ) {
   pmr->scp.fCubeOwner = fCubeOwner;
   AddMoveRecord( pmr );
 
-                  
   /* update menus etc */
 
   UpdateSettings();
