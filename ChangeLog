@@ -1,6 +1,6 @@
 Tue Sep 17 10:40:39 2002  Gary Wong  <gtw@gnu.org>
 
-	* gtkboard.c (board_init): Correct typo in previous revision.
+	* gtkboard.c (board_init): Correct typos in previous revision.
 
 Mon Sep 16 16:23:45 2002  Gary Wong  <gtw@gnu.org>
 

@@ -4829,7 +4829,7 @@ static void board_init( Board *board ) {
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->redouble,
-                                _("Reoduble immediately (beaver)"),
+                                _("Redouble immediately (beaver)"),
                                 _("private") );
 
     /* play button */
