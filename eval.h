@@ -77,6 +77,7 @@ typedef struct _evalcontext {
     int nPlies;
     int nSearchCandidates;
     float rSearchTolerance;
+  int nReduced;
 } evalcontext;
 
 typedef struct _move {
@@ -105,6 +106,16 @@ typedef enum _positionclass {
     CLASS_CONTACT,  /* Contact neural network */
     CLASS_BPG       /* On Bar, Back game, or Prime */
 } positionclass;
+
+
+typedef struct _redevaldata {
+  float arOutput[ NUM_OUTPUTS ];
+  float rScore;
+  float rWeight;
+  unsigned char auch[ 10 ];
+} RedEvalData;
+
+
 
 #define N_CLASSES (CLASS_BPG + 1)
 

@@ -51,9 +51,12 @@
 
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
+static int CompareRedEvalData( const void *p0, const void *p1 );
 
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
+typedef int ( *cfunc )( const void *, const void * );
+
 
 /* Race and contact inputs */
 enum {
@@ -215,7 +218,7 @@ void ( *fnAction )( void ) = NULL;
 
 static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
 
-static evalcontext ecBasic = { 0, 0, 0 };
+static evalcontext ecBasic = { 0, 0, 0, 0 };
 
 typedef struct _evalcache {
     unsigned char auchKey[ 10 ];
@@ -1592,6 +1595,16 @@ static classevalfunc acef[ N_CLASSES ] = {
     EvalOver, EvalBearoff2, EvalBearoff1, EvalRace, EvalContact, EvalBPG
 };
 
+static int CompareRedEvalData( const void *p0, const void *p1 ) {
+
+  return 
+    ( ( ( RedEvalData * ) p0 ) -> rScore ) <
+    ( ( ( RedEvalData * ) p1 ) -> rScore );
+  
+
+}
+
+
 static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
 				  evalcontext *pecx, int nPlies );
 static int FindBestMovePlied( int anMove[ 8 ], int nDice0, int nDice1,
@@ -1613,51 +1626,210 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 	for( i = 0; i < NUM_OUTPUTS; i++ )
 	    arOutput[ i ] = 0.0;
-	
-	for( n0 = 1; n0 <= 6; n0++ )
+
+
+	/* 
+	 * If nPlies = 2 there are two branches:
+	 * (1) Full 2-ply search: all 21 rolls evaluated.
+	 * (2) Reduced 2-ply search: 
+	 *     - evaluate all 21 rolls
+	 *     - sort, take a reduced set, and evaluate only these at
+	 *       1-ply.
+	 */
+
+	if ( ! ( ( nPlies == 2 ) && ( pec->nReduced > 0 ) ) ) {
+
+	  /* full search */
+	 
+	  for( n0 = 1; n0 <= 6; n0++ )
 	    for( n1 = 1; n1 <= n0; n1++ ) {
-		for( i = 0; i < 25; i++ ) {
-		    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-		    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-		}
+	      for( i = 0; i < 25; i++ ) {
+		anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+		anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	      }
 
-		if( fInterrupt ) {
-		    errno = EINTR;
-		    return -1;
-		} else if( fAction )
-		    fnAction();
-	    
-		FindBestMovePlied( anMove, n0, n1, anBoardNew, pec, 0 );
-
-		SwapSides( anBoardNew );
-
-		if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1 ) )
-		    return -1;
-
-		if( n0 == n1 )
-		    for( i = 0; i < NUM_OUTPUTS; i++ )
-			arOutput[ i ] += ar[ i ];
-		else
-		    for( i = 0; i < NUM_OUTPUTS; i++ )
-			arOutput[ i ] += ar[ i ] * 2.0;
+	      if( fInterrupt ) {
+		errno = EINTR;
+		return -1;
+	      } else if( fAction )
+		fnAction();
+	      
+	      FindBestMovePlied( anMove, n0, n1, anBoardNew, pec, 0 );
+	      
+	      SwapSides( anBoardNew );
+	      
+	      if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1 ) )
+		return -1;
+	      
+	      if( n0 == n1 )
+		for( i = 0; i < NUM_OUTPUTS; i++ )
+		  arOutput[ i ] += ar[ i ];
+	      else
+		for( i = 0; i < NUM_OUTPUTS; i++ )
+		  arOutput[ i ] += ar[ i ] * 2.0;
 	    }
 
-	arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
-
-	ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
-	arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
-	arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
-	
-	ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
-	arOutput[ OUTPUT_WINBACKGAMMON ] =
+	  arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
+	  
+	  ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
+	  arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
+	  arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
+	  
+	  ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
+	  arOutput[ OUTPUT_WINBACKGAMMON ] =
 	    arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
-	arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
+	  arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
+
+	} else {
+
+	  /* reduced search */
+
+	  /* 
+	   * - Loop over all 21 dice rolls
+	   * - evaluate at 0-ply
+	   * - sort
+	   * - do 1-ply on a subset
+	   * - calculate corrected probabilities
+	   */
+
+	  RedEvalData ad0ply[ 21 ];
+	  int anRed7[ 7 ] = { 2, 5, 8, 10, 12, 15, 18 };
+	  int anRed11[ 11 ] = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20 };
+	  int anRed14[ 14 ] = 
+	     { 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 19 }; 
+	  int *pnRed;
+	  int nRed;
+	  int k;
+	  float rDiff, arDiff[ NUM_OUTPUTS ];
+
+	  k = 0;
+
+	  /* Loop over all 21 dice rolls */
+
+	  for( n0 = 1; n0 <= 6; n0++ )
+	    for( n1 = 1; n1 <= n0; n1++ ) {
+
+	      for( i = 0; i < 25; i++ ) {
+		anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+		anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	      }
+
+	      if( fInterrupt ) {
+		errno = EINTR;
+		return -1;
+	      } else if( fAction )
+		fnAction();
+	      
+	      FindBestMovePlied( anMove, n0, n1, anBoardNew, pec, 0 );
+	      
+	      SwapSides( anBoardNew );
+
+	      /* Evaluate at 0-ply */
+	      
+	      if( EvaluatePositionCache( anBoardNew, ad0ply[ k ].arOutput, 
+					 pec, 0 ) )
+		return -1;
+
+	      ad0ply[ k ].rScore = Utility ( ad0ply[ k ].arOutput );
+	      PositionKey ( anBoardNew, ad0ply[ k ].auch);
+
+	      if( n0 == n1 ) {
+
+		for( i = 0; i < NUM_OUTPUTS; i++ )
+		  arOutput[ i ] += ad0ply[ k ].arOutput[ i ];
+
+		ad0ply[ k ].rWeight = 1.0;
+
+	      } else {
+
+		for( i = 0; i < NUM_OUTPUTS; i++ )
+		  arOutput[ i ] += 2.0 * ad0ply[ k ].arOutput[ i ];
+
+		ad0ply[ k ].rWeight = 2.0;
+
+	      }
+
+	      k++;
+	      
+	    }
+
+	  /* sort */
+
+	  qsort ( ad0ply, 21, sizeof ( RedEvalData ), 
+		  (cfunc) CompareRedEvalData );
+
+	  for ( i = 0; i < NUM_OUTPUTS; i++ )
+	    arDiff[ i ] = 0.0;
+	  rDiff = 0.0;
+
+	  /* do 1-ply on subset */
+
+	  switch ( pec->nReduced ) {
+	  case 7:
+	    nRed = 7;
+	    pnRed = anRed7;
+	    break;
+
+	  case 11:
+	    nRed = 11;
+	    pnRed = anRed11;
+	    break;
+
+	  case 14:
+	    nRed = 14;
+	    pnRed = anRed14;
+	    break;
+
+	  default:
+	    assert ( FALSE );
+	    break;
+
+	  }
+
+	  for ( k = 0; k < nRed; pnRed++, k++ ) {
+
+	    PositionFromKey ( anBoardNew, ad0ply[ *pnRed ].auch );
+
+	    if( EvaluatePositionCache( anBoardNew, ar, pec, nPlies - 1 ) )
+	      return -1;
+
+	    for ( i = 0; i < NUM_OUTPUTS; i++ ) {
+
+	      arDiff[ i ] +=
+		ad0ply[ *pnRed ].rWeight * 
+		( ar[ i ] - ad0ply[ *pnRed ].arOutput[ i ] );
+
+	    }
+
+	    rDiff += ad0ply[ *pnRed ].rWeight;
+
+	  }
+	    
+	  
+	  for ( i = 0; i < NUM_OUTPUTS; i++ )
+
+	    arOutput[ i ] += 36. * arDiff[ i ] / rDiff;
+
+	  arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
+	  
+	  ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
+	  arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
+	  arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
+	  
+	  ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
+	  arOutput[ OUTPUT_WINBACKGAMMON ] =
+	    arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
+	  arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
+
+	}
+	     
+
     } else {
-	/* at leaf node; use static evaluation */
-
-	acef[ pc ]( anBoard, arOutput );
-
-	SanityCheck( anBoard, arOutput );
+      /* at leaf node; use static evaluation */
+      
+      acef[ pc ]( anBoard, arOutput );
+      
+      SanityCheck( anBoard, arOutput );
     }
 
     return 0;
@@ -1674,17 +1846,19 @@ static int EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     l = EvalCacheHash( &ec );
     
     if( ( pec = CacheLookup( &cEval, l, &ec ) ) ) {
-	memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
-
-	return 0;
+      memcpy( arOutput, pec->ar, sizeof( pec->ar ) );
+      
+      return 0;
     }
     
     if( EvaluatePositionFull( anBoard, arOutput, pecx, nPlies ) )
 	return -1;
 
-    memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
 
+    memcpy( ec.ar, arOutput, sizeof( ec.ar ) );
+    
     return CacheAdd( &cEval, l, &ec, sizeof ec );
+
 }
 
 extern int EvaluatePosition( int anBoard[ 2 ][ 25 ], float arOutput[],
@@ -1966,8 +2140,6 @@ static int CompareMoves( const move *pm0, const move *pm1 ) {
 
     return pm1->rScore > pm0->rScore ? 1 : -1;
 }
-
-typedef int ( *cfunc )( const void *, const void * );
 
 static int ScoreMoves( movelist *pml, evalcontext *pec, int nPlies ) {
 

@@ -1,3 +1,8 @@
+Thu May 4 14:25:00 2000  Joern Thyssen  <joern@thyssen.nu>
+
+	* backgammon.h, eval.c, eval.h, set.c, show.c: implementation of
+	reduced 2+ ply searches.
+
 Mon Apr 10 14:13:37 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* makeweights.c (main): use binary mode on stdout, if possible,
