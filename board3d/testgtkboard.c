@@ -26,7 +26,7 @@
 #include "inc3d.h"
 #include <string.h>
 
-#ifdef BUILDING_LIB
+#if BUILDING_LIB
 #define PATH "Data//"
 #else
 #define PATH "..//Data//"
@@ -36,7 +36,7 @@ void DeleteTexture(Texture* texture);
 int LoadTexture(Texture* texture, const char* Filename);
 void setDicePos(BoardData* bd);
 
-#ifndef BUILDING_LIB
+#if !BUILDING_LIB
 int fClockwise; /* Player 1 moves clockwise */
 int fGUIDiceArea; /* Show dice below board */
 #endif
@@ -206,7 +206,7 @@ setDicePos(bd);
 	bd->LightPosition[2] = base_unit * 70;
 	bd->LightPosition[3] = 1;
 
-#ifndef BUILDING_LIB
+#if !BUILDING_LIB
 	InitialPos(bd);
 #endif
 

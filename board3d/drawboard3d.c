@@ -31,8 +31,8 @@
 #include "matrix.h"
 #include "shadow.h"
 
-#ifdef BUILDING_LIB
-#include "../../gnubg/renderprefs.h"
+#if BUILDING_LIB
+#include "../renderprefs.h"
 #endif
 
 // My logcube - more than 32 then return 0 (show 64)
@@ -44,7 +44,6 @@ static int LogCube( const int n )
 	if( n <= ( 1 << i ) )
 		return i < 6 ? i : 0;
 }
-
 
 /* Helper functions in misc3d */
 void circle(float radius, float height, int accuracy);
@@ -1006,7 +1005,7 @@ void drawDraggedPiece(BoardData* bd)
 		glPushMatrix();
 		glTranslated(bd->dragPos[0], bd->dragPos[1], bd->dragPos[2]);
 
-		renderPiece(bd, bd->movingPieceRotation, (bd->turn == 1));
+		renderPiece(bd, bd->movingPieceRotation, (pCurBoard->drag_colour == 1));
 
 		glPopMatrix();
 	}
@@ -1204,8 +1203,6 @@ void drawPoint(float tuv, int i, int p)
 	glPopMatrix();
 }
 
-extern float zebedee;
-
 void drawPoints(BoardData* bd)
 {
 	int i;
@@ -1287,16 +1284,17 @@ void tidyEdges(BoardData* bd)
 
 	glNormal3f(0, 0, 1);
 
-glDepthMask(GL_FALSE);
-	glBegin(GL_LINES);
-		/* bar */
-		glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+	/* Careful handiling of pieces obscured by bar */
+	glDepthMask(GL_FALSE);
+		glBegin(GL_LINES);
+			/* bar */
+			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
 
-		glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-		glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
-	glEnd();
-glDepthMask(GL_TRUE);
+			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+			glVertex3f(EDGE * 2 + PIECE_HOLE + BOARD_WIDTH + BAR_WIDTH, TOTAL_HEIGHT - SIDE_EDGE, BASE_HEIGHT + EDGE_DEPTH);
+		glEnd();
+	glDepthMask(GL_TRUE);
 
 	glBegin(GL_LINES);
 		/* left bear off tray */
@@ -1740,8 +1738,26 @@ void drawPointPick(BoardData* bd, int point)
 
 	if (point >= 0 && point <= 25)
 	{
-		for (i = 1; i < 6; i++)
+#define SPLIT_PERCENT .40f
+#define SPLIT_HEIGHT (PIECE_HOLE * SPLIT_PERCENT)
+		/* Split first point into 2 parts for zero and one selection */
+		getPiecePos(point, 1, fClockwise, pos);
+
+		glLoadName(0);
+		if (point > 12)
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] + (PIECE_HOLE / 2.0f) + PIECE_GAP - SPLIT_HEIGHT, pos[2], PIECE_HOLE, SPLIT_HEIGHT, 0);
+		else
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, SPLIT_HEIGHT, 0);
+
+		glLoadName(1);
+		if (point > 12)
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP - SPLIT_HEIGHT, 0);
+		else
+			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f) + SPLIT_HEIGHT, pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP - SPLIT_HEIGHT, 0);
+
+		for (i = 2; i < 6; i++)
 		{
+			/* Only 3 places for bar */
 			if ((point == 0 || point == 25) && i == 4)
 				break;
 			getPiecePos(point, i, fClockwise, pos);
@@ -1749,7 +1765,7 @@ void drawPointPick(BoardData* bd, int point)
 			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1] - (PIECE_HOLE / 2.0f), pos[2], PIECE_HOLE, PIECE_HOLE + PIECE_GAP, 0);
 		}
 		/* extra bit */
-		glLoadName(i);
+/*		glLoadName(i);
 		if (point > 12)
 		{
 			pos[1] = pos[1] - (PIECE_HOLE / 2.0f);
@@ -1760,7 +1776,7 @@ void drawPointPick(BoardData* bd, int point)
 			pos[1] = pos[1] + (PIECE_HOLE / 2.0f) + PIECE_GAP;
 			drawRect(pos[0] - (PIECE_HOLE / 2.0f), pos[1], pos[2], PIECE_HOLE, SIDE_EDGE + POINT_HEIGHT - pos[1], 0);
 		}
-	}
+*/	}
 }
 
 int board_point(BoardData *bd, int x, int y, int point)

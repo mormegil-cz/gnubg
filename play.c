@@ -655,7 +655,9 @@ static int NewGame( void ) {
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
     UpdateSetting( &ms.fTurn );
-    
+
+	InitBoardData();
+
  reroll:
     fError = RollDice( ms.anDice, rngCurrent );
 

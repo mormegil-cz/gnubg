@@ -3589,6 +3589,11 @@ extern void PromptForExit( void ) {
 	}
     }
 
+#if USE_BOARD3D
+	/* Stop any 3d animations */
+	StopIdle3d();
+#endif
+
 #if USE_GTK
     if( fX ) {
 #if USE_GTK2

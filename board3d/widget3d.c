@@ -27,7 +27,7 @@
 #include "inc3d.h"
 #include <assert.h>
 
-#ifdef USE_GTKGLEXT
+#if USE_GTKGLEXT
 
 #include <gtk/gtk.h>
 #include <gtk/gtkgl.h>
@@ -94,7 +94,6 @@ void SetupViewingVolume3d()
 	SetupViewingVolume();
 }
 
-
 gboolean idle(GtkWidget *widget)
 {
 	if (pIdleFun())
@@ -103,11 +102,18 @@ gboolean idle(GtkWidget *widget)
 	return TRUE;
 }
 
+void StopIdle3d()
+{
+	stopIdleFunc();
+}
+
 void stopIdleFunc()
 {
 	if (id)
+	{
 		g_idle_remove_by_data(widget);
-	id = 0;
+		id = 0;
+	}
 }
 
 void setIdleFunc(idleFunc* pFun)
@@ -169,13 +175,142 @@ static gboolean expose_event(GtkWidget *widget, GdkEventExpose *event, gpointer 
 	return TRUE;
 }
 
+void updateBoard(BoardData* bd)
+{
+	int points[2][25];
+	read_board(bd, points);
+	update_position_id(bd, points);
+	update_pipcount(bd, points);
+
+	gtk_widget_queue_draw(widget);
+	updatePieceOccPos(bd);
+}
+
+/* Snowie style editing: we will try to place i chequers of the
+   indicated colour on point n.  The x,y coordinates will be used to
+   map to a point n and a checker position i.
+
+   Clicking on a point occupied by the opposite color clears the point
+   first.  If not enough chequers are available in the bearoff tray,
+   we try to add what we can.  So if there are no chequers in the
+   bearoff tray, no chequers will be added.  This may be a point of
+   confusion during usage.  Clicking on the outside border of a point
+   corresponds to i=0, i.e. remove all chequers from that point. */
+void board_quick_edit3d(BoardData* bd, int x, int y, int dragging)
+{
+	int current, delta, c_chequer;
+	int off, opponent_off;
+	int bar, opponent_bar;
+	int i;
+
+	int colour = bd->drag_button == 1 ? 1 : -1;
+	int n = bd->drag_point;
+
+    if (!dragging)
+	{
+		if (n == 26 || n == 27)
+		{	/* click on bearoff tray in edit mode -- bear off all chequers */
+			for( i = 0; i < 28; i++ )
+				bd->points[i] = 0;
+
+			bd->points[26] = bd->nchequers;
+			bd->points[27] = -bd->nchequers;
+
+			updateBoard(bd);
+		}
+		else if ( n == POINT_UNUSED0 || n == POINT_UNUSED1) 
+		{	/* click on unused bearoff tray in edit mode -- reset to starting position */
+			int anBoard[ 2 ][ 25 ];
+			InitBoard( anBoard, ms.bgv );
+			write_board( bd, anBoard );
+			
+			updateBoard(bd);
+		}
+    }
+    
+    /* Only points or bar allowed */
+    if (n < 0 || n > 25)
+		return;
+
+    /* Make sure that if we drag across a bar, we started on that bar.
+       This is to make sure that if you drag a prime across say point
+       4 to point 9, you don't inadvertently add chequers to the bar */
+    if (dragging && (n == 0 || n == 25) && n != bd->qedit_point)
+		return;
+
+	bd->qedit_point = n;
+
+    off          = (colour == 1) ? 26 : 27;
+    opponent_off = (colour == 1) ? 27 : 26;
+
+    bar          = (colour == 1) ? 25 : 0;
+    opponent_bar = (colour == 1) ? 0 : 25;
+
+    /* Can't add checkers to the wrong bar */
+    if (n == opponent_bar)
+		return;
+
+    c_chequer = (n == 0 || n == 25) ? 3 : 5;
+
+    current = abs(bd->points[n]);
+    
+    /* Given n, map (x, y) to the ith checker position on point n*/
+	i = board_point(bd, x, y, n);
+    if (i < 0)
+		return;
+
+    /* We are at the maximum position in the point, so we should not
+       respond to dragging.  Each click will try to add one more
+       chequer */
+    if (!dragging && i >= c_chequer && current >= c_chequer)
+		i = current + 1;
+    
+    /* Clear chequers off the other colour from this point */
+    if (current && SGN(bd->points[n]) != colour)
+	{
+		bd->points[opponent_off] += current * -colour;
+		bd->points[n] = 0;
+		current = 0;
+
+		gtk_widget_queue_draw(widget);
+		updatePieceOccPos(bd);
+    }
+    
+    delta = i - current;
+    
+    /* No chequers of our colour added or removed */
+    if (delta == 0)
+		return;
+
+    if (delta < 0)
+	{	/* Need to remove some chequers of the same colour */
+		bd->points[off] -= delta * colour;
+		bd->points[n] += delta * colour;
+    }
+	else
+	{
+		int mv, avail = abs(bd->points[off]);
+		/* any free chequers? */
+		if (!avail)
+			return;
+		/* move up to delta chequers, from avail chequers to point n */
+		mv = (avail > delta) ? delta : avail;
+
+		bd->points[off] -= mv * colour;
+		bd->points[n] += mv * colour;
+    }
+
+	updateBoard(pCurBoard);
+}
+
 gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer data)
 {
+	int numOnPoint;
 	gint x = (int)event->x;
 	gint y = screenHeight - (int)event->y;	/* Reverse screen y coords */
 	int editing = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pCurBoard->edit));
 
-	if (pCurBoard->drag_point >= 0 || pCurBoard->shakingDice)
+	if (pCurBoard->drag_point >= 0 || pCurBoard->shakingDice || pCurBoard->moving)
 		return TRUE;
 
 	pCurBoard->click_time = gdk_event_get_time( (GdkEvent*)event );
@@ -219,7 +354,6 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 	case POINT_RESIGN:
 		/* clicked on resignation symbol */
 		updateFlagOccPos(pCurBoard);
-		stopIdleFunc();
 
 		pCurBoard->drag_point = -1;
 		if (pCurBoard->resigned && !editing)
@@ -273,12 +407,6 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 		pCurBoard->drag_point = -1;
 		return TRUE;
 
-	/* Clicked in un-used bear-off tray */
-	case POINT_UNUSED0:
-	case POINT_UNUSED1:
-		pCurBoard->drag_point = -1;
-		return TRUE;
-
 	default:	/* Points */
 		if (!pCurBoard->playing || (!editing && pCurBoard->dice[0] <= 0 ))
 		{
@@ -290,15 +418,21 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 			return TRUE;
 		}
 
-		if (editing)
+		if (editing && !(event->state & GDK_CONTROL_MASK))
 		{
-	//	    board_quick_edit( board, bd, x, y, colour, dragging );
+			board_quick_edit3d(pCurBoard, x, y, 0);
+		    pCurBoard->drag_point = -1;
+		    return TRUE;
+		}
+
+		if ((pCurBoard->drag_point == POINT_UNUSED0) || (pCurBoard->drag_point == POINT_UNUSED1))
+		{	/* Clicked in un-used bear-off tray */
 			pCurBoard->drag_point = -1;
 			return TRUE;
 		}
 
 		/* if nDragPoint is 26 or 27 (i.e. off), bear off as many chequers as possible. */
-        if (pCurBoard->drag_point == (53 - pCurBoard->turn) / 2)
+        if (!editing && pCurBoard->drag_point == (53 - pCurBoard->turn) / 2)
 		{
           /* user clicked on bear-off tray: try to bear-off chequers or
              show forced move */
@@ -325,11 +459,12 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 
           return TRUE;
         }
+		/* How many chequers on clicked point */
+		numOnPoint = pCurBoard->points[pCurBoard->drag_point];
 	
-	    /* Click on an empty point or opponent blot; try to make the
-	       point. */
-		if (pCurBoard->drag_point <= 24 &&
-			(!pCurBoard->points[pCurBoard->drag_point] || pCurBoard->points[pCurBoard->drag_point] == -pCurBoard->turn))
+	    /* Click on an empty point or opponent blot; try to make the point. */
+		if (!editing && pCurBoard->drag_point <= 24 &&
+			(numOnPoint == 0 || numOnPoint == -pCurBoard->turn))
 		{
 			int n[2], bar, i;
 			int old_points[ 28 ], points[ 2 ][ 25 ];
@@ -414,23 +549,20 @@ gboolean button_press_event(GtkWidget *widget, GdkEventButton *event, gpointer d
 			return TRUE;
 		}
 
-		if (!pCurBoard->points[ pCurBoard->drag_point ])
+		/* clicked on empty point */
+		if (numOnPoint == 0)
 		{
-			/* click on empty bearoff tray */
 			board_beep( pCurBoard );
-			
 			pCurBoard->drag_point = -1;
 			return TRUE;
 		}
-	
-		pCurBoard->drag_colour = SGN(pCurBoard->points[pCurBoard->drag_point]);
 
-		if (pCurBoard->drag_point != 25 && pCurBoard->drag_colour != pCurBoard->turn)
+		pCurBoard->drag_colour = SGN(numOnPoint);
+
+		/* trying to move opponent's chequer (except off the bar, which is OK) */
+		if (!editing && pCurBoard->drag_point != 25 && pCurBoard->drag_colour != pCurBoard->turn)
 		{
-			/* trying to move opponent's chequer (except off the bar, which
-			   is OK) */
 			board_beep( pCurBoard );
-			
 			pCurBoard->drag_point = -1;
 			return TRUE;
 		}
@@ -543,6 +675,16 @@ gboolean motion_notify_event(GtkWidget *widget, GdkEventMotion *event, gpointer 
 {
 	gint x = (int)event->x;
 	gint y = screenHeight - (int)event->y;	/* Reverse screen y coords */
+
+	/* In quick editing mode, dragging across points */
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(pCurBoard->edit))
+		 && !(event->state & GDK_CONTROL_MASK))
+	{
+		pCurBoard->drag_point = board_point(pCurBoard, x, y, -1);
+		board_quick_edit3d(pCurBoard, x, y, 1);
+	    pCurBoard->drag_point = -1;
+	    return TRUE;
+	}
 
 	if (MouseMove(x, y))
 		gtk_widget_queue_draw(widget);

@@ -1448,6 +1448,8 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
 	DisplayCorrectBoardType();
 	if (rdAppearance.fDisplayType == DT_3D)
 		updateOccPos(bd);
+	else
+		StopIdle3d();
 #endif
     }
 }

@@ -150,8 +150,7 @@ write_points ( gint points[ 28 ], const gint turn, const gint nchequers,
 
 }
 
-static void
-write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
+void write_board ( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 
   write_points( bd->points, bd->turn, bd->nchequers, anBoard );
 
@@ -2222,8 +2221,8 @@ static gint board_set( Board *board, const gchar *board_text,
 #if USE_BOARD3D
 			if (rdAppearance.fDisplayType == DT_3D)
 			{
-				/* Has been shaken, so roll dice */
-				if (old_dice[0] <= 0)
+				/* Has been shaken, so roll dice (if not editing) */
+				if (old_dice[0] <= 0 && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->edit)))
 					RollDice3d();
 			}
 #endif
@@ -2840,7 +2839,11 @@ static void board_size_allocate( GtkWidget *board,
 
     /* allocation for dice area */
 
-    if ( fGUIDiceArea ) {
+    if ( fGUIDiceArea
+#if USE_BOARD3D
+    && (rdAppearance.fDisplayType == DT_2D)
+#endif
+	) {
       child_allocation.width = 15 * rdAppearance.nSize;
       child_allocation.x += ( 108 - 15 ) * rdAppearance.nSize;
       child_allocation.height = 7 * rdAppearance.nSize;
@@ -4028,4 +4031,25 @@ extern GtkWidget *board_dice_widget( Board *board ) {
     gtk_container_set_border_width( GTK_CONTAINER( pw ), rdAppearance.nSize );
     
     return pw;	    
+}
+
+InitBoardData()
+{	/* Initialize some settings on new game start */
+	BoardData* bd = BOARD(pwBoard)->board_data;
+
+	bd->doubled = 0;
+	bd->cube_owner = 0;
+	bd->resigned = 0;
+	/* Set dice so roll works */
+	bd->dice_roll[0] = bd->dice_roll[1] = 1;
+	bd->dice[0] = bd->dice[1] = bd->dice_opponent[0] = bd->dice_opponent[1] = 0;
+
+#if USE_BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+	{
+		updateDiceOccPos(bd);
+		updateFlagOccPos(bd);
+		SetupViewingVolume3d();
+	}
+#endif
 }

@@ -22,9 +22,7 @@
 #ifndef _GTKBOARD_H_
 #define _GTKBOARD_H_
 
-#ifndef _RENDER_H_
 #include "render.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -227,6 +225,7 @@ extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
 extern void RollDice3d();
 extern void AnimateMove3d();
 extern void ShowFlag3d();
+extern void StopIdle3d();
 
 extern void updateOccPos(BoardData* bd);
 extern void updateHingeOccPos(BoardData* bd);
