@@ -3016,7 +3016,7 @@ EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
     /* This should be a part of the code that is called in all
        time-consuming operations at a relatively steady rate, so is a
        good choice for a callback function. */
-    if( ++iTick >= 0x100 ) {
+    if( ++iTick >= 0x400 ) {
 	iTick = 0;
 	if( fnTick )
 	    fnTick();
