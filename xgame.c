@@ -207,7 +207,7 @@ extern int StatsConfirm( extwindow *pewnd ) {
 
     if( psd->pm && psd->pm->cMoves == psd->ml.cMaxMoves &&
 	psd->pm->cPips == psd->ml.cMaxPips ) {
-	FormatMove( sz, NULL, psd->pm->anMove );
+	FormatMove( sz, psd->pgd->anBoardOld, psd->pm->anMove );
     
 	CommandMove( sz ); /* FIXME output from this command (if any) looks a
 			      bit grotty, because no linefeed was typed after

@@ -1,13 +1,17 @@
 /*
  * drawboard.c
  *
- * by Gary Wong, 1999
+ * by Gary Wong, 1999-2000
  *
+ * $Id$
  */
 
 #include "config.h"
 
 #include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "drawboard.h"
@@ -257,6 +261,8 @@ static char *FormatPoint( char *pch, int n ) {
     return pch;
 }
 
+#if 0
+/* Old (unprettified) output */
 extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 
     char *pch = sz;
@@ -284,4 +290,235 @@ extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
     *pch = 0;
     
     return sz;
+}
+#endif
+
+static int CompareMoves( const void *p0, const void *p1 ) {
+
+    int n0 = *( (int *) p0 ), n1 = *( (int *) p1 );
+
+    if( n0 != n1 )
+	return n1 - n0;
+    else
+	return *( (int *) p1 + 1 ) - *( (int *) p0 + 1 );
+}
+
+extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
+
+    char *pch = sz;
+    int aanMove[ 4 ][ 4 ], *pnSource[ 4 ], *pnDest[ 4 ], i, j, acRepeat[ 4 ];
+    int fl = 0;
+    
+    /* Re-order moves into 2-dimensional array. */
+    for( i = 0; i < 4 && anMove[ i << 1 ] >= 0; i++ ) {
+	aanMove[ i ][ 0 ] = anMove[ i << 1 ] + 1;
+	aanMove[ i ][ 1 ] = anMove[ ( i << 1 ) | 1 ] + 1;
+	pnSource[ i ] = aanMove[ i ];
+	pnDest[ i ] = aanMove[ i ] + 1;
+    }
+
+    while( i < 4 ) {
+	aanMove[ i ][ 0 ] = aanMove[ i ][ 1 ] = -1;
+	pnSource[ i++ ] = NULL;
+    }
+    
+    /* Order the moves in decreasing order of source point. */
+    qsort( aanMove, 4, 4 * sizeof( int ), CompareMoves );
+
+    /* Combine moves of a single chequer. */
+    for( i = 0; i < 4; i++ )
+	for( j = i; j < 4; j++ )
+	    if( pnSource[ i ] && pnSource[ j ] &&
+		*pnDest[ i ] == *pnSource[ j ] ) {
+		if( anBoard[ 0 ][ 24 - *pnDest[ i ] ] )
+		    /* Hitting blot; record intermediate point. */
+		    *++pnDest[ i ] = *pnDest[ j ];
+		else
+		    /* Non-hit; elide intermediate point. */
+		    *pnDest[ i ] = *pnDest[ j ];
+
+		pnSource[ j ] = NULL;		
+	    }
+
+    /* Compact array. */
+    i = 0;
+
+    for( j = 0; j < 4; j++ )
+	if( pnSource[ j ] ) {
+	    if( j > i ) {
+		pnSource[ i ] = pnSource[ j ];
+		pnDest[ i ] = pnDest[ j ];
+	    }
+	    
+	    acRepeat[ i++ ] = 1;
+	}
+
+    if( i < 4 )
+	pnSource[ i ] = NULL;
+    
+    /* FIXME Combine repeated moves, e.g. 6/5 6/5 -> 6/5(2).  Then compact
+       again. */
+
+    for( i = 0; i < 4 && pnSource[ i ]; i++ ) {
+	if( i )
+	    *pch++ = ' ';
+	
+	pch = FormatPoint( pch, *pnSource[ i ] );
+
+	for( j = 1; pnSource[ i ] + j < pnDest[ i ]; j++ ) {
+	    *pch = '/';
+	    pch = FormatPoint( pch + 1, pnSource[ i ][ j ] );
+	    *pch++ = '*';
+	}
+
+	*pch = '/';
+	pch = FormatPoint( pch + 1, *pnDest[ i ] );
+	
+	if( *pnDest[ i ] && anBoard[ 0 ][ 24 - *pnDest[ i ] ] &&
+	    !( fl & ( 1 << *pnDest[ i ] ) ) ) {
+	    *pch++ = '*';
+	    fl |= 1 << *pnDest[ i ];
+	}
+    }
+
+    *pch = 0;
+    
+    return sz;
+}
+
+extern int ParseMove( char *pch, int an[ 8 ] ) {
+
+    int i, j, c = 0, anUser[ 8 ];
+    unsigned fl = 0;
+    
+    while( *pch ) {
+	if( isspace( *pch ) ) {
+	    pch++;
+	    continue;
+	} else if( isdigit( *pch ) ) {
+	    if( c == 8 ) {
+		/* Too many points. */
+		errno = EINVAL;
+		return -1;
+	    }
+	    
+	    if( ( anUser[ c ] = strtol( pch, &pch, 10 ) ) < 0 ||
+		anUser[ c ] > 25 ) {
+		/* Invalid point number. */
+		errno = EINVAL;
+		return -1;
+	    }
+
+	    c++;
+	    continue;
+	} else switch( *pch ) {
+	case 'o':
+	case 'O':
+	case '-':
+	    if( c == 8 ) {
+		/* Too many points. */
+		errno = EINVAL;
+		return -1;
+	    }
+	    
+	    anUser[ c++ ] = 0;
+
+	    if( *pch != '-' && ( pch[ 1 ] == 'f' || pch[ 1 ] == 'F' ) ) {
+		pch++;
+		if( pch[ 1 ] == 'f' || pch[ 1 ] == 'F' )
+		    pch++;
+	    }
+	    break;
+	    
+	case 'b':
+	case 'B':
+	    if( c == 8 ) {
+		/* Too many points. */
+		errno = EINVAL;
+		return -1;
+	    }
+	    
+	    anUser[ c++ ] = 25;
+
+	    if( pch[ 1 ] == 'a' || pch[ 1 ] == 'A' ) {
+		pch++;
+		if( pch[ 1 ] == 'r' || pch[ 1 ] == 'R' )
+		    pch++;
+	    }
+	    break;
+	    
+	case '/':
+	    if( !c || fl & ( 1 << c ) ) {
+		/* Leading '/', or duplicate '/'s. */
+		errno = EINVAL;
+		return -1;
+	    }
+
+	    fl |= 1 << c;
+	    break;
+
+	case '*':
+	    /* Currently ignored. */
+	    break;
+
+	case '(':
+	    /* FIXME Allow repeated moves (e.g. "6/5(2)"). */
+	    errno = ENOSYS;
+	    return -1;
+	    
+	default:
+	    errno = EINVAL;
+	    return -1;
+	}    
+	pch++;
+    }
+
+    if( fl & ( 1 << c ) ) {
+	/* Trailing '/'. */
+	errno = EINVAL;
+	return -1;
+    }
+    
+    for( i = 0, j = 0; j < c; j++ ) {
+	if( i == 8 ) {
+	    /* Too many moves. */
+	    errno = EINVAL;
+	    return -1;
+	}
+
+	if( ( ( i & 1 ) && anUser[ j ] == 25 ) ||
+	    ( !( i & 1 ) && !anUser[ j ] ) ) {
+	    /* Trying to move from off the board, or to the bar. */
+	    errno = EINVAL;
+	    return -1;
+	}
+	
+	an[ i ] = anUser[ j ];
+
+	if( ( i & 1 ) && ( fl & ( 1 << ( j - 1 ) ) ) ) {
+	    /* Combined move; this destination is also the next source. */
+	    if( i == 7 ) {
+		/* Too many moves. */
+		errno = EINVAL;
+		return -1;
+	    }
+
+	    if( !an[ i ] || an[ i ] == 25 ) {
+		errno = EINVAL;
+		return -1;
+	    }
+	    
+	    an[ ++i ] = anUser[ j ];
+	}
+	
+	i++;
+    }
+
+    if( i & 1 ) {
+	/* Incomplete last move. */
+	errno = EINVAL;
+	return -1;
+    }
+    
+    return i >> 1;
 }
