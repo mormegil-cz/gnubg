@@ -556,9 +556,9 @@ extern void CommandShowGammonPrice ( char *sz ) {
 
   for ( i = 0; i < 2; i++ ) {
 
-    outputf ("%12s     %7.5f         %7.5f\n",
-	     ap[ 0 ].szName,
-	     ci.arGammonPrice[ i ], ci.arGammonPrice[ 1 + 2 * i ] );
+    outputf ("%-12s     %7.5f         %7.5f\n",
+	     ap[ i ].szName,
+	     ci.arGammonPrice[ i ], ci.arGammonPrice[ 2 + i ] );
   }
 
 }
