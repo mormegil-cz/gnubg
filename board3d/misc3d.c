@@ -310,8 +310,8 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 	}
 
 	*textureInfo = 0;
-	/* Only warn user if textures.txt file has been loaded */
-	if (!ListEmpty(&textures))
+	/* Only warn user if in 3d */
+	if (GetMainAppearance()->fDisplayType == DT_3D)
 		g_print("Texture %s not in texture info file\n", file);
 }
 
