@@ -1,3 +1,18 @@
+2001-10-07  Joern Thyssen  <jth@localhost.localdomain>
+
+	* eval.c (FindCubeDecision): convert from mwc to eq for match
+	play.
+	* eval.c (GeneralCubeDecisionE, GeneralEvaluationE): use new
+	cubeful routine.
+
+	* eval.c (GetECF3): new function. Calculate optimal equity for all
+	cube positions.
+	* eval.c (MakeCubePos): new function. Make all possible cube
+	positions for next ply.
+	* eval.c (EvaluatePositionCubeful3): new function. Latest
+	(hopefully working) version of cubeful equities.
+	
+
 Fri Oct  5 10:33:32 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (CommandSaveSettings): "cubedecisions" should be

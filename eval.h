@@ -329,4 +329,13 @@ extern int
 GeneralEvaluationEPlied ( float arOutput [ NUM_ROLLOUT_OUTPUTS ],
                           int anBoard[ 2 ][ 25 ],
                           cubeinfo *pci, evalcontext *pec, int nPlies );
+
+extern int 
+EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
+                          float arOutput[ NUM_OUTPUTS ],
+                          float arCubeful[],
+                          cubeinfo aciCubePos[], int cci, 
+                          cubeinfo *pciMove,
+                          evalcontext *pec, int nPlies, int fTop );
+
 #endif
