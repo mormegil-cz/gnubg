@@ -63,11 +63,19 @@ static int fComputerDecision = FALSE;
 #if USE_GTK
 #include "gtkboard.h"
 #include "gtkgame.h"
+
+static int anLastMove[ 8 ], fLastMove, fLastPlayer;
 #endif
 
 static void PlayMove( matchstate *pms, int anMove[ 8 ], int fPlayer ) {
 
     int i, nSrc, nDest;
+
+#if USE_GTK
+    memcpy( anLastMove, anMove, sizeof anLastMove );
+    fLastPlayer = fPlayer;
+    fLastMove = anMove[ 0 ] >= 0;
+#endif
     
     if( pms->fMove != -1 && fPlayer != pms->fMove )
 	SwapSides( pms->anBoard );
@@ -1165,7 +1173,14 @@ extern int NextTurn( int fPlayNext ) {
 	GTKDelay();
 	fDelaying = FALSE;
 	ResetDelayTimer();
-    }    
+	if( fLastMove ) {
+	    GTKDisallowStdin();
+	    board_animate( BOARD( pwBoard ), anLastMove, fLastPlayer );
+	    GTKAllowStdin();
+	    fLastMove = FALSE;
+	}
+    }
+    
 #elif USE_EXT && HAVE_SELECT
     if( fX && nDelay && fDisplay ) {
 	if( tvLast.tv_sec ) {
@@ -1717,10 +1732,16 @@ extern void CommandListGame( char *sz ) {
 	return;
     }
 #endif
+    
+    if( ms.gs != GAME_PLAYING ) {
+	outputl( "No game in progress (type `new game' to start one)." );
+	
+	return;
+    }
+
     DumpGameList(szOut, plGame);
     /* FIXME  outputl(szOut);
        DumpListGame will soon return szOut */
-
 }
 
 extern void CommandListMatch( char *sz ) {
@@ -1865,11 +1886,16 @@ CommandMove( char *sz ) {
                 sizeof( pmn->anMove ) );
 		
 #ifdef USE_GTK        
+	/* There's no point delaying here. */
+	if( nTimeout ) {
+	    gtk_timeout_remove( nTimeout );
+	    nTimeout = 0;
+	}
+    
         if ( fX ) {
-
-          outputnew ();
-	  ShowAutoMove( ms.anBoard, pmn->anMove );
-          outputx ();
+	    outputnew ();
+	    ShowAutoMove( ms.anBoard, pmn->anMove );
+	    outputx ();
 	}
 #endif
 
