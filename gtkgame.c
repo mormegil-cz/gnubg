@@ -212,7 +212,7 @@ guint nNextTurn = 0; /* GTK idle function */
 static int cchOutput;
 static guint idOutput;
 static list lOutput;
-int fGTKOutput = FALSE;
+int fGTKOutput = FALSE, fTTY = TRUE;
 static guint nStdin, nDisabledCount = 1;
 
 void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
@@ -249,7 +249,7 @@ void StdinReadNotify( gpointer p, gint h, GdkInputCondition cond ) {
 
 void AllowStdin( void ) {
 
-    if( !nDisabledCount )
+    if( !fTTY || !nDisabledCount )
 	return;
     
     if( !--nDisabledCount )
@@ -259,6 +259,9 @@ void AllowStdin( void ) {
 
 void DisallowStdin( void ) {
 
+    if( !fTTY )
+	return;
+    
     nDisabledCount++;
     
     if( nStdin ) {
@@ -561,23 +564,27 @@ extern void RunGTK( void ) {
 
     AllowStdin();
     
-    /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
     fnAction = HandleXAction;
+
+    if( fTTY ) {
 #ifdef ConnectionNumber /* FIXME use configure somehow to detect this */
-    if( ( n = fcntl( ConnectionNumber( GDK_DISPLAY() ), F_GETFL ) ) != -1 ) {
-	fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETOWN, getpid() );
-	fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | FASYNC );
-    }
+	if( ( n = fcntl( ConnectionNumber( GDK_DISPLAY() ),
+			 F_GETFL ) ) != -1 ) {
+	    /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
+	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETOWN, getpid() );
+	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | FASYNC );
+	}
 #endif
     
 #if HAVE_LIBREADLINE
-    fReadingCommand = TRUE;
-    rl_callback_handler_install( FormatPrompt(), HandleInput );
-    atexit( rl_callback_handler_remove );
+	fReadingCommand = TRUE;
+	rl_callback_handler_install( FormatPrompt(), HandleInput );
+	atexit( rl_callback_handler_remove );
 #else
-    Prompt();
+	Prompt();
 #endif
-
+    }
+    
     gtk_main();
 }
 

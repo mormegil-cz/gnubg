@@ -169,6 +169,10 @@ command acDatabase[] = {
 }, acLoad[] = {
     { "commands", CommandLoadCommands, "Read commands from a script file",
       szFILENAME, NULL },
+    { "game", CommandLoadGame, "Read a saved game from a file", szFILENAME,
+      NULL },
+    { "match", CommandLoadMatch, "Read a saved match from a file", szFILENAME,
+      NULL },
     /* FIXME add equivalents to the other save commands here */
     { NULL, NULL, NULL, NULL, NULL }
 }, acNew[] = {
@@ -1362,6 +1366,8 @@ static void ExportGame( FILE *pf, list *plGame, int iGame, int anScore[ 2 ] ) {
 	case MOVE_RESIGN:
 	    /* FIXME how does JF do it? */
 	    break;
+	default:
+	    assert( FALSE );
 	}
 
 	if( !i && pmr->mt == MOVE_NORMAL && pmr->n.fPlayer ) {
@@ -1509,181 +1515,6 @@ extern void CommandExportMatch( char *sz ) {
     
     for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
 	ExportGame( pf, pl->p, i, anScore );
-    
-    if( pf != stdout )
-	fclose( pf );
-}
-
-static void WriteEscapedString( FILE *pf, char *pch ) {
-
-    for( ; *pch; pch++ )
-	switch( *pch ) {
-	case '\\':
-	    putc( '\\', pf );
-	    putc( '\\', pf );
-	    break;
-	case ':':
-	    putc( '\\', pf );
-	    putc( ':', pf );
-	    break;
-	case ']':
-	    putc( '\\', pf );
-	    putc( ']', pf );
-	    break;
-	default:
-	    putc( *pch, pf );
-	}
-}
-
-static void WriteMove( FILE *pf, movenormal *pmn ) {
-
-    int i;
-
-    for( i = 0; i < 8; i++ )
-	switch( pmn->anMove[ i ] ) {
-	case 24: /* bar */
-	    putc( 'y', pf );
-	    break;
-	case -1: /* off */
-	    if( !( i & 1 ) )
-		return;
-	    putc( 'z', pf );
-	    break;
-	default:
-	    putc( pmn->fPlayer ? 'x' - pmn->anMove[ i ] :
-		  'a' + pmn->anMove[ i ], pf );
-	}
-}
-
-static void SaveGame( FILE *pf, list *plGame, int nMatch, int anScore[ 2 ] ) {
-
-    list *pl;
-    moverecord *pmr;
-    int nResult = 0, nFileCube = 1, fResigned = FALSE, anBoard[ 2 ][ 25 ];
-    char ch;
-    
-    /* Fixed header */
-    fputs( "(;FF[4]GM[6]AP[GNU Backgammon:" VERSION "]", pf );
-
-    /* Match length, if appropriate */
-    if( nMatch )
-	fprintf( pf, "ML[%d]", nMatch );
-    
-    /* Names */
-    fputs( "PW[", pf );
-    WriteEscapedString( pf, ap[ 0 ].szName );
-    fputs( "]PB[", pf );
-    WriteEscapedString( pf, ap[ 1 ].szName );
-    putc( ']', pf );
-
-    /* Scores, if appropriate */
-    if( anScore )
-	fprintf( pf, "WP[%d]BP[%d]", anScore[ 0 ], anScore[ 1 ] );
-
-    /* FIXME add RE (result) property if the game is complete */
-    
-    putc( '\n', pf );
-
-    InitBoard( anBoard );
-    
-    for( pl = plGame->plNext; pl != plGame; pl = pl->plNext ) {
-	pmr = pl->p;
-	switch( pmr->mt ) {
-	case MOVE_NORMAL:
-	    ch = pmr->n.fPlayer ? 'B' : 'W'; /* initialise ch -- the first
-						move should be MOVE_NORMAL */
-	    fprintf( pf, ";%c[%d%d", ch, pmr->n.anRoll[ 0 ],
-		     pmr->n.anRoll[ 1 ] );
-	    WriteMove( pf, &pmr->n );
-	    putc( ']', pf );
-	    ApplyMove( anBoard, pmr->n.anMove );
-	    
-	    nResult = GameStatus( anBoard );
-
-	    SwapSides( anBoard );
-	    break;
-	    
-	case MOVE_DOUBLE:
-	    fprintf( pf, ";%c[double]", ch );
-	    break;
-	    
-	case MOVE_TAKE:
-	    fprintf( pf, ";%c[take]", ch );
-	    nFileCube <<= 1;
-	    break;
-	    
-	case MOVE_DROP:
-	    fprintf( pf, ";%c[drop]", ch );
-	    nResult = 1;
-	    ch ^= 'B' ^ 'W'; /* when dropping, the other player wins */
-	    break;
-	    
-	case MOVE_RESIGN:
-	    fResigned = TRUE;
-	    nResult = pmr->r.nResigned;
-	    ch ^= 'B' ^ 'W'; /* when resigning, the other player wins */
-	    break;
-	}
-
-	if( nResult )
-	    break;
-	
-	ch ^= 'B' ^ 'W'; /* switch B/W each turn */
-    }
-
-    anScore[ ch == 'B' ] += nFileCube * nResult;
-    
-    fputs( ")\n", pf );
-}
-
-extern void CommandSaveGame( char *sz ) {
-
-    FILE *pf;
-    
-    if( !sz || !*sz ) {
-	outputl( "You must specify a file to save to (see `help save"
-		 "game')." );
-	return;
-    }
-
-    if( !strcmp( sz, "-" ) )
-	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
-	return;
-    }
-
-    SaveGame( pf, plGame, 0, NULL );
-    
-    if( pf != stdout )
-	fclose( pf );
-}
-
-extern void CommandSaveMatch( char *sz ) {
-
-    FILE *pf;
-    int i, anScore[ 2 ];
-    list *pl;
-
-    /* FIXME what should be done if nMatchTo == 0? */
-    
-    if( !sz || !*sz ) {
-	outputl( "You must specify a file to save to (see `help save "
-		 "match')." );
-	return;
-    }
-
-    if( !strcmp( sz, "-" ) )
-	pf = stdout;
-    else if( !( pf = fopen( sz, "w" ) ) ) {
-	perror( sz );
-	return;
-    }
-
-    anScore[ 0 ] = anScore[ 1 ] = 0;
-    
-    for( i = 0, pl = lMatch.plNext; pl != &lMatch; i++, pl = pl->plNext )
-	SaveGame( pf, pl->p, nMatchTo, anScore );
     
     if( pf != stdout )
 	fclose( pf );
@@ -1954,6 +1785,16 @@ extern void UserCommand( char *szCommand ) {
        read-only storage and HandleCommand might want to modify it. */
     strcpy( sz, szCommand );
 
+#if USE_GTK
+    if( !fTTY ) {
+	fInterrupt = FALSE;
+	HandleCommand( sz, acTop );
+	ResetInterrupt();
+
+	return;
+    }
+#endif
+
     /* Note that the command is always echoed to stdout; the output*()
        functions are bypassed. */
 #if HAVE_LIBREADLINE
@@ -2031,6 +1872,10 @@ extern char *GetInput( char *szPrompt ) {
 #endif
 #if USE_GUI
     fd_set fds;
+
+#if USE_GTK
+    assert( fTTY );
+#endif
     
     if( fX ) {
 #if HAVE_LIBREADLINE
@@ -2378,9 +2223,12 @@ static void usage( char *argv0 ) {
 "  -h, --help                Display usage and exit\n"
 "  -n, --no-weights          Do not load existing neural net weights\n"
 #if USE_GUI
-"  -t, --tty                 Start on tty instead of using X\n"
+"  -t, --tty                 Start on tty instead of using window system\n"
 #endif
 "  -v, --version             Show version information and exit\n"
+#if USE_GUI
+"  -w, --window-system-only  Ignore tty input when using window system\n"
+#endif
 "\n"
 "For more information, type `help' from within gnubg.\n"
 "Please report bugs to <bug-gnubg@gnu.org>.\n", argv0 );
@@ -2396,6 +2244,7 @@ extern int main( int argc, char *argv[] ) {
 	{ "no-bearoff", no_argument, NULL, 'b' },
 	{ "no-weights", no_argument, NULL, 'n' },
         { "version", no_argument, NULL, 'v' },
+	{ "window-system-only", no_argument, NULL, 'w' },
 	/* `tty' must be the last option -- see below. */
         { "tty", no_argument, NULL, 't' },
         { NULL, 0, NULL, 0 }
@@ -2439,7 +2288,7 @@ extern int main( int argc, char *argv[] ) {
     fInteractive = isatty( STDIN_FILENO );
     fShowProgress = isatty( STDOUT_FILENO );
     
-    while( ( ch = getopt_long( argc, argv, "bd:hntv", ao, NULL ) ) !=
+    while( ( ch = getopt_long( argc, argv, "bd:hntvw", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {
 	case 'b': /* no-bearoff */
@@ -2466,6 +2315,13 @@ extern int main( int argc, char *argv[] ) {
 	    outputl( "Position databases supported." );
 #endif
 	    return EXIT_SUCCESS;
+	case 'w':
+#if USE_GTK
+	    fTTY = FALSE;
+#else
+	    /* silently ignore */
+#endif
+	    break;
 	default:
 	    usage( argv[ 0 ] );
 	    return EXIT_FAILURE;
