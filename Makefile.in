@@ -176,7 +176,7 @@ makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 makeweights_SOURCES = makeweights.c i18n.c i18n.h
-makeweights_LDADD = -Llib -levent
+makeweights_LDADD = -Llib -levent $(COMMON_LIBS)
 makeweights_DEPENDENCIES = lib/libevent.a
 
 erftest_SOURCES = erftest.c
@@ -284,8 +284,9 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	Makefile.am Makefile.in NEWS TODO acinclude.m4 aclocal.m4 \
-	config.guess config.h.in config.sub configure configure.in \
-	depcomp erf.c install-sh missing mkinstalldirs strdup.c
+	config.guess config.h.in config.rpath config.sub configure \
+	configure.in depcomp erf.c install-sh missing mkinstalldirs \
+	strdup.c
 DIST_SUBDIRS = intl lib doc ext met po
 SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makeweights_SOURCES)
 

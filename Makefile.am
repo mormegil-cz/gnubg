@@ -62,7 +62,7 @@ makebearoff_LDADD = -Llib -levent $(COMMON_LIBS)
 makebearoff_DEPENDENCIES = lib/libevent.a
 
 makeweights_SOURCES = makeweights.c i18n.c i18n.h
-makeweights_LDADD = -Llib -levent
+makeweights_LDADD = -Llib -levent $(COMMON_LIBS)
 makeweights_DEPENDENCIES = lib/libevent.a
 
 erftest_SOURCES = erftest.c
