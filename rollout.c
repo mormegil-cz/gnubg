@@ -1310,7 +1310,7 @@ GeneralCubeDecisionR ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   cubeinfo (* apci[2]) = { &aci[ 0 ], &aci[ 1 ] };
 
 
-  int i, cGames;
+  int cGames;
   int afCubeDecTop[] = { FALSE, FALSE }; /* no cube decision in 
                                             iTurn = 0 */
   int (* apCubeDecTop[2]) = { afCubeDecTop, afCubeDecTop};
