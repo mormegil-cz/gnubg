@@ -3,7 +3,7 @@
 @settitle GNU Backgammon
 @include version.texi
 
-@set month-year March, 2001
+@set month-year April, 2001
 
 @syncodeindex vr cp
 
@@ -90,22 +90,16 @@ purposes, and more.
 It is driven by a command-line interface, and displays an ASCII
 rendition of a board on text-only terminals, but also allows the user to
 play games and manipulate positions with a GTK+
-@uref{http://www.gnu.org/software/gnubg/board.jpg,,board window} where
+@uref{http://www.gnu.org/software/gnubg/board.png,,board window} where
 available.  It is extensible on platforms which support
 @uref{http://www.gnu.org/software/guile/guile.html,,Guile}.
 
-Plans for the future include completing its ability to analyse games and
-matches, and completing the Guile support, so that the user can program
-it to answer sophisticated questions like ``How many chequers must Black
-have borne off in positions like this one to be able to accept a
-double?''@: and automate complicated rollout tasks.
-
-It currently plays at about the level of an advanced to open flight
-tournament player (depending what parameters are used, it rates in the
-1800s to 2000s on
+It currently plays at about the level of a championship flight
+tournament player (depending on its parameters and its luck in recent
+games, it rates from around 1900 to 2000 on
 @cindex FIBS
 @uref{http://www.fibs.com/,,FIBS}, the First Internet Backgammon Server
---- at its strongest, it ranks in the top 10 of over 6000 rated players
+--- at its strongest, it ranks in the top 5 of over 6000 rated players
 there) and is gradually improving; it should be somewhat stronger than
 this when released.  Since almost all of the CPU time required during
 supervised training is spent performing rollouts, and rollouts can
