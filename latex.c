@@ -120,7 +120,7 @@ static void LaTeXEpilogue( FILE *pf ) {
 
 static void DrawLaTeXPoint( FILE *pf, int i, int fPlayer, int c ) {
 
-    int j, x, y;
+    int j, x, y = 0;
 
     if( i < 6 )
 	x = 320 - 20 * i;

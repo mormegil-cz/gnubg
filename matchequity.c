@@ -1383,12 +1383,10 @@ extern void
 InitMatchEquity ( const char *szFileName ) {
 
   int i,j;
-
   metdata md;
 
-  static int fTableLoaded = FALSE;
-
 #ifdef HAVE_LIBXML2
+  static int fTableLoaded = FALSE;
 
   /*
    * Read match equity table from XML file

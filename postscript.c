@@ -406,7 +406,7 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
 
 static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
 
-    int j, x, y;
+    int j, x, y = 0;
 
     if( i < 6 )
 	x = 320 - 20 * i;

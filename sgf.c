@@ -525,7 +525,7 @@ static void RestoreNode( list *pl ) {
     property *pp, *ppDA = NULL, *ppA = NULL, *ppC = NULL;
     moverecord *pmr = NULL;
     char *pch;
-    int i, fPlayer, fSetBoard = FALSE, an[ 25 ];
+    int i, fPlayer = 0, fSetBoard = FALSE, an[ 25 ];
     skilltype st = SKILL_NONE;
     lucktype lt = LUCK_NONE;
     float rLuck = ERR_VAL;

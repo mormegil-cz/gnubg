@@ -104,7 +104,7 @@ static int
 FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
                  float ar[ NUM_OUTPUTS ] ) {
 
-  int i, j, anBoardTemp[ 2 ][ 25 ], iMinRolls;
+  int i, j, anBoardTemp[ 2 ][ 25 ], iMinRolls = 0;
   unsigned long cBestRolls;
   movelist ml;
 
@@ -231,7 +231,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   evalcontext ec;
 
   positionclass pc, pcBefore;
-  int nPipsBefore, nPipsAfter, nPipsDice;
+  int nPipsBefore = 0, nPipsAfter, nPipsDice;
   int anPips [ 2 ];
   int afClosedBoard[ 2 ];
 

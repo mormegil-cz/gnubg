@@ -1299,7 +1299,7 @@ extern void ResetInterrupt( void ) {
     }
 }
 
-#if USE_GUI
+#if USE_GUI && HAVE_FORK
 static int fChildDied;
 
 static RETSIGTYPE HandleChild( int n ) {
@@ -1527,16 +1527,14 @@ extern void InitBoard( int anBoard[ 2 ][ 25 ] ) {
 	anBoard[ 0 ][ 22 ] = anBoard[ 1 ][ 22 ] = 2;
 }
 
-#if USE_GTK
+#if USE_GTK && HAVE_GDK_GDKX_H
 static unsigned long nLastRequest;
 static guint nUpdate;
 
 static gint UpdateBoard( gpointer p ) {
 
     /* we've waited long enough -- force this update */
-#if HAVE_GDK_GDKX_H
     nLastRequest = LastKnownRequestProcessed( GDK_DISPLAY() );
-#endif
     
     ShowBoard();
 
@@ -4315,7 +4313,7 @@ extern RETSIGTYPE HandleInterrupt( int idSignal ) {
     fInterrupt = TRUE;
 }
 
-#if USE_GUI
+#if USE_GUI && defined(SIGIO)
 static RETSIGTYPE HandleIO( int idSignal ) {
 
     /* NB: It is safe to write to fAction even if it cannot be read

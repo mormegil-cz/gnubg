@@ -636,7 +636,7 @@ static moverecord *GameListLookupMove( int i ) {
 static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 			       GdkEventButton *pev, gpointer p ) {
     gamelistrow *pglr;
-    moverecord *pmr, *pmrPrev;
+    moverecord *pmr, *pmrPrev = NULL;
     list *pl;
     int i, iPrev;
     
@@ -2406,7 +2406,7 @@ extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
     GdkPixmap *ppm;
     GtkWidget *pwDialog = gtk_dialog_new(),
 	*pwOK = gtk_button_new_with_label( "OK" ),
-	*pwCancel,
+	*pwCancel = gtk_button_new_with_label( "Cancel" ),
 	*pwHbox = gtk_hbox_new( FALSE, 0 ),
 	*pwButtons = gtk_hbutton_box_new(),
 	*pwPixmap;
@@ -2432,7 +2432,6 @@ extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 			GTK_SIGNAL_FUNC( OK ), p );
 
     if( fQuestion ) {
-	pwCancel = gtk_button_new_with_label( "Cancel" );
 	gtk_container_add( GTK_CONTAINER( pwButtons ), pwCancel );
 	gtk_signal_connect_object( GTK_OBJECT( pwCancel ), "clicked",
 				   GTK_SIGNAL_FUNC( gtk_widget_destroy ),

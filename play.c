@@ -630,8 +630,10 @@ extern int ComputerTurn( void ) {
   movenormal *pmn;
   cubeinfo ci;
   float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ], rDoublePoint;
+#if HAVE_SOCKETS
   char szBoard[ 256 ], szResponse[ 256 ];
   int i, c, fTurnOrig;
+#endif
 
   if( fAction )
       fnAction();

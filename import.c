@@ -1,7 +1,7 @@
 /*
  * import.c
  *
- * by Øystein Johansen, 2000
+ * by Øystein Johansen, 2000, 2001, 2002
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -363,7 +363,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 
 static void ImportGame( FILE *pf, int iGame, int nLength ) {
 
-    char sz[ 128 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight;
+    char sz[ 128 ], sz0[ 32 ], sz1[ 32 ], *pch, *pchLeft, *pchRight = NULL;
     int n0, n1;
     moverecord *pmr;
     
@@ -797,7 +797,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1,
 
     char sz[ 1024 ];
     char *pch;
-    int c, fPlayer, anRoll[ 2 ];
+    int c, fPlayer = 0, anRoll[ 2 ];
     moverecord *pmgi, *pmr;
     
     InitBoard( ms.anBoard );

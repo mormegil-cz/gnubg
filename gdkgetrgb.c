@@ -37,7 +37,7 @@ gdk_get_rgb_image( GdkDrawable *drawable,
     guchar *p;
     guint32 pixel;
     GdkVisual *visual;
-    int r, g, b, dwidth, dheight;
+    int r = 0, g = 0 , b = 0, dwidth, dheight;
 
 #if GTK_CHECK_VERSION(1,3,0)
     gdk_drawable_get_size( drawable, &dwidth, &dheight );

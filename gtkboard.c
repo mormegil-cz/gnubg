@@ -36,6 +36,7 @@
 #include "drawboard.h"
 #include "gdkgetrgb.h"
 #include "gtkboard.h"
+#include "gtkgame.h"
 #include "gtk-multiview.h"
 #include "gtkprefs.h"
 #include "positionid.h"
@@ -1950,7 +1951,7 @@ static gint board_blink_timeout( gpointer p ) {
 
     Board *board = p;
     BoardData *pbd = board->board_data;
-    int src, dest, src_cheq, dest_cheq, colour;
+    int src, dest, src_cheq = 0, dest_cheq = 0, colour;
     static int blink_move, blink_count;
 
     if( blink_move >= 8 || animate_move_list[ blink_move ] < 0 ||
@@ -2991,9 +2992,9 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
     int ix, iy, in, fx, fy, i;
     float x, y, z, x_loop, y_loop, diffuse, specular_x, specular_o, cos_theta,
 	len;
-    GdkImage *img;
+    GdkImage *img = NULL;
     GdkGC *gc;
-    short *refract_x, *refract_o;
+    short *refract_x = 0, *refract_o = 0;
     
 #define BUFX( y, x, i ) buf_x[ ( (y) * size + (x) ) * 4 + (i) ]
 #define BUFO( y, x, i ) buf_o[ ( (y) * size + (x) ) * 4 + (i) ]
