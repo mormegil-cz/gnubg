@@ -10,14 +10,14 @@
 #
 msgid ""
 msgstr ""
-	"Project-Id-Version: GNU Backgammon\n"
-	"POT-Creation-Date: 2004-01-02 19:48+0900\n"
-	"PO-Revision-Date: 2004-04-14 21:35+CDT\n"
-	"Last-Translator: Dmitri I GOULIAEV <dig@telkel.net>\n"
-	"Language-Team: Russian <ru@li.org>\n"
-	"MIME-Version: 1.0\n"
-	"Content-Type: text/plain; charset=KOI8-R\n"
-	"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: GNU Backgammon\n"
+"POT-Creation-Date: 2004-01-02 19:48+0900\n"
+"PO-Revision-Date: 2004-04-14 21:35+CDT\n"
+"Last-Translator: Dmitri I GOULIAEV <dig@telkel.net>\n"
+"Language-Team: Russian <ru@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=KOI8-R\n"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: analysis.c:48
 msgid "Awful!"
@@ -6406,8 +6406,8 @@ msgid ""
 msgstr ""
 "Указание -- на сколько ходов вперёд GNU Backgammon должен производить "
 "оценку.  Каждый дополнительный ход (тур), увеличивает время оценки "
-"приблизительно в 20 раз.  Расчёт на два хода вперёд эквивалентен "
-"расчёту на 3 хода в Snowie."
+"приблизительно в 20 раз.  Расчёт на два хода вперёд эквивалентен расчёту на "
+"3 хода в Snowie."
 
 #: gtkgame.c:5502
 msgid "Lookahead"
@@ -6426,9 +6426,9 @@ msgid ""
 "search without reduction."
 msgstr ""
 "Вместо того, что бы усреднять оценку позиции по всем 21 комбинациям "
-"костяшек, можно усреднить по уменьшенному набору, например, по 7-ми "
-"броскам, что даст увеличение скорости оценки примерно в три раза (по "
-"сравнению с полным перебором)."
+"костяшек, можно усреднить по уменьшенному набору, например, по 7-ми броскам, "
+"что даст увеличение скорости оценки примерно в три раза (по сравнению с "
+"полным перебором)."
 
 #: gtkgame.c:5532
 msgid "Reduced evaluations"
@@ -6448,8 +6448,8 @@ msgid ""
 "of cube ownership in the evaluations. It is recommended to enable this "
 "option."
 msgstr ""
-"Указание использовать cubful оценку, то есть, при оценке позиции "
-"учитывать -- кто владелец куба.  Рекомендуется разрешить эту опцию."
+"Указание использовать cubful оценку, то есть, при оценке позиции учитывать "
+"-- кто владелец куба.  Рекомендуется разрешить эту опцию."
 
 #: gtkgame.c:5591
 msgid ""
@@ -6472,11 +6472,11 @@ msgid ""
 "same position, or it can be random"
 msgstr ""
 "Вы можете использовать эту опцию для того, чтобы ввести некоторый шум или "
-"ошибки в оценку. Эта опция может быть полезной для обеспечения уровней "
-"игры слабее 0-бросков.  Более слабые роботы (например, GGotter) на сервере "
-"GamesGrid используют этот способ.  Вводимый таким образом шум может быть "
-"как предопределённым (то есть, всегда один и тот же шум для той же "
-"позиции), так и случайным."
+"ошибки в оценку. Эта опция может быть полезной для обеспечения уровней игры "
+"слабее 0-бросков.  Более слабые роботы (например, GGotter) на сервере "
+"GamesGrid используют этот способ.  Вводимый таким образом шум может быть как "
+"предопределённым (то есть, всегда один и тот же шум для той же позиции), так "
+"и случайным."
 
 #: gtkgame.c:5613
 msgid "Noise"
@@ -6490,8 +6490,8 @@ msgstr "Шум:"
 msgid "Deterministic noise"
 msgstr "Предопределённый шум"
 
-#: gtkgame.c:5655
 # бред какой-то
+#: gtkgame.c:5655
 msgid ""
 "GNU Backgammon will evaluate all moves at 0-ply. The move filter controls "
 "how many moves to be evaluted at higher plies. A \"smaller\" filter will be "
@@ -6501,9 +6501,9 @@ msgstr ""
 "GNU Backgammom оценивает все ходы на 1 ход вперёд.  Фильтр ходов "
 "контролирует -- сколько ходов должно быть оценено при дальнейшей оценке. "
 "\"Меньший\" фильтр быстрее, но в этом случае GNU Backgammon может не найти "
-"лучший ход.  Сильные игроки могут настроить свои собственные фильтры, "
-"нажав кнопку [Поменять]"
- 
+"лучший ход.  Сильные игроки могут настроить свои собственные фильтры, нажав "
+"кнопку [Поменять]"
+
 #: gtkgame.c:5797 gtkgame.c:5906 gtkgame.c:6144 gtkgame.c:6247 gtkgame.c:6568
 #: gtkgame.c:8835
 msgid "Cube decisions"
@@ -6795,8 +6795,8 @@ msgid ""
 "Backgammon."
 msgstr ""
 "GNU Backgammon -- это свободное программное обеспечение (ПО), подчиняющееся "
-"Общей Общественной Лицензии (GNU General Public License) второй версии, "
-"и вы свободны изменять это ПО и/или распространять его копии при соблюдении "
+"Общей Общественной Лицензии (GNU General Public License) второй версии, и вы "
+"свободны изменять это ПО и/или распространять его копии при соблюдении "
 "некоторых условий.  GNU Backgammon не даёт абсолютно никаких гарантий."
 
 #: gtkgame.c:7682
@@ -6826,8 +6826,8 @@ msgid ""
 "\n"
 "    http://www.gnubg.org/docs/faq/"
 msgstr ""
-"Для этой установки GNU Backgammon Часто Задаваемые Вопросы недоступны."
-"Вы можете получить к ним доступ по адресу:\n"
+"Для этой установки GNU Backgammon Часто Задаваемые Вопросы недоступны.Вы "
+"можете получить к ним доступ по адресу:\n"
 "\n"
 "    http://www.gnubg.org/docs/faq/"
 
@@ -7288,12 +7288,11 @@ msgstr "Пользователь"
 msgid "File"
 msgstr "Файл"
 
-#DIG: уточнить названия генераторов
+# DIG: уточнить названия генераторов
 #: gtkoptions.c:190
 msgid ""
 "The rand() generator specified by ANSI C (typically linear congruential)"
-msgstr ""
-"Генератор rand(), описанный в ANSI C (обычно linear congruential)"
+msgstr "Генератор rand(), описанный в ANSI C (обычно linear congruential)"
 
 #: gtkoptions.c:192
 msgid "Blum, Blum and Shub's verifiably strong generator"
@@ -7331,10 +7330,10 @@ msgid ""
 "in the range '1' to '6' as dice. When the entire file has been read, it will "
 "be rewinded. You will be prompted for a file when closing the options dialog."
 msgstr ""
-"При чтении из файла, GNU Backgammon интерпретирует все символы от '1' до "
-"'6' как выпавшие значения на костях.  После того, как весь файл будет "
-"прочитан, чтение возобновится с начала файла.  Имя файла будет запрошено "
-"после закрытия диалога настроек."
+"При чтении из файла, GNU Backgammon интерпретирует все символы от '1' до '6' "
+"как выпавшие значения на костях.  После того, как весь файл будет прочитан, "
+"чтение возобновится с начала файла.  Имя файла будет запрошено после "
+"закрытия диалога настроек."
 
 #: gtkoptions.c:208
 msgid "Doubtful"
@@ -7485,8 +7484,8 @@ msgid ""
 "On a human player's turn, if there are no legal moves or only one legal "
 "move, then finish their turn for them."
 msgstr ""
-"Если у Человека нет разрешённых ходов, или этот ход единственный, то "
-"делать этот ход."
+"Если у Человека нет разрешённых ходов, или этот ход единственный, то делать "
+"этот ход."
 
 #: gtkoptions.c:279
 msgid "Play bearoff moves automatically"
@@ -7498,8 +7497,8 @@ msgid ""
 "unambiguous move which bears off as many chequers as possible, then choose "
 "that move automatically."
 msgstr ""
-"В случае, если ход Человека, и вынос неконтактный, то если есть один "
-"ход, который вынесет максимальное количество фишек, то делать этот ход "
+"В случае, если ход Человека, и вынос неконтактный, то если есть один ход, "
+"который вынесет максимальное количество фишек, то делать этот ход "
 "автоматически."
 
 #: gtkoptions.c:288
@@ -7514,9 +7513,9 @@ msgid ""
 "must be legal when you pick up the dice, or it will not be accepted."
 msgstr ""
 "При выборе хода, можно временно ставить шашки на те позиции, которые не "
-"соответствуют выброшенным очкам.  Если эта опция запрещена, то можно "
-"ставить шашки только на разрешённые позиции.  В любом случае, конечный "
-"ход должен быть сделан по правилам (иначе он не будет принят)."
+"соответствуют выброшенным очкам.  Если эта опция запрещена, то можно ставить "
+"шашки только на разрешённые позиции.  В любом случае, конечный ход должен "
+"быть сделан по правилам (иначе он не будет принят)."
 
 #: gtkoptions.c:301
 msgid "Variations"
@@ -7662,9 +7661,9 @@ msgid ""
 "player 0 moves anticlockwise).  Otherwise, player 1 moves anticlockwise and "
 "player 0 moves clockwise."
 msgstr ""
-"Ориентировать игральную доску таким образом, что шашки игрока 1 двигались "
-"бы по часовой стрелке (шашки игрока 0 -- против).  В противном случае, "
-"игрок 1 ходит против часовой стрелки, а игрок 0 -- по часовой стрелке."
+"Ориентировать игральную доску таким образом, что шашки игрока 1 двигались бы "
+"по часовой стрелке (шашки игрока 0 -- против).  В противном случае, игрок 1 "
+"ходит против часовой стрелки, а игрок 0 -- по часовой стрелке."
 
 #: gtkoptions.c:538
 msgid "Move delay:"
@@ -9123,7 +9122,7 @@ msgstr "Открыть"
 msgid "Open game, match, session or position"
 msgstr "Открыть файл с игрой, матчем, сессией или позицией"
 
-#DIG: если глагол в неопределённой форме, то получается *очень* длинно
+# DIG: если глагол в неопределённой форме, то получается *очень* длинно
 #: gtktoolbar.c:429
 msgid "Import"
 msgstr "Импорт"
@@ -9132,12 +9131,12 @@ msgstr "Импорт"
 msgid "Import game, match or position"
 msgstr "Импортировать игру, матч или позицию"
 
-#DIG: если глагол в неопределённой форме, то получается *очень* длинно
+# DIG: если глагол в неопределённой форме, то получается *очень* длинно
 #: gtktoolbar.c:466
 msgid "Save"
 msgstr "Сохр."
 
-#DIG: если глагол в неопределённой форме, то получается *очень* длинно
+# DIG: если глагол в неопределённой форме, то получается *очень* длинно
 #: gtktoolbar.c:473
 msgid "Export"
 msgstr "Экспорт"
@@ -9156,7 +9155,9 @@ msgstr "Отклонить"
 
 #: gtktoolbar.c:494
 msgid "Drop the offered cube or decline the offered resignation"
-msgstr "Отказаться от предложенного куба или отклонить признание противником поражения"
+msgstr ""
+"Отказаться от предложенного куба или отклонить признание противником "
+"поражения"
 
 #: gtktoolbar.c:500
 msgid "Redouble immediately (beaver)"
@@ -13804,13 +13805,15 @@ msgstr ""
 #: show.c:1892
 msgid "Warnings are given for 'doubtful', 'bad', or 'very bad' cube decisions."
 msgstr ""
-"Замечания будут выданы для 'сомнительных', 'плохих' и 'очень плохих' cube decisions."
+"Замечания будут выданы для 'сомнительных', 'плохих' и 'очень плохих' cube "
+"decisions."
 
 #: show.c:1895
 msgid ""
 "No warnings are given for 'doubtful', 'bad', or 'very bad' cube decisions."
 msgstr ""
-"Замечаний не будет для 'сомнительных', 'плохих' и 'очень плохих' cube decisions."
+"Замечаний не будет для 'сомнительных', 'плохих' и 'очень плохих' cube "
+"decisions."
 
 #: show.c:1899
 msgid "Warnings are given for 'doubtful', 'bad', or 'very bad' chequer moves."
@@ -13825,11 +13828,15 @@ msgstr ""
 
 #: show.c:1906
 msgid "Tutor mode evaluates moves using the same settings as Analysis."
-msgstr "Режим обучения оценивает ходы, используя те же установки, что и режим анализа позиции."
+msgstr ""
+"Режим обучения оценивает ходы, используя те же установки, что и режим "
+"анализа позиции."
 
 #: show.c:1909
 msgid "Tutor mode evaluates moves using the same settings as Evaluation."
-msgstr "Режим обучения оценивает ходы, используя те же установки, что и режим оценки позиции."
+msgstr ""
+"Режим обучения оценивает ходы, используя те же установки, что и режим оценки "
+"позиции."
 
 #: show.c:1928
 #, c-format
@@ -13973,7 +13980,8 @@ msgstr "Лучший ход"
 msgid ""
 "Actual and luck adjusted results for %s\n"
 "\n"
-msgstr "Результаты для %s (реальные и с поправкой на удачливость)\n"
+msgstr ""
+"Результаты для %s (реальные и с поправкой на удачливость)\n"
 "\n"
 
 #: show.c:2305
@@ -14351,5 +14359,3 @@ msgstr "3D выбор цвета"
 #: board3d/inc3d.h:68
 msgid "No texture"
 msgstr "Без текстуры"
-
-# end of file
