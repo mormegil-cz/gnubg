@@ -182,6 +182,10 @@ details.
 ** Optionally show numbers based on who's on roll
 ** Show resignations on board. Currently we show a white cube with a number.
   Change this to showing, e.g., R1, or change to a white flag.
+** the Race Theory window is way too large. Where does all that white space
+  come from?
+** Extend the Race Theory window with the output from "eval" for bearoff
+  databases.
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
