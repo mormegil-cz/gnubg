@@ -1,3 +1,8 @@
+Wed Nov 12 01:17:58 2003  Oystein Johansen <oystein@gnubg.org>
+
+        * gnubg.iss: New file for building MS-Windows installation archives
+	             with Inno Setup.
+
 Sat Nov  8 19:56:58 GMT 2003  Jim Segrave <jes@jes-2.demon.nl>
 
 	* analysis.c - set up cubeinfo before analysis of a SET_DICE
