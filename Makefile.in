@@ -264,7 +264,7 @@ gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 @USE_GTK_TRUE@	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
 @USE_GTK_TRUE@        gtktempmap.c gtktempmap.h \
 @USE_GTK_TRUE@	gtkbearoff.c gtkbearoff.h gtkoptions.h gtkoptions.c \
-@USE_GTK_TRUE@	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c \
+@USE_GTK_TRUE@	gtkpath.c gtkpath.h gtktoolbar.h gtktoolbar.c gtkgamelist.c \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES) $(PYTHON_SOURCES) $(TIME_SOURCES)
 
 @USE_GTK_FALSE@gnubg_SOURCES = $(COMMON_SOURCES) $(BR1_SOURCES) $(SOUND_SOURCES) \
@@ -400,9 +400,10 @@ am__objects_3 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtksplash.$(OBJEXT) gtkrolls.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktempmap.$(OBJEXT) gtkbearoff.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkoptions.$(OBJEXT) gtkpath.$(OBJEXT) \
-@USE_GTK_TRUE@	gtktoolbar.$(OBJEXT) $(am__objects_2) \
-@USE_GTK_TRUE@	$(am__objects_4) $(am__objects_5) \
-@USE_GTK_TRUE@	$(am__objects_6) $(am__objects_7)
+@USE_GTK_TRUE@	gtktoolbar.$(OBJEXT) gtkgamelist.$(OBJEXT) \
+@USE_GTK_TRUE@	$(am__objects_2) $(am__objects_4) \
+@USE_GTK_TRUE@	$(am__objects_5) $(am__objects_6) \
+@USE_GTK_TRUE@	$(am__objects_7)
 @USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_3) $(am__objects_2) \
 @USE_GTK_FALSE@	$(am__objects_4) $(am__objects_5) \
 @USE_GTK_FALSE@	$(am__objects_6) $(am__objects_7)
@@ -458,8 +459,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gtkbearoff.Po ./$(DEPDIR)/gtkboard.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkchequer.Po ./$(DEPDIR)/gtkcolour.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkcube.Po ./$(DEPDIR)/gtkexport.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkmet.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtkmovefilter.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkgame.Po ./$(DEPDIR)/gtkgamelist.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtkmet.Po ./$(DEPDIR)/gtkmovefilter.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkoptions.Po ./$(DEPDIR)/gtkpath.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkprefs.Po ./$(DEPDIR)/gtkrace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkrolls.Po ./$(DEPDIR)/gtksplash.Po \
@@ -647,6 +648,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkcube.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkexport.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkgame.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkgamelist.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkmet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkmovefilter.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkoptions.Po@am__quote@

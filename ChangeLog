@@ -1,3 +1,7 @@
+Thu Jun 10 17:41:40 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am: add gtkgamelist.c
+
 Thu Jun  10  14:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgamelist.c, gnubg.gtkrc: Multiple styles and new defaults for game list
