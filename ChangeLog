@@ -1,3 +1,8 @@
+Fri May 23 19:06:12 2003  Holger Bochnig  <hbgg@gmx.net>
+
+	* gnubg.c (NextTokenGeneral): fix for paths with spaces
+	(suggested by Henrik Ravn)
+
 Fri May 23 18:05:32 2003  Holger Bochnig  <hbgg@gmx.net>
 
 	draw arrow to indicate direction of play and who is on turn:

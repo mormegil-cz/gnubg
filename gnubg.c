@@ -1846,7 +1846,6 @@ NextTokenGeneral( char **ppch, const char *szTokens ) {
         }
         else
           *pchSave++ = **ppch;
-        break;
       }
       else {
 	switch( **ppch ) {
