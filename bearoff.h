@@ -25,7 +25,9 @@
 
 typedef enum _bearofftype {
   BEAROFF_GNUBG,
-  BEAROFF_UNKNOWN 
+  BEAROFF_EXACT_BEAROFF,
+  BEAROFF_UNKNOWN,
+  NUM_BEAROFFS
 } bearofftype;
 
 typedef struct _bearoffcontext {
