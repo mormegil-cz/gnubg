@@ -12758,6 +12758,16 @@ _ACEOF
 fi
 
 
+
+os=`echo $1 | sed 's/^\(.*\)-\(^-*-^-*\)$/\2/'`
+if test "$os" = "mingw32"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define WIN32 1
+_ACEOF
+
+fi
+
 ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

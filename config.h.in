@@ -438,6 +438,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Define if you use wintendo */
+#undef WIN32
+
 /* Define to 1 if the X Window System is missing or not being used. */
 #undef X_DISPLAY_MISSING
 
