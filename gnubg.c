@@ -520,6 +520,9 @@ command cER = {
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportSession[] = {
+    { "html", CommandExportMatchHtml,
+      N_("Records a log of the session in .html format"), szFILENAME,
+      &cFilename },
     { "latex", CommandExportMatchLaTeX, N_("Records a log of the session in "
       "LaTeX format"), szFILENAME, &cFilename },
     { "pdf", CommandExportMatchPDF, N_("Records a log of the session in the "

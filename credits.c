@@ -26,6 +26,7 @@ char *aszCredits[] = {
     "Matija Kejzar",
     "Jonathan Kinsey",
     "Johnny Kirk",
+    "Gerhard Knop",
     "Robert Konigsberg",
     "Corrin Lakeland",
     "Tim Laursen",

@@ -1,3 +1,8 @@
+Wed Oct  9 20:45:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c: new command "export session html".
+	(reported by Gerhard Knop)
+
 Mon Oct  7 22:08:14 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (SetDefaultPath): execute "set path xxx <path>"
