@@ -993,7 +993,11 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 	    aarVariance[ ici ][ j ] * ( 1.0 - 1.0 / i ) +
 	    ( i + 1 ) * rDelta * rDelta;
 	}
-	  
+	else {
+	  aarVariance[ ici ][ j ] = 0.0f;
+	  rDelta = 0;
+	}
+
 	aarMu[ ici ][ j ] = rMuNew;
 	  
 	if( j < OUTPUT_EQUITY ) {
