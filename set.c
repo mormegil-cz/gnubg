@@ -84,6 +84,11 @@
 #include "timecontrol.h"
 #endif
 
+#if WIN32
+/* Needed for thread priority defines */
+#include <windows.h>
+#endif
+
 static int iPlayerSet, iPlayerLateSet;
 
 static evalcontext *pecSet;

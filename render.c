@@ -184,6 +184,7 @@ renderdata rdDefault = {
 	PT_ROUNDED,	/* Piece type */
 	PTT_ALL,	/* Piece texture type */
     { TRUE, TRUE }, /* afDieColour3d */
+	0, 0,	/* Used at runtime */
 	/* Default 3d colours - black+white, should never be used -
 		if no 3d settings the first design will be used */
     {{{1, 1, 1, 1}, {1, 1, 1, 1}, {1, 1, 1, 1}, 100, 0, 0},

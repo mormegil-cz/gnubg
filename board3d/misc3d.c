@@ -1233,68 +1233,59 @@ void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture
 	glPopMatrix();
 }
 
-void drawQuarterRect(float x, float y, float z, float w, float h, Texture* texture)
-{	/* Draw a rectangle in 4 quarters */
-	float repX, repY, tuv;
+void drawChequeredRect(float x, float y, float z, float w, float h, int across, int down, Texture* texture)
+{	/* Draw a rectangle split into (across x down) chequers */
+	int i, j;
+	float hh = h / down;
+	float ww = w / across;
 
 	glPushMatrix();
-	glTranslatef(x + w / 2, y + h / 2, z);
-	glScalef(w / 2.0f, h / 2.0f, 1);
+	glTranslatef(x, y, z);
 	glNormal3f(0, 0, 1);
-	
+
 	if (texture)
 	{
-		tuv = TEXTURE_SCALE / texture->width;
-		repX = w * tuv;
-		repY = h * tuv;
+		float tuv = TEXTURE_SCALE / texture->width;
+		float tw = ww * tuv;
+		float th = hh * tuv;
+		float ty = 0;
 
-		glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex3f(-1, -1, 0);
-			glTexCoord2f(repX / 2.0f, 0); glVertex3f(0, -1, 0);
-			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
-			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 0);
-
-			glTexCoord2f(0, repY / 2.0f); glVertex3f(-1, 0, 0);
-			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
-			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0, 1, 0);
-			glTexCoord2f(0, repY); glVertex3f(-1, 1, 0);
-
-			glTexCoord2f(repX / 2.0f, 0); glVertex3f(0, -1, 0);
-			glTexCoord2f(repX, 0); glVertex3f(1, -1, 0);
-			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 0);
-			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
-
-			glTexCoord2f(repX / 2.0f, repY / 2.0f); glVertex3f(0, 0, 0);
-			glTexCoord2f(repX, repY / 2.0f); glVertex3f(1, 0, 0);
-			glTexCoord2f(repX, repY); glVertex3f(1, 1, 0);
-			glTexCoord2f(repX / 2.0f, repY); glVertex3f(0, 1, 0);
-		glEnd();
+		for (i = 0; i < down; i++)
+		{
+			float xx = 0, tx = 0;
+			glPushMatrix();
+			glTranslatef(0, hh * i, 0);
+			glBegin(GL_QUAD_STRIP);
+			for (j = 0; j <= across; j++)
+			{
+				glTexCoord2f(tx, ty + th); glVertex2f(xx, hh);
+				glTexCoord2f(tx, ty); glVertex2f(xx, 0);
+				xx += ww;
+				tx += tw;
+			}
+			ty += th;
+			glEnd();
+			glPopMatrix();
+		}
 	}
 	else
 	{
-		glBegin(GL_QUADS);
-			glVertex3f(-1, -1, 0);
-			glVertex3f(0, -1, 0);
-			glVertex3f(0, 0, 0);
-			glVertex3f(-1, 0, 0);
-
-			glVertex3f(-1, 0, 0);
-			glVertex3f(0, 0, 0);
-			glVertex3f(0, 1, 0);
-			glVertex3f(-1, 1, 0);
-
-			glVertex3f(0, -1, 0);
-			glVertex3f(1, -1, 0);
-			glVertex3f(1, 0, 0);
-			glVertex3f(0, 0, 0);
-
-			glVertex3f(0, 0, 0);
-			glVertex3f(1, 0, 0);
-			glVertex3f(1, 1, 0);
-			glVertex3f(0, 1, 0);
-		glEnd();
+		for (i = 0; i < down; i++)
+		{
+			float xx = 0;
+			glPushMatrix();
+			glTranslatef(0, hh * i, 0);
+			glBegin(GL_QUAD_STRIP);
+			for (j = 0; j <= across; j++)
+			{
+				glVertex2f(xx, hh);
+				glVertex2f(xx, 0);
+				xx += ww;
+			}
+			glEnd();
+			glPopMatrix();
+		}
 	}
-
 	glPopMatrix();
 }
 

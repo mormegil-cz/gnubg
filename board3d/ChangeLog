@@ -1,3 +1,7 @@
+Wed May 17 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* drawboard3d.c, misc3d.c: Vary board tesselation based on accuracy setting
+
 Wed May 12 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* drawboard3d.c: Add Taki-style rounded points

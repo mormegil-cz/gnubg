@@ -63,7 +63,7 @@ void drawBox(boxType type, float x, float y, float z, float w, float h, float d,
 void drawCube(float size);
 void drawRect(float x, float y, float z, float w, float h, Texture* texture);
 void drawSplitRect(float x, float y, float z, float w, float h, Texture* texture);
-void drawQuarterRect(float x, float y, float z, float w, float h, Texture* texture);
+void drawChequeredRect(float x, float y, float z, float w, float h, int across, int down, Texture* texture);
 void QuarterCylinder(float radius, float len, int accuracy, Texture* texture);
 void QuarterCylinderSplayed(float radius, float len, int accuracy, Texture* texture);
 void QuarterCylinderSplayedRev(float radius, float len, int accuracy, Texture* texture);
@@ -1289,9 +1289,9 @@ void drawPoints(renderdata* prd)
 
 	setMaterial(&prd->BaseMat);
 	if (prd->bgInTrays)
-		drawQuarterRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH + TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, prd->BaseMat.pTexture);
+		drawChequeredRect(EDGE_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH + TRAY_WIDTH - EDGE_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, prd->acrossCheq, prd->downCheq, prd->BaseMat.pTexture);
 	else
-		drawQuarterRect(TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, prd->BaseMat.pTexture);
+		drawChequeredRect(TRAY_WIDTH, EDGE_HEIGHT, BASE_DEPTH, BOARD_WIDTH, TOTAL_HEIGHT - EDGE_HEIGHT * 2, prd->acrossCheq, prd->downCheq, prd->BaseMat.pTexture);
 
 	/* Ignore depth values when drawing points */
 	glDepthMask(GL_FALSE);
@@ -3574,6 +3574,20 @@ void MakeShadowModel(BoardData* bd)
 	updateFlagOccPos(bd);
 }
 
+void getCheqSize(renderdata* prd)
+{
+	int accuracy = (prd->curveAccuracy / 4) - 1;
+	int i;
+	prd->acrossCheq = prd->downCheq = 1;
+	for (i = 1; i < accuracy; i++)
+	{
+		if (((float)prd->acrossCheq) / prd->downCheq > .5)
+			prd->downCheq++;
+		else
+			prd->acrossCheq++;
+	}
+}
+
 void preDraw3d(BoardData* bd)
 {
 	if (!bd->qobjTex)
@@ -3599,6 +3613,8 @@ void preDraw3d(BoardData* bd)
 	preDrawDice(bd);
 
 	MakeShadowModel(bd);
+
+	getCheqSize(bd->rd);
 }
 
 void RestrictiveDrawPiece(int pos, int depth)

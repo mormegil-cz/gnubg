@@ -147,6 +147,7 @@ typedef struct _renderdata {
 	PieceType pieceType;	/* Different piece models */
 	PieceTextureType pieceTextureType;	/* Different piece texture types */
 	int afDieColour3d[ 2 ]; /* TRUE means same colour as chequers */
+	int acrossCheq, downCheq; /* Split main board up to improve rendering */
 
 	Material ChequerMat[2];	/* Chequer colours */
 	Material DiceMat[2], DiceDotMat[2];
