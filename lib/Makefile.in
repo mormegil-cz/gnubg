@@ -174,11 +174,11 @@ pythondir = @pythondir@
 
 noinst_LIBRARIES = libevent.a
 libevent_a_SOURCES = buffer.c dynarray.c event.c fifo.c hash.c heap.c list.c \
-	neuralnet.c mt19937int.c isaac.c md5.c
+	neuralnet.c mt19937ar.c isaac.c md5.c
 
 
 noinst_HEADERS = buffer.h cache.h dynarray.h event.h fifo.h hash.h heap.h \
-	list.h neuralnet.h mt19937int.h isaac.h isaacs.h md5.h
+	list.h neuralnet.h mt19937ar.h isaac.h isaacs.h md5.h
 
 
 noinst_TEXINFOS = event.texi
@@ -199,7 +199,7 @@ libevent_a_AR = $(AR) cru
 libevent_a_LIBADD =
 am_libevent_a_OBJECTS = buffer.$(OBJEXT) dynarray.$(OBJEXT) \
 	event.$(OBJEXT) fifo.$(OBJEXT) hash.$(OBJEXT) heap.$(OBJEXT) \
-	list.$(OBJEXT) neuralnet.$(OBJEXT) mt19937int.$(OBJEXT) \
+	list.$(OBJEXT) neuralnet.$(OBJEXT) mt19937ar.$(OBJEXT) \
 	isaac.$(OBJEXT) md5.$(OBJEXT)
 libevent_a_OBJECTS = $(am_libevent_a_OBJECTS)
 check_PROGRAMS = hashtest$(EXEEXT) md5test$(EXEEXT)
@@ -226,7 +226,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/hash.Po ./$(DEPDIR)/hashtest.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/heap.Po ./$(DEPDIR)/isaac.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/list.Po ./$(DEPDIR)/md5.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/md5test.Po ./$(DEPDIR)/mt19937int.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/md5test.Po ./$(DEPDIR)/mt19937ar.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/neuralnet.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -286,7 +286,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/md5test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt19937int.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt19937ar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/neuralnet.Po@am__quote@
 
 distclean-depend:

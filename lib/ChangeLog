@@ -1,3 +1,9 @@
+Thu Apr 22 21:14:32 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+	
+	* mt19937int.[ch]: replaced by mt19937ar.[ch]
+	* mt19937ar.[ch]: upgrade Mersenne-Twister from
+	<URL:http://www.math.keio.ac.jp/matumoto/emt.html>.
+
 Thu Dec 18 23:35:48 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* neuralnet.c: implement Olivier Baur's faster sigmoid 
