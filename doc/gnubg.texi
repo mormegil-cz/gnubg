@@ -66,7 +66,7 @@ backgammon games and matches.  It corresponds to version @value{VERSION}
 * Import and export::			Opening and saving from and into different formats.
 * Settings::				Changing settings in GNU Backgammon.
 * Analysing and rollouts::		How to analyse positions, games, matches or sessions.
-* Position and match ID's::		A brief technical explanation.
+* Position and match IDs::		A brief technical explanation.
 * Training::				How to store databases and train the neural nets.
 * Bearoff databases::                   How to generate bearoff databases for use with GNU Backgammon
 * Frequently Asked Questions::		A bunch of questions and answers (mostly taken from r.g.b.).
@@ -542,8 +542,8 @@ writeme
 
 
 
-@node Position and match ID's
-@chapter Position and match ID's
+@node Position and match IDs
+@chapter Position and match IDs
 @menu
 * A technical description of the position ID::
 * A technical description of the match ID::

@@ -117,8 +117,7 @@ distributions P0(n) and P1(n), respectively. The chance of player 0
 bearing all chequers off before player 1 is:
 
 @tex
-$$ p = \sum_{i=0}^{\infty} P_0(i) \left( \sum_{j=i}^{\infty} P_1(j) $$
-\right) $$
+$$ p = \sum_{i=0}^{\infty} P_0(i) \left( \sum_{j=i}^{\infty} P_1(j) \right) $$
 @end tex
 @ifnottex
 p = sum(i=0 to infinity) P0(i) [ sum(j=i to infinity) P1(j) ]
@@ -157,8 +156,9 @@ The one sided bearoff distributions are
 
 Applying the formula above gives:
 
-@math{1.917% * 100% + 18.749% * 97.189% + 44.271% * 68.786% ... +
-0.037% * 0.02% = 56.7%}
+@c FIXME raw %s make TeX complain, but \% looks wrong in Info!
+@math{1.917\% * 100\% + 18.749\% * 97.189\% + 44.271\% * 68.786\% ... +
+0.037\% * 0.02\% = 56.7\%}
 
 The cubeless gwc's calculated from one sided bearoff distributions are
 usually quite good, although no thorough investigations have been
