@@ -1,3 +1,9 @@
+Wed Jul 16 14:57:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (CommandRollout): only save rollout into movelist, if
+	this is a rollout of a move!
+	(bug #4313 reported by Ian Shaw)
+
 Wed Jul 16 12:21:20 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Change rollouts routines to accept a progress callback instead

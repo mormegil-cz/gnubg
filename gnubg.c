@@ -3999,7 +3999,6 @@ CommandRollout( char *sz ) {
 	apCubeDecTop[ i ] = &false;
       }
 
-      
       RolloutProgressStart( &ci, c, aars, &rcRollout, asz, &p );
 
       if( ( cGames = 
@@ -4015,38 +4014,42 @@ CommandRollout( char *sz ) {
 
       /* save in current movelist */
 
-      for (i = 0; i < c; ++i) {
-	
-	move *pm = apMoves[ i ];
-	/* it was the =1 =2 notation */
-
-	cubeinfo cix;
-
-	memcpy( &cix, &ci, sizeof( cubeinfo ) );
-	cix.fMove = ! cix.fMove;
-
-	/* Score for move:
-	   rScore is the primary score (cubeful/cubeless)
-	   rScore2 is the secondary score (cubeless) */
-            
-	if ( pm->esMove.rc.fCubeful ) {
-	  if ( cix.nMatchTo )
-	    pm->rScore = 
-	      mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &cix );
-	  else
-	    pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
-	}
-	else
-	  pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
-            
-	pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
-
+      if ( fOpponent ) {
+        for (i = 0; i < c; ++i) {
+          
+          move *pm = apMoves[ i ];
+          /* it was the =1 =2 notation */
+          
+          cubeinfo cix;
+          
+          memcpy( &cix, &ci, sizeof( cubeinfo ) );
+          cix.fMove = ! cix.fMove;
+          
+          /* Score for move:
+             rScore is the primary score (cubeful/cubeless)
+             rScore2 is the secondary score (cubeless) */
+          
+          if ( pm->esMove.rc.fCubeful ) {
+            if ( cix.nMatchTo )
+              pm->rScore = 
+                mwc2eq ( pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ], &cix );
+            else
+              pm->rScore = pm->arEvalMove[ OUTPUT_CUBEFUL_EQUITY ];
+          }
+          else
+            pm->rScore = pm->arEvalMove[ OUTPUT_EQUITY ];
+          
+          pm->rScore2 = pm->arEvalMove[ OUTPUT_EQUITY ];
+          
+        }
+        
+        /* bring up Hint-dialog with chequerplay rollout */
+        CommandHint( NULL );
+      
       }
-    
-    }
 
-    /* bring up Hint-dialog with chequerplay rollout */
-    CommandHint( NULL );
+
+    }
 
 }
 
