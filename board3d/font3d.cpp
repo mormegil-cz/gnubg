@@ -21,23 +21,22 @@
 * $Id$
 */
 
-#include "../config.h"
-
-/* Duplicate definition of base_unit as including inc3d.h caused problems */
-#define base_unit .05f
+#include "config.h"
 
 #if HAVE_FTGL
 
 #include "FTGLPolygonFont.h"
 #include "FTGLOutlineFont.h"
 #include "FTFont.h"
+#include "inc3d.h"
 
-/* Avoid FTGLOutlineFont::render() as expensive to call repeatedly */
+/* Avoid FTGLOutlineFont::Render() as expensive to call repeatedly */
 class MyOutlineFont : public FTGLOutlineFont
 {
 public:
-	MyOutlineFont( const unsigned char *pBufferBytes, size_t bufferSizeInBytes) :
+	MyOutlineFont(const unsigned char *pBufferBytes, size_t bufferSizeInBytes) :
 		FTGLOutlineFont(pBufferBytes, bufferSizeInBytes) {}
+
 	void render(const char* string) {FTFont::Render(string);}
 };
 
@@ -99,33 +98,31 @@ private:
 	float size;
 };
 
-font *numberFont, *cubeFont;
-
-extern "C" void BuildFont()
+extern "C" void BuildFont(BoardData* bd)
 {
-	numberFont = new font(24, FONT_SIZE, auchLuxiSR, cbLuxiSR);
-	cubeFont = new font(48, CUBE_FONT_SIZE, auchLuxiRB, cbLuxiRB);
+	bd->numberFont = new font(24, FONT_SIZE, auchLuxiSR, cbLuxiSR);
+	bd->cubeFont = new font(48, CUBE_FONT_SIZE, auchLuxiRB, cbLuxiRB);
 }
 
-extern "C" void KillFont()
+extern "C" void KillFont(BoardData* bd)
 {
-	delete numberFont;
-	delete cubeFont;
+	delete (font*)bd->numberFont;
+	delete (font*)bd->cubeFont;
 }
 
-extern "C" float getFontHeight()
+extern "C" float getFontHeight(BoardData* bd)
 {
-	return numberFont->getHeight();
+	return ((font*)bd->numberFont)->getHeight();
 }
 
-extern "C" void glPrintPointNumbers(const char *text, int mode)
+extern "C" void glPrintPointNumbers(BoardData* bd, const char *text, int mode)
 {
-	numberFont->printHorAlign(text, mode);
+	((font*)bd->numberFont)->printHorAlign(text, mode);
 }
 
-extern "C" void glPrintCube(const char *text, int mode)
+extern "C" void glPrintCube(BoardData* bd, const char *text, int mode)
 {
-	cubeFont->printHorVertAlign(text, mode);
+	((font*)bd->cubeFont)->printHorVertAlign(text, mode);
 }
 
 #else
@@ -134,7 +131,7 @@ extern "C" void glPrintCube(const char *text, int mode)
 #include <GL/glut.h>
 
 extern "C" void KillFont() {}
-extern "C" float getFontHeight(){return base_unit;}
+extern "C" float getFontHeight() {return base_unit;}
 extern "C" void BuildFont(){}
 
 float getTextLen(const char* text)
@@ -164,12 +161,12 @@ void glutPrint(const char *text, float fontSize)
 
 extern "C" void glPrintPointNumbers(const char *text, int mode)
 {
-  glutPrint(text, base_unit / 100);
+	glutPrint(text, base_unit / 100);
 }
 
 extern "C" void glPrintCube(const char *text, int mode)
 {
-  glutPrint(text, base_unit / 80);
+	glutPrint(text, base_unit / 80);
 }
 
 #endif

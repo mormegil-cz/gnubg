@@ -785,6 +785,8 @@ static moverecord *GameListLookupMove( int i ) {
 
 static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
 			       GdkEventButton *pev, gpointer p ) {
+
+	BoardData *bd = BOARD( pwBoard )->board_data;
     gamelistrow *pglr;
     moverecord *pmr, *pmrPrev = NULL;
     list *pl;
@@ -827,21 +829,18 @@ static void GameListSelectRow( GtkCList *pcl, gint y, gint x,
     CalculateBoard();
 
     if ( pmr && pmr->mt == MOVE_NORMAL ) {
-       /* roll dice */
-       ms.gs = GAME_PLAYING;
-       ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
-       ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
-
+		/* roll dice */
+		ms.gs = GAME_PLAYING;
+		ms.anDice[ 0 ] = pmr->n.anRoll[ 0 ];
+		ms.anDice[ 1 ] = pmr->n.anRoll[ 1 ];
+   }
 #if USE_BOARD3D
-	/* If in 3d mode don't roll the dice */
-    if (rdAppearance.fDisplayType == DT_3D)
-	{
-		BoardData *bd = BOARD( pwBoard )->board_data;
-		bd->dice[0]=ms.anDice[ 0 ];
-		bd->dice[1]=ms.anDice[ 1 ];
+	if (rdAppearance.fDisplayType == DT_3D)
+	{	/* Make sure dice are shown (and not rolled) */
+		bd->diceShown = DICE_ON_BOARD;
+		bd->diceRoll[0] = !ms.anDice[0];
 	}
 #endif
-   }
 
     UpdateSetting( &ms.nCube );
     UpdateSetting( &ms.fCubeOwner );
@@ -2524,7 +2523,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	return FALSE;
 
 #if USE_BOARD3D
-	/* Initialize gtkglext */
+	/* Initialize openGL widget */
 	InitGTK3d(argc, argv);
 #endif
     
@@ -7447,17 +7446,20 @@ extern void GTKSet( void *p ) {
         }
     } else if( p == &fGUIDiceArea ) {
     
-	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
-	    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !fGUIDiceArea )
-		gtk_widget_hide( bd->dice_area );
-	    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
-		gtk_widget_show_all( bd->dice_area );
-
+	if( GTK_WIDGET_REALIZED( pwBoard ) )
+	{
 #if USE_BOARD3D
-	/* If in 3d mode may need to update sizes */
-    if (rdAppearance.fDisplayType == DT_3D)
-		SetupViewingVolume3d(bd);
+		/* If in 3d mode may need to update sizes */
+		if (rdAppearance.fDisplayType == DT_3D)
+			SetupViewingVolume3d(bd);
+		else
 #endif
+		{
+			if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !fGUIDiceArea )
+				gtk_widget_hide( bd->dice_area );
+			else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
+				gtk_widget_show_all( bd->dice_area );
+		}
 	}
     } else if( p == &fGUIShowIDs ) {
     

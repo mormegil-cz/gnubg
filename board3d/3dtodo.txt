@@ -1,66 +1,55 @@
-
 Todo
 ====
 
 Display settings
 ----------------
-* Add 3d preview window
-	+ Make sure switching from 2d/3d option works ok
-	+ Look at theWidget variable - problems/remove?
+* Get all options working...
+
+* Add material settings to appearnce dialog (see selmat.c)
+	+ Save/restore in designs
+	+ Display texture preview in a small box/rectangle
+* Store availiable textures in a text file or the xml file
+	+ Show list of available textures in drop-down
++ Move texture location from data directory to boards or boards/3d or boards/textures
+	+ Add them to cvs (as binary files)
++ Remove testgtkboard.c file from lib build (and cvs)
+* Only enable 2d/3d skin options when selected
+* Move non-skin settings to new display option page
 
 Bugs
 ====
 
-* Play 2 moves each, go back to your last move in game record window, then resign the game
- -> strange piece movement before resignation.
-	+ Doesn't work in 2d or 3d view
-	
-* 2d view: resign game, new game starts and resignation cube still visible.
-	+ Now switch to 3d view and sometimes hangs... or "no dice?" message
+* Switch to 2d view - couple of gtk errors...
 
-+Both go wrong with BOARD3D not defined
+* Show colour selection box in appearances, strange (gtk) error on settings exit
+	+ General delete case...?
+
+* 2+32 draw wrongly on cube after several changes
+	+ Not sure when happens... (still a problem?)
 
 Other things
 ============
 
-Tidy files
-	Put animation effects in misc3d.c to a new file/check through files
-		+ Add stuff in widget.c too (or put animation stuff here)
-	Remove test files from lib build (testgtkboard.c)
-		+ Remove initialization code (not needed from lib) - when in settings
-	Sort out dice_roll/dice/dice_opponent rubbish
-		+ No dice showing/dice below board or on either side
-
-Accelerated check
-	Add proper accelerated check under windows
-	Add check for unaccellerated graphics under linux
-		+ build/use very simple example to test
-
 Add tooltips for new options
+
+Add gtk 1.3 option (via other gtk widget)
+	+ Check compiles on windows
+		* Check running on linux box with BOARD3D set
+Add check for unaccellerated graphics under linux
+	+ use glX functions
 
 ----------------------------------------------------------
 
 Add a few preset light positions
 	i.e. left of board, top of board, right of board, centre of board.
-
-Move texture location from data directory to boards or boards/3d or boards/textures
-	Add them to cvs (as binary files)
-
-----------------------------------------------------------
-
-export position png - render 3d board to file?
-Separate dice animation speed setting?
-Add gtk 1.3 option (via other gtk widget)
-	+ Test ok
-Blink move animatation - useful?
+On close, remap background to a better shape?
+export position png - and any other place that uses rendered board
 FTGL uses C++
-Flag still waves if settings shown when resigning
-Fails to load (run) on my windows 98 box - freetype problem?
 
 Remove any build warnings
 Remove any g_prints/debug code
-Check gnubg builds and runs without BOARD3D defined
-
+Check builds and runs without BOARD3D defined
+Remove BUILDING_LIB #define's/code
 
 Skin help
 =========

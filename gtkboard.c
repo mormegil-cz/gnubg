@@ -204,10 +204,8 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
 	SwapSides( anBoard );
     anOff[ 0 ] = -bd->points[ 27 ];
     anOff[ 1 ] = bd->points[ 26 ];
-    anDice[ 0 ] = bd->colour == bd->turn ? bd->dice[ 0 ] :
-	bd->dice_opponent[ 0 ];
-    anDice[ 1 ] = bd->colour == bd->turn ? bd->dice[ 1 ] :
-	bd->dice_opponent[ 1 ];
+    anDice[ 0 ] = bd->diceRoll[ 0 ];
+    anDice[ 1 ] = bd->diceRoll[ 1 ];
     anDicePosition[ 0 ][ 0 ] = bd->x_dice[ 0 ];
     anDicePosition[ 0 ][ 1 ] = bd->y_dice[ 0 ];
     anDicePosition[ 1 ][ 0 ] = bd->x_dice[ 1 ];
@@ -430,8 +428,7 @@ static void update_match_id( BoardData *bd ) {
     fCubeOwner = 0;
 
   gtk_entry_set_text( GTK_ENTRY( bd->match_id ), 
-                      MatchID( ( bd->turn == 1 ) ? bd->dice :
-                               bd->dice_opponent,
+                      MatchID( bd->diceRoll,
                                ms.fTurn,
                                ms.fResigned,
                                ms.fDoubled,
@@ -525,9 +522,9 @@ int update_move(BoardData *bd)
             }
     }
 
-    gtk_widget_set_state( bd->move, fIncomplete ? GTK_STATE_ACTIVE :
+    gtk_widget_set_state( bd->wmove, fIncomplete ? GTK_STATE_ACTIVE :
 			  GTK_STATE_NORMAL );
-    gtk_label_set_text( GTK_LABEL( bd->move ), move );
+    gtk_label_set_text( GTK_LABEL( bd->wmove ), move );
 
     return fIllegal ? -1 : 0;
 }
@@ -677,16 +674,16 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 	/* current pip count */
 	CurrentPipCount( bd, anCurPipCount );
 
-	if ( bd->dice[0] == bd->dice[1] ) {
+	if ( bd->diceRoll[0] == bd->diceRoll[1] ) {
 	/* double roll: up to 4 possibilities to move, but only in multiples of dice[0] */
 		for ( i = 0; i <= 3; ++i ) {
-			if ( ( (i + 1) * bd->dice[0] > anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips )	/* no moves left*/
+			if ( ( (i + 1) * bd->diceRoll[0] > anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips )	/* no moves left*/
 			     || ( i && bd->points[ bar ] ) )		/* moving with chequer just entered not allowed if more chequers on the bar */
 				break;
 			iDestLegal = TRUE;
 			if ( !i || iCanMove & ( 1 << ( i - 1 ) ) ) {
 			/* only if moving first chequer or if last part-move succeeded */
-				iDestPt = bd->drag_point - bd->dice[0] * ( i + 1 ) * bd->drag_colour;
+				iDestPt = bd->drag_point - bd->diceRoll[0] * ( i + 1 ) * bd->drag_colour;
 				if( ( iDestPt <= 0 ) || ( iDestPt >= 25 ) ) {
 				/* bearing off */
 					/* all chequers in home board? */
@@ -707,13 +704,13 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 						if ( iCanMove ) {
 						/* prevent bearoff in more than 1 move if there are still chequers on points bigger than destination of the part-move before */
 							if ( bd->drag_colour > 0 ) {
-								if ( ! PointsAreEmpty( bd, bd->drag_point - i * bd->dice[0] + 1, 6, bd->drag_colour ) ) {
+								if ( ! PointsAreEmpty( bd, bd->drag_point - i * bd->diceRoll[0] + 1, 6, bd->drag_colour ) ) {
 									iDestPt = -1;
 									iDestLegal = FALSE;
 								}
 							}
 							else {
-								if ( ! PointsAreEmpty( bd, bd->drag_point + i * bd->dice[0] - 1, 19, bd->drag_colour ) ) {
+								if ( ! PointsAreEmpty( bd, bd->drag_point + i * bd->diceRoll[0] - 1, 19, bd->drag_colour ) ) {
 									iDestPt = -1;
 									iDestLegal = FALSE;
 								}
@@ -771,12 +768,12 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 	/* normal roll: up to 3 possibilities */
 		int iUnusedPips = anCurPipCount[ bd->drag_colour == -1 ? 0 : 1 ] - anPipsBeforeMove[ bd->drag_colour == -1 ? 0 : 1 ] + bd->move_list.cMaxPips;
 		for ( i = 0; i <= 1; ++i ) {
-			if ( ( iUnusedPips < bd->dice[i] ) ||		/* not possible to move with this die (anymore) */
-			     ( ( bd->valid_move ) && ( bd->dice[i] == ( bd->valid_move->anMove[0] - bd->valid_move->anMove[1] ) ) ) ||		/* this die has been used already */
-			     ( ( bd->valid_move ) && ( bd->valid_move->cMoves > 1 ) )		/* move already completed */ /* && ( bd->dice[i] != iUnusedPips ) && ( iUnusedPips != bd->move_list.cMaxPips ) */ )
+			if ( ( iUnusedPips < bd->diceRoll[i] ) ||		/* not possible to move with this die (anymore) */
+			     ( ( bd->valid_move ) && ( bd->diceRoll[i] == ( bd->valid_move->anMove[0] - bd->valid_move->anMove[1] ) ) ) ||		/* this die has been used already */
+			     ( ( bd->valid_move ) && ( bd->valid_move->cMoves > 1 ) )		/* move already completed */ /* && ( bd->diceRoll[i] != iUnusedPips ) && ( iUnusedPips != bd->move_list.cMaxPips ) */ )
 				continue;
 			iDestLegal = TRUE;
-			iDestPt = bd->drag_point - bd->dice[i] * bd->drag_colour;
+			iDestPt = bd->drag_point - bd->diceRoll[i] * bd->drag_colour;
 			if( ( iDestPt <= 0 ) || ( iDestPt >= 25 ) ) {
 			/* bearing off */
 				/* all chequers in home board? */
@@ -840,7 +837,7 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 		     ( ! bd->points[ bar ] ) )			/* and don't have any more chequers on the bar */
 		{
 			iDestLegal = TRUE;
-			iDestPt = bd->drag_point - ( bd->dice[0] + bd->dice[1] ) * bd->drag_colour;
+			iDestPt = bd->drag_point - ( bd->diceRoll[0] + bd->diceRoll[1] ) * bd->drag_colour;
 			if( ( iDestPt <= 0 ) || ( iDestPt >= 25 ) ) {
 			/* bearing off */
 				/* all chequers in home board? */
@@ -860,13 +857,13 @@ gboolean LegalDestPoints( BoardData *bd, int iDestPoints[4] ) {
 				/* bearing off with roll bigger than point */
 					/* prevent bearoff in more than 1 move if there are still chequers on points bigger than destination of first half-move */
 					if ( bd->drag_colour > 0 ) {
-						if ( ! PointsAreEmpty( bd, bd->drag_point - ( bd->dice[0] < bd->dice[1] ? bd->dice[0] : bd->dice[1] ) + 1, 6, bd->drag_colour ) ) {
+						if ( ! PointsAreEmpty( bd, bd->drag_point - ( bd->diceRoll[0] < bd->diceRoll[1] ? bd->diceRoll[0] : bd->diceRoll[1] ) + 1, 6, bd->drag_colour ) ) {
 							iDestPt = -1;
 							iDestLegal = FALSE;
 						}
 					}
 					else {
-						if ( ! PointsAreEmpty( bd, bd->drag_point + ( bd->dice[0] < bd->dice[1] ? bd->dice[0] : bd->dice[1] ) - 1, 19, bd->drag_colour ) ) {
+						if ( ! PointsAreEmpty( bd, bd->drag_point + ( bd->diceRoll[0] < bd->diceRoll[1] ? bd->diceRoll[0] : bd->diceRoll[1] ) - 1, 19, bd->drag_colour ) ) {
 							iDestPt = -1;
 							iDestLegal = FALSE;
 						}
@@ -1485,6 +1482,10 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 
 		/* -2 to avoid motion causing immediate edit */
 		bd->drag_point = -2;
+		/* Don't roll dice */
+		bd->diceShown = DICE_ON_BOARD;
+		bd->diceRoll[0] = 0;
+
 		GTKSetDice( NULL, 0, NULL );
 		return TRUE;
 	}
@@ -1527,7 +1528,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 
 	case POINT_DICE:
 #if USE_BOARD3D
-		if (rdAppearance.fDisplayType == DT_3D && bd->dice[0] <= 0)
+		if (rdAppearance.fDisplayType == DT_3D && bd->diceShown == DICE_BELOW_BOARD)
 		{	/* Click on dice (below board) - shake */
 			bd->drag_point = -1;
 			UserCommand("roll");
@@ -1540,22 +1541,16 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 			Confirm(bd);
 		}
 	    else 
-		{
-			/* Other buttons on dice swaps positions. */
-			int n = bd->dice[ 0 ];
-			bd->dice[ 0 ] = bd->dice[ 1 ];
-			bd->dice[ 1 ] = n;
-			
-			n = bd->dice_opponent[ 0 ];
-			bd->dice_opponent[ 0 ] = bd->dice_opponent[ 1 ];
-			bd->dice_opponent[ 1 ] = n;
+		{	/* Other buttons on dice swaps positions. */
+			swap(bd->diceRoll, bd->diceRoll + 1);
+
 			/* Display swapped dice */
 #if USE_BOARD3D
-		if (rdAppearance.fDisplayType == DT_3D)
-			gtk_widget_queue_draw(board);
-		else
+			if (rdAppearance.fDisplayType == DT_3D)
+				gtk_widget_queue_draw(board);
+			else
 #endif
-			board_invalidate_dice( bd );
+				board_invalidate_dice( bd );
 	    }
 	    return TRUE;
 
@@ -1565,7 +1560,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 	   rolling the dice if bottom player clicks the right side of
 	   the board, or the top player clicks the left side of the
 	   board (his/her right side). */
-		if (bd->dice[ 0 ] <= 0 &&
+		if (bd->diceShown == DICE_BELOW_BOARD &&
 			((bd->drag_point == POINT_RIGHT && bd->turn == 1) ||
 			(bd->drag_point == POINT_LEFT && bd->turn == -1)))
 		{
@@ -1581,7 +1576,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 	default:	/* Points */
 		/* Don't let them move chequers unless the dice have been
 		   rolled, or they're editing the board. */
-		if (bd->dice[0] <= 0 && !editing)
+		if (bd->diceShown != DICE_ON_BOARD && !editing)
 		{
 			board_beep(bd);
 			bd->drag_point = -1;
@@ -1613,8 +1608,8 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
           bd->drag_colour = bd->turn;
           bd->drag_point = -1;
           
-          if (ForcedMove(anBoard, bd->dice) ||
-               GreadyBearoff(anBoard, bd->dice)) 
+          if (ForcedMove(anBoard, bd->diceRoll) ||
+               GreadyBearoff(anBoard, bd->diceRoll)) 
 		  {
             /* we've found a move: update board  */
             if ( UpdateMove( bd, anBoard ) ) {
@@ -1643,7 +1638,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 			bd->drag_colour = bd->turn;
 			bar = bd->drag_colour == bd->colour ? 25 - bd->bar : bd->bar;
 			
-			if( bd->dice[ 0 ] == bd->dice[ 1 ] ) {
+			if( bd->diceRoll[ 0 ] == bd->diceRoll[ 1 ] ) {
 			/* Rolled a double; find the two closest chequers to make
 			   the point. */
 			int c = 0;
@@ -1652,7 +1647,7 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 			
 			for( i = 0; i < 4 && c < 2; i++ )
 			{
-				int j = bd->drag_point + bd->dice[ 0 ] * bd->drag_colour *
+				int j = bd->drag_point + bd->diceRoll[ 0 ] * bd->drag_colour *
 				( i + 1 );
 
 				if (j < 0 || j > 25)
@@ -1674,8 +1669,8 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 			{
 				/* Rolled a non-double; take one chequer from each point
 				   indicated by the dice. */
-				n[ 0 ] = bd->drag_point + bd->dice[ 0 ] * bd->drag_colour;
-				n[ 1 ] = bd->drag_point + bd->dice[ 1 ] * bd->drag_colour;
+				n[ 0 ] = bd->drag_point + bd->diceRoll[ 0 ] * bd->drag_colour;
+				n[ 1 ] = bd->drag_point + bd->diceRoll[ 1 ] * bd->drag_colour;
 			}
 			
 			if (n[ 0 ] >= 0 && n[ 0 ] <= 25 && n[ 1 ] >= 0 && n[ 1 ] <= 25 &&
@@ -1809,8 +1804,8 @@ gboolean button_release_event(GtkWidget *board, GdkEventButton *event, BoardData
 		}
 		else
 		{
-			gint left = bd->dice[0];
-			gint right = bd->dice[1];
+			gint left = bd->diceRoll[0];
+			gint right = bd->diceRoll[1];
 
 			/* Button 1 tries the left roll first.
 			   other buttons try the right dice roll first */
@@ -1893,13 +1888,9 @@ gboolean motion_notify_event(GtkWidget *board, GdkEventMotion *event, BoardData*
 #endif
 
 	/* In quick editing mode, dragging across points */
-	if (editing && !(event->state & GDK_CONTROL_MASK))
+	if (editing && !(event->state & GDK_CONTROL_MASK) && bd->drag_point == -1)
 	{
-		/* Avoid edit on dialog clicks */
-		if (bd->drag_point != -2)
-			board_quick_edit(board, bd, x, y, 1);
-
-	    bd->drag_point = -1;
+		board_quick_edit(board, bd, x, y, 1);
 	    return TRUE;
 	}
 
@@ -2000,7 +1991,47 @@ score_changed( GtkAdjustment *adj, BoardData *bd ) {
 
 }
 
+void RollDice2d(BoardData* bd)
+{
+	int iAttempt = 0, iPoint, x, y, cx, cy;
 
+	bd->x_dice[ 0 ] = RAND % 21 + 13;
+	bd->x_dice[ 1 ] = RAND % ( 34 - bd->x_dice[ 0 ] ) +
+	bd->x_dice[ 0 ] + 8;
+
+	if( bd->colour == bd->turn )
+	{
+		bd->x_dice[ 0 ] += 48;
+		bd->x_dice[ 1 ] += 48;
+	}
+
+	bd->y_dice[ 0 ] = RAND % 10 + 28;
+	bd->y_dice[ 1 ] = RAND % 10 + 28;
+
+	if( rdAppearance.nSize > 0 )
+	{
+		for( iPoint = 1; iPoint <= 24; iPoint++ )
+		{
+			if( abs( bd->points[ iPoint ] ) >= 5 )
+			{
+				point_area( bd, iPoint, &x, &y, &cx, &cy );
+				x /= rdAppearance.nSize;
+				y /= rdAppearance.nSize;
+				cx /= rdAppearance.nSize;
+				cy /= rdAppearance.nSize;
+				
+				if( ( intersects( bd->x_dice[ 0 ], bd->y_dice[ 0 ],
+						  7, 7, x, y, cx, cy ) ||
+					  intersects( bd->x_dice[ 1 ], bd->y_dice[ 1 ],
+						  7, 7, x, y, cx, cy ) ) &&
+					iAttempt++ < 0x80 )
+				{	/* Try placing again */
+					RollDice2d(bd);
+				}
+			}
+		}
+	}
+}
 
 static gint board_set( Board *board, const gchar *board_text,
                        const gint resigned, const gint cube_use ) {
@@ -2014,31 +2045,31 @@ static gint board_set( Board *board, const gchar *board_text,
     int old_xResign, old_yResign;
     int old_turn;
 	int redrawNeeded = 0;
+	int dummy;
     
 #if __GNUC__
     int *match_settings[] = { &bd->match_to, &bd->score,
 			      &bd->score_opponent };
-    int *game_settings[] = { &bd->turn, bd->dice, bd->dice + 1,
-		       bd->dice_opponent, bd->dice_opponent + 1,
+    int *game_settings[] = { &bd->turn, 
+		       bd->diceRoll, bd->diceRoll + 1, &dummy, &dummy,
 		       &bd->cube, &bd->can_double, &bd->opponent_can_double,
 		       &bd->doubled, &bd->colour, &bd->direction,
 		       &bd->home, &bd->bar, &bd->off, &bd->off_opponent,
 		       &bd->on_bar, &bd->on_bar_opponent, &bd->to_move,
 		       &bd->forced, &bd->crawford_game, &bd->redoubles };
-    int old_dice[] = { bd->dice[ 0 ], bd->dice[ 1 ],
-			bd->dice_opponent[ 0 ], bd->dice_opponent[ 1 ] };
+    int old_dice[] = {bd->diceRoll[ 0 ], bd->diceRoll[ 1 ]};
 #else
-    int *match_settings[ 3 ], *game_settings[ 21 ], old_dice[ 4 ];
+    int *match_settings[ 3 ], *game_settings[ 21 ], old_dice[ 2 ];
 
     match_settings[ 0 ] = &bd->match_to;
     match_settings[ 1 ] = &bd->score;
     match_settings[ 2 ] = &bd->score_opponent;
 
     game_settings[ 0 ] = &bd->turn;
-    game_settings[ 1 ] = bd->dice;
-    game_settings[ 2 ] = bd->dice + 1;
-    game_settings[ 3 ] = bd->dice_opponent;
-    game_settings[ 4 ] = bd->dice_opponent + 1;
+    game_settings[ 1 ] = bd->diceRoll;
+    game_settings[ 2 ] = bd->diceRoll + 1;
+    game_settings[ 3 ] = &dummy;
+    game_settings[ 4 ] = &dummy;
     game_settings[ 5 ] = &bd->cube;
     game_settings[ 6 ] = &bd->can_double;
     game_settings[ 7 ] = &bd->opponent_can_double;
@@ -2056,10 +2087,8 @@ static gint board_set( Board *board, const gchar *board_text,
     game_settings[ 19 ] = &bd->crawford_game;
     game_settings[ 20 ] = &bd->redoubles;
 
-    old_dice[ 0 ] = bd->dice[ 0 ];
-    old_dice[ 1 ] = bd->dice[ 1 ];
-    old_dice[ 2 ] = bd->dice_opponent[ 0 ];
-    old_dice[ 3 ] = bd->dice_opponent[ 1 ];
+    old_dice[ 0 ] = bd->diceRoll[ 0 ];
+    old_dice[ 1 ] = bd->diceRoll[ 1 ];
 #endif
     old_turn = bd->turn;
     
@@ -2180,104 +2209,92 @@ static gint board_set( Board *board, const gchar *board_text,
     
     update_match_id ( bd );
     update_move( bd );
-
-    if( bd->dice[ 0 ] || bd->dice_opponent[ 0 ] ) {
-	GenerateMoves( &bd->move_list, bd->old_board,
-		       bd->dice[ 0 ] | bd->dice_opponent[ 0 ],
-		       bd->dice[ 1 ] | bd->dice_opponent[ 1 ], TRUE );
-
-	/* bd->move_list contains pointers to static data, so we need to
-	   copy the actual moves into private storage. */
-	if( bd->all_moves )
-	    free( bd->all_moves );
-	bd->all_moves = malloc( bd->move_list.cMoves * sizeof( move ) );
-	bd->move_list.amMoves = memcpy( bd->all_moves, bd->move_list.amMoves,
-				 bd->move_list.cMoves * sizeof( move ) );
-	bd->valid_move = NULL;
-    }
 	
-    if( fGUIHighDieFirst ) {
-	if( bd->dice[ 0 ] < bd->dice[ 1 ] )
-	    swap( bd->dice, bd->dice + 1 );
-	
-	if( bd->dice_opponent[ 0 ] < bd->dice_opponent[ 1 ] )
-	    swap( bd->dice_opponent, bd->dice_opponent + 1 );
-    }
-    
-    if( bd->dice[ 0 ] != old_dice[ 0 ] ||
-	bd->dice[ 1 ] != old_dice[ 1 ] ||
-	bd->dice_opponent[ 0 ] != old_dice[ 2 ] ||
-	bd->dice_opponent[ 1 ] != old_dice[ 3 ] ) {
-	redrawNeeded = 1;
-	if( bd->x_dice[ 0 ] > 0 ) {
-	    /* dice were visible before; now they're not */
-	    int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
-	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
-            if ( rdAppearance.nSize > 0 ) {
-              board_invalidate_rect( bd->drawing_area,
-                                     ax[ 0 ] * rdAppearance.nSize,
-                                     bd->y_dice[ 0 ] * rdAppearance.nSize,
-                                     7 * rdAppearance.nSize, 
-                                     7 * rdAppearance.nSize, bd );
-              board_invalidate_rect( bd->drawing_area,
-                                     ax[ 1 ] * rdAppearance.nSize,
-                                     bd->y_dice[ 1 ] * rdAppearance.nSize,
-                                     7 * rdAppearance.nSize, 
-                                     7 * rdAppearance.nSize, bd );
-            }
-	}
+    if (fGUIHighDieFirst && bd->diceRoll[ 0 ] < bd->diceRoll[ 1 ] )
+	    swap( bd->diceRoll, bd->diceRoll + 1 );
 
-	if( ( bd->turn == bd->colour ? bd->dice[ 0 ] :
-	       bd->dice_opponent[ 0 ] ) <= 0 )
-	    /* dice have not been rolled */
-	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
-	else {
-	    /* FIXME different dice for first turn */
-	    int iAttempt = 0, iPoint, x, y, cx, cy;
+    if (bd->diceRoll[0] != old_dice[0] ||
+		bd->diceRoll[1] != old_dice[1] )
+	{
+		redrawNeeded = 1;
 
-	cocked:
-	    bd->x_dice[ 0 ] = RAND % 21 + 13;
-	    bd->x_dice[ 1 ] = RAND % ( 34 - bd->x_dice[ 0 ] ) +
-		bd->x_dice[ 0 ] + 8;
-	    
-	    if( bd->colour == bd->turn ) {
-		bd->x_dice[ 0 ] += 48;
-		bd->x_dice[ 1 ] += 48;
-	    }
-	    
-	    bd->y_dice[ 0 ] = RAND % 10 + 28;
-	    bd->y_dice[ 1 ] = RAND % 10 + 28;
+		if( bd->x_dice[ 0 ] > 0
+#if USE_BOARD3D
+			 && rdAppearance.fDisplayType == DT_2D
+#endif
+			)
+		{
+			/* dice were visible before; now they're not */
+			int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
+			bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
+				if ( rdAppearance.nSize > 0 ) {
+				  board_invalidate_rect( bd->drawing_area,
+										 ax[ 0 ] * rdAppearance.nSize,
+										 bd->y_dice[ 0 ] * rdAppearance.nSize,
+										 7 * rdAppearance.nSize, 
+										 7 * rdAppearance.nSize, bd );
+				  board_invalidate_rect( bd->drawing_area,
+										 ax[ 1 ] * rdAppearance.nSize,
+										 bd->y_dice[ 1 ] * rdAppearance.nSize,
+										 7 * rdAppearance.nSize, 
+										 7 * rdAppearance.nSize, bd );
+				}
+		}
 
-	    if( rdAppearance.nSize > 0 ) {
-		for( iPoint = 1; iPoint <= 24; iPoint++ )
-		    if( abs( bd->points[ iPoint ] ) >= 5 ) {
-			point_area( bd, iPoint, &x, &y, &cx, &cy );
-			x /= rdAppearance.nSize;
-			y /= rdAppearance.nSize;
-			cx /= rdAppearance.nSize;
-			cy /= rdAppearance.nSize;
-			
-			if( ( intersects( bd->x_dice[ 0 ], bd->y_dice[ 0 ],
-					  7, 7, x, y, cx, cy ) ||
-			      intersects( bd->x_dice[ 1 ], bd->y_dice[ 1 ],
-					  7, 7, x, y, cx, cy ) ) &&
-			    iAttempt++ < 0x80 )
-			    goto cocked;
-		    }
-	    }
+		if (bd->diceRoll[0] <= 0)
+		{	/* Dice not on board */
+			bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10;
+
+			if (bd->diceRoll[ 0 ] == 0)
+			{
+				bd->diceShown = DICE_BELOW_BOARD;
+				/* Keep showing shaken values */
+				bd->diceRoll[ 0 ] = old_dice[ 0 ];
+				bd->diceRoll[ 1 ] = old_dice[ 1 ];
+			}
+			else
+				bd->diceShown = DICE_NOT_SHOWN;
+		}
+		else
+		{
 #if USE_BOARD3D
 			if (rdAppearance.fDisplayType == DT_3D)
 			{
 				/* Has been shaken, so roll dice (if not editing) */
-				if (old_dice[0] <= 0 && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->edit)))
+				if (bd->diceShown != DICE_ON_BOARD && !gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(bd->edit)))
 				{
+					bd->diceShown = DICE_ON_BOARD;
 					RollDice3d(bd);
 					redrawNeeded = 0;
 				}
+				else
+				{	/* Move dice to new position */
+					setDicePos(bd);
+				}
 			}
+			else
 #endif
-    }
+			{
+				RollDice2d(bd);
+			}
+			bd->diceShown = DICE_ON_BOARD;
+		}
 	}
+
+    if (bd->diceShown == DICE_ON_BOARD )
+	{
+		GenerateMoves( &bd->move_list, bd->old_board,
+				   bd->diceRoll[ 0 ], bd->diceRoll[ 1 ], TRUE );
+
+		/* bd->move_list contains pointers to static data, so we need to
+		   copy the actual moves into private storage. */
+		if( bd->all_moves )
+			free( bd->all_moves );
+		bd->all_moves = malloc( bd->move_list.cMoves * sizeof( move ) );
+		bd->move_list.amMoves = memcpy( bd->all_moves, bd->move_list.amMoves,
+					 bd->move_list.cMoves * sizeof( move ) );
+		bd->valid_move = NULL;
+    }
 
     if( rdAppearance.nSize <= 0 )
 	return 0;
@@ -2580,7 +2597,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
     int n;
     monitor m;
 	
-    if( animGUI == ANIMATE_NONE )
+    if (animGUI == ANIMATE_NONE || ms.fResigned)
 	return;
 
     animate_move_list = move;
@@ -2609,19 +2626,6 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 }
 }
 
-extern gint game_set_old_dice( Board *board, gint die0, gint die1 ) {
-
-    BoardData *pbd = board->board_data;
-    
-    pbd->dice_roll[ 0 ] = die0;
-    pbd->dice_roll[ 1 ] = die1;
-
-    if( fGUIHighDieFirst && pbd->dice_roll[ 0 ] < pbd->dice_roll[ 1 ] )
-	swap( pbd->dice_roll, pbd->dice_roll + 1 );
-    
-    return 0;
-}
-
 extern void board_set_playing( Board *board, gboolean f ) {
 
     BoardData *pbd = board->board_data;
@@ -2640,8 +2644,8 @@ static void update_buttons( BoardData *pbd ) {
 
     c = C_NONE;
 
-    if( !pbd->dice[ 0 ] )
-	c = C_ROLLDOUBLE;
+	if (pbd->diceShown == DICE_BELOW_BOARD )
+		c = C_ROLLDOUBLE;
 
     if( ms.fDoubled )
 	c = C_TAKEDROP;
@@ -2717,9 +2721,6 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
     if( die0 ) {
 	if( fGUIHighDieFirst && die0 < die1 )
 	    swap( &die0, &die1 );
-	
-	pbd->dice_roll[ 0 ] = die0;
-	pbd->dice_roll[ 1 ] = die1;
     }
 
     update_buttons( pbd );
@@ -3077,8 +3078,7 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
               if ( anScoreNew[ i ] > nMatchToNew )
                 anScoreNew[ i ] = 0;
           sz = g_strdup_printf( "set matchid %s", 
-                                MatchID( ( bd->turn == 1 ) ? bd->dice :
-                                         bd->dice_opponent,
+                                MatchID(bd->diceRoll,
                                          ms.fTurn,
                                          ms.fResigned,
                                          ms.fDoubled,
@@ -3206,14 +3206,14 @@ DrawDie( GdkDrawable *pd,
 
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
                              BoardData *bd ) {
-    
-    if( rdAppearance.nSize <= 0 || event->count || !bd->dice_roll[ 0 ] )
-	return TRUE;
+
+	if (rdAppearance.nSize <= 0 || event->count || bd->diceShown == DICE_NOT_SHOWN)
+		return TRUE;
 
     DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, rdAppearance.nSize, bd->gc_copy,
-             0, 0, bd->turn > 0, bd->dice_roll[ 0 ] );
+             0, 0, bd->turn > 0, bd->diceRoll[ 0 ] );
     DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, rdAppearance.nSize, bd->gc_copy,
-             8 * rdAppearance.nSize, 0, bd->turn > 0, bd->dice_roll[ 1 ] );
+             8 * rdAppearance.nSize, 0, bd->turn > 0, bd->diceRoll[ 1 ] );
     
     return TRUE;
 }
@@ -3394,7 +3394,7 @@ static void board_init( Board *board ) {
     bd->widget = GTK_WIDGET( board );
 	
     bd->drag_point = rdAppearance.nSize = -1;
-    bd->dice_roll[ 0 ] = bd->dice_roll[ 1 ] = 0;
+
     bd->crawford_game = FALSE;
     bd->playing = FALSE;
     bd->cube_use = TRUE;    
@@ -3620,7 +3620,7 @@ static void board_init( Board *board ) {
     gtk_container_add( GTK_CONTAINER( bd->stopparent ), bd->stop );
 
     gtk_signal_connect( GTK_OBJECT( bd->stop ), "clicked",
-			GTK_SIGNAL_FUNC( board_stop ), NULL );
+			GTK_SIGNAL_FUNC( board_stop ), bd);
 
     gtk_toolbar_append_widget ( GTK_TOOLBAR ( bd->toolbar ),
                                 bd->stopparent,
@@ -3647,7 +3647,7 @@ static void board_init( Board *board ) {
 #if USE_BOARD3D
 	/* 3d board drawing area */
 	CreateBoard3d(bd, &bd->drawing_area3d);
-	gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area3d );
+	gtk_container_add(GTK_CONTAINER(board), bd->drawing_area3d);
 #endif
 
     /* Position and match ID */
@@ -3841,9 +3841,9 @@ static void board_init( Board *board ) {
     /* move string */
 
     gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
-                         bd->move = gtk_label_new( NULL ),
+                         bd->wmove = gtk_label_new( NULL ),
                          FALSE, FALSE, 0 );
-    gtk_widget_set_name( bd->move, "move" );
+    gtk_widget_set_name( bd->wmove, "move" );
 
     /* match length */
 
@@ -4094,16 +4094,28 @@ extern GtkWidget *board_dice_widget( Board *board ) {
 }
 
 void InitBoardData()
-{	/* Initialize some settings on new game start */
+{	/* Initialize some BoardData settings on new game start */
 	BoardData* bd = BOARD(pwBoard)->board_data;
 
 	bd->doubled = 0;
+
+	/* Move cube back to center */
+	board_invalidate_cube(bd);
 	bd->cube = 0;
 	bd->cube_owner = 0;
-	bd->resigned = 0;
-	/* Set dice so roll works */
-	bd->dice_roll[0] = bd->dice_roll[1] = 1;
-	bd->dice[0] = bd->dice[1] = bd->dice_opponent[0] = bd->dice_opponent[1] = 0;
+
+	if (bd->resigned)
+	{
+#if USE_BOARD3D
+		if (rdAppearance.fDisplayType == DT_2D)
+#endif
+			board_invalidate_resign(bd);
+		bd->resigned = 0;
+	}
+	/* Set dice so 3d roll happens */
+g_print("Init data: dice roll ok?\n");
+	bd->diceShown = DICE_NOT_SHOWN;
+	bd->diceRoll[0] = bd->diceRoll[1] = -1;
 
 #if USE_BOARD3D
 	if (rdAppearance.fDisplayType == DT_3D)

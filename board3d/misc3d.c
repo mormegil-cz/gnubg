@@ -23,18 +23,32 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <memory.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include "inc3d.h"
 #include "shadow.h"
 #include "renderprefs.h"
+#include "sound.h"
+#ifdef BUILDING_LIB
+#include "backgammon.h"
+#endif
 
-extern void BuildFont();
-extern void setupFlag();
+double animStartTime = 0;
+int stopNextTime;
+int slide_move;
+extern int convert_point( int i, int player );
+
+#if !BUILDING_LIB
+#define gtk_main_quit() 0
+#define gtk_main() 0
+#endif
+
+extern void BuildFont(BoardData* bd);
+extern void setupFlag(BoardData* bd);
 extern void setupDicePaths(BoardData* bd, Path dicePaths[2]);
-extern void waveFlag(float wag);
-extern void SetTexture(BoardData *bd, Material* pMat, const char* filename);
+extern void waveFlag(BoardData* bd, float wag);
 
 /* Test function to show normal direction*/
 void CheckNormal()
@@ -60,8 +74,6 @@ void CheckNormal()
 	glEnd();
 }
 
-extern float (*light_position)[4];
-
 void SetupLight3d(BoardData * bd)
 {
 	/* Ugly - store shadow light position here... 
@@ -70,9 +82,9 @@ void SetupLight3d(BoardData * bd)
 	float al[4], dl[4], sl[4];
 
 	/* Shadow light position */
-	light_position = &lp;
+	bd->shadow_light_position = &lp;
 
-	memcpy(lp, rdAppearance.lightPos, sizeof (float[3]));
+	copyPoint(lp, rdAppearance.lightPos);
 	lp[3] = (float)(rdAppearance.lightType == LT_POSITIONAL);
 
 	/* If directioinal vector is from origin */
@@ -96,9 +108,10 @@ void SetupLight3d(BoardData * bd)
 	glLightfv(GL_LIGHT0, GL_SPECULAR, sl);
 }
 
-void InitGL()
+void InitGL(BoardData *bd)
 {
 	float gal[4];
+	/* Turn on light 0 */
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
 
@@ -109,9 +122,11 @@ void InitGL()
 	/* Local specular viewpoint */
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 
+	/* Default to <= depth testing */
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_DEPTH_TEST);
 
+	/* Back face culling */
 	glCullFace(GL_BACK);
 	glEnable(GL_CULL_FACE);
 
@@ -123,11 +138,13 @@ void InitGL()
 	/* Default blend function for alpha-blending */
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	BuildFont();
+	/* Generate normal co-ords for nurbs */
+	glEnable(GL_AUTO_NORMAL);
 
-	setupFlag();
-
-	shadowInit();
+	/* Setup some 3d things */
+	BuildFont(bd);
+	setupFlag(bd);
+	shadowInit(bd);
 }
 
 void setMaterial(Material* pMat)
@@ -173,7 +190,7 @@ int LoadTexture(Texture* texture, const char* filename)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, texture->width, texture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
 
-	free(bits);
+	free(bits);	/* Release loaded image */
 	return 1;
 }
 
@@ -330,43 +347,7 @@ void initDT(diceTest* dt, int x, int y, int z)
 	dt->side[2] = 2;
 	dt->side[3] = 4;
 
-	while (x--)
-	{
-		int temp = dt->top;
-		dt->top = dt->side[0];
-		dt->side[0] = dt->bottom;
-		dt->bottom = dt->side[2];
-		dt->side[2] = temp;
-	}
-	while (y--)
-	{
-		int temp = dt->top;
-		dt->top = dt->side[1];
-		dt->side[1] = dt->bottom;
-		dt->bottom = dt->side[3];
-		dt->side[3] = temp;
-	}
-	while (z--)
-	{
-		int temp = dt->side[0];
-		dt->side[0] = dt->side[3];
-		dt->side[3] = dt->side[2];
-		dt->side[2] = dt->side[1];
-		dt->side[1] = temp;
-	}
-}
-
-/* Cube dice has different number format */
-void initDTCube(diceTest* dt, int x, int y, int z)
-{
-	dt->top = 0;
-	dt->bottom = 5;
-
-	dt->side[0] = 3;
-	dt->side[1] = 1;
-	dt->side[2] = 2;
-	dt->side[3] = 4;
-
+	/* Simulate rotations to determine actually dice position */
 	while (x--)
 	{
 		int temp = dt->top;
@@ -748,12 +729,10 @@ void SetMovingPieceRotation(BoardData* bd, int pt)
 }
 
 void PlaceMovingPieceRotation(BoardData* bd, int dest, int src)
-{	/* Make sure rotation is the correct in new position */
+{	/* Make sure rotation is correct in new position */
 	bd->pieceRotation[src][abs(bd->points[src])] = bd->pieceRotation[dest][abs(bd->points[dest] - 1)];
 	bd->pieceRotation[dest][abs(bd->points[dest]) - 1] = bd->movingPieceRotation;
 }
-
-Path path, dicePaths[2];
 
 void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])
 {
@@ -768,18 +747,6 @@ void updateDicePos(Path* path, DiceRotation *diceRot, float dist, float pos[3])
 		diceRot->xRot = diceRot->yRot = 0;
 	}
 }
-
-#if BUILDING_LIB
-
-#include "../config.h"
-#include "../backgammon.h"
-#include "../renderprefs.h"
-#include "../sound.h"
-
-double animStartTime = 0;
-int stopNextTime;
-int slide_move;
-extern int convert_point( int i, int player );
 
 void SetupMove(BoardData* bd)
 {
@@ -796,8 +763,8 @@ void SetupMove(BoardData* bd)
 	if ((abs(bd->points[dest]) == 1) && (dir != SGN(bd->points[dest])))
 		destDepth--;
 
-	setupPath(bd, &path, &bd->rotateMovingPiece, fClockwise, target, abs(bd->points[target]) + 1, dest, destDepth);
-	copyPoint(bd->movingPos, path.pts[0]);
+	setupPath(bd, &bd->piecePath, &bd->rotateMovingPiece, fClockwise, target, abs(bd->points[target]) + 1, dest, destDepth);
+	copyPoint(bd->movingPos, bd->piecePath.pts[0]);
 
 	SetMovingPieceRotation(bd, target);
 
@@ -820,10 +787,10 @@ int idleAnimate(BoardData* bd)
 	if (bd->moving)
 	{
 		float *pRotate = 0;
-		if (bd->rotateMovingPiece != -1 && path.state == 2)
+		if (bd->rotateMovingPiece != -1 && bd->piecePath.state == 2)
 			pRotate = &bd->rotateMovingPiece;
 
-		if (!movePath(&path, animateDistance, pRotate, bd->movingPos))
+		if (!movePath(&bd->piecePath, animateDistance, pRotate, bd->movingPos))
 		{
 			int points[2][25];
 		    int moveStart = convert_point(animate_move_list[slide_move], animate_player);
@@ -867,12 +834,12 @@ int idleAnimate(BoardData* bd)
 
 	if (bd->shakingDice)
 	{
-		if (!finishedPath(&dicePaths[0]))
-			updateDicePos(&dicePaths[0], &bd->diceRotation[0], animateDistance / 2.0f, bd->diceMovingPos[0]);
-		if (!finishedPath(&dicePaths[1]))
-			updateDicePos(&dicePaths[1], &bd->diceRotation[1], animateDistance / 2.0f, bd->diceMovingPos[1]);
+		if (!finishedPath(&bd->dicePaths[0]))
+			updateDicePos(&bd->dicePaths[0], &bd->diceRotation[0], animateDistance / 2.0f, bd->diceMovingPos[0]);
+		if (!finishedPath(&bd->dicePaths[1]))
+			updateDicePos(&bd->dicePaths[1], &bd->diceRotation[1], animateDistance / 2.0f, bd->diceMovingPos[1]);
 
-		if (finishedPath(&dicePaths[0]) && finishedPath(&dicePaths[1]))
+		if (finishedPath(&bd->dicePaths[0]) && finishedPath(&bd->dicePaths[1]))
 		{
 			bd->shakingDice = 0;
 			stopNextTime = 1;
@@ -897,7 +864,7 @@ void RollDice3d(BoardData *bd)
 		stopNextTime = 0;
 		setIdleFunc(bd, idleAnimate);
 
-		setupDicePaths(bd, dicePaths);
+		setupDicePaths(bd, bd->dicePaths);
 		/* Make sure shadows are in correct place */
 		updateOccPos(bd);
 
@@ -932,7 +899,9 @@ int idleWaveFlag(BoardData* bd)
 void ShowFlag3d(BoardData *bd)
 {
 	bd->flagWaved = 0;
-	if (rdAppearance.animateFlag && bd->resigned)
+
+	if (rdAppearance.animateFlag && bd->resigned &&
+		(ap[bd->turn == 1 ? 0 : 1].pt == PLAYER_HUMAN))		/* not for computer turn */
 	{
 		animStartTime = get_time();
 		setIdleFunc(bd, idleWaveFlag);
@@ -940,21 +909,9 @@ void ShowFlag3d(BoardData *bd)
 	else
 		StopIdle3d(bd);
 
-	waveFlag(0);
+	waveFlag(bd, 0);
 	updateFlagOccPos(bd);
 }
-
-#define PATH "Data//"
-
-#else
-
-#define PATH "../Data//"
-extern double animStartTime;
-
-#define gtk_main_quit() 0
-#define gtk_main() 0
-
-#endif
 
 int idleCloseBoard(BoardData* bd)
 {
@@ -977,9 +934,74 @@ int idleCloseBoard(BoardData* bd)
 	return 1;
 }
 
+
+double testStartTime;
+int numFrames;
+#define TEST_TIME 3000.0f
+
+int idleTestPerformance(BoardData* bd)
+{
+	float elapsedTime = (float)(get_time() - testStartTime);
+	if (elapsedTime > TEST_TIME)
+	{
+		StopIdle3d(bd);
+		gtk_main_quit();
+		return 0;
+	}
+	numFrames++;
+	return 1;
+}
+
+void TestPerformance3d(GtkWidget *pw, BoardData* bd)
+{
+	GtkWidget *dialog;
+	char str[255];
+	char *msg;
+	float elapsedTime;
+	int fps;
+	setIdleFunc(bd, idleTestPerformance);
+	testStartTime = get_time();
+	numFrames = 0;
+	gtk_main();
+	elapsedTime = (float)(get_time() - testStartTime);
+
+	fps = numFrames / (elapsedTime / 1000);
+	if (fps >= 30)
+		msg = "3d Performance is very fast.\n";
+	else if (fps > 15)
+		msg = "3d Performance is good.\n";
+	else if (fps > 10)
+		msg = "3d Performance is ok.\n";
+	else if (fps > 5)
+		msg = "3d Performance is poor.\n";
+	else
+		msg = "3d Performance is very poor.\n";
+
+	sprintf(str, "%s\n(%d frames per second)\n",msg, fps);
+
+	dialog = gtk_message_dialog_new (0, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
+			GTK_MESSAGE_INFO, GTK_BUTTONS_OK, str);
+	gtk_dialog_run(GTK_DIALOG(dialog));
+	gtk_widget_destroy(dialog);
+}
+
+void InitialPos(BoardData *bd)
+{	/* Set up initial board position */
+	int ip[] = {0,-2,0,0,0,0,5,0,3,0,0,0,-5,5,0,0,0,-3,0,-5,0,0,0,0,2,0,0,0};
+	memcpy(bd->points, ip, sizeof(bd->points));
+	updatePieceOccPos(bd);
+}
+
+void EmptyPos(BoardData *bd)
+{	/* All checkers home */
+	int ip[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,-15};
+	memcpy(bd->points, ip, sizeof(bd->points));
+}
+
 void CloseBoard3d(BoardData* bd)
 {
 	EmptyPos(bd);
+	updatePieceOccPos(bd);
 	bd->State = BOARD_CLOSED;
 	/* Turn off most things so they don't interfere when board closed/opening */
 	bd->cube_use = 0;
@@ -991,22 +1013,20 @@ void CloseBoard3d(BoardData* bd)
 	rdAppearance.showShadows = 0;
 	rdAppearance.showMoveIndicator = 0;
 	rdAppearance.fLabels = 0;
-	bd->dice_roll[0] = 0;
+	bd->diceShown = DICE_NOT_SHOWN;
 	bd->State = BOARD_CLOSING;
 
-	/* Sort out logo */
+	/* Random logo */
 	SetupSimpleMat(&bd->logoMat, bd->boxMat.ambientColour[0] * 1.5f, bd->boxMat.ambientColour[1] * 1.5f, bd->boxMat.ambientColour[2] * 1.5f);
-	if (bd->boxMat.pTexture)
-	{
-		if (rand() % 2)
-			SetTexture(bd, &bd->logoMat, PATH"logo.bmp");
-		else
-			SetTexture(bd, &bd->logoMat, PATH"logo2.bmp");
-	}
+	if (rand() % 2)
+		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp");
+	else
+		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo2.bmp");
+
 	animStartTime = get_time();
 	bd->perOpen = 0;
 	setIdleFunc(bd, idleCloseBoard);
-	/* As idleCloseBoard assumes last matrix is on stack */
+	/* Push matrix as idleCloseBoard assumes last matrix is on stack */
 	glPushMatrix();
 	
 	gtk_main();
@@ -1024,34 +1044,6 @@ int MouseMove3d(BoardData *bd, int x, int y)
 		return 0;
 }
 
-#ifdef WIN32
-
-void CheckAccelerated()
-{
-	const char* vendor = glGetString(GL_VENDOR);
-	const char* renderer = glGetString(GL_RENDERER);
-//	const char* version = glGetString(GL_VERSION);
-
-	if (strstr(vendor, "Microsoft") && strstr(renderer, "Generic"))
-	{
-#if HAVE_GTKGLEXT
-		GtkWidget *dialog = gtk_message_dialog_new (0, GTK_DIALOG_DESTROY_WITH_PARENT | GTK_DIALOG_MODAL,
-				GTK_MESSAGE_WARNING, GTK_BUTTONS_OK, 
-				"No hardware accelerated graphics card found - performance may be slow.\n");
-		gtk_dialog_run(GTK_DIALOG(dialog));
-		gtk_widget_destroy(dialog);
-#endif
-	}
-}
-
-#else
-
-void CheckAccelerated()
-{
-}
-
-#endif
-
 void SetupViewingVolume3d(BoardData *bd)
 {
 	GLint viewport[4];
@@ -1063,4 +1055,153 @@ void SetupViewingVolume3d(BoardData *bd)
 
 	SetupLight3d(bd);
 	calculateBackgroundSize(bd, viewport);
+}
+
+void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a)
+{
+	pMat->ambientColour[0] = r;
+	pMat->ambientColour[1] = g;
+	pMat->ambientColour[2] = b;
+	pMat->ambientColour[3] = a;
+
+	pMat->diffuseColour [0] = dr;
+	pMat->diffuseColour [1] = dg;
+	pMat->diffuseColour [2] = db;
+	pMat->diffuseColour [3] = a;
+
+	pMat->specularColour[0] = sr;
+	pMat->specularColour[1] = sg;
+	pMat->specularColour[2] = sb;
+	pMat->specularColour[3] = a;
+	pMat->shininess = shin;
+
+	pMat->alphaBlend = (a != 1) && (a != 0);
+
+	pMat->pTexture = 0;
+}
+
+void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a)
+{
+	SetupMat(pMat, r, g, b, r, g, b, 0, 0, 0, 0, a);
+}
+
+void SetupSimpleMat(Material* pMat, float r, float g, float b)
+{
+	SetupMat(pMat, r, g, b, r, g, b, 0, 0, 0, 0, 0);
+}
+
+void SetTexture(BoardData* bd, Material* pMat, const char* filename)
+{
+	/* See if already loaded */
+	int i;
+	const char* nameStart = filename;
+	/* Find start of name in filename */
+	char* newStart = 0;
+	do
+	{
+		if (!(newStart = strchr(nameStart, '\\')))
+			newStart = strchr(nameStart, '/');
+
+		if (newStart)
+			nameStart = newStart + 1;
+	} while(newStart);
+
+	/* Search for name in cached list */
+	for (i = 0; i < bd->numTextures; i++)
+	{
+		if (!strcasecmp(nameStart, bd->textureName[i]))
+		{	/* found */
+			pMat->pTexture = &bd->textureList[i];
+			return;
+		}
+	}
+
+	/* Not found - Load new texture */
+	if (bd->numTextures == MAX_TEXTURES - 1)
+	{
+		g_print("Error: Too many textures loaded...\n");
+		return;
+	}
+
+	if (LoadTexture(&bd->textureList[bd->numTextures], filename))
+	{
+		/* Remeber name */
+		bd->textureName[bd->numTextures] = malloc(strlen(nameStart) + 1);
+		strcpy(bd->textureName[bd->numTextures], nameStart);
+
+		pMat->pTexture = &bd->textureList[bd->numTextures];
+		bd->numTextures++;
+	}
+}
+/* Not currently used
+void RemoveTexture(Material* pMat)
+{
+	if (pMat->pTexture)
+	{
+		int i = 0;
+		while (&bd->textureList[i] != pMat->pTexture)
+			i++;
+
+		DeleteTexture(&bd->textureList[i]);
+		free(bd->textureName[i]);
+
+		while (i != bd->numTextures - 1)
+		{
+			bd->textureList[i] = bd->textureList[i + 1];
+			bd->textureName[i] = bd->textureName[i + 1];
+			i++;
+		}
+		bd->numTextures--;
+		pMat->pTexture = 0;
+	}
+}
+*/
+void ClearTextures(BoardData* bd)
+{
+	int i;
+	for (i = 0; i < bd->numTextures; i++)
+	{
+		DeleteTexture(&bd->textureList[i]);
+		free(bd->textureName[i]);
+	}
+	bd->numTextures = 0;
+}
+
+void InitBoard3d(BoardData *bd)
+{	/* Initilize 3d parts of boarddata */
+	int i, j;
+	/* Assign random rotation to each board position */
+	for (i = 0; i < 28; i++)
+		for (j = 0; j < 15; j++)
+			bd->pieceRotation[i][j] = rand() % 360;
+
+	bd->State = BOARD_OPEN;
+	bd->moving = 0;
+	bd->shakingDice = 0;
+	bd->drag_point = -1;
+	bd->DragTargetHelp = 0;
+	setDicePos(bd);
+
+	SetupSimpleMat(&bd->gap, 0, 0, 0);
+	SetupMat(&bd->flagMat, 1, 1, 1, 1, 1, 1, 1, 1, 1, 50, 0);
+
+	bd->diceList = bd->DCList = bd->pieceList = 0;
+	bd->qobjTex = bd->qobj = 0;
+	bd->flagNurb = 0;
+
+	bd->numTextures = 0;
+}
+
+void InitBoardPreview(BoardData *bd)
+{
+	InitBoard3d(bd);
+	/* Show set position */
+	InitialPos(bd);
+	bd->cube_use = 1;
+	bd->crawford_game = 0;
+	bd->doubled = bd->cube_owner = 0;
+	bd->diceShown = DICE_ON_BOARD;
+	bd->diceRoll[0] = 4;
+	bd->diceRoll[1] = 3;
+	bd->turn = 1;
 }

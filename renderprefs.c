@@ -360,7 +360,7 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
     else if( !strncasecmp( szParam, "shadowdarkness", c ) )
 	{
 		prd->shadowDarkness = atoi(szValue);
-		SetShadowDimness3d();
+		SetShadowDimness3d(BOARD(pwBoard)->board_data);
 	}
     else if( !strncasecmp( szParam, "testskin", c ) )
 		prd->skin3d = atoi( szValue );
@@ -370,8 +370,6 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 		prd->animateFlag = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "closeboard", c ) )
 		prd->closeBoardOnExit = toupper( *szValue ) == 'Y';
-    else if( !strncasecmp( szParam, "debugtime", c ) )
-		prd->debugTime = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "boardtype", c ) )
 		prd->fDisplayType = *szValue == '2' ? DT_2D : DT_3D;
     else if( !strncasecmp( szParam, "curveaccuracy", c ) )
@@ -468,7 +466,6 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		"animateroll=%c "
 		"animateflag=%c "
 		"closeboard=%c "
-		"debugTime=%c "
 		"curveaccuracy=%d "
 		"lighttype=%c "
 		"lightposx=%f lightposy=%f lightposz=%f "
@@ -502,7 +499,6 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->animateRoll ? 'y' : 'n',
 		prd->animateFlag ? 'y' : 'n',
 		prd->closeBoardOnExit ? 'y' : 'n',
-		prd->debugTime ? 'y' : 'n',
 		prd->curveAccuracy,
 		prd->lightType == LT_POSITIONAL ? 'p' : 'd',
 		prd->lightPos[0], prd->lightPos[1], prd->lightPos[2],

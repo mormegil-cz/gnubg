@@ -27,7 +27,7 @@
 
 #pragma pack(1)
 
-/* BMP file header structure */
+/* DIB file header structure */
 typedef struct		
 {
 	unsigned short	bfType;		/* Magic number for file */
@@ -37,7 +37,7 @@ typedef struct
 	unsigned int	bfOffBits;	/* Offset to bitmap data */
 } BITMAPFILEHEADER;
 
-/* BMP file info structure */
+/* DIB file info structure */
 typedef struct
 {
 	unsigned int	biSize;			/* Size of info header */

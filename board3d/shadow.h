@@ -1,31 +1,25 @@
-
-#include "mylist.h"
-
-typedef struct _OccModel
-{
-	myList planes;
-	myList edges;
-	myList points;
-} OccModel;
-
-typedef struct Occluder_T
-{
-	float invMat[4][4];
-	float trans[3];
-	float rot[3];
-	int rotator;
-
-	OccModel* handle;
-	int show;
-} Occluder;
-
-typedef enum _OcculderType {
-	OCC_BOARD, OCC_CUBE, OCC_DICE1, OCC_DICE2, OCC_FLAG, OCC_HINGE1, OCC_HINGE2, OCC_PIECE
-} OcculderType;
-#define LAST_PIECE (OCC_PIECE + 29)
-
-#define NUM_OCC (LAST_PIECE + 1)
-extern Occluder Occluders[NUM_OCC];
+/*
+* shadow.h
+* by Jon Kinsey, 2003
+*
+* 3d shadow functions
+*
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of version 2 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+* $Id$
+*/
 
 extern void initOccluder(Occluder* Occ);
 extern void freeOccluder(Occluder* Occ);
@@ -33,13 +27,11 @@ extern void copyOccluder(Occluder* fromOcc, Occluder* toOcc);
 
 void moveToOcc(Occluder* pOcc);
 
-void shadowInit();
-void shadowDisplay(void (*drawScene)(void*), void* arg);
-void draw_shadow_volume_extruded_edges(Occluder* Occluder, int prim);
+void shadowInit(BoardData* bd);
+void shadowDisplay(void (*drawScene)(BoardData*), BoardData* bd);
+void draw_shadow_volume_extruded_edges(Occluder* Occluder, float light_position[4], int prim);
 void draw_shadow_volume_edges(Occluder* Occluder);
 
-extern float (*light_position)[4];
-extern float dim;
 extern void addClosedSquare(Occluder* pOcc, float x, float y, float z, float w, float h, float d);
 extern void addSquare(Occluder* pOcc, float x, float y, float z, float w, float h, float d);
 extern void addSquareCentered(Occluder* pOcc, float x, float y, float z, float w, float h, float d);

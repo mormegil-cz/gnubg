@@ -1,16 +1,35 @@
+/*
+* model.c
+* by Jon Kinsey, 2003
+*
+* Shadow model representation
+*
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of version 2 of the GNU General Public License as
+* published by the Free Software Foundation.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+* $Id$
+*/
 
-#include <GL/gl.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <math.h>
 #include "matrix.h"
-#include "shadow.h"
+#include <GL/gl.h>
 #include "inc3d.h"
+#include "shadow.h"
 
 #define TOP_EDGE -2
-#define PI 3.14159265358979323846f
-
-float (*light_position)[4];
 
 typedef struct _position
 {
@@ -166,17 +185,14 @@ void GenerateShadowEdges(Occluder* pOcc)
 float sqdDist(OccModel* pMod, int pIndex, float point[4])
 {
 	plane* p = (plane*)ListGet(&pMod->planes, pIndex);
-
 	return (p->a * point[0] + p->b * point[1] + p->c * point[2] + p->d * point[3]);
 }
 
-void GenerateShadowVolume(Occluder* pOcc)
+void GenerateShadowVolume(Occluder* pOcc, float olight[4])
 {
 	int edgeOrder[2];
 	int i;
 	int numEdges = ListSize(&pOcc->handle->edges);
-	float olight[4];
-	mult_matrix_vec(pOcc->invMat, *light_position, olight);
 
 	for (i = 0; i < numEdges; i++)
 	{
@@ -337,19 +353,19 @@ void addSquareCentered(Occluder* pOcc, float x, float y, float z, float w, float
 
 void addWonkyCube(Occluder* pOcc, float x, float y, float z, float w, float h, float d, float s, int full)
 {
-if (full == 0)
-{
-	addLine(pOcc, x, y + h, z, x, y, z, x, y, z + .1f);
-	addLine(pOcc, x, y, z, x, y + h, z, x + .1f, y, z);
+	if (full == 0)
+	{
+		addLine(pOcc, x, y + h, z, x, y, z, x, y, z + .1f);
+		addLine(pOcc, x, y, z, x, y + h, z, x + .1f, y, z);
 
-	addLine(pOcc, x, y, z, x, y, z + d, x + .1f, y, z);
-	addLine(pOcc, x, y + h, z, x, y + h, z + d, x + .1f, y + h, z);
-	addLine(pOcc, x, y, z + d, x, y, z, x, y + .1f, z);
-	addLine(pOcc, x, y + h, z + d, x, y + h, z, x, y + h - .1f, z);
+		addLine(pOcc, x, y, z, x, y, z + d, x + .1f, y, z);
+		addLine(pOcc, x, y + h, z, x, y + h, z + d, x + .1f, y + h, z);
+		addLine(pOcc, x, y, z + d, x, y, z, x, y + .1f, z);
+		addLine(pOcc, x, y + h, z + d, x, y + h, z, x, y + h - .1f, z);
 
-	addLine(pOcc, x, y + h, z + d, x, y, z + d, x, y, z + d - .1f);
-	addLine(pOcc, x, y, z + d, x, y + h, z + d, x + .1f, y, z + d);
-}
+		addLine(pOcc, x, y + h, z + d, x, y, z + d, x, y, z + d - .1f);
+		addLine(pOcc, x, y, z + d, x, y + h, z + d, x + .1f, y, z + d);
+	}
 	/* Bottom */
 	addLine(pOcc, x + w, y + h, z + s, x, y + h, z, x, y + h, z + .1f);
 	addLine(pOcc, x, y, z, x + w, y, z + s, x + w, y, z + s + .1f);
@@ -357,20 +373,20 @@ if (full == 0)
 	addLine(pOcc, x, y + h, z, x + w, y + h, z + s, x, y + h - .1f, z);
 	addLine(pOcc, x + w, y, z + s, x, y, z, x + w, y + .1f, z + s);
 
-if (full == 2)
-{
-	/* Sides */
-	addLine(pOcc, x + w, y + h, z + s, x + w, y + h, z + s + d, x + w - .1f, y + h, z + s);
-	addLine(pOcc, x + w, y, z + s, x + w, y, z + s + d, x + w - .1f, y, z + s);
-	addLine(pOcc, x + w, y + h, z + s + d, x + w, y + h, z + s, x + w, y + h - .1f, z + s);
-	addLine(pOcc, x + w, y, z + s + d, x + w, y, z + s, x + w, y + .1f, z + s);
+	if (full == 2)
+	{
+		/* Sides */
+		addLine(pOcc, x + w, y + h, z + s, x + w, y + h, z + s + d, x + w - .1f, y + h, z + s);
+		addLine(pOcc, x + w, y, z + s, x + w, y, z + s + d, x + w - .1f, y, z + s);
+		addLine(pOcc, x + w, y + h, z + s + d, x + w, y + h, z + s, x + w, y + h - .1f, z + s);
+		addLine(pOcc, x + w, y, z + s + d, x + w, y, z + s, x + w, y + .1f, z + s);
 
-	addLine(pOcc, x + w, y, z + s, x + w, y + h, z + s, x + w, y + h, z + s + .1f);
-	addLine(pOcc, x + w, y + h, z + s, x + w, y, z + s, x + w - .1f, y + h, z + s);
+		addLine(pOcc, x + w, y, z + s, x + w, y + h, z + s, x + w, y + h, z + s + .1f);
+		addLine(pOcc, x + w, y + h, z + s, x + w, y, z + s, x + w - .1f, y + h, z + s);
 
-	addLine(pOcc, x + w, y, z + s + d, x + w, y + h, z + s + d, x + w, y + h, z + s + d - .1f);
-	addLine(pOcc, x + w, y + h, z + s + d, x + w, y, z + s + d, x + w - .1f, y + h, z + s + d);
-}
+		addLine(pOcc, x + w, y, z + s + d, x + w, y + h, z + s + d, x + w, y + h, z + s + d - .1f);
+		addLine(pOcc, x + w, y + h, z + s + d, x + w, y, z + s + d, x + w - .1f, y + h, z + s + d);
+	}
 	/* Top */
 	addLine(pOcc, x + w, y + h, z + s + d, x, y + h, z + d, x, y + h, z + d - .1f);
 	addLine(pOcc, x, y, z + d, x + w, y, z + s + d, x + w, y, z + s + d - .1f);
@@ -525,7 +541,7 @@ void GetCoords(float x, float y, float d, int c, int f, float v[3])
 }
 
 void addDice(Occluder* pOcc, float size)
-{	/* Hard-coded to keep model simple + doesn't work correctly when > 8... */
+{	/* Hard-coded numSteps to keep model simple + doesn't work correctly when > 8... */
 	int numSteps = 8;
 	float step = (2 * PI) / numSteps;
 	float *xPts = (float *)malloc(sizeof(float) * numSteps);

@@ -21,15 +21,12 @@
 * $Id$
 */
 
-#include "config.h"
 #include <gtk/gtk.h>
+#include "config.h"
 
 //#undef USE_GTK
 #if USE_GTK
 	#define BUILDING_LIB 1
-
-	#include "eval.h"
-
 #else
 	#define USE_GLUT
 
@@ -39,30 +36,26 @@
 	/* Comment out next line to remove glut library (needed for debug font) */
 	#define USE_GLUT_FONT
 
-	#include "eval.h"
-	#include "renderprefs.h"
+typedef struct _monitor {
+	int dummy;
+} monitor;
+
 	#define g_print(a)     ((void)0)
 #endif
 
+#include "eval.h"
 #include "gtkboard.h"
+#include "drawboard.h"
+#include "boardpos.h"
 
+/* Define relative sizes of objects from arbitrary unit .05 */
+#define base_unit .05f
+/* Scale textures by this amount */
+#define TEXTURE_SCALE (10.0f / base_unit)
+#define PI 3.14159265358979323846f
+#define copyPoint(to, from) memcpy(to, from, sizeof(float[3]))
 #define SGN(x) (x / abs(x))
-
-/* Animation paths */
-#define MAX_PATHS 3
-typedef enum _PathType
-{
-	PATH_LINE, PATH_CURVE_9TO12, PATH_CURVE_12TO3, PATH_PARABOLA, PATH_PARABOLA_12TO3
-} PathType;
-
-typedef struct _Path
-{
-	float pts[MAX_PATHS + 1][3];
-	PathType pathType[MAX_PATHS];
-	int state;
-	float mileStone;
-	int numSegments;
-} Path;
+#define TEXTURE_PATH "Data//"
 
 /* Draw board parts specially */
 typedef enum _boxType
@@ -76,28 +69,11 @@ typedef struct _diceTest
 	int top, bottom, side[4];
 } diceTest;
 
-/* Define relative sizes of objects from arbitrary unit .05 */
-#define base_unit .05f
-
-/* Scale textures by this amount */
-#define TEXTURE_SCALE (10.0f / base_unit)
-
-#include "boardpos.h"
-
-#define PI 3.14159265358979323846f
-
-#define copyPoint(to, from)	memcpy(to, from, sizeof(float[3]))
-
-extern int fClockwise; /* Player 1 moves clockwise */
-extern int fGUIDiceArea; /* Show dice below board */
-
 /* Setup functions */
 void InitBoard3d(BoardData *bd);
-void InitialPos(BoardData *bd);
-void EmptyPos(BoardData *bd);
-void CloseBoard(BoardData* bd);
-void TidyBoard(BoardData *bd);
-void InitGL();
+void InitBoardPreview(BoardData *bd);
+void InitGL(BoardData *bd);
+void SetupLight3d(BoardData *bd);
 
 /* Drawing functions */
 void drawBoard(BoardData* bd);
@@ -107,12 +83,13 @@ float getBoardHeight();
 void calculateBackgroundSize(BoardData *bd, int viewport[4]);
 
 // Misc functions
+void SetTexture(BoardData* bd, Material* pMat, const char* filename);
 void SetupSimpleMatAlpha(Material* pMat, float r, float g, float b, float a);
 void SetupSimpleMat(Material* pMat, float r, float g, float b);
+void SetupMat(Material* pMat, float r, float g, float b, float dr, float dg, float db, float sr, float sg, float sb, int shin, float a);
 void setMaterial(Material* pMat);
 void SetColour(float r, float g, float b, float a);
 unsigned char *LoadDIBitmap(const char *filename, int *width, int *height);
-int DiceBelowBoard(BoardData *bd);
 float randRange(float range);
 void setupPath(BoardData *bd, Path* p, float* pRotate, int fClockwise, int fromPoint, int fromDepth, int toPoint, int toDepth);
 int movePath(Path* p, float d, float* pRotate, float v[3]);
@@ -121,9 +98,7 @@ void updateHingeOccPos(BoardData* bd);
 double get_time();
 void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(BoardData* bd);
-void updateDiceOccPos(BoardData *bd);
-void setDicePos(BoardData* bd);
+void ClearTextures(BoardData* bd);
 
 typedef int idleFunc(BoardData* bd);
-
 void setIdleFunc(BoardData* bd, idleFunc* pFun);
