@@ -1055,14 +1055,20 @@ extern int ComputerTurn( void ) {
           case TOOGOODRE_PASS:
           case NODOUBLE_BEAVER:
           case NO_REDOUBLE_BEAVER:
+
+            /* better leave cube where it is: no op */
+            break;
+
           case OPTIONAL_DOUBLE_BEAVER:
           case OPTIONAL_DOUBLE_TAKE:
           case OPTIONAL_REDOUBLE_TAKE:
           case OPTIONAL_DOUBLE_PASS:
           case OPTIONAL_REDOUBLE_PASS:
 
-            /* better leave cube where it is: no op */
-            break;
+            if ( ap [ ms.fTurn ].esCube.et == EVAL_EVAL &&
+                 ap [ ms.fTurn ].esCube.ec.nPlies == 0 )
+              /* double if 0-ply */
+              CommandDouble ( NULL );
 
           default:
 

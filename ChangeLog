@@ -1,3 +1,8 @@
+Sat Aug 10 13:29:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* play.c (ComputerTurn): make gnubg double on optional
+	doubles if playing on 0-ply.
+
 Fri Aug  9 20:56:37 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* prevmarked.xpm, nextmarked.xpm: updated bitmaps by Jim.
