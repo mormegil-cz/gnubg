@@ -1,4 +1,4 @@
-GNU Backgammon 0.02
+GNU Backgammon 0.10
 ===================
 
 This is a pre-release version of GNU Backgammon (gnubg), a backgammon
@@ -27,7 +27,7 @@ Current features:
  - A command line interface (with full command editing features if GNU
    readline is available) that lets you play matches and sessions against
    gnubg
- - Support for either a GTK interface with a graphical board window, or
+ - Support for either a GTK+ interface with a graphical board window, or
    a rough ASCII representation of a board on text terminals
  - Automated rollouts of positions, with lookahead and race variance
    reduction where appropriate

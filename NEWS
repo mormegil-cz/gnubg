@@ -1,4 +1,15 @@
-GNU Backgammon NEWS -- history of user-visible changes.  1 February 2001
+GNU Backgammon NEWS -- history of user-visible changes.  16 March
+
+* Changes in GNU Backgammon 0.10
+
+** Man page added.
+
+** Import and export of position databases added.
+
+** "set output" and "set training" commands added.
+
+** External players (where moves are read from a socket to another process)
+added.
 
 ** Importing of JF ".pos" position files added.
 

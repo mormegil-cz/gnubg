@@ -81,7 +81,7 @@ VERSION = @VERSION@
 
 COMMON_INCS = -I$(srcdir)/lib @GUILE_CFLAGS@
 COMMON_LIBS = -Llib -levent @GUILE_LDFLAGS@
-COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c dice.c dice.h 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c         guile.h import.c import.h external.c
+COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c 	pub_eval.c set.c show.c database.h database.c dice.c dice.h 	rollout.c rollout.h copying.c kleinman.c matchequity.c matchequity.h 	analysis.h analysis.c sgf.c sgf.h sgfp.c sgfp.h sgfl.c guile.c         guile.h import.c import.h external.c external.h
 
 COMMON_DEPS = lib/libevent.a
 
@@ -116,7 +116,7 @@ makeweights_DEPENDENCIES = lib/libevent.a
 
 TESTS = gnubgtest
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h

@@ -1,6 +1,9 @@
 GNU Backgammon documentation
 
-This is the GNU Backgammon manual.  `make' will build gnubg.info by default,
-but if you have the necessary tools you can generate a DVI or PostScript
-manual with `make gnubg.dvi' or `make gnubg.ps'.  These formats are more
-suitable for printing.
+This is the GNU Backgammon manual.  `make' will build gnubg.info by
+default, but if you have the necessary tools you can generate a DVI or
+PostScript manual with `make dvi' or `make ps'.  These formats are
+more suitable for printing.
+
+You can also build the manual as plain text or HTML, with `make txt'
+or `make html' respectively.
