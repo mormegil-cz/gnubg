@@ -1,0 +1,57 @@
+<?xml version = "1.0"?>
+<!DOCTYPE met PUBLIC "-//GNU Backgammon//DTD Match Equity Tables//EN"
+                     "met.dtd">
+
+<!--
+
+     Kazaross-Shaw.xml
+
+     by Øystein Johansen <oystein@gnubg.org>, 2003
+
+
+     This file is distributed as a part of the GNU Backgammon program.
+
+     Copying and distribution of verbatim and modified versions of this file
+     is permitted in any medium provided the copyright notice and this
+     permission notice are preserved.
+
+     This match equity table is based rollouts by GNU Backgammon. It's still
+     work in progress.
+
+     $Id$
+
+ -->
+
+
+<met>
+  <info>
+    <name>Kazaross and Shaw</name>
+    <description>Neil Kazaross, Ian Shaw and GNU Backgammon, Table based on GNU Backgammon rollouts.</description>
+    <length>2</length>
+  </info>
+
+  <pre-crawford-table type="explicit">
+
+    <row>
+      <me>0.500</me>
+      <me>0.682</me>
+    </row>
+
+    <row>
+      <me>0.318</me>
+      <me>0.500</me>
+    </row>
+
+  </pre-crawford-table>      
+  
+
+  <post-crawford-table type="explicit" player="both">
+
+    <row>
+      <me>0.50</me>
+      <me>0.485</me>
+    </row>
+
+  </post-crawford-table>   
+
+</met>
