@@ -232,7 +232,7 @@ static void SetSkillThreshold( char *szCommand, skilltype lt, char *sz ) {
 
 extern void CommandSetAnalysisThresholdDoubtful( char *sz ) {
 
-    SetSkillThreshold( "bad", SKILL_BAD, sz );
+    SetSkillThreshold( "doubtful", SKILL_DOUBTFUL, sz );
 }
 extern void CommandSetAnalysisThresholdBad( char *sz ) {
 
