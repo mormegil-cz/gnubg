@@ -253,7 +253,7 @@ static void RenderArea( BoardData *bd, unsigned char *puch, int x, int y,
     
     int anBoard[ 2 ][ 25 ], anOff[ 2 ], anDice[ 2 ], anDicePosition[ 2 ][ 2 ],
 	anCubePosition[ 2 ], nOrient;
-    int anResignPosition[ 2 ], fResign, nResignOrientation;
+    int anResignPosition[ 2 ], nResignOrientation;
 
     read_board( bd, anBoard );
     if( bd->colour != bd->turn )
@@ -1753,9 +1753,6 @@ static gint board_set( Board *board, const gchar *board_text,
 	bd->valid_move = NULL;
     }
 	
-    if( rdAppearance.nSize <= 0 )
-	return 0;
-
     if( fGUIHighDieFirst ) {
 	if( bd->dice[ 0 ] < bd->dice[ 1 ] )
 	    swap( bd->dice, bd->dice + 1 );
@@ -1772,14 +1769,18 @@ static gint board_set( Board *board, const gchar *board_text,
 	    /* dice were visible before; now they're not */
 	    int ax[ 2 ] = { bd->x_dice[ 0 ], bd->x_dice[ 1 ] };
 	    bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -10 * rdAppearance.nSize;
-	    board_invalidate_rect( bd->drawing_area,
-				   ax[ 0 ] * rdAppearance.nSize,
-				   bd->y_dice[ 0 ] * rdAppearance.nSize,
-				   7 * rdAppearance.nSize, 7 * rdAppearance.nSize, bd );
-	    board_invalidate_rect( bd->drawing_area,
-				   ax[ 1 ] * rdAppearance.nSize,
-				   bd->y_dice[ 1 ] * rdAppearance.nSize,
-				   7 * rdAppearance.nSize, 7 * rdAppearance.nSize, bd );
+            if ( rdAppearance.nSize > 0 ) {
+              board_invalidate_rect( bd->drawing_area,
+                                     ax[ 0 ] * rdAppearance.nSize,
+                                     bd->y_dice[ 0 ] * rdAppearance.nSize,
+                                     7 * rdAppearance.nSize, 
+                                     7 * rdAppearance.nSize, bd );
+              board_invalidate_rect( bd->drawing_area,
+                                     ax[ 1 ] * rdAppearance.nSize,
+                                     bd->y_dice[ 1 ] * rdAppearance.nSize,
+                                     7 * rdAppearance.nSize, 
+                                     7 * rdAppearance.nSize, bd );
+            }
 	}
 
 	if( ( bd->turn == bd->colour ? bd->dice[ 0 ] :
@@ -1789,7 +1790,7 @@ static gint board_set( Board *board, const gchar *board_text,
 	else {
 	    /* FIXME different dice for first turn */
 	    int iAttempt = 0, iPoint, x, y, cx, cy;
-	    
+
 	cocked:
 	    bd->x_dice[ 0 ] = RAND % 21 + 13;
 	    bd->x_dice[ 1 ] = RAND % ( 34 - bd->x_dice[ 0 ] ) +
@@ -1820,6 +1821,10 @@ static gint board_set( Board *board, const gchar *board_text,
 		}
 	}
     }
+
+
+    if( rdAppearance.nSize <= 0 )
+	return 0;
 
     if( bd->doubled != old_doubled || 
         bd->cube != old_cube ||

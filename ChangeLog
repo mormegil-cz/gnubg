@@ -1,3 +1,9 @@
+Thu Jan 30 17:13:30 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (board_set): make sure dice positions are calculated
+	even though nSize < 0.
+	(reported by Holger Bochnig)
+
 Wed Jan 29 20:24:32 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* rollout.c (getResignation): resign single in money game with
