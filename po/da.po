@@ -25,7 +25,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnubg 0.12\n"
 "POT-Creation-Date: 2003-07-12 10:10+0200\n"
-"PO-Revision-Date: 2002-06-15 11:26+0200\n"
+"PO-Revision-Date: 2003-07-27 19:39+0200\n"
 "Last-Translator: Jørn Thyssen <jthyssen@dk.ibm.com>\n"
 "Language-Team: Danish <da@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1008,12 +1008,13 @@ msgstr ""
 
 #: eval.c:3927
 msgid "RACE"
-msgstr ""
+msgstr "LØBESPIL"
 
 #: eval.c:3928
 msgid "CRASHED"
 msgstr ""
 
+# KONTAKT
 #: eval.c:3929
 msgid "CONTACT"
 msgstr ""
@@ -1064,7 +1065,7 @@ msgstr ""
 
 #: eval.c:4094
 msgid "Race"
-msgstr ""
+msgstr "Løbespil"
 
 #: eval.c:4099
 msgid "Crashed"
@@ -1072,7 +1073,7 @@ msgstr ""
 
 #: eval.c:4104
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #: eval.c:4145 eval.c:4204 gtkcube.c:362 html.c:1990 text.c:851
 msgid "Double, take"
@@ -1303,21 +1304,20 @@ msgid "<die> <die>"
 msgstr ""
 
 #: gnubg.c:436
-#, fuzzy
 msgid "<command>"
-msgstr "Indlæs kommandoer"
+msgstr "<kommando>"
 
 #: gnubg.c:438
 msgid "<colour>"
-msgstr ""
+msgstr "<farve>"
 
 #: gnubg.c:439
 msgid "evaluation|rollout"
-msgstr ""
+msgstr "vurdering|udrulning"
 
 #: gnubg.c:440 set.c:83
 msgid "<filename>"
-msgstr ""
+msgstr "filnavn"
 
 #: gnubg.c:441
 msgid "[<key>=<value> ...]"
@@ -1325,19 +1325,19 @@ msgstr ""
 
 #: gnubg.c:442
 msgid "<length>"
-msgstr ""
+msgstr "<længde>"
 
 #: gnubg.c:443
 msgid "<limit>"
-msgstr ""
+msgstr "<antal>"
 
 #: gnubg.c:444
 msgid "<milliseconds>"
-msgstr ""
+msgstr "<millisekunder>"
 
 #: gnubg.c:445
 msgid "<from> <to> ..."
-msgstr ""
+msgstr "<fra> <til> ..."
 
 #: gnubg.c:446
 msgid ""
@@ -1347,15 +1347,15 @@ msgstr ""
 
 #: gnubg.c:448 set.c:84
 msgid "<name>"
-msgstr ""
+msgstr "<navn>"
 
 #: gnubg.c:449 set.c:86
 msgid "on|off"
-msgstr ""
+msgstr "fra|til"
 
 #: gnubg.c:450
 msgid "[command]"
-msgstr ""
+msgstr "[kommando]"
 
 #: gnubg.c:451
 msgid "[depth]"
@@ -1363,7 +1363,7 @@ msgstr ""
 
 #: gnubg.c:452
 msgid "[filename]"
-msgstr ""
+msgstr "[filnavn]"
 
 #: gnubg.c:453
 msgid "[generator] [seed]"
