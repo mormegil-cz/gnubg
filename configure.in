@@ -37,6 +37,7 @@ dnl Checks for libraries.
 AC_CHECK_LIB(m, sqrt)
 AC_CHECK_LIB(readline, readline)
 AC_CHECK_LIB(gdbm, gdbm_open)
+AC_CHECK_LIB(dl, dlopen)
 
 dnl Checks for header files.
 AC_HEADER_STDC
