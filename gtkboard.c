@@ -698,6 +698,10 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     
     switch( event->type ) {
     case GDK_BUTTON_PRESS:
+	if( bd->drag_point >= 0 )
+	    /* Ignore subsequent button presses once we're dragging. */
+	    break;
+	
 	/* We don't need the focus ourselves, but we want to steal it
 	   from any other widgets (e.g. the player name entry fields)
 	   so that those other widgets won't intercept global
@@ -705,8 +709,6 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	gtk_window_set_focus( GTK_WINDOW( gtk_widget_get_toplevel( board ) ),
 			      NULL );
 	
-	bd->drag_point = board_point( board, bd, x, y );
-
 	if( ( bd->drag_point = board_point( board, bd, x, y ) ) < 0 ) {
 	    /* Click on illegal area. */
 	    gdk_beep();
