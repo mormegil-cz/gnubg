@@ -124,10 +124,27 @@ extern void CommandShowPlayer( char *sz ) {
 
 extern void CommandShowScore( char *sz ) {
 
-    printf( "The score (after %d game%s) is: %s %d, %s %d.\n",
+    printf( "The score (after %d game%s) is: %s %d, %s %d",
 	    cGames, cGames == 1 ? "" : "s",
 	    ap[ 0 ].szName, anScore[ 0 ],
 	    ap[ 1 ].szName, anScore[ 1 ] );
+
+    if ( nMatchTo > 0 ) {
+        printf ( nMatchTo == 1 ? 
+	         " (match to %d point%s)\n" :
+	         " (match to %d points%s)\n",
+                 nMatchTo,
+		 fCrawford ? 
+		 ", (Crawford game)" : ( fPostCrawford ?
+					 ", (post-Crawford play)" : ""));
+    } 
+    else {
+        if ( fJacoby )
+	    puts ( " (money session (with Jacoby rule))\n" );
+        else
+	    puts ( " (money session (without Jacoby rule))\n" );
+    }
+
 }
 
 extern void CommandShowTurn( char *sz ) {
@@ -157,3 +174,42 @@ extern void CommandShowRNG( char *sz ) {
 	  aszRNG[ rngCurrent ] );
     
 }
+
+
+extern void CommandShowJacoby( char *sz ) {
+
+    if ( fJacoby ) 
+      puts( "Money sessions is played with the Jacoby rule." );
+    else
+      puts( "Money sessions is played without the Jacoby rule." );
+
+}
+
+
+extern void CommandShowCrawford( char *sz ) {
+
+  if( nMatchTo > 0 ) 
+    puts( fCrawford ?
+	  "This game is the Crawford game." :
+	  "This game is not the Crawford game" );
+  else if ( ! nMatchTo )
+    puts( "Crawford rule is not used in money sessions." );
+  else
+    puts( "No match is being played." );
+
+}
+
+
+extern void CommandShowPostCrawford( char *sz ) {
+
+  if( nMatchTo > 0 ) 
+    puts( fPostCrawford ?
+	  "This is post-Crawford play." :
+	  "This is not post-Crawford play." );
+  else if ( ! nMatchTo )
+    puts( "Crawford rule is not used in money sessions." );
+  else
+    puts( "No match is being played." );
+
+}
+

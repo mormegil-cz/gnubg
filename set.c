@@ -393,3 +393,77 @@ extern void CommandSetTurn( char *sz ) {
 
     printf( "`%s' is now on roll.\n", ap[ i ].szName );
 }
+
+
+extern void CommandSetJacoby( char *sz ) {
+
+  SetToggle( "jacoby", &fJacoby, sz, 
+	     "Will use the Jacoby rule for money sessions.",
+	     "Will not use the Jacoby rule for money sessions." );
+
+}
+
+
+extern void CommandSetCrawford( char *sz ) {
+
+  if ( nMatchTo > 0 ) {
+    if ( ( nMatchTo - anScore[ 0 ] == 1 ) || 
+	 ( nMatchTo - anScore[ 1 ] == 1 ) ) {
+
+      SetToggle( "crawford", &fCrawford, sz, 
+		 "This game is the Crawford game (no doubling allowed).",
+		 "This game is not the Crawford game." );
+
+      /* sanety check */
+
+      if ( fCrawford && fPostCrawford )
+	CommandSetPostCrawford ( "off" );
+
+      if ( !fCrawford && !fPostCrawford )
+	CommandSetPostCrawford ( "on" );
+
+    }
+    else {
+      puts( "Cannot set whether this is the Crawford game\n"
+	    "as none of the players are 1-away from winning." );
+    }
+  }
+  else if ( ! nMatchTo ) 
+    puts ( "Cannot set Crawford play for money sessions." );
+  else
+    puts ( "No match in progress (type `new match n' to start one)." );
+
+}
+
+
+extern void CommandSetPostCrawford( char *sz ) {
+
+  if ( nMatchTo > 0 ) {
+    if ( ( nMatchTo - anScore[ 0 ] == 1 ) || 
+	 ( nMatchTo - anScore[ 1 ] == 1 ) ) {
+
+      SetToggle( "postcrawford", &fPostCrawford, sz, 
+		 "This is post-Crawford play (doubling allowed).",
+		 "This is not post-Crawford play." );
+
+      /* sanety check */
+
+      if ( fPostCrawford && fCrawford )
+	CommandSetCrawford ( "off" );
+
+      if ( !fPostCrawford && !fCrawford )
+	CommandSetCrawford ( "on" );
+
+    }
+    else {
+      puts( "Cannot set whether this is post-Crawford play\n"
+	    "as none of the players are 1-away from winning." );
+    }
+  }
+  else if ( ! nMatchTo ) 
+    puts ( "Cannot set post-Crawford play for money sessions." );
+  else
+    puts ( "No match in progress (type `new match n' to start one)." );
+
+}
+

@@ -59,7 +59,8 @@ extern char *aszGameResult[], szDefaultPrompt[], *szPrompt;
 
 extern int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fDisplay, fAutoGame,
     fAutoMove, fResigned, fMove, fDoubled, nPliesEval, anScore[ 2 ], cGames,
-    nCube, fCubeOwner, fAutoRoll, nMatchTo;
+    nCube, fCubeOwner, fAutoRoll, nMatchTo, fJacoby, fCrawford,
+    fPostCrawford;
 
 extern list lMatch, lGame; /* (list of) list of moverecords */
 
@@ -104,6 +105,9 @@ extern void CommandAccept( char * ),
     CommandSetAutoGame( char * ),
     CommandSetAutoMove( char * ),
     CommandSetAutoRoll( char * ),
+    CommandSetJacoby( char * ),
+    CommandSetCrawford( char * ),
+    CommandSetPostCrawford( char * ),
     CommandSetBoard( char * ),
     CommandSetDice( char * ),
     CommandSetDisplay( char * ),
@@ -131,6 +135,9 @@ extern void CommandAccept( char * ),
     CommandShowScore( char * ),
     CommandShowTurn( char * ),
     CommandShowRNG( char * ),
+    CommandShowJacoby( char * ),
+    CommandShowCrawford( char * ),
+    CommandShowPostCrawford( char * ),
     CommandTake( char * ),
     CommandTrainTD( char * );
 #endif
