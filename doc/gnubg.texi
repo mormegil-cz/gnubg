@@ -830,6 +830,7 @@ the manual it is better to group them by purpose.
 
 accept                  playing
 agree                   playing
+analysis                analysis
 beaver                  playing         / cube
 database dump           databases
 database generate       databases
@@ -840,8 +841,15 @@ double                  playing         / cube
 drop                    playing         / cube
 eval                    analysis
 exit                    invocation
+export game
+export match
+export pos
 help                    basic
 hint                    playing?
+list game
+list match
+list session
+load commands
 load game               playing         / recording
 load match              playing         / recording
 load weights            training
@@ -849,7 +857,11 @@ move                    playing
 new game                playing
 new match               playing         / matches and sessions
 new session             playing         / matches and sessions
+new weights
+next    		playing
+pass			playing
 play                    playing         / computer player
+previous		playing
 quit                    invocation
 redouble                playing         / cube
 reject                  playing
@@ -858,6 +870,7 @@ roll                    playing         / dice
 rollout                 analysis
 save game               playing         / recording
 save match              playing         / recording
+save settings
 save weights            training
 set auto bearoff        playing
 set auto crawford       playing         / matches and sessions
@@ -865,8 +878,11 @@ set auto doubles        playing         / cube
 set auto game           playing         / matches and sessions
 set auto move           playing
 set auto roll           playing         / dice
+set beavers		playing
 set board               playing
 set cache               analysis?
+set colours
+set confirm		playing
 set crawford            playing         / matches and sessions
 set cube centre         playing         / cube
 set cube owner          playing         / cube
@@ -875,21 +891,26 @@ set cube value          playing         / cube
 set delay               playing
 set dice                playing         / dice
 set display             playing
-set evaluation          analysis?
+set evaluation *        analysis?
 set jacoby              playing         / matches and sessions
+set matchequitytable *	analysis?
 set nackgammon          playing
+set output matchpc	playing
+set output mwc  	playing
+set output winpc        playing
+set player eval *       playing		/ computer player
 set player gnubg        playing         / computer player
 set player human        playing         
 set player name         playing         
 set player plies        playing         / computer player
 set player pubeval      playing         / computer player
-set plies               analysis
 set postcrawford        playing         / matches and sessions
 set prompt              playing?
 set rng ansi            playing         / dice
 set rng bsd             playing         / dice
 set rng isaac           playing         / dice
 set rng manual          playing         / dice
+set rng md5		playing         / dice
 set rng mersenne        playing         / dice
 set rng user            playing         / dice
 set rollout *           analysis
@@ -897,8 +918,10 @@ set score               playing         / matches and sessions
 set seed                playing         / dice
 set turn                playing
 show automatic          playing?
+show beavers		playing		/ matches and sessions
 show board              playing
 show cache              analysis?
+show commands
 show confirm            playing?
 show copying            basic
 show crawford           playing         / matches and sessions
@@ -907,9 +930,13 @@ show delay              playing
 show dice               playing         / dice
 show display
 show evaluation
+show gammonprice	analysis
 show jacoby             playing         / matches and sessions
 show kleinman           analysis
-show nackgammon
+show marketwindow	analysis
+show matchequitytable	analysis
+show nackgammon		playing
+show output		playing
 show pipcount           playing
 show player             playing
 show postcrawford       playing         / matches and sessions
@@ -917,12 +944,15 @@ show prompt
 show rng                playing         / dice
 show rollout            analysis
 show score              playing         / matches and sessions
-show thorp
+show seed		playing		/ dice
+show thorp		analysis
 show turn               playing
 show warranty           basic
 take                    playing         / cube
 train database          databases
 train td                training
+! (shell)
+: (Guile)
 @end ignore
 
 @node Invocation

@@ -193,6 +193,7 @@ command acDatabase[] = {
       NULL },
     { "session", CommandListMatch, "Show the games played in this session",
       NULL, NULL },
+    { NULL, NULL, NULL, NULL, NULL }
 }, acLoad[] = {
     { "commands", CommandLoadCommands, "Read commands from a script file",
       szFILENAME, NULL },
@@ -290,11 +291,11 @@ command acDatabase[] = {
 }, acSet[] = {
     { "automatic", NULL, "Perform certain functions without user input",
       NULL, acSetAutomatic },
-    { "board", CommandSetBoard, "Set up the board in a particular "
-      "position", szPOSITION, NULL },
     { "beavers", CommandSetBeavers, 
       "Set whether beavers are allowed in money game or not", 
       szONOFF, NULL },
+    { "board", CommandSetBoard, "Set up the board in a particular "
+      "position", szPOSITION, NULL },
     { "cache", CommandSetCache, "Set the size of the evaluation cache",
       szSIZE, NULL },
     { "colours", CommandSetColours, "Modify the appearance of the board",
@@ -337,13 +338,15 @@ command acDatabase[] = {
 }, acShow[] = {
     { "automatic", CommandShowAutomatic, "List which functions will be "
       "performed without user input", NULL, NULL },
-    { "board", CommandShowBoard, "Redisplay the board position", szOPTPOSITION,
-      NULL },
     { "beavers", CommandShowBeavers, 
       "Show whether beavers are allowed in money game or not", 
       NULL, NULL },
+    { "board", CommandShowBoard, "Redisplay the board position", szOPTPOSITION,
+      NULL },
     { "cache", CommandShowCache, "Display statistics on the evaluation "
       "cache", NULL, NULL },
+    { "commands", CommandShowCommands, "List all available commands",
+      NULL, NULL },
     { "confirm", CommandShowConfirm, "Show whether confirmation is required "
       "before aborting a game", NULL, NULL },
     { "copying", CommandShowCopying, "Conditions for redistributing copies "
@@ -359,7 +362,7 @@ command acDatabase[] = {
     { "display", CommandShowDisplay, "Show whether the board will be updated "
       "on the computer's turn", NULL, NULL },
     { "evaluation", CommandShowEvaluation, "Display evaluation settings "
-      "and statistics", NULL, acSetEvaluation },
+      "and statistics", NULL, NULL },
     { "gammonprice", CommandShowGammonPrice, "Show gammon price",
       NULL, NULL },
     { "jacoby", CommandShowJacoby, 

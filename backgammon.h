@@ -52,7 +52,7 @@ typedef struct _command {
     char *sz; /* Command name (NULL indicates end of list) */
     void ( *pf )( char * ); /* Command handler; NULL to use default
 			       subcommand handler */
-    char *szHelp, *szUsage; /* Documentation */
+    char *szHelp, *szUsage; /* Documentation; NULL for abbreviations */
     struct _command *pc; /* List of subcommands (NULL if none) */
 } command;
 
@@ -377,6 +377,7 @@ extern void CommandAccept( char * ),
     CommandShowBoard( char * ),
     CommandShowBeavers( char * ),
     CommandShowCache( char * ),
+    CommandShowCommands( char * ),
     CommandShowConfirm( char * ),
     CommandShowCopying( char * ),
     CommandShowCrawford( char * ),

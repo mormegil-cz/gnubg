@@ -1,3 +1,7 @@
+Wed Jan 31 10:39:29 2001  Gary Wong  <gtw@research.att.com>
+
+	* show.c (ShowCommands): New function.
+
 Tue Jan 30 10:38:32 2001  Gary Wong  <gtw@research.att.com>
 
 	* gnubg.c (ShowBoard): Always inform the board window about dice

@@ -180,6 +180,7 @@ duplication of effort and to make sure our changes merge easily.
 ** "set eval cubeful" gives a poor error message.
 ** Cosmetic bug when using the rollout button in the hint window (the
   commands echoed to stdout and the prompts are in the wrong order).
+** "show marketwindow" tries to give output when no game is active.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
