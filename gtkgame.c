@@ -147,10 +147,7 @@ typedef enum _gnubgcommand {
     CMD_SET_DISPLAY,
     CMD_SET_EGYPTIAN,
     CMD_SET_JACOBY,
-    CMD_SET_MET_JACOBS,
-    CMD_SET_MET_SNOWIE,
-    CMD_SET_MET_WOOLSEY,
-    CMD_SET_MET_ZADEH,
+    CMD_SET_MET,
     CMD_SET_NACKGAMMON,
     CMD_SET_OUTPUT_MATCHPC,
     CMD_SET_OUTPUT_MWC,
@@ -261,10 +258,7 @@ static char *aszCommands[ NUM_CMDS ] = {
     "set display",
     "set egyptian",
     "set jacoby",
-    "set matchequitytable jacobs",
-    "set matchequitytable snowie",
-    "set matchequitytable woolsey",
-    "set matchequitytable zadeh",
+    NULL, /* set matchequitytable */
     "set nackgammon",
     "set output matchpc",
     "set output mwc",
@@ -343,6 +337,7 @@ static void SetCache( gpointer *p, guint n, GtkWidget *pw );
 static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
 static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw );
 static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw );
+static void SetMET( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
@@ -2141,15 +2136,8 @@ extern int InitGTK( int *argc, char ***argv ) {
           "<CheckItem>" },
 	{ "/_Settings/_Jacoby rule", NULL, Command, CMD_SET_JACOBY,
 	  "<CheckItem>" },
-	{ "/_Settings/_Match equity table", NULL, NULL, 0, "<Branch>" },
-	{ "/_Settings/_Match equity table/_Jacobs", NULL, Command,
-	  CMD_SET_MET_JACOBS, "<RadioItem>" },
-	{ "/_Settings/_Match equity table/_Snowie", NULL, Command,
-	  CMD_SET_MET_SNOWIE, "/Settings/Match equity table/Jacobs" },
-	{ "/_Settings/_Match equity table/_Woolsey", NULL, Command,
-	  CMD_SET_MET_WOOLSEY, "/Settings/Match equity table/Jacobs" },
-	{ "/_Settings/_Match equity table/_Zadeh", NULL, Command,
-	  CMD_SET_MET_ZADEH, "/Settings/Match equity table/Jacobs" },
+	{ "/_Settings/_Match equity table...", NULL, SetMET, 
+          CMD_SET_MET, NULL },
 	{ "/_Settings/_Nackgammon", NULL, Command, CMD_SET_NACKGAMMON,
 	  "<CheckItem>" },
 	{ "/_Settings/_Output", NULL, NULL, 0, "<Branch>" },
@@ -2316,7 +2304,6 @@ extern void RunGTK( void ) {
     GTKSet( &ms.nCube );
     GTKSet( ap );
     GTKSet( &ms.fTurn );
-    GTKSet( &metCurrent );
     GTKSet( &ms.gs );
     
     ShowBoard();
@@ -2946,6 +2933,11 @@ static void FileCommand( char *szPrompt, char *szCommand ) {
 static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
 
     FileCommand( "Open commands", "load commands" );
+}
+
+static void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
+
+    FileCommand( "Set match equity table", "set matchequitytable " );
 }
 
 static void LoadGame( gpointer *p, guint n, GtkWidget *pw ) {
@@ -5496,6 +5488,7 @@ extern void GTKShowMatchEquityTable( int n ) {
     GTKDisallowStdin();
     gtk_main();
     GTKAllowStdin();
+
 }
 
 
@@ -5958,18 +5951,6 @@ extern void GTKSet( void *p ) {
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	    pif, "/Settings/Dice generation/Seed..." ),
 				  rngCurrent != RNG_MANUAL );
-	fAutoCommand = FALSE;
-    } else if( p == &metCurrent ) {
-	/* Handle the MET radio items. */
-	static gnubgcommand agc[] = { CMD_SET_MET_ZADEH,
-				      CMD_SET_MET_SNOWIE,
-				      CMD_SET_MET_WOOLSEY,
-				      CMD_SET_MET_JACOBS };
-	fAutoCommand = TRUE;
-	
-	gtk_check_menu_item_set_active( GTK_CHECK_MENU_ITEM(
-	    gtk_item_factory_get_widget_by_action( pif, agc[ metCurrent ] ) ),
-					TRUE );
 	fAutoCommand = FALSE;
     } else if( p == ap ) {
 	/* Handle the player names. */
