@@ -1462,7 +1462,11 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
     log_name = 0;
   }
 
-  cGames = i;
+  for (alt = 0, cGames = 0; alt < alternatives; ++alt)
+  {
+    if ( nGamesDone[alt] > cGames )
+      cGames = nGamesDone[alt];
+  }
 
   memcpy (&rcRollout, &rcRolloutSave, sizeof (rcRollout));
   fOutputMWC = fOutputMWCSave;

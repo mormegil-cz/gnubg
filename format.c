@@ -392,13 +392,24 @@ OutputRolloutContext ( const char *szIndent, const evalsetup *pes ) {
               gettext( aszRNG[ prc->rngRollout ] ),
               prc->nSeed );
 
-  /* stop on std.err */
+   if ( ( prc->fStopOnJsd || prc->fStopMoveOnJsd || prc->fStopOnSTD )
+        && szIndent && *szIndent )
+     strcat ( sz, szIndent );
 
-  if ( prc->fStopOnSTD )
+    /* stop on std.err */
+
+   if ( prc->fStopOnSTD && !prc->fStopMoveOnJsd )
     sprintf( strchr( sz, 0 ),
              _("Stop when std.errs. are small enough: ratio "
                "%.4g (min. %d games)\n"),
              prc->rStdLimit, prc->nMinimumGames );
+
+   /* stop on JSD */
+   if ( prc->fStopOnJsd || prc->fStopMoveOnJsd )
+     sprintf( strchr( sz, 0 ),
+              _("Stop when best play is enough JSDs ahead: limit "
+                "%.4g (min. %d games)\n"),
+              prc->rJsdLimit, prc->nMinimumJsdGames );
 
   /* first play */
 
