@@ -1,0 +1,8 @@
+Sun Mar 10 22:35:28 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* woolsey.xml, jacobs.xml, snowie.xml: Calculate post crawford table as
+	"The trailer's equity at 1-away T-away post-Crawford can be calculated 
+	as twice the equity for the 1-away S-away Crawford, where S is the 
+	next odd number greater than T.". Add 1.5% for 2-away, 2-away and 
+	0.4% for 2-away, 4-away.
+

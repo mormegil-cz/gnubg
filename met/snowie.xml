@@ -307,15 +307,25 @@
   </pre-crawford-table>      
   
 
-  <post-crawford-table type="zadeh">
+  <post-crawford-table type="explicit">
 
-  <!-- does anyone have Snowie's post Crawford table??? -->
-
-    <parameters>
-      <parameter name="gammon-rate-trailer">0.25</parameter>
-      <parameter name="free-drop-2-away">0.015</parameter>
-      <parameter name="free-drop-4-away">0.004</parameter>
-    </parameters>
+    <row>
+      <me>0.500</me>
+      <me>0.489</me>
+      <me>0.314</me>
+      <me>0.310</me>
+      <me>0.186</me>
+      <me>0.186</me>
+      <me>0.112</me>
+      <me>0.112</me>
+      <me>0.066</me>
+      <me>0.066</me>
+      <me>0.040</me>
+      <me>0.040</me>
+      <me>0.024</me>
+      <me>0.024</me>
+      <me>0.010</me>
+    </row>
 
   </post-crawford-table>   
 
