@@ -35,6 +35,7 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include "positionid.h"
 
 static void AddBit( int b, unsigned char **ppuch, int *piBit ) {
@@ -117,7 +118,38 @@ static int ReadBit( unsigned char **ppuch, int *piBit ) {
     return n != 0;
 }
 
-extern void PositionFromKey( int anBoard[ 2 ][ 25 ],
+static int CheckPosition( int anBoard[ 2 ][ 25 ] ) {
+
+    int ac[ 2 ], i;
+
+    /* Check for a player with over 15 chequers */
+    for( i = ac[ 0 ] = ac[ 1 ] = 0; i < 25; i++ )
+	if( ( ac[ 0 ] += anBoard[ 0 ][ i ] ) > 15 ||
+	    ( ac[ 1 ] += anBoard[ 1 ][ i ] ) > 15 ) {
+	    errno = EINVAL;
+	    return -1;
+	}
+
+    /* Check for both players having chequers on the same point */
+    for( i = 0; i < 24; i++ )
+	if( anBoard[ 0 ][ i ] && anBoard[ 1 ][ 23 - i ] ) {
+	    errno = EINVAL;
+	    return -1;
+	}
+
+    /* Check for both players on the bar against closed boards */
+    for( i = 0; i < 6; i++ )
+	if( anBoard[ 0 ][ i ] || anBoard[ 1 ][ i ] )
+	    return 0;
+
+    if( !anBoard[ 0 ][ 24 ] || !anBoard[ 1 ][ 24 ] )
+	return 0;
+    
+    errno = EINVAL;
+    return -1;
+}
+
+extern int PositionFromKey( int anBoard[ 2 ][ 25 ],
 			     unsigned char *puch ) {
 
     int i, j, iBit = 0;
@@ -130,6 +162,8 @@ extern void PositionFromKey( int anBoard[ 2 ][ 25 ],
 	    while( puch < puchInit + 10 && ReadBit( &puch, &iBit ) )
 		anBoard[ i ][ j ]++;
 	}
+
+    return CheckPosition( anBoard );
 }
 
 static int Base64( char ch ) {
@@ -149,7 +183,7 @@ static int Base64( char ch ) {
     return 63;
 }
 
-extern void PositionFromID( int anBoard[ 2 ][ 25 ], char *pchEnc ) {
+extern int PositionFromID( int anBoard[ 2 ][ 25 ], char *pchEnc ) {
 
     unsigned char auchKey[ 10 ], ach[ 15 ], *pch = ach, *puch = auchKey;
     int i;
@@ -170,6 +204,8 @@ extern void PositionFromID( int anBoard[ 2 ][ 25 ], char *pchEnc ) {
     *puch = ( pch[ 0 ] << 2 ) | ( pch[ 1 ] >> 4 );
 
     PositionFromKey( anBoard, auchKey );
+
+    return CheckPosition( anBoard );
 }
 
 extern int EqualKeys( unsigned char auch0[ 10 ], unsigned char auch1[ 10 ] ) {
