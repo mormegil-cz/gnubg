@@ -434,7 +434,8 @@ WriteFloat ( const float r, FILE *output ) {
 static int
 generate_os ( const int nOS, const int fHeader,
               const int fCompress, const int fGammon,
-              const int nHashSize, bearoffcontext *pbc ) {
+              const int nHashSize, bearoffcontext *pbc,
+			  FILE *output) {
 
   int i;
   int n;
@@ -444,17 +445,6 @@ generate_os ( const int nOS, const int fHeader,
   time_t t;
   unsigned int npos;
   char szTmp[ 11 ];
-
-#ifdef STDOUT_FILENO 
-  FILE *output;
-
-  if( !( output = fdopen( STDOUT_FILENO, "wb" ) ) ) {
-    perror( "(stdout)" );
-    return EXIT_FAILURE;
-  }
-#else
-#define output stdout
-#endif
 
   /* initialise hash */
 
@@ -548,7 +538,7 @@ generate_os ( const int nOS, const int fHeader,
 
 static void
 NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
-            bearoffcontext *pbc ) {
+            bearoffcontext *pbc) {
 
   int d0, d1;
   movelist ml;
@@ -682,7 +672,7 @@ NDBearoff ( const int iPos, const int nPoints, float ar[ 4 ], hash *ph,
 
 static void
 generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
-              bearoffcontext *pbc ) {
+              bearoffcontext *pbc, FILE *output ) {
 
   int n = Combination ( nPoints + 15, nPoints );
 
@@ -692,17 +682,6 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
 
   hash h;
  
-#ifdef STDOUT_FILENO 
-  FILE *output;
-    
-  if( !( output = fdopen( STDOUT_FILENO, "wb" ) ) ) {
-    perror( "(stdout)" );
-    return;
-  }
-#else
-#define output stdout
-#endif
-
   if ( HashCreate ( &h, nHashSize / ( 4 * sizeof ( float ) ) ) ) {
     fprintf ( stderr, "Error creating cache\n" );
     return;
@@ -944,7 +923,7 @@ CalcPosition ( const int i, const int j, const int n ) {
 static void
 generate_ts ( const int nTSP, const int nTSC, 
               const int fHeader, const int fCubeful,
-              const int nHashSize, bearoffcontext *pbc ) {
+              const int nHashSize, bearoffcontext *pbc, FILE *output ) {
 
     int i, j, k;
     int iPos;
@@ -955,17 +934,6 @@ generate_ts ( const int nTSP, const int nTSC,
     FILE *pfTmp;
     time_t t;
     unsigned char ac[ 8 ];
-
-#ifdef STDOUT_FILENO 
-    FILE *output;
-
-    if( !( output = fdopen( STDOUT_FILENO, "wb" ) ) ) {
-	perror( "(stdout)" );
-	return;
-    }
-#else
-#define output stdout
-#endif
 
     time ( &t );
     sprintf ( szTmp, "t%06ld.bd", t % 100000 );
@@ -1099,6 +1067,8 @@ usage ( char *arg0 ) {
                                   " databases\n"
            "  -n, --normal-dist   Approximate one-sided bearoff database\n"
            "                      with normal distributions\n"
+           "  -f, --outfile filename\n"
+           "                      Output to file instead of stdout\n"
            "  -v, --version       Show version information and exit\n"
            "  -h, --help          Display usage and exit\n"
            "\n"
@@ -1130,6 +1100,9 @@ extern int main( int argc, char **argv ) {
   char *szOldBearoff = NULL;
   int fND = FALSE;
   bearoffcontext *pbc = NULL;
+  FILE *output = stdout;
+  char *outfile;
+
 
   static struct option ao[] = {
     { "two-sided", required_argument, NULL, 't' },
@@ -1146,7 +1119,7 @@ extern int main( int argc, char **argv ) {
     { NULL, 0, NULL, 0 }
   };
 
-  while ( ( ch = getopt_long ( argc, argv, "t:o:s:O:HCcgnhv", ao, NULL ) ) !=
+  while ( ( ch = getopt_long ( argc, argv, "t:o:s:O:f:HCcgnhv", ao, NULL ) ) !=
           (char) -1 ) {
     switch ( ch ) {
     case 't': /* size of two-sided */
@@ -1184,6 +1157,16 @@ extern int main( int argc, char **argv ) {
       version ();
       exit ( 0 );
       break;
+    case 'f':
+#define ERROR_TEXT "Can't open output file \'"        
+	  if( !( output = fopen( optarg, "wb" ) ) ) {
+		char *buf = malloc (1 + strlen (optarg) + strlen (ERROR_TEXT) + 1);
+		sprintf (buf, "%s%s\'", ERROR_TEXT, optarg);
+		perror (buf);
+		return EXIT_FAILURE;
+	  }
+      break;
+
     default:
       usage ( argv[ 0 ] );
       exit ( 1 );
@@ -1260,10 +1243,10 @@ extern int main( int argc, char **argv ) {
     }
     
     if ( fND ) {
-      generate_nd ( nOS, nHashSize, fHeader, pbc );
+      generate_nd ( nOS, nHashSize, fHeader, pbc, output );
     }
     else {
-      generate_os ( nOS, fHeader, fCompress, fGammon, nHashSize, pbc );
+      generate_os ( nOS, fHeader, fCompress, fGammon, nHashSize, pbc, output );
     }
 
     if ( pbc ) {
@@ -1322,7 +1305,7 @@ extern int main( int argc, char **argv ) {
       exit( 2 );
     }
     
-    generate_ts ( nTSP, nTSC, fHeader, fCubeful, nHashSize, pbc );
+    generate_ts ( nTSP, nTSC, fHeader, fCubeful, nHashSize, pbc, output );
 
     /* close old bearoff database */
 
