@@ -52,6 +52,7 @@ char *aszCredits[] = {
     "W. Stroop (Rob)",
     "Gerry Tesauro",
     "Jacques Thiriat",
+    "Sander van Rijnswou",
     "Robert-Jan Veldhuizen",
     "JP White",
     "Kit Woolsey",

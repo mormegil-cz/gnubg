@@ -386,6 +386,8 @@ command cER = {
     { "move", CommandAnalyseMove, 
       N_("Compute analysis and annotate the current "
       "move"), NULL, NULL },
+	{ "marked", CommandAnalyseMarked,
+	  N_("Re-analyse marked moves "), NULL, NULL },
     { "session", CommandAnalyseSession, 
       N_("Compute analysis and annotate every "
       "game in the session"), NULL, NULL },
@@ -2873,9 +2875,13 @@ extern void CommandHint( char *sz ) {
 	GetMatchStateCubeInfo( &ci, &ms );
 
 #if USE_GTK
-        fHasMoved = GTKGetMove ( anMove );
-        if ( fHasMoved )
-          MoveKey ( ms.anBoard, anMove, auch );
+        if ( fX ) {
+           fHasMoved = GTKGetMove ( anMove );
+           if ( fHasMoved )
+              MoveKey ( ms.anBoard, anMove, auch );
+        }
+        else
+           fHasMoved = FALSE;
 #else
         fHasMoved = FALSE;
 #endif /* ! USE_GTK */
