@@ -2996,9 +2996,11 @@ mwc2eq ( float rMwc, cubeinfo *pci ) {
 
   if ( nScore0 == 1 ) {
       rMwcWin = 1.0;
-      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, afMETPostCrawford );
+      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, 
+                                             aafMETPostCrawford[ 0 ] );
   } else if( nScore1 == 1 ) {
-      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, afMETPostCrawford );
+      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, 
+                                      aafMETPostCrawford[ 0 ] );
       rMwcLose = 0.0;
   } else {
     rMwcWin = GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
@@ -3046,9 +3048,11 @@ eq2mwc ( float rEq, cubeinfo *pci ) {
 
   if ( nScore0 == 1 ) {
       rMwcWin = 1.0;
-      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, afMETPostCrawford );
+      rMwcLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, 
+                                             aafMETPostCrawford[ 0 ] );
   } else if( nScore1 == 1 ) {
-      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, afMETPostCrawford );
+      rMwcWin = GET_METPostCrawford ( nScore0 - nCube - 1, 
+                                      aafMETPostCrawford[ 0 ] );
       rMwcLose = 0.0;
   } else {
       rMwcWin = GET_MET ( nScore0 - nCube - 1, nScore1 - 1, aafMET );
@@ -4324,11 +4328,14 @@ extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
 
     if ( nScore0 == 1 ) {
 	/* after this game will be post-Crawford */
-	float rLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, afMETPostCrawford );
+	float rLose = 1.0 - GET_METPostCrawford ( nScore1 - nCube - 1, 
+                                                  aafMETPostCrawford[ 0 ] );
 	float rLoseGammon = 
-	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 2 - 1, afMETPostCrawford );
+	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 2 - 1, 
+                                      aafMETPostCrawford[ 0 ] );
 	float rLoseBG =
-	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 3 - 1, afMETPostCrawford );
+	  1.0 - GET_METPostCrawford ( nScore1 - nCube * 3 - 1, 
+                                      aafMETPostCrawford[ 0 ] );
 
 	float rCenter = ( 1.0 + rLose ) / 2.0;
 
@@ -4343,11 +4350,14 @@ extern int SetCubeInfoMatch( cubeinfo *pci, int nCube, int fCubeOwner,
 	  ( pci->arGammonPrice[ 1 ] + 1.0 );
     } else if( nScore1 == 1 ) {
 	/* after this game will be post-Crawford */
-	float rWin = GET_METPostCrawford ( nScore0 - nCube - 1, afMETPostCrawford );
+	float rWin = GET_METPostCrawford ( nScore0 - nCube - 1, 
+                                           aafMETPostCrawford[ 0 ] );
 	float rWinGammon = 
-	  GET_METPostCrawford ( nScore0 - nCube * 2 - 1, afMETPostCrawford );
+	  GET_METPostCrawford ( nScore0 - nCube * 2 - 1, 
+                                aafMETPostCrawford[ 0 ] );
 	float rWinBG = 
-	  GET_METPostCrawford ( nScore0 - nCube * 3 - 1, afMETPostCrawford );
+	  GET_METPostCrawford ( nScore0 - nCube * 3 - 1, 
+                                aafMETPostCrawford[ 0 ] );
 
 	pci->arGammonPrice[ 0 ] =
 	  2.0 * rWinGammon / rWin - 2.0;
@@ -5145,7 +5155,7 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
 	  *prDPEq =
 	    GET_METPostCrawford ( pci->nMatchTo -
 				  pci->anScore [ pci->fMove ] - 1 - pci->nCube,
-				  afMETPostCrawford );
+				  aafMETPostCrawford[ 0 ] );
       }
       else
 	*prDPEq =
