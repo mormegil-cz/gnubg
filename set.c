@@ -890,10 +890,8 @@ extern void CommandSetPlayerName( char *sz ) {
 	sz[ 31 ] = 0;
 
     for( pch = sz; *pch; pch++ )
-	if( isspace( *pch ) ) {
-	    outputl( "Player names must not include spaces." );
-	    return;
-	}
+	if( isspace( *pch ) )
+	    *pch = '_';
     
     if( ( *sz == '0' || *sz == '1' ) && !sz[ 1 ] ) {
 	outputf( "`%c' is not a valid name.\n", *sz );
