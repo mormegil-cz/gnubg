@@ -35,6 +35,7 @@
 #include "database.h"
 #include "positionid.h"
 #include "rollout.h"
+#include "i18n.h"
 
 #if HAVE_LIBGDBM
 
@@ -76,8 +77,8 @@ extern void CommandDatabaseDump( char *sz ) {
 	pev = (dbevaluation *) dValue.dptr;
 	
 	if( !c )
-	    outputl( "Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
-		     "Date" );
+	    outputl( _("Position       Win   W(g)  W(bg) L(g)  L(bg) Trials "
+		     "Date") );
 	
 	outputf( "%14s %5.3f %5.3f %5.3f %5.3f %5.3f %6d %s",
 		 PositionIDFromKey( (unsigned char *) dKey.dptr ),
@@ -86,7 +87,7 @@ extern void CommandDatabaseDump( char *sz ) {
 		 (float) pev->asEq[ OUTPUT_WINBACKGAMMON ] / 0xFFFF,
 		 (float) pev->asEq[ OUTPUT_LOSEGAMMON ] / 0xFFFF,
 		 (float) pev->asEq[ OUTPUT_LOSEBACKGAMMON ] / 0xFFFF,
-		 pev->c, pev->t ? ctime( &pev->t ) : " (no rollout data)\n" );
+		 pev->c, pev->t ? ctime( &pev->t ) : _(" (no rollout data)\n") );
 	
 	c++;
 	
@@ -108,7 +109,7 @@ extern void CommandDatabaseDump( char *sz ) {
     }
     
     if( !c )
-	outputl( "The database is empty." );
+	outputl( _("The database is empty.") );
     
     gdbm_close( pdb );
 }
@@ -130,8 +131,8 @@ extern void CommandDatabaseExport( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to export to (see `help database "
-		 "export')." );
+	outputl( _("You must specify a file to export to (see `help database "
+		 "export').") );
 	gdbm_close( pdb );
 	return;
     }
@@ -213,8 +214,8 @@ extern void CommandDatabaseImport( char *sz ) {
     sz = NextToken( &sz );
     
     if( !sz || !*sz ) {
-	outputl( "You must specify a file to import from (see `help database "
-		 "import')." );
+	outputl( _("You must specify a file to import from (see `help database "
+		 "import').") );
 	gdbm_close( pdb );
 	return;
     }
@@ -275,7 +276,7 @@ extern void CommandDatabaseImport( char *sz ) {
     if( ferror( pf ) )
 	perror( sz );
     else if( !feof( pf ) )
-	fprintf( stderr, "%s: malformed position data\n", sz );
+	fprintf( stderr, _("%s: malformed position data\n"), sz );
     
     fclose( pf );
     gdbm_close( pdb );
@@ -361,8 +362,8 @@ extern void CommandDatabaseRollout( char *sz ) {
     }
     
     if( !fInterrupt && !c )
-	outputl( "There are no unevaluated positions in the database to roll "
-		 "out." );
+	outputl( _("There are no unevaluated positions in the database to roll "
+		 "out.") );
     
     gdbm_close( pdb );
 }
@@ -377,8 +378,8 @@ extern void CommandDatabaseGenerate( char *sz ) {
 
   if( sz && *sz ) {
       if( ( n = ParseNumber( &sz ) ) < 1 ) {
-	  outputl( "If you specify a parameter to `database generate', it\n"
-		   "must be a number of positions to create." );
+	  outputl( _("If you specify a parameter to `database generate', it\n"
+		   "must be a number of positions to create.") );
 	  return;
       }
   } else
@@ -390,7 +391,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
     return;
   }
 
-  ProgressStart( "Generating database..." );
+  ProgressStart( _("Generating database...") );
   
   while( ( !n || c <= n ) && !fInterrupt ) {
     InitBoard( anBoardGenerate );
@@ -477,8 +478,8 @@ extern void CommandDatabaseTrain( char *sz ) {
     
     if( sz && *sz ) {
 	if( ( n = ParseNumber( &sz ) ) < 1 ) {
-	    outputl( "If you specify a parameter to `database train', it\n"
-		     "must be a number of positions to train on." );
+	    outputl( _("If you specify a parameter to `database train', it\n"
+		     "must be a number of positions to train on.") );
 	    return;
 	}
     } else
@@ -490,7 +491,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 	return;
     }
 
-    ProgressStart( "Training from database..." );
+    ProgressStart( _("Training from database...") );
     
     while( ( !n || c <= n ) && !fInterrupt ) {
 	dKey = gdbm_firstkey( pdb );
@@ -539,8 +540,8 @@ extern void CommandDatabaseTrain( char *sz ) {
 	}
 	
 	if( !c ) {
-	    outputl( "There are no target evaluations in the database to "
-		     "train from." );
+	    outputl( _("There are no target evaluations in the database to "
+		     "train from.") );
 	    break;
 	}
     }
@@ -622,23 +623,23 @@ extern void CommandDatabaseVerify( char *sz ) {
 	for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ )
 	    arError[ i ] = sqrt( arError[ i ] / c );
 
-	outputf( "Error in: p(W) %5.3f p(WG) %5.3f p(WBG) %5.3f "
-		 "p(LG) %5.3f p(LBG) %5.3f\n", arError[ OUTPUT_WIN ],
+	outputf( _("Error in: p(W) %5.3f p(WG) %5.3f p(WBG) %5.3f "
+		 "p(LG) %5.3f p(LBG) %5.3f\n"), arError[ OUTPUT_WIN ],
 		 arError[ OUTPUT_WINGAMMON ], arError[ OUTPUT_WINBACKGAMMON ],
 		 arError[ OUTPUT_LOSEGAMMON ],
 		 arError[ OUTPUT_LOSEBACKGAMMON ] );
-	outputf( "Equity error %5.3f\n", arError[ OUTPUT_EQUITY ] );
+	outputf( _("Equity error %5.3f\n"), arError[ OUTPUT_EQUITY ] );
     } else
-	outputl( "There are no target evaluations in the database to "
-		 "verify against." );
+	outputl( _("There are no target evaluations in the database to "
+		 "verify against.") );
     
     gdbm_close( pdb );
 }
 #else
 static void NoGDBM( void ) {
 
-  outputl( "This installation of GNU Backgammon was compiled without GDBM\n"
-           "support, and does not implement position database operations." );
+  outputl( _("This installation of GNU Backgammon was compiled without GDBM\n"
+           "support, and does not implement position database operations.") );
 }
 
 extern void CommandDatabaseDump( char *sz ) {

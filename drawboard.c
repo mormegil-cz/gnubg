@@ -30,6 +30,7 @@
 
 #include "drawboard.h"
 #include "positionid.h"
+#include "i18n.h"
 
 int fClockwise = FALSE; /* Player 1 moves clockwise */
 
@@ -65,7 +66,7 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
         cOffX -= anBoard[ 1 ][ x ];
     }
     
-    strcpy( pch, " GNU Backgammon  Position ID: " );
+    strcpy( pch, _ (" GNU Backgammon  Position ID: ") );
 
     pch += 30;
 
@@ -86,7 +87,7 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     /* match id */
 
     if ( szMatchID && *szMatchID ) {
-      sprintf ( pch, "                 Match ID   : %s\n", szMatchID );
+      sprintf ( pch, _("                 Match ID   : %s\n"), szMatchID );
       pch = strchr ( pch, 0 );
     }
             
@@ -172,7 +173,7 @@ static char *DrawBoardStd( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     *pch++ = '\n';
     
     *pch++ = fRoll ? 'v' : '^';
-    strcpy( pch, "|                  |BAR|                  |     " );
+    strcpy( pch, _("|                  |BAR|                  |     ") );
     pch += 48;
     
     if( asz[ 3 ] )
@@ -299,7 +300,7 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
         cOffX -= anBoard[ 1 ][ x ];
     }
     
-    strcpy( pch, "    GNU Backgammon  Position ID: " );
+    strcpy( pch, _("    GNU Backgammon  Position ID: ") );
 
     pch += 33;
 
@@ -320,7 +321,7 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     /* match id */
 
     if ( szMatchID && *szMatchID ) {
-      sprintf ( pch, "                 Match ID   : %s\n", szMatchID );
+      sprintf ( pch, _("                 Match ID   : %s\n"), szMatchID );
       pch = strchr ( pch, 0 );
     }
             
@@ -405,7 +406,7 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
 
     *pch++ = '\n';
     
-    strcpy( pch, "    |                  |BAR|                  |" );
+    strcpy( pch, _("    |                  |BAR|                  |") );
     pch += 47;
     *pch++ = fRoll ? 'v' : '^';
     *pch++ = ' ';   
@@ -514,10 +515,10 @@ static char *FormatPoint( char *pch, int n ) {
     assert( n >= 0 );
     
     if( !n ) {
-        strcpy( pch, "off" );
+        strcpy( pch, _("off") );
         return pch + 3;
     } else if( n == 25 ) {
-        strcpy( pch, "bar" );
+        strcpy( pch, _("bar") );
         return pch + 3;
     } else if( n > 9 )
         *pch++ = n / 10 + '0';
@@ -915,7 +916,7 @@ extern char *FIBSBoard( char *pch, int anBoard[ 2 ][ 25 ], int fRoll,
     int i, anOff[ 2 ];
     
     /* Names and match length/score */
-    strcpy( sz, "board:" );
+    strcpy( sz, _("board:") );
     
     for( sz += 6; *szPlayer; szPlayer++ )
 	*sz++ = ( *szPlayer != ':' ? *szPlayer : '_' );

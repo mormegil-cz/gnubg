@@ -282,7 +282,11 @@ cubeinfo ciCubeless = { 1, 0, 0, 0, { 0, 0 }, FALSE, FALSE, FALSE,
 			      { 1.0, 1.0, 1.0, 1.0 } };
 
 char *aszEvalType[] = 
-   { "No evaluation", "Neural net evaluation", "Rollout" };
+   { 
+     N_ ("No evaluation"), 
+     N_ ("Neural net evaluation"), 
+     N_ ("Rollout")
+   };
 
 static evalcontext ecBasic = { 0, FALSE, 0, 0, TRUE, FALSE, 0.0, 0.0 };
 
@@ -327,8 +331,13 @@ static randctx rc;
  */
 
 const char *aszSettings[ NUM_SETTINGS ] = {
-  "beginner", "novice", "intermediate", "advanced", "expert", "world class",
-  "world class++" };
+  N_ ("beginner"), 
+  N_ ("novice"), 
+  N_ ("intermediate"), 
+  N_ ("advanced"), 
+  N_ ("expert"), 
+  N_ ("world class"),
+  N_ ("world class++") };
 
 evalcontext aecSettings[ NUM_SETTINGS ] = {
   { 0, TRUE, 0, 0, TRUE, FALSE, 0.0 , 0.060 }, /* beginner */
@@ -342,8 +351,15 @@ evalcontext aecSettings[ NUM_SETTINGS ] = {
 
 
 const char *aszSearchSpaces[ NUM_SEARCHSPACES ] = {
-  "super tiny", "tiny", "small", "medium", "large", "huge", 
-   "enormous", "gigantic" };
+  N_ ("super tiny"), 
+  N_ ("tiny"), 
+  N_ ("small"), 
+  N_ ("medium"), 
+  N_ ("large"), 
+  N_ ("huge"), 
+  N_ ("enormous"), 
+  N_ ("gigantic")
+};
 
 const int anSearchCandidates[ NUM_SEARCHSPACES ] = {
   2, 3, 4, 6, 7, 8, 16, 127
@@ -745,7 +761,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 		    if( errno )
 			perror( szDatabase );
 		    else
-			fprintf( stderr, "%s: incomplete bearoff database\n",
+			fprintf( stderr, _("%s: incomplete bearoff database\n"),
 				 szDatabase );
 		    
 		    free( pBearoff1 );
@@ -769,7 +785,7 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	       checksum, to make sure the contents were correct. */
 	    md5_buffer( pBearoff1, DATABASE_SIZE, ach );
 	    if( memcmp( ach, achCorrect, 16 ) ) {
-		fprintf( stderr, "%s: not a valid bearoff database\n",
+		fprintf( stderr, _("%s: not a valid bearoff database\n"),
 			 szDatabase );
 		
 		if( fMalloc )
@@ -800,13 +816,14 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	if( fread( &r, sizeof r, 1, pfWeights ) < 1 )
 	    perror( szWeightsBinary );
 	else if( r != WEIGHTS_MAGIC_BINARY )
-	    fprintf( stderr, "%s: not a weights file\n", szWeightsBinary );
+	    fprintf( stderr, _("%s: not a weights file\n"), szWeightsBinary );
 	else if( fread( &r, sizeof r, 1, pfWeights ) < 1 )
 	    perror( szWeightsBinary );
 	else if( r != WEIGHTS_VERSION_BINARY )
-	    fprintf( stderr, "%s: incorrect weights version (version "
-		     WEIGHTS_VERSION " is required, but these weights "
-		     "are %.2f)\n", szWeightsBinary, r );
+	    fprintf( stderr, _("%s: incorrect weights version (version %s "
+                               " is required, but these weights "
+                               "are %.2f)\n"), 
+                     WEIGHTS_VERSION, szWeightsBinary, r );
 	else {
 #if HAVE_MMAP
 	    struct stat st;
@@ -852,11 +869,12 @@ EvalInitialise( char *szWeights, char *szWeightsBinary,
 	else {
 	    if( fscanf( pfWeights, "GNU Backgammon %15s\n",
 			szFileVersion ) != 1 )
-		fprintf( stderr, "%s: not a weights file\n", szWeights );
+		fprintf( stderr, _("%s: not a weights file\n"), szWeights );
 	    else if( strcmp( szFileVersion, WEIGHTS_VERSION ) )
-		fprintf( stderr, "%s: incorrect weights version (version "
-			 WEIGHTS_VERSION " is required,\nbut these weights "
-			 "are %s)\n", szWeights, szFileVersion );
+                fprintf( stderr, _("%s: incorrect weights version (version "
+                                   "%s is required,\nbut these weights "
+                                   "are %s)\n"), 
+                         WEIGHTS_VERSION, szWeights, szFileVersion );
 	    else {
 
                 PushLocale ( "C" );
@@ -3665,18 +3683,18 @@ static void DumpOver( int anBoard[ 2 ][ 25 ], char *pchOutput ) {
     EvalOver( anBoard, ar );
 
     if( ar[ OUTPUT_WIN ] > 0.0 )
-	strcpy( pchOutput, "Win " );
+	strcpy( pchOutput, _("Win ") );
     else
-	strcpy( pchOutput, "Loss " );
+	strcpy( pchOutput, _("Loss ") );
 
     if( ar[ OUTPUT_WINBACKGAMMON ] > 0.0 ||
 	ar[ OUTPUT_LOSEBACKGAMMON ] > 0.0 )
-	strcat( pchOutput, "(backgammon)\n" );
+	strcat( pchOutput, _("(backgammon)\n") );
     else if( ar[ OUTPUT_WINGAMMON ] > 0.0 ||
 	ar[ OUTPUT_LOSEGAMMON ] > 0.0 )
-	strcat( pchOutput, "(gammon)\n" );
+	strcat( pchOutput, _("(gammon)\n") );
     else
-	strcat( pchOutput, "(single)\n" );
+	strcat( pchOutput, _("(single)\n") );
 }
 
 static void DumpBearoff2( int anBoard[ 2 ][ 25 ], char *szOutput ) {
@@ -3695,7 +3713,7 @@ static void DumpBearoff1( int anBoard[ 2 ][ 25 ], char *szOutput ) {
     nOpp = PositionBearoff( anBoard[ 0 ] );
     n = PositionBearoff( anBoard[ 1 ] );
 
-    strcpy( szOutput, "Rolls\tPlayer\tOpponent\n" );
+    strcpy( szOutput, _("Rolls\tPlayer\tOpponent\n") );
     
     for( i = 0; i < 32; i++ ) {
 	an[ 0 ] = pBearoff1[ ( n << 6 ) | ( i << 1 ) ] +
@@ -3817,7 +3835,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   cubedecision cd;
   evalcontext ec;
     
-  strcpy( szOutput, "Evaluator: \t" );
+  strcpy( szOutput, _("Evaluator: \t") );
     
   switch( pc ) {
   case CLASS_OVER: /* Game already finished */
@@ -3852,11 +3870,11 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   szOutput = strchr( szOutput, 0 );    
 
   if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
-    strcpy( szOutput, "\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
-	    "Equity  (cubeful)\n" );
+    strcpy( szOutput, _("\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
+	    "Equity  (cubeful)\n") );
   else
-    strcpy( szOutput, "\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
-	    "Mwc     (cubeful)\n" );
+    strcpy( szOutput, _("\n       \tWin   \tW(g)  \tW(bg) \tL(g)  \tL(bg) \t"
+	    "Mwc     (cubeful)\n") );
 
   nPlies = pec->nPlies > 9 ? 9 : pec->nPlies;
 
@@ -3891,9 +3909,9 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
 
     if( !i )
-	    strcpy( szOutput, "static" );
+	    strcpy( szOutput, _("static") );
     else
-	    sprintf( szOutput, "%2d ply", i );
+	    sprintf( szOutput, _("%2d ply"), i );
 
     szOutput = strchr( szOutput, 0 );
 
@@ -3981,8 +3999,8 @@ static void StatusBearoff2( char *sz ) {
     if( !pBearoff2 )
 	return;
 
-    strcpy( sz, " * 2-sided bearoff database evaluator:\n"
-	    "   - up to 6 chequers (924 positions) per player.\n\n" );
+    strcpy( sz, _(" * 2-sided bearoff database evaluator:\n"
+	    "   - up to 6 chequers (924 positions) per player.\n\n") );
 }
 
 static void StatusBearoff1( char *sz ) {
@@ -3990,32 +4008,33 @@ static void StatusBearoff1( char *sz ) {
     if( !pBearoff1 )
 	return;
 
-    sprintf( sz, " * 1-sided %sbearoff database evaluator:\n"
-	     "   - up to 6 points (54264 positions) per player.\n\n",
-	     fBearoffHeuristic ? "heuristic " : "" );
+    sprintf( sz, _(" * 1-sided %sbearoff database evaluator:\n"
+	     "   - up to 6 points (54264 positions) per player.\n\n"),
+	     fBearoffHeuristic ? _("heuristic ") : "" );
 }
 
 static void StatusNeuralNet( neuralnet *pnn, char *szTitle, char *sz ) {
 
-    sprintf( sz, " * %s neural network evaluator:\n"
-	     "   - version " WEIGHTS_VERSION ", %d inputs, %d hidden units, "
-	     "trained on %d positions.\n\n",
-	     szTitle, pnn->cInput, pnn->cHidden, pnn->nTrained );
+  sprintf( sz, _(" * %s neural network evaluator:\n"
+                 "   - version %s, %d inputs, %d hidden units, "
+                 "trained on %d positions.\n\n"),
+           WEIGHTS_VERSION, 
+           szTitle, pnn->cInput, pnn->cHidden, pnn->nTrained );
 }
 
 static void StatusRace( char *sz ) {
 
-    StatusNeuralNet( &nnRace, "Race", sz );
+    StatusNeuralNet( &nnRace, _("Race"), sz );
 }
 
 static void StatusCrashed( char *sz ) {
 
-    StatusNeuralNet( &nnContact, "Crashed", sz );
+    StatusNeuralNet( &nnContact, _("Crashed"), sz );
 }
 
 static void StatusContact( char *sz ) {
 
-    StatusNeuralNet( &nnContact, "Contact", sz );
+    StatusNeuralNet( &nnContact, _("Contact"), sz );
 }
 
 static classstatusfunc acsf[ N_CLASSES ] = {
@@ -4041,37 +4060,37 @@ extern char
   switch ( cd ) {
 
   case DOUBLE_TAKE:
-    return "Double, take";
+    return _("Double, take");
   case DOUBLE_PASS:
-    return "Double, pass";
+    return _("Double, pass");
   case NODOUBLE_TAKE:
-    return "No double, take";
+    return _("No double, take");
   case TOOGOOD_TAKE:
-    return "Too good to double, take";
+    return _("Too good to double, take");
   case TOOGOOD_PASS:
-    return "Too good to double, pass";
+    return _("Too good to double, pass");
   case DOUBLE_BEAVER:
-    return "Double, beaver";
+    return _("Double, beaver");
   case NODOUBLE_BEAVER:
-    return "No double, beaver";
+    return _("No double, beaver");
   case REDOUBLE_TAKE:
-    return "Redouble, take";
+    return _("Redouble, take");
   case REDOUBLE_PASS:
-    return "Redouble, pass";
+    return _("Redouble, pass");
   case NO_REDOUBLE_TAKE:
-    return "No redouble, take";
+    return _("No redouble, take");
   case TOOGOODRE_TAKE:
-    return "Too good to redouble, take";
+    return _("Too good to redouble, take");
   case TOOGOODRE_PASS:
-    return "Too good to redouble, pass";
+    return _("Too good to redouble, pass");
   case NO_REDOUBLE_BEAVER:
-    return "No redouble, beaver";
+    return _("No redouble, beaver");
   case NODOUBLE_DEADCUBE:
-    return "Never double, take (dead cube)";
+    return _("Never double, take (dead cube)");
   case NO_REDOUBLE_DEADCUBE:
-    return "Never redouble, take (dead cube)";
+    return _("Never redouble, take (dead cube)");
   default:
-    return "I have no idea!";
+    return _("I have no idea!");
   }
 
 }
@@ -4086,10 +4105,10 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
   static char *pc;
 
   static char *aszCubeString[ 4 ][ 2 ] = {
-    { "Unknown", "Unknown" },
-    { "No double", "No redouble" },
-    { "Double, take", "Redouble, take" },
-    { "Double, pass", "Redouble, pass" } };
+    { N_ ("Unknown"), N_ ("Unknown") },
+    { N_ ("No double"), N_ ("No redouble") },
+    { N_ ("Double, take"), N_ ("Redouble, take") },
+    { N_ ("Double, pass"), N_ ("Redouble, pass") } };
 
   /* Get cube decision */
 
@@ -4194,11 +4213,11 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
   if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
     sprintf ( pc, "%-20s: %+6.3f\n",
-              aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ],
+              gettext ( aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ] ),
               arDouble [ iOptimal ] );
   else
     sprintf ( pc, "%-20s: %6.2f%%\n",
-              aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ],
+              gettext ( aszCubeString[ iOptimal ][ pci->fCubeOwner != -1 ] ),
               100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
 
   
@@ -4207,12 +4226,12 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
   pc = strchr ( pc, 0 );
   if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
     sprintf ( pc, "%-20s: %+6.3f   (%+6.3f)\n",
-              aszCubeString[ iBest ][ pci->fCubeOwner != -1 ],
+              gettext ( aszCubeString[ iBest ][ pci->fCubeOwner != -1 ] ),
               arDouble[ iBest ],
               arDouble [ iBest ] - arDouble [ iOptimal ] );
   else
     sprintf ( pc, "%-20s: %6.2f%%   (%+6.2f%%)\n",
-              aszCubeString[ iBest ][ pci->fCubeOwner != -1 ],
+              gettext ( aszCubeString[ iBest ][ pci->fCubeOwner != -1 ] ),
               100.0 * eq2mwc ( arDouble[ iBest ], pci ),
               100.0 * eq2mwc ( arDouble[ iBest ], pci ) - 
               100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
@@ -4224,12 +4243,12 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
   pc = strchr ( pc, 0 );
   if ( ! pci->nMatchTo || ( pci->nMatchTo && ! fOutputMWC ) )
     sprintf ( pc, "%-20s: %+6.3f   (%+6.3f)\n\n",
-              aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ],
+              gettext ( aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ] ),
               arDouble[ iWorst ],
               arDouble [ iWorst ] - arDouble [ iOptimal ] );
   else
     sprintf ( pc, "%-20s: %6.2f%%   (%+6.2f%%)\n\n",
-              aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ],
+              gettext ( aszCubeString[ iWorst ][ pci->fCubeOwner != -1 ] ),
               100.0 * eq2mwc ( arDouble[ iWorst ], pci ),
               100.0 * eq2mwc ( arDouble[ iWorst ], pci ) - 
               100.0 * eq2mwc ( arDouble[ iOptimal ], pci ) );
@@ -4239,7 +4258,7 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci,
 
   pc = strchr ( pc, 0 );
 
-  sprintf ( pc, "Correct cube action: %s\n",
+  sprintf ( pc, _("Correct cube action: %s\n"),
             GetCubeRecommendation ( cd ) );
 
 
@@ -5934,12 +5953,12 @@ extern char *FormatEval ( char *sz, evalsetup *pes ) {
     strcpy ( sz, "" );
     break;
   case EVAL_EVAL:
-    sprintf ( sz, "%s %1i-ply", 
-              pes->ec.fCubeful ? "Cubeful" : "Cubeless",
+    sprintf ( sz, _("%s %1i-ply"), 
+              pes->ec.fCubeful ? _("Cubeful") : _("Cubeless"),
               pes->ec.nPlies );
     break;
   case EVAL_ROLLOUT:
-    sprintf ( sz, "%s", "Rollout" );
+    sprintf ( sz, "%s", _("Rollout") );
     break;
   default:
     printf ("pes->et: %i\n", pes->et );

@@ -54,6 +54,7 @@
 #include "md5.h"
 #include "mt19937int.h"
 #include "isaac.h"
+#include "i18n.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -97,7 +98,7 @@ static int GetManualDice( int anDice[ 2 ] ) {
 	  return -1;
       }
       
-      sz = GetInput( "Enter dice: " );
+      sz = GetInput( _("Enter dice: ") );
 
       if( fInterrupt ) {
 	  anDice[ 0 ] = anDice[ 1 ] = 0;
@@ -114,7 +115,7 @@ static int GetManualDice( int anDice[ 2 ] ) {
 	      pz++;
 
 	  if ( !*pz ) {
-	      outputl( "You must enter two numbers between 1 and 6." );
+	      outputl( _("You must enter two numbers between 1 and 6.") );
 	      goto TryAgain;
 	  }
 	  
@@ -131,7 +132,7 @@ extern void PrintRNGSeed( void ) {
 
     switch( rngCurrent ) {
     case RNG_MD5:
-	outputf( "The current seed is %u.\n", nMD5 );
+	outputf( _("The current seed is %u.\n"), nMD5 );
 	break;
 	
     case RNG_USER:
@@ -146,8 +147,8 @@ extern void PrintRNGSeed( void ) {
 	abort();
 #endif
     default:
-	outputl( "You cannot show the seed with this random number "
-		 "generator." );
+	outputl( _("You cannot show the seed with this random number "
+		 "generator.") );
     }
 }
 
@@ -327,7 +328,7 @@ extern int  UserRNGOpen() {
      * Bugger! Can't load shared library
      */
 
-    outputl( "Could not load shared library userrng.so." );
+    outputl( _("Could not load shared library userrng.so.") );
     
     return 0;
   } 
