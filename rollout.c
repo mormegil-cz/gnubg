@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "backgammon.h"
@@ -441,8 +442,6 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
                       float aarOutput[][ NUM_ROLLOUT_OUTPUTS ], 
                       int iTurn, int iGame,
                       cubeinfo aci[], int cci, rolloutcontext *prc ) {
-
-  positionclass pc;
   int anDice [ 2 ];
   cubeinfo *pciLocal, *pci;
   cubedecision cd;

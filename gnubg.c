@@ -2723,17 +2723,17 @@ extern void CommandSaveSettings( char *szParam ) {
 #endif
 	     fDisplay ? "on" : "off" );
 
-    sprintf( szTemp, "set evaluation chequerplay", i );
+    sprintf( szTemp, "set evaluation chequerplay" );
     SaveEvalSetupSettings ( pf, szTemp, &etEvalChequer, &esEvalChequer );
 
-    sprintf( szTemp, "set evaluation cubedecision", i );
+    sprintf( szTemp, "set evaluation cubedecision" );
     SaveEvalSetupSettings ( pf, szTemp, &etEvalCube, &esEvalCube );
 
-    sprintf( szTemp, "set analysis chequerplay", i );
+    sprintf( szTemp, "set analysis chequerplay" );
     SaveEvalSetupSettings ( pf, szTemp, 
                             &etAnalysisChequer, &esAnalysisChequer );
 
-    sprintf( szTemp, "set analysis cubedecision", i );
+    sprintf( szTemp, "set analysis cubedecision" );
     SaveEvalSetupSettings ( pf, szTemp, &etAnalysisCube, &esAnalysisCube );
 
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );

@@ -1252,8 +1252,8 @@ CommandSetRolloutPlayer ( char *sz ) {
     int i;
 
     if( !pch ) {
-	outputf( "You must specify a player -- try\n"
-                 " `help set %s player'.", szSet );
+	outputf( "You must specify a player -- try `help set %s player'.\n",
+		 szSetCommand );
 	
 	return;
     }
@@ -1291,11 +1291,9 @@ CommandSetRolloutPlayer ( char *sz ) {
     }
     
     outputf( "Unknown player `%s' -- try\n"
-             "`help set %s player'.\n", pch );
+             "`help set %s player'.\n", pch, szSetCommand );
 }
 
-
-    
 extern void CommandSetScore( char *sz ) {
 
     int n0, n1;

@@ -264,6 +264,7 @@ duplication of effort and to make sure our changes merge easily.
   both players have up to 11 chequers in the home board onto a CD-ROM).
 ** Add optional time rules, for tournament play when clocks are used.
 ** Add more optional feature tests to "make check" -- databases, X?
+** Add import/export tests.
 ** Change the fConfirm ("are you sure you want to abort the game in
   progress") checks so that they _do_ ask when the game is over but the
   match is still in progress, and they _don't_ ask if a game has not been
