@@ -1,3 +1,7 @@
+Thy Nov 27 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+	* htmlimages.c: Fix dice colour
+	* gtkboard.c: Remove previous fix...
+
 Wed Nov 26 22:12:37 2003 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* gtkgame.c: when opening the bug report page in a browser window
@@ -7,7 +11,6 @@ Mon Nov 24 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c: Make sure preview appears if libxml not present
 	* gtkboard.c: Remove valgrind error
-
 
 Sun Nov 23 21:07:12 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
