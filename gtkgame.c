@@ -924,8 +924,7 @@ static void CreateGameWindow( void ) {
     GtkWidget *psw = gtk_scrolled_window_new( NULL, NULL ),
 	*pvbox = gtk_vbox_new( FALSE, 0 ),
 	*phbox = gtk_hbox_new( FALSE, 0 ),
-	*pm = gtk_menu_new(),
-        *pwButton = gtk_button_new_with_label("Dump");
+	*pm = gtk_menu_new();
     GtkStyle *ps;
     GdkColormap *pcmap;
     
@@ -967,7 +966,7 @@ static void CreateGameWindow( void ) {
 			      pm );
     gtk_option_menu_set_history( GTK_OPTION_MENU( pom ), 0 );
     gtk_box_pack_start( GTK_BOX( phbox ), pom, TRUE, TRUE, 4 );
-    gtk_box_pack_start( GTK_BOX( phbox ), pwButton, TRUE, TRUE, 4 );
+/*    gtk_box_pack_start( GTK_BOX( phbox ), pwButton, FALSE, FALSE, 4 ); */
     
     gtk_container_add( GTK_CONTAINER( pvbox ), psw );
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
