@@ -2080,7 +2080,7 @@ static gint board_slide_timeout( gpointer p ) {
 extern void board_animate( Board *board, int move[ 8 ], int player ) {
 
     BoardData *pbd = board->board_data;
-    int n, f;
+    int n, f, id;
 	
     if( pbd->animate_computer_moves == ANIMATE_NONE )
 	return;
@@ -2101,8 +2101,14 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 	if( ( f = !GTK_WIDGET_HAS_GRAB( pbd->stop ) ) )
 	    gtk_grab_add( pbd->stop );
 	
+	id = gtk_signal_connect_after( GTK_OBJECT( pbd->stop ),
+				       "key-press-event",
+				       GTK_SIGNAL_FUNC( gtk_true ), NULL );
+	
 	gtk_main_iteration();
 
+	gtk_signal_disconnect( GTK_OBJECT( pbd->stop ), id );
+	
 	if( f )
 	    gtk_grab_remove( pbd->stop );
     }

@@ -234,14 +234,10 @@ functions:
 ** Issuing some commands (e.g. "set clockwise") while in edit mode
   destroys the editing changes.
 ** "help next" (and "next <tab>") are incomplete.
-** Hit C-r (i.e. roll) repeatedly during animation, and the assertion
-  !fComputing at the start of NextTurn can fail.  This seems to be caused
-  by incorrect recursion from the call to fnAction() part way through
-  NextTurn.  Presumably the problem is that the main GTK loop at some
-  point is allowing input, when it shouldn't be (input should be
-  grabbed -- see HandleXAction and board_animate).
 ** Does VarRednRollout use the pci parameter correctly?  It looks like
   it doesn't pay attention to which player is on roll.
+** In position bN8ZBADYthUDIA and roll 11, the move 13/12*/11 13/12 10/9 is
+  shown as 13/12*/11 13/12* 10/9.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

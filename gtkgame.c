@@ -466,16 +466,23 @@ int fEndDelay;
 
 extern void GTKDelay( void ) {
 
-    int f;
+    int f, id;
     
     GTKDisallowStdin();
     
     while( !fInterrupt && !fEndDelay ) {
+	/* Grab events so that the board window knows this is a re-entrant
+	   call, and won't allow commands like roll, move or double. */
 	if( ( f = !GTK_WIDGET_HAS_GRAB( pwGrab ) ) )
 	    gtk_grab_add( pwGrab );
 	
+	id = gtk_signal_connect_after( GTK_OBJECT( pwGrab ), "key-press-event",
+				       GTK_SIGNAL_FUNC( gtk_true ), NULL );
+	
 	gtk_main_iteration();
 
+	gtk_signal_disconnect( GTK_OBJECT( pwGrab ), id );
+	
 	if( f )
 	    gtk_grab_remove( pwGrab );
     }
