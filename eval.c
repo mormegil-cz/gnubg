@@ -1903,40 +1903,20 @@ enum {
   OBG_POSSIBLE = 0x8
 };
 
-/* A shameful HACK.
-   Instead of implementing an equivalent to FindBestMoveInEval, use a global
-   to control evaluation type.
-   When starting a series of 0ply evaluations, ScoreMoves sets 'moveNumber'
-   to -1. Each evaluation increments it, and at the end ScoreMoves sets it
-   back to -2 (default net evaluation, changes nothing).
-*/
-   
-static int moveNumber = -2;
+static int nContext = -1;
 
-static
-#if __GNUC__
-inline
-#endif
-NNEvalType NNevalAction(void)
+static inline NNEvalType
+NNevalAction( int nLastContext )
 {
-#if 1
-    /* Incremental evaluations are currently buggy -- disable them for
-       now.  See <bug-gnubg@gnu.org> discussions for details. */
-    return NNEVAL_NONE;
-#else
-  switch( moveNumber ) {
-    /* default, no change */
-    case -2:  return NNEVAL_NONE;
-
-    /* start a series of evaluations */
-    case -1:  moveNumber = 0; return NNEVAL_SAVE;
-
-    /* middle of series */
-    default:  ++moveNumber; break;
-  }
-
-  return NNEVAL_FROMBASE;
-#endif
+    if( nContext < 0 )
+	/* incremental evaluation not useful */
+	return NNEVAL_NONE;
+    else if( nContext != nLastContext )
+	/* starting a new context; save base in the hope it will be useful */
+	return NNEVAL_SAVE;
+    else
+	/* context hit!  use the previously computed base */
+	return NNEVAL_FROMBASE;
 }
 
 /* side - side that potentially can win a backgammon */
@@ -2020,11 +2000,14 @@ static void
 EvalRace(int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ )
 {
   float arInput[ NUM_INPUTS ];
+  static int nLastContext;
 
   CalculateRaceInputs( anBoard, arInput );
     
-  NeuralNetEvaluate( &nnRace, arInput, arOutput,  NNevalAction() );
-
+  NeuralNetEvaluate( &nnRace, arInput, arOutput,
+		     NNevalAction( nLastContext ) );
+  nLastContext = nContext;
+  
   /* anBoard[1] is on roll */
   {
     /* total men for side not on roll */
@@ -2116,20 +2099,26 @@ static void
 EvalContact( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm*/ ) {
     
     float arInput[ NUM_INPUTS ];
+    static int nLastContext;
     
     CalculateInputs( anBoard, arInput );
     
-    NeuralNetEvaluate( &nnContact, arInput, arOutput, NNevalAction() );
+    NeuralNetEvaluate( &nnContact, arInput, arOutput,
+		       NNevalAction( nLastContext ) );
+    nLastContext = nContext;
 }
 
 static void
 EvalCrashed( int anBoard[ 2 ][ 25 ], float arOutput[] /*, int nm */ ) {
     
     float arInput[ NUM_INPUTS ];
+    static int nLastContext;
     
     CalculateInputs( anBoard, arInput );
     
-    NeuralNetEvaluate( &nnCrashed, arInput, arOutput, NNevalAction() );
+    NeuralNetEvaluate( &nnCrashed, arInput, arOutput,
+		       NNevalAction( nLastContext ) );
+    nLastContext = nContext;
 }
 
 static void
@@ -3069,13 +3058,14 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
   int i;
   /* return value */
   int r = 0;
-    
+  int nSavedContext = nContext;
+  static int nNextContext;
+  
   pml->rBestScore = -99999.9;
 
-  if( nPlies == 0 ) {
-    /* start move count */
-    moveNumber = -1;
-  }
+  if( nPlies == 0 )
+      /* start incremental evaluations */
+      nContext = ++nNextContext;
     
   for( i = 0; i < pml->cMoves; i++ ) {
     if( ScoreMove( pml->amMoves + i, pci, pec, nPlies ) < 0 ) {
@@ -3092,10 +3082,9 @@ ScoreMoves( movelist *pml, cubeinfo *pci, evalcontext *pec, int nPlies )
     }
   }
 
-  if( nPlies == 0 ) {
-    /* deactivate */
-    moveNumber = -2;
-  }
+  if( nPlies == 0 )
+      /* restore old evaluation context */
+      nContext = nSavedContext;
     
   return 0;
 }
