@@ -4501,6 +4501,13 @@ SetVariation( const bgvariation bgvx ) {
   bgvDefault = bgvx;
   CommandShowVariation( NULL );
 
+  if ( ms.gs != GAME_NONE )
+    outputf( _("The current match or session is being played as `%s'.\n"),
+             gettext( aszVariations[ ms.bgv ] ) );
+
+  outputf( _("Please start a new match or session to play `%s'\n"),
+           gettext( aszVariations[ bgvDefault ] ) );
+
 #if USE_GUI
     if( fX && ms.gs == GAME_NONE )
 	ShowBoard();
