@@ -1,3 +1,7 @@
+Thu Jul  4 18:50:27 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* hash.c (CacheStat): only assign parameters if not NULL.
+
 Wed Jul  3 13:56:25 2002  Joseph Heled  <pepster@users.sourceforge.net>
 
 	* New cache code. Faster, and higher hit %. You can revert by

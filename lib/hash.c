@@ -411,8 +411,11 @@ CacheResize( cache *pc, int cNew )
 void
 CacheStats(cache* pc, int* pcLookup, int* pcHit)
 {
-  *pcLookup = pc->cLookup;
-  *pcHit = pc->cHit;
+   if ( pcLookup )
+      *pcLookup = pc->cLookup;
+
+   if ( pcHit )
+      *pcHit = pc->cHit;
 }
 
 

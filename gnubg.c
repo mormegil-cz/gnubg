@@ -3577,7 +3577,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     char szTemp[ 1024 ];
     FILE *pf;
-    int i; /* , cCache; */
+    int i, cCache; 
     char *szFile;
 
     szParam = NextToken ( &szParam );
@@ -3682,10 +3682,10 @@ extern void CommandSaveSettings( char *szParam ) {
 	     fAutoMove ? "on" : "off",
 	     fAutoRoll ? "on" : "off",
 	     nBeavers );
-#if 0
+//#if 0
     EvalCacheStats( NULL, &cCache, NULL, NULL );
     fprintf( pf, "set cache %d\n", cCache );
-#endif
+//#endif
     fprintf( pf, "set clockwise %s\n"
 	     "set confirm new %s\n"
 	     "set confirm save %s\n"
