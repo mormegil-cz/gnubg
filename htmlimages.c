@@ -40,6 +40,10 @@
 #include <unistd.h>
 #endif
 
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
 #if HAVE_LIBART
 #include <libart_lgpl/art_misc.h>
 #include <libart_lgpl/art_affine.h>
