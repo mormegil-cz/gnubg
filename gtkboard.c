@@ -41,6 +41,7 @@
 #include "gtkprefs.h"
 #include "positionid.h"
 #include "matchid.h"
+#include "i18n.h"
 
 #if !GTK_CHECK_VERSION(1,3,10)
 #define gtk_style_get_font(s) ((s)->font)
@@ -708,7 +709,7 @@ static void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
    move and position ID labels. */
 static int update_move( BoardData *bd ) {
     
-    char *move = "Illegal move", move_buf[ 40 ];
+    char *move = _("Illegal move"), move_buf[ 40 ];
     gint i, points[ 2 ][ 25 ];
     guchar key[ 10 ];
     int fIncomplete = TRUE, fIllegal = TRUE;
@@ -720,7 +721,7 @@ static int update_move( BoardData *bd ) {
     
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( bd->edit ) ) &&
 	bd->playing ) {
-	move = "(Editing)";
+	move = _("(Editing)");
 	fIncomplete = fIllegal = FALSE;
     } else if( EqualBoards( points, bd->old_board ) ) {
         /* no move has been made */
@@ -1834,7 +1835,7 @@ static gint board_set( Board *board, const gchar *board_text ) {
 	    sprintf( buf, "%d", bd->match_to );
 	    gtk_label_set_text( GTK_LABEL( bd->match ), buf );
 	} else
-	    gtk_label_set_text( GTK_LABEL( bd->match ), "unlimited" );
+	    gtk_label_set_text( GTK_LABEL( bd->match ), _("unlimited") );
 
 	padj0 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score0 ) );
 	padj1 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score1 ) );
@@ -4559,44 +4560,44 @@ static void board_init( Board *board ) {
     gtk_widget_set_name( bd->move, "move" );
 
     bd->takedrop = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( "Take" );
+    pw = gtk_button_new_with_label( _("Take") );
     gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "take" );
     gtk_container_add( GTK_CONTAINER( bd->takedrop ), pw );
-    pw = gtk_button_new_with_label( "Drop" );
+    pw = gtk_button_new_with_label( _("Drop") );
     gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "drop" );
     gtk_container_add( GTK_CONTAINER( bd->takedrop ), pw );
-    bd->redouble = gtk_button_new_with_label( "Redouble" );
+    bd->redouble = gtk_button_new_with_label( _("Redouble") );
     gtk_signal_connect( GTK_OBJECT( bd->redouble ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "redouble" );
     gtk_container_add( GTK_CONTAINER( bd->takedrop ), bd->redouble );
     gtk_container_add( GTK_CONTAINER( board ), bd->takedrop );
     
     bd->rolldouble = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( "Roll" );
+    pw = gtk_button_new_with_label( _("Roll") );
     gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "roll" );
     gtk_container_add( GTK_CONTAINER( bd->rolldouble ), pw );
-    bd->doub = gtk_button_new_with_label( "Double" );
+    bd->doub = gtk_button_new_with_label( _("Double") );
     gtk_signal_connect( GTK_OBJECT( bd->doub ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "double" );
     gtk_container_add( GTK_CONTAINER( bd->rolldouble ), bd->doub );
     gtk_container_add( GTK_CONTAINER( board ), bd->rolldouble );
 
     bd->agreedecline = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( "Agree" );
+    pw = gtk_button_new_with_label( _("Agree") );
     gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "agree" );
     gtk_container_add( GTK_CONTAINER( bd->agreedecline ), pw );
-    pw = gtk_button_new_with_label( "Decline" );
+    pw = gtk_button_new_with_label( _("Decline") );
     gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "decline" );
     gtk_container_add( GTK_CONTAINER( bd->agreedecline ), pw );
     gtk_container_add( GTK_CONTAINER( board ), bd->agreedecline );
 
     bd->play = gtk_hbutton_box_new();
-    pw = gtk_button_new_with_label( "Play" );
+    pw = gtk_button_new_with_label( _("Play") );
     gtk_signal_connect( GTK_OBJECT( pw ), "clicked",
 			GTK_SIGNAL_FUNC( ButtonClicked ), "play" );
     gtk_container_add( GTK_CONTAINER( bd->play ), pw );
@@ -4621,19 +4622,19 @@ static void board_init( Board *board ) {
 			pw = gtk_alignment_new( 0.5, 0.5, 0, 0 ),
 			FALSE, FALSE, 8 );
     gtk_container_add( GTK_CONTAINER( pw ), bd->stop =
-		       gtk_button_new_with_label( "Stop" ) );
+		       gtk_button_new_with_label( _("Stop") ) );
 
     bd->pos_table = gtk_table_new( 2, 4, FALSE );
     gtk_box_pack_end( GTK_BOX ( bd->hbox_pos), bd->pos_table, 
                       FALSE, FALSE, 4 );
 
     gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       pw = gtk_label_new ( "Position: " ),
+                       pw = gtk_label_new ( _("Position: ") ),
                        0, 1, 0, 1, GTK_FILL, 0, 4, 0 );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
     
     gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       pw = gtk_label_new ( "Match ID: " ),
+                       pw = gtk_label_new ( _("Match ID: ") ),
                        0, 1, 1, 2, GTK_FILL, 0, 4, 0 );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
 
@@ -4648,20 +4649,20 @@ static void board_init( Board *board ) {
     gtk_entry_set_max_length( GTK_ENTRY( bd->match_id ), 12 );
 
     gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       bd->edit = gtk_toggle_button_new_with_label( "Edit" ),
+                       bd->edit = gtk_toggle_button_new_with_label( _("Edit") ),
                        2, 3, 0, 1, GTK_FILL, 0, 4, 0 );
 
     gtk_table_attach ( GTK_TABLE ( bd->pos_table ),
-                       bd->reset = gtk_button_new_with_label( "Reset" ),
+                       bd->reset = gtk_button_new_with_label( _("Reset") ),
                        3, 4, 0, 1, GTK_FILL, 0, 4, 0 );
 
 
 
     
-    gtk_table_attach( GTK_TABLE( bd->table ), pw = gtk_label_new( "Name" ),
+    gtk_table_attach( GTK_TABLE( bd->table ), pw = gtk_label_new( _("Name") ),
 		      1, 2, 0, 1, GTK_FILL, 0, 4, 0 );
     gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-    gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( "Score" ),
+    gtk_table_attach( GTK_TABLE( bd->table ), gtk_label_new( _("Score") ),
 		      2, 3, 0, 1, 0, 0, 8, 0 );
     
     gtk_table_attach( GTK_TABLE( bd->table ), bd->mname0 =
@@ -4700,7 +4701,7 @@ static void board_init( Board *board ) {
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->score1 );
     
     gtk_table_attach( GTK_TABLE( bd->table ), bd->crawford =
-		      gtk_check_button_new_with_label( "Crawford game" ),
+		      gtk_check_button_new_with_label( _("Crawford game") ),
 		      3, 4, 1, 3, 0, 0, 0, 0 );
     gtk_signal_connect( GTK_OBJECT( bd->crawford ), "toggled",
 			GTK_SIGNAL_FUNC( board_set_crawford ), bd );
@@ -4708,7 +4709,7 @@ static void board_init( Board *board ) {
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
     
     gtk_box_pack_start( GTK_BOX( bd->hbox_match ),
-			gtk_label_new( "Match:" ), FALSE, FALSE, 4 );
+			gtk_label_new( _("Match:") ), FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( bd->hbox_match ), bd->match =
 			gtk_label_new( NULL ), FALSE, FALSE, 0 );
 
@@ -4760,7 +4761,7 @@ extern GtkType board_get_type( void ) {
 
     static GtkType board_type = 0;
     static const GtkTypeInfo board_info = {
-	"Board",
+        "Board",
 	sizeof( Board ),
 	sizeof( BoardClass ),
 	(GtkClassInitFunc) board_class_init,

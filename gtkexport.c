@@ -236,8 +236,8 @@ GTKShowExport ( exportsetup *pexs ) {
   GtkWidget *pw, *pwx;
 
   char *aszInclude[] = {
-    N_ ("Annotations"), 
-    N_ ("Analysis"), 
+    N_("Annotations"), 
+    N_("Analysis"), 
     N_("Statistics"), 
     N_("Legend") };
 
