@@ -167,6 +167,7 @@ static void ToggleAnimation( GtkWidget *pw, GtkWidget *pwSpeed ) {
 
 static char *aaszLang[][ 2 ] = {
     { N_("System default"), "system" },
+    { N_("Czech"),	    "cs_CZ" },
     { N_("Danish"),	    "da_DA" },
     { N_("English (UK)"),   "en_UK" },
     { N_("English (US)"),   "en_US" },
