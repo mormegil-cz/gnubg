@@ -1,3 +1,7 @@
+Tue Jun  8  8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gtkgame.c, gtkgamelist.c: Colour mistakes in game list
+
 Mon Jun  7  8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Remove keyboard focus from game window, fix minor bug

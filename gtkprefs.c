@@ -2481,7 +2481,10 @@ DesignPage ( GList **pplBoardDesigns, BoardData *bd ) {
 
   pwDesignList = gtk_clist_new( 1 );
   gtk_clist_set_column_auto_resize( GTK_CLIST( pwDesignList ), 0, TRUE );
-
+/* Should be set to browse mode really, but gtk gets confused when
+	the "lose current settings" warning is shown (dialog freezes)
+  gtk_clist_set_selection_mode( GTK_CLIST( pwDesignList ), GTK_SELECTION_BROWSE );
+*/
   g_list_foreach ( *pplBoardDesigns, AddDesignRow, pwDesignList );
   gtk_container_add ( GTK_CONTAINER ( pwScrolled ), pwDesignList );
 
