@@ -2514,7 +2514,7 @@ extern void RunGTK( GtkWidget *pwSplash ) {
     
     if( fTTY ) {
 #ifdef ConnectionNumber /* FIXME use configure somehow to detect this */
-#if O_ASYNC
+#if defined(O_ASYNC) || defined(__CYGWIN__)
     /* BSD O_ASYNC-style I/O notification */
     {
 	int n;
@@ -2522,7 +2522,11 @@ extern void RunGTK( GtkWidget *pwSplash ) {
 	if( ( n = fcntl( ConnectionNumber( GDK_DISPLAY() ),
 			 F_GETFL ) ) != -1 ) {
 	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETOWN, getpid() );
+#if !defined(__CYGWIN__)
 	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | O_ASYNC );
+#else
+	    fcntl( ConnectionNumber( GDK_DISPLAY() ), F_SETFL, n | FASYNC );
+#endif
 	}
     }
 #else

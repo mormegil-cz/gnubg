@@ -1,3 +1,8 @@
+Sat Mar 26 00:17:49 GMT 2005 Jim Segrave <jes@jes-2.demon.nl>
+
+	* gtkgame.c, sound.c - fix for Cygwin FASYNC vs O_ASYNC
+	  (from Ingo Macherius <macherius@web.de>
+
 Fri Mar  11  19:25:45 2005 Oystein Johansen <oystein@gnubg.org>
 
 	* gtkgame.c (InitGTK): move the 'Go' menu to the right place

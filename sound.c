@@ -609,12 +609,17 @@ static void play_audio_file(soundcache *psc, const char *file,
     pSound_ = pSoundCurrent = psc->pch;
     cbSound = psc->cb;
     hSound = fd;
-    
-#if O_ASYNC
+
+#if defined(O_ASYNC) || defined(__CYGWIN__)
     /* BSD O_ASYNC-style I/O notification */
     if( ( n = fcntl( fd, F_GETFL ) ) != -1 ) {
 	fcntl( fd, F_SETOWN, getpid() );
+#if !defined(__CYGWIN__)
 	fcntl( fd, F_SETFL, n | O_ASYNC | O_NONBLOCK );
+#else
+	fcntl( fd, F_SETFL, n | FASYNC | O_NONBLOCK );
+#endif
+
     }
 #else
     /* System V SIGPOLL-style I/O notification */
