@@ -1,3 +1,7 @@
+Mon Jul 29 17:58:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkchequer.c (MoveListCopy): remove windocentric code.
+
 Mon Jul 29 01:05:13 2002  Øystein Johansen  <oeysteij@online.no>
 
         Add command: set export html type <gnu/fibs2html/bbs>

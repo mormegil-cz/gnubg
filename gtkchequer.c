@@ -418,18 +418,7 @@ MoveListMove ( GtkWidget *pw, hintdata *phd ) {
 static void
 MoveListCopy ( GtkWidget *pw, hintdata *phd ) {
 
-#ifdef WIN32
-
-  char *pc = NULL; /* write me */
-
-  if ( pc )
-    WinCopy ( pc );
-
-#else /* WIN32 */
-
   UserCommand ( "xcopy" );
-
-#endif /* ! WIN32 */
 
 }
 
