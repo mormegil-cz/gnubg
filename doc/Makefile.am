@@ -16,6 +16,7 @@ EXTRA_DIST = rulfig1.png rulfig2.png rulfig3.png rulfig4.png rulfig5.png \
 	annealing.gp annealing.txt fdl.texi gnubg.xml texinfo.dtd \
 	annealing.png annealing.eps \
 	mgtp.gp mgtp.png mgtp.eps mgtp.txt \
+	mptp.gp mptp.png mptp.eps mptp.txt \
 	mgcd.gp mgcd.png mgcd.eps mgcd.txt \
 	d11.png d23.png d3.png d5.png d7.png fita2.png \
 	fitb.png lsqcoeff.png r11.png r1.png r23.png r3.png r5.png \
