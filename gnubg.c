@@ -2335,7 +2335,7 @@ static void ExportGameJF( FILE *pf, list *plGame, int iGame,
 			  int anScore[ 2 ] ) {
     list *pl;
     moverecord *pmr;
-    char sz[ 40 ];
+    char sz[ 128 ];
     int i = 0, n, nFileCube = 1, anBoard[ 2 ][ 25 ], fWarned = FALSE;
 
     /* FIXME It would be nice if this function was updated to use the

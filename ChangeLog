@@ -1,3 +1,7 @@
+Tue Oct  9 14:52:04 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (ExportGameJF): Avoid buffer overflow in earlier changes.
+
 Tue Oct  9 12:43:23 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkgame.c (SetAnalysisEvalChequer, SetAnalysisEvalCube): The
