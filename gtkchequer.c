@@ -560,12 +560,12 @@ CreateMoveListTools ( hintdata *phd ) {
   /* tool tips */
 
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRollout,
-                         _("Rollout cube decision with current settings"),
-                         _("Rollout cube decision with current settings") );
+                         _("Rollout chequer play with current settings"),
+                         _("Rollout chequer play with current settings") );
 
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwEval,
-                         _("Evaluate cube decision with current settings"),
-                         _("Evaluate cube decision with current settings") );
+                         _("Evaluate chequer play with current settings"),
+                         _("Evaluate chequer play with current settings") );
 
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwRolloutSettings,
                          _("Modify rollout settings"),
