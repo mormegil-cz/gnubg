@@ -404,7 +404,7 @@ static void RestoreDoubleAnalysis( property *pp,
 }
 
 static void RestoreMoveAnalysis( property *pp, int fPlayer,
-				 movelist *pml, int *piMove ) {
+				 movelist *pml, int *piMove, evalsetup *pesChequer ) {
     list *pl = pp->pl->plNext;
     char *pch, ch;
     move *pm;
@@ -420,6 +420,8 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
     pml->rBestScore = 0;
     
     pm = pml->amMoves = malloc( pml->cMoves * sizeof( move ) );
+
+	pesChequer->et = EVAL_NONE;
 
     for( pl = pp->pl->plNext->plNext; pl->p; pl = pl->plNext, pm++ ) {
 	pch = pl->p;
@@ -453,12 +455,20 @@ static void RestoreMoveAnalysis( property *pp, int fPlayer,
 		    &pm->arEvalMove[ 4 ], &pm->rScore,
 		    &pm->esMove.ec.nPlies, &ch );
 	    pm->esMove.ec.fCubeful = ch == 'C';
+
 	    break;
 	    
 	default:
 	    /* FIXME */
 	    break;
 	}
+
+	/* save "largest" evalsetup */
+
+    if ( cmp_evalsetup ( pesChequer, &pm->esMove ) > 0 )
+	   memcpy ( pesChequer, &pm->esMove, sizeof ( evalsetup ) );
+
+
     }
 }
 
@@ -557,6 +567,7 @@ static void RestoreNode( list *pl ) {
 		pmr->n.fPlayer = fPlayer;
 		pmr->n.ml.cMoves = 0;
 		pmr->n.ml.amMoves = NULL;
+                pmr->n.esChequer.et = EVAL_NONE;
 		pmr->n.esDouble.et = EVAL_NONE;
 		
 		pmr->n.anRoll[ 1 ] = 0;
@@ -698,7 +709,7 @@ static void RestoreNode( list *pl ) {
 				       pmr->n.arDouble, &pmr->n.esDouble );
 	    if( ppA )
 		RestoreMoveAnalysis( ppA, pmr->n.fPlayer, &pmr->n.ml,
-				     &pmr->n.iMove );
+				     &pmr->n.iMove, &pmr->n.esChequer );
 	    pmr->n.st = st;
 	    pmr->n.lt = fPlayer ? lt : LUCK_VERYGOOD - lt;
 	    pmr->n.rLuck = rLuck;
