@@ -47,9 +47,11 @@ extern GdkGLConfig *glconfig;
 #define INTER_GAP 4
 #define TOTAL_GAP 5
 #define RES_WIDTH (2 * BAR_WIDTH + MID_GAP + INTER_GAP)
-#define NUM_WIDTH 4
-#define NUM_HEIGHT 4
-#define TOT_SIZE 8
+#define NUM_WIDTH (modelWidth * NUM_WIDTH_PER)
+#define NUM_WIDTH_PER .1f
+#define NUM_HEIGHT (modelHeight * NUM_HEIGHT_PER)
+#define NUM_HEIGHT_PER .15f
+#define TOT_WIDTH (NUM_HEIGHT * 3)
 
 float modelWidth, modelHeight;
 BoardData fonts;
@@ -63,6 +65,7 @@ static gboolean graph_button_press_event(GtkWidget *board, GdkEventButton *event
 static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, GraphData* gd)
 {
 	int width, height;
+	float maxY, maxX;
 #if HAVE_GTKGLEXT
 	/*** OpenGL BEGIN ***/
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
@@ -70,18 +73,17 @@ static gboolean configure_event(GtkWidget *widget, GdkEventConfigure *notused, G
 	if (!gdk_gl_drawable_gl_begin(gldrawable, gtk_widget_get_gl_context(widget)))
 		return FALSE;
 #else
-	/* OpenGL functions can be called only if make_current returns true */
 	if (!gtk_gl_area_make_current(GTK_GL_AREA(widget)))
 		return FALSE;
 #endif
 	width = widget->allocation.width;
 	height = widget->allocation.height;
 
-	modelWidth = NUM_WIDTH + gd->numGames * RES_WIDTH + RES_WIDTH + TOTAL_GAP;
-	modelHeight = NUM_HEIGHT + gd->maxY + 1;
+	maxX = gd->numGames * RES_WIDTH + RES_WIDTH + TOTAL_GAP;
+	modelWidth = maxX * (1 + NUM_WIDTH_PER);
 
-	if (modelHeight < 16)
-		modelHeight = 16;
+	maxY = gd->maxY * 1.05f + 1;
+	modelHeight = maxY * (1 + NUM_HEIGHT_PER);
 
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
@@ -184,7 +186,7 @@ void DrawBars(int num, float **values, int total)
 	DrawColourBar(1, x + INTER_GAP / 2.0f + BAR_WIDTH + MID_GAP, NUM_HEIGHT, values[1][0], values[1][1]);
 }
 
-void PrintBottomNumber(int num, float size, float x, float y)
+void PrintBottomNumber(int num, float width, float height, float x, float y)
 {
 	char numStr[10];
 	sprintf(numStr, "%d", num);
@@ -193,7 +195,7 @@ void PrintBottomNumber(int num, float size, float x, float y)
 	glTranslatef(x, y, 0);
 
 	glColor3f(1, 1, 1);
-	glScalef(size, size, 1);
+	glScalef(width, height, 1);
 	glPushMatrix();
 	glPrintCube(&fonts, numStr, 0);
 	glPopMatrix();
@@ -201,7 +203,7 @@ void PrintBottomNumber(int num, float size, float x, float y)
 	glPopMatrix();
 }
 
-void PrintSideNumber(int num, float size, float x, float y)
+void PrintSideNumber(int num, float width, float height, float x, float y)
 {
 	char numStr[10];
 	sprintf(numStr, "%d", num);
@@ -209,7 +211,7 @@ void PrintSideNumber(int num, float size, float x, float y)
 	glPushMatrix();
 	glTranslatef(x, y, 0);
 
-	glScalef(size, size, 1);
+	glScalef(width, height, 1);
 	glPushMatrix();
 	glPrintNumbersRA(&fonts, numStr, 0);
 	glPopMatrix();
@@ -219,22 +221,24 @@ void PrintSideNumber(int num, float size, float x, float y)
 
 void DrawLeftAxis(GraphData *pgd)
 {
-	int scale[] = {1, 5, 10, 20, 50, 0};
+	int scale[] = {1, 5, 10, 20, 50, 100, 0};
 	int* pScale = scale;
 	int i, numPoints, pointInc;
-	int max = (int)modelHeight;
 
-	while (*pScale && max > 9 * *pScale)
+	while (pScale[1] && pgd->maxY > *pScale * 5)
 		pScale++;
 
 	pointInc = *pScale;
-	numPoints = max / pointInc - 1;
+	numPoints = pgd->maxY / pointInc;
+	if (numPoints == 0)
+		numPoints = 1;
 
 	for (i = 1; i <= numPoints; i++)
 	{
-		float y = NUM_HEIGHT + i * pointInc;
+		float y = NUM_HEIGHT;
+		y += i * pointInc;
 		glColor3f(1, 1, 1);
-		PrintSideNumber(i * pointInc, 30, NUM_WIDTH - 1, y);
+		PrintSideNumber(i * pointInc, NUM_WIDTH * 10, NUM_HEIGHT * 10, NUM_WIDTH - 1, y);
 
 		glColor3f(.5f, .5f, .5f);
 		glLineStipple(1, 0xAAAA);
@@ -250,6 +254,7 @@ void DrawLeftAxis(GraphData *pgd)
 void DrawGraph(GraphData *gd)
 {
 	int i;
+	float lastx = 0;
 
 	if (total.texID)
 	{
@@ -257,13 +262,14 @@ void DrawGraph(GraphData *gd)
 		glBindTexture(GL_TEXTURE_2D, total.texID);
 
 		glPushMatrix();
-		glTranslatef(NUM_WIDTH + RES_WIDTH * gd->numGames + TOTAL_GAP + TOT_SIZE / 2.0f, NUM_HEIGHT / 2.0f - TOT_SIZE / 6.0f, 0);
+		glTranslatef(NUM_WIDTH + RES_WIDTH * gd->numGames + TOTAL_GAP + (INTER_GAP + MID_GAP) / 2.0f,
+			NUM_HEIGHT / 2.0f - TOT_WIDTH / 6.0f, 0);
 
 		glBegin(GL_QUADS);
 			glTexCoord2f(0, 0); glVertex3f(0, 0, 0);
-			glTexCoord2f(1, 0); glVertex3f(TOT_SIZE, 0, 0);
-			glTexCoord2f(1, 1); glVertex3f(TOT_SIZE, TOT_SIZE, 0);
-			glTexCoord2f(0, 1); glVertex3f(0, TOT_SIZE, 0);
+			glTexCoord2f(1, 0); glVertex3f(BAR_WIDTH * 2, 0, 0);
+			glTexCoord2f(1, 1); glVertex3f(BAR_WIDTH * 2, TOT_WIDTH, 0);
+			glTexCoord2f(0, 1); glVertex3f(0, TOT_WIDTH, 0);
 		glEnd();
 		glDisable(GL_TEXTURE_2D);
 		glPopMatrix();
@@ -277,7 +283,11 @@ void DrawGraph(GraphData *gd)
 
 		DrawBars(i, gd->data[i], 0);
 
-		PrintBottomNumber(i + 1, 30, x, NUM_HEIGHT / 2.0f);
+		if (x > lastx + NUM_WIDTH)
+		{
+			PrintBottomNumber(i + 1, NUM_WIDTH * 10, NUM_HEIGHT * 10, x, NUM_HEIGHT / 2.0f);
+			lastx = x;
+		}
 	}
 
 	/* Total bars */
@@ -289,7 +299,7 @@ void DrawGraph(GraphData *gd)
 		glVertex2f(NUM_WIDTH, NUM_HEIGHT);
 		glVertex2f(modelWidth - 1, NUM_HEIGHT);
 		glVertex2f(NUM_WIDTH, NUM_HEIGHT);
-		glVertex2f(NUM_WIDTH, modelHeight - 1);
+		glVertex2f(NUM_WIDTH, modelHeight * .95f);
 	glEnd();
 	glBegin(GL_POINTS);
 		glVertex2f(NUM_WIDTH, NUM_HEIGHT);
@@ -353,6 +363,8 @@ GtkWidget* StatGraph(GraphData* pgd)
 	f1 = pgd->data[pgd->numGames][0][0] + pgd->data[pgd->numGames][0][1];
 	f2 = pgd->data[pgd->numGames][1][0] + pgd->data[pgd->numGames][1][1];
 	pgd->maxY = (f1 > f2) ? f1 : f2;
+	if (pgd->maxY < .5f)
+		pgd->maxY = .5f;
 
 	gtk_widget_set_events(pw, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
 	gtk_signal_connect(GTK_OBJECT(pw), "button_press_event", GTK_SIGNAL_FUNC(graph_button_press_event), pgd);
