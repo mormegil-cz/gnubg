@@ -5169,17 +5169,25 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 static float
 Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
-  if ( pci->fCubeOwner == -1 ) {
-    return Cl2CfMatchCentered ( arOutput, pci );
-  } 
-  else if ( pci->fCubeOwner == pci->fMove ) {
+  /* Check if this requires a cubeful evaluation */
 
-    return Cl2CfMatchOwned ( arOutput, pci );
+  if ( fDoCubeful ( pci ) ) {
 
-  } 
+    /* cubeless eval */
+
+    return eq2mwc ( Utility ( arOutput, pci ), pci );
+
+  } /* fDoCubeful */
   else {
 
-    return Cl2CfMatchUnavailable ( arOutput, pci );
+    /* cubeful eval */
+
+    if ( pci->fCubeOwner == -1 ) 
+      return Cl2CfMatchCentered ( arOutput, pci );
+    else if ( pci->fCubeOwner == pci->fMove )
+      return Cl2CfMatchOwned ( arOutput, pci );
+    else
+      return Cl2CfMatchUnavailable ( arOutput, pci );
 
   }
 
@@ -6545,7 +6553,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
         /* cube available */
         if ( pciMove->nMatchTo )
           arCf[ ici ] = Cl2CfMatch ( arOutput, &aci[ ici ] );
-        else
+        else 
           arCf[ ici ] = Cl2CfMoney ( arOutput, &aci[ ici ] );
       }
 
