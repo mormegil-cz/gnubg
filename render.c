@@ -107,6 +107,13 @@ renderdata rdDefault = {
     TRUE, /* fHinges */
     TRUE, /* fLabels */
     FALSE /* fClockwise */
+#if BOARD3D
+	, DT_3D,	/* Display type */
+	FALSE,	/* Show shadows */
+	1,	/* Test skin */
+	0,	/* Animate roll */
+	0	/* Animate flag */
+#endif
 };
 
 static inline unsigned char clamp( int n ) {

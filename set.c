@@ -1076,7 +1076,7 @@ extern void CommandSetGUIAnimationSpeed( char *sz ) {
 
     if( n < 0 || n > 7 ) {
 	outputl( _("You must specify a speed between 0 and 7 -- try "
-		   "`help set seed'.") );
+		   "`help set speed'.") );
 
 	return;
     }

@@ -32,6 +32,12 @@ typedef enum _woodtype {
     WOOD_WALNUT, WOOD_WILLOW, WOOD_PAINT
 } woodtype;
 
+#if BOARD3D
+typedef enum _displaytype {
+    DT_2D, DT_3D
+} displaytype;
+#endif
+
 typedef struct _renderdata {
     woodtype wt;
     double aarColour[ 2 ][ 4 ]; /* RGBA for each player */
@@ -52,6 +58,13 @@ typedef struct _renderdata {
     int fHinges; /* TRUE if hinges should be drawn */
     int fLabels; /* TRUE if point numbers should be drawn */
     int fClockwise; /* orientation for board point numbers */
+#if BOARD3D
+	displaytype fDisplayType;	/* 2d or 3d display */
+	int showShadows;	/* Show 3d shadows */
+	int skin3d;	/* Test skin number */
+	int animateRoll;	/* Animate dice rolls */
+	int animateFlag;	/* Animate resignation flag */
+#endif
 } renderdata;
 
 typedef struct _renderimages {

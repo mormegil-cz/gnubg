@@ -45,11 +45,6 @@
 #include "i18n.h"
 #include "boardpos.h"
 #include "matchequity.h"
-
-
-#define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
-			  same point is considered a real drag rather than a
-			  click */
 #define MASK_INVISIBLE 1
 #define MASK_VISIBLE 0
 
@@ -98,13 +93,13 @@ static inline guchar clamp( gint n ) {
 	return n;
 }
 
-static void board_beep( BoardData *bd ) {
-
+void board_beep( BoardData *bd )
+{
     if( fGUIIllegal )
 	gdk_beep();
 }
 
-static void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+void read_board( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
     gint i;
 
@@ -452,14 +447,13 @@ static void update_match_id( BoardData *bd ) {
 }
 
 
-static void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+void update_position_id( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
     gtk_entry_set_text( GTK_ENTRY( bd->position_id ), PositionID( points ) );
 }
 
 
-static void
-update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
+void update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
   int anPip[ 2 ];
   char *pc;
@@ -496,8 +490,8 @@ update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
 
 /* A chequer has been moved or the board has been updated -- update the
    move and position ID labels. */
-static int update_move( BoardData *bd ) {
-    
+int update_move(BoardData *bd)
+{
     char *move = _("Illegal move"), move_buf[ 40 ];
     gint i, points[ 2 ][ 25 ];
     guchar key[ 10 ];
@@ -539,7 +533,7 @@ static int update_move( BoardData *bd ) {
     return fIllegal ? -1 : 0;
 }
 
-static void Confirm( BoardData *bd ) {
+void Confirm( BoardData *bd ) {
 
     char move[ 40 ];
     int points[ 2 ][ 25 ];
@@ -993,8 +987,9 @@ static void board_end_drag( GtkWidget *widget, BoardData *bd ) {
  *
  * If the move fails, that pickup will be reverted.
  */
-static gboolean place_chequer_or_revert( GtkWidget *board, BoardData *bd, 
-					 int dest ) {
+gboolean place_chequer_or_revert(BoardData *bd, 
+					 int dest )
+{
     int bar, hit;
     gboolean placed = TRUE;
     int unhit;
@@ -1203,11 +1198,8 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 	    bd->points[ i ] = 0;
 	    board_invalidate_point( bd, i );
 	}
-	
 	bd->points[ 26 ] = bd->nchequers;
 	bd->points[ 27 ] = -bd->nchequers;
-	board_invalidate_point( bd, 26 );
-	board_invalidate_point( bd, 27 );
 
 	read_board( bd, points );
 	update_position_id( bd, points );
@@ -1328,8 +1320,7 @@ static void board_quick_edit( GtkWidget *board, BoardData *bd,
 }
 
 
-static int
-ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+int ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
   movelist ml;
 
@@ -1346,8 +1337,7 @@ ForcedMove ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
 }
 
-static int
-GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
+int GreadyBearoff ( int anBoard[ 2 ][ 25 ], int anDice[ 2 ] ) {
 
   movelist ml;
   int i, iMove, cMoves;
@@ -1866,7 +1856,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 
 		dest = bd->drag_point;
 
-    		place_chequer_or_revert( board, bd, dest );		
+    		place_chequer_or_revert(bd, dest );		
 	    } else {
 		gint left = bd->dice[0];
 		gint right = bd->dice[1];
@@ -1881,7 +1871,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 		    /* bearing off */
 		    dest = bd->drag_colour > 0 ? 26 : 27;
 		
-		if( place_chequer_or_revert( board, bd, dest ) )
+		if( place_chequer_or_revert(bd, dest ) )
 		    playSound( SOUND_CHEQUER );
 		else {
 		    /* First roll was illegal.  We are going to 
@@ -1899,7 +1889,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 			/* bearing off */
 			dest = bd->drag_colour > 0 ? 26 : 27;
 		    
-		    if( place_chequer_or_revert( board, bd, dest ) )
+		    if( place_chequer_or_revert(bd, dest ) )
 			playSound( SOUND_CHEQUER );
 		    else {
 			board_invalidate_point( bd, bd->drag_point );
@@ -1909,7 +1899,7 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    }
 	} else {
 	    /* This is from a normal drag release */
-	    if( place_chequer_or_revert( board, bd, dest ) )
+	    if( place_chequer_or_revert(bd, dest ) )
 		playSound( SOUND_CHEQUER );
 	    else
 		board_beep( bd );
@@ -2229,8 +2219,16 @@ static gint board_set( Board *board, const gchar *board_text,
 			    goto cocked;
 		    }
 	    }
-	}
+#if BOARD3D
+			if (rdAppearance.fDisplayType == DT_3D)
+			{
+				/* Has been shaken, so roll dice */
+				if (old_dice[0] <= 0)
+					RollDice3d();
+			}
+#endif
     }
+	}
 
     if( rdAppearance.nSize <= 0 )
 	return 0;
@@ -2247,7 +2245,13 @@ static gint board_set( Board *board, const gchar *board_text,
 
 	bd->cube_owner = bd->opponent_can_double - bd->can_double;
 	bd->cube_use = cube_use;
-		
+
+#if BOARD3D
+if (rdAppearance.fDisplayType == DT_3D)
+	SetupViewingVolume3d();	/* Cube may be out of top of screen */
+else
+#endif
+	{
 	/* erase old cube */
 	board_invalidate_rect( bd->drawing_area, old_xCube * rdAppearance.nSize,
 			       old_yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
@@ -2258,7 +2262,8 @@ static gint board_set( Board *board, const gchar *board_text,
 	board_invalidate_rect( bd->drawing_area, xCube * rdAppearance.nSize,
 			       yCube * rdAppearance.nSize, 8 * rdAppearance.nSize,
 			       8 * rdAppearance.nSize, bd );
-    }
+	}
+}
 
     if ( bd->resigned != old_resigned ) {
 	int xResign, yResign;
@@ -2277,7 +2282,10 @@ static gint board_set( Board *board, const gchar *board_text,
 			       yResign * rdAppearance.nSize, 
                                8 * rdAppearance.nSize,
 			       8 * rdAppearance.nSize, bd );
-
+#if BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+		ShowFlag3d();
+#endif
     }
 
     if( fClockwise != rdAppearance.fClockwise ) {
@@ -2294,7 +2302,13 @@ static gint board_set( Board *board, const gchar *board_text,
         
 	return 0;
     }
-    
+
+#if BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+		ShowBoard3d(bd);
+	else
+#endif
+	{
     for( i = 0; i < 28; i++ )
 	if( bd->points[ i ] != old_board[ i ] )
 	    board_invalidate_point( bd, i );
@@ -2304,11 +2318,12 @@ static gint board_set( Board *board, const gchar *board_text,
     board_invalidate_cube( bd );
     board_invalidate_resign( bd );
     board_invalidate_arrow( bd );
+	}
 
     return 0;
 }
 
-static int convert_point( int i, int player ) {
+int convert_point( int i, int player ) {
 
     if( player )
 	return ( i < 0 ) ? 26 : i + 1;
@@ -2316,7 +2331,7 @@ static int convert_point( int i, int player ) {
 	return ( i < 0 ) ? 27 : 24 - i;
 }
 
-static int animate_player, *animate_move_list, animation_finished;
+int animate_player, *animate_move_list, animation_finished;
 
 static gint board_blink_timeout( gpointer p ) {
 
@@ -2517,7 +2532,13 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
     animate_player = player;
 
     animation_finished = FALSE;
-    
+
+#if BOARD3D
+	if (rdAppearance.fDisplayType == DT_3D)
+		AnimateMove3d();
+	else
+#endif
+{    
     if( animGUI == ANIMATE_BLINK )
 	n = gtk_timeout_add( 0x300 >> nGUIAnimSpeed, board_blink_timeout,
 			     board );
@@ -2530,6 +2551,7 @@ extern void board_animate( Board *board, int move[ 8 ], int player ) {
 	gtk_main_iteration();
 	ResumeInput( &m );
     }
+}
 }
 
 extern gint game_set_old_dice( Board *board, gint die0, gint die1 ) {
@@ -2579,8 +2601,11 @@ static void update_buttons( BoardData *pbd ) {
 	c = C_NONE;
     
 
-    if ( fGUIDiceArea ) {
-
+    if ( fGUIDiceArea 
+#if BOARD3D
+    && (rdAppearance.fDisplayType == DT_2D)
+#endif
+     ) {
       if ( c == C_ROLLDOUBLE ) 
 	gtk_widget_show_all( pbd->dice_area );
       else 
@@ -2644,9 +2669,19 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 
     update_buttons( pbd );
 
+#if BOARD3D
+if (rdAppearance.fDisplayType == DT_3D)
+{
+	ShowBoard3d(pbd);
+	updateOccPos(pbd);	/* Make sure shadows are in correct place */
+}
+else
+#endif
+{
     /* FIXME it's overkill to do this every time, but if we don't do it,
        then "set turn <player>" won't redraw the dice in the other colour. */
     gtk_widget_queue_draw( pbd->dice_area );
+}
 
     return 0;
 }
@@ -2691,6 +2726,27 @@ extern void board_free_pixmaps( BoardData *bd ) {
 
     FreeImages( &bd->ri );
 }
+
+#if BOARD3D
+void DisplayCorrectBoardType()
+{
+	BoardData* bd = BOARD(pwBoard )->board_data;
+
+	if (rdAppearance.fDisplayType == DT_3D)
+	{
+		gtk_widget_hide(bd->drawing_area);
+		gtk_widget_show(bd->drawing_area3d);
+		gtk_widget_queue_draw( bd->drawing_area3d );
+		updateHingeOccPos(bd);
+	}
+	else
+	{
+		gtk_widget_hide(bd->drawing_area3d);
+		gtk_widget_show(bd->drawing_area);
+		gtk_widget_queue_draw( bd->drawing_area );
+	}
+}
+#endif
 
 static void board_size_allocate( GtkWidget *board,
 				 GtkAllocation *allocation ) {
@@ -2740,8 +2796,11 @@ static void board_size_allocate( GtkWidget *board,
 
     /* ensure there is room for the dice area or the move, whichever is
        bigger */
-    if ( fGUIDiceArea ) {
-
+    if ( fGUIDiceArea 
+#if BOARD3D
+    && (rdAppearance.fDisplayType == DT_2D)
+#endif
+	) {
       new_size = MIN( allocation->width / 108,
                       ( allocation->height - 2 ) / 79 );
 
@@ -2762,7 +2821,15 @@ static void board_size_allocate( GtkWidget *board,
 	board_free_pixmaps( bd );
 	board_create_pixmaps( board, bd );
     }
-    
+
+#if BOARD3D
+	child_allocation.width = allocation->width;
+	child_allocation.height = allocation->height;
+	child_allocation.x = allocation->x;
+	child_allocation.y = allocation->y;
+	gtk_widget_size_allocate( bd->drawing_area3d, &child_allocation );
+#endif
+
     child_allocation.width = 108 * rdAppearance.nSize;
     cx = child_allocation.x = allocation->x + ( ( allocation->width -
 					     child_allocation.width ) >> 1 );
@@ -2779,7 +2846,7 @@ static void board_size_allocate( GtkWidget *board,
       child_allocation.height = 7 * rdAppearance.nSize;
       child_allocation.y += 72 * rdAppearance.nSize + 1;
       gtk_widget_size_allocate( bd->dice_area, &child_allocation );
-    }
+		}
 
 }
 
@@ -3514,6 +3581,11 @@ static void board_init( Board *board ) {
 			   GDK_BUTTON_RELEASE_MASK | GDK_STRUCTURE_MASK );
     gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area );
 
+#if BOARD3D
+	/* 3d board drawing area */
+	CreateBoard3d(bd, &bd->drawing_area3d);
+	gtk_container_add( GTK_CONTAINER( board ), bd->drawing_area3d );
+#endif
 
     /* Position and match ID */
 

@@ -76,6 +76,7 @@
 #include "positionid.h"
 #include "record.h"
 #include "sound.h"
+#include "renderprefs.h"
 
 #define GNUBGMENURC ".gnubgmenurc"
 
@@ -2511,6 +2512,11 @@ extern int InitGTK( int *argc, char ***argv ) {
     
     if( !gtk_init_check( argc, argv ) )
 	return FALSE;
+
+#if BOARD3D
+	/* Initialize gtkglext */
+	InitGTK3d(argc, argv);
+#endif
     
     fnAction = HandleXAction;
 
@@ -2707,6 +2713,10 @@ extern void RunGTK( GtkWidget *pwSplash ) {
     }
     
     gtk_widget_show_all( pwMain );
+
+#if BOARD3D
+	DisplayCorrectBoardType();
+#endif
     
     DestroySplash ( pwSplash );
 
@@ -7274,6 +7284,7 @@ static void enable_menu( GtkWidget *pw, int f ) {
 
 /* A global setting has changed; update entry in Settings menu if necessary. */
 extern void GTKSet( void *p ) {
+	BoardData *bd = BOARD( pwBoard )->board_data;
 
     if( p == ap ) {
 	/* Handle the player names. */
@@ -7425,16 +7436,20 @@ extern void GTKSet( void *p ) {
           gtk_widget_hide( pwMessage );
         }
     } else if( p == &fGUIDiceArea ) {
-	BoardData *bd = BOARD( pwBoard )->board_data;
     
 	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
 	    if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !fGUIDiceArea )
 		gtk_widget_hide( bd->dice_area );
 	    else if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && fGUIDiceArea )
 		gtk_widget_show_all( bd->dice_area );
+
+#if BOARD3D
+	/* If in 3d mode may need to update sizes */
+    if (rdAppearance.fDisplayType == DT_3D)
+		SetupViewingVolume3d();
+#endif
 	}
     } else if( p == &fGUIShowIDs ) {
-	BoardData *bd = BOARD( pwBoard )->board_data;
     
 	if( GTK_WIDGET_REALIZED( pwBoard ) ) {
 	    if( GTK_WIDGET_VISIBLE( bd->vbox_ids ) && !fGUIShowIDs )

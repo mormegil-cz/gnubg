@@ -284,18 +284,6 @@ extern int fCheat;
 extern int afCheatRoll[ 2 ];
 extern int fGotoFirstGame;
 
-/* GUI settings. */
-#if USE_GTK
-typedef enum _animation {
-    ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
-} animation;
-    
-extern animation animGUI;
-extern int nGUIAnimSpeed, fGUIBeep, fGUIDiceArea, fGUIHighDieFirst,
-    fGUIIllegal, fGUIShowIDs, fGUIShowPips, fGUISetWindowPos,
-    fGUIDragTargetHelp;
-#endif
-
 typedef enum _pathformat {
   PATH_EPS, PATH_GAM, PATH_HTML, PATH_LATEX, PATH_MAT, PATH_OLDMOVES,
   PATH_PDF, PATH_POS, PATH_POSTSCRIPT, PATH_SGF, PATH_SGG, PATH_TEXT, 

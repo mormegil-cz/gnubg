@@ -34,6 +34,7 @@
 #include "i18n.h"
 #include "render.h"
 #include "renderprefs.h"
+#include "gtkboard.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -277,6 +278,18 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
     else if( !strncasecmp( szParam, "translucent", c ) )
 	/* deprecated option "translucent"; ignore */
 	;
+#ifdef BOARD3D
+    else if( !strncasecmp( szParam, "boardshadows", c ) )
+		prd->showShadows = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "testskin", c ) )
+		prd->skin3d = atoi( szValue );
+    else if( !strncasecmp( szParam, "animateroll", c ) )
+		prd->animateRoll = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "animateflag", c ) )
+		prd->animateRoll = toupper( *szValue ) == 'Y';
+    else if( !strncasecmp( szParam, "boardtype", c ) )
+		prd->fDisplayType = *szValue == '2' ? DT_2D : DT_3D;
+#endif
     else if( !strncasecmp( szParam, "labels", c ) )
 	/* labels=bool */
 	prd->fLabels = toupper( *szValue ) == 'Y';
@@ -415,6 +428,13 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
     sprintf( sz, 
              "set appearance board=#%02X%02X%02X;%0.2f "
 	     "border=#%02X%02X%02X "
+#if BOARD3D
+		 "boardtype=%c "
+		 "boardshadows=%c "
+		 "testskin=%d "
+		 "animateroll=%c "
+		 "animateflag=%c "
+#endif
 	     "labels=%c wood=%s hinges=%c "
 	     "light=%0.0f;%0.0f shape=%0.1f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
@@ -432,6 +452,13 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
              /* border */
 	     prd->aanBoardColour[ 1 ][ 0 ], prd->aanBoardColour[ 1 ][ 1 ], 
 	     prd->aanBoardColour[ 1 ][ 2 ],
+#if BOARD3D
+		prd->fDisplayType == DT_2D ? '2' : '3',
+		prd->showShadows ? 'y' : 'n',
+		prd->skin3d,
+		prd->animateRoll ? 'y' : 'n',
+		prd->animateFlag ? 'y' : 'n',
+#endif
              /* labels ... */
              prd->fLabels ? 'y' : 'n',
 	     aszWoodName[ prd->wt ],

@@ -29,7 +29,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-    
+
 #define TYPE_BOARD ( board_get_type() )
 #define BOARD( obj ) ( GTK_CHECK_CAST( (obj), TYPE_BOARD, Board ) )
 #define BOARD_CLASS( c ) ( GTK_CHECK_CLASS_CAST( (c), TYPE_BOARD, \
@@ -37,11 +37,24 @@ extern "C" {
 #define IS_BOARD( obj ) ( GTK_CHECK_TYPE( (obj), TYPE_BOARD ) )
 #define IS_BOARD_CLASS( c ) ( GTK_CHECK_CLASS_TYPE( (c), TYPE_BOARD ) )
 
+/* minimum time in milliseconds before a drag to the
+	same point is considered a real drag rather than a click */
+#define CLICK_TIME 200
+
+typedef enum _animation {
+    ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
+} animation;
+
+extern animation animGUI;
+extern int nGUIAnimSpeed, fGUIBeep, fGUIDiceArea, fGUIHighDieFirst,
+    fGUIIllegal, fGUIShowIDs, fGUIShowPips, fGUISetWindowPos,
+    fGUIDragTargetHelp;
+
 typedef struct _Board {
     GtkVBox vbox;
     gpointer board_data;
 } Board;
-    
+
 typedef struct _BoardClass {
     GtkVBoxClass parent_class;
 } BoardClass;
@@ -60,6 +73,41 @@ extern void board_animate( Board *board, int move[ 8 ], int player );
 
 extern GtkWidget *
 image_from_xpm_d ( char **xpm, GtkWidget *pw );
+
+#if BOARD3D
+/* New 3d types */
+typedef struct _Texture
+{
+	int texID;
+	int width;
+	int height;
+} Texture;
+
+typedef struct _Material
+{
+	float ambientColour[4];
+	float diffuseColour[4];
+	float specularColour[4];
+	int shininess;
+	int alphaBlend;
+	Texture* pTexture;
+} Material;
+
+typedef struct _DiceRotation
+{
+	float xRotStart, yRotStart;
+	float xRot, yRot;
+	float xRotFactor, yRotFactor;
+} DiceRotation;
+
+typedef enum _BoardState
+{
+	BOARD_CLOSED, BOARD_CLOSING, BOARD_OPENING, BOARD_OPEN
+} BoardState;
+
+#define MAX_TEXTURES 10
+
+#endif
 
 /* private data */
 typedef struct _BoardData {
@@ -110,20 +158,89 @@ typedef struct _BoardData {
     gint to_move; /* 0 to 4 -- number of pieces to move */
     gint forced, crawford_game; /* unused, Crawford game flag */
     gint redoubles; /* number of instant redoubles allowed */
+
+#if BOARD3D
+/* extra members for 3d board */
+	GtkWidget *drawing_area3d;	/* main 3d widget */
+
+	float LightPosition[4];	/* xyz light posistion + type */
+	float LightDiffuse;	/* Amount of diffuse light from light source */
+	float LightAmbient;	/* Amount of ambient light from light source */
+	float LightSpecular;	/* Amount of ambient light from light source */
+
+	/* Bit of a hack - assign each possible position a set rotation */
+	int pieceRotation[28][15];
+	int movingPieceRotation;
+
+	/* Materials for 3d objects */
+	Material diceMat[2], diceDotMat[2];
+	Material cubeMat, cubeNumberMat;
+	Material checkerMat[2];
+	Material baseMat, boxMat, pointMat[2];
+	Material hingeMat;
+	Material pointNumberMat;
+	Material backGroundMat;
+	Material gap;
+	Material logoMat;
+	Material flagMat;
+	/* Store how "big" the screen maps to in 3d */
+	float backGroundPos[2], backGroundSize[2];
+
+	/* List of textures */
+	Texture textureList[MAX_TEXTURES];
+	char* textureNames[MAX_TEXTURES];
+	int numTextures;
+
+	int step_accuracy;	/* How accurate should 3d curves be */
+	int pieceType;	/* Different piece models */
+	BoardState State;	/* Open/closed board */
+	float perOpen;	/* Percentage open when opening/closing board */
+
+	int moving;	/* Is a piece moving (animating) */
+	float rotateMovingPiece;
+	int shakingDice;	/* Are dice being animated */
+
+	float movingPos[3];
+	float dragPos[3];
+	float dicePos[2][3];
+	float diceMovingPos[2][3];
+	DiceRotation diceRotation[2];
+
+	int showIndicator;	/* Show move indicator */
+	float flagWaved;	/* How much has flag waved */
+	/* Angle of board display */
+	float fovAngle;	/* y-field of view angle 0-90 */
+	float boardAngle;	/* angle board is rotated at 0-90 */
+#endif
 } BoardData;
-    
+
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd );
 extern void board_free_pixmaps( BoardData *bd );
+
+#if BOARD3D
+/* Functions for 3d board */
+extern int InitGTK3d(int *argc, char ***argv);
+extern void SetupViewingVolume3d();
+extern void DisplayCorrectBoardType();
+extern void ShowBoard3d(BoardData *bd);
+extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);
+extern void RollDice3d();
+extern void AnimateMove3d();
+extern void ShowFlag3d();
+
+extern void updateOccPos(BoardData* bd);
+extern void updateHingeOccPos(BoardData* bd);
+extern void updateFlagOccPos(BoardData* bd);
+extern void CheckAccelerated();
+#endif
 
 extern void
 DrawDie( GdkDrawable *pd, 
          unsigned char *achDice[ 2 ], unsigned char *achPip[ 2 ],
          const int s, GdkGC *gc, int x, int y, int fColour, int n );
 
-extern int
-UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
+extern int UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] );
 
-  
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
