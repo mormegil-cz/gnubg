@@ -8,7 +8,7 @@
 
 * Game play:
 ** Add cube handling for computer player.
-** Add options for Jacoby/cubeless.
+** Add option for cubeless play.
 ** Finish matches and money sessions.
 
 * Command interface:
