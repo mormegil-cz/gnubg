@@ -15,6 +15,7 @@
 
 #line 24 "./sgf.y"
 
+#include "config.h"
 #include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,7 +74,7 @@ static char *Concatenate( list *pl ) {
 }
  
 
-#line 89 "./sgf.y"
+#line 90 "./sgf.y"
 #ifndef YYSTYPE
 typedef union {
     char ach[ 2 ]; /* property identifier */
@@ -148,8 +149,8 @@ static const short yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined. */
 static const short yyrline[] =
 {
-       0,   106,   110,   112,   114,   117,   121,   123,   125,   128,
-     132,   134,   138,   141,   149,   151,   155,   159,   161
+       0,   107,   111,   113,   115,   118,   122,   124,   126,   129,
+     133,   135,   139,   142,   150,   152,   156,   160,   162
 };
 #endif
 
@@ -931,43 +932,43 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 107 "./sgf.y"
+#line 108 "./sgf.y"
 { yyval.pl = plCollection = yyvsp[0].pl; ;
     break;}
 case 2:
-#line 111 "./sgf.y"
+#line 112 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 3:
-#line 113 "./sgf.y"
+#line 114 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 5:
-#line 118 "./sgf.y"
+#line 119 "./sgf.y"
 { ListInsert( yyvsp[-1].pl->plNext, yyvsp[-2].pl ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 6:
-#line 122 "./sgf.y"
+#line 123 "./sgf.y"
 { yyval.pl = NewList(); ListInsert( yyval.pl, yyvsp[0].pl ); ;
     break;}
 case 7:
-#line 124 "./sgf.y"
+#line 125 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pl ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 9:
-#line 129 "./sgf.y"
+#line 130 "./sgf.y"
 { yyval.pl = yyvsp[0].pl; ;
     break;}
 case 10:
-#line 133 "./sgf.y"
+#line 134 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 11:
-#line 135 "./sgf.y"
+#line 136 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pp ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 13:
-#line 142 "./sgf.y"
+#line 143 "./sgf.y"
 { 
 		    ListInsert( yyvsp[-1].pl, yyvsp[0].pch );
 		    yyval.pp = malloc( sizeof(property) ); yyval.pp->pl = yyvsp[-1].pl;
@@ -975,23 +976,23 @@ case 13:
 		;
     break;}
 case 14:
-#line 150 "./sgf.y"
+#line 151 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 15:
-#line 152 "./sgf.y"
+#line 153 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 case 16:
-#line 156 "./sgf.y"
+#line 157 "./sgf.y"
 { yyval.pch = Concatenate( yyvsp[-1].pl ); ;
     break;}
 case 17:
-#line 160 "./sgf.y"
+#line 161 "./sgf.y"
 { yyval.pl = NewList(); ;
     break;}
 case 18:
-#line 162 "./sgf.y"
+#line 163 "./sgf.y"
 { ListInsert( yyvsp[-1].pl, yyvsp[0].pch ); yyval.pl = yyvsp[-1].pl; ;
     break;}
 }
@@ -1227,7 +1228,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 165 "./sgf.y"
+#line 166 "./sgf.y"
 
 
 extern list *SGFParse( FILE *pf ) {

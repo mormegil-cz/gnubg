@@ -1,3 +1,15 @@
+Thu Jun  6 16:41:20 2002  Gary Wong  <gtw@gnu.org>
+
+	* sgf.y: #include "config.h".
+
+	* html.c (HTMLDumpStatcontext): Remove superfluous parameter.
+	
+	* gnubg.c (ShowBoard): Fix typo.
+
+	* gtkexport.c (GTKShowExport): Remove unused variables.
+	
+	* show.c (CommandShowCube): Fix incorrectly ordered parameters.
+
 Thu Jun  6 22:14:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* show.c (CommandShowExport): "%s" doesn't require translation.
