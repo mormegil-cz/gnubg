@@ -33,8 +33,7 @@ duplication of effort and to make sure our changes merge easily.
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
 ** Make gnubg offer resignations when its position is hopeless.
-** Make sure the accept/decline resignation code in ComputerTurn() works
-  in match play.
+** Remove the "fRelativeAccuracy" option.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -173,6 +172,7 @@ add Scheme bindings for useful functions.
   trying "prev" doesn't work, either -- why?)
 ** It should be possible to select the empty cell at the end of the game
   list when the player is on roll.
+** Declining a resignation seems to erase the current dice roll. (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
