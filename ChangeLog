@@ -1,3 +1,9 @@
+Fri May 30 21:27:04 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtktempmap.c (GTKShowTempMap): make dialog non-modal.
+	* gtkchequer.c (CreateMoveListTools): add temp. map button.
+	* gtkchequer.c (MoveListTempMapClicked): call temp. map.
+
 Fri May 30 20:43:50 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktempmap.c: improvements of temperature map.

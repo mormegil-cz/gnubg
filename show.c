@@ -2022,7 +2022,7 @@ CommandShowTemperatureMap( char *sz ) {
 #if USE_GTK
 
   if ( fX ) {
-    GTKShowTempMap( &ms );
+    GTKShowTempMap( &ms, NULL, FALSE );
     return;
   }
 #endif

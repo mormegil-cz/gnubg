@@ -42,6 +42,7 @@
 #include "gtkgame.h"
 #include "gtkchequer.h"
 #include "i18n.h"
+#include "gtktempmap.h"
 
 
 
@@ -298,6 +299,48 @@ ShowMove ( hintdata *phd, const int f ) {
 
 }
 
+
+static void
+MoveListTempMapClicked( GtkWidget *pw, hintdata *phd ) {
+
+  GList *pl;
+  GtkWidget *pwMoves = phd->pwMoves;
+  char szMove[ 100 ];
+  matchstate msx;
+
+  if ( !  GTK_CLIST( pwMoves )->selection )
+    return;
+
+  memcpy( &msx, &ms, sizeof ( matchstate ) );
+
+  for(  pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
+
+    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
+    gchar *sz;
+
+    /* Apply move to get board */
+
+    FormatMove( szMove, msx.anBoard, m->anMove );
+    ApplyMove( msx.anBoard, m->anMove, FALSE );
+
+    /* Swap sides */
+
+    SwapSides( msx.anBoard );
+    msx.fMove = ! msx.fMove;
+    msx.fTurn = ! msx.fTurn;
+
+    /* Show temp map dialog */
+
+    sz = g_strdup_printf( _("after %s"), szMove );
+    GTKShowTempMap( &msx, sz, TRUE );
+    g_free( sz );
+
+  }
+  
+}
+
+
+
 static void
 MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
 
@@ -541,6 +584,7 @@ CreateMoveListTools ( hintdata *phd ) {
   GtkWidget *pwMove = gtk_button_new_with_label ( _("Move") );
   GtkWidget *pwShow = gtk_toggle_button_new_with_label ( _("Show") );
   GtkWidget *pwCopy = gtk_button_new_with_label ( _("Copy") );
+  GtkWidget *pwTempMap = gtk_button_new_with_label( _("Temp. Map") );
   GtkWidget *pwply;
   int i;
   char *sz;
@@ -554,10 +598,11 @@ CreateMoveListTools ( hintdata *phd ) {
   phd->pwMove = pwMove;
   phd->pwShow = pwShow;
   phd->pwCopy = pwCopy;
+  phd->pwTempMap = pwTempMap;
 
   /* toolbox on the left with buttons for eval, rollout and more */
   
-  pwTools = gtk_table_new (7, 2, FALSE);
+  pwTools = gtk_table_new (8, 2, FALSE);
   
   gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
@@ -614,9 +659,14 @@ CreateMoveListTools ( hintdata *phd ) {
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   
+  gtk_table_attach (GTK_TABLE (pwTools), pwTempMap, 0, 2, 7, 8,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
   gtk_widget_set_sensitive( pwMove, FALSE );
   gtk_widget_set_sensitive( pwCopy, FALSE );
+  gtk_widget_set_sensitive( pwTempMap, FALSE );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
                                  fOutputMWC );
@@ -639,6 +689,8 @@ CreateMoveListTools ( hintdata *phd ) {
                       GTK_SIGNAL_FUNC( MoveListShowToggled ), phd );
   gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
                       GTK_SIGNAL_FUNC( MoveListCopy ), phd );
+  gtk_signal_connect( GTK_OBJECT( pwTempMap ), "clicked",
+                      GTK_SIGNAL_FUNC( MoveListTempMapClicked ), phd );
 
   /* tool tips */
 
@@ -669,6 +721,11 @@ CreateMoveListTools ( hintdata *phd ) {
   gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwMove,
                          _("Move the selected move"),
                          _("Move the selected move") );
+
+  gtk_tooltips_set_tip ( GTK_TOOLTIPS ( pt ), pwTempMap,
+                         _("Show Sho Sengoku Temperatur Map of position "
+                           "after selected move"),
+                         "" );
 
 
   return pwTools;
@@ -743,6 +800,7 @@ CheckHintButtons( hintdata *phd ) {
 
     gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
+    gtk_widget_set_sensitive( phd->pwTempMap, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEvalPly, c && phd->fButtonsValid );
