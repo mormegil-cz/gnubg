@@ -1,3 +1,10 @@
+Wed May 22 20:36:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix bug which sets chequer skill = cube skill.
+
+	* sgf.c (SaveGame): extra call to WriteSkill.
+	* sgf.c (RestoreNode): read up to two skills.
+
 Wed May 22 19:41:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Save path and suggest filename.

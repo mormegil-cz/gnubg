@@ -570,7 +570,8 @@ static void RestoreNode( list *pl ) {
     moverecord *pmr = NULL;
     char *pch;
     int i, fPlayer = 0, fSetBoard = FALSE, an[ 25 ];
-    skilltype st = SKILL_NONE;
+    skilltype ast[ 2 ] = { SKILL_NONE, SKILL_NONE };
+    int iSkill = 0;
     lucktype lt = LUCK_NONE;
     float rLuck = ERR_VAL;
     
@@ -714,14 +715,16 @@ static void RestoreNode( list *pl ) {
 	    /* comment */
 	    ppC = pp;
 	else if( pp->ach[ 0 ] == 'B' && pp->ach[ 1 ] == 'M' )
-	    st = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYBAD :
+	    ast[ iSkill++] 
+              = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYBAD :
 	    SKILL_BAD;
 	else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'O' )
-	    st = SKILL_DOUBTFUL;
+	    ast[ iSkill++] = SKILL_DOUBTFUL;
 	else if( pp->ach[ 0 ] == 'I' && pp->ach[ 1 ] == 'T' )
-	    st = SKILL_INTERESTING;
+	    ast[ iSkill++] = SKILL_INTERESTING;
 	else if( pp->ach[ 0 ] == 'T' && pp->ach[ 1 ] == 'E' )
-	    st = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
+	    ast[ iSkill++] 
+              = *( (char *) pp->pl->plNext->p ) == '2' ? SKILL_VERYGOOD :
 	    SKILL_GOOD;
 	else if( pp->ach[ 0 ] == 'L' && pp->ach[ 1 ] == 'U' )
 	    rLuck = atof( pp->pl->plNext->p );
@@ -744,7 +747,7 @@ static void RestoreNode( list *pl ) {
 
     if( pmr && ppC )
 	pmr->a.sz = CopyEscapedString( ppC->pl->plNext->p );
-    
+
     if( pmr ) {
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
@@ -759,8 +762,8 @@ static void RestoreNode( list *pl ) {
 				     &pmr->n.iMove, &pmr->n.esChequer,
                                      &ms );
             /* FIXME: separate st's */
-	    pmr->n.stMove = st;
-	    pmr->n.stCube = st;
+	    pmr->n.stMove = ast[ 0 ];
+	    pmr->n.stCube = ast[ 1 ];
 	    pmr->n.lt = fPlayer ? lt : LUCK_VERYGOOD - lt;
 	    pmr->n.rLuck = rLuck;
 	    break;
@@ -774,7 +777,7 @@ static void RestoreNode( list *pl ) {
                                        pmr->d.aarOutput,
                                        pmr->d.aarStdDev,
                                        &pmr->d.esDouble );
-	    pmr->d.st = st;
+	    pmr->d.st = ast[ 0 ];
 	    break;
 	    
 	case MOVE_SETDICE:
@@ -1280,6 +1283,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 	    WriteLuck( pf, pmr->n.fPlayer, pmr->n.rLuck, pmr->n.lt );
             /* FIXME: separate skill for cube and move */
 	    WriteSkill( pf, pmr->n.stMove );
+	    WriteSkill( pf, pmr->n.stCube );
 	    
 	    break;
 	    
