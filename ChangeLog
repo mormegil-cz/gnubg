@@ -1,3 +1,12 @@
+Mon Jun  9 23:20:00 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Allow modifications of the match length during edit.
+
+	* gtkboard.c (board_init): add spin button for match length.
+	* gtkboard.c (score_updated): new function.
+	* gtkboard.c (board_edit): issue "set matchid ..." when match 
+	length changes.
+
 Sun Jun  8 21:39:30 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Change how cubeful equities are calculated for money play to match

@@ -64,11 +64,13 @@ image_from_xpm_d ( char **xpm, GtkWidget *pw );
 /* private data */
 typedef struct _BoardData {
     GtkWidget *drawing_area, *dice_area, *table, *move,
-	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, *match,
+	*position_id, *reset, *edit, *name0, *name1, *score0, *score1, 
 	*crawford, *widget, *key0, *key1, *stop, *stopparent, 
 	*doub, *lname0, *lname1,
 	*lscore0, *lscore1, *mname0, *mname1, *mscore0, *mscore1, *play,
         *match_id;
+    GtkWidget *mmatch, *lmatch, *match;
+    GtkAdjustment *amatch, *ascore0, *ascore1;
     GtkWidget *toolbar, *vbox_toolbar;
     GtkWidget *roll;
     GtkWidget *take, *drop, *redouble;

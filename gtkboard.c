@@ -44,6 +44,7 @@
 #include "matchid.h"
 #include "i18n.h"
 #include "boardpos.h"
+#include "matchequity.h"
 
 
 #define CLICK_TIME 200 /* minimum time in milliseconds before a drag to the
@@ -1925,6 +1926,48 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
     return TRUE;
 }
 
+static void
+score_changed( GtkAdjustment *adj, BoardData *bd ) {
+
+  gchar buf[ 32 ];
+
+  bd->ascore0->upper = bd->ascore1->upper = 
+    bd->match_to ? bd->match_to : 65535;
+  gtk_adjustment_changed( bd->ascore0 );
+  gtk_adjustment_changed( bd->ascore1 );
+	
+  if ( bd->match_to ) {
+
+    if ( bd->score_opponent >= bd->match_to )
+      sprintf( buf, "%d (won match)", bd->score_opponent );
+    else
+      sprintf( buf, "%d (%d-away)", bd->score_opponent,
+               bd->match_to - bd->score_opponent );
+    gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
+
+    if ( bd->score >= bd->match_to )
+      sprintf( buf, "%d (won match)", bd->score );
+    else
+      sprintf( buf, "%d (%d-away)", bd->score,
+               bd->match_to - bd->score );
+    gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
+
+  }
+  else {
+
+    /* money game */
+
+    sprintf( buf, "%d", bd->score_opponent );
+    gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
+    sprintf( buf, "%d", bd->score );
+    gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
+
+  }
+
+}
+
+
+
 static gint board_set( Board *board, const gchar *board_text,
                        const gint resigned, const gint cube_use ) {
 
@@ -1936,7 +1979,6 @@ static gint board_set( Board *board, const gchar *board_text,
     int old_resigned;
     int old_xResign, old_yResign;
     int old_turn;
-    GtkAdjustment *padj0, *padj1;
     
 #if __GNUC__
     int *match_settings[] = { &bd->match_to, &bd->score,
@@ -2077,48 +2119,18 @@ static gint board_set( Board *board, const gchar *board_text,
     
 	if( bd->match_to ) {
 	    sprintf( buf, "%d", bd->match_to );
-	    gtk_label_set_text( GTK_LABEL( bd->match ), buf );
+	    gtk_label_set_text( GTK_LABEL( bd->lmatch ), buf );
 	} else
-	    gtk_label_set_text( GTK_LABEL( bd->match ), _("unlimited") );
+	    gtk_label_set_text( GTK_LABEL( bd->lmatch ), _("unlimited") );
 
-	padj0 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score0 ) );
-	padj1 = gtk_spin_button_get_adjustment( GTK_SPIN_BUTTON( bd->score1 ) );
-	padj0->upper = padj1->upper = bd->match_to ? bd->match_to : 65535;
-	gtk_adjustment_changed( padj0 );
-	gtk_adjustment_changed( padj1 );
-	
-	gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
-				   bd->score_opponent );
-	gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
-				   bd->score );
+        gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score0 ),
+                                   bd->score_opponent );
+        gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->score1 ),
+                                   bd->score );
+        gtk_spin_button_set_value( GTK_SPIN_BUTTON( bd->match ), 
+                                   bd->match_to );
 
-        if ( bd->match_to ) {
-
-          if ( bd->score_opponent >= bd->match_to )
-            sprintf( buf, "%d (won match)", bd->score_opponent );
-          else
-            sprintf( buf, "%d (%d-away)", bd->score_opponent,
-                     bd->match_to - bd->score_opponent );
-          gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
-
-          if ( bd->score >= bd->match_to )
-            sprintf( buf, "%d (won match)", bd->score );
-          else
-            sprintf( buf, "%d (%d-away)", bd->score,
-                     bd->match_to - bd->score );
-          gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
-
-        }
-        else {
-
-          /* money game */
-
-          sprintf( buf, "%d", bd->score_opponent );
-          gtk_label_set_text( GTK_LABEL( bd->lscore0 ), buf );
-          sprintf( buf, "%d", bd->score );
-          gtk_label_set_text( GTK_LABEL( bd->lscore1 ), buf );
-
-        }
+        score_changed( NULL, bd );
 
 	gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( bd->crawford ),
 				      bd->crawford_game );
@@ -2889,9 +2901,10 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname1 ), bd->name1 );
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore0 ), bd->score0 );
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore1 ), bd->score1 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mmatch ), bd->match );
     } else {
 	/* Editing complete; set board. */
-	int points[ 2 ][ 25 ], anScoreNew[ 2 ];
+        int points[ 2 ][ 25 ], anScoreNew[ 2 ], nMatchToNew;
 	const char *pch0, *pch1;
 	char sz[ 64 ]; /* "set board XXXXXXXXXXXXXX" */
 
@@ -2902,6 +2915,7 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
 	pch1 = gtk_entry_get_text( GTK_ENTRY( bd->name1 ) );
 	anScoreNew[ 0 ] = GTK_SPIN_BUTTON( bd->score0 )->adjustment->value;
 	anScoreNew[ 1 ] = GTK_SPIN_BUTTON( bd->score1 )->adjustment->value;
+        nMatchToNew = GTK_SPIN_BUTTON( bd->match )->adjustment->value;
 	read_board( bd, points );
 
 	outputpostpone();
@@ -2918,24 +2932,53 @@ static void board_edit( GtkWidget *pw, BoardData *bd ) {
 	    UserCommand( sz );
 	}
 
-	if( anScoreNew[ 0 ] != ms.anScore[ 0 ] ||
-	    anScoreNew[ 1 ] != ms.anScore[ 1 ] ) {
-	    sprintf( sz, "set score %d %d", anScoreNew[ 0 ],
-		     anScoreNew[ 1 ] );
-	    UserCommand( sz );
-	}
-
 	if( bd->playing && !EqualBoards( ms.anBoard, points ) ) {
 	    sprintf( sz, "set board %s", PositionID( points ) );
 	    UserCommand( sz );
 	}
-	
+
+        if ( nMatchToNew != ms.nMatchTo ) {
+          /* new match length; issue "set matchid ..." command */
+          gchar *sz;
+          int i;
+
+          if ( nMatchToNew )
+            for ( i = 0; i < 2; ++i )
+              if ( anScoreNew[ i ] > nMatchToNew )
+                anScoreNew[ i ] = 0;
+          sz = g_strdup_printf( "set matchid %s", 
+                                MatchID( ( bd->turn == 1 ) ? bd->dice :
+                                         bd->dice_opponent,
+                                         ms.fTurn,
+                                         ms.fResigned,
+                                         ms.fDoubled,
+                                         ms.fMove,
+                                         ms.fCubeOwner,
+                                         bd->crawford_game,
+                                         nMatchToNew,
+                                         anScoreNew,
+                                         bd->cube,
+                                         ms.gs ) );
+          UserCommand( sz );
+          g_free( sz );
+
+        }
+        else if( anScoreNew[ 0 ] != ms.anScore[ 0 ] ||
+	    anScoreNew[ 1 ] != ms.anScore[ 1 ] ) {
+          /* only score changed; no need for "set matchid ..." command */
+          sprintf( sz, "set score %d %d", anScoreNew[ 0 ],
+                   anScoreNew[ 1 ] );
+          UserCommand( sz );
+	}
+
 	outputresume();
 
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname0 ), bd->lname0 );
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mname1 ), bd->lname1 );
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore0 ), bd->lscore0 );
 	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mscore1 ), bd->lscore1 );
+	gtk_multiview_set_current( GTK_MULTIVIEW( bd->mmatch ), 
+                                   bd->lmatch );
     }
 }
 
@@ -3555,8 +3598,8 @@ static void board_init( Board *board ) {
     bd->mscore0 = gtk_multiview_new();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore0, FALSE, FALSE, 8 );
 
-    bd->score0 = gtk_spin_button_new( GTK_ADJUSTMENT(
-	gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ), 1, 0 );
+    bd->ascore0 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) );
+    bd->score0 = gtk_spin_button_new( GTK_ADJUSTMENT( bd->ascore0 ), 1, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score0 ), TRUE );
     bd->lscore0 = gtk_label_new( NULL );
     gtk_container_add( GTK_CONTAINER( bd->mscore0 ), bd->lscore0 );
@@ -3625,8 +3668,8 @@ static void board_init( Board *board ) {
     bd->mscore1 = gtk_multiview_new();
     gtk_box_pack_start ( GTK_BOX ( pw ), bd->mscore1, FALSE, FALSE, 8 );
 
-    bd->score1 = gtk_spin_button_new( GTK_ADJUSTMENT(
-	gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) ), 1, 0 );
+    bd->ascore1 = GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, 65535, 1, 1, 1 ) );
+    bd->score1 = gtk_spin_button_new( GTK_ADJUSTMENT( bd->ascore1 ), 1, 0 );
     gtk_spin_button_set_numeric( GTK_SPIN_BUTTON( bd->score1 ), TRUE );
     bd->lscore1 = gtk_label_new( NULL );
     gtk_container_add( GTK_CONTAINER( bd->mscore1 ), bd->lscore1 );
@@ -3675,9 +3718,18 @@ static void board_init( Board *board ) {
     
     gtk_box_pack_start( GTK_BOX( pw ),
 			gtk_label_new( _("Match:") ), FALSE, FALSE, 4 );
+
     gtk_box_pack_start( GTK_BOX( pw ),
-                        bd->match = gtk_label_new( NULL ), 
+                        bd->mmatch = gtk_multiview_new (),
                         FALSE, FALSE, 0 );
+
+    gtk_container_add( GTK_CONTAINER( bd->mmatch ), 
+                       bd->lmatch = gtk_label_new( NULL ) );
+
+    bd->amatch = 
+      GTK_ADJUSTMENT( gtk_adjustment_new( 0, 0, MAXSCORE, 1, 1, 1 ) );
+    bd->match = gtk_spin_button_new( GTK_ADJUSTMENT( bd->amatch ), 1, 0 );
+    gtk_container_add( GTK_CONTAINER( bd->mmatch ), bd->match );
 
     /* crawford flag */
 
@@ -3723,6 +3775,13 @@ static void board_init( Board *board ) {
 			GTK_SIGNAL_FUNC( dice_expose ), bd );
     gtk_signal_connect( GTK_OBJECT( bd->dice_area ), "button_press_event",
 			GTK_SIGNAL_FUNC( dice_press ), bd );
+
+    gtk_signal_connect( GTK_OBJECT( bd->amatch ), "value-changed",
+                        GTK_SIGNAL_FUNC( score_changed ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->ascore0 ), "value-changed",
+                        GTK_SIGNAL_FUNC( score_changed ), bd );
+    gtk_signal_connect( GTK_OBJECT( bd->ascore1 ), "value-changed",
+                        GTK_SIGNAL_FUNC( score_changed ), bd );
 
 }
 
