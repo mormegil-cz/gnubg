@@ -287,7 +287,8 @@ extern void board_edit( BoardData *bd );
 
 #if USE_BOARD3D
 /* Functions for 3d board */
-extern int InitGTK3d(int *argc, char ***argv);
+extern void InitGTK3d(int *argc, char ***argv);
+extern void Init3d();
 extern void SetupViewingVolume3d(BoardData *bd, renderdata* prd);
 extern void DisplayCorrectBoardType();
 extern void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area);

@@ -1,3 +1,7 @@
+Fri Mar 12 10:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c, gtkprefs.c, gtkgame.c: Removed texture load errors when in 2d mode
+
 Mon Mar 8 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkcolor.c, gtkprefs.c: Remove "property delete" gtk warning message

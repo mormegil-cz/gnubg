@@ -1116,6 +1116,9 @@ void toggle_display_type(GtkWidget *widget, BoardData* bd)
 
 	if (previewType == DT_3D)
 	{
+		/* Make sure 3d code is initialized */
+		Init3d();
+
 		if (!DoAcceleratedCheck(bd->drawing_area3d))
 			gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwQuickDraw), 1);
 	}			

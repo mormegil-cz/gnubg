@@ -8055,8 +8055,11 @@ static void real_main( void *closure, int argc, char *argv[] ) {
     SetDefaultTC();
 #endif
 #if USE_BOARD3D
-	if (fX)
-		Default3dSettings();
+	/* If using 3d board initilize 3d widget */
+	if (rdAppearance.fDisplayType == DT_3D)
+		Init3d();
+	/* If no 3d settings loaded, set appearance to first design */
+	Default3dSettings();
 #endif
 
 #if USE_GTK

@@ -3020,7 +3020,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	return FALSE;
     
 #if USE_BOARD3D
-	/* Initialize openGL widget */
+	/* Initialize openGL widget library */
 	InitGTK3d(argc, argv);
 #endif
 

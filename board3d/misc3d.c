@@ -261,7 +261,9 @@ void FindNamedTexture(TextureInfo** textureInfo, char* name)
 		}
 	}
 	*textureInfo = 0;
-	g_print("Texture %s not in texture info file\n", name);
+	/* Only warn user if textures.txt file has been loaded */
+	if (ListSize(&textures) > 0)
+		g_print("Texture %s not in texture info file\n", name);
 }
 
 void FindTexture(TextureInfo** textureInfo, char* file)
@@ -277,23 +279,29 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 		}
 	}
 	*textureInfo = 0;
-	g_print("Texture %s not in texture info file\n", file);
+	/* Only warn user if textures.txt file has been loaded */
+	if (ListSize(&textures) > 0)
+		g_print("Texture %s not in texture info file\n", file);
 }
 
 #define TEXTURE_FILE "textures.txt"
 #define TEXTURE_FILE_VERSION 2
 
-void LoadTextureInfo()
-{
+void LoadTextureInfo(int FirstPass)
+{	/* May be called several times, no errors shown on first pass */
 	FILE* fp;
 	char *szFile;
 	#define BUF_SIZE 100
 	char buf[BUF_SIZE];
 
+	if (!FirstPass && ListSize(&textures) > 0)
+		return;	/* Ignore multiple calls after a successful load */
+
 	ListInit(&textures, sizeof(TextureInfo));
 
 	if ( ! ( szFile = PathSearch( TEXTURE_FILE, szDataDirectory ) ) ) {
-		g_print( "PathSearch failed!\n" );
+		if (!FirstPass)
+			g_print( "PathSearch failed!\n" );
 		return;
 	}
 
@@ -301,13 +309,15 @@ void LoadTextureInfo()
 	free(szFile);
 	if (!fp)
 	{
-		g_print("Error: Texture file (%s) not found\n", TEXTURE_FILE);
+		if (!FirstPass)
+			g_print("Error: Texture file (%s) not found\n", TEXTURE_FILE);
 		return;
 	}
 
 	if (!fgets(buf, BUF_SIZE, fp) || atoi(buf) != TEXTURE_FILE_VERSION)
 	{
-		g_print("Error: Texture file (%s) out of date\n", TEXTURE_FILE);
+		if (!FirstPass)
+			g_print("Error: Texture file (%s) out of date\n", TEXTURE_FILE);
 		return;
 	}
 
@@ -320,7 +330,7 @@ void LoadTextureInfo()
 
 		/* filename */
 		if (!fgets(buf, BUF_SIZE, fp))
-			return;	/* finished */
+			break;	/* finished */
 		len = strlen(buf);
 		if (len > 0 && buf[len - 1] == '\n')
 		{

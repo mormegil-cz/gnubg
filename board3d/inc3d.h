@@ -162,7 +162,7 @@ int finishedPath(Path* p);
 void updateHingeOccPos(BoardData* bd);
 void getProjectedPieceDragPos(int x, int y, float pos[3]);
 void updateMovingPieceOccPos(BoardData* bd);
-void LoadTextureInfo();
+void LoadTextureInfo(int FirstPass);
 GList *GetTextureList(int type);
 int IsSet(int flags, int bit);
 float Dist2d(float a, float b);

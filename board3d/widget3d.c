@@ -32,6 +32,7 @@
 #include "renderprefs.h"
 #include "backgammon.h"
 #include "gtkgame.h"
+#include "gtkprefs.h"
 
 #if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
@@ -240,25 +241,35 @@ void CreateBoard3d(BoardData* bd, GtkWidget** drawing_area)
 	InitBoard3d(bd);
 }
 
-int InitGTK3d(int *argc, char ***argv)
+void InitGTK3d(int *argc, char ***argv)
 {
 #if HAVE_GTKGLEXT
 	gtk_gl_init(argc, argv);
+#endif
 
+	/* Call LoadTextureInfo to get texture details from textures.txt */
+	LoadTextureInfo(TRUE);
+}
+
+void Init3d()
+{	/* May be called several times - only init on first call */
+	static int initilized = FALSE;
+	if (initilized)
+		return;
+	initilized = TRUE;
+
+	/* Check for opengl support */
+#if HAVE_GTKGLEXT
 	/* Configure OpenGL-capable visual */
 	glconfig = gdk_gl_config_new_by_mode(GDK_GL_MODE_RGB | GDK_GL_MODE_DEPTH | GDK_GL_MODE_DOUBLE | GDK_GL_MODE_STENCIL);
 	if (!glconfig)
 #else
 	if (!gdk_gl_query())
 #endif
-	{
-		g_print("*** Cannot find OpenGL-capable visual.\n");
-		return 1;
-	}
+		g_print("*** Cannot find OpenGL-capable visual ***\n");
 
-	LoadTextureInfo();
-
-	return 0;
+	/* Second call to LoadTextureInfo to show any error messages */
+	LoadTextureInfo(FALSE);
 }
 
 #ifdef WIN32
