@@ -11,6 +11,8 @@
 
 #include <ext.h>
 
+#include "eval.h"
+
 typedef struct _gamedata {
     extwindow ewndBoard, ewndDice, ewndStats, ewndGame;
     GC gcAnd, gcOr, gcCopy, gcCube;
@@ -24,6 +26,7 @@ typedef struct _gamedata {
     
     int nDragPoint, fDragColour, xDrag, yDrag, xDice[ 2 ], yDice[ 2 ],
 	fDiceColour[ 2 ], fCubeFontRotated;
+    int anBoardOld[ 2 ][ 25 ]; /* board before user made any moves */
     int fCubeOwner; /* -1 = bottom, 0 = centred, 1 = top */ 
     
     /* remainder is from FIBS board: data */
@@ -52,11 +55,10 @@ extern extwindowclass ewcGame;
 extern int StatsConfirm( extwindow *pewnd );
 extern int StatsMove( extwindow *pewnd, int nSource, int nDest, int fHit );
 
-extern int GameSet( extwindow *pewnd, char *sz );
 extern void GameRedrawDice( extwindow *pewnd, gamedata *pgd, int x, int y,
 			     int fColour, int i );
-extern int GameSetBoard( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
-			 char *szPlayer, char *szOpp, int nMatchTo,
-			 int nScore, int nOpponent, int nDice0, int nDice1 );
+extern int GameSet( extwindow *pewnd, int anBoard[ 2 ][ 25 ], int fRoll,
+		    char *szPlayer, char *szOpp, int nMatchTo,
+		    int nScore, int nOpponent, int nDice0, int nDice1 );
 
 #endif

@@ -106,7 +106,7 @@ extern int EvalCacheResize( int cNew );
 extern int EvalCacheStats( int *pc, int *pcLookup, int *pcHit );
 
 extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
-			  int n0, int n1 );
+			  int n0, int n1, int fPartial );
 extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ], int nPlies,
 			  int nDice0, int nDice1, int anBoard[ 2 ][ 25 ],
 			  int c, float d );

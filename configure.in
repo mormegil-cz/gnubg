@@ -42,7 +42,7 @@ AC_CHECK_LIB(dl, dlopen)
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_TIME
-AC_CHECK_HEADERS(fcntl.h sys/mman.h sys/time.h unistd.h)
+AC_CHECK_HEADERS(fcntl.h sys/mman.h pwd.h sys/time.h unistd.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -50,8 +50,7 @@ AC_C_CONST
 dnl Checks for library functions.
 AC_FUNC_MMAP
 AC_CHECK_FUNCS(sigaction sigvec,break)
-AC_CHECK_FUNCS(gettimeofday)
-AC_CHECK_FUNCS(random)
+AC_CHECK_FUNCS(getlogin getpwuid gettimeofday random)
 AC_REPLACE_FUNCS(rand_r)
 AC_TYPE_SIGNAL
 

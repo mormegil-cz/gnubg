@@ -43,8 +43,8 @@ static void NewGame( void ) {
 	printf( "%s rolls %d, %s rolls %d.\n", ap[ 0 ].szName, anDice[ 0 ],
 		ap[ 1 ].szName, anDice[ 1 ] );
 
-    if( anDice[ 0 ] == anDice[ 1 ] ) {
-	if( nMatchTo <= 0 && nCube < ( 1 << cAutoDoubles ) && fCubeUse )
+    if( anDice[ 0 ] == anDice[ 1 ] && nCube < MAX_CUBE ) {
+	if( !nMatchTo && nCube < ( 1 << cAutoDoubles ) && fCubeUse )
 	    printf( "The cube is now at %d.\n", nCube <<= 1 );
 
 	goto reroll;
@@ -128,7 +128,7 @@ static int TryBearoff( void ) {
 	/* It's a contact position; don't automatically bear off */
 	return -1;
     
-    GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ] );
+    GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
     cMoves = ( anDice[ 0 ] == anDice[ 1 ] ) ? 4 : 2;
     
@@ -156,7 +156,7 @@ static int TryBearoff( void ) {
     return -1;
 }
 
-static void NextTurn( void ) {
+extern void NextTurn( void ) {
 
     int n, fWinner;
     static int fReentered = 0, fShouldRecurse = 0;
@@ -238,8 +238,9 @@ static void NextTurn( void ) {
 	if( fInterrupt )
 	    break;
 
-	if( fAutoRoll && fCubeOwner >= 0 && fCubeOwner != fTurn &&
-	    !anDice[ 0 ] && !fDoubled ) {
+	if( fAutoRoll && !anDice[ 0 ] &&
+	    ( !fCubeUse || ( fCubeOwner >= 0 && fCubeOwner != fTurn &&
+			     !fDoubled ) ) ) {
 	    CommandRoll( NULL );
 
 	    if( fShouldRecurse )
@@ -312,7 +313,14 @@ extern void CommandDouble( char *sz ) {
     movetype *pmt;
     
     if( fTurn < 0 ) {
-	puts( "No game in progress (type `new' to start one)." );
+	puts( "No game in progress (type `new game' to start one)." );
+
+	return;
+    }
+
+    if( fCrawford ) {
+	puts( "Doubling is forbidden by the Crawford rule (see `help set "
+	      "crawford')." );
 
 	return;
     }
@@ -425,7 +433,7 @@ extern void CommandMove( char *sz ) {
     }
     
     if( !*sz ) {
-	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ] );
+	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
 	if( ml.cMoves == 1 ) {
 	    pmn = malloc( sizeof( *pmn ) );
@@ -508,7 +516,7 @@ extern void CommandMove( char *sz ) {
 	    }
 	}
 
-	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ] );
+	GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE );
 
 	for( i = 0; i < ml.cMoves; i++ ) {
 	    PositionFromKey( anBoardTest, ml.amMoves[ i ].auch );
@@ -774,7 +782,7 @@ extern void CommandRoll( char *sz ) {
 
     ShowBoard();
 
-    if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ] ) ) {
+    if( !GenerateMoves( &ml, anBoard, anDice[ 0 ], anDice[ 1 ], FALSE ) ) {
 	pmn = malloc( sizeof( *pmn ) );
 	pmn->mt = MOVE_NORMAL;
 	pmn->anRoll[ 0 ] = anDice[ 0 ];
@@ -821,7 +829,7 @@ extern void CommandTake( char *sz ) {
     
     fDoubled = FALSE;
 
-    fTurn = fCubeOwner = !fMove;
+    fCubeOwner = fTurn;
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;

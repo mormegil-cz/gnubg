@@ -1,3 +1,23 @@
+Sat Jan  8 14:16:08 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* xgame.c (StatsMove, StatsConfirm): Keep a list of legal
+	moves from the current position.  Display whether the user's
+	move is incomplete, complete, or illegal.
+	* xgame.h, xgame.c (GameSet, GameSetBoard): Old GameSetBoard
+	renamed to GameSet; old GameSet deleted.
+	* eval.c (SaveMoves, GenerateMovesSub, GenerateMoves): added
+	parameter fPartial, and include incomplete moves in the list
+	if set.
+	* positionid.c, positionid.h (EqualBoards): New function.
+	* set.c (CommandSetCubeCentre, CommandSetCubeOwner,
+	CommandSetCubeValue): New functions.
+	* set.c (CommandSetCubeUse): If the cube had been offered and
+	cube use is being disabled, go back to the player on roll.
+	* gnubg.c (main): Initialise the players' names to "gnubg" and
+	the user's login name.
+	* gnubg.c (ShowBoard): Label the players' names with X or O in the
+	ASCII board.
+
 Fri Jan  7 21:14:19 2000  Gary Wong  <gary@cs.arizona.edu>
 
 	* xgame.c (GameHandler): Forward keyboard input in the board window

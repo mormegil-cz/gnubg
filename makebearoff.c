@@ -49,7 +49,7 @@ static void BearOff( int nId ) {
     
     for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
 	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
-	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ] );
+	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ], FALSE );
 
 	    us = 0xFFFF; iBest = -1;
 	    
@@ -108,7 +108,7 @@ static void BearOff2( int nUs, int nThem ) {
     
     for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
 	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
-	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ] );
+	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ], FALSE );
 
 	    r = -1.0; iBest = -1;
 	    

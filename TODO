@@ -14,11 +14,11 @@ duplication of effort and to make sure our changes merge easily.
 ** Add cube handling for computer player.
 ** Make "new game" ask "are you sure?" if invoked while a game is in
   progress.  To do it properly requires improved input routines.
-** Finish the "set cube" subcommands.
+** Print sensible warnings if the user tries to enable the Jacoby rule
+  and cubeless play at the same time.
 
 * Command interface:
 ** Check "show" exists for every "set"!
-** Allow setting long seeds for dice generators that support them.
 ** Add more completions to help and readline.
 ** Allow user to vary parameters for rollouts.
 ** Allow timeouts for "train" (and others?).
@@ -33,7 +33,9 @@ duplication of effort and to make sure our changes merge easily.
   been typed (this is nontrivial if a partial TTY command has been entered).
   (gary)
 ** Allow abbreviation of multiple moves (e.g. "8/7(2) 6/5(2)") and
-  concatenation of moves (e.g. "24/18*/13").
+  concatenation of moves (e.g. "24/18*/13").  Make FormatMove() use
+  this "pretty" format.  (If Jellyfish can't understand pretty moves in
+  saved games, then leave a function for saving in the plain format.)
 ** Finish "help" -- add detailed help for each command.
 ** Add undo, reroll, and viewing next/prev moves in game/match.
 ** Allow reading commands from scripts.  A .gnubgrc file would contain
@@ -52,8 +54,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow doubling by clicking the cube in the board window. (gary)
 ** Add an option to slow down display if moves happen too quickly (e.g.
   computer move, unable to move, auto bearoff, etc.)
-** Perform better move checking in the X window; provide visual feedback
-  so the user can tell whether the move is partial, complete, or illegal.
 ** Add a board edit mode.  What would be the best semantics for the
   interface?
 ** Try to use some optimisation like XCheckIfEvent() to ignore all but
@@ -75,7 +75,6 @@ duplication of effort and to make sure our changes merge easily.
   Joseph Heled has improved performance here.
 ** Think about what should happen with variance reduction in Rollout()
   and RolloutGame() when a probability turns out <0 or >1.
-** Undoing a move that hit a blot in the X window doesn't restore the blot.
 ** When X and readline are enabled, using the board window to play while
   the rng is set to manual really confuses the terminal (readline has
   left the TTY in a silly state while GetManualDice() is trying to
@@ -101,8 +100,4 @@ duplication of effort and to make sure our changes merge easily.
   HTML formatted manual, and perhaps pages to submit training data,
   an online evaluator like Monte Carlo, maybe even an entire game like
   Motif.
-** When $USER, $LOGNAME, getlogin(), getpwnam() or equivalent is available,
-  set the player name to the user's name (otherwise, just say "You").  Set
-  gnubg's name to "gnubg".  Make ShowBoard() add "X" and "O" to the
-  player name strings, so you can see who is who on the ASCII board. (gary)
 ** Allow loading and saving weights to specify binary or ASCII format.

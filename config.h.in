@@ -18,8 +18,14 @@
 /* Define if the X Window System is missing or not being used.  */
 #undef X_DISPLAY_MISSING
 
+/* Define if you have the getlogin function.  */
+#undef HAVE_GETLOGIN
+
 /* Define if you have the getpagesize function.  */
 #undef HAVE_GETPAGESIZE
+
+/* Define if you have the getpwuid function.  */
+#undef HAVE_GETPWUID
 
 /* Define if you have the gettimeofday function.  */
 #undef HAVE_GETTIMEOFDAY
@@ -38,6 +44,9 @@
 
 /* Define if you have the <fcntl.h> header file.  */
 #undef HAVE_FCNTL_H
+
+/* Define if you have the <pwd.h> header file.  */
+#undef HAVE_PWD_H
 
 /* Define if you have the <sys/mman.h> header file.  */
 #undef HAVE_SYS_MMAN_H

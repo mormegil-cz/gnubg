@@ -183,6 +183,18 @@ extern int EqualKeys( unsigned char auch0[ 10 ], unsigned char auch1[ 10 ] ) {
     return 1;
 }
 
+extern int EqualBoards( int anBoard0[ 2 ][ 25 ], int anBoard1[ 2 ][ 25 ] ) {
+
+    int i;
+
+    for( i = 0; i < 25; i++ )
+	if( anBoard0[ 0 ][ i ] != anBoard1[ 0 ][ i ] ||
+	    anBoard0[ 1 ][ i ] != anBoard1[ 1 ][ i ] )
+	    return 0;
+
+    return 1;
+}
+
 static int anCombination[ 21 ][ 6 ], fCalculated = 0;
 
 static int InitCombination( void ) {

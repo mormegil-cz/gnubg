@@ -15,6 +15,8 @@ extern extwindow ewnd;
 extern int fX;
 #endif
 
+#define MAX_CUBE ( 1 << 12 )
+
 typedef struct _command {
     char *sz;
     void ( *pf )( char * );
@@ -69,10 +71,11 @@ extern player ap[ 2 ];
 extern void HandleCommand( char *sz, command *ac );
 extern void InitBoard( int anBoard[ 2 ][ 25 ] );
 extern char *NextToken( char **ppch );
+extern void NextTurn( void );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char *sz );
-extern void SetToggle( char *szName, int *pf, char *sz, char *szOn,
+extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
 
@@ -113,7 +116,10 @@ extern void CommandAccept( char * ),
     CommandSetPostCrawford( char * ),
     CommandSetBoard( char * ),
     CommandSetCache( char * ),
+    CommandSetCubeCentre( char * ),
+    CommandSetCubeOwner( char * ),
     CommandSetCubeUse( char * ),
+    CommandSetCubeValue( char * ),
     CommandSetDice( char * ),
     CommandSetDisplay( char * ),
     CommandSetPlayerGNU( char * ),

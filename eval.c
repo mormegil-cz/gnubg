@@ -66,6 +66,17 @@ enum { I_BREAK_CONTACT = HALF_RACE_INPUTS, I_BACK_CHEQUER, I_BACK_ANCHOR,
 #define SEARCH_CANDIDATES 8
 #define SEARCH_TOLERANCE 0.16
 
+/* A trivial upper bound on the number of (complete or incomplete)
+ * legal moves of a single roll: if all 15 chequers are spread out,
+ * then there are 18 C 4 + 17 C 3 + 16 C 2 + 15 C 1 = 3875
+ * combinations in which a roll of 11 could be played (up to 4 choices from
+ * 15 chequers, and a chequer may be chosen more than once).  The true
+ * bound will be lower than this (because there are only 26 points,
+ * some plays of 15 chequers must "overlap" and map to the same
+ * resulting position), but that would be more difficult to
+ * compute. */
+#define MAX_MOVES 3875
+
 static int anEscapes[ 0x1000 ];
 static neuralnet nnContact, nnRace;
 static unsigned char *pBearoff1 = NULL, *pBearoff2;
@@ -1199,34 +1210,48 @@ extern int ApplyMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 }
 
 static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
-		       int anBoard[ 2 ][ 25 ] ) {
+		       int anBoard[ 2 ][ 25 ], int fPartial ) {
     int i, j;
     move *pm;
     unsigned char auch[ 10 ];
 
-    if( cMoves < pml->cMaxMoves || cPip < pml->cMaxPips )
-	return;
+    if( fPartial ) {
+	/* Save all moves, even incomplete ones */
+	if( cMoves > pml->cMaxMoves )
+	    pml->cMaxMoves = cMoves;
+	
+	if( cPip > pml->cMaxPips )
+	    pml->cMaxPips = cPip;
+    } else {
+	/* Save only legal moves: if the current move moves plays less
+	   chequers or pips than those already found, it is illegal; if
+	   it plays more, the old moves are illegal. */
+	if( cMoves < pml->cMaxMoves || cPip < pml->cMaxPips )
+	    return;
 
-    if( cMoves > pml->cMaxMoves || cPip > pml->cMaxPips )
-	pml->cMoves = 0;
-
-    pm = pml->amMoves + pml->cMoves;
+	if( cMoves > pml->cMaxMoves || cPip > pml->cMaxPips )
+	    pml->cMoves = 0;
+	
+	pml->cMaxMoves = cMoves;
+	pml->cMaxPips = cPip;
+    }
     
-    pml->cMaxMoves = cMoves;
-    pml->cMaxPips = cPip;
+    pm = pml->amMoves + pml->cMoves;
     
     PositionKey( anBoard, auch );
     
     for( i = 0; i < pml->cMoves; i++ )
 	if( EqualKeys( auch, pml->amMoves[ i ].auch ) ) {
-	    /* update moves, just in case cMoves or cPip has increased */
-	    for( j = 0; j < cMoves * 2; j++ )
-		pml->amMoves[ i ].anMove[ j ] = anMoves[ j ] > -1 ?
-		    anMoves[ j ] : -1;
+	    if( cMoves > pml->amMoves[ i ].cMoves ||
+		cPip > pml->amMoves[ i ].cPips ) {
+		for( j = 0; j < cMoves * 2; j++ )
+		    pml->amMoves[ i ].anMove[ j ] = anMoves[ j ] > -1 ?
+			anMoves[ j ] : -1;
     
-	    if( cMoves < 4 )
-		pml->amMoves[ i ].anMove[ cMoves * 2 ] = -1;
-    
+		if( cMoves < 4 )
+		    pml->amMoves[ i ].anMove[ cMoves * 2 ] = -1;
+	    }
+	    
 	    return;
 	}
     
@@ -1246,7 +1271,7 @@ static void SaveMoves( movelist *pml, int cMoves, int cPip, int anMoves[],
     
     pml->cMoves++;
 
-    assert( pml->cMoves < 3060 );
+    assert( pml->cMoves < MAX_MOVES );
 }
 
 static int LegalMove( int anBoard[ 2 ][ 25 ], int iSrc, int nPips ) {
@@ -1267,16 +1292,16 @@ static int LegalMove( int anBoard[ 2 ][ 25 ], int iSrc, int nPips ) {
 
 static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 			     int iPip, int cPip, int anBoard[ 2 ][ 25 ],
-			     int anMoves[] ) {
+			     int anMoves[], int fPartial ) {
     int i, iCopy, fUsed = 0;
     int anBoardNew[ 2 ][ 25 ];
 
     if( nMoveDepth > 3 || !anRoll[ nMoveDepth ] )
-	return -1;
+	return TRUE;
 
     if( anBoard[ 1 ][ 24 ] ) { /* on bar */
 	if( anBoard[ 0 ][ anRoll[ nMoveDepth ] - 1 ] >= 2 )
-	    return -1;
+	    return TRUE;
 
 	anMoves[ nMoveDepth * 2 ] = 24;
 	anMoves[ nMoveDepth * 2 + 1 ] = 24 - anRoll[ nMoveDepth ];
@@ -1289,11 +1314,12 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 	ApplySubMove( anBoardNew, 24, anRoll[ nMoveDepth ] );
 	
 	if( GenerateMovesSub( pml, anRoll, nMoveDepth + 1, 23, cPip +
-			      anRoll[ nMoveDepth ], anBoardNew, anMoves ) < 0 )
+			      anRoll[ nMoveDepth ], anBoardNew, anMoves,
+			      fPartial ) )
 	    SaveMoves( pml, nMoveDepth + 1, cPip + anRoll[ nMoveDepth ],
-		       anMoves, anBoardNew );
+		       anMoves, anBoardNew, fPartial );
 
-	return 0;
+	return fPartial;
     } else {
 	for( i = iPip; i >= 0; i-- )
 	    if( anBoard[ 1 ][ i ] && LegalMove( anBoard, i,
@@ -1312,16 +1338,16 @@ static int GenerateMovesSub( movelist *pml, int anRoll[], int nMoveDepth,
 		if( GenerateMovesSub( pml, anRoll, nMoveDepth + 1,
 				   anRoll[ 0 ] == anRoll[ 1 ] ? i : 23,
 				   cPip + anRoll[ nMoveDepth ],
-				   anBoardNew, anMoves ) < 0 ) {
+				   anBoardNew, anMoves, fPartial ) )
 		    SaveMoves( pml, nMoveDepth + 1, cPip +
-			       anRoll[ nMoveDepth ], anMoves, anBoardNew );
-		}
+			       anRoll[ nMoveDepth ], anMoves, anBoardNew,
+			       fPartial );
 		
 		fUsed = 1;
 	    }
     }
 
-    return fUsed ? 0 : -1;
+    return !fUsed || fPartial;
 }
 
 static int CompareMoves( const move *pm0, const move *pm1 ) {
@@ -1362,9 +1388,9 @@ static int ScoreMoves( movelist *pml, int nPlies ) {
 }
 
 extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
-			  int n0, int n1 ) {
+			  int n0, int n1, int fPartial ) {
     int anRoll[ 4 ], anMoves[ 8 ];
-    static move amMoves[ 3060 ];
+    static move amMoves[ MAX_MOVES ];
 
     anRoll[ 0 ] = n0;
     anRoll[ 1 ] = n1;
@@ -1375,12 +1401,12 @@ extern int GenerateMoves( movelist *pml, int anBoard[ 2 ][ 25 ],
     pml->amMoves = amMoves; /* use static array for top-level search, since
 			       it doesn't need to be re-entrant */
     
-    GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves );
+    GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves,fPartial );
 
     if( anRoll[ 0 ] != anRoll[ 1 ] ) {
 	swap( anRoll, anRoll + 1 );
 
-	GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves );
+	GenerateMovesSub( pml, anRoll, 0, 23, 0, anBoard, anMoves, fPartial );
     }
 
     return pml->cMoves;
@@ -1399,7 +1425,7 @@ extern int FindBestMove( int nPlies, int anMove[ 8 ], int nDice0, int nDice1,
 	for( i = 0; i < 8; i++ )
 	    anMove[ i ] = -1;
 
-    GenerateMoves( &ml, anBoard, nDice0, nDice1 );
+    GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
     
     if( !ml.cMoves )
 	/* no legal moves */
@@ -1467,7 +1493,7 @@ extern int FindBestMoves( movelist *pml, float ar[][ NUM_OUTPUTS ], int nPlies,
        data, so we can't call GenerateMoves again (or anything that calls
        it, such as ScoreMoves at more than 0 plies) until we have saved
        the moves we want to keep in amCandidates. */
-    GenerateMoves( pml, anBoard, nDice0, nDice1 );
+    GenerateMoves( pml, anBoard, nDice0, nDice1, FALSE );
 
     if( ScoreMoves( pml, 0 ) )
 	return -1;
@@ -1695,7 +1721,7 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] ) {
 
     fRace = ClassifyPosition( anBoard ) <= CLASS_RACE;
     
-    GenerateMoves( &ml, anBoard, nDice0, nDice1 );
+    GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
     
     if( !ml.cMoves )
 	/* no legal moves */

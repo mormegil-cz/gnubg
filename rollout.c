@@ -37,7 +37,7 @@ static int FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
     unsigned long cBestRolls;
     movelist ml;
 
-    GenerateMoves( &ml, anBoard, nDice0, nDice1 );
+    GenerateMoves( &ml, anBoard, nDice0, nDice1, FALSE );
     
     ml.rBestScore = -99999.9;
     cBestRolls = -1;

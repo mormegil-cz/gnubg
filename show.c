@@ -42,11 +42,10 @@ extern void CommandShowBoard( char *sz ) {
 
 #if !X_DISPLAY_MISSING
     if( fX )
-	GameSetBoard( &ewnd, an, TRUE, "", "", 0, 0, 0, 0, 0 );
+	GameSet( &ewnd, an, TRUE, "", "", 0, 0, 0, -1, -1 );
     else
 #endif
 	puts( DrawBoard( szOut, an, TRUE, ap ) );
-
 }
 
 extern void CommandShowCache( char *sz ) {

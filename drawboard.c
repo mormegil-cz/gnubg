@@ -267,7 +267,8 @@ extern char *FormatMove( char *sz, int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 	*pch++ = '/';
 	pch = FormatPoint( pch, anMove[ i + 1 ] + 1 );
 
-	if( anMove[ i + 1 ] >= 0 && anBoard[ 0 ][ 23 - anMove[ i + 1 ] ] ) {
+	if( anBoard && anMove[ i + 1 ] >= 0 &&
+	    anBoard[ 0 ][ 23 - anMove[ i + 1 ] ] ) {
 	    for( j = 1; ; j += 2 )
 		if( j > i ) {
 		    *pch++ = '*';
