@@ -1,3 +1,7 @@
+Tue May 18 15:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* external.*: Minor changes to parser
+
 Tue May 18 8:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkprefs.c, render.c: Several small fixes to board appearance options

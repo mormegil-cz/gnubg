@@ -32,11 +32,13 @@ void escapes(const char *cp, char *tp);
 
 %option noyywrap
 %option prefix="ext"
-%option outfile="lex.yy.c"
+%option outfile="external_l.c"
+
+NUMSTR -?[0-9]+
 
 %%
 
-\"[^\"]*\"	{
+(\"[^\"]*\")|(\'[^\']*\')	{
 			char *buf = malloc( strlen( exttext ) + 1 );
 
 			exttext[strlen(exttext)-1] = '\0';
@@ -46,17 +48,6 @@ void escapes(const char *cp, char *tp);
                         BEGIN(INITIAL);
 			return STRING;
 		}
-\'[^\']*\'	{
-			char *buf = malloc( strlen( exttext ) + 1 );
-
-			exttext[strlen(exttext)-1] = '\0';
-			escapes(exttext+1, buf);
-			extlval.sval = (char *) strdup(buf);
-                        free( buf );
-                        BEGIN(0);
-			return STRING;
-		}
-
 
 evaluation      { return EVALUATION; }
 fibsboard       { return FIBSBOARD; }
@@ -71,7 +62,7 @@ on              { return ON; }
 no              { return OFF; }
 off             { return OFF; }
 
-board:[A-Za-z0-9]+:[A-Za-z0-9]+(:-?[0-9]+)+  { 
+board:[[:alnum:]]+:[[:alnum:]]+(:{NUMSTR})+  { 
 			char *buf = malloc( strlen( exttext ) + 1 );
 
 			escapes(exttext, buf);
@@ -83,7 +74,7 @@ board:[A-Za-z0-9]+:[A-Za-z0-9]+(:-?[0-9]+)+  {
 
 (#.*)?\\?\n	{ prc_lineno++;	}   /* newline is ignored */
 
--?[0-9]+	{ extlval.number = atoi(exttext); return NUMBER; }
+{NUMSTR}	{ extlval.number = atoi(exttext); return NUMBER; }
 
 [^=;:, \t\r\n]+	{
 			char *buf = malloc( strlen( exttext ) + 1 );

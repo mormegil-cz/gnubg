@@ -53,6 +53,8 @@ void ( *ExtErrorHandler )( const char *, const char *, const int ) = NULL;
 %token OFF
 
 %name-prefix="ext"
+%output="external_y.c"
+%defines
 
 %%
 
@@ -103,18 +105,14 @@ optnoise       : NOISE NUMBER /* FIXME: FLOAT */ { ec.rNoise = $2; }
                | /* empty */
                ;
 
-optreduced     : REDUCED NUMBER { ec.nReduced = $2; };
+optreduced     : REDUCED NUMBER { ec.nReduced = $2; }
                | /* empty */
                ;
 
 evalcontext    : optplies optcube optcubeful optcubeless optnoise optreduced
                ;
 
-optevalcontext : evalcontext
-               | /* empty */
-               ;
-
-evaluation     : EVALUATION FIBSBOARD fibsboard optevalcontext { 
+evaluation     : EVALUATION FIBSBOARD fibsboard evalcontext {
   ec.ct = COMMAND_EVALUATION;
 }
 ;
