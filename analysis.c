@@ -63,7 +63,8 @@ const char *aszLuckRating[] = {
 };
 
 static const float arThrsRating [ RAT_SUPERNATURAL + 1 ] = {
-  1e38, 0.060, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 };
+  1e38, 0.035, 0.026, 0.018, 0.012, 0.008, 0.005, 0.002 };
+/* 1e38, 0.060, 0.030, 0.025, 0.020, 0.015, 0.010, 0.005 }; */
 
 int afAnalysePlayers[ 2 ] = { TRUE, TRUE };
 
@@ -1283,6 +1284,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
   float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
   float r = getMWCFromError ( psc, aaaar );
   float rFac = ms.nMatchTo ? 100.0f : 1.0f;
+  int n;
 
 
   /* nice human readable dump */
@@ -1340,9 +1342,9 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
     sprintf ( strchr ( szOutput, 0 ),
               ms.nMatchTo ?
               "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n"
-              "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
+              "%-31s %+6.2f (%+7.3f%%)       %+6.2f (%+7.3f%%)\n" :
               "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n"
-              "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
+              "%-31s %+6.2f (%+7.3f)        %+6.2f (%+7.3f)\n",
               _("Error rate (total)"),
               -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
               -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
@@ -1413,8 +1415,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         if ( psc->anTotalMoves[ i ] ) {
           sprintf ( strchr ( szOutput, 0 ),
                     ms.nMatchTo ?
-                    "%+6.3f (%+7.3f%%)" :
-                    "%+6.3f (%+7.3f) ",
+                    "%+6.2f (%+7.3f%%)" :
+                    "%+6.2f (%+7.3f) ",
                     psc->arLuck[ i ][ 0 ] / psc->anTotalMoves[ i ],
                     psc->arLuck[ i ][ 1 ] * rFac / psc->anTotalMoves[ i ] );
           if ( ! i ) 
@@ -1549,8 +1551,8 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
         if ( psc->anCloseCube[ i ] ) {
           sprintf ( strchr ( szOutput, 0 ),
                     ms.nMatchTo ?
-                    "%+6.3f (%+7.3f%%)" :
-                    "%+6.3f (%+7.3f) ",
+                    "%+6.2f (%+7.3f%%)" :
+                    "%+6.2f (%+7.3f) ",
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ],
                       -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ UNNORMALISED ] * rFac );
           if ( ! i ) 
@@ -1601,13 +1603,37 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
                 _("Error rate (per decision)") );
 
       for ( i = 0; i < 2; ++i ) 
-        if ( psc->anCloseCube[ i ] ) {
+        if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] ) {
           sprintf ( strchr ( szOutput, 0 ),
                     ms.nMatchTo ?
-                    "%+6.3f (%+7.3f%%)" :
-                    "%+6.3f (%+7.3f) ",
+                    "%+6.2f (%+7.3f%%)" :
+                    "%+6.2f (%+7.3f) ",
                   -aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ],
                   -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ] * rFac );
+          if ( ! i ) 
+            strcat ( szOutput, "       " );
+        }
+        else
+          sprintf ( strchr ( szOutput, 0 ),
+                    "%-23.23s ", _("n/a") );
+
+      strcat ( szOutput, "\n" );
+
+      /* equivalent Snowie error rate */
+
+      sprintf ( strchr ( szOutput, 0 ),
+                "%-31s ", 
+                _("Equiv. Snowie error rate    ") );
+
+      for ( i = 0; i < 2; ++i ) 
+        if ( ( n = psc->anTotalCube[ i ] + psc->anTotalMoves[ i ] ) ) {
+
+          sprintf ( strchr ( szOutput, 0 ),
+                    ms.nMatchTo ?
+                    "%+6.2f           " :
+                    "%+6.2f          ",
+                    -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n  *
+                    1000.0f );
           if ( ! i ) 
             strcat ( szOutput, "       " );
         }
@@ -1624,7 +1650,7 @@ DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz ) {
       
   sprintf ( strchr ( szOutput, 0 ),
             "%-31s %-23.23s %-23.23s\n\n",
-            _("Cube decision rating"),
+            _("Overall rating"),
             ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) ?
             gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
             ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) ?

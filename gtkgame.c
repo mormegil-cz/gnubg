@@ -7271,9 +7271,6 @@ extern void GTKSet( void *p ) {
 			 plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
 	    pif, "/File/Save/Weights..." ), TRUE );
-	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
-	    pif, "/File/Import/.pos position..." ),
-				  ms.gs == GAME_PLAYING );
 	enable_sub_menu( gtk_item_factory_get_widget( pif, "/File/Export" ),
 			 plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget(
@@ -7550,6 +7547,7 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
          N_("Overall"),
          N_("Overall error rate (total)"),
          N_("Overall error rate (per decision)"),
+         N_("Equivalent Snowie error rate"),
          N_("Overall rating"),
          N_("MWC against current opponent"),
          N_("Guestimated abs. rating"),
@@ -7840,16 +7838,34 @@ extern void GTKDumpStatcontext( statcontext *psc, matchstate *pms,
   
   /* overall error rate per move */
 
-  if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
+  if ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ],
                       1, pms->nMatchTo, -1.0 );
   else
     strcpy ( sz, _("n/a") );
   gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
 
-  if ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) 
+  if ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) 
     FormatStatEquity( sz, aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ],
                       1, pms->nMatchTo, -1.0 );
+  else
+    strcpy ( sz, _("n/a") );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);
+
+  /* equivalent Snowie error rate */
+
+  if ( psc->anTotalMoves[ 0 ] + psc->anTotalCube[ 0 ] ) 
+    sprintf( sz, "%+.1f", 
+             -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ] / 
+             ( psc->anTotalMoves[ 0 ] + psc->anTotalCube[ 0 ] ) );
+  else
+    strcpy ( sz, _("n/a") );
+  gtk_clist_set_text( GTK_CLIST( pwStats ), ++irow, 1, sz);
+
+  if ( psc->anTotalMoves[ 1 ] + psc->anTotalCube[ 1 ] ) 
+    sprintf( sz, "%+.1f", 
+             -1000.0 * aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ] / 
+             ( psc->anTotalMoves[ 1 ] + psc->anTotalCube[ 1 ] ) );
   else
     strcpy ( sz, _("n/a") );
   gtk_clist_set_text( GTK_CLIST( pwStats ), irow, 2, sz);

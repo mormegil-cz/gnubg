@@ -1,3 +1,11 @@
+Tue Apr  8 22:49:14 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Adjust threshold for the ratings "Supernatural", "world class", etc.
+
+	* html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+	analysis.c (DumpStatcontext): output "Equivalent Snowie error rate."
+	* analysis.c: adjust thresholds.
+
 Tue Apr  8 21:32:48 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Add experimental code for export of Jellyfish .pos,
