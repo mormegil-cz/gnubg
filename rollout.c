@@ -894,7 +894,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
   memcpy (&rcRolloutSave, &rcRollout, sizeof (rcRollout));
   if (alternatives < 2) {
     rcRollout.fStopMoveOnJsd = 0;
-    rcRollout.fStopOnSTD = 0;
+    rcRollout.fStopOnJsd = 0;
   }
 
   /* make sure cube decisions are rolled out cubeful */
