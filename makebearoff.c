@@ -42,11 +42,13 @@ typedef struct _hashent {
 } hashent;
 
 typedef struct _hash {
-  long int nQueries, nHits, nEntries, nOverwrites;
+  unsigned long int nQueries, nHits, nEntries, nOverwrites;
   int nHashSize;
   hashent *phe;
 } hash;
 
+
+static long cLookup;
 
 static long int
 HashPosition ( hash *ph, const int iKey ) {
@@ -61,8 +63,8 @@ HashStatus ( hash *ph ) {
 
   fprintf ( stderr, "Hash status:\n" );
   fprintf ( stderr, "Size:    %d elements\n", ph->nHashSize );
-  fprintf ( stderr, "Queries: %ld (hits: %ld)\n", ph->nQueries, ph->nHits );
-  fprintf ( stderr, "Entries: %ld (overwrites: %ld)\n",
+  fprintf ( stderr, "Queries: %lu (hits: %ld)\n", ph->nQueries, ph->nHits );
+  fprintf ( stderr, "Entries: %lu (overwrites: %lu)\n",
             ph->nEntries, ph->nOverwrites );
 
 
@@ -170,7 +172,6 @@ OSLookup ( const unsigned int iPos,
     int i, j;
     off_t iOffset;
     int nBytes;
-    int nPos = Combination ( nPoints + 15, nPoints );
     unsigned int ioff, nz, ioffg, nzg;
     unsigned short int us;
 
@@ -287,6 +288,8 @@ OSLookup ( const unsigned int iPos,
 
   }
 
+  ++cLookup;
+
   return 0;
 
 }
@@ -387,17 +390,10 @@ static void BearOff( int nId, int nPoints,
 
     /* look for position in existing bearoff file */
     
-    if ( pbc ) {
-      for ( i = 24; i >= 0 && ! anBoard[ 1 ][ i ]; --i )
-        ;
-      
-      if ( i < pbc->nPoints && k <= pbc->nChequers ) {
-        unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
-        BearoffDist ( pbc, nPosID, NULL, NULL, NULL, aOutProb, aOutProb + 32 );
-
-        return;
-      }
-      
+    if ( pbc && isBearoff ( pbc, anBoard ) ) {
+      unsigned int nPosID = PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+      BearoffDist ( pbc, nPosID, NULL, NULL, NULL, aOutProb, aOutProb + 32 );
+      return;
     }
     
     if ( k < 15 )
@@ -872,199 +868,26 @@ generate_nd ( const int nPoints,const int nHashSize, const int fHeader,
 }
 
 
-static float
-CubeEquity ( const float rND, const float rDT, const float rDP ) {
+static short int
+CubeEquity ( const short int siND, const short int siDT,
+             const short int siDP ) {
 
-  if ( rDT >= rND && rDP >= rND ) {
-    /* it's a float */
-    
-    if ( rDT >= rDP )
-      /* float, pass */
-      return rDP;
+  if ( siDT >= (siND/2) && siDP >= siND ) {
+    /* it's a double */
+
+    if ( siDT >= (siDP/2) )
+      /* double, pasi */
+      return siDP;
     else
-      /* float, take */
-      return rDT;
+      /* double, take */
+      return 2 * siDT;
 
   }
   else
 
-    /* no float */
+    /* no double */
 
-    return rND;
-
-}
-  
-
-
-static void BearOff2( int nUs, int nThem,
-                      const int nTSP, const int nTSC,
-                      float arEquity[ 4 ], const int n, const int fCubeful,
-                      hash *ph, bearoffcontext *pbc ) {
-
-    int i, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ], anBoardTemp[ 2 ][ 25 ];
-    movelist ml;
-    int aiBest[ 4 ];
-    float arBest[ 4 ];
-    float arTotal[ 4 ];
-    int k;
-    float *prj;
-    float arj[ 4 ];
-    float r;
-
-    if ( ! nUs ) {
-
-      /* we have won */
-      arEquity[ 0 ] = arEquity[ 1 ] = arEquity[ 2 ] = arEquity[ 3 ] = +1.0;
-      return;
-
-    }
-
-    if ( ! nThem ) {
-
-      /* we have lost */
-      arEquity[ 0 ] = arEquity[ 1 ] = arEquity[ 2 ] = arEquity[ 3 ] = -1.0;
-      return;
-
-    }
-
-    PositionFromBearoff( anBoard[ 0 ], nThem, nTSP );
-    PositionFromBearoff( anBoard[ 1 ], nUs, nTSP );
-
-    for( i = nTSP; i < 25; i++ )
-	anBoard[ 1 ][ i ] = anBoard[ 0 ][ i ] = 0;
-
-    /* look for position in bearoff file */
-
-    if ( pbc ) {
-
-      for ( j = 24; j >= 0 && ! anBoard[ 1 ][ j ]; --j )
-        ;
-      for ( i = 0, k = 0; i < 25; ++i )
-        k += anBoard[ 1 ][ i ];
-
-      if ( j < pbc->nPoints && k <= pbc->nChequers ) {
-
-        for ( j = 24; j >= 0 && ! anBoard[ 0 ][ j ]; --j )
-          ;
-        for ( i = 0, k = 0; i < 25; ++i )
-          k += anBoard[ 0 ][ i ];
-        
-        if ( j < pbc->nPoints && k <= pbc->nChequers ) {
-          unsigned short int nUsL = 
-            PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
-          unsigned short int nThemL = 
-            PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
-          int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
-          unsigned int iPos = nUsL * nL + nThemL;
-          
-          BearoffCubeful ( pbc, iPos, arEquity );
-          
-          return;
-        }
-
-      }
-      
-    }
-
-    arTotal[ 0 ] = arTotal[ 1 ] = arTotal[ 2 ] = arTotal[ 3 ] = 0.0f;
-    
-    for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
-	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
-	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ], FALSE );
-
-            arBest [ 0 ] = arBest[ 1 ] = arBest[ 2 ] = arBest [ 3 ] = -999.0;
-            aiBest [ 0 ] = aiBest[ 1 ] = aiBest[ 2 ] = aiBest [ 3 ] = -1;
-	    
-	    for( i = 0; i < ml.cMoves; i++ ) {
-		PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
-
-		j = PositionBearoff( anBoardTemp[ 1 ], nTSP );
-
-		assert( j >= 0 );
-		assert( j < nUs ); 
-
-                if ( ! HashLookup ( ph, n * nThem + j, (void **) &prj ) ) {
-                  BearOff2 ( nThem, j, nTSP, nTSC, prj = arj, n,
-                             fCubeful, ph, pbc );
-                  HashAdd ( ph, n * nThem + j, prj, 
-                            sizeof ( float ) * ( fCubeful ? 4 : 1 ) );
-                }
-
-                /* cubeless */
-
-                if ( -prj[ 0 ] > arBest[ 0 ] ) { 
-                  aiBest [ 0 ] = j;
-                  arBest [ 0 ] = -prj[ 0 ];
-                }
-
-                if ( fCubeful ) {
-
-                  /* I own cube:
-                     from opponent's view he doesn't own cube */
-                  
-                  if ( -prj[ 3 ] > arBest[ 1 ] ) {
-                    aiBest [ 1 ] = j;
-                    arBest [ 1 ] = -prj[ 3 ];
-                  }
-
-                  /* Centered cube (so centered for opponent too) */
-
-                  r = CubeEquity ( prj[ 2 ], 2.0 * prj[ 3 ], 1.0 ); 
-                  if ( -r > arBest[ 2 ] ) {
-                    aiBest [ 2 ] = j;
-                    arBest [ 2 ] = -r;
-                  }
-
-                  /* Opponent owns cube:
-                     from opponent's view he owns cube */
-
-                  r = CubeEquity ( prj[ 1 ], 2.0 * prj[ 3 ], 1.0 ); 
-                  if ( -r > arBest[ 3 ] ) {
-                    aiBest [ 3 ] = j;
-                    arBest [ 3 ] = -r;
-                  }
-
-                }
-
-	    }
-
-	    assert( aiBest[ 0 ] >= 0 );
-	    assert( ! fCubeful || aiBest[ 1 ] >= 0 );
-	    assert( ! fCubeful || aiBest[ 2 ] >= 0 );
-	    assert( ! fCubeful || aiBest[ 3 ] >= 0 );
-	    
-            if ( anRoll[ 0 ] == anRoll[ 1 ] )
-              for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
-                arTotal [ k ] += arBest[ k ];
-            else
-              for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
-                arTotal [ k ] += 2.0f * arBest[ k ];
-
-	}
-
-    /* cubeless equity */
-    arEquity[ 0 ] = arTotal[ 0 ] / 36.0;
-
-    if ( fCubeful ) {
-
-      for ( k = 1; k < 4; ++k )
-        arEquity[ k ] = arTotal[ k ] / 36.0f;
-
-    }
-
-
-}
-
-
-
-static void
-WriteEquity ( FILE *pf, const float r ) {
-
-  int k;
-  k = ( r + 1.0f ) * 32767.5;
-
-  putc( k & 0xFF, pf );
-  putc( k >> 8, pf );
+    return siND;
 
 }
 
@@ -1093,6 +916,224 @@ CalcPosition ( const int i, const int j, const int n ) {
 
 }
 
+
+
+static void
+TSLookup ( const int nUs, const int nThem,
+           const int nTSP, const int nTSC,
+           short int arEquity[ 4 ], 
+           const int n, const int fCubeful,
+           FILE *pfTmp ) {
+
+  int iPos = CalcPosition ( nUs, nThem, n );
+  unsigned char  ac[ 8 ];
+  int i;
+  unsigned short int us;
+
+  /* seek to position */
+
+  if ( fseek ( pfTmp, iPos * ( fCubeful ? 8 : 2 ), SEEK_SET ) < 0 ) {
+    perror ( "temp file" );
+    exit(-1);
+  }
+
+  if ( fread ( ac, 1, 8, pfTmp ) < 8 ) {
+      if ( errno )
+        perror ( "temp file" );
+      else
+        fprintf ( stderr, "error reading temp file\n" );
+      exit(-1);
+  }
+
+  /* re-position at EOF */
+  
+  if ( fseek ( pfTmp, 0L, SEEK_END ) < 0 ) {
+    perror ( "temp file" );
+    exit(-1);
+  }
+  
+  for ( i = 0; i < ( fCubeful ? 4 : 1 ); ++i ) {
+    us = ac[ 2 * i ] | ac[ 2 * i + 1 ] << 8;
+    arEquity[ i ] = us - 0x8000;
+  }
+
+  ++cLookup;
+    
+}
+  
+
+/*
+ * Calculate exact equity for position.
+ *
+ * We store the equity in two bytes:
+ * 0x0000 meaning equity=-1 and 0xFFFF meaning equity=+1.
+ *
+ */
+
+
+static void BearOff2( int nUs, int nThem,
+                      const int nTSP, const int nTSC,
+                      short int asiEquity[ 4 ],
+                      const int n, const int fCubeful,
+                      hash *ph, bearoffcontext *pbc, FILE *pfTmp ) {
+
+    int i, j, anRoll[ 2 ], anBoard[ 2 ][ 25 ], anBoardTemp[ 2 ][ 25 ];
+    movelist ml;
+    int aiBest[ 4 ];
+    int asiBest[ 4 ];
+    int aiTotal[ 4 ];
+    short int k;
+    short int *psij;
+    short int asij[ 4 ];
+    const short int EQUITY_P1 = 0x7FFF;
+    const short int EQUITY_M1 = ~EQUITY_P1;
+
+    if ( ! nUs ) {
+
+      /* we have won */
+      asiEquity[ 0 ] = asiEquity[ 1 ] = 
+        asiEquity[ 2 ] = asiEquity[ 3 ] = EQUITY_P1;
+      return;
+
+    }
+
+    if ( ! nThem ) {
+
+      /* we have lost */
+      asiEquity[ 0 ] = asiEquity[ 1 ] = 
+        asiEquity[ 2 ] = asiEquity[ 3 ] = EQUITY_M1;
+      return;
+
+    }
+
+    PositionFromBearoff( anBoard[ 0 ], nThem, nTSP );
+    PositionFromBearoff( anBoard[ 1 ], nUs, nTSP );
+
+    for( i = nTSP; i < 25; i++ )
+	anBoard[ 1 ][ i ] = anBoard[ 0 ][ i ] = 0;
+
+    /* look for position in bearoff file */
+
+    if ( pbc && isBearoff ( pbc, anBoard ) ) {
+      unsigned short int nUsL = 
+        PositionBearoff ( anBoard[ 1 ], pbc->nPoints );
+      unsigned short int nThemL = 
+        PositionBearoff ( anBoard[ 0 ], pbc->nPoints );
+      int nL = Combination ( pbc->nPoints + pbc->nChequers, pbc->nPoints );
+      unsigned int iPos = nUsL * nL + nThemL;
+      unsigned short int aus[ 4 ];
+      
+      BearoffCubeful ( pbc, iPos, NULL, aus );
+
+      for ( i = 0; i < 4; ++i )
+        asiEquity[ i ] = aus[ i ] - 0x8000;
+      
+      return;
+    }
+
+    aiTotal[ 0 ] = aiTotal[ 1 ] = aiTotal[ 2 ] = aiTotal[ 3 ] = 0.0;
+    
+    for( anRoll[ 0 ] = 1; anRoll[ 0 ] <= 6; anRoll[ 0 ]++ )
+	for( anRoll[ 1 ] = 1; anRoll[ 1 ] <= anRoll[ 0 ]; anRoll[ 1 ]++ ) {
+	    GenerateMoves( &ml, anBoard, anRoll[ 0 ], anRoll[ 1 ], FALSE );
+
+            asiBest [ 0 ] = asiBest[ 1 ] = 
+              asiBest[ 2 ] = asiBest [ 3 ] = -0xFFFF;
+            aiBest [ 0 ] = aiBest[ 1 ] = aiBest[ 2 ] = aiBest [ 3 ] = -1;
+	    
+	    for( i = 0; i < ml.cMoves; i++ ) {
+		PositionFromKey( anBoardTemp, ml.amMoves[ i ].auch );
+
+		j = PositionBearoff( anBoardTemp[ 1 ], nTSP );
+
+		assert( j >= 0 );
+		assert( j < nUs ); 
+
+                if ( ! nThem ) {
+                  psij = asij;
+                  asij[ 0 ] = asij[ 1 ] = asij[ 2 ] = asij[ 3 ] = EQUITY_P1;
+                }
+                else if ( ! j ) {
+                  psij = asij;
+                  asij[ 0 ] = asij[ 1 ] = asij[ 2 ] = asij[ 3 ] = EQUITY_M1;
+                }
+                if ( ! HashLookup ( ph, n * nThem + j, (void **) &psij ) ) {
+                  /* lookup in file */
+                  TSLookup ( nThem, j, nTSP, nTSC, psij = asij, n,
+                             fCubeful, pfTmp );
+                  HashAdd ( ph, n * nThem + j, psij, fCubeful ? 8 : 2 );
+                }
+
+                /* cubeless */
+
+                if ( psij[ 0 ] < -asiBest[ 0 ] ) { 
+                  aiBest [ 0 ] = j;
+                  asiBest [ 0 ] = ~psij[ 0 ];
+                }
+
+                if ( fCubeful ) {
+
+                  /* I own cube:
+                     from opponent's view he doesn't own cube */
+                  
+                  if ( psij[ 3 ] < -asiBest[ 1 ] ) {
+                    aiBest [ 1 ] = j;
+                    asiBest [ 1 ] = ~psij[ 3 ];
+                  }
+
+                  /* Centered cube (so centered for opponent too) */
+
+                  k = CubeEquity ( psij[ 2 ], psij[ 3 ], EQUITY_P1 ); 
+                  if ( ~k > asiBest[ 2 ] ) {
+                    aiBest [ 2 ] = j;
+                    asiBest [ 2 ] = ~k;
+                  }
+
+                  /* Opponent owns cube:
+                     from opponent's view he owns cube */
+
+                  k = CubeEquity ( psij[ 1 ], psij[ 3 ], EQUITY_P1 ); 
+                  if ( ~k > asiBest[ 3 ] ) {
+                    aiBest [ 3 ] = j;
+                    asiBest [ 3 ] = ~k;
+                  }
+
+                }
+
+	    }
+
+	    assert( aiBest[ 0 ] >= 0 );
+	    assert( ! fCubeful || aiBest[ 1 ] >= 0 );
+	    assert( ! fCubeful || aiBest[ 2 ] >= 0 );
+	    assert( ! fCubeful || aiBest[ 3 ] >= 0 );
+	    
+            if ( anRoll[ 0 ] == anRoll[ 1 ] )
+              for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
+                aiTotal [ k ] += asiBest[ k ];
+            else
+              for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
+                aiTotal [ k ] += 2 * asiBest[ k ];
+
+	}
+
+    /* final equities */
+    for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
+      asiEquity[ k ] = aiTotal[ k ] / 36;
+
+}
+
+
+
+static void
+WriteEquity ( FILE *pf, const short int si ) {
+  
+  unsigned short int us = si + 0x8000;
+
+  putc( us & 0xFF, pf );
+  putc( (us >> 8) & 0xFF, pf );
+
+}
+
 static void
 generate_ts ( const int nTSP, const int nTSC, 
               const int fHeader, const int fCubeful,
@@ -1101,7 +1142,7 @@ generate_ts ( const int nTSP, const int nTSC,
     int i, j, k;
     int iPos;
     int n;
-    float arEquity[ 4 ];
+    short int asiEquity[ 4 ];
     hash h;
     char szTmp[ 11 ];
     FILE *pfTmp;
@@ -1145,14 +1186,13 @@ generate_ts ( const int nTSP, const int nTSC,
     for( i = 0; i < n; i++ ) {
       for( j = 0; j <= i; j++, ++iPos ) {
 
-        BearOff2( i - j, j, nTSP, nTSC, arEquity, n, fCubeful, 
-                  &h, pbc );
+        BearOff2( i - j, j, nTSP, nTSC, asiEquity, n, fCubeful, 
+                  &h, pbc, pfTmp );
 
         for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
-          WriteEquity ( pfTmp, arEquity[ k ] );
+          WriteEquity ( pfTmp, asiEquity[ k ] );
 
-        HashAdd ( &h, ( i - j ) * n + j, arEquity, 
-                  sizeof ( float ) * ( fCubeful ? 4 : 1 ) );
+        HashAdd ( &h, ( i - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
 
       }
       
@@ -1165,14 +1205,13 @@ generate_ts ( const int nTSP, const int nTSC,
     for( i = 0; i < n; i++ ) {
       for( j = i + 1; j < n; j++, ++iPos ) {
         
-        BearOff2( i + n  - j, j, nTSP, nTSC, arEquity, n, fCubeful,
-                  &h, pbc );
+        BearOff2( i + n  - j, j, nTSP, nTSC, asiEquity, n, fCubeful,
+                  &h, pbc, pfTmp );
         
         for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
-          WriteEquity ( pfTmp, arEquity[ k ] );
+          WriteEquity ( pfTmp, asiEquity[ k ] );
         
-        HashAdd ( &h, ( i + n - j ) * n + j, arEquity, 
-                  sizeof ( float ) * ( fCubeful ? 4 : 1 ) );
+        HashAdd ( &h, ( i + n - j ) * n + j, asiEquity, fCubeful ? 8 : 2 );
         
       }
       
@@ -1201,11 +1240,6 @@ generate_ts ( const int nTSP, const int nTSC,
 
         fseek ( pfTmp, ( fCubeful ? 8 : 2 ) * k, SEEK_SET );
         fread ( ac, 1, fCubeful ? 8 : 2, pfTmp );
-
-        for ( k = 0; k < ( fCubeful ? 4 : 1 ); ++k )
-          arEquity[ k ] = 
-            ( ac[ 2 * k ] | ac[ 2 * k + 1 ] << 8 ) / 32767.5 - 1.0f;
-
         fwrite ( ac, 1, fCubeful ? 8 : 2, output );
 
       }
@@ -1222,8 +1256,10 @@ generate_ts ( const int nTSP, const int nTSC,
 static void
 usage ( char *arg0 ) {
 
-  printf ( "Usage: %s [options]\n"
+  printf ( "Usage: %s [options] -f filename\n"
            "Options:\n"
+           "  -f, --outfile filename\n"
+           "                      Output to file\n"
            "  -t, --two-sided PxC Number of points and number of chequers\n"
            "                      for two-sided database\n"
            "  -o, --one-sided P   Number of points for one-sided database\n"
@@ -1239,13 +1275,11 @@ usage ( char *arg0 ) {
                                   " databases\n"
            "  -n, --normal-dist   Approximate one-sided bearoff database\n"
            "                      with normal distributions\n"
-           "  -f, --outfile filename\n"
-           "                      Output to file instead of stdout\n"
            "  -v, --version       Show version information and exit\n"
            "  -h, --help          Display usage and exit\n"
            "\n"
-           "To generate gnubg.bd:\n"
-           "%s -t 6x6 -o 6 > gnubg.bd\n"
+           "To generate gnubg_os0.bd:\n"
+           "%s -o 6 -f gnubg_os0.bd\n"
            "\n",
            arg0, arg0 );
 
@@ -1273,6 +1307,8 @@ extern int main( int argc, char **argv ) {
   int fND = FALSE;
   bearoffcontext *pbc = NULL;
   FILE *output = stdout;
+  char *szOutput = NULL;
+  long long l;
 
   static struct option ao[] = {
     { "two-sided", required_argument, NULL, 't' },
@@ -1328,19 +1364,24 @@ extern int main( int argc, char **argv ) {
       exit ( 0 );
       break;
     case 'f':
-#define ERROR_TEXT "Can't open output file \'"        
-	  if( !( output = fopen( optarg, "w+b" ) ) ) {
-		char *buf = malloc (1 + strlen (optarg) + strlen (ERROR_TEXT) + 1);
-		sprintf (buf, "%s%s\'", ERROR_TEXT, optarg);
-		perror (buf);
-		return EXIT_FAILURE;
-	  }
+      szOutput = strdup ( optarg );
       break;
-
     default:
       usage ( argv[ 0 ] );
       exit ( 1 );
     }
+  }
+
+  /* open output file */
+
+  if ( ! szOutput ) {
+    usage ( argv[ 0 ] );
+    return EXIT_FAILURE;
+  }
+
+  if ( ! ( output = fopen ( szOutput, "w+b" ) ) ) {
+    perror ( szOutput );
+    return EXIT_FAILURE;
   }
 
   /* one sided database */
@@ -1376,22 +1417,26 @@ extern int main( int argc, char **argv ) {
               szOldBearoff ? "yes" : "no",
               szOldBearoff ? szOldBearoff : "" );
 
-    if ( fND )
+    if ( fND ) {
+      l = Combination ( nOS + 15, nOS );
+      l <<= 4;
       fprintf ( stderr, 
-                _("Size of database                  : %12d\n"),
-                Combination ( nOS + 15, nOS ) * 16 );
+                _("Size of database                  : %12lld (%lld MB)\n"), 
+                l, l >> 20 );
+    }
     else {
+      l = Combination ( nOS + 15, nOS );
+      l <<= ( fGammon ? 7 : 6 );
       fprintf ( stderr, 
-                _("Size of database (uncompressed)   : %12d\n"),
-                ( fGammon ) ?
-                Combination ( nOS + 15, nOS ) * 128:
-                Combination ( nOS + 15, nOS ) * 64 );
-      if ( fCompress )
-      fprintf ( stderr, 
-                _("Estimated size of compressed db   : %12d\n"),
-                ( fGammon ) ?
-                Combination ( nOS + 15, nOS ) * 32 :
-                Combination ( nOS + 15, nOS ) * 16 );
+                _("Size of database (uncompressed)   : %12lld (%lld MB)\n"), 
+                l, l >> 20 );
+      if ( fCompress ) {
+        l = Combination ( nOS + 15, nOS );
+        l <<= ( fGammon ? 5 : 4 );
+        fprintf ( stderr, 
+                  _("Estimated size of compressed db   : %12lld (%lld MB)\n"), 
+                  l, l >> 20 );
+      }
     }
 
     if ( szOldBearoff &&
@@ -1420,10 +1465,13 @@ extern int main( int argc, char **argv ) {
     }
 
     if ( pbc ) {
-      fprintf ( stderr, "Number of reads in old database: %ld\n",
+      fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
       BearoffClose ( pbc );
     }
+
+    fprintf ( stderr, "Number of re-reads while generating: %ld\n", 
+              cLookup );
 
   }
   
@@ -1435,6 +1483,9 @@ extern int main( int argc, char **argv ) {
 
     int n = Combination ( nTSP + nTSC, nTSC );
 
+    l = n;
+    l *= l;
+    l *= ( fCubeful ? 8 : 2 );
     fprintf ( stderr,
               _("Two-sided database:\n"
                 "Number of points             : %12d\n"
@@ -1443,7 +1494,7 @@ extern int main( int argc, char **argv ) {
                 "Write header                 : %s\n"
                 "Number of one-sided positions: %12d\n"
                 "Total number of positions    : %12d\n"
-                "Size of resulting file       : %12d bytes\n"
+                "Size of resulting file       : %12lld bytes (%lld MB)\n"
                 "Size of hash                 : %12d bytes\n"
                 "Reuse old bearoff database   : %s %s\n"),
               nTSP, nTSC,
@@ -1451,7 +1502,7 @@ extern int main( int argc, char **argv ) {
               fHeader ? _("yes") : ("no"),
               n,
               n * n,
-              n * n * 2 * ( fCubeful ? 4 : 1 ),
+              l,l >> 20,
               nHashSize,
               szOldBearoff ? "yes" : "no",
               szOldBearoff ? szOldBearoff : "" );
@@ -1480,13 +1531,17 @@ extern int main( int argc, char **argv ) {
     /* close old bearoff database */
 
     if ( pbc ) {
-      fprintf ( stderr, "Number of reads in old database: %ld\n",
+      fprintf ( stderr, "Number of reads in old database: %lu\n",
                 pbc->nReads );
       BearoffClose ( pbc );
     }
 
+    fprintf ( stderr, "Number of re-reads while generating: %ld\n", 
+              cLookup );
+
   }
 
+  fclose ( output );
       
   return 0;
 

@@ -1,3 +1,20 @@
+Sun Dec  8 11:31:21 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Improvement generation of two-sided databases.
+
+	* makebearoff.c (TSLookup): new function.
+	* makebearoff.c (main): ensure that file sizes are written correctly
+	(reported by Ian Shaw)
+	* makebearoff.c (ts_generate, BearOff2, CubeEquity): change
+	to operate on short ints instead of floats.
+
+	* bearoff.c (BearoffInit): remove support for old gnubg.bd
+	* bearoff.c (BearoffInit): prepare code for other types
+	of databases.
+	* bearoff.c (BearoffCubeful): prepare code for other types of 
+	databases.
+	
+
 Sat Dec  7 22:40:45 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 	
 	Some cleanup.

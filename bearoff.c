@@ -263,9 +263,12 @@ static unsigned char *HeuristicDatabase( void (*pfProgress)( int ) ) {
     return p;
 }
 
+/*
+ * BEAROFF_GNUBG: read two sided bearoff database
+ *
+ */
 
-
-extern int
+static int
 ReadTwoSidedBearoff ( bearoffcontext *pbc,
                       const unsigned int iPos,
                       float ar[ 4 ], unsigned short int aus[ 4 ] ) {
@@ -290,7 +293,7 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
       aus[ i ] = us;
     if ( ar )
       ar[ i ] = us / 32767.5f - 1.0f;
-  }      
+  }
 
   ++pbc->nReads;
 
@@ -298,16 +301,30 @@ ReadTwoSidedBearoff ( bearoffcontext *pbc,
 
 }
 
-
 extern int
 BearoffCubeful ( bearoffcontext *pbc,
                  const unsigned int iPos,
                  float ar[ 4 ], unsigned short int aus[ 4 ] ) {
 
-  if ( ! pbc->fCubeful )
-    return -1;
-  else
-    return ReadTwoSidedBearoff ( pbc, iPos, ar, aus );
+  switch ( pbc->bt ) {
+  case BEAROFF_GNUBG:
+
+    if ( ! pbc->fCubeful )
+      return -1;
+    else {
+      return ReadTwoSidedBearoff ( pbc, iPos, ar, aus );
+    }
+
+    break;
+
+  default:
+
+    assert ( FALSE );
+    break;
+
+  }
+
+  return 0;
 
 }
 
@@ -730,8 +747,6 @@ ReadIntoMemory ( bearoffcontext *pbc, const int iOffset, const int nSize ) {
 
 }
 
-
-
 /*
  * Initialise bearoff database
  *
@@ -753,7 +768,6 @@ BearoffInit ( const char *szFilename, const char *szDir,
 
   bearoffcontext *pbc;
   char sz[ 41 ];
-  int fHeader;
   int nSize = -1;
   int iOffset = 0;
 
@@ -834,104 +848,73 @@ BearoffInit ( const char *szFilename, const char *szDir,
   if ( ! strncmp ( sz, "gnubg", 5 ) )
     pbc->bt = BEAROFF_GNUBG;
   else
-    pbc->bt = BEAROFF_GNUBG;
+    pbc->bt = BEAROFF_UNKNOWN;
 
   switch ( pbc->bt ) {
 
   case BEAROFF_GNUBG:
 
-    fHeader = ! strncmp ( sz,"gnubg", 5 );
-    
-    if ( fHeader ) {
+    /* one sided or two sided? */
 
-      /* one sided or two sided? */
+    if ( ! strncmp ( sz + 6, "TS", 2 ) ) 
+      pbc->fTwoSided = TRUE;
+    else if ( ! strncmp ( sz + 6, "OS", 2 ) )
+      pbc->fTwoSided = FALSE;
+    else {
+      fprintf ( stderr,
+                _("%s: incomplete bearoff database\n"
+                  "(type is illegal: '%2s')\n"),
+                szFilename, sz + 6 );
+      close ( pbc->h );
+      free ( pbc );
+      return NULL;
+    }
 
-      if ( ! strncmp ( sz + 6, "TS", 2 ) ) 
-        pbc->fTwoSided = TRUE;
-      else if ( ! strncmp ( sz + 6, "OS", 2 ) )
-        pbc->fTwoSided = FALSE;
-      else {
-        fprintf ( stderr,
-                  _("%s: incomplete bearoff database\n"
-                    "(type is illegal: '%2s')\n"),
-                  szFilename, sz + 6 );
-        close ( pbc->h );
-        free ( pbc );
-        return NULL;
-      }
+    /* number of points */
 
-      /* number of points */
+    pbc->nPoints = atoi ( sz + 9 );
+    if ( pbc->nPoints < 1 || pbc->nPoints >= 24 ) {
+      fprintf ( stderr, 
+                _("%s: incomplete bearoff database\n"
+                  "(illegal number of points is %d)"), 
+                szFilename, pbc->nPoints );
+      close ( pbc->h );
+      free ( pbc );
+      return NULL;
+    }
 
-      pbc->nPoints = atoi ( sz + 9 );
-      if ( pbc->nPoints < 1 || pbc->nPoints >= 24 ) {
-        fprintf ( stderr, 
-                  _("%s: incomplete bearoff database\n"
-                    "(illegal number of points is %d)"), 
-                  szFilename, pbc->nPoints );
-        close ( pbc->h );
-        free ( pbc );
-        return NULL;
-      }
+    /* number of chequers */
 
-      /* number of chequers */
+    pbc->nChequers = atoi ( sz + 12 );
+    if ( pbc->nPoints < 1 || pbc->nPoints > 15 ) {
+      fprintf ( stderr, 
+                _("%s: incomplete bearoff database\n"
+                  "(illegal number of chequers is %d)"), 
+                szFilename, pbc->nChequers );
+      close ( pbc->h );
+      free ( pbc );
+      return NULL;
+    }
 
-      pbc->nChequers = atoi ( sz + 12 );
-      if ( pbc->nPoints < 1 || pbc->nPoints > 15 ) {
-        fprintf ( stderr, 
-                  _("%s: incomplete bearoff database\n"
-                    "(illegal number of chequers is %d)"), 
-                  szFilename, pbc->nChequers );
-        close ( pbc->h );
-        free ( pbc );
-        return NULL;
-      }
+    pbc->fCompressed = FALSE;
+    pbc->fGammon = FALSE;
+    pbc->fCubeful = FALSE;
+    pbc->fND = FALSE;
+    pbc->fHeuristic = FALSE;
 
-      pbc->fCompressed = FALSE;
-      pbc->fGammon = FALSE;
-      pbc->fCubeful = FALSE;
-      pbc->fND = FALSE;
-      pbc->fHeuristic = FALSE;
-
-      if ( pbc->fTwoSided ) {
-        /* options for two-sided dbs */
-        pbc->fCubeful = atoi ( sz + 15 );
-      }
-      else {
-        /* options for one-sided dbs */
-        pbc->fGammon = atoi ( sz + 15 );
-        pbc->fCompressed = atoi ( sz + 17 );
-        pbc->fND = atoi ( sz + 19 );
-      }
-
-      iOffset = 0;
-      nSize = -1;
-
+    if ( pbc->fTwoSided ) {
+      /* options for two-sided dbs */
+      pbc->fCubeful = atoi ( sz + 15 );
     }
     else {
-      /* no header information: we are most likely trying to read gnubg.bd */
-
-      /* rewind file */
-      lseek ( pbc->h, 0, SEEK_SET );
-
-      if ( bo & BO_MUST_BE_TWO_SIDED ) {
-        iOffset = 54264 * 2 * 32;
-        nSize = 924 * 924 * 2;
-      }
-      else {
-        iOffset = 0;
-        nSize = 54264 * 2 * 32;
-      }
-
-      pbc->fTwoSided = 
-        ( ( bo & BO_MUST_BE_TWO_SIDED ) == BO_MUST_BE_TWO_SIDED );
-      pbc->nPoints = 6;
-      pbc->nChequers = ( pbc->fTwoSided ) ? 6 : 15;
-      pbc->fCompressed = FALSE;
-      pbc->fGammon = FALSE;
-      pbc->fCubeful = FALSE;
-      pbc->fND = FALSE;
-
+      /* options for one-sided dbs */
+      pbc->fGammon = atoi ( sz + 15 );
+      pbc->fCompressed = atoi ( sz + 17 );
+      pbc->fND = atoi ( sz + 19 );
     }
+
+    iOffset = 0;
+    nSize = -1;
 
     /*
     fprintf ( stderr, "Database:\n"
@@ -948,34 +931,6 @@ BearoffInit ( const char *szFilename, const char *szDir,
               pbc->fCompressed, pbc->fGammon, pbc->fCubeful, pbc->fND,
               pbc->fInMemory );*/
     
-    /* read database into memory if requested */
-
-    if ( pbc->fInMemory ) {
-
-      if ( nSize < 0 ) {
-        struct stat st;
-        if ( fstat ( pbc->h, &st ) ) {
-          perror ( szFilename );
-          close ( pbc->h );
-          free ( pbc );
-          return NULL;
-        }
-        nSize = st.st_size;
-      }
-      
-      if ( ReadIntoMemory ( pbc, iOffset, nSize ) ) {
-
-          close ( pbc->h );
-          free ( pbc );
-          return NULL;
-
-      }
-
-      close ( pbc->h );
-      pbc->h = -1;
-
-    }
-
     break;
 
   default:
@@ -989,6 +944,36 @@ BearoffInit ( const char *szFilename, const char *szDir,
 
   }
 
+  /* 
+   * read database into memory if requested 
+   */
+
+  if ( pbc->fInMemory ) {
+
+    if ( nSize < 0 ) {
+      struct stat st;
+      if ( fstat ( pbc->h, &st ) ) {
+        perror ( szFilename );
+        close ( pbc->h );
+        free ( pbc );
+        return NULL;
+      }
+      nSize = st.st_size;
+    }
+    
+    if ( ReadIntoMemory ( pbc, iOffset, nSize ) ) {
+      
+      close ( pbc->h );
+      free ( pbc );
+      return NULL;
+
+    }
+    
+    close ( pbc->h );
+    pbc->h = -1;
+    
+  }
+  
   pbc->nReads = 0;
   
   return pbc;
