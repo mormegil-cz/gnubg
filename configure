@@ -5059,7 +5059,7 @@ EOF
 
 
 
-ALL_LINGUAS=""
+ALL_LINGUAS="da"
 
 
 # Make sure we can run config.sub.
