@@ -1,3 +1,7 @@
+Sat Nov 21 21:19:17 2003 Oystein Johansen <oystein@gnubg.org>
+
+        * gtkgame.c: corrected some links (reported by Frank Grosse)
+
 Thu Nov 20 20:24:04 GMT  Jim Segrave <jes@jes-2.demon.nl>
 
 	* rollout.c - board setup in .sgf files of rollouts only worked if

@@ -7607,8 +7607,10 @@ static void NoManual( void ) {
     outputl( _("The online manual is not available with this installation of "
 	     "GNU Backgammon.  You can view the manual on the WWW at:\n"
 	     "\n"
-	     "    http://www.gnu.org/manual/gnubg/") );
-
+	     "    http://www.gnubg.org/win32/gnubg/gnubg.html") );
+    /* Temporary place of manual, while Oystein is fixing the web system.
+       (Work in progress) */
+    
     outputx();
 }
 
@@ -7618,7 +7620,7 @@ static void NoFAQ( void ) {
 	       "installation of GNU Backgammon.  You can view them on "
 	       "the WWW at:\n"
 	       "\n"
-	       "    http://mole.dnsalias.org/~acepoint/GnuBG/gnubg-faq/") );
+	       "    http://www.gnubg.org/docs/faq/") );
 
     outputx();
 }
@@ -7636,7 +7638,7 @@ static void ShowManual( gpointer *p, guint n, GtkWidget *pwEvent ) {
 static void
 ShowManualWeb( gpointer *p, guint n, GtkWidget *pwEvent ) {
 
-  OpenURL( "http://www.gnu.org/manual/gnubg/" );
+  OpenURL( "http://www.gnubg.org/win32/gnubg/gnubg.html" );
 
 }
 
