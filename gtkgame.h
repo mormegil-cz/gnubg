@@ -65,6 +65,8 @@ extern void GTKOutputNew( void );
 extern void GTKProgressStart( char *sz );
 extern void GTKProgress( void );
 extern void GTKProgressEnd( void );
+
+extern void GTKDumpStatcontext( statcontext *psc, char *szTitle );
 extern void GTKEval( char *szOutput );
 extern void GTKHint( movelist *pml );
 extern void GTKRollout( int c, char asz[][ 40 ], int cGames );

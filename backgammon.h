@@ -24,6 +24,8 @@
 
 #include <stdarg.h>
 #include <list.h>
+
+#include "analysis.h"
 #include "eval.h"
 
 #if !defined (__GNUC__) && !defined (__attribute__)
@@ -78,23 +80,6 @@ typedef enum _movetype {
     MOVE_SETBOARD, MOVE_SETDICE, MOVE_SETCUBEVAL, MOVE_SETCUBEPOS
 } movetype;
 
-typedef enum _lucktype {
-    LUCK_VERYBAD, LUCK_BAD, LUCK_NONE, LUCK_GOOD, LUCK_VERYGOOD
-} lucktype;
-
-typedef enum _skilltype {
-    SKILL_VERYBAD, SKILL_BAD, SKILL_DOUBTFUL, SKILL_NONE,
-    SKILL_INTERESTING, SKILL_GOOD, SKILL_VERYGOOD
-} skilltype;
-
-typedef struct _summary {
-    /* Always in points for money games, and MWC for matches.  Never
-       normalised.  -HUGEVAL_F indicates summary has not been calculated. */
-    float arCubeError[ 2 ], arChequerError[ 2 ], arLuck[ 2 ];
-    int acMoves[ 2 ], acForcedMoves[ 2 ], acCubeDecisions[ 2 ],
-	acSkill[ 2 ][ SKILL_VERYGOOD + 1 ], acLuck[ 2 ][ LUCK_VERYGOOD + 1 ];
-} summary;
-
 typedef struct _movegameinfo {
     movetype mt;
     char *sz;
@@ -108,7 +93,7 @@ typedef struct _movegameinfo {
 	nPoints, /* how many points were scored by the winner */
 	fResigned, /* the game was ended by resignation */
 	nAutoDoubles; /* how many automatic doubles were rolled */
-    summary s;
+    statcontext sc;
 } movegameinfo;
 
 typedef struct _movedouble {
@@ -229,7 +214,7 @@ extern evalcontext ecEval, ecRollout, ecTD;
    lMatch is a list of games (i.e. a list of list of moverecords),
    and plGame points to a game within it (again, typically the last). */
 extern list lMatch, *plGame, *plLastMove;
-extern summary sMatch;
+extern statcontext scMatch;
 
 /* There is a global storedmoves struct to maintain the list of moves
    for "=n" notation (e.g. "hint", "rollout =1 =2 =4").
@@ -266,7 +251,6 @@ extern void ChangeGame( list *plGameNew );
 extern void CalculateBoard( void );
 extern void CancelCubeAction( void );
 extern void FreeMatch( void );
-extern void ClearSummary( summary *ps );
 extern int ParseNumber( char **ppch );
 extern int ParsePlayer( char *sz );
 extern int ParsePosition( int an[ 2 ][ 25 ], char **ppch, char *pchDesc );

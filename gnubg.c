@@ -3489,7 +3489,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #endif
     
     ListCreate( &lMatch );
-    ClearSummary( &sMatch );
+    IniStatcontext( &scMatch );
     
 #if USE_GTK
     if( fTTY )

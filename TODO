@@ -50,12 +50,18 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more completions to readline (player names, filenames for load/save).
 ** Add interactive rollouts.
 ** Analyse games and matches.
-*** Calculate luck/error rates over games and matches. (gary)
 *** Add an "analyse move" command.
 *** Allow re-evaluating analysis with different settings, and rollouts.
 *** Add "set automatic analysis".
 *** Make sure cube analysis works for beavers.
 *** Should luck be evaluated cubefully?  (An option, perhaps?)
+*** Use the fComputed field in statcontext (make "show statistics ..."
+  complain if not computed, disable the GTK menu items if not available).
+  Actually, fComputed should probably be broken into 3 (chequer, cube, luck).
+  Be careful to avoid division by 0 when computing statistics (e.g. in a
+  1-point match, there are no cube decisions, so the cube error = 0/0 = NaN,
+  so players always get cube and overall ratings of "beginner").
+*** Load and save statistics. (gary)
 ** Finish saving positions and evaluations to databases.
 ** Finish supervised training, and allow people to submit training data via
   web.
@@ -194,7 +200,7 @@ duplication of effort and to make sure our changes merge easily.
   readline, its readline state and ours get completely confused...
   see what the REPL in guile-gtk does.
 ** Check that calls to GTKUpdateAnnotations() are made where necessary
-  (e.g. the "annotate" commands probably should).
+  (e.g. the "annotate" commands probably should, and "set output ...").
 ** The SGF loading (saving?) routines and CommandLoadCommands use
   stdio, which restarts system calls on signals.  This means TTY interrupts
   and the GTK `stop' button don't work. (gary)
@@ -260,7 +266,8 @@ duplication of effort and to make sure our changes merge easily.
   make sure that InitBoard during analysis gets it right, etc.
 ** Make calls to irandinit() in eval.c and lib/neuralnet.c give the time as
   a seed.
-
+** If a MOVE_NORMAL is marked bad, it's not clear whether that means a
+  bad move, or a costly missed double.
 
 Local Variables:
 mode: outline

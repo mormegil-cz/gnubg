@@ -1,6 +1,14 @@
+Wed Apr 18 13:09:10 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (AnalyzeGame): Compute Statcontext data.
+
+	* gtkgame.c (GTKDumpStatcontext): Remove fComplete parameter.
+
+	* play.c: Use Statcontext instead of summary struct.
+	
 Wed Apr 18 11:30:10 2001  Øystein Johansen <oeysteij@online.no>
 
-        * gtkgame.c (GTKDumpStatcontext): New function
+	* gtkgame.c (GTKDumpStatcontext): New function.
 
 Wed Apr 18 10:15:47 2001  Gary Wong  <gtw@research.att.com>
 

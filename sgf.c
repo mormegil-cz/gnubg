@@ -205,7 +205,7 @@ static void RestoreRootNode( list *pl ) {
     pmgi->nPoints = 0;
     pmgi->fResigned = FALSE;
     pmgi->nAutoDoubles = 0;
-    ClearSummary( &pmgi->s );
+    IniStatcontext( &pmgi->sc );
     
     for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
 	if( pp->ach[ 0 ] == 'M' && pp->ach[ 1 ] == 'I' )

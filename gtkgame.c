@@ -720,7 +720,7 @@ static GtkWidget *CreateMoveList( hintdata *phd, int iHighlight ) {
 
 	gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
 
-	if( i == pml->cMoves - 1 && i == iHighlight )
+	if( i && i == pml->cMoves - 1 && i == iHighlight )
 	    /* The move made is the last on the list.  Some moves might
 	       have been deleted to fit this one in, so its rank isn't
 	       known. */
@@ -1600,11 +1600,11 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Analyse/Analyse session", NULL, Command, CMD_ANALYSE_SESSION,
 	  NULL },
 	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Analyse/Statistics game", NULL, Command,
+	{ "/_Analyse/Game statistics", NULL, Command,
           CMD_SHOW_STATISTICS_GAME, NULL },
-	{ "/_Analyse/Statistics match", NULL, Command,
+	{ "/_Analyse/Match statistics", NULL, Command,
           CMD_SHOW_STATISTICS_MATCH, NULL },
-	{ "/_Analyse/Statistics session", NULL, Command,
+	{ "/_Analyse/Session statistics", NULL, Command,
           CMD_SHOW_STATISTICS_SESSION, NULL },
 	{ "/_Analyse/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Analyse/_Pip count", NULL, Command, CMD_SHOW_PIPCOUNT, NULL },
@@ -2112,7 +2112,7 @@ extern void GTKProgress( void ) {
 
     static int i;
     
-    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i++ );
+    gtk_progress_set_value( GTK_PROGRESS( pwProgress ), i ^= 1 );
 
     GTKDisallowStdin();
     while( gtk_events_pending() )
@@ -3861,20 +3861,20 @@ extern void GTKSet( void *p ) {
     }
 }
 
-extern void GTKDumpStatcontext( statcontext *psc, int fComplete,
-                                char *szTitle ) {
+extern void GTKDumpStatcontext( statcontext *psc, char *szTitle ) {
+    
   static char *aszEmpty[] = { NULL, NULL, NULL };
   static char *aszLabels[] = { 
-         "Checkerplay statistics",
+         "Checkerplay statistics:",
          "Total moves",
          "Unforced moves",
-         "Moves rated perfect",
-         "Moves rated very good",
-         "Moves rated good",
-         "Moves rated small error",
-         "Moves rated error",
-         "Moves rated blunder",
-         "Moves rated Zzz Zzz",
+         "Moves marked very good",
+         "Moves marked good",
+         "Moves marked interesting",
+         "Moves unmarked",
+         "Moves marked doubtful",
+         "Moves marked bad",
+         "Moves marked very bad",
          "Error rate (total)",
          "Error rate (pr. move)",
          "Super-jokers",
@@ -3885,7 +3885,7 @@ extern void GTKDumpStatcontext( statcontext *psc, int fComplete,
          "Luck rate (total)",
          "Luck rate (pr. move)",
          "Checker play rating",
-         "Cube decisions statistics",
+         "Cube decision statistics:",
          "Total cube decisions",
          "Doubles",
          "Takes",
@@ -3903,7 +3903,7 @@ extern void GTKDumpStatcontext( statcontext *psc, int fComplete,
                                        FALSE, NULL, NULL ),
       *psw = gtk_scrolled_window_new( NULL, NULL ),
       *pwStats = gtk_clist_new_with_titles( 3, aszEmpty );
-  int i, j;
+  int i;
   char sz[ 32 ];
   ratingtype rt[ 2 ];
 
