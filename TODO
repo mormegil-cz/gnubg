@@ -24,6 +24,11 @@ duplication of effort and to make sure our changes merge easily.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
   speed increase.
+** The cubedecision REDOUBLE_BEAVER should never occur -- should it be
+  removed?  We could add a "too good to beaver" cubedecision.  This is
+  not as silly as it sounds: you can currently take advantage of gnubg
+  to escape a backgammon by doubling, if you have cube access; gnubg
+  doesn't realise it's too good to beaver.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -34,12 +39,7 @@ duplication of effort and to make sure our changes merge easily.
   2-sided.)
 
 * Commands:
-** Add more completions to readline (player names, filenames for
-  load/save). (gary)
-*** Commands with filename parameters should call NextToken, to handle
-  quoting.  This means that FileCommand() in gtkgame.c will have to
-  quote names containing spaces.  On MS-DOS, the backslash escape
-  character should probably be changed to something else. (gary)
+** Add more completions to readline (e.g. player names). (gary)
 ** Add interactive rollouts.
 ** Analyse games and matches.
 *** Add an "analyse move" command.
@@ -161,9 +161,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Add the players' names in the drop-down menu in the game window.  (They
   used to be there, but weren't updated if the names were changed.)
 ** Use a progress bar when generating a heuristic bearoff database. (gary)
-** Kit Woolsey suggests modifying the "edit mode" interface.  SW
-  <http://www.oasya.com/HTMLHelp/UserInterface/Editing.html> would be a
-  good starting point.
 ** When a long string is displayed in the status bar, the main window
   grows to accomodate it -- not very pretty.  A Layout or Viewport widget
   might be able to fix this.
@@ -256,6 +253,8 @@ functions:
   of both problems.
 ** When a match is over, the prev game/prev move menu items are disabled.
 ** "rollout =cube" when no game in progress dumps core.
+** Issuing some commands (e.g. "set clockwise") while in edit mode
+  destroys the editing changes.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
