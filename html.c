@@ -2165,7 +2165,8 @@ HTMLPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr,
 
       /* move no */
 
-      if ( i != pmr->n.iMove || i != pmr->n.ml.cMoves - 1 ) 
+      if ( i != pmr->n.iMove || i != pmr->n.ml.cMoves - 1 || 
+           pmr->n.ml.cMoves == 1 ) 
         fprintf ( pf, 
                   "<td>%d</td>\n", i + 1 );
       else
@@ -3276,7 +3277,7 @@ HTMLFilename ( const char *szBase, const int iGame ) {
 
     if ( ! szExtension ) {
 
-      sprintf ( sz, "%s_%03d", szBase, iGame );
+      sprintf ( sz, "%s_%03d", szBase, iGame + 1 );
       return sz;
 
     }
@@ -3285,7 +3286,7 @@ HTMLFilename ( const char *szBase, const int iGame ) {
       strcpy ( sz, szBase );
       pc = strrchr ( sz, '.' );
       
-      sprintf ( pc, "_%03d%s", iGame, szExtension );
+      sprintf ( pc, "_%03d%s", iGame + 1, szExtension );
 
       return sz;
 

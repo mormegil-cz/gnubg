@@ -1203,7 +1203,8 @@ TextPrintMoveAnalysis ( FILE *pf, matchstate *pms, moverecord *pmr ) {
       fputc( i == pmr->n.iMove ? '*' : ' ', pf );
       fputs( FormatMoveHint( szBuf, pms, &pmr->n.ml, i,
                              i != pmr->n.iMove ||
-                             i != pmr->n.ml.cMoves - 1,
+                             i != pmr->n.ml.cMoves - 1 ||
+                             pmr->n.ml.cMoves == 1,
                              exsExport.fMovesDetailProb,
                              exsExport.afMovesParameters 
                              [ pmr->n.ml.amMoves[ i ].esMove.et - 1 ] ), 

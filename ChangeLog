@@ -1,3 +1,13 @@
+Mon Jul 29 18:37:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Bugfixes for html and text export (reported by olivier croisille)
+
+	* html.c (HTMLFilename): align filenames with game
+	numbering.
+	* text.c (TextPrintMoveAnalysis, HTMLPrintMoveAnalysis):
+	assume rank of move is known if number of stored moves
+	are 1.
+
 Mon Jul 29 17:58:26 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkchequer.c (MoveListCopy): remove windocentric code.
