@@ -539,7 +539,7 @@ ReturnHits( int anBoard[ 2 ][ 25 ] ) {
       break;
 
   if ( j >= 0 ) {
-    char *pch = g_malloc( 3 * ( j + 1 ) + 20 );
+    char *pch = g_malloc( 3 * ( j + 1 ) + 200 );
     strcpy( pch, "" );
     for ( i = 0; i <= j; ++i )
       if ( aiHit[ i ] )

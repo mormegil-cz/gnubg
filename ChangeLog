@@ -1,3 +1,7 @@
+Son Aug  3 19:16:13 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkboard.c (ReturnHits): enlarge buffer.
+
 Sun Aug  3 18:51:30 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* html.c (HTMLPrintMoveAnalysis): add style to equity column.
