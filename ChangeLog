@@ -1,3 +1,7 @@
+Sun Jan  6 18:36:46 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkgame.c (GTKRolloutStatPage): add scrollbars to notebook pages.
+
 Sun Jan  6 16:34:28 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkgame.c (GTKRollout): new parameter ars (rollout statistics).
