@@ -117,4 +117,8 @@ absoluteFibsRating ( const float r, const int n );
 
 extern float
 getMWCFromError ( const statcontext *psc, float aaaar[ 3 ][ 2 ][ 2 ][ 2 ] );
+
+extern skilltype
+Skill( float r );
+
 #endif

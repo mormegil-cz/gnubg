@@ -131,8 +131,7 @@ static lucktype Luck( float r ) {
 	return LUCK_NONE;
 }
 
-static skilltype Skill( float r ) {
-
+extern skilltype Skill( float r ) {
     /* FIXME if the move is correct according to the selected evaluator
        but incorrect according to 0-ply, then return SKILL_GOOD or
        SKILL_VERYGOOD */
@@ -1681,3 +1680,5 @@ extern int getLuckRating ( const float rLuck ) {
     return 5;
 
 }
+
+
