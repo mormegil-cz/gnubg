@@ -67,6 +67,8 @@
 #include "gtkgame.h"
 #include "gtkprefs.h"
 #include "gtktexi.h"
+#include "gtkcube.h"
+#include "gtkchequer.h"
 #include "matchequity.h"
 #include "positionid.h"
 #include "i18n.h"
@@ -358,11 +360,8 @@ static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
 static void SetBeavers( gpointer *p, guint n, GtkWidget *pw );
 static void SetCache( gpointer *p, guint n, GtkWidget *pw );
 static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
-static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw );
-static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw );
 static void SetMET( gpointer *p, guint n, GtkWidget *pw );
 static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
-static void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
 static void SetThreshold( gpointer *p, guint n, GtkWidget *pw );
 static void SetCubeValue( GtkWidget *wd, int data);
@@ -777,450 +776,6 @@ static void DeleteGame( void ) {
   gtk_widget_hide ( pwGame );
 
 }
-
-typedef struct _hintdata {
-  GtkWidget *pwMove; /* the entire dialog */
-  GtkWidget *pw;     /* the movelist */
-  GtkWidget *pwRollout, *pwRolloutSettings; /* rollout buttons */
-  GtkWidget *pwEval, *pwEvalSettings;       /* evaluation buttons */
-  movelist *pml;
-  int fButtonsValid;
-  int *piHighlight;
-} hintdata;
-
-static int CheckHintButtons( void ) {
-
-    int c;
-    GList *pl;
-    hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
-    GtkWidget *pw = phd->pw;
-
-    for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
-	c++;
-
-    gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
-
-    return c;
-}
-
-
-/*
- * Call UpdateMostList to update the movelist in the GTK hint window.
- * For example, after new evaluations, rollouts or toggle of MWC/Equity.
- *
- */
-
-static void
-UpdateMoveList ( const hintdata *phd ) {
-
-  static int aanColumns[][ 2 ] = {
-    { 2, OUTPUT_WIN },
-    { 3, OUTPUT_WINGAMMON },
-    { 4, OUTPUT_WINBACKGAMMON },
-    { 6, OUTPUT_LOSEGAMMON },
-    { 7, OUTPUT_LOSEBACKGAMMON }
-  };
-
-  GtkWidget *pwMoves = phd->pw;
-  int i, j;
-  char sz[ 32 ];
-  float rBest;
-  cubeinfo ci;
-  movelist *pml = phd->pml;
-  int *piHighlight = phd->piHighlight;
-
-  /* This function should only be called when the game state matches
-     the move list. */
-
-  assert( ms.fMove == 0 || ms.fMove == 1 );
-    
-  GetMatchStateCubeInfo( &ci, &ms );
-    
-  if( fOutputMWC && ms.nMatchTo ) {
-    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("MWC") );
-    rBest = 100.0f * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
-  } else {
-    gtk_clist_set_column_title( GTK_CLIST( pwMoves ), 8, _("Equity") );
-    rBest = pml->amMoves[ 0 ].rScore;
-  }
-    
-  for( i = 0; i < pml->cMoves; i++ ) {
-    float *ar = pml->amMoves[ i ].arEvalMove;
-
-    gtk_clist_set_row_data( GTK_CLIST( pwMoves ), i, pml->amMoves + i );
-
-    if( i && i == pml->cMoves - 1 && piHighlight && i == *piHighlight )
-      /* The move made is the last on the list.  Some moves might
-         have been deleted to fit this one in, so its rank isn't
-         known. */
-      strcpy( sz, "??" );
-    else
-      sprintf( sz, "%d", i + 1 );
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 0, sz );
-
-    FormatEval( sz, &pml->amMoves[ i ].esMove );
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 1, sz );
-
-    for( j = 0; j < 5; j++ ) {
-      if( fOutputWinPC )
-        sprintf( sz, "%5.1f%%", ar[ aanColumns[ j ][ 1 ] ] * 100.0f );
-      else
-        sprintf( sz, "%5.3f", ar[ aanColumns[ j ][ 1 ] ] );
-	    
-      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, aanColumns[ j ][ 0 ],
-                          sz );
-    }
-
-    if( fOutputWinPC )
-      sprintf( sz, "%5.1f%%", ( 1.0f - ar[ OUTPUT_WIN ] ) * 100.0f );
-    else
-      sprintf( sz, "%5.3f", 1.0f - ar[ OUTPUT_WIN ] );
-	    
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 5, sz );
-
-    if( fOutputMWC && ms.nMatchTo )
-      sprintf( sz, "%7.3f%%", 100.0f * eq2mwc( pml->amMoves[ i ].rScore,
-                                               &ci ) );
-    else
-      sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore );
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 8, sz );
-
-    if( i ) {
-      if( fOutputMWC && ms.nMatchTo )
-        sprintf( sz, "%7.3f%%", eq2mwc( pml->amMoves[ i ].rScore, &ci )
-                 * 100.0f - rBest );
-      else
-        sprintf( sz, "%6.3f", pml->amMoves[ i ].rScore - rBest );
-      gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 9, sz );
-    }
-	
-    gtk_clist_set_text( GTK_CLIST( pwMoves ), i, 10,
-                        FormatMove( sz, ms.anBoard,
-                                    pml->amMoves[ i ].anMove ) );
-  }
-
-  /* highlight row */
-
-  if( piHighlight && *piHighlight >= 0 ) {
-    GtkStyle *psblack, *ps;
-    
-    gtk_widget_ensure_style( pwMoves );
-    psblack = gtk_style_copy( pwMoves->style );
-    ps = gtk_style_copy( pwMoves->style );
-
-    /* 
-     * reset style 
-     * Necesary if we have reordered the list due to rollouts or evaluations
-     * and the highlighted move is shiftet 
-     */
-    
-    for ( i = 0; i < pml->cMoves; i++ )
-      gtk_clist_set_row_style( GTK_CLIST( pwMoves ), i, psblack );
-    
-    ps->fg[ GTK_STATE_NORMAL ].red = ps->fg[ GTK_STATE_ACTIVE ].red =
-      ps->fg[ GTK_STATE_SELECTED ].red = 0xFFFF;
-    ps->fg[ GTK_STATE_NORMAL ].green = ps->fg[ GTK_STATE_ACTIVE ].green =
-      ps->fg[ GTK_STATE_SELECTED ].green = 0;
-    ps->fg[ GTK_STATE_NORMAL ].blue = ps->fg[ GTK_STATE_ACTIVE ].blue =
-      ps->fg[ GTK_STATE_SELECTED ].blue = 0;
-    
-    gtk_clist_set_row_style( GTK_CLIST( pwMoves ), *piHighlight, ps );
-    
-    gtk_style_unref( ps );
-  }
-    
-  /* update storedmoves global struct */
-
-  UpdateStoredMoves ( pml, &ms );
-
-}
-
-
-static void 
-MoveListRollout( GtkWidget *pw, hintdata *phd ) {
-
-
-  GList *pl;
-  GtkWidget *pwMoves = phd->pw;
-  cubeinfo ci;
-#if HAVE_ALLOCA
-  char ( *asz )[ 40 ];
-#else
-  char asz[ 10 ][ 40 ];
-#endif
-  int c;
-  int i;
-
-  int *ai;
-
-  if ( !  GTK_CLIST( pwMoves )->selection )
-    return;
-
-  GetMatchStateCubeInfo( &ci, &ms );
-  
-  for(  c = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
-    c++;
-
-  /* setup rollout dialog */
-
-#if HAVE_ALLOCA
-    asz = alloca( 40 * c );
-#else
-    if( c > 10 )
-	c = 10;
-#endif
-
-
-  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
-       pl = pl->next, i++ ) {
-
-    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-
-    FormatMove ( asz[ i ], ms.anBoard, m->anMove );
-
-  }
-
-#if USE_GTK
-  if( fX )
-    GTKRollout( c, asz, rcRollout.nTrials, NULL ); 
-#endif
-
-  ProgressStartValue( _("Rolling out positions; position:"), c );
-
-  for( i = 0, pl = GTK_CLIST( pwMoves )->selection; i < c; 
-       pl = pl->next, i++ ) {
-
-    move *m = &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ];
-
-    GTKRolloutRow ( i );
-
-    if ( ScoreMoveRollout ( m, &ci, &rcRollout ) < 0 ) {
-      GTKRolloutDone ();
-      ProgressEnd ();
-      return;
-    }
-    
-    ProgressValueAdd ( 1 );
-
-    /* Calling RefreshMoveList here requires some extra work, as
-       it may reorder moves */
-
-    UpdateMoveList ( phd );
-
-  }
-
-  GTKRolloutDone ();
-
-  gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
-
-  ai = (int *) malloc ( phd->pml->cMoves * sizeof ( int ) );
-  RefreshMoveList ( phd->pml, ai );
-
-  if ( phd->pml->cMoves ) 
-    *phd->piHighlight = ai [ *phd->piHighlight ];
-
-  free ( ai );
-
-
-  UpdateMoveList ( phd );
-
-  ProgressEnd ();
-
-}
-
-
-static void
-MoveListMWC ( GtkWidget *pw, hintdata *phd ) {
-
-  char sz[ 80 ];
-
-  sprintf ( sz, "set output mwc %s", fOutputMWC ? "off" : "on" );
-
-  UserCommand ( sz );
-
-  UpdateMoveList ( phd );
-
-}
-
-static void
-MoveListEval ( GtkWidget *pw, hintdata *phd ) {
-
-  GList *pl;
-  GtkWidget *pwMoves = phd->pw;
-  cubeinfo ci;
-  int *ai;
-
-  if ( !  GTK_CLIST( pwMoves )->selection )
-    return;
-
-  GetMatchStateCubeInfo( &ci, &ms );
-  
-  ProgressStart( _("Evaluating positions...") );
-
-  for(  pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
-
-    if ( ScoreMove ( &phd->pml->amMoves[ GPOINTER_TO_INT ( pl->data ) ],
-                     &ci, &esEvalChequer.ec, esEvalChequer.ec.nPlies ) < 0 ) {
-      ProgressEnd ();
-      return;
-    }
-
-    /* Calling RefreshMoveList here requires some extra work, as
-       it may reorder moves */
-
-    UpdateMoveList ( phd );
-
-  }
-
-  gtk_clist_unselect_all ( GTK_CLIST ( pwMoves ) );
-
-  ai = (int *) malloc ( phd->pml->cMoves * sizeof ( int ) );
-  RefreshMoveList ( phd->pml, ai );
-  free ( ai );
-
-  UpdateMoveList ( phd );
-
-  ProgressEnd ();
-
-}
-
-static void
-MoveListEvalSettings ( GtkWidget *pw, void *unused ) {
-
-  SetEvalChequer ( NULL, 0, NULL );
-
-}
-
-static void
-MoveListRolloutSettings ( GtkWidget *pw, void *unused ) {
-
-  SetRollouts ( NULL, 0, NULL );
-
-}
-
-
-
-static GtkWidget *
-CreateMoveListTools ( hintdata *phd ) {
-
-  GtkWidget *pwTools;
-  GtkWidget *pwEval = gtk_button_new_with_label ( _("Eval") );
-  GtkWidget *pwEvalSettings = gtk_button_new_with_label ( _("...") );
-  GtkWidget *pwRollout = gtk_button_new_with_label( _("Rollout") );
-  GtkWidget *pwRolloutSettings = gtk_button_new_with_label ( _("...") );
-  GtkWidget *pwMWC = gtk_toggle_button_new_with_label( _("MWC") );
-
-  phd->pwRollout = pwRollout;
-  phd->pwRolloutSettings = pwRolloutSettings;
-  phd->pwEval = pwEval;
-  phd->pwEvalSettings = pwEvalSettings;
-
-  /* toolbox on the left with buttons for eval, rollout and more */
-  
-  pwTools = gtk_table_new (3, 2, FALSE);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwEval, 0, 1, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-
-  gtk_table_attach (GTK_TABLE (pwTools), pwEvalSettings, 1, 2, 0, 1,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwRollout, 0, 1, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-
-  gtk_table_attach (GTK_TABLE (pwTools), pwRolloutSettings, 1, 2, 1, 2,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_table_attach (GTK_TABLE (pwTools), pwMWC, 0, 2, 2, 3,
-                    (GtkAttachOptions) (GTK_FILL),
-                    (GtkAttachOptions) (0), 0, 0);
-  
-  gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
-  
-  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
-                                 fOutputMWC );
-
-  /* signals */
-
-  gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListRollout ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwEval ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListEval ), phd );
-  gtk_signal_connect( GTK_OBJECT( pwEvalSettings ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListEvalSettings ), NULL );
-  gtk_signal_connect( GTK_OBJECT( pwRolloutSettings ), "clicked",
-                      GTK_SIGNAL_FUNC( MoveListRolloutSettings ), NULL );
-  gtk_signal_connect( GTK_OBJECT( pwMWC ), "toggled",
-                      GTK_SIGNAL_FUNC( MoveListMWC ), phd );
-
-
-  return pwTools;
-  
-}
-
-
-static GtkWidget *CreateMoveList( hintdata *phd, int *piHighlight ) {
-
-    static char *aszTitle[] = {
-	N_("Rank"), 
-        N_("Type"), 
-        N_("Win"), 
-        N_("W g"), 
-        N_("W bg"), 
-        N_("Lose"), 
-        N_("L g"), 
-        N_("L bg"),
-	"", 
-        N_("Diff."), 
-        N_("Move")
-    }, *aszEmpty[] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-		       NULL, NULL };
-    char *aszTemp[ 11 ];
-    GtkWidget *pwMoves;
-    int i;
-    movelist *pml = phd->pml;
-
-    /* set titles */
-
-    phd->piHighlight = piHighlight;
-
-    for ( i = 0; i < 11; i++ )
-     aszTemp[ i ] = gettext ( aszTitle[ i ] );
-
-    pwMoves = gtk_clist_new_with_titles( 11, aszTemp );
-
-    /* This function should only be called when the game state matches
-       the move list. */
-    assert( ms.fMove == 0 || ms.fMove == 1 );
-    
-    for( i = 0; i < 11; i++ ) {
-	gtk_clist_set_column_auto_resize( GTK_CLIST( pwMoves ), i, TRUE );
-	gtk_clist_set_column_justification( GTK_CLIST( pwMoves ), i,
-					    i == 1 || i == 10 ?
-					    GTK_JUSTIFY_LEFT :
-					    GTK_JUSTIFY_RIGHT );
-    }
-    gtk_clist_column_titles_passive( GTK_CLIST( pwMoves ) );
-    gtk_clist_set_selection_mode( GTK_CLIST( pwMoves ),
-				  GTK_SELECTION_MULTIPLE );
-
-    for( i = 0; i < pml->cMoves; i++ )
-      gtk_clist_append( GTK_CLIST( pwMoves ), aszEmpty );
-
-
-    phd->pw = pwMoves;
-    UpdateMoveList ( phd );
-
-
-    return pwMoves;
-}
-
 static int fAutoCommentaryChange;
 
 static void CommentaryChanged( GtkWidget *pw, void *p ) {
@@ -1728,489 +1283,7 @@ ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 }
 
 
-/*
- * Make cube analysis widget 
- *
- * Input:
- *   aarOutput, aarStdDev: evaluations
- *   pes: evaluation setup
- *
- * Returns:
- *   nice and pretty widget with cube analysis
- *
- */
 
-static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                                float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-                                const evalsetup *pes,
-                                const int fDouble ) {
-
-    cubeinfo ci;
-
-    GtkWidget *pw;
-    GtkWidget *pwTable;
-    GtkWidget *pwFrame;
-
-    int iRow;
-    int i;
-    cubedecision cd;
-    float r;
-
-    int ai[ 3 ];
-    const char *aszCube[] = {
-      NULL, 
-      N_("No double"), 
-      N_("Double, take"), 
-      N_("Double, pass") 
-    };
-
-    float arDouble[ 4 ];
-    gchar *sz;
-
-
-    if( pes->et == EVAL_NONE )
-	return NULL;
-
-    GetMatchStateCubeInfo( &ci, &ms );
-
-    cd = FindCubeDecision ( arDouble, aarOutput, &ci );
-    
-    if( !GetDPEq( NULL, NULL, &ci ) && ! fDouble )
-	/* No cube action possible */
-	return NULL;
-
-    /* header */
-
-    pwFrame = gtk_frame_new ( _("Cube analysis") );
-    gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
-
-    pwTable = gtk_table_new ( 8, 4, FALSE );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
-
-    /* if EVAL_EVAL include cubeless equity and winning percentages */
-
-    iRow = 0;
-
-    if ( pes->et == EVAL_EVAL ) {
-
-      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-        sz = g_strdup_printf ( _("Cubeless %d-ply equity: %+7.3f"), 
-                               pes->ec.nPlies, 
-                               Utility ( aarOutput[ 0 ], &ci ) );
-      else
-        sz = g_strdup_printf ( _("Cubeless %d-ply MWC: %7.3f%%"), 
-                               pes->ec.nPlies,
-                               100.0f * eq2mwc ( Utility ( aarOutput[ 0 ], 
-                                                           &ci ), &ci ) );
-
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-      g_free ( sz );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         0, 4, iRow, iRow + 1,
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      iRow++;
-
-
-      sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
-                             "%6.2f%% %6.2f%% %6.2f%%",
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
-                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ] );
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-      g_free ( sz );
-      
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         0, 4, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 4 );
-
-      iRow++;
-
-    }
-
-    getCubeDecisionOrdering ( ai, arDouble, &ci );
-
-    for ( i = 0; i < 3; i++ ) {
-
-      /* numbering */
-
-      sz = g_strdup_printf ( "%d.", i + 1 );
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-      g_free ( sz );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         0, 1, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      /* label */
-
-      pw = gtk_label_new ( gettext ( aszCube[ ai[ i ] ] ) );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         1, 2, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      /* equity */
-
-      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-        sz = g_strdup_printf ( "%+7.3f", arDouble[ ai [ i ] ] );
-      else
-        sz = g_strdup_printf ( "%+7.3f%%", 
-                               100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) );
-
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-      g_free ( sz );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         2, 3, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      /* difference */
-
-      if ( i ) {
-        
-        if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-          sz = g_strdup_printf ( "(%+7.3f)", 
-                                 arDouble[ ai [ i ] ] - 
-                                 arDouble[ OUTPUT_OPTIMAL ] );
-        else
-          sz = g_strdup_printf ( "(%+7.3f%%)", 
-                                 100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) -
-                                 100.0f * eq2mwc( arDouble[ OUTPUT_OPTIMAL ], 
-                                                  &ci ) );
-
-        pw = gtk_label_new ( sz );
-        gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-        g_free ( sz );
-        
-        gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                           3, 4, iRow, iRow + 1, 
-                           GTK_EXPAND | GTK_FILL, 
-                           GTK_EXPAND | GTK_FILL, 
-                           8, 0 );
-
-      }
-
-      /* rollout details */
-      
-      if ( pes->et == EVAL_ROLLOUT && 
-           ( ai[ i ] == OUTPUT_TAKE || ai[ i ] == OUTPUT_NODOUBLE ) ) {
-
-        /* FIXME: output cubeless euqities and percentages for rollout */
-        /*        probably along with rollout details */
-        
-      }
-        
-      iRow++;
-
-    }
-
-    /* proper cube action */
-
-    pw = gtk_label_new ( _("Proper cube action: ") );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-        
-    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                       0, 2, iRow, iRow + 1, 
-                       GTK_EXPAND | GTK_FILL, 
-                       GTK_EXPAND | GTK_FILL, 
-                       8, 8 );
-
-    pw = gtk_label_new ( GetCubeRecommendation ( cd ) );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-        
-    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                       2, 3, iRow, iRow + 1, 
-                       GTK_EXPAND | GTK_FILL, 
-                       GTK_EXPAND | GTK_FILL, 
-                       8, 8 );
-
-    /* percent */
-
-    if ( ( r = getPercent ( cd, arDouble ) ) >= 0.0 ) {
-
-      sz = g_strdup_printf ( "(%.1f%%)", 100.0 * r );
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         3, 4, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 8 );
-
-    }
-
-    return pwFrame;
-}
-
-
-static GtkWidget *TakeAnalysis( const movetype mt, 
-                                float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
-                                float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
-				const evalsetup *pes ) {
-
-    cubeinfo ci;
-
-    GtkWidget *pw;
-    GtkWidget *pwTable;
-    GtkWidget *pwFrame;
-
-    int iRow;
-    int i;
-    cubedecision cd;
-
-    int ai[ 2 ];
-    const char *aszCube[] = {
-      NULL, NULL, 
-      N_("Take"), 
-      N_("Pass") };
-
-    float arDouble[ 4 ];
-    gchar *sz;
-
-
-    if( pes->et == EVAL_NONE )
-	return NULL;
-
-    GetMatchStateCubeInfo( &ci, &ms );
-
-    cd = FindCubeDecision ( arDouble, aarOutput, &ci );
-    
-    /* header */
-
-    pwFrame = gtk_frame_new ( _("Take analysis") );
-    gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
-
-    pwTable = gtk_table_new ( 5, 4, FALSE );
-    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
-
-    /* if EVAL_EVAL include cubeless equity and winning percentages */
-
-    iRow = 0;
-
-    switch ( pes->et ) {
-
-    case EVAL_EVAL:
-
-      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-        sz = g_strdup_printf ( _("Cubeless %d-ply equity: %+7.3f"), 
-                               pes->ec.nPlies, 
-                               - Utility ( aarOutput[ 0 ], &ci ) );
-      else
-        sz = g_strdup_printf ( _("Cubeless %d-ply MWC: %7.3f%%"), 
-                               pes->ec.nPlies,
-                               100.0f * 
-                               ( 1.0 - eq2mwc ( Utility ( aarOutput[ 0 ], 
-                                                          &ci ), &ci ) ) );
-
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-      g_free ( sz );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         0, 4, iRow, iRow + 1,
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      iRow++;
-
-
-      sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
-                             "%6.2f%% %6.2f%% %6.2f%%",
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEGAMMON ],
-                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
-                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ] );
-
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-      g_free ( sz );
-      
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         0, 4, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 4 );
-
-      iRow++;
-
-      break;
-
-    case EVAL_ROLLOUT:
-
-      /* FIXME: */
-
-      break;
-
-    default:
-
-      assert ( FALSE );
-      break;
-
-    }
-
-    if ( arDouble[ OUTPUT_TAKE ] < arDouble[ OUTPUT_DROP ] ) {
-      ai[ 0 ] = OUTPUT_TAKE;
-      ai[ 1 ] = OUTPUT_DROP;
-    }
-    else {
-      ai[ 0 ] = OUTPUT_DROP;
-      ai[ 1 ] = OUTPUT_TAKE;
-    }
-      
-
-    for ( i = 0; i < 2; i++ ) {
-
-      /* numbering */
-
-      sz = g_strdup_printf ( "%d.", i + 1 );
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-      g_free ( sz );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         0, 1, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      /* label */
-
-      pw = gtk_label_new ( gettext ( aszCube[ ai[ i ] ] ) );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         1, 2, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      /* equity */
-
-      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-        sz = g_strdup_printf ( "%+7.3f", -arDouble[ ai [ i ] ] );
-      else
-        sz = g_strdup_printf ( "%7.3f%%", 
-                               100.0f * ( 1.0 - eq2mwc( arDouble[ ai[ i ] ], 
-                                                        &ci ) ) );
-
-      pw = gtk_label_new ( sz );
-      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-      g_free ( sz );
-
-      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                         2, 3, iRow, iRow + 1, 
-                         GTK_EXPAND | GTK_FILL, 
-                         GTK_EXPAND | GTK_FILL, 
-                         8, 0 );
-
-      /* difference */
-
-      if ( i ) {
-        
-        if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
-          sz = g_strdup_printf ( "(%+7.3f)", 
-                                 arDouble[ ai [ 0 ] ] - 
-                                 arDouble[ ai [ i ] ] );
-        else
-          sz = g_strdup_printf ( "(%+7.3f%%)", 
-                                 100.0f * eq2mwc( arDouble[ ai[ 0 ] ], 
-                                                  &ci )-
-                                 100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) );
-
-        pw = gtk_label_new ( sz );
-        gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
-        g_free ( sz );
-        
-        gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                           3, 4, iRow, iRow + 1, 
-                           GTK_EXPAND | GTK_FILL, 
-                           GTK_EXPAND | GTK_FILL, 
-                           8, 0 );
-
-      }
-
-      iRow++;
-
-    }
-
-    /* proper cube action */
-
-    pw = gtk_label_new ( _("Correct response: ") );
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-        
-    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                       0, 2, iRow, iRow + 1, 
-                       GTK_EXPAND | GTK_FILL, 
-                       GTK_EXPAND | GTK_FILL, 
-                       8, 8 );
-
-    switch ( cd ) {
-
-    case DOUBLE_TAKE:
-    case NODOUBLE_TAKE:
-    case TOOGOOD_TAKE:
-    case REDOUBLE_TAKE:
-    case NO_REDOUBLE_TAKE:
-    case TOOGOODRE_TAKE:
-    case NODOUBLE_DEADCUBE:
-    case NO_REDOUBLE_DEADCUBE:
-      pw = gtk_label_new ( _("Take") );
-      break;
-
-    case DOUBLE_PASS:
-    case TOOGOOD_PASS:
-    case REDOUBLE_PASS:
-    case TOOGOODRE_PASS:
-      pw = gtk_label_new ( _("Pass") );
-      break;
-
-    case DOUBLE_BEAVER:
-    case NODOUBLE_BEAVER:
-    case NO_REDOUBLE_BEAVER:
-      pw = gtk_label_new ( _("Beaver!") );
-      break;
-
-    case NOT_AVAILABLE:
-      pw = gtk_label_new ( _("Eat it!") );
-      break;
-
-    }
-
-    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
-        
-    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
-                       2, 4, iRow, iRow + 1, 
-                       GTK_EXPAND | GTK_FILL, 
-                       GTK_EXPAND | GTK_FILL, 
-                       8, 8 );
-
-    return pwFrame;
-
-}
 
 static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
 
@@ -2304,7 +1377,6 @@ static void SetAnnotation( moverecord *pmr ) {
 
     GtkWidget *pwParent = pwAnalysis->parent, *pw, *pwBox, *pwAlign;
     int fMoveOld, fTurnOld;
-    static hintdata hd = { NULL, NULL, NULL, NULL, FALSE };
     list *pl;
     char sz[ 64 ];
     
@@ -2352,8 +1424,8 @@ static void SetAnnotation( moverecord *pmr ) {
 
             fixOutput ( pmr->n.arDouble, pmr->n.aarOutput );
 	    
-	    if( ( pw = CubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
-				     &pmr->n.esDouble, FALSE ) ) ) {
+	    if( ( pw = CreateCubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
+				     &pmr->n.esDouble, MOVE_NORMAL ) ) ) {
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
                 /* FIXME: add cube skill */
@@ -2394,23 +1466,10 @@ static void SetAnnotation( moverecord *pmr ) {
 			      
 	    if( pmr->n.ml.cMoves ) {
 
-              GtkWidget *pwHBox = gtk_hbox_new ( FALSE, 0 );
-
-              hd.pml = &pmr->n.ml;
-              hd.pw = pw = gtk_scrolled_window_new( NULL, NULL );
-              gtk_scrolled_window_set_policy(
-                                GTK_SCROLLED_WINDOW( pw ),
-                                GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-              gtk_container_add( GTK_CONTAINER( pw ),
-                                 CreateMoveList( &hd, &pmr->n.iMove ) );
-
-              gtk_box_pack_start ( GTK_BOX ( pwHBox ), pw, TRUE, TRUE, 0 );
-              gtk_box_pack_end ( GTK_BOX ( pwHBox ),
-                                 CreateMoveListTools( &hd ),
-                                 FALSE, FALSE, 0 );
-
-              gtk_box_pack_start( GTK_BOX( pwAnalysis ), pwHBox, TRUE, TRUE,
-                                  0 );
+              gtk_box_pack_start( GTK_BOX( pwAnalysis ), 
+                                  CreateMoveList( &pmr->n.ml, &pmr->n.iMove,
+                                                  TRUE ),
+                                  TRUE, TRUE, 0 );
 	    }
 
 	    if( !g_list_first( GTK_BOX( pwAnalysis )->children ) ) {
@@ -2426,9 +1485,11 @@ static void SetAnnotation( moverecord *pmr ) {
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 	    
             fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
-
-	    if( ( pw = CubeAnalysis( pmr->d.aarOutput, pmr->d.aarStdDev,
-				     &pmr->d.esDouble, TRUE ) ) )
+            
+            if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
+                                             pmr->d.aarStdDev,
+                                             &pmr->d.esDouble,
+                                             MOVE_DOUBLE ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
@@ -2453,9 +1514,10 @@ static void SetAnnotation( moverecord *pmr ) {
 
             fixOutput ( pmr->d.arDouble, pmr->d.aarOutput );
 
-	    if( ( pw = TakeAnalysis( pmr->mt, pmr->d.aarOutput,
-                                     pmr->d.aarStdDev,
-				     &pmr->d.esDouble ) ) )
+            if ( ( pw = CreateCubeAnalysis ( pmr->d.aarOutput,
+                                             pmr->d.aarStdDev,
+                                             &pmr->d.esDouble,
+                                             pmr->mt ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
 
@@ -2541,6 +1603,7 @@ static void SetAnnotation( moverecord *pmr ) {
     gtk_widget_show_all( pwAnalysis );
 }
 
+
 /* Select a moverecord as the "current" one.  NOTE: This function must be
    called _after_ applying the moverecord. */
 extern void GTKSetMoveRecord( moverecord *pmr ) {
@@ -2555,7 +1618,7 @@ extern void GTKSetMoveRecord( moverecord *pmr ) {
 	hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
 
 	phd->fButtonsValid = FALSE;
-	CheckHintButtons();
+	CheckHintButtons( phd );
     }
     
     gtk_clist_set_cell_style( pcl, yCurrent, xCurrent, psGameList );
@@ -4644,7 +3707,7 @@ static void SetEvalCommands( char *szPrefix, evalcontext *pec,
     outputresume();
 }
 
-static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
+extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
 
     evalcontext ec;
     GtkWidget *pwDialog, *pwEval;
@@ -4677,7 +3740,7 @@ static void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw ) {
                          &esEvalChequer.ec );
 }
 
-static void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
+extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw ) {
 
     evalcontext ec;
     GtkWidget *pwDialog, *pwEval;
@@ -5258,7 +4321,7 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 }
 
-static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
+extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
     GtkWidget *pwDialog, *pwBox, *pw;
     int fOK = FALSE;
@@ -5446,11 +4509,15 @@ extern void GTKDoubleHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                            float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                            const evalsetup *pes ) {
 
+    evalsetup es;
+
     GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL,
 					NULL ),
       *pw, *pwRollout = gtk_button_new_with_label( _("Rollout") );
 
-    pw = CubeAnalysis ( aarOutput, aarStdDev, pes, FALSE );
+    memcpy ( &es, pes, sizeof ( evalsetup ) );
+
+    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pw );
@@ -5477,11 +4544,14 @@ extern void GTKTakeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
                          float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ], 
                          const evalsetup *pes ) {
 
+    evalsetup es;
+
     GtkWidget *pwDialog = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL,
 					NULL ),
       *pw, *pwRollout = gtk_button_new_with_label( _("Rollout") );
 
-    pw = TakeAnalysis ( MOVE_NORMAL, aarOutput, aarStdDev, pes );
+    memcpy ( &es, pes, sizeof ( evalsetup ) );
+    pw = CreateCubeAnalysis ( aarOutput, aarStdDev, &es, MOVE_NORMAL );
 
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
                        pw );
@@ -5651,72 +4721,6 @@ static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
     gtk_widget_destroy( gtk_widget_get_toplevel( pwMoves ) );
 }
 
-static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
-			hintdata *phd ) {
-    
-    int c = CheckHintButtons();
-    
-    if( c && peb )
-	gtk_selection_owner_set( pw, GDK_SELECTION_PRIMARY, peb->time );
-
-    /* Double clicking a row makes that move. */
-    if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && phd->fButtonsValid )
-	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
-}
-
-static gint HintClearSelection( GtkWidget *pw, GdkEventSelection *pes,
-				hintdata *phd ) {
-    
-    gtk_clist_unselect_all( GTK_CLIST( pw ) );
-
-    return TRUE;
-}
-
-typedef int ( *cfunc )( const void *, const void * );
-
-static int CompareInts( int *p0, int *p1 ) {
-
-    return *p0 - *p1;
-}
-
-static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
-			      guint n, guint t, hintdata *phd ) {
-    int c, i;
-    GList *pl;
-    char *sz, *pch;
-    int *an;
-    
-    for( c = 0, pl = GTK_CLIST( pw )->selection; pl; pl = pl->next )
-	c++;
-
-#if HAVE_ALLOCA
-    an = alloca( c * sizeof( an[ 0 ] ) );
-    sz = alloca( c * 160 );
-#else
-    an = malloc( c * sizeof( an[ 0 ] ) );
-    sz = malloc( c * 160 );
-#endif
-
-    *sz = 0;
-    
-    for( i = 0, pl = GTK_CLIST( pw )->selection; pl;
-	 pl = pl->next, i++ )
-	an[ i ] = GPOINTER_TO_INT( pl->data );
-
-    qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
-
-    for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
-	FormatMoveHint( pch, &ms, phd->pml, an[ i ], TRUE );
-        
-    gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
-			    sz, strlen( sz ) );
-    
-#if !HAVE_ALLOCA
-    free( an );
-    free( sz );
-#endif        
-}
-
 static void DestroyHint( gpointer p ) {
 
     hintdata *phd = gtk_object_get_user_data( GTK_OBJECT( pwHint ) );
@@ -5751,29 +4755,18 @@ extern void GTKHint( movelist *pmlOrig ) {
     pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
     memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
 
-    hd.pwMove = pwMove;
-    hd.fButtonsValid = TRUE;
-    hd.pml = pml;
-    hd.pw = pwMoves = CreateMoveList( &hd, NULL /* FIXME change if they've
-						 already moved */ );
+    pwMoves = CreateMoveList( pml, NULL, TRUE );
 
     /* create dialog */
     
     pwHint = CreateDialog( _("GNU Backgammon - Hint"), FALSE, NULL, NULL );
-    gtk_object_set_user_data( GTK_OBJECT( pwHint ), &hd );
+    gtk_object_set_user_data( GTK_OBJECT( pwHint ), 
+                              gtk_object_get_user_data ( 
+                                 GTK_OBJECT ( pwMoves ) ) );
     pwButtons = DialogArea( pwHint, DA_BUTTONS );
     
-    gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( psw ),
-				    GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC );
-    gtk_container_add( GTK_CONTAINER( psw ), pwMoves );
-
-    pwHBox = gtk_hbox_new ( FALSE, 4 );
-    gtk_container_add ( GTK_CONTAINER ( pwHBox ), psw );
-    gtk_container_add ( GTK_CONTAINER ( pwHBox ), 
-                        CreateMoveListTools ( &hd ) );
-    
     gtk_container_add( GTK_CONTAINER( DialogArea( pwHint, DA_MAIN ) ), 
-                       pwHBox );
+                       pwMoves );
 
     gtk_signal_connect( GTK_OBJECT( pwMove ), "clicked",
 			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
@@ -5783,19 +4776,6 @@ extern void GTKHint( movelist *pmlOrig ) {
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
 
-    gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
-			      GDK_SELECTION_TYPE_STRING, 0 );
-    
-    HintSelect( pwMoves, 0, 0, NULL, &hd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
-			GTK_SIGNAL_FUNC( HintSelect ), &hd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "unselect-row",
-			GTK_SIGNAL_FUNC( HintSelect ), &hd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_clear_event",
-			GTK_SIGNAL_FUNC( HintClearSelection ), &hd );
-    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_get",
-			GTK_SIGNAL_FUNC( HintGetSelection ), &hd );
-    
     gtk_window_set_default_size( GTK_WINDOW( pwHint ), 0, 300 );
     
     gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, &pwHint );

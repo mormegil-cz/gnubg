@@ -123,6 +123,10 @@ extern void GTKHelp( char *sz );
 extern void 
 GTKShowPath( void );
 
+extern void SetEvalChequer( gpointer *p, guint n, GtkWidget *pw );
+extern void SetEvalCube( gpointer *p, guint n, GtkWidget *pw );
+extern void SetRollouts( gpointer *p, guint n, GtkWidget *pw );
+
 extern int fTTY;
 
 #endif
