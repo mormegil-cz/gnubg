@@ -1,3 +1,12 @@
+Thu Jan  1 20:29:09 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* gnubg.c (DisplayAnalysis, DisplayTimeAnalysis): show time analysis
+	in cli.
+	* gtkgame.c (TimeAnalysis, SetAnnotation): show time analysis
+	in gui.
+	* analysis.c, import.c: remove debug output
+	* format.c (OutputMWCDiff): new function.
+
 Thu Jan  1 18:56:50 2004  Joern Thyssen  <jth@gnubg.org>
 
 	Report equity loss due to "time outs", e.g., when importing

@@ -1616,6 +1616,109 @@ SkillMenu(skilltype stSelect, char* szAnno)
 }
 
 
+#if USE_TIMECONTROL
+
+/*
+ * Display time penalty
+ *
+ * Parameters: pmr (move time)
+ *             pms (match state)
+ *
+ * Returns:    gtk widget
+ *
+ */
+
+static GtkWidget *
+TimeAnalysis( const movetime *pmt, const matchstate *pms ) {
+
+  cubeinfo ci;
+  GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
+  GtkWidget *pwLabel;
+
+  float rAfter, rBefore;
+
+  char *sz;
+
+  if ( pmt->es.et == EVAL_NONE ) 
+    return NULL;
+
+  GetMatchStateCubeInfo ( &ci, pms );
+
+  sz = g_strdup_printf( _("Time penalty: %s loses %d points"), 
+                        ap[ pmt->fPlayer ].szName, pmt->nPoints );
+  pwLabel = gtk_label_new ( sz );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     0, 2, 0, 1,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  g_free( sz );
+
+  /* First column with text */
+
+  pwLabel = gtk_label_new ( _("Equity before time penalty:") );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     0, 1, 1, 2,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  pwLabel = gtk_label_new ( _("Equity after time penalty:") );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     0, 1, 2, 3,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  pwLabel = gtk_label_new ( _("Loss from penalty:") );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 0, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     0, 1, 3, 4,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  /* Second column: equities/mwc */
+
+  pwLabel = 
+    gtk_label_new ( OutputMWC( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ], &ci, TRUE ) );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     1, 2, 1, 2,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+
+  pwLabel = 
+    gtk_label_new ( OutputMWC( pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci , TRUE ) );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     1, 2, 2, 3,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+  pwLabel = 
+    gtk_label_new ( OutputMWCDiff( pmt->aarOutput[ 0 ][ OUTPUT_CUBEFUL_EQUITY ] , pmt->aarOutput[ 1 ][ OUTPUT_CUBEFUL_EQUITY ], &ci ) );
+  gtk_misc_set_alignment( GTK_MISC( pwLabel ), 1, 0.5 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ),
+                     pwLabel,
+                     1, 2, 3, 4,
+                     GTK_FILL | GTK_EXPAND, GTK_FILL | GTK_EXPAND, 
+                     8, 2 );
+
+
+  return pwTable;
+
+}
+
+#endif /* USE_TIMECONTROL */
+
 static GtkWidget *
 ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
                  int nResigned,
@@ -2133,6 +2236,15 @@ static void SetAnnotation( moverecord *pmr ) {
 				       pmr->sd.anDice[ 1 ],
 				       pmr->sd.rLuck, pmr->sd.lt );
 	    break;
+
+#if USE_TIMECONTROL
+
+        case MOVE_TIME:
+
+          pwAnalysis = TimeAnalysis( &pmr->t, &ms );
+          break;
+
+#endif /* USE_TIMECONTROL */
 
 	default:
 	    break;
