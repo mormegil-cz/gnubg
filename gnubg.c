@@ -7351,7 +7351,7 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 #ifdef WIN32
          /* Bad hack */
             fX = TRUE;
-            MessageBox (NULL,Co
+            MessageBox (NULL,
               TEXT (_("Sorry, this build does not support the -tty option")),
               TEXT (_("GNU Backgammon for Windows")), MB_ICONWARNING);
 #else /* WIN32 */
