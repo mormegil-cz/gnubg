@@ -107,7 +107,7 @@ static char *aaszStyleSheetClasses[ NUM_CLASSES ][ 2 ] = {
   { "cubedecision", "background-color: #ddddee; text-align: left;" },
   { "cubedecisionheader", 
     "background-color: #89d0e2; text-align: center; padding: 0.5em" },
-  { "comment", "background-color: ccffcc; width: 39.5em; padding: 0.5em" },
+  { "comment", "background-color: #ccffcc; width: 39.5em; padding: 0.5em" },
   { "commentheader", 
     "background-color: #6f9915; font-weight: bold; text-align: center; "
     "width: 40em; padding: 0.25em" },

@@ -1,3 +1,7 @@
+Sat Aug 30 20:24:57 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* html.c: fix broken stylesheet.
+
 Sat Aug 30 20:20:39 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* formatgs.c (errorRateMP): report errors rate per decision
