@@ -49,7 +49,7 @@ typedef struct _metinfo {
 
 extern float aafMET [ MAXSCORE ][ MAXSCORE ];
 
-extern float afMETPostCrawford [ MAXSCORE ];
+extern float aafMETPostCrawford[ 2 ][ MAXSCORE ];
 
 extern metinfo miCurrent;
 

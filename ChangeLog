@@ -1,3 +1,24 @@
+Sat Mar 23 14:21:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Introduce two post-Crawford match equity tables -- one for each
+	player (First step in support of skewed match equity tables).
+
+	* eval.c (mwc2eq, eq2mwc, SetCubeInfoMatch,GetDPEq): use
+	post-Crawford table for player 0.
+
+	* show.c (CommandShowMatchEquityTable): display post-Crawford
+	match equity tables for both players.
+
+	* gtkgame.c (GTKShowMatchEquityTable): display post-Crawford
+	match equity tables for both players.
+
+	* matchequity.c (getDefaultMET): set parameters up for both
+	post-Crawford mets.
+	* matchequity.c (parsePostCrawfordFormula,
+	parsePostCrawfordExplicit, parsePostCrawford, readMET,
+	InitMatchEquity): parse and setup both post-Crawford mets.
+
+
 Fri Mar 22 15:27:19 2002  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (PathSearch): New function.
