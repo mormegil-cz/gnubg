@@ -9881,7 +9881,12 @@ extern void GTKResign( gpointer *p, guint n, GtkWidget *pw ) {
 static void 
 PythonShell( gpointer *p, guint n, GtkWidget *pw ) {
 
+#if WIN32
+  char *pch = g_strdup( ">import idlelib.PyShell; idlelib.PyShell.main()\n"
+);
+#else
   char *pch = g_strdup( ">import idle.PyShell; idle.PyShell.main()\n" );
+#endif
 
   UserCommand( pch );
 

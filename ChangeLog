@@ -1,3 +1,7 @@
+Fri Jul 30 23:08:58 CEST 2004   Oystein Johansen  <oystein@gnubg.org>
+
+	* gtkgame.c (PythonShell): starting "idle" differs between platforms.
+
 Sun Jul 25 20:34:35 2004 GMT  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* gnubg.c (Convert): Suppress compiler warnings. Synch with
