@@ -1,3 +1,7 @@
+Fri Nov 22 21:59:16 2002  Gary Wong  <gtw@gnu.org>
+
+	* set.c (SetPriority): [WIN32] _N() should be N_().
+
 Fri Nov 22 18:18:44 2002  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (output*, GetInput): Convert() terminal I/O to/from

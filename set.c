@@ -3541,22 +3541,22 @@ static void SetPriority( int n ) {
        
     if( n < -19 ) {
 	tp = THREAD_PRIORITY_TIME_CRITICAL;
-	pch = _N("time critical");
+	pch = N_("time critical");
     } else if( n < -10 ) {
 	tp = THREAD_PRIORITY_HIGHEST;
-	pch = _N("highest");
+	pch = N_("highest");
     } else if( n < 0 ) {
 	tp = THREAD_PRIORITY_ABOVE_NORMAL;
-	pch = _N("above normal");
+	pch = N_("above normal");
     } else if( !n ) {
 	tp = THREAD_PRIORITY_NORMAL;
-	pch = _N("normal");
+	pch = N_("normal");
     } else if( n < 19 ) {
 	tp = THREAD_PRIORITY_BELOW_NORMAL;
-	pch = _N("below normal");
+	pch = N_("below normal");
     } else {
 	tp = THREAD_PRIORITY_IDLE;
-	pch = _N("idle");
+	pch = N_("idle");
     }
 
     if ( SetThreadPriority(GetCurrentThread(), tp ) ) {
