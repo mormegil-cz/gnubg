@@ -62,13 +62,6 @@ typedef struct _rolloutstat {
 
 } rolloutstat;
 
-
-
-extern int 
-Rollout( int anBoard[ 2 ][ 25 ], char *sz, float arOutput[], float arStdDev[],
-         int nTruncate, int cGames, int fVarRedn, cubeinfo *pci,
-	 evalcontext *pec, int fInvert );
-
 extern int
 RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
                 float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
