@@ -37,10 +37,6 @@
 #include "rollout.h"
 #include "analysis.h"
 
-#ifndef HUGE_VALF
-#define HUGE_VALF 1e38
-#endif
-
 const char *aszRating [ RAT_UNDEFINED + 1 ] = {
   "Beginner", "Novice", "Intermediate", "Advanced", "Expert",
   "World class", "Extra-terrestrial", "N/A" };
@@ -79,13 +75,13 @@ static float LuckAnalysis( int anBoard[ 2 ][ 25 ], int n0, int n1,
 	    /* Find the best move for each roll at ply 0 only. */
 	    if( FindBestMove( NULL, i + 1, j + 1, anBoardTemp, pci,
 			      NULL ) < 0 )
-		return -HUGE_VALF;
+		return ERR_VAL;
 	    
 	    SwapSides( anBoardTemp );
 
 	    /* FIXME should we use EvaluatePositionCubeful here? */
 	    if( EvaluatePosition( anBoardTemp, ar, pci, NULL ) )
-		return -HUGE_VALF;
+		return ERR_VAL;
 
 	    if( fFirstMove ) {
 		rMean += Utility( ar, pci );

@@ -1,3 +1,56 @@
+Mon Oct 29 09:52:41 2001  Gary Wong  <gtw@research.att.com>
+
+	* backgammon.h: ERR_VAL definition added, to replace HUGE_VALF.
+
+	* database.c (CommandDatabaseRollout): Use rcRollout struct.
+
+	* drawboard.c (CanonicalMoveOrder): New function.
+
+	* gnubg.c: nDelay now defaults to 300ms.
+
+	* gnubg.c (CompleteKeyword): Perform filename completion where
+	appropriate.
+
+	* gnubg.c (CommandSaveSettings): Save rollout settings.
+
+	* gnubg.c (GetInput): [!HAVE_LIBREADLINE] Fix bug reading EOF from
+	stdin.
+
+	* gnubg.c (real_main): 	Add `-c' (--command) and `-s' (--script)
+	options.
+
+	* gtkboard.c (board_pointer): Clicking the side of the board rolls
+	the dice if appropriate, and clicking a chequer checks both dice
+	for legal moves (contributed by John Chuang).
+
+	* gtkboard.c (board_slide_timeout): New function.  Optionally
+	slide animated chequers.
+
+	* set.c (CommandSetBeavers): Allow a limit on the number of beavers
+	permitted to be specified.
+	* gtkgame.c (SetBeavers): New function.
+	
+	* gtkprefs.c: New options for animation, animation speed, and showing
+	the high die on the left.
+
+	* latex.c, postscript.c: Draw boards with player 1 moving clockwise
+	if fClockwise is set.  Draw a black or white symbol next to each move
+	to indicate the players.
+
+	* postscript.c (ReleaseFont): New function (to avoid overlapping
+	text and graphics objects in PDF files).
+	
+	* play.c: Do not allow resignations if a similar or lower resignation
+	has already been declined this move.
+	(ComputerTurn): Make gnubg offer resignations if its position is
+	hopeless.
+
+	* play.c (CommandAnnotateClearComment, CommandAnnotateClearLuck, 
+	CommandAnnotateClearSkill): New functions.
+
+	* rollout.c, set.c (CommandSetRolloutTruncation): Setting truncation
+	at 0 plies now means no truncation.
+
 Sun Oct 28 11:20:29 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	All entries below relates to the fact that is was not possible to set/show

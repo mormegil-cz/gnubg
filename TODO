@@ -20,7 +20,6 @@ duplication of effort and to make sure our changes merge easily.
   number of turns on the bar, whether each player is closed out, average
   number of pips wasted bearing off, etc.)
 ** Add cubeful rollouts
-** Make gnubg offer resignations when its position is hopeless.
 ** EvaluatePositionCache doesn't currently cache evaluations deeper than
   0-ply for match play.  Update EvalCacheHash so that spurious collisions
   won't occur, and then change EvaluatePositionCache to cache what it can.
@@ -37,7 +36,12 @@ duplication of effort and to make sure our changes merge easily.
   2-sided.)
 
 * Commands:
-** Add more completions to readline (player names, filenames for load/save).
+** Add more completions to readline (player names, filenames for
+  load/save). (gary)
+** Commands with filename parameters currently use the entire line (which
+  is necessary for filenames with spaces).  It would be better (and match
+  completion better) if NextToken could handle quoting rules for filenames,
+  and then they could just call that. (gary)
 ** Add interactive rollouts.
 ** Analyse games and matches.
 *** Add an "analyse move" command.
@@ -61,8 +65,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
   with push/pop semantics for readline state. (gary)
-** Change "set beavers" to allow a limit on the number of beavers
-  permitted.
 ** Add a "set record" command; when "record" is off, no moves are
   recorded (which implies that "save", "list" and the game list window
   won't work, but it will save memory for situations like playing
@@ -78,8 +80,6 @@ duplication of effort and to make sure our changes merge easily.
   under the Analyse menu).
 ** Make "show marketwindow" say something for money games.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
-** If a resignation is rejected, don't allow further resignations for
-  that amount or below for the rest of the turn.
 ** Kit suggests that it's more important to get early plays right in
   rollouts.  Should we consider options that allow larger search space/
   search depth/etc. for early moves in rollouts than later ones?  (Kit's
@@ -145,7 +145,8 @@ duplication of effort and to make sure our changes merge easily.
   strangely.  This is GTK+'s fault (adjustments store their values as
   floats, which have less precision than ints).
 ** During a rollout, the OK button should be the grab widget.  Can we
-  fix that by temporarily modifying pwGrab?
+  fix that by temporarily modifying pwGrab?  (Or maybe we should allow
+  the entire the whole rollout dialog to be active, for copy/paste.)
 ** Enable and disable the take/drop/redouble/agree/decline etc. buttons
   and menu items when appropriate.
 ** Make some of the information below the board optional (suggested by Jeremie 
@@ -183,7 +184,8 @@ duplication of effort and to make sure our changes merge easily.
 ** MS Windows:
 *** The stop button has no effect.  One approach would be to define a
   polling macro which sets fAction if gtk_events_pending() is true, and call
-  this macro before testing fAction.
+  this macro before testing fAction.  (This might also allow screen refreshes
+  while evaluations are in progress.)
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution
@@ -200,6 +202,7 @@ duplication of effort and to make sure our changes merge easily.
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages.  Bad "set rollout" commands (e.g.
   "set rollout chequerplay plies") also give bad errors.
+** "help load sfdkljsdlf" gives a poor error message.
 ** "set player <tab>" gives incorrect completions.
 ** When using guile and guile isn't using readline, X events are not
   handled while in the REPL.  When using guile and guile _is_ using
@@ -243,9 +246,7 @@ duplication of effort and to make sure our changes merge easily.
   many points a resignation was for.  See Little_Sister match
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
-** Does "save settings" save the rollout parameters? (gary)
-** When compiled without readline, an EOF from the terminal seems to ask
-  for confirmation for exiting indefinitely. (gary)
+** When a match is over, the prev game/prev move menu items are disabled.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -270,9 +271,7 @@ duplication of effort and to make sure our changes merge easily.
 *** ASCII.
 *** LaTeX.
 ** Improve the LaTeX, PS and PDF output:
-*** Make them pay attention to fClockwise when they draw boards.
 *** Add names and scores before each game.
-*** Show who rolled (black or white) before each roll.
 *** Show game and match statistics (if available) at end of game/match.
 *** Allow some option for selecting which boards to print (see the
   "FG" SGF property).
@@ -298,10 +297,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Allow printing positions/games/matches/etc.  (More or less the same
   as exporting to PostScript, but piped to a printing process.) (gary)
 ** Keep statistics of won/lost games/matches.
-** Consider "-s scheme-file" and "-c command-file" options to read scripts.
-** Replace HUGE_VALF with the more portable FLT_MAX in <float.h>.
-** Write CommandAnnotateClear in play.c.  Should there be different commands
-  or parameters for clearing luck and skill annotations?
 ** Make sure the Nackgammon option works properly: record when loading/saving,
   make sure that InitBoard during analysis gets it right, etc.  Similarly
   for Egyptian and Jacoby.
@@ -321,6 +316,9 @@ duplication of effort and to make sure our changes merge easily.
   standard error of rollouts in advance (see Chuck's work). (gary)
 ** Make sure that player names containing a `:' don't mess up the FIBS
   string. (gary)
+** Allow very large (128 bit+) seeds. (gary)
+** Allow the caller of the Rollout* functions to specify a callback function
+  (to replace the current hard-coded GTKRollout()/output* calls).
 
 Local Variables:
 mode: outline

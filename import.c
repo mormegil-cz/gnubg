@@ -33,10 +33,6 @@
 #include "import.h"
 #include "positionid.h"
 
-#ifndef HUGE_VALF
-#define HUGE_VALF 1e38
-#endif
-
 static int ReadInt16( FILE *pf ) {
 
     /* Read a little-endian, signed (2's complement) 16-bit integer.
@@ -249,7 +245,7 @@ ImportJF( FILE * fp, char *szFileName) {
       pmr->sd.anDice[ 0 ] = ms.anDice[ 0 ];
       pmr->sd.anDice[ 1 ] = ms.anDice[ 1 ];
       pmr->sd.lt = LUCK_NONE;
-      pmr->sd.rLuck = -HUGE_VALF;
+      pmr->sd.rLuck = ERR_VAL;
       AddMoveRecord( pmr );
   }
 
@@ -308,7 +304,7 @@ static void ParseMatMove( char *sz, int iPlayer ) {
         pmr->n.esDouble.et = EVAL_NONE;
         pmr->n.esChequer.et = EVAL_NONE;
 	pmr->n.lt = LUCK_NONE;
-	pmr->n.rLuck = -HUGE_VALF;
+	pmr->n.rLuck = ERR_VAL;
 	pmr->n.st = SKILL_NONE;
 	
 	if( ( c = ParseMove( sz + 3, pmr->n.anMove ) ) >= 0 ) {
@@ -538,7 +534,7 @@ static void ParseOldmove( char *sz, int fInvert ) {
         pmr->n.esDouble.et = EVAL_NONE;
         pmr->n.esChequer.et = EVAL_NONE;
 	pmr->n.lt = LUCK_NONE;
-	pmr->n.rLuck = -HUGE_VALF;
+	pmr->n.rLuck = ERR_VAL;
 	pmr->n.st = SKILL_NONE;
 
 	if( !strncasecmp( sz + 9, "can't move", 10 ) )
@@ -813,7 +809,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 		    pmr->n.esDouble.et = EVAL_NONE;
 		    pmr->n.esChequer.et = EVAL_NONE;
 		    pmr->n.lt = LUCK_NONE;
-		    pmr->n.rLuck = -HUGE_VALF;
+		    pmr->n.rLuck = ERR_VAL;
 		    pmr->n.st = SKILL_NONE;
 		    
 		    if( ( c = ParseMove( pch + 4, pmr->n.anMove ) ) >= 0 ) {
@@ -851,7 +847,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 			    pmr->n.esDouble.et = EVAL_NONE;
 			    pmr->n.esChequer.et = EVAL_NONE;
 			    pmr->n.lt = LUCK_NONE;
-			    pmr->n.rLuck = -HUGE_VALF;
+			    pmr->n.rLuck = ERR_VAL;
 			    pmr->n.st = SKILL_NONE;
 			    AddMoveRecord( pmr );
 			    anRoll[ 0 ] = 0;
@@ -875,7 +871,7 @@ static void ImportSGGGame( FILE *pf, int i, int nLength, int n0, int n1 ) {
 			    pmr->sd.anDice[ 0 ] = anRoll[ 0 ];
 			    pmr->sd.anDice[ 1 ] = anRoll[ 1 ];
 			    pmr->sd.lt = LUCK_NONE;
-			    pmr->sd.rLuck = -HUGE_VALF;
+			    pmr->sd.rLuck = ERR_VAL;
 			    AddMoveRecord( pmr );
 			}
 		    } else {

@@ -1,7 +1,7 @@
 /*
  * guile.c
  *
- * by Gary Wong <gtw@gnu.org>, 2000
+ * by Gary Wong <gtw@gnu.org>, 2000, 2001.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -177,8 +177,8 @@ static SCM cube_info( SCM sCube, SCM sCubeOwner, SCM sMove, SCM sMatchTo,
 		 SCM_NFALSEP( sCrawford ),
 		 sJacoby == SCM_UNDEFINED ? fJacoby :
 		 SCM_NFALSEP( sJacoby ),
-		 sBeavers == SCM_UNDEFINED ? fBeavers :
-		 SCM_NFALSEP( sBeavers ) );
+		 sBeavers == SCM_UNDEFINED ? nBeavers :
+		 SCM_INUM( sBeavers ) );
 
     SCM_ALLOW_INTS;
     
@@ -228,8 +228,8 @@ static SCM cube_info_money( SCM sCube, SCM sCubeOwner, SCM sMove,
     SetCubeInfoMoney( &ci, SCM_INUM( sCube ), SCM_INUM( sCubeOwner ),
 		      SCM_INUM( sMove ), sJacoby == SCM_UNDEFINED ?
 		      fJacoby : SCM_NFALSEP( sJacoby ),
-		      sBeavers == SCM_UNDEFINED ? fBeavers :
-		      SCM_NFALSEP( sBeavers ) );
+		      sBeavers == SCM_UNDEFINED ? nBeavers :
+		      SCM_INUM( sBeavers ) );
 
     SCM_ALLOW_INTS;
     
@@ -419,8 +419,8 @@ static SCM rollout_position( SCM sBoard, SCM sGames, SCM sTruncate,
     n = Rollout( anBoard, sDesc == SCM_UNDEFINED ?
 		 PositionID( anBoard ) : SCM_CHARS( sDesc ),
 		 ar, arStdDev, sTruncate == SCM_UNDEFINED ?
-		 nRolloutTruncate : SCM_INUM( sTruncate ), sGames ==
-		 SCM_UNDEFINED ? nRollouts : SCM_INUM( sGames ),
+		 rcRollout.nTruncate : SCM_INUM( sTruncate ), sGames ==
+		 SCM_UNDEFINED ? rcRollout.nTrials : SCM_INUM( sGames ),
 		 SCM_NFALSEP( sVarRedn ), &ci,
 		 &ecRollout /* FIXME use sEvalContext */,
 		 SCM_NFALSEP( sInvert ) );

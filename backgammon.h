@@ -22,14 +22,24 @@
 #ifndef _BACKGAMMON_H_
 #define _BACKGAMMON_H_
 
-#include <stdarg.h>
+#include <float.h>
 #include <list.h>
+#include <math.h>
+#include <stdarg.h>
 
 #include "analysis.h"
 #include "eval.h"
 
 #if !defined (__GNUC__) && !defined (__attribute__)
 #define __attribute__(X)
+#endif
+
+#ifdef HUGE_VALF
+#define ERR_VAL (-HUGE_VALF)
+#elif defined (HUGE_VAL)
+#define ERR_VAL (-HUGE_VAL)
+#else
+#define ERR_VAL (-FLT_MAX)
 #endif
 
 #if USE_GTK
@@ -121,7 +131,7 @@ typedef struct _movenormal {
     movelist ml;
     int iMove; /* index into the movelist of the move that was made */
     lucktype lt;
-    float rLuck; /* -HUGE_VALF means unknown */
+    float rLuck; /* ERR_VAL means unknown */
     skilltype st;
 } movenormal;
 
@@ -144,7 +154,7 @@ typedef struct _movesetdice {
     int fPlayer;
     int anDice[ 2 ];
     lucktype lt;
-    float rLuck; /* -HUGE_VALF means unknown */
+    float rLuck; /* ERR_VAL means unknown */
 } movesetdice;
 
 typedef struct _movesetcubeval {
@@ -188,9 +198,9 @@ typedef enum _gamestate {
    offered).  anDice indicate the roll to be played (0,0 indicates the
    roll has not been made). */
 typedef struct _matchstate {
-    int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned, fDoubled,
-	cGames, fMove, fCubeOwner, fCrawford, fPostCrawford, nMatchTo,
-	anScore[ 2 ], nCube;
+    int anBoard[ 2 ][ 25 ], anDice[ 2 ], fTurn, fResigned,
+	fResignationDeclined, fDoubled, cGames, fMove, fCubeOwner, fCrawford,
+	fPostCrawford, nMatchTo, anScore[ 2 ], nCube, cBeavers;
     gamestate gs;
 } matchstate;
 
@@ -199,10 +209,10 @@ extern int fNextTurn;
 
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
-    fCubeUse, fNackgammon, fVarRedn, nRollouts, nRolloutTruncate, fConfirm,
-    fDisplay, fAutoBearoff, fShowProgress, fBeavers, fOutputMWC, fEgyptian,
-    fOutputWinPC, fOutputMatchPC, fJacoby, fOutputRawboard, nRolloutSeed,
-    fAnnotation, cAnalysisMoves, fAnalyseCube, fAnalyseDice, fAnalyseMove;
+    fCubeUse, fNackgammon, fConfirm, fDisplay, fAutoBearoff, fShowProgress,
+    nBeavers, fOutputMWC, fEgyptian, fOutputWinPC, fOutputMatchPC, fJacoby,
+    fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
+    fAnalyseDice, fAnalyseMove;
 extern float rAlpha, rAnneal, rThreshold, arLuckLevel[ LUCK_VERYGOOD + 1 ],
     arSkillLevel[ SKILL_VERYGOOD + 1 ];
 
@@ -358,7 +368,9 @@ extern void CommandAccept( char * ),
     CommandAnalyseMatch( char * ),
     CommandAnalyseSession( char * ),
     CommandAnnotateBad( char * ),
-    CommandAnnotateClear( char * ),
+    CommandAnnotateClearComment( char * ),
+    CommandAnnotateClearLuck( char * ),
+    CommandAnnotateClearSkill( char * ),
     CommandAnnotateDoubtful( char * ),
     CommandAnnotateGood( char * ),
     CommandAnnotateInteresting( char * ),
