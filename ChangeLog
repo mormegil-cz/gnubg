@@ -1,3 +1,7 @@
+Wed Jan 22 21:12:31 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkmet.c (GTKWriteMET): [!USE_GTKEXTRA]: declare pw.
+
 Wed Jan 22 13:13:22 2003  Gary Wong  <gtw@gnu.org>
 
 	* backgammon.h, dice.c, eval.c, gnubg.c, gtkcube.c, gtkexport.c,

@@ -121,6 +121,7 @@ static GtkWidget
   GtkWidget *pwTable = gtk_sheet_new_browser( nRows, nCols, "" );
 #else
   GtkWidget *pwTable = gtk_table_new( nRows + 1, nCols + 1, TRUE );
+  GtkWidget *pw;
 #endif
   GtkWidget *pwBox = gtk_vbox_new( FALSE, 0 );
   mettable *pmt;
