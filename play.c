@@ -3609,7 +3609,7 @@ static skilltype ShouldDouble ( void ) {
 	case DOUBLE_PASS:
 	case REDOUBLE_PASS:
 
- 	  rDeltaEquity = arDouble [OUTPUT_NODOUBLE] - arDouble [OUTPUT_NODOUBLE];
+	  rDeltaEquity = arDouble [OUTPUT_NODOUBLE] - arDouble [OUTPUT_DROP];
 	  break;
 
 	default:
