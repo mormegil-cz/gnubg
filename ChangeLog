@@ -1,3 +1,9 @@
+Mon Apr  7 21:51:11 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* makehyper.c (StartGuessHyper): add some information about
+	the distribution of the positions.
+	* makehyper.c: pacify fussy compilers.
+
 Mon Apr  7 21:42:10 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (EvalShutdown): free all bearoff databases, neural nets,

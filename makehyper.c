@@ -115,11 +115,9 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
 
   int i, j, k;
   int nPos = Combination( 25 + nC, nC );
-  float arOutput[ NUM_OUTPUTS ];
   int anBoard[ 2 ][ 25 ];
-  char szBoard[ 2048 ];
-  char *asz[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-  float r;
+
+  int ai[ 4 ] = { 0,0,0,0 };
 
   for ( i = 0; i < nPos; ++i ) {
     for ( j = 0; j < nPos; ++j ) {
@@ -140,9 +138,13 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
         ahe[ i * nPos + j ].arEquity[ EQUITY_CENTER_JACOBY ] = 
           Utility ( ahe[ i * nPos + j ].arOutput, &ciJacoby );
 
+        ++ai[0];
+
         break;
 
       case HYPER_CONTACT:
+        ++ai[ 1 ];
+        --ai[2];
       case HYPER_BEAROFF:
 
         memset ( &ahe[ i * nPos + j  ], 0, sizeof ( hyperequity ) );
@@ -155,11 +157,14 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
         ahe[ i * nPos + j ].arEquity[ 0 ] = 
           Utility ( ahe[ i * nPos + j ].arOutput, &ci );
 
+        ++ai[2];
+
         break;
 
       case HYPER_ILLEGAL:
 
         memset ( &ahe[ i * nPos + j  ], 0, sizeof ( hyperequity ) );
+        ++ai[3];
 
         break;
 
@@ -173,6 +178,17 @@ StartGuessHyper ( hyperequity ahe[], const int nC, bearoffcontext *pbc ) {
     }
   }
 
+  printf( _("Number of game-over positions:   %10d\n"
+            "Number of non-contact positions: %10d\n"
+            "Number of contact positions:     %10d\n"
+            "Total number of legal positions: %10d\n"
+            "Number of illegal positions:     %10d\n"
+            "Total number of positions in file%10d\n"),
+          ai[ 0 ], ai[ 2 ], ai[ 1 ], 
+          ai[ 0 ] + ai[ 2 ] + ai[ 1 ], 
+          ai[ 3 ],
+          nPos * nPos );
+            
 }
 
 
@@ -185,7 +201,6 @@ StartFromDatabase( hyperequity ahe[], const int nC,
   unsigned char ac[ 28 ];
   unsigned int us;
   int i, j, k;
-  float arEquity[ 4 ];
   float r;
 
   if ( ! ( pf = fopen ( szFilename, "r+b" ) ) ) {
@@ -589,7 +604,6 @@ main ( int argc, char **argv ) {
   float rNorm;
   float rEpsilon = 1.0e-5;
   bearoffcontext *pbc;
-  int i, j;
   int it;
   char szFilename[ 20 ];
   float arNorm[ 10 ];
@@ -699,7 +713,7 @@ main ( int argc, char **argv ) {
 
   time ( &t1 );
 
-  printf ( _("Time for start guess: %d seconds\n"), t1 - t0 );
+  printf ( _("Time for start guess: %d seconds\n"), (int) (t1 - t0) );
   
   it = 0;
 
@@ -730,7 +744,7 @@ main ( int argc, char **argv ) {
     }
 
     time ( &t1 );
-    printf ( _("Time for iteration %03d: %d seconds\n"), it, t1 - t0 );
+    printf ( _("Time for iteration %03d: %d seconds\n"), it, (int) (t1 - t0) );
 
     ++it;
 
@@ -742,11 +756,13 @@ main ( int argc, char **argv ) {
 
   time ( &t1 );
 
-  printf ( _("Time for writing final file: %d seconds\n"), t1 - t0 );
+  printf ( _("Time for writing final file: %d seconds\n"), (int) (t1 - t0) );
 
   time ( &t3 );
 
-  printf ( _("Total time: %d seconds\n"), t3 - t2 );
+  printf ( _("Total time: %d seconds\n"), (int) (t3 - t2) );
+
+  return 0;
 
 }
 
