@@ -1953,7 +1953,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/_Export/_Game/PostScript...", NULL, ExportGamePostScript, 0,
 	  NULL },
 	{ "/_File/_Export/_Match", NULL, NULL, 0, "<Branch>" },
-	{ "/_File/_Export/_Match/Html...", NULL, ExportMatchHtml, 0, NULL },
+	{ "/_File/_Export/_Match/HTML...", NULL, ExportMatchHtml, 0, NULL },
 	{ "/_File/_Export/_Match/LaTeX...", NULL, ExportMatchLaTeX, 0, NULL },
 	{ "/_File/_Export/_Match/.mat...", NULL, ExportMatchMat, 0, NULL },
 	{ "/_File/_Export/_Match/PDF...", NULL, ExportMatchPDF, 0, NULL },
