@@ -1787,6 +1787,9 @@ extern int NextTurn( int fPlayNext ) {
 	else
 	    return -1;
 
+	if (!plGame)
+		return -1;
+
     fComputing = TRUE;
     
 #if USE_GTK

@@ -357,6 +357,20 @@ PythonCubeInfo(PyObject* self IGNORE, PyObject* args) {
 
 
 static PyObject *
+PythonNextTurn( PyObject *self IGNORE, PyObject *args ) {
+
+  fNextTurn = TRUE;
+  while( fNextTurn ) {
+    if (NextTurn( TRUE ) == -1)
+      fNextTurn = FALSE;
+  }
+
+  return Py_None;
+
+}
+
+
+static PyObject *
 PythonEvalContext( PyObject* self IGNORE, PyObject *args ) {
 
   evalcontext ec;
@@ -391,10 +405,9 @@ PythonCommand( PyObject* self IGNORE, PyObject *args ) {
 
   PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
   HandleCommand( sz, acTop );
-  fNextTurn = TRUE;
-  while( fNextTurn ) {
-    NextTurn( TRUE );
-  }
+
+  PythonNextTurn(0, 0);
+
   outputx();
   free( sz );
   PortableSignalRestore( SIGINT, &sh );
@@ -513,19 +526,6 @@ METPre( float aar[ MAXSCORE ][ MAXSCORE ], const int n ) {
   }
 
   return pyList;
-}
-
-
-static PyObject *
-PythonNextTurn( PyObject *self IGNORE, PyObject *args ) {
-
-  fNextTurn = TRUE;
-  while( fNextTurn ) {
-    NextTurn( TRUE );
-  }
-
-  return Py_None;
-
 }
 
 
