@@ -1,3 +1,8 @@
+Wed Nov  23 10:56:45 2004 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* play.c: Fix wrong resign acceptance
+	* eval.c, bearoff.c, set.c: Hypergammon fixes
+
 Thu Nov 18 23:06:46 2004 GMT  Holger Bochnig <hbgg@gmx.net>
 
 	* bearoffdump.c: allow posids as arguments
