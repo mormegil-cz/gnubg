@@ -2729,7 +2729,7 @@ extern int InitGTK( int *argc, char ***argv ) {
     GdkPixmap *ppm;
     GdkBitmap *pbm;
     GdkColormap *pcmap;
-    GtkWidget *pwPanelHbox, *pwEvent;
+    GtkWidget *pwPanelHbox, *pwEvent, *pwEventBox;
 
     static GtkItemFactoryEntry aife[] = {
 	{ N_("/_File"), NULL, NULL, 0, "<Branch>" },
@@ -3174,8 +3174,13 @@ extern int InitGTK( int *argc, char ***argv ) {
                        pwToolbar = ToolbarNew() );
     
    pwGrab = GTK_WIDGET( ToolbarGetStopParent( pwToolbar ) );
-   gtk_container_add( GTK_CONTAINER( pwVbox ), pwHbox = gtk_hbox_new(FALSE, 0));
-   gtk_box_pack_start( GTK_BOX(pwHbox), pwBoard = board_new(GetMainAppearance()), TRUE, TRUE, 0 );
+
+   gtk_container_add(GTK_CONTAINER(pwVbox), pwEventBox = gtk_event_box_new());
+   gtk_container_add(GTK_CONTAINER(pwEventBox), pwHbox = gtk_hbox_new(FALSE, 0));
+   gtk_box_pack_start(GTK_BOX(pwHbox), pwBoard = board_new(GetMainAppearance()), TRUE, TRUE, 0);
+   gtk_signal_connect(GTK_OBJECT(pwEventBox), "button-press-event", GTK_SIGNAL_FUNC(button_press_event),
+	   BOARD(pwBoard)->board_data);
+
    gtk_box_pack_start( GTK_BOX(pwHbox), pwPanelHbox = gtk_hbox_new(FALSE, 0),
 		    FALSE, TRUE, 0);
 

@@ -1700,6 +1700,22 @@ UpdateMove( BoardData *bd, int anBoard[ 2 ][ 25 ] ) {
 
 }
 
+void ShowBoardPopup(GdkEventButton* event)
+{
+	static GtkWidget *boardMenu = NULL;
+	if (!boardMenu)
+	{
+		GtkWidget* menu_item;
+		boardMenu = gtk_menu_new();
+
+		menu_item = gtk_menu_item_new_with_label ("Undo Moves");
+		gtk_menu_shell_append(GTK_MENU_SHELL(boardMenu), menu_item);
+		gtk_widget_show(menu_item);
+		gtk_signal_connect(GTK_OBJECT(menu_item), "activate", GTK_SIGNAL_FUNC(Undo), NULL);
+	}
+	gtk_menu_popup(GTK_MENU(boardMenu), NULL, NULL, NULL, NULL, event->button, event->time);
+}
+
 gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* bd)
 {
 	int x = event->x;
@@ -1751,6 +1767,11 @@ gboolean button_press_event(GtkWidget *board, GdkEventButton *event, BoardData* 
 	switch (bd->drag_point)
 	{
 	case -1:
+	    if (event->button == 3)
+	    {	/* Show context menu when right click on nothing */
+	    	ShowBoardPopup(event);
+	    	return TRUE;
+	    }
 	    /* Click on illegal area. */
 	    board_beep(bd);
 	    return TRUE;
