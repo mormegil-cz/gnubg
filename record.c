@@ -70,7 +70,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
     do {
 	if( ch == EOF ) {
 	    if( feof( pf ) )
-		fprintf( stderr, "%s: invalid record file\n", pch );
+		outputerrf( "%s: invalid record file", pch );
 	    else
 		outputerr( pch );
 	    return -1;
@@ -96,7 +96,7 @@ extern int RecordReadItem( FILE *pf, char *pch, playerrecord *ppr ) {
 	    if( ferror( pf ) )
 		outputerr( pch );
 	    else
-		fprintf( stderr, "%s: invalid record file\n", pch );
+		outputerrf( "%s: invalid record file", pch );
 	    
 	    return -1;
 	}

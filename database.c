@@ -57,7 +57,7 @@ extern void CommandDatabaseDump( char *sz ) {
     void *p;
     
     if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+	outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
         
 	return;
     }
@@ -66,8 +66,7 @@ extern void CommandDatabaseDump( char *sz ) {
     
     while( dKey.dptr ) {
 	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
-	    fprintf( stderr, "%s: %s\n", szDatabase,
-		     gdbm_strerror( gdbm_errno ) );
+	    outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
 	    
 	    gdbm_close( pdb );
 
@@ -123,7 +122,7 @@ extern void CommandDatabaseExport( char *sz ) {
     FILE *pf;
     
     if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+	outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
         
 	return;
     }
@@ -149,7 +148,7 @@ extern void CommandDatabaseExport( char *sz ) {
 
     while( dKey.dptr ) {
 	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
-	    fprintf( stderr, "%s: %s\n", szDatabase,
+	    outputerrf( "%s: %s", szDatabase,
 		     gdbm_strerror( gdbm_errno ) );
 	    
 	    gdbm_close( pdb );
@@ -206,7 +205,7 @@ extern void CommandDatabaseImport( char *sz ) {
     unsigned char auchKey[ 10 ];
     
     if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRCREAT, 0666, NULL ) ) ) {
-	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+	outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
         
 	return;
     }
@@ -260,8 +259,7 @@ extern void CommandDatabaseImport( char *sz ) {
 	dValue.dptr = (char *) &ev;
 	dValue.dsize = sizeof ev;
 	if( gdbm_store( pdb, dKey, dValue, GDBM_REPLACE ) < 0 ) {
-	    fprintf( stderr, "%s: %s\n", szDatabase,
-		     gdbm_strerror( gdbm_errno ) );
+	    outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
 
 	    fclose( pf );
 	    gdbm_close( pdb );
@@ -276,7 +274,7 @@ extern void CommandDatabaseImport( char *sz ) {
     if( ferror( pf ) )
 	outputerr( sz );
     else if( !feof( pf ) )
-	fprintf( stderr, _("%s: malformed position data\n"), sz );
+	outputerrf( _("%s: malformed position data"), sz );
     
     fclose( pf );
     gdbm_close( pdb );
@@ -292,7 +290,7 @@ extern void CommandDatabaseRollout( char *sz ) {
     void *p;
     
     if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRITER, 0, NULL ) ) ) {
-	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+	outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
         
 	return;
     }
@@ -301,7 +299,7 @@ extern void CommandDatabaseRollout( char *sz ) {
     
     while( dKey.dptr ) {
 	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
-	    fprintf( stderr, "%s: %s\n", szDatabase,
+	    outputerrf( "%s: %s", szDatabase,
 		     gdbm_strerror( gdbm_errno ) );
 	    
 	    gdbm_close( pdb );
@@ -335,8 +333,8 @@ extern void CommandDatabaseRollout( char *sz ) {
 	    }
 	    
 	    if( gdbm_store( pdb, dKey, dValue, GDBM_REPLACE ) < 0 ) {
-		fprintf( stderr, "%s: %s\n", szDatabase,
-			 gdbm_strerror( gdbm_errno ) );
+		outputerrf( "%s: %s", szDatabase,
+			    gdbm_strerror( gdbm_errno ) );
 		
 		gdbm_close( pdb );
 		
@@ -386,7 +384,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
       n = 0;
       
   if( !( pdb = gdbm_open( szDatabase, 0, GDBM_WRCREAT, 0666, NULL ) ) ) {
-    fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+      outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
         
     return;
   }
@@ -451,7 +449,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
 	if( gdbm_store( pdb, dKey, dValue, GDBM_INSERT ) < 0 ) {
 	    ProgressEnd();
 	    
-	    fprintf( stderr, "%s: %s\n", szDatabase,
+	    outputerrf( "%s: %s", szDatabase,
 		     gdbm_strerror( gdbm_errno ) );
 	    
 	    gdbm_close( pdb );
@@ -486,7 +484,7 @@ extern void CommandDatabaseTrain( char *sz ) {
 	n = 0;
     
     if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+	outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
         
 	return;
     }
@@ -500,8 +498,8 @@ extern void CommandDatabaseTrain( char *sz ) {
 	    if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
 		ProgressEnd();
 		
-		fprintf( stderr, "%s: %s\n", szDatabase,
-			 gdbm_strerror( gdbm_errno ) );
+		outputerrf( "%s: %s", szDatabase,
+			    gdbm_strerror( gdbm_errno ) );
 		
 		gdbm_close( pdb );
 		
@@ -562,7 +560,7 @@ extern void CommandDatabaseVerify( char *sz ) {
     void *p;
     
     if( !( pdb = gdbm_open( szDatabase, 0, GDBM_READER, 0, NULL ) ) ) {
-	fprintf( stderr, "%s: %s\n", szDatabase, gdbm_strerror( gdbm_errno ) );
+	outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
         
 	return;
     }
@@ -574,8 +572,7 @@ extern void CommandDatabaseVerify( char *sz ) {
     
     while( dKey.dptr ) {
 	if( !( dValue = gdbm_fetch( pdb, dKey ) ).dptr ) {
-	    fprintf( stderr, "%s: %s\n", szDatabase,
-		     gdbm_strerror( gdbm_errno ) );
+	    outputerrf( "%s: %s", szDatabase, gdbm_strerror( gdbm_errno ) );
 	    
 	    gdbm_close( pdb );
 

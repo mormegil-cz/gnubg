@@ -27,7 +27,6 @@
 #include <alloca.h>
 #endif
 #include <assert.h>
-#include <errno.h>
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -2801,16 +2800,13 @@ extern void GTKOutputX( void ) {
 
 extern void GTKOutputErr( char *sz ) {
 
-    char szMessage[ 4096 ];
-
-    sprintf( szMessage, "%s: %s", sz, strerror( errno ) );
-
-    Message( szMessage, DT_ERROR );
+    Message( sz, DT_ERROR );
     
     if( fMessage ) {
-	strcat( szMessage, "\n" );
 	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
-			 szMessage, -1 );
+			 sz, -1 );
+	gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
+			 "\n", 1 );
     }
 }
 

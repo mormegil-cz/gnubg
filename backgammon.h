@@ -391,6 +391,11 @@ extern void outputv( char *sz, va_list val )
     __attribute__((format(printf,1,0)));
 /* Write an error message, perror() style */
 extern void outputerr( char *sz );
+/* Write an error message, fprintf() style */
+extern void outputerrf( char *sz, ... ) __attribute__((format(printf,1,2)));
+/* Write an error message, vfprintf() style */
+extern void outputerrv( char *sz, va_list val )
+    __attribute__((format(printf,1,0)));
 /* Signifies that all output for the current command is complete */
 extern void outputx( void );
 /* Temporarily disable outputx() calls */

@@ -45,7 +45,7 @@ static void ErrorHandler( char *sz, int fParseError ) {
 
     if( !fError ) {
 	fError = TRUE;
-	fprintf( stderr, "%s: %s\n", szFile, sz );
+	outputerrf( "%s: %s", szFile, sz );
     }
 }
 

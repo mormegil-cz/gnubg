@@ -1,3 +1,8 @@
+Thu Sep 19 13:47:26 2002  Gary Wong  <gtw@gnu.org>
+
+	* gnubg.c (outputerrf): New function, replacing fprintf( stderr, ... ).
+	Most fprintf( stderr, ... ) calls changed.
+
 Thu Sep 19 12:57:06 2002  Gary Wong  <gtw@gnu.org>
 
 	* gtkboard.c (board_quick_edit): Allow setting dice in edit mode

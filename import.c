@@ -495,7 +495,7 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
     while( 1 ) {
 	if( ( n = fscanf( pf, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
 			  &ch ) ) == EOF ) {
-	    fprintf( stderr, _("%s: not a valid .mat file\n"), szFilename );
+	    outputerrf( _("%s: not a valid .mat file"), szFilename );
 	    return;
 	} else if( n > 1 )
 	    break;
@@ -879,7 +879,7 @@ extern void ImportOldmoves( FILE *pf, char *szFilename ) {
     while( 1 ) {
 	if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,
 			  &nLength ) ) == EOF ) {
-	    fprintf( stderr, _("%s: not a valid oldmoves file\n"), szFilename );
+	    outputerrf( _("%s: not a valid oldmoves file"), szFilename );
 	    return;
 	} else if( n == 2 ) {
 	    /* assume a money game */
@@ -1213,7 +1213,7 @@ extern void ImportSGG( FILE *pf, char *szFilename ) {
     
     while( 1 ) {
 	if( ( n = fscanf( pf, "%32s vs. %32s\n", sz0, sz1 ) ) == EOF ) {
-	    fprintf( stderr, _("%s: not a valid SGG file\n"), szFilename );
+	    outputerrf( _("%s: not a valid SGG file"), szFilename );
 	    return;
 	} else if( n == 2 )
 	    break;

@@ -474,16 +474,16 @@ extern int  UserRNGOpen() {
     pvUserRNGHandle = dlopen( "./userrng.so", RTLD_LAZY );
 
   if (!pvUserRNGHandle ) {
+      /* 
+       * Bugger! Can't load shared library
+       */
+      if( ( error = dlerror() ) )
+	  outputerrf( "userrng.so: %s", error );
+      else
+	  outputerrf( _("Could not load shared library userrng.so.") );
     
-    /* 
-     * Bugger! Can't load shared library
-     */
-
-    outputl( _("Could not load shared library userrng.so.") );
-    
-    return 0;
+      return 0;
   } 
-    
     
   /* 
    * Shared library should now be open.
@@ -497,22 +497,16 @@ extern int  UserRNGOpen() {
       dlsym( pvUserRNGHandle, szUserRNGSeed );
 
   if ((error = dlerror()) != NULL)  {
-    
-    fputs( error, stderr );
-    fputs ( "\n", stderr );
-    return 0;
-
+      outputerrf( "%s: %s", szUserRNGSeed, error );
+      return 0;
   }
   
   pfUserRNGRandom = (long int (*)(void)) dlsym( pvUserRNGHandle,
 						szUserRNGRandom );
 
   if ((error = dlerror()) != NULL)  {
-    
-    fputs( error, stderr );
-    fputs ( "\n", stderr );
-    return 0;
-
+      outputerrf( "%s: %s", szUserRNGRandom, error );
+      return 0;
   }
 
   /* this one is allowed to fail */
