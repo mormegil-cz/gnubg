@@ -1,3 +1,8 @@
+Tue Apr 16 21:53:38 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* jac050.xml: new file. Jacobs & Trice met for players that
+	differ by 50 ELO rating points.
+
 Tue Mar 26 18:06:09 2002  Øystein Johansen <oeysteij@online.no>
 
         * ortega.xml: set encoding to iso-8859-1
