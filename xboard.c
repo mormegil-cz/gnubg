@@ -311,8 +311,18 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 	break;
 
     case MotionNotify:
-	xEvent = pxev->xmotion.x;
-	yEvent = pxev->xmotion.y;
+	if( pxev->xmotion.is_hint ) {
+	    Window wIgnore;
+	    int nIgnore;
+	    
+	    if( !XQueryPointer( pewnd->pdsp, pewnd->wnd, &wIgnore, &wIgnore,
+				&nIgnore, &nIgnore, &xEvent, &yEvent,
+				&nIgnore ) )
+		return;
+	} else {
+	    xEvent = pxev->xmotion.x;
+	    yEvent = pxev->xmotion.y;
+	}
 	break;
 
     default:
@@ -1745,7 +1755,7 @@ static int BoardHandler( extwindow *pewnd, XEvent *pxev ) {
 
 extwindowclass ewcBoard = {
     ExposureMask | StructureNotifyMask | ButtonPressMask | ButtonReleaseMask |
-    ButtonMotionMask,
+    Button1MotionMask | PointerMotionHintMask,
     108, 72, 0, 0,
     BoardHandler,
     "Board",
