@@ -1,3 +1,7 @@
+Tue Dec 31 18:30:13 2002  Øystein Johansen  <oeysteij@online.no>
+
+	* gnubg.c: Add some #ifdefs to compile without GUI
+
 Sat Dec 28 16:09:11 2002  Jørn Thyssen  <jth@gnubg.org>
 
 	* gtkgame.c (SetAnnotation): display chequer skill, cube skill,
