@@ -133,6 +133,13 @@ extern float
 absoluteFibsRating ( const float rChequer, const float rCube, 
                      const int n, const float rOffset );
 
+extern float
+absoluteFibsRatingChequer( const float rChequer, const int n );
+
+extern float
+absoluteFibsRatingCube( const float rCube, const int n );
+
+
 #define CHEQUERPLAY  0
 #define CUBEDECISION 1
 #define COMBINED     2

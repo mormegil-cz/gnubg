@@ -40,6 +40,7 @@
 #include "sound.h"
 #include "matchequity.h"
 #include "export.h"
+#include "formatgs.h"
 
 #include "i18n.h"
 
@@ -1296,7 +1297,40 @@ relativeFibsRating ( const float r, const int n )
   float const x = - 2000.0 / sqrt ( 1.0 * n ) * log10 ( 1.0 / r - 1.0 );
 
   return ( x < -2100 ) ? -2100 : x;
-} 
+}
+
+/*
+ * Calculated the amount of rating lost by chequer play errors.
+ *
+ * a2(N) * EPM
+ *
+ * where a2(N) = 8798 + 25526/N
+ *
+ */ 
+
+extern float
+absoluteFibsRatingChequer( const float rChequer, const int n ) {
+
+  return rChequer * ( 8798.0f + 25526.0f/( n ) );
+
+}
+
+
+/*
+ * Calculated the amount of rating lost by cube play errors.
+ *
+ * b(N) * EPM
+ *
+ * where b(N) = 863 - 519/N.
+ *
+ */ 
+
+extern float
+absoluteFibsRatingCube( const float rCube, const int n ) {
+
+  return rCube * ( 863.0f - 519.0f / n );
+
+}
 
 
 /*
@@ -1313,17 +1347,8 @@ extern float
 absoluteFibsRating ( const float rChequer, const float rCube, 
                      const int n, const float rOffset ) {
 
-#define _A2(n) (8798.0 + 25526.0/(n))
-#define _B(n)  (863.0 - 519.0/(n))
-
-  return rOffset - ( _A2( n ) * rChequer + _B( n ) * rCube );
-
-#if 0
-  return rOffset - (11971.0f + 23681.0f/n) * rCube;
-#endif
-
-#undef _A2
-#undef _B
+  return rOffset - ( absoluteFibsRatingChequer( rChequer, n ) +
+                     absoluteFibsRatingCube( rCube, n ) );
 
 }
 
@@ -1410,477 +1435,102 @@ extern void
 DumpStatcontext ( char *szOutput, const statcontext *psc, const char * sz,
                   const int fIsMatch ) {
 
-  int i;
-  ratingtype rt[ 2 ];
-  char szTemp[1024];
-  float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-  float rFac = ms.nMatchTo ? 100.0f : 1.0f;
-  int n;
-  int fCalc;
+  /* header */
 
-  getMWCFromError ( psc, aaaar );
-  /* nice human readable dump */
+  sprintf( szOutput, "%-31s %-23s %-23s\n\n",
+           _("Player"), ap[ 0 ].szName, ap[ 1 ].szName );
 
-  /* FIXME: honour fOutputMWC etc. */
+  if ( psc->fMoves ) {
+    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_CHEQUER );
+    GList *pl;
 
-  sprintf ( szTemp, "Player\t\t\t\t%-15s\t\t%-15s\n\n",
-           ap[ 0 ].szName, ap [ 1 ].szName );
-  strcpy ( szOutput, szTemp);
- 
-  if( psc->fMoves ) {
+    strcat( szOutput, _("Chequerplay statistics") );
+    strcat( szOutput, "\n\n" );
 
-    sprintf ( strchr ( szOutput, 0 ),
-              "%s\n\n"
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n" 
-	      "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n",
-              _("Chequerplay statistics"),
-              _("Total moves"), 
-	      psc->anTotalMoves[ 0 ], psc->anTotalMoves[ 1 ],
-              _("Unforced moves"),
-	      psc->anUnforcedMoves[ 0 ], psc->anUnforcedMoves[ 1 ],
-	      _("Unmarked moves"), 
- 	      psc->anMoves[ 0 ][ SKILL_NONE ], 
- 	      psc->anMoves[ 1 ][ SKILL_NONE ], 
-              _("Moves marked good"),
-	      psc->anMoves[ 0 ][ SKILL_GOOD ],
-	      psc->anMoves[ 1 ][ SKILL_GOOD ],
-              _("Moves marked doubtful"),
-	      psc->anMoves[ 0 ][ SKILL_DOUBTFUL ],
-	      psc->anMoves[ 1 ][ SKILL_DOUBTFUL ],
-              _("Moves marked bad"),
-	      psc->anMoves[ 0 ][ SKILL_BAD ],
-	      psc->anMoves[ 1 ][ SKILL_BAD ],
-              _("Moves marked very bad"),
-	      psc->anMoves[ 0 ][ SKILL_VERYBAD ],
-	      psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
 
-    sprintf ( strchr ( szOutput, 0 ),
-              ms.nMatchTo ?
-              "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n"
-              "%-31s %+6.2f (%+7.3f%%)       %+6.2f (%+7.3f%%)\n" :
-              "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n"
-              "%-31s %+6.2f (%+7.3f)        %+6.2f (%+7.3f)\n",
-              _("Error rate (total)"),
-              -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-              -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
-                    
-              -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-              -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * rFac,
-              _("Error rate (per move)"),
-              -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-              -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
-              
-              -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-              -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] * rFac
-              );
+      char **asz = pl->data;
 
-
-      for ( i = 0 ; i < 2; i++ )
-        rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
-      
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %-23.23s %-23.23s\n\n",
-                _("Chequer play rating"),
-                psc->anUnforcedMoves[ 0 ] ? 
-                gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
-                psc->anUnforcedMoves[ 1 ] ? 
-                gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
-
-  }
-
-  if( psc->fDice ) {
-
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %3d                     %3d\n"
-                "%-31s %3d                     %3d\n" 
-                "%-31s %3d                     %3d\n"
-                "%-31s %3d                     %3d\n"
-                "%-31s %3d                     %3d\n",
-                _("Rolls marked very lucky"),
-	       psc->anLuck[ 0 ][ LUCK_VERYGOOD ],
-	       psc->anLuck[ 1 ][ LUCK_VERYGOOD ],
-                _("Rolls marked lucky"),
-	       psc->anLuck[ 0 ][ LUCK_GOOD ],
-	       psc->anLuck[ 1 ][ LUCK_GOOD ],
-                _("Rolls unmarked"),
-	       psc->anLuck[ 0 ][ LUCK_NONE ],
-	       psc->anLuck[ 1 ][ LUCK_NONE ],
-                _("Rolls marked unlucky"),
-	       psc->anLuck[ 0 ][ LUCK_BAD ],
-	       psc->anLuck[ 1 ][ LUCK_BAD ],
-                _("Rolls marked very unlucky"),
-	       psc->anLuck[ 0 ][ LUCK_VERYBAD ],
-	       psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
-
-      sprintf ( strchr ( szOutput, 0 ),
-                ms.nMatchTo ?
-                "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
-                "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
-                _("Luck rate (total)"),
-                psc->arLuck[ 0 ][ 0 ],
-                psc->arLuck[ 0 ][ 1 ] * rFac,
-                psc->arLuck[ 1 ][ 0 ],
-                psc->arLuck[ 1 ][ 1 ] * rFac );
-
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s ", 
-                _("Luck rate (per move)") );
-
-      for ( i = 0; i < 2; ++i ) 
-        if ( psc->anTotalMoves[ i ] ) {
-          sprintf ( strchr ( szOutput, 0 ),
-                    ms.nMatchTo ?
-                    "%+6.2f (%+7.3f%%)" :
-                    "%+6.2f (%+7.3f) ",
-                    psc->arLuck[ i ][ 0 ] / psc->anTotalMoves[ i ],
-                    psc->arLuck[ i ][ 1 ] * rFac / psc->anTotalMoves[ i ] );
-          if ( ! i ) 
-            strcat ( szOutput, "       " );
-        }
-        else
-          sprintf ( strchr ( szOutput, 0 ),
-                    "%-23.23s ", _("n/a") );
-
-      strcat ( szOutput, "\n" );
-
-      /* luck rating */
-
-
-      for ( i = 0; i < 2; i++ ) 
-        rt[ i ] = getLuckRating ( psc->arLuck[ i ][ 0 ] /
-                                  psc->anTotalMoves[ i ] );
-
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %-23.23s %-23.23s\n\n\n",
-                _("Luck rating"),
-                psc->anTotalMoves[ 0 ] ? 
-                gettext ( aszLuckRating[ rt [ 0 ] ] ) : _("n/a"), 
-                psc->anTotalMoves[ 1 ] ? 
-                gettext ( aszLuckRating[ rt [ 1 ] ] ) : _("n/a") );
-
-  }
-
-  /* cube decision */
-
-  if( psc->fCube ) {
-
-    sprintf ( strchr ( szOutput, 0 ),
-              "%s\n\n"
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n" 
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n"
-              "%-31s %3d                     %3d\n",
-              _("Cube decisions statistics:"),
-              _("Total cube decisions"),
-              psc->anTotalCube[ 0 ],
-              psc->anTotalCube[ 1 ],
-              _("Close or actual cube decisions"),
-              psc->anCloseCube[ 0 ],
-              psc->anCloseCube[ 1 ],
-              _("Doubles"),
-              psc->anDouble[ 0 ], 
-              psc->anDouble[ 1 ], 
-              _("Takes"),
-              psc->anTake[ 0 ],
-              psc->anTake[ 1 ],
-              _("Pass"),
-              psc->anPass[ 0 ], 
-              psc->anPass[ 1 ] );
-
-    sprintf ( strchr ( szOutput, 0 ),
-              ms.nMatchTo ?
-              "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f%%)  %3d (%+6.3f (%+7.3f%%))\n" :
-              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
-              "%-31s %3d (%+6.3f (%+7.3f)   %3d (%+6.3f (%+7.3f))\n" 
-              ,
-              _("Missed doubles around DP"),
-              psc->anCubeMissedDoubleDP[ 0 ],
-              -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-              -psc->arErrorMissedDoubleDP[ 0 ][ 1 ] * rFac,
-              psc->anCubeMissedDoubleDP[ 1 ],
-              -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-              -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] * rFac,
-              _("Missed doubles around TG"),
-              psc->anCubeMissedDoubleTG[ 0 ],
-              -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-              -psc->arErrorMissedDoubleTG[ 0 ][ 1 ] * rFac,
-              psc->anCubeMissedDoubleTG[ 1 ],
-              -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-              -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] * rFac,
-              _("Wrong doubles around DP"),
-              psc->anCubeWrongDoubleDP[ 0 ],
-              -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-              -psc->arErrorWrongDoubleDP[ 0 ][ 1 ] * rFac,
-              psc->anCubeWrongDoubleDP[ 1 ],
-              -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-              -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] * rFac,
-              _("Wrong doubles around TG"),
-              psc->anCubeWrongDoubleTG[ 0 ],
-              -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-              -psc->arErrorWrongDoubleTG[ 0 ][ 1 ] * rFac,
-              psc->anCubeWrongDoubleTG[ 1 ],
-              -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-              -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] * rFac,
-              _("Wrong takes"),
-              psc->anCubeWrongTake[ 0 ],
-              -psc->arErrorWrongTake[ 0 ][ 0 ],
-              -psc->arErrorWrongTake[ 0 ][ 1 ] * rFac,
-              psc->anCubeWrongTake[ 1 ],
-              -psc->arErrorWrongTake[ 1 ][ 0 ],
-              -psc->arErrorWrongTake[ 1 ][ 1 ] * rFac,
-              _("Wrong passes"),
-              psc->anCubeWrongPass[ 0 ],
-              -psc->arErrorWrongPass[ 0 ][ 0 ],
-              -psc->arErrorWrongPass[ 0 ][ 1 ] * rFac,
-              psc->anCubeWrongPass[ 1 ],
-              -psc->arErrorWrongPass[ 1 ][ 0 ],
-              -psc->arErrorWrongPass[ 1 ][ 1 ] * rFac );
-      
-
-      sprintf ( strchr ( szOutput, 0 ),
-                ms.nMatchTo ?
-                "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
-                "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
-                _("Error rate (total)"),
-                -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
-                    
-                -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * rFac );
-
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s ", 
-                _("Error rate (per cube decision)") );
-
-      for ( i = 0; i < 2; ++i ) 
-        if ( psc->anCloseCube[ i ] ) {
-          sprintf ( strchr ( szOutput, 0 ),
-                    ms.nMatchTo ?
-                    "%+6.2f (%+7.3f%%)" :
-                    "%+6.2f (%+7.3f) ",
-                      -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ],
-                      -aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ UNNORMALISED ] * rFac );
-          if ( ! i ) 
-            strcat ( szOutput, "       " );
-        }
-        else
-          sprintf ( strchr ( szOutput, 0 ),
-                    "%-23.23s ", _("n/a") );
-
-      strcat ( szOutput, "\n" );
-
-      /* luck rating */
-
-
-      for ( i = 0 ; i < 2; i++ )
-        rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
-      
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %-23.23s %-23.23s\n\n\n",
-                _("Cube decision rating"),
-                psc->anCloseCube[ 0 ] ? 
-                gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
-                psc->anCloseCube[ 1 ] ? 
-                gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
-
-  }
-  
-
-  /* overall rating */
-  
-  if( psc->fMoves && psc->fCube ) {
-    
-    strcat ( szOutput, _("Overall statistics:\n\n") );
-
-      sprintf ( strchr ( szOutput, 0 ),
-                ms.nMatchTo ?
-                "%-31s %+6.3f (%+7.3f%%)       %+6.3f (%+7.3f%%)\n" :
-                "%-31s %+6.3f (%+7.3f)        %+6.3f (%+7.3f)\n",
-                _("Error rate (total)"),
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] * rFac,
-                    
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-                -aaaar[ COMBINED ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] * rFac );
-
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s ", 
-                _("Error rate (per decision)") );
-
-      for ( i = 0; i < 2; ++i ) 
-        if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] ) {
-          sprintf ( strchr ( szOutput, 0 ),
-                    ms.nMatchTo ?
-                    "%+6.2f (%+7.3f%%)" :
-                    "%+6.2f (%+7.3f) ",
-                  -aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ],
-                  -aaaar[ COMBINED ][ PERMOVE ][ i ][ UNNORMALISED ] * rFac );
-          if ( ! i ) 
-            strcat ( szOutput, "       " );
-        }
-        else
-          sprintf ( strchr ( szOutput, 0 ),
-                    "%-23.23s ", _("n/a") );
-
-      strcat ( szOutput, "\n" );
-
-      /* equivalent Snowie error rate */
-
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s ", 
-                _("Equiv. Snowie error rate    ") );
-
-      n = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ];
-      for ( i = 0; i < 2; ++i ) 
-        if ( n ) {
-          
-          sprintf ( strchr ( szOutput, 0 ),
-                    ms.nMatchTo ?
-                    "%+6.2f           " :
-                    "%+6.2f          ",
-                    -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / n  *
-                    1000.0f );
-          if ( ! i ) 
-            strcat ( szOutput, "       " );
-        }
-        else
-          sprintf ( strchr ( szOutput, 0 ),
-                    "%-23.23s ", _("n/a") );
-      
-      strcat ( szOutput, "\n" );
-      
-  }
-
-  for ( i = 0 ; i < 2; i++ )
-    rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
-      
-  sprintf ( strchr ( szOutput, 0 ),
-            "%-31s %-23.23s %-23.23s\n\n",
-            _("Overall rating"),
-            ( psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ] ) ?
-            gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
-            ( psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ] ) ?
-            gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
-  
-  /* luck adjusted results */
-
-  fCalc = psc->arActualResult[ 0 ] > 0.0f || psc->arActualResult[ 1 ] > 0.0f;
-  if ( psc->fDice && fCalc ) {
-    
-    if ( ms.nMatchTo )
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s %+7.2f%%               %+7.2f%%\n"
-                "%-31s %+7.2f%%               %+7.2f%%\n",
-                _("Actual result"),
-                100.0 * psc->arActualResult[ 0 ],
-                100.0 * psc->arActualResult[ 1 ],
-                _("Luck adjusted result"),
-                100.0 * psc->arLuckAdj[ 0 ],
-                100.0 * psc->arLuckAdj[ 1 ] );
-    else {
-      sprintf ( strchr ( szOutput, 0 ), 
-                "%-31s %+7.3f                 %+7.3f\n"
-                "%-31s %+7.3f                 %+7.3f\n",
-                _("Actual result"),
-                psc->arActualResult[ 0 ],
-                psc->arActualResult[ 1 ],
-                _("Luck adjusted result"),
-                psc->arLuckAdj[ 0 ], psc->arLuckAdj[ 1 ] );
-      if ( fIsMatch && psc->nGames > 1 ) {
-        sprintf( strchr( szOutput, 0 ),
-                 "\n"
-                 "%-31.31s %7.3f                 %7.3f\n"
-                 "%-31.31s %7.3f                 %7.3f\n"
-                 "%-31.31s %7.3f                 %7.3f\n"
-                 "%-31.31s %7.3f                 %7.3f\n",
-                 _("Advantage (actual) in ppg"),
-                 psc->arActualResult[ 0 ] / psc->nGames,
-                 psc->arActualResult[ 1 ] / psc->nGames,
-                 _("95%% confidence interval (ppg)"),
-                 1.95996f *
-                 sqrt( psc->arVarianceActual[ 0 ] / psc->nGames ),
-                 1.95996f *
-                 sqrt( psc->arVarianceActual[ 1 ] / psc->nGames ),
-                 _("Advantage (luck adj.) in ppg"),
-                 psc->arLuckAdj[ 0 ] / psc->nGames,
-                 psc->arLuckAdj[ 1 ] / psc->nGames,
-                 _("95%% confidence interval (ppg)"),
-                 1.95996f *
-                 sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),
-                 1.95996f *
-                 sqrt( psc->arVarianceLuckAdj[ 1 ] / psc->nGames ) );
-      }
+      sprintf( strchr( szOutput, 0 ),
+               "%-31s %-23s %-23s\n",
+               asz[ 0 ], asz[ 1 ], asz[ 2 ] );
 
     }
 
+    strcat( szOutput, "\n\n" );
+
+    freeGS( list );
+
   }
-  
-  /* calculate total error */
 
-  if ( fIsMatch ) {
 
-    if ( ms.nMatchTo ) {
-      
-      float r = 0.5f + psc->arActualResult[ 0 ] - 
-        psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-      
-      if ( r > 0.0f && r < 1.0f ) {
-        float rRating = relativeFibsRating( r, ms.nMatchTo );
-        
-        sprintf ( strchr ( szOutput, 0 ),
-                  "%-31s %7.2f\n",
-                  _("FIBS rating difference"), rRating );
-      }
-      else
-        sprintf ( strchr ( szOutput, 0 ),
-                  "%-31s %-7s\n",
-                  _("FIBS rating difference"), _("n/a") );
+  if ( psc->fDice ) {
+    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_LUCK );
+    GList *pl;
 
-      strcat( szOutput, _("(based on luck adj. result)\n") );
+    strcat( szOutput, _("Luck statistics") );
+    strcat( szOutput, "\n\n" );
 
-      /* estimated abs. rating */
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
 
-      sprintf ( strchr ( szOutput, 0 ),
-                "%-31s ", 
-                _("Estimated abs. rating") );
+      char **asz = pl->data;
 
-      for ( i = 0; i < 2; ++i ) 
-        if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] ) {
-          sprintf ( strchr ( szOutput, 0 ),
-                    "%6.1f",
-                    absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
-                                        aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
-                                        ms.nMatchTo, rRatingOffset ) );
+      sprintf( strchr( szOutput, 0 ),
+               "%-31s %-23s %-23s\n",
+               asz[ 0 ], asz[ 1 ], asz[ 2 ] );
 
-          if ( ! i ) 
-            strcat ( szOutput, "                  " );
-        }
-        else
-          sprintf ( strchr ( szOutput, 0 ),
-                    "%-23.23s ", _("n/a") );
-
-      strcat ( szOutput, "\n" );
-      strcat( szOutput, _("(based on error rate per decision)\n") );
-      
-
-      
-        
     }
+
+    strcat( szOutput, "\n\n" );
+
+    freeGS( list );
+
+  }
+
+
+  if ( psc->fCube ) {
+    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_CUBE );
+    GList *pl;
+
+    strcat( szOutput, _("Cube statistics") );
+    strcat( szOutput, "\n\n" );
+
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
+
+      char **asz = pl->data;
+
+      sprintf( strchr( szOutput, 0 ),
+               "%-31s %-23s %-23s\n",
+               asz[ 0 ], asz[ 1 ], asz[ 2 ] );
+
+    }
+
+    strcat( szOutput, "\n\n" );
+
+    freeGS( list );
+
+  }
+
+  if ( psc->fCube && psc->fCube ) {
+    GList *list = formatGS( psc, &ms, fIsMatch, FORMATGS_OVERALL );
+    GList *pl;
+
+    strcat( szOutput, _("Overall statistics") );
+    strcat( szOutput, "\n\n" );
+
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
+
+      char **asz = pl->data;
+
+      sprintf( strchr( szOutput, 0 ),
+               "%-31s %-23s %-23s\n",
+               asz[ 0 ], asz[ 1 ], asz[ 2 ] );
+
+    }
+
+    strcat( szOutput, "\n\n" );
+
+    freeGS( list );
 
   }
 

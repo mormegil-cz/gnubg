@@ -1,3 +1,18 @@
+Sat Aug 30 20:06:47 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Unify handling of match and game statistics for html export,
+	text export, and gtk.
+
+	* Makefile.am: add formatgs.[ch]
+	* formatgs.c: new file. Return formatted match statistics.
+        * html.c (HTMLDumpStatcontext), gtkgame.c (GTKDumpStatcontext), 
+        analysis.c (DumpStatcontext): use formatGS.
+
+Sat Aug 30 08:45:23 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* credits.sh, credits.c, AUTHORS: refresh and revert some
+	changes.
+
 Sat Aug 30 09:57:49 2003  TAKAHASHI Kaoru  <kaoru@kaisei.org>
 
 	* backgammon.h (MAX_CUBE_STR): Remove #define.  Use MAX_CUBE and

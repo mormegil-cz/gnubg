@@ -41,6 +41,7 @@
 #include "matchid.h"
 #include "record.h"
 #include "path.h"
+#include "formatgs.h"
 
 #if HAVE_LIBGEN_H
 #include <libgen.h>
@@ -473,113 +474,6 @@ printStatTableRow ( FILE *pf, const char *format1, const char *format2,
   va_end( val );
 
 }
-
-static void
-printStatTableRow2( FILE *pf, const char *format1, int match,
-		    float v01, float v02, float v11, float v12 )
-{
-  if( match ) {
-    v02 *= 100;
-    v12 *= 100;
-  }
-  
-  fprintf (pf,
-	   "<tr>\n" 
-	   "<td>%s</td>\n"
-	   "<td>",
-	   format1) ;
-
-  if( v01 != 0.0 ) {
-    fprintf (pf, "%+6.3f (%+7.3f%s)\n",
-	     v01, v02, match ? "%" : "");
-  } else {
-    fprintf(pf, "0");
-  }
-  
-  fprintf(pf, " </td>\n<td>");
-
-  if( v11 != 0.0 ) {
-    fprintf (pf, "%+6.3f (%+7.3f%s)",
-	     v11, v12, match ? "%" : "" );
-  } else {
-    fprintf (pf, "0");
-  }
-  
-  fprintf (pf, " </td>\n</tr>\n");
-}
-
-
-static void
-printStatTableMissed( FILE *pf, int const match, const char* what,
-		      int const v01, float const v02, float const v03,
-		      int const v11, float const v12, float const v13)
-{
-  fprintf(pf, "<tr>\n"
-	  "<td>%s</td>\n", what);
-  
-  if( v01 ) {
-    fprintf(pf, "<td>%d (%+6.3f (%+7.3f%s)) </td>\n",
-	    v01, v02, match? v03*100 : v03, match ? "%" : "");
-  } else {
-    fprintf(pf, "<td>0 </td>\n");
-  }
-  if( v11 ) {
-    fprintf(pf, "<td>%d (%+6.3f (%+7.3f%s)) </td>\n",
-	    v11, v12, match? v13*100 : v13, match ? "%" : "");
-  } else {
-    fprintf(pf, "<td>0 </td>\n");
-  }
-
-  fputs( "</tr>\n", pf );
-
-}
-
-
-static void
-printStatTableRow4 ( FILE *pf, const char *format1, const char *format2,
-                     const char *format3, 
-                     const int f0, const float r00, const float r01,
-                     const int f1, const float r10, const float r11 ) {
-                     
-  fprintf ( pf, 
-            "<tr>\n"
-            "<td>%s</td>\n",
-            format1 );
-
-  fputs ( "<td>", pf );
-
-  if ( f0 ) {
-    if( r00 == 0.0 && r01 == 0.0 ) {
-      fprintf ( pf, "0" );
-    } else {
-      fprintf ( pf, format2, r00 );
-      fputs ( " (", pf );
-      fprintf ( pf, format3, r01 );
-      fputs ( " )", pf );
-    }
-  }
-  else
-    fputs ( _("n/a"), pf );
-
-  fputs ( "</td>\n<td>", pf );
-
-  if ( f1 ) {
-    if( r10 == 0.0 && r11 == 0.0 ) {
-      fprintf ( pf, "0" );
-    } else {
-      fprintf ( pf, format2, r10 );
-      fputs ( " (", pf );
-      fprintf ( pf, format3, r11 );
-      fputs ( ")", pf );
-    }
-  }
-  else
-    fputs ( _("n/a"), pf );
-
-  fputs ( "</td>\n</tr>\n", pf );
-
-}
-
 
 /*
  * Print img tag.
@@ -2935,25 +2829,7 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
                                   matchstate *pms, const int iGame,
                                   const htmlexportcss hecss ) {
 
-  int i, j;
-  ratingtype rt[ 2 ];
-  int ai[ 2 ];
-  float aaaar[ 3 ][ 2 ][ 2 ][ 2 ];
-
-  const char *aszLuckRating[] = {
-    N_("&quot;Haaa-haaa&quot;"),
-    N_("Go to bed"), 
-    N_("Better luck next time"),
-    N_("None"),
-    N_("Good dice, man!"),
-    N_("Go to Las Vegas immediately"),
-    N_("Cheater :-)")
-  };
-
-  int fCalc;
   const int fIsMatch = iGame < 0;
-
-  getMWCFromError ( psc, aaaar );
 
   fprintf ( pf, "\n<!-- %s Statistics -->\n\n", 
             ( iGame >= 0 ) ? "Game" : "Match" );
@@ -2993,95 +2869,21 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fMoves ) {
 
+    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_CHEQUER );
+    GList *pl;
+
     printStatTableHeader ( pf, hecss, _("Checker play statistics") );
 
-    printStatTableRow ( pf, 
-                        _("Total moves"), "%d",
-                        psc->anTotalMoves[ 0 ],
-                        psc->anTotalMoves[ 1 ] );
-    printStatTableRow ( pf, 
-                        _("Unforced moves"), "%d",
-                        psc->anUnforcedMoves[ 0 ], 
-                        psc->anUnforcedMoves[ 1 ] );
-/*     printStatTableRow ( pf,  */
-/*                         _("Moves marked very good"), "%d", */
-/*                         psc->anMoves[ 0 ][ SKILL_VERYGOOD ], */
-/*                         psc->anMoves[ 1 ][ SKILL_VERYGOOD ] ); */
-/*     printStatTableRow ( pf,  */
-/*                         _("Moves marked good"), "%d", */
-/*                         psc->anMoves[ 0 ][ SKILL_GOOD ], */
-/*                         psc->anMoves[ 1 ][ SKILL_GOOD ] ); */
-/*     printStatTableRow ( pf,  */
-/*                         _("Moves marked interesting"), "%d", */
-/*                         psc->anMoves[ 0 ][ SKILL_INTERESTING ], */
-/*                         psc->anMoves[ 1 ][ SKILL_INTERESTING ] ); */
-    printStatTableRow ( pf, 
-                        _("Moves unmarked"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_NONE ],
-                        psc->anMoves[ 1 ][ SKILL_NONE ] );
-    printStatTableRow ( pf, 
-                        _("Moves marked good"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_GOOD ],
-                        psc->anMoves[ 1 ][ SKILL_GOOD ] );
-    printStatTableRow ( pf, 
-                        _("Moves marked doubtful"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_DOUBTFUL ],
-                        psc->anMoves[ 1 ][ SKILL_DOUBTFUL ] );
-    printStatTableRow ( pf, 
-                        _("Moves marked bad"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_BAD ],
-                        psc->anMoves[ 1 ][ SKILL_BAD ] );
-    printStatTableRow ( pf, 
-                        _("Moves marked very bad"), "%d",
-                        psc->anMoves[ 0 ][ SKILL_VERYBAD ],
-                        psc->anMoves[ 1 ][ SKILL_VERYBAD ] );
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
+      
+      char **aasz = pl->data;
 
-    printStatTableRow2 ( pf,
-			  _("Error rate (total)"), pms->nMatchTo,
-			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ],
-			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-			  -aaaar[ CHEQUERPLAY ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ] );
-    
-    if ( pms->nMatchTo ) {
-
-
-      printStatTableRow4 ( pf,
-                           _("Error rate (pr. move)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           psc->anUnforcedMoves[ 0 ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           psc->anUnforcedMoves[ 1 ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
-
-    }
-    else {
-
-      printStatTableRow4 ( pf,
-                           _("Error rate (pr. move)"), 
-                           "%+6.3f", "%+7.3f",
-                           psc->anUnforcedMoves[ 0 ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
-                           psc->anUnforcedMoves[ 1 ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CHEQUERPLAY ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
+      printStatTableRow( pf,
+                         aasz[ 0 ], "%s", aasz[ 1 ], aasz[ 2 ] );
 
     }
 
-    for ( i = 0 ; i < 2; i++ )
-      rt[ i ] = GetRating ( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ] );
-    
-    printStatTableRow ( pf, 
-                        _( "Chequer play rating"), "%s",
-                        psc->anUnforcedMoves[ 0 ] ? 
-                        gettext ( aszRating[ rt[ 0 ] ] ) : _("n/a"), 
-                        psc->anUnforcedMoves[ 1 ] ? 
-                        gettext ( aszRating[ rt[ 1 ] ] ) : _("n/a" ) );
+    freeGS( list );
 
   }
 
@@ -3089,72 +2891,22 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fDice ) {
 
+    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_LUCK );
+    GList *pl;
+
     printStatTableHeader ( pf, hecss, 
                            _( "Luck statistics" ) );
 
-    printStatTableRow ( pf,
-                        _("Rolls marked very lucky"), "%d",
-                        psc->anLuck[ 0 ][ LUCK_VERYGOOD ],
-                        psc->anLuck[ 1 ][ LUCK_VERYGOOD ] );
-    printStatTableRow ( pf, _( "Rolls marked lucky" ), "%d",
-                        psc->anLuck[ 0 ][ LUCK_GOOD ],
-                        psc->anLuck[ 1 ][ LUCK_GOOD ] );
-    printStatTableRow ( pf, _( "Rolls marked good" ), "%d",
-                        psc->anLuck[ 0 ][ LUCK_NONE ],
-                        psc->anLuck[ 1 ][ LUCK_NONE ] );
-    printStatTableRow ( pf, _( "Rolls marked unlucky" ), "%d",
-                        psc->anLuck[ 0 ][ LUCK_BAD ],
-                        psc->anLuck[ 1 ][ LUCK_BAD ] );
-    printStatTableRow ( pf, _( "Rolls marked very unlucky" ), "%d",
-                        psc->anLuck[ 0 ][ LUCK_VERYBAD ],
-                        psc->anLuck[ 1 ][ LUCK_VERYBAD ] );
-       
-    printStatTableRow2 ( pf, 
-			  _( "Luck rate (total)"), pms->nMatchTo,
-			  psc->arLuck[ 0 ][ 0 ],
-			  psc->arLuck[ 0 ][ 1 ],
-			  psc->arLuck[ 1 ][ 0 ],
-			  psc->arLuck[ 1 ][ 1 ] );
-    
-    if ( pms->nMatchTo ) {
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
+      
+      char **aasz = pl->data;
 
-      printStatTableRow2 ( pf, 
-			    _( "Luck rate (pr. move)"),  1,
-                           psc->arLuck[ 0 ][ 0 ] /
-                           psc->anTotalMoves[ 0 ],
-                           psc->arLuck[ 0 ][ 1 ] /
-                           psc->anTotalMoves[ 0 ],
-                           psc->arLuck[ 1 ][ 0 ] /
-                           psc->anTotalMoves[ 1 ],
-                           psc->arLuck[ 1 ][ 1 ] /
-                           psc->anTotalMoves[ 1 ] );
-    }
-    else {
-      printStatTableRow4 ( pf, 
-                           _( "Luck rate (pr. move)"), 
-                           "%+6.3f", "%+7.3f",
-                           psc->anTotalMoves[ 0 ],
-                           psc->arLuck[ 0 ][ 0 ] /
-                           psc->anTotalMoves[ 0 ],
-                           psc->arLuck[ 0 ][ 1 ] /
-                           psc->anTotalMoves[ 0 ],
-                           psc->anTotalMoves[ 1 ],
-                           psc->arLuck[ 1 ][ 0 ] /
-                           psc->anTotalMoves[ 1 ],
-                           psc->arLuck[ 1 ][ 1 ] /
-                           psc->anTotalMoves[ 1 ] );
+      printStatTableRow( pf,
+                         aasz[ 0 ], "%s", aasz[ 1 ], aasz[ 2 ] );
+
     }
 
-    for ( i = 0; i < 2; i++ ) 
-      ai[ i ] = getLuckRating ( psc->arLuck[ i ][ 0 ] /
-                                psc->anTotalMoves[ i ] );
-
-    printStatTableRow ( pf, 
-                        _( "Luck rating"), "%s",
-                        psc->anTotalMoves[ 0 ] ?
-                        gettext ( aszLuckRating[ ai[ 0 ] ] ) : _("n/a"), 
-                        psc->anTotalMoves[ 1 ] ?
-                        gettext ( aszLuckRating[ ai[ 1 ] ] ) : _("n/a") );
+    freeGS( list );
 
   }
 
@@ -3162,309 +2914,46 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   if( psc->fCube ) {
 
+    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_CUBE );
+    GList *pl;
+
     printStatTableHeader ( pf, hecss, 
                            _( "Cube statistics" ) );
-    printStatTableRow ( pf, _ ( "Total cube decisions"), "%d",
-                        psc->anTotalCube[ 0 ],
-                        psc->anTotalCube[ 1 ] );
-    printStatTableRow ( pf, _ ( "Close or actual cube decisions"), "%d",
-                        psc->anCloseCube[ 0 ],
-                        psc->anCloseCube[ 1 ] );
-    printStatTableRow ( pf, _ ( "Doubles"), "%d",
-                        psc->anDouble[ 0 ], 
-                        psc->anDouble[ 1 ] );
-    printStatTableRow ( pf, _( "Takes"), "%d",
-                        psc->anTake[ 0 ],
-                        psc->anTake[ 1 ] );
-    printStatTableRow ( pf, _( "Passes"), "%d",
-                        psc->anPass[ 0 ], 
-                        psc->anPass[ 1 ] );
+
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
       
-      printStatTableMissed (pf, pms->nMatchTo,
-				 _ ( "Missed doubles around DP" ),
-                           psc->anCubeMissedDoubleDP[ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 0 ][ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 0 ][ 1 ],
-                           psc->anCubeMissedDoubleDP[ 1 ],
-                           -psc->arErrorMissedDoubleDP[ 1 ][ 0 ],
-                           -psc->arErrorMissedDoubleDP[ 1 ][ 1 ] );
-      printStatTableMissed ( pf, pms->nMatchTo,
-				  _ ( "Missed doubles around TG" ),
-                           psc->anCubeMissedDoubleTG[ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 0 ][ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 0 ][ 1 ],
-                           psc->anCubeMissedDoubleTG[ 1 ],
-                           -psc->arErrorMissedDoubleTG[ 1 ][ 0 ],
-                           -psc->arErrorMissedDoubleTG[ 1 ][ 1 ] );
-      printStatTableMissed ( pf, pms->nMatchTo,
-				  _ ( "Wrong doubles around DP"),
-                           psc->anCubeWrongDoubleDP[ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 0 ][ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 0 ][ 1 ],
-                           psc->anCubeWrongDoubleDP[ 1 ],
-                           -psc->arErrorWrongDoubleDP[ 1 ][ 0 ],
-                           -psc->arErrorWrongDoubleDP[ 1 ][ 1 ] );
-      printStatTableMissed ( pf, pms->nMatchTo,
-				  _ ( "Wrong doubles around TG"),
-                           psc->anCubeWrongDoubleTG[ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 0 ][ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 0 ][ 1 ],
-                           psc->anCubeWrongDoubleTG[ 1 ],
-                           -psc->arErrorWrongDoubleTG[ 1 ][ 0 ],
-                           -psc->arErrorWrongDoubleTG[ 1 ][ 1 ] );
-      printStatTableMissed ( pf, pms->nMatchTo,
-				  _ ( "Wrong takes"),
-                           psc->anCubeWrongTake[ 0 ],
-                           -psc->arErrorWrongTake[ 0 ][ 0 ],
-                           -psc->arErrorWrongTake[ 0 ][ 1 ],
-                           psc->anCubeWrongTake[ 1 ],
-                           -psc->arErrorWrongTake[ 1 ][ 0 ],
-                           -psc->arErrorWrongTake[ 1 ][ 1 ] );
-      printStatTableMissed ( pf, pms->nMatchTo,
-				  _ ( "Wrong passes"),
-                           psc->anCubeWrongPass[ 0 ],
-                           -psc->arErrorWrongPass[ 0 ][ 0 ],
-                           -psc->arErrorWrongPass[ 0 ][ 1 ],
-                           psc->anCubeWrongPass[ 1 ],
-                           -psc->arErrorWrongPass[ 1 ][ 0 ],
-                           -psc->arErrorWrongPass[ 1 ][ 1 ] );
+      char **aasz = pl->data;
 
-
-      printStatTableRow2 ( pf,
-			    _("Error rate (total)"), pms->nMatchTo,
-			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ NORMALISED ],
-			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_0 ][ UNNORMALISED ] ,
-			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ NORMALISED ],
-			    -aaaar[ CUBEDECISION ][ TOTAL ][ PLAYER_1 ][ UNNORMALISED ]  );
-      
-    if ( pms->nMatchTo ) {
-
-
-      printStatTableRow4 ( pf,
-                           _("Error rate (per cube decision)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           psc->anCloseCube[ 0 ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           psc->anCloseCube[ 1 ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
-
-    }
-    else {
-
-      printStatTableRow4 ( pf,
-                           _("Error rate (per cube decision)"), 
-                           "%+6.3f", "%+7.3f",
-                           psc->anCloseCube[ 0 ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
-                           psc->anCloseCube[ 1 ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ CUBEDECISION ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
+      printStatTableRow( pf,
+                         aasz[ 0 ], "%s", aasz[ 1 ], aasz[ 2 ] );
 
     }
 
-    for ( i = 0 ; i < 2; i++ )
-      rt[ i ] = GetRating ( aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ] );
+    freeGS( list );
 
-    printStatTableRow ( pf, 
-                        _( "Cube decision rating"), "%s",
-                        psc->anCloseCube[ 0 ] ? 
-                        gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
-                        psc->anCloseCube[ 1 ] ? 
-                        gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a") );
   }
     
   /* overall rating */
     
   if( psc->fMoves && psc->fCube ) {
 
-    cubeinfo ci;
-    
+    GList *list = formatGS( psc, pms, fIsMatch, FORMATGS_OVERALL );
+    GList *pl;
 
     printStatTableHeader ( pf, hecss, 
-                           _("Overall rating" ) );
-                            
-    printStatTableRow2( pf,
-			 _("Error rate (total)"), pms->nMatchTo,
-			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_0][NORMALISED],
-			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_0][UNNORMALISED],
-			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_1][NORMALISED],
-			 -aaaar[ COMBINED ][ TOTAL ][PLAYER_1][UNNORMALISED]);
-    
-    if ( pms->nMatchTo ) {
+                           _( "Overall statistics" ) );
 
-
-      printStatTableRow4 ( pf,
-                           _("Error rate (per decision)"), 
-                           "%+6.3f", "%+7.3f%%",
-                           psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ] 
-                           * 100.0f,
-                           psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] 
-                           * 100.0f );
-
-    }
-    else {
-
-      printStatTableRow4 ( pf,
-                           _("Error rate (per decision)"), 
-                           "%+6.3f", "%+7.3f%",
-                           psc->anUnforcedMoves[ 0 ] + psc->anCloseCube[ 0 ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_0 ][ UNNORMALISED ],
-                           psc->anUnforcedMoves[ 1 ] + psc->anCloseCube[ 1 ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ NORMALISED ],
-                           -aaaar[ COMBINED ][ PERMOVE ][ PLAYER_1 ][ UNNORMALISED ] );
-
-    }
-
-    {
-      char asz[ 2 ][ 16 ];
+    for ( pl = g_list_first( list ); pl; pl = g_list_next( pl ) ) {
       
-      for ( i = 0; i < 2; ++i )
-        if ( ( j = psc->anTotalMoves[ 0 ] + psc->anTotalMoves[ 1 ] ) )
-            sprintf( asz[ i ], "%.1f", 1000.0 * 
-                     -aaaar[ COMBINED ][ TOTAL ][ i ][ NORMALISED ] / j );
-        else
-          strcpy( asz[ i ], _("n/a") );
-      
-      printStatTableRow ( pf, 
-                          _("Equivalent Snowie error rate"), 
-                          "%s", asz[ 0 ], asz[ 1 ] );
-      
-    }
-
-
-    for ( i = 0 ; i < 2; i++ ) 
-      rt[ i ] = GetRating ( aaaar[ COMBINED ][ PERMOVE ][ i ][ NORMALISED ] );
-      
-    printStatTableRow ( pf, 
-                        _("Overall rating"), "%s",
-                        ( psc->anCloseCube[ 0 ] + psc->anUnforcedMoves[ 0 ] )? 
-                        gettext ( aszRating[ rt [ 0 ] ] ) : _("n/a"), 
-                        ( psc->anCloseCube[ 1 ] + psc->anUnforcedMoves[ 1 ] )? 
-                        gettext ( aszRating[ rt [ 1 ] ] ) : _("n/a" ) );
-
-    SetCubeInfo( &ci, pms->nCube, pms->fCubeOwner, 0,
-                 pms->nMatchTo, pms->anScore, pms->fCrawford,
-                 pms->fJacoby, nBeavers, pms->bgv );
-
-  }
-
-  fCalc = psc->arActualResult[ 0 ] > 0.0f || psc->arActualResult[ 1 ] > 0.0f;
-  if ( psc->fDice && fCalc ) {
-
-    if ( pms->nMatchTo ) {
-      float r = 0.5f + psc->arActualResult[ 0 ] - 
-        psc->arLuck[ 0 ][ 1 ] + psc->arLuck[ 1 ][ 1 ];
-
-      printStatTableRow( pf, 
-                         _("Actual result"),
-                         "%+.2f%%",
-                         100.0 * psc->arActualResult[ 0 ],
-                         100.0 * psc->arActualResult[ 1 ] );
-
-      printStatTableRow( pf, 
-                         _("Luck adjusted result"),
-                         "%+.2f%%",
-                         100.0 * psc->arLuckAdj[ 0 ],
-                         100.0 * psc->arLuckAdj[ 1 ] );
-
-      if ( fIsMatch ) {
-
-        if ( r > 0.0f && r < 1.0f ) {
-          float rRating = relativeFibsRating( r, pms->nMatchTo );
-          char sz[ 10 ];
-          sprintf( sz, "%.2f", rRating );
-          printStatTableRow( pf,
-                             _("FIBS rating difference"),
-                             "%s", sz, "" );
-        }
-        else
-          printStatTableRow( pf,
-                             _("FIBS rating difference"),
-                             "%s", _("n/a"), _("n/a") );
-
-        fprintf( pf, "<tr><td colspan=\"3\">%s</td></tr>\n",
-                 _("(based on luck. adj. result)") );
-
-        /* absolute fibs rating */
-
-        fprintf( pf, "<tr><td>%s</td>", _("Estimated abs. rating") );
-
-        for ( i = 0; i < 2; ++i ) {
-
-          fputs( "<td>", pf );
-
-          if ( psc->anCloseCube[ i ] + psc->anUnforcedMoves[ i ] )
-            fprintf( pf, "%6.1f", 
-                     absoluteFibsRating( aaaar[ CHEQUERPLAY ][ PERMOVE ][ i ][ NORMALISED ], 
-                                         aaaar[ CUBEDECISION ][ PERMOVE ][ i ][ NORMALISED ], 
-                                         pms->nMatchTo, rRatingOffset ) );
-          else
-            fputs( _("n/a"), pf );
-
-          fputs( "</td>", pf );
-
-        }
-
-        fputs( "</tr>\n", pf );
-
-        fprintf( pf, "<tr><td colspan=\"3\">%s</td></tr>\n",
-                 _("(based on error rate per decision)") );
-
-
-      }
-
-    }
-    else {
+      char **aasz = pl->data;
 
       printStatTableRow( pf,
-                         _("Actual result"),
-                         "%+.3f",
-                         psc->arActualResult[ 0 ],
-                         psc->arActualResult[ 1 ] );
-      printStatTableRow( pf,
-                         _("Luck adjusted result"),
-                         "%+.3f",
-                         psc->arLuckAdj[ 0 ],
-                         psc->arLuckAdj[ 1 ] );
-
-      if ( fIsMatch && psc->nGames > 1 ) {
-        printStatTableRow( pf,
-                           _("Advantage (actual) in ppg"),
-                           "%+.3f",
-                           psc->arActualResult[ 0 ] / psc->nGames,
-                           psc->arActualResult[ 1 ] / psc->nGames );
-        printStatTableRow( pf,
-                           _("95%% confidence interval (ppg)"),
-                           "%.3f",
-                           1.95996f *
-                           sqrt( psc->arVarianceActual[ 0 ] / psc->nGames ),
-                           1.95996f *
-                           sqrt( psc->arVarianceActual[ 1 ] / psc->nGames ) );
-        printStatTableRow( pf,
-                           _("Advantage (luck adjusted) in ppg"),
-                           "%+.3f",
-                           psc->arLuckAdj[ 0 ] / psc->nGames,
-                           psc->arLuckAdj[ 0 ] / psc->nGames );
-        printStatTableRow( pf,
-                           _("95%% confidence interval (ppg)"),
-                           "%.3f",
-                           1.95996f *
-                           sqrt( psc->arVarianceLuckAdj[ 0 ] / psc->nGames ),
-                           1.95996f *
-                           sqrt( psc->arVarianceLuckAdj[ 1 ] / psc->nGames ) );
-      }
+                         aasz[ 0 ], "%s", aasz[ 1 ], aasz[ 2 ] );
 
     }
+
+    freeGS( list );
+
 
   }
 
@@ -3472,8 +2961,6 @@ static void HTMLDumpStatcontext ( FILE *pf, const statcontext *psc,
 
   fprintf ( pf, "\n<!-- End %s Statistics -->\n\n", 
             ( iGame >= 0 ) ? "Game" : "Match" );
-
-
 
 }
 
