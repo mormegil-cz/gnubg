@@ -1,3 +1,16 @@
+Wed Jul 16 18:49:11 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Introduce flag to set the numbers of digits output for
+	probabilities and equities.
+	(derived from bug #4236 by Ian Shaw)
+
+	* gnubg.c: new command "set output digits ..."			
+	* text.c (OutputEquity, OutputMoneyEquity, OutputEquityScale,
+	OutputEquityDiff, OutputMWC, OutputPercent): generate format
+	dynamically using new flag fOutputDigits
+	* progress.c (GTKRolloutProgress): use Output* functions instead
+	of hardcoded logic.
+
 Wed Jul 16 15:57:01 2003  Joern Thyssen  <jth@gnubg.org>
 
 	Revert changes dated Wed Jul  9 10:32:08 2003 pending

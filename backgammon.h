@@ -278,7 +278,7 @@ extern int fNextTurn, fComputing;
 /* User settings. */
 extern int fAutoGame, fAutoMove, fAutoRoll, fAutoCrawford, cAutoDoubles,
     fCubeUse, fDisplay, fAutoBearoff, fShowProgress,
-    nBeavers, fOutputMWC, fOutputWinPC, fOutputMatchPC, fJacoby,
+    nBeavers, fOutputDigits, fOutputMWC, fOutputWinPC, fOutputMatchPC, fJacoby,
     fOutputRawboard, fAnnotation, cAnalysisMoves, fAnalyseCube,
     fAnalyseDice, fAnalyseMove, fRecord, fMessage, nDefaultLength;
 extern int fInvertMET;
@@ -817,6 +817,7 @@ extern void CommandAccept( char * ),
     CommandSetOutputMWC ( char * ),
     CommandSetOutputRawboard( char * ),
     CommandSetOutputWinPC( char * ),
+    CommandSetOutputDigits( char * ),
     CommandSetPathEPS( char * ),
     CommandSetPathSGF( char * ),
     CommandSetPathLaTeX( char * ),

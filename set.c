@@ -2529,6 +2529,24 @@ extern void CommandSetBeavers( char *sz ) {
 	outputl( _("No beavers allowed in money sessions.") );
 }
 
+extern void
+CommandSetOutputDigits( char *sz ) {
+
+  int n = ParseNumber( &sz );
+
+  if ( n < 0 || n > 6 ) {
+    outputl( _("You must specify a number between 1 and 6.\n") );
+    return;
+  }
+
+  fOutputDigits = n;
+
+  outputf( _("Probabilities and equities will be shown with %d digits "
+             "after the decimal separator\n"), fOutputDigits );
+
+}
+      
+
 extern void CommandSetOutputMatchPC( char *sz ) {
 
     SetToggle( "output matchpc", &fOutputMatchPC, sz,

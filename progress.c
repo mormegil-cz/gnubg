@@ -34,6 +34,7 @@
 #include "progress.h"
 #include "backgammon.h"
 #include "i18n.h"
+#include "export.h"
 
 #if USE_GTK
 #include "gtkgame.h"
@@ -809,90 +810,38 @@ GTKRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 
     for( i = 0; i < NUM_ROLLOUT_OUTPUTS; i++ ) {
 
-      if ( i < OUTPUT_EQUITY ) {
-        if ( fOutputWinPC )
-          sprintf( sz, "%6.2f%%", 100.0f * aarOutput[ iAlternative ][ i ] );
-        else
-          sprintf( sz, "%6.4f", aarOutput[ iAlternative ][ i ] );
-      }
-      else if ( i == OUTPUT_EQUITY ) {
+      /* result */
 
-        if ( ! ms.nMatchTo )
-          /* money game */
-          sprintf( sz, "%+7.4f", aarOutput[ iAlternative ][ i ] *
-                   aci[ iAlternative ].nCube / aci[ 0 ].nCube );
-        else if ( fOutputMWC )
-          /* match play (mwc) */
-          sprintf( sz, "%7.3f%%", 100.0f * eq2mwc ( aarOutput[ iAlternative ][ i ], &aci[ iAlternative ] ) );
-        else
-          /* match play (equity) */
-          sprintf( sz, "%+7.4f",
-                   mwc2eq ( eq2mwc ( aarOutput[ iAlternative ][ i ], &aci[ iAlternative ] ), &aci[ 0 ] ) );
-
-      }
-      else {
-        if ( prc->fCubeful ) {
-          if ( ! ms.nMatchTo )
-            /* money game */
-            sprintf( sz, "%+7.4f", aarOutput[ iAlternative ][ i ] );
-          else if ( fOutputMWC )
-            /* match play (mwc) */
-            sprintf( sz, "%7.3f%%", 100.0f * aarOutput[ iAlternative ][ i ] );
-          else
-            /* match play (equity) */
-            sprintf( sz, "%+7.4f", mwc2eq ( aarOutput[ iAlternative ][ i ], &aci[ 0 ] ) );
-        }
-        else {
-          strcpy ( sz, "n/a" );
-        }
-      }
+      if ( i < OUTPUT_EQUITY ) 
+        strcpy( sz, OutputPercent( aarOutput[ iAlternative ][ i ] ) );
+      else if ( i == OUTPUT_EQUITY ) 
+        strcpy( sz, OutputEquityScale( aarOutput[ iAlternative ][ i ],
+                                       &aci[ iAlternative ], &aci[ 0 ], 
+                                       TRUE ) );
+      else 
+        strcpy( sz, 
+                prc->fCubeful ? OutputMWC( aarOutput[ iAlternative ][ i ],
+                                           &aci[ 0 ], TRUE ) : "n/a" );
 
       gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ), 
                           iAlternative * 2, i + 1, sz );
 
+      /* standard errors */
+
       if ( i < OUTPUT_EQUITY )
-        /* standard error on winning chance etc. */
-        sprintf( sz, "%6.4f", aarStdDev[ iAlternative ][ i ] );
-      else if ( i == OUTPUT_EQUITY ) {
-
-        /* standard error for equity */
-
-        if ( ! ms.nMatchTo )
-          /* money game */
-          sprintf( sz, "%7.4f", aarStdDev[ iAlternative ][ i ] *
-                   aci[ iAlternative ].nCube / aci[ 0 ].nCube );
-        else if ( fOutputMWC )
-          /* match play (mwc) */
-          sprintf( sz, "%7.3f%%",
-                   100.0f * se_eq2mwc ( aarStdDev[ iAlternative ][ i ], &aci[ iAlternative ] ) );
-        else
-          /* match play (equity) */
-          sprintf( sz, "%7.4f",
-                   se_mwc2eq ( se_eq2mwc ( aarStdDev[ iAlternative ][ i ], &aci[ iAlternative ] ),
-                               &aci[ 0 ] ) );
-
-      }
-      else if ( prc->fCubeful ) {
-
-        /* standard error in cubeful equity */
-
-        if ( ! ms.nMatchTo )
-          /* money game */
-          sprintf( sz, "%+7.4f", aarStdDev[ iAlternative ][ i ] );
-        else if ( fOutputMWC )
-          /* match play (mwc) */
-          sprintf( sz, "%7.3f%%", 100.0f * aarStdDev[ iAlternative ][ i ] );
-        else
-          /* match play (equity) */
-          sprintf( sz, "%7.4f", se_mwc2eq ( aarStdDev[ iAlternative ][ i ],
-                                            &aci[ 0 ] ) );
-
-      }
+        strcpy( sz, OutputPercent( aarStdDev[ iAlternative ][ i ] ) );
+      else if ( i == OUTPUT_EQUITY ) 
+        strcpy( sz, OutputEquityScale( aarStdDev[ iAlternative ][ i ],
+                                       &aci[ iAlternative ], &aci[ 0 ], 
+                                       FALSE ) );
       else
-        strcpy ( sz, "n/a" );
+        strcpy( sz, 
+                prc->fCubeful ? OutputMWC( aarStdDev[ iAlternative ][ i ],
+                                           &aci[ 0 ], FALSE ) : "n/a" );
 
       gtk_clist_set_text( GTK_CLIST( prp->pwRolloutResult ), 
                           iAlternative * 2 + 1, i + 1, sz );
+
     }
 
     gtk_progress_configure( GTK_PROGRESS( prp->pwRolloutProgress ),
