@@ -645,12 +645,24 @@ EvalNewWeights(int nSize)
 extern int
 EvalShutdown ( void ) {
 
+  int i;
+
   /* close bearoff databases */
 
   BearoffClose ( pbc1 );
   BearoffClose ( pbc2 );
   BearoffClose ( pbcOS );
   BearoffClose ( pbcTS );
+  for ( i = 0; i < 3; ++i )
+    BearoffClose( apbcHyper[ i ] );
+
+  /* destroy neural nets */
+
+  DestroyWeights();
+
+  /* destroy cache */
+
+  CacheDestroy( &cEval );
 
   return 0;
 

@@ -1,3 +1,8 @@
+Mon Apr  7 21:42:10 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (EvalShutdown): free all bearoff databases, neural nets,
+	and evaluation cache.
+
 Mon Apr  7 21:22:46 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* sgf.c (RestoreNode): add missing call to FixMatchState.
