@@ -178,7 +178,9 @@ duplication of effort and to make sure our changes merge easily.
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
-  to recurse through help for subcommands.  (Wait for GTK+ 2.0.)
+  to recurse through help for subcommands.  (Wait for GTK+ 2.0.)  The
+  current pre-release "makeinfo" converts Texinfo to XML, which is
+  probably the best format for an online manual widget to read.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)

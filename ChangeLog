@@ -1,6 +1,11 @@
+Mon Feb 25 14:33:38 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtktexi.c, gtktexi.h: New files.  For use in a future manual
+	browser.  (For GTK+ 2.0.)
+
 Fri Feb 22 18:45:19 2002  Øystein Johansen <oeysteij@online.no>
 
-        * html.c: Small fixes and updates
+	* html.c: Small fixes and updates
 
 Thu Feb 21 18:42:26 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
