@@ -7,7 +7,7 @@
 credEntry ceAuthors[] = {
   {"Joseph Heled", 0},
   {"Oeystein Johansen", 0},
-  {"Johanthan Kinsey", 0},
+  {"Jonathan Kinsey", 0},
   {"David Montgomery", 0},
   {"Jim Segrave", 0},
   {"Joern Thyssen", 0},
@@ -169,7 +169,7 @@ char aszAUTHORS[] =
 "\n"
 "    Joseph Heled            David Montgomery        Gary Wong\n"
 "    Oeystein Johansen       Jim Segrave\n"
-"    Johanthan Kinsey        Joern Thyssen\n"
+"    Jonathan Kinsey         Joern Thyssen\n"
 " \n"
 "                                   Support by:\n"
 "\n"

@@ -32,7 +32,7 @@ extra=/tmp/extra.$$
 cat > $authors <<EOF
 Joseph Heled
 Oeystein Johansen
-Johanthan Kinsey
+Jonathan Kinsey
 David Montgomery
 Jim Segrave
 Joern Thyssen
