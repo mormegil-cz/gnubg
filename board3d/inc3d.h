@@ -55,7 +55,7 @@
 #define copyPoint(to, from) memcpy(to, from, sizeof(float[3]))
 #define SGN(x) (x / abs(x))
 
-#define TEXTURE_PATH "textures//"
+#define TEXTURE_PATH "textures/"
 #define NO_TEXTURE_STRING _("No texture")
 
 #define HINGE_SEGMENTS 6
