@@ -515,19 +515,19 @@ msgstr "mittel"
 
 #: eval.c:358
 msgid "large"
-msgstr "gro"
+msgstr "gross"
 
 #: eval.c:359
 msgid "huge"
-msgstr "sehr gro"
+msgstr "sehr gross"
 
 #: eval.c:360
 msgid "enormous"
-msgstr "riesig gro"
+msgstr "riesig gross"
 
 #: eval.c:361
 msgid "gigantic"
-msgstr "gigantisch gro"
+msgstr "gigantisch gross"
 
 #: eval.c:764
 #, c-format
@@ -609,7 +609,7 @@ msgstr "statisch"
 #: eval.c:3914
 #, c-format
 msgid "%2d ply"
-msgstr ""
+msgstr "%2d Ply"
 
 #: eval.c:4002
 msgid ""
@@ -617,6 +617,9 @@ msgid ""
 "   - up to 6 chequers (924 positions) per player.\n"
 "\n"
 msgstr ""
+" * Abschätzer mit zweiseitiger Bearoff-Datenbank:\n"
+"   - bis zu 6 Checker (924 Positionen) pro Spieler.\n"
+"\n"
 
 #: eval.c:4011
 #, c-format
@@ -625,6 +628,9 @@ msgid ""
 "   - up to 6 points (54264 positions) per player.\n"
 "\n"
 msgstr ""
+" * Abschätzer mit einseitiger Bearoff-Datenbank:\n"
+"   - bis zu 6 Punkte (54264 Positionen) pro Spieler.\n"
+"\n"
 
 #: eval.c:4013
 msgid "heuristic "
@@ -776,27 +782,27 @@ msgstr "annehmen"
 
 #: external.c:291
 msgid "Warning: badly formed board from external controller."
-msgstr ""
+msgstr "Warnung: Schlecht erzeugtes Board des externen Controllers"
 
 #: getopt.c:672
 #, c-format
 msgid "%s: option `%s' is ambiguous\n"
-msgstr ""
+msgstr "%s: Die Option `%s' ist nicht eindeutig\n"
 
 #: getopt.c:696
 #, c-format
 msgid "%s: option `--%s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: Die Option `--%s' erlaubt kein Argument\n"
 
 #: getopt.c:701
 #, c-format
 msgid "%s: option `%c%s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: Die Option `%c%s' erlaubt kein Argument\n"
 
 #: getopt.c:718 getopt.c:891
 #, c-format
 msgid "%s: option `%s' requires an argument\n"
-msgstr ""
+msgstr "%s: Die Option `%s' benoetigt ein Argument\n"
 
 #. --option
 #: getopt.c:747
@@ -830,12 +836,12 @@ msgstr "%s: Diese Option benoetigt ein Argument -- %c\n"
 #: getopt.c:857
 #, c-format
 msgid "%s: option `-W %s' is ambiguous\n"
-msgstr ""
+msgstr "%s: Die Option `-W %s' ist nicht eindeutig\n"
 
 #: getopt.c:875
 #, c-format
 msgid "%s: option `-W %s' doesn't allow an argument\n"
-msgstr ""
+msgstr "%s: Die Option `-W %s' erlaubt kein Argument\n"
 
 #. Usage strings
 #: gnubg.c:306
@@ -852,15 +858,15 @@ msgstr "Dateiname"
 
 #: gnubg.c:309
 msgid "[<key>=<value> ...]"
-msgstr ""
+msgstr "[<Schluessel>=<Wert> ...]"
 
 #: gnubg.c:310
 msgid "<length>"
-msgstr ""
+msgstr "<Laenge>"
 
 #: gnubg.c:311
 msgid "<limit>"
-msgstr ""
+msgstr "<Grenze>"
 
 #: gnubg.c:312
 msgid "<milliseconds>"
@@ -908,7 +914,7 @@ msgstr "<Spieler>"
 
 #: gnubg.c:323 set.c:64
 msgid "<plies>"
-msgstr ""
+msgstr "<Plies>"
 
 #: gnubg.c:324
 msgid "<position>"
@@ -916,7 +922,7 @@ msgstr "<Position>"
 
 #: gnubg.c:325
 msgid "<prompt>"
-msgstr ""
+msgstr "<Prompt>"
 
 #: gnubg.c:326
 msgid "<rate>"
@@ -928,15 +934,15 @@ msgstr "<Spielstand>"
 
 #: gnubg.c:328
 msgid "<size>"
-msgstr "<Groee>"
+msgstr "<Groesse>"
 
 #: gnubg.c:329
 msgid "[game|roll|rolled] [count]"
-msgstr ""
+msgstr "[Partie|Wurf|geworfen] [Stand]"
 
 #: gnubg.c:330
 msgid "<trials>"
-msgstr ""
+msgstr "<Anzahl>"
 
 #: gnubg.c:331
 msgid "<value>"
@@ -976,7 +982,7 @@ msgstr "Loesche die Kommentare eines Wurfes"
 
 #: gnubg.c:381
 msgid "Erase skill annotations for a move"
-msgstr ""
+msgstr "Loesche die Kommentare eines Zugs"
 
 #: gnubg.c:385
 msgid "Mark as bad"
@@ -1092,7 +1098,7 @@ msgstr "Das Netzwerk mit einer Positions-Datenbank trainieren"
 
 #: gnubg.c:444
 msgid "Measure the current network error against the database"
-msgstr ""
+msgstr "Vergleiche Fehler des gegewaertigen Netzwerks mit der Datenbank"
 
 #: gnubg.c:448
 msgid "Records a log of the game in .gam format"
@@ -1175,35 +1181,35 @@ msgstr "Ein Protokoll der Sitzung im `.ps'-Format aufzeichnen"
 
 #: gnubg.c:508 gnubg.c:563
 msgid "Record a log of the game so far to a file"
-msgstr ""
+msgstr "Speichere das bisherige Partie-Protokoll in eine Datei"
 
 #: gnubg.c:510 gnubg.c:566
 msgid "Record a log of the match so far to a file"
-msgstr "Das Protokoll des bis hier gespielten Matches in eine Datei schreiben"
+msgstr "Schreibe das Protokoll des bis hier gespielten Matches in eine Datei"
 
 #: gnubg.c:512
 msgid "Write the current position to a file"
-msgstr "Die gegenwaertige Position in eine Datei schreiben"
+msgstr "Schreibe die gegenwaertige Position in eine Datei"
 
 #: gnubg.c:514
 msgid "Record a log of the session so far to a file"
-msgstr "Das Protokoll der bis hier gespielten Sitzung in einer Datei speichern"
+msgstr "Speichere das Protokoll der bis hier gespielten Sitzung in einer Datei"
 
 #: gnubg.c:521
 msgid "Import a Jellyfish match"
-msgstr "Ein Jellyfish-Match importieren"
+msgstr "Importiere ein Jellyfish-Match"
 
 #: gnubg.c:523
 msgid "Import a FIBS oldmoves file"
-msgstr "Ein FIBS-Oldmove-Match importieren"
+msgstr "Importiere ein FIBS-Oldmove-Match"
 
 #: gnubg.c:526
 msgid "Import a Jellyfish position file"
-msgstr "Eine Jellyfish-Position importieren"
+msgstr "Importiere eine Jellyfish-Position"
 
 #: gnubg.c:529
 msgid "Import an SGG match"
-msgstr "Ein Gamesgrid-Match (.ssg) importieren"
+msgstr "Importiere ein Gamesgrid-Match (.ssg)"
 
 #: gnubg.c:532
 msgid "Show the moves made in this game"
@@ -1219,119 +1225,119 @@ msgstr "Zeige die Partien dieser Sitzung"
 
 #: gnubg.c:541
 msgid "Read commands from a script file"
-msgstr "Kommandos aus einem Skript lesen"
+msgstr "Lese die Kommandos aus einem Skript"
 
 #: gnubg.c:543
 msgid "Read a saved game from a file"
-msgstr "Gespeicherte Partie aus einer Datei lesen"
+msgstr "Lese eine gespeicherte Partie aus einer Datei"
 
 #: gnubg.c:546
 msgid "Read a saved match from a file"
-msgstr "Gespeichertes Match aus einer Datei lesen"
+msgstr "Lese ein gespeichertes Match aus einer Datei"
 
 #: gnubg.c:549
 msgid "Read neural net weights from a file"
-msgstr ""
+msgstr "Lese die 'weights' des Neuralen Netzes aus einer Datei"
 
 #: gnubg.c:554
 msgid "Start a new game within the current match or session"
-msgstr "Eine neue Partie im laufenden Match/in der laufenden Sitzung beginnen"
+msgstr "Beginne eine neue Partie im laufenden Match/in der laufenden Sitzung"
 
 #: gnubg.c:556
 msgid "Play a new match to some number of points"
-msgstr "Ein neues Match beginnen"
+msgstr "Spiel ein neues Match"
 
 #: gnubg.c:557
 msgid "Start a new (money) session"
-msgstr "Eine neue Moneygame-Sitzung beginnen"
+msgstr "Spiel eine neue Moneygame-Sitzung"
 
 #: gnubg.c:559
 msgid "Create new (random) neural net weights"
-msgstr ""
+msgstr "Erzeuge neue (zufaellige) 'weights' fuer das Neurale Netz"
 
 #: gnubg.c:568
 msgid "Use the current settings in future sessions"
-msgstr "Gegenwaertige Einstellungen in zukuenftigen Sitzungen benutzen"
+msgstr "Benutze die gegenwaertige Einstellungen in zukuenftigen Sitzungen"
 
 #: gnubg.c:571
 msgid "Write the neural net weights to a file"
-msgstr ""
+msgstr "Schreibe die 'weights' des Neuralen Netzes in eine Datei"
 
 #: gnubg.c:576
 msgid "Specify the equity loss for a bad move"
-msgstr ""
+msgstr "Definiere den Verlust an Equity fuer einen schlechten Zug"
 
 #: gnubg.c:578
 msgid "Specify the equity loss for a doubtful move"
-msgstr ""
+msgstr "Definiere den Verlust an Equity fuer einen zweifelhaften Zug"
 
 #: gnubg.c:580
 msgid "Specify the equity gain for a good move"
-msgstr ""
+msgstr "Definiere den Gewinn an Equity fuer einen guten Zug"
 
 #: gnubg.c:582
 msgid "Specify the equity gain for an interesting move"
-msgstr ""
+msgstr "Definiere den Gewinn an Equity fuer einen interessanten Zug"
 
 #: gnubg.c:585
 msgid "Specify the equity gain for a lucky roll"
-msgstr ""
+msgstr "Definiere den Gewinn an Equity fuer einen gluecklichen Wurf"
 
 #: gnubg.c:588
 msgid "Specify the equity loss for an unlucky roll"
-msgstr ""
+msgstr "Definiere den Verlust an Equity fuer einen schlechten Wurf"
 
 #: gnubg.c:591
 msgid "Specify the equity loss for a very bad move"
-msgstr ""
+msgstr "Definiere den Verlust an Equity fuer einen sehr schlechten Zug"
 
 #: gnubg.c:594
 msgid "Specify the equity gain for a very good move"
-msgstr ""
+msgstr "Definiere den Gewinn an Equity fuer einen sehr guten Zug"
 
 #: gnubg.c:597
 msgid "Specify the equity gain for a very lucky roll"
-msgstr ""
+msgstr "Definiere den Gewinn an Equity fuer einen sehr gluecklichen Wurf"
 
 #: gnubg.c:599
 msgid "Specify the equity loss for a very unlucky roll"
-msgstr ""
+msgstr "Definiere den Verlust an Equity fuer einen sehr schlechten Wurf"
 
 #: gnubg.c:604
 msgid "Specify type (evaluation or rollout)"
-msgstr ""
+msgstr "Definiere den Typ (Abschaetzung oder Rollout)"
 
 #: gnubg.c:606
 msgid "Speficy parameters for neural net evaluation"
-msgstr ""
+msgstr "Definiere die Parameter fuer die Abschaetzung des Neuralen Netzes"
 
 #: gnubg.c:609
 msgid "Speficy parameters for rollout"
-msgstr ""
+msgstr "Definiere die Parameter fuer ein Rollout"
 
 #: gnubg.c:613
 msgid "Specify parameters for the analysis of chequerplay"
-msgstr ""
+msgstr "Definiere die Parameter fuer die Analyse des Checkerplays"
 
 #: gnubg.c:615
 msgid "Select whether cube action will be analysed"
-msgstr ""
+msgstr "Waehle aus, ob Doppler-Aktionen analysiert werden sollen"
 
 #: gnubg.c:617
 msgid "Specify parameters for the analysis of cube decisions"
-msgstr ""
+msgstr "Definiere die Parameter fuer die Analyse der Doppler-Entscheidungen"
 
 #: gnubg.c:620
 msgid "Specify the maximum number of possible moves analysed"
-msgstr ""
+msgstr "Definiere die maximale Anzahl der zu analysierenden moeglichen Zuege"
 
 #: gnubg.c:622
 msgid "Select whether dice rolls will be analysed"
-msgstr ""
+msgstr "Waehle aus, ob die Wuerfe analysiert werden sollen"
 
 #: gnubg.c:625
 msgid "Select whether chequer play will be analysed"
-msgstr ""
+msgstr "Waehle aus, ob das Checkerplay analysiert werden soll"
 
 #: gnubg.c:627
 msgid "Specify levels for marking moves"
@@ -1339,11 +1345,11 @@ msgstr ""
 
 #: gnubg.c:631
 msgid "Analyse moves during match -- a.k.a. tutor-mode"
-msgstr ""
+msgstr "Analysiere die Zuege waehrend des Matches (Tutor-Modus)"
 
 #: gnubg.c:633
 msgid "Automatically bear off as many chequers as possible"
-msgstr ""
+msgstr "Trage automatisch soviel Checker ab, wie moeglich"
 
 #: gnubg.c:635
 msgid "Enable the Crawford game based on match score"
@@ -1355,23 +1361,23 @@ msgstr ""
 
 #: gnubg.c:639
 msgid "Select whether to start new games after wins"
-msgstr ""
+msgstr "Waehle aus, ob nach einem Gewinn eine neue Partie gestartet werden soll"
 
 #: gnubg.c:641
 msgid "Select whether forced moves will be made automatically"
-msgstr ""
+msgstr "Waehle aus, ob forcierte Zuege automatisch gespielt werden sollen"
 
 #: gnubg.c:643
 msgid "Control whether dice will be rolled automatically"
-msgstr ""
+msgstr "Waehle aus, ob automatisch gewuerfelt werden soll"
 
 #: gnubg.c:647
 msgid "Ask for confirmation before aborting a game in progress"
-msgstr ""
+msgstr "Frage nach einer Bestaetigung, bevor eine Partie abgebrochen wird"
 
 #: gnubg.c:649
 msgid "Ask for confirmation before overwriting existing files"
-msgstr ""
+msgstr "Frage nach einer Bestaetigung, bevor eine bestehende Datei ueberschrieben wird"
 
 #: gnubg.c:653
 msgid "The U.S.A. spelling of `centre'"
@@ -1379,15 +1385,15 @@ msgstr ""
 
 #: gnubg.c:655
 msgid "Allow both players access to the cube"
-msgstr ""
+msgstr "Erlaube beiden Spielern den Zugriff auf den Doppler"
 
 #: gnubg.c:657
 msgid "Allow only one player to double"
-msgstr ""
+msgstr "Erlaube nur einem Spieler den Zugriff auf den Doppler"
 
 #: gnubg.c:660
 msgid "Control use of the doubling cube"
-msgstr ""
+msgstr "Kontrolle des Dopplers"
 
 #: gnubg.c:662
 msgid "Fix what the cube stake has been set to"
@@ -1395,7 +1401,7 @@ msgstr ""
 
 #: gnubg.c:667
 msgid "Show match equities as percentages (on) or probabilities (off)"
-msgstr ""
+msgstr "Zeige die Matchequity in Prozent (ein) oder absoluter Wahrscheinlichkeit (aus)"
 
 #: gnubg.c:669
 msgid "Show output in MWC (on) or equity (off) (match play only)"
@@ -1407,47 +1413,47 @@ msgstr ""
 
 #: gnubg.c:674
 msgid "Show winning chances as percentages (on) or probabilities (off)"
-msgstr ""
+msgstr "Zeige die Gewinnchancen in Prozent (ein) oder absoluter Wahrscheinlichkeit (aus)"
 
 #: gnubg.c:678
 msgid "Use the ANSI C rand() (usually linear congruential) generator"
-msgstr ""
+msgstr "Benutze den ANSI C Zufallsgenerator"
 
 #: gnubg.c:680
 msgid "Use the BSD random() non-linear additive feedback generator"
-msgstr ""
+msgstr "Benutze den BSD Zufallsgenerator"
 
 #: gnubg.c:682
 msgid "Use the I.S.A.A.C. generator"
-msgstr ""
+msgstr "Benutze den I.S.A.A.C. Zufallsgenerator"
 
 #: gnubg.c:685
 msgid "Enter all dice rolls manually"
-msgstr ""
+msgstr "Gebe die Wuerfe manuell ein"
 
 #: gnubg.c:686
 msgid "Use the MD5 generator"
-msgstr ""
+msgstr "Benutze den MD5 Zufallsgenerator"
 
 #: gnubg.c:688
 msgid "Use the Mersenne Twister generator"
-msgstr ""
+msgstr "Benutze den Mersenne Twister Zufallsgenerator"
 
 #: gnubg.c:691
 msgid "Specify an external generator"
-msgstr ""
+msgstr "Definiere einen externen Zufallsgenerator"
 
 #: gnubg.c:695 gnubg.c:702
 msgid "Specify parameters for chequerplay during rollouts"
-msgstr ""
+msgstr "Definiere die Parameter fuer das Checkerplay waehrend der Rollouts"
 
 #: gnubg.c:698 gnubg.c:704
 msgid "Specify parameters for cube decisions during rollouts"
-msgstr ""
+msgstr "Definiere die Paramenter fuer Doppler-Entscheidungen waehrend des Rollouts"
 
 #: gnubg.c:706
 msgid "Specify whether the rollout is cubeful or cubeless"
-msgstr ""
+msgstr "Definiere, ob das Rollout mit oder ohne Doppler ausgefuehrt wird"
 
 #: gnubg.c:709
 msgid "Roll out as the initial position of a game"
@@ -1471,7 +1477,7 @@ msgstr ""
 
 #: gnubg.c:720
 msgid "End rollouts at a particular depth"
-msgstr ""
+msgstr "Beende die Rollouts bei einer bestimmten Tiefe"
 
 #: gnubg.c:722
 msgid "Use lookahead during rollouts to reduce variance"
@@ -1491,95 +1497,95 @@ msgstr ""
 
 #: gnubg.c:738
 msgid "Set evaluation parameters for chequer play"
-msgstr ""
+msgstr "Lege die Parameter fuer die Abschaetzung des Checkerplays fest"
 
 #: gnubg.c:741
 msgid "Set evaluation parameters for cube decisions"
-msgstr ""
+msgstr "Lege die Parameter fuer die Abschaetzung der Doppler-Entscheidungen fest"
 
 #: gnubg.c:746
 msgid "show detailed parameters for evaluations"
-msgstr ""
+msgstr "Zeige detaillierte Parameter der Abschaetzung"
 
 #: gnubg.c:748
 msgid "show detailed parameters for rollouts"
-msgstr ""
+msgstr "Zeige detaillierte Parameter der Rollouts"
 
 #: gnubg.c:752
 msgid "set URL to pictures used in HTML export"
-msgstr ""
+msgstr "Lege die URL zu den Bildern fest, die fuer den HTML-Export benutzt werden"
 
 #: gnubg.c:756 gnubg.c:772
 msgid "show very bad moves"
-msgstr ""
+msgstr "Zeige sehr schlechte Zuege"
 
 #: gnubg.c:758 gnubg.c:774
 msgid "show bad moves"
-msgstr ""
+msgstr "Zeige schlechte Zuege"
 
 #: gnubg.c:760 gnubg.c:776
 msgid "show doubtful moves"
-msgstr ""
+msgstr "Zeige zweifelhafte Zuege"
 
 #: gnubg.c:762 gnubg.c:778
 msgid "show unmarked moves"
-msgstr ""
+msgstr "Zeige nichtmarkierte Zuege"
 
 #: gnubg.c:764 gnubg.c:780
 msgid "show interesting moves"
-msgstr ""
+msgstr "Zeige interessante Zuege"
 
 #: gnubg.c:766 gnubg.c:782
 msgid "show good moves"
-msgstr ""
+msgstr "Zeige gute Zuege"
 
 #: gnubg.c:768 gnubg.c:784 gnubg.c:786 gnubg.c:788
 msgid "show very good moves"
-msgstr ""
+msgstr "Zeige sehr gute Zuege"
 
 #: gnubg.c:792
 msgid "include annotations"
-msgstr ""
+msgstr "Fuege Kommentare hinzu"
 
 #: gnubg.c:794
 msgid "include analysis (evaluations/rollouts)"
-msgstr ""
+msgstr "Fuege Analysen hinzu (Abschaetzung/Rollouts)"
 
 #: gnubg.c:796
 msgid "include statistics (# of bad moves, # of jokers, etc)"
-msgstr ""
+msgstr "Fuege Statistiken hinzu (schlechte Zuege, Joker, usw.)"
 
 #: gnubg.c:799
 msgid "include a legend that describes the output of the export"
-msgstr ""
+msgstr "Fuege Erklaerungen fuer den Export hinzu"
 
 #: gnubg.c:804
 msgid "show board every [value] move (0 for never)"
-msgstr ""
+msgstr "Zeige das Board alle [Anzahl] Zuege ('0' fuer niemals)"
 
 #: gnubg.c:806
 msgid "which player(s) to show"
-msgstr ""
+msgstr "Welche(r) Spieler soll(en) gezeigt werden"
 
 #: gnubg.c:810
 msgid "show at most [value] moves"
-msgstr ""
+msgstr "Zeige mindesten [Anzahl] Zuege"
 
 #: gnubg.c:812 gnubg.c:820
 msgid "show detailed probabilities"
-msgstr ""
+msgstr "Zeige detaillierte Wahrscheinlichkeiten"
 
 #: gnubg.c:814 gnubg.c:822
 msgid "show detailed rollout/evaluation parameters"
-msgstr ""
+msgstr "Zeige detailliere Rollout-/Abschaetzuns-Parameter"
 
 #: gnubg.c:816 gnubg.c:824
 msgid "when to show moves"
-msgstr ""
+msgstr "Wann sollen Zuege gezeigt werden"
 
 #: gnubg.c:828
 msgid "Set options for HTML export"
-msgstr ""
+msgstr "Lege die Optionen fuer den HTML-Export fest"
 
 #: gnubg.c:830
 msgid "Control which blocks to include in exports"
@@ -1599,7 +1605,7 @@ msgstr ""
 
 #: gnubg.c:841
 msgid "invert match equity table"
-msgstr ""
+msgstr "Drehe die Matchequity-Tabelle um"
 
 #: gnubg.c:843
 msgid "alias for 'set invert matchequitytable'"
@@ -1607,55 +1613,55 @@ msgstr ""
 
 #: gnubg.c:847
 msgid "Set default path for exporting Encapsulated PostScript files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Export von EPS-Dateien"
 
 #: gnubg.c:850
 msgid "Set default path for importing or exporting Jellyfish .gam files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Import/Export von Jellyfish '.gam'-Dateien"
 
 #: gnubg.c:853
 msgid "Set default path for exporting HTML files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Export von HTML-Dateien"
 
 #: gnubg.c:856
 msgid "Set default path for exporting LaTeX files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Export von LaTeX-Dateien"
 
 #: gnubg.c:859
 msgid "Set default path for importing or exporting Jellyfish .mat files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Import/Export von Jellyfish '.mat'-Dateien"
 
 #: gnubg.c:862
 msgid "Set default path for importing FIBS oldmoves files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Import von FIBS 'oldmoves'-Dateien"
 
 #: gnubg.c:865
 msgid "Set default path for exporting PDF files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Export von PDF-Dateien"
 
 #: gnubg.c:868
 msgid "Set default path for importing Jellyfish .pos files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Import von Jellyfish '.pos'-Dateien"
 
 #: gnubg.c:871
 msgid "Set default path for exporting PostScript files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Export von PS-Dateien"
 
 #: gnubg.c:874
 msgid "Set default path for loading and saving SGF files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer das Oeffnen/Speichern von SGF-Dateien"
 
 #: gnubg.c:877
 msgid "Set default path for importing GamesGrid SGG files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Import von Gamesgrid '.ssg'-Dateien"
 
 #: gnubg.c:880
 msgid "Set default path for export of text files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer den Export von Text-Dateien"
 
 #: gnubg.c:883
 msgid "Set default path for loading match equity files"
-msgstr ""
+msgstr "Setze den Vorgabe-Pfad fuer das Oeffnen der Matchequity-Dateien"
 
 #: gnubg.c:887
 msgid "Control parameters used when analysing moves"
@@ -1663,11 +1669,11 @@ msgstr ""
 
 #: gnubg.c:889
 msgid "Select whether move analysis and commentary are shown"
-msgstr ""
+msgstr "Waehle aus, ob Zug-Analysen und Kommentare gezeigt werden sollen"
 
 #: gnubg.c:891
 msgid "Modify the look and feel of the graphical interface"
-msgstr ""
+msgstr "Modifiziere das Aussehen der grafischen Oberflaeche"
 
 #: gnubg.c:893
 msgid "Perform certain functions without user input"
@@ -1675,15 +1681,15 @@ msgstr ""
 
 #: gnubg.c:896
 msgid "Set whether beavers are allowed in money game or not"
-msgstr ""
+msgstr "Lege fest, ob 'Beaver' im Moneygame erlaubt sind"
 
 #: gnubg.c:898
 msgid "Set up the board in a particular position"
-msgstr ""
+msgstr "Baue das Spielfeld mit einer bestimmten Position auf"
 
 #: gnubg.c:900
 msgid "Set the size of the evaluation cache"
-msgstr ""
+msgstr "Lege die Groesse des Abschaetzungs-Cachespeichers fest"
 
 #: gnubg.c:902
 msgid "Control the board orientation"
@@ -1695,27 +1701,27 @@ msgstr ""
 
 #: gnubg.c:906
 msgid "Confirmation settings"
-msgstr ""
+msgstr "Einstellungen fuer Bestaetigen"
 
 #: gnubg.c:908
 msgid "Set whether this is the Crawford game"
-msgstr ""
+msgstr "Lege fest, ob dies die 'Crawford'-Partie ist"
 
 #: gnubg.c:909
 msgid "Set the cube owner and/or value"
-msgstr ""
+msgstr "Lege den Eigentuemer und/oder Wert des Dopplers fest"
 
 #: gnubg.c:910
 msgid "Limit the speed at which moves are made"
-msgstr ""
+msgstr "Begrenze die Geschwindigkeit, in der Zuege ausgefuehrt werden"
 
 #: gnubg.c:912
 msgid "Select the roll for the current move"
-msgstr ""
+msgstr "Lege den Wurf fuer den gegenwaertigen Zug fest"
 
 #: gnubg.c:915
 msgid "Select whether the board is updated on the computer's turn"
-msgstr ""
+msgstr "Waehle aus, ob das Spielfeld beim Computerzug erneuert werden soll"
 
 #: gnubg.c:917
 msgid "Control position evaluation parameters"
@@ -1723,35 +1729,35 @@ msgstr ""
 
 #: gnubg.c:920
 msgid "Set whether to use the Egyptian rule in games"
-msgstr ""
+msgstr "Lege fest, ob die 'Aegyptische' Regel benutzt wird"
 
 #: gnubg.c:921
 msgid "Set settings for export"
-msgstr ""
+msgstr "Lege die Einstellungen fuer den Export fest"
 
 #: gnubg.c:922
 msgid "Invert match equity table"
-msgstr ""
+msgstr "Drehe die Matchequity-Tabelle"
 
 #: gnubg.c:923
 msgid "Set whether to use the Jacoby rule in money games"
-msgstr ""
+msgstr "Lege fest, ob die 'Jacoby'-Regel im Moneygame benutzt wird"
 
 #: gnubg.c:926
 msgid "Read match equity table from XML file"
-msgstr ""
+msgstr "Lese die Matchequity-Tabelle aus einer XML-Datei"
 
 #: gnubg.c:927
 msgid "set Match ID"
-msgstr ""
+msgstr "Setze die Match ID ein"
 
 #: gnubg.c:929
 msgid "Synonym for `set matchequitytable'"
-msgstr ""
+msgstr "Synonym fuer den Befehl `set matchequitytable'"
 
 #: gnubg.c:930
 msgid "Set the starting position"
-msgstr ""
+msgstr "Lege die Startaufstellung fest"
 
 #: gnubg.c:932
 msgid "Modify options for formatting results"
@@ -1759,63 +1765,63 @@ msgstr ""
 
 #: gnubg.c:934
 msgid "Set default path when saving, loading, importing, and exporting files."
-msgstr ""
+msgstr "Lege die Vorgabe-Pfade fuer Speichern, Oeffnen, Import und Export von Dateien fest."
 
 #: gnubg.c:936
 msgid "Change options for one or both players"
-msgstr ""
+msgstr "Aendere die Optionen fuer einen oder beide Spieler"
 
 #: gnubg.c:939
 msgid "Set whether this is a post-Crawford game"
-msgstr ""
+msgstr "Lege fest, ob dies eine 'Post-Crawford'-Partie ist"
 
 #: gnubg.c:940
 msgid "Customise the prompt gnubg prints when ready for commands"
-msgstr ""
+msgstr "Passe den 'Prompt' von GNU Backgammon an"
 
 #: gnubg.c:942
 msgid "Set whether all games in a session are recorded"
-msgstr ""
+msgstr "Lege fest, ob alle Partien einer Sitzung aufgezeichnet werden"
 
 #: gnubg.c:944
 msgid "Select the random number generator algorithm"
-msgstr ""
+msgstr "Lege den Zufallsgenerator fest"
 
 #: gnubg.c:946
 msgid "Control rollout parameters"
-msgstr ""
+msgstr "Kontrolle der Rollout-Parameter"
 
 #: gnubg.c:948
 msgid "Set the match or session score "
-msgstr ""
+msgstr "Lege den Spielstand des Matches/der Sitzung fest"
 
 #: gnubg.c:951
 msgid "Set the dice generator seed"
-msgstr ""
+msgstr "Lege die 'seed' des Wurf-Generators fest"
 
 #: gnubg.c:953
 msgid "Control training parameters"
-msgstr ""
+msgstr "Kontrolle der Trainings-Parameter"
 
 #: gnubg.c:954
 msgid "Set which player is on roll"
-msgstr ""
+msgstr "Lege fest, welcher Spieler am Zug ist"
 
 #: gnubg.c:959
 msgid "Compute statistics for current game"
-msgstr ""
+msgstr "Berechne die Statistiken der laufenden Partie"
 
 #: gnubg.c:961
 msgid "Compute statistics for every game in the match"
-msgstr ""
+msgstr "Berechne Statistiken aller Partien des Mataches"
 
 #: gnubg.c:963
 msgid "Compute statistics for every game in the session"
-msgstr ""
+msgstr "Berechne Statistiken aller Parien der Sitzung"
 
 #: gnubg.c:966
 msgid "Show parameters used for analysing moves"
-msgstr ""
+msgstr "Zeige die Parameter fuer die Analyse von Zuegen"
 
 #: gnubg.c:968
 msgid "List which functions will be performed without user input"
@@ -1823,15 +1829,15 @@ msgstr ""
 
 #: gnubg.c:971
 msgid "Show whether beavers are allowed in money game or not"
-msgstr ""
+msgstr "Zeige, ob 'Beaver' im Moneygame erlaubt sind oder nicht"
 
 #: gnubg.c:974
 msgid "Redisplay the board position"
-msgstr ""
+msgstr "Zeige nochmals das Spielfeld"
 
 #: gnubg.c:975
 msgid "Display statistics on the evaluation cache"
-msgstr ""
+msgstr "Zeige Statistiken fuer den Speichercache der Abschaetzungen"
 
 #: gnubg.c:977
 msgid "Display the board orientation"
@@ -1839,35 +1845,35 @@ msgstr ""
 
 #: gnubg.c:979
 msgid "List all available commands"
-msgstr ""
+msgstr "Liste alle verfuegbaren Kommandos auf"
 
 #: gnubg.c:982
 msgid "Show whether confirmation is required before aborting a game"
-msgstr ""
+msgstr "Zeige, ob der Abbruch einer Partie bestaetigt werden muss"
 
 #: gnubg.c:984
 msgid "Conditions for redistributing copies of GNU Backgammon"
-msgstr ""
+msgstr "Bedingungen fuer die Verteilung von Kopien von GNU Backgammon"
 
 #: gnubg.c:987
 msgid "See if this is the Crawford game"
-msgstr ""
+msgstr "Zeige, ob dies die 'Crawford'-Partie ist"
 
 #: gnubg.c:988
 msgid "Display the current cube value and owner"
-msgstr ""
+msgstr "Zeige den gegenwaertigen Eigentuemer und Wert des Dopplers"
 
 #: gnubg.c:990
 msgid "See what the current delay setting is"
-msgstr ""
+msgstr "Zeige die gegenwaertigen Verzoegerungen"
 
 #: gnubg.c:992
 msgid "See what the current dice roll is"
-msgstr ""
+msgstr "Zeige den gegenwaertigen Wurf"
 
 #: gnubg.c:995
 msgid "Show whether the board will be updated on the computer's turn"
-msgstr ""
+msgstr "Zeige, ob das Spielfeld bei einem Computerzug erneuert werden soll"
 
 #: gnubg.c:997
 msgid "Display the status of the evaluation engine"
@@ -1875,103 +1881,103 @@ msgstr ""
 
 #: gnubg.c:999
 msgid "Display evaluation settings and statistics"
-msgstr ""
+msgstr "Zeige die Einstellungen der Abschaetzung und Statistik"
 
 #: gnubg.c:1001
 msgid "Show gammon values"
-msgstr ""
+msgstr "Zeige den Gammonpreis"
 
 #: gnubg.c:1004
 msgid "See if the Egyptian rule is used in sessions"
-msgstr ""
+msgstr "Zeige, ob die 'Aegyptische' Regel in Sitzungen benutzt wird"
 
 #: gnubg.c:1005
 msgid "Show current export settings"
-msgstr ""
+msgstr "Zeige die gegenwaertigen Einstellungen fuer den Export"
 
 #: gnubg.c:1008
 msgid "See if the Jacoby rule is used in money sessions"
-msgstr ""
+msgstr "Zeige, ob die 'Jacoby'-Regel im Moneygame benutzt wird"
 
 #: gnubg.c:1009
 msgid "Calculate Kleinman count for position"
-msgstr ""
+msgstr "Berechne den 'Kleinman-Count' fuer die Position"
 
 #: gnubg.c:1012
 msgid "show market window for doubles"
-msgstr ""
+msgstr "Zeige das 'Marktfenster' fuer mögliche Doppel"
 
 #: gnubg.c:1014
 msgid "Show match equity table"
-msgstr ""
+msgstr "Zeige die 'Machtequity'-Tabelle"
 
 #: gnubg.c:1016
 msgid "Synonym for `show matchequitytable'"
-msgstr ""
+msgstr "Synonym fuer den Befehl `show matchequitytable'"
 
 #: gnubg.c:1018
 msgid "Display which starting position will be used"
-msgstr ""
+msgstr "Zeige, welche Ausgangsstellung benutzt wird"
 
 #: gnubg.c:1019
 msgid "Show how results will be formatted"
-msgstr ""
+msgstr "Zeige, wir die Resultate formatiert werden"
 
 #: gnubg.c:1021
 msgid "Show default paths for save, load, export, and import"
-msgstr ""
+msgstr "Zeige die Vorgabe-Pfade fuer Speichern, Oeffnen, Export und Import"
 
 #: gnubg.c:1024
 msgid "Count the number of pips each player must move to bear off"
-msgstr ""
+msgstr "Zeige die Anzahl Pips, die jeder Spieler fuer das 'Bearoff' benoetigt"
 
 #: gnubg.c:1026
 msgid "View per-player options"
-msgstr ""
+msgstr "Zeige die 'per-player' Optionen"
 
 #: gnubg.c:1028
 msgid "See if this is post-Crawford play"
-msgstr ""
+msgstr "Zeige, ob dies eine 'Post-Crawford'-Partie ist"
 
 #: gnubg.c:1029
 msgid "Show the prompt that will be printed when ready for commands"
-msgstr ""
+msgstr "Zeige den 'Prompt', den GNU Backgammon benutzt"
 
 #: gnubg.c:1031
 msgid "Display which random number generator is being used"
-msgstr ""
+msgstr "Zeige, welche Zufallsgenerator benutzt wird"
 
 #: gnubg.c:1033
 msgid "Display the evaluation settings used during rollouts"
-msgstr ""
+msgstr "Zeige die Einstellungen der Abschaetzung fuer 'Rollouts'"
 
 #: gnubg.c:1035
 msgid "View the match or session score "
-msgstr ""
+msgstr "Zeige den Spielstand des Matches oder der Sitzung"
 
 #: gnubg.c:1037
 msgid "Show the dice generator seed"
-msgstr ""
+msgstr "Zeige die 'seed' des Wuerfelgenerators"
 
 #: gnubg.c:1039
 msgid "Show statistics"
-msgstr ""
+msgstr "Zeige Statistiken"
 
 #: gnubg.c:1040
 msgid "Calculate Thorp Count for position"
-msgstr ""
+msgstr "Berechne den 'Thorp-Count' fuer die Position"
 
 #: gnubg.c:1042
 msgid "Display the training parameters"
-msgstr ""
+msgstr "Zeige die Parameter fuer das Training"
 
 #: gnubg.c:1045
 msgid "Show which player is on roll"
-msgstr ""
+msgstr "Zeige, welcher Spieler am Zug ist"
 
 #: gnubg.c:1047
 msgid "Describe this version of GNU Backgammon"
-msgstr ""
+msgstr "Zeige die Versionsnummer von GNU Backgammon"
 
 #: gnubg.c:1050
 msgid "Various kinds of warranty you do not have"
@@ -1979,7 +1985,7 @@ msgstr ""
 
 #: gnubg.c:1053 gnubg.c:1125
 msgid "Swap players"
-msgstr ""
+msgstr "Wechsel die Spieler"
 
 #: gnubg.c:1058
 msgid "Train the network by TD(0) zero-knowledge self-play"
@@ -1987,179 +1993,179 @@ msgstr ""
 
 #: gnubg.c:1062
 msgid "Accept a cube or resignation"
-msgstr ""
+msgstr "Einen Doppler oder eine gegnerische Aufgabe akzeptieren"
 
 #: gnubg.c:1064
 msgid "Agree to a resignation"
-msgstr ""
+msgstr "Stimme einer Aufgabe zu"
 
 #: gnubg.c:1065
 msgid "Run analysis"
-msgstr ""
+msgstr "Starte Analyse"
 
 #: gnubg.c:1068
 msgid "Record notes about a game"
-msgstr ""
+msgstr "Zeichne Notizen zu einer Partie auf"
 
 #: gnubg.c:1069
 msgid "Synonym for `redouble'"
-msgstr ""
+msgstr "Synonym fuer den Befehl `redouble'"
 
 #: gnubg.c:1070
 msgid "Copy current position to clipboard"
-msgstr ""
+msgstr "Kopiere die gegenwaertige Position in die Zwischenablage"
 
 #: gnubg.c:1072
 msgid "Manipulate a database of positions"
-msgstr ""
+msgstr "Veraendere eine Positions-Datenbank"
 
 #: gnubg.c:1074
 msgid "Decline a resignation"
-msgstr ""
+msgstr "Lehne eine Aufgabe ab"
 
 #: gnubg.c:1075
 msgid "Offer a double"
-msgstr ""
+msgstr "Biete ein Doppel an"
 
 #: gnubg.c:1076
 msgid "Decline an offered double"
-msgstr ""
+msgstr "Lehne ein angebotenes Doppel ab"
 
 #: gnubg.c:1078
 msgid "Convert normalised money equity to match winning chance"
-msgstr ""
+msgstr "Wandel 'normailzed money equity' in 'match winning chance' um"
 
 #: gnubg.c:1080
 msgid "Display evaluation of a position"
-msgstr ""
+msgstr "Zeige die Abschaetzung einer Position"
 
 #: gnubg.c:1082 gnubg.c:1110
 msgid "Leave GNU Backgammon"
-msgstr ""
+msgstr "Verlasse GNU Backgammon"
 
 #: gnubg.c:1083
 msgid "Write data for use by other programs"
-msgstr ""
+msgstr "Speichere Daten fuer den Gebrauch in anderen Anwendungen"
 
 #: gnubg.c:1085
 msgid "Make moves for an external controller"
-msgstr ""
+msgstr "Fuehre den Zug eines externen Programms aus"
 
 #: gnubg.c:1087 gnubg.c:1129
 msgid "Describe commands"
-msgstr ""
+msgstr "Beschreibe Kommandos"
 
 #: gnubg.c:1089
 msgid "Give hints on cube action or best legal moves"
-msgstr ""
+msgstr "Zeige Tipps fuer Doppler-Aktionen oder die besten legalen Zuege"
 
 #: gnubg.c:1091
 msgid "invert match equity tables, etc."
-msgstr ""
+msgstr "Drehe die 'Matcheyuity'-Tabelle um, etc."
 
 #: gnubg.c:1094
 msgid "Import matches, games or positions from other programs"
-msgstr ""
+msgstr "Importiere Matches, Partien oder Positionen aus anderen Anwendungen"
 
 #: gnubg.c:1096
 msgid "Show a list of games or moves"
-msgstr ""
+msgstr "Zeige eine Liste von Partien oder Zuegen"
 
 #: gnubg.c:1097
 msgid "Read data from a file"
-msgstr ""
+msgstr "Lese Daten aus einer Datei"
 
 #: gnubg.c:1098
 msgid "Make a backgammon move"
-msgstr ""
+msgstr "Mach einen Zug"
 
 #: gnubg.c:1100
 msgid "Convert match winning chance to normalised money equity"
-msgstr ""
+msgstr "Wandel 'match winning chance' in 'normalized money equity' um"
 
 #: gnubg.c:1103
 msgid "Start a new game, match or session"
-msgstr ""
+msgstr "Beginne eine neue Partie, ein neues Match oder eine neue Sitzung"
 
 #: gnubg.c:1104
 msgid "Step ahead within the game"
-msgstr ""
+msgstr "Geh in der laufenden Partie vorwaerts"
 
 #: gnubg.c:1106
 msgid "Synonym for `drop'"
-msgstr ""
+msgstr "Synonym fuer den Befehl `drop'"
 
 #: gnubg.c:1107
 msgid "Force the computer to move"
-msgstr ""
+msgstr "Zwinge den Computer zu ziehen"
 
 #: gnubg.c:1108
 msgid "Step backward within the game"
-msgstr ""
+msgstr "Geh in der laufenden Partie rueckwaerts"
 
 #: gnubg.c:1112
 msgid "Accept the cube one level higher than it was offered"
-msgstr ""
+msgstr "Akzeptiere den Doppler ein Level oberhalb des Angebots"
 
 #: gnubg.c:1114
 msgid "Reject a cube or resignation"
-msgstr ""
+msgstr "Lehne ein Doppel oder eine Aufgabe ab"
 
 #: gnubg.c:1116
 msgid "Offer to end the current game"
-msgstr ""
+msgstr "Biete an, die laufende Partie zu beenden"
 
 #: gnubg.c:1118
 msgid "Roll the dice"
-msgstr ""
+msgstr "Wuerfel"
 
 #: gnubg.c:1120
 msgid "Have gnubg perform rollouts of a position"
-msgstr ""
+msgstr "Lass gnubg 'Rollouts' einer Stellung erstellen"
 
 #: gnubg.c:1122
 msgid "Write data to a file"
-msgstr ""
+msgstr "Speichere die Daten in eine Datei"
 
 #: gnubg.c:1123
 msgid "Modify program parameters"
-msgstr ""
+msgstr "Veraendere die Programm-Parameter"
 
 #: gnubg.c:1124
 msgid "View program parameters"
-msgstr ""
+msgstr "Zeige die Programm-Parameter"
 
 #: gnubg.c:1126
 msgid "Agree to an offered double"
-msgstr ""
+msgstr "Stimme einem angebotenen Doppel zu"
 
 #: gnubg.c:1127
 msgid "Update gnubg's weights from training data"
-msgstr ""
+msgstr "Aktualisiere gnubg's 'weights' aus Trainingsdaten"
 
 #: gnubg.c:1139
 msgid "Guile supported."
-msgstr ""
+msgstr "'Guile' wird unterstuetzt"
 
 #: gnubg.c:1142
 msgid "Position databases supported."
-msgstr ""
+msgstr "Positions-dazenbanken werden unterstuetzt"
 
 #: gnubg.c:1145
 msgid "Window system supported."
-msgstr ""
+msgstr "Die grafische Oberflaeche wird unterstuetzt"
 
 #: gnubg.c:1148
 msgid "External players supported."
-msgstr ""
+msgstr "Externe Spieler werden unterstuetzt"
 
 #: gnubg.c:1151
 msgid "XML match equity files supported."
-msgstr ""
+msgstr "XML Matchequity-Dateien werden unterstuetzt"
 
 #: gnubg.c:1353
 msgid "Current position"
-msgstr ""
+msgstr "Gegenwaertige Position"
 
 #: gnubg.c:1373
 #, c-format
@@ -2172,7 +2178,7 @@ msgstr ""
 
 #: gnubg.c:1418
 msgid "There is no valid move list."
-msgstr ""
+msgstr "Es gibt keine gueltige Zug-Liste"
 
 #: gnubg.c:1423
 #, c-format
@@ -2181,7 +2187,7 @@ msgstr ""
 
 #: gnubg.c:1439
 msgid "Illegal position."
-msgstr ""
+msgstr "Illegale Position"
 
 #: gnubg.c:1507
 #, c-format
@@ -2195,82 +2201,82 @@ msgstr ""
 
 #: gnubg.c:1591
 msgid "(Interrupted)"
-msgstr ""
+msgstr "(Unterbrochen)"
 
 #: gnubg.c:1711
 msgid "This system does not support shell escapes."
-msgstr ""
+msgstr "Dieses System unterstuetzt keine 'Shell-Escape-Sequenzen."
 
 #: gnubg.c:1771
 msgid "This installation of GNU Backgammon was compiled without Guile support."
-msgstr ""
+msgstr "Diese version von GNU Backgammon wurde ohne 'Guile'-Unterstuetzung erstellt"
 
 #: gnubg.c:1781
 msgid "Incomplete command -- try `help'."
-msgstr ""
+msgstr "Kommando nicht vollstaendig -- Versuche `help'."
 
 #: gnubg.c:1805
 #, c-format
 msgid "Unknown keyword `%s' -- try `help'.\n"
-msgstr ""
+msgstr "Unbekanntes Wort '%s' -- Versuche `help'.\n"
 
 #: gnubg.c:1903 gnubg.c:2058 gnubg.c:3249 gtkgame.c:1962 text.c:84 text.c:834
 #, c-format
 msgid "Rolled %d%d"
-msgstr ""
+msgstr "Wurf %d%d"
 
 #: gnubg.c:1933
 #, c-format
 msgid "Rolled %d%d (%s):\n"
-msgstr ""
+msgstr "Wurf %d%d (%s):\n"
 
 #: gnubg.c:2007 gnubg.c:2800
 msgid "No game in progress."
-msgstr ""
+msgstr "Keine laufende Partie."
 
 #: gnubg.c:2035 gnubg.c:2040 gnubg.c:3224 gnubg.c:3229 text.c:61 text.c:66
 #, c-format
 msgid "%d point"
-msgstr ""
+msgstr "%d Punkt"
 
 #: gnubg.c:2037 gnubg.c:2042 gnubg.c:3226 gnubg.c:3231 text.c:63 text.c:68
 #, c-format
 msgid "%d points"
-msgstr ""
+msgstr "%d Punkte"
 
 #: gnubg.c:2049 gnubg.c:3239 text.c:75
 #, c-format
 msgid "Cube offered at %d"
-msgstr ""
+msgstr "Doppler angeboten auf %d"
 
 #: gnubg.c:2060 gnubg.c:3251 text.c:86
 msgid "On roll"
-msgstr ""
+msgstr "Am Wurf"
 
 #: gnubg.c:2069 gnubg.c:3260 text.c:95
 #, c-format
 msgid "%d point match (Cube: %d)"
-msgstr ""
+msgstr "%d-Punkte-Match (Doppler: %d)"
 
 #: gnubg.c:2072 gnubg.c:3263 text.c:98
 #, c-format
 msgid "(Cube: %d)"
-msgstr ""
+msgstr "(Doppler: %d)"
 
 #: gnubg.c:2079 gnubg.c:3272 text.c:105
 #, c-format
 msgid "%c: %*s (Cube: %d)"
-msgstr ""
+msgstr "%c: %*s (Doppler: %d)"
 
 #: gnubg.c:2085 gnubg.c:3278 text.c:111
 #, c-format
 msgid "%d point match"
-msgstr ""
+msgstr "%d-Punkte-Match"
 
 #: gnubg.c:2091 text.c:117
 #, c-format
 msgid ", resigns %s"
-msgstr ""
+msgstr ", gibt auf %s"
 
 #: gnubg.c:2143
 #, c-format
@@ -2279,19 +2285,19 @@ msgstr ""
 
 #: gnubg.c:2169 gnubg.c:2181
 msgid "No game"
-msgstr ""
+msgstr "Keine Partie"
 
 #: gnubg.c:2191
 msgid "Game over"
-msgstr ""
+msgstr "Partie beendet"
 
 #: gnubg.c:2231 gnubg.c:2775 show.c:285 show.c:516 show.c:657 show.c:680
 msgid "No position specified and no game in progress."
-msgstr ""
+msgstr "Keine Position ausgewaehlt und keine laufende Partie"
 
 #: gnubg.c:2249
 msgid "Evaluating position..."
-msgstr ""
+msgstr "Schaetze Position ab ..."
 
 #: gnubg.c:2316
 #, c-format
@@ -2312,11 +2318,11 @@ msgstr ""
 
 #: gnubg.c:2350
 msgid "Available commands:"
-msgstr ""
+msgstr "Verfuegbare Kommandos:"
 
 #: gnubg.c:2351
 msgid "Available subcommands:"
-msgstr ""
+msgstr "Verfuegbare Unter-Kommandos:"
 
 #: gnubg.c:2441
 #, c-format
