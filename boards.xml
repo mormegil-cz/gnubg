@@ -134,17 +134,17 @@
          dot0=#000000 
          dot1=#EBEDF0 
          cube=#D4D4C4 
-         points0=#CC7F00;0.09 
-         points1=#7F3F00;0.20
-		piecetype=0
-		lighttype=p
-		roundededges=n
-         lightposx=1.100000 lightposy=-0.300000 lightposz=2.300000
+         points0=#FF5F5F;0.20
+         points1=#BFBFBF;0.20
+         piecetype=0
+         roundededges=y
+         lighttype=d
+         lightposx=3.000000 lightposy=0.000000 lightposz=3.600000
          lightambient=50 lightdiffuse=70 lightspecular=100
          chequers3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100
-         chequers3d1=#0D0D0D;#323232;#999999;90;100
+         chequers3d1=#0C0C0C;#262626;#E5E5E5;100;100
          dice3d0=#F7F7F7;#E0E0E0;#E5E5E5;81;100;y
-         dice3d1=#0D0D0D;#323232;#999999;90;100;y
+         dice3d1=#0C0C0C;#262626;#E5E5E5;100;100;y
          dot3d0=#000000;#000000;#000000;100;100
          dot3d1=#FFFFFF;#E5E5E5;#E5E5E5;100;100
          cube3d=#FFFFFF;#E0E0E0;#E5E5E5;81;0
@@ -153,9 +153,9 @@
          points3d0=#BF7200;#B26600;#995E3F;100;100;aboard.bmp
          points3d1=#753B00;#7D4400;#9E510C;100;100;aboard.bmp
          border3d=#3F2400;#4C2603;#703D26;71;100;aboard2.bmp
-         hinge3d=#F9E29B;#FFE599;#EACE8E;100;0
+         hinge3d=#895B49;#7D613D;#EACE8E;100;0;hinge.bmp
          numbers3d=#FFFFFF;#FFFFFF;#E5E5E5;100;100
-         background3d=#FFFEC4;#FFFFFF;#FFFFFF;100;0
+         background3d=#FBFFB5;#FEFFAA;#FEFF7E;100;0;aboard.bmp
        </design>
 
    </board-design>
