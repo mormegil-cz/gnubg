@@ -1,3 +1,7 @@
+Thu Oct 16 11:49:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* renderprefs.c: Fix for 3d dice opacity settings
+
 Tue Oct 14  18:43:10 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
 	* drawboard.c - FormatPoint assumed bar and off would always be

@@ -147,25 +147,25 @@ static int SetColourF( float arColour[ 4 ], char *sz ) {
 #endif /* USE_GTK */
 
 #if USE_BOARD3D
-static int SetMaterial(Material* pMat, char *sz)
+static int SetMaterialCommon(Material* pMat, char *sz)
 {
 	float opac;
 	char* pch;
 
-    if (SetColourF(pMat->ambientColour, sz) != 0)
+	if (SetColourF(pMat->ambientColour, sz) != 0)
 		return -1;
 	sz += strlen(sz) + 1;
 
-    if (SetColourF(pMat->diffuseColour, sz) != 0)
+	if (SetColourF(pMat->diffuseColour, sz) != 0)
 		return -1;
 	sz += strlen(sz) + 1;
 
-    if (SetColourF(pMat->specularColour, sz) != 0)
+	if (SetColourF(pMat->specularColour, sz) != 0)
 		return -1;
 
 	if (sz)
 		sz += strlen(sz) + 1;
-    if ((pch = strchr(sz, ';')))
+	if ((pch = strchr(sz, ';')))
 		*pch = 0;
 
 	if (sz)
@@ -175,7 +175,7 @@ static int SetMaterial(Material* pMat, char *sz)
 
 	if (sz)
 		sz += strlen(sz) + 1;
-    if ((pch = strchr(sz, ';')))
+	if ((pch = strchr(sz, ';')))
 		*pch = 0;
 	if (sz)
 	{
@@ -191,68 +191,39 @@ static int SetMaterial(Material* pMat, char *sz)
 	pMat->ambientColour[3] = pMat->diffuseColour[3] = pMat->specularColour[3] = opac;
 	pMat->alphaBlend = (opac != 1) && (opac != 0);
 
-	pMat->textureInfo = 0;
-	pMat->pTexture = 0;
 	if (pch)
 	{
 		sz += strlen(sz) + 1;
 		if (sz && *sz)
-			FindTexture(&pMat->textureInfo, sz);
+			return (int)sz;
 	}
-
 	return 0;
 }
 
-static int SetMaterialDice(Material* pMat, char *sz, int* flag)
-{	/* Bit different as extra paramater at end */
-	float opac;
-	char* pch;
-
-    if (SetColourF(pMat->ambientColour, sz) != 0)
-		return -1;
-	sz += strlen(sz) + 1;
-
-    if (SetColourF(pMat->diffuseColour, sz) != 0)
-		return -1;
-	sz += strlen(sz) + 1;
-
-    if (SetColourF(pMat->specularColour, sz) != 0)
-		return -1;
-
-	if (sz)
-		sz += strlen(sz) + 1;
-    if ((pch = strchr(sz, ';')))
-		*pch = 0;
-
-	if (sz)
-		pMat->shine = atoi(sz);
-	else
-		pMat->shine = 128;
-
-	if (sz)
-		sz += strlen(sz) + 1;
-    if ((pch = strchr(sz, ';')))
-		*pch = 0;
-	if (sz)
+static int SetMaterial(Material* pMat, char *sz)
+{
+	sz = (char*)SetMaterialCommon(pMat, sz);
+	pMat->textureInfo = 0;
+	pMat->pTexture = 0;
+	if (sz > 0)
 	{
-		int o = atoi(sz);
-		if (o == 100)
-			opac = 1;
-		else
-			opac = o / 100.0f;
+		FindTexture(&pMat->textureInfo, sz);
+		sz = 0;
 	}
-	else
-		opac = 1;
+	return (int)sz;
+}
 
+static int SetMaterialDice(Material* pMat, char *sz, int* flag)
+{
+	sz = (char*)SetMaterialCommon(pMat, sz);
 	/* die colour same as chequer colour */
 	*flag = TRUE;
-	if (pch)
+	if (sz > 0)
 	{
-		sz += strlen(sz) + 1;
-		if (sz)
-			*flag = (toupper(*sz) == 'Y');
+		*flag = (toupper(*sz) == 'Y');
+		sz = 0;
 	}
-	return 0;
+	return (int)sz;
 }
 
 #endif
