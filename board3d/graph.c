@@ -22,11 +22,7 @@
 */
 
 #include <config.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#if !WIN32
-#include <GL/glx.h>
-#endif
+#include "glincl.h"
 #if HAVE_GTKGLEXT
 #include <gtk/gtkgl.h>
 #include <gtk/gtkglwidget.h>

@@ -27,7 +27,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "matrix.h"
-#include <GL/gl.h>
+#include "glincl.h"
 #include "inc3d.h"
 #include "shadow.h"
 

@@ -31,8 +31,7 @@
 #else
 #include <io.h>
 #endif
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include "glincl.h"
 #include "inc3d.h"
 #include "shadow.h"
 #include "renderprefs.h"

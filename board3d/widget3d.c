@@ -22,11 +22,7 @@
 */
 
 #include <config.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#if !WIN32
-#include <GL/glx.h>
-#endif
+#include "glincl.h"
 #include "inc3d.h"
 #include "shadow.h"
 #include "renderprefs.h"

@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <memory.h>
 #include "matrix.h"
-#include <GL/gl.h>
+#include "glincl.h"
 #include "inc3d.h"
 
 void setIdMatrix(float m[4][4])
