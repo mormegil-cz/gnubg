@@ -2595,7 +2595,8 @@ static gint board_set( Board *board, const gchar *board_text,
 		{	/* Dice not on board */
 			bd->x_dice[ 0 ] = bd->x_dice[ 1 ] = -DIE_WIDTH - 3;
 
-			if (bd->diceRoll[ 0 ] == 0 && old_dice[0] > 0)
+			if ((bd->diceRoll[ 0 ] == 0 && old_dice[0] > 0) &&
+				(bd->diceRoll[ 1 ] == 0 && old_dice[1] > 0))
 			{
 				bd->diceShown = DICE_BELOW_BOARD;
 				/* Keep showing shaken values */
