@@ -179,6 +179,9 @@
 /* Define to 1 if you have the `png' library (-lpng). */
 #undef HAVE_LIBPNG
 
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
 /* Define to 1 if you have the `readline' library (-lreadline). */
 #undef HAVE_LIBREADLINE
 
@@ -397,6 +400,9 @@
 
 /* The directory where the weights and databases will be stored. */
 #undef PKGDATADIR
+
+/* Define if you want to use the multi-processor code */
+#undef PROCESSING_UNITS
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE

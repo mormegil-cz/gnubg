@@ -1,3 +1,11 @@
+Sat May 31 13:30:36 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Add autoconf magic for multi-processor code.
+
+	* configure.in: look for pthread.
+	* gnubg.c, eval.c, procunits.c, rollout.c: PROCESSOR_UNITS now
+	defined in config.h
+
 Sat May 31 12:55:28 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* procunits.c (Thrad_RemoteProcessingUnit): remove call to htons, since

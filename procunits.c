@@ -1,5 +1,3 @@
-#define PROCESSING_UNITS 1
-
 #if HAVE_CONFIG_H
 #include "config.h"
 #endif

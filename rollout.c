@@ -21,7 +21,6 @@
 
 #include "config.h"
 
-#define PROCESSING_UNITS 1
 #define SERIALIZE 0
 
 #if HAVE_ALLOCA_H

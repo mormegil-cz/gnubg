@@ -73,7 +73,6 @@
 #endif
 #endif
 
-#define PROCESSING_UNITS 1
 #include "threadglobals.h"
 
 

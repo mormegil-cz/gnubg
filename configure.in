@@ -330,6 +330,15 @@ fi
 AC_SUBST(NAS_LIBS)
 AC_SUBST(NAS_CFLAGS)
 
+dnl pthreads
+dnl (the multi-processor code uses pthreads)
+
+AC_CHECK_LIB(pthread, pthread_create)
+if test "$have_pthread" != "no"; then
+  AC_DEFINE(PROCESSING_UNITS,1,
+            [Define if you want to use the multi-processor code])
+fi
+
 dnl test for libpng
 
 AC_CHECK_LIB(png,png_create_info_struct)
