@@ -10,7 +10,8 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 	eval.c play.c positionid.h positionid.c drawboard.h drawboard.c \
 	pub_eval.c set.c show.c database.h database.c mt19937int.c \
 	mt19937int.h dice.c dice.h rollout.c rollout.h isaac.c isaac.h \
-	isaacs.h copying.c kleinman.c md5.c md5.h
+	isaacs.h copying.c kleinman.c md5.c md5.h matchequity.c matchequity.h \
+	analysis.h analysis.c
 COMMON_DEPS = lib/libevent.a
 
 bin_PROGRAMS = gnubg
@@ -44,7 +45,7 @@ pkgdata_DATA = gnubg.bd gnubg.wd
 noinst_PROGRAMS = makebearoff makeweights
 
 makebearoff_SOURCES = makebearoff.c eval.h eval.c positionid.h positionid.c \
-	pub_eval.c
+	pub_eval.c matchequity.c
 makebearoff_LDADD = -Llib -levent
 makebearoff_DEPENDENCIES = lib/libevent.a
 
