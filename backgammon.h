@@ -998,5 +998,8 @@ extern int *Highlightrgb;
 extern void
 SetMatchInfo( char **ppch, char *sz, char *szMessage );
 
+extern void
+TextToClipboard ( const char * sz );
+
 
 #endif

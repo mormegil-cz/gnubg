@@ -2163,7 +2163,6 @@ static void
 MainSelectionReceived ( GtkWidget *pw, GtkSelectionData *data,
                         guint time, gpointer user_data ) {
 
-
   if ( data->length < 0 ) 
     /* no data */
     return;
@@ -2176,6 +2175,25 @@ MainSelectionReceived ( GtkWidget *pw, GtkSelectionData *data,
     free ( szCopied );
 
   szCopied = strdup ( data->data );
+
+}
+
+
+extern void
+GTKTextToClipboard( const char *sz ) {
+
+  /* copy text into global pointer used by MainGetSelection */
+
+  if ( szCopied )
+    free ( szCopied );
+
+  szCopied = strdup( sz );
+
+  /* claim clipboard and primary selection */
+
+  gtk_selection_owner_set ( pwMain, gdk_atom_intern ("CLIPBOARD", FALSE), 
+                            GDK_CURRENT_TIME );
+  gtk_selection_owner_set ( pwMain, GDK_SELECTION_PRIMARY, GDK_CURRENT_TIME );
 
 }
 
@@ -2572,6 +2590,9 @@ extern int InitGTK( int *argc, char ***argv ) {
     
     gtk_selection_add_target( pwMain, 
                               gdk_atom_intern ("CLIPBOARD", FALSE),
+                              GDK_SELECTION_TYPE_STRING, 0 );
+    gtk_selection_add_target( pwMain, 
+                              GDK_SELECTION_PRIMARY,
                               GDK_SELECTION_TYPE_STRING, 0 );
 
     gtk_signal_connect( GTK_OBJECT( pwMain ), "size-request",

@@ -165,4 +165,7 @@ GTKGetMove ( int anMove[ 8 ] );
 
 extern void GTKRecordShow( FILE *pfIn, char *sz, char *szPlayer );
 
+extern void
+GTKTextToClipboard( const char *sz );
+
 #endif
