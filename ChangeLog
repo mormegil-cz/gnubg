@@ -1,3 +1,8 @@
+Wed Nov 03 20:44:45 2004   Oystein Johansen <oystein@gnubg.org>
+
+	* gtkgame.c (EvalWidget): Fix a copy'n'waste error
+	* eval.c: Change 'Tiny' movefilter to 5 candidates.
+
 Wed Nov 03 20:07:45 2004   Oystein Johansen <oystein@gnubg.org>
 
 	* gtkchequer.c (CreateMoveList): Use NULL instead of ""
