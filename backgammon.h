@@ -64,7 +64,6 @@ typedef RETSIGTYPE (*psighandler)( int );
 #endif
 
 #define MAX_CUBE ( 1 << 12 )
-#define MAX_CUBE_STR "4096"
 
 #ifdef WIN32
 #include <stdlib.h>
