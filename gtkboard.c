@@ -4434,6 +4434,7 @@ static void board_init( Board *board ) {
 
     bd->translucent = TRUE;
     bd->wood = WOOD_ALDER;
+    bd->hinges = TRUE;
     bd->labels = FALSE;
     bd->usedicearea = TRUE;
     bd->permit_illegal = FALSE;
