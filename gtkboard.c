@@ -4534,18 +4534,19 @@ static void ButtonClickedYesNo( GtkWidget *pw, char *sz ) {
 }
 
 
-static GtkWidget *
+extern GtkWidget *
 image_from_xpm_d ( char **xpm, GtkWidget *pw ) {
 
-    GdkPixmap *ppm;
+  GdkPixmap *ppm;
+  GdkBitmap *mask;
 
-    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
-            gtk_widget_get_colormap( pw ), NULL, NULL,
+  ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
+                 gtk_widget_get_colormap( pw ), &mask, NULL,
                                                xpm );
-    if ( ! ppm )
-      return NULL;
-
-    return gtk_pixmap_new( ppm, NULL );
+  if ( ! ppm )
+    return NULL;
+  
+  return gtk_pixmap_new( ppm, mask );
 
 }
 

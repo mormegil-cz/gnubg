@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "backgammon.h"
 #include "gtkboard.h"
@@ -52,6 +53,14 @@ static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
     *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges;
+
+#if HAVE_LIBXML2 && 0
+static GtkWidget *pwDesignMenu;
+static GtkWidget *pwDesignTitle;
+static GtkWidget *pwDesignAuthor;
+static GtkWidget *pwDesignPixmap;
+#endif /* HAVE_LIBXML2 */
+
 static GtkWidget *pwShowIDs;
 static GtkWidget *pwShowPips;
 static GtkWidget *apwDiceColour[ 2 ];
@@ -64,6 +73,138 @@ static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
 static int fShowIDs;
 static int fShowPips;
 static animation anim;
+
+
+typedef struct _boarddesign {
+
+  gchar *szTitle;        /* Title of board design */
+  gchar *szAuthor;       /* Name of author */
+  gchar *szFilePreview;  /* preview picture */
+
+  /* chequers */
+
+  gdouble aarColour[ 2 ][ 4 ];
+  gfloat arRefraction[ 2 ];
+  gfloat arCoefficient[ 2 ];
+  gfloat arExponent[ 2 ];
+  gboolean translucent;
+
+  /* board, border, and points */
+
+  guchar aanBoardColour[ 4 ][ 4 ];
+  int aSpeckle[ 4 ];
+  gboolean hinges;
+  BoardWood wood;
+
+  /* die */
+
+  int afDieColor[ 2 ];
+  gdouble aarDiceColour[ 2 ][ 4 ];
+  gfloat arDiceCoefficient[ 2 ];
+  gfloat arDiceExponent[ 2 ];
+
+  /* die dot */
+
+  gdouble aarDiceDotColour[ 2 ][ 4 ];
+  
+  /* cube */
+
+  gdouble arCubeColour[ 4 ]; 
+
+  /* light */
+
+  gfloat rAzimuth;
+  gfloat rElevation;
+
+} boarddesign;
+
+
+extern GList *
+read_board_designs ( void ) {
+
+  GList *pl;
+  boarddesign *pbde;
+  int i;
+
+  boarddesign bde = {
+    NULL, NULL, NULL,
+    /* chequers */
+    { { 1.0, 1.0, 1.0, 1.0 }, { 0.05, 0.05, 0.05, 1.0 } },
+    { 3.0, 3.0 }, 
+    { 0.9, 0.9 },
+    { 20.0, 15.1 },
+    FALSE,
+    /* board + points */
+    { { 243, 230, 218, 0 },
+      {   0,   0,   0, 0 },
+      {   0, 166, 128, 0 },
+      {  77,  77,  77, 0 } },
+    { 13, 0, 13, 13 },
+    TRUE, WOOD_EBONY, 
+    /* dice */
+    { TRUE, TRUE },
+    { { 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0 } },
+    { 0.0, 0.0 },
+    { 0.0, 0.0 },
+    /*  dice dot */
+    { { 0.93, 0.94, 0.95, 0.0 }, { 0.93, 0.94, 0.95, 0.0 } },
+    /* cube color */
+    { 0.84, 0.84, 0.78, 0.0 },
+    /* light */
+    150.0, 50.0
+  };
+    
+
+  if ( ! ( pl = g_list_alloc () ) )
+    return NULL;
+
+  /* read board designs from file */
+
+  for ( i = 0; i < 10; ++i ) {
+
+    pbde = (boarddesign *) malloc ( sizeof ( boarddesign ) );
+    
+    memcpy ( pbde, &bde, sizeof ( boarddesign ) );
+    pbde->szTitle = g_strdup ( "test board" );
+    pbde->szAuthor = g_strdup ( "Jørn Thyssen" );
+    pbde->szFilePreview = g_strdup ( "xpm/bla.xpm" );
+
+    g_list_append ( pl, (gpointer) pbde );
+
+  }
+
+  return pl;
+
+}
+
+static void
+free_board_design ( gpointer data, gpointer user_data ) {
+
+  boarddesign *pbde = data;
+
+  if ( ! pbde )
+    return;
+
+  g_free ( pbde->szTitle );
+  g_free ( pbde->szAuthor );
+  g_free ( pbde->szFilePreview );
+
+  g_free ( data );
+
+}
+
+extern void
+free_board_designs ( GList *pl ) {
+
+  g_list_foreach ( pl, free_board_design, NULL );
+  g_list_free ( pl );
+
+}
+
+
+
+
+
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
 
@@ -480,7 +621,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     
     pwUseDiceIcon = 
       gtk_check_button_new_with_label( _("Show dice below board when human "
-                                         "playe ron roll") );
+                                         "player on roll") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwUseDiceIcon ),
 				  fUseDiceIcon );
     gtk_box_pack_start( GTK_BOX( pw ), pwUseDiceIcon, FALSE, FALSE, 4 );
@@ -601,6 +742,321 @@ extern void BoardPreferencesStart( GtkWidget *pwBoard ) {
     if( GTK_WIDGET_REALIZED( pwBoard ) )
 	board_free_pixmaps( bd );
 }
+
+#if HAVE_LIBXML2 && 0
+
+/* functions for board design */
+
+static void
+DesignMenuActivate ( GtkWidget *pw, boarddesign *pbde ) {
+
+  gchar *sz;
+  GdkPixmap *ppm;
+  GdkBitmap *mask;
+  char *szPath = NULL;
+
+#include "xpm/no_picture.xpm"
+
+  /* set title */
+
+  gtk_label_set_text ( GTK_LABEL ( pwDesignTitle ),
+                       pbde->szTitle );
+
+  /* set author */
+
+  sz = g_strdup_printf ( _("by %s" ), pbde->szAuthor );
+  gtk_label_set_text ( GTK_LABEL ( pwDesignAuthor ), sz );
+  g_free ( sz );
+
+  /* set picture */
+
+  if ( pbde->szFilePreview ) {
+
+    szPath = PathSearch ( pbde->szFilePreview, szDataDirectory );
+    if ( szPath && access ( szPath, R_OK ) ) {
+      g_free ( szPath );
+      szPath = NULL;
+    }
+
+  }
+
+  if ( pbde->szFilePreview && szPath ) {
+
+    ppm = gdk_pixmap_colormap_create_from_xpm( NULL,
+                                               gtk_widget_get_colormap( pw ), 
+                                               &mask, NULL,
+                                               szPath );
+
+    g_free ( szPath );
+
+    if ( ! ppm )
+      return;
+
+  }
+  else {
+
+    /* no picture available */
+
+    ppm = gdk_pixmap_colormap_create_from_xpm_d( NULL,
+                                                 gtk_widget_get_colormap( pw ), 
+                                                 &mask, NULL,
+                                                 no_picture_xpm );
+    if ( ! ppm )
+      return;
+
+  }
+
+  gtk_pixmap_set ( GTK_PIXMAP ( pwDesignPixmap ),
+                   ppm, mask );
+
+}
+
+
+static void
+AddDesignMenuItem ( gpointer data, gpointer user_data ) {
+
+  GtkWidget *pwMenu = user_data;
+  boarddesign *pbde = data;
+  GtkWidget *pw;
+
+  if ( ! pbde )
+    return;
+
+  if ( pbde->szTitle && *pbde->szTitle )
+    pw = gtk_menu_item_new_with_label ( pbde->szTitle );
+  else
+    pw = gtk_menu_item_new_with_label ( _("No title") );
+
+  gtk_menu_append ( GTK_MENU ( pwMenu ), pw );
+
+  gtk_signal_connect ( GTK_OBJECT ( pw ), "activate",
+                       GTK_SIGNAL_FUNC ( DesignMenuActivate ),
+                       pbde );
+
+
+}
+
+static void
+UseDesign ( GtkWidget *pw, GtkWidget *pwOptionMenu ) {
+
+  int n = gtk_option_menu_get_history ( GTK_OPTION_MENU ( pwOptionMenu ) );
+  GList *pl = g_list_nth ( plBoardDesigns, n + 1 );
+  boarddesign *pbde = pl->data;
+  int i, j;
+  gdouble ar[ 4 ];
+
+  /* chequers */
+
+  fTranslucent = pbde->translucent;
+  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwTranslucent ), 
+                                fTranslucent );
+
+  for ( i = 0; i < 2; ++i ) {
+    gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwColour[ i ] ),
+                                    pbde->aarColour[ i ] );
+
+    gtk_color_selection_set_has_opacity_control(
+	GTK_COLOR_SELECTION( apwColour[ i ] ), fTranslucent );
+
+    gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadj[ i ] ),
+                               pbde->arRefraction[ i ] );
+
+    gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjCoefficient[ i ] ),
+                               pbde->arCoefficient[ i ] );
+
+    gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjExponent[ i ] ),
+                               pbde->arExponent[ i ] );
+
+
+  }
+
+  /* board, border, and points */
+
+  gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwHinges ), 
+                                 pbde->hinges );
+  gtk_option_menu_set_history( GTK_OPTION_MENU( pwWoodType ), pbde->wood );
+
+  gtk_widget_set_sensitive( pwWoodType, pbde->wood != WOOD_PAINT );
+  gtk_widget_set_sensitive( apwBoard[ 1 ], pbde->wood == WOOD_PAINT);
+
+  /* board + border */
+    
+  for ( i = 0; i < 2; ++i ) {
+
+    if ( !i ) 
+      gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjBoard[ i ] ),
+                                 pbde->aSpeckle[ i ] / 128.0 );
+
+    for ( j = 0; j < 3; j++ )
+      ar[ j ] = pbde->aanBoardColour[ i ][ j ] / 255.0;
+
+    gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwBoard[ i ]),
+                                    ar );
+
+  }
+
+  /* points */
+
+  for ( i = 0; i < 2; ++i ) {
+
+    gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjPoint[ i ] ),
+                               pbde->aSpeckle[ i + 2 ] / 128.0 );
+
+    for ( j = 0; j < 3; j++ )
+      ar[ j ] = pbde->aanBoardColour[ i + 2 ][ j ] / 255.0;
+
+    gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwPoint[ i ]),
+                                    ar );
+
+  }
+
+  /* dice + dice dot */
+
+  for ( i = 0; i < 2; ++i ) {
+
+    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( apwDieColor[ i ] ),
+                                   pbde->afDieColor[ i ] );
+    gtk_widget_set_sensitive ( GTK_WIDGET ( apwDiceColorBox[ i ] ),
+                               ! pbde->afDieColor[ i ] );
+
+    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwDiceColour[ i ] ),
+                                   pbde->afDieColor[ i ] ? 
+                                   pbde->aarColour[ i ] :
+                                   pbde->aarDiceColour[ i ] );
+
+    gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjDiceExponent[ i ] ),
+                               pbde->afDieColor[ i ] ? 
+                               pbde->arExponent[ i ] :
+                               pbde->arDiceExponent[ i ] );
+
+    gtk_adjustment_set_value ( GTK_ADJUSTMENT ( apadjDiceCoefficient[ i ] ),
+                               pbde->afDieColor[ i ] ?
+                               pbde->arCoefficient[ i ] :
+                               pbde->arDiceCoefficient[ i ] );
+
+
+    /* die dot */
+
+    gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( apwDiceDotColour[ i ] ), 
+                                    pbde->aarDiceDotColour[ i ] );
+
+  }
+
+  /* cube color */
+  
+  gtk_color_selection_set_color ( GTK_COLOR_SELECTION ( pwCubeColour ), 
+                                  pbde->arCubeColour );
+
+  /* light */
+
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT ( paAzimuth ),
+                             pbde->rAzimuth );
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT ( paElevation ),
+                             pbde->rElevation );
+
+
+}
+
+static GtkWidget *
+DesignPage ( void ) {
+
+
+  GtkWidget *pwvbox;
+  GtkWidget *pwhbox;
+  GtkWidget *pw;
+  GtkWidget *pwFrame;
+  GtkWidget *pwv;
+
+#include "xpm/no_picture.xpm"
+
+  pwvbox = gtk_vbox_new ( FALSE, 0 );
+
+  /* menu with board designs */
+
+  pwhbox = gtk_hbox_new ( FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwhbox, FALSE, FALSE, 4 );
+
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ), 
+                       gtk_label_new ( _("Select board design:") ), 
+                       FALSE, FALSE, 4 );
+
+  pw = gtk_menu_new ();
+  g_list_foreach ( plBoardDesigns, AddDesignMenuItem, pw );
+
+  pwDesignMenu = gtk_option_menu_new ();
+  gtk_option_menu_set_menu ( GTK_OPTION_MENU ( pwDesignMenu ),
+                             pw );
+
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ), pwDesignMenu, TRUE, TRUE, 4 );
+
+  /* preview board design */
+
+  pwFrame = gtk_frame_new ( _("Selected board design" ) );
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       pwFrame, FALSE, FALSE, 4 );
+
+  pwv = gtk_vbox_new ( FALSE, 0 );
+  gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwv );
+
+  /* design title */
+
+  pwhbox = gtk_hbox_new ( FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pwv ), pwhbox, FALSE, FALSE, 0 );
+
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ),
+                       pwDesignTitle = gtk_label_new ( NULL ),
+                       FALSE, FALSE, 0 );
+
+  /* design author */
+
+  pwhbox = gtk_hbox_new ( FALSE, 0 );
+  gtk_box_pack_start ( GTK_BOX ( pwv ), pwhbox, FALSE, FALSE, 0 );
+
+  gtk_box_pack_start ( GTK_BOX ( pwhbox ),
+                       pwDesignAuthor = gtk_label_new ( NULL ),
+                       FALSE, FALSE, 0 );
+
+  /* design preview */
+
+  pwDesignPixmap = image_from_xpm_d ( no_picture_xpm, 
+                                       pwvbox );
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ),
+                       pwDesignPixmap,
+                       FALSE, FALSE, 0 );
+
+
+  /* horisontal separator */
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ),
+                       gtk_hseparator_new (), FALSE, FALSE, 4 );
+
+  /* button: use design */
+
+  pwhbox = gtk_alignment_new ( 0.5, 0.5, 0.0, 0.0 );
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwhbox, FALSE, FALSE, 4 );
+
+
+  pw = gtk_button_new_with_label ( _("Use design") );
+  gtk_container_add ( GTK_CONTAINER ( pwhbox ), pw );
+
+  gtk_signal_connect ( GTK_OBJECT ( pw ), "clicked",
+                       GTK_SIGNAL_FUNC ( UseDesign ), pwDesignMenu );
+
+  if ( g_list_length ( plBoardDesigns ) > 1 ) {
+    GList *pl = g_list_nth ( plBoardDesigns, 1 );
+
+    gtk_option_menu_set_history ( GTK_OPTION_MENU ( pwDesignMenu ), 0 );
+
+    DesignMenuActivate ( pwvbox, pl->data );
+  }
+
+  return pwvbox;
+
+}
+
+#endif /* HAVE_LIBXML2 */
+
 
 extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
     
@@ -842,6 +1298,11 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      GeneralPage( bd ),
 			      gtk_label_new( _("General") ) );
+#if HAVE_LIBXML2 && 0 
+    gtk_notebook_append_page ( GTK_NOTEBOOK ( pwNotebook ),
+                               DesignPage (),
+                               gtk_label_new ( "Designs" ) );
+#endif
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      ChequerPrefs( bd, 0 ),
 			      gtk_label_new( _("Chequers (0)") ) );

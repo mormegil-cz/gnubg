@@ -59,6 +59,9 @@ extern gint game_set_old_dice( Board *board, gint die0, gint die1 );
 extern void board_set_playing( Board *board, gboolean f );
 extern void board_animate( Board *board, int move[ 8 ], int player );
 
+extern GtkWidget *
+image_from_xpm_d ( char **xpm, GtkWidget *pw );
+
 typedef enum _animation {
     ANIMATE_NONE, ANIMATE_BLINK, ANIMATE_SLIDE
 } animation;

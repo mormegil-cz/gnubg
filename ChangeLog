@@ -1,3 +1,17 @@
+Sun Sep 15 13:46:59 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Predefined board designs (first iteration)
+
+	* gtkprefs.c (read_board_designs, free_board_designs):
+	new functions. read_board_designs will eventually read
+	board designs from an XML file.
+	* gnubg.c (real_main): call read_board_designs.
+	* gnubg.c (PromptForExit): call free_board_designs.
+	* gtkboard.c (image_from_xpm_d): declare extern.
+	* gtkprefs.c (DesignMenuActivate, AddDesignMenuItem, UseDesign, 
+	DesignPage): new functions.
+	* gtkprefs.c (BoardPreferences): add DesignPage to notebook.
+
 Sun Sep 15 11:02:46 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* sound.c: add #ifdef HAVE_SYS_IOCTL_H
