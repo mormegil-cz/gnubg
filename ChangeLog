@@ -1,3 +1,13 @@
+Sun Sep  1 14:16:43 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Add commands for setting sounds.
+
+	* gnubg.c: new commands for setting sounds.
+	* gnubg.c (CommandSaveSettings): save sound settings.
+	* show.c (CommandShowSound): show sound settings.
+	* set.c: new routines for sound settings.
+	* sound.c: rename SOUND_OPTION to SOUND_SYSTEM.
+
 Sun Sep  1 12:16:10 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	_Untested_ Experimental support for sounds under MS windows.
