@@ -1,5 +1,10 @@
 Wed Aug 27 17:43:38 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
 
+	* gtkgame.c - fix rollout settings problems - onesidedbearoff
+          truncation and negative values for rollout seed
+
+Wed Aug 27 17:43:38 GMT 2003 Jim Segrave <jes@jes-2.demon.nl>
+
 	* rollout.c - fix bug causing it to stop to soon in CommandRollout
 
 Wed Aug 27 18:19:44 2003 Oystein Johansen <oystein@gnubg.org>

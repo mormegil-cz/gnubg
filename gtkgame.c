@@ -6099,9 +6099,9 @@ static void JsdStopToggled( GtkWidget *pw, rolloutwidget *prw) {
   int do_jsd_move_stop = gtk_toggle_button_get_active ( GTK_TOGGLE_BUTTON (prw->prwGeneral->pwJsdDoMoveStop) );
   int enable = do_jsd_stop | do_jsd_move_stop;
   
+  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjLimit), enable);
 
   gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjMinGames), enable);
-  gtk_widget_set_sensitive (GTK_WIDGET (prw->prwGeneral->pwJsdAdjLimit), enable);
 
 }
 
@@ -6386,7 +6386,7 @@ RolloutPageGeneral (rolloutpagegeneral *prpw, rolloutwidget *prw) {
   gtk_container_add( GTK_CONTAINER( pw ), prpw->pwTruncBearoffOS );
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON 
                                  (prpw->pwTruncBearoffOS ),
-                                 prw->rcRollout.fTruncBearoff2 );
+                                 prw->rcRollout.fTruncBearoffOS );
 
   prpw->pwVarRedn = gtk_check_button_new_with_label ( 
                                                      _("Variance reduction") );
@@ -6534,7 +6534,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
   CubeEqCheqToggled (NULL, &rw);
   PlayersSameToggled (NULL, &rw);
   CubefulToggled (NULL, &rw);
-
+  
   gtk_main();
 
   GTKAllowStdin();
@@ -6703,7 +6703,7 @@ extern void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
       UserCommand( sz );
     }
 
-    if( rw.rcRollout.nSeed != rcRollout.nSeed ) {
+    if( abs(rw.rcRollout.nSeed) != abs(rcRollout.nSeed) ) {
       sprintf( sz, "set rollout seed %d", rw.rcRollout.nSeed );
       UserCommand( sz );
     }
