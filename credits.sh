@@ -75,6 +75,7 @@ Hans-Jürgen Schäfer
 Steve Schreiber
 Martin Schrode
 Paul Selick
+Sho Sengoku
 Ian Shaw
 Albert Silver
 Peter Sochovsky
@@ -85,6 +86,7 @@ W. Stroop (Rob)
 Kaoru Takahasi
 Yoshito Takeuchi
 Jacques Thiriat
+Malene Thyssen
 Sander van Rijnswou
 Robert-Jan Veldhuizen
 Morten Wang

@@ -112,6 +112,12 @@ typedef struct _BoardData {
     
 extern void board_create_pixmaps( GtkWidget *board, BoardData *bd );
 extern void board_free_pixmaps( BoardData *bd );
+
+extern void
+DrawDie( GdkDrawable *pd, unsigned char *achDice[ 2 ], unsigned char *achPip[ 2 ],
+         const int s, GdkGC *gc, int x, int y, int fColour, int n );
+
+
   
 #ifdef __cplusplus
 }

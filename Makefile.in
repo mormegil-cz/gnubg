@@ -206,7 +206,7 @@ bin_PROGRAMS = gnubg makebearoff makehyper
 @USE_GTK_TRUE@	gtkrace.c gtkrace.h nextmarked.xpm prevmarked.xpm \
 @USE_GTK_TRUE@	gtkmovefilter.c gtkmovefilter.h gtkmet.c gtkmet.h gtkcolour.c \
 @USE_GTK_TRUE@	gtkcolour.h gtksplash.c gtksplash.h gtkrolls.c gtkrolls.h \
-@USE_GTK_TRUE@        openurl.c openurl.h \
+@USE_GTK_TRUE@        openurl.c openurl.h gtktempmap.c gtktempmap.h \
 @USE_GTK_TRUE@	$(BR1_SOURCES) $(SOUND_SOURCES) $(FONT_SOURCES)
 
 @USE_EXT_FALSE@@USE_GTK_FALSE@gnubg_LDADD = $(COMMON_LIBS) $(SOUND_LIBS) $(PNG_LIBS)
@@ -312,8 +312,9 @@ am__objects_1 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkrace.$(OBJEXT) gtkmovefilter.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkmet.$(OBJEXT) gtkcolour.$(OBJEXT) \
 @USE_GTK_TRUE@	gtksplash.$(OBJEXT) gtkrolls.$(OBJEXT) \
-@USE_GTK_TRUE@	openurl.$(OBJEXT) $(am__objects_2) \
-@USE_GTK_TRUE@	$(am__objects_3) $(am__objects_4)
+@USE_GTK_TRUE@	openurl.$(OBJEXT) gtktempmap.$(OBJEXT) \
+@USE_GTK_TRUE@	$(am__objects_2) $(am__objects_3) \
+@USE_GTK_TRUE@	$(am__objects_4)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
 gnubg_LDFLAGS =
 am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
@@ -362,12 +363,12 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/gtkmet.Po ./$(DEPDIR)/gtkmovefilter.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkprefs.Po ./$(DEPDIR)/gtkrace.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/gtkrolls.Po ./$(DEPDIR)/gtksplash.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/gtktexi.Po ./$(DEPDIR)/gtktheory.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/guile.Po ./$(DEPDIR)/html.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/htmlimages.Po ./$(DEPDIR)/i18n.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/import.Po ./$(DEPDIR)/kleinman.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/latex.Po ./$(DEPDIR)/luxi.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/makebearoff.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtktempmap.Po ./$(DEPDIR)/gtktexi.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/gtktheory.Po ./$(DEPDIR)/guile.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/html.Po ./$(DEPDIR)/htmlimages.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/i18n.Po ./$(DEPDIR)/import.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/kleinman.Po ./$(DEPDIR)/latex.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/luxi.Po ./$(DEPDIR)/makebearoff.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makebearoff1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/makehyper.Po ./$(DEPDIR)/makeweights.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/matchequity.Po ./$(DEPDIR)/matchid.Po \
@@ -535,6 +536,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkrace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtkrolls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtksplash.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtktempmap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtktexi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gtktheory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/guile.Po@am__quote@

@@ -1635,6 +1635,9 @@ command cER = {
       NULL, NULL },
 #endif /* USE_SOUND */
     { "statistics", NULL, N_("Show statistics"), NULL, acShowStatistics },
+    { "temperaturemap", CommandShowTemperatureMap, 
+      N_("Show temperature map (graphic overview of dice distribution)"), 
+      NULL, NULL },
     { "thorp", CommandShowThorp, N_("Calculate Thorp Count for "
       "position"), szOPTPOSITION, NULL },
     { "training", CommandShowTraining, N_("Display the training parameters"),

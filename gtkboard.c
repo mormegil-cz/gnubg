@@ -3000,13 +3000,14 @@ static void DrawAlphaImage( GdkDrawable *pd, int x, int y,
 #endif
 }    
 
-static void DrawDie( GdkDrawable *pd, BoardData *pbd, int x, int y,
-		     int fColour, int n ) {
+extern void
+DrawDie( GdkDrawable *pd, 
+         unsigned char *achDice[ 2 ], unsigned char *achPip[ 2 ],
+         const int s, GdkGC *gc, int x, int y, int fColour, int n ) {
 
-    int s = rdAppearance.nSize;
     int ix, iy, afPip[ 9 ];
 
-    DrawAlphaImage( pd, x, y, pbd->ri.achDice[ fColour ], 7 * s * 4,
+    DrawAlphaImage( pd, x, y, achDice[ fColour ], 7 * s * 4,
 		    7 * s, 7 * s );
     
     afPip[ 0 ] = afPip[ 8 ] = ( n == 2 ) || ( n == 3 ) || ( n == 4 ) ||
@@ -3019,10 +3020,10 @@ static void DrawDie( GdkDrawable *pd, BoardData *pbd, int x, int y,
     for( iy = 0; iy < 3; iy++ )
 	for( ix = 0; ix < 3; ix++ )
 	    if( afPip[ iy * 3 + ix ] )
-		gdk_draw_rgb_image( pd, pbd->gc_copy, x + s + 2 * s * ix,
+		gdk_draw_rgb_image( pd, gc, x + s + 2 * s * ix,
 				    y + s + 2 * s * iy, s, s,
 				    GDK_RGB_DITHER_MAX,
-				    pbd->ri.achPip[ fColour ], s * 3 );
+				    achPip[ fColour ], s * 3 );
 }
 
 static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
@@ -3031,9 +3032,10 @@ static gboolean dice_expose( GtkWidget *dice, GdkEventExpose *event,
     if( rdAppearance.nSize <= 0 || event->count || !bd->dice_roll[ 0 ] )
 	return TRUE;
 
-    DrawDie( dice->window, bd, 0, 0, bd->turn > 0, bd->dice_roll[ 0 ] );
-    DrawDie( dice->window, bd, 8 * rdAppearance.nSize, 0, bd->turn > 0,
-	     bd->dice_roll[ 1 ] );
+    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, rdAppearance.nSize, bd->gc_copy,
+             0, 0, bd->turn > 0, bd->dice_roll[ 0 ] );
+    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, rdAppearance.nSize, bd->gc_copy,
+             8 * rdAppearance.nSize, 0, bd->turn > 0, bd->dice_roll[ 1 ] );
     
     return TRUE;
 }
@@ -3838,8 +3840,10 @@ static gboolean dice_widget_expose( GtkWidget *dice, GdkEventExpose *event,
     if( event->count )
 	return TRUE;
     
-    DrawDie( dice->window, bd, 0, 0, bd->turn > 0, n % 6 + 1 );
-    DrawDie( dice->window, bd, 7 * rdAppearance.nSize, 0, bd->turn > 0, n / 6 + 1 );
+    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, rdAppearance.nSize, bd->gc_copy,
+             0, 0, bd->turn > 0, n % 6 + 1 );
+    DrawDie( dice->window, bd->ri.achDice, bd->ri.achPip, rdAppearance.nSize, bd->gc_copy,
+             7 * rdAppearance.nSize, 0, bd->turn > 0, n / 6 + 1 );
     
     return TRUE;
 }

@@ -1,3 +1,14 @@
+Thu May 29 21:10:47 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Implement Sho Sengoku Equity Temperature Map
+	(suggested by Yoshito Takeuchi)
+
+	* gtktempmap.c, Makefile.am: new file
+	* gnubg.c: new command "show temperaturemap"
+	* show.c (CommandShowTemperatureMap): new function.
+	* gtkboard.c (DrawDie): declare function extern.
+	* gtkgame.c: new menu entry.
+
 Thu May 29 13:28:46 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* external.c (CommandExternal): bug fixes + resignations.

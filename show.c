@@ -52,6 +52,7 @@
 #include "gtkexport.h"
 #include "gtkmet.h"
 #include "gtkrolls.h"
+#include "gtktempmap.h"
 #elif USE_EXT
 #include "xgame.h"
 #endif
@@ -2007,6 +2008,28 @@ CommandShowRolls ( char *sz ) {
 
 }
 
+
+
+extern void
+CommandShowTemperatureMap( char *sz ) {
+
+  if( ms.gs != GAME_PLAYING ) {
+    outputl( _("No game in progress (type `new game' to start one).") );
+
+    return;
+  }
+
+#if USE_GTK
+
+  if ( fX ) {
+    GTKShowTempMap( &ms );
+    return;
+  }
+#endif
+
+  CommandNotImplemented( NULL );
+
+}  
 
 extern void
 CommandShowVariation( char *sz ) {
