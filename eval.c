@@ -4695,7 +4695,7 @@ Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
         rEq = 1.0; /* gammons don't count: rW = 1 */
       else
         rEq = rW + 
-          ( rW - 1.0 ) * ( arOutput[ 0 ] - 1.0 ) / ( rTG - 1.0 ) ;
+          ( 1.0  - rW ) * ( arOutput[ 0 ] - 1.0 ) / ( rTG - 1.0 ) ;
     }
 
   }

@@ -52,6 +52,7 @@ char *aszCredits[] = {
     "Steve Schreiber",
     "Martin Schrode",
     "Jim Segrave",
+    "Paul Selick",
     "Ian Shaw",
     "Brian Sheppard",
     "Albert Silver",

@@ -64,6 +64,7 @@ Hans-Jürgen Schäfer
 Steve Schreiber
 Martin Schrode
 Jim Segrave
+Paul Selick
 Ian Shaw
 Albert Silver
 Peter Sochovsky
