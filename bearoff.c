@@ -1116,8 +1116,8 @@ BearoffDumpTwoSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   };
 
   sprintf ( strchr ( sz, 0 ),
-            "             Player       Opponent\n"
-            "Position %12d  %12d\n\n", 
+            _("             Player       Opponent\n"
+            "Position %12d  %12d\n\n"), 
             nUs, nThem );
 
   if( ReadTwoSidedBearoff ( pbc, iPos, ar, NULL ) )
@@ -1224,7 +1224,7 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   /* mean rolls */
 
   sprintf ( sz = strchr ( sz, 0 ),
-            "Mean\t%7.3f\t%7.3f\t\t",
+            _("Mean\t%7.3f\t%7.3f\t\t"),
             ar[ 0 ][ 0 ], ar[ 1 ][ 0 ] );
 
   if ( pbc->fGammon )
@@ -1239,7 +1239,7 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   /* std. dev */
 
   sprintf ( sz = strchr ( sz, 0 ),
-            "Std dev\t%7.3f\t%7.3f\t\t",
+            _("Std dev\t%7.3f\t%7.3f\t\t"),
             ar[ 0 ][ 1 ], ar[ 1 ][ 1 ] );
 
   if ( pbc->fGammon )
