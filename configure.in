@@ -39,6 +39,7 @@ AC_PROG_LN_S
 AC_PROG_RANLIB
 AC_PROG_YACC
 AM_PROG_LEX
+AC_PATH_X
 dnl AC_CHECK_PROG(BISON, bison, bison, true)
 AC_CHECK_PROG(CSOUND, csound, csound, true)
 dnl AC_CHECK_PROG(FLEX, flex, flex, true)
@@ -55,6 +56,27 @@ AC_CANONICAL_HOST
 
 AM_YFLAGS='-d'
 AC_SUBST(AM_YFLAGS)
+
+dnl Darwin PPC builds should assume that darwin ports library
+dnl and fink are being used by default (/sw). Darwin linker needs
+dnl to specify binding, some math functions are in libmx
+dnl (atanf etc). Since gnubg has a cpp component darwin is
+dnl fussy about making sure stdc++ is included.
+
+AC_MSG_CHECKING([for Darwin PPC])
+case "$host" in
+  powerpc-apple-darwin*)
+    LDFLAGS="$LDFLAGS -L/sw/lib -bind_at_load"
+    LIBS="$LIBS -lmx -lstdc++"
+    darwinppc=yes;
+    ;;
+  *)
+    darwinppc=no;
+    ;;
+esac
+
+AC_MSG_RESULT([$darwinppc])
+AM_CONDITIONAL(OS_DARWINPPC, test "$darwinppc" = yes)
 
 dnl Shamelessly stolen taken from the libgnomecanvas configure.in
 dnl with slight modifications. Check for Win32 Native platform
@@ -328,6 +350,10 @@ if test "$no_gtk" != "yes"; then
   GTKDATA=gnubg.gtkrc
   AC_SUBST(GTKDATA)
   AM_PATH_LIBART(,AC_DEFINE(HAVE_LIBART,1,[Define if you have the art library]))
+
+  if test "$darwinppc" = "yes"; then
+    GTK_LIBS="$GTK_LIBS -L$x_libraries -lX11"
+  fi
 fi
 
 
@@ -439,10 +465,14 @@ fi
 AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
 AM_CONDITIONAL(XML_MANUAL, test "$no_libxml2" != "yes" -a "$gtk2" = "yes")
 
-AC_CHECK_FT2(,have_freetype=yes)
-if test "$have_freetype" = "yes"; then
-  AC_DEFINE(HAVE_FREETYPE,1,[Define if you have the FreeType rendering library])
-fi
+dnl AC_ARG_WITH(freetype,[  --with-freetype         compile with freetype2 support])
+dnl if test "$with_freetype" != "no"; then
+
+  AC_CHECK_FT2(,have_freetype=yes)
+  if test "$have_freetype" = "yes"; then
+    AC_DEFINE(HAVE_FREETYPE,1,[Define if you have the FreeType rendering library])
+  fi
+dnl fi
 AM_CONDITIONAL(USE_FREETYPE, test "$have_freetype" = "yes")
 
 dnl ---------------------------------------
@@ -509,6 +539,11 @@ if test "$with_sound" != "no"; then
         NAS_LIBS="-laudio -lXt"
         NAS_CFLAGS=
      fi
+
+     if test "$darwinppc" = "yes"; then
+	APPLE_QTIME_LIBS="-framework QuickTime"
+     fi
+
   else
      AC_DEFINE(USE_WINMMSND,1,Define if you wish to use the Win32 WINMM sound system)
      WINMMSND_LIBS="-lwinmm"
@@ -521,6 +556,7 @@ AC_SUBST(NAS_LIBS)
 AC_SUBST(NAS_CFLAGS)
 AC_SUBST(WINMMSND_LIBS)
 AC_SUBST(WINMMSND_CFLAGS)
+AC_SUBST(APPLE_QTIME_LIBS)
 
 dnl Clocks
 
