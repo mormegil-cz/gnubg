@@ -1,3 +1,9 @@
+Thu Jul 10 20:19:59 2003  Holger Bochnig <hbgg@gmx.net>
+
+	* postscript.c: changed StartPage and EndPage to 
+	  PSStartPage and PSEndPage, respectively, to avoid name clash
+	  on Windows
+
 Thu Jul 10 14:56:04 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c: new command "show matchresult" to show

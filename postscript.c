@@ -143,7 +143,7 @@ static void PostScriptEscape( FILE *pf, unsigned char *pchIn ) {
     free( sz );
 }
 
-static void StartPage( FILE *pf ) {
+static void PSStartPage( FILE *pf ) {
 
     iPage++;
     fn = FONT_NONE;
@@ -179,7 +179,7 @@ static void StartPage( FILE *pf ) {
 		 ( cxPage - 451 ) / 2, ( cyPage - 648 ) / 2 );
 }
 
-static void EndPage( FILE *pf ) {
+static void PSEndPage( FILE *pf ) {
 
     if( fPDF ) {
 	long cb;
@@ -227,8 +227,8 @@ static void Ensure( FILE *pf, int cy ) {
     assert( cy <= 648 );
     
     if( y < cy ) {
-	EndPage( pf );
-	StartPage( pf );
+	PSEndPage( pf );
+	PSStartPage( pf );
     }
 }
 
@@ -248,8 +248,8 @@ static void Advance( FILE *pf, int cy ) {
 static void Skip( FILE *pf, int cy ) {
 
     if( y < cy ) {
-	EndPage( pf );
-	StartPage( pf );
+	PSEndPage( pf );
+	PSStartPage( pf );
     } else if( y != 648 )
 	Consume( pf, cy );
 }
@@ -452,7 +452,7 @@ static void PostScriptPrologue( FILE *pf, int fEPS, char *szTitle ) {
     
     iPage = 0;
     
-    StartPage( pf );
+    PSStartPage( pf );
 }
 
 static void DrawPostScriptPoint( FILE *pf, int i, int fPlayer, int c ) {
@@ -1243,7 +1243,7 @@ static void PostScriptEpilogue( FILE *pf ) {
     int i;
     long lXRef;
     
-    EndPage( pf );
+    PSEndPage( pf );
 
     if( fPDF ) {
 	StartObject( pf, idPages );
