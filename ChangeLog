@@ -1,3 +1,8 @@
+Fri Mar 15 13:04:01 2002  Gary Wong  <gtw@research.att.com>
+
+	* gtkprefs.c: Make the border colour customisable.
+	* gtkboard.c (board_draw): Honour user settings for border colour.
+
 Thu Mar 14 20:55:45 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandSaveSettings): dump file name of current met.

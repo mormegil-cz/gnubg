@@ -44,11 +44,11 @@
 
 static GtkAdjustment *apadj[ 2 ], *paAzimuth, *paElevation,
     *apadjCoefficient[ 2 ], *apadjExponent[ 2 ], *apadjPoint[ 2 ],
-    *padjBoard, *padjSpeed;
-static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *pwBoard, *pwTranslucent,
-    *pwLabels, *pwUseDiceIcon, *pwPermitIllegal, *pwBeepIllegal,
-    *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink, *pwAnimateSlide,
-    *pwSpeed;
+    *apadjBoard[ 2 ], *padjSpeed;
+static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
+    *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
+    *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
+    *pwAnimateSlide, *pwSpeed;
 static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
     fHigherDieFirst;
 static animation anim;
@@ -121,7 +121,7 @@ static GtkWidget *PointPrefs( BoardData *bd, int f ) {
 			gtk_color_selection_new(), FALSE, FALSE, 0 );
     gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwPoint[ f ] ),
 				   ar );
-
+    
     gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
 			FALSE, FALSE, 4 );
     gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Smooth" ),
@@ -134,7 +134,7 @@ static GtkWidget *PointPrefs( BoardData *bd, int f ) {
     return pw;
 }
 
-static GtkWidget *BoardPage( BoardData *bd ) {
+static GtkWidget *BoardPage( BoardData *bd, int iCol ) {
 
     GtkWidget *pw, *pwhbox;
     gdouble ar[ 4 ];
@@ -142,26 +142,28 @@ static GtkWidget *BoardPage( BoardData *bd ) {
     
     pw = gtk_vbox_new( FALSE, 0 );
 
-    padjBoard = GTK_ADJUSTMENT( gtk_adjustment_new(
-	bd->aSpeckle[ 0 ] / 128.0, 0, 1, 0.1, 0.1, 0 ) );
+    apadjBoard[ iCol ] = GTK_ADJUSTMENT( gtk_adjustment_new(
+	bd->aSpeckle[ iCol ] / 128.0, 0, 1, 0.1, 0.1, 0 ) );
 
     for( i = 0; i < 3; i++ )
-	ar[ i ] = bd->aanBoardColour[ 0 ][ i ] / 255.0;
+	ar[ i ] = bd->aanBoardColour[ iCol ][ i ] / 255.0;
     
-    gtk_box_pack_start( GTK_BOX( pw ), pwBoard =
+    gtk_box_pack_start( GTK_BOX( pw ), apwBoard[ iCol ] =
 			gtk_color_selection_new(), FALSE, FALSE, 0 );
-    gtk_color_selection_set_color( GTK_COLOR_SELECTION( pwBoard ),
+    gtk_color_selection_set_color( GTK_COLOR_SELECTION( apwBoard[ iCol ] ),
 				   ar );
 
-    gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
-			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Smooth" ),
-			FALSE, FALSE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
-	padjBoard ), TRUE, TRUE, 4 );
-    gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Speckled" ),
-			FALSE, FALSE, 4 );
-
+    if( !iCol ) {
+	gtk_box_pack_start( GTK_BOX( pw ), pwhbox = gtk_hbox_new( FALSE, 0 ),
+			    FALSE, FALSE, 4 );
+	gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Smooth" ),
+			    FALSE, FALSE, 4 );
+	gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_hscale_new(
+	    apadjBoard[ iCol ] ), TRUE, TRUE, 4 );
+	gtk_box_pack_start( GTK_BOX( pwhbox ), gtk_label_new( "Speckled" ),
+			    FALSE, FALSE, 4 );
+    }
+    
     return pw;
 }
 
@@ -382,10 +384,15 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     if( fTranslucent )
 	bd->aarColour[ 1 ][ 3 ] = ar[ 3 ];
 
-    gtk_color_selection_get_color( GTK_COLOR_SELECTION( pwBoard ),
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwBoard[ 0 ] ),
 				   ar );
     for( i = 0; i < 3; i++ )
 	bd->aanBoardColour[ 0 ][ i ] = ar[ i ] * 0xFF;
+
+    gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwBoard[ 1 ] ),
+				   ar );
+    for( i = 0; i < 3; i++ )
+	bd->aanBoardColour[ 1 ][ i ] = ar[ i ] * 0xFF;
 
     gtk_color_selection_get_color( GTK_COLOR_SELECTION( apwPoint[ 0 ] ),
 				   ar );
@@ -397,7 +404,8 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     for( i = 0; i < 3; i++ )
 	bd->aanBoardColour[ 3 ][ i ] = ar[ i ] * 0xFF;
 
-    bd->aSpeckle[ 0 ] = padjBoard->value * 0x80;
+    bd->aSpeckle[ 0 ] = apadjBoard[ 0 ]->value * 0x80;
+    bd->aSpeckle[ 1 ] = apadjBoard[ 1 ]->value * 0x80;
     bd->aSpeckle[ 2 ] = apadjPoint[ 0 ]->value * 0x80;
     bd->aSpeckle[ 3 ] = apadjPoint[ 1 ]->value * 0x80;
     
@@ -460,8 +468,11 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
 			      ChequerPrefs( bd, 1 ),
 			      gtk_label_new( "Chequers (1)" ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
-			      BoardPage( bd ),
+			      BoardPage( bd, 0 ),
 			      gtk_label_new( "Board" ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      BoardPage( bd, 1 ),
+			      gtk_label_new( "Border" ) );
     gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
 			      PointPrefs( bd, 0 ),
 			      gtk_label_new( "Points (0)" ) );
@@ -485,26 +496,20 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_main();
 }
 
-#if WIN32
-/* The Win32 port of GDK doesn't support colour specifications of the
-   form "rgb:rr/gg/bb", so we have to do it by hand. */
-static gboolean colour_parse( char *sz, GdkColor *pcol ) {
+static int SetColour( char *sz, guchar anColour[] ) {
+    
+    GdkColor col;
+    
+    if( gdk_color_parse( sz, &col ) ) {
+	anColour[ 0 ] = col.red >> 8;
+	anColour[ 1 ] = col.green >> 8;
+	anColour[ 2 ] = col.blue >> 8;
+	
+	return 0;
+    }
 
-    if( !strncmp( sz, "rgb:", 4 ) ) {
-	if( sscanf( sz, "rgb:%hx/%hx/%hx", &pcol->red, &pcol->green,
-		    &pcol->blue ) != 3 )
-	    return FALSE;
-	pcol->red <<= 8;
-	pcol->green <<= 8;
-	pcol->blue <<= 8;
-
-	return TRUE;
-    } else
-	return gdk_color_parse( sz, pcol );
+    return -1;
 }
-#else
-#define colour_parse gdk_color_parse
-#endif
 
 static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
     
@@ -514,7 +519,7 @@ static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
     if( ( pch = strchr( sz, ';' ) ) )
 	*pch++ = 0;
 
-    if( colour_parse( sz, &col ) ) {
+    if( gdk_color_parse( sz, &col ) ) {
 	anColour[ 0 ] = col.red >> 8;
 	anColour[ 1 ] = col.green >> 8;
 	anColour[ 2 ] = col.blue >> 8;
@@ -543,7 +548,7 @@ static int SetColourARSS( BoardData *bd, char *sz, int i ) {
     if( ( pch = strchr( sz, ';' ) ) )
 	*pch++ = 0;
 
-    if( colour_parse( sz, &col ) ) {
+    if( gdk_color_parse( sz, &col ) ) {
 	bd->aarColour[ i ][ 0 ] = col.red / 65535.0f;
 	bd->aarColour[ i ][ 1 ] = col.green / 65535.0f;
 	bd->aarColour[ i ][ 2 ] = col.blue / 65535.0f;
@@ -608,6 +613,9 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	/* board=colour;speckle */
 	fValueError = SetColourSpeckle( szValue, bd->aanBoardColour[ 0 ],
 					&bd->aSpeckle[ 0 ] );
+    else if( !g_strncasecmp( szParam, "border", c ) )
+	/* border=colour */
+	fValueError = SetColour( szValue, bd->aanBoardColour[ 1 ] );
     else if( !g_strncasecmp( szParam, "translucent", c ) )
 	/* translucent=bool */
 	bd->translucent = toupper( *szValue ) == 'Y';
@@ -693,15 +701,18 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
     if( bd->arLight[ 1 ] < 0 )
 	rAzimuth = 360 - rAzimuth;
     
-    sprintf( sz, "set appearance board=rgb:%02X/%02X/%02X;%0.2f "
+    sprintf( sz, "set appearance board=#%02X%02X%02X;%0.2f "
+	     "border=#%02X%02X%02X "
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
 	     "beep=%c highdie=%c animate=%s speed=%d light=%0.0f;%0.0f " 
-	     "chequers0=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
-	     "chequers1=rgb:%02X/%02X/%02X;%0.2f;%0.2f;%0.2f;%0.2f "
-	     "points0=rgb:%02X/%02X/%02X;%0.2f "
-	     "points1=rgb:%02X/%02X/%02X;%0.2f",
+	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
+	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
+	     "points0=#%02X%02X%02X;%0.2f "
+	     "points1=#%02X%02X%02X;%0.2f",
 	     bd->aanBoardColour[ 0 ][ 0 ], bd->aanBoardColour[ 0 ][ 1 ], 
 	     bd->aanBoardColour[ 0 ][ 2 ], bd->aSpeckle[ 0 ] / 128.0f,
+	     bd->aanBoardColour[ 1 ][ 0 ], bd->aanBoardColour[ 1 ][ 1 ], 
+	     bd->aanBoardColour[ 1 ][ 2 ],
 	     bd->translucent ? 'y' : 'n', bd->labels ? 'y' : 'n',
 	     bd->usedicearea ? 'y' : 'n', bd->permit_illegal ? 'y' : 'n',
 	     bd->beep_illegal ? 'y' : 'n', bd->higher_die_first ? 'y' : 'n',

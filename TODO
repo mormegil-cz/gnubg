@@ -140,9 +140,9 @@ duplication of effort and to make sure our changes merge easily.
   style will survive across theme changes.
 ** Make usage() show the GDK and GTK options, if appropriate.
 ** Show a preview of the chequers in the appearances dialog.
-** Allow the border colour to be changed, and honour the user's lighting
-  angle when rendering the border.  Allow the dice pips colour to be
-  changed.
+** Allow the border specular/shiny parameters to be changed, and honour the
+  user's lighting angle when rendering the border and dice.  Allow the dice
+  pips colour to be changed.
 ** Use a file selection widget for the socket in the player dialog.
 ** Would ShowList() look better if it used a text widget?  (Wait for
   GTK+ 2.0.)
@@ -176,6 +176,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Make the 'Set cube' dialog availble by clicking the cube in edit mode.   
 ** Think about ways to improve event handling while "busy".  We could save
   them somewhere and then use gdk_event_put() when we're ready. (gary)
+** CreateDialog() should use GTK+ 2.0 stock icons instead of the gnu. (gary)
 
 ** Dialogs:
 *** Add buttons to the "help" window to look up the command in the manual,
@@ -240,9 +241,13 @@ functions:
   shown as 13/12*/11 13/12* 10/9.
 ** ShowManual() should look in the directory given with -d.
 ** GtkTexi should try to load images from the same directory as the XML file.
-** GTK+ 2.0 wants strings in UTF-8. (gary)
-** The "rgb:" colour strings in the preferences seem to fail under
-  GTK+ 2.0. (gary)
+** GTK+ 2.0 wants strings in UTF-8.  Unfortunately SGF files are specified
+  to be ISO 8859-1, and the terminal is locale-dependent. (gary)
+** Should InitMatchEquity() look in PKGDATADIR as well as . if given a
+  relative file name?
+** Under GTK+ 2.0, the status bar and/or progress bar request slightly
+  different sizes when they have text in them, and the window rearranges
+  itself to suit... yuck.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

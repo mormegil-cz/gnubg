@@ -2380,8 +2380,15 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 #define empty( y, x, i ) ( bd->rgb_empty[ ( ( (y) * 6 * bd->board_size + (x) )\
 					    * 3 ) + (i) ] )
     
-    /* R, B = 0.9^30 x 0.8; G = 0.92 x 0x30 + 0.9^30 x 0.8 */
-    gcv.foreground.pixel = gdk_rgb_xpixel_from_rgb( 0x093509 );
+    diffuse = 0.92; /* FIXME */
+    specular = pow( 0.9, 30 ) * 0.8; /* FIXME */
+    gcv.foreground.pixel = gdk_rgb_xpixel_from_rgb(
+	( (int) clamp( specular * 0x100 +
+		       diffuse * bd->aanBoardColour[ 1 ][ 0 ] ) << 16 ) |
+	( (int) clamp( specular * 0x100 +
+		       diffuse * bd->aanBoardColour[ 1 ][ 1 ] ) << 8 ) |
+	( (int) clamp( specular * 0x100 +
+		       diffuse * bd->aanBoardColour[ 1 ][ 2 ] ) ) );
     gc = gdk_gc_new_with_values( widget->window, &gcv, GDK_GC_FOREGROUND );
     
     gdk_draw_rectangle( bd->pm_board, gc, TRUE, 0, 0, bd->board_size * 108,
@@ -2390,14 +2397,17 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
     for( ix = 0; ix < bd->board_size; ix++ ) {
 	x = 1.0 - ( (float) ix / bd->board_size );
 	z = sqrt( 1.001 - x * x );
-	cos_theta = 0.9 * z - 0.3 * x;
+	cos_theta = 0.9 * z - 0.3 * x; /* FIXME */
 	diffuse = 0.8 * cos_theta + 0.2;
 	specular = pow( cos_theta, 30 ) * 0.8;
 
 	COLOURS( ix, 0 ).pixel = gdk_rgb_xpixel_from_rgb(
-	    ( (int) ( specular * 0x100 ) << 16 ) |
-	    ( (int) ( specular * 0x100 + diffuse * 0x30 ) << 8 ) |
-	    ( (int) ( specular * 0x100 ) ) );
+	    ( (int) clamp( specular * 0x100 +
+			   diffuse * bd->aanBoardColour[ 1 ][ 0 ] ) << 16 ) |
+	    ( (int) clamp( specular * 0x100 +
+			   diffuse * bd->aanBoardColour[ 1 ][ 1 ] ) << 8 ) |
+	    ( (int) clamp( specular * 0x100 +
+			   diffuse * bd->aanBoardColour[ 1 ][ 2 ] ) ) );
 
 	x = -x;
 	cos_theta = 0.9 * z - 0.3 * x;
@@ -2405,9 +2415,12 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 	specular = pow( cos_theta, 30 ) * 0.8;
 
 	COLOURS( ix, 1 ).pixel = gdk_rgb_xpixel_from_rgb(
-	    ( (int) ( specular * 0x100 ) << 16 ) |
-	    ( (int) ( specular * 0x100 + diffuse * 0x30 ) << 8 ) |
-	    ( (int) ( specular * 0x100 ) ) );
+	    ( (int) clamp( specular * 0x100 +
+			   diffuse * bd->aanBoardColour[ 1 ][ 0 ] ) << 16 ) |
+	    ( (int) clamp( specular * 0x100 +
+			   diffuse * bd->aanBoardColour[ 1 ][ 1 ] ) << 8 ) |
+	    ( (int) clamp( specular * 0x100 +
+			   diffuse * bd->aanBoardColour[ 1 ][ 2 ] ) ) );
     }
 #undef COLOURS
 
@@ -3595,6 +3608,9 @@ static void board_init( Board *board ) {
     bd->aanBoardColour[ 0 ][ 0 ] = 0x20;
     bd->aanBoardColour[ 0 ][ 1 ] = 0x40;
     bd->aanBoardColour[ 0 ][ 2 ] = 0x20;
+    bd->aanBoardColour[ 1 ][ 0 ] = 0x00;
+    bd->aanBoardColour[ 1 ][ 1 ] = 0x30;
+    bd->aanBoardColour[ 1 ][ 2 ] = 0x00;
     bd->aanBoardColour[ 2 ][ 0 ] = 0xC0;
     bd->aanBoardColour[ 2 ][ 1 ] = 0x40;
     bd->aanBoardColour[ 2 ][ 2 ] = 0x40;
@@ -3602,6 +3618,7 @@ static void board_init( Board *board ) {
     bd->aanBoardColour[ 3 ][ 1 ] = 0x80;
     bd->aanBoardColour[ 3 ][ 2 ] = 0x80;
     bd->aSpeckle[ 0 ] = 25;
+    bd->aSpeckle[ 1 ] = 25;
     bd->aSpeckle[ 2 ] = 25;
     bd->aSpeckle[ 3 ] = 25;
     
