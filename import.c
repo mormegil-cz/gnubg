@@ -23,6 +23,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "backgammon.h"
 #include "drawboard.h"
@@ -30,6 +31,10 @@
 #include "gtkgame.h"
 #endif
 #include "import.h"
+
+#ifndef HUGE_VALF
+#define HUGE_VALF 1e38
+#endif
 
 static int ReadInt16( FILE *pf ) {
 
@@ -241,7 +246,7 @@ ImportJF( FILE * fp, char *szFileName) {
 
 }  
 
-static int fWarned;
+static int fWarned, fPostCrawford;
 
 static void ParseMatMove( char *sz, int iPlayer ) {
 
@@ -306,9 +311,19 @@ static void ParseMatMove( char *sz, int iPlayer ) {
 	pmr->d.st = SKILL_NONE;
 	AddMoveRecord( pmr );
     } else if( !strncasecmp( sz, "win", 3 ) ) {
-	/* FIXME game over -- update the gameinfo record */
-	/* if there was no double/drop and no bear off to win, presume
-	   a resignation */
+	if( ms.gs == GAME_PLAYING ) {
+	    /* Neither a drop nor a bearoff to win, so we presume the loser
+	       resigned. */
+	    pmr = malloc( sizeof( pmr->r ) );
+	    pmr->r.mt = MOVE_RESIGN;
+	    pmr->r.sz = NULL;
+	    pmr->r.fPlayer = !iPlayer;
+	    if( ( pmr->r.nResigned = atoi( sz + 4 ) / ms.nCube ) < 1 )
+		pmr->r.nResigned = 1;
+	    else if( pmr->r.nResigned > 3 )
+		pmr->r.nResigned = 3;
+	    AddMoveRecord( pmr );
+	}
     } else if( !fWarned ) {
 	outputf( "Unrecognised move \"%s\" in .mat file.\n", sz );
 	fWarned = TRUE;
@@ -321,13 +336,14 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
     int n0, n1;
     moverecord *pmr;
     
+    if( fscanf( pf, " %31[^:]:%d %31[^:]:%d%*[ ]", sz0, &n0, sz1, &n1 ) < 4 )
+	return;
+
     InitBoard( ms.anBoard );
 
     ClearMoveRecord();
 
     ListInsert( &lMatch, plGame );
-
-    fscanf( pf, " %31[^:]:%d %31[^:]:%d%*[ ]", sz0, &n0, sz1, &n1 );
 
     for( pch = sz0; *pch; pch++ )
 	;
@@ -354,9 +370,11 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
     pmr->g.nMatch = nLength;
     pmr->g.anScore[ 0 ] = n0;
     pmr->g.anScore[ 1 ] = n1;
-    pmr->g.fCrawford = TRUE; /* FIXME assume JF always uses Crawford rule? */
-    pmr->g.fCrawfordGame = FALSE; /* FIXME how does JF mark this? */
-    pmr->g.fJacoby = FALSE; /* FIXME assume JF never uses Jacoby rule? */
+    pmr->g.fCrawford = TRUE; /* assume JF always uses Crawford rule */
+    if( ( pmr->g.fCrawfordGame = !fPostCrawford &&
+	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
+	fPostCrawford = TRUE;
+    pmr->g.fJacoby = FALSE; /* assume JF never uses Jacoby rule */
     pmr->g.fWinner = -1;
     pmr->g.nPoints = 0;
     pmr->g.fResigned = FALSE;
@@ -365,7 +383,10 @@ static void ImportGame( FILE *pf, int iGame, int nLength ) {
     AddMoveRecord( pmr );
     
     do
-	fgets( sz, 80, pf );
+	if( !fgets( sz, 80, pf ) ) {
+	    sz[ 0 ] = 0;
+	    break;
+	}
     while( strspn( sz, " \n\r\t" ) == strlen( sz ) );
 
     do {
@@ -401,7 +422,7 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
     int n, nLength, i;
     char ch;
 
-    fWarned = FALSE;
+    fWarned = fPostCrawford = FALSE;
     
     while( 1 ) {
 	if( ( n = fscanf( pf, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
@@ -443,6 +464,250 @@ extern void ImportMat( FILE *pf, char *szFilename ) {
 	    while( ( n = getc( pf ) ) != '\n' && n != EOF )
 		;
     }
+
+    UpdateSettings();
+    
+#if USE_GTK
+    if( fX ){
+	GTKThaw();
+	GTKSet(ap);
+    }
+#endif
+}
+
+static void ParseOldmove( char *sz, int fInvert ) {
+
+    int iPlayer, i, c;
+    moverecord *pmr;
+    char *pch;
+    
+    switch( *sz ) {
+    case 'X':
+	iPlayer = fInvert;
+	break;
+    case 'O':
+	iPlayer = !fInvert;
+	break;
+    default:
+	goto error;
+    }
+    
+    if( sz[ 3 ] == '(' && strlen( sz ) >= 8 ) {
+        pmr = malloc( sizeof( pmr->n ) );
+        pmr->n.mt = MOVE_NORMAL;
+	pmr->n.sz = NULL;
+        pmr->n.anRoll[ 0 ] = sz[ 4 ] - '0';
+        pmr->n.anRoll[ 1 ] = sz[ 6 ] - '0';
+        pmr->n.fPlayer = iPlayer;
+	pmr->n.ml.cMoves = 0;
+	pmr->n.ml.amMoves = NULL;
+        pmr->n.esDouble.et = EVAL_NONE;
+	pmr->n.lt = LUCK_NONE;
+	pmr->n.rLuck = -HUGE_VALF;
+	pmr->n.st = SKILL_NONE;
+
+	if( !strncasecmp( sz + 9, "can't move", 10 ) )
+	    c = 0;
+	else {
+	    for( pch = sz + 9; *pch; pch++ )
+		if( *pch == '-' )
+		    *pch = '/';
+	    
+	    c = ParseMove( sz + 9, pmr->n.anMove );
+	}
+	
+	if( c >= 0 ) {
+	    for( i = 0; i < ( c << 1 ); i++ ) {
+		pmr->n.anMove[ i ]--;
+
+		if( iPlayer == fInvert && pmr->n.anMove[ i ] >= 0 &&
+		    pmr->n.anMove[ i ] <= 23 )
+		    pmr->n.anMove[ i ] = 23 - pmr->n.anMove[ i ];
+	    }
+		    
+	    if( c < 4 )
+		pmr->n.anMove[ c << 1 ] = pmr->n.anMove[ ( c << 1 ) | 1 ] = -1;
+	    
+	    AddMoveRecord( pmr );
+	}
+	return;
+    } else if( !strncasecmp( sz + 3, "doubles", 7 ) ) {
+	pmr = malloc( sizeof( pmr->d ) );
+	pmr->d.mt = MOVE_DOUBLE;
+	pmr->d.sz = NULL;
+	pmr->d.fPlayer = iPlayer;
+	pmr->d.esDouble.et = EVAL_NONE;
+	pmr->d.st = SKILL_NONE;
+	AddMoveRecord( pmr );
+	return;
+    } else if( !strncasecmp( sz + 3, "accepts", 7 ) ) {
+	pmr = malloc( sizeof( pmr->d ) );
+	pmr->d.mt = MOVE_TAKE;
+	pmr->d.sz = NULL;
+	pmr->d.fPlayer = iPlayer;
+	pmr->d.esDouble.et = EVAL_NONE;
+	pmr->d.st = SKILL_NONE;
+	AddMoveRecord( pmr );
+	return;
+    } else if( !strncasecmp( sz + 3, "rejects", 7 ) ) {
+	pmr = malloc( sizeof( pmr->d ) );
+	pmr->d.mt = MOVE_DROP;
+	pmr->d.sz = NULL;
+	pmr->d.fPlayer = iPlayer;
+	pmr->d.esDouble.et = EVAL_NONE;
+	pmr->d.st = SKILL_NONE;
+	AddMoveRecord( pmr );
+	return;
+    } else if( !strncasecmp( sz + 3, "wants to resign", 15 ) ) {
+	/* ignore */
+	return;
+    } else if( !strncasecmp( sz + 3, "wins", 4 ) ) {
+	if( ms.gs == GAME_PLAYING ) {
+	    /* Neither a drop nor a bearoff to win, so we presume the loser
+	       resigned. */
+	    pmr = malloc( sizeof( pmr->r ) );
+	    pmr->r.mt = MOVE_RESIGN;
+	    pmr->r.sz = NULL;
+	    pmr->r.fPlayer = !iPlayer;
+	    pmr->r.nResigned = 1; /* FIXME determine from score */
+	    AddMoveRecord( pmr );
+	}
+	return;
+    }
+
+ error:
+    if( !fWarned ) {
+	outputf( "Unrecognised move \"%s\" in oldmoves file.\n", sz );
+	fWarned = TRUE;
+    }
+}
+
+static void ImportOldmovesGame( FILE *pf, int iGame, int nLength, int n0,
+				int n1 ) {
+
+    char sz[ 80 ], sz0[ 32 ], sz1[ 32 ], *pch;
+    moverecord *pmr;
+    int fInvert;
+    
+    if( fscanf( pf, " %31s is X - %31s is O\n", sz0, sz1 ) < 2 )
+	return;
+
+    InitBoard( ms.anBoard );
+
+    ClearMoveRecord();
+
+    ListInsert( &lMatch, plGame );
+
+    if( !iGame ) {
+	strcpy( ap[ 0 ].szName, sz0 );
+	strcpy( ap[ 1 ].szName, sz1 );
+	fInvert = FALSE;
+    } else
+	fInvert = strcmp( ap[ 0 ].szName, sz0 ) != 0;
+    
+    pmr = malloc( sizeof( movegameinfo ) );
+    pmr->g.mt = MOVE_GAMEINFO;
+    pmr->g.sz = NULL;
+    pmr->g.i = iGame;
+    pmr->g.nMatch = nLength;
+    pmr->g.anScore[ 0 ] = n0;
+    pmr->g.anScore[ 1 ] = n1;
+    pmr->g.fCrawford = nLength != 0; /* assume matches use Crawford rule */
+    if( ( pmr->g.fCrawfordGame = !fPostCrawford &&
+	  ( n0 == nLength - 1 ) ^ ( n1 == nLength - 1 ) ) )
+	fPostCrawford = TRUE;
+    pmr->g.fJacoby = !nLength; /* assume matches never use Jacoby rule */
+    pmr->g.fWinner = -1;
+    pmr->g.nPoints = 0;
+    pmr->g.fResigned = FALSE;
+    pmr->g.nAutoDoubles = 0;
+    IniStatcontext( &pmr->g.sc );
+    AddMoveRecord( pmr );
+    
+    do
+	if( !fgets( sz, 80, pf ) ) {
+	    sz[ 0 ] = 0;
+	    break;
+	}
+    while( strspn( sz, " \n\r\t" ) == strlen( sz ) );
+
+    do {
+	if( ( pch = strpbrk( sz, "\n\r" ) ) )
+	    *pch = 0;
+
+	ParseOldmove( sz, fInvert );
+	
+	if( !fgets( sz, 80, pf ) )
+	    break;
+    } while( strspn( sz, " \n\r\t" ) != strlen( sz ) );
+
+    AddGame( pmr );
+}
+
+extern void ImportOldmoves( FILE *pf, char *szFilename ) {
+
+    int n, n0, n1, nLength, i;
+
+    fWarned = fPostCrawford = FALSE;
+    
+    while( 1 ) {
+	if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,
+			  &nLength ) ) == EOF ) {
+	    fprintf( stderr, "%s: not a valid oldmoves file\n", szFilename );
+	    return;
+	} else if( n == 2 ) {
+	    /* assume a money game */
+	    nLength = 0;
+	    break;
+	} else if( n == 3 )
+	    break;
+	
+	/* discard line */
+	while( ( n = getc( pf ) ) != '\n' && n != EOF )
+	    ;
+    }
+    
+    if( ms.gs == GAME_PLAYING && fConfirm ) {
+	if( fInterrupt )
+	    return;
+	
+	if( !GetInputYN( "Are you sure you want to import a saved match, "
+			 "and discard the game in progress? " ) )
+	    return;
+    }
+
+#if USE_GTK
+    if( fX )
+	GTKFreeze();
+#endif
+    
+    FreeMatch();
+    ClearMatch();
+
+    i = 0;
+    
+    while( 1 ) {
+	/* discard line */
+	while( ( n = getc( pf ) ) != '\n' && n != EOF )
+	    ;
+	
+	ImportOldmovesGame( pf, i++, nLength, n0, n1 );
+
+	do {
+	    if( ( n = fscanf( pf, "Score is %d-%d in a %d", &n0, &n1,
+			      &nLength ) ) >= 2 )
+		break;
+
+	    /* discard line */
+	    while( ( n = getc( pf ) ) != '\n' && n != EOF )
+		;
+	} while( n != EOF );
+
+	if( n == EOF )
+	    break;
+    }
+
+    UpdateSettings();
     
 #if USE_GTK
     if( fX ){

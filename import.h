@@ -21,9 +21,8 @@
 #ifndef _IMPORT_H_
 #define _IMPORT_H_
 
-extern void
-ImportJF( FILE * fp, char *szFileName);
-
+extern void ImportJF( FILE * fp, char *szFileName);
 extern void ImportMat( FILE *fp, char *szFilename );
+extern void ImportOldmoves( FILE *pf, char *szFilename );
 
 #endif

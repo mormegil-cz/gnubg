@@ -39,7 +39,7 @@ duplication of effort and to make sure our changes merge easily.
   won't occur, and then change EvaluatePositionCache to cache what it can.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
-  speed increase. (gary)
+  speed increase.
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve
   space.
@@ -191,8 +191,6 @@ duplication of effort and to make sure our changes merge easily.
   played.
 ** Update the GTK+ SetEval(), SetPlayers() and SetRollouts() to match
   the new evalsetups. (gary)
-** Cosmetic bug with the progress bar (when text is first displayed in it,
-  GTK decides to resize the status bar and progress bar).
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -260,6 +258,15 @@ duplication of effort and to make sure our changes merge easily.
 ** LuckAnalysis() in analysis.c assumes the equity before the first
   move was 0, which is not true when the two players have different
   gammon prices.
+** TTY rollout output is wider than 80 columns.
+** Analysis with rollouts crashes under GTK.  (There are problems with the
+  rollout window -- do we really want a window in this case?)
+** We only allow the player on roll to resign.  But the other player can
+  resign in imported FIBS (and JF?) games... this can show the wrong player
+  resigning when using the TTY interface.  We also need to calculate how
+  many points a resignation was for.  See Little_Sister match
+  990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
+  of both problems.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are

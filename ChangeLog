@@ -1,3 +1,25 @@
+Mon Aug 27 10:37:52 2001  Gary Wong  <gtw@research.att.com>
+
+	* analysis.c (GetRating): Add an "N/A" rating for situations where
+	no information is available (e.g. the cube rating during the Crawford
+	game).
+
+	* gtkgame.c (InitGTK): Ask for text in the progress bar, so it will
+	be sized correctly in case we need to add text later.
+
+	* gtkgame.c (ReadReal): Use 2 decimal places in the spin button.
+	
+	* gnubg.c (CommandImportOldmoves): New function.
+	* import.c (ParseOldmove, ImportOldmovesGame, ImportOldmoves): New
+	functions.
+	
+	* import.c (ParseMatMove): Handle resignations and Crawford rule.
+
+	* rollout.c: Trim some output to 80 columns.
+
+	* analysis.c, gnubg.c, gtkgame.c, play.c, set.c, sgf.c: HUGE_VALF
+	should be positive.
+	
 Sat Aug 25 21:59:40 2001  Øystein Johansen <oeysteij@online.no>
 
         * gtkgame.c : Temporary hack to set analysis evaluation settings

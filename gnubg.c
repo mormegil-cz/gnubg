@@ -126,7 +126,7 @@ int fReadline = TRUE;
 #endif
 
 #ifndef HUGE_VALF
-#define HUGE_VALF (-1e38)
+#define HUGE_VALF 1e38
 #endif
 
 char szDefaultPrompt[] = "(\\p) ",
@@ -2516,33 +2516,33 @@ extern void CommandImportMat( char *sz ) {
 		     "and discard the game in progress? " ) )
 	return;
     
-#if USE_GTK
-	if( fX )
-	    GTKFreeze();
-#endif
-	
-	FreeMatch();
-	ClearMatch();
-	
-	if( ( pf = fopen( sz, "r" ) ) ) {
-	    ImportMat( pf, sz );
-	    fclose( pf );
-	} else
-	    perror( sz );
-
-	UpdateSettings();
-	
-#if USE_GTK
-	if( fX ){
-	    GTKThaw();
-	    GTKSet(ap);
-        }
-#endif
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	ImportMat( pf, sz );
+	fclose( pf );
+    } else
+	perror( sz );
 }
 
 extern void CommandImportOldmoves( char *sz ) {
 
-    CommandNotImplemented( sz ); /* FIXME */
+    FILE *pf;
+    
+    if( !sz || !*sz ) {
+	outputl( "You must specify an oldmoves file to import (see `help "
+		 "import oldmoves')." );
+	return;
+    }
+
+    if( ms.gs == GAME_PLAYING && fConfirm &&
+	!GetInputYN( "Are you sure you want to load a saved match, "
+		     "and discard the game in progress? " ) )
+	return;
+    
+    if( ( pf = fopen( sz, "r" ) ) ) {
+	ImportOldmoves( pf, sz );
+	fclose( pf );
+    } else
+	perror( sz );
 }
 
 extern void CommandCopy( char *sz ) {
