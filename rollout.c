@@ -991,7 +991,7 @@ RolloutGeneral( int anBoard[ 2 ][ 25 ], char asz[][ 40 ],
 
         }
 
-        aar[ ici ][ OUTPUT_EQUITY ] = Utility ( aar[ ici ], &aciLocal [ ici ]);
+        aar[ ici ][ OUTPUT_EQUITY ] = Utility ( aar[ ici ], &aci [ ici ]);
       
         for( j = 0; j < NUM_ROLLOUT_OUTPUTS; j++ ) {
 	  float rMuNew, rDelta;

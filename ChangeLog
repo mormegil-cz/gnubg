@@ -1,10 +1,15 @@
+Thu Jan 24 21:06:07 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* rollout.c (RolloutGeneral): calculate cubeles equity with aci instead
+	of aciLocal.
+
 Thu Jan 24 14:20:42 2002  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (StatusCrashed): New function.
 
 Thu Jan 24 19:19:27 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
 
-	* eval.c: don't calculate cubeful equities in Crawford game.
+	* eval.c(Cl2CfMatch): don't calculate cubeful equities in Crawford game.
 
 Wed Jan 23 19:15:58 2002  Øystein Johansen <oeysteij@online.no>
 
