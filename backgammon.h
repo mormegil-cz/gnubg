@@ -232,6 +232,7 @@ extern int SetToggle( char *szName, int *pf, char *sz, char *szOn,
 		       char *szOff );
 extern void ShowBoard( void );
 extern char *FormatPrompt( void );
+extern char *FormatMoveHint( char *sz, movelist *pml, int i );
 extern void UpdateSetting( void *p );
 extern void ResetInterrupt( void );
 extern void PromptForExit( void );

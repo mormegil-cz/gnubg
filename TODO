@@ -151,8 +151,9 @@ duplication of effort and to make sure our changes merge easily.
 *** Make "help" show its output in a CList (CTree?).  The user must be able
   to recurse through help for subcommands.
 *** Make "show matchequitytable" show output in a table.
-*** Allow copy and paste from data presented in dialogs (at least the important
-  ones like eval, hint, rollout).
+*** Allow selection of data from the rollout and eval dialogs (see the
+  hint dialog for an example). (gary)
+*** Make the rollout dialog look more like the hint dialog. (gary)
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution

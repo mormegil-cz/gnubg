@@ -1319,11 +1319,147 @@ extern void CommandHelp( char *sz ) {
     }
 }
 
+extern char *FormatMoveHint( char *sz, movelist *pml, int i ) {
+    
+    cubeinfo ci;
+    char szTemp[ 1024 ], szMove[ 32 ];
+    
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
+		  fCrawford, fJacoby, fBeavers );
+    
+    if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) ) {
+	/* output in equity */
+        float *ar, rEq, rEqTop;
+
+	ar = pml->amMoves[ 0 ].arEvalMove;
+	rEqTop = pml->amMoves[ 0 ].rScore;
+
+	if( !i ) {
+	    if( fOutputWinPC )
+		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f\n"
+			 "       %5.1f%% %5.1f%% %5.1f%%  -"
+			 " %5.1f%% %5.1f%% %5.1f%%\n",
+			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
+					 pml->amMoves[ 0 ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ 0 ].anMove ),
+			 rEqTop, 
+			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+			 100.0 * ar[ 4 ] );
+	    else
+		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f\n"
+			 "       %5.3f %5.3f %5.3f  -"
+			 " %5.3f %5.3f %5.3f\n",
+			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
+					 pml->amMoves[ 0 ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ 0 ].anMove ),
+			 rEqTop, 
+			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
+			 ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+			 ar[ 4 ] );
+	} else {
+	    ar = pml->amMoves[ i ].arEvalMove;
+	    rEq = pml->amMoves[ i ].rScore;
+
+	    if( fOutputWinPC )
+		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
+			 "       %5.1f%% %5.1f%% %5.1f%%  -"
+			 " %5.1f%% %5.1f%% %5.1f%%\n",
+			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+					    pml->amMoves[ i ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ i ].anMove ),
+			 rEq, rEq - rEqTop,
+			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+			 100.0 * ar[ 4 ] );
+	    else
+		sprintf( sz, " %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
+			 "       %5.3f %5.3f %5.3f  -"
+			 " %5.3f %5.3f %5.3f\n",
+			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+					    pml->amMoves[ i ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ i ].anMove ),
+			 rEq, rEq - rEqTop,
+			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
+			 ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+			 ar[ 4 ] );
+	}
+    } else {
+ 	/* output in mwc */
+
+        float *ar, rMWC, rMWCTop;
+	
+	ar = pml->amMoves[ 0 ].arEvalMove;
+	rMWCTop = 100.0 * eq2mwc ( pml->amMoves[ 0 ].rScore, &ci );
+
+	if( !i ) {
+	    if( fOutputWinPC )
+		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+			 "       %5.1f%% %5.1f%% %5.1f%%  -"
+			 " %5.1f%% %5.1f%% %5.1f%%\n",
+			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
+					 pml->amMoves[ 0 ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ 0 ].anMove ),
+			 rMWCTop, 
+			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+			 100.0 * ar[ 4 ] );
+	    else
+		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%%\n"
+			 "       %5.3f %5.3f %5.3f  -"
+			 " %5.3f %5.3f %5.3f\n",
+			 1, FormatEval ( szTemp, pml->amMoves[ 0 ].etMove,
+					 pml->amMoves[ 0 ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ 0 ].anMove ),
+			 rMWCTop, 
+			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
+			 ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+			 ar[ 4 ] );
+        } else {
+	    ar = pml->amMoves[ i ].arEvalMove;
+	    rMWC = 100.0 * eq2mwc ( pml->amMoves[ i ].rScore, &ci );
+
+	    if( fOutputWinPC )
+		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+			 "       %5.1f%% %5.1f%% %5.1f%%  -"
+			 " %5.1f%% %5.1f%% %5.1f%%\n",
+			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+					    pml->amMoves[ i ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ i ].anMove ),
+			 rMWC, rMWC - rMWCTop,
+			 100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
+			 100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
+			 100.0 * ar[ 4 ] );
+	    else
+		sprintf( sz, " %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
+			 "       %5.3f %5.3f %5.3f  -"
+			 " %5.3f %5.3f %5.3f\n",
+			 i+ 1, FormatEval ( szTemp, pml->amMoves[ i ].etMove,
+					    pml->amMoves[ i ].esMove ), 
+			 FormatMove( szMove, anBoard, 
+				     pml->amMoves[ i ].anMove ),
+			 rMWC, rMWC - rMWCTop,
+			 ar[ 0 ], ar[ 1 ], ar[ 2 ],
+			 ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
+			 ar[ 4 ] );
+	}
+    }
+
+    return sz;
+}
+
 extern void CommandHint( char *sz ) {
 
     movelist ml;
     int i;
-    char szMove[ 32 ], szTemp[ 1024 ];
+    char szBuf[ 1024 ];
     float arDouble[ 4 ], arOutput[ NUM_OUTPUTS ];
     cubeinfo ci;
     int n = ParseNumber ( &sz );
@@ -1348,7 +1484,7 @@ extern void CommandHint( char *sz ) {
                                        ecEval.nPlies ) < 0 )
           return;
 
-        GetCubeActionSz ( arDouble, szTemp, &ci, fOutputMWC, FALSE );
+        GetCubeActionSz ( arDouble, szBuf, &ci, fOutputMWC, FALSE );
 
 #if USE_GTK
 	/*
@@ -1361,7 +1497,7 @@ extern void CommandHint( char *sz ) {
 	  }
 	*/
 #endif
-	outputl ( szTemp );
+	outputl ( szBuf );
 	
 	return;
 
@@ -1461,143 +1597,8 @@ extern void CommandHint( char *sz ) {
       }
 #endif
 
-      if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) ) {
-
-	/* output in equity */
-    
-        float *ar, rEq, rEqTop;
-
-        if ( ml.cMoves ) {
-
-	  ar = ml.amMoves[ 0 ].arEvalMove;
-          rEqTop = ml.amMoves[ 0 ].rScore;
-
-	  if( fOutputWinPC )
-	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f\n"
-		       "       %5.1f%% %5.1f%% %5.1f%%  -"
-		       " %5.1f%% %5.1f%% %5.1f%%\n",
-		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
-				       ml.amMoves[ 0 ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ 0 ].anMove ),
-		       rEqTop, 
-		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-		       100.0 * ar[ 4 ] );
-	  else
-	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f\n"
-		       "       %5.3f %5.3f %5.3f  -"
-		       " %5.3f %5.3f %5.3f\n",
-		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
-				       ml.amMoves[ 0 ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ 0 ].anMove ),
-		       rEqTop, 
-		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
-		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
-		       ar[ 4 ] );
-        }
-
-	for( i = 1; i < n; i++ ) {
-
-	  ar = ml.amMoves[ i ].arEvalMove;
-          rEq = ml.amMoves[ i ].rScore;
-
-	  if( fOutputWinPC )
-	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
-		       "       %5.1f%% %5.1f%% %5.1f%%  -"
-		       " %5.1f%% %5.1f%% %5.1f%%\n",
-		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
-					  ml.amMoves[ i ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ i ].anMove ),
-		       rEq, rEq - rEqTop,
-		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-		       100.0 * ar[ 4 ] );
-	  else
-	      outputf (" %4i. %-14s   %-28s Eq.: %+6.3f (%+6.3f)\n"
-		       "       %5.3f %5.3f %5.3f  -"
-		       " %5.3f %5.3f %5.3f\n",
-		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
-					  ml.amMoves[ i ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ i ].anMove ),
-		       rEq, rEq - rEqTop,
-		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
-		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
-		       ar[ 4 ] );
-	}
-      }
-      else {
-
- 	/* output in mwc */
-
-        float *ar, rMWC, rMWCTop;
-
-        if ( ml.cMoves ) {
-
-	  ar = ml.amMoves[ 0 ].arEvalMove;
-          rMWCTop = 100.0 * eq2mwc ( ml.amMoves[ 0 ].rScore, &ci );
-
-	  if( fOutputWinPC )
-	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
-		       "       %5.1f%% %5.1f%% %5.1f%%  -"
-		       " %5.1f%% %5.1f%% %5.1f%%\n",
-		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
-				       ml.amMoves[ 0 ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ 0 ].anMove ),
-		       rMWCTop, 
-		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-		       100.0 * ar[ 4 ] );
-	  else
-	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%%\n"
-		       "       %5.3f %5.3f %5.3f  -"
-		       " %5.3f %5.3f %5.3f\n",
-		       1, FormatEval ( szTemp, ml.amMoves[ 0 ].etMove,
-				       ml.amMoves[ 0 ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ 0 ].anMove ),
-		       rMWCTop, 
-		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
-		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
-		       ar[ 4 ] );
-                   
-        }
-
-	for( i = 1; i < n; i++ ) {
-
-	  ar = ml.amMoves[ i ].arEvalMove;
-          rMWC = 100.0 * eq2mwc ( ml.amMoves[ i ].rScore, &ci );
-
-	  if( fOutputWinPC )
-	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
-		       "       %5.1f%% %5.1f%% %5.1f%%  -"
-		       " %5.1f%% %5.1f%% %5.1f%%\n",
-		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
-					  ml.amMoves[ i ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ i ].anMove ),
-		       rMWC, rMWC - rMWCTop,
-		       100.0 * ar[ 0 ], 100.0 * ar[ 1 ], 100.0 * ar[ 2 ],
-		       100.0 * ( 1.0 - ar[ 0 ] ) , 100.0 * ar[ 3 ], 
-		       100.0 * ar[ 4 ] );
-	  else
-	      outputf (" %4i. %-14s   %-28s Mwc: %7.3f%% (%+7.3f%%)\n"
-		       "       %5.3f %5.3f %5.3f  -"
-		       " %5.3f %5.3f %5.3f\n",
-		       i+ 1, FormatEval ( szTemp, ml.amMoves[ i ].etMove,
-					  ml.amMoves[ i ].esMove ), 
-		       FormatMove( szMove, anBoard, 
-				   ml.amMoves[ i ].anMove ),
-		       rMWC, rMWC - rMWCTop,
-		       ar[ 0 ], ar[ 1 ], ar[ 2 ],
-		       ( 1.0 - ar[ 0 ] ) , ar[ 3 ], 
-		       ar[ 4 ] );
-	}
-      }
+      for( i = 0; i < n; i++ )
+	  output( FormatMoveHint( szBuf, &ml, i ) );
     }
 }
 

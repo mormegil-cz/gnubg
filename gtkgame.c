@@ -1493,7 +1493,7 @@ static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
 
 static void HintRollout( GtkWidget *pw, GtkWidget *pwMoves ) {
 
-    int i;
+    int c;
     GList *pl;
     char *sz, *pch;
     
@@ -1502,19 +1502,19 @@ static void HintRollout( GtkWidget *pw, GtkWidget *pwMoves ) {
     /* FIXME selection is not in order... should we roll the moves out
        in the same order they're listed? */
     
-    for( i = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
-	i++;
+    for( c = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next )
+	c++;
 
 #if HAVE_ALLOCA
-    sz = alloca( i * 6 + 9 ); /* "rollout " plus c * "=9999 " plus \0 */
+    sz = alloca( c * 6 + 9 ); /* "rollout " plus c * "=9999 " plus \0 */
 #else
-    sz = malloc( i * 6 + 9 );
+    sz = malloc( c * 6 + 9 );
 #endif
 
     strcpy( sz, "rollout " );
     pch = sz + 8;
 
-    for( i = 0, pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
+    for( pl = GTK_CLIST( pwMoves )->selection; pl; pl = pl->next ) {
 	sprintf( pch, "=%d ", GPOINTER_TO_INT( pl->data ) + 1 );
 	pch = strchr( pch, 0 );
     }
@@ -1530,6 +1530,7 @@ static void HintRollout( GtkWidget *pw, GtkWidget *pwMoves ) {
 
 typedef struct _hintdata {
     GtkWidget *pwMove, *pwRollout;
+    movelist *pml;
 } hintdata;
 
 static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
@@ -1541,12 +1542,68 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
     for( c = 0, pl = GTK_CLIST( pw )->selection; c < 2 && pl; pl = pl->next )
 	c++;
 
+    if( c && peb )
+	gtk_selection_owner_set( pw, GDK_SELECTION_PRIMARY, peb->time );
+
     gtk_widget_set_sensitive( phd->pwMove, c == 1 );
     gtk_widget_set_sensitive( phd->pwRollout, c );
 
     /* Double clicking a row makes that move. */
     if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS )
 	gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
+}
+
+static gint HintClearSelection( GtkWidget *pw, GdkEventSelection *pes,
+				hintdata *phd ) {
+    
+    gtk_clist_unselect_all( GTK_CLIST( pw ) );
+
+    return TRUE;
+}
+
+typedef int ( *cfunc )( const void *, const void * );
+
+static int CompareInts( int *p0, int *p1 ) {
+
+    return *p0 - *p1;
+}
+
+static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
+			      guint n, guint t, hintdata *phd ) {
+    int c, i;
+    GList *pl;
+    char *sz, *pch;
+    int *an;
+    
+    for( c = 0, pl = GTK_CLIST( pw )->selection; pl; pl = pl->next )
+	c++;
+
+#if HAVE_ALLOCA
+    an = alloca( c * sizeof( an[ 0 ] ) );
+    sz = alloca( c * 160 );
+#else
+    an = malloc( c * sizeof( an[ 0 ] ) );
+    sz = malloc( c * 160 );
+#endif
+
+    *sz = 0;
+    
+    for( i = 0, pl = GTK_CLIST( pw )->selection; pl;
+	 pl = pl->next, i++ )
+	an[ i ] = GPOINTER_TO_INT( pl->data );
+
+    qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
+
+    for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
+	FormatMoveHint( pch, phd->pml, an[ i ] );
+        
+    gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
+			    sz, strlen( sz ) );
+    
+#if !HAVE_ALLOCA
+    free( an );
+    free( sz );
+#endif        
 }
 
 extern void GTKHint( movelist *pml ) {
@@ -1572,7 +1629,7 @@ extern void GTKHint( movelist *pml ) {
 	*pwMoves = gtk_clist_new_with_titles( 11, aszTitle );
     int i, j;
     char sz[ 32 ];
-    hintdata hd = { pwMove, pwRollout };
+    hintdata hd = { pwMove, pwRollout, pml };
     float rBest;
     
     for( i = 0; i < 11; i++ ) {
@@ -1651,11 +1708,18 @@ extern void GTKHint( movelist *pml ) {
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwRollout );
 
+    gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
+			      GDK_SELECTION_TYPE_STRING, 0 );
+    
     HintSelect( pwMoves, 0, 0, NULL, &hd );
     gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
 			GTK_SIGNAL_FUNC( HintSelect ), &hd );
     gtk_signal_connect( GTK_OBJECT( pwMoves ), "unselect-row",
 			GTK_SIGNAL_FUNC( HintSelect ), &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_clear_event",
+			GTK_SIGNAL_FUNC( HintClearSelection ), &hd );
+    gtk_signal_connect( GTK_OBJECT( pwMoves ), "selection_get",
+			GTK_SIGNAL_FUNC( HintGetSelection ), &hd );
     
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 0, 300 );
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );

@@ -1,3 +1,9 @@
+Fri Jan 19 15:20:24 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (FormatMoveHint): New function.
+	* gtkgame.c (GTKHint): Selecting rows in the hint dialog now
+	uses X selections.
+
 Wed Jan 17 17:13:46 2001  Gary Wong  <gtw@research.att.com>
 
 	* positionid.c (PositionKey): Added Joseph's optimised version.
