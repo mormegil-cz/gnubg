@@ -1,3 +1,9 @@
+Wed Oct 29 12:26:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* allgames.xpm gnu.xpm nextgame.xpm nextmarked.xpm nextmove.xpm 
+	prevgame.xpm prevmarked.xpm prevmove.xpm question.xpm:
+		Moved files from root directory to xpm directory
+
 Sun Aug 24 22:13:53 2003  Oystein Johansen  <oystein@gnubg.org>
 
         * dice.xpm,  hint_alt.xpm, resign.xpm, resigns.xpm, stock_cancel.xpm,
