@@ -21,6 +21,9 @@
 
 #include "config.h"
 
+#if HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 #include <assert.h>
 #include <cache.h>
 #include <errno.h>
@@ -69,7 +72,9 @@ static int anEscapes[ 0x1000 ];
 static neuralnet nnContact, nnBPG, nnRace;
 static unsigned char *pBearoff1 = NULL, *pBearoff2;
 static cache cEval;
-volatile int fInterrupt = FALSE;
+volatile int fInterrupt = FALSE, fAction = FALSE;
+void ( *fnAction )( void ) = NULL;
+
 static float arGammonPrice[ 4 ] = { 1.0, 1.0, 1.0, 1.0 };
 
 static evalcontext ecBasic = { 0, 0, 0 };
@@ -1131,7 +1136,8 @@ static int EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
 		if( fInterrupt ) {
 		    errno = EINTR;
 		    return -1;
-		}
+		} else if( fAction )
+		    fnAction();
 	    
 		FindBestMovePlied( anMove, n0, n1, anBoardNew, pec, 0 );
 

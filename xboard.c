@@ -64,10 +64,10 @@ static int Intersects( int x0, int y0, int cx0, int cy0,
 
 static void BoardRedrawDice( extwindow *pewnd, gamedata *pgd, int i ) {
 
-    return GameRedrawDice( pewnd, pgd, pgd->xDice[ i ] * pgd->nBoardSize,
-			   pgd->yDice[ i ] * pgd->nBoardSize,
-			   pgd->fDiceColour[ i ], pgd->fTurn == pgd->fColour ?
-			   pgd->anDice[ i ] : pgd->anDiceOpponent[ i ] );
+    GameRedrawDice( pewnd, pgd, pgd->xDice[ i ] * pgd->nBoardSize,
+		    pgd->yDice[ i ] * pgd->nBoardSize,
+		    pgd->fDiceColour[ i ], pgd->fTurn == pgd->fColour ?
+		    pgd->anDice[ i ] : pgd->anDiceOpponent[ i ] );
 }
 
 static void BoardRedrawCube( extwindow *pewnd, gamedata *pgd ) {
@@ -295,6 +295,13 @@ static void BoardPointer( extwindow *pewnd, gamedata *pgd, XEvent *pxev ) {
 
     Pixmap pmSwap;
     int n, nDest, xEvent, yEvent, nBar, fHit;
+
+    if( fBusy ) {
+	if( pxev->type == ButtonPress )
+	    XBell( pewnd->pdsp, 100 );
+
+	return;
+    }
     
     switch( pxev->type ) {
     case ButtonPress:
@@ -546,6 +553,10 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
     gamedata *pgd = pewnd->pv;
     char *pchDest;
     int i, *pn, **ppn;
+    int anBoardOld[ 28 ];
+    int fDirectionOld;
+    XExposeEvent xeev;
+#if __GNUC__
     int *apnMatch[] = { &pgd->nMatchTo, &pgd->nScore, &pgd->nScoreOpponent };
     int *apnGame[] = { &pgd->fTurn, pgd->anDice, pgd->anDice + 1,
 		       pgd->anDiceOpponent, pgd->anDiceOpponent + 1,
@@ -556,10 +567,41 @@ extern int BoardSet( extwindow *pewnd, char *pch ) {
 		       &pgd->nForced, &pgd->nCrawford, &pgd->nRedoubles };
     int anDiceOld[] = { pgd->anDice[ 0 ], pgd->anDice[ 1 ],
 			pgd->anDiceOpponent[ 0 ], pgd->anDiceOpponent[ 1 ] };
-    int anBoardOld[ 28 ];
-    int fDirectionOld;
-    XExposeEvent xeev;
-	    
+#else
+    int *apnMatch[ 3 ], *apnGame[ 21 ], anDiceOld[ 4 ];
+
+    apnMatch[ 0 ] = &pgd->nMatchTo;
+    apnMatch[ 1 ] = &pgd->nScore;
+    apnMatch[ 2 ] = &pgd->nScoreOpponent;
+
+    apnGame[ 0 ] = &pgd->fTurn;
+    apnGame[ 1 ] = pgd->anDice;
+    apnGame[ 2 ] = pgd->anDice + 1;
+    apnGame[ 3 ] = pgd->anDiceOpponent;
+    apnGame[ 4 ] = pgd->anDiceOpponent + 1;
+    apnGame[ 5 ] = &pgd->nCube;
+    apnGame[ 6 ] = &pgd->fDouble;
+    apnGame[ 7 ] = &pgd->fDoubleOpponent;
+    apnGame[ 8 ] = &pgd->fDoubled;
+    apnGame[ 9 ] = &pgd->fColour;
+    apnGame[ 10 ] = &pgd->fDirection;
+    apnGame[ 11 ] = &pgd->nHome;
+    apnGame[ 12 ] = &pgd->nBar;
+    apnGame[ 13 ] = &pgd->nOff;
+    apnGame[ 14 ] = &pgd->nOffOpponent;
+    apnGame[ 15 ] = &pgd->nOnBar;
+    apnGame[ 16 ] = &pgd->nOnBarOpponent;
+    apnGame[ 17 ] = &pgd->nToMove;
+    apnGame[ 18 ] = &pgd->nForced;
+    apnGame[ 19 ] = &pgd->nCrawford;
+    apnGame[ 20 ] = &pgd->nRedoubles;
+
+    anDiceOld[ 0 ] = pgd->anDice[ 0 ];
+    anDiceOld[ 1 ] = pgd->anDice[ 1 ];
+    anDiceOld[ 2 ] = pgd->anDiceOpponent[ 0 ];
+    anDiceOld[ 3 ] = pgd->anDiceOpponent[ 1 ];
+#endif
+    
     if( strncmp( pch, "board:", 6 ) )
 	return -1;
     

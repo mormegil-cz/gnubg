@@ -61,6 +61,11 @@ typedef struct _gamedata {
     int nRedoubles; /* number of instant redoubles allowed */
 } gamedata;
 
+/* Flag set to indicate re-entrant calls (i.e. processing a new X event
+   before an old one has completed).  It would be nicer if this was part of
+   gamedata, but never mind... */
+extern int fBusy;
+
 extern extwindowclass ewcGame;
 
 /* FIXME these shouldn't be part of the interface... Board windows should

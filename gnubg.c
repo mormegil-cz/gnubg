@@ -23,6 +23,9 @@
 
 #include <ctype.h>
 #include <errno.h>
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 #if HAVE_LIMITS_H
 #include <limits.h>
 #endif
@@ -56,9 +59,9 @@
 #include <ext.h>
 #include <extwin.h>
 #include <stdio.h>
-#include <X11/Xutil.h>
 #include "xgame.h"
 
+static extdisplay edsp;
 extwindow ewnd;
 int fX = TRUE; /* use X display */
 int nDelay = 0, fNeedPrompt = FALSE;
@@ -1073,15 +1076,40 @@ static eventhandler StdinReadHandler = {
     NextTurnNotify, NULL
 };
 
+static void HandleXAction( void ) {
+
+    /* It is safe to execute this function with SIGIO unblocked, because
+       if a SIGIO occurs before fAction is reset, then the I/O it alerts
+       us to will be processed anyway.  If one occurs after fAction is reset,
+       that will cause this function to be executed again, so we will
+       still process its I/O. */
+    fAction = FALSE;
+
+    /* Set flag so that the board window knows this is a re-entrant
+       call, and won't allow commands like roll, move or double. */
+    fBusy = TRUE;
+
+    /* Process incoming X events.  It's important to handle all of them,
+       because we won't get another SIGIO for events that are buffered
+       but not processed. */
+    while( XEventsQueued( edsp.pdsp, QueuedAfterReading ) )
+	EventProcess( &edsp.ev );
+
+    /* Now we need to commit (the timeout will call ExtDspCommit). */
+    EventTimeout( &edsp.ev );
+
+    fBusy = FALSE;
+}
+
 void RunX( void ) {
     /* Attempt to execute under X Window System.  Returns on error (for
        fallback to TTY), or executes until exit() if successful. */
     Display *pdsp;
-    extdisplay edsp;
     XrmDatabase rdb;
     XSizeHints xsh;
-    unsigned char *pch;
+    char *pch;
     event ev;
+    int n;
     
     XrmInitialize();
     
@@ -1138,6 +1166,13 @@ void RunX( void ) {
     EventCreate( &evNextTurn, &NextTurnHandler, NULL );
     evNextTurn.h = -1;
     EventHandlerReady( &evNextTurn, TRUE, -1 );
+
+    /* FIXME F_SETOWN is a BSDism... use SIOCSPGRP if necessary. */
+    fnAction = HandleXAction;
+    if( ( n = fcntl( ConnectionNumber( pdsp ), F_GETFL ) ) != -1 ) {
+	fcntl( ConnectionNumber( pdsp ), F_SETOWN, getpid() );
+	fcntl( ConnectionNumber( pdsp ), F_SETFL, n | FASYNC );
+    }
     
 #if HAVE_LIBREADLINE
     rl_callback_handler_install( FormatPrompt(), HandleInput );
@@ -1156,8 +1191,20 @@ void RunX( void ) {
 
 static RETSIGTYPE HandleInterrupt( int idSignal ) {
 
+    /* NB: It is safe to write to fInterrupt even if it cannot be read
+       atomically, because it is only used to hold a binary value. */
     fInterrupt = TRUE;
 }
+
+#if !X_DISPLAY_MISSING
+static RETSIGTYPE HandleIO( int idSignal ) {
+
+    /* NB: It is safe to write to fAction even if it cannot be read
+       atomically, because it is only used to hold a binary value. */
+    if( fX )
+	fAction = TRUE;
+}
+#endif
 
 static void usage( char *argv0 ) {
 
@@ -1272,9 +1319,13 @@ extern int main( int argc, char *argv[] ) {
 	sa.sa_flags = 0;
 # endif
 	sigaction( SIGINT, &sa, NULL );
+
+# if !X_DISPLAY_MISSING
+	sa.sa_handler = HandleIO;
+	sigaction( SIGIO, &sa, NULL );
+# endif
     }
-#else
-# if HAVE_SIGVEC
+#elif HAVE_SIGVEC
     {
 	struct sigvec sv;
 
@@ -1283,9 +1334,15 @@ extern int main( int argc, char *argv[] ) {
 	sv.sv_flags = 0;
 
 	sigvec( SIGINT, &sv, NULL );
+# if !X_DISPLAY_MISSING
+	sv.sv_handler = HandleIO;
+	sigaction( SIGIO, &sv, NULL );
+# endif
     }
-# else
+#else
     signal( SIGINT, HandleInterrupt );
+# if !X_DISPLAY_MISSING
+    signal( SIGIO, HandleIO );
 # endif
 #endif
 

@@ -115,6 +115,8 @@ extwindowspec aewsStats[] = {
     { "board", &ewcText, aedStatsTextPlainC, NULL, STATS_BOARD }
 };
 
+int fBusy = FALSE;
+
 static unsigned int nSeed = 1; /* for rand_r */
 #define RAND ( ( (unsigned int) rand_r( &nSeed ) ) & RAND_MAX )
 
@@ -410,7 +412,11 @@ static int DiceHandler( extwindow *pewnd, XEvent *pxev ) {
 	break;
 	
     case ButtonPress:
-	CommandRoll( NULL );
+	if( fBusy )
+	    XBell( pewnd->pdsp, 100 );
+	else
+	    CommandRoll( NULL );
+	
 	break;
 	
     case ExtPreCreateNotify:

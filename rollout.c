@@ -123,6 +123,8 @@ static int BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 	if( fInterrupt )
 	    return -1;
+	else if( fAction )
+	    fnAction();
 	
 	 iTurn++;
     }
@@ -150,9 +152,13 @@ static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	   CLASS_BEAROFF1 ) {
 	QuasiRandomDice( iTurn, iGame, cGames, anDice );
 	
-	if( FindBestMove( NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-			  anBoard, pec ) < 0 )
+	FindBestMove( NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
+		      anBoard, pec );
+
+	if( fInterrupt )
 	    return -1;
+	else if( fAction )
+	    fnAction();
 	
 	SwapSides( anBoard );
 
@@ -255,7 +261,9 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	
 	if( fInterrupt )
 	    return -1;
-
+	else if( fAction )
+	    fnAction();
+	
 	iTurn++;
     }
 
