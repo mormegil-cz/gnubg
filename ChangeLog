@@ -1,3 +1,11 @@
+Wed Dec 31 23:24:55 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Change external interface to use yacc/lex parser/scanner.
+
+	* configure.in: look for yacc, lex using correct macros.
+	* external_l.l, external_y.y: new files
+	* external.c: use yacc/lex
+
 Mon Dec 29 23:58:34 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* play.c (NewGame): remove some old code that led

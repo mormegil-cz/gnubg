@@ -35,6 +35,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <glib.h>
 
 #if HAVE_SYS_SOCKET_H
 #include <sys/types.h>
@@ -102,6 +103,15 @@
 #include "external.h"
 #include "rollout.h"
 #include "i18n.h"
+
+/* Stuff for the yacc/lex parser */
+
+extern extcmd ec;
+static int fError = FALSE;
+static char *szError = NULL;
+extern void ext_scan_string( const char *s );
+extern void extparse();
+
 
 #if defined(AF_UNIX) && !defined(AF_LOCAL)
 #define AF_LOCAL AF_UNIX
@@ -321,6 +331,231 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 }
 #endif /* HAVE_SOCKETS */
 
+
+static void
+ErrorHandler( char *szMessage, char *szNear, int fParseError ) {
+
+  fError = TRUE;
+
+  g_free( szError );
+  szError = 
+    g_strdup_printf( "Error (%s) near '%s'\n", szMessage, szNear );
+
+}
+
+static extcmd *
+ExtParse( const char *szCommand ) {
+
+  ExtErrorHandler = ErrorHandler;
+  fError = FALSE;
+  szError = NULL;
+
+  ext_scan_string( szCommand );
+  extparse();
+
+  return fError ? NULL : &ec;
+
+}
+
+static char *
+ExtEvaluation( extcmd *pec ) {
+
+  char szName[ 32 ], szOpp[ 32 ];
+  int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
+    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
+    anMove[ 8 ];
+  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+  cubeinfo ci;
+  int nScore, nScoreOpponent;
+  char *szResponse;
+  float r;
+  evalcontext ec;
+
+  if( ParseFIBSBoard( pec->szFIBSBoard, anBoard, szName, szOpp, &nMatchTo,
+                      &nScore, &nScoreOpponent, anDice, &nCube,
+                      &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) ) {
+    outputl( _("Warning: badly formed board from external controller.") );
+    szResponse = 
+      g_strdup_printf( "Error: badly formed board ('%s')\n", pec->szFIBSBoard );
+  }
+  else {
+    
+    anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
+    anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
+    
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
+                  fCrawford, fJacoby, nBeavers, bgvDefault ); 
+
+    ec.fCubeful = pec->fCubeful;
+    ec.nPlies = pec->nPlies;
+    ec.nReduced = pec->nReduced;
+    ec.fDeterministic = pec->fDeterministic;
+    ec.rNoise = pec->rNoise;
+    
+    if ( !fTurn )
+      SwapSides( anBoard );
+
+    if ( GeneralEvaluationE( arOutput, anBoard, &ci, &ec ) )
+      return NULL;
+
+    if ( nMatchTo ) {
+      if ( ec.fCubeful )
+        r = arOutput[ OUTPUT_CUBEFUL_EQUITY ];
+      else
+        r = eq2mwc( arOutput[ OUTPUT_EQUITY ], &ci );
+    }
+    else
+      r = ec.fCubeful ? arOutput[ 6 ] : arOutput[ 5 ];
+    
+    szResponse = g_strdup_printf( "%f %f %f %f %f %f\n",
+                                  arOutput[ 0 ],
+                                  arOutput[ 1 ],
+                                  arOutput[ 2 ],
+                                  arOutput[ 3 ],
+                                  arOutput[ 4 ],
+                                  r );
+  }
+
+  return szResponse;
+
+}
+
+static char *
+ExtFIBSBoard( extcmd *pec ) {
+
+  char szName[ 32 ], szOpp[ 32 ];
+  int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
+    anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
+    anMove[ 8 ];
+  float arDouble[ NUM_CUBEFUL_OUTPUTS ],
+    aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+    aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
+  rolloutstat aarsStatistics[ 2 ][ 2 ];
+  cubeinfo ci;
+  int nScore, nScoreOpponent;
+  char *szResponse;
+  
+  if( ParseFIBSBoard( pec->szFIBSBoard, anBoard, szName, szOpp, &nMatchTo,
+                      &nScore, &nScoreOpponent, anDice, &nCube,
+                      &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) ) {
+    outputl( _("Warning: badly formed board from external controller.") );
+    szResponse = 
+      g_strdup_printf( "Error: badly formed board ('%s')\n", pec->szFIBSBoard );
+  }
+  else {
+    
+    anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
+    anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
+    
+    SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
+                  fCrawford, fJacoby, nBeavers, bgvDefault ); 
+    
+    if ( !fTurn )
+      SwapSides( anBoard );
+
+#if 0
+    {
+      char *asz[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+      cha szBoard[ 10000 ];
+      outputl( DrawBoard( szBoard, anBoard, fTurn, asz,
+                          "no matchid", 15 ) );
+
+      printf( "score %d-%d to %d ", anScore[ 0 ], anScore[ 1 ],
+              nMatchTo );
+      printf( "dice %d %d ", anDice[ 0 ], anDice[ 1 ] );
+      printf( "cubeowner %d cube %d turn %d crawford %d doubled %d\n",
+              fCubeOwner, nCube, fTurn, fCrawford, fDoubled );
+    }
+#endif
+
+    memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
+
+    if ( fDoubled  ) {
+
+      /* take decision */
+      if( GeneralCubeDecision( aarOutput, aarStdDev,
+                               aarsStatistics, anBoard, &ci,
+                               &esEvalCube, NULL, NULL ) < 0 )
+        return NULL;
+	  
+      switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
+      case DOUBLE_PASS:
+      case TOOGOOD_PASS:
+      case REDOUBLE_PASS:
+      case TOOGOODRE_PASS:
+        szResponse = g_strdup( "drop\n" );
+        break;
+
+      case NODOUBLE_BEAVER:
+      case DOUBLE_BEAVER:
+      case NO_REDOUBLE_BEAVER:
+        szResponse = g_strdup( "beaver\n" );
+        break;
+		    
+      default:
+        szResponse = g_strdup( "take\n" );
+      }
+
+#if 0
+      /* this code is broken as the sign of fDoubled 
+         indicates who doubled */
+    } else if ( fDoubled < 0 ) {
+              
+      /* if opp wants to resign (extension to FIBS board) */
+
+      float arOutput[ NUM_ROLLOUT_OUTPUTS ];
+      float rEqBefore, rEqAfter;
+      const float epsilon = 1.0e-6;
+
+      getResignation( arOutput, anBoard, &ci, &esEvalCube );
+
+      getResignEquities ( arOutput, &ci, -fDoubled,
+                          &rEqBefore, &rEqAfter );
+
+      /* if opponent gives up equity by resigning */
+      if( ( rEqAfter - epsilon ) < rEqBefore )
+        szResponse = g_strdup( "accept\n" );
+      else
+        szResponse = g_strdup( "reject\n" );
+
+#endif /* broken */
+    } else if( anDice[ 0 ] ) {
+      /* move */
+      char szMove[ 64 ];
+      if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
+                        anBoard, &ci, &esEvalChequer.ec,
+                        aamfEval ) < 0 )
+        return NULL;
+
+      FormatMovePlain( szMove, anBoardOrig, anMove );
+      szResponse = g_strconcat( szMove, "\n", NULL );
+    } else {
+      /* double decision */
+      if( GeneralCubeDecision( aarOutput, aarStdDev,
+                               aarsStatistics, anBoard, &ci,
+                               &esEvalCube, NULL, NULL ) < 0 )
+        return NULL;
+		
+      switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
+      case DOUBLE_TAKE:
+      case DOUBLE_PASS:
+      case DOUBLE_BEAVER:
+      case REDOUBLE_TAKE:
+      case REDOUBLE_PASS:
+        szResponse = g_strdup( "double\n" );
+        break;
+		    
+      default:
+        szResponse = g_strdup( "roll\n" );
+      }
+    }
+	    
+  }
+
+  return szResponse;
+
+}
+
 extern void CommandExternal( char *sz ) {
 
 #if !HAVE_SOCKETS
@@ -329,17 +564,11 @@ extern void CommandExternal( char *sz ) {
 #else
     int h, hPeer, cb;
     struct sockaddr *psa;
-    char szCommand[ 256 ], szResponse[ 32 ];
-    char szName[ 32 ], szOpp[ 32 ];
-    int anBoard[ 2 ][ 25 ], anBoardOrig[ 2 ][ 25 ], nMatchTo, anScore[ 2 ],
-	anDice[ 2 ], nCube, fCubeOwner, fDoubled, fTurn, fCrawford,
-	anMove[ 8 ];
-    float arDouble[ NUM_CUBEFUL_OUTPUTS ],
-	aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
-	aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ];
-    rolloutstat aarsStatistics[ 2 ][ 2 ];
-    cubeinfo ci;
-    int nScore, nScoreOpponent;
+    char szCommand[ 256 ];
+    char *szResponse;
+    struct sockaddr_in saRemote;
+    socklen_t saLen;
+    extcmd *pec;
     
     sz = NextToken( &sz );
     
@@ -349,167 +578,100 @@ extern void CommandExternal( char *sz ) {
 	return;
     }
 
-    if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
+    do {
+
+      if( ( h = ExternalSocket( &psa, &cb, sz ) ) < 0 ) {
 	outputerr( sz );
 	return;
-    }
-
-    if( bind( h, psa, cb ) < 0 ) {
+      }
+      
+      if( bind( h, psa, cb ) < 0 ) {
 	outputerr( sz );
 	close( h );
 	free( psa );
 	return;
-    }
-
-    free( psa );
-    
-    if( listen( h, 1 ) < 0 ) {
+      }
+      
+      free( psa );
+      
+      if( listen( h, 1 ) < 0 ) {
 	outputerr( _("listen") );
 	close( h );
 	ExternalUnbind( sz );
 	return;
-    }
-
-    while( ( hPeer = accept( h, NULL, NULL ) ) < 0 ) {
+      }
+      
+      while( ( hPeer = accept( h, &saRemote, &saLen ) ) < 0 ) {
 	if( errno == EINTR ) {
-	    if( fAction )
-		fnAction();
+          if( fAction )
+            fnAction();
 
-	    if( fInterrupt ) {
-		close( h );
-		ExternalUnbind( sz );
-		return;
-	    }
+          if( fInterrupt ) {
+            close( h );
+            ExternalUnbind( sz );
+            return;
+          }
 	    
-	    continue;
+          continue;
 	}
 	
 	outputerr( _("accept") );
 	close( h );
 	ExternalUnbind( sz );
 	return;
-    }
-
-    close( h );
-    ExternalUnbind( sz );
-
-    while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) )
-      if( ParseFIBSBoard( szCommand, anBoard, szName, szOpp, &nMatchTo,
-			  &nScore, &nScoreOpponent, anDice, &nCube,
-			  &fCubeOwner, &fDoubled, &fTurn, &fCrawford ) )
-	outputl( _("Warning: badly formed board from external controller.") );
-      else {
-
-        anScore[ 0 ] = fTurn ? nScoreOpponent : nScore;
-        anScore[ 1 ] = fTurn ? nScore : nScoreOpponent;
-
-	SetCubeInfo ( &ci, nCube, fCubeOwner, fTurn, nMatchTo, anScore,
-		      fCrawford, fJacoby, nBeavers, bgvDefault ); 
-
-        if ( !fTurn )
-          SwapSides( anBoard );
-
-#if 0
- {
-   char *asz[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
-        char szBoard[ 10000 ];
-	outputl( DrawBoard( szBoard, anBoard, fTurn, asz,
-                            "no matchid", 15 ) );
-
-        printf( "score %d-%d to %d ", anScore[ 0 ], anScore[ 1 ],
-                nMatchTo );
-        printf( "dice %d %d ", anDice[ 0 ], anDice[ 1 ] );
-        printf( "cubeowner %d cube %d turn %d crawford %d doubled %d\n",
-                fCubeOwner, nCube, fTurn, fCrawford, fDoubled );
- }
-#endif
-
-	memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
-
-	if ( fDoubled  ) {
-
-	  /* take decision */
-	  if( GeneralCubeDecision( aarOutput, aarStdDev,
-				   aarsStatistics, anBoard, &ci,
-				   &esEvalCube, NULL, NULL ) < 0 )
-	    break;
-	  
-	  switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
-	  case DOUBLE_PASS:
-	  case TOOGOOD_PASS:
-	  case REDOUBLE_PASS:
-	  case TOOGOODRE_PASS:
-	    strcpy( szResponse, "drop" );
-	    break;
-
-	  case NODOUBLE_BEAVER:
-	  case DOUBLE_BEAVER:
-	  case NO_REDOUBLE_BEAVER:
-	    strcpy( szResponse, "beaver" );
-	    break;
-		    
-	  default:
-	    strcpy( szResponse, "take" );
-	  }
-
-#if 0
-          /* this code is broken as the sign of fDoubled 
-             indicates who doubled */
-	} else if ( fDoubled < 0 ) {
-              
-	  /* if opp wants to resign (extension to FIBS board) */
-
-	  float arOutput[ NUM_ROLLOUT_OUTPUTS ];
-	  float rEqBefore, rEqAfter;
-	  const float epsilon = 1.0e-6;
-
-          getResignation( arOutput, anBoard, &ci, &esEvalCube );
-
-          getResignEquities ( arOutput, &ci, -fDoubled,
-                              &rEqBefore, &rEqAfter );
-
-	  /* if opponent gives up equity by resigning */
-          if( ( rEqAfter - epsilon ) < rEqBefore )
-	    strcpy( szResponse, "accept" );
-	  else
-	    strcpy( szResponse, "reject" );
-
-#endif /* broken */
-	} else if( anDice[ 0 ] ) {
-	  /* move */
-	  if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
-			    anBoard, &ci, &esEvalChequer.ec,
-			    aamfEval ) < 0 )
-	    break;
-
-	  FormatMovePlain( szResponse, anBoardOrig, anMove );
-	} else {
-	  /* double decision */
-	  if( GeneralCubeDecision( aarOutput, aarStdDev,
-				   aarsStatistics, anBoard, &ci,
-				   &esEvalCube, NULL, NULL ) < 0 )
-	    break;
-		
-	  switch( FindCubeDecision( arDouble, GCCCONSTAHACK aarOutput, &ci )) {
-	  case DOUBLE_TAKE:
-	  case DOUBLE_PASS:
-	  case DOUBLE_BEAVER:
-	  case REDOUBLE_TAKE:
-	  case REDOUBLE_PASS:
-	    strcpy( szResponse, "double" );
-	    break;
-		    
-	  default:
-	    strcpy( szResponse, "roll" );
-	  }
-	}
-	    
-	strcat( szResponse, "\n" );
-
-	if( ExternalWrite( hPeer, szResponse, strlen( szResponse ) ) )
-	  break;
       }
 
-    close( hPeer );
+      close( h );
+      ExternalUnbind( sz );
+
+      /* print info about remove client */
+
+      outputf( _("Accepted connection from %s.\n"), 
+                 inet_ntoa( saRemote.sin_addr ) );
+
+      PushLocale( "C" );
+
+      while( !ExternalRead( hPeer, szCommand, sizeof( szCommand ) ) ) {
+
+        if ( ! ( pec = ExtParse( szCommand ) ) ) {
+          /* parse error */
+          szResponse = szError;
+        }
+        else {
+
+          switch ( pec->ct ) {
+          case COMMAND_NONE:
+            szResponse = g_strdup( "Error: no command given\n" );
+            break;
+          
+          case COMMAND_FIBSBOARD:
+          
+            szResponse = ExtFIBSBoard( pec );
+            break;
+          
+          case COMMAND_EVALUATION:
+          
+            szResponse = ExtEvaluation( pec );
+            break;
+          
+          }
+
+        }
+
+        if ( szResponse ) {
+          if ( ExternalWrite( hPeer, szResponse, strlen( szResponse ) ) )
+            break;
+
+          g_free( szResponse );
+        }
+
+      }
+
+
+      PopLocale();
+
+      close( hPeer );
+
+    } while ( 1 );
 #endif
 }

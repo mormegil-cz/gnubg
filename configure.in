@@ -37,9 +37,11 @@ AC_PROG_CXX
 AC_PROG_CC_IEEE
 AC_PROG_LN_S
 AC_PROG_RANLIB
-AC_CHECK_PROG(BISON, bison, bison, true)
+AC_PROG_YACC
+AM_PROG_LEX
+dnl AC_CHECK_PROG(BISON, bison, bison, true)
 AC_CHECK_PROG(CSOUND, csound, csound, true)
-AC_CHECK_PROG(FLEX, flex, flex, true)
+dnl AC_CHECK_PROG(FLEX, flex, flex, true)
 AC_CHECK_PROG(GNUPLOT, gnuplot, gnuplot)
 AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm)
 AC_CHECK_PROG(PNMSCALE, pnmscale, pnmscale)
@@ -50,6 +52,9 @@ AC_CHECK_PROG(SRCONV, srconv, srconv, true)
 AC_CHECK_PROG(TR, tr, tr)
 
 AC_CANONICAL_HOST 
+
+AM_YFLAGS='-d'
+AC_SUBST(AM_YFLAGS)
 
 dnl Shamelessly stolen taken from the libgnomecanvas configure.in
 dnl with slight modifications. Check for Win32 Native platform

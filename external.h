@@ -35,9 +35,37 @@
 #include <winsock.h>
 #endif /* #ifndef WIN32 */
 
+typedef enum _cmdtype  {
+  COMMAND_NONE = 0,
+  COMMAND_FIBSBOARD = 1,
+  COMMAND_EVALUATION = 2
+} cmdtype;
+
+
+typedef struct _extcmd {
+  cmdtype ct;
+  
+  /* evalcontext */
+  int nPlies;
+  float rNoise;
+  int fDeterministic;
+  int fCubeful;
+  int nReduced;
+
+  /* fibs board */
+  char *szFIBSBoard;
+} extcmd;
+
+static extcmd cmd;
+
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz );
 extern int ExternalRead( int h, char *pch, int cch );
 extern int ExternalWrite( int h, char *pch, int cch );
+
+/* Parser functions */
+
+extern void ( *ExtErrorHandler )( char *szMessage, char *szNear, 
+                                  int fParseError );
 
 #endif /* #if HAVE_SOCKETS */
 
