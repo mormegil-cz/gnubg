@@ -1,3 +1,10 @@
+Sun Jun  8 21:43:40 2003  Joern Thyssen  <jth@gnubg.org>
+
+        Fix bug: analysis on 0-ply does not stop when interrupted.
+        (reported by Michael Depreli)
+
+        * analysis.c (AnalyzeMove): return -1 if interrupted.
+
 Sat Jun  7 10:13:31 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (EvaluatePositionCubeful4, EvaluatePositionFull):

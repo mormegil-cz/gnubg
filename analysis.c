@@ -894,7 +894,7 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       psc->fDice = fAnalyseDice;
     }
   
-    return 0;
+    return fInterrupt ? -1 : 0;
 }
 
 
@@ -1077,8 +1077,10 @@ extern void CommandAnalyseMatch( char *sz ) {
   IniStatcontext( &scMatch );
   
   for( pl = lMatch.plNext; pl != &lMatch; pl = pl->plNext ) {
+
       if( AnalyzeGame( pl->p ) < 0 ) {
 	  /* analysis incomplete; erase partial summary */
+        
 	  IniStatcontext( &scMatch );
 	  break;
       }
