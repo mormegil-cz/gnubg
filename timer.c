@@ -22,6 +22,7 @@
 */
 
 #include <time.h>
+#include <sys/time.h>
 
 #ifdef WIN32
 #include "windows.h"
@@ -60,10 +61,10 @@ double get_time()
 
 double get_time()
 {	/* Return elapsed time in milliseconds */
-	struct timeval ts;
-	gettimeofday(&ts, 0);
+	struct timeval tv;
+	gettimeofday(&tv, 0);
 
-	return tv->tv_sec * 1000 + tv_usec / 1000;
+	return tv->tv_sec * 1000 + tv->tv_usec / 1000;
 }
 
 #endif
