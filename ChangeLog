@@ -1,3 +1,7 @@
+Mon Aug 25 20:53:03 GMT 2003  Jim Segrave jes@jes-2.dmeon.nl
+
+	* gnubg.c = glibc putenv() doesn't copy strings 
+
 Mon Aug 25 22:12:56 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktheory.c (TheoryUpdated): enlarge font used for

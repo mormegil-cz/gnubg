@@ -6858,6 +6858,7 @@ ChangeDisk( const char *szMsg, const int fChange, const char *szMissingFile ) {
 
 }
 
+
 static void real_main( void *closure, int argc, char *argv[] ) {
 
     char ch, *pch, *pchCommands = NULL, *pchGuileScript = NULL;
@@ -6951,7 +6952,6 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 	  assert (lang != 0);
 	  sprintf (lang, "LANG=%s", optarg);
 	  putenv (lang);
-	  free (lang);
 	  }
 	}
     
