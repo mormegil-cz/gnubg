@@ -196,7 +196,7 @@ details.
   or execute it.  Also use gtk_label_set_markup style markup in the help
   window.
 *** Make open/save/import/export dialogs larger to accomodate very long
-  filenames (or save the geometry)
+  filenames *and* save the geometry)
 
 ** Deprecated functions:
   Once GTK+ 2.0 is released, remove references to the following deprecated
