@@ -359,20 +359,6 @@ LogCube( const int n ) {
 
 
 static void
-dumpKey ( unsigned char *ac, int n ) {
-
-  int i;
-
-  for ( i = 0; i < n; i++ )
-    printf ( "%02x ", ac[ i ] );
-
-  printf ( "\n" );
-
-
-}
-
-
-static void
 SetBit ( unsigned char *pc, int bitPos, int iBit ) {
 
   const int k = bitPos / 8;
@@ -390,8 +376,6 @@ static void
 SetBits ( unsigned char *pc, int bitPos, int nBits, int iContent ) {
 
   int i, j;
-
-  unsigned char c, c2;
 
   /* FIXME: rewrite SetBit, SetBits to be faster */
 
@@ -429,7 +413,8 @@ GetBits ( unsigned char *pc, int bitPos, int nBits, int *piContent ) {
   }
 
   *piContent = c[ 0 ] | ( c[ 1 ] << 8 );
-    
+
+  return 0;
 }
 
 

@@ -7093,7 +7093,7 @@ getMatchPoints ( float aaarPoints[ 2 ][ 4 ][ 2 ],
 
   float arOutput[ NUM_OUTPUTS ];
   float arDP1[ 2 ], arDP2[ 2 ],arCP1[ 2 ], arCP2[ 2 ], arTG[ 2 ];
-  float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain, r;
+  float rDTW, rDTL, rNDW, rNDL, rDP, rRisk, rGain;
 
   int i, anNormScore[ 2 ];
 

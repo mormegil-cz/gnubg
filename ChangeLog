@@ -1,3 +1,7 @@
+Mon Mar 18 16:56:17 2002  Gary Wong  <gtw@research.att.com>
+
+	* eval.c, matchequity.c, play.c, positionid.c: pacify fussy compiler.
+
 Mon Mar 18 18:25:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * gnubg.c: Fix #define GTK_CHECK_VERSION so this file compiles without

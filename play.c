@@ -2889,16 +2889,18 @@ SetMatchID ( char *szMatchID ) {
                      &nMatchTo, anScore, &fCrawford, 
                      anDice, szMatchID ) < 0 ) {
 
-    outputf( "Illegal match ID '%'\n", szMatchID );
+    outputf( "Illegal match ID '%s'\n", szMatchID );
     outputx();
     return;
 
   }
 
+#if 0
   printf ( "%d %d %d %d %d %d %d %d %d\n",
            nCube, fCubeOwner, fMove, nMatchTo, anScore[ 0 ], anScore[ 1 ],
            fCrawford, anDice[ 0 ], anDice[ 1 ] );
-
+#endif
+  
   /* start new match or session */
 
   FreeMatch();

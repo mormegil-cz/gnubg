@@ -127,6 +127,20 @@ NormalDistArea ( float rMin, float rMax, float rMu, float rSigma ) {
 
 
 
+int 
+GetCubePrimeValue ( int i, int j, int nCubeValue ) {
+
+  if ( (i < 2 * nCubeValue) && (j >= 2 * nCubeValue ) )
+
+    /* automatic double */
+
+    return 2*nCubeValue;
+  else
+    return nCubeValue;
+
+}
+
+
 /*
  * Calculate post-Crawford match equity table
  *
@@ -389,20 +403,6 @@ initMETZadeh ( float aafMET[ MAXSCORE ][ MAXSCORE ],
     }
 
   }
-
-}
-
-
-int 
-GetCubePrimeValue ( int i, int j, int nCubeValue ) {
-
-  if ( (i < 2 * nCubeValue) && (j >= 2 * nCubeValue ) )
-
-    /* automatic double */
-
-    return 2*nCubeValue;
-  else
-    return nCubeValue;
 
 }
 
@@ -1028,136 +1028,6 @@ initPostCrawfordMETFromParameters ( float afMETPostCrawford[ MAXSCORE ],
 }
 
 
-extern void
-InitMatchEquity ( const char *szFileName ) {
-
-  int i,j;
-
-  metdata md;
-  int rc;
-
-  static int fTableLoaded = FALSE;
-
-#ifdef HAVE_LIBXML2
-
-  /*
-   * Read match equity table from XML file
-   */
-
-  if ( readMET ( &md, szFileName ) ) {
-
-    if ( ! fTableLoaded ) {
-
-      /* must read met */
-
-      getDefaultMET ( &md );
-
-    }
-    else {
-
-      fprintf ( stderr, "Error reading MET\n" );
-      return;
-
-    }
-    
-  }
-
-  fTableLoaded = TRUE;
-
-#else
-
-  printf ( "Your version of GNU Backgammon does not support\n"
-           "reading match equity files.\n"
-           "Fallback to default Zadeh table.\n" );
-
-  getDefaultMET ( &md );
-
-#endif
-
-  /*
-   * Copy met to current met
-   * Extend met (if needed)
-   */
-
-  /* post-Crawford table */
-
-  if ( ! strcmp ( md.mpPostCrawford.szName, "explicit" ) ) {
-
-    /* copy and extend table */
-
-    /* FIXME: implement better extension of post-Crawford table */
-
-    for ( i = 0; i < md.mi.nLength; i++ )
-      afMETPostCrawford[ i ] = md.arMETPostCrawford[ i ];
-
-    initPostCrawfordMET ( afMETPostCrawford, md.mi.nLength, 
-                          GAMMONRATE, 0.015, 0.004 );
-
-  }
-  else {
-
-    /* generate match equity table using Zadeh's formula */
-
-    if ( initPostCrawfordMETFromParameters ( afMETPostCrawford, 
-                                             md.mi.nLength,
-                                             &md.mpPostCrawford ) < 0 ) {
-
-      fprintf ( stderr, "Error generating post-Crawford MET\n" );
-      return;
-
-    }
-
-  }
-
-  /* pre-Crawford table */
-
-  if ( ! strcmp ( md.mpPreCrawford.szName, "explicit" ) ) {
-
-    /* copy table */
-
-    for ( i = 0; i < md.mi.nLength; i++ )
-      for ( j = 0; j < md.mi.nLength; j++ )
-        aafMET[ i ][ j ] = md.aarMET[ i ][ j ];
-
-  }
-  else {
-
-    /* generate matc equity table using Zadeh's formula */
-
-    if ( initMETFromParameters ( aafMET, afMETPostCrawford,
-                                 md.mi.nLength,
-                                 &md.mpPreCrawford ) < 0 ) {
-
-      fprintf ( stderr, "Error generating pre-Crawford MET\n" );
-      return;
-
-    }
-
-  }
-
-  /* Extend match equity table */
-
-  ExtendMET ( aafMET, md.mi.nLength );
-
-
-  /* garbage collect */
-
-  freeMP ( &md.mpPreCrawford );
-  freeMP ( &md.mpPostCrawford );
-
-  if ( miCurrent.szName ) free ( miCurrent.szName );
-  if ( miCurrent.szFileName ) free ( miCurrent.szFileName );
-  if ( miCurrent.szDescription ) free ( miCurrent.szDescription );
-
-  /* save match equity table information */
-
-  memcpy ( &miCurrent, &md.mi, sizeof ( metinfo ) );
-
-}
-
-
-
-
 #if HAVE_LIBXML2
 
 static void
@@ -1356,7 +1226,6 @@ extern int readMET ( metdata *pmd, const char *szFileName ) {
 
   char *pc;
 
-  int i, j;
   int fError;
 
   fError = 0;
@@ -1397,7 +1266,7 @@ extern int readMET ( metdata *pmd, const char *szFileName ) {
   /* FIXME: any tweaks needed for win32? */
 
   xmlLoadCatalog ( PKGDATADIR "/met/catalog " );
-  if ( pc = getenv ( "SGML_CATALOG_FILES" ) )
+  if ( ( pc = getenv ( "SGML_CATALOG_FILES" ) ) )
     xmlLoadCatalog ( pc );
   xmlLoadCatalog ( "./met/catalog" );
   xmlLoadCatalog ( "./catalog" );
@@ -1509,4 +1378,133 @@ extern int readMET ( metdata *pmd, const char *szFileName ) {
 }
 
 #endif
+
+extern void
+InitMatchEquity ( const char *szFileName ) {
+
+  int i,j;
+
+  metdata md;
+
+  static int fTableLoaded = FALSE;
+
+#ifdef HAVE_LIBXML2
+
+  /*
+   * Read match equity table from XML file
+   */
+
+  if ( readMET ( &md, szFileName ) ) {
+
+    if ( ! fTableLoaded ) {
+
+      /* must read met */
+
+      getDefaultMET ( &md );
+
+    }
+    else {
+
+      fprintf ( stderr, "Error reading MET\n" );
+      return;
+
+    }
+    
+  }
+
+  fTableLoaded = TRUE;
+
+#else
+
+  printf ( "Your version of GNU Backgammon does not support\n"
+           "reading match equity files.\n"
+           "Fallback to default Zadeh table.\n" );
+
+  getDefaultMET ( &md );
+
+#endif
+
+  /*
+   * Copy met to current met
+   * Extend met (if needed)
+   */
+
+  /* post-Crawford table */
+
+  if ( ! strcmp ( md.mpPostCrawford.szName, "explicit" ) ) {
+
+    /* copy and extend table */
+
+    /* FIXME: implement better extension of post-Crawford table */
+
+    for ( i = 0; i < md.mi.nLength; i++ )
+      afMETPostCrawford[ i ] = md.arMETPostCrawford[ i ];
+
+    initPostCrawfordMET ( afMETPostCrawford, md.mi.nLength, 
+                          GAMMONRATE, 0.015, 0.004 );
+
+  }
+  else {
+
+    /* generate match equity table using Zadeh's formula */
+
+    if ( initPostCrawfordMETFromParameters ( afMETPostCrawford, 
+                                             md.mi.nLength,
+                                             &md.mpPostCrawford ) < 0 ) {
+
+      fprintf ( stderr, "Error generating post-Crawford MET\n" );
+      return;
+
+    }
+
+  }
+
+  /* pre-Crawford table */
+
+  if ( ! strcmp ( md.mpPreCrawford.szName, "explicit" ) ) {
+
+    /* copy table */
+
+    for ( i = 0; i < md.mi.nLength; i++ )
+      for ( j = 0; j < md.mi.nLength; j++ )
+        aafMET[ i ][ j ] = md.aarMET[ i ][ j ];
+
+  }
+  else {
+
+    /* generate matc equity table using Zadeh's formula */
+
+    if ( initMETFromParameters ( aafMET, afMETPostCrawford,
+                                 md.mi.nLength,
+                                 &md.mpPreCrawford ) < 0 ) {
+
+      fprintf ( stderr, "Error generating pre-Crawford MET\n" );
+      return;
+
+    }
+
+  }
+
+  /* Extend match equity table */
+
+  ExtendMET ( aafMET, md.mi.nLength );
+
+
+  /* garbage collect */
+
+  freeMP ( &md.mpPreCrawford );
+  freeMP ( &md.mpPostCrawford );
+
+  if ( miCurrent.szName ) free ( miCurrent.szName );
+  if ( miCurrent.szFileName ) free ( miCurrent.szFileName );
+  if ( miCurrent.szDescription ) free ( miCurrent.szDescription );
+
+  /* save match equity table information */
+
+  memcpy ( &miCurrent, &md.mi, sizeof ( metinfo ) );
+
+}
+
+
+
 
