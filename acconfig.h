@@ -1,9 +1,8 @@
 /*
  * acconfig.h
  *
- * by Gary Wong, 1999, 2000
+ * by Gary Wong, 1999, 2000, 2001
  *
- * $Id$
  */
 
 /* Installation directory (used to determine PKGDATADIR below). */

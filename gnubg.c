@@ -38,6 +38,9 @@
 #include <pwd.h>
 #endif
 #include <signal.h>
+#if HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -2876,7 +2879,24 @@ static void real_main( void *closure, int argc, char *argv[] ) {
 		fInteractive = isatty( STDIN_FILENO );
 	    fShowProgress = isatty( STDOUT_FILENO );
 	}
-    
+
+#if HAVE_FSTAT && HAVE_SETVBUF
+    {
+	/* Use line buffering if stdout/stderr are pipes or sockets;
+	   Jens Hoefkens points out that buffering causes problems
+	   for other processes issuing gnubg commands via IPC. */
+	struct stat st;
+	
+	if( !fstat( STDOUT_FILENO, &st ) && ( S_ISFIFO( st.st_mode ) ||
+					      S_ISSOCK( st.st_mode ) ) )
+	    setvbuf( stdout, NULL, _IOLBF, 0 );
+	
+	if( !fstat( STDERR_FILENO, &st ) && ( S_ISFIFO( st.st_mode ) ||
+					      S_ISSOCK( st.st_mode ) ) )
+	    setvbuf( stderr, NULL, _IOLBF, 0 );
+    }
+#endif
+		
     while( ( ch = getopt_long( argc, argv, "bd:hn::rtvw", ao, NULL ) ) !=
            (char) -1 )
 	switch( ch ) {

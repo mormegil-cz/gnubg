@@ -153,6 +153,7 @@ duplication of effort and to make sure our changes merge easily.
 *** Allow selection of data from the rollout dialog (see the hint dialog for
   an example). (gary)
 *** Make the rollout dialog look more like the hint dialog. (gary)
+*** Matija Kejzar suggests making the hint dialog non-modal.
 
 * Bugs:
 ** Nothing handles running out of memory gracefully.  A solution
@@ -163,6 +164,8 @@ duplication of effort and to make sure our changes merge easily.
   too (so we can intercept calls coming from Xlib, for instance).  We
   shouldn't longjmp() out of the hook, though (it might confuse library
   functions).
+** When using mmap()ed bearoff databases, add a signal handler for
+  SIGBUS/SIGSEGV to trap I/O errors.
 ** The erroneous commands "set player both" and "set player both evaluation"
   give poor error messages.
 ** The GTK code uses ConnectionNumber() at various places to detect X

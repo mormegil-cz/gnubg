@@ -73,6 +73,9 @@
 /* Define if you have the fork function.  */
 #undef HAVE_FORK
 
+/* Define if you have the fstat function.  */
+#undef HAVE_FSTAT
+
 /* Define if you have the getdtablesize function.  */
 #undef HAVE_GETDTABLESIZE
 
@@ -102,6 +105,9 @@
 
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
+
+/* Define if you have the setvbuf function.  */
+#undef HAVE_SETVBUF
 
 /* Define if you have the sigaction function.  */
 #undef HAVE_SIGACTION
@@ -147,6 +153,9 @@
 
 /* Define if you have the <sys/socket.h> header file.  */
 #undef HAVE_SYS_SOCKET_H
+
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
 
 /* Define if you have the <sys/time.h> header file.  */
 #undef HAVE_SYS_TIME_H
