@@ -323,6 +323,7 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
   float aaar[ 6 ][ 6 ][ NUM_ROLLOUT_OUTPUTS ];
 
   evalcontext ecCubeless0ply = { FALSE, 0, 0, TRUE, 0.0 };
+  evalcontext ecCubeful0ply = { TRUE, 0, 0, TRUE, 0.0 };
 
   /* local pointers to the eval contexts to use */
   evalcontext *pecCube[2], *pecChequer[2];
@@ -380,24 +381,17 @@ BasicCubefulRollout ( int aanBoard[][ 2 ][ 25 ],
       /* check for truncation at bearoff databases */
 
       pc = ClassifyPosition ( aanBoard[ ici ], pci->bgv );
+
       if ( prc->fTruncBearoff2 && pc <= CLASS_PERFECT &&
            prc->fCubeful && *pf && ! pci->nMatchTo &&
-           ! ( afCubeDecTop[ ici ] && ! prc->fInitial && ! iTurn ) ) {
+           ( ( afCubeDecTop[ ici ] && ! prc->fInitial ) || iTurn > 0 ) ) {
 
         float arEquity[ 4 ];
 
         /* truncate at two sided bearoff if money game */
 
-        EvaluatePerfectCubeful ( aanBoard[ ici ], arEquity, pci->bgv );
-
-        aarOutput[ ici ][ 0 ] = ( arEquity[ 0 ] + 1.0 ) / 2.0;
-        aarOutput[ ici ][ 1 ] = aarOutput[ ici ][ 2 ] =
-          aarOutput[ ici ][ 3 ] = aarOutput[ ici ][ 4 ] = 0.0;
-
-        aarOutput[ ici ][ OUTPUT_EQUITY ] = arEquity[ 0 ];
-
-        aarOutput[ ici ][ OUTPUT_CUBEFUL_EQUITY ] = 
-          CFMONEY ( arEquity, pci );
+        GeneralEvaluationE( aarOutput[ ici ], aanBoard[ ici ],
+                            pci, &ecCubeful0ply );
 
         if ( iTurn & 1 ) InvertEvaluationR ( aarOutput[ ici ], pci );
 
