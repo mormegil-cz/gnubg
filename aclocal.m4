@@ -1206,6 +1206,7 @@ AC_DEFUN(PKG_CHECK_MODULES, [
 
 
 
+
 # Configure paths for ESD
 # Manish Singh    98-9-30
 # stolen back from Frank Belew
@@ -3147,4 +3148,5 @@ AC_DEFUN([AM_LC_MESSAGES],
         [Define if your <locale.h> file defines LC_MESSAGES.])
     fi
   fi])
+
 

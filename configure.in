@@ -34,6 +34,7 @@ AC_PROG_CC_IEEE
 AC_PROG_LN_S
 AC_PROG_RANLIB
 AC_CHECK_PROG(BISON, bison, bison, true)
+AC_CHECK_PROG(CSOUND, csound, csound, true)
 AC_CHECK_PROG(FLEX, flex, flex, true)
 AC_CHECK_PROG(GNUPLOT, gnuplot, gnuplot)
 AC_CHECK_PROG(PNGTOPNM, pngtopnm, pngtopnm)
@@ -294,4 +295,4 @@ dnl check for TRUE/FALSE
 AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))
 AC_CHECK_DECL(TRUE,,AC_DEFINE(TRUE,1,[Define TRUE]))
 
-AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile )
+AC_OUTPUT(Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile)

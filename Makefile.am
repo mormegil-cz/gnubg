@@ -1,7 +1,7 @@
 if USE_EXT
-SUBDIRS = intl lib doc ext met po m4 xpm
+SUBDIRS = intl lib doc ext met po m4 xpm sounds
 else
-SUBDIRS = intl lib doc met po m4 xpm
+SUBDIRS = intl lib doc met po m4 xpm sounds
 endif
 
 localedir = $(datadir)/locale

@@ -1,3 +1,9 @@
+Wed Sep 11 22:25:20 2002  Gary Wong  <gtw@research.att.com>
+
+	* sound.c, Makefile.am, configure.in: Add synthesised sound effects.
+
+	* INSTALL: Update to latest FSF version.
+
 Wed Sep 11 17:21:48 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gtkboard.c (board_init): make higher_die_first default

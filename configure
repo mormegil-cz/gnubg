@@ -2913,6 +2913,42 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+# Extract the first word of "csound", so it can be a program name with args.
+set dummy csound; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_CSOUND+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$CSOUND"; then
+  ac_cv_prog_CSOUND="$CSOUND" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_CSOUND="csound"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_prog_CSOUND" && ac_cv_prog_CSOUND="true"
+fi
+fi
+CSOUND=$ac_cv_prog_CSOUND
+if test -n "$CSOUND"; then
+  echo "$as_me:$LINENO: result: $CSOUND" >&5
+echo "${ECHO_T}$CSOUND" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
 # Extract the first word of "flex", so it can be a program name with args.
 set dummy flex; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -8667,14 +8703,14 @@ fi
     no_guile=yes
     :
   else
-    echo "$as_me:$LINENO: checking for Guile version 1.4 or newer" >&5
-echo $ECHO_N "checking for Guile version 1.4 or newer... $ECHO_C" >&6
+    echo "$as_me:$LINENO: checking for Guile version 1.6 or newer" >&5
+echo $ECHO_N "checking for Guile version 1.6 or newer... $ECHO_C" >&6
     guile_major_version=`$GUILE_CONFIG --version 2>&1 | \
 	sed -n 's/.* \([0-9]\+\)[^ ]*$/\1/p'`
     guile_minor_version=`$GUILE_CONFIG --version 2>&1 | \
 	sed -n 's/.* [0-9]\+.\([0-9]\+\)[^ ]*$/\1/p'`
     if test `expr "${guile_major_version:-0}" \* 1000 + \
-	"${guile_minor_version:-0}"` -ge 1004; then
+	"${guile_minor_version:-0}"` -ge 1006; then
       GUILE_CFLAGS="`$GUILE_CONFIG compile`"
       GUILE_LIBS="`$GUILE_CONFIG link`"
       echo "$as_me:$LINENO: result: yes" >&5
@@ -12059,7 +12095,7 @@ _ACEOF
 fi
 
 
-ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile xpm/Makefile"
+ac_config_files="$ac_config_files Makefile doc/Makefile ext/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile"
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -12607,6 +12643,7 @@ do
   "intl/Makefile" ) CONFIG_FILES="$CONFIG_FILES intl/Makefile" ;;
   "m4/Makefile" ) CONFIG_FILES="$CONFIG_FILES m4/Makefile" ;;
   "xpm/Makefile" ) CONFIG_FILES="$CONFIG_FILES xpm/Makefile" ;;
+  "sounds/Makefile" ) CONFIG_FILES="$CONFIG_FILES sounds/Makefile" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "default-1" ) CONFIG_COMMANDS="$CONFIG_COMMANDS default-1" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
@@ -12728,6 +12765,7 @@ s,@LN_S@,$LN_S,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@BISON@,$BISON,;t t
+s,@CSOUND@,$CSOUND,;t t
 s,@FLEX@,$FLEX,;t t
 s,@GNUPLOT@,$GNUPLOT,;t t
 s,@PNGTOPNM@,$PNGTOPNM,;t t
