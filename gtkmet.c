@@ -238,7 +238,7 @@ static void invertMETlocal( GtkWidget *pw, metwidget *pmw ){
 
 static void loadMET ( GtkWidget *pw, metwidget *pmw ) {
 
-  SetMET ( NULL, 0, NULL );
+  SetMET ( NULL, NULL );
 
   UpdateAllTables ( pmw );
 

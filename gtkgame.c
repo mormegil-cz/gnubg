@@ -3460,7 +3460,7 @@ static void LoadCommands( gpointer *p, guint n, GtkWidget *pw ) {
     GTKFileCommand( _("Open commands"), NULL, "load commands", NULL, 0 );
 }
 
-extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
+extern void SetMET( GtkWidget *pw, gpointer p ) {
 
     char *pchMet = NULL, *pch = NULL;
 
@@ -3478,7 +3478,7 @@ extern void SetMET( gpointer *p, guint n, GtkWidget *pw ) {
     GTKFileCommand( _("Set match equity table"), pch, "set matchequitytable ",
 		 "met", 0 );
 
-    /* FIXME: update filename on option page */
+    /* update filename on option page */
     if ( p && GTK_WIDGET_VISIBLE( p ) )
 	gtk_label_set_text( GTK_LABEL( p ), miCurrent.szFileName );
 
