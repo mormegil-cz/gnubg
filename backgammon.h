@@ -179,8 +179,8 @@ typedef union _moverecord {
 	char *sz;
     } a;
     movegameinfo g;
-    movedouble d;
-    movebasic t; /* take or drop */
+    movedouble d; /* cube decisions */
+    movebasic t; 
     movenormal n;
     moveresign r;
     movesetboard sb;
@@ -494,6 +494,7 @@ extern void CommandAccept( char * ),
     CommandShowRollout( char * ),
     CommandShowScore( char * ),
     CommandShowSeed( char * ),
+    CommandShowStatistics( char * ),
     CommandShowThorp( char * ),
     CommandShowTraining( char * ),
     CommandShowTurn( char * ),
