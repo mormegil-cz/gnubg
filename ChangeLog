@@ -1,3 +1,14 @@
+Mon May 27 23:22:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Fix bug reported by Ian Shaw:
+	"Crash when stepping on to non-existent move".
+
+	* play.c (CommandNextGame, CommandPreviousGame):
+	fix bug leading to core dump if no game is in progress.
+
+	* play.c (NewGame): set plLastMove to NULL if RollDice fails 
+	(e.g., user cancels manual dice dialog).
+
 Mon May 27 22:45:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (isCloseCubeDecision): fix typo. Bug reported by

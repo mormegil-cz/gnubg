@@ -626,6 +626,8 @@ static int NewGame( void ) {
 	free( plGame );
 	ListDelete( lMatch.plPrev );
 
+        plLastMove = NULL;
+
 	return -1;
     }
     
@@ -2592,8 +2594,13 @@ static void CommandNextGame( char *sz ) {
 	return;
     }
 
-    for( pl = lMatch.plNext; pl->p != plGame; pl = pl->plNext )
+    for( pl = lMatch.plNext; pl->p != plGame && pl != &lMatch; 
+         pl = pl->plNext )
 	;
+
+    if ( pl->p != plGame )
+      /* current game not found */
+      return;
     
     for( ; n && pl->plNext->p; n--, pl = pl->plNext )
 	;
@@ -2726,8 +2733,13 @@ static void CommandPreviousGame( char *sz ) {
 	return;
     }
     
-    for( pl = lMatch.plNext; pl->p != plGame; pl = pl->plNext )
+    for( pl = lMatch.plNext; pl->p != plGame && pl != &lMatch; 
+         pl = pl->plNext )
 	;
+    
+    if ( pl->p != plGame )
+      /* current game not found */
+      return;
     
     for( ; n && pl->plPrev->p; n--, pl = pl->plPrev )
 	;
