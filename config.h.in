@@ -55,6 +55,9 @@
 /* Installation directory (used to determine PKGDATADIR below). */
 #undef DATADIR
 
+/* Define if you have the gtkextra library (-lgtkextra).  */
+#undef HAVE_LIBGTKEXTRA
+
 /* Define if you have the XCopyPlane function.  */
 #undef HAVE_XCOPYPLANE
 
@@ -132,6 +135,9 @@
 
 /* Define if you have the <gdk/gdkx.h> header file.  */
 #undef HAVE_GDK_GDKX_H
+
+/* Define if you have the <gtkextra/gtksheet.h> header file.  */
+#undef HAVE_GTKEXTRA_GTKSHEET_H
 
 /* Define if you have the <limits.h> header file.  */
 #undef HAVE_LIMITS_H

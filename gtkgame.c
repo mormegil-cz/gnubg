@@ -31,6 +31,9 @@
 #include <fcntl.h>
 #endif
 #include <gtk/gtk.h>
+#if HAVE_GTKEXTRA_GTKSHEET_H
+#include <gtkextra/gtksheet.h>
+#endif
 #include <gdk/gdkkeysyms.h>
 #if HAVE_GDK_GDKX_H
 #include <gdk/gdkx.h> /* for ConnectionNumber GTK_DISPLAY -- get rid of this */
@@ -73,7 +76,11 @@ typedef enum _gnubgcommand {
     CMD_LIST_GAME,
     CMD_NEW_GAME,
     CMD_NEW_SESSION,
+    CMD_NEXT,
+    CMD_NEXT_GAME,
     CMD_PLAY,
+    CMD_PREV,
+    CMD_PREV_GAME,
     CMD_QUIT,
     CMD_REDOUBLE,
     CMD_RESIGN_N,
@@ -164,7 +171,11 @@ static char *aszCommands[ NUM_CMDS ] = {
     "list game",
     "new game",
     "new session",
+    "next",
+    "next game",
     "play",
+    "previous",
+    "previous game",
     "quit",
     "redouble",
     "resign normal",
@@ -943,7 +954,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_File/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_File/_Quit", "<control>Q", Command, CMD_QUIT, NULL },
 	{ "/_Edit", NULL, NULL, 0, "<Branch>" },
-	{ "/_Edit/_Undo", NULL, NULL, 0, NULL },
+	{ "/_Edit/_Undo", "<control>Z", ShowBoard, 0, NULL },
 	{ "/_Edit/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Edit/_Copy", "<control>C", NULL, 0, NULL },
 	{ "/_Edit/_Paste", "<control>V", NULL, 0, NULL },
@@ -963,6 +974,13 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Game/De_cline resignation", NULL, Command, CMD_DECLINE, NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Game/Play computer turn", NULL, Command, CMD_PLAY, NULL },
+	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
+	{ "/_Game/Next move", "Page_Down", Command, CMD_NEXT, NULL },
+	{ "/_Game/Previous move", "Page_Up", Command, CMD_PREV, NULL },
+	{ "/_Game/Next game", "<control>Page_Down", Command, CMD_NEXT_GAME,
+	  NULL },
+	{ "/_Game/Previous game", "<control>Page_Up", Command, CMD_PREV_GAME,
+	  NULL },
 	{ "/_Game/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Game/_Cube", NULL, NULL, 0, "<Branch>" },
 	{ "/_Game/_Cube/_Owner", NULL, NULL, 0, "<Branch>" },
@@ -1037,6 +1055,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Roll", NULL, Command, CMD_SET_AUTO_ROLL,
 	  "<CheckItem>" },
+	{ "/_Settings/_Beavers...", NULL, NULL, 0, NULL },
 	{ "/_Settings/Cache...", NULL, SetCache, 0, NULL },
 	{ "/_Settings/Colours...", NULL, Command, CMD_SET_COLOURS, NULL },
 	{ "/_Settings/_Confirmation", NULL, Command, CMD_SET_CONFIRM,
@@ -1075,9 +1094,17 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SET_MET_ZADEH, "/Settings/Match equity table/Jacobs" },
 	{ "/_Settings/_Nackgammon", NULL, Command, CMD_SET_NACKGAMMON,
 	  "<CheckItem>" },
+	{ "/_Settings/_Output", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Output/_Equity as MWC", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Output/_GWC as percentage", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Output/_MWC as percentage", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Output/_Raw boards", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Players...", NULL, SetPlayers, 0, NULL },
 	{ "/_Settings/Prompt...", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Rollouts...", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Training", NULL, NULL, 0, "<Branch>" },
+	{ "/_Settings/_Training/_Learning rate...", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Training/_Annealing rate...", NULL, NULL, 0, NULL },
 	{ "/_Settings/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Settings/Save settings", NULL, Command, CMD_SAVE_SETTINGS, NULL },
 	{ "/_Windows", NULL, NULL, 0, "<Branch>" },
@@ -2441,7 +2468,11 @@ extern void GTKShowMatchEquityTable( int n ) {
 					FALSE, NULL, NULL ),
 	*pwBox = gtk_vbox_new( FALSE, 0 ),
 	*pwScrolledWindow = gtk_scrolled_window_new( NULL, NULL ),
-	*pwTable = gtk_table_new( n + 2, n + 2, TRUE );
+#if HAVE_LIBGTKEXTRA
+	*pwTable = gtk_sheet_new_browser( n, n, "" );
+#else
+	*pwTable = gtk_table_new( n + 1, n + 1, TRUE );
+#endif
     int i, j;
     char sz[ 16 ];
     
@@ -2454,28 +2485,44 @@ extern void GTKShowMatchEquityTable( int n ) {
     gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( pwScrolledWindow ),
 				    GTK_POLICY_AUTOMATIC,
 				    GTK_POLICY_AUTOMATIC );
+#if HAVE_LIBGTKEXTRA
+    gtk_container_add( GTK_CONTAINER( pwScrolledWindow ), pwTable );
+#else
     gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(
 	pwScrolledWindow ), pwTable );
-
-    for( i = 0; i <= n; i++ ) {
-	sprintf( sz, "%d-away", i );
+#endif
+    
+    for( i = 0; i < n; i++ ) {
+	sprintf( sz, "%d-away", i + 1 );
+#if HAVE_LIBGTKEXTRA
+	gtk_sheet_row_button_add_label( GTK_SHEET( pwTable ), i, sz );
+	gtk_sheet_column_button_add_label( GTK_SHEET( pwTable ), i, sz );
+#else
 	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
 				   gtk_label_new( sz ),
 				   0, 1, i + 1, i + 2 );
 	gtk_table_attach_defaults( GTK_TABLE( pwTable ),
 				   gtk_label_new( sz ),
 				   i + 1, i + 2, 0, 1 );
+#endif
     }
     
-    for( i = 0; i <= n; i++ )
-	for( j = 0; j <= n; j++ ) {
+    for( i = 0; i < n; i++ )
+	for( j = 0; j < n; j++ ) {
 	    sprintf( sz, "%8.4f", GET_MET( i, j, aafMET ) * 100.0f );
+#if HAVE_LIBGTKEXTRA
+	    gtk_sheet_set_cell( GTK_SHEET( pwTable ), i, j, GTK_JUSTIFY_RIGHT,
+				sz );
+#else
 	    gtk_table_attach_defaults( GTK_TABLE( pwTable ),
 				       gtk_label_new( sz ),
 				       j + 1, j + 2, i + 1, i + 2 );
+#endif
 	}
-    
+
+#if !HAVE_LIBGTKEXTRA
     gtk_table_set_col_spacings( GTK_TABLE( pwTable ), 4 );
+#endif
     
     gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
     gtk_window_set_default_size( GTK_WINDOW( pwDialog ), 500, 300 );

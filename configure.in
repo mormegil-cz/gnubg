@@ -97,6 +97,7 @@ AC_SEARCH_LIBS(connect,socket,AC_DEFINE(HAVE_SOCKETS,1,Define if the system supp
 
 dnl Check for GTK
 AC_ARG_WITH(gtk,[  --with-gtk              use GTK library and widgets])
+AC_ARG_WITH(gtkextra,[  --with-gtkextra         use GtkExtra widgets])
 if test "$with_gtk" = "no"; then
   no_gtk=yes
 else
@@ -119,6 +120,13 @@ else
   LIBS="$LIBS $GTK_LIBS"
   AC_CHECK_HEADERS(gdk/gdkx.h)
   AC_CHECK_FUNCS(XCopyPlane)
+  if test "$with_gtkextra" != "no"; then
+    AC_CHECK_HEADERS(gtkextra/gtksheet.h)
+    AC_CHECK_LIB(gtkextra,gtk_sheet_new,
+[AC_DEFINE_UNQUOTED(HAVE_LIBGTKEXTRA)
+GTK_LIBS="-lgtkextra $GTK_LIBS"
+])
+  fi
   CPPFLAGS="$ac_save_CPPFLAGS"
   CFLAGS="$ac_save_CFLAGS"
   LIBS="$ac_save_LIBS"

@@ -139,16 +139,14 @@ duplication of effort and to make sure our changes merge easily.
   load match shouldn't update the score between games, either. (gary)
 ** When the user is moving, show _complete_ moves differently from
   incomplete ones.
-** Add commands to _hide_ the game window ("list game" shows it).
-  Should we show it by default?
 ** Animate the chequers when the computer moves.
 ** Show a preview of the chequers in the appearances dialog.
 ** Allow the border colour to be changed, and honour the user's lighting
   angle when rendering the border.
 ** Make "next" and "previous" change the off-board dice (see
   game_set_old_dice()).
-** Use a file selection widget for the socket in the player dialog, and
-  look into using a GtkSheet (from GtkExtra) for the match equity table.
+** Use a file selection widget for the socket in the player dialog.
+** Would ShowList() look better if it used a text widget?
 
 ** Dialogs:
 *** Make "help" show its output in a CList (CTree?).  The user must be able
@@ -195,6 +193,8 @@ duplication of effort and to make sure our changes merge easily.
   #define AF_LOCAL AF_UNIX (same with PF_).
 ** The fread() calls in import.c need to be byte-swapped on big-endian
   machines.
+** Not everything that checks fInterrupt checks fAction first (e.g.
+  CommandDatabaseTrain).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -234,6 +234,8 @@ duplication of effort and to make sure our changes merge easily.
   connection via TCP/IP.
 ** Allow an option for illegal moves to be entered.
 ** Allow ~ and $ escapes in filenames (use wordexp()).
+** Allow printing positions/games/matches/etc.
+** Keep statistics of won/lost games/matches.
 
 
 Local Variables:

@@ -1,3 +1,11 @@
+Thu Mar 15 10:48:53 2001  Gary Wong  <gtw@research.att.com>
+
+	* gtkgame.c (GTKShowMatchEquityTable): Use a GtkSheet (from
+	GtkExtra), if available.
+	
+	* show.c (CommandShowGammonPrice): Complain if no game is being
+	played.
+
 Wed Mar 14 17:33:25 2001  Gary Wong  <gtw@research.att.com>
 
 	* external.c (CommandExternal): Make sure we unlink() the socket.

@@ -8,6 +8,9 @@
 /* Installation directory (used to determine PKGDATADIR below). */
 #undef DATADIR
 
+/* Define if you have the gtkextra library (-lgtkextra).  */
+#undef HAVE_LIBGTKEXTRA
+
 @BOTTOM@
 /* Are we using either GUI (ext or GTK)? */
 #if USE_EXT || USE_GTK
