@@ -923,6 +923,11 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
   int i;
   float aarProb[ 2 ][ 32 ], aarGammonProb[ 2 ][ 32 ];
   int f0, f1, f2, f3;
+  int anPips[ 2 ];
+  const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
+              5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+
 
   BearoffDist ( pbc, nUs, aarProb[ 0 ], aarGammonProb[ 0 ], ar[ 0 ], 
                 NULL, NULL );
@@ -1018,6 +1023,22 @@ BearoffDumpOneSided ( bearoffcontext *pbc, int anBoard[ 2 ][ 25 ], char *sz ) {
               "%-7.7s\t%-7.7s\n",
               _("n/a"), _("n/a" ) );
 
+
+  /* effective pip count */
+
+  PipCount( anBoard, anPips );
+
+  strcat( strchr( sz, 0 ), _("\nEffective pip count:\n" ) );
+  strcat( strchr( sz, 0 ), _("\tPlayer\tOpponent\n" ) );
+  sprintf( strchr( sz, 0 ), _("EPC\t%7.3f\t%7.3f\n"
+                              "Wastage\t%7.3f\t%7.3f\n\n" ),
+           ar[ 0 ][ 0 ] * x, ar[ 1 ][ 0 ] * x,
+           ar[ 0 ][ 0 ] * x - anPips[ 0 ],
+           ar[ 1 ][ 0 ] * x - anPips[ 1 ] );
+
+  sprintf( strchr( sz, 0 ),
+          _("EPC = %5.3f * Average rolls\n"
+            "Wastage = EPC - pips\n\n" ), x );
 
 }
 

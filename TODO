@@ -57,6 +57,7 @@ details.
 *** Aborted rollouts show the full number of games in outputs
 *** Implement for rollouts the same heuristics used by ComputerTurn for 
    cube decisions
+*** Predefined rollout settings
 ** Extend ParsePosition() to handle some sort of syntax like
   [8/5 6/5] (meaning the position after that move).  FIBS boardstyle 3 output
   might be nice, too.

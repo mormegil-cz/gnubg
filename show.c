@@ -1076,6 +1076,33 @@ writeMET ( float aafMET[][ MAXSCORE ],
 
 }
 
+
+static void
+EffectivePipCount( const float arMu[ 2 ], const int anPips[ 2 ] ) {
+
+  int i;
+  const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
+              5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+
+  outputl ( "" );
+  outputl ( _("Effective pip count:") );
+
+  outputl ( _("                       "
+              "EPC      Wastage") );
+  for ( i = 0; i < 2; ++i )
+    outputf ( _("%-20.20s   %7.3f  %7.3f\n"),
+              ap[ ms.fMove ? i : !i ].szName,
+              arMu[ i ] * x,
+              arMu[ i ] * x - anPips[ i ] );
+
+  outputf( _("\n"
+             "EPC = Avg. rolls * %5.3f\n" 
+             "Wastage = EPC - Pips\n\n" ), x );
+           
+}
+
+
 extern void
 CommandShowOneChequer ( char *sz ) {
 
@@ -1123,14 +1150,16 @@ CommandShowOneChequer ( char *sz ) {
               "chequer only." ) );
   outputl ( _("                       "
               "Pips     Avg. rolls   Std.dev.") );
-
   for ( i = 0; i < 2; ++i )
     outputf ( _("%-20.20s   %4d     %7.3f       %7.3f\n"),
               ap[ ms.fMove ? i : !i ].szName,
               anPips[ i ], arMu[ i ], arSigma[ i ] );
 
-  outputf ( _("Estimated cubeless gwc: %8.4f%%"), r * 100.0f );
-  outputl ( "" );
+  outputf ( _("Estimated cubeless gwc: %8.4f%%\n\n"), r * 100.0f );
+
+  /* effective pip count */
+
+  EffectivePipCount( arMu, anPips );
 
 }
 
@@ -1140,7 +1169,9 @@ CommandShowOneSidedRollout ( char *sz ) {
 
   int anBoard[ 2 ][ 25 ];
   int nTrials = 576;
+  float arMu[ 2 ];
   float ar[ 5 ];
+  int anPips[ 2 ];
 
   if( !*sz && ms.gs == GAME_NONE ) {
     outputl( _("No position specified and no game in progress.") );
@@ -1160,8 +1191,11 @@ CommandShowOneSidedRollout ( char *sz ) {
 
   outputf ( _("One sided rollout with %d trials:\n"), nTrials );
 
-  raceProbs ( anBoard, nTrials, ar );
+  raceProbs ( anBoard, nTrials, ar, arMu );
   outputl ( OutputPercents ( ar, TRUE ) );
+
+  PipCount ( anBoard, anPips );
+  EffectivePipCount( arMu, anPips );
 
 }
 

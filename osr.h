@@ -24,7 +24,8 @@
 
 extern void
 raceProbs ( int anBoard[ 2 ][ 25 ], const int nGames,
-            float arOutput[ NUM_OUTPUTS ] );
+            float arOutput[ NUM_OUTPUTS ],
+            float arMu[ 2 ] );
 
 
 #endif /* _OSR_H_ */

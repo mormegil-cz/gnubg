@@ -46,10 +46,16 @@ extern double erf( double x );
 #endif
 
 
+typedef struct _epcwidget {
+  GtkWidget *apwEPC[ 2 ];
+  GtkWidget *apwWastage[ 2 ];
+} epcwidget;
+
 typedef struct _racewidget {
   GtkAdjustment *padjTrials;
   GtkWidget *pwRollout, *pwOutput;
   int anBoard[ 2 ][ 25 ];
+  epcwidget epcwOSR;
 } racewidget;
 
 
@@ -59,10 +65,14 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
   GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
   GtkWidget *pwTable = gtk_table_new ( 4, 2, FALSE );
   GtkWidget *pw;
+  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
   int i, nDiff, nSum;
   int anPips[ 2 ];
   char *sz;
   
+  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
+
   /* 
    * pip counts, diffs and sum 
    */
@@ -168,7 +178,7 @@ KleinmanPage ( int anBoard[ 2 ][ 25 ] ) {
   }
 
 
-  return pwvbox;
+  return pwp;
 
 }
 
@@ -179,10 +189,14 @@ ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
   GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
   GtkWidget *pwTable = gtk_table_new ( 2, 2, FALSE );
   GtkWidget *pw;
+  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
   int i, nLeader, nTrailer, nDiff;
   int anPips[ 2 ];
   char *sz;
   
+  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
+
   /* 
    * pip counts, diffs and sum 
    */
@@ -250,11 +264,85 @@ ThorpPage ( int anBoard[ 2 ][ 25 ] ) {
 
   
 
-  return pwvbox;
+  return pwp;
 
 }
 
 
+static GtkWidget *
+EffectivePipCount( const float arPips[ 2 ], const float arWastage[ 2 ],
+                   epcwidget *pepcw ) {
+
+  GtkWidget *pwTable = gtk_table_new( 3, 4, FALSE );
+  GtkWidget *pwvbox = gtk_vbox_new( 0, FALSE );
+  GtkWidget *pw;
+  GtkWidget *pwFrame;
+  gchar *sz;
+  int i;
+
+  pwFrame = gtk_frame_new( _("Effective pip count" ) );
+
+  gtk_container_add( GTK_CONTAINER( pwFrame ), pwvbox );
+  gtk_container_set_border_width( GTK_CONTAINER( pwvbox ), 4 );
+
+  /* table */
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), pwTable, FALSE, FALSE, 4 );
+
+  gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                     pw = gtk_label_new ( _("EPC") ),
+                     1, 2, 0, 1,
+                     0, 0, 4, 4 );
+  gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                     pw = gtk_label_new ( _("Wastage") ),
+                     2, 3, 0, 1,
+                     0, 0, 4, 4 );
+
+  for ( i = 0; i < 2; ++i ) {
+
+    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                       pw = gtk_label_new ( sz ),
+                       0, 1, i + 1, i + 2, 
+                       0, 0, 4, 4 );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+    g_free ( sz );
+
+    sz = g_strdup_printf ( _("%7.3f"), arPips[ i ] );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                       pw = gtk_label_new ( sz ),
+                       1, 2, i + 1, i + 2, 
+                       0, 0, 4, 4 );
+    g_free ( sz );
+    if ( pepcw )
+      pepcw->apwEPC[ i ] = pw;
+
+    sz = g_strdup_printf ( "%7.3f", arWastage[ i ] );
+    gtk_table_attach ( GTK_TABLE ( pwTable ), 
+                       pw = gtk_label_new ( sz ),
+                       2, 3, i + 1, i + 2, 
+                       0, 0, 4, 4 );
+    g_free ( sz );
+    if ( pepcw )
+      pepcw->apwWastage[ i ] = pw;
+
+  }
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       pw = gtk_label_new ( "EPC = Effective pip count = "
+                                            "Avg. rolls * 8.167" ),
+                       FALSE, FALSE, 0 );
+  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       pw = gtk_label_new ( "Wastage = EPC - Pips" ),
+                       FALSE, FALSE, 0 );
+  gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+
+  return pwFrame;
+
+}
 
 
 
@@ -265,6 +353,7 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
   GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
   GtkWidget *pwTable = gtk_table_new ( 3, 4, FALSE );
   GtkWidget *pw;
+  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
 
   int anPips[ 2 ];
   float arMu[ 2 ];
@@ -273,11 +362,24 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
   char *sz;
   float r;
   float aarProb[ 2 ][ 100 ];
+  int an[ 2 ][ 25 ];
+  float arEPC[ 2 ];
+  float arWastage[ 2 ];
+  const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
+              5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
 
+  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
 
   /* calculate one chequer bearoff */
 
-  PipCount ( anBoard, anPips );
+  memcpy( an, anBoard, 2 * 25 *sizeof ( int ) );
+
+  if ( ms.fMove )
+    SwapSides( an );
+
+  PipCount ( an, anPips );
 
   for ( i = 0; i < 2; ++i )
     OneChequer ( anPips[ i ], &arMu[ i ], &arSigma[ i ] );
@@ -319,7 +421,7 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
 
   for ( i = 0; i < 2; ++i ) {
 
-    sz = g_strdup_printf ( _("Player %s"), ap[ ms.fMove ? i : !i ].szName );
+    sz = g_strdup_printf ( _("Player %s"), ap[ i ].szName );
     gtk_table_attach ( GTK_TABLE ( pwTable ), 
                        pw = gtk_label_new ( sz ),
                        0, 1, i + 1, i + 2, 
@@ -360,8 +462,20 @@ OneChequerPage ( int anBoard[ 2 ][ 25 ] ) {
   gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
   g_free ( sz );
 
+  /* 
+   * effective pip count 
+   */
 
-  return pwvbox;
+  for ( i = 0; i < 2; ++i ) {
+    arEPC[ i ] = arMu[ i ] * x;
+    arWastage[ i ] = arEPC[ i ] - anPips[ i ];
+  }
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       EffectivePipCount( arEPC, arWastage, NULL ),
+                       FALSE, FALSE, 4 );
+
+  return pwp;
 
 }
 
@@ -374,9 +488,16 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
   float ar[ 5 ];
   int i;
   char sz[ 16 ];
+  int anPips[ 2 ];
+  const float x = ( 2 * 3 + 3 * 4 + 4 * 5 + 4 * 6 + 6 * 7 +
+              5* 8  + 4 * 9 + 2 * 10 + 2 * 11 + 1 * 12 + 
+              1 * 16 + 1 * 20 + 1 * 24 ) / 36.0;
+  float arMu[ 2 ];
+  gchar *pch;
 
-  raceProbs ( prw->anBoard, nTrials, ar );
+  raceProbs ( prw->anBoard, nTrials, ar, arMu );
 
+  PipCount( prw->anBoard, anPips );
   
   for ( i = 0; i < 5; ++i ) {
     if( fOutputWinPC )
@@ -390,6 +511,22 @@ PerformOSR ( GtkWidget *pw, racewidget *prw ) {
   for ( i = 0; i < 5; ++i )
     gtk_clist_set_text ( GTK_CLIST ( pwOutput ), 1, i + 1, _("n/a" ) );
 
+  /* effective pip count */
+
+  for ( i = 0; i < 2; ++i ) {
+
+    pch = g_strdup_printf ( _("%7.3f"), arMu[ i ] * x );
+    gtk_label_set_text( GTK_LABEL( prw->epcwOSR.apwEPC[ i ] ), pch );
+    g_free ( pch );
+
+    pch = g_strdup_printf ( "%7.3f", arMu[ i ] * x - anPips[ i ] );
+    gtk_label_set_text( GTK_LABEL( prw->epcwOSR.apwWastage[ i ] ), pch );
+    g_free ( pch );
+
+  }
+
+  
+
 }
 
 
@@ -398,8 +535,10 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
 
   GtkWidget *pwvbox = gtk_vbox_new ( 4, FALSE );
   GtkWidget *pw;
+  GtkWidget *pwp = gtk_alignment_new( 0, 0, 0, 0 );
   int i;
   char *asz[ 6 ];
+  float ar0[ 2 ] = { 0, 0 };
   const char *aszTitle[] = {
     "",
     N_("Win"),
@@ -408,6 +547,9 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
     N_("L g"),
     N_("L bg") 
   };
+
+  gtk_container_set_border_width( GTK_CONTAINER( pwp ), 4 );
+  gtk_container_add( GTK_CONTAINER( pwp ), pwvbox );
 
   prw->padjTrials = GTK_ADJUSTMENT(gtk_adjustment_new(576, 1, 
                                                       1296 * 1296, 36, 36, 0 ));
@@ -457,7 +599,18 @@ OSRPage ( int anBoard[ 2 ][ 25 ], racewidget *prw ) {
   gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 0, 0, _("Rollout" ) );
   gtk_clist_set_text ( GTK_CLIST ( prw->pwOutput ), 1, 0, _("Std.dev." ) );
 
-  return pwvbox;
+  /* effective pip count */
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       gtk_hseparator_new() , FALSE, FALSE, 4 );
+
+  gtk_box_pack_start ( GTK_BOX ( pwvbox ), 
+                       EffectivePipCount( ar0, ar0, &prw->epcwOSR ),
+                       FALSE, FALSE, 4 );
+
+  
+
+  return pwp;
 
 }
 

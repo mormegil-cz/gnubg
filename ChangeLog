@@ -1,3 +1,13 @@
+Mon May 12 20:38:20 2003  Joern Thyssen  <jth@gnubg.org>
+
+	Display effective pip count where available.
+	(suggested by Ian Shaw)	
+
+	* show.c (CommandShowOneSidedRollout, CommandShowOneChequer),
+	bearoff.c (DumpOneSided), gtkrace.c (OSRPage, OneChequerPage):
+	show effective pip count.
+	* osr.c (raceProbs): calculate average rolls to bear off.
+
 Sun May  4 22:48:47 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* analysis.c (AnalyzeMove): always analyse MOVE_DOUBLEs as they are
