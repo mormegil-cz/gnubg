@@ -636,6 +636,9 @@ CreateMoveList( movelist *pml, int *piHighlight, const int fButtonsValid ) {
     gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
 			      GDK_SELECTION_TYPE_STRING, 0 );
     
+    gtk_object_set_data_full( GTK_OBJECT( pwHBox ), "user_data", 
+                              phd, free );
+
     HintSelect( pwMoves, 0, 0, NULL, phd );
     gtk_signal_connect( GTK_OBJECT( pwMoves ), "select-row",
 			GTK_SIGNAL_FUNC( HintSelect ), phd );
