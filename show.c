@@ -1016,50 +1016,72 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
       rDTW =
         (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
-        GET_MET ( anNormScore[ i ] - 2 * ms.nCube - 1,
-                  anNormScore[ !i ] - 1, aafMET )
-        + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 4 * ms.nCube - 1,
-                              anNormScore[ ! i ] - 1, aafMET )
-        + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 6 * ms.nCube - 1,
-                               anNormScore[ ! i ] - 1, aafMET );
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                2 * ms.nCube, i, ms.fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ i ][ 0 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                4 * ms.nCube, i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford )
+        + aarRates[ i ][ 1 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                6 * ms.nCube, i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford );
 
       /* MWC for "no double, take; win" */
 
       rNDW =
         (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
-        GET_MET ( anNormScore[ i ] - ms.nCube - 1,
-                  anNormScore[ !i ] - 1, aafMET )
-        + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 2 * ms.nCube - 1,
-                              anNormScore[ ! i ] - 1, aafMET )
-        + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 3 * ms.nCube - 1,
-                               anNormScore[ ! i ] - 1, aafMET );
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                ms.nCube, i, ms.fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ i ][ 0 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                2 * ms.nCube, i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford )
+        + aarRates[ i ][ 1 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                3 * ms.nCube, i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford );
 
       /* MWC for "Double, take; lose" */
 
       rDTL =
         (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
-        GET_MET ( anNormScore[ i ] - 1,
-                  anNormScore[ !i ] - 2 * ms.nCube - 1, aafMET )
-        + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
-                              anNormScore[ ! i ] - 4 * ms.nCube - 1, aafMET )
-        + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
-                               anNormScore[ ! i ] - 6 * ms.nCube - 1, aafMET );
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                2 * ms.nCube, ! i, ms.fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ ! i ][ 0 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                4 * ms.nCube, ! i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford )
+        + aarRates[ ! i ][ 1 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                6 * ms.nCube, ! i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford );
 
       /* MWC for "No double; lose" */
 
       rNDL =
         (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
-        GET_MET ( anNormScore[ i ] - 1,
-                  anNormScore[ !i ] - 1 * ms.nCube - 1, aafMET )
-        + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
-                              anNormScore[ ! i ] - 2 * ms.nCube - 1, aafMET )
-        + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
-                               anNormScore[ ! i ] - 3 * ms.nCube - 1, aafMET );
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                1 * ms.nCube, ! i, ms.fCrawford,
+                aafMET, aafMETPostCrawford )
+        + aarRates[ ! i ][ 0 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                2 * ms.nCube, ! i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford )
+        + aarRates[ ! i ][ 1 ] * 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                3 * ms.nCube, ! i, ms.fCrawford, 
+                aafMET, aafMETPostCrawford );
 
       /* MWC for "Double, pass" */
 
-      rDP = GET_MET( anNormScore[ i ] - ms.nCube - 1,
-                     anNormScore[ ! i ] - 1, aafMET );
+      rDP = 
+        getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                ms.nCube, i, ms.fCrawford,
+                aafMET, aafMETPostCrawford );
 
       /* Double point */
 
@@ -1082,23 +1104,31 @@ extern void CommandShowMarketWindow ( char * sz ) {
 
         rDTW =
           (1.0 - aarRates[ i ][ 0 ] - aarRates[ i ][ 1 ]) *
-          GET_MET ( anNormScore[ i ] - 4 * ms.nCube - 1,
-                    anNormScore[ !i ] - 1, aafMET )
-          + aarRates[ i ][ 0 ] * GET_MET ( anNormScore[ i ] - 8 * ms.nCube - 1,
-                                anNormScore[ ! i ] - 1, aafMET )
-          + aarRates[ i ][ 1 ] * GET_MET ( anNormScore[ i ] - 12 * ms.nCube - 1,
-                                 anNormScore[ ! i ] - 1, aafMET );
+          getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                  4 * ms.nCube, i, ms.fCrawford,
+                  aafMET, aafMETPostCrawford )
+          + aarRates[ i ][ 0 ] * 
+          getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                  8 * ms.nCube, i, ms.fCrawford,
+                  aafMET, aafMETPostCrawford )
+          + aarRates[ i ][ 1 ] * 
+          getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                  12 * ms.nCube, i, ms.fCrawford,
+                  aafMET, aafMETPostCrawford );
 
         rDTL =
           (1.0 - aarRates[ ! i ][ 0 ] - aarRates[ ! i ][ 1 ]) *
-          GET_MET ( anNormScore[ i ] - 1,
-                    anNormScore[ !i ] - 4 * ms.nCube - 1, aafMET )
-          + aarRates[ ! i ][ 0 ] * GET_MET ( anNormScore[ i ] - 1,
-                                  anNormScore[ ! i ] - 8 * ms.nCube - 1,
-				  aafMET )
-          + aarRates[ ! i ][ 1 ] * GET_MET ( anNormScore[ i ] - 1,
-                                   anNormScore[ ! i ] - 12 * ms.nCube - 1,
-				   aafMET );
+          getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                  4 * ms.nCube, ! i, ms.fCrawford,
+                  aafMET, aafMETPostCrawford )
+          + aarRates[ ! i ][ 0 ] * 
+          getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                  8 * ms.nCube, ! i, ms.fCrawford,
+                  aafMET, aafMETPostCrawford )
+          + aarRates[ ! i ][ 1 ] * 
+          getME ( ms.anScore[ 0 ], ms.anScore[ 1 ], ms.nMatchTo, i,
+                  12 * ms.nCube, ! i, ms.fCrawford,
+                  aafMET, aafMETPostCrawford );
 
         rRisk = rDTW - rDP;
         rGain = rDP - rDTL;
