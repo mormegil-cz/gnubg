@@ -45,7 +45,10 @@
 typedef struct _rolloutprogress {
 
   void *p;
-
+  int n;
+  char **ppch;
+  int iNextAlternative;
+  int iNextGame;
 
 #if USE_GTK
   rolloutstat *prs;
@@ -921,11 +924,29 @@ TextRolloutProgressStart( const cubeinfo *pci, const int n,
                           rolloutstat aars[ 2 ][ 2 ],
                           rolloutcontext *prc, char asz[][ 40 ], void **pp ) {
 
+  int i;
+
+  rolloutprogress *prp = 
+    (rolloutprogress *) g_malloc( sizeof ( rolloutprogress ) );
+
+  *pp = prp;
+
+  prp->ppch = g_malloc( n * sizeof (char *) );
+  for ( i = 0; i < n; ++i )
+    prp->ppch[ i ] = (char *) asz[ i ];
+  prp->n = n;
+  prp->iNextAlternative = 0;
+  prp->iNextGame = prc->nTrials/10;
 
 }
 
 static void
 TextRolloutProgressEnd( void **pp ) {
+
+  rolloutprogress *prp = *pp;
+
+  g_free( prp->ppch );
+  g_free( prp );
 
   output( "\r\n" );
   fflush( stdout );
@@ -940,13 +961,57 @@ TextRolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                      const cubeinfo aci[],
                      const int iGame,
                      const int iAlternative,
+                     const int nRank,
+                     const float rJsd,
+                     const int fStopped,
+                     const int fShowRanks,
                      rolloutprogress *prp ) {
 
+  char *pch, *pc;
 
-  /* To avoid *.po include \r. */
-  outputf( _("Rollout: %d/%d trials"), iGame, prc->nTrials );
-  output( "      \r" );
-  fflush( stdout );
+  /* write progress 1/10th trial */
+
+  if ( iGame == prp->iNextGame && iAlternative == prp->iNextAlternative ) {
+
+    if ( ! iAlternative )
+      outputl( "" );
+
+    pch = OutputRolloutResult( NULL, 
+                               (char(*) [1024]) prp->ppch[ iAlternative ], 
+                               GCCCONSTAHACK aarOutput[ iAlternative ],
+                               GCCCONSTAHACK aarStdDev[ iAlternative ],
+                               &aci[ iAlternative ], 1, prc->fCubeful );
+
+    if ( fShowRanks && iGame > 1 ) {
+
+      pc = strrchr( pch, '\n' );
+      *pc = 0;
+
+      sprintf( pc, " %d%c", nRank, fStopped ? 's' : 'r' );
+
+      if ( nRank != 1 )
+        sprintf( strchr( pc, 0 ), " %5.3f\n", rJsd );
+      else
+        strcat( pc, "\n" );
+
+      
+    }
+
+    prp->iNextAlternative = ( ++prp->iNextAlternative ) % prp->n;
+    if ( iAlternative == ( prp->n - 1 ) )
+      prp->iNextGame += prc->nTrials/10;
+
+    output( pch );
+
+  }
+  else {
+
+    /* To avoid *.po include \r. */
+    outputf( _("Rollout: %d/%d trials"), iGame, prc->nTrials );
+    output( "      \r" );
+    fflush( stdout );
+
+  }
 
 }
 
@@ -978,10 +1043,10 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
                  const cubeinfo aci[],
                  const int iGame,
                  const int iAlternative,
-				 const int nRank,
-				 const float rJsd,
-				 const int fStopped,
-				 const int fShowRanks,
+                 const int nRank,
+                 const float rJsd,
+                 const int fStopped,
+                 const int fShowRanks,
                  void *pUserData ) {
 
   if ( ! fShowProgress )
@@ -996,7 +1061,7 @@ RolloutProgress( float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
 #endif /* USE_GTK */
 
   TextRolloutProgress( aarOutput, aarStdDev, prc, aci, iGame, iAlternative, 
-                       pUserData );
+                       nRank, rJsd, fStopped, fShowRanks, pUserData );
 
 }
 

@@ -1,3 +1,9 @@
+Sat Oct 11 13:15:36 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* progress.c (TextRolloutProgress): Improve rollout progress output
+	when in text mode
+	(suggested by Ian Shaw)
+
 Tue Oct 7 12:06:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkcube.c, gtkgame.c: Make sure hint window is correct size in new layout.
