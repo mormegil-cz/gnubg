@@ -39,7 +39,14 @@ gdk_get_rgb_image( GdkDrawable *drawable,
     GdkVisual *visual;
     int r, g, b, dwidth, dheight;
 
+#if WIN32
+    /* The Win32 port of GDK doesn't support gdk_window_get_geometry() on
+       pixmaps; fortunately, GDK 1.3 supplies gdk_drawable_get_size() to
+       do the same thing. */
+    gdk_drawable_get_size( drawable, &dwidth, &dheight );
+#else
     gdk_window_get_geometry( drawable, NULL, NULL, &dwidth, &dheight, NULL );
+#endif
     
     if( x <= -width || x >= dwidth )
 	return;

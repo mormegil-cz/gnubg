@@ -227,7 +227,7 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
 
 static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
 
-    int i;
+    int i, fTranslucentSaved;
     gdouble ar[ 4 ];
     char sz[ 256 ];
     
@@ -267,15 +267,20 @@ static void BoardPrefsOK( GtkWidget *pw, BoardData *bd ) {
     bd->arLight[ 1 ] = sinf( paAzimuth->value / 180 * M_PI ) *
 	sqrt( 1.0 - bd->arLight[ 2 ] * bd->arLight[ 2 ] );
 
-#if HAVE_XCOPYPLANE
+    /* This is a horrible hack, but we need translucency set to the new
+       value to call BoardPreferencesCommand(), so we get the correct
+       output; but then we reset it to the _old_ value before we change,
+       so the old pixmaps can be deallocated. */
+    fTranslucentSaved = bd->translucent;
+    
     bd->translucent = fTranslucent;
-#else
-    /* bd->translucent must always be true; leave it alone. */
-#endif
     
     gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
 
     BoardPreferencesCommand( bd->widget, sz );
+
+    bd->translucent = fTranslucentSaved;
+    
     UserCommand( sz );
 }
 
@@ -286,7 +291,7 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     
     fTranslucent = bd->translucent;
     
-    pwDialog = CreateDialog( "Board appearance", TRUE,
+    pwDialog = CreateDialog( "GNU Backgammon - Colours", TRUE,
 			     GTK_SIGNAL_FUNC( BoardPrefsOK ), bd );
 
     pwNotebook = gtk_notebook_new();
@@ -327,6 +332,27 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     gtk_main();
 }
 
+#if WIN32
+/* The Win32 port of GDK doesn't support colour specifications of the
+   form "rgb:rr/gg/bb", so we have to do it by hand. */
+static gboolean colour_parse( char *sz, GdkColor *pcol ) {
+
+    if( !strncmp( sz, "rgb:", 4 ) ) {
+	if( sscanf( sz, "rgb:%hx/%hx/%hx", &pcol->red, &pcol->green,
+		    &pcol->blue ) != 3 )
+	    return FALSE;
+	pcol->red <<= 8;
+	pcol->green <<= 8;
+	pcol->blue <<= 8;
+
+	return TRUE;
+    } else
+	return gdk_color_parse( sz, pcol );
+}
+#else
+#define colour_parse gdk_color_parse
+#endif
+
 static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
     
     char *pch;
@@ -335,7 +361,7 @@ static int SetColourSpeckle( char *sz, guchar anColour[], int *pnSpeckle ) {
     if( ( pch = strchr( sz, ';' ) ) )
 	*pch++ = 0;
 
-    if( gdk_color_parse( sz, &col ) ) {
+    if( colour_parse( sz, &col ) ) {
 	anColour[ 0 ] = col.red >> 8;
 	anColour[ 1 ] = col.green >> 8;
 	anColour[ 2 ] = col.blue >> 8;
@@ -364,7 +390,7 @@ static int SetColourARSS( BoardData *bd, char *sz, int i ) {
     if( ( pch = strchr( sz, ';' ) ) )
 	*pch++ = 0;
 
-    if( gdk_color_parse( sz, &col ) ) {
+    if( colour_parse( sz, &col ) ) {
 	bd->aarColour[ i ][ 0 ] = col.red / 65535.0f;
 	bd->aarColour[ i ][ 1 ] = col.green / 65535.0f;
 	bd->aarColour[ i ][ 2 ] = col.blue / 65535.0f;
@@ -431,12 +457,7 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 					&bd->aSpeckle[ 0 ] );
     else if( !g_strncasecmp( szParam, "translucent", c ) )
 	/* translucent=bool */
-#if HAVE_XCOPYPLANE
 	bd->translucent = toupper( *szValue ) == 'Y';
-#else
-        /* bd->translucent must always be true; silently ignore changes. */
-        ;
-#endif
     else if( !g_strncasecmp( szParam, "light", c ) ) {
 	/* light=azimuth;elevation */
 	float rAzimuth, rElevation;

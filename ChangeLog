@@ -1,3 +1,32 @@
+Mon Mar 12 11:03:37 2001  Gary Wong  <gtw@research.att.com>
+
+	* gdkgetrgb.c (gdk_get_rgb_image): Use gdk_drawable_get_size()
+	instead of gdk_window_get_geometry(), if available.
+
+	* gnubg.c (outputpostpone, outputresume): New functions.
+
+	* gnubg.c (real_main): Set `-w' option on by default under
+	MS Windows.
+
+	* gtkboard.c: Use GC clip masks instead of draw_bitplane().
+	Many related changes.
+	
+	* gtkprefs.c (colour_parse): Handle rgb:rr/gg/bb colour
+	specifications under MS Windows, since they're not understood
+	natively.
+	
+	* gtkgame.c (EvalWidget): Finish evaluation settings widget.
+	(SetPlayers): Started a player settings dialog.  Not working yet.
+
+	* eval.c (EvalRace): Fall back to neural net when trying to save
+	backgammon, if bearoff databases aren't present.
+
+	* eval.c (TrainPosition): Allow annealing rate to be specified.
+	All callers changed.
+
+	* play.c (NextTurn): Roll when "auto roll" is on and the cube
+	is dead.
+	
 Fri Mar  9 11:01:09 2001  Gary Wong  <gtw@research.att.com>
 
 	* eval.c (TrainPosition): Added alpha and anneal parameters.  All

@@ -25,9 +25,6 @@
 
 #include <assert.h>
 #include <gtk/gtk.h>
-#if HAVE_GDK_GDKX_H
-#include <gdk/gdkx.h>
-#endif
 #include <isaac.h>
 #include <math.h>
 #include <stdio.h>
@@ -43,6 +40,15 @@
 
 #define POINT_DICE 28
 #define POINT_CUBE 29
+
+#if WIN32
+/* The Win32 port of GDK wants clip masks to be inverted, for some reason... */
+#define MASK_INVISIBLE 0
+#define MASK_VISIBLE 1
+#else
+#define MASK_INVISIBLE 1
+#define MASK_VISIBLE 0
+#endif
 
 static int positions[ 28 ][ 3 ] = {
     { 51, 25, 7 },
@@ -69,18 +75,6 @@ static int intersects( int x0, int y0, int cx0, int cy0,
 
     return ( y1 + cy1 > y0 ) && ( y1 < y0 + cy0 ) &&
 	( x1 + cx1 > x0 ) && ( x1 < x0 + cx0 );
-}
-
-static void draw_bitplane( GdkDrawable *drawable, GdkGC *gc, GdkDrawable *src,
-			   gint xsrc, gint ysrc, gint xdest, gint ydest,
-			   gint width, gint height, gulong plane ) {
-#if HAVE_XCOPYPLANE
-    XCopyPlane( GDK_WINDOW_XDISPLAY( drawable ), GDK_WINDOW_XWINDOW( src ),
-		GDK_WINDOW_XWINDOW( drawable ), GDK_GC_XGC( gc ), xsrc, ysrc,
-		width, height, xdest, ydest, plane );
-#else
-    /* FIXME once we've eliminated all calls, assert( FALSE ) here */
-#endif
 }
 
 static void copy_rgb( guchar *src, guchar *dest, int xsrc, int ysrc,
@@ -255,14 +249,6 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
     if( bd->board_size <= 0 )
 	return;
 
-#if WIN32
-    /* FIXME Non-translucent drawing is buggy under Windows; always
-       use the translucent code there, even on empty points. */
-    assert( bd->translucent );    
-    board_redraw_translucent( board, bd, n );
-    return;
-#endif
-    
     if( bd->points[ n ] && bd->translucent ) {
 	board_redraw_translucent( board, bd, n );
 	return;
@@ -294,12 +280,12 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
     
     i_chequer = 0;
     
+    gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_mask );
+    
     for( i = abs( bd->points[ n ] ); i; i-- ) {
-	draw_bitplane( bd->pm_point, bd->gc_and, bd->bm_mask, 0, 0, 0,
-		       y_chequer, 6 * bd->board_size, 6 * bd->board_size,
-		       1 );
-
-	gdk_draw_pixmap( bd->pm_point, bd->gc_or, bd->points[ n ] > 0 ?
+	gdk_gc_set_clip_origin( bd->gc_copy, 0, y_chequer );
+	
+	gdk_draw_pixmap( bd->pm_point, bd->gc_copy, bd->points[ n ] > 0 ?
 			 bd->pm_o : bd->pm_x, 0, 0, 0, y_chequer,
 			 6 * bd->board_size, 6 * bd->board_size );
 	
@@ -314,6 +300,8 @@ static void board_redraw_point( GtkWidget *board, BoardData *bd, int n ) {
 	}
     }
 
+    gdk_gc_set_clip_mask( bd->gc_copy, NULL );
+    
     gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_point, 0, 0, x, y,
 		     cx, cy );
 }
@@ -326,13 +314,15 @@ static void board_redraw_die( GtkWidget *board, BoardData *bd, gint x, gint y,
     if( bd->board_size <= 0 || !n || !GTK_WIDGET_MAPPED( board ) )
 	return;
 
-    draw_bitplane( board->window, bd->gc_and, bd->bm_dice_mask,
-		   0, 0, x, y, 7 * bd->board_size, 7 * bd->board_size, 1 );
+    gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_dice_mask );
+    gdk_gc_set_clip_origin( bd->gc_copy, x, y );
 
-    gdk_draw_pixmap( board->window, bd->gc_or, colour < 0 ? bd->pm_x_dice :
+    gdk_draw_pixmap( board->window, bd->gc_copy, colour < 0 ? bd->pm_x_dice :
 		     bd->pm_o_dice, 0, 0, x, y, 7 * bd->board_size,
 		     7 * bd->board_size );
 
+    gdk_gc_set_clip_mask( bd->gc_copy, NULL );
+    
     pip[ 0 ] = pip[ 8 ] = ( n == 4 ) || ( n == 5 ) || ( n == 6 ) ||
 	( ( ( n == 2 ) || ( n == 3 ) ) && x & 1 );
     pip[ 1 ] = pip[ 7 ] = n == 6 && !( x & 1 );
@@ -390,12 +380,14 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
     x *= bd->board_size;
     y *= bd->board_size;
 
-    draw_bitplane( board->window, bd->gc_and, bd->bm_cube_mask, 0, 0, x, y,
-		   8 * bd->board_size, 8 * bd->board_size, 1 );
-    
-    gdk_draw_pixmap( board->window, bd->gc_or, bd->pm_cube, 0, 0, x, y,
+    gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_cube_mask );
+    gdk_gc_set_clip_origin( bd->gc_copy, x, y );
+
+    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_cube, 0, 0, x, y,
 		     8 * bd->board_size, 8 * bd->board_size );
 
+    gdk_gc_set_clip_mask( bd->gc_copy, NULL );
+    
     sprintf( cube_text, "%d", n > 1 && n < 65 ? n : 64 );
 
     two_chars = n == 1 || n > 10;
@@ -443,11 +435,12 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
 	}
     } else {
 	gdk_text_extents( bd->cube_font, cube_text, two_chars + 1,
-			  NULL, NULL, &width[ 0 ], &ascent[ 0 ], NULL );
+			  NULL, NULL, &width[ 0 ], &ascent[ 0 ],
+			  &descent[ 0 ] );
 
 	gdk_draw_text( board->window, bd->cube_font, bd->gc_cube, x + 4 *
 		       bd->board_size - width[ 0 ] / 2,
-		       y + 4 * bd->board_size + ascent[ 0 ] / 2,
+		       y + 4 * bd->board_size + ascent[ 0 ] / 2 - descent[ 0 ],
 		       cube_text, two_chars + 1 );
     }
 }
@@ -1016,16 +1009,17 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 	    gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->pm_temp_saved,
 			     0, 0, 0, 0, 6 * bd->board_size,
 			     6 * bd->board_size );
-		   
-	    draw_bitplane( bd->pm_temp, bd->gc_and, bd->bm_mask,
-			   0, 0, 0, 0, 6 * bd->board_size, 6 * bd->board_size,
-			   1 );
-		       
-	    gdk_draw_pixmap( bd->pm_temp, bd->gc_or, bd->drag_colour > 0 ?
+
+	    gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_mask );
+	    gdk_gc_set_clip_origin( bd->gc_copy, 0, 0 );
+	    
+	    gdk_draw_pixmap( bd->pm_temp, bd->gc_copy, bd->drag_colour > 0 ?
 			     bd->pm_o : bd->pm_x,
 			     0, 0, 0, 0, 6 * bd->board_size,
 			     6 * bd->board_size );
 	
+	    gdk_gc_set_clip_mask( bd->gc_copy, NULL );
+	    
 	    gdk_draw_pixmap( board->window, bd->gc_copy, bd->pm_saved,
 			     0, 0, bd->x_drag - 3 * bd->board_size,
 			     bd->y_drag - 3 * bd->board_size,
@@ -1683,6 +1677,21 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 		board_pixel( bd, 0, 0, 2 );
 	}
 
+#if WIN32
+    /* gdk_draw_pixmap doesn't seem to work when copying within a pixmap
+       on the Win32 port of GDK.  We have to do things the hard way... */
+    {
+	int iPoints, aPoints[] = { 12, 24, 36, 60, 72, 84 };
+
+	for( iPoints = 0; iPoints < sizeof( aPoints ) / sizeof( aPoints[ 0 ] );
+	     iPoints++ )
+	    gdk_draw_rgb_image( bd->pm_board, gc, aPoints[ iPoints ] *
+				bd->board_size, 3 * bd->board_size,
+				12 * bd->board_size, 66 * bd->board_size,
+				GDK_RGB_DITHER_MAX, bd->rgb_points,
+				12 * bd->board_size * 3 );
+    }
+#else
     gdk_draw_rgb_image( bd->pm_board, gc, 12 * bd->board_size,
 			3 * bd->board_size, 12 * bd->board_size,
 			66 * bd->board_size, GDK_RGB_DITHER_MAX,
@@ -1700,7 +1709,8 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 		     12 * bd->board_size, 3 * bd->board_size,
 		     60 * bd->board_size, 3 * bd->board_size,
 		     36 * bd->board_size, 66 * bd->board_size );
-		     
+#endif
+    
     for( iy = 0; iy < 30 * bd->board_size; iy++ )
 	for( ix = 0; ix < 6 * bd->board_size; ix++ ) {
 	    empty( iy, ix, 0 ) = board_pixel( bd, 0, 0, 0 );
@@ -1713,13 +1723,21 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 			30 * bd->board_size, GDK_RGB_DITHER_MAX,
 			bd->rgb_empty, 6 * bd->board_size * 3 );
 
-    if( !bd->translucent ) {
-	free( bd->rgb_points );
-	free( bd->rgb_empty );
-    }
-#undef buf
-#undef empty
-    
+#if WIN32
+    /* Same problem as above... */
+    gdk_draw_rgb_image( bd->pm_board, gc, 99 * bd->board_size,
+			3 * bd->board_size, 6 * bd->board_size,
+			30 * bd->board_size, GDK_RGB_DITHER_MAX,
+			bd->rgb_empty, 6 * bd->board_size * 3 );
+    gdk_draw_rgb_image( bd->pm_board, gc, 3 * bd->board_size,
+			39 * bd->board_size, 6 * bd->board_size,
+			30 * bd->board_size, GDK_RGB_DITHER_MAX,
+			bd->rgb_empty, 6 * bd->board_size * 3 );
+    gdk_draw_rgb_image( bd->pm_board, gc, 99 * bd->board_size,
+			39 * bd->board_size, 6 * bd->board_size,
+			30 * bd->board_size, GDK_RGB_DITHER_MAX,
+			bd->rgb_empty, 6 * bd->board_size * 3 );
+#else
     gdk_draw_pixmap( bd->pm_board, gc, bd->pm_board,
 		     3 * bd->board_size, 3 * bd->board_size,
 		     99 * bd->board_size, 3 * bd->board_size,
@@ -1732,6 +1750,14 @@ static void board_draw( GtkWidget *widget, BoardData *bd ) {
 		     3 * bd->board_size, 3 * bd->board_size,
 		     99 * bd->board_size, 39 * bd->board_size,
 		     6 * bd->board_size, 30 * bd->board_size );
+#endif
+    
+    if( !bd->translucent ) {
+	free( bd->rgb_points );
+	free( bd->rgb_empty );
+    }
+#undef buf
+#undef empty
 
     gdk_gc_unref( gc );
 }
@@ -1826,7 +1852,7 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 		if( bd->translucent )
 		    BUFX( iy, ix, 3 ) = BUFO( iy, ix, 3 ) = 0xFF;
 		else
-		    gdk_image_put_pixel( img, ix, iy, 0 );
+		    gdk_image_put_pixel( img, ix, iy, MASK_INVISIBLE );
 	    } else {
 		/* pixel is inside chequer */
 		if( bd->translucent ) {
@@ -1919,7 +1945,7 @@ static void board_draw_chequers( GtkWidget *widget, BoardData *bd, int fKey ) {
 						 specular_o )
 					       * 64.0 + ( 4 - in ) * 32.0 );
 		    
-		    gdk_image_put_pixel( img, ix, iy, ~0L );
+		    gdk_image_put_pixel( img, ix, iy, MASK_VISIBLE );
 		}
 	    }
 	    x_loop += 2.0 / ( size );
@@ -2031,9 +2057,9 @@ static void board_draw_dice( GtkWidget *widget, BoardData *bd ) {
 	    if( in < 2 ) {
 		for( i = 0; i < 3; i++ )
 		    buf_x[ iy ][ ix ][ i ] = buf_o[ iy ][ ix ][ i ] = 0;
-		gdk_image_put_pixel( img, ix, iy, 0 );
+		gdk_image_put_pixel( img, ix, iy, MASK_INVISIBLE );
 	    } else {
-		gdk_image_put_pixel( img, ix, iy, 1 );
+		gdk_image_put_pixel( img, ix, iy, MASK_VISIBLE );
 
 		buf_x[ iy ][ ix ][ 0 ] = clamp( ( diffuse *
 						  bd->aarColour[ 0 ][ 0 ] +
@@ -2238,9 +2264,9 @@ static void board_draw_cube( GtkWidget *widget, BoardData *bd ) {
 	    if( in < 2 ) {
 		for( i = 0; i < 3; i++ )
 		    buf[ iy ][ ix ][ i ] = 0;
-		gdk_image_put_pixel( img, ix, iy, 0 );
+		gdk_image_put_pixel( img, ix, iy, MASK_INVISIBLE );
 	    } else {
-		gdk_image_put_pixel( img, ix, iy, 1 );
+		gdk_image_put_pixel( img, ix, iy, MASK_VISIBLE );
 
 		buf[ iy ][ ix ][ 0 ] = clamp( ( diffuse * 0.8 + specular ) *
 					      64.0 + ( 4 - in ) * 32.0 );
@@ -2561,12 +2587,15 @@ static gboolean key_expose( GtkWidget *pw, GdkEventExpose *event,
 	gdk_window_clear_area( pw->window, event->area.x, event->area.y,
 			       event->area.width, event->area.height );
 
-	draw_bitplane( pw->window, bd->gc_and, bd->bm_key_mask, 0, 0, 0, 0,
-		       20, 20, 1 );
-	gdk_draw_pixmap( pw->window, bd->gc_or,
+	gdk_gc_set_clip_mask( bd->gc_copy, bd->bm_key_mask );
+	gdk_gc_set_clip_origin( bd->gc_copy, 0, 0 );
+
+	gdk_draw_pixmap( pw->window, bd->gc_copy,
 			 *( (GdkPixmap **) gtk_object_get_user_data(
 			     GTK_OBJECT( pw ) ) ), 0, 0, 0, 0,
 			 20, 20 );
+	
+	gdk_gc_set_clip_mask( bd->gc_copy, NULL );
     }
     
     return TRUE;

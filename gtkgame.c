@@ -231,6 +231,7 @@ static void SetAutoDoubles( gpointer *p, guint n, GtkWidget *pw );
 static void SetCache( gpointer *p, guint n, GtkWidget *pw );
 static void SetDelay( gpointer *p, guint n, GtkWidget *pw );
 static void SetEval( gpointer *p, guint n, GtkWidget *pw );
+static void SetPlayers( gpointer *p, guint n, GtkWidget *pw );
 static void SetSeed( gpointer *p, guint n, GtkWidget *pw );
 
 /* A dummy widget that can grab events when others shouldn't see them. */
@@ -1023,7 +1024,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SET_AUTO_BEAROFF, "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Crawford", NULL, Command,
 	  CMD_SET_AUTO_CRAWFORD, "<CheckItem>" },
-	{ "/_Settings/_Automatic/_Doubles", NULL, SetAutoDoubles, 0, NULL },
+	{ "/_Settings/_Automatic/_Doubles...", NULL, SetAutoDoubles, 0, NULL },
 	{ "/_Settings/_Automatic/_Game", NULL, Command, CMD_SET_AUTO_GAME,
 	  "<CheckItem>" },
 	{ "/_Settings/_Automatic/_Move", NULL, Command, CMD_SET_AUTO_MOVE,
@@ -1051,7 +1052,7 @@ extern int InitGTK( int *argc, char ***argv ) {
 	{ "/_Settings/_Dice generation/_User", NULL, Command, CMD_SET_RNG_USER,
 	  "/Settings/Dice generation/ANSI" },
 	{ "/_Settings/_Dice generation/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Settings/_Dice generation/_Seed", NULL, SetSeed, 0, NULL },
+	{ "/_Settings/_Dice generation/_Seed...", NULL, SetSeed, 0, NULL },
 	{ "/_Settings/Di_splay", NULL, Command, CMD_SET_DISPLAY,
 	  "<CheckItem>" },
 	{ "/_Settings/_Evaluation...", NULL, SetEval, 0, NULL },
@@ -1067,18 +1068,18 @@ extern int InitGTK( int *argc, char ***argv ) {
 	  CMD_SET_MET_ZADEH, "/Settings/Match equity table/Jacobs" },
 	{ "/_Settings/_Nackgammon", NULL, Command, CMD_SET_NACKGAMMON,
 	  "<CheckItem>" },
-	{ "/_Settings/_Players...", NULL, NULL, 0, NULL },
+	{ "/_Settings/_Players...", NULL, SetPlayers, 0, NULL },
 	{ "/_Settings/Prompt...", NULL, NULL, 0, NULL },
 	{ "/_Settings/_Rollouts...", NULL, NULL, 0, NULL },
 	{ "/_Settings/-", NULL, NULL, 0, "<Separator>" },
 	{ "/_Settings/Save settings", NULL, Command, CMD_SAVE_SETTINGS, NULL },
 	{ "/_Help", NULL, NULL, 0, "<Branch>" },
-	{ "/_Help/_Commands...", NULL, Command, CMD_HELP, NULL },
-	{ "/_Help/Co_pying gnubg...", NULL, Command, CMD_SHOW_COPYING, NULL },
-	{ "/_Help/gnubg _Warranty...", NULL, Command, CMD_SHOW_WARRANTY,
+	{ "/_Help/_Commands", NULL, Command, CMD_HELP, NULL },
+	{ "/_Help/Co_pying gnubg", NULL, Command, CMD_SHOW_COPYING, NULL },
+	{ "/_Help/gnubg _Warranty", NULL, Command, CMD_SHOW_WARRANTY,
 	  NULL },
 	{ "/_Help/-", NULL, NULL, 0, "<Separator>" },
-	{ "/_Help/_About...", NULL, NULL, 0, NULL }
+	{ "/_Help/_About gnubg", NULL, NULL, 0, NULL }
     };
 
     if( !gtk_init_check( argc, argv ) )
@@ -1223,7 +1224,6 @@ static void OK( GtkWidget *pw, int *pf ) {
 
 extern GtkWidget *CreateDialog( char *szTitle, int fQuestion, GtkSignalFunc pf,
 				void *p ) {
-
 #include "gnu.xpm"
 #include "question.xpm"
 
@@ -1643,45 +1643,122 @@ typedef struct _evalwidget {
     evalcontext *pec;
     GtkWidget *pwPlies, *pwSearchCandidates, *pwSearchTolerance, *pwReduced,
 	*pwCubeful;
+    GtkAdjustment *padjPlies, *padjSearchCandidates, *padjSearchTolerance,
+	*padjReduced;
+    int *pfOK;
 } evalwidget;
 
-static GtkWidget *EvalWidget( evalcontext *pec ) {
+static GtkWidget *EvalWidget( evalcontext *pec, int *pfOK ) {
 
     evalwidget *pew;
-    GtkWidget *pw;
+    GtkWidget *pwEval, *pw;
 
-    pw = gtk_vbox_new( FALSE, 0 );
+    if( pfOK )
+	*pfOK = FALSE;
+    
+    pwEval = gtk_vbox_new( FALSE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pwEval ), 8 );
+    
     pew = malloc( sizeof *pew );
 
+    pew->padjPlies = GTK_ADJUSTMENT( gtk_adjustment_new( pec->nPlies, 0, 10,
+							 1, 1, 1 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwEval ), pw );
     gtk_container_add( GTK_CONTAINER( pw ),
-		       gtk_label_new( "FIXME: evaluation settings "
-				      "would go here" ) );
+		       gtk_label_new( "Plies:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_spin_button_new( pew->padjPlies, 1, 0 ) );
 
-    gtk_object_set_user_data( GTK_OBJECT( pw ), pew );
-
-    /* FIXME set destroy handler to free pew */
+    pew->padjSearchCandidates = GTK_ADJUSTMENT( gtk_adjustment_new(
+	pec->nSearchCandidates, 2, MAX_SEARCH_CANDIDATES, 1, 1, 1 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwEval ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Search candidates:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_spin_button_new( pew->padjSearchCandidates,
+					    1, 0 ) );
     
-    return pw;
+    pew->padjSearchTolerance = GTK_ADJUSTMENT( gtk_adjustment_new(
+	pec->rSearchTolerance, 0, 1, 0.01, 0.01, 0.01 ) );
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwEval ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Search tolerance:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_spin_button_new( pew->padjSearchTolerance, 0.01,
+					    3 ) );
+
+    gtk_container_add( GTK_CONTAINER( pwEval ),
+		       pew->pwCubeful = gtk_check_button_new_with_label(
+			   "Cubeful evaluation" ) );
+    
+    gtk_object_set_data_full( GTK_OBJECT( pwEval ), "user_data", pew, free );
+
+    pew->pec = pec;
+    pew->pfOK = pfOK;
+    
+    return pwEval;
 }
 
 static void EvalOK( GtkWidget *pw, void *p ) {
 
-    /* FIXME */
+    GtkWidget *pwEval = GTK_WIDGET( p );
+    evalwidget *pew = gtk_object_get_user_data( GTK_OBJECT( pwEval ) );
+
+    if( pew->pfOK )
+	*pew->pfOK = TRUE;
+
+    pew->pec->nPlies = pew->padjPlies->value;
+    pew->pec->nSearchCandidates = pew->padjSearchCandidates->value;
+    pew->pec->rSearchTolerance = pew->padjSearchTolerance->value;
+    pew->pec->fCubeful = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pew->pwCubeful ) );
+
+    if( pew->pfOK )
+	gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+}
+
+static void SetEvalCommands( char *szPrefix, evalcontext *pec ) {
+
+    char sz[ 256 ];
+
+    outputpostpone();
     
-    gtk_widget_destroy( gtk_widget_get_toplevel( pw ) );
+    sprintf( sz, "%s plies %d", szPrefix, pec->nPlies );
+    UserCommand( sz );
+
+    sprintf( sz, "%s candidates %d", szPrefix, pec->nSearchCandidates );
+    UserCommand( sz );
+
+    sprintf( sz, "%s tolerance %.3f", szPrefix, pec->rSearchTolerance );
+    UserCommand( sz );
+
+    if( pec->nPlies > 1 ) {
+	sprintf( sz, "%s reduced %d", szPrefix, pec->nReduced );
+	UserCommand( sz );
+    }
+    
+    sprintf( sz, "%s cubeful %s", szPrefix, pec->fCubeful ? "on" : "off" );
+    UserCommand( sz );
+
+    outputresume();
 }
 
 static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
 
     evalcontext ec;
-    GtkWidget *pwDialog = CreateDialog( "GNU Backgammon - Evaluations", TRUE,
-					GTK_SIGNAL_FUNC( EvalOK ), NULL ),
-	*pwEval;
-
+    GtkWidget *pwDialog, *pwEval;
+    int fOK;
+    
     memcpy( &ec, &ecEval, sizeof ec );
 
-    pwEval = EvalWidget( &ec );
+    pwEval = EvalWidget( &ec, &fOK );
     
+    pwDialog = CreateDialog( "GNU Backgammon - Evaluations", TRUE,
+			     GTK_SIGNAL_FUNC( EvalOK ), pwEval );
+
     gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
 		       pwEval );
 
@@ -1696,6 +1773,140 @@ static void SetEval( gpointer *p, guint n, GtkWidget *pw ) {
     DisallowStdin();
     gtk_main();
     AllowStdin();
+
+    if( fOK )
+	SetEvalCommands( "set evaluation", &ec );
+}
+
+typedef struct _playerswidget {
+    player *ap;
+    GtkWidget *apwName[ 2 ], *apwRadio[ 2 ][ 4 ], *apwEval[ 2 ],
+	*apwSocket[ 2 ], *apwExternal[ 2 ];
+    evalcontext aec[ 2 ];
+} playerswidget;
+
+static void PlayerTypeToggled( GtkWidget *pw, playerswidget *ppw ) {
+
+    int i;
+
+    for( i = 0; i < 2; i++ ) {
+	gtk_widget_set_sensitive(
+	    ppw->apwEval[ i ], gtk_toggle_button_get_active(
+		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 1 ] ) ) );
+	gtk_widget_set_sensitive(
+	    ppw->apwExternal[ i ], gtk_toggle_button_get_active(
+		GTK_TOGGLE_BUTTON( ppw->apwRadio[ i ][ 3 ] ) ) );
+    }
+}
+
+static GtkWidget *PlayersPage( playerswidget *ppw, int i ) {
+
+    GtkWidget *pwPage, *pw;
+    static int aiRadioButton[ PLAYER_PUBEVAL + 1 ] = { 3, 0, 1, 2 };
+
+    pwPage = gtk_vbox_new( FALSE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pwPage ), 8 );
+    
+    pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Name:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       ppw->apwName[ i ] = gtk_entry_new() );
+    gtk_entry_set_text( GTK_ENTRY( ppw->apwName[ i ] ),
+			ppw->ap[ i ].szName );
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 0 ] =
+		       gtk_radio_button_new_with_label( NULL, "Human" ) );
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 1 ] =
+		       gtk_radio_button_new_with_label_from_widget(
+			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
+			   "GNU Backgammon" ) );
+
+    gtk_container_add( GTK_CONTAINER( pwPage ), ppw->apwEval[ i ] =
+		       EvalWidget( ppw->aec + i, NULL ) );
+    gtk_widget_set_sensitive( ppw->apwEval[ i ],
+			      ap[ i ].pt == PLAYER_GNU );
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 2 ] =
+		       gtk_radio_button_new_with_label_from_widget(
+			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
+			   "Pubeval" ) );
+    
+    gtk_container_add( GTK_CONTAINER( pwPage ),
+		       ppw->apwRadio[ i ][ 3 ] =
+		       gtk_radio_button_new_with_label_from_widget(
+			   GTK_RADIO_BUTTON( ppw->apwRadio[ i ][ 0 ] ),
+			   "External" ) );
+    ppw->apwExternal[ i ] = pw = gtk_hbox_new( FALSE, 0 );
+    gtk_container_set_border_width( GTK_CONTAINER( pw ), 8 );
+    gtk_widget_set_sensitive( pw, ap[ i ].pt == PLAYER_EXTERNAL );
+    gtk_container_add( GTK_CONTAINER( pwPage ), pw );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       gtk_label_new( "Socket:" ) );
+    gtk_container_add( GTK_CONTAINER( pw ),
+		       ppw->apwSocket[ i ] = gtk_entry_new() );
+    
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON(
+	ppw->apwRadio[ i ][ aiRadioButton[ ap[ i ].pt ] ] ), TRUE );
+
+    gtk_signal_connect( GTK_OBJECT( ppw->apwRadio[ i ][ 1 ] ), "toggled",
+			GTK_SIGNAL_FUNC( PlayerTypeToggled ), ppw );
+    gtk_signal_connect( GTK_OBJECT( ppw->apwRadio[ i ][ 3 ] ), "toggled",
+			GTK_SIGNAL_FUNC( PlayerTypeToggled ), ppw );
+    
+    return pwPage;
+}
+
+static void PlayersOK( GtkWidget *pw, void *p ) {
+}
+
+static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
+
+    GtkWidget *pwDialog, *pwNotebook;
+    int i, fOK;
+    player apTemp[ 2 ];
+    playerswidget plw;
+    static evalcontext ecDefault = { 0, 8, 0.16, 0, FALSE };
+    
+    memcpy( apTemp, ap, sizeof ap );
+    plw.ap = apTemp;
+    
+    for( i = 0; i < 2; i++ )
+	memcpy( plw.aec + i, ap[ i ].pt == PLAYER_GNU ? &ap[ i ].pd.ec :
+		&ecDefault, sizeof( evalcontext ) );
+    
+    pwDialog = CreateDialog( "GNU Backgammon - Players", TRUE,
+			     GTK_SIGNAL_FUNC( PlayersOK ), NULL );
+
+    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+		       pwNotebook = gtk_notebook_new() );
+    gtk_container_set_border_width( GTK_CONTAINER( pwNotebook ), 4 );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      PlayersPage( &plw, 0 ),
+			      gtk_label_new( "Player 0" ) );
+    gtk_notebook_append_page( GTK_NOTEBOOK( pwNotebook ),
+			      PlayersPage( &plw, 1 ),
+			      gtk_label_new( "Player 1" ) );
+    
+    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+				  GTK_WINDOW( pwMain ) );
+    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
+    
+    gtk_widget_show_all( pwDialog );
+
+    DisallowStdin();
+    gtk_main();
+    AllowStdin();
+
+    if( fOK )
+	/* FIXME */;
 }
 
 extern void GTKEval( char *szOutput ) {

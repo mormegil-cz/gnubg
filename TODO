@@ -79,7 +79,6 @@ duplication of effort and to make sure our changes merge easily.
   under the Analyse menu).
 ** Make "show marketwindow" say something for money games.
 ** Make "set score" handle "set score crawford -3" or "set score 4C 3".
-** Make "set auto roll" roll when holding a dead cube.
 
 * Guile:
 ** Add more data types and Scheme bindings for useful functions.
@@ -171,8 +170,6 @@ duplication of effort and to make sure our changes merge easily.
 ** The GTK code uses ConnectionNumber() at various places to detect X
   events.  This is unportable and ugly; find something better. (gary)
 ** "set player <tab>" gives incorrect completions.
-** When using GTK, some output is lost for (e.g.) "set player both human".
-  It should show in a dialog, not in the status bar.
 ** Cosmetic problems when a "set board" is shown in the game list (the
   wrong cell is highlighted).
 ** When using guile and guile isn't using readline, X events are not
@@ -190,6 +187,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Make sure the socket changes for external players work on Solaris.  Things
   to check: #include <sys/types.h>; don't use the identifier "sun";
   #define AF_LOCAL AF_UNIX (same with PF_).
+** The gnubg and external data in the player struct shouldn't be in a
+  union.  (Switching between the two corrupts their settings.) (gary)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
