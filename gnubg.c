@@ -500,6 +500,9 @@ command cER = {
     { "postscript", CommandExportMatchPostScript, N_("Records a log of the "
       "session in PostScript format"), szFILENAME, &cFilename },
     { "ps", CommandExportMatchPostScript, NULL, szFILENAME, &cFilename },
+    { "text", CommandExportMatchText,
+      N_("Records a log of the session in text format"),
+      szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExport[] = {
     { "database", CommandDatabaseExport, 

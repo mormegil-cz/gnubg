@@ -1,3 +1,7 @@
+Fri Jun 28 22:06:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c: new command "export session text".
+
 Thu Jun 27 21:34:39 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* html.c (CommandExportMatchHTML, CommandExportGameHTML, 
