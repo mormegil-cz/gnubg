@@ -73,7 +73,7 @@ extern void setMaterial(Material* pMat);
 extern void CheckOpenglError();
 extern void UpdatePreview(GtkWidget **ppw);
 extern void RenderPreview(Material* pMat, unsigned char* buf);
-extern int LoadTexture(Texture* texture, const char* Filename);
+extern int LoadTexture(Texture* texture, const char* Filename, TextureFormat format);
 extern BoardData bd3d;
 
 int previewLightLevels[3];
@@ -115,7 +115,7 @@ static void Draw(Material* pMat)
 		char buf[100];
 		strcpy(buf, TEXTURE_PATH);
 		strcat(buf, pMat->textureInfo->file);
-		LoadTexture(&texture, buf);
+		LoadTexture(&texture, buf, pMat->textureInfo->format);
 
 		gluQuadricTexture(qobj, GL_TRUE);
 

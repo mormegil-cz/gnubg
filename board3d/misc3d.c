@@ -220,6 +220,7 @@ int IsSet(int flags, int bit)
 myList textures;
 
 char* TextureTypeStrs[TT_COUNT] = {"general", "piece", "hinge"};
+char* TextureFormatStrs[TF_COUNT] = {"bmp", "png"};
 
 GList *GetTextureList(int type)
 {
@@ -268,10 +269,14 @@ void FindTexture(TextureInfo** textureInfo, char* file)
 }
 
 #define TEXTURE_FILE "textures.txt"
+#define TEXTURE_FILE_VERSION 2
+
 void LoadTextureInfo()
 {
 	FILE* fp;
 	char *szFile;
+	#define BUF_SIZE 100
+	char buf[BUF_SIZE];
 
 	ListInit(&textures, sizeof(TextureInfo));
 
@@ -286,10 +291,14 @@ void LoadTextureInfo()
 		return;
 	}
 
+	if (!fgets(buf, BUF_SIZE, fp) || atoi(buf) != TEXTURE_FILE_VERSION)
+	{
+		g_print("Error: Texture file (%s) out of date\n", TEXTURE_FILE);
+		return;
+	}
+
 	do
 	{
-		#define BUF_SIZE 100
-		char buf[BUF_SIZE];
 		int err, found, i, len, val;
 		TextureInfo text;
 
@@ -311,6 +320,35 @@ void LoadTextureInfo()
 		}
 		else
 			strcpy(text.file, buf);
+
+		/* format */
+		if (!fgets(buf, BUF_SIZE, fp))
+		{
+			g_print("Error in texture file info.\n");
+			return;
+		}
+		len = strlen(buf);
+		if (len > 0 && buf[len - 1] == '\n')
+		{
+			len--;
+			buf[len] = '\0';
+		}
+		found = -1;
+		for (i = 0; i < TF_COUNT; i++)
+		{
+			if (!strcasecmp(buf, TextureFormatStrs[i]))
+			{
+				found = i;
+				break;
+			}
+		}
+		if (found == -1)
+		{
+			g_print("Unknown texture format %s.  Entry ignored.\n", buf);
+			err = 1;
+		}
+		else
+			text.format = (TextureFormat)i;
 
 		/* name */
 		if (!fgets(buf, BUF_SIZE, fp))
@@ -378,24 +416,63 @@ void DeleteTexture(Texture* texture)
 	texture->texID = 0;
 }
 
-int LoadTexture(Texture* texture, const char* filename)
+int LoadTexture(Texture* texture, const char* filename, TextureFormat format)
 {
-	unsigned char* bits;
+	unsigned char* bits = 0;
+	int n;
 
-	bits = LoadDIBitmap(filename, &texture->width, &texture->height);
+	FILE* fp = fopen(filename, "rb");
+	if (!fp)
+	{
+		g_print("Failed to open texture: %s\n", filename);
+		return 0;	/* failed to load file */
+	}
+
+	switch(format)
+	{
+	case TF_BMP:
+		bits = LoadDIBTexture(fp, &texture->width, &texture->height);
+		break;
+	case TF_PNG:
+#ifdef HAVE_LIBPNG
+		bits = LoadPNGTexture(fp, &texture->width, &texture->height);
+#endif
+		break;
+	default:
+		g_print("Unknown texture type for texture %s\n", filename);
+		return 0;	/* failed to load file */
+	}
+
+	fclose(fp);
+
 	if (!bits)
 	{
 		g_print("Failed to load texture: %s\n", filename);
 		return 0;	/* failed to load file */
 	}
+	if (texture->width != texture->height)
+	{
+		g_print("Failed to load texture %s. width (%d) different to height (%d)\n",
+			filename, texture->width, texture->height);
+		return 0;	/* failed to load file */
+	}
+	/* Check size is a power of 2 */
+	frexp(texture->width, &n);
+	if (texture->width != pow(2, n - 1))
+	{
+		g_print("Failed to load texture %s, size (%d) isn't a power of 2\n",
+			filename, texture->width);
+		return 0;	/* failed to load file */
+	}
 
+	/* Create texture */
 	glGenTextures(1, &texture->texID);
 	glBindTexture(GL_TEXTURE_2D, texture->texID);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, texture->width, texture->height, 0, GL_RGB, GL_UNSIGNED_BYTE, bits);
 
-	free(bits);	/* Release loaded image */
+	free(bits);	/* Release loaded image data */
 	return 1;
 }
 
@@ -406,7 +483,7 @@ void GetTexture(BoardData* bd, Material* pMat)
 		char buf[100];
 		strcpy(buf, TEXTURE_PATH);
 		strcat(buf, pMat->textureInfo->file);
-		SetTexture(bd, pMat, buf);
+		SetTexture(bd, pMat, buf, pMat->textureInfo->format);
 	}
 	else
 		pMat->pTexture = 0;
@@ -437,6 +514,7 @@ void testSet3dSetting(BoardData* bd, const renderdata *prd)
 	bd->testSkewFactor = prd->testSkewFactor;
 	bd->boardAngle = prd->boardAngle;
 	bd->diceSize = prd->diceSize * base_unit;
+	bd->planView = prd->planView;
 
 	memcpy(bd->chequerMat, prd->rdChequerMat, sizeof(Material[2]));
 
@@ -1478,9 +1556,9 @@ void CloseBoard3d(BoardData* bd)
 
 	/* Random logo */
 	if (rand() % 2)
-		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp");
+		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo.bmp", TF_BMP);
 	else
-		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo2.bmp");
+		SetTexture(bd, &bd->logoMat, TEXTURE_PATH"logo2.bmp", TF_BMP);
 
 	animStartTime = get_time();
 	bd->perOpen = 0;
@@ -1549,7 +1627,7 @@ void SetupSimpleMat(Material* pMat, float r, float g, float b)
 	SetupMat(pMat, r, g, b, r, g, b, 0, 0, 0, 0, 0);
 }
 
-void SetTexture(BoardData* bd, Material* pMat, const char* filename)
+void SetTexture(BoardData* bd, Material* pMat, const char* filename, TextureFormat format)
 {
 	/* See if already loaded */
 	int i;
@@ -1583,7 +1661,7 @@ void SetTexture(BoardData* bd, Material* pMat, const char* filename)
 		return;
 	}
 
-	if (LoadTexture(&bd->textureList[bd->numTextures], filename))
+	if (LoadTexture(&bd->textureList[bd->numTextures], filename, format))
 	{
 		/* Remeber name */
 		bd->textureName[bd->numTextures] = malloc(strlen(nameStart) + 1);
@@ -1593,6 +1671,7 @@ void SetTexture(BoardData* bd, Material* pMat, const char* filename)
 		bd->numTextures++;
 	}
 }
+
 /* Not currently used
 void RemoveTexture(Material* pMat)
 {
@@ -1616,6 +1695,7 @@ void RemoveTexture(Material* pMat)
 	}
 }
 */
+
 void ClearTextures(BoardData* bd, int glValid)
 {
 	int i;

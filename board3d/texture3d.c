@@ -55,19 +55,14 @@ typedef struct
 
 #pragma pack()
 
-unsigned char *LoadDIBitmap(const char *filename, int *width, int *height)
+unsigned char *LoadDIBTexture(FILE *fp, int *width, int *height)
 {
-	FILE *fp;
 	unsigned char *bits;	/* Bitmap pixel bits */
 	unsigned int bitsize;	/* Size of bitmap */
 	BITMAPFILEHEADER header;
 	BITMAPINFOHEADER infoheader;
 	unsigned int i;
 	unsigned char *ptr;
-
-	fp = fopen(filename, "rb");
-	if (!fp)
-		return 0;
 
 	/* Read in header info */
 	if ((fread(&header, sizeof(BITMAPFILEHEADER), 1, fp) != 1) ||
@@ -135,6 +130,81 @@ unsigned char *LoadDIBitmap(const char *filename, int *width, int *height)
 		}
 	}
 
-	fclose(fp);
-	return (bits);
+	return bits;
 }
+
+#include "config.h"
+
+#ifdef HAVE_LIBPNG
+
+#include <png.h>
+
+#define PNG_CHECK_BYTES 8
+
+unsigned char *LoadPNGTexture(FILE *fp, int *width, int *height)
+{
+	unsigned char header[PNG_CHECK_BYTES];
+	png_structp png_ptr;
+	png_infop info_ptr;
+	int rowbytes, i, colour;
+	png_bytep data, *row_p;
+
+	fread(header, 1, PNG_CHECK_BYTES, fp);
+	if (!png_check_sig(header, PNG_CHECK_BYTES))
+		return 0;	/* Not a PNG file */
+
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	info_ptr = png_create_info_struct(png_ptr);
+
+	if (!png_ptr || !info_ptr || setjmp(png_jmpbuf(png_ptr)))
+		return 0;	/* Problem with png library */
+
+	/* Setup input */
+	png_init_io(png_ptr, fp);
+	png_set_sig_bytes(png_ptr, PNG_CHECK_BYTES);
+
+	/* Read file info */
+	png_read_info(png_ptr, info_ptr);
+
+	*width = png_get_image_width(png_ptr, info_ptr);
+	*height = png_get_image_height(png_ptr, info_ptr);
+
+	/* Standardize colour formats */
+	colour = png_get_color_type(png_ptr, info_ptr);
+
+	if (colour == PNG_COLOR_TYPE_GRAY || colour == PNG_COLOR_TYPE_GRAY_ALPHA)
+		png_set_gray_to_rgb(png_ptr);
+
+	if (colour & PNG_COLOR_MASK_ALPHA)
+		png_set_strip_alpha(png_ptr);
+
+	if (colour == PNG_COLOR_TYPE_PALETTE)
+		png_set_expand(png_ptr);
+
+	/* Reflect updated flags */
+	png_read_update_info(png_ptr, info_ptr);
+
+	/* Alloc space for image */
+	rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+	data = (png_bytep)malloc((*height) * rowbytes);
+	/* Row pointers for png read */
+	row_p = (png_bytep *)malloc(sizeof(png_bytep) * (*height));
+	if (!data || !row_p)
+		return 0;	/* Allocation failed */
+	/* Assign row points inside data
+		NB. notice reveresed y co-ords as opengl is upside down */
+	for (i = 0; i < *height; i++)
+		row_p[*height - 1 - i] = &data[i * rowbytes];
+
+	/* Read data */
+	png_read_image(png_ptr, row_p);
+
+	/* Tidy up */
+	png_read_end(png_ptr, NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+	free(row_p);
+
+	return data;
+}
+
+#endif

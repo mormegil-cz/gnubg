@@ -123,6 +123,7 @@ renderdata rdDefault = {
 	1,	/* Show move indicator */
 	35,	/* Board angle */
 	20,	/* FOV skew factor */
+	0,	/* Plan view */
 	3,	/* Dice size */
 	0,	/* Rounded edges */
 	PT_ROUNDED,	/* Piece type */

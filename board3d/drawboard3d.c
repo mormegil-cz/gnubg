@@ -2498,12 +2498,10 @@ int BoardPoint3d(BoardData *bd, int x, int y, int point)
 	gluPickMatrix(x, y, 1, 1, viewport);
 
 	/* Setup projection matrix - using saved values */
-//#define ORTHO_TEST 1
-#if ORTHO_TEST
-	glOrtho(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, 0, 5);
-#else
-	glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
-#endif
+	if (bd->planView)
+		glOrtho(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, 0, 5);
+	else
+		glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(bd->modelMatrix);
@@ -3006,89 +3004,90 @@ float GetFOVAngle(BoardData* bd)
 void SetupPerspVolume(BoardData* bd, int viewport[4])
 {
 	float aspectRatio = (float)viewport[2]/(float)(viewport[3]);
-#if !ORTHO_TEST
-	float fovScale;
-	float zoom;
-
-	float halfRadianFOV;
-	float p[3];
-	float boardRadAngle;
-	viewArea va;
-	initViewArea(&va);
-
-	boardRadAngle = (bd->boardAngle * PI) / 180.0f;
-	halfRadianFOV = ((GetFOVAngle(bd) * PI) / 180.0f) / 2.0f;
-
-	if (aspectRatio < .5f)
+	if (!bd->planView)
 	{
-		int newHeight = viewport[2] * 2;
-		viewport[1] = (viewport[3] - newHeight) / 2;
-		viewport[3] = newHeight;
-		glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-		aspectRatio = .5f;
-	}
+		float fovScale;
+		float zoom;
 
-	/* Sort out viewing area */
-	addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, 0);
-	addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
+		float halfRadianFOV;
+		float p[3];
+		float boardRadAngle;
+		viewArea va;
+		initViewArea(&va);
 
-	if (fGUIDiceArea)
-	{
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, 0);
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, BASE_DEPTH + bd->diceSize);
+		boardRadAngle = (bd->boardAngle * PI) / 180.0f;
+		halfRadianFOV = ((GetFOVAngle(bd) * PI) / 180.0f) / 2.0f;
+
+		if (aspectRatio < .5f)
+		{
+			int newHeight = viewport[2] * 2;
+			viewport[1] = (viewport[3] - newHeight) / 2;
+			viewport[3] = newHeight;
+			glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+			aspectRatio = .5f;
+		}
+
+		/* Sort out viewing area */
+		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, 0);
+		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
+
+		if (fGUIDiceArea)
+		{
+			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, 0);
+			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 + bd->diceSize, BASE_DEPTH + bd->diceSize);
+		}
+		else
+		{	/* Bottom edge is defined by board */
+			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, 0);
+			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
+		}
+
+		if (!bd->doubled)
+		{
+			if (bd->cube_owner == 1)
+				addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
+			if (bd->cube_owner == -1)
+				addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
+		}
+
+		p[0] = getBoardWidth() / 2;
+		p[1] = getBoardHeight() / 2;
+		p[2] = BASE_DEPTH + EDGE_DEPTH;
+		workOutWidth(&va, halfRadianFOV, boardRadAngle, aspectRatio, p);
+
+		fovScale = zNear * (float)tan(halfRadianFOV);
+
+		if (aspectRatio > getAreaRatio(&va))
+		{
+			bd->vertFrustrum = fovScale;
+			bd->horFrustrum = bd->vertFrustrum * aspectRatio;
+		}
+		else
+		{
+			bd->horFrustrum = fovScale * getAreaRatio(&va);
+			bd->vertFrustrum = bd->horFrustrum / aspectRatio;
+		}
+		/* Setup projection matrix */
+		glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
+
+		/* Setup modelview matrix */
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
+		/* Zoom back so image fills window */
+		zoom = (getViewAreaHeight(&va) / 2) / (float)tan(halfRadianFOV);
+		glTranslatef(0, 0, -zoom);
+
+		/* Offset from centre because of perspective */
+		glTranslatef(0, getViewAreaHeight(&va) / 2 + va.bottom, 0);
+
+		/* Rotate board */
+		glRotatef((float)bd->boardAngle, -1, 0, 0);
+
+		/* Origin is bottom left, so move from centre */
+		glTranslatef(-(getBoardWidth() / 2.0f), -((getBoardHeight()) / 2.0f), 0);
 	}
 	else
-	{	/* Bottom edge is defined by board */
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, 0);
-		addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2, BASE_DEPTH + EDGE_DEPTH);
-	}
-
-	if (!bd->doubled)
-	{
-		if (bd->cube_owner == 1)
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, -(getBoardHeight() / 2 - EDGE_HEIGHT), BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
-		if (bd->cube_owner == -1)
-			addViewAreaHeightPoint(&va, halfRadianFOV, boardRadAngle, getBoardHeight() / 2 - EDGE_HEIGHT, BASE_DEPTH + EDGE_DEPTH + DOUBLECUBE_SIZE);
-	}
-
-	p[0] = getBoardWidth() / 2;
-	p[1] = getBoardHeight() / 2;
-	p[2] = BASE_DEPTH + EDGE_DEPTH;
-	workOutWidth(&va, halfRadianFOV, boardRadAngle, aspectRatio, p);
-
-	fovScale = zNear * (float)tan(halfRadianFOV);
-
-	if (aspectRatio > getAreaRatio(&va))
-	{
-		bd->vertFrustrum = fovScale;
-		bd->horFrustrum = bd->vertFrustrum * aspectRatio;
-	}
-	else
-	{
-		bd->horFrustrum = fovScale * getAreaRatio(&va);
-		bd->vertFrustrum = bd->horFrustrum / aspectRatio;
-	}
-	/* Setup projection matrix */
-	glFrustum(-bd->horFrustrum, bd->horFrustrum, -bd->vertFrustrum, bd->vertFrustrum, zNear, zFar);
-
-	/* Setup modelview matrix */
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	/* Zoom back so image fills window */
-	zoom = (getViewAreaHeight(&va) / 2) / (float)tan(halfRadianFOV);
-	glTranslatef(0, 0, -zoom);
-
-	/* Offset from centre because of perspective */
-	glTranslatef(0, getViewAreaHeight(&va) / 2 + va.bottom, 0);
-
-	/* Rotate board */
-	glRotatef((float)bd->boardAngle, -1, 0, 0);
-
-	/* Origin is bottom left, so move from centre */
-	glTranslatef(-(getBoardWidth() / 2.0f), -((getBoardHeight()) / 2.0f), 0);
-
-#else
 	{
 		float size;
 
@@ -3111,7 +3110,7 @@ void SetupPerspVolume(BoardData* bd, int viewport[4])
 
 		glTranslatef(-(getBoardWidth() / 2.0f), -(getBoardHeight() / 2.0f), -3);
 	}
-#endif
+
 	/* Save matrix for later */
 	glGetFloatv(GL_MODELVIEW_MATRIX, bd->modelMatrix);
 }

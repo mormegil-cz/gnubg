@@ -222,6 +222,7 @@ typedef struct _BoardData {
 	int shadowDarkness;	/* How dark are shadows */
 	int boardAngle;	/* Angle board is tilted at */
 	int testSkewFactor;	/* Debug FOV adjustment */
+	int planView;	/* Ortho view? */
 	int curveAccuracy;	/* Round curve approximation accuracy */
 	float diceSize;
 	int roundedEdges;	/* Rounded board edges? */

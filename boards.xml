@@ -102,9 +102,9 @@
          dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
          cube3d=#ADA3AA;#B5AFA0;#97B787;59;0
          cubetext3d=#000082;#23266B;#4A3166;128;100
-         base3d=#F2B254;#EABA5B;#6C5270;128;0;base3.bmp
-         points3d0=#FFCC7A;#FFDBBA;#2D3277;128;100;base3.bmp
-         points3d1=#8C4F00;#7B5B05;#6C242B;128;100;base3.bmp
+         base3d=#F2B254;#EABA5B;#6C5270;128;0;base3.png
+         points3d0=#FFCC7A;#FFDBBA;#2D3277;128;100;base3.png
+         points3d1=#8C4F00;#7B5B05;#6C242B;128;100;base3.png
          border3d=#C59E49;#B19245;#495D79;128;100;board3.bmp
          hinge3d=#CC915A;#BF7F63;#DAA260;122;0;hinge.bmp
          numbers3d=#E3E3E3;#D0CBCE;#010101;128;100
@@ -182,26 +182,26 @@
          cube=#D3D3C3 
          points0=#980000;0.09 
          points1=#000072;0.20      
-		piecetype=1
-		roundededges=n
+		piecetype=0
+		roundededges=y
 		lighttype=p
 		lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
 		lightambient=50 lightdiffuse=70 lightspecular=100
-		chequers3d0=#FFA5A5;#F2A5A5;#EFB651;61;95;checker.bmp
-		chequers3d1=#CC7FCC;#B074C1;#733F96;65;100;checker.bmp
-		dice3d0=#DA7F29;#F2A5A5;#EFB651;69;95
-		dice3d1=#A466A4;#C1529B;#733F96;65;100
-		dot3d0=#DF7AE7;#AD40A0;#CD6FD0;128;100
+		chequers3d0=#D83F3F;#CC3333;#FF0000;60;80
+		chequers3d1=#333333;#4C4C4C;#3F3F3F;70;80
+		dice3d0=#F22626;#CC3333;#FF0000;100;100;n
+		dice3d1=#333333;#4C4C4C;#3F3F3F;70;100;n
+		dot3d0=#A5A5A5;#BFBFBF;#4C4F4C;128;100
 		dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
-		cube3d=#CED0C6;#E4E9C9;#97B787;93;0
-		cubetext3d=#000093;#3A4589;#4A3166;128;100
-		base3d=#F2CCCC;#F2D8D8;#BD8FC3;128;0;base2.bmp
-		points3d0=#CBCCFF;#8AB2D6;#4149AD;128;100;base2.bmp
-		points3d1=#7F007F;#7B435A;#6C242B;118;100;base2.bmp
-		border3d=#C4BFC9;#C4C1C9;#6C89B3;128;100;board2.bmp
-		hinge3d=#CC915A;#BF7F63;#DAA260;122;100;hinge.bmp
-		numbers3d=#7F7F7F;#535152;#010101;128;100
-		background3d=#5B993F;#4B7748;#1A4312;128;0;base2.bmp         
+		cube3d=#B2B2BF;#A5A5B2;#CBCCCB;80;0
+		cubetext3d=#000066;#00007F;#00008C;98;100
+		base3d=#007F00;#007200;#8AD6AB;128;0;
+		points3d0=#F3FBFB;#FDEDF9;#E1FFEA;128;100;
+		points3d1=#FF3233;#DB4C5A;#6C242B;128;100;
+		border3d=#D87226;#D85630;#37465C;128;100;
+		hinge3d=#D8F233;#99BF0C;#E9C944;63;0;
+		numbers3d=#AB78CC;#E7E675;#010101;116;100
+		background3d=#D45588;#933E98;#CA41C7;116;0;
       </design>
 
    </board-design>
@@ -230,26 +230,26 @@
          cube=#E5E5E5
          points0=#007F00;0.09
          points1=#FFFFFF;0.09
-		piecetype=0
-		roundededges=y
+		piecetype=1
+		roundededges=n
 		lighttype=p
 		lightposx=0.000000 lightposy=2.000000 lightposz=3.500000
 		lightambient=50 lightdiffuse=70 lightspecular=100
-		chequers3d0=#D83F3F;#CC3333;#FF0000;60;80
-		chequers3d1=#333333;#4C4C4C;#3F3F3F;70;80
-		dice3d0=#F22626;#CC3333;#FF0000;100;100;n
-		dice3d1=#333333;#4C4C4C;#3F3F3F;70;100;n
-		dot3d0=#A5A5A5;#BFBFBF;#4C4F4C;128;100
+		chequers3d0=#FFA5A5;#F2A5A5;#EFB651;61;95;checker.bmp
+		chequers3d1=#CC7FCC;#B074C1;#733F96;65;100;checker.bmp
+		dice3d0=#DA7F29;#F2A5A5;#EFB651;69;95
+		dice3d1=#A466A4;#C1529B;#733F96;65;100
+		dot3d0=#DF7AE7;#AD40A0;#CD6FD0;128;100
 		dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
-		cube3d=#B2B2BF;#A5A5B2;#CBCCCB;80;0
-		cubetext3d=#000066;#00007F;#00008C;98;100
-		base3d=#007F00;#007200;#8AD6AB;128;0;
-		points3d0=#F3FBFB;#FDEDF9;#E1FFEA;128;100;
-		points3d1=#FF3233;#DB4C5A;#6C242B;128;100;
-		border3d=#D87226;#D85630;#37465C;128;100;
-		hinge3d=#D8F233;#99BF0C;#E9C944;63;0;
-		numbers3d=#AB78CC;#E7E675;#010101;116;100
-		background3d=#D45588;#933E98;#CA41C7;116;0;
+		cube3d=#CED0C6;#E4E9C9;#97B787;93;0
+		cubetext3d=#000093;#3A4589;#4A3166;128;100
+		base3d=#F2CCCC;#F2D8D8;#BD8FC3;128;0;base2.bmp
+		points3d0=#CBCCFF;#8AB2D6;#4149AD;128;100;base2.bmp
+		points3d1=#7F007F;#7B435A;#6C242B;118;100;base2.bmp
+		border3d=#C4BFC9;#C4C1C9;#6C89B3;128;100;board2.bmp
+		hinge3d=#CC915A;#BF7F63;#DAA260;122;100;hinge.bmp
+		numbers3d=#7F7F7F;#535152;#010101;128;100
+		background3d=#5B993F;#4B7748;#1A4312;128;0;base2.bmp         
       </design>
 
    </board-design>

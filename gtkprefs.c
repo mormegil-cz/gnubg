@@ -78,6 +78,7 @@ static GList *plBoardDesigns;
 GtkWidget *pwBoardType, *pwShowShadows, *pwAnimateRoll, *pwAnimateFlag, *pwCloseBoard,
 	*pwDarkness, *lightLab, *darkLab, *pwLightSource, *pwDirectionalSource,
 	*pwTestPerformance, *pmHingeCol, *pieceTypeCombo, *frame3dOptions,
+	*pwPlanView, *pwBoardAngle, *pwSkewFactor, *skewLab, *anglelab,
 	*dtLightSourceFrame, *dtLightPositionFrame, *dtLightLevelsFrame, *pwRoundedEdges;
 GtkAdjustment *padjDarkness, *padjAccuracy, *padjBoardAngle, *padjSkewFactor, *padjLightPosX,
 	*padjLightLevelAmbient, *padjLightLevelDiffuse, *padjLightLevelSpecular,
@@ -1119,6 +1120,17 @@ void toggle_show_shadows(GtkWidget *widget, GtkWidget *pw)
 	redrawChange = TRUE;
 }
 
+void toggle_planview(GtkWidget *widget, GtkWidget *pw)
+{
+	int set = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(widget));
+	gtk_widget_set_sensitive(pwSkewFactor, !set);
+	gtk_widget_set_sensitive(pwBoardAngle, !set);
+	gtk_widget_set_sensitive(skewLab, !set);
+	gtk_widget_set_sensitive(anglelab, !set);
+	
+	redrawChange = TRUE;
+}
+
 void DoTestPerformance(GtkWidget *pw, BoardData* bd)
 {
 	char str[255];
@@ -1353,7 +1365,7 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     GtkWidget *pw, *pwx;
 #if USE_BOARD3D
 	GtkWidget *dtBox, *button, *dtFrame, *hBox, *lab, *pwev, *pwhbox,
-			*pwAccuracy, *pwBoardAngle, *pwSkewFactor, *pwDiceSize;
+			*pwAccuracy, *pwDiceSize;
 #endif
 
     pwx = gtk_hbox_new ( FALSE, 0 );
@@ -1441,7 +1453,6 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 
 	toggle_show_shadows(pwShowShadows, 0);
 
-
 	pwAnimateRoll = gtk_check_button_new_with_label (_("Animate dice rolls"));
 	gtk_tooltips_set_tip(ptt, pwAnimateRoll, _("Dice rolls will shake across board"), 0);
 	gtk_box_pack_start (GTK_BOX (pw), pwAnimateRoll, FALSE, FALSE, 0);
@@ -1466,8 +1477,8 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (pw), hBox, FALSE, FALSE, 0);
 
-	lab = gtk_label_new(_("Board angle: "));
-	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+	anglelab = gtk_label_new(_("Board angle: "));
+	gtk_box_pack_start(GTK_BOX(hBox), anglelab, FALSE, FALSE, 0);
 
 	padjBoardAngle = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.boardAngle,
 										0, 60, 1, 10, 0));
@@ -1486,8 +1497,8 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 	hBox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start (GTK_BOX (pw), hBox, FALSE, FALSE, 0);
 
-	lab = gtk_label_new("FOV test: ");
-	gtk_box_pack_start(GTK_BOX(hBox), lab, FALSE, FALSE, 0);
+	skewLab = gtk_label_new("FOV skew: ");
+	gtk_box_pack_start(GTK_BOX(hBox), skewLab, FALSE, FALSE, 0);
 
 	padjSkewFactor = GTK_ADJUSTMENT(gtk_adjustment_new(rdAppearance.testSkewFactor,
 										0, 100, 1, 10, 0));
@@ -1499,11 +1510,16 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
 #else
     gtk_widget_set_usize ( GTK_WIDGET ( pwSkewFactor ), 100, -1 );
 #endif
-	gtk_tooltips_set_tip(ptt, pwSkewFactor, "This option is temporary, I think one of these values"
-			" should be ideal for any board angle", 0);
+	gtk_tooltips_set_tip(ptt, pwSkewFactor, "Vary the field-of-view of the 3d display", 0);
 	gtk_scale_set_digits( GTK_SCALE( pwSkewFactor ), 0 );
 	gtk_box_pack_start(GTK_BOX(hBox), pwSkewFactor, FALSE, FALSE, 0);
 
+	pwPlanView = gtk_check_button_new_with_label ("Plan view");
+	gtk_tooltips_set_tip(ptt, pwPlanView, "Display the 3d board with a 2d overhead view", 0);
+	gtk_box_pack_start (GTK_BOX (pw), pwPlanView, FALSE, FALSE, 0);
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (pwPlanView), rdAppearance.planView);
+	gtk_signal_connect(GTK_OBJECT(pwPlanView), "toggled", GTK_SIGNAL_FUNC(toggle_planview), NULL);
+	toggle_planview(pwPlanView, 0);
 
 	lab = gtk_label_new(_("Curve accuracy"));
 	gtk_box_pack_start (GTK_BOX (pw), lab, FALSE, FALSE, 0);
@@ -2401,6 +2417,7 @@ static void GetPrefs ( renderdata *prd ) {
 		prd->pieceType = getPieceType(lastPieceStr);
 		prd->diceSize = padjDiceSize->value;
 		prd->roundedEdges = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwRoundedEdges));
+		prd->planView = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(pwPlanView));
 
 		/* Both chequers have the same texture */
 		if (bd3d.chequerMat[0].textureInfo != bd3d.chequerMat[1].textureInfo)
@@ -2602,7 +2619,7 @@ void ChangePage(GtkNotebook *notebook, GtkNotebookPage *page,
 				return;
 			}
 		}
-		if (redrawChange)
+		if (redrawChange && page_num >= NUM_NONPREVIEW_PAGES)
 		{
 			redraw_changed(NULL, NULL);
 			redrawChange = FALSE;

@@ -520,6 +520,8 @@ extern void RenderPreferencesParam( renderdata *prd, char *szParam,
 		prd->boardAngle = atoi(szValue);
     else if( !strncasecmp( szParam, "skewfactor", c ) )
 		prd->testSkewFactor = atoi(szValue);
+    else if( !strncasecmp( szParam, "planview", c ) )
+		prd->planView = toupper( *szValue ) == 'Y';
     else if( !strncasecmp( szParam, "dicesize", c ) )
 		prd->diceSize = atof(szValue);
     else if( !strncasecmp( szParam, "roundededges", c ) )
@@ -663,6 +665,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		"moveindicator=%c "
 		"boardangle=%d "
 		"skewfactor=%d "
+		"planview=%c "
 		"dicesize=%f "
 		"roundededges=%c "
 		"piecetype=%d "
@@ -713,6 +716,7 @@ extern char *RenderPreferencesCommand( renderdata *prd, char *sz ) {
 		prd->showMoveIndicator ? 'y' : 'n',
 		prd->boardAngle,
 		prd->testSkewFactor,
+		prd->planView ? 'y' : 'n',
 		prd->diceSize,
 		prd->roundedEdges ? 'y' : 'n',
 		prd->pieceType,

@@ -2,6 +2,20 @@
 Todo
 ====
 
+Player records
+	New Game|Match
+		Player 0: <List>
+		Player 1: <List>
+	Settings|players
+		List of players
+	etc.
+	
+Settings|players
+	Open dialog with right pane selected
+Analyse|player records
+	Open dialog with left pane selected
+
+	
 Bugs
 ====
 
