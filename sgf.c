@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "backgammon.h"
+#include "positionid.h"
 #include "sgf.h"
 
 static char *szFile;
@@ -258,10 +259,12 @@ static void RestoreNode( list *pl ) {
     property *pp;
     moverecord *pmr;
     char *pch;
-    int i, fPlayer;
+    int i, fPlayer, fSetBoard;
     
-    for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext )
-	if( pp->ach[ 0 ] == 'B' || pp->ach[ 0 ] == 'W' ) {
+    for( pl = pl->plNext; ( pp = pl->p ); pl = pl->plNext ) {
+	fSetBoard = FALSE;
+	if( pp->ach[ 1 ] == 0 &&
+	    ( pp->ach[ 0 ] == 'B' || pp->ach[ 0 ] == 'W' ) ) {
 	    /* B or W - Move property */
 	    pch = pp->pl->plNext->p;
 	    pmr = NULL;
@@ -301,7 +304,7 @@ static void RestoreNode( list *pl ) {
 			
 		if( pmr->n.anRoll[ 0 ] < 1 || pmr->n.anRoll[ 0 ] > 6 ||
 		    pmr->n.anRoll[ 1 ] < 1 || pmr->n.anRoll[ 1 ] > 6 ) {
-		    /* illegal move -- ignore */
+		    /* illegal roll -- ignore */
 		    free( pmr );
 		    pmr = NULL;
 		}
@@ -309,9 +312,29 @@ static void RestoreNode( list *pl ) {
 	    
 	    if( pmr )
 		AddMoveRecord( pmr );
-	} else
-	    /* FIXME handle setup properties */
-	    ;
+	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'E' ) {
+	    fSetBoard = TRUE;
+	    /* FIXME add empty */
+	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'B' ) {
+	    fSetBoard = TRUE;
+	    /* FIXME add black */
+	} else if( pp->ach[ 0 ] == 'A' && pp->ach[ 1 ] == 'W' ) {
+	    fSetBoard = TRUE;
+	    /* FIXME add white */
+	} else if( pp->ach[ 0 ] == 'P' && pp->ach[ 1 ] == 'L' )
+	    fTurn = fMove = *( (char *) pp->pl->plNext->p ) == 'B';
+	else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'V' ) {
+	    /* FIXME cube value */
+	} else if( pp->ach[ 0 ] == 'C' && pp->ach[ 1 ] == 'P' ) {
+	    /* FIXME cube posn */
+	} else if( pp->ach[ 0 ] == 'D' && pp->ach[ 1 ] == 'I' ) {
+	    /* FIXME dice */
+	}
+
+	if( fSetBoard ) {
+	    /* FIXME add MOVE_SETBOARD mr */
+	}
+    }
 }
 
 static void RestoreSequence( list *pl, int fRoot ) {
@@ -514,11 +537,7 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
     list *pl;
     moverecord *pmr;
-    int nResult = 0, nFileCube = 1, fResigned = FALSE, anBoard[ 2 ][ 25 ];
-    char ch;
-
-    /* FIXME get rid of ch in this function and use the values in the
-       moverecords */
+    int i, j, anBoard[ 2 ][ 25 ];
     
     pl = plGame->plNext;
     pmr = pl->p;
@@ -553,57 +572,68 @@ static void SaveGame( FILE *pf, list *plGame ) {
 
     putc( '\n', pf );
 
-    InitBoard( anBoard );
-    
     for( pl = pl->plNext; pl != plGame; pl = pl->plNext ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_NORMAL:
-	    ch = pmr->n.fPlayer ? 'B' : 'W'; /* initialise ch -- the first
-						move should be MOVE_NORMAL */
-	    fprintf( pf, ";%c[%d%d", ch, pmr->n.anRoll[ 0 ],
-		     pmr->n.anRoll[ 1 ] );
+	    fprintf( pf, ";%c[%d%d", pmr->n.fPlayer ? 'B' : 'W',
+		     pmr->n.anRoll[ 0 ], pmr->n.anRoll[ 1 ] );
 	    WriteMove( pf, &pmr->n );
 	    putc( ']', pf );
-	    ApplyMove( anBoard, pmr->n.anMove, FALSE );
 	    
-	    nResult = GameStatus( anBoard );
-
-	    SwapSides( anBoard );
 	    break;
 	    
 	case MOVE_DOUBLE:
-	    fprintf( pf, ";%c[double]", ch );
+	    fprintf( pf, ";%c[double]", pmr->t.fPlayer ? 'B' : 'W' );
 	    break;
 	    
 	case MOVE_TAKE:
-	    fprintf( pf, ";%c[take]", ch );
-	    nFileCube <<= 1;
+	    fprintf( pf, ";%c[take]", pmr->t.fPlayer ? 'B' : 'W' );
 	    break;
 	    
 	case MOVE_DROP:
-	    fprintf( pf, ";%c[drop]", ch );
-	    nResult = 1;
-	    ch ^= 'B' ^ 'W'; /* when dropping, the other player wins */
+	    fprintf( pf, ";%c[drop]", pmr->t.fPlayer ? 'B' : 'W' );
 	    break;
 	    
 	case MOVE_RESIGN:
-	    fResigned = TRUE;
-	    nResult = pmr->r.nResigned;
-	    ch ^= 'B' ^ 'W'; /* when resigning, the other player wins */
 	    break;
+
+	case MOVE_SETBOARD:
+	    PositionFromKey( anBoard, pmr->sb.auchKey );
+
+	    fputs( ";AE[a:z];AW", pf );
+	    for( i = 0; i < 25; i++ )
+		for( j = 0; j < anBoard[ 0 ][ i ]; j++ )
+		    fprintf( pf, "[%c]", 'a' + i );
+
+	    fputs( ";AB", pf );
+	    for( i = 0; i < 25; i++ )
+		for( j = 0; j < anBoard[ 1 ][ i ]; j++ )
+		    fprintf( pf, "[%c]", i == 24 ? 'y' : 'x' - i );
+
+	    break;
+	    
+	case MOVE_SETDICE:
+	    fprintf( pf, ";PL[%c]DI[%d%d]", pmr->sd.fPlayer ? 'B' : 'W',
+		     pmr->sd.anDice[ 0 ], pmr->sd.anDice[ 1 ] );
+	    break;
+	    
+	case MOVE_SETCUBEVAL:
+	    fprintf( pf, ";CV[%d]", pmr->scv.nCube );
+	    break;
+	    
+	case MOVE_SETCUBEPOS:
+	    fprintf( pf, ";CP[%c]", "cwb"[ pmr->scp.fCubeOwner + 1 ] );
+	    break;
+	    
 	default:
 	    assert( FALSE );
 	}
-
-	if( nResult )
-	    break;
-	
-	ch ^= 'B' ^ 'W'; /* switch B/W each turn */
     }
 
-    anScore[ ch == 'B' ] += nFileCube * nResult;
-    
+    /* FIXME if the game is not over and the player on roll is the last
+       player to move, add a PL property */
+
     fputs( ")\n", pf );
 }
 
