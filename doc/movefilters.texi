@@ -1,0 +1,128 @@
+@subsection Movefilters
+
+@gnubg{} uses a technique called ``move filters'' in order to prune
+the complete list of legal moves when analysing chequer play
+decisions. Move filters can be considering a generalising of the
+search space used in earlier versions of @gnubg{}. 
+
+A move filter consists of three parameters for each ply: (1) the
+number of moves always accepted at the given level (zero means accept
+all moves, i.e., no pruning at this ply), (2) the number of extra
+moves to add, and (3) the threshold for adding extra moves. 
+
+For example, for 2-ply chequer play decisions there are two
+movefilters: one for pruning at 0-ply, and another for pruning at
+1-ply. The predefined setting ``Normal'' has: accept 4 moves and add
+up to 3 moves within 0.07 at 0-ply, and no pruning at 1-ply.
+
+Consider the opening position where 4-2 has been rolled:
+@verbatim
+ GNU Backgammon  Position ID: 4HPwATDgc/ABMA
+                 Match ID   : cAkRAAAAAAAA
+ +13-14-15-16-17-18------19-20-21-22-23-24-+     O: gnubg
+ | X           O    |   | O              X |     0 points
+ | X           O    |   | O              X |
+ | X           O    |   | O                |
+ | X                |   | O                |
+ | X                |   | O                |
+v|                  |BAR|                  |     (Cube: 1)
+ | O                |   | X                |
+ | O                |   | X                |
+ | O           X    |   | X                |
+ | O           X    |   | X              O |     Rolled 24
+ | O           X    |   | X              O |     0 points
+ +12-11-10--9--8--7-------6--5--4--3--2--1-+     X: jth
+Pip counts: O 167, X 167
+@end verbatim
+
+@gnubg{} starts by finding all possible moves and evaluate those at
+0-ply:
+@verbatim
+    1. Cubeful 0-ply    8/4 6/4                      Eq.:  +0.156
+       0.538 0.160 0.009 - 0.462 0.120 0.006
+        0-ply cubeful [expert]
+    2. Cubeful 0-ply    24/22 13/9                   Eq.:  +0.035 ( -0.122)
+       0.506 0.141 0.007 - 0.494 0.127 0.004
+        0-ply cubeful [expert]
+    3. Cubeful 0-ply    24/20 13/11                  Eq.:  +0.030 ( -0.126)
+       0.506 0.134 0.006 - 0.494 0.126 0.004
+        0-ply cubeful [expert]
+    4. Cubeful 0-ply    13/11 13/9                   Eq.:  +0.022 ( -0.135)
+       0.502 0.149 0.008 - 0.498 0.136 0.007
+        0-ply cubeful [expert]
+    5. Cubeful 0-ply    24/22 24/20                  Eq.:  -0.006 ( -0.162)
+       0.499 0.122 0.005 - 0.501 0.126 0.003
+        0-ply cubeful [expert]
+    6. Cubeful 0-ply    24/18                        Eq.:  -0.031 ( -0.187)
+       0.496 0.115 0.005 - 0.504 0.134 0.004
+        0-ply cubeful [expert]
+    7. Cubeful 0-ply    13/9 6/4                     Eq.:  -0.039 ( -0.195)
+       0.491 0.138 0.008 - 0.509 0.149 0.009
+        0-ply cubeful [expert]
+    8. Cubeful 0-ply    24/20 6/4                    Eq.:  -0.051 ( -0.208)
+       0.488 0.123 0.005 - 0.512 0.138 0.005
+        0-ply cubeful [expert]
+[10 moves deleted]
+@end verbatim
+
+Accoring to the move filter the first 4 moves are accepted. The equity
+of the best move is +0.156, and according to the movefilter we add up
+to 3 extra moves if they're within 0.07, that is, if they have equity
+higher than +0.086. Move 5-7 all have equity lower that -0.048, so
+the move list after pruning at 0-ply consists of move 1-4. According
+to the move filter we do not perform any pruning at 1-ply, so move 1-4
+is submitted for evaluation at 2-ply;
+
+@verbatim
+    1. Cubeful 2-ply    8/4 6/4                      Eq.:  +0.171
+       0.539 0.162 0.007 - 0.461 0.119 0.005
+        2-ply cubeful 100% speed [world class]
+    2. Cubeful 2-ply    24/20 13/11                  Eq.:  +0.034 ( -0.138)
+       0.509 0.136 0.006 - 0.491 0.129 0.005
+        2-ply cubeful 100% speed [world class]
+    3. Cubeful 2-ply    24/22 13/9                   Eq.:  +0.025 ( -0.146)
+       0.504 0.141 0.006 - 0.496 0.130 0.004
+        2-ply cubeful 100% speed [world class]
+    4. Cubeful 2-ply    13/11 13/9                   Eq.:  +0.021 ( -0.150)
+       0.501 0.151 0.007 - 0.499 0.136 0.007
+        2-ply cubeful 100% speed [world class]
+    5. Cubeful 0-ply    24/22 24/20                  Eq.:  -0.006 ( -0.177)
+       0.499 0.122 0.005 - 0.501 0.126 0.003
+        0-ply cubeful [expert]
+    6. Cubeful 0-ply    24/18                        Eq.:  -0.031 ( -0.202)
+       0.496 0.115 0.005 - 0.504 0.134 0.004
+        0-ply cubeful [expert]
+    7. Cubeful 0-ply    13/9 6/4                     Eq.:  -0.039 ( -0.210)
+       0.491 0.138 0.008 - 0.509 0.149 0.009
+        0-ply cubeful [expert]
+    8. Cubeful 0-ply    24/20 6/4                    Eq.:  -0.051 ( -0.223)
+       0.488 0.123 0.005 - 0.512 0.138 0.005
+        0-ply cubeful [expert]
+[10 moves deleted]
+@end verbatim
+
+If we instead request a 4-ply chequer play decision, @gnubg{} will use
+the move filters defined for 4-ply:
+
+@multitable @columnfractions 0.2 0.2 0.2 0.2
+@item @strong{Ply}  
+@tab @strong{Accept moves}   
+@tab @strong{Extra moves}
+@tab @strong{Threshold for extra moves}
+@item 0       @tab 4          @tab 3        @tab 0.07
+@item 1       @tab no pruning @tab          @tab 
+@item 2       @tab 2          @tab 1        @tab 0.04
+@item 3       @tab no pruning @tab          @tab 
+@end multitable
+
+The 4-ply move filter is identical to the 2-ply for pruning at 0-ply,
+so after 0-ply we have the same four moves as above. Since there is no
+pruning at 1-ply these four moves are evaluated at 2-ply. According to
+the move filter we accept the two best moves. We add a third move if
+it's within 0.04 of the best move. However, 24/22 13/9 is 0.146 worse
+than 8/4 6/4 so only the two best moves are evaluted at 4-ply:
+
+@verbatim
+
+
+@end verbatim

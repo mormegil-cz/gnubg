@@ -1,3 +1,9 @@
+Sun Dec 22 00:05:16 2002  Joern Thyssen  <jth@freeshell.org>
+
+	* movefilters.texi: new file
+	* gnubg.texi: add subsection on move filters.
+	* Makefile.am: new file
+
 Fri Dec 13 16:59:11 2002  Gary Wong  <gtw@gnu.org>
 
 	* Makefile.am (EXTRA_DIST): Add some necessary files.

@@ -503,6 +503,8 @@ writeme
 @node Evaluation
 @section Evaluation
 
+@include movefilters.texi
+
 @node Analysis
 @section Analysis
 
