@@ -706,25 +706,44 @@ static void ParseMatMove( char *sz, int iPlayer ) {
     }
 }
 
-static int 
-ImportGame( FILE *pf, int iGame, int nLength ) {
+#define START_STRING " Game "
+#define START_STRING_LEN 6
 
-    char sz[ 256 ], sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ], *pch, *pchLeft, *pchRight = NULL;
+char* GetMatLine(FILE* fp)
+{
+	static char szLine[1024];
+
+	do
+	{
+	    if (feof(fp) || !fgets(szLine, sizeof(szLine), fp))
+			return NULL;
+	} while(strspn(szLine, " \n\r\t" ) == strlen(szLine));
+
+	return szLine;
+}
+
+static int 
+ImportGame( FILE *fp, int iGame, int nLength ) {
+
+    char sz0[ MAX_NAME_LEN ], sz1[ MAX_NAME_LEN ], *pch, *pchLeft, *pchRight = NULL, *szLine;
     int n0, n1;
 	char *colon, *psz, *pszEnd;
     moverecord *pmr;
 
 	/* Process player score line, avoid fscanf(%nn) as buffer may overrun */
-	fgets(sz, sizeof(sz), pf);
+	szLine = GetMatLine(fp);
+	psz = szLine;
+	while (isspace(*psz))
+		psz++;
 	/* 1st player name */
-	colon = strchr(sz, ':');
+	colon = strchr(psz, ':');
 	if (!colon)
 		return 0;
 	pszEnd = colon - 1;
 	while(isspace(*pszEnd))
 		pszEnd--;
-	sz[MIN(pszEnd - sz + 1, MAX_NAME_LEN - 1)] = '\0';
-	strcpy(sz0, sz);
+	psz[MIN(pszEnd - psz + 1, MAX_NAME_LEN - 1)] = '\0';
+	strcpy(sz0, psz);
 	/* 1st score */
 	psz = colon + 1;
 	while (isspace(*psz))
@@ -797,40 +816,30 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
     IniStatcontext( &pmr->g.sc );
     AddMoveRecord( pmr );
     
-    do
-	if( !fgets( sz, sizeof( sz ), pf ) ) {
-	    sz[ 0 ] = 0;
-	    break;
-	}
-    while( strspn( sz, " \n\r\t" ) == strlen( sz ) );
+    while((szLine = GetMatLine(fp)) && strncmp(szLine, START_STRING, START_STRING_LEN))
+    {
+      pchRight = pchLeft = NULL;
 
-    do {
-
-        pchRight = pchLeft = NULL;
-
-	if( ( pch = strpbrk( sz, "\n\r" ) ) )
+      if( ( pch = strpbrk( szLine, "\n\r" ) ) )
 	    *pch = 0;
 
-        if( ( pchLeft = strchr( sz, ':' ) ) &&
+      if( ( pchLeft = strchr( szLine, ':' ) ) &&
             ( pchRight = strchr( pchLeft + 1, ':' ) ) &&
-            pchRight > sz + 3 )
+            pchRight > szLine + 3 )
           *( ( pchRight -= 2 ) - 1 ) = 0;
-	else if( strlen( sz ) > 15 && ( pchRight = strstr( sz + 15, "  " ) ) )
+      else if( strlen( szLine ) > 15 && ( pchRight = strstr( szLine + 15, "  " ) ) )
 	    *pchRight++ = 0;
 	
-	if( ( pchLeft = strchr( sz, ')' ) ) )
+      if( ( pchLeft = strchr( szLine, ')' ) ) )
 	    pchLeft++;
-	else
-	    pchLeft = sz;
+      else
+	    pchLeft = szLine;
 
-	ParseMatMove( pchLeft, 0 );
+      ParseMatMove( pchLeft, 0 );
 
-	if( pchRight )
+      if( pchRight )
 	    ParseMatMove( pchRight, 1 );
-	
-	if( !fgets( sz, sizeof( sz ), pf ) )
-	    break;
-    } while( strspn( sz, " \n\r\t" ) != strlen( sz ) );
+    }
 
     AddGame( pmr );
 
@@ -840,18 +849,20 @@ ImportGame( FILE *pf, int iGame, int nLength ) {
 
 }
 
-extern int ImportMat( FILE *pf, char *szFilename ) {
+extern int ImportMat( FILE *fp, char *szFilename ) {
 
-    int n, nLength, i;
+    int n = 0, nLength, game;
     char ch;
     gchar *pchComment = NULL;
-    char szLine[ 1024 ];
+    char *szLine;
 
     fWarned = fPostCrawford = FALSE;
     
-    while( 1 ) {
-
-      if ( feof( pf ) || ! fgets( szLine, sizeof ( szLine ), pf ) ) {
+    do
+    {
+      szLine = GetMatLine(fp);
+      if (!szLine)
+      {
         outputerrf( _("%s: not a valid .mat file"), szFilename );
         g_free( pchComment );
         return -1;
@@ -861,7 +872,7 @@ extern int ImportMat( FILE *pf, char *szFilename ) {
         /* comment */
         char *pchOld = pchComment;
         char *pch;
-	if( ( pch = strpbrk( szLine, "\n\r" ) ) )
+        if( ( pch = strpbrk( szLine, "\n\r" ) ) )
           *pch = 0;
         pch = szLine + 1;
         while ( isspace( *pch ) )
@@ -872,12 +883,10 @@ extern int ImportMat( FILE *pf, char *szFilename ) {
           g_free( pchOld );
         }
       }
-      else if ( ( n = sscanf( szLine, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength,
-                              &ch ) ) > 1 )
-        /* this appears to be a valid JF mat file */
-        break;
-
-    }
+      else
+        /* Look for start of mat file */
+        n = sscanf( szLine, "%d %*1[Pp]oint %*1[Mm]atch%c", &nLength, &ch );
+    } while(n != 2);
     
     if( ms.gs == GAME_PLAYING && fConfirm ) {
       if( fInterrupt ) {
@@ -906,18 +915,19 @@ extern int ImportMat( FILE *pf, char *szFilename ) {
                                                ClearMatch */
     g_free( pchComment );
 
-    while( 1 ) {
-        if( ( n = fscanf( pf, " Game %d\n", &i ) ) == 1 ) {
-          if ( ImportGame( pf, i - 1, nLength ) ) 
-            /* match is over; avoid multiple matches in same .mat file */
-            break;
-        }
-	else if( n == EOF )
-	    break;
-	else
-	    /* discard line */
-	    while( ( n = getc( pf ) ) != '\n' && n != EOF )
-		;
+	szLine = GetMatLine(fp);
+	while(szLine)
+	{
+		if (!strncmp(szLine, START_STRING, START_STRING_LEN))
+		{
+			game = atoi(szLine + START_STRING_LEN);
+			if (!game)
+				outputf( _("WARNING! Unrecognized line in mat file: '%s'\n"), szLine);
+			{
+				if (ImportGame(fp, game - 1, nLength))
+					break;  /* match is over; avoid multiple matches in same .mat file */
+			}
+		}
     }
 
     UpdateSettings();
@@ -3103,5 +3113,3 @@ ImportSnowieTxt( FILE *pf ) {
   return 0;
 
 }
-
-

@@ -1,14 +1,20 @@
+Sun Jun  6 18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+
+	* gnubg.c: Empty board on startup
+	* gtkboard.c: Close hint window when editing
+	* import.c: Ignore empty lines in mat import
+
 Fri Jun  4 22:58:22 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* eval.c (EvalKey): add another bit to match scores in
 	hash key.
 	(fixes bug #9211 reported by Casey Hopkins)
 
-Fri Jun 4  18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Fri Jun  4 18:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gnubg.c: Add show scoresheet command (to right click menu)
 
-Wed Jun 2  9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
+Wed Jun  2 9:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c, gtkboard.c: Add undo right click menu
 
