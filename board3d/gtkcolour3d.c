@@ -342,7 +342,7 @@ void AddWidgets(GdkWindow* pixWind, GtkWidget *window)
 			       0 );
 	gtk_table_attach_defaults(GTK_TABLE (table), pcpSpecular, 3, 4, 0, 1);
 
-	label = gtk_label_new("Shineness:");
+	label = gtk_label_new("Shininess:");
 	gtk_table_attach_defaults(GTK_TABLE (table), label, 2, 3, 1, 2);
 	padjShine = GTK_ADJUSTMENT(gtk_adjustment_new(0, 0, 128, 1, 10, 0));
 	gtk_signal_connect_object( GTK_OBJECT( padjShine ),

@@ -38,6 +38,10 @@
 #include "inc3d.h"
 #include "renderprefs.h"
 
+#if HAVE_GTKGLEXT
+extern GdkGLConfig *glconfig;
+#endif
+
 #define BAR_WIDTH 5
 #define MID_GAP 1
 #define INTER_GAP 4

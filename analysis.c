@@ -298,7 +298,7 @@ getMarketWindowDividerMWC( float* prMarketWindowDividerMWC, const matchstate* pm
 
     GetMatchStateCubeInfo ( &ci, pms );
 
-    getCurrentGammonRates( aarRates, arOutput, pms->anBoard,
+    getCurrentGammonRates( aarRates, arOutput, (void*)pms->anBoard,
 			   &ci, &ec );
 
     if( ci.nMatchTo ) {

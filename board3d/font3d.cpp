@@ -181,4 +181,9 @@ extern "C" void glPrintCube(BoardData* bd, const char *text, int mode)
 	glutPrint(text, base_unit / 80);
 }
 
+extern "C" void glPrintNumbersRA(BoardData* bd, const char *text, int mode)
+{	/* Right aligned numbers */
+	glutPrint(text, base_unit / 80);
+}
+
 #endif

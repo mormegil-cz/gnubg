@@ -147,9 +147,4 @@ void CheckOpenglError();
 typedef int idleFunc(BoardData* bd);
 void setIdleFunc(BoardData* bd, idleFunc* pFun);
 
-#if HAVE_GTKGLEXT
-#include <gdk/gdkgltypes.h>
-extern GdkGLConfig *glconfig;
-#endif
-
 #endif

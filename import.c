@@ -893,7 +893,6 @@ static void ParseOldmove( char *sz, int fInvert ) {
     int iPlayer, i, c;
     moverecord *pmr;
     char *pch;
-    int anMoveLocal[8];
 
     switch( *sz ) {
     case 'X':

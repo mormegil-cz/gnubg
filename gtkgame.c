@@ -3365,9 +3365,11 @@ extern void GTKOutputX( void ) {
       strcat ( sz, "\n" );
       gtk_text_insert( GTK_TEXT( pwMessageText ), NULL, NULL, NULL,
                        sz, -1 );
-      /* Hack to make sure message is drawn correctly */
+#if !USE_GTK2
+      /* Hack to make sure message is drawn correctly with gtk 1 */
       gtk_text_freeze(GTK_TEXT( pwMessageText ));
       gtk_text_thaw(GTK_TEXT( pwMessageText ));
+#endif
 
     }
       
@@ -9217,7 +9219,6 @@ static void
 FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	BoardData *bd = BOARD( pwBoard )->board_data;
 	GtkWidget *pwHandle = gtk_widget_get_parent(pwToolbar);
-	
 	fGUIShowIDs = FALSE;
 	UpdateSetting(&fGUIShowIDs);
 
@@ -9231,5 +9232,17 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 	gtk_widget_hide(pwStatus);
 	gtk_widget_hide(pwProgress);
         HideAllPanels(NULL, 0, NULL);
+
 	/* How can I maximize the window ?? */
+#if USE_GTK2
+{
+	GtkWindow* ptl = GTK_WINDOW(gtk_widget_get_toplevel(GTK_WIDGET(bd->table)));
+	gtk_window_maximize(ptl);
+	gtk_window_set_decorated(ptl, FALSE);
+}
+#else
+	/* Not sure about gtk1...
+	gdk_window_set_decorations(GTK_WIDGET(ptl)->window, 0);
+	*/
+#endif
 }
