@@ -1,3 +1,11 @@
+Thu Dec 18 23:35:48 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* neuralnet.c: implement Olivier Baur's faster sigmoid 
+	(note that it should probably not be used until the net
+	has been retrained)
+	* neuralnet.c (Evaluate, EvaluateFromBase): implement
+	net propagation as matrix x vector using BLAS from ATLAS.
+
 Fri Jan 10 19:13:15 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* hash.h: enlarge cache to hold cubeful equities as well
