@@ -27,6 +27,7 @@
 #include <time.h>
 #include <assert.h>
 #include <stdarg.h>
+#include <libgen.h>
 
 #include "analysis.h"
 #include "backgammon.h"
@@ -3317,10 +3318,12 @@ extern void CommandExportMatchHtml( char *sz ) {
     for( pl = lMatch.plNext, i = 0; pl != &lMatch; pl = pl->plNext, i++ ) {
 
       szCurrent = HTMLFilename ( sz, i );
-      aszLinks[ 0 ] = HTMLFilename ( sz, 0 );
-      aszLinks[ 1 ] = ( i > 0 ) ? HTMLFilename ( sz, i - 1 ) : NULL;
-      aszLinks[ 2 ] = ( i < nGames - 1 ) ? HTMLFilename ( sz, i + 1 ) : NULL;
-      aszLinks[ 3 ] = HTMLFilename ( sz, nGames - 1 );
+      aszLinks[ 0 ] = basename ( HTMLFilename ( sz, 0 ) );
+      aszLinks[ 1 ] = ( i > 0 ) ? 
+        basename ( HTMLFilename ( sz, i - 1 ) ): NULL;
+      aszLinks[ 2 ] = ( i < nGames - 1 ) ? 
+        basename ( HTMLFilename ( sz, i + 1 ) ) : NULL;
+      aszLinks[ 3 ] = basename ( HTMLFilename ( sz, nGames - 1 ) );
 
       if ( !i ) {
 

@@ -1,3 +1,15 @@
+Tue Aug  6 21:38:52 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (CommandExportMatchHtml): use only basename
+	as link. Should make it easier to publish produced
+	html file on the web, e.g., with links
+
+        <a href="bla.html"> 
+
+        instead of
+
+        <a href="/home/jth/prog/gnubg-bugfix/bla.html">
+
 Tue Aug  6 21:28:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* eval.c (FindBestCubeDecision): fix bug introduced in 1.165.
