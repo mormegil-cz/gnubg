@@ -1,3 +1,8 @@
+Thu Jan  1 22:59:09 2004  Oystein Johansen <oystein@gnubg.org>
+
+        * external.c: Add som #if USE_SOCKETS to make it compile w/o socket
+	support.
+
 Thu Jan  1 20:29:09 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* gnubg.c (DisplayAnalysis, DisplayTimeAnalysis): show time analysis

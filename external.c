@@ -104,6 +104,7 @@
 #include "rollout.h"
 #include "i18n.h"
 
+#if HAVE_SOCKETS
 /* Stuff for the yacc/lex parser */
 
 extern extcmd ec;
@@ -118,7 +119,6 @@ extern void extparse();
 #define PF_LOCAL PF_UNIX
 #endif
 
-#if HAVE_SOCKETS
 extern int ExternalSocket( struct sockaddr **ppsa, int *pcb, char *sz ) {
 
     int sock, f;
@@ -332,6 +332,7 @@ extern int ExternalWrite( int h, char *pch, int cch ) {
 #endif /* HAVE_SOCKETS */
 
 
+#if HAVE_SOCKETS
 static void
 ErrorHandler( const char *szMessage, const char *szNear, 
               const int fParseError ) {
@@ -556,6 +557,7 @@ ExtFIBSBoard( extcmd *pec ) {
   return szResponse;
 
 }
+#endif
 
 extern void CommandExternal( char *sz ) {
 
