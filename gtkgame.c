@@ -3524,6 +3524,7 @@ int showHelp = 0;
 #define NUM_CMD_HISTORY 10
 char* cmdHistory[NUM_CMD_HISTORY];
 int numHistory = 0;
+int completing = 0;
 
 /* Display help for command (pStr) in widget (pwText) */
 extern void ShowHelp(GtkWidget *pwText, char* pStr)
@@ -3679,18 +3680,76 @@ static void ShowHelpToggled(GtkWidget *widget, gpointer data)
 	gtk_widget_grab_focus(pwEntry);
 }
 
+/* Capitalize first letter of each word */
+static void Capitalize(char* str)
+{
+	int cap = 1;
+	while (*str)
+	{
+		if (cap)
+		{
+			if (*str >= 'a' && *str <= 'z')
+				*str += 'A' - 'a';
+			cap = 0;
+		}
+		else
+		{
+			if (*str == ' ')
+				cap = 1;
+			if (*str >= 'A' && *str <= 'Z')
+				*str -= 'A' - 'a';
+		}
+		str++;
+	}
+}
+
+static gboolean CommandKeyPress(GtkWidget *widget, GdkEventKey *event, gpointer user_data)
+{
+	short k = event->keyval;
+
+	if (k == -247)
+	{	/* Tab press - auto complete */
+		command *pc;
+		char szCommand[128], szUsage[128];
+		command cTop = { NULL, NULL, NULL, NULL, acTop };
+		if ((pc = FindHelpCommand(&cTop, gtk_editable_get_chars( GTK_EDITABLE( pwEntry ), 0, -1 ), szCommand, szUsage)))
+		{
+			Capitalize(szCommand);
+		    gtk_entry_set_text( GTK_ENTRY( pwEntry ), szCommand );
+		}
+		/* Gtk 1 not good at stoping focus moving - so just move back later */
+		completing = 1;
+	}
+	return FALSE;
+}
+
+static gboolean CommandFocusIn(GtkWidget *widget, GdkEventFocus *event, gpointer user_data)
+{
+	if (completing)
+	{
+		/* Gtk 1 not good at stoping focus moving - so just move back now */
+		completing = 0;
+		gtk_widget_grab_focus( pwEntry );
+		gtk_editable_set_position(GTK_EDITABLE(pwEntry), strlen(gtk_editable_get_chars( GTK_EDITABLE( pwEntry ), 0, -1 )));
+		return TRUE;
+	}
+	else
+		return FALSE;
+}	
+
 static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 
-    char *sz = NULL;
+	char *sz = NULL;
 	GList *glist;
 	int i;
 	GtkWidget *pwVbox, *pwHbox, *pwShowHelp, *cmdEntryCombo;
-    GtkWidget *pwDialog = GTKCreateDialog( szTitle, DT_QUESTION,
+	GtkWidget *pwDialog = GTKCreateDialog( szTitle, DT_QUESTION,
 					GTK_SIGNAL_FUNC( CommandOK ), &sz ),
 	*pwPrompt = gtk_label_new( szPrompt );
 
 	cmdEntryCombo = gtk_combo_new();
 	gtk_combo_set_value_in_list(GTK_COMBO(cmdEntryCombo), FALSE, TRUE);
+	gtk_widget_set_usize(cmdEntryCombo, 200, -1);
 
 	gtk_combo_disable_activate(GTK_COMBO(cmdEntryCombo));
 	pwEntry = GTK_COMBO(cmdEntryCombo)->entry;
@@ -3704,17 +3763,18 @@ static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 		g_list_free(glist);
 	}
 
-    gtk_entry_set_text( GTK_ENTRY( pwEntry ), szDefault );
+	gtk_entry_set_text( GTK_ENTRY( pwEntry ), szDefault );
 	gtk_signal_connect(GTK_OBJECT(pwEntry), "changed", GTK_SIGNAL_FUNC(CommandTextChange), 0);
+	gtk_signal_connect(GTK_OBJECT(pwEntry), "key-press-event", GTK_SIGNAL_FUNC(CommandKeyPress), 0);
 	gtk_signal_connect(GTK_OBJECT(pwEntry), "activate", GTK_SIGNAL_FUNC(CommandOK), &sz);
 
 	pwVbox = gtk_vbox_new(FALSE, 0);
-    gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
-		       pwVbox );
+	gtk_container_add( GTK_CONTAINER( DialogArea( pwDialog, DA_MAIN ) ),
+				pwVbox );
 	pwHbox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHbox, FALSE, FALSE, 0);
 
-    gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
+	gtk_misc_set_padding( GTK_MISC( pwPrompt ), 8, 8 );
 	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwPrompt, FALSE, FALSE, 0);
 	gtk_box_pack_start( GTK_BOX( pwHbox ), cmdEntryCombo, FALSE, FALSE, 0);
 
@@ -3724,6 +3784,7 @@ static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(pwShowHelp), showHelp);
 	gtk_signal_connect(GTK_OBJECT(pwShowHelp), "toggled", GTK_SIGNAL_FUNC(ShowHelpToggled), 0);
 	gtk_box_pack_start ( GTK_BOX ( pwHbox ), pwShowHelp, FALSE, TRUE, 0);
+	gtk_signal_connect(GTK_OBJECT(pwShowHelp), "focus-in-event", GTK_SIGNAL_FUNC(CommandFocusIn), 0);
 
 	pwHelpbox = gtk_hbox_new(FALSE, 0);
 	gtk_box_pack_start ( GTK_BOX ( pwVbox ), pwHelpbox, TRUE, TRUE, 0);
@@ -3732,20 +3793,20 @@ static char *ReadCommand( char *szTitle, char *szPrompt, char *szDefault ) {
 	if (showHelp)
 		CreateHelpText();
 
-    gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
-    gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
-				  GTK_WINDOW( pwMain ) );
-    gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
+	gtk_window_set_modal( GTK_WINDOW( pwDialog ), TRUE );
+	gtk_window_set_transient_for( GTK_WINDOW( pwDialog ),
+					GTK_WINDOW( pwMain ) );
+	gtk_signal_connect( GTK_OBJECT( pwDialog ), "destroy",
 			GTK_SIGNAL_FUNC( gtk_main_quit ), NULL );
 
-    gtk_widget_grab_focus( pwEntry );
-    gtk_widget_show_all( pwDialog );
+	gtk_widget_grab_focus( pwEntry );
+	gtk_widget_show_all( pwDialog );
 
-    GTKDisallowStdin();
-    gtk_main();
-    GTKAllowStdin();
+	GTKDisallowStdin();
+	gtk_main();
+	GTKAllowStdin();
 
-    return sz;
+	return sz;
 }
 #if 0
 
