@@ -1,3 +1,11 @@
+Fri Jul 11 19:29:11 2003  Holger Bochnig <hbgg@gmx.net>
+
+	trying to use sockets on Windows (SIGPIPE still missing)
+
+	* dice.c, external.c, external.h: added includes and defines for Windows
+	* external.c: some workarounds for missing socket functions and
+	              ones with different prototypes
+
 Fri Jul 11 12:39:38 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* play.c (CommandRoll): fix grammer (bug #4273)
