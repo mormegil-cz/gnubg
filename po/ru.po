@@ -667,7 +667,7 @@ msgstr ""
 #: dice.c:554
 #, c-format
 msgid "GNU Backgammon is reading dice from file: %s\n"
-msgstr ""
+msgstr "Программа будет читать значения для кубиков из файла %s\n"
 
 #: dice.c:595
 msgid "You cannot show the seed with this random number generator."
@@ -858,15 +858,15 @@ msgstr "Проигрыш "
 
 #: eval.c:3719
 msgid "(backgammon)\n"
-msgstr ""
+msgstr "(бэкгаммон)\n"
 
 #: eval.c:3722
 msgid "(gammon)\n"
-msgstr ""
+msgstr "(гаммон)\n"
 
 #: eval.c:3724
 msgid "(single)\n"
-msgstr ""
+msgstr "(простой)\n"
 
 #: eval.c:3939
 msgid "OVER"
