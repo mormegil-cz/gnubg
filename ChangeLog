@@ -1,3 +1,10 @@
+Sat Sep 14 18:51:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	Make pip count and position/match IDs optional.
+
+	* gtkprefs.c: check buttons for pip count and ids.
+	* gtkboard.c: make pip count and position/match IDs optional.
+
 Sat Sep 14 12:17:35 2002  Gary Wong  <gtw@gnu.org>
 
 	* gnubg.c (real_main): Make `-q' option take precedence over RC file.

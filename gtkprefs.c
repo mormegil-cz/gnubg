@@ -52,6 +52,8 @@ static GtkWidget *apwColour[ 2 ], *apwPoint[ 2 ], *apwBoard[ 2 ],
     *pwTranslucent, *pwLabels, *pwUseDiceIcon, *pwPermitIllegal,
     *pwBeepIllegal, *pwHigherDieFirst, *pwAnimateNone, *pwAnimateBlink,
     *pwAnimateSlide, *pwSpeed, *pwWood, *pwWoodType, *pwWoodMenu, *pwHinges;
+static GtkWidget *pwShowIDs;
+static GtkWidget *pwShowPips;
 static GtkWidget *apwDiceColour[ 2 ];
 static GtkWidget *pwCubeColour;
 static GtkWidget *apwDiceDotColour[ 2 ];
@@ -59,6 +61,8 @@ static GtkWidget *apwDieColor[ 2 ];
 static GtkWidget *apwDiceColorBox[ 2 ];
 static int fTranslucent, fLabels, fUseDiceIcon, fPermitIllegal, fBeepIllegal,
     fHigherDieFirst, fWood, fHinges;
+static int fShowIDs;
+static int fShowPips;
 static animation anim;
 
 static GtkWidget *ChequerPrefs( BoardData *bd, int f ) {
@@ -474,8 +478,9 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwLabels ), fLabels );
     gtk_box_pack_start( GTK_BOX( pw ), pwLabels, FALSE, FALSE, 0 );
     
-    pwUseDiceIcon = gtk_check_button_new_with_label( _("Click dice icon to "
-						     "roll") );
+    pwUseDiceIcon = 
+      gtk_check_button_new_with_label( _("Show dice below board when human "
+                                         "playe ron roll") );
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwUseDiceIcon ),
 				  fUseDiceIcon );
     gtk_box_pack_start( GTK_BOX( pw ), pwUseDiceIcon, FALSE, FALSE, 4 );
@@ -497,6 +502,18 @@ static GtkWidget *GeneralPage( BoardData *bd ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwHigherDieFirst ),
 				  fHigherDieFirst );
     gtk_box_pack_start( GTK_BOX( pw ), pwHigherDieFirst, FALSE, FALSE, 0 );
+
+    pwShowIDs = gtk_check_button_new_with_label(
+	_("Show Position ID and Match ID") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwShowIDs ),
+				  fShowIDs );
+    gtk_box_pack_start( GTK_BOX( pw ), pwShowIDs, FALSE, FALSE, 0 );
+
+    pwShowPips = gtk_check_button_new_with_label(
+	_("Show pip count permanently") );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( pwShowPips ),
+				  fShowPips );
+    gtk_box_pack_start( GTK_BOX( pw ), pwShowPips, FALSE, FALSE, 0 );
 
     pwAnimBox = gtk_hbox_new( FALSE, 0 );
     gtk_box_pack_start( GTK_BOX( pw ), pwAnimBox, FALSE, FALSE, 0 );
@@ -592,6 +609,8 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
     if( GTK_WIDGET_REALIZED( pwBoard ) ) {
 	board_create_pixmaps( pwBoard, bd );
 
+        /* dice area */
+
 	if( GTK_WIDGET_VISIBLE( bd->dice_area ) && !bd->usedicearea ) {
 	    gtk_widget_hide( bd->dice_area );
 	}
@@ -599,7 +618,16 @@ extern void BoardPreferencesDone( GtkWidget *pwBoard ) {
 	if( ! GTK_WIDGET_VISIBLE( bd->dice_area ) && bd->usedicearea ) {
 	    gtk_widget_show_all( bd->dice_area );
 	}
-	
+
+        /* Position ID and Match ID */
+        
+        if ( GTK_WIDGET_VISIBLE ( bd->vbox_ids ) != bd->show_ids ) {
+          if ( bd->show_ids )
+            gtk_widget_show_all ( bd->vbox_ids );
+          else
+            gtk_widget_hide ( bd->vbox_ids );
+        }
+
 	gtk_widget_queue_draw( bd->drawing_area );
 	gtk_widget_queue_draw( bd->dice_area );
 	gtk_widget_queue_draw( bd->table );
@@ -626,6 +654,10 @@ static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
 	GTK_TOGGLE_BUTTON( pwHinges ) );
     fWood = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( pwWood ) );
+    fShowIDs = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwShowIDs ) );
+    fShowPips = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( pwShowPips ) );
     if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( pwAnimateBlink ) ) )
 	anim = ANIMATE_BLINK;
     else if( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON(
@@ -733,6 +765,8 @@ static void BoardPrefsDo( GtkWidget *pw, BoardData *bd, int fOK ) {
 
     bd->labels = fLabels;
     bd->usedicearea = fUseDiceIcon;
+    bd->show_ids = fShowIDs;
+    bd->show_pips = fShowPips;
     bd->permit_illegal = fPermitIllegal;
     bd->beep_illegal = fBeepIllegal;
     bd->higher_die_first = fHigherDieFirst;
@@ -779,6 +813,8 @@ extern void BoardPreferences( GtkWidget *pwBoard ) {
     fTranslucent = bd->translucent;
     fLabels = bd->labels;
     fUseDiceIcon = bd->usedicearea;
+    fShowIDs = bd->show_ids;
+    fShowPips = bd->show_pips;
     fPermitIllegal = bd->permit_illegal;
     fBeepIllegal = bd->beep_illegal;
     fHigherDieFirst = bd->higher_die_first;
@@ -1097,6 +1133,10 @@ extern void BoardPreferencesParam( GtkWidget *pwBoard, char *szParam,
 	bd->labels = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "diceicon", c ) )
 	bd->usedicearea = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "show_ids", c ) )
+	bd->show_ids = toupper( *szValue ) == 'Y';
+    else if( !g_strncasecmp( szParam, "show_pips", c ) )
+	bd->show_pips = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "illegal", c ) )
 	bd->permit_illegal = toupper( *szValue ) == 'Y';
     else if( !g_strncasecmp( szParam, "beep", c ) )
@@ -1210,6 +1250,7 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     "border=#%02X%02X%02X "
 	     "translucent=%c labels=%c diceicon=%c illegal=%c "
 	     "beep=%c highdie=%c wood=%s hinges=%c "
+             "show_ids=%c show_pips=%c "
 	     "animate=%s speed=%d light=%0.0f;%0.0f " 
 	     "chequers0=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
 	     "chequers1=#%02X%02X%02X;%0.2f;%0.2f;%0.2f;%0.2f "
@@ -1234,6 +1275,8 @@ extern char *BoardPreferencesCommand( GtkWidget *pwBoard, char *sz ) {
 	     bd->beep_illegal ? 'y' : 'n', bd->higher_die_first ? 'y' : 'n',
 	     aszWoodName[ bd->wood ],
 	     bd->hinges ? 'y' : 'n',
+	     bd->show_ids ? 'y' : 'n',
+             bd->show_pips ? 'y' : 'n',
              /* animate, speed, ... */
 	     aszAnim[ bd->animate_computer_moves ], bd->animate_speed,
 	     rAzimuth, rElevation, 

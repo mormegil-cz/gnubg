@@ -713,15 +713,29 @@ update_pipcount ( BoardData *bd, gint points[ 2 ][ 25 ] ) {
   int anPip[ 2 ];
   char *pc;
 
-  PipCount ( points, anPip );
+  if ( bd->show_pips ) {
 
-  pc = g_strdup_printf ( "%d", anPip[ 0 ] );
-  gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), pc );
-  g_free ( pc );
+    /* show pip count */
 
-  pc = g_strdup_printf ( "%d", anPip[ 1 ] );
-  gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), pc );
-  g_free ( pc );
+    PipCount ( points, anPip );
+    
+    pc = g_strdup_printf ( "%d", anPip[ 0 ] );
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), pc );
+    g_free ( pc );
+    
+    pc = g_strdup_printf ( "%d", anPip[ 1 ] );
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), pc );
+    g_free ( pc );
+
+  }
+  else {
+
+    /* don't show pip count */
+
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcount0 ), _("n/a") );
+    gtk_label_set_text ( GTK_LABEL ( bd->pipcount1 ), _("n/a") );
+
+  }
 
 
 }
@@ -4159,14 +4173,18 @@ static void board_size_allocate( GtkWidget *board,
 
     /* position ID, match ID: just below toolbar */
 
-    gtk_widget_get_child_requisition( bd->vbox_ids, &requisition );
-    allocation->height -= requisition.height;
-    child_allocation.x = allocation->x;
-    child_allocation.y = allocation->y;
-    child_allocation.width = allocation->width;
-    child_allocation.height = requisition.height;
-    allocation->y += requisition.height;
-    gtk_widget_size_allocate( bd->vbox_ids, &child_allocation );
+    if ( bd->show_ids ) {
+
+      gtk_widget_get_child_requisition( bd->vbox_ids, &requisition );
+      allocation->height -= requisition.height;
+      child_allocation.x = allocation->x;
+      child_allocation.y = allocation->y;
+      child_allocation.width = allocation->width;
+      child_allocation.height = requisition.height;
+      allocation->y += requisition.height;
+      gtk_widget_size_allocate( bd->vbox_ids, &child_allocation );
+      
+    }
 
     gtk_widget_get_child_requisition( bd->table, &requisition );
     allocation->height -= requisition.height;
@@ -4247,7 +4265,10 @@ static void board_size_request( GtkWidget *pw, GtkRequisition *pr ) {
     bd = BOARD( pw )->board_data;
 
     AddChild( bd->vbox_toolbar, pr );
-    AddChild( bd->vbox_ids, pr );
+
+    if ( bd->show_ids )
+      AddChild( bd->vbox_ids, pr );
+
     AddChild( bd->table, pr );
 
     if ( bd->usedicearea )
@@ -4569,6 +4590,8 @@ static void board_init( Board *board ) {
     bd->higher_die_first = TRUE;
     bd->animate_computer_moves = ANIMATE_SLIDE;
     bd->animate_speed = 4;
+    bd->show_ids = TRUE;
+    bd->show_pips = TRUE;
     bd->arLight[ 0 ] = -0.55667;
     bd->arLight[ 1 ] = 0.32139;
     bd->arLight[ 2 ] = 0.76604;
@@ -5191,4 +5214,5 @@ extern GtkWidget *board_dice_widget( Board *board ) {
     gtk_container_set_border_width( GTK_CONTAINER( pw ), bd->board_size );
     
     return pw;	    
+
 }
