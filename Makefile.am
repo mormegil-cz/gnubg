@@ -41,7 +41,7 @@ gnubg_DEPENDENCIES = $(COMMON_DEPS)
 endif
 endif
 
-pkgdata_DATA = gnubg.bd gnubg.wd gnubg.scm
+pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 
 man_MANS = gnubg.6
 
@@ -60,7 +60,8 @@ TESTS = gnubgtest
 distcheck-hook:
 	-cp $(srcdir)/gnubg.bd $(srcdir)/gnubg.weights $(distdir)/
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm \
+	gnubg.gtkrc
 
 sgfp.h sgfp.c: sgf.y
 	$(BISON) -o $@ -p sgf -d $<
@@ -74,6 +75,10 @@ copying.c: COPYING copying.awk
 gnubg.bd:
 	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
 	$(LN_S) $(srcdir)/gnubg.bd $@; else $(MAKE) bd.message; fi
+
+gnubg.gtkrc:
+	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.gtkrc ]; then \
+	$(LN_S) $(srcdir)/gnubg.gtkrc $@; fi
 
 bd.message:
 	@echo ' ** NOTE: For full strength in bearoff moves, GNU'

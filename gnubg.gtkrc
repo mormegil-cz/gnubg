@@ -1,0 +1,10 @@
+#
+# gnubg.gtkrc
+#
+
+style "movelabel" = "default"
+{
+  fg[ACTIVE] = { 0xffff, 0, 0 }
+}
+
+widget "*Board.*move" style "movelabel"

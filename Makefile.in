@@ -62,9 +62,11 @@ BISON = @BISON@
 CC = @CC@
 FLEX = @FLEX@
 GNUPLOT = @GNUPLOT@
+GTKDATA = @GTKDATA@
 GTK_CFLAGS = @GTK_CFLAGS@
 GTK_CONFIG = @GTK_CONFIG@
 GTK_LIBS = @GTK_LIBS@
+GUILEDATA = @GUILEDATA@
 GUILE_CFLAGS = @GUILE_CFLAGS@
 GUILE_CONFIG = @GUILE_CONFIG@
 GUILE_LDFLAGS = @GUILE_LDFLAGS@
@@ -99,7 +101,7 @@ bin_PROGRAMS = gnubg
 @USE_GTK_FALSE@@USE_EXT_TRUE@gnubg_DEPENDENCIES = $(COMMON_DEPS) ext/libext.a
 @USE_GTK_FALSE@@USE_EXT_FALSE@gnubg_DEPENDENCIES = $(COMMON_DEPS)
 
-pkgdata_DATA = gnubg.bd gnubg.wd gnubg.scm
+pkgdata_DATA = gnubg.bd gnubg.wd @GTKDATA@ @GUILEDATA@
 
 man_MANS = gnubg.6
 
@@ -116,7 +118,8 @@ makeweights_DEPENDENCIES = lib/libevent.a
 
 TESTS = gnubgtest
 
-EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm
+EXTRA_DIST = userrng.c copying.awk gnubgtest sgf.l sgf.y gnubg.6 gnubg.scm 	gnubg.gtkrc
+
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
@@ -673,6 +676,10 @@ copying.c: COPYING copying.awk
 gnubg.bd:
 	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.bd ]; then \
 	$(LN_S) $(srcdir)/gnubg.bd $@; else $(MAKE) bd.message; fi
+
+gnubg.gtkrc:
+	@[ -s $@ ] || if [ -s $(srcdir)/gnubg.gtkrc ]; then \
+	$(LN_S) $(srcdir)/gnubg.gtkrc $@; fi
 
 bd.message:
 	@echo ' ** NOTE: For full strength in bearoff moves, GNU'

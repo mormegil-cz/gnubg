@@ -64,6 +64,8 @@ else
 fi
 if test "$no_guile" != "yes"; then
   AC_DEFINE(USE_GUILE,1,Define if you want to use the Guile extensibility language.)
+  GUILEDATA=gnubg.scm
+  AC_SUBST(GUILEDATA)
 fi
 
 dnl Checks for header files.
@@ -130,6 +132,8 @@ GTK_LIBS="-lgtkextra $GTK_LIBS"
   CPPFLAGS="$ac_save_CPPFLAGS"
   CFLAGS="$ac_save_CFLAGS"
   LIBS="$ac_save_LIBS"
+  GTKDATA=gnubg.gtkrc
+  AC_SUBST(GTKDATA)
 fi
 
 AM_CONDITIONAL(CROSS_COMPILING, test "$cross_compiling" = "yes")
