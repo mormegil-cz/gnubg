@@ -1195,7 +1195,7 @@ extern void GTKThaw( void ) {
 extern void GTKPopMoveRecord( moverecord *pmr ) {
 
     GtkCList *pcl = GTK_CLIST( pwGameList );
-    gamelistrow *pglr;
+    gamelistrow *pglr = NULL;
     
     gtk_clist_freeze( pcl );
 
@@ -3945,8 +3945,8 @@ static void SetPlayers( gpointer *p, guint n, GtkWidget *pw ) {
 
 typedef struct _rolloutwidget {
     evalcontext ec;
-    int nTrials, nTruncate, fCubeful, fVarRedn, nSeed;
-    GtkWidget *pwEval, *pwCubeful, *pwVarRedn;
+    int nTrials, nTruncate, fCubeful, fVarRedn, nSeed, fInitial;
+    GtkWidget *pwEval, *pwCubeful, *pwVarRedn, *pwInitial;
     GtkAdjustment *padjTrials, *padjTrunc, *padjSeed;
     int *pfOK;
 } rolloutwidget;
@@ -3962,6 +3962,8 @@ static void SetRolloutsOK( GtkWidget *pw, rolloutwidget *prw ) {
 	GTK_TOGGLE_BUTTON( prw->pwCubeful ) );
     prw->fVarRedn = gtk_toggle_button_get_active(
 	GTK_TOGGLE_BUTTON( prw->pwVarRedn ) );
+    prw->fInitial = gtk_toggle_button_get_active(
+	GTK_TOGGLE_BUTTON( prw->pwInitial ) );
     
     EvalOK( prw->pwEval, prw->pwEval );
     
@@ -4016,6 +4018,12 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
     gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwVarRedn ),
 				  rcRollout.fVarRedn );
 
+    gtk_container_add( GTK_CONTAINER( pwBox ),
+		       rw.pwInitial = gtk_check_button_new_with_label(
+			   "Rollout as initial position" ) );
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( rw.pwInitial ),
+				  rcRollout.fInitial );
+
     rw.padjSeed = GTK_ADJUSTMENT( gtk_adjustment_new( abs( rcRollout.nSeed ),
 						      0, INT_MAX, 1, 1, 0 ) );
     pw = gtk_hbox_new( FALSE, 0 );
@@ -4063,6 +4071,12 @@ static void SetRollouts( gpointer *p, guint n, GtkWidget *pwIgnore ) {
 
 	if( rw.fVarRedn != rcRollout.fVarRedn ) {
 	    sprintf( sz, "set rollout varredn %s",
+		     rw.fVarRedn ? "on" : "off" );
+	    UserCommand( sz );
+	}
+
+	if( rw.fInitial != rcRollout.fInitial ) {
+	    sprintf( sz, "set rollout initial %s",
 		     rw.fVarRedn ? "on" : "off" );
 	    UserCommand( sz );
 	}
