@@ -7769,12 +7769,26 @@ static gboolean ContextCopyMenu(GtkWidget *widget, GdkEventButton *event, GtkWid
 	return TRUE;
 }
 
+#if WIN32
+void AddWinLF(const char* str)
+{
+	char* psz = strchr(str, 0);
+	psz[-1] = '\r';
+	psz[0] = '\n';
+	psz[1] = '\0';
+}
+#else
+/* Just remove function call */
+#define AddWinLF(x)
+#endif
+
 static void AddList(char* pStr, GtkCList* pList, char* pTitle)
 {
 	int i;
 	gchar *sz;
 
 	sprintf ( strchr ( pStr, 0 ), "%s", pTitle);
+	AddWinLF(pStr);
 
 	for (i = 0; i < pList->rows; i++ )
 	{
@@ -7789,8 +7803,10 @@ static void AddList(char* pStr, GtkCList* pList, char* pTitle)
 		sprintf ( strchr ( pStr, 0 ), "%-20.20s\n", 
 			  ( gtk_clist_get_text ( pList, i, 2, &sz ) ) ?
 			  sz : "" );
+		AddWinLF(pStr);
 	}
 	sprintf ( strchr ( pStr, 0 ), "\n");
+	AddWinLF(pStr);
 }
 
 static void CopyData(GtkWidget *pwNotebook, cdPageType page)
@@ -7798,6 +7814,7 @@ static void CopyData(GtkWidget *pwNotebook, cdPageType page)
 	char szOutput[4096];
 
 	sprintf(szOutput, "%-37.37s %-20.20s %-20.20s\n", "", ap[ 0 ].szName, ap[ 1 ].szName);
+	AddWinLF(szOutput);
 
 	if (page == CD_CHEQUER || page == CD_ALL)
 		AddList(szOutput, GTK_CLIST(statLists[1]), _("Chequer Statistics:\n"));
