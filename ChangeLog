@@ -1,3 +1,8 @@
+Thu Sep 20 17:52:08 2001  Gary Wong  <gtw@research.att.com>
+
+	* gnubg.c (CommandSaveSettings): Save "set beavers" setting, and
+	eliminate duplicate "set egyptian".
+
 Wed Sep 19 13:02:16 2001  Gary Wong  <gtw@research.att.com>
 
 	* gtkboard.c (board_set): Recalculate the board pixmap if the
