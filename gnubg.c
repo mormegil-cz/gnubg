@@ -233,10 +233,10 @@ rolloutcontext rcRollout =
       { 8, FALSE, 0, 0, TRUE, FALSE, 0.16, 0.0 } /* player 1 chequerplay */
   }, 
   FALSE, /* cubeful */
-  FALSE, /* variance reduction */
+  TRUE, /* variance reduction */
   FALSE, /* initial position */
   TRUE, /* rotate */
-  7, /* truncation */
+  11, /* truncation */
   36, /* number of trials */
   RNG_MERSENNE, /* RNG */
   0 /* seed */

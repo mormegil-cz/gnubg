@@ -1,3 +1,8 @@
+Tue Oct 15 17:49:36 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c: change default settings for rollout.
+	(reported by Scott Steiner)
+
 Tue Oct 15 17:41:44 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c, set.c: fix typos from last checkin.
