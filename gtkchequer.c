@@ -271,15 +271,13 @@ MoveListRollout( GtkWidget *pw, hintdata *phd ) {
 
 
 static void
-MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
+ShowMove ( hintdata *phd, const int f ) {
 
   move *pm;
   char *sz;
   int i;
   GtkWidget *pwMoves = phd->pwMoves;
   int anBoard[ 2 ][ 25 ];
-  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
-  
   if ( f ) {
 
     assert( GTK_CLIST( pwMoves )->selection );
@@ -312,6 +310,19 @@ MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
 
   }
 
+}
+
+static void
+MoveListShowToggled ( GtkWidget *pw, hintdata *phd ) {
+
+  int f = gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) );
+  int c = CheckHintButtons ( phd );
+
+  if ( f && c == 1 )
+    ShowMove ( phd, TRUE );
+  else
+    ShowMove ( phd, FALSE );
+  
 }
 
 
@@ -595,7 +606,6 @@ CreateMoveListTools ( hintdata *phd ) {
   
   gtk_widget_set_sensitive( pwMWC, ms.nMatchTo );
   gtk_widget_set_sensitive( pwMove, FALSE );
-  gtk_widget_set_sensitive( pwShow, FALSE );
   gtk_widget_set_sensitive( pwCopy, FALSE );
   
   gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( pwMWC ),
@@ -660,13 +670,30 @@ static void HintSelect( GtkWidget *pw, int y, int x, GdkEventButton *peb,
 			hintdata *phd ) {
     
     int c = CheckHintButtons( phd );
-    
+
     if( c && peb )
 	gtk_selection_owner_set( pw, GDK_SELECTION_PRIMARY, peb->time );
 
     /* Double clicking a row makes that move. */
     if( c == 1 && peb && peb->type == GDK_2BUTTON_PRESS && phd->fButtonsValid )
       gtk_button_clicked( GTK_BUTTON( phd->pwMove ) );
+
+    /* show moves */
+
+    if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON ( phd->pwShow ) ) ) {
+      switch ( c ) {
+      case 0:
+      case 1:
+        ShowMove ( phd, c );
+        break;
+
+      default:
+        ShowMove ( phd, FALSE );
+        break;
+
+      }
+
+    }
     
 }
 
@@ -702,13 +729,10 @@ CheckHintButtons( hintdata *phd ) {
 	c++;
 
     gtk_widget_set_sensitive( phd->pwMove, c == 1 && phd->fButtonsValid );
-    gtk_widget_set_sensitive( phd->pwShow, c == 1 && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwCopy, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwRollout, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEval, c && phd->fButtonsValid );
     gtk_widget_set_sensitive( phd->pwEvalPly, c && phd->fButtonsValid );
-
-    gtk_toggle_button_set_active ( GTK_TOGGLE_BUTTON ( phd->pwShow ), FALSE );
 
     return c;
 }

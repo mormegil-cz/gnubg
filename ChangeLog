@@ -1,3 +1,8 @@
+Thu Jan  9 17:42:39 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkchequer.c (MoveListShow): modify logic according to
+	Albert Silvers suggestions.
+
 Thu Jan  9 16:33:19 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtkchequer.c (MoveListMove): show board after move.
