@@ -71,8 +71,10 @@ static int FindBestBearoff( int anBoard[ 2 ][ 25 ], int nDice0, int nDice1,
 	    iMinRolls = i;
 	    cBestRolls = j;
 	}
+
+	/* FIXME: the fMove in the call to Utility is a bit shaky! */
 	
-	if( ( ml.amMoves[ i ].rScore = -Utility( ar ) ) >
+	if( ( ml.amMoves[ i ].rScore = -Utility( ar, NULL ) ) >
 	    ml.rBestScore ) {
 	    ml.iMoveBest = i;
 	    ml.rBestScore = ml.amMoves[ i ].rScore;
@@ -107,7 +109,7 @@ static int BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	if( anDice[ 0 ]-- < anDice[ 1 ]-- )
 	    swap( anDice, anDice + 1 );
 
-	if( EvaluatePosition( anBoard, arMean, 0 ) < 0 )
+	if( EvaluatePosition( anBoard, arMean, NULL, 0 ) < 0 )
 	    return -1;
 	
 	if( iTurn & 1 )
@@ -132,7 +134,7 @@ static int BearoffRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	 iTurn++;
     }
 
-    if( EvaluatePosition( anBoard, ar, 0 ) )
+    if( EvaluatePosition( anBoard, ar, NULL, 0 ) )
 	return -1;
 
     if( iTurn & 1 )
@@ -157,7 +159,7 @@ static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    return -1;
 	
 	FindBestMove( NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-		      anBoard, pec );
+		      anBoard, NULL, pec );
 
 	if( fInterrupt )
 	    return -1;
@@ -173,7 +175,7 @@ static int BasicRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	return BearoffRollout( anBoard, arOutput, nTruncate, iTurn, iGame,
 			       cGames );
 
-    if( EvaluatePosition( anBoard, arOutput, pec ) )
+    if( EvaluatePosition( anBoard, arOutput, NULL, pec ) )
 	return -1;
 
     if( iTurn & 1 )
@@ -222,14 +224,14 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 
 		/* Find the best move for each roll at ply 0 only. */
 		if( FindBestMove( NULL, i + 1, j + 1, aaanBoard[ i ][ j ],
-				  NULL ) < 0 )
+				  NULL, NULL ) < 0 )
 		    return -1;
 		
 		SwapSides( aaanBoard[ i ][ j ] );
 
 		/* Re-evaluate the chosen move at ply n-1. */
 		if( EvaluatePosition( aaanBoard[ i ][ j ], aaar[ i ][ j ],
-				      &ec ) )
+				      NULL, &ec ) )
 		    return -1;
 			
 		if( !( iTurn & 1 ) )
@@ -250,7 +252,7 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	    /* User requested n-ply play.  Another call to FindBestMove
 	       is required. */
 	    if( FindBestMove( NULL, anDice[ 0 ] + 1, anDice[ 1 ] + 1,
-			      anBoard, pec ) < 0 )
+			      anBoard, NULL, pec ) < 0 )
 		return -1;
 	    
 	    SwapSides( anBoard );
@@ -277,7 +279,7 @@ static int VarRednRollout( int anBoard[ 2 ][ 25 ], float arOutput[],
 	if( BearoffRollout( anBoard, ar, nTruncate, iTurn, iGame, cGames ) )
 	    return -1;
     } else {
-	if( EvaluatePosition( anBoard, ar, pec ) )
+	if( EvaluatePosition( anBoard, ar, NULL, pec ) )
 	    return -1;
 
 	if( iTurn & 1 )

@@ -746,7 +746,8 @@ extern void CommandHint( char *sz ) {
     int i;
     char szMove[ 32 ];
     float aar[ 32 ][ NUM_OUTPUTS ];
-    float arDouble[ 3 ];
+    float arDouble[ 4 ];
+    cubeinfo ci;
     
     if( fTurn < 0 ) {
 	puts( "You must set up a board first." );
@@ -764,19 +765,29 @@ extern void CommandHint( char *sz ) {
 
       /* give hints on cube action */
 
-      EvaluatePositionCubeful( anBoard, nCube, fCubeOwner,
-			       fMove, arDouble, &ecEval, ecEval.nPlies );
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
+      EvaluatePositionCubeful( anBoard, arDouble, &ci, &ecEval,
+			       ecEval.nPlies ); 
       
       if ( fInterrupt )
 	return;
       
       puts ( "Take decision:\n" );
-      printf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
-      printf ( "Equity for pass: %+6.3f\n\n", -1.0 );
+      if ( ! nMatchTo ) {
+	printf ( "Equity for take: %+6.3f\n", -arDouble[ 2 ] );
+	printf ( "Equity for pass: %+6.3f\n\n", -arDouble[ 3 ] );
+      }
+      else {
+	printf ( "Mwc for take: %6.2f%%\n", 
+		 100.0 * ( 1.0 - arDouble[ 2 ] ) );
+	printf ( "Mwc for pass: %6.2f%%\n\n", 
+		 100.0 * ( 1.0 - arDouble[ 3 ] ) );
+      }
 
       if ( ( arDouble[ 2 ] < 0 ) && ( ! nMatchTo ) )
 	puts ( "Proper cube action: Beaver\n" );
-      else if ( arDouble[ 2 ] <= 1.0 )
+      else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
 	puts ( "Proper cube action: Take\n" );
       else
 	puts ( "Proper cube action: Pass\n" );
@@ -786,9 +797,11 @@ extern void CommandHint( char *sz ) {
 
       /* give hints on moves */
 
+      SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
+
       FindBestMoves( &ml, aar, anDice[ 0 ], anDice[ 1 ], anBoard,
 		     ecEval.nSearchCandidates, ecEval.rSearchTolerance,
-		     &ecEval );
+		     &ci, &ecEval );
       
       if( fInterrupt )
 	return;
@@ -950,7 +963,7 @@ extern void CommandTrainTD( char *sz ) {
     int c = 0, anBoardTrain[ 2 ][ 25 ], anBoardOld[ 2 ][ 25 ],
 	anDiceTrain[ 2 ];
     float ar[ NUM_OUTPUTS ];
-    
+
     while( !fInterrupt ) {
 	InitBoard( anBoardTrain );
 	
@@ -968,14 +981,14 @@ extern void CommandTrainTD( char *sz ) {
 	    memcpy( anBoardOld, anBoardTrain, sizeof( anBoardOld ) );
 	    
 	    FindBestMove( NULL, anDiceTrain[ 0 ], anDiceTrain[ 1 ],
-			  anBoardTrain, &ecTD );
+			  anBoardTrain, NULL, &ecTD );
 
 	    if( fInterrupt )
 		return;
 	    
 	    SwapSides( anBoardTrain );
 	    
-	    EvaluatePosition( anBoardTrain, ar, &ecTD );
+	    EvaluatePosition( anBoardTrain, ar, NULL, &ecTD );
 
 	    InvertEvaluation( ar );
 	    if( TrainPosition( anBoardOld, ar ) )

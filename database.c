@@ -191,7 +191,7 @@ extern void CommandDatabaseGenerate( char *sz ) {
 		break;
 	    
 	    FindBestMove( NULL, anDiceGenerate[ 0 ], anDiceGenerate[ 1 ],
-			  anBoardGenerate, NULL );
+			  anBoardGenerate, NULL, NULL );
 
 	    if( fInterrupt )
 		break;

@@ -17,6 +17,7 @@
 						 (aafA1 [ i ][ j ]) ) )
 #define GET_A2(i,j,aafA2) ( ( (i) < 0 ) ? 0.0 : ( ( (j) < 0 ) ? 1.0 : \
 						 (aafA2 [ i ][ j ]) ) )
+#define GET_Btilde(i,afBtilde) ( (i) < 0 ? 1.0 : afBtilde [ i ] )
 
 /*
  * A1 (A2) is the match equity of player 1 (2)

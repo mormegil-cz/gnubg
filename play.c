@@ -85,7 +85,7 @@ static void NewGame( void ) {
 #endif
 	
     fMove = fTurn = anDice[ 1 ] > anDice[ 0 ];
-    CalcGammonPrice ( nCube, fCubeOwner );
+
 }
 
 
@@ -113,13 +113,16 @@ static int ComputerTurn( void ) {
     case PLAYER_GNU:
 	if( fResigned ) {
 	    float ar[ NUM_OUTPUTS ];
+	    cubeinfo ci;
+
+	    SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
 	    /* FIXME: use EvaluatePositionCubeful instead */
 
-	    if( EvaluatePosition( anBoard, ar, &ap[ fTurn ].ec ) )
+	    if( EvaluatePosition( anBoard, ar, &ci, &ap[ fTurn ].ec ) )
 		return -1;
 
-	    if( -fResigned <= Utility ( ar ) ) {
+	    if( -fResigned <= Utility ( ar, &ci ) ) {
 		CommandAgree( NULL );
 		return 0;
 	    } else {
@@ -128,10 +131,13 @@ static int ComputerTurn( void ) {
 	    }
 	} else if( fDoubled ) {
 	  /* consider cube action */
+	  cubeinfo ci;
+	  
+	  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 	  
 	  gettimeofday ( &tv0, NULL );
-	  if ( EvaluatePositionCubeful( anBoard, nCube, fCubeOwner, 
-					fMove, arDouble, &ap [ fTurn ].ec,
+	  if ( EvaluatePositionCubeful( anBoard, arDouble, &ci, 
+					&ap [ fTurn ].ec,
 					ap [ fTurn ].ec.nPlies ) < 0 ) 
 	    return -1;
 	  gettimeofday ( &tv1, NULL );
@@ -139,8 +145,9 @@ static int ComputerTurn( void ) {
 		  1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
 		  (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
 	  printf ( "equity(new code) for take decision"
-		   " %+6.3f %+6.3f %+6.3f\n",  
-		   arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ]);
+		   " %+6.3f %+6.3f %+6.3f %+6.3f\n",  
+		   arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ],
+		   arDouble[ 3 ]);
 	  
 	  if ( ( arDouble[ 2 ] < 0.0 ) && ( ! nMatchTo ) ) {
 
@@ -149,7 +156,7 @@ static int ComputerTurn( void ) {
 
 	    CommandRedouble ( NULL );
 	  }
-	  else if ( arDouble[ 2 ] <= 1.0 )
+	  else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
 	    CommandTake( NULL );
 	  else
 	    CommandReject ( NULL );
@@ -158,6 +165,9 @@ static int ComputerTurn( void ) {
 	} else {
 	  
 	  int anBoardMove[ 2 ][ 25 ];
+	  cubeinfo ci;
+	  
+	  SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
 
 	  /* Don't use the global board for this call, to avoid
 	     race conditions with updating the board and aborting the
@@ -171,9 +181,8 @@ static int ComputerTurn( void ) {
 
 	    gettimeofday ( &tv0, NULL );
 
-	    if ( EvaluatePositionCubeful( anBoardMove, nCube,
-					  fCubeOwner, 
-					  fMove, arDouble, 
+	    if ( EvaluatePositionCubeful( anBoardMove,
+					  arDouble, &ci, 
 					  &ap [ fTurn ].ec,
 					  ap [ fTurn ].ec.nPlies ) 
 		 < 0 )  
@@ -182,11 +191,12 @@ static int ComputerTurn( void ) {
 	    printf ("Time for EvaluatePositionCubeful: %10.6f seconds\n",
 		    1.0 * tv1.tv_sec + 0.000001 * tv1.tv_usec -
 		    (1.0 * tv0.tv_sec + 0.000001 * tv0.tv_usec ) ) ;
-	    printf ( "equity(new code) for double decision"
-		     " %+6.3f %+6.3f %+6.3f\n",  
-		     arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ]);
+	    printf ( "equity(new code) for take decision"
+		     " %+6.3f %+6.3f %+6.3f %+6.3f\n",  
+		     arDouble[ 0 ], arDouble[ 1 ], arDouble[ 2 ],
+		     arDouble[ 3 ]);
 
-	    if ( ( arDouble[ 1 ] <= 1.0 ) && 
+	    if ( ( arDouble[ 3 ] >= arDouble[ 1 ] ) && 
 		 ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
 	      CommandDouble ( NULL );
 	      return 0;
@@ -211,7 +221,7 @@ static int ComputerTurn( void ) {
 
 	  gettimeofday ( &tv0, NULL );
 	  if( FindBestMove( pmn->anMove, anDice[ 0 ], anDice[ 1 ],
-			    anBoardMove, &ap[ fTurn ].ec ) < 0 )
+			    anBoardMove, &ci, &ap[ fTurn ].ec ) < 0 )
 	    return -1;
 	  gettimeofday ( &tv1, NULL );
 
@@ -861,7 +871,6 @@ extern void CommandRedouble( char *sz ) {
 		ap[ fTurn ].szName, nCube << 1 );
     
     fCubeOwner = !fMove;
-    CalcGammonPrice ( nCube, fCubeOwner );
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_DOUBLE;
@@ -1013,7 +1022,6 @@ extern void CommandTake( char *sz ) {
     fDoubled = FALSE;
 
     fCubeOwner = !fMove;
-    CalcGammonPrice ( nCube, fCubeOwner );
 
     pmt = malloc( sizeof( *pmt ) );
     *pmt = MOVE_TAKE;
@@ -1021,18 +1029,3 @@ extern void CommandTake( char *sz ) {
     
     TurnDone();
 }
-
-extern void 
-SetCube ( int nNewCube, int fNewCubeOwner ) {
-
-  nCube = nNewCube;
-  fCubeOwner = fNewCubeOwner;
-
-  CalcGammonPrice ( nCube, fCubeOwner );
-
-}
-
-
-
-
-
