@@ -195,6 +195,10 @@ duplication of effort and to make sure our changes merge easily.
   gtk_clist_row_is_visible should fix this. (gary)
 ** Dithering problems in GDK RGB (gary).
 ** >5 chequers on a point no longer work correctly with translucency. (gary)
+** "set eval cubeful y", "set eval plies 2", "set eval tol .3",
+  "set eval cand 8", "set board mG8PDAA2m2ADAw", "set dice 66", "hint":
+  the winning probabilities do not match the equities (same thing
+  happens in match play).
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
