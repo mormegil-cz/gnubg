@@ -143,7 +143,7 @@ typedef enum _gnubgcommand {
     CMD_NEXT_GAME,
     CMD_NEXT_MARKED,
     CMD_NEXT_ROLL,
-	CMD_NEXT_ROLLED,
+    CMD_NEXT_ROLLED,
     CMD_PLAY,
     CMD_PREV,
     CMD_PREV_GAME,
@@ -7174,6 +7174,10 @@ extern void GTKSet( void *p ) {
 	    pif, CMD_NEXT ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_PREV ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_NEXT_ROLLED ), plGame != NULL );
+	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
+	    pif, CMD_PREV_ROLLED ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
 	    pif, CMD_NEXT_MARKED ), plGame != NULL );
 	gtk_widget_set_sensitive( gtk_item_factory_get_widget_by_action(
