@@ -1,3 +1,9 @@
+Thu Jan  9 15:37:04 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* gtkgame.c (GTKRollout): don't use gettext on empty strings.
+	* play.c (NextTurn, CommandDrop): some changes related to i18n.
+	(contributed by TAKAHASHI Kaoru)
+
 Wed Jan  8 23:10:47 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* configure: update to newest version.

@@ -5603,7 +5603,7 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
 			rolloutstat ars[][ 2 ] ) {
     
     static char *aszTitle[] = {
-        "",
+        NULL,
         N_("Win"), 
         N_("Win (g)"), 
         N_("Win (bg)"), 
@@ -5655,7 +5655,7 @@ extern void GTKRollout( int c, char asz[][ 40 ], int cGames,
     pwVbox = gtk_vbox_new( FALSE, 4 );
 	
     for ( i = 0; i < 8; i++ )
-      aszTemp[ i ] = gettext ( aszTitle[ i ] );
+      aszTemp[ i ] = aszTitle[ i ] ? gettext ( aszTitle[ i ] ) : "";
 
     pwRolloutResult = gtk_clist_new_with_titles( 8, aszTemp );
     gtk_clist_column_titles_passive( GTK_CLIST( pwRolloutResult ) );
