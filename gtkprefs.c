@@ -1899,7 +1899,8 @@ BoardPrefsDestroy ( GtkWidget *pw, void * arg) {
 #endif /* HAVE_LIBXML2 */
 
 #if USE_BOARD3D
-	Tidy3dObjects(&bd3d, FALSE);
+	if (previewType == DT_3D)
+		Tidy3dObjects(&bd3d, FALSE);
 #endif
 
 	gtk_main_quit();
