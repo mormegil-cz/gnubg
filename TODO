@@ -65,6 +65,8 @@ duplication of effort and to make sure our changes merge easily.
 ** Save partial input when TTY input is overwritten by an X command.
   The best way would be to unify what GetInput does and ProcessInput,
   with push/pop semantics for readline state. (gary)
+** Change "set beavers" to allow a limit on the number of beavers
+  permitted.
 
 * X interface:
 ** Get rid of Xmu calls in ext (they're not really portable). (gary)
@@ -104,9 +106,6 @@ duplication of effort and to make sure our changes merge easily.
   undoing moves]. Alternatively there could be button for restoring the
   last moved checker, and one for restoring all checkers moved. 
 ** Add "beavers" in the Set menu.
-** When a player is doubled, the cube should be placed on the board,
-   so the user is aware that she is doubled.
-   Currently a message is shown in status bar.
 ** Have a progress bar along with some text in the main window, which
    indicates progress for the current possibly time-consuming operation.
    E.g. when the user clicks 'hint' the progress text will show
@@ -146,8 +145,6 @@ duplication of effort and to make sure our changes merge easily.
 ** "set player <tab>" gives incorrect completions.
 ** Make sure when one player is on roll and "set turn" is used to change
   to the other, that the dice in the board window change colour.
-** Beavers (redoubles) doesn't work properly. The player who beavers
-  get to roll instead of the player who originally doubled.
 ** When using GTK, some output is lost for (e.g.) "set player both human".
   It should show in a dialog, not in the status bar.
 ** In the Crawford game, "hint" still tries to recommend a doubling action.
@@ -175,8 +172,6 @@ duplication of effort and to make sure our changes merge easily.
 ** Export matches (and analysis) to ASCII, HTML, PostScript, etc.
 ** Import and export position databases to a portable format.
 ** Add option to flip the board.
-** Find someone who lives near London and wants to enter gnubg in the
-  MSO Olympiad in August: <http://www.msoworld.com/Olympiad/computer.html>.
 ** Think about generating huge databases for CD-ROMs (we can get 1-sided
   databases for all chequers up to the 11 point, or 2-sided databases where
   both players have up to 11 chequers in the home board onto a CD-ROM).

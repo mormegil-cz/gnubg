@@ -1,3 +1,15 @@
+Wed Oct 11 23:30:47 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* gtkboard.c (cube_position): New function.  Calculate where
+	(and which way around) cube should be drawn.
+	(board_set): Changed to update cube more often (now shows cube
+	on board when double offered).
+	
+	* play.c (CommandTake): Fixed bug for beavers (wrong player was on
+	roll after beaver accepted).
+
+	* gnubg.c, eval.c: Minor changes to avoid compiler warnings.
+	
 Wed Oct 11 10:46:09 2000  Joseph Heled  <pepe@internet.co.nz>
 
 	* redo changes to net 0.10 that were lost after I added them in 1.42.

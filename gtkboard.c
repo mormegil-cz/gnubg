@@ -68,7 +68,7 @@ typedef struct _BoardData {
     gint dice[ 2 ], dice_opponent[ 2 ]; /* 0, 0 if not rolled */
     gint cube;
     gint can_double, opponent_can_double; /* allowed to double */
-    gint doubled; /* opponent just doubled */
+    gint doubled; /* -1 if X is doubling, 1 if O is doubling */
     gint colour; /* -1 for player X, 1 for player O */
     gint direction; /* -1 playing from 24 to 1, 1 playing from 1 to 24 */
     gint home, bar; /* 0 or 25 depending on fDirection */
@@ -203,15 +203,36 @@ static void board_redraw_dice( GtkWidget *board, BoardData *bd, int i ) {
 		      bd->dice[ i ] : bd->dice_opponent[ i ] );
 }
 
-static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
-    int x, y, two_chars, lbearing[ 2 ], width[ 2 ], ascent[ 2 ], descent[ 2 ];
-    char cube_text[ 3 ];
+/* Determine the position and rotation of the cube; *px and *py return the
+   position (in board units -- multiply by bd->board_size to get
+   pixels) and *porient returns the rotation (1 = facing the top, 0 = facing
+   the side, -1 = facing the bottom). */
+static void cube_position( BoardData *bd, int *px, int *py, int *porient ) {
 
+    if( bd->doubled ) {
+	if( px ) *px = 50 - 20 * bd->doubled;
+	if( py ) *py = 32;
+	if( porient ) *porient = bd->doubled;
+    } else {
+	if( px ) *px = 50;
+	if( py ) *py = 32 - 29 * bd->cube_owner;
+	if( porient ) *porient = bd->cube_owner;
+    }
+}
+
+static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
+    int x, y, two_chars, lbearing[ 2 ], width[ 2 ], ascent[ 2 ], descent[ 2 ],
+	orient, n;
+    char cube_text[ 3 ];
+    
     if( bd->board_size <= 0 )
 	return;
+
+    n = bd->doubled ? bd->cube << 1 : bd->cube;
     
-    x = 50 * bd->board_size;
-    y = ( 32 - 29 * bd->cube_owner ) * bd->board_size;
+    cube_position( bd, &x, &y, &orient );
+    x *= bd->board_size;
+    y *= bd->board_size;
 
     draw_bitplane( board->window, bd->gc_and, bd->bm_cube_mask, 0, 0, x, y,
 		   8 * bd->board_size, 8 * bd->board_size, 1 );
@@ -219,10 +240,9 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
     gdk_draw_pixmap( board->window, bd->gc_or, bd->pm_cube, 0, 0, x, y,
 		     8 * bd->board_size, 8 * bd->board_size );
 
-    sprintf( cube_text, "%d", bd->cube > 1 && bd->cube < 65 ?
-	     bd->cube : 64 );
+    sprintf( cube_text, "%d", n > 1 && n < 65 ? n : 64 );
 
-    two_chars = bd->cube == 1 || bd->cube > 10;
+    two_chars = n == 1 || n > 10;
     
     if( bd->cube_font_rotated ) {
 	gdk_text_extents( bd->cube_font, cube_text, 1, &lbearing[ 0 ],
@@ -234,7 +254,7 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
 	else
 	    lbearing[ 1 ] = ascent[ 1 ] = descent[ 1 ] = 0;
 
-	if( bd->cube_owner ) {
+	if( orient ) {
 	    /* upside down */
 	    lbearing[ 1 ] += lbearing[ 0 ];
 
@@ -278,7 +298,7 @@ static void board_redraw_cube( GtkWidget *board, BoardData *bd ) {
 
 static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
 			      BoardData *bd ) {
-    int i;
+    int i, xCube, yCube;
     
     if( !bd->pm_board )
 	return TRUE;
@@ -338,9 +358,12 @@ static gboolean board_expose( GtkWidget *board, GdkEventExpose *event,
 		    7 * bd->board_size, 7 * bd->board_size ) )
 	board_redraw_dice( board, bd, 1 );
 
+    cube_position( bd, &xCube, &yCube, NULL );
+    xCube *= bd->board_size;
+    yCube *= bd->board_size;
+    
     if( intersects( event->area.x, event->area.y, event->area.width,
-		    event->area.height, 50 * bd->board_size,
-		    ( 32 - 29 * bd->cube_owner ) * bd->board_size,
+		    event->area.height, xCube, yCube,
 		    8 * bd->board_size, 8 * bd->board_size ) )
 	board_redraw_cube( board, bd );
     
@@ -371,7 +394,7 @@ static void board_expose_point( GtkWidget *board, BoardData *bd, int n ) {
 
 static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 
-    int i, y, cy;
+    int i, y, cy, xCube, yCube;
 
     x0 /= bd->board_size;
     y0 /= bd->board_size;
@@ -380,7 +403,9 @@ static int board_point( GtkWidget *board, BoardData *bd, int x0, int y0 ) {
 	intersects( x0, y0, 0, 0, bd->x_dice[ 1 ], bd->y_dice[ 1 ], 7, 7 ) )
 	return POINT_DICE;
 
-    if( intersects( x0, y0, 0, 0, 50, 30 - 29 * bd->cube_owner, 8, 8 ) )
+    cube_position( bd, &xCube, &yCube, NULL );
+    
+    if( intersects( x0, y0, 0, 0, xCube, yCube, 8, 8 ) )
 	return POINT_CUBE;
     
     for( i = 0; i < 28; i++ ) {
@@ -829,17 +854,19 @@ static gboolean board_pointer( GtkWidget *board, GdkEvent *event,
 static void board_set_cube_font( GtkWidget *widget, BoardData *bd ) {
 
     char font_name[ 256 ];
-    int i, sizes[ 20 ] = { 34, 33, 26, 25, 24, 20, 19, 18, 17, 16, 15, 14, 13,
-			   12, 11, 10, 9, 8, 7, 6 };
+    int i, orient, sizes[ 20 ] = { 34, 33, 26, 25, 24, 20, 19, 18, 17, 16, 15,
+				   14, 13, 12, 11, 10, 9, 8, 7, 6 };
     
     /* FIXME query resource for font name and method */
 
     bd->cube_font_rotated = FALSE;
 
+    cube_position( bd, NULL, NULL, &orient );
+    
     /* First attempt (applies only if cube is not owned by the player at
        the bottom of the screen): try scaled, rotated font. */
-    if( bd->cube_owner != -1 ) {
-	sprintf( font_name, bd->cube_owner ?
+    if( orient != -1 ) {
+	sprintf( font_name, orient ?
 		 "-adobe-utopia-bold-r-normal--[~%d 0 0 ~%d]-"
 		 "*-*-*-p-*-iso8859-1[49_52 54 56]" :
 		 "-adobe-utopia-bold-r-normal--[0 %d ~%d 0]-"
@@ -884,7 +911,7 @@ extern gint board_set( Board *board, const gchar *board_text ) {
     gchar *dest, buf[ 32 ];
     gint i, *pn, **ppn;
     gint old_board[ 28 ];
-    int old_direction;
+    int old_direction, old_cube, old_doubled, old_xCube, old_yCube;
     GdkEventExpose event;
     GtkAdjustment *padj0, *padj1;
     
@@ -979,6 +1006,11 @@ extern gint board_set( Board *board, const gchar *board_text ) {
     old_board[ 27 ] = bd->points[ 27 ];
 
     old_direction = bd->direction;
+
+    old_cube = bd->cube;
+    old_doubled = bd->doubled;
+    
+    cube_position( bd, &old_xCube, &old_yCube, NULL );
     
     for( i = 21, ppn = game_settings; i--; ) {
 	if( *board_text++ != ':' )
@@ -1087,15 +1119,28 @@ extern gint board_set( Board *board, const gchar *board_text ) {
 	    bd->dice_colour[ 0 ] = bd->dice_colour[ 1 ] = bd->turn;
 	}
     }
-    
-    if( bd->cube_owner != bd->opponent_can_double - bd->can_double ) {
+
+    if( bd->doubled != old_doubled || bd->cube != old_cube ||
+	bd->cube_owner != bd->opponent_can_double - bd->can_double ) {
+	int xCube, yCube;
+
+	bd->cube_owner = bd->opponent_can_double - bd->can_double;
+	
+	/* erase old cube */
 	event.count = 0;
-	event.area.x = 50 * bd->board_size;
-	event.area.y = ( 32 - 29 * bd->cube_owner ) * bd->board_size;
+	event.area.x = old_xCube * bd->board_size;
+	event.area.y = old_yCube * bd->board_size;
 	event.area.width = event.area.height = 8 * bd->board_size;
+	
+	board_expose( bd->drawing_area, &event, bd );
+
+	/* draw new cube */
+	cube_position( bd, &xCube, &yCube, NULL );
+	
+	event.area.x = xCube * bd->board_size;
+	event.area.y = yCube * bd->board_size;
 
 	gdk_font_unref( bd->cube_font );
-	bd->cube_owner = bd->opponent_can_double - bd->can_double;
 	board_set_cube_font( GTK_WIDGET( board ), bd );
 
 	board_expose( bd->drawing_area, &event, bd );
@@ -1119,7 +1164,7 @@ extern gint board_set( Board *board, const gchar *board_text ) {
 	    if( bd->points[ i ] != old_board[ i ] )
 		board_redraw_point( bd->drawing_area, bd, i );
 	
-	/* FIXME only redraw changed points/dice/cube */
+	/* FIXME only redraw dice/cube if changed */
 	board_redraw_dice( bd->drawing_area, bd, 0 );
 	board_redraw_dice( bd->drawing_area, bd, 1 );
 	board_redraw_cube( bd->drawing_area, bd );
@@ -1161,12 +1206,11 @@ extern gint game_set( Board *board, gint points[ 2 ][ 25 ], int roll,
 	off[ 0 ] -= points[ 0 ][ i ];
 	off[ 1 ] -= points[ 1 ][ i ];
     }
-    
+
     sprintf( strchr( board_str, 0 ), "%d:%d:%d:%d:%d:%d:%d:%d:1:-1:0:25:%d:%d:0:0:0:"
 	     "0:0:0", die0, die1, die0, die1, fTurn < 0 ? 1 : nCube,
 	     fTurn < 0 || fCubeOwner != 0, fTurn < 0 || fCubeOwner != 1,
-	     fDoubled, off[ 1 ], off[ 0 ] );
-    
+	     fDoubled ? ( fTurn ? -1 : 1 ) : 0, off[ 1 ], off[ 0 ] );    
     board_set( board, board_str );
     
     /* FIXME update names, score, match length */
