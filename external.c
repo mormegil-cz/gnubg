@@ -210,7 +210,7 @@ extern void CommandExternal( char *sz ) {
 	    memcpy( anBoardOrig, anBoard, sizeof( anBoard ) );
 	    
 	    if( FindBestMove( anMove, anDice[ 0 ], anDice[ 1 ],
-			      anBoard, &ci, &ecEval ) < 0 )
+			      anBoard, &ci, &esEvalChequer.ec ) < 0 )
 		break;
 
 	    FormatMove( szResponse, anBoardOrig, anMove );
