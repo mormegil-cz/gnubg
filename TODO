@@ -227,6 +227,7 @@ functions:
   the board shown will be out of date.)
 ** the move number shown when exporting positions to text or html is -1
 ** the rollout window is a bit to small
+** try to eliminate dependency on pstopng and friends
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
