@@ -1,3 +1,10 @@
+Sat Nov  1 14:36:45 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* htmlimages (CommandExportHTMLImages): make the html image
+	export work with the new board dimensions.
+	(reported by olivier croisille)
+	* html.c (printHTMLBoardGNU): some new images.
+
 Wed Oct 29 12:26:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* gtkgame.c: Moved .xpm files in root directory to xpm directory
