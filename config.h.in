@@ -171,6 +171,12 @@
 /* Define if you have the art library */
 #undef HAVE_LIBART
 
+/* Define to 1 if you have the `atlas' library (-latlas). */
+#undef HAVE_LIBATLAS
+
+/* Define to 1 if you have the `cblas' library (-lcblas). */
+#undef HAVE_LIBCBLAS
+
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
