@@ -892,8 +892,10 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
     fOutputMWC = 0;
 
   memcpy (&rcRolloutSave, &rcRollout, sizeof (rcRollout));
-  if (alternatives < 2)
+  if (alternatives < 2) {
     rcRollout.fStopMoveOnJsd = 0;
+    rcRollout.fStopOnSTD = 0;
+  }
 
   /* make sure cube decisions are rolled out cubeful */
   if (fCubeRollout) {
@@ -1154,8 +1156,7 @@ RolloutGeneral( int (* apBoard[])[ 2 ][ 25 ],
 	if (denominator < 1e-8)
 	  denominator = 1e-8;
 
-        ajiJSD[ alt ].rJSD = ajiJSD[ alt ].rEquity /
-          sqrt (s + ajiJSD[ alt ].rJSD * ajiJSD[ alt ].rJSD);
+        ajiJSD[ alt ].rJSD = ajiJSD[ alt ].rEquity / denominator;
         
         if ((rcRollout.fStopMoveOnJsd || rcRollout.fStopOnJsd) &&
             (i >= rcRollout.nMinimumJsdGames)) {

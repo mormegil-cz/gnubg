@@ -1652,7 +1652,7 @@ extern void CommandSetRolloutMaxError ( char *sz ) {
 
     prcSet->rStdLimit = r;
 
-    outputf ( _("Rollouts can stop when the ratio |STD/value| is less than"
+    outputf ( _("Rollouts can stop when the ratio |STD/value| is less than "
 		"%5.4f for every value (win/gammon/backgammon/...equity\n"),
 	      r);
 }
