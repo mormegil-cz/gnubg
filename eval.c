@@ -2416,6 +2416,11 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
     for( i = 0; i < NUM_OUTPUTS; i++ )
       arOutput[ i ] = 0.0;
 
+    /* reset reduction group */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
+
     fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
 
     if ( fUseReduction ) {
@@ -2466,6 +2471,11 @@ EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
         arOutput[ i ] += w * arVariationOutput[ i ];
       sumW += w;
     }
+
+    /* reset reduction group */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
 
     /* normalize */
     for ( i = 0; i < NUM_OUTPUTS; i++ )
@@ -5952,6 +5962,7 @@ EvaluatePositionCubeful3( int anBoard[ 2 ][ 25 ],
   /* get equities */
   
   if ( ! fAll ) {
+
     /* cache miss */
     if ( EvaluatePositionCubeful4 ( anBoard, arOutput, arCubeful, 
                                     aciCubePos, 
@@ -6048,6 +6059,13 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
 
     MakeCubePos ( aciCubePos, cci, fTop, aci, TRUE );
 
+    /* speed reduction */
+
+    /* make sure to reset nReductionGroup */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
+
     fUseReduction = pec->nReduced && ( nPlies == 1 ) && ( pec->nPlies > 0 );
 
     if ( fUseReduction ) {
@@ -6110,6 +6128,11 @@ EvaluatePositionCubeful4( int anBoard[ 2 ][ 25 ],
       sumW += w;
 
     }
+
+    /* reset reduction group */
+
+    if ( pec->nReduced && ( nPlies == pec->nPlies ) )
+      nReductionGroup = 0;
 
     /* Flip evals */
 

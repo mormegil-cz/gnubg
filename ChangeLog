@@ -1,3 +1,9 @@
+Sat Jun  7 10:13:31 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* eval.c (EvaluatePositionCubeful4, EvaluatePositionFull):
+	ensure nReductionGroup is reset to zero.
+	(reported by Michael Depreli)
+
 Fri Jun  6 12:43:47 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* gtktempmap.c (ExposeQuadrant): ahem, fix small bug in
