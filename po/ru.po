@@ -6013,7 +6013,7 @@ msgstr ""
 
 #: gtkgame.c:2584
 msgid "/_Settings"
-msgstr "/_Настройки"
+msgstr "/_Настройка"
 
 #: gtkgame.c:2585
 msgid "/_Settings/Analysis..."
