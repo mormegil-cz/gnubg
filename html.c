@@ -1406,7 +1406,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s to play %d%d"),
-              gettext ( aaszColorName[ het ][ pms->fTurn ] ),
+              gettext ( aaszColorName[ het ][ pms->fMove ] ),
               pms->anDice[ 0 ], pms->anDice[ 1 ] 
             );
 
@@ -1416,7 +1416,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s doubles to %d"),
-              gettext ( aaszColorName[ het ][ pms->fTurn ] ),
+              gettext ( aaszColorName[ het ][ pms->fMove ] ),
               pms->nCube * 2
             );
 
@@ -1426,7 +1426,7 @@ HTMLBoardHeader ( FILE *pf, const matchstate *pms,
 
     fprintf ( pf,
               _(" %s onroll, cube decision?"),
-              gettext ( aaszColorName[ het ][ pms->fTurn ] ) );
+              gettext ( aaszColorName[ het ][ pms->fMove ] ) );
 
 
   fputs ( "</p>\n", pf );

@@ -1,3 +1,8 @@
+Mon Oct 14 20:29:32 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* html.c (HTMLBoardHeader): fix typos.
+	(reported by Magnar Naustdalslid)
+
 Sat Oct 12 14:37:58 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Make match information optional in exports (text/html).

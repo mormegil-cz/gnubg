@@ -47,6 +47,7 @@ Eli Liang
 Kevin Maguire
 Thomas Meyer
 Achim Mueller
+Magnar Naustdalslid
 Dave Neary
 Mirori Orange
 Peter Orum
