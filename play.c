@@ -141,7 +141,9 @@ autoAnalyseMove ( void *p, const matchstate *pms ) {
   if ( fAutoAnalysis && f ) {
       SuspendInput( &m );
       memcpy ( &msx, pms, sizeof ( matchstate ) );
+      ProgressStart( _("Analysing move...") );
       AnalyzeMove ( pmr, &msx, NULL, FALSE );
+      ProgressEnd();
       ResumeInput( &m );
   }
 

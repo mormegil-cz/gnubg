@@ -240,6 +240,9 @@ functions:
   rollouts and do the averaging.
 ** When 'Allow dragging to illegal input' is selected, Two consecutive Button 1
 click will both use the 'first' dice.
+** The board should be updated before automatic analysis starts.  (Currently,
+  if you interrupt the automatic analysis, the move will go into effect, but
+  the board shown will be out of date.)
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
