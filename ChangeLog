@@ -1,3 +1,7 @@
+Tue Jul  9 19:58:03 2002  Øystein Johansen <oeysteij@online.no>
+
+        * gtkgame.c: Add a Dump/Copy button in the hint dialog. 
+
 Tue Jul  9 19:21:24 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* analysis.c (getMWCFromError): improve function.

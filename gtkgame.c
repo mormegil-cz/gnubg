@@ -5307,13 +5307,45 @@ GTKResignHint( float arOutput[], float rEqBefore, float rEqAfter,
     GTKAllowStdin();
 }
 
-
-
 #if WIN32
 extern void GTKWinCopy( GtkWidget *widget, gpointer data) {
    WinCopy( (char *) data);
 }
 #endif
+
+static void HintCopy( GtkWidget *pw, movelist *pmlOrig ) {
+
+   char szBuf[4096], szTemp[160];
+   int n, i;
+ 
+   movelist *pml;
+    
+   pml = malloc( sizeof( *pml ) );
+   memcpy( pml, pmlOrig, sizeof( *pml ) );
+    
+   pml->amMoves = malloc( pmlOrig->cMoves * sizeof( move ) );
+   memcpy( pml->amMoves, pmlOrig->amMoves, pmlOrig->cMoves * sizeof( move ) );
+
+   n = pml->cMoves;
+
+   if (n > 12) n = 12;  /* FIXME There should be some kind of way to
+                         * control how many moves you want to copy */
+#ifdef WIN32
+   sprintf(szBuf, "");
+#else
+   sprintf(szBuf, "\n");
+#endif
+
+   for( i = 0; i < n; i++ )
+      strcat( szBuf, FormatMoveHint( szTemp, &ms, pml, i, TRUE ) );
+
+#ifdef WIN32   
+   WinCopy( szBuf ); 
+#else
+   printf("%s", szBuf); 
+#endif
+   
+}
 
 static void HintMove( GtkWidget *pw, GtkWidget *pwMoves ) {
 
@@ -5451,6 +5483,11 @@ extern void GTKHint( movelist *pmlOrig ) {
 	*pwButtons,
 	*pwMove = gtk_button_new_with_label( _("Move") ),
 	*pwRollout = gtk_button_new_with_label( _("Rollout") ),
+#ifdef WIN32
+  	*pwCopy = gtk_button_new_with_label( _("Copy") ),
+#else 
+  	*pwCopy = gtk_button_new_with_label( _("Dump") ),
+#endif
 	*pwMoves;
     static hintdata hd;
     movelist *pml;
@@ -5485,9 +5522,12 @@ extern void GTKHint( movelist *pmlOrig ) {
 			GTK_SIGNAL_FUNC( HintMove ), pwMoves );
     gtk_signal_connect( GTK_OBJECT( pwRollout ), "clicked",
 			GTK_SIGNAL_FUNC( HintRollout ), pwMoves );
+    gtk_signal_connect( GTK_OBJECT( pwCopy ), "clicked",
+			GTK_SIGNAL_FUNC( HintCopy ), pml );
 
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwMove );
     gtk_container_add( GTK_CONTAINER( pwButtons ), pwRollout );
+    gtk_container_add( GTK_CONTAINER( pwButtons ), pwCopy );
 
     gtk_selection_add_target( pwMoves, GDK_SELECTION_PRIMARY,
 			      GDK_SELECTION_TYPE_STRING, 0 );
