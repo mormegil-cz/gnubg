@@ -939,6 +939,11 @@ UseDesign ( GtkWidget *pw, BoardData *bdBoard ) {
   gtk_adjustment_set_value ( GTK_ADJUSTMENT ( paElevation ),
                              rElevation );
 
+  /* round */
+
+  gtk_adjustment_set_value ( GTK_ADJUSTMENT ( padjRound ),
+                             1.0f - bd.round );
+
 
   BoardPrefsDo ( pw, bdBoard, FALSE );
 

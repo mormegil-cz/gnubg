@@ -1,3 +1,8 @@
+Fri Dec  6 18:58:57 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gtkprefs.c (UseDesign): apply chequer shape as well.
+	(reported by Nardy Pillards)
+
 Fri Dec  6 11:05:07 2002  Gary Wong  <gtw@gnu.org>
 
 	* configure.in: Add "ja" to ALL_LINGUAS (translation provided
