@@ -1222,8 +1222,11 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
 
   sprintf ( sz, "b-%stop%s", fTurn ? "hi" : "lo", fClockwise ? "" : "r");
   printImage ( pf, szImageDir, sz, szExtension,
-               fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
-               "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+",
+               fClockwise ?
+                 (fTurn ? "+-24-23-22-21-20-19-+---+-18-17-16-15-14-13-+" :
+                   "+--1--2--3--4--5--6-+---+--7--8--9-10-11-12-+") :
+                 (fTurn ? "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+" :
+                   "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+"),
                hecss, HTML_EXPORT_TYPE_GNU );
 
   fputs ( "</td></tr>\n", pf );
@@ -1549,9 +1552,12 @@ printHTMLBoardGNU ( FILE *pf, matchstate *pms, int fTurn,
   fputs ( "<td colspan=\"15\">", pf );
   sprintf ( sz, "b-%sbot%s", fTurn ? "lo" : "hi", fClockwise ? "" : "r");
   printImage ( pf, szImageDir, sz, szExtension,
-               fTurn ?
-               "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
-               "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+", 
+               fClockwise ?
+                (fTurn ? "+--1--2--3--4--5--6-+---+--7--8--9-10-11-12-+" :
+                "+-24-23-22-21-20-19-+---+-18-17-16-15-14-13-+") :
+                (fTurn ? "+-12-11-10--9--8--7-+---+--6--5--4--3--2--1-+" :
+                "+-13-14-15-16-17-18-+---+-19-20-21-22-23-24-+"),
+
                hecss, HTML_EXPORT_TYPE_GNU );
   fputs ( "</td>", pf );
   fputs ( "</tr>", pf );
