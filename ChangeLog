@@ -1,3 +1,8 @@
+Mon May 20 19:52:09 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (SaveSettings): save confirm settings properly.
+	* gnubg.c (SaveEvalSettings): save nooneplyprune.
+
 Mon May 20 19:21:53 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	Fix bug in bearoff cube evaluations.

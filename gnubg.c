@@ -3271,11 +3271,13 @@ SaveEvalSettings( FILE *pf, char *sz, evalcontext *pec ) {
 	     "%s candidates %d\n"
 	     "%s tolerance %.3f\n"
 	     "%s reduced %d\n"
+	     "%s nooneplyprune %s\n"
 	     "%s cubeful %s\n"
 	     "%s noise %.3f\n"
 	     "%s deterministic %s\n",
 	     sz, pec->nPlies, sz, pec->nSearchCandidates,
 	     sz, pec->rSearchTolerance, sz, pec->nReduced,
+             sz, pec->fNoOnePlyPrune ? "on" : "off",
 	     sz, pec->fCubeful ? "on" : "off",
 	     sz, pec->rNoise, sz, pec->fDeterministic ? "on" : "off" );
 }
@@ -3450,14 +3452,17 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf( pf, "set cache %d\n", cCache );
 
     fprintf( pf, "set clockwise %s\n"
-	     "set confirm %s\n"
+	     "set confirm new %s\n"
+	     "set confirm save %s\n"
 	     "set cube use %s\n"
 #if USE_GUI
 	     "set delay %d\n"
 #endif
 	     "set display %s\n"
 	     "set egyptian %s\n",
-	     fClockwise ? "on" : "off", fConfirm ? "on" : "off",
+	     fClockwise ? "on" : "off", 
+             fConfirm ? "on" : "off",
+             fConfirmSave ? "on" : "off",
 	     fCubeUse ? "on" : "off",
 #if USE_GUI
 	     nDelay,
