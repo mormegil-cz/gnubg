@@ -37,8 +37,6 @@ duplication of effort and to make sure our changes merge easily.
 ** EvaluatePositionCache doesn't currently cache evaluations deeper than
   0-ply for match play.  Update EvalCacheHash so that spurious collisions
   won't occur, and then change EvaluatePositionCache to cache what it can.
-** Merge David's match equity table extension code. (gary, unless Jørn wants
-  to)
 ** Merge David's reduced evaluation code. (gary)
 ** Bearoff database changes:
 *** Use a more intelligent encoding in the 1-sided database, to conserve

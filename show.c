@@ -614,11 +614,11 @@ extern void CommandShowMatchEquityTable ( char *sz ) {
      else if match write nMatchTo x nMatchTo table,
      else write full table (may be HUGE!) */
 
-  if ( ( n <= 0 ) || ( n > nMaxScore ) ) {
+  if ( ( n <= 0 ) || ( n > MAXSCORE ) ) {
     if ( nMatchTo )
       n = nMatchTo;
     else
-      n = nMaxScore;
+      n = MAXSCORE;
   }
 
 #if USE_GTK

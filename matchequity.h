@@ -33,8 +33,8 @@ extern float aafMET [ MAXSCORE ][ MAXSCORE ];
 
 extern float afMETPostCrawford [ MAXSCORE ];
 
+
 extern met metCurrent;
-extern int nMaxScore;
 
 void
 InitMatchEquity ( met metInit );
@@ -44,5 +44,8 @@ GetPoints ( float arOutput [ 5 ], cubeinfo *pci, float arCP[ 2 ] );
 
 extern float
 GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci );
+
+extern int
+GetMaxScore ( met metx );
 
 #endif

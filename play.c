@@ -1667,12 +1667,12 @@ extern void CommandNewMatch( char *sz ) {
 
     /* Check that match equity table is large enough */
 
-    if ( n > nMaxScore ) {
-
-      outputf ( "The current match equity table does not support "
-                "matches of length %i\n"
-                "(see `help set matchequitytable')\n", n );
-      return;
+    if ( n > MAXSCORE ) {
+       outputf ( "GNU Backgammon is compiled with support only for "
+                 "matches of length %i\n"
+                 "and below\n",
+                 MAXSCORE );
+       return;
     }
 
     if( gs == GAME_PLAYING && fConfirm ) {

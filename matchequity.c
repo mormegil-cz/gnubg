@@ -23,6 +23,9 @@
  */
 
 #include <stdio.h>
+#include <assert.h>
+#include <math.h>
+
 #include "matchequity.h"
 
 char *szMET[ MET_JACOBS + 1 ] = {
@@ -43,7 +46,6 @@ float aafMET [ MAXSCORE ][ MAXSCORE ];
 float afMETPostCrawford [ MAXSCORE ];
 
 met metCurrent = MET_ZADEH;
-int nMaxScore = MAXSCORE;
 
 int 
 GetCubePrimeValue ( int i, int j, int nCubeValue );
@@ -53,6 +55,12 @@ InitMETZadeh ();
 
 void
 InitPostCrawfordMET ();
+
+void
+ExtendMET ( int nMaxScore );
+
+extern float
+NormalDistArea ( float rMin, float rMax, float rMu, float rSigma );
 
 /*
  * Match equity table from Kit Woolsey: "How to Play Tournament
@@ -244,11 +252,36 @@ float aafMETSnowie[ 15 ][ 15 ] =
    0.300, 0.341, 0.382, 0.422, 0.462, 0.500},
 };
 
+extern int
+GetMaxScore ( met metx ) {
+
+   switch ( metx ) {
+
+   case MET_ZADEH:
+      return MAXSCORE;
+      break;
+   case MET_WOOLSEY:
+      return 15;
+      break;
+   case MET_JACOBS:
+      return 25;
+      break;
+   case MET_SNOWIE:
+      return 15;
+      break;
+   default:
+      return -1;
+      break;
+   }
+
+}
+
 
 void
 InitMatchEquity ( met metInit ) {
 
   int i,j;
+  int nMaxScore;
 
   metCurrent = metInit;
 
@@ -260,29 +293,27 @@ InitMatchEquity ( met metInit ) {
 
   /* calc. or init MET */
 
+  nMaxScore = GetMaxScore ( metInit );
+
   switch ( metInit ) {
 
   case MET_ZADEH:
 
-    nMaxScore = MAXSCORE;
     InitMETZadeh ();
+    
     break;
 
   case MET_WOOLSEY:
-
-    nMaxScore = 15;
 
     for ( i = 0; i < 15; i++ ) 
       for ( j = 0; j < 15; j++ ) 
         aafMET[ i ][ j ] = aafMETWoolsey[ i ][ j ];
 
     InitPostCrawfordMET ();
-
+  
     break;
 
   case MET_JACOBS:
-
-    nMaxScore = 25;
 
     for ( i = 0; i < 25; i++ ) 
       for ( j = 0; j < 25; j++ ) 
@@ -293,8 +324,6 @@ InitMatchEquity ( met metInit ) {
     break;
 
   case MET_SNOWIE:
-
-    nMaxScore = 15;
 
     for ( i = 0; i < 15; i++ ) 
       for ( j = 0; j < 15; j++ ) 
@@ -309,6 +338,14 @@ InitMatchEquity ( met metInit ) {
     break;
   }
 
+
+  /* 
+   * Extend match equity table to MAXSCORE using
+   * David Montgomery's extrapolation algorithm.
+   */
+
+  ExtendMET ( nMaxScore );
+
 }
 
 
@@ -319,7 +356,7 @@ InitPostCrawfordMET () {
   
   /* post-crawford match equity */
 
-  for ( i = 0; i < 15; i++ ) {
+  for ( i = 0; i < MAXSCORE; i++ ) {
 
     afMETPostCrawford[ i ] = 
       GAMMONRATE * 0.5 * 
@@ -912,5 +949,76 @@ GetDoublePointDeadCube ( float arOutput [ 5 ], cubeinfo *pci ) {
     return rRisk / ( rRisk +  rGain );
 
   }
+
+}
+
+
+void
+ExtendMET ( int nMaxScore ) {
+
+  static const float arStddevTable[] =
+     { 0, 1.24, 1.27, 1.47, 1.50, 1.60, 1.61, 1.66, 1.68, 1.70, 1.72, 1.77 };
+  
+  float rStddev0, rStddev1, rGames, rSigma, rProb;
+  int i,j;
+  int nScore0, nScore1;
+
+  /* Extend match equity table */
+
+  for ( i = nMaxScore; i < MAXSCORE; i++ ) {
+
+    for ( j = 0; j <= i ; j++ ) {
+
+      nScore0 = i + 1;
+      nScore1 = j + 1;
+
+      rGames = ( nScore0 + nScore1 ) / 2.00f;
+
+      if ( nScore0 > 10 ) 
+        rStddev0 = 1.77;
+      else
+        rStddev0 = arStddevTable[ nScore0 ];
+
+      if ( nScore1 > 10 ) 
+        rStddev1 = 1.77;
+      else
+        rStddev1 = arStddevTable[ nScore1 ];
+
+      rSigma =
+        sqrt ( rStddev0 * rStddev0 + rStddev1 * rStddev1 )
+        * sqrt ( rGames );
+
+      assert ( 6.0f * rSigma > nScore1 - nScore0 );
+
+      aafMET[ i ][ j ] =
+        1.0 - NormalDistArea ( nScore1 - nScore0, 6.0f * rSigma,
+                               0.0f, rSigma );
+
+    }
+  }
+
+  /* Generate j > i part of MET */
+
+  for ( i = 0; i < MAXSCORE; i++ )
+    for ( j = ( (i < nMaxScore) ? nMaxScore : i + 1);
+          j < MAXSCORE; j++ )
+      aafMET[ i ][ j ] = 1.0 - aafMET[ j ][ i ];
+
+}
+
+
+extern float
+NormalDistArea ( float rMin, float rMax, float rMu, float rSigma ) {
+
+  float rtMin, rtMax;
+  float rInt1, rInt2;
+
+  rtMin = ( rMin - rMu ) / rSigma;
+  rtMax = ( rMax - rMu ) / rSigma;
+
+  rInt1 = ( erf( rtMin / sqrt(2) ) + 1.0f ) / 2.0f;
+  rInt2 = ( erf( rtMax / sqrt(2) ) + 1.0f ) / 2.0f;
+
+  return rInt2 - rInt1;
 
 }
