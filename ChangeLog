@@ -1,3 +1,8 @@
+Fri Jun 11 19:00:05 CEST 2004  Jim Segrave  <jes@jes-2.demon.nl>
+
+	* gtkgamelist.c gnubg.gtkrc
+	* Add gtkrc support for any-blunder/any-error/any-doubtful
+
 Thu Jun 10 17:41:40 CEST 2004  Joern Thyssen  <jth@gnubg.org>
 
 	* Makefile.am: add gtkgamelist.c
