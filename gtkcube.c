@@ -1017,8 +1017,7 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   cubehintdata *pchd = (cubehintdata *) malloc ( sizeof ( cubehintdata ) );
 
-  GtkWidget *pw;
-  GtkWidget *pwx;
+  GtkWidget *pw, *pwhb, *pwx;
 
   pchd->aarOutput = aarOutput;
   pchd->aarStdDev = aarStdDev;
@@ -1066,9 +1065,11 @@ CreateCubeAnalysis ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
 
   gtk_box_pack_start ( GTK_BOX ( pwx ), pw, FALSE, FALSE, 0 );
 
-  gtk_box_pack_start ( GTK_BOX ( pwx ), 
-                     CreateCubeAnalysisTools ( pchd ), 
-                     TRUE, FALSE, 0 );
+  pwhb = gtk_hbox_new(FALSE, 0);
+  gtk_box_pack_start(GTK_BOX(pwhb), CreateCubeAnalysisTools ( pchd ), FALSE, FALSE, 8 );
+
+  gtk_box_pack_start ( GTK_BOX ( pwx ), pwhb,
+                     FALSE, FALSE, 0 );
 
   gtk_object_set_data_full( GTK_OBJECT( pw ), "user_data", 
                             pchd, free );

@@ -7178,6 +7178,8 @@ extern void GTKCubeHint( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
     
     setWindowGeometry ( pwHint, &awg[ WINDOW_HINT ] );
     
+    gtk_window_set_default_size(GTK_WINDOW(pwHint), 400, 300);
+    
     gtk_object_weakref( GTK_OBJECT( pwHint ), DestroyHint, NULL );
 
     gtk_widget_show_all( pwHint );
