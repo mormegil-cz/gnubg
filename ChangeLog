@@ -1,3 +1,11 @@
+Wed Apr 28 20:28:22 CEST 2004  Joern Thyssen  <jth@gnubg.org>
+
+	Add new utility program bearoffdump for inspection
+	of databases.
+
+	* bearoffdump.c: new file.	
+	* Makefile.am: add bearoffdump as installable file.
+
 Wed Apr 28 16:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* set.c: Change "set priority idle" to set the process priority to

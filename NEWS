@@ -4,11 +4,13 @@ GNU Backgammon NEWS -- history of user-visible changes.  15 Jan
 
 ** fix "bug" in Zadeh match equity table
 
-** Add built-in support for mec 
+** Add built-in support for Claes Tornberg's mec 
 
 ** Russian translation started
 
 ** Interface to relational databases using Python
+
+** New utility program bearoffdump to dump information about databases.
 
 * Changes in GNU Backgammon 0.14.2
 

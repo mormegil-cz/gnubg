@@ -247,7 +247,7 @@ COMMON_SOURCES = backgammon.h gnubg.c getopt.h getopt.c getopt1.c eval.h \
 
 COMMON_DEPS = @LIBOBJS@ lib/libevent.a
 
-bin_PROGRAMS = gnubg makebearoff makehyper
+bin_PROGRAMS = gnubg makebearoff makehyper bearoffdump
 
 gnubg_LDFLAGS = @PYTHON_LDFLAGS@
 
@@ -317,6 +317,15 @@ makehyper_SOURCES = makehyper.c eval.h eval.c positionid.h positionid.c \
 makehyper_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
 makehyper_DEPENDENCIES = lib/libevent.a
 
+bearoffdump_SOURCES = bearoffdump.c eval.h eval.c positionid.h positionid.c \
+	pub_eval.c matchequity.c matchequity.h matchid.h matchid.c \
+        i18n.c i18n.h getopt.c getopt.h getopt1.c osr.c osr.h \
+        bearoffgammon.c bearoffgammon.h bearoff.c bearoff.h path.c path.h \
+	format.c format.h mec.h mec.c $(LIBGEN_SOURCES)  $(BR1_SOURCES)
+
+bearoffdump_LDADD = -Llib -levent $(COMMON_LIBS) @GTK_LIBS@
+bearoffdump_DEPENDENCIES = lib/libevent.a
+
 erftest_SOURCES = erftest.c
 
 TESTS = gnubgtest erftest
@@ -333,19 +342,30 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = intl/Makefile
-bin_PROGRAMS = gnubg$(EXEEXT) makebearoff$(EXEEXT) makehyper$(EXEEXT)
+bin_PROGRAMS = gnubg$(EXEEXT) makebearoff$(EXEEXT) makehyper$(EXEEXT) \
+	bearoffdump$(EXEEXT)
 check_PROGRAMS = erftest$(EXEEXT)
 noinst_PROGRAMS = makeweights$(EXEEXT) makebearoff1$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
+@HAVE_LIBGEN_TRUE@am__objects_1 =
+@HAVE_LIBGEN_FALSE@am__objects_1 = simplelibgen.$(OBJEXT)
+@COMPILE_BR1_TRUE@am__objects_2 = br1.$(OBJEXT)
+@COMPILE_BR1_FALSE@am__objects_2 =
+am_bearoffdump_OBJECTS = bearoffdump.$(OBJEXT) eval.$(OBJEXT) \
+	positionid.$(OBJEXT) pub_eval.$(OBJEXT) matchequity.$(OBJEXT) \
+	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
+	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT) \
+	bearoff.$(OBJEXT) path.$(OBJEXT) format.$(OBJEXT) mec.$(OBJEXT) \
+	$(am__objects_1) $(am__objects_2)
+bearoffdump_OBJECTS = $(am_bearoffdump_OBJECTS)
+bearoffdump_LDFLAGS =
 am_erftest_OBJECTS = erftest.$(OBJEXT)
 erftest_OBJECTS = $(am_erftest_OBJECTS)
 erftest_LDADD = $(LDADD)
 erftest_DEPENDENCIES =
 erftest_LDFLAGS =
-@HAVE_LIBGEN_TRUE@am__objects_1 =
-@HAVE_LIBGEN_FALSE@am__objects_1 = simplelibgen.$(OBJEXT)
-am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
+am__objects_3 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	eval.$(OBJEXT) play.$(OBJEXT) positionid.$(OBJEXT) \
 	drawboard.$(OBJEXT) pub_eval.$(OBJEXT) set.$(OBJEXT) \
 	show.$(OBJEXT) database.$(OBJEXT) dice.$(OBJEXT) \
@@ -362,8 +382,6 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 	formatgs.$(OBJEXT) timer.$(OBJEXT) $(am__objects_1) \
 	external_y.$(OBJEXT) external_l.$(OBJEXT) openurl.$(OBJEXT) \
 	mec.$(OBJEXT) relational.$(OBJEXT)
-@COMPILE_BR1_TRUE@am__objects_3 = br1.$(OBJEXT)
-@COMPILE_BR1_FALSE@am__objects_3 =
 @USE_SOUND_TRUE@am__objects_4 = sound.$(OBJEXT)
 @USE_SOUND_FALSE@am__objects_4 =
 @USE_FREETYPE_TRUE@am__objects_5 = luxi.$(OBJEXT)
@@ -372,7 +390,7 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_PYTHON_FALSE@am__objects_6 =
 @USE_TIMECONTROL_TRUE@am__objects_7 = timecontrol.$(OBJEXT)
 @USE_TIMECONTROL_FALSE@am__objects_7 =
-@USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_2) gtkboard.$(OBJEXT) \
+@USE_GTK_TRUE@am_gnubg_OBJECTS = $(am__objects_3) gtkboard.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkgame.$(OBJEXT) gtkprefs.$(OBJEXT) \
 @USE_GTK_TRUE@	gtk-multiview.$(OBJEXT) gtktheory.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktexi.$(OBJEXT) gtkexport.$(OBJEXT) \
@@ -382,10 +400,10 @@ am__objects_2 = gnubg.$(OBJEXT) getopt.$(OBJEXT) getopt1.$(OBJEXT) \
 @USE_GTK_TRUE@	gtksplash.$(OBJEXT) gtkrolls.$(OBJEXT) \
 @USE_GTK_TRUE@	gtktempmap.$(OBJEXT) gtkbearoff.$(OBJEXT) \
 @USE_GTK_TRUE@	gtkoptions.$(OBJEXT) gtkpath.$(OBJEXT) \
-@USE_GTK_TRUE@	gtktoolbar.$(OBJEXT) $(am__objects_3) \
+@USE_GTK_TRUE@	gtktoolbar.$(OBJEXT) $(am__objects_2) \
 @USE_GTK_TRUE@	$(am__objects_4) $(am__objects_5) \
 @USE_GTK_TRUE@	$(am__objects_6) $(am__objects_7)
-@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_2) $(am__objects_3) \
+@USE_GTK_FALSE@am_gnubg_OBJECTS = $(am__objects_3) $(am__objects_2) \
 @USE_GTK_FALSE@	$(am__objects_4) $(am__objects_5) \
 @USE_GTK_FALSE@	$(am__objects_6) $(am__objects_7)
 gnubg_OBJECTS = $(am_gnubg_OBJECTS)
@@ -394,7 +412,7 @@ am_makebearoff_OBJECTS = makebearoff.$(OBJEXT) eval.$(OBJEXT) \
 	matchid.$(OBJEXT) i18n.$(OBJEXT) getopt.$(OBJEXT) \
 	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT) \
 	bearoff.$(OBJEXT) path.$(OBJEXT) format.$(OBJEXT) mec.$(OBJEXT) \
-	$(am__objects_1) $(am__objects_3)
+	$(am__objects_1) $(am__objects_2)
 makebearoff_OBJECTS = $(am_makebearoff_OBJECTS)
 makebearoff_LDFLAGS =
 am_makebearoff1_OBJECTS = makebearoff1.$(OBJEXT) getopt.$(OBJEXT) \
@@ -407,7 +425,7 @@ am_makehyper_OBJECTS = makehyper.$(OBJEXT) eval.$(OBJEXT) \
 	getopt1.$(OBJEXT) osr.$(OBJEXT) bearoffgammon.$(OBJEXT) \
 	bearoff.$(OBJEXT) path.$(OBJEXT) drawboard.$(OBJEXT) \
 	format.$(OBJEXT) mec.$(OBJEXT) $(am__objects_1) \
-	$(am__objects_3)
+	$(am__objects_2)
 makehyper_OBJECTS = $(am_makehyper_OBJECTS)
 makehyper_LDFLAGS =
 am_makeweights_OBJECTS = makeweights.$(OBJEXT) i18n.$(OBJEXT) \
@@ -424,6 +442,7 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/erf.Po $(DEPDIR)/strdup.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/analysis.Po ./$(DEPDIR)/bearoff.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/bearoffdump.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/bearoffgammon.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/boardpos.Po ./$(DEPDIR)/br1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/copying.Po ./$(DEPDIR)/credits.Po \
@@ -475,8 +494,8 @@ CFLAGS = @CFLAGS@
 LEXCOMPILE = $(LEX) $(LFLAGS) $(AM_LFLAGS)
 YLWRAP = $(top_srcdir)/ylwrap
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
-DIST_SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) \
-	$(makebearoff_SOURCES) $(makebearoff1_SOURCES) \
+DIST_SOURCES = $(bearoffdump_SOURCES) $(erftest_SOURCES) \
+	$(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) \
 	$(makehyper_SOURCES) $(makeweights_SOURCES)
 
 NROFF = nroff
@@ -495,7 +514,7 @@ DIST_COMMON = README ABOUT-NLS AUTHORS COPYING ChangeLog INSTALL \
 	missing mkinstalldirs py-compile strdup.c ylwrap
 DIST_SUBDIRS = intl lib doc met po m4 xpm sounds board3d textures \
 	scripts
-SOURCES = $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
+SOURCES = $(bearoffdump_SOURCES) $(erftest_SOURCES) $(gnubg_SOURCES) $(makebearoff_SOURCES) $(makebearoff1_SOURCES) $(makehyper_SOURCES) $(makeweights_SOURCES)
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -567,6 +586,9 @@ clean-checkPROGRAMS:
 
 clean-noinstPROGRAMS:
 	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+bearoffdump$(EXEEXT): $(bearoffdump_OBJECTS) $(bearoffdump_DEPENDENCIES) 
+	@rm -f bearoffdump$(EXEEXT)
+	$(LINK) $(bearoffdump_LDFLAGS) $(bearoffdump_OBJECTS) $(bearoffdump_LDADD) $(LIBS)
 erftest$(EXEEXT): $(erftest_OBJECTS) $(erftest_DEPENDENCIES) 
 	@rm -f erftest$(EXEEXT)
 	$(LINK) $(erftest_LDFLAGS) $(erftest_OBJECTS) $(erftest_LDADD) $(LIBS)
@@ -596,6 +618,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/strdup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/analysis.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bearoff.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bearoffdump.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bearoffgammon.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boardpos.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/br1.Po@am__quote@
