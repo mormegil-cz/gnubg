@@ -51,7 +51,7 @@ static void ShowEvaluation( evalcontext *pec ) {
 	    pec->nPlies, pec->nSearchCandidates, pec->nSearchCandidates == 1 ?
 	    "" : "s", pec->rSearchTolerance,
 	    (pec->nReduced) ? 100. * pec->nReduced / 21.0 : 100.,
-	    pec->fRelativeAccuracy ? "Consistent evaluations",
+	    pec->fRelativeAccuracy ? "Consistent evaluations" :
 	    "Variable evaluations" );
 }
 
