@@ -1,3 +1,12 @@
+Wed Oct 17 18:41:20 2001  Joern Thyssen  <jth@chem.sdu.dk>
+
+	* eval.c (DumpPosition): Skip call to cubeless evaluator.
+	Also, only call GeneralCubeDecision for last ply, and then
+	iff the cube is available.
+
+	* eval.c (FindCubeDecision): Can now return
+	cube is NOT_AVAILABLE.
+
 Tue Oct 16 18:08:26 2001  Joern Thyssen  <jth@chem.sdu.dk>
 
 	* eval.c (GetCubeActionSz): Cosmetic change: no '+' in output for

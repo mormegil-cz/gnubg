@@ -3548,7 +3548,6 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 			 int fOutputWinPC, int fOutputInvert ) {
 
   float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ], arDouble[ 4 ];
-  float arClOutput[ NUM_OUTPUTS ];
   positionclass pc = ClassifyPosition( anBoard );
   int i, nPlies;
   cubedecision cd;
@@ -3598,13 +3597,30 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
   for( i = 0; i <= nPlies; i++ ) {
     szOutput = strchr( szOutput, 0 );
 	
-    if( EvaluatePositionCache( anBoard, arClOutput,
-                               pci, pec, i, pc ) < 0 )
-	    return -1;
 
     ec.nPlies = i;
-    if ( GeneralCubeDecisionE ( aarOutput, anBoard, pci, &ec ) < 0 )
-      return -1;
+    ec.fCubeful = TRUE;
+
+    /* For lower level plies we do not need equities for
+       both no double and double take */
+
+    if ( i == nPlies && GetDPEq ( NULL, NULL, pci ) ) {
+
+      /* last ply */
+
+      if ( GeneralCubeDecisionE ( aarOutput, anBoard, pci, &ec ) < 0 )
+        return -1;
+
+    } 
+    else {
+
+      /* intermediate ply */
+
+      if ( GeneralEvaluationE ( aarOutput[ 0 ], anBoard, pci, & ec )  < 0 ) 
+        return -1;
+
+    }
+
 
     if( !i )
 	    strcpy( szOutput, "static" );
@@ -3614,7 +3630,6 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     szOutput = strchr( szOutput, 0 );
 
     if( fOutputInvert ) {
-      InvertEvaluation( arClOutput );
       InvertEvaluationR( aarOutput[ 0 ] );
       InvertEvaluationR( aarOutput[ 1 ] );
       pci->fMove = !pci->fMove;
@@ -3631,43 +3646,43 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 	    sprintf( szOutput,
 		     ":\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t"
 		     "(%6.2f%% (%6.2f%%))\n",
-		     100.0f * arClOutput[ 0 ],
-                     100.0f * arClOutput[ 1 ],
-		     100.0f * arClOutput[ 2 ],
-                     100.0f * arClOutput[ 3 ],
-		     100.0f * arClOutput[ 4 ], 
-		     100.0 * eq2mwc ( Utility ( arClOutput, pci ), pci ), 
+		     100.0f * aarOutput[ 0 ][ 0 ],
+                     100.0f * aarOutput[ 0 ][ 1 ],
+		     100.0f * aarOutput[ 0 ][ 2 ],
+                     100.0f * aarOutput[ 0 ][ 3 ],
+		     100.0f * aarOutput[ 0 ][ 4 ], 
+		     100.0 * eq2mwc ( Utility ( aarOutput[ 0 ], pci ), pci ), 
 		     100.0 * eq2mwc ( arDouble[ 0 ], pci ) ); 
 	else
 	    sprintf( szOutput,
 		     ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
 		     "(%6.2f%% (%6.2f%%))\n",
-		     arClOutput[ 0 ],
-                     arClOutput[ 1 ],
-		     arClOutput[ 2 ],
-                     arClOutput[ 3 ],
-		     arClOutput[ 4 ], 
-		     100.0 * eq2mwc ( Utility ( arClOutput, pci ), pci ), 
+		     aarOutput[ 0 ][ 0 ],
+                     aarOutput[ 0 ][ 1 ],
+		     aarOutput[ 0 ][ 2 ],
+                     aarOutput[ 0 ][ 3 ],
+		     aarOutput[ 0 ][ 4 ], 
+		     100.0 * eq2mwc ( Utility ( aarOutput[ 0 ], pci ), pci ), 
 		     100.0 * eq2mwc ( arDouble[ 0 ], pci ) ); 
     } else {
 	if( fOutputWinPC )
 	    sprintf( szOutput,
 		     ":\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t%5.1f%%\t"
 		     "(%+6.3f  (%+6.3f))\n",
-		     100.0f * arClOutput[ 0 ],
-                     100.0f * arClOutput[ 1 ],
-		     100.0f * arClOutput[ 2 ],
-                     100.0f * arClOutput[ 3 ],
-		     100.0f * arClOutput[ 4 ],
-                     Utility ( arClOutput, pci ), 
+		     100.0f * aarOutput[ 0 ][ 0 ],
+                     100.0f * aarOutput[ 0 ][ 1 ],
+		     100.0f * aarOutput[ 0 ][ 2 ],
+                     100.0f * aarOutput[ 0 ][ 3 ],
+		     100.0f * aarOutput[ 0 ][ 4 ],
+                     Utility ( aarOutput[ 0 ], pci ), 
 		     arDouble[ 0 ] ); 
 	else
 	    sprintf( szOutput,
 		     ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
 		     "(%+6.3f  (%+6.3f))\n",
-		     arClOutput[ 0 ], arClOutput[ 1 ],
-		     arClOutput[ 2 ], arClOutput[ 3 ],
-		     arClOutput[ 4 ], Utility ( arClOutput, pci ), 
+		     aarOutput[ 0 ][ 0 ], aarOutput[ 0 ][ 1 ],
+		     aarOutput[ 0 ][ 2 ], aarOutput[ 0 ][ 3 ],
+		     aarOutput[ 0 ][ 4 ], Utility ( aarOutput[ 0 ], pci ), 
 		     arDouble[ 0 ] ); 
     }
     
@@ -4187,6 +4202,39 @@ SetCubeInfo ( cubeinfo *pci, int nCube, int fCubeOwner, int fMove,
 
 static cubedecision
 FindBestCubeDecision ( float arDouble[], cubeinfo *pci ) {
+
+/*
+ * FindBestCubeDecision:
+ *
+ *    Calculate optimal cube decision and equity/mwc for this.
+ *
+ * Input:
+ *    arDouble    - array with equities or mwc's:
+ *                      arDouble[ 1 ]: no double,
+ *                      arDouble[ 2 ]: double take
+ *                      arDouble[ 3 ]: double pass
+ *    pci         - pointer to cube info
+ *
+ * Output:
+ *    arDouble    - array with equities or mwc's
+ *                      arDouble[ 0 ]: equity for optimal cube decision
+ *
+ * Returns:
+ *    cube decision 
+ *
+ */
+
+  /* Check if cube is avaiable */
+
+  if ( ! GetDPEq ( NULL, NULL, pci ) ) {
+
+    arDouble[ OUTPUT_OPTIMAL ] = arDouble[ OUTPUT_NODOUBLE ];
+    return NOT_AVAILABLE;
+
+  }
+
+
+  /* Cube is available: find optimal cube action */
 
   if ( ( arDouble[ OUTPUT_TAKE ] >= arDouble[ OUTPUT_NODOUBLE ] ) &&
        ( arDouble[ OUTPUT_DROP ] >= arDouble[ OUTPUT_NODOUBLE ] ) ) {
@@ -5991,6 +6039,7 @@ GeneralCubeDecisionE ( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
   cubeinfo aciCubePos[ 2 ];
   float arCubeful[ 2 ];
   int i,j;
+
 
   /* Setup cube for "no double" and "double, take" */
 
