@@ -1,3 +1,8 @@
+Thu Nov  1 14:25:39 2001  Gary Wong  <gtw@research.att.com>
+
+	* rollout.c (BasicCubefulRollout): Keep track of unfinished games;
+	exit loop when all games are finished.
+
 Thu Nov  1 10:43:49 2001  Gary Wong  <gtw@research.att.com>
 
 	* analysis.c (AnalyzeMove, AnalyzeGame, CommandAnalyseMatch): Handle
