@@ -27,6 +27,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#if HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #include "backgammon.h"
 #include "eval.h"
 
