@@ -445,6 +445,9 @@ command cER = {
       "against the database"), NULL, NULL },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportGame[] = {
+    { "equityevolution", CommandExportGameEquityEvolution, 
+      N_("Exports the equity evolution of the game (for import into a spreadsheet"), 
+      szFILENAME, &cFilename },
     { "gam", CommandExportGameGam, N_("Records a log of the game in .gam "
       "format"), szFILENAME, &cFilename },
     { "html", CommandExportGameHtml,
@@ -462,6 +465,9 @@ command cER = {
       szFILENAME, &cFilename },
     { NULL, NULL, NULL, NULL, NULL }
 }, acExportMatch[] = {
+    { "equityevolution", CommandExportMatchEquityEvolution, 
+      N_("Exports the equity evolution of the match (for import into a spreadsheet"), 
+      szFILENAME, &cFilename },
     { "mat", CommandExportMatchMat, N_("Records a log of the match in .mat "
       "format"), szFILENAME, &cFilename },
     { "html", CommandExportMatchHtml,
@@ -3638,6 +3644,14 @@ extern void CommandSaveSettings( char *szParam ) {
 	     arSkillLevel[ SKILL_VERYGOOD ],
 	     arLuckLevel[ LUCK_VERYGOOD ],
 	     arLuckLevel[ LUCK_VERYBAD ] );
+
+    fprintf ( pf,
+              "set analysis cube %s\n"
+              "set analysis luck %s\n"
+              "set analysis moves %s\n",
+              fAnalyseCube ? "on" : "off",
+              fAnalyseDice ? "on" : "off",
+              fAnalyseMove ? "on" : "off" );
     
     fprintf ( pf,
               "set analysis cube %s\n"
@@ -3699,7 +3713,7 @@ extern void CommandSaveSettings( char *szParam ) {
 
     fprintf( pf, "set jacoby %s\n", fJacoby ? "on" : "off" );
 
-    fprintf( pf, "set matchequitytable %s\n", miCurrent.szFileName );
+    fprintf( pf, "set matchequitytable \"%s\"\n", miCurrent.szFileName );
     
     fprintf( pf, "set nackgammon %s\n", fNackgammon ? "on" : "off" );
 

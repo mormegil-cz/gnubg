@@ -1,3 +1,8 @@
+Sat Jun 29 10:08:34 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.c (CommandSaveSettings): add qoutation marks when saving
+	match equity table.
+
 Fri Jun 28 23:30:05 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* sgf.c (WriteSkillCube): new function.
