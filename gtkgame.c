@@ -6091,7 +6091,8 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
 
           if ( ! ms.nMatchTo )
             /* money game */
-            sprintf( sz, "%+7.4f", aarMu[ j ][ i ] );
+            sprintf( sz, "%+7.4f", aarMu[ j ][ i ] * 
+                     aci[ j ].nCube / aci[ 0 ].nCube );
           else if ( fOutputMWC )
             /* match play (mwc) */
             sprintf( sz, "%7.3f%%", 100.0f * eq2mwc ( aarMu[ j ][ i ], &aci[ j ] ) );
@@ -6105,7 +6106,8 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
           if ( fCubeful ) {
             if ( ! ms.nMatchTo ) 
               /* money game */
-              sprintf( sz, "%+7.4f", aarMu[ j ][ i ] );
+              sprintf( sz, "%+7.4f", aarMu[ j ][ i ] *
+                       aci[ j ].nCube / aci[ 0 ].nCube );
             else if ( fOutputMWC )
               /* match play (mwc) */
               sprintf( sz, "%7.3f%%", 100.0f * aarMu[ j ][ i ] );
@@ -6130,7 +6132,8 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
 
           if ( ! ms.nMatchTo )
             /* money game */
-            sprintf( sz, "%7.4f", aarSigma[ j ][ i ] );
+            sprintf( sz, "%7.4f", aarSigma[ j ][ i ] *
+                     aci[ j ].nCube / aci[ 0 ].nCube );
           else if ( fOutputMWC )
             /* match play (mwc) */
             sprintf( sz, "%7.3f%%", 
@@ -6148,7 +6151,8 @@ GTKRolloutUpdate( float aarMu[][ NUM_ROLLOUT_OUTPUTS ],
 
           if ( ! ms.nMatchTo ) 
             /* money game */
-            sprintf( sz, "%+7.4f", aarSigma[ j ][ i ] );
+            sprintf( sz, "%+7.4f", aarSigma[ j ][ i ] *
+                     aci[ j ].nCube / aci[ 0 ].nCube );
           else if ( fOutputMWC )
             /* match play (mwc) */
             sprintf( sz, "%7.3f%%", 100.0f * aarSigma[ j ][ i ] );
