@@ -234,7 +234,7 @@ extern int Rollout( int anBoard[ 2 ][ 25 ], float arOutput[], float arStdDev[],
 		arVariance[ i ] -= cGames * arOutput[ i ] * arOutput[ i ];
 		if( arVariance[ i ] < 0.0 )
 		    arVariance[ i ] = 0.0;
-		arStdDev[ i ] = sqrt( arVariance[ i ] / ( cGames - 1 ) );
+		arStdDev[ i ] = sqrt( arVariance[ i ] ) / ( cGames - 1 );
 	    }
 	}
     }
