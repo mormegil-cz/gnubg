@@ -1,3 +1,8 @@
+Wed Aug 14 21:21:02 2002  Joern Thyssen  <jthyssen@dk.ibm.com>
+
+	* gnubg.texi: add section on match ID and position ID to the
+	new manual.
+
 Son Aug 11 18:39:19 CEST 2002  Achim Mueller <acepoint@deltacity.net>
 	* gnubg.texi: new structure of the document, starting the new 
 	manual now. Everybody is invited to add chapters or sections,
