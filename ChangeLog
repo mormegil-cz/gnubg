@@ -1,3 +1,9 @@
+Sun May  4 22:48:47 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* analysis.c (AnalyzeMove): always analyse MOVE_DOUBLEs as they are
+	shared with the subsequent MOVE_TAKEs or MOVE_DROPs.
+	(bug reported by Øystein Johansen)
+
 Sun May  4 22:36:03 2003  Joern Thyssen  <jth@gnubg.org>
 
 	* import.c (ParseMatMove): handle bug in mat files produced by 

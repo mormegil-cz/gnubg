@@ -688,10 +688,9 @@ AnalyzeMove ( moverecord *pmr, matchstate *pms, list *plGame, statcontext *psc,
       
     case MOVE_DOUBLE:
 
-        if ( afAnalysePlayers && ! afAnalysePlayers[ pmr->d.fPlayer ] )
-          /* we do not analyse this player */
-          break;
-      
+      /* always analyse MOVE_DOUBLEs as they are shared with the subsequent
+         MOVE_TAKEs or MOVE_DROPs. */
+
         dt = DoubleType ( pms->fDoubled, pms->fMove, pms->fTurn );
 
         if ( dt != DT_NORMAL )
