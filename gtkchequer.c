@@ -472,12 +472,22 @@ MoveListMove ( GtkWidget *pw, hintdata *phd ) {
   char szMove[ 40 ];
   int i;
   GtkWidget *pwMoves = phd->pwMoves;
+  int anBoard[ 2 ][ 25 ];
   
   assert( GTK_CLIST( pwMoves )->selection );
   
   i = GPOINTER_TO_INT( GTK_CLIST( pwMoves )->selection->data );
   memcpy ( &m, (move * ) gtk_clist_get_row_data( GTK_CLIST( pwMoves ), i ),
            sizeof ( move ) );
+
+  memcpy ( anBoard, ms.anBoard, sizeof ( anBoard ) );
+  ApplyMove ( anBoard, m.anMove, FALSE );
+
+  if ( ! ms.fMove )
+    SwapSides ( anBoard );
+
+  sprintf ( szMove, "show board %s", PositionID ( anBoard ) );
+  UserCommand ( szMove );
   
   if ( phd->fDestroyOnMove )
     /* Destroy widget on exit */
