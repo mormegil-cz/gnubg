@@ -19,8 +19,7 @@ duplication of effort and to make sure our changes merge easily.
 ** Add more statistics for rollouts (e.g. number of times each player hit,
   number of turns on the bar, whether each player is closed out, average
   number of pips wasted bearing off, etc.)
-** Make cubeful rollouts work with variance reduction.  (Also see Michael
-  Zehr's method for cube variance reduction in money games.)
+** Add Michael Zehr's method for cube variance reduction in money games.
 ** Add a cache for cubeful evaluations.
 ** Joseph has weights for small (5 hidden nodes) nets, which could be
   used for the internal evaluations of deep searches for a significant
@@ -49,6 +48,7 @@ duplication of effort and to make sure our changes merge easily.
 *** Use the fComputed field in statcontext (make "show statistics ..."
   complain if not computed, disable the GTK menu items if not available).
 *** Make DumpStatcontext and GTKDumpStatcontext work for money sessions.
+  (HTMLDumpStatcontext is probably a good example to copy.)
 *** Make sure analysis works with resignations.
 *** Consider a way for analysis to mark _good_ moves (e.g. moves which are
   flagged as errors at 0-ply but turn out to be correct at higher plies).
@@ -77,11 +77,10 @@ duplication of effort and to make sure our changes merge easily.
   beavers, resignations, "and the match"...)
 *** Check drops, beavers, resignations, implement Crawford and Jacoby etc. in
   SGG importing.
-*** Export to ASCII and HTML.
+*** Export to ASCII.
 *** Improve the LaTeX, PS and PDF output:
 **** Add commands to change paper size, board magnification, and number of
   move candidates listed in analysis. (gary)
-**** Add names and scores before each game.
 **** Show game and match statistics (if available) at end of game/match.
 **** Allow some option for selecting which boards to print (see the
   "FG" SGF property).
@@ -169,7 +168,6 @@ duplication of effort and to make sure our changes merge easily.
   the new evalsetups. (gary)
 ** Make sure copy/paste works correctly everywhere.  See
   <http://www.freedesktop.org/standards/clipboards.txt>.  (Wait for GTK+ 2.0.)
-** Add some kind of GTK interface for viewing rollout statistics.
 ** Think about ways to improve event handling while "busy".  We could save
   them somewhere and then use gdk_event_put() when we're ready. (gary)
 ** CreateDialog() should use GTK+ 2.0 stock icons instead of the gnu. (gary)
@@ -231,19 +229,12 @@ functions:
   990429083514-MattiT-1985-5468-13-bgbored-25-5.txt (game 2) for an example
   of both problems.
 ** "help next" (and "next <tab>") are incomplete.
-** Does VarRednRollout use the pci parameter correctly?  It looks like
-  it doesn't pay attention to which player is on roll.
-** In position bN8ZBADYthUDIA and roll 11, the move 13/12*/11 13/12 10/9 is
-  shown as 13/12*/11 13/12* 10/9.
 ** ShowManual() should look in the directory given with -d.
 ** GtkTexi should try to load images from the same directory as the XML file.
 ** GTK+ 2.0 wants strings in UTF-8.  Unfortunately SGF files are specified
   to be ISO 8859-1, and the terminal is locale-dependent. (gary)
 ** Should InitMatchEquity() look in PKGDATADIR and/or PKGDATADIR/met/ as well
   as . (and even ./met/) if given a relative file name?
-** Under GTK+ 2.0, the status bar and/or progress bar request slightly
-  different sizes when they have text in them, and the window rearranges
-  itself to suit... yuck.
 
 * Documentation:
 ** Complete the Texinfo manual.  Perhaps for now, only things that are
@@ -271,9 +262,6 @@ functions:
   progress") checks so that they _do_ ask when the game is over but the
   match is still in progress, and they _don't_ ask if a game has not been
   modified since it was last loaded/saved.
-** Extend ParsePosition to cope with other formats, e.g. FIBS
-  "boardstyle 3" and/or a human friendly position description,
-  like "set board (0 -1 2 -2 2 -3 -4 -2 -3 0 0 0 0 1 0 0 0 0 1 2 2 2 2 1 0 0)".
 ** Handle SGF variations.
 ** Allow loading/saving of compressed games/matches with zlib.
 ** Make the external player handle resignation decisions.
@@ -304,8 +292,6 @@ functions:
 ** Investigate more sophisticated training techniques, e.g. real
   simulated annealing (see the GNU Scientific Library, at
   <http://sources.redhat.com/gsl/>).
-** Rollout() and BasicRollout() appear to be obselete.  Should they be
-  removed?
 ** It looks as if the interface to expat is close enough to libxml2's
   (they both approximate SAX) that we could write a wrapper to make use
   of whichever library is available.  We could even include a bare-bones

@@ -1,7 +1,7 @@
 /*
  * postscript.c
  *
- * by Gary Wong <gtw@gnu.org>, 2001
+ * by Gary Wong <gtw@gnu.org>, 2001, 2002
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -731,7 +731,34 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
-	    /* FIXME game introduction */
+	    Ensure( pf, 26 );
+	    Consume( pf, 14 );
+	    RequestFont( pf, FONT_RM, 14 );
+	    if( pmr->g.nMatch )
+		sprintf( sz, "%d point match (game %d)", pmr->g.nMatch,
+			 pmr->g.i );
+	    else
+		sprintf( sz, "Money session (game %d)", pmr->g.i + 1 );
+	    
+	    fprintf( pf, fPDF ? "1 0 0 1 0 %d Tm (%s) Tj\n" :
+		     "0 %d moveto (%s) show\n", y, sz );
+
+	    RequestFont( pf, FONT_RM, 12 );
+	    Consume( pf, 12 );
+	    PlayerSymbol( pf, 8, 0 );
+	    fprintf( pf, fPDF ? "1 0 0 1 16 %d Tm (" : "16 %d moveto (",
+		     y );
+	    PostScriptEscape( pf, ap[ 0 ].szName );
+	    fprintf( pf, " (%d points)", pmr->g.anScore[ 0 ] );
+	    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+	    
+	    PlayerSymbol( pf, 225, 1 );
+	    fprintf( pf, fPDF ? "1 0 0 1 233 %d Tm (" : "233 %d moveto (",
+		     y );
+	    PostScriptEscape( pf, ap[ 1 ].szName );
+	    fprintf( pf, " (%d points)", pmr->g.anScore[ 1 ] );
+	    fputs( fPDF ? ") Tj\n" : ") show\n", pf );
+	    
 	    break;
 	    
 	case MOVE_NORMAL:
@@ -892,7 +919,7 @@ static void ExportGamePostScript( FILE *pf, list *plGame ) {
     }
     
     if( ( GameStatus( msExport.anBoard ) ) )
-	/* FIXME print game result */
+	/* FIXME print game result and statistics */
 	;
     
 }

@@ -1,3 +1,17 @@
+Thu Mar 21 17:55:35 2002  Gary Wong  <gtw@research.att.com>
+
+	* drawboard.c (FormatMove): Update fl when hitting blot on
+	intermediate point.
+
+	* gnubg.c (ParsePosition, CommandRollout): Allow "simple" position
+	notation in "rollout" command.
+
+	* gtkgame.c: Set the progress bar "show text" settings on at all
+	times, to ensure it is sized correctly under GTK+ 2.0.
+
+	* latex.c, postscript.c: Show the player names and scores at the
+	start of each game.
+
 Thu Mar 21 20:45:19 2002  Øystein Johansen <oeysteij@online.no>
 
         * gtkprefs.c, gtkboard.[ch]: Make hinges optional

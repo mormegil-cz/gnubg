@@ -1,7 +1,7 @@
 /*
  * latex.c
  *
- * by Gary Wong <gtw@gnu.org>, 2001
+ * by Gary Wong <gtw@gnu.org>, 2001, 2002
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -210,7 +210,7 @@ static void PrintLaTeXBoard( FILE *pf, matchstate *pms, int fPlayer ) {
 	   pf );
 }
 
-static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
+static void LaTeXEscape( FILE *pf, unsigned char *pch ) {
 
     /* Translation table from GNU recode, by François Pinard. */
     static struct translation {
@@ -332,6 +332,11 @@ static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
 	    }
 	pch++;
     }
+}
+
+static void PrintLaTeXComment( FILE *pf, unsigned char *pch ) {
+
+    LaTeXEscape( pf, pch );
 
     fputs( "\n\n", pf );
 }
@@ -376,7 +381,23 @@ static void ExportGameLaTeX( FILE *pf, list *plGame ) {
 	pmr = pl->p;
 	switch( pmr->mt ) {
 	case MOVE_GAMEINFO:
-	    /* FIXME game introduction */
+	    if( pmr->g.nMatch )
+		fprintf( pf, "\\noindent{\\Large %d point match "
+			 "(game %d)}\n\n", pmr->g.nMatch, pmr->g.i );
+	    else
+		fprintf( pf, "\\noindent{\\Large Money session "
+			 "(game %d)}\n\n", pmr->g.i + 1 );
+
+	    fprintf( pf, "\\noindent\n\\makebox[0.5\\textwidth][s]"
+		     "{\\large %s ", PlayerSymbol( 0 ) );
+	    LaTeXEscape( pf, ap[ 0 ].szName );
+	    fprintf( pf, " (%d points)\\hfill}", pmr->g.anScore[ 0 ] );
+	    
+	    fprintf( pf, "\\makebox[0.5\\textwidth][s]"
+		     "{\\large %s ", PlayerSymbol( 1 ) );
+	    LaTeXEscape( pf, ap[ 1 ].szName );
+	    fprintf( pf, " (%d points)\\hfill}\n\n", pmr->g.anScore[ 1 ] );
+	    	    
 	    break;
 	    
 	case MOVE_NORMAL:
