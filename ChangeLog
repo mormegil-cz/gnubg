@@ -1,3 +1,8 @@
+Fri Feb 20 15:10:39 CET 2004  Joern Thyssen  <jth@gnubg.org>
+
+	* Makefile.am, configure.in: move gnubg.py to scripts.
+	* gnubgmodule.c: _MAX_PATH only defined onwintendo.
+
 Thu Feb 19 13:56:45 2003 GMT  Jon Kinsey <Jon_Kinsey@hotmail.com>
 
 	* import.c: Fixed import jellyfish pos problem (bug 6086)

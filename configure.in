@@ -567,4 +567,4 @@ AC_CHECK_DECL(FALSE,,AC_DEFINE(FALSE,0,[Define FALSE]))
 AC_CHECK_DECL(TRUE,,AC_DEFINE(TRUE,1,[Define TRUE]))
 
 
-AC_OUTPUT(Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile)
+AC_OUTPUT(Makefile doc/Makefile lib/Makefile met/Makefile po/Makefile.in po/Makefile  intl/Makefile m4/Makefile xpm/Makefile sounds/Makefile board3d/Makefile textures/Makefile scripts/Makefile)
