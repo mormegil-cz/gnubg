@@ -51,6 +51,8 @@
 #include <readline/readline.h>
 #endif
 
+#include "glib.h"
+
 #include "analysis.h"
 #include "backgammon.h"
 #include "dice.h"
@@ -1360,6 +1362,222 @@ ResignAnalysis ( float arResign[ NUM_ROLLOUT_OUTPUTS ],
 }
 
 
+/*
+ * Make cube analysis widget 
+ *
+ * Input:
+ *   aarOutput, aarStdDev: evaluations
+ *   pes: evaluation setup
+ *
+ * Returns:
+ *   nice and pretty widget with cube analysis
+ *
+ */
+
+static GtkWidget *CubeAnalysis( float aarOutput[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                                float aarStdDev[ 2 ][ NUM_ROLLOUT_OUTPUTS ],
+                                evalsetup *pes ) {
+
+    cubeinfo ci;
+
+    GtkWidget *pw;
+    GtkWidget *pwTable;
+    GtkWidget *pwFrame;
+
+    int iRow;
+    int i;
+    cubedecision cd;
+
+    int ai[ 3 ];
+    const char *aszCube[] = {
+      NULL, "No double", "Double, take", "Double, pass" };
+
+    float arDouble[ 4 ];
+    gchar *sz;
+
+
+    if( pes->et == EVAL_NONE )
+	return NULL;
+
+    GetMatchStateCubeInfo( &ci, &ms );
+
+    cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+    
+    if( !GetDPEq( NULL, NULL, &ci ) )
+	/* No cube action possible */
+	return NULL;
+
+    /* header */
+
+    pwFrame = gtk_frame_new ( "Cube analysis" );
+    gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
+
+    pwTable = gtk_table_new ( 8, 4, FALSE );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
+
+    /* if EVAL_EVAL include cubeless equity and winning percentages */
+
+    iRow = 0;
+
+    if ( pes->et == EVAL_EVAL ) {
+
+      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
+        sz = g_strdup_printf ( "Cubeless %d-ply equity: %+7.3f", 
+                               pes->ec.nPlies, 
+                               Utility ( aarOutput[ 0 ], &ci ) );
+      else
+        sz = g_strdup_printf ( "Cubeless %d-ply MWC: %7.3f%%", 
+                               pes->ec.nPlies,
+                               100.0f * eq2mwc ( Utility ( aarOutput[ 0 ], 
+                                                           &ci ), &ci ) );
+
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+      g_free ( sz );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         0, 4, iRow, iRow + 1,
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      iRow++;
+
+
+      sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
+                             "%6.2f%% %6.2f%% %6.2f%%",
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
+                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
+                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEGAMMON ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ] );
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+      g_free ( sz );
+      
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         0, 4, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 4 );
+
+      iRow++;
+
+    }
+
+    getCubeDecisionOrdering ( ai, arDouble, &ci );
+
+    for ( i = 0; i < 3; i++ ) {
+
+      /* numbering */
+
+      sz = g_strdup_printf ( "%d.", i + 1 );
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+      g_free ( sz );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         0, 1, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      /* label */
+
+      pw = gtk_label_new ( aszCube[ ai[ i ] ] );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         1, 2, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      /* equity */
+
+      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
+        sz = g_strdup_printf ( "%+7.3f", arDouble[ ai [ i ] ] );
+      else
+        sz = g_strdup_printf ( "%+7.3f%%", 
+                               100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) );
+
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+      g_free ( sz );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         2, 3, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      /* difference */
+
+      if ( i ) {
+        
+        if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
+          sz = g_strdup_printf ( "(%+7.3f)", 
+                                 arDouble[ ai [ i ] ] - 
+                                 arDouble[ OUTPUT_OPTIMAL ] );
+        else
+          sz = g_strdup_printf ( "(%+7.3f%%)", 
+                                 100.0f * eq2mwc( arDouble[ ai[ i ] ], &ci ) -
+                                 100.0f * eq2mwc( arDouble[ OUTPUT_OPTIMAL ], 
+                                                  &ci ) );
+
+        pw = gtk_label_new ( sz );
+        gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+        g_free ( sz );
+        
+        gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                           3, 4, iRow, iRow + 1, 
+                           GTK_EXPAND | GTK_FILL, 
+                           GTK_EXPAND | GTK_FILL, 
+                           8, 0 );
+
+      }
+
+      /* rollout details */
+      
+      if ( pes->et == EVAL_ROLLOUT && 
+           ( ai[ i ] == OUTPUT_TAKE || ai[ i ] == OUTPUT_NODOUBLE ) ) {
+
+        /* FIXME: output cubeless euqities and percentages for rollout */
+        /*        probably along with rollout details */
+        
+      }
+        
+      iRow++;
+
+    }
+
+    /* proper cube action */
+
+    pw = gtk_label_new ( "Proper cube action: " );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+        
+    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                       0, 2, iRow, iRow + 1, 
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       8, 8 );
+
+    pw = gtk_label_new ( GetCubeRecommendation ( cd ) );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+        
+    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                       2, 4, iRow, iRow + 1, 
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       8, 8 );
+
+    gtk_widget_pop_style ();
+      
+    return pwFrame;
+}
+
+#if 0
 static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
     cubeinfo ci;
     char sz[ 1024 ];
@@ -1377,9 +1595,255 @@ static GtkWidget *CubeAnalysis( float arDouble[ 4 ], evalsetup *pes ) {
 
     return gtk_label_new( sz );
 }
+#endif
 
-static GtkWidget *TakeAnalysis( movetype mt, float arDouble[], 
+static GtkWidget *TakeAnalysis( movetype mt, 
+                                float aarOutput[][ NUM_ROLLOUT_OUTPUTS ],
+                                float aarStdDev[][ NUM_ROLLOUT_OUTPUTS ],
 				evalsetup *pes ) {
+
+    cubeinfo ci;
+
+    GtkWidget *pw;
+    GtkWidget *pwTable;
+    GtkWidget *pwFrame;
+
+    int iRow;
+    int i;
+    cubedecision cd;
+
+    int ai[ 2 ];
+    const char *aszCube[] = {
+      NULL, NULL, "Take", "Pass" };
+
+    float arDouble[ 4 ];
+    gchar *sz;
+
+
+    if( pes->et == EVAL_NONE )
+	return NULL;
+
+    GetMatchStateCubeInfo( &ci, &ms );
+
+    cd = FindCubeDecision ( arDouble, aarOutput, &ci );
+    
+    if( !GetDPEq( NULL, NULL, &ci ) )
+	/* No cube action possible */
+	return NULL;
+
+    /* header */
+
+    pwFrame = gtk_frame_new ( "Take analysis" );
+    gtk_container_set_border_width ( GTK_CONTAINER ( pwFrame ), 8 );
+
+    pwTable = gtk_table_new ( 5, 4, FALSE );
+    gtk_container_add ( GTK_CONTAINER ( pwFrame ), pwTable );
+
+    /* if EVAL_EVAL include cubeless equity and winning percentages */
+
+    iRow = 0;
+
+    switch ( pes->et ) {
+
+    case EVAL_EVAL:
+
+      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
+        sz = g_strdup_printf ( "Cubeless %d-ply equity: %+7.3f", 
+                               pes->ec.nPlies, 
+                               Utility ( aarOutput[ 0 ], &ci ) );
+      else
+        sz = g_strdup_printf ( "Cubeless %d-ply MWC: %7.3f%%", 
+                               pes->ec.nPlies,
+                               100.0f * eq2mwc ( Utility ( aarOutput[ 0 ], 
+                                                           &ci ), &ci ) );
+
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+      g_free ( sz );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         0, 4, iRow, iRow + 1,
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      iRow++;
+
+
+      sz = g_strdup_printf ( "%6.2f%% %6.2f%% %6.2f%% "
+                             "%6.2f%% %6.2f%% %6.2f%%",
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WINBACKGAMMON ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WINGAMMON ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_WIN ],
+                             100.0f * ( 1.0 - aarOutput[ 0 ][ OUTPUT_WIN ] ),
+                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEGAMMON ],
+                             100.0f * aarOutput[ 0 ][ OUTPUT_LOSEBACKGAMMON ] );
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+      g_free ( sz );
+      
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         0, 4, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 4 );
+
+      iRow++;
+
+      break;
+
+    case EVAL_ROLLOUT:
+
+      /* FIXME: */
+
+      break;
+
+    default:
+
+      assert ( FALSE );
+      break;
+
+    }
+
+    if ( arDouble[ OUTPUT_TAKE ] < arDouble[ OUTPUT_DROP ] ) {
+      ai[ 0 ] = OUTPUT_TAKE;
+      ai[ 1 ] = OUTPUT_DROP;
+    }
+    else {
+      ai[ 0 ] = OUTPUT_DROP;
+      ai[ 1 ] = OUTPUT_TAKE;
+    }
+      
+
+    for ( i = 0; i < 2; i++ ) {
+
+      /* numbering */
+
+      sz = g_strdup_printf ( "%d.", i + 1 );
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+      g_free ( sz );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         0, 1, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      /* label */
+
+      pw = gtk_label_new ( aszCube[ ai[ i ] ] );
+      printf ( "vla %s\n", aszCube[ ai [ i ] ] );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         1, 2, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      /* equity */
+
+      if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
+        sz = g_strdup_printf ( "%+7.3f", -arDouble[ ai [ i ] ] );
+      else
+        sz = g_strdup_printf ( "%+7.3f%%", 
+                               100.0f * eq2mwc( -arDouble[ ai[ i ] ], &ci ) );
+
+      pw = gtk_label_new ( sz );
+      gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+      g_free ( sz );
+
+      gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                         2, 3, iRow, iRow + 1, 
+                         GTK_EXPAND | GTK_FILL, 
+                         GTK_EXPAND | GTK_FILL, 
+                         8, 0 );
+
+      /* difference */
+
+      if ( i ) {
+        
+        if ( ! ci.nMatchTo || ( ci.nMatchTo && ! fOutputMWC ) )
+          sz = g_strdup_printf ( "(%+7.3f)", 
+                                 arDouble[ ai [ i ] ] - 
+                                 arDouble[ OUTPUT_OPTIMAL ] );
+        else
+          sz = g_strdup_printf ( "(%+7.3f%%)", 
+                                 100.0f * eq2mwc( -arDouble[ ai[ i ] ], &ci ) -
+                                 100.0f * eq2mwc( -arDouble[ OUTPUT_OPTIMAL ], 
+                                                  &ci ) );
+
+        pw = gtk_label_new ( sz );
+        gtk_misc_set_alignment( GTK_MISC( pw ), 1, 0.5 );
+        g_free ( sz );
+        
+        gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                           3, 4, iRow, iRow + 1, 
+                           GTK_EXPAND | GTK_FILL, 
+                           GTK_EXPAND | GTK_FILL, 
+                           8, 0 );
+
+      }
+
+      iRow++;
+
+    }
+
+    /* proper cube action */
+
+    pw = gtk_label_new ( "Correct response: " );
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+        
+    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                       0, 2, iRow, iRow + 1, 
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       8, 8 );
+
+    switch ( cd ) {
+
+    case DOUBLE_TAKE:
+    case NODOUBLE_TAKE:
+    case TOOGOOD_TAKE:
+    case REDOUBLE_TAKE:
+    case NO_REDOUBLE_TAKE:
+    case TOOGOODRE_TAKE:
+      pw = gtk_label_new ( "Take" );
+      break;
+
+    case DOUBLE_PASS:
+    case TOOGOOD_PASS:
+    case REDOUBLE_PASS:
+    case TOOGOODRE_PASS:
+      pw = gtk_label_new ( "Pass" );
+      break;
+
+    case DOUBLE_BEAVER:
+    case NODOUBLE_BEAVER:
+    case NO_REDOUBLE_BEAVER:
+      pw = gtk_label_new ( "Beaver!" );
+      break;
+
+    case NOT_AVAILABLE:
+      pw = gtk_label_new ( "Eat it!" );
+      break;
+
+    }
+
+    gtk_misc_set_alignment( GTK_MISC( pw ), 0, 0.5 );
+        
+    gtk_table_attach ( GTK_TABLE ( pwTable ), pw,
+                       2, 4, iRow, iRow + 1, 
+                       GTK_EXPAND | GTK_FILL, 
+                       GTK_EXPAND | GTK_FILL, 
+                       8, 8 );
+
+    gtk_widget_pop_style ();
+      
+    return pwFrame;
+
+#if 0
     char sz[ 128 ], *pch;
     cubeinfo ci;
     float rError;
@@ -1420,6 +1884,7 @@ static GtkWidget *TakeAnalysis( movetype mt, float arDouble[],
 	sprintf( sz, "Correct response: %s (%+0.3f)", pch, rError );
 
     return gtk_label_new( sz );
+#endif
 }
 
 static void LuckMenuActivate( GtkWidget *pw, lucktype lt ) {
@@ -1526,7 +1991,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	    
 	    ms.fMove = ms.fTurn = pmr->n.fPlayer;
 	    
-	    if( ( pw = CubeAnalysis( pmr->n.arDouble, 
+	    if( ( pw = CubeAnalysis( pmr->n.aarOutput, pmr->n.aarStdDev,
 				     &pmr->n.esDouble ) ) ) {
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE, FALSE,
 				    4 );
@@ -1590,7 +2055,7 @@ static void SetAnnotation( moverecord *pmr ) {
 	case MOVE_DOUBLE:
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 	    
-	    if( ( pw = CubeAnalysis( pmr->d.arDouble, 
+	    if( ( pw = CubeAnalysis( pmr->d.aarOutput, pmr->d.aarStdDev,
 				     &pmr->d.esDouble ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
@@ -1614,7 +2079,8 @@ static void SetAnnotation( moverecord *pmr ) {
 	case MOVE_DROP:
 	    pwAnalysis = gtk_vbox_new( FALSE, 0 );
 
-	    if( ( pw = TakeAnalysis( pmr->mt, pmr->d.arDouble,
+	    if( ( pw = TakeAnalysis( pmr->mt, pmr->d.aarOutput,
+                                     pmr->d.aarStdDev,
 				     &pmr->d.esDouble ) ) )
 		gtk_box_pack_start( GTK_BOX( pwAnalysis ), pw, FALSE,
 				    FALSE, 0 );
