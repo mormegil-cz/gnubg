@@ -9238,10 +9238,11 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 		gtk_widget_hide(pwProgress);
 
 		showingPanels = ArePanelsShowing();
-		HideAllPanels(NULL, 0, NULL);
 
 		showIDs = bd->rd->fShowIDs;
 		bd->rd->fShowIDs = 0;
+
+		HideAllPanels(NULL, 0, NULL);
 
 /* How can I maximize the window ?? */
 #if USE_GTK2
@@ -9284,6 +9285,7 @@ FullScreenMode( gpointer *p, guint n, GtkWidget *pw ) {
 #endif
 		if (showingPanels)
 			ShowAllPanels(NULL, 0, NULL);
+
 	}
 	UpdateSetting(&bd->rd->fShowIDs);
 }
