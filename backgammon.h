@@ -1032,7 +1032,7 @@ basename ( const char *filename );
 
 #ifndef HAVE_DIRNAME
 extern char *
-dirname ( const char *filename );
+dirname ( char *filename );
 #endif
 
 #if USE_GTK

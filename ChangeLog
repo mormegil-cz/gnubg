@@ -1,4 +1,8 @@
 Sun Jul 27 14:39:51 2003  Oystein Johansen  <oystein@gnubg.org>
+	
+	* gnubg.c (dirname), backgammon.h: Pacify fussy compilers.
+
+Sun Jul 27 14:39:51 2003  Oystein Johansen  <oystein@gnubg.org>
 
 	* gnubg.c, html.c, bearoff.c: improve 'dirname' where it's not present.
 

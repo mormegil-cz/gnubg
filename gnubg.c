@@ -7992,7 +7992,7 @@ basename (const char *filename)
  */
 
 extern char *
-dirname (const char *path)
+dirname (char *path)
 {
   static const char dot[] = ".";
   char *last_slash;
