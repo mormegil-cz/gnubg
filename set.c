@@ -3592,7 +3592,7 @@ extern void CommandSetTutorCube( char * sz) {
 
 extern void CommandSetTutorChequer( char * sz) {
 
-  SetToggle ( "tutor-cube", &fTutorChequer, sz,
+  SetToggle ( "tutor-chequer", &fTutorChequer, sz,
 			  _("Include advice on chequer play in tutor mode."),
 			  _("Exclude advice on chequer play from tutor mode.") );
 }
