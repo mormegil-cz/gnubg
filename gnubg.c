@@ -3198,36 +3198,82 @@ extern void CommandImportSGG( char *sz ) {
 	perror( sz );
 }
 
-extern void CommandCopy( char *sz ) {
-  char *aps[ 7 ] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL};
-  char szOut[ 2048 ];
+extern void CommandCopy (char *sz)
+{
+  char *aps[7] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+  char szOut[2048];
+  char szCube[32], szPlayer0[35], szPlayer1[35],
+    szScore0[35], szScore1[35], szMatch[35];
+    
+  aps[0] = szPlayer0;
+  aps[6] = szPlayer1;
 
-  /* FIXME - Rewrite for new WinCopy command */
+  if (ms.anScore[0] == 1)
+    sprintf (aps[1] = szScore0, _("%d point"), ms.anScore[0]);
+  else
+    sprintf (aps[1] = szScore0, _("%d points"), ms.anScore[0]);
+
+  if (ms.anScore[1] == 1)
+    sprintf (aps[5] = szScore1, _("%d point"), ms.anScore[1]);
+  else
+    sprintf (aps[5] = szScore1, _("%d points"), ms.anScore[1]);
+
+  if (ms.fDoubled)
+    {
+      aps[ms.fTurn ? 4 : 2] = szCube;
+
+      sprintf (szPlayer0, "O: %s", ap[0].szName);
+      sprintf (szPlayer1, "X: %s", ap[1].szName);
+      sprintf (szCube, _("Cube offered at %d"), ms.nCube << 1);
+    }
+  else
+    {
+      sprintf (szPlayer0, "O: %s", ap[0].szName);
+      sprintf (szPlayer1, "X: %s", ap[1].szName);
+
+      aps[ms.fMove ? 4 : 2] = sz;
+
+      if (ms.anDice[0])
+	sprintf (sz, _("Rolled %d%d"), ms.anDice[0], ms.anDice[1]);
+      else if (!GameStatus (ms.anBoard))
+	strcpy (sz, _("On roll"));
+      else
+	sz[0] = 0;
+
+      if (ms.fCubeOwner < 0)
+	{
+	  aps[3] = szCube;
+
+	  if (ms.nMatchTo)
+	    sprintf (szCube, _("%d point match (Cube: %d)"), ms.nMatchTo,
+		     ms.nCube);
+	  else
+	    sprintf (szCube, _("(Cube: %d)"), ms.nCube);
+	}
+      else
+	{
+	  int cch = strlen (ap[ms.fCubeOwner].szName);
+
+	  if (cch > 20)
+	    cch = 20;
+
+	  sprintf (szCube, _("%c: %*s (Cube: %d)"), ms.fCubeOwner ? 'X' :
+		   'O', cch, ap[ms.fCubeOwner].szName, ms.nCube);
+
+	  aps[ms.fCubeOwner ? 6 : 0] = szCube;
+
+	  if (ms.nMatchTo)
+	    sprintf (aps[3] = szMatch, _("%d point match"), ms.nMatchTo);
+	}
+    }
 
 #ifdef WIN32
-  DrawBoard( szOut, ms.anBoard, 1, aps, MatchIDFromMatchState ( &ms ) );
-  strcat(szOut, "\n");
-
-  if(OpenClipboard(0)) {
-
-    HGLOBAL clipbuffer;
-    char * buf;
-
-    EmptyClipboard();
-    clipbuffer = GlobalAlloc(GMEM_DDESHARE, strlen(szOut)+1 );
-    buf = (char*)GlobalLock(clipbuffer);
-    strcpy(buf, szOut);
-    GlobalUnlock(clipbuffer);
-    SetClipboardData(CF_TEXT, clipbuffer);
-    CloseClipboard();
-
-    } else {
-
-    outputl( _("Can't open clipboard") ); 
-  }
+  DrawBoard (szOut, ms.anBoard, ms.fMove, aps, MatchIDFromMatchState (&ms));
+  strcat (szOut, "\n");
+  WinCopy (szOut);
 #else
-  puts( DrawBoard( szOut, ms.anBoard, 1, aps, 
-                   MatchIDFromMatchState ( &ms ) ) );
+  puts (DrawBoard (szOut, ms.anBoard, ms.fMove, aps,
+			  MatchIDFromMatchState (&ms)));
 #endif
 }
 
@@ -3726,13 +3772,13 @@ extern void CommandSaveSettings( char *szParam ) {
     fprintf ( pf, "set export cube close %s\n", 
               exsExport.afCubeDisplay[ EXPORT_CUBE_CLOSE ] ? "yes" : "no" );
 
-    if ( *exsExport.szHTMLPictureURL != '"' && 
-         strchr ( exsExport.szHTMLPictureURL, ' ' ) )
-       fprintf ( pf, "set export html pictureurl  \"%s\"\n",
-                 exsExport.szHTMLPictureURL );
+    if ( *exsExport.szHTMLPictureURL != '"' &&
+       strchr ( exsExport.szHTMLPictureURL, ' ' ) )
+       fprintf ( pf, "set export html pictureurl \"%s\"\n",
+                  exsExport.szHTMLPictureURL );
     else
-       fprintf ( pf, "set export html pictureurl  %s\n",
-                 exsExport.szHTMLPictureURL );
+      fprintf ( pf, "set export html pictureurl  %s\n",
+                exsExport.szHTMLPictureURL );
 
     /* invert settings */
 

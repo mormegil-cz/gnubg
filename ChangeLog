@@ -1,3 +1,9 @@
+Tue Jun 11 16:50:03 2002  Øystein Johansen  <oeysteij@online.no>
+
+        * gnubg.c (CommandCopy): Add match information
+
+        * drawboard.c (DrawBoardCls): Adjust 'Match ID: 0123456789ABCD'
+
 Tue Jun 11 15:50:03 2002  Jørn Thyssen  <jthyssen@dk.ibm.com>
 
 	* gnubg.c (CommandSaveSettings): do not add " to 

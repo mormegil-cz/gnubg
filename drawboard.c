@@ -321,7 +321,7 @@ static char *DrawBoardCls( char *sz, int anBoard[ 2 ][ 25 ], int fRoll,
     /* match id */
 
     if ( szMatchID && *szMatchID ) {
-      sprintf ( pch, _("                 Match ID   : %s\n"), szMatchID );
+      sprintf ( pch, _("                    Match ID   : %s\n"), szMatchID );
       pch = strchr ( pch, 0 );
     }
             
