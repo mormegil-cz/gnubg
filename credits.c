@@ -18,6 +18,7 @@ char *aszCredits[] = {
     "Ned Cross",
     "Bill Davidson",
     "Michael Depreli",
+    "Ian Dunstan",
     "Max Durbano",
     "Christopher D. Yep",
     "Robert Eberlein",

@@ -153,71 +153,15 @@ OutputEvalContext ( const evalcontext *pec, const int fChequer ) {
 
 }
 
+static void
+OutputEvalContextsForRollout( char *sz, const char *szIndent,
+                              const evalcontext aecCube[ 2 ],
+                              const evalcontext aecChequer[ 2 ] ) {
 
-
-extern char *
-OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
-
-  static char sz[ 1024 ];
-  char *pc;
-
-  int fCube = 
-    ! cmp_evalcontext ( &prc->aecCube[ 0 ], &prc->aecCube[ 1 ] );
-  int fChequer = 
-    ! cmp_evalcontext ( &prc->aecChequer[ 0 ], &prc->aecChequer[ 1 ] );
-
+  int fCube = ! cmp_evalcontext ( &aecCube[ 0 ], &aecCube[ 1 ] );
+  int fChequer = ! cmp_evalcontext ( &aecChequer[ 0 ], &aecChequer[ 1 ] );
   int fIdentical = fCube && fChequer;
-
   int i;
-
-  strcpy ( sz, "" );
-
-  if ( szIndent && *szIndent )
-    strcat ( sz, szIndent );
-
-  if ( prc->nTruncate && prc->fDoTruncate)
-    sprintf ( pc = strchr ( sz, 0 ),
-              prc->fCubeful ?
-              _("Truncated cubeful rollout (depth %d)") :
-              _("Truncated cubeless rollout (depth %d)"), 
-              prc->nTruncate );
-  else
-    sprintf ( pc = strchr ( sz, 0 ),
-              prc->fCubeful ? 
-              _("Full cubeful rollout") :
-              _("Full cubeless rollout") );
-
-  if ( prc->fTruncBearoffOS && ! prc->fCubeful )
-    strcat ( pc, _(" (trunc. at one-sided bearoff)") );
-  else if ( prc->fTruncBearoff2 && ! prc->fCubeful )
-    strcat ( pc, _(" (trunc. at exact bearoff)") );
-
-  sprintf ( pc = strchr ( sz, 0 ),
-            prc->fVarRedn ? _(" with var.redn.") : _(" without var.redn.") );
-
-  strcat ( sz, "\n" );
-  
-  if ( szIndent && *szIndent )
-    strcat ( sz, szIndent );
-
-  sprintf ( pc = strchr ( sz, 0 ),
-            "%d games",
-            prc->nTrials );
-
-  if ( prc->fInitial )
-    strcat ( sz, ", rollout as initial position" );
-
-  if ( prc->fRotate ) 
-    sprintf ( pc = strchr ( sz, 0 ),
-              ", seed %d using %s and %s\n",
-              prc->nSeed,
-              _("quasi-random dice"),
-              gettext ( aszRNG[ prc->rngRollout ] ) );
-  else
-    sprintf ( pc = strchr ( sz, 0 ),
-              ", seed %d using %s\n",
-              prc->nSeed,
-              gettext ( aszRNG[ prc->rngRollout ] ) );
 
   for ( i = 0; i < 1 + ! fIdentical; i++ ) {
 
@@ -226,16 +170,16 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
       if ( szIndent && *szIndent )
         strcat ( sz, szIndent );
 
-      sprintf ( pc = strchr ( sz, 0 ), _("Player %d:\n" ), i );
+      sprintf ( strchr ( sz, 0 ), _("Player %d:\n" ), i );
     }
 
-    if ( ! cmp_evalcontext ( &prc->aecChequer[ i ], &prc->aecCube[ i ] ) ) {
+    if ( ! cmp_evalcontext ( &aecChequer[ i ], &aecCube[ i ] ) ) {
 
       if ( szIndent && *szIndent )
         strcat ( sz, szIndent );
 
       strcat ( sz, _("Play and cube: ") );
-      strcat ( sz, OutputEvalContext ( &prc->aecChequer[ i ], TRUE ) );
+      strcat ( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );
       strcat ( sz, "\n" );
 
     }
@@ -245,23 +189,102 @@ OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
         strcat ( sz, szIndent );
 
       strcat ( sz, _("Play: ") );
-      strcat ( sz, OutputEvalContext ( &prc->aecChequer[ i ], TRUE ) );
+      strcat ( sz, OutputEvalContext ( &aecChequer[ i ], TRUE ) );
       strcat ( sz, "\n" );
 
       if ( szIndent && *szIndent )
         strcat ( sz, szIndent );
 
       strcat ( sz, _("Cube: ") );
-      strcat ( sz, OutputEvalContext ( &prc->aecCube[ i ], FALSE ) );
+      strcat ( sz, OutputEvalContext ( &aecCube[ i ], FALSE ) );
       strcat ( sz, "\n" );
 
     }
 
   }
 
+}
+
+
+
+extern char *
+OutputRolloutContext ( const char *szIndent, const rolloutcontext *prc ) {
+
+  static char sz[ 1024 ];
+
+  strcpy ( sz, "" );
+
+  if ( szIndent && *szIndent )
+    strcat ( sz, szIndent );
+
+  if ( prc->nTruncate && prc->fDoTruncate)
+    sprintf ( strchr ( sz, 0 ),
+              prc->fCubeful ?
+              _("Truncated cubeful rollout (depth %d)") :
+              _("Truncated cubeless rollout (depth %d)"), 
+              prc->nTruncate );
+  else
+    sprintf ( strchr ( sz, 0 ),
+              prc->fCubeful ? 
+              _("Full cubeful rollout") :
+              _("Full cubeless rollout") );
+
+  if ( prc->fTruncBearoffOS && ! prc->fCubeful )
+    strcat ( sz, _(" (trunc. at one-sided bearoff)") );
+  else if ( prc->fTruncBearoff2 && ! prc->fCubeful )
+    strcat ( sz, _(" (trunc. at exact bearoff)") );
+
+  sprintf ( strchr ( sz, 0 ),
+            prc->fVarRedn ? _(" with var.redn.") : _(" without var.redn.") );
+
+  strcat ( sz, "\n" );
+  
+  if ( szIndent && *szIndent )
+    strcat ( sz, szIndent );
+
+  sprintf ( strchr ( sz, 0 ),
+            "%d games",
+            prc->nTrials );
+
+  if ( prc->fInitial )
+    strcat ( sz, ", rollout as initial position" );
+
+  if ( prc->fRotate ) 
+    sprintf ( strchr ( sz, 0 ),
+              _(", %s dice gen. with seed %d and quasi-random dice\n"),
+              gettext( aszRNG[ prc->rngRollout ] ),
+              prc->nSeed );
+  else
+    sprintf ( strchr ( sz, 0 ),
+              _(", %s dice generator with seed %d\n"),
+              gettext( aszRNG[ prc->rngRollout ] ),
+              prc->nSeed );
+
+  /* first play */
+
+  OutputEvalContextsForRollout( sz, szIndent, 
+                                prc->aecCube, prc->aecChequer );
+
+  /* later play */
+
+  if ( prc->fLateEvals ) {
+
+    if ( szIndent && *szIndent )
+      strcat ( sz, szIndent );
+    
+    sprintf( strchr( sz, 0 ), 
+             _("Different evaluations after %d plies:\n"),
+             prc->nLate );
+
+    OutputEvalContextsForRollout( sz, szIndent, 
+                                  prc->aecCubeLate, prc->aecChequerLate );
+
+  }
+
   return sz;
 
 }
+
 
 /*
  * Return formatted string with equity or MWC.

@@ -1,8 +1,12 @@
+Tue Jul  8 18:29:56 2003  Joern Thyssen  <jth@gnubg.org>
+
+	* text.c (OutputRolloutContext): display later evals.
+	(bug #4229, reported by Ian Dunstan)
+
 Tue Jul 8 11:15 GMT 2003 Jim Segrave jes@jes-2.demon.nl
 
 	* rollout.c - initialise internal variables on first game of
 	  rollout
-	
 	
 Mon Jul  7 12:33:17 2003  Joern Thyssen  <jth@gnubg.org>
 
