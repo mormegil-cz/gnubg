@@ -3719,7 +3719,7 @@ static void HintGetSelection( GtkWidget *pw, GtkSelectionData *psd,
     qsort( an, c, sizeof( an[ 0 ] ), (cfunc) CompareInts );
 
     for( i = 0, pch = sz; i < c; i++, pch = strchr( pch, 0 ) )
-	FormatMoveHint( pch, ms.anBoard, phd->pml, an[ i ], TRUE );
+	FormatMoveHint( pch, &ms, phd->pml, an[ i ], TRUE );
         
     gtk_selection_data_set( psd, GDK_SELECTION_TYPE_STRING, 8,
 			    sz, strlen( sz ) );
