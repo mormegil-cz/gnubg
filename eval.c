@@ -48,6 +48,7 @@
 #include "dice.h"
 #include "eval.h"
 #include "positionid.h"
+#include "matchequity.h"
 
 /* From pub_eval.c: */
 extern float pubeval( int race, int pos[] );
@@ -57,6 +58,18 @@ extern int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies);
+
+extern float
+Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
+
+extern float
+Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
+
+extern float
+Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
+
+extern float
+Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci );
 
 typedef void ( *classevalfunc )( int anBoard[ 2 ][ 25 ], float arOutput[] );
 typedef void ( *classdumpfunc )( int anBoard[ 2 ][ 25 ], char *szOutput );
@@ -219,9 +232,10 @@ static unsigned char *pBearoff1 = NULL, *pBearoff2 = NULL;
 static cache cEval;
 volatile int fInterrupt = FALSE, fAction = FALSE;
 void ( *fnAction )( void ) = NULL;
-int fMove, fCubeOwner, fJacoby = 1, fCrawford;
-int fPostCrawford, nMatchTo, anScore[ 2 ], fBeavers = 1;
+int fMove, fCubeOwner, fJacoby = TRUE, fCrawford = FALSE;
+int fPostCrawford = FALSE, nMatchTo, anScore[ 2 ], fBeavers = 1;
 int nCube;
+int fOutputMWC = TRUE;
 float rCubeX = 2.0/3.0;
 
 static cubeinfo ciBasic = { 1, 0, 0, { 1.0, 1.0, 1.0, 1.0 } };
@@ -1855,237 +1869,238 @@ static int
 EvaluatePositionFull( int anBoard[ 2 ][ 25 ], float arOutput[],
                       cubeinfo *pci, evalcontext *pec, int nPlies,
                       positionclass pc ) {
-	int i, n0, n1;
+  int i, n0, n1;
 
-	if( pc > CLASS_PERFECT && nPlies > 0 ) {
-		/* internal node; recurse */
+  if( pc > CLASS_PERFECT && nPlies > 0 ) {
+    /* internal node; recurse */
 
-		float ar[ NUM_OUTPUTS ];
-		int anBoardNew[ 2 ][ 25 ];
-		int anMove[ 8 ];
-		cubeinfo ciOpp;
+    float ar[ NUM_OUTPUTS ];
+    int anBoardNew[ 2 ][ 25 ];
+    int anMove[ 8 ];
+    cubeinfo ciOpp;
 
-		for( i = 0; i < NUM_OUTPUTS; i++ )
-	    arOutput[ i ] = 0.0;
+    for( i = 0; i < NUM_OUTPUTS; i++ )
+      arOutput[ i ] = 0.0;
 
 
-		/* 
-		 * If nPlies = 2 there are two branches:
-		 * (1) Full 2-ply search: all 21 rolls evaluated.
-		 * (2) Reduced 2-ply search: 
-		 *     - evaluate all 21 rolls
-		 *     - sort, take a reduced set, and evaluate only these at
-		 *       1-ply.
-		 */
+    /* 
+     * If nPlies = 2 there are two branches:
+     * (1) Full 2-ply search: all 21 rolls evaluated.
+     * (2) Reduced 2-ply search: 
+     *     - evaluate all 21 rolls at 0-ply
+     *     - sort, take a reduced set, and evaluate only these at
+     *       1-ply.
+     */
 
-		if ( ! ( ( nPlies == 2 ) && ( pec->nReduced > 0 ) ) ) {
+    if ( ! ( ( nPlies == 2 ) && ( pec->nReduced > 0 ) ) ) {
 
-			/* full search */
+      /* full search */
 	 
-			for( n0 = 1; n0 <= 6; n0++ )
-				for( n1 = 1; n1 <= n0; n1++ ) {
-					for( i = 0; i < 25; i++ ) {
-						anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-						anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-					}
+      for( n0 = 1; n0 <= 6; n0++ )
+	for( n1 = 1; n1 <= n0; n1++ ) {
+	  for( i = 0; i < 25; i++ ) {
+	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	  }
 				
-					if( fInterrupt ) {
-						errno = EINTR;
-						return -1;
-					} else if( fAction )
-						fnAction();
+	  if( fInterrupt ) {
+	    errno = EINTR;
+	    return -1;
+	  } else if( fAction )
+	    fnAction();
 	      
-					FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
+	  FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
 	      
-					SwapSides( anBoardNew );
+	  SwapSides( anBoardNew );
 
-					SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, ! pci->fMove );
+	  SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner, ! pci->fMove );
 	      
-					if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
-																		 pec->fRelativeAccuracy ? pc :
-																		 ClassifyPosition( anBoardNew ) ) )
-						return -1;
+	  if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
+				     pec->fRelativeAccuracy ? pc :
+				     ClassifyPosition( anBoardNew ) ) )
+	    return -1;
 	      
-					if( n0 == n1 )
-						for( i = 0; i < NUM_OUTPUTS; i++ )
-							arOutput[ i ] += ar[ i ];
-					else
-						for( i = 0; i < NUM_OUTPUTS; i++ )
-							arOutput[ i ] += ar[ i ] * 2.0;
-				}
-
-			arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
-	  
-			ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
-			arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
-			arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
-	  
-			ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
-			arOutput[ OUTPUT_WINBACKGAMMON ] =
-				arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
-			arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
-
-		} else {
-
-			/* reduced search */
-
-			/* 
-			 * - Loop over all 21 dice rolls
-			 * - evaluate at 0-ply
-			 * - sort
-			 * - do 1-ply on a subset
-			 * - calculate corrected probabilities
-			 */
-
-			RedEvalData ad0ply[ 21 ];
-			int anRed7[ 7 ] = { 2, 5, 8, 10, 12, 15, 18 };
-			int anRed11[ 11 ] = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20 };
-			int anRed14[ 14 ] = 
-			{ 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 19 }; 
-			int *pnRed;
-			int nRed;
-			int k;
-			float rDiff, arDiff[ NUM_OUTPUTS ];
-
-			k = 0;
-
-			/* Loop over all 21 dice rolls */
-
-			for( n0 = 1; n0 <= 6; n0++ )
-				for( n1 = 1; n1 <= n0; n1++ ) {
-
-					for( i = 0; i < 25; i++ ) {
-						anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
-						anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
-					}
-
-					if( fInterrupt ) {
-						errno = EINTR;
-						return -1;
-					} else if( fAction )
-						fnAction();
-	      
-					FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
-	      
-					SwapSides( anBoardNew );
-
-					SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner,
-												! pci->fMove );
-
-					/* Evaluate at 0-ply */
-	      
-					if( EvaluatePositionCache( anBoardNew, ad0ply[ k ].arOutput, 
-																		 &ciOpp, pec, 0, 
-																		 pec->fRelativeAccuracy ? pc :
-																		 ClassifyPosition( anBoardNew ) ) )
-						return -1;
-
-					ad0ply[ k ].rScore = Utility ( ad0ply[ k ].arOutput, &ciOpp );
-					PositionKey ( anBoardNew, ad0ply[ k ].auch);
-
-					if( n0 == n1 ) {
-
-						for( i = 0; i < NUM_OUTPUTS; i++ )
-							arOutput[ i ] += ad0ply[ k ].arOutput[ i ];
-
-						ad0ply[ k ].rWeight = 1.0;
-
-					} else {
-
-						for( i = 0; i < NUM_OUTPUTS; i++ )
-							arOutput[ i ] += 2.0 * ad0ply[ k ].arOutput[ i ];
-
-						ad0ply[ k ].rWeight = 2.0;
-
-					}
-
-					k++;
-	      
-				}
-
-			/* sort */
-
-			qsort ( ad0ply, 21, sizeof ( RedEvalData ), 
-							(cfunc) CompareRedEvalData );
-
-			for ( i = 0; i < NUM_OUTPUTS; i++ )
-				arDiff[ i ] = 0.0;
-			rDiff = 0.0;
-
-			/* do 1-ply on subset */
-
-			switch ( pec->nReduced ) {
-			case 7:
-				nRed = 7;
-				pnRed = anRed7;
-				break;
-
-			case 11:
-				nRed = 11;
-				pnRed = anRed11;
-				break;
-
-			case 14:
-				nRed = 14;
-				pnRed = anRed14;
-				break;
-
-			default:
-				assert ( FALSE );
-				break;
-
-			}
-
-			for ( k = 0; k < nRed; pnRed++, k++ ) {
-
-				PositionFromKey ( anBoardNew, ad0ply[ *pnRed ].auch );
-
-				if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
-																	 pec->fRelativeAccuracy ? pc :
-																	 ClassifyPosition( anBoardNew ) ) )
-					return -1;
-
-				for ( i = 0; i < NUM_OUTPUTS; i++ ) {
-
-					arDiff[ i ] +=
-						ad0ply[ *pnRed ].rWeight * 
-						( ar[ i ] - ad0ply[ *pnRed ].arOutput[ i ] );
-
-				}
-
-				rDiff += ad0ply[ *pnRed ].rWeight;
-
-			}
-	    
-	  
-			for ( i = 0; i < NUM_OUTPUTS; i++ )
-
-				arOutput[ i ] += 36. * arDiff[ i ] / rDiff;
-
-			arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
-	  
-			ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
-			arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
-			arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
-	  
-			ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
-			arOutput[ OUTPUT_WINBACKGAMMON ] =
-				arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
-			arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
-
-		}
-	     
-
-	} else {
-		/* at leaf node; use static evaluation */
-      
-		acef[ pc ]( anBoard, arOutput );
-      
-		SanityCheck( anBoard, arOutput );
+	  if( n0 == n1 )
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+	      arOutput[ i ] += ar[ i ];
+	  else
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+	      arOutput[ i ] += ar[ i ] * 2.0;
 	}
 
-	return 0;
+      arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
+	  
+      ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
+      arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
+      arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
+	  
+      ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
+      arOutput[ OUTPUT_WINBACKGAMMON ] =
+	arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
+
+    } else {
+
+      /* reduced search */
+
+      /* 
+       * - Loop over all 21 dice rolls
+       * - evaluate at 0-ply
+       * - sort
+       * - do 1-ply on a subset
+       * - calculate corrected probabilities
+       */
+
+      RedEvalData ad0ply[ 21 ];
+      int anRed7[ 7 ] = { 2, 5, 8, 10, 12, 15, 18 };
+      int anRed11[ 11 ] = { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20 };
+      int anRed14[ 14 ] = 
+      { 1, 2, 3, 5, 6, 7, 9, 11, 12, 13, 15, 17, 18, 19 }; 
+      int *pnRed;
+      int nRed;
+      int k;
+      float rDiff, arDiff[ NUM_OUTPUTS ];
+
+      k = 0;
+
+      /* Loop over all 21 dice rolls */
+
+      for( n0 = 1; n0 <= 6; n0++ )
+	for( n1 = 1; n1 <= n0; n1++ ) {
+
+	  for( i = 0; i < 25; i++ ) {
+	    anBoardNew[ 0 ][ i ] = anBoard[ 0 ][ i ];
+	    anBoardNew[ 1 ][ i ] = anBoard[ 1 ][ i ];
+	  }
+
+	  if( fInterrupt ) {
+	    errno = EINTR;
+	    return -1;
+	  } else if( fAction )
+	    fnAction();
+	      
+	  FindBestMovePlied( anMove, n0, n1, anBoardNew, pci, pec, 0 );
+	      
+	  SwapSides( anBoardNew );
+
+	  SetCubeInfo ( &ciOpp, pci->nCube, pci->fCubeOwner,
+			! pci->fMove );
+
+	  /* Evaluate at 0-ply */
+	      
+	  if( EvaluatePositionCache( anBoardNew, ad0ply[ k ].arOutput, 
+				     &ciOpp, pec, 0, 
+				     pec->fRelativeAccuracy ? pc :
+				     ClassifyPosition( anBoardNew ) ) )
+	    return -1;
+
+	  ad0ply[ k ].rScore = Utility ( ad0ply[ k ].arOutput, &ciOpp );
+	  PositionKey ( anBoardNew, ad0ply[ k ].auch);
+
+	  if( n0 == n1 ) {
+
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+	      arOutput[ i ] += ad0ply[ k ].arOutput[ i ];
+
+	    ad0ply[ k ].rWeight = 1.0;
+
+	  } else {
+
+	    for( i = 0; i < NUM_OUTPUTS; i++ )
+	      arOutput[ i ] += 2.0 * ad0ply[ k ].arOutput[ i ];
+
+	    ad0ply[ k ].rWeight = 2.0;
+
+	  }
+
+	  k++;
+	      
+	}
+
+      /* sort */
+
+      qsort ( ad0ply, 21, sizeof ( RedEvalData ), 
+	      (cfunc) CompareRedEvalData );
+
+      for ( i = 0; i < NUM_OUTPUTS; i++ )
+	arDiff[ i ] = 0.0;
+      rDiff = 0.0;
+
+      /* do 1-ply on subset */
+
+      switch ( pec->nReduced ) {
+      case 7:
+	nRed = 7;
+	pnRed = anRed7;
+	break;
+
+      case 11:
+	nRed = 11;
+	pnRed = anRed11;
+	break;
+
+      case 14:
+	nRed = 14;
+	pnRed = anRed14;
+	break;
+
+      default:
+	assert ( FALSE );
+	break;
+
+      }
+
+      for ( k = 0; k < nRed; pnRed++, k++ ) {
+
+	PositionFromKey ( anBoardNew, ad0ply[ *pnRed ].auch );
+
+	if( EvaluatePositionCache( anBoardNew, ar, &ciOpp, pec, nPlies - 1,
+				   pec->fRelativeAccuracy ? pc :
+				   ClassifyPosition( anBoardNew ) ) )
+	  return -1;
+
+	for ( i = 0; i < NUM_OUTPUTS; i++ ) {
+
+	  arDiff[ i ] +=
+	    ad0ply[ *pnRed ].rWeight * 
+	    ( ar[ i ] - ad0ply[ *pnRed ].arOutput[ i ] );
+
+	}
+
+	rDiff += ad0ply[ *pnRed ].rWeight;
+
+      }
+	    
+	  
+      for ( i = 0; i < NUM_OUTPUTS; i++ )
+
+	arOutput[ i ] += 36. * arDiff[ i ] / rDiff;
+
+      arOutput[ OUTPUT_WIN ] = 1.0 - arOutput[ OUTPUT_WIN ] / 36.0;
+	  
+      ar[ 0 ] = arOutput[ OUTPUT_WINGAMMON ] / 36.0;
+      arOutput[ OUTPUT_WINGAMMON ] = arOutput[ OUTPUT_LOSEGAMMON ] / 36.0;
+      arOutput[ OUTPUT_LOSEGAMMON ] = ar[ 0 ];
+	  
+      ar[ 0 ] = arOutput[ OUTPUT_WINBACKGAMMON ] / 36.0;
+      arOutput[ OUTPUT_WINBACKGAMMON ] =
+	arOutput[ OUTPUT_LOSEBACKGAMMON ] / 36.0;
+      arOutput[ OUTPUT_LOSEBACKGAMMON ] = ar[ 0 ];
+
+    }
+	     
+
+  } else {
+    /* at leaf node; use static evaluation */
+      
+    acef[ pc ]( anBoard, arOutput );
+       
+    SanityCheck( anBoard, arOutput );
+  }
+
+  return 0;
 }
+
 
 static int 
 EvaluatePositionCache( int anBoard[ 2 ][ 25 ], float arOutput[],
@@ -2204,12 +2219,12 @@ extern void SetGammonPrice( float rGammon, float rLoseGammon,
 extern float
 Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
 
-	if ( ! nMatchTo ) {
+  if ( ! nMatchTo ) {
 
-		/* equity calculation for money game */
+    /* equity calculation for money game */
 
-		/* For money game the gammon price is the same for both
-			 players, so there is no need to use pci->fMove. */
+    /* For money game the gammon price is the same for both
+       players, so there is no need to use pci->fMove. */
 
     return 
       ar[ OUTPUT_WIN ] * 2.0 - 1.0 +
@@ -2218,19 +2233,127 @@ Utility( float ar[ NUM_OUTPUTS ], cubeinfo *pci ) {
       ( ar[ OUTPUT_WINBACKGAMMON ] - ar[ OUTPUT_LOSEBACKGAMMON ] ) *
       pci -> arGammonPrice[ 1 ];
 
-	} 
-	else {
+  } 
+  else {
 
-		/* equity calculation for match play */
+    /* equity calculation for match play */
 
-		/* FIXME! */
+    return
+      ar [ OUTPUT_WIN ] * 2.0 - 1.0
+      + ar[ OUTPUT_WINGAMMON ] *
+      pci -> arGammonPrice[ pci -> fMove ] 
+      - ar[ OUTPUT_LOSEGAMMON ] *
+      pci -> arGammonPrice[ ! pci -> fMove ] 
+      + ar[ OUTPUT_WINBACKGAMMON ] *
+      pci -> arGammonPrice[ 2 + pci -> fMove ] 
+      - ar[ OUTPUT_LOSEBACKGAMMON ] *
+      pci -> arGammonPrice[ 2 + ! pci -> fMove ];
 
-		assert ( FALSE );
-
-	}
-
+  }
 		
 }
+
+
+
+extern float 
+mwc2eq ( float rMwc, cubeinfo *ci ) {
+
+
+  int nCube = ci->nCube;
+  int fWho  = ci->fMove;
+
+  /* normalized score */
+
+  int nScore0 = nMatchTo - anScore[ fWho ];
+  int nScore1 = nMatchTo - anScore[ ! fWho ];
+  
+  /* mwc if I win/lose */
+
+  float rMwcWin, rMwcLose;
+
+  if ( fCrawford || fPostCrawford ) {
+    if ( nScore0 == 1 ) {
+      rMwcWin = 1.0;
+      rMwcLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
+    }
+    else {
+      rMwcWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
+      rMwcLose = 0.0;
+    }
+  }
+  else {
+    rMwcWin = GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
+    rMwcLose = GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+  }
+
+  /* 
+   * make linear inter- or extrapolation:
+   * equity       mwc
+   *  -1          rMwcLose
+   *  +1          rMwcWin
+   *
+   * Interpolation formula:
+   *
+   *       2 * rMwc - ( rMwcWin + rMwcLose )
+   * rEq = ---------------------------------
+   *            rMwcWin - rMwcLose
+   *
+   * FIXME: numerical problems?
+   * If you are trailing 30-away, 1-away the difference between
+   * 29-away, 1-away and 30-away, 0-away is not very large, and it may
+   * give numerical problems.
+   *
+   */
+
+  return ( 2.0 * rMwc - ( rMwcWin + rMwcLose ) ) / 
+    ( rMwcWin - rMwcLose );
+
+}
+
+extern float 
+eq2mwc ( float rEq, cubeinfo *ci ) {
+
+  int nCube = ci->nCube;
+  int fWho  = ci->fMove;
+
+  /* normalized score */
+
+  int nScore0 = nMatchTo - anScore[ fWho ];
+  int nScore1 = nMatchTo - anScore[ ! fWho ];
+
+  /* mwc if I win/lose */
+
+  float rMwcWin, rMwcLose;
+
+  if ( fCrawford || fPostCrawford ) {
+    if ( nScore0 == 1 ) {
+      rMwcWin = 1.0;
+      rMwcLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
+    }
+    else {
+      rMwcWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
+      rMwcLose = 0.0;
+    }
+  }
+  else {
+    rMwcWin = GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
+    rMwcLose = GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+  }
+  
+  /*
+   * Linear inter- or extrapolation.
+   * Solve the formula in the routine above (mwc2eq):
+   *
+   *        rEq * ( rMwcWin - rMwcLose ) + ( rMwcWin + rMwcLose )
+   * rMwc = -----------------------------------------------------
+   *                                   2
+   */
+
+  return 
+    0.5 * ( rEq * ( rMwcWin - rMwcLose ) + ( rMwcWin + rMwcLose ) );
+
+}
+
 
 static int ApplySubMove( int anBoard[ 2 ][ 25 ], int iSrc, int nRoll ) {
 
@@ -2861,18 +2984,41 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     break;
   }
 
+#ifdef UNDEF
+  /* debug code */
+
+  {
+
+    float ar[ 5 ] = { 0.5, 0.0, 0.0, 0.0, 0.0 };
+
+    ci.nCube = nCube;
+    ci.fMove = fMove;
+    
+    GetPoints ( ar, anScore, nMatchTo, &ci, NULL );
+
+    exit(-1);
+
+  }
+
+  /* end debug */
+#endif
+    
   strcat( szOutput, "\n\n" );
 
   acdf[ pc ]( anBoard, strchr( szOutput, 0 ) );
   szOutput = strchr( szOutput, 0 );    
 
-  strcpy( szOutput, "\n       \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
-          "Equity  (cubeful)\n" );
+  if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) )
+    strcpy( szOutput, "\n       \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+	    "Equity  (cubeful)\n" );
+  else
+    strcpy( szOutput, "\n       \tWin  \tW(g) \tW(bg)\tL(g) \tL(bg)\t"
+	    "Mwc     (cubeful)\n" );
 
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove );
     
   nPlies = pec->nPlies > 9 ? 9 : pec->nPlies;
-    
+
   for( i = 0; i <= nPlies; i++ ) {
     szOutput = strchr( szOutput, 0 );
 	
@@ -2890,10 +3036,24 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
     szOutput = strchr( szOutput, 0 );
 	
-    sprintf( szOutput,
-             ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t(%+6.3f  (%+6.3f))\n",
-             arOutput[ 0 ], arOutput[ 1 ], arOutput[ 2 ], arOutput[ 3 ],
-             arOutput[ 4 ], Utility ( arOutput, &ci ), arCfOutput[ 0 ] );
+    if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) )
+      sprintf( szOutput,
+	       ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+	       "(%+6.3f  (%+6.3f))\n",
+	       arOutput[ 0 ], arOutput[ 1 ],
+	       arOutput[ 2 ], arOutput[ 3 ],
+	       arOutput[ 4 ], Utility ( arOutput, &ci ), 
+	       arCfOutput[ 0] ); 
+    else {
+      sprintf( szOutput,
+	       ":\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t%5.3f\t"
+	       "(%6.2f%% (%6.2f%%))\n",
+	       arOutput[ 0 ], arOutput[ 1 ],
+	       arOutput[ 2 ], arOutput[ 3 ],
+	       arOutput[ 4 ], 
+	       100.0 * eq2mwc ( Utility ( arOutput, &ci ), &ci ), 
+	       100.0 * eq2mwc ( arCfOutput[ 0], &ci ) ); 
+    }
   }
 
   /* if cube is available, output cube action */
@@ -2903,7 +3063,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
     szOutput = strchr( szOutput, 0 );    
     sprintf( szOutput, "\n\n" );
     szOutput = strchr( szOutput, 0 );    
-    GetCubeActionSz ( arCfOutput, szOutput );
+    GetCubeActionSz ( arCfOutput, szOutput, &ci );
 
   }
   
@@ -2912,7 +3072,7 @@ extern int DumpPosition( int anBoard[ 2 ][ 25 ], char *szOutput,
 
 
 extern int 
-GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
+GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci ) {
 
   /* write string with cube action */
 
@@ -2928,14 +3088,28 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
          Best for me : Double, pass
          Worst for me: No Double */
 
-      sprintf ( szOutput,
-                "Double, take  : %+6.3f\n"
-                "Double, pass  : %+6.3f   (%+6.3f)\n"
-                "No double     : %+6.3f   (%+6.3f)\n\n"
-                "Correct cube action: Double, take",
-                arDouble[ 2 ],
-                arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 2 ],
-                arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 2 ] );
+      if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) )
+	sprintf ( szOutput,
+		  "Double, take  : %+6.3f\n"
+		  "Double, pass  : %+6.3f   (%+6.3f)\n"
+		  "No double     : %+6.3f   (%+6.3f)\n\n"
+		  "Correct cube action: Double, take",
+		  arDouble[ 2 ],
+		  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 2 ],
+		  arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 2 ] );
+      else
+	sprintf ( szOutput,
+		  "Double, take  : %6.2f%%\n"
+		  "Double, pass  : %6.2f%%   (%+6.2f%%)\n"
+		  "No double     : %6.2f%%   (%+6.2f%%)\n\n"
+		  "Correct cube action: Double, take",
+		  100.0 * eq2mwc ( arDouble[ 2 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 3 ], pci ) -
+		  100.0 * eq2mwc ( arDouble[ 2 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 1 ], pci ), 
+		  100.0 * eq2mwc ( arDouble[ 1 ], pci ) - 
+		  100.0 * eq2mwc ( arDouble[ 2 ], pci ) );
 
     }
     else {
@@ -2944,15 +3118,28 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
          BEst for me : Double, take
          Worst for me: no double */
 
-      sprintf ( szOutput,
-                "Double, pass  : %+6.3f\n"
-                "Double, take  : %+6.3f   (%+6.3f)\n"
-                "No double     : %+6.3f   (%+6.3f)\n\n"
-                "Correct cube action: Double, pass",
-                arDouble[ 3 ],
-                arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 3 ],
-                arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 3 ] );
-
+      if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) )
+	sprintf ( szOutput,
+		  "Double, pass  : %+6.3f\n"
+		  "Double, take  : %+6.3f   (%+6.3f)\n"
+		  "No double     : %+6.3f   (%+6.3f)\n\n"
+		  "Correct cube action: Double, pass",
+		  arDouble[ 3 ],
+		  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 3 ],
+		  arDouble[ 1 ], arDouble[ 1 ] - arDouble[ 3 ] );
+      else
+	sprintf ( szOutput,
+		  "Double, pass  : %+6.2f%%\n"
+		  "Double, take  : %+6.2f%%   (%+6.2f%%)\n"
+		  "No double     : %+6.2f%%   (%+6.2f%%)\n\n"
+		  "Correct cube action: Double, pass",
+		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 2 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 2 ], pci ) -
+		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 1 ], pci ), 
+		  100.0 * eq2mwc ( arDouble[ 1 ], pci ) - 
+		  100.0 * eq2mwc ( arDouble[ 3 ], pci ) );
     }
 
   } 
@@ -2968,14 +3155,28 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
            Best for me : Double, take
            Worst for me: Double, pass */
 
-        sprintf ( szOutput,
-                  "No double     : %+6.3f\n"
-                  "Double, take  : %+6.3f   (%+6.3f)\n"
-                  "Double, pass  : %+6.3f   (%+6.3f)\n\n"
-                  "Correct cube action: too good to double, pass",
-                  arDouble[ 1 ],
-                  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ],
-                  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ] );
+	if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) )
+	  sprintf ( szOutput,
+		    "No double     : %+6.3f\n"
+		    "Double, take  : %+6.3f   (%+6.3f)\n"
+		    "Double, pass  : %+6.3f   (%+6.3f)\n\n"
+		    "Correct cube action: too good to double, pass",
+		    arDouble[ 1 ],
+		    arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ],
+		    arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ] );
+	else
+	  sprintf ( szOutput,
+		    "No double     : %+6.2f%%\n"
+		    "Double, take  : %+6.2f%%   (%+6.2f%%)\n"
+		    "Double, pass  : %+6.2f%%   (%+6.2f%%)\n\n"
+		    "Correct cube action: too good to double, pass",
+		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
+		    100.0 * eq2mwc ( arDouble[ 2 ], pci ),
+		    100.0 * eq2mwc ( arDouble[ 2 ], pci ) -
+		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
+		    100.0 * eq2mwc ( arDouble[ 3 ], pci ), 
+		    100.0 * eq2mwc ( arDouble[ 3 ], pci ) - 
+		    100.0 * eq2mwc ( arDouble[ 1 ], pci ) );
 
       }
       else {
@@ -2986,14 +3187,28 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
 
         /* This situation may arise in match play. */
 
-        sprintf ( szOutput,
-                  "No double     : %+6.3f\n"
-                  "Double, pass  : %+6.3f   (%+6.3f)\n"
-                  "Double, take  : %+6.3f   (%+6.3f)\n\n"
-                  "Correct cube action: too good to double, take(!)",
-                  arDouble[ 1 ],
-                  arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ],
-                  arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ] );
+	if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) )
+	  sprintf ( szOutput,
+		    "No double     : %+6.3f\n"
+		    "Double, pass  : %+6.3f   (%+6.3f)\n"
+		    "Double, take  : %+6.3f   (%+6.3f)\n\n"
+		    "Correct cube action: too good to double, take(!)",
+		    arDouble[ 1 ],
+		    arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ],
+		    arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ] );
+	else
+	  sprintf ( szOutput,
+		    "No double     : %+6.2f%%\n"
+		    "Double, pass  : %+6.2f%%   (%+6.2f%%)\n"
+		    "Double, take  : %+6.2f%%   (%+6.2f%%)\n\n"
+		    "Correct cube action: too good to double, take(!)",
+		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
+		    100.0 * eq2mwc ( arDouble[ 3 ], pci ),
+		    100.0 * eq2mwc ( arDouble[ 3 ], pci ) -
+		    100.0 * eq2mwc ( arDouble[ 1 ], pci ),
+		    100.0 * eq2mwc ( arDouble[ 2 ], pci ), 
+		    100.0 * eq2mwc ( arDouble[ 2 ], pci ) - 
+		    100.0 * eq2mwc ( arDouble[ 1 ], pci ) );
 
       }
 
@@ -3004,6 +3219,7 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
          Best for me : Double, pass
          Worst for me: Double, take */
 
+      if ( ! nMatchTo || ( nMatchTo && ! fOutputMWC ) )
         sprintf ( szOutput,
                   "No double     : %+6.3f\n"
                   "Double, pass  : %+6.3f   (%+6.3f)\n"
@@ -3012,7 +3228,19 @@ GetCubeActionSz ( float arDouble[ 4 ], char *szOutput ) {
                   arDouble[ 1 ],
                   arDouble[ 3 ], arDouble[ 3 ] - arDouble[ 1 ],
                   arDouble[ 2 ], arDouble[ 2 ] - arDouble[ 1 ] );
-
+      else
+        sprintf ( szOutput,
+                  "No double     : %+6.2f%%\n"
+                  "Double, pass  : %+6.2f%%   (%+6.2f%%)\n"
+                  "Double, take  : %+6.2f%%   (%+6.2f%%)\n\n"
+                  "Correct cube action: No double, take",
+		  100.0 * eq2mwc ( arDouble[ 1 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 3 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 3 ], pci ) -
+		  100.0 * eq2mwc ( arDouble[ 1 ], pci ),
+		  100.0 * eq2mwc ( arDouble[ 2 ], pci ), 
+		  100.0 * eq2mwc ( arDouble[ 2 ], pci ) - 
+		  100.0 * eq2mwc ( arDouble[ 1 ], pci ) );
     }
 
   }
@@ -3085,7 +3313,7 @@ extern int FindPubevalMove( int nDice0, int nDice1, int anBoard[ 2 ][ 25 ] ) {
 
 extern int
 SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
-							int fMove ) {
+	      int fMove ) {
 
   ci->nCube = nCube;
   ci->fCubeOwner = fCubeOwner;
@@ -3113,13 +3341,88 @@ SetCubeInfo ( cubeinfo *ci, int nCube, int fCubeOwner,
   }
   else {
 
-		/* match play gammon prices */
+    /*
+     * Match play.
+     * FIXME: calculate gammon price when initializing program
+     * instead of recalculating it again and again, or cache it.
+     */
+              
+    int nScore0 = NORM_SCORE ( anScore[ 0 ] );
+    int nScore1 = NORM_SCORE ( anScore[ 1 ] );
 
-		/* FIXME */
+    if ( fCrawford || fPostCrawford ) {
 
-		assert ( FALSE );
+      if ( nScore0 == 1 ) {
 
-	}
+	float rLose = 1.0 - GET_Btilde ( nScore1 - nCube - 1, afBtilde );
+	float rLoseGammon = 
+	  1.0 - GET_Btilde ( nScore1 - nCube * 2 - 1, afBtilde );
+	float rLoseBG =
+	  1.0 - GET_Btilde ( nScore1 - nCube * 3 - 1, afBtilde );
+
+	float rCenter = ( 1.0 + rLose ) / 2.0;
+
+	ci->arGammonPrice[ 0 ] = 0.0; 
+	ci->arGammonPrice[ 2 ] = 0.0;
+
+	ci->arGammonPrice[ 1 ] = 
+	  ( rCenter - rLoseGammon ) / ( 1.0 - rCenter ) - 1.0;
+
+	ci->arGammonPrice[ 3 ] = 
+	  ( rCenter - rLoseBG ) / ( 1.0 - rCenter ) - 
+	  ( ci->arGammonPrice[ 1 ] + 1.0 );
+
+      }
+      else {
+
+	float rWin = GET_Btilde ( nScore0 - nCube - 1, afBtilde );
+	float rWinGammon = 
+	  GET_Btilde ( nScore0 - nCube * 2 - 1, afBtilde );
+	float rWinBG = 
+	  GET_Btilde ( nScore0 - nCube * 3 - 1, afBtilde );
+
+	ci->arGammonPrice[ 0 ] =
+	  2.0 * rWinGammon / rWin - 2.0;
+
+	ci->arGammonPrice[ 2 ] =
+	  2.0 * rWinBG / rWin - ( ci->arGammonPrice[ 0 ] + 2.0 );
+
+	ci->arGammonPrice[ 1 ] = 0.0;
+	ci->arGammonPrice[ 3 ] = 0.0;
+	
+      }
+
+    }
+    else {
+      float rWin = 
+	GET_A1 ( nScore0 - nCube - 1, nScore1 - 1, aafA1 );
+      float rLose =
+	GET_A1 ( nScore0 - 1, nScore1 - nCube - 1, aafA1 );
+      float rWinGammon =
+	GET_A1 ( nScore0 - nCube * 2 - 1, nScore1 - 1, aafA1 );
+      float rLoseGammon =
+	GET_A1 ( nScore0 - 1, nScore1 - nCube * 2 - 1, aafA1 );
+      float rWinBG =
+	GET_A1 ( nScore0 - nCube * 3 - 1, nScore1 - 1, aafA1 );
+      float rLoseBG =
+	GET_A1 ( nScore0 - 1, nScore1 - nCube * 3 - 1, aafA1 );
+
+      float rCenter = ( rWin + rLose ) / 2.0;
+
+      ci->arGammonPrice[ 0 ] = 
+	( rWinGammon - rCenter ) / ( rWin - rCenter ) - 1.0;
+      ci->arGammonPrice[ 1 ] = 
+	( rCenter - rLoseGammon ) / ( rWin - rCenter ) - 1.0;
+      ci->arGammonPrice[ 2 ] = 
+	( rWinBG - rCenter ) / ( rWin - rCenter ) - 
+	( ci->arGammonPrice[ 0 ] + 1.0 );
+      ci->arGammonPrice[ 3 ] = 
+	( rCenter - rLoseBG ) / ( rWin - rCenter ) - 
+	( ci->arGammonPrice[ 1 ] + 1.0 );
+
+    } /* Crawford || PostCrawford */
+
+  } /* match play */
 
 }
 
@@ -3134,6 +3437,14 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
                 arCfOutput[ 1 ]: equity for no double,
                 arCfOutput[ 2 ]: equity for double, take,
                 arCfOutput[ 3 ]: equity for double, pass.
+
+     This is the top-level routine. If it is a n-ply (n>1) evaluation
+     we are going to do a "no double" evaluation and a "double
+     evaluation". The recursion is done in EvaluatePositionCubeful1.
+
+     The cubeful equity is the optimal (assuming both players play
+     optimal) of the "no double", "double, take", and "double, pass"
+     equities. 
 
   */
 
@@ -3152,6 +3463,7 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
                 ! pci -> fMove );
 
   arCfOutput[ 1 ] = 0.0;
+  arCfOutput[ 2 ] = 0.0;
 
   if ( pc != CLASS_OVER && nPlies > 0 ) {
 
@@ -3203,8 +3515,6 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
     SetCubeInfo ( &ciR, 2 * pci -> nCube, ! pci -> fMove, ! pci -> fMove );
 
     if ( pc != CLASS_OVER && nPlies > 0 ) {
-
-      arCfOutput[ 2 ] = 0.0;
 
       for ( n0 = 1; n0 <= 6; n0++ ) 
         for ( n1 = 1; n1 <= n0; n1++ ) {
@@ -3276,6 +3586,12 @@ EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
 
   }
 
+  /* convert mwc to equity */
+
+  if ( nMatchTo )
+    for ( i = 0; i < 4; i++ )
+      arCfOutput[ i ] = mwc2eq ( arCfOutput[ i ], pci );
+
   return 0;
 
 }
@@ -3285,6 +3601,44 @@ extern int
 EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput, 
                           cubeinfo *pci, evalcontext *pec, 
                           int nPlies) { 
+
+  /* Calculate cubeful equity.
+
+     nPlies >0 and the game isn't over:
+     ----------------------------------
+
+     To save computer time, we don't take both the "no double" and
+     "double, take" branch as we did on the top level. Instead, we
+     first do a 0-ply cube action decision, and decide which branch to
+     take. 
+
+     Then do a normal evaluation:
+
+     Loop over 21 dice rolls
+        Find Best Move
+        Swap Sides
+        EvaluatePositionCubeful1 ( nPlies - 1 )
+     End Loop
+
+
+     nPlies = 0:
+     -----------
+
+     Use Rick Janowskis formulae for converting cubeless equity to
+     cubeful equity. 
+
+
+     Game over:
+     ----------
+
+     When the game is over you're not very likely to use the cube
+     (unless you throw it at your opponent, if you believe she has
+     been very lucky), so
+
+     Equity (cubeless) = Equity ( cubeful ).
+
+  */
+    
 
   positionclass pc;
 
@@ -3332,7 +3686,8 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
 	if ( rDT > rDP ) {
 
-	  /* Double, pass */
+	  /* Double, pass:
+	     No need to do recursion. Equity is just +1.0. */
 
 	  *prOutput = rDP;
 	  return 0;
@@ -3340,7 +3695,8 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 	}
 	else {
 
-	  /* Double, take */
+	  /* Double, take:
+	     Take "double, take" branch in evaluation below. */
 
 	  pciE = &ciD;
 	  SetCubeInfo ( &ciR, 2 * pci -> nCube, 
@@ -3350,7 +3706,8 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 	}
       }
       else {
-        /* no double */
+        /* no double:
+	   Take "no double" branch in the evaluation below. */
         pciE = &ciND;
         SetCubeInfo ( &ciR, pci -> nCube, 
                       pci -> fCubeOwner, ! pci -> fMove );
@@ -3359,12 +3716,15 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
 
     } 
     else {
+      /* We can't double, so do the "no double" evaluation. */
       pciE = &ciND;
       SetCubeInfo ( &ciR, pci -> nCube, 
                     pci -> fCubeOwner, ! pci -> fMove );
     }
 
     *prOutput = 0.0;
+
+    /* Do normal evaluation and recurse. */
 
     for ( n0 = 1; n0 <= 6; n0++ ) 
       for ( n1 = 1; n1 <= n0; n1++ ) {
@@ -3404,10 +3764,9 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
   } /* end recurse */
   else {
 
-    /* At leaf node; use static evaluation.
+    /* At leaf node or gave over: use static evaluation.
        Call EvaluatePostion to ensure that the evaluation
-       is cached.
-    */
+       is cached. */
 
     float arOutput [ NUM_OUTPUTS ], rEq;
 
@@ -3427,163 +3786,10 @@ EvaluatePositionCubeful1( int anBoard[ 2 ][ 25 ], float *prOutput,
     }
     else {
 
-      float rW, rL;
-      float rOppTG, rOppCP, rCP, rTG;
-      float rOppIDP, rIDP;
-      float rk, rOppk;
-
-      /* money game */
-
-      if ( arOutput[ 0 ] > 0.0 )
-        rW = 1.0 + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
+      if ( ! nMatchTo )
+	*prOutput = Cl2CfMoney ( arOutput, pci );
       else
-        rW = 1.0;
-
-      if ( arOutput[ 0 ] < 1.0 )
-        rL = 1.0 + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
-          ( 1.0 - arOutput [ 0 ] );
-      else
-        rL = 1.0;
-
-      rOppTG = 1.0 - ( rW + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
-      rOppCP = 1.0 -
-        ( rW + 0.5 + 0.5 * rCubeX ) /
-        ( rW + rL + 0.5 * rCubeX );
-      rCP =
-        ( rL + 0.5 + 0.5 * rCubeX ) /
-        ( rW + rL + 0.5 * rCubeX );
-      rTG = ( rL + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
-      
-      if ( pci->fCubeOwner == -1 ) {
-
-        /* centered cube */
-
-        if ( arOutput[0 ] > rOppTG && arOutput[ 0 ] < rOppCP ) {
-          /* Opp cashes. Don't award him full bonus, as I might
-             have a joker-roll. */
-          rEq = -0.9999;
-        } else if ( arOutput[ 0 ] > rOppCP && arOutput[ 0 ] < rCP ) {
-          /* in market window */
-          
-          if ( ! fJacoby ) {
-
-            /* initial double point for money game without
-               Jacoby rule. */
-            
-            rOppk = 1.0;
-            rk = 1.0;
-            
-          }
-          else {
-            
-            /* initial double points for money game with
-               Jacoby rule. */
-            
-            if ( ! fBeavers ) {
-
-              /* no beavers and other critters */
-
-              rOppk =
-                ( rW + rL ) * ( rW - 0.5 * ( 1.0 - rCubeX ) ) /
-                ( rW * ( rW + rL - ( 1.0 - rCubeX ) ) );
-
-              rk =
-                ( rW + rL ) * ( rL - 0.5 * ( 1.0 - rCubeX ) ) /
-                ( rL * ( rW + rL - ( 1.0 - rCubeX ) ) );
-
-            }
-            else {
-
-              /* with beavers and other critters */
-
-              rOppk =
-                ( rW + rL ) * ( rW - 0.25 * ( 1.0 - rCubeX ) ) /
-                ( rW * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
-
-              rk =
-                ( rW + rL ) * ( rL - 0.25 * ( 1.0 - rCubeX ) ) /
-                ( rL * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
-
-            }
-          }
-
-          rOppIDP = 1.0 - rOppk *
-            ( rW +
-              rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
-            / ( rL +  rW + 0.5 * rCubeX );
-
-          rIDP = rk *
-            ( rL +
-              rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
-            / ( rL +  rW + 0.5 * rCubeX );
-
-          if ( arOutput[ 0 ] < rOppIDP ) {
-
-            float rE2 =
-              2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
-
-            rEq = -1.0 +  ( rE2 + 1.0 ) *
-              ( arOutput[ 0 ] - rOppCP ) / ( rOppIDP - rOppCP );
-
-          }
-          else if ( arOutput[ 0 ] < rIDP ) {
-
-            float rE2 =
-              2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
-            float rE3 =
-              2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
-                      rL - 0.5 * rCubeX );
-
-            rEq = rE2 + ( rE3 - rE2 ) *
-              ( arOutput[ 0 ] - rOppIDP ) / ( rIDP - rOppIDP );
-
-          }
-          else {
-
-            float rE3 =
-              2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
-                      rL - 0.5 * rCubeX );
-
-            rEq = rE3 + ( 1.0 - rE3 ) *
-              ( arOutput[ 0 ] - rIDP ) / ( rCP - rIDP );
-
-          }
-
-        } else if ( arOutput[ 0 ] > rCP && arOutput[ 0 ] < rTG ) {
-          /* cash */
-          rEq = 1.0;
-        }
-
-      }
-      else if ( pci->fCubeOwner == pci->fMove ) {
-
-        /* I own cube */
-
-        if ( arOutput[ 0 ] < rCP ) {
-          rEq =
-            ( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX ) - rL );
-        }
-        else if ( arOutput[ 0 ] > rCP && arOutput[ 0 ] < rTG ) {
-          /* cash */
-          rEq = 1.0;
-        }
-
-      } else {
-
-        /* Opp own Cube */
-
-        if ( arOutput[0 ] > rOppTG && arOutput[ 0 ] < rOppCP ) {
-          /* Opp cashes. Don't award him full bonus, as I might
-             have a joker-roll. */
-          rEq = -0.9999;
-        } else if ( arOutput[ 0 ] > rOppCP ) {
-          rEq = ( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX )
-                  - rL - 0.5 * rCubeX );
-        }
-
-      }
-
-      *prOutput = rEq;
+	*prOutput = Cl2CfMatch ( arOutput, pci );
 
     } /* CLASS_OVER */
       
@@ -3635,6 +3841,22 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
       ( ( pci -> fCubeOwner == -1 ) || ( pci -> fCubeOwner == pci ->
                                          fMove ) );   
 
+    if ( prDPEq ) {
+
+      if ( fPostCrawford || fCrawford ) {
+	if ( nMatchTo - anScore[ fMove ]  == 1 )
+	  *prDPEq = 1.0;
+	else
+	  *prDPEq =
+	    GET_Btilde ( nMatchTo - anScore [ fMove ] - 1 - nCube,
+			 afBtilde );
+      }
+      else
+	*prDPEq =
+	  GET_A1 ( nMatchTo - anScore[ fMove ] - 1 - nCube,
+		   nMatchTo - anScore[ !fMove ] - 1, aafA1 );
+    }
+              
     if ( pfCube )
       *pfCube = fCube;
       
@@ -3646,57 +3868,461 @@ GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci ) {
 
 
 extern float
-GetDoublePointDeadCube ( float arOutput [ 5 ],
-                         int   anScore[ 2 ], int nMatchTo,
-                         cubeinfo *pci ) {
+Cl2CfMoney ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
 
-  /*
-   * Calculate double point for dead cubes
-   */
+  float rW, rL;
+  float rOppTG, rOppCP, rCP, rTG;
+  float rOppIDP, rIDP;
+  float rk, rOppk;
+  float rEq;
 
-  if ( ! nMatchTo ) {
+  /* money game */
 
-    /* Use Rick Janowski's formulas
-       [insert proper reference here] */
+      /* Transform cubeless 0-ply equity to cubeful 0-ply equity using
+	 Rick Janowski's formulas [insert ref here]. */
 
-    float rW, rL;
+      /* First calculate average win and loss W and L: */
 
-    if ( arOutput[ 0 ] > 0.0 )
-      rW = 1.0 + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
-    else
-      rW = 1.0;
+  if ( arOutput[ 0 ] > 0.0 )
+    rW = 1.0 + ( arOutput[ 1 ] + arOutput[ 2 ] ) / arOutput[ 0 ];
+  else
+    rW = 1.0;
 
-    if ( arOutput[ 0 ] < 1.0 )
-      rL = 1.0 + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
-        ( 1.0 - arOutput [ 0 ] );
-    else
-      rL = 1.0;
+  if ( arOutput[ 0 ] < 1.0 )
+    rL = 1.0 + ( arOutput[ 3 ] + arOutput[ 4 ] ) /
+      ( 1.0 - arOutput [ 0 ] );
+  else
+    rL = 1.0;
 
-    if ( pci->fCubeOwner == -1 && fJacoby) {
+      /* Calculate too good and cash points for opponent and
+	 myself. These points are used for doing linear
+	 interpolations. */
 
-      /* centered cube */
+  rOppTG = 1.0 - ( rW + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
+  rOppCP = 1.0 -
+    ( rW + 0.5 + 0.5 * rCubeX ) /
+    ( rW + rL + 0.5 * rCubeX );
+  rCP =
+    ( rL + 0.5 + 0.5 * rCubeX ) /
+    ( rW + rL + 0.5 * rCubeX );
+  rTG = ( rL + 1.0 ) / ( rW + rL + 0.5 * rCubeX );
+      
+  if ( pci->fCubeOwner == -1 ) {
 
-      if ( fBeavers ) {
-        return ( rL - 0.25 ) / ( rW + rL - 0.5 );
+    /* Centered cube.  */
+
+    if ( arOutput[0 ] > rOppTG && arOutput[ 0 ] < rOppCP ) {
+      /* Opp cashes. Don't award him full bonus, as I might
+	 have a joker-roll. */
+      rEq = -0.9999;
+    } else if ( arOutput[ 0 ] > rOppCP && arOutput[ 0 ] < rCP ) {
+      /* In market window.
+	 We do linear interpolation, but the initial double points
+	 are dependent on Jacoby rule and beavers. */
+          
+      if ( ! fJacoby ) {
+
+	/* Constants used in formulae for initial double points are
+	   1 for money game without Jacoby rule. */
+            
+	rOppk = 1.0;
+	rk = 1.0;
+            
       }
       else {
-        return ( rL - 0.5 ) / ( rW + rL - 1.0 );
+            
+	/* Constants used in formulae for initial double points
+	   with playing with the Jacoby rule. */
+            
+	if ( ! fBeavers ) {
+
+	  /* no beavers and other critters */
+
+	  rOppk =
+	    ( rW + rL ) * ( rW - 0.5 * ( 1.0 - rCubeX ) ) /
+	    ( rW * ( rW + rL - ( 1.0 - rCubeX ) ) );
+
+	  rk =
+	    ( rW + rL ) * ( rL - 0.5 * ( 1.0 - rCubeX ) ) /
+	    ( rL * ( rW + rL - ( 1.0 - rCubeX ) ) );
+
+	}
+	else {
+
+	  /* with beavers and other critters */
+
+	  rOppk =
+	    ( rW + rL ) * ( rW - 0.25 * ( 1.0 - rCubeX ) ) /
+	    ( rW * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
+
+	  rk =
+	    ( rW + rL ) * ( rL - 0.25 * ( 1.0 - rCubeX ) ) /
+	    ( rL * ( rW + rL - 0.5 * ( 1.0 - rCubeX ) ) );
+
+	}
       }
-    }
-    else {
 
-      /* redoubles or Jacoby rule not in effect */
+      /* Initial double points: */
 
-      return rL / ( rL + rW );
+      rOppIDP = 1.0 - rOppk *
+	( rW +
+	  rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
+	/ ( rL +  rW + 0.5 * rCubeX );
+
+      rIDP = rk *
+	( rL +
+	  rCubeX / 2.0 * ( 3.0 - rCubeX )  / ( 2.0 - rCubeX ) )
+	/ ( rL +  rW + 0.5 * rCubeX );
+
+      if ( arOutput[ 0 ] < rOppIDP ) {
+
+	/* Winning chance is
+	   rOppCP < p < rOppIDP
+	   Do linear interpolation between
+
+	   p = rOppCP, E = -1, and 
+	   p = rOppIDP, E = rE2 (given below) */
+
+	float rE2 =
+	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
+
+	rEq = -1.0 +  ( rE2 + 1.0 ) *
+	  ( arOutput[ 0 ] - rOppCP ) / ( rOppIDP - rOppCP );
+
+      }
+      else if ( arOutput[ 0 ] < rIDP ) {
+
+	/* Winning chance is
+	   rOppIDP < p < rIDP
+
+	   Do linear interpolation between
+
+	   p = rOppIDP, E = rE2, and
+	   p = rIDP, E = rE3 */
+
+	float rE2 =
+	  2.0 * ( rOppIDP * ( rW + rL + 0.5 * rCubeX ) - rL );
+	float rE3 =
+	  2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
+		  rL - 0.5 * rCubeX );
+
+	rEq = rE2 + ( rE3 - rE2 ) *
+	  ( arOutput[ 0 ] - rOppIDP ) / ( rIDP - rOppIDP );
+
+      }
+      else {
+
+	/* Winning chance is
+	   rIDP < p < rCP
+
+	   Do linear interpolation between
+
+	   p = rIDP, E = rE3, and
+	   p = CP, E = +1 */
+
+	float rE3 =
+	  2.0 * ( rIDP * ( rW + rL + 0.5 * rCubeX ) -
+		  rL - 0.5 * rCubeX );
+
+	rEq = rE3 + ( 1.0 - rE3 ) *
+	  ( arOutput[ 0 ] - rIDP ) / ( rCP - rIDP );
+
+      }
+
+    } else if ( arOutput[ 0 ] > rCP && arOutput[ 0 ] < rTG ) {
+      /* We cash one point */
+      rEq = 1.0;
     }
 
   }
+  else if ( pci->fCubeOwner == pci->fMove ) {
+
+    /* I own cube */
+
+    if ( arOutput[ 0 ] < rTG ) {
+	  
+      /* Use formula (5) in Rick Janowski's article. 
+	 Linear interpolation between
+	  
+	 p = 0, E = -L, and
+	 p = rTG, E = +1 */
+
+      rEq =
+	( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX ) - rL );
+    }
+    else {
+
+      /* Linear interpolation between
+
+         p = rTG, E = +1, and
+         p = 1, E = +W */
+
+      rEq = 1.0 + ( rW - 1.0 ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
+
+    }
+
+  } else {
+
+    /* Opp own Cube */
+
+    if ( arOutput[ 0 ] > rOppTG ) {
+	  
+      /* Use formula (6) in Rick Janowski's article. 
+	     Linear interpolation between
+	  
+	     p = rOppTG, E = -1, and
+	     p = 1, E = +W */
+
+      rEq = ( arOutput[ 0 ] * ( rW + rL + 0.5 * rCubeX )
+	      - rL - 0.5 * rCubeX );
+    }
+    else {
+
+      /* Use linear interpolation between
+
+         p = 0, E = -L, and
+         p = rOppTG, E = -1 */
+
+      rEq = -rL + ( rL - 1.0 ) * arOutput[ 0 ] / rOppTG;
+
+    }
+
+  }
+
+  return rEq;
+
+}  
+
+
+extern float
+Cl2CfMatch ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
+
+  if ( pci->fCubeOwner == -1 ) {
+
+    float rEqO, rEqU;
+
+    rEqO = mwc2eq ( Cl2CfMatchOwned ( arOutput, pci ), pci );
+    rEqU = mwc2eq ( Cl2CfMatchUnavailable ( arOutput, pci ), pci );
+
+    return eq2mwc ( 2.0 / ( 4.0 - rCubeX ) * ( rEqO + rEqU ), pci );
+
+  } 
+  else if ( pci->fCubeOwner == pci->fMove ) {
+
+    return Cl2CfMatchOwned ( arOutput, pci );
+
+  } 
   else {
 
-    /* Match play */
-
-    /* FIXME! */
+    return Cl2CfMatchUnavailable ( arOutput, pci );
 
   }
 
 }
+  
+
+extern float
+Cl2CfMatchOwned ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
+
+  /* normalized score */
+
+  int nScore0 = nMatchTo - anScore[ pci->fMove ];
+  int nScore1 = nMatchTo - anScore[ ! pci->fMove ];
+
+  float rG0, rBG0, rG1, rBG1;
+  float arCP[ 2 ];
+
+  float rMWCDead, rMWCLive, rMWCWin, rMWCWin2, rMWCLose;
+  float rMWCCash, rOppTP, rTG;
+
+  /* I own cube */
+
+  /* Calculate normal, gammon, and backgammon ratios */
+
+  if ( arOutput[ 0 ] > 0.0 ) {
+    rG0 = arOutput[ 1 ] / arOutput[ 0 ];
+    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+  }
+  else {
+    rG0 = 0.0;
+    rBG0 = 0.0;
+  }
+
+  if ( arOutput[ 0 ] < 1.0 ) {
+    rG1 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+  }
+  else {
+    rG1 = 0.0;
+    rBG1 = 0.0;
+  }
+
+  /* MWC(dead cube) = cubeless equity */
+
+  rMWCDead = eq2mwc ( Utility ( arOutput, pci ), pci );
+
+  /* Get live cube cash points */
+
+  GetPoints ( arOutput, anScore, nMatchTo, pci, arCP );
+
+  rMWCCash = GET_A1 ( nScore0 - pci->nCube - 1, nScore1 - 1, aafA1 );
+
+  rTG = arCP[ pci->fMove ];
+
+  if ( arOutput[ 0 ] <= rTG ) {
+    
+    /* MWC(live cube) linear interpolation between the
+       points:
+
+       p = 0, MWC = I lose (normal, gammon, or backgammon)
+       p = TG, MWC = I win 1 point
+	 
+    */
+
+    rMWCLose = 
+      ( 1.0 - rG1 - rBG1 ) * 
+      GET_A1 ( nScore0 - 1, nScore1 - pci->nCube - 1, aafA1 ) +
+      rG1 * GET_A1 ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafA1 ) +
+      rBG1 * GET_A1 ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafA1 );
+
+    rMWCLive = rMWCLose + 
+      ( rMWCCash - rMWCLose ) * arOutput[ 0 ] / rTG;
+
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  } 
+  else {
+
+    /* we are too good to double */
+
+    /* MWC(live cube) linear interpolation between the
+       points:
+
+       p = TG, MWC = I win 1 point
+       p = 1, MWC = I win (normal, gammon, or backgammon)
+	 
+    */
+
+    rMWCWin = 
+      ( 1.0 - rG0 - rBG0 ) * 
+      GET_A1 ( nScore0 - pci->nCube - 1, nScore1 - 1, aafA1 ) +
+      rG0 * GET_A1 ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafA1 ) +
+      rBG0 * GET_A1 ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafA1 );
+
+    rMWCLive = rMWCCash + 
+      ( rMWCWin - rMWCCash ) * ( arOutput[ 0 ] - rTG ) / ( 1.0 - rTG );
+      
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  }
+
+}
+
+
+extern float
+Cl2CfMatchUnavailable ( float arOutput [ NUM_OUTPUTS ], cubeinfo *pci ) {
+
+  /* normalized score */
+
+  int nScore0 = nMatchTo - anScore[ pci->fMove ];
+  int nScore1 = nMatchTo - anScore[ ! pci->fMove ];
+
+  float rG0, rBG0, rG1, rBG1;
+  float arCP[ 2 ];
+
+  float rMWCDead, rMWCLive, rMWCWin, rMWCLose;
+  float rMWCOppCash, rOppTG;
+
+  /* I own cube */
+
+  /* Calculate normal, gammon, and backgammon ratios */
+
+  if ( arOutput[ 0 ] > 0.0 ) {
+    rG0 = arOutput[ 1 ] / arOutput[ 0 ];
+    rBG0 = arOutput[ 2 ] / arOutput[ 0 ];
+  }
+  else {
+    rG0 = 0.0;
+    rBG0 = 0.0;
+  }
+
+  if ( arOutput[ 0 ] < 1.0 ) {
+    rG1 = arOutput[ 3 ] / ( 1.0 - arOutput[ 0 ] );
+    rBG1 = arOutput[ 4 ] / ( 1.0 - arOutput[ 0 ] );
+  }
+  else {
+    rG1 = 0.0;
+    rBG1 = 0.0;
+  }
+
+  /* MWC(dead cube) = cubeless equity */
+
+  rMWCDead = eq2mwc ( Utility ( arOutput, pci ), pci );
+
+  /* Get live cube cash points */
+
+  GetPoints ( arOutput, anScore, nMatchTo, pci, arCP );
+
+  rMWCOppCash = GET_A1 ( nScore0 - 1, nScore1 - pci -> nCube - 1, aafA1 );
+
+  rOppTG = 1.0 - arCP[ ! pci->fMove ];
+
+  if ( arOutput[ 0 ] <= rOppTG ) {
+
+    /* Opponent is too good to double.
+
+       MWC(live cube) linear interpolation between the
+       points:
+
+       p = 0, MWC = opp win normal, gammon, backgammon
+       p = OppTG, MWC = opp cashes
+	 
+    */
+
+    rMWCLose = 
+      ( 1.0 - rG1 - rBG1 ) * 
+      GET_A1 ( nScore0 - 1, nScore1 - pci->nCube - 1, aafA1 ) +
+      rG1 * GET_A1 ( nScore0 - 1, nScore1 - 2 * pci->nCube - 1, aafA1 ) +
+      rBG1 * GET_A1 ( nScore0 - 1, nScore1 - 3 * pci->nCube - 1, aafA1 );
+
+    rMWCLive = rMWCLose + 
+      ( rMWCOppCash - rMWCLose ) * arOutput[ 0 ] / rOppTG;
+      
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  }
+  else {
+
+    /* MWC(live cube) linear interpolation between the
+       points:
+
+       p = OppTG, MWC = opponent cashes
+       p = 1, MWC = I win (normal, gammon, or backgammon)
+	 
+    */
+
+    rMWCWin = 
+      ( 1.0 - rG0 - rBG0 ) * 
+      GET_A1 ( nScore0 - pci->nCube - 1, nScore1 - 1, aafA1 ) +
+      rG0 * GET_A1 ( nScore0 - 2 * pci->nCube - 1, nScore1 - 1, aafA1 ) +
+      rBG0 * GET_A1 ( nScore0 - 3 * pci->nCube - 1, nScore1 - 1, aafA1 );
+
+    rMWCLive = rMWCOppCash + 
+      ( rMWCWin - rMWCOppCash ) * ( arOutput[ 0 ] - rOppTG ) 
+      / ( 1.0 - rOppTG );
+
+    /* (1-x) MWC(dead) + x MWC(live) */
+
+    return  rMWCDead * ( 1.0 - rCubeX ) + rMWCLive * rCubeX;
+
+  } 
+
+}
+
+

@@ -110,11 +110,13 @@ typedef struct _cubeinfo {
 
 } cubeinfo;
 
+#define NORM_SCORE(n) ( nMatchTo - ( n ) ) 
+
 
 extern volatile int fInterrupt, fAction;
 extern int fMove, fCubeOwner, fJacoby, fCrawford;
 extern int fPostCrawford, nMatchTo, anScore[ 2 ], fBeavers;
-extern int nCube;
+extern int nCube, fOutputMWC;
 extern float rCubeX;
 
 extern void ( *fnAction )( void );
@@ -238,15 +240,16 @@ extern int
 EvaluatePositionCubeful( int anBoard[ 2 ][ 25 ], float arCfOutput[],
                          cubeinfo *pci, evalcontext *pec, int nPlies );
 
-extern float
-GetDoublePointDeadCube ( float arOutput [ 5 ],
-                         int   anScore[ 2 ], int nMatchTo,
-                         cubeinfo *pci );
-
 extern int
 GetDPEq ( int *pfCube, float *prDPEq, cubeinfo *pci );
 
 extern int 
-GetCubeActionSz ( float arDouble[ 4 ], char *szOutput );
+GetCubeActionSz ( float arDouble[ 4 ], char *szOutput, cubeinfo *pci );
 
+extern float
+mwc2eq ( float rMwc, cubeinfo *ci );
+
+extern float
+eq2mwc ( float rEq, cubeinfo *ci );
+ 
 #endif
