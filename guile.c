@@ -289,6 +289,46 @@ static SCM evaluate_position( SCM sBoard, SCM sCube, SCM sEvalContext ) {
     return s;
 }
 
+static SCM evaluate_position_cubeful( SCM sBoard, SCM sCube,
+				      SCM sEvalContext ) {
+    int i, anBoard[ 2 ][ 25 ], n;
+    float ar[ NUM_OUTPUTS ], arCube[ NUM_CUBEFUL_OUTPUTS ];
+    SCM s;
+    cubeinfo ci;
+    psighandler sh;
+    
+    SCMToBoard( sBoard, anBoard );
+    
+    if( sCube == SCM_UNDEFINED )
+	sCube = cube_info( SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED,
+			   SCM_UNDEFINED, SCM_UNDEFINED, SCM_UNDEFINED,
+			   SCM_UNDEFINED, SCM_UNDEFINED );
+
+    SCMToCubeInfo( sCube, &ci );
+
+    PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
+    n = EvaluatePositionCubeful( anBoard, arCube, ar, &ci, NULL, 0 );
+    PortableSignalRestore( SIGINT, &sh );
+    if( fInterrupt ) {
+	raise( SIGINT );
+	fInterrupt = FALSE;
+    }
+    
+    if( n < 0 )
+	return SCM_BOOL_F; /* FIXME throw error? */
+    
+    s = scm_make_vector( SCM_MAKINUM( NUM_CUBEFUL_OUTPUTS ), SCM_UNSPECIFIED );
+    for( i = 0; i < NUM_CUBEFUL_OUTPUTS; i++ )
+	scm_vector_set_x( s, SCM_MAKINUM( i ), scm_make_real( arCube[ i ] ) );
+
+    return s;
+}
+
+static SCM game_state( void ) {
+
+    return SCM_MAKINUM( gs );
+}
+
 static SCM gnubg_command( SCM sCommand ) {
 
     int cch;
@@ -304,6 +344,8 @@ static SCM gnubg_command( SCM sCommand ) {
 
     PortableSignal( SIGINT, HandleInterrupt, &sh, FALSE );
     HandleCommand( sz, acTop );
+    NextTurn( FALSE );
+    outputx();
     free( sz );
     PortableSignalRestore( SIGINT, &sh );
     if( fInterrupt ) {
@@ -321,14 +363,6 @@ static SCM menu_bar( void ) {
     else
 #endif
 	return SCM_BOOL_F;
-}
-
-static SCM play_game( void ) {
-
-    while( gs == GAME_PLAYING && ap[ fTurn ].pt != PLAYER_HUMAN )
-	NextTurn();
-
-    return SCM_UNSPECIFIED;
 }
 
 static SCM position_id_to_board( SCM sPosID ) {
@@ -453,6 +487,12 @@ extern int GuileInitialise( char *szDir ) {
     scm_sysintern( "CLASS_BEAROFF1", SCM_MAKINUM( CLASS_BEAROFF1 ) );
     scm_sysintern( "CLASS_RACE", SCM_MAKINUM( CLASS_RACE ) );
     scm_sysintern( "CLASS_CONTACT", SCM_MAKINUM( CLASS_CONTACT ) );
+
+    scm_sysintern( "GAME_NONE", SCM_MAKINUM( GAME_NONE ) );
+    scm_sysintern( "GAME_PLAYING", SCM_MAKINUM( GAME_PLAYING ) );
+    scm_sysintern( "GAME_OVER", SCM_MAKINUM( GAME_OVER ) );
+    scm_sysintern( "GAME_RESIGNED", SCM_MAKINUM( GAME_RESIGNED ) );
+    scm_sysintern( "GAME_DROP", SCM_MAKINUM( GAME_DROP ) );
     
     scm_make_gsubr( "board->position-id", 1, 0, 0, board_to_position_id );
     scm_make_gsubr( "classify-position", 1, 0, 0, classify_position );
@@ -462,9 +502,11 @@ extern int GuileInitialise( char *szDir ) {
     scm_make_gsubr( "current-board", 0, 0, 0, current_board );
     scm_make_gsubr( "current-score", 0, 0, 0, current_score );
     scm_make_gsubr( "evaluate-position", 1, 2, 0, evaluate_position );
+    scm_make_gsubr( "evaluate-position-cubeful", 1, 2, 0,
+		    evaluate_position_cubeful );
+    scm_make_gsubr( "game-state", 0, 0, 0, game_state );
     scm_make_gsubr( "gnubg-command", 1, 0, 0, gnubg_command );
     scm_make_gsubr( "menu-bar", 0, 0, 0, menu_bar );
-    scm_make_gsubr( "play-game", 0, 0, 0, play_game );
     scm_make_gsubr( "position-id->board", 1, 0, 0, position_id_to_board );
     scm_make_gsubr( "rollout-position", 1, 7, 0, rollout_position );
 

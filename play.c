@@ -311,6 +311,7 @@ static int PopGame( list *plDelete, int fInclusive ) {
 	pl = pl->plNext;
 	FreeGame( pl->plPrev->p );
 	ListDelete( pl->plPrev );
+	cGames--;
     } while( pl->p );
 
     return 0;
@@ -593,8 +594,7 @@ static void ShowAutoMove( int anBoard[ 2 ][ 25 ], int anMove[ 8 ] ) {
 		 FormatMove( sz, anBoard, anMove ) );
 }
 
-
-static int ComputerTurn( void ) {
+extern int ComputerTurn( void ) {
 
   movenormal *pmn;
   cubeinfo ci;
@@ -605,7 +605,7 @@ static int ComputerTurn( void ) {
   if( fAction )
       fnAction();
 
-  if( fInterrupt )
+  if( fInterrupt || gs != GAME_PLAYING )
       return -1;
   
   SetCubeInfo ( &ci, nCube, fCubeOwner, fMove, nMatchTo, anScore,
@@ -647,14 +647,13 @@ static int ComputerTurn( void ) {
 
       fComputerDecision = TRUE;
 
-      if( rEqAfter >= rEqBefore ) {
+      if( rEqAfter >= rEqBefore )
         CommandAgree( NULL );
-        return 0;
-      } else {
+      else
         CommandDecline( NULL );
-        return 0;
-      }
-
+      
+      fComputerDecision = FALSE;
+      return 0;
     } else if( fDoubled ) {
 
       /* Consider cube action */
@@ -667,15 +666,16 @@ static int ComputerTurn( void ) {
       fComputerDecision = TRUE;
       
       if ( fBeavers && ! nMatchTo && arDouble[ 2 ] <= 0.0 &&
-	  nCube < ( MAX_CUBE >> 1 ) ) {
+	  nCube < ( MAX_CUBE >> 1 ) ) 
         /* It's a beaver... beaver all night! */
         CommandRedouble ( NULL );
-      }
       else if ( arDouble[ 2 ] <= arDouble[ 3 ] )
         CommandTake ( NULL );
       else
         CommandDrop ( NULL );
-
+      
+      fComputerDecision = FALSE;
+      
       return 0;
 
     } else {
@@ -719,6 +719,7 @@ static int ComputerTurn( void ) {
                ( arDouble[ 2 ] >= arDouble[ 1 ] ) ) {
 	      fComputerDecision = TRUE;
 	      CommandDouble ( NULL );
+	      fComputerDecision = FALSE;
 	      return 0;
           }
         } /* market window */
@@ -788,14 +789,17 @@ static int ComputerTurn( void ) {
     if( fResigned == 3 ) {
       fComputerDecision = TRUE;
       CommandAgree( NULL );
+      fComputerDecision = FALSE;
       return 0;
     } else if( fResigned ) {
       fComputerDecision = TRUE;
       CommandDecline( NULL );
+      fComputerDecision = FALSE;
       return 0;
     } else if( fDoubled ) {
       fComputerDecision = TRUE;
       CommandTake( NULL );
+      fComputerDecision = FALSE;
       return 0;
     } else if( !anDice[ 0 ] ) {
       if( RollDice( anDice ) < 0 )
@@ -829,16 +833,19 @@ static int ComputerTurn( void ) {
 	  /* FIXME get resignation decision */
 	  fComputerDecision = TRUE;
 	  CommandAgree( NULL );
+	  fComputerDecision = FALSE;
 	  return 0;
       } else if( fResigned ) {
 	  /* FIXME get resignation decision */
 	  fComputerDecision = TRUE;
 	  CommandDecline( NULL );
+	  fComputerDecision = FALSE;
 	  return 0;
       } else if( fDoubled ) {
 	  /* FIXME get take decision */
 	  fComputerDecision = TRUE;
 	  CommandTake( NULL );
+	  fComputerDecision = FALSE;
 	  return 0;
       } else if( !anDice[ 0 ] ) {
 	  /* FIXME get double decision (check cube use on, cube access, and
@@ -970,7 +977,7 @@ static int TryBearoff( void ) {
     return -1;
 }
 
-extern void NextTurn( void ) {
+extern int NextTurn( int fPlayNext ) {
 
     int n;
 #if USE_EXT && HAVE_SELECT
@@ -984,14 +991,21 @@ extern void NextTurn( void ) {
 	if( nNextTurn ) {
 	    gtk_idle_remove( nNextTurn );
 	    nNextTurn = 0;
-	}
+	} else
+	    return -1;
 #else
-        EventPending( &evNextTurn, FALSE );	
+	if( evNextTurn.fPending )
+	    EventPending( &evNextTurn, FALSE );
+	else
+	    return -1;
 #endif
     } else
 #endif
-	fNextTurn = FALSE;
-
+	if( fNextTurn )
+	    fNextTurn = FALSE;
+	else
+	    return -1;
+    
 #if USE_GTK
     if( fX && nDelay && fDisplay && nTimeout ) {
 	fDelaying = TRUE;
@@ -1057,7 +1071,7 @@ extern void NextTurn( void ) {
 	outputf( "%s wins a %s and %d point%s.\n", ap[ pmgi->fWinner ].szName,
 		 aszGameResult[ n - 1 ], pmgi->nPoints,
 		 pmgi->nPoints > 1 ? "s" : "" );
-	
+
 #if USE_GUI
 	if( fX ) {
 	    if( fDisplay )
@@ -1082,7 +1096,7 @@ extern void NextTurn( void ) {
 	if( nMatchTo && anScore[ pmgi->fWinner ] >= nMatchTo ) {
 	    outputf( "%s has won the match.\n", ap[ pmgi->fWinner ].szName );
 	    outputx();
-	    return;
+	    return -1;
 	}
 
 	outputx();
@@ -1093,8 +1107,10 @@ extern void NextTurn( void ) {
 	    if( ap[ fTurn ].pt == PLAYER_HUMAN )
 		ShowBoard();
 	} else
-	    return;
+	    return -1;
     }
+
+    assert( gs == GAME_PLAYING );
     
     if( fDisplay || ap[ fTurn ].pt == PLAYER_HUMAN )
 	ShowBoard();
@@ -1104,8 +1120,8 @@ extern void NextTurn( void ) {
     if( fAction )
 	fnAction();
 	
-    if( fInterrupt )
-	return;
+    if( fInterrupt || !fPlayNext )
+	return -1;
     
     if( ap[ fTurn ].pt == PLAYER_HUMAN ) {
 	/* Roll for them, if:
@@ -1123,33 +1139,35 @@ extern void NextTurn( void ) {
 	      ( fCubeOwner >= 0 && fCubeOwner != fTurn ) ||
 	      ( nMatchTo > 0 && anScore[ fTurn ] + nCube >= nMatchTo ) ) )
 	    CommandRoll( NULL );
-	return;
-    } else
+	return -1;
+    }
+    
 #if USE_GUI
-	if( fX ) {
+    if( fX ) {
 #if USE_GTK
-	    if( !ComputerTurn() )
-		nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+	if( !ComputerTurn() && !nNextTurn )
+	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
 #else
-            EventPending( &evNextTurn, !ComputerTurn() );	    
+	EventPending( &evNextTurn, !ComputerTurn() );	    
 #endif
-	} else
+    } else
 #endif
-	    fNextTurn = !ComputerTurn();
+	fNextTurn = !ComputerTurn();
+
+    return 0;
 }
 
 extern void TurnDone( void ) {
 
-    fComputerDecision = FALSE;
-    
 #if USE_GUI
-    if( fX )
+    if( fX ) {
 #if USE_GTK
-	nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
+	if( !nNextTurn )
+	    nNextTurn = gtk_idle_add( NextTurnNotify, NULL );
 #else
-        EventPending( &evNextTurn, TRUE );    
+	EventPending( &evNextTurn, TRUE );    
 #endif
-    else
+    } else
 #endif
 	fNextTurn = TRUE;
 
@@ -1218,9 +1236,6 @@ static void AnnotateMove( skilltype st ) {
 	break;
 	
     case MOVE_DOUBLE:
-	pmr->d.st = st;
-	break;
-	
     case MOVE_TAKE:
     case MOVE_DROP:
 	pmr->d.st = st;
@@ -1236,22 +1251,33 @@ static void AnnotateMove( skilltype st ) {
 
 static void AnnotateRoll( lucktype lt ) {
 
-    CommandNotImplemented( NULL ); /* FIXME */
-}
+    moverecord *pmr;
 
-static int Emphasis( char *sz, char *szDescription ) {
+    if( !( pmr = plLastMove->plNext->p ) ) {
+	outputl( "You must select a move to annotate first." );
+	return;
+    }
 
-    return 0; /* FIXME */
+    switch( pmr->mt ) {
+    case MOVE_NORMAL:
+	pmr->n.lt = lt;
+	break;
+	
+    case MOVE_SETDICE:
+	pmr->sd.lt = lt;
+	break;
+	
+    default:
+	outputl( "You cannot annotate this move." );
+	return;
+    }
+
+    outputf( "Roll marked as %s.\n", aszLuckType[ lt ] );
 }
 
 extern void CommandAnnotateBad( char *sz ) {
 
-    int f;
-
-    if( ( f = Emphasis( sz, "bad" ) < 0 ) )
-	return;
-    
-    AnnotateMove( f ? SKILL_VERYBAD : SKILL_BAD );
+    AnnotateMove( SKILL_BAD );
 }
 
 extern void CommandAnnotateClear( char *sz ) {
@@ -1266,12 +1292,7 @@ extern void CommandAnnotateDoubtful( char *sz ) {
 
 extern void CommandAnnotateGood( char *sz ) {
 
-    int f;
-
-    if( ( f = Emphasis( sz, "good" ) < 0 ) )
-	return;
-    
-    AnnotateMove( f ? SKILL_VERYGOOD : SKILL_GOOD );
+    AnnotateMove( SKILL_GOOD );
 }
 
 extern void CommandAnnotateInteresting( char *sz ) {
@@ -1281,22 +1302,32 @@ extern void CommandAnnotateInteresting( char *sz ) {
 
 extern void CommandAnnotateLucky( char *sz ) {
 
-    int f;
-
-    if( ( f = Emphasis( sz, "lucky" ) < 0 ) )
-	return;
-    
-    AnnotateRoll( f ? LUCK_VERYGOOD : LUCK_GOOD );
+    AnnotateRoll( LUCK_GOOD );
 }
 
 extern void CommandAnnotateUnlucky( char *sz ) {
 
-    int f;
+    AnnotateRoll( LUCK_BAD );
+}
 
-    if( ( f = Emphasis( sz, "unlucky" ) < 0 ) )
-	return;
-    
-    AnnotateRoll( f ? LUCK_VERYBAD : LUCK_BAD );
+extern void CommandAnnotateVeryBad( char *sz ) {
+
+    AnnotateMove( SKILL_BAD );
+}
+
+extern void CommandAnnotateVeryGood( char *sz ) {
+
+    AnnotateMove( SKILL_GOOD );
+}
+
+extern void CommandAnnotateVeryLucky( char *sz ) {
+
+    AnnotateRoll( LUCK_GOOD );
+}
+
+extern void CommandAnnotateVeryUnlucky( char *sz ) {
+
+    AnnotateRoll( LUCK_BAD );
 }
 
 extern void CommandDecline( char *sz ) {
