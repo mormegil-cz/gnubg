@@ -1,3 +1,8 @@
+Mon Jun 26 12:21:17 2000  Gary Wong  <gary@cs.arizona.edu>
+
+	* show.c (CommandShowDelay): new function (patch supplied
+	by Eric Augustine).
+
 Mon Jun 19 20:39:36 2000  Oystein Johansen <oeysteij@online.no>
 
         * rollout.c: Fixed Cygwin bug

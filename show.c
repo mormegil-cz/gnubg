@@ -143,6 +143,13 @@ extern void CommandShowBoard( char *sz ) {
 	puts( DrawBoard( szOut, an, TRUE, ap ) );
 }
 
+extern void CommandShowDelay( char *sz ) {
+    if( nDelay )
+	printf( "The delay is set to %d ms.\n",nDelay);
+    else
+	puts( "No delay is being used." );
+}
+
 extern void CommandShowCache( char *sz ) {
 
     int c, cLookup, cHit;
@@ -359,6 +366,7 @@ extern void CommandShowKleinman( char *sz ) {
     else
         printf ("Cubeless Winning Chance: %.4f\n", fKC);
  }
+
 extern void CommandShowThorp( char *sz ) {
 
     int anPips[ 2 ], an[ 2 ][ 25 ];

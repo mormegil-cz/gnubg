@@ -234,7 +234,8 @@ static command acDatabase[] = {
     /* FIXME show cube */
     { "crawford", CommandShowCrawford, 
       "See if this is the Crawford game", NULL },
-    /* FIXME show delay */
+    { "delay", CommandShowDelay, "See what the current delay setting is", 
+              NULL },
     { "dice", CommandShowDice, "See what the current dice roll is", NULL },
     /* FIXME show display */
     { "evaluation", CommandShowEvaluation, "Display evaluation settings "
