@@ -386,8 +386,6 @@ command cER = {
     { "move", CommandAnalyseMove, 
       N_("Compute analysis and annotate the current "
       "move"), NULL, NULL },
-	{ "marked", CommandAnalyseMarked,
-	  N_("Re-analyse marked moves "), NULL, NULL },
     { "session", CommandAnalyseSession, 
       N_("Compute analysis and annotate every "
       "game in the session"), NULL, NULL },
