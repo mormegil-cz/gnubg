@@ -6,6 +6,7 @@ char *aszCredits[] = {
     "Steve Baedke",
     "Hans Berliner",
     "Chuck Bower",
+    "Craig Campbell",
     "Tristan Colgate",
     "Bill Davidson",
     "Eric Groleau",

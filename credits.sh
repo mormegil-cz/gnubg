@@ -20,6 +20,7 @@ cat > $contributors <<'EOF'
 Eric Augustine
 Steve Baedke
 Chuck Bower
+Craig Campbell
 Tristan Colgate
 Bill Davidson
 Eric Groleau
