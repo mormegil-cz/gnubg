@@ -8370,19 +8370,29 @@ extern void
 TextToClipboard( const char *sz ) {
 
 #if WIN32
+#if ENABLE_NLS
+  /* darty hack for Windows Japanese edition */
+  if ( !strncmp( "Japanese", setlocale(LC_ALL, NULL), 8 ) ) {
+    WinCopy( Convert( sz, "SHIFT_JIS", GNUBG_CHARSET ) );
+  }
+  else {
+    WinCopy ( sz );
+  }
+#else /* ENABLE_NLS */
   WinCopy ( sz );
-#else
-  
+#endif /* ! ENABLE_NLS */
+#else /* WIN32 */
+
 #if USE_GTK
   if ( fX ) {
     GTKTextToClipboard( sz );
     return;
   }
-#else
+#else /* USE_GTK */
   /* no clipboard: just write string */
   outputl( sz );
-#endif
-#endif
+#endif /* ! USE_GTK */
+#endif /* ! WIN32 */
 
 }
 
