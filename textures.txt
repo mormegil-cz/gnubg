@@ -1,0 +1,27 @@
+base.bmp
+Test base 1
+General
+base2.bmp
+Test base 2
+General
+base3.bmp
+Test base 3
+General
+board.bmp
+Test board 1
+General
+board2.bmp
+Test board 2
+General
+board3.bmp
+Test board 3
+General
+checker.bmp
+Test chequer 1
+Piece
+checker2.bmp
+Test chequer 2
+Piece
+hinge.bmp
+Test hinge
+Hinge

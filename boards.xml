@@ -22,7 +22,7 @@
    <board-design>
 
       <about>
-         <title>Default setting (2D)</title>
+         <title>Default setting</title>
          <author>The GNU Backgammon Team</author>
       </about>
  
@@ -42,16 +42,30 @@
          cube=#D7D7D7
          points0=#FF5F5F;0.20
          points1=#BFBFBF;0.20
-         boardtype=2
-      </design>
-
+         piecetype=0
+		chequers3d0=#D83F3F;#CC3333;#FF0000;60;80
+		chequers3d1=#333333;#4C4C4C;#3F3F3F;70;80
+		dice3d0=#F22626;#CC3333;#FF0000;100;100;n
+		dice3d1=#333333;#4C4C4C;#3F3F3F;70;100;n
+		dot3d0=#A5A5A5;#BFBFBF;#4C4F4C;128;100
+		dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
+		cube3d=#B2B2BF;#A5A5B2;#CBCCCB;80;0
+		cubetext3d=#000066;#00007F;#00008C;98;100
+		base3d=#007F00;#007200;#8AD6AB;128;0;base.bmp
+		points3d0=#F3FBFB;#FDEDF9;#E1FFEA;128;100;base.bmp
+		points3d1=#FF3233;#DB4C5A;#6C242B;128;100;base.bmp
+		border3d=#D87226;#D85630;#37465C;128;100;board.bmp
+		hinge3d=#D8F233;#99BF0C;#E9C944;63;0;hinge.bmp
+		numbers3d=#AB78CC;#E7E675;#010101;116;100
+		background3d=#D45588;#933E98;#CA41C7;116;0;base.bmp
+	</design>
    </board-design>
 
 
    <board-design>
 
       <about>
-         <title>Green/Black (2D)</title>
+         <title>Green/Black</title>
          <author>Albert Silver</author>
       </about>
  
@@ -59,7 +73,7 @@
          board=#F2E5D8;0.09 
          border=#003F00 
          wood=ebony 
-         hinges=y
+         hinges=n
          light=150;50 
          shape=0.5
          chequers0=#FDFDFD;1.00;3.00;0.90;20.00
@@ -71,15 +85,29 @@
          cube=#D6D6C6
          points0=#4CA57F;0.09 
          points1=#4C4C4C;0.20
-         boardtype=2
+         piecetype=1
+		chequers3d0=#FFA5A5;#F2A5A5;#EFB651;61;95;checker.bmp
+		chequers3d1=#CC7FCC;#B074C1;#733F96;65;100;checker.bmp
+		dice3d0=#DA7F29;#F2A5A5;#EFB651;69;95
+		dice3d1=#A466A4;#C1529B;#733F96;65;100
+		dot3d0=#DF7AE7;#AD40A0;#CD6FD0;128;100
+		dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
+		cube3d=#CED0C6;#E4E9C9;#97B787;93;0
+		cubetext3d=#000093;#3A4589;#4A3166;128;100
+		base3d=#F2CCCC;#F2D8D8;#BD8FC3;128;0;base2.bmp
+		points3d0=#CBCCFF;#8AB2D6;#4149AD;128;100;base2.bmp
+		points3d1=#7F007F;#7B435A;#6C242B;118;100;base2.bmp
+		border3d=#C4BFC9;#C4C1C9;#6C89B3;128;100;board2.bmp
+		hinge3d=#CC915A;#BF7F63;#DAA260;122;100;hinge.bmp
+		numbers3d=#7F7F7F;#535152;#010101;128;100
+		background3d=#5B993F;#4B7748;#1A4312;128;0;base2.bmp         
       </design>
-
    </board-design>
 
    <board-design>
 
       <about>
-         <title>Wood 1 (2D)</title>
+         <title>Wood 1</title>
          <author>Albert Silver</author>
       </about>
  
@@ -87,7 +115,7 @@
          board=#FFD872;0.09 
          border=#003F00 
          wood=walnut 
-         hinges=y 
+         hinges=y
          light=150;50 
          shape=0.5 
          chequers0=#FFFFFF;1.00;3.00;0.90;19.90 
@@ -99,15 +127,30 @@
          cube=#D4D4C4 
          points0=#CC7F00;0.09 
          points1=#7F3F00;0.20
-         boardtype=2
-      </design>
+		piecetype=0
+		chequers3d0=#FFCE70;#DBE287;#EFB651;51;95;checker2.bmp
+		chequers3d1=#9E6600;#845900;#96412B;49;100;checker2.bmp
+		dice3d0=#337F32;#308420;#9AEF6E;51;60
+		dice3d1=#CE6693;#ED91C6;#96412B;49;60 
+		dot3d0=#DF7AE7;#AD40A0;#CD6FD0;128;100
+		dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
+		cube3d=#ADA3AA;#B5AFA0;#97B787;59;0
+		cubetext3d=#000082;#23266B;#4A3166;128;100 
+		base3d=#F2B254;#EABA5B;#6C5270;128;0;base3.bmp
+		points3d0=#FFCC7A;#FFDBBA;#2D3277;128;100;base3.bmp
+		points3d1=#8C4F00;#7B5B05;#6C242B;128;100;base3.bmp
+		border3d=#C59E49;#B19245;#495D79;128;100;board3.bmp
+		hinge3d=#CC915A;#BF7F63;#DAA260;122;0;hinge.bmp
+		numbers3d=#E3E3E3;#D0CBCE;#010101;128;100
+		background3d=#C62149;#993559;#1A4312;128;0;board.bmp
+       </design>
 
    </board-design>
 
    <board-design>
 
       <about>
-         <title>Red/Blue (2D)</title>
+         <title>Red/Blue</title>
          <author>Albert Silver</author>
       </about>
  
@@ -127,7 +170,22 @@
          cube=#D3D3C3 
          points0=#980000;0.09 
          points1=#000072;0.20      
-         boardtype=2
+         piecetype=0
+		chequers3d0=#D83F3F;#CC3333;#FF0000;60;80
+		chequers3d1=#333333;#4C4C4C;#3F3F3F;70;80
+		dice3d0=#F22626;#CC3333;#FF0000;100;100;n
+		dice3d1=#333333;#4C4C4C;#3F3F3F;70;100;n
+		dot3d0=#A5A5A5;#BFBFBF;#4C4F4C;128;100
+		dot3d1=#C6C6C6;#D1D898;#1B1B1B;128;100
+		cube3d=#B2B2BF;#A5A5B2;#CBCCCB;80;0
+		cubetext3d=#000066;#00007F;#00008C;98;100
+		base3d=#007F00;#007200;#8AD6AB;128;0;
+		points3d0=#F3FBFB;#FDEDF9;#E1FFEA;128;100;
+		points3d1=#FF3233;#DB4C5A;#6C242B;128;100;
+		border3d=#D87226;#D85630;#37465C;128;100;
+		hinge3d=#D8F233;#99BF0C;#E9C944;63;0;
+		numbers3d=#AB78CC;#E7E675;#010101;116;100
+		background3d=#D45588;#933E98;#CA41C7;116;0;
       </design>
 
    </board-design>
@@ -136,7 +194,7 @@
    <board-design>
 
       <about>
-         <title>Crisloid (2D)</title>
+         <title>Crisloid</title>
          <author>Gary Wong</author>
       </about>
 
@@ -156,7 +214,7 @@
          cube=#E5E5E5
          points0=#007F00;0.09
          points1=#FFFFFF;0.09
-         boardtype=2
+
       </design>
 
    </board-design>
@@ -165,7 +223,7 @@
    <board-design>
 
       <about>
-         <title>Crystal (2D)</title>
+         <title>Crystal</title>
          <author>Gary Wong</author>
       </about>
 
@@ -185,7 +243,7 @@
          cube=#E5E5E5
          points0=#D7DFDF;0.00
          points1=#878E8F;0.00
-         boardtype=2
+
    </design>
 
    </board-design>
@@ -194,7 +252,7 @@
    <board-design>
   
      <about> 
-         <title>Daily Gammon (2D)</title>
+         <title>Daily Gammon</title>
          <author>Nardy Pillards</author>
       </about>
   
@@ -214,7 +272,6 @@
          cube=#AFE5A8 
          points0=#49D441;0.00   
          points1=#0A6810;0.00   
-         boardtype=2
       </design> 
   
    </board-design>
@@ -222,7 +279,7 @@
    <board-design>
 
      <about> 
-         <title>GamesGrid Classic (2D)</title>  
+         <title>GamesGrid Classic</title>  
          <author>Ned Cross</author>
       </about>
   
@@ -242,7 +299,6 @@
          cube=#F7C80A
          points0=#9A6750;0.09
          points1=#5F7287;0.09 
-         boardtype=2
       </design> 
 
    </board-design>
@@ -250,7 +306,7 @@
    <board-design>
 
      <about> 
-         <title>GoL Blue and White (2D)</title>  
+         <title>GoL Blue and White</title>  
          <author>Ian Shaw</author>
       </about>
   
@@ -270,7 +326,6 @@
          cube=#FBF7FF
          points0=#8B8C8E;0.09
          points1=#D4D4D4;0.09
-         boardtype=2
       </design> 
 
    </board-design>
@@ -279,7 +334,7 @@
    <board-design>
   
      <about> 
-         <title>Jellyfish (2D)</title>
+         <title>Jellyfish</title>
          <author>Oeystein Johansen</author>
       </about>
   
@@ -299,7 +354,6 @@
          cube=#E5E5E5 
          points0=#FFFEFE;0.00 
          points1=#010101;0.09
-         boardtype=2
       </design> 
   
    </board-design>
@@ -307,7 +361,7 @@
    <board-design>
 
      <about> 
-         <title>Red/Blue - Gold/Silver (2D)</title>  
+         <title>Red/Blue - Gold/Silver</title>  
          <author>Ian Shaw</author>
       </about>
   
@@ -327,7 +381,6 @@
          cube=#E5E5E5
          points0=#FF6060;0.20
          points1=#7EA9CA;0.20 
-         boardtype=2
       </design> 
 
    </board-design>
@@ -335,7 +388,7 @@
    <board-design>
 
      <about> 
-         <title>Red Green (2D)</title>  
+         <title>Red Green</title>  
          <author>Nardy Pillards</author>
       </about>
   
@@ -355,7 +408,6 @@
          cube=#D6BA00
          points0=#CAFDDB;0.00
          points1=#B52D3C;0.00   
-         boardtype=2
       </design> 
 
    </board-design>
@@ -364,7 +416,7 @@
    <board-design>
 
      <about>
-         <title>Zox-Vegas (2D)</title>
+         <title>Zox-Vegas</title>
          <author>Greg Cattanach/Albert Silver</author>
       </about>
   
@@ -384,7 +436,6 @@
          cube=#E5E5E5
          points0=#E05454;0.09
          points1=#4B4B4B;0.09
-         boardtype=2
       </design> 
   
    </board-design>
@@ -393,7 +444,7 @@
    <board-design>
 
       <about>
-         <title>Irish Gold (2D)</title>
+         <title>Irish Gold</title>
          <author>Michael Depreli</author>
       </about>
 
@@ -413,7 +464,7 @@
          cube=#D4D4C4
          points0=#CC7F00;0.09
          points1=#7F3F00;0.20
-         boardtype=2
+
       </design>
 
    </board-design>
@@ -422,7 +473,7 @@
    <board-design>
 
       <about>
-         <title>Union Jack (2D)</title>
+         <title>Union Jack</title>
          <author>Michael Depreli</author>
       </about>
 
@@ -442,7 +493,7 @@
          cube=#D4D4C4
          points0=#010100;0.09
          points1=#F30A0A;0.20
-         boardtype=2
+
    </design>
 
    </board-design>
@@ -451,7 +502,7 @@
    <board-design>
 
       <about>
-         <title>España (2D)</title> 
+         <title>España</title> 
          <author>Ian Shaw</author>     
      </about>
 
@@ -472,7 +523,7 @@
         cube=#E5C997
         points0=#AD2323;0.20 
         points1=#D4A527;0.09
-        boardtype=2
+
      </design>
 
   </board-design>
@@ -480,7 +531,7 @@
    <board-design>
 
       <about>
-         <title>30's Board (2D)</title>
+         <title>30's Board</title>
          <author>JP White</author>
       </about>
 
@@ -500,7 +551,7 @@
          cube=#F3F12E
          points0=#309829;0.09
          points1=#FFFFFF;0.20
-         boardtype=3
+
    </design>
 
    </board-design>
