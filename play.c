@@ -1392,15 +1392,10 @@ extern int ComputerTurn( void ) {
 	if (ms.gs ==  GAME_TIMEOUT)
 		return(0);
 #endif
-      /* write move to status bar if using GTK */
-#if USE_GTK        
-      if ( fX ) {
-	  
-	  outputnew ();
-	  ShowAutoMove( ms.anBoard, pmn->anMove );
-	  outputx ();
-      }
-#endif
+      /* write move to status bar or stdout */
+	outputnew ();
+	ShowAutoMove( ms.anBoard, pmn->anMove );
+	outputx ();
 
       if( pmn->anMove[ 0 ] < 0 )
 	  playSound ( SOUND_BOT_DANCE );
